@@ -38,8 +38,7 @@ public:
   NotificationService() : QObject() {}
 
   /// Display a notification
-  static void showMessage(const QString &title, const QString &message,
-                          MessageIcon icon = MessageIcon::Information,
+  static void showMessage(const QString &title, const QString &message, MessageIcon icon = MessageIcon::Information,
                           int millisecondsTimeoutHint = 5000);
 
   /// Is the notification service enabled through the config service?

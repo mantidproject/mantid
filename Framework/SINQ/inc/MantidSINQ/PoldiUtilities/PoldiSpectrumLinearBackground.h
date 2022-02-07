@@ -27,10 +27,9 @@ namespace Poldi {
         @author Michael Wedel, Paul Scherrer Institut - SINQ
         @date 06/08/2014
   */
-class MANTID_SINQ_DLL PoldiSpectrumLinearBackground
-    : public API::ParamFunction,
-      public API::IFunction1DSpectrum,
-      public IPoldiFunction1D {
+class MANTID_SINQ_DLL PoldiSpectrumLinearBackground : public API::ParamFunction,
+                                                      public API::IFunction1DSpectrum,
+                                                      public IPoldiFunction1D {
 public:
   PoldiSpectrumLinearBackground();
 
@@ -39,13 +38,10 @@ public:
   void setWorkspace(std::shared_ptr<const API::Workspace> ws) override;
   size_t getTimeBinCount() const;
 
-  void function1DSpectrum(const API::FunctionDomain1DSpectrum &domain,
-                          API::FunctionValues &values) const override;
-  void functionDeriv1DSpectrum(const API::FunctionDomain1DSpectrum &domain,
-                               API::Jacobian &jacobian) override;
+  void function1DSpectrum(const API::FunctionDomain1DSpectrum &domain, API::FunctionValues &values) const override;
+  void functionDeriv1DSpectrum(const API::FunctionDomain1DSpectrum &domain, API::Jacobian &jacobian) override;
 
-  void poldiFunction1D(const std::vector<int> &indices,
-                       const API::FunctionDomain1D &domain,
+  void poldiFunction1D(const std::vector<int> &indices, const API::FunctionDomain1D &domain,
                        API::FunctionValues &values) const override;
 
 protected:

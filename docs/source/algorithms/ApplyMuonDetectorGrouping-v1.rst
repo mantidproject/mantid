@@ -18,7 +18,7 @@ Analysis
 
 The algorithm supports two analysis types:
 
-- *Counts* - The spectra associated to the given detector IDs via **Grouping** are summed (with errors added in quadrature), see :ref:`algm-MuonGroupDetectors`. Note that if several detector IDs are associated to the same spectra, the spectra will be counted **once for each ID**. 
+- *Counts* - The spectra associated to the given detector IDs via **Grouping** are summed (with errors added in quadrature), see :ref:`algm-MuonGroupDetectors`. Note that if several detector IDs are associated to the same spectra, the spectra will be counted **once for each ID**.
 - *Asymmetry* - The summation from Counts is performed. Then the asymmetry between the given group and muon exponential decay is calculated (see :ref:`algm-EstimateMuonAsymmetryFromCounts`), between the times **TimeMin** and **TimeMax**.
 
 The way in which period data is combined before the analysis is determined by
@@ -65,19 +65,19 @@ Usage
     # Create the workspace group in which the analysed workspaces will be placed
     ws = CreateSampleWorkspace()
     wsGroup = GroupWorkspaces("ws")
-    RenameWorkspace(  InputWorkspace="wsGroup", 
-                      OutputWorkspace='MUSR00015193', 
+    RenameWorkspace(  InputWorkspace="wsGroup",
+                      OutputWorkspace='MUSR00015193',
                       OverwriteExisting=True)
 
     # Load the data
-    LoadMuonNexus(  Filename='MUSR00015193.nxs', 
+    LoadMuonNexus(  Filename='MUSR00015193.nxs',
                     OutputWorkspace='MuonAnalysis')
 
     ApplyMuonDetectorGrouping(
-                    InputWorkspace='MuonAnalysis', 
-                    InputWorkspaceGroup='MUSR00015193', 
-                    GroupName='Test', 
-                    Grouping='1,2,3,5-10', 
+                    InputWorkspace='MuonAnalysis',
+                    InputWorkspaceGroup='MUSR00015193',
+                    GroupName='Test',
+                    Grouping='1,2,3,5-10',
                     TimeOffset=0.0,
                     RebinArgs = "0.2")
 

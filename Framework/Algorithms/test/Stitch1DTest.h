@@ -43,11 +43,8 @@ using Mantid::HistogramData::Points;
 double roundSix(double i) { return floor(i * 1000000. + 0.5) / 1000000.; }
 
 namespace {
-MatrixWorkspace_sptr createWorkspace(const HistogramX &xData,
-                                     const HistogramY &yData,
-                                     const HistogramE &eData,
-                                     const HistogramDx &Dx,
-                                     const int nSpec = 1) {
+MatrixWorkspace_sptr createWorkspace(const HistogramX &xData, const HistogramY &yData, const HistogramE &eData,
+                                     const HistogramDx &Dx, const int nSpec = 1) {
 
   Workspace2D_sptr outWS = std::make_shared<Workspace2D>();
   outWS->initialize(nSpec, xData.size(), yData.size());
@@ -63,8 +60,7 @@ MatrixWorkspace_sptr createWorkspace(const HistogramX &xData,
   return outWS;
 }
 
-MatrixWorkspace_sptr create1DWorkspace(const HistogramX &xData,
-                                       const HistogramY &yData) {
+MatrixWorkspace_sptr create1DWorkspace(const HistogramX &xData, const HistogramY &yData) {
   Workspace2D_sptr outWS = std::make_shared<Workspace2D>();
   outWS->initialize(1, xData.size(), yData.size());
   outWS->mutableY(0) = yData;
@@ -152,8 +148,7 @@ public:
     return ResultType(stitched, scaleFactor);
   }
 
-  ResultType do_stitch1D(MatrixWorkspace_sptr &lhs, MatrixWorkspace_sptr &rhs,
-                         const std::vector<double> &params) {
+  ResultType do_stitch1D(MatrixWorkspace_sptr &lhs, MatrixWorkspace_sptr &rhs, const std::vector<double> &params) {
     Stitch1D alg;
     alg.setChild(true);
     alg.setRethrows(true);
@@ -168,10 +163,8 @@ public:
     return ResultType(stitched, scaleFactor);
   }
 
-  ResultType do_stitch1D(MatrixWorkspace_sptr &lhs, MatrixWorkspace_sptr &rhs,
-                         bool scaleRHS, bool useManualScaleFactor,
-                         const double &startOverlap, const double &endOverlap,
-                         const std::vector<double> &params,
+  ResultType do_stitch1D(MatrixWorkspace_sptr &lhs, MatrixWorkspace_sptr &rhs, bool scaleRHS, bool useManualScaleFactor,
+                         const double &startOverlap, const double &endOverlap, const std::vector<double> &params,
                          const double &manualScaleFactor) {
     Stitch1D alg;
     alg.setChild(true);
@@ -192,10 +185,8 @@ public:
     return ResultType(stitched, scaleFactor);
   }
 
-  ResultType do_stitch1D(MatrixWorkspace_sptr &lhs, MatrixWorkspace_sptr &rhs,
-                         const double &startOverlap, const double &endOverlap,
-                         const std::vector<double> &params,
-                         bool scaleRHS = true) {
+  ResultType do_stitch1D(MatrixWorkspace_sptr &lhs, MatrixWorkspace_sptr &rhs, const double &startOverlap,
+                         const double &endOverlap, const std::vector<double> &params, bool scaleRHS = true) {
     Stitch1D alg;
     alg.setChild(true);
     alg.setRethrows(true);
@@ -213,10 +204,8 @@ public:
     return ResultType(stitched, scaleFactor);
   }
 
-  ResultType do_stitch1D(MatrixWorkspace_sptr &lhs, MatrixWorkspace_sptr &rhs,
-                         const double &overlap,
-                         const std::vector<double> &params,
-                         const bool startoverlap) {
+  ResultType do_stitch1D(MatrixWorkspace_sptr &lhs, MatrixWorkspace_sptr &rhs, const double &overlap,
+                         const std::vector<double> &params, const bool startoverlap) {
     Stitch1D alg;
     alg.setChild(true);
     alg.setRethrows(true);
@@ -244,10 +233,8 @@ public:
 
   void test_startoverlap_greater_than_end_overlap_throws() {
     std::vector<double> params = {0., 0.2, .5};
-    TSM_ASSERT_THROWS(
-        "Should have thrown with StartOverlap < x max",
-        do_stitch1D(this->a, this->b, this->x.back(), this->x.front(), params),
-        std::runtime_error &);
+    TSM_ASSERT_THROWS("Should have thrown with StartOverlap < x max",
+                      do_stitch1D(this->a, this->b, this->x.back(), this->x.front(), params), std::runtime_error &);
   }
 
   void test_sort_x() {
@@ -346,8 +333,7 @@ public:
     MatrixWorkspace_const_sptr stitched = alg.getProperty("OutputWorkspace");
     const std::vector<double> x_values{1., 1.5, 2., 2.5, 3., 3.5};
     TS_ASSERT_EQUALS(stitched->x(0).rawData(), x_values);
-    const std::vector<double> y_values{
-        1., 5. * scaleFactor, 2., 6. * scaleFactor, 3., 7. * scaleFactor};
+    const std::vector<double> y_values{1., 5. * scaleFactor, 2., 6. * scaleFactor, 3., 7. * scaleFactor};
     TS_ASSERT_EQUALS(stitched->y(0).rawData(), y_values);
     const std::vector<double> dx_values{3., 9., 2., 9., 1., 9.};
     TS_ASSERT_EQUALS(stitched->dx(0).rawData(), dx_values);
@@ -378,8 +364,7 @@ public:
     MatrixWorkspace_const_sptr stitched = alg.getProperty("OutputWorkspace");
     const std::vector<double> x_values{1., 1.5, 2., 2.5, 3., 3.5};
     TS_ASSERT_EQUALS(stitched->x(0).rawData(), x_values);
-    const std::vector<double> y_values{
-        1., 5. * scaleFactor, 2., 6. * scaleFactor, 3., 7. * scaleFactor};
+    const std::vector<double> y_values{1., 5. * scaleFactor, 2., 6. * scaleFactor, 3., 7. * scaleFactor};
     TS_ASSERT_EQUALS(stitched->y(0).rawData(), y_values);
     TS_ASSERT(!stitched->hasDx(0));
   }
@@ -393,8 +378,7 @@ public:
     const auto &dx = HistogramDx(2, LinearGenerator(3., 0.1));
     auto ws2 = createWorkspace(x, y, e, dx);
     auto ws4 = createWorkspace(x, y, e, dx);
-    TSM_ASSERT_THROWS_NOTHING("Histogram workspaces should pass",
-                              do_stitch1D(ws2, ws1));
+    TSM_ASSERT_THROWS_NOTHING("Histogram workspaces should pass", do_stitch1D(ws2, ws1));
     Mantid::Algorithms::CompareWorkspaces compare;
     compare.initialize();
     compare.setRethrows(true);
@@ -568,8 +552,7 @@ public:
     // eliminate
     // insignificant error
     auto xCopy = this->x;
-    std::transform(stitched_x.begin(), stitched_x.end(), stitched_x.begin(),
-                   roundSix);
+    std::transform(stitched_x.begin(), stitched_x.end(), stitched_x.begin(), roundSix);
     std::transform(xCopy.begin(), xCopy.end(), xCopy.begin(), roundSix);
     TS_ASSERT(xCopy == stitched_x.rawData());
   }
@@ -598,16 +581,14 @@ public:
     // eliminate
     // insignificant error
     auto xCopy = this->x;
-    std::transform(stitched_x.begin(), stitched_x.end(), stitched_x.begin(),
-                   roundSix);
+    std::transform(stitched_x.begin(), stitched_x.end(), stitched_x.begin(), roundSix);
     std::transform(xCopy.begin(), xCopy.end(), xCopy.begin(), roundSix);
     TS_ASSERT(xCopy == stitched_x.rawData());
   }
 
   void test_stitching_manual_scale_factor_scale_right() {
     std::vector<double> params = {0.2};
-    auto ret =
-        do_stitch1D(this->b, this->a, true, true, -0.4, 0.4, params, 2.0 / 3.0);
+    auto ret = do_stitch1D(this->b, this->a, true, true, -0.4, 0.4, params, 2.0 / 3.0);
 
     double scale = ret.get<1>();
     // Check the scale factor
@@ -629,16 +610,14 @@ public:
     // eliminate
     // insignificant error
     auto xCopy = this->x;
-    std::transform(stitched_x.begin(), stitched_x.end(), stitched_x.begin(),
-                   roundSix);
+    std::transform(stitched_x.begin(), stitched_x.end(), stitched_x.begin(), roundSix);
     std::transform(xCopy.begin(), xCopy.end(), xCopy.begin(), roundSix);
     TS_ASSERT(xCopy == stitched_x.rawData());
   }
 
   void test_stitching_manual_scale_factor_scale_left() {
     std::vector<double> params = {0.2};
-    auto ret = do_stitch1D(this->b, this->a, false, true, -0.4, 0.4, params,
-                           3.0 / 2.0);
+    auto ret = do_stitch1D(this->b, this->a, false, true, -0.4, 0.4, params, 3.0 / 2.0);
 
     double scale = ret.get<1>();
     // Check the scale factor
@@ -660,8 +639,7 @@ public:
     // eliminate
     // insignificant error
     auto xCopy = this->x;
-    std::transform(stitched_x.begin(), stitched_x.end(), stitched_x.begin(),
-                   roundSix);
+    std::transform(stitched_x.begin(), stitched_x.end(), stitched_x.begin(), roundSix);
     std::transform(xCopy.begin(), xCopy.end(), xCopy.begin(), roundSix);
     TS_ASSERT(xCopy == stitched_x.rawData());
   }
@@ -675,14 +653,12 @@ public:
     MatrixWorkspace_sptr outWS = ret.get<0>();
     const double scaleFactor = ret.get<1>();
 
-    TSM_ASSERT_EQUALS("Two cosine waves in phase scale factor should be unity",
-                      1.0, scaleFactor);
-    const double stitchedWSFirstYValue =
-        outWS->readY(0)[0];                           // Should be 1.0 at cos(0)
-    const double lhsWSFirstYValue = lhs->readY(0)[0]; // Should be 1.0 at cos(0)
+    TSM_ASSERT_EQUALS("Two cosine waves in phase scale factor should be unity", 1.0, scaleFactor);
+    const double stitchedWSFirstYValue = outWS->readY(0)[0]; // Should be 1.0 at cos(0)
+    const double lhsWSFirstYValue = lhs->readY(0)[0];        // Should be 1.0 at cos(0)
 
-    TSM_ASSERT_EQUALS("No scaling of the output workspace should have occurred",
-                      stitchedWSFirstYValue, lhsWSFirstYValue);
+    TSM_ASSERT_EQUALS("No scaling of the output workspace should have occurred", stitchedWSFirstYValue,
+                      lhsWSFirstYValue);
   }
 
   void test_has_non_zero_errors_single_spectrum() {
@@ -714,8 +690,7 @@ public:
     HistogramE e(9, 1.);
     HistogramDx dx(9, 0.);
 
-    MatrixWorkspace_sptr ws =
-        createWorkspace(x, y, e, dx, static_cast<int>(nspectrum));
+    MatrixWorkspace_sptr ws = createWorkspace(x, y, e, dx, static_cast<int>(nspectrum));
     Stitch1D alg;
     TSM_ASSERT("All error values are non-zero", alg.hasNonzeroErrors(ws));
 
@@ -806,9 +781,7 @@ public:
   // This pair of boilerplate methods prevent the suite being created
   // statically
   // This means the constructor isn't called when running other tests
-  static Stitch1DTestPerformance *createSuite() {
-    return new Stitch1DTestPerformance();
-  }
+  static Stitch1DTestPerformance *createSuite() { return new Stitch1DTestPerformance(); }
   static void destroySuite(Stitch1DTestPerformance *suite) {
     AnalysisDataService::Instance().clear();
     delete suite;

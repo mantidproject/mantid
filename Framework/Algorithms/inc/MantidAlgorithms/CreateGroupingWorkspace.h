@@ -8,6 +8,7 @@
 
 #include "MantidAPI/Algorithm.h"
 #include "MantidAlgorithms/DllConfig.h"
+#include "MantidGeometry/Instrument.h"
 
 namespace Mantid {
 namespace Algorithms {
@@ -32,9 +33,7 @@ public:
 
   /// Algorithm's version for identification
   int version() const override;
-  const std::vector<std::string> seeAlso() const override {
-    return {"DiffractionFocussing", "LoadCalFile"};
-  }
+  const std::vector<std::string> seeAlso() const override { return {"DiffractionFocussing", "LoadCalFile"}; }
   /// Algorithm's category for identification
   const std::string category() const override;
 
@@ -45,6 +44,8 @@ private:
   std::map<std::string, std::string> validateInputs() override;
   /// Run the algorithm
   void exec() override;
+
+  Mantid::Geometry::Instrument_const_sptr getInstrument();
 };
 
 } // namespace Algorithms

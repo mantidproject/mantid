@@ -29,8 +29,7 @@ public:
   CICatHelper();
 
   /// search method
-  int doSearch(ICat3::ICATPortBindingProxy &icat,
-               std::shared_ptr<ICat3::ns1__searchByAdvanced> &request,
+  int doSearch(ICat3::ICATPortBindingProxy &icat, std::shared_ptr<ICat3::ns1__searchByAdvanced> &request,
                ICat3::ns1__searchByAdvancedResponse &response);
 
   /// calls getInvestigationIncludes api's
@@ -39,8 +38,7 @@ public:
 
   /// this method calls Icat api getInvestigationIncludes and returns datasets
   /// for the given investigation id.
-  void doDataSetsSearch(long long invstId,
-                        ICat3::ns1__investigationInclude include,
+  void doDataSetsSearch(long long invstId, ICat3::ns1__investigationInclude include,
                         API::ITableWorkspace_sptr &responsews_sptr);
 
   /// This method lists the isntruments
@@ -56,18 +54,15 @@ public:
   void doMyDataSearch(API::ITableWorkspace_sptr &ws_sptr);
 
   /// do advanced search
-  void doAdvancedSearch(const CatalogSearchParam &inputs,
-                        API::ITableWorkspace_sptr &outputws, const int &offset,
+  void doAdvancedSearch(const CatalogSearchParam &inputs, API::ITableWorkspace_sptr &outputws, const int &offset,
                         const int &limit);
 
   /// Obtain the number of results returned by the doAdvancedSearch method.
   int64_t getNumberOfSearchResults(const CatalogSearchParam &inputs);
 
   // do login
-  API::CatalogSession_sptr doLogin(const std::string &username,
-                                   const std::string &password,
-                                   const std::string &endpoint,
-                                   const std::string &facility);
+  API::CatalogSession_sptr doLogin(const std::string &username, const std::string &password,
+                                   const std::string &endpoint, const std::string &facility);
 
   /// get the url of the given file id
   const std::string getdownloadURL(const long long &fileId);
@@ -78,34 +73,27 @@ public:
 private:
   /// This method saves the response data of search by run number to table
   /// workspace
-  void saveSearchRessults(
-      const ICat3::ns1__searchByAdvancedPaginationResponse &response,
-      API::ITableWorkspace_sptr &outputws);
+  void saveSearchRessults(const ICat3::ns1__searchByAdvancedPaginationResponse &response,
+                          API::ITableWorkspace_sptr &outputws);
 
   /// this method saves investigation include response to a table workspace
-  void saveInvestigationIncludesResponse(
-      const ICat3::ns1__getInvestigationIncludesResponse &response,
-      API::ITableWorkspace_sptr &outputws);
+  void saveInvestigationIncludesResponse(const ICat3::ns1__getInvestigationIncludesResponse &response,
+                                         API::ITableWorkspace_sptr &outputws);
 
   /// This method saves Datasets to a table workspace
-  void
-  saveDataSets(const ICat3::ns1__getInvestigationIncludesResponse &response,
-               API::ITableWorkspace_sptr &outputws);
+  void saveDataSets(const ICat3::ns1__getInvestigationIncludesResponse &response, API::ITableWorkspace_sptr &outputws);
 
   /// This method saves the myinvestigations data to a table workspace
-  void saveMyInvestigations(
-      const ICat3::ns1__getMyInvestigationsIncludesResponse &response,
-      API::ITableWorkspace_sptr &outputws);
+  void saveMyInvestigations(const ICat3::ns1__getMyInvestigationsIncludesResponse &response,
+                            API::ITableWorkspace_sptr &outputws);
 
   /// save investigations
-  void saveInvestigations(
-      const std::vector<ICat3::ns1__investigation *> &investigations,
-      API::ITableWorkspace_sptr &outputws);
+  void saveInvestigations(const std::vector<ICat3::ns1__investigation *> &investigations,
+                          API::ITableWorkspace_sptr &outputws);
 
   /// Builds search query based on user input and stores query in related ICAT
   /// class.
-  ICat3::ns1__advancedSearchDetails *
-  buildSearchQuery(const CatalogSearchParam &inputs);
+  ICat3::ns1__advancedSearchDetails *buildSearchQuery(const CatalogSearchParam &inputs);
 
   // Defines the SSL authentication scheme.
   void setSSLContext(ICat3::ICATPortBindingProxy &icat);
@@ -117,8 +105,7 @@ private:
    * @param input :: pointer to input value
    * @param t :: table row reference
    */
-  template <class T>
-  void savetoTableWorkspace(const T *input, Mantid::API::TableRow &t) {
+  template <class T> void savetoTableWorkspace(const T *input, Mantid::API::TableRow &t) {
     if (input != nullptr) {
       t << *input;
 

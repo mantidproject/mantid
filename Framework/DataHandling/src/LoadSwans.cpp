@@ -16,8 +16,7 @@
 #include <fstream>
 #include <map>
 
-namespace Mantid {
-namespace DataHandling {
+namespace Mantid::DataHandling {
 
 using namespace Mantid::Kernel;
 using namespace Mantid::Geometry;
@@ -42,9 +41,7 @@ const std::string LoadSwans::name() const { return "LoadSwans"; }
 int LoadSwans::version() const { return 1; }
 
 /// Algorithm's category for identification. @see Algorithm::category
-const std::string LoadSwans::category() const {
-  return "DataHandling\\Text;SANS\\DataHandling";
-}
+const std::string LoadSwans::category() const { return "DataHandling\\Text;SANS\\DataHandling"; }
 
 /// Algorithm's summary for use in the GUI and help. @see Algorithm::summary
 const std::string LoadSwans::summary() const { return "Loads SNS SWANS Data"; }
@@ -68,18 +65,15 @@ int LoadSwans::confidence(Kernel::FileDescriptor &descriptor) const {
 /** Initialize the algorithm's properties.
  */
 void LoadSwans::init() {
-  declareProperty(std::make_unique<FileProperty>("FilenameData", "",
-                                                 FileProperty::Load, ".dat"),
+  declareProperty(std::make_unique<FileProperty>("FilenameData", "", FileProperty::Load, ".dat"),
                   "The name of the text file to read, including its full or "
                   "relative path. The file extension must be .dat.");
 
-  declareProperty(std::make_unique<FileProperty>(
-                      "FilenameMetaData", "", FileProperty::Load, "meta.dat"),
+  declareProperty(std::make_unique<FileProperty>("FilenameMetaData", "", FileProperty::Load, "meta.dat"),
                   "The name of the text file to read, including its full or "
                   "relative path. The file extension must be meta.dat.");
 
-  declareProperty(std::make_unique<WorkspaceProperty<EventWorkspace>>(
-                      "OutputWorkspace", "", Direction::Output),
+  declareProperty(std::make_unique<WorkspaceProperty<EventWorkspace>>("OutputWorkspace", "", Direction::Output),
                   "The name to use for the output workspace");
 }
 
@@ -107,14 +101,13 @@ void LoadSwans::exec() {
  */
 void LoadSwans::loadInstrument() {
 
-  IAlgorithm_sptr loadInst = createChildAlgorithm("LoadInstrument");
+  auto loadInst = createChildAlgorithm("LoadInstrument");
 
   // Now execute the Child Algorithm. Catch and log any error, but don't stop.
   try {
     loadInst->setPropertyValue("InstrumentName", m_instrumentName);
     loadInst->setProperty<MatrixWorkspace_sptr>("Workspace", m_ws);
-    loadInst->setProperty("RewriteSpectraMap",
-                          Mantid::Kernel::OptionalBool(true));
+    loadInst->setProperty("RewriteSpectraMap", Mantid::Kernel::OptionalBool(true));
     loadInst->execute();
   } catch (...) {
     g_log.information("Cannot load the instrument definition.");
@@ -129,15 +122,13 @@ void LoadSwans::loadInstrument() {
  */
 void LoadSwans::placeDetectorInSpace() {
 
-  std::string componentName =
-      m_ws->getInstrument()->getStringParameter("detector-name")[0];
-  const double distance = static_cast<double>(
-      m_ws->getInstrument()->getNumberParameter("detector-sample-distance")[0]);
+  std::string componentName = m_ws->getInstrument()->getStringParameter("detector-name")[0];
+  const double distance = static_cast<double>(m_ws->getInstrument()->getNumberParameter("detector-sample-distance")[0]);
   // Make the angle negative to accommodate the sense of rotation.
   const double angle = -m_ws->run().getPropertyValueAsType<double>("angle");
 
-  g_log.information() << "Moving detector " << componentName << " " << distance
-                      << " meters and " << angle << " degrees.\n";
+  g_log.information() << "Moving detector " << componentName << " " << distance << " meters and " << angle
+                      << " degrees.\n";
 
   LoadHelper helper;
   constexpr double deg2rad = M_PI / 180.0;
@@ -207,9 +198,7 @@ std::vector<double> LoadSwans::loadMetaData() {
     if (!line.empty() && line[0] != '#') {
       g_log.debug() << "Metadata parsed line: " << line << '\n';
       auto tokenizer = Mantid::Kernel::StringTokenizer(
-          line, "\t ",
-          Mantid::Kernel::StringTokenizer::TOK_TRIM |
-              Mantid::Kernel::StringTokenizer::TOK_IGNORE_EMPTY);
+          line, "\t ", Mantid::Kernel::StringTokenizer::TOK_TRIM | Mantid::Kernel::StringTokenizer::TOK_IGNORE_EMPTY);
       metadata.reserve(tokenizer.size());
       for (const auto &token : tokenizer) {
         metadata.emplace_back(boost::lexical_cast<double>(token));
@@ -218,9 +207,7 @@ std::vector<double> LoadSwans::loadMetaData() {
   }
   if (metadata.size() < 6) {
     g_log.error("Expecting length >=6 for metadata arguments!");
-    throw Exception::NotFoundError(
-        "Number of arguments for metadata must be at least 6. Found: ",
-        metadata.size());
+    throw Exception::NotFoundError("Number of arguments for metadata must be at least 6. Found: ", metadata.size());
   }
   return metadata;
 }
@@ -234,8 +221,7 @@ std::vector<double> LoadSwans::loadMetaData() {
  * 4 - ??
  * 5 - angle
  */
-void LoadSwans::setMetaDataAsWorkspaceProperties(
-    const std::vector<double> &metadata) {
+void LoadSwans::setMetaDataAsWorkspaceProperties(const std::vector<double> &metadata) {
   API::Run &runDetails = m_ws->mutableRun();
   runDetails.addProperty<double>("wavelength", metadata[1]);
   runDetails.addProperty<double>("angle", metadata[5]);
@@ -245,8 +231,7 @@ void LoadSwans::setMetaDataAsWorkspaceProperties(
  * Puts all events from the map into the WS
  *
  */
-void LoadSwans::loadDataIntoTheWorkspace(
-    const std::map<uint32_t, std::vector<uint32_t>> &eventMap) {
+void LoadSwans::loadDataIntoTheWorkspace(const std::map<uint32_t, std::vector<uint32_t>> &eventMap) {
   for (const auto &position : eventMap) {
     EventList &el = m_ws->getSpectrum(position.first);
     el.setSpectrumNo(position.first);
@@ -264,13 +249,12 @@ void LoadSwans::loadDataIntoTheWorkspace(
  * longest-tof
  */
 void LoadSwans::setTimeAxis() {
-  const unsigned int shortest_tof = static_cast<unsigned int>(
-      m_ws->getInstrument()->getNumberParameter("shortest-tof")[0]);
-  const unsigned int longest_tof = static_cast<unsigned int>(
-      m_ws->getInstrument()->getNumberParameter("longest-tof")[0]);
+  const unsigned int shortest_tof =
+      static_cast<unsigned int>(m_ws->getInstrument()->getNumberParameter("shortest-tof")[0]);
+  const unsigned int longest_tof =
+      static_cast<unsigned int>(m_ws->getInstrument()->getNumberParameter("longest-tof")[0]);
   // Now, create a default X-vector for histogramming, with just 2 bins.
-  auto axis = HistogramData::BinEdges{static_cast<double>(shortest_tof),
-                                      static_cast<double>(longest_tof)};
+  auto axis = HistogramData::BinEdges{static_cast<double>(shortest_tof), static_cast<double>(longest_tof)};
   m_ws->setAllX(axis);
 }
 
@@ -279,12 +263,11 @@ void LoadSwans::setTimeAxis() {
  * and calculates the detector size/shape
  */
 unsigned int LoadSwans::getDetectorSize() {
-  const unsigned int x_size = static_cast<unsigned int>(
-      m_ws->getInstrument()->getNumberParameter("number-of-x-pixels")[0]);
-  const unsigned int y_size = static_cast<unsigned int>(
-      m_ws->getInstrument()->getNumberParameter("number-of-y-pixels")[0]);
+  const unsigned int x_size =
+      static_cast<unsigned int>(m_ws->getInstrument()->getNumberParameter("number-of-x-pixels")[0]);
+  const unsigned int y_size =
+      static_cast<unsigned int>(m_ws->getInstrument()->getNumberParameter("number-of-y-pixels")[0]);
   return x_size * y_size;
 }
 
-} // namespace DataHandling
-} // namespace Mantid
+} // namespace Mantid::DataHandling

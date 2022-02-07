@@ -22,9 +22,7 @@ class GetQsInQENSDataTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static GetQsInQENSDataTest *createSuite() {
-    return new GetQsInQENSDataTest();
-  }
+  static GetQsInQENSDataTest *createSuite() { return new GetQsInQENSDataTest(); }
   static void destroySuite(GetQsInQENSDataTest *suite) { delete suite; }
 
   /*
@@ -59,12 +57,9 @@ public:
     createAlg.setProperty("VerticalAxisValues", verticalAxisValues);
     createAlg.execute();
 
-    MatrixWorkspace_sptr workspace =
-        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-            outputWsName);
+    MatrixWorkspace_sptr workspace = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(outputWsName);
     TS_ASSERT(workspace);
-    const std::string expectedErrorMsg =
-        "Detectors are missing from the input workspace";
+    const std::string expectedErrorMsg = "Detectors are missing from the input workspace";
 
     try {
       GetQsInQENSData alg;

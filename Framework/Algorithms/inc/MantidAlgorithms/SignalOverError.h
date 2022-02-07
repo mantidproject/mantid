@@ -23,18 +23,14 @@ public:
 
   const std::string name() const override;
   /// Summary of algorithms purpose
-  const std::string summary() const override {
-    return "Replace Y by Y/E for a MatrixWorkspace";
-  }
+  const std::string summary() const override { return "Replace Y by Y/E for a MatrixWorkspace"; }
 
   int version() const override;
   const std::string category() const override;
 
 private:
   // Overridden UnaryOperation methods
-  void performUnaryOperation(const double XIn, const double YIn,
-                             const double EIn, double &YOut,
-                             double &EOut) override;
+  void performUnaryOperation(const double XIn, const double YIn, const double EIn, double &YOut, double &EOut) override;
 };
 
 } // namespace Algorithms

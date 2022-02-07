@@ -33,7 +33,7 @@ Usage
 
    # Load Peaks
    ws=LoadIsawPeaks(Filename='TOPAZ_3007.peaks')
- 
+
    # Run Algorithm
    IndexSXPeaks(PeaksWorkspace=ws, a=8.605819, b=11.935925, c=11.941813, alpha=107.429088, beta=98.752912, gamma=98.951193, dTolerance=0.15)
 
@@ -44,7 +44,7 @@ Usage
 Output:
 
 .. testoutput:: ExIndexSXPeaksSimple
-       
+
    Number of Indexed Peaks: 43
 
 Related Algorithms

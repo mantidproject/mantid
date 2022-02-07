@@ -6,11 +6,12 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
+#include "DllConfig.h"
 #include "MantidKernel/System.h"
 
-#include "DllConfig.h"
-
+#include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidQtWidgets/Common/UserSubWindow.h"
+#include "MantidQtWidgets/Plotting/Mpl/ExternalPlotter.h"
 
 #include "ui_ALCInterface.h"
 
@@ -53,8 +54,22 @@ private slots:
 
   void updateBaselineData();
   void updatePeakData();
+  void externalPlotRequested();
 
 private:
+  void importLoadedData(const std::string &workspaceName);
+  void importBaselineData(const std::string &workspaceName);
+  void importPeakData(const std::string &workspaceName);
+  void externallyPlotWorkspace(Mantid::API ::MatrixWorkspace_sptr &data, std::string const &workspaceName,
+                               std::string const &workspaceIndices, bool errorBars,
+                               boost::optional<QHash<QString, QVariant>> const &kwargs);
+  void externallyPlotWorkspaces(Mantid::API::MatrixWorkspace_sptr &data, std::vector<std::string> const &workspaceNames,
+                                std::vector<int> const &workspaceIndices, std::vector<bool> const &errorBars,
+                                std::vector<boost::optional<QHash<QString, QVariant>>> const &spectraKwargs);
+  void externalPlotDataLoading();
+  void externalPlotBaselineModel();
+  void externalPlotPeakFitting();
+
   /// UI form
   Ui::ALCInterface m_ui;
 
@@ -76,6 +91,12 @@ private:
 
   /// Format of the label at the bottom
   static const QString LABEL_FORMAT;
+
+  /// External plotter
+  std::unique_ptr<Widgets::MplCpp::ExternalPlotter> m_externalPlotter;
+
+  /// Steps of the ALC interface
+  enum Steps { DataLoading = 0, BaselineModel = 1, PeakFitting = 2 };
 };
 
 } // namespace CustomInterfaces

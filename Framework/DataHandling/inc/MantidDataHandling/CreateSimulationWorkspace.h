@@ -20,9 +20,7 @@ class DLLExport CreateSimulationWorkspace : public API::Algorithm {
 public:
   const std::string name() const override;
   /// Summary of algorithms purpose
-  const std::string summary() const override {
-    return "Create a blank workspace for a given instrument.";
-  }
+  const std::string summary() const override { return "Create a blank workspace for a given instrument."; }
 
   int version() const override;
   const std::string category() const override;
@@ -46,7 +44,7 @@ private:
   /// Load the detector mapping from a NXS file
   void loadMappingFromISISNXS(const std::string &filename);
   /// Create the grouping map from the tables
-  void createGroupingsFromTables(int *specTable, int *udetTable, int ndets);
+  void createGroupingsFromTables(const int *specTable, const int *udetTable, int ndets);
   /// Returns new Xbins
   HistogramData::BinEdges createBinBoundaries() const;
   /// Apply the created mapping to the workspace

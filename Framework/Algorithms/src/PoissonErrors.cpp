@@ -9,8 +9,7 @@
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
 
-namespace Mantid {
-namespace Algorithms {
+namespace Mantid::Algorithms {
 // Register the class into the algorithm factory
 DECLARE_ALGORITHM(PoissonErrors)
 
@@ -22,9 +21,8 @@ DECLARE_ALGORITHM(PoissonErrors)
  * @retval "<reason why not compatible>" The two workspaces are NOT size
  * compatible
  */
-std::string PoissonErrors::checkSizeCompatibility(
-    const API::MatrixWorkspace_const_sptr lhs,
-    const API::MatrixWorkspace_const_sptr rhs) const {
+std::string PoissonErrors::checkSizeCompatibility(const API::MatrixWorkspace_const_sptr lhs,
+                                                  const API::MatrixWorkspace_const_sptr rhs) const {
   // in order to be size compatible then the workspaces must be identically
   // sized
   if (lhs->size() == rhs->size()) {
@@ -34,10 +32,8 @@ std::string PoissonErrors::checkSizeCompatibility(
   }
 }
 
-void PoissonErrors::performBinaryOperation(const HistogramData::Histogram &lhs,
-                                           const HistogramData::Histogram &rhs,
-                                           HistogramData::HistogramY &YOut,
-                                           HistogramData::HistogramE &EOut) {
+void PoissonErrors::performBinaryOperation(const HistogramData::Histogram &lhs, const HistogramData::Histogram &rhs,
+                                           HistogramData::HistogramY &YOut, HistogramData::HistogramE &EOut) {
   // Just copy over the lhs data
   YOut = lhs.y();
   // Now make the fractional error the same as it was on the rhs
@@ -50,10 +46,8 @@ void PoissonErrors::performBinaryOperation(const HistogramData::Histogram &lhs,
   }
 }
 
-void PoissonErrors::performBinaryOperation(const HistogramData::Histogram &lhs,
-                                           const double rhsY, const double rhsE,
-                                           HistogramData::HistogramY &YOut,
-                                           HistogramData::HistogramE &EOut) {
+void PoissonErrors::performBinaryOperation(const HistogramData::Histogram &lhs, const double rhsY, const double rhsE,
+                                           HistogramData::HistogramY &YOut, HistogramData::HistogramE &EOut) {
 
   assert(lhs.x().size() == 1);
   // If we get here we've got two single column workspaces so it's easy.
@@ -64,5 +58,4 @@ void PoissonErrors::performBinaryOperation(const HistogramData::Histogram &lhs,
   else
     EOut[0] = 0.0;
 }
-} // namespace Algorithms
-} // namespace Mantid
+} // namespace Mantid::Algorithms

@@ -21,13 +21,10 @@ class PDLoadCharacterizationsTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static PDLoadCharacterizationsTest *createSuite() {
-    return new PDLoadCharacterizationsTest();
-  }
+  static PDLoadCharacterizationsTest *createSuite() { return new PDLoadCharacterizationsTest(); }
   static void destroySuite(PDLoadCharacterizationsTest *suite) { delete suite; }
 
-  void runAlg(PDLoadCharacterizations &alg, ITableWorkspace_sptr &wksp,
-              const std::string &filename) {
+  void runAlg(PDLoadCharacterizations &alg, ITableWorkspace_sptr &wksp, const std::string &filename) {
     TS_ASSERT_THROWS_NOTHING(alg.initialize());
     TS_ASSERT(alg.isInitialized());
 
@@ -45,8 +42,7 @@ public:
 
   // checks the focus positions for NOMAD
   void checkNOMAD(PDLoadCharacterizations &alg, bool checkAziValues = true) {
-    TS_ASSERT_EQUALS(alg.getPropertyValue("IParmFilename"),
-                     std::string("NOMAD_11_22_11.prm"));
+    TS_ASSERT_EQUALS(alg.getPropertyValue("IParmFilename"), std::string("NOMAD_11_22_11.prm"));
     double l1 = alg.getProperty("PrimaryFlightPath");
     TS_ASSERT_EQUALS(l1, 19.5);
 
@@ -198,8 +194,7 @@ public:
     checkPG3(wksp);
 
     // test the other output properties
-    TS_ASSERT_EQUALS(alg.getPropertyValue("IParmFilename"),
-                     std::string("dummy.iparm"));
+    TS_ASSERT_EQUALS(alg.getPropertyValue("IParmFilename"), std::string("dummy.iparm"));
     double l1 = alg.getProperty("PrimaryFlightPath");
     TS_ASSERT_EQUALS(l1, 60.);
 
@@ -331,8 +326,7 @@ public:
 
     // there shouldn't be an instrument
     // test the other output properties
-    TS_ASSERT_EQUALS(alg.getPropertyValue("IParmFilename"),
-                     std::string("NOMAD_11_22_11.prm"));
+    TS_ASSERT_EQUALS(alg.getPropertyValue("IParmFilename"), std::string("NOMAD_11_22_11.prm"));
     double l1 = alg.getProperty("PrimaryFlightPath");
     TS_ASSERT_EQUALS(l1, Mantid::EMPTY_DBL());
 

@@ -26,10 +26,8 @@ private:
   double m_min, m_max;
 };
 
-MANTIDQT_ISISREFLECTOMETRY_DLL bool operator==(RangeInLambda const &lhs,
-                                               RangeInLambda const &rhs);
-MANTIDQT_ISISREFLECTOMETRY_DLL bool operator!=(RangeInLambda const &lhs,
-                                               RangeInLambda const &rhs);
+MANTIDQT_ISISREFLECTOMETRY_DLL bool operator==(RangeInLambda const &lhs, RangeInLambda const &rhs);
+MANTIDQT_ISISREFLECTOMETRY_DLL bool operator!=(RangeInLambda const &lhs, RangeInLambda const &rhs);
 } // namespace ISISReflectometry
 } // namespace CustomInterfaces
 } // namespace MantidQt

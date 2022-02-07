@@ -59,15 +59,13 @@ public:
     //
     //  test workspace, copied from LoadMuonNexusTest.h
     MatrixWorkspace_sptr output;
-    (output = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-         outputSpace));
+    (output = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(outputSpace));
 
     // MatrixWorkspace_sptr output;
     // TS_ASSERT_THROWS_NOTHING(output =
     // AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(outputSpace+"_1"));
 
-    MatrixWorkspace_sptr output2D =
-        std::dynamic_pointer_cast<MatrixWorkspace>(output);
+    MatrixWorkspace_sptr output2D = std::dynamic_pointer_cast<MatrixWorkspace>(output);
     // Should be 32 for file inputFile =
     // "../../../../Test/Nexus/emu00006473.nxs";
     TS_ASSERT_EQUALS(output2D->getNumberHistograms(), 32);
@@ -104,21 +102,14 @@ public:
     // TS_ASSERT_THROWS_NOTHING(output =
     // AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(outputSpace));
     WorkspaceGroup_sptr work_grpout;
-    (work_grpout = AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(
-         outputSpace));
-    (output1 = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-         outputSpace + "_1"));
-    (output2 = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-         outputSpace + "_2"));
-    (output3 = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-         outputSpace + "_3"));
-    (output4 = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-         outputSpace + "_4"));
+    (work_grpout = AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(outputSpace));
+    (output1 = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(outputSpace + "_1"));
+    (output2 = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(outputSpace + "_2"));
+    (output3 = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(outputSpace + "_3"));
+    (output4 = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(outputSpace + "_4"));
 
-    MatrixWorkspace_sptr output2D =
-        std::dynamic_pointer_cast<MatrixWorkspace>(output1);
-    MatrixWorkspace_sptr output2D2 =
-        std::dynamic_pointer_cast<MatrixWorkspace>(output2);
+    MatrixWorkspace_sptr output2D = std::dynamic_pointer_cast<MatrixWorkspace>(output1);
+    MatrixWorkspace_sptr output2D2 = std::dynamic_pointer_cast<MatrixWorkspace>(output2);
     // Should be 32 for file inputFile =
     // "../../../../Test/Nexus/emu00006475.nxs";
     TS_ASSERT_EQUALS(output2D->getNumberHistograms(), 32);

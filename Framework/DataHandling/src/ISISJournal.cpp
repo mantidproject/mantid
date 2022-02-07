@@ -7,7 +7,6 @@
 // Includes
 #include "MantidDataHandling/ISISJournal.h"
 #include "MantidKernel/Exception.h"
-#include "MantidKernel/InternetHelper.h"
 
 #include "Poco/SAX/SAXException.h"
 #include <Poco/DOM/DOMParser.h>
@@ -20,9 +19,7 @@
 #include <boost/regex.hpp>
 #include <sstream>
 
-namespace Mantid {
-namespace DataHandling {
-namespace ISISJournal {
+namespace Mantid::DataHandling {
 
 using Kernel::InternetHelper;
 using Poco::XML::Document;
@@ -33,8 +30,7 @@ using Poco::XML::NodeFilter;
 using Poco::XML::TreeWalker;
 
 namespace {
-static constexpr const char *URL_PREFIX =
-    "http://data.isis.rl.ac.uk/journals/ndx";
+static constexpr const char *URL_PREFIX = "http://data.isis.rl.ac.uk/journals/ndx";
 static constexpr const char *INDEX_FILE_NAME = "main";
 static constexpr const char *JOURNAL_PREFIX = "/journal_";
 static constexpr const char *JOURNAL_EXT = ".xml";
@@ -83,15 +79,14 @@ Poco::AutoPtr<Document> parse(std::string const &xmlString) {
 void throwIfNotValid(Element *element, const char *expectedName) {
   if (!element) {
     std::ostringstream msg;
-    msg << "ISISJournal::throwIfNotValid() - invalid element for '"
-        << expectedName << "'\n";
+    msg << "ISISJournal::throwIfNotValid() - invalid element for '" << expectedName << "'\n";
     throw std::invalid_argument(msg.str());
   }
 
   if (element->nodeName() != expectedName) {
     std::ostringstream msg;
-    msg << "ISISJournal::throwIfNotValid() - Element name does not match '"
-        << expectedName << "'. Found " << element->nodeName() << "\n";
+    msg << "ISISJournal::throwIfNotValid() - Element name does not match '" << expectedName << "'. Found "
+        << element->nodeName() << "\n";
     throw std::invalid_argument(msg.str());
   }
 }
@@ -147,8 +142,7 @@ ISISJournal::RunData createRunDataForElement(Element *element) {
  * @param result : a map of names to values to which we add key-value pairs for
  * each requested value
  */
-void addValuesForElement(Element *element,
-                         std::vector<std::string> const &valuesToLookup,
+void addValuesForElement(Element *element, std::vector<std::string> const &valuesToLookup,
                          ISISJournal::RunData &result) {
   for (auto &name : valuesToLookup)
     result[name] = getTextValue(element->getChildElement(name));
@@ -164,10 +158,9 @@ void addValuesForElement(Element *element,
  * @returns : a map of name->value pairs containing mandatory run data as well
  * as the values that were requested
  */
-std::vector<ISISJournal::RunData>
-getValuesForAllElements(Element *parentElement,
-                        std::vector<std::string> const &valuesToLookup,
-                        ISISJournal::RunData const &filters) {
+std::vector<ISISJournal::RunData> getValuesForAllElements(Element *parentElement,
+                                                          std::vector<std::string> const &valuesToLookup,
+                                                          ISISJournal::RunData const &filters) {
   auto results = std::vector<ISISJournal::RunData>{};
 
   auto nodeIter = TreeWalker(parentElement, NodeFilter::SHOW_ELEMENT);
@@ -191,10 +184,8 @@ getValuesForAllElements(Element *parentElement,
  * @returns : the attribute values for all of the child elements
  * @throws : if any of the child elements does not have the expected name
  */
-std::vector<std::string>
-getAttributeForAllChildElements(Element *parentElement,
-                                const char *childElementName,
-                                const char *attributeName) {
+std::vector<std::string> getAttributeForAllChildElements(Element *parentElement, const char *childElementName,
+                                                         const char *attributeName) {
   auto results = std::vector<std::string>{};
 
   auto nodeIter = TreeWalker(parentElement, NodeFilter::SHOW_ELEMENT);
@@ -229,8 +220,7 @@ std::string convertFilenameToCycleName(std::string const &filename) {
  * @returns : the list of cycle names for all valid journal files e.g. 19_4
  * (note that this excludes files that do not match the journal-file pattern).
  */
-std::vector<std::string>
-convertFilenamesToCycleNames(std::vector<std::string> const &filenames) {
+std::vector<std::string> convertFilenamesToCycleNames(std::vector<std::string> const &filenames) {
   auto cycles = std::vector<std::string>();
   cycles.reserve(filenames.size());
   for (const auto &filename : filenames) {
@@ -248,11 +238,9 @@ convertFilenamesToCycleNames(std::vector<std::string> const &filenames) {
  * @param cycle : the ISIS cycle the required data is from e.g. "19_4"
  * @param internetHelper : class for sending internet requests
  */
-ISISJournal::ISISJournal(std::string const &instrument,
-                         std::string const &cycle,
+ISISJournal::ISISJournal(std::string const &instrument, std::string const &cycle,
                          std::unique_ptr<InternetHelper> internetHelper)
-    : m_internetHelper(std::move(internetHelper)),
-      m_runsFileURL(constructURL(instrument, cycle)),
+    : m_internetHelper(std::move(internetHelper)), m_runsFileURL(constructURL(instrument, cycle)),
       m_indexFileURL(constructURL(instrument, INDEX_FILE_NAME)) {}
 
 ISISJournal::~ISISJournal() = default;
@@ -273,8 +261,7 @@ std::vector<std::string> ISISJournal::getCycleNames() {
   }
   auto rootElement = m_indexDocument->documentElement();
   throwIfNotValid(rootElement, JOURNAL_TAG);
-  auto filenames =
-      getAttributeForAllChildElements(rootElement, FILE_TAG, "name");
+  auto filenames = getAttributeForAllChildElements(rootElement, FILE_TAG, "name");
   return convertFilenamesToCycleNames(filenames);
 }
 
@@ -286,9 +273,8 @@ std::vector<std::string> ISISJournal::getCycleNames() {
  * @param filters : optional element names and values to filter the results by
  * @throws : if there was an error fetching the runs
  */
-std::vector<ISISJournal::RunData>
-ISISJournal::getRuns(std::vector<std::string> const &valuesToLookup,
-                     ISISJournal::RunData const &filters) {
+std::vector<ISISJournal::RunData> ISISJournal::getRuns(std::vector<std::string> const &valuesToLookup,
+                                                       ISISJournal::RunData const &filters) {
   if (!m_runsDocument) {
     auto xmlString = getURLContents(m_runsFileURL);
     m_runsDocument = parse(xmlString);
@@ -305,15 +291,20 @@ ISISJournal::getRuns(std::vector<std::string> const &valuesToLookup,
  */
 std::string ISISJournal::getURLContents(std::string const &url) {
   std::ostringstream serverReply;
-  auto const statusCode = m_internetHelper->sendRequest(url, serverReply);
+  int statusCode;
+  try {
+    statusCode = m_internetHelper->sendRequest(url, serverReply);
+  } catch (Kernel::Exception::InternetError const &) {
+    std::ostringstream msg;
+    msg << "Failed to access file " << url << "\nCheck that the cycle name is valid.";
+    throw Kernel::Exception::InternetError(msg.str());
+  }
+
   if (statusCode != Poco::Net::HTTPResponse::HTTP_OK) {
-    throw Kernel::Exception::InternetError(
-        std::string("Failed to access journal file: HTTP Code: ") +
-        std::to_string(statusCode));
+    std::ostringstream msg;
+    msg << "Failed to access file " << url << "\nHTTP Code: " << statusCode << "\nCheck that the cycle name is valid.";
+    throw Kernel::Exception::InternetError(msg.str());
   }
   return serverReply.str();
 }
-
-} // namespace ISISJournal
-} // namespace DataHandling
-} // namespace Mantid
+} // namespace Mantid::DataHandling

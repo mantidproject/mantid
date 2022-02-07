@@ -157,6 +157,8 @@ class ProjectRecoveryModel(QObject):
         self.rows = []
 
         pid_folder = self.project_recovery.get_pid_folder_to_load_a_checkpoint_from()
+        if pid_folder is None:
+            return
         paths = self.project_recovery.listdir_fullpath(os.path.join(self.project_recovery.recovery_directory_hostname,
                                                        pid_folder))
 

@@ -26,17 +26,13 @@ public:
   const std::string name() const override { return "ConvertCWSDExpToMomentum"; }
 
   /// Summary of algorithms purpose
-  const std::string summary() const override {
-    return "Load and convert a set of files in an HB3A experiment.";
-  }
+  const std::string summary() const override { return "Load and convert a set of files in an HB3A experiment."; }
 
   /// Algorithm's version
   int version() const override { return (1); }
 
   /// Algorithm's category for identification
-  const std::string category() const override {
-    return "Diffraction\\ConstantWavelength;DataHandling\\Text";
-  }
+  const std::string category() const override { return "Diffraction\\ConstantWavelength;DataHandling\\Text"; }
 
 private:
   void init() override;
@@ -44,30 +40,24 @@ private:
 
   void addMDEvents(bool usevirtual);
 
-  void convertSpiceMatrixToMomentumMDEvents(
-      const API::MatrixWorkspace_sptr &dataws, bool usevirtual,
-      const detid_t &startdetid, const int scannumber, const int runnumber,
-      double measuretime, int monitor_counts);
+  void convertSpiceMatrixToMomentumMDEvents(const API::MatrixWorkspace_sptr &dataws, bool usevirtual,
+                                            const detid_t &startdetid, const int scannumber, const int runnumber,
+                                            double measuretime, int monitor_counts);
 
   /// Convert |Q| with detector position to Q_sample
-  Kernel::V3D convertToQSample(const Kernel::V3D &samplePos,
-                               const Kernel::V3D &ki, const Kernel::V3D &detPos,
-                               const double &momentum,
-                               std::vector<Mantid::coord_t> &qSample,
+  Kernel::V3D convertToQSample(const Kernel::V3D &samplePos, const Kernel::V3D &ki, const Kernel::V3D &detPos,
+                               const double &momentum, std::vector<Mantid::coord_t> &qSample,
                                const Kernel::DblMatrix &rotationMatrix);
 
   API::IMDEventWorkspace_sptr createExperimentMDWorkspace();
 
   bool getInputs(bool virtualinstrument, std::string &errmsg);
 
-  API::MatrixWorkspace_sptr loadSpiceData(const std::string &filename,
-                                          bool &loaded, std::string &errmsg);
+  API::MatrixWorkspace_sptr loadSpiceData(const std::string &filename, bool &loaded, std::string &errmsg);
 
-  void parseDetectorTable(std::vector<Kernel::V3D> &vec_detpos,
-                          std::vector<detid_t> &vec_detid);
+  void parseDetectorTable(std::vector<Kernel::V3D> &vec_detpos, std::vector<detid_t> &vec_detid);
 
-  void setupTransferMatrix(const API::MatrixWorkspace_sptr &dataws,
-                           Kernel::DblMatrix &rotationMatrix);
+  void setupTransferMatrix(const API::MatrixWorkspace_sptr &dataws, Kernel::DblMatrix &rotationMatrix);
 
   void createVirtualInstrument();
 

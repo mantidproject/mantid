@@ -24,39 +24,18 @@ This is a parent algorithm that uses several different child algorithms to
 perform it's task.
 Takes a workspace as input and the filename of a grouping file of a suitable
 format.
-
-The input workspace is
-1) Converted to d-spacing units
-2) Rebinned to a common set of bins
-3) The spectra are grouped according to the grouping file.
-
-    Required Properties:
-<UL>
-<LI> InputWorkspace - The name of the 2D Workspace to take as input </LI>
-<LI> OutputWorkspace - The name of the 2D workspace in which to store the result
-</LI>
-</UL>
-
-
-@author Vickie Lynch, SNS
-@date 07/16/2012
 */
-class DLLExport AlignAndFocusPowder
-    : public API::DistributedDataProcessorAlgorithm {
+class DLLExport AlignAndFocusPowder : public API::DistributedDataProcessorAlgorithm {
 public:
   /// Algorithm's name for identification overriding a virtual method
   const std::string name() const override { return "AlignAndFocusPowder"; }
 
   /// Algorithm's version for identification overriding a virtual method
   int version() const override { return 1; }
-  const std::vector<std::string> seeAlso() const override {
-    return {"AlignAndFocusPowderFromFiles"};
-  }
+  const std::vector<std::string> seeAlso() const override { return {"AlignAndFocusPowderFromFiles"}; }
 
   /// Algorithm's category for identification overriding a virtual method
-  const std::string category() const override {
-    return "Workflow\\Diffraction";
-  }
+  const std::string category() const override { return "Workflow\\Diffraction"; }
 
   /// Summary of algorithms purpose
   const std::string summary() const override {
@@ -71,29 +50,28 @@ private:
   // Overridden Algorithm methods
   void init() override;
   void exec() override;
-  void loadCalFile(const std::string &calFilename,
-                   const std::string &groupFilename);
+  void loadCalFile(const std::string &calFilename, const std::string &groupFilename);
   API::MatrixWorkspace_sptr rebin(API::MatrixWorkspace_sptr matrixws);
+  API::MatrixWorkspace_sptr rebinRagged(API::MatrixWorkspace_sptr matrixws, const bool inDspace);
 
-  API::MatrixWorkspace_sptr
-  conjoinWorkspaces(const API::MatrixWorkspace_sptr &ws1,
-                    const API::MatrixWorkspace_sptr &ws2, size_t offset);
+  API::MatrixWorkspace_sptr conjoinWorkspaces(const API::MatrixWorkspace_sptr &ws1,
+                                              const API::MatrixWorkspace_sptr &ws2, size_t offset);
 
   /// Call diffraction focus to a matrix workspace.
   API::MatrixWorkspace_sptr diffractionFocus(API::MatrixWorkspace_sptr ws);
 
   /// Convert units
-  API::MatrixWorkspace_sptr convertUnits(API::MatrixWorkspace_sptr matrixws,
-                                         const std::string &target);
+  API::MatrixWorkspace_sptr convertUnits(API::MatrixWorkspace_sptr matrixws, const std::string &target);
+
+  /// Filter out absorption resonances
+  API::MatrixWorkspace_sptr filterResonances(API::MatrixWorkspace_sptr matrixws);
 
   /// Call edit instrument geometry
-  API::MatrixWorkspace_sptr editInstrument(
-      API::MatrixWorkspace_sptr ws, const std::vector<double> &polars,
-      const std::vector<specnum_t> &specids, const std::vector<double> &l2s,
-      const std::vector<double> &phis);
+  API::MatrixWorkspace_sptr editInstrument(API::MatrixWorkspace_sptr ws, const std::vector<double> &polars,
+                                           const std::vector<specnum_t> &specids, const std::vector<double> &l2s,
+                                           const std::vector<double> &phis);
   void convertOffsetsToCal(DataObjects::OffsetsWorkspace_sptr &offsetsWS);
-  double getVecPropertyFromPmOrSelf(const std::string &name,
-                                    std::vector<double> &avec);
+  double getVecPropertyFromPmOrSelf(const std::string &name, std::vector<double> &avec);
 
   API::MatrixWorkspace_sptr m_inputW;
   API::MatrixWorkspace_sptr m_outputW;
@@ -112,6 +90,9 @@ private:
   int m_resampleX{0};
   std::vector<double> m_dmins;
   std::vector<double> m_dmaxs;
+  std::vector<double> m_delta_ragged;
+  std::vector<double> m_resonanceLower;
+  std::vector<double> m_resonanceUpper;
   bool dspace{false};
   double xmin{0.0};
   double xmax{0.0};

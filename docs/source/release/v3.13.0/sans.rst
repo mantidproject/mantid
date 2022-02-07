@@ -30,7 +30,7 @@ Improvements
 ############
 * Transmission workspaces are now output by default from the new GUI.
 * The Beam centre finder now takes the default radius limits from the instrument parameter file if specified.
-* Updated old backend to mask by detector ID rather than spectrum number, improving reliability. 
+* Updated old backend to mask by detector ID rather than spectrum number, improving reliability.
 * Added EventSlice option to options column in new GUI.
 * Added thickness column to table in new GUI.
 * Added Radius Cutoff and Wavelength Cutoff boxes to the old and new GUI.
@@ -46,9 +46,9 @@ Bugfixes
 * User files specified in the batch file are now being loaded into the new GUI.
 * The new sans GUI will now save out all the outputs of a time sliced reduction.
 * Fixed a bug where save_format was not being specified if a user file was entered for a row.
-* Use gravity now defaulting to false. 
+* Use gravity now defaulting to false.
 * MASK/TIME and TIME/MASK now both work in new backend.
-* SET Centre/HAB command is now correctly parsed into a separate variable to SET Centre. 
+* SET Centre/HAB command is now correctly parsed into a separate variable to SET Centre.
 
 Features Removed
 ################

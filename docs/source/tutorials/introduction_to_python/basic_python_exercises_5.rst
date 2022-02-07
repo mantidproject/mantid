@@ -1,7 +1,7 @@
 .. _basic_python_exercises_5:
 
 =======================
-Basic Python Exercises  
+Basic Python Exercises
 =======================
 
 -  This exercise aims to perform a moderately complicated set of

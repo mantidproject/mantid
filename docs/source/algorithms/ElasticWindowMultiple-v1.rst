@@ -28,7 +28,7 @@ Usage
 -----
 
 .. testcode:: exElasticWindowMultiple
-    
+
     # This test needs the facility to be set to ISIS to load the IRIS instrument
     facility = config['default.facility']
     config['default.facility'] = 'ISIS'

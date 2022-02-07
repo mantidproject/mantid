@@ -1,7 +1,7 @@
 .. _error_handling:
 
 ==============
-Error Handling 
+Error Handling
 ==============
 
 -  As we saw earlier Python can give error messages under certain
@@ -113,7 +113,7 @@ gives the output
 gives the output
 
 .. testoutput:: tryExcept4
- 
+
    Something went wrong but I don't know what
 
 `Category:Tested Examples <Category:Tested_Examples>`__

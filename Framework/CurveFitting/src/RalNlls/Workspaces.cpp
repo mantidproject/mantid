@@ -8,16 +8,12 @@
 // https://ccpforge.cse.rl.ac.uk/gf/project/ral_nlls June 2016
 #include "MantidCurveFitting/RalNlls/Workspaces.h"
 
-namespace Mantid {
-namespace CurveFitting {
-namespace NLLS {
+namespace Mantid::CurveFitting::NLLS {
 
 /// Constructor of the workspace.
 NLLS_workspace::NLLS_workspace()
-    : first_call(0), iter(0), normF0(), normJF0(), normF(), normJF(),
-      normJFold(), normJF_Newton(), Delta(), normd(),
-      use_second_derivatives(false), hybrid_count(0), hybrid_tol(1.0), tr_p(7) {
-}
+    : first_call(0), iter(0), normF0(), normJF0(), normF(), normJF(), normJFold(), normJF_Newton(), Delta(), normd(),
+      use_second_derivatives(false), hybrid_count(0), hybrid_tol(1.0), tr_p(7) {}
 
 /// Initialize the workspace.
 /// @param n :: The number of fitting parameters.
@@ -61,6 +57,4 @@ void NLLS_workspace::initialize(int n, int m, const nlls_options &options) {
   }
 }
 
-} // namespace NLLS
-} // namespace CurveFitting
-} // namespace Mantid
+} // namespace Mantid::CurveFitting::NLLS

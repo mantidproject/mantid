@@ -32,8 +32,7 @@ public:
   // see full ChebyshevPolyFitPrivate implementation
   ~ChebyshevPolyFit();
 
-  std::vector<double> operator()(const std::vector<double> &xs,
-                                 const std::vector<double> &ys,
+  std::vector<double> operator()(const std::vector<double> &xs, const std::vector<double> &ys,
                                  const std::vector<double> &wgts);
 
 private:

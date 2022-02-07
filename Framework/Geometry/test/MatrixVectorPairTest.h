@@ -21,9 +21,7 @@ class MatrixVectorPairTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static MatrixVectorPairTest *createSuite() {
-    return new MatrixVectorPairTest();
-  }
+  static MatrixVectorPairTest *createSuite() { return new MatrixVectorPairTest(); }
   static void destroySuite(MatrixVectorPairTest *suite) { delete suite; }
 
   void test_Construction() {

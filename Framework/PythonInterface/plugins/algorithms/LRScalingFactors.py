@@ -239,13 +239,13 @@ class LRScalingFactors(PythonAlgorithm):
         else:
             self.have_attenuator_info = True
 
-    def get_attenuators(self, workspace, run_index):
+    def get_attenuators(self, workspace, expInfoIndex):
         """
             @param workspace: workspace we are determining the number of attenuators for
-            @param run_index: index of the run in case we are getting the attenuators from the input properties
+            @param expInfoIndex: index of the run in case we are getting the attenuators from the input properties
         """
         if self.have_attenuator_info:
-            return self.attenuators[run_index]
+            return self.attenuators[expInfoIndex]
         else:
             return int(workspace.getRun().getProperty('vAtt').value[0]-1)
 
@@ -477,7 +477,8 @@ class LRScalingFactors(PythonAlgorithm):
                                                 PeakRange=peak_range,
                                                 BackgroundRange=background_range,
                                                 LowResolutionRange=low_res_range,
-                                                OutputWorkspace=str(workspace))
+                                                OutputWorkspace=str(workspace),
+                                                ErrorWeighting=True)
 
         # Normalize by current proton charge
         # Note that the background subtraction will use an error weighted mean

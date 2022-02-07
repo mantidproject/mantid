@@ -5,11 +5,8 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 import os
-import subprocess
 import mantid
-from .base import AlgorithmBaseDirective #pylint: disable=unused-import
-
-from mantiddoc.tools.git_last_modified import get_file_last_modified_time
+from .base import AlgorithmBaseDirective
 
 
 class SourceLinkError(Exception):
@@ -51,21 +48,11 @@ class SourceLinkDirective(AlgorithmBaseDirective):
     """
 
     required_arguments, optional_arguments = 0, 0
-    option_spec = {
-        "filename": str,
-        "sanity_checks": int,
-        "cpp": str,
-        "h": str,
-        "py": str
-    }
+    option_spec = {"filename": str, "sanity_checks": int, "cpp": str, "h": str, "py": str}
 
     #IMPORTANT: keys must match the option spec above
     # - apart from filename and sanity_checks
-    file_types = {
-        "h": "C++ header",
-        "cpp": "C++ source",
-        "py": "Python"
-    }
+    file_types = {"h": "C++ header", "cpp": "C++ source", "py": "Python"}
     file_lookup = {}
 
     git_cache = {}
@@ -73,10 +60,9 @@ class SourceLinkDirective(AlgorithmBaseDirective):
     # will be filled in
     __source_root = None
 
-
     def execute(self):
         """
-        Called by Sphinx when the ..sourcelink:: directive is encountered.
+        Called by Sphinx when the .. sourcelink:: directive is encountered.
         """
         file_paths = {}
         error_string = ""
@@ -94,24 +80,20 @@ class SourceLinkDirective(AlgorithmBaseDirective):
             if file_paths[extension] is None:
                 try:
                     fname = self.find_source_file(file_name, extension)
-                    file_paths[extension] = (
-                            fname, get_file_last_modified_time(self.git_cache, self.source_root, fname)) \
-                            if fname is not None else None
+                    file_paths[extension] = fname if fname is not None else None
                 except SourceLinkError as err:
                     error_string += str(err) + "\n"
-
             elif file_paths[extension].lower() == "none":
                 # the users has specifically chosen to suppress this - set it to a "proper" None
                 # but do not search for this file
                 file_paths[extension] = None
-
             else:
                 # prepend the base framework directory
                 fname = os.path.join(self.source_root, file_paths[extension])
-                file_paths[extension] = (fname, get_file_last_modified_time(self.git_cache, self.source_root, fname))
-                if not os.path.exists(file_paths[extension][0]):
+                file_paths[extension] = fname
+                if not os.path.exists(file_paths[extension]):
                     error_string += "Cannot find {} file at {}\n".format(
-                        extension, file_paths[extension][0])
+                        extension, file_paths[extension])
 
         # throw accumulated errors now if you have any
         if error_string != "":
@@ -137,15 +119,11 @@ class SourceLinkDirective(AlgorithmBaseDirective):
                 suggested_path = "os_agnostic_path_to_file_from_source_root"
                 if len(path_list) > 1:
                     suggested_path = path_list[0].replace(self.source_root, "")
-                raise SourceLinkError("Found multiple possibilities for " +
-                                      file_name + "." + extension + "\n" +
-                                      "Possible matches" +  str(path_list) +
-                                      "\n" +
-                                      "Specify one using the " + extension +
-                                      " option\n" +
-                                      "e.g. \n" +
-                                      ".. sourcelink:\n" +
-                                      "      :" + extension + ": " + suggested_path)
+                raise SourceLinkError("Found multiple possibilities for " + file_name + "."
+                                      + extension + "\n" + "Possible matches" + str(path_list)
+                                      + "\n" + "Specify one using the " + extension + " option\n"
+                                      + "e.g. \n" + ".. sourcelink:\n" + "      :" + extension
+                                      + ": " + suggested_path)
 
             return self.file_lookup[file_name][extension]
         except KeyError:
@@ -159,10 +137,10 @@ class SourceLinkDirective(AlgorithmBaseDirective):
         """
         if self.__source_root is None:
             env = self.state.document.settings.env
-            direc = env.srcdir #= C:\Mantid\Code\Mantid\docs\source
-            direc = os.path.join(direc, "..", "..") # assume root is two levels up
+            direc = env.srcdir  #= C:\Mantid\Code\Mantid\docs\source
+            direc = os.path.join(direc, "..", "..")  # assume root is two levels up
             direc = os.path.abspath(direc)
-            self.__source_root = direc #pylint: disable=protected-access
+            self.__source_root = direc  #pylint: disable=protected-access
 
         return self.__source_root
 
@@ -171,13 +149,13 @@ class SourceLinkDirective(AlgorithmBaseDirective):
         Fills the file_lookup dictionary after parsing the source code
         """
         env = self.state.document.settings.env
-        builddir = env.doctreedir # there should be a better setting option
+        builddir = env.doctreedir  # there should be a better setting option
         builddir = os.path.join(builddir, "..", "..")
         builddir = os.path.abspath(builddir)
 
         for dir_name, _, file_list in os.walk(self.source_root):
             if dir_name.startswith(builddir):
-                continue # don't check or add to the cache
+                continue  # don't check or add to the cache
             for fname in file_list:
                 (base_name, file_extensions) = os.path.splitext(fname)
                 #strip the dot from the extension
@@ -209,45 +187,38 @@ class SourceLinkDirective(AlgorithmBaseDirective):
         if sanity_checks > 0:
             suggested_path = "os_agnostic_path_to_file_from_Code/Mantid"
             if not valid_ext_list:
-                raise SourceLinkError("No file possibilities for " + file_name + " have been found\n" +
-                                      "Please specify a better one using the :filename: option or use the " +
-                                      str(list(self.file_types.keys())) + " options\n" +
-                                      "e.g. \n" +
-                                      ".. sourcelink:\n" +
-                                      "      :" + list(self.file_types.keys())[0] + ": " + suggested_path + "\n "+
-                                      "or \n" +
-                                      ".. sourcelink:\n" +
-                                      "      :filename: " + file_name)
+                raise SourceLinkError(
+                    "No file possibilities for " + file_name + " have been found\n"
+                    + "Please specify a better one using the :filename: option or use the "
+                    + str(list(self.file_types.keys())) + " options\n" + "e.g. \n"
+                    + ".. sourcelink:\n" + "      :" + list(self.file_types.keys())[0] + ": "
+                    + suggested_path + "\n " + "or \n" + ".. sourcelink:\n" + "      :filename: "
+                    + file_name)
 
             # if the have a cpp we should also have a h
             if ("cpp" in valid_ext_list) ^ ("h" in valid_ext_list):
-                raise SourceLinkError("Only one of .h and .cpp found for " + file_name + "\n" +
-                                      "valid files found for " + str(valid_ext_list) + "\n" +
-                                      "Please specify the missing one using an " +
-                                      str(list(self.file_types.keys())) + " option\n" +
-                                      "e.g. \n" +
-                                      ".. sourcelink:\n" +
-                                      "      :" + list(self.file_types.keys())[0] + ": " + suggested_path)
+                raise SourceLinkError("Only one of .h and .cpp found for " + file_name + "\n"
+                                      + "valid files found for " + str(valid_ext_list) + "\n"
+                                      + "Please specify the missing one using an "
+                                      + str(list(self.file_types.keys())) + " option\n" + "e.g. \n"
+                                      + ".. sourcelink:\n" + "      :"
+                                      + list(self.file_types.keys())[0] + ": " + suggested_path)
 
     def output_path_to_page(self, filepath, extension):
         """
         Outputs the source link for a file to the rst page
         """
-        _, f_name = os.path.split(filepath[0])
+        _, f_name = os.path.split(filepath)
 
-        self.add_rst("{}: `{} <{}>`_ *(last modified: {})*\n\n".format(
-            self.file_types[extension],
-            f_name,
-            self.convert_path_to_github_url(filepath[0]),
-            filepath[1]
-        ))
+        self.add_rst("{}: `{} <{}>`_\n\n".format(
+            self.file_types[extension], f_name, self.convert_path_to_github_url(filepath)))
 
     def convert_path_to_github_url(self, file_path):
         """
         Converts a file path to the github url for that same file
 
-        example path C:\Mantid\Code\Mantid/Framework/Algorithms/inc/MantidAlgorithms/MergeRuns.h
-        example url  https://github.com/mantidproject/mantid/blob/master/Code/Mantid/Framework/Algorithms/inc/MantidAlgorithms/MergeRuns.h
+        example path Framework/Algorithms/inc/MantidAlgorithms/MergeRuns.h
+        example url  https://github.com/mantidproject/mantid/blob/master/Framework/Algorithms/inc/MantidAlgorithms/MergeRuns.h
         """
         url = file_path
         # remove the directory path

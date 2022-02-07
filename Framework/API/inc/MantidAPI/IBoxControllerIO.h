@@ -32,25 +32,20 @@ public:
                         it is opened in read mode otherwise
    * @return false if the file had been already opened. Throws if problems with
    openeing */
-  virtual bool openFile(const std::string &fileName,
-                        const std::string &mode) = 0;
+  virtual bool openFile(const std::string &fileName, const std::string &mode) = 0;
   /**@return true if file is already opened */
   virtual bool isOpened() const = 0;
   /**@return the full name of the used data file*/
   virtual const std::string &getFileName() const = 0;
 
   /**Save a float data block in the specified file position */
-  virtual void saveBlock(const std::vector<float> & /* DataBlock */,
-                         const uint64_t /*blockPosition*/) const = 0;
+  virtual void saveBlock(const std::vector<float> & /* DataBlock */, const uint64_t /*blockPosition*/) const = 0;
   /**Save a double data block in the specified file position */
-  virtual void saveBlock(const std::vector<double> & /* DataBlock */,
-                         const uint64_t /*blockPosition*/) const = 0;
+  virtual void saveBlock(const std::vector<double> & /* DataBlock */, const uint64_t /*blockPosition*/) const = 0;
   /** load known size float data block from spefied file position */
-  virtual void loadBlock(std::vector<float> & /* Block */,
-                         const uint64_t /*blockPosition*/,
+  virtual void loadBlock(std::vector<float> & /* Block */, const uint64_t /*blockPosition*/,
                          const size_t /*BlockSize*/) const = 0;
-  virtual void loadBlock(std::vector<double> & /* Block */,
-                         const uint64_t /*blockPosition*/,
+  virtual void loadBlock(std::vector<double> & /* Block */, const uint64_t /*blockPosition*/,
                          const size_t /*BlockSize*/) const = 0;
 
   /** flush the IO buffers */
@@ -66,8 +61,7 @@ public:
    *  and the size of the data type in bytes (e.g. the  class dependant physical
    * meaning of the blockSize and blockPosition used
    *  by save/load operations     */
-  virtual void setDataType(const size_t blockSize,
-                           const std::string &typeName) = 0;
+  virtual void setDataType(const size_t blockSize, const std::string &typeName) = 0;
   virtual void getDataType(size_t &blockSize, std::string &typeName) const = 0;
 };
 } // namespace API

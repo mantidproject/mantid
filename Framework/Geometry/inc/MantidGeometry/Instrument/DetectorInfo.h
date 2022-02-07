@@ -51,8 +51,7 @@ public:
   DetectorInfo(std::unique_ptr<Beamline::DetectorInfo> detectorInfo,
                std::shared_ptr<const Geometry::Instrument> instrument,
                std::shared_ptr<const std::vector<detid_t>> detectorIds,
-               std::shared_ptr<const std::unordered_map<detid_t, size_t>>
-                   detIdToIndexMap);
+               std::shared_ptr<const std::unordered_map<detid_t, size_t>> detIdToIndexMap);
   DetectorInfo(const DetectorInfo &other);
   DetectorInfo &operator=(const DetectorInfo &rhs);
   ~DetectorInfo();
@@ -76,6 +75,11 @@ public:
   double signedTwoTheta(const std::pair<size_t, size_t> &index) const;
   double azimuthal(const size_t index) const;
   double azimuthal(const std::pair<size_t, size_t> &index) const;
+  std::tuple<double, double, double> diffractometerConstants(const size_t index, std::vector<detid_t> &calibratedDets,
+                                                             std::vector<detid_t> &uncalibratedDets) const;
+  double difcUncalibrated(const size_t index) const;
+  std::pair<double, double> geographicalAngles(const size_t index) const;
+  std::pair<double, double> geographicalAngles(const std::pair<size_t, size_t> &index) const;
   Kernel::V3D position(const size_t index) const;
   Kernel::V3D position(const std::pair<size_t, size_t> &index) const;
   Kernel::Quat rotation(const size_t index) const;
@@ -86,11 +90,9 @@ public:
   void clearMaskFlags();
 
   void setPosition(const size_t index, const Kernel::V3D &position);
-  void setPosition(const std::pair<size_t, size_t> &index,
-                   const Kernel::V3D &position);
+  void setPosition(const std::pair<size_t, size_t> &index, const Kernel::V3D &position);
   void setRotation(const size_t index, const Kernel::Quat &rotation);
-  void setRotation(const std::pair<size_t, size_t> &index,
-                   const Kernel::Quat &rotation);
+  void setRotation(const std::pair<size_t, size_t> &index, const Kernel::Quat &rotation);
 
   const Geometry::IDetector &detector(const size_t index) const;
 
@@ -106,9 +108,7 @@ public:
   size_t indexOf(const detid_t id) const;
 
   size_t scanCount() const;
-  const std::vector<
-      std::pair<Types::Core::DateAndTime, Types::Core::DateAndTime>>
-  scanIntervals() const;
+  const std::vector<std::pair<Types::Core::DateAndTime, Types::Core::DateAndTime>> scanIntervals() const;
 
   friend class API::SpectrumInfo;
   friend class Instrument;
@@ -120,8 +120,8 @@ public:
 
 private:
   const Geometry::IDetector &getDetector(const size_t index) const;
-  std::shared_ptr<const Geometry::IDetector>
-  getDetectorPtr(const size_t index) const;
+  std::shared_ptr<const Geometry::IDetector> getDetectorPtr(const size_t index) const;
+  void clearPositionDependentParameters(const size_t index);
 
   /// Pointer to the actual DetectorInfo object (non-wrapping part).
   std::unique_ptr<Beamline::DetectorInfo> m_detectorInfo;
@@ -130,8 +130,7 @@ private:
   std::shared_ptr<const std::vector<detid_t>> m_detectorIDs;
   std::shared_ptr<const std::unordered_map<detid_t, size_t>> m_detIDToIndex;
 
-  mutable std::vector<std::shared_ptr<const Geometry::IDetector>>
-      m_lastDetector;
+  mutable std::vector<std::shared_ptr<const Geometry::IDetector>> m_lastDetector;
   mutable std::vector<size_t> m_lastIndex;
 };
 

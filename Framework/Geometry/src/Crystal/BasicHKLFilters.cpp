@@ -4,14 +4,14 @@
 //   NScD Oak Ridge National Laboratory, European Spallation Source,
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
+#include <utility>
+
 #include "MantidGeometry/Crystal/BasicHKLFilters.h"
 
-namespace Mantid {
-namespace Geometry {
+namespace Mantid::Geometry {
 
 /// Constructor, dMax is set to the largest lattice parameter.
-HKLFilterDRange::HKLFilterDRange(const UnitCell &cell, double dMin)
-    : m_cell(cell), m_dmin(dMin) {
+HKLFilterDRange::HKLFilterDRange(const UnitCell &cell, double dMin) : m_cell(cell), m_dmin(dMin) {
   m_dmax = std::max(m_cell.a(), std::max(m_cell.b(), m_cell.c()));
 
   checkProperDRangeValues();
@@ -54,12 +54,9 @@ void HKLFilterDRange::checkProperDRangeValues() {
 }
 
 /// Constructor, throws exception if the supplied pointer is invalid.
-HKLFilterSpaceGroup::HKLFilterSpaceGroup(
-    const SpaceGroup_const_sptr &spaceGroup)
-    : m_spaceGroup(spaceGroup) {
+HKLFilterSpaceGroup::HKLFilterSpaceGroup(SpaceGroup_const_sptr spaceGroup) : m_spaceGroup(std::move(spaceGroup)) {
   if (!m_spaceGroup) {
-    throw std::runtime_error(
-        "Cannot construct HKLFilterSpaceGroup from null space group.");
+    throw std::runtime_error("Cannot construct HKLFilterSpaceGroup from null space group.");
   }
 }
 
@@ -75,12 +72,10 @@ bool HKLFilterSpaceGroup::isAllowed(const Kernel::V3D &hkl) const noexcept {
 }
 
 /// Constructor, throws exception if the calculator pointer is invalid.
-HKLFilterStructureFactor::HKLFilterStructureFactor(
-    const StructureFactorCalculator_sptr &calculator, double fSquaredMin)
-    : m_calculator(calculator), m_fSquaredMin(fSquaredMin) {
+HKLFilterStructureFactor::HKLFilterStructureFactor(StructureFactorCalculator_sptr calculator, double fSquaredMin)
+    : m_calculator(std::move(calculator)), m_fSquaredMin(fSquaredMin) {
   if (!m_calculator) {
-    throw std::runtime_error(
-        "Cannot construct HKLFilterStructureFactor from null calculator.");
+    throw std::runtime_error("Cannot construct HKLFilterStructureFactor from null calculator.");
   }
 }
 
@@ -93,18 +88,14 @@ std::string HKLFilterStructureFactor::getDescription() const noexcept {
 }
 
 /// Returns true if F^2(hkl) is larger than the stored minimum.
-bool HKLFilterStructureFactor::isAllowed(const Kernel::V3D &hkl) const
-    noexcept {
+bool HKLFilterStructureFactor::isAllowed(const Kernel::V3D &hkl) const noexcept {
   return m_calculator->getFSquared(hkl) > m_fSquaredMin;
 }
 
 /// Constructor, throws exception if pointer is null.
-HKLFilterCentering::HKLFilterCentering(
-    const ReflectionCondition_sptr &centering)
-    : m_centering(centering) {
+HKLFilterCentering::HKLFilterCentering(ReflectionCondition_sptr centering) : m_centering(std::move(centering)) {
   if (!m_centering) {
-    throw std::runtime_error(
-        "Cannot construct HKLFilterCentering from null centering.");
+    throw std::runtime_error("Cannot construct HKLFilterCentering from null centering.");
   }
 }
 
@@ -115,10 +106,7 @@ std::string HKLFilterCentering::getDescription() const noexcept {
 
 /// Returns true if the HKL is allowed according to the lattice centering.
 bool HKLFilterCentering::isAllowed(const Kernel::V3D &hkl) const noexcept {
-  return m_centering->isAllowed(static_cast<int>(hkl.X()),
-                                static_cast<int>(hkl.Y()),
-                                static_cast<int>(hkl.Z()));
+  return m_centering->isAllowed(static_cast<int>(hkl.X()), static_cast<int>(hkl.Y()), static_cast<int>(hkl.Z()));
 }
 
-} // namespace Geometry
-} // namespace Mantid
+} // namespace Mantid::Geometry

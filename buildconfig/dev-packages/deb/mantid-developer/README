@@ -10,3 +10,5 @@ To build the package:
    * Switch to the directory containing this file
    * Run `equivs-build ns-control`
    * A file called mantid-developer_x.y.z.deb will appear in this directory.
+
+[Information for file format](https://www.debian.org/doc/debian-policy/ch-relationships.html)

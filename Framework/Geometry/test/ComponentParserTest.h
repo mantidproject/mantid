@@ -28,9 +28,7 @@ class ComponentParserTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static ComponentParserTest *createSuite() {
-    return new ComponentParserTest();
-  }
+  static ComponentParserTest *createSuite() { return new ComponentParserTest(); }
   static void destroySuite(ComponentParserTest *suite) { delete suite; }
 
   void test_todo() {}

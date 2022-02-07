@@ -13,12 +13,9 @@
 
 
 import inspect as _inspect
-import sys
-
-from inspect import getsource
 
 from mantid.api import AnalysisDataServiceImpl, ITableWorkspace, Workspace, WorkspaceGroup, performBinaryOp
-from mantid.kernel.funcinspect import customise_func, lhs_info
+from mantid.kernel.funcinspect import customise_func, lhs_info, LazyMethodSignature
 
 
 # ------------------------------------------------------------------------------
@@ -53,17 +50,14 @@ def attach_binary_operators_to_workspace():
         "And": "__and__",
         "Xor": "__xor__"
     }
-    # The division operator changed in Python 3
+
     divops = ["__truediv__", "__rtruediv__", "__itruediv__"]
-    if sys.version_info[0] < 3:
-        # For Python 2 add the older methods so that modules without __future__
-        # still work
-        divops.extend(["__div__", "__rdiv__", "__idiv__"])
     operations["Divide"] = divops
 
     # Loop through and add each one in turn
     for alg, attributes in operations.items():
-        if type(attributes) == str: attributes = [attributes]
+        if type(attributes) == str:
+            attributes = [attributes]
         for attr in attributes:
             add_operator_func(attr, alg, attr.startswith('__i'), attr.startswith('__r'))
 
@@ -149,7 +143,8 @@ def attach_unary_operators_to_workspace():
     }
     # Loop through and add each one in turn
     for alg, attributes in operations.items():
-        if type(attributes) == str: attributes = [attributes]
+        if type(attributes) == str:
+            attributes = [attributes]
         for attr in attributes:
             add_operator_func(attr, alg)
 
@@ -223,7 +218,7 @@ def attach_tableworkspaceiterator():
 # ------------------------------------------------------------------------------
 # Algorithms as workspace methods
 # ------------------------------------------------------------------------------
-def attach_func_as_method(name, func_obj, self_param_name, workspace_types=None):
+def attach_func_as_method(name, func_obj, self_param_name, algm_name, workspace_types=None):
     """
         Adds a method to the given type that calls an algorithm
         using the calling object as the input workspace
@@ -231,6 +226,7 @@ def attach_func_as_method(name, func_obj, self_param_name, workspace_types=None)
         :param name: The name of the new method as it should appear on the type
         :param func_obj: A free function object that defines the implementation of the call
         :param self_param_name: The name of the parameter in the free function that the method's self maps to
+        :param algm_name: The name of the algorithm being attached.
         :param workspace_types: A list of string names of a workspace types. If None, then it is attached
                               to the general Workspace type. Default=None
     """
@@ -245,18 +241,8 @@ def attach_func_as_method(name, func_obj, self_param_name, workspace_types=None)
         return func_obj(*args, **kwargs)
 
     # ------------------------------------------------------------------
-    # Add correct meta-properties for the method
-    if hasattr(func_obj, '__signature__'):
-        from inspect import Parameter
-        func_parameters = list(func_obj.__signature__.parameters.values())
-        func_parameters.insert(0, Parameter("self", Parameter.POSITIONAL_ONLY))
-        signature = func_obj.__signature__.replace(parameters=func_parameters)
-    else:
-        signature = ['self']
-        signature.extend(getsource(func_obj).co_varnames)
-        signature = tuple(signature)
     customise_func(_method_impl, func_obj.__name__,
-                   signature, func_obj.__doc__)
+                   LazyMethodSignature(alg_name=algm_name), func_obj.__doc__)
 
     if workspace_types or len(workspace_types) > 0:
         from mantid import api

@@ -21,20 +21,16 @@ class PoldiTimeTransformerTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static PoldiTimeTransformerTest *createSuite() {
-    return new PoldiTimeTransformerTest();
-  }
+  static PoldiTimeTransformerTest *createSuite() { return new PoldiTimeTransformerTest(); }
   static void destroySuite(PoldiTimeTransformerTest *suite) { delete suite; }
 
   PoldiTimeTransformerTest() {
-    m_detector =
-        std::shared_ptr<ConfiguredHeliumDetector>(new ConfiguredHeliumDetector);
+    m_detector = std::shared_ptr<ConfiguredHeliumDetector>(new ConfiguredHeliumDetector);
     m_chopper = std::make_shared<MockChopper>();
 
     m_spectrum = PoldiSourceSpectrum_sptr(new ConfiguredSpectrum);
 
-    EXPECT_CALL(*m_chopper, distanceFromSample())
-        .WillRepeatedly(Return(11800.0));
+    EXPECT_CALL(*m_chopper, distanceFromSample()).WillRepeatedly(Return(11800.0));
 
     EXPECT_CALL(*m_chopper, zeroOffset()).WillRepeatedly(Return(0.15));
 
@@ -49,8 +45,8 @@ public:
     double sinTheta = 0.70942287322834615878;
     double cosTheta = 0.70478307793280472246;
 
-    DetectorElementCharacteristics characteristics(
-        static_cast<int>(m_detector->centralElement()), m_detector, m_chopper);
+    DetectorElementCharacteristics characteristics(static_cast<int>(m_detector->centralElement()), m_detector,
+                                                   m_chopper);
 
     TS_ASSERT_DELTA(characteristics.twoTheta, twoTheta, 1e-6);
     TS_ASSERT_DELTA(characteristics.distance, distance, 1e-3);
@@ -60,8 +56,7 @@ public:
     TS_ASSERT_DELTA(characteristics.cosTheta, cosTheta, 1e-6);
 
     TestablePoldiTimeTransformer transformer;
-    DetectorElementCharacteristics center =
-        transformer.getDetectorCenterCharacteristics(m_detector, m_chopper);
+    DetectorElementCharacteristics center = transformer.getDetectorCenterCharacteristics(m_detector, m_chopper);
 
     TS_ASSERT_EQUALS(characteristics.twoTheta, center.twoTheta);
     TS_ASSERT_EQUALS(characteristics.distance, center.distance);
@@ -72,8 +67,7 @@ public:
   }
 
   void testDetectorFactors() {
-    DetectorElementCharacteristics center(
-        static_cast<int>(m_detector->centralElement()), m_detector, m_chopper);
+    DetectorElementCharacteristics center(static_cast<int>(m_detector->centralElement()), m_detector, m_chopper);
 
     DetectorElementData data(102, center, m_detector, m_chopper);
 
@@ -84,10 +78,8 @@ public:
 
   void testGetDetectorElementData() {
     TestablePoldiTimeTransformer transformer;
-    std::vector<DetectorElementData_const_sptr> elements =
-        transformer.getDetectorElementData(m_detector, m_chopper);
-    DetectorElementCharacteristics center =
-        transformer.getDetectorCenterCharacteristics(m_detector, m_chopper);
+    std::vector<DetectorElementData_const_sptr> elements = transformer.getDetectorElementData(m_detector, m_chopper);
+    DetectorElementCharacteristics center = transformer.getDetectorCenterCharacteristics(m_detector, m_chopper);
 
     DetectorElementData data(102, center, m_detector, m_chopper);
 
@@ -99,12 +91,10 @@ public:
   void testInitializationFromInstrument() {
     TestablePoldiTimeTransformer transformer;
 
-    TS_ASSERT_THROWS_NOTHING(
-        transformer.initializeFromPoldiInstrument(m_instrument));
+    TS_ASSERT_THROWS_NOTHING(transformer.initializeFromPoldiInstrument(m_instrument));
 
     PoldiInstrumentAdapter_sptr invalid;
-    TS_ASSERT_THROWS(transformer.initializeFromPoldiInstrument(invalid),
-                     const std::invalid_argument &);
+    TS_ASSERT_THROWS(transformer.initializeFromPoldiInstrument(invalid), const std::invalid_argument &);
   }
 
   void TestCalculatedTotalIntensity() {
@@ -114,9 +104,7 @@ public:
     function.initializeFromPoldiInstrument(m_instrument);
     function.m_chopperSlits = 8;
 
-    TS_ASSERT_DELTA(
-        fabs(1.0 - function.calculatedTotalIntensity(centre) / 8220.165039062),
-        0.0, 1e-7);
+    TS_ASSERT_DELTA(fabs(1.0 - function.calculatedTotalIntensity(centre) / 8220.165039062), 0.0, 1e-7);
   }
 
 private:

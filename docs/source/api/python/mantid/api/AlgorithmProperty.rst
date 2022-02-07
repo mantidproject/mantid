@@ -8,7 +8,7 @@ This is a Python binding to the C++ class Mantid::API::AlgorithmProperty.
 
 .. module:`mantid.api`
 
-.. autoclass:: mantid.api.AlgorithmProperty 
+.. autoclass:: mantid.api.AlgorithmProperty
     :members:
     :undoc-members:
     :inherited-members:

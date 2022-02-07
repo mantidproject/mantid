@@ -32,8 +32,7 @@ using Mantid::API::AlgorithmManager;
 using Mantid::API::FrameworkManager;
 using Mantid::API::IWorkspaceProperty;
 
-namespace MantidQt {
-namespace API {
+namespace MantidQt::API {
 
 //----------------------------------------------------------------------------------------------
 /** Constructor
@@ -69,6 +68,11 @@ AlgorithmPropertiesWidget::AlgorithmPropertiesWidget(QWidget *parent)
   setLayout(dialog_layout);
 
   this->initLayout();
+
+  // Wide widgets inside the QScrollArea do not cause the dialog to grow
+  // and so can be cut off. Force a minimum width
+  setObjectName("AlgorithmPropertiesWidget");
+  setStyleSheet("#AlgorithmPropertiesWidget {min-width: 25em;}");
 }
 
 //----------------------------------------------------------------------------------------------
@@ -82,23 +86,19 @@ AlgorithmPropertiesWidget::~AlgorithmPropertiesWidget() {}
  *
  * @param inputHistory :: AlgorithmInputHistoryImpl ptr
  */
-void AlgorithmPropertiesWidget::setInputHistory(
-    MantidQt::API::AbstractAlgorithmInputHistory *inputHistory) {
+void AlgorithmPropertiesWidget::setInputHistory(MantidQt::API::AbstractAlgorithmInputHistory *inputHistory) {
   m_inputHistory = inputHistory;
 }
 
 //----------------------------------------------------------------------------------------------
 ///@return the algorithm being viewed
-Mantid::API::IAlgorithm_sptr AlgorithmPropertiesWidget::getAlgorithm() {
-  return m_algo;
-}
+Mantid::API::IAlgorithm_sptr AlgorithmPropertiesWidget::getAlgorithm() { return m_algo; }
 
 //----------------------------------------------------------------------------------------------
 /** Directly set the algorithm to view. Sets the name to match
  *
  * @param algo :: IAlgorithm bare ptr */
-void AlgorithmPropertiesWidget::setAlgorithm(
-    const Mantid::API::IAlgorithm_sptr &algo) {
+void AlgorithmPropertiesWidget::setAlgorithm(const Mantid::API::IAlgorithm_sptr &algo) {
   if (!algo)
     return;
   saveInput();
@@ -109,9 +109,7 @@ void AlgorithmPropertiesWidget::setAlgorithm(
 
 //----------------------------------------------------------------------------------------------
 ///@return the name of the algorithm being displayed
-QString AlgorithmPropertiesWidget::getAlgorithmName() const {
-  return m_algoName;
-}
+QString AlgorithmPropertiesWidget::getAlgorithmName() const { return m_algoName; }
 
 /** Set the algorithm to view using its name
  *
@@ -120,8 +118,7 @@ void AlgorithmPropertiesWidget::setAlgorithmName(QString name) {
   FrameworkManager::Instance();
   m_algoName = std::move(name);
   try {
-    Algorithm_sptr alg =
-        AlgorithmManager::Instance().createUnmanaged(m_algoName.toStdString());
+    Algorithm_sptr alg = AlgorithmManager::Instance().createUnmanaged(m_algoName.toStdString());
     alg->initialize();
 
     // Set the algorithm ptr. This will redo the layout
@@ -132,8 +129,7 @@ void AlgorithmPropertiesWidget::setAlgorithmName(QString name) {
 
 //---------------------------------------------------------------------------------------------------------------
 /** Sets the properties to force as enabled/disabled */
-void AlgorithmPropertiesWidget::addEnabledAndDisableLists(
-    const QStringList &enabled, const QStringList &disabled) {
+void AlgorithmPropertiesWidget::addEnabledAndDisableLists(const QStringList &enabled, const QStringList &disabled) {
   this->m_enabled = enabled;
   this->m_disabled = disabled;
 }
@@ -147,11 +143,9 @@ bool haveInputWS(const std::vector<Property *> &prop_list) {
   // check.
   // Also the ones that don't have a set of allowed values as input workspace
   std::vector<Property *>::const_iterator pEnd = prop_list.end();
-  for (std::vector<Property *>::const_iterator pIter = prop_list.begin();
-       pIter != pEnd; ++pIter) {
+  for (std::vector<Property *>::const_iterator pIter = prop_list.begin(); pIter != pEnd; ++pIter) {
     Property *prop = *pIter;
-    if (prop->direction() == Direction::Input &&
-        dynamic_cast<IWorkspaceProperty *>(prop)) {
+    if (prop->direction() == Direction::Input && dynamic_cast<IWorkspaceProperty *>(prop)) {
       return true;
     }
   }
@@ -209,13 +203,12 @@ void AlgorithmPropertiesWidget::initLayout() {
           // Make a groupbox with a border and a light background
           QGroupBox *grpBox = new QGroupBox(QString::fromStdString(group));
           grpBox->setAutoFillBackground(true);
-          grpBox->setStyleSheet(
-              "QGroupBox { border: 1px solid gray;  border-radius: 4px; "
-              "font-weight: bold; margin-top: 4px; margin-bottom: 4px; "
-              "padding-top: 16px; }"
-              "QGroupBox::title { background-color: transparent;  "
-              "subcontrol-position: top center;  padding-top:4px; "
-              "padding-bottom:4px; } ");
+          grpBox->setStyleSheet("QGroupBox { border: 1px solid gray;  border-radius: 4px; "
+                                "font-weight: bold; margin-top: 4px; margin-bottom: 4px; "
+                                "padding-top: 16px; }"
+                                "QGroupBox::title { background-color: transparent;  "
+                                "subcontrol-position: top center;  padding-top:4px; "
+                                "padding-bottom:4px; } ");
           QPalette pal = grpBox->palette();
           pal.setColor(grpBox->backgroundRole(), pal.alternateBase().color());
           grpBox->setPalette(pal);
@@ -239,8 +232,7 @@ void AlgorithmPropertiesWidget::initLayout() {
         continue;
 
       // Create the appropriate widget at this row in the grid.
-      PropertyWidget *widget =
-          PropertyWidgetFactory::createWidget(prop, this, m_currentGrid, row);
+      PropertyWidget *widget = PropertyWidgetFactory::createWidget(prop, this, m_currentGrid, row);
 
       // Set the previous input value, if any
       if (m_inputHistory) {
@@ -256,12 +248,10 @@ void AlgorithmPropertiesWidget::initLayout() {
       m_propWidgets[propName] = widget;
 
       // Whenever the value changes in the widget, this fires propertyChanged()
-      connect(widget, SIGNAL(valueChanged(const QString &)), this,
-              SLOT(propertyChanged(const QString &)));
+      connect(widget, SIGNAL(valueChanged(const QString &)), this, SLOT(propertyChanged(const QString &)));
 
       // For clicking the "Replace Workspace" button (if any)
-      connect(widget, SIGNAL(replaceWorkspaceName(const QString &)), this,
-              SLOT(replaceWSClicked(const QString &)));
+      connect(widget, SIGNAL(replaceWorkspaceName(const QString &)), this, SLOT(replaceWSClicked(const QString &)));
 
       // Only show the "Replace Workspace" button if the algorithm has an input
       // workspace.
@@ -277,12 +267,10 @@ void AlgorithmPropertiesWidget::initLayout() {
 //--------------------------------------------------------------------------------------
 /** SLOT to be called whenever a property's value has just been changed
  * and the widget has lost focus/value has been changed.
- * @param pName :: name of the property that was changed
+ * @param changedPropName :: name of the property that was changed
  */
-void AlgorithmPropertiesWidget::propertyChanged(const QString &pName) {
-  UNUSED_ARG(pName);
-  // PropertyWidget * widget = m_propWidgets[pName];
-  this->hideOrDisableProperties();
+void AlgorithmPropertiesWidget::propertyChanged(const QString &changedPropName) {
+  this->hideOrDisableProperties(changedPropName);
 }
 
 bool isCalledInputWorkspace(PropertyWidget *const candidate) {
@@ -325,8 +313,7 @@ void AlgorithmPropertiesWidget::replaceWSClicked(const QString &propName) {
       // from.
       if (candidateReplacementSources.size() > 0) {
         CollectionOfPropertyWidget::iterator selectedIt = std::find_if(
-            candidateReplacementSources.begin(),
-            candidateReplacementSources.end(), isCalledInputWorkspace);
+            candidateReplacementSources.begin(), candidateReplacementSources.end(), isCalledInputWorkspace);
         if (selectedIt != candidateReplacementSources.end()) {
           // Use the InputWorkspace property called "InputWorkspace" as the
           // source for the OutputWorkspace.
@@ -347,8 +334,7 @@ void AlgorithmPropertiesWidget::replaceWSClicked(const QString &propName) {
  * @param property :: the property that allows to check for the settings.
  * @param propName :: The name of the property
  */
-bool AlgorithmPropertiesWidget::isWidgetEnabled(Property *property,
-                                                const QString &propName) const {
+bool AlgorithmPropertiesWidget::isWidgetEnabled(Property *property, const QString &propName) const {
   // To avoid errors
   if (propName.isEmpty())
     return true;
@@ -381,28 +367,19 @@ bool AlgorithmPropertiesWidget::isWidgetEnabled(Property *property,
  * It also shows/hids the validators.
  * All properties' values should be set already, otherwise the validators
  * will be running on old data.
+ * @param changedPropName :: name of the property that was changed
  */
-void AlgorithmPropertiesWidget::hideOrDisableProperties() {
-  for (auto pitr = m_propWidgets.begin(); pitr != m_propWidgets.end(); ++pitr) {
-    PropertyWidget *widget = pitr.value();
+void AlgorithmPropertiesWidget::hideOrDisableProperties(const QString &changedPropName) {
+  // SetValueWhenProperty as appropriate
+  for (auto &widget : m_propWidgets) {
     Mantid::Kernel::Property *prop = widget->getProperty();
-    const QString &propName = pitr.key();
     IPropertySettings *settings = prop->getSettings();
 
-    // Set the enabled and visible flags based on what the validators say.
-    // Default is always true.
-    bool visible = true;
-    // Dynamically check if the widget should be enabled.
-    bool enabled = this->isWidgetEnabled(prop, propName);
-
-    // Do we have a custom IPropertySettings?
     if (settings) {
-      // Set the visible flag
-      visible = settings->isVisible(m_algo.get());
-
-      // Dynamic PropertySettings objects allow a property to change validators.
-      // This removes the old widget and creates a new one instead.
-      if (settings->isConditionChanged(m_algo.get())) {
+      // Dynamic PropertySettings objects allow a property to change
+      // validators. This removes the old widget and creates a new one
+      // instead.
+      if (settings->isConditionChanged(m_algo.get(), changedPropName.toStdString())) {
         settings->applyChanges(m_algo.get(), prop);
 
         // Delete the old widget
@@ -414,14 +391,29 @@ void AlgorithmPropertiesWidget::hideOrDisableProperties() {
         // Create the appropriate widget at this row in the grid.
         widget = PropertyWidgetFactory::createWidget(prop, this, layout, row);
 
-        // Replace in the list of prop widgets
-        pitr.value() = widget;
-
         // Whenever the value changes in the widget, this fires
         // propertyChanged()
-        connect(widget, SIGNAL(valueChanged(const QString &)), this,
-                SLOT(propertyChanged(const QString &)));
+        connect(widget, SIGNAL(valueChanged(const QString &)), this, SLOT(propertyChanged(const QString &)));
       }
+    }
+  } // for each property
+
+  // set Visible and Enabled as appropriate
+  for (auto &widget : m_propWidgets) {
+    Mantid::Kernel::Property *prop = widget->getProperty();
+    IPropertySettings *settings = prop->getSettings();
+    const auto &propName = QString::fromStdString(prop->name());
+
+    // Set the enabled and visible flags based on what the validators say.
+    // Default is always true.
+    bool visible = true;
+    // Dynamically check if the widget should be enabled.
+    bool enabled = this->isWidgetEnabled(prop, propName);
+
+    // Do we have a custom IPropertySettings?
+    if (settings) {
+      // Set the visible flag
+      visible = settings->isVisible(m_algo.get());
     }
 
     // Show/hide the validator label (that red star)
@@ -446,18 +438,15 @@ void AlgorithmPropertiesWidget::hideOrDisableProperties() {
  */
 void AlgorithmPropertiesWidget::saveInput() {
   if (m_inputHistory) {
-    for (auto pitr = m_propWidgets.begin(); pitr != m_propWidgets.end();
-         ++pitr) {
+    for (auto pitr = m_propWidgets.begin(); pitr != m_propWidgets.end(); ++pitr) {
       PropertyWidget *widget = pitr.value();
       const QString &propName = pitr.key();
       QString value = widget->getValue();
       //        Mantid::Kernel::Property *prop = widget->getProperty();
       //        if (!prop || prop->remember())
-      m_inputHistory->storeNewValue(m_algoName,
-                                    QPair<QString, QString>(propName, value));
+      m_inputHistory->storeNewValue(m_algoName, QPair<QString, QString>(propName, value));
     }
   }
 }
 
-} // namespace API
-} // namespace MantidQt
+} // namespace MantidQt::API

@@ -24,8 +24,7 @@ using namespace API;
 void WorkspaceAlgorithm::init() {
 
   // Declare a 1D workspace property.
-  declareProperty(
-      std::make_unique<WorkspaceProperty<>>("Workspace", "", Direction::Input));
+  declareProperty(std::make_unique<WorkspaceProperty<>>("Workspace", "", Direction::Input));
 }
 
 /** Executes the algorithm
@@ -33,8 +32,7 @@ void WorkspaceAlgorithm::init() {
 void WorkspaceAlgorithm::exec() {
   // g_log is a reference to the logger. It is used to print out information,
   // warning, and error messages
-  g_log.information() << "Running algorithm " << name() << " version "
-                      << version() << std::endl;
+  g_log.information() << "Running algorithm " << name() << " version " << version() << std::endl;
 
   // Get the input workspace
   MatrixWorkspace_const_sptr workspace = getProperty("Workspace");
@@ -51,9 +49,8 @@ void WorkspaceAlgorithm::exec() {
 
     const auto numBins = YValues.size();
     for (size_t j = 0; numBins; ++j) {
-      g_log.information() << "Point number " << count++
-                          << " values: " << XValues[j] << ' ' << YValues[j]
-                          << ' ' << EValues[j] << std::endl;
+      g_log.information() << "Point number " << count++ << " values: " << XValues[j] << ' ' << YValues[j] << ' '
+                          << EValues[j] << std::endl;
     }
   }
 }

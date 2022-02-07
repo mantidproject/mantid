@@ -31,18 +31,16 @@
 #include "MantidKernel/DateAndTime.h"
 #include "MantidKernel/Strings.h"
 #include "MantidKernel/Utils.h"
-#include "MantidKernel/cow_ptr.h"
 
-#include "MantidTestHelpers/FacilityHelper.h"
-#include "MantidTestHelpers/MDEventsTestHelper.h"
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
+#include "MantidFrameworkTestHelpers/FacilityHelper.h"
+#include "MantidFrameworkTestHelpers/MDEventsTestHelper.h"
+#include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
 
 #include <memory>
 
 #include <Poco/File.h>
 
-namespace Mantid {
-namespace DataObjects {
+namespace Mantid::DataObjects {
 
 using namespace Mantid::API;
 using Mantid::DataObjects::EventWorkspace;
@@ -67,30 +65,30 @@ namespace MDEventsTestHelper {
  *
  * @return EventWorkspace_sptr
  */
-EventWorkspace_sptr
-createDiffractionEventWorkspace(int numEvents, int numPixels, int numBins) {
+EventWorkspace_sptr createDiffractionEventWorkspace(int numEvents, int numPixels, int numBins) {
   double binDelta = 10.0;
 
   auto retVal = std::make_shared<EventWorkspace>();
-  retVal->initialize(numPixels, 1, 1);
+  retVal->initialize(numPixels + 2, 1, 1);
 
   // --------- Load the instrument -----------
-  const std::string filename = FileFinder::Instance().getFullPath(
-      "unit_testing/MINITOPAZ_Definition.xml");
-  InstrumentDefinitionParser parser(filename, "MINITOPAZ",
-                                    Strings::loadFile(filename));
+  const std::string filename = FileFinder::Instance().getFullPath("unit_testing/MINITOPAZ_Definition.xml");
+  InstrumentDefinitionParser parser(filename, "MINITOPAZ", Strings::loadFile(filename));
   auto instrument = parser.parseXML(nullptr);
   retVal->populateInstrumentParameters();
   retVal->setInstrument(instrument);
 
   DateAndTime run_start("2010-01-01T00:00:00");
 
+  // create spectra for monitors
+  retVal->getSpectrum(0).addDetectorID(-1);
+  retVal->getSpectrum(1).addDetectorID(-2);
+
   for (int pix = 0; pix < numPixels; pix++) {
     for (int i = 0; i < numEvents; i++) {
-      retVal->getSpectrum(pix) +=
-          Types::Event::TofEvent((i + 0.5) * binDelta, run_start + double(i));
+      retVal->getSpectrum(pix + 2) += Types::Event::TofEvent((i + 0.5) * binDelta, run_start + double(i));
     }
-    retVal->getSpectrum(pix).addDetectorID(pix);
+    retVal->getSpectrum(pix + 2).addDetectorID(pix);
   }
 
   // Create the x-axis for histogramming.
@@ -116,7 +114,7 @@ createDiffractionEventWorkspace(int numEvents, int numPixels, int numBins) {
                              "instrument loaded.");
   Mantid::detid2det_map dets;
   retVal->getInstrument()->getDetectors(dets);
-  if (dets.size() != 100 * 100)
+  if (dets.size() != 100 * 100 + 2)
     throw std::runtime_error("MDEventsTestHelper::"
                              "createDiffractionEventWorkspace(): Wrong "
                              "instrument size.");
@@ -136,29 +134,25 @@ createDiffractionEventWorkspace(int numEvents, int numPixels, int numBins) {
  * @param coord :: Required coordinate system
  * @return MDEW sptr
  */
-MDEventWorkspace3Lean::sptr
-makeFakeMDEventWorkspace(const std::string &wsName, long numEvents,
-                         Kernel::SpecialCoordinateSystem coord) {
+MDEventWorkspace3Lean::sptr makeFakeMDEventWorkspace(const std::string &wsName, long numEvents,
+                                                     Kernel::SpecialCoordinateSystem coord) {
   // ---------- Make a file-backed MDEventWorkspace -----------------------
-  MDEventWorkspace3Lean::sptr ws1 =
-      MDEventsTestHelper::makeMDEW<3>(10, 0.0, 10.0, 0);
+  MDEventWorkspace3Lean::sptr ws1 = MDEventsTestHelper::makeMDEW<3>(10, 0.0, 10.0, 0);
   ws1->setCoordinateSystem(coord);
   ws1->getBoxController()->setSplitThreshold(100);
-  API::AnalysisDataService::Instance().addOrReplace(
-      wsName, std::dynamic_pointer_cast<Mantid::API::IMDEventWorkspace>(ws1));
-  FakeMD dataFaker(std::vector<double>(1, static_cast<double>(numEvents)),
-                   std::vector<double>(), 0, true);
+  API::AnalysisDataService::Instance().addOrReplace(wsName,
+                                                    std::dynamic_pointer_cast<Mantid::API::IMDEventWorkspace>(ws1));
+  FakeMD dataFaker(std::vector<double>(1, static_cast<double>(numEvents)), std::vector<double>(), std::vector<double>(),
+                   0, true);
   dataFaker.fill(ws1);
-  return std::dynamic_pointer_cast<MDEventWorkspace3Lean>(
-      API::AnalysisDataService::Instance().retrieve(wsName));
+  return std::dynamic_pointer_cast<MDEventWorkspace3Lean>(API::AnalysisDataService::Instance().retrieve(wsName));
 }
 
 //-------------------------------------------------------------------------------------
 /** Generate an empty MDBox ,
 !!! Box controller has to be deleted saparately to avoid memory leaks in tests
 !!!!*/
-MDBox<MDLeanEvent<1>, 1> *makeMDBox1(size_t splitInto,
-                                     BoxController *splitter) {
+MDBox<MDLeanEvent<1>, 1> *makeMDBox1(size_t splitInto, BoxController *splitter) {
   if (!splitter) {
     splitter = (new BoxController(1));
   }
@@ -220,15 +214,12 @@ std::vector<MDLeanEvent<1>> makeMDEvents1(size_t num) {
  * @param numEvents :: optional number of events in each bin. Default 1.0
  * @return the MDHisto
  */
-Mantid::DataObjects::MDHistoWorkspace_sptr
-makeFakeMDHistoWorkspace(double signal, size_t numDims, size_t numBins,
-                         coord_t max, double errorSquared,
-                         const std::string &name, double numEvents) {
+Mantid::DataObjects::MDHistoWorkspace_sptr makeFakeMDHistoWorkspace(double signal, size_t numDims, size_t numBins,
+                                                                    coord_t max, double errorSquared,
+                                                                    const std::string &name, double numEvents) {
   // Create MDFrame of General Frame type
-  Mantid::Geometry::GeneralFrame frame(
-      Mantid::Geometry::GeneralFrame::GeneralFrameDistance, "m");
-  return makeFakeMDHistoWorkspaceWithMDFrame(
-      signal, numDims, frame, numBins, max, errorSquared, name, numEvents);
+  Mantid::Geometry::GeneralFrame frame(Mantid::Geometry::GeneralFrame::GeneralFrameDistance, "m");
+  return makeFakeMDHistoWorkspaceWithMDFrame(signal, numDims, frame, numBins, max, errorSquared, name, numEvents);
 }
 
 //-------------------------------------------------------------------------------------
@@ -244,21 +235,19 @@ makeFakeMDHistoWorkspace(double signal, size_t numDims, size_t numBins,
  * @param name :: optional name
  * @return the MDHisto
  */
-MDHistoWorkspace_sptr makeFakeMDHistoWorkspaceGeneral(
-    size_t numDims, double signal, double errorSquared, size_t *numBins,
-    coord_t *min, coord_t *max, const std::string &name) {
+MDHistoWorkspace_sptr makeFakeMDHistoWorkspaceGeneral(size_t numDims, double signal, double errorSquared,
+                                                      size_t *numBins, coord_t *min, coord_t *max,
+                                                      const std::string &name) {
   std::vector<std::string> names{"x", "y", "z", "t"};
   // Create MDFrame of General Frame type
-  Mantid::Geometry::GeneralFrame frame(
-      Mantid::Geometry::GeneralFrame::GeneralFrameDistance, "m");
+  Mantid::Geometry::GeneralFrame frame(Mantid::Geometry::GeneralFrame::GeneralFrameDistance, "m");
 
   std::vector<Mantid::Geometry::MDHistoDimension_sptr> dimensions;
   for (size_t d = 0; d < numDims; d++)
-    dimensions.emplace_back(MDHistoDimension_sptr(new MDHistoDimension(
-        names[d], names[d], frame, min[d], max[d], numBins[d])));
+    dimensions.emplace_back(
+        MDHistoDimension_sptr(new MDHistoDimension(names[d], names[d], frame, min[d], max[d], numBins[d])));
 
-  MDHistoWorkspace_sptr ws_sptr =
-      std::make_shared<MDHistoWorkspace>(dimensions);
+  MDHistoWorkspace_sptr ws_sptr = std::make_shared<MDHistoWorkspace>(dimensions);
   ws_sptr->setTo(signal, errorSquared, 1.0 /* num events */);
   if (!name.empty())
     AnalysisDataService::Instance().addOrReplace(name, ws_sptr);
@@ -279,20 +268,17 @@ MDHistoWorkspace_sptr makeFakeMDHistoWorkspaceGeneral(
  * @param name :: optional name
  * @return the MDHisto
  */
-MDHistoWorkspace_sptr makeFakeMDHistoWorkspaceGeneral(
-    size_t numDims, double signal, double errorSquared, size_t *numBins,
-    coord_t *min, coord_t *max, std::vector<std::string> names,
-    const std::string &name) {
+MDHistoWorkspace_sptr makeFakeMDHistoWorkspaceGeneral(size_t numDims, double signal, double errorSquared,
+                                                      size_t *numBins, coord_t *min, coord_t *max,
+                                                      std::vector<std::string> names, const std::string &name) {
   std::vector<Mantid::Geometry::MDHistoDimension_sptr> dimensions;
   // Create MDFrame of General Frame type
-  Mantid::Geometry::GeneralFrame frame(
-      Mantid::Geometry::GeneralFrame::GeneralFrameDistance, "m");
+  Mantid::Geometry::GeneralFrame frame(Mantid::Geometry::GeneralFrame::GeneralFrameDistance, "m");
   for (size_t d = 0; d < numDims; d++)
-    dimensions.emplace_back(MDHistoDimension_sptr(new MDHistoDimension(
-        names[d], names[d], frame, min[d], max[d], numBins[d])));
+    dimensions.emplace_back(
+        MDHistoDimension_sptr(new MDHistoDimension(names[d], names[d], frame, min[d], max[d], numBins[d])));
 
-  MDHistoWorkspace_sptr ws_sptr =
-      std::make_shared<MDHistoWorkspace>(dimensions);
+  MDHistoWorkspace_sptr ws_sptr = std::make_shared<MDHistoWorkspace>(dimensions);
   ws_sptr->setTo(signal, errorSquared, 1.0 /* num events */);
   if (!name.empty())
     AnalysisDataService::Instance().addOrReplace(name, ws_sptr);
@@ -313,39 +299,34 @@ MDHistoWorkspace_sptr makeFakeMDHistoWorkspaceGeneral(
  * @param numEvents :: optional number of events in each bin. Default 1.0
  * @return the MDHisto
  */
-Mantid::DataObjects::MDHistoWorkspace_sptr makeFakeMDHistoWorkspaceWithMDFrame(
-    double signal, size_t numDims, const Mantid::Geometry::MDFrame &frame,
-    size_t numBins, coord_t max, double errorSquared, const std::string &name,
-    double numEvents) {
+Mantid::DataObjects::MDHistoWorkspace_sptr
+makeFakeMDHistoWorkspaceWithMDFrame(double signal, size_t numDims, const Mantid::Geometry::MDFrame &frame,
+                                    size_t numBins, coord_t max, double errorSquared, const std::string &name,
+                                    double numEvents) {
   // MDHistoWorkspace *ws = nullptr;
   MDHistoWorkspace_sptr ws_sptr;
   if (numDims == 1) {
     ws_sptr =
-        std::make_shared<MDHistoWorkspace>(std::make_shared<MDHistoDimension>(
-            "x", "x", frame, 0.0f, max, numBins));
+        std::make_shared<MDHistoWorkspace>(std::make_shared<MDHistoDimension>("x", "x", frame, 0.0f, max, numBins));
   } else if (numDims == 2) {
-    ws_sptr = std::make_shared<MDHistoWorkspace>(
-        std::make_shared<MDHistoDimension>("x", "x", frame, 0.0f, max, numBins),
-        std::make_shared<MDHistoDimension>("y", "y", frame, 0.0f, max,
-                                           numBins));
+    ws_sptr =
+        std::make_shared<MDHistoWorkspace>(std::make_shared<MDHistoDimension>("x", "x", frame, 0.0f, max, numBins),
+                                           std::make_shared<MDHistoDimension>("y", "y", frame, 0.0f, max, numBins));
   } else if (numDims == 3) {
-    ws_sptr = std::make_shared<MDHistoWorkspace>(
-        std::make_shared<MDHistoDimension>("x", "x", frame, 0.0f, max, numBins),
-        std::make_shared<MDHistoDimension>("y", "y", frame, 0.0f, max, numBins),
-        std::make_shared<MDHistoDimension>("z", "z", frame, 0.0f, max,
-                                           numBins));
+    ws_sptr =
+        std::make_shared<MDHistoWorkspace>(std::make_shared<MDHistoDimension>("x", "x", frame, 0.0f, max, numBins),
+                                           std::make_shared<MDHistoDimension>("y", "y", frame, 0.0f, max, numBins),
+                                           std::make_shared<MDHistoDimension>("z", "z", frame, 0.0f, max, numBins));
   } else if (numDims == 4) {
-    ws_sptr = std::make_shared<MDHistoWorkspace>(
-        std::make_shared<MDHistoDimension>("x", "x", frame, 0.0f, max, numBins),
-        std::make_shared<MDHistoDimension>("y", "y", frame, 0.0f, max, numBins),
-        std::make_shared<MDHistoDimension>("z", "z", frame, 0.0f, max, numBins),
-        std::make_shared<MDHistoDimension>("t", "t", frame, 0.0f, max,
-                                           numBins));
+    ws_sptr =
+        std::make_shared<MDHistoWorkspace>(std::make_shared<MDHistoDimension>("x", "x", frame, 0.0f, max, numBins),
+                                           std::make_shared<MDHistoDimension>("y", "y", frame, 0.0f, max, numBins),
+                                           std::make_shared<MDHistoDimension>("z", "z", frame, 0.0f, max, numBins),
+                                           std::make_shared<MDHistoDimension>("t", "t", frame, 0.0f, max, numBins));
   }
 
   if (!ws_sptr)
-    throw std::runtime_error(
-        " invalid or unsupported number of dimensions given");
+    throw std::runtime_error(" invalid or unsupported number of dimensions given");
 
   ws_sptr->setTo(signal, errorSquared, numEvents);
   ws_sptr->addExperimentInfo(std::make_shared<ExperimentInfo>());
@@ -367,5 +348,4 @@ void checkAndDeleteFile(const std::string &filename) {
 }
 
 } // namespace MDEventsTestHelper
-} // namespace DataObjects
-} // namespace Mantid
+} // namespace Mantid::DataObjects

@@ -43,8 +43,7 @@ public:
   void setProfileParameterValues(std::map<std::string, double> parammap);
 
   /// Set up a parameter to fit but tied among all peaks
-  void setFitProfileParameter(const std::string &paramname, double minvalue,
-                              double maxvalue);
+  void setFitProfileParameter(const std::string &paramname, double minvalue, double maxvalue);
 
   /// Function
   void setPeakHeights(const std::vector<double> &inheights);
@@ -63,23 +62,19 @@ public:
   void addPeaks(std::vector<std::vector<int>> peakhkls);
 
   /// Add background function
-  void addBackgroundFunction(const std::string &backgroundtype,
-                             const unsigned int &order,
-                             const std::vector<std::string> &vecparnames,
-                             const std::vector<double> &vecparvalues,
+  void addBackgroundFunction(const std::string &backgroundtype, const unsigned int &order,
+                             const std::vector<std::string> &vecparnames, const std::vector<double> &vecparvalues,
                              double startx, double endx);
 
   /// Get number of peaks
   size_t getNumberOfPeaks() const { return m_numPeaks; }
 
   /// Calculate
-  Mantid::HistogramData::HistogramY
-  function(const Mantid::HistogramData::HistogramX &xvalues, bool calpeaks,
-           bool calbkgd) const;
+  Mantid::HistogramData::HistogramY function(const Mantid::HistogramData::HistogramX &xvalues, bool calpeaks,
+                                             bool calbkgd) const;
 
   ///  Calculate a single peak's value
-  Mantid::HistogramData::HistogramY
-  calPeak(size_t ipk, const std::vector<double> &xvalues, size_t ySize) const;
+  Mantid::HistogramData::HistogramY calPeak(size_t ipk, const std::vector<double> &xvalues, size_t ySize) const;
 
   /// Return the composite function
   API::IFunction_sptr getFunction();
@@ -94,8 +89,7 @@ public:
   double getPeakParameter(size_t index, const std::string &parname) const;
 
   /// Get peak parameters (calculated)
-  double getPeakParameter(std::vector<int> hkl,
-                          const std::string &parname) const;
+  double getPeakParameter(std::vector<int> hkl, const std::string &parname) const;
 
   /// Set up a parameter to be fixed
   void fixPeakParameter(const std::string &paramname, double paramvalue);
@@ -107,23 +101,19 @@ public:
   void setFixPeakHeights();
 
   /// Calculate peak intensities by Le Bail algorithm
-  bool calculatePeaksIntensities(const std::vector<double> &vecX,
-                                 const std::vector<double> &vecY,
+  bool calculatePeaksIntensities(const std::vector<double> &vecX, const std::vector<double> &vecY,
                                  std::vector<double> &vec_summedpeaks);
 
   /// Get the maximum value of a peak in a given set of data points
-  double getPeakMaximumValue(std::vector<int> hkl,
-                             const std::vector<double> &xvalues, size_t &ix);
+  double getPeakMaximumValue(std::vector<int> hkl, const std::vector<double> &xvalues, size_t &ix);
 
 private:
   /// Set peak parameters
-  void setPeakParameters(const API::IPowderDiffPeakFunction_sptr &peak,
-                         const std::map<std::string, double> &parammap,
+  void setPeakParameters(const API::IPowderDiffPeakFunction_sptr &peak, const std::map<std::string, double> &parammap,
                          double peakheight, bool setpeakheight);
 
   /// Retrieve peak's parameter.  may be native or calculated
-  double getPeakParameterValue(const API::IPowderDiffPeakFunction_sptr &peak,
-                               const std::string &parname) const;
+  double getPeakParameterValue(const API::IPowderDiffPeakFunction_sptr &peak, const std::string &parname) const;
 
   /// Calculate all peaks' parameter value
   void calculatePeakParameterValues() const;
@@ -132,19 +122,13 @@ private:
   API::IPowderDiffPeakFunction_sptr generatePeak(int h, int k, int l);
 
   /// Calculate the peaks intensities in same group
-  bool calculateGroupPeakIntensities(
-      std::vector<std::pair<double, API::IPowderDiffPeakFunction_sptr>>
-          peakgroup,
-      const std::vector<double> &vecX, const std::vector<double> &vecY,
-      std::vector<double> &vec_summedpeaks);
+  bool calculateGroupPeakIntensities(std::vector<std::pair<double, API::IPowderDiffPeakFunction_sptr>> peakgroup,
+                                     const std::vector<double> &vecX, const std::vector<double> &vecY,
+                                     std::vector<double> &vec_summedpeaks);
 
   /// Group close peaks together
-  void groupPeaks(
-      std::vector<
-          std::vector<std::pair<double, API::IPowderDiffPeakFunction_sptr>>>
-          &peakgroupvec,
-      std::vector<API::IPowderDiffPeakFunction_sptr> &outboundpeakvec,
-      double xmin, double xmax);
+  void groupPeaks(std::vector<std::vector<std::pair<double, API::IPowderDiffPeakFunction_sptr>>> &peakgroupvec,
+                  std::vector<API::IPowderDiffPeakFunction_sptr> &outboundpeakvec, double xmin, double xmax);
 
   /// Peak type
   std::string m_peakType;
@@ -161,8 +145,7 @@ private:
   /// Vector of all peaks
   std::vector<API::IPowderDiffPeakFunction_sptr> m_vecPeaks;
   /// Vector of pair <peak position in d-space, Peak> sortable
-  std::vector<std::pair<double, API::IPowderDiffPeakFunction_sptr>>
-      m_dspPeakVec;
+  std::vector<std::pair<double, API::IPowderDiffPeakFunction_sptr>> m_dspPeakVec;
   /// Vector of all peak's Miller indexes
   std::map<std::vector<int>, API::IPowderDiffPeakFunction_sptr> m_mapHKLPeak;
 

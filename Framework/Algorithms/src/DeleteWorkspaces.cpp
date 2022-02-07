@@ -9,17 +9,16 @@
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidKernel/ArrayProperty.h"
 
-namespace Mantid {
-namespace Algorithms {
+namespace Mantid::Algorithms {
 
 // Register the algorithm
 DECLARE_ALGORITHM(DeleteWorkspaces)
 
 /// Initialize the algorithm properties
 void DeleteWorkspaces::init() {
-  declareProperty(std::make_unique<Kernel::ArrayProperty<std::string>>(
-                      "WorkspaceList", std::make_shared<API::ADSValidator>()),
-                  "A list of the workspaces to delete.");
+  declareProperty(
+      std::make_unique<Kernel::ArrayProperty<std::string>>("WorkspaceList", std::make_shared<API::ADSValidator>()),
+      "A list of the workspaces to delete.");
 }
 
 /// Execute the algorithm
@@ -39,13 +38,13 @@ void DeleteWorkspaces::exec() {
       auto deleteAlg = createChildAlgorithm("DeleteWorkspace", -1, -1, false);
       deleteAlg->initialize();
       deleteAlg->setPropertyValue("Workspace", wsName);
-      bool success = deleteAlg->execute();
-      if (!deleteAlg->isExecuted() || !success) {
+      auto success = deleteAlg->execute();
+      auto executed = deleteAlg->isExecuted();
+      if (!executed || !success) {
         g_log.error() << "Failed to delete " << wsName << ".\n";
       }
     }
     prog.report();
   }
 }
-} // namespace Algorithms
-} // namespace Mantid
+} // namespace Mantid::Algorithms

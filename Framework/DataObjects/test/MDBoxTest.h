@@ -11,12 +11,12 @@
 #include "MantidDataObjects/MDBin.h"
 #include "MantidDataObjects/MDBox.h"
 #include "MantidDataObjects/MDLeanEvent.h"
+#include "MantidFrameworkTestHelpers/MDEventsTestHelper.h"
 #include "MantidGeometry/MDGeometry/MDDimensionExtents.h"
 #include "MantidKernel/CPUTimer.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/DiskBuffer.h"
 #include "MantidKernel/MultiThreaded.h"
-#include "MantidTestHelpers/MDEventsTestHelper.h"
 #include <Poco/File.h>
 #include <cxxtest/TestSuite.h>
 #include <map>
@@ -121,7 +121,7 @@ public:
     std::vector<coord_t> coord(2, 2.);
     coord[1] = 3;
 
-    b.buildAndAddEvent(1.2, 3.4, coord, 0, 0);
+    b.buildAndAddEvent(1.2, 3.4, coord, 0, 0, 0);
     TS_ASSERT_EQUALS(b.getNPoints(), 1)
 
     b.refreshCache();
@@ -179,11 +179,12 @@ public:
     std::vector<signal_t> SigErrSq(3 * 2, 1.2);
     std::vector<coord_t> Coord(3 * 2, 2);
     std::vector<uint16_t> ind;
-    std::vector<uint32_t> RunID;
+    std::vector<uint16_t> goniometerIndex;
+    std::vector<uint32_t> detID;
     SigErrSq[1] = SigErrSq[3] = SigErrSq[5] = 3.4;
     Coord[1] = Coord[3] = Coord[5] = 3.0;
 
-    b.buildAndAddEvents(SigErrSq, Coord, ind, RunID);
+    b.buildAndAddEvents(SigErrSq, Coord, ind, goniometerIndex, detID);
 
     b.refreshCache();
 
@@ -201,11 +202,12 @@ public:
     std::vector<signal_t> SigErrSq(3 * 2, 1.2);
     std::vector<coord_t> Coord(3 * 2, 2);
     std::vector<uint16_t> ind(3, 10);
-    std::vector<uint32_t> RunID(3, 20);
+    std::vector<uint16_t> goniometerIndex(3, 42);
+    std::vector<uint32_t> detID(3, 20);
     SigErrSq[1] = SigErrSq[3] = SigErrSq[5] = 3.4;
     Coord[1] = Coord[3] = Coord[5] = 3.0;
 
-    b.buildAndAddEvents(SigErrSq, Coord, ind, RunID);
+    b.buildAndAddEvents(SigErrSq, Coord, ind, goniometerIndex, detID);
 
     b.refreshCache();
 
@@ -215,7 +217,8 @@ public:
     TS_ASSERT_DELTA(b.getSignal(), 1.2 * 3, 1e-5);
     TS_ASSERT_DELTA(b.getErrorSquared(), 3.4 * 3, 1e-5);
 
-    TS_ASSERT_EQUALS(b.getEvents()[2].getRunIndex(), 10);
+    TS_ASSERT_EQUALS(b.getEvents()[2].getExpInfoIndex(), 10);
+    TS_ASSERT_EQUALS(b.getEvents()[2].getGoniometerIndex(), 42);
     TS_ASSERT_EQUALS(b.getEvents()[2].getDetectorID(), 20);
   }
 
@@ -277,7 +280,7 @@ public:
     int num = 500000;
     PARALLEL_FOR_NO_WSP_CHECK()
     for (int i = 0; i < num; i++) {
-      b.buildAndAddEvent(1.2, 3.4, Coord, 1, 10);
+      b.buildAndAddEvent(1.2, 3.4, Coord, 1, 0, 10);
     }
 
     b.refreshCache();
@@ -377,10 +380,8 @@ public:
   void test_bad_splitter() {
     BoxController_sptr sc(new BoxController(4));
     sc->setSplitThreshold(10);
-    using MACROS_ARE_DUMB =
-        MDBox<MDLeanEvent<3>, 3>; //...since they get confused by commas
-    TS_ASSERT_THROWS(MACROS_ARE_DUMB b3(sc.get()),
-                     const std::invalid_argument &);
+    using MACROS_ARE_DUMB = MDBox<MDLeanEvent<3>, 3>; //...since they get confused by commas
+    TS_ASSERT_THROWS(MACROS_ARE_DUMB b3(sc.get()), const std::invalid_argument &);
   }
 
   void test_splitter() {
@@ -436,8 +437,7 @@ public:
    * @param radius :: radius to integrate
    * @param numExpected :: how many events should be in there
    */
-  void dotest_integrateSphere(MDBox<MDLeanEvent<3>, 3> &box, coord_t x,
-                              coord_t y, coord_t z, const coord_t radius,
+  void dotest_integrateSphere(MDBox<MDLeanEvent<3>, 3> &box, coord_t x, coord_t y, coord_t z, const coord_t radius,
                               double numExpected) {
     // The sphere transformation
     bool dimensionsUsed[3] = {true, true, true};
@@ -451,11 +451,8 @@ public:
     TS_ASSERT_DELTA(errorSquared, 1.5 * numExpected, 1e-5);
   }
 
-  void dotest_integrateSphereWithInnerRadius(MDBox<MDLeanEvent<3>, 3> &box,
-                                             coord_t x, coord_t y, coord_t z,
-                                             const coord_t radius,
-                                             const coord_t innerRadius,
-                                             const bool useOnePercent,
+  void dotest_integrateSphereWithInnerRadius(MDBox<MDLeanEvent<3>, 3> &box, coord_t x, coord_t y, coord_t z,
+                                             const coord_t radius, const coord_t innerRadius, const bool useOnePercent,
                                              double numExpected) {
     // The sphere transformation
     bool dimensionsUsed[3] = {true, true, true};
@@ -464,8 +461,7 @@ public:
 
     signal_t signal = 0;
     signal_t errorSquared = 0;
-    box.integrateSphere(sphere, radius * radius, signal, errorSquared,
-                        innerRadius * innerRadius, useOnePercent);
+    box.integrateSphere(sphere, radius * radius, signal, errorSquared, innerRadius * innerRadius, useOnePercent);
     TS_ASSERT_DELTA(signal, 1.0 * numExpected, 1e-5);
     TS_ASSERT_DELTA(errorSquared, 1.5 * numExpected, 1e-5);
   }
@@ -507,16 +503,13 @@ public:
     TS_ASSERT_EQUALS(box.getNPoints(), 9 * 9 * 9);
 
     // Too small shell
-    dotest_integrateSphereWithInnerRadius(box, 5.0f, 5.0f, 5.0f, 0.5f, 0.4f,
-                                          false, 0.0);
+    dotest_integrateSphereWithInnerRadius(box, 5.0f, 5.0f, 5.0f, 0.5f, 0.4f, false, 0.0);
 
     // The 0.7 shell contains 2 but the 1.15 inner shell excludes one of them
-    dotest_integrateSphereWithInnerRadius(box, 5.6f, 5.0f, 5.0f, 0.7f, 0.5f,
-                                          false, 1.0);
+    dotest_integrateSphereWithInnerRadius(box, 5.6f, 5.0f, 5.0f, 0.7f, 0.5f, false, 1.0);
 
     // The 1.3 shell contains 2 and the 1.05 inner shell contains 2
-    dotest_integrateSphereWithInnerRadius(box, 5.6f, 5.0f, 5.0f, 0.7f, 0.4f,
-                                          false, 2.0);
+    dotest_integrateSphereWithInnerRadius(box, 5.6f, 5.0f, 5.0f, 0.7f, 0.4f, false, 2.0);
   }
 
   //-----------------------------------------------------------------------------------------
@@ -615,8 +608,7 @@ public:
   void test_getIsMasked_Default() {
     BoxController_sptr sc(new BoxController(1));
     MDBox<MDLeanEvent<1>, 1> box(sc.get());
-    TSM_ASSERT("Default should be for a MDBox not to be masked!",
-               !box.getIsMasked());
+    TSM_ASSERT("Default should be for a MDBox not to be masked!", !box.getIsMasked());
   }
 
   void test_mask() {

@@ -23,14 +23,12 @@ namespace {
 class CostFuncMock : public CostFuncFitting {
 public:
   std::string name() const override { return "CostFuncMock"; }
-  void addVal(FunctionDomain_sptr domain,
-              FunctionValues_sptr values) const override {
+  void addVal(FunctionDomain_sptr domain, FunctionValues_sptr values) const override {
     UNUSED_ARG(domain)
     UNUSED_ARG(values)
   }
-  void addValDerivHessian(IFunction_sptr function, FunctionDomain_sptr domain,
-                          FunctionValues_sptr values, bool evalDeriv = true,
-                          bool evalHessian = true) const override {
+  void addValDerivHessian(IFunction_sptr function, FunctionDomain_sptr domain, FunctionValues_sptr values,
+                          bool evalDeriv = true, bool evalHessian = true) const override {
     UNUSED_ARG(domain)
     UNUSED_ARG(values)
     UNUSED_ARG(evalDeriv)
@@ -47,15 +45,12 @@ class CostFuncFittingTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static CostFuncFittingTest *createSuite() {
-    return new CostFuncFittingTest();
-  }
+  static CostFuncFittingTest *createSuite() { return new CostFuncFittingTest(); }
   static void destroySuite(CostFuncFittingTest *suite) { delete suite; }
 
   void test_parameterName() {
     CostFuncMock costFun;
-    auto fun = FunctionFactory::Instance().createInitialized(
-        "name=LinearBackground;name=ExpDecay");
+    auto fun = FunctionFactory::Instance().createInitialized("name=LinearBackground;name=ExpDecay");
     auto domain = std::make_shared<FunctionDomain1DVector>(0);
     auto values = std::make_shared<FunctionValues>(*domain);
     costFun.setFittingFunction(fun, domain, values);

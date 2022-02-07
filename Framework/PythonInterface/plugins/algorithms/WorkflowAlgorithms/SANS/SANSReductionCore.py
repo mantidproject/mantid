@@ -90,18 +90,20 @@ class SANSReductionCore(SANSReductionCoreBase):
         # 6. Convert to Wavelength
         # --------------------------------------------------------------------------------------------------------------
         progress.report("Converting to wavelength ...")
-        workspace = self._convert_to_wavelength(state=state, workspace=workspace)
+        workspaces = self._convert_to_wavelength(workspace=workspace, wavelength_state=state.wavelength)
         # Convert and rebin the dummy workspace to get correct bin flags
+        del workspace
         if use_dummy_workspace:
             dummy_mask_workspace = mask_bins(state.mask, dummy_mask_workspace,
                                              DetectorType(component_as_string))
-            dummy_mask_workspace = self._convert_to_wavelength(state=state, workspace=dummy_mask_workspace)
+            dummy_mask_workspaces = self._convert_to_wavelength(wavelength_state=state.wavelength,
+                                                                workspace=dummy_mask_workspace)
 
         # --------------------------------------------------------------------------------------------------------------
         # 7. Multiply by volume and absolute scale
         # --------------------------------------------------------------------------------------------------------------
         progress.report("Multiplying by volume and absolute scale ...")
-        workspace = self._scale(state=state, workspace=workspace)
+        workspaces = self._scale(state=state, ws_list=workspaces)
 
         # --------------------------------------------------------------------------------------------------------------
         # 8. Create adjustment workspaces, those are
@@ -114,45 +116,46 @@ class SANSReductionCore(SANSReductionCoreBase):
         # settings. On the other hand it is not clear that this would be an advantage with the GIL.
         # --------------------------------------------------------------------------------------------------------------
         progress.report("Creating adjustment workspaces ...")
-        wavelength_adjustment_workspace, pixel_adjustment_workspace, wavelength_and_pixel_adjustment_workspace, \
-            calculated_transmission_workspace, unfitted_transmission_workspace = \
-            self._adjustment(state, workspace, monitor_workspace, component_as_string, data_type_as_string)
+        adjustment_dict = self._adjustment(state, workspaces, monitor_workspace,
+                                           component_as_string, data_type_as_string)
 
         # ----------------------------------------------------------------
         # 9. Convert event workspaces to histogram workspaces, and re-mask
         # ----------------------------------------------------------------
         progress.report("Converting to histogram mode ...")
-        workspace = self._convert_to_histogram(workspace)
+        workspaces = self._convert_to_histogram(workspaces)
         if use_dummy_workspace:
-            workspace = self._copy_bin_masks(workspace, dummy_mask_workspace)
+            self._copy_bin_masks(workspaces, dummy_mask_workspaces)
 
         # ------------------------------------------------------------
         # 10. Convert to Q
         # -----------------------------------------------------------
         progress.report("Converting to q ...")
-        workspace, sum_of_counts, sum_of_norms = \
-            self._convert_to_q(state=state,
-                               workspace=workspace,
-                               wavelength_adjustment_workspace=wavelength_adjustment_workspace,
-                               pixel_adjustment_workspace=pixel_adjustment_workspace,
-                               wavelength_and_pixel_adjustment_workspace=wavelength_and_pixel_adjustment_workspace)
+        sums_dict = self._convert_to_q(state=state, workspaces=workspaces, adjustment_dict=adjustment_dict)
         progress.report("Completed SANSReductionCore ...")
 
         # ------------------------------------------------------------
         # Populate the output
         # ------------------------------------------------------------
-        self.setProperty("OutputWorkspace", workspace)
+        self.setProperty("OutputWorkspaces", self._group_workspaces(self._add_metadata(state, workspaces)))
 
         # ------------------------------------------------------------
         # Diagnostic output
         # ------------------------------------------------------------
-        if sum_of_counts:
-            self.setProperty("SumOfCounts", sum_of_counts)
-        if sum_of_norms:
-            self.setProperty("SumOfNormFactors", sum_of_norms)
+        counts_workspaces = {k: v.counts for k, v in sums_dict.items()}
+        self.setProperty("SumOfCounts", self._group_workspaces(self._add_metadata(state, counts_workspaces)))
+        norms_workspaces = {k: v.norm for k, v in sums_dict.items()}
+        self.setProperty("SumOfNormFactors", self._group_workspaces(self._add_metadata(state, norms_workspaces)))
 
-        self.setProperty("CalculatedTransmissionWorkspace", calculated_transmission_workspace)
-        self.setProperty("UnfittedTransmissionWorkspace", unfitted_transmission_workspace)
+        calc_trans_workspaces = {k: v.calculated_transmission_workspace for k, v in adjustment_dict.items()}
+        self._add_metadata(state, calc_trans_workspaces)
+        unfit_trans_workspace = {k: v.unfitted_transmission_workspace for k, v in adjustment_dict.items()}
+        self._add_metadata(state, unfit_trans_workspace)
+
+        if any(calc_trans_workspaces.values()):
+            self.setProperty("CalculatedTransmissionWorkspaces", self._group_workspaces(calc_trans_workspaces))
+        if any(unfit_trans_workspace.values()):
+            self.setProperty("UnfittedTransmissionWorkspaces", self._group_workspaces(unfit_trans_workspace))
 
     def validateInputs(self):
         errors = dict()

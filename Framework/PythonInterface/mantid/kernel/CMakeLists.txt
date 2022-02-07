@@ -2,10 +2,8 @@
 
 set(MODULE_TEMPLATE src/kernel.cpp.in)
 
-# Files containing export definitions, these are automatically processed
-# -- Do NOT sort this list. The order defines the order in which the export
-# definitions occur and some depend on their base classes being exported first
-# --
+# Files containing export definitions, these are automatically processed -- Do NOT sort this list. The order defines the
+# order in which the export definitions occur and some depend on their base classes being exported first --
 set(EXPORT_FILES
     src/Exports/ConfigService.cpp
     src/Exports/ConfigObserver.cpp
@@ -40,6 +38,7 @@ set(EXPORT_FILES
     src/Exports/ArrayBoundedValidator.cpp
     src/Exports/ArrayOrderedPairsValidator.cpp
     src/Exports/MandatoryValidator.cpp
+    src/Exports/MantidVersion.cpp
     src/Exports/CompositeValidator.cpp
     src/Exports/LogFilter.cpp
     src/Exports/UnitConversion.cpp
@@ -60,7 +59,10 @@ set(EXPORT_FILES
     src/Exports/Atom.cpp
     src/Exports/StringContainsValidator.cpp
     src/Exports/PropertyFactory.cpp
-    src/Exports/RebinParamsValidator.cpp)
+    src/Exports/RebinParamsValidator.cpp
+    src/Exports/PhysicalConstants.cpp
+    src/Exports/SpecialCoordinateSystem.cpp
+)
 
 set(MODULE_DEFINITION ${CMAKE_CURRENT_BINARY_DIR}/kernel.cpp)
 create_module(${MODULE_TEMPLATE} ${MODULE_DEFINITION} ${EXPORT_FILES})
@@ -68,11 +70,9 @@ create_module(${MODULE_TEMPLATE} ${MODULE_DEFINITION} ${EXPORT_FILES})
 # Helper code
 
 set(SRC_FILES
-    src/Registry/MappingTypeHandler.cpp
-    src/Registry/PropertyManagerFactory.cpp
-    src/Registry/PropertyWithValueFactory.cpp
-    src/Registry/SequenceTypeHandler.cpp
-    src/Registry/TypeRegistry.cpp)
+    src/Registry/MappingTypeHandler.cpp src/Registry/PropertyManagerFactory.cpp
+    src/Registry/PropertyWithValueFactory.cpp src/Registry/SequenceTypeHandler.cpp src/Registry/TypeRegistry.cpp
+)
 
 set(INC_FILES
     inc/MantidPythonInterface/kernel/Registry/MappingTypeHandler.h
@@ -82,20 +82,14 @@ set(INC_FILES
     inc/MantidPythonInterface/kernel/Registry/SequenceTypeHandler.h
     inc/MantidPythonInterface/kernel/Registry/TypedPropertyValueHandler.h
     inc/MantidPythonInterface/kernel/Registry/TypeRegistry.h
-    inc/MantidPythonInterface/kernel/Registry/RegisterWorkspacePtrToPython.h)
+)
 
 # Generate the packagesetup module for the build & install package
 set(PACKAGESETUP_PY packagesetup)
 set(NEXUSLIB ${NEXUS_C_LIBRARIES})
 if(WIN32) # .lib -> .dll
-  string(REPLACE "/lib/"
-                 "/bin/"
-                 NEXUSLIB
-                 ${NEXUSLIB})
-  string(REPLACE ".lib"
-                 ".dll"
-                 NEXUSLIB
-                 ${NEXUSLIB})
+  string(REPLACE "/lib/" "/bin/" NEXUSLIB ${NEXUSLIB})
+  string(REPLACE ".lib" ".dll" NEXUSLIB ${NEXUSLIB})
 endif()
 set(MPISETUP_PY mpisetup)
 if(MPI_EXPERIMENTAL)
@@ -105,76 +99,66 @@ else()
 endif()
 
 # Build version
-configure_file(${CMAKE_CURRENT_SOURCE_DIR}/${PACKAGESETUP_PY}.py.in
-               ${CMAKE_CURRENT_SOURCE_DIR}/${PACKAGESETUP_PY}.py)
+configure_file(${CMAKE_CURRENT_SOURCE_DIR}/${PACKAGESETUP_PY}.py.in ${CMAKE_CURRENT_SOURCE_DIR}/${PACKAGESETUP_PY}.py)
 
-configure_file(${CMAKE_CURRENT_SOURCE_DIR}/${MPISETUP_PY}.py.in
-               ${CMAKE_CURRENT_SOURCE_DIR}/${MPISETUP_PY}.py)
+configure_file(${CMAKE_CURRENT_SOURCE_DIR}/${MPISETUP_PY}.py.in ${CMAKE_CURRENT_SOURCE_DIR}/${MPISETUP_PY}.py)
 
 # Package version
-if(WIN32 OR (APPLE AND ENABLE_MANTIDPLOT))
+if(WIN32)
   # NeXus library is in the same place relative to the Python library
   get_filename_component(NEXUSLIB_FILE ${NEXUSLIB} NAME)
   set(NEXUSLIB ../../${NEXUSLIB_FILE})
 endif()
-configure_file(${CMAKE_CURRENT_SOURCE_DIR}/${PACKAGESETUP_PY}.py.in
-               ${CMAKE_CURRENT_BINARY_DIR}/${PACKAGESETUP_PY}.install.py)
-configure_file(${CMAKE_CURRENT_SOURCE_DIR}/${MPISETUP_PY}.py.in
-               ${CMAKE_CURRENT_BINARY_DIR}/${MPISETUP_PY}.install.py)
+configure_file(
+  ${CMAKE_CURRENT_SOURCE_DIR}/${PACKAGESETUP_PY}.py.in ${CMAKE_CURRENT_BINARY_DIR}/${PACKAGESETUP_PY}.install.py
+)
+configure_file(${CMAKE_CURRENT_SOURCE_DIR}/${MPISETUP_PY}.py.in ${CMAKE_CURRENT_BINARY_DIR}/${MPISETUP_PY}.install.py)
+
+# Add a precompiled header where they are supported
+list(APPEND ALL_FILES ${EXPORT_FILES} ${SRC_FILES})
+enable_precompiled_headers(inc/MantidPythonInterface/kernel/Registry/PrecompiledHeader.h ALL_FILES)
 
 # Create the target for this directory
-add_library(PythonKernelModule
-            ${EXPORT_FILES}
-            ${MODULE_DEFINITION}
-            ${SRC_FILES}
-            ${INC_FILES}
-            ${PYTHON_INSTALL_FILES})
+add_library(PythonKernelModule ${ALL_FILES} ${MODULE_DEFINITION} ${INC_FILES} ${PYTHON_INSTALL_FILES})
+add_library(Mantid::PythonKernelModule ALIAS PythonKernelModule)
+
 set_python_properties(PythonKernelModule _kernel)
 
-target_include_directories(PythonKernelModule PUBLIC inc)
+target_include_directories(
+  PythonKernelModule PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/inc> $<INSTALL_INTERFACE:include/Mantid>
+)
 
 # Add the required dependencies
-target_link_libraries(PythonKernelModule
-                      PRIVATE ${TCMALLOC_LIBRARIES_LINKTIME}
-                              PythonInterfaceCore
-                              Types
-                              Kernel
-                              ${Boost_LIBRARIES}
-                              ${PYTHON_LIBRARIES}			      
-                              ${PYTHON_DEPS}
-                              ${POCO_LIBRARIES}
-                              ${TBB_LIBRARIES}
-                              ${TBB_MALLOC_LIBRARIES})
-
-if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
-  set_target_properties(PythonKernelModule
-                        PROPERTIES INSTALL_RPATH "@loader_path/../../../MacOS")
-elseif(${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
-  set_target_properties(PythonKernelModule
-                        PROPERTIES INSTALL_RPATH "\$ORIGIN/../../../${LIB_DIR}")
-endif()
+target_link_libraries(
+  PythonKernelModule
+  PUBLIC Mantid::Kernel
+  PRIVATE Mantid::PythonInterfaceCore ${PYTHON_DEPS}
+)
 
 # Installation settings
+set_target_properties(PythonKernelModule PROPERTIES INSTALL_RPATH "${EXT_INSTALL_RPATH}")
 
-mtd_install_targets(TARGETS
-                    PythonKernelModule
-                    INSTALL_DIRS
-                    ${LIB_DIR}/mantid/kernel
-                    ${WORKBENCH_LIB_DIR}/mantid/kernel)
+mtd_install_targets(
+  TARGETS PythonKernelModule INSTALL_DIRS ${SITE_PACKAGES}/mantid/kernel ${WORKBENCH_SITE_PACKAGES}/mantid/kernel
+)
 
 # packagesetup.py that will overwrite the ones from the built target
-mtd_install_files(FILES
-                  ${CMAKE_CURRENT_BINARY_DIR}/${PACKAGESETUP_PY}.install.py
-                  INSTALL_DIRS
-                  ${LIB_DIR}/mantid/kernel
-                  ${WORKBENCH_LIB_DIR}/mantid/kernel
-                  RENAME
-                  ${PACKAGESETUP_PY}.py)
+mtd_install_files(
+  FILES
+  ${CMAKE_CURRENT_BINARY_DIR}/${PACKAGESETUP_PY}.install.py
+  INSTALL_DIRS
+  ${SITE_PACKAGES}/mantid/kernel
+  ${WORKBENCH_SITE_PACKAGES}/mantid/kernel
+  RENAME
+  ${PACKAGESETUP_PY}.py
+)
 
-mtd_install_files(FILES
-                  ${CMAKE_CURRENT_BINARY_DIR}/${MPISETUP_PY}.install.py
-                  INSTALL_DIRS
-                  ${LIB_DIR}/mantid/kernel
-                  ${WORKBENCH_LIB_DIR}/mantid/kernel
-                  RENAME
-                  ${MPISETUP_PY}.py)
+mtd_install_files(
+  FILES
+  ${CMAKE_CURRENT_BINARY_DIR}/${MPISETUP_PY}.install.py
+  INSTALL_DIRS
+  ${SITE_PACKAGES}/mantid/kernel
+  ${WORKBENCH_SITE_PACKAGES}/mantid/kernel
+  RENAME
+  ${MPISETUP_PY}.py
+)

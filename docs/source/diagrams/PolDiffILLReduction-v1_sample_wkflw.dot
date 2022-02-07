@@ -1,0 +1,95 @@
+digraph Sample {
+  $global_style
+
+  subgraph decisions {
+    $decision_style
+    AverageCounts [label="Average counts or sum"]
+    SelfAttenuationMethod
+    SingleCrystal
+    TimeOfFlight1 [label="Time-of-flight"]
+    TimeOfFlight2 [label="Time-of-flight"]
+    ConvertToEnergy
+  }
+
+  subgraph params {
+    $param_style
+    Run
+    D7YIGPositionCalibration
+    CadmiumWorkspace
+    EmptyContainerWorkspace
+    QuartzWorkspace
+    Transmission
+    PaalmanPingsMonteCarloAbsorption
+    SampleAndEnvironmentProperties
+    ElasticChannelsWorkspace
+  }
+
+  subgraph values {
+    $value_style
+    OutputWorkspace
+  }
+
+  subgraph algorithms {
+    $algorithm_style
+    LoadAndMerge
+    Divide [label="Normalize to monitor/time"]
+    MergeOmegaScan
+    Multiply [label="Correct polarising efficiency"]
+    FrameOverlapCorrection
+    EnergyEfficiencyCorrection
+    ElasticPeakCalibration
+    Minus [label="Subtract background"]
+    Plus [label="Average polarization/2theta"]
+    PaalmanPingsMonteCarloAbsorption
+    PaalmanPingsAbsorptionCorrection
+    ApplyPaalmanPingsCorrection
+    Divide2 [label="Divide by transmission"]
+    SumOverlappingTubes
+    FindEPP
+  }
+
+  Run -> LoadAndMerge
+  D7YIGPositionCalibration -> LoadAndMerge
+  LoadAndMerge -> SingleCrystal
+  SingleCrystal -> Divide
+  SingleCrystal -> MergeOmegaScan
+  MergeOmegaScan -> Divide
+  Divide -> Minus
+  CadmiumWorkspace -> Minus
+  EmptyContainerWorkspace -> Minus
+  Transmission -> Minus
+  Minus -> TimeOfFlight1
+  TimeOfFlight1 -> FrameOverlapCorrection
+  FrameOverlapCorrection -> Multiply
+  TimeOfFlight1 -> Multiply
+  QuartzWorkspace -> Multiply
+  Multiply -> SelfAttenuationMethod
+  SelfAttenuationMethod -> PaalmanPingsMonteCarloAbsorption
+  SelfAttenuationMethod -> Divide2
+  SampleAndEnvironmentProperties -> PaalmanPingsMonteCarloAbsorption
+  PaalmanPingsMonteCarloAbsorption -> ApplyPaalmanPingsCorrection
+  SelfAttenuationMethod -> PaalmanPingsAbsorptionCorrection
+  SampleAndEnvironmentProperties -> PaalmanPingsAbsorptionCorrection
+  PaalmanPingsAbsorptionCorrection -> ApplyPaalmanPingsCorrection
+  SelfAttenuationMethod -> SampleSelfAttenuationFactors
+  SampleSelfAttenuationFactors -> ApplyPaalmanPingsCorrection
+  SelfAttenuationMethod -> TimeOfFlight2
+  ApplyPaalmanPingsCorrection -> TimeOfFlight2
+  Divide2 -> TimeOfFlight2
+  TimeOfFlight2 -> AverageCounts
+  TimeOfFlight2 -> FindEPP
+  ElasticChannelsWorkspace -> ElasticPeakCalibration
+  FindEPP -> ConvertToEnergy
+  ConvertToEnergy -> ElasticPeakCalibration
+  ElasticPeakCalibration -> EnergyEfficiencyCorrection
+  EnergyEfficiencyCorrection -> AverageCounts
+  ConvertToEnergy -> AverageCounts
+  AverageCounts -> SumOverlappingTubes
+  AverageCounts -> Plus
+  AverageCounts -> OutputWorkspace
+  SumOverlappingTubes -> OutputWorkspace
+  Plus -> OutputWorkspace
+}
+
+
+

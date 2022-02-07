@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>fitting_layout</class>
+ <widget class="QWidget" name="fitting_layout">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>609</width>
+    <height>579</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Form</string>
+  </property>
+  <layout class="QVBoxLayout" name="verticalLayout">
+   <property name="spacing">
+    <number>10</number>
+   </property>
+   <item>
+    <layout class="QGridLayout" name="tf_asymmetry_mode_switcher_layout"/>
+   </item>
+   <item>
+    <layout class="QGridLayout" name="fit_controls_layout"/>
+   </item>
+   <item>
+    <layout class="QGridLayout" name="general_fitting_options_layout"/>
+   </item>
+   <item>
+    <layout class="QGridLayout" name="workspace_selector_layout"/>
+   </item>
+   <item>
+    <layout class="QGridLayout" name="tf_asymmetry_fitting_options_layout"/>
+   </item>
+   <item>
+    <layout class="QGridLayout" name="fit_function_options_layout"/>
+   </item>
+  </layout>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>

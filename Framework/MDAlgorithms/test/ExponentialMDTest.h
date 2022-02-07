@@ -11,8 +11,8 @@
 #include <cxxtest/TestSuite.h>
 
 #include "MantidDataObjects/MDHistoWorkspace.h"
+#include "MantidFrameworkTestHelpers/BinaryOperationMDTestHelper.h"
 #include "MantidMDAlgorithms/ExponentialMD.h"
-#include "MantidTestHelpers/BinaryOperationMDTestHelper.h"
 
 using namespace Mantid;
 using namespace Mantid::MDAlgorithms;
@@ -33,8 +33,5 @@ public:
     TS_ASSERT_DELTA(out->getSignalAt(0), exp(2.0), 1e-5);
   }
 
-  void test_event_fails() {
-    UnaryOperationMDTestHelper::doTest("ExponentialMD", "event", "out",
-                                       false /* fails*/);
-  }
+  void test_event_fails() { UnaryOperationMDTestHelper::doTest("ExponentialMD", "event", "out", false /* fails*/); }
 };

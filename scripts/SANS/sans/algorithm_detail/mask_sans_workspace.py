@@ -7,9 +7,10 @@
 from sans.algorithm_detail.mask_workspace import create_masker
 from sans.common.enums import DetectorType
 from sans.common.general_functions import append_to_sans_file_tag
+from sans.state.AllStates import AllStates
 
 
-def mask_workspace(state, component_as_string, workspace):
+def mask_workspace(state: AllStates, component_as_string, workspace):
     assert (state is not dict)
     component = DetectorType(component_as_string)
 
@@ -18,7 +19,8 @@ def mask_workspace(state, component_as_string, workspace):
 
     # Perform the masking
     mask_info = state.mask
-    workspace = masker.mask_workspace(mask_info, workspace, component)
+    inst_info = state.instrument_info
+    workspace = masker.mask_workspace(mask_info, inst_info, workspace, component)
 
     append_to_sans_file_tag(workspace, "_masked")
     return workspace

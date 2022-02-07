@@ -14,9 +14,13 @@
 using Mantid::HistogramData::detail::FixedLengthVector;
 using Mantid::Kernel::make_cow;
 
-struct FixedLengthVectorTester
-    : public FixedLengthVector<FixedLengthVectorTester> {
+struct FixedLengthVectorTester : public FixedLengthVector<FixedLengthVectorTester> {
   FixedLengthVectorTester() = default;
+  ~FixedLengthVectorTester() = default;
+  FixedLengthVectorTester(const FixedLengthVectorTester &) = default;
+  FixedLengthVectorTester(FixedLengthVectorTester &&) = default;
+  FixedLengthVectorTester &operator=(const FixedLengthVectorTester &) = default;
+  FixedLengthVectorTester &operator=(FixedLengthVectorTester &&) = default;
   using FixedLengthVector<FixedLengthVectorTester>::FixedLengthVector;
   using FixedLengthVector<FixedLengthVectorTester>::operator=;
 };
@@ -25,9 +29,7 @@ class FixedLengthVectorTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static FixedLengthVectorTest *createSuite() {
-    return new FixedLengthVectorTest();
-  }
+  static FixedLengthVectorTest *createSuite() { return new FixedLengthVectorTest(); }
   static void destroySuite(FixedLengthVectorTest *suite) { delete suite; }
 
   void test_empty_constructor() {
@@ -84,7 +86,6 @@ public:
     FixedLengthVectorTester src(2, 0.1);
     TS_ASSERT_EQUALS(src.size(), 2);
     const FixedLengthVectorTester dest(std::move(src));
-    TS_ASSERT_EQUALS(src.size(), 0);
     TS_ASSERT_EQUALS(dest[0], 0.1);
     TS_ASSERT_EQUALS(dest[1], 0.1);
   }
@@ -136,8 +137,7 @@ public:
     std::vector<double> src(10, 0);
     FixedLengthVectorTester dest(5);
 
-    TS_ASSERT_THROWS(dest.assign(src.cbegin(), src.cend()),
-                     const std::logic_error &);
+    TS_ASSERT_THROWS(dest.assign(src.cbegin(), src.cend()), const std::logic_error &);
   }
 
   void test_length_value_assignment() {
@@ -167,25 +167,28 @@ public:
     TS_ASSERT_EQUALS(dest[1], 0.1);
   }
 
-  void test_copy_assignment_fail() {
+  void test_assignment() {
     const FixedLengthVectorTester src(2, 0.1);
-    FixedLengthVectorTester dest(1);
-    TS_ASSERT_THROWS(dest = src, const std::logic_error &);
-  }
-
-  void test_move_assignment() {
-    FixedLengthVectorTester src(2, 0.1);
-    FixedLengthVectorTester dest(2);
-    dest = std::move(src);
-    TS_ASSERT_EQUALS(src.size(), 0);
+    FixedLengthVectorTester dest = src;
+    TS_ASSERT_EQUALS(dest.size(), 2);
     TS_ASSERT_EQUALS(dest[0], 0.1);
     TS_ASSERT_EQUALS(dest[1], 0.1);
   }
 
-  void test_move_assignment_fail() {
+  void test_move_rval_ref() {
     FixedLengthVectorTester src(2, 0.1);
-    FixedLengthVectorTester dest(1);
-    TS_ASSERT_THROWS(dest = std::move(src), const std::logic_error &);
+    FixedLengthVectorTester dest(2);
+    dest = std::move(src);
+    TS_ASSERT_EQUALS(dest[0], 0.1);
+    TS_ASSERT_EQUALS(dest[1], 0.1);
+  }
+
+  void test_move_assignment() {
+    FixedLengthVectorTester src(2, 0.1);
+    FixedLengthVectorTester dest = std::move(src);
+    TS_ASSERT_EQUALS(dest.size(), 2);
+    TS_ASSERT_EQUALS(dest[0], 0.1);
+    TS_ASSERT_EQUALS(dest[1], 0.1);
   }
 
   void test_initializer_list_assignment() {
@@ -239,7 +242,6 @@ public:
     std::vector<double> vector{0.1, 0.2};
     FixedLengthVectorTester values(2);
     TS_ASSERT_THROWS_NOTHING(values = std::move(vector));
-    TS_ASSERT_EQUALS(vector.size(), 0);
     TS_ASSERT_EQUALS(values.size(), 2);
     TS_ASSERT_EQUALS(values[0], 0.1);
     TS_ASSERT_EQUALS(values[1], 0.2);

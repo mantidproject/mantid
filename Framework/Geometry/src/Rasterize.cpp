@@ -10,8 +10,7 @@
 #include "MantidGeometry/Objects/Track.h"
 #include <array>
 
-namespace Mantid {
-namespace Geometry {
+namespace Mantid::Geometry {
 
 using Geometry::CSGObject;
 using Kernel::V3D;
@@ -46,10 +45,9 @@ struct HollowCylinderParameters {
 // since cylinders are symmetric around the main axis, choose a random
 // perpendicular to have as the second axis
 V3D createPerpendicular(const V3D &symmetryAxis) {
-  const std::array<double, 3> scalars = {
-      {fabs(symmetryAxis.scalar_prod(X_AXIS)),
-       fabs(symmetryAxis.scalar_prod(Y_AXIS)),
-       fabs(symmetryAxis.scalar_prod(Z_AXIS))}};
+  const std::array<double, 3> scalars = {{fabs(symmetryAxis.scalar_prod(X_AXIS)),
+                                          fabs(symmetryAxis.scalar_prod(Y_AXIS)),
+                                          fabs(symmetryAxis.scalar_prod(Z_AXIS))}};
   // check against the cardinal axes
   if (scalars[0] == 0.)
     return symmetryAxis.cross_prod(X_AXIS);
@@ -67,9 +65,7 @@ V3D createPerpendicular(const V3D &symmetryAxis) {
     return symmetryAxis.cross_prod(Z_AXIS);
 }
 
-const V3D CalculatePosInCylinder(const double phi, const double R,
-                                 const double z,
-                                 const std::array<V3D, 3> coords) {
+const V3D CalculatePosInCylinder(const double phi, const double R, const double z, const std::array<V3D, 3> coords) {
   const auto &x_prime = coords[0];
   const auto &y_prime = coords[1];
   const auto &z_prime = coords[2];
@@ -78,12 +74,9 @@ const V3D CalculatePosInCylinder(const double phi, const double R,
   const double rCosPhi = -R * cos(phi);
 
   // Calculate the current position in the shape in Cartesian coordinates
-  const double xcomp =
-      rCosPhi * x_prime[0] + rSinPhi * y_prime[0] + z * z_prime[0];
-  const double ycomp =
-      rCosPhi * x_prime[1] + rSinPhi * y_prime[1] + z * z_prime[1];
-  const double zcomp =
-      rCosPhi * x_prime[2] + rSinPhi * y_prime[2] + z * z_prime[2];
+  const double xcomp = rCosPhi * x_prime[0] + rSinPhi * y_prime[0] + z * z_prime[0];
+  const double ycomp = rCosPhi * x_prime[1] + rSinPhi * y_prime[1] + z * z_prime[1];
+  const double zcomp = rCosPhi * x_prime[2] + rSinPhi * y_prime[2] + z * z_prime[2];
   return V3D(xcomp, ycomp, zcomp);
 }
 
@@ -97,17 +90,18 @@ bool hasCustomizedRaster(detail::ShapeInfo::GeometryShape shape) {
   return false;
 }
 
-double calcDistanceInShapeNoCheck(const V3D &beamDirection,
-                                  const IObject &shape, const V3D &position) {
+double calcDistanceInShapeNoCheck(const V3D &beamDirection, const IObject &shape, const V3D &position) {
   // Create track for distance in cylinder before scattering point
   Track incoming(position, -beamDirection);
 
-  shape.interceptSurface(incoming);
-  return incoming.front().distFromStart;
+  if (shape.interceptSurface(incoming) > 0) {
+    return incoming.totalDistInsideObject();
+  } else {
+    return 0;
+  }
 }
 
-Raster calculateGeneric(const V3D &beamDirection, const IObject &shape,
-                        const double cubeSizeInMetre) {
+Raster calculateGeneric(const V3D &beamDirection, const IObject &shape, const double cubeSizeInMetre) {
   if (cubeSizeInMetre <= 0.)
     throw std::runtime_error("Tried to section shape into zero size elements");
 
@@ -126,8 +120,7 @@ Raster calculateGeneric(const V3D &beamDirection, const IObject &shape,
   const double XSliceThickness = xLength / static_cast<double>(numXSlices);
   const double YSliceThickness = yLength / static_cast<double>(numYSlices);
   const double ZSliceThickness = zLength / static_cast<double>(numZSlices);
-  const double elementVolume =
-      XSliceThickness * YSliceThickness * ZSliceThickness;
+  const double elementVolume = XSliceThickness * YSliceThickness * ZSliceThickness;
 
   const size_t numVolumeElements = numXSlices * numYSlices * numZSlices;
 
@@ -137,24 +130,20 @@ Raster calculateGeneric(const V3D &beamDirection, const IObject &shape,
   } catch (...) {
     // Typically get here if the number of volume elements is too large
     // Provide a bit more information
-    throw std::logic_error(
-        "Too many volume elements requested - try increasing the value "
-        "of the ElementSize property.");
+    throw std::logic_error("Too many volume elements requested - try increasing the value "
+                           "of the ElementSize property.");
   }
 
   // go through the bounding box generating cubes and seeing if they are
   // inside the shape
   for (size_t i = 0; i < numZSlices; ++i) {
-    const double z =
-        (static_cast<double>(i) + 0.5) * ZSliceThickness + bbox.xMin();
+    const double z = (static_cast<double>(i) + 0.5) * ZSliceThickness + bbox.xMin();
 
     for (size_t j = 0; j < numYSlices; ++j) {
-      const double y =
-          (static_cast<double>(j) + 0.5) * YSliceThickness + bbox.yMin();
+      const double y = (static_cast<double>(j) + 0.5) * YSliceThickness + bbox.yMin();
 
       for (size_t k = 0; k < numXSlices; ++k) {
-        const double x =
-            (static_cast<double>(k) + 0.5) * XSliceThickness + bbox.zMin();
+        const double x = (static_cast<double>(k) + 0.5) * XSliceThickness + bbox.zMin();
         // Set the current position in the sample in Cartesian coordinates.
         const Kernel::V3D currentPosition = V3D(x, y, z);
         // Check if the current point is within the object. If not, skip.
@@ -167,7 +156,7 @@ Raster calculateGeneric(const V3D &beamDirection, const IObject &shape,
           // just chuck away the element in this case. This will also throw
           // away points that are inside a gauge volume but outside the sample
           if (shape.interceptSurface(incoming) > 0) {
-            result.l1.emplace_back(incoming.cbegin()->distFromStart);
+            result.l1.emplace_back(incoming.totalDistInsideObject());
             result.position.emplace_back(currentPosition);
             result.volume.emplace_back(elementVolume);
           }
@@ -189,8 +178,7 @@ namespace Rasterize {
 // -------------------
 // collection of calculations that convert to CSGObjects and pass the work on
 
-Raster calculate(const V3D &beamDirection, const IObject &shape,
-                 const double cubeSizeInMetre) {
+Raster calculate(const V3D &beamDirection, const IObject &shape, const double cubeSizeInMetre) {
   const auto primitive = shape.shape();
   if (hasCustomizedRaster(primitive)) {
     // convert to the underlying primitive type - this assumes that there are
@@ -198,31 +186,25 @@ Raster calculate(const V3D &beamDirection, const IObject &shape,
     const auto &shapeInfo = shape.shapeInfo();
     if (primitive == Geometry::detail::ShapeInfo::GeometryShape::CYLINDER) {
       const auto params = shapeInfo.cylinderGeometry();
-      const size_t numSlice = std::max<size_t>(
-          1, static_cast<size_t>(params.height / cubeSizeInMetre));
-      const size_t numAnnuli = std::max<size_t>(
-          1, static_cast<size_t>(params.radius / cubeSizeInMetre));
+      const size_t numSlice = std::max<size_t>(1, static_cast<size_t>(params.height / cubeSizeInMetre));
+      const size_t numAnnuli = std::max<size_t>(1, static_cast<size_t>(params.radius / cubeSizeInMetre));
       return calculateCylinder(beamDirection, shape, numSlice, numAnnuli);
-    } else if (primitive ==
-               Geometry::detail::ShapeInfo::GeometryShape::HOLLOWCYLINDER) {
+    } else if (primitive == Geometry::detail::ShapeInfo::GeometryShape::HOLLOWCYLINDER) {
       const auto params = shapeInfo.hollowCylinderGeometry();
-      const size_t numSlice = std::max<size_t>(
-          1, static_cast<size_t>(params.height / cubeSizeInMetre));
-      const size_t numAnnuli = std::max<size_t>(
-          1, static_cast<size_t>((params.radius - params.innerRadius) /
-                                 cubeSizeInMetre));
+      const size_t numSlice = std::max<size_t>(1, static_cast<size_t>(params.height / cubeSizeInMetre));
+      const size_t numAnnuli =
+          std::max<size_t>(1, static_cast<size_t>((params.radius - params.innerRadius) / cubeSizeInMetre));
       return calculateHollowCylinder(beamDirection, shape, numSlice, numAnnuli);
     } else {
-      throw std::runtime_error(
-          "Rasterize::calculate should never get to this point");
+      throw std::runtime_error("Rasterize::calculate should never get to this point");
     }
   } else {
     return calculateGeneric(beamDirection, shape, cubeSizeInMetre);
   }
 }
 
-Raster calculateCylinder(const V3D &beamDirection, const IObject &shape,
-                         const size_t numSlices, const size_t numAnnuli) {
+Raster calculateCylinder(const V3D &beamDirection, const IObject &shape, const size_t numSlices,
+                         const size_t numAnnuli) {
   if (shape.shape() != detail::ShapeInfo::GeometryShape::CYLINDER)
     throw std::invalid_argument("Given shape is not a cylinder.");
 
@@ -236,8 +218,7 @@ Raster calculateCylinder(const V3D &beamDirection, const IObject &shape,
 
   // get the geometry for the volume elements
   const auto params = shapeInfo.cylinderGeometry();
-  const V3D center =
-      (params.axis * .5 * params.height) + params.centreOfBottomBase;
+  const V3D center = (params.axis * .5 * params.height) + params.centreOfBottomBase;
 
   const double sliceThickness{params.height / static_cast<double>(numSlices)};
   const double deltaR{params.radius / static_cast<double>(numAnnuli)};
@@ -263,38 +244,32 @@ Raster calculateCylinder(const V3D &beamDirection, const IObject &shape,
   // loop over the elements of the shape and create everything
   // loop over slices
   for (size_t i = 0; i < numSlices; ++i) {
-    const double z =
-        (static_cast<double>(i) + 0.5) * sliceThickness - 0.5 * params.height;
+    const double z = (static_cast<double>(i) + 0.5) * sliceThickness - 0.5 * params.height;
 
     // Number of elements in 1st annulus
     size_t Ni = 0;
     // loop over annuli
     for (size_t j = 0; j < numAnnuli; ++j) {
       Ni += 6;
-      const double R = (static_cast<double>(j) * params.radius /
-                        static_cast<double>(numAnnuli)) +
-                       (0.5 * deltaR);
+      const double R = (static_cast<double>(j) * params.radius / static_cast<double>(numAnnuli)) + (0.5 * deltaR);
 
       // all the volume elements in the ring/slice are the same
       const double outerR = R + (deltaR / 2.0);
       const double innerR = outerR - deltaR;
-      const double elementVolume = M_PI * (outerR * outerR - innerR * innerR) *
-                                   sliceThickness / static_cast<double>(Ni);
+      const double elementVolume =
+          M_PI * (outerR * outerR - innerR * innerR) * sliceThickness / static_cast<double>(Ni);
 
       // loop over elements in current annulus
       for (size_t k = 0; k < Ni; ++k) {
-        const double phi =
-            2. * M_PI * static_cast<double>(k) / static_cast<double>(Ni);
-        const auto position =
-            center + CalculatePosInCylinder(phi, R, z, coords);
+        const double phi = 2. * M_PI * static_cast<double>(k) / static_cast<double>(Ni);
+        const auto position = center + CalculatePosInCylinder(phi, R, z, coords);
 
         assert(shape.isValid(position));
 
         result.position.emplace_back(position);
         result.volume.emplace_back(elementVolume);
         // TODO should be customized for cylinder
-        result.l1.emplace_back(
-            calcDistanceInShapeNoCheck(beamDirection, shape, position));
+        result.l1.emplace_back(calcDistanceInShapeNoCheck(beamDirection, shape, position));
       } // loop over k
     }   // loop over j
   }     // loop over i
@@ -302,8 +277,8 @@ Raster calculateCylinder(const V3D &beamDirection, const IObject &shape,
   return result;
 }
 
-Raster calculateHollowCylinder(const V3D &beamDirection, const IObject &shape,
-                               const size_t numSlices, const size_t numAnnuli) {
+Raster calculateHollowCylinder(const V3D &beamDirection, const IObject &shape, const size_t numSlices,
+                               const size_t numAnnuli) {
   if (shape.shape() != detail::ShapeInfo::GeometryShape::HOLLOWCYLINDER)
     throw std::invalid_argument("Given shape is not a hollow cylinder.");
 
@@ -317,12 +292,10 @@ Raster calculateHollowCylinder(const V3D &beamDirection, const IObject &shape,
 
   // get the geometry for the volume elements
   const auto params = shapeInfo.hollowCylinderGeometry();
-  const V3D center =
-      (params.axis * .5 * params.height) + params.centreOfBottomBase;
+  const V3D center = (params.axis * .5 * params.height) + params.centreOfBottomBase;
 
   const double sliceThickness{params.height / static_cast<double>(numSlices)};
-  const double deltaR{(params.radius - params.innerRadius) /
-                      static_cast<double>(numAnnuli)};
+  const double deltaR{(params.radius - params.innerRadius) / static_cast<double>(numAnnuli)};
 
   /* The number of volume elements is
    * numslices*(1+2+3+.....+numAnnuli)*6
@@ -333,9 +306,7 @@ Raster calculateHollowCylinder(const V3D &beamDirection, const IObject &shape,
 
   Raster result;
   result.reserve(numVolumeElements);
-  result.totalvolume =
-      params.height * M_PI *
-      (params.radius * params.radius - params.innerRadius * params.innerRadius);
+  result.totalvolume = params.height * M_PI * (params.radius * params.radius - params.innerRadius * params.innerRadius);
 
   // Assume that z' = axis. Then select whatever has the smallest dot product
   // with axis to be the x' direction
@@ -348,41 +319,44 @@ Raster calculateHollowCylinder(const V3D &beamDirection, const IObject &shape,
   // loop over the elements of the shape and create everything
   // loop over slices
   for (size_t i = 0; i < numSlices; ++i) {
-    const double z =
-        (static_cast<double>(i) + 0.5) * sliceThickness - 0.5 * params.height;
+    const double z = (static_cast<double>(i) + 0.5) * sliceThickness - 0.5 * params.height;
 
     // Number of elements in 1st annulus
-    size_t Ni = 0;
+    // NOTE:
+    // For example, if the hollow cylinder consist of an inner cylinder surface with
+    // two annulus, and two annulus for the hollow ring (i.e. total four annulus for
+    // the outter cylinder surface). We have
+    // Ni = [6,  12,  18, 24]
+    //              ^
+    //       inner    outter
+    const auto nSteps = params.innerRadius / deltaR;
+    size_t Ni = static_cast<size_t>(nSteps) * 6;
     // loop over annuli
     for (size_t j = 0; j < numAnnuli; ++j) {
       Ni += 6;
       const double R =
           params.innerRadius +
-          (static_cast<double>(j) * (params.radius - params.innerRadius) /
-           static_cast<double>(numAnnuli)) +
+          (static_cast<double>(j) * (params.radius - params.innerRadius) / static_cast<double>(numAnnuli)) +
           (0.5 * deltaR);
 
       // all the volume elements in the ring/slice are the same
       const double outerR = R + (deltaR / 2.0);
       const double innerR = outerR - deltaR;
-      const double elementVolume = M_PI * (outerR * outerR - innerR * innerR) *
-                                   sliceThickness / static_cast<double>(Ni);
+      const double elementVolume =
+          M_PI * (outerR * outerR - innerR * innerR) * sliceThickness / static_cast<double>(Ni);
 
       // loop over elements in current annulus
       for (size_t k = 0; k < Ni; ++k) {
-        const double phi =
-            2. * M_PI * static_cast<double>(k) / static_cast<double>(Ni);
+        const double phi = 2. * M_PI * static_cast<double>(k) / static_cast<double>(Ni);
 
-        const auto position =
-            center + CalculatePosInCylinder(phi, R, z, coords);
+        const auto position = center + CalculatePosInCylinder(phi, R, z, coords);
 
         assert(shape.isValid(position));
 
         result.position.emplace_back(position);
         result.volume.emplace_back(elementVolume);
         // TODO should be customized for hollow cylinder
-        result.l1.emplace_back(
-            calcDistanceInShapeNoCheck(beamDirection, shape, position));
+        result.l1.emplace_back(calcDistanceInShapeNoCheck(beamDirection, shape, position));
       } // loop over k
     }   // loop over j
   }     // loop over i
@@ -391,5 +365,4 @@ Raster calculateHollowCylinder(const V3D &beamDirection, const IObject &shape,
 }
 
 } // namespace Rasterize
-} // namespace Geometry
-} // namespace Mantid
+} // namespace Mantid::Geometry

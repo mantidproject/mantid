@@ -8,6 +8,7 @@ from mantid.api import (PythonAlgorithm, AlgorithmFactory,
                         PropertyMode, WorkspaceProperty, Progress,
                         IMDHistoWorkspaceProperty, mtd)
 from mantid.kernel import Direction, FloatArrayProperty, FloatArrayLengthValidator, StringListValidator, FloatBoundedValidator
+from mantid import config
 from mantid import logger
 import numpy as np
 
@@ -65,6 +66,8 @@ class ConvertWANDSCDtoQ(PythonAlgorithm):
                              "format: 'minimum,maximum,number_of_bins'.")
         self.declareProperty('KeepTemporaryWorkspaces', False,
                              "If True the normalization and data workspaces in addition to the normalized data will be outputted")
+        self.declareProperty("ObliquityParallaxCoefficient", 1.0, validator=FloatBoundedValidator(0.0),
+                             doc="Geometrical correction for shift in vertical beam position due to wide beam.")
         self.declareProperty(WorkspaceProperty("OutputWorkspace", "",
                                                optional=PropertyMode.Mandatory,
                                                direction=Direction.Output),
@@ -96,8 +99,12 @@ class ConvertWANDSCDtoQ(PythonAlgorithm):
         # Check that all logs are there and are of correct length
         run = inWS.getExperimentInfo(0).run()
 
+        # Check number of goniometers
+        if run.getNumGoniometers() != number_of_runs:
+            issues["InputWorkspace"] = "goniometers not set correctly, did you run SetGoniometer with Average=False"
+
         if instrument == "HB3A":
-            for prop in ['omega', 'chi', 'phi', 'monitor', 'time']:
+            for prop in ['monitor', 'time']:
                 if run.hasProperty(prop):
                     p = run.getProperty(prop).value
                     if np.size(p) != number_of_runs:
@@ -105,7 +112,7 @@ class ConvertWANDSCDtoQ(PythonAlgorithm):
                 else:
                     issues["InputWorkspace"] = "missing log {}".format(prop)
         else:
-            for prop in ['duration', 'monitor_count', 's1']:
+            for prop in ['duration', 'monitor_count']:
                 if run.hasProperty(prop):
                     p = run.getProperty(prop).value
                     if np.size(p) != number_of_runs:
@@ -169,14 +176,6 @@ class ConvertWANDSCDtoQ(PythonAlgorithm):
 
         progress = Progress(self, 0.0, 1.0, number_of_runs+4)
 
-        # Get rotation array
-        if instrument == "HB3A":
-            omega = np.deg2rad(inWS.getExperimentInfo(0).run().getProperty('omega').value)
-            chi = np.deg2rad(inWS.getExperimentInfo(0).run().getProperty('chi').value)
-            phi = np.deg2rad(inWS.getExperimentInfo(0).run().getProperty('phi').value)
-        else:
-            s1 = np.deg2rad(inWS.getExperimentInfo(0).run().getProperty('s1').value) + np.deg2rad(self.getProperty("S1Offset").value)
-
         normaliseBy = self.getProperty("NormaliseBy").value
         if normaliseBy == "Monitor":
             if instrument == "HB3A":
@@ -228,9 +227,10 @@ class ConvertWANDSCDtoQ(PythonAlgorithm):
             chars=['H','K','L']
             names = ['['+','.join(char_dict.get(j, '{0}{1}')
                                   .format(j,chars[np.argmax(np.abs(W[:,i]))]) for j in W[:,i])+']' for i in range(3)]
-            units = 'in {:.3f} A^-1,in {:.3f} A^-1,in {:.3f} A^-1'.format(ol.qFromHKL(W[0]).norm(),
-                                                                          ol.qFromHKL(W[1]).norm(),
-                                                                          ol.qFromHKL(W[2]).norm())
+            # Slicing because we want the column vector and not the row vector
+            units = 'in {:.3f} A^-1,in {:.3f} A^-1,in {:.3f} A^-1'.format(ol.qFromHKL(W[:,0]).norm(),
+                                                                          ol.qFromHKL(W[:,1]).norm(),
+                                                                          ol.qFromHKL(W[:,2]).norm())
             frames = 'HKL,HKL,HKL'
             k = 1/self.getProperty("Wavelength").value # Not 2pi/wavelength to save dividing by 2pi later
         else:
@@ -248,7 +248,7 @@ class ConvertWANDSCDtoQ(PythonAlgorithm):
             if inWS.getExperimentInfo(0).getInstrument().getName() == 'HB3A':
                 polar = polar.reshape(512*3, 512).T.flatten()
 
-        if inWS.getExperimentInfo(0).run().hasProperty('twotheta'):
+        if inWS.getExperimentInfo(0).run().hasProperty('azimuthal'):
             azim = np.array(inWS.getExperimentInfo(0).run().getProperty('azimuthal').value)
         else:
             di = inWS.getExperimentInfo(0).detectorInfo()
@@ -256,8 +256,14 @@ class ConvertWANDSCDtoQ(PythonAlgorithm):
             if inWS.getExperimentInfo(0).getInstrument().getName() == 'HB3A':
                 azim = azim.reshape(512*3, 512).T.flatten()
 
+        # check convention to determine the sign
+        if config['Q.convention'] == 'Crystallography':
+            k *= -1.0
+
+        cop = self.getProperty('ObliquityParallaxCoefficient').value
+
         qlab = np.vstack((np.sin(polar)*np.cos(azim),
-                          np.sin(polar)*np.sin(azim),
+                          np.sin(polar)*np.sin(azim)*cop,
                           np.cos(polar) - 1)).T * -k # Kf - Ki(0,0,1)
 
         progress.report('Calculating Q volume')
@@ -286,22 +292,14 @@ class ConvertWANDSCDtoQ(PythonAlgorithm):
         assert not data_array[:,:,0].ravel('F').flags.owndata
         assert data_array[:,:,0].flags.fnc
 
+        s1offset = np.deg2rad(self.getProperty("S1Offset").value)
+        s1offset = np.array([[ np.cos(s1offset), 0, np.sin(s1offset)],
+                             [             0,    1,                0],
+                             [-np.sin(s1offset), 0, np.cos(s1offset)]])
+
         for n in range(number_of_runs):
-            if instrument == "HB3A":
-                R1 = np.array([[np.cos(omega[n]), 0, -np.sin(omega[n])], # omega 0,1,0,-1
-                               [               0, 1,                 0],
-                               [np.sin(omega[n]), 0,  np.cos(omega[n])]])
-                R2 = np.array([[ np.cos(chi[n]),  np.sin(chi[n]), 0], # chi 0,0,1,-1
-                               [-np.sin(chi[n]),  np.cos(chi[n]), 0],
-                               [              0,               0, 1]])
-                R3 = np.array([[np.cos(phi[n]), 0, -np.sin(phi[n])], # phi 0,1,0,-1
-                               [             0, 1,               0],
-                               [np.sin(phi[n]), 0,  np.cos(phi[n])]])
-                R = np.dot(np.dot(R1, R2), R3)
-            else:
-                R = np.array([[ np.cos(s1[n]), 0, np.sin(s1[n])], # s1 0,1,0,1
-                              [             0, 1,             0],
-                              [-np.sin(s1[n]), 0, np.cos(s1[n])]])
+            R = inWS.getExperimentInfo(0).run().getGoniometer(n).getR()
+            R = np.dot(s1offset, R)
             RUBW = np.dot(R,UBW)
             q = np.round(np.dot(np.linalg.inv(RUBW),qlab.T)/bin_size-offset).astype(np.int)
             q_index = np.ravel_multi_index(q, (dim0_bins+2, dim1_bins+2, dim2_bins+2), mode='clip')
@@ -373,6 +371,7 @@ class ConvertWANDSCDtoQ(PythonAlgorithm):
 
         outWS.getExperimentInfo(0).run().addProperty('RUBW_MATRIX', list(UBW.flatten()), True)
         outWS.getExperimentInfo(0).run().addProperty('W_MATRIX', list(W.flatten()), True)
+        outWS.getExperimentInfo(0).run().addProperty('wavelength', self.getProperty("Wavelength").value, True)
         try:
             if outWS.getExperimentInfo(0).sample().hasOrientedLattice():
                 outWS.getExperimentInfo(0).sample().getOrientedLattice().setUB(UB)

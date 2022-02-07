@@ -42,7 +42,7 @@ protected:
 
 public:
   Sphere();
-  Sphere(Kernel::V3D centre, double radius);
+  Sphere(const Kernel::V3D &centre, double radius);
   std::unique_ptr<Sphere> clone() const;
   /// Effective typename
   std::string className() const override { return "Sphere"; }
@@ -54,7 +54,7 @@ public:
   /// sphere
   int side(const Kernel::V3D &) const override;
   /// Checks whether the give input point is on the surface
-  int onSurface(const Kernel::V3D &) const override;
+  bool onSurface(const Kernel::V3D &) const override;
   /// Gets the distance from the sphere to the input point
   double distance(const Kernel::V3D &) const override;
   /// Setter for centre of sphere
@@ -72,13 +72,12 @@ public:
   void setBaseEqn() override;
   /// Writes the sphere equatation in MCNP format
   void write(std::ostream &) const override;
-  void getBoundingBox(double &xmax, double &ymax, double &zmax, double &xmin,
-                      double &ymin, double &zmin) override;
+  void getBoundingBox(double &xmax, double &ymax, double &zmax, double &xmin, double &ymin, double &zmin) override;
 
   /// The number of slices to approximate a sphere
-  static int g_nslices;
+  constexpr static int g_NSLICES = 5;
   /// The number of stacks to approximate a sphere
-  static int g_nstacks;
+  constexpr static int g_NSTACKS = 5;
 #ifdef ENABLE_OPENCASCADE
   TopoDS_Shape createShape() override;
 #endif

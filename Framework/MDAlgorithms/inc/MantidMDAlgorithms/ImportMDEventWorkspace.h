@@ -29,9 +29,7 @@ public:
   }
 
   int version() const override;
-  const std::vector<std::string> seeAlso() const override {
-    return {"ImportMDHistoWorkspace"};
-  }
+  const std::vector<std::string> seeAlso() const override { return {"ImportMDHistoWorkspace"}; }
   const std::string category() const override;
 
   /// Flag used to indicate the dimension block in the file
@@ -59,8 +57,7 @@ private:
   /// Actual number of md events provided.
   size_t m_nDataObjects = 0;
   /// call back to add event data
-  template <typename MDE, size_t nd>
-  void addEventsData(typename DataObjects::MDEventWorkspace<MDE, nd>::sptr ws);
+  template <typename MDE, size_t nd> void addEventsData(typename DataObjects::MDEventWorkspace<MDE, nd>::sptr ws);
   /// Quick check of the structure, so we can abort if passed junk.
   void quickFileCheck();
   ///  Check that the a flag exists in the file.

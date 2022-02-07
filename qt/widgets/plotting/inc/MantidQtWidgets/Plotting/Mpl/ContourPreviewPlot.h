@@ -47,19 +47,14 @@ private:
   void createLayout();
 
   void onWorkspaceRemoved(Mantid::API::WorkspacePreDeleteNotification_ptr nf);
-  void
-  onWorkspaceReplaced(Mantid::API::WorkspaceBeforeReplaceNotification_ptr nf);
+  void onWorkspaceReplaced(Mantid::API::WorkspaceBeforeReplaceNotification_ptr nf);
 
   /// Canvas objects
   Widgets::MplCpp::FigureCanvasQt *m_canvas;
 
   /// Observers for ADS Notifications
-  Poco::NObserver<ContourPreviewPlot,
-                  Mantid::API::WorkspacePreDeleteNotification>
-      m_wsRemovedObserver;
-  Poco::NObserver<ContourPreviewPlot,
-                  Mantid::API::WorkspaceBeforeReplaceNotification>
-      m_wsReplacedObserver;
+  Poco::NObserver<ContourPreviewPlot, Mantid::API::WorkspacePreDeleteNotification> m_wsRemovedObserver;
+  Poco::NObserver<ContourPreviewPlot, Mantid::API::WorkspaceBeforeReplaceNotification> m_wsReplacedObserver;
 };
 
 } // namespace MantidWidgets

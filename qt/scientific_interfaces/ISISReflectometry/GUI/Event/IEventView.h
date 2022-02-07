@@ -20,10 +20,8 @@ public:
   virtual void notifySliceTypeChanged(SliceType newSliceType) = 0;
   virtual void notifyUniformSliceCountChanged(int sliceCount) = 0;
   virtual void notifyUniformSecondsChanged(double sliceLengthInSeconds) = 0;
-  virtual void
-  notifyCustomSliceValuesChanged(std::string pythonListOfSliceTimes) = 0;
-  virtual void
-  notifyLogSliceBreakpointsChanged(std::string logValueBreakpoints) = 0;
+  virtual void notifyCustomSliceValuesChanged(std::string pythonListOfSliceTimes) = 0;
+  virtual void notifyLogSliceBreakpointsChanged(std::string logValueBreakpoints) = 0;
   virtual void notifyLogBlockNameChanged(std::string blockName) = 0;
 };
 

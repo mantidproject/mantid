@@ -21,8 +21,7 @@
 using namespace MantidQt::MantidWidgets;
 using Mantid::Beamline::ComponentType;
 
-namespace MantidQt {
-namespace MantidWidgets {
+namespace MantidQt::MantidWidgets {
 
 namespace {
 size_t decodePickColorRGB(unsigned char r, unsigned char g, unsigned char b) {
@@ -34,8 +33,8 @@ size_t decodePickColorRGB(unsigned char r, unsigned char g, unsigned char b) {
   return index;
 }
 
-void updateVisited(const Mantid::Geometry::ComponentInfo &compInfo,
-                   const size_t bankIndex, std::vector<bool> &visited) {
+void updateVisited(const Mantid::Geometry::ComponentInfo &compInfo, const size_t bankIndex,
+                   std::vector<bool> &visited) {
   visited[bankIndex] = true;
   const auto &children = compInfo.children(bankIndex);
   for (auto child : children) {
@@ -48,8 +47,7 @@ void updateVisited(const Mantid::Geometry::ComponentInfo &compInfo,
 }
 } // namespace
 
-InstrumentRenderer::InstrumentRenderer(const InstrumentActor &actor)
-    : m_actor(actor), m_isUsingLayers(false) {
+InstrumentRenderer::InstrumentRenderer(const InstrumentActor &actor) : m_actor(actor), m_isUsingLayers(false) {
 
   m_displayListId[0] = 0;
   m_displayListId[1] = 0;
@@ -60,9 +58,7 @@ InstrumentRenderer::InstrumentRenderer(const InstrumentActor &actor)
   size_t textureIndex = 0;
   for (size_t i = componentInfo.root(); !componentInfo.isDetector(i); --i) {
     auto type = componentInfo.componentType(i);
-    if (type == ComponentType::Rectangular ||
-        type == ComponentType::OutlineComposite ||
-        type == ComponentType::Grid) {
+    if (type == ComponentType::Rectangular || type == ComponentType::OutlineComposite || type == ComponentType::Grid) {
       m_textures.emplace_back(componentInfo, i);
       m_reverseTextureIndexMap[i] = textureIndex;
       textureIndex++;
@@ -78,11 +74,13 @@ InstrumentRenderer::~InstrumentRenderer() {
   }
 }
 
-void InstrumentRenderer::renderInstrument(const std::vector<bool> &visibleComps,
-                                          bool showGuides, bool picking) {
-  if (std::none_of(visibleComps.cbegin(), visibleComps.cend(),
-                   [](bool visible) { return visible; }))
+void InstrumentRenderer::renderInstrument(const std::vector<bool> &visibleComps, bool showGuides, bool picking) {
+  if (std::none_of(visibleComps.cbegin(), visibleComps.cend(), [](bool visible) { return visible; }))
     return;
+
+  if (!m_actor.isInitialized()) {
+    return;
+  }
 
   OpenGLError::check("InstrumentActor::draw()");
   size_t i = picking ? 1 : 0;
@@ -96,20 +94,17 @@ void InstrumentRenderer::renderInstrument(const std::vector<bool> &visibleComps,
     draw(visibleComps, showGuides, picking);
     glEndList();
     if (glGetError() == GL_OUT_OF_MEMORY) // Throw an exception
-      throw Mantid::Kernel::Exception::OpenGLError(
-          "OpenGL: Out of video memory");
+      throw Mantid::Kernel::Exception::OpenGLError("OpenGL: Out of video memory");
     glCallList(m_displayListId[i]);
   }
   OpenGLError::check("InstrumentActor::draw()");
 }
 
-void InstrumentRenderer::draw(const std::vector<bool> &visibleComps,
-                              bool showGuides, bool picking) {
+void InstrumentRenderer::draw(const std::vector<bool> &visibleComps, bool showGuides, bool picking) {
   const auto &compInfo = m_actor.componentInfo();
   std::vector<bool> visited(compInfo.size(), false);
 
-  for (size_t i = compInfo.root(); i != std::numeric_limits<size_t>::max();
-       --i) {
+  for (size_t i = compInfo.root(); i != std::numeric_limits<size_t>::max(); --i) {
     auto type = compInfo.componentType(i);
     if (type == ComponentType::Infinite)
       continue;
@@ -185,23 +180,17 @@ void InstrumentRenderer::drawGridBank(size_t bankIndex, bool picking) {
     BankRenderingHelpers::renderGridBankOutline(compInfo, bankIndex);
   } else { // Render 6 faces representing grid box
     tex.uploadTextures(picking, detail::GridTextureFace::Front);
-    BankRenderingHelpers::renderGridBankFull(compInfo, bankIndex,
-                                             detail::GridTextureFace::Front);
+    BankRenderingHelpers::renderGridBankFull(compInfo, bankIndex, detail::GridTextureFace::Front);
     tex.uploadTextures(picking, detail::GridTextureFace::Back);
-    BankRenderingHelpers::renderGridBankFull(compInfo, bankIndex,
-                                             detail::GridTextureFace::Back);
+    BankRenderingHelpers::renderGridBankFull(compInfo, bankIndex, detail::GridTextureFace::Back);
     tex.uploadTextures(picking, detail::GridTextureFace::Left);
-    BankRenderingHelpers::renderGridBankFull(compInfo, bankIndex,
-                                             detail::GridTextureFace::Left);
+    BankRenderingHelpers::renderGridBankFull(compInfo, bankIndex, detail::GridTextureFace::Left);
     tex.uploadTextures(picking, detail::GridTextureFace::Right);
-    BankRenderingHelpers::renderGridBankFull(compInfo, bankIndex,
-                                             detail::GridTextureFace::Right);
+    BankRenderingHelpers::renderGridBankFull(compInfo, bankIndex, detail::GridTextureFace::Right);
     tex.uploadTextures(picking, detail::GridTextureFace::Top);
-    BankRenderingHelpers::renderGridBankFull(compInfo, bankIndex,
-                                             detail::GridTextureFace::Top);
+    BankRenderingHelpers::renderGridBankFull(compInfo, bankIndex, detail::GridTextureFace::Top);
     tex.uploadTextures(picking, detail::GridTextureFace::Bottom);
-    BankRenderingHelpers::renderGridBankFull(compInfo, bankIndex,
-                                             detail::GridTextureFace::Bottom);
+    BankRenderingHelpers::renderGridBankFull(compInfo, bankIndex, detail::GridTextureFace::Bottom);
   }
   tex.unbindTextures();
   glPopMatrix();
@@ -241,16 +230,14 @@ void InstrumentRenderer::drawStructuredBank(size_t bankIndex, bool picking) {
   glPushMatrix();
 
   auto bank = compInfo.quadrilateralComponent(bankIndex);
-  const auto &shapeInfo =
-      compInfo.shape(bank.bottomLeft).getGeometryHandler()->shapeInfo();
+  const auto &shapeInfo = compInfo.shape(bank.bottomLeft).getGeometryHandler()->shapeInfo();
   auto pos = shapeInfo.points()[0];
   pos.setZ(compInfo.position(bank.bottomLeft).Z());
   auto scale = compInfo.scaleFactor(bankIndex);
   glTranslated(pos.X(), pos.Y(), pos.Z());
   glScaled(scale[0], scale[1], scale[2]);
 
-  BankRenderingHelpers::renderStructuredBank(compInfo, bankIndex,
-                                             picking ? m_pickColors : m_colors);
+  BankRenderingHelpers::renderStructuredBank(compInfo, bankIndex, picking ? m_pickColors : m_colors);
 
   glPopMatrix();
 }
@@ -334,8 +321,7 @@ void InstrumentRenderer::resetColors() {
   // Reset all colors to 0 and resize m_colors to the appropriate size
   const auto zero = m_colorMap.rgb(vmin, vmax, 0);
   const auto &compInfo = m_actor.componentInfo();
-  m_colors.assign(compInfo.size(),
-                  GLColor(qRed(zero), qGreen(zero), qBlue(zero), 1));
+  m_colors.assign(compInfo.size(), GLColor(qRed(zero), qGreen(zero), qBlue(zero), 1));
   // No data/masked colors
   static const auto invalidColor = GLColor(80, 80, 80, 1);
   static const auto maskedColor = GLColor(100, 100, 100, 1);
@@ -366,13 +352,13 @@ void InstrumentRenderer::resetColors() {
   for (size_t det = 0; det < counts.size(); ++det) {
     if (!isMasked(det)) {
       const double integratedValue(counts[det]);
-      if (integratedValue > -1) {
+      if (integratedValue == InstrumentActor::INVALID_VALUE) {
+        m_colors[det] = invalidColor;
+      } else {
         const auto &color = rgba[det];
         m_colors[det] =
-            GLColor(qRed(color), qGreen(color), qBlue(color),
-                    static_cast<int>(255 * (integratedValue / vmax)));
-      } else
-        m_colors[det] = invalidColor;
+            GLColor(qRed(color), qGreen(color), qBlue(color), static_cast<int>(255 * (integratedValue / vmax)));
+      }
     } else {
       m_colors[det] = maskedColor;
     }
@@ -391,13 +377,9 @@ void InstrumentRenderer::resetPickColors() {
   }
 }
 
-void InstrumentRenderer::changeScaleType(ColorMap::ScaleType type) {
-  m_colorMap.changeScaleType(type);
-}
+void InstrumentRenderer::changeScaleType(ColorMap::ScaleType type) { m_colorMap.changeScaleType(type); }
 
-void InstrumentRenderer::changeNthPower(double nth_power) {
-  m_colorMap.setNthPower(nth_power);
-}
+void InstrumentRenderer::changeNthPower(double nth_power) { m_colorMap.setNthPower(nth_power); }
 
 GLColor InstrumentRenderer::getColor(size_t index) const {
   if (index <= m_colors.size() - 1)
@@ -421,13 +403,9 @@ GLColor InstrumentRenderer::makePickColor(size_t pickID) {
 }
 
 size_t InstrumentRenderer::decodePickColor(const QRgb &c) {
-  return decodePickColorRGB(static_cast<unsigned char>(qRed(c)),
-                            static_cast<unsigned char>(qGreen(c)),
+  return decodePickColorRGB(static_cast<unsigned char>(qRed(c)), static_cast<unsigned char>(qGreen(c)),
                             static_cast<unsigned char>(qBlue(c)));
 }
 
-void InstrumentRenderer::loadColorMap(const QString &fname) {
-  m_colorMap.loadMap(fname);
-}
-} // namespace MantidWidgets
-} // namespace MantidQt
+void InstrumentRenderer::loadColorMap(const QString &fname) { m_colorMap.loadMap(fname); }
+} // namespace MantidQt::MantidWidgets

@@ -34,9 +34,7 @@ class QString;
 namespace MantidQt {
 namespace MantidWidgets {
 
-class EXPORT_OPT_MANTIDQT_COMMON AlgorithmProgressWidget
-    : public QWidget,
-      public IAlgorithmProgressWidget {
+class EXPORT_OPT_MANTIDQT_COMMON AlgorithmProgressWidget : public QWidget, public IAlgorithmProgressWidget {
   Q_OBJECT
 public:
   AlgorithmProgressWidget(QWidget *parent = nullptr);
@@ -48,7 +46,8 @@ public:
   /// Enable or disable the processing of updates to the algorithm progress
   void blockUpdates(bool block = true);
   /// Update the progress bar
-  void updateProgress(double progress, const QString &message) override;
+  void updateProgress(const double progress, const QString &message, const double estimatedTime,
+                      const int progressPrecision) override;
 
 public slots:
   void showDetailsDialog() override;

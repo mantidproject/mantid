@@ -34,8 +34,7 @@ public:
   std::string name() const override { return "SimplexGaussian"; }
 
 protected:
-  void functionDerivMW(Jacobian *out, const double *xValues,
-                       const size_t nData) {
+  void functionDerivMW(Jacobian *out, const double *xValues, const size_t nData) {
     UNUSED_ARG(out);
     UNUSED_ARG(xValues);
     UNUSED_ARG(nData);
@@ -49,12 +48,11 @@ class GaussianTest : public CxxTest::TestSuite {
 public:
   void test_category() {
     Gaussian fn;
-    TS_ASSERT_EQUALS(fn.category(), "Peak");
+    TS_ASSERT_EQUALS(fn.category(), "Peak; Muon\\MuonModelling");
   }
 
   void test_with_Levenberg_Marquardt() {
-    API::FunctionDomain1D_sptr domain(
-        new API::FunctionDomain1DVector(79292.4, 79603.6, 41));
+    API::FunctionDomain1D_sptr domain(new API::FunctionDomain1DVector(79292.4, 79603.6, 41));
     API::FunctionValues mockData(*domain);
     UserFunction dataMaker;
     dataMaker.setAttributeValue("Formula", "h*exp(-((x-c)/s)^2)");
@@ -74,8 +72,7 @@ public:
     fn->setParameter("Height", 200.0);
     fn->setParameter("Sigma", 30.0);
 
-    std::shared_ptr<CostFuncLeastSquares> costFun =
-        std::make_shared<CostFuncLeastSquares>();
+    std::shared_ptr<CostFuncLeastSquares> costFun = std::make_shared<CostFuncLeastSquares>();
     costFun->setFittingFunction(fn, domain, values);
 
     FuncMinimisers::LevenbergMarquardtMDMinimizer s;
@@ -94,6 +91,19 @@ public:
 
     // Area under a gaussian is height * sigma * sqrt(2 * pi)
     TS_ASSERT_DELTA(fn->intensity(), 0.26611675485780654483, 1e-10);
+  }
+
+  void testIntensityError() {
+    std::shared_ptr<Gaussian> fn = std::make_shared<Gaussian>();
+    fn->initialize();
+    fn->setHeight(2.0);
+    fn->setFwhm(0.125);
+    fn->setCentre(-200.0);
+
+    fn->setError("Height", 0.04);
+    fn->setError("Sigma", 0.002);
+
+    TS_ASSERT_DELTA(fn->intensityError(), 0.01135157327427759437, 1e-10);
   }
 
   void testSetIntensity() {
@@ -128,6 +138,21 @@ public:
 
     TS_ASSERT_THROWS_NOTHING(fn->setIntensity(20.0));
     TS_ASSERT_DELTA(fn->intensity(), 20.0, 1e-10);
+  }
+
+  void testIntensityCache() {
+    std::shared_ptr<Gaussian> fn = std::make_shared<Gaussian>();
+    fn->initialize();
+    fn->setHeight(2.0);
+    fn->setFwhm(0.125);
+    fn->setCentre(-200.0);
+
+    const auto result1 = fn->intensity();
+
+    fn->setHeight(3.0);
+
+    const auto result2 = fn->intensity();
+    TS_ASSERT(result1 != result2);
   }
 
   void testGetCentreParameterName() {

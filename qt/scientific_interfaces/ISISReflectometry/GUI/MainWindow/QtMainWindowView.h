@@ -7,8 +7,8 @@
 #pragma once
 
 #include "GUI/Common/IFileHandler.h"
-#include "GUI/Common/IMessageHandler.h"
 #include "GUI/Common/IPythonRunner.h"
+#include "GUI/Common/IReflMessageHandler.h"
 #include "IMainWindowPresenter.h"
 #include "IMainWindowView.h"
 #include "MainWindowPresenter.h"
@@ -22,20 +22,26 @@ namespace MantidQt {
 namespace CustomInterfaces {
 namespace ISISReflectometry {
 
+class QtOptionsDialogView;
+
 /** @class QtMainWindowView
 
 MainWindowView is the concrete main window view implementing the
 functionality defined by the interface IMainWindowView
 */
-class MANTIDQT_ISISREFLECTOMETRY_DLL QtMainWindowView
-    : public MantidQt::API::UserSubWindow,
-      public IMainWindowView,
-      public IMessageHandler,
-      public IFileHandler,
-      public IPythonRunner {
+class MANTIDQT_ISISREFLECTOMETRY_DLL QtMainWindowView : public MantidQt::API::UserSubWindow,
+                                                        public IMainWindowView,
+                                                        public IReflMessageHandler,
+                                                        public IFileHandler,
+                                                        public IPythonRunner {
   Q_OBJECT
 public:
   explicit QtMainWindowView(QWidget *parent = nullptr);
+  ~QtMainWindowView();
+  QtMainWindowView(QtMainWindowView const &) = delete;
+  QtMainWindowView(QtMainWindowView &&) = delete;
+  QtMainWindowView &operator=(QtMainWindowView const &) = delete;
+  QtMainWindowView &operator=(QtMainWindowView &&) = delete;
 
   void subscribe(MainWindowSubscriber *notifyee) override;
 
@@ -47,16 +53,16 @@ public:
   virtual std::vector<IBatchView *> batches() const override;
 
   void closeEvent(QCloseEvent *event) override;
+  void acceptCloseEvent() override;
+  void ignoreCloseEvent() override;
 
   IBatchView *newBatch() override;
   void removeBatch(int batchIndex) override;
 
-  void giveUserCritical(const std::string &prompt,
-                        const std::string &title) override;
-  void giveUserInfo(const std::string &prompt,
-                    const std::string &title) override;
-  bool askUserYesNo(const std::string &prompt,
-                    const std::string &title) override;
+  void giveUserCritical(const std::string &prompt, const std::string &title) override;
+  void giveUserWarning(const std::string &prompt, const std::string &title) override;
+  void giveUserInfo(const std::string &prompt, const std::string &title) override;
+  bool askUserOkCancel(const std::string &prompt, const std::string &title) override;
   std::string askUserForLoadFileName(std::string const &filter) override;
   std::string askUserForSaveFileName(std::string const &filter) override;
 
@@ -65,10 +71,8 @@ public:
 
   // TODO Remove Qt types from this interface - conversion should be done in
   // QtJSONUtils if possible
-  void saveJSONToFile(std::string const &filename,
-                      QMap<QString, QVariant> const &map) override;
-  QMap<QString, QVariant>
-  loadJSONFromFile(std::string const &filename) override;
+  void saveJSONToFile(std::string const &filename, QMap<QString, QVariant> const &map) override;
+  QMap<QString, QVariant> loadJSONFromFile(std::string const &filename) override;
 
 public slots:
   void helpPressed();
@@ -90,8 +94,10 @@ private:
   /// instantiated this is currently necessary for QtMainWindowView. Direct use
   /// of m_presenter should be avoided - use m_notifyee instead.
   std::unique_ptr<MainWindowPresenter> m_presenter;
+  std::unique_ptr<QtOptionsDialogView> m_optionsDialogView;
   std::vector<IBatchView *> m_batchViews;
   int m_batchIndex;
+  QCloseEvent *m_closeEvent;
 
   friend class Encoder;
   friend class Decoder;

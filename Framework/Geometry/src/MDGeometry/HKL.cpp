@@ -16,8 +16,7 @@ void checkUnitCompatibility(Mantid::Kernel::MDUnit const *const unit) {
 }
 } // namespace
 
-namespace Mantid {
-namespace Geometry {
+namespace Mantid::Geometry {
 
 const std::string HKL::HKLName = "HKL";
 
@@ -47,8 +46,7 @@ HKL::HKL(const HKL &other) : m_unit(other.getMDUnit().clone()) {}
 
 HKL &HKL::operator=(const HKL &other) {
   if (this == &other) {
-    this->m_unit =
-        std::unique_ptr<Mantid::Kernel::MDUnit>(other.getMDUnit().clone());
+    this->m_unit = std::unique_ptr<Mantid::Kernel::MDUnit>(other.getMDUnit().clone());
   }
   return *this;
 }
@@ -62,16 +60,13 @@ bool HKL::setMDUnit(const Mantid::Kernel::MDUnit &newUnit) {
   return true;
 }
 
-bool HKL::canConvertTo(const Kernel::MDUnit &otherUnit) const {
-  return this->m_unit->canConvertTo(otherUnit);
-}
+bool HKL::canConvertTo(const Kernel::MDUnit &otherUnit) const { return this->m_unit->canConvertTo(otherUnit); }
 
 std::string HKL::name() const { return HKLName; }
 
 HKL *HKL::clone() const { return new HKL(m_unit->clone()); }
 
-Mantid::Kernel::SpecialCoordinateSystem
-HKL::equivalientSpecialCoordinateSystem() const {
+Mantid::Kernel::SpecialCoordinateSystem HKL::equivalientSpecialCoordinateSystem() const {
   return Mantid::Kernel::SpecialCoordinateSystem::HKL;
 }
 
@@ -87,5 +82,4 @@ bool HKL::isSameType(const MDFrame &frame) const {
   }
   return isSameType;
 }
-} // namespace Geometry
-} // namespace Mantid
+} // namespace Mantid::Geometry

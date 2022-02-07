@@ -17,11 +17,9 @@
  * @param DoubleEditorType :: Double editor class to create
  */
 template <class DoubleManagerType, class DoubleEditorType>
-class DoubleEditorFactoryBase
-    : public QtAbstractEditorFactory<DoubleManagerType> {
+class DoubleEditorFactoryBase : public QtAbstractEditorFactory<DoubleManagerType> {
 public:
-  DoubleEditorFactoryBase(QObject *parent = nullptr)
-      : QtAbstractEditorFactory<DoubleManagerType>(parent) {}
+  DoubleEditorFactoryBase(QObject *parent = nullptr) : QtAbstractEditorFactory<DoubleManagerType>(parent) {}
 
 protected:
   void connectPropertyManager(DoubleManagerType *manager) override {
@@ -34,9 +32,7 @@ protected:
     // Do nothing
   }
 
-  QWidget *createEditorForManager(DoubleManagerType *manager,
-                                  QtProperty *property,
-                                  QWidget *parent) override {
+  QWidget *createEditorForManager(DoubleManagerType *manager, QtProperty *property, QWidget *parent) override {
     (void)manager; // Unused
 
     return new DoubleEditorType(property, parent);
@@ -70,8 +66,7 @@ protected:
 class EXPORT_OPT_MANTIDQT_COMMON ParameterEditor : public DoubleEditor {
   Q_OBJECT
 public:
-  ParameterEditor(QtProperty *property, QWidget *parent)
-      : DoubleEditor(property, parent) {}
+  ParameterEditor(QtProperty *property, QWidget *parent) : DoubleEditor(property, parent) {}
 protected slots:
   void updateProperty() override;
 };
@@ -84,19 +79,16 @@ class EXPORT_OPT_MANTIDQT_COMMON DoubleEditorFactory
   Q_OBJECT
 public:
   DoubleEditorFactory(QObject *parent = nullptr)
-      : DoubleEditorFactoryBase<QtDoublePropertyManager, DoubleEditor>(parent) {
-  }
+      : DoubleEditorFactoryBase<QtDoublePropertyManager, DoubleEditor>(parent) {}
 };
 
 /**
  * Concrete double editor factory for parameter properties
  */
 class EXPORT_OPT_MANTIDQT_COMMON ParameterEditorFactory
-    : public DoubleEditorFactoryBase<ParameterPropertyManager,
-                                     ParameterEditor> {
+    : public DoubleEditorFactoryBase<ParameterPropertyManager, ParameterEditor> {
   Q_OBJECT
 public:
   ParameterEditorFactory(QObject *parent = nullptr)
-      : DoubleEditorFactoryBase<ParameterPropertyManager, ParameterEditor>(
-            parent) {}
+      : DoubleEditorFactoryBase<ParameterPropertyManager, ParameterEditor>(parent) {}
 };

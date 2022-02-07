@@ -53,6 +53,8 @@ public:
   void setName(const std::string &name);
   /// Return the sample shape
   const Geometry::IObject &getShape() const;
+  /// Return a pointer to the sample shape
+  const Geometry::IObject_sptr getShapePtr() const;
   /// Update the shape of the object
   void setShape(const Geometry::IObject_sptr &shape);
 
@@ -68,7 +70,7 @@ public:
   /// Get a reference to the sample's environment
   const Geometry::SampleEnvironment &getEnvironment() const;
   /// Set the environment used to contain the sample
-  void setEnvironment(std::unique_ptr<Geometry::SampleEnvironment> env);
+  void setEnvironment(std::shared_ptr<Geometry::SampleEnvironment> env);
   //@}
 
   /** @name Access the sample's lattice structure and orientation */
@@ -86,8 +88,7 @@ public:
   /** @name Access the sample's crystal structure */
   //@{
   const Geometry::CrystalStructure &getCrystalStructure() const;
-  void
-  setCrystalStructure(const Geometry::CrystalStructure &newCrystalStructure);
+  void setCrystalStructure(const Geometry::CrystalStructure &newCrystalStructure);
   bool hasCrystalStructure() const;
   void clearCrystalStructure();
   //@}

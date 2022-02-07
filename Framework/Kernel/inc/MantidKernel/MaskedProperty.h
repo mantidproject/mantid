@@ -24,17 +24,18 @@
 
 namespace Mantid {
 namespace Kernel {
-template <typename TYPE = std::string>
-class MaskedProperty : public Kernel::PropertyWithValue<TYPE> {
+template <typename TYPE = std::string> class MaskedProperty : public Kernel::PropertyWithValue<TYPE> {
 public:
   /// Constructor with a validator
-  MaskedProperty(
-      const std::string &name, TYPE defaultvalue,
-      const IValidator_sptr &validator = IValidator_sptr(new NullValidator),
-      const unsigned int direction = Direction::Input);
+  MaskedProperty(std::string name, TYPE defaultvalue, IValidator_sptr validator = IValidator_sptr(new NullValidator),
+                 const unsigned int direction = Direction::Input);
   /// Constructor with a validator without validation
-  MaskedProperty(const std::string &name, const TYPE &defaultvalue,
-                 const unsigned int direction);
+  MaskedProperty(std::string name, TYPE defaultvalue, const unsigned int direction);
+
+  MaskedProperty(const MaskedProperty &) = default;
+  // Unhide the PropertyWithValue assignment operator
+  using Kernel::PropertyWithValue<TYPE>::operator=;
+
   /// "virtual" copy constructor
   MaskedProperty *clone() const override;
 
@@ -44,9 +45,6 @@ public:
   /** This method returns the masked property value
    */
   TYPE getMaskedValue() const;
-
-  // Unhide the PropertyWithValue assignment operator
-  using Kernel::PropertyWithValue<TYPE>::operator=;
 
 private:
   /// Perform the actual masking

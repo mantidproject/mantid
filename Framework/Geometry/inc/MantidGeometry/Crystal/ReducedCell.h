@@ -32,8 +32,8 @@ namespace Geometry {
 class MANTID_GEOMETRY_DLL ReducedCell {
 public:
   // Construct a ReducedCell for the specified form and lattice parameters
-  ReducedCell(size_t form_num = 0, double a = 1, double b = 1, double c = 1,
-              double alpha = 90, double beta = 90, double gamma = 90);
+  ReducedCell(size_t form_num = 0, double a = 1, double b = 1, double c = 1, double alpha = 90, double beta = 90,
+              double gamma = 90);
 
   size_t GetFormNum() const;
   std::string GetCellType() const;
@@ -65,8 +65,7 @@ public:
   static const std::string R_CENTERED() { return "R"; }
 
 private:
-  void init(size_t f_num, double a_a, double b_b, double c_c, double b_c,
-            double a_c, double a_b);
+  void init(size_t f_num, double a_a, double b_b, double c_c, double b_c, double a_c, double a_b);
   void foot_note_b(double a_a, double a_c);
   void foot_note_c(double b_b, double b_c);
   void foot_note_d(double c_c, double b_c);

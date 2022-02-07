@@ -96,7 +96,7 @@ class SampleTest(unittest.TestCase):
         self.assertEqual(type(xml), str)
 
     def do_test_copyable(self, copy_op):
-        original = Sample() 
+        original = Sample()
         width = 1.0
         height = 2.0
         thickness = 3.0

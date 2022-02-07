@@ -235,30 +235,30 @@ _cell_volume                           35.06113
 _symmetry_cell_setting                 hexagonal
 _symmetry_space_group_name_H-M         P63/mmc
 loop_ _symmetry_equiv_pos_site_id _symmetry_equiv_pos_as_xyz
-       1 +x,+y,+z 
-       2 x-y,+x,+z+1/2 
-       3 -y,x-y,+z 
-       4 -x,-y,+z+1/2 
-       5 y-x,-x,+z 
-       6 +y,y-x,+z+1/2 
-       7 y-x,+y,+z 
-       8 -x,y-x,+z+1/2 
-       9 -y,-x,+z 
-      10 x-y,-y,+z+1/2 
-      11 +x,x-y,+z 
-      12 +y,+x,+z+1/2 
-      -1 -x,-y,-z 
-      -2 y-x,-x,-z+1/2 
-      -3 +y,y-x,-z 
-      -4 +x,+y,-z+1/2 
-      -5 x-y,+x,-z 
-      -6 -y,x-y,-z+1/2 
-      -7 x-y,-y,-z 
-      -8 +x,x-y,-z+1/2 
-      -9 +y,+x,-z 
-     -10 y-x,+y,-z+1/2 
-     -11 -x,y-x,-z 
-     -12 -y,-x,-z+1/2 
+       1 +x,+y,+z
+       2 x-y,+x,+z+1/2
+       3 -y,x-y,+z
+       4 -x,-y,+z+1/2
+       5 y-x,-x,+z
+       6 +y,y-x,+z+1/2
+       7 y-x,+y,+z
+       8 -x,y-x,+z+1/2
+       9 -y,-x,+z
+      10 x-y,-y,+z+1/2
+      11 +x,x-y,+z
+      12 +y,+x,+z+1/2
+      -1 -x,-y,-z
+      -2 y-x,-x,-z+1/2
+      -3 +y,y-x,-z
+      -4 +x,+y,-z+1/2
+      -5 x-y,+x,-z
+      -6 -y,x-y,-z+1/2
+      -7 x-y,-y,-z
+      -8 +x,x-y,-z+1/2
+      -9 +y,+x,-z
+     -10 y-x,+y,-z+1/2
+     -11 -x,y-x,-z
+     -12 -y,-x,-z+1/2
 
 # ATOMIC COORDINATES AND DISPLACEMENT PARAMETERS
 
@@ -278,8 +278,8 @@ TI1     0.33333      0.66667      0.25         1.0        Uiso   0.025         2
 
 loop_ _atom_type_symbol
       _atom_type_number_in_cell
-                   Ti  2.0        
- 
+                   Ti  2.0
+
 # If you change Z, be sure to change all 3 of the following
 _chemical_formula_sum                  Ti
 _chemical_formula_weight               47.90

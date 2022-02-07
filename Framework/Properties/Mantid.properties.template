@@ -10,7 +10,7 @@
 #          we will never alter your user.properties file so settings there are safe.
 
 # Set a default facility
-default.facility = ISIS
+default.facility =
 
 # Set a default instrument
 default.instrument =
@@ -21,10 +21,9 @@ Q.convention = Inelastic
 
 # Set of PyQt interfaces to add to the Interfaces menu, separated by a space.  Interfaces are seperated from their respective categories by a "/".
 
-mantidqt.python_interfaces = Direct/DGS_Reduction.py Direct/DGSPlanner.py Direct/PyChop.py Direct/MSlice.py SANS/ORNL_SANS.py Utility/TofConverter.py Diffraction/Engineering_Diffraction.py Diffraction/Powder_Diffraction_Reduction.py Utility/FilterEvents.py Diffraction/HFIR_4Circle_Reduction.py Utility/QECoverage.py SANS/ISIS_SANS.py Muon/Frequency_Domain_Analysis.py Muon/Elemental_Analysis.py Muon/Frequency_Domain_Analysis_Old.py Muon/Muon_Analysis.py
+mantidqt.python_interfaces = ILL/Drill.py Direct/DGS_Reduction.py Direct/DGSPlanner.py Direct/PyChop.py Direct/MSlice.py SANS/ORNL_SANS.py Utility/TofConverter.py Diffraction/Engineering_Diffraction.py Diffraction/Powder_Diffraction_Reduction.py Utility/FilterEvents.py Diffraction/HFIR_4Circle_Reduction.py Utility/QECoverage.py SANS/ISIS_SANS.py Muon/Frequency_Domain_Analysis.py Muon/Elemental_Analysis.py Muon/Muon_Analysis.py General/Sample_Transmission_Calculator.py
 
-# Directory containing the above startup scripts
-mantidqt.python_interfaces_directory = @MANTID_ROOT@/scripts
+mantidqt.python_interfaces_io_registry = Engineering_Diffraction_register.py
 
 # Where to find mantid framework plugins
 framework.plugins.directory = @FRAMEWORK_PLUGINS_DIR@
@@ -32,14 +31,14 @@ framework.plugins.directory = @FRAMEWORK_PLUGINS_DIR@
 # Libraries to skip. The strings are searched for when loading libraries so they don't need to be exact
 framework.plugins.exclude = Qt4;Qt5
 
-# Where to find mantid paraview plugin libraries
-pvplugins.directory = @PV_PLUGINS_DIR@
-
 # Where to find Mantid Qt plugin libraries
 mantidqt.plugins.directory = @QT_PLUGINS_DIR@
 
-# Where to find python plugins
-python.plugins.directories = @PYTHONPLUGIN_DIRS@
+# Where to find the python plugin manifest file
+python.plugins.manifest = @PYTHONPLUGIN_MANIFEST@
+
+# Where to find the template files used to generate python scripts for some algorithms
+python.templates.directory = @MANTID_ROOT@/scripts/templates
 
 # Where to load instrument definition files from
 instrumentDefinition.directory = @MANTID_ROOT@/instrument
@@ -80,24 +79,8 @@ pythonalgorithms.refresh.allowed = 0
 # Use forward slash / for all paths
 datasearch.directories = @DATADIRS@
 
-# Path to the ParaView bin directory, i.e. the directory containing the paraview executable
-# Warning: Mantid is compiled against a specific version of ParaView. Ensure that this path
-# points to the ParaView obtained from the Mantid download page
-paraview.path = @PARAVIEW_APP_BIN_DIR@
-
-# A semi-colon(;) separated list of directories to use to search for data
-# Use forward slash / for all paths
-paraview.pythonpaths = @PARAVIEW_PYTHON_PATHS@
-
-# Whether to look for ParaView (0 = try to use, 1 = don't use).
-paraview.ignore = @IGNORE_PARAVIEW@
-
 # Root of html documentation (kept as unix-style path)
 docs.html.root = @HTML_ROOT@
-
-# A semi-colon(;) separated list of directories to use to search for files other than data
-# Use forward slash / for all paths
-usersearch.directories =
 
 # Setting this to On enables searching the facilitie's archive automatically
 datasearch.searcharchive = Off
@@ -198,7 +181,19 @@ loading.multifile=On
 loading.multifilelimit =
 
 # Hide algorithms that use a Property Manager by default.
-algorithms.categories.hidden=Workflow\\Inelastic\\UsesPropertyManager;Workflow\\SANS\\UsesPropertyManager;DataHandling\\LiveData\\Support;Deprecated;Utility\\Development;Remote
+algorithms.categories.hidden=Workflow\\Inelastic\\UsesPropertyManager;Workflow\\SANS\\UsesPropertyManager;DataHandling\\LiveData\\Support;Deprecated;Utility\\Development
+
+# Response upon invoking a deprecated algorithm.
+# Allowed values are:
+#   "Log": log a warning indicating the algorithm is deprecated, along with the name of the replacement algorithm
+#   "Raise": raise a RuntimeError when a deprecated algorithm is invoked
+algorithms.deprecated = @ALGORITHMDEPRECATED@
+
+# Response upon invoking an algorithm with its alias, when the alias is deprecated.
+# Allowed values are:
+#   "Log": log a warning indicating the alias is deprecated, along with the name to be used
+#   "Raise": raise a RuntimeError if the deprecated deadline has been met
+algorithms.alias.deprecated = @ALIASDEPRECATED@
 
 # All interface categories are shown by default.
 interfaces.categories.hidden =
@@ -236,12 +231,51 @@ projectSaving.warningSize = 10737418240
 # Whether to show titles on plots
 plots.ShowTitle = On
 
+# Whether to show the legend by default
+plots.ShowLegend = On
+
+# The default font for matplotlib plots
+plots.font=
+
 # The default scale on 1d plots. Options are Linear or Log
 plots.xAxesScale = Linear
 plots.yAxesScale = Linear
 
+# The default width of the lines for the axes
+plots.axesLineWidth = 1
+
+# Whether to enable the grid by default
+plots.enableGrid = Off
+
+# Whether to show minor ticks on plots
+plots.ShowMinorTicks = Off
+
+# Whether to show minor gridlines on plots
+plots.ShowMinorGridlines = Off
+
+# Whether to show ticks and tick labels on each side of the plot
+plots.showTicksLeft = On
+plots.showTicksBottom = On
+plots.showTicksRight = Off
+plots.showTicksTop = Off
+plots.showLabelsLeft = On
+plots.showLabelsBottom = On
+plots.showLabelsRight = Off
+plots.showLabelsTop = Off
+
+# The length, width, and direction of major and minor ticks
+plots.ticks.major.length = 6
+plots.ticks.major.width = 1
+plots.ticks.major.direction = Out
+plots.ticks.minor.length = 3
+plots.ticks.minor.width = 1
+plots.ticks.minor.direction = Out
+
 # Default Line style on 1d plots. Options are solid, dashed, dotted, dashdot
 plots.line.Style = solid
+
+# Default Draw style on 1d plots. Options are default, steps, steps-pre, steps-mid, steps-post
+plots.line.DrawStyle = default
 
 # Default Line width on 1d plots
 plots.line.Width = 1.5
@@ -263,3 +297,15 @@ plots.errorbar.errorEvery = 1
 
 # Default width of error bars in 1d plots
 plots.errorbar.Width = 1.0
+
+# Default legend location
+plots.legend.Location = best
+
+# Default legend size
+plots.legend.FontSize = 8
+
+# Default colormap for image plots
+plots.images.Colormap = viridis
+
+# Default colorbar scale for image plots
+plots.images.ColorBarScale = Linear

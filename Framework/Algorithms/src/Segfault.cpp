@@ -6,8 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAlgorithms/Segfault.h"
 
-namespace Mantid {
-namespace Algorithms {
+namespace Mantid::Algorithms {
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(Segfault)
@@ -24,17 +23,12 @@ int Segfault::version() const { return 1; }
 const std::string Segfault::category() const { return "Utility\\Development"; }
 
 /// Algorithm's summary for use in the GUI and help. @see Algorithm::summary
-const std::string Segfault::summary() const {
-  return "WARNING: THIS CRASHES MANTID";
-}
+const std::string Segfault::summary() const { return "WARNING: THIS CRASHES MANTID"; }
 
 //----------------------------------------------------------------------------------------------
 /** Initialize the algorithm's properties.
  */
-void Segfault::init() {
-  declareProperty("DryRun", true,
-                  "Just log to the error channel but don't crash mantid");
-}
+void Segfault::init() { declareProperty("DryRun", true, "Just log to the error channel but don't crash mantid"); }
 
 //----------------------------------------------------------------------------------------------
 /** Execute the algorithm.
@@ -51,5 +45,4 @@ void Segfault::exec() {
   }
 }
 
-} // namespace Algorithms
-} // namespace Mantid
+} // namespace Mantid::Algorithms

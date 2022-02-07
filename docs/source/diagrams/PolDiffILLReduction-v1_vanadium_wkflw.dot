@@ -1,0 +1,76 @@
+digraph Vanadium {
+  $global_style
+
+  subgraph decisions {
+    $decision_style
+    AverageCounts
+    SelfAttenuationMethod
+    TimeOfFlight1 [label="Time-of-flight"]
+    TimeOfFlight2 [label="Time-of-flight"]
+  }
+
+  subgraph params {
+    $param_style
+    Run
+    D7YIGPositionCalibration
+    CadmiumWorkspace
+    EmptyContainerWorkspace
+    QuartzWorkspace
+    Transmission
+    SampleSelfAttenuationFactors
+    SampleAndEnvironmentProperties
+  }
+
+  subgraph values {
+    $value_style
+    OutputWorkspace
+  }
+
+  subgraph algorithms {
+    $algorithm_style
+    LoadAndMerge
+    Divide [label="Normalize to monitor"]
+    Multiply [label="Correct polarising efficiency"]
+    Minus [label="Subtract background"]
+    Divide2 [label="Divide by transmission"]
+    Plus [label="Average polarization/2theta"]
+    PaalmanPingsMonteCarloAbsorption
+    PaalmanPingsAbsorptionCorrection
+    ApplyPaalmanPingsCorrection
+    Divide3 [label="Normalize"]
+  }
+
+  Run -> LoadAndMerge
+  D7YIGPositionCalibration -> LoadAndMerge
+  LoadAndMerge -> Divide
+  Divide -> Minus
+  CadmiumWorkspace -> Minus
+  EmptyContainerWorkspace -> Minus
+  Transmission -> Minus
+  Minus -> TimeOfFlight1
+  TimeOfFlight1 -> FrameOverlapCorrection
+  FrameOverlapCorrection -> Multiply
+  TimeOfFlight1 -> Multiply
+  QuartzWorkspace -> Multiply
+  Multiply -> SelfAttenuationMethod
+  SelfAttenuationMethod -> PaalmanPingsMonteCarloAbsorption
+  SelfAttenuationMethod -> Divide2
+  SampleAndEnvironmentProperties -> PaalmanPingsMonteCarloAbsorption
+  PaalmanPingsMonteCarloAbsorption -> ApplyPaalmanPingsCorrection
+  SelfAttenuationMethod -> PaalmanPingsAbsorptionCorrection
+  SampleAndEnvironmentProperties -> PaalmanPingsAbsorptionCorrection
+  PaalmanPingsAbsorptionCorrection -> ApplyPaalmanPingsCorrection
+  SelfAttenuationMethod -> SampleSelfAttenuationFactors
+  SampleSelfAttenuationFactors -> ApplyPaalmanPingsCorrection
+  SelfAttenuationMethod -> TimeOfFlight2
+  ApplyPaalmanPingsCorrection -> TimeOfFlight2
+  Divide2 -> TimeOfFlight2
+  TimeOfFlight2 -> AverageCounts
+  TimeOfFlight2 -> EnergyEfficiencyCorrection
+  EnergyEfficiencyCorrection -> ElasticPeakCalibration
+  ElasticPeakCalibration -> AverageCounts
+  AverageCounts -> Divide3
+  AverageCounts -> Plus
+  Plus -> Divide3
+  Divide3 -> OutputWorkspace
+}

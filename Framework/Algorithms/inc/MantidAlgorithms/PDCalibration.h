@@ -26,9 +26,7 @@ public:
 
   const std::string name() const override;
   int version() const override;
-  const std::vector<std::string> seeAlso() const override {
-    return {"CalibrateRectangularDetectors"};
-  }
+  const std::vector<std::string> seeAlso() const override { return {}; }
   const std::string category() const override;
   const std::string summary() const override;
 
@@ -44,27 +42,20 @@ private:
   void createCalTableFromExisting();
   void createCalTableNew();
   void createInformationWorkspaces();
-  std::function<double(double)> getDSpacingToTof(const detid_t detid);
-  std::vector<double> dSpacingWindows(const std::vector<double> &centres,
-                                      const double widthMax);
-  std::vector<double> getTOFminmax(const double difc, const double difa,
-                                   const double tzero);
-  void setCalibrationValues(const detid_t detid, const double difc,
-                            const double difa, const double tzero);
-  void fitDIFCtZeroDIFA_LM(const std::vector<double> &d,
-                           const std::vector<double> &tof,
-                           const std::vector<double> &height2, double &difc,
-                           double &t0, double &difa);
+  std::tuple<double, double, double> getDSpacingToTof(const std::set<detid_t> &detIds);
+  std::vector<double> dSpacingWindows(const std::vector<double> &centres, const std::vector<double> &widthMax);
+  std::vector<double> getTOFminmax(const double difc, const double difa, const double tzero);
+  void setCalibrationValues(const detid_t detid, const double difc, const double difa, const double tzero);
+  void fitDIFCtZeroDIFA_LM(const std::vector<double> &d, const std::vector<double> &tof,
+                           const std::vector<double> &height2, double &difc, double &t0, double &difa);
   API::MatrixWorkspace_sptr calculateResolutionTable();
 
   /// NEW: convert peak positions in dSpacing to peak centers workspace
   std::pair<API::MatrixWorkspace_sptr, API::MatrixWorkspace_sptr>
-  createTOFPeakCenterFitWindowWorkspaces(
-      const API::MatrixWorkspace_sptr &dataws,
-      const double peakWindowMaxInDSpacing);
+  createTOFPeakCenterFitWindowWorkspaces(const API::MatrixWorkspace_sptr &dataws,
+                                         const std::vector<double> &peakWindowMaxInDSpacing);
 
-  API::ITableWorkspace_sptr
-  sortTableWorkspace(API::ITableWorkspace_sptr &table);
+  API::ITableWorkspace_sptr sortTableWorkspace(API::ITableWorkspace_sptr &table);
 
   API::MatrixWorkspace_sptr m_uncalibratedWS{nullptr};
   API::ITableWorkspace_sptr m_calibrationTable{nullptr};
@@ -73,8 +64,8 @@ private:
   API::ITableWorkspace_sptr m_peakHeightTable{nullptr};
   std::vector<double> m_peaksInDspacing;
   std::map<detid_t, size_t> m_detidToRow;
-  double m_tofMin{0.};
-  double m_tofMax{0.};
+  double m_tofMin{0.}; // first bin boundary when rebinning in TOF (user input)
+  double m_tofMax{0.}; // last bin boundary when rebinning in TOF (user input)
   double m_tzeroMin{0.};
   double m_tzeroMax{0.};
   double m_difaMin{0.};

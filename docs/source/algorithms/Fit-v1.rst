@@ -44,6 +44,11 @@ additional properties:
 | ErrColumn        | Input       | string    |                         | The name of the error column.                           |
 +------------------+-------------+-----------+-------------------------+---------------------------------------------------------+
 
+Changelog
+#########
+- In mantid v6.0 the errors/confidence-bounds on the fitted curve were determined using the covariance matrix scaled by the reduced chi-squared (i.e. chi-squared divided by the number of degrees of freedom). Previously it had been scaled by chi-squared.
+- In mantid v6.3 the errors/confidence-bounds on the fitted curve were determined using the covariance matrix without scaling (this makes them consistent with the errors on the best fit parameters).
+
 Overview
 ########
 
@@ -79,10 +84,23 @@ Using the Minimizer property, Fit can be set to use different algorithms
 to perform the minimization. By default if the function's derivatives
 can be evaluated then Fit uses the GSL Levenberg-Marquardt minimizer.
 
-In Mantidplot this algorithm can be run from the `Fit Property
-Browser <http://www.mantidproject.org/MantidPlot:_Data_Analysis_and_Curve_Fitting>`__
+In :ref:`MantidWorkbench <workbench>` this algorithm can be run from the
+:ref:`Fit Property Browser <WorkbenchPlotWindow_Fitting>`
 which allows all the settings to be specified via its graphical user
 interface.
+
+The confidence bands (CB) on the calculated fit curve (:math:`\mathbf{\hat{y}}`) are obtained using the method outlined in `kmpfit`.
+For a function, :math:`f(\mathbf{p})`, with fit parameters :math:`\mathbf{p}`, the confidence interval is given by,
+
+.. math:: CB=\mathbf{f}(\mathbf{p}) \pm \mathbf{\sigma_f}
+
+with :math:`\mathbf{\sigma_f}` defined as,
+
+.. math:: \mathbf{\sigma_f}^2=  \sum_{j=0}^{j=n}\sum_{k=0}^{k=n}\frac{\partial f}{\partial p_j}\frac{\partial f}{\partial p_k}\, \mathbf{C}_{jk}
+
+where :math:`\mathbf{C}_{jk}` are elements of the covariance matrix (not scaled by the reduced chi-squared).
+This interval defines the region where there is a 68.3% chance to find the true value of :math:`f(\mathbf{p})`.
+For further details see reference [1].
 
 Setting a simple function
 #########################
@@ -211,7 +229,7 @@ The "Histogram" evaluation type will typically give more accurate results when f
 histograms with very large bins. It also less sensitive to a particular binning.
 
 For the next example a spectrum was generated and rebinned to different bin sizes.
-Each binned spectrum was fitted using both "CentrePoint" (left column) and "Histogram" 
+Each binned spectrum was fitted using both "CentrePoint" (left column) and "Histogram"
 evaluation (right column). As it can be seen form the plots the "Histogram" fitting
 gives more consistent results which are also closer to the correct values (Amplitude=20.0,
 PeakCentre=0.0, FWHM=1.0).
@@ -311,14 +329,14 @@ Multiple Fit
 It is possible to fit to multiple data sets using the fit algorithm. This
 can be either simultaneously or sequentially. There are a few differences
 to a single fit. Firstly is that the :ref:`CompositeFunction <func-CompositeFunction>`
-must be a :code:`MultiDomainFunction` and each of the individual fitting functions must include 
+must be a :code:`MultiDomainFunction` and each of the individual fitting functions must include
 :code:`$domain=i`. The extra workspaces can be added by placing an :code:`_i` after :code:`InputWorkspace` and
-:code:`InputWorkspaceIndex` starting with :math:`i=1` for the second workspace. It is also possible to 
-set the fitting range for each data set individually in the same way as the :code:`InputWorkspace`. 
-If a variable is to be fitted using data from multiple data sets then a :code:`tie` has 
+:code:`InputWorkspaceIndex` starting with :math:`i=1` for the second workspace. It is also possible to
+set the fitting range for each data set individually in the same way as the :code:`InputWorkspace`.
+If a variable is to be fitted using data from multiple data sets then a :code:`tie` has
 to be used. The values that are tied will have the same value and be calculated from multiple
-data sets. 
- 
+data sets.
+
 Examples
 --------
 
@@ -528,7 +546,7 @@ Output:
 
     Constant 1: 2.00
     Constant 2: 5.00
-   
+
 **Example - Fit to two data sets with shared parameter:**
 
 .. testcode:: shareFit
@@ -558,7 +576,7 @@ Output:
     # print results
     print("Constant 1: {0:.2f}".format(paramTable.column(1)[0]))
     print("Constant 2: {0:.2f}".format(paramTable.column(1)[1]))
-   
+
 Output:
 
 .. testoutput:: shareFit
@@ -610,6 +628,185 @@ Output:
     offsets:
     Constant 1: 2.86
     Constant 2: 14.14
+
+**Example - Fit to two data sets with one shared parameter, and different fit functions:**
+
+.. testcode:: shareFit3
+
+    from mantid.simpleapi import *
+    import numpy as np
+
+    # Create workspaces
+    x_values = np.linspace(start=1.0,stop=10.0,num=22)
+    y_values1 = [2.0*x + 10.0 for x in x_values]
+    y_values2 = [5.0/x + 10.0 for x in x_values]
+
+    input_workspace1 = CreateWorkspace(x_values, y_values1)
+    input_workspace2 = CreateWorkspace(x_values, y_values2)
+
+    # Create MultiDomainFunction where datasets have different fitting functions
+    multi_domain_function = FunctionFactory.createInitializedMultiDomainFunction('name=CompositeFunction', 2)
+
+    flat_background = FunctionFactory.createInitialized("name=FlatBackground")
+    linear_background = FunctionFactory.createInitialized("name=LinearBackground")
+    exp_decay = FunctionFactory.createInitialized("name=ExpDecay")
+
+    composite1 = multi_domain_function.getFunction(0)
+    composite1.add(flat_background)
+    composite1.add(linear_background)
+
+    composite2 = multi_domain_function.getFunction(1)
+    composite2.add(flat_background)
+    composite2.add(exp_decay)
+
+    # Tie the FlatBackground which is common for both datasets
+    function_string = str(multi_domain_function)
+    function_string += ";ties=(f1.f0.A0=f0.f0.A0)"
+
+    # Perform the fit
+    fit_output = Fit(Function=function_string,
+                     InputWorkspace=input_workspace1, WorkspaceIndex=0, StartX = 1.0, EndX=10.0,
+                     InputWorkspace_1=input_workspace2, WorkspaceIndex_1=0, StartX_1 = 1.0, EndX_1=10.0,
+                     Output='fit')
+
+    # Print Results
+    param_values = fit_output.OutputParameters.column(1)
+    print("Tied parameters (shared):")
+    print("Workspace1 FlatBackground.A0: {0:.2f}".format(param_values[0]))
+    print("Workspace2 FlatBackground.A0: {0:.2f}".format(param_values[3]))
+    print("Other Parameters:")
+    print("Workspace1 LinearBackground.A0: {0:.2f}".format(param_values[1]))
+    print("Workspace1 LinearBackground.A1: {0:.2f}".format(param_values[2]))
+    print("Workspace2 ExpDecay.Height: {0:.2f}".format(param_values[4]))
+    print("Workspace2 ExpDecay.Lifetime: {0:.2f}".format(param_values[5]))
+
+Output:
+
+.. testoutput:: shareFit3
+
+    Tied parameters (shared):
+    Workspace1 FlatBackground.A0: 10.64
+    Workspace2 FlatBackground.A0: 10.64
+    Other Parameters:
+    Workspace1 LinearBackground.A0: -0.64
+    Workspace1 LinearBackground.A1: 2.00
+    Workspace2 ExpDecay.Height: 8.44
+    Workspace2 ExpDecay.Lifetime: 1.40
+
+Comparison with scipy.optimize.curve_fit
+----------------------------------------
+
+The `scipy.optimize.curve_fit` function is a commonly used optimiser for fitting models to data.
+By default `curve_fit` scales the covariance matrix from the fit by the reduced chi-squared statistic -
+this is equivalent to scaling the errorbars on the data points such that the reduced chi-squared is unity
+(the expectation value for a "good" fit). This can be desirable if a fit is performed with unit weights
+or the weights are only to be interpreted as relative.
+
+In mantid the weights are typically calculated from the error on a number of counts using Poisson statistics and
+should be interpreted as absolute. Therefore, the mantid `Fit` algorithm does not scale the covariance matrix by the
+reduced chi-squared (since v6.3). The scaling of the covariance matrix in `curve_fit` is governed by the
+`absolute_sigma` parameter (by default `absolute_sigma = False`). Here we show that the mantid `Fit` algorithm and
+`curve_fit` give the same result when `absolute_sigma=True`.
+
+.. code-block:: python
+
+    from mantid.simpleapi import *
+    import matplotlib.pyplot as plt
+    import numpy as np
+    from scipy import optimize
+    from scipy.stats import t
+
+    def func(x, c ,m):
+        return m*x + c
+
+    def confidence_band(x, yfit, covar, dfdp, confprob=0.6826):
+       alpha = 1 - confprob
+       prb = 1.0 - alpha/2
+       nparams = pcov_true.shape[0]
+       dof = len(x)-nparams
+       tval = t.ppf(prb, dof)
+       df_sq = np.zeros(x.shape)
+       for j in range(nparams):
+          for k in range(nparams):
+             df_sq  += dfdp[j]*dfdp[k]*covar[j,k]
+       df = np.sqrt(df_sq)
+       delta = tval * df
+       upperband = yfit + delta
+       lowerband = yfit - delta
+       return upperband, lowerband
+
+    # Generate data
+    noise_stdev = 0.1
+    err_scale = 0.5  # 1 => chi-squared ~ 1 (i.e. errorbars will correspond to stdev of simulated noise)
+    m0 = 1
+    c0 = 0.5
+    x = np.linspace(0,1,20)
+    np.random.seed(1)
+    y = np.random.normal(func(x, c0, m0), noise_stdev)
+    e = err_scale*noise_stdev*np.ones(x.shape)
+    ws = CreateWorkspace(DataX=x,DataY=y, DataE=e, EnableLogging=False)
+
+    # initial guess
+    p0 = [1,2]  # c, m
+
+    # scipy
+    popt, pcov_false = optimize.curve_fit(func, x, y, p0, sigma=e,
+        absolute_sigma=False)
+    perr_false = np.sqrt(np.diag(pcov_false))
+    _, pcov_true = optimize.curve_fit(func, x, y, p0, sigma=e,
+        absolute_sigma=True)  # popt does not depend on absolute_sigma
+    perr_true = np.sqrt(np.diag(pcov_true))
+    chisq = np.sum(((y - func(x, *popt))/e)**2)
+    red_chisq = chisq/(len(x) - len(popt))
+    # calc confidence limits
+    dfdp = [1, x]  # dy/dparam = [dy/dc, dy/dm]
+    upper_true, lower_true = confidence_band(x, func(x, *popt), pcov_true, dfdp)
+    upper_false, lower_false = confidence_band(x, func(x, *popt), pcov_false, dfdp)
+
+    # mantid
+    fit = Fit(Function='name=LinearBackground,A0={0},A1={1}'.format(*p0),
+        InputWorkspace='ws', IgnoreInvalidData=True, Output='ws', OutputCompositeMembers=True)
+
+    popt_mtd = [fit.Function.function.getParameterValue(iparam) for
+        iparam in range(fit.Function.function.nParams())]
+    perr_mtd = [fit.Function.function.getError(iparam) for
+        iparam in range(fit.Function.function.nParams())]
+    red_chisq_mtd = fit.OutputChi2overDoF
+
+    # compare mantid and scipy
+
+    print('### scipy curve_fit ###')
+    print("red chisq = ", red_chisq)
+    print("popt = ", popt)
+    print('abs_sigma=False:\t perr = ', perr_false)
+    print('abs_sigma=True:\t perr = ', perr_true)
+    print('### mantid ###')
+    print("red chisq = ", red_chisq_mtd)
+    print("popt = ", popt_mtd)
+    print('perr =', perr_mtd)
+
+    fig, ax = plt.subplots(subplot_kw={'projection': 'mantid'})
+    ax.errorbar(x, y, yerr=e, color = 'k',
+        marker='o', markersize=3, capsize=2, ls='', label = 'data')
+    ax.plot(ax.get_xlim(), func(np.array(ax.get_xlim()), c0, m0), '-k', label = 'model')
+    ax.plot(x, func(x, *popt), '-b', label = 'scipy curve_fit')
+    ax.plot(x, upper_true, ':b', label = '68.3% bound (scipy cov abs_sig=True)')
+    ax.plot(x, lower_true, ':b')
+    ax.plot(x, upper_false, ':c', label = '68.3% bound (scipy cov abs_sig=False)')
+    ax.plot(x, lower_false, ':c')
+    ax.errorbar(fit.OutputWorkspace, wkspIndex=1,
+        color = 'r', ls ='--', capsize=2, label='mtd fit')
+    ax.set_xlabel('x')
+    ax.set_ylabel('y')
+    ax.legend(fontsize=8.0).set_draggable(True).legend
+    fig.show()
+
+.. figure:: /images/ScipyCurveFit_Mantid_comparison_LinearFit.png
+
+References
+----------
+
+[1] Vogelaar, M.G.R., kmpfit. University of Groningen, The Netherlands (https://www.astro.rug.nl/software/kapteyn/kmpfittutorial.html)
 
 .. categories::
 

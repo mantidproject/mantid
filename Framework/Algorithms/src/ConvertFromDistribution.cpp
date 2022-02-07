@@ -13,8 +13,7 @@
 #include "MantidAPI/WorkspaceOpOverloads.h"
 #include "MantidKernel/CompositeValidator.h"
 
-namespace Mantid {
-namespace Algorithms {
+namespace Mantid::Algorithms {
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(ConvertFromDistribution)
@@ -25,8 +24,7 @@ void ConvertFromDistribution::init() {
   auto wsValidator = std::make_shared<Kernel::CompositeValidator>();
   wsValidator->add<HistogramValidator>();
   wsValidator->add<RawCountValidator>(false);
-  declareProperty(std::make_unique<WorkspaceProperty<>>(
-                      "Workspace", "", Kernel::Direction::InOut, wsValidator),
+  declareProperty(std::make_unique<WorkspaceProperty<>>("Workspace", "", Kernel::Direction::InOut, wsValidator),
                   "The name of the workspace to convert.");
 }
 
@@ -36,5 +34,4 @@ void ConvertFromDistribution::exec() {
   WorkspaceHelpers::makeDistribution(workspace, false);
 }
 
-} // namespace Algorithms
-} // namespace Mantid
+} // namespace Mantid::Algorithms

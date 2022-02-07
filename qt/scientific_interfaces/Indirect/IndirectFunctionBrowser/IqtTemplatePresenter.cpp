@@ -10,9 +10,7 @@
 
 #include <cmath>
 
-namespace MantidQt {
-namespace CustomInterfaces {
-namespace IDA {
+namespace MantidQt::CustomInterfaces::IDA {
 
 using namespace MantidWidgets;
 
@@ -20,8 +18,7 @@ using namespace MantidWidgets;
  * Constructor
  * @param parent :: The parent widget.
  */
-IqtTemplatePresenter::IqtTemplatePresenter(IqtTemplateBrowser *view)
-    : QObject(view), m_view(view) {
+IqtTemplatePresenter::IqtTemplatePresenter(IqtTemplateBrowser *view) : QObject(view), m_view(view) {
   connect(m_view, SIGNAL(localParameterButtonClicked(const QString &)), this,
           SLOT(editLocalParameter(const QString &)));
   connect(m_view, SIGNAL(parameterValueChanged(const QString &, double)), this,
@@ -30,8 +27,7 @@ IqtTemplatePresenter::IqtTemplatePresenter(IqtTemplateBrowser *view)
 
 void IqtTemplatePresenter::setNumberOfExponentials(int n) {
   if (n < 0) {
-    throw std::logic_error(
-        "The number of exponents cannot be a negative number.");
+    throw std::logic_error("The number of exponents cannot be a negative number.");
   }
   if (n > 2) {
     throw std::logic_error("The number of exponents is limited to 2.");
@@ -93,21 +89,16 @@ void IqtTemplatePresenter::setBackground(const QString &name) {
     m_view->addFlatBackground();
     m_model.setBackground(name);
   } else {
-    throw std::logic_error("Browser doesn't support background " +
-                           name.toStdString());
+    throw std::logic_error("Browser doesn't support background " + name.toStdString());
   }
   setErrorsEnabled(false);
   updateView();
   emit functionStructureChanged();
 }
 
-void IqtTemplatePresenter::setNumberOfDatasets(int n) {
-  m_model.setNumberDomains(n);
-}
+void IqtTemplatePresenter::setNumberOfDatasets(int n) { m_model.setNumberDomains(n); }
 
-int IqtTemplatePresenter::getNumberOfDatasets() const {
-  return m_model.getNumberDomains();
-}
+int IqtTemplatePresenter::getNumberOfDatasets() const { return m_model.getNumberDomains(); }
 
 void IqtTemplatePresenter::setFunction(const QString &funStr) {
   m_model.setFunctionString(funStr);
@@ -130,21 +121,13 @@ void IqtTemplatePresenter::setFunction(const QString &funStr) {
   emit functionStructureChanged();
 }
 
-IFunction_sptr IqtTemplatePresenter::getGlobalFunction() const {
-  return m_model.getFitFunction();
-}
+IFunction_sptr IqtTemplatePresenter::getGlobalFunction() const { return m_model.getFitFunction(); }
 
-IFunction_sptr IqtTemplatePresenter::getFunction() const {
-  return m_model.getCurrentFunction();
-}
+IFunction_sptr IqtTemplatePresenter::getFunction() const { return m_model.getCurrentFunction(); }
 
-QStringList IqtTemplatePresenter::getGlobalParameters() const {
-  return m_model.getGlobalParameters();
-}
+QStringList IqtTemplatePresenter::getGlobalParameters() const { return m_model.getGlobalParameters(); }
 
-QStringList IqtTemplatePresenter::getLocalParameters() const {
-  return m_model.getLocalParameters();
-}
+QStringList IqtTemplatePresenter::getLocalParameters() const { return m_model.getLocalParameters(); }
 
 void IqtTemplatePresenter::setGlobalParameters(const QStringList &globals) {
   m_model.setGlobalParameters(globals);
@@ -161,8 +144,7 @@ void IqtTemplatePresenter::updateMultiDatasetParameters(const IFunction &fun) {
   updateViewParameters();
 }
 
-void IqtTemplatePresenter::updateMultiDatasetParameters(
-    const ITableWorkspace &paramTable) {
+void IqtTemplatePresenter::updateMultiDatasetParameters(const ITableWorkspace &paramTable) {
   m_model.updateMultiDatasetParameters(paramTable);
   updateViewParameters();
 }
@@ -177,21 +159,15 @@ void IqtTemplatePresenter::setCurrentDataset(int i) {
   updateViewParameters();
 }
 
-int IqtTemplatePresenter::getCurrentDataset() {
-  return m_model.currentDomainIndex();
-}
+int IqtTemplatePresenter::getCurrentDataset() { return m_model.currentDomainIndex(); }
 
-void IqtTemplatePresenter::setDatasetNames(const QStringList &names) {
-  m_model.setDatasetNames(names);
-}
+void IqtTemplatePresenter::setDatasets(const QList<FunctionModelDataset> &datasets) { m_model.setDatasets(datasets); }
 
 void IqtTemplatePresenter::setViewParameterDescriptions() {
   m_view->updateParameterDescriptions(m_model.getParameterDescriptionMap());
 }
 
-void IqtTemplatePresenter::setErrorsEnabled(bool enabled) {
-  m_view->setErrorsEnabled(enabled);
-}
+void IqtTemplatePresenter::setErrorsEnabled(bool enabled) { m_view->setErrorsEnabled(enabled); }
 
 void IqtTemplatePresenter::tieIntensities(bool on) {
   if (on && !canTieIntensities())
@@ -201,13 +177,10 @@ void IqtTemplatePresenter::tieIntensities(bool on) {
 }
 
 bool IqtTemplatePresenter::canTieIntensities() const {
-  return (m_model.hasStretchExponential() ||
-          m_model.getNumberOfExponentials() > 0) &&
-         m_model.hasBackground();
+  return (m_model.hasStretchExponential() || m_model.getNumberOfExponentials() > 0) && m_model.hasBackground();
 }
 
-void IqtTemplatePresenter::updateParameterEstimationData(
-    DataForParameterEstimationCollection &&data) {
+void IqtTemplatePresenter::updateParameterEstimationData(DataForParameterEstimationCollection &&data) {
   m_model.updateParameterEstimationData(std::move(data));
 }
 
@@ -217,23 +190,15 @@ void IqtTemplatePresenter::setBackgroundA0(double value) {
 }
 
 void IqtTemplatePresenter::updateViewParameters() {
-  static std::map<IqtFunctionModel::ParamID,
-                  void (IqtTemplateBrowser::*)(double, double)>
-      setters{{IqtFunctionModel::ParamID::EXP1_HEIGHT,
-               &IqtTemplateBrowser::setExp1Height},
-              {IqtFunctionModel::ParamID::EXP1_LIFETIME,
-               &IqtTemplateBrowser::setExp1Lifetime},
-              {IqtFunctionModel::ParamID::EXP2_HEIGHT,
-               &IqtTemplateBrowser::setExp2Height},
-              {IqtFunctionModel::ParamID::EXP2_LIFETIME,
-               &IqtTemplateBrowser::setExp2Lifetime},
-              {IqtFunctionModel::ParamID::STRETCH_HEIGHT,
-               &IqtTemplateBrowser::setStretchHeight},
-              {IqtFunctionModel::ParamID::STRETCH_LIFETIME,
-               &IqtTemplateBrowser::setStretchLifetime},
-              {IqtFunctionModel::ParamID::STRETCH_STRETCHING,
-               &IqtTemplateBrowser::setStretchStretching},
-              {IqtFunctionModel::ParamID::BG_A0, &IqtTemplateBrowser::setA0}};
+  static std::map<IqtFunctionModel::ParamID, void (IqtTemplateBrowser::*)(double, double)> setters{
+      {IqtFunctionModel::ParamID::EXP1_HEIGHT, &IqtTemplateBrowser::setExp1Height},
+      {IqtFunctionModel::ParamID::EXP1_LIFETIME, &IqtTemplateBrowser::setExp1Lifetime},
+      {IqtFunctionModel::ParamID::EXP2_HEIGHT, &IqtTemplateBrowser::setExp2Height},
+      {IqtFunctionModel::ParamID::EXP2_LIFETIME, &IqtTemplateBrowser::setExp2Lifetime},
+      {IqtFunctionModel::ParamID::STRETCH_HEIGHT, &IqtTemplateBrowser::setStretchHeight},
+      {IqtFunctionModel::ParamID::STRETCH_LIFETIME, &IqtTemplateBrowser::setStretchLifetime},
+      {IqtFunctionModel::ParamID::STRETCH_STRETCHING, &IqtTemplateBrowser::setStretchStretching},
+      {IqtFunctionModel::ParamID::BG_A0, &IqtTemplateBrowser::setA0}};
   auto values = m_model.getCurrentValues();
   auto errors = m_model.getCurrentErrors();
   for (auto const name : values.keys()) {
@@ -241,44 +206,35 @@ void IqtTemplatePresenter::updateViewParameters() {
   }
 }
 
-QStringList IqtTemplatePresenter::getDatasetNames() const {
-  return m_model.getDatasetNames();
-}
+QStringList IqtTemplatePresenter::getDatasetNames() const { return m_model.getDatasetNames(); }
 
-double IqtTemplatePresenter::getLocalParameterValue(const QString &parName,
-                                                    int i) const {
+QStringList IqtTemplatePresenter::getDatasetDomainNames() const { return m_model.getDatasetDomainNames(); }
+
+double IqtTemplatePresenter::getLocalParameterValue(const QString &parName, int i) const {
   return m_model.getLocalParameterValue(parName, i);
 }
 
-bool IqtTemplatePresenter::isLocalParameterFixed(const QString &parName,
-                                                 int i) const {
+bool IqtTemplatePresenter::isLocalParameterFixed(const QString &parName, int i) const {
   return m_model.isLocalParameterFixed(parName, i);
 }
 
-QString IqtTemplatePresenter::getLocalParameterTie(const QString &parName,
-                                                   int i) const {
+QString IqtTemplatePresenter::getLocalParameterTie(const QString &parName, int i) const {
   return m_model.getLocalParameterTie(parName, i);
 }
 
-QString
-IqtTemplatePresenter::getLocalParameterConstraint(const QString &parName,
-                                                  int i) const {
+QString IqtTemplatePresenter::getLocalParameterConstraint(const QString &parName, int i) const {
   return m_model.getLocalParameterConstraint(parName, i);
 }
 
-void IqtTemplatePresenter::setLocalParameterValue(const QString &parName, int i,
-                                                  double value) {
+void IqtTemplatePresenter::setLocalParameterValue(const QString &parName, int i, double value) {
   m_model.setLocalParameterValue(parName, i, value);
 }
 
-void IqtTemplatePresenter::setLocalParameterTie(const QString &parName, int i,
-                                                const QString &tie) {
+void IqtTemplatePresenter::setLocalParameterTie(const QString &parName, int i, const QString &tie) {
   m_model.setLocalParameterTie(parName, i, tie);
 }
 
-void IqtTemplatePresenter::updateViewParameterNames() {
-  m_view->updateParameterNames(m_model.getParameterNameMap());
-}
+void IqtTemplatePresenter::updateViewParameterNames() { m_view->updateParameterNames(m_model.getParameterNameMap()); }
 
 void IqtTemplatePresenter::updateView() {
   updateViewParameterNames();
@@ -286,18 +242,18 @@ void IqtTemplatePresenter::updateView() {
   m_view->updateState();
 }
 
-void IqtTemplatePresenter::setLocalParameterFixed(const QString &parName, int i,
-                                                  bool fixed) {
+void IqtTemplatePresenter::setLocalParameterFixed(const QString &parName, int i, bool fixed) {
   m_model.setLocalParameterFixed(parName, i, fixed);
 }
 
 void IqtTemplatePresenter::editLocalParameter(const QString &parName) {
-  auto const wsNames = getDatasetNames();
+  auto const datasetNames = getDatasetNames();
+  auto const domainNames = getDatasetDomainNames();
   QList<double> values;
   QList<bool> fixes;
   QStringList ties;
   QStringList constraints;
-  const int n = wsNames.size();
+  const int n = domainNames.size();
   for (int i = 0; i < n; ++i) {
     const double value = getLocalParameterValue(parName, i);
     values.push_back(value);
@@ -309,10 +265,9 @@ void IqtTemplatePresenter::editLocalParameter(const QString &parName) {
     constraints.push_back(constraint);
   }
 
-  m_editLocalParameterDialog = new EditLocalParameterDialog(
-      m_view, parName, wsNames, values, fixes, ties, constraints);
-  connect(m_editLocalParameterDialog, SIGNAL(finished(int)), this,
-          SLOT(editLocalParameterFinish(int)));
+  m_editLocalParameterDialog =
+      new EditLocalParameterDialog(m_view, parName, datasetNames, domainNames, values, fixes, ties, constraints);
+  connect(m_editLocalParameterDialog, SIGNAL(finished(int)), this, SLOT(editLocalParameterFinish(int)));
   m_editLocalParameterDialog->open();
 }
 
@@ -339,8 +294,7 @@ void IqtTemplatePresenter::editLocalParameterFinish(int result) {
   emit functionStructureChanged();
 }
 
-void IqtTemplatePresenter::viewChangedParameterValue(const QString &parName,
-                                                     double value) {
+void IqtTemplatePresenter::viewChangedParameterValue(const QString &parName, double value) {
   if (parName.isEmpty())
     return;
   if (m_model.isGlobal(parName)) {
@@ -359,6 +313,4 @@ void IqtTemplatePresenter::viewChangedParameterValue(const QString &parName,
   emit functionStructureChanged();
 }
 
-} // namespace IDA
-} // namespace CustomInterfaces
-} // namespace MantidQt
+} // namespace MantidQt::CustomInterfaces::IDA

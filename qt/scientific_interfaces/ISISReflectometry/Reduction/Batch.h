@@ -8,9 +8,13 @@
 
 #include "Common/DllConfig.h"
 #include "Experiment.h"
+#include "IBatch.h"
 #include "Instrument.h"
 #include "RunsTable.h"
 #include "Slicing.h"
+
+#include <boost/optional.hpp>
+#include <vector>
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -21,10 +25,9 @@ namespace ISISReflectometry {
     The Batch model holds the entire reduction configuration for a batch of
     runs.
 */
-class MANTIDQT_ISISREFLECTOMETRY_DLL Batch {
+class MANTIDQT_ISISREFLECTOMETRY_DLL Batch : public IBatch {
 public:
-  Batch(Experiment const &experiment, Instrument const &instrument,
-        RunsTable &runsTable, Slicing const &slicing);
+  Batch(Experiment const &experiment, Instrument const &instrument, RunsTable &runsTable, Slicing const &slicing);
 
   Experiment const &experiment() const;
   Instrument const &instrument() const;
@@ -33,16 +36,13 @@ public:
   Slicing const &slicing() const;
 
   std::vector<MantidWidgets::Batch::RowLocation> selectedRowLocations() const;
+  std::vector<Group> selectedGroups() const;
   template <typename T>
-  bool isInSelection(T const &item,
-                     std::vector<MantidWidgets::Batch::RowLocation> const
-                         &selectedRowLocations) const;
-  PerThetaDefaults const *defaultsForTheta(double thetaAngle) const;
-  PerThetaDefaults const *wildcardDefaults() const;
+  bool isInSelection(T const &item, std::vector<MantidWidgets::Batch::RowLocation> const &selectedRowLocations) const;
+  LookupRow const *findLookupRow(boost::optional<double> thetaAngle = boost::none) const;
   void resetState();
   void resetSkippedItems();
-  boost::optional<Item &>
-  getItemWithOutputWorkspaceOrNone(std::string const &wsName);
+  boost::optional<Item &> getItemWithOutputWorkspaceOrNone(std::string const &wsName);
 
 private:
   Experiment const &m_experiment;
@@ -53,8 +53,7 @@ private:
 
 template <typename T>
 bool Batch::isInSelection(T const &item,
-                          std::vector<MantidWidgets::Batch::RowLocation> const
-                              &selectedRowLocations) const {
+                          std::vector<MantidWidgets::Batch::RowLocation> const &selectedRowLocations) const {
   return m_runsTable.isInSelection(item, selectedRowLocations);
 }
 } // namespace ISISReflectometry

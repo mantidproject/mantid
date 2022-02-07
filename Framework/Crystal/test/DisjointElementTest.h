@@ -16,9 +16,7 @@ class DisjointElementTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static DisjointElementTest *createSuite() {
-    return new DisjointElementTest();
-  }
+  static DisjointElementTest *createSuite() { return new DisjointElementTest(); }
   static void destroySuite(DisjointElementTest *suite) { delete suite; }
 
   void test_default_constructor() {
@@ -80,9 +78,7 @@ public:
 
     item1.unionWith(&item2);
     TS_ASSERT_EQUALS(0, item1.getRank());
-    TSM_ASSERT_EQUALS(
-        "Same rank, but different parents, so item2, should take ownership", 1,
-        item2.getRank());
+    TSM_ASSERT_EQUALS("Same rank, but different parents, so item2, should take ownership", 1, item2.getRank());
     TSM_ASSERT_EQUALS("item2 should be parent", item1.getParent(), &item2);
   }
 
@@ -138,8 +134,7 @@ public:
     TS_ASSERT_EQUALS(0, c.getRank());
     TSM_ASSERT_EQUALS("b should be parent of a", c.getParent(), &a);
     TSM_ASSERT_EQUALS("a should be parent of b", b.getParent(), &a);
-    TSM_ASSERT_EQUALS("b and c should have a common root", b.getRoot(),
-                      c.getRoot());
+    TSM_ASSERT_EQUALS("b and c should have a common root", b.getRoot(), c.getRoot());
   }
 
   void test_complex() {

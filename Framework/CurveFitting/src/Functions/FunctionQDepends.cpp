@@ -27,9 +27,7 @@ namespace {
 Mantid::Kernel::Logger g_log("FunctionQDepends");
 }
 
-namespace Mantid {
-namespace CurveFitting {
-namespace Functions {
+namespace Mantid::CurveFitting::Functions {
 
 /* ===========
    Public
@@ -66,15 +64,16 @@ void FunctionQDepends::declareAttributes() {
  * @param attName name of the attribute
  * @param attValue  value of the attribute
  */
-void FunctionQDepends::setAttribute(const std::string &attName,
-                                    const Attr &attValue) {
+void FunctionQDepends::setAttribute(const std::string &attName, const Attr &attValue) {
   // Q value is tied to WorkspaceIndex if we have a list of Q values
   if (attName == "WorkspaceIndex") {
-    size_t wi{static_cast<size_t>(
-        attValue.asInt())}; // ah!, the "joys" of C++ strong typing.
+    size_t wi{static_cast<size_t>(attValue.asInt())}; // ah!, the "joys" of C++ strong typing.
     if (!m_vQ.empty() && wi < m_vQ.size()) {
       Mantid::API::IFunction::setAttribute(attName, attValue);
-      Mantid::API::IFunction::setAttribute("Q", Attribute(m_vQ.at(wi)));
+      auto qAttr = getAttribute("Q");
+      qAttr.setDouble(m_vQ.at(wi));
+      // Can't call setAttributeValue, as it will recurse back into here
+      Mantid::API::IFunction::setAttribute("Q", qAttr);
     }
   }
   // Q can be manually changed by user only if list of Q values is empty
@@ -95,15 +94,14 @@ void FunctionQDepends::setAttribute(const std::string &attName,
  * @param startX unused
  * @param endX unused
  */
-void FunctionQDepends::setMatrixWorkspace(
-    std::shared_ptr<const Mantid::API::MatrixWorkspace> workspace, size_t wi,
-    double startX, double endX) {
+void FunctionQDepends::setMatrixWorkspace(std::shared_ptr<const Mantid::API::MatrixWorkspace> workspace, size_t wi,
+                                          double startX, double endX) {
   UNUSED_ARG(startX);
   UNUSED_ARG(endX);
   // reset attributes if new workspace is passed
   if (!m_vQ.empty()) {
-    Mantid::API::IFunction::setAttribute("WorkspaceIndex", Attr(EMPTY_INT()));
-    Mantid::API::IFunction::setAttribute("Q", Attr(EMPTY_DBL()));
+    Mantid::API::IFunction::setAttributeValue("WorkspaceIndex", EMPTY_INT());
+    Mantid::API::IFunction::setAttributeValue("Q", EMPTY_DBL());
   }
   // Obtain Q values from the passed workspace, if possible. m_vQ will be
   // cleared if unsuccessful.
@@ -111,7 +109,7 @@ void FunctionQDepends::setMatrixWorkspace(
     m_vQ = this->extractQValues(*workspace);
   }
   if (!m_vQ.empty()) {
-    this->setAttribute("WorkspaceIndex", Attr(static_cast<int>(wi)));
+    this->setAttributeValue("WorkspaceIndex", static_cast<int>(wi));
   }
 }
 
@@ -124,13 +122,11 @@ void FunctionQDepends::setMatrixWorkspace(
  * them.
  * @param workspace workspace possibly containing Q values.
  */
-std::vector<double> FunctionQDepends::extractQValues(
-    const Mantid::API::MatrixWorkspace &workspace) {
+std::vector<double> FunctionQDepends::extractQValues(const Mantid::API::MatrixWorkspace &workspace) {
   std::vector<double> qs;
   // Check if the vertical axis has units of momentum transfer, then extract Q
   // values...
-  auto axis_ptr =
-      dynamic_cast<Mantid::API::NumericAxis *>(workspace.getAxis(1));
+  auto axis_ptr = dynamic_cast<Mantid::API::NumericAxis *>(workspace.getAxis(1));
   if (axis_ptr) {
     const std::shared_ptr<Kernel::Unit> &unit_ptr = axis_ptr->unit();
     if (unit_ptr->unitID() == "MomentumTransfer") {
@@ -146,8 +142,7 @@ std::vector<double> FunctionQDepends::extractQValues(
         const auto detID = spectrumInfo.detector(wi).getID();
         double efixed = workspace.getEFixed(detID);
         double usignTheta = 0.5 * spectrumInfo.twoTheta(wi);
-        double q = Mantid::Kernel::UnitConversion::convertToElasticQ(usignTheta,
-                                                                     efixed);
+        double q = Mantid::Kernel::UnitConversion::convertToElasticQ(usignTheta, efixed);
         qs.emplace_back(q);
       } else {
         g_log.debug("Cannot populate Q values from workspace");
@@ -159,6 +154,4 @@ std::vector<double> FunctionQDepends::extractQValues(
   return qs;
 }
 
-} // namespace Functions
-} // namespace CurveFitting
-} // namespace Mantid
+} // namespace Mantid::CurveFitting::Functions

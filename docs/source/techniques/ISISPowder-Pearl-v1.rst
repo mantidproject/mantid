@@ -109,13 +109,13 @@ On PEARL the following parameters are required when executing *focus*:
 The following parameter is required if
 :ref:`perform_attenuation_pearl_isis-powder-diffraction-ref` is set to **True**
 
-- :ref:`attenuation_file_path_pearl_isis-powder-diffraction-ref`
+- :ref:`attenuation_file_pearl_isis-powder-diffraction-ref`
 
 The following parameters may also be optionally set:
 
 - :ref:`file_ext_pearl_isis-powder-diffraction-ref`
 - :ref:`suffix_pearl_isis-powder-diffraction-ref`
-  
+
 Example
 =======
 
@@ -124,12 +124,10 @@ Example
   # Notice how the filename ends with .yaml
   cal_mapping_file = r"C:\path\to\cal_mapping.yaml"
 
-  attenuation_path = r"C:\path\to\attenuation_file"
-
   pearl_example.focus(calibration_mapping_file=cal_mapping_file,
                       focus_mode="all", long_mode=True,
                       perform_attenuation=True,
-                      attenuation_file_path=attenuation_path,
+                      attenuation_file="ZTA",
                       run_number="100-110", tt_mode="tt88",
                       vanadium_normalisation=True)
 
@@ -152,8 +150,8 @@ Example
 
   # Notice how the filename ends with .yaml
   cal_mapping_file = r"C:\path\to\cal_mapping.yaml"
-  
-  pearl_example.create_cal(run_number=95671, 
+
+  pearl_example.create_cal(run_number=95671,
                            tt_mode="tt70",
                            long_mode=True,
                            calibration_mapping_file=cal_mapping_file)
@@ -236,28 +234,51 @@ Example Input:
   pearl_example.focus(generate_absorb_corrections=True,
                       absorb_corrections_out_filename=r"C:\PEARL\pearl_absorb_sphere_17_2.nxs"...)
 
-.. _attenuation_file_path_pearl_isis-powder-diffraction-ref:
+.. _attenuation_file_pearl_isis-powder-diffraction-ref:
 
-attenuation_file_path
-^^^^^^^^^^^^^^^^^^^^^
+attenuation_file
+^^^^^^^^^^^^^^^^
 Required if :ref:`perform_attenuation_pearl_isis-powder-diffraction-ref`
 is set to **True**
 
-The full path to the attenuation file to use within the
-:ref:`focus_pearl_isis-powder-diffraction-ref` method.
+The name of the attenuation file to use within the
+:ref:`focus_pearl_isis-powder-diffraction-ref` method. The name must match the name
+of one of the entries in the :ref:`attenuation_files_pearl_isis-powder-diffraction-ref` setting
 
 The workspace will be attenuated with the specified file
 if the :ref:`focus_mode_pearl_isis-powder-diffraction-ref`
 is set to **all** or **trans**. For more details see
 :ref:`PearlMCAbsorption<algm-PearlMCAbsorption>`
 
-*Note: The path to the file must include the file extension*
-
 Example Input:
 
 ..  code-block:: python
 
-  pearl_example(attenuation_file_path=r"C:\path\to\attenuation_file.out", ...)
+  pearl_example.focus(attenuation_file="ZTA", ...)
+
+.. _attenuation_files_pearl_isis-powder-diffraction-ref:
+
+attenuation_files
+^^^^^^^^^^^^^^^^^
+
+A list of attenuation file names and paths that are available for use in the Focus process.
+It is expected that this setting will be specified in a configuration yaml file as follows:
+
+.. code-block:: yaml
+
+  attenuation_files:
+    - name : ZTA
+      path : C:\path\to\anvil_atten_files\PRL112_DC25_10MM_FF.OUT
+    - name : WC
+      path : C:\path\to\anvil_atten_files\PRL985_WC_HOYBIDE_NK_10MM_FF.OUT
+
+It can alternatively be supplied as part of the call to focus:
+
+..  code-block:: python
+
+  pearl_example.focus(attenuation_file="ZTA", attenuation_files=r'[{"name": "ZTA", "path": r"C:\path\to\anvil_atten_files\PRL112_DC25_10MM_FF.OUT"}]' ...)
+
+*Note: The path to the file must include the file extension*
 
 .. _calibration_directory_pearl_isis-powder-diffraction-ref:
 
@@ -322,6 +343,17 @@ Example Input:
 
   # Notice the filename always ends in .yaml
   pearl_example = Pearl(config_file=r"C:\path\to\file\configuration.yaml", ...)
+
+.. _custom_grouping_filename_pearl_isis-powder-diffraction-ref:
+
+custom_grouping_filename
+^^^^^^^^^^^^^^^^^^^^^^^^
+The name of a custom grouping cal file to use. The file needs to be located
+within top level of the :ref:`calibration_directory_pearl_isis-powder-diffraction-ref`
+
+..  code-block:: python
+
+  custom_grouping_filename: "DAC_group.cal"
 
 .. _do_absorb_corrections_pearl_isis-powder-diffraction-ref:
 
@@ -438,7 +470,7 @@ When *long_mode* is **False** the TOF window processed is
 between 0-20,000 μs
 
 When *long_mode* is **True** the TOF window processed is
-between 0-40,000 μs
+between 20,000-40,000 μs
 
 This also affects the :ref:`advanced_parameters_pearl_isis-powder-diffraction-ref`
 used. More detail can be found for each individual parameter
@@ -485,7 +517,7 @@ For more details of the corrections performed see:
 :ref:`PearlMCAbsorption<algm-PearlMCAbsorption>`
 
 If this is set to **True**
-:ref:`attenuation_file_path_pearl_isis-powder-diffraction-ref`
+:ref:`attenuation_file_pearl_isis-powder-diffraction-ref`
 must be set too.
 
 *Note: This correction will only be performed if 'focus_mode'
@@ -583,12 +615,15 @@ see the following:
 - :ref:`tt35_grouping_filename_pearl_isis-powder-diffraction-ref`
 - :ref:`tt70_grouping_filename_pearl_isis-powder-diffraction-ref`
 - :ref:`tt88_grouping_filename_pearl_isis-powder-diffraction-ref`
+- :ref:`custom_grouping_filename_pearl_isis-powder-diffraction-ref`
 
-Accepted values are: **tt35**, **tt70** and **tt80**
+Accepted values are: **tt35**, **tt70**, **tt80** and custom
 
 When calling :ref:`create_vanadium_pearl_isis-powder-diffraction-ref`
-**all** can be used to implicitly process all of the supported
+**all** can be used to implicitly process all of the ttXX
 values indicated above.
+
+When the custom tt_mode is used a focus mode of "Mods" is always used
 
 Example Input:
 
@@ -663,11 +698,11 @@ set to the following:
 
   # Long mode OFF:
         create_cal_rebin_1_params: "100,-0.0006,19950"
-	
+
   # Long mode ON:
         create_cal_rebin_1_params: "20300,-0.0006,39990"
 
-	
+
 .. _create_cal_rebin_2_params_pearl_isis-powder-diffraction-ref:
 
 create_cal_rebin_2_params
@@ -694,7 +729,7 @@ set to the following:
 
   cross_corr_reference_spectra: 20
 
-  
+
 .. _cross_corr_ws_index_max_pearl_isis-powder-diffraction-ref:
 
 cross_corr_ws_index_max
@@ -708,7 +743,7 @@ set to the following:
 
   cross_corr_ws_index_max: 1063
 
-  
+
 .. _cross_corr_ws_index_min_pearl_isis-powder-diffraction-ref:
 
 cross_corr_ws_index_min
@@ -722,7 +757,7 @@ set to the following:
 
   cross_corr_ws_index_min: 9
 
-  
+
 .. _cros_cor_x_max_pearl_isis-powder-diffraction-ref:
 
 cross_cor_x_max
@@ -748,6 +783,29 @@ set to the following:
 
   cross_corr_x_min: 1.8
 
+.. _custom_focused_bin_widths_pearl_isis-powder-diffraction-ref:
+
+custom_focused_bin_widths
+^^^^^^^^^^^^^^^^^^^^^^^^^
+The dt-upon-t binning for the focused data when using tt_mode=custom
+
+On PEARL this is set to -0.0006 for all banks in the custom grouping file
+
+.. _custom_focused_cropping_values_pearl_isis-powder-diffraction-ref:
+
+custom_focused_cropping_values
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Indicates a list of TOF values to crop the focused workspace
+which was created by :ref:`focus_pearl_isis-powder-diffraction-ref`
+on a bank by bank basis when using tt_mode=custom
+
+.. _focused_bin_widths_pearl_isis-powder-diffraction-ref:
+
+focused_bin_widths
+^^^^^^^^^^^^^^^^^^
+The dt-upon-t binning for the focused data.
+
+On PEARL this is set to -0.0006 for all 14 banks
 
 .. _focused_cropping_values_pearl_isis-powder-diffraction-ref:
 
@@ -858,7 +916,7 @@ is set to the following:
 
   get_det_offsets_x_max: -200
 
-  
+
 .. _get_det_offsets_x_min_pearl_isis-powder-diffraction-ref:
 
 get_det_offsets_x_min
@@ -870,7 +928,7 @@ is set to the following:
 .. code-block:: python
 
   get_det_offsets_x_min: -200
-		
+
 
 .. _monitor_lambda_crop_range_pearl_isis-powder-diffraction-ref:
 
@@ -931,7 +989,7 @@ On PEARL this is set to the following:
 
   monitor_mask_regions: [[3.45, 2.96, 2.1,  1.73],
                          [3.7,  3.2,  2.26, 1.98]]
-					
+
 .. _monitor_spectrum_number_pearl_isis-powder-diffraction-ref:
 
 monitor_spectrum_number
@@ -1007,7 +1065,7 @@ On PEARL this is set to the following:
 
   # Long mode OFF:
     spline_coefficient: 60
-    
+
   # Long mode ON:
     spline_coefficient: 5
 
@@ -1112,7 +1170,7 @@ A template for the filename of the generated GSAS file.
 
 dat_files_directory
 ^^^^^^^^^^^^^^^^^^^
-The subdirectory of the output directory where the .dat files are saved
+The subdirectory of the output directory where the .xye files are saved
 
 .. _tof_xye_filename_pearl_isis-powder-diffraction-ref:
 

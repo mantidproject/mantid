@@ -41,8 +41,8 @@ The algorithm proceeds as follows. For each spectrum:
 
 #. for each event in `NEvents`
 
-   * loop over the bins. 
-   
+   * loop over the bins.
+
      - If `ResimulateTracksForDifferentWavelengths` = True then generate tracks using the following procedure for each wavelength step,
        where the size of each wavelength step is defined by `NumberOfWavelengthPoints`. If `ResimulateTracksForDifferentWavelengths` = false
        generate one set of tracks and define a step size of 1 ie all bins are visited. At the moment there are no wavelength dependent effects in the simulation that affect the simulation of the track geometry so the default value for `ResimulateTracksForDifferentWavelengths` is false.
@@ -80,15 +80,23 @@ The algorithm proceeds as follows. For each spectrum:
      - accumulate this wavelength-specific factor across all `NEvents`
 
 #. average the accumulated attentuation factors over `NEvents` and assign this as the correction factor for
-   this :math:`\lambda_{step}`.
+   this :math:`\lambda_{step}`. Calculate the error as the standard deviation of the accumulated attenuation factors divided by :math:`\sqrt{NEvents}`
 
 #. finally, if `ResimulateTracksForDifferentWavelengths` = True, interpolate through the unsimulated wavelength points using the selected method
+
+The algorithm generates some statistics on the number of scatter points generated in the sample and each environment component if the logging level is set to debug.
 
 Interpolation
 #############
 
 The default linear interpolation method will produce an absorption curve that is not smooth. CSpline interpolation
-will produce a smoother result by using a 3rd-order polynomial to approximate the original points. 
+will produce a smoother result by using a 3rd-order polynomial to approximate the original points.
+
+The errors that the Monte Carlo simulation calculates for different wavelength points in a single spectrum may or may not be independent. If the same set of tracks have been used for different wavelengths (ResimulateTracksForDifferentWavelengths=False) then the errors will be correlated. A worst case positive correlation has been assumed giving an error on the interpolated point that is approximately the same as the surrounding simulated points.
+
+If ResimulateTracksForDifferentWavelengths=True then the errors on the simulated points will be independent and the errors can be combined using standard formulae for combining errors on independent variables.
+
+The error propagation through the spline interpolation is complex because each cubic polynomial is usually expressed as a function of the known y values and a derivative of those y values at the same points (some texts use the first derivative others the second). The error in y and the derivative of y are correlated at a particular x value and the derivatives at different x values are also correlated. So some extra covariances are required in addition to the error (variance) of each y value. The method followed [#GAR]_ involves inverting a symmetric tridiagonal matrix and an analytic calculation for the inversion has been implemented to minimize the run time [#HUO]_
 
 Sparse instrument
 #################
@@ -98,7 +106,7 @@ The simulation may take long to complete on instruments with a large number of d
 The sparse instrument consists of a grid of detectors covering the full instrument entirely. The figure below shows an example of a such an instrument approximating the IN5 spectrometer at ILL.
 
 .. figure:: ../images/MonteCarloAbsorption_Sparse_Instrument.png
-   :alt: IN5 spectrometer and its sparse approximation. 
+   :alt: IN5 spectrometer and its sparse approximation.
    :scale: 60%
 
    Absorption corrections for IN5 spectrometer interpolated from the sparse instrument shown on the right. The sparse instrument has 6 detector rows and 22 columns, a total of 132 detectors. IN5, on the other hand, has approximately 100000 detectors.
@@ -114,26 +122,26 @@ The interpolation is a two step process: first a spatial interpolation is done f
 Spatial interpolation
 ^^^^^^^^^^^^^^^^^^^^^
 
-The sample to detector distance does not matter for absorption, so it suffices to consider directions only. The detector grid of the sparse instrument consists of detectors at constant latitude and longitude intervals. For a detector :math:`D` of the full input instrument at latitude :math:`\phi` and longitude :math:`\lambda`, we pick the four detectors :math:`D_i` (:math:`i = 1, 2, 3, 4`) at the corners of the grid cell which includes (:math:`\phi`, :math:`\lambda`). The distance :math:`\Delta_i` in units of angle between :math:`D` and  :math:`D_i` on a spherical surface is given by
+The sample to detector distance does not matter for absorption, so it suffices to consider directions only. The detector grid of the sparse instrument consists of detectors at constant latitude and longitude intervals. For a detector :math:`D` of the full input instrument at latitude :math:`\phi` and longitude :math:`\lambda`, we pick the four detectors :math:`D_{ij}` (:math:`i = 1, 2` :math:`j = 1, 2`) at the corners of the grid cell which includes (:math:`\phi`, :math:`\lambda`).
+
+If :math:`D` coincides with any :math:`D_{ij}`, the :math:`y` values of the histogram linked to :math:`D` are directly taken from :math:`D_{ij}`. Otherwise, :math:`y` is interpolated using a bilinear interpolation method. The data is interpolated in the longitude direction first:
 
 .. math::
 
-   \Delta_i = 2 \arcsin \sqrt{\sin^2 \left(\frac{\phi - \phi_i}{2} \right) + \cos \phi \cos \phi_i \sin^2 \left( \frac{\lambda - \lambda_i}{2} \right)}
+   y_1 = \frac{(\lambda_2 - \lambda) * y_{11} + (\lambda - \lambda_1) * y_{21}}{\lambda_2 - \lambda_1}
 
-If :math:`D` coincides with any :math:`D_i`, the :math:`y` values of the histogram linked to :math:`D` are directly taken from :math:`D_i`. Otherwise, :math:`y` is interpolated using the inverse distance weighing method
+   y_2 = \frac{(\lambda_2 - \lambda) * y_{12} + (\lambda - \lambda_1) * y_{22}}{\lambda_2 - \lambda_1},
 
-.. math::
-
-   y = \frac{\sum_i w_i y_i}{\sum_i w_i},
-
-where the weights are given by
+and then finally in the latitude direction:
 
 .. math::
 
-   w_i = \frac{1}{\Delta_i^2}
+   y = \frac{(\phi_2 - \phi) * y_1 + (\phi - \phi_1) * y_2}{\phi_2 - \phi_1}
 
-Wavelength interpolation
-^^^^^^^^^^^^^^^^^^^^^^^^
+The errors present in the 4 simulated histograms are assumed to be independent and they are propagated through the bilinear formulae given above to give one contribution to the error on the interpolated histogram. The second contribution is the interpolation error (how well the bilinear interpolation matches the actual attenuation factor variation). This is calculated based on the second derivative of the attenuation factor in the :math:`\phi` and :math:`\lambda` directions ([#SEV]_)
+
+Wavelength interpolation for sparse instruments
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 The wavelength points for simulation with the sparse instrument are chosen as follows:
 
@@ -250,6 +258,15 @@ References
           `doi: 10.1107/S0365110X57002212 <http://dx.doi.org/10.1107/S0365110X57002212>`_
 .. [#SAB] Sabine, T. M., *International Tables for Crystallography*, Vol. C, Page 609, Ed. Wilson, A. J. C and Prince, E. Kluwer Publishers (2004)
           `doi: 10.1107/97809553602060000103 <http://dx.doi.org/10.1107/97809553602060000103>`_
+.. [#GAR] Gardner, James L., *Journal of Research of the National Institute of Standards and Technology*, section 4 (2003),
+          `https://nvlpubs.nist.gov/nistpubs/jres/108/1/j80gar.pdf <https://nvlpubs.nist.gov/nistpubs/jres/108/1/j80gar.pdf>`_
+.. [#SEV] Severens, Ivo, technische universiteit eindhoven, (2003),
+          `https://www.win.tue.nl/casa/meetings/seminar/previous/_abstract030122_files/4.pdf <https://www.win.tue.nl/casa/meetings/seminar/previous/_abstract030122_files/4.pdf>`_
+.. [#HUO] Hu, G. Y., O'Connell, R.F. , *Journal of Physics A*, **29** 1511 (1996),
+          `doi: 10.1088/0305-4470/29/7/020 <http://dx.doi.org/10.1088/0305-4470/29/7/020>`_
+          Note: the following edits have been applied to the formulae in the paper for the case -2 < D < 2:
+          a) D = -2 cos :math:`\lambda` has been implemented instead of D = 2 cos :math:`\lambda`
+          b) equation (10) has been modified for the -2 < D < 2 case so that the leading minus sign on the right hand side is removed
 
 |
 

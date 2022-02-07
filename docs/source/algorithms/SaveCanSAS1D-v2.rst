@@ -9,12 +9,19 @@
 .. _version 1.0: http://www.cansas.org/formats/1.0/cansas1d.xsd
 .. _Version 1.1: http://www.cansas.org/formats/1.1/cansas1d.xsd
 .. _canSAS Wiki: http://www.cansas.org/formats/canSAS1d/1.1/doc/
-.. _MatrixWorkspace: http://www.mantidproject.org/MatrixWorkspace
 
 Description
 -----------
 
-Saves the given `MatrixWorkspace`_ to a file in the canSAS 1-D format.
+Saves the given :ref:`MatrixWorkspace` to a file in the canSAS 1-D format.
+
+If the workspace contains several spectra, two options are available:
+
+* if OneSpectrumPerFile if false (default value), all spectra will be appended
+  into the same file (into different <SASdata> entries)
+* if OneSpectrumPerFile is true, each spectrum will be written in a separate
+  file. The name of the file will be created as follows: <Filename property>_
+  <spectrum index>_<axis value><axis unit>.<extension>
 
 The canSAS 1-D Format
 #####################

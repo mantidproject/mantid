@@ -12,8 +12,7 @@
 
 #include <stdexcept>
 
-namespace Mantid {
-namespace Kernel {
+namespace Mantid::Kernel {
 //----------------------------------------------------------------------------------------------
 // Public static methods
 //----------------------------------------------------------------------------------------------
@@ -31,8 +30,7 @@ namespace Kernel {
 bool FileDescriptor::isAscii(const std::string &filename, const size_t nbytes) {
   std::ifstream data(filename.c_str(), std::ios::in | std::ios::binary);
   if (!data) {
-    throw std::invalid_argument(
-        "FileDescriptor::isAscii() - Unable to open file '" + filename + "'");
+    throw std::invalid_argument("FileDescriptor::isAscii() - Unable to open file '" + filename + "'");
   }
   return FileDescriptor::isAscii(data, nbytes);
 }
@@ -105,6 +103,21 @@ bool FileDescriptor::isAscii(FILE *file, const size_t nbytes) {
   return result;
 }
 
+/**
+ * Check whether a file is empty.
+ * @param filename
+ * @return true if the file is empty.
+ */
+bool FileDescriptor::isEmpty(const std::string &filename) {
+  std::ifstream file(filename.c_str());
+
+  if (!file) {
+    throw std::invalid_argument("FileDescriptor::isEmpty() - Unable to open file '" + filename + "'");
+  }
+
+  return file.peek() == std::ifstream::traits_type::eof();
+}
+
 //----------------------------------------------------------------------------------------------
 // Public methods
 //----------------------------------------------------------------------------------------------
@@ -114,15 +127,12 @@ bool FileDescriptor::isAscii(FILE *file, const size_t nbytes) {
  * @throws std::invalid_argument if the filename is empty or the file does not
  * exist
  */
-FileDescriptor::FileDescriptor(const std::string &filename)
-    : m_filename(), m_extension(), m_file(), m_ascii(false) {
+FileDescriptor::FileDescriptor(const std::string &filename) : m_filename(), m_extension(), m_file(), m_ascii(false) {
   if (filename.empty()) {
-    throw std::invalid_argument("FileDescriptor() - Empty filename '" +
-                                filename + "'");
+    throw std::invalid_argument("FileDescriptor() - Empty filename '" + filename + "'");
   }
   if (!Poco::File(filename).exists()) {
-    throw std::invalid_argument("FileDescriptor() - File '" + filename +
-                                "' does not exist");
+    throw std::invalid_argument("FileDescriptor() - File '" + filename + "' does not exist");
   }
   initialize(filename);
 }
@@ -155,9 +165,7 @@ void FileDescriptor::resetStreamToStart() {
  * @returns true if the file is of Ascii type and has a ".xml" extension, false
  * otherwise
  */
-bool FileDescriptor::isXML() const {
-  return (this->isAscii() && this->extension() == ".xml");
-}
+bool FileDescriptor::isXML() const { return (this->isAscii() && this->extension() == ".xml"); }
 
 //----------------------------------------------------------------------------------------------
 // Private methods
@@ -169,16 +177,13 @@ bool FileDescriptor::isXML() const {
  */
 void FileDescriptor::initialize(const std::string &filename) {
   m_filename = filename;
-  m_extension = Mantid::Kernel::Strings::toLower(
-      "." + Poco::Path(filename).getExtension());
+  m_extension = Mantid::Kernel::Strings::toLower("." + Poco::Path(filename).getExtension());
 
   m_file.open(m_filename.c_str(), std::ios::in | std::ios::binary);
   if (!m_file)
-    throw std::runtime_error("FileDescriptor::initialize - Cannot open file '" +
-                             filename + "' for reading");
+    throw std::runtime_error("FileDescriptor::initialize - Cannot open file '" + filename + "' for reading");
 
   m_ascii = FileDescriptor::isAscii(m_file);
 }
 
-} // namespace Kernel
-} // namespace Mantid
+} // namespace Mantid::Kernel

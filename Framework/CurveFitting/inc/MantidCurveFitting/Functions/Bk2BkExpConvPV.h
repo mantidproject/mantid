@@ -22,11 +22,10 @@ namespace Functions {
 
   @date 2012-06-06
 */
-class MANTID_CURVEFITTING_DLL Bk2BkExpConvPV
-    : virtual public API::IPeakFunction,
-      virtual public API::IFunctionMW {
+class MANTID_CURVEFITTING_DLL Bk2BkExpConvPV : virtual public API::IPeakFunction, virtual public API::IFunctionMW {
 public:
-  Bk2BkExpConvPV();
+  /// Default constructor.
+  Bk2BkExpConvPV() = default;
 
   /// overwrite IPeakFunction base class methods
   double centre() const override;
@@ -44,16 +43,14 @@ public:
   // void setCalculationRange(double tof_low, double tof_upper);
   /// Calculate peak
   void geneatePeak(double *out, const double *xValues, const size_t nData);
-  ///
-  void resetFWHM();
+
+  void setMatrixWorkspace(std::shared_ptr<const API::MatrixWorkspace> workspace, size_t wi, double startX,
+                          double endX) override;
 
 protected:
-  void functionLocal(double *out, const double *xValues,
-                     const size_t nData) const override;
-  void functionDerivLocal(API::Jacobian *out, const double *xValues,
-                          const size_t nData) override;
-  void functionDeriv(const API::FunctionDomain &domain,
-                     API::Jacobian &jacobian) override;
+  void functionLocal(double *out, const double *xValues, const size_t nData) const override;
+  void functionDerivLocal(API::Jacobian *out, const double *xValues, const size_t nData) override;
+  void functionDeriv(const API::FunctionDomain &domain, API::Jacobian &jacobian) override;
 
   /// overwrite IFunction base class method, which declare function parameters
   void init() override;
@@ -62,16 +59,13 @@ private:
   /// container for storing wavelength values for each data point
   mutable std::vector<double> m_dtt1;
 
-  double calOmega(double x, double eta, double N, double alpha, double beta,
-                  double H, double sigma2, double invert_sqrt2sigma) const;
+  double calOmega(double x, double eta, double N, double alpha, double beta, double H, double sigma2,
+                  double invert_sqrt2sigma) const;
 
   std::complex<double> E1(std::complex<double> z) const;
 
   void calHandEta(double sigma2, double gamma, double &H, double &eta) const;
-
-  mutable double mFWHM;
-  mutable double mLowTOF;
-  mutable double mUpperTOF;
+  double expWidth() const;
 };
 
 // typedef std::shared_ptr<TableWorkspace> TableWorkspace_sptr;

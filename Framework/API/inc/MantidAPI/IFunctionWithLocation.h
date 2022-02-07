@@ -23,8 +23,7 @@ namespace API {
     @author Anders Markvardsen, ISIS, RAL
     @date 2/11/2009
 */
-class MANTID_API_DLL IFunctionWithLocation : public virtual ParamFunction,
-                                             public virtual IFunction1D {
+class MANTID_API_DLL IFunctionWithLocation : public virtual ParamFunction, public virtual IFunction1D {
 public:
   /// Virtual destructor
   /// (avoids warnings about non-trivial move assignment in virtually inheriting
@@ -55,15 +54,11 @@ public:
   ///    don't show it in ties
   virtual void fixCentre(bool isDefault = false) {
     UNUSED_ARG(isDefault);
-    throw std::runtime_error(
-        "Generic centre fixing isn't implemented for this function.");
+    throw std::runtime_error("Generic centre fixing isn't implemented for this function.");
   }
 
   /// Free the centre parameter.
-  virtual void unfixCentre() {
-    throw std::runtime_error(
-        "Generic centre fixing isn't implemented for this function.");
-  }
+  virtual void unfixCentre() { throw std::runtime_error("Generic centre fixing isn't implemented for this function."); }
 };
 
 } // namespace API

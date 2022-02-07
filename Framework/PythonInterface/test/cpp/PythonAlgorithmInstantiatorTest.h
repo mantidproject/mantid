@@ -23,17 +23,12 @@ class PythonAlgorithmInstantiatorTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static PythonAlgorithmInstantiatorTest *createSuite() {
-    return new PythonAlgorithmInstantiatorTest();
-  }
-  static void destroySuite(PythonAlgorithmInstantiatorTest *suite) {
-    delete suite;
-  }
+  static PythonAlgorithmInstantiatorTest *createSuite() { return new PythonAlgorithmInstantiatorTest(); }
+  static void destroySuite(PythonAlgorithmInstantiatorTest *suite) { delete suite; }
 
 public:
   void test_Bare_Pointer_Throws_On_Creation() {
-    TS_ASSERT_THROWS(instantiator().createUnwrappedInstance(),
-                     const std::runtime_error &);
+    TS_ASSERT_THROWS(instantiator().createUnwrappedInstance(), const std::runtime_error &);
   }
 
   void test_Shared_Pointer() {
@@ -62,8 +57,7 @@ private:
       PyRun_SimpleString(code);
       PyObject *main = PyImport_AddModule("__main__");
       TS_ASSERT(main);
-      boost::python::object cls(
-          boost::python::handle<>(PyObject_GetAttrString(main, "PyAlg")));
+      boost::python::object cls(boost::python::handle<>(PyObject_GetAttrString(main, "PyAlg")));
       TS_ASSERT(cls);
       m_creator = std::make_unique<PythonAlgorithmInstantiator>(cls);
     }

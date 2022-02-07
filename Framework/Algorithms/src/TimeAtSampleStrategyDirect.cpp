@@ -20,19 +20,16 @@ using namespace Mantid::Kernel;
 using namespace Mantid::Geometry;
 using namespace Mantid::API;
 
-namespace Mantid {
-namespace Algorithms {
+namespace Mantid::Algorithms {
 
 //----------------------------------------------------------------------------------------------
 /** Constructor
  */
-TimeAtSampleStrategyDirect::TimeAtSampleStrategyDirect(
-    const MatrixWorkspace_const_sptr &ws, double ei)
+TimeAtSampleStrategyDirect::TimeAtSampleStrategyDirect(const MatrixWorkspace_const_sptr &ws, double ei)
     : m_constShift(0) {
 
   // A constant among all spectra
-  constexpr double TWO_MEV_OVER_MASS =
-      2. * PhysicalConstants::meV / PhysicalConstants::NeutronMass;
+  constexpr double TWO_MEV_OVER_MASS = 2. * PhysicalConstants::meV / PhysicalConstants::NeutronMass;
 
   // Get L1
   const auto &samplepos = ws->getInstrument()->getSample()->getPos();
@@ -47,12 +44,10 @@ TimeAtSampleStrategyDirect::TimeAtSampleStrategyDirect(
  * @brief Calculate corrections to get a Time at Sample for a DG instrument.
  * @return Correction struct
  */
-Correction Mantid::Algorithms::TimeAtSampleStrategyDirect::calculate(
-    const size_t & /*workspace_index*/) const {
+Correction Mantid::Algorithms::TimeAtSampleStrategyDirect::calculate(const size_t & /*workspace_index*/) const {
 
   // Correction is L1 and Ei dependent only. Detector positions are not
   // required.
   return Correction(0, m_constShift);
 }
-} // namespace Algorithms
-} // namespace Mantid
+} // namespace Mantid::Algorithms

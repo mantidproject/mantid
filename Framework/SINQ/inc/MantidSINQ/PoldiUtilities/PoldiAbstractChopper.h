@@ -27,8 +27,7 @@ class MANTID_SINQ_DLL PoldiAbstractChopper {
 public:
   virtual ~PoldiAbstractChopper() = default;
 
-  virtual void
-  loadConfiguration(Geometry::Instrument_const_sptr poldiInstrument) = 0;
+  virtual void loadConfiguration(Geometry::Instrument_const_sptr poldiInstrument) = 0;
 
   virtual void setRotationSpeed(double rotationSpeed) = 0;
 

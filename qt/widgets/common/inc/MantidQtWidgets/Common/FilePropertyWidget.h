@@ -25,8 +25,8 @@ class DLLExport FilePropertyWidget : public TextPropertyWidget {
   Q_OBJECT
 
 public:
-  FilePropertyWidget(Mantid::Kernel::Property *prop, QWidget *parent = nullptr,
-                     QGridLayout *layout = nullptr, int row = -1);
+  FilePropertyWidget(Mantid::Kernel::Property *prop, QWidget *parent = nullptr, QGridLayout *layout = nullptr,
+                     int row = -1);
   ~FilePropertyWidget() override;
 
   static QString openFileDialog(Mantid::Kernel::Property *baseProp);

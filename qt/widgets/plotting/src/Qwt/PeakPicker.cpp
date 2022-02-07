@@ -25,17 +25,15 @@ const Qt::CursorShape PeakPicker::DEFAULT_CURSOR = Qt::PointingHandCursor;
  * @param color :: Peak picker color
  */
 PeakPicker::PeakPicker(QwtPlot *plot, const QColor &color)
-    : QwtPlotPicker(plot->canvas()), QwtPlotItem(), m_plot(plot),
-      m_basePen(color, 0, Qt::SolidLine), m_widthPen(color, 0, Qt::DashLine),
-      m_isMoving(false), m_isResizing(false), m_peak() {
+    : QwtPlotPicker(plot->canvas()), QwtPlotItem(), m_plot(plot), m_basePen(color, 0, Qt::SolidLine),
+      m_widthPen(color, 0, Qt::DashLine), m_isMoving(false), m_isResizing(false), m_peak() {
   attach(plot);
   plot->canvas()->setCursor(DEFAULT_CURSOR);
 }
 
 PeakPicker::PeakPicker(PreviewPlot *plot, const QColor &color)
-    : QwtPlotPicker(plot->canvas()), QwtPlotItem(), m_plot(plot->getPlot()),
-      m_basePen(color, 0, Qt::SolidLine), m_widthPen(color, 0, Qt::DashLine),
-      m_isMoving(false), m_isResizing(false), m_peak() {
+    : QwtPlotPicker(plot->canvas()), QwtPlotItem(), m_plot(plot->getPlot()), m_basePen(color, 0, Qt::SolidLine),
+      m_widthPen(color, 0, Qt::DashLine), m_isMoving(false), m_isResizing(false), m_peak() {
   attach(m_plot);
   m_plot->canvas()->setCursor(DEFAULT_CURSOR);
 }
@@ -54,15 +52,12 @@ bool PeakPicker::eventFilter(QObject *object, QEvent *event) {
     QPoint p = mouseEvent->pos();
 
     // Widget coordinates of left and right width bars
-    int xLeft = m_plot->transform(QwtPlot::xBottom,
-                                  m_peak->centre() - (m_peak->fwhm() / 2.0));
-    int xRight = m_plot->transform(QwtPlot::xBottom,
-                                   m_peak->centre() + (m_peak->fwhm() / 2.0));
+    int xLeft = m_plot->transform(QwtPlot::xBottom, m_peak->centre() - (m_peak->fwhm() / 2.0));
+    int xRight = m_plot->transform(QwtPlot::xBottom, m_peak->centre() + (m_peak->fwhm() / 2.0));
 
     // If clicked with Ctrl pressed, or close enough to one of the width bars -
     // start resizing
-    if (mod.testFlag(Qt::ControlModifier) ||
-        std::abs(p.x() - xLeft) < DRAG_SENSITIVITY ||
+    if (mod.testFlag(Qt::ControlModifier) || std::abs(p.x() - xLeft) < DRAG_SENSITIVITY ||
         std::abs(p.x() - xRight) < DRAG_SENSITIVITY) {
       m_isResizing = true;
       m_plot->canvas()->setCursor(Qt::SizeHorCursor);
@@ -74,8 +69,7 @@ bool PeakPicker::eventFilter(QObject *object, QEvent *event) {
     peakTip.setY(m_plot->transform(QwtPlot::yLeft, m_peak->height()));
 
     // If clicked with Shift pressed or close enough to peak tip - start moving
-    if (mod.testFlag(Qt::ShiftModifier) ||
-        QLineF(p, peakTip).length() < DRAG_SENSITIVITY) {
+    if (mod.testFlag(Qt::ShiftModifier) || QLineF(p, peakTip).length() < DRAG_SENSITIVITY) {
       m_isMoving = true;
       m_plot->canvas()->setCursor(Qt::SizeAllCursor);
     }
@@ -95,9 +89,7 @@ bool PeakPicker::eventFilter(QObject *object, QEvent *event) {
 
     // Resize, if resizing in process
     if (m_isResizing) {
-      m_peak->setFwhm(fabs(m_peak->centre() -
-                           m_plot->invTransform(QwtPlot::xBottom, p.x())) *
-                      2);
+      m_peak->setFwhm(fabs(m_peak->centre() - m_plot->invTransform(QwtPlot::xBottom, p.x())) * 2);
     }
 
     // If moving or resizing in process - update the plot and accept the event
@@ -126,19 +118,16 @@ bool PeakPicker::eventFilter(QObject *object, QEvent *event) {
   return false;
 }
 
-Mantid::API::IPeakFunction_const_sptr PeakPicker::peak() const {
-  return m_peak;
-}
+Mantid::API::IPeakFunction_const_sptr PeakPicker::peak() const { return m_peak; }
 
 void PeakPicker::setPeak(const Mantid::API::IPeakFunction_const_sptr &peak) {
   // Copy the function
   m_peak = std::dynamic_pointer_cast<Mantid::API::IPeakFunction>(
-      Mantid::API::FunctionFactory::Instance().createInitialized(
-          peak->asString()));
+      Mantid::API::FunctionFactory::Instance().createInitialized(peak->asString()));
 }
 
-void PeakPicker::draw(QPainter *painter, const QwtScaleMap &xMap,
-                      const QwtScaleMap &yMap, const QRect &canvasRect) const {
+void PeakPicker::draw(QPainter *painter, const QwtScaleMap &xMap, const QwtScaleMap &yMap,
+                      const QRect &canvasRect) const {
   if (!m_peak) {
     return; // Peak not set - nothing to do
   }

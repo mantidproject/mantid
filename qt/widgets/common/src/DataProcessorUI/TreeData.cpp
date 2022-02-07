@@ -18,8 +18,7 @@ RowData::RowData(const int columnCount) : m_isProcessed{false} {
     m_data.append("");
 }
 
-RowData::RowData(const QStringList &data)
-    : m_data(std::move(data)), m_isProcessed{false} {}
+RowData::RowData(const QStringList &data) : m_data(std::move(data)), m_isProcessed{false} {}
 
 RowData::RowData(const std::vector<std::string> &data) : m_isProcessed{false} {
   for (auto &value : data)
@@ -36,13 +35,9 @@ QList<QString>::iterator RowData::begin() { return m_data.begin(); }
 
 QList<QString>::iterator RowData::end() { return m_data.end(); }
 
-QList<QString>::const_iterator RowData::constBegin() const {
-  return m_data.constBegin();
-}
+QList<QString>::const_iterator RowData::constBegin() const { return m_data.constBegin(); }
 
-QList<QString>::const_iterator RowData::constEnd() const {
-  return m_data.constEnd();
-}
+QList<QString>::const_iterator RowData::constEnd() const { return m_data.constEnd(); }
 
 QString RowData::back() const { return m_data.back(); }
 
@@ -57,9 +52,7 @@ QStringList RowData::data() const { return m_data; }
  * @param i [in] : the column index of the value
  * @return : the value in that column
  */
-QString RowData::value(const int i) {
-  return m_data.size() > i ? m_data.at(i) : "";
-}
+QString RowData::value(const int i) { return m_data.size() > i ? m_data.at(i) : ""; }
 
 /** Set a data value
  * @param i [in] : the index of the value to set
@@ -67,8 +60,7 @@ QString RowData::value(const int i) {
  * @param isGenerated [in] : indicates whether the value is
  * auto-generated or user-entered
  */
-void RowData::setValue(const int i, const QString &value,
-                       const bool isGenerated) {
+void RowData::setValue(const int i, const QString &value, const bool isGenerated) {
   // Set the row value
   if (m_data.size() > i) {
     m_data[i] = value;
@@ -97,9 +89,7 @@ OptionsMap RowData::options() const { return m_options; }
  * after preprocessing has been performed on them
  * @return : the options as a map of property name to value
  */
-OptionsMap RowData::preprocessedOptions() const {
-  return m_preprocessedOptions;
-}
+OptionsMap RowData::preprocessedOptions() const { return m_preprocessedOptions; }
 
 /** Set the options
  * @param options [in] : the options to set as a map of property
@@ -111,9 +101,7 @@ void RowData::setOptions(OptionsMap options) { m_options = std::move(options); }
  * @param options [in] : the options to set as a map of property
  * name to value
  */
-void RowData::setPreprocessedOptions(OptionsMap options) {
-  m_preprocessedOptions = std::move(options);
-}
+void RowData::setPreprocessedOptions(OptionsMap options) { m_preprocessedOptions = std::move(options); }
 
 /** Get the number of fields in the row data
  * @return : the number of fields
@@ -124,16 +112,12 @@ int RowData::size() const { return m_data.size(); }
  * a result of the algorithm rather than being entered by the user)
  * @param i : the column index of the cell to check
  */
-bool RowData::isGenerated(const int i) const {
-  return (m_generatedColumns.count(i) > 0);
-}
+bool RowData::isGenerated(const int i) const { return (m_generatedColumns.count(i) > 0); }
 
 /** Check whether the given property exists in the options
  * @return : true if the property exists
  */
-bool RowData::hasOption(const QString &name) const {
-  return m_options.find(name) != m_options.end();
-}
+bool RowData::hasOption(const QString &name) const { return m_options.find(name) != m_options.end(); }
 
 /** Check whether the given property exists in the options
  * @return : true if the property exists
@@ -148,9 +132,7 @@ bool RowData::hasPreprocessedOption(const QString &name) const {
  * @return : the value, or an empty string if the property
  * doesn't exist
  */
-QString RowData::optionValue(const QString &name) const {
-  return hasOption(name) ? m_options.at(name) : "";
-}
+QString RowData::optionValue(const QString &name) const { return hasOption(name) ? m_options.at(name) : ""; }
 
 /** Get the value for the given property for the given slice
  * @param name [in] : the property name to get
@@ -158,8 +140,7 @@ QString RowData::optionValue(const QString &name) const {
  * @return : the value, or an empty string if the property
  * doesn't exist
  */
-QString RowData::optionValue(const QString &name,
-                             const size_t sliceIndex) const {
+QString RowData::optionValue(const QString &name, const size_t sliceIndex) const {
   if (sliceIndex >= m_slices.size())
     throw std::runtime_error("Attempted to access an invalid slice");
 
@@ -180,16 +161,13 @@ QString RowData::preprocessedOptionValue(const QString &name) const {
  * @param name [in] : the property to set
  * @param value [in] : the value
  */
-void RowData::setOptionValue(const QString &name, const QString &value) {
-  m_options[name] = value;
-}
+void RowData::setOptionValue(const QString &name, const QString &value) { m_options[name] = value; }
 
 /** Set the value for the given property
  * @param name [in] : the property to set
  * @param value [in] : the value
  */
-void RowData::setOptionValue(const std::string &name,
-                             const std::string &value) {
+void RowData::setOptionValue(const std::string &name, const std::string &value) {
   setOptionValue(QString::fromStdString(name), QString::fromStdString(value));
 }
 
@@ -197,8 +175,7 @@ void RowData::setOptionValue(const std::string &name,
  * @param name [in] : the property to set
  * @param value [in] : the value
  */
-void RowData::setPreprocessedOptionValue(const QString &name,
-                                         const QString &value) {
+void RowData::setPreprocessedOptionValue(const QString &name, const QString &value) {
   m_preprocessedOptions[name] = value;
 }
 
@@ -206,10 +183,8 @@ void RowData::setPreprocessedOptionValue(const QString &name,
  * @param name [in] : the property to set
  * @param value [in] : the value
  */
-void RowData::setPreprocessedOptionValue(const std::string &name,
-                                         const std::string &value) {
-  setPreprocessedOptionValue(QString::fromStdString(name),
-                             QString::fromStdString(value));
+void RowData::setPreprocessedOptionValue(const std::string &name, const std::string &value) {
+  setPreprocessedOptionValue(QString::fromStdString(name), QString::fromStdString(value));
 }
 
 /** Get the number of slices for this row
@@ -221,9 +196,7 @@ size_t RowData::numberOfSlices() const { return m_slices.size(); }
  * @param sliceIndex [in] : the index of the slice
  * @return : true if the slice exists
  */
-bool RowData::hasSlice(const size_t sliceIndex) {
-  return (sliceIndex < m_slices.size());
-}
+bool RowData::hasSlice(const size_t sliceIndex) { return (sliceIndex < m_slices.size()); }
 
 /** Get a child slice
  * @param sliceIndex [in] : the index of the slice
@@ -245,9 +218,7 @@ RowData_sptr RowData::getSlice(const size_t sliceIndex) {
  * the slice suffix in the options for the new slice.
  * @return : the row data for the new slice
  */
-RowData_sptr
-RowData::addSlice(const QString &sliceSuffix,
-                  const std::vector<QString> &workspaceProperties) {
+RowData_sptr RowData::addSlice(const QString &sliceSuffix, const std::vector<QString> &workspaceProperties) {
   // Create a copy
   auto sliceData = std::make_shared<RowData>(*this);
   for (auto const &propertyName : workspaceProperties) {
@@ -302,9 +273,7 @@ bool RowData::reductionFailed() const {
   if (!m_error.empty())
     return true;
 
-  return std::any_of(m_slices.cbegin(), m_slices.cend(), [](const auto &slice) {
-    return slice->reductionFailed();
-  });
+  return std::any_of(m_slices.cbegin(), m_slices.cend(), [](const auto &slice) { return slice->reductionFailed(); });
 }
 
 /** Return the canonical reduced workspace name i.e. before any
@@ -321,8 +290,7 @@ QString RowData::reducedName(const QString &prefix) const {
 /** Check if this row has an output workspace with the given workspace name
  * and prefix (including any slices)
  */
-bool RowData::hasOutputWorkspaceWithNameAndPrefix(const QString &workspaceName,
-                                                  const QString &prefix) const {
+bool RowData::hasOutputWorkspaceWithNameAndPrefix(const QString &workspaceName, const QString &prefix) const {
   if (reducedName(prefix) == workspaceName) {
     return true;
   }

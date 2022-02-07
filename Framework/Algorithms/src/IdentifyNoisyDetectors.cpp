@@ -14,8 +14,7 @@
 #include "MantidKernel/CompositeValidator.h"
 #include <numeric>
 
-namespace Mantid {
-namespace Algorithms {
+namespace Mantid::Algorithms {
 using namespace Kernel;
 using namespace API;
 using namespace HistogramData;
@@ -29,10 +28,9 @@ void IdentifyNoisyDetectors::init() {
   wsVal->add<HistogramValidator>();
   wsVal->add<SpectraAxisValidator>();
   wsVal->add<InstrumentValidator>();
-  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
-      "InputWorkspace", "", Direction::Input /*,wsVal*/));
-  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
-      "OutputWorkspace", "", Direction::Output));
+  declareProperty(
+      std::make_unique<WorkspaceProperty<MatrixWorkspace>>("InputWorkspace", "", Direction::Input /*,wsVal*/));
+  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>("OutputWorkspace", "", Direction::Output));
   declareProperty("RangeLower", 2000.0, "The lower integration range");
   declareProperty("RangeUpper", 19000.0, "The upper integration range");
 }
@@ -48,10 +46,9 @@ void IdentifyNoisyDetectors::exec() {
   const double steps = rangeUpper - rangeLower;
 
   if (0 == nHist)
-    throw std::runtime_error(
-        "Cannot run this algorithm on an input workspace without any spectra. "
-        "It does not seem to make sense and the calculations done here will "
-        "will cause a division by zero.");
+    throw std::runtime_error("Cannot run this algorithm on an input workspace without any spectra. "
+                             "It does not seem to make sense and the calculations done here will "
+                             "will cause a division by zero.");
 
   Progress progress(this, 0.0, 1.0, (nHist * 7) + 6);
 
@@ -64,7 +61,7 @@ void IdentifyNoisyDetectors::exec() {
 
   progress.report("Integrating...");
 
-  IAlgorithm_sptr integ = createChildAlgorithm("Integration");
+  auto integ = createChildAlgorithm("Integration");
   integ->initialize();
   integ->setProperty<MatrixWorkspace_sptr>("InputWorkspace", inputWs);
   integ->setProperty<double>("RangeLower", rangeLower);
@@ -75,7 +72,7 @@ void IdentifyNoisyDetectors::exec() {
 
   progress.report("Power...");
 
-  IAlgorithm_sptr power = createChildAlgorithm("Power");
+  auto power = createChildAlgorithm("Power");
   power->initialize();
   power->setProperty<MatrixWorkspace_sptr>("InputWorkspace", inputWs);
   power->setProperty<double>("Exponent", 2.0);
@@ -95,34 +92,23 @@ void IdentifyNoisyDetectors::exec() {
 
   MatrixWorkspace_sptr int2 = integ->getProperty("OutputWorkspace");
 
-  progress.report("Creating single valued workspace...");
-
-  IAlgorithm_sptr csvw = createChildAlgorithm("CreateSingleValuedWorkspace");
-  csvw->initialize();
-  csvw->setProperty<double>("DataValue", steps);
-  csvw->execute();
-
-  MatrixWorkspace_sptr stepsWs = csvw->getProperty("OutputWorkspace");
+  progress.report("Dividing...");
+  auto algScale = createChildAlgorithm("Scale");
+  algScale->initialize();
+  algScale->setProperty("InputWorkspace", int1);
+  algScale->setProperty("OutputWorkspace", int1);
+  algScale->setProperty("Factor", 1.0 / steps);
+  algScale->execute();
+  int1 = algScale->getProperty("OutputWorkspace");
 
   progress.report("Dividing...");
 
-  IAlgorithm_sptr divide = createChildAlgorithm("Divide");
-  divide->initialize();
-  divide->setProperty<MatrixWorkspace_sptr>("LHSWorkspace", int1);
-  divide->setProperty<MatrixWorkspace_sptr>("RHSWorkspace", stepsWs);
-  divide->execute();
-
-  int1 = divide->getProperty("OutputWorkspace");
-
-  progress.report("Dividing...");
-
-  divide = createChildAlgorithm("Divide");
-  divide->initialize();
-  divide->setProperty<MatrixWorkspace_sptr>("LHSWorkspace", int2);
-  divide->setProperty<MatrixWorkspace_sptr>("RHSWorkspace", stepsWs);
-  divide->execute();
-
-  int2 = divide->getProperty("OutputWorkspace");
+  algScale = createChildAlgorithm("Scale");
+  algScale->setProperty("InputWorkspace", int2);
+  algScale->setProperty("OutputWorkspace", int2);
+  algScale->setProperty("Factor", 1.0 / steps);
+  algScale->execute();
+  int2 = algScale->getProperty("OutputWorkspace");
 
   for (int i = 0; i < nHist; i++) {
     outputWs->setHistogram(i, Points{0.0}, Counts{1.0});
@@ -148,8 +134,7 @@ void IdentifyNoisyDetectors::exec() {
  * @param valid :: eventual output workspace, holding 0 for bad and 1 for good
  * @param values :: stddeviations of each spectra (I think)
  */
-void IdentifyNoisyDetectors::getStdDev(API::Progress &progress,
-                                       const MatrixWorkspace_sptr &valid,
+void IdentifyNoisyDetectors::getStdDev(API::Progress &progress, const MatrixWorkspace_sptr &valid,
                                        const MatrixWorkspace_sptr &values) {
   const auto nhist = static_cast<int>(valid->getNumberHistograms());
   int count = 0;
@@ -193,5 +178,4 @@ void IdentifyNoisyDetectors::getStdDev(API::Progress &progress,
   }
 }
 
-} // namespace Algorithms
-} // namespace Mantid
+} // namespace Mantid::Algorithms

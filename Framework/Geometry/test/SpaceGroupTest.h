@@ -64,8 +64,7 @@ public:
   }
 
   void testGetEquivalentsR3c() {
-    Group_const_sptr group = GroupFactory::create<ProductOfCyclicGroups>(
-        "-y,x-y,z; y,x,-z+1/2; -x,-y,-z");
+    Group_const_sptr group = GroupFactory::create<ProductOfCyclicGroups>("-y,x-y,z; y,x,-z+1/2; -x,-y,-z");
     Group_const_sptr centering = GroupFactory::create<CenteringGroup>("R");
 
     SpaceGroup spaceGroup(167, "R-3c", *(group * centering));
@@ -76,8 +75,7 @@ public:
     }
     std::sort(byOperator.begin(), byOperator.end());
 
-    std::vector<V3D> byEquivalents =
-        spaceGroup.getEquivalentPositions(V3D(0.3, 0.0, 0.25));
+    std::vector<V3D> byEquivalents = spaceGroup.getEquivalentPositions(V3D(0.3, 0.0, 0.25));
     std::sort(byEquivalents.begin(), byEquivalents.end());
 
     TS_ASSERT_EQUALS(byOperator.size(), 18);
@@ -96,8 +94,7 @@ public:
     }
     std::sort(byOperator.begin(), byOperator.end());
 
-    std::vector<V3D> byEquivalents =
-        spaceGroup.getEquivalentPositions(V3D(0.5, 0.0, 0.0));
+    std::vector<V3D> byEquivalents = spaceGroup.getEquivalentPositions(V3D(0.5, 0.0, 0.0));
     std::sort(byEquivalents.begin(), byEquivalents.end());
 
     TS_ASSERT_EQUALS(byOperator.size(), 9);
@@ -182,8 +179,7 @@ public:
      * of crystallographic point groups and space groups"
      * Acta Cryst. A62, 115-128 (2006)
      */
-    Group_const_sptr group = GroupFactory::create<ProductOfCyclicGroups>(
-        "-y,x-y,z; y,x,-z+1/2; -x,-y,-z");
+    Group_const_sptr group = GroupFactory::create<ProductOfCyclicGroups>("-y,x-y,z; y,x,-z+1/2; -x,-y,-z");
     Group_const_sptr centering = GroupFactory::create<CenteringGroup>("R");
 
     SpaceGroup spaceGroup(167, "R-3c", *(group * centering));
@@ -222,8 +218,7 @@ public:
 
 private:
   SpaceGroup getSpaceGroupR3m() {
-    Group_const_sptr group = GroupFactory::create<ProductOfCyclicGroups>(
-        "-y,x-y,z; y,x,-z; -x,-y,-z");
+    Group_const_sptr group = GroupFactory::create<ProductOfCyclicGroups>("-y,x-y,z; y,x,-z; -x,-y,-z");
     Group_const_sptr centering = GroupFactory::create<CenteringGroup>("R");
 
     SpaceGroup sg(166, "R-3m", *(group * centering));
@@ -231,20 +226,16 @@ private:
     return sg;
   }
 
-  void checkSiteSymmetryGroupPositions(const V3D &position,
-                                       const Group_const_sptr &siteSymmGroup,
-                                       const std::string &wPosName,
-                                       size_t siteSymmGroupOrder) {
+  void checkSiteSymmetryGroupPositions(const V3D &position, const Group_const_sptr &siteSymmGroup,
+                                       const std::string &wPosName, size_t siteSymmGroupOrder) {
     std::vector<V3D> equivalents = (*siteSymmGroup) * position;
     for (auto eq = equivalents.begin(); eq != equivalents.end(); ++eq) {
-      TSM_ASSERT_EQUALS("Problem with Wyckoff-position " + wPosName +
-                            ". Expected " + position.toString() + ", got " +
+      TSM_ASSERT_EQUALS("Problem with Wyckoff-position " + wPosName + ". Expected " + position.toString() + ", got " +
                             (*eq).toString() + ".",
                         *eq, position);
     }
 
-    TSM_ASSERT_EQUALS("Problem with Wyckoff-position " + wPosName +
-                          ", order of site symmetry group is incorrect.",
+    TSM_ASSERT_EQUALS("Problem with Wyckoff-position " + wPosName + ", order of site symmetry group is incorrect.",
                       siteSymmGroup->order(), siteSymmGroupOrder);
   }
 

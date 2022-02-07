@@ -20,8 +20,7 @@
 #include <cstdio> //Required for gcc 4.4
 #include <memory>
 
-namespace Mantid {
-namespace DataHandling {
+namespace Mantid::DataHandling {
 // Register the algorithm into the algorithm factory
 DECLARE_ALGORITHM(LoadRawSpectrum0)
 
@@ -30,8 +29,8 @@ using namespace API;
 
 /// Constructor
 LoadRawSpectrum0::LoadRawSpectrum0()
-    : isisRaw(), m_filename(), m_numberOfSpectra(0), m_cache_options(),
-      m_specTimeRegimes(), m_prog(0.0), m_lengthIn(0), m_noTimeRegimes(0) {}
+    : isisRaw(), m_filename(), m_numberOfSpectra(0), m_cache_options(), m_specTimeRegimes(), m_prog(0.0), m_lengthIn(0),
+      m_noTimeRegimes(0) {}
 
 /// Initialisation method.
 void LoadRawSpectrum0::init() { LoadRawHelper::init(); }
@@ -55,7 +54,7 @@ void LoadRawSpectrum0::exec() {
   // Need to check that the file is not a text file as the ISISRAW routines
   // don't deal with these very well, i.e
   // reading continues until a bad_alloc is encountered.
-  if (isAscii(file)) {
+  if (Kernel::FileDescriptor::isAscii(file)) {
     g_log.error() << "File \"" << m_filename << "\" is not a valid RAW file.\n";
     throw std::invalid_argument("Incorrect file type encountered.");
   }
@@ -63,8 +62,7 @@ void LoadRawSpectrum0::exec() {
   std::string title;
   readTitle(file, title);
 
-  readworkspaceParameters(m_numberOfSpectra, m_numberOfPeriods, m_lengthIn,
-                          m_noTimeRegimes);
+  readworkspaceParameters(m_numberOfSpectra, m_numberOfPeriods, m_lengthIn, m_noTimeRegimes);
 
   // Calculate the size of a workspace, given its number of periods & spectra to
   // read
@@ -77,8 +75,7 @@ void LoadRawSpectrum0::exec() {
   int64_t histCurrent = -1;
 
   // Create the 2D workspace for the output
-  DataObjects::Workspace2D_sptr localWorkspace =
-      createWorkspace(total_specs, m_lengthIn, m_lengthIn - 1, title);
+  DataObjects::Workspace2D_sptr localWorkspace = createWorkspace(total_specs, m_lengthIn, m_lengthIn - 1, title);
 
   Run &run = localWorkspace->mutableRun();
 
@@ -91,15 +88,14 @@ void LoadRawSpectrum0::exec() {
   setProtonCharge(run);
 
   WorkspaceGroup_sptr wsgrp_sptr = createGroupWorkspace();
-  setWorkspaceProperty("OutputWorkspace", title, wsgrp_sptr, localWorkspace,
-                       m_numberOfPeriods, false, this);
+  setWorkspaceProperty("OutputWorkspace", title, wsgrp_sptr, localWorkspace, m_numberOfPeriods, false, this);
 
   // Loop over the number of periods in the raw file, putting each period in a
   // separate workspace
   for (int period = 0; period < m_numberOfPeriods; ++period) {
     if (period > 0) {
-      localWorkspace = std::dynamic_pointer_cast<DataObjects::Workspace2D>(
-          WorkspaceFactory::Instance().create(localWorkspace));
+      localWorkspace =
+          std::dynamic_pointer_cast<DataObjects::Workspace2D>(WorkspaceFactory::Instance().create(localWorkspace));
 
       if (bLoadlogFiles) {
         // remove previous period data
@@ -131,8 +127,7 @@ void LoadRawSpectrum0::exec() {
     }
 
     // set the workspace data
-    setWorkspaceData(localWorkspace, timeChannelsVec, wsIndex, 0,
-                     m_noTimeRegimes, m_lengthIn, 1);
+    setWorkspaceData(localWorkspace, timeChannelsVec, wsIndex, 0, m_noTimeRegimes, m_lengthIn, 1);
 
     if (m_numberOfPeriods == 1) {
       if (++histCurrent % 100 == 0) {
@@ -143,8 +138,7 @@ void LoadRawSpectrum0::exec() {
     if (m_numberOfPeriods > 1) {
       setWorkspaceProperty(localWorkspace, wsgrp_sptr, period, false, this);
       // progress for workspace groups
-      m_prog = static_cast<double>(period) /
-               static_cast<double>(m_numberOfPeriods - 1);
+      m_prog = static_cast<double>(period) / static_cast<double>(m_numberOfPeriods - 1);
     }
 
   } // loop over periods
@@ -153,5 +147,4 @@ void LoadRawSpectrum0::exec() {
   reset();
   fclose(file);
 }
-} // namespace DataHandling
-} // namespace Mantid
+} // namespace Mantid::DataHandling

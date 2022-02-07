@@ -7,16 +7,14 @@
 #include "MantidAlgorithms/MaxEnt/MaxentSpaceReal.h"
 #include <stdexcept>
 
-namespace Mantid {
-namespace Algorithms {
+namespace Mantid::Algorithms {
 
 /**
  * Converts a vector of real values to a vector of complex numbers
  * @param values : [input] The real values as a vector
  * @return : The input as a vector of complex numbers
  */
-std::vector<double>
-MaxentSpaceReal::toComplex(const std::vector<double> &values) {
+std::vector<double> MaxentSpaceReal::toComplex(const std::vector<double> &values) {
 
   // The output has 2*N values
   std::vector<double> result(values.size() * 2);
@@ -32,8 +30,7 @@ MaxentSpaceReal::toComplex(const std::vector<double> &values) {
  * @param values : [input] The complex values as a vector
  * @return : The input as a vector of real numbers
  */
-std::vector<double>
-MaxentSpaceReal::fromComplex(const std::vector<double> &values) {
+std::vector<double> MaxentSpaceReal::fromComplex(const std::vector<double> &values) {
 
   if (values.size() % 2) {
     throw std::invalid_argument("Cannot convert to real vector");
@@ -48,5 +45,4 @@ MaxentSpaceReal::fromComplex(const std::vector<double> &values) {
   return result;
 }
 
-} // namespace Algorithms
-} // namespace Mantid
+} // namespace Mantid::Algorithms

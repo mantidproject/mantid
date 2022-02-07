@@ -44,8 +44,7 @@ class PropertiesDirective(AlgorithmBaseDirective):
             for i in range(ifunc.numParams()):
                 properties.append((ifunc.parameterName(i),
                                    str(ifunc.getParameterValue(i)),
-                                   ifunc.paramDescription(i)
-                                  ))
+                                   ifunc.paramDescription(i)))
             self.add_rst(self.make_header("Properties (fitting parameters)"))
         else: # this is an Algorithm
             alg = self.create_mantid_algorithm(self.algorithm_name(),
@@ -227,16 +226,16 @@ class PropertiesDirective(AlgorithmBaseDirective):
         Returns:
           str: The string to add to the property table description section.
         """
+        from mantid.api import IWorkspaceProperty
+
         desc = str(prop.documentation.replace("\n", " "))
 
         allowedValueString = str(prop.allowedValues)
         # 4 allows for ['']
-        if len(allowedValueString) > 4:
+        if len(allowedValueString) > 4 and not isinstance(prop, IWorkspaceProperty):
             ##make sure the last sentence ended with a full stop (or equivalent)
-            if (not desc.rstrip().endswith("."))      \
-                and (not desc.rstrip().endswith("!")) \
-                and (not desc.rstrip().endswith("?")) \
-                and (len(desc.strip())>0):
+            if (not desc.rstrip().endswith(".")) and (not desc.rstrip().endswith("!")) and\
+                    (not desc.rstrip().endswith("?")) and (len(desc.strip())>0):
                 desc += "."
             isFileExts = True
             for item in prop.allowedValues:

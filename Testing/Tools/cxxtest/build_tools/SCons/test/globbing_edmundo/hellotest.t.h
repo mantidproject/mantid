@@ -16,9 +16,9 @@
 
 #include <cxxtest/TestSuite.h>
 #include <hello.hh>
-      
 
-class helloTestSuite : public CxxTest::TestSuite 
+
+class helloTestSuite : public CxxTest::TestSuite
   {
     public:
     void testFoo()

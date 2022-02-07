@@ -23,9 +23,7 @@ public:
   const std::string name() const override;
   int version() const override;
   const std::string category() const override;
-  const std::string summary() const override {
-    return "Abstract base class for unary operations on MDWorkspaces.";
-  }
+  const std::string summary() const override { return "Abstract base class for unary operations on MDWorkspaces."; }
 
 protected:
   /// The name of the input workspace property

@@ -41,15 +41,13 @@
 #include "MantidQtWidgets/Common/FlowLayout.h"
 #include <QWidget>
 
-namespace MantidQt {
-namespace API {
+namespace MantidQt::API {
 FlowLayout::FlowLayout(QWidget *parent, int margin, int hSpacing, int vSpacing)
     : QLayout(parent), m_hSpace(hSpacing), m_vSpace(vSpacing) {
   setContentsMargins(margin, margin, margin, margin);
 }
 
-FlowLayout::FlowLayout(int margin, int hSpacing, int vSpacing)
-    : m_hSpace(hSpacing), m_vSpace(vSpacing) {
+FlowLayout::FlowLayout(int margin, int hSpacing, int vSpacing) : m_hSpace(hSpacing), m_vSpace(vSpacing) {
   setContentsMargins(margin, margin, margin, margin);
 }
 
@@ -79,9 +77,7 @@ int FlowLayout::verticalSpacing() const {
 
 int FlowLayout::count() const { return itemList.size(); }
 
-QLayoutItem *FlowLayout::itemAt(int index) const {
-  return itemList.value(index);
-}
+QLayoutItem *FlowLayout::itemAt(int index) const { return itemList.value(index); }
 
 QLayoutItem *FlowLayout::takeAt(int index) {
   if (index >= 0 && index < itemList.size())
@@ -127,12 +123,10 @@ int FlowLayout::doLayout(const QRect &rect, bool testOnly) const {
     QWidget *wid = item->widget();
     int spaceX = horizontalSpacing();
     if (spaceX == -1)
-      spaceX = wid->style()->layoutSpacing(
-          QSizePolicy::PushButton, QSizePolicy::PushButton, Qt::Horizontal);
+      spaceX = wid->style()->layoutSpacing(QSizePolicy::PushButton, QSizePolicy::PushButton, Qt::Horizontal);
     int spaceY = verticalSpacing();
     if (spaceY == -1)
-      spaceY = wid->style()->layoutSpacing(
-          QSizePolicy::PushButton, QSizePolicy::PushButton, Qt::Vertical);
+      spaceY = wid->style()->layoutSpacing(QSizePolicy::PushButton, QSizePolicy::PushButton, Qt::Vertical);
     int nextX = x + item->sizeHint().width() + spaceX;
     if (nextX - spaceX > effectiveRect.right() && lineHeight > 0) {
       x = effectiveRect.x();
@@ -160,5 +154,4 @@ int FlowLayout::smartSpacing(QStyle::PixelMetric pm) const {
     return static_cast<QLayout *>(parent)->spacing();
   }
 }
-} // namespace API
-} // namespace MantidQt
+} // namespace MantidQt::API

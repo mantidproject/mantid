@@ -23,19 +23,19 @@ Usage
    mdew = Load("TOPAZ_3680_5_sec_MDEW.nxs")
    # Find some peaks. These are all unindexed so will have HKL = [0,0,0]
    peaks = FindPeaksMD(InputWorkspace=mdew, MaxPeaks=1)
-   
+
    # Find peaks in region when the Peak sits in the centre of a box
    in_box_table = PeaksInRegion(peaks, CoordinateFrame='HKL', PeakRadius=0.1, Extents=[-1.0,1.0,-1.0,1.0,-1.0,1.0], CheckPeakExtents=True)
    print("{{'Distance': {Distance}, 'PeakIndex': {PeakIndex}, 'Intersecting': {Intersecting}}}".format(**in_box_table.row(0)))
-   
+
    # Find peaks in region when the peak is just outside the box (by radius)
    just_outside_box_table = PeaksInRegion(peaks, CoordinateFrame='HKL', PeakRadius=0.999, Extents=[1.0,2.0,-1.0,1.0,-1.0,1.0], CheckPeakExtents=True)
    print("{{'Distance': {Distance}, 'PeakIndex': {PeakIndex}, 'Intersecting': {Intersecting}}}".format(**just_outside_box_table.row(0)))
-   
+
    # Find peaks in region when the peak is just inside the box (by radius)
    just_intersecting_box_table = PeaksInRegion(peaks, CoordinateFrame='HKL', PeakRadius=1.00, Extents=[1.0,2.0,-1.0,1.0,-1.0,1.0], CheckPeakExtents=True)
    print("{{'Distance': {Distance}, 'PeakIndex': {PeakIndex}, 'Intersecting': {Intersecting}}}".format(**just_intersecting_box_table.row(0)))
-   
+
 Output:
 
 .. testoutput:: PeaksInRegionExample

@@ -22,8 +22,7 @@ namespace Crystal {
 @author Vickie Lynch, SNS
 @date 7/25/2016
 */
-class MANTID_CRYSTAL_DLL SCDPanelErrors : public API::ParamFunction,
-                                          public API::IFunction1D {
+class MANTID_CRYSTAL_DLL SCDPanelErrors : public API::ParamFunction, public API::IFunction1D {
 public:
   /// Constructor
   SCDPanelErrors();
@@ -31,21 +30,16 @@ public:
   /// overwrite IFunction base class methods
   std::string name() const override { return "SCDPanelErrors"; }
   const std::string category() const override { return "General"; }
-  void function1D(double *out, const double *xValues,
-                  const size_t nData) const override;
+  void function1D(double *out, const double *xValues, const size_t nData) const override;
   ///  function derivatives
-  void functionDeriv1D(API::Jacobian *out, const double *xValues,
-                       const size_t nData) override;
+  void functionDeriv1D(API::Jacobian *out, const double *xValues, const size_t nData) override;
 
   /// Set a value to attribute attName
-  void setAttribute(const std::string &attName,
-                    const IFunction::Attribute &value) override;
+  void setAttribute(const std::string &attName, const IFunction::Attribute &value) override;
 
   /// Move detectors with parameters
-  void moveDetector(double x, double y, double z, double rotx, double roty,
-                    double rotz, double scalex, double scaley,
-                    std::string detname,
-                    const API::Workspace_sptr &inputW) const;
+  void moveDetector(double x, double y, double z, double rotx, double roty, double rotz, double scalex, double scaley,
+                    std::string detname, const API::Workspace_sptr &inputW) const;
 
 private:
   /// Call the appropriate load function
@@ -61,10 +55,8 @@ private:
   void clear() const;
 
   /// Evaluate the function for a list of arguments and given scaling factor
-  void eval(double xshift, double yshift, double zshift, double xrotate,
-            double yrotate, double zrotate, double scalex, double scaley,
-            double *out, const double *xValues, const size_t nData,
-            double tShift) const;
+  void eval(double xshift, double yshift, double zshift, double xrotate, double yrotate, double zrotate, double scalex,
+            double scaley, double *out, const double *xValues, const size_t nData, double tShift) const;
 
   /// Fill in the workspace and bank names
   void setupData() const;

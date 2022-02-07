@@ -26,13 +26,10 @@ class PointVariances;
   @date 2016
 */
 class MANTID_HISTOGRAMDATA_DLL PointStandardDeviations
-    : public detail::StandardDeviationVectorOf<PointStandardDeviations,
-                                               HistogramDx, PointVariances> {
+    : public detail::StandardDeviationVectorOf<PointStandardDeviations, HistogramDx, PointVariances> {
 public:
-  using StandardDeviationVectorOf<PointStandardDeviations, HistogramDx,
-                                  PointVariances>::StandardDeviationVectorOf;
-  using StandardDeviationVectorOf<PointStandardDeviations, HistogramDx,
-                                  PointVariances>::operator=;
+  using StandardDeviationVectorOf<PointStandardDeviations, HistogramDx, PointVariances>::StandardDeviationVectorOf;
+  using StandardDeviationVectorOf<PointStandardDeviations, HistogramDx, PointVariances>::operator=;
   /// Default constructor, creates a NULL object.
   PointStandardDeviations() = default;
   // The copy and move constructor and assignment are not captured properly by
@@ -42,8 +39,7 @@ public:
   /// Move constructor.
   PointStandardDeviations(PointStandardDeviations &&) = default;
   /// Copy assignment. Lightweight, internal data will be shared.
-  PointStandardDeviations &
-  operator=(const PointStandardDeviations &) & = default;
+  PointStandardDeviations &operator=(const PointStandardDeviations &) & = default;
   /// Move assignment.
   PointStandardDeviations &operator=(PointStandardDeviations &&) & = default;
 };

@@ -33,14 +33,10 @@ public:
   size_t size() const override { return m_data.size(); }
 
   /// Returns typeid for the data in the column
-  const std::type_info &get_type_info() const override {
-    return typeid(std::vector<Type>);
-  }
+  const std::type_info &get_type_info() const override { return typeid(std::vector<Type>); }
 
   /// Returns typeid for the pointer type to the data element in the column
-  const std::type_info &get_pointer_type_info() const override {
-    return typeid(std::vector<Type> *);
-  }
+  const std::type_info &get_pointer_type_info() const override { return typeid(std::vector<Type> *); }
 
   /// Print specified item to the stream
   void print(size_t index, std::ostream &s) const override {
@@ -62,15 +58,13 @@ public:
   /// Set item from a string value
   void read(size_t index, const std::string &text) override {
     std::vector<Type> newValues;
-    Mantid::Kernel::StringTokenizer elements(
-        text, ",", Mantid::Kernel::StringTokenizer::TOK_TRIM);
+    Mantid::Kernel::StringTokenizer elements(text, ",", Mantid::Kernel::StringTokenizer::TOK_TRIM);
 
     for (const auto &element : elements) {
       try {
         newValues.emplace_back(boost::lexical_cast<Type>(element));
       } catch (boost::bad_lexical_cast &) {
-        throw std::invalid_argument("Unable to convert one of the elements: " +
-                                    element);
+        throw std::invalid_argument("Unable to convert one of the elements: " + element);
       }
     }
 
@@ -129,8 +123,7 @@ public:
     if (!possibleToCompare(otherColumn)) {
       return false;
     }
-    const auto &otherColumnTyped =
-        static_cast<const VectorColumn<Type> &>(otherColumn);
+    const auto &otherColumnTyped = static_cast<const VectorColumn<Type> &>(otherColumn);
     const auto &otherData = otherColumnTyped.data();
     for (size_t i = 0; i < m_data.size(); i++) {
       if (m_data[i].size() != otherData[i].size()) {
@@ -145,13 +138,11 @@ public:
     return true;
   }
 
-  bool equalsRelErr(const Column &otherColumn,
-                    double tolerance) const override {
+  bool equalsRelErr(const Column &otherColumn, double tolerance) const override {
     if (!possibleToCompare(otherColumn)) {
       return false;
     }
-    const auto &otherColumnTyped =
-        static_cast<const VectorColumn<Type> &>(otherColumn);
+    const auto &otherColumnTyped = static_cast<const VectorColumn<Type> &>(otherColumn);
     const auto &otherData = otherColumnTyped.data();
     for (size_t i = 0; i < m_data.size(); i++) {
       if (m_data[i].size() != otherData[i].size()) {
@@ -159,8 +150,7 @@ public:
       }
       for (size_t j = 0; j < m_data[i].size(); j++) {
         double num = fabs((double)m_data[i][j] - (double)otherData[i][j]);
-        double den =
-            (fabs((double)m_data[i][j]) + fabs((double)otherData[i][j])) / 2;
+        double den = (fabs((double)m_data[i][j]) + fabs((double)otherData[i][j])) / 2;
         if (den < tolerance && num > tolerance) {
           return false;
         } else if (num / den > tolerance) {
@@ -188,9 +178,7 @@ protected:
   void *void_pointer(size_t index) override { return &m_data.at(index); }
 
   /// Pointer to a data element
-  const void *void_pointer(size_t index) const override {
-    return &m_data.at(index);
-  }
+  const void *void_pointer(size_t index) const override { return &m_data.at(index); }
 
 private:
   /// All the vectors stored
@@ -204,8 +192,7 @@ private:
 } // namespace DataObjects
 } // namespace Mantid
 
-#define DECLARE_VECTORCOLUMN(Type, TypeName)                                   \
-  template <> std::string VectorColumn<Type>::typeName() { return #TypeName; } \
-  Kernel::RegistrationHelper register_column_##TypeName((                      \
-      API::ColumnFactory::Instance().subscribe<VectorColumn<Type>>(#TypeName), \
-      0));
+#define DECLARE_VECTORCOLUMN(Type, TypeName)                                                                           \
+  template <> std::string VectorColumn<Type>::typeName() { return #TypeName; }                                         \
+  Kernel::RegistrationHelper register_column_##TypeName(                                                               \
+      (API::ColumnFactory::Instance().subscribe<VectorColumn<Type>>(#TypeName), 0));

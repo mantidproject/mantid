@@ -38,6 +38,8 @@ public:
   CollapsiblePanel(const QString &caption, QWidget *parent);
   void setWidget(QWidget *widget);
   void setCaption(const QString &caption);
+  void collapseCaption() { m_label->collapse(); }
+  void expandCaption() { m_label->expand(); }
   bool isCollapsed() const;
 signals:
   void collapsed();

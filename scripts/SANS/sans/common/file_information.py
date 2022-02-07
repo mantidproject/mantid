@@ -17,6 +17,7 @@ from mantid.kernel import (DateAndTime, ConfigService, Logger)
 from mantid.api import (AlgorithmManager, ExperimentInfo)
 from sans.common.enums import (SANSInstrument, FileType, SampleShape)
 from sans.common.general_functions import (get_instrument, instrument_name_correction, get_facility)
+
 # ----------------------------------------------------------------------------------------------------------------------
 # Constants
 # ----------------------------------------------------------------------------------------------------------------------
@@ -366,7 +367,7 @@ def get_date_for_isis_nexus(file_name):
     return DateAndTime(value)
 
 
-def get_event_mode_information(file_name):
+def is_raw_nexus_event_mode(file_name):
     """
     Event mode files have a class with a "NXevent_data" type
     Structure:
@@ -426,15 +427,15 @@ def get_geometry_information_isis_nexus(file_name):
 # 3. Scenario 2: Added event data, ie files which were added and saved as event data.
 
 
-def get_added_nexus_information(file_name):  # noqa
+def check_nexus_information(file_name):
     """
     Get information if is added data and the number of periods.
 
     :param file_name: the full file path.
     :return: if the file was a Nexus file and the number of periods.
     """
-    ADDED_SUFFIX = "-add_added_event_data"
-    ADDED_MONITOR_SUFFIX = "-add_monitors_added_event_data"
+    ADDED_SUFFIX = "_added_event_data"
+    ADDED_MONITOR_SUFFIX = "_monitors_added_event_data"
 
     def get_all_keys_for_top_level(key_collection):
         top_level_key_collection = []
@@ -443,26 +444,30 @@ def get_added_nexus_information(file_name):  # noqa
                 top_level_key_collection.append(key)
         return sorted(top_level_key_collection)
 
+    with h5.File(file_name, 'r') as h5_file:
+        # Get all mantid_workspace_X keys
+        keys = list(h5_file.keys())
+        top_level_keys = get_all_keys_for_top_level(keys)
+        # This magic workspace name gets used whenever Mantid has touched a file
+        # so we will assume anything we've touched is an add file.
+        # If this assumption no longer holds true, you are welcome to find another
+        # fingerprint and complain at me, since this was the "easiest" method
+        nexus_added_tag_present = any("mantid_workspace" in key for key in top_level_keys)
+
     def check_if_event_mode(entry):
         return "event_workspace" in list(entry.keys())
 
-    def get_workspace_name(entry):
-        return entry["workspace_name"][0].decode("utf-8")
+    def get_workspace_name(entry, file_name):
+        return entry[WORKSPACE_NAME][0].decode("utf-8") if WORKSPACE_NAME in entry else file_name
 
     def has_same_number_of_entries(workspace_names, monitor_workspace_names):
         return len(workspace_names) == len(monitor_workspace_names)
-
-    def has_added_tag(workspace_names, monitor_workspace_names):
-        all_have_added_tag = all([ADDED_SUFFIX in ws_name for ws_name in workspace_names])
-        if all_have_added_tag:
-            all_have_added_tag = all([ADDED_MONITOR_SUFFIX in ws_name for ws_name in monitor_workspace_names])
-        return all_have_added_tag
 
     def entries_match(workspace_names, monitor_workspace_names):
         altered_names = [ws_name.replace(ADDED_SUFFIX, ADDED_MONITOR_SUFFIX) for ws_name in workspace_names]
         return all([ws_name in monitor_workspace_names for ws_name in altered_names])
 
-    def get_added_event_info(h5_file_handle, key_collection):
+    def get_added_event_info(h5_file_handle, key_collection, file_name):
         """
         We expect to find one event workspace and one histogram workspace per period
         """
@@ -471,7 +476,7 @@ def get_added_nexus_information(file_name):  # noqa
         for key in key_collection:
             entry = h5_file_handle[key]
             is_event_mode = check_if_event_mode(entry)
-            workspace_name = get_workspace_name(entry)
+            workspace_name = get_workspace_name(entry, file_name)
             if is_event_mode:
                 workspace_names.append(workspace_name)
             else:
@@ -485,7 +490,6 @@ def get_added_nexus_information(file_name):  # noqa
         # 3. Every data entry has matching monitor entry, e.g. random_name-add_added_event_data_4 needs
         #    random_name-add_monitors_added_event_data_4.s
         if (has_same_number_of_entries(workspace_names, monitor_workspace_names)
-                and has_added_tag(workspace_names, monitor_workspace_names)
                 and entries_match(workspace_names, monitor_workspace_names)):
             is_added_file_event = True
             num_periods = len(workspace_names)
@@ -507,39 +511,30 @@ def get_added_nexus_information(file_name):  # noqa
                 break
         return is_added_file_histogram, num_periods
 
-    if has_added_suffix(file_name):
-        try:
-            with h5.File(file_name, 'r') as h5_file:
-                # Get all mantid_workspace_X keys
-                keys = list(h5_file.keys())
-                top_level_keys = get_all_keys_for_top_level(keys)
-
-                # Check if entries are added event data, if we don't have a hit, then it can always be
-                # added histogram data
-                is_added_event_file, number_of_periods_event = get_added_event_info(h5_file, top_level_keys)
-                is_added_histogram_file, number_of_periods_histogram = get_added_histogram_info(h5_file, top_level_keys)
-
-                if is_added_event_file:
-                    is_added = True
-                    is_event = True
-                    number_of_periods = number_of_periods_event
-                elif is_added_histogram_file:
-                    is_added = True
-                    is_event = False
-                    number_of_periods = number_of_periods_histogram
-                else:
-                    is_added = True
-                    is_event = False
-                    number_of_periods = 1
-        except IOError:
-            is_added = False
-            is_event = False
-            number_of_periods = 1
-    else:
-        is_added = False
-        is_event = False
+    if not nexus_added_tag_present:
+        is_event = is_raw_nexus_event_mode(file_name)
         number_of_periods = 1
-    return is_added, number_of_periods, is_event
+        return nexus_added_tag_present, number_of_periods, is_event
+
+    with h5.File(file_name, 'r') as h5_file:
+        # Get all mantid_workspace_X keys
+        # Check if entries are added event data, if we don't have a hit, then it can always be
+        # added histogram data
+        is_added_event_file, number_of_periods_event = get_added_event_info(h5_file, top_level_keys, file_name)
+        is_added_histogram_file, number_of_periods_histogram = get_added_histogram_info(h5_file, top_level_keys)
+
+        number_of_periods = number_of_periods_event
+
+        if is_added_event_file:
+            is_event = True
+            number_of_periods = number_of_periods_event
+        elif is_added_histogram_file:
+            is_event = False
+            number_of_periods = number_of_periods_histogram
+        else:
+            raise RuntimeError("Ended up in added branch where it's neither processed or raw?")
+
+    return nexus_added_tag_present, number_of_periods, is_event
 
 
 def get_date_for_added_workspace(file_name):
@@ -553,12 +548,12 @@ def has_added_suffix(file_name):
 
 
 def is_added_histogram(file_name):
-    is_added, _, is_event = get_added_nexus_information(file_name)
+    is_added, _, is_event = check_nexus_information(file_name)
     return is_added and not is_event
 
 
 def is_added_event(file_name):
-    is_added, _, is_event = get_added_nexus_information(file_name)
+    is_added, _, is_event = check_nexus_information(file_name)
     return is_added and is_event
 
 
@@ -728,6 +723,11 @@ class SANSFileInformation(metaclass=ABCMeta):
 
         self._run_number = self._init_run_number()
 
+    def __eq__(self, other):
+        if type(other) is type(self):
+            return self.__dict__ == other.__dict__
+        return False
+
     @abstractmethod
     def get_file_name(self):
         pass
@@ -829,6 +829,7 @@ class SANSFileInformationBlank(SANSFileInformation):
     Blank SANS File information to avoid mocks being called in, in the future this should be removed
     as we should not be creating blank information states
     """
+
     def __init__(self):
         super(SANSFileInformationBlank, self).__init__(full_file_name="00000")
 
@@ -873,7 +874,7 @@ class SANSFileInformationBlank(SANSFileInformation):
 
 
 class SANSFileInformationISISNexus(SANSFileInformation):
-    def __init__(self, file_name):
+    def __init__(self, file_name, is_event):
         super(SANSFileInformationISISNexus, self).__init__(file_name)
         # Setup instrument name
         instrument_name = get_instrument_name_for_isis_nexus(self._full_file_name)
@@ -887,9 +888,7 @@ class SANSFileInformationISISNexus(SANSFileInformation):
 
         # Setup number of periods
         self._number_of_periods = get_number_of_periods_for_isis_nexus(self._full_file_name)
-
-        # Setup event mode check
-        self._is_event_mode = get_event_mode_information(self._full_file_name)
+        self._is_event_mode = is_event
 
         # Get geometry details
         height, width, thickness, shape = get_geometry_information_isis_nexus(self._full_file_name)
@@ -939,7 +938,7 @@ class SANSFileInformationISISNexus(SANSFileInformation):
 
 
 class SANSFileInformationISISAdded(SANSFileInformation):
-    def __init__(self, file_name):
+    def __init__(self, file_name, num_periods, is_event):
         super(SANSFileInformationISISAdded, self).__init__(file_name)
         # Setup instrument name
         instrument_name = get_instrument_name_for_isis_nexus(self._full_file_name)
@@ -949,9 +948,7 @@ class SANSFileInformationISISAdded(SANSFileInformation):
         self._facility = get_facility(self._instrument)
 
         self._date, _ = self._get_date_and_run_number_added_nexus(self._full_file_name)
-
-        _, number_of_periods, is_event = get_added_nexus_information(self._full_file_name)
-        self._number_of_periods = number_of_periods
+        self._number_of_periods = num_periods
         self._is_event_mode = is_event
 
         # Get geometry details
@@ -1089,13 +1086,17 @@ class SANSFileInformationFactory(object):
             raise ValueError("The filename given to FileInformation is empty")
 
         full_file_name = find_sans_file(file_name)
+        if is_raw_single_period(full_file_name) or is_raw_multi_period(full_file_name):
+            return SANSFileInformationRaw(full_file_name)
 
-        if is_isis_nexus_single_period(full_file_name) or is_isis_nexus_multi_period(full_file_name):
-            file_information = SANSFileInformationISISNexus(full_file_name)
-        elif is_raw_single_period(full_file_name) or is_raw_multi_period(full_file_name):
-            file_information = SANSFileInformationRaw(full_file_name)
-        elif is_added_histogram(full_file_name) or is_added_event(full_file_name):
-            file_information = SANSFileInformationISISAdded(full_file_name)
+        # We should have a nexus file, let's figure out what it is
+        is_added, number_of_periods, is_event = check_nexus_information(full_file_name)
+
+        if is_added:
+            file_information = SANSFileInformationISISAdded(full_file_name, number_of_periods, is_event)
+        elif is_event or is_isis_nexus_single_period(full_file_name) or is_isis_nexus_multi_period(full_file_name):
+            assert not is_added, "Order has been changed, an added file should not use this loader"
+            file_information = SANSFileInformationISISNexus(full_file_name, is_event)
         else:
             raise NotImplementedError("The file type you have provided is not implemented yet.")
         return file_information

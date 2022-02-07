@@ -34,6 +34,9 @@ def apply_calibration(calibration_file_name, workspaces, monitor_workspaces, use
     """
     full_file_path = find_full_file_path(calibration_file_name)
 
+    if not full_file_path:
+        raise IOError(f"{calibration_file_name} was not found")
+
     # Check for the sample scatter and the can scatter workspaces
     workspaces_to_calibrate = {}
     if SANSDataType.SAMPLE_SCATTER in workspaces:
@@ -119,7 +122,7 @@ def get_calibration_workspace(full_file_path, use_loaded, parent_alg):
 
     if calibration_workspace is None:
         if not isfile(full_file_path):
-            raise RuntimeError("SANSCalibration: The file for  {0} does not seem to exist".format(full_file_path))
+            raise RuntimeError("SANSCalibration: The file for {0} does not seem to exist".format(full_file_path))
         loader_name = "LoadNexusProcessed"
         loader_options = {"Filename": full_file_path,
                           "OutputWorkspace": "dummy"}

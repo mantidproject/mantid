@@ -7,19 +7,21 @@
 #  This file is part of the mantid workbench.
 #
 #
-# std imports
 
 # 3rdparty imports
-from mantid.plots.datafunctions import update_colorbar_scale
+from mantid.plots.datafunctions import update_colorbar_scale, get_images_from_figure
 from mantidqt.plotting.figuretype import FigureType, figure_type
 from mantidqt.utils.qt import load_ui
-from matplotlib.collections import QuadMesh
+
 from matplotlib.colors import LogNorm, Normalize
-from mpl_toolkits.mplot3d.art3d import Poly3DCollection
+from matplotlib.ticker import ScalarFormatter, LogFormatterSciNotation
+from mpl_toolkits.mplot3d.axes3d import Axes3D
 from qtpy.QtGui import QDoubleValidator, QIcon
 from qtpy.QtWidgets import QDialog, QWidget
 
 TREAT_LOG_NEGATIVE_VALUES = 'clip'
+DECIMAL_FORMAT = 'Decimal Format'
+SCIENTIFIC_FORMAT = 'Scientific Format'
 
 
 class PropertiesEditorBase(QDialog):
@@ -92,11 +94,49 @@ class LabelEditor(PropertiesEditorBase):
         self.ui.errors.show()
 
 
+class LegendEditorModel(object):
+
+    def __init__(self, label_text):
+        self.label_text = label_text
+
+
+class LegendEditor(PropertiesEditorBase):
+    """Provides a dialog box to edit a legend label"""
+
+    def __init__(self, canvas, target, target_curve):
+        """
+        :param target: A reference to the label being edited
+        :param target_curve: A reference to the curve whose legend is being edited
+       """
+        super().__init__('labeleditor.ui', canvas)
+        self.ui.errors.hide()
+
+        self.target = target
+        self.target_curve = target_curve
+        self._memento = LegendEditorModel(target.get_text())
+        self.ui.editor.setText(self._memento.label_text)
+
+    def changes_accepted(self):
+        self.ui.errors.hide()
+        self.target.set_text(self.ui.editor.text())
+        self.target_curve.set_label(self.ui.editor.text())
+
+    def error_occurred(self, exc):
+        """
+        Display errors to user and reset state
+        :param exc: The exception that occurred
+        """
+        self.target.set_text(self._memento.label_text)
+        self.ui.errors.setText(str(exc).strip())
+        self.ui.errors.show()
+
+
 class AxisEditorModel(object):
     min = None
     max = None
     log = None
     grid = None
+    formatter = None
 
 
 class AxisEditor(PropertiesEditorBase):
@@ -114,25 +154,36 @@ class AxisEditor(PropertiesEditorBase):
         # Ensure that only floats can be entered
         self.ui.editor_min.setValidator(QDoubleValidator())
         self.ui.editor_max.setValidator(QDoubleValidator())
-        if figure_type(canvas.figure) == FigureType.Image:
+        if figure_type(canvas.figure) in [FigureType.Surface, FigureType.Wireframe, FigureType.Mesh]:
             self.ui.logBox.hide()
             self.ui.gridBox.hide()
-
+        self.ui.editor_format.addItem(DECIMAL_FORMAT)
+        self.ui.editor_format.addItem(SCIENTIFIC_FORMAT)
         self.axes = axes
         self.axis_id = axis_id
         self.lim_getter = getattr(axes, 'get_{}lim'.format(axis_id))
-        self.lim_setter = getattr(axes, 'set_{}lim'.format(axis_id))
+
+        if isinstance(axes, Axes3D):
+            self.lim_setter = getattr(axes, 'set_{}lim3d'.format(axis_id))
+        else:
+            self.lim_setter = getattr(axes, 'set_{}lim'.format(axis_id))
+
         self.scale_setter = getattr(axes, 'set_{}scale'.format(axis_id))
         self.nonposkw = 'nonpos' + axis_id
-        # Grid has no direct accessor from the axes
-        self.axis = axes.xaxis if axis_id == 'x' else axes.yaxis
+        # Store the axis for attributes that can't be directly accessed
+        # from axes object (e.g. grid and tick parameters).
+        self.axis = getattr(axes, '{}axis'.format(axis_id))
 
     def create_model(self):
         memento = AxisEditorModel()
         self._memento = memento
         memento.min, memento.max = getattr(self.axes, 'get_{}lim'.format(self.axis_id))()
         memento.log = getattr(self.axes, 'get_{}scale'.format(self.axis_id))() != 'linear'
-        memento.grid = self.axis._gridOnMajor
+        memento.grid = self.axis.grid_on() if hasattr(self.axis, 'grid_on') else self.axis._major_tick_kw.get('gridOn', False)
+        if type(self.axis.get_major_formatter()) is ScalarFormatter:
+            memento.formatter = DECIMAL_FORMAT
+        elif type(self.axis.get_major_formatter()) is LogFormatterSciNotation:
+            memento.formatter = SCIENTIFIC_FORMAT
         self._fill(memento)
 
     def changes_accepted(self):
@@ -141,7 +192,6 @@ class AxisEditor(PropertiesEditorBase):
         axes = self.axes
 
         self.limit_min, self.limit_max = float(self.ui.editor_min.text()), float(self.ui.editor_max.text())
-
         if self.ui.logBox.isChecked():
             self.scale_setter('log', **{self.nonposkw: TREAT_LOG_NEGATIVE_VALUES})
             self.limit_min, self.limit_max = self._check_log_limits(self.limit_min, self.limit_max)
@@ -149,8 +199,9 @@ class AxisEditor(PropertiesEditorBase):
             self.scale_setter('linear')
 
         self.lim_setter(self.limit_min, self.limit_max)
-
-        axes.grid(self.ui.gridBox.isChecked(), axis=self.axis_id)
+        self._set_tick_format()
+        which = 'both' if hasattr(axes, 'show_minor_gridlines') and axes.show_minor_gridlines else 'major'
+        axes.grid(self.ui.gridBox.isChecked(), axis=self.axis_id, which=which)
 
     def error_occurred(self, exc):
         # revert
@@ -164,6 +215,7 @@ class AxisEditor(PropertiesEditorBase):
         self.ui.editor_max.setText(str(model.max))
         self.ui.logBox.setChecked(model.log)
         self.ui.gridBox.setChecked(model.grid)
+        self.ui.editor_format.setCurrentText(model.formatter)
 
     def _check_log_limits(self, editor_min, editor_max):
         # Check that the limits from the editor are sensible for a log graph
@@ -174,6 +226,15 @@ class AxisEditor(PropertiesEditorBase):
         if editor_max <= 0:
             editor_max = lim_max
         return editor_min, editor_max
+
+    def _set_tick_format(self):
+        formatter = self.ui.editor_format.currentText()
+        if formatter == DECIMAL_FORMAT:
+            fmt = ScalarFormatter(useOffset=True)
+        elif formatter == SCIENTIFIC_FORMAT:
+            fmt = LogFormatterSciNotation()
+        getattr(self.axes, '{}axis'.format(self.axis_id)).set_major_formatter(fmt)
+        return
 
 
 class XAxisEditor(AxisEditor):
@@ -202,33 +263,47 @@ class ColorbarAxisEditor(AxisEditor):
     def __init__(self, canvas, axes):
         super(ColorbarAxisEditor, self).__init__(canvas, axes, 'y')
 
-        self.images = self.canvas.figure.gca().images
-        if len(self.images) == 0:
-            self.images = [col for col in self.canvas.figure.gca().collections if isinstance(col, QuadMesh)
-                           or isinstance(col, Poly3DCollection)]
+        self.ui.gridBox.hide()
+
+        self.images = []
+
+        images = get_images_from_figure(canvas.figure)
+        # If there are an equal number of plots and colorbars so apply changes to plot with the selected colorbar
+        # Otherwise apply changes to all the plots in the figure
+        if len(images) != len(self.canvas.figure.axes) / 2:
+            self.images = images
+        else:
+            # apply changes to selected axes
+            for img in images:
+                if img.colorbar and img.colorbar.ax == axes:
+                    self.images.append(img)
 
         self.create_model()
+        self.ui.editor_format.setEnabled(False)
 
     def changes_accepted(self):
         self.ui.errors.hide()
 
+        if len(self.images) == 0:
+            raise RuntimeError("Cannot find any plot linked to this colorbar")
+
         limit_min, limit_max = float(self.ui.editor_min.text()), float(self.ui.editor_max.text())
 
-        scale = Normalize
-        if isinstance(self.images[0].norm, LogNorm):
-            scale = LogNorm
+        scale = LogNorm if self.ui.logBox.isChecked() else Normalize
 
         if scale == LogNorm and (limit_min <= 0 or limit_max <= 0):
             raise ValueError("Limits must be positive\nwhen scale is logarithmic.")
 
         self.lim_setter(limit_min, limit_max)
-        update_colorbar_scale(self.canvas.figure, self.images[0], scale, limit_min, limit_max)
+        for img in self.images:
+            update_colorbar_scale(self.canvas.figure, img, scale, limit_min, limit_max)
 
     def create_model(self):
         memento = AxisEditorModel()
         self._memento = memento
-        memento.min, memento.max = self.images[0].get_clim()
-        memento.log = False
+        if len(self.images) > 0:
+            memento.min, memento.max = self.images[0].get_clim()
+        memento.log = isinstance(self.images[0].norm, LogNorm)
         memento.grid = False
 
         self._fill(memento)

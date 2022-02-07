@@ -15,13 +15,13 @@ associated long range diffusive motions of molecules.
 
 The Hall-Ross Jump diffusion model [1]_ has the form:
 
-.. math:: Gamma(Q) = \frac{\hbar}{\tau} \cdot (1-exp(-\frac{l^2 Q^2}{2}))
+.. math:: Gamma(Q) = \frac{\hbar}{\tau} \cdot (1-\exp(-\frac{l^2 Q^2}{2}))
 
 Units of :math:`l` are inverse units of :math:`Q`.
 
-Units of :math:`Gamma` are :math:`meV` if units of :math:`\tau` are *ps*.
-Alternatively, units of :math:`Gamma` are :math:`\mu eV` if units of
-:math:`\tau` are *ns*.
+Units of :math:`Gamma` are meV if units of :math:`\tau` are ps.
+Alternatively, units of :math:`Gamma` are :math:`\mu`eV if units of
+:math:`\tau` are ns.
 
 Mean square diffusion jump length :math:`= 3 l^2 \ \AA^2`.
 

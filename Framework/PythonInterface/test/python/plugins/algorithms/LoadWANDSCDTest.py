@@ -56,6 +56,11 @@ class LoadWANDTest(unittest.TestCase):
         self.assertAlmostEqual(duration[0], 40.05, 5)
         self.assertAlmostEqual(duration[1], 40.05, 5)
 
+        # test that the goniometer has been set correctly
+        self.assertEqual(run.getNumGoniometers(), 2)
+        self.assertAlmostEqual(run.getGoniometer(0).getEulerAngles('YZY')[0], -142.6) # s1 from HB2C_7000
+        self.assertAlmostEqual(run.getGoniometer(1).getEulerAngles('YZY')[0], -142.5) # s1 from HB2C_7001
+
         LoadWANDTest_ws.delete()
 
 

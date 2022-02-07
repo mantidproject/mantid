@@ -8,12 +8,13 @@
 
 #include <cxxtest/TestSuite.h>
 
+#include "MantidAPI/Axis.h"
 #include "MantidAPI/Sample.h"
 #include "MantidAlgorithms/SampleCorrections/MayersSampleCorrection.h"
+#include "MantidFrameworkTestHelpers/ComponentCreationHelper.h"
+#include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidKernel/Material.h"
-#include "MantidTestHelpers/ComponentCreationHelper.h"
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
 using Mantid::Algorithms::MayersSampleCorrection;
 using Mantid::API::IAlgorithm_sptr;
@@ -23,9 +24,7 @@ class MayersSampleCorrectionTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static MayersSampleCorrectionTest *createSuite() {
-    return new MayersSampleCorrectionTest();
-  }
+  static MayersSampleCorrectionTest *createSuite() { return new MayersSampleCorrectionTest(); }
   static void destroySuite(MayersSampleCorrectionTest *suite) { delete suite; }
 
   // ------------------------ Success cases ----------------------------
@@ -81,20 +80,17 @@ public:
   void test_Input_Workspace_With_No_Instrument_Throws_Error() {
     auto noInstWS = createTestWorkspaceWithNoInstrument();
 
-    TS_ASSERT_THROWS(runAlgorithm(noInstWS, true),
-                     const std::invalid_argument &);
+    TS_ASSERT_THROWS(runAlgorithm(noInstWS, true), const std::invalid_argument &);
   }
 
   void test_InputWorkspace_With_No_Sample_Shape_Throws_Error() {
     auto noSampleShapeWS = createTestWorkspaceWithNoSampleShape();
 
-    TS_ASSERT_THROWS(runAlgorithm(noSampleShapeWS, true),
-                     const std::invalid_argument &);
+    TS_ASSERT_THROWS(runAlgorithm(noSampleShapeWS, true), const std::invalid_argument &);
   }
 
 private:
-  IAlgorithm_sptr runAlgorithm(const MatrixWorkspace_sptr &inputWS,
-                               bool mscatOn) {
+  IAlgorithm_sptr runAlgorithm(const MatrixWorkspace_sptr &inputWS, bool mscatOn) {
     auto alg = std::make_shared<MayersSampleCorrection>();
     // Don't put output in ADS by default
     alg->setChild(true);
@@ -138,8 +134,7 @@ private:
 
     // Sample properties
     const double radius(0.0025), height(0.04);
-    auto cylinder =
-        createCappedCylinder(radius, height, V3D(), V3D(0., 1., 0.), "sample");
+    auto cylinder = createCappedCylinder(radius, height, V3D(), V3D(0., 1., 0.), "sample");
     const double numberDensity(0.07261);
     cylinder->setMaterial(Material("V", getNeutronAtom(23), numberDensity));
     testWS->mutableSample().setShape(cylinder);
@@ -149,14 +144,15 @@ private:
     const double l2 = 2.2;
     auto &detInfo = testWS->mutableDetectorInfo();
     detInfo.setPosition(0, V3D(l2 * sin(twoTheta), 0.0, l2 * cos(twoTheta)));
+
+    testWS->getAxis(0)->setUnit("TOF");
     return testWS;
   }
 
   MatrixWorkspace_sptr createTestWorkspaceWithNoInstrument() {
     const int nhist(1), nbins(1);
     const double xstart(99.5), deltax(1.0);
-    return WorkspaceCreationHelper::create2DWorkspaceBinned(nhist, nbins,
-                                                            xstart, deltax);
+    return WorkspaceCreationHelper::create2DWorkspaceBinned(nhist, nbins, xstart, deltax);
   }
 
   MatrixWorkspace_sptr createTestWorkspaceWithNoSampleShape() {

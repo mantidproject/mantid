@@ -43,8 +43,7 @@ public:
 
     std::string outWS("outWS");
 
-    TS_ASSERT_THROWS_NOTHING(
-        loader.setPropertyValue("Filename", "Example.spe"));
+    TS_ASSERT_THROWS_NOTHING(loader.setPropertyValue("Filename", "Example.spe"));
     TS_ASSERT_THROWS_NOTHING(loader.setPropertyValue("OutputWorkspace", outWS));
 
     TS_ASSERT_THROWS_NOTHING(loader.execute());
@@ -52,8 +51,7 @@ public:
 
     MatrixWorkspace_const_sptr ws;
     TS_ASSERT_THROWS_NOTHING(
-        ws = std::dynamic_pointer_cast<MatrixWorkspace>(
-            AnalysisDataService::Instance().retrieve(outWS)));
+        ws = std::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(outWS)));
 
     TS_ASSERT_EQUALS(ws->getNumberHistograms(), 32);
     TS_ASSERT_EQUALS(ws->blocksize(), 195);

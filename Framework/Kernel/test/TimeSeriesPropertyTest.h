@@ -25,8 +25,7 @@ using Mantid::Types::Core::DateAndTime;
 class TimeSeriesPropertyTest : public CxxTest::TestSuite {
   // Create a small TSP<double>. Callee owns the returned object.
   TimeSeriesProperty<double> *createDoubleTSP() {
-    TimeSeriesProperty<double> *p =
-        new TimeSeriesProperty<double>("doubleProp");
+    TimeSeriesProperty<double> *p = new TimeSeriesProperty<double>("doubleProp");
     TS_ASSERT_THROWS_NOTHING(p->addValue("2007-11-30T16:17:00", 9.99));
     TS_ASSERT_THROWS_NOTHING(p->addValue("2007-11-30T16:17:10", 7.55));
     TS_ASSERT_THROWS_NOTHING(p->addValue("2007-11-30T16:17:20", 5.55));
@@ -67,31 +66,26 @@ public:
 
     TS_ASSERT(!dProp->name().compare("doubleProp"));
     TS_ASSERT(!dProp->documentation().compare(""));
-    TS_ASSERT(typeid(std::vector<TimeValueUnit<double>>) ==
-              *dProp->type_info());
+    TS_ASSERT(typeid(std::vector<TimeValueUnit<double>>) == *dProp->type_info());
     TS_ASSERT(!dProp->isDefault())
 
     TS_ASSERT(!sProp->name().compare("stringProp"));
     TS_ASSERT(!sProp->documentation().compare(""));
-    TS_ASSERT(typeid(std::vector<TimeValueUnit<std::string>>) ==
-              *sProp->type_info());
+    TS_ASSERT(typeid(std::vector<TimeValueUnit<std::string>>) == *sProp->type_info());
     TS_ASSERT(!sProp->isDefault())
 
     TS_ASSERT_EQUALS(sProp->isValid(), "");
   }
 
   void test_Constructor_with_values() {
-    std::vector<DateAndTime> times = {DateAndTime("2019-01-01T00:00:00"),
-                                      DateAndTime("2019-01-01T00:01:00")};
+    std::vector<DateAndTime> times = {DateAndTime("2019-01-01T00:00:00"), DateAndTime("2019-01-01T00:01:00")};
 
     // Test int TimeSeriesProperty
     std::vector<int> iValues = {0, 1};
-    auto iPropWithValues =
-        std::make_unique<TimeSeriesProperty<int>>("intProp", times, iValues);
+    auto iPropWithValues = std::make_unique<TimeSeriesProperty<int>>("intProp", times, iValues);
     TS_ASSERT(!iPropWithValues->name().compare("intProp"));
     TS_ASSERT(!iPropWithValues->documentation().compare(""));
-    TS_ASSERT(typeid(std::vector<TimeValueUnit<int>>) ==
-              *iPropWithValues->type_info());
+    TS_ASSERT(typeid(std::vector<TimeValueUnit<int>>) == *iPropWithValues->type_info());
     TS_ASSERT(!iPropWithValues->isDefault());
 
     auto iPropTimes = iPropWithValues->timesAsVector();
@@ -104,12 +98,10 @@ public:
 
     // Test double TimeSeriesProperty
     std::vector<double> dValues = {0.1, 1.2};
-    auto dPropWithValues = std::make_unique<TimeSeriesProperty<double>>(
-        "doubleProp", times, dValues);
+    auto dPropWithValues = std::make_unique<TimeSeriesProperty<double>>("doubleProp", times, dValues);
     TS_ASSERT(!dPropWithValues->name().compare("doubleProp"));
     TS_ASSERT(!dPropWithValues->documentation().compare(""));
-    TS_ASSERT(typeid(std::vector<TimeValueUnit<double>>) ==
-              *dPropWithValues->type_info());
+    TS_ASSERT(typeid(std::vector<TimeValueUnit<double>>) == *dPropWithValues->type_info());
     TS_ASSERT(!dPropWithValues->isDefault());
 
     auto dPropTimes = dPropWithValues->timesAsVector();
@@ -122,12 +114,10 @@ public:
 
     // Test string TimeSeriesProperty
     std::vector<std::string> sValues = {"test", "test2"};
-    auto sPropWithValues = std::make_unique<TimeSeriesProperty<std::string>>(
-        "stringProp", times, sValues);
+    auto sPropWithValues = std::make_unique<TimeSeriesProperty<std::string>>("stringProp", times, sValues);
     TS_ASSERT(!sPropWithValues->name().compare("stringProp"));
     TS_ASSERT(!sPropWithValues->documentation().compare(""));
-    TS_ASSERT(typeid(std::vector<TimeValueUnit<std::string>>) ==
-              *sPropWithValues->type_info());
+    TS_ASSERT(typeid(std::vector<TimeValueUnit<std::string>>) == *sPropWithValues->type_info());
     TS_ASSERT(!sPropWithValues->isDefault());
 
     auto sPropTimes = sPropWithValues->timesAsVector();
@@ -140,21 +130,15 @@ public:
   }
 
   void test_SetValueFromString() {
-    TS_ASSERT_THROWS(iProp->setValue("1"),
-                     const Exception::NotImplementedError &);
-    TS_ASSERT_THROWS(dProp->setValue("5.5"),
-                     const Exception::NotImplementedError &);
-    TS_ASSERT_THROWS(sProp->setValue("aValue"),
-                     const Exception::NotImplementedError &);
+    TS_ASSERT_THROWS(iProp->setValue("1"), const Exception::NotImplementedError &);
+    TS_ASSERT_THROWS(dProp->setValue("5.5"), const Exception::NotImplementedError &);
+    TS_ASSERT_THROWS(sProp->setValue("aValue"), const Exception::NotImplementedError &);
   }
 
   void test_SetValueFromJson() {
-    TS_ASSERT_THROWS(iProp->setValueFromJson(Json::Value(1)),
-                     const Exception::NotImplementedError &);
-    TS_ASSERT_THROWS(dProp->setValueFromJson(Json::Value(5.5)),
-                     const Exception::NotImplementedError &);
-    TS_ASSERT_THROWS(sProp->setValueFromJson(Json::Value("aValue")),
-                     const Exception::NotImplementedError &);
+    TS_ASSERT_THROWS(iProp->setValueFromJson(Json::Value(1)), const Exception::NotImplementedError &);
+    TS_ASSERT_THROWS(dProp->setValueFromJson(Json::Value(5.5)), const Exception::NotImplementedError &);
+    TS_ASSERT_THROWS(sProp->setValueFromJson(Json::Value("aValue")), const Exception::NotImplementedError &);
   }
 
   void test_AddValue() {
@@ -176,10 +160,8 @@ public:
 
     // Now try the other overloads
     TimeSeriesProperty<int> otherProp("otherProp");
-    TS_ASSERT_THROWS_NOTHING(
-        otherProp.addValue(static_cast<std::time_t>(123), 1));
-    TS_ASSERT_THROWS_NOTHING(
-        otherProp.addValue(boost::posix_time::second_clock::local_time(), 1));
+    TS_ASSERT_THROWS_NOTHING(otherProp.addValue(static_cast<std::time_t>(123), 1));
+    TS_ASSERT_THROWS_NOTHING(otherProp.addValue(boost::posix_time::second_clock::local_time(), 1));
 
     const std::string dString = dProp->value();
     TS_ASSERT_EQUALS(dString.substr(0, 27), "2007-Nov-30 16:17:00  9.99\n");
@@ -216,13 +198,11 @@ public:
     TS_ASSERT_EQUALS(derValues[1], 1);
     TS_ASSERT_EQUALS(derValues[2], 1);
 
-    TSM_ASSERT_THROWS("derivative undefined for string property",
-                      sProp->getDerivative(), const std::runtime_error &);
+    TSM_ASSERT_THROWS("derivative undefined for string property", sProp->getDerivative(), const std::runtime_error &);
 
     iProp->addValue("2007-11-30T16:17:10", 10);
-    TSM_ASSERT_THROWS(
-        "derivative undefined for property with less then 2 values",
-        iProp->getDerivative(), const std::runtime_error &);
+    TSM_ASSERT_THROWS("derivative undefined for property with less then 2 values", iProp->getDerivative(),
+                      const std::runtime_error &);
     iProp->addValue("2007-11-30T16:17:12", 12);
 
     derProp = iProp->getDerivative();
@@ -231,8 +211,7 @@ public:
     TS_ASSERT_EQUALS(derValues[0], 1);
   }
   void test_timesAsVector() {
-    TimeSeriesProperty<double> *p =
-        new TimeSeriesProperty<double>("doubleProp");
+    TimeSeriesProperty<double> *p = new TimeSeriesProperty<double>("doubleProp");
     TS_ASSERT_THROWS_NOTHING(p->addValue("2007-11-30T16:17:20", 5.55));
     TS_ASSERT_THROWS_NOTHING(p->addValue("2007-11-30T16:17:00", 9.99));
     TS_ASSERT_THROWS_NOTHING(p->addValue("2007-11-30T16:17:10", 5.55));
@@ -277,8 +256,7 @@ public:
 
     // Assert
     TSM_ASSERT_EQUALS("Should have 1000 entries", tsp.size(), 1000);
-    TSM_ASSERT_EQUALS("Should be 3 plus the offset of 100", tsp.nthValue(3),
-                      103.0);
+    TSM_ASSERT_EQUALS("Should be 3 plus the offset of 100", tsp.nthValue(3), 103.0);
   }
 
   void test_addValues() {
@@ -298,14 +276,10 @@ public:
   }
 
   void test_Casting() {
-    TS_ASSERT_DIFFERS(dynamic_cast<Property *>(iProp),
-                      static_cast<Property *>(nullptr));
-    TS_ASSERT_DIFFERS(dynamic_cast<Property *>(dProp),
-                      static_cast<Property *>(nullptr));
-    TS_ASSERT_DIFFERS(dynamic_cast<Property *>(sProp),
-                      static_cast<Property *>(nullptr));
-    TS_ASSERT_DIFFERS(dynamic_cast<ITimeSeriesProperty *>(iProp),
-                      static_cast<ITimeSeriesProperty *>(nullptr));
+    TS_ASSERT_DIFFERS(dynamic_cast<Property *>(iProp), static_cast<Property *>(nullptr));
+    TS_ASSERT_DIFFERS(dynamic_cast<Property *>(dProp), static_cast<Property *>(nullptr));
+    TS_ASSERT_DIFFERS(dynamic_cast<Property *>(sProp), static_cast<Property *>(nullptr));
+    TS_ASSERT_DIFFERS(dynamic_cast<ITimeSeriesProperty *>(iProp), static_cast<ITimeSeriesProperty *>(nullptr));
   }
 
   //----------------------------------------------------------------------------
@@ -403,9 +377,8 @@ public:
     TimeSeriesProperty<int> *log = createIntegerTSP(6);
     TS_ASSERT_EQUALS(log->realSize(), 6);
 
-    Mantid::Kernel::SplittingInterval interval0(
-        DateAndTime("2007-11-30T16:17:10"), DateAndTime("2007-11-30T16:17:40"),
-        0);
+    Mantid::Kernel::SplittingInterval interval0(DateAndTime("2007-11-30T16:17:10"), DateAndTime("2007-11-30T16:17:40"),
+                                                0);
 
     Mantid::Kernel::TimeSplitterType splitters;
     splitters.emplace_back(interval0);
@@ -424,13 +397,11 @@ public:
     TimeSeriesProperty<int> *log = createIntegerTSP(10);
     TS_ASSERT_EQUALS(log->realSize(), 10);
 
-    Mantid::Kernel::SplittingInterval interval0(
-        DateAndTime("2007-11-30T16:17:10"), DateAndTime("2007-11-30T16:17:40"),
-        0);
+    Mantid::Kernel::SplittingInterval interval0(DateAndTime("2007-11-30T16:17:10"), DateAndTime("2007-11-30T16:17:40"),
+                                                0);
 
-    Mantid::Kernel::SplittingInterval interval1(
-        DateAndTime("2007-11-30T16:18:05"), DateAndTime("2007-11-30T16:18:25"),
-        0);
+    Mantid::Kernel::SplittingInterval interval1(DateAndTime("2007-11-30T16:18:05"), DateAndTime("2007-11-30T16:18:25"),
+                                                0);
 
     Mantid::Kernel::TimeSplitterType splitters;
     splitters.emplace_back(interval0);
@@ -481,8 +452,7 @@ public:
 
   //----------------------------------------------------------------------------
   void test_makeFilterByValue() {
-    TimeSeriesProperty<double> *log =
-        new TimeSeriesProperty<double>("MyIntLog");
+    TimeSeriesProperty<double> *log = new TimeSeriesProperty<double>("MyIntLog");
     TS_ASSERT_THROWS_NOTHING(log->addValue("2007-11-30T16:17:00", 1));
     TS_ASSERT_THROWS_NOTHING(log->addValue("2007-11-30T16:17:10", 2));
     TS_ASSERT_THROWS_NOTHING(log->addValue("2007-11-30T16:17:20", 3));
@@ -530,8 +500,7 @@ public:
     TS_ASSERT_DELTA(s.stop(), t, 1e-3);
 
     // Check throws if min > max
-    TS_ASSERT_THROWS(log->makeFilterByValue(splitter, 2.0, 1.0, 0.0, true),
-                     const std::invalid_argument &);
+    TS_ASSERT_THROWS(log->makeFilterByValue(splitter, 2.0, 1.0, 0.0, true), const std::invalid_argument &);
 
     delete log;
   }
@@ -539,8 +508,7 @@ public:
   void test_makeFilterByValue_throws_for_string_property() {
     TimeSeriesProperty<std::string> log("StringTSP");
     TimeSplitterType splitter;
-    TS_ASSERT_THROWS(log.makeFilterByValue(splitter, 0.0, 0.0, 0.0, true),
-                     const Exception::NotImplementedError &);
+    TS_ASSERT_THROWS(log.makeFilterByValue(splitter, 0.0, 0.0, 0.0, true), const Exception::NotImplementedError &);
   }
 
   void test_expandFilterToRange() {
@@ -553,76 +521,58 @@ public:
     TS_ASSERT_THROWS_NOTHING(log.addValue("2007-11-30T16:17:50", 2));
 
     // Create a TimeInterval that's wider than this log
-    TimeInterval interval(DateAndTime("2007-11-30T16:16:00"),
-                          DateAndTime("2007-11-30T16:18:50"));
+    TimeInterval interval(DateAndTime("2007-11-30T16:16:00"), DateAndTime("2007-11-30T16:18:50"));
 
     TimeSplitterType splitter;
     // Test good at both ends
     log.makeFilterByValue(splitter, 1.0, 2.2, 1.0, false);
     log.expandFilterToRange(splitter, 1.0, 2.2, interval);
     TS_ASSERT_EQUALS(splitter.size(), 2);
-    TS_ASSERT_DELTA(splitter[0].start(), DateAndTime("2007-11-30T16:16:00"),
-                    1e-3);
-    TS_ASSERT_DELTA(splitter[0].stop(), DateAndTime("2007-11-30T16:17:20"),
-                    1e-3);
-    TS_ASSERT_DELTA(splitter[1].start(), DateAndTime("2007-11-30T16:17:50"),
-                    1e-3);
-    TS_ASSERT_DELTA(splitter[1].stop(), DateAndTime("2007-11-30T16:18:50"),
-                    1e-3);
+    TS_ASSERT_DELTA(splitter[0].start(), DateAndTime("2007-11-30T16:16:00"), 1e-3);
+    TS_ASSERT_DELTA(splitter[0].stop(), DateAndTime("2007-11-30T16:17:20"), 1e-3);
+    TS_ASSERT_DELTA(splitter[1].start(), DateAndTime("2007-11-30T16:17:50"), 1e-3);
+    TS_ASSERT_DELTA(splitter[1].stop(), DateAndTime("2007-11-30T16:18:50"), 1e-3);
 
     // Test bad at both ends
     log.makeFilterByValue(splitter, 2.5, 10.0, 0.0, false);
     log.expandFilterToRange(splitter, 2.5, 10.0, interval);
     TS_ASSERT_EQUALS(splitter.size(), 1);
-    TS_ASSERT_DELTA(splitter[0].start(), DateAndTime("2007-11-30T16:17:20"),
-                    1e-3);
-    TS_ASSERT_DELTA(splitter[0].stop(), DateAndTime("2007-11-30T16:17:50"),
-                    1e-3);
+    TS_ASSERT_DELTA(splitter[0].start(), DateAndTime("2007-11-30T16:17:20"), 1e-3);
+    TS_ASSERT_DELTA(splitter[0].stop(), DateAndTime("2007-11-30T16:17:50"), 1e-3);
 
     // Test good at start, bad at end
     log.makeFilterByValue(splitter, -1.0, 1.5, 0.0, false);
     log.expandFilterToRange(splitter, -1.0, 1.5, interval);
     TS_ASSERT_EQUALS(splitter.size(), 1);
-    TS_ASSERT_DELTA(splitter[0].start(), DateAndTime("2007-11-30T16:16:00"),
-                    1e-3);
-    TS_ASSERT_DELTA(splitter[0].stop(), DateAndTime("2007-11-30T16:17:10"),
-                    1e-3);
+    TS_ASSERT_DELTA(splitter[0].start(), DateAndTime("2007-11-30T16:16:00"), 1e-3);
+    TS_ASSERT_DELTA(splitter[0].stop(), DateAndTime("2007-11-30T16:17:10"), 1e-3);
 
     // Test good at end, bad at start
     log.makeFilterByValue(splitter, 1.99, 2.5, 1.0, false);
     log.expandFilterToRange(splitter, 1.99, 2.5, interval);
     TS_ASSERT_EQUALS(splitter.size(), 2);
-    TS_ASSERT_DELTA(splitter[0].start(), DateAndTime("2007-11-30T16:17:10"),
-                    1e-3);
-    TS_ASSERT_DELTA(splitter[0].stop(), DateAndTime("2007-11-30T16:17:20"),
-                    1e-3);
-    TS_ASSERT_DELTA(splitter[1].start(), DateAndTime("2007-11-30T16:17:50"),
-                    1e-3);
-    TS_ASSERT_DELTA(splitter[1].stop(), DateAndTime("2007-11-30T16:18:50"),
-                    1e-3);
+    TS_ASSERT_DELTA(splitter[0].start(), DateAndTime("2007-11-30T16:17:10"), 1e-3);
+    TS_ASSERT_DELTA(splitter[0].stop(), DateAndTime("2007-11-30T16:17:20"), 1e-3);
+    TS_ASSERT_DELTA(splitter[1].start(), DateAndTime("2007-11-30T16:17:50"), 1e-3);
+    TS_ASSERT_DELTA(splitter[1].stop(), DateAndTime("2007-11-30T16:18:50"), 1e-3);
 
     // Check throws if min > max
-    TS_ASSERT_THROWS(log.expandFilterToRange(splitter, 2.0, 1.0, interval),
-                     const std::invalid_argument &);
+    TS_ASSERT_THROWS(log.expandFilterToRange(splitter, 2.0, 1.0, interval), const std::invalid_argument &);
 
     // Test good at both ends, but interval narrower than log range
-    TimeInterval narrowinterval(DateAndTime("2007-11-30T16:17:15"),
-                                DateAndTime("2007-11-30T16:17:41"));
+    TimeInterval narrowinterval(DateAndTime("2007-11-30T16:17:15"), DateAndTime("2007-11-30T16:17:41"));
     log.makeFilterByValue(splitter, 0.0, 10.0, 0.0, false);
     log.expandFilterToRange(splitter, 0.0, 10.0, narrowinterval);
     TS_ASSERT_EQUALS(splitter.size(), 1);
-    TS_ASSERT_DELTA(splitter[0].start(), DateAndTime("2007-11-30T16:17:00"),
-                    1e-3);
-    TS_ASSERT_DELTA(splitter[0].stop(), DateAndTime("2007-11-30T16:17:50"),
-                    1e-3);
+    TS_ASSERT_DELTA(splitter[0].start(), DateAndTime("2007-11-30T16:17:00"), 1e-3);
+    TS_ASSERT_DELTA(splitter[0].stop(), DateAndTime("2007-11-30T16:17:50"), 1e-3);
   }
 
   void test_expandFilterToRange_throws_for_string_property() {
     TimeSeriesProperty<std::string> log("StringTSP");
     TimeSplitterType splitter;
-    TS_ASSERT_THROWS(
-        log.expandFilterToRange(splitter, 0.0, 0.0, TimeInterval()),
-        const Exception::NotImplementedError &);
+    TS_ASSERT_THROWS(log.expandFilterToRange(splitter, 0.0, 0.0, TimeInterval()),
+                     const Exception::NotImplementedError &);
   }
 
   void test_averageValueInFilter() {
@@ -631,30 +581,25 @@ public:
 
     // Test a filter that's fully within the range of both properties
     TimeSplitterType filter;
-    filter.emplace_back(SplittingInterval(DateAndTime("2007-11-30T16:17:05"),
-                                          DateAndTime("2007-11-30T16:17:29")));
+    filter.emplace_back(SplittingInterval(DateAndTime("2007-11-30T16:17:05"), DateAndTime("2007-11-30T16:17:29")));
     TS_ASSERT_DELTA(dblLog->averageValueInFilter(filter), 7.308, 0.001);
     TS_ASSERT_DELTA(intLog->averageValueInFilter(filter), 2.167, 0.001);
 
     // Test a filter that starts before the log start time
-    filter[0] = SplittingInterval(DateAndTime("2007-11-30T16:16:30"),
-                                  DateAndTime("2007-11-30T16:17:13"));
+    filter[0] = SplittingInterval(DateAndTime("2007-11-30T16:16:30"), DateAndTime("2007-11-30T16:17:13"));
     TS_ASSERT_DELTA(dblLog->averageValueInFilter(filter), 9.820, 0.001);
     TS_ASSERT_DELTA(intLog->averageValueInFilter(filter), 1.070, 0.001);
 
     // How about one that's entirely outside the log range (should just take the
     // last value)
-    filter[0] = SplittingInterval(DateAndTime("2013-01-01T00:00:00"),
-                                  DateAndTime("2013-01-01T01:00:00"));
+    filter[0] = SplittingInterval(DateAndTime("2013-01-01T00:00:00"), DateAndTime("2013-01-01T01:00:00"));
     TS_ASSERT_DELTA(dblLog->averageValueInFilter(filter), 10.55, 0.001);
     TS_ASSERT_DELTA(intLog->averageValueInFilter(filter), 5.0, 0.001);
 
     // Test a filter with two separate ranges, one of which goes past the end of
     // the log
-    filter[0] = SplittingInterval(DateAndTime("2007-11-30T16:17:05"),
-                                  DateAndTime("2007-11-30T16:17:15"));
-    filter.emplace_back(SplittingInterval(DateAndTime("2007-11-30T16:17:25"),
-                                          DateAndTime("2007-11-30T16:17:45")));
+    filter[0] = SplittingInterval(DateAndTime("2007-11-30T16:17:05"), DateAndTime("2007-11-30T16:17:15"));
+    filter.emplace_back(SplittingInterval(DateAndTime("2007-11-30T16:17:25"), DateAndTime("2007-11-30T16:17:45")));
     TS_ASSERT_DELTA(dblLog->averageValueInFilter(filter), 9.123, 0.001);
     TS_ASSERT_DELTA(intLog->averageValueInFilter(filter), 3.167, 0.001);
 
@@ -662,16 +607,13 @@ public:
     // the first)
     // It should work fine.
     filter[0] = filter[1];
-    filter[0] = SplittingInterval(DateAndTime("2007-11-30T16:17:05"),
-                                  DateAndTime("2007-11-30T16:17:15"));
+    filter[0] = SplittingInterval(DateAndTime("2007-11-30T16:17:05"), DateAndTime("2007-11-30T16:17:15"));
     TS_ASSERT_DELTA(dblLog->averageValueInFilter(filter), 9.123, 0.001);
     TS_ASSERT_DELTA(intLog->averageValueInFilter(filter), 3.167, 0.001);
 
     // What about an overlap between the filters? It's odd, but it's allowed.
-    filter[0] = SplittingInterval(DateAndTime("2007-11-30T16:17:05"),
-                                  DateAndTime("2007-11-30T16:17:15"));
-    filter[1] = SplittingInterval(DateAndTime("2007-11-30T16:17:10"),
-                                  DateAndTime("2007-11-30T16:17:20"));
+    filter[0] = SplittingInterval(DateAndTime("2007-11-30T16:17:05"), DateAndTime("2007-11-30T16:17:15"));
+    filter[1] = SplittingInterval(DateAndTime("2007-11-30T16:17:10"), DateAndTime("2007-11-30T16:17:20"));
     TS_ASSERT_DELTA(dblLog->averageValueInFilter(filter), 8.16, 0.001);
     TS_ASSERT_DELTA(intLog->averageValueInFilter(filter), 1.75, 0.001);
 
@@ -702,10 +644,8 @@ public:
 
   void test_averageValueInFilter_throws_for_string_property() {
     TimeSplitterType splitter;
-    TS_ASSERT_THROWS(sProp->averageValueInFilter(splitter),
-                     const Exception::NotImplementedError &);
-    TS_ASSERT_THROWS(sProp->averageAndStdDevInFilter(splitter),
-                     const Exception::NotImplementedError &);
+    TS_ASSERT_THROWS(sProp->averageValueInFilter(splitter), const Exception::NotImplementedError &);
+    TS_ASSERT_THROWS(sProp->averageAndStdDevInFilter(splitter), const Exception::NotImplementedError &);
   }
 
   //----------------------------------------------------------------------------
@@ -743,16 +683,11 @@ public:
 
     log->splitByTime(splitter, outputs, false);
 
-    TS_ASSERT_EQUALS(
-        dynamic_cast<TimeSeriesProperty<int> *>(outputs[0])->realSize(), 3);
-    TS_ASSERT_EQUALS(
-        dynamic_cast<TimeSeriesProperty<int> *>(outputs[1])->realSize(), 1);
-    TS_ASSERT_EQUALS(
-        dynamic_cast<TimeSeriesProperty<int> *>(outputs[2])->realSize(), 2);
-    TS_ASSERT_EQUALS(
-        dynamic_cast<TimeSeriesProperty<int> *>(outputs[3])->realSize(), 3);
-    TS_ASSERT_EQUALS(
-        dynamic_cast<TimeSeriesProperty<int> *>(outputs[4])->realSize(), 2);
+    TS_ASSERT_EQUALS(dynamic_cast<TimeSeriesProperty<int> *>(outputs[0])->realSize(), 3);
+    TS_ASSERT_EQUALS(dynamic_cast<TimeSeriesProperty<int> *>(outputs[1])->realSize(), 1);
+    TS_ASSERT_EQUALS(dynamic_cast<TimeSeriesProperty<int> *>(outputs[2])->realSize(), 2);
+    TS_ASSERT_EQUALS(dynamic_cast<TimeSeriesProperty<int> *>(outputs[3])->realSize(), 3);
+    TS_ASSERT_EQUALS(dynamic_cast<TimeSeriesProperty<int> *>(outputs[4])->realSize(), 2);
 
     delete log;
     delete outputs[0];
@@ -786,8 +721,7 @@ public:
 
     log->splitByTime(splitter, outputs, false);
 
-    TS_ASSERT_EQUALS(
-        dynamic_cast<TimeSeriesProperty<int> *>(outputs[0])->realSize(), 5);
+    TS_ASSERT_EQUALS(dynamic_cast<TimeSeriesProperty<int> *>(outputs[0])->realSize(), 5);
 
     delete log;
     delete outputs[0];
@@ -1088,8 +1022,7 @@ public:
 
   //----------------------------------------------------------------------------
   void test_statistics() {
-    TimeSeriesProperty<double> *log =
-        new TimeSeriesProperty<double>("MydoubleLog");
+    TimeSeriesProperty<double> *log = new TimeSeriesProperty<double>("MydoubleLog");
     TS_ASSERT_THROWS_NOTHING(log->addValue("2007-11-30T16:17:00", 1));
     TS_ASSERT_THROWS_NOTHING(log->addValue("2007-11-30T16:17:10", 2));
     TS_ASSERT_THROWS_NOTHING(log->addValue("2007-11-30T16:17:20", 3));
@@ -1119,8 +1052,7 @@ public:
   }
 
   void test_empty_statistics() {
-    TimeSeriesProperty<double> *log =
-        new TimeSeriesProperty<double>("MydoubleLog");
+    TimeSeriesProperty<double> *log = new TimeSeriesProperty<double>("MydoubleLog");
     TimeSeriesPropertyStatistics stats = log->getStatistics();
     TS_ASSERT(std::isnan(stats.minimum));
     TS_ASSERT(std::isnan(stats.maximum));
@@ -1138,11 +1070,9 @@ public:
     // Adding incompatible types together should not throw, but issue a warning
     // in the log
 
-    TimeSeriesProperty<double> *log =
-        new TimeSeriesProperty<double>("MydoubleLog");
+    TimeSeriesProperty<double> *log = new TimeSeriesProperty<double>("MydoubleLog");
     TimeSeriesProperty<int> *logi = new TimeSeriesProperty<int>("MyIntLog");
-    PropertyWithValue<double> *val =
-        new PropertyWithValue<double>("MySimpleDouble", 1.23);
+    PropertyWithValue<double> *val = new PropertyWithValue<double>("MySimpleDouble", 1.23);
 
     log->operator+=(val);
     log->operator+=(logi);
@@ -1156,15 +1086,13 @@ public:
   }
 
   void test_PlusEqualsOperator_() {
-    TimeSeriesProperty<double> *lhs =
-        new TimeSeriesProperty<double>("doubleLog");
+    TimeSeriesProperty<double> *lhs = new TimeSeriesProperty<double>("doubleLog");
     TS_ASSERT_THROWS_NOTHING(lhs->addValue("2007-11-30T16:17:00", 1));
     TS_ASSERT_THROWS_NOTHING(lhs->addValue("2007-11-30T16:17:10", 2));
     TS_ASSERT_THROWS_NOTHING(lhs->addValue("2007-11-30T16:17:20", 3));
     TS_ASSERT_THROWS_NOTHING(lhs->addValue("2007-11-30T16:17:30", 4));
     TS_ASSERT_THROWS_NOTHING(lhs->addValue("2007-11-30T16:17:40", 5));
-    TimeSeriesProperty<double> *rhs =
-        new TimeSeriesProperty<double>("doubleLog");
+    TimeSeriesProperty<double> *rhs = new TimeSeriesProperty<double>("doubleLog");
     TS_ASSERT_THROWS_NOTHING(rhs->addValue("2007-11-30T16:17:00", 1));
     TS_ASSERT_THROWS_NOTHING(rhs->addValue("2007-11-30T16:17:10", 2));
     TS_ASSERT_THROWS_NOTHING(rhs->addValue("2007-11-30T16:17:20", 3));
@@ -1278,8 +1206,7 @@ public:
   void test_Merge() {
     // 1. Construct p1 and p2
     TimeSeriesProperty<double> *p1 = createDoubleTSP();
-    TimeSeriesProperty<double> *p2 =
-        new TimeSeriesProperty<double>("doubleProp2");
+    TimeSeriesProperty<double> *p2 = new TimeSeriesProperty<double>("doubleProp2");
 
     TS_ASSERT_THROWS_NOTHING(p2->addValue("2007-11-30T16:17:05", 19.99));
     TS_ASSERT_THROWS_NOTHING(p2->addValue("2007-11-30T16:17:15", 17.55));
@@ -1312,8 +1239,7 @@ public:
    * Test setName and getName
    */
   void test_Name() {
-    TimeSeriesProperty<double> *p =
-        new TimeSeriesProperty<double>("doubleProp");
+    TimeSeriesProperty<double> *p = new TimeSeriesProperty<double>("doubleProp");
 
     std::string propertyname("UnitTest");
 
@@ -1345,8 +1271,7 @@ public:
    */
   void test_ValueAsVector() {
     // 1. Create property
-    TimeSeriesProperty<double> *p =
-        new TimeSeriesProperty<double>("doubleProp");
+    TimeSeriesProperty<double> *p = new TimeSeriesProperty<double>("doubleProp");
     TS_ASSERT_THROWS_NOTHING(p->addValue("2007-11-30T16:17:00", 1.00));
     TS_ASSERT_THROWS_NOTHING(p->addValue("2007-11-30T16:17:20", 3.00));
     TS_ASSERT_THROWS_NOTHING(p->addValue("2007-11-30T16:17:10", 2.00));
@@ -1370,23 +1295,20 @@ public:
    */
   void test_Clone() {
     // 1. Create property
-    TimeSeriesProperty<double> *p =
-        new TimeSeriesProperty<double>("doubleProp");
+    TimeSeriesProperty<double> *p = new TimeSeriesProperty<double>("doubleProp");
     TS_ASSERT_THROWS_NOTHING(p->addValue("2007-11-30T16:17:00", 1.00));
     TS_ASSERT_THROWS_NOTHING(p->addValue("2007-11-30T16:17:20", 3.00));
     TS_ASSERT_THROWS_NOTHING(p->addValue("2007-11-30T16:17:10", 2.00));
     TS_ASSERT_THROWS_NOTHING(p->addValue("2007-11-30T16:17:30", 4.00));
 
     // 2. Clone
-    TimeSeriesProperty<double> *newp =
-        dynamic_cast<TimeSeriesProperty<double> *>(p->clone());
+    TimeSeriesProperty<double> *newp = dynamic_cast<TimeSeriesProperty<double> *>(p->clone());
 
     // 3. Check
     std::vector<Mantid::Types::Core::DateAndTime> times1 = p->timesAsVector();
     std::vector<double> values1 = p->valuesAsVector();
 
-    std::vector<Mantid::Types::Core::DateAndTime> times2 =
-        newp->timesAsVector();
+    std::vector<Mantid::Types::Core::DateAndTime> times2 = newp->timesAsVector();
     std::vector<double> values2 = newp->valuesAsVector();
 
     TS_ASSERT_EQUALS(times1, times2);
@@ -1412,22 +1334,17 @@ public:
     auto time_series = std::make_unique<TimeSeriesProperty<int>>("IntUnixTest");
     time_series->addValue("2019-02-10T16:17:00", 1);
 
-    auto time_series_small_shift = dynamic_cast<TimeSeriesProperty<int> *>(
-        time_series->cloneWithTimeShift(100.));
+    auto time_series_small_shift = dynamic_cast<TimeSeriesProperty<int> *>(time_series->cloneWithTimeShift(100.));
     const auto &small_shift_times = time_series_small_shift->timesAsVector();
     TS_ASSERT_EQUALS(small_shift_times[0], DateAndTime("2019-02-10T16:18:40"));
 
-    auto time_series_large_shift = dynamic_cast<TimeSeriesProperty<int> *>(
-        time_series->cloneWithTimeShift(1234.));
+    auto time_series_large_shift = dynamic_cast<TimeSeriesProperty<int> *>(time_series->cloneWithTimeShift(1234.));
     const auto &large_shift_times = time_series_large_shift->timesAsVector();
     TS_ASSERT_EQUALS(large_shift_times[0], DateAndTime("2019-02-10T16:37:34"));
 
-    auto time_series_negative_shift = dynamic_cast<TimeSeriesProperty<int> *>(
-        time_series->cloneWithTimeShift(-1234.));
-    const auto &negative_shift_times =
-        time_series_negative_shift->timesAsVector();
-    TS_ASSERT_EQUALS(negative_shift_times[0],
-                     DateAndTime("2019-02-10T15:56:26"));
+    auto time_series_negative_shift = dynamic_cast<TimeSeriesProperty<int> *>(time_series->cloneWithTimeShift(-1234.));
+    const auto &negative_shift_times = time_series_negative_shift->timesAsVector();
+    TS_ASSERT_EQUALS(negative_shift_times[0], DateAndTime("2019-02-10T15:56:26"));
 
     // There is a known issue which can cause cloneWithTimeShift to be called
     // with a large (~9e+9 s) shift. Actual shifting is capped to be ~4.6e+19
@@ -1444,8 +1361,7 @@ public:
    */
   void test_CountSize() {
     // 1. Create property
-    TimeSeriesProperty<double> *p =
-        new TimeSeriesProperty<double>("doubleProp");
+    TimeSeriesProperty<double> *p = new TimeSeriesProperty<double>("doubleProp");
     TS_ASSERT_THROWS_NOTHING(p->addValue("2007-11-30T16:17:00", 1.00));
     TS_ASSERT_THROWS_NOTHING(p->addValue("2007-11-30T16:17:20", 3.00));
     TS_ASSERT_THROWS_NOTHING(p->addValue("2007-11-30T16:17:10", 2.00));
@@ -1485,8 +1401,7 @@ public:
   }
 
   void test_clear() {
-    boost::scoped_ptr<TimeSeriesProperty<int>> p(
-        new TimeSeriesProperty<int>("aProp"));
+    boost::scoped_ptr<TimeSeriesProperty<int>> p(new TimeSeriesProperty<int>("aProp"));
     p->addValue("2007-11-30T16:17:00", 1);
 
     TS_ASSERT_EQUALS(p->size(), 1);
@@ -1500,8 +1415,7 @@ public:
   }
 
   void test_clearOutdated() {
-    boost::scoped_ptr<TimeSeriesProperty<int>> p(
-        new TimeSeriesProperty<int>("aProp"));
+    boost::scoped_ptr<TimeSeriesProperty<int>> p(new TimeSeriesProperty<int>("aProp"));
     p->addValue("2007-11-30T16:17:00", 99);
 
     ITimeSeriesProperty *pi = p.get();
@@ -1535,8 +1449,7 @@ public:
    */
   void test_Create() {
     // Create property by add 4 entries
-    TimeSeriesProperty<double> *p =
-        new TimeSeriesProperty<double>("doubleProp");
+    TimeSeriesProperty<double> *p = new TimeSeriesProperty<double>("doubleProp");
     TS_ASSERT_THROWS_NOTHING(p->addValue("2007-11-30T16:17:00", 1.00));
     TS_ASSERT_THROWS_NOTHING(p->addValue("2007-11-30T16:17:20", 3.00));
     TS_ASSERT_THROWS_NOTHING(p->addValue("2007-11-30T16:17:10", 2.00));
@@ -1554,19 +1467,16 @@ public:
     values.emplace_back(2.00);
     values.emplace_back(4.00);
 
-    TimeSeriesProperty<double> *p1 =
-        new TimeSeriesProperty<double>("Property2");
+    TimeSeriesProperty<double> *p1 = new TimeSeriesProperty<double>("Property2");
     p1->create(times, values);
 
     TS_ASSERT_EQUALS(p->size(), p1->size());
     if (p->size() == p1->size()) {
       std::vector<Mantid::Types::Core::DateAndTime> times0 = p->timesAsVector();
-      std::vector<Mantid::Types::Core::DateAndTime> times1 =
-          p1->timesAsVector();
+      std::vector<Mantid::Types::Core::DateAndTime> times1 = p1->timesAsVector();
       for (size_t i = 0; i < static_cast<size_t>(p->size()); i++) {
         TS_ASSERT_EQUALS(times0[i], times1[i]);
-        TS_ASSERT_DELTA(p->getSingleValue(times0[i]),
-                        p1->getSingleValue(times1[i]), 1.0E-9);
+        TS_ASSERT_DELTA(p->getSingleValue(times0[i]), p1->getSingleValue(times1[i]), 1.0E-9);
       }
     }
 
@@ -1580,19 +1490,16 @@ public:
       valueXs.emplace_back(static_cast<double>(i) + 1.0);
     }
 
-    TimeSeriesProperty<double> *p2 =
-        new TimeSeriesProperty<double>("Property4");
+    TimeSeriesProperty<double> *p2 = new TimeSeriesProperty<double>("Property4");
     p2->create(tStart, deltaTs, valueXs);
 
     TS_ASSERT_EQUALS(p->size(), p2->size());
     if (p->size() == p2->size()) {
       std::vector<Mantid::Types::Core::DateAndTime> times0 = p->timesAsVector();
-      std::vector<Mantid::Types::Core::DateAndTime> times1 =
-          p2->timesAsVector();
+      std::vector<Mantid::Types::Core::DateAndTime> times1 = p2->timesAsVector();
       for (size_t i = 0; i < static_cast<size_t>(p->size()); i++) {
         TS_ASSERT_EQUALS(times0[i], times1[i]);
-        TS_ASSERT_DELTA(p->getSingleValue(times0[i]),
-                        p2->getSingleValue(times1[i]), 1.0E-9);
+        TS_ASSERT_DELTA(p->getSingleValue(times0[i]), p2->getSingleValue(times1[i]), 1.0E-9);
       }
     }
 
@@ -1609,17 +1516,15 @@ public:
    */
   void test_timeTValue() {
     // 1. Create property
-    TimeSeriesProperty<double> *p =
-        new TimeSeriesProperty<double>("doubleProp");
+    TimeSeriesProperty<double> *p = new TimeSeriesProperty<double>("doubleProp");
     TS_ASSERT_THROWS_NOTHING(p->addValue("2007-11-30T16:17:00", 1.00));
     TS_ASSERT_THROWS_NOTHING(p->addValue("2007-11-30T16:17:20", 3.00));
     TS_ASSERT_THROWS_NOTHING(p->addValue("2007-11-30T16:17:10", 2.00));
     TS_ASSERT_THROWS_NOTHING(p->addValue("2007-11-30T16:17:30", 4.00));
 
     // 2. What is correct
-    std::vector<std::string> correctS{
-        "2007-Nov-30 16:17:00 1", "2007-Nov-30 16:17:10 2",
-        "2007-Nov-30 16:17:20 3", "2007-Nov-30 16:17:30 4"};
+    std::vector<std::string> correctS{"2007-Nov-30 16:17:00 1", "2007-Nov-30 16:17:10 2", "2007-Nov-30 16:17:20 3",
+                                      "2007-Nov-30 16:17:30 4"};
 
     // 3. Check
     std::vector<std::string> tvalues = p->time_tValue();
@@ -1640,18 +1545,15 @@ public:
    */
   void test_valueAsCorrectMap() {
     // 1. Create property
-    TimeSeriesProperty<double> *p =
-        new TimeSeriesProperty<double>("doubleProp");
+    TimeSeriesProperty<double> *p = new TimeSeriesProperty<double>("doubleProp");
     TS_ASSERT_THROWS_NOTHING(p->addValue("2007-11-30T16:17:00", 1.00));
     TS_ASSERT_THROWS_NOTHING(p->addValue("2007-11-30T16:17:20", 3.00));
-    TS_ASSERT_THROWS_NOTHING(
-        p->addValue("2007-11-30T16:17:10", 1.99)); // this one is ignored
+    TS_ASSERT_THROWS_NOTHING(p->addValue("2007-11-30T16:17:10", 1.99)); // this one is ignored
     TS_ASSERT_THROWS_NOTHING(p->addValue("2007-11-30T16:17:10", 2.00));
     TS_ASSERT_THROWS_NOTHING(p->addValue("2007-11-30T16:17:30", 4.00));
 
     // 2. Get map
-    std::map<Mantid::Types::Core::DateAndTime, double> tmap =
-        p->valueAsCorrectMap();
+    std::map<Mantid::Types::Core::DateAndTime, double> tmap = p->valueAsCorrectMap();
 
     // 3. Check
     std::vector<Mantid::Types::Core::DateAndTime> times;
@@ -1681,8 +1583,7 @@ public:
 
   void test_valueAsMultiMap() {
     // 1. Create property
-    TimeSeriesProperty<double> *p =
-        new TimeSeriesProperty<double>("doubleProp");
+    TimeSeriesProperty<double> *p = new TimeSeriesProperty<double>("doubleProp");
     TS_ASSERT_THROWS_NOTHING(p->addValue("2007-11-30T16:17:00", 1.00));
     TS_ASSERT_THROWS_NOTHING(p->addValue("2007-11-30T16:17:20", 3.00));
     TS_ASSERT_THROWS_NOTHING(p->addValue("2007-11-30T16:17:10", 1.99));
@@ -1690,8 +1591,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(p->addValue("2007-11-30T16:17:30", 4.00));
 
     // 2. Get multimap
-    std::multimap<Mantid::Types::Core::DateAndTime, double> tmap =
-        p->valueAsMultiMap();
+    std::multimap<Mantid::Types::Core::DateAndTime, double> tmap = p->valueAsMultiMap();
 
     // 3. Check
     std::vector<Mantid::Types::Core::DateAndTime> times;
@@ -1723,8 +1623,7 @@ public:
    */
   void test_valueAsVector() {
     // 1. Create property
-    TimeSeriesProperty<double> *p =
-        new TimeSeriesProperty<double>("doubleProp");
+    TimeSeriesProperty<double> *p = new TimeSeriesProperty<double>("doubleProp");
     TS_ASSERT_THROWS_NOTHING(p->addValue("2007-11-30T16:17:00", 1.00));
     TS_ASSERT_THROWS_NOTHING(p->addValue("2007-11-30T16:17:10", 2.00));
     TS_ASSERT_THROWS_NOTHING(p->addValue("2007-11-30T16:17:15", 3.00));
@@ -1766,8 +1665,7 @@ public:
    */
   void test_valueAsMap() {
     // 1. Create property
-    TimeSeriesProperty<double> *p =
-        new TimeSeriesProperty<double>("doubleProp");
+    TimeSeriesProperty<double> *p = new TimeSeriesProperty<double>("doubleProp");
     TS_ASSERT_THROWS_NOTHING(p->addValue("2007-11-30T16:17:00", 1.00));
     TS_ASSERT_THROWS_NOTHING(p->addValue("2007-11-30T16:17:20", 3.00));
     TS_ASSERT_THROWS_NOTHING(p->addValue("2007-11-30T16:17:25", 3.00));
@@ -1783,14 +1681,10 @@ public:
 
     if (tmap.size() == 4) {
       std::vector<Mantid::Types::Core::DateAndTime> times;
-      times.emplace_back(
-          Mantid::Types::Core::DateAndTime("2007-11-30T16:17:00"));
-      times.emplace_back(
-          Mantid::Types::Core::DateAndTime("2007-11-30T16:17:10"));
-      times.emplace_back(
-          Mantid::Types::Core::DateAndTime("2007-11-30T16:17:20"));
-      times.emplace_back(
-          Mantid::Types::Core::DateAndTime("2007-11-30T16:17:30"));
+      times.emplace_back(Mantid::Types::Core::DateAndTime("2007-11-30T16:17:00"));
+      times.emplace_back(Mantid::Types::Core::DateAndTime("2007-11-30T16:17:10"));
+      times.emplace_back(Mantid::Types::Core::DateAndTime("2007-11-30T16:17:20"));
+      times.emplace_back(Mantid::Types::Core::DateAndTime("2007-11-30T16:17:30"));
       std::vector<double> values;
       values.emplace_back(1.00);
       values.emplace_back(2.00);
@@ -1816,8 +1710,7 @@ public:
    * Test nth Time
    */
   void test_nthTime() {
-    TimeSeriesProperty<double> *p =
-        new TimeSeriesProperty<double>("doubleProp");
+    TimeSeriesProperty<double> *p = new TimeSeriesProperty<double>("doubleProp");
 
     // 1. Test Throws
     TS_ASSERT_THROWS(p->nthTime(1), const std::runtime_error &);
@@ -1860,8 +1753,7 @@ public:
    * Test nthInterval()
    */
   void test_nthInterval() {
-    TimeSeriesProperty<double> *p =
-        new TimeSeriesProperty<double>("doubleProp");
+    TimeSeriesProperty<double> *p = new TimeSeriesProperty<double>("doubleProp");
 
     // 1. Test Throws
     TS_ASSERT_THROWS(p->nthInterval(0), const std::runtime_error &);
@@ -1875,22 +1767,16 @@ public:
 
     // 3. Test
     Mantid::Kernel::TimeInterval dt0 = p->nthInterval(0);
-    TS_ASSERT_EQUALS(dt0.begin(),
-                     Mantid::Types::Core::DateAndTime("2007-11-30T16:17:00"));
-    TS_ASSERT_EQUALS(dt0.end(),
-                     Mantid::Types::Core::DateAndTime("2007-11-30T16:17:05"));
+    TS_ASSERT_EQUALS(dt0.begin(), Mantid::Types::Core::DateAndTime("2007-11-30T16:17:00"));
+    TS_ASSERT_EQUALS(dt0.end(), Mantid::Types::Core::DateAndTime("2007-11-30T16:17:05"));
 
     Mantid::Kernel::TimeInterval dt1 = p->nthInterval(1);
-    TS_ASSERT_EQUALS(dt1.begin(),
-                     Mantid::Types::Core::DateAndTime("2007-11-30T16:17:05"));
-    TS_ASSERT_EQUALS(dt1.end(),
-                     Mantid::Types::Core::DateAndTime("2007-11-30T16:17:15"));
+    TS_ASSERT_EQUALS(dt1.begin(), Mantid::Types::Core::DateAndTime("2007-11-30T16:17:05"));
+    TS_ASSERT_EQUALS(dt1.end(), Mantid::Types::Core::DateAndTime("2007-11-30T16:17:15"));
 
     Mantid::Kernel::TimeInterval dt2 = p->nthInterval(2);
-    TS_ASSERT_EQUALS(dt2.begin(),
-                     Mantid::Types::Core::DateAndTime("2007-11-30T16:17:15"));
-    TS_ASSERT_EQUALS(dt2.end(),
-                     Mantid::Types::Core::DateAndTime("2007-11-30T16:17:35"));
+    TS_ASSERT_EQUALS(dt2.begin(), Mantid::Types::Core::DateAndTime("2007-11-30T16:17:15"));
+    TS_ASSERT_EQUALS(dt2.end(), Mantid::Types::Core::DateAndTime("2007-11-30T16:17:35"));
 
     // -1 Clean
     delete p;
@@ -1910,8 +1796,7 @@ public:
       deltaTs.emplace_back(static_cast<double>(i) * 10.0);
       valueXs.emplace_back(static_cast<double>(i) + 1.0);
     }
-    TimeSeriesProperty<double> *p1 =
-        new TimeSeriesProperty<double>("BaseProperty");
+    TimeSeriesProperty<double> *p1 = new TimeSeriesProperty<double>("BaseProperty");
     p1->create(tStart, deltaTs, valueXs);
 
     std::vector<Mantid::Types::Core::DateAndTime> times = p1->timesAsVector();
@@ -1939,16 +1824,12 @@ public:
     TS_ASSERT_EQUALS(p1->size(), 7);
 
     Mantid::Kernel::TimeInterval dt1 = p1->nthInterval(1);
-    TS_ASSERT_EQUALS(dt1.begin(),
-                     Mantid::Types::Core::DateAndTime("2007-11-30T16:17:10"));
-    TS_ASSERT_EQUALS(dt1.end(),
-                     Mantid::Types::Core::DateAndTime("2007-11-30T16:17:16"));
+    TS_ASSERT_EQUALS(dt1.begin(), Mantid::Types::Core::DateAndTime("2007-11-30T16:17:10"));
+    TS_ASSERT_EQUALS(dt1.end(), Mantid::Types::Core::DateAndTime("2007-11-30T16:17:16"));
 
     Mantid::Kernel::TimeInterval dt2 = p1->nthInterval(2);
-    TS_ASSERT_EQUALS(dt2.begin(),
-                     Mantid::Types::Core::DateAndTime("2007-11-30T16:18:40"));
-    TS_ASSERT_EQUALS(dt2.end(),
-                     Mantid::Types::Core::DateAndTime("2007-11-30T16:18:50"));
+    TS_ASSERT_EQUALS(dt2.begin(), Mantid::Types::Core::DateAndTime("2007-11-30T16:18:40"));
+    TS_ASSERT_EQUALS(dt2.end(), Mantid::Types::Core::DateAndTime("2007-11-30T16:18:50"));
 
     // 4. Clear filter
     p1->clearFilter();
@@ -1976,16 +1857,14 @@ public:
     auto p1 = std::make_shared<TimeSeriesProperty<double>>("SingleValueTSP");
     p1->addValue("2007-11-30T16:17:00", 1.5);
 
-    auto filterEndsBefore =
-        std::make_shared<TimeSeriesProperty<bool>>("EndsBefore");
+    auto filterEndsBefore = std::make_shared<TimeSeriesProperty<bool>>("EndsBefore");
     filterEndsBefore->addValue("2007-11-30T16:16:30", false);
     filterEndsBefore->addValue("2007-11-30T16:16:58", true);
     p1->filterWith(filterEndsBefore.get());
     TS_ASSERT_EQUALS(1, p1->size());
 
     p1->clearFilter();
-    auto filterEndsAfter =
-        std::make_shared<TimeSeriesProperty<bool>>("EndsAfter");
+    auto filterEndsAfter = std::make_shared<TimeSeriesProperty<bool>>("EndsAfter");
     filterEndsAfter->addValue("2007-11-30T16:16:30", false);
     filterEndsAfter->addValue("2007-11-30T16:17:01", true);
     p1->filterWith(filterEndsAfter.get());
@@ -2006,8 +1885,7 @@ public:
       deltaTs.emplace_back(static_cast<double>(i) * 10.0);
       valueXs.emplace_back(static_cast<double>(i) + 1.0);
     }
-    TimeSeriesProperty<double> *p1 =
-        new TimeSeriesProperty<double>("BaseProperty");
+    TimeSeriesProperty<double> *p1 = new TimeSeriesProperty<double>("BaseProperty");
     p1->create(tStart, deltaTs, valueXs);
 
     std::vector<Mantid::Types::Core::DateAndTime> times = p1->timesAsVector();
@@ -2028,34 +1906,26 @@ public:
 
     // 4. Check interval & Value
     Mantid::Kernel::TimeInterval dt0 = p1->nthInterval(0);
-    TS_ASSERT_EQUALS(dt0.begin(),
-                     Mantid::Types::Core::DateAndTime("2007-11-30T16:17:00"));
-    TS_ASSERT_EQUALS(dt0.end(),
-                     Mantid::Types::Core::DateAndTime("2007-11-30T16:17:10"));
+    TS_ASSERT_EQUALS(dt0.begin(), Mantid::Types::Core::DateAndTime("2007-11-30T16:17:00"));
+    TS_ASSERT_EQUALS(dt0.end(), Mantid::Types::Core::DateAndTime("2007-11-30T16:17:10"));
     double v0 = p1->nthValue(0);
     TS_ASSERT_DELTA(v0, 1, 0.00000001);
 
     Mantid::Kernel::TimeInterval dt1 = p1->nthInterval(1);
-    TS_ASSERT_EQUALS(dt1.begin(),
-                     Mantid::Types::Core::DateAndTime("2007-11-30T16:17:10"));
-    TS_ASSERT_EQUALS(dt1.end(),
-                     Mantid::Types::Core::DateAndTime("2007-11-30T16:17:16"));
+    TS_ASSERT_EQUALS(dt1.begin(), Mantid::Types::Core::DateAndTime("2007-11-30T16:17:10"));
+    TS_ASSERT_EQUALS(dt1.end(), Mantid::Types::Core::DateAndTime("2007-11-30T16:17:16"));
     double v1 = p1->nthValue(1);
     TS_ASSERT_DELTA(v1, 2, 0.00000001);
 
     Mantid::Kernel::TimeInterval dt2 = p1->nthInterval(2);
-    TS_ASSERT_EQUALS(dt2.begin(),
-                     Mantid::Types::Core::DateAndTime("2007-11-30T16:18:40"));
-    TS_ASSERT_EQUALS(dt2.end(),
-                     Mantid::Types::Core::DateAndTime("2007-11-30T16:18:50"));
+    TS_ASSERT_EQUALS(dt2.begin(), Mantid::Types::Core::DateAndTime("2007-11-30T16:18:40"));
+    TS_ASSERT_EQUALS(dt2.end(), Mantid::Types::Core::DateAndTime("2007-11-30T16:18:50"));
     double v2 = p1->nthValue(2);
     TS_ASSERT_DELTA(v2, 11, 0.00000001);
 
     Mantid::Kernel::TimeInterval dt12 = p1->nthInterval(11);
-    TS_ASSERT_EQUALS(dt12.begin(),
-                     Mantid::Types::Core::DateAndTime("2007-11-30T16:20:10"));
-    TS_ASSERT_EQUALS(dt12.end(),
-                     Mantid::Types::Core::DateAndTime("2007-11-30T17:19:30"));
+    TS_ASSERT_EQUALS(dt12.begin(), Mantid::Types::Core::DateAndTime("2007-11-30T16:20:10"));
+    TS_ASSERT_EQUALS(dt12.end(), Mantid::Types::Core::DateAndTime("2007-11-30T17:19:30"));
     double v12 = p1->nthValue(11);
     TS_ASSERT_DELTA(v12, 20, 1.0E-8);
 
@@ -2082,8 +1952,7 @@ public:
       deltaTs.emplace_back(static_cast<double>(i) * 10.0);
       valueXs.emplace_back(static_cast<double>(i) + 1.0);
     }
-    TimeSeriesProperty<double> *p1 =
-        new TimeSeriesProperty<double>("BaseProperty");
+    TimeSeriesProperty<double> *p1 = new TimeSeriesProperty<double>("BaseProperty");
     p1->create(tStart, deltaTs, valueXs);
 
     std::vector<Mantid::Types::Core::DateAndTime> times = p1->timesAsVector();
@@ -2104,10 +1973,8 @@ public:
 
     // 4. Check interval
     Mantid::Kernel::TimeInterval dt0 = p1->nthInterval(0);
-    TS_ASSERT_EQUALS(dt0.begin(),
-                     Mantid::Types::Core::DateAndTime("2007-11-30T16:17:16"));
-    TS_ASSERT_EQUALS(dt0.end(),
-                     Mantid::Types::Core::DateAndTime("2007-11-30T16:17:20"));
+    TS_ASSERT_EQUALS(dt0.begin(), Mantid::Types::Core::DateAndTime("2007-11-30T16:17:16"));
+    TS_ASSERT_EQUALS(dt0.end(), Mantid::Types::Core::DateAndTime("2007-11-30T16:17:20"));
     double v0 = p1->nthValue(0);
     TS_ASSERT_DELTA(v0, 2, 1.0E-8);
 
@@ -2134,8 +2001,7 @@ public:
       deltaTs.emplace_back(static_cast<double>(i) * 10.0);
       valueXs.emplace_back(static_cast<double>(i) + 1.0);
     }
-    TimeSeriesProperty<double> *p1 =
-        new TimeSeriesProperty<double>("BaseProperty");
+    TimeSeriesProperty<double> *p1 = new TimeSeriesProperty<double>("BaseProperty");
     p1->create(tStart, deltaTs, valueXs);
 
     std::vector<Mantid::Types::Core::DateAndTime> times = p1->timesAsVector();
@@ -2156,18 +2022,14 @@ public:
 
     // 4. Check interval
     Mantid::Kernel::TimeInterval dt1 = p1->nthInterval(1);
-    TS_ASSERT_EQUALS(dt1.begin(),
-                     Mantid::Types::Core::DateAndTime("2007-11-30T16:17:10"));
-    TS_ASSERT_EQUALS(dt1.end(),
-                     Mantid::Types::Core::DateAndTime("2007-11-30T16:17:16"));
+    TS_ASSERT_EQUALS(dt1.begin(), Mantid::Types::Core::DateAndTime("2007-11-30T16:17:10"));
+    TS_ASSERT_EQUALS(dt1.end(), Mantid::Types::Core::DateAndTime("2007-11-30T16:17:16"));
     double v1 = p1->nthValue(1);
     TS_ASSERT_DELTA(v1, 2, 1.0E-8);
 
     Mantid::Kernel::TimeInterval dt2 = p1->nthInterval(2);
-    TS_ASSERT_EQUALS(dt2.begin(),
-                     Mantid::Types::Core::DateAndTime("2007-11-30T16:18:40"));
-    TS_ASSERT_EQUALS(dt2.end(),
-                     Mantid::Types::Core::DateAndTime("2007-11-30T16:18:50"));
+    TS_ASSERT_EQUALS(dt2.begin(), Mantid::Types::Core::DateAndTime("2007-11-30T16:18:40"));
+    TS_ASSERT_EQUALS(dt2.end(), Mantid::Types::Core::DateAndTime("2007-11-30T16:18:50"));
     double v2 = p1->nthValue(2);
     TS_ASSERT_DELTA(v2, 11, 1.0E-8);
 
@@ -2195,8 +2057,7 @@ public:
       deltaTs.emplace_back(static_cast<double>(i) * 10.0);
       valueXs.emplace_back(static_cast<double>(i) + 1.0);
     }
-    TimeSeriesProperty<double> *p1 =
-        new TimeSeriesProperty<double>("BaseProperty");
+    TimeSeriesProperty<double> *p1 = new TimeSeriesProperty<double>("BaseProperty");
     p1->create(tStart, deltaTs, valueXs);
 
     std::vector<Mantid::Types::Core::DateAndTime> times = p1->timesAsVector();
@@ -2217,10 +2078,8 @@ public:
 
     // 4. Check interval
     Mantid::Kernel::TimeInterval dt0 = p1->nthInterval(0);
-    TS_ASSERT_EQUALS(dt0.begin(),
-                     Mantid::Types::Core::DateAndTime("2007-11-30T16:17:16"));
-    TS_ASSERT_EQUALS(dt0.end(),
-                     Mantid::Types::Core::DateAndTime("2007-11-30T16:17:20"));
+    TS_ASSERT_EQUALS(dt0.begin(), Mantid::Types::Core::DateAndTime("2007-11-30T16:17:16"));
+    TS_ASSERT_EQUALS(dt0.end(), Mantid::Types::Core::DateAndTime("2007-11-30T16:17:20"));
     double v0 = p1->nthValue(0);
     TS_ASSERT_DELTA(v0, 2, 1.0E-8);
 
@@ -2239,8 +2098,7 @@ public:
    * Note that this will be same with new container
    */
   void test_getMemorySize() {
-    TimeSeriesProperty<double> *p =
-        new TimeSeriesProperty<double>("doubleProp");
+    TimeSeriesProperty<double> *p = new TimeSeriesProperty<double>("doubleProp");
 
     size_t memsize = p->getMemorySize();
     TS_ASSERT_EQUALS(memsize, 0);
@@ -2273,10 +2131,8 @@ public:
     series.addValue("2000-11-30T01:01:01", expectedFilteredValue);
     series.addValue("2000-11-30T01:01:02", 2);
 
-    const double actualFilteredValue =
-        filterByStatistic(&series, Mantid::Kernel::Math::FirstValue);
-    TSM_ASSERT_EQUALS("Filtering by FirstValue is not working.",
-                      expectedFilteredValue, actualFilteredValue);
+    const double actualFilteredValue = filterByStatistic(&series, Mantid::Kernel::Math::FirstValue);
+    TSM_ASSERT_EQUALS("Filtering by FirstValue is not working.", expectedFilteredValue, actualFilteredValue);
   }
 
   void test_filter_by_last_value() {
@@ -2286,10 +2142,8 @@ public:
     series.addValue("2000-11-30T01:01:01", 0);
     series.addValue("2000-11-30T01:01:02", expectedFilteredValue);
 
-    const double actualFilteredValue =
-        filterByStatistic(&series, Mantid::Kernel::Math::LastValue);
-    TSM_ASSERT_EQUALS("Filtering by LastValue is not working.",
-                      expectedFilteredValue, actualFilteredValue);
+    const double actualFilteredValue = filterByStatistic(&series, Mantid::Kernel::Math::LastValue);
+    TSM_ASSERT_EQUALS("Filtering by LastValue is not working.", expectedFilteredValue, actualFilteredValue);
   }
 
   void test_filter_by_minimum_value() {
@@ -2301,10 +2155,8 @@ public:
                     expectedFilteredValue); // minimum. 1 < 3 < 4
     series.addValue("2000-11-30T01:01:03", 4);
 
-    const double actualFilteredValue =
-        filterByStatistic(&series, Mantid::Kernel::Math::Minimum);
-    TSM_ASSERT_EQUALS("Filtering by Minimum is not working.",
-                      expectedFilteredValue, actualFilteredValue);
+    const double actualFilteredValue = filterByStatistic(&series, Mantid::Kernel::Math::Minimum);
+    TSM_ASSERT_EQUALS("Filtering by Minimum is not working.", expectedFilteredValue, actualFilteredValue);
   }
 
   void test_filter_by_maximum_value() {
@@ -2316,10 +2168,8 @@ public:
                     expectedFilteredValue); // maximum. 1 > 0.9 > 0.1
     series.addValue("2000-11-30T01:01:03", 0.9);
 
-    const double actualFilteredValue =
-        filterByStatistic(&series, Mantid::Kernel::Math::Maximum);
-    TSM_ASSERT_EQUALS("Filtering by Maximum is not working.",
-                      expectedFilteredValue, actualFilteredValue);
+    const double actualFilteredValue = filterByStatistic(&series, Mantid::Kernel::Math::Maximum);
+    TSM_ASSERT_EQUALS("Filtering by Maximum is not working.", expectedFilteredValue, actualFilteredValue);
   }
 
   void test_filter_by_mean_value() {
@@ -2332,10 +2182,8 @@ public:
                                             // (T1 + T2 + T3) / 3
     series.addValue("2000-11-30T01:01:03", 2);
 
-    const double actualFilteredValue =
-        filterByStatistic(&series, Mantid::Kernel::Math::Mean);
-    TSM_ASSERT_EQUALS("Filtering by Mean Time is not working.",
-                      expectedFilteredValue, actualFilteredValue);
+    const double actualFilteredValue = filterByStatistic(&series, Mantid::Kernel::Math::Mean);
+    TSM_ASSERT_EQUALS("Filtering by Mean Time is not working.", expectedFilteredValue, actualFilteredValue);
   }
 
   void test_filter_by_median() {
@@ -2349,10 +2197,8 @@ public:
     series.addValue("2000-11-30T01:01:04", 4);
     series.addValue("2000-11-30T01:02:00", 5);
 
-    const double actualFilteredValue =
-        filterByStatistic(&series, Mantid::Kernel::Math::Median);
-    TSM_ASSERT_EQUALS("Filtering by Median Time is not working.",
-                      expectedFilteredValue, actualFilteredValue);
+    const double actualFilteredValue = filterByStatistic(&series, Mantid::Kernel::Math::Median);
+    TSM_ASSERT_EQUALS("Filtering by Median Time is not working.", expectedFilteredValue, actualFilteredValue);
   }
 
   //----------------------------------------------------------------------------
@@ -2366,15 +2212,12 @@ public:
 
     TS_ASSERT_EQUALS(original_size, 6);
 
-    DateAndTime start = DateAndTime(
-        "2007-11-30T15:00:00"); // Much earlier than first time series value
-    DateAndTime stop = DateAndTime(
-        "2007-11-30T17:00:00"); // Much later than last time series value
+    DateAndTime start = DateAndTime("2007-11-30T15:00:00"); // Much earlier than first time series value
+    DateAndTime stop = DateAndTime("2007-11-30T17:00:00");  // Much later than last time series value
 
     log->filterByTime(start, stop);
 
-    TSM_ASSERT_EQUALS("Shouldn't be filtering anything!", original_size,
-                      log->realSize());
+    TSM_ASSERT_EQUALS("Shouldn't be filtering anything!", original_size, log->realSize());
 
     delete log;
   }
@@ -2423,9 +2266,8 @@ public:
     const auto &log = getTestLog();
     // Add the filter
     auto filter = std::make_unique<TimeSeriesProperty<bool>>("Filter");
-    Mantid::Types::Core::DateAndTime firstStart("2007-11-30T16:17:00"),
-        firstEnd("2007-11-30T16:17:15"), secondStart("2007-11-30T16:18:35"),
-        secondEnd("2007-11-30T16:18:40");
+    Mantid::Types::Core::DateAndTime firstStart("2007-11-30T16:17:00"), firstEnd("2007-11-30T16:17:15"),
+        secondStart("2007-11-30T16:18:35"), secondEnd("2007-11-30T16:18:40");
     filter->addValue(firstStart.toISO8601String(), true);
     filter->addValue(firstEnd.toISO8601String(), false);
     filter->addValue("2007-11-30T16:17:25", false);
@@ -2436,8 +2278,7 @@ public:
     const auto &intervals = log->getSplittingIntervals();
     TS_ASSERT_EQUALS(intervals.size(), 2);
     if (intervals.size() == 2) {
-      const auto &firstRange = intervals.front(),
-                 &secondRange = intervals.back();
+      const auto &firstRange = intervals.front(), &secondRange = intervals.back();
       TS_ASSERT_EQUALS(firstRange.start(), firstStart);
       TS_ASSERT_EQUALS(firstRange.stop(), firstEnd);
       TS_ASSERT_EQUALS(secondRange.start(), secondStart);
@@ -2449,9 +2290,8 @@ public:
     const auto &log = getTestLog();
     // Add the filter
     auto filter = std::make_unique<TimeSeriesProperty<bool>>("Filter");
-    Mantid::Types::Core::DateAndTime firstEnd("2007-11-30T16:17:05"),
-        secondStart("2007-11-30T16:17:10"), secondEnd("2007-11-30T16:17:15"),
-        thirdStart("2007-11-30T16:18:35");
+    Mantid::Types::Core::DateAndTime firstEnd("2007-11-30T16:17:05"), secondStart("2007-11-30T16:17:10"),
+        secondEnd("2007-11-30T16:17:15"), thirdStart("2007-11-30T16:18:35");
     filter->addValue(log->firstTime(), true);
     filter->addValue(firstEnd.toISO8601String(), false);
     filter->addValue(secondStart.toISO8601String(), true);

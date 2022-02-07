@@ -8,7 +8,7 @@ This is a Python binding to the C++ class Mantid::Geometry::IDetector.
 
 .. module:`mantid.geometry`
 
-.. autoclass:: mantid.geometry.IDetector 
+.. autoclass:: mantid.geometry.IDetector
     :members:
     :undoc-members:
     :inherited-members:

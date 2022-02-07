@@ -1,3 +1,7 @@
+.. _func-VesuvioResolution:
+
+.. index:: VesuvioResolution
+
 .. algorithm::
 
 .. summary::

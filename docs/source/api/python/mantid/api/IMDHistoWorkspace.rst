@@ -1,3 +1,5 @@
+.. _mantid.api.IMDHistoWorkspace:
+
 ===================
  IMDHistoWorkspace
 ===================
@@ -8,7 +10,7 @@ This is a Python binding to the C++ class Mantid::API::IMDHistoWorkspace.
 
 .. module:`mantid.api`
 
-.. autoclass:: mantid.api.IMDHistoWorkspace 
+.. autoclass:: mantid.api.IMDHistoWorkspace
     :members:
     :undoc-members:
     :inherited-members:

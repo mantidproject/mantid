@@ -12,8 +12,7 @@
 #include "MantidKernel/PropertyManager.h"
 #include "Poco/Path.h"
 
-namespace Mantid {
-namespace WorkflowAlgorithms {
+namespace Mantid::WorkflowAlgorithms {
 
 using namespace Kernel;
 using namespace API;
@@ -22,24 +21,17 @@ using namespace API;
 DECLARE_ALGORITHM(SANSBeamFluxCorrection)
 
 void SANSBeamFluxCorrection::init() {
-  declareProperty(std::make_unique<WorkspaceProperty<>>("InputWorkspace", "",
-                                                        Direction::Input),
+  declareProperty(std::make_unique<WorkspaceProperty<>>("InputWorkspace", "", Direction::Input),
                   "Workspace to be corrected");
-  declareProperty(
-      std::make_unique<WorkspaceProperty<>>("InputMonitorWorkspace", "",
-                                            Direction::Input),
-      "Workspace containing the monitor counts for the sample data");
+  declareProperty(std::make_unique<WorkspaceProperty<>>("InputMonitorWorkspace", "", Direction::Input),
+                  "Workspace containing the monitor counts for the sample data");
 
   std::vector<std::string> exts{"_event.nxs", ".nxs", ".nxs.h5"};
-  declareProperty(
-      std::make_unique<API::FileProperty>("ReferenceFluxFilename", "",
-                                          API::FileProperty::Load, exts),
-      "File containing the reference flux spectrum.");
+  declareProperty(std::make_unique<API::FileProperty>("ReferenceFluxFilename", "", API::FileProperty::Load, exts),
+                  "File containing the reference flux spectrum.");
 
-  declareProperty("ReductionProperties", "__sans_reduction_properties",
-                  Direction::Input);
-  declareProperty(std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
-                                                        Direction::Output),
+  declareProperty("ReductionProperties", "__sans_reduction_properties", Direction::Input);
+  declareProperty(std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "", Direction::Output),
                   "Corrected workspace.");
   declareProperty("OutputMessage", "", Direction::Output);
 }
@@ -68,17 +60,16 @@ void SANSBeamFluxCorrection::exec() {
 
   // Rebin the reference and monitor data to the sample data workspace
   progress.report("Rebinning reference data");
-  IAlgorithm_sptr convAlg = createChildAlgorithm("ConvertToHistogram");
+  auto convAlg = createChildAlgorithm("ConvertToHistogram");
   convAlg->setProperty("InputWorkspace", fluxRefWS);
   convAlg->executeAsChildAlg();
   fluxRefWS = convAlg->getProperty("OutputWorkspace");
 
-  IAlgorithm_sptr rebinAlg = createChildAlgorithm("RebinToWorkspace");
+  auto rebinAlg = createChildAlgorithm("RebinToWorkspace");
   rebinAlg->setProperty("WorkspaceToRebin", fluxRefWS);
   rebinAlg->setProperty("WorkspaceToMatch", inputWS);
   rebinAlg->executeAsChildAlg();
-  MatrixWorkspace_sptr scaledfluxRefWS =
-      rebinAlg->getProperty("OutputWorkspace");
+  MatrixWorkspace_sptr scaledfluxRefWS = rebinAlg->getProperty("OutputWorkspace");
 
   progress.report("Rebinning monitor data");
   rebinAlg = createChildAlgorithm("RebinToWorkspace");
@@ -91,7 +82,7 @@ void SANSBeamFluxCorrection::exec() {
   // I = I_0 / Phi_sample
   // Phi_sample = M_sample * [Phi_ref/M_ref]
   // where [Phi_ref/M_ref] is the fluxRefWS workspace
-  IAlgorithm_sptr divideAlg = createChildAlgorithm("Divide");
+  auto divideAlg = createChildAlgorithm("Divide");
   divideAlg->setProperty("LHSWorkspace", inputWS);
   divideAlg->setProperty("RHSWorkspace", monitorWS);
   divideAlg->executeAsChildAlg();
@@ -112,8 +103,7 @@ void SANSBeamFluxCorrection::exec() {
  * scientists. A simple Load algorithm should suffice.
  */
 MatrixWorkspace_sptr SANSBeamFluxCorrection::loadReference() {
-  const std::string referenceFluxFile =
-      getPropertyValue("ReferenceFluxFilename");
+  const std::string referenceFluxFile = getPropertyValue("ReferenceFluxFilename");
   Poco::Path path(referenceFluxFile);
   const std::string entryName = "SANSBeamFluxCorrection_" + path.getBaseName();
   std::string fluxRefWSName = "__beam_flux_reference_" + path.getBaseName();
@@ -124,18 +114,17 @@ MatrixWorkspace_sptr SANSBeamFluxCorrection::loadReference() {
     fluxRefWS = m_reductionManager->getProperty(entryName);
     m_output_message += "   | Using flux reference " + referenceFluxFile + "\n";
   } else {
-    IAlgorithm_sptr loadAlg = createChildAlgorithm("Load");
+    auto loadAlg = createChildAlgorithm("Load");
     loadAlg->setProperty("Filename", referenceFluxFile);
     loadAlg->executeAsChildAlg();
     Workspace_sptr tmpWS = loadAlg->getProperty("OutputWorkspace");
     fluxRefWS = std::dynamic_pointer_cast<MatrixWorkspace>(tmpWS);
-    m_output_message +=
-        "   | Loaded flux reference " + referenceFluxFile + "\n";
+    m_output_message += "   | Loaded flux reference " + referenceFluxFile + "\n";
 
     // Keep the reference data for later use
     AnalysisDataService::Instance().addOrReplace(fluxRefWSName, fluxRefWS);
-    m_reductionManager->declareProperty(std::make_unique<WorkspaceProperty<>>(
-        entryName, fluxRefWSName, Direction::InOut));
+    m_reductionManager->declareProperty(
+        std::make_unique<WorkspaceProperty<>>(entryName, fluxRefWSName, Direction::InOut));
     m_reductionManager->setPropertyValue(entryName, fluxRefWSName);
     m_reductionManager->setProperty(entryName, fluxRefWS);
   }
@@ -143,5 +132,4 @@ MatrixWorkspace_sptr SANSBeamFluxCorrection::loadReference() {
   return fluxRefWS;
 }
 
-} // namespace WorkflowAlgorithms
-} // namespace Mantid
+} // namespace Mantid::WorkflowAlgorithms

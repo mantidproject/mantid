@@ -31,8 +31,7 @@ using namespace Mantid::Kernel::Strings;
 using namespace Mantid::API;
 using namespace Mantid::PhysicalConstants;
 
-namespace Mantid {
-namespace Crystal {
+namespace Mantid::Crystal {
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(SaveHKL)
@@ -40,14 +39,12 @@ DECLARE_ALGORITHM(SaveHKL)
 /** Initialize the algorithm's properties.
  */
 void SaveHKL::init() {
-  declareProperty(std::make_unique<WorkspaceProperty<PeaksWorkspace>>(
-                      "InputWorkspace", "", Direction::Input),
+  declareProperty(std::make_unique<WorkspaceProperty<PeaksWorkspace>>("InputWorkspace", "", Direction::Input),
                   "An input PeaksWorkspace.");
 
   auto mustBePositive = std::make_shared<BoundedValidator<double>>();
   mustBePositive->setLower(0.0);
-  declareProperty("ScalePeaks", 1.0, mustBePositive,
-                  "Multiply FSQ and sig(FSQ) by scaleFactor");
+  declareProperty("ScalePeaks", 1.0, mustBePositive, "Multiply FSQ and sig(FSQ) by scaleFactor");
   declareProperty("MinDSpacing", 0.0, "Minimum d-spacing (Angstroms)");
   declareProperty("MinWavelength", 0.0, "Minimum wavelength (Angstroms)");
   declareProperty("MaxWavelength", 100.0, "Maximum wavelength (Angstroms)");
@@ -64,40 +61,30 @@ void SaveHKL::init() {
   declareProperty("LinearAbsorptionCoef", EMPTY_DBL(), mustBePositive,
                   "Linear absorption coefficient at 1.8 Angstroms in 1/cm if "
                   "not set with SetSampleMaterial");
-  declareProperty("Radius", EMPTY_DBL(), mustBePositive,
-                  "Radius of the sample in centimeters");
+  declareProperty("Radius", EMPTY_DBL(), mustBePositive, "Radius of the sample in centimeters");
   declareProperty("PowerLambda", 4.0, "Power of lambda ");
-  declareProperty(
-      std::make_unique<FileProperty>("SpectraFile", "",
-                                     API::FileProperty::OptionalLoad, ".dat"),
-      " Spectrum data read from a spectrum file.");
+  declareProperty(std::make_unique<FileProperty>("SpectraFile", "", API::FileProperty::OptionalLoad, ".dat"),
+                  " Spectrum data read from a spectrum file.");
 
-  declareProperty(std::make_unique<FileProperty>("Filename", "",
-                                                 FileProperty::Save, ".hkl"),
+  declareProperty(std::make_unique<FileProperty>("Filename", "", FileProperty::Save, ".hkl"),
                   "Path to an hkl file to save.");
 
   std::vector<std::string> histoTypes{"Bank", "RunNumber", ""};
-  declareProperty("SortBy", histoTypes[2],
-                  std::make_shared<StringListValidator>(histoTypes),
+  declareProperty("SortBy", histoTypes[2], std::make_shared<StringListValidator>(histoTypes),
                   "Sort the histograms by bank, run number or both (default).");
-  declareProperty("MinIsigI", EMPTY_DBL(), mustBePositive,
-                  "The minimum I/sig(I) ratio");
+  declareProperty("MinIsigI", EMPTY_DBL(), mustBePositive, "The minimum I/sig(I) ratio");
   declareProperty("WidthBorder", EMPTY_INT(), "Width of border of detectors");
-  declareProperty("MinIntensity", EMPTY_DBL(), mustBePositive,
-                  "The minimum Intensity");
-  declareProperty(std::make_unique<WorkspaceProperty<PeaksWorkspace>>(
-                      "OutputWorkspace", "SaveHKLOutput", Direction::Output),
-                  "Output PeaksWorkspace");
+  declareProperty("MinIntensity", EMPTY_DBL(), mustBePositive, "The minimum Intensity");
   declareProperty(
-      "HKLDecimalPlaces", EMPTY_INT(),
-      "Number of decimal places for fractional HKL.  Default is integer HKL.");
-  declareProperty(
-      "DirectionCosines", false,
-      "Extra columns (22 total) in file if true for direction cosines.\n"
-      "If false, original 14 columns (default).");
+      std::make_unique<WorkspaceProperty<PeaksWorkspace>>("OutputWorkspace", "SaveHKLOutput", Direction::Output),
+      "Output PeaksWorkspace");
+  declareProperty("HKLDecimalPlaces", EMPTY_INT(),
+                  "Number of decimal places for fractional HKL.  Default is integer HKL.");
+  declareProperty("DirectionCosines", false,
+                  "Extra columns (22 total) in file if true for direction cosines.\n"
+                  "If false, original 14 columns (default).");
   const std::vector<std::string> exts{".mat", ".ub", ".txt"};
-  declareProperty(std::make_unique<FileProperty>(
-                      "UBFilename", "", FileProperty::OptionalLoad, exts),
+  declareProperty(std::make_unique<FileProperty>("UBFilename", "", FileProperty::OptionalLoad, exts),
                   "Path to an ISAW-style UB matrix text file only needed for "
                   "DirectionCosines if workspace does not have lattice.");
 }
@@ -113,7 +100,7 @@ void SaveHKL::exec() {
   if (peaksW != m_ws)
     peaksW = m_ws->clone();
   auto inst = peaksW->getInstrument();
-  std::vector<Peak> peaks = peaksW->getPeaks();
+  std::vector<Peak> &peaks = peaksW->getPeaks();
   double scaleFactor = getProperty("ScalePeaks");
   double dMin = getProperty("MinDSpacing");
   double wlMin = getProperty("MinWavelength");
@@ -124,33 +111,32 @@ void SaveHKL::exec() {
   int widthBorder = getProperty("WidthBorder");
   int decimalHKL = getProperty("HKLDecimalPlaces");
   bool cosines = getProperty("DirectionCosines");
-  Kernel::DblMatrix UB(3, 3);
+  OrientedLattice ol;
   if (cosines) {
     if (peaksW->sample().hasOrientedLattice()) {
-      UB = peaksW->sample().getOrientedLattice().getUB();
+      ol = peaksW->sample().getOrientedLattice();
     } else {
       // Find OrientedLattice
       std::string fileUB = getProperty("UBFilename");
       // Open the file
       std::ifstream in(fileUB.c_str());
       if (!in)
-        throw std::runtime_error(
-            "A file containing the UB matrix must be input into UBFilename.");
+        throw std::runtime_error("A file containing the UB matrix must be input into UBFilename.");
       std::string s;
       double val;
 
       // Read the ISAW UB matrix
+      Kernel::DblMatrix UB;
       for (size_t row = 0; row < 3; row++) {
         for (size_t col = 0; col < 3; col++) {
           s = getWord(in, true);
           if (!convert(s, val))
-            throw std::runtime_error(
-                "The string '" + s +
-                "' in the file was not understood as a number.");
+            throw std::runtime_error("The string '" + s + "' in the file was not understood as a number.");
           UB[row][col] = val;
         }
         readToEndOfLine(in, true);
       }
+      ol.setUB(UB);
     }
   }
 
@@ -165,27 +151,7 @@ void SaveHKL::exec() {
     qSign = 1.0;
 
   std::fstream out;
-  bool append = getProperty("AppendFile");
-  if (append && Poco::File(filename.c_str()).exists()) {
-    IAlgorithm_sptr load_alg = createChildAlgorithm("LoadHKL");
-    load_alg->setPropertyValue("Filename", filename);
-    load_alg->setProperty("OutputWorkspace", "peaks");
-    load_alg->executeAsChildAlg();
-    // Get back the result
-    DataObjects::PeaksWorkspace_sptr ws2 =
-        load_alg->getProperty("OutputWorkspace");
-    ws2->setInstrument(inst);
-
-    IAlgorithm_sptr plus_alg = createChildAlgorithm("CombinePeaksWorkspaces");
-    plus_alg->setProperty("LHSWorkspace", peaksW);
-    plus_alg->setProperty("RHSWorkspace", ws2);
-    plus_alg->executeAsChildAlg();
-    // Get back the result
-    peaksW = plus_alg->getProperty("OutputWorkspace");
-    out.open(filename.c_str(), std::ios::out);
-  } else {
-    out.open(filename.c_str(), std::ios::out);
-  }
+  out.open(filename.c_str(), std::ios::out);
 
   // We cannot assume the peaks have bank type detector modules, so we have a
   // string to check this
@@ -203,8 +169,7 @@ void SaveHKL::exec() {
     int bank = 0;
     std::string bankName = p.getBankName();
     if (bankName.size() <= 4) {
-      g_log.information() << "Could not interpret bank number of peak " << i
-                          << "(" << bankName << ")\n";
+      g_log.information() << "Could not interpret bank number of peak " << i << "(" << bankName << ")\n";
       continue;
     }
     // Save the "bank" part once to check whether it really is a bank
@@ -236,18 +201,6 @@ void SaveHKL::exec() {
   m_amu = getProperty("LinearAbsorptionCoef"); // in 1/cm
   m_power_th = getProperty("PowerLambda");     // in cm
 
-  // Function to calculate total attenuation for a track
-  auto calculateAttenuation = [](const Track &path, double lambda) {
-    double factor(1.0);
-    for (const auto &segment : path) {
-      const double length = segment.distInsideObject;
-      const auto &segObj = *(segment.object);
-      const auto &segMat = segObj.material();
-      factor *= segMat.attenuation(length, lambda);
-    }
-    return factor;
-  };
-
   API::Run &run = peaksW->mutableRun();
 
   double radius = getProperty("Radius"); // in cm
@@ -257,10 +210,6 @@ void SaveHKL::exec() {
     if (run.hasProperty("Radius"))
       radius = run.getPropertyValueAsType<double>("Radius");
   }
-
-  const auto sourcePos = inst->getSource()->getPos();
-  const auto samplePos = inst->getSample()->getPos();
-  const auto reverseBeamDir = normalize(samplePos - sourcePos);
 
   const Material &sampleMaterial = peaksW->sample().getMaterial();
   const IObject *sampleShape{nullptr};
@@ -282,6 +231,14 @@ void SaveHKL::exec() {
     peaksW->mutableSample().setShape(sphere);
   } else if (peaksW->sample().getShape().hasValidShape()) {
     sampleShape = &(peaksW->sample().getShape());
+    // if AddAbsorptionWeightedPathLengths has already been run on the workspace
+    // then keep those tbar values
+    if (std::all_of(peaks.cbegin(), peaks.cend(), [](auto &p) { return p.getAbsorptionWeightedPathLength() == 0; })) {
+      auto alg = createChildAlgorithm("AddAbsorptionWeightedPathLengths");
+      alg->setProperty("InputWorkspace", peaksW);
+      alg->setProperty("UseSinglePath", true);
+      alg->executeAsChildAlg();
+    }
   }
 
   if (correctPeaks) {
@@ -327,8 +284,7 @@ void SaveHKL::exec() {
     bankMap_t &bankMap = runMap_it->second;
 
     bankMap_t::iterator bankMap_it;
-    for (bankMap_it = bankMap.begin(); bankMap_it != bankMap.end();
-         ++bankMap_it) {
+    for (bankMap_it = bankMap.begin(); bankMap_it != bankMap.end(); ++bankMap_it) {
       // Start of a new bank.
       // int bank = bankMap_it->first;
       std::vector<size_t> &ids = bankMap_it->second;
@@ -337,13 +293,11 @@ void SaveHKL::exec() {
       for (auto wi : ids) {
 
         Peak &p = peaks[wi];
-        if (p.getIntensity() == 0.0 || !(std::isfinite(p.getIntensity())) ||
-            !(std::isfinite(p.getSigmaIntensity()))) {
+        if (p.getIntensity() == 0.0 || !(std::isfinite(p.getIntensity())) || !(std::isfinite(p.getSigmaIntensity()))) {
           banned.insert(wi);
           continue;
         }
-        if (minIsigI != EMPTY_DBL() &&
-            p.getIntensity() < std::abs(minIsigI * p.getSigmaIntensity())) {
+        if (minIsigI != EMPTY_DBL() && p.getIntensity() < std::abs(minIsigI * p.getSigmaIntensity())) {
           banned.insert(wi);
           continue;
         }
@@ -359,16 +313,13 @@ void SaveHKL::exec() {
         sizeBanks(bankName, nCols, nRows);
         // peaks with detectorID=-1 are from LoadHKL
         if (widthBorder != EMPTY_INT() && p.getDetectorID() != -1 &&
-            (p.getCol() < widthBorder || p.getRow() < widthBorder ||
-             p.getCol() > (nCols - widthBorder) ||
+            (p.getCol() < widthBorder || p.getRow() < widthBorder || p.getCol() > (nCols - widthBorder) ||
              p.getRow() > (nRows - widthBorder))) {
           banned.insert(wi);
           continue;
         }
         // Take out the "bank" part of the bank name and convert to an int
-        bankName.erase(
-            remove_if(bankName.begin(), bankName.end(), std::not_fn(::isdigit)),
-            bankName.end());
+        bankName.erase(remove_if(bankName.begin(), bankName.end(), std::not_fn(::isdigit)), bankName.end());
         Strings::convert(bankName, bank);
 
         // Two-theta = polar angle = scattering angle = between +Z vector and
@@ -387,19 +338,8 @@ void SaveHKL::exec() {
           // keep original method if radius is provided
           transmission = absorbSphere(radius, scattering, lambda, tbar);
         } else if (sampleShape) {
-          Track beforeScatter(samplePos, reverseBeamDir);
-          sampleShape->interceptSurface(beforeScatter);
-          const auto detDir = normalize(p.getDetPos() - samplePos);
-          Track afterScatter(samplePos, detDir);
-          sampleShape->interceptSurface(afterScatter);
-
-          transmission = calculateAttenuation(beforeScatter, lambda) *
-                         calculateAttenuation(afterScatter, lambda);
-          const auto &mat = sampleShape->material();
-          const auto mu =
-              (mat.totalScatterXSection() + mat.absorbXSection(lambda)) *
-              mat.numberDensity();
-          tbar = -std::log(transmission) / mu;
+          tbar = p.getAbsorptionWeightedPathLength();
+          transmission = exp(-tbar * 0.01 * sampleShape->material().attenuationCoefficient(lambda));
         }
 
         // Anvred write from Art Schultz/
@@ -411,40 +351,30 @@ void SaveHKL::exec() {
           continue;
         }
         if (decimalHKL == EMPTY_INT())
-          out << std::setw(4) << Utils::round(qSign * p.getH()) << std::setw(4)
-              << Utils::round(qSign * p.getK()) << std::setw(4)
-              << Utils::round(qSign * p.getL());
+          out << std::setw(4) << Utils::round(qSign * p.getH()) << std::setw(4) << Utils::round(qSign * p.getK())
+              << std::setw(4) << Utils::round(qSign * p.getL());
         else
-          out << std::setw(5 + decimalHKL) << std::fixed
-              << std::setprecision(decimalHKL) << -p.getH()
-              << std::setw(5 + decimalHKL) << std::fixed
-              << std::setprecision(decimalHKL) << -p.getK()
-              << std::setw(5 + decimalHKL) << std::fixed
-              << std::setprecision(decimalHKL) << -p.getL();
+          out << std::setw(5 + decimalHKL) << std::fixed << std::setprecision(decimalHKL) << -p.getH()
+              << std::setw(5 + decimalHKL) << std::fixed << std::setprecision(decimalHKL) << -p.getK()
+              << std::setw(5 + decimalHKL) << std::fixed << std::setprecision(decimalHKL) << -p.getL();
         double correc = scaleFactor;
         double instBkg = 0;
         double relSigSpect = 0.0;
-        bankSequence = static_cast<int>(
-            std::distance(uniqueBanks.begin(), uniqueBanks.find(bank)));
-        runSequence = static_cast<int>(
-            std::distance(uniqueRuns.begin(), uniqueRuns.find(runNumber)));
+        bankSequence = static_cast<int>(std::distance(uniqueBanks.begin(), uniqueBanks.find(bank)));
+        runSequence = static_cast<int>(std::distance(uniqueRuns.begin(), uniqueRuns.find(runNumber)));
         if (correctPeaks) {
           // correct for the slant path throught the scintillator glass
           double mu = (9.614 * lambda) + 0.266; // mu for GS20 glass
           double depth = 0.2;
-          double eff_center =
-              1.0 - std::exp(-mu * depth); // efficiency at center of detector
+          double eff_center = 1.0 - std::exp(-mu * depth); // efficiency at center of detector
 
           // Distance to center of detector
-          std::shared_ptr<const IComponent> det0 =
-              inst->getComponentByName(p.getBankName());
-          if (inst->getName() ==
-              "CORELLI") // for Corelli with sixteenpack under bank
+          std::shared_ptr<const IComponent> det0 = inst->getComponentByName(p.getBankName());
+          if (inst->getName() == "CORELLI") // for Corelli with sixteenpack under bank
           {
             std::vector<Geometry::IComponent_const_sptr> children;
             std::shared_ptr<const Geometry::ICompAssembly> asmb =
-                std::dynamic_pointer_cast<const Geometry::ICompAssembly>(
-                    inst->getComponentByName(p.getBankName()));
+                std::dynamic_pointer_cast<const Geometry::ICompAssembly>(inst->getComponentByName(p.getBankName()));
             asmb->getChildren(children, false);
             det0 = children[0];
           }
@@ -452,7 +382,7 @@ void SaveHKL::exec() {
           double cosA = det0->getDistance(*sample) / p.getL2();
           double pathlength = depth / cosA;
           double eff_R = 1.0 - exp(-mu * pathlength); // efficiency at point R
-          double sp_ratio = eff_center / eff_R; // slant path efficiency ratio
+          double sp_ratio = eff_center / eff_R;       // slant path efficiency ratio
           double sinsqt = std::pow(lambda / (2.0 * dsp), 2);
           double wl4 = std::pow(lambda, m_power_th);
           double cmonx = 1.0;
@@ -465,24 +395,20 @@ void SaveHKL::exec() {
           double theta2 = p.getScattering();
           double l1 = p.getL1();
           double l2 = p.getL2();
-          Mantid::Kernel::Unit_sptr unit =
-              UnitFactory::Instance().create("Wavelength");
-          unit->toTOF(xdata, ydata, l1, l2, theta2, 0, 0.0, 0.0);
+          Mantid::Kernel::Unit_sptr unit = UnitFactory::Instance().create("Wavelength");
+          unit->toTOF(xdata, ydata, l1, 0, {{UnitParams::l2, l2}, {UnitParams::twoTheta, theta2}});
           double one = xdata[0];
           double spect1 = spectrumCalc(one, iSpec, time, spectra, bank);
           relSigSpect = std::sqrt((1.0 / spect) + (1.0 / spect1));
           if (spect1 != 0.0) {
             spect /= spect1;
           } else {
-            throw std::runtime_error(
-                "Wavelength for normalizing to spectrum is out of range.");
+            throw std::runtime_error("Wavelength for normalizing to spectrum is out of range.");
           }
-          correc = scaleFactor * sinsqt * cmonx * sp_ratio /
-                   (wl4 * spect * transmission);
+          correc = scaleFactor * sinsqt * cmonx * sp_ratio / (wl4 * spect * transmission);
 
           if (inst->hasParameter("detScale" + bankName))
-            correc *= static_cast<double>(
-                inst->getNumberParameter("detScale" + bankName)[0]);
+            correc *= static_cast<double>(inst->getNumberParameter("detScale" + bankName)[0]);
 
           // instrument background constant for sigma
           instBkg = 0. * 12.28 / cmonx * scaleFactor;
@@ -491,26 +417,21 @@ void SaveHKL::exec() {
         // SHELX can read data without the space between the l and intensity
         if (p.getDetectorID() != -1) {
           double ckIntensity = correc * p.getIntensity();
-          double cksigI = std::sqrt(
-              std::pow(correc * p.getSigmaIntensity(), 2) +
-              std::pow(relSigSpect * correc * p.getIntensity(), 2) + instBkg);
+          double cksigI = std::sqrt(std::pow(correc * p.getSigmaIntensity(), 2) +
+                                    std::pow(relSigSpect * correc * p.getIntensity(), 2) + instBkg);
           p.setIntensity(ckIntensity);
           p.setSigmaIntensity(cksigI);
           if (ckIntensity > 99999.985)
-            g_log.warning()
-                << "Scaled intensity, " << ckIntensity
-                << " is too large for format.  Decrease ScalePeaks.\n";
-          out << std::setw(8) << std::fixed << std::setprecision(2)
-              << ckIntensity;
+            g_log.warning() << "Scaled intensity, " << ckIntensity
+                            << " is too large for format.  Decrease ScalePeaks.\n";
+          out << std::setw(8) << std::fixed << std::setprecision(2) << ckIntensity;
 
           out << std::setw(8) << std::fixed << std::setprecision(2) << cksigI;
         } else {
           // This is data from LoadHKL which is already corrected
-          out << std::setw(8) << std::fixed << std::setprecision(2)
-              << p.getIntensity();
+          out << std::setw(8) << std::fixed << std::setprecision(2) << p.getIntensity();
 
-          out << std::setw(8) << std::fixed << std::setprecision(2)
-              << p.getSigmaIntensity();
+          out << std::setw(8) << std::fixed << std::setprecision(2) << p.getSigmaIntensity();
         }
         if (type.compare(0, 2, "Ba") == 0)
           out << std::setw(4) << bankSequence + 1;
@@ -521,68 +442,39 @@ void SaveHKL::exec() {
           out << std::setw(8) << std::fixed << std::setprecision(5) << lambda;
           out << std::setw(8) << std::fixed << std::setprecision(5) << tbar;
           Kernel::DblMatrix oriented = p.getGoniometerMatrix();
-          Kernel::DblMatrix orientedIPNS(3, 3);
-          V3D dir_cos_1, dir_cos_2;
 
-          orientedIPNS[0][0] = oriented[0][0];
-          orientedIPNS[0][1] = oriented[0][2];
-          orientedIPNS[0][2] = oriented[0][1];
-          orientedIPNS[1][0] = oriented[2][0];
-          orientedIPNS[1][1] = oriented[2][2];
-          orientedIPNS[1][2] = oriented[2][1];
-          orientedIPNS[2][0] = oriented[1][0];
-          orientedIPNS[2][1] = oriented[1][2];
-          orientedIPNS[2][2] = oriented[1][1];
-          Kernel::DblMatrix orientedUB = UB * orientedIPNS;
-          double l2 = p.getL2();
-          V3D R_reverse_incident = V3D(-l2, 0., 0.);
-          V3D R_IPNS;
-          double twoth = p.getScattering();
+          auto U = ol.getU();
+          auto RU = oriented * U;
+          RU.Transpose();
+
+          // This is the reverse incident beam
+          V3D reverse_incident = inst->getSource()->getPos() - inst->getSample()->getPos();
+          reverse_incident.normalize();
           // This is the scattered beam direction
           V3D dir = p.getDetPos() - inst->getSample()->getPos();
+          dir.normalize();
 
-          // "Azimuthal" angle: project the scattered beam direction onto the
-          // XY plane, and calculate the angle between that and the +X axis
-          // (right-handed)
-          double az = atan2(dir.Y(), dir.X());
-          R_IPNS[0] = std::cos(twoth) * l2;
-          R_IPNS[1] = std::cos(az) * std::sin(twoth) * l2;
-          R_IPNS[2] = std::sin(az) * std::sin(twoth) * l2;
+          V3D dir_cos_1 = RU * reverse_incident;
+          V3D dir_cos_2 = RU * dir;
 
           for (int k = 0; k < 3; ++k) {
-            V3D q_abc_star =
-                V3D(orientedUB[k][0], orientedUB[k][1], orientedUB[k][2]);
-            double length_q_abc_star = q_abc_star.norm();
-            dir_cos_1[k] = R_reverse_incident.scalar_prod(q_abc_star) /
-                           (l2 * length_q_abc_star);
-            dir_cos_2[k] =
-                R_IPNS.scalar_prod(q_abc_star) / (l2 * length_q_abc_star);
-          }
-
-          for (int k = 0; k < 3; ++k) {
-            out << std::setw(9) << std::fixed << std::setprecision(5)
-                << dir_cos_1[k];
-            out << std::setw(9) << std::fixed << std::setprecision(5)
-                << dir_cos_2[k];
+            out << std::setw(9) << std::fixed << std::setprecision(5) << dir_cos_1[k];
+            out << std::setw(9) << std::fixed << std::setprecision(5) << dir_cos_2[k];
           }
 
           out << std::setw(6) << runNumber;
 
           out << std::setw(6) << seqNum;
 
-          out << std::setw(7) << std::fixed << std::setprecision(4)
-              << transmission;
+          out << std::setw(7) << std::fixed << std::setprecision(4) << transmission;
 
           out << std::setw(4) << std::right << bank;
 
-          out << std::setw(9) << std::fixed << std::setprecision(5)
-              << scattering; // two-theta scattering
+          out << std::setw(9) << std::fixed << std::setprecision(5) << scattering; // two-theta scattering
 
           out << std::setw(8) << std::fixed << std::setprecision(4) << dsp;
-          out << std::setw(7) << std::fixed << std::setprecision(2)
-              << static_cast<double>(p.getCol());
-          out << std::setw(7) << std::fixed << std::setprecision(2)
-              << static_cast<double>(p.getRow());
+          out << std::setw(7) << std::fixed << std::setprecision(2) << static_cast<double>(p.getCol());
+          out << std::setw(7) << std::fixed << std::setprecision(2) << static_cast<double>(p.getRow());
         } else {
           out << std::setw(8) << std::fixed << std::setprecision(4) << lambda;
 
@@ -592,13 +484,11 @@ void SaveHKL::exec() {
 
           out << std::setw(7) << wi + 1;
 
-          out << std::setw(7) << std::fixed << std::setprecision(4)
-              << transmission;
+          out << std::setw(7) << std::fixed << std::setprecision(4) << transmission;
 
           out << std::setw(4) << std::right << bank;
 
-          out << std::setw(9) << std::fixed << std::setprecision(5)
-              << scattering; // two-theta scattering
+          out << std::setw(9) << std::fixed << std::setprecision(5) << scattering; // two-theta scattering
 
           out << std::setw(9) << std::fixed << std::setprecision(4) << dsp;
         }
@@ -610,10 +500,8 @@ void SaveHKL::exec() {
   if (decimalHKL == EMPTY_INT())
     out << std::setw(4) << 0 << std::setw(4) << 0 << std::setw(4) << 0;
   else
-    out << std::setw(5 + decimalHKL) << std::fixed
-        << std::setprecision(decimalHKL) << 0.0 << std::setw(5 + decimalHKL)
-        << std::fixed << std::setprecision(decimalHKL) << 0.0
-        << std::setw(5 + decimalHKL) << std::fixed
+    out << std::setw(5 + decimalHKL) << std::fixed << std::setprecision(decimalHKL) << 0.0 << std::setw(5 + decimalHKL)
+        << std::fixed << std::setprecision(decimalHKL) << 0.0 << std::setw(5 + decimalHKL) << std::fixed
         << std::setprecision(decimalHKL) << 0.0;
   if (cosines) {
     out << "    0.00    0.00   0 0.00000 0.00000  0.00000  0.00000  0.00000"
@@ -632,6 +520,25 @@ void SaveHKL::exec() {
     badPeaks.emplace_back(static_cast<int>(*it));
   }
   peaksW->removePeaks(std::move(badPeaks));
+
+  bool append = getProperty("AppendFile");
+  if (append && Poco::File(filename.c_str()).exists()) {
+    auto load_alg = createChildAlgorithm("LoadHKL");
+    load_alg->setPropertyValue("Filename", filename);
+    load_alg->setProperty("OutputWorkspace", "peaks");
+    load_alg->executeAsChildAlg();
+    // Get back the result
+    DataObjects::PeaksWorkspace_sptr ws2 = load_alg->getProperty("OutputWorkspace");
+    ws2->setInstrument(inst);
+
+    auto plus_alg = createChildAlgorithm("CombinePeaksWorkspaces");
+    plus_alg->setProperty("LHSWorkspace", peaksW);
+    plus_alg->setProperty("RHSWorkspace", ws2);
+    plus_alg->executeAsChildAlg();
+    // Get back the result
+    peaksW = plus_alg->getProperty("OutputWorkspace");
+  }
+
   setProperty("OutputWorkspace", peaksW);
 } // namespace Crystal
 
@@ -651,69 +558,38 @@ p *       input are the smu (scattering) and amu (absorption at 1.8 ang.)
  *
  *       a. j. schultz, june, 2008
  */
-double SaveHKL::absorbSphere(double radius, double twoth, double wl,
-                             double &tbar) {
-  int i;
-  double mu, mur; // mu is the linear absorption coefficient,
-  // r is the radius of the spherical sample.
-  double theta, astar1, astar2, frac, astar;
-  double trans;
+double SaveHKL::absorbSphere(double radius, double twoth, double wl, double &tbar) {
 
-  //  For each of the 19 theta values in dwiggins (theta = 0.0 to 90.0
-  //  in steps of 5.0 deg.), the astar values vs.mur were fit to a third
-  //  order polynomial in excel. these values are given in the static array
-  //  pc[][]
+  const double mu = m_smu + (m_amu / 1.8f) * wl; // linear absorption coef
+  const double mur = mu * radius;
 
-  mu = m_smu + (m_amu / 1.8f) * wl;
-
-  mur = mu * radius;
   if (mur < 0. || mur > 2.5) {
     std::ostringstream s;
     s << mur;
-    throw std::runtime_error("muR is not in range of Dwiggins' table :" +
-                             s.str());
+    throw std::runtime_error("muR is not in range of Dwiggins' table :" + s.str());
   }
 
-  theta = twoth * radtodeg_half;
+  const double theta = twoth * radtodeg * 0.5;
   if (theta < 0. || theta > 90.) {
     std::ostringstream s;
     s << theta;
-    throw std::runtime_error("theta is not in range of Dwiggins' table :" +
-                             s.str());
+    throw std::runtime_error("theta is not valid it must be in range [0, 90]");
   }
 
-  //  using the polymial coefficients, calulate astar (= 1/transmission) at
-  //  theta values below and above the actual theta value.
+  const double transmission = 1.f / AnvredCorrection::calc_Astar(theta, mur);
 
-  i = static_cast<int>(theta / 5.);
-  astar1 = pc[0][i] + mur * (pc[1][i] + mur * (pc[2][i] + pc[3][i] * mur));
-
-  i = i + 1;
-  astar2 = pc[0][i] + mur * (pc[1][i] + mur * (pc[2][i] + pc[3][i] * mur));
-
-  //  do a linear interpolation between theta values.
-
-  frac = theta -
-         static_cast<double>(static_cast<int>(theta / 5.)) * 5.; // theta%5.
-  frac = frac / 5.;
-
-  astar = astar1 * (1 - frac) + astar2 * frac; // astar is the correction
-  trans = 1.f / astar;                         // trans is the transmission
-                                               // trans = exp(-mu*tbar)
-
-  //  calculate tbar as defined by coppens.
+  // calculate tbar as defined by coppens.
+  // transmission = exp(-mu*tbar)
   if (std::fabs(mu) < 1e-300)
     tbar = 0.0;
   else
-    tbar = -std::log(trans) / mu;
+    tbar = -std::log(transmission) / mu;
 
-  return trans;
+  return transmission;
 }
 
-double SaveHKL::spectrumCalc(double TOF, int iSpec,
-                             std::vector<std::vector<double>> time,
-                             std::vector<std::vector<double>> spectra,
-                             size_t id) {
+double SaveHKL::spectrumCalc(double TOF, int iSpec, std::vector<std::vector<double>> time,
+                             std::vector<std::vector<double>> spectra, size_t id) {
   double spect = 0;
   if (iSpec == 1) {
     //"Calculate the spectrum using spectral coefficients for the GSAS Type 2
@@ -732,17 +608,15 @@ double SaveHKL::spectrumCalc(double TOF, int iSpec,
     double c10 = spectra[id][9];
     double c11 = spectra[id][10];
 
-    spect = c1 + c2 * exp(-c3 / std::pow(T, 2)) / std::pow(T, 5) +
-            c4 * exp(-c5 * std::pow(T, 2)) + c6 * exp(-c7 * std::pow(T, 3)) +
-            c8 * exp(-c9 * std::pow(T, 4)) + c10 * exp(-c11 * std::pow(T, 5));
+    spect = c1 + c2 * exp(-c3 / std::pow(T, 2)) / std::pow(T, 5) + c4 * exp(-c5 * std::pow(T, 2)) +
+            c6 * exp(-c7 * std::pow(T, 3)) + c8 * exp(-c9 * std::pow(T, 4)) + c10 * exp(-c11 * std::pow(T, 5));
   } else {
     size_t i = 1;
     for (i = 1; i < spectra[id].size(); ++i)
       if (TOF < time[id][i])
         break;
-    spect = spectra[id][i - 1] + (TOF - time[id][i - 1]) /
-                                     (time[id][i] - time[id][i - 1]) *
-                                     (spectra[id][i] - spectra[id][i - 1]);
+    spect = spectra[id][i - 1] +
+            (TOF - time[id][i - 1]) / (time[id][i] - time[id][i - 1]) * (spectra[id][i] - spectra[id][i - 1]);
   }
 
   return spect;
@@ -750,19 +624,16 @@ double SaveHKL::spectrumCalc(double TOF, int iSpec,
 void SaveHKL::sizeBanks(const std::string &bankName, int &nCols, int &nRows) {
   if (bankName == "None")
     return;
-  std::shared_ptr<const IComponent> parent =
-      m_ws->getInstrument()->getComponentByName(bankName);
+  std::shared_ptr<const IComponent> parent = m_ws->getInstrument()->getComponentByName(bankName);
   if (!parent)
     return;
   if (parent->type() == "RectangularDetector") {
-    std::shared_ptr<const RectangularDetector> RDet =
-        std::dynamic_pointer_cast<const RectangularDetector>(parent);
+    std::shared_ptr<const RectangularDetector> RDet = std::dynamic_pointer_cast<const RectangularDetector>(parent);
 
     nCols = RDet->xpixels();
     nRows = RDet->ypixels();
   } else {
-    if (m_ws->getInstrument()->getName() ==
-        "CORELLI") // for Corelli with sixteenpack under bank
+    if (m_ws->getInstrument()->getName() == "CORELLI") // for Corelli with sixteenpack under bank
     {
       std::vector<Geometry::IComponent_const_sptr> children;
       std::shared_ptr<const Geometry::ICompAssembly> asmb =
@@ -783,5 +654,4 @@ void SaveHKL::sizeBanks(const std::string &bankName, int &nCols, int &nRows) {
   }
 }
 
-} // namespace Crystal
-} // namespace Mantid
+} // namespace Mantid::Crystal

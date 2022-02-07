@@ -76,8 +76,7 @@ public:
     TS_ASSERT_EQUALS(def.size(), 1);
     SpectrumInfo info(3);
     info.setSpectrumDefinition(1, def);
-    TS_ASSERT_EQUALS(info.spectrumDefinition(1)[0],
-                     (std::pair<size_t, size_t>(7, 5)));
+    TS_ASSERT_EQUALS(info.spectrumDefinition(1)[0], (std::pair<size_t, size_t>(7, 5)));
     TS_ASSERT_EQUALS(def.size(), 1);
   }
 
@@ -87,8 +86,7 @@ public:
     TS_ASSERT_EQUALS(def.size(), 1);
     SpectrumInfo info(3);
     info.setSpectrumDefinition(1, std::move(def));
-    TS_ASSERT_EQUALS(info.spectrumDefinition(1)[0],
-                     (std::pair<size_t, size_t>(7, 5)));
+    TS_ASSERT_EQUALS(info.spectrumDefinition(1)[0], (std::pair<size_t, size_t>(7, 5)));
     TS_ASSERT_EQUALS(def.size(), 0);
   }
 
@@ -103,8 +101,7 @@ public:
       info.setSpectrumDefinition(i, def);
     }
     for (int64_t i = 0; i < size; ++i) {
-      TS_ASSERT_EQUALS(info.spectrumDefinition(i)[0],
-                       (std::pair<size_t, size_t>(i, 0)));
+      TS_ASSERT_EQUALS(info.spectrumDefinition(i)[0], (std::pair<size_t, size_t>(i, 0)));
     }
   }
 

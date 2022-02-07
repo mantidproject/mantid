@@ -17,9 +17,9 @@ Mikkelson.
 
 * Elastic scattering is assumed
 
-In [1]_ we see that the calculation of the attenuation factor F involves 
-an integral over the sample cylinder. By expanding the integrands as a power series, 
-we can factor out any dependence on scattering cross section and radius. 
+In [1]_ we see that the calculation of the attenuation factor F involves
+an integral over the sample cylinder. By expanding the integrands as a power series,
+we can factor out any dependence on scattering cross section and radius.
 These integral terms are denoted by :math:`Z_{mn}` and so we may write:
 
 .. math::
@@ -27,13 +27,13 @@ These integral terms are denoted by :math:`Z_{mn}` and so we may write:
 
 where :math:`\mu` is the inverse scattering length.
 
-The functions :math:`Z_{mn}(\theta)` are written in terms of Chebyshev 
+The functions :math:`Z_{mn}(\theta)` are written in terms of Chebyshev
 expansion coefficients:
 
 .. math::
   Z_{mn}(\theta) = \sum_{s=0}^\infty c_{s}(m,n)cos(s\theta)
-  
-where the Chebyshev coefficients :math:`c_{s}(m,n)` up to  m + n 
+
+where the Chebyshev coefficients :math:`c_{s}(m,n)` up to  m + n
 :math:`\leqslant` 5 have been tabulated and are stored as an array by the algorithm.
 
 This version of the correction follows the implementation in [1]_ in that it only calculates for the correction in-plane, unlike [2]_, [3]_ that generalizes the correction to out-of-plane.
@@ -41,7 +41,7 @@ This version of the correction follows the implementation in [1]_ in that it onl
 This algorithm calculates and outputs the absorption and/or multiple scattering correction workspaces to be applied to the InputWorkspace. Thus, there are, at most, two workspaces in the OutputWorkspaceBaseName group workspace. This allows for flexibility of applying either correction to a workspace without having to apply both (as is the case with :ref:`algm-CarpenterSampleCorrection`). For the case where both corrections are calculated, the output will be the following:
 
 1. The absorption correction workspace will be OutputWorkspaceBaseName + `_abs` and will be in `.getItem(0)`.
- 
+
 2. The multiple scattering correction workspace will be OutputWorkspaceBaseName + `_ms` and will be in `.getItem(1)`.
 
 This is the child algorithm that :ref:`algm-CarpenterSampleCorrection` (previously known as *MultipleScatteringCylinderAbsorption*) uses to calculate and apply the correction to a sample workspace.
@@ -126,7 +126,7 @@ Output:
 
     #restrict the number of wavelength points to speed up the example
     basename = "corrections"
-    CalculateCarpenterSampleCorrection(ws,OutputWorkspaceBaseName=basename, 
+    CalculateCarpenterSampleCorrection(ws,OutputWorkspaceBaseName=basename,
                                        CylinderSampleRadius=0.2)
 
     # Get absorption correction

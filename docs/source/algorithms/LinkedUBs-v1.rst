@@ -17,11 +17,11 @@ for grouping of reflections and refinement.
 On chopper instruments, when the sample is lowered into the
 blockhouse there is often no possibility to adjust its position. When rotating the
 crystal via the goniometer, since the crystal is likely not centred exactly, the
-predicted peaks from the initial UB often do not capture the data. As well as 
+predicted peaks from the initial UB often do not capture the data. As well as
 consistently indexing the peaks, the algorithm also effectively carries out a U
-matrix correction that accounts for sample miscentering. Use of this algorithm 
-will result in a seperate UB matrix for each orientation which can then be used 
-for integration. 
+matrix correction that accounts for sample miscentering. Use of this algorithm
+will result in a seperate UB matrix for each orientation which can then be used
+for integration.
 
 The algorithm requires a set of predicted peaks that have been generated from
 the initial UB via goniometer rotation, a set of observed (found) peaks, and
@@ -37,14 +37,14 @@ used for the first cycle. As the refinement of the UB is carried out, more
 peaks at shorter d are added, encoded by the PeakIncrement parameter. This adds
 a defined number of peaks after each cycle.
 
-The main limitation of this approach is that the lattice parameters of the sample should be known accurately. It is recommended that at least 10 iterations are carried out, but in cases where the crystal is well centred and the goniometer angles are known accurately fewer iterations are necessary. 
+The main limitation of this approach is that the lattice parameters of the sample should be known accurately. It is recommended that at least 10 iterations are carried out, but in cases where the crystal is well centred and the goniometer angles are known accurately fewer iterations are necessary.
 
 Useage
 -----------
 
 **Example:**
 
-.. code-block:: python 
+.. code-block:: python
 
     # WISH single crystal
     # demonstration of linkedUBs algorithm on D10 Ruby (cyle 18/1)
@@ -59,7 +59,7 @@ Useage
     beta = 90
     gamma = 120
 
-    # parameters for PredictPeaks 
+    # parameters for PredictPeaks
     MinDSpacing = 0.5
     MaxDSpacing = 20
     MinWavelength = 0.8
@@ -68,14 +68,14 @@ Useage
 
     # parameters for LinkedUBs
     QTolerance = 0.5
-    QDecrement = 0.95 
-    DTolerance = 0.02 
+    QDecrement = 0.95
+    DTolerance = 0.02
     NumPeaks = 25
     PeakIncrement = 10
     Iterations = 10
     DeleteWorkspace = False
 
-    # phi axis at omega = 270 
+    # phi axis at omega = 270
     u_phi_x, u_phi_y, u_phi_z = 0.58779, 0.80902, 0.0
 
     # load and process 41598
@@ -102,32 +102,32 @@ Useage
 
     CopySample(InputWorkspace='WISH00041598_predict_peaks', OutputWorkspace='WISH00041598', CopyName=False, CopyMaterial=False, CopyEnvironment=False, CopyShape=False)
 
-    # set gonio on 41598 and predict the peaks of 41599 
+    # set gonio on 41598 and predict the peaks of 41599
     SetGoniometer(Workspace='WISH00041598', Axis0='0,0,1,0,1', Axis1='25,{},{},{},-1'.format(u_phi_x, u_phi_y, u_phi_z))
     PredictPeaks(InputWorkspace='WISH00041598', WavelengthMin=MinWavelength, WavelengthMax=MaxWavelength, MinDSpacing=MinDSpacing, ReflectionCondition=ReflectionCondition, OutputWorkspace='WISH00041599_predict_peaks')
 
     # linkedUBs
     LinkedUBs(QTolerance=QTolerance,
-              QDecrement=QDecrement, 
-              DTolerance=DTolerance, 
+              QDecrement=QDecrement,
+              DTolerance=DTolerance,
               NumPeaks=NumPeaks,
               PeakIncrement=PeakIncrement,
-              Iterations=Iterations, 
-              a=a, 
-              b=b, 
-              c=c, 
+              Iterations=Iterations,
+              a=a,
+              b=b,
+              c=c,
               alpha=alpha,
               beta=beta,
               gamma=gamma,
               MinWavelength=MinWavelength,
               MaxWavelength=MaxWavelength,
-              MinDSpacing=MinDSpacing, 
+              MinDSpacing=MinDSpacing,
               MaxDSpacing=MaxDSpacing,
               ReflectionCondition=ReflectionCondition,
-              Workspace='WISH00041599', 
-              ObservedPeaks='WISH00041599_find_peaks', 
-              PredictedPeaks='WISH00041599_predict_peaks', 
-              LinkedPeaks='WISH00041599_linked_peaks', 
+              Workspace='WISH00041599',
+              ObservedPeaks='WISH00041599_find_peaks',
+              PredictedPeaks='WISH00041599_predict_peaks',
+              LinkedPeaks='WISH00041599_linked_peaks',
               LinkedPredictedPeaks='WISH00041599_linked_peaks_predicted',
               DeleteWorkspace=DeleteWorkspace)
 

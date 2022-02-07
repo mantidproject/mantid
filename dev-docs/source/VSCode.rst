@@ -1,9 +1,5 @@
 .. _VSCode:
 
-.. |extensions| image:: /images/VSCode/extension-button.png
-.. |debug| image:: /images/VSCode/debug-button.png
-.. |debug-cog| image:: /images/VSCode/debug-cog-button.png
-
 ======
 VSCode
 ======
@@ -38,7 +34,7 @@ All Extensions have been tested working on Ubuntu 18.04 and Ubuntu 19.04,
 however most, if not all, extensions should be cross-platform.
 
 Install extensions either by running the commands given on the marketplace or by
-clicking on this Icon |extensions|.
+clicking `the Extension Marketplace icon. <https://code.visualstudio.com/docs/editor/extension-gallery#_browse-for-extensions>`_
 
 Required
 --------
@@ -149,45 +145,14 @@ To get to this file:
 - Hit Enter.
 
 If this fails
-- Click on the debug icon on the left hand side of VSCode |debug|
-- Click on the cod icon at the top of this newly opened side window |debug-cog|
+- Click on `the debug icon <https://code.visualstudio.com/docs/editor/debugging#_start-debugging>`_ on the left hand side of VSCode.
+- Click `the cog icon at the top <https://code.visualstudio.com/docs/editor/debugging#_launch-configurations>`_ of this newly opened side window
 - Select "(GDB) Launch" or "(msvc) Launch"
 
 **Linux/OSX**
 
 For this section the guide will show you how to use GDB debugging. Inside the launch.json
 you will want to make your file look something a little like this:
-
-*MantidPlot*
-
-.. code-block:: javascript
-
-    {
-        "version": "0.2.0",
-        "configurations": [
-            {
-                "name": "(gdb) Launch",
-                "type": "cppdbg",
-                "request": "launch",
-                "program": "Path/To/Build/Directory/bin/MantidPlot",
-                "args": [],
-                "stopAtEntry": false,
-                "cwd": "${workspaceFolder}",
-                "environment": [],
-                "externalConsole": false,
-                "MIMode": "gdb",
-                "preLaunchTask": "Build Mantid", // This causes the task labelled to be called before
-                "setupCommands": [
-                    {
-                        "description": "Enable pretty-printing for gdb",
-                        "text": "-enable-pretty-printing",
-                        "ignoreFailures": true
-                    }
-                ]
-            }
-        ]
-    }
-
 
 *Workbench*
 
@@ -199,12 +164,12 @@ To debug C++ and start directly into the Workbench, add this to the configuratio
       "name": "(gdb) Workbench C++ Only",
       "type": "cppdbg",
       "request": "launch",
-      "program": "/usr/bin/python2.7", // Path to your used Python interpreter, here and below
-      "args": ["Path/To/Build/Directory/bin/workbench", "&&","gdb","/usr/bin/python2.7","$!"], // $! gets the process ID
+      "program": "/usr/bin/python3", // Path to your used Python interpreter, here and below
+      "args": ["Path/To/Build/Directory/bin/workbench", "&&","gdb","/usr/bin/python3","$!"], // $! gets the process ID
       "stopAtEntry": false,
       "cwd": "Path/To/Build/Directory/bin", // this should point to bin inside the build directory
       "environment": [],
-      "externalConsole": false,
+      "externalConsole": true,
       "MIMode": "gdb",
       "preLaunchTask": "Build Mantid",
       "setupCommands": [
@@ -216,6 +181,16 @@ To debug C++ and start directly into the Workbench, add this to the configuratio
       ]
     }
 
+If this fails, try adding the following environment variables:
+
+.. code-block:: javascript
+
+      "environment": [
+        {"name":"LD_PRELOAD", "value": "/usr/lib/x86_64-linux-gnu/libjemalloc.so.1"},
+        {"name":"PYTHONPATH", "value": "Path/To/Build/Directory/bin:${env:PYTHONPATH}"}
+      ],
+
+where the correct value for the ``LD_PRELOAD`` environment variable can be found in Path/To/Build/Directory/bin/launch_mantidworkbench.sh.
 
 
 **Windows:**
@@ -233,7 +208,7 @@ The launch.json should end up looking a little like this:
                 "name": "(msvc) Launch",
                 "type": "cppvsdbg",
                 "request": "launch",
-                "program": "Path/To/Build/Directory/bin/Debug/MantidPlot.exe",
+                "program": "Path/To/Build/Directory/bin/Debug/MantidWorkbench.exe",
                 "args": [],
                 "stopAtEntry": true,
                 "cwd": "${workspaceFolder}",
@@ -244,7 +219,7 @@ The launch.json should end up looking a little like this:
         ]
     }
 
-To actually start the debug session, switch to the debug tab (clicking |debug|)
+To actually start the debug session, switch to `the debug tab <https://code.visualstudio.com/docs/editor/debugging#_start-debugging>`_
 and select "(GDB) Launch" from the drop down and click the play button.
 
 Debugging C++ called from Workbench
@@ -262,12 +237,15 @@ like this:
 .. code-block:: javascript
 
         {
-            "name": "(gdb) Attach Workbench Python 2.7",
+            "name": "(gdb) Launch Workbench",
             "type": "cppdbg",
-            "request": "attach",
-            "program": "/usr/bin/python2.7", // Path to your used Python interpreter
-            "processId": "1234", // Replace this with the process ID of workbench
+            "request": "launch",
+            "program": "/usr/bin/python3",
+            "args": [
+                "/path/to/build/dir/bin/MantidWorkbench"
+            ],
             "MIMode": "gdb",
+            "cwd": "${fileDirname}",
             "setupCommands": [
                 {
                     "description": "Enable pretty-printing for gdb",
@@ -278,7 +256,7 @@ like this:
         }
 
 - Place this json in the "configurations" list in launch.json
-- Then launch the debug session like any other
+- Then launch the debug session like any other, note it may be slow to get started.
 
 Debugging C++ Tests
 -------------------
@@ -336,32 +314,28 @@ Then pass as an argument the specific test you want to be debugging. As an examp
 
 Debugging Python
 -----------------
-Visual Studio Code can be remotely attached to any running Python targets 
-using `ptvsd`.
+Visual Studio Code can be remotely attached to any running Python targets
+using `debugpy`.
 Whilst this "just works" for the majority of cases, it will not allow you to
 debug both C++ and Python at the same time. It also will not work with
 PyQt listeners, as the debugger must be attached to the main thread.
 
-**Setting up ptvsd**
+**Setting up debugpy**
 
 *Linux/OSX*
 
-Install `ptvsd` using pip within the terminal
+Install `debugpy` using pip within the terminal
 
 .. code-block:: bash
 
-    pip install ptvsd
-    # Or if using Python 3
-    pip3 install ptvsd
+   python3 -m pip install --user debugpy
 
 *Windows*
 
-`ptvsd` needs to be installed into each source folder:
-
 - Go to your source folder with Mantid (not the build folder)
-- Go to external/src/ThirdParty/lib/python2.7
+- Go to external/src/ThirdParty/lib/python3.8
 - Open a command prompt here (shift + right click in empty space)
-- Run the following: `python -m pip install ptvsd`
+- Run the following: `python -m pip install --user debugpy`
 
 **Setting up VS Code**
 - Ensure the Python extension is installed
@@ -384,18 +358,16 @@ Install `ptvsd` using pip within the terminal
 
 .. code-block:: python
 
-    import ptvsd
-    ptvsd.enable_attach(address=('127.0.0.1', 5678), redirect_output=True)
-    ptvsd.wait_for_attach()
-    ptvsd.break_into_debugger()
+    import debugpy
+    debugpy.listen(('127.0.0.1', 5678))
+    debugpy.wait_for_client()
+    debugpy.breakpoint()
 
-- When Mantid appears to freeze. Open the debug tab and start the Python 
-  Attach Target
-- Any additional breakpoints using the IDE are added automatically 
-  (i.e. don't add `ptvsd.break_into_debugger()`
+- When Mantid appears to freeze. Open the debug tab and start the "Python Attach" Target
+- Any additional breakpoints using the IDE are added automatically
+  (i.e. don't add `debugpy.breakpoint()`
 - If you'd like the code to not break at that location, but would like the
-  debugger to attach only remove `wait_for_attach()`
-
+  debugger to attach only remove `wait_for_client()`
 
 
 Keybindings
@@ -423,7 +395,7 @@ Reference" and hit Enter.
 
 Remote Development
 ------------------
-VSCode supports the ability to open and work from directories on a remote machine using SSH. 
+VSCode supports the ability to open and work from directories on a remote machine using SSH.
 
 Detailed instructions on how to set this up can be found `here <https://code.visualstudio.com/docs/remote/ssh>`_.
 
@@ -431,48 +403,16 @@ Detailed instructions on how to set this up can be found `here <https://code.vis
 =======================================================
 (Linux only)
 
-The C++ extension in VS Code provides limited inspection: it (currently) has
+The default C++ extension in VS Code provides limited inspection: it has
 warnings disabled and will only emit errors.
 
-Clang can be used to provide live warnings and will notify on common bugs, like
-implicit casts, which are normally only detected whilst building.
-
-Future versions of clangd (>=10) will also emit clang-tidy warnings as you
-work.
+Clang can be used to provide live warnings and runs clang-tidy continuously. This helps detect warnings and errors live which are normally only detected whilst building.
 
 **Setup**
 
-- Remove the C++ Intellisense extension
-- Remove the C++ extension and install Native Debug to keep C++ debugging OR
--  Go to the C++ extension settings and disable the following:
-
-  Autocomplete, Enhanced Colorization, Error Squiggles,
-  Experimental Features, IntelliSense Engine, IntelliSense Engine Fallback
-
-- Install the official clangd extension: `vscode-clangd`
-- Install clangd >= 8 which is part of `clang-tools-n`
-  (where n is the latest version)
-- Create a folder for a clang build separate to your main Mantid build.
-  One recommended location is to create it in a folder called **build**
-  within the source folder since this will also be rebuilt by the
-  *CMakeTools* extension, if you have it.
-- Configure this separate folder to use the clang compiler:
-
-.. code-block:: sh
-
-    cd *path/to/clang_build*
-    CXX=clang++ CC=clang cmake *path/to/src* -DPYTHON_EXECTUABLE=/usr/bin/python2  # (or 3)
-    # Note this does not have to build unless you want to!
-
-- Go to the clangd setting in VS Code and add the following argument:
-  `--compile-commands-dir=/path/to/your/clang-build` ensuring that build
-  folder is related to the source folder. This allows clangd to understand
-  the structure of Mantid.
+- Install the latest stable `clang ppa <https://apt.llvm.org/>`_
+- Install the clangd extension
+- Install the latest stable clangd, e.g. `clang-tools-n` (where n is the latest version)
+- Go to the clangd settings in VS Code and ensure the correct binary is manually specified
 - Restart VS Code - attempt to write: `int i = (size_t) 1;` and check a warning
   appears.
-- Any errors about unknown types can usually be resolved by briefly opening
-  that header to force clangd to parse the type.
-
-
-
-

@@ -59,9 +59,7 @@ public:
     // get workspace
     //
     MatrixWorkspace_sptr output;
-    TS_ASSERT_THROWS_NOTHING(
-        output = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-            outputSpace));
+    TS_ASSERT_THROWS_NOTHING(output = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(outputSpace));
     Workspace2D_sptr output2D = std::dynamic_pointer_cast<Workspace2D>(output);
     if (!saveNexusP.isInitialized())
       saveNexusP.initialize();
@@ -89,21 +87,17 @@ public:
 
     // specify name of workspace
     myOutputSpace = "testLNP3";
-    TS_ASSERT_THROWS_NOTHING(
-        algToBeTested.setPropertyValue("OutputWorkspace", myOutputSpace));
+    TS_ASSERT_THROWS_NOTHING(algToBeTested.setPropertyValue("OutputWorkspace", myOutputSpace));
     // file name to load
     inputFile = outputFile;
     entryNumber = 1;
-    TS_ASSERT_THROWS_NOTHING(
-        algToBeTested.setPropertyValue("FileName", inputFile));
+    TS_ASSERT_THROWS_NOTHING(algToBeTested.setPropertyValue("FileName", inputFile));
     algToBeTested.setProperty("EntryNumber", entryNumber);
 
     std::string result;
-    TS_ASSERT_THROWS_NOTHING(result =
-                                 algToBeTested.getPropertyValue("FileName"));
+    TS_ASSERT_THROWS_NOTHING(result = algToBeTested.getPropertyValue("FileName"));
     TS_ASSERT(!result.compare(inputFile));
-    TS_ASSERT_THROWS_NOTHING(
-        result = algToBeTested.getPropertyValue("OutputWorkspace"));
+    TS_ASSERT_THROWS_NOTHING(result = algToBeTested.getPropertyValue("OutputWorkspace"));
     TS_ASSERT(!result.compare(myOutputSpace));
     int res = -1;
     TS_ASSERT_THROWS_NOTHING(res = algToBeTested.getProperty("EntryNumber"));
@@ -116,9 +110,7 @@ public:
 
     // Get back the saved workspace
     MatrixWorkspace_sptr output;
-    TS_ASSERT_THROWS_NOTHING(
-        output = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-            myOutputSpace));
+    TS_ASSERT_THROWS_NOTHING(output = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(myOutputSpace));
     Workspace2D_sptr output2D = std::dynamic_pointer_cast<Workspace2D>(output);
     // set to 4 for CSP78173
     TS_ASSERT_EQUALS(output2D->getNumberHistograms(), 4);
@@ -189,20 +181,17 @@ public:
     // obtain the expected log data which was read from the Nexus file (NXlog)
 
     Property *l_property = output->run().getLogData(std::string("height"));
-    TimeSeriesProperty<double> *l_timeSeriesDouble1 =
-        dynamic_cast<TimeSeriesProperty<double> *>(l_property);
+    TimeSeriesProperty<double> *l_timeSeriesDouble1 = dynamic_cast<TimeSeriesProperty<double> *>(l_property);
     std::string timeSeriesString = l_timeSeriesDouble1->value();
 
     //
     // Testing log data - this was failing at one time as internal format of log
     // data changed, but now OK again
     //
-    TS_ASSERT_EQUALS(timeSeriesString.substr(0, 30),
-                     "2008-Jun-17 11:10:44  -0.86526");
+    TS_ASSERT_EQUALS(timeSeriesString.substr(0, 30), "2008-Jun-17 11:10:44  -0.86526");
 
     l_property = output->run().getLogData(std::string("ICPevent"));
-    TimeSeriesProperty<std::string> *l_timeSeriesString =
-        dynamic_cast<TimeSeriesProperty<std::string> *>(l_property);
+    TimeSeriesProperty<std::string> *l_timeSeriesString = dynamic_cast<TimeSeriesProperty<std::string> *>(l_property);
     timeSeriesString = l_timeSeriesString->value();
 
     //
@@ -213,8 +202,7 @@ public:
     // now enabled after changing 12=> 1 (and added one more space character
     // before CHANGE).
     std::cout << timeSeriesString;
-    TS_ASSERT_EQUALS(timeSeriesString.substr(0, 38),
-                     "2008-Jun-17 11:11:13   CHANGE PERIOD 1");
+    TS_ASSERT_EQUALS(timeSeriesString.substr(0, 38), "2008-Jun-17 11:11:13   CHANGE PERIOD 1");
 
     remove(outputFile.c_str());
   }

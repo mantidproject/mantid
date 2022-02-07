@@ -22,20 +22,14 @@ namespace CrystalFieldUtils {
 /**
 Utility functions to help set up peak functions in a Crystal Field spectrum.
 */
-size_t buildSpectrumFunction(API::CompositeFunction &spectrum,
-                             const std::string &peakShape,
-                             const API::FunctionValues &centresAndIntensities,
-                             const std::vector<double> &xVec,
-                             const std::vector<double> &yVec,
-                             double fwhmVariation, double defaultFWHM,
+size_t buildSpectrumFunction(API::CompositeFunction &spectrum, const std::string &peakShape,
+                             const API::FunctionValues &centresAndIntensities, const std::vector<double> &xVec,
+                             const std::vector<double> &yVec, double fwhmVariation, double defaultFWHM,
                              size_t nRequiredPeaks, bool fixAllPeaks);
-size_t updateSpectrumFunction(API::CompositeFunction &spectrum,
-                              const std::string &peakShape,
-                              const API::FunctionValues &centresAndIntensities,
-                              size_t iFirst, const std::vector<double> &xVec,
-                              const std::vector<double> &yVec,
-                              double fwhmVariation, double defaultFWHM,
-                              bool fixAllPeaks);
+size_t updateSpectrumFunction(API::CompositeFunction &spectrum, const std::string &peakShape,
+                              const API::FunctionValues &centresAndIntensities, size_t iFirst,
+                              const std::vector<double> &xVec, const std::vector<double> &yVec, double fwhmVariation,
+                              double defaultFWHM, bool fixAllPeaks);
 size_t calculateNPeaks(const API::FunctionValues &centresAndIntensities);
 size_t calculateMaxNPeaks(size_t nPeaks);
 

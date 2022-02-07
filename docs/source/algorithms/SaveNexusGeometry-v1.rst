@@ -41,7 +41,7 @@ Usage
 Output:
 
 .. testoutput:: SaveNexusGeometryExampleDefault
-	
+
 	True
 
 .. testcleanup:: SaveNexusGeometryExampleDefault

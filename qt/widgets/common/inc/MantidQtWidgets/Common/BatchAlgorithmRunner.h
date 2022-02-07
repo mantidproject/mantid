@@ -1,12 +1,13 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
-// Copyright &copy; 2012 ISIS Rutherford Appleton Laboratory UKRI,
+// Copyright &copy; 2021 ISIS Rutherford Appleton Laboratory UKRI,
 //   NScD Oak Ridge National Laboratory, European Spallation Source,
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
 #include "DllOption.h"
+#include "IConfiguredAlgorithm.h"
 #include "MantidAPI/Algorithm.h"
 
 #include <QObject>
@@ -21,34 +22,7 @@
 #include <mutex>
 #include <utility>
 
-namespace MantidQt {
-namespace API {
-class EXPORT_OPT_MANTIDQT_COMMON IConfiguredAlgorithm {
-public:
-  using AlgorithmRuntimeProps = std::map<std::string, std::string>;
-
-  virtual Mantid::API::IAlgorithm_sptr algorithm() const = 0;
-  virtual AlgorithmRuntimeProps properties() const = 0;
-};
-
-class EXPORT_OPT_MANTIDQT_COMMON ConfiguredAlgorithm
-    : public IConfiguredAlgorithm {
-public:
-  ConfiguredAlgorithm(Mantid::API::IAlgorithm_sptr algorithm,
-                      AlgorithmRuntimeProps properties);
-  virtual ~ConfiguredAlgorithm();
-
-  Mantid::API::IAlgorithm_sptr algorithm() const override;
-  AlgorithmRuntimeProps properties() const override;
-
-protected:
-  Mantid::API::IAlgorithm_sptr m_algorithm;
-
-private:
-  AlgorithmRuntimeProps m_properties;
-};
-
-using IConfiguredAlgorithm_sptr = std::shared_ptr<IConfiguredAlgorithm>;
+namespace MantidQt::API {
 
 class BatchCompleteNotification : public Poco::Notification {
 public:
@@ -92,10 +66,8 @@ private:
 
 class AlgorithmErrorNotification : public Poco::Notification {
 public:
-  AlgorithmErrorNotification(IConfiguredAlgorithm_sptr algorithm,
-                             std::string const &errorMessage)
-      : Poco::Notification(), m_algorithm(std::move(algorithm)),
-        m_errorMessage(errorMessage) {}
+  AlgorithmErrorNotification(IConfiguredAlgorithm_sptr algorithm, std::string const &errorMessage)
+      : Poco::Notification(), m_algorithm(std::move(algorithm)), m_errorMessage(errorMessage) {}
 
   IConfiguredAlgorithm_sptr algorithm() const { return m_algorithm; }
   std::string errorMessage() const { return m_errorMessage; }
@@ -115,15 +87,13 @@ class EXPORT_OPT_MANTIDQT_COMMON BatchAlgorithmRunner : public QObject {
   Q_OBJECT
 
 public:
-  using AlgorithmRuntimeProps = std::map<std::string, std::string>;
-
   explicit BatchAlgorithmRunner(QObject *parent = nullptr);
   ~BatchAlgorithmRunner() override;
 
   /// Adds an algorithm to the execution queue
-  void
-  addAlgorithm(const Mantid::API::IAlgorithm_sptr &algo,
-               const AlgorithmRuntimeProps &props = AlgorithmRuntimeProps());
+  void addAlgorithm(const Mantid::API::IAlgorithm_sptr &algo);
+  void addAlgorithm(const Mantid::API::IAlgorithm_sptr &algo, std::unique_ptr<IAlgorithmRuntimeProps> props);
+
   void setQueue(std::deque<IConfiguredAlgorithm_sptr> algorithm);
   /// Clears all algorithms from queue
   void clearQueue();
@@ -146,8 +116,7 @@ signals:
   void batchCancelled();
   void algorithmStarted(MantidQt::API::IConfiguredAlgorithm_sptr algorithm);
   void algorithmComplete(MantidQt::API::IConfiguredAlgorithm_sptr algorithm);
-  void algorithmError(MantidQt::API::IConfiguredAlgorithm_sptr algorithm,
-                      std::string errorMessage);
+  void algorithmError(MantidQt::API::IConfiguredAlgorithm_sptr algorithm, std::string errorMessage);
 
 private:
   /// Implementation of algorithm runner
@@ -157,14 +126,10 @@ private:
 
   /// Handlers for notifications
   void handleBatchComplete(const Poco::AutoPtr<BatchCompleteNotification> &pNf);
-  void
-  handleBatchCancelled(const Poco::AutoPtr<BatchCancelledNotification> &pNf);
-  void handleAlgorithmStarted(
-      const Poco::AutoPtr<AlgorithmStartedNotification> &pNf);
-  void handleAlgorithmComplete(
-      const Poco::AutoPtr<AlgorithmCompleteNotification> &pNf);
-  void
-  handleAlgorithmError(const Poco::AutoPtr<AlgorithmErrorNotification> &pNf);
+  void handleBatchCancelled(const Poco::AutoPtr<BatchCancelledNotification> &pNf);
+  void handleAlgorithmStarted(const Poco::AutoPtr<AlgorithmStartedNotification> &pNf);
+  void handleAlgorithmComplete(const Poco::AutoPtr<AlgorithmCompleteNotification> &pNf);
+  void handleAlgorithmError(const Poco::AutoPtr<AlgorithmErrorNotification> &pNf);
 
   /// The queue of algorithms to be executed
   std::deque<IConfiguredAlgorithm_sptr> m_algorithms;
@@ -184,26 +149,18 @@ private:
   /// Notification center used to handle notifications from active method
   mutable Poco::NotificationCenter m_notificationCenter;
   /// Observer for notifications
-  Poco::NObserver<BatchAlgorithmRunner, BatchCompleteNotification>
-      m_batchCompleteObserver;
-  Poco::NObserver<BatchAlgorithmRunner, BatchCancelledNotification>
-      m_batchCancelledObserver;
-  Poco::NObserver<BatchAlgorithmRunner, AlgorithmStartedNotification>
-      m_algorithmStartedObserver;
-  Poco::NObserver<BatchAlgorithmRunner, AlgorithmCompleteNotification>
-      m_algorithmCompleteObserver;
-  Poco::NObserver<BatchAlgorithmRunner, AlgorithmErrorNotification>
-      m_algorithmErrorObserver;
+  Poco::NObserver<BatchAlgorithmRunner, BatchCompleteNotification> m_batchCompleteObserver;
+  Poco::NObserver<BatchAlgorithmRunner, BatchCancelledNotification> m_batchCancelledObserver;
+  Poco::NObserver<BatchAlgorithmRunner, AlgorithmStartedNotification> m_algorithmStartedObserver;
+  Poco::NObserver<BatchAlgorithmRunner, AlgorithmCompleteNotification> m_algorithmCompleteObserver;
+  Poco::NObserver<BatchAlgorithmRunner, AlgorithmErrorNotification> m_algorithmErrorObserver;
 
   /// Active method to run batch runner on separate thread
-  Poco::ActiveMethod<bool, Poco::Void, BatchAlgorithmRunner,
-                     Poco::ActiveStarter<BatchAlgorithmRunner>>
-      m_executeAsync;
+  Poco::ActiveMethod<bool, Poco::Void, BatchAlgorithmRunner, Poco::ActiveStarter<BatchAlgorithmRunner>> m_executeAsync;
   /// Holds result of async execution
   Poco::ActiveResult<bool> executeAsync();
 
   void addAllObservers();
   void removeAllObservers();
 };
-} // namespace API
-} // namespace MantidQt
+} // namespace MantidQt::API

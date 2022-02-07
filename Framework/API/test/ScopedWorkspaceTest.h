@@ -24,9 +24,7 @@ class MockWorkspace : public Workspace {
   size_t getMemorySize() const override { return 1; }
 
 private:
-  MockWorkspace *doClone() const override {
-    throw std::runtime_error("Cloning of MockWorkspace is not implemented.");
-  }
+  MockWorkspace *doClone() const override { throw std::runtime_error("Cloning of MockWorkspace is not implemented."); }
   MockWorkspace *doCloneEmpty() const override {
     throw std::runtime_error("Cloning of MockWorkspace is not implemented.");
   }
@@ -37,14 +35,10 @@ class ScopedWorkspaceTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static ScopedWorkspaceTest *createSuite() {
-    return new ScopedWorkspaceTest();
-  }
+  static ScopedWorkspaceTest *createSuite() { return new ScopedWorkspaceTest(); }
   static void destroySuite(ScopedWorkspaceTest *suite) { delete suite; }
 
-  ScopedWorkspaceTest() : m_ads(AnalysisDataService::Instance()) {
-    m_ads.clear();
-  }
+  ScopedWorkspaceTest() : m_ads(AnalysisDataService::Instance()) { m_ads.clear(); }
 
   ~ScopedWorkspaceTest() override { m_ads.clear(); }
 
@@ -85,9 +79,7 @@ public:
 
   void test_removedWhenOutOfScope() {
     TS_ASSERT_EQUALS(
-        m_ads
-            .getObjectNames(Mantid::Kernel::DataServiceSort::Unsorted,
-                            Mantid::Kernel::DataServiceHidden::Include)
+        m_ads.getObjectNames(Mantid::Kernel::DataServiceSort::Unsorted, Mantid::Kernel::DataServiceHidden::Include)
             .size(),
         0);
 
@@ -102,18 +94,14 @@ public:
 
     // Should be removed when goes out of scope
     TS_ASSERT_EQUALS(
-        m_ads
-            .getObjectNames(Mantid::Kernel::DataServiceSort::Unsorted,
-                            Mantid::Kernel::DataServiceHidden::Include)
+        m_ads.getObjectNames(Mantid::Kernel::DataServiceSort::Unsorted, Mantid::Kernel::DataServiceHidden::Include)
             .size(),
         0);
   }
 
   void test_removedWhenException() {
     TS_ASSERT_EQUALS(
-        m_ads
-            .getObjectNames(Mantid::Kernel::DataServiceSort::Unsorted,
-                            Mantid::Kernel::DataServiceHidden::Include)
+        m_ads.getObjectNames(Mantid::Kernel::DataServiceSort::Unsorted, Mantid::Kernel::DataServiceHidden::Include)
             .size(),
         0);
 
@@ -132,18 +120,14 @@ public:
     }
 
     TS_ASSERT_EQUALS(
-        m_ads
-            .getObjectNames(Mantid::Kernel::DataServiceSort::Unsorted,
-                            Mantid::Kernel::DataServiceHidden::Include)
+        m_ads.getObjectNames(Mantid::Kernel::DataServiceSort::Unsorted, Mantid::Kernel::DataServiceHidden::Include)
             .size(),
         0);
   }
 
   void test_workspaceGroups() {
     TS_ASSERT_EQUALS(
-        m_ads
-            .getObjectNames(Mantid::Kernel::DataServiceSort::Unsorted,
-                            Mantid::Kernel::DataServiceHidden::Include)
+        m_ads.getObjectNames(Mantid::Kernel::DataServiceSort::Unsorted, Mantid::Kernel::DataServiceHidden::Include)
             .size(),
         0);
 
@@ -160,18 +144,14 @@ public:
       m_ads.add(testGroup.name(), wsGroup);
 
       TS_ASSERT_EQUALS(
-          m_ads
-              .getObjectNames(Mantid::Kernel::DataServiceSort::Unsorted,
-                              Mantid::Kernel::DataServiceHidden::Include)
+          m_ads.getObjectNames(Mantid::Kernel::DataServiceSort::Unsorted, Mantid::Kernel::DataServiceHidden::Include)
               .size(),
           3);
     }
 
     // Whole group should be removed
     TS_ASSERT_EQUALS(
-        m_ads
-            .getObjectNames(Mantid::Kernel::DataServiceSort::Unsorted,
-                            Mantid::Kernel::DataServiceHidden::Include)
+        m_ads.getObjectNames(Mantid::Kernel::DataServiceSort::Unsorted, Mantid::Kernel::DataServiceHidden::Include)
             .size(),
         0);
   }
@@ -208,9 +188,7 @@ public:
     TS_ASSERT_EQUALS(ws2->getName(), test.name());
     TS_ASSERT(ws1->getName().empty());
     TS_ASSERT_EQUALS(
-        m_ads
-            .getObjectNames(Mantid::Kernel::DataServiceSort::Unsorted,
-                            Mantid::Kernel::DataServiceHidden::Include)
+        m_ads.getObjectNames(Mantid::Kernel::DataServiceSort::Unsorted, Mantid::Kernel::DataServiceHidden::Include)
             .size(),
         1);
   }

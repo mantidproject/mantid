@@ -1,0 +1,27 @@
+digraph Beam {
+  $global_style
+
+  subgraph params {
+    $param_style
+    Run
+    CadmiumTransmissionWorkspace
+  }
+
+  subgraph values {
+    $value_style
+    OutputWorkspace
+  }
+
+  subgraph algorithms {
+    $algorithm_style
+    LoadAndMerge
+    Divide [label="Normalize to monitor/time"]
+    Minus
+  }
+
+  Run -> LoadAndMerge
+  LoadAndMerge -> Divide
+  Divide -> Minus
+  CadmiumTransmissionWorkspace -> Minus
+  Minus -> OutputWorkspace
+}

@@ -5,13 +5,13 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 #  This file is part of the mantid package
-try:
-   from collections.abc import Iterable
-except ImportError:
-   # check Python 2 location
-   from collections import Iterable
+from collections.abc import Iterable
+import copy
+import numpy as np
+import re
 
 from matplotlib.axes import Axes
+from matplotlib.cbook import safe_masked_invalid
 from matplotlib.collections import Collection, PolyCollection
 from matplotlib.colors import Colormap
 from matplotlib.container import Container, ErrorbarContainer
@@ -19,6 +19,7 @@ from matplotlib.image import AxesImage
 from matplotlib.lines import Line2D
 from matplotlib.patches import Patch
 from matplotlib.table import Table
+from matplotlib.ticker import NullLocator
 from mpl_toolkits.mplot3d import Axes3D
 
 from mantid import logger
@@ -40,17 +41,25 @@ WATERFALL_XOFFSET_DEFAULT, WATERFALL_YOFFSET_DEFAULT = 10, 20
 def plot_decorator(func):
     def wrapper(self, *args, **kwargs):
         func_value = func(self, *args, **kwargs)
+        func_name = func.__name__
         # Saves saving it on array objects
         if datafunctions.validate_args(*args, **kwargs):
             # Fill out kwargs with the values of args
             kwargs["workspaces"] = args[0].name()
-            kwargs["function"] = func.__name__
+            kwargs["function"] = func_name
 
             if 'wkspIndex' not in kwargs and 'specNum' not in kwargs:
                 kwargs['specNum'] = MantidAxes.get_spec_number_or_bin(args[0], kwargs)
             if "cmap" in kwargs and isinstance(kwargs["cmap"], Colormap):
                 kwargs["cmap"] = kwargs["cmap"].name
             self.creation_args.append(kwargs)
+        elif func_name == "axhline" or func_name == "axvline":
+            self.creation_args.append({
+                'function': func_name,
+                'args': args,
+                'kwargs': kwargs
+            })
+
         return func_value
 
     return wrapper
@@ -199,6 +208,27 @@ class MantidAxes(Axes):
                         return ads.retrieve(ws_name), ws_artists.spec_num
         raise ValueError("Artist: '{}' not tracked by axes.".format(artist))
 
+    def get_artists_workspace_and_workspace_index(self, artist):
+        """Retrieve the workspace and spec num of the given artist"""
+        for ws_name, ws_artists_list in self.tracked_workspaces.items():
+            for ws_artists in ws_artists_list:
+                for ws_artist in ws_artists._artists:
+                    if artist == ws_artist:
+                        return ads.retrieve(ws_name), ws_artists.workspace_index
+        raise ValueError("Artist: '{}' not tracked by axes.".format(artist))
+
+    def get_artists_sample_log_plot_details(self, artist):
+        """Retrieve the sample log plot details of the given artist"""
+        for ws_name, ws_artists_list in self.tracked_workspaces.items():
+            for ws_artists in ws_artists_list:
+                for ws_artist in ws_artists._artists:
+                    if artist == ws_artist:
+                        if ws_artists.log_name is not None:
+                            return (ws_artists.log_name, ws_artists.filtered, ws_artists.expt_info_index)
+                        else:
+                            return None
+        raise ValueError("Artist: '{}' not tracked by axes.".format(artist))
+
     def get_artist_normalization_state(self, artist):
         for ws_name, ws_artists_list in self.tracked_workspaces.items():
             for ws_artists in ws_artists_list:
@@ -212,7 +242,10 @@ class MantidAxes(Axes):
                                data_replace_cb=None,
                                spec_num=None,
                                is_normalized=None,
-                               is_spec=True):
+                               is_spec=True,
+                               log_name=None,
+                               filtered=True,
+                               expt_info_index=None):
         """
         Add the given workspace's name to the list of workspaces
         displayed on this Axes instance
@@ -225,6 +258,11 @@ class MantidAxes(Axes):
             This can be from either a distribution workspace or a workspace being
             plotted as a distribution
         :param is_spec: bool. True if spec_num represents a spectrum, and False if it is a bin index
+        :param log_name: string. The name of the plotted log
+        :param filtered: bool. True if log plotted was filtered, and False if unfiltered.
+            This only has meaning if log_name is not None.
+        :param expt_info_index: Integer. The index of the experiment info for this plotted log.
+            This only has meaning if log_name is not None.
         :returns: The artists variable as it was passed in.
         """
         name = workspace.name()
@@ -238,7 +276,8 @@ class MantidAxes(Axes):
             artist_info = self.tracked_workspaces.setdefault(name, [])
 
             artist_info.append(
-                _WorkspaceArtists(artists, data_replace_cb, is_normalized, name, spec_num, is_spec))
+                _WorkspaceArtists(artists, data_replace_cb, is_normalized, name, spec_num, is_spec,
+                                  log_name, filtered, expt_info_index))
             self.check_axes_distribution_consistency()
         return artists
 
@@ -267,7 +306,7 @@ class MantidAxes(Axes):
         if artist.axes.creation_args[0].get('axis', None) == MantidAxType.BIN:
             if any([workspace.readE(i)[spec_num] != 0 for i in range(0, workspace.getNumberHistograms())]):
                 return True
-        else:
+        elif spec_num is not None:
             workspace_index = workspace.getIndexFromSpectrumNumber(spec_num)
             if any(workspace.readE(workspace_index) != 0):
                 return True
@@ -283,6 +322,51 @@ class MantidAxes(Axes):
         return tracked_artists
 
     def remove_workspace_artists(self, workspace):
+        if self.is_waterfall():
+            return self._remove_workspace_artists_waterfall(workspace=workspace)
+        else:
+            return self._remove_workspace_artists(workspace)
+
+    def remove_artists_if(self, unary_predicate):
+        if self.is_waterfall():
+            return self._remove_workspace_artists_waterfall(predicate=unary_predicate)
+        else:
+            return self._remove_artists_if(unary_predicate)
+
+    def _remove_workspace_artists_waterfall(self, workspace=None, predicate=None):
+        """
+        Perform the steps necessary to maintain waterfall plot settings before removing
+        the artists. Output is based on the inner function.
+        If workspace is set, uses _remove_workspace_artists()
+        otherwise if predicate is set, uses _remove_artists_if()
+        otherwise raises a RuntimeError.
+        :param workspace: A Workspace object
+        :param predicate: A unary predicate used to select artists.
+        :return: The output of the inner function.
+        """
+        waterfall_x_offset = copy.copy(self.waterfall_x_offset)
+        waterfall_y_offset = copy.copy(self.waterfall_y_offset)
+        has_fills = self.waterfall_has_fill()
+
+        self.update_waterfall(0, 0)
+
+        if workspace is not None:
+            output = self._remove_workspace_artists(workspace)
+        elif predicate is not None:
+            output = self._remove_artists_if(predicate)
+        else:
+            raise RuntimeError("A workspace or predicate is required.")
+
+        self.update_waterfall(waterfall_x_offset, waterfall_y_offset)
+
+        if len(self.lines) == 1:  # Can't have waterfall plots with only one line.
+            self.set_waterfall(False)
+        elif has_fills:
+            datafunctions.waterfall_update_fill(self)
+
+        return output
+
+    def _remove_workspace_artists(self, workspace):
         """
         Remove the artists reference by this workspace (if any) and return True
         if the axes is then empty
@@ -300,7 +384,7 @@ class MantidAxes(Axes):
 
         return True
 
-    def remove_artists_if(self, unary_predicate):
+    def _remove_artists_if(self, unary_predicate):
         """
         Remove any artists which satisfy the predicate and return True
         if the axes is then empty
@@ -360,6 +444,22 @@ class MantidAxes(Axes):
 
         return True
 
+    def rename_workspace(self, new_name, old_name):
+        """
+        Rename a workspace, and update the artists, creation arguments and tracked workspaces accordingly
+        :param new_name : the new name of workspace
+        :param old_name : the old name of workspace
+        """
+        for cargs in self.creation_args:
+            if cargs['workspaces'] == old_name:
+                cargs['workspaces'] = new_name
+        for ws_name, ws_artist_list in list(self.tracked_workspaces.items()):
+            for ws_artist in ws_artist_list:
+                if ws_artist.workspace_name == old_name:
+                    ws_artist.rename_data(new_name)
+            if ws_name == old_name:
+                self.tracked_workspaces[new_name] = self.tracked_workspaces.pop(old_name)
+
     def replot_artist(self, artist, errorbars=False, **kwargs):
         """
         Replot an artist with a new set of kwargs via 'plot' or 'errorbar'
@@ -371,17 +471,42 @@ class MantidAxes(Axes):
         """
         kwargs['distribution'] = not self.get_artist_normalization_state(artist)
         workspace, spec_num = self.get_artists_workspace_and_spec_num(artist)
-        self.remove_artists_if(lambda art: art == artist)
-        if kwargs.get('axis', None) == MantidAxType.BIN:
-            workspace_index = spec_num
-        else:
-            workspace_index = workspace.getIndexFromSpectrumNumber(spec_num)
-        self._remove_matching_curve_from_creation_args(workspace.name(), workspace_index, spec_num)
 
-        if errorbars:
-            new_artist = self.errorbar(workspace, wkspIndex=workspace_index, **kwargs)
+        # deal with MDHisto workspace
+        if workspace.isMDHistoWorkspace():
+            # the MDHisto does not have the distribution concept.
+            # This is available only for Workspace2D
+            if 'distribution' in kwargs.keys():
+                del kwargs['distribution']
+        # check if it is a sample log plot
+        elif spec_num is None:
+            sample_log_plot_details = self.get_artists_sample_log_plot_details(artist)
+            # we plot MDHisto workspaces, Workspace2D spectra, and Sample Logs
+            # if you get here, the LogName is valid and not None
+            kwargs['LogName'] = sample_log_plot_details[0]
+            if sample_log_plot_details[1] is not None:
+                kwargs['Filtered'] = sample_log_plot_details[1]
+            if sample_log_plot_details[2] is not None:
+                kwargs['ExperimentInfo'] = sample_log_plot_details[2]
+            # error bar plots do not make sense for log plots
+            errorbars = False
+            # neither does distribution
+            if 'distribution' in kwargs.keys():
+                del kwargs['distribution']
         else:
-            new_artist = self.plot(workspace, wkspIndex=workspace_index, **kwargs)
+            if kwargs.get('axis', None) == MantidAxType.BIN:
+                workspace_index = spec_num
+            else:
+                workspace_index = workspace.getIndexFromSpectrumNumber(spec_num)
+
+            self._remove_matching_curve_from_creation_args(workspace.name(), workspace_index, spec_num)
+            kwargs['wkspIndex'] = workspace_index
+
+        self.remove_artists_if(lambda art: art == artist)
+        if errorbars:
+            new_artist = self.errorbar(workspace, **kwargs)
+        else:
+            new_artist = self.plot(workspace, **kwargs)[0]
         return new_artist
 
     def relim(self, visible_only=True):
@@ -500,7 +625,7 @@ class MantidAxes(Axes):
 
         For keywords related to workspaces, see :func:`plotfunctions.plot`.
         """
-        if datafunctions.validate_args(*args):
+        if datafunctions.validate_args(*args,**kwargs):
             logger.debug('using plotfunctions')
 
             autoscale_on = kwargs.pop("autoscale_on_update", self.get_autoscale_on())
@@ -541,14 +666,18 @@ class MantidAxes(Axes):
             workspace = args[0]
             spec_num = self.get_spec_number_or_bin(workspace, kwargs)
             normalize_by_bin_width, kwargs = get_normalize_by_bin_width(workspace, self, **kwargs)
-            is_normalized = normalize_by_bin_width or workspace.isDistribution()
+            is_normalized = normalize_by_bin_width or \
+                            (hasattr(workspace, 'isDistribution') and workspace.isDistribution())
 
             with autoscale_on_update(self, autoscale_on):
                 artist = self.track_workspace_artist(workspace,
-                                                     axesfunctions.plot(self, normalize_by_bin_width = is_normalized,
+                                                     axesfunctions.plot(self, normalize_by_bin_width=is_normalized,
                                                                         *args, **kwargs),
                                                      _data_update, spec_num, is_normalized,
-                                                     MantidAxes.is_axis_of_type(MantidAxType.SPECTRUM, kwargs))
+                                                     MantidAxes.is_axis_of_type(MantidAxType.SPECTRUM, kwargs),
+                                                     kwargs.get('LogName', None),
+                                                     kwargs.get('Filtered', None),
+                                                     kwargs.get('ExperimentInfo', None))
             return artist
         else:
             return Axes.plot(self, *args, **kwargs)
@@ -658,7 +787,8 @@ class MantidAxes(Axes):
             workspace = args[0]
             spec_num = self.get_spec_number_or_bin(workspace, kwargs)
             normalize_by_bin_width, kwargs = get_normalize_by_bin_width(workspace, self, **kwargs)
-            is_normalized = normalize_by_bin_width or workspace.isDistribution()
+            is_normalized = normalize_by_bin_width or \
+                            (hasattr(workspace, 'isDistribution') and workspace.isDistribution())
 
             with autoscale_on_update(self, autoscale_on):
                 artist = self.track_workspace_artist(workspace,
@@ -669,6 +799,14 @@ class MantidAxes(Axes):
             return artist
         else:
             return Axes.errorbar(self, *args, **kwargs)
+
+    @plot_decorator
+    def axhline(self, *args, **kwargs):
+        return Axes.axhline(self, *args, **kwargs)
+
+    @plot_decorator
+    def axvline(self, *args, **kwargs):
+        return Axes.axvline(self, *args, **kwargs)
 
     @plot_decorator
     def pcolor(self, *args, **kwargs):
@@ -807,20 +945,23 @@ class MantidAxes(Axes):
                     col.remove()
             if hasattr(artist_orig, 'colorbar_cid'):
                 artist_orig.callbacksSM.disconnect(artist_orig.colorbar_cid)
-        if artist_orig.norm.vmin == 0:  # avoid errors with log 0
-            artist_orig.norm.vmin += 1e-6
-        artists_new = colorfunc(self, workspace, norm=artist_orig.norm,  **kwargs)
-
-        artists_new.set_cmap(artist_orig.cmap)
-        if hasattr(artist_orig, 'interpolation'):
-            artists_new.set_interpolation(artist_orig.get_interpolation())
-
-        artists_new.autoscale()
-        artists_new.set_norm(
-            type(artist_orig.norm)(vmin=artists_new.norm.vmin, vmax=artists_new.norm.vmax))
-
+        # If the colormap has been overridden then it needs to be passed in at
+        # creation time
+        if 'colors' not in kwargs:
+            kwargs['cmap'] = artists_orig[-1].cmap
+        artists_new = colorfunc(self, workspace, **kwargs)
+        # Copy properties from old to new
         if not isinstance(artists_new, Iterable):
             artists_new = [artists_new]
+        # assume 1:1 match between old/new artist lists
+        # and update relevant properties
+        for src, dest in zip(artists_orig, artists_new):
+            if hasattr(dest, 'update_from'):
+                dest.update_from(src)
+            if hasattr(dest, 'set_interpolation'):
+                dest.set_interpolation(src.get_interpolation())
+            dest.autoscale()
+            dest.set_norm(src.norm)
 
         try:
             axesfunctions.update_colorplot_datalimits(self, artists_new)
@@ -1063,6 +1204,29 @@ class MantidAxes(Axes):
 
             datafunctions.waterfall_remove_fill(self)
 
+    def set_xscale(self, *args, **kwargs):
+        has_minor_ticks = not isinstance(self.xaxis.minor.locator, NullLocator)
+
+        super().set_xscale(*args, **kwargs)
+
+        if has_minor_ticks:
+            self.minorticks_on()
+        else:
+            self.minorticks_off()
+
+    def set_yscale(self, *args, **kwargs):
+        has_minor_ticks = not isinstance(self.yaxis.minor.locator, NullLocator)
+
+        super().set_yscale(*args, **kwargs)
+
+        if has_minor_ticks:
+            self.minorticks_on()
+        else:
+            self.minorticks_off()
+
+    def grid_on(self):
+        return self.xaxis._major_tick_kw.get('gridOn', False) and self.yaxis._major_tick_kw.get('gridOn', False)
+
     # ------------------ Private api --------------------------------------------------------
 
     def _attach_colorbar(self, mappable, colorbar):
@@ -1131,6 +1295,64 @@ class MantidAxes3D(Axes3D):
         # Remove the connection for when you click on the plot as this is dealt with in figureinteraction.py to stop
         # it interfering with double-clicking on the axes.
         self.figure.canvas.mpl_disconnect(self._cids[1])
+
+    def set_title(self, *args, **kwargs):
+        # The set_title function in Axes3D also moves the title downwards for some reason so the Axes function is called
+        # instead.
+        return Axes.set_title(self, *args, **kwargs)
+
+    def set_xlim3d(self, *args):
+        super().set_xlim3d(*args)
+        self._set_overflowing_data_to_nan(0)
+
+    def set_ylim3d(self, *args):
+        super().set_ylim3d(*args)
+        self._set_overflowing_data_to_nan(1)
+
+    def set_zlim3d(self, *args):
+        super().set_zlim3d(*args)
+        self._set_overflowing_data_to_nan(2)
+
+    def autoscale(self, *args, **kwargs):
+        super().autoscale(*args, **kwargs)
+        self._set_overflowing_data_to_nan()
+
+    def grid_on(self):
+        return self._draw_grid
+
+    def _set_overflowing_data_to_nan(self, axis_index=None):
+        """
+        Sets any data for the given axis that is less than min[axis_index] or greater than max[axis_index]
+        to nan so only the parts of the plot that are within the axes are visible.
+        :param axis_index: the index of the axis being edited, 0 for x, 1 for y, 2 for z.
+        """
+
+        min_vals, max_vals = zip(self.get_xlim3d(),self.get_ylim3d(),self.get_zlim3d())
+        if hasattr(self, 'original_data_surface'):
+            if axis_index is None:
+                axis_index_list = [0,1,2]
+            else:
+                axis_index_list = [axis_index]
+
+            for axis_index in axis_index_list:
+                axis_data = self.original_data_surface[axis_index].copy()
+                axis_data[np.less(axis_data, min_vals[axis_index], where=~np.isnan(axis_data))] = np.nan
+                axis_data[np.greater(axis_data, max_vals[axis_index], where=~np.isnan(axis_data))] = np.nan
+                self.collections[0]._vec[axis_index] = axis_data
+
+        if hasattr(self, 'original_data_wireframe'):
+
+            all_data = copy.deepcopy(self.original_data_wireframe)
+
+            for spectrum in range(len(all_data)):
+                spectrum_data = all_data[spectrum]
+                for point in range(len(spectrum_data)):
+                    for axis in range(3):
+                        if (np.less(spectrum_data[point][axis],min_vals[axis])
+                                or np.greater(spectrum_data[point][axis],max_vals[axis])):
+                            all_data[spectrum][point] = np.repeat(np.nan,3)
+
+            self.collections[0].set_segments(all_data)
 
     def plot(self, *args, **kwargs):
         """
@@ -1203,9 +1425,14 @@ class MantidAxes3D(Axes3D):
         """
         if datafunctions.validate_args(*args):
             logger.debug('using plotfunctions3D')
-            return axesfunctions3D.plot_wireframe(self, *args, **kwargs)
+            line_c = axesfunctions3D.plot_wireframe(self, *args, **kwargs)
         else:
-            return Axes3D.plot_wireframe(self, *args, **kwargs)
+            line_c = Axes3D.plot_wireframe(self, *args, **kwargs)
+
+        # Create a copy of the original data points because data are set to nan when the axis limits are changed.
+        self.original_data_wireframe = copy.deepcopy(line_c._segments3d)
+
+        return line_c
 
     def plot_surface(self, *args, **kwargs):
         """
@@ -1228,9 +1455,18 @@ class MantidAxes3D(Axes3D):
         """
         if datafunctions.validate_args(*args):
             logger.debug('using plotfunctions3D')
-            return axesfunctions3D.plot_surface(self, *args, **kwargs)
+            poly_c = axesfunctions3D.plot_surface(self, *args, **kwargs)
         else:
-            return Axes3D.plot_surface(self, *args, **kwargs)
+            poly_c = Axes3D.plot_surface(self, *args, **kwargs)
+
+            # This is a bit of a hack, should be able to remove
+            # when matplotlib supports plotting masked arrays
+            poly_c._A = safe_masked_invalid(poly_c._A)
+
+        # Create a copy of the original data points because data are set to nan when the axis limits are changed.
+        self.original_data_surface = copy.deepcopy(poly_c._vec)
+
+        return poly_c
 
     def contour(self, *args, **kwargs):
         """
@@ -1282,6 +1518,27 @@ class MantidAxes3D(Axes3D):
         else:
             return Axes3D.contourf(self, *args, **kwargs)
 
+    def set_mesh_axes_equal(self, mesh):
+        """Set the 3D axes centred on the provided mesh and with the aspect ratio equal"""
+
+        ax_limits = mesh.flatten()
+        self.auto_scale_xyz(ax_limits[0::3], ax_limits[1::3], ax_limits[2::3])
+        x_limits = self.get_xlim3d()
+        y_limits = self.get_ylim3d()
+        z_limits = self.get_zlim3d()
+
+        x_range = abs(x_limits[1] - x_limits[0])
+        x_middle = np.mean(x_limits)
+        y_range = abs(y_limits[1] - y_limits[0])
+        y_middle = np.mean(y_limits)
+        z_range = abs(z_limits[1] - z_limits[0])
+        z_middle = np.mean(z_limits)
+        plot_radius = 0.5 * max([x_range, y_range, z_range])
+
+        self.set_xlim3d([x_middle - plot_radius, x_middle + plot_radius])
+        self.set_ylim3d([y_middle - plot_radius, y_middle + plot_radius])
+        self.set_zlim3d([z_middle - plot_radius, z_middle + plot_radius])
+
 
 class _WorkspaceArtists(object):
     """Captures information regarding an artist that has been plotted
@@ -1294,7 +1551,10 @@ class _WorkspaceArtists(object):
                  is_normalized,
                  workspace_name=None,
                  spec_num=None,
-                 is_spec=True):
+                 is_spec=True,
+                 log_name=None,
+                 filtered=True,
+                 expt_info_index=None):
         """
         Initialize an instance
         :param artists: A reference to a list of artists "attached" to a workspace
@@ -1303,6 +1563,11 @@ class _WorkspaceArtists(object):
         :param workspace_name: String. The name of the associated workspace
         :param spec_num: The spectrum number of the spectrum used to plot the artist
         :param is_spec: True if spec_num represents a spectrum rather than a bin
+        :param log_name: string. The name of the plotted log
+        :param filtered: bool. True if log plotted was filtered, and False if unfiltered.
+            This only has meaning if log_name is not None.
+        :param expt_info_index: Integer. The index of the experiment info for this plotted log.
+            This only has meaning if log_name is not None.
         """
         self._set_artists(artists)
         self._data_replace_cb = data_replace_cb
@@ -1311,6 +1576,9 @@ class _WorkspaceArtists(object):
         self.is_spec = is_spec
         self.workspace_index = self._get_workspace_index()
         self.is_normalized = is_normalized
+        self.log_name = log_name
+        self.filtered = filtered
+        self.expt_info_index = expt_info_index
 
     def _get_workspace_index(self):
         """Get the workspace index (spectrum or bin index) of the workspace artist"""
@@ -1378,9 +1646,22 @@ class _WorkspaceArtists(object):
         self._set_artists(new_artists)
         return len(self._artists) == 0
 
+    def rename_data(self, new_name):
+        """
+        Rename a workspace and update the artists label
+        """
+        self._update_artist_label_with_new_workspace_name(new_name)
+        self.workspace_name = new_name
+
     def _set_artists(self, artists):
         """Ensure the stored artists is an iterable"""
         if isinstance(artists, Container) or not isinstance(artists, Iterable):
             self._artists = [artists]
         else:
             self._artists = artists
+
+    def _update_artist_label_with_new_workspace_name(self, new_workspace_name):
+        for artist in self._artists:
+            old_workspace_name = self.workspace_name
+            prev_label = artist.get_label()
+            artist.set_label(re.sub(rf'\b{old_workspace_name}\b', new_workspace_name, prev_label))

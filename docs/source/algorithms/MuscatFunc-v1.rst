@@ -27,7 +27,7 @@ Usage
 **Example - a basic example using MuscatFunc.**
 
 .. code-block:: python
-                
+
 		def createSampleWorkspace(name, random=False):
 			""" Creates a sample workspace with a single lorentzian that looks like IRIS data"""
 			import os
@@ -36,7 +36,7 @@ Usage
 			ws = CropWorkspace(ws, StartWorkspaceIndex=0, EndWorkspaceIndex=9)
 			ws = ScaleX(ws, -5, "Add")
 			ws = ScaleX(ws, 0.1, "Multiply")
-			
+
 			#load instrument and instrument parameters
 			LoadInstrument(ws, InstrumentName='IRIS', RewriteSpectraMap=True)
 			path = os.path.join(config['instrumentDefinition.directory'], 'IRIS_graphite_002_Parameters.xml')
@@ -48,7 +48,7 @@ Usage
 		ws = createSampleWorkspace("irs26173_graphite002_red", random=True)
 		SaveNexus(ws, "irs26173_graphite002_red.nxs")
 
-		MuscatFunc(SamNumber='26173', Thick='0.5', Width='0.5', Instrument='irs') 
+		MuscatFunc(SamNumber='26173', Thick='0.5', Width='0.5', Instrument='irs')
 
 
 .. categories::

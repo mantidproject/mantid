@@ -20,15 +20,12 @@ namespace Crystal {
 class MANTID_CRYSTAL_DLL FindUBUsingLatticeParameters : public API::Algorithm {
 public:
   /// Algorithm's name for identification
-  const std::string name() const override {
-    return "FindUBUsingLatticeParameters";
-  };
+  const std::string name() const override { return "FindUBUsingLatticeParameters"; };
 
   /// Algorithm's version for identification
   int version() const override { return 1; };
   const std::vector<std::string> seeAlso() const override {
-    return {"SetUB", "FindUBUsingFFT", "FindUBUsingIndexedPeaks",
-            "FindUBUsingMinMaxD"};
+    return {"SetUB", "FindUBUsingFFT", "FindUBUsingIndexedPeaks", "FindUBUsingMinMaxD"};
   }
 
   /// Algorithm's category for identification

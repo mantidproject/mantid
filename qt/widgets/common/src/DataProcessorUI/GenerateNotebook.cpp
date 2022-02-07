@@ -50,30 +50,24 @@ post-processing algorithms specified via hinting line edits in the view
 the corresponding hinting line edit in the view
 @returns ipython notebook string
 */
-GenerateNotebook::GenerateNotebook(
-    const QString &name, const QString &instrument, WhiteList whitelist,
-    std::map<QString, PreprocessingAlgorithm> preprocessMap,
-    const ProcessingAlgorithm &processor,
-    boost::optional<PostprocessingStep> postprocessingStep,
-    ColumnOptionsMap preprocessingOptionsMap)
-    : m_wsName(std::move(name)), m_instrument(std::move(instrument)),
-      m_whitelist(std::move(whitelist)),
-      m_preprocessMap(std::move(preprocessMap)),
-      m_processor(std::move(processor)),
+GenerateNotebook::GenerateNotebook(const QString &name, const QString &instrument, WhiteList whitelist,
+                                   std::map<QString, PreprocessingAlgorithm> preprocessMap,
+                                   const ProcessingAlgorithm &processor,
+                                   boost::optional<PostprocessingStep> postprocessingStep,
+                                   ColumnOptionsMap preprocessingOptionsMap)
+    : m_wsName(std::move(name)), m_instrument(std::move(instrument)), m_whitelist(std::move(whitelist)),
+      m_preprocessMap(std::move(preprocessMap)), m_processor(std::move(processor)),
       m_postprocessingStep(std::move(postprocessingStep)),
       m_preprocessingOptionsMap(std::move(preprocessingOptionsMap)) {
 
   if (m_whitelist.size() < 2)
-    throw std::invalid_argument(
-        "A valid WhiteList must have at least two columns");
+    throw std::invalid_argument("A valid WhiteList must have at least two columns");
 }
 
 /** Check whether post-processing is applicable
  * @return : true if there is a post-processing step
  * */
-bool GenerateNotebook::hasPostprocessing() const {
-  return bool(m_postprocessingStep);
-}
+bool GenerateNotebook::hasPostprocessing() const { return bool(m_postprocessingStep); }
 
 /**
   Generate an ipython notebook
@@ -103,9 +97,8 @@ QString GenerateNotebook::generateNotebook(const TreeData &data) {
     for (const auto &row : rowMap) {
       codeString += "#Load and reduce\n";
 
-      auto reducedRowStr = reduceRowString(
-          row.second, m_instrument, m_whitelist, m_preprocessMap, m_processor,
-          m_preprocessingOptionsMap);
+      auto reducedRowStr = reduceRowString(row.second, m_instrument, m_whitelist, m_preprocessMap, m_processor,
+                                           m_preprocessingOptionsMap);
 
       // The reduction code
       codeString += reducedRowStr;
@@ -116,16 +109,13 @@ QString GenerateNotebook::generateNotebook(const TreeData &data) {
     boost::tuple<QString, QString> postProcessString;
     if (hasPostprocessing() && rowMap.size() > 1) {
       // If there was only one run selected, it could not be post-processed
-      postProcessString =
-          postprocessGroupString(rowMap, m_processor, *m_postprocessingStep);
+      postProcessString = postprocessGroupString(rowMap, m_processor, *m_postprocessingStep);
     }
     notebook->codeCell(boost::get<0>(postProcessString).toStdString());
 
     /** Draw plots **/
 
-    notebook->codeCell(
-        plotsString(rowMap, boost::get<1>(postProcessString), m_processor)
-            .toStdString());
+    notebook->codeCell(plotsString(rowMap, boost::get<1>(postProcessString), m_processor).toStdString());
   }
 
   return QString::fromStdString(notebook->writeNotebook());
@@ -141,8 +131,7 @@ QString titleString(const QString &wsName) {
   QString title_string;
 
   if (!wsName.isEmpty()) {
-    title_string =
-        "Processed data from workspace: " + wsName + "\n---------------";
+    title_string = "Processed data from workspace: " + wsName + "\n---------------";
   } else {
     title_string = "Processed data\n---------------";
   }
@@ -158,8 +147,7 @@ QString titleString(const QString &wsName) {
   @param processor : the data processor algorithm
   @return string containing the python code
   */
-QString plotsString(const GroupData &groupData, const QString &stitched_wsStr,
-                    const ProcessingAlgorithm &processor) {
+QString plotsString(const GroupData &groupData, const QString &stitched_wsStr, const ProcessingAlgorithm &processor) {
 
   // First, we have to parse 'output_ws'
   // This is a vector containing all the output workspace produced during the
@@ -209,8 +197,7 @@ QString plotsString(const GroupData &groupData, const QString &stitched_wsStr,
         wsNames.append(row->optionValue(propertyName));
     }
 
-    plotString +=
-        "GroupWorkspaces(InputWorkspaces = '" + wsNames.join(", ") + "', ";
+    plotString += "GroupWorkspaces(InputWorkspaces = '" + wsNames.join(", ") + "', ";
     plotString += "OutputWorkspace = '" + prefix + "groupWS'";
     plotString += ")\n";
   }
@@ -285,10 +272,8 @@ QString tableString(const TreeData &treeData, const WhiteList &whitelist) {
   groups and the options specified for post-processing via HintingLineEdit.
   @return tuple containing the python code string and the output workspace name
   */
-boost::tuple<QString, QString>
-postprocessGroupString(const GroupData &rowMap,
-                       const ProcessingAlgorithm &processor,
-                       const PostprocessingStep &postprocessingStep) {
+boost::tuple<QString, QString> postprocessGroupString(const GroupData &rowMap, const ProcessingAlgorithm &processor,
+                                                      const PostprocessingStep &postprocessingStep) {
 
   QString postprocessString;
 
@@ -321,8 +306,7 @@ postprocessGroupString(const GroupData &rowMap,
     postprocessString += ", ";
     postprocessString += postprocessingStep.m_options;
   }
-  postprocessString += ", " + postprocessingStep.m_algorithm.outputProperty() +
-                       " = '" + outputWSName + "'";
+  postprocessString += ", " + postprocessingStep.m_algorithm.outputProperty() + " = '" + outputWSName + "'";
   postprocessString += ")";
 
   return boost::make_tuple(postprocessString, outputWSName);
@@ -369,8 +353,7 @@ QString plot1DString(const QStringList &ws_names) {
   return plotString;
 }
 
-template <typename Map>
-void addProperties(QStringList &algProperties, const Map &optionsMap) {
+template <typename Map> void addProperties(QStringList &algProperties, const Map &optionsMap) {
   for (auto &&kvp : optionsMap) {
     algProperties.append(kvp.first + " = '" + kvp.second + "'");
   }
@@ -390,12 +373,9 @@ void addProperties(QStringList &algProperties, const Map &optionsMap) {
  First item in the tuple is the python code that performs the reduction, and
  second item are the names of the output workspaces.
 */
-QString
-reduceRowString(const RowData_sptr &data, const QString &instrument,
-                const WhiteList &whitelist,
-                const std::map<QString, PreprocessingAlgorithm> &preprocessMap,
-                const ProcessingAlgorithm &processor,
-                const ColumnOptionsMap &globalPreprocessingOptionsMap) {
+QString reduceRowString(const RowData_sptr &data, const QString &instrument, const WhiteList &whitelist,
+                        const std::map<QString, PreprocessingAlgorithm> &preprocessMap,
+                        const ProcessingAlgorithm &processor, const ColumnOptionsMap &globalPreprocessingOptionsMap) {
 
   if (static_cast<int>(whitelist.size()) != data->size()) {
     throw std::invalid_argument("Can't generate notebook");
@@ -435,8 +415,8 @@ reduceRowString(const RowData_sptr &data, const QString &instrument,
     // but override them if they are set in the row data
     QString options;
     if (globalPreprocessingOptionsMap.count(colName) > 0) {
-      OptionsMap preprocessingOptions = getCanonicalOptions(
-          data, globalPreprocessingOptionsMap.at(colName), whitelist, false);
+      OptionsMap preprocessingOptions =
+          getCanonicalOptions(data, globalPreprocessingOptionsMap.at(colName), whitelist, false);
       options = convertMapToString(preprocessingOptions);
     }
 
@@ -483,10 +463,8 @@ reduceRowString(const RowData_sptr &data, const QString &instrument,
  @param options : options given to this pre-processing algorithm
  @return : tuple of strings of python code and output workspace name
 */
-boost::tuple<QString, QString>
-loadWorkspaceString(const QString &runStr, const QString &instrument,
-                    const PreprocessingAlgorithm &preprocessor,
-                    const QString &options) {
+boost::tuple<QString, QString> loadWorkspaceString(const QString &runStr, const QString &instrument,
+                                                   const PreprocessingAlgorithm &preprocessor, const QString &options) {
 
   auto runs = preprocessingStringToList(runStr);
 
@@ -498,8 +476,7 @@ loadWorkspaceString(const QString &runStr, const QString &instrument,
   }
 
   const QString prefix = preprocessor.prefix();
-  const QString outputName =
-      preprocessingListToString(runs, prefix, preprocessor.separator());
+  const QString outputName = preprocessingListToString(runs, prefix, preprocessor.separator());
 
   boost::tuple<QString, QString> loadString;
 
@@ -518,8 +495,7 @@ loadWorkspaceString(const QString &runStr, const QString &instrument,
     loadString = loadRunString(*runIt, instrument, prefix);
     loadStrings += boost::get<0>(loadString);
     auto inputName2 = boost::get<1>(loadString);
-    loadStrings += preprocessString(inputName1, inputName2, outputName,
-                                    preprocessor, options);
+    loadStrings += preprocessString(inputName1, inputName2, outputName, preprocessor, options);
   }
 
   return boost::make_tuple(loadStrings, outputName);
@@ -535,10 +511,8 @@ loadWorkspaceString(const QString &runStr, const QString &instrument,
  @param options : the properties to pass to the pre-processing algorithm
  @return string of python code
 */
-QString preprocessString(const QString &input_name1, const QString &input_name2,
-                         const QString &output_name,
-                         const PreprocessingAlgorithm &preprocessor,
-                         const QString &options) {
+QString preprocessString(const QString &input_name1, const QString &input_name2, const QString &output_name,
+                         const PreprocessingAlgorithm &preprocessor, const QString &options) {
   QString preprocessString;
 
   preprocessString += preprocessor.name();
@@ -548,8 +522,7 @@ QString preprocessString(const QString &input_name1, const QString &input_name2,
   if (!options.isEmpty()) {
     preprocessString += ", " + options;
   }
-  preprocessString +=
-      ", " + preprocessor.outputProperty() + " = '" + output_name + "'";
+  preprocessString += ", " + preprocessor.outputProperty() + " = '" + output_name + "'";
   preprocessString += ")\n";
   return preprocessString;
 }
@@ -564,9 +537,7 @@ QString preprocessString(const QString &input_name1, const QString &input_name2,
  will be created based on the run number and prefix
  @return tuple of strings of python code and output workspace name
 */
-boost::tuple<QString, QString> loadRunString(const QString &run,
-                                             const QString &instrument,
-                                             const QString &prefix,
+boost::tuple<QString, QString> loadRunString(const QString &run, const QString &instrument, const QString &prefix,
                                              const QString &outputName) {
   QString loadString;
   // We do not have access to AnalysisDataService from notebook, so must load
@@ -589,16 +560,14 @@ boost::tuple<QString, QString> loadRunString(const QString &run,
  * workspaces
  * @return : The list of output properties as a string
  */
-QString completeOutputProperties(const QString &algName,
-                                 size_t currentProperties) {
+QString completeOutputProperties(const QString &algName, size_t currentProperties) {
 
   // In addition to output ws properties, our reduction and post-processing
   // algorithms could return other types of properties, for instance,
   // ReflectometryReductionOneAuto also returns a number called 'ThetaOut'
   // We need to specify those too in our python code
 
-  Mantid::API::IAlgorithm_sptr alg =
-      Mantid::API::AlgorithmManager::Instance().create(algName.toStdString());
+  Mantid::API::IAlgorithm_sptr alg = Mantid::API::AlgorithmManager::Instance().create(algName.toStdString());
   auto properties = alg->getProperties();
   int totalOutputProp = 0;
   for (auto &prop : properties) {

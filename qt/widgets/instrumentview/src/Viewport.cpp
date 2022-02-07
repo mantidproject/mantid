@@ -8,52 +8,37 @@
 #include "MantidGeometry/Rendering/OpenGL_Headers.h"
 #include "MantidKernel/V3D.h"
 
-#include <QtGlobal>
-#if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
 #include "MantidQtWidgets/Common/TSVSerialiser.h"
-#endif
+#include <QtGlobal>
 
 #include "MantidQtWidgets/InstrumentView/OpenGLError.h"
 #include <cmath>
 #include <limits>
 
-namespace MantidQt {
-namespace MantidWidgets {
+namespace MantidQt::MantidWidgets {
 
 /**
  * Initialize with defaults.
- * @param w :: Vieport width in pixels
- * @param h :: Vieport height in pixels
+ * @param glWidgetDimensions Viewport width/height in device pixels
  */
-Viewport::Viewport(int w, int h)
-    : m_projectionType(Viewport::ORTHO), m_width(w), m_height(h), m_left(-1),
-      m_right(1), m_bottom(-1), m_top(1), m_near(-1), m_far(1),
-      m_rotationspeed(180.0 / M_PI), m_zoomFactor(1.0), m_xTrans(0.0),
-      m_yTrans(0.0), m_zTrans(0.0) {
+Viewport::Viewport(QSize dimensions)
+    : m_projectionType(Viewport::ORTHO), m_dimensions(dimensions), m_left(-1), m_right(1), m_bottom(-1), m_top(1),
+      m_near(-1), m_far(1), m_rotationspeed(180.0 / M_PI), m_zoomFactor(1.0), m_xTrans(0.0), m_yTrans(0.0),
+      m_zTrans(0.0) {
   m_quaternion.GLMatrix(&m_rotationmatrix[0]);
 }
 
 /**
  * Resize the viewport = size of the displaying widget.
- * @param w :: New viewport width in pixels.
- * @param h :: New viewport height in pixels.
+ * @param dimensions Viewport width/height in device pixels
  */
-void Viewport::resize(int w, int h) {
-  m_width = w;
-  m_height = h;
-}
+void Viewport::resize(QSize dimensions) { m_dimensions = dimensions; }
 
 /**
- * Get the size of the viewport in screen pixels (size of the displaying
+ * Get the size of the viewport in logical pixels (size of the displaying
  * widget).
- *
- * @param w :: Buffer to accept the viewport width value.
- * @param h :: Buffer to accept the viewport height value.
  */
-void Viewport::getViewport(int &w, int &h) const {
-  w = m_width;
-  h = m_height;
-}
+QSize Viewport::dimensions() const { return m_dimensions; }
 
 /**
  * This will set the projection. The parameters describe the dimensions of a
@@ -72,8 +57,7 @@ void Viewport::getViewport(int &w, int &h) const {
  * @param type :: Projection type: ORTHO or PERSPECTIVE. PERSPECTIVE isn't fully
  *implemented
  */
-void Viewport::setProjection(double l, double r, double b, double t,
-                             double nearz, double farz,
+void Viewport::setProjection(double l, double r, double b, double t, double nearz, double farz,
                              Viewport::ProjectionType type) {
   m_projectionType = type;
   m_left = l;
@@ -86,6 +70,11 @@ void Viewport::setProjection(double l, double r, double b, double t,
     std::swap(m_bottom, m_top);
   m_near = nearz;
   m_far = farz;
+  // save the current projection bounds to reuse on view changes
+  m_leftOrig = m_left;
+  m_rightOrig = m_right;
+  m_topOrig = m_top;
+  m_bottomOrig = m_bottom;
 }
 
 /**
@@ -96,24 +85,43 @@ void Viewport::setProjection(double l, double r, double b, double t,
  * @param type :: Projection type: ORTHO or PERSPECTIVE. PERSPECTIVE isn't fully
  *implemented
  */
-void Viewport::setProjection(const Mantid::Kernel::V3D &minBounds,
-                             const Mantid::Kernel::V3D &maxBounds,
+void Viewport::setProjection(const Mantid::Kernel::V3D &minBounds, const Mantid::Kernel::V3D &maxBounds,
                              ProjectionType type) {
   double radius = minBounds.norm();
   double tmp = maxBounds.norm();
   if (tmp > radius)
     radius = tmp;
 
-  setProjection(minBounds.X(), maxBounds.X(), minBounds.Y(), maxBounds.Y(),
-                -radius, radius, type);
+  // save the Z value of the bounding box to use when rotating views
+  m_zmin = minBounds.Z();
+  m_zmax = maxBounds.Z();
+  m_zminOrig = m_zmin;
+  m_zmaxOrig = m_zmax;
+
+  setProjection(minBounds.X(), maxBounds.X(), minBounds.Y(), maxBounds.Y(), -radius, radius, type);
+}
+
+/**
+ * Sets the near and far clipping plane based on the size of given points
+ *
+ * @param minBounds :: Near-bottom-left corner of the scene.
+ * @param maxBounds :: Far-top-right corner of the scene.
+ */
+void Viewport::setProjectionZPlane(const Mantid::Kernel::V3D &minBounds, const Mantid::Kernel::V3D &maxBounds) {
+  double radius = minBounds.norm();
+  double tmp = maxBounds.norm();
+  if (tmp > radius)
+    radius = tmp;
+
+  m_near = -radius;
+  m_far = radius;
 }
 
 /**
  * Return XY plane bounds corrected for the aspect ratio.
  */
-void Viewport::correctForAspectRatioAndZoom(double &xmin, double &xmax,
-                                            double &ymin, double &ymax,
-                                            double &zmin, double &zmax) const {
+void Viewport::correctForAspectRatioAndZoom(double &xmin, double &xmax, double &ymin, double &ymax, double &zmin,
+                                            double &zmax) const {
   xmin = m_left;
   xmax = m_right;
   ymin = m_bottom;
@@ -122,7 +130,7 @@ void Viewport::correctForAspectRatioAndZoom(double &xmin, double &xmax,
   // and correct the extent to make it loook normal
   double xSize = m_right - m_left;
   double ySize = m_top - m_bottom;
-  double r = ySize * m_width / (xSize * m_height);
+  double r = ySize * m_dimensions.width() / (xSize * m_dimensions.height());
   if (r < 1.0) {
     // ySize is too small
     ySize /= r;
@@ -138,9 +146,7 @@ void Viewport::correctForAspectRatioAndZoom(double &xmin, double &xmax,
   zmax = m_far * m_zoomFactor;
 }
 
-Viewport::ProjectionType Viewport::getProjectionType() const {
-  return m_projectionType;
-}
+Viewport::ProjectionType Viewport::getProjectionType() const { return m_projectionType; }
 
 /**
  * Get the projection bounds.
@@ -151,8 +157,7 @@ Viewport::ProjectionType Viewport::getProjectionType() const {
  * @param zmin :: near side of the Ortho Projection
  * @param zmax :: far side of the Ortho Projection
  */
-void Viewport::getInstantProjection(double &xmin, double &xmax, double &ymin,
-                                    double &ymax, double &zmin,
+void Viewport::getInstantProjection(double &xmin, double &xmax, double &ymin, double &ymax, double &zmin,
                                     double &zmax) const {
   correctForAspectRatioAndZoom(xmin, xmax, ymin, ymax, zmin, zmax);
 }
@@ -166,7 +171,7 @@ void Viewport::setTranslation(double xval, double yval) {
  * Issue the OpenGL commands that define the viewport and projection.
  */
 void Viewport::applyProjection() const {
-  glViewport(0, 0, m_width, m_height);
+  glViewport(0, 0, m_dimensions.width(), m_dimensions.height());
   glMatrixMode(GL_PROJECTION);
   glLoadIdentity();
   OpenGLError::check("GLViewport::issueGL()");
@@ -192,9 +197,7 @@ void Viewport::applyProjection() const {
 
     if (OpenGLError::hasError("GLViewport::issueGL()")) {
       OpenGLError::log() << "Arguments to glOrtho:\n";
-      OpenGLError::log() << xmin << ' ' << xmax << '\n'
-                         << ymin << ' ' << ymax << '\n'
-                         << zmin << ' ' << zmax << "\n\n";
+      OpenGLError::log() << xmin << ' ' << xmax << '\n' << ymin << ' ' << ymax << '\n' << zmin << ' ' << zmax << "\n\n";
     }
   }
   // Reset the rendering options just in case
@@ -212,8 +215,8 @@ void Viewport::applyProjection() const {
 void Viewport::projectOnSphere(int a, int b, Mantid::Kernel::V3D &point) const {
   // z initiaised to zero if out of the sphere
   double z = 0;
-  auto x = static_cast<double>((2.0 * a - m_width) / m_width);
-  auto y = static_cast<double>((m_height - 2.0 * b) / m_height);
+  auto x = static_cast<double>((2.0 * a - m_dimensions.width()) / m_dimensions.width());
+  auto y = static_cast<double>((m_dimensions.height() - 2.0 * b) / m_dimensions.height());
   double norm = x * x + y * y;
   if (norm > 1.0) // The point is inside the sphere
   {
@@ -258,10 +261,10 @@ void Viewport::reset() {
  */
 void Viewport::setViewToXPositive() {
   reset();
-  Mantid::Kernel::Quat tempy(Mantid::Kernel::V3D(0.0, 0.0, 1.0),
-                             Mantid::Kernel::V3D(-1.0, 0.0, 0.0));
+  Mantid::Kernel::Quat tempy(Mantid::Kernel::V3D(0.0, 0.0, 1.0), Mantid::Kernel::V3D(-1.0, 0.0, 0.0));
   m_quaternion = tempy;
   m_quaternion.GLMatrix(&m_rotationmatrix[0]);
+  adjustProjection();
 }
 
 /**
@@ -270,10 +273,10 @@ void Viewport::setViewToXPositive() {
  */
 void Viewport::setViewToYPositive() {
   reset();
-  Mantid::Kernel::Quat tempy(Mantid::Kernel::V3D(0.0, 0.0, 1.0),
-                             Mantid::Kernel::V3D(0.0, -1.0, 0.0));
+  Mantid::Kernel::Quat tempy(Mantid::Kernel::V3D(0.0, 0.0, 1.0), Mantid::Kernel::V3D(0.0, -1.0, 0.0));
   m_quaternion = tempy;
   m_quaternion.GLMatrix(&m_rotationmatrix[0]);
+  adjustProjection();
 }
 
 /**
@@ -284,6 +287,7 @@ void Viewport::setViewToZPositive() {
   reset();
   m_quaternion.init();
   m_quaternion.GLMatrix(&m_rotationmatrix[0]);
+  adjustProjection();
 }
 
 /**
@@ -292,10 +296,10 @@ void Viewport::setViewToZPositive() {
  */
 void Viewport::setViewToXNegative() {
   reset();
-  Mantid::Kernel::Quat tempy(Mantid::Kernel::V3D(0.0, 0.0, 1.0),
-                             Mantid::Kernel::V3D(1.0, 0.0, 0.0));
+  Mantid::Kernel::Quat tempy(Mantid::Kernel::V3D(0.0, 0.0, 1.0), Mantid::Kernel::V3D(1.0, 0.0, 0.0));
   m_quaternion = tempy;
   m_quaternion.GLMatrix(&m_rotationmatrix[0]);
+  adjustProjection();
 }
 
 /**
@@ -304,10 +308,10 @@ void Viewport::setViewToXNegative() {
  */
 void Viewport::setViewToYNegative() {
   reset();
-  Mantid::Kernel::Quat tempy(Mantid::Kernel::V3D(0.0, 0.0, 1.0),
-                             Mantid::Kernel::V3D(0.0, 1.0, 0.0));
+  Mantid::Kernel::Quat tempy(Mantid::Kernel::V3D(0.0, 0.0, 1.0), Mantid::Kernel::V3D(0.0, 1.0, 0.0));
   m_quaternion = tempy;
   m_quaternion.GLMatrix(&m_rotationmatrix[0]);
+  adjustProjection();
 }
 
 /**
@@ -319,6 +323,23 @@ void Viewport::setViewToZNegative() {
   Mantid::Kernel::Quat tempy(180.0, Mantid::Kernel::V3D(0.0, 1.0, 0.0));
   m_quaternion = tempy;
   m_quaternion.GLMatrix(&m_rotationmatrix[0]);
+  adjustProjection();
+}
+
+void Viewport::adjustProjection() {
+  // reset the projection bounds to the original values
+  m_left = m_leftOrig;
+  m_right = m_rightOrig;
+  m_top = m_topOrig;
+  m_bottom = m_bottomOrig;
+  m_zmin = m_zminOrig;
+  m_zmax = m_zmaxOrig;
+
+  // rotate the original projection based on the new quaternion
+  m_quaternion.rotateBB(m_left, m_bottom, m_zmin, m_right, m_top, m_zmax);
+
+  // update the GL projection with the new bounds
+  applyProjection();
 }
 
 /**
@@ -340,11 +361,11 @@ void Viewport::setRotation(const Mantid::Kernel::Quat &rot) {
 void Viewport::initZoomFrom(int a, int b) {
   if (a <= 0 || b <= 0)
     return;
-  if (a >= m_width || b >= m_height)
+  if (a >= m_dimensions.width() || b >= m_dimensions.height())
     return;
   double z = 0;
-  auto x = static_cast<double>(m_width - a);
-  auto y = static_cast<double>(b - m_height);
+  auto x = static_cast<double>(m_dimensions.width() - a);
+  auto y = static_cast<double>(b - m_dimensions.height());
   m_lastpoint(x, y, z);
 }
 
@@ -355,9 +376,9 @@ void Viewport::initZoomFrom(int a, int b) {
  * @param b :: The y mouse coordinate
  */
 void Viewport::generateZoomTo(int a, int b) {
-  if (a >= m_width || b >= m_height || a <= 0 || b <= 0)
+  if (a >= m_dimensions.width() || b >= m_dimensions.height() || a <= 0 || b <= 0)
     return;
-  auto y = static_cast<double>(b - m_height);
+  auto y = static_cast<double>(b - m_dimensions.height());
   if (y == 0)
     y = m_lastpoint[1];
   double diff = m_lastpoint[1] / y;
@@ -404,9 +425,7 @@ void Viewport::setZoom(double zoom) {
  * @param a :: The x mouse coordinate
  * @param b :: The y mouse coordinate
  */
-void Viewport::initRotationFrom(int a, int b) {
-  projectOnSphere(a, b, m_lastpoint);
-}
+void Viewport::initRotationFrom(int a, int b) { projectOnSphere(a, b, m_lastpoint); }
 
 /**
  * Generate the rotation matrix to rotate to this point.
@@ -434,9 +453,7 @@ void Viewport::generateRotationTo(int a, int b) {
  * @param a :: The x mouse coordinate
  * @param b :: The y mouse coordinate
  */
-void Viewport::initTranslateFrom(int a, int b) {
-  generateTranslationPoint(a, b, m_lastpoint);
-}
+void Viewport::initTranslateFrom(int a, int b) { generateTranslationPoint(a, b, m_lastpoint); }
 
 /**
  * Generate scene translation such that a point of the last initTranslateFrom
@@ -459,14 +476,12 @@ void Viewport::generateTranslationTo(int a, int b) {
  * @param b :: The y mouse coordinate
  * @param point :: Return the result through this reference.
  */
-void Viewport::generateTranslationPoint(int a, int b,
-                                        Mantid::Kernel::V3D &point) const {
+void Viewport::generateTranslationPoint(int a, int b, Mantid::Kernel::V3D &point) const {
   double x, y, z = 0.0;
   double xmin, xmax, ymin, ymax, zmin, zmax;
   correctForAspectRatioAndZoom(xmin, xmax, ymin, ymax, zmin, zmax);
-  x = static_cast<double>(
-      (xmin + ((xmax - xmin) * ((double)a / (double)m_width))));
-  y = static_cast<double>((ymin + ((ymax - ymin) * (m_height - b) / m_height)));
+  x = static_cast<double>((xmin + ((xmax - xmin) * ((double)a / (double)m_dimensions.width()))));
+  y = static_cast<double>((ymin + ((ymax - ymin) * (m_dimensions.height() - b) / m_dimensions.height())));
   point(x, y, z);
 }
 
@@ -502,13 +517,14 @@ void Viewport::loadFromProject(const std::string &lines) {
   setRotation(quat);
 #else
   Q_UNUSED(lines);
-  throw std::runtime_error(
-      "Viewport::loadFromProject not implemented for Qt >= 5");
+  throw std::runtime_error("Viewport::loadFromProject not implemented for Qt >= 5");
 #endif
 }
 
 std::string Viewport::saveToProject() const {
-#if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
+  // WARNING: Q1DWeighted heavily depends on the format of this function's
+  // output (via "Save Shapes to table" in the instrument viewer draw tab).
+  // Modify with great caution.
   API::TSVSerialiser tsv;
   tsv.writeLine("Translation") << m_xTrans << m_yTrans;
   tsv.writeLine("Zoom") << m_zoomFactor;
@@ -519,10 +535,5 @@ std::string Viewport::saveToProject() const {
   }
 
   return tsv.outputLines();
-#else
-  throw std::runtime_error(
-      "Viewport::saveToProject() not implemented for Qt >= 5");
-#endif
 }
-} // namespace MantidWidgets
-} // namespace MantidQt
+} // namespace MantidQt::MantidWidgets

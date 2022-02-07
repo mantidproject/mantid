@@ -14,26 +14,20 @@
 #include <QSplitter>
 #include <QVBoxLayout>
 
-namespace MantidQt {
-namespace MantidWidgets {
+namespace MantidQt::MantidWidgets {
 
-BaseCustomInstrumentView::BaseCustomInstrumentView(
-    const std::string &instrument, QWidget *parent)
-    : QSplitter(Qt::Vertical, parent), m_helpPage(""),
-      m_loadRunObservable(nullptr), m_files(nullptr),
-      m_instrument(QString::fromStdString(instrument)),
-      m_instrumentWidget(nullptr), m_help(nullptr) {
+BaseCustomInstrumentView::BaseCustomInstrumentView(const std::string &instrument, QWidget *parent)
+    : QSplitter(Qt::Vertical, parent), m_helpPage(""), m_loadRunObservable(nullptr), m_files(nullptr),
+      m_instrument(QString::fromStdString(instrument)), m_instrumentWidget(nullptr), m_help(nullptr) {
   auto loadWidget = generateLoadWidget();
   this->addWidget(loadWidget);
 }
 
 void BaseCustomInstrumentView::setUpInstrument(
-    const std::string &fileName,
-    std::vector<std::function<bool(std::map<std::string, bool>)>> &instrument) {
+    const std::string &fileName, std::vector<std::function<bool(std::map<std::string, bool>)>> &instrument) {
 
   (void)instrument;
-  auto instrumentWidget =
-      new InstrumentWidget(QString::fromStdString(fileName));
+  auto instrumentWidget = new InstrumentWidget(QString::fromStdString(fileName));
   instrumentWidget->hideHelp();
   setInstrumentWidget(instrumentWidget);
 }
@@ -41,7 +35,7 @@ void BaseCustomInstrumentView::setUpInstrument(
 QWidget *BaseCustomInstrumentView::generateLoadWidget() {
   m_loadRunObservable = new Observable();
 
-  m_files = new API::MWRunFiles(this);
+  m_files = new API::FileFinderWidget(this);
   m_files->setLabelText(m_instrument);
   m_files->allowMultipleFiles(false);
   m_files->setInstrumentOverride(m_instrument);
@@ -51,17 +45,14 @@ QWidget *BaseCustomInstrumentView::generateLoadWidget() {
   auto loadWidget = new QWidget();
   auto loadLayout = new QHBoxLayout(loadWidget);
 
-  loadLayout->addItem(
-      new QSpacerItem(20, 40, QSizePolicy::Minimum, QSizePolicy::Expanding));
+  loadLayout->addItem(new QSpacerItem(20, 40, QSizePolicy::Minimum, QSizePolicy::Expanding));
   loadLayout->addWidget(m_files);
-  loadLayout->addItem(
-      new QSpacerItem(20, 40, QSizePolicy::Minimum, QSizePolicy::Expanding));
+  loadLayout->addItem(new QSpacerItem(20, 40, QSizePolicy::Minimum, QSizePolicy::Expanding));
 
   return loadWidget;
 }
 
-void BaseCustomInstrumentView::setupInstrumentAnalysisSplitters(
-    QWidget *analysisPane) {
+void BaseCustomInstrumentView::setupInstrumentAnalysisSplitters(QWidget *analysisPane) {
   auto *split = new QSplitter(Qt::Horizontal);
   split->addWidget(m_instrumentWidget);
   split->addWidget(analysisPane);
@@ -75,8 +66,7 @@ void BaseCustomInstrumentView::setupHelp() {
   auto helpLayout = new QHBoxLayout(helpWidget);
   helpLayout->addWidget(m_help);
 
-  helpLayout->addItem(new QSpacerItem(1000, 20, QSizePolicy::Expanding,
-                                      QSizePolicy::Expanding));
+  helpLayout->addItem(new QSpacerItem(1000, 20, QSizePolicy::Expanding, QSizePolicy::Expanding));
   this->addWidget(helpWidget);
   connect(m_help, SIGNAL(clicked()), this, SLOT(openHelp()));
 }
@@ -85,8 +75,7 @@ void BaseCustomInstrumentView::openHelp() {
   if (m_helpPage == "") {
     return;
   }
-  MantidQt::API::HelpWindow::showCustomInterface(
-      nullptr, QString::fromStdString(m_helpPage));
+  MantidQt::API::HelpWindow::showCustomInterface(nullptr, QString::fromStdString(m_helpPage));
 }
 
 std::string BaseCustomInstrumentView::getFile() {
@@ -111,13 +100,10 @@ void BaseCustomInstrumentView::fileLoaded() {
   m_loadRunObservable->notify();
 }
 
-void BaseCustomInstrumentView::warningBox(const std::string &message) {
-  warningBox(QString::fromStdString(message));
-}
+void BaseCustomInstrumentView::warningBox(const std::string &message) { warningBox(QString::fromStdString(message)); }
 
 void BaseCustomInstrumentView::warningBox(const QString &message) {
   QMessageBox::warning(this, m_instrument + " view", message);
 }
 
-} // namespace MantidWidgets
-} // namespace MantidQt
+} // namespace MantidQt::MantidWidgets

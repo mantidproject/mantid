@@ -19,8 +19,7 @@ namespace Functions {
   Generalization of the Abragam relaxation function to a longitudinal field
   See Phys Rev B, 50, 10039 (1994)
 */
-class MANTID_CURVEFITTING_DLL Keren : public API::ParamFunction,
-                                      public API::IFunction1D {
+class MANTID_CURVEFITTING_DLL Keren : public API::ParamFunction, public API::IFunction1D {
 
 public:
   /// Name of function
@@ -34,16 +33,13 @@ public:
 
 protected:
   /// Evaluate the function at the given values
-  void function1D(double *out, const double *xValues,
-                  const size_t nData) const override;
+  void function1D(double *out, const double *xValues, const size_t nData) const override;
   /// Initialize parameters
   void init() override;
   /// Time-dependent muon polarization
-  double polarization(const double delta, const double larmor,
-                      const double fluct, const double time) const;
+  double polarization(const double delta, const double larmor, const double fluct, const double time) const;
   /// Relaxation form
-  double relaxation(const double delta, const double larmor, const double fluct,
-                    const double time) const;
+  double relaxation(const double delta, const double larmor, const double fluct, const double time) const;
 };
 
 } // namespace Functions

@@ -41,13 +41,9 @@ public:
 
   /// Algorithm's version for identification
   int version() const override { return 1; };
-  const std::vector<std::string> seeAlso() const override {
-    return {"SliceMDHisto", "ProjectMD", "CutMD", "BinMD"};
-  }
+  const std::vector<std::string> seeAlso() const override { return {"SliceMDHisto", "ProjectMD", "CutMD", "BinMD"}; }
   /// Algorithm's category for identification
-  const std::string category() const override {
-    return "MDAlgorithms\\Slicing";
-  }
+  const std::string category() const override { return "MDAlgorithms\\Slicing"; }
 
 private:
   /// Initialise the properties
@@ -56,8 +52,7 @@ private:
   void exec() override;
 
   /// Helper method
-  template <typename MDE, size_t nd>
-  void doExec(typename DataObjects::MDEventWorkspace<MDE, nd>::sptr ws);
+  template <typename MDE, size_t nd> void doExec(typename DataObjects::MDEventWorkspace<MDE, nd>::sptr ws);
 
   /// Method to actually do the slice
   template <typename MDE, size_t nd, typename OMDE, size_t ond>

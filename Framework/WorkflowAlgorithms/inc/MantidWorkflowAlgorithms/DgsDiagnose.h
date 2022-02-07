@@ -20,9 +20,7 @@ class DLLExport DgsDiagnose : public API::Algorithm {
 public:
   const std::string name() const override;
   /// Summary of algorithms purpose
-  const std::string summary() const override {
-    return "Setup and run DetectorDiagnostic.";
-  }
+  const std::string summary() const override { return "Setup and run DetectorDiagnostic."; }
 
   int version() const override;
   const std::string category() const override;

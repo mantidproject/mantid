@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<parameter-file instrument = "IN16BD" valid-from = "2014-03-11T00:00:00">
+
+<component-link name = "IN16BD">
+
+<!-- Sample log merging behaviour -->
+<parameter name="sample_logs_sum" type="string" visible="false">
+  <value val="time, duration" />
+</parameter>
+
+</component-link>
+
+</parameter-file>

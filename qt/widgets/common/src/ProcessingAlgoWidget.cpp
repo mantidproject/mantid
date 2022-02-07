@@ -18,8 +18,7 @@
 using Mantid::API::Algorithm_sptr;
 using Mantid::API::AlgorithmManager;
 
-namespace MantidQt {
-namespace MantidWidgets {
+namespace MantidQt::MantidWidgets {
 
 //----------------------
 // Public member functions
@@ -43,9 +42,7 @@ ProcessingAlgoWidget::ProcessingAlgoWidget(QWidget *parent) : QWidget(parent) {
   ui.splitter->setStretchFactor(1, 0);
 
   //=========== SLOTS =============
-  connect(ui.algoSelector,
-          SIGNAL(algorithmSelectionChanged(const QString &, int)), this,
-          SLOT(changeAlgorithm()));
+  connect(ui.algoSelector, SIGNAL(algorithmSelectionChanged(const QString &, int)), this, SLOT(changeAlgorithm()));
 
   connect(ui.btnSave, SIGNAL(clicked()), this, SLOT(btnSaveClicked()));
   connect(ui.btnLoad, SIGNAL(clicked()), this, SLOT(btnLoadClicked()));
@@ -84,8 +81,7 @@ void ProcessingAlgoWidget::saveSettings() {
 void ProcessingAlgoWidget::btnSaveClicked() {
   // Save to a .py file
   QString fileselection = QFileDialog::getSaveFileName(
-      this, "Save a Python Script", QFileInfo(m_lastFile).absoluteFilePath(),
-      "Python scripts (*.py);;All files (*)");
+      this, "Save a Python Script", QFileInfo(m_lastFile).absoluteFilePath(), "Python scripts (*.py);;All files (*)");
   if (!fileselection.isEmpty()) {
     m_lastFile = fileselection;
     std::ofstream file;
@@ -95,11 +91,9 @@ void ProcessingAlgoWidget::btnSaveClicked() {
       file << ui.editor->text().toStdString();
       file.close();
     } catch (std::ifstream::failure &e) {
-      QMessageBox::critical(
-          this, "Exception saving file " + m_lastFile,
-          QString(
-              "The file could not be saved due to the following exception:\n") +
-              QString(e.what()));
+      QMessageBox::critical(this, "Exception saving file " + m_lastFile,
+                            QString("The file could not be saved due to the following exception:\n") +
+                                QString(e.what()));
     }
   }
 }
@@ -109,8 +103,7 @@ void ProcessingAlgoWidget::btnSaveClicked() {
 void ProcessingAlgoWidget::btnLoadClicked() {
   // Load a .py file
   QString fileselection = QFileDialog::getOpenFileName(
-      this, "Load a Python Script", QFileInfo(m_lastFile).absoluteFilePath(),
-      "Python scripts (*.py);;All files (*)");
+      this, "Load a Python Script", QFileInfo(m_lastFile).absoluteFilePath(), "Python scripts (*.py);;All files (*)");
   if (!fileselection.isEmpty()) {
     m_lastFile = fileselection;
     std::ifstream file(fileselection.toStdString().c_str());
@@ -127,8 +120,7 @@ void ProcessingAlgoWidget::btnLoadClicked() {
 void ProcessingAlgoWidget::changeAlgorithm() {
   auto alg = ui.algoSelector->getSelectedAlgorithm();
   try {
-    m_alg = AlgorithmManager::Instance().createUnmanaged(alg.name.toStdString(),
-                                                         alg.version);
+    m_alg = AlgorithmManager::Instance().createUnmanaged(alg.name.toStdString(), alg.version);
     m_alg->initialize();
   } catch (std::runtime_error &) {
     // Ignore when the m_algorithm is not found
@@ -141,6 +133,7 @@ void ProcessingAlgoWidget::changeAlgorithm() {
   QStringList disabled;
   disabled.push_back("OutputWorkspace");
   disabled.push_back("InputWorkspace");
+  disabled.push_back("Workspace");
   ui.algoProperties->addEnabledAndDisableLists(QStringList(), disabled);
   // Sets the m_algorithm and also the properties from the InputHistory
   ui.algoProperties->setAlgorithm(m_alg);
@@ -164,9 +157,6 @@ void ProcessingAlgoWidget::setSelectedAlgorithm(QString algo) {
 /// @return the text in the script editor
 QString ProcessingAlgoWidget::getScriptText() { return ui.editor->text(); }
 /// Set the script editor text
-void ProcessingAlgoWidget::setScriptText(const QString &text) {
-  ui.editor->setText(text);
-}
+void ProcessingAlgoWidget::setScriptText(const QString &text) { ui.editor->setText(text); }
 
-} // namespace MantidWidgets
-} // namespace MantidQt
+} // namespace MantidQt::MantidWidgets

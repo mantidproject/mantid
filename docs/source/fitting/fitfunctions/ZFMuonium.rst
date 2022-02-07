@@ -38,7 +38,7 @@ FreqD (MHz) is the anisotropic hyperfine coupling constant,
 and :math:`\phi` (rad) is the phase at time :math:`t=0` .
 
 .. plot::
-	
+
    from mantid.simpleapi import FunctionWrapper
    import matplotlib.pyplot as plt
    import numpy as np

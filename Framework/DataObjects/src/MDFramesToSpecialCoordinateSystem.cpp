@@ -9,8 +9,7 @@
 #include "MantidAPI/IMDHistoWorkspace.h"
 #include "MantidKernel/WarningSuppressions.h"
 
-namespace Mantid {
-namespace DataObjects {
+namespace Mantid::DataObjects {
 
 /**
  * Get the Special Coordinate System based on the MDFrame information.
@@ -18,8 +17,7 @@ namespace DataObjects {
  * @returns either a special coordinate or an empty optional
  */
 boost::optional<Mantid::Kernel::SpecialCoordinateSystem>
-MDFramesToSpecialCoordinateSystem::
-operator()(const Mantid::API::IMDWorkspace *workspace) const {
+MDFramesToSpecialCoordinateSystem::operator()(const Mantid::API::IMDWorkspace *workspace) const {
   // Make sure that the workspaces are either an MDHisto or MDEvent workspaces
   if (!dynamic_cast<const Mantid::API::IMDEventWorkspace *>(workspace) &&
       !dynamic_cast<const Mantid::API::IMDHistoWorkspace *>(workspace)) {
@@ -100,5 +98,4 @@ bool MDFramesToSpecialCoordinateSystem::isUnknownFrame(
   }
   return isUnknown;
 }
-} // namespace DataObjects
-} // namespace Mantid
+} // namespace Mantid::DataObjects

@@ -137,8 +137,7 @@ public:
     DoubleFortranVector e_energies;
     DoubleFortranMatrix i_energies;
     const double de = 1e-10;
-    calculateIntensities(nre, en, wf, 25.0, de, degeneration, e_energies,
-                         i_energies);
+    calculateIntensities(nre, en, wf, 25.0, de, degeneration, e_energies, i_energies);
 
     int n_energies = int(e_energies.size());
     TS_ASSERT_EQUALS(n_energies, 3);
@@ -176,13 +175,11 @@ public:
     DoubleFortranMatrix i_energies;
     const double de = 1e-10;
     const double di = 1e-3 * c_mbsr;
-    calculateIntensities(nre, en, wf, temperature, de, degeneration, e_energies,
-                         i_energies);
+    calculateIntensities(nre, en, wf, temperature, de, degeneration, e_energies, i_energies);
 
     DoubleFortranVector e_excitations;
     DoubleFortranVector i_excitations;
-    calculateExcitations(e_energies, i_energies, de, di, e_excitations,
-                         i_excitations);
+    calculateExcitations(e_energies, i_energies, de, di, e_excitations, i_excitations);
     TS_ASSERT_EQUALS(e_excitations.size(), 3);
     TS_ASSERT_EQUALS(i_excitations.size(), 3);
     TS_ASSERT_DELTA(e_excitations(1), 0.0, 1e-10);
@@ -194,15 +191,13 @@ public:
   }
 
 private:
-  void zeroAllEntries(DoubleFortranVector &bmol, DoubleFortranVector &bext,
-                      ComplexFortranMatrix &bkq) {
+  void zeroAllEntries(DoubleFortranVector &bmol, DoubleFortranVector &bext, ComplexFortranMatrix &bkq) {
     bmol.zero();
     bext.zero();
     bkq.zero();
   }
 
-  void doTestEigensystem(DoubleFortranVector &en, ComplexFortranMatrix &wf,
-                         ComplexFortranMatrix &ham) {
+  void doTestEigensystem(DoubleFortranVector &en, ComplexFortranMatrix &wf, ComplexFortranMatrix &ham) {
     const size_t n = en.size();
     TS_ASSERT_DIFFERS(n, 0);
     TS_ASSERT_EQUALS(wf.size1(), n);

@@ -19,14 +19,14 @@ Usage
 
 .. testcode:: DetectorFloodWeightingExample
 
-   import numpy as np 
+   import numpy as np
    # create histogram workspace
    dataX = range(0,10) # or use dataX=range(0,10)
    dataY = [1,1,1,1,1,1,1,1,1,2,2,2,2,2,2,2,2,2] # or use dataY=[1]*9
    ws = CreateWorkspace(dataX, dataY, NSpec=2, UnitX="Wavelength")
-   
+
    out_ws = DetectorFloodWeighting(InputWorkspace=ws, Bands=[0,10], SolidAngleCorrection=False)
-   
+
    print('Number Histograms {}'.format(out_ws.getNumberHistograms()))
    print('Min X: {} Max X: {}'.format(out_ws.readX(0)[0], out_ws.readX(0)[1]))
 

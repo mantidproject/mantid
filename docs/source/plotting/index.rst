@@ -9,14 +9,25 @@ Matplotlib in Mantid
    :glob:
    :maxdepth: 1
 
-   scripting_plots
+   1DPlotsHelp
+   WaterfallPlotsHelp
+   ColorfillPlotsHelp
+   3DPlotsHelp
+   MeshPlotHelp
 
 **Other Plotting Documentation**
 
-* :ref:`scripting_plots`
+* :ref:`02_scripting_plots`
 * :ref:`06_formatting_plots`
 * `Matplotlib Keyboard Shortcuts <https://matplotlib.org/3.1.1/users/navigation_toolbar.html#navigation-keyboard-shortcuts>`_
 
+**Help Documentation**
+
+* :ref:`Basic_1D_Plots`
+* :ref:`Waterfall_Plots`
+* :ref:`Colorfill_Plots`
+* :ref:`3D_Plots`
+* :ref:`Mesh_Plots`
 
 .. contents:: Table of contents
     :local:
@@ -248,7 +259,6 @@ fashion as the plotting of arrays in matplotlib. Moreover, one can combine the t
 .. plot::
    :include-source:
 
-   from __future__ import division
    import numpy as np
    import matplotlib.pyplot as plt
    from mantid import plots
@@ -307,7 +317,6 @@ and adds a grid
 .. plot::
    :include-source:
 
-   from __future__ import division
    import numpy as np
    import matplotlib.pyplot as plt
    from mantid import plots
@@ -343,7 +352,6 @@ above, but we add a fit, In the bottom part we add the difference.
 .. plot::
    :include-source:
 
-   from __future__ import division
    import numpy as np
    import matplotlib.pyplot as plt
    from mantid import plots
@@ -425,13 +433,12 @@ Custom Colors
 Custom Color Cycle (Line / 1D plots)
 ####################################
 
-The Default Color Cycle doesn't have to be used. Here is an example where a Custom Color Cycle is chosen. Make sure to fill the list `custom_colors` with either the HTML hex codes (eg. #b3457f) or recognised names for the desired colours. 
+The Default Color Cycle doesn't have to be used. Here is an example where a Custom Color Cycle is chosen. Make sure to fill the list `custom_colors` with either the HTML hex codes (eg. #b3457f) or recognised names for the desired colours.
 Both can be found `online <https://www.rapidtables.com/web/color/html-color-codes.html>`_.
 
 .. plot::
    :include-source:
 
-   from __future__ import (absolute_import, division, print_function, unicode_literals)
    import matplotlib.pyplot as plt
    from mantid import plots
    from mantid.simpleapi import *
@@ -444,7 +451,7 @@ Both can be found `online <https://www.rapidtables.com/web/color/html-color-code
 
    '''Change the following two parameters as you wish'''
    custom_colors = ['#0000ffff', 'salmon','#00ff00ff'] # I've chosen Blue, Salmon, Green
-   
+
    fig = plt.figure(figsize = (10,10))
    ax1 = plt.subplot(211,projection='mantid')
    for i in range(Number):
@@ -461,46 +468,8 @@ Both can be found `online <https://www.rapidtables.com/web/color/html-color-code
    fig.suptitle('Line Plots: Color Cycle', fontsize='x-large')
    #fig.show()
 
-Custom Colormap (MantidPlot)
-############################
+.. _custom-colormap-mantidworkbench:
 
-In MantidPlot, a Custom Colormap (256 entries of Red, Green and Blue values [0-255 for each]) can be created and saved with:
-
-.. code-block:: python
-
-   from __future__ import (absolute_import, division, print_function, unicode_literals)
-   from mantid.simpleapi import *
-   import matplotlib.pyplot as plt
-   import numpy as np
-
-   r = np.zeros(256)
-   g = np.zeros(256)
-   b = np.zeros(256)
-   for i in range(256):
-      '''Control how the RGB values change throughout the Colormap'''
-      r[i] = i          #linear increase in Red
-      g[i] = 255 - i    #linear decrease in Green
-
-   f = open("C:\MantidInstall\colormaps\GreenRed.map","w+") #Change the .map filename as you wish!
-   for i in range(256):
-      f.write(str(int(r[i])))
-      f.write(' ')
-      f.write(str(int(g[i])))
-      f.write(' ')
-      f.write(str(int(b[i])))
-      f.write('\n')
-   f.close()
-
-Then open up any dataset (such as EMU00020884.nxs from the `TrainingCourseData <https://sourceforge.net/projects/mantid/files/Sample%20Data/TrainingCourseData.zip/download>`_) and produce a Colorfill plot. Change the Colormap by following `these instructions <https://docs.mantidproject.org/nightly/tutorials/mantid_basic_course/loading_and_displaying_data/04_displaying_2D_data.html#changing-the-colour-map>`_ and selecting the newly created `Greenred.map`.
-
-.. figure:: ../images/ColorMapCustomPlot.PNG
-   :class: screenshot
-   :width: 500px
-   :align: center
-
-This New Colormap is saved within the MantidInstall folder so it can be used without re-running this script!
-
-   
 Custom Colormap (MantidWorkbench)
 #################################
 
@@ -550,7 +519,7 @@ The following methods show how to Load, Convert from MantidPlot format, Create f
 
   Res = len(Loaded_Cmap)
   Cmap = np.zeros((Res,4))
-  for i in range(Res): 
+  for i in range(Res):
     '''Normalise RGB values, Add 4th column alpha set to 1'''
     for j in range(3):
       Cmap[i][j] = float(Loaded_Cmap[i][j]) / 255
@@ -596,7 +565,7 @@ The following methods show how to Load, Convert from MantidPlot format, Create f
 
   Re = Res-1
   Cmap = np.zeros((Res,4))
-  for i in range(Res): 
+  for i in range(Res):
     '''Input functions inside float(), Divide by Res to normalise'''
     Cmap[i][0] = float(Res)   / Res       #Red   #just 1
     Cmap[i][1] = float(i)     / Re        #Green #+ve i divisible by Res-1 = Re
@@ -627,7 +596,7 @@ The following methods show how to Load, Convert from MantidPlot format, Create f
   Listed_CustomCmap_r = ListedColormap(Reverse, name=(Cmap_Name + '_r') )
   plt.register_cmap(name=(Cmap_Name + '_r'), cmap= Listed_CustomCmap_r)
 
-Now the Custom Colormap has been registered, right-click on a workspace and produce a colorfill plot. In Figure Options (Gear Icon in Plot Figure), under the Images Tab, you can use the drop down-menu to select the new Colormap, and use the check-box to select its Reverse! 
+Now the Custom Colormap has been registered, right-click on a workspace and produce a colorfill plot. In Figure Options (Gear Icon in Plot Figure), under the Images Tab, you can use the drop down-menu to select the new Colormap, and use the check-box to select its Reverse!
 
 - Otherwise, use a script like this (from above in Section "Simple Plots") to plot with your new Colormap:
 
@@ -643,7 +612,7 @@ Now the Custom Colormap has been registered, right-click on a workspace and prod
    data = ConvertUnits(InputWorkspace=data,Target='DeltaE', EMode='Direct', EFixed=3)
    data = Rebin(InputWorkspace=data, Params='-3,0.025,3', PreserveEvents=False)
    md = ConvertToMD(InputWorkspace=data,QDimensions='|Q|',dEAnalysisMode='Direct')
-   sqw = BinMD(InputWorkspace=md,AlignedDim0='|Q|,0,3,100',AlignedDim1='DeltaE,-3,3,100') 
+   sqw = BinMD(InputWorkspace=md,AlignedDim0='|Q|,0,3,100',AlignedDim1='DeltaE,-3,3,100')
 
    fig, ax = plt.subplots(subplot_kw={'projection':'mantid'})
    c = ax.pcolormesh(sqw, cmap='Beach', norm=LogNorm())
@@ -662,7 +631,7 @@ Now the Custom Colormap has been registered, right-click on a workspace and prod
 
   Re = Res-1
   Cmap = np.zeros((Res,4))
-  for i in range(Res): 
+  for i in range(Res):
     '''Input functions inside float(), Divide by Res to normalise'''
     Cmap[i][0] = float(Res)   / Res       #Red   #just 1
     Cmap[i][1] = float(i)     / Re        #Green #+ve i divisible by Res-1 = Re
@@ -692,7 +661,7 @@ Now the Custom Colormap has been registered, right-click on a workspace and prod
 
   Listed_CustomCmap_r = ListedColormap(Reverse, name=(Cmap_Name + '_r') )
   plt.register_cmap(name=(Cmap_Name + '_r'), cmap= Listed_CustomCmap_r)
-   
+
   from mantid.simpleapi import Load, ConvertToMD, BinMD, ConvertUnits, Rebin
   from mantid import plots
   from matplotlib.colors import LogNorm
@@ -700,7 +669,7 @@ Now the Custom Colormap has been registered, right-click on a workspace and prod
   data = ConvertUnits(InputWorkspace=data,Target='DeltaE', EMode='Direct', EFixed=3)
   data = Rebin(InputWorkspace=data, Params='-3,0.025,3', PreserveEvents=False)
   md = ConvertToMD(InputWorkspace=data,QDimensions='|Q|',dEAnalysisMode='Direct')
-  sqw = BinMD(InputWorkspace=md,AlignedDim0='|Q|,0,3,100',AlignedDim1='DeltaE,-3,3,100') 
+  sqw = BinMD(InputWorkspace=md,AlignedDim0='|Q|,0,3,100',AlignedDim1='DeltaE,-3,3,100')
 
   fig, ax = plt.subplots(subplot_kw={'projection':'mantid'})
   c = ax.pcolormesh(sqw, cmap='Beach', norm=LogNorm())

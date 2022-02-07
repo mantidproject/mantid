@@ -35,9 +35,7 @@ class LoadGSASInstrumentFileTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static LoadGSASInstrumentFileTest *createSuite() {
-    return new LoadGSASInstrumentFileTest();
-  }
+  static LoadGSASInstrumentFileTest *createSuite() { return new LoadGSASInstrumentFileTest(); }
   static void destroySuite(LoadGSASInstrumentFileTest *suite) { delete suite; }
 
   //----------------------------------------------------------------------------------------------
@@ -58,8 +56,8 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.execute());
     TS_ASSERT(alg.isExecuted());
 
-    TableWorkspace_sptr outws = std::dynamic_pointer_cast<TableWorkspace>(
-        AnalysisDataService::Instance().retrieve("Test1BankTable"));
+    TableWorkspace_sptr outws =
+        std::dynamic_pointer_cast<TableWorkspace>(AnalysisDataService::Instance().retrieve("Test1BankTable"));
     TS_ASSERT(outws);
 
     TS_ASSERT_EQUALS(outws->columnCount(), 2);
@@ -102,8 +100,8 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.execute());
     TS_ASSERT(alg.isExecuted());
 
-    TableWorkspace_sptr outws = std::dynamic_pointer_cast<TableWorkspace>(
-        AnalysisDataService::Instance().retrieve("Test2BankTable"));
+    TableWorkspace_sptr outws =
+        std::dynamic_pointer_cast<TableWorkspace>(AnalysisDataService::Instance().retrieve("Test2BankTable"));
     TS_ASSERT(outws);
 
     TS_ASSERT_EQUALS(outws->columnCount(), 3);
@@ -156,8 +154,8 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.execute());
     TS_ASSERT(alg.isExecuted());
 
-    TableWorkspace_sptr outws = std::dynamic_pointer_cast<TableWorkspace>(
-        AnalysisDataService::Instance().retrieve("TestAGSTable"));
+    TableWorkspace_sptr outws =
+        std::dynamic_pointer_cast<TableWorkspace>(AnalysisDataService::Instance().retrieve("TestAGSTable"));
     TS_ASSERT(outws);
 
     // 3. Verify names
@@ -238,8 +236,7 @@ public:
     gws = AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(wsName);
     auto ws = std::dynamic_pointer_cast<MatrixWorkspace>(gws->getItem(0));
     const auto &paramMap = ws->constInstrumentParameters();
-    std::shared_ptr<const Mantid::Geometry::Instrument> instr =
-        ws->getInstrument();
+    std::shared_ptr<const Mantid::Geometry::Instrument> instr = ws->getInstrument();
 
     // To check parameters in workspace
     Mantid::Geometry::FitParameter fitParam;
@@ -256,13 +253,11 @@ public:
     // Check Beta0 parameter
     param = paramMap.get(&(*instr), "Beta0", "fitting");
     fitParam = param->value<Mantid::Geometry::FitParameter>();
-    TS_ASSERT_EQUALS(boost::lexical_cast<double>(fitParam.getFormula()),
-                     31.7927);
+    TS_ASSERT_EQUALS(boost::lexical_cast<double>(fitParam.getFormula()), 31.7927);
     // Check Beta1 parameter
     param = paramMap.get(&(*instr), "Kappa", "fitting");
     fitParam = param->value<Mantid::Geometry::FitParameter>();
-    TS_ASSERT_EQUALS(boost::lexical_cast<double>(fitParam.getFormula()),
-                     51.4205);
+    TS_ASSERT_EQUALS(boost::lexical_cast<double>(fitParam.getFormula()), 51.4205);
     // Check SigmsSquared parameter
     // This is a formula, so values are not exact
     param = paramMap.get(&(*instr), "SigmaSquared", "fitting");
@@ -293,13 +288,11 @@ public:
     // Check Beta0 parameter
     param = paramMap2.get(&(*instr), "Beta0", "fitting");
     fitParam = param->value<Mantid::Geometry::FitParameter>();
-    TS_ASSERT_EQUALS(boost::lexical_cast<double>(fitParam.getFormula()),
-                     32.7927);
+    TS_ASSERT_EQUALS(boost::lexical_cast<double>(fitParam.getFormula()), 32.7927);
     // Check Beta1 parameter
     param = paramMap2.get(&(*instr), "Kappa", "fitting");
     fitParam = param->value<Mantid::Geometry::FitParameter>();
-    TS_ASSERT_EQUALS(boost::lexical_cast<double>(fitParam.getFormula()),
-                     52.4205);
+    TS_ASSERT_EQUALS(boost::lexical_cast<double>(fitParam.getFormula()), 52.4205);
     // Check SigmsSquared parameter
     // This is a formula, so values are not exact
     param = paramMap2.get(&(*instr), "SigmaSquared", "fitting");
@@ -322,8 +315,7 @@ public:
   //----------------------------------------------------------------------------------------------
   /** Parse a TableWorkspace to a map
    */
-  void parseTableWorkspace(const TableWorkspace_sptr &tablews,
-                           map<string, double> &parammap) {
+  void parseTableWorkspace(const TableWorkspace_sptr &tablews, map<string, double> &parammap) {
     parammap.clear();
 
     size_t numrows = tablews->rowCount();
@@ -341,8 +333,7 @@ public:
   //----------------------------------------------------------------------------------------------
   /** Parse a TableWorkspace's 2nd bank to a map
    */
-  void parseTableWorkspace2(const TableWorkspace_sptr &tablews,
-                            map<string, double> &parammap) {
+  void parseTableWorkspace2(const TableWorkspace_sptr &tablews, map<string, double> &parammap) {
     parammap.clear();
 
     size_t numrows = tablews->rowCount();
@@ -496,21 +487,18 @@ public:
   //----------------------------------------------------------------------------------------------
   /** Create a workspace group with specified number of workspaces.
    */
-  void createWorkspaceGroup(size_t numberOfWorkspaces,
-                            const std::string &workspaceName) {
+  void createWorkspaceGroup(size_t numberOfWorkspaces, const std::string &workspaceName) {
     // create a workspace with some sample data
     WorkspaceGroup_sptr gws(new API::WorkspaceGroup);
 
     for (size_t i = 0; i < numberOfWorkspaces; ++i) {
-      Workspace_sptr ws =
-          WorkspaceFactory::Instance().create("Workspace2D", 1, 1, 1);
+      Workspace_sptr ws = WorkspaceFactory::Instance().create("Workspace2D", 1, 1, 1);
       Workspace2D_sptr ws2D = std::dynamic_pointer_cast<Workspace2D>(ws);
       gws->addWorkspace(ws2D);
     }
 
     // put this workspace in the analysis data service
-    TS_ASSERT_THROWS_NOTHING(
-        AnalysisDataService::Instance().add(workspaceName, gws));
+    TS_ASSERT_THROWS_NOTHING(AnalysisDataService::Instance().add(workspaceName, gws));
 
     // save workspace name
     wsName = workspaceName;

@@ -55,6 +55,8 @@ public:
   /// disabled() signal.
   virtual void onDisabled() { emit disabled(); }
 
+  virtual void freezeRotation(bool) {}
+
   /// Returns true if a surface using this controller can show
   /// a context menu on right-click
   bool canShowContextMenu() const { return m_canShowContextMenu; }
@@ -72,8 +74,7 @@ private:
     translation, rotation and zooming.
 
   */
-class EXPORT_OPT_MANTIDQT_COMMON InputController3DMove
-    : public InputController {
+class EXPORT_OPT_MANTIDQT_COMMON InputController3DMove : public InputController {
   Q_OBJECT
 
 public:
@@ -82,6 +83,7 @@ public:
   void mouseMoveEvent(QMouseEvent * /*unused*/) override;
   void mouseReleaseEvent(QMouseEvent * /*unused*/) override;
   void wheelEvent(QWheelEvent * /*unused*/) override;
+  void freezeRotation(bool) override;
 
 signals:
   /// Init zooming. x and y is the zoom starting point on the screen.
@@ -103,6 +105,7 @@ signals:
 
 private:
   bool m_isButtonPressed;
+  bool m_isRotationFrozen = false;
 };
 
 /**
@@ -131,8 +134,7 @@ private:
 /**
     Controller for drawing mask shapes.
   */
-class EXPORT_OPT_MANTIDQT_COMMON InputControllerDrawShape
-    : public InputController {
+class EXPORT_OPT_MANTIDQT_COMMON InputControllerDrawShape : public InputController {
   Q_OBJECT
 
 public:
@@ -147,8 +149,7 @@ signals:
   /// Deselect all selected shapes
   void deselectAll();
   /// Add a new shape
-  void addShape(const QString &type, int x, int y, const QColor &borderColor,
-                const QColor &fillColor);
+  void addShape(const QString &type, int x, int y, const QColor &borderColor, const QColor &fillColor);
   /// Resize the current shape by moving the right-bottom control point to a
   /// location on the screen
   void moveRightBottomTo(int /*_t1*/, int /*_t2*/);
@@ -168,10 +169,13 @@ signals:
   void setSelection(const QRect & /*_t1*/);
   /// Rubber band selection is done
   void finishSelection(const QRect & /*_t1*/);
+  /// Copy the selected shapes.
+  void copySelectedShapes();
+  /// Paste previously copied shapes.
+  void pasteCopiedShapes();
 
 public slots:
-  void startCreatingShape2D(const QString &type, const QColor &borderColor,
-                            const QColor &fillColor);
+  void startCreatingShape2D(const QString &type, const QColor &borderColor, const QColor &fillColor);
   void onDisabled() override;
 
 private:
@@ -186,8 +190,7 @@ private:
 /**
     Controller for moving the instrument on an unwrapped surface.
   */
-class EXPORT_OPT_MANTIDQT_COMMON InputControllerMoveUnwrapped
-    : public InputController {
+class EXPORT_OPT_MANTIDQT_COMMON InputControllerMoveUnwrapped : public InputController {
   Q_OBJECT
 
 public:
@@ -249,8 +252,7 @@ private:
 /**
     Controller for erasing peaks on an unwrapped surface.
   */
-class EXPORT_OPT_MANTIDQT_COMMON InputControllerSelection
-    : public InputControllerDraw {
+class EXPORT_OPT_MANTIDQT_COMMON InputControllerSelection : public InputControllerDraw {
   Q_OBJECT
 
 public:
@@ -274,8 +276,7 @@ private:
 /**
     Controller for drawing and erasing arbitrary shapes on an unwrapped surface.
   */
-class EXPORT_OPT_MANTIDQT_COMMON InputControllerDrawAndErase
-    : public InputControllerDraw {
+class EXPORT_OPT_MANTIDQT_COMMON InputControllerDrawAndErase : public InputControllerDraw {
   Q_OBJECT
 
 public:
@@ -284,8 +285,7 @@ public:
 signals:
   void draw(const QPolygonF & /*_t1*/);
   void erase(const QPolygonF & /*_t1*/);
-  void addShape(const QPolygonF &poly, const QColor &borderColor,
-                const QColor &fillColor);
+  void addShape(const QPolygonF &poly, const QColor &borderColor, const QColor &fillColor);
 
 public slots:
   void startCreatingShape2D(const QColor &borderColor, const QColor &fillColor);

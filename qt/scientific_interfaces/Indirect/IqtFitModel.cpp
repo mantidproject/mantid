@@ -17,11 +17,9 @@
 using namespace Mantid::API;
 
 namespace {
-IFunction_sptr getFirstInCategory(IFunction_sptr function,
-                                  const std::string &category);
+IFunction_sptr getFirstInCategory(IFunction_sptr function, const std::string &category);
 
-IFunction_sptr getFirstInCategory(const CompositeFunction_sptr &composite,
-                                  const std::string &category) {
+IFunction_sptr getFirstInCategory(const CompositeFunction_sptr &composite, const std::string &category) {
   for (auto i = 0u; i < composite->nFunctions(); ++i) {
     auto function = getFirstInCategory(composite->getFunction(i), category);
     if (function)
@@ -30,8 +28,7 @@ IFunction_sptr getFirstInCategory(const CompositeFunction_sptr &composite,
   return nullptr;
 }
 
-IFunction_sptr getFirstInCategory(IFunction_sptr function,
-                                  const std::string &category) {
+IFunction_sptr getFirstInCategory(IFunction_sptr function, const std::string &category) {
   if (!function)
     return nullptr;
   if (function->category() == category)
@@ -42,8 +39,7 @@ IFunction_sptr getFirstInCategory(IFunction_sptr function,
   return nullptr;
 }
 
-std::vector<std::string> getParameters(const IFunction_sptr &function,
-                                       const std::string &shortParameterName) {
+std::vector<std::string> getParameters(const IFunction_sptr &function, const std::string &shortParameterName) {
   std::vector<std::string> parameters;
 
   for (const auto &longName : function->getParameterNames()) {
@@ -57,15 +53,12 @@ bool constrainIntensities(const IFunction_sptr &function) {
   const auto intensityParameters = getParameters(function, "Height");
   const auto backgroundParameters = getParameters(function, "A0");
 
-  if (intensityParameters.size() + backgroundParameters.size() < 2 ||
-      intensityParameters.empty())
+  if (intensityParameters.size() + backgroundParameters.size() < 2 || intensityParameters.empty())
     return false;
 
-  std::string tieString = std::accumulate(
-      backgroundParameters.cbegin(), backgroundParameters.cend(),
-      std::string("1"), [](const auto &head, const auto &parameter) {
-        return head + "-" + parameter;
-      });
+  std::string tieString =
+      std::accumulate(backgroundParameters.cbegin(), backgroundParameters.cend(), std::string("1"),
+                      [](const auto &head, const auto &parameter) { return head + "-" + parameter; });
 
   for (auto i = 1u; i < intensityParameters.size(); ++i)
     tieString += "-" + intensityParameters[i];
@@ -90,85 +83,11 @@ double computeHeightApproximation(IFunction_sptr function) {
     return height - background->getParameter("A0");
   return height;
 }
-
-std::string getSuffix(const MatrixWorkspace_sptr &workspace) {
-  const auto position = workspace->getName().rfind("_");
-  return workspace->getName().substr(position + 1);
-}
-
-std::string getFitString(const MatrixWorkspace_sptr &workspace) {
-  auto suffix = getSuffix(std::move(workspace));
-  boost::algorithm::to_lower(suffix);
-  if (suffix == "iqt")
-    return "Fit";
-  return "_IqtFit";
-}
-
-boost::optional<std::string>
-findFullParameterName(const IFunction_sptr &function, const std::string &name) {
-  for (auto i = 0u; i < function->nParams(); ++i) {
-    const auto fullName = function->parameterName(i);
-    if (boost::algorithm::ends_with(fullName, name))
-      return fullName;
-  }
-  return boost::none;
-}
-
-std::vector<std::string> constructGlobalTies(const std::string &parameter,
-                                             std::size_t nDomains) {
-  if (nDomains <= 1)
-    return std::vector<std::string>();
-
-  std::string firstParameter = "f0." + parameter;
-  std::vector<std::string> ties;
-  for (auto i = 1u; i < nDomains; ++i)
-    ties.emplace_back("f" + std::to_string(i) + "." + parameter + "=" +
-                      firstParameter);
-  return ties;
-}
-
-void addGlobalTie(CompositeFunction &composite, const std::string &parameter) {
-  if (composite.nFunctions() == 0)
-    return;
-
-  const auto fullName =
-      findFullParameterName(composite.getFunction(0), parameter);
-
-  if (fullName) {
-    const auto ties = constructGlobalTies(*fullName, composite.nFunctions());
-    composite.addTies(boost::algorithm::join(ties, ","));
-  }
-}
-
-IFunction_sptr createFunction(const std::string &functionString) {
-  return FunctionFactory::Instance().createInitialized(functionString);
-}
-
 } // namespace
 
-namespace MantidQt {
-namespace CustomInterfaces {
-namespace IDA {
+namespace MantidQt::CustomInterfaces::IDA {
 
-IqtFitModel::IqtFitModel()
-    : IndirectFittingModel(), m_makeBetaGlobal(false),
-      m_constrainIntensities(false) {}
-
-MultiDomainFunction_sptr IqtFitModel::getMultiDomainFunction() const {
-  if (m_makeBetaGlobal)
-    return createFunctionWithGlobalBeta(getFittingFunction());
-  return IndirectFittingModel::getMultiDomainFunction();
-}
-
-IAlgorithm_sptr IqtFitModel::getFittingAlgorithm() const {
-  if (m_makeBetaGlobal)
-    return createSimultaneousFitWithEqualRange(getMultiDomainFunction());
-  return IndirectFittingModel::getFittingAlgorithm();
-}
-
-std::vector<std::string> IqtFitModel::getSpectrumDependentAttributes() const {
-  return {};
-}
+IqtFitModel::IqtFitModel() : IndirectFittingModel(), m_constrainIntensities(false) { m_fitType = IQTFIT_STRING; }
 
 IAlgorithm_sptr IqtFitModel::sequentialFitAlgorithm() const {
   auto algorithm = AlgorithmManager::Instance().create("IqtFitSequential");
@@ -182,47 +101,17 @@ IAlgorithm_sptr IqtFitModel::simultaneousFitAlgorithm() const {
   return algorithm;
 }
 
-std::string IqtFitModel::sequentialFitOutputName() const {
-  if (isMultiFit())
-    return "MultiIqtFit_" + m_fitType + "_Results";
-  auto const fitString = getFitString(getWorkspace(TableDatasetIndex{0}));
-  return createOutputName("%1%" + fitString + "_seq_" + m_fitType + "_s%2%",
-                          "_to_", TableDatasetIndex{0});
-}
-
-std::string IqtFitModel::simultaneousFitOutputName() const {
-  if (isMultiFit())
-    return "MultiSimultaneousIqtFit_" + m_fitType + "_Results";
-  auto const fitString = getFitString(getWorkspace(TableDatasetIndex{0}));
-  return createOutputName("%1%" + fitString + "_sim_" + m_fitType + "_s%2%",
-                          "_to_", TableDatasetIndex{0});
-}
-
-std::string IqtFitModel::singleFitOutputName(TableDatasetIndex index,
-                                             WorkspaceIndex spectrum) const {
-  auto const fitString = getFitString(getWorkspace(TableDatasetIndex{0}));
-  return createSingleFitOutputName(
-      "%1%" + fitString + "_" + m_fitType + "_s%2%_Results", index, spectrum);
-}
-
-void IqtFitModel::setFitTypeString(const std::string &fitType) {
-  m_fitType = fitType;
-}
-
-void IqtFitModel::setFitFunction(
-    Mantid::API::MultiDomainFunction_sptr function) {
+void IqtFitModel::setFitFunction(Mantid::API::MultiDomainFunction_sptr function) {
   IndirectFittingModel::setFitFunction(function);
   if (m_constrainIntensities)
     constrainIntensities(function);
 }
 
-std::unordered_map<std::string, ParameterValue>
-IqtFitModel::createDefaultParameters(TableDatasetIndex index) const {
+std::unordered_map<std::string, ParameterValue> IqtFitModel::createDefaultParameters(WorkspaceID workspaceID) const {
   std::unordered_map<std::string, ParameterValue> parameters;
-  parameters["Height"] =
-      ParameterValue(computeHeightApproximation(getFittingFunction()));
+  parameters["Height"] = ParameterValue(computeHeightApproximation(getFitFunction()));
 
-  const auto inputWs = getWorkspace(index);
+  const auto inputWs = getWorkspace(workspaceID);
   const auto tau = inputWs ? computeTauApproximation(inputWs) : 0.0;
 
   parameters["Lifetime"] = ParameterValue(tau);
@@ -231,23 +120,4 @@ IqtFitModel::createDefaultParameters(TableDatasetIndex index) const {
   return parameters;
 }
 
-MultiDomainFunction_sptr IqtFitModel::createFunctionWithGlobalBeta(
-    const IFunction_sptr &function) const {
-  std::shared_ptr<MultiDomainFunction> multiDomainFunction(
-      new MultiDomainFunction);
-  const auto functionString = function->asString();
-  for (auto i = TableDatasetIndex{0}; i < numberOfWorkspaces(); ++i) {
-    auto addDomains = [&](WorkspaceIndex /*unused*/) {
-      const auto index = multiDomainFunction->nFunctions();
-      multiDomainFunction->addFunction(createFunction(functionString));
-      multiDomainFunction->setDomainIndex(index, index);
-    };
-    applySpectra(i, addDomains);
-  }
-  addGlobalTie(*multiDomainFunction, "Stretching");
-  return multiDomainFunction;
-}
-
-} // namespace IDA
-} // namespace CustomInterfaces
-} // namespace MantidQt
+} // namespace MantidQt::CustomInterfaces::IDA

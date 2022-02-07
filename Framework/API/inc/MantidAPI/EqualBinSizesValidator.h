@@ -18,8 +18,7 @@ namespace API {
 class MANTID_API_DLL EqualBinSizesValidator : public MatrixWorkspaceValidator {
 public:
   /// Constructor: sets properties
-  EqualBinSizesValidator(const double errorLevel,
-                         const double warningLevel = -1);
+  EqualBinSizesValidator(const double errorLevel);
   /// Gets the type of the validator
   std::string getType() const { return "equalbinsizes"; }
   /// Clone the current state
@@ -30,8 +29,6 @@ private:
   std::string checkValidity(const MatrixWorkspace_sptr &value) const override;
   /// Error threshold
   const double m_errorLevel;
-  /// Warning threshold
-  const double m_warningLevel;
 };
 
 } // namespace API

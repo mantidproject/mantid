@@ -20,14 +20,12 @@
 #include "MantidAPI/IWorkspaceProperty.h"
 #include "MantidKernel/Property.h"
 
-namespace MantidQt {
-namespace CustomDialogs {
+namespace MantidQt::CustomDialogs {
 // Declare the dialog. Name must match the class name
 DECLARE_DIALOG(ConvertTableToMatrixWorkspaceDialog)
 
 /// Default constructor
-ConvertTableToMatrixWorkspaceDialog::ConvertTableToMatrixWorkspaceDialog(
-    QWidget *parent)
+ConvertTableToMatrixWorkspaceDialog::ConvertTableToMatrixWorkspaceDialog(QWidget *parent)
     : API::AlgorithmDialog(parent), m_form() {}
 
 /**
@@ -35,17 +33,15 @@ ConvertTableToMatrixWorkspaceDialog::ConvertTableToMatrixWorkspaceDialog(
  * be updated.
  * @param qWSName :: The new table workspace name
  */
-void ConvertTableToMatrixWorkspaceDialog::fillColumnNames(
-    const QString &qWSName) {
+void ConvertTableToMatrixWorkspaceDialog::fillColumnNames(const QString &qWSName) {
   m_form.cbColumnX->clear();
   m_form.cbColumnY->clear();
   m_form.cbColumnE->clear();
   std::string wsName = qWSName.toStdString();
   if (wsName.empty())
     return;
-  Mantid::API::ITableWorkspace_sptr tws =
-      std::dynamic_pointer_cast<Mantid::API::ITableWorkspace>(
-          Mantid::API::AnalysisDataService::Instance().retrieve(wsName));
+  Mantid::API::ITableWorkspace_sptr tws = std::dynamic_pointer_cast<Mantid::API::ITableWorkspace>(
+      Mantid::API::AnalysisDataService::Instance().retrieve(wsName));
   if (!tws)
     return;                             // just in case
   m_form.cbColumnE->insertItem(-1, ""); // the default value
@@ -55,8 +51,7 @@ void ConvertTableToMatrixWorkspaceDialog::fillColumnNames(
   QString defaultXColumn;
   QString defaultYColumn;
   QString defaultEColumn;
-  for (std::vector<std::string>::const_iterator column = columns.begin();
-       column != columns.end(); ++column) {
+  for (std::vector<std::string>::const_iterator column = columns.begin(); column != columns.end(); ++column) {
     QString qName = QString::fromStdString(*column);
     m_form.cbColumnX->addItem(qName);
     m_form.cbColumnY->addItem(qName);
@@ -104,8 +99,7 @@ void ConvertTableToMatrixWorkspaceDialog::fillColumnNames(
 void ConvertTableToMatrixWorkspaceDialog::initLayout() {
   m_form.setupUi(this);
 
-  static_cast<QVBoxLayout *>(this->layout())
-      ->addLayout(createDefaultButtonLayout());
+  static_cast<QVBoxLayout *>(this->layout())->addLayout(createDefaultButtonLayout());
   tie(m_form.cbInputWorkspace, "InputWorkspace", m_form.gridLayout);
   tie(m_form.leOutputWorkspace, "OutputWorkspace", m_form.gridLayout);
   tie(m_form.cbColumnX, "ColumnX", m_form.gridLayout);
@@ -120,9 +114,8 @@ void ConvertTableToMatrixWorkspaceDialog::initLayout() {
       m_form.cbInputWorkspace->setCurrentIndex(i);
     }
   }
-  connect(m_form.cbInputWorkspace, SIGNAL(currentIndexChanged(const QString &)),
-          this, SLOT(fillColumnNames(const QString &)));
+  connect(m_form.cbInputWorkspace, SIGNAL(currentIndexChanged(const QString &)), this,
+          SLOT(fillColumnNames(const QString &)));
   fillColumnNames(m_form.cbInputWorkspace->currentText());
 }
-} // namespace CustomDialogs
-} // namespace MantidQt
+} // namespace MantidQt::CustomDialogs

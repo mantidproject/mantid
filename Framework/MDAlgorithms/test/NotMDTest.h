@@ -7,8 +7,8 @@
 #pragma once
 
 #include "MantidDataObjects/MDHistoWorkspace.h"
+#include "MantidFrameworkTestHelpers/BinaryOperationMDTestHelper.h"
 #include "MantidMDAlgorithms/NotMD.h"
-#include "MantidTestHelpers/BinaryOperationMDTestHelper.h"
 
 #include <cxxtest/TestSuite.h>
 
@@ -31,8 +31,5 @@ public:
     TS_ASSERT_DELTA(out->getSignalAt(0), 0.0, 1e-5);
   }
 
-  void test_event_fails() {
-    UnaryOperationMDTestHelper::doTest("NotMD", "event", "out",
-                                       false /* fails*/);
-  }
+  void test_event_fails() { UnaryOperationMDTestHelper::doTest("NotMD", "event", "out", false /* fails*/); }
 };

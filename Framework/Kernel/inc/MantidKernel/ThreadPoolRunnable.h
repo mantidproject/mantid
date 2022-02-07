@@ -23,8 +23,7 @@ class ThreadScheduler;
  */
 class MANTID_KERNEL_DLL ThreadPoolRunnable : public Poco::Runnable {
 public:
-  ThreadPoolRunnable(size_t threadnum, ThreadScheduler *scheduler,
-                     ProgressBase *prog = nullptr, double waitSec = 0.0);
+  ThreadPoolRunnable(size_t threadnum, ThreadScheduler *scheduler, ProgressBase *prog = nullptr, double waitSec = 0.0);
 
   /// Return the thread number of this thread.
   size_t threadnum() { return m_threadnum; }

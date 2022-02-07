@@ -27,8 +27,7 @@ public:
     TS_ASSERT_EQUALS(Ions, "\"Ce\"");
     std::string Symmetries = cf.getAttribute("Symmetries").asString();
     TS_ASSERT_EQUALS(Symmetries, "\"C2v\"");
-    std::string PhysicalProperties =
-        cf.getAttribute("PhysicalProperties").asString();
+    std::string PhysicalProperties = cf.getAttribute("PhysicalProperties").asString();
     TS_ASSERT_EQUALS(PhysicalProperties, "");
     std::string Background = cf.getAttribute("Background").asString();
     TS_ASSERT_EQUALS(Background, "\"\"");
@@ -57,10 +56,8 @@ public:
     auto source = cf.buildSource();
     std::string Ions = cf.getAttribute("Ions").asString();
     std::string Symmetries = cf.getAttribute("Symmetries").asString();
-    std::string PhysicalProperties =
-        cf.getAttribute("PhysicalProperties").asString();
-    bool isComposite =
-        dynamic_cast<Mantid::API::CompositeFunction *>(source.get()) != nullptr;
+    std::string PhysicalProperties = cf.getAttribute("PhysicalProperties").asString();
+    bool isComposite = dynamic_cast<Mantid::API::CompositeFunction *>(source.get()) != nullptr;
     bool isMultiSite = cf.isMultiSite();
     bool isMultiSpectrum = cf.isMultiSpectrum();
     int nControls = (int)cf.nFunctions();
@@ -83,10 +80,8 @@ public:
     auto source = cf.buildSource();
     std::string Ions = cf.getAttribute("Ions").asString();
     std::string Symmetries = cf.getAttribute("Symmetries").asString();
-    std::string PhysicalProperties =
-        cf.getAttribute("PhysicalProperties").asString();
-    bool isComposite =
-        dynamic_cast<Mantid::API::CompositeFunction *>(source.get()) != nullptr;
+    std::string PhysicalProperties = cf.getAttribute("PhysicalProperties").asString();
+    bool isComposite = dynamic_cast<Mantid::API::CompositeFunction *>(source.get()) != nullptr;
     bool isMultiSite = cf.isMultiSite();
     bool isMultiSpectrum = cf.isMultiSpectrum();
     int nControls = (int)cf.nFunctions();
@@ -109,10 +104,8 @@ public:
     auto source = cf.buildSource();
     std::string Ions = cf.getAttribute("Ions").asString();
     std::string Symmetries = cf.getAttribute("Symmetries").asString();
-    std::string PhysicalProperties =
-        cf.getAttribute("PhysicalProperties").asString();
-    bool isComposite =
-        dynamic_cast<Mantid::API::CompositeFunction *>(source.get()) != nullptr;
+    std::string PhysicalProperties = cf.getAttribute("PhysicalProperties").asString();
+    bool isComposite = dynamic_cast<Mantid::API::CompositeFunction *>(source.get()) != nullptr;
     bool isMultiSite = cf.isMultiSite();
     bool isMultiSpectrum = cf.isMultiSpectrum();
     int nControls = (int)cf.nFunctions();
@@ -135,10 +128,8 @@ public:
     auto source = cf.buildSource();
     std::string Ions = cf.getAttribute("Ions").asString();
     std::string Symmetries = cf.getAttribute("Symmetries").asString();
-    std::string PhysicalProperties =
-        cf.getAttribute("PhysicalProperties").asString();
-    bool isComposite =
-        dynamic_cast<Mantid::API::CompositeFunction *>(source.get()) != nullptr;
+    std::string PhysicalProperties = cf.getAttribute("PhysicalProperties").asString();
+    bool isComposite = dynamic_cast<Mantid::API::CompositeFunction *>(source.get()) != nullptr;
     bool isMultiSite = cf.isMultiSite();
     bool isMultiSpectrum = cf.isMultiSpectrum();
     int nControls = (int)cf.nFunctions();
@@ -175,10 +166,8 @@ public:
     auto source = cf.buildSource();
     std::string Ions = cf.getAttribute("Ions").asString();
     std::string Symmetries = cf.getAttribute("Symmetries").asString();
-    std::string PhysicalProperties =
-        cf.getAttribute("PhysicalProperties").asString();
-    bool isComposite =
-        dynamic_cast<Mantid::API::CompositeFunction *>(source.get()) != nullptr;
+    std::string PhysicalProperties = cf.getAttribute("PhysicalProperties").asString();
+    bool isComposite = dynamic_cast<Mantid::API::CompositeFunction *>(source.get()) != nullptr;
     bool isMultiSite = cf.isMultiSite();
     bool isMultiSpectrum = cf.isMultiSpectrum();
     int nControls = (int)cf.nFunctions();
@@ -201,10 +190,8 @@ public:
     auto source = cf.buildSource();
     std::string Ions = cf.getAttribute("Ions").asString();
     std::string Symmetries = cf.getAttribute("Symmetries").asString();
-    std::string PhysicalProperties =
-        cf.getAttribute("PhysicalProperties").asString();
-    bool isComposite =
-        dynamic_cast<Mantid::API::CompositeFunction *>(source.get()) != nullptr;
+    std::string PhysicalProperties = cf.getAttribute("PhysicalProperties").asString();
+    bool isComposite = dynamic_cast<Mantid::API::CompositeFunction *>(source.get()) != nullptr;
     bool isMultiSite = cf.isMultiSite();
     bool isMultiSpectrum = cf.isMultiSpectrum();
     int nControls = (int)cf.nFunctions();
@@ -227,10 +214,8 @@ public:
     auto source = cf.buildSource();
     std::string Ions = cf.getAttribute("Ions").asString();
     std::string Symmetries = cf.getAttribute("Symmetries").asString();
-    std::string PhysicalProperties =
-        cf.getAttribute("PhysicalProperties").asString();
-    bool isComposite =
-        dynamic_cast<Mantid::API::CompositeFunction *>(source.get()) != nullptr;
+    std::string PhysicalProperties = cf.getAttribute("PhysicalProperties").asString();
+    bool isComposite = dynamic_cast<Mantid::API::CompositeFunction *>(source.get()) != nullptr;
     bool isMultiSite = cf.isMultiSite();
     bool isMultiSpectrum = cf.isMultiSpectrum();
     int nControls = (int)cf.nFunctions();
@@ -253,10 +238,8 @@ public:
     auto source = cf.buildSource();
     std::string Ions = cf.getAttribute("Ions").asString();
     std::string Symmetries = cf.getAttribute("Symmetries").asString();
-    std::string PhysicalProperties =
-        cf.getAttribute("PhysicalProperties").asString();
-    bool isComposite =
-        dynamic_cast<Mantid::API::CompositeFunction *>(source.get()) != nullptr;
+    std::string PhysicalProperties = cf.getAttribute("PhysicalProperties").asString();
+    bool isComposite = dynamic_cast<Mantid::API::CompositeFunction *>(source.get()) != nullptr;
     bool isMultiSite = cf.isMultiSite();
     bool isMultiSpectrum = cf.isMultiSpectrum();
     int nControls = (int)cf.nFunctions();
@@ -279,10 +262,8 @@ public:
     auto source = cf.buildSource();
     std::string Ions = cf.getAttribute("Ions").asString();
     std::string Symmetries = cf.getAttribute("Symmetries").asString();
-    std::string PhysicalProperties =
-        cf.getAttribute("PhysicalProperties").asString();
-    bool isComposite =
-        dynamic_cast<Mantid::API::CompositeFunction *>(source.get()) != nullptr;
+    std::string PhysicalProperties = cf.getAttribute("PhysicalProperties").asString();
+    bool isComposite = dynamic_cast<Mantid::API::CompositeFunction *>(source.get()) != nullptr;
     bool isMultiSite = cf.isMultiSite();
     bool isMultiSpectrum = cf.isMultiSpectrum();
     int nControls = (int)cf.nFunctions();
@@ -305,10 +286,8 @@ public:
     auto source = cf.buildSource();
     std::string Ions = cf.getAttribute("Ions").asString();
     std::string Symmetries = cf.getAttribute("Symmetries").asString();
-    std::string PhysicalProperties =
-        cf.getAttribute("PhysicalProperties").asString();
-    bool isComposite =
-        dynamic_cast<Mantid::API::CompositeFunction *>(source.get()) != nullptr;
+    std::string PhysicalProperties = cf.getAttribute("PhysicalProperties").asString();
+    bool isComposite = dynamic_cast<Mantid::API::CompositeFunction *>(source.get()) != nullptr;
     bool isMultiSite = cf.isMultiSite();
     bool isMultiSpectrum = cf.isMultiSpectrum();
     int nControls = (int)cf.nFunctions();
@@ -331,10 +310,8 @@ public:
     auto source = cf.buildSource();
     std::string Ions = cf.getAttribute("Ions").asString();
     std::string Symmetries = cf.getAttribute("Symmetries").asString();
-    std::string PhysicalProperties =
-        cf.getAttribute("PhysicalProperties").asString();
-    bool isComposite =
-        dynamic_cast<Mantid::API::CompositeFunction *>(source.get()) != nullptr;
+    std::string PhysicalProperties = cf.getAttribute("PhysicalProperties").asString();
+    bool isComposite = dynamic_cast<Mantid::API::CompositeFunction *>(source.get()) != nullptr;
     bool isMultiSite = cf.isMultiSite();
     bool isMultiSpectrum = cf.isMultiSpectrum();
     int nControls = (int)cf.nFunctions();
@@ -357,10 +334,8 @@ public:
     auto source = cf.buildSource();
     std::string Ions = cf.getAttribute("Ions").asString();
     std::string Symmetries = cf.getAttribute("Symmetries").asString();
-    std::string PhysicalProperties =
-        cf.getAttribute("PhysicalProperties").asString();
-    bool isComposite =
-        dynamic_cast<Mantid::API::CompositeFunction *>(source.get()) != nullptr;
+    std::string PhysicalProperties = cf.getAttribute("PhysicalProperties").asString();
+    bool isComposite = dynamic_cast<Mantid::API::CompositeFunction *>(source.get()) != nullptr;
     bool isMultiSite = cf.isMultiSite();
     bool isMultiSpectrum = cf.isMultiSpectrum();
     int nControls = (int)cf.nFunctions();

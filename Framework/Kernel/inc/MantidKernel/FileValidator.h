@@ -24,9 +24,8 @@ bool has_ending(const std::string &value, const std::string &ending);
 */
 class MANTID_KERNEL_DLL FileValidator : public TypedValidator<std::string> {
 public:
-  explicit FileValidator(
-      const std::vector<std::string> &extensions = std::vector<std::string>(),
-      bool testFileExists = true);
+  explicit FileValidator(const std::vector<std::string> &extensions = std::vector<std::string>(),
+                         bool testFileExists = true);
   std::vector<std::string> allowedValues() const override;
   IValidator_sptr clone() const override;
 

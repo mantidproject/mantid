@@ -24,8 +24,7 @@ namespace ISISReflectometry {
  */
 class MANTIDQT_ISISREFLECTOMETRY_DLL ReductionWorkspaces {
 public:
-  ReductionWorkspaces(std::vector<std::string> inputRunNumbers,
-                      TransmissionRunPair transmissionRuns);
+  ReductionWorkspaces(std::vector<std::string> inputRunNumbers, TransmissionRunPair transmissionRuns);
 
   std::vector<std::string> const &inputRunNumbers() const;
   TransmissionRunPair const &transmissionRuns() const;
@@ -33,8 +32,7 @@ public:
   std::string const &iVsQ() const;
   std::string const &iVsQBinned() const;
 
-  void setOutputNames(std::string iVsLambda, std::string iVsQ,
-                      std::string iVsQBinned);
+  void setOutputNames(std::string iVsLambda, std::string iVsQ, std::string iVsQBinned);
   void resetOutputNames();
   bool hasOutputName(std::string const &wsName) const;
   void renameOutput(std::string const &oldName, std::string const &newName);
@@ -49,20 +47,16 @@ private:
   friend class Encoder;
 };
 
-MANTIDQT_ISISREFLECTOMETRY_DLL bool operator==(ReductionWorkspaces const &lhs,
-                                               ReductionWorkspaces const &rhs);
-MANTIDQT_ISISREFLECTOMETRY_DLL bool operator!=(ReductionWorkspaces const &lhs,
-                                               ReductionWorkspaces const &rhs);
+MANTIDQT_ISISREFLECTOMETRY_DLL bool operator==(ReductionWorkspaces const &lhs, ReductionWorkspaces const &rhs);
+MANTIDQT_ISISREFLECTOMETRY_DLL bool operator!=(ReductionWorkspaces const &lhs, ReductionWorkspaces const &rhs);
 
-TransmissionRunPair
-transmissionWorkspaceNames(TransmissionRunPair const &transmissionRuns);
+TransmissionRunPair transmissionWorkspaceNames(TransmissionRunPair const &transmissionRuns);
 
-MANTIDQT_ISISREFLECTOMETRY_DLL ReductionWorkspaces
-workspaceNames(std::vector<std::string> const &inputRunNumbers,
-               TransmissionRunPair const &transmissionRuns);
+MANTIDQT_ISISREFLECTOMETRY_DLL ReductionWorkspaces workspaceNames(std::vector<std::string> const &inputRunNumbers,
+                                                                  TransmissionRunPair const &transmissionRuns);
 
-MANTIDQT_ISISREFLECTOMETRY_DLL std::string postprocessedWorkspaceName(
-    std::vector<std::vector<std::string> const *> const &summedRunNumbers);
+MANTIDQT_ISISREFLECTOMETRY_DLL std::string
+postprocessedWorkspaceName(std::vector<std::vector<std::string> const *> const &summedRunNumbers);
 } // namespace ISISReflectometry
 } // namespace CustomInterfaces
 } // namespace MantidQt

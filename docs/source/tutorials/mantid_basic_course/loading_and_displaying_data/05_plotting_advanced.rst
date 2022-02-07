@@ -1,7 +1,7 @@
 .. _05_plotting_advanced:
 
 =================
-Advanced Plotting  
+Advanced Plotting
 =================
 
 .. This should be updated as Mantid Workbench gains more Plot Advanced features.
@@ -32,7 +32,7 @@ Tiled Plots
 
 Tiled Plots can be done in a similar manner to
 Waterfall plots, but with the appropriate choice of "Plot Type".
-If you produce a Tiled plot with more than about 4 tiles, you may need to 
+If you produce a Tiled plot with more than about 4 tiles, you may need to
 enlarge plot window or set it to full screen to appreciate all of the spectra.
 
 .. figure:: /images/EMUTiledplot.png

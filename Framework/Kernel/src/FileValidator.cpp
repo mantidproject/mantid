@@ -9,10 +9,11 @@
 #include <Poco/File.h>
 #include <Poco/Path.h>
 #include <boost/algorithm/string/case_conv.hpp>
+#include <fstream>
 #include <memory>
+#include <sstream>
 
-namespace Mantid {
-namespace Kernel {
+namespace Mantid::Kernel {
 
 namespace {
 // Initialize the static logger
@@ -24,30 +25,24 @@ Logger g_log("FileValidator");
  *  @param testFileExists :: Flag indicating whether to test for existence of
  * file (default: yes)
  */
-FileValidator::FileValidator(const std::vector<std::string> &extensions,
-                             bool testFileExists)
+FileValidator::FileValidator(const std::vector<std::string> &extensions, bool testFileExists)
     : TypedValidator<std::string>(), m_testExist(testFileExists) {
   for (const auto &extension : extensions) {
     const std::string ext = boost::to_lower_copy(extension);
-    if (std::find(m_extensions.begin(), m_extensions.end(), ext) ==
-        m_extensions.end()) {
+    if (std::find(m_extensions.begin(), m_extensions.end(), ext) == m_extensions.end()) {
       m_extensions.emplace_back(ext);
     }
   }
 }
 
 /// Returns the set of valid values
-std::vector<std::string> FileValidator::allowedValues() const {
-  return m_extensions;
-}
+std::vector<std::string> FileValidator::allowedValues() const { return m_extensions; }
 
 /**
  * Clone the validator
  * @returns A pointer to a new validator with the same properties as this one
  */
-IValidator_sptr FileValidator::clone() const {
-  return std::make_shared<FileValidator>(*this);
-}
+IValidator_sptr FileValidator::clone() const { return std::make_shared<FileValidator>(*this); }
 
 /** If m_fullTest=true if checks that the files exists, otherwise just that path
  * syntax looks valid
@@ -90,6 +85,16 @@ std::string FileValidator::checkValidity(const std::string &value) const {
     return "File \"" + abspath + "\" not found";
   }
 
+  if (m_testExist && (Poco::File(value).exists())) {
+    std::ifstream in;
+    in.open(value.c_str());
+    if (!in) {
+      std::stringstream error;
+      error << "Failed to open " + value + ": " << strerror(errno);
+      return error.str();
+    }
+  }
+
   // Otherwise we are okay, file extensions are just a suggestion so no
   // validation on them is necessary
   return "";
@@ -105,8 +110,7 @@ bool has_ending(const std::string &value, const std::string &ending) {
     return true;
   if (value.length() < ending.length()) // filename is not long enough
     return false;
-  int result =
-      value.compare(value.length() - ending.length(), ending.length(), ending);
+  int result = value.compare(value.length() - ending.length(), ending.length(), ending);
   return (result == 0); // only care if it matches
 }
 
@@ -123,8 +127,7 @@ bool FileValidator::endswith(const std::string &value) const {
 
   // create a lowercase copy of the filename
   std::string value_copy(value);
-  std::transform(value_copy.begin(), value_copy.end(), value_copy.begin(),
-                 tolower);
+  std::transform(value_copy.begin(), value_copy.end(), value_copy.begin(), tolower);
 
   // check for the ending
   for (const auto &extension : m_extensions) {
@@ -136,5 +139,4 @@ bool FileValidator::endswith(const std::string &value) const {
   return false;
 }
 
-} // namespace Kernel
-} // namespace Mantid
+} // namespace Mantid::Kernel

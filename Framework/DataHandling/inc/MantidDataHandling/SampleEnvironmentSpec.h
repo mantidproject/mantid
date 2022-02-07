@@ -26,8 +26,7 @@ namespace DataHandling {
 class MANTID_DATAHANDLING_DLL SampleEnvironmentSpec {
 public:
   // Convenience typedefs
-  using ContainerIndex =
-      std::unordered_map<std::string, Geometry::Container_const_sptr>;
+  using ContainerIndex = std::unordered_map<std::string, Geometry::Container_const_sptr>;
   using ComponentList = std::vector<Geometry::IObject_const_sptr>;
 
   SampleEnvironmentSpec(std::string name);
@@ -40,8 +39,7 @@ public:
   inline size_t ncomponents() const { return m_components.size(); }
   Geometry::Container_const_sptr findContainer(const std::string &id) const;
 
-  Geometry::SampleEnvironment_uptr
-  buildEnvironment(const std::string &canID) const;
+  Geometry::SampleEnvironment_uptr buildEnvironment(const std::string &canID) const;
 
   void addContainer(const Geometry::Container_const_sptr &can);
   void addComponent(const Geometry::IObject_const_sptr &component);
@@ -55,8 +53,7 @@ private:
 /// unique_ptr to a SampleEnvironmentSpec
 using SampleEnvironmentSpec_uptr = std::unique_ptr<SampleEnvironmentSpec>;
 /// unique_ptr to a const SampleEnvironmentSpec
-using SampleEnvironmentSpec_const_uptr =
-    std::unique_ptr<const SampleEnvironmentSpec>;
+using SampleEnvironmentSpec_const_uptr = std::unique_ptr<const SampleEnvironmentSpec>;
 
 } // namespace DataHandling
 } // namespace Mantid

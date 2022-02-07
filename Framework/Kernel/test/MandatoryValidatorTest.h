@@ -28,58 +28,47 @@ public:
     TS_ASSERT_DIFFERS(v, vv);
     TS_ASSERT(std::dynamic_pointer_cast<MandatoryValidator<std::string>>(vv));
 
-    IValidator_sptr i =
-        std::make_shared<MandatoryValidator<std::vector<int>>>();
+    IValidator_sptr i = std::make_shared<MandatoryValidator<std::vector<int>>>();
     IValidator_sptr ii = i->clone();
     TS_ASSERT_DIFFERS(i, ii)
-    TS_ASSERT(
-        std::dynamic_pointer_cast<MandatoryValidator<std::vector<int>>>(ii))
+    TS_ASSERT(std::dynamic_pointer_cast<MandatoryValidator<std::vector<int>>>(ii))
 
-    IValidator_sptr d =
-        std::make_shared<MandatoryValidator<std::vector<double>>>();
+    IValidator_sptr d = std::make_shared<MandatoryValidator<std::vector<double>>>();
     IValidator_sptr dd = d->clone();
     TS_ASSERT_DIFFERS(d, dd);
-    TS_ASSERT(
-        std::dynamic_pointer_cast<MandatoryValidator<std::vector<double>>>(dd));
+    TS_ASSERT(std::dynamic_pointer_cast<MandatoryValidator<std::vector<double>>>(dd));
 
-    IValidator_sptr s =
-        std::make_shared<MandatoryValidator<std::vector<std::string>>>();
+    IValidator_sptr s = std::make_shared<MandatoryValidator<std::vector<std::string>>>();
     IValidator_sptr ss = s->clone();
     TS_ASSERT_DIFFERS(s, ss);
-    TS_ASSERT(
-        std::dynamic_pointer_cast<MandatoryValidator<std::vector<std::string>>>(
-            ss));
+    TS_ASSERT(std::dynamic_pointer_cast<MandatoryValidator<std::vector<std::string>>>(ss));
   }
 
   void testMandatoryValidator() {
     MandatoryValidator<std::string> p;
     TS_ASSERT_EQUALS(p.isValid("AZ"), "");
     TS_ASSERT_EQUALS(p.isValid("B"), "");
-    TS_ASSERT_EQUALS(p.isValid(""),
-                     "A value must be entered for this parameter");
+    TS_ASSERT_EQUALS(p.isValid(""), "A value must be entered for this parameter");
     TS_ASSERT_EQUALS(p.isValid("ta"), "");
 
     MandatoryValidator<std::vector<int>> i;
     std::vector<int> ivec;
     TS_ASSERT(ivec.empty())
-    TS_ASSERT_EQUALS(i.isValid(ivec),
-                     "A value must be entered for this parameter")
+    TS_ASSERT_EQUALS(i.isValid(ivec), "A value must be entered for this parameter")
     ivec.emplace_back(1);
     TS_ASSERT_EQUALS(i.isValid(ivec), "")
 
     MandatoryValidator<std::vector<double>> d;
     std::vector<double> dvec;
     TS_ASSERT(dvec.empty())
-    TS_ASSERT_EQUALS(d.isValid(dvec),
-                     "A value must be entered for this parameter")
+    TS_ASSERT_EQUALS(d.isValid(dvec), "A value must be entered for this parameter")
     dvec.emplace_back(1.1);
     TS_ASSERT_EQUALS(d.isValid(dvec), "")
 
     MandatoryValidator<std::vector<std::string>> s;
     std::vector<std::string> svec;
     TS_ASSERT(svec.empty())
-    TS_ASSERT_EQUALS(s.isValid(svec),
-                     "A value must be entered for this parameter")
+    TS_ASSERT_EQUALS(s.isValid(svec), "A value must be entered for this parameter")
     svec.emplace_back("OK");
     TS_ASSERT_EQUALS(s.isValid(svec), "")
 

@@ -8,14 +8,17 @@
 #include <cxxtest/TestSuite.h>
 
 #include "MantidAPI/Axis.h"
+#include "MantidAPI/BinEdgeAxis.h"
+#include "MantidAPI/NumericAxis.h"
 #include "MantidAPI/Sample.h"
+#include "MantidAPI/TextAxis.h"
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidDataHandling/LoadCanSAS1D2.h"
 #include "MantidDataHandling/LoadRaw3.h"
 #include "MantidDataHandling/SaveCanSAS1D2.h"
+#include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidKernel/UnitFactory.h"
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
 #include <Poco/File.h>
 #include <Poco/Path.h>
@@ -34,9 +37,8 @@ public:
 
   // set up the workspace that will be loaded
   SaveCanSAS1dTest2()
-      : m_workspace1("SaveCanSAS1dTest2_in1"),
-        m_workspace2("SaveCanSAS1dTest2_in2"),
-        m_workspace3("SaveCanSAS1dTest2_in3"), m_filename("./savecansas1d2.xml")
+      : m_workspace1("SaveCanSAS1dTest2_in1"), m_workspace2("SaveCanSAS1dTest2_in2"),
+        m_workspace3("SaveCanSAS1dTest2_in3"), m_workspace4("SaveCanSAS1dTest2_in4"), m_filename("./savecansas1d2.xml")
 
   {
     LoadRaw3 loader;
@@ -56,10 +58,8 @@ public:
     TS_ASSERT(loader.isExecuted());
 
     // Change the unit to Q
-    ws = std::dynamic_pointer_cast<MatrixWorkspace>(
-        AnalysisDataService::Instance().retrieve(m_workspace1));
-    ws->getAxis(0)->unit() =
-        Mantid::Kernel::UnitFactory::Instance().create("MomentumTransfer");
+    ws = std::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(m_workspace1));
+    ws->getAxis(0)->unit() = Mantid::Kernel::UnitFactory::Instance().create("MomentumTransfer");
 
     {
       LoadRaw3 loader;
@@ -73,15 +73,12 @@ public:
       TS_ASSERT(loader.isExecuted());
 
       // Change the unit to Wavelength
-      ws = std::dynamic_pointer_cast<MatrixWorkspace>(
-          AnalysisDataService::Instance().retrieve(m_workspace3));
-      ws->getAxis(0)->unit() =
-          Mantid::Kernel::UnitFactory::Instance().create("Wavelength");
+      ws = std::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(m_workspace3));
+      ws->getAxis(0)->unit() = Mantid::Kernel::UnitFactory::Instance().create("Wavelength");
     }
 
     WorkspaceGroup_sptr group(new WorkspaceGroup);
-    AnalysisDataService::Instance().addOrReplace("SaveCanSAS1dTest2_group",
-                                                 group);
+    AnalysisDataService::Instance().addOrReplace("SaveCanSAS1dTest2_group", group);
 
     group->add(m_workspace1);
 
@@ -94,12 +91,14 @@ public:
     TS_ASSERT(load.isExecuted());
 
     // Change the unit to Q
-    ws = std::dynamic_pointer_cast<MatrixWorkspace>(
-        AnalysisDataService::Instance().retrieve(m_workspace2));
-    ws->getAxis(0)->unit() =
-        Mantid::Kernel::UnitFactory::Instance().create("MomentumTransfer");
+    ws = std::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(m_workspace2));
+    ws->getAxis(0)->unit() = Mantid::Kernel::UnitFactory::Instance().create("MomentumTransfer");
 
     group->add(m_workspace2);
+
+    auto ws4 = WorkspaceCreationHelper::create2DWorkspace(3, 5);
+    ws4->getAxis(0)->setUnit("MomentumTransfer");
+    AnalysisDataService::Instance().addOrReplace("SaveCanSAS1dTest2_in4", ws4);
   }
 
   // saving is required by all the following test so, if this test fails so will
@@ -194,8 +193,7 @@ public:
     TS_ASSERT_EQUALS(fileLine, "\t\t</SASdata>");
 
     std::getline(testFile, fileLine); // transmission spectrum start
-    TS_ASSERT_EQUALS(fileLine,
-                     "\t\t<SAStransmission_spectrum name=\"sample\">");
+    TS_ASSERT_EQUALS(fileLine, "\t\t<SAStransmission_spectrum name=\"sample\">");
 
     idataline = "\t\t\t<Tdata><Lambda unit=\"A\">3543.75</Lambda><T "
                 "unit=\"Counts\">111430</T><Tdev "
@@ -235,18 +233,14 @@ public:
     savealg.setPropertyValue("DetectorNames", "HAB");
 
     // Set the additional run number properties
-    TSM_ASSERT_THROWS_NOTHING(
-        "Should be able to set SampleTransmissionRunNumber property",
-        savealg.setProperty("SampleTransmissionRunNumber", "5"));
-    TSM_ASSERT_THROWS_NOTHING(
-        "Should be able to set SampleDirectRunNumber property",
-        savealg.setProperty("SampleDirectRunNumber", "6"));
-    TSM_ASSERT_THROWS_NOTHING(
-        "Should be able to set CanScatterRunNumber property",
-        savealg.setProperty("CanScatterRunNumber", "7"));
-    TSM_ASSERT_THROWS_NOTHING(
-        "Should be able to set CanDirectRunNumber property",
-        savealg.setProperty("CanDirectRunNumber", "8"));
+    TSM_ASSERT_THROWS_NOTHING("Should be able to set SampleTransmissionRunNumber property",
+                              savealg.setProperty("SampleTransmissionRunNumber", "5"));
+    TSM_ASSERT_THROWS_NOTHING("Should be able to set SampleDirectRunNumber property",
+                              savealg.setProperty("SampleDirectRunNumber", "6"));
+    TSM_ASSERT_THROWS_NOTHING("Should be able to set CanScatterRunNumber property",
+                              savealg.setProperty("CanScatterRunNumber", "7"));
+    TSM_ASSERT_THROWS_NOTHING("Should be able to set CanDirectRunNumber property",
+                              savealg.setProperty("CanDirectRunNumber", "8"));
 
     // Execute
     TS_ASSERT_THROWS_NOTHING(savealg.execute());
@@ -281,16 +275,14 @@ public:
       return; // To avoid breaking the rest of the test runner.
     std::vector<std::string> wNames = group->getNames();
 
-    TS_ASSERT_EQUALS(
-        wNames.size(),
-        2); // change this and the lines below when group workspace names change
+    TS_ASSERT_EQUALS(wNames.size(),
+                     2); // change this and the lines below when group workspace names change
     TS_ASSERT_EQUALS(wNames[0], m_workspace1);
     TS_ASSERT_EQUALS(wNames[1], m_workspace2);
 
     // check the second workspace in more detail
     ws = Mantid::API::AnalysisDataService::Instance().retrieve(wNames[1]);
-    Mantid::DataObjects::Workspace2D_sptr ws2d =
-        std::dynamic_pointer_cast<Mantid::DataObjects::Workspace2D>(ws);
+    Mantid::DataObjects::Workspace2D_sptr ws2d = std::dynamic_pointer_cast<Mantid::DataObjects::Workspace2D>(ws);
     TS_ASSERT(ws2d);
 
     Run run = ws2d->run();
@@ -323,23 +315,81 @@ public:
     int expectedGeometryFlag = 3;
     double expectedWidth = 1;
     double expectedHeight = 2;
-    do_test_collimation_settings(geometry, width, height, expectedGeometryFlag,
-                                 expectedWidth, expectedHeight);
+    do_test_collimation_settings(geometry, width, height, expectedGeometryFlag, expectedWidth, expectedHeight);
+  }
+
+  void test_one_spectrum_per_file() {
+    size_t extPos = m_filename.find(".xml");
+    ws = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(m_workspace4);
+    SaveCanSAS1D2 savealg;
+    TS_ASSERT_THROWS_NOTHING(savealg.initialize());
+    savealg.setPropertyValue("InputWorkspace", m_workspace4);
+    savealg.setPropertyValue("Filename", m_filename);
+    savealg.setProperty("OneSpectrumPerFile", true);
+
+    // spectrum axis
+    TS_ASSERT_THROWS_NOTHING(savealg.execute());
+    for (int spec = 0; spec < 3; ++spec) {
+      std::ostringstream ss;
+      ss << std::string(m_filename, 0, extPos) << "_" << spec << std::string(m_filename, extPos);
+      TS_ASSERT(Poco::File(ss.str()).exists());
+      Poco::File(ss.str()).remove();
+    }
+
+    // numeric axis
+    std::unique_ptr<Axis> numericAxis = std::make_unique<NumericAxis>(3);
+    for (int i = 0; i < 3; ++i) {
+      numericAxis->setValue(i, i * i);
+    }
+    ws->replaceAxis(1, std::move(numericAxis));
+    TS_ASSERT_THROWS_NOTHING(savealg.execute());
+    for (int spec = 0; spec < 3; ++spec) {
+      std::ostringstream ss;
+      ss << std::string(m_filename, 0, extPos) << "_" << spec << "_" << spec * spec << std::string(m_filename, extPos);
+      TS_ASSERT(Poco::File(ss.str()).exists());
+      Poco::File(ss.str()).remove();
+    }
+
+    // bin edge axis
+    std::unique_ptr<Axis> binEdgeAxis = std::make_unique<BinEdgeAxis>(4);
+    for (int i = 0; i < 4; ++i) {
+      binEdgeAxis->setValue(i, i * i);
+    }
+    ws->replaceAxis(1, std::move(binEdgeAxis));
+    TS_ASSERT_THROWS_NOTHING(savealg.execute());
+    for (int spec = 0; spec < 3; ++spec) {
+      std::ostringstream ss;
+      ss << std::string(m_filename, 0, extPos) << "_" << spec << "_" << 0.5 * (spec * spec + (spec + 1) * (spec + 1))
+         << std::string(m_filename, extPos);
+      TS_ASSERT(Poco::File(ss.str()).exists());
+      Poco::File(ss.str()).remove();
+    }
+
+    // text axis
+    std::unique_ptr<TextAxis> textAxis = std::make_unique<TextAxis>(3);
+    for (int i = 0; i < 3; ++i) {
+      textAxis->setLabel(i, std::string("ax_") + std::to_string(i));
+    }
+    ws->replaceAxis(1, std::unique_ptr<Axis>(std::move(textAxis)));
+    TS_ASSERT_THROWS_NOTHING(savealg.execute());
+    for (int spec = 0; spec < 3; ++spec) {
+      std::ostringstream ss;
+      ss << std::string(m_filename, 0, extPos) << "_" << spec << "_ax_" << spec << std::string(m_filename, extPos);
+      TS_ASSERT(Poco::File(ss.str()).exists());
+      Poco::File(ss.str()).remove();
+    }
   }
 
 private:
-  void do_test_collimation_settings(const std::string &geometry, double width,
-                                    double height, int expectedGeometry,
-                                    double expectedWidth,
-                                    double expectedHeight) {
+  void do_test_collimation_settings(const std::string &geometry, double width, double height, int expectedGeometry,
+                                    double expectedWidth, double expectedHeight) {
     // Create sample workspace
     auto wsIn = WorkspaceCreationHelper::create1DWorkspaceRand(3, true);
     auto axis = wsIn->getAxis(0);
     axis->unit() = UnitFactory::Instance().create("MomentumTransfer");
     axis->title() = "|Q|";
 
-    AnalysisDataService::Instance().addOrReplace("test_worksapce_can_sas_1d",
-                                                 wsIn);
+    AnalysisDataService::Instance().addOrReplace("test_worksapce_can_sas_1d", wsIn);
     // Save the workspace
     SaveCanSAS1D2 savealg;
     TS_ASSERT_THROWS_NOTHING(savealg.initialize());
@@ -358,15 +408,12 @@ private:
     LoadCanSAS1D lAlg;
     TS_ASSERT_THROWS_NOTHING(lAlg.initialize());
     TS_ASSERT(lAlg.isInitialized());
-    lAlg.setPropertyValue("OutputWorkspace",
-                          "test_worksapce_can_sas_1d_reloaded");
+    lAlg.setPropertyValue("OutputWorkspace", "test_worksapce_can_sas_1d_reloaded");
     lAlg.setPropertyValue("Filename", m_filename);
     TS_ASSERT_THROWS_NOTHING(lAlg.execute());
     TS_ASSERT(lAlg.isExecuted());
-    Workspace_sptr ws = AnalysisDataService::Instance().retrieve(
-        "test_worksapce_can_sas_1d_reloaded");
-    Mantid::API::MatrixWorkspace_sptr loaded =
-        std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(ws);
+    Workspace_sptr ws = AnalysisDataService::Instance().retrieve("test_worksapce_can_sas_1d_reloaded");
+    Mantid::API::MatrixWorkspace_sptr loaded = std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(ws);
 
     // Check that elements are set correctly
     TS_ASSERT(loaded->sample().getGeometryFlag() == expectedGeometry);
@@ -374,8 +421,7 @@ private:
     TS_ASSERT(loaded->sample().getHeight() == expectedHeight);
 
     // Delete workspaces
-    std::string toDeleteList[2] = {"test_worksapce_can_sas_1d",
-                                   "test_worksapce_can_sas_1d_reloaded"};
+    std::string toDeleteList[2] = {"test_worksapce_can_sas_1d", "test_worksapce_can_sas_1d_reloaded"};
     for (auto &toDelete : toDeleteList) {
       if (AnalysisDataService::Instance().doesExist(toDelete)) {
         AnalysisDataService::Instance().remove(toDelete);
@@ -383,7 +429,7 @@ private:
     }
   }
 
-  std::string m_workspace1, m_workspace2, m_workspace3, m_filename;
+  std::string m_workspace1, m_workspace2, m_workspace3, m_workspace4, m_filename;
   std::string m_runNum;
   MatrixWorkspace_sptr ws;
 };

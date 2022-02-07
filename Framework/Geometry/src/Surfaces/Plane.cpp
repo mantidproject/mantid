@@ -35,9 +35,7 @@ GNU_DIAG_ON("conversion")
 GNU_DIAG_ON("cast-qual")
 #endif
 
-namespace Mantid {
-
-namespace Geometry {
+namespace Mantid::Geometry {
 namespace {
 Kernel::Logger logger("Plane");
 }
@@ -45,7 +43,7 @@ using Kernel::Tolerance;
 using Kernel::V3D;
 
 Plane::Plane()
-    : Quadratic(), NormV(1.0, 0.0, 0.0), Dist(0)
+    : Quadratic(), m_normVec(1.0, 0.0, 0.0), m_distance(0)
 /**
   Constructor: sets plane in y-z plane and throught origin
 */
@@ -94,8 +92,7 @@ int Plane::setSurface(const std::string &Pstr)
   if (item.size() == 1) // PROCESS BASIC PLANE:
   {
     int cnt;
-    for (cnt = 0; cnt < 9 && Mantid::Kernel::Strings::section(Line, surf[cnt]);
-         cnt++)
+    for (cnt = 0; cnt < 9 && Mantid::Kernel::Strings::section(Line, surf[cnt]); cnt++)
       ;
 
     if (cnt != 4 && cnt != 9)
@@ -107,16 +104,16 @@ int Plane::setSurface(const std::string &Pstr)
       Kernel::V3D C = Kernel::V3D(surf[6], surf[7], surf[8]);
       B -= A;
       C -= A;
-      NormV = B * C;
-      NormV.normalize();
-      Dist = A.scalar_prod(NormV);
+      m_normVec = B * C;
+      m_normVec.normalize();
+      m_distance = A.scalar_prod(m_normVec);
     } else // Norm Equation:
     {
-      NormV = Kernel::V3D(surf[0], surf[1], surf[2]);
-      const double ll = NormV.normalize();
+      m_normVec = Kernel::V3D(surf[0], surf[1], surf[2]);
+      const double ll = m_normVec.normalize();
       if (ll < Tolerance) // avoid
         return -4;
-      Dist = surf[3] / ll;
+      m_distance = surf[3] / ll;
     }
   } else if (item.size() == 2) //  PROCESS px type PLANE
   {
@@ -124,9 +121,9 @@ int Plane::setSurface(const std::string &Pstr)
     if (ptype < 0 || ptype > 2) // Not x,y,z
       return -5;
     surf[ptype] = 1.0;
-    if (!Mantid::Kernel::Strings::convert(Line, Dist))
+    if (!Mantid::Kernel::Strings::convert(Line, m_distance))
       return -6; // Too short or no number
-    NormV = Kernel::V3D(surf[0], surf[1], surf[2]);
+    m_normVec = Kernel::V3D(surf[0], surf[1], surf[2]);
   } else
     return -3; // WRONG NAME
 
@@ -143,11 +140,11 @@ int Plane::setPlane(const Kernel::V3D &P, const Kernel::V3D &N)
 */
 {
   try {
-    NormV = normalize(N);
+    m_normVec = normalize(N);
   } catch (std::runtime_error &) {
     throw std::invalid_argument("Attempt to create Plane with zero normal");
   }
-  Dist = P.scalar_prod(NormV);
+  m_distance = P.scalar_prod(m_normVec);
   setBaseEqn();
   return 0;
 }
@@ -158,8 +155,8 @@ void Plane::rotate(const Kernel::Matrix<double> &MA)
   @param MA :: direct rotation matrix (3x3)
 */
 {
-  NormV.rotate(MA);
-  NormV.normalize();
+  m_normVec.rotate(MA);
+  m_normVec.normalize();
   Quadratic::rotate(MA);
 }
 
@@ -170,7 +167,7 @@ void Plane::displace(const Kernel::V3D &Sp)
   @param Sp :: point value of displacement
 */
 {
-  Dist += NormV.scalar_prod(Sp);
+  m_distance += m_normVec.scalar_prod(Sp);
   Quadratic::displace(Sp);
 }
 
@@ -182,7 +179,7 @@ double Plane::distance(const Kernel::V3D &A) const
   @return singed distance from point
 */
 {
-  return A.scalar_prod(NormV) - Dist;
+  return A.scalar_prod(m_normVec) - m_distance;
 }
 
 double Plane::dotProd(const Plane &A) const
@@ -191,7 +188,7 @@ double Plane::dotProd(const Plane &A) const
   @return the Normal.A.Normal dot product
 */
 {
-  return NormV.scalar_prod(A.NormV);
+  return m_normVec.scalar_prod(A.m_normVec);
 }
 
 Kernel::V3D Plane::crossProd(const Plane &A) const
@@ -201,7 +198,7 @@ Kernel::V3D Plane::crossProd(const Plane &A) const
   @return the Normal x A.Normal cross product
 */
 {
-  return NormV.cross_prod(A.NormV);
+  return m_normVec.cross_prod(A.m_normVec);
 }
 
 int Plane::side(const Kernel::V3D &A) const
@@ -213,23 +210,20 @@ int Plane::side(const Kernel::V3D &A) const
   @retval 0 :: A is on the plane itself (within tolerence)
 */
 {
-  const double Dp = NormV.scalar_prod(A) - Dist;
+  const double Dp = m_normVec.scalar_prod(A) - m_distance;
   if (Tolerance < std::abs(Dp))
     return (Dp > 0) ? 1 : -1;
   return 0;
 }
 
-int Plane::onSurface(const Kernel::V3D &A) const
+bool Plane::onSurface(const Kernel::V3D &A) const
 /**
    Calcuate the side that the point is on
    and returns success if it is on the surface.
    - Uses getSurfaceTolerance to determine the closeness
-   @retval 1 if on the surface
-   @retval 0 if off the surface
-
 */
 {
-  return (side(A) != 0) ? 0 : 1;
+  return (side(A) == 0);
 }
 
 void Plane::print() const
@@ -239,20 +233,20 @@ void Plane::print() const
 */
 {
   Quadratic::print();
-  logger.debug() << "NormV == " << NormV << " : " << Dist << '\n';
+  logger.debug() << "m_normVec == " << m_normVec << " : " << m_distance << '\n';
 }
 
 std::size_t Plane::planeType() const
 /**
    Find if the normal vector allows it to be a special
    type of plane (x,y,z direction)
-   (Assumes NormV is a unit vector)
+   (Assumes m_normVec is a unit vector)
    @retval 1-3 :: on the x,y,z axis
    @retval 0 :: general plane
 */
 {
   for (std::size_t i = 0; i < 3; i++)
-    if (fabs(NormV[i]) > (1.0 - Tolerance))
+    if (fabs(m_normVec[i]) > (1.0 - Tolerance))
       return i + 1;
   return 0;
 }
@@ -261,16 +255,16 @@ std::size_t Plane::planeType() const
  *   Sets the general equation for a plane
  */
 void Plane::setBaseEqn() {
-  BaseEqn[0] = 0.0;      // A x^2
-  BaseEqn[1] = 0.0;      // B y^2
-  BaseEqn[2] = 0.0;      // C z^2
-  BaseEqn[3] = 0.0;      // D xy
-  BaseEqn[4] = 0.0;      // E xz
-  BaseEqn[5] = 0.0;      // F yz
-  BaseEqn[6] = NormV[0]; // G x
-  BaseEqn[7] = NormV[1]; // H y
-  BaseEqn[8] = NormV[2]; // J z
-  BaseEqn[9] = -Dist;    // K const
+  BaseEqn[0] = 0.0;          // A x^2
+  BaseEqn[1] = 0.0;          // B y^2
+  BaseEqn[2] = 0.0;          // C z^2
+  BaseEqn[3] = 0.0;          // D xy
+  BaseEqn[4] = 0.0;          // E xz
+  BaseEqn[5] = 0.0;          // F yz
+  BaseEqn[6] = m_normVec[0]; // G x
+  BaseEqn[7] = m_normVec[1]; // H y
+  BaseEqn[8] = m_normVec[2]; // J z
+  BaseEqn[9] = -m_distance;  // K const
 }
 
 /**
@@ -284,13 +278,13 @@ void Plane::write(std::ostream &OX) const {
   cx.precision(Surface::Nprecision);
   const std::size_t ptype = planeType();
   if (!ptype)
-    cx << "p " << NormV[0] << " " << NormV[1] << " " << NormV[2] << " " << Dist;
-  else if (NormV[ptype - 1] < 0)
+    cx << "p " << m_normVec[0] << " " << m_normVec[1] << " " << m_normVec[2] << " " << m_distance;
+  else if (m_normVec[ptype - 1] < 0)
     cx << "p"
-       << "xyz"[ptype - 1] << " " << -Dist;
+       << "xyz"[ptype - 1] << " " << -m_distance;
   else
     cx << "p"
-       << "xyz"[ptype - 1] << " " << Dist;
+       << "xyz"[ptype - 1] << " " << m_distance;
 
   Mantid::Kernel::Strings::writeMCNPX(cx.str(), OX);
 }
@@ -306,20 +300,16 @@ int Plane::LineIntersectionWithPlane(V3D startpt, V3D endpt, V3D &output) {
   double const sprod = this->getNormal().scalar_prod(startpt - endpt);
   if (sprod == 0)
     return 0;
-  double const projection =
-      NormV[0] * startpt[0] + NormV[1] * startpt[1] + NormV[2] * startpt[2];
-  double s1 = (projection - Dist) / sprod;
+  double const projection = m_normVec[0] * startpt[0] + m_normVec[1] * startpt[1] + m_normVec[2] * startpt[2];
+  double s1 = (projection - m_distance) / sprod;
   if (s1 < 0 || s1 > 1)
     return 0;
   // The expressions below for resolving the point of intersection are
-  // resilient to the corner Dist << sprod.
+  // resilient to the corner m_distance << sprod.
   double const ratio = projection / sprod;
-  output[0] = ratio * endpt[0] + (1 - ratio) * startpt[0] -
-              ((endpt[0] - startpt[0]) / sprod) * Dist;
-  output[1] = ratio * endpt[1] + (1 - ratio) * startpt[1] -
-              ((endpt[1] - startpt[1]) / sprod) * Dist;
-  output[2] = ratio * endpt[2] + (1 - ratio) * startpt[2] -
-              ((endpt[2] - startpt[2]) / sprod) * Dist;
+  output[0] = ratio * endpt[0] + (1 - ratio) * startpt[0] - ((endpt[0] - startpt[0]) / sprod) * m_distance;
+  output[1] = ratio * endpt[1] + (1 - ratio) * startpt[1] - ((endpt[1] - startpt[1]) / sprod) * m_distance;
+  output[2] = ratio * endpt[2] + (1 - ratio) * startpt[2] - ((endpt[2] - startpt[2]) / sprod) * m_distance;
   return 1;
 }
 
@@ -334,8 +324,7 @@ int Plane::LineIntersectionWithPlane(V3D startpt, V3D endpt, V3D &output) {
  * @param ymin :: input & output minimum value in y direction
  * @param zmin :: input & output minimum value in z direction
  */
-void Plane::getBoundingBox(double &xmax, double &ymax, double &zmax,
-                           double &xmin, double &ymin, double &zmin) {
+void Plane::getBoundingBox(double &xmax, double &ymax, double &zmax, double &xmin, double &ymin, double &zmin) {
   // to get the bounding box calculate the normal and the starting point
   V3D vertex1(xmin, ymin, zmin);
   V3D vertex2(xmax, ymin, zmin);
@@ -376,8 +365,7 @@ void Plane::getBoundingBox(double &xmax, double &ymax, double &zmax,
     listOfPoints.emplace_back(vertex7);
   if (this->side(vertex8) <= 0)
     listOfPoints.emplace_back(vertex8);
-  V3D edge1, edge2, edge3, edge4, edge5, edge6, edge7, edge8, edge9, edge10,
-      edge11, edge12;
+  V3D edge1, edge2, edge3, edge4, edge5, edge6, edge7, edge8, edge9, edge10, edge11, edge12;
   if (LineIntersectionWithPlane(vertex1, vertex2, edge1) == 1)
     listOfPoints.emplace_back(edge1);
   if (LineIntersectionWithPlane(vertex2, vertex3, edge2) == 1)
@@ -406,9 +394,8 @@ void Plane::getBoundingBox(double &xmax, double &ymax, double &zmax,
   //	std::cout<<listOfPoints.size()<<'\n';
   if (!listOfPoints.empty()) {
     xmin = ymin = zmin = std::numeric_limits<double>::max();
-    xmax = ymax = zmax = -std::numeric_limits<double>::max();
-    for (std::vector<V3D>::const_iterator it = listOfPoints.begin();
-         it != listOfPoints.end(); ++it) {
+    xmax = ymax = zmax = std::numeric_limits<double>::lowest();
+    for (std::vector<V3D>::const_iterator it = listOfPoints.begin(); it != listOfPoints.end(); ++it) {
       //			std::cout<<(*it)<<'\n';
       if ((*it)[0] < xmin)
         xmin = (*it)[0];
@@ -438,18 +425,12 @@ TopoDS_Shape Plane::createShape() {
   // Find point closest to origin
   double t = distance / norm2;
   // Create Half Space
-  TopoDS_Face P = BRepBuilderAPI_MakeFace(
-                      gp_Pln(normal[0], normal[1], normal[2], -distance))
-                      .Face();
+  TopoDS_Face P = BRepBuilderAPI_MakeFace(gp_Pln(normal[0], normal[1], normal[2], -distance)).Face();
 
-  TopoDS_Shape Result = BRepPrimAPI_MakeHalfSpace(
-                            P, gp_Pnt(normal[0] * (1 + t), normal[1] * (1 + t),
-                                      normal[2] * (1 + t)))
-                            .Solid();
+  TopoDS_Shape Result =
+      BRepPrimAPI_MakeHalfSpace(P, gp_Pnt(normal[0] * (1 + t), normal[1] * (1 + t), normal[2] * (1 + t))).Solid();
   return Result.Complemented();
 }
 #endif
 
-} // namespace Geometry
-
-} // NAMESPACE Mantid
+} // namespace Mantid::Geometry

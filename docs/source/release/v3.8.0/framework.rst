@@ -128,7 +128,7 @@ Performance
   - :ref:`CorrectFlightPaths <algm-ConvertToConstantL2>`: 10% speedup
   - :ref:`ExtractSpectra <algm-ExtractSpectra>`: no change when X-range changes, otherwise 50x to 100x speedup for Workspace2D and up to 3x speedup for EventWorkspace
   - :ref:`GetAllEi <algm-GetAllEi>`: 5-10% speedup
-  - :ref:`GetDetOffsetsMultiPeaks <algm-GetDetOffsetsMultiPeaks>`: 5-10% speedup
+  - `GetDetOffsetsMultiPeaks`: 5-10% speedup
   - :ref:`GetEi <algm-GetEi>`: 20% speedup
   - :ref:`MaxEnt <algm-MaxEnt>`: 5% speedup
   - :ref:`ModeratorTzero <algm-ModeratorTzero>`: 30% speedup
@@ -162,8 +162,8 @@ CurveFitting
   is a histogram with large bins it can improve accuracy of the fit.
 - The concept page for :ref:`Comparing fit minimizers <FittingMinimizers>` has been updated to include the new
   minimizer and a comparison against neutron data examples.
-  
-The work on benchmarking fitting has received funding from the Horizon 2020 Framework Programme of the European Union under the SINE2020 project Grant No 654000.  
+
+The work on benchmarking fitting has received funding from the Horizon 2020 Framework Programme of the European Union under the SINE2020 project Grant No 654000.
 
 Others
 ------

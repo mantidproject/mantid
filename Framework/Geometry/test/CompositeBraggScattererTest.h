@@ -23,35 +23,24 @@ class CompositeBraggScattererTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static CompositeBraggScattererTest *createSuite() {
-    return new CompositeBraggScattererTest();
-  }
+  static CompositeBraggScattererTest *createSuite() { return new CompositeBraggScattererTest(); }
   static void destroySuite(CompositeBraggScattererTest *suite) { delete suite; }
 
-  void testConstructor() {
-    TS_ASSERT_THROWS_NOTHING(CompositeBraggScatterer scatterers);
-  }
+  void testConstructor() { TS_ASSERT_THROWS_NOTHING(CompositeBraggScatterer scatterers); }
 
   void testCreate() {
-    TS_ASSERT_THROWS_NOTHING(CompositeBraggScatterer_sptr scatterer =
-                                 CompositeBraggScatterer::create());
+    TS_ASSERT_THROWS_NOTHING(CompositeBraggScatterer_sptr scatterer = CompositeBraggScatterer::create());
 
-    std::vector<BraggScatterer_sptr> scatterers{
-        getInitializedScatterer("Si", "0.35, 0, 0"),
-        getInitializedScatterer("Si", "1/4, 1/4, 1/4")};
+    std::vector<BraggScatterer_sptr> scatterers{getInitializedScatterer("Si", "0.35, 0, 0"),
+                                                getInitializedScatterer("Si", "1/4, 1/4, 1/4")};
 
-    CompositeBraggScatterer_sptr scatterer =
-        CompositeBraggScatterer::create(scatterers);
+    CompositeBraggScatterer_sptr scatterer = CompositeBraggScatterer::create(scatterers);
     TS_ASSERT_EQUALS(scatterer->nScatterers(), 2);
     TS_ASSERT_EQUALS(
-        std::dynamic_pointer_cast<BraggScattererInCrystalStructure>(
-            scatterer->getScatterer(0))
-            ->getPosition(),
+        std::dynamic_pointer_cast<BraggScattererInCrystalStructure>(scatterer->getScatterer(0))->getPosition(),
         V3D(0.35, 0, 0));
     TS_ASSERT_EQUALS(
-        std::dynamic_pointer_cast<BraggScattererInCrystalStructure>(
-            scatterer->getScatterer(1))
-            ->getPosition(),
+        std::dynamic_pointer_cast<BraggScattererInCrystalStructure>(scatterer->getScatterer(1))->getPosition(),
         V3D(0.25, 0.25, 0.25));
   }
 
@@ -59,20 +48,15 @@ public:
     CompositeBraggScatterer_sptr scatterer = getCompositeScatterer();
     BraggScatterer_sptr clone = scatterer->clone();
 
-    CompositeBraggScatterer_sptr collectionClone =
-        std::dynamic_pointer_cast<CompositeBraggScatterer>(clone);
+    CompositeBraggScatterer_sptr collectionClone = std::dynamic_pointer_cast<CompositeBraggScatterer>(clone);
 
     TS_ASSERT(collectionClone);
     TS_ASSERT_EQUALS(collectionClone->nScatterers(), 2);
     TS_ASSERT_EQUALS(
-        std::dynamic_pointer_cast<BraggScattererInCrystalStructure>(
-            collectionClone->getScatterer(0))
-            ->getPosition(),
+        std::dynamic_pointer_cast<BraggScattererInCrystalStructure>(collectionClone->getScatterer(0))->getPosition(),
         V3D(0.35, 0, 0));
     TS_ASSERT_EQUALS(
-        std::dynamic_pointer_cast<BraggScattererInCrystalStructure>(
-            collectionClone->getScatterer(1))
-            ->getPosition(),
+        std::dynamic_pointer_cast<BraggScattererInCrystalStructure>(collectionClone->getScatterer(1))->getPosition(),
         V3D(0.25, 0.25, 0.25));
   }
 
@@ -80,8 +64,7 @@ public:
     CompositeBraggScatterer_sptr scatterer = CompositeBraggScatterer::create();
     TS_ASSERT_EQUALS(scatterer->propertyCount(), 0);
 
-    IsotropicAtomBraggScatterer_sptr siOne =
-        getInitializedScatterer("Si", "[0, 0, 0]");
+    IsotropicAtomBraggScatterer_sptr siOne = getInitializedScatterer("Si", "[0, 0, 0]");
     size_t oldCount = scatterer->nScatterers();
     scatterer->addScatterer(siOne);
     TS_ASSERT_EQUALS(scatterer->propertyCount(), 1);
@@ -99,10 +82,8 @@ public:
 
     TS_ASSERT_EQUALS(scattererCollection->nScatterers(), oldCount - 1);
 
-    TS_ASSERT_THROWS(scattererCollection->getScatterer(oldCount - 1),
-                     const std::out_of_range &);
-    TS_ASSERT_THROWS(scattererCollection->removeScatterer(10),
-                     const std::out_of_range &);
+    TS_ASSERT_THROWS(scattererCollection->getScatterer(oldCount - 1), const std::out_of_range &);
+    TS_ASSERT_THROWS(scattererCollection->removeScatterer(10), const std::out_of_range &);
 
     scattererCollection->removeScatterer(0);
 
@@ -132,10 +113,8 @@ public:
      *option.
      */
     UnitCell cell(5.43, 6.43, 7.43, 90.0, 103.0, 90.0);
-    SpaceGroup_const_sptr spaceGroup =
-        SpaceGroupFactory::Instance().createSpaceGroup("P 1 2/m 1");
-    std::vector<V3D> positions =
-        spaceGroup->getEquivalentPositions(V3D(0.2, 0.3, 0.4));
+    SpaceGroup_const_sptr spaceGroup = SpaceGroupFactory::Instance().createSpaceGroup("P 1 2/m 1");
+    std::vector<V3D> positions = spaceGroup->getEquivalentPositions(V3D(0.2, 0.3, 0.4));
 
     CompositeBraggScatterer_sptr coll = CompositeBraggScatterer::create();
     for (auto &position : positions) {
@@ -160,12 +139,9 @@ public:
   }
 
 private:
-  IsotropicAtomBraggScatterer_sptr
-  getInitializedScatterer(const std::string &element,
-                          const std::string &position, double U = 0.0,
-                          double occ = 1.0) {
-    IsotropicAtomBraggScatterer_sptr scatterer =
-        std::make_shared<IsotropicAtomBraggScatterer>();
+  IsotropicAtomBraggScatterer_sptr getInitializedScatterer(const std::string &element, const std::string &position,
+                                                           double U = 0.0, double occ = 1.0) {
+    IsotropicAtomBraggScatterer_sptr scatterer = std::make_shared<IsotropicAtomBraggScatterer>();
     scatterer->initialize();
     scatterer->setProperty("Element", element);
     scatterer->setProperty("Position", position);
@@ -177,28 +153,20 @@ private:
 
   CompositeBraggScatterer_sptr getCompositeScatterer() {
     return CompositeBraggScatterer::create(
-        {getInitializedScatterer("Si", "[0.35, 0, 0]"),
-         getInitializedScatterer("Si", "1/4, 1/4, 1/4")});
+        {getInitializedScatterer("Si", "[0.35, 0, 0]"), getInitializedScatterer("Si", "1/4, 1/4, 1/4")});
   }
 
   std::map<V3D, double> getCalculatedStructureFactors() {
-    return {{{2, 0, 0}, 167.84}, {{3, 0, 0}, 153.50}, {{4, 0, 0}, 19.76},
-            {{5, 0, 0}, 176.21}, {{1, 1, 0}, 2.44},   {{2, 1, 0}, 15.83},
-            {{3, 1, 0}, 14.48},  {{4, 1, 0}, 1.86},   {{5, 1, 0}, 16.62},
-            {{2, 2, 0}, 104.66}, {{3, 2, 0}, 95.72},  {{4, 2, 0}, 12.32},
-            {{5, 2, 0}, 109.88}, {{3, 3, 0}, 90.10},  {{4, 3, 0}, 11.60},
-            {{5, 3, 0}, 103.43}, {{4, 4, 0}, 1.55},   {{5, 4, 0}, 13.86},
-            {{5, 5, 0}, 130.22}, {{1, 1, 1}, 16.45},  {{2, 1, 1}, 2.26},
-            {{3, 1, 1}, 21.53},  {{4, 1, 1}, 1.80},   {{5, 1, 1}, 10.47},
-            {{2, 2, 1}, 14.95},  {{3, 2, 1}, 142.33}, {{4, 2, 1}, 11.92},
-            {{5, 2, 1}, 69.17},  {{3, 3, 1}, 133.97}, {{4, 3, 1}, 11.22},
-            {{5, 3, 1}, 65.11},  {{4, 4, 1}, 1.50},   {{5, 4, 1}, 8.73},
-            {{5, 5, 1}, 81.98},  {{2, 2, 2}, 14.36},  {{3, 2, 2}, 88.94},
-            {{4, 2, 2}, 77.57},  {{5, 2, 2}, 9.52},   {{3, 3, 2}, 83.72},
-            {{4, 3, 2}, 73.02},  {{5, 3, 2}, 8.96},   {{4, 4, 2}, 9.79},
-            {{5, 4, 2}, 1.20},   {{5, 5, 2}, 11.29},  {{3, 3, 3}, 11.44},
-            {{4, 3, 3}, 103.89}, {{5, 3, 3}, 8.30},   {{4, 4, 3}, 13.93},
-            {{5, 4, 3}, 1.11},   {{5, 5, 3}, 10.45},  {{4, 4, 4}, 8.33},
-            {{5, 4, 4}, 6.93},   {{5, 5, 4}, 65.05},  {{5, 5, 5}, 88.57}};
+    return {{{2, 0, 0}, 167.84}, {{3, 0, 0}, 153.50}, {{4, 0, 0}, 19.76},  {{5, 0, 0}, 176.21}, {{1, 1, 0}, 2.44},
+            {{2, 1, 0}, 15.83},  {{3, 1, 0}, 14.48},  {{4, 1, 0}, 1.86},   {{5, 1, 0}, 16.62},  {{2, 2, 0}, 104.66},
+            {{3, 2, 0}, 95.72},  {{4, 2, 0}, 12.32},  {{5, 2, 0}, 109.88}, {{3, 3, 0}, 90.10},  {{4, 3, 0}, 11.60},
+            {{5, 3, 0}, 103.43}, {{4, 4, 0}, 1.55},   {{5, 4, 0}, 13.86},  {{5, 5, 0}, 130.22}, {{1, 1, 1}, 16.45},
+            {{2, 1, 1}, 2.26},   {{3, 1, 1}, 21.53},  {{4, 1, 1}, 1.80},   {{5, 1, 1}, 10.47},  {{2, 2, 1}, 14.95},
+            {{3, 2, 1}, 142.33}, {{4, 2, 1}, 11.92},  {{5, 2, 1}, 69.17},  {{3, 3, 1}, 133.97}, {{4, 3, 1}, 11.22},
+            {{5, 3, 1}, 65.11},  {{4, 4, 1}, 1.50},   {{5, 4, 1}, 8.73},   {{5, 5, 1}, 81.98},  {{2, 2, 2}, 14.36},
+            {{3, 2, 2}, 88.94},  {{4, 2, 2}, 77.57},  {{5, 2, 2}, 9.52},   {{3, 3, 2}, 83.72},  {{4, 3, 2}, 73.02},
+            {{5, 3, 2}, 8.96},   {{4, 4, 2}, 9.79},   {{5, 4, 2}, 1.20},   {{5, 5, 2}, 11.29},  {{3, 3, 3}, 11.44},
+            {{4, 3, 3}, 103.89}, {{5, 3, 3}, 8.30},   {{4, 4, 3}, 13.93},  {{5, 4, 3}, 1.11},   {{5, 5, 3}, 10.45},
+            {{4, 4, 4}, 8.33},   {{5, 4, 4}, 6.93},   {{5, 5, 4}, 65.05},  {{5, 5, 5}, 88.57}};
   }
 };

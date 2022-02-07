@@ -11,8 +11,8 @@ Description
 
 This function is an Ikeda-Carpenter function convolved with a tophat function and a Gaussian function.  The Ikeda-Carpenter function is given by:
 
-.. math:: 
-    V =  Scale \times \Big\{ (1-R)(\alpha t')^2 e^{-\alpha t'} + 2R\frac{\alpha^2 \beta}{(\alpha-\beta)^3} \times 
+.. math::
+    V =  Scale \times \Big\{ (1-R)(\alpha t')^2 e^{-\alpha t'} + 2R\frac{\alpha^2 \beta}{(\alpha-\beta)^3} \times
     \big[ e^{-\beta t'} - e^{-\alpha t'}  (1 + (\alpha - \beta)t' + \frac{1}{2}(\alpha-\beta)^2t'^2) \big]    \Big\}
 
 This is convolved with a tophat function (of width **hatWidth**) and a Gaussian function :math:`exp(-k_{conv} t^2)`.
@@ -32,7 +32,7 @@ Here is an example of generating an Ikeda-Carpenter function:
 
 .. code-block:: python
     :linenos:
- 
+
     import numpy as np
     import matplotlib.pyplot as plt
     fICC = IkedaCarpenterConvoluted()

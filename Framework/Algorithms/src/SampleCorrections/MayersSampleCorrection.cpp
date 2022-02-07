@@ -10,6 +10,7 @@
 #include "MantidAPI/SampleValidator.h"
 #include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/WorkspaceFactory.h"
+#include "MantidAPI/WorkspaceUnitValidator.h"
 #include "MantidAlgorithms/SampleCorrections/MayersSampleCorrectionStrategy.h"
 #include "MantidGeometry/IDetector.h"
 #include "MantidGeometry/Instrument.h"
@@ -20,8 +21,7 @@
 
 #include <cmath>
 
-namespace Mantid {
-namespace Algorithms {
+namespace Mantid::Algorithms {
 
 using API::MatrixWorkspace_sptr;
 using Geometry::IDetector_const_sptr;
@@ -37,17 +37,13 @@ DECLARE_ALGORITHM(MayersSampleCorrection)
 MayersSampleCorrection::MayersSampleCorrection() : API::Algorithm() {}
 
 /// Algorithms name for identification. @see Algorithm::name
-const std::string MayersSampleCorrection::name() const {
-  return "MayersSampleCorrection";
-}
+const std::string MayersSampleCorrection::name() const { return "MayersSampleCorrection"; }
 
 /// Algorithm's version for identification. @see Algorithm::version
 int MayersSampleCorrection::version() const { return 1; }
 
 /// Algorithm's category for identification. @see Algorithm::category
-const std::string MayersSampleCorrection::category() const {
-  return "CorrectionFunctions\\AbsorptionCorrections";
-}
+const std::string MayersSampleCorrection::category() const { return "CorrectionFunctions\\AbsorptionCorrections"; }
 
 /// Algorithm's summary for use in the GUI and help. @see Algorithm::summary
 const std::string MayersSampleCorrection::summary() const {
@@ -61,16 +57,14 @@ void MayersSampleCorrection::init() {
   using API::WorkspaceProperty;
   // Inputs
   declareProperty(
-      std::make_unique<WorkspaceProperty<>>(
-          "InputWorkspace", "", Direction::Input, createInputWSValidator()),
+      std::make_unique<WorkspaceProperty<>>("InputWorkspace", "", Direction::Input, createInputWSValidator()),
       "Input workspace with X units in TOF. The workspace must "
       "also have a sample with a cylindrical shape and an "
       "instrument with a defined source and sample position.");
-  declareProperty(
-      "MultipleScattering", false,
-      "If True then also correct for the effects of multiple scattering."
-      "Please note that the MS correction assumes the scattering is elastic.",
-      Direction::Input);
+  declareProperty("MultipleScattering", false,
+                  "If True then also correct for the effects of multiple scattering."
+                  "Please note that the MS correction assumes the scattering is elastic.",
+                  Direction::Input);
   declareProperty("MSEvents", 10000,
                   "Controls the number of second-scatter "
                   "events generated. Only applicable where "
@@ -83,8 +77,7 @@ void MayersSampleCorrection::init() {
                   "where MultipleScattering=True.",
                   Direction::Input);
   // Outputs
-  declareProperty(std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
-                                                        Direction::Output),
+  declareProperty(std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "", Direction::Output),
                   "An output workspace.");
 }
 
@@ -110,8 +103,7 @@ void MayersSampleCorrection::exec() {
   double minX(-big), maxX(big), minY(-big), maxY(big), minZ(-big), maxZ(big);
   sampleShape.getBoundingBox(maxX, maxY, maxZ, minX, minY, minZ);
   V3D boxWidth(maxX - minX, maxY - minY, maxZ - minZ);
-  const double radius(0.5 * boxWidth[frame->pointingHorizontal()]),
-      height(boxWidth[frame->pointingUp()]);
+  const double radius(0.5 * boxWidth[frame->pointingHorizontal()]), height(boxWidth[frame->pointingUp()]);
   const auto &sampleMaterial = sampleShape.material();
 
   const size_t nhist(inputWS->getNumberHistograms());
@@ -124,8 +116,8 @@ void MayersSampleCorrection::exec() {
   for (int64_t i = 0; i < static_cast<int64_t>(nhist); ++i) {
     PARALLEL_START_INTERUPT_REGION
 
-    if (!spectrumInfo.hasDetectors(i) || spectrumInfo.isMonitor(i) ||
-        spectrumInfo.isMasked(i) || spectrumInfo.l2(i) == 0) {
+    if (!spectrumInfo.hasDetectors(i) || spectrumInfo.isMonitor(i) || spectrumInfo.isMasked(i) ||
+        spectrumInfo.l2(i) == 0) {
       continue;
     }
 
@@ -170,18 +162,20 @@ void MayersSampleCorrection::exec() {
 Kernel::IValidator_sptr MayersSampleCorrection::createInputWSValidator() const {
   using API::InstrumentValidator;
   using API::SampleValidator;
+  using API::WorkspaceUnitValidator;
   using Kernel::CompositeValidator;
   auto validator = std::make_shared<CompositeValidator>();
 
-  unsigned int requires = (InstrumentValidator::SamplePosition |
-                           InstrumentValidator::SourcePosition);
+  unsigned int requires = (InstrumentValidator::SamplePosition | InstrumentValidator::SourcePosition);
   validator->add<InstrumentValidator, unsigned int>(requires);
 
   requires = (SampleValidator::Shape | SampleValidator::Material);
   validator->add<SampleValidator, unsigned int>(requires);
 
+  // NOTE: Mayers correction requires the input to be of TOF
+  validator->add<WorkspaceUnitValidator>("TOF");
+
   return validator;
 }
 
-} // namespace Algorithms
-} // namespace Mantid
+} // namespace Mantid::Algorithms

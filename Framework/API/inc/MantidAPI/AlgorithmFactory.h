@@ -12,8 +12,10 @@
 #include "MantidAPI/DllConfig.h"
 #include "MantidKernel/DynamicFactory.h"
 #include "MantidKernel/SingletonHolder.h"
+#include <boost/optional.hpp>
 #include <memory>
 #include <sstream>
+#include <unordered_map>
 #include <unordered_set>
 #include <vector>
 
@@ -43,8 +45,7 @@ class Algorithm;
     @author Russell Taylor, Tessella Support Services plc
     @date 21/09/2007
 */
-class MANTID_API_DLL AlgorithmFactoryImpl final
-    : public Kernel::DynamicFactory<Algorithm> {
+class MANTID_API_DLL AlgorithmFactoryImpl final : public Kernel::DynamicFactory<Algorithm> {
 public:
   AlgorithmFactoryImpl(const AlgorithmFactoryImpl &) = delete;
   AlgorithmFactoryImpl &operator=(const AlgorithmFactoryImpl &) = delete;
@@ -70,12 +71,12 @@ public:
    * @returns The classname that was registered
    */
   template <class T>
-  std::pair<std::string, int>
-  subscribe(std::unique_ptr<Kernel::AbstractInstantiator<T>> instantiator,
-            const SubscribeAction replaceExisting = ErrorIfExists) {
-    std::shared_ptr<IAlgorithm> tempAlg = instantiator->createInstance();
+  std::pair<std::string, int> subscribe(std::unique_ptr<Kernel::AbstractInstantiator<T>> instantiator,
+                                        const SubscribeAction replaceExisting = ErrorIfExists) {
+    const auto tempAlg = instantiator->createInstance();
     const int version = extractAlgVersion(tempAlg);
     const std::string className = extractAlgName(tempAlg);
+    const std::string alias = extractAlgAlias(tempAlg);
     typename VersionMap::const_iterator it = m_vmap.find(className);
     if (!className.empty()) {
       const std::string key = createName(className, version);
@@ -84,19 +85,21 @@ public:
       } else {
         if (version == it->second && replaceExisting == ErrorIfExists) {
           std::ostringstream os;
-          os << "Cannot register algorithm " << className
-             << " twice with the same version\n";
+          os << "Cannot register algorithm " << className << " twice with the same version\n";
           throw std::runtime_error(os.str());
         }
         if (version > it->second) {
           m_vmap[className] = version;
         }
       }
-      Kernel::DynamicFactory<Algorithm>::subscribe(key, std::move(instantiator),
-                                                   replaceExisting);
+      Kernel::DynamicFactory<Algorithm>::subscribe(key, std::move(instantiator), replaceExisting);
     } else {
       throw std::invalid_argument("Cannot register empty algorithm name");
     }
+
+    if (!alias.empty())
+      m_amap[alias] = className;
+
     return std::make_pair(className, version);
   }
   /// Unsubscribe the given algorithm
@@ -108,19 +111,20 @@ public:
   const std::vector<std::string> getKeys() const override;
   const std::vector<std::string> getKeys(bool includeHidden) const;
 
+  /// Get an algorithms name from the alias map
+  boost::optional<std::string> getRealNameFromAlias(const std::string &alias) const noexcept;
+
   /// Returns the highest version of the algorithm currently registered
   int highestVersion(const std::string &algorithmName) const;
 
   /// Get the algorithm categories
-  const std::unordered_set<std::string>
-  getCategories(bool includeHidden = false) const;
+  const std::unordered_set<std::string> getCategories(bool includeHidden = false) const;
 
   /// Get the algorithm categories
   const std::map<std::string, bool> getCategoriesWithState() const;
 
   /// Returns algorithm descriptors.
-  std::vector<AlgorithmDescriptor>
-  getDescriptors(bool includeHidden = false) const;
+  std::vector<AlgorithmDescriptor> getDescriptors(bool includeHidden = false, bool includeAliases = false) const;
 
   /// unmangles the names used as keys into the name and version
   std::pair<std::string, int> decodeName(const std::string &mangledName) const;
@@ -129,14 +133,14 @@ private:
   friend struct Mantid::Kernel::CreateUsingNew<AlgorithmFactoryImpl>;
 
   /// Extract the name of an algorithm
-  const std::string
-  extractAlgName(const std::shared_ptr<IAlgorithm> &alg) const;
+  const std::string extractAlgName(const std::shared_ptr<IAlgorithm> &alg) const;
   /// Extract the version of an algorithm
   int extractAlgVersion(const std::shared_ptr<IAlgorithm> &alg) const;
+  /// Extract the alias of an algorithm
+  const std::string extractAlgAlias(const std::shared_ptr<IAlgorithm> &alg) const;
 
   /// Create an algorithm object with the specified name
-  std::shared_ptr<Algorithm> createAlgorithm(const std::string &name,
-                                             const int version) const;
+  std::shared_ptr<Algorithm> createAlgorithm(const std::string &name, const int version) const;
 
   /// Private Constructor for singleton class
   AlgorithmFactoryImpl();
@@ -151,22 +155,24 @@ private:
   using VersionMap = std::map<std::string, int>;
   /// The map holding the registered class names and their highest versions
   VersionMap m_vmap;
+  /// A typedef for the map of algorithm aliases
+  using AliasMap = std::unordered_map<std::string, std::string>;
+  /// The map holding the alias names of registered algorithms
+  AliasMap m_amap;
 };
 
 using AlgorithmFactory = Mantid::Kernel::SingletonHolder<AlgorithmFactoryImpl>;
 
 /// Convenient typedef for an UpdateNotification
-using AlgorithmFactoryUpdateNotification =
-    Mantid::Kernel::DynamicFactory<Algorithm>::UpdateNotification;
-using AlgorithmFactoryUpdateNotification_ptr = const Poco::AutoPtr<
-    Mantid::Kernel::DynamicFactory<Algorithm>::UpdateNotification> &;
+using AlgorithmFactoryUpdateNotification = Mantid::Kernel::DynamicFactory<Algorithm>::UpdateNotification;
+using AlgorithmFactoryUpdateNotification_ptr =
+    const Poco::AutoPtr<Mantid::Kernel::DynamicFactory<Algorithm>::UpdateNotification> &;
 
 } // namespace API
 } // namespace Mantid
 
 namespace Mantid {
 namespace Kernel {
-EXTERN_MANTID_API template class MANTID_API_DLL
-    Mantid::Kernel::SingletonHolder<Mantid::API::AlgorithmFactoryImpl>;
+EXTERN_MANTID_API template class MANTID_API_DLL Mantid::Kernel::SingletonHolder<Mantid::API::AlgorithmFactoryImpl>;
 }
 } // namespace Mantid

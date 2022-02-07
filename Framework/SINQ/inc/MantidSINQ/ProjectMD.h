@@ -23,19 +23,13 @@ public:
   /// Algorithm's name
   const std::string name() const override { return "ProjectMD"; }
   /// Summary of algorithms purpose
-  const std::string summary() const override {
-    return "Sum a MDHistoWorkspace along a choosen dimension";
-  }
+  const std::string summary() const override { return "Sum a MDHistoWorkspace along a choosen dimension"; }
 
   /// Algorithm's version
   int version() const override { return (1); }
-  const std::vector<std::string> seeAlso() const override {
-    return {"CutMD", "BinMD"};
-  }
+  const std::vector<std::string> seeAlso() const override { return {"CutMD", "BinMD"}; }
   /// Algorithm's category for identification
-  const std::string category() const override {
-    return "MDAlgorithms\\Slicing";
-  }
+  const std::string category() const override { return "MDAlgorithms\\Slicing"; }
 
 private:
   /// Initialisation code
@@ -43,16 +37,11 @@ private:
   /// Execution code
   void exec() override;
 
-  void copyMetaData(const Mantid::API::IMDHistoWorkspace_sptr &inws,
-                    const Mantid::API::IMDHistoWorkspace_sptr &outws);
-  void sumData(const Mantid::API::IMDHistoWorkspace_sptr &inws,
-               const Mantid::API::IMDHistoWorkspace_sptr &outws, int *sourceDim,
-               int *targetDim, int targetDimCount, int dimNo, int start,
-               int end, int currentDim);
+  void copyMetaData(const Mantid::API::IMDHistoWorkspace_sptr &inws, const Mantid::API::IMDHistoWorkspace_sptr &outws);
+  void sumData(const Mantid::API::IMDHistoWorkspace_sptr &inws, const Mantid::API::IMDHistoWorkspace_sptr &outws,
+               int *sourceDim, int *targetDim, int targetDimCount, int dimNo, int start, int end, int currentDim);
 
   double getValue(const Mantid::API::IMDHistoWorkspace_sptr &ws, int *dim);
-  void putValue(const Mantid::API::IMDHistoWorkspace_sptr &ws, int *dim,
-                double val);
-  unsigned int calcIndex(const Mantid::API::IMDHistoWorkspace_sptr &ws,
-                         int *dim);
+  void putValue(const Mantid::API::IMDHistoWorkspace_sptr &ws, int *dim, double val);
+  unsigned int calcIndex(const Mantid::API::IMDHistoWorkspace_sptr &ws, int *dim);
 };

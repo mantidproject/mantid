@@ -30,8 +30,7 @@ namespace MDF {
  */
 class MDFFunctionPlotData {
 public:
-  MDFFunctionPlotData(const std::shared_ptr<Mantid::API::IFunction> &fun,
-                      double startX, double endX,
+  MDFFunctionPlotData(const std::shared_ptr<Mantid::API::IFunction> &fun, double startX, double endX,
                       size_t nX = g_defaultDomainSize);
   ~MDFFunctionPlotData();
   QwtDoubleRect boundingRect() const;

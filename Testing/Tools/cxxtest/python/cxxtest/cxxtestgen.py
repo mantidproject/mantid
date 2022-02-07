@@ -1,13 +1,8 @@
 __all__ = ['main']
 
 import sys
-import os.path
-from os.path import abspath, dirname
-#sys.path.insert(0, dirname(dirname(abspath(__file__))))
 import re
-import getopt
 import glob
-import string
 from optparse import OptionParser
 from . import cxxtest_parser
 try:
@@ -54,11 +49,10 @@ def parseCommandline(args):
     parser = OptionParser("%prog [options] [input_files]")
     if imported_fog:
         parser.add_option("--fog",
-                        action="store_true",
-                        dest="fog",
-                        default=False,
-                        help="Use new FOG C++ parser"
-                        )
+                          action="store_true",
+                          dest="fog",
+                          default=False,
+                          help="Use new FOG C++ parser")
     parser.add_option("-v", "--version",
                       action="store_true", dest="version", default=False,
                       help="Write CxxTest version")
@@ -78,7 +72,9 @@ def parseCommandline(args):
                       action="store_true", dest="xunit_printer", default=False,
                       help="Specifies the use of the XUnitPrinter.")
     parser.add_option("", "--xunit-file",  dest="xunit_file", default="",
-                      help="The value of this option is an XML filename to which the XML summary is written.  The default XML filename is TEST-<world>.xml, where <world> is the value of the --world option.")
+                      help="The value of this option is an XML filename to which the XML summary is written. The "
+                           "default XML filename is TEST-<world>.xml, where <world> is the value of the --world "
+                           "option.")
     parser.add_option("-w","--world", dest="world", default="",
                       help="The label of the tests, used to name the XML results.")
     parser.add_option("", "--abort-on-fail",
@@ -121,7 +117,7 @@ def parseCommandline(args):
     (options, args) = parser.parse_args(args=args)
 
     if options.version:
-      printVersion()
+        printVersion()
 
     # the cxxtest builder relies on this behaviour! don't remove
     if options.runner == 'none':
@@ -141,9 +137,8 @@ def parseCommandline(args):
             options.xunit_file="TEST-"+options.world+".xml"
 
     if options.error_printer:
-      options.runner= "ErrorPrinter"
-      options.haveStandardLibrary = True
-
+        options.runner= "ErrorPrinter"
+        options.haveStandardLibrary = True
 
     if options.noStaticInit and (options.root or options.part):
         abort( '--no-static-init cannot be used with --root/--part' )
@@ -152,20 +147,20 @@ def parseCommandline(args):
         options.runner = 'StdioPrinter'
 
     files = setFiles(args)
-    if len(files) is 0 and not options.root:
+    if len(files) == 0 and not options.root:
         print(parser.error("No input files found"))
     return files
 
 
 def printVersion():
     '''Print CxxTest version and exit'''
-    sys.stdout.write( "This is CxxTest version INSERT_VERSION_HERE.\n" )
+    sys.stdout.write("This is CxxTest version INSERT_VERSION_HERE.\n" )
     sys.exit(0)
 
 
 def setFiles(patterns ):
     '''Set input files specified on command line'''
-    files = expandWildcards( patterns )
+    files = expandWildcards(patterns)
     return files
 
 
@@ -179,9 +174,9 @@ def expandWildcards( patterns ):
     return fileNames
 
 
-def fixBackslashes( fileName ):
+def fixBackslashes(fileName):
     '''Convert backslashes to slashes in file name'''
-    return re.sub( r'\\', '/', fileName, 0 )
+    return re.sub(r'\\', '/', fileName, 0)
 
 
 def writeOutput():
@@ -205,6 +200,7 @@ def writeSimpleOutput():
     writeWorld( output )
     output.close()
 
+
 include_re = re.compile( r"\s*\#\s*include\s+<cxxtest/" )
 preamble_re = re.compile( r"^\s*<CxxTest\s+preamble>\s*$" )
 world_re = re.compile( r"^\s*<CxxTest\s+world>\s*$" )
@@ -217,7 +213,7 @@ def writeTemplateOutput():
     while 1:
         line = template.readline()
         if not line:
-            break;
+            break
         if include_re.search( line ):
             writePreamble( output )
             output.write( line )
@@ -244,54 +240,57 @@ def startOutputFile():
 def writePreamble( output ):
     '''Write the CxxTest header (#includes and #defines)'''
     global wrotePreamble
-    if wrotePreamble: return
-    output.write( "#ifndef CXXTEST_RUNNING\n" )
-    output.write( "#define CXXTEST_RUNNING\n" )
-    output.write( "#endif\n" )
-    output.write( "\n" )
+    if wrotePreamble:
+        return
+    output.write("#ifndef CXXTEST_RUNNING\n")
+    output.write("#define CXXTEST_RUNNING\n")
+    output.write("#endif\n")
+    output.write("\n")
     if options.xunit_printer:
-        output.write( "#include <fstream>\n" )
+        output.write("#include <fstream>\n")
     if options.haveStandardLibrary:
-        output.write( "#define _CXXTEST_HAVE_STD\n" )
+        output.write("#define _CXXTEST_HAVE_STD\n")
     if options.haveExceptionHandling:
-        output.write( "#define _CXXTEST_HAVE_EH\n" )
+        output.write("#define _CXXTEST_HAVE_EH\n")
     if options.abortOnFail:
-        output.write( "#define _CXXTEST_ABORT_TEST_ON_FAIL\n" )
+        output.write("#define _CXXTEST_ABORT_TEST_ON_FAIL\n")
     if options.longlong:
-        output.write( "#define _CXXTEST_LONGLONG %s\n" % options.longlong )
+        output.write("#define _CXXTEST_LONGLONG %s\n" % options.longlong)
     if options.factor:
-        output.write( "#define _CXXTEST_FACTOR\n" )
+        output.write("#define _CXXTEST_FACTOR\n")
     for header in options.headers:
-        output.write( "#include \"%s\"\n" % header )
-    output.write( "#include <cxxtest/TestListener.h>\n" )
-    output.write( "#include <cxxtest/TestTracker.h>\n" )
-    output.write( "#include <cxxtest/TestRunner.h>\n" )
-    output.write( "#include <cxxtest/RealDescriptions.h>\n" )
-    output.write( "#include <cxxtest/TestMain.h>\n" )
+        output.write("#include \"%s\"\n" % header)
+    output.write("#include <cxxtest/TestListener.h>\n")
+    output.write("#include <cxxtest/TestTracker.h>\n")
+    output.write("#include <cxxtest/TestRunner.h>\n")
+    output.write("#include <cxxtest/RealDescriptions.h>\n")
+    output.write("#include <cxxtest/TestMain.h>\n")
+    output.write("#include <gmock/gmock.h>\n")
     if options.runner:
-        output.write( "#include <cxxtest/%s.h>\n" % options.runner )
+        output.write("#include <cxxtest/%s.h>\n" % options.runner)
     if options.gui:
-        output.write( "#include <cxxtest/%s.h>\n" % options.gui )
-    output.write( "\n" )
+        output.write("#include <cxxtest/%s.h>\n" % options.gui)
+    output.write("\n")
     wrotePreamble = 1
 
 
-def writeMain( output ):
+def writeMain(output):
     '''Write the main() function for the test runner'''
     if not (options.gui or options.runner):
-       return
-    output.write( 'int main( int argc, char *argv[] ) {\n' )
+        return
+    output.write('int main( int argc, char *argv[] ) {\n')
 
     # Build the filename to output, using the suitename if specified
-    output.write( '    std::string output_filename = "%s";  \n' % (options.xunit_file))
-    # output.write( '    std::cout << argc << " args\\n";  \n ' )
-    output.write( '    // Look for an argument giving the suite name (not starting with -) and change the output filename to use it.  \n ' )
-    output.write( '    if (argc > 1) { \n ')
-    output.write( '        if (argv[1][0] != \'-\') { \n ')
-    output.write( '           output_filename = "TEST-%s." + std::string(argv[1]) + ".xml"; \n        } } \n' %  options.world)
+    output.write('    ::testing::GTEST_FLAG(throw_on_failure) = true;\n')
+    output.write('    ::testing::InitGoogleMock(&argc, argv);\n')
+    output.write('    std::string output_filename = "%s";  \n' % (options.xunit_file))
+    output.write('    // Look for an argument giving the suite name (not starting with -) and change the output filename to use it.  \n ')
+    output.write('    if (argc > 1) { \n ')
+    output.write('        if (argv[1][0] != \'-\') { \n ')
+    output.write('           output_filename = "TEST-%s." + std::string(argv[1]) + ".xml"; \n        } } \n' %  options.world)
 
     if options.noStaticInit:
-        output.write( ' CxxTest::initialize();\n' )
+        output.write(' CxxTest::initialize();\n')
 
     if options.gui:
         tester_t = "CxxTest::GuiTuiRunner<CxxTest::%s, CxxTest::%s> " % (options.gui, options.runner)
@@ -299,43 +298,44 @@ def writeMain( output ):
         tester_t = "CxxTest::%s" % (options.runner)
 
     if options.xunit_printer:
-       output.write( '    // Create the output XML file \n' )
-       output.write( '    std::ofstream ofstr( output_filename.c_str() );\n' )
-       output.write( '    %s tmp(ofstr);\n' % tester_t )
-       output.write( '    CxxTest::RealWorldDescription::_worldName = "%s";\n' % options.world )
+        output.write('    // Create the output XML file \n')
+        output.write('    std::ofstream ofstr( output_filename.c_str() );\n')
+        output.write('    %s tmp(ofstr);\n' % tester_t)
+        output.write('    CxxTest::RealWorldDescription::_worldName = "%s";\n' % options.world)
     else:
-       output.write( '    %s tmp;\n' % tester_t )
-    output.write( '    return CxxTest::Main<%s>( tmp, argc, argv );\n' % tester_t )
-    output.write( '}\n' )
+        output.write('    %s tmp;\n' % tester_t)
+    output.write('    return CxxTest::Main<%s>( tmp, argc, argv );\n' % tester_t)
+    output.write('}\n')
 
 
-def writeWorld( output ):
+def writeWorld(output):
     '''Write the world definitions'''
     global wroteWorld
-    if wroteWorld: return
-    writePreamble( output )
-    writeSuites( output )
+    if wroteWorld:
+        return
+    writePreamble(output)
+    writeSuites(output)
     if options.root or not options.part:
-        writeRoot( output )
-        writeWorldDescr( output )
+        writeRoot(output)
+        writeWorldDescr(output)
     if options.noStaticInit:
-        writeInitialize( output )
+        writeInitialize(output)
     wroteWorld = 1
 
 
 def writeSuites(output):
     '''Write all TestDescriptions and SuiteDescriptions'''
     for suite in suites:
-        writeInclude( output, suite['file'] )
+        writeInclude(output, suite['file'])
         if isGenerated(suite):
-            generateSuite( output, suite )
+            generateSuite(output, suite)
         if isDynamic(suite):
-            writeSuitePointer( output, suite )
+            writeSuitePointer(output, suite)
         else:
-            writeSuiteObject( output, suite )
-        writeTestList( output, suite )
-        writeSuiteDescription( output, suite )
-        writeTestDescriptions( output, suite )
+            writeSuiteObject(output, suite)
+        writeTestList(output, suite)
+        writeSuiteDescription(output, suite)
+        writeTestDescriptions(output, suite)
 
 
 def isGenerated(suite):
@@ -351,42 +351,43 @@ def isDynamic(suite):
 def writeInclude(output, file):
     '''Add #include "file" statement'''
     global lastIncluded
-    if file == lastIncluded: return
-    output.writelines( [ '#include "', file, '"\n\n' ] )
+    if file == lastIncluded:
+        return
+    output.writelines(['#include "', file, '"\n\n'])
     lastIncluded = file
 
 
-def generateSuite( output, suite ):
+def generateSuite(output, suite):
     '''Write a suite declared with CXXTEST_SUITE()'''
-    output.write( 'class %s : public CxxTest::TestSuite {\n' % suite['name'] )
-    output.write( 'public:\n' )
+    output.write('class %s : public CxxTest::TestSuite {\n' % suite['name'])
+    output.write('public:\n')
     for line in suite['lines']:
         output.write(line)
-    output.write( '};\n\n' )
+    output.write('};\n\n')
 
 
-def writeSuitePointer( output, suite ):
+def writeSuitePointer(output, suite):
     '''Create static suite pointer object for dynamic suites'''
     if options.noStaticInit:
-        output.write( 'static %s *%s;\n\n' % (suite['name'], suite['object']) )
+        output.write('static %s *%s;\n\n' % (suite['name'], suite['object']))
     else:
-        output.write( 'static %s *%s = nullptr;\n\n' % (suite['name'], suite['object']) )
+        output.write('static %s *%s = nullptr;\n\n' % (suite['name'], suite['object']))
 
 
-def writeSuiteObject( output, suite ):
+def writeSuiteObject(output, suite):
     '''Create static suite object for non-dynamic suites'''
-    output.writelines( [ "static ", suite['name'], " ", suite['object'], ";\n\n" ] )
+    output.writelines(["static ", suite['name'], " ", suite['object'], ";\n\n"])
 
 
-def writeTestList( output, suite ):
+def writeTestList(output, suite):
     '''Write the head of the test linked list for a suite'''
     if options.noStaticInit:
-        output.write( 'static CxxTest::List %s;\n' % suite['tlist'] )
+        output.write('static CxxTest::List %s;\n' % suite['tlist'])
     else:
-        output.write( 'static CxxTest::List %s = { nullptr, nullptr };\n' % suite['tlist'] )
+        output.write('static CxxTest::List %s = { nullptr, nullptr };\n' % suite['tlist'])
 
 
-def writeWorldDescr( output ):
+def writeWorldDescr(output):
     '''Write the static name of the world name'''
     if options.noStaticInit:
         output.write( 'const char* CxxTest::RealWorldDescription::_worldName;\n' )
@@ -413,8 +414,10 @@ def writeTestDescription( output, suite, test ):
 
 def runBody( suite, test ):
     '''Body of TestDescription::run()'''
-    if isDynamic(suite): return dynamicRun( suite, test )
-    else: return staticRun( suite, test )
+    if isDynamic(suite):
+        return dynamicRun( suite, test )
+    else:
+        return staticRun( suite, test )
 
 
 def dynamicRun( suite, test ):

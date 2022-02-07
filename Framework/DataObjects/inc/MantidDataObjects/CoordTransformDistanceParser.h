@@ -20,12 +20,10 @@ class CoordTransformDistance;
  * @author Owen Arnold
  * @date 25/july/2011
  */
-class DLLExport CoordTransformDistanceParser
-    : public CoordTransformAffineParser {
+class DLLExport CoordTransformDistanceParser : public CoordTransformAffineParser {
 public:
   CoordTransformDistanceParser();
-  Mantid::API::CoordTransform *
-  createTransform(Poco::XML::Element *coordTransElement) const override;
+  Mantid::API::CoordTransform *createTransform(Poco::XML::Element *coordTransElement) const override;
 
 private:
   CoordTransformDistanceParser(const CoordTransformDistanceParser &);

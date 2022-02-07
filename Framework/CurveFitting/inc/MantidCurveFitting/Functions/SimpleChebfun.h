@@ -25,11 +25,9 @@ public:
   /// Constructor.
   SimpleChebfun(size_t n, const API::IFunction &fun, double start, double end);
   /// Constructor.
-  SimpleChebfun(const ChebfunFunctionType &fun, double start, double end,
-                double accuracy = 0.0, size_t badSize = 10);
+  SimpleChebfun(const ChebfunFunctionType &fun, double start, double end, double accuracy = 0.0, size_t badSize = 10);
   /// Constructor.
-  SimpleChebfun(const API::IFunction &fun, double start, double end,
-                double accuracy = 0.0, size_t badSize = 10);
+  SimpleChebfun(const API::IFunction &fun, double start, double end, double accuracy = 0.0, size_t badSize = 10);
   /// Constructor.
   SimpleChebfun(const std::vector<double> &x, const std::vector<double> &y);
   /// Number of points in the approximation.

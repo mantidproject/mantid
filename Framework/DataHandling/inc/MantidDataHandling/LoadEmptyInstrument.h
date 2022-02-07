@@ -43,8 +43,7 @@ instrument display window</LI>
 @author Anders Markvardsen, ISIS, RAL
 @date 31/10/2008
 */
-class DLLExport LoadEmptyInstrument
-    : public API::IFileLoader<Kernel::FileDescriptor> {
+class DLLExport LoadEmptyInstrument : public API::IFileLoader<Kernel::FileDescriptor> {
 public:
   /// Algorithm's name for identification overriding a virtual method
   const std::string name() const override { return "LoadEmptyInstrument"; }
@@ -56,13 +55,9 @@ public:
 
   /// Algorithm's version for identification overriding a virtual method
   int version() const override { return 1; }
-  const std::vector<std::string> seeAlso() const override {
-    return {"LoadInstrument"};
-  }
+  const std::vector<std::string> seeAlso() const override { return {"LoadInstrument"}; }
   /// Algorithm's category for identification overriding a virtual method
-  const std::string category() const override {
-    return "DataHandling\\Instrument";
-  }
+  const std::string category() const override { return "DataHandling\\Instrument"; }
   /// Returns a confidence value that this algorithm can load a file
   int confidence(Kernel::FileDescriptor &descriptor) const override;
 
@@ -72,9 +67,7 @@ private:
   /// Overwrites Algorithm method
   void exec() override;
 
-  API::MatrixWorkspace_sptr
-  runLoadInstrument(const std::string &filename,
-                    const std::string &instrumentname);
+  API::MatrixWorkspace_sptr runLoadInstrument(const std::string &filename, const std::string &instrumentname);
 };
 
 } // namespace DataHandling

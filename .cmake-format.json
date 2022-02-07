@@ -1,7 +1,6 @@
 {
-  "line_width": 80,
+  "line_width": 120,
   "tab_size": 2,
-  "max_subargs_per_line": 1,
   "separate_ctrl_name_with_space": false,
   "separate_fn_name_with_space": false,
   "dangle_parens": true,
@@ -92,24 +91,29 @@
         "MODULE_OUTPUT_DIR": 1,
         "PYQT_VERSION": 1,
         "FOLDER": 1,
-        "SIP_SRCS": "+",
+        "SIP_SRC": 1,
         "HEADER_DEPS": "+",
         "INCLUDE_DIRS": "+",
         "LINK_LIBS": "+",
-        "INSTALL_DIRS": "+",
+        "INSTALL_DIR": "+",
         "OSX_INSTALL_RPATH": "+",
         "LINUX_INSTALL_RPATH": "+"
       }
+    },
+    "add_python_package": {
+      "kwargs": {
+        "EGGLINKNAME": 1,
+        "INSTALL_LIB_DIRS": "+",
+        "INSTALL_BIN_DIR": 1,
+        "EXCLUDE_ON_INSTALL": "+"
+      },
+      "flags": [
+        "EXECUTABLE",
+        "GENERATE_SITECUSTOMIZE"
+      ]
     }
   },
   "always_wrap": [],
-  "algorithm_order": [
-    0,
-    1,
-    2,
-    3,
-    4
-  ],
   "enable_markup": true,
   "first_comment_is_literal": false,
   "literal_comment_pattern": null,

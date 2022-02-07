@@ -12,8 +12,7 @@
 
 #include "MantidAPI/MatrixWorkspace.h"
 
-namespace Mantid {
-namespace CurveFitting {
+namespace Mantid::CurveFitting {
 
 using namespace API;
 using namespace HistogramData;
@@ -21,16 +20,14 @@ using namespace HistogramData;
  * Default Constructor.
  */
 FunctionDomain1DSpectrumCreator::FunctionDomain1DSpectrumCreator()
-    : IDomainCreator(nullptr, std::vector<std::string>(),
-                     FunctionDomain1DSpectrumCreator::Simple),
-      m_matrixWorkspace(), m_workspaceIndex(0), m_workspaceIndexIsSet(false) {}
+    : IDomainCreator(nullptr, std::vector<std::string>(), FunctionDomain1DSpectrumCreator::Simple), m_matrixWorkspace(),
+      m_workspaceIndex(0), m_workspaceIndexIsSet(false) {}
 
 /**
  * Sets the matrix workspace this creator is working with.
  * @param matrixWorkspace :: Pointer to matrix workspace the domain is based on.
  */
-void FunctionDomain1DSpectrumCreator::setMatrixWorkspace(
-    MatrixWorkspace_sptr matrixWorkspace) {
+void FunctionDomain1DSpectrumCreator::setMatrixWorkspace(MatrixWorkspace_sptr matrixWorkspace) {
   m_matrixWorkspace = std::move(matrixWorkspace);
 }
 
@@ -60,14 +57,12 @@ void FunctionDomain1DSpectrumCreator::setWorkspaceIndex(size_t workspaceIndex) {
  * @param i0 :: Size offset in case the FunctionValues object already contains
  *data.
  */
-void FunctionDomain1DSpectrumCreator::createDomain(
-    std::shared_ptr<FunctionDomain> &domain,
-    std::shared_ptr<FunctionValues> &values, size_t i0) {
+void FunctionDomain1DSpectrumCreator::createDomain(std::shared_ptr<FunctionDomain> &domain,
+                                                   std::shared_ptr<FunctionValues> &values, size_t i0) {
   throwIfWorkspaceInvalid();
 
   auto points = m_matrixWorkspace->points(m_workspaceIndex);
-  domain.reset(
-      new FunctionDomain1DSpectrum(m_workspaceIndex, points.mutableRawData()));
+  domain.reset(new FunctionDomain1DSpectrum(m_workspaceIndex, points.mutableRawData()));
 
   if (!values) {
     values.reset(new FunctionValues(*domain));
@@ -113,12 +108,9 @@ void FunctionDomain1DSpectrumCreator::throwIfWorkspaceInvalid() const {
                                 "domain.");
   }
 
-  if (!m_workspaceIndexIsSet ||
-      m_workspaceIndex >= m_matrixWorkspace->getNumberHistograms()) {
-    throw std::invalid_argument(
-        "Workspace index has not been set or is invalid.");
+  if (!m_workspaceIndexIsSet || m_workspaceIndex >= m_matrixWorkspace->getNumberHistograms()) {
+    throw std::invalid_argument("Workspace index has not been set or is invalid.");
   }
 }
 
-} // namespace CurveFitting
-} // namespace Mantid
+} // namespace Mantid::CurveFitting

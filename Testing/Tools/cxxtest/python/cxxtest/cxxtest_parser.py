@@ -1,7 +1,4 @@
 import re
-#import sys
-#import getopt
-#import glob
 from .cxxtest_misc import abort
 
 # Global variables
@@ -19,23 +16,18 @@ def scanInputFiles(files, _options):
     for file in files:
         scanInputFile(file)
     global suites
-    if len(suites) is 0 and not options.root:
+    if len(suites) == 0 and not options.root:
         abort( 'No tests defined' )
-
-    #print "INFO\n"
-    #for suite in suites:
-        #for key in suite:
-            #print key,suite[key]
-        #print ""
 
     return [options,suites]
 
-lineCont_re = re.compile('(.*)\\\s*$')
+
+lineCont_re = re.compile(r'(.*)\\\s*$')
 
 
 def scanInputFile(fileName):
     '''Scan single input file for test suites'''
-    file = open(fileName)
+    file = open(fileName, encoding='utf-8')
     prev = ""
     lineNo = 0
     contNo = 0
@@ -106,6 +98,7 @@ def scanLineForStandardLibrary( line ):
         if not options.noStandardLibrary:
             options.haveStandardLibrary = 1
 
+
 exception_re = re.compile( r"\b(throw|try|catch|TSM?_ASSERT_THROWS[A-Z_]*)\b" )
 
 
@@ -116,9 +109,10 @@ def scanLineForExceptionHandling( line ):
         if not options.noExceptionHandling:
             options.haveExceptionHandling = 1
 
-classdef = '(?:::\s*)?(?:\w+\s*::\s*)*\w+'
-baseclassdef = '(?:public|private|protected)\s+%s' % (classdef,)
-testsuite = '(?:(?:::)?\s*CxxTest\s*::\s*)?TestSuite'
+
+classdef = r'(?:::\s*)?(?:\w+\s*::\s*)*\w+'
+baseclassdef = r'(?:public|private|protected)\s+%s' % (classdef,)
+testsuite = r'(?:(?:::)?\s*CxxTest\s*::\s*)?TestSuite'
 suite_re = re.compile( r"\bclass\s+(%s)\s*:(?:\s*%s\s*,)*\s*public\s+%s"
                        % (classdef, baseclassdef, testsuite) )
 generatedSuite_re = re.compile( r'\bCXXTEST_SUITE\s*\(\s*(\w*)\s*\)' )
@@ -155,6 +149,7 @@ def startSuite( name, file, line, generated ):
 def lineStartsBlock( line ):
     '''Check if current line starts a new CXXTEST_CODE() block'''
     return re.search( r'\bCXXTEST_CODE\s*\(', line ) is not None
+
 
 test_re = re.compile( r'^([^/]|/[^/])*\bvoid\s+([Tt]est\w+)\s*\(\s*(void)?\s*\)' )
 void_re = re.compile( r'^([^/]|/[^/])*\bvoid\s*$' )
@@ -208,6 +203,7 @@ def fixBlockLine( suite, lineNo, line):
                    r'_\1(%s,%s,' % (suite['cfile'], lineNo),
                    line, 0 )
 
+
 create_re = re.compile( r'\bstatic\s+\w+\s*\*\s*createSuite\s*\(\s*(void)?\s*\)' )
 
 
@@ -215,6 +211,7 @@ def scanLineForCreate( suite, lineNo, line ):
     '''Check if current line defines a createSuite() function'''
     if create_re.search( line ):
         addSuiteCreateDestroy( suite, 'create', lineNo )
+
 
 destroy_re = re.compile( r'\bstatic\s+void\s+destroySuite\s*\(\s*\w+\s*\*\s*\w*\s*\)' )
 
@@ -241,7 +238,7 @@ def closeSuite():
     '''Close current suite and add it to the list if valid'''
     global suite
     if suite is not None:
-        if len(suite['tests']) is not 0:
+        if len(suite['tests']) != 0:
             verifySuite(suite)
             rememberSuite(suite)
         suite = None

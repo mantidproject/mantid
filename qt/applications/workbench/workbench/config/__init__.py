@@ -40,17 +40,14 @@ _ADDITIONAL_MAINWINDOWS_PARENT = None
 # -----------------------------------------------------------------------------
 # Public Constants
 # -----------------------------------------------------------------------------
+# The strings APPNAME, ORG_DOMAIN, ORGANIZATION are duplicated
+# in mantidqt/dialogs/errorreports/main.py
+
 ORGANIZATION = 'mantidproject'
 ORG_DOMAIN = 'mantidproject.org'
 APPNAME = 'mantidworkbench'
 
 DEFAULT_SCRIPT_CONTENT = ""
-if sys.version_info < (3, 0):
-    DEFAULT_SCRIPT_CONTENT += "# The following line helps with future compatibility with Python 3" + os.linesep + \
-                              "# print must now be used as a function, e.g print('Hello','World')" + os.linesep + \
-                              "from __future__ import (absolute_import, division, print_function, unicode_literals)" + \
-                              os.linesep + os.linesep
-
 DEFAULT_SCRIPT_CONTENT += "# import mantid algorithms, numpy and matplotlib" + os.linesep + \
                           "from mantid.simpleapi import *" + os.linesep + \
                           "import matplotlib.pyplot as plt" + os.linesep + \
@@ -74,20 +71,27 @@ else:
 # Iterable containing defaults for each configurable section of the code
 # General application settings are in the main section
 DEFAULTS = {
-    'high_dpi_scaling': True,
     'MainWindow': {
         'size': (1260, 740),
         'position': (10, 10),
     },
     'AdditionalWindows': {
-        'ontop': True
+        'behaviour': "On top"
     },
     'project': {
         'prompt_save_on_close': True,
         'prompt_save_editor_modified': True,
-        'prompt_on_deleting_workspace': False
+        'prompt_on_deleting_workspace': False,
+        'save_altered_workspaces_only': False
+    },
+    'Editors': {
+        'completion_enabled': True,
     }
 }
+
+# State encodes widget layout (among other things).
+# Increment this when the state of the next version is incompatible with the previous.
+SAVE_STATE_VERSION = 2
 
 # 'Singleton' instance
 QSettings.setDefaultFormat(QSettings.IniFormat)
@@ -100,10 +104,10 @@ def get_window_config():
     :return: A WindowConfig object describing the desired window configuration based on the current settings
     """
     try:
-        windows_on_top = CONF.get("AdditionalWindows", "ontop", type=bool)
+        windows_behaviour = CONF.get("AdditionalWindows", "behaviour", type=str)
+        windows_on_top = True if windows_behaviour == "On top" else False
     except KeyError:
         windows_on_top = False
-
     if windows_on_top:
         parent = _ADDITIONAL_MAINWINDOWS_PARENT
         flags = WINDOW_ONTOP_FLAGS

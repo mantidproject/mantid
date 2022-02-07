@@ -34,12 +34,9 @@ class CharIconPainter;
  */
 class EXPORT_OPT_MANTIDQT_ICONS CharIconEngine : public QIconEngine {
 public:
-  CharIconEngine(IconicFont *iconic, CharIconPainter *painter,
-                 const QList<QHash<QString, QVariant>> &options);
-  void paint(QPainter *painter, const QRect &rect, QIcon::Mode mode,
-             QIcon::State state) override;
-  QPixmap pixmap(const QSize &size, QIcon::Mode mode,
-                 QIcon::State state) override;
+  CharIconEngine(IconicFont *iconic, CharIconPainter *painter, const QList<QHash<QString, QVariant>> &options);
+  void paint(QPainter *painter, const QRect &rect, QIcon::Mode mode, QIcon::State state) override;
+  QPixmap pixmap(const QSize &size, QIcon::Mode mode, QIcon::State state) override;
 #if (QT_VERSION < QT_VERSION_CHECK(5, 0, 0))
   QIconEngine *clone() const;
 #else

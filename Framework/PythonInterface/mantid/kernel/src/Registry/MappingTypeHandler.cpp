@@ -5,6 +5,7 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidPythonInterface/kernel/Registry/MappingTypeHandler.h"
+#include "MantidPythonInterface/core/ExtractSharedPtr.h"
 #include "MantidPythonInterface/kernel/Registry/PropertyManagerFactory.h"
 #include "MantidPythonInterface/kernel/Registry/PropertyWithValueFactory.h"
 
@@ -18,9 +19,10 @@ using boost::python::dict;
 using boost::python::object;
 
 namespace Mantid {
+using Kernel::PropertyManager;
 using Kernel::PropertyManager_sptr;
-namespace PythonInterface {
-namespace Registry {
+
+namespace PythonInterface::Registry {
 
 /**
  * Sets the named property in the PropertyManager by extracting a new
@@ -29,13 +31,15 @@ namespace Registry {
  * @param name The name of the property to update
  * @param mapping The new value of the property
  */
-void MappingTypeHandler::set(Kernel::IPropertyManager *alg,
-                             const std::string &name,
-                             const object &mapping) const {
-  if (!PyObject_TypeCheck(mapping.ptr(), &PyDict_Type)) {
+void MappingTypeHandler::set(Kernel::IPropertyManager *alg, const std::string &name, const object &mapping) const {
+  auto ptrExtract = Mantid::PythonInterface::ExtractSharedPtr<PropertyManager>(mapping);
+  if (ptrExtract.check()) { // try converting directly to a PropertyManager
+    alg->setProperty(name, ptrExtract());
+  } else if (PyObject_TypeCheck(mapping.ptr(), &PyDict_Type)) { // treat the value as a dict
+    alg->setProperty(name, createPropertyManager(dict(mapping)));
+  } else {
     throw std::invalid_argument("Property " + name + " expects a dictionary");
   }
-  alg->setProperty(name, createPropertyManager(dict(mapping)));
 }
 
 /**
@@ -47,16 +51,13 @@ void MappingTypeHandler::set(Kernel::IPropertyManager *alg,
  * @param direction The direction of the property
  * @returns A pointer to a newly constructed property instance
  */
-std::unique_ptr<Kernel::Property>
-MappingTypeHandler::create(const std::string &name, const object &defaultValue,
-                           const boost::python::api::object & /*validator*/,
-                           const unsigned int direction) const {
+std::unique_ptr<Kernel::Property> MappingTypeHandler::create(const std::string &name, const object &defaultValue,
+                                                             const boost::python::api::object & /*validator*/,
+                                                             const unsigned int direction) const {
   // Wrap the property manager in a PropertyManagerProperty instance.
   std::unique_ptr<Kernel::Property> valueProp =
-      std::make_unique<Kernel::PropertyManagerProperty>(
-          name, createPropertyManager(dict(defaultValue)), direction);
+      std::make_unique<Kernel::PropertyManagerProperty>(name, createPropertyManager(dict(defaultValue)), direction);
   return valueProp;
 }
-} // namespace Registry
-} // namespace PythonInterface
+} // namespace PythonInterface::Registry
 } // namespace Mantid

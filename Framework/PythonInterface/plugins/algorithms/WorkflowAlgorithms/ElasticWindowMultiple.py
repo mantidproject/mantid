@@ -284,6 +284,10 @@ class ElasticWindowMultiple(DataProcessorAlgorithm):
             logger.debug('{0} {1} found for run: {2}'.format(sample, unit, run_name))
         else:
             logger.warning('No sample units found for run: {}'.format(run_name))
+
+        if unit is not None and unit.isspace():
+            unit = ""
+
         return sample, unit
 
 

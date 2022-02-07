@@ -357,7 +357,7 @@ class DirectEnergyConversion(object):
 #pylint: disable=too-many-branches
 #pylint: disable=too-many-locals
 #pylint: disable=W0621
-# flake8: noqa 
+# flake8: noqa
     def convert_to_energy(self,wb_run=None,sample_run=None,ei_guess=None,rebin=None,map_file=None,
                           monovan_run=None,wb_for_monovan_run=None,**kwargs):
         """ One step conversion of run into workspace containing information about energy transfer
@@ -446,6 +446,10 @@ class DirectEnergyConversion(object):
         else:
             n_spectra = 0
         prop_man.log(header.format(n_spectra,n_masked_spectra),'notice')
+#--------------------------------------------------------------------------------------------------
+#       Remove emtpy background if one is defined
+#--------------------------------------------------------------------------------------------------
+        self.remove_empty_background(masking)
 #--------------------------------------------------------------------------------------------------
 #  now reduction
 #--------------------------------------------------------------------------------------------------
@@ -577,6 +581,28 @@ class DirectEnergyConversion(object):
 
         self.clean_up_convert_to_energy(start_time)
         return result
+
+#------------------------------------------------------------------------------------------
+    def remove_empty_background(self,masking_ws=None):
+        """Remove empty background from the workspaces, described by RunDescriptors, specified here
+           Inputs:
+           masking_ws -- if provided, mask empty background workspace before extracting it from
+                         workspaces requested
+        """
+        prop_man = self.prop_man
+
+        # list of RunDescriptors to extract and process workspaces
+        rd_to_process = ['sample_run','wb_run','monovan_run','wb_for_monovan_run']
+        # list of Background properties
+        bg_to_process = ['empty_bg_run','empty_bg_run_for_wb','empty_bg_run_for_monovan','empty_bg_run_for_monoWb']
+
+        for rd_name,bg_rd_name in zip(rd_to_process,bg_to_process):
+            rd_prop = prop_man.get_prop_class(rd_name)
+            bg_prop = prop_man.get_prop_class(bg_rd_name)
+            empty_bg_ws = bg_prop.get_workspace()
+            if masking_ws is not None and empty_bg_ws is not None:
+                MaskDetectors(empty_bg_ws, MaskedWorkspace=masking_ws)
+            rd_prop.remove_empty_background(empty_bg_ws)
 
 
 #------------------------------------------------------------------------------------------
@@ -882,6 +908,7 @@ class DirectEnergyConversion(object):
             GetEi(InputWorkspace=monitor_ws, Monitor1Spec=ei_mon_spectra[0],
                   Monitor2Spec=ei_mon_spectra[1],
                   EnergyEstimate=ei_guess,FixEi=fix_ei)
+        SetInstrumentParameter(data_ws,ParameterName='EFixed',ParameterType='Number', Value='{0}'.format(ei))
 
         # Store found incident energy in the class itself
         if self.prop_man.normalise_method == 'monitor-2' and not separate_monitors:
@@ -1960,4 +1987,3 @@ def get_failed_spectra_list_from_masks(masked_wksp,prop_man):
 #-----------------------------------------------------------------
 if __name__ == "__main__":
     pass
-    #unittest.main()

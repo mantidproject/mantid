@@ -6,9 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 # pylint: disable=too-many-lines, invalid-name, bare-except, too-many-instance-attributes
 import math
-import os
 import re
-import sys
 
 from mantid.simpleapi import *
 from mantid.api import WorkspaceGroup, Workspace
@@ -60,26 +58,6 @@ class BaseInstrument(object):
         if "SANS2D_Definition_Tubes" in self.idf_path:
             return "SANS2DTUBES"
         return self._NAME
-
-    def view(self, workspace_name=None):
-        """
-            Opens Mantidplot's InstrumentView displaying the current instrument. This
-            empty instrument created contained in the named workspace (a default name
-            is generated if this the argument is left blank) unless the workspace already
-            exists and then it's contents are displayed
-            @param workspace_name: the name of the workspace to create and/or display
-        """
-        if workspace_name is None:
-            workspace_name = self._NAME + '_instrument_view'
-            self.load_empty(workspace_name)
-        elif not AnalysisDataService.doesExist(workspace_name):
-            self.load_empty(workspace_name)
-
-        import mantidplot
-        instrument_win = mantidplot.getInstrumentView(workspace_name)
-        instrument_win.show()
-
-        return workspace_name
 
     def load_empty(self, workspace_name=None):
         """
@@ -1357,11 +1335,7 @@ class SANS2D(ISISInstrument):
                 if len(date_string) > date_str_len:
                     date_string = date_string[:date_str_len]
                 from datetime import datetime
-                if sys.version_info[0] == 2 and sys.version_info[1] < 5:
-                    import time
-                    return datetime(*(time.strptime(date_string, format)[0:6]))
-                else:
-                    return datetime.strptime(date_string, format)
+                return datetime.strptime(date_string, format)
 
             # if the value was stored as a time series we have an array here
             property = log_data.getLogData(log_name)
@@ -1588,11 +1562,7 @@ class LARMOR(ISISInstrument):
                 if len(date_string) > date_str_len:
                     date_string = date_string[:date_str_len]
                 from datetime import datetime
-                if sys.version_info[0] == 2 and sys.version_info[1] < 5:
-                    import time
-                    return datetime(*(time.strptime(date_string, format)[0:6]))
-                else:
-                    return datetime.strptime(date_string, format)
+                return datetime.strptime(date_string, format)
 
             # if the value was stored as a time series we have an array here
             property = log_data.getLogData(log_name)

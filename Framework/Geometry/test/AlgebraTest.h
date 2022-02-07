@@ -42,9 +42,8 @@ public:
 
     Algebra A, B;
     std::vector<std::string> Func;
-    Func.emplace_back(
-        "(a'b'c'd')+(a'b'c'd)+(a'b'cd')+(a'bc'd)+(a'bcd')+(a'bcd)+("
-        "ab'c'd')+(ab'c'd)+(ab'cd')+(abcd')");
+    Func.emplace_back("(a'b'c'd')+(a'b'c'd)+(a'b'cd')+(a'bc'd)+(a'bcd')+(a'bcd)+("
+                      "ab'c'd')+(ab'c'd)+(ab'cd')+(abcd')");
     Func.emplace_back("(a'b'c')+(a'b'c)+(a'bc')+(ab'c)+(abc')+(abc)");
     Func.emplace_back("a'b'c'+d'e'");
     // This test takes about 20 second on an old PC. [Note: the g' : g  cyclic
@@ -103,8 +102,7 @@ public:
     B.setFunction("jxyzi(ad+sw)");
     B += A;
 
-    TS_ASSERT_EQUALS(B.display(),
-                     "(a'bcd)+(a((cd)+(f(x+y+z))))+(ijxyz((ad)+(sw)))");
+    TS_ASSERT_EQUALS(B.display(), "(a'bcd)+(a((cd)+(f(x+y+z))))+(ijxyz((ad)+(sw)))");
   }
 
   void testmakeString()
@@ -176,7 +174,6 @@ public:
     A.setFunction("ab((c'(d+e+f')g'h'i')+(gj'(k+l')(m+n)))");
     TS_ASSERT_EQUALS(A.display(), "ab((j'g(l'+k)(m+n))+(i'h'g'c'(f'+d+e)))");
     A.Complement();
-    TS_ASSERT_EQUALS(A.display(),
-                     "b'+a'+((g'+j+(n'm')+(k'l))(c+g+h+i+(e'd'f)))");
+    TS_ASSERT_EQUALS(A.display(), "b'+a'+((g'+j+(n'm')+(k'l))(c+g+h+i+(e'd'f)))");
   }
 };

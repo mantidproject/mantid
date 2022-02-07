@@ -17,15 +17,13 @@
 #include <limits>
 #include <map>
 
-namespace Mantid {
-namespace Algorithms {
+namespace Mantid::Algorithms {
 
 // Register the class into the algorithm factory
 DECLARE_ALGORITHM(DiffractionFocussing)
 
 /// Constructor
-DiffractionFocussing::DiffractionFocussing()
-    : API::Algorithm(), API::DeprecatedAlgorithm() {
+DiffractionFocussing::DiffractionFocussing() : API::Algorithm(), API::DeprecatedAlgorithm() {
   this->useAlgorithm("DiffractionFocussing", 2);
 }
 
@@ -41,14 +39,11 @@ using API::WorkspaceProperty;
  *
  */
 void DiffractionFocussing::init() {
-  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
-                      "InputWorkspace", "", Direction::Input),
+  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>("InputWorkspace", "", Direction::Input),
                   "The input workspace");
-  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
-                      "OutputWorkspace", "", Direction::Output),
+  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>("OutputWorkspace", "", Direction::Output),
                   "The result of diffraction focussing of InputWorkspace");
-  declareProperty(std::make_unique<FileProperty>("GroupingFileName", "",
-                                                 FileProperty::Load, ".cal"),
+  declareProperty(std::make_unique<FileProperty>("GroupingFileName", "", FileProperty::Load, ".cal"),
                   "The name of the CalFile with grouping data");
 }
 
@@ -78,9 +73,7 @@ void DiffractionFocussing::exec() {
   RebinWorkspace(tmpW);
 
   std::set<int64_t> groupNumbers;
-  for (std::multimap<int64_t, int64_t>::const_iterator d =
-           detectorGroups.begin();
-       d != detectorGroups.end(); ++d) {
+  for (std::multimap<int64_t, int64_t>::const_iterator d = detectorGroups.begin(); d != detectorGroups.end(); ++d) {
     if (groupNumbers.find(d->first) == groupNumbers.end()) {
       groupNumbers.insert(d->first);
     }
@@ -102,8 +95,7 @@ void DiffractionFocussing::exec() {
     for (auto d = from; d != to; ++d)
       detectorList.emplace_back(static_cast<detid_t>(d->second));
     // Want version 1 of GroupDetectors here
-    API::IAlgorithm_sptr childAlg =
-        createChildAlgorithm("GroupDetectors", -1.0, -1.0, true, 1);
+    auto childAlg = createChildAlgorithm("GroupDetectors", -1.0, -1.0, true, 1);
     childAlg->setProperty("Workspace", tmpW);
     childAlg->setProperty<std::vector<detid_t>>("DetectorList", detectorList);
     childAlg->executeAsChildAlg();
@@ -114,8 +106,7 @@ void DiffractionFocussing::exec() {
         resultIndeces.emplace_back(ri);
       }
     } catch (...) {
-      throw std::runtime_error(
-          "Unable to get Properties from GroupDetectors Child Algorithm");
+      throw std::runtime_error("Unable to get Properties from GroupDetectors Child Algorithm");
     }
   }
 
@@ -125,25 +116,21 @@ void DiffractionFocussing::exec() {
   const int64_t oldHistNumber = tmpW->getNumberHistograms();
   API::Axis *spectraAxis = tmpW->getAxis(1);
   for (int64_t i = 0; i < oldHistNumber; i++)
-    if (spectraAxis->spectraNo(i) >= 0 &&
-        find(resultIndeces.begin(), resultIndeces.end(), i) ==
-            resultIndeces.end()) {
+    if (spectraAxis->spectraNo(i) >= 0 && find(resultIndeces.begin(), resultIndeces.end(), i) == resultIndeces.end()) {
       ++discarded;
     }
-  g_log.warning() << "Discarded " << discarded
-                  << " spectra that were not assigned to any group\n";
+  g_log.warning() << "Discarded " << discarded << " spectra that were not assigned to any group\n";
 
   // Running GroupDetectors leads to a load of redundant spectra
   // Create a new workspace that's the right size for the meaningful spectra and
   // copy them in
   int64_t newSize = tmpW->blocksize();
-  API::MatrixWorkspace_sptr outputW = DataObjects::create<API::MatrixWorkspace>(
-      *tmpW, resultIndeces.size(), BinEdges(newSize + 1));
+  API::MatrixWorkspace_sptr outputW =
+      DataObjects::create<API::MatrixWorkspace>(*tmpW, resultIndeces.size(), BinEdges(newSize + 1));
 
   std::vector<Indexing::SpectrumNumber> specNums;
   const auto &tmpIndices = tmpW->indexInfo();
-  for (int64_t hist = 0; hist < static_cast<int64_t>(resultIndeces.size());
-       hist++) {
+  for (int64_t hist = 0; hist < static_cast<int64_t>(resultIndeces.size()); hist++) {
     int64_t i = resultIndeces[hist];
     outputW->setHistogram(hist, tmpW->histogram(i));
     specNums.emplace_back(tmpIndices.spectrumNumber(i));
@@ -161,17 +148,14 @@ void DiffractionFocussing::exec() {
 }
 
 /// Run ConvertUnits as a Child Algorithm to convert to dSpacing
-MatrixWorkspace_sptr DiffractionFocussing::convertUnitsToDSpacing(
-    const API::MatrixWorkspace_sptr &workspace) {
+MatrixWorkspace_sptr DiffractionFocussing::convertUnitsToDSpacing(const API::MatrixWorkspace_sptr &workspace) {
   const std::string CONVERSION_UNIT = "dSpacing";
 
   Unit_const_sptr xUnit = workspace->getAxis(0)->unit();
 
-  g_log.information() << "Converting units from " << xUnit->label().ascii()
-                      << " to " << CONVERSION_UNIT << ".\n";
+  g_log.information() << "Converting units from " << xUnit->label().ascii() << " to " << CONVERSION_UNIT << ".\n";
 
-  API::IAlgorithm_sptr childAlg =
-      createChildAlgorithm("ConvertUnits", 0.34, 0.66);
+  auto childAlg = createChildAlgorithm("ConvertUnits", 0.34, 0.66);
   childAlg->setProperty("InputWorkspace", workspace);
   childAlg->setPropertyValue("Target", CONVERSION_UNIT);
   childAlg->executeAsChildAlg();
@@ -180,8 +164,7 @@ MatrixWorkspace_sptr DiffractionFocussing::convertUnitsToDSpacing(
 }
 
 /// Run Rebin as a Child Algorithm to harmonise the bin boundaries
-void DiffractionFocussing::RebinWorkspace(
-    API::MatrixWorkspace_sptr &workspace) {
+void DiffractionFocussing::RebinWorkspace(API::MatrixWorkspace_sptr &workspace) {
 
   double min = 0;
   double max = 0;
@@ -190,10 +173,9 @@ void DiffractionFocussing::RebinWorkspace(
   calculateRebinParams(workspace, min, max, step);
   std::vector<double> paramArray{min, -step, max};
 
-  g_log.information() << "Rebinning from " << min << " to " << max << " in "
-                      << step << " logaritmic steps.\n";
+  g_log.information() << "Rebinning from " << min << " to " << max << " in " << step << " logaritmic steps.\n";
 
-  API::IAlgorithm_sptr childAlg = createChildAlgorithm("Rebin");
+  auto childAlg = createChildAlgorithm("Rebin");
   childAlg->setProperty<MatrixWorkspace_sptr>("InputWorkspace", workspace);
   childAlg->setProperty<std::vector<double>>("Params", paramArray);
   childAlg->executeAsChildAlg();
@@ -208,9 +190,8 @@ void DiffractionFocussing::RebinWorkspace(
     @param max ::       (return) The calculated frame ending point
     @param step ::      (return) The calculated bin width
  */
-void DiffractionFocussing::calculateRebinParams(
-    const API::MatrixWorkspace_const_sptr &workspace, double &min, double &max,
-    double &step) {
+void DiffractionFocussing::calculateRebinParams(const API::MatrixWorkspace_const_sptr &workspace, double &min,
+                                                double &max, double &step) {
 
   min = std::numeric_limits<double>::max();
   // for min and max we need to iterate over the data block and investigate each
@@ -240,12 +221,10 @@ void DiffractionFocussing::calculateRebinParams(
  * @returns :: map of groups to detector IDs
  * @throws FileError if can't read the file
  */
-std::multimap<int64_t, int64_t>
-DiffractionFocussing::readGroupingFile(const std::string &groupingFileName) {
+std::multimap<int64_t, int64_t> DiffractionFocussing::readGroupingFile(const std::string &groupingFileName) {
   std::ifstream grFile(groupingFileName.c_str());
   if (!grFile) {
-    g_log.error() << "Unable to open grouping file " << groupingFileName
-                  << '\n';
+    g_log.error() << "Unable to open grouping file " << groupingFileName << '\n';
     throw Exception::FileError("Error reading .cal file", groupingFileName);
   }
 
@@ -268,5 +247,4 @@ DiffractionFocussing::readGroupingFile(const std::string &groupingFileName) {
   return detectorGroups;
 }
 
-} // namespace Algorithms
-} // namespace Mantid
+} // namespace Mantid::Algorithms

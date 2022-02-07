@@ -24,10 +24,8 @@ public:
     // Insert the directory of the properties file as a sitedir
     // to ensure the built copy of mantid gets picked up
     const MantidQt::Widgets::Common::Python::Object siteModule{
-        MantidQt::Widgets::Common::Python::NewRef(
-            PyImport_ImportModule("site"))};
-    siteModule.attr("addsitedir")(
-        Mantid::Kernel::ConfigService::Instance().getPropertiesDir());
+        MantidQt::Widgets::Common::Python::NewRef(PyImport_ImportModule("site"))};
+    siteModule.attr("addsitedir")(Mantid::Kernel::ConfigService::Instance().getPropertiesDir());
     TS_ASSERT(Py_IsInitialized());
   }
 
@@ -42,12 +40,9 @@ public:
   // ----------------- success tests ---------------------
   void testExtractWithSipWrappedTypeSucceeds() {
     MantidQt::Widgets::Common::Python::Object qwidget{
-        MantidQt::Widgets::Common::Python::NewRef(
-            PyImport_ImportModule("qtpy.QtWidgets"))
-            .attr("QWidget")()};
+        MantidQt::Widgets::Common::Python::NewRef(PyImport_ImportModule("qtpy.QtWidgets")).attr("QWidget")()};
     QWidget *w{nullptr};
-    TS_ASSERT_THROWS_NOTHING(
-        w = MantidQt::Widgets::Common::Python::extract<QWidget>(qwidget));
+    TS_ASSERT_THROWS_NOTHING(w = MantidQt::Widgets::Common::Python::extract<QWidget>(qwidget));
     TS_ASSERT(w);
   }
 
@@ -57,8 +52,6 @@ public:
     const MantidQt::Widgets::Common::Python::Object nonSipType{
         MantidQt::Widgets::Common::Python::NewRef(Py_BuildValue("(ii)", 1, 2))};
     struct Foo;
-    TS_ASSERT_THROWS(
-        MantidQt::Widgets::Common::Python::extract<Foo>(nonSipType),
-        const std::runtime_error &);
+    TS_ASSERT_THROWS(MantidQt::Widgets::Common::Python::extract<Foo>(nonSipType), const std::runtime_error &);
   }
 };

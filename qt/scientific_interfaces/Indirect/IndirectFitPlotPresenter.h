@@ -6,75 +6,68 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
-#include "DllConfig.h"
-
-#include "IndexTypes.h"
 #include "IndirectFitPlotModel.h"
-#include "IndirectPlotter.h"
+#include "IndirectFitPlotView.h"
 
-#include "IIndirectFitPlotView.h"
+#include "DllConfig.h"
 #include "LazyAsyncRunner.h"
+#include "MantidQtWidgets/Plotting/Mpl/ExternalPlotter.h"
 
 namespace MantidQt {
 namespace CustomInterfaces {
 namespace IDA {
+using namespace MantidWidgets;
 
 class MANTIDQT_INDIRECT_DLL IndirectFitPlotPresenter : public QObject {
   Q_OBJECT
 
 public:
-  IndirectFitPlotPresenter(IndirectFittingModel *model,
-                           IIndirectFitPlotView *view,
-                           IPyRunner *pythonRunner = nullptr);
+  IndirectFitPlotPresenter(IIndirectFitPlotView *view);
 
   void watchADS(bool watch);
 
-  TableDatasetIndex getSelectedDataIndex() const;
-  WorkspaceIndex getSelectedSpectrum() const;
-  TableRowIndex getSelectedSpectrumIndex() const;
-  TableRowIndex getSelectedDomainIndex() const;
-  bool isCurrentlySelected(TableDatasetIndex dataIndex,
-                           WorkspaceIndex spectrum) const;
+  WorkspaceID getActiveWorkspaceID() const;
+  WorkspaceIndex getActiveWorkspaceIndex() const;
+  FitDomainIndex getSelectedDomainIndex() const;
+  bool isCurrentlySelected(WorkspaceID workspaceID, WorkspaceIndex spectrum) const;
 
+  void setFittingData(std::vector<IndirectFitData> *fittingData);
+  void setFitOutput(IIndirectFitOutput *fitOutput);
+  void setFitFunction(Mantid::API::MultiDomainFunction_sptr function);
   void setFitSingleSpectrumIsFitting(bool fitting);
   void setFitSingleSpectrumEnabled(bool enable);
+
+  void setXBounds(std::pair<double, double> const &bounds);
 
 public slots:
   void setStartX(double /*startX*/);
   void setEndX(double /*endX*/);
+  void setActiveSpectrum(WorkspaceIndex spectrum);
   void updatePlotSpectrum(WorkspaceIndex spectrum);
-  void hideMultipleDataSelection();
-  void showMultipleDataSelection();
   void updateRangeSelectors();
-  void appendLastDataToSelection();
-  void updateSelectedDataName();
-  void updateDataSelection();
+  void appendLastDataToSelection(std::vector<std::string> displayNames);
+  void updateDataSelection(std::vector<std::string> displayNames);
   void updateAvailableSpectra();
   void updatePlots();
+  void updateFit();
   void updateGuess();
   void updateGuessAvailability();
+
   void enablePlotGuessInSeparateWindow();
   void disablePlotGuessInSeparateWindow();
   void disableSpectrumPlotSelection();
-  void handlePlotSpectrumChanged(WorkspaceIndex spectrum);
 
 signals:
-  void selectedFitDataChanged(TableDatasetIndex /*_t1*/);
-  void noFitDataSelected();
-  void plotSpectrumChanged(WorkspaceIndex /*_t1*/);
-  void fitSingleSpectrum(TableDatasetIndex /*_t1*/, WorkspaceIndex /*_t2*/);
+  void selectedFitDataChanged(WorkspaceID /*_t1*/);
+  void plotSpectrumChanged();
+  void fitSingleSpectrum(WorkspaceID /*_t1*/, WorkspaceIndex /*_t2*/);
   void startXChanged(double /*_t1*/);
   void endXChanged(double /*_t1*/);
   void fwhmChanged(double /*_t1*/);
   void backgroundChanged(double /*_t1*/);
-  void runAsPythonScript(const QString &code, bool noOutput = false);
 
 private slots:
-  void setModelStartX(double value);
-  void setModelEndX(double value);
-  void setModelHWHM(double minimum, double maximum);
-  void setModelBackground(double background);
-  void setActiveIndex(TableDatasetIndex index);
+  void setActiveIndex(WorkspaceID workspaceID);
   void setHWHMMaximum(double minimum);
   void setHWHMMinimum(double maximum);
   void plotGuess(bool doPlotGuess);
@@ -82,26 +75,19 @@ private slots:
   void plotCurrentPreview();
   void emitFitSingleSpectrum();
   void emitFWHMChanged(double minimum, double maximum);
-  void setActiveSpectrum(WorkspaceIndex spectrum);
-  void handleSelectedFitDataChanged(TableDatasetIndex index);
+  void handleSelectedFitDataChanged(WorkspaceID workspaceID);
+  void handlePlotSpectrumChanged(WorkspaceIndex spectrum);
 
 private:
   void disableAllDataSelection();
   void enableAllDataSelection();
   void plotInput(Mantid::API::MatrixWorkspace_sptr workspace);
-  void plotInput(Mantid::API::MatrixWorkspace_sptr workspace,
-                 WorkspaceIndex spectrum);
+  void plotInput(Mantid::API::MatrixWorkspace_sptr workspace, WorkspaceIndex spectrum);
   void plotFit(const Mantid::API::MatrixWorkspace_sptr &workspace);
-  void plotFit(Mantid::API::MatrixWorkspace_sptr workspace,
-               WorkspaceIndex spectrum);
-  void plotDifference(Mantid::API::MatrixWorkspace_sptr workspace,
-                      WorkspaceIndex spectrum);
-  void clearInput();
-  void clearFit();
-  void clearDifference();
+  void plotFit(Mantid::API::MatrixWorkspace_sptr workspace, WorkspaceIndex spectrum);
+  void plotDifference(Mantid::API::MatrixWorkspace_sptr workspace, WorkspaceIndex spectrum);
   void plotGuess(Mantid::API::MatrixWorkspace_sptr workspace);
-  void
-  plotGuessInSeparateWindow(const Mantid::API::MatrixWorkspace_sptr &workspace);
+  void plotGuessInSeparateWindow(const Mantid::API::MatrixWorkspace_sptr &workspace);
   void plotLines();
   void updatePlotRange(const std::pair<double, double> &range);
   void clearGuess();
@@ -117,7 +103,7 @@ private:
 
   bool m_plotGuessInSeparateWindow;
   QtLazyAsyncRunner<std::function<void()>> m_plotExternalGuessRunner;
-  std::unique_ptr<IndirectPlotter> m_plotter;
+  std::unique_ptr<Widgets::MplCpp::ExternalPlotter> m_plotter;
 };
 
 } // namespace IDA

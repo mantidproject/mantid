@@ -11,7 +11,7 @@ import unittest
 import testhelpers
 import platform
 
-from mantid.simpleapi import CreateWorkspace, Fit, FitDialog, FunctionWrapper
+from mantid.simpleapi import CreateWorkspace, Fit, FunctionWrapper
 from mantid.api import mtd, MatrixWorkspace, ITableWorkspace, IFunction
 
 
@@ -34,7 +34,7 @@ class SimpleAPIFitTest(unittest.TestCase):
         if  platform.system() == 'Darwin': # crashes
             return
         testhelpers.assertRaisesNothing(self, Fit, "name=FlatBackground", self._raw_ws)
-        
+
     def test_minimal_positional_arguments_with_functionwrapper_work(self):
         if  platform.system() == 'Darwin': # crashes
             return
@@ -97,14 +97,6 @@ class SimpleAPIFitTest(unittest.TestCase):
         self.assertTrue(isinstance(retvals.OutputWorkspace, MatrixWorkspace))
         self.assertTrue(isinstance(retvals.Function, FunctionWrapper))
         self.assertTrue(isinstance(retvals.CostFunction, str))
-
-    def test_that_dialog_call_raises_runtime_error(self):
-        try:
-            FitDialog()
-        except RuntimeError as exc:
-            msg = str(exc)
-            if msg != "Can only display properties dialog in gui mode":
-                self.fail("Dialog function raised the correct exception type but the message was wrong: " + msg)
 
     def test_Fit_works_with_multidomain_functions(self):
         x1 = np.arange(10)

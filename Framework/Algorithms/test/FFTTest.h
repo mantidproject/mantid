@@ -28,9 +28,7 @@ using namespace Mantid::API;
  */
 class TestFFT : public Mantid::Algorithms::FFT {
 public:
-  std::map<std::string, std::string> wrapValidateInputs() {
-    return this->validateInputs();
-  }
+  std::map<std::string, std::string> wrapValidateInputs() { return this->validateInputs(); }
 };
 
 class FFTTest : public CxxTest::TestSuite {
@@ -40,8 +38,7 @@ public:
   static FFTTest *createSuite() { return new FFTTest(); }
   static void destroySuite(FFTTest *suite) { delete suite; }
 
-  FFTTest()
-      : dX(0.2), h(sqrt(M_PI / 3)), a(M_PI * M_PI / 3), tolerance(0.001) {}
+  FFTTest() : dX(0.2), h(sqrt(M_PI / 3)), a(M_PI * M_PI / 3), tolerance(0.001) {}
   ~FFTTest() override {}
 
   void testForward() {
@@ -251,8 +248,7 @@ public:
     fft->setPropertyValue("Real", "0");
     fft->execute();
 
-    const MatrixWorkspace_sptr intermediate =
-        fft->getProperty("OutputWorkspace");
+    const MatrixWorkspace_sptr intermediate = fft->getProperty("OutputWorkspace");
     TS_ASSERT(intermediate);
 
     fft = Mantid::API::AlgorithmManager::Instance().create("FFT");
@@ -330,8 +326,7 @@ public:
     fft->setPropertyValue("Real", "0");
     fft->execute();
 
-    const MatrixWorkspace_sptr intermediate =
-        fft->getProperty("OutputWorkspace");
+    const MatrixWorkspace_sptr intermediate = fft->getProperty("OutputWorkspace");
     TS_ASSERT(intermediate);
 
     fft = Mantid::API::AlgorithmManager::Instance().create("FFT");
@@ -411,8 +406,7 @@ public:
     MatrixWorkspace_sptr inWS = createWS(N, 1);
 
     // Set a label
-    inWS->getAxis(0)->unit() =
-        Mantid::Kernel::UnitFactory::Instance().create("Energy");
+    inWS->getAxis(0)->unit() = Mantid::Kernel::UnitFactory::Instance().create("Energy");
 
     auto fft = Mantid::API::AlgorithmManager::Instance().create("FFT");
     fft->initialize();
@@ -577,27 +571,20 @@ public:
     fft->setProperty("AutoShift", false);
     fft->setProperty("Shift", noOffsetShift);
     fft->execute();
-    MatrixWorkspace_sptr fftManualShiftNoOffset =
-        fft->getProperty("OutputWorkspace");
+    MatrixWorkspace_sptr fftManualShiftNoOffset = fft->getProperty("OutputWorkspace");
     fft->setProperty("InputWorkspace", offsetWS);
     fft->setProperty("Shift", offsetShift);
     fft->execute();
-    MatrixWorkspace_sptr fftManualShiftWithOffset =
-        fft->getProperty("OutputWorkspace");
+    MatrixWorkspace_sptr fftManualShiftWithOffset = fft->getProperty("OutputWorkspace");
 
     // No shift - should match
-    TS_ASSERT(Mantid::API::equals(fftNoShiftNoOffset, fftNoShiftWithOffset,
-                                  tolerance));
+    TS_ASSERT(Mantid::API::equals(fftNoShiftNoOffset, fftNoShiftWithOffset, tolerance));
     // Shift - should have a phase difference (correct)
-    TS_ASSERT(!Mantid::API::equals(fftAutoShiftNoOffset, fftAutoShiftWithOffset,
-                                   tolerance));
-    TS_ASSERT(!Mantid::API::equals(fftManualShiftNoOffset,
-                                   fftManualShiftWithOffset, tolerance));
+    TS_ASSERT(!Mantid::API::equals(fftAutoShiftNoOffset, fftAutoShiftWithOffset, tolerance));
+    TS_ASSERT(!Mantid::API::equals(fftManualShiftNoOffset, fftManualShiftWithOffset, tolerance));
     // Manual shift by -X[N/2] should do the same as auto shift
-    TS_ASSERT(Mantid::API::equals(fftAutoShiftNoOffset, fftManualShiftNoOffset,
-                                  tolerance));
-    TS_ASSERT(Mantid::API::equals(fftAutoShiftWithOffset,
-                                  fftManualShiftWithOffset, tolerance));
+    TS_ASSERT(Mantid::API::equals(fftAutoShiftNoOffset, fftManualShiftNoOffset, tolerance));
+    TS_ASSERT(Mantid::API::equals(fftAutoShiftWithOffset, fftManualShiftWithOffset, tolerance));
   }
 
   void test_complexWorkspace_phase() {
@@ -646,8 +633,7 @@ public:
    * Transforms should match (although with different point spacing)
    */
   void test_differentLength_croppedSections() {
-    const auto &inputWSOne = createComplicatedPulseWS(2000, 6.2 * 2.0 * M_PI,
-                                                      4.277321, 0.8, 0.1, 5.0);
+    const auto &inputWSOne = createComplicatedPulseWS(2000, 6.2 * 2.0 * M_PI, 4.277321, 0.8, 0.1, 5.0);
     const auto &inputWSTwo = doCrop(inputWSOne, -4.0, 3.0);
     const auto &inputWSThree = doCrop(inputWSOne, -3.0, 4.0);
     const auto &fftOne = doFFT(inputWSOne, true, true);
@@ -679,8 +665,7 @@ public:
    * (Test that this succeeds for histogram data)
    */
   void test_symmetricalFunction_realTransform_histo() {
-    const auto &inputWS =
-        createSymmetricalWorkspace(2000, 6.2 * 2.0 * M_PI, 4.277321, 0.8, true);
+    const auto &inputWS = createSymmetricalWorkspace(2000, 6.2 * 2.0 * M_PI, 4.277321, 0.8, true);
     const auto &fft = doFFT(inputWS, false, true);
     const auto &imagTransform = fft->y(4); // spectrum 4 is the imaginary one
     for (const auto &y : imagTransform) {
@@ -695,8 +680,7 @@ public:
    * (Test that this succeeds for point data)
    */
   void test_symmetricalFunction_realTransform_point() {
-    const auto &inputWS = createSymmetricalWorkspace(2000, 6.2 * 2.0 * M_PI,
-                                                     4.277321, 0.8, false);
+    const auto &inputWS = createSymmetricalWorkspace(2000, 6.2 * 2.0 * M_PI, 4.277321, 0.8, false);
     const auto &fft = doFFT(inputWS, false, true);
     const auto &imagTransform = fft->y(4); // spectrum 4 is the imaginary one
     for (const auto &y : imagTransform) {
@@ -705,8 +689,7 @@ public:
   }
 
 private:
-  MatrixWorkspace_sptr doRebin(const MatrixWorkspace_sptr &inputWS,
-                               const std::string &params) {
+  MatrixWorkspace_sptr doRebin(const MatrixWorkspace_sptr &inputWS, const std::string &params) {
     auto rebin = AlgorithmManager::Instance().create("Rebin");
     rebin->initialize();
     rebin->setChild(true);
@@ -717,8 +700,7 @@ private:
     return rebin->getProperty("OutputWorkspace");
   }
 
-  MatrixWorkspace_sptr doFFT(MatrixWorkspace_sptr inputWS, const bool complex,
-                             const bool phaseShift) {
+  MatrixWorkspace_sptr doFFT(MatrixWorkspace_sptr inputWS, const bool complex, const bool phaseShift) {
     auto fft = AlgorithmManager::Instance().create("FFT");
     fft->initialize();
     fft->setChild(true);
@@ -746,17 +728,14 @@ private:
     auto fftAutoShiftWithOffset = doFFT(offsetWS, complex, true);
 
     // No shift - should match
-    TS_ASSERT(Mantid::API::equals(fftNoShiftNoOffset, fftNoShiftWithOffset,
-                                  tolerance));
+    TS_ASSERT(Mantid::API::equals(fftNoShiftNoOffset, fftNoShiftWithOffset, tolerance));
     // Shift - should have a phase difference (correct)
-    TS_ASSERT(!Mantid::API::equals(fftAutoShiftNoOffset, fftAutoShiftWithOffset,
-                                   tolerance));
+    TS_ASSERT(!Mantid::API::equals(fftAutoShiftNoOffset, fftAutoShiftWithOffset, tolerance));
   }
 
   MatrixWorkspace_sptr createWS(int n, int dn) {
-    Mantid::DataObjects::Workspace2D_sptr ws =
-        std::dynamic_pointer_cast<Mantid::DataObjects::Workspace2D>(
-            WorkspaceFactory::Instance().create("Workspace2D", 1, n + dn, n));
+    Mantid::DataObjects::Workspace2D_sptr ws = std::dynamic_pointer_cast<Mantid::DataObjects::Workspace2D>(
+        WorkspaceFactory::Instance().create("Workspace2D", 1, n + dn, n));
 
     auto &X = ws->mutableX(0);
     auto &Y = ws->mutableY(0);
@@ -802,8 +781,7 @@ private:
     return scaleX->getProperty("OutputWorkspace");
   }
 
-  MatrixWorkspace_sptr createComplexWorkspace(const size_t n,
-                                              const double omega) {
+  MatrixWorkspace_sptr createComplexWorkspace(const size_t n, const double omega) {
     Mantid::MantidVec X, Y, E;
     X.reserve(2 * n);
     Y.reserve(2 * n);
@@ -835,8 +813,7 @@ private:
     return create->getProperty("OutputWorkspace");
   }
 
-  MatrixWorkspace_sptr createPulseWS(const size_t n, const double omega,
-                                     const double x0, const double factor,
+  MatrixWorkspace_sptr createPulseWS(const size_t n, const double omega, const double x0, const double factor,
                                      const double sigma) {
     Mantid::MantidVec X, Y, E;
     X.reserve(2 * n);
@@ -873,10 +850,8 @@ private:
     return create->getProperty("OutputWorkspace");
   }
 
-  MatrixWorkspace_sptr
-  createComplicatedPulseWS(const size_t n, const double omega, const double x0,
-                           const double sigma, const double xc,
-                           const double ww) {
+  MatrixWorkspace_sptr createComplicatedPulseWS(const size_t n, const double omega, const double x0, const double sigma,
+                                                const double xc, const double ww) {
     // Create bin edges
     std::vector<double> X, Y, E;
     const size_t xSize = 2 * n + 2, ySize = 2 * n;
@@ -894,16 +869,14 @@ private:
     // imaginary spectrum
     for (size_t i = 0; i < n; ++i) {
       const double x = points[i];
-      const double yImag =
-          sin(omega * x + ww * x * x) * exp(-pow(((x - xc) * sigma), 4));
+      const double yImag = sin(omega * x + ww * x * x) * exp(-pow(((x - xc) * sigma), 4));
       Y.emplace_back(yImag);
       E.emplace_back(0.1);
     }
     // real spectrum
     for (size_t i = 0; i < n; ++i) {
       const double x = points[i];
-      const double yReal =
-          cos(omega * x + ww * x * x) * exp(-pow(((x - xc) * sigma), 4));
+      const double yReal = cos(omega * x + ww * x * x) * exp(-pow(((x - xc) * sigma), 4));
       Y.emplace_back(yReal);
       E.emplace_back(0.1);
     }
@@ -920,8 +893,7 @@ private:
     return create->getProperty("OutputWorkspace");
   }
 
-  MatrixWorkspace_sptr doCrop(const MatrixWorkspace_sptr &inputWS, double lower,
-                              double higher) {
+  MatrixWorkspace_sptr doCrop(const MatrixWorkspace_sptr &inputWS, double lower, double higher) {
     auto crop = AlgorithmManager::Instance().create("CropWorkspace");
     crop->initialize();
     crop->setChild(true);
@@ -933,11 +905,8 @@ private:
     return crop->getProperty("OutputWorkspace");
   }
 
-  MatrixWorkspace_sptr createSymmetricalWorkspace(const size_t n,
-                                                  const double omega,
-                                                  const double x0,
-                                                  const double sigma,
-                                                  const bool isHisto) {
+  MatrixWorkspace_sptr createSymmetricalWorkspace(const size_t n, const double omega, const double x0,
+                                                  const double sigma, const bool isHisto) {
     std::vector<double> X, Y;
     const size_t xSize = isHisto ? n + 1 : n;
     X.reserve(xSize);

@@ -8,12 +8,12 @@
 
 #include "MantidBeamline/ComponentInfo.h"
 #include "MantidBeamline/DetectorInfo.h"
+#include "MantidFrameworkTestHelpers/ComponentCreationHelper.h"
 #include "MantidGeometry/Instrument/Detector.h"
 #include "MantidGeometry/Instrument/Parameter.h"
 #include "MantidGeometry/Instrument/ParameterFactory.h"
 #include "MantidGeometry/Instrument/ParameterMap.h"
 #include "MantidKernel/V3D.h"
-#include "MantidTestHelpers/ComponentCreationHelper.h"
 #include <cxxtest/TestSuite.h>
 
 #include <boost/function.hpp>
@@ -31,14 +31,9 @@ public:
   static ParameterMapTest *createSuite() { return new ParameterMapTest(); }
   static void destroySuite(ParameterMapTest *suite) { delete suite; }
 
-  ParameterMapTest() {
-    m_testInstrument =
-        ComponentCreationHelper::createTestInstrumentCylindrical(1);
-  }
+  ParameterMapTest() { m_testInstrument = ComponentCreationHelper::createTestInstrumentCylindrical(1); }
 
-  void testConstructor_Does_Not_Throw() {
-    TS_ASSERT_THROWS_NOTHING(ParameterMap());
-  }
+  void testConstructor_Does_Not_Throw() { TS_ASSERT_THROWS_NOTHING(ParameterMap()); }
 
   void testParameter_Name_Functions() {
     // This should be the only test to explicitly use the string values
@@ -160,8 +155,7 @@ public:
     ParameterMap pmapA, pmapB;
 
     pmapA.addDouble(m_testInstrument.get(), "testDouble", value);
-    pmapA.addV3D(m_testInstrument.get(), "testV3D",
-                 Mantid::Kernel::V3D(1, 2, 3));
+    pmapA.addV3D(m_testInstrument.get(), "testV3D", Mantid::Kernel::V3D(1, 2, 3));
 
     auto parD = pmapA.getRecursive(m_testInstrument.get(), "testDouble");
     auto parV3 = pmapA.getRecursive(m_testInstrument.get(), "testV3D");
@@ -187,8 +181,7 @@ public:
     TS_ASSERT_EQUALS(parD->getShortDescription(), "Test description");
 
     parD->setDescription("Short description. LongDescription.");
-    TS_ASSERT_EQUALS(parD->getDescription(),
-                     "Short description. LongDescription.");
+    TS_ASSERT_EQUALS(parD->getDescription(), "Short description. LongDescription.");
     TS_ASSERT_EQUALS(parD->getShortDescription(), "Short description.");
 
     descr = pmapA.getDescription("basic", "testDouble");
@@ -238,122 +231,100 @@ public:
     TS_ASSERT_DELTA(finalValue, stored->value<double>(), DBL_EPSILON);
   }
 
-  void
-  test_Replacing_Existing_Parameter_On_A_Copy_Does_Not_Update_Original_Value_Using_Generic_Add() {
+  void test_Replacing_Existing_Parameter_On_A_Copy_Does_Not_Update_Original_Value_Using_Generic_Add() {
     using namespace Mantid::Kernel;
 
     // -- General templated function --
-    doCopyAndUpdateTestUsingGenericAdd<double>(
-        "double", 5.0, 3.5); // no need to check other types
+    doCopyAndUpdateTestUsingGenericAdd<double>("double", 5.0, 3.5); // no need to check other types
   }
 
-  void
-  test_Replacing_Existing_Parameter_On_A_Copy_Does_Not_Update_Original_Value_Using_AddHelpers() {
+  void test_Replacing_Existing_Parameter_On_A_Copy_Does_Not_Update_Original_Value_Using_AddHelpers() {
     using namespace Mantid::Kernel;
     // -- Specialized Helper Functions --
 
     // double
-    boost::function<void(ParameterMap *, const IComponent *,
-                         const std::string &, double, const std::string *const)>
+    boost::function<void(ParameterMap *, const IComponent *, const std::string &, double, const std::string *const,
+                         const std::string &)>
         faddDouble;
-    faddDouble =
-        (void (ParameterMap::*)(const IComponent *, const std::string &, double,
-                                const std::string *const)) &
-        ParameterMap::addDouble;
+    faddDouble = (void (ParameterMap::*)(const IComponent *, const std::string &, double, const std::string *const,
+                                         const std::string &)) &
+                 ParameterMap::addDouble;
     doCopyAndUpdateTestUsingAddHelpers(faddDouble, "name", 5.0, 4.0);
 
     // int
-    boost::function<void(ParameterMap *, const IComponent *,
-                         const std::string &, int, const std::string *const)>
+    boost::function<void(ParameterMap *, const IComponent *, const std::string &, int, const std::string *const,
+                         const std::string &)>
         faddInt;
-    faddInt = (void (ParameterMap::*)(const IComponent *, const std::string &,
-                                      int, const std::string *const)) &
+    faddInt = (void (ParameterMap::*)(const IComponent *, const std::string &, int, const std::string *const,
+                                      const std::string &)) &
               ParameterMap::addInt;
     doCopyAndUpdateTestUsingAddHelpers(faddInt, "name", 3, 5);
 
     // bool
-    boost::function<void(ParameterMap *, const IComponent *,
-                         const std::string &, bool, const std::string *const)>
+    boost::function<void(ParameterMap *, const IComponent *, const std::string &, bool, const std::string *const,
+                         const std::string &)>
         faddBool;
-    faddBool = (void (ParameterMap::*)(const IComponent *, const std::string &,
-                                       bool, const std::string *const)) &
+    faddBool = (void (ParameterMap::*)(const IComponent *, const std::string &, bool, const std::string *const,
+                                       const std::string &)) &
                ParameterMap::addBool;
     doCopyAndUpdateTestUsingAddHelpers(faddBool, "name", true, false);
 
     // string
-    boost::function<void(ParameterMap *, const IComponent *,
-                         const std::string &, const std::string &,
-                         const std::string *const)>
+    boost::function<void(ParameterMap *, const IComponent *, const std::string &, const std::string &,
+                         const std::string *const, const std::string &)>
         faddStr;
-    faddStr = (void (ParameterMap::*)(const IComponent *, const std::string &,
-                                      const std::string &,
-                                      const std::string *const)) &
+    faddStr = (void (ParameterMap::*)(const IComponent *, const std::string &, const std::string &,
+                                      const std::string *const, const std::string &)) &
               ParameterMap::addString;
-    doCopyAndUpdateTestUsingAddHelpers(faddStr, "name", std::string("first"),
-                                       std::string("second"));
+    doCopyAndUpdateTestUsingAddHelpers(faddStr, "name", std::string("first"), std::string("second"));
 
     // V3D
-    boost::function<void(ParameterMap *, const IComponent *,
-                         const std::string &, const V3D &,
+    boost::function<void(ParameterMap *, const IComponent *, const std::string &, const V3D &,
                          const std::string *const)>
         faddV3D;
-    faddV3D = (void (ParameterMap::*)(const IComponent *, const std::string &,
-                                      const V3D &, const std::string *const)) &
+    faddV3D = (void (ParameterMap::*)(const IComponent *, const std::string &, const V3D &, const std::string *const)) &
               ParameterMap::addV3D;
-    doCopyAndUpdateTestUsingAddHelpers(faddV3D, "name", V3D(1, 2, 3),
-                                       V3D(4, 5, 6));
+    doCopyAndUpdateTestUsingAddHelpersPositions(faddV3D, "V3D", V3D(1, 2, 3), V3D(4, 5, 6));
 
     // Quat
-    boost::function<void(ParameterMap *, const IComponent *,
-                         const std::string &, const Quat &,
+    boost::function<void(ParameterMap *, const IComponent *, const std::string &, const Quat &,
                          const std::string *const)>
         faddQuat;
     faddQuat =
-        (void (ParameterMap::*)(const IComponent *, const std::string &,
-                                const Quat &, const std::string *const)) &
+        (void (ParameterMap::*)(const IComponent *, const std::string &, const Quat &, const std::string *const)) &
         ParameterMap::addQuat;
-    doCopyAndUpdateTestUsingAddHelpers(faddQuat, "name", Quat(),
-                                       Quat(45.0, V3D(0, 0, 1)));
+    doCopyAndUpdateTestUsingAddHelpersPositions(faddQuat, "Quat", Quat(), Quat(45.0, V3D(0, 0, 1)));
   }
 
-  void
-  test_Replacing_Existing_Parameter_On_A_Copy_Does_Not_Update_Original_Value_Using_AddHelpers_As_Strings() {
+  void test_Replacing_Existing_Parameter_On_A_Copy_Does_Not_Update_Original_Value_Using_AddHelpers_As_Strings() {
     // -- Specialized Helper Functions --
 
-    using AddFuncHelper = boost::function<void(
-        ParameterMap *, const IComponent *, const std::string &,
-        const std::string &, const std::string *const)>;
+    using AddFuncHelper = boost::function<void(ParameterMap *, const IComponent *, const std::string &,
+                                               const std::string &, const std::string *const, const std::string &)>;
 
     // double
     AddFuncHelper faddDouble;
-    faddDouble = (void (ParameterMap::*)(
-                     const IComponent *, const std::string &,
-                     const std::string &, const std::string *const)) &
+    faddDouble = (void (ParameterMap::*)(const IComponent *, const std::string &, const std::string &,
+                                         const std::string *const, const std::string &)) &
                  ParameterMap::addDouble;
-    doCopyAndUpdateTestUsingAddHelpersAsStrings<AddFuncHelper, double>(
-        faddDouble, "name", 5.0, 4.0);
+    doCopyAndUpdateTestUsingAddHelpersAsStrings<AddFuncHelper, double>(faddDouble, "name", 5.0, 4.0);
 
     // int
     AddFuncHelper faddInt;
-    faddInt = (void (ParameterMap::*)(const IComponent *, const std::string &,
-                                      const std::string &,
-                                      const std::string *const)) &
+    faddInt = (void (ParameterMap::*)(const IComponent *, const std::string &, const std::string &,
+                                      const std::string *const, const std::string &)) &
               ParameterMap::addInt;
-    doCopyAndUpdateTestUsingAddHelpersAsStrings<AddFuncHelper, int>(
-        faddInt, "name", 3, 5);
+    doCopyAndUpdateTestUsingAddHelpersAsStrings<AddFuncHelper, int>(faddInt, "name", 3, 5);
 
     // bool
     AddFuncHelper faddBool;
-    faddBool = (void (ParameterMap::*)(const IComponent *, const std::string &,
-                                       const std::string &,
-                                       const std::string *const)) &
+    faddBool = (void (ParameterMap::*)(const IComponent *, const std::string &, const std::string &,
+                                       const std::string *const, const std::string &)) &
                ParameterMap::addBool;
-    doCopyAndUpdateTestUsingAddHelpersAsStrings<AddFuncHelper, bool>(
-        faddBool, "name", true, false);
+    doCopyAndUpdateTestUsingAddHelpersAsStrings<AddFuncHelper, bool>(faddBool, "name", true, false);
   }
 
-  void
-  test_Replacing_Existing_Parameter_On_A_Copy_Does_Not_Update_Original_Value_Using_AddPosition_Helper() {
+  void test_Replacing_Existing_Parameter_On_A_Copy_Does_Not_Update_Original_Value_Using_AddPosition_Helper() {
     using namespace Mantid::Kernel;
 
     ParameterMap pmap;
@@ -366,8 +337,7 @@ public:
     auto parameter = copy.get(m_testInstrument.get(), ParameterMap::pos());
     TS_ASSERT_EQUALS(origValue, parameter->value<V3D>());
     // change the value on the copy and it should NOT update on the original
-    copy.addPositionCoordinate(m_testInstrument.get(), ParameterMap::posy(),
-                               5.0);
+    copy.addPositionCoordinate(m_testInstrument.get(), ParameterMap::posy(), 5.0);
 
     V3D newValue(1, 5, 3);
     auto copyParameter = copy.get(m_testInstrument.get(), ParameterMap::pos());
@@ -376,8 +346,7 @@ public:
     TS_ASSERT_EQUALS(origValue, origParameter->value<V3D>());
   }
 
-  void
-  test_Replacing_Existing_Parameter_On_A_Copy_Does_Not_Update_Original_Value_Using_AddRotation_Helper() {
+  void test_Replacing_Existing_Parameter_On_A_Copy_Does_Not_Update_Original_Value_Using_AddRotation_Helper() {
     using namespace Mantid::Kernel;
 
     ParameterMap pmap;
@@ -410,19 +379,14 @@ public:
     TS_ASSERT_EQUALS(pmap.contains(parametrized.get(), name), false);
   }
 
-  void
-  testMap_Contains_Newly_Added_Value_For_Correct_Component_Of_Correct_Type() {
+  void testMap_Contains_Newly_Added_Value_For_Correct_Component_Of_Correct_Type() {
     ParameterMap pmap;
     const std::string name("MyValue");
     const std::string type(ParameterMap::pInt());
     const int value(1);
     pmap.add<int>(type, m_testInstrument.get(), name, value);
-    TS_ASSERT_EQUALS(
-        pmap.contains(m_testInstrument.get(), name, ParameterMap::pInt()),
-        true);
-    TS_ASSERT_EQUALS(
-        pmap.contains(m_testInstrument.get(), name, ParameterMap::pDouble()),
-        false);
+    TS_ASSERT_EQUALS(pmap.contains(m_testInstrument.get(), name, ParameterMap::pInt()), true);
+    TS_ASSERT_EQUALS(pmap.contains(m_testInstrument.get(), name, ParameterMap::pDouble()), false);
   }
 
   void testMap_Contains_Parameter() {
@@ -443,8 +407,7 @@ public:
     ParameterMap pmap;
     pmap.addDouble(parametrized.get(), camelCase, value);
     Parameter_sptr fetched = pmap.get(parametrized.get(), "TESTCASE");
-    TSM_ASSERT("The parameter should be found by a case insensitive search",
-               fetched);
+    TSM_ASSERT("The parameter should be found by a case insensitive search", fetched);
   }
 
   void testRecursive_Parameter_Search_Moves_Up_The_Instrument_Tree() {
@@ -483,8 +446,7 @@ public:
     Parameter_sptr stored = pmap.get(m_testInstrument.get(), "second");
     TSM_ASSERT("Parameter called second should still exist", stored);
     stored = pmap.get(m_testInstrument.get(), "first");
-    TSM_ASSERT_EQUALS("Parameter called first should not exist", stored,
-                      Parameter_sptr());
+    TSM_ASSERT_EQUALS("Parameter called first should not exist", stored, Parameter_sptr());
   }
 
   void testClearByName_Only_Removes_Named_Parameter_for_Cmpt() {
@@ -502,8 +464,7 @@ public:
     stored = pmap.get(comp.get(), "first");
     TSM_ASSERT("Parameter called first for child should still exist", stored);
     stored = pmap.get(m_testInstrument.get(), "first");
-    TSM_ASSERT_EQUALS("Parameter called first for inst should not exist",
-                      stored, Parameter_sptr());
+    TSM_ASSERT_EQUALS("Parameter called first for inst should not exist", stored, Parameter_sptr());
   }
 
   void testClear_Results_In_Empty_Map() {
@@ -525,10 +486,8 @@ public:
     pmap.addBool(comp.get(), "A", true);
     TS_ASSERT_EQUALS(pmap.size(), 1);
     // Try to find double type parameters, of which there should be none.
-    Parameter_sptr fetchedValue =
-        pmap.getByType(comp.get(), ParameterMap::pDouble());
-    TSM_ASSERT("Should not be able to find a double type parameter",
-               fetchedValue == nullptr);
+    Parameter_sptr fetchedValue = pmap.getByType(comp.get(), ParameterMap::pDouble());
+    TSM_ASSERT("Should not be able to find a double type parameter", fetchedValue == nullptr);
   }
 
   void test_lookup_via_type() {
@@ -542,15 +501,13 @@ public:
     TS_ASSERT_EQUALS(pmap.size(), 2);
 
     // Test the ability to correctly fetch the double argument by type.
-    Parameter_sptr fetchedValue1 =
-        pmap.getByType(comp.get(), ParameterMap::pDouble());
+    Parameter_sptr fetchedValue1 = pmap.getByType(comp.get(), ParameterMap::pDouble());
     TS_ASSERT(fetchedValue1);
     TS_ASSERT_EQUALS("A", fetchedValue1->name());
     TS_ASSERT_DELTA(1.2, fetchedValue1->value<double>(), DBL_EPSILON);
 
     // Test the ability to correctly fetch the bool argument by type.
-    Parameter_sptr fetchedValue2 =
-        pmap.getByType(comp.get(), ParameterMap::pBool());
+    Parameter_sptr fetchedValue2 = pmap.getByType(comp.get(), ParameterMap::pBool());
     TS_ASSERT(fetchedValue2);
     TS_ASSERT_EQUALS("B", fetchedValue2->name());
     TS_ASSERT_EQUALS(true, fetchedValue2->value<bool>());
@@ -564,8 +521,7 @@ public:
     pmap.addBool(component.get(), "A", true);
 
     // Find it via the component
-    Parameter_sptr fetchedValue =
-        pmap.getRecursiveByType(component.get(), ParameterMap::pBool());
+    Parameter_sptr fetchedValue = pmap.getRecursiveByType(component.get(), ParameterMap::pBool());
     TS_ASSERT(fetchedValue != nullptr);
     TS_ASSERT_EQUALS("A", fetchedValue->name());
     TS_ASSERT_EQUALS(ParameterMap::pBool(), fetchedValue->type());
@@ -581,16 +537,14 @@ public:
     pmap.addBool(parentComponent.get(), "A", true);
 
     // Find it via the child
-    Parameter_sptr fetchedValue =
-        pmap.getRecursiveByType(childComponent.get(), ParameterMap::pBool());
+    Parameter_sptr fetchedValue = pmap.getRecursiveByType(childComponent.get(), ParameterMap::pBool());
     TS_ASSERT(fetchedValue != nullptr);
     TS_ASSERT_EQUALS("A", fetchedValue->name());
     TS_ASSERT_EQUALS(ParameterMap::pBool(), fetchedValue->type());
     TS_ASSERT_EQUALS(true, fetchedValue->value<bool>());
   }
 
-  void
-  test_lookup_recursive_by_type_finds_on_current_in_preference_to_parent() {
+  void test_lookup_recursive_by_type_finds_on_current_in_preference_to_parent() {
     IComponent_sptr childComponent = m_testInstrument->getChild(0);
     IComponent_sptr parentComponent = m_testInstrument;
 
@@ -602,18 +556,27 @@ public:
     pmap.addBool(parentComponent.get(), "B", true);
 
     // Find it via the child
-    Parameter_sptr fetchedValue =
-        pmap.getRecursiveByType(childComponent.get(), ParameterMap::pBool());
+    Parameter_sptr fetchedValue = pmap.getRecursiveByType(childComponent.get(), ParameterMap::pBool());
     TS_ASSERT(fetchedValue != nullptr);
-    TSM_ASSERT_EQUALS(
-        "Has not searched through parameters with the correct priority", "A",
-        fetchedValue->name());
-    TSM_ASSERT_EQUALS(
-        "Has not searched through parameters with the correct priority",
-        ParameterMap::pBool(), fetchedValue->type());
-    TSM_ASSERT_EQUALS(
-        "Has not searched through parameters with the correct priority", false,
-        fetchedValue->value<bool>());
+    TSM_ASSERT_EQUALS("Has not searched through parameters with the correct priority", "A", fetchedValue->name());
+    TSM_ASSERT_EQUALS("Has not searched through parameters with the correct priority", ParameterMap::pBool(),
+                      fetchedValue->type());
+    TSM_ASSERT_EQUALS("Has not searched through parameters with the correct priority", false,
+                      fetchedValue->value<bool>());
+  }
+
+  void test_add_not_visible_parameter() {
+    // Add a parameter for the first component of the instrument with visible attribute
+    IComponent_sptr comp = m_testInstrument->getChild(0);
+    // Create the parameter map with a single boolean type.
+    ParameterMap pmap;
+    TS_ASSERT_EQUALS(pmap.size(), 0);
+    std::string descr("Test description");
+    pmap.addDouble(comp.get(), "A", 2.71, &descr, "false");
+    TS_ASSERT_EQUALS(pmap.size(), 1);
+    Parameter_sptr fetchedValue = pmap.getByType(comp.get(), ParameterMap::pDouble());
+    TS_ASSERT_EQUALS(fetchedValue->value<double>(), 2.71);
+    TS_ASSERT_EQUALS(fetchedValue->visible(), false);
   }
 
   void test_copy_from_old_pmap_to_new_pmap_with_new_component() {
@@ -631,10 +594,8 @@ public:
 
     newPMap.copyFromParameterMap(oldComp.get(), newComp.get(), &oldPMap);
 
-    TS_ASSERT_EQUALS(
-        newPMap.contains(newComp.get(), "A", ParameterMap::pBool()), true);
-    TS_ASSERT_EQUALS(
-        newPMap.contains(newComp.get(), "B", ParameterMap::pDouble()), true);
+    TS_ASSERT_EQUALS(newPMap.contains(newComp.get(), "A", ParameterMap::pBool()), true);
+    TS_ASSERT_EQUALS(newPMap.contains(newComp.get(), "B", ParameterMap::pDouble()), true);
 
     Parameter_sptr a = newPMap.get(newComp.get(), "A");
     TS_ASSERT_EQUALS(a->value<bool>(), false);
@@ -651,18 +612,14 @@ public:
     ParameterMap pmap;
     auto comp = m_testInstrument.get();
     pmap.addDouble(comp, "d", 0.123456789012345);
-    pmap.addV3D(comp, "v",
-                Mantid::Kernel::V3D(0.123456789012345, 0.123456789012345,
-                                    0.123456789012345));
+    pmap.addV3D(comp, "v", Mantid::Kernel::V3D(0.123456789012345, 0.123456789012345, 0.123456789012345));
     TS_ASSERT_EQUALS(pmap.get(comp, "d")->asString(), "0.123456789012345");
-    TS_ASSERT_EQUALS(pmap.get(comp, "v")->asString(),
-                     "[0.123456789012345,0.123456789012345,0.123456789012345]");
+    TS_ASSERT_EQUALS(pmap.get(comp, "v")->asString(), "[0.123456789012345,0.123456789012345,0.123456789012345]");
   }
 
 private:
   template <typename ValueType>
-  void doCopyAndUpdateTestUsingGenericAdd(const std::string &type,
-                                          const ValueType &origValue,
+  void doCopyAndUpdateTestUsingGenericAdd(const std::string &type, const ValueType &origValue,
                                           const ValueType &newValue) {
     ParameterMap pmap;
     const std::string name = "Parameter";
@@ -683,13 +640,29 @@ private:
   }
 
   template <typename FuncType, typename ValueType>
-  void doCopyAndUpdateTestUsingAddHelpers(const FuncType &addFunc,
-                                          const std::string &name,
-                                          const ValueType &origValue,
+  void doCopyAndUpdateTestUsingAddHelpers(const FuncType &addFunc, const std::string &name, const ValueType &origValue,
                                           const ValueType &newValue) {
     ParameterMap pmap;
-    addFunc(&pmap, m_testInstrument.get(), name, origValue, NULL);
+    addFunc(&pmap, m_testInstrument.get(), name, origValue, NULL, "true");
+    ParameterMap copy(pmap); // invoke copy constructor
 
+    TS_ASSERT_EQUALS(1, copy.size());
+    auto parameter = copy.get(m_testInstrument.get(), name);
+    TS_ASSERT_EQUALS(origValue, parameter->value<ValueType>());
+    // change the value on the copy and it should NOT update on the original
+    addFunc(&copy, m_testInstrument.get(), name, newValue, NULL, "true");
+
+    auto copyParameter = copy.get(m_testInstrument.get(), name);
+    TS_ASSERT_EQUALS(newValue, copyParameter->value<ValueType>());
+    auto origParameter = pmap.get(m_testInstrument.get(), name);
+    TS_ASSERT_EQUALS(origValue, origParameter->value<ValueType>());
+  }
+
+  template <typename FuncType, typename ValueType>
+  void doCopyAndUpdateTestUsingAddHelpersPositions(const FuncType &addFunc, const std::string &name,
+                                                   const ValueType &origValue, const ValueType &newValue) {
+    ParameterMap pmap;
+    addFunc(&pmap, m_testInstrument.get(), name, origValue, NULL);
     ParameterMap copy(pmap); // invoke copy constructor
 
     TS_ASSERT_EQUALS(1, copy.size());
@@ -705,14 +678,13 @@ private:
   }
 
   template <typename FuncType, typename ValueType>
-  void doCopyAndUpdateTestUsingAddHelpersAsStrings(
-      const FuncType &addFunc, const std::string &name,
-      const ValueType &origTypedValue, const ValueType &newTypedValue) {
+  void doCopyAndUpdateTestUsingAddHelpersAsStrings(const FuncType &addFunc, const std::string &name,
+                                                   const ValueType &origTypedValue, const ValueType &newTypedValue) {
     std::string origValue = boost::lexical_cast<std::string>(origTypedValue);
     std::string newValue = boost::lexical_cast<std::string>(newTypedValue);
 
     ParameterMap pmap;
-    addFunc(&pmap, m_testInstrument.get(), name, origValue, NULL);
+    addFunc(&pmap, m_testInstrument.get(), name, origValue, NULL, "true");
 
     ParameterMap copy(pmap); // invoke copy constructor
 
@@ -720,7 +692,7 @@ private:
     auto parameter = copy.get(m_testInstrument.get(), name);
     TS_ASSERT_EQUALS(origTypedValue, parameter->value<ValueType>());
     // change the value on the copy and it should NOT update on the original
-    addFunc(&copy, m_testInstrument.get(), name, newValue, NULL);
+    addFunc(&copy, m_testInstrument.get(), name, newValue, NULL, "true");
 
     auto copyParameter = copy.get(m_testInstrument.get(), name);
     TS_ASSERT_EQUALS(newTypedValue, copyParameter->value<ValueType>());
@@ -735,9 +707,7 @@ private:
 //----------------------------------------
 class ParameterMapTestPerformance : public CxxTest::TestSuite {
 public:
-  static ParameterMapTestPerformance *createSuite() {
-    return new ParameterMapTestPerformance();
-  }
+  static ParameterMapTestPerformance *createSuite() { return new ParameterMapTestPerformance(); }
   static void destroySuite(ParameterMapTestPerformance *suite) { delete suite; }
 
   ParameterMapTestPerformance() {
@@ -749,8 +719,7 @@ public:
     // One object
     const double cylRadius(0.004), cylHeight(0.0002);
     IObject_sptr pixelShape = ComponentCreationHelper::createCappedCylinder(
-        cylRadius, cylHeight, V3D(0.0, -cylHeight / 2.0, 0.0), V3D(0., 1.0, 0.),
-        "pixel-shape");
+        cylRadius, cylHeight, V3D(0.0, -cylHeight / 2.0, 0.0), V3D(0., 1.0, 0.), "pixel-shape");
 
     // Create a hierarchy
     // Inst

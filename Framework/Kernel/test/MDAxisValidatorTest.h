@@ -22,9 +22,7 @@ class MDAxisValidatorTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static MDAxisValidatorTest *createSuite() {
-    return new MDAxisValidatorTest();
-  }
+  static MDAxisValidatorTest *createSuite() { return new MDAxisValidatorTest(); }
   static void destroySuite(MDAxisValidatorTest *suite) { delete suite; }
 
   /**
@@ -90,14 +88,12 @@ private:
    * vector is empty
    * @returns A shared pointer to an MDAxisValidator with the given properties
    */
-  MDAxisValidator_sptr createValidator(int nAxes, int nDimensions,
-                                       bool checkIfEmpty) const {
+  MDAxisValidator_sptr createValidator(int nAxes, int nDimensions, bool checkIfEmpty) const {
     std::vector<int> axes;
     for (int i = 0; i < nAxes; i++) {
       axes.emplace_back(i);
     }
-    auto checker =
-        std::make_shared<MDAxisValidator>(axes, nDimensions, checkIfEmpty);
+    auto checker = std::make_shared<MDAxisValidator>(axes, nDimensions, checkIfEmpty);
     return checker;
   }
 };

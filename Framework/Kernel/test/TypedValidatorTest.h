@@ -12,13 +12,11 @@
 #include <cxxtest/TestSuite.h>
 #include <memory>
 
-#define DECLARE_TEST_VALIDATOR(ClassName, HeldType)                            \
-  class ClassName : public Mantid::Kernel::TypedValidator<HeldType> {          \
-  public:                                                                      \
-    Mantid::Kernel::IValidator_sptr clone() const override {                   \
-      return std::make_shared<ClassName>();                                    \
-    }                                                                          \
-    std::string checkValidity(const HeldType &) const override { return ""; }  \
+#define DECLARE_TEST_VALIDATOR(ClassName, HeldType)                                                                    \
+  class ClassName : public Mantid::Kernel::TypedValidator<HeldType> {                                                  \
+  public:                                                                                                              \
+    Mantid::Kernel::IValidator_sptr clone() const override { return std::make_shared<ClassName>(); }                   \
+    std::string checkValidity(const HeldType &) const override { return ""; }                                          \
   };
 
 /// Dummy object to hold in a shared_ptr for test
@@ -35,41 +33,32 @@ public:
 private:
   std::string m_name{"Empty"};
 };
-DECLARE_TEST_VALIDATOR(DataItemSptrTypedValidator,
-                       std::shared_ptr<FakeDataItem>)
+DECLARE_TEST_VALIDATOR(DataItemSptrTypedValidator, std::shared_ptr<FakeDataItem>)
 
 class TypedValidatorTest : public CxxTest::TestSuite {
 public:
   void test_shared_ptr_is_passed_successfully_to_concrete_validator() {
-    Mantid::Kernel::IValidator_sptr valueChecker =
-        std::make_shared<SharedPtrTypedValidator>();
+    Mantid::Kernel::IValidator_sptr valueChecker = std::make_shared<SharedPtrTypedValidator>();
     const std::shared_ptr<Holder> testPtr = std::make_shared<Holder>();
 
-    checkIsValidReturnsEmptyString<std::shared_ptr<Holder>>(valueChecker,
-                                                            testPtr);
+    checkIsValidReturnsEmptyString<std::shared_ptr<Holder>>(valueChecker, testPtr);
   }
 
   void test_simple_type_passed_successfully_to_concrete_validator() {
-    Mantid::Kernel::IValidator_sptr valueChecker =
-        std::make_shared<PODTypedValidator>();
+    Mantid::Kernel::IValidator_sptr valueChecker = std::make_shared<PODTypedValidator>();
 
     checkIsValidReturnsEmptyString<double>(valueChecker, 10.0);
   }
 
-  void
-  test_DataItem_sptr_descendent_is_passed_successfully_to_concrete_validator() {
-    Mantid::Kernel::IValidator_sptr valueChecker =
-        std::make_shared<DataItemSptrTypedValidator>();
+  void test_DataItem_sptr_descendent_is_passed_successfully_to_concrete_validator() {
+    Mantid::Kernel::IValidator_sptr valueChecker = std::make_shared<DataItemSptrTypedValidator>();
     std::shared_ptr<FakeDataItem> fakeData = std::make_shared<FakeDataItem>();
-    checkIsValidReturnsEmptyString<std::shared_ptr<FakeDataItem>>(valueChecker,
-                                                                  fakeData);
+    checkIsValidReturnsEmptyString<std::shared_ptr<FakeDataItem>>(valueChecker, fakeData);
   }
 
 private:
   template <typename HeldType>
-  void checkIsValidReturnsEmptyString(
-      const Mantid::Kernel::IValidator_sptr &valueChecker,
-      const HeldType &value) {
+  void checkIsValidReturnsEmptyString(const Mantid::Kernel::IValidator_sptr &valueChecker, const HeldType &value) {
     std::string error;
     TS_ASSERT_THROWS_NOTHING(error = valueChecker->isValid(value));
     TS_ASSERT_EQUALS(error, "");

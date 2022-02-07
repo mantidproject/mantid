@@ -14,22 +14,18 @@
 using Mantid::API::Workspace_sptr;
 using Mantid::API::WorkspaceGroup;
 
-namespace Mantid {
-namespace DataHandling {
+namespace Mantid::DataHandling {
 
 DECLARE_ALGORITHM(LoadNexusMonitors)
 
 /// Initialization method.
 void LoadNexusMonitors::init() {
-  declareProperty(
-      std::make_unique<API::FileProperty>("Filename", "",
-                                          API::FileProperty::Load, ".nxs"),
-      "The name (including its full or relative path) of the NeXus file to "
-      "attempt to load. The file extension must either be .nxs or .NXS");
+  declareProperty(std::make_unique<API::FileProperty>("Filename", "", API::FileProperty::Load, ".nxs"),
+                  "The name (including its full or relative path) of the NeXus file to "
+                  "attempt to load. The file extension must either be .nxs or .NXS");
 
   declareProperty(
-      std::make_unique<API::WorkspaceProperty<API::Workspace>>(
-          "OutputWorkspace", "", Kernel::Direction::Output),
+      std::make_unique<API::WorkspaceProperty<API::Workspace>>("OutputWorkspace", "", Kernel::Direction::Output),
       "The name of the output workspace in which to load the NeXus monitors.");
 }
 
@@ -68,10 +64,9 @@ void LoadNexusMonitors::exec() {
       std::stringstream ssPropName;
       ssPropName << "OutputWorkspace"
                  << "_" << i + 1;
-      declareProperty(
-          std::make_unique<API::WorkspaceProperty<API::Workspace>>(
-              ssPropName.str(), ssWsName.str(), Kernel::Direction::Output),
-          "Additional output workspace for multi period monitors.");
+      declareProperty(std::make_unique<API::WorkspaceProperty<API::Workspace>>(ssPropName.str(), ssWsName.str(),
+                                                                               Kernel::Direction::Output),
+                      "Additional output workspace for multi period monitors.");
       setProperty(ssPropName.str(), ws_group->getItem(i));
     }
   }
@@ -79,5 +74,4 @@ void LoadNexusMonitors::exec() {
   setProperty("OutputWorkspace", ws);
 }
 
-} // namespace DataHandling
-} // namespace Mantid
+} // namespace Mantid::DataHandling

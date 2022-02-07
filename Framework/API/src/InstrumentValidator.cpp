@@ -11,16 +11,14 @@
 #include <list>
 #include <memory>
 
-namespace Mantid {
-namespace API {
+namespace Mantid::API {
 using Kernel::Strings::join;
 
 /**
  * Construct a validator with requirements (default = SamplePosition)
  * @param flags A combination of flags to specify requirements
  */
-InstrumentValidator::InstrumentValidator(const unsigned int flags)
-    : m_requires(flags) {}
+InstrumentValidator::InstrumentValidator(const unsigned int flags) : m_requires(flags) {}
 
 /**
  * @return A string type identifier for the object
@@ -30,25 +28,22 @@ std::string InstrumentValidator::getType() const { return "Instrument"; }
 /**
  * @return A copy of the current state of the object
  */
-Kernel::IValidator_sptr InstrumentValidator::clone() const {
-  return std::make_shared<InstrumentValidator>(*this);
-}
+Kernel::IValidator_sptr InstrumentValidator::clone() const { return std::make_shared<InstrumentValidator>(*this); }
 
 /** Checks that the workspace has an instrument defined
  *  @param value :: The workspace to test
  *  @return A user-level description if a problem exists or ""
  */
-std::string InstrumentValidator::checkValidity(
-    const std::shared_ptr<ExperimentInfo> &value) const {
+std::string InstrumentValidator::checkValidity(const std::shared_ptr<ExperimentInfo> &value) const {
   const auto inst = value->getInstrument();
   if (!inst)
     return "The workspace must have an instrument defined";
 
   std::list<std::string> missing;
-  if ((m_requires & SourcePosition) && !inst->getSource()) {
+  if ((m_requires & SourcePosition) && !inst->hasSource()) {
     missing.emplace_back("source");
   }
-  if ((m_requires & SamplePosition) && !inst->getSample()) {
+  if ((m_requires & SamplePosition) && !inst->hasSample()) {
     missing.emplace_back("sample holder");
   }
 
@@ -61,5 +56,4 @@ std::string InstrumentValidator::checkValidity(
   }
 }
 
-} // namespace API
-} // namespace Mantid
+} // namespace Mantid::API

@@ -17,8 +17,7 @@
 /*  Following A.J.Schultz's anvred, scaling the vanadium spectra:
  */
 
-namespace Mantid {
-namespace Crystal {
+namespace Mantid::Crystal {
 
 // Register the class into the algorithm factory
 DECLARE_ALGORITHM(NormaliseVanadium)
@@ -34,18 +33,15 @@ void NormaliseVanadium::init() {
   // The input workspace must have an instrument and units of wavelength
   auto wsValidator = std::make_shared<InstrumentValidator>();
 
-  declareProperty(std::make_unique<WorkspaceProperty<>>(
-                      "InputWorkspace", "", Direction::Input, wsValidator),
+  declareProperty(std::make_unique<WorkspaceProperty<>>("InputWorkspace", "", Direction::Input, wsValidator),
                   "The X values for the input workspace must be in units of "
                   "wavelength or TOF");
-  declareProperty(std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
-                                                        Direction::Output),
+  declareProperty(std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "", Direction::Output),
                   "Output workspace name");
 
   auto mustBePositive = std::make_shared<BoundedValidator<double>>();
   mustBePositive->setLower(0.0);
-  declareProperty("Wavelength", 1.0, mustBePositive,
-                  "Normalizes spectra to this wavelength");
+  declareProperty("Wavelength", 1.0, mustBePositive, "Normalizes spectra to this wavelength");
 }
 
 void NormaliseVanadium::exec() {
@@ -56,8 +52,7 @@ void NormaliseVanadium::exec() {
   // Get the input parameters
   double lambdanorm = getProperty("Wavelength"); // in 1/cm
 
-  MatrixWorkspace_sptr correctionFactors =
-      WorkspaceFactory::Instance().create(m_inputWS);
+  MatrixWorkspace_sptr correctionFactors = WorkspaceFactory::Instance().create(m_inputWS);
 
   const auto numHists = static_cast<int64_t>(m_inputWS->getNumberHistograms());
   const auto specSize = static_cast<int64_t>(m_inputWS->blocksize());
@@ -86,17 +81,13 @@ void NormaliseVanadium::exec() {
     if (!spectrumInfo.hasDetectors(i))
       continue;
 
-    // This is the scattered beam direction
-    double L2 = spectrumInfo.l2(i);
-    // Two-theta = polar angle = scattering angle = between +Z vector and the
-    // scattered beam
-    double scattering = spectrumInfo.twoTheta(i);
-
     Mantid::Kernel::Units::Wavelength wl;
+    Mantid::Kernel::Units::TOF tof;
+    UnitParametersMap pmap{};
+    spectrumInfo.getDetectorValues(tof, wl, Kernel::DeltaEMode::Elastic, false, i, pmap);
     auto timeflight = inSpec.points();
     if (unitStr == "TOF")
-      wl.fromTOF(timeflight.mutableRawData(), timeflight.mutableRawData(), L1,
-                 L2, scattering, 0, 0, 0);
+      wl.fromTOF(timeflight.mutableRawData(), timeflight.mutableRawData(), L1, 0, pmap);
 
     // Loop through the bins in the current spectrum
     double lambp = 0;
@@ -113,8 +104,7 @@ void NormaliseVanadium::exec() {
       lambm = lambda;
       normm = Yin[j];
     }
-    double normvalue =
-        normm + (lambdanorm - lambm) * (normp - normm) / (lambp - lambm);
+    double normvalue = normm + (lambdanorm - lambm) * (normp - normm) / (lambp - lambm);
     for (int64_t j = 0; j < specSize; j++) {
       Y[j] = Yin[j] / normvalue;
       E[j] = Ein[j] / normvalue;
@@ -129,5 +119,4 @@ void NormaliseVanadium::exec() {
   setProperty("OutputWorkspace", correctionFactors);
 }
 
-} // namespace Crystal
-} // namespace Mantid
+} // namespace Mantid::Crystal

@@ -7,6 +7,7 @@
 #pragma once
 
 #include "MantidAPI/Algorithm.h"
+#include "MantidAPI/ExperimentInfo.h"
 #include "MantidDataHandling/MeshFileIO.h"
 #include "MantidGeometry/Objects/MeshObject.h"
 
@@ -17,6 +18,7 @@ namespace DataHandling {
      The following file types are supported
 
        STL file with suffix .stl
+       OFF file with suffix .off
 
 
 @author Karl Palmen ISIS;
@@ -37,21 +39,16 @@ public:
   int version() const override { return 1; };
   /// Related algorithms
   const std::vector<std::string> seeAlso() const override {
-    return {"CreateSampleShape", "CopySample", "SetSampleMaterial",
-            "LoadSampleEnvironment"};
+    return {"CreateSampleShape", "CopySample", "SetSampleMaterial", "LoadSampleEnvironment"};
   }
   /// Algorithm's category for identification overriding a virtual method
-  const std::string category() const override {
-    return "DataHandling\\Instrument";
-  }
+  const std::string category() const override { return "DataHandling\\Instrument"; }
 
 private:
   // Implement abstract Algorithm methods
   void init() override;
   void exec() override;
 };
-void DLLExport rotate(Geometry::MeshObject &sampleMesh,
-                      const API::MatrixWorkspace_const_sptr &inputWS);
 
 } // namespace DataHandling
 } // namespace Mantid

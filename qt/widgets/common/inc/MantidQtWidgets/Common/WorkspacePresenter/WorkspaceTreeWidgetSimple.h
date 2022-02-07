@@ -30,15 +30,15 @@ function overides
 \date   16-01-2018
 \version 1.0
 */
-class EXPORT_OPT_MANTIDQT_COMMON WorkspaceTreeWidgetSimple
-    : public WorkspaceTreeWidget {
+class EXPORT_OPT_MANTIDQT_COMMON WorkspaceTreeWidgetSimple : public WorkspaceTreeWidget {
   Q_OBJECT
 public:
-  explicit WorkspaceTreeWidgetSimple(bool viewOnly, QWidget *parent = nullptr);
+  explicit WorkspaceTreeWidgetSimple(bool viewOnly = false, QWidget *parent = nullptr);
   ~WorkspaceTreeWidgetSimple();
 
   // Context Menu Handlers
   void popupContextMenu() override;
+  void setOverplotDisabled(bool disabled);
 
 signals:
   void plotSpectrumClicked(const QStringList &workspaceNames);
@@ -54,9 +54,24 @@ signals:
   void showAlgorithmHistoryClicked(const QStringList &workspaceNames);
   void showDetectorsClicked(const QStringList &workspaceNames);
   void plotAdvancedClicked(const QStringList &workspaceNames);
+  void plotSurfaceClicked(const QStringList &workspaceNames);
+  void plotWireframeClicked(const QStringList &workspaceNames);
+  void plotContourClicked(const QStringList &workspaceNames);
+  void sampleMaterialClicked(const QStringList &workspaceNames);
+  void superplotClicked(const QStringList &workspaceNames);
+  void superplotWithErrsClicked(const QStringList &workspaceNames);
+  void superplotBinsClicked(const QStringList &workspaceNames);
+  void superplotBinsWithErrsClicked(const QStringList &workspaceNames);
+  void contextMenuAboutToShow(void);
 
   void workspaceDoubleClicked(const QString &workspaceName);
   void treeSelectionChanged();
+
+  // Signal when plot MDHistogram clicked
+  void plotMDHistoClicked(const QStringList &workspaceNames);
+  void overplotMDHistoClicked(const QStringList &workspaceNames);
+  void plotMDHistoWithErrorsClicked(const QStringList &workspaceNames);
+  void overplotMDHistoWithErrorsClicked(const QStringList &workspaceNames);
 
 private slots:
   void onPlotSpectrumClicked();
@@ -72,12 +87,25 @@ private slots:
   void onShowAlgorithmHistoryClicked();
   void onShowDetectorsClicked();
   void onPlotAdvancedClicked();
+  void onPlotSurfaceClicked();
+  void onPlotWireframeClicked();
+  void onPlotContourClicked();
+  void onPlotMDHistoWorkspaceClicked(); // Linked to plotMDHistoClicked
+  void onOverPlotMDHistoWorkspaceClicked();
+  void onPlotMDHistoWorkspaceWithErrorsClicked();
+  void onOverPlotMDHistoWorkspaceWithErrorsClicked();
+  void onSampleMaterialClicked();
+  void onSuperplotClicked();
+  void onSuperplotWithErrsClicked();
+  void onSuperplotBinsClicked();
+  void onSuperplotBinsWithErrsClicked();
 
 private:
-  QAction *m_plotSpectrum, *m_plotBin, *m_overplotSpectrum,
-      *m_plotSpectrumWithErrs, *m_overplotSpectrumWithErrs, *m_plotColorfill,
-      *m_sampleLogs, *m_sliceViewer, *m_showInstrument, *m_showData,
-      *m_showAlgorithmHistory, *m_showDetectors, *m_plotAdvanced;
+  QAction *m_plotSpectrum, *m_plotBin, *m_overplotSpectrum, *m_plotSpectrumWithErrs, *m_overplotSpectrumWithErrs,
+      *m_plotColorfill, *m_sampleLogs, *m_sliceViewer, *m_showInstrument, *m_showData, *m_showAlgorithmHistory,
+      *m_showDetectors, *m_plotAdvanced, *m_plotSurface, *m_plotWireframe, *m_plotContour, *m_plotMDHisto1D,
+      *m_overplotMDHisto1D, *m_plotMDHisto1DWithErrs, *m_overplotMDHisto1DWithErrs, *m_sampleMaterial, *m_superplot,
+      *m_superplotWithErrs, *m_superplotBins, *m_superplotBinsWithErrs;
 };
 } // namespace MantidWidgets
 } // namespace MantidQt

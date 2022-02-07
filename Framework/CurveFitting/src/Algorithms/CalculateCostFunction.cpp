@@ -10,9 +10,7 @@
 #include "MantidCurveFitting/CostFunctions/CostFuncFitting.h"
 #include "MantidKernel/ListValidator.h"
 
-namespace Mantid {
-namespace CurveFitting {
-namespace Algorithms {
+namespace Mantid::CurveFitting::Algorithms {
 
 using namespace Kernel;
 using namespace API;
@@ -23,9 +21,7 @@ DECLARE_ALGORITHM(CalculateCostFunction)
 //----------------------------------------------------------------------------------------------
 
 /// Algorithms name for identification. @see Algorithm::name
-const std::string CalculateCostFunction::name() const {
-  return "CalculateCostFunction";
-}
+const std::string CalculateCostFunction::name() const { return "CalculateCostFunction"; }
 
 /// Algorithm's version for identification. @see Algorithm::version
 int CalculateCostFunction::version() const { return 1; }
@@ -40,8 +36,7 @@ const std::string CalculateCostFunction::summary() const {
 /// Initialize the algorithm's properties.
 void CalculateCostFunction::initConcrete() {
   declareCostFunctionProperty();
-  declareProperty("Value", 0.0, "Output value of the cost function.",
-                  Direction::Output);
+  declareProperty("Value", 0.0, "Output value of the cost function.", Direction::Output);
 }
 
 //----------------------------------------------------------------------------------------------
@@ -58,6 +53,4 @@ void CalculateCostFunction::execConcrete() {
   setProperty("Value", value);
 }
 
-} // namespace Algorithms
-} // namespace CurveFitting
-} // namespace Mantid
+} // namespace Mantid::CurveFitting::Algorithms

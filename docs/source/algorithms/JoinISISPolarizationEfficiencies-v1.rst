@@ -18,7 +18,7 @@ Usage
 -----
 
 .. testcode:: Example
-    
+
     # Create input workspaces which can have different sizes
     ws1 = CreateWorkspace([1, 2, 3], [1, 1])
     ws2 = CreateWorkspace([2, 3, 4, 5], [1, 1, 1])
@@ -32,7 +32,7 @@ Usage
 
 Output:
 
-.. testoutput:: Example 
+.. testoutput:: Example
 
     Number of spectra = 2
     Number of bins    = 3

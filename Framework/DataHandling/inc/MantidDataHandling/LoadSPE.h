@@ -31,19 +31,13 @@ public:
   /// Algorithm's name
   const std::string name() const override { return "LoadSPE"; }
   /// Summary of algorithms purpose
-  const std::string summary() const override {
-    return "Loads a file written in the spe format.";
-  }
+  const std::string summary() const override { return "Loads a file written in the spe format."; }
 
   /// Algorithm's version
   int version() const override { return (1); }
-  const std::vector<std::string> seeAlso() const override {
-    return {"SaveSPE"};
-  }
+  const std::vector<std::string> seeAlso() const override { return {"SaveSPE"}; }
   /// Algorithm's category for identification
-  const std::string category() const override {
-    return "DataHandling\\SPE;Inelastic\\DataHandling";
-  }
+  const std::string category() const override { return "DataHandling\\SPE;Inelastic\\DataHandling"; }
   /// Returns a confidence value that this algorithm can load a file
   int confidence(Kernel::FileDescriptor &descriptor) const override;
 
@@ -53,8 +47,7 @@ private:
   // Execution code
   void exec() override;
 
-  void readHistogram(FILE *speFile, const API::MatrixWorkspace_sptr &workspace,
-                     size_t index);
+  void readHistogram(FILE *speFile, const API::MatrixWorkspace_sptr &workspace, size_t index);
   void reportFormatError(const std::string &what);
 
   std::string m_filename; ///< The file to load

@@ -46,19 +46,13 @@ public:
   /// Algorithm's name for identification overriding a virtual method
   const std::string name() const override { return "LoadMuonLog"; };
   /// Summary of algorithms purpose
-  const std::string summary() const override {
-    return "Load log data from within Muon Nexus files into a workspace.";
-  }
+  const std::string summary() const override { return "Load log data from within Muon Nexus files into a workspace."; }
 
   /// Algorithm's version for identification overriding a virtual method
   int version() const override { return 1; };
-  const std::vector<std::string> seeAlso() const override {
-    return {"LoadLog", "LoadLogPropertyTable"};
-  }
+  const std::vector<std::string> seeAlso() const override { return {"LoadLog", "LoadLogPropertyTable"}; }
   /// Algorithm's category for identification overriding a virtual method
-  const std::string category() const override {
-    return "DataHandling\\Logs;Muon\\DataHandling";
-  }
+  const std::string category() const override { return "DataHandling\\Logs;Muon\\DataHandling"; }
 
 private:
   /// Overwrites Algorithm method.
@@ -67,8 +61,7 @@ private:
   /// Overwrites Algorithm method
   void exec() override;
   /// Adds a log to the workspace
-  void addLogValueFromIndex(MuonNexusReader &nxload, const int &index,
-                            API::MatrixWorkspace_sptr &localWorkspace,
+  void addLogValueFromIndex(MuonNexusReader &nxload, const int &index, API::MatrixWorkspace_sptr &localWorkspace,
                             std::set<std::string> &logNames);
   /// The name and path of an input file. This may be the filename of a raw
   /// datafile or the name of a specific log file.

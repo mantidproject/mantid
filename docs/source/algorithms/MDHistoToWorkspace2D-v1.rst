@@ -31,7 +31,7 @@ Usage
    FakeMDEventData(InputWorkspace='demo', PeakParams='32,0,0,0,1')
    input = BinMD(InputWorkspace='demo', AlignedDim0='A,-2,2,4', AlignedDim1='B,-2,2,4', AlignedDim2='C,-2,2,4')
 
-   # Run the algorithm 
+   # Run the algorithm
    output = MDHistoToWorkspace2D(InputWorkspace='input')
 
    # print 6th group of 4 bins in both input and output workspaces

@@ -52,84 +52,51 @@ public:
 
   virtual void anyChangeHandle();
   virtual void addHandle(const std::string &wsName, const Workspace_sptr &ws);
-  virtual void replaceHandle(const std::string &wsName,
-                             const Workspace_sptr &ws);
-  virtual void deleteHandle(const std::string &wsName,
-                            const Workspace_sptr &ws);
+  virtual void replaceHandle(const std::string &wsName, const Workspace_sptr &ws);
+  virtual void deleteHandle(const std::string &wsName, const Workspace_sptr &ws);
   virtual void clearHandle();
-  virtual void renameHandle(const std::string &wsName,
-                            const std::string &newName);
+  virtual void renameHandle(const std::string &wsName, const std::string &newName);
   virtual void groupHandle(const std::string &wsName, const Workspace_sptr &ws);
-  virtual void unGroupHandle(const std::string &wsName,
-                             const Workspace_sptr &ws);
-  virtual void groupUpdateHandle(const std::string &wsName,
-                                 const Workspace_sptr &ws);
+  virtual void unGroupHandle(const std::string &wsName, const Workspace_sptr &ws);
+  virtual void groupUpdateHandle(const std::string &wsName, const Workspace_sptr &ws);
 
 private:
-  bool m_observingAdd{false}, m_observingReplace{false},
-      m_observingDelete{false}, m_observingClear{false},
-      m_observingRename{false}, m_observingGroup{false},
-      m_observingUnGroup{false}, m_observingGroupUpdate{false};
+  bool m_observingAdd{false}, m_observingReplace{false}, m_observingDelete{false}, m_observingClear{false},
+      m_observingRename{false}, m_observingGroup{false}, m_observingUnGroup{false}, m_observingGroupUpdate{false};
 
-  void _addHandle(
-      const Poco::AutoPtr<AnalysisDataServiceImpl::AddNotification> &pNf);
-  void _replaceHandle(
-      const Poco::AutoPtr<AnalysisDataServiceImpl::AfterReplaceNotification>
-          &pNf);
-  void _deleteHandle(
-      const Poco::AutoPtr<AnalysisDataServiceImpl::PreDeleteNotification> &pNf);
-  void _clearHandle(
-      const Poco::AutoPtr<AnalysisDataServiceImpl::ClearNotification> &pNf);
-  void _renameHandle(
-      const Poco::AutoPtr<AnalysisDataServiceImpl::RenameNotification> &pNf);
-  void _groupHandle(
-      const Poco::AutoPtr<AnalysisDataServiceImpl::GroupWorkspacesNotification>
-          &pNf);
-  void _unGroupHandle(
-      const Poco::AutoPtr<
-          AnalysisDataServiceImpl::UnGroupingWorkspaceNotification> &pNf);
-  void _groupUpdateHandle(
-      const Poco::AutoPtr<AnalysisDataServiceImpl::GroupUpdatedNotification>
-          &pNf);
+  void _addHandle(const Poco::AutoPtr<AnalysisDataServiceImpl::AddNotification> &pNf);
+  void _replaceHandle(const Poco::AutoPtr<AnalysisDataServiceImpl::AfterReplaceNotification> &pNf);
+  void _deleteHandle(const Poco::AutoPtr<AnalysisDataServiceImpl::PreDeleteNotification> &pNf);
+  void _clearHandle(const Poco::AutoPtr<AnalysisDataServiceImpl::ClearNotification> &pNf);
+  void _renameHandle(const Poco::AutoPtr<AnalysisDataServiceImpl::RenameNotification> &pNf);
+  void _groupHandle(const Poco::AutoPtr<AnalysisDataServiceImpl::GroupWorkspacesNotification> &pNf);
+  void _unGroupHandle(const Poco::AutoPtr<AnalysisDataServiceImpl::UnGroupingWorkspaceNotification> &pNf);
+  void _groupUpdateHandle(const Poco::AutoPtr<AnalysisDataServiceImpl::GroupUpdatedNotification> &pNf);
 
   /// Poco::NObserver for AddNotification.
-  Poco::NObserver<AnalysisDataServiceObserver,
-                  AnalysisDataServiceImpl::AddNotification>
-      m_addObserver;
+  Poco::NObserver<AnalysisDataServiceObserver, AnalysisDataServiceImpl::AddNotification> m_addObserver;
 
   /// Poco::NObserver for ReplaceNotification.
-  Poco::NObserver<AnalysisDataServiceObserver,
-                  AnalysisDataServiceImpl::AfterReplaceNotification>
-      m_replaceObserver;
+  Poco::NObserver<AnalysisDataServiceObserver, AnalysisDataServiceImpl::AfterReplaceNotification> m_replaceObserver;
 
   /// Poco::NObserver for DeleteNotification.
-  Poco::NObserver<AnalysisDataServiceObserver,
-                  AnalysisDataServiceImpl::PreDeleteNotification>
-      m_deleteObserver;
+  Poco::NObserver<AnalysisDataServiceObserver, AnalysisDataServiceImpl::PreDeleteNotification> m_deleteObserver;
 
   /// Poco::NObserver for ClearNotification
-  Poco::NObserver<AnalysisDataServiceObserver,
-                  AnalysisDataServiceImpl::ClearNotification>
-      m_clearObserver;
+  Poco::NObserver<AnalysisDataServiceObserver, AnalysisDataServiceImpl::ClearNotification> m_clearObserver;
 
   /// Poco::NObserver for RenameNotification
-  Poco::NObserver<AnalysisDataServiceObserver,
-                  AnalysisDataServiceImpl::RenameNotification>
-      m_renameObserver;
+  Poco::NObserver<AnalysisDataServiceObserver, AnalysisDataServiceImpl::RenameNotification> m_renameObserver;
 
   /// Poco::NObserver for GroupNotification
-  Poco::NObserver<AnalysisDataServiceObserver,
-                  AnalysisDataServiceImpl::GroupWorkspacesNotification>
-      m_groupObserver;
+  Poco::NObserver<AnalysisDataServiceObserver, AnalysisDataServiceImpl::GroupWorkspacesNotification> m_groupObserver;
 
   /// Poco::NObserver for UnGroupNotification
-  Poco::NObserver<AnalysisDataServiceObserver,
-                  AnalysisDataServiceImpl::UnGroupingWorkspaceNotification>
+  Poco::NObserver<AnalysisDataServiceObserver, AnalysisDataServiceImpl::UnGroupingWorkspaceNotification>
       m_unGroupObserver;
 
   /// Poco::NObserver for GroupUpdateNotification
-  Poco::NObserver<AnalysisDataServiceObserver,
-                  AnalysisDataServiceImpl::GroupUpdatedNotification>
+  Poco::NObserver<AnalysisDataServiceObserver, AnalysisDataServiceImpl::GroupUpdatedNotification>
       m_groupUpdatedObserver;
 };
 

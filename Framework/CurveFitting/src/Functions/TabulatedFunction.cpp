@@ -20,9 +20,7 @@
 #include <sstream>
 #include <utility>
 
-namespace Mantid {
-namespace CurveFitting {
-namespace Functions {
+namespace Mantid::CurveFitting::Functions {
 
 using namespace CurveFitting;
 
@@ -40,23 +38,22 @@ DECLARE_FUNCTION(TabulatedFunction)
 const int TabulatedFunction::defaultIndexValue = 0;
 
 /// Constructor
-TabulatedFunction::TabulatedFunction()
-    : m_setupFinished(false), m_explicitXY(false) {
+TabulatedFunction::TabulatedFunction() : m_setupFinished(false), m_explicitXY(false) {
   declareParameter("Scaling", 1.0, "A scaling factor");
   declareParameter("Shift", 0.0, "Shift in the abscissa");
   declareParameter("XScaling", 1.0, "Scaling factor in X");
   declareAttribute("FileName", Attribute("", true));
   declareAttribute("Workspace", Attribute(""));
   declareAttribute("WorkspaceIndex", Attribute(defaultIndexValue));
+  declareAttribute("X", Attribute(std::vector<double>()));
+  declareAttribute("Y", Attribute(std::vector<double>()));
 }
 
 /// Evaluate the function for a list of arguments and given scaling factor
-void TabulatedFunction::eval(double scaling, double xshift, double xscale,
-                             double *out, const double *xValues,
+void TabulatedFunction::eval(double scaling, double xshift, double xscale, double *out, const double *xValues,
                              const size_t nData) const {
   if (nData == 0)
     return;
-
   setupData();
 
   if (size() == 0)
@@ -68,13 +65,11 @@ void TabulatedFunction::eval(double scaling, double xshift, double xscale,
     value *= xscale;
     value += xshift;
   }
-
   const double xStart = xData.front();
   const double xEnd = xData.back();
 
   if (xStart >= xValues[nData - 1] || xEnd <= xValues[0])
     return;
-
   size_t i = 0;
   while (i < nData - 1 && xValues[i] < xStart) {
     out[i] = 0;
@@ -112,8 +107,7 @@ void TabulatedFunction::eval(double scaling, double xshift, double xscale,
  * @param xValues :: The array of x-values.
  * @param nData :: The size of the data.
  */
-void TabulatedFunction::function1D(double *out, const double *xValues,
-                                   const size_t nData) const {
+void TabulatedFunction::function1D(double *out, const double *xValues, const size_t nData) const {
   const double scaling = getParameter("Scaling");
   const double xshift = getParameter("Shift");
   const double xscale = getParameter("XScaling");
@@ -127,9 +121,7 @@ void TabulatedFunction::function1D(double *out, const double *xValues,
  * @param xValues :: The function arguments
  * @param nData :: The size of xValues.
  */
-void TabulatedFunction::functionDeriv1D(API::Jacobian *out,
-                                        const double *xValues,
-                                        const size_t nData) {
+void TabulatedFunction::functionDeriv1D(API::Jacobian *out, const double *xValues, const size_t nData) {
   const double scaling = getParameter("Scaling");
   const double xshift = getParameter("Shift");
   const double xscale = getParameter("XScaling");
@@ -140,8 +132,7 @@ void TabulatedFunction::functionDeriv1D(API::Jacobian *out,
     out->set(i, 0, tmp[i]);
   }
 
-  const double dx =
-      (xValues[nData - 1] - xValues[0]) / static_cast<double>(nData);
+  const double dx = (xValues[nData - 1] - xValues[0]) / static_cast<double>(nData);
   std::vector<double> tmpplus(nData);
   std::vector<double> tmpminus(nData);
 
@@ -171,8 +162,7 @@ void TabulatedFunction::clear() const {
  * @param attName :: The attribute name
  * @param value :: The new value
  */
-void TabulatedFunction::setAttribute(const std::string &attName,
-                                     const IFunction::Attribute &value) {
+void TabulatedFunction::setAttribute(const std::string &attName, const IFunction::Attribute &value) {
   if (attName == "FileName") {
     std::string fileName = value.asUnquotedString();
     if (fileName.empty()) {
@@ -241,23 +231,14 @@ void TabulatedFunction::setAttribute(const std::string &attName,
 }
 
 /// Returns the number of attributes associated with the function
-size_t TabulatedFunction::nAttributes() const {
-  // additional X and Y attributes
-  return IFunction::nAttributes() + 2;
-}
+size_t TabulatedFunction::nAttributes() const { return IFunction::nAttributes(); }
 
 /// Returns a list of attribute names
-std::vector<std::string> TabulatedFunction::getAttributeNames() const {
-  std::vector<std::string> attNames = IFunction::getAttributeNames();
-  attNames.emplace_back("X");
-  attNames.emplace_back("Y");
-  return attNames;
-}
+std::vector<std::string> TabulatedFunction::getAttributeNames() const { return IFunction::getAttributeNames(); }
 
 /// Return a value of attribute attName
 /// @param attName :: The attribute name
-IFunction::Attribute
-TabulatedFunction::getAttribute(const std::string &attName) const {
+IFunction::Attribute TabulatedFunction::getAttribute(const std::string &attName) const {
   if (attName == "X") {
     return m_explicitXY ? Attribute(m_xData) : Attribute(std::vector<double>());
   } else if (attName == "Y") {
@@ -265,39 +246,25 @@ TabulatedFunction::getAttribute(const std::string &attName) const {
   }
   return IFunction::getAttribute(attName);
 }
-
-/// Check if attribute attName exists
-/// @param attName :: The attribute name
-bool TabulatedFunction::hasAttribute(const std::string &attName) const {
-  if (attName == "X" || attName == "Y") {
-    return true;
-  }
-  return IFunction::hasAttribute(attName);
-}
-
 /**
  * Load input file as a Nexus file.
  * @param fname :: The file name
  */
 void TabulatedFunction::load(const std::string &fname) {
-  IAlgorithm_sptr loadAlg =
-      Mantid::API::AlgorithmFactory::Instance().create("Load", -1);
+  auto loadAlg = Mantid::API::AlgorithmFactory::Instance().create("Load", -1);
   loadAlg->initialize();
   loadAlg->setChild(true);
   loadAlg->setLogging(false);
   try {
     loadAlg->setPropertyValue("Filename", fname);
-    loadAlg->setPropertyValue("OutputWorkspace",
-                              "_TabulatedFunction_fit_data_");
+    loadAlg->setPropertyValue("OutputWorkspace", "_TabulatedFunction_fit_data_");
     loadAlg->execute();
   } catch (std::runtime_error &) {
-    throw std::runtime_error(
-        "Unable to load Nexus file for TabulatedFunction function.");
+    throw std::runtime_error("Unable to load Nexus file for TabulatedFunction function.");
   }
 
   Workspace_sptr ws = loadAlg->getProperty("OutputWorkspace");
-  MatrixWorkspace_sptr resData =
-      std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(ws);
+  MatrixWorkspace_sptr resData = std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(ws);
   loadWorkspace(resData);
 }
 
@@ -314,8 +281,7 @@ void TabulatedFunction::loadWorkspace(const std::string &wsName) const {
  * Load the points from a MatrixWorkspace
  * @param ws :: The workspace to load from
  */
-void TabulatedFunction::loadWorkspace(
-    std::shared_ptr<API::MatrixWorkspace> ws) const {
+void TabulatedFunction::loadWorkspace(std::shared_ptr<API::MatrixWorkspace> ws) const {
   m_workspace = std::move(ws);
   m_setupFinished = false;
 }
@@ -326,8 +292,7 @@ void TabulatedFunction::loadWorkspace(
 void TabulatedFunction::setupData() const {
   if (m_setupFinished) {
     if (m_xData.size() != m_yData.size()) {
-      throw std::invalid_argument(this->name() +
-                                  ": X and Y vectors have different sizes.");
+      throw std::invalid_argument(this->name() + ": X and Y vectors have different sizes.");
     }
     g_log.debug() << "Re-setting isn't required.";
     return;
@@ -343,8 +308,7 @@ void TabulatedFunction::setupData() const {
 
   size_t index = static_cast<size_t>(getAttribute("WorkspaceIndex").asInt());
 
-  g_log.debug() << "Setting up " << m_workspace->getName() << " index " << index
-                << '\n';
+  g_log.debug() << "Setting up " << m_workspace->getName() << " index " << index << '\n';
 
   const auto &xData = m_workspace->points(index);
   const auto &yData = m_workspace->y(index);
@@ -355,6 +319,4 @@ void TabulatedFunction::setupData() const {
   m_setupFinished = true;
 }
 
-} // namespace Functions
-} // namespace CurveFitting
-} // namespace Mantid
+} // namespace Mantid::CurveFitting::Functions

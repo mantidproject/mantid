@@ -51,20 +51,14 @@ signals:
 
 protected:
   /// Algorithm notification handlers
-  void handleAlgorithmFinishedNotification(
-      const Poco::AutoPtr<Mantid::API::Algorithm::FinishedNotification> &pNf);
-  Poco::NObserver<AlgorithmRunner, Mantid::API::Algorithm::FinishedNotification>
-      m_finishedObserver;
+  void handleAlgorithmFinishedNotification(const Poco::AutoPtr<Mantid::API::Algorithm::FinishedNotification> &pNf);
+  Poco::NObserver<AlgorithmRunner, Mantid::API::Algorithm::FinishedNotification> m_finishedObserver;
 
-  void handleAlgorithmProgressNotification(
-      const Poco::AutoPtr<Mantid::API::Algorithm::ProgressNotification> &pNf);
-  Poco::NObserver<AlgorithmRunner, Mantid::API::Algorithm::ProgressNotification>
-      m_progressObserver;
+  void handleAlgorithmProgressNotification(const Poco::AutoPtr<Mantid::API::Algorithm::ProgressNotification> &pNf);
+  Poco::NObserver<AlgorithmRunner, Mantid::API::Algorithm::ProgressNotification> m_progressObserver;
 
-  void handleAlgorithmErrorNotification(
-      const Poco::AutoPtr<Mantid::API::Algorithm::ErrorNotification> &pNf);
-  Poco::NObserver<AlgorithmRunner, Mantid::API::Algorithm::ErrorNotification>
-      m_errorObserver;
+  void handleAlgorithmErrorNotification(const Poco::AutoPtr<Mantid::API::Algorithm::ErrorNotification> &pNf);
+  Poco::NObserver<AlgorithmRunner, Mantid::API::Algorithm::ErrorNotification> m_errorObserver;
 
   /// For the asynchronous call in dynamic rebinning. Holds the result of
   /// asyncExecute() algorithm call

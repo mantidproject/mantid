@@ -7,29 +7,50 @@
 #pragma once
 
 #include "DllOption.h"
+#include <QtGlobal>
+
+#if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
 #include "MantidQtWidgets/Common/MantidDialog.h"
-#include "ui_ManageUserDirectories.h"
+#else
 #include <QDialog>
+#endif
+#include "ui_ManageUserDirectories.h"
 
 namespace MantidQt {
 namespace API {
 
+/**
+ * Access and update the user directory settings within the
+ * Mantid config service
+ */
 class EXPORT_OPT_MANTIDQT_COMMON ManageUserDirectories
+#if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
     : public MantidQt::API::MantidDialog {
+  using BaseClass = MantidQt::API::MantidDialog;
+#else
+    : public QDialog {
+  using BaseClass = QDialog;
+#endif
+
   Q_OBJECT
 
 public:
+  static ManageUserDirectories *openManageUserDirectories();
+
+public:
   ManageUserDirectories(QWidget *parent = nullptr);
-  ~ManageUserDirectories() override;
-  static void openManageUserDirectories();
-  void closeEvent(QCloseEvent *event) override;
+
+  void enableSaveToFile(bool enabled);
+
+public:
+  /// Testing accessors
+  QPushButton *cancelButton() const { return m_uiForm.pbCancel; }
 
 private:
   virtual void initLayout();
   void loadProperties();
   void saveProperties();
-  void appendSlashIfNone(QString &path) const;
-  QListWidget *listWidget();
+  QListWidget *listWidget(QObject *object);
 
 private slots:
   void helpClicked();
@@ -44,7 +65,7 @@ private slots:
 
 private:
   Ui::ManageUserDirectories m_uiForm;
-  QString m_userPropFile;
+  bool m_saveToFile;
 };
 
 } // namespace API

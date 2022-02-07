@@ -15,8 +15,7 @@ using namespace Mantid::Kernel;
 using namespace Mantid::API;
 using namespace Mantid::DataObjects;
 
-namespace Mantid {
-namespace MDAlgorithms {
+namespace Mantid::MDAlgorithms {
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(MinusMD)
@@ -56,10 +55,8 @@ void MinusMD::checkInputs() {
  *
  * @param ws ::  MDEventWorkspace being added to
  */
-template <typename MDE, size_t nd>
-void MinusMD::doMinus(typename MDEventWorkspace<MDE, nd>::sptr ws1) {
-  typename MDEventWorkspace<MDE, nd>::sptr ws2 =
-      std::dynamic_pointer_cast<MDEventWorkspace<MDE, nd>>(m_operand_event);
+template <typename MDE, size_t nd> void MinusMD::doMinus(typename MDEventWorkspace<MDE, nd>::sptr ws1) {
+  typename MDEventWorkspace<MDE, nd>::sptr ws2 = std::dynamic_pointer_cast<MDEventWorkspace<MDE, nd>>(m_operand_event);
   if (!ws1 || !ws2)
     throw std::runtime_error("Incompatible workspace types passed to MinusMD.");
 
@@ -130,19 +127,16 @@ void MinusMD::execEvent() {
 
 //----------------------------------------------------------------------------------------------
 /// Run the algorithm with a MDHisotWorkspace as output and operand
-void MinusMD::execHistoHisto(
-    Mantid::DataObjects::MDHistoWorkspace_sptr out,
-    Mantid::DataObjects::MDHistoWorkspace_const_sptr operand) {
+void MinusMD::execHistoHisto(Mantid::DataObjects::MDHistoWorkspace_sptr out,
+                             Mantid::DataObjects::MDHistoWorkspace_const_sptr operand) {
   out->subtract(*operand);
 }
 
 //----------------------------------------------------------------------------------------------
 /// Run the algorithm with a MDHisotWorkspace as output, scalar and operand
-void MinusMD::execHistoScalar(
-    Mantid::DataObjects::MDHistoWorkspace_sptr out,
-    Mantid::DataObjects::WorkspaceSingleValue_const_sptr scalar) {
+void MinusMD::execHistoScalar(Mantid::DataObjects::MDHistoWorkspace_sptr out,
+                              Mantid::DataObjects::WorkspaceSingleValue_const_sptr scalar) {
   out->subtract(scalar->y(0)[0], scalar->e(0)[0]);
 }
 
-} // namespace MDAlgorithms
-} // namespace Mantid
+} // namespace Mantid::MDAlgorithms

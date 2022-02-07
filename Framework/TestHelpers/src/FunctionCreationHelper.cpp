@@ -4,18 +4,14 @@
 //   NScD Oak Ridge National Laboratory, European Spallation Source,
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#include "MantidTestHelpers/FunctionCreationHelper.h"
+#include "MantidFrameworkTestHelpers/FunctionCreationHelper.h"
 #include "MantidKernel/Exception.h"
 
-namespace Mantid {
-namespace TestHelpers {
+namespace Mantid::FrameworkTestHelpers {
 
-std::string FunctionChangesNParams::name() const {
-  return "FunctionChangesNParams";
-}
+std::string FunctionChangesNParams::name() const { return "FunctionChangesNParams"; }
 
-FunctionChangesNParams::FunctionChangesNParams()
-    : Mantid::API::IFunction1D(), Mantid::API::ParamFunction() {
+FunctionChangesNParams::FunctionChangesNParams() : Mantid::API::IFunction1D(), Mantid::API::ParamFunction() {
   this->declareParameter("A0", 0.0);
 }
 
@@ -30,8 +26,7 @@ void FunctionChangesNParams::iterationFinished() {
   m_canChange = false;
 }
 
-void FunctionChangesNParams::function1D(double *out, const double *xValues,
-                                        const size_t nData) const {
+void FunctionChangesNParams::function1D(double *out, const double *xValues, const size_t nData) const {
   auto np = nParams();
   for (size_t i = 0; i < nData; ++i) {
     double x = xValues[i];
@@ -45,9 +40,7 @@ void FunctionChangesNParams::function1D(double *out, const double *xValues,
   }
 }
 
-void FunctionChangesNParams::functionDeriv1D(Mantid::API::Jacobian *out,
-                                             const double *xValues,
-                                             const size_t nData) {
+void FunctionChangesNParams::functionDeriv1D(Mantid::API::Jacobian *out, const double *xValues, const size_t nData) {
   auto np = nParams();
   for (size_t i = 0; i < nData; ++i) {
     double x = xValues[i];
@@ -62,5 +55,4 @@ void FunctionChangesNParams::functionDeriv1D(Mantid::API::Jacobian *out,
   }
 }
 
-} // namespace TestHelpers
-} // namespace Mantid
+} // namespace Mantid::FrameworkTestHelpers

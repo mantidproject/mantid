@@ -10,7 +10,7 @@ import unittest
 from unittest.mock import Mock, patch
 from mantidqt.utils.qt.testing import start_qapplication
 from mantidqt.utils.testing.strict_mock import StrictMock
-from workbench.widgets.settings.fitting.presenter import FittingSettings
+from workbench.widgets.settings.fitting.presenter import FittingSettings, FittingProperties
 
 
 class MockSettingsView(object):
@@ -61,12 +61,12 @@ class FittingSettingsTest(unittest.TestCase):
         mock_ConfigService.setString.reset_mock()
 
         presenter.action_auto_background_changed("None")
-        mock_ConfigService.setString.assert_called_once_with(FittingSettings.AUTO_BACKGROUND, "")
+        mock_ConfigService.setString.assert_called_once_with(FittingProperties.AUTO_BACKGROUND.value, "")
 
         mock_ConfigService.setString.reset_mock()
 
         presenter.action_auto_background_changed("Polynomial")
-        mock_ConfigService.setString.assert_called_once_with(FittingSettings.AUTO_BACKGROUND, "Polynomial ")
+        mock_ConfigService.setString.assert_called_once_with(FittingProperties.AUTO_BACKGROUND.value, "Polynomial ")
 
     @patch(CONFIG_SERVICE_CLASSPATH, new_callable=MockConfigService)
     def test_action_background_args_changed(self, mock_ConfigService):
@@ -78,13 +78,13 @@ class FittingSettingsTest(unittest.TestCase):
 
         mock_view.background_args.text = Mock(return_value="n=3")
         presenter.action_background_args_changed()
-        mock_ConfigService.setString.assert_called_once_with(FittingSettings.AUTO_BACKGROUND, "Polynomial n=3")
+        mock_ConfigService.setString.assert_called_once_with(FittingProperties.AUTO_BACKGROUND.value, "Polynomial n=3")
 
         mock_ConfigService.setString.reset_mock()
 
         mock_view.background_args.text = Mock(return_value="n=5")
         presenter.action_background_args_changed()
-        mock_ConfigService.setString.assert_called_once_with(FittingSettings.AUTO_BACKGROUND,
+        mock_ConfigService.setString.assert_called_once_with(FittingProperties.AUTO_BACKGROUND.value,
                                                              "Polynomial n=5")
 
     @patch(CONFIG_SERVICE_CLASSPATH, new_callable=MockConfigService)
@@ -97,7 +97,7 @@ class FittingSettingsTest(unittest.TestCase):
 
         mock_view.background_args.text = Mock(return_value="n=3")
         presenter.action_background_args_changed()
-        mock_ConfigService.setString.assert_called_once_with(FittingSettings.AUTO_BACKGROUND, "")
+        mock_ConfigService.setString.assert_called_once_with(FittingProperties.AUTO_BACKGROUND.value, "")
 
     @patch(CONFIG_SERVICE_CLASSPATH, new_callable=MockConfigService)
     def test_action_default_peak_changed(self, mock_ConfigService):
@@ -106,12 +106,12 @@ class FittingSettingsTest(unittest.TestCase):
         mock_ConfigService.setString.reset_mock()
 
         presenter.action_default_peak_changed("None")
-        mock_ConfigService.setString.assert_called_once_with(FittingSettings.DEFAULT_PEAK, "None")
+        mock_ConfigService.setString.assert_called_once_with(FittingProperties.DEFAULT_PEAK.value, "None")
 
         mock_ConfigService.setString.reset_mock()
 
         presenter.action_default_peak_changed("Gaussian")
-        mock_ConfigService.setString.assert_called_once_with(FittingSettings.DEFAULT_PEAK, "Gaussian")
+        mock_ConfigService.setString.assert_called_once_with(FittingProperties.DEFAULT_PEAK.value, "Gaussian")
 
     @patch(CONFIG_SERVICE_CLASSPATH, new_callable=MockConfigService)
     def test_action_find_peaks_fwhm_changed(self, mock_ConfigService):
@@ -120,12 +120,12 @@ class FittingSettingsTest(unittest.TestCase):
         mock_ConfigService.setString.reset_mock()
 
         presenter.action_find_peaks_fwhm_changed(5)
-        mock_ConfigService.setString.assert_called_once_with(FittingSettings.FWHM, "5")
+        mock_ConfigService.setString.assert_called_once_with(FittingProperties.FWHM.value, "5")
 
         mock_ConfigService.setString.reset_mock()
 
         presenter.action_find_peaks_fwhm_changed(9)
-        mock_ConfigService.setString.assert_called_once_with(FittingSettings.FWHM, "9")
+        mock_ConfigService.setString.assert_called_once_with(FittingProperties.FWHM.value, "9")
 
     @patch(CONFIG_SERVICE_CLASSPATH, new_callable=MockConfigService)
     def test_action_find_peaks_tolerance_changed(self, mock_ConfigService):
@@ -134,9 +134,9 @@ class FittingSettingsTest(unittest.TestCase):
         mock_ConfigService.setString.reset_mock()
 
         presenter.action_find_peaks_tolerance_changed(3)
-        mock_ConfigService.setString.assert_called_once_with(FittingSettings.TOLERANCE, "3")
+        mock_ConfigService.setString.assert_called_once_with(FittingProperties.TOLERANCE.value, "3")
 
         mock_ConfigService.setString.reset_mock()
 
         presenter.action_find_peaks_tolerance_changed(8)
-        mock_ConfigService.setString.assert_called_once_with(FittingSettings.TOLERANCE, "8")
+        mock_ConfigService.setString.assert_called_once_with(FittingProperties.TOLERANCE.value, "8")

@@ -4,8 +4,6 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-
-import ILL_utilities as utils
 from mantid.api import (AlgorithmFactory, DataProcessorAlgorithm, MatrixWorkspaceProperty, PropertyMode,
                         WorkspaceUnitValidator)
 from mantid.kernel import (CompositeValidator, Direction, FloatArrayBoundedValidator, FloatArrayProperty,
@@ -13,8 +11,9 @@ from mantid.kernel import (CompositeValidator, Direction, FloatArrayBoundedValid
                            StringListValidator)
 from mantid.simpleapi import (CropWorkspace, Divide, ExtractSingleSpectrum, MoveInstrumentComponent, RebinToWorkspace,
                               ReflectometryBeamStatistics, ReflectometrySumInQ, RotateInstrumentComponent)
-import numpy
 import ReflectometryILL_common as common
+import ILL_utilities as utils
+import numpy
 
 
 class Prop:
@@ -308,14 +307,40 @@ class ReflectometryILLSumForeground(DataProcessorAlgorithm):
             es = addeeWS.readE(0)
             foregroundEs += es**2
             self._cleanup.cleanup(addeeWS)
-        self._cleanup.cleanup(ws)
         numpy.sqrt(foregroundEs, out=foregroundEs)
-        # Move the detector to the fractional linePosition
+        foregroundWS = self._correctForFractionalForegroundCentre(ws, foregroundWS)
+        self._cleanup.cleanup(ws)
+        return foregroundWS
+
+    def _correctForFractionalForegroundCentre(self, ws, summedForeground):
+        """
+        This needs to be called after having summed the foreground but before transfering to momentum transfer.
+        This needs to be called in both coherent and incoherent cases, regardless the angle calibration option.
+        The reason for this is that up to this point is the fractional workspace index that correponds to the calibrated 2theta.
+        However the momentum transfer calculation, which normally comes after summing the foreground,
+        takes the 2theta from the spectrumInfo of the summed foreground workspace.
+        Hence this code below translated the detector by the difference of the
+        fractional and integer foreground centre along the detector plane.
+        It also applies local rotation so that the detector continues to face the sample.
+        Note that this translation has nothing to do with the difference of foreground centres in direct and reflected beams,
+        which is handled already in pre-process algorithm.
+        Here it's only about the difference of the fractional and integer foreground centre of the reflected beam
+        with already calibrated angle no matter the option.
+        Note also, that this could probably be avoided, if the loader placed
+        the integer foreground at the given angle and not the fractional one.
+        Fractional foreground centre only matter when calculating the difference between direct and reflected beams.
+        But for the final Q (and sigma) calculation, it takes the position/angle from spectrumInfo()...(0),
+        which corresponds to the centre of the pixel."""
+        foreground = self._foregroundIndices(ws)
+        # integer foreground centre
+        beamPosIndex = foreground[1]
+        # fractional foreground centre
         linePosition = ws.run().getProperty(common.SampleLogs.LINE_POSITION).value
+        l2 = ws.run().getProperty('L2').value
         instr = common.instrumentName(ws)
         pixelSize = common.pixelSize(instr)
-        dist = pixelSize * (linePosition-beamPosIndex)
-
+        # the distance between the fractional and integer foreground centres along the detector plane
+        dist = pixelSize * (linePosition - beamPosIndex)
         if dist != 0.:
             detPoint1 = ws.spectrumInfo().position(0)
             detPoint2 = ws.spectrumInfo().position(20)
@@ -331,24 +356,24 @@ class ReflectometryILLSumForeground(DataProcessorAlgorithm):
                 my = xvsy
                 rotationAxis = [-1, 0, 0]
             MoveInstrumentComponent(
-                Workspace=foregroundWS,
+                Workspace=summedForeground,
                 ComponentName='detector',
                 X=mx,
                 Y=my,
                 Z=mz,
                 RelativePosition=True
             )
-            theta=foregroundWS.spectrumInfo().twoTheta(0) / 2.
+            angle_corr = numpy.arctan2(dist, l2) * 180 / numpy.pi
             RotateInstrumentComponent(
-                Workspace=foregroundWS,
+                Workspace=summedForeground,
                 ComponentName='detector',
                 X=rotationAxis[0],
                 Y=rotationAxis[1],
                 Z=rotationAxis[2],
-                Angle=theta,
+                Angle=angle_corr,
                 RelativeRotation=True
             )
-        return foregroundWS
+        return summedForeground
 
     def _sumForegroundInQ(self, ws):
         """Sum the foreground region into a single histogram using the coherent method."""
@@ -364,6 +389,7 @@ class ReflectometryILLSumForeground(DataProcessorAlgorithm):
             BeamCentre=linePosition,
             FlatSample=isFlatSample,
             EnableLogging=self._subalgLogging)
+        sumWS = self._correctForFractionalForegroundCentre(ws, sumWS)
         self._cleanup.cleanup(ws)
         return sumWS
 

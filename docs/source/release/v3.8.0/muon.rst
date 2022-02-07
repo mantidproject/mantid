@@ -16,14 +16,14 @@ ALC
 Muon Analysis
 #############
 
-Multi-dataset fitting 
+Multi-dataset fitting
 *********************
 
 The *Data Analysis* tab of the Muon Analysis interface has been updated to enable simultaneous fits of multiple datasets.
 A full explanation of how to use this new functionality is contained in the interface's documentation.
 Results tables of these new kinds of fit can also be created.
 
-As this is a new change for this release, please report any bugs, or requests for enhancements, to the development team. 
+As this is a new change for this release, please report any bugs, or requests for enhancements, to the development team.
 If you find a bug that stops you working, or would simply prefer to stick with the previous UI, just check the "Compatibility mode" box on the *Settings* tab and this will revert the interface to how it was in Mantid 3.7.
 
 Other fixes and enhancements:

@@ -5,11 +5,14 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 import copy
+from typing import Dict
 
+from mantid import UsageService
+from mantid.kernel import FeatureType
 from mantid.kernel import Logger
+from sans.gui_logic.models.async_workers.beam_centre_async import BeamCentreAsync
 from sans.gui_logic.models.beam_centre_model import BeamCentreModel
 from ui.sans_isis.beam_centre import BeamCentre
-from ui.sans_isis.work_handler import WorkHandler
 
 
 class BeamCentrePresenter(object):
@@ -20,23 +23,12 @@ class BeamCentrePresenter(object):
         def on_run_clicked(self):
             self._presenter.on_run_clicked()
 
-    class CentreFinderListener(WorkHandler.WorkListener):
-        def __init__(self, presenter):
-            super(BeamCentrePresenter.CentreFinderListener, self).__init__()
-            self._presenter = presenter
-
-        def on_processing_finished(self, _):
-            self._presenter.on_processing_finished_centre_finder()
-
-        def on_processing_error(self, error):
-            self._presenter.on_processing_error_centre_finder(error)
-
-    def __init__(self, parent_presenter, SANSCentreFinder, work_handler=None, beam_centre_model=None):
+    def __init__(self, parent_presenter, beam_centre_model=None):
         self._view = None
         self._parent_presenter = parent_presenter
-        self._work_handler = WorkHandler() if not work_handler else work_handler
         self._logger = Logger("SANS")
-        self._beam_centre_model = BeamCentreModel(SANSCentreFinder) if not beam_centre_model else beam_centre_model
+        self._beam_centre_model = BeamCentreModel() if not beam_centre_model else beam_centre_model
+        self._worker = BeamCentreAsync(parent_presenter=self)
 
     def set_view(self, view):
         if view:
@@ -57,31 +49,38 @@ class BeamCentrePresenter(object):
         self._view.r_max_line_edit.textChanged.connect(self._validate_radius_values)
 
     def on_update_instrument(self, instrument):
-        self._beam_centre_model.set_scaling(instrument)
         self._view.on_update_instrument(instrument)
 
     def on_update_rows(self):
         self._beam_centre_model.reset_inst_defaults(self._parent_presenter.instrument)
+        self.update_centre_positions()
+
+    def on_update_centre_values(self, new_vals: Dict):
+        self._beam_centre_model.update_centre_positions(new_vals)
 
     def on_processing_finished_centre_finder(self):
         # Enable button
         self._view.set_run_button_to_normal()
         # Update Centre Positions in model and GUI
-        self._view.lab_pos_1 = self._beam_centre_model.lab_pos_1 * self._beam_centre_model.scale_1
-        self._view.lab_pos_2 = self._beam_centre_model.lab_pos_2 * self._beam_centre_model.scale_2
-        self._view.hab_pos_1 = self._beam_centre_model.hab_pos_1 * self._beam_centre_model.scale_1
-        self._view.hab_pos_2 = self._beam_centre_model.hab_pos_2 * self._beam_centre_model.scale_2
+        self._view.rear_pos_1 = self._round(self._beam_centre_model.rear_pos_1)
+        self._view.rear_pos_2 = self._round(self._beam_centre_model.rear_pos_2)
+        self._view.front_pos_1 = self._round(self._beam_centre_model.front_pos_1)
+        self._view.front_pos_2 = self._round(self._beam_centre_model.front_pos_2)
 
     def on_processing_error_centre_finder(self, error):
         self._logger.warning("There has been an error. See more: {}".format(error))
         self._view.set_run_button_to_normal()
 
+    def on_processing_finished(self):
+        # Signal from run tab presenter
+        self._view.set_run_button_to_normal()
+
     def on_processing_error(self, error):
+        # Signal from run tab presenter
         self._view.set_run_button_to_normal()
 
     def on_run_clicked(self):
-        self._work_handler.wait_for_done()
-
+        UsageService.registerFeatureUsage(FeatureType.Feature, ["ISIS SANS", "Beam Centre Finder - Run"], False)
         # Get the state information for the first row.
         state = self._parent_presenter.get_state_for_row(0)
 
@@ -92,15 +91,11 @@ class BeamCentrePresenter(object):
 
         # Disable the button
         self._view.set_run_button_to_processing()
-
-        #Update model
         self._update_beam_model_from_view()
 
         # Run the task
-        listener = BeamCentrePresenter.CentreFinderListener(self)
         state_copy = copy.copy(state)
-
-        self._work_handler.process(listener, self._beam_centre_model.find_beam_centre, 0, state_copy)
+        self._worker.find_beam_centre(state_copy, self._beam_centre_model.pack_beam_centre_settings())
 
     def _update_beam_model_from_view(self):
         self._beam_centre_model.r_min = self._view.r_min
@@ -111,53 +106,68 @@ class BeamCentrePresenter(object):
         self._beam_centre_model.verbose = self._view.verbose
         self._beam_centre_model.COM = self._view.COM
         self._beam_centre_model.up_down = self._view.up_down
-        self._beam_centre_model.lab_pos_1 = self._view.lab_pos_1 / self._beam_centre_model.scale_1
-        self._beam_centre_model.lab_pos_2 = self._view.lab_pos_2 / self._beam_centre_model.scale_2
-        self._beam_centre_model.hab_pos_1 = self._view.hab_pos_1 / self._beam_centre_model.scale_1
-        self._beam_centre_model.hab_pos_2 = self._view.hab_pos_2 / self._beam_centre_model.scale_2
+        self._beam_centre_model.rear_pos_1 = self._view.rear_pos_1
+        self._beam_centre_model.rear_pos_2 = self._view.rear_pos_2
+        self._beam_centre_model.front_pos_1 = self._view.front_pos_1
+        self._beam_centre_model.front_pos_2 = self._view.front_pos_2
         self._beam_centre_model.q_min = self._view.q_min
         self._beam_centre_model.q_max = self._view.q_max
         self._beam_centre_model.component = self._view.component
-        self._beam_centre_model.update_hab = self._view.update_hab
-        self._beam_centre_model.update_lab = self._view.update_lab
+        self._beam_centre_model.update_front = self._view.update_front
+        self._beam_centre_model.update_rear = self._view.update_rear
 
-    def update_centre_positions(self, state_model):
-        lab_pos_1 = getattr(state_model, 'lab_pos_1')
-        lab_pos_2 = getattr(state_model, 'lab_pos_2')
+    def copy_centre_positions(self, state_model):
+        """
+        Copies rear / front positions from an external model
+        """
+        rear_pos_1 = getattr(state_model, 'rear_pos_1')
+        rear_pos_2 = getattr(state_model, 'rear_pos_2')
 
-        hab_pos_1 = getattr(state_model, 'hab_pos_1') if getattr(state_model, 'hab_pos_1') else lab_pos_1
-        hab_pos_2 = getattr(state_model, 'hab_pos_2') if getattr(state_model, 'hab_pos_2') else lab_pos_2
+        self._beam_centre_model.rear_pos_1 = rear_pos_1
+        self._beam_centre_model.rear_pos_2 = rear_pos_2
 
-        self._view.lab_pos_1 = lab_pos_1
-        self._view.lab_pos_2 = lab_pos_2
+        self._beam_centre_model.front_pos_1 = \
+            getattr(state_model, 'front_pos_1') if getattr(state_model, 'front_pos_1') else rear_pos_1
+        self._beam_centre_model.front_pos_2 = \
+            getattr(state_model, 'front_pos_2') if getattr(state_model, 'front_pos_2') else rear_pos_2
 
-        self._view.hab_pos_1 = hab_pos_1
-        self._view.hab_pos_2 = hab_pos_2
+    def update_centre_positions(self):
+        rear_pos_1 = self._beam_centre_model.rear_pos_1
+        rear_pos_2 = self._beam_centre_model.rear_pos_2
 
-    def update_hab_selected(self):
-        self._beam_centre_model.update_hab = True
-        self._beam_centre_model.update_lab = False
+        front_pos_1 = self._beam_centre_model.front_pos_1 if self._beam_centre_model.front_pos_1 != '' else rear_pos_1
+        front_pos_2 = self._beam_centre_model.front_pos_2 if self._beam_centre_model.front_pos_2 != '' else rear_pos_2
 
-        # HAB is selected, so ensure update HAB is enabled and checked
-        self._view.enable_update_hab(True)
-        # Disable and deselect update LAB
-        self._view.enable_update_lab(False)
+        self._view.rear_pos_1 = self._round(rear_pos_1)
+        self._view.rear_pos_2 = self._round(rear_pos_2)
 
-    def update_lab_selected(self):
-        self._beam_centre_model.update_hab = False
-        self._beam_centre_model.update_lab = True
+        self._view.front_pos_1 = self._round(front_pos_1)
+        self._view.front_pos_2 = self._round(front_pos_2)
 
-        # LAB is selected, so ensure update LAB is enabled and checked
-        self._view.enable_update_lab(True)
-        # Disable and deselect update HAB
-        self._view.enable_update_hab(False)
+    def update_front_selected(self):
+        self._beam_centre_model.update_front = True
+        self._beam_centre_model.update_rear = False
+
+        # front is selected, so ensure update front is enabled and checked
+        self._view.enable_update_front(True)
+        # Disable and deselect update rear
+        self._view.enable_update_rear(False)
+
+    def update_rear_selected(self):
+        self._beam_centre_model.update_front = False
+        self._beam_centre_model.update_rear = True
+
+        # rear is selected, so ensure update rear is enabled and checked
+        self._view.enable_update_rear(True)
+        # Disable and deselect update front
+        self._view.enable_update_front(False)
 
     def update_all_selected(self):
-        self._beam_centre_model.update_hab = True
-        self._beam_centre_model.update_lab = True
+        self._beam_centre_model.update_front = True
+        self._beam_centre_model.update_rear = True
 
-        self._view.enable_update_hab(True)
-        self._view.enable_update_lab(True)
+        self._view.enable_update_front(True)
+        self._view.enable_update_rear(True)
 
     def set_on_state_model(self, attribute_name, state_model):
         attribute = getattr(self._view, attribute_name)
@@ -166,8 +176,17 @@ class BeamCentrePresenter(object):
 
     def set_on_view(self, attribute_name, state_model):
         attribute = getattr(state_model, attribute_name)
-        if attribute or isinstance(attribute, bool):  # We need to be careful here. We don't want to set empty strings, or None, but we want to set boolean values. # noqa
+        # We need to be careful here. We don't want to set empty strings, or None, but we want to set boolean values.
+        if attribute or isinstance(attribute, bool):
             setattr(self._view, attribute_name, attribute)
+
+    def _round(self, val):
+        DECIMAL_PLACES_CENTRE_POS = 3
+        try:
+            val = float(val)
+        except ValueError:
+            return val
+        return round(val, DECIMAL_PLACES_CENTRE_POS)
 
     def _validate_radius_values(self):
         min_value = getattr(self._view, "r_min_line_edit").text()

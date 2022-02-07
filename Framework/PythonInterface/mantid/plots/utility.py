@@ -6,13 +6,13 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 #  This file is part of the mantid package
 # std imports
-import math
-import numpy as np
 import collections
 from contextlib import contextmanager
 from enum import Enum
+from distutils.version import LooseVersion
 
 # 3rd party imports
+from matplotlib import colors
 from matplotlib.legend import Legend
 from matplotlib import cm, __version__ as mpl_version_str
 from matplotlib.container import ErrorbarContainer
@@ -24,6 +24,8 @@ from matplotlib.container import ErrorbarContainer
 MPLVersionInfo = collections.namedtuple("MPLVersionInfo", ("major", "minor", "patch"))
 MATPLOTLIB_VERSION_INFO = MPLVersionInfo._make(map(int, mpl_version_str.split(".")))
 
+# Restrict zooming out of plots.
+ZOOM_LIMIT = 1e300
 
 # Use the correct draggable method based on the matplotlib version
 if hasattr(Legend, "set_draggable"):
@@ -157,6 +159,28 @@ def mpl_version_info():
     return MATPLOTLIB_VERSION_INFO
 
 
+def row_num(ax):
+    """
+    Returns the row number of an input axes with relation to a gridspec
+    Version check to avoid calling depreciated method in matplotlib > 3.2
+    """
+    if LooseVersion(mpl_version_str) >= LooseVersion("3.2.0"):
+        return ax.get_subplotspec().rowspan.start
+    else:
+        return ax.rowNum
+
+
+def col_num(ax):
+    """
+    Returns the column number of an input axes with relation to a gridspec
+    Version check to avoid calling depreciated method in matplotlib > 3.2
+    """
+    if LooseVersion(mpl_version_str) >= LooseVersion("3.2.0"):
+        return ax.get_subplotspec().colspan.start
+    else:
+        return ax.colNum
+
+
 def zoom_axis(ax, coord, x_or_y, factor):
     """
     Zoom in around the value 'coord' along the given axis.
@@ -178,7 +202,17 @@ def zoom_axis(ax, coord, x_or_y, factor):
     new_ax_min = coord - dist_to_min/factor
     new_ax_max = coord + dist_to_max/factor
 
+    # Don't allow further zooming out if we're beyond the limit. Zooming in is allowed.
+    # The abs in the second half of the conditional statements accounts for the case when the min and max axis limits
+    # are flipped, which is possible in matplotlib.
+    if abs(new_ax_max) > ZOOM_LIMIT and abs(new_ax_max) > abs(ax_max):
+        new_ax_max = ax_max
+
+    if abs(new_ax_min) > ZOOM_LIMIT and abs(new_ax_min) > abs(ax_min):
+        new_ax_min = ax_min
+
     set_lims((new_ax_min, new_ax_max))
+
     return new_ax_min, new_ax_max
 
 
@@ -212,3 +246,20 @@ def get_single_workspace_log_value(ws_index, *, log_values=None, matrix_ws=None,
             return 0
 
         return log_values[ws_index]
+
+
+def colormap_as_plot_color(number_colors: int, colormap_name: str = 'viridis', cmap=None):
+    if not cmap:
+        cmap = cm.get_cmap(name=colormap_name)
+
+    for i in range(number_colors):
+        yield cmap(float(i) / number_colors)
+
+
+def convert_color_to_hex(color):
+    """Convert a matplotlib color to its hex form"""
+    try:
+        return colors.cnames[color]
+    except (KeyError, TypeError):
+        rgb = colors.colorConverter.to_rgb(color)
+        return colors.rgb2hex(rgb)

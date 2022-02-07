@@ -48,11 +48,11 @@ digraph DirectILLReduction {
   absoluteUnitsEnabled -> AbsoluteUnits [label="yes"]
   AbsoluteUnits -> ConvertToEnergy
   ConvertToEnergy -> CorrectKiKf
-  CorrectKiKf -> Rebin
+  CorrectKiKf -> DetectorEfficiency
+  DetectorEfficiency -> Rebin
   wRebinParams -> Rebin
   Rebin -> ConvertToDistribution
-  ConvertToDistribution -> DetectorEfficiency
-  DetectorEfficiency -> GroupDetectors
+  ConvertToDistribution -> GroupDetectors
   GroupDetectors -> outputOptionalWS
   GroupDetectors -> SofQW
   qBinParams -> SofQW

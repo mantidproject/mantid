@@ -4,11 +4,10 @@
 //   NScD Oak Ridge National Laboratory, European Spallation Source,
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#include "MantidTestHelpers/MultiDomainFunctionHelper.h"
-#include "MantidTestHelpers/FakeObjects.h"
+#include "MantidFrameworkTestHelpers/MultiDomainFunctionHelper.h"
+#include "MantidFrameworkTestHelpers/FakeObjects.h"
 
-namespace Mantid {
-namespace TestHelpers {
+namespace Mantid::FrameworkTestHelpers {
 
 MultiDomainFunctionTest_Function::MultiDomainFunctionTest_Function()
     : Mantid::API::IFunction1D(), Mantid::API::ParamFunction() {
@@ -17,9 +16,7 @@ MultiDomainFunctionTest_Function::MultiDomainFunctionTest_Function()
   this->declareAttribute("Order", Attribute(1));
 }
 
-void MultiDomainFunctionTest_Function::function1D(double *out,
-                                                  const double *xValues,
-                                                  const size_t nData) const {
+void MultiDomainFunctionTest_Function::function1D(double *out, const double *xValues, const size_t nData) const {
   const double A = getParameter(0);
   const double B = getParameter(1);
   const int order = getAttribute("Order").asInt();
@@ -41,8 +38,8 @@ void MultiDomainFunctionTest_Function::function1D(double *out,
     };
   }
 }
-void MultiDomainFunctionTest_Function::functionDeriv1D(
-    Mantid::API::Jacobian *out, const double *xValues, const size_t nData) {
+void MultiDomainFunctionTest_Function::functionDeriv1D(Mantid::API::Jacobian *out, const double *xValues,
+                                                       const size_t nData) {
   const int order = getAttribute("Order").asInt();
   for (size_t i = 0; i < nData; ++i) {
     double x = xValues[i];
@@ -89,12 +86,9 @@ std::shared_ptr<Mantid::API::MultiDomainFunction> makeMultiDomainFunction3() {
 
 std::shared_ptr<Mantid::API::JointDomain> makeMultiDomainDomain3() {
   auto domain = std::make_shared<Mantid::API::JointDomain>();
-  domain->addDomain(
-      std::make_shared<Mantid::API::FunctionDomain1DVector>(0, 1, 9));
-  domain->addDomain(
-      std::make_shared<Mantid::API::FunctionDomain1DVector>(1, 2, 10));
-  domain->addDomain(
-      std::make_shared<Mantid::API::FunctionDomain1DVector>(2, 3, 11));
+  domain->addDomain(std::make_shared<Mantid::API::FunctionDomain1DVector>(0, 1, 9));
+  domain->addDomain(std::make_shared<Mantid::API::FunctionDomain1DVector>(1, 2, 10));
+  domain->addDomain(std::make_shared<Mantid::API::FunctionDomain1DVector>(2, 3, 11));
 
   return domain;
 }
@@ -150,5 +144,4 @@ Mantid::API::MatrixWorkspace_sptr makeMultiDomainWorkspace3() {
 
   return ws3;
 }
-} // namespace TestHelpers
-} // namespace Mantid
+} // namespace Mantid::FrameworkTestHelpers

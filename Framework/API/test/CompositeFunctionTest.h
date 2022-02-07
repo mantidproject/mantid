@@ -15,7 +15,7 @@
 #include "MantidAPI/IPeakFunction.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/ParamFunction.h"
-#include "MantidTestHelpers/FakeObjects.h"
+#include "MantidFrameworkTestHelpers/FakeObjects.h"
 
 using namespace Mantid;
 using namespace Mantid::API;
@@ -23,8 +23,7 @@ using namespace Mantid::API;
 class CompositeFunctionTest_MocSpectrum : public SpectrumTester {
 public:
   CompositeFunctionTest_MocSpectrum(size_t nx, size_t ny)
-      : SpectrumTester(HistogramData::getHistogramXMode(nx, ny),
-                       HistogramData::Histogram::YMode::Counts) {
+      : SpectrumTester(HistogramData::getHistogramXMode(nx, ny), HistogramData::Histogram::YMode::Counts) {
     dataX().resize(nx);
     dataY().resize(ny);
     dataE().resize(ny);
@@ -33,8 +32,7 @@ public:
 
 class CompositeFunctionTest_MocMatrixWorkspace : public MatrixWorkspace {
 public:
-  CompositeFunctionTest_MocMatrixWorkspace(size_t nspec, size_t nx, size_t ny)
-      : m_blocksize(ny) {
+  CompositeFunctionTest_MocMatrixWorkspace(size_t nspec, size_t nx, size_t ny) : m_blocksize(ny) {
     for (size_t i = 0; i < nspec; ++i) {
       CompositeFunctionTest_MocSpectrum sp(nx, ny);
       m_spectra.emplace_back(sp);
@@ -43,11 +41,20 @@ public:
 
   ~CompositeFunctionTest_MocMatrixWorkspace() override {}
 
+  bool isRaggedWorkspace() const override { return false; }
+
   // Section required for iteration
   /// Returns the number of single indexable items in the workspace
   std::size_t size() const override { return m_spectra.size() * m_blocksize; }
   /// Returns the size of each block of data returned by the dataY accessors
   std::size_t blocksize() const override { return m_blocksize; }
+  /// Returns the number of bins for a given histogram index.
+  std::size_t getNumberBins(const std::size_t &index) const override {
+    UNUSED_ARG(index);
+    return m_blocksize;
+  }
+  /// Returns the maximum number of bins in a workspace (works on ragged data).
+  std::size_t getMaxNumberBins() const override { return m_blocksize; }
   /// Returns the number of histograms in the workspace
   std::size_t getNumberHistograms() const override { return m_spectra.size(); }
 
@@ -59,20 +66,14 @@ public:
 
   /// Return the underlying ISpectrum ptr (const version) at the given workspace
   /// index.
-  const ISpectrum &getSpectrum(const size_t index) const override {
-    return m_spectra[index];
-  }
+  const ISpectrum &getSpectrum(const size_t index) const override { return m_spectra[index]; }
   const std::string id(void) const override { return ""; }
   void init(const size_t &, const size_t &, const size_t &) override {}
   void init(const HistogramData::Histogram &) override {}
-  void generateHistogram(const std::size_t, const MantidVec &, MantidVec &,
-                         MantidVec &, bool) const override {}
+  void generateHistogram(const std::size_t, const MantidVec &, MantidVec &, MantidVec &, bool) const override {}
 
   void clearFileBacked(bool) override{};
-  ITableWorkspace_sptr makeBoxTable(size_t /* start*/,
-                                    size_t /*num*/) override {
-    return ITableWorkspace_sptr();
-  }
+  ITableWorkspace_sptr makeBoxTable(size_t /* start*/, size_t /*num*/) override { return ITableWorkspace_sptr(); }
 
 private:
   CompositeFunctionTest_MocMatrixWorkspace *doClone() const override {
@@ -85,25 +86,25 @@ private:
                              "CompositeFunctionTest_MocMatrixWorkspace is not "
                              "implemented.");
   }
-  ISpectrum &getSpectrumWithoutInvalidation(const size_t index) override {
-    return m_spectra[index];
-  }
+  ISpectrum &getSpectrumWithoutInvalidation(const size_t index) override { return m_spectra[index]; }
   std::vector<CompositeFunctionTest_MocSpectrum> m_spectra;
   size_t m_blocksize;
 };
 
-class Gauss : public IPeakFunction {
+template <bool withAttributes = false> class Gauss : public IPeakFunction {
 public:
   Gauss() {
     declareParameter("c");
     declareParameter("h", 1.);
     declareParameter("s", 1.);
+    if constexpr (withAttributes) {
+      declareAttribute("GaussAttribute", Attribute("Gauss"));
+    }
   }
 
   std::string name() const override { return "Gauss"; }
 
-  void functionLocal(double *out, const double *xValues,
-                     const size_t nData) const override {
+  void functionLocal(double *out, const double *xValues, const size_t nData) const override {
     double c = getParameter("c");
     double h = getParameter("h");
     double w = getParameter("s");
@@ -112,8 +113,7 @@ public:
       out[i] = h * exp(-0.5 * x * x * w);
     }
   }
-  void functionDerivLocal(Jacobian *out, const double *xValues,
-                          const size_t nData) override {
+  void functionDerivLocal(Jacobian *out, const double *xValues, const size_t nData) override {
     // throw Mantid::Kernel::Exception::NotImplementedError("");
     double c = getParameter("c");
     double h = getParameter("h");
@@ -139,26 +139,26 @@ public:
   void setFwhm(const double w) override { setParameter(2, w); }
 };
 
-class Linear : public ParamFunction, public IFunction1D {
+template <bool withAttributes = false> class Linear : public ParamFunction, public IFunction1D {
 public:
   Linear() {
     declareParameter("a");
     declareParameter("b");
+    if constexpr (withAttributes) {
+      declareAttribute("LinearAttribute", Attribute("Linear"));
+    }
   }
 
   std::string name() const override { return "Linear"; }
 
-  void function1D(double *out, const double *xValues,
-                  const size_t nData) const override {
+  void function1D(double *out, const double *xValues, const size_t nData) const override {
     double a = getParameter("a");
     double b = getParameter("b");
     for (size_t i = 0; i < nData; i++) {
       out[i] = a + b * xValues[i];
     }
   }
-  void functionDeriv1D(Jacobian *out, const double *xValues,
-                       const size_t nData) override {
-    // throw Mantid::Kernel::Exception::NotImplementedError("");
+  void functionDeriv1D(Jacobian *out, const double *xValues, const size_t nData) override {
     for (size_t i = 0; i < nData; i++) {
       out->set(static_cast<int>(i), 0, 1.);
       out->set(static_cast<int>(i), 1, xValues[i]);
@@ -166,19 +166,21 @@ public:
   }
 };
 
-class Cubic : public ParamFunction, public IFunction1D {
+template <bool withAttributes = false> class Cubic : public ParamFunction, public IFunction1D {
 public:
   Cubic() {
     declareParameter("c0");
     declareParameter("c1");
     declareParameter("c2");
     declareParameter("c3");
+    if constexpr (withAttributes) {
+      declareAttribute("CubicAttribute", Attribute("Cubic"));
+    }
   }
 
   std::string name() const override { return "Cubic"; }
 
-  void function1D(double *out, const double *xValues,
-                  const size_t nData) const override {
+  void function1D(double *out, const double *xValues, const size_t nData) const override {
     double c0 = getParameter("c0");
     double c1 = getParameter("c1");
     double c2 = getParameter("c2");
@@ -188,8 +190,7 @@ public:
       out[i] = c0 + x * (c1 + x * (c2 + x * c3));
     }
   }
-  void functionDeriv1D(Jacobian *out, const double *xValues,
-                       const size_t nData) override {
+  void functionDeriv1D(Jacobian *out, const double *xValues, const size_t nData) override {
     for (size_t i = 0; i < nData; i++) {
       double x = xValues[i];
       out->set(static_cast<int>(i), 0, 1.);
@@ -202,18 +203,12 @@ public:
 
 class CompositeFunctionTest : public CxxTest::TestSuite {
 public:
-  static CompositeFunctionTest *createSuite() {
-    return new CompositeFunctionTest();
-  }
+  static CompositeFunctionTest *createSuite() { return new CompositeFunctionTest(); }
   static void destroySuite(CompositeFunctionTest *suite) { delete suite; }
 
-  CompositeFunctionTest() {
-    FunctionFactory::Instance().subscribe<Linear>("Linear");
-  }
+  CompositeFunctionTest() { FunctionFactory::Instance().subscribe<Linear<false>>("Linear"); }
 
-  ~CompositeFunctionTest() override {
-    FunctionFactory::Instance().unsubscribe("Linear");
-  }
+  ~CompositeFunctionTest() override { FunctionFactory::Instance().unsubscribe("Linear"); }
 
   void testAdd() {
     IFunction_sptr g1 = IFunction_sptr(new Gauss());
@@ -527,18 +522,12 @@ public:
     mfun->fix(10);
     // g2->fix(1);  // This doesn't work
 
-    TS_ASSERT_THROWS(mfun->setActiveParameter(0, 0),
-                     const std::runtime_error &);
-    TS_ASSERT_THROWS(mfun->setActiveParameter(1, 0),
-                     const std::runtime_error &);
-    TS_ASSERT_THROWS(mfun->setActiveParameter(4, 0),
-                     const std::runtime_error &);
-    TS_ASSERT_THROWS(mfun->setActiveParameter(6, 0),
-                     const std::runtime_error &);
-    TS_ASSERT_THROWS(mfun->setActiveParameter(7, 0),
-                     const std::runtime_error &);
-    TS_ASSERT_THROWS(mfun->setActiveParameter(10, 0),
-                     const std::runtime_error &);
+    TS_ASSERT_THROWS(mfun->setActiveParameter(0, 0), const std::runtime_error &);
+    TS_ASSERT_THROWS(mfun->setActiveParameter(1, 0), const std::runtime_error &);
+    TS_ASSERT_THROWS(mfun->setActiveParameter(4, 0), const std::runtime_error &);
+    TS_ASSERT_THROWS(mfun->setActiveParameter(6, 0), const std::runtime_error &);
+    TS_ASSERT_THROWS(mfun->setActiveParameter(7, 0), const std::runtime_error &);
+    TS_ASSERT_THROWS(mfun->setActiveParameter(10, 0), const std::runtime_error &);
 
     mfun->setActiveParameter(2, 100);
     mfun->setActiveParameter(3, 101);
@@ -1181,8 +1170,7 @@ public:
     mfun->addFunction(bk);
     mfun->addFunction(g1);
 
-    MatrixWorkspace_sptr ws(
-        new CompositeFunctionTest_MocMatrixWorkspace(10, 11, 10));
+    MatrixWorkspace_sptr ws(new CompositeFunctionTest_MocMatrixWorkspace(10, 11, 10));
 
     MantidVec &x = ws->dataX(3);
     MantidVec &y = ws->dataY(3);
@@ -1201,8 +1189,7 @@ public:
   }
 
   void test_ctreatingWithFactory() {
-    std::string funStr =
-        "composite=CompositeFunction,NumDeriv=true;name=Linear;name=Linear";
+    std::string funStr = "composite=CompositeFunction,NumDeriv=true;name=Linear;name=Linear";
     auto fun = FunctionFactory::Instance().createInitialized(funStr);
     TS_ASSERT(fun);
     TS_ASSERT(fun->hasAttribute("NumDeriv"));
@@ -1212,8 +1199,7 @@ public:
                                       "true;name=Linear,a=0,b=0;name=Linear,a="
                                       "0,b=0");
 
-    fun = FunctionFactory::Instance().createInitialized(
-        "name=Linear;name=Linear");
+    fun = FunctionFactory::Instance().createInitialized("name=Linear;name=Linear");
     TS_ASSERT(fun);
     TS_ASSERT(fun->hasAttribute("NumDeriv"));
     b = fun->getAttribute("NumDeriv").asBool();
@@ -1222,8 +1208,7 @@ public:
 
   void test_local_name() {
     std::string funStr = "name=Linear;(name=Linear;(name=Linear;name=Linear))";
-    auto fun = std::dynamic_pointer_cast<CompositeFunction>(
-        FunctionFactory::Instance().createInitialized(funStr));
+    auto fun = std::dynamic_pointer_cast<CompositeFunction>(FunctionFactory::Instance().createInitialized(funStr));
     TS_ASSERT_EQUALS(fun->parameterLocalIndex(0), 0);
     TS_ASSERT_EQUALS(fun->parameterLocalIndex(2), 0);
     TS_ASSERT_EQUALS(fun->parameterLocalIndex(4), 2);
@@ -1243,5 +1228,218 @@ public:
     TS_ASSERT_EQUALS(fun->parameterLocalName(2, true), "a");
     TS_ASSERT_EQUALS(fun->parameterLocalName(4, true), "a");
     TS_ASSERT_EQUALS(fun->parameterLocalName(6, true), "a");
+  }
+
+  void test_attributes_generated_with_correct_prefix() {
+    auto mfun = std::make_unique<CompositeFunction>();
+    auto gauss = std::make_shared<Gauss<true>>();
+    auto background = std::make_shared<Linear<true>>();
+    auto cubic = std::make_shared<Cubic<true>>();
+
+    mfun->addFunction(gauss);
+    mfun->addFunction(background);
+    mfun->addFunction(cubic);
+
+    TS_ASSERT_EQUALS(mfun->nAttributes(), 4);
+    TS_ASSERT_EQUALS(mfun->attributeName(0), "NumDeriv");
+    TS_ASSERT_EQUALS(mfun->attributeName(1), "f0.GaussAttribute");
+    TS_ASSERT_EQUALS(mfun->attributeName(2), "f1.LinearAttribute");
+    TS_ASSERT_EQUALS(mfun->attributeName(3), "f2.CubicAttribute");
+  }
+
+  void test_has_attribute_returns_correctly() {
+    auto mfun = std::make_unique<CompositeFunction>();
+    auto gauss = std::make_shared<Gauss<true>>();
+    auto background = std::make_shared<Linear<true>>();
+    auto cubic = std::make_shared<Cubic<true>>();
+
+    mfun->addFunction(gauss);
+    mfun->addFunction(background);
+    mfun->addFunction(cubic);
+
+    TS_ASSERT_EQUALS(mfun->hasAttribute("NumDeriv"), true);
+    TS_ASSERT_EQUALS(mfun->hasAttribute("Test"), false);
+    TS_ASSERT_EQUALS(mfun->hasAttribute("f0.GaussAttribute"), true);
+    TS_ASSERT_EQUALS(mfun->hasAttribute("f0.CubicAttribute"), false);
+    TS_ASSERT_EQUALS(mfun->hasAttribute("f1.LinearAttribute"), true);
+    TS_ASSERT_EQUALS(mfun->hasAttribute("f1.GaussAttribute"), false);
+    TS_ASSERT_EQUALS(mfun->hasAttribute("f2.CubicAttribute"), true);
+    TS_ASSERT_EQUALS(mfun->hasAttribute("f2.GaussAttribute"), false);
+  }
+
+  void test_get_attribute_names_returns_correctly() {
+    auto mfun = std::make_unique<CompositeFunction>();
+    auto gauss = std::make_shared<Gauss<true>>();
+    auto background = std::make_shared<Linear<true>>();
+    auto cubic = std::make_shared<Cubic<true>>();
+
+    mfun->addFunction(gauss);
+    mfun->addFunction(background);
+    mfun->addFunction(cubic);
+
+    auto names = mfun->getAttributeNames();
+    // 1 attribute per function + the global numerical derivative attribute
+    TS_ASSERT_EQUALS(names.size(), 4);
+    TS_ASSERT_EQUALS(names[0], "NumDeriv");
+    TS_ASSERT_EQUALS(names[1], "f0.GaussAttribute");
+    TS_ASSERT_EQUALS(names[2], "f1.LinearAttribute");
+    TS_ASSERT_EQUALS(names[3], "f2.CubicAttribute");
+  }
+
+  void test_as_string_preserves_attributes() {
+    auto mfun = std::make_unique<CompositeFunction>();
+    auto gauss = std::make_shared<Gauss<true>>();
+    auto background = std::make_shared<Linear<true>>();
+    auto cubic = std::make_shared<Cubic<true>>();
+
+    mfun->addFunction(gauss);
+    mfun->addFunction(background);
+    mfun->addFunction(cubic);
+
+    std::string str = "name=Gauss,GaussAttribute=Gauss,c=0,h=1,s=1;";
+    str += "name=Linear,LinearAttribute=Linear,a=0,b=0;";
+    str += "name=Cubic,CubicAttribute=Cubic,c0=0,c1=0,c2=0,c3=0";
+
+    TS_ASSERT_EQUALS(mfun->asString(), str);
+  }
+
+  void test_set_attribute_supports_prefixed_attributes() {
+    auto mfun = std::make_unique<CompositeFunction>();
+    auto gauss = std::make_shared<Gauss<true>>();
+    auto background = std::make_shared<Linear<true>>();
+    auto cubic = std::make_shared<Cubic<true>>();
+
+    mfun->addFunction(gauss);
+    mfun->addFunction(background);
+    mfun->addFunction(cubic);
+    mfun->setAttribute("f2.CubicAttribute", IFunction::Attribute("NewCubicAttribute"));
+    mfun->setAttribute("f1.LinearAttribute", IFunction::Attribute("NewLinearAttribute"));
+
+    TS_ASSERT_EQUALS(mfun->getAttribute("f2.CubicAttribute").asString(), "NewCubicAttribute");
+    TS_ASSERT_EQUALS(mfun->getAttribute("f1.LinearAttribute").asString(), "NewLinearAttribute");
+  }
+  void test_set_attribute_supports_unprefixed_attributes() {
+    auto mfun = std::make_unique<CompositeFunction>();
+    auto gauss = std::make_shared<Gauss<true>>();
+    auto background = std::make_shared<Linear<true>>();
+    auto cubic = std::make_shared<Cubic<true>>();
+
+    mfun->addFunction(gauss);
+    mfun->addFunction(background);
+    mfun->addFunction(cubic);
+
+    // Set the global NumDeriv attribute
+    mfun->setAttribute("NumDeriv", IFunction::Attribute(true));
+
+    TS_ASSERT_EQUALS(mfun->getAttribute("NumDeriv").asBool(), true);
+  }
+
+  void test_set_attribute_thorws_if_attribute_not_recongized() {
+    auto mfun = std::make_unique<CompositeFunction>();
+    auto gauss = std::make_shared<Gauss<true>>();
+    auto background = std::make_shared<Linear<true>>();
+    auto cubic = std::make_shared<Cubic<true>>();
+
+    mfun->addFunction(gauss);
+    mfun->addFunction(background);
+    mfun->addFunction(cubic);
+
+    TS_ASSERT_THROWS(mfun->setAttribute("f0.CubicAttribute", IFunction::Attribute("NewCubicAttribute")),
+                     std::invalid_argument &);
+  }
+
+  void test_remove_function_correctly_shifts_down_attributes() {
+    auto mfun = std::make_unique<CompositeFunction>();
+    auto gauss = std::make_shared<Gauss<true>>();
+    auto background = std::make_shared<Linear<true>>();
+    auto cubic = std::make_shared<Cubic<true>>();
+    mfun->addFunction(gauss);
+    mfun->addFunction(background);
+    mfun->addFunction(cubic);
+
+    mfun->removeFunction(1);
+
+    TS_ASSERT_EQUALS(mfun->nAttributes(), 3);
+    TS_ASSERT_EQUALS(mfun->attributeName(0), "NumDeriv");
+    TS_ASSERT_EQUALS(mfun->attributeName(1), "f0.GaussAttribute");
+    TS_ASSERT_EQUALS(mfun->attributeName(2), "f1.CubicAttribute");
+  }
+
+  void test_replace_function_correctly_adds_attributes() {
+    auto mfun = std::make_unique<CompositeFunction>();
+    auto gauss = std::make_shared<Gauss<false>>();
+    auto background = std::make_shared<Linear<true>>();
+    auto cubic = std::make_shared<Cubic<true>>();
+    auto gaussWithAttributes = std::make_shared<Gauss<true>>();
+
+    mfun->addFunction(background);
+    mfun->addFunction(gauss);
+    mfun->addFunction(cubic);
+
+    TS_ASSERT_EQUALS(mfun->nAttributes(), 3);
+    TS_ASSERT_EQUALS(mfun->attributeName(0), "NumDeriv");
+    TS_ASSERT_EQUALS(mfun->attributeName(1), "f0.LinearAttribute");
+    TS_ASSERT_EQUALS(mfun->attributeName(2), "f2.CubicAttribute");
+
+    mfun->replaceFunction(1, gaussWithAttributes);
+
+    TS_ASSERT_EQUALS(mfun->nAttributes(), 4);
+    TS_ASSERT_EQUALS(mfun->attributeName(0), "NumDeriv");
+    TS_ASSERT_EQUALS(mfun->attributeName(1), "f0.LinearAttribute");
+    TS_ASSERT_EQUALS(mfun->attributeName(2), "f1.GaussAttribute");
+    TS_ASSERT_EQUALS(mfun->attributeName(3), "f2.CubicAttribute");
+  }
+
+  void test_setError_with_name() {
+    auto mfun = std::make_unique<CompositeFunction>();
+    auto gauss = std::make_shared<Gauss<false>>();
+    auto background = std::make_shared<Linear<true>>();
+    auto cubic = std::make_shared<Cubic<true>>();
+
+    mfun->addFunction(background);
+    mfun->addFunction(gauss);
+    mfun->addFunction(cubic);
+
+    mfun->setError(0, 1.0);
+    TS_ASSERT_EQUALS(mfun->getError(0), 1.0);
+    mfun->setError("f1.s", 5.0);
+    TS_ASSERT_EQUALS(mfun->getError("f1.s"), 5.0);
+  }
+
+  void test_hasFunction_returns_true_if_the_composite_contains_a_function_with_the_given_name() {
+    auto composite = std::make_unique<CompositeFunction>();
+    auto const gauss = std::make_shared<Gauss<true>>();
+
+    composite->addFunction(gauss);
+
+    TS_ASSERT(composite->hasFunction("Gauss"));
+  }
+
+  void test_hasFunction_returns_false_if_the_composite_does_not_contain_a_function_with_the_given_name() {
+    auto const composite = std::make_unique<CompositeFunction>();
+    auto const background = std::make_shared<Linear<true>>();
+    composite->addFunction(background);
+
+    TS_ASSERT(!composite->hasFunction("Gauss"));
+  }
+
+  void test_functionIndex_returns_the_correct_index_of_a_function_in_the_composite() {
+    auto composite = std::make_unique<CompositeFunction>();
+    auto const gauss = std::make_shared<Gauss<true>>();
+    auto const background = std::make_shared<Linear<true>>();
+
+    composite->addFunction(gauss);
+    composite->addFunction(background);
+
+    TS_ASSERT_EQUALS(composite->functionIndex("Gauss"), 0);
+    TS_ASSERT_EQUALS(composite->functionIndex("Linear"), 1);
+  }
+
+  void test_functionIndex_throws_if_the_function_name_provided_does_not_exist_in_the_composite() {
+    auto const composite = std::make_unique<CompositeFunction>();
+    auto const background = std::make_shared<Linear<true>>();
+    composite->addFunction(background);
+
+    TS_ASSERT_THROWS(composite->functionIndex("Gauss"), const std::invalid_argument &);
   }
 };

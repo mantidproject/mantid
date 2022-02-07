@@ -17,8 +17,7 @@
 #include <boost/algorithm/string.hpp>
 #include <boost/format.hpp>
 
-namespace Mantid {
-namespace Geometry {
+namespace Mantid::Geometry {
 
 MDPlaneImplicitFunction::MDPlaneImplicitFunction() : MDImplicitFunction() {}
 
@@ -30,9 +29,7 @@ MDPlaneImplicitFunction::MDPlaneImplicitFunction() : MDImplicitFunction() {}
  * @param normal array of coordinates for the plane normal
  * @param point array of coorindates for the plane origin
  */
-MDPlaneImplicitFunction::MDPlaneImplicitFunction(const size_t nd,
-                                                 const float *normal,
-                                                 const float *point)
+MDPlaneImplicitFunction::MDPlaneImplicitFunction(const size_t nd, const float *normal, const float *point)
     : MDImplicitFunction(), origin(nd) {
   for (std::size_t i = 0; i < nd; i++) {
     this->origin[i] = static_cast<coord_t>(point[i]);
@@ -48,9 +45,7 @@ MDPlaneImplicitFunction::MDPlaneImplicitFunction(const size_t nd,
  * @param normal array of coordinates for the plane normal
  * @param point array of coorindates for the plane origin
  */
-MDPlaneImplicitFunction::MDPlaneImplicitFunction(const size_t nd,
-                                                 const double *normal,
-                                                 const double *point)
+MDPlaneImplicitFunction::MDPlaneImplicitFunction(const size_t nd, const double *normal, const double *point)
     : MDImplicitFunction(), origin(nd) {
   for (std::size_t i = 0; i < nd; i++) {
     this->origin[i] = static_cast<coord_t>(point[i]);
@@ -72,9 +67,7 @@ void MDPlaneImplicitFunction::addPlane(const MDPlane &plane) {
   }
 }
 
-std::string MDPlaneImplicitFunction::getName() const {
-  return std::string("PlaneImplicitFuction");
-}
+std::string MDPlaneImplicitFunction::getName() const { return std::string("PlaneImplicitFuction"); }
 
 std::string MDPlaneImplicitFunction::toXMLString() const {
   using namespace Poco::XML;
@@ -111,8 +104,7 @@ std::string MDPlaneImplicitFunction::toXMLString() const {
   origParameterElement->appendChild(origTypeElement);
   AutoPtr<Element> origValueElement = pDoc->createElement("Value");
   origParameterElement->appendChild(origValueElement);
-  AutoPtr<Text> origValueText =
-      pDoc->createTextNode(this->coordValue(this->origin.data()));
+  AutoPtr<Text> origValueText = pDoc->createTextNode(this->coordValue(this->origin.data()));
   origValueElement->appendChild(origValueText);
   origParameterElement->appendChild(origValueElement);
 
@@ -120,8 +112,7 @@ std::string MDPlaneImplicitFunction::toXMLString() const {
   DOMWriter writer;
   writer.writeNode(xmlstream, pDoc);
 
-  std::string formattedXMLString =
-      boost::str(boost::format(xmlstream.str().c_str()));
+  std::string formattedXMLString = boost::str(boost::format(xmlstream.str().c_str()));
   return formattedXMLString;
 }
 
@@ -147,5 +138,4 @@ void MDPlaneImplicitFunction::checkOrigin() {
   }
 }
 
-} // namespace Geometry
-} // namespace Mantid
+} // namespace Mantid::Geometry

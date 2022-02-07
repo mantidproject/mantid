@@ -59,13 +59,9 @@ public:
 
   /// Algorithm's version for identification overriding a virtual method
   int version() const override { return 2; }
-  const std::vector<std::string> seeAlso() const override {
-    return {"LoadNexus"};
-  }
+  const std::vector<std::string> seeAlso() const override { return {"LoadNexus"}; }
   /// Algorithm's category for identification overriding a virtual method
-  const std::string category() const override {
-    return "DataHandling\\Nexus;Muon\\DataHandling";
-  }
+  const std::string category() const override { return "DataHandling\\Nexus;Muon\\DataHandling"; }
 
   /// Returns a confidence value that this algorithm can load a file
   int confidence(Kernel::NexusDescriptor &descriptor) const override;
@@ -76,14 +72,11 @@ private:
   /// Execute this version of the algorithm
   void doExec();
 
-  HistogramData::Histogram
-  loadData(const Mantid::HistogramData::BinEdges &edges,
-           const Mantid::NeXus::NXInt &counts, int period, int spec);
-  void loadLogs(const API::MatrixWorkspace_sptr &ws,
-                Mantid::NeXus::NXEntry &entry, int period);
+  HistogramData::Histogram loadData(const Mantid::HistogramData::BinEdges &edges, const Mantid::NeXus::NXInt &counts,
+                                    int period, int spec);
+  void loadLogs(const API::MatrixWorkspace_sptr &ws, Mantid::NeXus::NXEntry &entry, int period);
   void loadRunDetails(const DataObjects::Workspace2D_sptr &localWorkspace);
-  std::map<int, std::set<int>>
-  loadDetectorMapping(const Mantid::NeXus::NXInt &spectrumIndex);
+  std::map<int, std::set<int>> loadDetectorMapping(const Mantid::NeXus::NXInt &spectrumIndex);
 };
 
 } // namespace DataHandling

@@ -19,9 +19,7 @@
 #include <cmath>
 #include <gsl/gsl_blas.h>
 
-namespace Mantid {
-namespace CurveFitting {
-namespace FuncMinimisers {
+namespace Mantid::CurveFitting::FuncMinimisers {
 
 namespace {
 /// static logger
@@ -31,21 +29,17 @@ Kernel::Logger g_log("DampedGaussNewtonMinimizer");
 DECLARE_FUNCMINIMIZER(DampedGaussNewtonMinimizer, Damped GaussNewton)
 
 /// Constructor
-DampedGaussNewtonMinimizer::DampedGaussNewtonMinimizer(double relTol)
-    : IFuncMinimizer(), m_relTol(relTol) {
+DampedGaussNewtonMinimizer::DampedGaussNewtonMinimizer(double relTol) : IFuncMinimizer(), m_relTol(relTol) {
   declareProperty("Damping", 0.0, "The damping parameter.");
   declareProperty("Verbose", false, "Make output more verbose.");
 }
 
 /// Initialize minimizer, i.e. pass a function to minimize.
-void DampedGaussNewtonMinimizer::initialize(API::ICostFunction_sptr function,
-                                            size_t /*maxIterations*/) {
-  m_leastSquares =
-      std::dynamic_pointer_cast<CostFunctions::CostFuncLeastSquares>(function);
+void DampedGaussNewtonMinimizer::initialize(API::ICostFunction_sptr function, size_t /*maxIterations*/) {
+  m_leastSquares = std::dynamic_pointer_cast<CostFunctions::CostFuncLeastSquares>(function);
   if (!m_leastSquares) {
-    throw std::invalid_argument(
-        "Damped Gauss-Newton minimizer works only with least "
-        "squares. Different function was given.");
+    throw std::invalid_argument("Damped Gauss-Newton minimizer works only with least "
+                                "squares. Different function was given.");
   }
 }
 
@@ -74,8 +68,7 @@ bool DampedGaussNewtonMinimizer::iterate(size_t /*iteration*/) {
   for (size_t i = 0; i < n; ++i) {
     double tmp = H.get(i, i) + damping;
     if (tmp == 0.0) {
-      m_errorString = "Function doesn't depend on parameter " +
-                      m_leastSquares->parameterName(i);
+      m_errorString = "Function doesn't depend on parameter " + m_leastSquares->parameterName(i);
       return false;
     }
     H.set(i, i, tmp);
@@ -117,8 +110,7 @@ bool DampedGaussNewtonMinimizer::iterate(size_t /*iteration*/) {
     double d = m_leastSquares->getParameter(i) + dx.get(i);
     m_leastSquares->setParameter(i, d);
     if (verbose) {
-      g_log.warning() << i << " Parameter " << m_leastSquares->parameterName(i)
-                      << ' ' << d << '\n';
+      g_log.warning() << i << " Parameter " << m_leastSquares->parameterName(i) << ' ' << d << '\n';
     }
   }
   m_leastSquares->getFittingFunction()->applyTies();
@@ -140,6 +132,4 @@ double DampedGaussNewtonMinimizer::costFunctionVal() {
   return m_leastSquares->val();
 }
 
-} // namespace FuncMinimisers
-} // namespace CurveFitting
-} // namespace Mantid
+} // namespace Mantid::CurveFitting::FuncMinimisers

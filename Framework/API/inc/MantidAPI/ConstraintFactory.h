@@ -36,17 +36,14 @@ class Expression;
     @date 4/02/2010
 */
 
-class MANTID_API_DLL ConstraintFactoryImpl final
-    : public Kernel::DynamicFactory<IConstraint> {
+class MANTID_API_DLL ConstraintFactoryImpl final : public Kernel::DynamicFactory<IConstraint> {
 public:
   ConstraintFactoryImpl(const ConstraintFactoryImpl &) = delete;
   ConstraintFactoryImpl &operator=(const ConstraintFactoryImpl &) = delete;
   /// Creates an instance of a Constraint
-  IConstraint *createInitialized(IFunction *fun, const std::string &input,
-                                 bool isDefault = false) const;
+  IConstraint *createInitialized(IFunction *fun, const std::string &input, bool isDefault = false) const;
   /// Creates an instance of a Constraint
-  IConstraint *createInitialized(IFunction *fun, const Expression &expr,
-                                 bool isDefault = false) const;
+  IConstraint *createInitialized(IFunction *fun, const Expression &expr, bool isDefault = false) const;
 
 private:
   friend struct Mantid::Kernel::CreateUsingNew<ConstraintFactoryImpl>;
@@ -57,16 +54,14 @@ private:
   ~ConstraintFactoryImpl() override = default;
 };
 
-using ConstraintFactory =
-    Mantid::Kernel::SingletonHolder<ConstraintFactoryImpl>;
+using ConstraintFactory = Mantid::Kernel::SingletonHolder<ConstraintFactoryImpl>;
 
 } // namespace API
 } // namespace Mantid
 
 namespace Mantid {
 namespace Kernel {
-EXTERN_MANTID_API template class MANTID_API_DLL
-    Mantid::Kernel::SingletonHolder<Mantid::API::ConstraintFactoryImpl>;
+EXTERN_MANTID_API template class MANTID_API_DLL Mantid::Kernel::SingletonHolder<Mantid::API::ConstraintFactoryImpl>;
 }
 } // namespace Mantid
 
@@ -74,10 +69,8 @@ EXTERN_MANTID_API template class MANTID_API_DLL
  * Macro for declaring a new type of function to be used with the
  * FunctionFactory
  */
-#define DECLARE_CONSTRAINT(classname)                                          \
-  namespace {                                                                  \
-  Mantid::Kernel::RegistrationHelper register_constraint_##classname(          \
-      ((Mantid::API::ConstraintFactory::Instance().subscribe<classname>(       \
-           #classname)),                                                       \
-       0));                                                                    \
+#define DECLARE_CONSTRAINT(classname)                                                                                  \
+  namespace {                                                                                                          \
+  Mantid::Kernel::RegistrationHelper register_constraint_##classname(                                                  \
+      ((Mantid::API::ConstraintFactory::Instance().subscribe<classname>(#classname)), 0));                             \
   }

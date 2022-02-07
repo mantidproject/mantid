@@ -6,14 +6,12 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAPI/IndexTypeProperty.h"
 
-namespace Mantid {
-namespace API {
-IndexTypeProperty::IndexTypeProperty(const std::string &name,
-                                     const int indexType)
+namespace Mantid::API {
+IndexTypeProperty::IndexTypeProperty(const std::string &name, const int indexType)
     : PropertyWithValue<std::string>(name, "", Kernel::Direction::Input) {
-  if (indexType & IndexType::WorkspaceIndex)
+  if (indexType & static_cast<int>(IndexType::WorkspaceIndex))
     m_allowedValues.emplace_back("WorkspaceIndex");
-  if (indexType & IndexType::SpectrumNum)
+  if (indexType & static_cast<int>(IndexType::SpectrumNum))
     m_allowedValues.emplace_back("SpectrumNumber");
 
   if (m_allowedValues.empty())
@@ -40,19 +38,17 @@ int IndexTypeProperty::allowedTypes() const {
   const auto end = m_allowedValues.cend();
 
   if (std::find(beg, end, "SpectrumNumber") != end) {
-    types |= IndexType::SpectrumNum;
+    types |= static_cast<int>(IndexType::SpectrumNum);
   }
 
   if (std::find(beg, end, "WorkspaceIndex") != end) {
-    types |= IndexType::WorkspaceIndex;
+    types |= static_cast<int>(IndexType::WorkspaceIndex);
   }
 
   return types;
 }
 
-std::vector<std::string> IndexTypeProperty::allowedValues() const {
-  return m_allowedValues;
-}
+std::vector<std::string> IndexTypeProperty::allowedValues() const { return m_allowedValues; }
 
 bool IndexTypeProperty::isMultipleSelectionAllowed() { return false; }
 
@@ -72,9 +68,6 @@ IndexTypeProperty &IndexTypeProperty::operator=(API::IndexType type) {
   return *this;
 }
 
-std::string IndexTypeProperty::generatePropertyName(const std::string &name) {
-  return name + "IndexType";
-}
+std::string IndexTypeProperty::generatePropertyName(const std::string &name) { return name + "IndexType"; }
 
-} // namespace API
-} // namespace Mantid
+} // namespace Mantid::API

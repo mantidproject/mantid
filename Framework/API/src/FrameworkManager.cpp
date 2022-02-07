@@ -29,11 +29,15 @@
 
 // The below can be replaced with global_control when all platforms
 // have 2019U4
+#if __has_include("tbb/tbb_stddef.h")
 #include "tbb/tbb_stddef.h"
-
 #if TBB_INTERFACE_VERSION_MAJOR < 11
 #include "tbb/task_scheduler_init.h"
 #include <thread>
+#else
+#define TBB_HAS_GLOBAL_CONTROL
+#include "tbb/global_control.h"
+#endif
 #else
 #define TBB_HAS_GLOBAL_CONTROL
 #include "tbb/global_control.h"
@@ -77,13 +81,10 @@ const char *PLUGINS_EXCLUDE_KEY = "framework.plugins.exclude";
 
 /** This is a function called every time NeXuS raises an error.
  * This swallows the errors and outputs nothing.
- *
- * @param data :: data passed in NXMSetError (will be NULL)
- * @param text :: text of the error.
  */
-void NexusErrorFunction(void *data, char *text) {
-  UNUSED_ARG(data);
-  UNUSED_ARG(text);
+// Prevent clang-tidy trying to change the signature for ext. interface
+// NOLINTNEXTLINE(readability-non-const-parameter)
+void NexusErrorFunction(void *, char *) {
   // Do nothing.
 }
 
@@ -155,8 +156,7 @@ FrameworkManagerImpl::FrameworkManagerImpl()
   setNumOMPThreadsToConfigValue();
 
 #ifdef MPI_BUILD
-  g_log.notice() << "This MPI process is rank: "
-                 << boost::mpi::communicator().rank() << '\n';
+  g_log.notice() << "This MPI process is rank: " << boost::mpi::communicator().rank() << '\n';
 #endif
 
   g_log.debug() << "FrameworkManager created.\n";
@@ -167,17 +167,14 @@ FrameworkManagerImpl::FrameworkManagerImpl()
 /**
  * Load all plugins from the framework
  */
-void FrameworkManagerImpl::loadPlugins() {
-  loadPluginsUsingKey(PLUGINS_DIR_KEY, PLUGINS_EXCLUDE_KEY);
-}
+void FrameworkManagerImpl::loadPlugins() { loadPluginsUsingKey(PLUGINS_DIR_KEY, PLUGINS_EXCLUDE_KEY); }
 
 /**
  * Set the number of OpenMP cores to use based on the config value
  */
 void FrameworkManagerImpl::setNumOMPThreadsToConfigValue() {
   // Set the number of threads to use for this process
-  auto maxCores =
-      Kernel::ConfigService::Instance().getValue<int>("MultiThreaded.MaxCores");
+  auto maxCores = Kernel::ConfigService::Instance().getValue<int>("MultiThreaded.MaxCores");
   if (maxCores.get_value_or(0) > 0) {
     setNumOMPThreads(maxCores.get());
   }
@@ -191,13 +188,11 @@ void FrameworkManagerImpl::setNumOMPThreads(const int nthreads) {
   g_log.debug() << "Setting maximum number of threads to " << nthreads << "\n";
   PARALLEL_SET_NUM_THREADS(nthreads);
   if (m_globalTbbControl) {
-    m_globalTbbControl
-        .reset(); // Have to reset to change the number of threads at runtime
+    m_globalTbbControl.reset(); // Have to reset to change the number of threads at runtime
   }
 
 #ifdef TBB_HAS_GLOBAL_CONTROL
-  m_globalTbbControl = std::make_unique<tbb::global_control>(
-      tbb::global_control::max_allowed_parallelism, nthreads);
+  m_globalTbbControl = std::make_unique<tbb::global_control>(tbb::global_control::max_allowed_parallelism, nthreads);
 #else
   m_globalTbbControl = std::make_unique<tbb::task_scheduler_init>(nthreads);
 #endif
@@ -209,9 +204,7 @@ void FrameworkManagerImpl::setNumOMPThreads(const int nthreads) {
  * parallel
  * call
  */
-int FrameworkManagerImpl::getNumOMPThreads() const {
-  return PARALLEL_GET_MAX_THREADS;
-}
+int FrameworkManagerImpl::getNumOMPThreads() const { return PARALLEL_GET_MAX_THREADS; }
 
 /** Clears all memory associated with the AlgorithmManager
  *  and with the Analysis & Instrument data services.
@@ -233,23 +226,17 @@ void FrameworkManagerImpl::shutdown() {
 /**
  * Clear memory associated with the AlgorithmManager
  */
-void FrameworkManagerImpl::clearAlgorithms() {
-  AlgorithmManager::Instance().clear();
-}
+void FrameworkManagerImpl::clearAlgorithms() { AlgorithmManager::Instance().clear(); }
 
 /**
  * Clear memory associated with the ADS
  */
-void FrameworkManagerImpl::clearData() {
-  AnalysisDataService::Instance().clear();
-}
+void FrameworkManagerImpl::clearData() { AnalysisDataService::Instance().clear(); }
 
 /**
  * Clear memory associated with the IDS
  */
-void FrameworkManagerImpl::clearInstruments() {
-  InstrumentDataService::Instance().clear();
-}
+void FrameworkManagerImpl::clearInstruments() { InstrumentDataService::Instance().clear(); }
 
 /**
  * Clear memory associated with the PropertyManagers
@@ -265,16 +252,13 @@ void FrameworkManagerImpl::clearPropertyManagers() {
  * @param count :: number of arguments given.
  * @return the algorithm created
  */
-IAlgorithm_sptr FrameworkManagerImpl::exec(const std::string &algorithmName,
-                                           int count, ...) {
+IAlgorithm_sptr FrameworkManagerImpl::exec(const std::string &algorithmName, int count, ...) {
   if (count % 2 == 1) {
-    throw std::runtime_error(
-        "Must have an even number of parameter/value string arguments");
+    throw std::runtime_error("Must have an even number of parameter/value string arguments");
   }
 
   // Create the algorithm
-  IAlgorithm_sptr alg =
-      AlgorithmManager::Instance().createUnmanaged(algorithmName, -1);
+  auto alg = AlgorithmManager::Instance().createUnmanaged(algorithmName, -1);
   alg->initialize();
   if (!alg->isInitialized())
     throw std::runtime_error(algorithmName + " was not initialized.");
@@ -305,8 +289,7 @@ Workspace *FrameworkManagerImpl::getWorkspace(const std::string &wsName) {
   try {
     space = AnalysisDataService::Instance().retrieve(wsName).get();
   } catch (Kernel::Exception::NotFoundError &) {
-    throw Kernel::Exception::NotFoundError("Unable to retrieve workspace",
-                                           wsName);
+    throw Kernel::Exception::NotFoundError("Unable to retrieve workspace", wsName);
   }
   return space;
 }
@@ -328,8 +311,7 @@ bool FrameworkManagerImpl::deleteWorkspace(const std::string &wsName) {
     return false;
   }
 
-  std::shared_ptr<WorkspaceGroup> ws_grpsptr =
-      std::dynamic_pointer_cast<WorkspaceGroup>(ws_sptr);
+  std::shared_ptr<WorkspaceGroup> ws_grpsptr = std::dynamic_pointer_cast<WorkspaceGroup>(ws_sptr);
   if (ws_grpsptr) {
     //  selected workspace is a group workspace
     AnalysisDataService::Instance().deepRemoveGroup(wsName);
@@ -355,18 +337,15 @@ bool FrameworkManagerImpl::deleteWorkspace(const std::string &wsName) {
  * ConfigService
  * @param excludeKey A string
  */
-void FrameworkManagerImpl::loadPluginsUsingKey(const std::string &locationKey,
-                                               const std::string &excludeKey) {
+void FrameworkManagerImpl::loadPluginsUsingKey(const std::string &locationKey, const std::string &excludeKey) {
   const auto &cfgSvc = Kernel::ConfigService::Instance();
   const auto pluginDir = cfgSvc.getString(locationKey);
   if (pluginDir.length() > 0) {
     std::vector<std::string> excludes;
     const auto excludeStr = cfgSvc.getString(excludeKey);
     boost::split(excludes, excludeStr, boost::is_any_of(";"));
-    g_log.debug("Loading libraries from '" + pluginDir + "', excluding '" +
-                excludeStr + "'");
-    LibraryManager::Instance().openLibraries(
-        pluginDir, LibraryManagerImpl::NonRecursive, excludes);
+    g_log.debug("Loading libraries from '" + pluginDir + "', excluding '" + excludeStr + "'");
+    LibraryManager::Instance().openLibraries(pluginDir, LibraryManagerImpl::NonRecursive, excludes);
   } else {
     g_log.debug("No library directory found in key \"" + locationKey + "\"");
   }
@@ -388,14 +367,11 @@ void FrameworkManagerImpl::setGlobalNumericLocaleToC() {
 }
 
 /// Silence NeXus output
-void FrameworkManagerImpl::disableNexusOutput() {
-  NXMSetError(nullptr, NexusErrorFunction);
-}
+void FrameworkManagerImpl::disableNexusOutput() { NXMSetError(nullptr, NexusErrorFunction); }
 
 /// Starts asynchronous tasks that are done as part of Start-up.
 void FrameworkManagerImpl::asynchronousStartupTasks() {
-  auto instrumentUpdates = Kernel::ConfigService::Instance().getValue<bool>(
-      "UpdateInstrumentDefinitions.OnStartup");
+  auto instrumentUpdates = Kernel::ConfigService::Instance().getValue<bool>("UpdateInstrumentDefinitions.OnStartup");
 
   if (instrumentUpdates.get_value_or(false)) {
     updateInstrumentDefinitions();
@@ -404,8 +380,7 @@ void FrameworkManagerImpl::asynchronousStartupTasks() {
                            "instrument definitions.\n";
   }
 
-  auto newVersionCheck = Kernel::ConfigService::Instance().getValue<bool>(
-      "CheckMantidVersion.OnStartup");
+  auto newVersionCheck = Kernel::ConfigService::Instance().getValue<bool>("CheckMantidVersion.OnStartup");
   if (newVersionCheck.get_value_or(false)) {
     checkIfNewerVersionIsAvailable();
   } else {
@@ -430,8 +405,7 @@ void FrameworkManagerImpl::setupUsageReporting() {
 /// Update instrument definitions from github
 void FrameworkManagerImpl::updateInstrumentDefinitions() {
   try {
-    auto algDownloadInstrument =
-        Mantid::API::AlgorithmManager::Instance().create("DownloadInstrument");
+    auto algDownloadInstrument = Mantid::API::AlgorithmManager::Instance().create("DownloadInstrument");
     algDownloadInstrument->setAlgStartupLogging(false);
     algDownloadInstrument->executeAsync();
   } catch (Kernel::Exception::NotFoundError &) {
@@ -443,8 +417,7 @@ void FrameworkManagerImpl::updateInstrumentDefinitions() {
 /// Check if a newer release of Mantid is available
 void FrameworkManagerImpl::checkIfNewerVersionIsAvailable() {
   try {
-    auto algCheckVersion =
-        Mantid::API::AlgorithmManager::Instance().create("CheckMantidVersion");
+    auto algCheckVersion = Mantid::API::AlgorithmManager::Instance().create("CheckMantidVersion");
     algCheckVersion->setAlgStartupLogging(false);
     algCheckVersion->executeAsync();
   } catch (Kernel::Exception::NotFoundError &) {

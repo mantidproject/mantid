@@ -20,13 +20,12 @@ namespace MantidQt {
 namespace MantidWidgets {
 /** SlitCalculator : A calculator for Reflectometry instrument slits
  */
-class EXPORT_OPT_MANTIDQT_COMMON SlitCalculator : public QDialog,
-                                                  public ISlitCalculator {
+class EXPORT_OPT_MANTIDQT_COMMON SlitCalculator : public QDialog, public ISlitCalculator {
   Q_OBJECT
 public:
   SlitCalculator(QWidget *parent);
   ~SlitCalculator() override;
-  void setCurrentInstrumentName(std::string instrumentName) override;
+  void setCurrentInstrumentName(const std::string &instrumentName) override;
   void processInstrumentHasBeenChanged() override;
   void show() override;
 
@@ -36,8 +35,7 @@ protected:
 private:
   Mantid::Geometry::Instrument_const_sptr instrument;
   std::string currentInstrumentName;
-  void setupSlitCalculatorWithInstrumentValues(
-      const Mantid::Geometry::Instrument_const_sptr & /*instrument*/);
+  void setupSlitCalculatorWithInstrumentValues(const Mantid::Geometry::Instrument_const_sptr & /*instrument*/);
   std::string getCurrentInstrumentName();
   Mantid::Geometry::Instrument_const_sptr getInstrument();
   void setInstrument(const std::string &instrumentName);

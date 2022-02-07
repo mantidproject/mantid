@@ -23,17 +23,14 @@ namespace Functions {
   @author Arturs Bekasovs
   @date 27/09/2013
 */
-class MANTID_CURVEFITTING_DLL StaticKuboToyabeTimesGausDecay
-    : public API::ParamFunction,
-      public API::IFunction1D {
+class MANTID_CURVEFITTING_DLL StaticKuboToyabeTimesGausDecay : public API::ParamFunction, public API::IFunction1D {
 public:
   std::string name() const override { return "StaticKuboToyabeTimesGausDecay"; }
 
   const std::string category() const override { return "Muon\\MuonGeneric"; }
 
 protected:
-  void function1D(double *out, const double *xValues,
-                  const size_t nData) const override;
+  void function1D(double *out, const double *xValues, const size_t nData) const override;
 
   void init() override;
 };

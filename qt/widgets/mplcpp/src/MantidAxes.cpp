@@ -11,8 +11,7 @@
 using Mantid::API::MatrixWorkspace_sptr;
 using Mantid::PythonInterface::GlobalInterpreterLock;
 
-namespace MantidQt {
-namespace Widgets {
+namespace MantidQt::Widgets {
 namespace Python = Common::Python;
 namespace MplCpp {
 using MatrixWorkpaceToPython = Python::ToPythonValue<MatrixWorkspace_sptr>;
@@ -32,11 +31,9 @@ MantidAxes::MantidAxes(Python::Object pyObj) : Axes{std::move(pyObj)} {}
  * @param otherKwargs Other kwargs to use for the line
  * @return A new Line2D artist object
  */
-Line2D
-MantidAxes::plot(const Mantid::API::MatrixWorkspace_sptr &workspace,
-                 const size_t wkspIndex, const QString &lineColour,
-                 const QString &label,
-                 const boost::optional<QHash<QString, QVariant>> &otherKwargs) {
+Line2D MantidAxes::plot(const Mantid::API::MatrixWorkspace_sptr &workspace, const size_t wkspIndex,
+                        const QString &lineColour, const QString &label,
+                        const boost::optional<QHash<QString, QVariant>> &otherKwargs) {
   GlobalInterpreterLock lock;
   const auto wksp = Python::NewRef(MatrixWorkpaceToPython()(workspace));
   const auto args = Python::NewRef(Py_BuildValue("(O)", wksp.ptr()));
@@ -59,10 +56,9 @@ MantidAxes::plot(const Mantid::API::MatrixWorkspace_sptr &workspace,
  * @param label A label for the curve
  * @return A new ErrorbarContainer object
  */
-ErrorbarContainer MantidAxes::errorbar(
-    const Mantid::API::MatrixWorkspace_sptr &workspace, const size_t wkspIndex,
-    const QString &lineColour, const QString &label,
-    const boost::optional<QHash<QString, QVariant>> &otherKwargs) {
+ErrorbarContainer MantidAxes::errorbar(const Mantid::API::MatrixWorkspace_sptr &workspace, const size_t wkspIndex,
+                                       const QString &lineColour, const QString &label,
+                                       const boost::optional<QHash<QString, QVariant>> &otherKwargs) {
   GlobalInterpreterLock lock;
   const auto wksp = Python::NewRef(MatrixWorkpaceToPython()(workspace));
   const auto args = Python::NewRef(Py_BuildValue("(O)", wksp.ptr()));
@@ -77,9 +73,8 @@ ErrorbarContainer MantidAxes::errorbar(
   return ErrorbarContainer{pyobj().attr("errorbar")(*args, **kwargs)};
 }
 
-void MantidAxes::pcolormesh(
-    const Mantid::API::MatrixWorkspace_sptr &workspace,
-    const boost::optional<QHash<QString, QVariant>> &otherKwargs) {
+void MantidAxes::pcolormesh(const Mantid::API::MatrixWorkspace_sptr &workspace,
+                            const boost::optional<QHash<QString, QVariant>> &otherKwargs) {
   GlobalInterpreterLock lock;
   const auto wksp = Python::NewRef(MatrixWorkpaceToPython()(workspace));
   const auto args = Python::NewRef(Py_BuildValue("(O)", wksp.ptr()));
@@ -96,13 +91,11 @@ void MantidAxes::pcolormesh(
  * @param ws A reference to a workspace whose name is used to
  * lookup any artists for removal
  */
-bool MantidAxes::removeWorkspaceArtists(
-    const Mantid::API::MatrixWorkspace_sptr &ws) {
+bool MantidAxes::removeWorkspaceArtists(const Mantid::API::MatrixWorkspace_sptr &ws) {
   GlobalInterpreterLock lock;
   bool removed = false;
   try {
-    removed = pyobj().attr("remove_workspace_artists")(
-        Python::NewRef(MatrixWorkpaceToPython()(ws)));
+    removed = pyobj().attr("remove_workspace_artists")(Python::NewRef(MatrixWorkpaceToPython()(ws)));
   } catch (Python::ErrorAlreadySet &) {
     throw Mantid::PythonInterface::PythonException();
   }
@@ -113,13 +106,10 @@ bool MantidAxes::removeWorkspaceArtists(
  * Replace the artists on this axes instance that are based off this workspace
  * @param newWS A reference to the new workspace containing the data
  */
-bool MantidAxes::replaceWorkspaceArtists(
-    const Mantid::API::MatrixWorkspace_sptr &newWS) {
+bool MantidAxes::replaceWorkspaceArtists(const Mantid::API::MatrixWorkspace_sptr &newWS) {
   GlobalInterpreterLock lock;
-  return pyobj().attr("replace_workspace_artists")(
-      Python::NewRef(MatrixWorkpaceToPython()(newWS)));
+  return pyobj().attr("replace_workspace_artists")(Python::NewRef(MatrixWorkpaceToPython()(newWS)));
 }
 
 } // namespace MplCpp
-} // namespace Widgets
-} // namespace MantidQt
+} // namespace MantidQt::Widgets

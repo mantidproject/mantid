@@ -1,0 +1,31 @@
+digraph FullTreatment {
+  $global_style
+
+  subgraph params {
+    $param_style
+    AT
+    B
+    T
+    C
+    A
+    Q
+    V
+    S
+  }
+
+  AT -> B
+  AT -> T
+  B -> T
+  A -> Q
+  C -> Q
+  T -> Q
+  Q -> V
+  T -> V
+  C -> V
+  A -> V
+  Q -> S
+  T -> S
+  A -> S
+  C -> S
+
+}

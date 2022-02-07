@@ -7,19 +7,22 @@ Building with CMake
 .. contents::
   :local:
 
-CMake is the build system for the entirety of Mantid (Framework, MantidQt & MantidPlot). It is used to generate native build files for your platform, which can be Makefiles (for use with make, nmake or jom) for command line builds or project/solution files for an IDE (e.g. Visual Studio, Eclipse, Qt Creator, XCode).
+CMake is the build system for the entirety of Mantid (Framework, MantidQt and MantidWorkbench). It is used to generate native build files for your platform, which can be Makefiles (for use with make, nmake or jom) for command line builds or project/solution files for an IDE (e.g. Visual Studio, Eclipse, Qt Creator, XCode).
+For a "how is it used version" of this guide, look at the scripts used on the builservers for `windows <https://github.com/mantidproject/mantid/blob/main/buildconfig/Jenkins/buildscript.bat>`_ or `linux/osx <https://github.com/mantidproject/mantid/blob/master/buildconfig/Jenkins/buildscript>`_.
 
 Environment
 ###########
 
-The  :ref:`GettingStarted` page describes how to set up your environment to build Mantid. Follow those instructions and install the Mantid dependencies first.
+The :ref:`getting started <GettingStarted>` page describes how to set up your environment to build Mantid. Follow those instructions and install the Mantid dependencies first.
 
-Also, if you use the Ninja generator then the executable is called ``ninja-build``.
+Also, if you use the `Ninja <https://ninja-build.org/>`_ generator then the executable is called ``ninja-build`` on many systems (e.g. RHEL) rather than ``ninja``.
 
 CCache
 ######
 
-Mantid's cmake is configure to use the `ccache <https://ccache.samba.org/>`_ tool if it is available. It is highly recommended that this be used on Linux/macOS systems.
+Mantid's cmake is configure to use the `ccache <https://ccache.samba.org/>`_ tool if it is available.
+It is highly recommended that this be used on Linux/macOS systems.
+Once ccache is installed, cmake is configured to automatically configure builds to use it.
 
 For Linux either run either
 
@@ -55,6 +58,14 @@ Configuring your build
 
 CMake encourages the use of 'out of source' builds. This means that all generated files are placed in a separate directory structure to the source files. This separation makes a full clean easier (you just delete everything) and means that you can have different types of build (Release, Debug, different compiler versions, ....) in separate places (N.B. For Visual Studio & XCode, you can still select the type of build from within the IDE).
 
+CMake generators
+----------------
+
+CMake has a `variety of generators available <https://cmake.org/cmake/help/latest/manual/cmake-generators.7.html>`_.
+It is suggested that one select the generator that is most appropriate for the IDE/toolchain being used.
+On linux, there is a large benefit to selecting the ``-GNinja`` generator as it is faster at evaluating what targets to rebuild.
+Using an `extra generator <https://cmake.org/cmake/help/latest/manual/cmake-generators.7.html#extra-generators>`_ will, for example, configure qtcreator files with `ninja <https://ninja-build.org/>`_ as the underlying build tool.
+
 From the command line
 ---------------------
 
@@ -62,9 +73,9 @@ From the command line
 * On Windows, you may need to be in a Visual Studio Command Prompt.
 * Run ``cmake /path/to/Mantid``, or to ``/path/to/Mantid/Framework`` if you only want a build of the Framework (typically not recommended, but possible nonetheless). This will generate build files using the default generator for your platform (e.g. Unix Makefiles on Linux).
 * If you want to use a specific generator (run ``cmake --help`` for a list of available generators for your platform), use the ``-G`` option, e.g. ``cmake -G"NMake Makefiles" /path/to/Mantid``.
-* If you want to set the build type (e.g. Release, Debug) you can run cmake with the ``-i`` option or by passing the argument ``-DCMAKE_BUILD_TYPE=Debug`` to cmake. The default is Release.
+* If you want to set the build type (e.g. Release, Debug) you can run cmake with the ``-i`` option or by passing the argument ``-DCMAKE_BUILD_TYPE=RelWithDebIfo`` to cmake. The default is Release.
 * Please note that the executable is called ``cmake3`` on Red Hat 7 / CentOS7.
-* On Red Hat 7 / CentOS7 mantid uses `devtoolset-7 <https://www.softwarecollections.org/en/scls/rhscl/devtoolset-7/>`_. This means that you need to wrap your initial ``cmake`` command as ``scl enable devtoolset-7 "cmake3 /path/to/source"``
+* On Red Hat 7 / CentOS7 mantid uses `devtoolset-7 <https://www.softwarecollections.org/en/scls/rhscl/devtoolset-7/>`_. This means that you need to wrap your initial ``cmake`` command as ``scl enable devtoolset-7 "cmake3 /path/to/source"``. Following build commands do not need this.
 
 From the CMake gui
 ------------------
@@ -79,7 +90,7 @@ From the CMake gui
   * Windows developers should choose ``Visual Studio 16 2019`` and in the _Optional platform for generator\_ box select ``x64``. If you see errors related to HDF5 then you have most likely selected the wrong platform.
 
 * Wait a while....
-* You will be presented with a list of options in red that can in principle be changed. You probably don't want to change anything, except perhaps checking ``MAKE_VATES`` if you want to build that.
+* You will be presented with a list of options in red that can in principle be changed. You probably don't want to change anything.
 * Click "Configure" again and wait....
 * Finally, click "Generate". This will create the build files, e.g. for a Visual Studio build there will be a ``Mantid.sln`` in the directory you selected as your build directory.
 
@@ -131,3 +142,35 @@ Tips
 
 * Running unit test executables directly with the CMake-generated ``Mantid.properties`` file will lead to a bunch of logging output to the console. You are encouraged to use CTest instead, which suppresses this output automatically. Otherwise, adding the line ``logging.channels.consoleChannel.class = NullChannel`` to your Mantid.user.properties file will turn if off.
 * If you have more than one gcc and want to build with a version other than the default (e.g. on RedHat), setting CC & CXX environment variables is one way to make it so.
+
+Build system customisation using CMake variables
+###########################################################
+
+The Mantid CMake build can be configured using several ENABLE_XXX variables, for instance ENABLE_DOCS, ENABLE_WORKBENCH and ENABLE_OPENGL
+A full list of these variables, with a description, can be viewed in the CMake GUI after the project has been configured.
+
+Component builds of mantid can be performed using the `MANTID_FRAMEWORK_LIB`, `MANTID_QT_LIB` and `ENABLE_WORKBENCH` cmake variables.
+For instance, we can build just the framework element using,
+
+.. code-block:: sh
+
+  cmake \
+  -DMANTID_FRAMEWORK_LIB=BUILD \
+  -DMANTID_QT_LIB=OFF \
+  -DENABLE_WORKBENCH=OFF \
+  -GNinja \
+  ../
+
+and likewise a mantidqt only build with,
+
+.. code-block:: sh
+
+  cmake \
+  -DMANTID_FRAMEWORK_LIB=SYSTEM \
+  -DMANTID_QT_LIB=BUILD \
+  -DENABLE_WORKBENCH=OFF \
+  -GNinja \
+  ../
+
+Specifying `MANTID_FRAMEWORK_LIB=SYSTEM` requires that we have installed the Framework and its cmake config files somewhere on the CMAKE_PREFIX_PATH.
+This will enable the framework to be found using `find_package(MantidFramework)`.

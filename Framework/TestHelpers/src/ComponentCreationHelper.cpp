@@ -16,7 +16,7 @@
 //------------------------------------------------------------------------------
 // Includes
 //------------------------------------------------------------------------------
-#include "MantidTestHelpers/ComponentCreationHelper.h"
+#include "MantidFrameworkTestHelpers/ComponentCreationHelper.h"
 #include "MantidGeometry/IDetector.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/CompAssembly.h"
@@ -30,6 +30,7 @@
 #include "MantidGeometry/Objects/ShapeFactory.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/DateAndTime.h"
+#include "MantidKernel/Matrix.h"
 #include "MantidKernel/Quat.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/V2D.h"
@@ -48,16 +49,13 @@ namespace ComponentCreationHelper {
 /**
  * Return the XML for a capped cylinder
  */
-std::string cappedCylinderXML(double radius, double height,
-                              const Mantid::Kernel::V3D &baseCentre,
-                              const Mantid::Kernel::V3D &axis,
-                              const std::string &id) {
+std::string cappedCylinderXML(double radius, double height, const Mantid::Kernel::V3D &baseCentre,
+                              const Mantid::Kernel::V3D &axis, const std::string &id) {
   std::ostringstream xml;
   xml << "<cylinder id=\"" << id << "\">"
-      << "<centre-of-bottom-base x=\"" << baseCentre.X() << "\" y=\""
-      << baseCentre.Y() << "\" z=\"" << baseCentre.Z() << "\"/>"
-      << "<axis x=\"" << axis.X() << "\" y=\"" << axis.Y() << "\" z=\""
-      << axis.Z() << "\"/>"
+      << "<centre-of-bottom-base x=\"" << baseCentre.X() << "\" y=\"" << baseCentre.Y() << "\" z=\"" << baseCentre.Z()
+      << "\"/>"
+      << "<axis x=\"" << axis.X() << "\" y=\"" << axis.Y() << "\" z=\"" << axis.Z() << "\"/>"
       << "<radius val=\"" << radius << "\" />"
       << "<height val=\"" << height << "\" />"
       << "</cylinder>";
@@ -67,18 +65,13 @@ std::string cappedCylinderXML(double radius, double height,
 /**
  * Create a capped cylinder object
  */
-std::shared_ptr<CSGObject> createCappedCylinder(double radius, double height,
-                                                const V3D &baseCentre,
-                                                const V3D &axis,
+std::shared_ptr<CSGObject> createCappedCylinder(double radius, double height, const V3D &baseCentre, const V3D &axis,
                                                 const std::string &id) {
-  return ShapeFactory().createShape(
-      cappedCylinderXML(radius, height, baseCentre, axis, id));
+  return ShapeFactory().createShape(cappedCylinderXML(radius, height, baseCentre, axis, id));
 }
 
-void addSourceToInstrument(Instrument_sptr &instrument, const V3D &sourcePos,
-                           const std::string &name) {
-  ObjComponent *source =
-      new ObjComponent(name, IObject_sptr(new CSGObject), instrument.get());
+void addSourceToInstrument(Instrument_sptr &instrument, const V3D &sourcePos, const std::string &name) {
+  ObjComponent *source = new ObjComponent(name, IObject_sptr(new CSGObject), instrument.get());
   source->setPos(sourcePos);
   instrument->add(source);
   instrument->markAsSource(source);
@@ -88,17 +81,14 @@ void addSourceToInstrument(Instrument_sptr &instrument, const V3D &sourcePos,
 /**
  * Return the XML for a hollow cylinder
  */
-std::string hollowCylinderXML(double innerRadius, double outerRadius,
-                              double height,
-                              const Mantid::Kernel::V3D &baseCentre,
-                              const Mantid::Kernel::V3D &axis,
+std::string hollowCylinderXML(double innerRadius, double outerRadius, double height,
+                              const Mantid::Kernel::V3D &baseCentre, const Mantid::Kernel::V3D &axis,
                               const std::string &id) {
   std::ostringstream xml;
   xml << "<hollow-cylinder id=\"" << id << "\">"
-      << "<centre-of-bottom-base x=\"" << baseCentre.X() << "\" y=\""
-      << baseCentre.Y() << "\" z=\"" << baseCentre.Z() << "\"/>"
-      << "<axis x=\"" << axis.X() << "\" y=\"" << axis.Y() << "\" z=\""
-      << axis.Z() << "\"/>"
+      << "<centre-of-bottom-base x=\"" << baseCentre.X() << "\" y=\"" << baseCentre.Y() << "\" z=\"" << baseCentre.Z()
+      << "\"/>"
+      << "<axis x=\"" << axis.X() << "\" y=\"" << axis.Y() << "\" z=\"" << axis.Z() << "\"/>"
       << "<inner-radius val=\"" << innerRadius << "\" />"
       << "<outer-radius val=\"" << outerRadius << "\" />"
       << "<height val=\"" << height << "\" />"
@@ -109,20 +99,13 @@ std::string hollowCylinderXML(double innerRadius, double outerRadius,
 /**
  * Create a hollow cylinder object
  */
-std::shared_ptr<CSGObject>
-createHollowCylinder(double innerRadius, double outerRadius, double height,
-                     const V3D &baseCentre, const V3D &axis,
-                     const std::string &id) {
-  return ShapeFactory().createShape(hollowCylinderXML(
-      innerRadius, outerRadius, height, baseCentre, axis, id));
+std::shared_ptr<CSGObject> createHollowCylinder(double innerRadius, double outerRadius, double height,
+                                                const V3D &baseCentre, const V3D &axis, const std::string &id) {
+  return ShapeFactory().createShape(hollowCylinderXML(innerRadius, outerRadius, height, baseCentre, axis, id));
 }
 
 void addSampleToInstrument(Instrument_sptr &instrument, const V3D &samplePos) {
-  // Define a sample as a simple sphere
-  IObject_sptr sampleSphere =
-      createSphere(0.001, V3D(0.0, 0.0, 0.0), "sample-shape");
-  ObjComponent *sample =
-      new ObjComponent("sample", sampleSphere, instrument.get());
+  Component *sample = new Component("sample", instrument.get());
   instrument->setPos(samplePos);
   instrument->add(sample);
   instrument->markAsSamplePos(sample);
@@ -136,8 +119,7 @@ void addSampleToInstrument(Instrument_sptr &instrument, const V3D &samplePos) {
 std::string sphereXML(double radius, const V3D &centre, const std::string &id) {
   std::ostringstream xml;
   xml << "<sphere id=\"" << id << "\">"
-      << "<centre x=\"" << centre.X() << "\"  y=\"" << centre.Y() << "\" z=\""
-      << centre.Z() << "\" />"
+      << "<centre x=\"" << centre.X() << "\"  y=\"" << centre.Y() << "\" z=\"" << centre.Z() << "\" />"
       << "<radius val=\"" << radius << "\" />"
       << "</sphere>";
   return xml.str();
@@ -146,72 +128,84 @@ std::string sphereXML(double radius, const V3D &centre, const std::string &id) {
 /**
  * Create a sphere object
  */
-std::shared_ptr<CSGObject> createSphere(double radius, const V3D &centre,
-                                        const std::string &id) {
+std::shared_ptr<CSGObject> createSphere(double radius, const V3D &centre, const std::string &id) {
   ShapeFactory shapeMaker;
   return shapeMaker.createShape(sphereXML(radius, centre, id));
 }
 
-//----------------------------------------------------------------------------------------------
-/** Create a cuboid shape for your pixels */
-std::shared_ptr<CSGObject> createCuboid(double xHalfLength, double yHalfLength,
-                                        double zHalfLength) {
+std::string cuboidXML(double xHalfLength, double yHalfLength, double zHalfLength, const V3D &centrePos,
+                      const std::string &id) {
   const double szX = xHalfLength;
   const double szY = (yHalfLength == -1.0 ? szX : yHalfLength);
   const double szZ = (zHalfLength == -1.0 ? szX : zHalfLength);
+
+  // top\bottom along z
+  V3D leftFrontBottom{szX, -szY, -szZ};
+  V3D leftFrontTop{szX, -szY, szZ};
+  V3D leftBackBottom{-szX, -szY, -szZ};
+  V3D rightFrontBottom{szX, szY, -szZ};
+
+  leftFrontBottom += centrePos;
+  leftFrontTop += centrePos;
+  leftBackBottom += centrePos;
+  rightFrontBottom += centrePos;
+
   std::ostringstream xmlShapeStream;
-  xmlShapeStream << " <cuboid id=\"detector-shape\"> "
-                 << "<left-front-bottom-point x=\"" << szX << "\" y=\"" << -szY
-                 << "\" z=\"" << -szZ << "\"  /> "
-                 << "<left-front-top-point  x=\"" << szX << "\" y=\"" << -szY
-                 << "\" z=\"" << szZ << "\"  /> "
-                 << "<left-back-bottom-point  x=\"" << -szX << "\" y=\"" << -szY
-                 << "\" z=\"" << -szZ << "\"  /> "
-                 << "<right-front-bottom-point  x=\"" << szX << "\" y=\"" << szY
-                 << "\" z=\"" << -szZ << "\"  /> "
+  xmlShapeStream << " <cuboid id=\"" << id << "\"> "
+                 << "<left-front-bottom-point x=\"" << leftFrontBottom.X() << "\" y=\"" << leftFrontBottom.Y()
+                 << "\" z=\"" << leftFrontBottom.Z() << "\"  /> "
+                 << "<left-front-top-point  x=\"" << leftFrontTop.X() << "\" y=\"" << leftFrontTop.Y() << "\" z=\""
+                 << leftFrontTop.Z() << "\"  /> "
+                 << "<left-back-bottom-point  x=\"" << leftBackBottom.X() << "\" y=\"" << leftBackBottom.Y()
+                 << "\" z=\"" << leftBackBottom.Z() << "\"  /> "
+                 << "<right-front-bottom-point  x=\"" << rightFrontBottom.X() << "\" y=\"" << rightFrontBottom.Y()
+                 << "\" z=\"" << rightFrontBottom.Z() << "\"  /> "
                  << "</cuboid>";
 
-  std::string xmlCuboidShape(xmlShapeStream.str());
+  return xmlShapeStream.str();
+}
+
+//----------------------------------------------------------------------------------------------
+/** Create a cuboid shape for your pixels */
+std::shared_ptr<CSGObject> createCuboid(double xHalfLength, double yHalfLength, double zHalfLength,
+                                        const V3D &centrePos, const std::string &id) {
   ShapeFactory shapeCreator;
-  auto cuboidShape = shapeCreator.createShape(xmlCuboidShape);
-  return cuboidShape;
+  return shapeCreator.createShape(cuboidXML(xHalfLength, yHalfLength, zHalfLength, centrePos, id));
 }
 
 /**
- * Create a cuboid shape rotated around (0, 0, 1) axis and centered at the
+ * Create a cuboid shape rotated around supplied axis and centered at the
  * origin.
  * @param xHalfLength thickness
  * @param yHalfLength width
  * @param zHalfLength height
  * @param angle rotation angle in radians
+ * @param axis the axis to rotate around
  * @return a pointer to the cuboid shape
  */
-std::shared_ptr<CSGObject> createCuboid(double xHalfLength, double yHalfLength,
-                                        double zHalfLength, double angle) {
-  const V2D leftFront{xHalfLength, -yHalfLength};
-  const V2D leftBack{-xHalfLength, -yHalfLength};
-  const V2D rightFront{xHalfLength, yHalfLength};
-  const double sn{std::sin(angle)};
-  const double cs{std::cos(angle)};
-  const V2D rotatedLF{leftFront.X() * cs - leftFront.Y() * sn,
-                      leftFront.X() * sn + leftFront.Y() * cs};
-  const V2D rotatedLB{leftBack.X() * cs - leftBack.Y() * sn,
-                      leftBack.X() * sn + leftBack.Y() * cs};
-  const V2D rotatedRF{rightFront.X() * cs - rightFront.Y() * sn,
-                      rightFront.X() * sn + rightFront.Y() * cs};
+std::shared_ptr<CSGObject> createCuboid(double xHalfLength, double yHalfLength, double zHalfLength, double angle,
+                                        const Mantid::Kernel::V3D &axis) {
+  // top\bottom along z
+  V3D leftFrontBottom{xHalfLength, -yHalfLength, -zHalfLength};
+  V3D leftFrontTop{xHalfLength, -yHalfLength, zHalfLength};
+  V3D leftBackBottom{-xHalfLength, -yHalfLength, -zHalfLength};
+  V3D rightFrontBottom{xHalfLength, yHalfLength, -zHalfLength};
+  Quat rotation(angle, axis);
+  auto rotMatrix = Mantid::Kernel::DblMatrix(rotation.getRotation());
+  leftFrontBottom.rotate(rotMatrix);
+  leftFrontTop.rotate(rotMatrix);
+  leftBackBottom.rotate(rotMatrix);
+  rightFrontBottom.rotate(rotMatrix);
   std::ostringstream xmlShapeStream;
   xmlShapeStream << " <cuboid id=\"detector-shape\"> "
-                 << "<left-front-bottom-point x=\"" << rotatedLF.X()
-                 << "\" y=\"" << rotatedLF.Y() << "\" z=\"" << -zHalfLength
-                 << "\"  /> "
-                 << "<left-front-top-point  x=\"" << rotatedLF.X() << "\" y=\""
-                 << rotatedLF.Y() << "\" z=\"" << zHalfLength << "\"  /> "
-                 << "<left-back-bottom-point  x=\"" << rotatedLB.X()
-                 << "\" y=\"" << rotatedLB.Y() << "\" z=\"" << -zHalfLength
-                 << "\"  /> "
-                 << "<right-front-bottom-point  x=\"" << rotatedRF.X()
-                 << "\" y=\"" << rotatedRF.Y() << "\" z=\"" << -zHalfLength
-                 << "\"  /> "
+                 << "<left-front-bottom-point x=\"" << leftFrontBottom.X() << "\" y=\"" << leftFrontBottom.Y()
+                 << "\" z=\"" << leftFrontBottom.Z() << "\"  /> "
+                 << "<left-front-top-point  x=\"" << leftFrontTop.X() << "\" y=\"" << leftFrontTop.Y() << "\" z=\""
+                 << leftFrontTop.Z() << "\"  /> "
+                 << "<left-back-bottom-point  x=\"" << leftBackBottom.X() << "\" y=\"" << leftBackBottom.Y()
+                 << "\" z=\"" << leftBackBottom.Z() << "\"  /> "
+                 << "<right-front-bottom-point  x=\"" << rightFrontBottom.X() << "\" y=\"" << rightFrontBottom.Y()
+                 << "\" z=\"" << rightFrontBottom.Z() << "\"  /> "
                  << "</cuboid>";
 
   std::string xmlCuboidShape(xmlShapeStream.str());
@@ -225,11 +219,10 @@ std::shared_ptr<CSGObject> createCuboid(double xHalfLength, double yHalfLength,
  * Create a component assembly at the origin made up of 4 cylindrical detectors
  */
 std::shared_ptr<CompAssembly> createTestAssemblyOfFourCylinders() {
-  std::shared_ptr<CompAssembly> bank =
-      std::make_shared<CompAssembly>("BankName");
+  std::shared_ptr<CompAssembly> bank = std::make_shared<CompAssembly>("BankName");
   // One object
-  auto pixelShape = ComponentCreationHelper::createCappedCylinder(
-      0.5, 1.5, V3D(0.0, 0.0, 0.0), V3D(0., 1.0, 0.), "tube");
+  auto pixelShape =
+      ComponentCreationHelper::createCappedCylinder(0.5, 1.5, V3D(0.0, 0.0, 0.0), V3D(0., 1.0, 0.), "tube");
   // Four object components
   for (size_t i = 1; i < 5; ++i) {
     ObjComponent *physicalPixel = new ObjComponent("pixel", pixelShape);
@@ -244,11 +237,9 @@ std::shared_ptr<CompAssembly> createTestAssemblyOfFourCylinders() {
  * Create a hollow shell, i.e. the intersection of two spheres or radius r1 and
  * r2
  */
-std::shared_ptr<CSGObject>
-createHollowShell(double innerRadius, double outerRadius, const V3D &centre) {
-  std::string wholeXML = sphereXML(innerRadius, centre, "inner") + "\n" +
-                         sphereXML(outerRadius, centre, "outer") + "\n" +
-                         "<algebra val=\"(outer (# inner))\" />";
+std::shared_ptr<CSGObject> createHollowShell(double innerRadius, double outerRadius, const V3D &centre) {
+  std::string wholeXML = sphereXML(innerRadius, centre, "inner") + "\n" + sphereXML(outerRadius, centre, "outer") +
+                         "\n" + "<algebra val=\"(outer (# inner))\" />";
 
   ShapeFactory shapeMaker;
   return shapeMaker.createShape(wholeXML);
@@ -262,8 +253,7 @@ std::shared_ptr<DetectorGroup> createDetectorGroupWith5CylindricalDetectors() {
   const int ndets = 5;
   std::vector<std::shared_ptr<const IDetector>> groupMembers(ndets);
   // One object
-  auto detShape = ComponentCreationHelper::createCappedCylinder(
-      0.5, 1.5, V3D(0.0, 0.0, 0.0), V3D(0., 1.0, 0.), "tube");
+  auto detShape = ComponentCreationHelper::createCappedCylinder(0.5, 1.5, V3D(0.0, 0.0, 0.0), V3D(0., 1.0, 0.), "tube");
   for (int i = 0; i < ndets; ++i) {
     std::ostringstream os;
     os << "d" << i;
@@ -279,14 +269,11 @@ std::shared_ptr<DetectorGroup> createDetectorGroupWith5CylindricalDetectors() {
 /**
  * Create a detector group containing N cylindrical detectors with gaps
  */
-std::shared_ptr<DetectorGroup>
-createDetectorGroupWithNCylindricalDetectorsWithGaps(unsigned int nDet,
-                                                     double gap) {
+std::shared_ptr<DetectorGroup> createDetectorGroupWithNCylindricalDetectorsWithGaps(unsigned int nDet, double gap) {
 
   std::vector<std::shared_ptr<const IDetector>> groupMembers(nDet);
   // One object
-  auto detShape = ComponentCreationHelper::createCappedCylinder(
-      0.5, 1.5, V3D(0.0, 0.0, 0.0), V3D(0., 1.0, 0.), "tube");
+  auto detShape = ComponentCreationHelper::createCappedCylinder(0.5, 1.5, V3D(0.0, 0.0, 0.0), V3D(0., 1.0, 0.), "tube");
   for (unsigned int i = 0; i < nDet; ++i) {
     std::ostringstream os;
     os << "d" << i;
@@ -298,15 +285,13 @@ createDetectorGroupWithNCylindricalDetectorsWithGaps(unsigned int nDet,
   return std::make_shared<DetectorGroup>(groupMembers);
 }
 
-std::vector<std::unique_ptr<IDetector>>
-createVectorOfCylindricalDetectors(const double R_min, const double R_max,
-                                   const double z0) {
+std::vector<std::unique_ptr<IDetector>> createVectorOfCylindricalDetectors(const double R_min, const double R_max,
+                                                                           const double z0) {
   std::vector<std::unique_ptr<IDetector>> allDetectors;
   // One object
   double R0 = 0.5;
   double h = 1.5;
-  auto detShape = ComponentCreationHelper::createCappedCylinder(
-      R0, h, V3D(0.0, 0.0, 0.0), V3D(0., 1.0, 0.), "tube");
+  auto detShape = ComponentCreationHelper::createCappedCylinder(R0, h, V3D(0.0, 0.0, 0.0), V3D(0., 1.0, 0.), "tube");
 
   auto NY = int(ceil(2 * R_max / h) + 1);
   auto NX = int(ceil(2 * R_max / R0) + 1);
@@ -324,8 +309,7 @@ createVectorOfCylindricalDetectors(const double R_min, const double R_max,
       if (Rsq >= Rmin2 && Rsq < Rmax2) {
         std::ostringstream os;
         os << "d" << ic;
-        auto det =
-            std::make_unique<Detector>(os.str(), ic + 1, detShape, nullptr);
+        auto det = std::make_unique<Detector>(os.str(), ic + 1, detShape, nullptr);
         det->setPos(x, y, z0);
         allDetectors.emplace_back(std::move(det));
       }
@@ -340,9 +324,8 @@ createVectorOfCylindricalDetectors(const double R_min, const double R_max,
 /**
  * Create a group of detectors arranged in a ring;
  */
-std::shared_ptr<DetectorGroup>
-createRingOfCylindricalDetectors(const double R_min, const double R_max,
-                                 const double z0) {
+std::shared_ptr<DetectorGroup> createRingOfCylindricalDetectors(const double R_min, const double R_max,
+                                                                const double z0) {
 
   auto vecOfDetectors = createVectorOfCylindricalDetectors(R_min, R_max, z0);
   std::vector<std::shared_ptr<const IDetector>> groupMembers;
@@ -354,16 +337,14 @@ createRingOfCylindricalDetectors(const double R_min, const double R_max,
   return std::make_shared<DetectorGroup>(std::move(groupMembers));
 }
 
-Instrument_sptr createTestInstrumentCylindrical(
-    int num_banks, const Mantid::Kernel::V3D &sourcePos,
-    const Mantid::Kernel::V3D &samplePos, const double cylRadius,
-    const double cylHeight) {
+Instrument_sptr createTestInstrumentCylindrical(int num_banks, const Mantid::Kernel::V3D &sourcePos,
+                                                const Mantid::Kernel::V3D &samplePos, const double cylRadius,
+                                                const double cylHeight) {
   auto testInst = std::make_shared<Instrument>("basic");
 
   // One object
-  auto pixelShape = ComponentCreationHelper::createCappedCylinder(
-      cylRadius, cylHeight, V3D(0.0, -cylHeight / 2.0, 0.0), V3D(0., 1.0, 0.),
-      "pixel-shape");
+  auto pixelShape = ComponentCreationHelper::createCappedCylinder(cylRadius, cylHeight, V3D(0.0, -cylHeight / 2.0, 0.0),
+                                                                  V3D(0., 1.0, 0.), "pixel-shape");
 
   // Just increment pixel IDs
   int pixelID = 1;
@@ -379,8 +360,7 @@ Instrument_sptr createTestInstrumentCylindrical(
       for (int j = -1; j < 2; ++j) {
         std::ostringstream lexer;
         lexer << "pixel-(" << j << ";" << i << ")";
-        Detector *physicalPixel =
-            new Detector(lexer.str(), pixelID, pixelShape, bank);
+        Detector *physicalPixel = new Detector(lexer.str(), pixelID, pixelShape, bank);
         const double xpos = j * (cylRadius * 2.0);
         const double ypos = i * cylHeight;
         physicalPixel->setPos(xpos, ypos, 0.0);
@@ -401,23 +381,20 @@ Instrument_sptr createTestInstrumentCylindrical(
 }
 
 Mantid::Geometry::Instrument_sptr
-createCylInstrumentWithVerticalOffsetsSpecified(
-    size_t nTubes, std::vector<double> verticalOffsets, size_t nDetsPerTube,
-    double xMin, double xMax, double yMin, double yMax) {
+createCylInstrumentWithVerticalOffsetsSpecified(size_t nTubes, std::vector<double> verticalOffsets, size_t nDetsPerTube,
+                                                double xMin, double xMax, double yMin, double yMax) {
   // Pixel shape
   const double ySpan = (yMax - yMin);
   const double xSpan = (xMax - xMin);
-  const double tubeDiameter =
-      xSpan / static_cast<double>(nTubes);   // No gaps between tubes
-  const double cylRadius = tubeDiameter / 2; // No gaps between tubes
+  const double tubeDiameter = xSpan / static_cast<double>(nTubes); // No gaps between tubes
+  const double cylRadius = tubeDiameter / 2;                       // No gaps between tubes
   const double cylHeight = ySpan / static_cast<double>(nDetsPerTube);
   const double bankZPos = 2;
   const double sourceZPos = -10;
   const double sampleZPos = 0;
 
-  auto pixelShape = ComponentCreationHelper::createCappedCylinder(
-      cylRadius, cylHeight, V3D(0.0, 0.0, 0.0), V3D(0., 1.0, 0.),
-      "pixel-shape");
+  auto pixelShape = ComponentCreationHelper::createCappedCylinder(cylRadius, cylHeight, V3D(0.0, 0.0, 0.0),
+                                                                  V3D(0., 1.0, 0.), "pixel-shape");
   auto instrument = std::make_shared<Instrument>("instrument_with_tubes");
   CompAssembly *bank = new CompAssembly("sixteenpack");
   for (size_t i = 0; i < nTubes; ++i) {
@@ -425,23 +402,20 @@ createCylInstrumentWithVerticalOffsetsSpecified(
     for (size_t j = 0; j < nDetsPerTube; ++j) {
 
       auto id = static_cast<int>(i * nDetsPerTube + j);
-      Detector *physicalPixel =
-          new Detector("det-" + std::to_string(id), id, pixelShape, tube);
+      Detector *physicalPixel = new Detector("det-" + std::to_string(id), id, pixelShape, tube);
       tube->add(physicalPixel);
       physicalPixel->setPos(V3D(0, static_cast<double>(j) * cylHeight, 0));
       instrument->markAsDetector(physicalPixel);
     }
-    tube->setPos(V3D(xMin + static_cast<double>(i) * tubeDiameter,
-                     -ySpan / 2 + verticalOffsets[i], 0));
+    tube->setPos(V3D(xMin + static_cast<double>(i) * tubeDiameter, -ySpan / 2 + verticalOffsets[i], 0));
     tube->setOutline(tube->createOutline());
     Mantid::Geometry::BoundingBox tmp = tube->shape()->getBoundingBox();
     bank->add(tube);
   }
   bank->setPos(V3D(0, 0, bankZPos));
   instrument->add(bank);
-  instrument->setReferenceFrame(std::make_shared<ReferenceFrame>(
-      Mantid::Geometry::Y /*up*/, Mantid::Geometry::Z /*along*/, Left,
-      "0,0,0"));
+  instrument->setReferenceFrame(
+      std::make_shared<ReferenceFrame>(Mantid::Geometry::Y /*up*/, Mantid::Geometry::Z /*along*/, Left, "0,0,0"));
   addSourceToInstrument(instrument, V3D(0, 0, sourceZPos));
   addSampleToInstrument(instrument, V3D(0, 0, sampleZPos));
   return instrument;
@@ -459,14 +433,11 @@ bool double_cmprsn(double x1, double x2) {
     return (std::fabs((x1 - x2) / (x1 + x2)) < TOL / 2);
   }
 }
-Mantid::Geometry::Instrument_sptr
-createCylInstrumentWithDetInGivenPositions(const std::vector<double> &L2,
-                                           const std::vector<double> &polar,
-                                           const std::vector<double> &azim) {
+Mantid::Geometry::Instrument_sptr createCylInstrumentWithDetInGivenPositions(const std::vector<double> &L2,
+                                                                             const std::vector<double> &polar,
+                                                                             const std::vector<double> &azim) {
 
   auto testInst = std::make_shared<Instrument>("processed");
-  double cylRadius(0.004);
-  double cylHeight(0.0002);
   // find characteristic sizes of the detectors;
   double dAzi_min(FLT_MAX);
   double dPol_min(FLT_MAX);
@@ -494,21 +465,19 @@ createCylInstrumentWithDetInGivenPositions(const std::vector<double> &L2,
       }
     }
   }
-  cylRadius = L2_min * sin(dAzi_min * 0.5);
-  cylHeight = 2 * L2_min * sin(dPol_min * 0.5);
+  double cylRadius = L2_min * sin(dAzi_min * 0.5);
+  double cylHeight = 2 * L2_min * sin(dPol_min * 0.5);
 
   // One object
-  auto pixelShape = ComponentCreationHelper::createCappedCylinder(
-      cylRadius, cylHeight, V3D(0.0, -cylHeight / 2.0, 0.0), V3D(0., 1.0, 0.),
-      "pixel-shape");
+  auto pixelShape = ComponentCreationHelper::createCappedCylinder(cylRadius, cylHeight, V3D(0.0, -cylHeight / 2.0, 0.0),
+                                                                  V3D(0., 1.0, 0.), "pixel-shape");
   // Just increment pixel ID's
   int pixelID = 1;
   // one bank
   CompAssembly *bank = new CompAssembly("det_ass");
 
   for (size_t i = 0; i < azim.size(); i++) {
-    Detector *physicalPixel =
-        new Detector("det" + std::to_string(i), pixelID, pixelShape, bank);
+    Detector *physicalPixel = new Detector("det" + std::to_string(i), pixelID, pixelShape, bank);
     double zpos = L2[i] * cos(polar[i]);
     double xpos = L2[i] * sin(polar[i]) * cos(azim[i]);
     double ypos = L2[i] * sin(polar[i]) * sin(azim[i]);
@@ -528,20 +497,17 @@ createCylInstrumentWithDetInGivenPositions(const std::vector<double> &L2,
 
 //----------------------------------------------------------------------------------------------
 
-void addRectangularBank(Instrument &testInstrument, int idStart, int pixels,
-                        double pixelSpacing, const std::string &bankName,
-                        const V3D &bankPos, const Quat &bankRot) {
+void addRectangularBank(Instrument &testInstrument, int idStart, int pixels, double pixelSpacing,
+                        const std::string &bankName, const V3D &bankPos, const Quat &bankRot) {
 
   const double cylRadius(pixelSpacing / 2);
   const double cylHeight(0.0002);
   // One object
-  auto pixelShape = ComponentCreationHelper::createCappedCylinder(
-      cylRadius, cylHeight, V3D(0.0, -cylHeight / 2.0, 0.0), V3D(0., 1.0, 0.),
-      "pixel-shape");
+  auto pixelShape = ComponentCreationHelper::createCappedCylinder(cylRadius, cylHeight, V3D(0.0, -cylHeight / 2.0, 0.0),
+                                                                  V3D(0., 1.0, 0.), "pixel-shape");
 
   auto *bank = new RectangularDetector(bankName);
-  bank->initialize(pixelShape, pixels, 0.0, pixelSpacing, pixels, 0.0,
-                   pixelSpacing, idStart, true, pixels);
+  bank->initialize(pixelShape, pixels, 0.0, pixelSpacing, pixels, 0.0, pixelSpacing, idStart, true, pixels);
 
   // Mark them all as detectors
   for (int x = 0; x < pixels; x++)
@@ -571,8 +537,7 @@ void addRectangularBank(Instrument &testInstrument, int idStart, int pixels,
  * @param pixelSpacing :: padding between pixels
  * @param bankDistanceFromSample :: How far the bank is from the sample
  */
-Instrument_sptr createTestInstrumentRectangular(int num_banks, int pixels,
-                                                double pixelSpacing,
+Instrument_sptr createTestInstrumentRectangular(int num_banks, int pixels, double pixelSpacing,
                                                 double bankDistanceFromSample) {
   auto testInst = std::make_shared<Instrument>("basic_rect");
 
@@ -582,8 +547,7 @@ Instrument_sptr createTestInstrumentRectangular(int num_banks, int pixels,
     bankName << "bank" << banknum;
     V3D bankPos(0.0, 0.0, bankDistanceFromSample * banknum);
     Quat bankRot{}; // Identity
-    addRectangularBank(*testInst, banknum * pixels * pixels, pixels,
-                       pixelSpacing, bankName.str(), bankPos, bankRot);
+    addRectangularBank(*testInst, banknum * pixels * pixels, pixels, pixelSpacing, bankName.str(), bankPos, bankRot);
   }
 
   addSourceToInstrument(testInst, V3D(0.0, 0.0, -10.0), "source");
@@ -604,8 +568,7 @@ Instrument_sptr createTestInstrumentRectangular(int num_banks, int pixels,
  * @param pixels : number of pixels in each direction.
  * @param pixelSpacing : padding between pixels
  */
-Instrument_sptr createTestInstrumentRectangular2(int num_banks, int pixels,
-                                                 double pixelSpacing) {
+Instrument_sptr createTestInstrumentRectangular2(int num_banks, int pixels, double pixelSpacing) {
 
   const auto instrName = "basic_rect";
   auto testInst = std::make_shared<Instrument>(instrName);
@@ -613,19 +576,16 @@ Instrument_sptr createTestInstrumentRectangular2(int num_banks, int pixels,
   const double cylRadius(pixelSpacing / 2);
   const double cylHeight(0.0002);
   // One object
-  auto pixelShape = ComponentCreationHelper::createCappedCylinder(
-      cylRadius, cylHeight, V3D(0.0, -cylHeight / 2.0, 0.0), V3D(0., 1.0, 0.),
-      "pixel-shape");
+  auto pixelShape = ComponentCreationHelper::createCappedCylinder(cylRadius, cylHeight, V3D(0.0, -cylHeight / 2.0, 0.0),
+                                                                  V3D(0., 1.0, 0.), "pixel-shape");
 
   for (int banknum = 1; banknum <= num_banks; banknum++) {
     // Make a new bank
     std::ostringstream bankname;
     bankname << "bank" << banknum;
     auto *bank = new RectangularDetector(bankname.str());
-    bank->initialize(pixelShape, pixels, -pixels * pixelSpacing / 2.0,
-                     pixelSpacing, pixels, -pixels * pixelSpacing / 2.0,
-                     pixelSpacing, (banknum - 1) * pixels * pixels, true,
-                     pixels);
+    bank->initialize(pixelShape, pixels, -pixels * pixelSpacing / 2.0, pixelSpacing, pixels,
+                     -pixels * pixelSpacing / 2.0, pixelSpacing, (banknum - 1) * pixels * pixels, true, pixels);
 
     // Mark them all as detectors
     for (int x = 0; x < pixels; x++)
@@ -660,16 +620,14 @@ Instrument_sptr createTestInstrumentRectangular2(int num_banks, int pixels,
  * @param pixels :: number of pixels in each direction.
  * @param pixelSpacing :: padding between pixels
  */
-Instrument_sptr createTestUnnamedRectangular2(int num_banks, int pixels,
-                                              double pixelSpacing) {
+Instrument_sptr createTestUnnamedRectangular2(int num_banks, int pixels, double pixelSpacing) {
   auto testInst = std::make_shared<Instrument>("");
 
   const double cylRadius(pixelSpacing / 2);
   const double cylHeight(0.0002);
   // One object
-  auto pixelShape = ComponentCreationHelper::createCappedCylinder(
-      cylRadius, cylHeight, V3D(0.0, -cylHeight / 2.0, 0.0), V3D(0., 1.0, 0.),
-      "pixel-shape");
+  auto pixelShape = ComponentCreationHelper::createCappedCylinder(cylRadius, cylHeight, V3D(0.0, -cylHeight / 2.0, 0.0),
+                                                                  V3D(0., 1.0, 0.), "pixel-shape");
 
   for (int banknum = 1; banknum <= num_banks; banknum++) {
     // Make a new bank
@@ -677,10 +635,8 @@ Instrument_sptr createTestUnnamedRectangular2(int num_banks, int pixels,
     bankname << "";
 
     RectangularDetector *bank = new RectangularDetector(bankname.str());
-    bank->initialize(pixelShape, pixels, -pixels * pixelSpacing / 2.0,
-                     pixelSpacing, pixels, -pixels * pixelSpacing / 2.0,
-                     pixelSpacing, (banknum - 1) * pixels * pixels, true,
-                     pixels);
+    bank->initialize(pixelShape, pixels, -pixels * pixelSpacing / 2.0, pixelSpacing, pixels,
+                     -pixels * pixelSpacing / 2.0, pixelSpacing, (banknum - 1) * pixels * pixels, true, pixels);
 
     // Mark them all as detectors
     for (int x = 0; x < pixels; x++)
@@ -705,6 +661,31 @@ Instrument_sptr createTestUnnamedRectangular2(int num_banks, int pixels,
 }
 
 /**
+ * createEmptyInstrument, creates a geometrically nonsensical instrument
+ * specifically to be populated with detectors. Components are added to
+ * satisfy basic checks in algorithms.
+ */
+Instrument_sptr createEmptyInstrument() {
+  Instrument_sptr instrument = std::make_shared<Instrument>();
+
+  V3D place_holder_pos(0, 0, 0);
+
+  // A source
+  ObjComponent *place_holder_0 = new ObjComponent("place_holder");
+  place_holder_0->setPos(place_holder_pos);
+  place_holder_0->setShape(createSphere(0.01, V3D(0, 0, 0), "1"));
+  instrument->add(place_holder_0);
+  instrument->markAsSource(place_holder_0);
+
+  // A sample
+  Component *place_holder_1 = new Component("place_holder");
+  place_holder_1->setPos(place_holder_pos);
+  instrument->add(place_holder_1);
+  instrument->markAsSamplePos(place_holder_1);
+
+  return instrument;
+}
+/**
  * createMinimalInstrument, creates the most simple possible definition of
  * an instrument in which we can extract a valid L1 and L2 distance for unit
  * calculations.
@@ -717,14 +698,11 @@ Instrument_sptr createTestUnnamedRectangular2(int num_banks, int pixels,
  * @param detectorPos : V3D detector position
  * @return Instrument generated.
  */
-Instrument_sptr
-createMinimalInstrument(const Mantid::Kernel::V3D &sourcePos,
-                        const Mantid::Kernel::V3D &samplePos,
-                        const Mantid::Kernel::V3D &detectorPos) {
+Instrument_sptr createMinimalInstrument(const Mantid::Kernel::V3D &sourcePos, const Mantid::Kernel::V3D &samplePos,
+                                        const Mantid::Kernel::V3D &detectorPos) {
   Instrument_sptr instrument = std::make_shared<Instrument>();
-  instrument->setReferenceFrame(std::make_shared<ReferenceFrame>(
-      Mantid::Geometry::Y /*up*/, Mantid::Geometry::X /*along*/, Left,
-      "0,0,0"));
+  instrument->setReferenceFrame(
+      std::make_shared<ReferenceFrame>(Mantid::Geometry::Y /*up*/, Mantid::Geometry::X /*along*/, Left, "0,0,0"));
 
   // A source
   ObjComponent *source = new ObjComponent("source");
@@ -734,9 +712,8 @@ createMinimalInstrument(const Mantid::Kernel::V3D &sourcePos,
   instrument->markAsSource(source);
 
   // A sample
-  ObjComponent *sample = new ObjComponent("some-surface-holder");
+  Component *sample = new Component("some-surface-holder");
   sample->setPos(samplePos);
-  sample->setShape(createSphere(0.01 /*1cm*/, V3D(0, 0, 0), "1"));
   instrument->add(sample);
   instrument->markAsSamplePos(sample);
 
@@ -761,13 +738,11 @@ createMinimalInstrument(const Mantid::Kernel::V3D &sourcePos,
  * @param monitorRot : V3D monitor rotation
  * @return Instrument generated.
  */
-Instrument_sptr
-createMinimalInstrumentWithMonitor(const Mantid::Kernel::V3D &monitorPos,
-                                   const Mantid::Kernel::Quat &monitorRot) {
+Instrument_sptr createMinimalInstrumentWithMonitor(const Mantid::Kernel::V3D &monitorPos,
+                                                   const Mantid::Kernel::Quat &monitorRot) {
   Instrument_sptr instrument = std::make_shared<Instrument>();
-  instrument->setReferenceFrame(std::make_shared<ReferenceFrame>(
-      Mantid::Geometry::Y /*up*/, Mantid::Geometry::X /*along*/, Left,
-      "0,0,0"));
+  instrument->setReferenceFrame(
+      std::make_shared<ReferenceFrame>(Mantid::Geometry::Y /*up*/, Mantid::Geometry::X /*along*/, Left, "0,0,0"));
 
   instrument->setName("test-instrument-with-monitor");
 
@@ -779,9 +754,8 @@ createMinimalInstrumentWithMonitor(const Mantid::Kernel::V3D &monitorPos,
   instrument->markAsSource(source);
 
   // A sample
-  auto *sample = new ObjComponent("some-surface-holder");
+  auto *sample = new Component("some-surface-holder");
   sample->setPos(V3D(0, 0, 0));
-  sample->setShape(createSphere(0.01 /*1cm*/, V3D(0, 0, 0), "1"));
   instrument->add(sample);
   instrument->markAsSamplePos(sample);
 
@@ -811,9 +785,7 @@ source/sample for unit test of exception handling.
 * @param haveSample : bool option to have sample in instrument
 * @param haveDetector : bool option to have detector in instrument
 */
-Instrument_sptr createInstrumentWithOptionalComponents(bool haveSource,
-                                                       bool haveSample,
-                                                       bool haveDetector) {
+Instrument_sptr createInstrumentWithOptionalComponents(bool haveSource, bool haveSample, bool haveDetector) {
 
   Instrument_sptr instrument = std::make_shared<Instrument>();
 
@@ -827,7 +799,7 @@ Instrument_sptr createInstrumentWithOptionalComponents(bool haveSource,
 
   // A sample
   if (haveSample) {
-    ObjComponent *sample = new ObjComponent("some-sample");
+    Component *sample = new Component("some-sample");
 
     instrument->add(sample);
     instrument->markAsSamplePos(sample);
@@ -860,16 +832,15 @@ Instrument_sptr createInstrumentWithOptionalComponents(bool haveSource,
  * @param detOffset : V3D offset of detector from bank
  * @return Instrument generated.
  */
-Instrument_sptr createSimpleInstrumentWithRotation(
-    const Mantid::Kernel::V3D &sourcePos, const Mantid::Kernel::V3D &samplePos,
-    const Mantid::Kernel::V3D &detectorPos,
-    const Mantid::Kernel::Quat &relativeBankRotation,
-    const Mantid::Kernel::Quat &relativeDetRotation,
-    const Mantid::Kernel::V3D detOffset) {
+Instrument_sptr createSimpleInstrumentWithRotation(const Mantid::Kernel::V3D &sourcePos,
+                                                   const Mantid::Kernel::V3D &samplePos,
+                                                   const Mantid::Kernel::V3D &detectorPos,
+                                                   const Mantid::Kernel::Quat &relativeBankRotation,
+                                                   const Mantid::Kernel::Quat &relativeDetRotation,
+                                                   const Mantid::Kernel::V3D &detOffset) {
   Instrument_sptr instrument = std::make_shared<Instrument>();
-  instrument->setReferenceFrame(std::make_shared<ReferenceFrame>(
-      Mantid::Geometry::Y /*up*/, Mantid::Geometry::Z /*along*/, Left,
-      "0,0,0"));
+  instrument->setReferenceFrame(
+      std::make_shared<ReferenceFrame>(Mantid::Geometry::Y /*up*/, Mantid::Geometry::Z /*along*/, Left, "0,0,0"));
 
   instrument->setName("test-instrument-with-detector-rotations");
 
@@ -881,9 +852,8 @@ Instrument_sptr createSimpleInstrumentWithRotation(
   instrument->markAsSource(source);
 
   // A sample
-  ObjComponent *sample = new ObjComponent("some-surface-holder");
+  Component *sample = new Component("some-surface-holder");
   sample->setPos(samplePos);
-  sample->setShape(createSphere(0.01 /*1cm*/, V3D(0, 0, 0), "1"));
   instrument->add(sample);
   instrument->markAsSamplePos(sample);
 
@@ -917,14 +887,13 @@ Instrument_sptr createSimpleInstrumentWithRotation(
  * @param relativeSourceRotation : Quat relative source rotation
  * @return Instrument generated.
  */
-Instrument_sptr createInstrumentWithSourceRotation(
-    const Mantid::Kernel::V3D &sourcePos, const Mantid::Kernel::V3D &samplePos,
-    const Mantid::Kernel::V3D &detectorPos,
-    const Mantid::Kernel::Quat &relativeSourceRotation) {
+Instrument_sptr createInstrumentWithSourceRotation(const Mantid::Kernel::V3D &sourcePos,
+                                                   const Mantid::Kernel::V3D &samplePos,
+                                                   const Mantid::Kernel::V3D &detectorPos,
+                                                   const Mantid::Kernel::Quat &relativeSourceRotation) {
   Instrument_sptr instrument = std::make_shared<Instrument>();
-  instrument->setReferenceFrame(std::make_shared<ReferenceFrame>(
-      Mantid::Geometry::Y /*up*/, Mantid::Geometry::Z /*along*/, Left,
-      "0,0,0"));
+  instrument->setReferenceFrame(
+      std::make_shared<ReferenceFrame>(Mantid::Geometry::Y /*up*/, Mantid::Geometry::Z /*along*/, Left, "0,0,0"));
 
   instrument->setName("test-instrument");
 
@@ -937,9 +906,8 @@ Instrument_sptr createInstrumentWithSourceRotation(
   instrument->markAsSource(source);
 
   // A sample
-  ObjComponent *sample = new ObjComponent("some-surface-holder");
+  Component *sample = new Component("some-surface-holder");
   sample->setPos(samplePos);
-  sample->setShape(createSphere(0.01 /*1cm*/, V3D(0, 0, 0), "1"));
   instrument->add(sample);
   instrument->markAsSamplePos(sample);
 
@@ -979,10 +947,8 @@ CompAssembly *makeBank(size_t width, size_t height, Instrument *instrument) {
   return bank;
 }
 
-Instrument_sptr sansInstrument(const Mantid::Kernel::V3D &sourcePos,
-                               const Mantid::Kernel::V3D &samplePos,
-                               const Mantid::Kernel::V3D &trolley1Pos,
-                               const Mantid::Kernel::V3D &trolley2Pos) {
+Instrument_sptr sansInstrument(const Mantid::Kernel::V3D &sourcePos, const Mantid::Kernel::V3D &samplePos,
+                               const Mantid::Kernel::V3D &trolley1Pos, const Mantid::Kernel::V3D &trolley2Pos) {
 
   /*
   This has been generated for comparison with newer Instrument designs. It is
@@ -991,23 +957,11 @@ Instrument_sptr sansInstrument(const Mantid::Kernel::V3D &sourcePos,
    */
   auto instrument = std::make_shared<Instrument>();
 
-  instrument->setReferenceFrame(std::make_shared<ReferenceFrame>(
-      Mantid::Geometry::Y /*up*/, Mantid::Geometry::Z /*along*/, Left,
-      "0,0,0"));
+  instrument->setReferenceFrame(
+      std::make_shared<ReferenceFrame>(Mantid::Geometry::Y /*up*/, Mantid::Geometry::Z /*along*/, Left, "0,0,0"));
 
-  // A source
-  ObjComponent *source = new ObjComponent("source");
-  source->setPos(sourcePos);
-  source->setShape(createSphere(0.01 /*1cm*/, V3D(0, 0, 0), "1"));
-  instrument->add(source);
-  instrument->markAsSource(source);
-
-  // A sample
-  ObjComponent *sample = new ObjComponent("some-surface-holder");
-  sample->setPos(samplePos);
-  sample->setShape(createSphere(0.01 /*1cm*/, V3D(0, 0, 0), "1"));
-  instrument->add(sample);
-  instrument->markAsSamplePos(sample);
+  addSourceToInstrument(instrument, sourcePos);
+  addSampleToInstrument(instrument, samplePos);
 
   size_t width = 100;
   size_t height = 100;
@@ -1036,9 +990,8 @@ Instrument_sptr sansInstrument(const Mantid::Kernel::V3D &sourcePos,
   return instrument;
 }
 
-Mantid::Geometry::Instrument_sptr
-createInstrumentWithPSDTubes(const size_t nTubes, const size_t nPixelsPerTube,
-                             bool mirrorTubes) {
+Mantid::Geometry::Instrument_sptr createInstrumentWithPSDTubes(const size_t nTubes, const size_t nPixelsPerTube,
+                                                               bool mirrorTubes) {
   // Need a tube based instrument.
   //
   // Pixels will be numbered simply from 1->nTubes*nPixelsPerTube with a 1:1
@@ -1052,21 +1005,18 @@ createInstrumentWithPSDTubes(const size_t nTubes, const size_t nPixelsPerTube,
     xDirection = -1;
 
   testInst->setReferenceFrame(
-      std::make_shared<ReferenceFrame>(Mantid::Geometry::Y, Mantid::Geometry::Z,
-                                       Mantid::Geometry::X, Right, "0,0,0"));
+      std::make_shared<ReferenceFrame>(Mantid::Geometry::Y, Mantid::Geometry::Z, Mantid::Geometry::X, Right, "0,0,0"));
 
   // Pixel shape
   const double pixelRadius(0.01);
   const double pixelHeight(0.003);
   const double radius(1.0);
   const auto pixelShape = ComponentCreationHelper::createCappedCylinder(
-      pixelRadius, pixelHeight, V3D(0.0, -0.5 * pixelHeight, 0.0),
-      V3D(0.0, 1.0, 0.0), "pixelShape");
+      pixelRadius, pixelHeight, V3D(0.0, -0.5 * pixelHeight, 0.0), V3D(0.0, 1.0, 0.0), "pixelShape");
 
   const auto tubeShape = ComponentCreationHelper::createCappedCylinder(
-      pixelRadius, pixelHeight,
-      V3D(0.0, -0.5 * pixelHeight * (double)nPixelsPerTube, 0.0),
-      V3D(0.0, 1.0, 0.0), "tubeShape");
+      pixelRadius, pixelHeight, V3D(0.0, -0.5 * pixelHeight * (double)nPixelsPerTube, 0.0), V3D(0.0, 1.0, 0.0),
+      "tubeShape");
 
   for (size_t i = 0; i < nTubes; ++i) {
     std::ostringstream lexer;
@@ -1084,8 +1034,7 @@ createInstrumentWithPSDTubes(const size_t nTubes, const size_t nPixelsPerTube,
     for (size_t j = 0; j < nPixelsPerTube; ++j) {
       lexer.str("");
       lexer << "pixel-" << i * nPixelsPerTube + j;
-      Detector *pixel = new Detector(
-          lexer.str(), int(i * nPixelsPerTube + j + 1), pixelShape, tube);
+      Detector *pixel = new Detector(lexer.str(), int(i * nPixelsPerTube + j + 1), pixelShape, tube);
       const double xpos = 0.0;
       const double ypos = double(j) * pixelHeight;
       pixel->setPos(xpos, ypos, 0.0);

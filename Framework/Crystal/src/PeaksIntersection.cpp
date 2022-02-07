@@ -16,11 +16,11 @@
 using namespace Mantid::API;
 using namespace Mantid::Geometry;
 using namespace Mantid::Kernel;
+using Mantid::DataObjects::Peak;
 using Mantid::DataObjects::PeaksWorkspace;
 using Mantid::DataObjects::PeaksWorkspace_sptr;
 
-namespace Mantid {
-namespace Crystal {
+namespace Mantid::Crystal {
 std::string PeaksIntersection::detectorSpaceFrame() { return "Detector space"; }
 
 std::string PeaksIntersection::qLabFrame() { return "Q (lab frame)"; }
@@ -33,8 +33,7 @@ std::string PeaksIntersection::hklFrame() { return "HKL"; }
 /** Initialize the algorithm's properties.
  */
 void PeaksIntersection::initBaseProperties() {
-  declareProperty(std::make_unique<WorkspaceProperty<PeaksWorkspace>>(
-                      "InputWorkspace", "", Direction::Input),
+  declareProperty(std::make_unique<WorkspaceProperty<PeaksWorkspace>>("InputWorkspace", "", Direction::Input),
                   "An input peaks workspace.");
 
   std::vector<std::string> propOptions;
@@ -43,20 +42,16 @@ void PeaksIntersection::initBaseProperties() {
   propOptions.emplace_back(qSampleFrame());
   propOptions.emplace_back(hklFrame());
 
-  declareProperty(
-      "CoordinateFrame", "DetectorSpace",
-      std::make_shared<StringListValidator>(propOptions),
-      "What coordinate system to use for intersection criteria?\n"
-      "  DetectorSpace: Real-space coordinates.\n"
-      "  Q (lab frame): Wave-vector change of the lattice in the lab frame.\n"
-      "  Q (sample frame): Momentum in the sample frame.\n"
-      "  HKL");
+  declareProperty("CoordinateFrame", "DetectorSpace", std::make_shared<StringListValidator>(propOptions),
+                  "What coordinate system to use for intersection criteria?\n"
+                  "  DetectorSpace: Real-space coordinates.\n"
+                  "  Q (lab frame): Wave-vector change of the lattice in the lab frame.\n"
+                  "  Q (sample frame): Momentum in the sample frame.\n"
+                  "  HKL");
 
-  declareProperty("PeakRadius", 0.0,
-                  "Effective peak radius in CoordinateFrame");
+  declareProperty("PeakRadius", 0.0, "Effective peak radius in CoordinateFrame");
 
-  declareProperty(std::make_unique<WorkspaceProperty<ITableWorkspace>>(
-                      "OutputWorkspace", "", Direction::Output),
+  declareProperty(std::make_unique<WorkspaceProperty<ITableWorkspace>>("OutputWorkspace", "", Direction::Output),
                   "An output table workspace. Two columns. Peak index into "
                   "input workspace, and boolean, where true is for positive "
                   "intersection.");
@@ -78,14 +73,14 @@ void PeaksIntersection::executePeaksIntersection(const bool checkPeakExtents) {
 
   m_peakRadius = this->getProperty("PeakRadius");
 
-  // Find the coordinate frame to use an set up boost function for this.
-  boost::function<V3D(IPeak *)> coordFrameFunc = &IPeak::getHKL;
+  boost::function<V3D(Peak *)> coordFrameFunc;
+  coordFrameFunc = &Peak::getHKL;
   if (coordinateFrame == detectorSpaceFrame()) {
-    coordFrameFunc = &IPeak::getDetectorPosition;
+    coordFrameFunc = &Peak::getDetectorPosition;
   } else if (coordinateFrame == qLabFrame()) {
-    coordFrameFunc = &IPeak::getQLabFrame;
+    coordFrameFunc = &Peak::getQLabFrame;
   } else if (coordinateFrame == qSampleFrame()) {
-    coordFrameFunc = &IPeak::getQSampleFrame;
+    coordFrameFunc = &Peak::getQSampleFrame;
   }
 
   // Create the faces.
@@ -131,7 +126,7 @@ void PeaksIntersection::executePeaksIntersection(const bool checkPeakExtents) {
   PARALLEL_FOR_IF(Kernel::threadSafe(*ws, *outputWorkspace))
   for (int i = 0; i < nPeaks; ++i) {
     PARALLEL_START_INTERUPT_REGION
-    IPeak *peak = ws->getPeakPtr(i);
+    Peak *peak = dynamic_cast<Peak *>(ws->getPeakPtr(i));
     V3D peakCenter = coordFrameFunc(peak);
 
     if (i % frequency == 0)
@@ -146,17 +141,14 @@ void PeaksIntersection::executePeaksIntersection(const bool checkPeakExtents) {
       if (checkPeakExtents) {
         // Take account of radius spherical extents.
         for (int j = 0; j < numberOfFaces; ++j) {
-          distance = normals[j].scalar_prod(
-              faces[j][0] -
-              peakCenter); // Distance between plane and peak center.
-          if (m_peakRadius >= std::abs(distance)) // Sphere passes through one
-                                                  // of the PLANES defined by
-                                                  // the box faces.
+          distance = normals[j].scalar_prod(faces[j][0] - peakCenter); // Distance between plane and peak center.
+          if (m_peakRadius >= std::abs(distance))                      // Sphere passes through one
+                                                                       // of the PLANES defined by
+                                                                       // the box faces.
           {
             // Check that it is actually within the face boundaries.
-            const V3D touchPoint = (normals[j] * distance) +
-                                   peakCenter; // Vector equation of line give
-                                               // touch point on plane.
+            const V3D touchPoint = (normals[j] * distance) + peakCenter; // Vector equation of line give
+                                                                         // touch point on plane.
 
             // checkTouchPoint(touchPoint, normals[i], faces[i][0]); //
             // Debugging line.
@@ -179,5 +171,4 @@ void PeaksIntersection::executePeaksIntersection(const bool checkPeakExtents) {
   setProperty("OutputWorkspace", outputWorkspace);
 }
 
-} // namespace Crystal
-} // namespace Mantid
+} // namespace Mantid::Crystal

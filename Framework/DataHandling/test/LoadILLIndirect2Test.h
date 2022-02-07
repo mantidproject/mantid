@@ -11,7 +11,11 @@
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidDataHandling/LoadILLIndirect2.h"
+#include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/DetectorInfo.h"
+#include "MantidTypes/Core/DateAndTimeHelpers.h"
+
+#include <boost/algorithm/string/predicate.hpp>
 
 using namespace Mantid::API;
 using Mantid::DataHandling::LoadILLIndirect2;
@@ -20,9 +24,7 @@ class LoadILLIndirect2Test : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static LoadILLIndirect2Test *createSuite() {
-    return new LoadILLIndirect2Test();
-  }
+  static LoadILLIndirect2Test *createSuite() { return new LoadILLIndirect2Test(); }
   static void destroySuite(LoadILLIndirect2Test *suite) { delete suite; }
 
   void test_Init() {
@@ -68,24 +70,91 @@ public:
     LoadILLIndirect2 loader;
     TS_ASSERT_THROWS_NOTHING(loader.initialize())
     TS_ASSERT(loader.isInitialized())
-    TS_ASSERT_THROWS_NOTHING(
-        loader.setPropertyValue("Filename", m_bats33degree));
-    TS_ASSERT_THROWS_NOTHING(
-        loader.setPropertyValue("OutputWorkspace", "__out_ws"));
+    TS_ASSERT_THROWS_NOTHING(loader.setPropertyValue("Filename", m_bats33degree));
+    TS_ASSERT_THROWS_NOTHING(loader.setPropertyValue("OutputWorkspace", "__out_ws"));
     TS_ASSERT_THROWS_NOTHING(loader.execute(););
     TS_ASSERT(loader.isExecuted());
-    MatrixWorkspace_sptr output2D =
-        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("__out_ws");
+    MatrixWorkspace_sptr output2D = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("__out_ws");
     const Mantid::API::Run &runlogs = output2D->run();
     TS_ASSERT(runlogs.hasProperty("PSD.PSD angle 1"));
     TS_ASSERT_DELTA(runlogs.getLogAsSingleValue("PSD.PSD angle 1"), 33.1, 0.01);
     const auto &detInfo = output2D->detectorInfo();
     constexpr double degToRad = M_PI / 180.;
     TS_ASSERT_DELTA(detInfo.twoTheta(65), 33.1 * degToRad, 0.01)
+    checkTimeFormat(output2D);
   }
 
-  void doExecTest(const std::string &file, int numHist = 2051,
-                  int numChannels = 2048) {
+  void test_first_tube_251() {
+    LoadILLIndirect2 loader;
+    TS_ASSERT_THROWS_NOTHING(loader.initialize())
+    TS_ASSERT(loader.isInitialized())
+    TS_ASSERT_THROWS_NOTHING(loader.setPropertyValue("Filename", m_firstTube251));
+    TS_ASSERT_THROWS_NOTHING(loader.setPropertyValue("OutputWorkspace", "__out_ws"));
+    TS_ASSERT_THROWS_NOTHING(loader.execute(););
+    TS_ASSERT(loader.isExecuted());
+    MatrixWorkspace_sptr output2D = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("__out_ws");
+    const Mantid::API::Run &runlogs = output2D->run();
+    TS_ASSERT(runlogs.hasProperty("PSD.PSD angle 1"));
+    TS_ASSERT_DELTA(runlogs.getLogAsSingleValue("PSD.PSD angle 1"), 25.1, 0.01);
+    const auto &detInfo = output2D->detectorInfo();
+    constexpr double degToRad = M_PI / 180.;
+    TS_ASSERT_DELTA(detInfo.twoTheta(65), 25.1 * degToRad, 0.01);
+    const std::string idf = output2D->getInstrument()->getFilename();
+    TS_ASSERT_EQUALS(output2D->getInstrument()->getName(), "IN16BF");
+    TS_ASSERT(boost::ends_with(idf, "IN16BF_Definition.xml"));
+    checkTimeFormat(output2D);
+  }
+
+  void test_diffraction_bats() {
+    // checks loading IN16B diffraction data acquired in bats mode with the data
+    // written in the older way in the Nexus
+    LoadILLIndirect2 loader;
+    TS_ASSERT_THROWS_NOTHING(loader.initialize())
+    TS_ASSERT(loader.isInitialized())
+    TS_ASSERT_THROWS_NOTHING(loader.setPropertyValue("Filename", m_batsDiffraction));
+    TS_ASSERT_THROWS_NOTHING(loader.setPropertyValue("OutputWorkspace", "__out_ws"));
+    TS_ASSERT_THROWS_NOTHING(loader.setProperty("LoadDetectors", "Diffractometer"));
+    TS_ASSERT_THROWS_NOTHING(loader.execute(););
+    TS_ASSERT(loader.isExecuted());
+    MatrixWorkspace_sptr output2D = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("__out_ws");
+    TS_ASSERT_EQUALS(output2D->getNumberHistograms(), 2049)
+    TS_ASSERT_EQUALS(output2D->blocksize(), 2048)
+
+    // check some values near the center tubes to verify the geometry
+    // used is from the older version
+    TS_ASSERT_EQUALS(output2D->dataY(1050)[1156], 16)
+    TS_ASSERT_EQUALS(output2D->dataY(871)[1157], 17)
+    TS_ASSERT_EQUALS(output2D->dataY(746)[1157], 18)
+    checkTimeFormat(output2D);
+
+    AnalysisDataService::Instance().clear();
+  }
+  void test_diffraction_doppler() {
+    // checks loading IN16B diffration data acquired in Doppler mode with the
+    // data written in the newer way in the Nexus
+    LoadILLIndirect2 loader;
+    TS_ASSERT_THROWS_NOTHING(loader.initialize())
+    TS_ASSERT(loader.isInitialized())
+    TS_ASSERT_THROWS_NOTHING(loader.setPropertyValue("Filename", m_dopplerDiffraction));
+    TS_ASSERT_THROWS_NOTHING(loader.setPropertyValue("OutputWorkspace", "__out_ws"));
+    TS_ASSERT_THROWS_NOTHING(loader.setProperty("LoadDetectors", "Diffractometer"));
+    TS_ASSERT_THROWS_NOTHING(loader.execute(););
+    TS_ASSERT(loader.isExecuted());
+    MatrixWorkspace_sptr output2D = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("__out_ws");
+    TS_ASSERT_EQUALS(output2D->getNumberHistograms(), 2049)
+    TS_ASSERT_EQUALS(output2D->blocksize(), 1024)
+
+    // check some values near the center tubes to verify the geometry
+    // used is from the newer version
+    TS_ASSERT_EQUALS(output2D->dataY(1050)[558], 2)
+    TS_ASSERT_EQUALS(output2D->dataY(873)[557], 2)
+    TS_ASSERT_EQUALS(output2D->dataY(724)[561], 3)
+    checkTimeFormat(output2D);
+
+    AnalysisDataService::Instance().clear();
+  }
+
+  void doExecTest(const std::string &file, int numHist = 2051, int numChannels = 2048) {
     // Name of the output workspace.
     std::string outWSName("LoadILLIndirectTest_OutputWS");
 
@@ -93,33 +162,40 @@ public:
     TS_ASSERT_THROWS_NOTHING(loader.initialize())
     TS_ASSERT(loader.isInitialized())
     TS_ASSERT_THROWS_NOTHING(loader.setPropertyValue("Filename", file));
-    TS_ASSERT_THROWS_NOTHING(
-        loader.setPropertyValue("OutputWorkspace", outWSName));
+    TS_ASSERT_THROWS_NOTHING(loader.setPropertyValue("OutputWorkspace", outWSName));
     TS_ASSERT_THROWS_NOTHING(loader.execute(););
     TS_ASSERT(loader.isExecuted());
 
-    MatrixWorkspace_sptr output =
-        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(outWSName);
+    MatrixWorkspace_sptr output = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(outWSName);
     TS_ASSERT(output);
 
-    MatrixWorkspace_sptr output2D =
-        std::dynamic_pointer_cast<MatrixWorkspace>(output);
+    MatrixWorkspace_sptr output2D = std::dynamic_pointer_cast<MatrixWorkspace>(output);
     TS_ASSERT_EQUALS(output2D->getNumberHistograms(), numHist);
     TS_ASSERT_EQUALS(output2D->blocksize(), numChannels);
 
     const Mantid::API::Run &runlogs = output->run();
     TS_ASSERT(runlogs.hasProperty("Facility"));
     TS_ASSERT_EQUALS(runlogs.getProperty("Facility")->value(), "ILL");
+    checkTimeFormat(output);
 
     // Remove workspace from the data service.
     AnalysisDataService::Instance().clear();
   }
 
+  void checkTimeFormat(MatrixWorkspace_const_sptr outputWS) {
+    TS_ASSERT(outputWS->run().hasProperty("start_time"));
+    TS_ASSERT(
+        Mantid::Types::Core::DateAndTimeHelpers::stringIsISO8601(outputWS->run().getProperty("start_time")->value()));
+  }
+
 private:
-  std::string m_dataFile2013{"ILLIN16B_034745.nxs"};
-  std::string m_dataFile2015{"ILLIN16B_127500.nxs"};
+  std::string m_dataFile2013{"ILL/IN16B/034745.nxs"};
+  std::string m_dataFile2015{"ILL/IN16B/127500.nxs"};
   std::string m_batsFile{"ILL/IN16B/215962.nxs"};
   std::string m_bats33degree{"ILL/IN16B/247933.nxs"};
+  std::string m_firstTube251{"ILL/IN16B/136558.nxs"};
+  std::string m_batsDiffraction{"ILL/IN16B/249290.nxs"};
+  std::string m_dopplerDiffraction{"ILL/IN16B/276047.nxs"};
 };
 
 class LoadILLIndirect2TestPerformance : public CxxTest::TestSuite {
@@ -149,7 +225,7 @@ private:
 
   const int numberOfIterations = 5;
 
-  const std::string inFileName = "ILLIN16B_127500.nxs";
+  const std::string inFileName = "ILL/IN16B/215962.nxs";
   const std::string outWSName = "LoadILLWsOut";
 
   LoadILLIndirect2 *setupAlg() {

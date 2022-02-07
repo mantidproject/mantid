@@ -27,8 +27,7 @@ using namespace Mantid::API;
 using namespace Mantid::DataObjects;
 using namespace Mantid::Geometry;
 
-namespace Mantid {
-namespace MDAlgorithms {
+namespace Mantid::MDAlgorithms {
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(ChangeQConvention)
@@ -37,8 +36,7 @@ DECLARE_ALGORITHM(ChangeQConvention)
 /** Initialize the algorithm's properties.
  */
 void ChangeQConvention::init() {
-  declareProperty(std::make_unique<WorkspaceProperty<IMDWorkspace>>(
-                      "InputWorkspace", "", Direction::InOut),
+  declareProperty(std::make_unique<WorkspaceProperty<IMDWorkspace>>("InputWorkspace", "", Direction::InOut),
                   "An input MDEventWorkspace or MDHistoWorkspace.");
 }
 
@@ -52,8 +50,7 @@ void ChangeQConvention::exec() {
   g_log.information() << "Transforming Q in workspace\n";
 
   Algorithm_sptr transform_alg = createChildAlgorithm("TransformMD");
-  transform_alg->setProperty("InputWorkspace",
-                             std::dynamic_pointer_cast<IMDWorkspace>(ws));
+  transform_alg->setProperty("InputWorkspace", std::dynamic_pointer_cast<IMDWorkspace>(ws));
   transform_alg->setProperty("Scaling", "-1.0");
   transform_alg->executeAsChildAlg();
   ws = transform_alg->getProperty("OutputWorkspace");
@@ -63,5 +60,4 @@ void ChangeQConvention::exec() {
   setProperty("InputWorkspace", ws);
 }
 
-} // namespace MDAlgorithms
-} // namespace Mantid
+} // namespace Mantid::MDAlgorithms

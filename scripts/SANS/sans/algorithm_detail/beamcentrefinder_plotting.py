@@ -7,22 +7,17 @@
 import sys
 
 IN_WORKBENCH = False
-IN_MANTIDPLOT = False
 
-try:
-    import mantidplot
-    IN_MANTIDPLOT = True
-except (Exception, Warning):
-    if "workbench.app.mainwindow" in sys.modules:
+if "workbench.app.mainwindow" in sys.modules:
+    try:
+        from mantidqt.plotting.functions import plot
         IN_WORKBENCH = True
-        try:
-            from mantidqt.plotting.functions import plot
-        except ImportError:
-            pass
+    except ImportError:
+        pass
 
 
 def can_plot_beamcentrefinder():
-    return IN_WORKBENCH or IN_MANTIDPLOT
+    return IN_WORKBENCH
 
 
 def _plot_quartiles_matplotlib(output_workspaces, sample_scatter):
@@ -42,17 +37,6 @@ def _plot_quartiles_matplotlib(output_workspaces, sample_scatter):
          plot_kwargs=plot_kwargs, window_title=title)
 
 
-def _plot_quartiles(output_workspaces, sample_scatter):
-    title = '{}_beam_centre_finder'.format(sample_scatter)
-    graph_handle = mantidplot.plotSpectrum(output_workspaces, 0)
-    graph_handle.activeLayer().logLogAxes()
-    graph_handle.activeLayer().setTitle(title)
-    graph_handle.setName(title)
-    return graph_handle
-
-
 def plot_workspace_quartiles(output_workspaces, sample_scatter):
     if IN_WORKBENCH:
         _plot_quartiles_matplotlib(output_workspaces, sample_scatter)
-    elif IN_MANTIDPLOT:
-        _plot_quartiles(output_workspaces, sample_scatter)

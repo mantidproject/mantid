@@ -10,9 +10,7 @@
 using Mantid::PythonInterface::GlobalInterpreterLock;
 using namespace MantidQt::Widgets::Common;
 
-namespace MantidQt {
-namespace Widgets {
-namespace MplCpp {
+namespace MantidQt::Widgets::MplCpp {
 
 namespace {
 Python::Object colorConverter() {
@@ -33,13 +31,10 @@ inline int toByte(const Python::Object &pyfloat) {
  * https://matplotlib.org/api/colors_api.html?highlight=colors#module-matplotlib.colors
  * @return A QColor object that represents this color
  */
-QColor MantidQt::Widgets::MplCpp::ColorConverter::toRGB(
-    const Python::Object &colorSpec) {
+QColor MantidQt::Widgets::MplCpp::ColorConverter::toRGB(const Python::Object &colorSpec) {
   GlobalInterpreterLock lock;
   auto tuple = Python::Object(colorConverter().attr("to_rgb")(colorSpec));
   return QColor(toByte(tuple[0]), toByte(tuple[1]), toByte(tuple[2]));
 }
 
-} // namespace MplCpp
-} // namespace Widgets
-} // namespace MantidQt
+} // namespace MantidQt::Widgets::MplCpp

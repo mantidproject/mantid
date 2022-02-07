@@ -23,8 +23,7 @@ namespace ParameterEstimator {
 
 /// ParameterEstimator estimates parameter values of some fitting functions
 ///  from fitting data.
-void MANTID_CURVEFITTING_DLL estimate(API::IFunction &function,
-                                      const API::FunctionDomain1D &domain,
+void MANTID_CURVEFITTING_DLL estimate(API::IFunction &function, const API::FunctionDomain1D &domain,
                                       const API::FunctionValues &values);
 
 } // namespace ParameterEstimator

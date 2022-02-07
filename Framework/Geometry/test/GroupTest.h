@@ -39,10 +39,8 @@ public:
 
   void testConstructor() {
     std::vector<SymmetryOperation> symOps;
-    symOps.emplace_back(
-        SymmetryOperationFactory::Instance().createSymOp("x,y,z"));
-    symOps.emplace_back(
-        SymmetryOperationFactory::Instance().createSymOp("-x,-y,-z"));
+    symOps.emplace_back(SymmetryOperationFactory::Instance().createSymOp("x,y,z"));
+    symOps.emplace_back(SymmetryOperationFactory::Instance().createSymOp("-x,-y,-z"));
 
     TS_ASSERT_THROWS_NOTHING(Group group(symOps));
 
@@ -57,37 +55,30 @@ public:
 
   void testCopyConstructor() {
     std::vector<SymmetryOperation> symOps;
-    symOps.emplace_back(
-        SymmetryOperationFactory::Instance().createSymOp("x,y,z"));
-    symOps.emplace_back(
-        SymmetryOperationFactory::Instance().createSymOp("-x,-y,-z"));
+    symOps.emplace_back(SymmetryOperationFactory::Instance().createSymOp("x,y,z"));
+    symOps.emplace_back(SymmetryOperationFactory::Instance().createSymOp("-x,-y,-z"));
 
     Group group(symOps);
     Group otherGroup(group);
 
     TS_ASSERT_EQUALS(group.order(), otherGroup.order());
-    TS_ASSERT_EQUALS(group.getSymmetryOperations(),
-                     otherGroup.getSymmetryOperations());
+    TS_ASSERT_EQUALS(group.getSymmetryOperations(), otherGroup.getSymmetryOperations());
   }
 
   void testAssignmentOperator() {
     std::vector<SymmetryOperation> symOps;
-    symOps.emplace_back(
-        SymmetryOperationFactory::Instance().createSymOp("x,y,z"));
-    symOps.emplace_back(
-        SymmetryOperationFactory::Instance().createSymOp("-x,-y,-z"));
+    symOps.emplace_back(SymmetryOperationFactory::Instance().createSymOp("x,y,z"));
+    symOps.emplace_back(SymmetryOperationFactory::Instance().createSymOp("-x,-y,-z"));
 
     Group otherGroup(symOps);
 
     Group group;
     TS_ASSERT_DIFFERS(group.order(), otherGroup.order());
-    TS_ASSERT_DIFFERS(group.getSymmetryOperations(),
-                      otherGroup.getSymmetryOperations());
+    TS_ASSERT_DIFFERS(group.getSymmetryOperations(), otherGroup.getSymmetryOperations());
 
     group = otherGroup;
     TS_ASSERT_EQUALS(group.order(), otherGroup.order());
-    TS_ASSERT_EQUALS(group.getSymmetryOperations(),
-                     otherGroup.getSymmetryOperations());
+    TS_ASSERT_EQUALS(group.getSymmetryOperations(), otherGroup.getSymmetryOperations());
   }
 
   void testOrder() {
@@ -96,33 +87,27 @@ public:
 
     // Making a group of two operations gives order 2
     std::vector<SymmetryOperation> symOps;
-    symOps.emplace_back(
-        SymmetryOperationFactory::Instance().createSymOp("x,y,z"));
-    symOps.emplace_back(
-        SymmetryOperationFactory::Instance().createSymOp("-x,-y,-z"));
+    symOps.emplace_back(SymmetryOperationFactory::Instance().createSymOp("x,y,z"));
+    symOps.emplace_back(SymmetryOperationFactory::Instance().createSymOp("-x,-y,-z"));
 
     Group biggerGroup(symOps);
     TS_ASSERT_EQUALS(biggerGroup.order(), 2);
 
     // Adding another one results in 3
-    symOps.emplace_back(
-        SymmetryOperationFactory::Instance().createSymOp("-x,y,z"));
+    symOps.emplace_back(SymmetryOperationFactory::Instance().createSymOp("-x,y,z"));
     Group evenBiggerGroup(symOps);
     TS_ASSERT_EQUALS(evenBiggerGroup.order(), 3);
 
     // Multiple occurences of the same operation do not count
-    symOps.emplace_back(
-        SymmetryOperationFactory::Instance().createSymOp("-x,-y,-z"));
+    symOps.emplace_back(SymmetryOperationFactory::Instance().createSymOp("-x,-y,-z"));
     Group sameAsBefore(symOps);
     TS_ASSERT_EQUALS(sameAsBefore.order(), 3);
   }
 
   void testComparison() {
     std::vector<SymmetryOperation> symOps;
-    symOps.emplace_back(
-        SymmetryOperationFactory::Instance().createSymOp("x,y,z"));
-    symOps.emplace_back(
-        SymmetryOperationFactory::Instance().createSymOp("-x,-y,-z"));
+    symOps.emplace_back(SymmetryOperationFactory::Instance().createSymOp("x,y,z"));
+    symOps.emplace_back(SymmetryOperationFactory::Instance().createSymOp("-x,-y,-z"));
 
     Group groupOne(symOps);
     Group groupTwo(symOps);
@@ -140,17 +125,13 @@ public:
   void testMultiplicationOperator() {
     // We take pointgroup -1
     std::vector<SymmetryOperation> inversion;
-    inversion.emplace_back(
-        SymmetryOperationFactory::Instance().createSymOp("x,y,z"));
-    inversion.emplace_back(
-        SymmetryOperationFactory::Instance().createSymOp("-x,-y,-z"));
+    inversion.emplace_back(SymmetryOperationFactory::Instance().createSymOp("x,y,z"));
+    inversion.emplace_back(SymmetryOperationFactory::Instance().createSymOp("-x,-y,-z"));
 
     // And 2 (b-axis unique)
     std::vector<SymmetryOperation> twoFoldY;
-    twoFoldY.emplace_back(
-        SymmetryOperationFactory::Instance().createSymOp("x,y,z"));
-    twoFoldY.emplace_back(
-        SymmetryOperationFactory::Instance().createSymOp("-x,y,-z"));
+    twoFoldY.emplace_back(SymmetryOperationFactory::Instance().createSymOp("x,y,z"));
+    twoFoldY.emplace_back(SymmetryOperationFactory::Instance().createSymOp("-x,y,-z"));
 
     Group one(inversion);
     Group two(twoFoldY);
@@ -160,14 +141,12 @@ public:
     TS_ASSERT_EQUALS(three.order(), 4);
 
     // The multiplication created m perpendicular to b (x,-y,-z)
-    SymmetryOperation mirrorY =
-        SymmetryOperationFactory::Instance().createSymOp("x,-y,z");
+    SymmetryOperation mirrorY = SymmetryOperationFactory::Instance().createSymOp("x,-y,z");
     std::vector<SymmetryOperation> opsOfThree = three.getSymmetryOperations();
 
     // Check that it is found in the list of symmetry operations of the new
     // group
-    TS_ASSERT_DIFFERS(std::find(opsOfThree.begin(), opsOfThree.end(), mirrorY),
-                      opsOfThree.end());
+    TS_ASSERT_DIFFERS(std::find(opsOfThree.begin(), opsOfThree.end(), mirrorY), opsOfThree.end());
 
     Group four = two * one;
     TS_ASSERT(three == four);
@@ -175,10 +154,8 @@ public:
 
   void testAxisSystemOrthogonal() {
     std::vector<SymmetryOperation> orthogonal;
-    orthogonal.emplace_back(
-        SymmetryOperationFactory::Instance().createSymOp("x,y,z"));
-    orthogonal.emplace_back(
-        SymmetryOperationFactory::Instance().createSymOp("-x,y,-z"));
+    orthogonal.emplace_back(SymmetryOperationFactory::Instance().createSymOp("x,y,z"));
+    orthogonal.emplace_back(SymmetryOperationFactory::Instance().createSymOp("-x,y,-z"));
 
     Group two(orthogonal);
 
@@ -187,10 +164,8 @@ public:
 
   void testAxisSystemHexagonal() {
     std::vector<SymmetryOperation> hexagonal;
-    hexagonal.emplace_back(
-        SymmetryOperationFactory::Instance().createSymOp("-y,x-y,z"));
-    hexagonal.emplace_back(
-        SymmetryOperationFactory::Instance().createSymOp("y,x,-z+1/2"));
+    hexagonal.emplace_back(SymmetryOperationFactory::Instance().createSymOp("-y,x-y,z"));
+    hexagonal.emplace_back(SymmetryOperationFactory::Instance().createSymOp("y,x,-z+1/2"));
 
     Group two(hexagonal);
 
@@ -266,8 +241,7 @@ public:
     TS_ASSERT(group.containsOperation(ops[0]));
     TS_ASSERT(group.containsOperation(ops[1]));
 
-    SymmetryOperation mirror =
-        SymmetryOperationFactory::Instance().createSymOp("x,y,-z");
+    SymmetryOperation mirror = SymmetryOperationFactory::Instance().createSymOp("x,y,-z");
 
     TS_ASSERT(!group.containsOperation(mirror));
   }
@@ -347,17 +321,13 @@ public:
   void testSmartPointerOperators() {
     // We take pointgroup -1
     std::vector<SymmetryOperation> inversion;
-    inversion.emplace_back(
-        SymmetryOperationFactory::Instance().createSymOp("x,y,z"));
-    inversion.emplace_back(
-        SymmetryOperationFactory::Instance().createSymOp("-x,-y,-z"));
+    inversion.emplace_back(SymmetryOperationFactory::Instance().createSymOp("x,y,z"));
+    inversion.emplace_back(SymmetryOperationFactory::Instance().createSymOp("-x,-y,-z"));
 
     // And 2 (b-axis unique)
     std::vector<SymmetryOperation> twoFoldY;
-    twoFoldY.emplace_back(
-        SymmetryOperationFactory::Instance().createSymOp("x,y,z"));
-    twoFoldY.emplace_back(
-        SymmetryOperationFactory::Instance().createSymOp("-x,y,-z"));
+    twoFoldY.emplace_back(SymmetryOperationFactory::Instance().createSymOp("x,y,z"));
+    twoFoldY.emplace_back(SymmetryOperationFactory::Instance().createSymOp("-x,y,-z"));
 
     Group_const_sptr one = std::make_shared<const Group>(inversion);
     Group_const_sptr two = std::make_shared<const Group>(twoFoldY);
@@ -365,14 +335,12 @@ public:
     Group_const_sptr three = one * two;
     TS_ASSERT_EQUALS(three->order(), 4);
 
-    SymmetryOperation mirrorY =
-        SymmetryOperationFactory::Instance().createSymOp("x,-y,z");
+    SymmetryOperation mirrorY = SymmetryOperationFactory::Instance().createSymOp("x,-y,z");
     std::vector<SymmetryOperation> opsOfThree = three->getSymmetryOperations();
 
     // Check that it is found in the list of symmetry operations of the new
     // group
-    TS_ASSERT_DIFFERS(std::find(opsOfThree.begin(), opsOfThree.end(), mirrorY),
-                      opsOfThree.end());
+    TS_ASSERT_DIFFERS(std::find(opsOfThree.begin(), opsOfThree.end(), mirrorY), opsOfThree.end());
 
     // Make sure that null-pointer do not work
     Group_const_sptr null;

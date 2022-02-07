@@ -23,8 +23,7 @@ class MANTIDQT_INDIRECT_DLL IndirectSettingsPresenter : public QObject {
 
 public:
   explicit IndirectSettingsPresenter(QWidget *parent = nullptr);
-  explicit IndirectSettingsPresenter(IndirectSettingsModel *model,
-                                     IIndirectSettingsView *view);
+  explicit IndirectSettingsPresenter(IndirectSettingsModel *model, IIndirectSettingsView *view);
 
   IIndirectSettingsView *getView();
 

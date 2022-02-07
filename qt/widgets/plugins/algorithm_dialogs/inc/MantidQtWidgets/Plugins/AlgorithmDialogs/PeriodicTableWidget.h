@@ -42,8 +42,7 @@ public:
 
   /// @return Comma-separated string of all the element buttons for one group
   /// that are currently checked
-  QString
-  elementsSelectedToString(const QVector<QPushButton *> &elementsSelected);
+  QString elementsSelectedToString(const QVector<QPushButton *> &elementsSelected);
 
   /// @return Comma-separated string of all element buttons that are checked in
   /// the whole PeriodicTableWidget
@@ -60,8 +59,7 @@ public:
 
   ///@return the result of the comparison between a string and the text of a
   /// button.
-  bool compareButtonNameToStr(QPushButton *buttonToCompare,
-                              const QString &stringToCompare);
+  bool compareButtonNameToStr(QPushButton *buttonToCompare, const QString &stringToCompare);
 
   /// Displays or hides the Legend for the colour coding of periodic groups
   void showGroupLegend(bool checked);
@@ -74,13 +72,11 @@ private:
   /// Methods to colour element buttons by periodic group
   void ColourNonMetals(const QVector<QPushButton *> &nonMetals);
   void ColourAlkaliMetals(const QVector<QPushButton *> &alkaliMetals);
-  void
-  ColourAlkalineEarthMetals(const QVector<QPushButton *> &alkalineEarthMetals);
+  void ColourAlkalineEarthMetals(const QVector<QPushButton *> &alkalineEarthMetals);
   void ColourTransitionMetals(const QVector<QPushButton *> &transMetals);
   void ColourActinides(const QVector<QPushButton *> &actinides);
   void ColourLanthanides(const QVector<QPushButton *> &lanthanides);
-  void
-  ColourPostTransitionMetals(const QVector<QPushButton *> &postTransMetals);
+  void ColourPostTransitionMetals(const QVector<QPushButton *> &postTransMetals);
   void ColourUnknownProperties(const QVector<QPushButton *> &unknownProperties);
   void ColourMetalloids(const QVector<QPushButton *> &metalloids);
   void ColourHalogens(const QVector<QPushButton *> &halogens);

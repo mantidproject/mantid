@@ -44,32 +44,27 @@ public slots:
   /// Update the data curve displayed
   /// @param workspace :: The workspace containing the data
   /// @param workspaceIndex :: The index to plot
-  virtual void setDataCurve(Mantid::API::MatrixWorkspace_sptr workspace,
-                            std::size_t const &workspaceIndex = 0) = 0;
+  virtual void setDataCurve(Mantid::API::MatrixWorkspace_sptr workspace, std::size_t const &workspaceIndex = 0) = 0;
 
   /// Update the fitted curve displayed
   /// @param workspace :: The workspace containing the data
   /// @param workspaceIndex :: The index to plot
-  virtual void setFittedCurve(Mantid::API::MatrixWorkspace_sptr workspace,
-                              std::size_t const &workspaceIndex = 0) = 0;
+  virtual void setFittedCurve(Mantid::API::MatrixWorkspace_sptr workspace, std::size_t const &workspaceIndex = 0) = 0;
 
   /// Update the guess curve displayed
   /// @param workspace :: The workspace containing the data
   /// @param workspaceIndex :: The index to plot
-  virtual void setGuessCurve(Mantid::API::MatrixWorkspace_sptr workspace,
-                             std::size_t const &workspaceIndex = 0) = 0;
+  virtual void setGuessCurve(Mantid::API::MatrixWorkspace_sptr workspace, std::size_t const &workspaceIndex = 0) = 0;
 
   /// Set function displayed in Function Browser
   /// @param newFunction :: New function to display
-  virtual void
-  setFunction(const Mantid::API::IFunction_const_sptr &newFunction) = 0;
+  virtual void setFunction(const Mantid::API::IFunction_const_sptr &newFunction) = 0;
 
   /// Update a single parameter in Function Browser
   /// @param funcIndex :: Index of the function where to update parameter
   /// @param paramName :: Name of the parameter to udpate
   /// @param value :: New parameter value
-  virtual void setParameter(const QString &funcIndex, const QString &paramName,
-                            double value) = 0;
+  virtual void setParameter(const QString &funcIndex, const QString &paramName, double value) = 0;
 
   /// Enabled/disable PeakPicker on the plot
   /// @param enabled :: New enabled status
@@ -77,8 +72,7 @@ public slots:
 
   /// Resize/move PeakPicker so that it represents specified peak
   /// @param peak :: A new peak to represent
-  virtual void
-  setPeakPicker(const Mantid::API::IPeakFunction_const_sptr &peak) = 0;
+  virtual void setPeakPicker(const Mantid::API::IPeakFunction_const_sptr &peak) = 0;
 
   /**
    * Pops-up an error box

@@ -17,16 +17,18 @@ using namespace Mantid::Kernel;
 #define DATA_SIZE 10000000
 std::vector<double> shared_data;
 
-Poco::RWLock _access;
+namespace {
+Poco::RWLock g_mutex;
+}
 
 // Poco::ScopedReadRWLock getReadLock()
 //{
-//  return Poco::ScopedReadRWLock(_access);
+//  return Poco::ScopedReadRWLock(g_mutex);
 //}
 
 void reader() {
   //  std::cout << "Read started\n";
-  Poco::ScopedReadRWLock lock(_access);
+  Poco::ScopedReadRWLock lock(g_mutex);
   //  std::cout << "Read launching\n";
   // do work here, without anyone having exclusive access
   for (double val : shared_data) {
@@ -37,7 +39,7 @@ void reader() {
 
 void unconditional_writer() {
   //  std::cout << "Write started\n";
-  Poco::ScopedWriteRWLock lock(_access);
+  Poco::ScopedWriteRWLock lock(g_mutex);
   //  std::cout << "Write launching\n";
   // do work here, with exclusive access
   shared_data.resize(shared_data.size() + 1, 2.345);
@@ -75,8 +77,7 @@ public:
       pool.schedule(std::make_shared<FunctionTask>(unconditional_writer));
     pool.joinAll();
     std::cout << tim << " to execute all " << numTasks << " tasks\n";
-    TSM_ASSERT_EQUALS("The writers were all called", shared_data.size(),
-                      DATA_SIZE + numTasks)
+    TSM_ASSERT_EQUALS("The writers were all called", shared_data.size(), DATA_SIZE + numTasks)
   }
 
   /** Mix 1 writing thread for 9 reading threads */
@@ -92,7 +93,6 @@ public:
     }
     pool.joinAll();
     std::cout << tim << " to execute all " << numTasks << " tasks\n";
-    TSM_ASSERT_EQUALS("The writers were all called", shared_data.size(),
-                      DATA_SIZE + numTasks / 10)
+    TSM_ASSERT_EQUALS("The writers were all called", shared_data.size(), DATA_SIZE + numTasks / 10)
   }
 };

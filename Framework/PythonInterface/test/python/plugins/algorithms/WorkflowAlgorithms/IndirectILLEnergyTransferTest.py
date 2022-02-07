@@ -19,7 +19,8 @@ class IndirectILLEnergyTransferTest(unittest.TestCase):
                   ('two_wing_QENS', '136558-136559'),
                   ('two_wing_EFWS', '143720'),
                   ('two_wing_IFWS', '170300'),
-                  ('bats', '215962')])
+                  ('bats', '215962'),
+                  ('3_single_dets', '318724')])
 
     # cache the def instrument and data search dirs
     _def_fac = config['default.facility']
@@ -58,6 +59,10 @@ class IndirectILLEnergyTransferTest(unittest.TestCase):
         IndirectILLEnergyTransfer(**args)
 
         self._check_workspace_group(mtd['red'], 2, 18, 1017)
+        deltaE = mtd['red'][0].readX(0)
+        bsize = mtd['red'][0].blocksize()
+        self.assertAlmostEquals(deltaE[bsize//2], 0, 4)
+        self.assertTrue(deltaE[-1] > -deltaE[0])
 
     def test_one_wing_QENS(self):
         # tests one wing QENS with PSD range
@@ -65,6 +70,11 @@ class IndirectILLEnergyTransferTest(unittest.TestCase):
                 'ManualPSDIntegrationRange': [20,100]}
         res = IndirectILLEnergyTransfer(**args)
         self._check_workspace_group(res, 1, 18, 1024)
+
+        deltaE = res[0].readX(0)
+        bsize = res[0].blocksize()
+        self.assertEquals(deltaE[bsize//2], 0)
+        self.assertTrue(deltaE[-1] > -deltaE[0])
 
     def test_one_wing_EFWS(self):
         args = {'Run': self._runs['one_wing_EFWS']}
@@ -96,6 +106,16 @@ class IndirectILLEnergyTransferTest(unittest.TestCase):
         res = IndirectILLEnergyTransfer(**args)
         self._check_workspace_group(res, 1, 2050, 1121)
 
+    def test_bats_monitor(self):
+        args = {'Run': self._runs['bats'], 'PulseChopper': '34', 'GroupDetectors': False, 'DeleteMonitorWorkspace':False}
+        res = IndirectILLEnergyTransfer(**args)
+        mon_ws = 'res_215962_mon'
+        self.assertTrue(mtd.doesExist(mon_ws))
+        self.assertTrue(mtd[mon_ws])
+        self.assertTrue(isinstance(mtd[mon_ws], MatrixWorkspace))
+        self.assertEquals(mtd[mon_ws].getAxis(0).getUnit().unitID(), 'DeltaE')
+        self._check_workspace_group(res, 1, 2050, 1121)
+
     def test_bats_grouped(self):
         args = {'Run': self._runs['bats'], 'PulseChopper': '34'}
         res = IndirectILLEnergyTransfer(**args)
@@ -106,6 +126,43 @@ class IndirectILLEnergyTransferTest(unittest.TestCase):
                 'DiscardSingleDetectors': True}
         res = IndirectILLEnergyTransfer(**args)
         self._check_workspace_group(res, 1, 16, 1024)
+
+    def test_3_sd(self):
+        args = {'Run': self._runs['3_single_dets'],
+                'DiscardSingleDetectors': False,
+                "GroupDetectors": False}
+        res = IndirectILLEnergyTransfer(**args)
+        self._check_workspace_group(res, 1, 2051, 984)
+
+    def test_equatorial_fit(self):
+        args = {'Run': self._runs['3_single_dets'],
+                'OutputWorkspace': "res",
+                'DiscardSingleDetectors': False,
+                'GroupDetectors': False,
+                'ElasticPeakFitting': 'FitEquatorialOnly',
+                'OutputElasticChannelWorkspace': 'out_epp_ws'}
+
+        IndirectILLEnergyTransfer(**args)
+
+        self._check_workspace_group(mtd["res"], 1, 2051, 984)
+
+        epp_ws = mtd['out_epp_ws']
+        self.assertEquals(epp_ws.rowCount(), 4)
+
+    def test_fit_all(self):
+        args = {'Run': self._runs['3_single_dets'],
+                'OutputWorkspace': "res",
+                'DiscardSingleDetectors': False,
+                'GroupDetectors': False,
+                'ElasticPeakFitting': 'FitAllPixelGroups',
+                'OutputElasticChannelWorkspace': 'out_epp_ws'}
+
+        IndirectILLEnergyTransfer(**args)
+
+        self._check_workspace_group(mtd["res"], 1, 2051, 984)
+
+        epp_ws = mtd['out_epp_ws']
+        self.assertEquals(epp_ws.rowCount(), 516)
 
     def _check_workspace_group(self, wsgroup, nentries, nspectra, nbins):
 
@@ -126,6 +183,7 @@ class IndirectILLEnergyTransferTest(unittest.TestCase):
         self.assertTrue(item.getSampleDetails())
 
         self.assertTrue(item.getHistory().lastAlgorithm())
+
 
 if __name__ == '__main__':
     unittest.main()

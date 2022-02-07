@@ -9,20 +9,21 @@
 
 using namespace Mantid::Kernel;
 
-namespace MantidQt {
-namespace API {
+namespace MantidQt::API {
 
 //----------------------------------------------------------------------------------------------
 /** Constructor
  */
-BoolPropertyWidget::BoolPropertyWidget(
-    Mantid::Kernel::PropertyWithValue<bool> *prop, QWidget *parent,
-    QGridLayout *layout, int row)
+BoolPropertyWidget::BoolPropertyWidget(Mantid::Kernel::PropertyWithValue<bool> *prop, QWidget *parent,
+                                       QGridLayout *layout, int row)
     : PropertyWidget(prop, parent, layout, row) {
   m_checkBox = new QCheckBox(QString::fromStdString(prop->name()), m_parent);
   m_checkBox->setToolTip(m_doc);
-  connect(m_checkBox, SIGNAL(stateChanged(int)), this,
-          SLOT(userEditedProperty()));
+  // Make current value visible
+  this->setValue(QString::fromStdString(m_prop->value()));
+
+  // Make sure the connection comes after updating any values
+  connect(m_checkBox, SIGNAL(stateChanged(int)), this, SLOT(userEditedProperty()));
   m_widgets.push_back(m_checkBox);
 
   // Add the checkbox at column 1
@@ -48,13 +49,11 @@ QString BoolPropertyWidget::getValue() const {
  *
  * @param value :: string representation of the value */
 void BoolPropertyWidget::setValueImpl(const QString &value) {
-  const QString temp =
-      value.isEmpty() ? QString::fromStdString(m_prop->getDefault()) : value;
+  const QString temp = value.isEmpty() ? QString::fromStdString(m_prop->getDefault()) : value;
 
   if (temp == "0")
     m_checkBox->setCheckState(Qt::Unchecked);
   else
     m_checkBox->setCheckState(Qt::Checked);
 }
-} // namespace API
-} // namespace MantidQt
+} // namespace MantidQt::API

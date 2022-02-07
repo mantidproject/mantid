@@ -6,14 +6,12 @@ Mocking Exercise Solution
 
 .. code-block:: python
 
-    from __future__ import (absolute_import, division, print_function)
-
     import sys
     import presenter
     import view
 
     import unittest
-    from mantid.py3compat import mock
+    from unittest import mock
 
     class PresenterTest(unittest.TestCase):
         def setUp(self):
@@ -29,15 +27,15 @@ Mocking Exercise Solution
             self.view.setTableRow = mock.Mock()
             self.view.addWidgetToTable = mock.Mock()
             self.view.addITemToTable = mock.Mock()
-        
+
             self.presenter = presenter.Presenter(self.view)
 
         def test_updatePlot(self):
             self.presenter.updatePlot()
-            assert(self.view.getColour.call_count == 1)
-            assert(self.view.getGridLines.call_count == 1)
-            assert(self.view.getFreq.call_count == 1)
-            assert(self.view.getPhase.call_count == 1)
+            self.view.getColour.assert_called_once()
+            self.view.getGridLines.assert_called_once()
+            self.view.getFreq.assert_called_once()
+            self.view.getPhase.assert_called_once()
 
     if __name__ == "__main__":
         unittest.main()

@@ -43,9 +43,7 @@ public:
   /// Algorithm's name
   const std::string name() const override { return "MaskBins"; }
   /// Summary of algorithms purpose
-  const std::string summary() const override {
-    return "Marks bins in a workspace as being masked.";
-  }
+  const std::string summary() const override { return "Marks bins in a workspace as being masked."; }
 
   /// Algorithm's version
   int version() const override { return (1); }
@@ -62,14 +60,12 @@ private:
   void exec() override;
   void execEvent();
 
-  void findIndices(const HistogramData::BinEdges &X,
-                   MantidVec::difference_type &startBin,
+  void findIndices(const HistogramData::BinEdges &X, MantidVec::difference_type &startBin,
                    MantidVec::difference_type &endBin);
 
-  double m_startX{0.0}; ///< The range start point
-  double m_endX{0.0};   ///< The range end point
-  Indexing::SpectrumIndexSet
-      indexSet; ///< the list of Spectra (workspace index) to load
+  double m_startX{0.0};                ///< The range start point
+  double m_endX{0.0};                  ///< The range end point
+  Indexing::SpectrumIndexSet indexSet; ///< the list of Spectra (workspace index) to load
 };
 
 } // namespace Algorithms

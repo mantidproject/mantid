@@ -40,12 +40,9 @@ namespace API {
 class EXPORT_OPT_MANTIDQT_COMMON FakeFindFilesThread : public FindFilesWorker {
   Q_OBJECT
 public:
-  FakeFindFilesThread(
-      const FindFilesSearchParameters &parameters,
-      const FindFilesSearchResults &results = FindFilesSearchResults(),
-      int milliseconds = 100)
-      : FindFilesWorker(parameters), m_results(results),
-        m_milliseconds(milliseconds) {}
+  FakeFindFilesThread(const FindFilesSearchParameters &parameters,
+                      const FindFilesSearchResults &results = FindFilesSearchResults(), int milliseconds = 100)
+      : FindFilesWorker(parameters), m_results(results), m_milliseconds(milliseconds) {}
 
 protected:
   void run() override {
@@ -59,7 +56,7 @@ private:
   int m_milliseconds;
 };
 
-/** FakeMWRunFiles
+/** FakeFileFinderWidget
  *
  * This implements the slots required to listen to a FindFilesWorker
  * and will simply capture the result produced by the worker.
@@ -67,13 +64,12 @@ private:
  * It will also capture if the worker notified that the search was
  * finished.
  */
-class EXPORT_OPT_MANTIDQT_COMMON FakeMWRunFiles : public QObject {
+class EXPORT_OPT_MANTIDQT_COMMON FakeFileFinderWidget : public QObject {
   Q_OBJECT
 
 public:
-  FakeMWRunFiles() : m_results(), m_finishedSignalRecieved(false) {
-    connect(this, SIGNAL(fileFindingFinished()), this,
-            SLOT(setSignalRecieved()));
+  FakeFileFinderWidget() : m_results(), m_finishedSignalRecieved(false) {
+    connect(this, SIGNAL(fileFindingFinished()), this, SLOT(setSignalRecieved()));
   }
 
   /// Get the captured results of a file search
@@ -83,9 +79,7 @@ public:
 
 public slots:
   /// Slot called when file finding thread has finished.
-  void inspectThreadResult(const FindFilesSearchResults &result) {
-    m_results = result;
-  }
+  void inspectThreadResult(const FindFilesSearchResults &result) { m_results = result; }
 
   /// Slot called when the file finding thread has finished.
   void setSignalRecieved() { m_finishedSignalRecieved = true; }

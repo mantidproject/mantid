@@ -5,6 +5,7 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 import collections
+import copy
 import warnings
 
 import mantid.kernel as kernel
@@ -252,6 +253,29 @@ def generate_unsplined_name(vanadium_string, *args):
     return _generate_vanadium_name(vanadium_string, False, *args)
 
 
+def generate_summed_empty_name(empty_runs_string, *args):
+    """
+    Generates a name for the summed empty instrument runs
+    so that the file can be later loaded.
+    :param empty_runs_string: The empty runs that are summed in this file
+    :return: The generated file name
+    """
+    out_name = 'summed_empty'
+    out_name += '_' + str(empty_runs_string)
+
+    # Only arg that may be added is long_mode. tt_mode and cal file are not needed.
+    for passed_arg in args:
+        if isinstance(passed_arg, list):
+            if 'long' in passed_arg:
+                out_name += '_long'
+        else:
+            if passed_arg == 'long':
+                out_name += '_long'
+
+    out_name += ".nxs"
+    return out_name
+
+
 def get_first_run_number(run_number_string):
     """
     Takes a run number string and returns the first user specified run from that string
@@ -375,11 +399,15 @@ def rebin_workspace_list(workspace_list, bin_width_list, start_x_list=None, end_
     :param end_x_list: The list of ending x boundaries to rebin to
     :return: List of rebinned workspace
     """
-    if not isinstance(workspace_list, list) or not isinstance(bin_width_list, list):
-        raise RuntimeError("One of the types passed to rebin_workspace_list was not a list")
+    if not isinstance(workspace_list, list):
+        raise RuntimeError("Workspace list passed to rebin_workspace_list was not a list")
+    if not isinstance(bin_width_list, list) and not isinstance(bin_width_list, float):
+        raise RuntimeError("Bin width list passed to rebin_workspace_list was not a list or float")
 
     ws_list_len = len(workspace_list)
-    if ws_list_len != len(bin_width_list):
+    if not isinstance(bin_width_list, list):
+        bin_width_list = [bin_width_list] * ws_list_len
+    elif ws_list_len != len(bin_width_list):
         raise ValueError("The number of bin widths found to rebin to does not match the number of banks")
     if start_x_list and len(start_x_list) != ws_list_len:
         raise ValueError("The number of starting bin values does not match the number of banks")
@@ -470,20 +498,15 @@ def spline_workspaces(focused_vanadium_spectra, num_splines):
     return splined_ws_list
 
 
-def subtract_summed_runs(ws_to_correct, empty_sample_ws_string, instrument, scale_factor=None):
+def generate_summed_runs(empty_sample_ws_string, instrument, scale_factor=None):
     """
-    Loads the list of empty runs specified by the empty_sample_ws_string and subtracts
-    them from the workspace specified. Returns the subtracted workspace.
-    :param ws_to_correct: The workspace to subtract the empty instrument runs from
-    :param empty_sample_ws_string: The empty run numbers to subtract from the workspace
+    Loads the list of empty runs specified by the empty_sample_ws_string and sums
+    them (and optionally scales). Returns the summed workspace.
+    :param empty_sample_ws_string: The empty run numbers to sum
     :param instrument: The instrument object these runs belong to
     :param scale_factor: The percentage to scale the loaded runs by
-    :return: The workspace with the empty runs subtracted
+    :return: The summed and normalised empty runs
     """
-    # Skip this step if an empty string was not specified
-    # or if the workspace has no current, as subtracting empty would give us negative counts
-    if empty_sample_ws_string is None or not workspace_has_current(ws_to_correct):
-        return ws_to_correct
 
     empty_sample = load_current_normalised_ws_list(run_number_string=empty_sample_ws_string, instrument=instrument,
                                                    input_batching=INPUT_BATCHING.Summed)
@@ -491,11 +514,27 @@ def subtract_summed_runs(ws_to_correct, empty_sample_ws_string, instrument, scal
     if scale_factor:
         empty_sample = mantid.Scale(InputWorkspace=empty_sample, OutputWorkspace=empty_sample, Factor=scale_factor,
                                     Operation="Multiply")
-    try:
-        mantid.Minus(LHSWorkspace=ws_to_correct, RHSWorkspace=empty_sample, OutputWorkspace=ws_to_correct)
-    except ValueError:
-        raise ValueError("The empty run(s) specified for this file do not have matching binning. Do the TOF windows of"
-                         " the empty and sample match?")
+    return empty_sample
+
+
+def subtract_summed_runs(ws_to_correct, empty_sample):
+    """
+    Subtracts the list of empty runs specified by the empty_sample_ws_string
+    from the workspace specified. Returns the subtracted workspace.
+    :param ws_to_correct: The workspace to correct
+    :param empty_sample: The empty workspace to subtract
+    :return: The workspace with the empty runs subtracted
+    """
+    # Skip this step if the workspace has no current, as subtracting empty
+    # would give us negative counts
+    if workspace_has_current(ws_to_correct):
+        try:
+            mantid.Minus(LHSWorkspace=ws_to_correct, RHSWorkspace=empty_sample, OutputWorkspace=ws_to_correct)
+        except ValueError:
+            raise ValueError("The empty run(s) specified for this file do not have matching binning. Do the TOF windows of"
+                             " the empty and sample match?")
+    else:
+        ws_to_correct = copy.deepcopy(ws_to_correct)
 
     remove_intermediate_workspace(empty_sample)
 

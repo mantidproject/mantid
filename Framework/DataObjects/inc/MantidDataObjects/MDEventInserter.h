@@ -40,22 +40,24 @@ public:
   Constructor
   @param ws : MDEventWorkspace to add to.
   */
-  MDEventInserter(MDEW_SPTR ws) : m_ws(ws) {}
+  MDEventInserter(MDEW_SPTR &ws) : m_ws(ws) {}
 
   /**
   Creates an mdevent and adds it to the MDEW. The type of MDEvent generated is
   determined internally using type information on the MDEventType.
   @param signal : intensity
   @param errorSQ : squared value of the error
-  @param runindex : run index (index into the vector of ExperimentInfo)
+  @param expInfoIndex : associated experiment-info index (index into the vector of ExperimentInfo)
+  @param goniometerIndex: 0-based index determines the goniometer settings when
+  this event occurred
   @param detectno : detector number
   @param coords : pointer to coordinates array
   */
-  void insertMDEvent(float signal, float errorSQ, uint16_t runindex,
-                     int32_t detectno, Mantid::coord_t *coords) {
+  void insertMDEvent(float signal, float errorSQ, uint16_t expInfoIndex, uint16_t goniometerIndex, int32_t detectno,
+                     Mantid::coord_t *coords) {
     // compile-time overload selection based on nested type information on the
     // MDEventType.
-    insertMDEvent(signal, errorSQ, runindex, detectno, coords,
+    insertMDEvent(signal, errorSQ, expInfoIndex, goniometerIndex, detectno, coords,
                   IntToType<MDEventType::is_full_mdevent>());
   }
 
@@ -69,8 +71,8 @@ private:
   @param errorSQ : squared value of the error
   @param coords : pointer to coordinates array
  */
-  void insertMDEvent(float signal, float errorSQ, uint16_t, int32_t,
-                     Mantid::coord_t *coords, IntToType<false>) {
+  void insertMDEvent(float signal, float errorSQ, uint16_t, uint16_t, int32_t, Mantid::coord_t *coords,
+                     IntToType<false>) {
     m_ws->addEvent(MDEventType(signal, errorSQ, coords));
   }
 
@@ -78,14 +80,15 @@ private:
   Creates a FULL MDEvent and adds it to the MDEW.
   @param signal : intensity
   @param errorSQ : squared value of the error
-  @param runindex : run index
+  @param expInfoIndex : associated experiment-info index
+  @param goniometerIndex: 0-based index determines the goniometer settings when
+  this event occurred
   @param detectno : detector number
   @param coords : pointer to coordinates array
   */
-  void insertMDEvent(float signal, float errorSQ, uint16_t runindex,
-                     int32_t detectno, Mantid::coord_t *coords,
-                     IntToType<true>) {
-    m_ws->addEvent(MDEventType(signal, errorSQ, runindex, detectno, coords));
+  void insertMDEvent(float signal, float errorSQ, uint16_t expInfoIndex, uint16_t goniometerIndex, int32_t detectno,
+                     Mantid::coord_t *coords, IntToType<true>) {
+    m_ws->addEvent(MDEventType(signal, errorSQ, expInfoIndex, goniometerIndex, detectno, coords));
   }
 };
 

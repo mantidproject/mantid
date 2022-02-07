@@ -18,20 +18,15 @@ using namespace Indexing;
 class PartitionerHelper : public Partitioner {
 public:
   explicit PartitionerHelper(int numberOfPartitions)
-      : Partitioner(numberOfPartitions, PartitionIndex(0),
-                    Partitioner::MonitorStrategy::CloneOnEachPartition,
+      : Partitioner(numberOfPartitions, PartitionIndex(0), Partitioner::MonitorStrategy::CloneOnEachPartition,
                     std::vector<GlobalSpectrumIndex>{}) {}
 
-  PartitionerHelper(int numberOfPartitions, const PartitionIndex partition,
-                    const MonitorStrategy monitorStrategy,
+  PartitionerHelper(int numberOfPartitions, const PartitionIndex partition, const MonitorStrategy monitorStrategy,
                     std::vector<GlobalSpectrumIndex> monitors)
-      : Partitioner(numberOfPartitions, partition, monitorStrategy,
-                    std::move(monitors)) {}
+      : Partitioner(numberOfPartitions, partition, monitorStrategy, std::move(monitors)) {}
 
 private:
-  PartitionIndex doIndexOf(const GlobalSpectrumIndex) const override {
-    return PartitionIndex(0);
-  }
+  PartitionIndex doIndexOf(const GlobalSpectrumIndex) const override { return PartitionIndex(0); }
 };
 
 class PartitionerTest : public CxxTest::TestSuite {
@@ -44,19 +39,14 @@ public:
   void test_constructor_failures() {
     TS_ASSERT_THROWS(PartitionerHelper(-1), const std::logic_error &);
     TS_ASSERT_THROWS(PartitionerHelper(0), const std::logic_error &);
-    TS_ASSERT_THROWS_NOTHING(PartitionerHelper(
-        1, PartitionIndex(13),
-        Partitioner::MonitorStrategy::CloneOnEachPartition,
-        std::vector<GlobalSpectrumIndex>{GlobalSpectrumIndex(3)}));
-    TS_ASSERT_THROWS(
-        PartitionerHelper(
-            1, PartitionIndex(13),
-            Partitioner::MonitorStrategy::DedicatedPartition,
-            std::vector<GlobalSpectrumIndex>{GlobalSpectrumIndex(3)}),
-        const std::logic_error &);
-    TS_ASSERT_THROWS_NOTHING(PartitionerHelper(
-        2, PartitionIndex(13), Partitioner::MonitorStrategy::DedicatedPartition,
-        std::vector<GlobalSpectrumIndex>{GlobalSpectrumIndex(3)}));
+    TS_ASSERT_THROWS_NOTHING(PartitionerHelper(1, PartitionIndex(13),
+                                               Partitioner::MonitorStrategy::CloneOnEachPartition,
+                                               std::vector<GlobalSpectrumIndex>{GlobalSpectrumIndex(3)}));
+    TS_ASSERT_THROWS(PartitionerHelper(1, PartitionIndex(13), Partitioner::MonitorStrategy::DedicatedPartition,
+                                       std::vector<GlobalSpectrumIndex>{GlobalSpectrumIndex(3)}),
+                     const std::logic_error &);
+    TS_ASSERT_THROWS_NOTHING(PartitionerHelper(2, PartitionIndex(13), Partitioner::MonitorStrategy::DedicatedPartition,
+                                               std::vector<GlobalSpectrumIndex>{GlobalSpectrumIndex(3)}));
   }
 
   void test_isValid() {
@@ -69,50 +59,38 @@ public:
 
   void test_checkValid() {
     PartitionerHelper p(42);
-    TS_ASSERT_THROWS(p.checkValid(PartitionIndex(-1)),
-                     const std::out_of_range &);
+    TS_ASSERT_THROWS(p.checkValid(PartitionIndex(-1)), const std::out_of_range &);
     TS_ASSERT_THROWS_NOTHING(p.checkValid(PartitionIndex(0)));
     TS_ASSERT_THROWS_NOTHING(p.checkValid(PartitionIndex(41)));
-    TS_ASSERT_THROWS(p.checkValid(PartitionIndex(42)),
-                     const std::out_of_range &);
+    TS_ASSERT_THROWS(p.checkValid(PartitionIndex(42)), const std::out_of_range &);
   }
 
   void test_numberOfPartitions() {
-    TS_ASSERT_EQUALS(
-        PartitionerHelper(42, PartitionIndex(13),
-                          Partitioner::MonitorStrategy::CloneOnEachPartition,
-                          std::vector<GlobalSpectrumIndex>{})
-            .numberOfPartitions(),
-        42);
-    TS_ASSERT_EQUALS(
-        PartitionerHelper(42, PartitionIndex(13),
-                          Partitioner::MonitorStrategy::DedicatedPartition,
-                          std::vector<GlobalSpectrumIndex>{})
-            .numberOfPartitions(),
-        42);
+    TS_ASSERT_EQUALS(PartitionerHelper(42, PartitionIndex(13), Partitioner::MonitorStrategy::CloneOnEachPartition,
+                                       std::vector<GlobalSpectrumIndex>{})
+                         .numberOfPartitions(),
+                     42);
+    TS_ASSERT_EQUALS(PartitionerHelper(42, PartitionIndex(13), Partitioner::MonitorStrategy::DedicatedPartition,
+                                       std::vector<GlobalSpectrumIndex>{})
+                         .numberOfPartitions(),
+                     42);
   }
 
   void test_indexOf_normal_monitors() {
-    PartitionerHelper p(
-        42, PartitionIndex(13),
-        Partitioner::MonitorStrategy::TreatAsNormalSpectrum,
-        std::vector<GlobalSpectrumIndex>{GlobalSpectrumIndex(3)});
+    PartitionerHelper p(42, PartitionIndex(13), Partitioner::MonitorStrategy::TreatAsNormalSpectrum,
+                        std::vector<GlobalSpectrumIndex>{GlobalSpectrumIndex(3)});
     TS_ASSERT_EQUALS(p.indexOf(GlobalSpectrumIndex(3)), PartitionIndex(0));
   }
 
   void test_indexOf_cloned_monitors() {
-    PartitionerHelper p(
-        42, PartitionIndex(13),
-        Partitioner::MonitorStrategy::CloneOnEachPartition,
-        std::vector<GlobalSpectrumIndex>{GlobalSpectrumIndex(3)});
+    PartitionerHelper p(42, PartitionIndex(13), Partitioner::MonitorStrategy::CloneOnEachPartition,
+                        std::vector<GlobalSpectrumIndex>{GlobalSpectrumIndex(3)});
     TS_ASSERT_EQUALS(p.indexOf(GlobalSpectrumIndex(3)), PartitionIndex(13));
   }
 
   void test_indexOf_dedicated_monitors() {
-    PartitionerHelper p(
-        42, PartitionIndex(13),
-        Partitioner::MonitorStrategy::DedicatedPartition,
-        std::vector<GlobalSpectrumIndex>{GlobalSpectrumIndex(3)});
+    PartitionerHelper p(42, PartitionIndex(13), Partitioner::MonitorStrategy::DedicatedPartition,
+                        std::vector<GlobalSpectrumIndex>{GlobalSpectrumIndex(3)});
     TS_ASSERT_EQUALS(p.indexOf(GlobalSpectrumIndex(3)), PartitionIndex(41));
   }
 };

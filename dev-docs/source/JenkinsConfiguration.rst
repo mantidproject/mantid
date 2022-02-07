@@ -10,113 +10,89 @@ Jenkins Configuration
 Summary
 #######
 
-Mantid uses the `Jenkins <https://jenkins.io/>`__ automation server to
-support the continuous integration requirements of Mantid. This document
-aims to describe the general setup of the system.
+Mantid uses the `Jenkins <https://jenkins.io/>`__ automation server to support the continuous integration requirements of Mantid.
+This document aims to describe the general setup of the system.
 
 Introduction
 ############
 
-Jenkins works on a 'master->slave' principle. The master node is
-responsible for orchestrating jobs and managing the slave nodes, where the
-work is actually performed. The master node is located at
-http://builds.mantidproject.org and each facility is responsible for providing
-hardware to act as slaves for the various required configurations.
+Jenkins works on a 'master -> worker' principle.
+The master node is responsible for orchestrating jobs and managing the agents, where the work is actually performed.
+The master node is located at https://builds.mantidproject.org and each facility is responsible for providing hardware to act as agents for the various required configurations.
 
-General Setup
-#############
-
-The master node is set to a fixed TCP port for JNLP slave agents under
-http://builds.mantidproject.org/configureSecurity.
-
-The anonymous jenkins user has the following rights: Overall Read,
-Slave Connect, Job Read, View Read.
-
-Setting up a New Slave
+Setting up a New Agent
 ######################
+
+.. note::
+  If you are deploying a new Linux based agent, it is recommended that you use the container based approach as described `here <https://github.com/mantidproject/dockerfiles/tree/main/jenkins-node>`__.
 
 Machine Setup
 -------------
 
-Set up a local ``builder`` account that will be used by the slave.
+Set up a local ``builder`` account that will be used by the agent.
 
-Install the :ref:`required prerequisites <GettingStarted>` for the relevant OS. In addition, install a standalone `Python <https://www.python.org/downloads/windows/>`__ interpreter so the system tests are able to install the mantid package. Do not use the embeddable zip, use the full installer and ensure python.exe is on the `PATH`. 
+Install the :ref:`required prerequisites <GettingStarted>` for the relevant OS.
+In addition, install a standalone `Python <https://www.python.org/downloads/windows/>`__ interpreter so the system tests are able to install the mantid package.
+Do not use the embeddable zip, use the full installer and ensure python.exe is on the `PATH`.
 
 .. note::
-   For Windows the `Command line Visual C++ build tools <https://visualstudio.microsoft.com/downloads/>`__
-   may be used in place of a full Visual Studio install from version 2017 onwards (the 2015 tools contain a broken `vcvarsall.bat`). The same
-   options should be used as for the full install.
+   For Windows the `Command line Visual C++ build tools <https://visualstudio.microsoft.com/downloads/>`__ may be used in place of a full Visual Studio install from version 2017 onwards (the 2015 tools contain a broken `vcvarsall.bat`).
+   The same options should be used as for the full install.
 
 Windows
 -------
 
-* Ensure that the location of ``msbuild.exe`` (``C:\Windows\Microsoft.NET\Framework64\v4.0.30319``) is on the ``PATH``
+Ensure that the location of ``msbuild.exe`` (``C:\Windows\Microsoft.NET\Framework64\v4.0.30319``) is on the ``PATH``.
+For conda-build we need to ensure that we can have long paths, on Windows 10 and up it is possible using a registry key. Change "Computer\HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\FileSystem\LongPathsEnabled (Type: REG_DWORD)" to 1
 
-Slave Connection
+Agent Connection
 ^^^^^^^^^^^^^^^^
 
-There are following additional steps required to be able to connect a
-Windows slave using JNLP as a Windows service :
+There are following additional steps required to be able to connect a Windows agent using JNLP as a Windows service:
 
-#. Setup the slave on the master node using "New Node" under
-   http://builds.mantidproject.org/computer/. If "New Node" is not visible
-   then you do not have the required permissions - ask an admin for help. It is
-   recommended that you copy from an existing node of a similar type.
-#. Once configured on the master, remote desktop to the slave, open a browser and connect to the webpage of the
-   slave, .e.g. http://builds.mantidproject.org/computer/ornl-pc73896/
+#. Setup the agent on the master node using "New Node" under https://builds.mantidproject.org/computer/.
+   If "New Node" is not visible then you do not have the required permissions - ask an admin for help.
+   It is recommended that you copy from an existing node of a similar type.
+#. Once configured on the master, remote desktop to the agent, open a browser and connect to the webpage of the agent, .e.g. https://builds.mantidproject.org/computer/ornl-pc73896/
 #. Click on the **connect** button to launch the JNLP client.
-#. Once the client is launched, you can select "Install as Windows
-   Service" from the clients menu. If you have a proxy then see the
-   section below for further configuration steps.
-#. Once installed change the recovery behaviour for
-   the service. Do this by right-clicking on the Jenkins
-   service->Properties->Recovery. Change the first, second, subsequent
-   failures to restart the service.
-#. Change the account that the service uses to log on by right-clicking
-   on the Jenkins service->Properties->Log On and enter the details in
-   the builder account
+#. Once the client is launched, you can select "Install as Windows Service" from the clients menu.
+   If you have a proxy then see the section below for further configuration steps.
+#. Once installed change the recovery behaviour for the service.
+   Do this by right-clicking on the Jenkins service->Properties->Recovery.
+   Change the first, second, subsequent failures to restart the service.
+#. Change the account that the service uses to log on by right-clicking on the Jenkins service->Properties->Log On and enter the details in the builder account
 #. Change the "Startup type:" of the service to be "Automatic (Delayed Start)"
 #. Ensure the msbuild directory is on the ``PATH``
-#. Finally reboot the slave (this is the easiest way for the Jenkins to
-   start trying to reconnect to it)
+#. Finally reboot the agent (this is the easiest way for the Jenkins to start trying to reconnect to it)
 
-Note that changes to ``PATH`` require restarting the Jenkins service in
-order to be reflected in the build environment.
+Note that changes to ``PATH`` require restarting the Jenkins service in order to be reflected in the build environment.
 
 Connecting Through a Proxy Server
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-It is a little more tricky to windows slaves connected through a
-proxy.To do this you must modify the java arguments that are used to
-start the ``jenkins-slave`` process. Once the "Install as a Windows
-Service" has completed you should
+It is a little more tricky to add Windows agents connected through a proxy.
+To do this you must modify the Java arguments that are used to start the ``jenkins-slave`` process.
+Once the "Install as a Windows Service" has completed you should:
 
-#. Find a directory on the machine such as ``C:\Jenkins``` or whatever
-   was configured in the slave config.
+#. Find a directory on the machine such as ``C:\Jenkins``` or whatever was configured in the agent config.
 #. Open the ``jenkins-slave.xml`` file
-#. Edit the tag and add ``-Dhttp.proxyHost=PROXYHOST``
-   ``-Dhttp.proxyPort=PROXYPORT`` to the list
+#. Edit the tag and add ``-Dhttp.proxyHost=PROXYHOST -Dhttp.proxyPort=PROXYPORT`` to the list
 #. Save the file and restart the service (or machine)
-
 
 Linux
 -----
 
-Install an ssh server, ``ccache``, ``curl`` and ``xvfb``.
-
-From the ``builder`` account run ``ccache --max-size=20G``.
-
-Any machines acting as performance test servers will require ``mysqldb`` to be installed.
+#. Install OpenSSH server, ``ccache``, ``curl`` and ``xvfb``.
+#. From the ``builder`` account run ``ccache --max-size=20G``.
+#. Any machines acting as performance test servers will require ``mysqldb`` to be installed.
 
 Ubuntu
 ^^^^^^
 
-Configure `automatic security updates <https://help.ubuntu.com/community/AutomaticSecurityUpdates>`__.
-
 Install ``gdebi-core`` package to allow installing ``.deb`` files.
 
-The ``builder`` account must be setup to be able to run ``gdebi`` non-interactively. Use ``visudo`` to add the following
-exception for ``builder``::
+The ``builder`` account must be setup to be able to run ``gdebi`` non-interactively.
+Use ``visudo`` to add the following exception for ``builder``::
 
     # Allow no password for gdebi
     builder       ALL=(ALL)NOPASSWD:/usr/bin/gdebi, /usr/bin/dpkg
@@ -127,8 +103,8 @@ exception for ``builder``::
 Red Hat
 ^^^^^^^
 
-The ``builder`` account must be setup to be able to run ``yum`` non-interactively. Use ``visudo`` to add the following
-exception for ``builder``::
+The ``builder`` account must be setup to be able to run ``yum`` non-interactively.
+Use ``visudo`` to add the following exception for ``builder``::
 
     ## Allow no password for yum
     builder       ALL = NOPASSWD: /usr/bin/yum,/bin/rpm
@@ -139,11 +115,11 @@ exception for ``builder``::
 Mac OS
 ------
 
-Enable `SSH ("Remote Login") and VNC ("Remote Management") <https://apple.stackexchange.com/a/73919>`__.  If you have
-connection issues from a non-OS X client then try adjusting your color depth settings (True Color 32bpp works on Remmina).
+Enable `SSH ("Remote Login") and VNC ("Remote Management") <https://apple.stackexchange.com/a/73919>`__.
+If you have connection issues from a non-OS X client then try adjusting your color depth settings (True Color 32bpp works on Remmina).
 
-The ``builder`` account must be setup to be able to cp packages non-interactively. Use ``visudo`` to add the following
-exception for ``builder``::
+The ``builder`` account must be setup to be able to cp packages non-interactively.
+Use ``visudo`` to add the following exception for ``builder``::
 
 
     # Allow builder to copy packages without a password
@@ -152,44 +128,38 @@ exception for ``builder``::
     Defaults!/bin/cp        !requiretty
     Defaults!/bin/rm        !requiretty
 
-In order to run the MantidPlot tests, which require a connection to the windowing system, the user that is running the jenkins slave must
-have logged in. This is most easily done by VNC - connect, log in,
-then disconnect. If you see errors such as::
+In order to run the Qt tests, which require a connection to the windowing system, the user that is running the Jenkins agent must have logged in.
+This is most easily done by VNC - connect, log in, then disconnect.
+If you see errors such as::
 
     _RegisterApplication(), FAILED TO establish the default connection to the WindowServer,
     _CGSDefaultConnection() is NULL.
 
 then no one is logged in to the system.
 
+Finally, disable saved application states that cause a dialog to be raised after a program crash resulting in a test hanging waiting for a user to click ok on a dialog::
+
+    defaults write org.python.python NSQuitAlwaysKeepsWindows -bool false
+    defaults write org.mantidproject.MantidPlot NSQuitAlwaysKeepsWindows -bool false
+
 Linux/Mac Connection Notes
 --------------------------
 
-The jenkins JNLP connections are maintained by a crontab entry. The
-script is in the `mantid repository
-<https://github.com/mantidproject/mantid/blob/master/buildconfig/Jenkins/jenkins-slave.sh>`__.
+The Jenkins JNLP connections are maintained by a crontab entry.
+The script is in the `mantid repository <https://github.com/mantidproject/mantid/blob/main/buildconfig/Jenkins/jenkins-slave.sh>`__.
 
-The comments at the top describe a typical crontab entry for the script. This needs to be manually set for each slave. Ensure the script is
-marked executable after downloading it. Also ensure the entry in the crontab
-has the correct ``PATH`` setting (by default cron uses a reduced ``PATH`` entry). On macOS ``latex`` and ``sysctl``
-should be available.
-
-Post-Connection Setup - All Systems
------------------------------------
-
-Ensure the new machine is added to the relevant `ParaView build job <http://builds.mantidproject.org/view/ParaView/>`__ and build
-ParaView. Set the ``PARAVIEW_DIR`` & ``PARAVIEW_NEXT_DIR`` variables
-(it's easiest to just look at the configuration for one of the other
-nodes of a similar type.
+The comments at the top describe a typical crontab entry for the script.
+This needs to be manually set for each agent. Ensure the script is marked executable after downloading it.
+Also ensure the entry in the crontab has the correct ``PATH`` setting (by default cron uses a reduced ``PATH`` entry).
+On macOS ``latex`` and ``sysctl`` should be available.
 
 Misc Groovy Scripts
 ###################
 
-The following is a collection of groovy scripts that can be run either
-at http://builds.mantidproject.org/script (for master node) or on a
-given node, e.g `isis-mantidx3 <http://builds.mantidproject.org/computer/isis-mantidlx3/script>`__.
+The following is a collection of groovy scripts that can be run either at https://builds.mantidproject.org/script (for master node) or on a given node, e.g `isis-mantidx3 <https://builds.mantidproject.org/computer/isis-mantidlx3/script>`__.
 You must have admin privileges to run them.
 
-https://github.com/jenkinsci/jenkins-scripts/tree/master/scriptler was helpful for coming up with some of these.
+https://github.com/jenkinsci/jenkins-scripts/tree/main/scriptler was helpful for coming up with some of these.
 
 Print the Value of an Environment Variable on All Nodes
 -------------------------------------------------------
@@ -200,7 +170,7 @@ Print the Value of an Environment Variable on All Nodes
     import hudson.model.*
     import hudson.slaves.*
 
-    VARIABLE_NAME = "PARAVIEW_DIR"
+    VARIABLE_NAME = "ENV_VARIABLE_NAME"
 
     nodes = Jenkins.instance.getNodes()
     println("Displaying values of " + VARIABLE_NAME + " on all nodes")
@@ -208,87 +178,15 @@ Print the Value of an Environment Variable on All Nodes
     for(node in nodes) {
       node_props = node.nodeProperties.getAll(hudson.slaves.EnvironmentVariablesNodeProperty.class)
       if(node_props.size() == 1) {
-      env_vars = node_props[0].getEnvVars()
+        env_vars = node_props[0].getEnvVars()
       if(env_vars.containsKey(VARIABLE_NAME)) {
-      pv_dir = env_vars.get(VARIABLE_NAME, "")
+        pv_dir = env_vars.get(VARIABLE_NAME, "")
       } else {
-      pv_dir = VARIABLE_NAME + " not set."
+        pv_dir = VARIABLE_NAME + " not set."
       }
       println(node.getDisplayName() + ": " + pv_dir)
       } else {
-      pv_dir = VARIABLE_NAME + " not set."
-      }
-    }
-
-Update ParaView variables on nodes
-----------------------------------
-
-**After running this script the variables look like they are updated but
-are in fact cached on the slaves so the new values don't take effect
-without disconnecting and forcing each slave to reconnect**
-
-.. code-block:: groovy
-
-    import jenkins.model.*
-    import hudson.model.*
-    import hudson.slaves.*
-
-    VARIABLE_NAME = "PARAVIEW_NEXT_DIR"
-    VERSION = "ParaView-5.1.2"
-
-    jenkins = Jenkins.instance
-    nodes = jenkins.getNodes()
-    println("Displaying values of " + VARIABLE_NAME + " on all nodes")
-    println()
-    for(node in nodes) {
-      node_props = node.nodeProperties.getAll(hudson.slaves.EnvironmentVariablesNodeProperty.class)
-      if(node_props.size() == 1) {
-      env_vars = node_props[0].getEnvVars()
-      if(env_vars.containsKey(VARIABLE_NAME)) {
-        def pv_dir = node.createPath(env_vars.get(VARIABLE_NAME, ""));
-        if(pv_dir) {
-          def pv_build_dir = pv_dir.getParent();
-          def pv_dir_new = pv_build_dir.child(VERSION);
-          println(node.getDisplayName() + ": Updating $VARIABLE_NAME from '" + pv_dir.toString() + "' to '" + pv_dir_new.toString() + "'");
-          env_vars.put(VARIABLE_NAME, pv_dir_new.toString());
-        }
-        else {
-          println(node.getDisplayName() + " has variable set but " + env_vars.get(VARIABLE_NAME, "") + " does not exist");
-        }
-      } else {
-        println(node.getDisplayName() + ": $VARIABLE_NAME " +  "not set.")
-      }
-      } else {
-        println(node.getDisplayName() + ": $VARIABLE_NAME " +  "not set.")
-      }
-    }
-    jenkins.save();
-
-Check existence of ParaView builds
-----------------------------------
-
-.. code-block:: groovy
-
-    import hudson.model.*
-
-    nodes = Jenkins.instance.slaves
-
-    PV_VERSION = "5.1.2"
-
-    for (node in nodes) {
-      FilePath root = node.getRootPath();
-      if(root) {
-        FilePath fp = root.getParent();
-        // assume this is $HOME on osx/linux & drive: on Windows
-        if(fp.toString().startsWith("C:")) {
-          fp = fp.child("Builds")
-        } else {
-          fp = fp.child("build");
-        }
-        fp = fp.child("ParaView-$PV_VERSION");
-        if(!fp.exists()) {
-          println(node.getDisplayName() + " does not have PV 5.1.2")
-        }
+        pv_dir = VARIABLE_NAME + " not set."
       }
     }
 

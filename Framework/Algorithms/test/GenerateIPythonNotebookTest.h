@@ -34,17 +34,15 @@ public:
   /// Algorithm's category for identification overriding a virtual method
   const std::string category() const override { return "Rubbish"; }
   /// Summary of algorithms purpose
-  const std::string summary() const override {
-    return "I do not exist, or do I?";
-  }
+  const std::string summary() const override { return "I do not exist, or do I?"; }
 
   void init() override {
-    declareProperty(std::make_unique<WorkspaceProperty<API::MatrixWorkspace>>(
-                        "InputWorkspace", "", Kernel::Direction::Input),
-                    "A workspace with units of TOF");
-    declareProperty(std::make_unique<WorkspaceProperty<API::MatrixWorkspace>>(
-                        "OutputWorkspace", "", Kernel::Direction::Output),
-                    "The name to use for the output workspace");
+    declareProperty(
+        std::make_unique<WorkspaceProperty<API::MatrixWorkspace>>("InputWorkspace", "", Kernel::Direction::Input),
+        "A workspace with units of TOF");
+    declareProperty(
+        std::make_unique<WorkspaceProperty<API::MatrixWorkspace>>("OutputWorkspace", "", Kernel::Direction::Output),
+        "The name to use for the output workspace");
     declareProperty("MissingProperty", "rubbish", Kernel::Direction::Input);
   };
   void exec() override{
@@ -66,22 +64,21 @@ public:
     create_test_workspace(workspaceName);
 
     std::string result[] = {"{",
-                            "   \"metadata\" : {",
-                            R"(      "name" : "Mantid Notebook")",
-                            "   },",
-                            "   \"nbformat\" : 3,",
-                            "   \"nbformat_minor\" : 0,",
-                            "   \"worksheets\" : [",
-                            "      {"};
+                            " \"metadata\" : ",
+                            " {",
+                            "  \"name\" : \"Mantid Notebook\"",
+                            " },",
+                            " \"nbformat\" : 3,",
+                            " \"nbformat_minor\" : 0,",
+                            " \"worksheets\" : ",
+                            "  {"};
 
     // Set up and execute the algorithm.
     GenerateIPythonNotebook alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize());
     TS_ASSERT(alg.isInitialized());
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("InputWorkspace", workspaceName));
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("Filename", "GenerateIPythonNotebookTest.ipynb"));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("InputWorkspace", workspaceName));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("Filename", "GenerateIPythonNotebookTest.ipynb"));
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("NotebookText", ""));
     TS_ASSERT_THROWS_NOTHING(alg.execute(););
     TS_ASSERT(alg.isExecuted());
@@ -102,16 +99,14 @@ public:
     }
 
     // Check that the expected lines do appear in the output
-    for (auto const expected_line : result) {
-      TS_ASSERT(std::find(notebookLines.cbegin(), notebookLines.cend(),
-                          expected_line) != notebookLines.cend())
+    for (auto const &expected_line : result) {
+      TS_ASSERT(std::find(notebookLines.cbegin(), notebookLines.cend(), expected_line) != notebookLines.cend())
     }
 
     // Verify that if we set the content of NotebookText that it is set
     // correctly.
-    alg.setPropertyValue("NotebookText", result[5]);
-    TS_ASSERT_EQUALS(alg.getPropertyValue("NotebookText"),
-                     "   \"nbformat_minor\" : 0,");
+    alg.setPropertyValue("NotebookText", result[6]);
+    TS_ASSERT_EQUALS(alg.getPropertyValue("NotebookText"), " \"nbformat_minor\" : 0,");
 
     file.close();
     if (Poco::File(filename).exists())
@@ -158,8 +153,7 @@ public:
     API::WorkspaceHistory &history = ws->history();
     auto pAlg = std::make_unique<NonExistingAlgorithm>();
     pAlg->initialize();
-    history.addHistory(
-        std::make_shared<AlgorithmHistory>(API::AlgorithmHistory(pAlg.get())));
+    history.addHistory(std::make_shared<AlgorithmHistory>(API::AlgorithmHistory(pAlg.get())));
 
     pAlg.reset(nullptr);
   }

@@ -15,7 +15,7 @@ class XmlResultReporter(systemtesting.ResultReporter):
 	_time_taken = 0.0
 	_failures = []
 	_skipped = []
-	
+
 	def __init__(self, showSkipped=True, total_number_of_tests=0, maximum_name_length=0):
 		self._doc = getDOMImplementation().createDocument(None,'testsuite',None)
 		self._show_skipped = showSkipped

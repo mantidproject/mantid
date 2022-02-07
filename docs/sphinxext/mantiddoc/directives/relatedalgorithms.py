@@ -4,10 +4,10 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from mantiddoc.directives.base import AlgorithmBaseDirective #pylint: disable=unused-import
+from mantiddoc.directives.base import AlgorithmBaseDirective  #pylint: disable=unused-import
 
-class relatedalgorithmsDirective(AlgorithmBaseDirective):
 
+class RelatedalgorithmsDirective(AlgorithmBaseDirective):
     """
     Obtains the see also section for a given algorithm based on it's name.
     This lists similar algorithms and aliases
@@ -27,23 +27,28 @@ class relatedalgorithmsDirective(AlgorithmBaseDirective):
             for seeAlsoEntry in seeAlsoList:
                 #test the algorithm exists
                 try:
-                    alg = self.create_mantid_algorithm_by_name(seeAlsoEntry)
+                    alg = self.create_mantid_algorithm(seeAlsoEntry)
                     link_rst += ":ref:`%s <algm-%s>`, " % (alg.name(), alg.name())
                 except RuntimeError:
                     env = self.state.document.settings.env
-                    env.app.warn('relatedalgorithms - Could not find algorithm "{0}" listed in the seeAlso for {1}.v{2}'.format(
-                                 seeAlsoEntry,self.algorithm_name(), self.algorithm_version()))
-                      
+                    try:
+                        env.app.warn(
+                            'relatedalgorithms - Could not find algorithm "{0}" listed in the seeAlso for {1}.v{2}'
+                            .format(seeAlsoEntry, self.algorithm_name(), self.algorithm_version()))
+                    except AttributeError:
+                        pass
+
         if link_rst or alias:
-            self.add_rst(self.make_header("See Also",level=3))
+            self.add_rst(self.make_header("See Also", level=3))
             if link_rst:
-                link_rst = link_rst.rstrip(", ") # remove final separator
+                link_rst = link_rst.rstrip(", ")  # remove final separator
                 self.add_rst(link_rst + "\n\n")
             if alias:
                 format_str = "This algorithm is also known as: **%s**"
                 self.add_rst(format_str % alias)
         return []
-        
+
+
 def setup(app):
     """
     Setup the directives when the extension is activated
@@ -51,4 +56,4 @@ def setup(app):
     Args:
       app: The main Sphinx application object
     """
-    app.add_directive('relatedalgorithms', relatedalgorithmsDirective)
+    app.add_directive('relatedalgorithms', RelatedalgorithmsDirective)

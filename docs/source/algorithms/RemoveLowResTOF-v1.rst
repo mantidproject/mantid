@@ -9,7 +9,7 @@
 Description
 -----------
 
-The low resolution time-of-flight cutoff is determined by one of two methods. 
+The low resolution time-of-flight cutoff is determined by one of two methods.
 The selection is made based on whether or not ``MinWavelength`` is specified.
 
 MinWavelength

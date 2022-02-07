@@ -27,8 +27,7 @@ namespace {
 bool isOne(int i) { return (i == 1); }
 } // namespace
 
-namespace Mantid {
-namespace WorkflowAlgorithms {
+namespace Mantid::WorkflowAlgorithms {
 using namespace Kernel;
 using namespace API;
 using namespace DataObjects;
@@ -55,12 +54,10 @@ const std::string MuonProcess::category() const { return "Workflow\\Muon"; }
  */
 void MuonProcess::init() {
   declareProperty(
-      std::make_unique<WorkspaceProperty<Workspace>>(
-          "InputWorkspace", "", Direction::Input, PropertyMode::Mandatory),
+      std::make_unique<WorkspaceProperty<Workspace>>("InputWorkspace", "", Direction::Input, PropertyMode::Mandatory),
       "Input workspace loaded from file (e.g. by LoadMuonNexus)");
 
-  std::vector<std::string> allowedModes{"CorrectAndGroup", "Analyse",
-                                        "Combined"};
+  std::vector<std::string> allowedModes{"CorrectAndGroup", "Analyse", "Combined"};
   auto modeVal = std::make_shared<CompositeValidator>();
   modeVal->add(std::make_shared<StringListValidator>(allowedModes));
   modeVal->add(std::make_shared<MandatoryValidator<std::string>>());
@@ -70,56 +67,42 @@ void MuonProcess::init() {
                   "crops, rebins and calculates asymmetry; Combined does all "
                   "of the above.");
 
-  declareProperty(
-      std::make_unique<ArrayProperty<int>>("SummedPeriodSet", Direction::Input),
-      "Comma-separated list of periods to be summed");
+  declareProperty(std::make_unique<ArrayProperty<int>>("SummedPeriodSet", Direction::Input),
+                  "Comma-separated list of periods to be summed");
 
-  declareProperty(std::make_unique<ArrayProperty<int>>("SubtractedPeriodSet",
-                                                       Direction::Input),
+  declareProperty(std::make_unique<ArrayProperty<int>>("SubtractedPeriodSet", Direction::Input),
                   "Comma-separated list of periods to be subtracted from the "
                   "SummedPeriodSet");
 
-  declareProperty(
-      "ApplyDeadTimeCorrection", false,
-      "Whether dead time correction should be applied to loaded workspace");
-  declareProperty(
-      std::make_unique<WorkspaceProperty<TableWorkspace>>(
-          "DeadTimeTable", "", Direction::Input, PropertyMode::Optional),
-      "Table with dead time information, e.g. from LoadMuonNexus."
-      "Must be specified if ApplyDeadTimeCorrection is set true.");
-  declareProperty(
-      std::make_unique<WorkspaceProperty<TableWorkspace>>(
-          "DetectorGroupingTable", "", Direction::Input,
-          PropertyMode::Optional),
-      "Table with detector grouping information, e.g. from LoadMuonNexus.");
+  declareProperty("ApplyDeadTimeCorrection", false,
+                  "Whether dead time correction should be applied to loaded workspace");
+  declareProperty(std::make_unique<WorkspaceProperty<TableWorkspace>>("DeadTimeTable", "", Direction::Input,
+                                                                      PropertyMode::Optional),
+                  "Table with dead time information, e.g. from LoadMuonNexus."
+                  "Must be specified if ApplyDeadTimeCorrection is set true.");
+  declareProperty(std::make_unique<WorkspaceProperty<TableWorkspace>>("DetectorGroupingTable", "", Direction::Input,
+                                                                      PropertyMode::Optional),
+                  "Table with detector grouping information, e.g. from LoadMuonNexus.");
 
-  declareProperty("TimeZero", EMPTY_DBL(),
-                  "Value used for Time Zero correction");
-  declareProperty("LoadedTimeZero", EMPTY_DBL(),
-                  std::make_shared<MandatoryValidator<double>>(),
+  declareProperty("TimeZero", EMPTY_DBL(), "Value used for Time Zero correction");
+  declareProperty("LoadedTimeZero", EMPTY_DBL(), std::make_shared<MandatoryValidator<double>>(),
                   "Time Zero value loaded from file, e.g. from LoadMuonNexus.");
-  declareProperty(
-      std::make_unique<ArrayProperty<double>>("RebinParams"),
-      "Params used for rebinning. If empty - rebinning is not done.");
+  declareProperty(std::make_unique<ArrayProperty<double>>("RebinParams"),
+                  "Params used for rebinning. If empty - rebinning is not done.");
   declareProperty("Xmin", EMPTY_DBL(), "Minimal X value to include");
   declareProperty("Xmax", EMPTY_DBL(), "Maximal X value to include");
 
-  std::vector<std::string> allowedTypes{"PairAsymmetry", "GroupAsymmetry",
-                                        "GroupCounts"};
-  declareProperty("OutputType", "PairAsymmetry",
-                  std::make_shared<StringListValidator>(allowedTypes),
+  std::vector<std::string> allowedTypes{"PairAsymmetry", "GroupAsymmetry", "GroupCounts"};
+  declareProperty("OutputType", "PairAsymmetry", std::make_shared<StringListValidator>(allowedTypes),
                   "What kind of workspace required for analysis.");
 
-  declareProperty("PairFirstIndex", EMPTY_INT(),
-                  "Workspace index of the first pair group");
-  declareProperty("PairSecondIndex", EMPTY_INT(),
-                  "Workspace index of the second pair group");
+  declareProperty("PairFirstIndex", EMPTY_INT(), "Workspace index of the first pair group");
+  declareProperty("PairSecondIndex", EMPTY_INT(), "Workspace index of the second pair group");
   declareProperty("Alpha", 1.0, "Alpha value of the pair");
 
   declareProperty("GroupIndex", EMPTY_INT(), "Workspace index of the group");
 
-  declareProperty(std::make_unique<WorkspaceProperty<Workspace>>(
-                      "OutputWorkspace", "", Direction::Output),
+  declareProperty(std::make_unique<WorkspaceProperty<Workspace>>("OutputWorkspace", "", Direction::Output),
                   "An output workspace.");
 
   declareProperty("CropWorkspace", true,
@@ -190,19 +173,18 @@ void MuonProcess::exec() {
     int groupIndex = getProperty("GroupIndex");
     std::unique_ptr<IMuonAsymmetryCalculator> asymCalc;
     if (outputType == "GroupCounts") {
-      asymCalc = std::make_unique<MuonGroupCountsCalculator>(
-          allPeriodsWS, summedPeriods, subtractedPeriods, groupIndex);
+      asymCalc =
+          std::make_unique<MuonGroupCountsCalculator>(allPeriodsWS, summedPeriods, subtractedPeriods, groupIndex);
     } else if (outputType == "GroupAsymmetry") {
-      asymCalc = std::make_unique<MuonGroupAsymmetryCalculator>(
-          allPeriodsWS, summedPeriods, subtractedPeriods, groupIndex,
-          getProperty("Xmin"), getProperty("Xmax"),
-          getProperty("WorkspaceName"));
+      asymCalc = std::make_unique<MuonGroupAsymmetryCalculator>(allPeriodsWS, summedPeriods, subtractedPeriods,
+                                                                groupIndex, getProperty("Xmin"), getProperty("Xmax"),
+                                                                getProperty("WorkspaceName"));
     } else if (outputType == "PairAsymmetry") {
       int first = getProperty("PairFirstIndex");
       int second = getProperty("PairSecondIndex");
       double alpha = getProperty("Alpha");
-      asymCalc = std::make_unique<MuonPairAsymmetryCalculator>(
-          allPeriodsWS, summedPeriods, subtractedPeriods, first, second, alpha);
+      asymCalc = std::make_unique<MuonPairAsymmetryCalculator>(allPeriodsWS, summedPeriods, subtractedPeriods, first,
+                                                               second, alpha);
     }
     progress.report();
     outWS = asymCalc->calculate();
@@ -218,15 +200,14 @@ void MuonProcess::exec() {
  * @param grouping :: Detector grouping table to use
  * @return Grouped workspaces
  */
-WorkspaceGroup_sptr
-MuonProcess::groupWorkspaces(const WorkspaceGroup_sptr &wsGroup,
-                             const TableWorkspace_sptr &grouping) {
+WorkspaceGroup_sptr MuonProcess::groupWorkspaces(const WorkspaceGroup_sptr &wsGroup,
+                                                 const TableWorkspace_sptr &grouping) {
   WorkspaceGroup_sptr outWS = std::make_shared<WorkspaceGroup>();
   for (int i = 0; i < wsGroup->getNumberOfEntries(); i++) {
     auto ws = std::dynamic_pointer_cast<MatrixWorkspace>(wsGroup->getItem(i));
     if (ws) {
       MatrixWorkspace_sptr result;
-      IAlgorithm_sptr group = createChildAlgorithm("MuonGroupDetectors");
+      auto group = createChildAlgorithm("MuonGroupDetectors");
       group->setProperty("InputWorkspace", ws);
       group->setProperty("DetectorGroupingTable", grouping);
       group->execute();
@@ -243,14 +224,13 @@ MuonProcess::groupWorkspaces(const WorkspaceGroup_sptr &wsGroup,
  * @param dt :: Dead time table to use
  * @return Corrected workspace group
  */
-WorkspaceGroup_sptr MuonProcess::applyDTC(const WorkspaceGroup_sptr &wsGroup,
-                                          const TableWorkspace_sptr &dt) {
+WorkspaceGroup_sptr MuonProcess::applyDTC(const WorkspaceGroup_sptr &wsGroup, const TableWorkspace_sptr &dt) {
   WorkspaceGroup_sptr outWS = std::make_shared<WorkspaceGroup>();
   for (int i = 0; i < wsGroup->getNumberOfEntries(); i++) {
     auto ws = std::dynamic_pointer_cast<MatrixWorkspace>(wsGroup->getItem(i));
     if (ws) {
       MatrixWorkspace_sptr result;
-      IAlgorithm_sptr dtc = createChildAlgorithm("ApplyDeadTimeCorr");
+      auto dtc = createChildAlgorithm("ApplyDeadTimeCorr");
       dtc->setProperty("InputWorkspace", ws);
       dtc->setProperty("DeadTimeTable", dt);
       dtc->execute();
@@ -274,9 +254,7 @@ WorkspaceGroup_sptr MuonProcess::applyDTC(const WorkspaceGroup_sptr &wsGroup,
  * offset
  * @return Corrected workspaces
  */
-WorkspaceGroup_sptr
-MuonProcess::correctWorkspaces(const WorkspaceGroup_sptr &wsGroup,
-                               double loadedTimeZero) {
+WorkspaceGroup_sptr MuonProcess::correctWorkspaces(const WorkspaceGroup_sptr &wsGroup, double loadedTimeZero) {
   WorkspaceGroup_sptr outWS = std::make_shared<WorkspaceGroup>();
   for (int i = 0; i < wsGroup->getNumberOfEntries(); i++) {
     auto ws = std::dynamic_pointer_cast<MatrixWorkspace>(wsGroup->getItem(i));
@@ -296,14 +274,13 @@ MuonProcess::correctWorkspaces(const WorkspaceGroup_sptr &wsGroup,
  * offset
  * @return Corrected workspace
  */
-MatrixWorkspace_sptr MuonProcess::correctWorkspace(MatrixWorkspace_sptr ws,
-                                                   double loadedTimeZero) {
+MatrixWorkspace_sptr MuonProcess::correctWorkspace(MatrixWorkspace_sptr ws, double loadedTimeZero) {
   // Offset workspace, if need to
   double timeZero = getProperty("TimeZero");
   if (timeZero != EMPTY_DBL()) {
     double offset = loadedTimeZero - timeZero;
 
-    IAlgorithm_sptr changeOffset = createChildAlgorithm("ChangeBinOffset");
+    auto changeOffset = createChildAlgorithm("ChangeBinOffset");
     changeOffset->setProperty("InputWorkspace", ws);
     changeOffset->setProperty("Offset", offset);
     changeOffset->execute();
@@ -314,7 +291,7 @@ MatrixWorkspace_sptr MuonProcess::correctWorkspace(MatrixWorkspace_sptr ws,
   double Xmin = getProperty("Xmin");
   double Xmax = getProperty("Xmax");
   if (Xmin != EMPTY_DBL() || Xmax != EMPTY_DBL()) {
-    IAlgorithm_sptr crop = createChildAlgorithm("CropWorkspace");
+    auto crop = createChildAlgorithm("CropWorkspace");
     crop->setProperty("InputWorkspace", ws);
 
     if (Xmin != EMPTY_DBL())
@@ -332,7 +309,7 @@ MatrixWorkspace_sptr MuonProcess::correctWorkspace(MatrixWorkspace_sptr ws,
   // Rebin workspace if need to
   std::vector<double> rebinParams = getProperty("RebinParams");
   if (!rebinParams.empty()) {
-    IAlgorithm_sptr rebin = createChildAlgorithm("Rebin");
+    auto rebin = createChildAlgorithm("Rebin");
     rebin->setProperty("InputWorkspace", ws);
     rebin->setProperty("Params", rebinParams);
     rebin->setProperty("FullBinsOnly", true);
@@ -358,8 +335,7 @@ std::map<std::string, std::string> MuonProcess::validateInputs() {
   std::map<std::string, std::string> errors;
 
   // Supplied input workspace and sets of periods
-  const std::string propInputWS("InputWorkspace"),
-      propSummedPeriodSet("SummedPeriodSet"),
+  const std::string propInputWS("InputWorkspace"), propSummedPeriodSet("SummedPeriodSet"),
       propSubtractedPeriodSet("SubtractedPeriodSet");
   Workspace_sptr inputWS = getProperty(propInputWS);
   std::vector<int> summedPeriods = getProperty(propSummedPeriodSet);
@@ -367,14 +343,12 @@ std::map<std::string, std::string> MuonProcess::validateInputs() {
 
   // If single-period data, test the sets of periods specified
   if (auto ws = std::dynamic_pointer_cast<MatrixWorkspace>(inputWS)) {
-    if (std::find_if_not(summedPeriods.begin(), summedPeriods.end(), isOne) !=
-        summedPeriods.end()) {
+    if (std::find_if_not(summedPeriods.begin(), summedPeriods.end(), isOne) != summedPeriods.end()) {
       errors[propSummedPeriodSet] = "Single period data but set of periods to "
                                     "sum contains invalid values.";
     }
     if (!subtractedPeriods.empty()) {
-      errors[propSubtractedPeriodSet] =
-          "Single period data but second set of periods specified";
+      errors[propSubtractedPeriodSet] = "Single period data but second set of periods specified";
     }
   } else {
     // If not a MatrixWorkspace, must be a multi-period WorkspaceGroup
@@ -388,21 +362,15 @@ std::map<std::string, std::string> MuonProcess::validateInputs() {
       }
       // check summed period numbers
       std::vector<int> invalidPeriods;
-      std::copy_if(summedPeriods.cbegin(), summedPeriods.cend(),
-                   std::back_inserter(invalidPeriods),
-                   [numPeriods](auto period) {
-                     return period < 1 || period > numPeriods;
-                   });
+      std::copy_if(summedPeriods.cbegin(), summedPeriods.cend(), std::back_inserter(invalidPeriods),
+                   [numPeriods](auto period) { return period < 1 || period > numPeriods; });
       if (!invalidPeriods.empty()) {
         errors[propSummedPeriodSet] = buildErrorString(invalidPeriods);
         invalidPeriods.clear();
       }
       // check subtracted period numbers
-      std::copy_if(subtractedPeriods.cbegin(), subtractedPeriods.cend(),
-                   std::back_inserter(invalidPeriods),
-                   [numPeriods](auto period) {
-                     return period < 1 || period > numPeriods;
-                   });
+      std::copy_if(subtractedPeriods.cbegin(), subtractedPeriods.cend(), std::back_inserter(invalidPeriods),
+                   [numPeriods](auto period) { return period < 1 || period > numPeriods; });
       if (!invalidPeriods.empty()) {
         errors[propSubtractedPeriodSet] = buildErrorString(invalidPeriods);
       }
@@ -410,14 +378,13 @@ std::map<std::string, std::string> MuonProcess::validateInputs() {
   }
 
   // Some parameters can be mandatory or not depending on the mode
-  const std::string propMode("Mode"), propApplyDTC("ApplyDeadTimeCorrection"),
-      propDeadTime("DeadTimeTable"), propDetGroup("DetectorGroupingTable");
+  const std::string propMode("Mode"), propApplyDTC("ApplyDeadTimeCorrection"), propDeadTime("DeadTimeTable"),
+      propDetGroup("DetectorGroupingTable");
   const std::string mode = getProperty(propMode);
   // If analysis will take place, SummedPeriodSet is mandatory
   if (mode != "CorrectAndGroup") {
     if (summedPeriods.empty()) {
-      errors[propSummedPeriodSet] =
-          "Cannot analyse: list of periods to sum was empty";
+      errors[propSummedPeriodSet] = "Cannot analyse: list of periods to sum was empty";
     }
   }
   // If correcting/grouping will take place, DetectorGroupingTable is mandatory
@@ -432,8 +399,7 @@ std::map<std::string, std::string> MuonProcess::validateInputs() {
   if (applyDtc) {
     TableWorkspace_sptr deadTimes = getProperty(propDeadTime);
     if (!deadTimes) {
-      errors[propDeadTime] =
-          "Cannot apply dead time correction as no dead times were supplied";
+      errors[propDeadTime] = "Cannot apply dead time correction as no dead times were supplied";
     }
   }
 
@@ -445,8 +411,7 @@ std::map<std::string, std::string> MuonProcess::validateInputs() {
  * @param invalidPeriods :: [input] Vector containing invalid periods
  * @returns An error message
  */
-std::string
-MuonProcess::buildErrorString(const std::vector<int> &invalidPeriods) const {
+std::string MuonProcess::buildErrorString(const std::vector<int> &invalidPeriods) const {
   std::stringstream message;
   message << "Invalid periods specified: ";
   for (auto it = invalidPeriods.begin(); it != invalidPeriods.end(); it++) {
@@ -458,5 +423,4 @@ MuonProcess::buildErrorString(const std::vector<int> &invalidPeriods) const {
   return message.str();
 }
 
-} // namespace WorkflowAlgorithms
-} // namespace Mantid
+} // namespace Mantid::WorkflowAlgorithms

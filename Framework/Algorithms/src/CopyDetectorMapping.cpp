@@ -11,8 +11,7 @@
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/SpectrumDetectorMapping.h"
 
-namespace Mantid {
-namespace Algorithms {
+namespace Mantid::Algorithms {
 
 DECLARE_ALGORITHM(CopyDetectorMapping)
 
@@ -20,18 +19,14 @@ using namespace Kernel;
 using namespace API;
 
 void CopyDetectorMapping::init() {
-  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
-      "WorkspaceToMatch", "", Direction::Input));
+  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>("WorkspaceToMatch", "", Direction::Input));
 
-  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
-      "WorkspaceToRemap", "", Direction::InOut));
+  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>("WorkspaceToRemap", "", Direction::InOut));
 
-  declareProperty(
-      std::make_unique<PropertyWithValue<bool>>("IndexBySpectrumNumber", false,
-                                                Direction::Input),
-      "Will use mapping indexed by spectrum number rather than the default of"
-      "Workspace Index (recommended when both workspaces have a vertical axis "
-      "in spectrum number).");
+  declareProperty(std::make_unique<PropertyWithValue<bool>>("IndexBySpectrumNumber", false, Direction::Input),
+                  "Will use mapping indexed by spectrum number rather than the default of"
+                  "Workspace Index (recommended when both workspaces have a vertical axis "
+                  "in spectrum number).");
 }
 
 void CopyDetectorMapping::exec() {
@@ -66,13 +61,10 @@ std::map<std::string, std::string> CopyDetectorMapping::validateInputs() {
   }
 
   // Check histohram counts match (assuming both are MatrixWorkspaces)
-  if (validWorkspaces &&
-      wsToMatch->getNumberHistograms() != wsToRemap->getNumberHistograms())
-    issues["WorkspaceToRemap"] =
-        "Number of histograms must match WorkspaceToMatch";
+  if (validWorkspaces && wsToMatch->getNumberHistograms() != wsToRemap->getNumberHistograms())
+    issues["WorkspaceToRemap"] = "Number of histograms must match WorkspaceToMatch";
 
   return issues;
 }
 
-} // namespace Algorithms
-} // namespace Mantid
+} // namespace Mantid::Algorithms

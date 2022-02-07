@@ -11,7 +11,7 @@ Description
 
 When interacting with the :ref:`Muon_Analysis-ref` interface, operations such as detector grouping, group asymmetry and pair asymmetry are performed on data. This algorithm performs a "grouping counts" operation, in other words it sums the counts associated to a given sequence of detector IDs.
 
-This algorithm is part of a set of four; with :ref:`algm-MuonPreProcess` being run first; and the output being fed into this one. This allows the replication of the workflow used by the muon analysis interface to produce group data. 
+This algorithm is part of a set of four; with :ref:`algm-MuonPreProcess` being run first; and the output being fed into this one. This allows the replication of the workflow used by the muon analysis interface to produce group data.
 
 Analysis
 ########
@@ -20,14 +20,14 @@ A workspace has one or more *spectra* contained within it; for muon data each sp
 
 The **InputWorkspace** must be a *WorkspaceGroup*, where each workspace within the workspace-group represents a single period. Thus, single period data is just a *workspaceGroup* with a single workspace within it.
 
-The detector-group must be given a name via **GroupName** which can consist of letters, numbers and underscores. 
+The detector-group must be given a name via **GroupName** which can consist of letters, numbers and underscores.
 
 #. Valid names : "fwd", "fwd2", "fwd_2", "1234"
 #. Invalid names : "", "fwd!", "fwd "
 
 The detector-group name does not affect the data; however the name is used in the muon interface when automatically generating workspace names from detector-group data.
 
-Multi period data 
+Multi period data
 #################
 
 Both single and multi period data are supported by the algorithm.
@@ -35,7 +35,7 @@ Both single and multi period data are supported by the algorithm.
 The **SummedPeriods** and **SubtractedPeriods** inputs are used to control the way that periods are combined. so for example;
 
 #. SummedPeriods = 1,2
-#. SubtractedPeriods = 3,4 
+#. SubtractedPeriods = 3,4
 
 would combine periods in the combination $(1+2)-(3+4)$.
 

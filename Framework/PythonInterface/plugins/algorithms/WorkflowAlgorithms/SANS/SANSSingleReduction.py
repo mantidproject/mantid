@@ -10,11 +10,11 @@
 
 from SANSSingleReductionBase import SANSSingleReductionBase
 
-from mantid.api import (MatrixWorkspaceProperty, AlgorithmFactory, PropertyMode)
+from mantid.api import (AlgorithmFactory, PropertyMode, WorkspaceGroup, WorkspaceGroupProperty)
 from mantid.kernel import (Direction, Property)
 from mantid.simpleapi import CloneWorkspace
 from sans.algorithm_detail.single_execution import (run_core_reduction, run_optimized_for_can)
-from sans.common.enums import (DataType, ReductionMode, FitType)
+from sans.common.enums import (DataType, ReductionMode)
 from sans.common.general_functions import does_can_workspace_exist_on_ads
 
 
@@ -37,14 +37,14 @@ class SANSSingleReduction(SANSSingleReductionBase):
 
         # This breaks our flexibility with the reduction mode. We need to check if we can populate this based on
         # the available reduction modes for the state input. TODO: check if this is possible
-        self.declareProperty(MatrixWorkspaceProperty('OutputWorkspaceLAB', '',
-                                                     optional=PropertyMode.Optional, direction=Direction.Output),
+        self.declareProperty(WorkspaceGroupProperty('OutputWorkspaceLAB', '',
+                                                    optional=PropertyMode.Optional, direction=Direction.Output),
                              doc='The output workspace for the low-angle bank.')
-        self.declareProperty(MatrixWorkspaceProperty('OutputWorkspaceHAB', '',
-                                                     optional=PropertyMode.Optional, direction=Direction.Output),
+        self.declareProperty(WorkspaceGroupProperty('OutputWorkspaceHAB', '',
+                                                    optional=PropertyMode.Optional, direction=Direction.Output),
                              doc='The output workspace for the high-angle bank.')
-        self.declareProperty(MatrixWorkspaceProperty('OutputWorkspaceMerged', '',
-                                                     optional=PropertyMode.Optional, direction=Direction.Output),
+        self.declareProperty(WorkspaceGroupProperty('OutputWorkspaceMerged', '',
+                                                    optional=PropertyMode.Optional, direction=Direction.Output),
                              doc='The output workspace for the merged reduction.')
         self.setPropertyGroup("OutScaleFactor", 'Output')
         self.setPropertyGroup("OutShiftFactor", 'Output')
@@ -53,29 +53,29 @@ class SANSSingleReduction(SANSSingleReductionBase):
         self.setPropertyGroup("OutputWorkspaceMerged", 'Output')
 
         # CAN output
-        self.declareProperty(MatrixWorkspaceProperty('OutputWorkspaceLABCan', '',
-                                                     optional=PropertyMode.Optional, direction=Direction.Output),
+        self.declareProperty(WorkspaceGroupProperty('OutputWorkspaceLABCan', '',
+                                                    optional=PropertyMode.Optional, direction=Direction.Output),
                              doc='The can output workspace for the low-angle bank, provided there is one.')
-        self.declareProperty(MatrixWorkspaceProperty('OutputWorkspaceHABCan', '',
-                                                     optional=PropertyMode.Optional, direction=Direction.Output),
+        self.declareProperty(WorkspaceGroupProperty('OutputWorkspaceHABCan', '',
+                                                    optional=PropertyMode.Optional, direction=Direction.Output),
                              doc='The can output workspace for the high-angle bank, provided there is one.')
-        self.declareProperty(MatrixWorkspaceProperty('OutputWorkspaceLABSample', '',
-                                                     optional=PropertyMode.Optional, direction=Direction.Output),
+        self.declareProperty(WorkspaceGroupProperty('OutputWorkspaceLABSample', '',
+                                                    optional=PropertyMode.Optional, direction=Direction.Output),
                              doc='The sample output workspace for the low-angle bank, provided there is one.')
-        self.declareProperty(MatrixWorkspaceProperty('OutputWorkspaceHABSample', '',
-                                                     optional=PropertyMode.Optional, direction=Direction.Output),
+        self.declareProperty(WorkspaceGroupProperty('OutputWorkspaceHABSample', '',
+                                                    optional=PropertyMode.Optional, direction=Direction.Output),
                              doc='The sample output workspace for the high-angle bank, provided there is one')
-        self.declareProperty(MatrixWorkspaceProperty('OutputWorkspaceCalculatedTransmission', '',
-                                                     optional=PropertyMode.Optional, direction=Direction.Output),
+        self.declareProperty(WorkspaceGroupProperty('OutputWorkspaceCalculatedTransmission', '',
+                                                    optional=PropertyMode.Optional, direction=Direction.Output),
                              doc='The calculated transmission workspace')
-        self.declareProperty(MatrixWorkspaceProperty('OutputWorkspaceUnfittedTransmission', '',
-                                                     optional=PropertyMode.Optional, direction=Direction.Output),
+        self.declareProperty(WorkspaceGroupProperty('OutputWorkspaceUnfittedTransmission', '',
+                                                    optional=PropertyMode.Optional, direction=Direction.Output),
                              doc='The unfitted transmission workspace')
-        self.declareProperty(MatrixWorkspaceProperty('OutputWorkspaceCalculatedTransmissionCan', '',
-                                                     optional=PropertyMode.Optional, direction=Direction.Output),
+        self.declareProperty(WorkspaceGroupProperty('OutputWorkspaceCalculatedTransmissionCan', '',
+                                                    optional=PropertyMode.Optional, direction=Direction.Output),
                              doc='The calculated transmission workspace for the can')
-        self.declareProperty(MatrixWorkspaceProperty('OutputWorkspaceUnfittedTransmissionCan', '',
-                                                     optional=PropertyMode.Optional, direction=Direction.Output),
+        self.declareProperty(WorkspaceGroupProperty('OutputWorkspaceUnfittedTransmissionCan', '',
+                                                    optional=PropertyMode.Optional, direction=Direction.Output),
                              doc='The unfitted transmission workspace for the can')
         self.setPropertyGroup("OutputWorkspaceLABCan", 'Can Output')
         self.setPropertyGroup("OutputWorkspaceHABCan", 'Can Output')
@@ -83,17 +83,17 @@ class SANSSingleReduction(SANSSingleReductionBase):
         self.setPropertyGroup("OutputWorkspaceHABSample", 'Can Output')
 
         # Output CAN Count and Norm for optimizations
-        self.declareProperty(MatrixWorkspaceProperty('OutputWorkspaceLABCanNorm', '',
-                                                     optional=PropertyMode.Optional, direction=Direction.Output),
+        self.declareProperty(WorkspaceGroupProperty('OutputWorkspaceLABCanNorm', '',
+                                                    optional=PropertyMode.Optional, direction=Direction.Output),
                              doc='The can norm output workspace for the low-angle bank, provided there is one.')
-        self.declareProperty(MatrixWorkspaceProperty('OutputWorkspaceLABCanCount', '',
-                                                     optional=PropertyMode.Optional, direction=Direction.Output),
+        self.declareProperty(WorkspaceGroupProperty('OutputWorkspaceLABCanCount', '',
+                                                    optional=PropertyMode.Optional, direction=Direction.Output),
                              doc='The can count output workspace for the low-angle bank, provided there is one.')
-        self.declareProperty(MatrixWorkspaceProperty('OutputWorkspaceHABCanCount', '',
-                                                     optional=PropertyMode.Optional, direction=Direction.Output),
+        self.declareProperty(WorkspaceGroupProperty('OutputWorkspaceHABCanCount', '',
+                                                    optional=PropertyMode.Optional, direction=Direction.Output),
                              doc='The can count output workspace for the high-angle bank, provided there is one.')
-        self.declareProperty(MatrixWorkspaceProperty('OutputWorkspaceHABCanNorm', '',
-                                                     optional=PropertyMode.Optional, direction=Direction.Output),
+        self.declareProperty(WorkspaceGroupProperty('OutputWorkspaceHABCanNorm', '',
+                                                    optional=PropertyMode.Optional, direction=Direction.Output),
                              doc='The can norm output workspace for the high-angle bank, provided there is one.')
 
         self.setPropertyGroup("OutputWorkspaceLABCanCount", 'Opt Output')
@@ -119,7 +119,7 @@ class SANSSingleReduction(SANSSingleReductionBase):
         """
         return [self._get_reduction_setting_bundles(state, overall_reduction_mode)]
 
-    def do_reduction(self, reduction_alg, reduction_setting_bundles, use_optimizations, progress):
+    def do_reduction(self, reduction_alg, reduction_setting_bundle, use_optimizations, progress):
         """
         Perform the main reduction.
         :param reduction_alg: SANSReductionCore algorithm
@@ -132,24 +132,18 @@ class SANSSingleReduction(SANSSingleReductionBase):
                  output_parts_bundles: a list containing a single list of output workspaces
                  output_transmission_bundles: a list containing transmission workspaces
         """
-        reduction_setting_bundles = reduction_setting_bundles[0]
-        output_bundles = []
-        output_parts_bundles = []
-        output_transmission_bundles = []
-        for reduction_setting_bundle in reduction_setting_bundles:
-            progress.report("Running a single reduction ...")
-            # We want to make use of optimizations here. If a can workspace has already been reduced with the same can
-            # settings and is stored in the ADS, then we should use it (provided the user has optimizations enabled).
-            if use_optimizations and reduction_setting_bundle.data_type is DataType.CAN:
-                output_bundle, output_parts_bundle, \
-                    output_transmission_bundle = run_optimized_for_can(reduction_alg, reduction_setting_bundle)
-            else:
-                output_bundle, output_parts_bundle, \
-                    output_transmission_bundle = run_core_reduction(reduction_alg, reduction_setting_bundle)
-            output_bundles.append(output_bundle)
-            output_parts_bundles.append(output_parts_bundle)
-            output_transmission_bundles.append(output_transmission_bundle)
-        return [output_bundles], [output_parts_bundles], output_transmission_bundles
+        progress.report("Running reduction ...")
+        # We want to make use of optimizations here. If a can workspace has already been reduced with the same can
+        # settings and is stored in the ADS, then we should use it (provided the user has optimizations enabled).
+        if use_optimizations and reduction_setting_bundle.data_type is DataType.CAN:
+            reduced_slices = run_optimized_for_can(reduction_alg, reduction_setting_bundle)
+        else:
+            reduced_slices = run_core_reduction(reduction_alg, reduction_setting_bundle)
+        return reduced_slices
+
+    def _set_prop_if_group_has_data(self, prop_name, group_ws):
+        if group_ws.size() != 0:
+            self.setProperty(prop_name, group_ws)
 
     def set_shift_and_scale_output(self, scale_factors, shift_factors):
         self.setProperty("OutScaleFactor", scale_factors[0])
@@ -166,143 +160,165 @@ class SANSSingleReduction(SANSSingleReductionBase):
         # Note that this breaks the flexibility that we have established with the reduction mode. We have not hardcoded
         # HAB or LAB anywhere which means that in the future there could be other detectors of relevance. Here we
         # reference HAB and LAB directly since we currently don't want to rely on dynamic properties. See also in PyInit
-        for reduction_mode, output_workspaces in list(reduction_mode_vs_output_workspaces.items()):
-            output_workspace = output_workspaces[0]
-            # In an MPI reduction output_workspace is produced on the master rank, skip others.
-            if output_workspace is None:
-                continue
-            if reduction_mode is ReductionMode.MERGED:
-                self.setProperty("OutputWorkspaceMerged", output_workspace)
-            elif reduction_mode is ReductionMode.LAB:
-                self.setProperty("OutputWorkspaceLAB", output_workspace)
-            elif reduction_mode is ReductionMode.HAB:
-                self.setProperty("OutputWorkspaceHAB", output_workspace)
-            else:
-                raise RuntimeError("SANSSingleReduction: Cannot set the output workspace. The selected reduction "
-                                   "mode {0} is unknown.".format(reduction_mode))
 
-    def set_reduced_can_workspace_on_output(self, output_bundles):
+        merged, lab, hab = WorkspaceGroup(), WorkspaceGroup(), WorkspaceGroup()
+
+        for reduction_mode, output_workspace_list in reduction_mode_vs_output_workspaces.items():
+            for output_workspace in output_workspace_list:
+                if reduction_mode is ReductionMode.MERGED:
+                    merged.addWorkspace(output_workspace)
+                elif reduction_mode is ReductionMode.LAB:
+                    lab.addWorkspace(output_workspace)
+                elif reduction_mode is ReductionMode.HAB:
+                    hab.addWorkspace(output_workspace)
+                else:
+                    raise RuntimeError("SANSSingleReduction: Cannot set the output workspace. The selected reduction "
+                                       "mode {0} is unknown.".format(reduction_mode))
+
+        self._set_prop_if_group_has_data("OutputWorkspaceLAB", lab)
+        self._set_prop_if_group_has_data("OutputWorkspaceHAB", hab)
+        self._set_prop_if_group_has_data("OutputWorkspaceMerged", merged)
+
+    def set_reduced_can_workspace_on_output(self, completed_event_bundled):
         """
         Sets the reduced can workspaces on the output properties.
 
-        The reduced can workspaces can be:
-        1. LAB Can
-        4. HAB Can
-        :param output_bundles: a list containing a single list of output bundles
+        The reduced can workspaces can be either LAB or HAB
+        :param completed_event_bundled: a list containing output bundles
         """
         # Find the LAB Can and HAB Can entries if they exist
-        output_bundles = output_bundles[0]
-        for output_bundle in output_bundles:
-            if output_bundle.data_type is DataType.CAN:
-                reduction_mode = output_bundle.reduction_mode
-                output_workspace = output_bundle.output_workspace
+        lab_groups = WorkspaceGroup()
+        hab_groups = WorkspaceGroup()
+
+        for bundle in completed_event_bundled:
+            if bundle.output_bundle.data_type is DataType.CAN:
+                reduction_mode = bundle.output_bundle.reduction_mode
+                output_workspace = bundle.output_bundle.output_workspace
                 # Make sure that the output workspace is not None which can be the case if there has never been a
                 # can set for the reduction.
+
                 if output_workspace is not None and not does_can_workspace_exist_on_ads(output_workspace):
                     if reduction_mode is ReductionMode.LAB:
-                        self.setProperty("OutputWorkspaceLABCan", output_workspace)
+                        lab_groups.addWorkspace(output_workspace)
                     elif reduction_mode is ReductionMode.HAB:
-                        self.setProperty("OutputWorkspaceHABCan", output_bundle.output_workspace)
+                        hab_groups.addWorkspace(output_workspace)
                     else:
                         raise RuntimeError("SANSSingleReduction: The reduction mode {0} should not"
                                            " be set with a can.".format(reduction_mode))
 
-    def set_reduced_can_count_and_norm_on_output(self, output_bundles_parts):
+        self._set_prop_if_group_has_data("OutputWorkspaceLABCan", lab_groups)
+        self._set_prop_if_group_has_data("OutputWorkspaceHABCan", hab_groups)
+
+    def set_reduced_can_count_and_norm_on_output(self, completed_event_slices):
         """
         Sets the reduced can count and norm group workspaces on the output properties.
-        The reduced can workspaces can be:
-        1. LAB Can Count
-        2. LAB Can Norm
-        3. HAB Can Count
-        4. HAB Can Norm
+        This includes the HAB/LAB counts and Norms
 
-        :param output_bundles_parts: a list containing a single list of output bundle parts
+        :param completed_event_slices: a list containing a single list of output bundle parts
         """
         # Find the partial output bundles fo LAB Can and HAB Can if they exist
-        output_bundles_part = output_bundles_parts[0]
-        for output_bundle_part in output_bundles_part:
-            if output_bundle_part.data_type is DataType.CAN:
-                reduction_mode = output_bundle_part.reduction_mode
-                output_workspace_count = output_bundle_part.output_workspace_count
-                output_workspace_norm = output_bundle_part.output_workspace_norm
+        lab_can_counts, hab_can_counts = WorkspaceGroup(), WorkspaceGroup()
+        lab_can_norms, hab_can_norms = WorkspaceGroup(), WorkspaceGroup()
+
+        for bundle in completed_event_slices:
+            if bundle.output_bundle.data_type is DataType.CAN:
+                reduction_mode = bundle.parts_bundle.reduction_mode
+                output_workspace_count = bundle.parts_bundle.output_workspace_count
+                output_workspace_norm = bundle.parts_bundle.output_workspace_norm
                 # Make sure that the output workspace is not None which can be the case if there has never been a
                 # can set for the reduction.
                 if output_workspace_norm is not None and output_workspace_count is not None and \
                         not does_can_workspace_exist_on_ads(output_workspace_norm) and \
                         not does_can_workspace_exist_on_ads(output_workspace_count):
                     if reduction_mode is ReductionMode.LAB:
-                        self.setProperty("OutputWorkspaceLABCanCount", output_workspace_count)
-                        self.setProperty("OutputWorkspaceLABCanNorm", output_workspace_norm)
+                        lab_can_counts.addWorkspace(output_workspace_count)
+                        lab_can_norms.addWorkspace(output_workspace_norm)
                     elif reduction_mode is ReductionMode.HAB:
-                        self.setProperty("OutputWorkspaceHABCanCount", output_workspace_count)
-                        self.setProperty("OutputWorkspaceHABCanNorm", output_workspace_norm)
+                        hab_can_counts.addWorkspace(output_workspace_count)
+                        hab_can_norms.addWorkspace(output_workspace_norm)
                     else:
                         raise RuntimeError("SANSSingleReduction: The reduction mode {0} should not"
                                            " be set with a partial can.".format(reduction_mode))
 
-    def set_can_and_sam_on_output(self, output_bundles):
+        self._set_prop_if_group_has_data("OutputWorkspaceLABCanCount", lab_can_counts)
+        self._set_prop_if_group_has_data("OutputWorkspaceLABCanNorm", lab_can_norms)
+        self._set_prop_if_group_has_data("OutputWorkspaceHABCanCount", hab_can_counts)
+        self._set_prop_if_group_has_data("OutputWorkspaceHABCanNorm", hab_can_norms)
+
+    def set_can_and_sam_on_output(self, completed_event_slices):
         """
-        Sets the reduced can and sam workspaces.
-        These can be:
-        1. LAB Can
-        2. HAB Can
-        3. LAB Sample
-        4. HAB Sample
+        Sets the reduced can and sample workspaces.
+        These is the LAB/HAB can and sample
         Cans are also output for optimization, so check for double output.
         :param output_bundles: a list containing a single list of output_bundles
         """
-        output_bundles = output_bundles[0]
-        for output_bundle in output_bundles:
-            if output_bundle.data_type is DataType.CAN:
-                reduction_mode = output_bundle.reduction_mode
-                output_workspace = output_bundle.output_workspace
-
+        lab_cans, hab_cans = WorkspaceGroup(), WorkspaceGroup()
+        lab_samples, hab_samples = WorkspaceGroup(), WorkspaceGroup()
+        for bundle in completed_event_slices:
+            reduction_mode = bundle.output_bundle.reduction_mode
+            output_workspace = bundle.output_bundle.output_workspace
+            if bundle.output_bundle.data_type is DataType.CAN:
                 if output_workspace is not None and not does_can_workspace_exist_on_ads(output_workspace):
                     if reduction_mode is ReductionMode.LAB:
-                        self.setProperty("OutputWorkspaceLABCan", output_workspace)
+                        lab_cans.addWorkspace(output_workspace)
                     elif reduction_mode is ReductionMode.HAB:
-                        self.setProperty("OutputWorkspaceHABCan", output_bundle.output_workspace)
+                        hab_cans.addWorkspace(output_workspace)
                     else:
                         raise RuntimeError("SANSSingleReduction: The reduction mode {0} should not"
                                            " be set with a can.".format(reduction_mode))
-
-            elif output_bundle.data_type is DataType.SAMPLE:
-                reduction_mode = output_bundle.reduction_mode
-                output_workspace = output_bundle.output_workspace
-
-                if output_workspace is not None:
+            elif bundle.output_bundle.data_type is DataType.SAMPLE:
+                if output_workspace is not None and not does_can_workspace_exist_on_ads(output_workspace):
                     if reduction_mode is ReductionMode.LAB:
-                        self.setProperty("OutputWorkspaceLABSample", output_workspace)
+                        lab_samples.addWorkspace(output_workspace)
                     elif reduction_mode is ReductionMode.HAB:
-                        self.setProperty("OutputWorkspaceHABSample", output_bundle.output_workspace)
+                        hab_samples.addWorkspace(output_workspace)
                     else:
                         raise RuntimeError("SANSSingleReduction: The reduction mode {0} should not"
                                            " be set with a sample.".format(reduction_mode))
+        self._set_prop_if_group_has_data("OutputWorkspaceLABCan", lab_cans)
+        self._set_prop_if_group_has_data("OutputWorkspaceHABCan", hab_cans)
+        self._set_prop_if_group_has_data("OutputWorkspaceLABSample", lab_samples)
+        self._set_prop_if_group_has_data("OutputWorkspaceHABSample", hab_samples)
 
-    def set_transmission_workspaces_on_output(self, transmission_bundles, fit_state):
-        for transmission_bundle in transmission_bundles:
-            fit_performed = fit_state[transmission_bundle.data_type.value].fit_type != FitType.NO_FIT
-            calculated_transmission_workspace = transmission_bundle.calculated_transmission_workspace
-            unfitted_transmission_workspace = transmission_bundle.unfitted_transmission_workspace
-            if transmission_bundle.data_type is DataType.CAN:
+    def set_transmission_workspaces_on_output(self, completed_event_slices, fit_state):
+        calc_can, calc_sample = WorkspaceGroup(), WorkspaceGroup()
+        unfit_can, unfit_sample = WorkspaceGroup(), WorkspaceGroup()
+        output_hab_or_lab = None
+        for bundle in completed_event_slices:
+            if output_hab_or_lab is not None and output_hab_or_lab != bundle.output_bundle.reduction_mode:
+                continue  # The transmission workspace for HAB/LAB is the same, so only output one
+            output_hab_or_lab = bundle.output_bundle.reduction_mode
+            calculated_transmission_workspace = bundle.transmission_bundle.calculated_transmission_workspace
+            unfitted_transmission_workspace = bundle.transmission_bundle.unfitted_transmission_workspace
+            if bundle.transmission_bundle.data_type is DataType.CAN:
                 if does_can_workspace_exist_on_ads(calculated_transmission_workspace):
                     # The workspace is cloned here because the transmission runs are diagnostic output so even though
-                    # the values already exist they need to be labelled seperately for each reduction.
-                    calculated_transmission_workspace = CloneWorkspace(calculated_transmission_workspace, StoreInADS=False)
+                    # the values already exist they need to be labelled separately for each reduction.
+                    calculated_transmission_workspace = CloneWorkspace(calculated_transmission_workspace,
+                                                                       StoreInADS=False)
                 if does_can_workspace_exist_on_ads(unfitted_transmission_workspace):
-                    unfitted_transmission_workspace = CloneWorkspace(unfitted_transmission_workspace, StoreInADS=False)
-                if fit_performed:
-                    self.setProperty("OutputWorkspaceCalculatedTransmissionCan", calculated_transmission_workspace)
-                self.setProperty("OutputWorkspaceUnfittedTransmissionCan", unfitted_transmission_workspace)
-            elif transmission_bundle.data_type is DataType.SAMPLE:
-                if fit_performed:
-                    self.setProperty("OutputWorkspaceCalculatedTransmission", calculated_transmission_workspace)
-                self.setProperty("OutputWorkspaceUnfittedTransmission", unfitted_transmission_workspace)
+                    unfitted_transmission_workspace = CloneWorkspace(unfitted_transmission_workspace,
+                                                                     StoreInADS=False)
+                if calculated_transmission_workspace:
+                    calc_can.addWorkspace(calculated_transmission_workspace)
+                if unfitted_transmission_workspace:
+                    unfit_can.addWorkspace(unfitted_transmission_workspace)
+
+            elif bundle.transmission_bundle.data_type is DataType.SAMPLE:
+                if calculated_transmission_workspace:
+                    calc_sample.addWorkspace(calculated_transmission_workspace)
+                if unfitted_transmission_workspace:
+                    unfit_sample.addWorkspace(unfitted_transmission_workspace)
             else:
                 raise RuntimeError("SANSSingleReduction: The data type {0} should be"
-                                   " sample or can.".format(transmission_bundle.data_type))
+                                   " sample or can.".format(bundle.transmission_bundle.data_type))
 
-    def _get_workspace_names(self, reduction_mode_vs_workspace_names, event_slice_bundle):
+        self._set_prop_if_group_has_data("OutputWorkspaceCalculatedTransmission", calc_sample)
+        self._set_prop_if_group_has_data("OutputWorkspaceUnfittedTransmission", unfit_sample)
+        self._set_prop_if_group_has_data("OutputWorkspaceCalculatedTransmissionCan", calc_can)
+        self._set_prop_if_group_has_data("OutputWorkspaceUnfittedTransmissionCan", unfit_can)
+
+    def _get_workspace_names(self, reduction_mode_vs_workspace_names, _):
         """
         This method is for compatibility with version 2. It is not required for version 1
         """

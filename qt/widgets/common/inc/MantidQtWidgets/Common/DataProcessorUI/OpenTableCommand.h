@@ -17,8 +17,7 @@ OpenTableCommand defines the action "Open Table"
 */
 class OpenTableCommand : public CommandBase {
 public:
-  OpenTableCommand(DataProcessorPresenter *tablePresenter)
-      : CommandBase(tablePresenter){};
+  OpenTableCommand(DataProcessorPresenter *tablePresenter) : CommandBase(tablePresenter){};
   OpenTableCommand(const QDataProcessorWidget &widget) : CommandBase(widget){};
   virtual ~OpenTableCommand(){};
 

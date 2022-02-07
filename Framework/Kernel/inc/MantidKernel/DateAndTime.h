@@ -27,8 +27,7 @@ public:
   /// Default constructor
   TimeInterval() : m_begin(), m_end() {}
   /// Constructor
-  TimeInterval(const Types::Core::DateAndTime &from,
-               const Types::Core::DateAndTime &to);
+  TimeInterval(const Types::Core::DateAndTime &from, const Types::Core::DateAndTime &to);
   /// Beginning of the interval
   Types::Core::DateAndTime begin() const { return m_begin; }
   /// End of the interval
@@ -40,9 +39,7 @@ public:
   Types::Core::time_duration length() const { return m_end - m_begin; }
 
   /// True if the interval contains \a t.
-  bool contains(const Types::Core::DateAndTime &t) const {
-    return t >= begin() && t < end();
-  }
+  bool contains(const Types::Core::DateAndTime &t) const { return t >= begin() && t < end(); }
   /// Returns an intersection of two intervals
   TimeInterval intersection(const TimeInterval &ti) const;
   /// Returns true if this interval ends before \a ti starts
@@ -53,8 +50,7 @@ public:
   std::string end_str() const;
 
   /** Stream output operator  */
-  friend MANTID_KERNEL_DLL std::ostream &
-  operator<<(std::ostream &s, const Mantid::Kernel::TimeInterval &t);
+  friend MANTID_KERNEL_DLL std::ostream &operator<<(std::ostream &s, const Mantid::Kernel::TimeInterval &t);
 
 private:
   /// begin

@@ -9,8 +9,8 @@
 Description
 -----------
 
-Subtract the dark current from an EQSANS data set. 
-This algorithm is rarely called directly. It is called by 
+Subtract the dark current from an EQSANS data set.
+This algorithm is rarely called directly. It is called by
 :ref:`SANSReduction <algm-SANSReduction>`.
 
 This workflow algorithm will:
@@ -26,7 +26,7 @@ The dark current is subtracted pixel by pixel by normalizing the dark current da
 
 :math:`I'(i,\lambda_j)=I_{data}(i,\lambda_j)-N_{dc}(i) \ \ \frac{T_{data}}{T_{dc}} \ \ \frac{t_{frame}-t^{low}_{cut} - t^{high}_{cut}}{t_{frame}} \ \ \frac{\Delta\lambda_j}{\lambda_{max}-\lambda_{min}}`
 
-where the T-values are the counting times for the data set and the dark current (dc). The :math:`t_{cut}` values are the TOF cuts at the beginning and end of a frame. :math:`t_{frame}` is the width of a frame. :math:`\Delta\lambda_j` is the width of the wavelength bin we are considering. 
+where the T-values are the counting times for the data set and the dark current (dc). The :math:`t_{cut}` values are the TOF cuts at the beginning and end of a frame. :math:`t_{frame}` is the width of a frame. :math:`\Delta\lambda_j` is the width of the wavelength bin we are considering.
 
 .. categories::
 

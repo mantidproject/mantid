@@ -22,21 +22,14 @@ void export_ReferenceFrame() {
 
   register_ptr_to_python<std::shared_ptr<ReferenceFrame>>();
 
-  enum_<PointingAlong>("PointingAlong")
-      .value("X", X)
-      .value("Y", Y)
-      .value("Z", Z)
-      .export_values();
+  enum_<PointingAlong>("PointingAlong").value("X", X).value("Y", Y).value("Z", Z).export_values();
 
   class_<ReferenceFrame, boost::noncopyable>("ReferenceFrame", no_init)
       .def("pointingAlongBeam", &ReferenceFrame::pointingAlongBeam, arg("self"))
       .def("pointingUp", &ReferenceFrame::pointingUp, arg("self"))
       .def("vecPointingUp", &ReferenceFrame::vecPointingUp, arg("self"))
-      .def("vecPointingAlongBeam", &ReferenceFrame::vecPointingAlongBeam,
-           arg("self"))
-      .def("pointingAlongBeamAxis", &ReferenceFrame::pointingAlongBeamAxis,
-           arg("self"))
+      .def("vecPointingAlongBeam", &ReferenceFrame::vecPointingAlongBeam, arg("self"))
+      .def("pointingAlongBeamAxis", &ReferenceFrame::pointingAlongBeamAxis, arg("self"))
       .def("pointingUpAxis", &ReferenceFrame::pointingUpAxis, arg("self"))
-      .def("pointingHorizontalAxis", &ReferenceFrame::pointingHorizontalAxis,
-           arg("self"));
+      .def("pointingHorizontalAxis", &ReferenceFrame::pointingHorizontalAxis, arg("self"));
 }

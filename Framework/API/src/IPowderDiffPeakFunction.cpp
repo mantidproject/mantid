@@ -17,8 +17,7 @@
 
 const double IGNOREDCHANGE = 1.0E-9;
 
-namespace Mantid {
-namespace API {
+namespace Mantid::API {
 
 int IPowderDiffPeakFunction::s_peakRadius = 5;
 
@@ -27,13 +26,11 @@ int IPowderDiffPeakFunction::s_peakRadius = 5;
  * property
  */
 IPowderDiffPeakFunction::IPowderDiffPeakFunction()
-    : m_centre(0.), m_dcentre(0.), m_fwhm(0.), m_hasNewParameterValue(false),
-      m_cellParamValueChanged(false), m_sortedProfileParameterNames(),
-      m_unitCell(), m_unitCellSize(0.), m_parameterValid(false), mH(0), mK(0),
-      mL(0), mHKLSet(false), LATTICEINDEX(9999), HEIGHTINDEX(9999) {
+    : m_centre(0.), m_dcentre(0.), m_fwhm(0.), m_hasNewParameterValue(false), m_cellParamValueChanged(false),
+      m_sortedProfileParameterNames(), m_unitCell(), m_unitCellSize(0.), m_parameterValid(false), mH(0), mK(0), mL(0),
+      mHKLSet(false), LATTICEINDEX(9999), HEIGHTINDEX(9999) {
   // Set peak's radius from configuration
-  auto peakRadius = Kernel::ConfigService::Instance().getValue<int>(
-      "curvefitting.peakRadius");
+  auto peakRadius = Kernel::ConfigService::Instance().getValue<int>("curvefitting.peakRadius");
   if (peakRadius.is_initialized() && peakRadius.get() != s_peakRadius) {
     setPeakRadius(peakRadius.get());
   }
@@ -45,8 +42,7 @@ IPowderDiffPeakFunction::IPowderDiffPeakFunction()
  * @param value :: parameter name
  * @param explicitlySet ::
  */
-void IPowderDiffPeakFunction::setParameter(size_t i, const double &value,
-                                           bool explicitlySet) {
+void IPowderDiffPeakFunction::setParameter(size_t i, const double &value, bool explicitlySet) {
   double origparamvalue = getParameter(i);
   if (fabs(origparamvalue - value) > IGNOREDCHANGE) {
     m_hasNewParameterValue = true;
@@ -60,9 +56,7 @@ void IPowderDiffPeakFunction::setParameter(size_t i, const double &value,
  * @param value :: parameter name
  * @param explicitlySet ::
  */
-void IPowderDiffPeakFunction::setParameter(const std::string &name,
-                                           const double &value,
-                                           bool explicitlySet) {
+void IPowderDiffPeakFunction::setParameter(const std::string &name, const double &value, bool explicitlySet) {
   double origparamvalue = getParameter(name);
   if (fabs(origparamvalue - value) > IGNOREDCHANGE) {
     m_hasNewParameterValue = true;
@@ -103,9 +97,7 @@ void IPowderDiffPeakFunction::setHeight(const double h)
 //----------------------------------------------------------------------------------------------
 /** Set peak height
  */
-void IPowderDiffPeakFunction::setHeight(const double h) {
-  setParameter(HEIGHTINDEX, h);
-}
+void IPowderDiffPeakFunction::setHeight(const double h) { setParameter(HEIGHTINDEX, h); }
 
 //----------------------------------------------------------------------------------------------
 /** Get peak's height
@@ -128,9 +120,7 @@ double IPowderDiffPeakFunction::fwhm() const {
 //----------------------------------------------------------------------------------------------
 /** Get maximum value on a given set of data points
  */
-double
-IPowderDiffPeakFunction::getMaximumValue(const std::vector<double> &xValues,
-                                         size_t &indexmax) const {
+double IPowderDiffPeakFunction::getMaximumValue(const std::vector<double> &xValues, size_t &indexmax) const {
   // Calculate function with given data points
   std::vector<double> out(xValues.size(), 0.);
   function(out, xValues);
@@ -202,8 +192,7 @@ void IPowderDiffPeakFunction::setPeakRadius(const int &r) {
 /** Check whether a parameter is a profile parameter
  */
 bool IPowderDiffPeakFunction::hasProfileParameter(std::string paramname) {
-  auto candname = lower_bound(m_sortedProfileParameterNames.begin(),
-                              m_sortedProfileParameterNames.end(), paramname);
+  auto candname = lower_bound(m_sortedProfileParameterNames.begin(), m_sortedProfileParameterNames.end(), paramname);
   if (candname == m_sortedProfileParameterNames.end())
     return false;
 
@@ -264,5 +253,4 @@ std::complex<double> E1(std::complex<double> z) {
   return exp_e1;
 }
 
-} // namespace API
-} // namespace Mantid
+} // namespace Mantid::API

@@ -1,78 +1,105 @@
-# Find SIP
-# ~~~~~~~~
+# Mantid Repository : https://github.com/mantidproject/mantid
 #
-# SIP website: http://www.riverbankcomputing.co.uk/sip/index.php
-#
-# Find the installed version of SIP. FindSIP should be called after Python
-# has been found.
-#
-# This file defines the following variables:
-#
-# SIP_VERSION - The version of SIP found expressed as a 6 digit hex number
-#     suitable for comparison as a string.
-#
-# SIP_VERSION_STR - The version of SIP found as a human readable string.
-#
-# SIP_EXECUTABLE - Path and filename of the SIP command line executable.
-#
-# SIP_INCLUDE_DIR - Directory holding the SIP C++ header file.
-#
-# SIP_DEFAULT_SIP_DIR - Default directory where .sip files should be installed
-#     into.
+# Copyright &copy; 2008 ISIS Rutherford Appleton Laboratory UKRI, NScD Oak Ridge National Laboratory, European
+# Spallation Source, Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS SPDX - License - Identifier:
+# GPL - 3.0 +
 
-# Copyright (c) 2007, Simon Edwards <simon@simonzone.com>
-# Redistribution and use is allowed according to the terms of the BSD license.
-# For details see the accompanying COPYING-CMAKE-SCRIPTS file.
+#[=======================================================================[.rst:
+FindSIP
+-------
 
+Find the installed version of the SIP Python binding library.
+FindSIP should be called after Python has been found.
+It supports both sip build systems in v6 and <= v5.
 
+SIP website: http://www.riverbankcomputing.co.uk/sip/index.php
 
-IF(SIP_VERSION)
-  # Already in cache, be silent
-  SET(SIP_FOUND TRUE)
-ELSE(SIP_VERSION)
+Result Variables
+^^^^^^^^^^^^^^^^
 
-  if (EXISTS "${CMAKE_MODULE_PATH}/FindSIP.py")
-    set (_find_sip_py "${CMAKE_MODULE_PATH}/FindSIP.py")
-  else()
-    FIND_FILE(_find_sip_py FindSIP.py PATHS ${CMAKE_MODULE_PATH})
+All versions of sip define the following variables:
+
+``SIP_FOUND``
+  True if sip has been found.
+
+``SIP_VERSION``
+  The version of SIP found in ``X.Y.Z`` format
+
+For versions 6 and this file additionally defines the following variables:
+
+``SIP_BUILD_EXECUTABLE``
+  The path to the sip-build executable
+
+``SIP_MODULE_EXECUTABLE``
+  The path to the sip-module executable
+
+For versions prior to 5 this file additionally defines the following variables:
+
+``SIP_EXECUTABLE``
+Path and filename of the SIP command line executable.
+
+``SIP_INCLUDE_DIR``
+Directory holding the SIP C++ header file.
+
+#]=======================================================================]
+include(FindPackageHandleStandardArgs)
+
+if(EXISTS "$ENV{CONDA_PREFIX}")
+  set(_path_opt NO_DEFAULT_PATH)
+endif()
+
+# First look for sip-build, indicating the newer v6 build system
+find_program(SIP_BUILD_EXECUTABLE sip-build ${_path_opt})
+
+if(SIP_BUILD_EXECUTABLE)
+
+  # version string
+  execute_process(
+    COMMAND ${SIP_BUILD_EXECUTABLE} --version
+    OUTPUT_VARIABLE SIP_VERSION
+    OUTPUT_STRIP_TRAILING_WHITESPACE
+  )
+
+  # module generator
+  find_program(SIP_MODULE_EXECUTABLE sip-module)
+
+  # pyproject.toml template
+  find_file(SIP_PYPROJECT_TOML_TEMPLATE NAME pyproject.toml.in PATHS ${CMAKE_MODULE_PATH}/sip-build)
+
+  # project.py template
+  find_file(SIP_PROJECT_PY_TEMPLATE NAME project.py.in PATHS ${CMAKE_MODULE_PATH}/sip-build)
+
+  # Set expected variables for find_package
+  find_package_handle_standard_args(
+    SIP
+    REQUIRED_VARS SIP_BUILD_EXECUTABLE SIP_MODULE_EXECUTABLE SIP_PYPROJECT_TOML_TEMPLATE SIP_PROJECT_PY_TEMPLATE
+    VERSION_VAR SIP_VERSION
+  )
+endif()
+
+if(NOT SIP_FOUND)
+  # Python development is required for the older system
+  if(NOT Python_Development_FOUND)
+    message(FATAL_ERROR "FindSIP requires find_package(Python) to be called first")
   endif()
 
-  if (NOT EXISTS ${_find_sip_py})
-    message(FATAL_ERROR "Failed to find FindSIP.py in \"${CMAKE_MODULE_PATH}\"")
-  endif()
+  # Look for older sip build system. CentOS has this prefixed with python3
+  find_program(SIP_EXECUTABLE NAMES python${Python_VERSION_MAJOR}-sip sip)
 
-  EXECUTE_PROCESS(COMMAND ${PYTHON_EXECUTABLE} ${_find_sip_py} OUTPUT_VARIABLE sip_config)
-  IF(sip_config)
-    STRING(REGEX REPLACE "^sip_version:([^\n]+).*$" "\\1" SIP_VERSION ${sip_config})
-    STRING(REGEX REPLACE ".*\nsip_version_str:([^\n]+).*$" "\\1" SIP_VERSION_STR ${sip_config})
-    STRING(REGEX REPLACE ".*\nsip_bin:([^\n]+).*$" "\\1" SIP_EXECUTABLE ${sip_config})
-    IF(NOT SIP_DEFAULT_SIP_DIR)
-        STRING(REGEX REPLACE ".*\ndefault_sip_dir:([^\n]+).*$" "\\1" SIP_DEFAULT_SIP_DIR ${sip_config})
-    ENDIF(NOT SIP_DEFAULT_SIP_DIR)
-    STRING(REGEX REPLACE ".*\nsip_inc_dir:([^\n]+).*$" "\\1" SIP_INCLUDE_DIRECTORY ${sip_config})
-    SET(SIP_FOUND TRUE)
-  ENDIF(sip_config)
+  # version string
+  execute_process(
+    COMMAND ${SIP_EXECUTABLE} -V
+    OUTPUT_VARIABLE SIP_VERSION
+    OUTPUT_STRIP_TRAILING_WHITESPACE
+  )
 
-  # Check that it really exists
-  if(${CMAKE_SYSTEM} MATCHES "Darwin" AND IS_SYMLINK ${SIP_INCLUDE_DIRECTORY}/sip.h)
-    get_filename_component(_sip_h "${SIP_INCLUDE_DIRECTORY}/sip.h" REALPATH BASE_DIR)
-    get_filename_component(SIP_INCLUDE_DIRECTORY "${_sip_h}" DIRECTORY)
-  endif()
-  find_path(SIP_INCLUDE_DIR sip.h PATHS ${SIP_INCLUDE_DIRECTORY} NO_DEFAULT_PATH)
-  
-  include ( FindPackageHandleStandardArgs )
-  find_package_handle_standard_args( SIP DEFAULT_MSG SIP_VERSION_STR SIP_INCLUDE_DIR SIP_EXECUTABLE )
+  # header directory
+  find_path(SIP_INCLUDE_DIR sip.h HINTS ${Python_INCLUDE_DIRS})
 
-#  IF(SIP_FOUND)
-#    IF(NOT SIP_FIND_QUIETLY)
-#      MESSAGE(STATUS "Found SIP version: ${SIP_VERSION_STR}")
-#    ENDIF(NOT SIP_FIND_QUIETLY)
-#  ELSE(SIP_FOUND)
-#    IF(SIP_FIND_REQUIRED)
-#      MESSAGE(FATAL_ERROR "Could not find SIP")
-#    ENDIF(SIP_FIND_REQUIRED)
-#  ENDIF(SIP_FOUND)
-
-  mark_as_advanced ( _find_sip_py )
-
-ENDIF(SIP_VERSION)
+  # Set expected variables for find_package
+  find_package_handle_standard_args(
+    SIP
+    REQUIRED_VARS SIP_EXECUTABLE SIP_INCLUDE_DIR
+    VERSION_VAR SIP_VERSION
+  )
+endif()

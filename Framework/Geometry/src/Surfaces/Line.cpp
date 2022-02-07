@@ -18,21 +18,20 @@
 namespace {
 Mantid::Kernel::Logger logger("Line");
 }
-namespace Mantid {
-namespace Geometry {
+namespace Mantid::Geometry {
 
 using Kernel::Tolerance;
 using Kernel::V3D;
 
 Line::Line()
-    : Origin(), Direct()
+    : m_origin(), m_direction()
 /**
 Constructor
 */
 {}
 
 Line::Line(const Kernel::V3D &O, const Kernel::V3D &D)
-    : Origin(O), Direct(normalize(D))
+    : m_origin(O), m_direction(normalize(D))
 /**
 Constructor
 */
@@ -54,7 +53,7 @@ Return the point on the line given lambda*direction
 @return \f$ \vec{O}+ \lambda \vec{D} \f$
 */
 {
-  return Origin + Direct * lambda;
+  return m_origin + m_direction * lambda;
 }
 
 double Line::distance(const Kernel::V3D &A) const
@@ -64,7 +63,7 @@ Distance of a point from the line
 @return absolute distance (not signed)
 */
 {
-  const double lambda = Direct.scalar_prod(A - Origin);
+  const double lambda = m_direction.scalar_prod(A - m_origin);
   Kernel::V3D L = getPoint(lambda);
   L -= A;
   return L.norm();
@@ -89,9 +88,9 @@ object.
 @param MA :: Rotation Matrix
 */
 {
-  Origin.rotate(MA);
-  Direct.rotate(MA);
-  Direct.normalize();
+  m_origin.rotate(MA);
+  m_direction.rotate(MA);
+  m_direction.normalize();
 }
 
 void Line::displace(const Kernel::V3D &Pt)
@@ -100,13 +99,10 @@ Apply a displacement Pt
 @param Pt :: Point value of the displacement
 */
 {
-  Origin += Pt;
+  m_origin += Pt;
 }
 
-int Line::lambdaPair(
-    const int ix,
-    const std::pair<std::complex<double>, std::complex<double>> &SQ,
-    std::vector<Kernel::V3D> &PntOut) const
+int Line::lambdaPair(const int ix, const std::pair<std::complex<double>, std::complex<double>> &SQ, PType &PntOut) const
 /**
 Helper function to decide which roots to take.
 The assumption is that lambda has been solved by quadratic
@@ -153,8 +149,7 @@ cases exist.
   return 0; // both points imaginary
 }
 
-int Line::intersect(std::vector<Kernel::V3D> &VecOut,
-                    const Quadratic &Sur) const
+int Line::intersect(PType &VecOut, const Quadratic &Sur) const
 /**
 For the line that intersects the surfaces
 add the point(s) to the VecOut, return number of points
@@ -165,24 +160,21 @@ added. It does not check the points for validity.
 */
 {
   const std::vector<double> &BN = Sur.copyBaseEqn();
-  const double a(Origin[0]), b(Origin[1]), c(Origin[2]);
-  const double d(Direct[0]), e(Direct[1]), f(Direct[2]);
+  const double a(m_origin[0]), b(m_origin[1]), c(m_origin[2]);
+  const double d(m_direction[0]), e(m_direction[1]), f(m_direction[2]);
   double Coef[3];
-  Coef[0] = BN[0] * d * d + BN[1] * e * e + BN[2] * f * f + BN[3] * d * e +
-            BN[4] * d * f + BN[5] * e * f;
-  Coef[1] = 2 * BN[0] * a * d + 2 * BN[1] * b * e + 2 * BN[2] * c * f +
-            BN[3] * (a * e + b * d) + BN[4] * (a * f + c * d) +
-            BN[5] * (b * f + c * e) + BN[6] * d + BN[7] * e + BN[8] * f;
-  Coef[2] = BN[0] * a * a + BN[1] * b * b + BN[2] * c * c + BN[3] * a * b +
-            BN[4] * a * c + BN[5] * b * c + BN[6] * a + BN[7] * b + BN[8] * c +
-            BN[9];
+  Coef[0] = BN[0] * d * d + BN[1] * e * e + BN[2] * f * f + BN[3] * d * e + BN[4] * d * f + BN[5] * e * f;
+  Coef[1] = 2 * BN[0] * a * d + 2 * BN[1] * b * e + 2 * BN[2] * c * f + BN[3] * (a * e + b * d) +
+            BN[4] * (a * f + c * d) + BN[5] * (b * f + c * e) + BN[6] * d + BN[7] * e + BN[8] * f;
+  Coef[2] = BN[0] * a * a + BN[1] * b * b + BN[2] * c * c + BN[3] * a * b + BN[4] * a * c + BN[5] * b * c + BN[6] * a +
+            BN[7] * b + BN[8] * c + BN[9];
 
   std::pair<std::complex<double>, std::complex<double>> SQ;
   const int ix = solveQuadratic(Coef, SQ);
   return lambdaPair(ix, SQ, VecOut);
 }
 
-int Line::intersect(std::vector<Kernel::V3D> &PntOut, const Plane &Pln) const
+int Line::intersect(PType &PntOut, const Plane &Pln) const
 /**
 For the line that intersects the cylinder generate
 add the point to the VecOut, return number of points
@@ -194,8 +186,8 @@ added. It does not check the points for validity.
 */
 {
 
-  const double OdotN = Origin.scalar_prod(Pln.getNormal());
-  const double DdotN = Direct.scalar_prod(Pln.getNormal());
+  const double OdotN = m_origin.scalar_prod(Pln.getNormal());
+  const double DdotN = m_direction.scalar_prod(Pln.getNormal());
   if (fabs(DdotN) < Tolerance) // Plane and line parallel
     return 0;
   const double u = (Pln.getDistance() - OdotN) / DdotN;
@@ -205,35 +197,41 @@ added. It does not check the points for validity.
   return 1;
 }
 
-int Line::intersect(std::vector<Kernel::V3D> &PntOut, const Cylinder &Cyl) const
+int Line::intersect(PType &PntOut, const Cylinder &cylinder) const
 /**
 For the line that intersects the cylinder generate
 add the point to the VecOut, return number of points
 added. It does not check the points for validity.
 
 @param PntOut :: Vector of points found by the line/cylinder intersection
-@param Cyl :: Cylinder to intersect line with
+@param cylinder :: Cylinder to intersect line with
 @return Number of points found by intersection
 */
 {
-  const Kernel::V3D Cent = Cyl.getCentre();
-  const Kernel::V3D Ax = Origin - Cent;
-  const Kernel::V3D N = Cyl.getNormal();
-  const double R = Cyl.getRadius();
-  const double vDn = N.scalar_prod(Direct);
-  const double vDA = N.scalar_prod(Ax);
-  // First solve the equation of intersection
-  double C[3];
-  C[0] = 1.0 - (vDn * vDn);
-  C[1] = 2.0 * (Ax.scalar_prod(Direct) - vDA * vDn);
-  C[2] = Ax.scalar_prod(Ax) - (R * R + vDA * vDA);
-  std::pair<std::complex<double>, std::complex<double>> SQ;
-  const int ix = solveQuadratic(C, SQ);
+  const Kernel::V3D center = m_origin - cylinder.getCentre();
+  const Kernel::V3D cylinder_axis = cylinder.getNormal();
+  const double radius = cylinder.getRadius();
+  const double vDn = cylinder_axis.scalar_prod(m_direction);
+  const double vDA = cylinder_axis.scalar_prod(center);
+
+  // this is param[0] * x^2 + param[1] * x + param[0]
+  // NOTE: Check the documentation page (concept::GeometryofShape) to learn the
+  //       detailed derivation of the following formula.
+  double quadratic_params[3];
+  quadratic_params[0] = 1.0 - (vDn * vDn);
+  quadratic_params[1] = 2.0 * (center.scalar_prod(m_direction) - vDA * vDn);
+  // norm is the distance from the origin to the center of the cylinder
+  quadratic_params[2] = center.norm2() - (radius * radius + vDA * vDA);
+
+  // output parameter
+  std::pair<std::complex<double>, std::complex<double>> roots;
+  // solve the equation of intersection
+  const int num_solutions = solveQuadratic(quadratic_params, roots);
   // This takes the centre displacement into account:
-  return lambdaPair(ix, SQ, PntOut);
+  return lambdaPair(num_solutions, roots, PntOut);
 }
 
-int Line::intersect(std::vector<Kernel::V3D> &PntOut, const Sphere &Sph) const
+int Line::intersect(PType &PntOut, const Sphere &Sph) const
 /**
 For the line that intersects the cylinder generate
 add the point to the VecOut, return number of points
@@ -245,12 +243,12 @@ added. It does not check the points for validity.
 */
 {
   // Nasty stripping of useful stuff from sphere
-  const Kernel::V3D Ax = Origin - Sph.getCentre();
+  const Kernel::V3D Ax = m_origin - Sph.getCentre();
   const double R = Sph.getRadius();
   // First solve the equation of intersection
   double C[3];
   C[0] = 1;
-  C[1] = 2.0 * Ax.scalar_prod(Direct);
+  C[1] = 2.0 * Ax.scalar_prod(m_direction);
   C[2] = Ax.scalar_prod(Ax) - R * R;
   std::pair<std::complex<double>, std::complex<double>> SQ;
   const int ix = solveQuadratic(C, SQ);
@@ -270,8 +268,8 @@ sets the line given the Origne and direction
 {
   if (D.nullVector())
     return 0;
-  Origin = O;
-  Direct = normalize(D);
+  m_origin = O;
+  m_direction = normalize(D);
   return 1;
 }
 
@@ -280,9 +278,7 @@ void Line::print() const
 Print statement for debugging
 */
 {
-  logger.debug() << "Line == " << Origin << " :: " << Direct << '\n';
+  logger.debug() << "Line == " << m_origin << " :: " << m_direction << '\n';
 }
 
-} // namespace Geometry
-
-} // NAMESPACE Mantid
+} // namespace Mantid::Geometry

@@ -26,8 +26,7 @@ using namespace ConvTypes;
  * and set properties that can be used to generate a fit function.
  *
  */
-class MANTIDQT_INDIRECT_DLL ConvTemplateBrowser
-    : public FunctionTemplateBrowser {
+class MANTIDQT_INDIRECT_DLL ConvTemplateBrowser : public FunctionTemplateBrowser {
   Q_OBJECT
 public:
   explicit ConvTemplateBrowser(QWidget *parent = nullptr);
@@ -37,7 +36,7 @@ public:
   void setNumberOfDatasets(int) override;
   int getCurrentDataset() override;
   int getNumberOfDatasets() const override;
-  void setDatasetNames(const QStringList &names) override;
+  void setDatasets(const QList<MantidWidgets::FunctionModelDataset> &datasets) override;
   QStringList getGlobalParameters() const override;
   QStringList getLocalParameters() const override;
   void setGlobalParameters(const QStringList &globals) override;
@@ -48,21 +47,20 @@ public:
   void updateParameterNames(const QMap<int, QString> &parameterNames) override;
   void setErrorsEnabled(bool enabled) override;
   void clear() override;
-  void updateParameterEstimationData(
-      DataForParameterEstimationCollection &&data) override;
+  void updateParameterEstimationData(DataForParameterEstimationCollection &&data) override;
+  void estimateFunctionParameters() override;
+
   void setBackgroundA0(double value) override;
-  void setResolution(std::string const &name,
-                     TableDatasetIndex const &index) override;
-  void setResolution(
-      const std::vector<std::pair<std::string, int>> &fitResolutions) override;
+  void setResolution(const std::vector<std::pair<std::string, size_t>> &fitResolutions) override;
   void addDeltaFunction();
   void removeDeltaFunction();
   void addTempCorrection(double value);
   void removeTempCorrection();
   void setQValues(const std::vector<double> &qValues) override;
   void setEnum(size_t subTypeIndex, int fitType);
-  void updateTemperatureCorrectionAndDelta(bool tempCorrection,
-                                           bool deltaFunction);
+  void setInt(size_t subTypeIndex, int val);
+
+  void updateTemperatureCorrectionAndDelta(bool tempCorrection, bool deltaFunction);
 
 protected slots:
   void intChanged(QtProperty *) override;
@@ -78,6 +76,7 @@ private:
   void setParameterPropertyValue(QtProperty *prop, double value, double error);
   void setGlobalParametersQuiet(const QStringList &globals);
   void createFunctionParameterProperties();
+  void createLorentzianFunctionProperties();
   void createDeltaFunctionProperties();
   void createTempCorrectionProperties();
   void setSubType(size_t subTypeIndex, int typeIndex);
@@ -92,6 +91,7 @@ private:
 
   QtProperty *m_deltaFunctionOn;
   QtProperty *m_deltaFunctionHeight;
+  QtProperty *m_deltaFunctionCenter;
 
   QtProperty *m_tempCorrectionOn;
   QtProperty *m_temperature;
@@ -106,6 +106,7 @@ private:
   bool m_emitParameterValueChange = true;
   bool m_emitBoolChange = true;
   bool m_emitEnumChange = true;
+  bool m_emitIntChange = true;
   friend class ConvTemplatePresenter;
 };
 

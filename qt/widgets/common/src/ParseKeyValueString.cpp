@@ -5,17 +5,18 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidQtWidgets/Common/ParseKeyValueString.h"
+#include "MantidQtWidgets/Common/IAlgorithmRuntimeProps.h"
+
 #include <QStringList>
 #include <boost/algorithm/string.hpp>
 #include <boost/tokenizer.hpp>
+
 #include <vector>
 
-namespace MantidQt {
-namespace MantidWidgets {
+namespace MantidQt::MantidWidgets {
 
 namespace {
-void appendKeyValuePair(const std::pair<std::string, std::string> &kvp,
-                        const bool quoteValues,
+void appendKeyValuePair(const std::pair<std::string, std::string> &kvp, const bool quoteValues,
                         std::ostringstream &resultStream) {
   if (quoteValues)
     resultStream << kvp.first << "='" << kvp.second << '\'';
@@ -92,8 +93,7 @@ void trimWhitespaceQuotesAndEmptyValues(QStringList &values) {
    @throws std::runtime_error on an invalid input string
    @returns : a map of key/value pairs as strings
 */
-std::map<std::string, std::string>
-parseKeyValueString(const std::string &str, const std::string &separator) {
+std::map<std::string, std::string> parseKeyValueString(const std::string &str, const std::string &separator) {
   /*
     This is a bad example of using a tokenizer, and
     Mantid::Kernel::StringTokenizer should
@@ -144,8 +144,7 @@ parseKeyValueString(const std::string &str, const std::string &separator) {
    @throws std::runtime_error on an invalid input string
    @returns : a map of key/value pairs as QStrings
 */
-std::map<QString, QString> parseKeyValueQString(const QString &qstr,
-                                                const std::string &separator) {
+std::map<QString, QString> parseKeyValueQString(const QString &qstr, const std::string &separator) {
   /*
     This is a bad example of using a tokenizer, and
     Mantid::Kernel::StringTokenizer should
@@ -187,8 +186,7 @@ std::map<QString, QString> parseKeyValueQString(const QString &qstr,
 
 /** Convert an options map to a comma-separated list of key=value pairs
  */
-QString convertMapToString(const std::map<QString, QString> &optionsMap,
-                           const char separator, const bool quoteValues) {
+QString convertMapToString(const std::map<QString, QString> &optionsMap, const char separator, const bool quoteValues) {
   QString result;
   bool first = true;
 
@@ -215,9 +213,8 @@ QString convertMapToString(const std::map<QString, QString> &optionsMap,
 
 /** Convert an options map to a comma-separated list of key=value pairs
  */
-std::string
-convertMapToString(const std::map<std::string, std::string> &optionsMap,
-                   const char separator, const bool quoteValues) {
+std::string convertMapToString(const std::map<std::string, std::string> &optionsMap, const char separator,
+                               const bool quoteValues) {
   std::string result;
   bool first = true;
 
@@ -242,8 +239,7 @@ convertMapToString(const std::map<std::string, std::string> &optionsMap,
   return result;
 }
 
-std::string optionsToString(std::map<std::string, std::string> const &options,
-                            const bool quoteValues,
+std::string optionsToString(std::map<std::string, std::string> const &options, const bool quoteValues,
                             const std::string &separator) {
   if (!options.empty()) {
     std::ostringstream resultStream;
@@ -264,5 +260,15 @@ std::string optionsToString(std::map<std::string, std::string> const &options,
     return std::string();
   }
 }
-} // namespace MantidWidgets
-} // namespace MantidQt
+
+std::string convertAlgPropsToString(MantidQt::API::IAlgorithmRuntimeProps const &options) {
+  auto props = options.getDeclaredPropertyNames();
+  if (props.empty()) {
+    return std::string();
+  }
+  auto result = std::string(props[0] + std::string("=") + options.getPropertyValue(props[0]));
+  return std::accumulate(++props.cbegin(), props.cend(), result, [&options](auto const &result, auto const &prop) {
+    return result + std::string(";") + prop + std::string("=") + options.getPropertyValue(prop);
+  });
+}
+} // namespace MantidQt::MantidWidgets

@@ -20,8 +20,7 @@ namespace Indexing {
   @author Simon Heybrock
   @date 2017
 */
-class GlobalSpectrumIndex
-    : public detail::IndexType<GlobalSpectrumIndex, size_t> {
+class GlobalSpectrumIndex : public detail::IndexType<GlobalSpectrumIndex, size_t> {
 public:
   using detail::IndexType<GlobalSpectrumIndex, size_t>::IndexType;
   using detail::IndexType<GlobalSpectrumIndex, size_t>::operator=;

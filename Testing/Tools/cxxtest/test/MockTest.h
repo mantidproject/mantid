@@ -15,7 +15,7 @@
 static int one( void ) { return 1; }
 static void two( int *p ) { *p = 2; }
 
-namespace NameSpace 
+namespace NameSpace
 {
     static int identity( int i ) { return i; }
     static double identity( double d ) { return d; }
@@ -28,7 +28,7 @@ public:
     int value;
 };
 
-static Opaque getOpaque( int i ) 
+static Opaque getOpaque( int i )
 {
     return Opaque( i );
 }
@@ -180,7 +180,7 @@ public:
         SupplyFour sf( 53 );
 
         TS_ASSERT_EQUALS( supplyThree(), 28 );
-        
+
         int i;
         supplyFour( &i );
         TS_ASSERT_EQUALS( i, 53 );

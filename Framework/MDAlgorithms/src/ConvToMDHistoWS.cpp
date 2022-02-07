@@ -6,8 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidMDAlgorithms/ConvToMDHistoWS.h"
 
-namespace Mantid {
-namespace MDAlgorithms {
+namespace Mantid::MDAlgorithms {
 // service variable used for efficient filling of the MD event WS  -> should be
 // moved to configuration?
 #define DATA_BUFFER_SIZE 8192
@@ -17,8 +16,7 @@ template <class T> inline bool isNaN(T val) {
   return (val != buf);
 }
 
-ConvToMDHistoWS::ConvToMDHistoWS()
-    : ConvToMDBase(), m_spectraChunk(0), m_bufferSize(0) {}
+ConvToMDHistoWS::ConvToMDHistoWS() : ConvToMDBase(), m_spectraChunk(0), m_bufferSize(0) {}
 
 /** method sets up all internal variables necessary to convert from Matrix2D
 workspace to MDEvent workspace
@@ -28,16 +26,13 @@ workspaces
 @param inWSWrapper -- the class wrapping the target MD workspace
 @param ignoreZeros  -- if zero value signals should be rejected
 */
-size_t
-ConvToMDHistoWS::initialize(const MDWSDescription &WSD,
-                            std::shared_ptr<MDEventWSWrapper> inWSWrapper,
-                            bool ignoreZeros) {
+size_t ConvToMDHistoWS::initialize(const MDWSDescription &WSD, std::shared_ptr<MDEventWSWrapper> inWSWrapper,
+                                   bool ignoreZeros) {
 
   size_t numSpec = ConvToMDBase::initialize(WSD, inWSWrapper, ignoreZeros);
 
   // check if we indeed have matrix workspace as input.
-  DataObjects::Workspace2D_const_sptr pWS2D =
-      std::dynamic_pointer_cast<const DataObjects::Workspace2D>(m_InWS2D);
+  DataObjects::Workspace2D_const_sptr pWS2D = std::dynamic_pointer_cast<const DataObjects::Workspace2D>(m_InWS2D);
   if (!pWS2D)
     throw(std::logic_error("ConvToDataObjectsHisto should work with defined "
                            "histrogram workspace"));
@@ -67,14 +62,12 @@ size_t ConvToMDHistoWS::conversionChunk(size_t startSpectra) {
   std::vector<coord_t> locCoord(m_Coord);
 
   // allocate temporary buffer for MD Events data
-  std::vector<float> sig_err(2 * m_bufferSize); // array for signal and error.
-  std::vector<uint16_t> run_index(
-      m_bufferSize); // Buffer run index for each event
-  std::vector<uint32_t> det_ids(
-      m_bufferSize); // Buffer of det Id-s for each event
+  std::vector<float> sig_err(2 * m_bufferSize);         // array for signal and error.
+  std::vector<uint16_t> expInfoIndex(m_bufferSize);     // Buffer associated experiment-info index for each event
+  std::vector<uint16_t> goniometer_index(m_bufferSize); // Buffer goniometer index for each event
+  std::vector<uint32_t> det_ids(m_bufferSize);          // Buffer of det Id-s for each event
 
-  std::vector<coord_t> allCoord(m_NDims *
-                                m_bufferSize); // MD events coordinates buffer
+  std::vector<coord_t> allCoord(m_NDims * m_bufferSize); // MD events coordinates buffer
   size_t n_coordinates = 0;
 
   size_t nSpectraToProcess = startSpectra + m_spectraChunk;
@@ -126,14 +119,14 @@ size_t ConvToMDHistoWS::conversionChunk(size_t startSpectra) {
         continue;
       double errorSq = Error[j] * Error[j];
 
-      if (!m_QConverter->calcMatrixCoord(XtargetUnits[j], locCoord, signal,
-                                         errorSq))
+      if (!m_QConverter->calcMatrixCoord(XtargetUnits[j], locCoord, signal, errorSq))
         continue; // skip ND outside the range
       //  ADD RESULTING EVENTS TO THE BUFFER
       // coppy all data into data buffer for future transformation into events;
       sig_err[2 * nBufEvents + 0] = float(signal);
       sig_err[2 * nBufEvents + 1] = float(errorSq);
-      run_index[nBufEvents] = m_RunIndex;
+      expInfoIndex[nBufEvents] = m_ExpInfoIndex;
+      goniometer_index[nBufEvents] = 0; // default value
       det_ids[nBufEvents] = det_id;
 
       for (size_t ii = 0; ii < m_NDims; ii++)
@@ -142,8 +135,7 @@ size_t ConvToMDHistoWS::conversionChunk(size_t startSpectra) {
       // calculate number of events
       nBufEvents++;
       if (nBufEvents >= m_bufferSize) {
-        m_OutWSWrapper->addMDData(sig_err, run_index, det_ids, allCoord,
-                                  nBufEvents);
+        m_OutWSWrapper->addMDData(sig_err, expInfoIndex, goniometer_index, det_ids, allCoord, nBufEvents);
         nAddedEvents += nBufEvents;
         // reset buffer counts
         n_coordinates = 0;
@@ -153,8 +145,7 @@ size_t ConvToMDHistoWS::conversionChunk(size_t startSpectra) {
   }   // end detectors loop;
 
   if (nBufEvents > 0) {
-    m_OutWSWrapper->addMDData(sig_err, run_index, det_ids, allCoord,
-                              nBufEvents);
+    m_OutWSWrapper->addMDData(sig_err, expInfoIndex, goniometer_index, det_ids, allCoord, nBufEvents);
     nAddedEvents += nBufEvents;
     nBufEvents = 0;
   }
@@ -167,8 +158,7 @@ void ConvToMDHistoWS::runConversion(API::Progress *pProgress) {
   // counder for the number of events
   size_t nAddedEvents(0);
   //
-  Mantid::API::BoxController_sptr bc =
-      m_OutWSWrapper->pWorkspace()->getBoxController();
+  Mantid::API::BoxController_sptr bc = m_OutWSWrapper->pWorkspace()->getBoxController();
   size_t lastNumBoxes = bc->getTotalNumMDBoxes();
   size_t nEventsInWS = m_OutWSWrapper->pWorkspace()->getNPoints();
   //
@@ -226,10 +216,9 @@ void ConvToMDHistoWS::runConversion(API::Progress *pProgress) {
         if (ts->size() > 0)
           tp.joinAll();
       } else {
-        m_OutWSWrapper->pWorkspace()->splitAllIfNeeded(
-            nullptr); // it is done this way as it is possible trying to do
-                      // single
-                      // threaded split more efficiently
+        m_OutWSWrapper->pWorkspace()->splitAllIfNeeded(nullptr); // it is done this way as it is possible trying to do
+                                                                 // single
+                                                                 // threaded split more efficiently
       }
       // Count the new # of boxes.
       lastNumBoxes = bc->getTotalNumMDBoxes();
@@ -272,8 +261,7 @@ void ConvToMDHistoWS::runConversion(API::Progress *pProgress) {
  * @param specSize        -- the size of single spectra in matrix workspace;
  * @param nPointsToProcess -- total number of data points in the workspace
  */
-void ConvToMDHistoWS::estimateThreadWork(size_t nThreads, size_t specSize,
-                                         size_t nPointsToProcess) {
+void ConvToMDHistoWS::estimateThreadWork(size_t nThreads, size_t specSize, size_t nPointsToProcess) {
   if (nThreads == 0)
     nThreads = 1;
 
@@ -287,5 +275,4 @@ void ConvToMDHistoWS::estimateThreadWork(size_t nThreads, size_t specSize,
   m_spectraChunk = std::max(nSpectras / nThreads, static_cast<size_t>(1));
 }
 
-} // namespace MDAlgorithms
-} // namespace Mantid
+} // namespace Mantid::MDAlgorithms

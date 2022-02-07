@@ -37,18 +37,14 @@ public:
   void unrollAll();
   void roll(size_t index);
   void rollAll();
-  void
-  filterBetweenExecDate(Mantid::Types::Core::DateAndTime start,
-                        Mantid::Types::Core::DateAndTime end =
-                            Mantid::Types::Core::DateAndTime::getCurrentTime());
+  void filterBetweenExecDate(Mantid::Types::Core::DateAndTime start,
+                             Mantid::Types::Core::DateAndTime end = Mantid::Types::Core::DateAndTime::getCurrentTime());
   /**
    * Get the list of History Items for this view.
    *
    * @returns vector of history items for this view.
    */
-  const std::vector<HistoryItem> &getAlgorithmsList() const {
-    return m_historyItems;
-  };
+  const std::vector<HistoryItem> &getAlgorithmsList() const { return m_historyItems; };
 
   size_t size() const { return m_historyItems.size(); }
 

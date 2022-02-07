@@ -7,12 +7,10 @@
 #include "MantidNexusGeometry/Hdf5Version.h"
 #include <H5Cpp.h>
 
-namespace Mantid {
-namespace NexusGeometry {
+namespace Mantid::NexusGeometry {
 
 // Utility for checking hdf5 library version
-uint32_t Hdf5Version::makeHdf5VersionNumber(uint32_t maj, uint32_t min,
-                                            uint32_t relnum) {
+uint32_t Hdf5Version::makeHdf5VersionNumber(uint32_t maj, uint32_t min, uint32_t relnum) {
   return 100000 * maj + 1000 * min + relnum;
 }
 
@@ -25,5 +23,4 @@ bool Hdf5Version::checkVariableLengthStringSupport() {
   return (actual > expected);
 }
 
-} // namespace NexusGeometry
-} // namespace Mantid
+} // namespace Mantid::NexusGeometry

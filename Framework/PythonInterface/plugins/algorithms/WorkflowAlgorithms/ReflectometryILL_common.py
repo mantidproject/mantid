@@ -6,20 +6,49 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 
 from mantid.kernel import UnitConversion, DeltaEModeType
-from mantid.simpleapi import *
+from mantid.simpleapi import CreateWorkspace, DeleteWorkspace, Multiply, mtd
 import scipy.constants as constants
+import h5py
+import numpy
+
+
+def sample_angle(run):
+    """Return the sample theta angle in degrees."""
+    if isinstance(run, list):
+        run = run[0]
+    with h5py.File(run, "r") as nexus:
+        if nexus.get('entry0/instrument/SAN') is not None:
+            return float(numpy.array(nexus.get('entry0/instrument/SAN/value'), dtype='float'))
+        elif nexus.get('entry0/instrument/san') is not None:
+            return float(numpy.array(nexus.get('entry0/instrument/san/value'), dtype='float'))
+        else:
+            raise RuntimeError('Cannot retrieve sample angle from Nexus file {}.'.format(run))
+
+
+def detector_angle(run):
+    """Return the detector angle in degrees."""
+    if isinstance(run, list):
+        run = run[0]
+    with h5py.File(run, "r") as nexus:
+        if nexus.get('entry0/instrument/DAN') is not None:
+            return float(numpy.array(nexus.get('entry0/instrument/DAN/value'), dtype='float'))
+        elif nexus.get('entry0/instrument/dan') is not None:
+            return float(numpy.array(nexus.get('entry0/instrument/dan/value'), dtype='float'))
+        else:
+            raise RuntimeError('Cannot retrieve detector angle from Nexus file {}.'.format(run))
 
 
 def chopperOpeningAngle(sampleLogs, instrumentName):
     """Return the chopper opening angle in degrees."""
     if instrumentName == 'D17':
         chopper1Phase = sampleLogs.getProperty('VirtualChopper.chopper1_phase_average').value
+        chopperWindow = sampleLogs.getProperty('ChopperWindow').value
         if chopper1Phase > 360.:
             # Workaround for broken old D17 NeXus files.
             chopper1Phase = sampleLogs.getProperty('VirtualChopper.chopper2_speed_average').value
         chopper2Phase = sampleLogs.getProperty('VirtualChopper.chopper2_phase_average').value
         openoffset = sampleLogs.getProperty('VirtualChopper.open_offset').value
-        return 45. - (chopper2Phase - chopper1Phase) - openoffset
+        return chopperWindow - (chopper2Phase - chopper1Phase) - openoffset
     else:
         firstChopper = int(sampleLogs.getProperty('ChopperSetting.firstChopper').value)
         secondChopper = int(sampleLogs.getProperty('ChopperSetting.secondChopper').value)
@@ -40,7 +69,7 @@ def chopperOpeningAngle(sampleLogs, instrumentName):
 def chopperPairDistance(sampleLogs, instrumentName):
     """Return the gap between the two choppers."""
     if instrumentName == 'D17':
-        return sampleLogs.getProperty('Distance.ChopperGap').value * 1e-2
+        return sampleLogs.getProperty('Distance.ChopperGap').value # in [m]
     else:
         return sampleLogs.getProperty('ChopperSetting.distSeparationChopperPair').value * 1e-3
 
@@ -162,8 +191,6 @@ class SampleLogs:
     SLIT2WIDTH = 'reduction.slit2width'
     SLIT3WIDTH = 'reduction.slit3width'
     SUM_TYPE = 'reduction.foreground.summation_type'
-    TWO_THETA = 'loader.two_theta'
-    REDUCTION_TWO_THETA = 'reduction.two_theta'
 
 
 class WSCleanup:

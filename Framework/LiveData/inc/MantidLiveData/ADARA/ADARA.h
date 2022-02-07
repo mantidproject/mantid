@@ -46,8 +46,7 @@ namespace ADARA {
 const std::string VERSION = "1.5.1";
 const std::string TAG_NAME = "XXX_TAG_NAME_XXX";
 
-#define ADARA_PKT_TYPE(_base_type, _version)                                   \
-  ((((uint32_t)(_base_type)) << 8) | (_version))
+#define ADARA_PKT_TYPE(_base_type, _version) ((((uint32_t)(_base_type)) << 8) | (_version))
 
 #define ADARA_BASE_PKT_TYPE(_type) ((_type) >> 8)
 

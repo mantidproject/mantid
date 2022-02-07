@@ -9,9 +9,9 @@
 #include "MantidAPI/Axis.h"
 #include "MantidDataHandling/CreatePolarizationEfficiencies.h"
 #include "MantidDataObjects/Workspace2D.h"
+#include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidHistogramData/LinearGenerator.h"
 #include "MantidKernel/Unit.h"
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include <cxxtest/TestSuite.h>
 
 #include <memory>
@@ -26,12 +26,8 @@ class CreatePolarizationEfficienciesTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static CreatePolarizationEfficienciesTest *createSuite() {
-    return new CreatePolarizationEfficienciesTest();
-  }
-  static void destroySuite(CreatePolarizationEfficienciesTest *suite) {
-    delete suite;
-  }
+  static CreatePolarizationEfficienciesTest *createSuite() { return new CreatePolarizationEfficienciesTest(); }
+  static void destroySuite(CreatePolarizationEfficienciesTest *suite) { delete suite; }
 
   void test_init() {
     CreatePolarizationEfficiencies alg;

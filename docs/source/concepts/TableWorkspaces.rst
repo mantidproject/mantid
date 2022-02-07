@@ -56,17 +56,22 @@ Most of the time Table workspaces are the output of certain algorithms, but you 
     tableWS = CreateEmptyTableWorkspace()
 
     # Add some columns, Recognized types are: int,float,double,bool,str,V3D,long64
-    tableWS.addColumn(type="int",name="Detector ID")  
-    tableWS.addColumn(type="str",name="Detector Name")  
-    tableWS.addColumn(type="V3D",name="Detector Position")
+    tableWS.addColumn(type="int",name="Detector ID",plottype=6)
+    tableWS.addColumn(type="str",name="Detector Name",plottype=6)
+    tableWS.addColumn(type="V3D",name="Detector Position",plottype=6)
+    tableWS.addColumn(type='float',name="Value",plottype=2)
+    tableWS.addColumn(type='float',name="Error",plottype=5)
+    tableWS.setLinkedYCol(4, 3)
 
     # Populate the columns for three detectors
     detIDList = range(1,4)
     detPosList = [ V3D(9.0,0.0,0.0), V3D(10.0,3.0,0.0), V3D(12.0,3.0,6.0)]
     for j in range(len(detIDList)):
-        nextRow = { 'Detector ID': detIDList[j], 
+        nextRow = { 'Detector ID': detIDList[j],
                     'Detector Name': "Detector {0}".format(detIDList[j]),
-                    'Detector Position': detPosList[j] }
+                    'Detector Position': detPosList[j],
+                    'Value': 10,
+                    'Error': 1 }
         tableWS.addRow ( nextRow )
 
 Table Workspace Properties
@@ -80,15 +85,15 @@ Table Workspace Properties
     tableWS = CreateEmptyTableWorkspace()
 
     # Add some columns
-    tableWS.addColumn(type="int",name="Detector ID")  
-    tableWS.addColumn(type="str",name="Detector Name")  
+    tableWS.addColumn(type="int",name="Detector ID")
+    tableWS.addColumn(type="str",name="Detector Name")
     tableWS.addColumn(type="V3D",name="Detector Position")
 
     # Populate the columns for three detectors
     detIDList = range(1,4)
     detPosList = [ V3D(9.0,0.0,0.0), V3D(10.0,3.0,0.0), V3D(12.0,3.0,6.0)]
     for j in range(len(detIDList)):
-        nextRow = { 'Detector ID': detIDList[j], 
+        nextRow = { 'Detector ID': detIDList[j],
                     'Detector Name': "Detector {0}".format(detIDList[j]),
                     'Detector Position': detPosList[j] }
         tableWS.addRow ( nextRow )
@@ -108,7 +113,7 @@ Table Workspace Properties
     # Add Rows
     tableWS.addRow( [2, "new Detector 1", V3D(2,2,2)])
     # or using a dictionary
-    nextRow = { 'Detector ID': 5, 
+    nextRow = { 'Detector ID': 5,
                     'Detector Name': "new Detector 2",
                     'Detector Position':  V3D(5,5,5) }
     tableWS.addRow ( nextRow )
@@ -159,7 +164,7 @@ Pickling Workspaces
 
 A TableWorkspace may be `pickled <https://docs.python.org/2/library/pickle.html/>` and de-pickled in python. Users should prefer using cPickle over pickle, and make sure that the protocol option is set to the HIGHEST_PROTOCOL to ensure that the serialization/deserialization process is as fast as possible.
 
-.. code-block:: python   
+.. code-block:: python
 
   import cPickle as pickle
   pickled = pickle.dumps(ws2d, pickle.HIGHEST_PROTOCOL)
@@ -225,7 +230,7 @@ Cells with the same index form a row. TableRow class represents a row.
 Use getRow(int) or getFirstRow() to access existing rows. For example:
 
 .. code-block:: c++
- 
+
     std::string key;
     double value;
     TableRow row = table->getFirstRow();

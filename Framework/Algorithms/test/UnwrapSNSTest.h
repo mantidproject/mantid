@@ -9,10 +9,10 @@
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/Axis.h"
 #include "MantidDataObjects/EventWorkspace.h"
+#include "MantidFrameworkTestHelpers/ComponentCreationHelper.h"
+#include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidKernel/Timer.h"
 #include "MantidKernel/UnitFactory.h"
-#include "MantidTestHelpers/ComponentCreationHelper.h"
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include <cxxtest/TestSuite.h>
 #include <string>
 
@@ -31,13 +31,11 @@ private:
 
   void makeFakeEventWorkspace(const std::string &wsName) {
     // Make an event workspace with 2 events in each bin.
-    EventWorkspace_sptr test_in = WorkspaceCreationHelper::createEventWorkspace(
-        NUMPIXELS, NUMBINS, NUMBINS, 0.0, BIN_DELTA, 2);
+    EventWorkspace_sptr test_in =
+        WorkspaceCreationHelper::createEventWorkspace(NUMPIXELS, NUMBINS, NUMBINS, 0.0, BIN_DELTA, 2);
     // Fake a d-spacing unit in the data.
     test_in->getAxis(0)->unit() = UnitFactory::Instance().create("TOF");
-    test_in->setInstrument(
-        ComponentCreationHelper::createTestInstrumentCylindrical(NUMPIXELS /
-                                                                 9));
+    test_in->setInstrument(ComponentCreationHelper::createTestInstrumentCylindrical(NUMPIXELS / 9));
     // Add it to the workspace
     AnalysisDataService::Instance().add(wsName, test_in);
   }
@@ -58,8 +56,7 @@ public:
     // setup
     std::string name("UnwrapSNS");
     this->makeFakeEventWorkspace(name);
-    EventWorkspace_sptr ws =
-        AnalysisDataService::Instance().retrieveWS<EventWorkspace>(name);
+    EventWorkspace_sptr ws = AnalysisDataService::Instance().retrieveWS<EventWorkspace>(name);
     size_t num_events = ws->getNumberEvents();
     double min_event0 = ws->getSpectrum(0).getTofMin();
     double max_event0 = ws->getSpectrum(0).getTofMax();

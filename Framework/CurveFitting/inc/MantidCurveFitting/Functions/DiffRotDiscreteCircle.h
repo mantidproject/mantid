@@ -30,8 +30,7 @@ namespace Functions {
  * jump to neighboring sites. This is the most common type of discrete
  * rotational diffusion in a circle.
  */
-class MANTID_CURVEFITTING_DLL DiffRotDiscreteCircle
-    : public API::ImmutableCompositeFunction {
+class MANTID_CURVEFITTING_DLL DiffRotDiscreteCircle : public API::ImmutableCompositeFunction {
 public:
   std::string name() const override { return "DiffRotDiscreteCircle"; }
 
@@ -45,12 +44,10 @@ public:
   virtual void trickleDownAttribute(const std::string &name);
 
   /// Override parent definition
-  virtual void declareAttribute(const std::string &name,
-                                const API::IFunction::Attribute &defaultValue);
+  virtual void declareAttribute(const std::string &name, const API::IFunction::Attribute &defaultValue);
 
   /// Override parent definition
-  void setAttribute(const std::string &name,
-                    const API::IFunction::Attribute &att) override;
+  void setAttribute(const std::string &name, const API::IFunction::Attribute &att) override;
 
 private:
   std::shared_ptr<ElasticDiffRotDiscreteCircle> m_elastic;

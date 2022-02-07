@@ -44,7 +44,7 @@ namespace CxxTest
     private:
         CXXTEST_STD(string) _s;
     };
-    
+
     //
     // std::string
     //
@@ -100,7 +100,7 @@ namespace CxxTest
             s << "{}";
             return;
         }
-        
+
         s << "{ ";
         while ( first != last ) {
             s << TS_AS_STRING(*first);
@@ -118,7 +118,7 @@ namespace CxxTest
     class ValueTraits< CXXTEST_STD(pair)<First, Second> > : public StdTraitsBase
     {
     public:
-        ValueTraits( const CXXTEST_STD(pair)<First, Second> &p ) 
+        ValueTraits( const CXXTEST_STD(pair)<First, Second> &p )
         {
             *this << "<" << TS_AS_STRING( p.first ) << ", " << TS_AS_STRING( p.second ) << ">";
         }
@@ -174,7 +174,7 @@ namespace CxxTest
         {
             dumpRange( *this, m.begin(), m.end() );
         }
-    };    
+    };
 
     //
     // std::deque

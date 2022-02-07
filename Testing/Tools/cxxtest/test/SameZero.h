@@ -14,13 +14,13 @@ class SameZero : public CxxTest::TestSuite
 {
 public:
     char data[4];
-    
+
     void setUp()
     {
         for ( unsigned i = 0; i < sizeof(data); ++ i )
             data[i] = (char)i;
     }
-    
+
     void test_TS_ASSERT_SAME_DATA_passed_zero()
     {
         TS_ASSERT_SAME_DATA( data, 0, sizeof(data) );

@@ -9,6 +9,24 @@ from mantid.kernel import PropertyManager, IPropertyManager
 
 
 class PropertyManagerTest(unittest.TestCase):
+    def test_static_methods(self):
+        test_log_name = "testLog"
+        self.assertFalse(PropertyManager.isAnInvalidValuesFilterLog(test_log_name))
+        self.assertEqual(PropertyManager.getInvalidValuesFilterLogName(test_log_name),
+          test_log_name + "_invalid_values")
+
+        self.assertTrue(PropertyManager.isAnInvalidValuesFilterLog(
+            PropertyManager.getInvalidValuesFilterLogName(test_log_name)))
+
+        # not a valid invalid values log
+        self.assertEqual(
+            PropertyManager.getLogNameFromInvalidValuesFilter(test_log_name), "")
+        # A valid invalid values log
+        self.assertEqual(
+            PropertyManager.getLogNameFromInvalidValuesFilter(
+                PropertyManager.getInvalidValuesFilterLogName(test_log_name)),
+            test_log_name)
+
     def test_propertymanager_population(self):
         manager = PropertyManager()
 

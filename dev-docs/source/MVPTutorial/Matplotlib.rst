@@ -26,11 +26,10 @@ The view has the following imports:
 
 .. code-block:: python
 
-    from __future__ import (absolute_import, division, print_function)
     from qtpy import QtWidgets, QtCore, QtGui
     import matplotlib.pyplot as plt
 
-    from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg as FigureCanvas
+    from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 
 The fourth line imports Matplotlib and the last line allows it to
 interface with the GUI.
@@ -42,14 +41,14 @@ the plot and creating an empty plot (no data).
 
     class PlotView(QtWidgets.QWidget):
         def __init__(self, parent=None):
-            super(PlotView, self).__init__(parent)
+            super().__init__(parent)
 
             self.figure = plt.figure()
             grid = QtWidgets.QVBoxLayout(self)
-            self.draw() 
+            self.draw()
             self.canvas = self.getWidget()
             grid.addWidget(self.canvas)
-            self.setLayout(grid) 
+            self.setLayout(grid)
 
         def draw(self):
             ax = self.figure.add_subplot(111)
@@ -66,7 +65,7 @@ the plot and creating an empty plot (no data).
         def addData(self, xvalues, yvalues, grid_lines, colour, marker):
             ax = self.draw()
             ax.grid(grid_lines)
-            ax.plot(xvalues, yvalues, color=colour, marker=marker, linestyle="--") 
+            ax.plot(xvalues, yvalues, color=colour, marker=marker, linestyle="--")
             self.canvas.draw()
 
 The ``draw`` method creates the plot area without any data. The widget

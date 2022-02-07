@@ -30,15 +30,12 @@ using namespace Mantid;
 // It is used to print out information, warning and error messages
 
 void InvertMDDim::init() {
-  declareProperty(std::make_unique<WorkspaceProperty<IMDHistoWorkspace>>(
-      "InputWorkspace", "", Direction::Input));
-  declareProperty(std::make_unique<WorkspaceProperty<IMDHistoWorkspace>>(
-      "OutputWorkspace", "", Direction::Output));
+  declareProperty(std::make_unique<WorkspaceProperty<IMDHistoWorkspace>>("InputWorkspace", "", Direction::Input));
+  declareProperty(std::make_unique<WorkspaceProperty<IMDHistoWorkspace>>("OutputWorkspace", "", Direction::Output));
 }
 
 void InvertMDDim::exec() {
-  IMDHistoWorkspace_sptr inWS =
-      IMDHistoWorkspace_sptr(getProperty("InputWorkspace"));
+  IMDHistoWorkspace_sptr inWS = IMDHistoWorkspace_sptr(getProperty("InputWorkspace"));
   std::vector<IMDDimension_sptr> dimensions;
   for (int i = static_cast<int>(inWS->getNumDims()) - 1; i >= 0; i--) {
     std::shared_ptr<const IMDDimension> dimi = inWS->getDimension(i);
@@ -62,9 +59,8 @@ void InvertMDDim::exec() {
   setProperty("OutputWorkspace", outWS);
 }
 
-void InvertMDDim::recurseDim(const IMDHistoWorkspace_sptr &inWS,
-                             const IMDHistoWorkspace_sptr &outWS,
-                             int currentDim, int *idx, int rank) {
+void InvertMDDim::recurseDim(const IMDHistoWorkspace_sptr &inWS, const IMDHistoWorkspace_sptr &outWS, int currentDim,
+                             int *idx, int rank) {
   std::shared_ptr<const IMDDimension> dimi = inWS->getDimension(currentDim);
   if (currentDim == rank - 1) {
     for (int i = 0; i < static_cast<int>(dimi->getNBins()); i++) {
@@ -82,9 +78,8 @@ void InvertMDDim::recurseDim(const IMDHistoWorkspace_sptr &inWS,
   }
 }
 
-void InvertMDDim::copyMetaData(
-    const Mantid::API::IMDHistoWorkspace_sptr &inws,
-    const Mantid::API::IMDHistoWorkspace_sptr &outws) {
+void InvertMDDim::copyMetaData(const Mantid::API::IMDHistoWorkspace_sptr &inws,
+                               const Mantid::API::IMDHistoWorkspace_sptr &outws) {
   outws->setTitle(inws->getTitle());
   ExperimentInfo_sptr info;
 
@@ -98,8 +93,7 @@ void InvertMDDim::copyMetaData(
  * IMDHistoWorkspace.
  * I.e. a proper address calculation from an index array.
  */
-unsigned int InvertMDDim::calcIndex(const IMDHistoWorkspace_sptr &ws,
-                                    int dim[]) {
+unsigned int InvertMDDim::calcIndex(const IMDHistoWorkspace_sptr &ws, int dim[]) {
   size_t idx = 0;
   switch (ws->getNumDims()) {
   case 2:
@@ -117,8 +111,7 @@ unsigned int InvertMDDim::calcIndex(const IMDHistoWorkspace_sptr &ws,
   return static_cast<unsigned int>(idx);
 }
 
-unsigned int InvertMDDim::calcInvertedIndex(const IMDHistoWorkspace_sptr &ws,
-                                            int dim[]) {
+unsigned int InvertMDDim::calcInvertedIndex(const IMDHistoWorkspace_sptr &ws, int dim[]) {
   size_t idx = 0;
   switch (ws->getNumDims()) {
   case 2:

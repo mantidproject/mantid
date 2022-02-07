@@ -32,45 +32,33 @@ class CreateCacheFilename(PythonAlgorithm):
         """
         return """Create cache filename"""
 
-    def require(self):
-        return
-
     def PyInit(self):
         """ Declare properties
         """
         # this is the requirement of using this plugin
         # is there a place to register that?
-        self.require()
-
         self.declareProperty("PropertyManager", "", "Name of a property manager from which properties are extracted from")
-
         self.declareProperty(
             StringArrayProperty("Properties", Direction.Input),
             "A list of property names to be included")
-
         self.declareProperty(
             StringArrayProperty("OtherProperties", Direction.Input),
             "A list of key=value strings for other properties not in the property manager")
-
+        self.declareProperty("Prefix", "", "prefix for the output file name")
         self.declareProperty(
-            "Prefix", "", "prefix for the output file name")
-
-        self.declareProperty(
-            "CacheDir", "",
-            "the directory in which the cache file will be created")
-
+            FileProperty(name='CacheDir', defaultValue='', action=FileAction.OptionalDirectory),
+            doc='Directory storing cache files for reuse, in-lieu of repetitive, time-consuming calculations')
         self.declareProperty("OutputFilename", "", "Full path of output file name", Direction.Output)
-
-        self.declareProperty("OutputSignature", "", "Calculated sha1 hash", Direction.Output)
+        self.declareProperty("OutputSignature", "", "sha1 string, 40 characters long", Direction.Output)
         return
 
     def validateInputs(self):
         issues = dict()
 
         manager = self.getPropertyValue('PropertyManager').strip()
-        if len(manager) > 0 and not mantid.PropertyManagerDataService.doesExist(manager):
+        if len(manager) > 0 and manager not in mantid.PropertyManagerDataService:
             issues['PropertyManager'] = 'Does not exist'
-        elif len(manager) <= 0 and not self.getProperty('OtherProperties').value:
+        if len(manager) <= 0 and not self.getProperty('OtherProperties').value:
             message = "Either PropertyManager or OtherProperties should be supplied"
             issues['PropertyManager'] = message
             issues['OtherProperties'] = message
@@ -82,8 +70,8 @@ class CreateCacheFilename(PythonAlgorithm):
         """
         # Inputs
         prop_manager = self.getPropertyValue("PropertyManager").strip()
-        if len(prop_manager) > 0:
-            prop_manager = mantid.PropertyManagerDataService.retrieve(prop_manager)
+        if prop_manager in mantid.PropertyManagerDataService:
+            prop_manager = mantid.PropertyManagerDataService[prop_manager]
         else:
             prop_manager = None
 
@@ -100,14 +88,11 @@ class CreateCacheFilename(PythonAlgorithm):
         prefix = self.getPropertyValue("Prefix")
         cache_dir = self.getPropertyValue("CacheDir")
         if not cache_dir:
-            cache_dir = os.path.join(
-                ConfigService.getUserPropertiesDir(),
-                "cache"
-                )
+            cache_dir = os.path.join(ConfigService.getUserPropertiesDir(), "cache")
         # calculate
-        fn = self._calculate(
-            prop_manager, props, other_props, prefix, cache_dir)
-        self.setProperty("OutputFilename", fn)
+        file_name, sha1_hash = self._calculate(prop_manager, props, other_props, prefix, cache_dir)
+        self.setProperty("OutputFilename", file_name)
+        self.setProperty("OutputSignature", sha1_hash)
         return
 
     def _get_signature(self, prop_manager, props, other_props):
@@ -126,19 +111,16 @@ class CreateCacheFilename(PythonAlgorithm):
         kvpairs.sort()
         # one string out of the list
         s = ','.join(kvpairs)
-        self.setProperty("OutputSignature", s)
         return s
 
     def _calculate(self, prop_manager, props, other_props, prefix, cache_dir):
         s = self._get_signature(prop_manager, props, other_props)
-        # hash
-        h = _hash(s)
-        # prefix
+        h = _hash(s)   # sha1 hash
         if prefix:
-            h = "%s_%s" % (prefix, h)
-        # filename
-        fn = "%s.nxs" % h
-        return os.path.join(cache_dir, fn)
+            fn = "%s_%s.nxs" % (prefix, h)  # filename
+        else:
+            fn = "%s.nxs" % h
+        return os.path.join(cache_dir, fn), h
 
 
 def _hash(s):

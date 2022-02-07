@@ -25,30 +25,22 @@ namespace Algorithms {
    @author Martyn Gigg, Tessella Support Services plc
    @date 28/01/2009
 */
-class MANTID_ALGORITHMS_DLL CreateSingleValuedWorkspace
-    : public Mantid::API::Algorithm {
+class MANTID_ALGORITHMS_DLL CreateSingleValuedWorkspace : public Mantid::API::Algorithm {
 public:
   /// Algorithm's name
-  const std::string name() const override {
-    return "CreateSingleValuedWorkspace";
-  }
+  const std::string name() const override { return "CreateSingleValuedWorkspace"; }
   /// Summary of algorithms purpose
-  const std::string summary() const override {
-    return "Creates a 2D workspace containing a single X, Y & E value.";
-  }
+  const std::string summary() const override { return "Creates a 2D workspace containing a single X, Y & E value."; }
 
   /// Algorithm's version
   int version() const override { return (1); }
-  const std::vector<std::string> seeAlso() const override {
-    return {"CreateWorkspace"};
-  }
+  const std::vector<std::string> seeAlso() const override { return {"CreateWorkspace"}; }
   /// Algorithm's category for identification
   const std::string category() const override { return "Utility\\Workspaces"; }
 
 protected:
-  Parallel::ExecutionMode getParallelExecutionMode(
-      const std::map<std::string, Parallel::StorageMode> &storageModes)
-      const override;
+  Parallel::ExecutionMode
+  getParallelExecutionMode(const std::map<std::string, Parallel::StorageMode> &storageModes) const override;
 
 private:
   /// Initialisation code

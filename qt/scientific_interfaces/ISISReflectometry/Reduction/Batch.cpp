@@ -5,14 +5,13 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "Batch.h"
-namespace MantidQt {
-namespace CustomInterfaces {
-namespace ISISReflectometry {
 
-Batch::Batch(Experiment const &experiment, Instrument const &instrument,
-             RunsTable &runsTable, Slicing const &slicing)
-    : m_experiment(experiment), m_instrument(instrument),
-      m_runsTable(runsTable), m_slicing(slicing) {}
+#include <utility>
+
+namespace MantidQt::CustomInterfaces::ISISReflectometry {
+
+Batch::Batch(Experiment const &experiment, Instrument const &instrument, RunsTable &runsTable, Slicing const &slicing)
+    : m_experiment(experiment), m_instrument(instrument), m_runsTable(runsTable), m_slicing(slicing) {}
 
 Experiment const &Batch::experiment() const { return m_experiment; }
 
@@ -24,28 +23,21 @@ RunsTable &Batch::mutableRunsTable() { return m_runsTable; }
 
 Slicing const &Batch::slicing() const { return m_slicing; }
 
-std::vector<MantidWidgets::Batch::RowLocation>
-Batch::selectedRowLocations() const {
+std::vector<MantidWidgets::Batch::RowLocation> Batch::selectedRowLocations() const {
   return m_runsTable.selectedRowLocations();
 }
 
-PerThetaDefaults const *Batch::defaultsForTheta(double thetaAngle) const {
-  return experiment().defaultsForTheta(thetaAngle,
-                                       runsTable().thetaTolerance());
-}
+std::vector<Group> Batch::selectedGroups() const { return m_runsTable.selectedGroups(); }
 
-PerThetaDefaults const *Batch::wildcardDefaults() const {
-  return experiment().wildcardDefaults();
+LookupRow const *Batch::findLookupRow(boost::optional<double> thetaAngle) const {
+  return experiment().findLookupRow(thetaAngle, runsTable().thetaTolerance());
 }
 
 void Batch::resetState() { m_runsTable.resetState(); }
 
 void Batch::resetSkippedItems() { m_runsTable.resetSkippedItems(); }
 
-boost::optional<Item &>
-Batch::getItemWithOutputWorkspaceOrNone(std::string const &wsName) {
+boost::optional<Item &> Batch::getItemWithOutputWorkspaceOrNone(std::string const &wsName) {
   return m_runsTable.getItemWithOutputWorkspaceOrNone(wsName);
 }
-} // namespace ISISReflectometry
-} // namespace CustomInterfaces
-} // namespace MantidQt
+} // namespace MantidQt::CustomInterfaces::ISISReflectometry

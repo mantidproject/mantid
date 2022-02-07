@@ -50,7 +50,7 @@ Improved
   * The NumberOfWavelengthPoints input property is now validated more rigorously.
   * A new MaxScatterPtAttempts input has been added to control how many tries are made to generate a random point in the object. Useful for cases such as thin annuli that require a higher number of tries. The previous version was hard coded internally.
 - :ref:`SaveGSS <algm-SaveGSS-v1>` now supports saving in the legacy GSAS ALT format. This is useful for older tools however the default format FXYE should be used whenever possible.
-- :ref:`SaveMDWorkspaceToVTK <algm-SaveMDWorkspaceToVTK-v1>` and :ref:`LoadVTK <algm-LoadVTK-v1>` algorithms are now accessible from python.
+- ``SaveMDWorkspaceToVTK`` and ``LoadVTK`` algorithms are now accessible from python.
 - :ref:`MergeRuns <algm-MergeRuns-v1>` will now merge workspaces with detector scans.
 - :ref:`SetUncertainties <algm-SetUncertainties-v1>` now provides a "custom" mode, which lets the user specify both an arbitrary error value whose occurrences are to be replaced in the input workspace, as well as the value to replace it with.
 - :ref:`SimpleShapeMonteCarloAbsorption <algm-SimpleShapeMonteCarloAbsorption>` has been added to simplify sample environment inputs for MonteCarloAbsorption

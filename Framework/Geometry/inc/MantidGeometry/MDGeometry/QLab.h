@@ -29,8 +29,7 @@ public:
   bool isSameType(const MDFrame &frame) const override;
   std::string name() const override;
   QLab *clone() const override;
-  Mantid::Kernel::SpecialCoordinateSystem
-  equivalientSpecialCoordinateSystem() const override;
+  Mantid::Kernel::SpecialCoordinateSystem equivalientSpecialCoordinateSystem() const override;
 
   // Type name
   static const std::string QLabName;

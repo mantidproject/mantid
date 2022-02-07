@@ -15,9 +15,11 @@
 #include "MantidCrystal/LoadIsawUB.h"
 #include "MantidCrystal/TransformHKL.h"
 #include "MantidDataHandling/LoadNexusProcessed.h"
+#include "MantidDataObjects/LeanElasticPeaksWorkspace.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidGeometry/Crystal/IndexingUtils.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
+#include "MantidKernel/SpecialCoordinateSystem.h"
 
 using namespace Mantid::Crystal;
 using namespace Mantid::API;
@@ -47,8 +49,7 @@ public:
     TS_ASSERT(loader.isExecuted());
     PeaksWorkspace_sptr ws;
     TS_ASSERT_THROWS_NOTHING(
-        ws = std::dynamic_pointer_cast<PeaksWorkspace>(
-            AnalysisDataService::Instance().retrieve(WSName)));
+        ws = std::dynamic_pointer_cast<PeaksWorkspace>(AnalysisDataService::Instance().retrieve(WSName)));
     TS_ASSERT(ws);
     // make a reasonable UB and
     // put it in the workspace
@@ -89,8 +90,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("Tolerance", "0.1"));
 
     // specify a matrix that will swap H and K and negate L
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("HKLTransform", "0,1,0,1,0,0,0,0,-1"));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("HKLTransform", "0,1,0,1,0,0,0,0,-1"));
     TS_ASSERT_THROWS_NOTHING(alg.execute(););
     TS_ASSERT(alg.isExecuted());
 
@@ -115,5 +115,65 @@ public:
     TS_ASSERT_DELTA(averageError, 0.0097, 1e-3);
 
     AnalysisDataService::Instance().remove(WSName);
+  }
+
+  void test_exec_LeanElasticPeak() {
+    auto ws = std::make_shared<LeanElasticPeaksWorkspace>();
+    AnalysisDataService::Instance().addOrReplace("ws", ws);
+    auto lattice = std::make_unique<Mantid::Geometry::OrientedLattice>(5, 6, 7, 90, 90, 120);
+    ws->mutableSample().setOrientedLattice(std::move(lattice));
+    ws->addPeak(V3D(1, 0, 0), SpecialCoordinateSystem::HKL);
+    ws->addPeak(V3D(0, 2, 0), SpecialCoordinateSystem::HKL);
+    ws->addPeak(V3D(0, 0, 3), SpecialCoordinateSystem::HKL);
+
+    TransformHKL alg;
+    TS_ASSERT_THROWS_NOTHING(alg.initialize())
+    TS_ASSERT(alg.isInitialized())
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("PeaksWorkspace", "ws"));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("Tolerance", "0.1"));
+
+    // specify a matrix that will swap H and K and negate L
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("HKLTransform", "0,1,0,1,0,0,0,0,-1"));
+    TS_ASSERT_THROWS_NOTHING(alg.execute(););
+    TS_ASSERT(alg.isExecuted());
+
+    TS_ASSERT_EQUALS(ws->getPeak(0).getHKL(), V3D(0, 1, 0))
+    TS_ASSERT_EQUALS(ws->getPeak(1).getHKL(), V3D(2, 0, 0))
+    TS_ASSERT_EQUALS(ws->getPeak(2).getHKL(), V3D(0, 0, -3))
+  }
+
+  void test_exec_skip_FindError() {
+    auto ws = std::make_shared<LeanElasticPeaksWorkspace>();
+    AnalysisDataService::Instance().addOrReplace("ws", ws);
+    auto lattice = std::make_unique<Mantid::Geometry::OrientedLattice>(5, 6, 7, 90, 90, 120);
+    ws->mutableSample().setOrientedLattice(std::move(lattice));
+    ws->addPeak(V3D(1, 2, 0), SpecialCoordinateSystem::HKL);
+    ws->addPeak(V3D(0, 0, 3), SpecialCoordinateSystem::HKL);
+
+    TransformHKL alg;
+    TS_ASSERT_THROWS_NOTHING(alg.initialize())
+    TS_ASSERT(alg.isInitialized())
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("PeaksWorkspace", "ws"));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("Tolerance", "0.1"));
+
+    // skip error calculation for lattice parameters
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("FindError", false));
+
+    // specify a matrix that will swap H and K and negate L
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("HKLTransform", "0,1,0,1,0,0,0,0,-1"));
+    TS_ASSERT_THROWS_NOTHING(alg.execute(););
+    TS_ASSERT(alg.isExecuted());
+
+    TS_ASSERT_EQUALS(ws->getPeak(0).getHKL(), V3D(2, 1, 0))
+    TS_ASSERT_EQUALS(ws->getPeak(1).getHKL(), V3D(0, 0, -3))
+
+    auto lat = ws->sample().getOrientedLattice();
+
+    TS_ASSERT_DELTA(lat.errora(), 0.0, 1e-6)
+    TS_ASSERT_DELTA(lat.errorb(), 0.0, 1e-6)
+    TS_ASSERT_DELTA(lat.errorc(), 0.0, 1e-6)
+    TS_ASSERT_DELTA(lat.erroralpha(), 0.0, 1e-6)
+    TS_ASSERT_DELTA(lat.errorbeta(), 0.0, 1e-6)
+    TS_ASSERT_DELTA(lat.errorgamma(), 0.0, 1e-6)
   }
 };

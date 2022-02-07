@@ -44,20 +44,15 @@ public:
 
   double twoTheta() const { return m_detectorInfo->twoTheta(m_index); }
 
-  Mantid::Kernel::V3D position() const {
-    return m_detectorInfo->position(m_index);
-  }
+  Mantid::Kernel::V3D position() const { return m_detectorInfo->position(m_index); }
 
-  Mantid::Kernel::Quat rotation() const {
-    return m_detectorInfo->rotation(m_index);
-  }
+  Mantid::Kernel::Quat rotation() const { return m_detectorInfo->rotation(m_index); }
 
   double l2() const { return m_detectorInfo->l2(m_index); }
 
   size_t index() const { return m_index; }
 
-  DetectorInfoItem(T &detectorInfo, const size_t index)
-      : m_detectorInfo(&detectorInfo), m_index(index) {}
+  DetectorInfoItem(T &detectorInfo, const size_t index) : m_detectorInfo(&detectorInfo), m_index(index) {}
 
   // Non-owning pointer. A reference makes the class unable to define an
   // assignment operator that we need.

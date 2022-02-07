@@ -70,7 +70,6 @@ using namespace Mantid::API;
 int getNumberOfSpectra(const MatrixWorkspace_sptr &workspace) {
   return static_cast<int>(workspace->getNumberHistograms());
 }
-
 } // namespace
 
 /**
@@ -79,41 +78,29 @@ int getNumberOfSpectra(const MatrixWorkspace_sptr &workspace) {
  * @param mantidui :: The UI form for MantidPlot
  */
 FitPropertyBrowser::FitPropertyBrowser(QWidget *parent, QObject *mantidui)
-    : QDockWidget("Fit Function", parent), m_workspaceIndex(nullptr),
-      m_startX(nullptr), m_endX(nullptr), m_output(nullptr),
-      m_minimizer(nullptr), m_ignoreInvalidData(nullptr),
-      m_costFunction(nullptr), m_maxIterations(nullptr), m_peakRadius(nullptr),
-      m_logValue(nullptr), m_plotDiff(nullptr), m_excludeRange(nullptr),
-      m_plotCompositeMembers(nullptr), m_convolveMembers(nullptr),
-      m_rawData(nullptr), m_xColumn(nullptr), m_yColumn(nullptr),
-      m_errColumn(nullptr), m_showParamErrors(nullptr),
-      m_evaluationType(nullptr), m_compositeFunction(), m_browser(nullptr),
-      m_fitActionUndoFit(nullptr), m_fitActionSeqFit(nullptr),
-      m_fitActionFit(nullptr), m_fitActionEvaluate(nullptr),
-      m_functionsGroup(nullptr), m_settingsGroup(nullptr),
-      m_customSettingsGroup(nullptr), m_changeSlotsEnabled(false),
-      m_guessOutputName(true),
-      m_updateObserver(*this, &FitPropertyBrowser::handleFactoryUpdate),
-      m_fitMapper(nullptr), m_fitMenu(nullptr),
-      m_displayActionPlotGuess(nullptr), m_displayActionQuality(nullptr),
-      m_displayActionClearAll(nullptr), m_setupActionCustomSetup(nullptr),
-      m_setupActionRemove(nullptr), m_tip(nullptr), m_fitSelector(nullptr),
-      m_fitTree(nullptr), m_currentHandler(nullptr),
-      m_defaultFunction("Gaussian"), m_defaultPeak("Gaussian"),
-      m_defaultBackground("LinearBackground"), m_peakToolOn(false),
-      m_auto_back(false),
-      m_autoBgName(QString::fromStdString(
-          Mantid::Kernel::ConfigService::Instance().getString(
-              "curvefitting.autoBackground"))),
-      m_autoBackground(nullptr), m_decimals(-1), m_mantidui(mantidui),
-      m_shouldBeNormalised(false), m_oldWorkspaceIndex(-1) {
+    : QDockWidget("Fit Function", parent), m_workspaceIndex(nullptr), m_startX(nullptr), m_endX(nullptr),
+      m_output(nullptr), m_minimizer(nullptr), m_ignoreInvalidData(nullptr), m_costFunction(nullptr),
+      m_maxIterations(nullptr), m_peakRadius(nullptr), m_logValue(nullptr), m_plotDiff(nullptr),
+      m_excludeRange(nullptr), m_plotCompositeMembers(nullptr), m_convolveMembers(nullptr), m_rawData(nullptr),
+      m_xColumn(nullptr), m_yColumn(nullptr), m_errColumn(nullptr), m_showParamErrors(nullptr),
+      m_evaluationType(nullptr), m_compositeFunction(), m_browser(nullptr), m_fitActionUndoFit(nullptr),
+      m_fitActionSeqFit(nullptr), m_fitActionFit(nullptr), m_fitActionEvaluate(nullptr), m_functionsGroup(nullptr),
+      m_settingsGroup(nullptr), m_customSettingsGroup(nullptr), m_changeSlotsEnabled(false), m_guessOutputName(true),
+      m_updateObserver(*this, &FitPropertyBrowser::handleFactoryUpdate), m_fitMapper(nullptr), m_fitMenu(nullptr),
+      m_displayActionPlotGuess(nullptr), m_displayActionQuality(nullptr), m_displayActionClearAll(nullptr),
+      m_setupActionCustomSetup(nullptr), m_setupActionRemove(nullptr), m_tip(nullptr), m_fitSelector(nullptr),
+      m_fitTree(nullptr), m_currentHandler(nullptr), m_defaultFunction("Gaussian"), m_defaultPeak("Gaussian"),
+      m_defaultBackground("LinearBackground"), m_peakToolOn(false), m_hideWsListWidget(false), m_auto_back(false),
+      m_autoBgName(
+          QString::fromStdString(Mantid::Kernel::ConfigService::Instance().getString("curvefitting.autoBackground"))),
+      m_autoBackground(nullptr), m_decimals(-1), m_mantidui(mantidui), m_shouldBeNormalised(false),
+      m_fitAlgParameters(""), m_oldWorkspaceIndex(-1) {
   Mantid::API::FrameworkManager::Instance().loadPlugins();
 
   // If Gaussian does not exist then the plugins did not load.
   if (!Mantid::API::FunctionFactory::Instance().exists("Gaussian")) {
-    throw std::runtime_error(
-        "FitPropertyBrowser: Unable to find Gaussian function\n"
-        "Has the CurveFitting plugin loaded?");
+    throw std::runtime_error("FitPropertyBrowser: Unable to find Gaussian function\n"
+                             "Has the CurveFitting plugin loaded?");
   }
   if (m_autoBgName.toLower() == "none") {
     m_autoBgName = "";
@@ -121,21 +108,18 @@ FitPropertyBrowser::FitPropertyBrowser(QWidget *parent, QObject *mantidui)
     setAutoBackgroundName(m_autoBgName);
   }
 
-  std::string def = Mantid::Kernel::ConfigService::Instance().getString(
-      "curvefitting.defaultPeak");
+  std::string def = Mantid::Kernel::ConfigService::Instance().getString("curvefitting.defaultPeak");
   if (!def.empty()) {
     m_defaultPeak = def;
   }
 
-  def = Mantid::Kernel::ConfigService::Instance().getString(
-      "curvefitting.autoBackground");
+  def = Mantid::Kernel::ConfigService::Instance().getString("curvefitting.autoBackground");
   if (!def.empty()) {
     m_defaultBackground = def;
   }
   m_defaultFunction = m_defaultPeak;
 
-  setObjectName(
-      "FitFunction"); // this is needed for QMainWindow::restoreState()
+  setObjectName("FitFunction"); // this is needed for QMainWindow::restoreState()
   setMinimumHeight(150);
   setMinimumWidth(200);
 
@@ -172,8 +156,7 @@ void FitPropertyBrowser::init() {
   QtProperty *functionsGroup = m_groupManager->addProperty("Functions");
 
   if (m_mantidui) {
-    connect(this, SIGNAL(xRangeChanged(double, double)), m_mantidui,
-            SLOT(x_range_from_picker(double, double)));
+    connect(this, SIGNAL(xRangeChanged(double, double)), m_mantidui, SLOT(x_range_from_picker(double, double)));
   }
   /* Create input - output properties */
   QtProperty *settingsGroup = m_groupManager->addProperty("Settings");
@@ -204,47 +187,37 @@ void FitPropertyBrowser::init() {
                   << "Poisson";
   m_enumManager->setEnumNames(m_costFunction, m_costFunctions);
   m_maxIterations = m_intManager->addProperty("Max Iterations");
-  m_intManager->setValue(m_maxIterations,
-                         settings.value("Max Iterations", 500).toInt());
+  m_intManager->setValue(m_maxIterations, settings.value("Max Iterations", 500).toInt());
 
   m_peakRadius = m_intManager->addProperty("Peak Radius");
-  m_intManager->setValue(m_peakRadius,
-                         settings.value("Peak Radius", 0).toInt());
+  m_intManager->setValue(m_peakRadius, settings.value("Peak Radius", 0).toInt());
 
   m_plotDiff = m_boolManager->addProperty("Plot Difference");
   bool plotDiff = settings.value("Plot Difference", QVariant(true)).toBool();
   m_boolManager->setValue(m_plotDiff, plotDiff);
 
   m_excludeRange = m_stringManager->addProperty("Exclude Range");
-  m_excludeRange->setToolTip(
-      "A list of pairs of real numbers which define the region to exclude");
+  m_excludeRange->setToolTip("A list of pairs of real numbers which define the region to exclude");
 
   m_plotCompositeMembers = m_boolManager->addProperty("Plot Composite Members");
-  bool plotCompositeItems =
-      settings.value(m_plotCompositeMembers->propertyName(), QVariant(false))
-          .toBool();
+  bool plotCompositeItems = settings.value(m_plotCompositeMembers->propertyName(), QVariant(false)).toBool();
   m_boolManager->setValue(m_plotCompositeMembers, plotCompositeItems);
 
   m_convolveMembers = m_boolManager->addProperty("Convolve Composite Members");
-  bool convolveCompositeItems =
-      settings.value(m_plotCompositeMembers->propertyName(), QVariant(false))
-          .toBool();
+  bool convolveCompositeItems = settings.value(m_plotCompositeMembers->propertyName(), QVariant(false)).toBool();
   m_boolManager->setValue(m_convolveMembers, convolveCompositeItems);
 
   m_showParamErrors = m_boolManager->addProperty("Show Parameter Errors");
-  bool showParamErrors =
-      settings.value(m_showParamErrors->propertyName(), false).toBool();
+  bool showParamErrors = settings.value(m_showParamErrors->propertyName(), false).toBool();
   m_boolManager->setValue(m_showParamErrors, showParamErrors);
   m_parameterManager->setErrorsEnabled(showParamErrors);
 
   m_evaluationType = m_enumManager->addProperty("Evaluate Function As");
-  m_evaluationType->setToolTip(
-      "Consider using Histogram fit which may produce more accurate results.");
+  m_evaluationType->setToolTip("Consider using Histogram fit which may produce more accurate results.");
   m_evaluationTypes << "CentrePoint"
                     << "Histogram";
   m_enumManager->setEnumNames(m_evaluationType, m_evaluationTypes);
-  int evaluationType =
-      settings.value(m_evaluationType->propertyName(), 0).toInt();
+  int evaluationType = settings.value(m_evaluationType->propertyName(), 0).toInt();
   m_enumManager->setValue(m_evaluationType, evaluationType);
 
   m_xColumn = m_columnManager->addProperty("XColumn");
@@ -308,8 +281,7 @@ QPushButton *FitPropertyBrowser::createFitMenuButton(QWidget *w) {
   m_fitMapper = new QSignalMapper(this);
   m_fitMenu = new QMenu(this);
   populateFitMenuButton(m_fitMapper, m_fitMenu);
-  connect(m_fitMapper, SIGNAL(mapped(const QString &)), this,
-          SLOT(executeFitMenu(const QString &)));
+  connect(m_fitMapper, SIGNAL(mapped(const QString &)), this, SLOT(executeFitMenu(const QString &)));
   btnFit->setMenu(m_fitMenu);
   return btnFit;
 }
@@ -322,8 +294,7 @@ QPushButton *FitPropertyBrowser::createFitMenuButton(QWidget *w) {
  * @param fitMapper the QMap to the fit mapper
  * @param fitMenu the QMenu for the fit button
  */
-void FitPropertyBrowser::populateFitMenuButton(QSignalMapper *fitMapper,
-                                               QMenu *fitMenu) {
+void FitPropertyBrowser::populateFitMenuButton(QSignalMapper *fitMapper, QMenu *fitMenu) {
   // assert(fitmapper);
 
   m_fitActionFit = new QAction("Fit", this);
@@ -361,35 +332,23 @@ void FitPropertyBrowser::initBasicLayout(QWidget *w) {
   QPushButton *btnFit = createFitMenuButton(w);
   btnFit->setObjectName("button_Fit");
   // to be able to change windows title from tread
-  connect(this, SIGNAL(changeWindowTitle(const QString &)), this,
-          SLOT(setWindowTitle(const QString &)));
+  connect(this, SIGNAL(changeWindowTitle(const QString &)), this, SLOT(setWindowTitle(const QString &)));
 
   /* Create the top level group */
 
   m_groupManager->addProperty("Fit");
 
-  connect(m_enumManager, SIGNAL(propertyChanged(QtProperty *)), this,
-          SLOT(enumChanged(QtProperty *)));
-  connect(m_boolManager, SIGNAL(propertyChanged(QtProperty *)), this,
-          SLOT(boolChanged(QtProperty *)));
-  connect(m_intManager, SIGNAL(propertyChanged(QtProperty *)), this,
-          SLOT(intChanged(QtProperty *)));
-  connect(m_doubleManager, SIGNAL(propertyChanged(QtProperty *)), this,
-          SLOT(doubleChanged(QtProperty *)));
-  connect(m_stringManager, SIGNAL(propertyChanged(QtProperty *)), this,
-          SLOT(stringChanged(QtProperty *)));
-  connect(m_filenameManager, SIGNAL(propertyChanged(QtProperty *)), this,
-          SLOT(stringChanged(QtProperty *)));
-  connect(m_formulaManager, SIGNAL(propertyChanged(QtProperty *)), this,
-          SLOT(stringChanged(QtProperty *)));
-  connect(m_columnManager, SIGNAL(propertyChanged(QtProperty *)), this,
-          SLOT(columnChanged(QtProperty *)));
-  connect(m_vectorDoubleManager, SIGNAL(propertyChanged(QtProperty *)), this,
-          SLOT(vectorDoubleChanged(QtProperty *)));
-  connect(m_parameterManager, SIGNAL(propertyChanged(QtProperty *)), this,
-          SLOT(parameterChanged(QtProperty *)));
-  connect(m_vectorSizeManager, SIGNAL(propertyChanged(QtProperty *)), this,
-          SLOT(vectorSizeChanged(QtProperty *)));
+  connect(m_enumManager, SIGNAL(propertyChanged(QtProperty *)), this, SLOT(enumChanged(QtProperty *)));
+  connect(m_boolManager, SIGNAL(propertyChanged(QtProperty *)), this, SLOT(boolChanged(QtProperty *)));
+  connect(m_intManager, SIGNAL(propertyChanged(QtProperty *)), this, SLOT(intChanged(QtProperty *)));
+  connect(m_doubleManager, SIGNAL(propertyChanged(QtProperty *)), this, SLOT(doubleChanged(QtProperty *)));
+  connect(m_stringManager, SIGNAL(propertyChanged(QtProperty *)), this, SLOT(stringChanged(QtProperty *)));
+  connect(m_filenameManager, SIGNAL(propertyChanged(QtProperty *)), this, SLOT(stringChanged(QtProperty *)));
+  connect(m_formulaManager, SIGNAL(propertyChanged(QtProperty *)), this, SLOT(stringChanged(QtProperty *)));
+  connect(m_columnManager, SIGNAL(propertyChanged(QtProperty *)), this, SLOT(columnChanged(QtProperty *)));
+  connect(m_vectorDoubleManager, SIGNAL(propertyChanged(QtProperty *)), this, SLOT(vectorDoubleChanged(QtProperty *)));
+  connect(m_parameterManager, SIGNAL(propertyChanged(QtProperty *)), this, SLOT(parameterChanged(QtProperty *)));
+  connect(m_vectorSizeManager, SIGNAL(propertyChanged(QtProperty *)), this, SLOT(vectorSizeChanged(QtProperty *)));
 
   auto *layout = new QVBoxLayout(w);
   layout->setObjectName("vlayout");
@@ -412,14 +371,10 @@ void FitPropertyBrowser::initBasicLayout(QWidget *w) {
   displayMapper->setMapping(m_displayActionPlotGuess, "PlotGuess");
   displayMapper->setMapping(m_displayActionQuality, "Quality");
   displayMapper->setMapping(m_displayActionClearAll, "ClearAll");
-  connect(m_displayActionPlotGuess, SIGNAL(triggered()), displayMapper,
-          SLOT(map()));
-  connect(m_displayActionQuality, SIGNAL(triggered()), displayMapper,
-          SLOT(map()));
-  connect(m_displayActionClearAll, SIGNAL(triggered()), displayMapper,
-          SLOT(map()));
-  connect(displayMapper, SIGNAL(mapped(const QString &)), this,
-          SLOT(executeDisplayMenu(const QString &)));
+  connect(m_displayActionPlotGuess, SIGNAL(triggered()), displayMapper, SLOT(map()));
+  connect(m_displayActionQuality, SIGNAL(triggered()), displayMapper, SLOT(map()));
+  connect(m_displayActionClearAll, SIGNAL(triggered()), displayMapper, SLOT(map()));
+  connect(displayMapper, SIGNAL(mapped(const QString &)), this, SLOT(executeDisplayMenu(const QString &)));
   displayMenu->addAction(m_displayActionPlotGuess);
   displayMenu->addAction(m_displayActionClearAll);
   displayMenu->addAction(m_displayActionQuality);
@@ -446,6 +401,8 @@ void FitPropertyBrowser::initBasicLayout(QWidget *w) {
   QMenu *setupSubMenuManage = new QMenu(this);
   QAction *setupActionSave = new QAction("Save Setup", this);
   m_setupActionRemove = new QAction("Remove Setup", this);
+  QAction *setupActionClear = new QAction("Clear Setups", this);
+  setupActionClear->setObjectName("action_ClearSetups");
   QAction *setupActionCopyToClipboard = new QAction("Copy To Clipboard", this);
   setupActionCopyToClipboard->setObjectName("action_CopyToClipboard");
   QAction *setupActionLoadFromString = new QAction("Load From String", this);
@@ -454,15 +411,15 @@ void FitPropertyBrowser::initBasicLayout(QWidget *w) {
   setupManageMapper->setMapping(setupActionSave, "SaveSetup");
   setupManageMapper->setMapping(setupActionCopyToClipboard, "CopyToClipboard");
   setupManageMapper->setMapping(setupActionLoadFromString, "LoadFromString");
+  setupManageMapper->setMapping(setupActionClear, "ClearSetups");
   connect(setupActionSave, SIGNAL(triggered()), setupManageMapper, SLOT(map()));
-  connect(setupActionCopyToClipboard, SIGNAL(triggered()), setupManageMapper,
-          SLOT(map()));
-  connect(setupActionLoadFromString, SIGNAL(triggered()), setupManageMapper,
-          SLOT(map()));
-  connect(setupManageMapper, SIGNAL(mapped(const QString &)), this,
-          SLOT(executeSetupManageMenu(const QString &)));
+  connect(setupActionCopyToClipboard, SIGNAL(triggered()), setupManageMapper, SLOT(map()));
+  connect(setupActionLoadFromString, SIGNAL(triggered()), setupManageMapper, SLOT(map()));
+  connect(setupActionClear, SIGNAL(triggered()), setupManageMapper, SLOT(map()));
+  connect(setupManageMapper, SIGNAL(mapped(const QString &)), this, SLOT(executeSetupManageMenu(const QString &)));
   setupSubMenuManage->addAction(setupActionSave);
   setupSubMenuManage->addAction(m_setupActionRemove);
+  setupSubMenuManage->addAction(setupActionClear);
   setupSubMenuManage->addAction(setupActionCopyToClipboard);
   setupSubMenuManage->addAction(setupActionLoadFromString);
   setupActionManageSetup->setMenu(setupSubMenuManage);
@@ -477,8 +434,7 @@ void FitPropertyBrowser::initBasicLayout(QWidget *w) {
   setupMapper->setMapping(setupActionFindPeaks, "FindPeaks");
   connect(setupActionClearFit, SIGNAL(triggered()), setupMapper, SLOT(map()));
   connect(setupActionFindPeaks, SIGNAL(triggered()), setupMapper, SLOT(map()));
-  connect(setupMapper, SIGNAL(mapped(const QString &)), this,
-          SLOT(executeSetupMenu(const QString &)));
+  connect(setupMapper, SIGNAL(mapped(const QString &)), this, SLOT(executeSetupMenu(const QString &)));
 
   setupMenu->addAction(m_setupActionCustomSetup);
   setupMenu->addAction(setupActionManageSetup);
@@ -496,8 +452,8 @@ void FitPropertyBrowser::initBasicLayout(QWidget *w) {
 
   m_status = new QLabel("Status:", w);
   m_status->hide();
-  connect(this, SIGNAL(fitResultsChanged(const QString &)), this,
-          SLOT(showFitResultStatus(const QString &)), Qt::QueuedConnection);
+  connect(this, SIGNAL(fitResultsChanged(const QString &)), this, SLOT(showFitResultStatus(const QString &)),
+          Qt::QueuedConnection);
   layout->addWidget(m_status);
   layout->addLayout(buttonsLayout);
   layout->addWidget(m_tip);
@@ -514,12 +470,9 @@ void FitPropertyBrowser::initBasicLayout(QWidget *w) {
   setWidget(w);
 
   m_browser->setContextMenuPolicy(Qt::CustomContextMenu);
-  connect(m_browser, SIGNAL(customContextMenuRequested(const QPoint &)), this,
-          SLOT(popupMenu(const QPoint &)));
-  connect(m_browser, SIGNAL(currentItemChanged(QtBrowserItem *)), this,
-          SLOT(currentItemChanged(QtBrowserItem *)));
-  connect(this, SIGNAL(multifitFinished()), this,
-          SLOT(processMultiBGResults()));
+  connect(m_browser, SIGNAL(customContextMenuRequested(const QPoint &)), this, SLOT(popupMenu(const QPoint &)));
+  connect(m_browser, SIGNAL(currentItemChanged(QtBrowserItem *)), this, SLOT(currentItemChanged(QtBrowserItem *)));
+  connect(this, SIGNAL(multifitFinished()), this, SLOT(processMultiBGResults()));
 
   connect(m_wsListWidget, SIGNAL(itemDoubleClicked(QListWidgetItem *)), this,
           SLOT(workspaceDoubleClicked(QListWidgetItem *)));
@@ -535,8 +488,7 @@ void FitPropertyBrowser::initBasicLayout(QWidget *w) {
   // factory changes.
   using Mantid::API::FunctionFactory;
   FunctionFactory::Instance().notificationCenter.addObserver(m_updateObserver);
-  connect(this, SIGNAL(functionFactoryUpdateReceived()), this,
-          SLOT(populateFunctionNames()));
+  connect(this, SIGNAL(functionFactoryUpdateReceived()), this, SLOT(populateFunctionNames()));
   FunctionFactory::Instance().enableNotifications();
 
   // Initial call, as function is not changed when it's created for the first
@@ -559,18 +511,15 @@ void FitPropertyBrowser::addFitResultWorkspacesToTableWidget() {
 
   for (const auto &name : workspaceNames) {
     // check if already in the list
-    auto foundInList = m_wsListWidget->findItems(QString::fromStdString(name),
-                                                 Qt::MatchExactly);
-    if (foundInList.size() == 0 &&
-        AnalysisDataService::Instance().doesExist(name)) {
+    auto foundInList = m_wsListWidget->findItems(QString::fromStdString(name), Qt::MatchExactly);
+    if (foundInList.size() == 0 && AnalysisDataService::Instance().doesExist(name)) {
       new QListWidgetItem(QString::fromStdString(name), m_wsListWidget);
     }
   }
 
   auto noOfItems = m_wsListWidget->count();
-  if (noOfItems != 0) {
-    auto height = m_wsListWidget->sizeHintForRow(0) * (noOfItems + 1) +
-                  2 * m_wsListWidget->frameWidth();
+  if (noOfItems != 0 && !m_hideWsListWidget) {
+    auto height = m_wsListWidget->sizeHintForRow(0) * (noOfItems + 1) + 2 * m_wsListWidget->frameWidth();
     m_wsListWidget->setMaximumHeight(height);
     m_workspaceLabel->show();
     m_wsListWidget->show();
@@ -595,10 +544,8 @@ void FitPropertyBrowser::createEditors(QWidget *w) {
   QtSpinBoxFactory *spinBoxFactory = new QtSpinBoxFactory(w);
   DoubleEditorFactory *doubleEditorFactory = new DoubleEditorFactory(w);
   StringEditorFactory *stringEditFactory = new StringEditorFactory(w);
-  FilenameDialogEditorFactory *filenameDialogEditorFactory =
-      new FilenameDialogEditorFactory(w);
-  FormulaDialogEditorFactory *formulaDialogEditFactory =
-      new FormulaDialogEditorFactory(w);
+  FilenameDialogEditorFactory *filenameDialogEditorFactory = new FilenameDialogEditorFactory(w);
+  FormulaDialogEditorFactory *formulaDialogEditFactory = new FormulaDialogEditorFactory(w);
 
   m_browser = new QtTreePropertyBrowser();
   m_browser->setFactoryForManager(m_enumManager, comboBoxFactory);
@@ -606,14 +553,12 @@ void FitPropertyBrowser::createEditors(QWidget *w) {
   m_browser->setFactoryForManager(m_intManager, spinBoxFactory);
   m_browser->setFactoryForManager(m_doubleManager, doubleEditorFactory);
   m_browser->setFactoryForManager(m_stringManager, stringEditFactory);
-  m_browser->setFactoryForManager(m_filenameManager,
-                                  filenameDialogEditorFactory);
+  m_browser->setFactoryForManager(m_filenameManager, filenameDialogEditorFactory);
   m_browser->setFactoryForManager(m_formulaManager, formulaDialogEditFactory);
   m_browser->setFactoryForManager(m_columnManager, comboBoxFactory);
   m_browser->setFactoryForManager(m_vectorSizeManager, spinBoxFactory);
   m_browser->setFactoryForManager(m_vectorDoubleManager, doubleEditorFactory);
-  m_browser->setFactoryForManager(m_parameterManager,
-                                  new ParameterEditorFactory(w));
+  m_browser->setFactoryForManager(m_parameterManager, new ParameterEditorFactory(w));
 }
 
 /// Update setup menus according to how these are set in
@@ -644,10 +589,8 @@ void FitPropertyBrowser::updateSetupMenus() {
     menuLoad->addAction(itemLoad);
     menuRemove->addAction(itemRemove);
   }
-  connect(mapperLoad, SIGNAL(mapped(const QString &)), this,
-          SLOT(executeCustomSetupLoad(const QString &)));
-  connect(mapperRemove, SIGNAL(mapped(const QString &)), this,
-          SLOT(executeCustomSetupRemove(const QString &)));
+  connect(mapperLoad, SIGNAL(mapped(const QString &)), this, SLOT(executeCustomSetupLoad(const QString &)));
+  connect(mapperRemove, SIGNAL(mapped(const QString &)), this, SLOT(executeCustomSetupRemove(const QString &)));
 }
 
 void FitPropertyBrowser::executeCustomSetupLoad(const QString &name) {
@@ -663,6 +606,14 @@ void FitPropertyBrowser::executeCustomSetupRemove(const QString &name) {
   settings.beginGroup("Mantid/FitBrowser/SavedFunctions");
 
   settings.remove(name);
+  updateSetupMenus();
+}
+
+void FitPropertyBrowser::executeClearCustomSetups() {
+  QSettings settings;
+  settings.beginGroup("Mantid/FitBrowser/SavedFunctions");
+
+  settings.clear();
   updateSetupMenus();
 }
 
@@ -704,6 +655,8 @@ void FitPropertyBrowser::executeSetupMenu(const QString &item) {
 void FitPropertyBrowser::executeSetupManageMenu(const QString &item) {
   if (item == "SaveSetup")
     saveFunction();
+  if (item == "ClearSetups")
+    executeClearCustomSetups();
   if (item == "CopyToClipboard")
     copy();
   if (item == "LoadFromString")
@@ -716,8 +669,7 @@ FitPropertyBrowser::~FitPropertyBrowser() {
 
   // remove the FunctionFactory Observer
   using Mantid::API::FunctionFactory;
-  FunctionFactory::Instance().notificationCenter.removeObserver(
-      m_updateObserver);
+  FunctionFactory::Instance().notificationCenter.removeObserver(m_updateObserver);
 
   m_browser->unsetFactoryForManager(m_enumManager);
   m_browser->unsetFactoryForManager(m_boolManager);
@@ -745,11 +697,11 @@ PropertyHandler *FitPropertyBrowser::addFunction(const std::string &fnName) {
 
 void FitPropertyBrowser::removeFunction(PropertyHandler *handler) {
   if (handler) {
+    emit functionRemoved();
+    emit functionChanged();
     emit removePlotSignal(getHandler());
     handler->removeFunction();
     compositeFunction()->checkFunction();
-    emit functionRemoved();
-    emit functionChanged();
   }
 }
 
@@ -772,8 +724,7 @@ void FitPropertyBrowser::addFunction() {
 
 void FitPropertyBrowser::acceptFit() {
   QtBrowserItem *ci = m_browser->currentItem();
-  std::shared_ptr<const Mantid::API::CompositeFunction> cf =
-      getHandler()->findCompositeFunction(ci);
+  std::shared_ptr<const Mantid::API::CompositeFunction> cf = getHandler()->findCompositeFunction(ci);
   if (!cf)
     return;
   auto function = m_fitSelector->getFunction();
@@ -793,8 +744,7 @@ void FitPropertyBrowser::closeFit() { m_fitSelector->close(); }
  * Create CompositeFunction from function pointer
  * @param func :: [input] Pointer to function
  */
-void FitPropertyBrowser::createCompositeFunction(
-    const Mantid::API::IFunction_sptr &func) {
+void FitPropertyBrowser::createCompositeFunction(const Mantid::API::IFunction_sptr &func) {
   if (m_compositeFunction) {
     emit functionRemoved();
     m_autoBackground = nullptr;
@@ -803,8 +753,7 @@ void FitPropertyBrowser::createCompositeFunction(
     m_compositeFunction.reset(new Mantid::API::CompositeFunction);
   } else {
     auto cf = std::dynamic_pointer_cast<Mantid::API::CompositeFunction>(func);
-    if (!cf || (cf->name() != "CompositeFunction" && cf->name() != "MultiBG" &&
-                cf->name() != "MultiDomainFunction")) {
+    if (!cf || (cf->name() != "CompositeFunction" && cf->name() != "MultiBG" && cf->name() != "MultiDomainFunction")) {
       m_compositeFunction.reset(new Mantid::API::CompositeFunction);
       m_compositeFunction->addFunction(func);
     } else {
@@ -813,11 +762,9 @@ void FitPropertyBrowser::createCompositeFunction(
   }
   setWorkspace(m_compositeFunction);
 
-  auto h = std::make_unique<PropertyHandler>(
-      m_compositeFunction, Mantid::API::CompositeFunction_sptr(), this);
+  auto h = std::make_unique<PropertyHandler>(m_compositeFunction, Mantid::API::CompositeFunction_sptr(), this);
   m_compositeFunction->setHandler(std::move(h));
-  setCurrentFunction(
-      static_cast<PropertyHandler *>(m_compositeFunction->getHandler()));
+  setCurrentFunction(static_cast<PropertyHandler *>(m_compositeFunction->getHandler()));
 
   if (m_auto_back) {
     addAutoBackground();
@@ -845,15 +792,11 @@ void FitPropertyBrowser::createCompositeFunction(const QString &str) {
   }
 }
 
-Mantid::API::IFunction_sptr
-FitPropertyBrowser::tryCreateFitFunction(const QString &str) {
+Mantid::API::IFunction_sptr FitPropertyBrowser::tryCreateFitFunction(const QString &str) {
   try {
-    return Mantid::API::FunctionFactory::Instance().createInitialized(
-        str.toStdString());
+    return Mantid::API::FunctionFactory::Instance().createInitialized(str.toStdString());
   } catch (const std::exception &ex) {
-    QMessageBox::critical(this, "Mantid - Error",
-                          "Unexpected exception caught:\n\n" +
-                              QString(ex.what()));
+    QMessageBox::critical(this, "Mantid - Error", "Unexpected exception caught:\n\n" + QString(ex.what()));
     return nullptr;
   }
 }
@@ -869,8 +812,7 @@ void FitPropertyBrowser::popupMenu(const QPoint & /*unused*/) {
   bool isSettingsGroup = ci == m_settingsGroup;
   bool isASetting = ci->parent() == m_settingsGroup;
   bool isFunction = getHandler()->findFunction(ci) != nullptr;
-  bool isCompositeFunction =
-      isFunction && getHandler()->findCompositeFunction(ci);
+  bool isCompositeFunction = isFunction && getHandler()->findCompositeFunction(ci);
 
   PropertyHandler *h = getHandler()->findHandler(ci->property());
 
@@ -879,10 +821,8 @@ void FitPropertyBrowser::popupMenu(const QPoint & /*unused*/) {
     connect(action, SIGNAL(triggered()), this, SLOT(addFunction()));
     menu->addAction(action);
 
-    if (m_compositeFunction->name() == "MultiBG" &&
-        m_compositeFunction->nFunctions() == 1 &&
-        Mantid::API::AnalysisDataService::Instance().doesExist(
-            workspaceName())) {
+    if (m_compositeFunction->name() == "MultiBG" && m_compositeFunction->nFunctions() == 1 &&
+        Mantid::API::AnalysisDataService::Instance().doesExist(workspaceName())) {
       action = new QAction("Setup multifit", this);
       connect(action, SIGNAL(triggered()), this, SLOT(setupMultifit()));
       menu->addAction(action);
@@ -971,10 +911,8 @@ void FitPropertyBrowser::popupMenu(const QPoint & /*unused*/) {
   } else if (h) {
     bool isParameter = h->isParameter(ci->property());
     bool isTie = !isParameter && ci->property()->propertyName() == "Tie";
-    bool isLowerBound =
-        !isParameter && ci->property()->propertyName() == "Lower Bound";
-    bool isUpperBound =
-        !isParameter && ci->property()->propertyName() == "Upper Bound";
+    bool isLowerBound = !isParameter && ci->property()->propertyName() == "Lower Bound";
+    bool isUpperBound = !isParameter && ci->property()->propertyName() == "Upper Bound";
     bool isType = isParameter && ci->property()->propertyName() == "Type";
     if (isType) {
       isParameter = false;
@@ -1086,21 +1024,16 @@ void FitPropertyBrowser::deleteFunction() {
 //
 
 // Get the default function name
-std::string FitPropertyBrowser::defaultFunctionType() const {
-  return m_defaultFunction;
-}
+std::string FitPropertyBrowser::defaultFunctionType() const { return m_defaultFunction; }
 
 // Set the default function name
-void FitPropertyBrowser::setDefaultFunctionType(const std::string &fnType) {
-  m_defaultFunction = fnType;
-}
+void FitPropertyBrowser::setDefaultFunctionType(const std::string &fnType) { m_defaultFunction = fnType; }
 
 /// Get the default peak type
 std::string FitPropertyBrowser::defaultPeakType() {
   // If the default peak is not in registered peaks, default to Gaussian
   if (m_registeredPeaks.indexOf(QString::fromStdString(m_defaultPeak)) == -1) {
-    g_log.warning("Could not find peak function: '" + m_defaultPeak +
-                  "'. Defaulting to Gaussian.");
+    g_log.warning("Could not find peak function: '" + m_defaultPeak + "'. Defaulting to Gaussian.");
     setDefaultPeakType("Gaussian");
   }
   return m_defaultPeak;
@@ -1109,21 +1042,16 @@ std::string FitPropertyBrowser::defaultPeakType() {
 void FitPropertyBrowser::setDefaultPeakType(const std::string &fnType) {
   m_defaultPeak = fnType;
   setDefaultFunctionType(fnType);
-  Mantid::Kernel::ConfigService::Instance().setString(
-      "curvefitting.defaultPeak", fnType);
 }
 /// Get the default background type
-std::string FitPropertyBrowser::defaultBackgroundType() const {
-  return m_defaultBackground;
-}
+std::string FitPropertyBrowser::defaultBackgroundType() const { return m_defaultBackground; }
 /// Set the default background type
 void FitPropertyBrowser::setDefaultBackgroundType(const std::string &fnType) {
   m_defaultBackground = fnType;
   setDefaultFunctionType(fnType);
 }
 
-std::shared_ptr<Mantid::API::Workspace>
-FitPropertyBrowser::getWorkspace() const {
+std::shared_ptr<Mantid::API::Workspace> FitPropertyBrowser::getWorkspace() const {
   std::string wsName = workspaceName();
   if (wsName.empty())
     return std::shared_ptr<Mantid::API::Workspace>();
@@ -1158,8 +1086,7 @@ void FitPropertyBrowser::setWorkspaceName(const QString &wsName) {
     Mantid::API::MatrixWorkspace_sptr mws;
     try {
       mws = std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
-          Mantid::API::AnalysisDataService::Instance().retrieve(
-              wsName.toStdString()));
+          Mantid::API::AnalysisDataService::Instance().retrieve(wsName.toStdString()));
     } catch (Mantid::Kernel::Exception::NotFoundError &) {
     }
     if (mws) {
@@ -1174,9 +1101,7 @@ void FitPropertyBrowser::setWorkspaceName(const QString &wsName) {
 }
 
 /// Get workspace index
-int FitPropertyBrowser::workspaceIndex() const {
-  return m_intManager->value(m_workspaceIndex);
-}
+int FitPropertyBrowser::workspaceIndex() const { return m_intManager->value(m_workspaceIndex); }
 
 /// Set workspace index
 void FitPropertyBrowser::setWorkspaceIndex(int i) {
@@ -1189,9 +1114,7 @@ void FitPropertyBrowser::setWorkspaceIndex(int i) {
 }
 
 /// Get the output name
-std::string FitPropertyBrowser::outputName() const {
-  return m_stringManager->value(m_output).toStdString();
-}
+std::string FitPropertyBrowser::outputName() const { return m_stringManager->value(m_output).toStdString(); }
 
 /// Set the output name
 void FitPropertyBrowser::setOutputName(const std::string &name) {
@@ -1230,14 +1153,10 @@ std::string FitPropertyBrowser::minimizer(bool withProperties) const {
 }
 
 /// Get the ignore invalid data option
-bool FitPropertyBrowser::ignoreInvalidData() const {
-  return m_boolManager->value(m_ignoreInvalidData);
-}
+bool FitPropertyBrowser::ignoreInvalidData() const { return m_boolManager->value(m_ignoreInvalidData); }
 
 /// Set the ignore invalid data option
-void FitPropertyBrowser::setIgnoreInvalidData(bool on) {
-  m_boolManager->setValue(m_ignoreInvalidData, on);
-}
+void FitPropertyBrowser::setIgnoreInvalidData(bool on) { m_boolManager->setValue(m_ignoreInvalidData, on); }
 
 /// Get the cost function
 std::string FitPropertyBrowser::costFunction() const {
@@ -1248,9 +1167,7 @@ std::string FitPropertyBrowser::costFunction() const {
 /**
  * Get the "ConvolveMembers" option
  */
-bool FitPropertyBrowser::convolveMembers() const {
-  return m_boolManager->value(m_convolveMembers);
-}
+bool FitPropertyBrowser::convolveMembers() const { return m_boolManager->value(m_convolveMembers); }
 
 /// Get "HistogramFit" option
 bool FitPropertyBrowser::isHistogramFit() const {
@@ -1262,14 +1179,10 @@ bool FitPropertyBrowser::isHistogramFit() const {
 }
 
 /// Get the max number of iterations
-int FitPropertyBrowser::maxIterations() const {
-  return m_intManager->value(m_maxIterations);
-}
+int FitPropertyBrowser::maxIterations() const { return m_intManager->value(m_maxIterations); }
 
 /// Get the peak radius for peak functions
-int FitPropertyBrowser::getPeakRadius() const {
-  return m_intManager->value(m_peakRadius);
-}
+int FitPropertyBrowser::getPeakRadius() const { return m_intManager->value(m_peakRadius); }
 
 /// Get the excluded range
 std::string FitPropertyBrowser::getExcludeRange() const {
@@ -1278,8 +1191,7 @@ std::string FitPropertyBrowser::getExcludeRange() const {
 
 /// Get the registered function names
 void FitPropertyBrowser::populateFunctionNames() {
-  const std::vector<std::string> names =
-      Mantid::API::FunctionFactory::Instance().getFunctionNamesGUI();
+  const std::vector<std::string> names = Mantid::API::FunctionFactory::Instance().getFunctionNamesGUI();
   m_registeredFunctions.clear();
   m_registeredPeaks.clear();
   m_registeredBackgrounds.clear();
@@ -1293,16 +1205,14 @@ void FitPropertyBrowser::populateFunctionNames() {
     try {
       function = functionFactory.createFunction(fnName);
     } catch (std::exception &exc) {
-      g_log.warning() << "Unable to create " << fnName << ": " << exc.what()
-                      << "\n";
+      g_log.warning() << "Unable to create " << fnName << ": " << exc.what() << "\n";
       continue;
     }
     QString qfnName = QString::fromStdString(fnName);
     m_registeredFunctions << qfnName;
     if (dynamic_cast<Mantid::API::IPeakFunction *>(function.get())) {
       m_registeredPeaks << qfnName;
-    } else if (dynamic_cast<Mantid::API::IBackgroundFunction *>(
-                   function.get())) {
+    } else if (dynamic_cast<Mantid::API::IBackgroundFunction *>(function.get())) {
       m_registeredBackgrounds << qfnName;
     } else {
       m_registeredOther << qfnName;
@@ -1321,6 +1231,7 @@ void FitPropertyBrowser::enumChanged(QtProperty *prop) {
   if (prop == m_workspace) {
     workspaceChange(QString::fromStdString(workspaceName()));
     setWorkspaceProperties();
+    intChanged(m_workspaceIndex);
     m_storedWorkspaceName = workspaceName();
   } else if (prop->propertyName() == "Type") {
     disableUndo();
@@ -1330,8 +1241,7 @@ void FitPropertyBrowser::enumChanged(QtProperty *prop) {
     // if (!h->parentHandler()) return;
     auto f = h->changeType(prop);
     if (!h->parentHandler()) {
-      m_compositeFunction =
-          std::dynamic_pointer_cast<Mantid::API::CompositeFunction>(f);
+      m_compositeFunction = std::dynamic_pointer_cast<Mantid::API::CompositeFunction>(f);
     }
     if (f)
       setCurrentFunction(f);
@@ -1358,8 +1268,8 @@ void FitPropertyBrowser::boolChanged(QtProperty *prop) {
   if (!m_changeSlotsEnabled)
     return;
 
-  if (prop == m_plotDiff || prop == m_plotCompositeMembers ||
-      prop == m_ignoreInvalidData || prop == m_showParamErrors) {
+  if (prop == m_plotDiff || prop == m_plotCompositeMembers || prop == m_ignoreInvalidData ||
+      prop == m_showParamErrors) {
     bool val = m_boolManager->value(prop);
 
     QSettings settings;
@@ -1386,6 +1296,7 @@ void FitPropertyBrowser::intChanged(QtProperty *prop) {
     return;
 
   if (prop == m_workspaceIndex) {
+    // Get current value displayed by the workspace index spinbox
     auto const currentIndex = workspaceIndex();
     auto const allowedIndex = getAllowedIndex(currentIndex);
     if (allowedIndex != currentIndex) {
@@ -1508,14 +1419,12 @@ void FitPropertyBrowser::stringChanged(QtProperty *prop) {
     QString parName = h->functionPrefix() + "." + parProp->propertyName();
 
     QString str = m_stringManager->value(prop);
-    Mantid::API::ParameterTie *tie = new Mantid::API::ParameterTie(
-        compositeFunction().get(), parName.toStdString());
+    Mantid::API::ParameterTie *tie = new Mantid::API::ParameterTie(compositeFunction().get(), parName.toStdString());
     try {
       tie->set(str.toStdString());
       h->addTie(parName + "=" + str);
     } catch (...) {
-      g_log.warning() << "Failed to update tie on "
-                      << parName.toLatin1().constData() << "\n";
+      g_log.warning() << "Failed to update tie on " << parName.toLatin1().constData() << "\n";
     }
     delete tie;
   } else if (getHandler()->setAttribute(prop)) { // setting an attribute may
@@ -1594,14 +1503,10 @@ void FitPropertyBrowser::setFwhm(double value) {
 }
 
 /// Get number of functions in CompositeFunction
-int FitPropertyBrowser::count() const {
-  return static_cast<int>(m_compositeFunction->nFunctions());
-}
+int FitPropertyBrowser::count() const { return static_cast<int>(m_compositeFunction->nFunctions()); }
 
 /// Get the current function
-PropertyHandler *FitPropertyBrowser::currentHandler() const {
-  return m_currentHandler;
-}
+PropertyHandler *FitPropertyBrowser::currentHandler() const { return m_currentHandler; }
 
 /** Set new current function
  * @param h :: New current function
@@ -1617,9 +1522,8 @@ void FitPropertyBrowser::setCurrentFunction(PropertyHandler *h) const {
 /** Set new current function
  * @param f :: New current function
  */
-void FitPropertyBrowser::setCurrentFunction(
-    const Mantid::API::IFunction_const_sptr &f) const {
-  setCurrentFunction(getHandler()->findHandler(std::move(f)));
+void FitPropertyBrowser::setCurrentFunction(const Mantid::API::IFunction_const_sptr &f) const {
+  setCurrentFunction(getHandler()->findHandler(f));
 }
 
 /**
@@ -1645,16 +1549,12 @@ void FitPropertyBrowser::doFit(int maxIterations) {
     }
     m_fitActionUndoFit->setEnabled(true);
 
-    auto function = getFittingFunction();
-    const std::string funStr = function->asString();
-
-    Mantid::API::IAlgorithm_sptr alg =
-        Mantid::API::AlgorithmManager::Instance().create("Fit");
+    Mantid::API::IAlgorithm_sptr alg = Mantid::API::AlgorithmManager::Instance().create("Fit");
     alg->initialize();
     if (isHistogramFit()) {
       alg->setProperty("EvaluationType", "Histogram");
     }
-    alg->setPropertyValue("Function", funStr);
+    alg->setProperty("Function", std::dynamic_pointer_cast<Mantid::API::IFunction>(compositeFunction())->clone());
     alg->setProperty("InputWorkspace", ws);
     auto tbl = std::dynamic_pointer_cast<ITableWorkspace>(ws);
     if (!tbl) {
@@ -1687,13 +1587,12 @@ void FitPropertyBrowser::doFit(int maxIterations) {
       if (alg->getPropertyValue("EvaluationType") != "Histogram")
         alg->setProperty("Exclude", getExcludeRange());
       else {
-        g_log.warning(
-            "Exclude property not avaliable when evaluating as a histogram.");
+        g_log.warning("Exclude property not avaliable when evaluating as a histogram.");
       }
     }
     observeFinish(alg);
     alg->executeAsync();
-
+    m_fitAlgParameters = alg->toString();
   } catch (const std::exception &e) {
     QString msg = "Fit algorithm failed.\n\n" + QString(e.what()) + "\n";
     QMessageBox::critical(this, "Mantid - Error", msg);
@@ -1716,8 +1615,7 @@ Mantid::API::IFunction_sptr FitPropertyBrowser::getFittingFunction() const {
 /**
  * Return the function within a composite function at the position specified
  */
-Mantid::API::IFunction_sptr
-FitPropertyBrowser::getFunctionAtIndex(std::size_t const &index) const {
+Mantid::API::IFunction_sptr FitPropertyBrowser::getFunctionAtIndex(std::size_t const &index) const {
   return m_compositeFunction->getFunction(index);
 }
 
@@ -1731,13 +1629,15 @@ void FitPropertyBrowser::finishHandle(const Mantid::API::IAlgorithm *alg) {
   else // else fitting to current workspace, group under same name.
     emit fittingDone(name);
 
-  getFitResults();
+  IFunction_sptr function = alg->getProperty("Function");
+  updateBrowserFromFitResults(function);
   if (!isWorkspaceAGroup() && alg->existsProperty("OutputWorkspace")) {
     std::string out = alg->getProperty("OutputWorkspace");
     emit algorithmFinished(QString::fromStdString(out));
   }
-  // Update Status string
-  auto status = QString::fromStdString(alg->getPropertyValue("OutputStatus"));
+  // Update Status string in member variable (so can be retrieved)
+  m_fitAlgOutputStatus = alg->getPropertyValue("OutputStatus");
+  auto status = QString::fromStdString(m_fitAlgOutputStatus);
   emit fitResultsChanged(status);
   // update Quality string
   if (m_displayActionQuality->isChecked()) {
@@ -1745,17 +1645,19 @@ void FitPropertyBrowser::finishHandle(const Mantid::API::IAlgorithm *alg) {
     std::string costFunction = alg->getProperty("CostFunction");
     std::shared_ptr<Mantid::API::ICostFunction> costfun =
         Mantid::API::CostFunctionFactory::Instance().create(costFunction);
-    if (status != "success") {
-      status = "failed";
-    }
-    emit changeWindowTitle(QString("Fit Function (") +
-                           costfun->shortName().c_str() + " = " +
-                           QString::number(quality) + ", " + status + ")");
+    status = (status == "success") ? "success" : "failed";
+    emit changeWindowTitle(QString("Fit Function (") + costfun->shortName().c_str() + " = " + QString::number(quality) +
+                           ", " + status + ")");
   } else
     emit changeWindowTitle("Fit Function");
   if (m_compositeFunction->name() == "MultiBG") {
     emit multifitFinished();
   }
+}
+
+std::string FitPropertyBrowser::getFunctionString() const {
+  auto function = getFittingFunction();
+  return function->asString();
 }
 
 /// Display the status string returned from Fit
@@ -1768,8 +1670,7 @@ void FitPropertyBrowser::showFitResultStatus(const QString &status) {
     color = "red";
   }
 
-  m_status->setText(
-      QString("Status: <span style='color:%2'>%1</span>").arg(text, color));
+  m_status->setText(QString("Status: <span style='color:%2'>%1</span>").arg(text, color));
   m_status->show();
 }
 
@@ -1794,9 +1695,7 @@ void FitPropertyBrowser::populateWorkspaceNames() {
     }
 
     for (const auto &name : allowedNames) {
-      Mantid::API::Workspace_sptr ws =
-          Mantid::API::AnalysisDataService::Instance().retrieve(
-              name.toStdString());
+      Mantid::API::Workspace_sptr ws = Mantid::API::AnalysisDataService::Instance().retrieve(name.toStdString());
       if (isWorkspaceValid(ws)) {
         m_workspaceNames.append(name);
       }
@@ -1835,13 +1734,10 @@ void FitPropertyBrowser::setADSObserveEnabled(bool enabled) {
 }
 
 /// workspace was added
-void FitPropertyBrowser::addHandle(
-    const std::string &wsName,
-    const std::shared_ptr<Mantid::API::Workspace> &ws) {
+void FitPropertyBrowser::addHandle(const std::string &wsName, const std::shared_ptr<Mantid::API::Workspace> &ws) {
   auto const qName = QString::fromStdString(wsName);
   if (!isWorkspaceValid(ws) ||
-      (!m_allowedSpectra.isEmpty() && !m_allowedSpectra.contains(qName) &&
-       m_allowedTableWorkspace.isEmpty()))
+      (!m_allowedSpectra.isEmpty() && !m_allowedSpectra.contains(qName) && m_allowedTableWorkspace.isEmpty()))
     return;
   QString oldName = QString::fromStdString(workspaceName());
   int i = m_workspaceNames.indexOf(qName);
@@ -1868,7 +1764,9 @@ void FitPropertyBrowser::addHandle(
 }
 
 /// workspace was removed
-void FitPropertyBrowser::postDeleteHandle(const std::string &wsName) {
+void FitPropertyBrowser::postDeleteHandle(const std::string &wsName) { removeWorkspace(wsName); }
+
+void FitPropertyBrowser::removeWorkspace(const std::string &wsName) {
   QString oldName = QString::fromStdString(workspaceName());
   int i = m_workspaceNames.indexOf(QString(wsName.c_str()));
   if (i >= 0) {
@@ -1903,21 +1801,27 @@ void FitPropertyBrowser::postDeleteHandle(const std::string &wsName) {
   }
 }
 
-void FitPropertyBrowser::renameHandle(const std::string &oldName,
-                                      const std::string &newName) {
-  int i = m_workspaceNames.indexOf(QString(oldName.c_str()));
-  if (i >= 0) {
-    m_workspaceNames.replace(i, QString::fromStdString(newName));
+void FitPropertyBrowser::renameHandle(const std::string &oldName, const std::string &newName) {
+  QString oldNameQ = QString::fromStdString(oldName);
+  QString newNameQ = QString::fromStdString(newName);
+  auto it = m_allowedSpectra.find(oldNameQ);
+  if (it != m_allowedSpectra.end()) {
+    auto indices = m_allowedSpectra.value(oldNameQ);
+    m_allowedSpectra.remove(oldNameQ);
+    m_allowedSpectra.insert(newNameQ, indices);
+  }
+  int iWorkspace = m_workspaceNames.indexOf(oldNameQ);
+  if (iWorkspace >= 0) {
+    m_workspaceNames.replace(iWorkspace, newNameQ);
     m_enumManager->setEnumNames(m_workspace, m_workspaceNames);
   }
-  workspaceChange(QString::fromStdString(newName));
+  workspaceChange(newNameQ);
 
   for (auto i = 0; i < m_wsListWidget->count(); ++i) {
     auto item = m_wsListWidget->item(i);
     if (item->text().toStdString() == oldName) {
       m_wsListWidget->takeItem(m_wsListWidget->row(item));
-      m_wsListWidget->insertItem(m_wsListWidget->row(item),
-                                 QString::fromStdString(newName));
+      m_wsListWidget->insertItem(m_wsListWidget->row(item), newNameQ);
     }
   }
 }
@@ -1926,8 +1830,7 @@ void FitPropertyBrowser::renameHandle(const std::string &oldName,
  * MatrixWorkspaces or TableWorkspaces
  * @param ws :: The workspace
  */
-bool FitPropertyBrowser::isWorkspaceValid(
-    Mantid::API::Workspace_sptr ws) const {
+bool FitPropertyBrowser::isWorkspaceValid(Mantid::API::Workspace_sptr ws) const {
   return (dynamic_cast<Mantid::API::MatrixWorkspace *>(ws.get()) != nullptr ||
           dynamic_cast<Mantid::API::ITableWorkspace *>(ws.get()) != nullptr);
 }
@@ -1947,29 +1850,20 @@ bool FitPropertyBrowser::isPeak() const {
 }
 
 /// Get the start X
-double FitPropertyBrowser::startX() const {
-  return m_doubleManager->value(m_startX);
-}
+double FitPropertyBrowser::startX() const { return m_doubleManager->value(m_startX); }
 
 /// Set the start X
-void FitPropertyBrowser::setStartX(double value) {
-  m_doubleManager->setValue(m_startX, value);
-}
+void FitPropertyBrowser::setStartX(double value) { m_doubleManager->setValue(m_startX, value); }
 
 /// Get the end X
-double FitPropertyBrowser::endX() const {
-  return m_doubleManager->value(m_endX);
-}
+double FitPropertyBrowser::endX() const { return m_doubleManager->value(m_endX); }
 
 /// Set the end X
-void FitPropertyBrowser::setEndX(double value) {
-  m_doubleManager->setValue(m_endX, value);
-}
+void FitPropertyBrowser::setEndX(double value) { m_doubleManager->setValue(m_endX, value); }
 
 void FitPropertyBrowser::setXRange(double start, double end) {
 #if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
-  disconnect(m_doubleManager, SIGNAL(propertyChanged(QtProperty *)), this,
-             SLOT(doubleChanged(QtProperty *)));
+  disconnect(m_doubleManager, SIGNAL(propertyChanged(QtProperty *)), this, SLOT(doubleChanged(QtProperty *)));
 #endif
 
   m_doubleManager->setValue(m_startX, start);
@@ -1983,8 +1877,7 @@ void FitPropertyBrowser::setXRange(double start, double end) {
   getHandler()->setAttribute("StartX", start);
   getHandler()->setAttribute("EndX", end);
 
-  connect(m_doubleManager, SIGNAL(propertyChanged(QtProperty *)), this,
-          SLOT(doubleChanged(QtProperty *)));
+  connect(m_doubleManager, SIGNAL(propertyChanged(QtProperty *)), this, SLOT(doubleChanged(QtProperty *)));
 #endif
 }
 
@@ -2002,8 +1895,7 @@ QVector<double> FitPropertyBrowser::getXRange() {
         xColumnData.emplace_back(col->toDouble(i));
       }
     } catch (std::invalid_argument &err) {
-      QMessageBox::critical(this, "Mantid - Error",
-                            "The X column is not a number");
+      QMessageBox::critical(this, "Mantid - Error", "The X column is not a number");
       throw std::invalid_argument(err);
     }
     std::sort(xColumnData.begin(), xColumnData.end());
@@ -2025,8 +1917,7 @@ QString FitPropertyBrowser::getXColumnName() const {
     auto columns = tbl->getColumnNames();
     auto xIndex = m_columnManager->value(m_xColumn);
     if (xIndex >= static_cast<int>(columns.size())) {
-      QMessageBox::critical(nullptr, "Mantid - Error",
-                            "X column was not found.");
+      QMessageBox::critical(nullptr, "Mantid - Error", "X column was not found.");
     }
     columnName = QString::fromStdString(columns[xIndex]);
   }
@@ -2041,8 +1932,7 @@ QString FitPropertyBrowser::getYColumnName() const {
     auto columns = tbl->getColumnNames();
     auto yIndex = m_columnManager->value(m_yColumn);
     if (yIndex >= static_cast<int>(columns.size())) {
-      QMessageBox::critical(nullptr, "Mantid - Error",
-                            "Y column was not found.");
+      QMessageBox::critical(nullptr, "Mantid - Error", "Y column was not found.");
     }
     columnName = QString::fromStdString(columns[yIndex]);
   }
@@ -2058,8 +1948,7 @@ QString FitPropertyBrowser::getErrColumnName() const {
     // The error column has an empty first entry
     auto errIndex = m_columnManager->value(m_errColumn) - 1;
     if (errIndex >= static_cast<int>(columns.size())) {
-      QMessageBox::warning(nullptr, "Mantid - Warning",
-                           "Error column was not found.");
+      QMessageBox::warning(nullptr, "Mantid - Warning", "Error column was not found.");
     } else if (errIndex != -1) {
       columnName = QString::fromStdString(columns[errIndex]);
     }
@@ -2068,8 +1957,7 @@ QString FitPropertyBrowser::getErrColumnName() const {
 }
 
 ///
-QtBrowserItem *FitPropertyBrowser::findItem(QtBrowserItem *parent,
-                                            QtProperty *prop) const {
+QtBrowserItem *FitPropertyBrowser::findItem(QtBrowserItem *parent, QtProperty *prop) const {
   QList<QtBrowserItem *> children = parent->children();
   QtBrowserItem *res = nullptr;
   for (auto &child : children) {
@@ -2122,16 +2010,12 @@ void FitPropertyBrowser::vectorSizeChanged(QtProperty *prop) {
 /**
  * Update the function parameter properties
  */
-void FitPropertyBrowser::updateParameters() {
-  getHandler()->updateParameters();
-}
+void FitPropertyBrowser::updateParameters() { getHandler()->updateParameters(); }
 
 /**
  * Update the function attributes which have changed
  */
-void FitPropertyBrowser::updateAttributes() {
-  getHandler()->updateAttributes();
-}
+void FitPropertyBrowser::updateAttributes() { getHandler()->updateAttributes(); }
 
 /**
  * Slot. Removes all functions.
@@ -2145,42 +2029,17 @@ void FitPropertyBrowser::clear() {
 
 void FitPropertyBrowser::clearBrowser() {
   QList<QtProperty *> props = m_functionsGroup->property()->subProperties();
-  foreach (QtProperty *prop, props) {
-    m_functionsGroup->property()->removeSubProperty(prop);
-  }
+  foreach (QtProperty *prop, props) { m_functionsGroup->property()->removeSubProperty(prop); }
 }
 
 /// Set the parameters to the fit outcome
-void FitPropertyBrowser::getFitResults() {
-  std::string wsName = outputName() + "_Parameters";
-  if (Mantid::API::AnalysisDataService::Instance().doesExist(wsName)) {
-    Mantid::API::ITableWorkspace_sptr ws =
-        std::dynamic_pointer_cast<Mantid::API::ITableWorkspace>(
-            Mantid::API::AnalysisDataService::Instance().retrieve(wsName));
-
-    Mantid::API::TableRow row = ws->getFirstRow();
-    do {
-      try {
-        std::string name;
-        double value, error;
-        row >> name >> value >> error;
-
-        // In case of a single function Fit doesn't create a CompositeFunction
-        if (count() == 1) {
-          name.insert(0, "f0.");
-        }
-
-        size_t paramIndex = compositeFunction()->parameterIndex(name);
-
-        compositeFunction()->setParameter(paramIndex, value);
-        compositeFunction()->setError(paramIndex, error);
-      } catch (...) {
-        // do nothing
-      }
-    } while (row.next());
-    updateParameters();
-    getHandler()->updateErrors();
+void FitPropertyBrowser::updateBrowserFromFitResults(const IFunction_sptr &finalFunction) {
+  for (auto paramIndex = 0u; paramIndex < finalFunction->nParams(); ++paramIndex) {
+    compositeFunction()->setParameter(paramIndex, finalFunction->getParameter(paramIndex));
+    compositeFunction()->setError(paramIndex, finalFunction->getError(paramIndex));
   }
+  updateParameters();
+  getHandler()->updateErrors();
 }
 
 /**
@@ -2207,8 +2066,7 @@ void FitPropertyBrowser::disableUndo() {
 
 /// Tells if undo can be done
 bool FitPropertyBrowser::isUndoEnabled() const {
-  return m_initialParameters.size() &&
-         compositeFunction()->nParams() == m_initialParameters.size();
+  return m_initialParameters.size() && compositeFunction()->nParams() == m_initialParameters.size();
 }
 
 /// Enable/disable the Fit buttons;
@@ -2218,9 +2076,7 @@ void FitPropertyBrowser::setFitEnabled(bool enable) {
 }
 
 /// Returns true if the function is ready for a fit
-bool FitPropertyBrowser::isFitEnabled() const {
-  return m_fitActionFit->isEnabled();
-}
+bool FitPropertyBrowser::isFitEnabled() const { return m_fitActionFit->isEnabled(); }
 
 /**
  * Slot. Adds a tie. Full expression to be entered \<name\>=\<formula\>
@@ -2239,13 +2095,11 @@ void FitPropertyBrowser::addTie() {
     return;
 
   bool ok = false;
-  QString tieStr = QInputDialog::getText(
-      this, "Mantid - Fit", "Enter tie expression", QLineEdit::Normal, "", &ok);
+  QString tieStr = QInputDialog::getText(this, "Mantid - Fit", "Enter tie expression", QLineEdit::Normal, "", &ok);
   if (ok) {
     tieStr = tieStr.trimmed();
     if (!tieStr.contains('=')) {
-      tieStr =
-          h->functionPrefix() + "." + paramProp->propertyName() + "=" + tieStr;
+      tieStr = h->functionPrefix() + "." + paramProp->propertyName() + "=" + tieStr;
     }
     h->addTie(tieStr);
   } // if (ok)
@@ -2273,35 +2127,27 @@ void FitPropertyBrowser::addTieToFunction() {
 
     // Pick out parameters with the same name as the one we're tying from
     if (fun->parameterName(static_cast<int>(ref.getLocalIndex())) == parName) {
-      if (iPar == -1 &&
-          fun ==
-              h->function()
-                  .get()) // If this is the 'tied from' parameter, remember it
+      if (iPar == -1 && fun == h->function().get()) // If this is the 'tied from' parameter, remember it
       {
         iPar = (int)i;
       } else // Otherwise add it to the list of potential 'tyees'
       {
-        fnNames << QString::fromStdString(
-            m_compositeFunction->parameterName(i));
+        fnNames << QString::fromStdString(m_compositeFunction->parameterName(i));
       }
     }
   }
   if (fnNames.empty() || iPar < 0) {
-    QMessageBox::information(this, "Mantid - information",
-                             "Cannot tie this parameter to any function");
+    QMessageBox::information(this, "Mantid - information", "Cannot tie this parameter to any function");
     return;
   }
 
   bool ok;
-  QString tieName = QInputDialog::getItem(
-      this, "Mantid - Fit", "Select function", fnNames, 0, false, &ok);
+  QString tieName = QInputDialog::getItem(this, "Mantid - Fit", "Select function", fnNames, 0, false, &ok);
 
   if (!ok)
     return;
 
-  QString tieExpr =
-      QString::fromStdString(m_compositeFunction->parameterName(iPar)) + "=" +
-      tieName;
+  QString tieExpr = QString::fromStdString(m_compositeFunction->parameterName(iPar)) + "=" + tieName;
 
   h->addTie(tieExpr);
 }
@@ -2345,30 +2191,24 @@ void FitPropertyBrowser::deleteTie() {
     // ithParameter = -1 => not found
     int ithParameter = -1;
     for (size_t i = 0; i < m_compositeFunction->nParams(); i++) {
-      Mantid::API::ParameterReference parameterRef(m_compositeFunction.get(),
-                                                   i);
+      Mantid::API::ParameterReference parameterRef(m_compositeFunction.get(), i);
       Mantid::API::IFunction *function = parameterRef.getLocalFunction();
       // Pick out parameters with the same name as the one we're tying from
-      if (function->parameterName(
-              static_cast<int>(parameterRef.getLocalIndex())) == parName) {
-        if (ithParameter == -1 &&
-            function == h->function().get()) // If this is the 'tied from'
-                                             // parameter, remember it
+      if (function->parameterName(static_cast<int>(parameterRef.getLocalIndex())) == parName) {
+        if (ithParameter == -1 && function == h->function().get()) // If this is the 'tied from'
+                                                                   // parameter, remember it
         {
           ithParameter = static_cast<int>(i);
         } else // Otherwise add it to the list of potential 'tyees'
         {
-          functionNames << QString::fromStdString(
-              m_compositeFunction->parameterName(i));
+          functionNames << QString::fromStdString(m_compositeFunction->parameterName(i));
         }
       }
     }
     if (functionNames.empty() && ithParameter < 0) {
-      QMessageBox::information(this, "Mantid - information",
-                               "Cannot find a parameter with this tie");
+      QMessageBox::information(this, "Mantid - information", "Cannot find a parameter with this tie");
     } else {
-      QString tieExpr = QString::fromStdString(
-          m_compositeFunction->parameterName(ithParameter));
+      QString tieExpr = QString::fromStdString(m_compositeFunction->parameterName(ithParameter));
       h->removeTie(paramProp, tieExpr.toStdString());
     }
   } else {
@@ -2381,8 +2221,7 @@ void FitPropertyBrowser::deleteTie() {
  * @param hasTie :: Parameter has a tie
  * @param hasBounds :: Parameter has bounds
  */
-void FitPropertyBrowser::hasConstraints(QtProperty *parProp, bool &hasTie,
-                                        bool &hasBounds) const {
+void FitPropertyBrowser::hasConstraints(QtProperty *parProp, bool &hasTie, bool &hasBounds) const {
   hasTie = false;
   hasBounds = false;
   QList<QtProperty *> subs = parProp->subProperties();
@@ -2416,8 +2255,7 @@ QtProperty *FitPropertyBrowser::getTieProperty(QtProperty *parProp) const {
  * Called when the function factory has been updated
  * @param notice A Poco notification object
  */
-void FitPropertyBrowser::handleFactoryUpdate(
-    Mantid::API::FunctionFactoryUpdateNotification_ptr notice) {
+void FitPropertyBrowser::handleFactoryUpdate(Mantid::API::FunctionFactoryUpdateNotification_ptr notice) {
   Q_UNUSED(notice);
   // Don't call populate directly as the updates can come from a different
   // thread
@@ -2543,9 +2381,7 @@ void FitPropertyBrowser::clearAllPlots() { emit removeFitCurves(); }
  * @param manager :: The current property manager
  * @return Pointer to the created property
  */
-QtProperty *
-FitPropertyBrowser::addDoubleProperty(const QString &name,
-                                      QtDoublePropertyManager *manager) const {
+QtProperty *FitPropertyBrowser::addDoubleProperty(const QString &name, QtDoublePropertyManager *manager) const {
   if (manager == nullptr)
     manager = m_doubleManager;
   QtProperty *prop = manager->addProperty(name);
@@ -2578,27 +2414,22 @@ QtProperty *FitPropertyBrowser::addStringProperty(const QString &name) const {
  * @param prop :: A pointer to the property
  * @param value :: New value for the property
  */
-void FitPropertyBrowser::setStringPropertyValue(QtProperty *prop,
-                                                const QString &value) const {
-  auto *manager =
-      dynamic_cast<QtStringPropertyManager *>(prop->propertyManager());
+void FitPropertyBrowser::setStringPropertyValue(QtProperty *prop, const QString &value) const {
+  auto *manager = dynamic_cast<QtStringPropertyManager *>(prop->propertyManager());
   if (manager) {
     manager->setValue(prop, value);
   }
 }
 
 QString FitPropertyBrowser::getStringPropertyValue(QtProperty *prop) const {
-  auto *manager =
-      dynamic_cast<QtStringPropertyManager *>(prop->propertyManager());
+  auto *manager = dynamic_cast<QtStringPropertyManager *>(prop->propertyManager());
   if (manager)
     return manager->value(prop);
   else
     return QString("");
 }
 
-Mantid::API::IFunction_const_sptr FitPropertyBrowser::theFunction() const {
-  return m_compositeFunction;
-}
+Mantid::API::IFunction_const_sptr FitPropertyBrowser::theFunction() const { return m_compositeFunction; }
 
 void FitPropertyBrowser::checkFunction() {}
 
@@ -2607,33 +2438,23 @@ void FitPropertyBrowser::checkFunction() {}
  * returns the nearest allowed index. Otherwise the current index is returned.
  */
 int FitPropertyBrowser::getAllowedIndex(int currentIndex) const {
-  auto const workspace =
-      std::dynamic_pointer_cast<MatrixWorkspace>(getWorkspace());
+  auto const workspace = std::dynamic_pointer_cast<MatrixWorkspace>(getWorkspace());
 
   if (!workspace) {
     return 0;
   }
 
-  if (currentIndex == m_oldWorkspaceIndex) {
-    return currentIndex < 0 ? 0 : currentIndex;
-  }
-
   auto const allowedIndices =
-      m_allowedSpectra.empty()
-          ? QList<int>()
-          : m_allowedSpectra[QString::fromStdString(workspaceName())];
+      m_allowedSpectra.empty() ? QList<int>() : m_allowedSpectra[QString::fromStdString(workspaceName())];
   auto const firstIndex = m_allowedSpectra.empty() ? 0 : allowedIndices.front();
-  auto const lastIndex = m_allowedSpectra.empty()
-                             ? getNumberOfSpectra(workspace) - 1
-                             : allowedIndices.back();
+  auto const lastIndex = m_allowedSpectra.empty() ? getNumberOfSpectra(workspace) - 1 : allowedIndices.back();
 
   auto allowedIndex = currentIndex;
   if (currentIndex < firstIndex) {
     allowedIndex = firstIndex;
   } else if (currentIndex > lastIndex) {
     allowedIndex = lastIndex;
-  } else if (!m_allowedSpectra.empty() &&
-             !allowedIndices.contains(currentIndex)) {
+  } else if (!m_allowedSpectra.empty() && !allowedIndices.contains(currentIndex)) {
     allowedIndex = m_oldWorkspaceIndex;
     auto i = allowedIndices.indexOf(m_oldWorkspaceIndex);
     if (i >= 0) {
@@ -2648,9 +2469,8 @@ int FitPropertyBrowser::getAllowedIndex(int currentIndex) const {
 
 void FitPropertyBrowser::saveFunction() {
   bool ok(false);
-  QString fnName = QInputDialog::getText(
-      this, tr("Mantid - Input"), tr("Please select a name for the function"),
-      QLineEdit::Normal, "", &ok);
+  QString fnName = QInputDialog::getText(this, tr("Mantid - Input"), tr("Please select a name for the function"),
+                                         QLineEdit::Normal, "", &ok);
   if (ok && !fnName.isEmpty()) {
     saveFunction(fnName);
   }
@@ -2660,11 +2480,10 @@ void FitPropertyBrowser::saveFunction(const QString &fnName) {
   QSettings settings;
   settings.beginGroup("Mantid/FitBrowser/SavedFunctions");
   QStringList names = settings.childKeys();
-  if (names.contains(fnName) &&
-      QMessageBox::question(this, "Mantid - Question",
-                            "Function with this name already exists.\n"
-                            "Would you like to replace it?",
-                            QMessageBox::Yes) != QMessageBox::Yes) {
+  if (names.contains(fnName) && QMessageBox::question(this, "Mantid - Question",
+                                                      "Function with this name already exists.\n"
+                                                      "Would you like to replace it?",
+                                                      QMessageBox::Yes) != QMessageBox::Yes) {
     return;
   }
   settings.setValue(fnName, QString::fromStdString(theFunction()->asString()));
@@ -2676,13 +2495,10 @@ void FitPropertyBrowser::loadFunction() {
   settings.beginGroup("Mantid/FitBrowser/SavedFunctions");
   QStringList names = settings.childKeys();
   if (names.isEmpty()) {
-    QMessageBox::information(this, "Mantid - Information",
-                             "There are no saved functions");
+    QMessageBox::information(this, "Mantid - Information", "There are no saved functions");
     return;
   }
-  QString name = QInputDialog::getItem(this, "Mantid - Input",
-                                       "Please select a function to load",
-                                       names, 0, false);
+  QString name = QInputDialog::getItem(this, "Mantid - Input", "Please select a function to load", names, 0, false);
   if (!name.isEmpty()) {
     QString str = settings.value(name).toString();
 
@@ -2691,8 +2507,7 @@ void FitPropertyBrowser::loadFunction() {
 }
 
 void FitPropertyBrowser::loadFunctionFromString() {
-  QString str = QInputDialog::getText(this, "Mantid - Input",
-                                      "Specify fit function string");
+  QString str = QInputDialog::getText(this, "Mantid - Input", "Specify fit function string");
 
   if (!str.isEmpty()) {
     loadFunction(str);
@@ -2735,8 +2550,7 @@ void FitPropertyBrowser::reset() {
   createCompositeFunction(str);
 }
 
-void FitPropertyBrowser::setWorkspace(
-    const Mantid::API::IFunction_sptr &function) const {
+void FitPropertyBrowser::setWorkspace(const Mantid::API::IFunction_sptr &function) const {
   std::string wsName = workspaceName();
   if (!wsName.empty()) {
     try {
@@ -2812,18 +2626,15 @@ void FitPropertyBrowser::setAutoBackgroundName(const QString &aName) {
     if (nameList.isEmpty())
       return;
     QString name = nameList[0];
-    std::shared_ptr<Mantid::API::IFunction> f =
-        std::shared_ptr<Mantid::API::IFunction>(
-            Mantid::API::FunctionFactory::Instance().createFunction(
-                name.toStdString()));
+    std::shared_ptr<Mantid::API::IFunction> f = std::shared_ptr<Mantid::API::IFunction>(
+        Mantid::API::FunctionFactory::Instance().createFunction(name.toStdString()));
     m_auto_back = true;
     m_autoBgName = name;
     if (nameList.size() > 1) {
       nameList.removeFirst();
       m_autoBgAttributes = nameList.join(" ");
     }
-    Mantid::Kernel::ConfigService::Instance().setString(
-        "curvefitting.autoBackground", aName.toStdString());
+    Mantid::Kernel::ConfigService::Instance().setString("curvefitting.autoBackground", aName.toStdString());
   } catch (...) {
     m_auto_back = false;
   }
@@ -2883,8 +2694,7 @@ void FitPropertyBrowser::removeLogValue() {
 void FitPropertyBrowser::sequentialFit() {
   auto *dlg = new SequentialFitDialog(this, m_mantidui);
   std::string wsName = workspaceName();
-  if (!wsName.empty() &&
-      dlg->addWorkspaces(QStringList(QString::fromStdString(wsName)))) {
+  if (!wsName.empty() && dlg->addWorkspaces(QStringList(QString::fromStdString(wsName)))) {
     dlg->show();
   }
 }
@@ -2899,18 +2709,15 @@ void FitPropertyBrowser::findPeaks() {
   std::string peakListName = wsName + "_PeakList_tmp";
 
   int FWHM, Tolerance;
-  QString setting = QString::fromStdString(
-      Mantid::Kernel::ConfigService::Instance().getString(
-          "curvefitting.findPeaksFWHM"));
+  QString setting =
+      QString::fromStdString(Mantid::Kernel::ConfigService::Instance().getString("curvefitting.findPeaksFWHM"));
   FWHM = setting.isEmpty() ? 7 : setting.toInt();
 
-  setting = QString::fromStdString(
-      Mantid::Kernel::ConfigService::Instance().getString(
-          "curvefitting.findPeaksTolerance"));
+  setting =
+      QString::fromStdString(Mantid::Kernel::ConfigService::Instance().getString("curvefitting.findPeaksTolerance"));
   Tolerance = setting.isEmpty() ? 4 : setting.toInt();
 
-  Mantid::API::IAlgorithm_sptr alg =
-      Mantid::API::AlgorithmManager::Instance().create("FindPeaks");
+  Mantid::API::IAlgorithm_sptr alg = Mantid::API::AlgorithmManager::Instance().create("FindPeaks");
   alg->initialize();
   alg->setPropertyValue("InputWorkspace", wsName);
   alg->setProperty("WorkspaceIndex", workspaceIndex());
@@ -2920,17 +2727,13 @@ void FitPropertyBrowser::findPeaks() {
 
   QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
 
-  Mantid::API::MatrixWorkspace_sptr inputWS =
-      std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
-          Mantid::API::AnalysisDataService::Instance().retrieve(
-              workspaceName()));
+  Mantid::API::MatrixWorkspace_sptr inputWS = std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
+      Mantid::API::AnalysisDataService::Instance().retrieve(workspaceName()));
 
   try {
     alg->execute();
-    Mantid::API::ITableWorkspace_sptr ws =
-        std::dynamic_pointer_cast<Mantid::API::ITableWorkspace>(
-            Mantid::API::AnalysisDataService::Instance().retrieve(
-                peakListName));
+    Mantid::API::ITableWorkspace_sptr ws = std::dynamic_pointer_cast<Mantid::API::ITableWorkspace>(
+        Mantid::API::AnalysisDataService::Instance().retrieve(peakListName));
 
     clear();
     Mantid::API::ColumnVector<double> centre = ws->getVector("centre");
@@ -2940,8 +2743,7 @@ void FitPropertyBrowser::findPeaks() {
       if (centre[i] < startX() || centre[i] > endX())
         continue;
       auto f = std::dynamic_pointer_cast<Mantid::API::IPeakFunction>(
-          Mantid::API::FunctionFactory::Instance().createFunction(
-              defaultPeakType()));
+          Mantid::API::FunctionFactory::Instance().createFunction(defaultPeakType()));
       if (!f)
         break;
       f->setMatrixWorkspace(inputWS, workspaceIndex(), startX(), endX());
@@ -2973,9 +2775,7 @@ void FitPropertyBrowser::updateDecimals() {
     m_decimals = settings.value("decimals", 6).toInt();
   }
   QSet<QtProperty *> props = m_doubleManager->properties();
-  foreach (QtProperty *prop, props) {
-    m_doubleManager->setDecimals(prop, m_decimals);
-  }
+  foreach (QtProperty *prop, props) { m_doubleManager->setDecimals(prop, m_decimals); }
 }
 
 void FitPropertyBrowser::setDecimals(int d) {
@@ -2986,22 +2786,14 @@ void FitPropertyBrowser::setDecimals(int d) {
   updateDecimals();
 }
 
-bool FitPropertyBrowser::plotDiff() const {
-  return m_boolManager->value(m_plotDiff);
-}
+bool FitPropertyBrowser::plotDiff() const { return m_boolManager->value(m_plotDiff); }
 
 /// @returns true if each function with a composite should also be plotted
-bool FitPropertyBrowser::plotCompositeMembers() const {
-  return m_boolManager->value(m_plotCompositeMembers);
-}
+bool FitPropertyBrowser::plotCompositeMembers() const { return m_boolManager->value(m_plotCompositeMembers); }
 
-bool FitPropertyBrowser::rawData() const {
-  return m_boolManager->value(m_rawData);
-}
+bool FitPropertyBrowser::rawData() const { return m_boolManager->value(m_rawData); }
 
-void FitPropertyBrowser::setTextPlotGuess(const QString &text) {
-  m_displayActionPlotGuess->setText(text);
-}
+void FitPropertyBrowser::setTextPlotGuess(const QString &text) { m_displayActionPlotGuess->setText(text); }
 
 /**
  * Sets a new workspace
@@ -3009,11 +2801,9 @@ void FitPropertyBrowser::setTextPlotGuess(const QString &text) {
 void FitPropertyBrowser::workspaceChange(const QString &wsName) {
   if (m_guessOutputName) {
     if (isWorkspaceAGroup()) {
-      m_stringManager->setValue(
-          m_output, QString::fromStdString(workspaceName() + "_params"));
+      m_stringManager->setValue(m_output, QString::fromStdString(workspaceName() + "_params"));
     } else {
-      m_stringManager->setValue(m_output,
-                                QString::fromStdString(workspaceName()));
+      m_stringManager->setValue(m_output, QString::fromStdString(workspaceName()));
     }
   }
   if (isWorkspaceAGroup()) {
@@ -3041,28 +2831,23 @@ void FitPropertyBrowser::setupMultifit() {
 
   if (!ties.isEmpty()) {
     QString wsName = QString::fromStdString(workspaceName());
-    Mantid::API::MatrixWorkspace_sptr mws =
-        std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
-            Mantid::API::AnalysisDataService::Instance().retrieve(
-                workspaceName()));
+    Mantid::API::MatrixWorkspace_sptr mws = std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
+        Mantid::API::AnalysisDataService::Instance().retrieve(workspaceName()));
     if (mws) {
       auto fun = getFunctionAtIndex(0);
       QString fun1Ini = QString::fromStdString(fun->asString());
-      QString funIni = "composite=MultiBG;" + fun1Ini + ",Workspace=" + wsName +
-                       ",WSParam=(WorkspaceIndex=0);";
+      QString funIni = "composite=MultiBG;" + fun1Ini + ",Workspace=" + wsName + ",WSParam=(WorkspaceIndex=0);";
       QString tieStr;
       for (size_t i = 1; i < mws->getNumberHistograms(); ++i) {
         QString comma = i > 1 ? "," : "";
         QString fi = comma + "f" + QString::number(i) + ".";
         for (int j = 0; j < static_cast<int>(fun->nParams()); ++j) {
           if (!ties[j].isEmpty()) {
-            tieStr += fi + QString::fromStdString(fun->parameterName(j)) + "=" +
-                      ties[j];
+            tieStr += fi + QString::fromStdString(fun->parameterName(j)) + "=" + ties[j];
           }
         }
         QString wsParam = ",WSParam=(WorkspaceIndex=" + QString::number(i);
-        wsParam += ",StartX=" + QString::number(startX()) +
-                   ",EndX=" + QString::number(endX()) + ")";
+        wsParam += ",StartX=" + QString::number(startX()) + ",EndX=" + QString::number(endX()) + ")";
         funIni += fun1Ini + ",Workspace=" + wsName + wsParam + ";";
       }
       if (!tieStr.isEmpty()) {
@@ -3085,8 +2870,7 @@ void FitPropertyBrowser::processMultiBGResults() {
   QStringList parNames;
   auto fun0 = getFunctionAtIndex(0);
   if (!fun0) {
-    throw std::runtime_error(
-        "IFunction expected but func function of another type");
+    throw std::runtime_error("IFunction expected but func function of another type");
   }
   for (size_t i = 0; i < fun0->nParams(); ++i) {
     parNames << QString::fromStdString(fun0->parameterName(i));
@@ -3095,8 +2879,7 @@ void FitPropertyBrowser::processMultiBGResults() {
   for (size_t i = 1; i < compositeFunction()->nFunctions(); ++i) {
     auto fun = getFunctionAtIndex(i);
     if (!fun) {
-      throw std::runtime_error(
-          "IFunction expected but func function of another type");
+      throw std::runtime_error("IFunction expected but func function of another type");
     }
     for (size_t j = 0; j < fun->nParams(); ++j) {
       if (parNames.indexOf(QString::fromStdString(fun->parameterName(j))) < 0) {
@@ -3109,12 +2892,9 @@ void FitPropertyBrowser::processMultiBGResults() {
   QApplication::setOverrideCursor(Qt::WaitCursor);
   // create a TableWorkspace: first column - function index
   // other colomns - the parameters
-  Mantid::API::ITableWorkspace_sptr table =
-      Mantid::API::WorkspaceFactory::Instance().createTable("TableWorkspace");
+  Mantid::API::ITableWorkspace_sptr table = Mantid::API::WorkspaceFactory::Instance().createTable("TableWorkspace");
   table->addColumn("int", "Index");
-  foreach (QString par, parNames) {
-    table->addColumn("double", par.toStdString());
-  }
+  foreach (QString par, parNames) { table->addColumn("double", par.toStdString()); }
   // Create WorkspaceGroup with the fit results
   std::vector<std::string> worspaceNames(compositeFunction()->nFunctions());
   for (size_t i = 0; i < compositeFunction()->nFunctions(); ++i) {
@@ -3135,11 +2915,9 @@ void FitPropertyBrowser::processMultiBGResults() {
   }
 
   // Save the table
-  Mantid::API::AnalysisDataService::Instance().addOrReplace(
-      workspaceName() + "_Param_series", table);
+  Mantid::API::AnalysisDataService::Instance().addOrReplace(workspaceName() + "_Param_series", table);
   try {
-    Mantid::API::IAlgorithm_sptr group =
-        Mantid::API::AlgorithmManager::Instance().create("GroupWorkspaces");
+    Mantid::API::IAlgorithm_sptr group = Mantid::API::AlgorithmManager::Instance().create("GroupWorkspaces");
     group->setProperty("InputWorkspaces", worspaceNames);
     group->setPropertyValue("OutputWorkspace", workspaceName() + "_Workspace");
     group->execute();
@@ -3156,11 +2934,9 @@ void FitPropertyBrowser::processMultiBGResults() {
 void FitPropertyBrowser::setWorkspaceProperties() {
   // remove old properties
   if (m_browser->isItemVisible(m_settingsGroup)) {
-    if (m_settingsGroup->property()->subProperties().contains(
-            m_workspaceIndex)) {
+    if (m_settingsGroup->property()->subProperties().contains(m_workspaceIndex)) {
       m_settingsGroup->property()->removeSubProperty(m_workspaceIndex);
-    } else if (m_settingsGroup->property()->subProperties().contains(
-                   m_xColumn)) {
+    } else if (m_settingsGroup->property()->subProperties().contains(m_xColumn)) {
       m_settingsGroup->property()->removeSubProperty(m_xColumn);
       m_settingsGroup->property()->removeSubProperty(m_yColumn);
       m_settingsGroup->property()->removeSubProperty(m_errColumn);
@@ -3180,21 +2956,22 @@ void FitPropertyBrowser::setWorkspaceProperties() {
   // Settings group.
   // If not, there is no Custom Settings group and it goes in the regular
   // Settings group.
-  auto *settings =
-      m_customSettingsGroup ? m_customSettingsGroup : m_settingsGroup;
+  auto *settings = m_customSettingsGroup ? m_customSettingsGroup : m_settingsGroup;
 
-  settings->property()->removeSubProperty(m_evaluationType);
-  m_evaluationType->setEnabled(false);
-  // if it is a MatrixWorkspace insert WorkspaceIndex
-  auto mws = std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(ws);
-  if (mws) {
-    addWorkspaceIndexToBrowser();
-    auto isHistogram = mws->isHistogramData();
-    m_evaluationType->setEnabled(isHistogram);
-    if (isHistogram) {
-      settings->property()->addSubProperty(m_evaluationType);
+  if (settings->property()->subProperties().contains(m_evaluationType)) {
+    settings->property()->removeSubProperty(m_evaluationType);
+    m_evaluationType->setEnabled(false);
+    // if it is a MatrixWorkspace insert WorkspaceIndex
+    auto mws = std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(ws);
+    if (mws) {
+      addWorkspaceIndexToBrowser();
+      auto isHistogram = mws->isHistogramData();
+      m_evaluationType->setEnabled(isHistogram);
+      if (isHistogram) {
+        settings->property()->addSubProperty(m_evaluationType);
+      }
+      return;
     }
-    return;
   }
 
   // if it is a TableWorkspace insert the column properties
@@ -3261,10 +3038,8 @@ void FitPropertyBrowser::setWorkspaceProperties() {
 
 void FitPropertyBrowser::addWorkspaceIndexToBrowser() {
   if (m_browser->isItemVisible(m_settingsGroup)) {
-    if (!m_settingsGroup->property()->subProperties().contains(
-            m_workspaceIndex)) {
-      m_settingsGroup->property()->insertSubProperty(m_workspaceIndex,
-                                                     m_workspace);
+    if (!m_settingsGroup->property()->subProperties().contains(m_workspaceIndex)) {
+      m_settingsGroup->property()->insertSubProperty(m_workspaceIndex, m_workspace);
     }
   }
 }
@@ -3277,6 +3052,33 @@ void FitPropertyBrowser::fit() {
   doFit(maxIterations);
 }
 
+/**
+ * Function to toggle the visibility of the settings browser
+ */
+void FitPropertyBrowser::toggleSettingsBrowserVisible() {
+  if (m_browser->isItemVisible(m_settingsGroup)) {
+    m_browser->setItemVisible(m_settingsGroup, false);
+  } else {
+    m_browser->setItemVisible(m_settingsGroup, true);
+  }
+}
+
+/**
+ * Function to toggle the visibility of a settings group property
+ * exposed to python
+ */
+void FitPropertyBrowser::removePropertiesFromSettingsBrowser(const QStringList &propsToRemove) {
+  // get settings properties
+  QList<QtProperty *> props = m_settingsGroup->property()->subProperties();
+  for (auto &prop : props) {
+    if (propsToRemove.contains(prop->propertyName())) {
+      m_settingsGroup->property()->removeSubProperty(prop);
+    }
+  }
+}
+
+void FitPropertyBrowser::toggleWsListVisible() { m_hideWsListWidget = !m_hideWsListWidget; }
+
 /**=================================================================================================
  * Slot connected to the change signals of properties m_xColumn, m_yColumn,
  * and m_errColumn.
@@ -3285,14 +3087,12 @@ void FitPropertyBrowser::fit() {
 void FitPropertyBrowser::columnChanged(QtProperty *prop) {
   if (prop == m_xColumn) { // update startX and endX
     try {
-      auto ws = Mantid::API::AnalysisDataService::Instance().retrieve(
-          workspaceName());
+      auto ws = Mantid::API::AnalysisDataService::Instance().retrieve(workspaceName());
       auto tws = std::dynamic_pointer_cast<Mantid::API::ITableWorkspace>(ws);
       if (!tws)
         return;
       int i = m_columnManager->value(m_xColumn);
-      if (i < 0 || i >= static_cast<int>(tws->rowCount()) ||
-          tws->rowCount() == 0)
+      if (i < 0 || i >= static_cast<int>(tws->rowCount()) || tws->rowCount() == 0)
         return;
       auto col = tws->getColumn(static_cast<size_t>(i));
       const double startX = col->toDouble(0);
@@ -3310,54 +3110,40 @@ void FitPropertyBrowser::columnChanged(QtProperty *prop) {
  */
 void FitPropertyBrowser::minimizerChanged() {
   // delete old minimizer properties
-  foreach (QtProperty *prop, m_minimizerProperties) {
-    m_settingsGroup->property()->removeSubProperty(prop);
-  }
+  foreach (QtProperty *prop, m_minimizerProperties) { m_settingsGroup->property()->removeSubProperty(prop); }
 
   // add new minimizer properties
-  auto minzer = Mantid::API::FuncMinimizerFactory::Instance().createMinimizer(
-      this->minimizer());
+  auto minzer = Mantid::API::FuncMinimizerFactory::Instance().createMinimizer(this->minimizer());
   auto &properties = minzer->getProperties();
   for (auto property : properties) {
     QString propName = QString::fromStdString((*property).name());
     QtProperty *prop = nullptr;
-    if (auto prp =
-            dynamic_cast<Mantid::Kernel::PropertyWithValue<bool> *>(property)) {
+    if (auto prp = dynamic_cast<Mantid::Kernel::PropertyWithValue<bool> *>(property)) {
       prop = m_boolManager->addProperty(propName);
       bool val = *prp;
       m_boolManager->setValue(prop, val);
-    } else if (auto prp =
-                   dynamic_cast<Mantid::Kernel::PropertyWithValue<double> *>(
-                       property)) {
+    } else if (auto prp = dynamic_cast<Mantid::Kernel::PropertyWithValue<double> *>(property)) {
       prop = this->addDoubleProperty(propName);
       double val = *prp;
       m_doubleManager->setValue(prop, val);
-    } else if (auto prp =
-                   dynamic_cast<Mantid::Kernel::PropertyWithValue<int> *>(
-                       property)) {
+    } else if (auto prp = dynamic_cast<Mantid::Kernel::PropertyWithValue<int> *>(property)) {
       prop = m_intManager->addProperty(propName);
       int val = *prp;
       m_intManager->setValue(prop, val);
-    } else if (auto prp =
-                   dynamic_cast<Mantid::Kernel::PropertyWithValue<size_t> *>(
-                       property)) {
+    } else if (auto prp = dynamic_cast<Mantid::Kernel::PropertyWithValue<size_t> *>(property)) {
       prop = m_intManager->addProperty(propName);
       size_t val = *prp;
       m_intManager->setValue(prop, static_cast<int>(val));
-    } else if (auto prp = dynamic_cast<
-                   Mantid::Kernel::PropertyWithValue<std::string> *>(
-                   property)) {
+    } else if (auto prp = dynamic_cast<Mantid::Kernel::PropertyWithValue<std::string> *>(property)) {
       prop = m_stringManager->addProperty(propName);
       QString val = QString::fromStdString(prp->value());
       m_stringManager->setValue(prop, val);
     } else if (dynamic_cast<Mantid::API::IWorkspaceProperty *>(property)) {
       prop = m_stringManager->addProperty(propName);
-      m_stringManager->setValue(prop,
-                                QString::fromStdString((*property).value()));
+      m_stringManager->setValue(prop, QString::fromStdString((*property).value()));
     } else {
       QMessageBox::warning(this, "Mantid - Error",
-                           "Type of minimizer's property " + propName +
-                               " is not yet supported by the browser.");
+                           "Type of minimizer's property " + propName + " is not yet supported by the browser.");
       continue;
     }
 
@@ -3400,6 +3186,15 @@ QStringList FitPropertyBrowser::getParameterNames() const {
   }
   return out;
 }
+/**=================================================================================================
+ * Get Fit Algorithm parameters
+ */
+std::string FitPropertyBrowser::getFitAlgorithmParameters() const { return m_fitAlgParameters; }
+
+/**=================================================================================================
+ * Get Fit Algorithm output statuss
+ */
+std::string FitPropertyBrowser::getFitAlgorithmOutputStatus() const { return m_fitAlgOutputStatus; }
 
 /**=================================================================================================
  * Show online function help
@@ -3407,8 +3202,7 @@ QStringList FitPropertyBrowser::getParameterNames() const {
 void FitPropertyBrowser::functionHelp() {
   PropertyHandler *handler = currentHandler();
   if (handler) {
-    MantidQt::API::HelpWindow::showFitFunction(nullptr,
-                                               handler->ifun()->name());
+    MantidQt::API::HelpWindow::showFitFunction(nullptr, handler->ifun()->name());
   }
 }
 
@@ -3416,10 +3210,9 @@ void FitPropertyBrowser::functionHelp() {
  * Show online browser help
  */
 void FitPropertyBrowser::browserHelp() {
-  MantidDesktopServices::openUrl(
-      QUrl("http://www.mantidproject.org/"
-           "MantidPlot:_Simple_Peak_Fitting_with_the_Fit_"
-           "Wizard#Fit_Properties_Browser"));
+  MantidDesktopServices::openUrl(QUrl("http://www.mantidproject.org/"
+                                      "MantidPlot:_Simple_Peak_Fitting_with_the_Fit_"
+                                      "Wizard#Fit_Properties_Browser"));
 }
 
 /**=================================================================================================
@@ -3449,8 +3242,7 @@ int MantidQt::MantidWidgets::FitPropertyBrowser::sizeOfFunctionsGroup() const {
   return m_functionsGroup->children().size();
 }
 
-void FitPropertyBrowser::addAllowedSpectra(const QString &wsName,
-                                           const QList<int> &wsSpectra) {
+void FitPropertyBrowser::addAllowedSpectra(const QString &wsName, const QList<int> &wsSpectra) {
   auto const name = wsName.toStdString();
   auto ws = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(name);
   if (ws) {
@@ -3458,10 +3250,26 @@ void FitPropertyBrowser::addAllowedSpectra(const QString &wsName,
     for (auto const i : wsSpectra) {
       indices.push_back(static_cast<int>(ws->getIndexFromSpectrumNumber(i)));
     }
+    auto wsFound = m_allowedSpectra.find(wsName);
     m_allowedSpectra.insert(wsName, indices);
+    if (wsFound != m_allowedSpectra.end()) {
+      // we already knew about this workspace
+      // update workspace index list
+      intChanged(m_workspaceIndex);
+    } else {
+      // new workspace, update workspace names
+      populateWorkspaceNames();
+    }
   } else {
     throw std::runtime_error("Workspace " + name + " is not a MatrixWorkspace");
   }
+}
+
+void FitPropertyBrowser::removeWorkspaceAndSpectra(const std::string &wsName) {
+  removeWorkspace(wsName);
+  // remove spectra
+  QString qWsName = QString::fromStdString(wsName);
+  m_allowedSpectra.erase(m_allowedSpectra.find(qWsName));
 }
 
 void FitPropertyBrowser::addAllowedTableWorkspace(const QString &wsName) {
@@ -3530,6 +3338,21 @@ void FitPropertyBrowser::setPeakFwhmOf(const QString &prefix, double value) {
 double FitPropertyBrowser::getPeakFwhmOf(const QString &prefix) {
   auto handler = getPeakHandler(prefix);
   return handler->fwhm();
+}
+
+std::string FitPropertyBrowser::getWidthParameterNameOf(const QString &prefix) {
+  auto handler = getPeakHandler(prefix);
+  return handler->getWidthParameterName();
+}
+
+std::string FitPropertyBrowser::getCentreParameterNameOf(const QString &prefix) {
+  auto handler = getPeakHandler(prefix);
+  return handler->getCentreParameterName();
+}
+
+bool FitPropertyBrowser::isParameterExplicitlySetOf(const QString &prefix, const std::string &param) {
+  auto handler = getPeakHandler(prefix);
+  return handler->isParameterExplicitlySet(param);
 }
 
 QStringList FitPropertyBrowser::getPeakPrefixes() const {

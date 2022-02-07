@@ -7,49 +7,60 @@
 #include "MantidAlgorithms/MaskDetectorsIf.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/SpectrumInfo.h"
+#include "MantidDataObjects/EventWorkspace.h"
 #include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidKernel/ListValidator.h"
 
 #include <fstream>
 #include <iomanip>
+#include <numeric>
 
-namespace Mantid {
-namespace Algorithms {
+namespace Mantid::Algorithms {
 
 // Register the class into the algorithm factory
 DECLARE_ALGORITHM(MaskDetectorsIf)
 
 using namespace Kernel;
 
+// anonymous namespace
+namespace {
+/** Binary function specification  of (not) isfinite so it can be used
+ * interchangeably with the other binary operators
+ */
+template <class T> struct not_finite {
+  T first_argument_type;
+  T second_argument_type;
+  bool result_type;
+
+  constexpr bool operator()(const T &value, const T &ignored) const {
+    UNUSED_ARG(ignored);
+    return !std::isfinite(value);
+  };
+};
+} // namespace
+
 /** Initialisation method. Declares properties to be used in algorithm.
  */
 void MaskDetectorsIf::init() {
   using namespace Mantid::Kernel;
-  declareProperty(std::make_unique<API::WorkspaceProperty<>>(
-                      "InputWorkspace", "", Direction::Input),
+  declareProperty(std::make_unique<API::WorkspaceProperty<>>("InputWorkspace", "", Direction::Input),
                   "A 1D Workspace that contains values to select against");
   const std::vector<std::string> select_mode{"SelectIf", "DeselectIf"};
-  declareProperty(
-      "Mode", "SelectIf", std::make_shared<StringListValidator>(select_mode),
-      "Mode to select or deselect detectors based on comparison with values.");
-  const std::vector<std::string> select_operator{
-      "Equal", "NotEqual", "Greater", "GreaterEqual", "Less", "LessEqual"};
-  declareProperty("Operator", "Equal",
-                  std::make_shared<StringListValidator>(select_operator),
-                  "Unary operator to compare to given values.");
+  declareProperty("Mode", "SelectIf", std::make_shared<StringListValidator>(select_mode),
+                  "Mode to select or deselect detectors based on comparison with values.");
+  const std::vector<std::string> select_operator{"Equal", "NotEqual",  "Greater",  "GreaterEqual",
+                                                 "Less",  "LessEqual", "NotFinite"};
+  declareProperty("Operator", "Equal", std::make_shared<StringListValidator>(select_operator),
+                  "Operator to compare to given values.");
   declareProperty("Value", 0.0);
+  declareProperty(std::make_unique<API::FileProperty>("InputCalFile", "", API::FileProperty::OptionalLoad, ".cal"),
+                  "The name of the CalFile with grouping data.");
+  declareProperty(std::make_unique<API::FileProperty>("OutputCalFile", "", API::FileProperty::OptionalSave, ".cal"),
+                  "The name of the CalFile with grouping data.");
   declareProperty(
-      std::make_unique<API::FileProperty>(
-          "InputCalFile", "", API::FileProperty::OptionalLoad, ".cal"),
-      "The name of the CalFile with grouping data.");
-  declareProperty(
-      std::make_unique<API::FileProperty>(
-          "OutputCalFile", "", API::FileProperty::OptionalSave, ".cal"),
-      "The name of the CalFile with grouping data.");
-  declareProperty(std::make_unique<API::WorkspaceProperty<>>(
-                      "OutputWorkspace", "", Direction::Output,
-                      API::PropertyMode::Optional),
-                  "The masked workspace.");
+      std::make_unique<API::WorkspaceProperty<>>("OutputWorkspace", "", Direction::Output, API::PropertyMode::Optional),
+      "The masked workspace.");
 }
 
 /**
@@ -74,8 +85,7 @@ void MaskDetectorsIf::exec() {
   retrieveProperties();
 
   if (isDefault("InputCalFile") && isDefault("OutputWorkspace")) {
-    g_log.error() << "No InputCalFle or OutputWorkspace specified; the "
-                     "algorithm will do nothing.";
+    g_log.error() << "No InputCalFle or OutputWorkspace specified; " << this->name() << " will do nothing.\n";
     return;
   }
   const size_t nspec = m_inputW->getNumberHistograms();
@@ -86,10 +96,15 @@ void MaskDetectorsIf::exec() {
     if (dets.empty())
       continue;
     else {
-      const double val = m_inputW->y(i)[0];
-      if (m_compar_f(val, m_value)) {
-        for (const auto det : dets) {
-          m_umap.emplace(det, m_select_on);
+      const size_t num_bins = m_inputW->y(i).size();
+      for (size_t j = 0; j < num_bins; ++j) {
+        const double val = m_inputW->y(i)[j];
+        if (m_compar_f(val, m_value)) {
+          for (const auto det : dets) {
+            m_umap.emplace(det, m_select_on);
+          }
+          // stop after the first bin matches the criteria
+          break;
         }
       }
     }
@@ -114,12 +129,20 @@ void MaskDetectorsIf::outputToWorkspace() {
     outputW = m_inputW->clone();
   auto &detectorInfo = outputW->mutableDetectorInfo();
   for (const auto &selection : m_umap) {
-    detectorInfo.setMasked(detectorInfo.indexOf(selection.first),
-                           selection.second);
+    detectorInfo.setMasked(detectorInfo.indexOf(selection.first), selection.second);
   }
+
+  const auto &spectrumInfo = outputW->spectrumInfo();
+  for (size_t i = 0; i < spectrumInfo.size(); ++i) {
+    if (spectrumInfo.hasDetectors(i) && spectrumInfo.isMasked(i))
+      outputW->getSpectrum(i).clearData();
+  }
+
+  if (auto event = dynamic_cast<DataObjects::EventWorkspace *>(outputW.get()))
+    event->clearMRU();
+
   setProperty("OutputWorkspace", outputW);
 }
-
 /**
  * Get the input properties and store them in the object variables
  */
@@ -149,6 +172,8 @@ void MaskDetectorsIf::retrieveProperties() {
     m_compar_f = std::equal_to<double>();
   else if (select_operator == "NotEqual")
     m_compar_f = std::not_equal_to<double>();
+  else if (select_operator == "NotFinite")
+    m_compar_f = not_finite<double>();
 }
 
 /**
@@ -189,13 +214,11 @@ void MaskDetectorsIf::createNewCalFile() {
     else
       selection = (*it).second;
 
-    newf << std::fixed << std::setw(9) << n << std::fixed << std::setw(15)
-         << udet << std::fixed << std::setprecision(7) << std::setw(15)
-         << offset << std::fixed << std::setw(8) << selection << std::fixed
-         << std::setw(8) << group << '\n';
+    newf << std::fixed << std::setw(9) << n << std::fixed << std::setw(15) << udet << std::fixed << std::setprecision(7)
+         << std::setw(15) << offset << std::fixed << std::setw(8) << selection << std::fixed << std::setw(8) << group
+         << '\n';
   }
   oldf.close();
   newf.close();
 }
-} // namespace Algorithms
-} // namespace Mantid
+} // namespace Mantid::Algorithms

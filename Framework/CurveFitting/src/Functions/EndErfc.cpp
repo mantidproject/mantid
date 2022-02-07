@@ -12,9 +12,7 @@
 #include <cmath>
 #include <gsl/gsl_sf_erf.h>
 
-namespace Mantid {
-namespace CurveFitting {
-namespace Functions {
+namespace Mantid::CurveFitting::Functions {
 
 using namespace CurveFitting;
 
@@ -25,16 +23,13 @@ using namespace API;
 DECLARE_FUNCTION(EndErfc)
 
 void EndErfc::init() {
-  declareParameter(
-      "A", 2000.0,
-      "Half value at minus infinity minus half value at plus infinity");
+  declareParameter("A", 2000.0, "Half value at minus infinity minus half value at plus infinity");
   declareParameter("B", 50.0, "Mid x value");
   declareParameter("C", 6.0, "Width parameter");
   declareParameter("D", 0.0, "Minimum value - must not be negative");
 }
 
-void EndErfc::function1D(double *out, const double *xValues,
-                         const size_t nData) const {
+void EndErfc::function1D(double *out, const double *xValues, const size_t nData) const {
   const double gA = getParameter("A");
   const double gB = getParameter("B");
   const double gC = getParameter("C");
@@ -61,6 +56,4 @@ void EndErfc::setActiveParameter(size_t i, double value) {
     setParameter(j, value, false);
 }
 
-} // namespace Functions
-} // namespace CurveFitting
-} // namespace Mantid
+} // namespace Mantid::CurveFitting::Functions

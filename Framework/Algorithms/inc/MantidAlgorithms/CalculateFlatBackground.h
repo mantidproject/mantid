@@ -35,22 +35,17 @@ namespace Algorithms {
     @author Russell Taylor, Tessella plc
     @date 5/02/2009
 */
-class MANTID_ALGORITHMS_DLL CalculateFlatBackground
-    : public API::ParallelAlgorithm {
+class MANTID_ALGORITHMS_DLL CalculateFlatBackground : public API::ParallelAlgorithm {
 public:
   /// Algorithm's name
   const std::string name() const override { return "CalculateFlatBackground"; }
   /// Summary of algorithms purpose
-  const std::string summary() const override {
-    return "Finds a constant background value of each desired histogram.";
-  }
+  const std::string summary() const override { return "Finds a constant background value of each desired histogram."; }
 
   /// Algorithm's version
   int version() const override { return (1); }
   /// Algorithm's category for identification
-  const std::string category() const override {
-    return "SANS;CorrectionFunctions\\BackgroundCorrections";
-  }
+  const std::string category() const override { return "SANS;CorrectionFunctions\\BackgroundCorrections"; }
 
 private:
   /// Initialisation code
@@ -61,12 +56,11 @@ private:
   void convertToDistribution(API::MatrixWorkspace_sptr workspace);
   void restoreDistributionState(API::MatrixWorkspace_sptr workspace);
   void checkRange(double &startX, double &endX);
-  void Mean(const HistogramData::Histogram &histogram, double &background,
-            double &variance, const double startX, const double endX) const;
-  void LinearFit(const HistogramData::Histogram &histogram, double &background,
-                 double &variance, const double startX, const double endX);
-  void MovingAverage(const HistogramData::Histogram &histogram,
-                     double &background, double &variance,
+  void Mean(const HistogramData::Histogram &histogram, double &background, double &variance, const double startX,
+            const double endX) const;
+  void LinearFit(const HistogramData::Histogram &histogram, double &background, double &variance, const double startX,
+                 const double endX);
+  void MovingAverage(const HistogramData::Histogram &histogram, double &background, double &variance,
                      const size_t windowWidth) const;
 
   /// Progress reporting

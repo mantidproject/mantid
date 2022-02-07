@@ -26,8 +26,7 @@ Required Properties:
 @author Michael Reuter, SNS
 @date October 25, 2010
 */
-class DLLExport LoadNexusMonitors : public API::Algorithm,
-                                    public API::DeprecatedAlgorithm {
+class DLLExport LoadNexusMonitors : public API::Algorithm, public API::DeprecatedAlgorithm {
 public:
   /// Constructor
   LoadNexusMonitors() { this->useAlgorithm("LoadNexusMonitors", 2); }
@@ -36,9 +35,7 @@ public:
   const std::string name() const override { return "LoadNexusMonitors"; }
 
   /// Summary of algorithms purpose
-  const std::string summary() const override {
-    return "Load all monitors from a NeXus file into a workspace.";
-  }
+  const std::string summary() const override { return "Load all monitors from a NeXus file into a workspace."; }
 
   /// Algorithm's version for identification overriding a virtual method
   int version() const override { return 1; }

@@ -33,18 +33,18 @@ New
   - **Note that this may break existing scripts if you assign outputs directly to a python list:**
 
     e.g. if previously you called an algorithm as:
-    
+
     ``qbin, q = ReflectometryReductionOneAuto(InputWorkspace=run, FirstTransmissionRun=trans, ThetaIn=0.7)``
-    
+
     then this will now need to be as follows (note that the optional ``IvsLam`` also needs to be added here because it is declared before the transmission output and the list must always be in the same order):
-    
+
     ``qbin, q, lam, trans = ReflectometryReductionOneAuto(InputWorkspace=run, FirstTransmissionRun=trans, ThetaIn=0.7)``
 
     If your scripts use the output property instead then they will not be affected, e.g. calls like this will still work as before:
-    
+
     ``ReflectometryReductionOneAuto(InputWorkspace=run, FirstTransmissionRun=trans, ThetaIn=0.7, OutputWorkspaceBinned='qbin')``
 
-  
+
 Bug fixes
 ---------
 

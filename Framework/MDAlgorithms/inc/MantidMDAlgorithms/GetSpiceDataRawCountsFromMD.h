@@ -21,9 +21,7 @@ namespace MDAlgorithms {
 class DLLExport GetSpiceDataRawCountsFromMD : public API::Algorithm {
 public:
   /// Algorithm's name
-  const std::string name() const override {
-    return "GetSpiceDataRawCountsFromMD";
-  }
+  const std::string name() const override { return "GetSpiceDataRawCountsFromMD"; }
 
   /// Summary of algorithms purpose
   const std::string summary() const override {
@@ -35,9 +33,7 @@ public:
   int version() const override { return (1); }
 
   /// Algorithm's category for identification
-  const std::string category() const override {
-    return "Diffraction\\ConstantWavelength";
-  }
+  const std::string category() const override { return "Diffraction\\ConstantWavelength"; }
 
 private:
   /// Initialisation code
@@ -47,43 +43,33 @@ private:
   void exec() override;
 
   /// Export all detectors' counts for a run
-  void
-  exportDetCountsOfRun(const API::IMDEventWorkspace_const_sptr &datamdws,
-                       const API::IMDEventWorkspace_const_sptr &monitormdws,
-                       const int runnumber, std::vector<double> &vecX,
-                       std::vector<double> &vecY, std::string &xlabel,
-                       std::string &ylabel, bool donormalize);
+  void exportDetCountsOfRun(const API::IMDEventWorkspace_const_sptr &datamdws,
+                            const API::IMDEventWorkspace_const_sptr &monitormdws, const int runnumber,
+                            std::vector<double> &vecX, std::vector<double> &vecY, std::string &xlabel,
+                            std::string &ylabel, bool donormalize);
 
   /// Export a detector's counts accross all runs
-  void exportIndividualDetCounts(
-      const API::IMDEventWorkspace_const_sptr &datamdws,
-      const API::IMDEventWorkspace_const_sptr &monitormdws, const int detid,
-      std::vector<double> &vecX, std::vector<double> &vecY, std::string &xlabel,
-      std::string &ylabel, const bool &donormalize);
+  void exportIndividualDetCounts(const API::IMDEventWorkspace_const_sptr &datamdws,
+                                 const API::IMDEventWorkspace_const_sptr &monitormdws, const int detid,
+                                 std::vector<double> &vecX, std::vector<double> &vecY, std::string &xlabel,
+                                 std::string &ylabel, const bool &donormalize);
 
   /// Export sample log values accross all runs
-  void exportSampleLogValue(const API::IMDEventWorkspace_const_sptr &datamdws,
-                            const std::string &samplelogname,
-                            std::vector<double> &vecX,
-                            std::vector<double> &vecY, std::string &xlabel,
+  void exportSampleLogValue(const API::IMDEventWorkspace_const_sptr &datamdws, const std::string &samplelogname,
+                            std::vector<double> &vecX, std::vector<double> &vecY, std::string &xlabel,
                             std::string &ylabel);
 
   /// Get detectors' counts
-  void getDetCounts(const API::IMDEventWorkspace_const_sptr &mdws,
-                    const int &runnumber, const int &detid,
-                    std::vector<double> &vecX, std::vector<double> &vecY,
-                    bool formX);
+  void getDetCounts(const API::IMDEventWorkspace_const_sptr &mdws, const int &runnumber, const int &detid,
+                    std::vector<double> &vecX, std::vector<double> &vecY, bool formX);
 
   /// Get sample log values
-  void getSampleLogValues(const API::IMDEventWorkspace_const_sptr &mdws,
-                          const std::string &samplelogname, const int runnumber,
-                          std::vector<double> &vecSampleLog);
+  void getSampleLogValues(const API::IMDEventWorkspace_const_sptr &mdws, const std::string &samplelogname,
+                          const int runnumber, std::vector<double> &vecSampleLog);
 
   /// Create output workspace
-  API::MatrixWorkspace_sptr
-  createOutputWorkspace(const std::vector<double> &vecX,
-                        const std::vector<double> &vecY,
-                        const std::string &xlabel, const std::string &ylabel);
+  API::MatrixWorkspace_sptr createOutputWorkspace(const std::vector<double> &vecX, const std::vector<double> &vecY,
+                                                  const std::string &xlabel, const std::string &ylabel);
 };
 
 } // namespace MDAlgorithms

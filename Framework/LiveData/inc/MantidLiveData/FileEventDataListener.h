@@ -33,14 +33,11 @@ public:
   ~FileEventDataListener() override;
 
   std::string name() const override { return "FileEventDataListener"; }
-  bool supportsHistory() const override {
-    return false;
-  } // For the time being at least
+  bool supportsHistory() const override { return false; } // For the time being at least
   bool buffersEvents() const override { return true; }
 
   bool connect(const Poco::Net::SocketAddress &address) override;
-  void start(
-      Types::Core::DateAndTime startTime = Types::Core::DateAndTime()) override;
+  void start(Types::Core::DateAndTime startTime = Types::Core::DateAndTime()) override;
   std::shared_ptr<API::Workspace> extractData() override;
 
   bool isConnected() override;
@@ -56,7 +53,7 @@ private:
   int m_nextChunk;            ///< The number of the next chunk to be loaded
   std::string m_filePropName; ///< The file property name for the loader
   std::string m_loaderName;   ///< The loader that will do the work
-  bool m_canLoadMonitors; ///< A flag to turn off monitor loading for loaders
+  bool m_canLoadMonitors;     ///< A flag to turn off monitor loading for loaders
   /// that can
 
   /// Future that holds the result of the latest call to LoadEventPreNexus

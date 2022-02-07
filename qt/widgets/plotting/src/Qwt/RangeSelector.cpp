@@ -15,32 +15,25 @@
 
 using namespace MantidQt::MantidWidgets;
 
-RangeSelector::RangeSelector(QwtPlot *plot, SelectType type, bool visible,
-                             bool infoOnly)
-    : QwtPlotPicker(plot->canvas()), m_type(type), m_min(0.0), m_max(0.0),
-      m_lower(0.0), m_higher(0.0), m_mrkMin(nullptr), m_mrkMax(nullptr),
-      m_plot(plot), m_canvas(plot->canvas()), m_minChanging(false),
-      m_maxChanging(false), m_infoOnly(infoOnly), m_visible(visible),
-      m_pen(nullptr), m_movCursor() {
+RangeSelector::RangeSelector(QwtPlot *plot, SelectType type, bool visible, bool infoOnly)
+    : QwtPlotPicker(plot->canvas()), m_type(type), m_min(0.0), m_max(0.0), m_lower(0.0), m_higher(0.0),
+      m_mrkMin(nullptr), m_mrkMax(nullptr), m_plot(plot), m_canvas(plot->canvas()), m_minChanging(false),
+      m_maxChanging(false), m_infoOnly(infoOnly), m_visible(visible), m_pen(nullptr), m_movCursor() {
   init();
 }
 
-RangeSelector::RangeSelector(PreviewPlot *plot, SelectType type, bool visible,
-                             bool infoOnly)
-    : QwtPlotPicker(plot->m_uiForm.plot->canvas()), m_type(type), m_min(0.0),
-      m_max(0.0), m_lower(0.0), m_higher(0.0), m_mrkMin(nullptr),
-      m_mrkMax(nullptr), m_plot(plot->m_uiForm.plot),
-      m_canvas(plot->m_uiForm.plot->canvas()), m_minChanging(false),
-      m_maxChanging(false), m_infoOnly(infoOnly), m_visible(visible),
-      m_pen(nullptr), m_movCursor() {
+RangeSelector::RangeSelector(PreviewPlot *plot, SelectType type, bool visible, bool infoOnly)
+    : QwtPlotPicker(plot->m_uiForm.plot->canvas()), m_type(type), m_min(0.0), m_max(0.0), m_lower(0.0), m_higher(0.0),
+      m_mrkMin(nullptr), m_mrkMax(nullptr), m_plot(plot->m_uiForm.plot), m_canvas(plot->m_uiForm.plot->canvas()),
+      m_minChanging(false), m_maxChanging(false), m_infoOnly(infoOnly), m_visible(visible), m_pen(nullptr),
+      m_movCursor() {
   init();
 }
 
 void RangeSelector::init() {
   m_canvas->installEventFilter(this);
 
-  m_canvas->setCursor(
-      Qt::PointingHandCursor); ///< @todo Make this an option at some point
+  m_canvas->setCursor(Qt::PointingHandCursor); ///< @todo Make this an option at some point
 
   m_mrkMin = new QwtPlotMarker();
   m_mrkMax = new QwtPlotMarker();
@@ -228,9 +221,7 @@ void RangeSelector::setRange(double min, double max) {
  * maximum
  * @param range
  */
-void RangeSelector::setRange(const std::pair<double, double> &range) {
-  this->setRange(range.first, range.second);
-}
+void RangeSelector::setRange(const std::pair<double, double> &range) { this->setRange(range.first, range.second); }
 
 /**
  * @brief get the lowest and highest limits for the range selector
@@ -393,9 +384,7 @@ void RangeSelector::setMax(double val) {
  * to the maximum
  * @return
  */
-bool RangeSelector::changingMin(double x, double xPlusdx) {
-  return (fabs(x - m_min) <= fabs(xPlusdx - x));
-}
+bool RangeSelector::changingMin(double x, double xPlusdx) { return (fabs(x - m_min) <= fabs(xPlusdx - x)); }
 
 /**
  * @brief Find out if user is moving the line marking the position of the
@@ -405,9 +394,7 @@ bool RangeSelector::changingMin(double x, double xPlusdx) {
  * to the minimum
  * @return
  */
-bool RangeSelector::changingMax(double x, double xPlusdx) {
-  return (fabs(x - m_max) <= fabs(xPlusdx - x));
-}
+bool RangeSelector::changingMax(double x, double xPlusdx) { return (fabs(x - m_max) <= fabs(xPlusdx - x)); }
 
 /**
  * @brief Ensure that current position for minimum is not below the lowest
@@ -437,6 +424,4 @@ void RangeSelector::verify() {
  * @param x
  * @return true if position within the allowed range
  */
-bool RangeSelector::inRange(double x, double dx) {
-  return (x >= m_lower - dx && x <= m_higher + dx);
-}
+bool RangeSelector::inRange(double x, double dx) { return (x >= m_lower - dx && x <= m_higher + dx); }

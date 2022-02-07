@@ -19,7 +19,7 @@ Usage
 
 .. testcode:: ExHasUB1
 
-    ws = CreateMDHistoWorkspace(SignalInput='1,2,3,4,5,6,7,8,9', 
+    ws = CreateMDHistoWorkspace(SignalInput='1,2,3,4,5,6,7,8,9',
         ErrorInput='1,1,1,1,1,1,1,1,1', Dimensionality='2',
         Extents='-1,1,-1,1', NumberOfBins='3,3', Names='A,B', Units='U,T')
 
@@ -41,12 +41,12 @@ Output:
 
 .. testcode:: ExHasUB2
 
-    ws = CreateMDHistoWorkspace(SignalInput='1,2,3', 
+    ws = CreateMDHistoWorkspace(SignalInput='1,2,3',
         ErrorInput='1,1,1', Dimensionality='2',
         Extents='-1,1,-1,1', NumberOfBins='1,3', Names='A,B', Units='U,T')
 
     print("{} is a {}".format(ws, ws.id()))
-    
+
     wsOut=ConvertMDHistoToMatrixWorkspace(ws)
 
     print("{} is a {} with {} histograms and {} bins".format(wsOut, wsOut.id(), wsOut.getNumberHistograms(), wsOut.blocksize()))

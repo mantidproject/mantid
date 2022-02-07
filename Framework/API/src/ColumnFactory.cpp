@@ -8,15 +8,12 @@
 #include "MantidAPI/Column.h"
 #include <sstream>
 
-namespace Mantid {
-namespace API {
+namespace Mantid::API {
 
-std::shared_ptr<Column>
-ColumnFactoryImpl::create(const std::string &type) const {
+std::shared_ptr<Column> ColumnFactoryImpl::create(const std::string &type) const {
   std::shared_ptr<Column> c = Kernel::DynamicFactory<Column>::create(type);
   c->m_type = type;
   return c;
 }
 
-} // namespace API
-} // namespace Mantid
+} // namespace Mantid::API

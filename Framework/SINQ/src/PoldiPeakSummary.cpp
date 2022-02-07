@@ -12,8 +12,7 @@
 #include "MantidSINQ/PoldiUtilities/PoldiPeakCollection.h"
 #include "MantidSINQ/PoldiUtilities/UncertainValueIO.h"
 
-namespace Mantid {
-namespace Poldi {
+namespace Mantid::Poldi {
 
 using namespace API;
 using namespace DataObjects;
@@ -43,12 +42,10 @@ const std::string PoldiPeakSummary::summary() const {
 /** Initialize the algorithm's properties.
  */
 void PoldiPeakSummary::init() {
-  declareProperty(std::make_unique<WorkspaceProperty<TableWorkspace>>(
-                      "InputWorkspace", "", Direction::Input),
+  declareProperty(std::make_unique<WorkspaceProperty<TableWorkspace>>("InputWorkspace", "", Direction::Input),
                   "Input workspace containing a table with peaks from a POLDI "
                   "fit routine.");
-  declareProperty(std::make_unique<WorkspaceProperty<TableWorkspace>>(
-                      "OutputWorkspace", "", Direction::Output),
+  declareProperty(std::make_unique<WorkspaceProperty<TableWorkspace>>("OutputWorkspace", "", Direction::Output),
                   "Output table workspace that contains ");
 }
 
@@ -57,19 +54,16 @@ void PoldiPeakSummary::init() {
  */
 void PoldiPeakSummary::exec() {
   TableWorkspace_sptr poldiPeakTableWorkspace = getProperty("InputWorkspace");
-  PoldiPeakCollection_sptr peaks =
-      std::make_shared<PoldiPeakCollection>(poldiPeakTableWorkspace);
+  PoldiPeakCollection_sptr peaks = std::make_shared<PoldiPeakCollection>(poldiPeakTableWorkspace);
 
   TableWorkspace_sptr resultTable = getSummaryTable(peaks);
 
   setProperty("OutputWorkspace", resultTable);
 }
 
-TableWorkspace_sptr PoldiPeakSummary::getSummaryTable(
-    const PoldiPeakCollection_sptr &peakCollection) const {
+TableWorkspace_sptr PoldiPeakSummary::getSummaryTable(const PoldiPeakCollection_sptr &peakCollection) const {
   if (!peakCollection) {
-    throw std::invalid_argument(
-        "Cannot create summary of a null PoldiPeakCollection.");
+    throw std::invalid_argument("Cannot create summary of a null PoldiPeakCollection.");
   }
 
   TableWorkspace_sptr peakResultWorkspace = getInitializedResultWorkspace();
@@ -83,8 +77,7 @@ TableWorkspace_sptr PoldiPeakSummary::getSummaryTable(
 
 TableWorkspace_sptr PoldiPeakSummary::getInitializedResultWorkspace() const {
   TableWorkspace_sptr peakResultWorkspace =
-      std::dynamic_pointer_cast<TableWorkspace>(
-          WorkspaceFactory::Instance().createTable());
+      std::dynamic_pointer_cast<TableWorkspace>(WorkspaceFactory::Instance().createTable());
 
   peakResultWorkspace->addColumn("str", "hkl");
   peakResultWorkspace->addColumn("str", "Q");
@@ -96,17 +89,13 @@ TableWorkspace_sptr PoldiPeakSummary::getInitializedResultWorkspace() const {
   return peakResultWorkspace;
 }
 
-void PoldiPeakSummary::storePeakSummary(TableRow tableRow,
-                                        const PoldiPeak_sptr &peak) const {
+void PoldiPeakSummary::storePeakSummary(TableRow tableRow, const PoldiPeak_sptr &peak) const {
   UncertainValue q = peak->q();
   UncertainValue d = peak->d();
 
-  tableRow << MillerIndicesIO::toString(peak->hkl())
-           << UncertainValueIO::toString(q) << UncertainValueIO::toString(d)
-           << d.error() / d.value() * 1e3
-           << UncertainValueIO::toString(peak->fwhm(PoldiPeak::Relative) * 1e3)
+  tableRow << MillerIndicesIO::toString(peak->hkl()) << UncertainValueIO::toString(q) << UncertainValueIO::toString(d)
+           << d.error() / d.value() * 1e3 << UncertainValueIO::toString(peak->fwhm(PoldiPeak::Relative) * 1e3)
            << UncertainValueIO::toString(peak->intensity());
 }
 
-} // namespace Poldi
-} // namespace Mantid
+} // namespace Mantid::Poldi

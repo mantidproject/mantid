@@ -47,7 +47,7 @@ Output:
 .. testoutput:: ExMUSRGrouping
 
    <?xml version="1.0"?>
-   <detector-grouping instrument="MUSR">
+   <detector-grouping idf-date="1900-01-31T23:59:59" instrument="MUSR">
      <group ID="0">
        <detids>34-64</detids>
      </group>

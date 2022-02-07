@@ -1,3 +1,5 @@
+.. _mantid.kernel.FloatBoundedValidator:
+
 =======================
  FloatBoundedValidator
 =======================
@@ -8,7 +10,7 @@ This is a Python binding to the C++ class Mantid::Kernel::FloatBoundedValidator.
 
 .. module:`mantid.kernel`
 
-.. autoclass:: mantid.kernel.FloatBoundedValidator 
+.. autoclass:: mantid.kernel.FloatBoundedValidator
     :members:
     :undoc-members:
     :inherited-members:

@@ -44,8 +44,7 @@ public:
   bool buffersEvents() const override { return false; }
 
   bool connect(const Poco::Net::SocketAddress &address) override;
-  void start(
-      Types::Core::DateAndTime startTime = Types::Core::DateAndTime()) override;
+  void start(Types::Core::DateAndTime startTime = Types::Core::DateAndTime()) override;
   std::shared_ptr<API::Workspace> extractData() override;
 
   bool isConnected() override;
@@ -57,19 +56,13 @@ private:
   void setPeriods(const std::vector<specnum_t> &periodList);
   int getInt(const std::string &par) const;
   std::string getString(const std::string &par) const;
-  void getFloatArray(const std::string &par, std::vector<float> &arr,
-                     const size_t dim);
-  void getIntArray(const std::string &par, std::vector<int> &arr,
-                   const size_t dim);
-  void getData(int period, int index, int count,
-               const std::shared_ptr<API::MatrixWorkspace> &workspace,
+  void getFloatArray(const std::string &par, std::vector<float> &arr, const size_t dim);
+  void getIntArray(const std::string &par, std::vector<int> &arr, const size_t dim);
+  void getData(int period, int index, int count, const std::shared_ptr<API::MatrixWorkspace> &workspace,
                size_t workspaceIndex);
-  void calculateIndicesForReading(std::vector<int> &index,
-                                  std::vector<int> &count);
+  void calculateIndicesForReading(std::vector<int> &index, std::vector<int> &count);
   void loadSpectraMap();
-  void
-  runLoadInstrument(const std::shared_ptr<API::MatrixWorkspace> &localWorkspace,
-                    const std::string &iName);
+  void runLoadInstrument(const std::shared_ptr<API::MatrixWorkspace> &localWorkspace, const std::string &iName);
   void loadTimeRegimes();
   int getTimeRegimeToLoad() const;
   bool isPeriodIgnored(int period) const;

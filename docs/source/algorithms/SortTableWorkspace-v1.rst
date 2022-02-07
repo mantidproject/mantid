@@ -59,7 +59,7 @@ Usage
 
 Output:
 
-.. testoutput:: SortTableWorkspaceExample 
+.. testoutput:: SortTableWorkspaceExample
 
     Sorted ascending
     {'y': 'one (1)', 'x': 1, 'z': 7.0}
@@ -83,7 +83,7 @@ Output:
     {'y': 'one (3)', 'x': 1, 'z': 1.0}
     {'y': 'one (2)', 'x': 1, 'z': 2.0}
     {'y': 'one (1)', 'x': 1, 'z': 7.0}
-    
+
 .. categories::
 
 .. sourcelink::

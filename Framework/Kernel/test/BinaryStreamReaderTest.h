@@ -21,14 +21,10 @@ class BinaryStreamReaderTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static BinaryStreamReaderTest *createSuite() {
-    return new BinaryStreamReaderTest();
-  }
+  static BinaryStreamReaderTest *createSuite() { return new BinaryStreamReaderTest(); }
   static void destroySuite(BinaryStreamReaderTest *suite) { delete suite; }
 
-  BinaryStreamReaderTest() : CxxTest::TestSuite(), m_bytes() {
-    createTestStream();
-  }
+  BinaryStreamReaderTest() : CxxTest::TestSuite(), m_bytes() { createTestStream(); }
 
   void setUp() override { resetStreamToStart(); }
 
@@ -40,9 +36,7 @@ public:
     TS_ASSERT_EQUALS(std::ios_base::beg, m_bytes.tellg());
   }
 
-  void test_Read_int16_t_Gives_Correct_Value() {
-    doReadSingleValueTest<int16_t>(6, sizeof(int16_t));
-  }
+  void test_Read_int16_t_Gives_Correct_Value() { doReadSingleValueTest<int16_t>(6, sizeof(int16_t)); }
 
   void test_Read_int32_t_Gives_Correct_Value() {
     moveStreamToPosition(10);
@@ -88,8 +82,7 @@ public:
     moveStreamToPosition(42);
     std::vector<int64_t> expectedValue{200, 400, 600, 900};
     const auto nvals(expectedValue.size());
-    doReadArrayValueTest(expectedValue.size(), expectedValue,
-                         nvals * sizeof(int64_t));
+    doReadArrayValueTest(expectedValue.size(), expectedValue, nvals * sizeof(int64_t));
   }
 
   void test_Read_Vector_float() {
@@ -237,14 +230,12 @@ public:
     // read will put it into a 'bad' state
     int i(0);
     m_bytes >> i;
-    TSM_ASSERT_THROWS("Expected a runtime_error when given a bad stream",
-                      BinaryStreamReader reader(m_bytes),
+    TSM_ASSERT_THROWS("Expected a runtime_error when given a bad stream", BinaryStreamReader reader(m_bytes),
                       const std::runtime_error &);
   }
 
 private:
-  template <typename T>
-  void doReadSingleValueTest(T expectedValue, size_t expectedStreamOffset) {
+  template <typename T> void doReadSingleValueTest(T expectedValue, size_t expectedStreamOffset) {
     BinaryStreamReader reader(m_bytes);
     auto streamPosBeg = m_bytes.tellg();
     T value;
@@ -254,9 +245,7 @@ private:
   }
 
   template <typename T>
-  void doReadArrayValueTest(const size_t nvals,
-                            const std::vector<T> &expectedValue,
-                            size_t expectedStreamOffset) {
+  void doReadArrayValueTest(const size_t nvals, const std::vector<T> &expectedValue, size_t expectedStreamOffset) {
     BinaryStreamReader reader(m_bytes);
     auto streamPosBeg = m_bytes.tellg();
 
@@ -289,8 +278,7 @@ private:
     // array of characters
     m_bytes.write("abcdef", 6);
     // matrix of floats
-    writeArrayValuesToStream<float>(m_bytes,
-                                    {1.0f, 2.0f, 3.0f, 4.0f, 5.0f, 6.0f});
+    writeArrayValuesToStream<float>(m_bytes, {1.0f, 2.0f, 3.0f, 4.0f, 5.0f, 6.0f});
     // matrix of doubles
     writeArrayValuesToStream<double>(m_bytes, {1.0, 2.0, 3.0, 4.0, 5.0, 6.0});
   }
@@ -299,13 +287,10 @@ private:
     m_bytes.write(reinterpret_cast<const char *>(&value), sizeof(T));
   }
 
-  template <typename T>
-  void writeArrayValuesToStream(std::ostream &,
-                                std::initializer_list<T> values) {
+  template <typename T> void writeArrayValuesToStream(std::ostream &, std::initializer_list<T> values) {
     auto length = values.size();
     std::vector<T> asVector(values);
-    m_bytes.write(reinterpret_cast<const char *>(asVector.data()),
-                  length * sizeof(T));
+    m_bytes.write(reinterpret_cast<const char *>(asVector.data()), length * sizeof(T));
   }
 
   void resetStreamToStart() {
@@ -314,9 +299,7 @@ private:
   }
 
   /// Move the stream nbytes from the beginning
-  void moveStreamToPosition(size_t nbytes) {
-    m_bytes.seekg(nbytes, std::ios_base::beg);
-  }
+  void moveStreamToPosition(size_t nbytes) { m_bytes.seekg(nbytes, std::ios_base::beg); }
 
   std::stringstream m_bytes;
 };

@@ -25,8 +25,7 @@ public:
   enum class ReferenceBin { Average, First };
   /// Type of errors to check
   enum class ErrorType { Cumulative, Individual };
-  EqualBinsChecker(const MantidVec &xData, const double errorLevel,
-                   const double warningLevel = -1);
+  EqualBinsChecker(const MantidVec &xData, const double errorLevel, const double warningLevel = -1);
   virtual ~EqualBinsChecker() = default;
   virtual std::string validate() const;
   virtual void setReferenceBin(const ReferenceBin &refBinType);

@@ -6,6 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 from mantid.api import WorkspaceGroup
 import mantid.simpleapi as mantid
+from mantid.kernel import logger
 
 import isis_powder.routines.common as common
 from isis_powder.routines.common_enums import INPUT_BATCHING
@@ -34,14 +35,22 @@ def _focus_one_ws(input_workspace, run_number, instrument, perform_vanadium_norm
     # Subtract empty instrument runs, as long as this run isn't an empty, user hasn't turned empty subtraction off, or
     # The user has not supplied a sample empty
     is_run_empty = common.runs_overlap(run_number, run_details.empty_runs)
+    summed_empty = None
     if not is_run_empty and instrument.should_subtract_empty_inst() and not run_details.sample_empty:
-        input_workspace = common.subtract_summed_runs(ws_to_correct=input_workspace, instrument=instrument,
-                                                      empty_sample_ws_string=run_details.empty_runs)
+        if os.path.isfile(run_details.summed_empty_file_path):
+            logger.warning('Pre-summed empty instrument workspace found at ' + run_details.summed_empty_file_path)
+            summed_empty = mantid.LoadNexus(Filename=run_details.summed_empty_file_path)
+        else:
+            summed_empty = common.generate_summed_runs(empty_sample_ws_string=run_details.empty_runs,
+                                                       instrument=instrument)
     elif run_details.sample_empty:
         # Subtract a sample empty if specified
-        input_workspace = common.subtract_summed_runs(ws_to_correct=input_workspace, instrument=instrument,
-                                                      empty_sample_ws_string=run_details.sample_empty,
-                                                      scale_factor=instrument._inst_settings.sample_empty_scale)
+        summed_empty = common.generate_summed_runs(empty_sample_ws_string=run_details.sample_empty,
+                                                   instrument=instrument,
+                                                   scale_factor=instrument._inst_settings.sample_empty_scale)
+    if summed_empty is not None:
+        input_workspace = common.subtract_summed_runs(ws_to_correct=input_workspace,
+                                                      empty_sample=summed_empty)
 
     # Crop to largest acceptable TOF range
     input_workspace = instrument._crop_raw_to_expected_tof_range(ws_to_crop=input_workspace)
@@ -56,8 +65,9 @@ def _focus_one_ws(input_workspace, run_number, instrument, perform_vanadium_norm
                              Geometry=common.generate_sample_geometry(sample_details),
                              Material=common.generate_sample_material(sample_details))
     # Align
-    aligned_ws = mantid.AlignDetectors(InputWorkspace=input_workspace,
-                                       CalibrationFile=run_details.offset_file_path)
+    mantid.ApplyDiffCal(InstrumentWorkspace=input_workspace,
+                        CalibrationFile=run_details.offset_file_path)
+    aligned_ws = mantid.ConvertUnits(InputWorkspace=input_workspace, Target="dSpacing")
 
     solid_angle = instrument.get_solid_angle_corrections(run_details.vanadium_run_numbers, run_details)
     if solid_angle:
@@ -67,6 +77,8 @@ def _focus_one_ws(input_workspace, run_number, instrument, perform_vanadium_norm
     # Focus the spectra into banks
     focused_ws = mantid.DiffractionFocussing(InputWorkspace=aligned_ws,
                                              GroupingFileName=run_details.grouping_file_path)
+
+    instrument.apply_calibration_to_focused_data(focused_ws)
 
     calibrated_spectra = _apply_vanadium_corrections(instrument=instrument,
                                                      input_workspace=focused_ws,
@@ -122,14 +134,15 @@ def _batched_run_focusing(instrument, perform_vanadium_norm, run_number_string, 
                                                 OutputWorkspace=van)
         else:
             vanadium_splines = mantid.mtd[van]
-
     output = None
     for ws in read_ws_list:
         output = _focus_one_ws(input_workspace=ws, run_number=run_number_string, instrument=instrument,
                                perform_vanadium_norm=perform_vanadium_norm, absorb=absorb,
                                sample_details=sample_details, vanadium_path=vanadium_splines)
     if instrument.get_instrument_prefix() == "PEARL" and vanadium_splines is not None :
-        mantid.DeleteWorkspace(vanadium_splines.OutputWorkspace)
+        if hasattr(vanadium_splines, "OutputWorkspace"):
+            vanadium_splines = vanadium_splines.OutputWorkspace
+        mantid.DeleteWorkspace(vanadium_splines)
     return output
 
 
@@ -162,7 +175,6 @@ def _divide_by_vanadium_splines(spectra_list, vanadium_splines, instrument):
                        for data_ws, van_ws in zip(spectra_list, vanadium_splines)]
         return output_list
     output_list = [_divide_one_spectrum_by_spline(spectra_list[0], vanadium_splines, instrument)]
-    common.remove_intermediate_workspace(vanadium_splines)
     return output_list
 
 

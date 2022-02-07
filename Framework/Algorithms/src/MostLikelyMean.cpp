@@ -12,8 +12,7 @@
 
 #include "boost/multi_array.hpp"
 
-namespace Mantid {
-namespace Algorithms {
+namespace Mantid::Algorithms {
 
 using Mantid::Kernel::ArrayLengthValidator;
 using Mantid::Kernel::ArrayProperty;
@@ -46,12 +45,9 @@ const std::string MostLikelyMean::summary() const {
 void MostLikelyMean::init() {
   auto lengthValidator = std::make_shared<ArrayLengthValidator<double>>();
   lengthValidator->setLengthMin(1);
-  declareProperty(std::make_unique<ArrayProperty<double>>(
-                      "InputArray", lengthValidator, Direction::Input),
+  declareProperty(std::make_unique<ArrayProperty<double>>("InputArray", lengthValidator, Direction::Input),
                   "An input array.");
-  declareProperty(std::make_unique<PropertyWithValue<double>>(
-                      "Output", 0., Direction::Output),
-                  "The output (mean).");
+  declareProperty(std::make_unique<PropertyWithValue<double>>("Output", 0., Direction::Output), "The output (mean).");
 }
 
 //----------------------------------------------------------------------------------------------
@@ -77,5 +73,4 @@ void MostLikelyMean::exec() {
   setProperty("Output", input[std::distance(sums.cbegin(), minIndex)]);
 }
 
-} // namespace Algorithms
-} // namespace Mantid
+} // namespace Mantid::Algorithms

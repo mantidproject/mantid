@@ -33,6 +33,7 @@ digraph isisPowderCreateVanadium{
 
         // Common
         proc_LoadCurrentNormWS_1        [label="Load current normalised workspace(s)"]
+        proc_LoadCurrentNormWS_2        [label="Load current normalised workspace(s)"]
 
         // Bespoke
         proc_InstApplyAbsorbCorr        [label="Inst specific: Apply absorption corrections"]
@@ -49,6 +50,7 @@ digraph isisPowderCreateVanadium{
         alg_CropVanTOF                  [label="Crop data to expected TOF"]
         alg_DiffractionFocusing         [label="Diffraction Focusing"]
         alg_ExtractWsSpectra            [label="Extract spectra into individual banks"]
+        alg_SaveNexusProcessedEmpty     [label="Save Nexus file"]
         alg_SaveNexusProcessed          [label="Save Nexus file"]
         alg_SplineVanadium              [label="Spline Background"]
         alg_Subtract_van_empty          [label="Subtract: vanadium - empty"]
@@ -66,14 +68,17 @@ digraph isisPowderCreateVanadium{
         // Load current normalised vanadium file
         label_start                     ->      param_calMapping_1
         param_calMapping_1              ->      param_vanadiumRunNumber
-        param_vanadiumRunNumber         ->      proc_LoadCurrentNormWS_1
+        param_vanadiumRunNumber         ->      proc_LoadCurrentNormWS_1      [label="InputMode=Summed"]
 
         // Load current normalised empty file
         param_calMapping_1              ->      param_emptyRunNumber
-        param_emptyRunNumber            ->      proc_LoadCurrentNormWS_1
+        param_emptyRunNumber            ->      proc_LoadCurrentNormWS_2      [label="InputMode=Summed"]
+
+        proc_LoadCurrentNormWS_2        ->      alg_SaveNexusProcessedEmpty
 
         // Subtract empty from vanadium
         proc_LoadCurrentNormWS_1        ->      alg_Subtract_van_empty
+        alg_SaveNexusProcessedEmpty     ->      alg_Subtract_van_empty
 
         // Crop to expected raw TOF
         param_rawTOFCropValues          ->      alg_CropRawTOF
@@ -102,7 +107,7 @@ digraph isisPowderCreateVanadium{
         param_vanadiumTOFCropValues     ->      alg_CropVanTOF
         alg_ExtractWsSpectra            ->      alg_CropVanTOF
         alg_CropVanTOF                  ->      proc_InstMaskPeaks
-        
+
         // Spline the vanadium
         param_vanadiumSplineCoefficient ->      alg_SplineVanadium
         proc_InstMaskPeaks              ->      alg_SplineVanadium

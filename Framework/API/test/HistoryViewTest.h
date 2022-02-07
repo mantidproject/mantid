@@ -28,18 +28,10 @@ private:
   public:
     testalg() : Algorithm() {}
     ~testalg() override {}
-    const std::string summary() const override {
-      return "testalg";
-    } ///< Algorithm's documentation summary
-    const std::string name() const override {
-      return "testalg";
-    } ///< Algorithm's name for identification
-    int version() const override {
-      return 1;
-    } ///< Algorithm's version for identification
-    const std::string category() const override {
-      return "Cat";
-    } ///< Algorithm's category for identification
+    const std::string summary() const override { return "testalg"; } ///< Algorithm's documentation summary
+    const std::string name() const override { return "testalg"; }    ///< Algorithm's name for identification
+    int version() const override { return 1; }                       ///< Algorithm's version for identification
+    const std::string category() const override { return "Cat"; }    ///< Algorithm's category for identification
 
     void init() override { declareProperty("name", "", Direction::Input); }
 
@@ -47,9 +39,7 @@ private:
   };
 
 private:
-  AlgorithmHistory_sptr
-  createFromTestAlg(const std::string &name,
-                    DateAndTime execTime = DateAndTime::defaultTime()) {
+  AlgorithmHistory_sptr createFromTestAlg(const std::string &name, DateAndTime execTime = DateAndTime::defaultTime()) {
     testalg alg;
     alg.initialize();
     alg.setPropertyValue("name", name);
@@ -101,8 +91,7 @@ public:
     for (auto it = items.begin(); it != items.end(); ++it, ++i) {
       auto history = it->getAlgorithmHistory();
       auto props = history->getProperties();
-      TS_ASSERT_EQUALS(props[0]->value(),
-                       "alg" + boost::lexical_cast<std::string>(i + 1));
+      TS_ASSERT_EQUALS(props[0]->value(), "alg" + boost::lexical_cast<std::string>(i + 1));
     }
   }
 
@@ -117,8 +106,7 @@ public:
 
     std::vector<std::string> propNames(items.size());
     for (size_t i = 0; i < items.size(); ++i) {
-      propNames[i] =
-          items[i].getAlgorithmHistory()->getProperties()[0]->value();
+      propNames[i] = items[i].getAlgorithmHistory()->getProperties()[0]->value();
     }
 
     TS_ASSERT_EQUALS(propNames[0], "alg1")
@@ -140,8 +128,7 @@ public:
 
     std::vector<std::string> propNames(items.size());
     for (size_t i = 0; i < items.size(); ++i) {
-      propNames[i] =
-          items[i].getAlgorithmHistory()->getProperties()[0]->value();
+      propNames[i] = items[i].getAlgorithmHistory()->getProperties()[0]->value();
     }
 
     // check it unrolled properly
@@ -160,8 +147,7 @@ public:
     propNames.clear();
     propNames.resize(items.size());
     for (size_t i = 0; i < items.size(); ++i) {
-      propNames[i] =
-          items[i].getAlgorithmHistory()->getProperties()[0]->value();
+      propNames[i] = items[i].getAlgorithmHistory()->getProperties()[0]->value();
     }
 
     // check it rolled back up properly
@@ -183,8 +169,7 @@ public:
 
     std::vector<std::string> propNames(items.size());
     for (size_t i = 0; i < items.size(); ++i) {
-      propNames[i] =
-          items[i].getAlgorithmHistory()->getProperties()[0]->value();
+      propNames[i] = items[i].getAlgorithmHistory()->getProperties()[0]->value();
     }
 
     TS_ASSERT_EQUALS(propNames[0], "alg1")
@@ -202,8 +187,7 @@ public:
     propNames.clear();
     propNames.resize(items.size());
     for (size_t i = 0; i < items.size(); ++i) {
-      propNames[i] =
-          items[i].getAlgorithmHistory()->getProperties()[0]->value();
+      propNames[i] = items[i].getAlgorithmHistory()->getProperties()[0]->value();
     }
 
     TS_ASSERT_EQUALS(propNames[0], "alg1")
@@ -223,8 +207,7 @@ public:
     propNames.clear();
     propNames.resize(items.size());
     for (size_t i = 0; i < items.size(); ++i) {
-      propNames[i] =
-          items[i].getAlgorithmHistory()->getProperties()[0]->value();
+      propNames[i] = items[i].getAlgorithmHistory()->getProperties()[0]->value();
     }
 
     TS_ASSERT_EQUALS(propNames[0], "alg1")
@@ -243,8 +226,7 @@ public:
 
     std::vector<std::string> propNames(items.size());
     for (size_t i = 0; i < items.size(); ++i) {
-      propNames[i] =
-          items[i].getAlgorithmHistory()->getProperties()[0]->value();
+      propNames[i] = items[i].getAlgorithmHistory()->getProperties()[0]->value();
     }
 
     TS_ASSERT_EQUALS(propNames[0], "alg1")
@@ -267,8 +249,7 @@ public:
 
     std::vector<std::string> propNames(items.size());
     for (size_t i = 0; i < items.size(); ++i) {
-      propNames[i] =
-          items[i].getAlgorithmHistory()->getProperties()[0]->value();
+      propNames[i] = items[i].getAlgorithmHistory()->getProperties()[0]->value();
     }
 
     TS_ASSERT_EQUALS(propNames[0], "alg1")
@@ -286,8 +267,7 @@ public:
     for (auto it = items.begin(); it != items.end(); ++it, ++i) {
       auto history = it->getAlgorithmHistory();
       auto props = history->getProperties();
-      TS_ASSERT_EQUALS(props[0]->value(),
-                       "alg" + boost::lexical_cast<std::string>(i + 1));
+      TS_ASSERT_EQUALS(props[0]->value(), "alg" + boost::lexical_cast<std::string>(i + 1));
     }
   }
 
@@ -305,8 +285,7 @@ public:
     TS_ASSERT_EQUALS(view.size(), 7);
 
     // Filter by time with a start and end time
-    TS_ASSERT_THROWS_NOTHING(
-        view.filterBetweenExecDate(DateAndTime(200, 0), DateAndTime(211, 0)));
+    TS_ASSERT_THROWS_NOTHING(view.filterBetweenExecDate(DateAndTime(200, 0), DateAndTime(211, 0)));
     TS_ASSERT_EQUALS(view.size(), 3);
 
     // Get algorithm list and compare results
@@ -315,8 +294,7 @@ public:
 
     std::vector<std::string> propNames(items.size());
     for (size_t i = 0; i < items.size(); ++i) {
-      propNames[i] =
-          items[i].getAlgorithmHistory()->getProperties()[0]->value();
+      propNames[i] = items[i].getAlgorithmHistory()->getProperties()[0]->value();
     }
 
     TS_ASSERT_EQUALS(propNames[0], "alg2")
@@ -341,8 +319,7 @@ public:
 
     std::vector<std::string> propNames(items.size());
     for (size_t i = 0; i < items.size(); ++i) {
-      propNames[i] =
-          items[i].getAlgorithmHistory()->getProperties()[0]->value();
+      propNames[i] = items[i].getAlgorithmHistory()->getProperties()[0]->value();
     }
 
     TS_ASSERT_EQUALS(propNames[0], "alg2")

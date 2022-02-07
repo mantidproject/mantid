@@ -13,6 +13,7 @@ from sans.common.constants import EMPTY_NAME
 from sans.common.enums import (DetectorType)
 from sans.common.enums import (RangeStepType)
 from sans.common.general_functions import create_unmanaged_algorithm
+from sans.state.StateObjects.wavelength_interval import WavRange
 
 
 class CreateSANSWavelengthPixelAdjustment(object):
@@ -25,7 +26,7 @@ class CreateSANSWavelengthPixelAdjustment(object):
         self._component = component
         self._state = state_adjustment_wavelength_and_pixel
 
-    def create_sans_wavelength_and_pixel_adjustment(self, transmission_ws, monitor_norm_ws):
+    def create_sans_wavelength_and_pixel_adjustment(self, transmission_ws, monitor_norm_ws, wav_range):
         """
         Calculates wavelength adjustment and pixel adjustment workspaces.
         :param transmission_ws: The calculated transmission workspace in wavelength units.
@@ -40,7 +41,7 @@ class CreateSANSWavelengthPixelAdjustment(object):
         component = self._component
         adj_file = wavelength_and_pixel_adjustment_state.adjustment_files[component].wavelength_adjustment_file
 
-        rebin_string = self._get_rebin_string(wavelength_and_pixel_adjustment_state)
+        rebin_string = self._get_rebin_string(wavelength_and_pixel_adjustment_state, wav_range=wav_range)
         wavelength_adjustment_workspace = self._get_wavelength_adjustment_workspace(adj_file,
                                                                                     transmission_ws,
                                                                                     monitor_norm_ws,
@@ -147,6 +148,9 @@ class CreateSANSWavelengthPixelAdjustment(object):
             load_alg.execute()
             output_workspace = load_alg.getProperty("OutputWorkspace").value
 
+            if not idf_path:
+                raise ValueError("No IDF path was found in the provided state")
+
             # Add an instrument to the workspace
             instrument_name = "LoadInstrument"
             instrument_options = {"Workspace": output_workspace,
@@ -171,13 +175,11 @@ class CreateSANSWavelengthPixelAdjustment(object):
         return pixel_adjustment_workspace
 
     @staticmethod
-    def _get_rebin_string(wavelength_and_pixel_adjustment_state):
-        wavelength_low = wavelength_and_pixel_adjustment_state.wavelength_low[0]
-        wavelength_high = wavelength_and_pixel_adjustment_state.wavelength_high[0]
-        wavelength_step = wavelength_and_pixel_adjustment_state.wavelength_step
-        wavelength_step_type = -1.0 if wavelength_and_pixel_adjustment_state.wavelength_step_type \
+    def _get_rebin_string(wavelength_and_pixel_adjustment_state, wav_range: WavRange):
+        wavelength_step = wavelength_and_pixel_adjustment_state.wavelength_interval.wavelength_step
+        wavelength_step_type = -1.0 if wavelength_and_pixel_adjustment_state.wavelength_step_type_lin_log \
                                        is RangeStepType.LOG else 1.0  # noqa
 
         # Create a rebin string from the wavelength information
         wavelength_step *= wavelength_step_type
-        return str(wavelength_low) + "," + str(wavelength_step) + "," + str(wavelength_high)
+        return f"{wav_range[0]}, {wavelength_step}, {wav_range[1]}"

@@ -15,9 +15,7 @@
 
 using std::size_t;
 
-namespace Mantid {
-namespace Kernel {
-namespace VectorHelper {
+namespace Mantid::Kernel::VectorHelper {
 
 /** Creates a new output X array given a 'standard' set of rebinning parameters.
  *  @param[in]  params Rebin parameters input [x_1, delta_1,x_2, ...
@@ -29,17 +27,15 @@ namespace VectorHelper {
  *step are not included. (Default=True)
  *  @param[in] xMinHint x_1 if params contains only delta_1.
  *  @param[in] xMaxHint x_2 if params contains only delta_1.
+ *  @param[in] useReverseLogarithmic wheter or not to use reverse logarithmic for bins
+ *  @param[in] power the power in case of inverse power sum. Must be between 0 and 1 or is ignored.
  *  @return The number of bin boundaries in the new axis
  **/
-int DLLExport createAxisFromRebinParams(const std::vector<double> &params,
-                                        std::vector<double> &xnew,
-                                        const bool resize_xnew,
-                                        const bool full_bins_only,
-                                        const double xMinHint,
-                                        const double xMaxHint) {
+int DLLExport createAxisFromRebinParams(const std::vector<double> &params, std::vector<double> &xnew,
+                                        const bool resize_xnew, const bool full_bins_only, const double xMinHint,
+                                        const double xMaxHint, const bool useReverseLogarithmic, const double power) {
   std::vector<double> tmp;
-  const std::vector<double> &fullParams = [&params, &tmp, xMinHint,
-                                           xMaxHint]() {
+  const std::vector<double> &fullParams = [&params, &tmp, xMinHint, xMaxHint]() {
     if (params.size() == 1) {
       if (std::isnan(xMinHint) || std::isnan(xMaxHint)) {
         throw std::runtime_error("createAxisFromRebinParams: xMinHint and "
@@ -57,14 +53,12 @@ int DLLExport createAxisFromRebinParams(const std::vector<double> &params,
   auto ibounds = static_cast<int>(fullParams.size());
   int isteps = ibounds - 1; // highest index in params array containing a step
 
-  // This coefficitent represents the maximum difference between the size of the
-  // last bin and all
+  // This coefficitent represents the maximum difference between the size of the last bin and all
   // the other bins.
   double lastBinCoef(0.25);
 
   if (full_bins_only) {
-    // For full_bin_only, we want it so that last bin couldn't be smaller then
-    // the pervious bin
+    // For full_bin_only, we want it so that last bin couldn't be smaller than the previous bin
     lastBinCoef = 1.0;
   }
 
@@ -75,46 +69,75 @@ int DLLExport createAxisFromRebinParams(const std::vector<double> &params,
   if (resize_xnew)
     xnew.emplace_back(xcurr);
 
+  int currDiv = 1;
+
+  bool isPower = power > 0 && power <= 1;
+
   while ((ibound <= ibounds) && (istep <= isteps)) {
     // if step is negative then it is logarithmic step
-    if (fullParams[istep] >= 0.0)
-      xs = fullParams[istep];
-    else
-      xs = xcurr * fabs(fullParams[istep]);
+    bool isLogBin = (fullParams[istep] < 0.0);
+    bool isReverseLogBin = isLogBin && useReverseLogarithmic;
+    double alpha = std::fabs(fullParams[istep]);
+
+    if (isReverseLogBin && xcurr == fullParams[ibound - 2]) {
+      // we are starting a new bin, but since it is a rev log, xcurr needs to be at its end
+      xcurr = fullParams[ibound];
+    }
+    if (!isPower) {
+      if (!isLogBin)
+        xs = fullParams[istep];
+      else {
+        if (useReverseLogarithmic) {
+          // we go through a reverse log bin by starting from its end, and working our way back to the beginning
+          // this way we can define the bins in a reccuring way, and with a more obvious closeness with the usual log.
+          double x0 = fullParams[ibound - 2];
+          double step = x0 + fullParams[ibound] - xcurr;
+
+          xs = -step * alpha;
+
+        } else
+          xs = xcurr * fabs(fullParams[istep]);
+      }
+    } else {
+      xs = fullParams[istep] * std::pow(currDiv, -power);
+      ++currDiv;
+    }
 
     if (fabs(xs) == 0.0) {
       // Someone gave a 0-sized step! What a dope.
-      throw std::runtime_error(
-          "Invalid binning step provided! Can't creating binning axis.");
+      throw std::runtime_error("Invalid binning step provided! Can't create binning axis.");
     } else if (!std::isfinite(xs)) {
-      throw std::runtime_error(
-          "An infinite or NaN value was found in the binning parameters.");
+      throw std::runtime_error("An infinite or NaN value was found in the binning parameters.");
     }
 
-    if ((xcurr + xs * (1.0 + lastBinCoef)) <= fullParams[ibound]) {
-      // If we can still fit current bin _plus_ specified portion of a last bin,
-      // continue
+    if ((!isReverseLogBin && xcurr + xs * (1.0 + lastBinCoef) <= fullParams[ibound]) ||
+        (isReverseLogBin && xcurr + 2 * xs >= fullParams[ibound - 2])) {
+      // If we can still fit current bin _plus_ specified portion of a last bin, continue
       xcurr += xs;
+
     } else {
       // If this is the start of the last bin, finish this range
-      if (full_bins_only)
-        // For full_bins_only, finish the range by adding one more full bin, so
-        // that last bin is not
-        // bigger than the previous one
-        xcurr += xs;
-      else
-        // For non full_bins_only, finish by adding as mush as is left from the
-        // range
+      if (!isReverseLogBin) {
+        if (full_bins_only)
+          // For full_bins_only, finish the range by adding one more full bin, so that last bin is not bigger than the
+          // previous one
+          xcurr += xs;
+        else
+          // For non full_bins_only, finish by adding as much as is left from the range
+          xcurr = fullParams[ibound];
+      } else {
+        // we have finished this range, because its starting time has already been added, so we jump back to the last
+        // value of the bin and resume normal behaviour
         xcurr = fullParams[ibound];
-
-      ibound += 2;
+      }
       istep += 2;
+      ibound += 2;
     }
     if (resize_xnew)
       xnew.emplace_back(xcurr);
     inew++;
   }
-
+  std::sort(xnew.begin(), xnew.end());
   return inew;
 }
 
@@ -137,10 +160,9 @@ int DLLExport createAxisFromRebinParams(const std::vector<double> &params,
  *  @throw runtime_error Thrown if algorithm cannot execute.
  *  @throw invalid_argument Thrown if input to function is incorrect.
  **/
-void rebin(const std::vector<double> &xold, const std::vector<double> &yold,
-           const std::vector<double> &eold, const std::vector<double> &xnew,
-           std::vector<double> &ynew, std::vector<double> &enew,
-           bool distribution, bool addition) {
+void rebin(const std::vector<double> &xold, const std::vector<double> &yold, const std::vector<double> &eold,
+           const std::vector<double> &xnew, std::vector<double> &ynew, std::vector<double> &enew, bool distribution,
+           bool addition) {
   // Make sure y and e vectors are of correct sizes
   const size_t size_xold = xold.size();
   if (size_xold != (yold.size() + 1) || size_xold != (eold.size() + 1))
@@ -225,8 +247,7 @@ void rebin(const std::vector<double> &xold, const std::vector<double> &yold,
             ynew[i] /= width;
             enew[i] = sqrt(enew[i]) / width;
           } else {
-            throw std::invalid_argument(
-                "rebin: Invalid output X array, contains consecutive X values");
+            throw std::invalid_argument("rebin: Invalid output X array, contains consecutive X values");
           }
         }
       }
@@ -256,20 +277,16 @@ void rebin(const std::vector<double> &xold, const std::vector<double> &yold,
  *SQUARED ERRORS!
  *  @throw runtime_error Thrown if vector sizes are inconsistent
  **/
-void rebinHistogram(const std::vector<double> &xold,
-                    const std::vector<double> &yold,
-                    const std::vector<double> &eold,
-                    const std::vector<double> &xnew, std::vector<double> &ynew,
-                    std::vector<double> &enew, bool addition) {
+void rebinHistogram(const std::vector<double> &xold, const std::vector<double> &yold, const std::vector<double> &eold,
+                    const std::vector<double> &xnew, std::vector<double> &ynew, std::vector<double> &enew,
+                    bool addition) {
   // Make sure y and e vectors are of correct sizes
   const size_t size_yold = yold.size();
   if (xold.size() != (size_yold + 1) || size_yold != eold.size())
-    throw std::runtime_error(
-        "rebin: y and error vectors should be of same size & 1 shorter than x");
+    throw std::runtime_error("rebin: y and error vectors should be of same size & 1 shorter than x");
   const size_t size_ynew = ynew.size();
   if (xnew.size() != (size_ynew + 1) || size_ynew != enew.size())
-    throw std::runtime_error(
-        "rebin: y and error vectors should be of same size & 1 shorter than x");
+    throw std::runtime_error("rebin: y and error vectors should be of same size & 1 shorter than x");
 
   // If not adding to existing vectors, make sure ynew & enew contain zeroes
   if (!addition) {
@@ -285,15 +302,13 @@ void rebinHistogram(const std::vector<double> &xold,
     if (it == xold.end())
       return;
     //      throw std::runtime_error("No overlap: max of X-old < min of X-new");
-    iold = std::distance(xold.begin(), it) -
-           1; // Old bin to start at (counting from 0)
+    iold = std::distance(xold.begin(), it) - 1; // Old bin to start at (counting from 0)
   } else {
     auto it = std::upper_bound(xnew.cbegin(), xnew.cend(), xold.front());
     if (it == xnew.cend())
       return;
     //      throw std::runtime_error("No overlap: max of X-new < min of X-old");
-    inew = std::distance(xnew.cbegin(), it) -
-           1; // New bin to start at (counting from 0)
+    inew = std::distance(xnew.cbegin(), it) - 1; // New bin to start at (counting from 0)
   }
 
   double frac, fracE;
@@ -314,8 +329,7 @@ void rebinHistogram(const std::vector<double> &xold,
     } else {
       double xold_of_iold = xold[iold]; // cache for speed
       // This is the counts per unit X in current old bin
-      oneOverWidth = 1. / (xold_of_iold_p_1 -
-                           xold_of_iold); // cache 1/width to speed things up
+      oneOverWidth = 1. / (xold_of_iold_p_1 - xold_of_iold); // cache 1/width to speed things up
       frac = yold[iold] * oneOverWidth;
       temp = eold[iold];
       fracE = temp * temp * oneOverWidth;
@@ -355,8 +369,7 @@ void rebinHistogram(const std::vector<double> &xold,
  * @param bin_edges :: A vector of values specifying bin boundaries
  * @param bin_centres :: An output vector of bin centre values.
  */
-void convertToBinCentre(const std::vector<double> &bin_edges,
-                        std::vector<double> &bin_centres) {
+void convertToBinCentre(const std::vector<double> &bin_edges, std::vector<double> &bin_centres) {
   const std::vector<double>::size_type npoints = bin_edges.size();
   if (bin_centres.size() != npoints) {
     bin_centres.resize(npoints);
@@ -365,8 +378,7 @@ void convertToBinCentre(const std::vector<double> &bin_edges,
   // The custom binary function modifies the behaviour of the algorithm to
   // compute the average of
   // two adjacent bin boundaries
-  std::adjacent_difference(bin_edges.begin(), bin_edges.end(),
-                           bin_centres.begin(), SimpleAverage<double>());
+  std::adjacent_difference(bin_edges.begin(), bin_edges.end(), bin_centres.begin(), SimpleAverage<double>());
   // The algorithm copies the first element of the input to the first element of
   // the output so we need to
   // remove the first element of the output
@@ -389,8 +401,7 @@ void convertToBinCentre(const std::vector<double> &bin_edges,
  *                       boundaries
  *
  */
-void convertToBinBoundary(const std::vector<double> &bin_centers,
-                          std::vector<double> &bin_edges) {
+void convertToBinBoundary(const std::vector<double> &bin_centers, std::vector<double> &bin_edges) {
   const auto n = bin_centers.size();
 
   // Special case empty input: output is also empty
@@ -428,8 +439,7 @@ void convertToBinBoundary(const std::vector<double> &bin_centers,
  * (in bin edge representation)
  */
 
-size_t indexOfValueFromCenters(const std::vector<double> &bin_centers,
-                               const double value) {
+size_t indexOfValueFromCenters(const std::vector<double> &bin_centers, const double value) {
   if (bin_centers.empty()) {
     throw std::out_of_range("indexOfValue - vector is empty");
   }
@@ -442,22 +452,18 @@ size_t indexOfValueFromCenters(const std::vector<double> &bin_centers,
     }
   } else {
     const size_t n = bin_centers.size();
-    const double firstBinLowEdge =
-        bin_centers[0] - 0.5 * (bin_centers[1] - bin_centers[0]);
-    const double lastBinHighEdge =
-        bin_centers[n - 1] + 0.5 * (bin_centers[n - 1] - bin_centers[n - 2]);
+    const double firstBinLowEdge = bin_centers[0] - 0.5 * (bin_centers[1] - bin_centers[0]);
+    const double lastBinHighEdge = bin_centers[n - 1] + 0.5 * (bin_centers[n - 1] - bin_centers[n - 2]);
     if (value < firstBinLowEdge || value > lastBinHighEdge) {
       throw std::out_of_range("indexOfValue - value out of range");
     } else {
-      const auto it =
-          std::lower_bound(bin_centers.begin(), bin_centers.end(), value);
+      const auto it = std::lower_bound(bin_centers.begin(), bin_centers.end(), value);
       if (it == bin_centers.end()) {
         return n - 1;
       }
       size_t binIndex = std::distance(bin_centers.begin(), it);
-      if (binIndex > 0 && value < bin_centers[binIndex - 1] +
-                                      0.5 * (bin_centers[binIndex] -
-                                             bin_centers[binIndex - 1])) {
+      if (binIndex > 0 &&
+          value < bin_centers[binIndex - 1] + 0.5 * (bin_centers[binIndex] - bin_centers[binIndex - 1])) {
         binIndex--;
       }
       return binIndex;
@@ -473,8 +479,7 @@ size_t indexOfValueFromCenters(const std::vector<double> &bin_centers,
  * @throw std::out_of_range : if vector is empty, contains one element,
  *  or value is out of it's range
  */
-size_t indexOfValueFromEdges(const std::vector<double> &bin_edges,
-                             const double value) {
+size_t indexOfValueFromEdges(const std::vector<double> &bin_edges, const double value) {
   if (bin_edges.empty()) {
     throw std::out_of_range("indexOfValue - vector is empty");
   }
@@ -538,8 +543,7 @@ bool isConstantValue(const std::vector<double> &arra) {
  * @return a vector of doubles
  * @throw an error if there was a string that could not convert to a double.
  */
-template <typename NumT>
-std::vector<NumT> splitStringIntoVector(std::string listString) {
+template <typename NumT> std::vector<NumT> splitStringIntoVector(std::string listString) {
   // Split the string and turn it into a vector.
   std::vector<NumT> values;
 
@@ -603,9 +607,8 @@ namespace {
  *@param input      -- vector of input signal
  *@param binBndrs   -- pointer to vector of bin boundaries or NULL pointer.
  */
-double runAverage(size_t index, size_t startIndex, size_t endIndex,
-                  const double halfWidth, const std::vector<double> &input,
-                  std::vector<double> const *const binBndrs) {
+double runAverage(size_t index, size_t startIndex, size_t endIndex, const double halfWidth,
+                  const std::vector<double> &input, std::vector<double> const *const binBndrs) {
 
   size_t iStart, iEnd;
   double weight0(0), weight1(0), start(0.0), end(0.0);
@@ -627,8 +630,7 @@ double runAverage(size_t index, size_t startIndex, size_t endIndex,
       start = rBndrs[iStart];
     } else {
       iStart = getBinIndex(*binBndrs, start);
-      weight0 =
-          (rBndrs[iStart + 1] - start) / (rBndrs[iStart + 1] - rBndrs[iStart]);
+      weight0 = (rBndrs[iStart + 1] - start) / (rBndrs[iStart + 1] - rBndrs[iStart]);
       iStart++;
     }
     if (end >= rBndrs[endIndex]) {
@@ -703,10 +705,9 @@ double runAverage(size_t index, size_t startIndex, size_t endIndex,
  * @param outBins ::   if present, pointer to a vector to return
  *                     bin boundaries for output array.
  */
-void smoothInRange(const std::vector<double> &input,
-                   std::vector<double> &output, const double avrgInterval,
-                   std::vector<double> const *const binBndrs, size_t startIndex,
-                   size_t endIndex, std::vector<double> *const outBins) {
+void smoothInRange(const std::vector<double> &input, std::vector<double> &output, const double avrgInterval,
+                   std::vector<double> const *const binBndrs, size_t startIndex, size_t endIndex,
+                   std::vector<double> *const outBins) {
 
   if (endIndex == 0)
     endIndex = input.size();
@@ -721,9 +722,8 @@ void smoothInRange(const std::vector<double> &input,
   size_t max_size = input.size();
   if (binBndrs) {
     if (binBndrs->size() != max_size + 1) {
-      throw std::invalid_argument(
-          "Array of bin boundaries, "
-          "if present, have to be one bigger then the input array");
+      throw std::invalid_argument("Array of bin boundaries, "
+                                  "if present, have to be one bigger then the input array");
     }
   }
 
@@ -746,9 +746,7 @@ void smoothInRange(const std::vector<double> &input,
     if (binBndrs) {
       binSize = binBndrs->operator[](i + 1) - binBndrs->operator[](i);
     }
-    output[i - startIndex] =
-        runAverage(i, startIndex, endIndex, halfWidth, input, binBndrs) *
-        binSize;
+    output[i - startIndex] = runAverage(i, startIndex, endIndex, halfWidth, input, binBndrs) * binSize;
     if (outBins && binBndrs) {
       outBins->operator[](i - startIndex) = binBndrs->operator[](i);
     }
@@ -759,19 +757,11 @@ void smoothInRange(const std::vector<double> &input,
 }
 
 /// Declare all version of this
-template DLLExport std::vector<int32_t>
-splitStringIntoVector<int32_t>(std::string listString);
-template DLLExport std::vector<int64_t>
-splitStringIntoVector<int64_t>(std::string listString);
-template DLLExport std::vector<size_t>
-splitStringIntoVector<size_t>(std::string listString);
-template DLLExport std::vector<float>
-splitStringIntoVector<float>(std::string listString);
-template DLLExport std::vector<double>
-splitStringIntoVector<double>(std::string listString);
-template DLLExport std::vector<std::string>
-splitStringIntoVector<std::string>(std::string listString);
+template DLLExport std::vector<int32_t> splitStringIntoVector<int32_t>(std::string listString);
+template DLLExport std::vector<int64_t> splitStringIntoVector<int64_t>(std::string listString);
+template DLLExport std::vector<size_t> splitStringIntoVector<size_t>(std::string listString);
+template DLLExport std::vector<float> splitStringIntoVector<float>(std::string listString);
+template DLLExport std::vector<double> splitStringIntoVector<double>(std::string listString);
+template DLLExport std::vector<std::string> splitStringIntoVector<std::string>(std::string listString);
 
-} // End namespace VectorHelper
-} // End namespace Kernel
-} // End namespace Mantid
+} // namespace Mantid::Kernel::VectorHelper

@@ -1,7 +1,7 @@
 .. _05_fitting_exercises:
 
 =========
-Exercises 
+Exercises
 =========
 
 
@@ -56,12 +56,12 @@ Exercise 2
    to be between approximately 2270 and 5000 microseconds
 5. Right click on plot and select "Add background", then
    LinearBackground
-6. Change the peak type to IkedaCarpenterPV. 
-   
+6. Change the peak type to IkedaCarpenterPV.
+
    Remember, this is a peak function where
    some parameters are set based on the relevant instrument
    geometry. This is evident from the starting guess of the peak width
-   but also by inspecting this function in the Fit Function panel. 
+   but also by inspecting this function in the Fit Function panel.
 
 7. Add an IkedaCarpenterPV peak to each of the three peaks, remembering to change the peak width (at least for the first one!)
 8. Display > "Plot guess" and what you should see is something similar to
@@ -87,12 +87,14 @@ Optionally using a similar approach try to fit the spectrum in for example *GEM6
 Exercise 3
 ==========
 
-#. Load the MUSR00015189 data set
-#. Plot spectrum number 64 of the second workspace in the group
+#. Load the MUSR00015189 data set, this is a group workspace
+#. Click the triangle beside this workspace
+#. From the second workspace (MUSR00015189_2), plot spectrum number 64
 #. Open the Fit property browser
-#. As described earlier, add a UserFunction with the with Formula = h*exp(-a*x)
-#. Set h = 5000 and **Tie** it to this value
-#. Fit the data.
+#. As described earlier, add a UserFunction with the with Formula = `h*exp(-a*x)`
+#. Set `h = 5000` and **Fix** it to this value
+#. Give `a` some positive intial value such as `1.0`
+#. Fit the data
 
 .. figure:: /images/ExerciseFittingMBCfit_3MUSR.png
    :alt: ExerciseFittingMBCfit_3MUSR.png

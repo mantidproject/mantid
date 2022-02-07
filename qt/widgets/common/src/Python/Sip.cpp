@@ -8,12 +8,7 @@
 #include <QtGlobal>
 #include <sip.h>
 
-namespace MantidQt {
-namespace Widgets {
-namespace Common {
-namespace Python {
-
-namespace Detail {
+namespace MantidQt::Widgets::Common::Python::Detail {
 /**
  * @return A pointer to the C++ sip api object
  */
@@ -25,8 +20,7 @@ const sipAPIDef *sipAPI() {
     // Some configs have a private sip module inside PyQt. Try this first
 #if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
   sip_API = (const sipAPIDef *)PyCapsule_Import("PyQt4.sip._C_API", 0);
-#elif QT_VERSION >= QT_VERSION_CHECK(5, 0, 0) &&                               \
-    QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
+#elif QT_VERSION >= QT_VERSION_CHECK(5, 0, 0) && QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
   sip_API = (const sipAPIDef *)PyCapsule_Import("PyQt5.sip._C_API", 0);
 #else
 #error "Unknown sip module for Qt >= 6"
@@ -40,9 +34,4 @@ const sipAPIDef *sipAPI() {
   assert(sip_API);
   return sip_API;
 }
-} // namespace Detail
-
-} // namespace Python
-} // namespace Common
-} // namespace Widgets
-} // namespace MantidQt
+} // namespace MantidQt::Widgets::Common::Python::Detail

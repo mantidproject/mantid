@@ -1,0 +1,13 @@
+# Perform a simultaneous fit
+input_workspaces = list(input_data.keys())
+domain_data = list(input_data.values())
+
+fit_output = \
+    Fit(Function=function,
+        InputWorkspace=input_workspaces[0], WorkspaceIndex=domain_data[0][0], StartX=domain_data[0][1], EndX=domain_data[0][2],
+{{other_domains}}        MaxIterations=max_iterations, Minimizer=minimizer, CostFunction=cost_function,
+        EvaluationType=evaluation_type, Output=output_base_name)
+
+output_workspaces = []
+for i in range(len(input_workspaces)):
+    output_workspaces.append(output_base_name + "_Workspace_" + str(i))

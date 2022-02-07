@@ -9,33 +9,29 @@
 #include "boost/format.hpp"
 #include <stdexcept>
 
-namespace Mantid {
-namespace Poldi {
+namespace Mantid::Poldi {
 
 MillerIndices::MillerIndices(int h, int k, int l)
     : m_h(h), m_k(k), m_l(l), m_asVector(3),
-      m_asV3D(static_cast<double>(h), static_cast<double>(k),
-              static_cast<double>(l)) {
+      m_asV3D(static_cast<double>(h), static_cast<double>(k), static_cast<double>(l)) {
   populateVector();
 }
 
 MillerIndices::MillerIndices(std::vector<int> hkl) {
   if (hkl.size() != 3) {
-    throw std::runtime_error(
-        "MillerIndices object can only be created with 3 indices");
+    throw std::runtime_error("MillerIndices object can only be created with 3 indices");
   }
 
   m_asVector = hkl;
   m_h = hkl[0];
   m_k = hkl[1];
   m_l = hkl[2];
-  m_asV3D(static_cast<double>(m_h), static_cast<double>(m_k),
-          static_cast<double>(m_l));
+  m_asV3D(static_cast<double>(m_h), static_cast<double>(m_k), static_cast<double>(m_l));
 }
 
 MillerIndices::MillerIndices(const Kernel::V3D &hkl)
-    : m_h(static_cast<int>(hkl.X())), m_k(static_cast<int>(hkl.Y())),
-      m_l(static_cast<int>(hkl.Z())), m_asVector(3), m_asV3D(hkl) {
+    : m_h(static_cast<int>(hkl.X())), m_k(static_cast<int>(hkl.Y())), m_l(static_cast<int>(hkl.Z())), m_asVector(3),
+      m_asV3D(hkl) {
   populateVector();
 }
 
@@ -57,9 +53,7 @@ bool MillerIndices::operator==(const MillerIndices &other) const {
   return m_h == other.m_h && m_k == other.m_k && m_l == other.m_l;
 }
 
-bool MillerIndices::operator!=(const MillerIndices &other) const {
-  return !operator==(other);
-}
+bool MillerIndices::operator!=(const MillerIndices &other) const { return !operator==(other); }
 
 const std::vector<int> &MillerIndices::asVector() const { return m_asVector; }
 
@@ -70,5 +64,4 @@ void MillerIndices::populateVector() {
   m_asVector[1] = m_k;
   m_asVector[2] = m_l;
 }
-} // namespace Poldi
-} // namespace Mantid
+} // namespace Mantid::Poldi

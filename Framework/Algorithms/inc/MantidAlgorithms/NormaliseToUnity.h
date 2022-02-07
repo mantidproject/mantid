@@ -54,9 +54,7 @@ public:
   int version() const override { return (1); }
   const std::vector<std::string> seeAlso() const override { return {"Divide"}; }
   /// Algorithm's category for identification overriding a virtual method
-  const std::string category() const override {
-    return "CorrectionFunctions\\NormalisationCorrections";
-  }
+  const std::string category() const override { return "CorrectionFunctions\\NormalisationCorrections"; }
 
 private:
   // Overridden Algorithm methods

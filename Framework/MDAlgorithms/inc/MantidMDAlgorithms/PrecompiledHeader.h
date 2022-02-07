@@ -7,4 +7,6 @@
 #pragma once
 
 #include "MantidAPI/Algorithm.h"
+#include "MantidDataObjects/EventWorkspace.h"
+#include "MantidDataObjects/MDEventWorkspace.h"
 #include "MantidKernel/Exception.h"

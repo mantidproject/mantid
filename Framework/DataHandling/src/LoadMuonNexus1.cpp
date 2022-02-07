@@ -16,6 +16,7 @@
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidDataHandling/ISISRunLogs.h"
+#include "MantidDataHandling/LoadMuonStrategy.h"
 #include "MantidDataObjects/TableWorkspace.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidGeometry/Instrument/Detector.h"
@@ -43,8 +44,7 @@
 #include <cmath>
 #include <limits>
 
-namespace Mantid {
-namespace DataHandling {
+namespace Mantid::DataHandling {
 using namespace DataObjects;
 
 // Register the algorithm into the algorithm factory
@@ -107,8 +107,34 @@ void LoadMuonNexus1::exec() {
       setProperty("FirstGoodData", bin * bin_size);
     }
   } catch (std::exception &e) {
-    g_log.warning() << "Error while loading the FirstGoodData value: "
-                    << e.what() << "\n";
+    g_log.warning() << "Error while loading the FirstGoodData value: " << e.what() << "\n";
+  }
+
+  try {
+    NXInfo infoResolution = entry.getDataSetInfo("resolution");
+    NXInt counts = root.openNXInt("run/histogram_data_1/counts");
+    std::string lastGoodBin = counts.attributes("last_good_bin");
+    if (!lastGoodBin.empty() && infoResolution.stat != NX_ERROR) {
+      double resolution;
+
+      switch (infoResolution.type) {
+      case NX_FLOAT32:
+        resolution = static_cast<double>(entry.getFloat("resolution"));
+        break;
+      case NX_INT32:
+        resolution = static_cast<double>(entry.getInt("resolution"));
+        break;
+      default:
+        throw std::runtime_error("Unsupported data type for resolution");
+      }
+
+      auto bin = static_cast<double>(boost::lexical_cast<int>(lastGoodBin));
+      double bin_size = resolution / 1000000.0;
+
+      setProperty("LastGoodData", bin * bin_size);
+    }
+  } catch (std::exception &e) {
+    g_log.warning() << "Error while loading the LastGoodData value: " << e.what() << "\n";
   }
 
   NXEntry nxRun = root.openEntry("run");
@@ -182,27 +208,22 @@ void LoadMuonNexus1::exec() {
   loadDeadTimes(root);
 
   // Create the 2D workspace for the output
-  DataObjects::Workspace2D_sptr localWorkspace =
-      std::dynamic_pointer_cast<DataObjects::Workspace2D>(
-          WorkspaceFactory::Instance().create("Workspace2D", total_specs,
-                                              lengthIn, lengthIn - 1));
+  DataObjects::Workspace2D_sptr localWorkspace = std::dynamic_pointer_cast<DataObjects::Workspace2D>(
+      WorkspaceFactory::Instance().create("Workspace2D", total_specs, lengthIn, lengthIn - 1));
   localWorkspace->setTitle(title);
   localWorkspace->setComment(notes);
-  localWorkspace->mutableRun().addLogData(
-      new PropertyWithValue<std::string>("run_number", run_num));
+  localWorkspace->mutableRun().addLogData(new PropertyWithValue<std::string>("run_number", run_num));
 
   // Add 'FirstGoodData' to list of logs if possible
   if (existsProperty("FirstGoodData") && existsProperty("TimeZero")) {
     double fgd = getProperty("FirstGoodData");
     double tz = getProperty("TimeZero");
-    localWorkspace->mutableRun().addLogData(
-        new PropertyWithValue<double>("FirstGoodData", fgd - tz));
+    localWorkspace->mutableRun().addLogData(new PropertyWithValue<double>("FirstGoodData", fgd - tz));
   }
   // Set the unit on the workspace to muon time, for now in the form of a Label
   // Unit
   std::shared_ptr<Kernel::Units::Label> lblUnit =
-      std::dynamic_pointer_cast<Kernel::Units::Label>(
-          UnitFactory::Instance().create("Label"));
+      std::dynamic_pointer_cast<Kernel::Units::Label>(UnitFactory::Instance().create("Label"));
   lblUnit->setLabel("Time", Units::Symbol::Microsecond);
   localWorkspace->getAxis(0)->unit() = lblUnit;
   // Set y axis unit
@@ -230,19 +251,26 @@ void LoadMuonNexus1::exec() {
       localWorkspace->populateInstrumentParameters();
     } else // We are working on a higher period of a multiperiod raw file
     {
-      localWorkspace = std::dynamic_pointer_cast<DataObjects::Workspace2D>(
-          WorkspaceFactory::Instance().create(localWorkspace));
+      localWorkspace =
+          std::dynamic_pointer_cast<DataObjects::Workspace2D>(WorkspaceFactory::Instance().create(localWorkspace));
       localWorkspace->setTitle(title);
       localWorkspace->setComment(notes);
     }
     addPeriodLog(localWorkspace, period);
     addGoodFrames(localWorkspace, period, nxload.t_nper);
+    addToSampleLog("period_sequences", nxload.m_numPeriodSequences, localWorkspace);
+    addToSampleLog("period_labels", nxload.m_periodNames, localWorkspace);
+    addToSampleLog("period_type", nxload.m_periodTypes, localWorkspace);
+    addToSampleLog("frames_period_requested", nxload.m_framesPeriodsRequested, localWorkspace);
+    addToSampleLog("frames_period_raw", nxload.m_framesPeriodsRaw, localWorkspace);
+    addToSampleLog("period_output", nxload.m_periodsOutput, localWorkspace);
+    addToSampleLog("total_counts_period", nxload.m_periodsCounts, localWorkspace);
 
     size_t counter = 0;
-    for (int64_t i = m_spec_min; i < m_spec_max; ++i) {
+    for (auto i = m_spec_min; i < m_spec_max; ++i) {
       // Shift the histogram to read if we're not in the first period
       auto histToRead = static_cast<specnum_t>(i - 1 + period * nxload.t_nsp1);
-      auto specNo = static_cast<specnum_t>(i);
+      auto specNo = i;
       loadData(counter, histToRead, specNo, nxload, lengthIn - 1,
                localWorkspace); // added -1 for NeXus
       counter++;
@@ -251,11 +279,9 @@ void LoadMuonNexus1::exec() {
     // Read in the spectra in the optional list parameter, if set
     if (m_list) {
       for (auto specid : m_spec_list) {
-        auto histToRead =
-            static_cast<specnum_t>(specid - 1 + period * nxload.t_nsp1);
+        auto histToRead = static_cast<specnum_t>(specid - 1 + period * nxload.t_nsp1);
         auto specNo = static_cast<specnum_t>(specid);
-        loadData(counter, histToRead, specNo, nxload, lengthIn - 1,
-                 localWorkspace);
+        loadData(counter, histToRead, specNo, nxload, lengthIn - 1, localWorkspace);
         counter++;
         progress.report();
       }
@@ -270,8 +296,7 @@ void LoadMuonNexus1::exec() {
     // Try to load detector grouping info, if needed for auto-grouping or user
     // requested it
     if (autoGroup || returnGrouping) {
-      loadedGrouping =
-          loadDetectorGrouping(root, localWorkspace->getInstrument());
+      loadedGrouping = loadDetectorGrouping(root, localWorkspace->getInstrument());
 
       if (loadedGrouping && returnGrouping) {
         // Return loaded grouping, if requested
@@ -280,21 +305,17 @@ void LoadMuonNexus1::exec() {
 
       if (!loadedGrouping && autoGroup) {
         // If autoGroup requested and no grouping in the file - show a warning
-        g_log.warning(
-            "Unable to load grouping from the file. Grouping not applied.");
+        g_log.warning("Unable to load grouping from the file. Grouping not applied.");
       }
     }
 
     if (autoGroup && loadedGrouping) {
       TableWorkspace_sptr groupingTable;
 
-      if (auto table =
-              std::dynamic_pointer_cast<TableWorkspace>(loadedGrouping)) {
+      if (auto table = std::dynamic_pointer_cast<TableWorkspace>(loadedGrouping)) {
         groupingTable = table;
-      } else if (auto group = std::dynamic_pointer_cast<WorkspaceGroup>(
-                     loadedGrouping)) {
-        groupingTable =
-            std::dynamic_pointer_cast<TableWorkspace>(group->getItem(period));
+      } else if (auto group = std::dynamic_pointer_cast<WorkspaceGroup>(loadedGrouping)) {
+        groupingTable = std::dynamic_pointer_cast<TableWorkspace>(group->getItem(period));
       }
       std::vector<int> specIDs, detecIDs;
       for (size_t i = 0; i < localWorkspace->getNumberHistograms(); i++) {
@@ -316,6 +337,13 @@ void LoadMuonNexus1::exec() {
       outWs = localWorkspace;
     }
 
+    if (existsProperty("TimeZero")) {
+      auto timeZeroList = std::vector<double>(m_numberOfSpectra, getProperty("TimeZero"));
+      setProperty("TimeZeroList", timeZeroList);
+      if (!getPropertyValue("TimeZeroTable").empty())
+        setProperty("TimeZeroTable", createTimeZeroTable(m_numberOfSpectra, timeZeroList));
+    }
+
     if (m_numberOfPeriods == 1)
       setProperty("OutputWorkspace", outWs);
     else
@@ -327,8 +355,7 @@ void LoadMuonNexus1::exec() {
   } // loop over periods
 
   if (m_numberOfPeriods > 1) {
-    setProperty("OutputWorkspace",
-                std::dynamic_pointer_cast<Workspace>(wsGrpSptr));
+    setProperty("OutputWorkspace", std::dynamic_pointer_cast<Workspace>(wsGrpSptr));
   }
 }
 
@@ -356,12 +383,9 @@ void LoadMuonNexus1::loadDeadTimes(NXRoot &root) {
     // Set the spectrum list that should be loaded
     if (m_interval || m_list) {
       // Load only selected spectra
-      specToLoad.insert(
-          specToLoad.end(),
-          boost::counting_iterator<int>(static_cast<int>(m_spec_min)),
-          boost::counting_iterator<int>(static_cast<int>(m_spec_max)));
-      specToLoad.insert(specToLoad.end(), m_spec_list.begin(),
-                        m_spec_list.end());
+      specToLoad.insert(specToLoad.end(), boost::counting_iterator<specnum_t>(m_spec_min),
+                        boost::counting_iterator<specnum_t>(m_spec_max));
+      specToLoad.insert(specToLoad.end(), m_spec_list.begin(), m_spec_list.end());
     } else {
       // Load all the spectra
       // Start from 1 to N+1 to be consistent with
@@ -373,16 +397,12 @@ void LoadMuonNexus1::loadDeadTimes(NXRoot &root) {
     if (numDeadTimes < m_numberOfSpectra) {
       // Check number of dead time entries match the number of
       // spectra in the nexus file
-      throw Exception::FileError(
-          "Number of dead times specified is less than number of spectra",
-          m_filename);
+      throw Exception::FileError("Number of dead times specified is less than number of spectra", m_filename);
 
     } else if (numDeadTimes % m_numberOfSpectra) {
 
       // At least, number of dead times should cover the number of spectra
-      throw Exception::FileError(
-          "Number of dead times doesn't cover every spectrum in every period",
-          m_filename);
+      throw Exception::FileError("Number of dead times doesn't cover every spectrum in every period", m_filename);
     } else {
 
       if (m_numberOfPeriods == 1) {
@@ -413,7 +433,6 @@ void LoadMuonNexus1::loadDeadTimes(NXRoot &root) {
         setProperty("DeadTimeTable", table);
       } else {
         // More complex case - different dead times for different periods
-
         WorkspaceGroup_sptr tableGroup = std::make_shared<WorkspaceGroup>();
 
         for (int64_t i = 0; i < m_numberOfPeriods; i++) {
@@ -426,8 +445,7 @@ void LoadMuonNexus1::loadDeadTimes(NXRoot &root) {
           }
 
           // Load into table
-          TableWorkspace_sptr table =
-              createDeadTimeTable(specToLoad, deadTimes);
+          TableWorkspace_sptr table = createDeadTimeTable(specToLoad, deadTimes);
 
           tableGroup->addWorkspace(table);
         }
@@ -448,8 +466,7 @@ void LoadMuonNexus1::loadDeadTimes(NXRoot &root) {
  * @param inst :: Pointer to instrument (to use if IDF needed)
  * @returns :: Grouping table - or tables, if per period
  */
-Workspace_sptr LoadMuonNexus1::loadDetectorGrouping(
-    NXRoot &root, const Geometry::Instrument_const_sptr &inst) {
+Workspace_sptr LoadMuonNexus1::loadDetectorGrouping(NXRoot &root, const Geometry::Instrument_const_sptr &inst) {
   NXEntry dataEntry = root.openEntry("run/histogram_data_1");
 
   NXInfo infoGrouping = dataEntry.getDataSetInfo("grouping");
@@ -465,12 +482,9 @@ Workspace_sptr LoadMuonNexus1::loadDetectorGrouping(
     // Set the spectrum list that should be loaded
     if (m_interval || m_list) {
       // Load only selected spectra
-      specToLoad.insert(
-          specToLoad.end(),
-          boost::counting_iterator<int>(static_cast<int>(m_spec_min)),
-          boost::counting_iterator<int>(static_cast<int>(m_spec_max)));
-      specToLoad.insert(specToLoad.end(), m_spec_list.begin(),
-                        m_spec_list.end());
+      specToLoad.insert(specToLoad.end(), boost::counting_iterator<specnum_t>(m_spec_min),
+                        boost::counting_iterator<specnum_t>(m_spec_max));
+      specToLoad.insert(specToLoad.end(), m_spec_list.begin(), m_spec_list.end());
     } else {
       // Load all the spectra
       // Start from 1 to N+1 to be consistent with
@@ -482,9 +496,7 @@ Workspace_sptr LoadMuonNexus1::loadDetectorGrouping(
     if (numGroupingEntries < m_numberOfSpectra) {
       // Check number of dead time entries match the number of
       // spectra in the nexus file
-      throw Exception::FileError(
-          "Number of grouping entries is less than number of spectra",
-          m_filename);
+      throw Exception::FileError("Number of grouping entries is less than number of spectra", m_filename);
 
     } else if (numGroupingEntries % m_numberOfSpectra) {
       // At least the number of entries should cover all the spectra
@@ -507,15 +519,12 @@ Workspace_sptr LoadMuonNexus1::loadDetectorGrouping(
         } else {
           // User selected an entry number
           for (auto &spec : specToLoad) {
-            int index =
-                spec - 1 +
-                static_cast<int>((m_entrynumber - 1) * m_numberOfSpectra);
+            int index = spec - 1 + static_cast<int>((m_entrynumber - 1) * m_numberOfSpectra);
             grouping.emplace_back(groupingData[index]);
           }
         }
 
-        TableWorkspace_sptr table =
-            createDetectorGroupingTable(specToLoad, grouping);
+        TableWorkspace_sptr table = createDetectorGroupingTable(specToLoad, grouping);
 
         if (table->rowCount() != 0)
           return table;
@@ -530,8 +539,7 @@ Workspace_sptr LoadMuonNexus1::loadDetectorGrouping(
           grouping.emplace_back(groupingData[spectrum - 1]);
         }
         // Load into table
-        TableWorkspace_sptr table =
-            createDetectorGroupingTable(specToLoad, grouping);
+        TableWorkspace_sptr table = createDetectorGroupingTable(specToLoad, grouping);
         if (table->rowCount() != 0)
           return table;
       } else {
@@ -549,8 +557,7 @@ Workspace_sptr LoadMuonNexus1::loadDetectorGrouping(
           }
 
           // Set table for period i
-          TableWorkspace_sptr table =
-              createDetectorGroupingTable(specToLoad, grouping);
+          TableWorkspace_sptr table = createDetectorGroupingTable(specToLoad, grouping);
 
           // Add table to group
           if (table->rowCount() != 0)
@@ -559,8 +566,7 @@ Workspace_sptr LoadMuonNexus1::loadDetectorGrouping(
 
         if (tableGroup->size() != 0) {
           if (tableGroup->size() != static_cast<size_t>(m_numberOfPeriods))
-            throw Exception::FileError("Zero grouping for some of the periods",
-                                       m_filename);
+            throw Exception::FileError("Zero grouping for some of the periods", m_filename);
 
           return tableGroup;
         }
@@ -598,11 +604,9 @@ Workspace_sptr LoadMuonNexus1::loadDetectorGrouping(
  * @param deadTimes :: vector containing the corresponding dead times
  * @return Dead Time Table create using the data
  */
-TableWorkspace_sptr
-LoadMuonNexus1::createDeadTimeTable(std::vector<int> specToLoad,
-                                    std::vector<double> deadTimes) {
-  TableWorkspace_sptr deadTimeTable = std::dynamic_pointer_cast<TableWorkspace>(
-      WorkspaceFactory::Instance().createTable("TableWorkspace"));
+TableWorkspace_sptr LoadMuonNexus1::createDeadTimeTable(std::vector<int> specToLoad, std::vector<double> deadTimes) {
+  TableWorkspace_sptr deadTimeTable =
+      std::dynamic_pointer_cast<TableWorkspace>(WorkspaceFactory::Instance().createTable("TableWorkspace"));
 
   deadTimeTable->addColumn("int", "spectrum");
   deadTimeTable->addColumn("double", "dead-time");
@@ -622,11 +626,10 @@ LoadMuonNexus1::createDeadTimeTable(std::vector<int> specToLoad,
  * @param grouping :: Vector containing corresponding grouping
  * @return Detector Grouping Table create using the data
  */
-TableWorkspace_sptr
-LoadMuonNexus1::createDetectorGroupingTable(std::vector<int> specToLoad,
-                                            std::vector<int> grouping) {
-  auto detectorGroupingTable = std::dynamic_pointer_cast<TableWorkspace>(
-      WorkspaceFactory::Instance().createTable("TableWorkspace"));
+TableWorkspace_sptr LoadMuonNexus1::createDetectorGroupingTable(std::vector<int> specToLoad,
+                                                                std::vector<int> grouping) {
+  auto detectorGroupingTable =
+      std::dynamic_pointer_cast<TableWorkspace>(WorkspaceFactory::Instance().createTable("TableWorkspace"));
 
   detectorGroupingTable->addColumn("vector_int", "Detectors");
 
@@ -658,37 +661,30 @@ LoadMuonNexus1::createDetectorGroupingTable(std::vector<int> specToLoad,
  *  @param localWorkspace :: A pointer to the workspace in which the data will
  * be stored
  */
-void LoadMuonNexus1::loadData(
-    size_t hist, specnum_t &i, specnum_t specNo, MuonNexusReader &nxload,
-    const int64_t lengthIn,
-    const DataObjects::Workspace2D_sptr &localWorkspace) {
+void LoadMuonNexus1::loadData(size_t hist, specnum_t &i, specnum_t specNo, MuonNexusReader &nxload,
+                              const int64_t lengthIn, const DataObjects::Workspace2D_sptr &localWorkspace) {
   // Read in a spectrum
   // Put it into a vector, discarding the 1st entry, which is rubbish
   // But note that the last (overflow) bin is kept
   // For Nexus, not sure if above is the case, hence give all data for now
 
   // Create and fill another vector for the X axis
-  auto timeChannels = new float[lengthIn + 1]();
-  nxload.getTimeChannels(timeChannels, static_cast<int>(lengthIn + 1));
+  std::vector<float> timeChannels(lengthIn + 1);
+  nxload.getTimeChannels(timeChannels.data(), static_cast<int>(lengthIn + 1));
   // Put the read in array into a vector (inside a shared pointer)
-
   localWorkspace->setHistogram(
-      hist, BinEdges(timeChannels, timeChannels + lengthIn + 1),
-      Counts(nxload.counts + i * lengthIn,
-             nxload.counts + i * lengthIn + lengthIn));
+      hist, BinEdges(timeChannels.data(), timeChannels.data() + lengthIn + 1),
+      Counts(nxload.m_counts.begin() + i * lengthIn, nxload.m_counts.begin() + i * lengthIn + lengthIn));
 
   localWorkspace->getSpectrum(hist).setSpectrumNo(specNo);
   // Muon v1 files: always a one-to-one mapping between spectra and detectors
   localWorkspace->getSpectrum(hist).setDetectorID(static_cast<detid_t>(specNo));
-  // Clean up
-  delete[] timeChannels;
 }
 
 /**  Log the run details from the file
  * @param localWorkspace :: The workspace details to use
  */
-void LoadMuonNexus1::loadRunDetails(
-    const DataObjects::Workspace2D_sptr &localWorkspace) {
+void LoadMuonNexus1::loadRunDetails(const DataObjects::Workspace2D_sptr &localWorkspace) {
   API::Run &runDetails = localWorkspace->mutableRun();
 
   runDetails.addProperty("run_title", localWorkspace->getTitle(), true);
@@ -730,15 +726,13 @@ void LoadMuonNexus1::loadRunDetails(
 
   if (runSample.containsDataSet("magnetic_field")) {
     float magn_field = runSample.getFloat("magnetic_field");
-    runDetails.addProperty("sample_magn_field",
-                           static_cast<double>(magn_field));
+    runDetails.addProperty("sample_magn_field", static_cast<double>(magn_field));
   }
 }
 
 /// Run the LoadLog Child Algorithm
-void LoadMuonNexus1::runLoadLog(
-    const DataObjects::Workspace2D_sptr &localWorkspace) {
-  IAlgorithm_sptr loadLog = createChildAlgorithm("LoadMuonLog");
+void LoadMuonNexus1::runLoadLog(const DataObjects::Workspace2D_sptr &localWorkspace) {
+  auto loadLog = createChildAlgorithm("LoadMuonLog");
   // Pass through the same input filename
   loadLog->setPropertyValue("Filename", m_filename);
   // Set the workspace property to be the same one filled above
@@ -766,8 +760,7 @@ void LoadMuonNexus1::runLoadLog(
     orientation.load();
 
     if (orientation[0] == 't') {
-      auto p =
-          std::make_unique<Kernel::TimeSeriesProperty<double>>("fromNexus");
+      auto p = std::make_unique<Kernel::TimeSeriesProperty<double>>("fromNexus");
       std::string start_time = root.getString("run/start_time");
       p->addValue(start_time, -90.0);
       localWorkspace->mutableRun().addLogData(std::move(p));
@@ -791,8 +784,7 @@ void LoadMuonNexus1::runLoadLog(
  * @param localWorkspace A workspace to add the log to.
  * @param period A period for this workspace.
  */
-void LoadMuonNexus1::addPeriodLog(
-    const DataObjects::Workspace2D_sptr &localWorkspace, int64_t period) {
+void LoadMuonNexus1::addPeriodLog(const DataObjects::Workspace2D_sptr &localWorkspace, int64_t period) {
   auto &run = localWorkspace->mutableRun();
   ISISRunLogs runLogs(run);
   if (period == 0) {
@@ -803,9 +795,7 @@ void LoadMuonNexus1::addPeriodLog(
   }
 }
 
-void LoadMuonNexus1::addGoodFrames(
-    const DataObjects::Workspace2D_sptr &localWorkspace, int64_t period,
-    int nperiods) {
+void LoadMuonNexus1::addGoodFrames(const DataObjects::Workspace2D_sptr &localWorkspace, int64_t period, int nperiods) {
 
   // Get handle to nexus file
   ::NeXus::File handle(m_filename, NXACC_READ);
@@ -930,5 +920,4 @@ int LoadMuonNexus1::confidence(Kernel::NexusDescriptor &descriptor) const {
   return 0;
 }
 
-} // namespace DataHandling
-} // namespace Mantid
+} // namespace Mantid::DataHandling

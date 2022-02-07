@@ -17,21 +17,16 @@ using namespace Mantid::Kernel;
 // Helper class
 class PropertyHelper : public Property {
 public:
-  PropertyHelper(const std::string &name = "Test")
-      : Property(name, typeid(int)) {}
+  PropertyHelper(const std::string &name = "Test") : Property(name, typeid(int)) {}
   PropertyHelper *clone() const override { return new PropertyHelper(*this); }
   std::string value() const override { return "Nothing"; }
   Json::Value valueAsJson() const override { return Json::Value(); }
   std::string setValue(const std::string &) override { return ""; }
   std::string setValueFromJson(const Json::Value &) override { return ""; }
   std::string setValueFromProperty(const Property &) override { return ""; }
-  std::string setDataItem(const std::shared_ptr<DataItem> &) override {
-    return "";
-  }
+  std::string setDataItem(const std::shared_ptr<DataItem> &) override { return ""; }
   bool isDefault() const override { return true; }
-  std::string getDefault() const override {
-    return "Is not implemented in this class, should be overriden";
-  }
+  std::string getDefault() const override { return "Is not implemented in this class, should be overriden"; }
   Property &operator+=(Property const *) override { return *this; }
 };
 
@@ -44,9 +39,7 @@ public:
 
   void testName() { TS_ASSERT(!p->name().compare("Test")); }
 
-  void testEmptyNameNotPermitted() {
-    TS_ASSERT_THROWS(PropertyHelper(""), const std::invalid_argument &);
-  }
+  void testEmptyNameNotPermitted() { TS_ASSERT_THROWS(PropertyHelper(""), const std::invalid_argument &); }
 
   void testDocumentation() {
     auto pp = std::make_unique<PropertyHelper>();

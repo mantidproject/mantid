@@ -18,17 +18,13 @@ using Mantid::PythonInterface::PythonException;
 
 namespace {
 
-Python::Object
-newMarker(FigureCanvasQt *canvas, int peakID, double x, double yTop,
-          double yBottom, double fwhm,
-          boost::optional<QHash<QString, QVariant>> const &otherKwargs) {
+Python::Object newMarker(FigureCanvasQt *canvas, int peakID, double x, double yTop, double yBottom, double fwhm,
+                         boost::optional<QHash<QString, QVariant>> const &otherKwargs) {
   GlobalInterpreterLock lock;
 
-  Python::Object markersModule{
-      Python::NewRef(PyImport_ImportModule("mantidqt.plotting.markers"))};
+  Python::Object markersModule{Python::NewRef(PyImport_ImportModule("mantidqt.plotting.markers"))};
 
-  auto const args = Python::NewRef(Py_BuildValue(
-      "(Oidddd)", canvas->pyobj().ptr(), peakID, x, yTop, yBottom, fwhm));
+  auto const args = Python::NewRef(Py_BuildValue("(Oidddd)", canvas->pyobj().ptr(), peakID, x, yTop, yBottom, fwhm));
   Python::Dict kwargs = Python::qHashToDict(otherKwargs.get());
 
   auto const marker = markersModule.attr("PeakMarker")(*args, **kwargs);
@@ -37,18 +33,14 @@ newMarker(FigureCanvasQt *canvas, int peakID, double x, double yTop,
 
 } // namespace
 
-namespace MantidQt {
-namespace Widgets {
-namespace MplCpp {
+namespace MantidQt::Widgets::MplCpp {
 
 /**
  * @brief Create a PeakMarker instance
  */
-PeakMarker::PeakMarker(FigureCanvasQt *canvas, int peakID, double x,
-                       double yTop, double yBottom, double fwhm,
+PeakMarker::PeakMarker(FigureCanvasQt *canvas, int peakID, double x, double yTop, double yBottom, double fwhm,
                        QHash<QString, QVariant> const &otherKwargs)
-    : InstanceHolder(
-          newMarker(canvas, peakID, x, yTop, yBottom, fwhm, otherKwargs)) {}
+    : InstanceHolder(newMarker(canvas, peakID, x, yTop, yBottom, fwhm, otherKwargs)) {}
 
 /**
  * @brief Redraw the PeakMarker
@@ -77,13 +69,10 @@ void PeakMarker::updatePeak(double centre, double height, double fwhm) {
 std::tuple<double, double, double> PeakMarker::peakProperties() const {
   GlobalInterpreterLock lock;
 
-  auto const toDouble = [](Python::Object const &value) {
-    return PyFloat_AsDouble(value.ptr());
-  };
+  auto const toDouble = [](Python::Object const &value) { return PyFloat_AsDouble(value.ptr()); };
 
   auto const properties = pyobj().attr("peak_properties")();
-  return std::make_tuple<double, double, double>(toDouble(properties[0]),
-                                                 toDouble(properties[1]),
+  return std::make_tuple<double, double, double>(toDouble(properties[0]), toDouble(properties[1]),
                                                  toDouble(properties[2]));
 }
 
@@ -113,16 +102,12 @@ void PeakMarker::deselect() { callMethodNoCheck<void>(pyobj(), "deselect"); }
  * @param x The x position of the mouse press in axes coords.
  * @param y The y position of the mouse press in axes coords.
  */
-void PeakMarker::mouseMoveStart(double x, double y) {
-  callMethodNoCheck<void>(pyobj(), "mouse_move_start", x, y);
-}
+void PeakMarker::mouseMoveStart(double x, double y) { callMethodNoCheck<void>(pyobj(), "mouse_move_start", x, y); }
 
 /**
  * @brief Notifies the relevant marker to stop moving.
  */
-void PeakMarker::mouseMoveStop() {
-  callMethodNoCheck<void>(pyobj(), "mouse_move_stop");
-}
+void PeakMarker::mouseMoveStop() { callMethodNoCheck<void>(pyobj(), "mouse_move_stop"); }
 
 /**
  * @brief Notifies the relevant marker to start moving.
@@ -138,6 +123,4 @@ bool PeakMarker::mouseMove(double x, double y) {
   return PyLong_AsLong(movedPy.ptr()) > 0;
 }
 
-} // namespace MplCpp
-} // namespace Widgets
-} // namespace MantidQt
+} // namespace MantidQt::Widgets::MplCpp

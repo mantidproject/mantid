@@ -15,8 +15,7 @@
 #include "MantidKernel/MandatoryValidator.h"
 #include "MantidKernel/Material.h"
 
-namespace Mantid {
-namespace DataHandling {
+namespace Mantid::DataHandling {
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(CreateSampleShape)
 
@@ -28,8 +27,7 @@ using namespace Mantid::API;
  * @param expt A reference to the experiment holding the sample object
  * @param shapeXML XML defining the object's shape
  */
-void CreateSampleShape::setSampleShape(API::ExperimentInfo &expt,
-                                       const std::string &shapeXML) {
+void CreateSampleShape::setSampleShape(API::ExperimentInfo &expt, const std::string &shapeXML) {
   Geometry::ShapeFactory sFactory;
   // Create the object
   auto shape = sFactory.createShape(shapeXML);
@@ -43,8 +41,7 @@ void CreateSampleShape::setSampleShape(API::ExperimentInfo &expt,
     std::ostringstream msg;
     msg << "Object has invalid shape.";
     if (auto csgShape = dynamic_cast<Geometry::CSGObject *>(shape.get())) {
-      msg << " TopRule = " << csgShape->topRule()
-          << ", number of surfaces = " << csgShape->getSurfacePtr().size()
+      msg << " TopRule = " << csgShape->topRule() << ", number of surfaces = " << csgShape->getSurfacePtr().size()
           << "\n";
     }
     throw std::runtime_error(msg.str());
@@ -56,11 +53,9 @@ void CreateSampleShape::setSampleShape(API::ExperimentInfo &expt,
  */
 void CreateSampleShape::init() {
   using namespace Mantid::Kernel;
-  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
-                      "InputWorkspace", "", Direction::Input),
+  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>("InputWorkspace", "", Direction::Input),
                   "The workspace with which to associate the sample ");
-  declareProperty("ShapeXML", "",
-                  std::make_shared<MandatoryValidator<std::string>>(),
+  declareProperty("ShapeXML", "", std::make_shared<MandatoryValidator<std::string>>(),
                   "The XML that describes the shape");
 }
 
@@ -74,5 +69,4 @@ void CreateSampleShape::exec() {
   // Done!
   progress(1);
 }
-} // namespace DataHandling
-} // namespace Mantid
+} // namespace Mantid::DataHandling

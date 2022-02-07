@@ -11,6 +11,7 @@ set(SRC_FILES
     src/CombinePeaksWorkspaces.cpp
     src/CompositeCluster.cpp
     src/ConnectedComponentLabeling.cpp
+    src/ConvertPeaksWorkspace.cpp
     src/CountReflections.cpp
     src/DiffPeaksWorkspaces.cpp
     src/DisjointElement.cpp
@@ -52,6 +53,8 @@ set(SRC_FILES
     src/PredictPeaks.cpp
     src/PredictSatellitePeaks.cpp
     src/SCDCalibratePanels.cpp
+    src/SCDCalibratePanels2.cpp
+    src/SCDCalibratePanels2ObjFunc.cpp
     src/SCDPanelErrors.cpp
     src/SaveHKL.cpp
     src/SaveIsawPeaks.cpp
@@ -68,7 +71,8 @@ set(SRC_FILES
     src/SortHKL.cpp
     src/SortPeaksWorkspace.cpp
     src/StatisticsOfPeaksWorkspace.cpp
-    src/TransformHKL.cpp)
+    src/TransformHKL.cpp
+)
 
 set(SRC_UNITY_IGNORE_FILES)
 set(INC_FILES
@@ -85,6 +89,7 @@ set(INC_FILES
     inc/MantidCrystal/CombinePeaksWorkspaces.h
     inc/MantidCrystal/CompositeCluster.h
     inc/MantidCrystal/ConnectedComponentLabeling.h
+    inc/MantidCrystal/ConvertPeaksWorkspace.h
     inc/MantidCrystal/CountReflections.h
     inc/MantidCrystal/DiffPeaksWorkspaces.h
     inc/MantidCrystal/DisjointElement.h
@@ -128,6 +133,8 @@ set(INC_FILES
     inc/MantidCrystal/PredictPeaks.h
     inc/MantidCrystal/PredictSatellitePeaks.h
     inc/MantidCrystal/SCDCalibratePanels.h
+    inc/MantidCrystal/SCDCalibratePanels2.h
+    inc/MantidCrystal/SCDCalibratePanels2ObjFunc.h
     inc/MantidCrystal/SCDPanelErrors.h
     inc/MantidCrystal/SaveHKL.h
     inc/MantidCrystal/SaveIsawPeaks.h
@@ -144,7 +151,8 @@ set(INC_FILES
     inc/MantidCrystal/SortHKL.h
     inc/MantidCrystal/SortPeaksWorkspace.h
     inc/MantidCrystal/StatisticsOfPeaksWorkspace.h
-    inc/MantidCrystal/TransformHKL.h)
+    inc/MantidCrystal/TransformHKL.h
+)
 
 set(TEST_FILES
     AddPeakHKLTest.h
@@ -159,6 +167,7 @@ set(TEST_FILES
     CombinePeaksWorkspacesTest.h
     CompositeClusterTest.h
     ConnectedComponentLabelingTest.h
+    ConvertPeaksWorkspaceTest.h
     DiffPeaksWorkspacesTest.h
     DisjointElementTest.h
     FilterPeaksTest.h
@@ -196,6 +205,8 @@ set(TEST_FILES
     PredictFractionalPeaksTest.h
     PredictPeaksTest.h
     PredictSatellitePeaksTest.h
+    SCDCalibratePanels2Test.h
+    SCDCalibratePanels2ObjFuncTest.h
     SCDCalibratePanelsTest.h
     SaveHKLTest.h
     SaveIsawPeaksTest.h
@@ -212,32 +223,37 @@ set(TEST_FILES
     SortHKLTest.h
     SortPeaksWorkspaceTest.h
     StatisticsOfPeaksWorkspaceTest.h
-    TransformHKLTest.h)
+    TransformHKLTest.h
+)
 
 if(UNITY_BUILD)
   include(UnityBuild)
   enable_unity_build(Crystal SRC_FILES SRC_UNITY_IGNORE_FILES 10)
 endif(UNITY_BUILD)
 
-if(COVERALLS)
+if(COVERAGE)
   foreach(loop_var ${SRC_FILES} ${INC_FILES})
-    set_property(GLOBAL APPEND
-                 PROPERTY COVERAGE_SRCS
-                          "${CMAKE_CURRENT_SOURCE_DIR}/${loop_var}")
+    set_property(GLOBAL APPEND PROPERTY COVERAGE_SRCS "${CMAKE_CURRENT_SOURCE_DIR}/${loop_var}")
   endforeach(loop_var)
 endif()
 
+# Add a precompiled header where they are supported
+enable_precompiled_headers(inc/MantidCrystal/PrecompiledHeader.h SRC_FILES)
+
 # Add the target for this directory
 add_library(Crystal ${SRC_FILES} ${INC_FILES})
+add_library(Mantid::Crystal ALIAS Crystal)
+
+target_include_directories(
+  Crystal PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/inc> $<INSTALL_INTERFACE:include/Mantid>
+)
+
 # Set the name of the generated library
 set_target_properties(Crystal PROPERTIES OUTPUT_NAME MantidCrystal)
 if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
-  set_target_properties(Crystal
-                        PROPERTIES INSTALL_RPATH
-                                   "@loader_path/../Contents/MacOS/")
+  set_target_properties(Crystal PROPERTIES INSTALL_RPATH "@loader_path/../Contents/MacOS/")
 elseif(${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
-  set_target_properties(Crystal
-                        PROPERTIES INSTALL_RPATH "\$ORIGIN/../${LIB_DIR}")
+  set_target_properties(Crystal PROPERTIES INSTALL_RPATH "\$ORIGIN/../${LIB_DIR}")
 endif()
 
 # Add to the 'Framework' group in VS
@@ -245,23 +261,24 @@ set_property(TARGET Crystal PROPERTY FOLDER "MantidFramework")
 
 include_directories(inc)
 
-target_link_libraries(Crystal
-                      LINK_PRIVATE
-                      ${TCMALLOC_LIBRARIES_LINKTIME}
-                      ${MANTIDLIBS}
-                      ${GSL_LIBRARIES})
+target_link_libraries(
+  Crystal
+  PUBLIC Mantid::API Mantid::Geometry Mantid::Kernel
+  PRIVATE Mantid::DataObjects Mantid::Indexing Boost::filesystem
+)
 
 # Add the unit tests directory
 add_subdirectory(test)
 
 # Auto-generate exports header
-target_include_directories(Crystal PUBLIC ${CMAKE_BINARY_DIR}/Framework/Crystal)
+target_include_directories(
+  Crystal PUBLIC $<BUILD_INTERFACE:${CMAKE_BINARY_DIR}/Framework/Crystal> $<INSTALL_INTERFACE:include/Mantid>
+)
 generate_mantid_export_header(Crystal FALSE)
 
 # Installation settings
-
-mtd_install_targets(TARGETS
-                    Crystal
-                    INSTALL_DIRS
-                    ${PLUGINS_DIR}
-                    ${WORKBENCH_PLUGINS_DIR})
+if(CONDA_ENV)
+  mtd_install_framework_lib(TARGETS Crystal PLUGIN_LIB)
+else()
+  mtd_install_targets(TARGETS Crystal INSTALL_DIRS ${PLUGINS_DIR} ${WORKBENCH_PLUGINS_DIR})
+endif()

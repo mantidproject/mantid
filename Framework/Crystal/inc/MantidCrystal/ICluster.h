@@ -27,12 +27,10 @@ public:
   using ClusterIntegratedValues = boost::tuple<double, double>;
 
   /// integrate the cluster
-  virtual ClusterIntegratedValues
-  integrate(std::shared_ptr<const Mantid::API::IMDHistoWorkspace> ws) const = 0;
+  virtual ClusterIntegratedValues integrate(std::shared_ptr<const Mantid::API::IMDHistoWorkspace> ws) const = 0;
 
   /// Apply labels to the workspace
-  virtual void
-  writeTo(std::shared_ptr<Mantid::API::IMDHistoWorkspace> ws) const = 0;
+  virtual void writeTo(std::shared_ptr<Mantid::API::IMDHistoWorkspace> ws) const = 0;
 
   /// Get the originally set label
   virtual size_t getOriginalLabel() const = 0;

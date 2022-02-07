@@ -8,8 +8,7 @@
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidGeometry/Crystal/UnitCell.h"
 
-namespace Mantid {
-namespace CurveFitting {
+namespace Mantid::CurveFitting {
 
 using namespace API;
 using namespace Geometry;
@@ -19,8 +18,7 @@ DECLARE_FUNCTION(LatticeFunction)
 LatticeFunction::LatticeFunction() : ILatticeFunction(), m_cellParameters() {}
 
 /// Calculates d-values using the internally stored cell parameters
-void LatticeFunction::functionLattice(const LatticeDomain &latticeDomain,
-                                      FunctionValues &values) const {
+void LatticeFunction::functionLattice(const LatticeDomain &latticeDomain, FunctionValues &values) const {
   throwIfNoFunctionSet();
 
   UnitCell cell = m_cellParameters->getUnitCellFromParameters();
@@ -62,22 +60,17 @@ UnitCell LatticeFunction::getUnitCell() const {
 }
 
 /// Sets the decorated function to expose parameters
-void LatticeFunction::init() {
-  setDecoratedFunction("PawleyParameterFunction");
-}
+void LatticeFunction::init() { setDecoratedFunction("PawleyParameterFunction"); }
 
 /// Checks that the decorated function is a PawleyParameterFunction.
 void LatticeFunction::beforeDecoratedFunctionSet(const IFunction_sptr &fn) {
-  Functions::PawleyParameterFunction_sptr paramFn =
-      std::dynamic_pointer_cast<Functions::PawleyParameterFunction>(fn);
+  Functions::PawleyParameterFunction_sptr paramFn = std::dynamic_pointer_cast<Functions::PawleyParameterFunction>(fn);
 
   if (!paramFn) {
-    throw std::invalid_argument(
-        "LatticeFunction can only decorate a PawleyParameterFunction.");
+    throw std::invalid_argument("LatticeFunction can only decorate a PawleyParameterFunction.");
   }
 
   m_cellParameters = paramFn;
 }
 
-} // namespace CurveFitting
-} // namespace Mantid
+} // namespace Mantid::CurveFitting

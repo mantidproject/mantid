@@ -8,14 +8,10 @@
 namespace MantidQt {
 namespace MantidWidgets {
 namespace DataProcessor {
-ConstColumnIterator::ConstColumnIterator(QStringIterator names,
-                                         QStringIterator descriptions,
-                                         QStringIterator algorithmProperties,
-                                         BoolIterator isShown,
-                                         QStringIterator prefixes,
-                                         BoolIterator isKey)
-    : m_names(names), m_descriptions(descriptions),
-      m_algorithmProperties(algorithmProperties), m_isShown(isShown),
+ConstColumnIterator::ConstColumnIterator(QStringIterator names, QStringIterator descriptions,
+                                         QStringIterator algorithmProperties, BoolIterator isShown,
+                                         QStringIterator prefixes, BoolIterator isKey)
+    : m_names(names), m_descriptions(descriptions), m_algorithmProperties(algorithmProperties), m_isShown(isShown),
       m_prefixes(prefixes), m_isKey(isKey) {}
 
 ConstColumnIterator &ConstColumnIterator::operator++() {
@@ -34,17 +30,12 @@ ConstColumnIterator ConstColumnIterator::operator++(int) {
   return result;
 }
 
-bool ConstColumnIterator::operator==(const ConstColumnIterator &other) const {
-  return m_names == other.m_names;
-}
+bool ConstColumnIterator::operator==(const ConstColumnIterator &other) const { return m_names == other.m_names; }
 
-bool ConstColumnIterator::operator!=(const ConstColumnIterator &other) const {
-  return !((*this) == other);
-}
+bool ConstColumnIterator::operator!=(const ConstColumnIterator &other) const { return !((*this) == other); }
 
 auto ConstColumnIterator::operator*() const -> reference {
-  return reference(*m_names, *m_algorithmProperties, *m_isShown, *m_prefixes,
-                   *m_descriptions, *m_isKey);
+  return reference(*m_names, *m_algorithmProperties, *m_isShown, *m_prefixes, *m_descriptions, *m_isKey);
 }
 
 ConstColumnIterator &ConstColumnIterator::operator+=(difference_type n) {

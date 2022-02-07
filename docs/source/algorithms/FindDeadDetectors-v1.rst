@@ -25,7 +25,7 @@ Uses the :ref:`algm-Integration` algorithm to sum the spectra.
 Usage
 -----
 
-**Example - Find various dead detectors**  
+**Example - Find various dead detectors**
 
 .. testcode:: FindVariousDeadDets
 
@@ -67,7 +67,7 @@ Output:
 
     with a lower range and upper range will find all three
     [110,115,120]
- 
+
 
 
 

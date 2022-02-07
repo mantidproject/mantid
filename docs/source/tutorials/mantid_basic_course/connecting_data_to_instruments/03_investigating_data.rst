@@ -1,7 +1,7 @@
 .. _03_investigating_data:
 
 ==================
-Investigating Data 
+Investigating Data
 ==================
 
 The Pick tab on the controls panel allows you to see the data in the
@@ -19,6 +19,7 @@ The Toolbar
 - |PickTabRectButton.png| - Draw a rectangle.
 - |PickTabElRingButton.png| - Draw an elliptical ring.
 - |PickTabRectRingButton.png| - Draw a rectangular ring.
+- |PickTabSectorButton.png| - Draw a circular sector.
 - |PickTabArbitraryShape.png| - Draw an arbitrary shape.
 - |PickTabPickPixelButton.png| - Select a single detector.
 - |PickTabPickTubeButton.png| - Select a tube/bank.
@@ -47,7 +48,7 @@ Picking a Tube
 The Tube selection tool |PickTube.png| is useful for tube instruments.
 When it's on the mini-plot displays the integrated data in the whole
 tube. The integration is done either over the detectors in the tube (Sum
-option) or over time (Integrate). To switch between the options, right-click on the mini-plot 
+option) or over time (Integrate). To switch between the options, right-click on the mini-plot
 to display the following menu:
 
 .. figure:: /images/SumIntegrateMenu.png
@@ -71,12 +72,18 @@ With the Integrate option the mini-plot displays the counts integrated
 over time of flight vs detector position in the tube.
 
 | |MiniplotIntegrate.png|
-| Detector positions can be shown as detector IDs, or distance form a
+| Detector positions can be shown as detector IDs, or distance from a
   tube's end, or the φ angle. Switch between the units using the
   mini-plot's context menu.
 
 .. figure:: /images/DetectorPositionOptions.png
    :alt: DetectorPositionOptions.png
+
+Data integration slider
+-----------------------
+
+Edit the range over the X-axis (e.g. Time) that the data is displayed by altering the data integration
+slider at the bottom of the Instrument Viewer. Drag the ends of the slider or input exact start and end values.
 
 
 Navigate
@@ -111,16 +118,19 @@ Edit a shape
 ------------
 
 #. Switch on the editing tool |PickTabEditButton.png|.
+   This tool is automatically selected after drawing a shape.
 #. Click on a shape you would like to edit. The selected shape displays
    control points as small white rectangles.
 #. Drag the control points to resize the shape.
 #. To translate the shape click inside its shaded area and drag.
 
-To select multiple shapes draw a rubber band around them.
+To select multiple shapes draw a box around them.
 
 .. figure:: /images/SelectMuplipleShapes.png
    :alt: SelectMuplipleShapes.png
    :width: 300px
+
+#. Copy selected shapes using Ctrl+C. Then paste them as much as you like using Ctrl+V.
 
 The selected shapes are indicated by drawing a bounding box around each
 of them.
@@ -130,6 +140,7 @@ of them.
    :width: 300px
 
 Only translation is possible for a multiple selection.
+
 
 
 Sum selected detectors
@@ -146,6 +157,7 @@ the shapes and plots this vs time of flight.
 .. |PickTabRectButton.png| image:: /images/PickTabRectButton.png
 .. |PickTabElRingButton.png| image:: /images/PickTabElRingButton.png
 .. |PickTabRectRingButton.png| image:: /images/PickTabRectRingButton.png
+.. |PickTabSectorButton.png| image:: /images/PickTabSectorButton.png
 .. |PickTabPickPixelButton.png| image:: /images/PickTabPickPixelButton.png
 .. |PickTabPickTubeButton.png| image:: /images/PickTabPickTubeButton.png
 .. |PickTabAddPeakButton.png| image:: /images/PickTabAddPeakButton.png

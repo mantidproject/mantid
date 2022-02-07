@@ -12,13 +12,13 @@
 
 #include <cxxtest/Descriptions.h>
 
-namespace CxxTest 
+namespace CxxTest
 {
     class DummyTestDescription : public TestDescription
     {
     public:
         DummyTestDescription();
-        
+
         const char *file() const;
         unsigned line() const;
         const char *testName() const;
@@ -32,10 +32,10 @@ namespace CxxTest
     };
 
     class DummySuiteDescription : public SuiteDescription
-    {      
+    {
     public:
         DummySuiteDescription();
-        
+
         const char *file() const;
         unsigned line() const;
         const char *suiteName() const;
@@ -48,7 +48,7 @@ namespace CxxTest
         const TestDescription *firstTest() const;
         void activateAllTests();
         bool leaveOnly( const char * /*testName*/ );
-        
+
         bool setUp();
         bool tearDown();
 
@@ -60,7 +60,7 @@ namespace CxxTest
     {
     public:
         DummyWorldDescription();
-        
+
         unsigned numSuites( void ) const;
         unsigned numTotalTests( void ) const;
         const SuiteDescription &suiteDescription( unsigned ) const;
@@ -68,7 +68,7 @@ namespace CxxTest
         const SuiteDescription *firstSuite() const;
         void activateAllTests();
         bool leaveOnly( const char * /*suiteName*/, const char * /*testName*/ = 0 );
-            
+
         bool setUp();
         bool tearDown();
 

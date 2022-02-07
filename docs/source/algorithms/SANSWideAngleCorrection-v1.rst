@@ -108,7 +108,7 @@ Comparison with Wide Angle Correction at SNS
 --------------------------------------------
 
 The transmission correction applied at SNS is described
-`here <http://www.mantidproject.org/HFIR_SANS#Transmission_correction>`__,
+:ref:`here <algm-HFIRSANSReduction-v1>`,
 and it is applied through the
 :ref:`algm-ApplyTransmissionCorrection` algorithm.
 The correction applied there is an approximation for the same equations

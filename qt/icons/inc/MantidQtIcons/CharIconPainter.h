@@ -27,13 +27,11 @@ class IconicFont;
  */
 class EXPORT_OPT_MANTIDQT_ICONS CharIconPainter : public QPainter {
 public:
-  void paint(IconicFont *iconic, QPainter *painter, QRect rect,
-             QIcon::Mode mode, QIcon::State state,
+  void paint(IconicFont *iconic, QPainter *painter, QRect rect, QIcon::Mode mode, QIcon::State state,
              QList<QHash<QString, QVariant>> &options);
 
 private:
-  void paintIcon(IconicFont *iconic, QPainter *painter, QRect rect,
-                 QIcon::Mode mode, QIcon::State state,
+  void paintIcon(IconicFont *iconic, QPainter *painter, QRect rect, QIcon::Mode mode, QIcon::State state,
                  QHash<QString, QVariant> &options);
 };
 

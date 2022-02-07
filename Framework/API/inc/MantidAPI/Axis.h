@@ -35,8 +35,7 @@ public:
   /// Virtual constructor
   virtual Axis *clone(const MatrixWorkspace *const parentWorkspace) = 0;
   /// Virtual constructor for axis of different length
-  virtual Axis *clone(const std::size_t length,
-                      const MatrixWorkspace *const parentWorkspace) = 0;
+  virtual Axis *clone(const std::size_t length, const MatrixWorkspace *const parentWorkspace) = 0;
 
   const std::string &title() const;
   std::string &title();
@@ -45,8 +44,7 @@ public:
   std::shared_ptr<Kernel::Unit> &unit();
 
   /// Set the unit on the Axis
-  virtual const std::shared_ptr<Kernel::Unit> &
-  setUnit(const std::string &unitName);
+  virtual const std::shared_ptr<Kernel::Unit> &setUnit(const std::string &unitName);
 
   /// Returns true is the axis is a Spectra axis
   virtual bool isSpectra() const { return false; }
@@ -58,12 +56,10 @@ public:
   /// Returns the value at a specified index
   /// @param index :: the index
   /// @param verticalIndex :: The verticalIndex
-  virtual double operator()(const std::size_t &index,
-                            const std::size_t &verticalIndex = 0) const = 0;
+  virtual double operator()(const std::size_t &index, const std::size_t &verticalIndex = 0) const = 0;
   /// Gets the value at the specified index. Just calls operator() but is easier
   /// to use with Axis pointers
-  double getValue(const std::size_t &index,
-                  const std::size_t &verticalIndex = 0) const;
+  double getValue(const std::size_t &index, const std::size_t &verticalIndex = 0) const;
   /// returns min value defined on axis
   virtual double getMin() const = 0;
   /// returns max value defined on axis
@@ -86,15 +82,15 @@ public:
   virtual bool operator==(const Axis &) const = 0;
 
   /// Returns a text label of for a value
+  /// Note that the index here is not the index of a value, but the effective
+  /// index of the bin
   virtual std::string label(const std::size_t &index) const = 0;
 
 protected:
   Axis(const Axis &) = default;
+  Axis &operator=(const Axis &) = default;
 
 private:
-  /// Private, undefined copy assignment operator
-  const Axis &operator=(const Axis &) = delete;
-
   /// The user-defined title for this axis
   std::string m_title;
   /// The unit for this axis

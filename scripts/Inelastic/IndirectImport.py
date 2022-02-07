@@ -12,8 +12,9 @@ We also deal with importing the mantidplot module outside of MantidPlot here.
 """
 from contextlib import contextmanager
 import numpy.core.setup_common as numpy_cfg
-import os
 import platform
+import os
+import importlib
 import sys
 from mantid import logger
 
@@ -21,6 +22,10 @@ from mantid import logger
 # the fortran modules with f2py. It must match the version of
 # the numpy ABI at runtime.
 F2PY_MODULES_REQUIRED_C_ABI = 0x01000009
+BAYES_PACKAGE_NAME = 'quasielasticbayes'
+UNSUPPORTED_PLATFORM_MESSAGE = """Functionality not currently available on your platform.
+Please try installing the extra package: python -m pip install --user quasielasticbayes
+"""
 
 
 def import_mantidplot():
@@ -49,13 +54,45 @@ def _os_env():
     return platform.system() + platform.architecture()[0]
 
 
-def _lib_suffix():
-    if platform.system() == "Windows":
-        suffix = "win"
-    elif platform.system() == "Linux":
-        suffix = "lnx"
+def is_pip_version_of_libs():
+    """
+    If we are using a pip version of the libs we can import them from the BAYES_PACKAGE_NAME package
+    import BAYES_PACKAGE_NAME
+    # imports BAYES_PACKAGE_NAME.QLdata ect., i.e. the libraries are usable with:
+    BAYES_PACKAGE_NAME.QLdata.qldata(....)
+    ...
+    Which will import the binaries from the python path,
+    most likely the site-packages folder
+    """
+    if importlib.util.find_spec(BAYES_PACKAGE_NAME) is not None:
+        return True, BAYES_PACKAGE_NAME + '.'
     else:
+        return False, ""
+
+
+def _lib_suffix():
+    """
+    If we are using a pip version of the libs they are NOT suffixed.
+    They are imported with
+    import Quest
+    import QLdata
+    ..
+    If we are using the internally shipped libraries, we HAVE a suffix
+    This means we import the quest library with:
+    import Quest_win64
+    import QLdata_win64
+    Thefore, if we are using the pip versions we don't add a suffix.
+    """
+    is_pip, _ = is_pip_version_of_libs()
+    if is_pip:
         return ""
+    else:
+        if platform.system() == "Windows":
+            suffix = "win"
+        elif platform.system() == "Linux":
+            suffix = "lnx"
+        else:
+            return ""
     return "_" + suffix + platform.architecture()[0][0:2]
 
 
@@ -69,7 +106,7 @@ def _numpy_abi_ver():
 
 
 def unsupported_message():
-    logger.error('F2Py functionality not currently available on your platform.')
+    logger.error(UNSUPPORTED_PLATFORM_MESSAGE)
     sys.exit()
 
 
@@ -81,10 +118,14 @@ def is_supported_f2py_platform():
     @returns True if we are currently on a platform that supports the F2Py
     libraries, else False.
     """
-    if (_os_env().startswith("Windows")
+    if (_os_env().startswith("Windows") and "CONDA_PREFIX" not in os.environ
             and _numpy_abi_ver() == F2PY_MODULES_REQUIRED_C_ABI
             and "python_d" not in sys.executable):
         return True
+    # check if we have pip installed the fortran libraries
+    # first check the numpy abi is correct
+    if _numpy_abi_ver() == F2PY_MODULES_REQUIRED_C_ABI:
+        return is_pip_version_of_libs()[0]
     return False
 
 
@@ -111,18 +152,9 @@ def import_f2py(lib_base_name):
         sys.path.insert(0, directory)
         yield
         sys.path.pop(0)
-
-    lib_name = lib_base_name + _lib_suffix()
-    # In Python 3 f2py produces a filename properly tagged with the ABI compatability
-    # information and Python can import this without issue but it will take an untagged
-    # filename in preference so we cannot keep the Python2/Python3 ones in the same
-    # directory. We manipulate the sys.path temporarily to get the correct library.
-    version = sys.version_info
-    if version.major >= 3:
-        return __import__(lib_name)
-    else:
-        with in_syspath(os.path.join(os.path.dirname(__file__), 'cp27')):
-            return __import__(lib_name)
+    _, package_base = is_pip_version_of_libs()
+    lib_name = package_base + lib_base_name + _lib_suffix()
+    return __import__(lib_name, fromlist=[None])
 
 
 def run_f2py_compatibility_test():
@@ -131,4 +163,4 @@ def run_f2py_compatibility_test():
     the F2Py libraries on an incompatible platform.
     """
     if not is_supported_f2py_platform():
-        raise RuntimeError("F2Py programs NOT available on this platform.")
+        raise RuntimeError(UNSUPPORTED_PLATFORM_MESSAGE)

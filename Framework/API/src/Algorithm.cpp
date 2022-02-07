@@ -10,10 +10,12 @@
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/DeprecatedAlgorithm.h"
+#include "MantidAPI/DeprecatedAlias.h"
 #include "MantidAPI/IWorkspaceProperty.h"
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidAPI/WorkspaceHistory.h"
 
+#include "MantidJson/Json.h"
 #include "MantidKernel/CompositeValidator.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/EmptyValues.h"
@@ -55,8 +57,7 @@ const size_t DELAY_BEFORE_GC = 5;
 
 class WorkspacePropertyValueIs {
 public:
-  explicit WorkspacePropertyValueIs(const std::string &value)
-      : m_value(value) {}
+  explicit WorkspacePropertyValueIs(const std::string &value) : m_value(value) {}
   bool operator()(IWorkspaceProperty *property) {
     auto *prop = dynamic_cast<Property *>(property);
     if (!prop)
@@ -69,7 +70,6 @@ private:
 };
 
 template <typename T> struct RunOnFinish {
-
   RunOnFinish(T &&task) : m_onfinsh(std::move(task)) {}
   ~RunOnFinish() { m_onfinsh(); }
 
@@ -107,17 +107,13 @@ size_t Algorithm::g_execCount = 0;
 
 /// Constructor
 Algorithm::Algorithm()
-    : PropertyManagerOwner(), m_cancel(false), m_parallelException(false),
-      m_log("Algorithm"), g_log(m_log), m_groupSize(0), m_executeAsync(nullptr),
-      m_notificationCenter(nullptr), m_progressObserver(nullptr),
-      m_executionState(ExecutionState::Uninitialized),
-      m_resultState(ResultState::NotFinished), m_isChildAlgorithm(false),
-      m_recordHistoryForChild(false), m_alwaysStoreInADS(true),
-      m_runningAsync(false), m_rethrow(false),
-      m_isAlgStartupLoggingEnabled(true), m_startChildProgress(0.),
-      m_endChildProgress(0.), m_algorithmID(this), m_singleGroup(-1),
-      m_groupsHaveSimilarNames(false), m_inputWorkspaceHistories(),
-      m_communicator(std::make_unique<Parallel::Communicator>()) {}
+    : m_cancel(false), m_parallelException(false), m_log("Algorithm"), g_log(m_log), m_groupSize(0),
+      m_executeAsync(nullptr), m_notificationCenter(nullptr), m_progressObserver(nullptr),
+      m_executionState(ExecutionState::Uninitialized), m_resultState(ResultState::NotFinished),
+      m_isChildAlgorithm(false), m_recordHistoryForChild(false), m_alwaysStoreInADS(true), m_runningAsync(false),
+      m_rethrow(false), m_isAlgStartupLoggingEnabled(true), m_startChildProgress(0.), m_endChildProgress(0.),
+      m_algorithmID(this), m_singleGroup(-1), m_groupsHaveSimilarNames(false), m_inputWorkspaceHistories(),
+      m_communicator(std::make_unique<Parallel::Communicator>()), m_properties() {}
 
 /// Virtual destructor
 Algorithm::~Algorithm() {}
@@ -131,9 +127,7 @@ Algorithm::~Algorithm() {}
 ExecutionState Algorithm::executionState() const { return m_executionState; }
 
 /// Sets the current execution state
-void Algorithm::setExecutionState(const ExecutionState state) {
-  m_executionState = state;
-}
+void Algorithm::setExecutionState(const ExecutionState state) { m_executionState = state; }
 
 /// Gets the current result State
 ResultState Algorithm::resultState() const { return m_resultState; }
@@ -149,14 +143,11 @@ void Algorithm::setResultState(const ResultState state) {
 
 //---------------------------------------------------------------------------------------------
 /// Has the Algorithm already been initialized
-bool Algorithm::isInitialized() const {
-  return (m_executionState != ExecutionState::Uninitialized);
-}
+bool Algorithm::isInitialized() const { return (m_executionState != ExecutionState::Uninitialized); }
 
 /// Has the Algorithm already been executed successfully
 bool Algorithm::isExecuted() const {
-  return ((executionState() == ExecutionState::Finished) &&
-          (resultState() == ResultState::Success));
+  return ((executionState() == ExecutionState::Finished) && (resultState() == ResultState::Success));
 }
 
 //---------------------------------------------------------------------------------------------
@@ -180,18 +171,14 @@ void Algorithm::setChild(const bool isChild) {
  * child algorithms.
  * @param on :: The new state of the flag
  */
-void Algorithm::enableHistoryRecordingForChild(const bool on) {
-  m_recordHistoryForChild = on;
-}
+void Algorithm::enableHistoryRecordingForChild(const bool on) { m_recordHistoryForChild = on; }
 
 /** Do we ALWAYS store in the AnalysisDataService? This is set to true
  * for python algorithms' child algorithms
  *
  * @param doStore :: always store in ADS
  */
-void Algorithm::setAlwaysStoreInADS(const bool doStore) {
-  m_alwaysStoreInADS = doStore;
-}
+void Algorithm::setAlwaysStoreInADS(const bool doStore) { m_alwaysStoreInADS = doStore; }
 
 /** Returns true if we always store in the AnalysisDataService.
  *  @return true if output is saved to the AnalysisDataService.
@@ -204,9 +191,7 @@ bool Algorithm::getAlwaysStoreInADS() const { return m_alwaysStoreInADS; }
 void Algorithm::setRethrows(const bool rethrow) { this->m_rethrow = rethrow; }
 
 /// True if the algorithm is running.
-bool Algorithm::isRunning() const {
-  return (executionState() == ExecutionState::Running);
-}
+bool Algorithm::isRunning() const { return (executionState() == ExecutionState::Running); }
 
 /// True if the algorithm is ready for garbage collection.
 bool Algorithm::isReadyForGarbageCollection() const {
@@ -241,19 +226,16 @@ void Algorithm::removeObserver(const Poco::AbstractObserver &observer) const {
  * @param progressPrecision :: optional, int number of digits after the decimal
  * point to show.
  */
-void Algorithm::progress(double p, const std::string &msg, double estimatedTime,
-                         int progressPrecision) {
-  notificationCenter().postNotification(
-      new ProgressNotification(this, p, msg, estimatedTime, progressPrecision));
+void Algorithm::progress(double p, const std::string &msg, double estimatedTime, int progressPrecision) {
+  notificationCenter().postNotification(new ProgressNotification(this, p, msg, estimatedTime, progressPrecision));
 }
 
 //---------------------------------------------------------------------------------------------
 /// Function to return all of the categories that contain this algorithm
 const std::vector<std::string> Algorithm::categories() const {
-  Mantid::Kernel::StringTokenizer tokenizer(
-      category(), categorySeparator(),
-      Mantid::Kernel::StringTokenizer::TOK_TRIM |
-          Mantid::Kernel::StringTokenizer::TOK_IGNORE_EMPTY);
+  Mantid::Kernel::StringTokenizer tokenizer(category(), categorySeparator(),
+                                            Mantid::Kernel::StringTokenizer::TOK_TRIM |
+                                                Mantid::Kernel::StringTokenizer::TOK_IGNORE_EMPTY);
 
   auto res = tokenizer.asVector();
 
@@ -276,10 +258,9 @@ const std::string Algorithm::workspaceMethodName() const { return ""; }
  *workspaceMethodName attached
  */
 const std::vector<std::string> Algorithm::workspaceMethodOn() const {
-  Mantid::Kernel::StringTokenizer tokenizer(
-      this->workspaceMethodOnTypes(), WORKSPACE_TYPES_SEPARATOR,
-      Mantid::Kernel::StringTokenizer::TOK_TRIM |
-          Mantid::Kernel::StringTokenizer::TOK_IGNORE_EMPTY);
+  Mantid::Kernel::StringTokenizer tokenizer(this->workspaceMethodOnTypes(), WORKSPACE_TYPES_SEPARATOR,
+                                            Mantid::Kernel::StringTokenizer::TOK_TRIM |
+                                                Mantid::Kernel::StringTokenizer::TOK_IGNORE_EMPTY);
   return tokenizer.asVector();
 }
 
@@ -338,9 +319,7 @@ void Algorithm::initialize() {
  * @return a map where: Key = string name of the the property;
             Value = string describing the problem with the property.
  */
-std::map<std::string, std::string> Algorithm::validateInputs() {
-  return std::map<std::string, std::string>();
-}
+std::map<std::string, std::string> Algorithm::validateInputs() { return std::map<std::string, std::string>(); }
 
 //---------------------------------------------------------------------------------------------
 /**
@@ -369,9 +348,8 @@ void Algorithm::cacheWorkspaceProperties() {
       m_pureOutputWorkspaceProps.emplace_back(wsProp);
       break;
     default:
-      throw std::logic_error(
-          "Unexpected property direction found for property " + prop->name() +
-          " of algorithm " + this->name());
+      throw std::logic_error("Unexpected property direction found for property " + prop->name() + " of algorithm " +
+                             this->name());
     }
   }
 }
@@ -386,8 +364,7 @@ void Algorithm::cacheInputWorkspaceHistories() {
 
   auto cacheHistories = [this](const Workspace_sptr &ws) {
     if (auto group = dynamic_cast<const WorkspaceGroup *>(ws.get())) {
-      m_inputWorkspaceHistories.reserve(m_inputWorkspaceHistories.size() +
-                                        group->size());
+      m_inputWorkspaceHistories.reserve(m_inputWorkspaceHistories.size() + group->size());
       for (const auto &memberWS : *group) {
         m_inputWorkspaceHistories.emplace_back(memberWS);
       }
@@ -401,8 +378,7 @@ void Algorithm::cacheInputWorkspaceHistories() {
       return false;
     if (dynamic_cast<ADSValidator *>(validator.get()))
       return true;
-    if (const auto compValidator =
-            dynamic_cast<CompositeValidator *>(validator.get()))
+    if (const auto compValidator = dynamic_cast<CompositeValidator *>(validator.get()))
       return compValidator->contains<ADSValidator>();
 
     return false;
@@ -415,8 +391,7 @@ void Algorithm::cacheInputWorkspaceHistories() {
   m_inputWorkspaceHistories.clear();
   const auto &props = this->getProperties();
   for (const auto &prop : props) {
-    if (prop->direction() != Direction::Input &&
-        prop->direction() != Direction::InOut)
+    if (prop->direction() != Direction::Input && prop->direction() != Direction::InOut)
       continue;
 
     if (auto wsProp = dynamic_cast<IWorkspaceProperty *>(prop)) {
@@ -463,10 +438,8 @@ void Algorithm::lockWorkspaces() {
     if (ws) {
       // The workspace property says to do locking,
       // AND it has NOT already been write-locked
-      if (outputWorkspaceProp->isLocking() &&
-          std::find(m_writeLockedWorkspaces.begin(),
-                    m_writeLockedWorkspaces.end(),
-                    ws) == m_writeLockedWorkspaces.end()) {
+      if (outputWorkspaceProp->isLocking() && std::find(m_writeLockedWorkspaces.begin(), m_writeLockedWorkspaces.end(),
+                                                        ws) == m_writeLockedWorkspaces.end()) {
         // Write-lock it if not already
         debugLog << "Write-locking " << ws->getName() << '\n';
         ws->getLock()->writeLock();
@@ -481,10 +454,8 @@ void Algorithm::lockWorkspaces() {
     if (ws) {
       // The workspace property says to do locking,
       // AND it has NOT already been write-locked
-      if (inputWorkspaceProp->isLocking() &&
-          std::find(m_writeLockedWorkspaces.begin(),
-                    m_writeLockedWorkspaces.end(),
-                    ws) == m_writeLockedWorkspaces.end()) {
+      if (inputWorkspaceProp->isLocking() && std::find(m_writeLockedWorkspaces.begin(), m_writeLockedWorkspaces.end(),
+                                                       ws) == m_writeLockedWorkspaces.end()) {
         // Read-lock it if not already write-locked
         debugLog << "Read-locking " << ws->getName() << '\n';
         ws->getLock()->readLock();
@@ -542,10 +513,19 @@ bool Algorithm::executeInternal() {
   Timer timer;
   bool algIsExecuted = false;
   AlgorithmManager::Instance().notifyAlgorithmStarting(this->getAlgorithmID());
+
+  // runtime check for deprecation warning
   {
     auto *depo = dynamic_cast<DeprecatedAlgorithm *>(this);
     if (depo != nullptr)
       getLogger().error(depo->deprecationMsg(this));
+  }
+
+  // runtime check for deprecated alias warning
+  {
+    auto *da_alg = dynamic_cast<DeprecatedAlias *>(this);
+    if ((da_alg != nullptr) && (this->calledByAlias))
+      getLogger().warning(da_alg->deprecationMessage(this));
   }
 
   // Register clean up tasks that should happen regardless of the route
@@ -580,8 +560,7 @@ bool Algorithm::executeInternal() {
     }
     // Try the validation again
     if (!validateProperties()) {
-      notificationCenter().postNotification(
-          new ErrorNotification(this, "Some invalid Properties found"));
+      notificationCenter().postNotification(new ErrorNotification(this, "Some invalid Properties found"));
       throw std::runtime_error("Some invalid Properties found");
     }
   }
@@ -599,11 +578,8 @@ bool Algorithm::executeInternal() {
     // Checking the input is a group. Throws if the sizes are wrong
     callProcessGroups = this->checkGroups();
   } catch (std::exception &ex) {
-    getLogger().error() << "Error in execution of algorithm " << this->name()
-                        << "\n"
-                        << ex.what() << "\n";
-    notificationCenter().postNotification(
-        new ErrorNotification(this, ex.what()));
+    getLogger().error() << "Error in execution of algorithm " << this->name() << "\n" << ex.what() << "\n";
+    notificationCenter().postNotification(new ErrorNotification(this, ex.what()));
     setResultState(ResultState::Failed);
     if (m_isChildAlgorithm || m_runningAsync || m_rethrow) {
       m_runningAsync = false;
@@ -616,10 +592,9 @@ bool Algorithm::executeInternal() {
 
   timingInit += timer.elapsed(resetTimer);
   // ----- Perform validation of the whole set of properties -------------
-  if ((!callProcessGroups) &&
-      (executionMode != Parallel::ExecutionMode::MasterOnly ||
-       communicator().rank() == 0)) // for groups this is called on each
-                                    // workspace separately
+  if ((!callProcessGroups) && (executionMode != Parallel::ExecutionMode::MasterOnly ||
+                               communicator().rank() == 0)) // for groups this is called on each
+                                                            // workspace separately
   {
     std::map<std::string, std::string> errors = this->validateInputs();
     if (!errors.empty()) {
@@ -629,19 +604,21 @@ bool Algorithm::executeInternal() {
       auto &warnLog = getLogger().warning();
       for (auto &error : errors) {
         if (this->existsProperty(error.first))
-          errorLog << "Invalid value for " << error.first << ": "
-                   << error.second << "\n";
+          errorLog << "Invalid value for " << error.first << ": " << error.second << "\n";
         else {
           numErrors -= 1; // don't count it as an error
-          warnLog << "validateInputs() references non-existant property \""
-                  << error.first << "\"\n";
+          warnLog << "validateInputs() references non-existant property \"" << error.first << "\"\n";
         }
       }
       // Throw because something was invalid
       if (numErrors > 0) {
-        notificationCenter().postNotification(
-            new ErrorNotification(this, "Some invalid Properties found"));
-        throw std::runtime_error("Some invalid Properties found");
+        std::stringstream msg;
+        msg << "Some invalid Properties found: ";
+        for (auto &error : errors) {
+          msg << "\n " << error.first << ": " << error.second;
+        }
+        notificationCenter().postNotification(new ErrorNotification(this, "Some invalid Properties found"));
+        throw std::runtime_error(msg.str());
       }
     }
   }
@@ -684,13 +661,11 @@ bool Algorithm::executeInternal() {
       interruption_point();
       const float timingExec = timer.elapsed(resetTimer);
       // The total runtime including all init steps is used for general logging.
-      const float duration = timingInit + timingPropertyValidation +
-                             timingInputValidation + timingExec;
+      const float duration = timingInit + timingPropertyValidation + timingInputValidation + timingExec;
       // need it to throw before trying to run fillhistory() on an algorithm
       // which has failed
       if (trackingHistory() && m_history) {
-        m_history->fillAlgorithmHistory(this, startTime, duration,
-                                        Algorithm::g_execCount);
+        m_history->fillAlgorithmHistory(this, startTime, duration, Algorithm::g_execCount);
         fillHistory();
         linkHistoryWithLastChild();
       }
@@ -704,43 +679,33 @@ bool Algorithm::executeInternal() {
       algIsExecuted = true;
 
       // Log that execution has completed.
-      getLogger().debug(
-          "Time to validate properties: " +
-          std::to_string(timingPropertyValidation) + " seconds\n" +
-          "Time for other input validation: " +
-          std::to_string(timingInputValidation) + " seconds\n" +
-          "Time for other initialization: " + std::to_string(timingInit) +
-          " seconds\n" + "Time to run exec: " + std::to_string(timingExec) +
-          " seconds\n");
+      getLogger().debug("Time to validate properties: " + std::to_string(timingPropertyValidation) + " seconds\n" +
+                        "Time for other input validation: " + std::to_string(timingInputValidation) + " seconds\n" +
+                        "Time for other initialization: " + std::to_string(timingInit) + " seconds\n" +
+                        "Time to run exec: " + std::to_string(timingExec) + " seconds\n");
       reportCompleted(duration);
     } catch (std::runtime_error &ex) {
       m_gcTime = Mantid::Types::Core::DateAndTime::getCurrentTime() +=
           (Mantid::Types::Core::DateAndTime::ONE_SECOND * DELAY_BEFORE_GC);
       setResultState(ResultState::Failed);
-      notificationCenter().postNotification(
-          new ErrorNotification(this, ex.what()));
+      notificationCenter().postNotification(new ErrorNotification(this, ex.what()));
       this->unlockWorkspaces();
       if (m_isChildAlgorithm || m_runningAsync || m_rethrow)
         throw;
       else {
-        getLogger().error()
-            << "Error in execution of algorithm " << this->name() << '\n'
-            << ex.what() << '\n';
+        getLogger().error() << "Error in execution of algorithm " << this->name() << '\n' << ex.what() << '\n';
       }
 
     } catch (std::logic_error &ex) {
       m_gcTime = Mantid::Types::Core::DateAndTime::getCurrentTime() +=
           (Mantid::Types::Core::DateAndTime::ONE_SECOND * DELAY_BEFORE_GC);
-      notificationCenter().postNotification(
-          new ErrorNotification(this, ex.what()));
+      notificationCenter().postNotification(new ErrorNotification(this, ex.what()));
       setResultState(ResultState::Failed);
       this->unlockWorkspaces();
       if (m_isChildAlgorithm || m_runningAsync || m_rethrow)
         throw;
       else {
-        getLogger().error()
-            << "Logic Error in execution of algorithm " << this->name() << '\n'
-            << ex.what() << '\n';
+        getLogger().error() << "Logic Error in execution of algorithm " << this->name() << '\n' << ex.what() << '\n';
       }
     }
   } catch (CancelException &ex) {
@@ -749,8 +714,7 @@ bool Algorithm::executeInternal() {
     m_gcTime = Mantid::Types::Core::DateAndTime::getCurrentTime() +=
         (Mantid::Types::Core::DateAndTime::ONE_SECOND * DELAY_BEFORE_GC);
     setResultState(ResultState::Failed);
-    notificationCenter().postNotification(
-        new ErrorNotification(this, ex.what()));
+    notificationCenter().postNotification(new ErrorNotification(this, ex.what()));
     this->unlockWorkspaces();
 
     throw;
@@ -758,14 +722,11 @@ bool Algorithm::executeInternal() {
   // Gaudi also specifically catches GaudiException & std:exception.
   catch (std::exception &ex) {
     m_runningAsync = false;
-    getLogger().error() << "Error in execution of algorithm " << this->name()
-                        << ":\n"
-                        << ex.what() << "\n";
+    getLogger().error() << "Error in execution of algorithm " << this->name() << ":\n" << ex.what() << "\n";
     m_gcTime = Mantid::Types::Core::DateAndTime::getCurrentTime() +=
         (Mantid::Types::Core::DateAndTime::ONE_SECOND * DELAY_BEFORE_GC);
     setResultState(ResultState::Failed);
-    notificationCenter().postNotification(
-        new ErrorNotification(this, ex.what()));
+    notificationCenter().postNotification(new ErrorNotification(this, ex.what()));
     this->unlockWorkspaces();
 
     throw;
@@ -778,25 +739,24 @@ bool Algorithm::executeInternal() {
     m_gcTime = Mantid::Types::Core::DateAndTime::getCurrentTime() +=
         (Mantid::Types::Core::DateAndTime::ONE_SECOND * DELAY_BEFORE_GC);
     setResultState(ResultState::Failed);
-    notificationCenter().postNotification(
-        new ErrorNotification(this, "UNKNOWN Exception is caught in exec()"));
-    getLogger().error() << this->name()
-                        << ": UNKNOWN Exception is caught in exec()\n";
+    notificationCenter().postNotification(new ErrorNotification(this, "UNKNOWN Exception is caught in exec()"));
+    getLogger().error() << this->name() << ": UNKNOWN Exception is caught in exec()\n";
     this->unlockWorkspaces();
 
     throw;
   }
-
-  this->unlockWorkspaces();
 
   m_gcTime = Mantid::Types::Core::DateAndTime::getCurrentTime() +=
       (Mantid::Types::Core::DateAndTime::ONE_SECOND * DELAY_BEFORE_GC);
   if (algIsExecuted) {
     setResultState(ResultState::Success);
   }
+
   // Only gets to here if algorithm ended normally
-  notificationCenter().postNotification(
-      new FinishedNotification(this, isExecuted()));
+  notificationCenter().postNotification(new FinishedNotification(this, isExecuted()));
+
+  // Unlock the workspaces once the notification has been sent, to prevent too early deletion
+  this->unlockWorkspaces();
 
   return isExecuted();
 }
@@ -815,8 +775,7 @@ void Algorithm::executeAsChildAlg() {
   }
 
   if (!executed) {
-    throw std::runtime_error("Unable to successfully run ChildAlgorithm " +
-                             this->name());
+    throw std::runtime_error("Unable to successfully run ChildAlgorithm " + this->name());
   }
 }
 
@@ -835,8 +794,7 @@ void Algorithm::store() {
     if (wsProp) {
       // check if the workspace is a group, if so remember where it is and add
       // it later
-      auto group =
-          std::dynamic_pointer_cast<WorkspaceGroup>(wsProp->getWorkspace());
+      auto group = std::dynamic_pointer_cast<WorkspaceGroup>(wsProp->getWorkspace());
       if (!group) {
         try {
           wsProp->store();
@@ -851,8 +809,7 @@ void Algorithm::store() {
 
   // now store workspace groups once their members have been added
   std::vector<int>::const_iterator wsIndex;
-  for (wsIndex = groupWsIndicies.begin(); wsIndex != groupWsIndicies.end();
-       ++wsIndex) {
+  for (wsIndex = groupWsIndicies.begin(); wsIndex != groupWsIndicies.end(); ++wsIndex) {
     auto *wsProp = dynamic_cast<IWorkspaceProperty *>(props[*wsIndex]);
     if (wsProp) {
       try {
@@ -882,13 +839,9 @@ void Algorithm::store() {
  *default gives the latest version.
  *  @return shared pointer to the newly created algorithm object
  */
-Algorithm_sptr Algorithm::createChildAlgorithm(const std::string &name,
-                                               const double startProgress,
-                                               const double endProgress,
-                                               const bool enableLogging,
-                                               const int &version) {
-  Algorithm_sptr alg =
-      AlgorithmManager::Instance().createUnmanaged(name, version);
+Algorithm_sptr Algorithm::createChildAlgorithm(const std::string &name, const double startProgress,
+                                               const double endProgress, const bool enableLogging, const int &version) {
+  Algorithm_sptr alg = AlgorithmManager::Instance().createUnmanaged(name, version);
   setupAsChildAlgorithm(alg, startProgress, endProgress, enableLogging);
   return alg;
 }
@@ -899,9 +852,7 @@ Algorithm_sptr Algorithm::createChildAlgorithm(const std::string &name,
  * Can also be used manually for algorithms created otherwise. This allows
  * running algorithms that are not declared into the factory as child
  * algorithms. */
-void Algorithm::setupAsChildAlgorithm(const Algorithm_sptr &alg,
-                                      const double startProgress,
-                                      const double endProgress,
+void Algorithm::setupAsChildAlgorithm(const Algorithm_sptr &alg, const double startProgress, const double endProgress,
                                       const bool enableLogging) {
   // set as a child
   alg->setChild(true);
@@ -911,8 +862,7 @@ void Algorithm::setupAsChildAlgorithm(const Algorithm_sptr &alg,
   try {
     alg->initialize();
   } catch (std::runtime_error &) {
-    throw std::runtime_error("Unable to initialise Child Algorithm '" +
-                             alg->name() + "'");
+    throw std::runtime_error("Unable to initialise Child Algorithm '" + alg->name() + "'");
   }
 
   // If output workspaces are nameless, give them a temporary name to satisfy
@@ -927,8 +877,7 @@ void Algorithm::setupAsChildAlgorithm(const Algorithm_sptr &alg,
     }
   }
 
-  if (startProgress >= 0.0 && endProgress > startProgress &&
-      endProgress <= 1.0) {
+  if (startProgress >= 0.0 && endProgress > startProgress && endProgress <= 1.0) {
     alg->addObserver(this->progressObserver());
     m_startChildProgress = startProgress;
     m_endChildProgress = endProgress;
@@ -940,9 +889,7 @@ void Algorithm::setupAsChildAlgorithm(const Algorithm_sptr &alg,
   // It must be protected by a critical block so that Child Algorithms can run
   // in parallel safely.
   std::weak_ptr<IAlgorithm> weakPtr(alg);
-  PARALLEL_CRITICAL(Algorithm_StoreWeakPtr) {
-    m_ChildAlgorithms.emplace_back(weakPtr);
-  }
+  PARALLEL_CRITICAL(Algorithm_StoreWeakPtr) { m_ChildAlgorithms.emplace_back(weakPtr); }
 }
 
 //=============================================================================================
@@ -955,11 +902,7 @@ void Algorithm::setupAsChildAlgorithm(const Algorithm_sptr &alg,
  * a json formatted string.
  * @returns This object serialized as a string
  */
-std::string Algorithm::toString() const {
-  ::Json::FastWriter writer;
-
-  return writer.write(toJson());
-}
+std::string Algorithm::toString() const { return Mantid::JsonHelpers::jsonToString(toJson()); }
 
 /**
  * Serialize this object to a json object)
@@ -970,7 +913,7 @@ std::string Algorithm::toString() const {
 
   root["name"] = name();
   root["version"] = this->version();
-  root["properties"] = Kernel::PropertyManagerOwner::asJson(false);
+  root["properties"] = m_properties.asJson(false);
 
   return root;
 }
@@ -986,7 +929,6 @@ std::string Algorithm::toString() const {
 IAlgorithm_sptr Algorithm::fromHistory(const AlgorithmHistory &history) {
   ::Json::Value root;
   ::Json::Value jsonMap;
-  ::Json::FastWriter writer;
 
   auto props = history.getProperties();
   const size_t numProps(props.size());
@@ -1001,15 +943,14 @@ IAlgorithm_sptr Algorithm::fromHistory(const AlgorithmHistory &history) {
   root["version"] = history.version();
   root["properties"] = jsonMap;
 
-  const std::string output = writer.write(root);
+  const std::string output = Mantid::JsonHelpers::jsonToString(root);
   IAlgorithm_sptr alg;
 
   try {
     alg = Algorithm::fromString(output);
   } catch (std::invalid_argument &) {
-    throw std::runtime_error(
-        "Could not create algorithm from history. "
-        "Is this a child algorithm whose workspaces are not in the ADS?");
+    throw std::runtime_error("Could not create algorithm from history. "
+                             "Is this a child algorithm whose workspaces are not in the ADS?");
   }
   return alg;
 }
@@ -1025,8 +966,7 @@ IAlgorithm_sptr Algorithm::fromHistory(const AlgorithmHistory &history) {
  */
 IAlgorithm_sptr Algorithm::fromString(const std::string &input) {
   ::Json::Value root;
-  ::Json::Reader reader;
-  if (reader.parse(input, root)) {
+  if (Mantid::JsonHelpers::parse(input, &root)) {
     return fromJson(root);
   } else {
     throw std::runtime_error("Cannot create algorithm, invalid string format.");
@@ -1074,8 +1014,7 @@ void Algorithm::linkHistoryWithLastChild() {
   // iterate over the algorithms output workspaces
   const auto &algProperties = getProperties();
   for (const auto &prop : algProperties) {
-    if (prop->direction() != Kernel::Direction::Output &&
-        prop->direction() != Kernel::Direction::InOut)
+    if (prop->direction() != Kernel::Direction::Output && prop->direction() != Kernel::Direction::InOut)
       continue;
     const auto *wsProp = dynamic_cast<IWorkspaceProperty *>(prop);
     if (!wsProp)
@@ -1113,8 +1052,7 @@ void Algorithm::linkHistoryWithLastChild() {
  * is a child.
  *  @param parentHist :: the parent algorithm history object the history in.
  */
-void Algorithm::trackAlgorithmHistory(
-    std::shared_ptr<AlgorithmHistory> parentHist) {
+void Algorithm::trackAlgorithmHistory(std::shared_ptr<AlgorithmHistory> parentHist) {
   enableHistoryRecordingForChild(true);
   m_parentHistory = std::move(parentHist);
 }
@@ -1122,9 +1060,7 @@ void Algorithm::trackAlgorithmHistory(
 /** Check if we are tracking history for this algorithm
  *  @return if we are tracking the history of this algorithm
  */
-bool Algorithm::trackingHistory() {
-  return (!isChild() || m_recordHistoryForChild);
-}
+bool Algorithm::trackingHistory() { return (!isChild() || m_recordHistoryForChild); }
 
 /** Populate lists of the workspace properties for a given direction
  *  (InOut workspaces are included in both input/output)
@@ -1134,21 +1070,19 @@ bool Algorithm::trackingHistory() {
  * if the check on the workspace property value is empty. Most useful for
  * finding group workspaces that are never stored on the property
  */
-void Algorithm::findWorkspaces(WorkspaceVector &workspaces,
-                               unsigned int direction, bool checkADS) const {
-  auto workspaceFromWSProperty =
-      [](const IWorkspaceProperty &prop, const AnalysisDataServiceImpl &ads,
-         const std::string &strValue, bool checkADS) {
-        auto workspace = prop.getWorkspace();
-        if (workspace)
-          return workspace;
+void Algorithm::findWorkspaces(WorkspaceVector &workspaces, unsigned int direction, bool checkADS) const {
+  auto workspaceFromWSProperty = [](const IWorkspaceProperty &prop, const AnalysisDataServiceImpl &ads,
+                                    const std::string &strValue, bool checkADS) {
+    auto workspace = prop.getWorkspace();
+    if (workspace)
+      return workspace;
 
-        // Empty string indicates optional workspace
-        if (checkADS && !strValue.empty()) {
-          return ads.retrieve(strValue);
-        }
-        return Workspace_sptr();
-      };
+    // Empty string indicates optional workspace
+    if (checkADS && !strValue.empty()) {
+      return ads.retrieve(strValue);
+    }
+    return Workspace_sptr();
+  };
   auto appendWS = [&workspaces](const Workspace_sptr &workspace) {
     if (!workspace)
       return false;
@@ -1286,13 +1220,11 @@ bool Algorithm::checkGroups() {
         // Check for matching group size
         if (m_groupSize > 1)
           if (thisGroup.size() != m_groupSize)
-            throw std::invalid_argument(
-                "Input WorkspaceGroups are not of the same size.");
+            throw std::invalid_argument("Input WorkspaceGroups are not of the same size.");
 
         // Are ALL the names similar?
         if (wsGroup)
-          m_groupsHaveSimilarNames =
-              m_groupsHaveSimilarNames && wsGroup->areNamesSimilar();
+          m_groupsHaveSimilarNames = m_groupsHaveSimilarNames && wsGroup->areNamesSimilar();
 
         // Save the size for the next group
         m_groupSize = thisGroup.size();
@@ -1312,8 +1244,7 @@ bool Algorithm::checkGroups() {
  *
  * @return whether processGroups succeeds.
  */
-bool Algorithm::doCallProcessGroups(
-    Mantid::Types::Core::DateAndTime &startTime) {
+bool Algorithm::doCallProcessGroups(Mantid::Types::Core::DateAndTime &startTime) {
   // In the base implementation of processGroups, this normally calls
   // this->execute() again on each member of the group. Other algorithms may
   // choose to override that behavior (examples: CompareWorkspaces,
@@ -1333,14 +1264,12 @@ bool Algorithm::doCallProcessGroups(
     // AlgorithmMonitor).
     setResultState(ResultState::Failed);
     m_runningAsync = false;
-    notificationCenter().postNotification(
-        new ErrorNotification(this, ex.what()));
+    notificationCenter().postNotification(new ErrorNotification(this, ex.what()));
     throw;
   } catch (...) {
     setResultState(ResultState::Failed);
     m_runningAsync = false;
-    notificationCenter().postNotification(new ErrorNotification(
-        this, "UNKNOWN Exception caught from processGroups"));
+    notificationCenter().postNotification(new ErrorNotification(this, "UNKNOWN Exception caught from processGroups"));
     throw;
   }
 
@@ -1351,8 +1280,7 @@ bool Algorithm::doCallProcessGroups(
     // Get how long this algorithm took to run
     const float duration = timer.elapsed();
 
-    m_history = std::make_shared<AlgorithmHistory>(this, startTime, duration,
-                                                   ++g_execCount);
+    m_history = std::make_shared<AlgorithmHistory>(this, startTime, duration, ++g_execCount);
     if (trackingHistory() && m_history) {
       // find any further outputs created by the execution
       WorkspaceVector outputWorkspaces;
@@ -1372,8 +1300,7 @@ bool Algorithm::doCallProcessGroups(
     setResultState(ResultState::Failed);
   }
 
-  notificationCenter().postNotification(
-      new FinishedNotification(this, isExecuted()));
+  notificationCenter().postNotification(new FinishedNotification(this, isExecuted()));
 
   return completed;
 }
@@ -1385,8 +1312,7 @@ bool Algorithm::doCallProcessGroups(
  *  @param outputWorkspaces :: A reference to a vector for the output
  * workspaces. Used in the non-child case.
  */
-void Algorithm::fillHistory(
-    const std::vector<Workspace_sptr> &outputWorkspaces) {
+void Algorithm::fillHistory(const std::vector<Workspace_sptr> &outputWorkspaces) {
   // this is not a child algorithm. Add the history algorithm to the
   // WorkspaceHistory object.
   if (!isChild()) {
@@ -1457,10 +1383,9 @@ bool Algorithm::processGroups() {
   // Go through each entry in the input group(s)
   for (size_t entry = 0; entry < m_groupSize; entry++) {
     // use create Child Algorithm that look like this one
-    Algorithm_sptr alg_sptr = this->createChildAlgorithm(
-        this->name(), progress_proportion * static_cast<double>(entry),
-        progress_proportion * (1 + static_cast<double>(entry)),
-        this->isLogging(), this->version());
+    Algorithm_sptr alg_sptr = this->createChildAlgorithm(this->name(), progress_proportion * static_cast<double>(entry),
+                                                         progress_proportion * (1 + static_cast<double>(entry)),
+                                                         this->isLogging(), this->version());
     // Make a child algorithm and turn off history recording for it, but always
     // store result in the ADS
     alg_sptr->setChild(true);
@@ -1468,7 +1393,7 @@ bool Algorithm::processGroups() {
     alg_sptr->enableHistoryRecordingForChild(false);
     alg_sptr->setRethrows(true);
 
-    IAlgorithm *alg = alg_sptr.get();
+    Algorithm *alg = alg_sptr.get();
     // Set all non-workspace properties
     this->copyNonWorkspaceProperties(alg, int(entry) + 1);
 
@@ -1496,9 +1421,8 @@ bool Algorithm::processGroups() {
             // with all N inputs of the second group. In this case processGroup
             // needs to be overridden, which is currently not possible in
             // python.
-            throw std::runtime_error(
-                "Unable to process over groups; consider passing workspaces "
-                "one-by-one or override processGroup method of the algorithm.");
+            throw std::runtime_error("Unable to process over groups; consider passing workspaces "
+                                     "one-by-one or override processGroup method of the algorithm.");
           }
         }
         // Append the names together
@@ -1523,32 +1447,27 @@ bool Algorithm::processGroups() {
     std::vector<std::string> outputWSNames(m_pureOutputWorkspaceProps.size());
     // ---------- Set all the output workspaces ----------------------------
     for (size_t owp = 0; owp < m_pureOutputWorkspaceProps.size(); owp++) {
-      if (auto *prop =
-              dynamic_cast<Property *>(m_pureOutputWorkspaceProps[owp])) {
+      if (auto *prop = dynamic_cast<Property *>(m_pureOutputWorkspaceProps[owp])) {
         // Default name = "in1_in2_out"
         const std::string inName = prop->value();
         if (inName.empty())
           continue;
         std::string outName;
         if (m_groupsHaveSimilarNames) {
-          outName.append(inName).append("_").append(
-              Strings::toString(entry + 1));
+          outName.append(inName).append("_").append(Strings::toString(entry + 1));
         } else {
           outName.append(outputBaseName).append("_").append(inName);
         }
 
-        auto inputProp = std::find_if(m_inputWorkspaceProps.begin(),
-                                      m_inputWorkspaceProps.end(),
-                                      WorkspacePropertyValueIs(inName));
+        auto inputProp =
+            std::find_if(m_inputWorkspaceProps.begin(), m_inputWorkspaceProps.end(), WorkspacePropertyValueIs(inName));
 
         // Overwrite workspaces in any input property if they have the same
         // name as an output (i.e. copy name button in algorithm dialog used)
         // (only need to do this for a single input, multiple will be handled
         // by ADS)
         if (inputProp != m_inputWorkspaceProps.end()) {
-          const auto &inputGroup =
-              m_unrolledInputWorkspaces[inputProp -
-                                        m_inputWorkspaceProps.begin()];
+          const auto &inputGroup = m_unrolledInputWorkspaces[inputProp - m_inputWorkspaceProps.begin()];
           if (!inputGroup.empty())
             outName = inputGroup[entry]->getName();
         }
@@ -1569,8 +1488,7 @@ bool Algorithm::processGroups() {
       alg->execute();
     } catch (std::exception &e) {
       std::ostringstream msg;
-      msg << "Execution of " << this->name() << " for group entry "
-          << (entry + 1) << " failed: ";
+      msg << "Execution of " << this->name() << " for group entry " << (entry + 1) << " failed: ";
       msg << e.what(); // Add original message
       throw std::runtime_error(msg.str());
     }
@@ -1626,9 +1544,7 @@ void Algorithm::copyNonWorkspaceProperties(IAlgorithm *alg, int periodNum) {
  *  @param propertyValue :: value  of the property
  *  @param periodNum :: period number
  */
-void Algorithm::setOtherProperties(IAlgorithm *alg,
-                                   const std::string &propertyName,
-                                   const std::string &propertyValue,
+void Algorithm::setOtherProperties(IAlgorithm *alg, const std::string &propertyName, const std::string &propertyValue,
                                    int periodNum) {
   (void)periodNum; // Avoid compiler warning
   if (alg)
@@ -1660,9 +1576,7 @@ struct AsyncFlagHolder {
   /** Constructor
    * @param A :: reference to the running flag
    */
-  explicit AsyncFlagHolder(bool &running_flag) : m_running_flag(running_flag) {
-    m_running_flag = true;
-  }
+  explicit AsyncFlagHolder(bool &running_flag) : m_running_flag(running_flag) { m_running_flag = true; }
   /// Destructor
   ~AsyncFlagHolder() { m_running_flag = false; }
 
@@ -1680,8 +1594,7 @@ private:
  */
 Poco::ActiveResult<bool> Algorithm::executeAsync() {
   m_executeAsync =
-      std::make_unique<Poco::ActiveMethod<bool, Poco::Void, Algorithm>>(
-          this, &Algorithm::executeAsyncImpl);
+      std::make_unique<Poco::ActiveMethod<bool, Poco::Void, Algorithm>>(this, &Algorithm::executeAsyncImpl);
   return (*m_executeAsync)(Poco::Void());
 }
 
@@ -1707,10 +1620,8 @@ Poco::NotificationCenter &Algorithm::notificationCenter() const {
 /** Handles and rescales child algorithm progress notifications.
  *  @param pNf :: The progress notification from the child algorithm.
  */
-void Algorithm::handleChildProgressNotification(
-    const Poco::AutoPtr<ProgressNotification> &pNf) {
-  double p = m_startChildProgress +
-             (m_endChildProgress - m_startChildProgress) * pNf->progress;
+void Algorithm::handleChildProgressNotification(const Poco::AutoPtr<ProgressNotification> &pNf) {
+  double p = m_startChildProgress + (m_endChildProgress - m_startChildProgress) * pNf->progress;
 
   progress(p, pNf->message);
 }
@@ -1720,10 +1631,8 @@ void Algorithm::handleChildProgressNotification(
  */
 const Poco::AbstractObserver &Algorithm::progressObserver() const {
   if (!m_progressObserver)
-    m_progressObserver =
-        std::make_unique<Poco::NObserver<Algorithm, ProgressNotification>>(
-            *const_cast<Algorithm *>(this),
-            &Algorithm::handleChildProgressNotification);
+    m_progressObserver = std::make_unique<Poco::NObserver<Algorithm, ProgressNotification>>(
+        *const_cast<Algorithm *>(this), &Algorithm::handleChildProgressNotification);
 
   return *m_progressObserver;
 }
@@ -1792,8 +1701,7 @@ Report that the algorithm has completed.
 @param duration : Algorithm duration
 @param groupProcessing : We have been processing via processGroups if true.
 */
-void Algorithm::reportCompleted(const double &duration,
-                                const bool groupProcessing) {
+void Algorithm::reportCompleted(const double &duration, const bool groupProcessing) {
   std::string optionalMessage;
   if (groupProcessing) {
     optionalMessage = ". Processed as a workspace group";
@@ -1810,15 +1718,13 @@ void Algorithm::reportCompleted(const double &duration,
         msg << minutes << " minutes ";
         seconds = seconds - static_cast<double>(minutes) * 60.;
       }
-      msg << std::fixed << std::setprecision(2) << seconds << " seconds"
-          << optionalMessage;
+      msg << std::fixed << std::setprecision(2) << seconds << " seconds" << optionalMessage;
       getLogger().notice(msg.str());
     }
   }
 
   else {
-    getLogger().debug() << name() << " finished with isChild = " << isChild()
-                        << '\n';
+    getLogger().debug() << name() << " finished with isChild = " << isChild() << '\n';
   }
   setExecutionState(ExecutionState::Finished);
 }
@@ -1829,28 +1735,22 @@ void Algorithm::registerFeatureUsage() const {
   if (UsageService::Instance().isEnabled()) {
     std::ostringstream oss;
     oss << this->name() << ".v" << this->version();
-    UsageService::Instance().registerFeatureUsage(FeatureType::Algorithm,
-                                                  oss.str(), isChild());
+    UsageService::Instance().registerFeatureUsage(FeatureType::Algorithm, oss.str(), isChild());
   }
 }
 
 /** Enable or disable Logging of start and end messages
 @param enabled : true to enable logging, false to disable
 */
-void Algorithm::setAlgStartupLogging(const bool enabled) {
-  m_isAlgStartupLoggingEnabled = enabled;
-}
+void Algorithm::setAlgStartupLogging(const bool enabled) { m_isAlgStartupLoggingEnabled = enabled; }
 
 /** return the state of logging of start and end messages
 @returns : true to logging is enabled
 */
-bool Algorithm::getAlgStartupLogging() const {
-  return m_isAlgStartupLoggingEnabled;
-}
+bool Algorithm::getAlgStartupLogging() const { return m_isAlgStartupLoggingEnabled; }
 
 bool Algorithm::isCompoundProperty(const std::string &name) const {
-  return std::find(m_reservedList.cbegin(), m_reservedList.cend(), name) !=
-         m_reservedList.cend();
+  return std::find(m_reservedList.cbegin(), m_reservedList.cend(), name) != m_reservedList.cend();
 }
 
 /// Runs the algorithm with the specified execution mode.
@@ -1864,8 +1764,7 @@ void Algorithm::exec(Parallel::ExecutionMode executionMode) {
   case Parallel::ExecutionMode::MasterOnly:
     return execMasterOnly();
   default:
-    throw(std::runtime_error("Algorithm " + name() +
-                             " does not support execution mode " +
+    throw(std::runtime_error("Algorithm " + name() + " does not support execution mode " +
                              Parallel::toString(executionMode)));
   }
 }
@@ -1911,22 +1810,19 @@ Parallel::ExecutionMode Algorithm::getExecutionMode() const {
     throw(std::runtime_error(error));
   }
   if (executionMode == Parallel::ExecutionMode::Serial) {
-    std::string error(Parallel::toString(executionMode) +
-                      " is not a valid *parallel* execution mode.");
+    std::string error(Parallel::toString(executionMode) + " is not a valid *parallel* execution mode.");
     getLogger().error() << error << "\n";
     throw(std::runtime_error(error));
   }
-  getLogger().information()
-      << "MPI Rank " << communicator().rank() << " running with "
-      << Parallel::toString(executionMode) << '\n';
+  getLogger().information() << "MPI Rank " << communicator().rank() << " running with "
+                            << Parallel::toString(executionMode) << '\n';
   return executionMode;
 }
 
 /** Get map of storage modes of all input workspaces.
  *
  * The key to the name is the property name of the respective workspace. */
-std::map<std::string, Parallel::StorageMode>
-Algorithm::getInputWorkspaceStorageModes() const {
+std::map<std::string, Parallel::StorageMode> Algorithm::getInputWorkspaceStorageModes() const {
   std::map<std::string, Parallel::StorageMode> map;
   for (const auto &wsProp : m_inputWorkspaceProps) {
     // This is the reverse cast of what is done in cacheWorkspaceProperties(),
@@ -1938,11 +1834,9 @@ Algorithm::getInputWorkspaceStorageModes() const {
     else if (!wsProp->isOptional())
       map.emplace(prop.name(), Parallel::StorageMode::MasterOnly);
   }
-  getLogger().information()
-      << "Input workspaces for determining execution mode:\n";
+  getLogger().information() << "Input workspaces for determining execution mode:\n";
   for (const auto &item : map)
-    getLogger().information() << "  " << item.first << " --- "
-                              << Parallel::toString(item.second) << '\n';
+    getLogger().information() << "  " << item.first << " --- " << Parallel::toString(item.second) << '\n';
   return map;
 }
 
@@ -1952,8 +1846,8 @@ Algorithm::getInputWorkspaceStorageModes() const {
  * inheriting from Algorithm can re-implement this if they support execution
  * with multiple MPI ranks. May not return ExecutionMode::Serial, because that
  * is not a "parallel" execution mode. */
-Parallel::ExecutionMode Algorithm::getParallelExecutionMode(
-    const std::map<std::string, Parallel::StorageMode> &storageModes) const {
+Parallel::ExecutionMode
+Algorithm::getParallelExecutionMode(const std::map<std::string, Parallel::StorageMode> &storageModes) const {
   UNUSED_ARG(storageModes)
   // By default no parallel execution is possible.
   return Parallel::ExecutionMode::Invalid;
@@ -1973,9 +1867,7 @@ void Algorithm::setupSkipValidationMasterOnly() {
 }
 
 /// Returns a const reference to the (MPI) communicator of the algorithm.
-const Parallel::Communicator &Algorithm::communicator() const {
-  return *m_communicator;
-}
+const Parallel::Communicator &Algorithm::communicator() const { return *m_communicator; }
 
 /// Sets the (MPI) communicator of the algorithm.
 void Algorithm::setCommunicator(const Parallel::Communicator &communicator) {
@@ -1986,48 +1878,259 @@ void Algorithm::setCommunicator(const Parallel::Communicator &communicator) {
 // Algorithm's inner classes
 //---------------------------------------------------------------------------
 
-Algorithm::AlgorithmNotification::AlgorithmNotification(
-    const Algorithm *const alg)
+Algorithm::AlgorithmNotification::AlgorithmNotification(const Algorithm *const alg)
     : Poco::Notification(), m_algorithm(alg) {}
 
-const IAlgorithm *Algorithm::AlgorithmNotification::algorithm() const {
-  return m_algorithm;
-}
+const IAlgorithm *Algorithm::AlgorithmNotification::algorithm() const { return m_algorithm; }
 
-Algorithm::StartedNotification::StartedNotification(const Algorithm *const alg)
-    : AlgorithmNotification(alg) {}
-std::string Algorithm::StartedNotification::name() const {
-  return "StartedNotification";
-} ///< class name
+Algorithm::StartedNotification::StartedNotification(const Algorithm *const alg) : AlgorithmNotification(alg) {}
+std::string Algorithm::StartedNotification::name() const { return "StartedNotification"; } ///< class name
 
-Algorithm::FinishedNotification::FinishedNotification(
-    const Algorithm *const alg, bool res)
+Algorithm::FinishedNotification::FinishedNotification(const Algorithm *const alg, bool res)
     : AlgorithmNotification(alg), success(res) {}
-std::string Algorithm::FinishedNotification::name() const {
-  return "FinishedNotification";
+std::string Algorithm::FinishedNotification::name() const { return "FinishedNotification"; }
+
+Algorithm::ProgressNotification::ProgressNotification(const Algorithm *const alg, double p, std::string msg,
+                                                      double estimatedTime, int progressPrecision)
+    : AlgorithmNotification(alg), progress(p), message(std::move(msg)), estimatedTime(estimatedTime),
+      progressPrecision(progressPrecision) {}
+
+std::string Algorithm::ProgressNotification::name() const { return "ProgressNotification"; }
+
+Algorithm::ErrorNotification::ErrorNotification(const Algorithm *const alg, std::string str)
+    : AlgorithmNotification(alg), what(std::move(str)) {}
+
+std::string Algorithm::ErrorNotification::name() const { return "ErrorNotification"; }
+
+const char *Algorithm::CancelException::what() const noexcept { return "Algorithm terminated"; }
+
+/** Add a property to the list of managed properties
+ *  @param p :: The property object to add
+ *  @param doc :: A description of the property that may be displayed to users
+ *  @throw Exception::ExistsError if a property with the given name already
+ * exists
+ */
+void Algorithm::declareProperty(std::unique_ptr<Property> p, const std::string &doc) {
+  m_properties.declareProperty(std::move(p), doc);
 }
 
-Algorithm::ProgressNotification::ProgressNotification(
-    const Algorithm *const alg, double p, const std::string &msg,
-    double estimatedTime, int progressPrecision)
-    : AlgorithmNotification(alg), progress(p), message(msg),
-      estimatedTime(estimatedTime), progressPrecision(progressPrecision) {}
-
-std::string Algorithm::ProgressNotification::name() const {
-  return "ProgressNotification";
+/** Add or replace property in the list of managed properties
+ *  @param p :: The property object to add
+ *  @param doc :: A description of the property that may be displayed to users
+ */
+void Algorithm::declareOrReplaceProperty(std::unique_ptr<Property> p, const std::string &doc) {
+  m_properties.declareOrReplaceProperty(std::move(p), doc);
 }
 
-Algorithm::ErrorNotification::ErrorNotification(const Algorithm *const alg,
-                                                const std::string &str)
-    : AlgorithmNotification(alg), what(str) {}
+/** Reset property values back to initial values (blank or default values)
+ */
+void Algorithm::resetProperties() { m_properties.resetProperties(); }
 
-std::string Algorithm::ErrorNotification::name() const {
-  return "ErrorNotification";
+/** Set the ordered list of properties by one string of values, separated by
+ *semicolons.
+ *
+ * The string should be a json formatted collection of name value pairs
+ *
+ *  @param propertiesJson :: The string of property values
+ *  @param ignoreProperties :: A set of names of any properties NOT to set
+ *      from the propertiesArray
+ *  @param createMissing :: If the property does not exist then create it
+ *  @throw invalid_argument if error in parameters
+ */
+void Algorithm::setProperties(const std::string &propertiesJson,
+                              const std::unordered_set<std::string> &ignoreProperties, bool createMissing) {
+  m_properties.setProperties(propertiesJson, ignoreProperties, createMissing);
 }
 
-const char *Algorithm::CancelException::what() const noexcept {
-  return "Algorithm terminated";
+/** Sets all the declared properties from a json object
+  @param jsonValue :: A json name value pair collection
+  @param ignoreProperties :: A set of names of any properties NOT to set
+  from the propertiesArray
+  @param createMissing :: If the property does not exist then create it
+*/
+void Algorithm::setProperties(const ::Json::Value &jsonValue, const std::unordered_set<std::string> &ignoreProperties,
+                              bool createMissing) {
+  m_properties.setProperties(jsonValue, ignoreProperties, createMissing);
 }
+
+/** Sets all the declared properties from a string.
+  @param propertiesString :: A list of name = value pairs separated by a
+    semicolon
+  @param ignoreProperties :: A set of names of any properties NOT to set
+  from the propertiesArray
+*/
+void Algorithm::setPropertiesWithString(const std::string &propertiesString,
+                                        const std::unordered_set<std::string> &ignoreProperties) {
+  m_properties.setPropertiesWithString(propertiesString, ignoreProperties);
+}
+
+/** Set the value of a property by string
+ *  N.B. bool properties must be set using 1/0 rather than true/false
+ *  @param name :: The name of the property (case insensitive)
+ *  @param value :: The value to assign to the property
+ *  @throw Exception::NotFoundError if the named property is unknown
+ *  @throw std::invalid_argument If the value is not valid for the property
+ * given
+ */
+void Algorithm::setPropertyValue(const std::string &name, const std::string &value) {
+  m_properties.setPropertyValue(name, value);
+  this->afterPropertySet(name);
+}
+
+/** Set the value of a property by Json::Value object
+ *  @param name :: The name of the property (case insensitive)
+ *  @param value :: The value to assign to the property
+ *  @throw Exception::NotFoundError if the named property is unknown
+ *  @throw std::invalid_argument If the value is not valid for the property
+ * given
+ */
+void Algorithm::setPropertyValueFromJson(const std::string &name, const Json::Value &value) {
+  m_properties.setPropertyValueFromJson(name, value);
+  this->afterPropertySet(name);
+}
+
+/** Set the value of a property by an index
+ *  N.B. bool properties must be set using 1/0 rather than true/false
+ *  @param index :: The index of the property to assign
+ *  @param value :: The value to assign to the property
+ *  @throw std::runtime_error if the property index is too high
+ */
+void Algorithm::setPropertyOrdinal(const int &index, const std::string &value) {
+  m_properties.setPropertyOrdinal(index, value);
+  this->afterPropertySet(m_properties.getPointerToPropertyOrdinal(index)->name());
+}
+
+/** Checks whether the named property is already in the list of managed
+ * property.
+ *  @param name :: The name of the property (case insensitive)
+ *  @return True if the property is already stored
+ */
+bool Algorithm::existsProperty(const std::string &name) const { return m_properties.existsProperty(name); }
+
+/** Validates all the properties in the collection
+ *  @return True if all properties have a valid value
+ */
+bool Algorithm::validateProperties() const { return m_properties.validateProperties(); }
+
+/**
+ * Count the number of properties under management
+ * @returns The number of properties being managed
+ */
+size_t Algorithm::propertyCount() const { return m_properties.propertyCount(); }
+
+/** Get the value of a property as a string
+ *  @param name :: The name of the property (case insensitive)
+ *  @return The value of the named property
+ *  @throw Exception::NotFoundError if the named property is unknown
+ */
+std::string Algorithm::getPropertyValue(const std::string &name) const { return m_properties.getPropertyValue(name); }
+
+/** Get a property by name
+ *  @param name :: The name of the property (case insensitive)
+ *  @return A pointer to the named property
+ *  @throw Exception::NotFoundError if the named property is unknown
+ */
+Property *Algorithm::getPointerToProperty(const std::string &name) const {
+  return m_properties.getPointerToProperty(name);
+}
+
+/** Get a property by an index
+ *  @param index :: The name of the property (case insensitive)
+ *  @return A pointer to the named property
+ *  @throw std::runtime_error if the property index is too high
+ */
+Property *Algorithm::getPointerToPropertyOrdinal(const int &index) const {
+  return m_properties.getPointerToPropertyOrdinal(index);
+}
+
+/** Get the list of managed properties.
+ *  The properties will be stored in the order that they were declared.
+ *  @return A vector holding pointers to the list of properties
+ */
+const std::vector<Property *> &Algorithm::getProperties() const { return m_properties.getProperties(); }
+
+/**
+ * Return the list of declared property names.
+ * @return A vector holding strings of property names
+ */
+std::vector<std::string> Algorithm::getDeclaredPropertyNames() const noexcept {
+  return m_properties.getDeclaredPropertyNames();
+}
+
+/** Get the value of a property. Allows you to assign directly to a variable of
+ *the property's type
+ *  (if a supported type).
+ *
+ *  *** This method does NOT work for assigning to an existing std::string.
+ *      In this case you have to use getPropertyValue() instead.
+ *      Note that you can, though, construct a local string variable by writing,
+ *      e.g. std::string s = getProperty("myProperty"). ***
+ *
+ *  @param name :: The name of the property
+ *  @return The value of the property. Will be cast to the desired type (if a
+ *supported type).
+ *  @throw std::runtime_error If an attempt is made to assign a property to a
+ *different type
+ *  @throw Exception::NotFoundError If the property requested does not exist
+ */
+IPropertyManager::TypedValue Algorithm::getProperty(const std::string &name) const {
+  return m_properties.getProperty(name);
+}
+
+/**
+ * @param name
+ * @return True if the property is its default value.
+ */
+bool Algorithm::isDefault(const std::string &name) const {
+  return m_properties.getPointerToProperty(name)->isDefault();
+}
+
+/**
+ * Return the property manager serialized as a string.
+ * The format is propName=value,propName=value,propName=value
+ * @param withDefaultValues :: If true then the value of default parameters will
+ * be included
+ * @returns A stringized version of the manager
+ */
+std::string Algorithm::asString(bool withDefaultValues) const { return m_properties.asString(withDefaultValues); }
+/**
+ * Return the property manager serialized as a json object.
+ * @param withDefaultValues :: If true then the value of default parameters will
+ * be included
+ * @returns A jsonValue of the manager
+ */
+::Json::Value Algorithm::asJson(bool withDefaultValues) const { return m_properties.asJson(withDefaultValues); }
+
+/**
+ * Removes the property from properties map.
+ * @param name :: Name of the property to be removed.
+ *  @param delproperty :: if true, delete the named property
+ */
+void Algorithm::removeProperty(const std::string &name, const bool delproperty) {
+  m_properties.removeProperty(name, delproperty);
+}
+
+/**
+ * Removes a property from the properties map by index and return a pointer to it
+ * @param index :: index of the property to be removed
+ * @returns :: pointer to the removed property if found, NULL otherwise
+ */
+std::unique_ptr<Kernel::Property> Algorithm::takeProperty(const size_t index) {
+  return m_properties.takeProperty(index);
+}
+
+/**
+ * Clears all properties under management
+ */
+void Algorithm::clear() { m_properties.clear(); }
+
+/**
+ * Override this method to perform a custom action right after a property was
+ * set.
+ * The argument is the property name. Default - do nothing.
+ * @param name :: A property name.
+ */
+void Algorithm::afterPropertySet(const std::string &name) { m_properties.afterPropertySet(name); }
 
 } // namespace API
 
@@ -2042,16 +2145,12 @@ namespace Kernel {
  * @returns A pointer to an algorithm
  */
 template <>
-MANTID_API_DLL API::IAlgorithm_sptr
-IPropertyManager::getValue<API::IAlgorithm_sptr>(
-    const std::string &name) const {
-  auto *prop = dynamic_cast<PropertyWithValue<API::IAlgorithm_sptr> *>(
-      getPointerToProperty(name));
+MANTID_API_DLL API::IAlgorithm_sptr IPropertyManager::getValue<API::IAlgorithm_sptr>(const std::string &name) const {
+  auto *prop = dynamic_cast<PropertyWithValue<API::IAlgorithm_sptr> *>(getPointerToProperty(name));
   if (prop) {
     return *prop;
   } else {
-    std::string message = "Attempt to assign property " + name +
-                          " to incorrect type. Expected shared_ptr<IAlgorithm>";
+    std::string message = "Attempt to assign property " + name + " to incorrect type. Expected shared_ptr<IAlgorithm>";
     throw std::runtime_error(message);
   }
 }
@@ -2064,19 +2163,17 @@ IPropertyManager::getValue<API::IAlgorithm_sptr>(
  */
 template <>
 MANTID_API_DLL API::IAlgorithm_const_sptr
-IPropertyManager::getValue<API::IAlgorithm_const_sptr>(
-    const std::string &name) const {
-  auto *prop = dynamic_cast<PropertyWithValue<API::IAlgorithm_sptr> *>(
-      getPointerToProperty(name));
+IPropertyManager::getValue<API::IAlgorithm_const_sptr>(const std::string &name) const {
+  auto *prop = dynamic_cast<PropertyWithValue<API::IAlgorithm_sptr> *>(getPointerToProperty(name));
   if (prop) {
     return prop->operator()();
   } else {
     std::string message =
-        "Attempt to assign property " + name +
-        " to incorrect type. Expected const shared_ptr<IAlgorithm>";
+        "Attempt to assign property " + name + " to incorrect type. Expected const shared_ptr<IAlgorithm>";
     throw std::runtime_error(message);
   }
 }
+
 } // namespace Kernel
 
 } // namespace Mantid

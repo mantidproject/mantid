@@ -30,19 +30,11 @@ Examples
 Running TubeCalibDemoWish_Simple.py
 ###################################
 
-Open Script Window Console (MantidPlot: Python Window **F3**)
-
 .. image:: ../../images/MultipleScriptsZoomed.png
 			:alt: center
 			:width: 300px
 
-From its Menu->File->Open File, select
-scripts/Calibration/Examples/TubeCalibDemoWish_Simple.py
-
-Finally, Menu->Execute->Execute_All triggers the execution of the
-example.
-
-Another possibility is to open a new file and write the following lines:
+In MantidWorkbench write the following lines in a new script:
 
 .. code-block:: python
 
@@ -65,8 +57,7 @@ Calibrated panel 03:
 Running TubeCalibDemoMaps_All.py
 ################################
 
-Open file scripts/Calibration/Examples/TubeCalibDemoMaps_All.py on
-Script Window Console or, alternatively, write the following line:
+Write the following lines:
 
 .. code-block:: python
 
@@ -90,15 +81,15 @@ calling the functions as in the following example:
 
 The results are, Uncalibrated MAPS B2 window (lower part) instrument:
 
-.. image:: ../../images/UncalibratedMAPS.png 
+.. image:: ../../images/UncalibratedMAPS.png
 			:width: 500px
- 
+
 
 Calibrated MAPS B2 window:
 
-.. image:: ../../images/CalibratedMAPS.png 
+.. image:: ../../images/CalibratedMAPS.png
 			:width: 500px
- 
+
 Running TubeCalibDemoMerlin.py
 ##############################
 
@@ -143,7 +134,7 @@ the panels.
 The picture below show part of two panels that result from the
 calibration (they are rotated):
 
-.. image:: ../../images/CalibratedWish5Panels.jpg 
+.. image:: ../../images/CalibratedWish5Panels.jpg
 			:width: 800px
 
 .. categories:: Calibration

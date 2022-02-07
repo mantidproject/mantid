@@ -18,9 +18,7 @@ class DetectorGridDefinitionTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static DetectorGridDefinitionTest *createSuite() {
-    return new DetectorGridDefinitionTest();
-  }
+  static DetectorGridDefinitionTest *createSuite() { return new DetectorGridDefinitionTest(); }
   static void destroySuite(DetectorGridDefinitionTest *suite) { delete suite; }
 
   void test_latitudeAt() {
@@ -35,8 +33,7 @@ public:
   void test_longitudeAt() {
     const auto def = makeTestDefinition();
     for (size_t i = 0; i < nLong(); ++i) {
-      const auto dLong =
-          (maxLong() - minLong()) / static_cast<double>(nLong() - 1);
+      const auto dLong = (maxLong() - minLong()) / static_cast<double>(nLong() - 1);
       const auto lon = static_cast<double>(i) * dLong + minLong();
       TS_ASSERT_EQUALS(def.longitudeAt(i), lon)
     }
@@ -56,14 +53,35 @@ public:
     TS_ASSERT(inArray(indices, nLat() * (nLong() - 1) + nLat() - 1))
     const auto dLat = (maxLat() - minLat()) / static_cast<double>(nLat() - 1);
     const auto lat = (maxLat() + minLat() - dLat) / 2.0;
-    const auto dLong =
-        (maxLong() - minLong()) / static_cast<double>(nLong() - 1);
+    const auto dLong = (maxLong() - minLong()) / static_cast<double>(nLong() - 1);
     const auto lon = (maxLong() + minLong() - dLong) / 2.0;
     indices = def.nearestNeighbourIndices(lat, lon);
     TS_ASSERT(inArray(indices, 37))
     TS_ASSERT(inArray(indices, 38))
     TS_ASSERT(inArray(indices, 44))
     TS_ASSERT(inArray(indices, 45))
+  }
+
+  void test_grid_too_small() {
+    TS_ASSERT_THROWS(DetectorGridDefinition(minLat(), maxLat(), 1, minLong(), maxLong(), 1),
+                     const std::runtime_error &);
+  }
+
+  void test_getNearestVertex() {
+    const auto def = makeTestDefinition();
+    auto index = def.getNearestVertex(minLat(), minLong());
+    TS_ASSERT_EQUALS(index.first, 0)
+    TS_ASSERT_EQUALS(index.second, 0)
+    index = def.getNearestVertex(maxLat(), maxLong());
+    TS_ASSERT_EQUALS(index.first, nLat() - 2)
+    TS_ASSERT_EQUALS(index.second, nLong() - 2)
+    const auto dLat = (maxLat() - minLat()) / static_cast<double>(nLat() - 1);
+    const auto lat = (maxLat() + minLat() - dLat) / 2.0;
+    const auto dLong = (maxLong() - minLong()) / static_cast<double>(nLong() - 1);
+    const auto lon = (maxLong() + minLong() - dLong) / 2.0;
+    index = def.getNearestVertex(lat, lon);
+    TS_ASSERT_EQUALS(index.first, 2)
+    TS_ASSERT_EQUALS(index.second, 5)
   }
 
   void test_size() {
@@ -74,8 +92,7 @@ public:
 
   void test_latitudes_have_zero_gap() {
     DetectorGridDefinition def(minLat(), minLat(), 2, minLong(), maxLong(), 4);
-    const auto indices =
-        def.nearestNeighbourIndices(minLat(), (minLong() + maxLong()) / 2.0);
+    const auto indices = def.nearestNeighbourIndices(minLat(), (minLong() + maxLong()) / 2.0);
     TS_ASSERT(inArray(indices, 2))
     TS_ASSERT(inArray(indices, 3))
     TS_ASSERT(inArray(indices, 4))
@@ -84,8 +101,7 @@ public:
 
   void test_longitudes_have_zero_gap() {
     DetectorGridDefinition def(minLat(), maxLat(), 4, minLong(), minLong(), 2);
-    const auto indices =
-        def.nearestNeighbourIndices((minLat() + maxLat()) / 2.0, minLong());
+    const auto indices = def.nearestNeighbourIndices((minLat() + maxLat()) / 2.0, minLong());
     TS_ASSERT(inArray(indices, 1))
     TS_ASSERT(inArray(indices, 2))
     TS_ASSERT(inArray(indices, 5))
@@ -100,8 +116,7 @@ private:
   static double maxLong() { return 2.71; }
   static size_t nLong() { return 13; }
   static DetectorGridDefinition makeTestDefinition() {
-    return DetectorGridDefinition(minLat(), maxLat(), nLat(), minLong(),
-                                  maxLong(), nLong());
+    return DetectorGridDefinition(minLat(), maxLat(), nLat(), minLong(), maxLong(), nLong());
   }
 
   static bool inArray(const std::array<size_t, 4> &a, const size_t i) {

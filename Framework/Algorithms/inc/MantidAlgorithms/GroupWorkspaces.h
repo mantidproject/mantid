@@ -34,20 +34,15 @@ public:
 
   /// Algorithm's version for identification overriding a virtual method
   int version() const override { return 1; }
-  const std::vector<std::string> seeAlso() const override {
-    return {"UnGroupWorkspace"};
-  }
+  const std::vector<std::string> seeAlso() const override { return {"UnGroupWorkspace"}; }
   /// Algorithm's category for identification overriding a virtual method
-  const std::string category() const override {
-    return "Transforms\\Grouping;Utility\\Workspaces";
-  }
+  const std::string category() const override { return "Transforms\\Grouping;Utility\\Workspaces"; }
 
   std::map<std::string, std::string> validateInputs() override;
 
 protected:
-  Parallel::ExecutionMode getParallelExecutionMode(
-      const std::map<std::string, Parallel::StorageMode> &storageModes)
-      const override;
+  Parallel::ExecutionMode
+  getParallelExecutionMode(const std::map<std::string, Parallel::StorageMode> &storageModes) const override;
 
 private:
   /// Overridden Init method

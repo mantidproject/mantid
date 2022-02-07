@@ -22,10 +22,8 @@ namespace Converters {
  * The type of conversion is specified by another struct/class that
  * contains a static member create.
  */
-template <typename ElementType, typename ConversionPolicy>
-struct CArrayToNDArray {
-  inline PyObject *operator()(const ElementType *carray, const int ndims,
-                              Py_intptr_t *dims) const {
+template <typename ElementType, typename ConversionPolicy> struct CArrayToNDArray {
+  inline PyObject *operator()(const ElementType *carray, const int ndims, Py_intptr_t *dims) const {
     // Round about way of calling the wrapNDArray template function that is
     // defined
     // in the cpp file

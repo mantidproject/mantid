@@ -11,8 +11,8 @@
 #include <cxxtest/TestSuite.h>
 
 #include "MantidDataObjects/MDHistoWorkspace.h"
+#include "MantidFrameworkTestHelpers/BinaryOperationMDTestHelper.h"
 #include "MantidMDAlgorithms/LogarithmMD.h"
-#include "MantidTestHelpers/BinaryOperationMDTestHelper.h"
 
 using namespace Mantid;
 using namespace Mantid::MDAlgorithms;
@@ -35,13 +35,9 @@ public:
 
   void test_histo_with_not_Natural() {
     MDHistoWorkspace_sptr out;
-    out = UnaryOperationMDTestHelper::doTest("LogarithmMD", "histo", "out",
-                                             true, "Natural", "0");
+    out = UnaryOperationMDTestHelper::doTest("LogarithmMD", "histo", "out", true, "Natural", "0");
     TS_ASSERT_DELTA(out->getSignalAt(0), std::log10(2.0), 1e-5);
   }
 
-  void test_event_fails() {
-    UnaryOperationMDTestHelper::doTest("LogarithmMD", "event", "out",
-                                       false /* fails*/);
-  }
+  void test_event_fails() { UnaryOperationMDTestHelper::doTest("LogarithmMD", "event", "out", false /* fails*/); }
 };

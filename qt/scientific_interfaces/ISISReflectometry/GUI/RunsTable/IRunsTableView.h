@@ -12,8 +12,7 @@ namespace MantidQt {
 namespace CustomInterfaces {
 namespace ISISReflectometry {
 
-class RunsTableViewSubscriber
-    : public MantidQt::MantidWidgets::Batch::JobTreeViewSubscriber {
+class RunsTableViewSubscriber : public MantidQt::MantidWidgets::Batch::JobTreeViewSubscriber {
 public:
   virtual void notifyResumeReductionRequested() = 0;
   virtual void notifyPauseReductionRequested() = 0;

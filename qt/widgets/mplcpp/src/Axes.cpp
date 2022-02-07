@@ -11,9 +11,7 @@
 #include "MantidPythonInterface/core/ErrorHandling.h"
 #include "MantidPythonInterface/core/VersionCompat.h"
 
-namespace MantidQt {
-namespace Widgets {
-namespace MplCpp {
+namespace MantidQt::Widgets::MplCpp {
 
 using Mantid::PythonInterface::callMethodNoCheck;
 using Mantid::PythonInterface::GlobalInterpreterLock;
@@ -28,9 +26,7 @@ namespace {
  * @param pystr A Python string object. This is not checked
  * @return A new QString
  */
-QString toQString(const Python::Object &pystr) {
-  return QString::fromLatin1(TO_CSTRING(pystr.ptr()));
-}
+QString toQString(const Python::Object &pystr) { return QString::fromLatin1(TO_CSTRING(pystr.ptr())); }
 
 /**
  * Retrieve axes limits from an axes object as C++ tuple
@@ -38,14 +34,10 @@ QString toQString(const Python::Object &pystr) {
  * @param method The accessor name
  * @return A 2-tuple of the limits values
  */
-std::tuple<double, double> limitsToTuple(const Python::Object &axes,
-                                         const char *method) {
-  auto toDouble = [](const Python::Object &value) {
-    return PyFloat_AsDouble(value.ptr());
-  };
+std::tuple<double, double> limitsToTuple(const Python::Object &axes, const char *method) {
+  auto toDouble = [](const Python::Object &value) { return PyFloat_AsDouble(value.ptr()); };
   auto limits = axes.attr(method)();
-  return std::make_tuple<double, double>(toDouble(limits[0]),
-                                         toDouble(limits[1]));
+  return std::make_tuple<double, double>(toDouble(limits[0]), toDouble(limits[1]));
 }
 
 } // namespace
@@ -87,8 +79,7 @@ void Axes::forEachArtist(const char *containerAttr, const ArtistOperation &op) {
  */
 void Axes::removeArtists(const char *containerAttr, const QString &label) {
   GlobalInterpreterLock lock;
-  const auto lineNameAsUnicode =
-      Python::NewRef(PyUnicode_FromString(label.toLatin1().constData()));
+  const auto lineNameAsUnicode = Python::NewRef(PyUnicode_FromString(label.toLatin1().constData()));
   try {
     const auto container = pyobj().attr(containerAttr);
     auto containerLength = Python::Len(container);
@@ -111,24 +102,40 @@ void Axes::removeArtists(const char *containerAttr, const QString &label) {
  * @brief Set the X-axis label
  * @param label String for the axis label
  */
-void Axes::setXLabel(const char *label) {
-  callMethodNoCheck<void, const char *>(pyobj(), "set_xlabel", label);
-}
+void Axes::setXLabel(const char *label) { callMethodNoCheck<void, const char *>(pyobj(), "set_xlabel", label); }
 
 /**
  * @brief Set the Y-axis label
  * @param label String for the axis label
  */
-void Axes::setYLabel(const char *label) {
-  callMethodNoCheck<void, const char *>(pyobj(), "set_ylabel", label);
-}
+void Axes::setYLabel(const char *label) { callMethodNoCheck<void, const char *>(pyobj(), "set_ylabel", label); }
 
 /**
  * @brief Set the title
  * @param label String for the title label
  */
-void Axes::setTitle(const char *label) {
-  callMethodNoCheck<void, const char *>(pyobj(), "set_title", label);
+void Axes::setTitle(const char *label) { callMethodNoCheck<void, const char *>(pyobj(), "set_title", label); }
+
+/**
+ * Format the tick labels on an axis or axes
+ * @param char* axis :: [ 'x' | 'y' | 'both' ]
+ * @param char* style :: [ 'sci' (or 'scientific') | 'plain' ] plain turns off
+ * scientific notation
+ * @param bool useOffset :: True, the offset will be
+ * calculated as needed, False no offset will be used
+ */
+void Axes::tickLabelFormat(const char *axis, const char *style, const bool useOffset) {
+  try {
+    GlobalInterpreterLock lock;
+    Python::List args;
+    Python::Dict kwargs;
+    kwargs["axis"] = axis;
+    kwargs["style"] = style;
+    kwargs["useOffset"] = useOffset;
+    pyobj().attr("ticklabel_format")(*args, **kwargs);
+  } catch (...) {
+    throw PythonException();
+  }
 }
 
 /**
@@ -140,9 +147,7 @@ Artist Axes::legend(const bool draggable) {
   GlobalInterpreterLock lock;
   Artist legend{pyobj().attr("legend")()};
   const auto draggableAttr =
-      PyObject_HasAttrString(legend.pyobj().ptr(), "set_draggable")
-          ? "set_draggable"
-          : "draggable";
+      PyObject_HasAttrString(legend.pyobj().ptr(), "set_draggable") ? "set_draggable" : "draggable";
   legend.pyobj().attr(draggableAttr)(draggable);
   return legend;
 }
@@ -165,11 +170,9 @@ Artist Axes::legendInstance() const {
  * return value is not captured the line will be automatically removed from
  * the canvas as the vector data will be destroyed.
  */
-Line2D Axes::plot(std::vector<double> xdata, std::vector<double> ydata,
-                  const QString &format, const QString &label) {
+Line2D Axes::plot(std::vector<double> xdata, std::vector<double> ydata, const QString &format, const QString &label) {
   GlobalInterpreterLock lock;
-  auto line2d =
-      plot(std::move(xdata), std::move(ydata), format.toLatin1().constData());
+  auto line2d = plot(std::move(xdata), std::move(ydata), format.toLatin1().constData());
   if (!label.isEmpty()) {
     line2d.pyobj().attr("set_label")(label.toLatin1().constData());
   }
@@ -186,12 +189,10 @@ Line2D Axes::plot(std::vector<double> xdata, std::vector<double> ydata,
  * return value is not captured the line will be automatically removed from
  * the canvas as the vector data will be destroyed.
  */
-Line2D Axes::plot(std::vector<double> xdata, std::vector<double> ydata,
-                  const char *format) {
+Line2D Axes::plot(std::vector<double> xdata, std::vector<double> ydata, const char *format) {
   auto throwIfEmpty = [](const std::vector<double> &data, char vecId) {
     if (data.empty()) {
-      throw std::invalid_argument(
-          std::string("Cannot plot line. Empty vector=") + vecId);
+      throw std::invalid_argument(std::string("Cannot plot line. Empty vector=") + vecId);
     }
   };
   throwIfEmpty(xdata, 'X');
@@ -202,12 +203,10 @@ Line2D Axes::plot(std::vector<double> xdata, std::vector<double> ydata,
   // The vector still owns the data so it needs to be kept alive too
   // It is transferred to the Line2D for this purpose.
   VectorToNDArray<double, WrapReadOnly> wrapNDArray;
-  Python::Object xarray{Python::NewRef(wrapNDArray(xdata))},
-      yarray{Python::NewRef(wrapNDArray(ydata))};
+  Python::Object xarray{Python::NewRef(wrapNDArray(xdata))}, yarray{Python::NewRef(wrapNDArray(ydata))};
 
   try {
-    return Line2D{pyobj().attr("plot")(xarray, yarray, format)[0],
-                  std::move(xdata), std::move(ydata)};
+    return Line2D{pyobj().attr("plot")(xarray, yarray, format)[0], std::move(xdata), std::move(ydata)};
   } catch (Python::ErrorAlreadySet &) {
     throw PythonException();
   }
@@ -221,13 +220,28 @@ Line2D Axes::plot(std::vector<double> xdata, std::vector<double> ydata,
  * @param horizontalAlignment A string indicating the horizontal
  * alignment of the string
  */
-Artist Axes::text(double x, double y, const QString &text,
-                  const char *horizontalAlignment) {
+Artist Axes::text(double x, double y, const QString &text, const char *horizontalAlignment) {
   GlobalInterpreterLock lock;
-  auto args =
-      Python::NewRef(Py_BuildValue("(ffs)", x, y, text.toLatin1().constData()));
+  auto args = Python::NewRef(Py_BuildValue("(ffs)", x, y, text.toLatin1().constData()));
+  auto kwargs = Python::NewRef(Py_BuildValue("{ss}", "horizontalalignment", horizontalAlignment));
+  return Artist(pyobj().attr("text")(*args, **kwargs));
+}
+
+/**
+ * Add an arbitrary text label to the canvas
+ * @param x X position in data coordinates
+ * @param y Y position in data coordinates
+ * @param text The string to attach to the canvas
+ * @param horizontalAlignment A string indicating the horizontal
+ * @param transform A transform object to
+ * alignment of the string
+ */
+
+Artist Axes::text(double x, double y, const QString &text, const char *horizontalAlignment, Transform transform) {
+  GlobalInterpreterLock lock;
+  auto args = Python::NewRef(Py_BuildValue("(ffs)", x, y, text.toLatin1().constData()));
   auto kwargs = Python::NewRef(
-      Py_BuildValue("{ss}", "horizontalalignment", horizontalAlignment));
+      Py_BuildValue("{sssO}", "horizontalalignment", horizontalAlignment, "transform", transform.pyobj().ptr()));
   return Artist(pyobj().attr("text")(*args, **kwargs));
 }
 
@@ -241,8 +255,7 @@ void Axes::setXScale(const char *value) {
   try {
     callMethodNoCheck<void, const char *>(pyobj(), "set_xscale", value);
   } catch (PythonException &) {
-    throw std::invalid_argument(
-        std::string("Axes::setXScale - Invalid scale type ") + value);
+    throw std::invalid_argument(std::string("Axes::setXScale - Invalid scale type ") + value);
   }
 }
 
@@ -262,8 +275,7 @@ void Axes::setYScale(const char *value) {
   try {
     callMethodNoCheck<void, const char *>(pyobj(), "set_yscale", value);
   } catch (PythonException &) {
-    throw std::invalid_argument(
-        std::string("Axes::setYScale - Invalid scale type ") + value);
+    throw std::invalid_argument(std::string("Axes::setYScale - Invalid scale type ") + value);
   }
 }
 
@@ -314,17 +326,13 @@ void Axes::setYLim(double min, double max) const {
  * @param visibleOnly If true then only include visble artists in the
  * calculation
  */
-void Axes::relim(bool visibleOnly) {
-  callMethodNoCheck<void, bool>(pyobj(), "relim", visibleOnly);
-}
+void Axes::relim(bool visibleOnly) { callMethodNoCheck<void, bool>(pyobj(), "relim", visibleOnly); }
 
 /**
  * Calls Axes.autoscale to enable/disable auto scaling
  * @param enable If true enable autoscaling and perform the automatic rescale
  */
-void Axes::autoscale(bool enable) {
-  callMethodNoCheck<void, bool>(pyobj(), "autoscale", enable);
-}
+void Axes::autoscale(bool enable) { callMethodNoCheck<void, bool>(pyobj(), "autoscale", enable); }
 
 /**
  * Autoscale the view based on the current data limits. Calls
@@ -334,8 +342,7 @@ void Axes::autoscale(bool enable) {
  * @param scaleY If true (default) scale the Y axis limits
  */
 void Axes::autoscaleView(bool scaleX, bool scaleY) {
-  callMethodNoCheck<void, Python::Object, bool, bool>(
-      pyobj(), "autoscale_view", Python::Object(), scaleX, scaleY);
+  callMethodNoCheck<void, Python::Object, bool, bool>(pyobj(), "autoscale_view", Python::Object(), scaleX, scaleY);
 }
 
 /**
@@ -347,10 +354,17 @@ void Axes::autoscaleView(bool scaleX, bool scaleY) {
  * @param scaleY If true (default) scale the Y axis limits
  */
 void Axes::autoscaleView(bool tight, bool scaleX, bool scaleY) {
-  callMethodNoCheck<void, bool, bool, bool>(pyobj(), "autoscale_view", tight,
-                                            scaleX, scaleY);
+  callMethodNoCheck<void, bool, bool, bool>(pyobj(), "autoscale_view", tight, scaleX, scaleY);
 }
 
-} // namespace MplCpp
-} // namespace Widgets
-} // namespace MantidQt
+/**
+ * Returns the blended transform that treats X in data coordinates and Y in axes coordinates
+ * https://matplotlib.org/stable/tutorials/advanced/transforms_tutorial.html#blended-transformations
+ * @return An instance of a matplotlib.transforms.Transform
+ */
+Transform Axes::getXAxisTransform() const {
+  GlobalInterpreterLock lock;
+  return Transform(pyobj().attr("get_xaxis_transform")());
+}
+
+} // namespace MantidQt::Widgets::MplCpp

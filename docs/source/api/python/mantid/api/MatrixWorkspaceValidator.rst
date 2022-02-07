@@ -8,7 +8,7 @@ This is a Python binding to the C++ class Mantid::API::MatrixWorkspaceValidator.
 
 .. module:`mantid.api`
 
-.. autoclass:: mantid.api.MatrixWorkspaceValidator 
+.. autoclass:: mantid.api.MatrixWorkspaceValidator
     :members:
     :undoc-members:
     :inherited-members:

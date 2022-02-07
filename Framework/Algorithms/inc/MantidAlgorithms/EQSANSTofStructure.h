@@ -29,8 +29,7 @@ namespace Algorithms {
 // Pulse widge (micro sec per angstrom)
 const double PULSEWIDTH = 20.0;
 // Chopper phase offset (micro sec)
-const double CHOPPER_PHASE_OFFSET[2][4] = {{9507., 9471., 9829.7, 9584.3},
-                                           {19024., 18820., 19714., 19360.}};
+const double CHOPPER_PHASE_OFFSET[2][4] = {{9507., 9471., 9829.7, 9584.3}, {19024., 18820., 19714., 19360.}};
 // Chopper angles (degree)
 const double CHOPPER_ANGLE[4] = {129.605, 179.989, 230.010, 230.007};
 // Chopper location (mm)
@@ -60,13 +59,11 @@ private:
   void exec() override;
   // void execEvent(Mantid::DataObjects::EventWorkspace_sptr inputWS, bool
   // frame_skipping);
-  void execEvent(const Mantid::DataObjects::EventWorkspace_sptr &inputWS,
-                 double threshold, double frame_offset, double tof_frame_width,
-                 double tmp_frame_width, bool frame_skipping);
+  void execEvent(const Mantid::DataObjects::EventWorkspace_sptr &inputWS, double threshold, double frame_offset,
+                 double tof_frame_width, double tmp_frame_width, bool frame_skipping);
 
   /// Compute TOF offset
-  double getTofOffset(const DataObjects::EventWorkspace_const_sptr &inputWS,
-                      bool frame_skipping);
+  double getTofOffset(const DataObjects::EventWorkspace_const_sptr &inputWS, bool frame_skipping);
   double frame_tof0;
   bool flight_path_correction;
   double low_tof_cut;

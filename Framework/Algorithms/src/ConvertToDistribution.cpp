@@ -12,8 +12,7 @@
 #include "MantidAPI/RawCountValidator.h"
 #include "MantidKernel/CompositeValidator.h"
 
-namespace Mantid {
-namespace Algorithms {
+namespace Mantid::Algorithms {
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(ConvertToDistribution)
@@ -24,8 +23,7 @@ void ConvertToDistribution::init() {
   auto wsValidator = std::make_shared<Kernel::CompositeValidator>();
   wsValidator->add<HistogramValidator>();
   wsValidator->add<RawCountValidator>();
-  declareProperty(std::make_unique<WorkspaceProperty<>>(
-                      "Workspace", "", Kernel::Direction::InOut, wsValidator),
+  declareProperty(std::make_unique<WorkspaceProperty<>>("Workspace", "", Kernel::Direction::InOut, wsValidator),
                   "The name of the workspace to convert.");
 }
 
@@ -47,5 +45,4 @@ std::map<std::string, std::string> ConvertToDistribution::validateInputs() {
   return errors;
 }
 
-} // namespace Algorithms
-} // namespace Mantid
+} // namespace Mantid::Algorithms

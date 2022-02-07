@@ -6,9 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "Item.h"
 
-namespace MantidQt {
-namespace CustomInterfaces {
-namespace ISISReflectometry {
+namespace MantidQt::CustomInterfaces::ISISReflectometry {
 
 Item::Item() : m_itemState(), m_skipped(false) {}
 
@@ -26,19 +24,14 @@ void Item::resetState(bool resetChildren) {
 
 void Item::setSkipped(bool skipped) { m_skipped = skipped; }
 
-bool Item::success() const {
-  return m_itemState.state() == State::ITEM_COMPLETE;
-}
+bool Item::success() const { return m_itemState.state() == State::ITEM_COMPLETE; }
 
 bool Item::complete() const {
-  return m_itemState.state() == State::ITEM_COMPLETE ||
-         m_itemState.state() == State::ITEM_ERROR ||
+  return m_itemState.state() == State::ITEM_COMPLETE || m_itemState.state() == State::ITEM_ERROR ||
          m_itemState.state() == State::ITEM_WARNING;
 }
 
-void Item::setProgress(double p, std::string const &msg) {
-  m_itemState.setProgress(p, msg);
-}
+void Item::setProgress(double p, std::string const &msg) { m_itemState.setProgress(p, msg); }
 
 void Item::setStarting() { m_itemState.setStarting(); }
 
@@ -69,6 +62,4 @@ bool Item::requiresProcessing(bool reprocessFailed) const {
   }
   return false;
 }
-} // namespace ISISReflectometry
-} // namespace CustomInterfaces
-} // namespace MantidQt
+} // namespace MantidQt::CustomInterfaces::ISISReflectometry

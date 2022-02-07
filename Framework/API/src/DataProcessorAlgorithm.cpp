@@ -28,16 +28,14 @@
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
 
-namespace Mantid {
-namespace API {
+namespace Mantid::API {
 
 //----------------------------------------------------------------------------------------------
 /** Constructor
  */
 template <class Base>
 GenericDataProcessorAlgorithm<Base>::GenericDataProcessorAlgorithm()
-    : m_useMPI(false), m_loadAlg("Load"), m_accumulateAlg("Plus"),
-      m_loadAlgFileProp("Filename"),
+    : m_useMPI(false), m_loadAlg("Load"), m_accumulateAlg("Plus"), m_loadAlgFileProp("Filename"),
       m_propertyManagerPropertyName("ReductionProperties") {
   Base::enableHistoryRecordingForChild(true);
 }
@@ -65,12 +63,11 @@ GenericDataProcessorAlgorithm<Base>::GenericDataProcessorAlgorithm()
  */
 template <class Base>
 std::shared_ptr<Algorithm>
-GenericDataProcessorAlgorithm<Base>::createChildAlgorithm(
-    const std::string &name, const double startProgress,
-    const double endProgress, const bool enableLogging, const int &version) {
+GenericDataProcessorAlgorithm<Base>::createChildAlgorithm(const std::string &name, const double startProgress,
+                                                          const double endProgress, const bool enableLogging,
+                                                          const int &version) {
   // call parent method to create the child algorithm
-  auto alg = Algorithm::createChildAlgorithm(name, startProgress, endProgress,
-                                             enableLogging, version);
+  auto alg = Algorithm::createChildAlgorithm(name, startProgress, endProgress, enableLogging, version);
   alg->enableHistoryRecordingForChild(this->isRecordingHistoryForChild());
   if (this->isRecordingHistoryForChild()) {
     // pass pointer to the history object created in Algorithm to the child
@@ -79,34 +76,26 @@ GenericDataProcessorAlgorithm<Base>::createChildAlgorithm(
   return alg;
 }
 
-template <class Base>
-void GenericDataProcessorAlgorithm<Base>::setLoadAlg(const std::string &alg) {
+template <class Base> void GenericDataProcessorAlgorithm<Base>::setLoadAlg(const std::string &alg) {
   if (alg.empty())
     throw std::invalid_argument("Cannot set load algorithm to empty string");
   m_loadAlg = alg;
 }
 
-template <class Base>
-void GenericDataProcessorAlgorithm<Base>::setLoadAlgFileProp(
-    const std::string &filePropName) {
+template <class Base> void GenericDataProcessorAlgorithm<Base>::setLoadAlgFileProp(const std::string &filePropName) {
   if (filePropName.empty()) {
-    throw std::invalid_argument(
-        "Cannot set the load algorithm file property name");
+    throw std::invalid_argument("Cannot set the load algorithm file property name");
   }
   m_loadAlgFileProp = filePropName;
 }
 
-template <class Base>
-void GenericDataProcessorAlgorithm<Base>::setAccumAlg(const std::string &alg) {
+template <class Base> void GenericDataProcessorAlgorithm<Base>::setAccumAlg(const std::string &alg) {
   if (alg.empty())
-    throw std::invalid_argument(
-        "Cannot set accumulate algorithm to empty string");
+    throw std::invalid_argument("Cannot set accumulate algorithm to empty string");
   m_accumulateAlg = alg;
 }
 
-template <class Base>
-void GenericDataProcessorAlgorithm<Base>::setPropManagerPropName(
-    const std::string &propName) {
+template <class Base> void GenericDataProcessorAlgorithm<Base>::setPropManagerPropName(const std::string &propName) {
   m_propertyManagerPropertyName = propName;
 }
 
@@ -119,8 +108,8 @@ void GenericDataProcessorAlgorithm<Base>::setPropManagerPropName(
  * @param nameInPropManager Name of the property in the PropertyManager.
  */
 template <class Base>
-void GenericDataProcessorAlgorithm<Base>::mapPropertyName(
-    const std::string &nameInProp, const std::string &nameInPropManager) {
+void GenericDataProcessorAlgorithm<Base>::mapPropertyName(const std::string &nameInProp,
+                                                          const std::string &nameInPropManager) {
   m_nameToPMName[nameInProp] = nameInPropManager;
 }
 
@@ -136,18 +125,15 @@ void GenericDataProcessorAlgorithm<Base>::mapPropertyName(
  * @throws std::runtime_error If you ask to copy a non-existent property
  */
 template <class Base>
-void GenericDataProcessorAlgorithm<Base>::copyProperty(
-    const API::Algorithm_sptr &alg, const std::string &name) {
+void GenericDataProcessorAlgorithm<Base>::copyProperty(const API::Algorithm_sptr &alg, const std::string &name) {
   if (!alg->existsProperty(name)) {
     std::stringstream msg;
-    msg << "Algorithm \"" << alg->name() << "\" does not have property \""
-        << name << "\"";
+    msg << "Algorithm \"" << alg->name() << "\" does not have property \"" << name << "\"";
     throw std::runtime_error(msg.str());
   }
 
   auto prop = alg->getPointerToProperty(name);
-  Base::declareProperty(std::unique_ptr<Property>(prop->clone()),
-                        prop->documentation());
+  Base::declareProperty(std::unique_ptr<Property>(prop->clone()), prop->documentation());
 }
 
 /**
@@ -158,9 +144,7 @@ void GenericDataProcessorAlgorithm<Base>::copyProperty(
  * @param name
  * @return
  */
-template <class Base>
-std::string GenericDataProcessorAlgorithm<Base>::getPropertyValue(
-    const std::string &name) const {
+template <class Base> std::string GenericDataProcessorAlgorithm<Base>::getPropertyValue(const std::string &name) const {
   // explicitly specifying a property wins
   if (!Base::isDefault(name)) {
     return Algorithm::getPropertyValue(name);
@@ -187,9 +171,7 @@ std::string GenericDataProcessorAlgorithm<Base>::getPropertyValue(
  * @return
  */
 template <class Base>
-PropertyManagerOwner::TypedValue
-GenericDataProcessorAlgorithm<Base>::getProperty(
-    const std::string &name) const {
+PropertyManagerOwner::TypedValue GenericDataProcessorAlgorithm<Base>::getProperty(const std::string &name) const {
   // explicitely specifying a property wins
   if (!Base::isDefault(name)) {
     return Base::getProperty(name);
@@ -209,21 +191,16 @@ GenericDataProcessorAlgorithm<Base>::getProperty(
 }
 
 template <class Base>
-ITableWorkspace_sptr GenericDataProcessorAlgorithm<Base>::determineChunk(
-    const std::string &filename) {
+ITableWorkspace_sptr GenericDataProcessorAlgorithm<Base>::determineChunk(const std::string &filename) {
   UNUSED_ARG(filename);
 
-  throw std::runtime_error(
-      "DataProcessorAlgorithm::determineChunk is not implemented");
+  throw std::runtime_error("DataProcessorAlgorithm::determineChunk is not implemented");
 }
 
-template <class Base>
-MatrixWorkspace_sptr
-GenericDataProcessorAlgorithm<Base>::loadChunk(const size_t rowIndex) {
+template <class Base> MatrixWorkspace_sptr GenericDataProcessorAlgorithm<Base>::loadChunk(const size_t rowIndex) {
   UNUSED_ARG(rowIndex);
 
-  throw std::runtime_error(
-      "DataProcessorAlgorithm::loadChunk is not implemented");
+  throw std::runtime_error("DataProcessorAlgorithm::loadChunk is not implemented");
 }
 
 /**
@@ -231,12 +208,10 @@ GenericDataProcessorAlgorithm<Base>::loadChunk(const size_t rowIndex) {
  * @param partialWS :: workspace to assemble
  * thread only)
  */
-template <class Base>
-Workspace_sptr
-GenericDataProcessorAlgorithm<Base>::assemble(Workspace_sptr partialWS) {
+template <class Base> Workspace_sptr GenericDataProcessorAlgorithm<Base>::assemble(Workspace_sptr partialWS) {
   Workspace_sptr outputWS = std::move(partialWS);
 #ifdef MPI_BUILD
-  IAlgorithm_sptr gatherAlg = createChildAlgorithm("GatherWorkspaces");
+  auto gatherAlg = createChildAlgorithm("GatherWorkspaces");
   gatherAlg->setLogging(true);
   gatherAlg->setAlwaysStoreInADS(true);
   gatherAlg->setProperty("InputWorkspace", partialWS);
@@ -259,14 +234,12 @@ GenericDataProcessorAlgorithm<Base>::assemble(Workspace_sptr partialWS) {
  * thread only)
  */
 template <class Base>
-Workspace_sptr
-GenericDataProcessorAlgorithm<Base>::assemble(const std::string &partialWSName,
-                                              const std::string &outputWSName) {
+Workspace_sptr GenericDataProcessorAlgorithm<Base>::assemble(const std::string &partialWSName,
+                                                             [[maybe_unused]] const std::string &outputWSName) {
 #ifdef MPI_BUILD
   std::string threadOutput = partialWSName;
-  Workspace_sptr partialWS =
-      AnalysisDataService::Instance().retrieve(partialWSName);
-  IAlgorithm_sptr gatherAlg = createChildAlgorithm("GatherWorkspaces");
+  Workspace_sptr partialWS = AnalysisDataService::Instance().retrieve(partialWSName);
+  auto gatherAlg = createChildAlgorithm("GatherWorkspaces");
   gatherAlg->setLogging(true);
   gatherAlg->setAlwaysStoreInADS(true);
   gatherAlg->setProperty("InputWorkspace", partialWS);
@@ -277,12 +250,10 @@ GenericDataProcessorAlgorithm<Base>::assemble(const std::string &partialWSName,
   if (isMainThread())
     threadOutput = outputWSName;
 #else
-  UNUSED_ARG(outputWSName)
   const std::string &threadOutput = partialWSName;
 
 #endif
-  Workspace_sptr outputWS =
-      AnalysisDataService::Instance().retrieve(threadOutput);
+  Workspace_sptr outputWS = AnalysisDataService::Instance().retrieve(threadOutput);
   return outputWS;
 }
 
@@ -293,14 +264,13 @@ GenericDataProcessorAlgorithm<Base>::assemble(const std::string &partialWSName,
  * @param outputFile :: Path to the Nexus file to save
  */
 template <class Base>
-void GenericDataProcessorAlgorithm<Base>::saveNexus(
-    const std::string &outputWSName, const std::string &outputFile) {
+void GenericDataProcessorAlgorithm<Base>::saveNexus(const std::string &outputWSName, const std::string &outputFile) {
 #ifdef MPI_BUILD
   if (boost::mpi::communicator().rank() <= 0 && !outputFile.empty()) {
 #else
   if (!outputFile.empty()) {
 #endif
-    IAlgorithm_sptr saveAlg = createChildAlgorithm("SaveNexus");
+    auto saveAlg = createChildAlgorithm("SaveNexus");
     saveAlg->setPropertyValue("Filename", outputFile);
     saveAlg->setPropertyValue("InputWorkspace", outputWSName);
     saveAlg->execute();
@@ -333,9 +303,7 @@ template <class Base> int GenericDataProcessorAlgorithm<Base>::getNThreads() {
  * @param loadQuiet :: If true then the output is not stored in the ADS
  */
 template <class Base>
-Workspace_sptr
-GenericDataProcessorAlgorithm<Base>::load(const std::string &inputData,
-                                          const bool loadQuiet) {
+Workspace_sptr GenericDataProcessorAlgorithm<Base>::load(const std::string &inputData, const bool loadQuiet) {
   Workspace_sptr inputWS;
 
   // First, check whether we have the name of an existing workspace
@@ -354,7 +322,7 @@ GenericDataProcessorAlgorithm<Base>::load(const std::string &inputData,
       Poco::Path p(foundFile);
       const std::string outputWSName = p.getBaseName();
 
-      IAlgorithm_sptr loadAlg = createChildAlgorithm(m_loadAlg);
+      auto loadAlg = createChildAlgorithm(m_loadAlg);
       loadAlg->setProperty(m_loadAlgFileProp, foundFile);
       if (!loadQuiet) {
         loadAlg->setAlwaysStoreInADS(true);
@@ -363,13 +331,11 @@ GenericDataProcessorAlgorithm<Base>::load(const std::string &inputData,
 // Set up MPI if available
 #ifdef MPI_BUILD
       // First, check whether the loader allows use to chunk the data
-      if (loadAlg->existsProperty("ChunkNumber") &&
-          loadAlg->existsProperty("TotalChunks")) {
+      if (loadAlg->existsProperty("ChunkNumber") && loadAlg->existsProperty("TotalChunks")) {
         m_useMPI = true;
         // The communicator containing all processes
         boost::mpi::communicator world;
-        g_log.notice() << "Chunk/Total: " << world.rank() + 1 << "/"
-                       << world.size() << '\n';
+        g_log.notice() << "Chunk/Total: " << world.rank() + 1 << "/" << world.size() << '\n';
         loadAlg->setPropertyValue("OutputWorkspace", outputWSName);
         loadAlg->setProperty("ChunkNumber", world.rank() + 1);
         loadAlg->setProperty("TotalChunks", world.size());
@@ -383,8 +349,7 @@ GenericDataProcessorAlgorithm<Base>::load(const std::string &inputData,
         inputWS = AnalysisDataService::Instance().retrieve(outputWSName);
       }
     } else
-      throw std::runtime_error(
-          "DataProcessorAlgorithm::load could process any data");
+      throw std::runtime_error("DataProcessorAlgorithm::load could process any data");
   }
   return inputWS;
 }
@@ -399,14 +364,12 @@ GenericDataProcessorAlgorithm<Base>::load(const std::string &inputData,
  */
 template <class Base>
 std::shared_ptr<PropertyManager>
-GenericDataProcessorAlgorithm<Base>::getProcessProperties(
-    const std::string &propertyManager) const {
+GenericDataProcessorAlgorithm<Base>::getProcessProperties(const std::string &propertyManager) const {
   std::string propertyManagerName(propertyManager);
   if (propertyManager.empty() && (!m_propertyManagerPropertyName.empty())) {
     if (!Base::existsProperty(m_propertyManagerPropertyName)) {
       std::stringstream msg;
-      msg << "Failed to find property \"" << m_propertyManagerPropertyName
-          << "\"";
+      msg << "Failed to find property \"" << m_propertyManagerPropertyName << "\"";
       throw Exception::NotFoundError(msg.str(), this->name());
     }
     propertyManagerName = this->getPropertyValue(m_propertyManagerPropertyName);
@@ -414,29 +377,23 @@ GenericDataProcessorAlgorithm<Base>::getProcessProperties(
 
   std::shared_ptr<PropertyManager> processProperties;
   if (PropertyManagerDataService::Instance().doesExist(propertyManagerName)) {
-    processProperties =
-        PropertyManagerDataService::Instance().retrieve(propertyManagerName);
+    processProperties = PropertyManagerDataService::Instance().retrieve(propertyManagerName);
   } else {
     Base::getLogger().notice() << "Could not find property manager\n";
     processProperties = std::make_shared<PropertyManager>();
-    PropertyManagerDataService::Instance().addOrReplace(propertyManagerName,
-                                                        processProperties);
+    PropertyManagerDataService::Instance().addOrReplace(propertyManagerName, processProperties);
   }
   return processProperties;
 }
 
 template <class Base>
-std::vector<std::string>
-GenericDataProcessorAlgorithm<Base>::splitInput(const std::string &input) {
+std::vector<std::string> GenericDataProcessorAlgorithm<Base>::splitInput(const std::string &input) {
   UNUSED_ARG(input);
-  throw std::runtime_error(
-      "DataProcessorAlgorithm::splitInput is not implemented");
+  throw std::runtime_error("DataProcessorAlgorithm::splitInput is not implemented");
 }
 
-template <class Base>
-void GenericDataProcessorAlgorithm<Base>::forwardProperties() {
-  throw std::runtime_error(
-      "DataProcessorAlgorithm::forwardProperties is not implemented");
+template <class Base> void GenericDataProcessorAlgorithm<Base>::forwardProperties() {
+  throw std::runtime_error("DataProcessorAlgorithm::forwardProperties is not implemented");
 }
 
 //------------------------------------------------------------------------------------------
@@ -450,12 +407,10 @@ void GenericDataProcessorAlgorithm<Base>::forwardProperties() {
  * @return matrix workspace resulting from the operation
  */
 template <class Base>
-MatrixWorkspace_sptr
-GenericDataProcessorAlgorithm<Base>::divide(const MatrixWorkspace_sptr lhs,
-                                            const MatrixWorkspace_sptr rhs) {
-  return this->executeBinaryAlgorithm<
-      MatrixWorkspace_sptr, MatrixWorkspace_sptr, MatrixWorkspace_sptr>(
-      "Divide", lhs, rhs);
+MatrixWorkspace_sptr GenericDataProcessorAlgorithm<Base>::divide(const MatrixWorkspace_sptr lhs,
+                                                                 const MatrixWorkspace_sptr rhs) {
+  return this->executeBinaryAlgorithm<MatrixWorkspace_sptr, MatrixWorkspace_sptr, MatrixWorkspace_sptr>("Divide", lhs,
+                                                                                                        rhs);
 }
 
 /**
@@ -465,11 +420,9 @@ GenericDataProcessorAlgorithm<Base>::divide(const MatrixWorkspace_sptr lhs,
  * @return matrix workspace resulting from the operation
  */
 template <class Base>
-MatrixWorkspace_sptr
-GenericDataProcessorAlgorithm<Base>::divide(const MatrixWorkspace_sptr lhs,
-                                            const double &rhsValue) {
-  return this->executeBinaryAlgorithm<
-      MatrixWorkspace_sptr, MatrixWorkspace_sptr, MatrixWorkspace_sptr>(
+MatrixWorkspace_sptr GenericDataProcessorAlgorithm<Base>::divide(const MatrixWorkspace_sptr lhs,
+                                                                 const double &rhsValue) {
+  return this->executeBinaryAlgorithm<MatrixWorkspace_sptr, MatrixWorkspace_sptr, MatrixWorkspace_sptr>(
       "Divide", lhs, createWorkspaceSingleValue(rhsValue));
 }
 
@@ -482,12 +435,10 @@ GenericDataProcessorAlgorithm<Base>::divide(const MatrixWorkspace_sptr lhs,
  * @return matrix workspace resulting from the operation
  */
 template <class Base>
-MatrixWorkspace_sptr
-GenericDataProcessorAlgorithm<Base>::multiply(const MatrixWorkspace_sptr lhs,
-                                              const MatrixWorkspace_sptr rhs) {
-  return this->executeBinaryAlgorithm<
-      MatrixWorkspace_sptr, MatrixWorkspace_sptr, MatrixWorkspace_sptr>(
-      "Divide", lhs, rhs);
+MatrixWorkspace_sptr GenericDataProcessorAlgorithm<Base>::multiply(const MatrixWorkspace_sptr lhs,
+                                                                   const MatrixWorkspace_sptr rhs) {
+  return this->executeBinaryAlgorithm<MatrixWorkspace_sptr, MatrixWorkspace_sptr, MatrixWorkspace_sptr>("Divide", lhs,
+                                                                                                        rhs);
 }
 
 /**
@@ -499,11 +450,9 @@ GenericDataProcessorAlgorithm<Base>::multiply(const MatrixWorkspace_sptr lhs,
  * @return matrix workspace resulting from the operation
  */
 template <class Base>
-MatrixWorkspace_sptr
-GenericDataProcessorAlgorithm<Base>::multiply(const MatrixWorkspace_sptr lhs,
-                                              const double &rhsValue) {
-  return this->executeBinaryAlgorithm<
-      MatrixWorkspace_sptr, MatrixWorkspace_sptr, MatrixWorkspace_sptr>(
+MatrixWorkspace_sptr GenericDataProcessorAlgorithm<Base>::multiply(const MatrixWorkspace_sptr lhs,
+                                                                   const double &rhsValue) {
+  return this->executeBinaryAlgorithm<MatrixWorkspace_sptr, MatrixWorkspace_sptr, MatrixWorkspace_sptr>(
       "Multiply", lhs, createWorkspaceSingleValue(rhsValue));
 }
 
@@ -514,12 +463,10 @@ GenericDataProcessorAlgorithm<Base>::multiply(const MatrixWorkspace_sptr lhs,
  * @return matrix workspace resulting from the operation
  */
 template <class Base>
-MatrixWorkspace_sptr
-GenericDataProcessorAlgorithm<Base>::plus(const MatrixWorkspace_sptr lhs,
-                                          const MatrixWorkspace_sptr rhs) {
-  return this->executeBinaryAlgorithm<
-      MatrixWorkspace_sptr, MatrixWorkspace_sptr, MatrixWorkspace_sptr>(
-      "Plus", lhs, rhs);
+MatrixWorkspace_sptr GenericDataProcessorAlgorithm<Base>::plus(const MatrixWorkspace_sptr lhs,
+                                                               const MatrixWorkspace_sptr rhs) {
+  return this->executeBinaryAlgorithm<MatrixWorkspace_sptr, MatrixWorkspace_sptr, MatrixWorkspace_sptr>("Plus", lhs,
+                                                                                                        rhs);
 }
 
 /**
@@ -529,11 +476,8 @@ GenericDataProcessorAlgorithm<Base>::plus(const MatrixWorkspace_sptr lhs,
  * @return matrix workspace resulting from the operation
  */
 template <class Base>
-MatrixWorkspace_sptr
-GenericDataProcessorAlgorithm<Base>::plus(const MatrixWorkspace_sptr lhs,
-                                          const double &rhsValue) {
-  return this->executeBinaryAlgorithm<
-      MatrixWorkspace_sptr, MatrixWorkspace_sptr, MatrixWorkspace_sptr>(
+MatrixWorkspace_sptr GenericDataProcessorAlgorithm<Base>::plus(const MatrixWorkspace_sptr lhs, const double &rhsValue) {
+  return this->executeBinaryAlgorithm<MatrixWorkspace_sptr, MatrixWorkspace_sptr, MatrixWorkspace_sptr>(
       "Plus", lhs, createWorkspaceSingleValue(rhsValue));
 }
 
@@ -544,12 +488,10 @@ GenericDataProcessorAlgorithm<Base>::plus(const MatrixWorkspace_sptr lhs,
  * @return matrix workspace resulting from the operation
  */
 template <class Base>
-MatrixWorkspace_sptr
-GenericDataProcessorAlgorithm<Base>::minus(const MatrixWorkspace_sptr lhs,
-                                           const MatrixWorkspace_sptr rhs) {
-  return this->executeBinaryAlgorithm<
-      MatrixWorkspace_sptr, MatrixWorkspace_sptr, MatrixWorkspace_sptr>(
-      "Minus", lhs, rhs);
+MatrixWorkspace_sptr GenericDataProcessorAlgorithm<Base>::minus(const MatrixWorkspace_sptr lhs,
+                                                                const MatrixWorkspace_sptr rhs) {
+  return this->executeBinaryAlgorithm<MatrixWorkspace_sptr, MatrixWorkspace_sptr, MatrixWorkspace_sptr>("Minus", lhs,
+                                                                                                        rhs);
 }
 
 /**
@@ -560,11 +502,9 @@ GenericDataProcessorAlgorithm<Base>::minus(const MatrixWorkspace_sptr lhs,
  * @return matrix workspace resulting from the operation
  */
 template <class Base>
-MatrixWorkspace_sptr
-GenericDataProcessorAlgorithm<Base>::minus(const MatrixWorkspace_sptr lhs,
-                                           const double &rhsValue) {
-  return this->executeBinaryAlgorithm<
-      MatrixWorkspace_sptr, MatrixWorkspace_sptr, MatrixWorkspace_sptr>(
+MatrixWorkspace_sptr GenericDataProcessorAlgorithm<Base>::minus(const MatrixWorkspace_sptr lhs,
+                                                                const double &rhsValue) {
+  return this->executeBinaryAlgorithm<MatrixWorkspace_sptr, MatrixWorkspace_sptr, MatrixWorkspace_sptr>(
       "Minus", lhs, createWorkspaceSingleValue(rhsValue));
 }
 
@@ -574,28 +514,20 @@ GenericDataProcessorAlgorithm<Base>::minus(const MatrixWorkspace_sptr lhs,
  * @return matrix workspace resulting from the operation
  */
 template <class Base>
-MatrixWorkspace_sptr
-GenericDataProcessorAlgorithm<Base>::createWorkspaceSingleValue(
-    const double &rhsValue) {
-  MatrixWorkspace_sptr retVal =
-      WorkspaceFactory::Instance().create("WorkspaceSingleValue", 1, 1, 1);
+MatrixWorkspace_sptr GenericDataProcessorAlgorithm<Base>::createWorkspaceSingleValue(const double &rhsValue) {
+  MatrixWorkspace_sptr retVal = WorkspaceFactory::Instance().create("WorkspaceSingleValue", 1, 1, 1);
   retVal->dataY(0)[0] = rhsValue;
 
   return retVal;
 }
 
-template <typename T>
-void GenericDataProcessorAlgorithm<T>::visualStudioC4661Workaround() {}
+template <typename T> void GenericDataProcessorAlgorithm<T>::visualStudioC4661Workaround() {}
 
 template class GenericDataProcessorAlgorithm<Algorithm>;
 template class MANTID_API_DLL GenericDataProcessorAlgorithm<SerialAlgorithm>;
 template class MANTID_API_DLL GenericDataProcessorAlgorithm<ParallelAlgorithm>;
-template class MANTID_API_DLL
-    GenericDataProcessorAlgorithm<DistributedAlgorithm>;
+template class MANTID_API_DLL GenericDataProcessorAlgorithm<DistributedAlgorithm>;
 
-template <>
-MANTID_API_DLL void
-GenericDataProcessorAlgorithm<Algorithm>::visualStudioC4661Workaround() {}
+template <> MANTID_API_DLL void GenericDataProcessorAlgorithm<Algorithm>::visualStudioC4661Workaround() {}
 
-} // namespace API
-} // namespace Mantid
+} // namespace Mantid::API

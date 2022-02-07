@@ -95,12 +95,11 @@ ANNmin_k *ANNkdPointMK; // set of k closest points
 //	annkSearch - search for the k nearest neighbors
 //----------------------------------------------------------------------
 
-void ANNkd_tree::annkSearch(
-    ANNpoint q,         // the query point
-    int k,              // number of near neighbors to return
-    ANNidxArray nn_idx, // nearest neighbor indices (returned)
-    ANNdistArray dd,    // the approximate nearest neighbor
-    double eps)         // the error bound
+void ANNkd_tree::annkSearch(ANNpoint q,         // the query point
+                            int k,              // number of near neighbors to return
+                            ANNidxArray nn_idx, // nearest neighbor indices (returned)
+                            ANNdistArray dd,    // the approximate nearest neighbor
+                            double eps)         // the error bound
 {
 
   ANNkdDim = dim; // copy arguments to static equivs
@@ -145,8 +144,7 @@ void ANNkd_split::ann_search(ANNdist box_dist) {
     if (box_diff < 0) // within bounds - ignore
       box_diff = 0;
     // distance to further box
-    box_dist = (ANNdist)ANN_SUM(box_dist,
-                                ANN_DIFF(ANN_POW(box_diff), ANN_POW(cut_diff)));
+    box_dist = (ANNdist)ANN_SUM(box_dist, ANN_DIFF(ANN_POW(box_diff), ANN_POW(cut_diff)));
 
     // visit further child if close enough
     if (box_dist * ANNkdMaxErr < ANNkdPointMK->max_key())
@@ -159,8 +157,7 @@ void ANNkd_split::ann_search(ANNdist box_dist) {
     if (box_diff < 0) // within bounds - ignore
       box_diff = 0;
     // distance to further box
-    box_dist = (ANNdist)ANN_SUM(box_dist,
-                                ANN_DIFF(ANN_POW(box_diff), ANN_POW(cut_diff)));
+    box_dist = (ANNdist)ANN_SUM(box_dist, ANN_DIFF(ANN_POW(box_diff), ANN_POW(cut_diff)));
 
     // visit further child if close enough
     if (box_dist * ANNkdMaxErr < ANNkdPointMK->max_key())

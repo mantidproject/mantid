@@ -27,8 +27,7 @@ should inherit from this class to enable certain features. E.g. querying
 @author Roman Tolchenov, Tessella plc
 @date 26/04/2010
 */
-class MANTID_CURVEFITTING_DLL BackgroundFunction
-    : public API::IBackgroundFunction {
+class MANTID_CURVEFITTING_DLL BackgroundFunction : public API::IBackgroundFunction {
 public:
   /// Returns the centre of the function, which may be something as simple as
   /// the centre of

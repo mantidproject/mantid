@@ -24,8 +24,7 @@ class EXPORT_OPT_MANTIDQT_PLOTTING RangeSelector : public QObject {
 public:
   enum SelectType { XMINMAX, YMINMAX };
 
-  RangeSelector(PreviewPlot *plot, SelectType type = XMINMAX,
-                bool visible = true, bool infoOnly = false,
+  RangeSelector(PreviewPlot *plot, SelectType type = XMINMAX, bool visible = true, bool infoOnly = false,
                 const QColor &colour = Qt::black);
 
   void setColour(const QColor &colour);
@@ -38,6 +37,7 @@ public:
   double getMaximum() const;
 
   void setVisible(bool visible);
+  void setBounds(const double min, const double max);
 
   void detach();
 
@@ -54,7 +54,6 @@ private slots:
   void handleMouseMove(const QPoint &point);
   void handleMouseUp(const QPoint &point);
 
-  void resetBounds();
   void redrawMarker();
 
 private:

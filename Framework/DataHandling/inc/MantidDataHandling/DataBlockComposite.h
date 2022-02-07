@@ -18,11 +18,11 @@ namespace DataHandling {
 */
 class DLLExport DataBlockComposite : public DataBlock {
 public:
-  int64_t getMinSpectrumID() const override;
-  void setMinSpectrumID(int64_t) override;
+  specnum_t getMinSpectrumID() const override;
+  void setMinSpectrumID(specnum_t) override;
 
-  int64_t getMaxSpectrumID() const override;
-  void setMaxSpectrumID(int64_t) override;
+  specnum_t getMaxSpectrumID() const override;
+  void setMaxSpectrumID(specnum_t) override;
 
   size_t getNumberOfSpectra() const override;
   size_t getNumberOfChannels() const override;
@@ -37,8 +37,8 @@ public:
   std::vector<DataBlock> getDataBlocks();
   DataBlockComposite operator+(const DataBlockComposite &other);
   void removeSpectra(DataBlockComposite &toRemove);
-  void truncate(int64_t specMin, int64_t specMax);
-  std::vector<int64_t> getAllSpectrumNumbers();
+  void truncate(specnum_t specMin, specnum_t specMax);
+  std::vector<specnum_t> getAllSpectrumNumbers();
   bool isEmpty();
 
 private:
@@ -59,13 +59,11 @@ private:
  * @param monitorSpectra: a collection of monitor spectrum numbers
  */
 template <typename T>
-void DLLExport populateDataBlockCompositeWithContainer(
-    DataBlockComposite &dataBlockComposite, T &indexContainer, int64_t nArray,
-    int numberOfPeriods, size_t numberOfChannels,
-    std::vector<int64_t> monitorSpectra) {
-  auto isMonitor = [&monitorSpectra](int64_t index) {
-    return std::find(std::begin(monitorSpectra), std::end(monitorSpectra),
-                     index) != std::end(monitorSpectra);
+void DLLExport populateDataBlockCompositeWithContainer(DataBlockComposite &dataBlockComposite, T &indexContainer,
+                                                       int64_t nArray, int numberOfPeriods, size_t numberOfChannels,
+                                                       std::vector<specnum_t> monitorSpectra) {
+  auto isMonitor = [&monitorSpectra](specnum_t index) {
+    return std::find(std::begin(monitorSpectra), std::end(monitorSpectra), index) != std::end(monitorSpectra);
   };
 
   // Handles the case when an element is a monitor. It needs to crate a data
@@ -74,14 +72,11 @@ void DLLExport populateDataBlockCompositeWithContainer(
   // the
   // monitor itself
   struct HandleWhenElementIsMonitor {
-    void
-    operator()(Mantid::DataHandling::DataBlockComposite &dataBlockComposite,
-               int numberOfPeriods, size_t numberOfChannels,
-               int64_t previousValue, int64_t startValue) {
+    void operator()(Mantid::DataHandling::DataBlockComposite &dataBlockComposite, int numberOfPeriods,
+                    size_t numberOfChannels, specnum_t previousValue, specnum_t startValue) {
       if (previousValue - startValue > 0) {
-        auto numberOfSpectra =
-            previousValue - startValue; /* Should be from [start,
-                                           previousValue -1]*/
+        auto numberOfSpectra = previousValue - startValue; /* Should be from [start,
+                                                              previousValue -1]*/
         DataBlock dataBlock(numberOfPeriods, numberOfSpectra, numberOfChannels);
         dataBlock.setMinSpectrumID(startValue);
         dataBlock.setMaxSpectrumID(previousValue - 1);
@@ -100,10 +95,8 @@ void DLLExport populateDataBlockCompositeWithContainer(
   // be a gap between neighbouring spetrum numbers. Then we need to
   // write out this range as a data block.
   struct HandleWhenElementMadeAJump {
-    void
-    operator()(Mantid::DataHandling::DataBlockComposite &dataBlockComposite,
-               int numberOfPeriods, size_t numberOfChannels,
-               int64_t previousValue, int64_t startValue) {
+    void operator()(Mantid::DataHandling::DataBlockComposite &dataBlockComposite, int numberOfPeriods,
+                    size_t numberOfChannels, specnum_t previousValue, specnum_t startValue) {
       auto numberOfSpectra = previousValue - startValue + 1;
       DataBlock dataBlock(numberOfPeriods, numberOfSpectra, numberOfChannels);
       dataBlock.setMinSpectrumID(startValue);
@@ -123,14 +116,12 @@ void DLLExport populateDataBlockCompositeWithContainer(
     // to clear the data that was potentially before the monitor.
 
     if (isMonitor(previousValue)) {
-      handleWhenElementIsMonitor(dataBlockComposite, numberOfPeriods,
-                                 numberOfChannels, previousValue, startValue);
+      handleWhenElementIsMonitor(dataBlockComposite, numberOfPeriods, numberOfChannels, previousValue, startValue);
       startValue = indexContainer[arrayIndex];
     } else if ((indexContainer[arrayIndex] - previousValue) != 1) {
       // We must have completed an interval, we create a DataBlock and add
       // it
-      handleWhenElementMadeAJump(dataBlockComposite, numberOfPeriods,
-                                 numberOfChannels, previousValue, startValue);
+      handleWhenElementMadeAJump(dataBlockComposite, numberOfPeriods, numberOfChannels, previousValue, startValue);
       startValue = indexContainer[arrayIndex];
     }
 
@@ -140,11 +131,9 @@ void DLLExport populateDataBlockCompositeWithContainer(
 
   // The last interval would not have been added.
   if (isMonitor(previousValue)) {
-    handleWhenElementIsMonitor(dataBlockComposite, numberOfPeriods,
-                               numberOfChannels, previousValue, startValue);
+    handleWhenElementIsMonitor(dataBlockComposite, numberOfPeriods, numberOfChannels, previousValue, startValue);
   } else {
-    handleWhenElementMadeAJump(dataBlockComposite, numberOfPeriods,
-                               numberOfChannels, previousValue, startValue);
+    handleWhenElementMadeAJump(dataBlockComposite, numberOfPeriods, numberOfChannels, previousValue, startValue);
   }
 }
 } // namespace DataHandling

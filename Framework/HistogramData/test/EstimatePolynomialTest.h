@@ -25,35 +25,27 @@ class EstimatePolynomialTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static EstimatePolynomialTest *createSuite() {
-    return new EstimatePolynomialTest();
-  }
+  static EstimatePolynomialTest *createSuite() { return new EstimatePolynomialTest(); }
   static void destroySuite(EstimatePolynomialTest *suite) { delete suite; }
 
   void test_BadParameters() {
-    Histogram histo(Points{10, LinearGenerator(0., 1.)},
-                    Counts{10, LinearGenerator(10., 0.)});
+    Histogram histo(Points{10, LinearGenerator(0., 1.)}, Counts{10, LinearGenerator(10., 0.)});
 
     double bg0, bg1, bg2, chisq;
     // bad order
-    TS_ASSERT_THROWS(Mantid::HistogramData::estimatePolynomial(
-                         3, histo, 0, histo.size(), bg0, bg1, bg2, chisq),
+    TS_ASSERT_THROWS(Mantid::HistogramData::estimatePolynomial(3, histo, 0, histo.size(), bg0, bg1, bg2, chisq),
                      const std::runtime_error &);
     // bad range i_max < i_min
-    TS_ASSERT_THROWS(estimatePolynomial(2, histo, 1, 0, bg0, bg1, bg2, chisq),
-                     const std::runtime_error &);
+    TS_ASSERT_THROWS(estimatePolynomial(2, histo, 1, 0, bg0, bg1, bg2, chisq), const std::runtime_error &);
     // bad range x.size() < i_max
-    TS_ASSERT_THROWS(estimatePolynomial(2, histo, 0, 30, bg0, bg1, bg2, chisq),
-                     const std::runtime_error &);
+    TS_ASSERT_THROWS(estimatePolynomial(2, histo, 0, 30, bg0, bg1, bg2, chisq), const std::runtime_error &);
   }
 
   void test_FlatData() {
-    Histogram histo(Points{10, LinearGenerator(0., 1.)},
-                    Counts{10, LinearGenerator(10., 0.)});
+    Histogram histo(Points{10, LinearGenerator(0., 1.)}, Counts{10, LinearGenerator(10., 0.)});
 
     double bg0, bg1, bg2, chisq;
-    for (size_t order = 0; order < 3;
-         ++order) { // should always return that constant is best
+    for (size_t order = 0; order < 3; ++order) { // should always return that constant is best
       estimatePolynomial(order, histo, 0, histo.size(), bg0, bg1, bg2, chisq);
       TS_ASSERT_EQUALS(bg0, 10.);
       TS_ASSERT_EQUALS(bg1, 0.);
@@ -62,8 +54,7 @@ public:
   }
 
   void test_LinearData() {
-    Histogram histo(Points{10, LinearGenerator(0., 1.)},
-                    Counts{10, LinearGenerator(0., 12.)});
+    Histogram histo(Points{10, LinearGenerator(0., 1.)}, Counts{10, LinearGenerator(0., 12.)});
 
     double bg0, bg1, bg2, chisq;
 
@@ -93,8 +84,7 @@ public:
   }
 
   void test_QuadraticData() {
-    Histogram histo(Points{10, LinearGenerator(0., 1.)},
-                    Counts{10, QuadraticGenerator(10., 12., -3.)});
+    Histogram histo(Points{10, LinearGenerator(0., 1.)}, Counts{10, QuadraticGenerator(10., 12., -3.)});
     std::cout << "-> quad: ";
     for (const auto &val : histo.y())
       std::cout << val << " ";

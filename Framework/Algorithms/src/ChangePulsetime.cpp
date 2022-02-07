@@ -9,8 +9,7 @@
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/System.h"
 
-namespace Mantid {
-namespace Algorithms {
+namespace Mantid::Algorithms {
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(ChangePulsetime)
@@ -24,19 +23,15 @@ using std::size_t;
 /** Initialize the algorithm's properties.
  */
 void ChangePulsetime::init() {
-  declareProperty(std::make_unique<WorkspaceProperty<EventWorkspace>>(
-                      "InputWorkspace", "", Direction::Input),
+  declareProperty(std::make_unique<WorkspaceProperty<EventWorkspace>>("InputWorkspace", "", Direction::Input),
                   "An input event workspace.");
-  declareProperty(std::make_unique<PropertyWithValue<double>>("TimeOffset",
-                                                              Direction::Input),
+  declareProperty(std::make_unique<PropertyWithValue<double>>("TimeOffset", Direction::Input),
                   "Number of seconds (a float) to add to each event's pulse "
                   "time. Required.");
-  declareProperty(
-      std::make_unique<ArrayProperty<int>>("WorkspaceIndexList", ""),
-      "An optional list of workspace indices to change. If blank, "
-      "all spectra in the workspace are modified.");
-  declareProperty(std::make_unique<WorkspaceProperty<EventWorkspace>>(
-                      "OutputWorkspace", "", Direction::Output),
+  declareProperty(std::make_unique<ArrayProperty<int>>("WorkspaceIndexList", ""),
+                  "An optional list of workspace indices to change. If blank, "
+                  "all spectra in the workspace are modified.");
+  declareProperty(std::make_unique<WorkspaceProperty<EventWorkspace>>("OutputWorkspace", "", Direction::Output),
                   "An output event workspace.");
 }
 
@@ -80,5 +75,4 @@ void ChangePulsetime::exec() {
   setProperty("OutputWorkspace", out_ws);
 }
 
-} // namespace Algorithms
-} // namespace Mantid
+} // namespace Mantid::Algorithms

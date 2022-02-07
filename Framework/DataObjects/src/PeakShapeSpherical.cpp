@@ -5,12 +5,12 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidDataObjects/PeakShapeSpherical.h"
+#include "MantidJson/Json.h"
 #include <json/json.h>
 #include <stdexcept>
 #include <utility>
 
-namespace Mantid {
-namespace DataObjects {
+namespace Mantid::DataObjects {
 
 /**
  * @brief Constructor
@@ -19,12 +19,9 @@ namespace DataObjects {
  * @param algorithmName : Algorithm name used for the integration
  * @param algorithmVersion : Algorithm version used for the integration
  */
-PeakShapeSpherical::PeakShapeSpherical(const double &peakRadius,
-                                       Kernel::SpecialCoordinateSystem frame,
-                                       std::string algorithmName,
-                                       int algorithmVersion)
-    : PeakShapeBase(frame, std::move(algorithmName), algorithmVersion),
-      m_radius(peakRadius) {}
+PeakShapeSpherical::PeakShapeSpherical(const double &peakRadius, Kernel::SpecialCoordinateSystem frame,
+                                       std::string algorithmName, int algorithmVersion)
+    : PeakShapeBase(frame, std::move(algorithmName), algorithmVersion), m_radius(peakRadius) {}
 
 /**
  * @brief PeakShapeSpherical::PeakShapeSpherical
@@ -35,18 +32,11 @@ PeakShapeSpherical::PeakShapeSpherical(const double &peakRadius,
  * @param algorithmName : Algorithm name
  * @param algorithmVersion : Algorithm version
  */
-PeakShapeSpherical::PeakShapeSpherical(const double &peakRadius,
-                                       const double &peakInnerRadius,
-                                       const double &peakOuterRadius,
-                                       Kernel::SpecialCoordinateSystem frame,
-                                       std::string algorithmName,
-                                       int algorithmVersion)
-    : PeakShapeBase(frame, std::move(algorithmName), algorithmVersion),
-      m_radius(peakRadius), m_backgroundInnerRadius(peakInnerRadius),
-      m_backgroundOuterRadius(peakOuterRadius) {
-  if (peakRadius == m_backgroundInnerRadius) {
-    m_backgroundInnerRadius.reset();
-  }
+PeakShapeSpherical::PeakShapeSpherical(const double &peakRadius, const double &peakInnerRadius,
+                                       const double &peakOuterRadius, Kernel::SpecialCoordinateSystem frame,
+                                       std::string algorithmName, int algorithmVersion)
+    : PeakShapeBase(frame, std::move(algorithmName), algorithmVersion), m_radius(peakRadius),
+      m_backgroundInnerRadius(peakInnerRadius), m_backgroundOuterRadius(peakOuterRadius) {
   if (peakRadius == m_backgroundOuterRadius) {
     m_backgroundOuterRadius.reset();
   }
@@ -62,23 +52,18 @@ std::string PeakShapeSpherical::toJSON() const {
   root["radius"] = Json::Value(m_radius);
 
   if (m_backgroundInnerRadius && m_backgroundOuterRadius) {
-    root["background_outer_radius"] =
-        Json::Value(m_backgroundOuterRadius.get());
-    root["background_inner_radius"] =
-        Json::Value(m_backgroundInnerRadius.get());
+    root["background_outer_radius"] = Json::Value(m_backgroundOuterRadius.get());
+    root["background_inner_radius"] = Json::Value(m_backgroundInnerRadius.get());
   }
 
-  Json::StyledWriter writer;
-  return writer.write(root);
+  return Mantid::JsonHelpers::jsonToString(root);
 }
 
 /**
  * @brief Clone object as deep copy
  * @return pointer to new object
  */
-PeakShapeSpherical *PeakShapeSpherical::clone() const {
-  return new PeakShapeSpherical(*this);
-}
+PeakShapeSpherical *PeakShapeSpherical::clone() const { return new PeakShapeSpherical(*this); }
 
 std::string PeakShapeSpherical::shapeName() const { return sphereShapeName(); }
 
@@ -115,18 +100,14 @@ boost::optional<double> PeakShapeSpherical::radius(RadiusType type) const {
  * this is optional.
  * @return boost optional outer radius
  */
-boost::optional<double> PeakShapeSpherical::backgroundOuterRadius() const {
-  return m_backgroundOuterRadius;
-}
+boost::optional<double> PeakShapeSpherical::backgroundOuterRadius() const { return m_backgroundOuterRadius; }
 
 /**
  * @brief Get the background inner radius. The inner radius may not be set, so
  * this is optional.
  * @return boost optional inner radius.
  */
-boost::optional<double> PeakShapeSpherical::backgroundInnerRadius() const {
-  return m_backgroundInnerRadius;
-}
+boost::optional<double> PeakShapeSpherical::backgroundInnerRadius() const { return m_backgroundInnerRadius; }
 
 /**
  * @brief PeakShapeSpherical::sphereShapeName
@@ -134,5 +115,4 @@ boost::optional<double> PeakShapeSpherical::backgroundInnerRadius() const {
  */
 const std::string PeakShapeSpherical::sphereShapeName() { return "spherical"; }
 
-} // namespace DataObjects
-} // namespace Mantid
+} // namespace Mantid::DataObjects

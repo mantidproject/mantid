@@ -12,10 +12,10 @@
 // clang-format off
 #include <nexus/NeXusFile.hpp>
 #include <nexus/NeXusException.hpp>
+#include <utility>
 // clang-format on
 
-namespace Mantid {
-namespace API {
+namespace Mantid::API {
 
 namespace {
 /// static logger object
@@ -27,19 +27,15 @@ Kernel::Logger g_log("FileBackedExperimentInfo");
  * @param filename The full path to the file
  * @param nxpath Path to the location of the experiment information
  */
-FileBackedExperimentInfo::FileBackedExperimentInfo(const std::string &filename,
-                                                   const std::string &nxpath)
-    : ExperimentInfo(), m_loaded(false), m_filename(filename),
-      m_nxpath(nxpath) {}
+FileBackedExperimentInfo::FileBackedExperimentInfo(std::string filename, std::string nxpath)
+    : ExperimentInfo(), m_loaded(false), m_filename(std::move(filename)), m_nxpath(std::move(nxpath)) {}
 
 /**
  * This clones the FileBackedExperimentInfo and will not cause a load
  * of the information.
  * @return A clone of the object.
  */
-ExperimentInfo *FileBackedExperimentInfo::cloneExperimentInfo() const {
-  return new FileBackedExperimentInfo(*this);
-}
+ExperimentInfo *FileBackedExperimentInfo::cloneExperimentInfo() const { return new FileBackedExperimentInfo(*this); }
 
 /**
  * Check if the object has been populated and load the information if
@@ -64,17 +60,13 @@ void FileBackedExperimentInfo::populateFromFile() const {
     m_loaded = true;
 
     std::string parameterStr;
-    const_cast<FileBackedExperimentInfo *>(this)->loadExperimentInfoNexus(
-        m_filename, &nxFile, parameterStr);
-    const_cast<FileBackedExperimentInfo *>(this)->readParameterMap(
-        parameterStr);
+    const_cast<FileBackedExperimentInfo *>(this)->loadExperimentInfoNexus(m_filename, &nxFile, parameterStr);
+    const_cast<FileBackedExperimentInfo *>(this)->readParameterMap(parameterStr);
   } catch (::NeXus::Exception &exc) {
     std::ostringstream os;
-    os << "Unable to load experiment information from NeXus file: "
-       << exc.what() << "\n";
+    os << "Unable to load experiment information from NeXus file: " << exc.what() << "\n";
     throw std::runtime_error(os.str());
   }
 }
 
-} // namespace API
-} // namespace Mantid
+} // namespace Mantid::API

@@ -24,9 +24,7 @@ template <typename CType> struct ExtractCType {
    * @param value A pointer to the Python object
    * @return The value as a C type
    */
-  inline CType operator()(PyObject *value) {
-    return boost::python::extract<CType>(value);
-  }
+  inline CType operator()(PyObject *value) { return boost::python::extract<CType>(value); }
 };
 
 /**
@@ -38,9 +36,7 @@ template <> struct ExtractCType<std::string> {
    * @param value A pointer to the Python object
    * @return The value as a C type
    */
-  inline std::string operator()(PyObject *value) {
-    return boost::python::extract<std::string>(PyObject_Str(value));
-  }
+  inline std::string operator()(PyObject *value) { return boost::python::extract<std::string>(PyObject_Str(value)); }
 };
 
 } // namespace
@@ -83,15 +79,12 @@ template <typename DestElementType> struct DLLExport PySequenceToVector {
 private:
   inline PyObject *ptr() const { return m_obj.ptr(); }
 
-  inline std::size_t srcSize() const {
-    return static_cast<size_t>(PySequence_Size(ptr()));
-  }
+  inline std::size_t srcSize() const { return static_cast<size_t>(PySequence_Size(ptr())); }
 
   inline void throwIfSizeMismatched(const TypedVector &dest) const {
     if (srcSize() != dest.size()) {
-      throw std::invalid_argument(
-          "Length mismatch between python list & C array. python=" +
-          std::to_string(srcSize()) + ", C=" + std::to_string(dest.size()));
+      throw std::invalid_argument("Length mismatch between python list & C array. python=" + std::to_string(srcSize()) +
+                                  ", C=" + std::to_string(dest.size()));
     }
   }
 

@@ -29,10 +29,10 @@ Improved
 
 - :ref:`CalculateFlatBackground <algm-CalculateFlatBackground>` has a new mode 'Moving Average', which takes the minimum of a moving window average as the flat background.
 - :ref:`StartLiveData <algm-StartLiveData>` and its dialog now support dynamic listener properties, based on the specific LiveListener being used.
-- All algorithms using AsciiPointBase now have a new property 'Separator' which allows the delimiter to be set to either comma, space or tab. This affects :ref:`SaveReflCustomAscii <algm-SaveReflCustomAscii>`, :ref:`SaveReflThreeColumnAscii <algm-SaveReflThreeColumnAscii>`, :ref:`SaveANSTOAscii <algm-SaveANSTOAscii>` and :ref:`SaveILLCosmosAscii <algm-SaveILLCosmosAscii>`.
+- All algorithms using AsciiPointBase now have a new property 'Separator' which allows the delimiter to be set to either comma, space or tab. This affects ``SaveReflCustomAscii``, ``SaveReflThreeColumnAscii``, ``SaveANSTOAscii`` and ``SaveILLCosmosAscii``.
 - :ref:`ReplaceSpecialValues <algm-ReplaceSpecialValues>` allows for 'small' values, which are below a user specified threshold, to be replaced.
 - :ref:`Stitch1DMany <algm-Stitch1DMany>` has a new property 'ScaleFactorFromPeriod', which enables it to apply scale factors from a particular period when stitching group workspaces. The documentation for this algorithm has also been improved.
-- :ref:`SaveMDWorkspaceToVTK <algm-SaveMDWorkspaceToVTK>` has a working progress bar.
+- ``SaveMDWorkspaceToVTK`` has a working progress bar.
 - :ref:`SumSpectra <algm-SumSpectra>` has an option to ignore special floating point values called 'RemoveSpecialValues'. This is off by default. When enabled it will ignore values such as NaN or Infinity during the summation of the spectra.  It was also updated to fix special values being used in some cases when the option was selected.
 - :ref:`MonteCarloAbsorption <algm-MonteCarloAbsorption>`:
    - An `Interpolation` option has been added. The availabile options are: `Linear` & `CSpline`.
@@ -73,7 +73,7 @@ Deprecated
 - :ref:`ConvertUnitsUsingDetectorTable	 <algm-ConvertUnitsUsingDetectorTable>`.
 - :ref:`DownloadRemoteFile	 <algm-DownloadRemoteFile>` is deprecated in favour of v2.
 - :ref:`FFTSmooth	 <algm-FFTSmooth>` is deprecated in favour of v2.
-- :ref:`OneStepMDEW	 <algm-OneStepMDEW>`.
+- OneStepMDEW.
 - :ref:`QueryAllRemoteJobs	 <algm-QueryAllRemoteJobs>` is deprecated in favour of v2.
 - :ref:`RefinePowderInstrumentParameters	 <algm-RefinePowderInstrumentParameters>` is deprecated in favour of v2.
 - :ref:`StartRemoteTransaction	 <algm-StartRemoteTransaction>` is deprecated in favour of v2.

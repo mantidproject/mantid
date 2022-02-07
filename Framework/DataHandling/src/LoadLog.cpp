@@ -27,13 +27,13 @@
 #include <Poco/Path.h>
 #include <boost/algorithm/string.hpp>
 #include <fstream> // used to get ifstream
+#include <regex>
 #include <sstream>
 #include <utility>
 
 using Mantid::Types::Core::DateAndTime;
 
-namespace Mantid {
-namespace DataHandling {
+namespace Mantid::DataHandling {
 // Register the algorithm into the algorithm factory
 DECLARE_ALGORITHM(LoadLog)
 
@@ -48,8 +48,7 @@ using Types::Core::DateAndTime;
 namespace {
 
 template <class MapClass, class LoggerType>
-void addLogDataToRun(Mantid::API::Run &run, MapClass &aMap,
-                     LoggerType &logger) {
+void addLogDataToRun(Mantid::API::Run &run, MapClass &aMap, LoggerType &logger) {
   for (auto &itr : aMap) {
     try {
       run.addLogData(itr.second.release());
@@ -70,34 +69,29 @@ LoadLog::LoadLog() {}
 void LoadLog::init() {
   // When used as a Child Algorithm the workspace name is not used - hence the
   // "Anonymous" to satisfy the validator
-  declareProperty(
-      std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
-          "Workspace", "Anonymous", Direction::InOut),
-      "The name of the workspace to which the log data will be added.");
+  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>("Workspace", "Anonymous", Direction::InOut),
+                  "The name of the workspace to which the log data will be added.");
 
   const std::vector<std::string> exts{".txt", ".log"};
-  declareProperty(
-      std::make_unique<FileProperty>("Filename", "", FileProperty::Load, exts),
-      "The filename (including its full or relative path) of a SNS "
-      "text log file (not cvinfo), "
-      "an ISIS log file, or an ISIS raw file. "
-      "If a raw file is specified all log files associated with "
-      "that raw file are loaded into the specified workspace. The "
-      "file extension must "
-      "either be .raw or .s when specifying a raw file");
+  declareProperty(std::make_unique<FileProperty>("Filename", "", FileProperty::Load, exts),
+                  "The filename (including its full or relative path) of a SNS "
+                  "text log file (not cvinfo), "
+                  "an ISIS log file, or an ISIS raw file. "
+                  "If a raw file is specified all log files associated with "
+                  "that raw file are loaded into the specified workspace. The "
+                  "file extension must "
+                  "either be .raw or .s when specifying a raw file");
 
-  declareProperty(
-      std::make_unique<ArrayProperty<std::string>>("Names"),
-      "For SNS-style log files only: the names of each column's log, separated "
-      "by commas. "
-      "This must be one fewer than the number of columns in the file.");
+  declareProperty(std::make_unique<ArrayProperty<std::string>>("Names"),
+                  "For SNS-style log files only: the names of each column's log, separated "
+                  "by commas. "
+                  "This must be one fewer than the number of columns in the file.");
 
-  declareProperty(
-      std::make_unique<ArrayProperty<std::string>>("Units"),
-      "For SNS-style log files only: the units of each column's log, separated "
-      "by commas. "
-      "This must be one fewer than the number of columns in the file. "
-      "Optional: leave blank for no units in any log.");
+  declareProperty(std::make_unique<ArrayProperty<std::string>>("Units"),
+                  "For SNS-style log files only: the units of each column's log, separated "
+                  "by commas. "
+                  "This must be one fewer than the number of columns in the file. "
+                  "Optional: leave blank for no units in any log.");
 
   declareProperty("NumberOfColumns", Mantid::EMPTY_INT(),
                   "Number of columns in the file. If not set Mantid will "
@@ -139,8 +133,12 @@ void LoadLog::exec() {
 
   // If there's more than one log name provided, then it's an invalid ISIS file.
   if (names.size() > 1) {
-    throw std::invalid_argument(
-        "More than one log name provided. Invalid ISIS log file.");
+    throw std::invalid_argument("More than one log name provided. Invalid ISIS log file.");
+  }
+
+  // If it's an old log file (pre-2007), then it is not currently supported.
+  if (isOldDateTimeFormat(logFileStream)) {
+    throw std::invalid_argument("File " + m_filename + " cannot be read because it has an old unsupported format.");
   }
 
   int colNum = static_cast<int>(getProperty("NumberOfColumns"));
@@ -151,12 +149,10 @@ void LoadLog::exec() {
 
   switch (colNum) {
   case 2:
-    loadTwoColumnLogFile(logFileStream, extractLogName(names),
-                         localWorkspace->mutableRun());
+    loadTwoColumnLogFile(logFileStream, extractLogName(names), localWorkspace->mutableRun());
     break;
   case 3:
-    loadThreeColumnLogFile(logFileStream, m_filename,
-                           localWorkspace->mutableRun());
+    loadThreeColumnLogFile(logFileStream, m_filename, localWorkspace->mutableRun());
     break;
   default:
     throw std::invalid_argument("The log file provided is invalid as it has "
@@ -171,8 +167,7 @@ void LoadLog::exec() {
  * @param logFileName :: The name of the log file to load.
  * @param run :: The run information object
  */
-void LoadLog::loadTwoColumnLogFile(std::ifstream &logFileStream,
-                                   std::string logFileName, API::Run &run) {
+void LoadLog::loadTwoColumnLogFile(std::ifstream &logFileStream, std::string logFileName, API::Run &run) {
   if (!logFileStream) {
     throw std::invalid_argument("Unable to open file " + m_filename);
   }
@@ -181,7 +176,7 @@ void LoadLog::loadTwoColumnLogFile(std::ifstream &logFileStream,
   std::string aLine;
   if (Mantid::Kernel::Strings::extractToEOL(logFileStream, aLine)) {
     if (!isDateTimeString(aLine)) {
-      throw std::invalid_argument("File" + m_filename +
+      throw std::invalid_argument("File " + m_filename +
                                   " is not a standard ISIS log file. Expected "
                                   "to be a two column file.");
     }
@@ -197,14 +192,11 @@ void LoadLog::loadTwoColumnLogFile(std::ifstream &logFileStream,
     kind l_kind = classify(whatType);
 
     if (LoadLog::string != l_kind && LoadLog::number != l_kind) {
-      throw std::invalid_argument(
-          "ISIS log file contains unrecognised second column entries: " +
-          m_filename);
+      throw std::invalid_argument("ISIS log file contains unrecognised second column entries: " + m_filename);
     }
 
     try {
-      Property *log = LogParser::createLogProperty(
-          m_filename, stringToLower(std::move(logFileName)));
+      Property *log = LogParser::createLogProperty(m_filename, stringToLower(std::move(logFileName)));
       if (log) {
         run.addLogData(log);
       }
@@ -220,16 +212,11 @@ void LoadLog::loadTwoColumnLogFile(std::ifstream &logFileStream,
  * @param logFileName :: The name of the log file to load.
  * @param run :: The run information object
  */
-void LoadLog::loadThreeColumnLogFile(std::ifstream &logFileStream,
-                                     const std::string &logFileName,
-                                     API::Run &run) {
+void LoadLog::loadThreeColumnLogFile(std::ifstream &logFileStream, const std::string &logFileName, API::Run &run) {
   std::string str;
   std::string propname;
-  std::map<std::string, std::unique_ptr<Kernel::TimeSeriesProperty<double>>>
-      dMap;
-  std::map<std::string,
-           std::unique_ptr<Kernel::TimeSeriesProperty<std::string>>>
-      sMap;
+  std::map<std::string, std::unique_ptr<Kernel::TimeSeriesProperty<double>>> dMap;
+  std::map<std::string, std::unique_ptr<Kernel::TimeSeriesProperty<std::string>>> sMap;
   kind l_kind(LoadLog::empty);
   bool isNumeric(false);
 
@@ -239,14 +226,13 @@ void LoadLog::loadThreeColumnLogFile(std::ifstream &logFileStream,
 
   while (Mantid::Kernel::Strings::extractToEOL(logFileStream, str)) {
     if (!isDateTimeString(str) && !str.empty()) {
-      throw std::invalid_argument("File" + logFileName +
+      throw std::invalid_argument("File " + logFileName +
                                   " is not a standard ISIS log file. Expected "
                                   "to be a file starting with DateTime String "
                                   "format.");
     }
 
-    if (!Kernel::TimeSeriesProperty<double>::isTimeString(str) ||
-        (str.empty() || str[0] == '#')) {
+    if (!Kernel::TimeSeriesProperty<double>::isTimeString(str) || (str.empty() || str[0] == '#')) {
       // if the line doesn't start with a time read the next line
       continue;
     }
@@ -260,15 +246,12 @@ void LoadLog::loadThreeColumnLogFile(std::ifstream &logFileStream,
     l_kind = classify(blockcolumn);
 
     if (LoadLog::empty == l_kind) {
-      g_log.warning() << "Failed to parse line in log file: " << timecolumn
-                      << "\t" << blockcolumn;
+      g_log.warning() << "Failed to parse line in log file: " << timecolumn << "\t" << blockcolumn;
       continue;
     }
 
     if (LoadLog::string != l_kind) {
-      throw std::invalid_argument(
-          "ISIS log file contains unrecognised second column entries:" +
-          logFileName);
+      throw std::invalid_argument("ISIS log file contains unrecognised second column entries: " + logFileName);
     }
 
     std::string valuecolumn;
@@ -294,8 +277,7 @@ void LoadLog::loadThreeColumnLogFile(std::ifstream &logFileStream,
         if (prop)
           prop->addValue(timecolumn, dvalue);
       } else {
-        auto logd =
-            std::make_unique<Kernel::TimeSeriesProperty<double>>(propname);
+        auto logd = std::make_unique<Kernel::TimeSeriesProperty<double>>(propname);
         logd->addValue(timecolumn, dvalue);
         dMap.emplace(propname, std::move(logd));
       }
@@ -306,8 +288,7 @@ void LoadLog::loadThreeColumnLogFile(std::ifstream &logFileStream,
         if (prop)
           prop->addValue(timecolumn, valuecolumn);
       } else {
-        auto logs =
-            std::make_unique<Kernel::TimeSeriesProperty<std::string>>(propname);
+        auto logs = std::make_unique<Kernel::TimeSeriesProperty<std::string>>(propname);
         logs->addValue(timecolumn, valuecolumn);
         sMap.emplace(propname, std::move(logs));
       }
@@ -393,16 +374,14 @@ bool LoadLog::LoadSNSText() {
         throw std::runtime_error("Inconsistent number of columns while reading "
                                  "SNS-style text file.");
     } else
-      throw std::runtime_error(
-          "Error while reading columns in SNS-style text file.");
+      throw std::runtime_error("Error while reading columns in SNS-style text file.");
   }
   // Now add all the full logs to the workspace
   for (size_t i = 0; i < numCols; i++) {
     std::string name = props[i]->name();
     if (localWorkspace->mutableRun().hasProperty(name)) {
       localWorkspace->mutableRun().removeLogData(name);
-      g_log.information() << "Log data named " << name
-                          << " already existed and was overwritten.\n";
+      g_log.information() << "Log data named " << name << " already existed and was overwritten.\n";
     }
     localWorkspace->mutableRun().addLogData(props[i]);
   }
@@ -453,8 +432,7 @@ LoadLog::kind LoadLog::classify(const std::string &s) const {
  * @returns The string but with all characters in lower case
  */
 std::string LoadLog::stringToLower(std::string strToConvert) {
-  std::transform(strToConvert.begin(), strToConvert.end(), strToConvert.begin(),
-                 tolower);
+  std::transform(strToConvert.begin(), strToConvert.end(), strToConvert.begin(), tolower);
   return strToConvert;
 }
 
@@ -492,16 +470,35 @@ bool LoadLog::isDateTimeString(const std::string &str) const {
 }
 
 /**
+ * Check whether the string is consistent with the old log file
+ * date-time format, for example:
+ * Fri 31-JAN-2003 11:28:15
+ * Wed  9-FEB-2005 09:47:01
+ * @param logFileStream :: The file to test
+ * @return true if the format matches the old log file format.
+ */
+bool LoadLog::isOldDateTimeFormat(std::ifstream &logFileStream) const {
+  // extract first line of file
+  std::string firstLine;
+  Mantid::Kernel::Strings::extractToEOL(logFileStream, firstLine);
+  // reset file back to the beginning
+  logFileStream.seekg(0);
+
+  std::regex oldDateFormat(R"([A-Z][a-z]{2} [ 1-3]\d-[A-Z]{3}-\d{4} \d{2}:\d{2}:\d{2})");
+
+  return std::regex_match(firstLine.substr(0, 24), oldDateFormat);
+}
+
+/**
  * Read a line of a SNS-style text file.
- * @param str :: The string to test
+ * @param input :: The string to test
  * @param out :: a vector that will be filled with the double values.
  * @return false if the format is NOT SNS style or a conversion failed.
  */
-bool LoadLog::SNSTextFormatColumns(const std::string &str,
-                                   std::vector<double> &out) const {
+bool LoadLog::SNSTextFormatColumns(const std::string &input, std::vector<double> &out) const {
   std::vector<std::string> strs;
   out.clear();
-  boost::split(strs, str, boost::is_any_of("\t "));
+  boost::split(strs, input, boost::is_any_of("\t "));
   double val;
   // Every column must evaluate to a double
   for (auto &str : strs) {
@@ -519,8 +516,7 @@ bool LoadLog::SNSTextFormatColumns(const std::string &str,
  * @param logFileStream :: stream to the file
  * @param logFileName :: name for the log file
  */
-int LoadLog::countNumberColumns(std::ifstream &logFileStream,
-                                const std::string &logFileName) {
+int LoadLog::countNumberColumns(std::ifstream &logFileStream, const std::string &logFileName) {
   if (!logFileStream) {
     throw std::invalid_argument("Unable to open file " + m_filename);
   }
@@ -532,7 +528,7 @@ int LoadLog::countNumberColumns(std::ifstream &logFileStream,
   Mantid::Kernel::Strings::extractToEOL(logFileStream, str);
 
   if (!isDateTimeString(str)) {
-    throw std::invalid_argument("File" + logFileName +
+    throw std::invalid_argument("File " + logFileName +
                                 " is not a standard ISIS log file. Expected to "
                                 "be a file starting with DateTime String "
                                 "format.");
@@ -547,9 +543,7 @@ int LoadLog::countNumberColumns(std::ifstream &logFileStream,
   l_kind = classify(blockcolumn);
 
   if (LoadLog::string != l_kind && LoadLog::number != l_kind) {
-    throw std::invalid_argument(
-        "ISIS log file contains unrecognised second column entries:" +
-        logFileName);
+    throw std::invalid_argument("ISIS log file contains unrecognised second column entries: " + logFileName);
   }
 
   std::string valuecolumn;
@@ -566,5 +560,4 @@ int LoadLog::countNumberColumns(std::ifstream &logFileStream,
   }
 }
 
-} // namespace DataHandling
-} // namespace Mantid
+} // namespace Mantid::DataHandling

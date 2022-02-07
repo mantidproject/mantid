@@ -6,18 +6,19 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidPythonInterface/api/FitFunctions/IFunctionAdapter.h"
 #include "MantidPythonInterface/core/CallMethod.h"
+#include "MantidPythonInterface/core/Converters/PyNativeTypeExtractor.h"
 #include "MantidPythonInterface/core/Converters/WrapWithNDArray.h"
 
 #include <boost/python/class.hpp>
 #include <boost/python/list.hpp>
+#include <boost/variant/apply_visitor.hpp>
 #include <utility>
 
 #define PY_ARRAY_UNIQUE_SYMBOL API_ARRAY_API
 #define NO_IMPORT_ARRAY
 #include <numpy/arrayobject.h>
 
-namespace Mantid {
-namespace PythonInterface {
+namespace Mantid::PythonInterface {
 using API::IFunction;
 using PythonInterface::callMethod;
 using PythonInterface::callMethodNoCheck;
@@ -26,48 +27,47 @@ using namespace boost::python;
 
 namespace {
 
+class AttrVisitor : Mantid::PythonInterface::IPyTypeVisitor {
+public:
+  AttrVisitor(IFunction::Attribute &attrToUpdate) : m_attr(attrToUpdate) {}
+
+  void operator()(bool value) const override { m_attr.setValue(value); }
+  void operator()(long value) const override { m_attr.setValue(static_cast<int>(value)); }
+  void operator()(double value) const override { m_attr.setValue(value); }
+  void operator()(std::string value) const override { m_attr.setValue(std::move(value)); }
+  void operator()(Mantid::API::Workspace_sptr) const override { throw std::invalid_argument(m_errorMsg); }
+
+  void operator()(std::vector<bool>) const override { throw std::invalid_argument(m_errorMsg); }
+  void operator()(std::vector<long> value) const override {
+    // Previous existing code blindly converted any list type into a list of doubles.
+    // We now have to preserve this behaviour to maintain API compatibility as
+    // setValue only takes std::vector<double>.
+    std::vector<double> doubleVals(value.cbegin(), value.cend());
+    m_attr.setValue(std::move(doubleVals));
+  }
+  void operator()(std::vector<double> value) const override { m_attr.setValue(std::move(value)); }
+  void operator()(std::vector<std::string>) const override { throw std::invalid_argument(m_errorMsg); }
+
+  using Mantid::PythonInterface::IPyTypeVisitor::operator();
+
+private:
+  IFunction::Attribute &m_attr;
+  const std::string m_errorMsg = "Invalid attribute. Allowed types=float,int,str,bool,list(float),list(int)";
+};
+
 /**
  * Create an Attribute from a python value.
  * @param value :: A value python object. Allowed python types:
  * float,int,str,bool.
  * @return :: The created attribute.
  */
-IFunction::Attribute createAttributeFromPythonValue(const object &value) {
+IFunction::Attribute createAttributeFromPythonValue(IFunction::Attribute attrToUpdate, const object &value) {
 
-  PyObject *rawptr = value.ptr();
-  IFunction::Attribute attr;
+  using Mantid::PythonInterface::PyNativeTypeExtractor;
+  auto variantObj = PyNativeTypeExtractor::convert(value);
 
-  if (PyBool_Check(rawptr) == 1) {
-    attr = IFunction::Attribute(extract<bool>(rawptr)());
-  }
-#if PY_MAJOR_VERSION >= 3
-  else if (PyLong_Check(rawptr) == 1) {
-#else
-  else if (PyInt_Check(rawptr) == 1) {
-#endif
-    attr = IFunction::Attribute(extract<int>(rawptr)());
-  } else if (PyFloat_Check(rawptr) == 1) {
-    attr = IFunction::Attribute(extract<double>(rawptr)());
-  }
-#if PY_MAJOR_VERSION >= 3
-  else if (PyUnicode_Check(rawptr) == 1) {
-#else
-  else if (PyBytes_Check(rawptr) == 1) {
-#endif
-    attr = IFunction::Attribute(extract<std::string>(rawptr)());
-  } else if (PyList_Check(rawptr) == 1) {
-    auto n = PyList_Size(rawptr);
-    std::vector<double> vec;
-    for (Py_ssize_t i = 0; i < n; ++i) {
-      auto v = extract<double>(PyList_GetItem(rawptr, i))();
-      vec.emplace_back(v);
-    }
-    attr = IFunction::Attribute(vec);
-  } else {
-    throw std::invalid_argument("Invalid attribute type. Allowed "
-                                "types=float,int,str,bool,list(float)");
-  }
-  return attr;
+  boost::apply_visitor(AttrVisitor(attrToUpdate), variantObj);
+  return attrToUpdate;
 }
 
 } // namespace
@@ -78,24 +78,19 @@ IFunction::Attribute createAttributeFromPythonValue(const object &value) {
  * @param functionMethod The name of the function method that must be present
  * @param derivMethod The name of the derivative method that may be overridden
  */
-IFunctionAdapter::IFunctionAdapter(PyObject *self, std::string functionMethod,
-                                   std::string derivMethod)
-    : m_self(self), m_functionName(std::move(functionMethod)),
-      m_derivName(std::move(derivMethod)),
+IFunctionAdapter::IFunctionAdapter(PyObject *self, std::string functionMethod, std::string derivMethod)
+    : m_self(self), m_functionName(std::move(functionMethod)), m_derivName(std::move(derivMethod)),
       m_derivOveridden(typeHasAttribute(self, m_derivName.c_str())) {
   if (!typeHasAttribute(self, "init"))
     throw std::runtime_error("Function does not define an init method.");
   if (!typeHasAttribute(self, m_functionName.c_str()))
-    throw std::runtime_error("Function does not define a " + m_functionName +
-                             " method.");
+    throw std::runtime_error("Function does not define a " + m_functionName + " method.");
 }
 
 /**
  * @returns The class name of the function. This cannot be overridden in Python.
  */
-std::string IFunctionAdapter::name() const {
-  return getSelf()->ob_type->tp_name;
-}
+std::string IFunctionAdapter::name() const { return getSelf()->ob_type->tp_name; }
 
 /**
  * Specify a category for the function
@@ -115,13 +110,12 @@ void IFunctionAdapter::init() { callMethodNoCheck<void>(getSelf(), "init"); }
  * @param name :: The name of the new attribute
  * @param defaultValue :: The default value for the attribute
  */
-void IFunctionAdapter::declareAttribute(const std::string &name,
-                                        const object &defaultValue) {
-  auto attr = createAttributeFromPythonValue(defaultValue);
+void IFunctionAdapter::declareAttribute(const std::string &name, const object &defaultValue) {
+  auto attr = IFunction::hasAttribute(name) ? IFunction::getAttribute(name) : Attribute();
+  attr = createAttributeFromPythonValue(attr, defaultValue);
   IFunction::declareAttribute(name, attr);
   try {
-    callMethod<void, std::string, object>(getSelf(), "setAttributeValue", name,
-                                          defaultValue);
+    callMethod<void, std::string, object>(getSelf(), "setAttributeValue", name, defaultValue);
   } catch (UndefinedAttributeError &) {
     // nothing to do
   }
@@ -133,8 +127,7 @@ void IFunctionAdapter::declareAttribute(const std::string &name,
  * @param name :: The name of the new attribute.
  * @returns The value of the attribute
  */
-PyObject *IFunctionAdapter::getAttributeValue(IFunction &self,
-                                              const std::string &name) {
+PyObject *IFunctionAdapter::getAttributeValue(const IFunction &self, const std::string &name) {
   auto attr = self.getAttribute(name);
   return getAttributeValue(self, attr);
 }
@@ -145,9 +138,7 @@ PyObject *IFunctionAdapter::getAttributeValue(IFunction &self,
  * @param attr An attribute object
  * @returns The value of the attribute
  */
-PyObject *
-IFunctionAdapter::getAttributeValue(IFunction &self,
-                                    const API::IFunction::Attribute &attr) {
+PyObject *IFunctionAdapter::getAttributeValue(const IFunction &self, const API::IFunction::Attribute &attr) {
   UNUSED_ARG(self);
   std::string type = attr.type();
   PyObject *result(nullptr);
@@ -173,10 +164,9 @@ IFunctionAdapter::getAttributeValue(IFunction &self,
  * @param name :: The name of the attribute
  * @param value :: The value to set
  */
-void IFunctionAdapter::setAttributePythonValue(IFunction &self,
-                                               const std::string &name,
-                                               const object &value) {
-  self.setAttribute(name, createAttributeFromPythonValue(value));
+void IFunctionAdapter::setAttributePythonValue(IFunction &self, const std::string &name, const object &value) {
+  auto previousAttr = self.getAttribute(name);
+  self.setAttribute(name, createAttributeFromPythonValue(previousAttr, value));
 }
 
 /**
@@ -185,12 +175,10 @@ void IFunctionAdapter::setAttributePythonValue(IFunction &self,
  * @param attName The name of the attribute
  * @param attr An attribute object
  */
-void IFunctionAdapter::setAttribute(const std::string &attName,
-                                    const Attribute &attr) {
+void IFunctionAdapter::setAttribute(const std::string &attName, const Attribute &attr) {
   try {
     object value = object(handle<>(getAttributeValue(*this, attr)));
-    callMethod<void, std::string, object>(getSelf(), "setAttributeValue",
-                                          attName, value);
+    callMethod<void, std::string, object>(getSelf(), "setAttributeValue", attName, value);
     storeAttributeValue(attName, attr);
   } catch (UndefinedAttributeError &) {
     IFunction::setAttribute(attName, attr);
@@ -203,8 +191,7 @@ void IFunctionAdapter::setAttribute(const std::string &attName,
  *    For a single domain function it should have a single element (self).
  * @return A python list of IFunction_sprs.
  */
-boost::python::list
-IFunctionAdapter::createPythonEquivalentFunctions(IFunction &self) {
+boost::python::list IFunctionAdapter::createPythonEquivalentFunctions(const IFunction &self) {
   auto functions = self.createEquivalentFunctions();
   boost::python::list list;
   for (const auto &fun : functions) {
@@ -249,16 +236,14 @@ void IFunctionAdapter::setActiveParameter(size_t i, double value) {
  * @param xValues The input domain
  * @param nData The size of the input and output arrays
  */
-void IFunctionAdapter::evaluateFunction(double *out, const double *xValues,
-                                        const size_t nData) const {
+void IFunctionAdapter::evaluateFunction(double *out, const double *xValues, const size_t nData) const {
   using namespace Converters;
   // GIL must be held while numpy wrappers are destroyed as they access Python
   // state information
   GlobalInterpreterLock gil;
 
   Py_intptr_t dims[1] = {static_cast<Py_intptr_t>(nData)};
-  PyObject *xvals =
-      WrapReadOnly::apply<double>::createFromArray(xValues, 1, dims);
+  PyObject *xvals = WrapReadOnly::apply<double>::createFromArray(xValues, 1, dims);
 
   // Deliberately avoids using the CallMethod wrappers. They lock the GIL again
   // and
@@ -267,8 +252,7 @@ void IFunctionAdapter::evaluateFunction(double *out, const double *xValues,
   // boost::python::objects whn using boost::python::call_method
 
   PyObject *result =
-      PyObject_CallMethod(getSelf(), const_cast<char *>(m_functionName.c_str()),
-                          const_cast<char *>("(O)"), xvals);
+      PyObject_CallMethod(getSelf(), const_cast<char *>(m_functionName.c_str()), const_cast<char *>("(O)"), xvals);
   Py_DECREF(xvals);
   if (PyErr_Occurred()) {
     Py_XDECREF(result);
@@ -278,15 +262,13 @@ void IFunctionAdapter::evaluateFunction(double *out, const double *xValues,
     auto nparray = reinterpret_cast<PyArrayObject *>(result);
     // dtype matches so use memcpy for speed
     if (PyArray_TYPE(nparray) == NPY_DOUBLE) {
-      std::memcpy(static_cast<void *>(out), PyArray_DATA(nparray),
-                  nData * sizeof(npy_double));
+      std::memcpy(static_cast<void *>(out), PyArray_DATA(nparray), nData * sizeof(npy_double));
       Py_DECREF(result);
     } else {
       Py_DECREF(result);
       PyArray_Descr *dtype = PyArray_DESCR(nparray);
       std::string err("Unsupported numpy data type: '");
-      err.append(dtype->typeobj->tp_name)
-          .append("'. Currently only numpy.float64 is supported.");
+      err.append(dtype->typeobj->tp_name).append("'. Currently only numpy.float64 is supported.");
       throw std::runtime_error(err);
     }
   } else {
@@ -306,17 +288,14 @@ void IFunctionAdapter::evaluateFunction(double *out, const double *xValues,
  * @param xValues The input domain
  * @param nData The size of the input and output arrays
  */
-void IFunctionAdapter::evaluateDerivative(API::Jacobian *out,
-                                          const double *xValues,
-                                          const size_t nData) const {
+void IFunctionAdapter::evaluateDerivative(API::Jacobian *out, const double *xValues, const size_t nData) const {
   using namespace Converters;
   // GIL must be held while numpy wrappers are destroyed as they access Python
   // state information
   GlobalInterpreterLock gil;
 
   Py_intptr_t dims[1] = {static_cast<Py_intptr_t>(nData)};
-  PyObject *xvals =
-      WrapReadOnly::apply<double>::createFromArray(xValues, 1, dims);
+  PyObject *xvals = WrapReadOnly::apply<double>::createFromArray(xValues, 1, dims);
   PyObject *jacobian = boost::python::to_python_value<API::Jacobian *>()(out);
 
   // Deliberately avoids using the CallMethod wrappers. They lock the GIL
@@ -324,10 +303,8 @@ void IFunctionAdapter::evaluateDerivative(API::Jacobian *out,
   // will check for each function call whether the wrapped method exists. It
   // also avoid unnecessary construction of
   // boost::python::objects when using boost::python::call_method
-  PyObject_CallMethod(getSelf(), const_cast<char *>(m_derivName.c_str()),
-                      const_cast<char *>("(OO)"), xvals, jacobian);
+  PyObject_CallMethod(getSelf(), const_cast<char *>(m_derivName.c_str()), const_cast<char *>("(OO)"), xvals, jacobian);
   if (PyErr_Occurred())
     throw PythonException();
 }
-} // namespace PythonInterface
-} // namespace Mantid
+} // namespace Mantid::PythonInterface

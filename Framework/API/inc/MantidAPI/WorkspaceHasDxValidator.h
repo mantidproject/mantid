@@ -16,8 +16,7 @@ namespace API {
 /** WorkspaceHasDxValidator : A validator which checks that all histograms in a
  * workspace have Dx values.
  */
-class MANTID_API_DLL WorkspaceHasDxValidator final
-    : public MatrixWorkspaceValidator {
+class MANTID_API_DLL WorkspaceHasDxValidator final : public MatrixWorkspaceValidator {
 public:
   Kernel::IValidator_sptr clone() const override;
 

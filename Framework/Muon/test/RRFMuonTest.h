@@ -36,8 +36,7 @@ public:
     TS_ASSERT(rrfMuon.isInitialized());
     // Set Values
     TS_ASSERT_THROWS_NOTHING(rrfMuon.setProperty("InputWorkspace", ws));
-    TS_ASSERT_THROWS_NOTHING(
-        rrfMuon.setProperty("OutputWorkspace", "outputWs"));
+    TS_ASSERT_THROWS_NOTHING(rrfMuon.setProperty("OutputWorkspace", "outputWs"));
     TS_ASSERT_THROWS_NOTHING(rrfMuon.setProperty("Frequency", "0"));
     TS_ASSERT_THROWS_NOTHING(rrfMuon.setProperty("FrequencyUnits", "MHz"));
     TS_ASSERT_THROWS_NOTHING(rrfMuon.setProperty("Phase", "0"));
@@ -45,8 +44,8 @@ public:
     TS_ASSERT_THROWS_NOTHING(rrfMuon.execute());
     TS_ASSERT(rrfMuon.isExecuted());
     // Get result
-    MatrixWorkspace_const_sptr ows = std::dynamic_pointer_cast<MatrixWorkspace>(
-        AnalysisDataService::Instance().retrieve("outputWs"));
+    MatrixWorkspace_const_sptr ows =
+        std::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("outputWs"));
     TS_ASSERT(ows);
 
     // Checks
@@ -69,8 +68,7 @@ public:
     TS_ASSERT(rrfMuon.isInitialized());
     // Set Values
     TS_ASSERT_THROWS_NOTHING(rrfMuon.setProperty("InputWorkspace", ws));
-    TS_ASSERT_THROWS_NOTHING(
-        rrfMuon.setProperty("OutputWorkspace", "outputWs"));
+    TS_ASSERT_THROWS_NOTHING(rrfMuon.setProperty("OutputWorkspace", "outputWs"));
     TS_ASSERT_THROWS_NOTHING(rrfMuon.setProperty("Frequency", "1"));
     TS_ASSERT_THROWS_NOTHING(rrfMuon.setProperty("FrequencyUnits", "MHz"));
     TS_ASSERT_THROWS_NOTHING(rrfMuon.setProperty("Phase", "0"));
@@ -78,8 +76,8 @@ public:
     TS_ASSERT_THROWS_NOTHING(rrfMuon.execute());
     TS_ASSERT(rrfMuon.isExecuted());
     // Get result
-    MatrixWorkspace_const_sptr ows = std::dynamic_pointer_cast<MatrixWorkspace>(
-        AnalysisDataService::Instance().retrieve("outputWs"));
+    MatrixWorkspace_const_sptr ows =
+        std::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("outputWs"));
     TS_ASSERT(ows);
 
     // Checks
@@ -115,22 +113,19 @@ public:
     // Set Values
     // First run
     TS_ASSERT_THROWS_NOTHING(rrfMuon.setProperty("InputWorkspace", ws));
-    TS_ASSERT_THROWS_NOTHING(
-        rrfMuon.setProperty("OutputWorkspace", "outputWs1"));
+    TS_ASSERT_THROWS_NOTHING(rrfMuon.setProperty("OutputWorkspace", "outputWs1"));
     TS_ASSERT_THROWS_NOTHING(rrfMuon.setProperty("Frequency", "1"));
     TS_ASSERT_THROWS_NOTHING(rrfMuon.setProperty("FrequencyUnits", "MHz"));
     TS_ASSERT_THROWS_NOTHING(rrfMuon.setProperty("Phase", "0"));
     // Second run
     TS_ASSERT_THROWS_NOTHING(rrfMuon2.setProperty("InputWorkspace", ws));
-    TS_ASSERT_THROWS_NOTHING(
-        rrfMuon2.setProperty("OutputWorkspace", "outputWs2"));
+    TS_ASSERT_THROWS_NOTHING(rrfMuon2.setProperty("OutputWorkspace", "outputWs2"));
     TS_ASSERT_THROWS_NOTHING(rrfMuon2.setProperty("Frequency", "0.159155"));
     TS_ASSERT_THROWS_NOTHING(rrfMuon2.setProperty("FrequencyUnits", "Mrad/s"));
     TS_ASSERT_THROWS_NOTHING(rrfMuon2.setProperty("Phase", "0"));
     // Third run
     TS_ASSERT_THROWS_NOTHING(rrfMuon3.setProperty("InputWorkspace", ws));
-    TS_ASSERT_THROWS_NOTHING(
-        rrfMuon3.setProperty("OutputWorkspace", "outputWs3"));
+    TS_ASSERT_THROWS_NOTHING(rrfMuon3.setProperty("OutputWorkspace", "outputWs3"));
     TS_ASSERT_THROWS_NOTHING(rrfMuon3.setProperty("Frequency", "11.742398"));
     TS_ASSERT_THROWS_NOTHING(rrfMuon3.setProperty("FrequencyUnits", "Gauss"));
     TS_ASSERT_THROWS_NOTHING(rrfMuon3.setProperty("Phase", "0"));
@@ -143,16 +138,13 @@ public:
     TS_ASSERT(rrfMuon3.isExecuted());
     // Get results
     MatrixWorkspace_const_sptr ows1 =
-        std::dynamic_pointer_cast<MatrixWorkspace>(
-            AnalysisDataService::Instance().retrieve("outputWs1"));
+        std::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("outputWs1"));
     TS_ASSERT(ows1);
     MatrixWorkspace_const_sptr ows2 =
-        std::dynamic_pointer_cast<MatrixWorkspace>(
-            AnalysisDataService::Instance().retrieve("outputWs2"));
+        std::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("outputWs2"));
     TS_ASSERT(ows2);
     MatrixWorkspace_const_sptr ows3 =
-        std::dynamic_pointer_cast<MatrixWorkspace>(
-            AnalysisDataService::Instance().retrieve("outputWs3"));
+        std::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("outputWs3"));
     TS_ASSERT(ows3);
 
     // Check Y values
@@ -187,8 +179,7 @@ private:
 
   MatrixWorkspace_sptr createDummyWorkspace() {
     int nBins = 300;
-    MatrixWorkspace_sptr ws =
-        WorkspaceFactory::Instance().create("Workspace2D", 2, nBins + 1, nBins);
+    MatrixWorkspace_sptr ws = WorkspaceFactory::Instance().create("Workspace2D", 2, nBins + 1, nBins);
 
     for (int i = 0; i < nBins; i++) {
       double x = i / static_cast<double>(nBins);
@@ -202,8 +193,7 @@ private:
     ws->mutableX(1)[nBins] = nBins;
 
     // Units
-    ws->getAxis(0)->unit() =
-        Mantid::Kernel::UnitFactory::Instance().create("TOF");
+    ws->getAxis(0)->unit() = Mantid::Kernel::UnitFactory::Instance().create("TOF");
 
     return ws;
   }

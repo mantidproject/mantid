@@ -35,9 +35,9 @@ frequency sample logs, which can be even faster than chopper frequencies.
 Input Workspace
 ###############
 
-This algorithm mainly uses the information retrieved from sample logs to create 
+This algorithm mainly uses the information retrieved from sample logs to create
 event splitters.
-Therefore, EventWorkspace is only required if the run end time cannot be determined by sample logs. 
+Therefore, EventWorkspace is only required if the run end time cannot be determined by sample logs.
 For example, proton charge log cannot be found.
 
 
@@ -56,10 +56,10 @@ event splitters that are supported by this algorithm.
    the amount of generated event splitters are not huge;
 -  :ref:`MatrixWorkspace <MatrixWorkspace>`: It uses X-axis to store time
    stamp in total nanoseconds and Y-axis to store target workspace. For
-   example, x\_i, x\_i+1 and y\_i construct an event filter as start
-   time is x\_i, stop time is x\_i+1, and target workspace is y\_i-th
-   workspace. If y\_i is less than 0, then it means that all events
-   between time x\_i and x\_i+1 will be discarded. This type of
+   example, :math:`x_{i}, x_{i+1}` and :math:`y_{i}` construct an event filter as start
+   time is :math:`x_{i}`, stop time is :math:`x_{i+1}`, and target workspace is :math:`y_{i}` -th
+   workspace. If :math:`y_{i}` is less than 0, then it means that all events
+   between time :math:`x_{i}` and :math:`x_{i+1}` will be discarded. This type of
    workspace is appropriate for the case that the amount of generated
    event splitters are huge, because processing a
    :ref:`MatrixWorkspace <MatrixWorkspace>` is way faster than a
@@ -81,11 +81,15 @@ this algorithm:
    workspace index associated. These workspace indices are incremented
    by 1 from 0 along with their orders in time.
 
+-  A series of filters for multiple continuous time intervals, which have an exponentially increasing length,
+   or exponentially decreasing length. Each of them has an individual workspace index associated.
+   These workspace indices are incremented by 1 from 0 along with their orders in time.
+
 -  A series of filters for multiple continuous time intervals, which
-   have various lengths of period.  
-   Each of them has an individual workspace index associated. 
+   have various lengths of period.
+   Each of them has an individual workspace index associated.
    These workspace indices are incremented by 1 from 0 along with their
-   order in time. 
+   order in time.
 
 -  A filter containing one or multiple time intervals according to a
    specified log value. Any log value of the time that falls into the
@@ -95,45 +99,46 @@ this algorithm:
 -  A series filters containing one or multiple time intervals according
    to specified log values incremented by a constant value. Any log
    value of the time that falls into the selected time intervals is
-   equal or within the tolerance of the log value as v\_0 + n x delta\_v
-   +/- tolerance\_v.
+   equal or within the tolerance of the log value as
+   :math:`v_{0}  + n \cdot \Delta_{v} \pm tolerance_{v}`.
 
 .. _filterbytime-GenerateEventFilter-ref:
 
 Generate event filters by time
 ##############################
 
-Event filters can be created by defining start time, stop time and time intervals. 
-The three input properties for them are ``StartTime``, ``StopTime`` and ``TimeInterval``, 
-respectively. 
+Event filters can be created by defining start time, stop time and time intervals.
+The three input properties for them are ``StartTime``, ``StopTime`` and ``TimeInterval``,
+respectively.
 
-``TimeInterval`` accepts an array of doubles.  
-If the array size is zero, then there will be one and only splitter will be 
-created from ``StartTime`` and ``StopTime``.  
-If the size of the array is one, then all event splitters will have the same duration
-of time. 
-In general if the array is composed as :math:`t_1, t_2, \cdots, t_n`, 
-and :math:`T_0` is the run start time, 
-then the event splitters will have the time boundaries as 
+``TimeInterval`` accepts an array of doubles.
+If the array size is zero, then there will be one and only splitter will be
+created from ``StartTime`` and ``StopTime``.
+If the size of the array is one, then  if the value is positive, all event splitters will have the same duration.
+If it is negative, the event splitters duration will exponentially increase (if ``UseReverseLogarithmic`` is unchecked)
+or exponentially decrease (if ``UseReverseLogarithmic`` is checked).
+In general if the array is composed as :math:`t_1, t_2, \cdots, t_n`,
+and :math:`T_0` is the run start time,
+then the event splitters will have the time boundaries as
 
 .. math:: (T_0, T_0+t_1), (T_0+t_1, T_0+t_1+t_2), \cdots, (T_0+\sum_{i=1}^{n-1}t_i, T_0+\sum_{i=1}^nt_i), (T_0+\sum_{i=1}^nt_i, T_0+\sum_{i=1}^nt_i+t_1), \cdots
 
-until the stop time is reached. 
+until the stop time is reached.
 
 Unit of time
 ============
 
-There are three types of units that are supported for time. 
-They are second, nanosecond and percentage of duration from ``StartTime`` to ``StopTime``. 
+There are three types of units that are supported for time.
+They are second, nanosecond and percentage of duration from ``StartTime`` to ``StopTime``.
 
 .. _filterbylogv-GenerateEventFilter-ref:
 
 Generate event filters by sample log value
 ##########################################
 
-The sample log will be divided to intervals as :math:`v_0, v_1, \cdots, v_{i-1}, v_i, v_{i+1}, \cdots`. 
+The sample log will be divided to intervals as :math:`v_0, v_1, \cdots, v_{i-1}, v_i, v_{i+1}, \cdots`.
 All log entries, whose values falls into range :math:`[v_j, v_{j+1})`, will be assigned to
-a same workspace group. 
+a same workspace group.
 
 
 About how log value is recorded
@@ -164,13 +169,14 @@ resolution to 1 microsecond.
 Algorithm Parameters and Examples
 ---------------------------------
 
-Here are the introductions to some important parameters (i.e., algorithm's properties). 
+Here are the introductions to some important parameters (i.e., algorithm's properties).
 
 
-Parameter: ``Centre``
-#####################
+Parameter: ``LogBoundary``
+##########################
 
-The input Boolean parameter ``centre`` is for filtering by log value(s).
+The input string parameter ``LogBoundary`` is for filtering by log value(s).
+
 If option ``centre`` is taken, then for each interval,
 
 -  starting time = log\_time - tolerance\_time;
@@ -178,11 +184,61 @@ If option ``centre`` is taken, then for each interval,
 
 It is a shift to left.
 
+**Logs that only record changes**
+
+In SNS, most of the sample environment devices record values upon changing.
+Therefore, the ``LogBoundary`` value shall set to ``Left`` but not ``Centre``.
+And in this case, ``TimeTolerance`` is ignored.
+
+Please check with the instrument scientist to confirm how the sample log values are recorded.
+
+Here is an example how the time splitter works with the a motor's position.
+
+.. figure:: /images/SNAP_motor_filter.png
+
+        For this SNAP run, the user wants to filter events with motor (BL3:Mot:Hexa:MotZ) position
+        at value equal to 6.65 with tolerance as 0.1.
+        The red curve shows the boundary of the time splitters (i.e., event filters).
+
+
+Time Tolerance and Log Boundary
+###############################
+
+How ``TimeTolerance`` is applied in this algorithm is similar to that in :ref:`FilterByLogValue<algm-FilterByLogValue>`
+except that this algorithm does not support ``PulseFilter``.
+
+
+- If ``LogBoundary`` is ``Left``, ``TimeTolerance`` is ignored in the algorithm.
+
+- If ``LogBoundary`` is set to ``Centre``,
+  assuming the log entries are
+  ``(t0, v0), (t1, v1), (t2, v2), (t3, v3), ... (t_n, v_n) ...``.
+
+  - If there is a log entry ``(t_i, v_i)`` is between ``MinimumValue`` and ``MaximumValue``,
+    while ``v_{i-1}`` and ``v_{i+1}`` are not in the desired log value range,
+    all events between ``t_i - TimeTolerance`` and ``t_i + TimeTolerance)`` are kept.
+
+  - If there are several consecutive log entries that have values in the desired log value range,
+    such as ``(t_i, v_i), ..., (t_j, v_j)``,
+    events between ``t_i - TimeTolerance`` and ``t_j + TimToleranc`` are kept.
+
+  A good value is 1/2 your measurement interval if the intervals are constant.
+
+
 Parameter: ``FastLog``
 ######################
 
 When ``FastLog`` is set to True, a :ref:`MatrixWorkspace <MatrixWorkspace>` will be used to store the event
 splitters, which is more appropriate for fast changing logs. (see above for details).
+
+Parameter: ``UseReverseLogarithmic``
+####################################
+
+When ``UseReverseLogarithmic`` is checked, if only one ``TimeInterval`` value has been provided and it is negative,
+the logarithmic time splitting will start from the end of the run going back to the start, resulting in time splits
+shorter and shorter. The bin widths correspond to those that would have been generated by the log binning algorithm,
+except they are reverted - ie the last, biggest log bin comes first, etc ....
+The bins are always in decreasing order of width, so the first bin might be merged with the second one if it is incomplete.
 
 Parameter: ``MinimumLogValue``, ``MaximumLogValue``, ``LogValueTolerance`` and ``LogValueInterval``
 ###################################################################################################
@@ -193,46 +249,46 @@ filtering events.
 Double value log
 ================
 
-Let user-specified minimum log value to be :math:`L_{min}`, 
-LogValueTolerance to be :math:`t`, and LogValueInterval to be :math:`\delta`, 
-then the log value intervals are 
+Let user-specified minimum log value to be :math:`L_{\text{min}}`,
+LogValueTolerance to be :math:`t`, and LogValueInterval to be :math:`\delta`,
+then the log value intervals are
 
-.. math:: [L_{min}-t, L_{min}-tol+\delta), [L_{min}-tol+\delta, L_{min}-tol+2\cdot\delta), \cdots
+.. math:: [L_{\text{min}}-t, L_{\text{min}}-tol+\delta), [L_{\text{min}}-tol+\delta, L_{\text{min}}-tol+2\cdot\delta), \cdots
 
 The default value of LogValueTolerance is LogValueInterval divided by 2.
 
 Integer value log
 =================
 
-It is a little bit different for sample log recorded with integer. 
+It is a little bit different for sample log recorded with integer.
 
-- ``MinimumLogValue`` and ``MaximumLogValue`` can be same such that only entries with exactly the same log value 
+- ``MinimumLogValue`` and ``MaximumLogValue`` can be same such that only entries with exactly the same log value
   will be considered;
 - If ``LogValueInterval`` is not give (i.e., default value is used), then any log enetry with log value
-  larger and equal to ``MinimumLogValue`` and smaller and equal to ``MaximumLogValue`` will be considered. 
+  larger and equal to ``MinimumLogValue`` and smaller and equal to ``MaximumLogValue`` will be considered.
   Be noticed that in the same case for double value log, log entry with value equal to ``MaximumLogValue``
-  will be excluded. 
+  will be excluded.
 
 
 
 Example: Filter by double log value from :math:`s_0` to :math:`s_f`
 ###################################################################
 
-There are two setup to acquire the same result: 
+There are two setup to acquire the same result:
 
 - Use single-log-value mode:
 
   - MinimumLogValue = :math:`s_0`
   - MaximumLogValue = :math:`s_f`
   - LogValueInterval is left to default
-  
+
 - Use multiple-log-value mode:
 
   - MinimumLogValue = :math:`s_0`
   - MaximumLogValue = :math:`s_f`
   - LogValueInterval = :math:`s_f - s_0`
   - LogValueTolerance = 0
-  
+
 
 
 
@@ -280,9 +336,9 @@ Output:
 
 **Example - Generate event filter by temperature value with an empty workspace**
 
-The following is a contrived example to show how one would use the algorithm to 
+The following is a contrived example to show how one would use the algorithm to
 generate event splitters from an empty workspace, which has sample logs in run object,
-by a temperature log. 
+by a temperature log.
 The resulting workspaces would then be fed to
 :ref:`FilterEvents <algm-FilterEvents>`
 for further processing.

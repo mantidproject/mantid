@@ -39,14 +39,7 @@ std::string toString(CFStringRef str) {
 /**
  * Helper enums.
  */
-enum ProxyType {
-  DefaultProxy,
-  Socks5Proxy,
-  NoProxy,
-  HttpProxy,
-  HttpCachingProxy,
-  FtpCachingProxy
-};
+enum ProxyType { DefaultProxy, Socks5Proxy, NoProxy, HttpProxy, HttpCachingProxy, FtpCachingProxy };
 
 /// Typedef Collection of proxy information.
 using ProxyInfoVec = std::vector<ProxyInfo>;
@@ -60,27 +53,21 @@ ProxyInfo proxyFromDictionary(CFDictionaryRef dict) {
   ProxyInfo proxyInfo;
   ProxyType proxyType = NoProxy;
 
-  CFStringRef cfProxyType = reinterpret_cast<CFStringRef>(
-      CFDictionaryGetValue(dict, kCFProxyTypeKey));
+  CFStringRef cfProxyType = reinterpret_cast<CFStringRef>(CFDictionaryGetValue(dict, kCFProxyTypeKey));
 
   if (CFStringCompare(cfProxyType, kCFProxyTypeFTP, 0) == kCFCompareEqualTo) {
     proxyType = FtpCachingProxy;
-  } else if (CFStringCompare(cfProxyType, kCFProxyTypeHTTP, 0) ==
-             kCFCompareEqualTo) {
+  } else if (CFStringCompare(cfProxyType, kCFProxyTypeHTTP, 0) == kCFCompareEqualTo) {
     proxyType = HttpProxy;
-  } else if (CFStringCompare(cfProxyType, kCFProxyTypeHTTPS, 0) ==
-             kCFCompareEqualTo) {
+  } else if (CFStringCompare(cfProxyType, kCFProxyTypeHTTPS, 0) == kCFCompareEqualTo) {
     proxyType = HttpProxy;
-  } else if (CFStringCompare(cfProxyType, kCFProxyTypeSOCKS, 0) ==
-             kCFCompareEqualTo) {
+  } else if (CFStringCompare(cfProxyType, kCFProxyTypeSOCKS, 0) == kCFCompareEqualTo) {
     proxyType = Socks5Proxy;
   }
 
   int port = 0;
-  std::string hostName = toString(reinterpret_cast<CFStringRef>(
-      CFDictionaryGetValue(dict, kCFProxyHostNameKey)));
-  CFNumberRef portNumber = reinterpret_cast<CFNumberRef>(
-      CFDictionaryGetValue(dict, kCFProxyPortNumberKey));
+  std::string hostName = toString(reinterpret_cast<CFStringRef>(CFDictionaryGetValue(dict, kCFProxyHostNameKey)));
+  CFNumberRef portNumber = reinterpret_cast<CFNumberRef>(CFDictionaryGetValue(dict, kCFProxyPortNumberKey));
   if (portNumber) {
     CFNumberGetValue(portNumber, kCFNumberSInt16Type, &port);
   }
@@ -98,62 +85,52 @@ ProxyInfo proxyFromDictionary(CFDictionaryRef dict) {
  * @param logger : Log object
  * @return Collection of proxy information.
  */
-ProxyInfoVec proxyInformationFromPac(CFDictionaryRef dict,
-                                     const std::string &targetURLString,
-                                     Logger &logger) {
+ProxyInfoVec proxyInformationFromPac(CFDictionaryRef dict, const std::string &targetURLString, Logger &logger) {
   ProxyInfoVec proxyInfoVec;
 
   // is there a PAC enabled? If so, use it first.
   CFNumberRef pacEnabled;
-  if ((pacEnabled = reinterpret_cast<CFNumberRef>(CFDictionaryGetValue(
-           dict, kSCPropNetProxiesProxyAutoConfigEnable)))) {
+  if ((pacEnabled =
+           reinterpret_cast<CFNumberRef>(CFDictionaryGetValue(dict, kSCPropNetProxiesProxyAutoConfigEnable)))) {
     int enabled;
     if (CFNumberGetValue(pacEnabled, kCFNumberIntType, &enabled) && enabled) {
       // PAC is enabled
       CFStringRef cfPacLocation =
-          reinterpret_cast<CFStringRef>(CFDictionaryGetValue(
-              dict, kSCPropNetProxiesProxyAutoConfigURLString));
+          reinterpret_cast<CFStringRef>(CFDictionaryGetValue(dict, kSCPropNetProxiesProxyAutoConfigURLString));
       CFDataRef pacData;
-      CFURLRef pacURL =
-          CFURLCreateWithString(kCFAllocatorDefault, cfPacLocation, nullptr);
+      CFURLRef pacURL = CFURLCreateWithString(kCFAllocatorDefault, cfPacLocation, nullptr);
       SInt32 errorCode;
-      if (!CFURLCreateDataAndPropertiesFromResource(kCFAllocatorDefault, pacURL,
-                                                    &pacData, nullptr, nullptr,
+      if (!CFURLCreateDataAndPropertiesFromResource(kCFAllocatorDefault, pacURL, &pacData, nullptr, nullptr,
                                                     &errorCode)) {
-        logger.debug() << "Unable to get the PAC script at "
-                       << toString(cfPacLocation) << "Error code: " << errorCode
+        logger.debug() << "Unable to get the PAC script at " << toString(cfPacLocation) << "Error code: " << errorCode
                        << '\n';
         return proxyInfoVec;
       }
 
-      CFStringRef pacScript = CFStringCreateFromExternalRepresentation(
-          kCFAllocatorDefault, pacData, kCFStringEncodingISOLatin1);
+      CFStringRef pacScript =
+          CFStringCreateFromExternalRepresentation(kCFAllocatorDefault, pacData, kCFStringEncodingISOLatin1);
 
-      CFURLRef targetURL = CFURLCreateWithBytes(
-          kCFAllocatorDefault,
-          reinterpret_cast<UInt8 *>(
-              const_cast<char *>(targetURLString.c_str())),
-          targetURLString.size(), kCFStringEncodingUTF8, nullptr);
+      CFURLRef targetURL = CFURLCreateWithBytes(kCFAllocatorDefault,
+                                                reinterpret_cast<UInt8 *>(const_cast<char *>(targetURLString.c_str())),
+                                                targetURLString.size(), kCFStringEncodingUTF8, nullptr);
       if (!targetURL) {
         logger.debug("Problem with Target URI for proxy script");
         return proxyInfoVec;
       }
 
       CFErrorRef pacError;
-      CFArrayRef proxies = CFNetworkCopyProxiesForAutoConfigurationScript(
-          pacScript, targetURL, &pacError);
+      CFArrayRef proxies = CFNetworkCopyProxiesForAutoConfigurationScript(pacScript, targetURL, &pacError);
 
       if (!proxies) {
         std::string pacLocation = toString(cfPacLocation);
         CFStringRef pacErrorDescription = CFErrorCopyDescription(pacError);
-        logger.debug() << "Execution of PAC script at \"%s\" failed: %s"
-                       << pacLocation << toString(pacErrorDescription) << '\n';
+        logger.debug() << "Execution of PAC script at \"%s\" failed: %s" << pacLocation << toString(pacErrorDescription)
+                       << '\n';
       }
 
       CFIndex size = CFArrayGetCount(proxies);
       for (CFIndex i = 0; i < size; ++i) {
-        CFDictionaryRef proxy = reinterpret_cast<CFDictionaryRef>(
-            CFArrayGetValueAtIndex(proxies, i));
+        CFDictionaryRef proxy = reinterpret_cast<CFDictionaryRef>(CFArrayGetValueAtIndex(proxies, i));
         proxyInfoVec.push_back(proxyFromDictionary(proxy));
       }
     }
@@ -169,19 +146,14 @@ ProxyInfoVec proxyInformationFromPac(CFDictionaryRef dict,
  * @param portKey
  * @return return Proxy object.
  */
-ProxyInfo proxyFromDictionary(CFDictionaryRef dict, CFStringRef enableKey,
-                              CFStringRef hostKey, CFStringRef portKey) {
+ProxyInfo proxyFromDictionary(CFDictionaryRef dict, CFStringRef enableKey, CFStringRef hostKey, CFStringRef portKey) {
   ProxyInfo proxyInfo;
   CFNumberRef protoEnabled;
   CFNumberRef protoPort;
   CFStringRef protoHost;
-  if (enableKey &&
-      (protoEnabled = reinterpret_cast<CFNumberRef>(
-           CFDictionaryGetValue(dict, enableKey))) &&
-      (protoHost = reinterpret_cast<CFStringRef>(
-           CFDictionaryGetValue(dict, hostKey))) &&
-      (protoPort = reinterpret_cast<CFNumberRef>(
-           CFDictionaryGetValue(dict, portKey)))) {
+  if (enableKey && (protoEnabled = reinterpret_cast<CFNumberRef>(CFDictionaryGetValue(dict, enableKey))) &&
+      (protoHost = reinterpret_cast<CFStringRef>(CFDictionaryGetValue(dict, hostKey))) &&
+      (protoPort = reinterpret_cast<CFNumberRef>(CFDictionaryGetValue(dict, portKey)))) {
     int enabled;
     if (CFNumberGetValue(protoEnabled, kCFNumberIntType, &enabled) && enabled) {
       std::string host = toString(protoHost);
@@ -202,9 +174,8 @@ ProxyInfo proxyFromDictionary(CFDictionaryRef dict, CFStringRef enableKey,
  * @return Return the proxy info object.
  */
 ProxyInfo httpProxyFromSystem(CFDictionaryRef dict) {
-  ProxyInfo tempProxy = proxyFromDictionary(dict, kSCPropNetProxiesHTTPEnable,
-                                            kSCPropNetProxiesHTTPProxy,
-                                            kSCPropNetProxiesHTTPPort);
+  ProxyInfo tempProxy =
+      proxyFromDictionary(dict, kSCPropNetProxiesHTTPEnable, kSCPropNetProxiesHTTPProxy, kSCPropNetProxiesHTTPPort);
 
   return tempProxy;
 }
@@ -216,8 +187,7 @@ ProxyInfo httpProxyFromSystem(CFDictionaryRef dict) {
  * @param logger : ref to log object.
  * @return Proxy object.
  */
-ProxyInfo findHttpProxy(const std::string &targetURLString,
-                        Mantid::Kernel::Logger &logger) {
+ProxyInfo findHttpProxy(const std::string &targetURLString, Mantid::Kernel::Logger &logger) {
   ProxyInfo httpProxy;
   CFDictionaryRef dict = SCDynamicStoreCopyProxies(nullptr);
   if (!dict) {
@@ -230,9 +200,7 @@ ProxyInfo findHttpProxy(const std::string &targetURLString,
   ProxyInfoVec info = proxyInformationFromPac(dict, targetURLString, logger);
 
   bool foundHttpProxy = false;
-  auto proxyIt =
-      std::find_if(info.cbegin(), info.cend(),
-                   [](const auto &proxy) { return proxy.isHttpProxy(); });
+  auto proxyIt = std::find_if(info.cbegin(), info.cend(), [](const auto &proxy) { return proxy.isHttpProxy(); });
   if (proxyIt != info.cend()) {
     foundHttpProxy = true;
     httpProxy = *proxyIt;

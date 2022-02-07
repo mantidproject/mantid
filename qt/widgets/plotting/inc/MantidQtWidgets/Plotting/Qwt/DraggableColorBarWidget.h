@@ -27,8 +27,7 @@ class EXPORT_OPT_MANTIDQT_PLOTTING DraggableColorBarWidget : public QFrame {
   enum DragType { Bottom, Top };
 
 public:
-  DraggableColorBarWidget(QWidget *parent,
-                          const double &minPositiveValue = 0.0001);
+  DraggableColorBarWidget(QWidget *parent, const double &minPositiveValue = 0.0001);
   void setupColorBarScaling(const MantidColorMap & /*colorMap*/);
   void setClim(double vmin, double vmax);
   void setMinValue(double /*value*/);

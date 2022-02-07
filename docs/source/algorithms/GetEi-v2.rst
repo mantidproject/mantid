@@ -9,8 +9,7 @@
 Description
 -----------
 
-Uses :math:`E=\frac{1}{2}mv^2`
-to calculate the energy of neutrons leaving the
+Uses :math:`E=\frac{1}{2}mv^2` to calculate the energy of neutrons leaving the
 source. The velocity is calculated from the time it takes for the
 neutron pulse to travel between the two monitors whose spectra were
 specified. If no spectra are specified, the algorithm will use the
@@ -59,7 +58,7 @@ Usage
 **Example: Fixing the Ei**
 
 .. testcode:: fixEi
-    
+
     ws = CreateSampleWorkspace(bankPixelWidth=1,binWidth=10)
 
     (ei, firstMonitorPeak, FirstMonitorIndex, tzero) = GetEi(ws,Monitor1Spec=1,Monitor2Spec=2,EnergyEstimate=15.0,FixEi=True)

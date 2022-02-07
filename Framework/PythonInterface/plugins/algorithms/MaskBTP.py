@@ -17,15 +17,17 @@ class MaskBTP(mantid.api.PythonAlgorithm):
     """
 
     # list of supported instruments
-    INSTRUMENT_LIST = ['ARCS', 'BIOSANS', 'CG2', 'CG3', 'CHESS', 'CNCS', 'CORELLI', 'EQ-SANS', 'GPSANS', 'HYSPEC', 'MANDI', 'NOMAD',
-                       'POWGEN', 'REF_M', 'SEQUOIA', 'SNAP', 'SXD', 'TOPAZ', 'WAND', 'WISH']
+    INSTRUMENT_LIST = ['ARCS', 'BIOSANS', 'CG2', 'CG3', 'CHESS', 'CNCS', 'CORELLI', 'D11', 'D11B', 'D11lr', 'D16',
+                       'D22', 'D22B', 'D22lr', 'D33', 'EQ-SANS', 'GPSANS', 'HYSPEC', 'MANDI', 'NOMAD', 'POWGEN',
+                       'REF_M', 'SEQUOIA', 'SNAP', 'SXD', 'TOPAZ', 'WAND', 'WISH']
 
     instname = None
     instrument = None
-    bankmin = defaultdict(lambda: 1, {'SEQUOIA': 23, 'TOPAZ': 10})  # default is one
-    bankmax = {'ARCS': 115, 'BIOSANS': 88, 'CG2': 48, 'CG3': 88, 'CHESS': 163, 'CNCS': 50, 'CORELLI': 91, 'EQ-SANS': 48,
-               'GPSANS': 48, 'HYSPEC': 20, 'MANDI': 59, 'NOMAD': 99, 'POWGEN': 300, 'REF_M': 1, 'SEQUOIA': 150, 'SNAP': 64,
-               'SXD': 11, 'TOPAZ': 59, 'WAND': 8, 'WISH': 10}
+    bankmin = defaultdict(lambda: 1, {'D33': 0, 'SEQUOIA': 23, 'TOPAZ': 10})  # default is one
+    bankmax = {'ARCS': 115, 'BIOSANS': 88, 'CG2': 48, 'CG3': 88, 'CHESS': 163, 'CNCS': 50, 'CORELLI': 91, 'D11': 1,
+               'D11B': 3, 'D11lr': 1, 'D16': 1, 'D22': 1, 'D22B': 2, 'D22lr': 1, 'D33': 4, 'EQ-SANS': 48, 'GPSANS': 48,
+               'HYSPEC': 20, 'MANDI': 59, 'NOMAD': 99, 'POWGEN': 300, 'REF_M': 1, 'SEQUOIA': 150, 'SNAP': 64, 'SXD': 11,
+               'TOPAZ': 59, 'WAND': 8, 'WISH': 10}
 
     def category(self):
         """ Mantid required
@@ -33,7 +35,7 @@ class MaskBTP(mantid.api.PythonAlgorithm):
         return "Transforms\\Masking;Inelastic\\Utility"
 
     def seeAlso(self):
-        return [ "MaskDetectors","MaskInstrument" ]
+        return ["MaskDetectors", "MaskInstrument"]
 
     def name(self):
         """ Mantid required
@@ -46,17 +48,17 @@ class MaskBTP(mantid.api.PythonAlgorithm):
         return "Algorithm to mask detectors in particular banks, tube, or pixels."
 
     def PyInit(self):
-        self.declareProperty(mantid.api.WorkspaceProperty("Workspace", "",direction=Direction.InOut,
-                                                          optional = mantid.api.PropertyMode.Optional), "Input workspace (optional)")
-        allowedInstrumentList=StringListValidator(['']+self.INSTRUMENT_LIST)
-        self.declareProperty("Instrument","",validator=allowedInstrumentList,doc="One of the following instruments: "
+        self.declareProperty(mantid.api.WorkspaceProperty("Workspace", "", direction=Direction.InOut,
+                                                          optional=mantid.api.PropertyMode.Optional), "Input workspace (optional)")
+        allowedInstrumentList = StringListValidator(['']+self.INSTRUMENT_LIST)
+        self.declareProperty("Instrument", "", validator=allowedInstrumentList, doc="One of the following instruments: "
                              + ', '.join(self.INSTRUMENT_LIST))
         self.declareProperty(StringArrayProperty(name='Components', values=[]),
                              doc='Component names to mask')
         self.declareProperty(IntArrayProperty(name="Bank", values=[]),
                              doc="Bank(s) to be masked. If empty, will apply to all banks")
-        self.declareProperty("Tube","",doc="Tube(s) to be masked. If empty, will apply to all tubes")
-        self.declareProperty("Pixel","",doc="Pixel(s) to be masked. If empty, will apply to all pixels")
+        self.declareProperty("Tube", "", doc="Tube(s) to be masked. If empty, will apply to all tubes")
+        self.declareProperty("Pixel", "", doc="Pixel(s) to be masked. If empty, will apply to all pixels")
         self.declareProperty(IntArrayProperty(name="MaskedDetectors", direction=Direction.Output),
                              doc="List of  masked detectors")
 
@@ -78,7 +80,7 @@ class MaskBTP(mantid.api.PythonAlgorithm):
         deleteWS = False
         if not ws:
             IDF = mantid.api.ExperimentInfo.getInstrumentFilename(self.instname)
-            ws = mantid.simpleapi.LoadEmptyInstrument(IDF, OutputWorkspace=self.instname + "MaskBTP")
+            ws = mantid.simpleapi.LoadEmptyInstrument(Filename=IDF, OutputWorkspace=self.instname + "MaskBTP")
             deleteWS = True  # if there is going to be an issue with the instrument provdied
         self.instname = ws.getInstrument().getName()  # update the instrument name
 
@@ -121,7 +123,7 @@ class MaskBTP(mantid.api.PythonAlgorithm):
         bankIndices = self._getBankIndices(compInfo, components)
 
         # generate the list of detector identifiers to mask
-        detlist=[]
+        detlist = []
         fullDetectorIdList = ws.detectorInfo().detectorIDs()
 
         if len(tubes) > 0 or len(pixels) > 0:
@@ -147,7 +149,7 @@ class MaskBTP(mantid.api.PythonAlgorithm):
             self.log().information("no detectors within this range")
 
         # set the outputs
-        self.setProperty("Workspace",ws.name())
+        self.setProperty("Workspace", ws.name())
         self.setProperty("MaskedDetectors", detlist)
 
     def _startsFrom(self):
@@ -191,22 +193,22 @@ class MaskBTP(mantid.api.PythonAlgorithm):
             return result - min_value
 
     def _getBankName(self, banknum, validFrom):  # noqa: C901
-        banknum=int(banknum)
+        banknum = int(banknum)
         if not (self.bankmin[self.instname] <= banknum <= self.bankmax[self.instname]):
             raise ValueError("Out of range index={} for {} instrument bank numbers".format(banknum, self.instname))
 
         if self.instname == 'ARCS':
-            ARCS_bank_names=['B{}'.format(b) for b in range(1,39)] + \
-                            ['M{}'.format(b) for b in range(1,32)] + \
-                            ['M32A','M32B'] + \
-                            ['M{}'.format(b) for b in range(33,39)] + \
-                            ['T{}'.format(b) for b in range(1,39)]
+            ARCS_bank_names = ['B{}'.format(b) for b in range(1, 39)] + \
+                              ['M{}'.format(b) for b in range(1, 32)] + \
+                              ['M32A', 'M32B'] + \
+                              ['M{}'.format(b) for b in range(33, 39)] + \
+                              ['T{}'.format(b) for b in range(1, 39)]
             if self.bankmin[self.instname] <= banknum <= self.bankmax[self.instname]:
                 return ARCS_bank_names[banknum-1]
             else:
                 raise ValueError("Out of range index for ARCS instrument bank numbers: {}".format(banknum))
         elif self.instname == 'SEQUOIA':
-            ToB = '' # top/bottom for short packs
+            ToB = ''  # top/bottom for short packs
             # there are only banks 23-26 in A row
             if self.bankmin[self.instname] <= banknum <= 37:
                 label = 'A'
@@ -229,7 +231,7 @@ class MaskBTP(mantid.api.PythonAlgorithm):
             elif 102 < banknum <= 113:
                 label = 'C'
                 banknum = banknum-76
-            elif 113 <banknum <= self.bankmax[self.instname]:
+            elif 113 < banknum <= self.bankmax[self.instname]:
                 label = 'D'
                 banknum = banknum-113
             else:
@@ -258,11 +260,21 @@ class MaskBTP(mantid.api.PythonAlgorithm):
                     return 'detector1'
                 elif banknum == 2:
                     return 'wing_detector'
+        elif self.instname == "D33":
+            banks = ["back_detector", "front_detector_top", "front_detector_right", "front_detector_bottom",
+                     "front_detector_left"]
+            return banks[banknum]
+        elif self.instname == "D11B":
+            return ["detector_center", "detector_left", "detector_right"][banknum - 1]
+        elif self.instname == "D22B":
+            return ["detector_back", "detector_front"][banknum - 1]
+        elif self.instname in ["D11", "D11lr", "D22", "D22lr", "D16"]:
+            return "detector"
         else:
             return "bank" + str(banknum)
 
     def _getBankIndices(self, compInfo, bankNames):
-        '''This removes banks that don't exist'''
+        """This removes banks that don't exist"""
         if len(bankNames) == 0:
             return list()
 

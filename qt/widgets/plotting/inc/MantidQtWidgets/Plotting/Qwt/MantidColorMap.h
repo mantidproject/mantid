@@ -30,8 +30,7 @@ public:
 
 public:
   MantidColorMap();
-  explicit MantidColorMap(const QString &filename,
-                          MantidColorMap::ScaleType type);
+  explicit MantidColorMap(const QString &filename, MantidColorMap::ScaleType type);
   ~MantidColorMap() override;
   QwtColorMap *copy() const override;
 
@@ -48,14 +47,12 @@ public:
   void setupDefaultMap();
 
   QRgb rgb(double vmin, double vmax, double value) const;
-  std::vector<QRgb> rgb(double vmin, double vmax,
-                        const std::vector<double> &values) const;
+  std::vector<QRgb> rgb(double vmin, double vmax, const std::vector<double> &values) const;
   QRgb rgb(const QwtDoubleInterval &interval, double value) const override;
 
   double normalize(const QwtDoubleInterval &interval, double value) const;
 
-  unsigned char colorIndex(const QwtDoubleInterval &interval,
-                           double value) const override;
+  unsigned char colorIndex(const QwtDoubleInterval &interval, double value) const override;
 
   QVector<QRgb> colorTable(const QwtDoubleInterval &interval) const override;
 
@@ -80,16 +77,12 @@ public:
   /**
    * Get the number of colors in this map
    */
-  inline unsigned char getTopCIndex() const {
-    return static_cast<unsigned char>(m_num_colors - 1);
-  }
+  inline unsigned char getTopCIndex() const { return static_cast<unsigned char>(m_num_colors - 1); }
 
   /**
    * The maximum number of colors that any color map is allowed to use
    */
-  static unsigned char getLargestAllowedCIndex() {
-    return static_cast<unsigned char>(255);
-  }
+  static unsigned char getLargestAllowedCIndex() { return static_cast<unsigned char>(255); }
 
 private:
   /// The scale choice

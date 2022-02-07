@@ -25,9 +25,7 @@ namespace PythonInterface {
  * It also provides access to the protected methods on DataProcessorAlgorithm
  * from the type exported to Python
  */
-template <class Base>
-class DataProcessorAdapter
-    : public AlgorithmAdapter<API::GenericDataProcessorAlgorithm<Base>> {
+template <class Base> class DataProcessorAdapter : public AlgorithmAdapter<API::GenericDataProcessorAlgorithm<Base>> {
 public:
   /// A constructor that looks like a Python __init__ method
   DataProcessorAdapter(PyObject *self);
@@ -52,21 +50,15 @@ public:
 
   void setLoadAlgProxy(const std::string &alg) { this->setLoadAlg(alg); }
 
-  void setLoadAlgFilePropProxy(const std::string &filePropName) {
-    this->setLoadAlgFileProp(filePropName);
-  }
+  void setLoadAlgFilePropProxy(const std::string &filePropName) { this->setLoadAlgFileProp(filePropName); }
 
   void setAccumAlgProxy(const std::string &alg) { this->setAccumAlg(alg); }
 
-  API::ITableWorkspace_sptr determineChunkProxy(const std::string &filename) {
-    return this->determineChunk(filename);
-  }
+  API::ITableWorkspace_sptr determineChunkProxy(const std::string &filename) { return this->determineChunk(filename); }
 
   void loadChunkProxy(const size_t rowIndex) { this->loadChunk(rowIndex); }
 
-  void copyPropertiesProxy(const std::string &algName,
-                           const boost::python::object &propNames,
-                           const int version = -1) {
+  void copyPropertiesProxy(const std::string &algName, const boost::python::object &propNames, const int version = -1) {
     if (algName.empty()) {
       throw std::invalid_argument("Failed to specify algorithm name");
     }
@@ -77,12 +69,10 @@ public:
       if (extractor.check()) {
         names = std::vector<std::string>(1, extractor());
       } else {
-        names = PythonInterface::Converters::PySequenceToVector<std::string>(
-            propNames)();
+        names = PythonInterface::Converters::PySequenceToVector<std::string>(propNames)();
       }
 
-      auto algorithm =
-          API::AlgorithmManager::Instance().createUnmanaged(algName, version);
+      auto algorithm = API::AlgorithmManager::Instance().createUnmanaged(algName, version);
       algorithm->initialize();
 
       for (const auto &name : names) {
@@ -95,29 +85,24 @@ public:
     }
   }
 
-  API::Workspace_sptr loadProxy(const std::string &inputData,
-                                const bool loadQuiet = false) {
+  API::Workspace_sptr loadProxy(const std::string &inputData, const bool loadQuiet = false) {
     return this->load(inputData, loadQuiet);
   }
 
-  std::vector<std::string> splitInputProxy(const std::string &input) {
-    return this->splitInput(input);
-  }
+  std::vector<std::string> splitInputProxy(const std::string &input) { return this->splitInput(input); }
 
   void forwardPropertiesProxy() { this->forwardProperties(); }
 
-  std::shared_ptr<Kernel::PropertyManager> getProcessPropertiesProxy(
-      const std::string &propertyManager = std::string()) {
+  std::shared_ptr<Kernel::PropertyManager>
+  getProcessPropertiesProxy(const std::string &propertyManager = std::string()) {
     return this->getProcessProperties(propertyManager);
   }
 
-  API::Workspace_sptr assembleProxy(const std::string &partialWSName,
-                                    const std::string &outputWSName) {
+  API::Workspace_sptr assembleProxy(const std::string &partialWSName, const std::string &outputWSName) {
     return this->assemble(partialWSName, outputWSName);
   }
 
-  void saveNexusProxy(const std::string &outputWSName,
-                      const std::string &outputFile) {
+  void saveNexusProxy(const std::string &outputWSName, const std::string &outputFile) {
     this->saveNexus(outputWSName, outputFile);
   }
 

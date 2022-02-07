@@ -49,53 +49,39 @@ private:
   // Implement abstract Algorithm methods
   void init() override;
   void exec() override;
-  Kernel::Property *getPLogForProperty(const API::MatrixWorkspace_sptr &inputWS,
-                                       const std::string &propertyName);
+  Kernel::Property *getPLogForProperty(const API::MatrixWorkspace_sptr &inputWS, const std::string &propertyName);
   void setFilterLog(const API::MatrixWorkspace_sptr &inputWS);
   // former lambda function exposed as not evry compiler support this yet
-  bool peakGuess(const API::MatrixWorkspace_sptr &inputWS, size_t index,
-                 double Ei, const std::vector<size_t> &monsRangeMin,
-                 const std::vector<size_t> &monsRangeMax, double &peakPos,
+  bool peakGuess(const API::MatrixWorkspace_sptr &inputWS, size_t index, double Ei,
+                 const std::vector<size_t> &monsRangeMin, const std::vector<size_t> &monsRangeMax, double &peakPos,
                  double &peakHeight, double &peakTwoSigma);
 
 protected: // for testing, private otherwise.
   // prepare working workspace with appropriate monitor spectra for fitting
   API::MatrixWorkspace_sptr
   // prepare matrix workspace to analyze monitor signal
-  buildWorkspaceToFit(const API::MatrixWorkspace_sptr &inputWS,
-                      size_t &wsIndex0);
+  buildWorkspaceToFit(const API::MatrixWorkspace_sptr &inputWS, size_t &wsIndex0);
 
   /**Return average time series log value for the appropriately filtered log*/
-  double getAvrgLogValue(const API::MatrixWorkspace_sptr &inputWS,
-                         const std::string &propertyName,
+  double getAvrgLogValue(const API::MatrixWorkspace_sptr &inputWS, const std::string &propertyName,
                          std::vector<Kernel::SplittingInterval> &splitter);
   /**process logs and retrieve chopper speed and chopper delay*/
-  void findChopSpeedAndDelay(const API::MatrixWorkspace_sptr &inputWS,
-                             double &chop_speed, double &chop_delay);
-  void findGuessOpeningTimes(const std::pair<double, double> &TOF_range,
-                             double ChopDelay, double Period,
+  void findChopSpeedAndDelay(const API::MatrixWorkspace_sptr &inputWS, double &chop_speed, double &chop_delay);
+  void findGuessOpeningTimes(const std::pair<double, double> &TOF_range, double ChopDelay, double Period,
                              std::vector<double> &guess_opening_times);
   /**Get energy of monitor peak if one is present*/
-  bool findMonitorPeak(const API::MatrixWorkspace_sptr &inputWS, double Ei,
-                       const std::vector<size_t> &monsRangeMin,
-                       const std::vector<size_t> &monsRangeMax,
-                       double &position, double &height, double &twoSigma);
+  bool findMonitorPeak(const API::MatrixWorkspace_sptr &inputWS, double Ei, const std::vector<size_t> &monsRangeMin,
+                       const std::vector<size_t> &monsRangeMax, double &position, double &height, double &twoSigma);
   /**Find indexes of each expected peak intervals */
-  void findBinRanges(const HistogramData::HistogramX &eBins,
-                     const HistogramData::HistogramY &signal,
-                     const std::vector<double> &guess_energy,
-                     double eResolution, std::vector<size_t> &irangeMin,
-                     std::vector<size_t> &irangeMax,
-                     std::vector<bool> &guessValid);
+  void findBinRanges(const HistogramData::HistogramX &eBins, const HistogramData::HistogramY &signal,
+                     const std::vector<double> &guess_energy, double eResolution, std::vector<size_t> &irangeMin,
+                     std::vector<size_t> &irangeMax, std::vector<bool> &guessValid);
 
-  size_t calcDerivativeAndCountZeros(const std::vector<double> &bins,
-                                     const std::vector<double> &signal,
-                                     std::vector<double> &deriv,
-                                     std::vector<double> &zeros);
+  size_t calcDerivativeAndCountZeros(const std::vector<double> &bins, const std::vector<double> &signal,
+                                     std::vector<double> &deriv, std::vector<double> &zeros);
 
   /**Auxiliary method to print guess chopper energies in debug mode*/
-  void printDebugModeInfo(const std::vector<double> &guess_opening,
-                          const std::pair<double, double> &TOF_range,
+  void printDebugModeInfo(const std::vector<double> &guess_opening, const std::pair<double, double> &TOF_range,
                           std::shared_ptr<Kernel::Unit> &destUnit);
   /// if true, take derivate of the filter log to identify interval when
   /// instrument is running.

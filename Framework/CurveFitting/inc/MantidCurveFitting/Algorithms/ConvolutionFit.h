@@ -16,8 +16,7 @@ namespace Algorithms {
 
 /** ConvolutionFit : Performs a QENS convolution fit
  */
-template <typename Base>
-class MANTID_CURVEFITTING_DLL ConvolutionFit : public Base {
+template <typename Base> class MANTID_CURVEFITTING_DLL ConvolutionFit : public Base {
 public:
   const std::string name() const override;
   int version() const override;
@@ -26,8 +25,7 @@ public:
   const std::vector<std::string> seeAlso() const override;
 
 protected:
-  virtual API::ITableWorkspace_sptr
-  processParameterTable(API::ITableWorkspace_sptr parameterTable) override;
+  virtual API::ITableWorkspace_sptr processParameterTable(API::ITableWorkspace_sptr parameterTable) override;
   std::map<std::string, std::string> getAdditionalLogStrings() const override;
   std::map<std::string, std::string> getAdditionalLogNumbers() const override;
   std::vector<std::string> getFitParameterNames() const override;

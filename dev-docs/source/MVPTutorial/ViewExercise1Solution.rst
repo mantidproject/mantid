@@ -9,7 +9,6 @@ main.py
 
 .. code-block:: python
 
-    from __future__ import (absolute_import,division,print_function)
 
     from qtpy import QtWidgets
 
@@ -22,7 +21,7 @@ main.py
     """
     class Demo(QtWidgets.QMainWindow):
         def __init__(self,parent=None):
-            super(Demo,self).__init__(parent)
+            super().__init__(parent)
 
             self.window = QtWidgets.QMainWindow()
             my_view = view.View()
@@ -48,21 +47,20 @@ view.py
 
 .. code-block:: python
 
-    from __future__ import (absolute_import,division,print_function)
     from qtpy import QtWidgets, QtCore, QtGui
 
 
     class View(QtWidgets.QWidget):
 
         def __init__(self, parent=None):
-            super(view, self).__init__(parent)
+            super().__init__(parent)
 
             grid = QtWidgets.QVBoxLayout(self)
 
             self.table = QtWidgets.QTableWidget(self)
             self.table.setRowCount(4)
             self.table.setColumnCount(2)
-            grid.addWidget(self.table)           
+            grid.addWidget(self.table)
 
             self.colours = QtWidgets.QComboBox()
             options = ["Blue", "Green", "Red"]
@@ -83,22 +81,22 @@ view.py
             self.plot = QtWidgets.QPushButton('Add', self)
             self.plot.setStyleSheet("background-color:lightgrey")
 
-            grid.addWidget(self.plot)           
+            grid.addWidget(self.plot)
 
             self.setLayout(grid)
 
-     def setTableRow(self, name, row):
+        def setTableRow(self, name, row):
             text = QtWidgets.QTableWidgetItem(name)
             text.setFlags(QtCore.Qt.ItemIsEnabled)
             col = 0
             self.table.setItem(row, col, text)
 
-     def addWidgetToTable(self, name, widget, row):
+        def addWidgetToTable(self, name, widget, row):
             self.setTableRow(name,row)
             col = 1
             self.table.setCellWidget(row, col, widget)
 
-     def addItemToTable(self, name, widget, row):
+        def addItemToTable(self, name, widget, row):
             self.setTableRow(name, row)
             col = 1
             self.table.setItem(row, col, widget)

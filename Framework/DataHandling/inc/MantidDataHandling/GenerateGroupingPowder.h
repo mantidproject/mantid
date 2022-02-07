@@ -21,15 +21,11 @@ class DLLExport GenerateGroupingPowder : public API::Algorithm {
 public:
   const std::string name() const override;
   /// Summary of algorithms purpose
-  const std::string summary() const override {
-    return "Generate grouping by angles.";
-  }
+  const std::string summary() const override { return "Generate grouping by angles."; }
 
   int version() const override;
   const std::string category() const override;
-  const std::vector<std::string> seeAlso() const override {
-    return {"LoadDetectorsGroupingFile", "GroupDetectors"};
-  }
+  const std::vector<std::string> seeAlso() const override { return {"LoadDetectorsGroupingFile", "GroupDetectors"}; }
 
 private:
   void init() override;

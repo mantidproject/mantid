@@ -18,8 +18,6 @@ Usage
 
 .. testcode:: ExExtractQENSMembers
 
-  from __future__ import print_function
-
   # Load sample and resolution files
   sample = Load('irs26176_graphite002_red.nxs', OutputWorkspace='irs26176_graphite002_red')
   resolution = Load('irs26173_graphite002_red.nxs')
@@ -41,7 +39,7 @@ Usage
   # Run ConvolutionFitSequential algorithm
   ConvolutionFitSequential(InputWorkspace=sample, Function=function,
                            PassWSIndexToFunction=True, StartX=startX, EndX=endX,
-                           SpecMin=specMin, SpecMax=specMax, ConvolveMembers=convolve,
+                           SpecMin=specMin, SpecMax=specMax, OutputCompositeMembers=convolve, ConvolveMembers=convolve,
                            Minimizer=minimizer, MaxIterations=maxIt,
                            OutputWorkspace=output_ws_name)
 
@@ -74,8 +72,6 @@ Output:
 
 .. testcode:: ExExtractQENSMembersProperty
 
-  from __future__ import print_function
-
   # Load sample and resolution files
   sample = Load('irs26176_graphite002_red.nxs', OutputWorkspace='irs26176_graphite002_red')
   resolution = Load('irs26173_graphite002_red.nxs')
@@ -96,7 +92,7 @@ Output:
 
   # Run ConvolutionFitSequential algorithm with ExtractMembers property
   ConvolutionFitSequential(InputWorkspace=sample, Function=function, PassWSIndexToFunction=True,
-                           StartX=startX, EndX=endX, SpecMin=specMin, SpecMax=specMax,
+                           StartX=startX, EndX=endX, SpecMin=specMin, SpecMax=specMax, OutputCompositeMembers=convolve,
                            ConvolveMembers=convolve, Minimizer=minimizer, MaxIterations=maxIt,
                            ExtractMembers=True, OutputWorkspace=output_ws_name)
 

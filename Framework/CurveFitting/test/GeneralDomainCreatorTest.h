@@ -32,14 +32,11 @@ namespace {
 
 class TestFunction1 : public IFunctionGeneral, public ParamFunction {
 public:
-  TestFunction1() : IFunctionGeneral(), ParamFunction() {
-    declareParameter("a", 1.0);
-  }
+  TestFunction1() : IFunctionGeneral(), ParamFunction() { declareParameter("a", 1.0); }
   std::string name() const override { return "TestFunction1"; }
   size_t getNumberDomainColumns() const override { return 2; }
   size_t getNumberValuesPerArgument() const override { return 3; }
-  void functionGeneral(const FunctionDomainGeneral &generalDomain,
-                       FunctionValues &values) const override {
+  void functionGeneral(const FunctionDomainGeneral &generalDomain, FunctionValues &values) const override {
     double a = getParameter(0);
     auto x = generalDomain.getColumn(0);
     auto nam = generalDomain.getColumn(1);
@@ -58,15 +55,12 @@ public:
 
 class TestFunction2 : public IFunctionGeneral, public ParamFunction {
 public:
-  TestFunction2() : IFunctionGeneral(), ParamFunction() {
-    declareParameter("a", 0.0);
-  }
+  TestFunction2() : IFunctionGeneral(), ParamFunction() { declareParameter("a", 0.0); }
   std::string name() const override { return "TestFunction2"; }
   size_t getNumberDomainColumns() const override { return 0; }
   size_t getNumberValuesPerArgument() const override { return 2; }
   size_t getDefaultDomainSize() const override { return 5; }
-  void functionGeneral(const FunctionDomainGeneral &,
-                       FunctionValues &values) const override {
+  void functionGeneral(const FunctionDomainGeneral &, FunctionValues &values) const override {
     double a = getParameter(0);
     auto n = getDefaultDomainSize();
     for (size_t i = 0; i < n; ++i) {
@@ -82,9 +76,7 @@ class GeneralDomainCreatorTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static GeneralDomainCreatorTest *createSuite() {
-    return new GeneralDomainCreatorTest();
-  }
+  static GeneralDomainCreatorTest *createSuite() { return new GeneralDomainCreatorTest(); }
   static void destroySuite(GeneralDomainCreatorTest *suite) { delete suite; }
 
   void test_declared_properties() {
@@ -114,8 +106,7 @@ public:
 
     TableWorkspace_sptr ws = makeData1();
 
-    manager.declareProperty(std::make_unique<WorkspaceProperty<Workspace>>(
-                                "InputWorkspace", "", Direction::Input),
+    manager.declareProperty(std::make_unique<WorkspaceProperty<Workspace>>("InputWorkspace", "", Direction::Input),
                             "Name of the input Workspace");
     manager.setProperty("InputWorkspace", ws);
     manager.setProperty("ArgumentColumn", "X");
@@ -246,8 +237,7 @@ public:
 
     TableWorkspace_sptr ws = makeData2();
 
-    manager.declareProperty(std::make_unique<WorkspaceProperty<Workspace>>(
-                                "InputWorkspace", "", Direction::Input),
+    manager.declareProperty(std::make_unique<WorkspaceProperty<Workspace>>("InputWorkspace", "", Direction::Input),
                             "Name of the input Workspace");
     manager.setProperty("InputWorkspace", ws);
     manager.setProperty("DataColumn", "Energies");
@@ -311,8 +301,7 @@ public:
 
     TableWorkspace_sptr ws = makeData1();
 
-    manager.declareProperty(std::make_unique<WorkspaceProperty<Workspace>>(
-                                "InputWorkspace", "", Direction::Input),
+    manager.declareProperty(std::make_unique<WorkspaceProperty<Workspace>>("InputWorkspace", "", Direction::Input),
                             "Name of the input Workspace");
     manager.setProperty("InputWorkspace", ws);
     manager.setProperty("ArgumentColumn", "X");
@@ -331,8 +320,7 @@ public:
     fun->setParameter(0, 5.0);
     fun->function(*domain, *values);
 
-    auto result = std::static_pointer_cast<ITableWorkspace>(
-        creator.createOutputWorkspace("out", fun, domain, values));
+    auto result = std::static_pointer_cast<ITableWorkspace>(creator.createOutputWorkspace("out", fun, domain, values));
 
     TS_ASSERT_EQUALS(result->columnCount(), 8);
     TS_ASSERT_EQUALS(result->rowCount(), 4);
@@ -377,8 +365,7 @@ public:
     creator.declareDatasetProperties();
 
     TableWorkspace_sptr ws = makeData2();
-    manager.declareProperty(std::make_unique<WorkspaceProperty<Workspace>>(
-                                "InputWorkspace", "", Direction::Input),
+    manager.declareProperty(std::make_unique<WorkspaceProperty<Workspace>>("InputWorkspace", "", Direction::Input),
                             "Name of the input Workspace");
     manager.setProperty("InputWorkspace", ws);
     manager.setProperty("DataColumn", "Energies");
@@ -393,8 +380,7 @@ public:
     fun->setParameter(0, 2.0);
     fun->function(*domain, *values);
 
-    auto result = std::static_pointer_cast<ITableWorkspace>(
-        creator.createOutputWorkspace("out", fun, domain, values));
+    auto result = std::static_pointer_cast<ITableWorkspace>(creator.createOutputWorkspace("out", fun, domain, values));
 
     TS_ASSERT_EQUALS(result->columnCount(), 4);
     TS_ASSERT_EQUALS(result->rowCount(), 5);

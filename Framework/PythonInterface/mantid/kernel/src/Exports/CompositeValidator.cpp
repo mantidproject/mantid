@@ -21,9 +21,7 @@ namespace {
 /**
  * Creates a composite validator from a python list of validators
  */
-CompositeValidator *
-createCompositeValidator(const boost::python::list &validators,
-                         const CompositeRelation &relation) {
+CompositeValidator *createCompositeValidator(const boost::python::list &validators, const CompositeRelation &relation) {
   namespace bpl = boost::python;
   auto composite = new CompositeValidator(relation);
   const bpl::ssize_t nitems = bpl::len(validators);
@@ -41,18 +39,11 @@ createCompositeValidator(const boost::python::list &validators,
 } // namespace
 
 void export_CompositeValidator() {
-  enum_<CompositeRelation>("CompositeRelation")
-      .value("AND", CompositeRelation::AND)
-      .value("OR", CompositeRelation::OR);
+  enum_<CompositeRelation>("CompositeRelation").value("AND", CompositeRelation::AND).value("OR", CompositeRelation::OR);
 
-  class_<CompositeValidator, bases<IValidator>, boost::noncopyable>(
-      "CompositeValidator")
-      .def("__init__",
-           make_constructor(
-               &createCompositeValidator, default_call_policies(),
-               (arg("validators"), arg("relation") = CompositeRelation::AND)))
-      .def("add",
-           (void (CompositeValidator::*)(const IValidator_sptr &)) &
-               CompositeValidator::add,
+  class_<CompositeValidator, bases<IValidator>, boost::noncopyable>("CompositeValidator")
+      .def("__init__", make_constructor(&createCompositeValidator, default_call_policies(),
+                                        (arg("validators"), arg("relation") = CompositeRelation::AND)))
+      .def("add", (void (CompositeValidator::*)(const IValidator_sptr &)) & CompositeValidator::add,
            (arg("self"), arg("other")), "Add another validator to the list");
 }

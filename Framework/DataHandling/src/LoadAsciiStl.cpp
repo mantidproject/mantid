@@ -8,8 +8,7 @@
 #include "MantidGeometry/Objects/MeshObject.h"
 #include <boost/algorithm/string.hpp>
 #include <fstream>
-namespace Mantid {
-namespace DataHandling {
+namespace Mantid::DataHandling {
 
 bool LoadAsciiStl::isAsciiSTL(const std::string &filename) {
   std::ifstream file(filename.c_str());
@@ -23,17 +22,15 @@ bool LoadAsciiStl::isAsciiSTL(const std::string &filename) {
   return (line.size() >= 5 && line.substr(0, 5) == "solid");
 }
 
-std::unique_ptr<Geometry::MeshObject> LoadAsciiStl::readStl() {
-  std::ifstream file(m_filename.c_str());
+std::unique_ptr<Geometry::MeshObject> LoadAsciiStl::readShape() {
   std::string line;
-  getline(file, line);
+  getline(m_file, line);
   m_lineNumber++;
   Kernel::V3D t1, t2, t3;
   uint32_t vertexCount = 0;
-  while (readSTLTriangle(file, t1, t2, t3)) {
+  while (readSTLTriangle(m_file, t1, t2, t3)) {
     // Add triangle if all 3 vertices are distinct
-    if (!areEqualVertices(t1, t2) && !areEqualVertices(t1, t3) &&
-        !areEqualVertices(t2, t3)) {
+    if (!areEqualVertices(t1, t2) && !areEqualVertices(t1, t3) && !areEqualVertices(t2, t3)) {
       auto vertexPair = std::pair<Kernel::V3D, uint32_t>(t1, vertexCount);
       auto emplacementResult = vertexSet.insert(vertexPair);
       if (emplacementResult.second) {
@@ -64,13 +61,11 @@ std::unique_ptr<Geometry::MeshObject> LoadAsciiStl::readStl() {
   } else {
     material = Mantid::Kernel::Material();
   }
-  auto retVal = std::make_unique<Geometry::MeshObject>(
-      std::move(m_triangle), std::move(m_vertices), material);
+  auto retVal = std::make_unique<Geometry::MeshObject>(std::move(m_triangle), std::move(m_vertices), material);
   return retVal;
 }
 
-bool LoadAsciiStl::readSTLTriangle(std::ifstream &file, Kernel::V3D &v1,
-                                   Kernel::V3D &v2, Kernel::V3D &v3) {
+bool LoadAsciiStl::readSTLTriangle(std::ifstream &file, Kernel::V3D &v1, Kernel::V3D &v2, Kernel::V3D &v3) {
   if (readSTLLine(file, "facet") && readSTLLine(file, "outer loop")) {
     readSTLVertex(file, v1);
     readSTLVertex(file, v2);
@@ -95,12 +90,10 @@ bool LoadAsciiStl::readSTLVertex(std::ifstream &file, Kernel::V3D &vertex) {
       vertex = createScaledV3D(xVal, yVal, zVal);
       return true;
     } else {
-      throw Kernel::Exception::ParseError("Error on reading STL vertex",
-                                          m_filename, m_lineNumber);
+      throw Kernel::Exception::ParseError("Error on reading STL vertex", m_filename, m_lineNumber);
     }
   }
-  throw Kernel::Exception::ParseError("Error on reading STL triangle",
-                                      m_filename, m_lineNumber);
+  throw Kernel::Exception::ParseError("Error on reading STL triangle", m_filename, m_lineNumber);
 }
 
 // Read, check and ignore line in STL file. Return true if line is read
@@ -113,9 +106,8 @@ bool LoadAsciiStl::readSTLLine(std::ifstream &file, std::string const &type) {
       // Before throwing, check for endsolid statment
       const std::string type2 = "endsolid";
       if (line.size() < type2.size() || line.substr(0, type2.size()) != type2) {
-        throw Kernel::Exception::ParseError("Expected STL line begining with " +
-                                                type + " or " + type2,
-                                            m_filename, m_lineNumber);
+        throw Kernel::Exception::ParseError("Expected STL line begining with " + type + " or " + type2, m_filename,
+                                            m_lineNumber);
       } else {
         return false; // ends reading at endsolid
       }
@@ -126,5 +118,4 @@ bool LoadAsciiStl::readSTLLine(std::ifstream &file, std::string const &type) {
   }
 }
 
-} // namespace DataHandling
-} // namespace Mantid
+} // namespace Mantid::DataHandling

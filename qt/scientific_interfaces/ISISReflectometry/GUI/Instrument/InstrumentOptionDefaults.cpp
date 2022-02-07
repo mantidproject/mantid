@@ -12,21 +12,17 @@
 #include "MantidAPI/AlgorithmManager.h"
 #include "Reduction/Instrument.h"
 
-namespace MantidQt {
-namespace CustomInterfaces {
-namespace ISISReflectometry {
+namespace MantidQt::CustomInterfaces::ISISReflectometry {
 
 // unnamed namespace
 namespace {
 Mantid::Kernel::Logger g_log("Reflectometry GUI");
 
-Instrument
-getInstrumentDefaults(Mantid::Geometry::Instrument_const_sptr instrument) {
+Instrument getInstrumentDefaults(Mantid::Geometry::Instrument_const_sptr instrument) {
   auto defaults = OptionDefaults(std::move(instrument));
 
-  auto wavelengthRange =
-      RangeInLambda(defaults.getValue<double>("WavelengthMin", "LambdaMin"),
-                    defaults.getValue<double>("WavelengthMax", "LambdaMax"));
+  auto wavelengthRange = RangeInLambda(defaults.getValue<double>("WavelengthMin", "LambdaMin"),
+                                       defaults.getValue<double>("WavelengthMax", "LambdaMax"));
   if (!wavelengthRange.isValid(false))
     throw std::invalid_argument("Invalid wavelength range");
 
@@ -34,42 +30,30 @@ getInstrumentDefaults(Mantid::Geometry::Instrument_const_sptr instrument) {
   if (monitorIndex < 0)
     throw std::invalid_argument("Monitor index cannot be negative");
 
-  auto integrate = defaults.getBoolOrTrue("NormalizeByIntegratedMonitors",
-                                          "NormalizeByIntegratedMonitors");
+  auto integrate = defaults.getBoolOrTrue("NormalizeByIntegratedMonitors", "NormalizeByIntegratedMonitors");
   auto backgroundRange =
-      RangeInLambda(defaults.getDoubleOrZero("MonitorBackgroundWavelengthMin",
-                                             "MonitorBackgroundMin"),
-                    defaults.getDoubleOrZero("MonitorBackgroundWavelengthMax",
-                                             "MonitorBackgroundMax"));
+      RangeInLambda(defaults.getDoubleOrZero("MonitorBackgroundWavelengthMin", "MonitorBackgroundMin"),
+                    defaults.getDoubleOrZero("MonitorBackgroundWavelengthMax", "MonitorBackgroundMax"));
   if (!backgroundRange.isValid(true))
     throw std::invalid_argument("Invalid monitor background range");
 
-  auto integralRange =
-      RangeInLambda(defaults.getDoubleOrZero("MonitorIntegrationWavelengthMin",
-                                             "MonitorIntegralMin"),
-                    defaults.getDoubleOrZero("MonitorIntegrationWavelengthMax",
-                                             "MonitorIntegralMax"));
+  auto integralRange = RangeInLambda(defaults.getDoubleOrZero("MonitorIntegrationWavelengthMin", "MonitorIntegralMin"),
+                                     defaults.getDoubleOrZero("MonitorIntegrationWavelengthMax", "MonitorIntegralMax"));
   if (!integralRange.isValid(false))
     throw std::invalid_argument("Invalid monitor integral range");
 
-  auto monitorCorrections = MonitorCorrections(monitorIndex, integrate,
-                                               backgroundRange, integralRange);
+  auto monitorCorrections = MonitorCorrections(monitorIndex, integrate, backgroundRange, integralRange);
 
-  auto detectorCorrectionString = defaults.getStringOrDefault(
-      "DetectorCorrectionType", "DetectorCorrectionType", "VerticalShift");
-  auto detectorCorrections = DetectorCorrections(
-      defaults.getBoolOrTrue("CorrectDetectors", "CorrectDetectors"),
-      detectorCorrectionTypeFromString(detectorCorrectionString));
+  auto detectorCorrectionString =
+      defaults.getStringOrDefault("DetectorCorrectionType", "DetectorCorrectionType", "VerticalShift");
+  auto detectorCorrections = DetectorCorrections(defaults.getBoolOrTrue("CorrectDetectors", "CorrectDetectors"),
+                                                 detectorCorrectionTypeFromString(detectorCorrectionString));
 
-  return Instrument(std::move(wavelengthRange), std::move(monitorCorrections),
-                    std::move(detectorCorrections));
+  return Instrument(wavelengthRange, std::move(monitorCorrections), detectorCorrections);
 }
 } // unnamed namespace
 
-Instrument InstrumentOptionDefaults::get(
-    Mantid::Geometry::Instrument_const_sptr instrument) {
+Instrument InstrumentOptionDefaults::get(Mantid::Geometry::Instrument_const_sptr instrument) {
   return getInstrumentDefaults(instrument);
 }
-} // namespace ISISReflectometry
-} // namespace CustomInterfaces
-} // namespace MantidQt
+} // namespace MantidQt::CustomInterfaces::ISISReflectometry

@@ -55,7 +55,6 @@ using ColumnFactory = Mantid::Kernel::SingletonHolder<ColumnFactoryImpl>;
 
 namespace Mantid {
 namespace Kernel {
-EXTERN_MANTID_API template class MANTID_API_DLL
-    Mantid::Kernel::SingletonHolder<Mantid::API::ColumnFactoryImpl>;
+EXTERN_MANTID_API template class MANTID_API_DLL Mantid::Kernel::SingletonHolder<Mantid::API::ColumnFactoryImpl>;
 }
 } // namespace Mantid

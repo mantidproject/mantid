@@ -21,30 +21,26 @@ using namespace Mantid::DataObjects;
 class CoordTransformAffineParserTest : public CxxTest::TestSuite {
 private:
   class MockCoordTransformAffineParser : public CoordTransformAffineParser {
-    Mantid::API::CoordTransform *
-    createTransform(Poco::XML::Element *) const override {
+    Mantid::API::CoordTransform *createTransform(Poco::XML::Element *) const override {
       return new CoordTransformAffine(1, 1);
     }
   };
 
 public:
   void testSuccessfulParse() {
-    std::string xmlToParse =
-        std::string("<CoordTransform>") + "<Type>CoordTransformAffine</Type>" +
-        "<ParameterList>" +
-        "<Parameter><Type>InDimParameter</Type><Value>2</Value></Parameter>" +
-        "<Parameter><Type>OutDimParameter</Type><Value>2</Value></Parameter>" +
-        "<Parameter><Type>AffineMatrixParameter</"
-        "Type><Value>0,1,2;3,4,5;6,7,8</Value></Parameter>" +
-        "</ParameterList></CoordTransform>";
+    std::string xmlToParse = std::string("<CoordTransform>") + "<Type>CoordTransformAffine</Type>" + "<ParameterList>" +
+                             "<Parameter><Type>InDimParameter</Type><Value>2</Value></Parameter>" +
+                             "<Parameter><Type>OutDimParameter</Type><Value>2</Value></Parameter>" +
+                             "<Parameter><Type>AffineMatrixParameter</"
+                             "Type><Value>0,1,2;3,4,5;6,7,8</Value></Parameter>" +
+                             "</ParameterList></CoordTransform>";
 
     Poco::XML::DOMParser pParser;
     Poco::AutoPtr<Poco::XML::Document> pDoc = pParser.parseString(xmlToParse);
     Poco::XML::Element *pRootElem = pDoc->documentElement();
 
     CoordTransformAffineParser parser;
-    CoordTransformAffine *transform =
-        dynamic_cast<CoordTransformAffine *>(parser.createTransform(pRootElem));
+    CoordTransformAffine *transform = dynamic_cast<CoordTransformAffine *>(parser.createTransform(pRootElem));
     AffineMatrixType product = transform->getMatrix();
 
     // Check that matrix is recovered.
@@ -75,38 +71,34 @@ public:
     Poco::XML::Element *pRootElem = pDoc->documentElement();
 
     CoordTransformAffineParser parser;
-    TSM_ASSERT_THROWS("XML root node must be a coordinate transform",
-                      parser.createTransform(pRootElem),
+    TSM_ASSERT_THROWS("XML root node must be a coordinate transform", parser.createTransform(pRootElem),
                       const std::invalid_argument &);
   }
 
   void testNoSuccessorThrows() {
-    std::string xmlToParse =
-        "<CoordTransform><Type>OTHER</Type></CoordTransform>"; // type is not a
-                                                               // coordinate
-                                                               // transform, so
-                                                               // should try to
-                                                               // use it's
-                                                               // successor
+    std::string xmlToParse = "<CoordTransform><Type>OTHER</Type></CoordTransform>"; // type is not a
+                                                                                    // coordinate
+                                                                                    // transform, so
+                                                                                    // should try to
+                                                                                    // use it's
+                                                                                    // successor
 
     Poco::XML::DOMParser pParser;
     Poco::AutoPtr<Poco::XML::Document> pDoc = pParser.parseString(xmlToParse);
     Poco::XML::Element *pRootElem = pDoc->documentElement();
 
     CoordTransformAffineParser parser;
-    TSM_ASSERT_THROWS("Should throw since no successor parser has been set",
-                      parser.createTransform(pRootElem),
+    TSM_ASSERT_THROWS("Should throw since no successor parser has been set", parser.createTransform(pRootElem),
                       const std::runtime_error &);
   }
 
   void testDelegateToSuccessor() {
-    std::string xmlToParse =
-        "<CoordTransform><Type>OTHER</Type></CoordTransform>"; // type is not a
-                                                               // coordinate
-                                                               // transform, so
-                                                               // should try to
-                                                               // use it's
-                                                               // successor
+    std::string xmlToParse = "<CoordTransform><Type>OTHER</Type></CoordTransform>"; // type is not a
+                                                                                    // coordinate
+                                                                                    // transform, so
+                                                                                    // should try to
+                                                                                    // use it's
+                                                                                    // successor
 
     Poco::XML::DOMParser pParser;
     Poco::AutoPtr<Poco::XML::Document> pDoc = pParser.parseString(xmlToParse);

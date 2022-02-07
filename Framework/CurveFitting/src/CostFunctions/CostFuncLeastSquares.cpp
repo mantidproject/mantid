@@ -18,9 +18,7 @@
 
 #include <sstream>
 
-namespace Mantid {
-namespace CurveFitting {
-namespace CostFunctions {
+namespace Mantid::CurveFitting::CostFunctions {
 namespace {
 /// static logger
 Kernel::Logger g_log("CostFuncLeastSquares");
@@ -31,16 +29,14 @@ DECLARE_COSTFUNCTION(CostFuncLeastSquares, Least squares)
 /**
  * Constructor
  */
-CostFuncLeastSquares::CostFuncLeastSquares()
-    : CostFuncFitting(), m_factor(0.5) {}
+CostFuncLeastSquares::CostFuncLeastSquares() : CostFuncFitting(), m_factor(0.5) {}
 /**
  * Add a contribution to the cost function value from the fitting function
  * evaluated on a particular domain.
  * @param domain :: A domain
  * @param values :: Values
  */
-void CostFuncLeastSquares::addVal(API::FunctionDomain_sptr domain,
-                                  API::FunctionValues_sptr values) const {
+void CostFuncLeastSquares::addVal(API::FunctionDomain_sptr domain, API::FunctionValues_sptr values) const {
   m_function->function(*domain, *values);
   size_t ny = values->size();
 
@@ -49,8 +45,7 @@ void CostFuncLeastSquares::addVal(API::FunctionDomain_sptr domain,
   std::vector<double> weights = getFitWeights(values);
 
   for (size_t i = 0; i < ny; i++) {
-    double val =
-        (values->getCalculated(i) - values->getFitData(i)) * weights[i];
+    double val = (values->getCalculated(i) - values->getFitData(i)) * weights[i];
     retVal += val * val;
   }
 
@@ -67,11 +62,8 @@ void CostFuncLeastSquares::addVal(API::FunctionDomain_sptr domain,
  * @param evalDeriv :: Flag to evaluate the derivatives
  * @param evalHessian :: Flag to evaluate the Hessian
  */
-void CostFuncLeastSquares::addValDerivHessian(API::IFunction_sptr function,
-                                              API::FunctionDomain_sptr domain,
-                                              API::FunctionValues_sptr values,
-                                              bool evalDeriv,
-                                              bool evalHessian) const {
+void CostFuncLeastSquares::addValDerivHessian(API::IFunction_sptr function, API::FunctionDomain_sptr domain,
+                                              API::FunctionValues_sptr values, bool evalDeriv, bool evalHessian) const {
   UNUSED_ARG(evalDeriv);
   function->function(*domain, *values);
   size_t np = function->nParams(); // number of parameters
@@ -86,6 +78,7 @@ void CostFuncLeastSquares::addValDerivHessian(API::IFunction_sptr function,
   for (size_t ip = 0; ip < np; ++ip) {
     if (!function->isActive(ip))
       continue;
+
     double d = 0.0;
     for (size_t i = 0; i < ny; ++i) {
       double calc = values->getCalculated(i);
@@ -102,6 +95,9 @@ void CostFuncLeastSquares::addValDerivHessian(API::IFunction_sptr function,
       m_der.set(iActiveP, der + d);
     }
     ++iActiveP;
+
+    if (iActiveP >= m_der.size())
+      break;
   }
 
   PARALLEL_ATOMIC
@@ -134,13 +130,18 @@ void CostFuncLeastSquares::addValDerivHessian(API::IFunction_sptr function,
         }
       }
       ++i2;
+
+      if (i2 >= m_hessian.size2())
+        break;
     }
     ++i1;
+
+    if (i1 >= m_hessian.size1())
+      break;
   }
 }
 
-std::vector<double>
-CostFuncLeastSquares::getFitWeights(API::FunctionValues_sptr values) const {
+std::vector<double> CostFuncLeastSquares::getFitWeights(API::FunctionValues_sptr values) const {
   std::vector<double> weights(values->size());
   for (size_t i = 0; i < weights.size(); ++i) {
     weights[i] = values->getFitWeight(i);
@@ -154,8 +155,7 @@ CostFuncLeastSquares::getFitWeights(API::FunctionValues_sptr values) const {
  * @param covar :: Output cavariance matrix.
  * @param epsrel :: Tolerance.
  */
-void CostFuncLeastSquares::calActiveCovarianceMatrix(GSLMatrix &covar,
-                                                     double epsrel) {
+void CostFuncLeastSquares::calActiveCovarianceMatrix(GSLMatrix &covar, double epsrel) {
   UNUSED_ARG(epsrel);
 
   if (m_hessian.isEmpty()) {
@@ -193,6 +193,4 @@ void CostFuncLeastSquares::calActiveCovarianceMatrix(GSLMatrix &covar,
   }
 }
 
-} // namespace CostFunctions
-} // namespace CurveFitting
-} // namespace Mantid
+} // namespace Mantid::CurveFitting::CostFunctions

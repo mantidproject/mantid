@@ -40,18 +40,18 @@ Usage
    MaskDetectors(ws2, WorkspaceIndexList=0)
    a, list = ExtractMask(ws1)
    b, list = ExtractMask(ws2)
-   
+
    # Run using AND
    _and = BinaryOperateMasks(a, b, OperationType='AND')
    # Run using OR
    _or = BinaryOperateMasks(a, b, OperationType='OR')
    # Run using XOR
    _xor = BinaryOperateMasks(a, b, OperationType='XOR')
-   
+
    print(_and.readY(0))
    print(_or.readY(0))
    print(_xor.readY(0))
-   
+
 Output:
 
 .. testoutput::  BinaryOperateMasksExample

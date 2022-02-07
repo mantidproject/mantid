@@ -28,8 +28,7 @@ namespace Geometry {
       @date 04/11/2014
   */
 
-class MANTID_GEOMETRY_DLL BraggScattererInCrystalStructure
-    : public BraggScatterer {
+class MANTID_GEOMETRY_DLL BraggScattererInCrystalStructure : public BraggScatterer {
 public:
   BraggScattererInCrystalStructure();
 
@@ -58,8 +57,7 @@ protected:
   UnitCell m_cell;
 };
 
-using BraggScattererInCrystalStructure_sptr =
-    std::shared_ptr<BraggScattererInCrystalStructure>;
+using BraggScattererInCrystalStructure_sptr = std::shared_ptr<BraggScattererInCrystalStructure>;
 
 /**
  * Helper class for validating unit cell strings.
@@ -68,15 +66,13 @@ using BraggScattererInCrystalStructure_sptr =
  * possibly floating point numbers. It's required for the unit cell string
  * property.
  */
-class MANTID_GEOMETRY_DLL UnitCellStringValidator
-    : public Kernel::TypedValidator<std::string> {
+class MANTID_GEOMETRY_DLL UnitCellStringValidator : public Kernel::TypedValidator<std::string> {
 protected:
   Kernel::IValidator_sptr clone() const override;
   std::string checkValidity(const std::string &unitCellString) const override;
 };
 
-MANTID_GEOMETRY_DLL std::vector<std::string>
-getTokenizedPositionString(const std::string &position);
+MANTID_GEOMETRY_DLL std::vector<std::string> getTokenizedPositionString(const std::string &position);
 
 } // namespace Geometry
 } // namespace Mantid

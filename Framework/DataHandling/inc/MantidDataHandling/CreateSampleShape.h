@@ -26,19 +26,15 @@ namespace DataHandling {
 */
 class DLLExport CreateSampleShape : public API::Algorithm {
 public:
-  static void setSampleShape(API::ExperimentInfo &expt,
-                             const std::string &shapeXML);
+  static void setSampleShape(API::ExperimentInfo &expt, const std::string &shapeXML);
 
 public:
   const std::string name() const override { return "CreateSampleShape"; }
-  const std::string summary() const override {
-    return "Create a shape object to model the sample.";
-  }
+  const std::string summary() const override { return "Create a shape object to model the sample."; }
 
   int version() const override { return (1); }
   const std::vector<std::string> seeAlso() const override {
-    return {"SetSample", "AbsorptionCorrection", "SetSampleMaterial",
-            "CopySample"};
+    return {"SetSample", "AbsorptionCorrection", "SetSampleMaterial", "CopySample"};
   }
   const std::string category() const override { return "Sample;"; }
   const std::string alias() const override { return "SetSampleShape"; }

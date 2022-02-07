@@ -18,18 +18,13 @@ constexpr double MIN_MAX_DELTA = 1.001;
 } // namespace
 
 MantidQwtWorkspaceData::MantidQwtWorkspaceData(bool logScaleY)
-    : m_logScaleY(logScaleY), m_minY(0), m_minPositive(0), m_maxY(0),
-      m_plottable(DataStatus::Undefined), m_isWaterfall(false), m_offsetX(0),
-      m_offsetY(0) {}
+    : m_logScaleY(logScaleY), m_minY(0), m_minPositive(0), m_maxY(0), m_plottable(DataStatus::Undefined),
+      m_isWaterfall(false), m_offsetX(0), m_offsetY(0) {}
 
-MantidQwtWorkspaceData::MantidQwtWorkspaceData(
-    const MantidQwtWorkspaceData &data) {
-  *this = data;
-}
+MantidQwtWorkspaceData::MantidQwtWorkspaceData(const MantidQwtWorkspaceData &data) { *this = data; }
 
 /// This cannot be declared default because QwtData doesn't implement operator=.
-MantidQwtWorkspaceData &MantidQwtWorkspaceData::
-operator=(const MantidQwtWorkspaceData &data) {
+MantidQwtWorkspaceData &MantidQwtWorkspaceData::operator=(const MantidQwtWorkspaceData &data) {
   m_logScaleY = data.m_logScaleY;
   m_minY = data.m_minY;
   m_minPositive = data.m_minPositive;
@@ -51,8 +46,7 @@ void MantidQwtWorkspaceData::calculateYMinAndMax() const {
   m_plottable = DataStatus::Plottable;
   m_minY = m_maxY = m_minPositive = 0.0;
 
-  double ymin(std::numeric_limits<double>::max()),
-      ymax(-std::numeric_limits<double>::max()),
+  double ymin(std::numeric_limits<double>::max()), ymax(-std::numeric_limits<double>::max()),
       yminPos(std::numeric_limits<double>::max());
   for (size_t i = 0; i < size(); ++i) {
     auto val = y(i);
@@ -82,8 +76,7 @@ void MantidQwtWorkspaceData::calculateYMinAndMax() const {
     } else {
       // All values are <= 0
       m_minPositive = MIN_POSITIVE;
-      m_plottable =
-          logScaleY() ? DataStatus::NotPlottable : DataStatus::Plottable;
+      m_plottable = logScaleY() ? DataStatus::NotPlottable : DataStatus::Plottable;
     }
   } else {
     // Set to arbitrary values (this is unlikely to happen)
@@ -177,12 +170,9 @@ double MantidQwtWorkspaceData::ex(size_t i) const { return getEX(i); }
  *   - scale == log & all(y) > 0.0
  * @return True if the data is considered plottable, false otherwise
  */
-bool MantidQwtWorkspaceData::isPlottable() const {
-  return (m_plottable == DataStatus::Plottable);
-}
+bool MantidQwtWorkspaceData::isPlottable() const { return (m_plottable == DataStatus::Plottable); }
 
 //------------------------------------------------------------------------------
 // MantidQwtMatrixWorkspaceData class
 //------------------------------------------------------------------------------
-MantidQwtMatrixWorkspaceData::MantidQwtMatrixWorkspaceData(bool logScaleY)
-    : MantidQwtWorkspaceData(logScaleY) {}
+MantidQwtMatrixWorkspaceData::MantidQwtMatrixWorkspaceData(bool logScaleY) : MantidQwtWorkspaceData(logScaleY) {}

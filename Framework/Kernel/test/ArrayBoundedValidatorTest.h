@@ -126,14 +126,11 @@ public:
     ArrayBoundedValidator<int> vi(0, 10);
     vector<int> ai{10, 3, -1, 2, 11, 0};
 
-    TS_ASSERT_EQUALS(vi.isValid(ai), index_start + "2" + index_end + start +
-                                         "-1" + lessThan + "0" + end +
-                                         index_start + "4" + index_end + start +
-                                         "11" + greaterThan + "10" + end);
+    TS_ASSERT_EQUALS(vi.isValid(ai), index_start + "2" + index_end + start + "-1" + lessThan + "0" + end + index_start +
+                                         "4" + index_end + start + "11" + greaterThan + "10" + end);
 
     vi.clearLower();
-    TS_ASSERT_EQUALS(vi.isValid(ai), index_start + "4" + index_end + start +
-                                         "11" + greaterThan + "10" + end);
+    TS_ASSERT_EQUALS(vi.isValid(ai), index_start + "4" + index_end + start + "11" + greaterThan + "10" + end);
 
     vi.clearUpper();
     TS_ASSERT_EQUALS(vi.isValid(ai), "");
@@ -141,19 +138,14 @@ public:
     ArrayBoundedValidator<double> vd(0, 10);
     vector<double> ad{10.001, 3., -1., 2., 11., -0.01};
 
-    TS_ASSERT_EQUALS(vd.isValid(ad),
-                     index_start + "0" + index_end + start + "10.001" +
-                         greaterThan + "10" + end + index_start + "2" +
-                         index_end + start + "-1" + lessThan + "0" + end +
-                         index_start + "4" + index_end + start + "11" +
-                         greaterThan + "10" + end + index_start + "5" +
-                         index_end + start + "-0.01" + lessThan + "0" + end);
+    TS_ASSERT_EQUALS(vd.isValid(ad), index_start + "0" + index_end + start + "10.001" + greaterThan + "10" + end +
+                                         index_start + "2" + index_end + start + "-1" + lessThan + "0" + end +
+                                         index_start + "4" + index_end + start + "11" + greaterThan + "10" + end +
+                                         index_start + "5" + index_end + start + "-0.01" + lessThan + "0" + end);
 
     vd.clearUpper();
-    TS_ASSERT_EQUALS(vd.isValid(ad), index_start + "2" + index_end + start +
-                                         "-1" + lessThan + "0" + end +
-                                         index_start + "5" + index_end + start +
-                                         "-0.01" + lessThan + "0" + end);
+    TS_ASSERT_EQUALS(vd.isValid(ad), index_start + "2" + index_end + start + "-1" + lessThan + "0" + end + index_start +
+                                         "5" + index_end + start + "-0.01" + lessThan + "0" + end);
 
     vd.clearLower();
     TS_ASSERT_EQUALS(vd.isValid(ad), "");

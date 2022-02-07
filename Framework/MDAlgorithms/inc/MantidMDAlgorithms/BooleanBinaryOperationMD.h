@@ -32,14 +32,12 @@ protected:
   bool commutative() const override;
   void checkInputs() override;
   void execEvent() override;
-  void execHistoScalar(
-      Mantid::DataObjects::MDHistoWorkspace_sptr out,
-      Mantid::DataObjects::WorkspaceSingleValue_const_sptr scalar) override;
+  void execHistoScalar(Mantid::DataObjects::MDHistoWorkspace_sptr out,
+                       Mantid::DataObjects::WorkspaceSingleValue_const_sptr scalar) override;
 
   /// Run the algorithm with a MDHisotWorkspace as output and operand
-  void execHistoHisto(
-      Mantid::DataObjects::MDHistoWorkspace_sptr out,
-      Mantid::DataObjects::MDHistoWorkspace_const_sptr operand) override = 0;
+  void execHistoHisto(Mantid::DataObjects::MDHistoWorkspace_sptr out,
+                      Mantid::DataObjects::MDHistoWorkspace_const_sptr operand) override = 0;
 };
 
 } // namespace MDAlgorithms

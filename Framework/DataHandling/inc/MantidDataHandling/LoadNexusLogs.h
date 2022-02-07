@@ -8,6 +8,7 @@
 
 #include "MantidAPI/NexusFileLoader.h"
 #include <nexus/NeXusFile.hpp>
+#include <vector>
 
 namespace Mantid {
 namespace Kernel {
@@ -46,17 +47,11 @@ public:
 
   /// Algorithm's version for identification overriding a virtual method
   int version() const override { return 1; }
-  const std::vector<std::string> seeAlso() const override {
-    return {"LoadLog", "MergeLogs"};
-  }
+  const std::vector<std::string> seeAlso() const override { return {"LoadLog", "MergeLogs"}; }
   /// Algorithm's category for identification overriding a virtual method
-  const std::string category() const override {
-    return "DataHandling\\Logs;DataHandling\\Nexus";
-  }
+  const std::string category() const override { return "DataHandling\\Logs;DataHandling\\Nexus"; }
 
-  int confidence(Kernel::NexusHDF5Descriptor & /*descriptor*/) const override {
-    return 0;
-  }
+  int confidence(Kernel::NexusHDF5Descriptor & /*descriptor*/) const override { return 0; }
 
 private:
   /// Overwrites Algorithm method.
@@ -71,9 +66,9 @@ private:
    * @param entry_class type of the entry (NXlog)
    * @param workspace input workspace
    */
-  void loadLogs(::NeXus::File &file, const std::string &absolute_entry_name,
-                const std::string &entry_class,
-                const std::shared_ptr<API::MatrixWorkspace> &workspace) const;
+  void loadLogs(::NeXus::File &file, const std::string &absolute_entry_name, const std::string &entry_class,
+                const std::shared_ptr<API::MatrixWorkspace> &workspace, const std::vector<std::string> &allow_list,
+                const std::vector<std::string> &block_list) const;
 
   /**
    * Load an NXlog entry
@@ -82,8 +77,7 @@ private:
    * @param entry_class type of the entry (NXlog)
    * @param workspace input workspace
    */
-  void loadNXLog(::NeXus::File &file, const std::string &absolute_entry_name,
-                 const std::string &entry_class,
+  void loadNXLog(::NeXus::File &file, const std::string &absolute_entry_name, const std::string &entry_class,
                  const std::shared_ptr<API::MatrixWorkspace> &workspace) const;
 
   /**
@@ -94,12 +88,8 @@ private:
    */
   void loadSELog(::NeXus::File &file, const std::string &absolute_entry_name,
                  const std::shared_ptr<API::MatrixWorkspace> &workspace) const;
-  void
-  loadVetoPulses(::NeXus::File &file,
-                 const std::shared_ptr<API::MatrixWorkspace> &workspace) const;
-  void
-  loadNPeriods(::NeXus::File &file,
-               const std::shared_ptr<API::MatrixWorkspace> &workspace) const;
+  void loadVetoPulses(::NeXus::File &file, const std::shared_ptr<API::MatrixWorkspace> &workspace) const;
+  void loadNPeriods(::NeXus::File &file, const std::shared_ptr<API::MatrixWorkspace> &workspace) const;
 
   /// Progress reporting object
   std::shared_ptr<API::Progress> m_progress;
@@ -107,6 +97,8 @@ private:
   /// Use frequency start for Monitor19 and Special1_19 logs with "No Time" for
   /// SNAP
   std::string freqStart;
+
+  mutable std::vector<std::string> m_logsWithInvalidValues;
 };
 
 } // namespace DataHandling

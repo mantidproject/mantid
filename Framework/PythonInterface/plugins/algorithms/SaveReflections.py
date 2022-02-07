@@ -52,26 +52,27 @@ def has_modulated_indexing(workspace):
     return num_modulation_vectors(workspace) > 0
 
 
-def modulation_indices(peak, num_mod_vec):
+def get_intHKLM(peak, workspace):
+    """Get the HKL to write to file (of parent peak if a satellite) and mnp (empty if no modulation)
+
+    :params: peak :: peak object from workspace
+    :params: workspace :: the peak workspace
+    :returns: list containing hkl to write (hkl of the parent if a satellite peak)
+    :returns: list of mnp (empty if not a satellite peak)
     """
-    Gather non-zero modulated structure indices from a peak
-
-    :param workspace: A single Peak
-    :param num_mod_vec: The number of modulation vectors set on the workspace
-    :return: A list of the modulation indices
-    """
-    mnp = peak.getIntMNP()
-    return [mnp[i] for i in range(num_mod_vec)]
-
-
-def get_additional_index_names(workspace):
-    """Get the names of the additional indices to export
-
-    :params: workspace :: the workspace to get column names from
-    :returns: the names of any additional columns in the workspace
-    """
-    num_mod_vec = num_modulation_vectors(workspace)
-    return ["m{}".format(i + 1) for i in range(num_mod_vec)]
+    hkl = peak.getHKL()
+    mnp = []
+    if has_modulated_indexing(workspace):
+        lattice = workspace.sample().getOrientedLattice()
+        num_mod_vec = num_modulation_vectors(workspace)
+        mnp = list(peak.getIntMNP())[:num_mod_vec]  # +/- 1 for one of up to 3 mod vecs (0 otherwise)
+        for ivec in range(num_mod_vec):
+            if abs(mnp[ivec]) > 1e-10:
+                # undo modulation to get integer HKL (can't round if cell non-primitive and mod component > 0.5)
+                mod_vec = lattice.getModVec(ivec)
+                hkl -= mod_vec * mnp[ivec]
+                break
+    return list(hkl), mnp
 
 
 class SaveReflections(PythonAlgorithm):
@@ -96,15 +97,16 @@ class SaveReflections(PythonAlgorithm):
         self.declareProperty(name="Format",
                              direction=Direction.Input,
                              defaultValue="Fullprof",
-                             validator=StringListValidator(dir(ReflectionFormat)),
+                             validator=StringListValidator(
+                                 [fmt.name for fmt in ReflectionFormat]),
                              doc="The output format to export reflections to")
 
         self.declareProperty(name="SplitFiles",
                              defaultValue=False,
                              direction=Direction.Input,
                              doc="If True save separate files with only the peaks associated"
-                             "with a single modulation vector in a single file. Only "
-                             "applies to JANA format.")
+                                 "with a single modulation vector in a single file. Only "
+                                 "applies to JANA format.")
 
     def PyExec(self):
         """Execute the algorithm"""
@@ -112,8 +114,11 @@ class SaveReflections(PythonAlgorithm):
         output_format = ReflectionFormat[self.getPropertyValue("Format")]
         file_name = self.getPropertyValue("Filename")
         split_files = self.getProperty("SplitFiles").value
-
-        FORMAT_MAP[output_format]()(file_name, workspace, split_files)
+        # find the max intensity so fits in column with format 12.2f in Fullprof and Jana, 8.2f in SaveHKL (SHELX, GSAS)
+        max_intens = max(workspace.column('Intens'))
+        max_exponent = 8 if output_format in [ReflectionFormat.Fullprof, ReflectionFormat.Jana] else 4
+        scale = 1 if max_intens < 10**max_exponent else 10**(-(int(np.log10(max_intens))-max_exponent+1))
+        FORMAT_MAP[output_format]()(file_name, workspace, split_files, scale)
 
 
 # ------------------------------------------------------------------------------------------------------
@@ -123,19 +128,20 @@ class FullprofFormat(object):
     """Writes a PeaksWorkspace to an ASCII file in the format required
     by the Fullprof crystallographic refinement program.
 
-    This is a 7 columns file format consisting of H, K, L, instensity,
+    This is a 7 columns file format consisting of H, K, L, intensity,
     sigma, crystal domain, and wavelength.
     """
-    def __call__(self, file_name, workspace, split_files):
+
+    def __call__(self, file_name, workspace, split_files, scale):
         """Write a PeaksWorkspace to an ASCII file using this formatter.
 
         :param file_name: the file name to output data to.
         :param workspace: the PeaksWorkspace to write to file.
-        :param _: Ignored parameter for compatability with other savers
+        :param _: Ignored parameter for compatibility with other savers
         """
         with open(file_name, 'w') as f_handle:
             self.write_header(f_handle, workspace)
-            self.write_peaks(f_handle, workspace)
+            self.write_peaks(f_handle, workspace, scale)
 
     def write_header(self, f_handle, workspace):
         """Write the header of the Fullprof file format
@@ -143,26 +149,52 @@ class FullprofFormat(object):
         :param f_handle: handle to the file to write to.
         :param workspace: the PeaksWorkspace to save to file.
         """
-        num_hkl = 3 + num_modulation_vectors(workspace)
-        f_handle.write(workspace.getTitle())
+        num_hkl = 3 + has_modulated_indexing(workspace)  # add a column if mod vectors
+        title = workspace.getTitle() if workspace.getTitle() else workspace.name()
+        f_handle.write(title + '\n')
         f_handle.write("({}i4,2f12.2,i5,4f10.4)\n".format(num_hkl))
-        f_handle.write("  0 0 0\n")
-        names = "".join(["  {}".format(name) for name in get_additional_index_names(workspace)])
-        f_handle.write("#  h   k   l{}      Fsqr       s(Fsqr)   Cod   Lambda\n".format(names))
+        wavelength = '0'  # if TOF Laue this is ignored
+        if np.std([pk.getWavelength() for pk in workspace]) < 0.01:
+            # check for constant wavelength (same as in SaveHKLCW)
+            wavelength = f"{workspace.getPeak(0).getWavelength():.5f}"
+        f_handle.write("  {} 0 0\n".format(wavelength))
+        mod_colname = ""
+        if has_modulated_indexing(workspace):
+            # num_rows = 2*num_vecs (separate rows for +/- q)
+            f_handle.write("   {:>4.0f}\n".format(2 * num_modulation_vectors(workspace)))
+            # now write out mod vectors
+            lattice = workspace.sample().getOrientedLattice()
+            row_num = 1
+            for ivec in range(num_modulation_vectors(workspace)):
+                vec = lattice.getModVec(ivec)
+                x, y, z = vec.X(), vec.Y(), vec.Z()
+                if abs(x) > 0 or abs(y) > 0 or abs(z) > 0:
+                    f_handle.write("   {}{: >13.6f}{: >13.6f}{: >13.6f}\n".format(row_num, x, y, z))
+                    f_handle.write("   {}{: >13.6f}{: >13.6f}{: >13.6f}\n".format(
+                        row_num + 1, -x, -y, -z))
+                    row_num += 2
+            mod_colname = "   m"
+        f_handle.write("#  h   k   l{}      Fsqr       s(Fsqr)   Cod   Lambda\n".format(mod_colname))
 
-    def write_peaks(self, f_handle, workspace):
+    def write_peaks(self, f_handle, workspace, scale):
         """Write all the peaks in the workspace to file.
 
         :param f_handle: handle to the file to write to.
         :param workspace: the PeaksWorkspace to save to file.
         """
-        num_mod_vec = num_modulation_vectors(workspace)
         for i, peak in enumerate(workspace):
-            data = [peak.getH(), peak.getK(), peak.getL()]
-            data.extend(modulation_indices(peak, num_mod_vec))
-            hkls = "".join(["{:>4.0f}".format(item) for item in data])
+            hkl, mnp = get_intHKLM(peak, workspace)
+            if mnp:
+                if all([abs(m) < 1e-10 for m in mnp]):
+                    # modulations present in ws but this is not a satellite peak
+                    iq = [0]
+                else:
+                    # find num of mod vector as written in header
+                    iq = [2 * im + 1 + (m < 0) for im, m in enumerate(mnp) if (abs(m) > 1e-10)]
+                hkl.extend(iq)
+            hkls = "".join(["{:>4.0f}".format(item) for item in hkl])
 
-            data = (peak.getIntensity(), peak.getSigmaIntensity(), i + 1, peak.getWavelength())
+            data = (peak.getIntensity()*scale, peak.getSigmaIntensity()*scale, 1, peak.getWavelength())
             line = "{:>12.2f}{:>12.2f}{:>5.0f}{:>10.4f}\n".format(*data)
             line = "".join([hkls, line])
 
@@ -182,13 +214,16 @@ class JanaFormat(object):
 
     Currently the last three columns are hard coded to 1.0, 0.0, and 0.0 respectively.
     """
+
     class FileBuilder(object):
         """Encapsulate information to build a single Jana file"""
-        def __init__(self, filepath, workspace, num_mod_vec, modulation_col_num=None):
+
+        def __init__(self, filepath, workspace, num_mod_vec, modulation_col_num=None, scale=1):
             self._filepath = filepath
             self._workspace = workspace
             self._num_mod_vec = num_mod_vec
             self._modulation_col_num = modulation_col_num
+            self._scale = scale
 
             self._headers = []
             self._peaks = []
@@ -254,15 +289,14 @@ class JanaFormat(object):
             for peak in self._workspace:
                 if self._num_mod_vec > 0:
                     # if this is a main peak write it out. if not decide if it should be in this file
-                    hkl = peak.getIntHKL()
-                    mnp = peak.getIntMNP()
+                    hkl, mnp = get_intHKLM(peak, self._workspace)
                     if self._modulation_col_num is None:
                         # write all modulation indices
                         modulation_indices = [mnp[i] for i in range(self._num_mod_vec)]
                     else:
                         # is this a main peak or one with the modulation vector matching this file
                         mnp_index = -1
-                        for i in range(3):
+                        for i in range(self._num_mod_vec):
                             if abs(mnp[i]) > 0.0:
                                 mnp_index = i
                                 break
@@ -283,9 +317,10 @@ class JanaFormat(object):
                     self.create_peak_line(hkl, modulation_indices,
                                           peak.getIntensity(), peak.getSigmaIntensity(),
                                           peak.getWavelength(),
-                                          get_two_theta(peak.getDSpacing(), peak.getWavelength())))
+                                          get_two_theta(peak.getDSpacing(), peak.getWavelength()),
+                                          peak.getAbsorptionWeightedPathLength()))
 
-        def create_peak_line(self, hkl, mnp, intensity, sig_int, wavelength, two_theta):
+        def create_peak_line(self, hkl, mnp, intensity, sig_int, wavelength, two_theta, t_bar):
             """
             Write the raw peak data to a file.
 
@@ -296,18 +331,19 @@ class JanaFormat(object):
             :param sig_int: Signal value
             :param wavelength: Wavelength in angstroms
             :param two_theta: Two theta of detector
+            :param t_bar: absorption weighted path length for the detector/wavelength
             """
             template = "{: >5.0f}{: >5.0f}{: >5.0f}{}{: >12.2f}{: >12.2f}{: >5.0f}{: >10.4f}{: >10.4f}{: >10.4f}{: >10.4f}{: >10.4f}\n"
             mod_indices = "".join(["{: >5.0f}".format(value) for value in mnp])
-            return template.format(hkl[0], hkl[1], hkl[2], mod_indices, intensity, sig_int, 1, wavelength,
-                                   two_theta, 1.0, 0.0, 0.0)
+            return template.format(hkl[0], hkl[1], hkl[2], mod_indices, intensity*self._scale, sig_int*self._scale, 1,
+                                   wavelength, two_theta, 1.0, t_bar, 0.0)
 
         def write(self):
             with open(self._filepath, 'w') as handle:
                 handle.write("".join(self._headers))
                 handle.write("".join(self._peaks))
 
-    def __call__(self, file_name, workspace, split_files):
+    def __call__(self, file_name, workspace, split_files, scale):
         """Write a PeaksWorkspace or TableWorkspace with the appropriate columns
         to an ASCII file using this formatter.
 
@@ -318,13 +354,13 @@ class JanaFormat(object):
                             files. The suffix -mi where identifier=1,2...n
                             is appended to each file
         """
-        builders = self._create_file_builders(file_name, workspace, split_files)
+        builders = self._create_file_builders(file_name, workspace, split_files, scale)
         for builder in builders:
             builder.build_headers()
             builder.build_peaks_info()
             builder.write()
 
-    def _create_file_builders(self, file_name, workspace, split_files):
+    def _create_file_builders(self, file_name, workspace, split_files, scale):
         """Create a sequence of JanaFileBuilder to contain the information.
 
         :param file_name: Filename given by user
@@ -337,11 +373,11 @@ class JanaFormat(object):
             name, ext = osp.splitext(file_name)
             builders = [
                 JanaFormat.FileBuilder('{}-m{}{}'.format(name, col_num, ext), workspace,
-                                       num_mod_vec, col_num)
+                                       num_mod_vec, col_num, scale)
                 for col_num in range(1, num_mod_vec + 1)
             ]
         else:
-            builders = [JanaFormat.FileBuilder(file_name, workspace, num_mod_vec, None)]
+            builders = [JanaFormat.FileBuilder(file_name, workspace, num_mod_vec, None, scale)]
 
         return builders
 
@@ -356,7 +392,8 @@ class SaveHKLFormat(object):
     The SaveHKL algorithm currently supports both the GSAS and SHELX formats. For
     more information see the SaveHKL algorithm documentation.
     """
-    def __call__(self, file_name, workspace, _):
+
+    def __call__(self, file_name, workspace, _, scale):
         """Write a PeaksWorkspace to an ASCII file using this formatter.
 
         :param file_name: the file name to output data to.
@@ -368,7 +405,7 @@ class SaveHKLFormat(object):
                 "Cannot currently save modulated structures to GSAS or SHELX formats")
 
         from mantid.simpleapi import SaveHKL
-        SaveHKL(Filename=file_name, InputWorkspace=workspace, OutputWorkspace=workspace.name())
+        SaveHKL(Filename=file_name, InputWorkspace=workspace, OutputWorkspace=workspace.name(), ScalePeaks=scale)
 
 
 class ReflectionFormat(Enum):

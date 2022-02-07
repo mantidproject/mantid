@@ -7,7 +7,6 @@
 import unittest
 import numpy
 
-from mantid.kernel import *
 from mantid.api import *
 from mantid import config
 from testhelpers import run_algorithm

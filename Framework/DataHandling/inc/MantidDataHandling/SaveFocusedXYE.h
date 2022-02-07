@@ -53,13 +53,9 @@ public:
 
   /// Algorithm's version
   int version() const override { return (1); }
-  const std::vector<std::string> seeAlso() const override {
-    return {"SaveFullprofResolution", "SaveAscii"};
-  }
+  const std::vector<std::string> seeAlso() const override { return {"SaveFullprofResolution", "SaveAscii"}; }
   /// Algorithm's category for identification
-  const std::string category() const override {
-    return "Diffraction\\DataHandling;DataHandling\\Text";
-  }
+  const std::string category() const override { return "Diffraction\\DataHandling;DataHandling\\Text"; }
 
 private:
   /// Initialisation code
@@ -67,34 +63,24 @@ private:
   /// Execution code
   void exec() override;
   /// Write the header information
-  void writeHeaders(std::ostream &os,
-                    API::MatrixWorkspace_const_sptr &workspace) const;
+  void writeHeaders(std::ostream &os, API::MatrixWorkspace_const_sptr &workspace) const;
   /// Write the header information in default "XYE" format
-  void writeXYEHeaders(std::ostream &os,
-                       API::MatrixWorkspace_const_sptr &workspace) const;
+  void writeXYEHeaders(std::ostream &os, API::MatrixWorkspace_const_sptr &workspace) const;
   /// Write the header information in MAUD format
-  void writeMAUDHeaders(std::ostream &os,
-                        API::MatrixWorkspace_const_sptr &workspace) const;
+  void writeMAUDHeaders(std::ostream &os, API::MatrixWorkspace_const_sptr &workspace) const;
   /// Write spectra header
-  void writeSpectraHeader(std::ostream &os, size_t index1, size_t index2,
-                          double flightPath, double tth,
-                          const std::string &caption,
-                          const std::string &spectraAxisCaption,
-                          const std::string &spectraAxisLabel,
-                          double observable);
+  void writeSpectraHeader(std::ostream &os, size_t index1, size_t index2, double flightPath, double tth,
+                          const std::string &caption, const std::string &spectraAxisCaption,
+                          const std::string &spectraAxisLabel, double observable);
   /// Write spectra XYE header
-  void writeXYESpectraHeader(std::ostream &os, size_t index1,
-                             const std::string &caption,
-                             const std::string &spectrumAxisCaption,
-                             const std::string &spectraAxisLabel,
+  void writeXYESpectraHeader(std::ostream &os, size_t index1, const std::string &caption,
+                             const std::string &spectrumAxisCaption, const std::string &spectraAxisLabel,
                              double observable);
   /// Write spectra MAUD header
-  void writeMAUDSpectraHeader(std::ostream &os, size_t index1, size_t index2,
-                              double flightPath, double tth,
+  void writeMAUDSpectraHeader(std::ostream &os, size_t index1, size_t index2, double flightPath, double tth,
                               const std::string &caption);
   /// sets non workspace properties for the algorithm
-  void setOtherProperties(IAlgorithm *alg, const std::string &propertyName,
-                          const std::string &propertyValue,
+  void setOtherProperties(IAlgorithm *alg, const std::string &propertyName, const std::string &propertyValue,
                           int perioidNum) override;
 
   /// Header type

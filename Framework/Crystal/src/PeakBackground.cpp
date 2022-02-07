@@ -14,20 +14,16 @@ using namespace Mantid::API;
 using namespace Mantid::Kernel;
 using Mantid::Geometry::IPeak;
 
-namespace Mantid {
-namespace Crystal {
+namespace Mantid::Crystal {
 
 //----------------------------------------------------------------------------------------------
 /** Constructor
  */
-PeakBackground::PeakBackground(IPeaksWorkspace_const_sptr peaksWS,
-                               const double &radiusEstimate,
-                               const double &thresholdSignal,
-                               const Mantid::API::MDNormalization normalisation,
+PeakBackground::PeakBackground(IPeaksWorkspace_const_sptr peaksWS, const double &radiusEstimate,
+                               const double &thresholdSignal, const Mantid::API::MDNormalization normalisation,
                                const SpecialCoordinateSystem coordinates)
-    : HardThresholdBackground(thresholdSignal, normalisation),
-      m_peaksWS(std::move(peaksWS)), m_radiusEstimate(radiusEstimate),
-      m_mdCoordinates(coordinates) {
+    : HardThresholdBackground(thresholdSignal, normalisation), m_peaksWS(std::move(peaksWS)),
+      m_radiusEstimate(radiusEstimate), m_mdCoordinates(coordinates) {
 
   if (m_mdCoordinates == QLab) {
     m_coordFunction = &IPeak::getQLabFrame;
@@ -36,15 +32,12 @@ PeakBackground::PeakBackground(IPeaksWorkspace_const_sptr peaksWS,
   } else if (m_mdCoordinates == Mantid::Kernel::HKL) {
     m_coordFunction = &IPeak::getHKL;
   } else {
-    throw std::invalid_argument(
-        "Unknown CoordinateSystem provided to PeakBackground");
+    throw std::invalid_argument("Unknown CoordinateSystem provided to PeakBackground");
   }
 }
 
 /// Virutal constructor
-PeakBackground *PeakBackground::clone() const {
-  return new PeakBackground(*this);
-}
+PeakBackground *PeakBackground::clone() const { return new PeakBackground(*this); }
 
 bool PeakBackground::isBackground(Mantid::API::IMDIterator *iterator) const {
   if (!HardThresholdBackground::isBackground(iterator)) {
@@ -64,8 +57,6 @@ bool PeakBackground::isBackground(Mantid::API::IMDIterator *iterator) const {
   return true;
 }
 
-void PeakBackground::configureIterator(
-    Mantid::API::IMDIterator *const /*iterator*/) const {}
+void PeakBackground::configureIterator(Mantid::API::IMDIterator *const /*iterator*/) const {}
 
-} // namespace Crystal
-} // namespace Mantid
+} // namespace Mantid::Crystal

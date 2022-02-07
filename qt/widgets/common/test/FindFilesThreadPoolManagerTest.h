@@ -13,8 +13,8 @@
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
 
+using MantidQt::API::FakeFileFinderWidget;
 using MantidQt::API::FakeFindFilesThread;
-using MantidQt::API::FakeMWRunFiles;
 using MantidQt::API::FindFilesSearchParameters;
 using MantidQt::API::FindFilesSearchResults;
 using MantidQt::API::FindFilesThreadPoolManager;
@@ -23,16 +23,12 @@ class FindFilesThreadPoolManagerTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static FindFilesThreadPoolManagerTest *createSuite() {
-    return new FindFilesThreadPoolManagerTest();
-  }
-  static void destroySuite(FindFilesThreadPoolManagerTest *suite) {
-    delete suite;
-  }
+  static FindFilesThreadPoolManagerTest *createSuite() { return new FindFilesThreadPoolManagerTest(); }
+  static void destroySuite(FindFilesThreadPoolManagerTest *suite) { delete suite; }
 
   void test_find_single_file() {
     // Arrange
-    auto *widget = new FakeMWRunFiles();
+    auto *widget = new FakeFileFinderWidget();
 
     // The parameters of the search
     FindFilesSearchParameters parameters;
@@ -46,10 +42,9 @@ public:
     FindFilesSearchResults exp_results;
     exp_results.filenames.emplace_back("FoundFile");
 
-    auto fakeAllocator =
-        [&exp_results](const FindFilesSearchParameters &parameters) {
-          return new FakeFindFilesThread(parameters, exp_results);
-        };
+    auto fakeAllocator = [&exp_results](const FindFilesSearchParameters &parameters) {
+      return new FakeFindFilesThread(parameters, exp_results);
+    };
     FindFilesThreadPoolManager poolManager;
     poolManager.setAllocator(fakeAllocator);
 
@@ -57,7 +52,7 @@ public:
     poolManager.createWorker(widget, parameters);
     // Block and wait for all the threads to process
     poolManager.waitForDone();
-    QCoreApplication::processEvents();
+    QCoreApplication::sendPostedEvents();
 
     // Assert
     const auto results = widget->getResults();
@@ -71,7 +66,7 @@ public:
 
   void test_starting_new_search_cancels_currently_running_search() {
     // Arrange
-    FakeMWRunFiles widget;
+    FakeFileFinderWidget widget;
 
     // The parameters of the search
     FindFilesSearchParameters parameters;
@@ -85,20 +80,17 @@ public:
     FindFilesSearchResults exp_results;
     exp_results.filenames.emplace_back("FoundFile");
 
-    auto fakeAllocatorNoResults =
-        [](const FindFilesSearchParameters &parameters) {
-          // Run a thread that returns nothing and takes 1000 milliseconds to do
-          // so
-          return new FakeFindFilesThread(parameters, FindFilesSearchResults(),
-                                         1000);
-        };
+    auto fakeAllocatorNoResults = [](const FindFilesSearchParameters &parameters) {
+      // Run a thread that returns nothing and takes 1000 milliseconds to do
+      // so
+      return new FakeFindFilesThread(parameters, FindFilesSearchResults(), 1000);
+    };
 
-    auto fakeAllocatorSomeResults =
-        [&exp_results](const FindFilesSearchParameters &parameters) {
-          // Run a thread that returns something and takes 100 milliseconds to
-          // do so
-          return new FakeFindFilesThread(parameters, exp_results);
-        };
+    auto fakeAllocatorSomeResults = [&exp_results](const FindFilesSearchParameters &parameters) {
+      // Run a thread that returns something and takes 100 milliseconds to
+      // do so
+      return new FakeFindFilesThread(parameters, exp_results);
+    };
 
     // Act
     FindFilesThreadPoolManager poolManager;
@@ -115,7 +107,7 @@ public:
 
     // Block and wait for all the threads to process
     poolManager.waitForDone();
-    QCoreApplication::processEvents();
+    QCoreApplication::sendPostedEvents();
 
     // Assert
     const auto results = widget.getResults();

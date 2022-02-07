@@ -10,19 +10,16 @@
 #include "MantidHistogramData/CountVariances.h"
 #include "MantidHistogramData/FrequencyVariances.h"
 
-namespace Mantid {
-namespace HistogramData {
+namespace Mantid::HistogramData {
 
 /// Constructs FrequencStandardDeviations from CountStandardDeviations and bin
 /// width based on BinEdges.
-FrequencyStandardDeviations::FrequencyStandardDeviations(
-    const CountStandardDeviations &counts, const BinEdges &edges)
+FrequencyStandardDeviations::FrequencyStandardDeviations(const CountStandardDeviations &counts, const BinEdges &edges)
     : FrequencyStandardDeviations(CountStandardDeviations(counts), edges) {}
 
 /// Move-constructs FrequencyStandardDeviations from CountStandardDeviations and
 /// bin width based on BinEdges.
-FrequencyStandardDeviations::FrequencyStandardDeviations(
-    CountStandardDeviations &&counts, const BinEdges &edges) {
+FrequencyStandardDeviations::FrequencyStandardDeviations(CountStandardDeviations &&counts, const BinEdges &edges) {
   if (!counts)
     return;
   if (!edges)
@@ -42,5 +39,4 @@ FrequencyStandardDeviations::FrequencyStandardDeviations(
   }
 }
 
-} // namespace HistogramData
-} // namespace Mantid
+} // namespace Mantid::HistogramData

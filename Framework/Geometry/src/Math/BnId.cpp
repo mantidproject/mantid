@@ -17,9 +17,7 @@
 
 #include "MantidGeometry/Math/BnId.h"
 
-namespace Mantid {
-
-namespace Geometry {
+namespace Mantid::Geometry {
 
 /** Output as a stream
  *  @param of :: Reference to the output stream
@@ -246,8 +244,7 @@ int BnId::intValue() const
   return out;
 }
 
-void BnId::mapState(const std::vector<int> &Index,
-                    std::map<int, int> &Base) const
+void BnId::mapState(const std::vector<int> &Index, std::map<int, int> &Base) const
 /**
   Sets the components within base with true/false
   @param Index :: vector of Literal/Surface numbers
@@ -319,8 +316,7 @@ void BnId::reverse()
 */
 {
   using std::placeholders::_1;
-  transform(Tval.begin(), Tval.end(), Tval.begin(),
-            std::bind(std::multiplies<int>(), _1, -1));
+  transform(Tval.begin(), Tval.end(), Tval.begin(), std::bind(std::multiplies<int>(), _1, -1));
   setCounters();
 }
 
@@ -348,6 +344,4 @@ std::string BnId::display() const
 
 void BnId::write(std::ostream &os) const { os << display(); }
 
-} // NAMESPACE Geometry
-
-} // NAMESPACE Mantid
+} // namespace Mantid::Geometry

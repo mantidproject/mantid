@@ -31,7 +31,7 @@ Usage
   newprop = ws.run().getProperty("PhaseM12")
   prop1 = ws.run().getProperty("Phase1")
   prop2 = ws.run().getProperty("Phase2")
-  
+
   print("Phase 1's size = {}, Phase 2's size = {}, Merged size = {}.".format(prop1.size(), prop2.size(), newprop.size()))
   for i in range(5):
       print("Phase1              Time[{}] = {}.".format(i, prop1.nthTime(i)))

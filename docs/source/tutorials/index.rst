@@ -14,8 +14,8 @@ At the end of this course you can start to use Mantid independently.
 
 *Python introduction* is a crash course in the Python that you need for scripting in Mantid.
 
-*Muon GUI course* focuses on the reduction and analysis of Muon data collected from any of the ISIS 
-muon instruments via a Graphical User Interface (GUI). This interface has been specifically designed 
+*Muon GUI course* focuses on the reduction and analysis of Muon data collected from any of the ISIS
+muon instruments via a Graphical User Interface (GUI). This interface has been specifically designed
 to guide the user through the data reduction and analysis procedure.
 
 *Python in Mantid* introduces how to interact with Mantid through Python. Some knowledge of
@@ -32,6 +32,8 @@ capabilities of Mantid, by developing your own scripts.
 
    mantid_basic_course/index
    introduction_to_python/index
+   python_in_mantid/index
+   extending_mantid_with_python/index
    muon_GUI_course/index
 
 **Sections:**
@@ -43,6 +45,6 @@ capabilities of Mantid, by developing your own scripts.
 
 * :ref:`mantid_basic_course`
 * :ref:`muon_GUI_course`
-* `Introduction To Python <http://www.mantidproject.org/Introduction_To_Python>`_
-* `Python in Mantid <http://www.mantidproject.org/Python_In_Mantid>`_
-* `Extending Mantid with Python <http://www.mantidproject.org/Extending_Mantid_With_Python>`_
+* :ref:`introduction_to_python`
+* :ref:`pim_intro`
+* :ref:`emwp_intro`

@@ -38,8 +38,7 @@ namespace MantidWidgets {
 /// Constructor
 /// @param fitBrowser
 /// @param mantidui Its purpose is to provide the slot showSequentialPlot
-SequentialFitDialog::SequentialFitDialog(FitPropertyBrowser *fitBrowser,
-                                         QObject *mantidui)
+SequentialFitDialog::SequentialFitDialog(FitPropertyBrowser *fitBrowser, QObject *mantidui)
     : MantidDialog(fitBrowser), m_fitBrowser(fitBrowser) {
   ui.setupUi(this);
 
@@ -50,12 +49,9 @@ SequentialFitDialog::SequentialFitDialog(FitPropertyBrowser *fitBrowser,
   connect(ui.btnFit, SIGNAL(clicked()), this, SLOT(accept()));
   connect(ui.btnCancel, SIGNAL(clicked()), this, SLOT(reject()));
   connect(ui.btnHelp, SIGNAL(clicked()), this, SLOT(helpClicked()));
-  connect(ui.ckbLogPlot, SIGNAL(toggled(bool)), this,
-          SLOT(plotAgainstLog(bool)));
-  connect(ui.ckCreateOutput, SIGNAL(toggled(bool)), ui.ckOutputCompMembers,
-          SLOT(setEnabled(bool)));
-  connect(ui.ckCreateOutput, SIGNAL(toggled(bool)), ui.ckConvolveMembers,
-          SLOT(setEnabled(bool)));
+  connect(ui.ckbLogPlot, SIGNAL(toggled(bool)), this, SLOT(plotAgainstLog(bool)));
+  connect(ui.ckCreateOutput, SIGNAL(toggled(bool)), ui.ckOutputCompMembers, SLOT(setEnabled(bool)));
+  connect(ui.ckCreateOutput, SIGNAL(toggled(bool)), ui.ckConvolveMembers, SLOT(setEnabled(bool)));
 
   ui.cbLogValue->setEditable(true);
   ui.ckbLogPlot->setChecked(true);
@@ -66,23 +62,15 @@ SequentialFitDialog::SequentialFitDialog(FitPropertyBrowser *fitBrowser,
   connect(fitBrowser, SIGNAL(functionChanged()), this, SLOT(functionChanged()));
 
   // When a fit is completed finishHandle is called which emits needShowPlot
-  connect(
-      this,
-      SIGNAL(needShowPlot(Ui::SequentialFitDialog *,
-                          MantidQt::MantidWidgets::FitPropertyBrowser *)),
-      mantidui,
-      SLOT(showSequentialPlot(Ui::SequentialFitDialog *,
-                              MantidQt::MantidWidgets::FitPropertyBrowser *)));
-  connect(ui.tWorkspaces, SIGNAL(cellChanged(int, int)), this,
-          SLOT(spectraChanged(int, int)));
-  connect(ui.tWorkspaces, SIGNAL(itemSelectionChanged()), this,
-          SLOT(selectionChanged()));
+  connect(this, SIGNAL(needShowPlot(Ui::SequentialFitDialog *, MantidQt::MantidWidgets::FitPropertyBrowser *)),
+          mantidui, SLOT(showSequentialPlot(Ui::SequentialFitDialog *, MantidQt::MantidWidgets::FitPropertyBrowser *)));
+  connect(ui.tWorkspaces, SIGNAL(cellChanged(int, int)), this, SLOT(spectraChanged(int, int)));
+  connect(ui.tWorkspaces, SIGNAL(itemSelectionChanged()), this, SLOT(selectionChanged()));
   selectionChanged();
 } // namespace MantidWidgets
 
 void SequentialFitDialog::addWorkspace() {
-  SelectWorkspacesDialog *dlg =
-      new SelectWorkspacesDialog(this, "MatrixWorkspace");
+  SelectWorkspacesDialog *dlg = new SelectWorkspacesDialog(this, "MatrixWorkspace");
   if (dlg->exec() == QDialog::Accepted) {
     addWorkspaces(dlg->getSelectedNames());
   }
@@ -112,10 +100,8 @@ bool SequentialFitDialog::addWorkspaces(const QStringList &wsNames) {
 
     if (ui.ckbLogPlot->isChecked()) {
       // set spectrum number corresponding to the workspace index
-      Mantid::API::MatrixWorkspace_sptr ws =
-          std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
-              Mantid::API::AnalysisDataService::Instance().retrieve(
-                  name.toStdString()));
+      Mantid::API::MatrixWorkspace_sptr ws = std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
+          Mantid::API::AnalysisDataService::Instance().retrieve(name.toStdString()));
       int spec = -1;
       if (ws) {
         Mantid::API::Axis *y = ws->getAxis(1);
@@ -143,8 +129,7 @@ bool SequentialFitDialog::addWorkspaces(const QStringList &wsNames) {
 void SequentialFitDialog::addFile() {
   QFileDialog dlg(this);
   dlg.setFileMode(QFileDialog::ExistingFiles);
-  const std::vector<std::string> &searchDirs =
-      Mantid::Kernel::ConfigService::Instance().getDataSearchDirs();
+  const std::vector<std::string> &searchDirs = Mantid::Kernel::ConfigService::Instance().getDataSearchDirs();
   QString dir;
   if (searchDirs.empty()) {
     dir = "";
@@ -185,23 +170,21 @@ void SequentialFitDialog::addFile() {
 void SequentialFitDialog::removeItem() {
   QList<QTableWidgetSelectionRange> ranges = ui.tWorkspaces->selectedRanges();
   while (!ranges.empty()) {
-    ui.tWorkspaces->model()->removeRows(ranges[0].topRow(),
-                                        ranges[0].rowCount());
+    ui.tWorkspaces->model()->removeRows(ranges[0].topRow(), ranges[0].rowCount());
     ranges = ui.tWorkspaces->selectedRanges();
   }
 }
 
 bool SequentialFitDialog::validateLogs(const QString &wsName) {
-  Mantid::API::MatrixWorkspace_sptr ws =
-      std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
-          Mantid::API::AnalysisDataService::Instance().retrieve(
-              wsName.toStdString()));
+  Mantid::API::MatrixWorkspace_sptr ws = std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
+      Mantid::API::AnalysisDataService::Instance().retrieve(wsName.toStdString()));
   if (ws) {
     const std::vector<Mantid::Kernel::Property *> logs = ws->run().getLogData();
     QStringList logNames;
+    // add the option that displays workspace names
+    logNames << "SourceName";
     for (auto log : logs) {
-      Mantid::Kernel::TimeSeriesProperty<double> *p =
-          dynamic_cast<Mantid::Kernel::TimeSeriesProperty<double> *>(log);
+      Mantid::Kernel::TimeSeriesProperty<double> *p = dynamic_cast<Mantid::Kernel::TimeSeriesProperty<double> *>(log);
       if (!p)
         continue;
       logNames << QString::fromStdString(log->name());
@@ -252,15 +235,9 @@ bool SequentialFitDialog::isFile(int row) const {
  */
 QString SequentialFitDialog::getIndex(int row) const {
   QString index;
-  QString spectrum = ui.tWorkspaces->model()
-                         ->data(ui.tWorkspaces->model()->index(row, 2))
-                         .toString();
-  QString wsIndex = ui.tWorkspaces->model()
-                        ->data(ui.tWorkspaces->model()->index(row, 3))
-                        .toString();
-  QString range = ui.tWorkspaces->model()
-                      ->data(ui.tWorkspaces->model()->index(row, 4))
-                      .toString();
+  QString spectrum = ui.tWorkspaces->model()->data(ui.tWorkspaces->model()->index(row, 2)).toString();
+  QString wsIndex = ui.tWorkspaces->model()->data(ui.tWorkspaces->model()->index(row, 3)).toString();
+  QString range = ui.tWorkspaces->model()->data(ui.tWorkspaces->model()->index(row, 4)).toString();
 
   if (isFile(row)) {
     // if it is a file the ndex can be either spectrum or a range of values
@@ -271,10 +248,8 @@ QString SequentialFitDialog::getIndex(int row) const {
       index = "sp" + spectrum;
     }
   } else {
-    Mantid::API::MatrixWorkspace_sptr ws =
-        std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
-            Mantid::API::AnalysisDataService::Instance().retrieve(
-                name(row).toStdString()));
+    Mantid::API::MatrixWorkspace_sptr ws = std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
+        Mantid::API::AnalysisDataService::Instance().retrieve(name(row).toStdString()));
     Mantid::API::Axis *y = ws->getAxis(1);
 
     // if it is a single workspace index can only be a range since we are doing
@@ -296,14 +271,10 @@ QString SequentialFitDialog::getIndex(int row) const {
 void SequentialFitDialog::accept() {
   QStringList inputStr;
   for (int i = 0; i < ui.tWorkspaces->rowCount(); ++i) {
-    QString name = ui.tWorkspaces->model()
-                       ->data(ui.tWorkspaces->model()->index(i, 0))
-                       .toString();
+    QString name = ui.tWorkspaces->model()->data(ui.tWorkspaces->model()->index(i, 0)).toString();
     QString parStr = name + "," + getIndex(i);
     if (isFile(i)) { // add the period
-      parStr += QString(",") + ui.tWorkspaces->model()
-                                   ->data(ui.tWorkspaces->model()->index(i, 1))
-                                   .toString();
+      parStr += QString(",") + ui.tWorkspaces->model()->data(ui.tWorkspaces->model()->index(i, 1)).toString();
     }
     inputStr << parStr;
   }
@@ -319,24 +290,29 @@ void SequentialFitDialog::accept() {
     m_outputName += "_res";
   }
 
-  Mantid::API::IAlgorithm_sptr alg =
-      Mantid::API::AlgorithmManager::Instance().create("PlotPeakByLogValue");
+  Mantid::API::IAlgorithm_sptr alg = Mantid::API::AlgorithmManager::Instance().create("PlotPeakByLogValue");
   alg->initialize();
   alg->setPropertyValue("Input", inputStr.join(";").toStdString());
   alg->setProperty("WorkspaceIndex", m_fitBrowser->workspaceIndex());
-  alg->setProperty("StartX", m_fitBrowser->startX());
-  alg->setProperty("EndX", m_fitBrowser->endX());
+  // Create an array property of start and end X times, each pair startX[i]
+  // endX[i] will be used for the ith fit.
+  // At the moment we read the startX and endX from the single entry in the fit
+  // browser - and duplicate it for each input
+  auto nInputs = rowCount();
+  auto startX = m_fitBrowser->startX();
+  auto endX = m_fitBrowser->endX();
+  alg->setProperty("StartX", std::vector<double>(nInputs, startX));
+  alg->setProperty("EndX", std::vector<double>(nInputs, endX));
   alg->setPropertyValue("OutputWorkspace", m_outputName);
   alg->setPropertyValue("Function", funStr);
   alg->setProperty("CreateOutput", ui.ckCreateOutput->isChecked());
-  alg->setProperty("OutputCompositeMembers",
-                   ui.ckOutputCompMembers->isChecked());
+  alg->setProperty("OutputCompositeMembers", ui.ckOutputCompMembers->isChecked());
   alg->setProperty("ConvolveMembers", ui.ckConvolveMembers->isChecked());
   if (ui.ckbLogPlot->isChecked()) {
     std::string logName = ui.cbLogValue->currentText().toStdString();
     alg->setPropertyValue("LogValue", logName);
     observeFinish(alg);
-  } else if (rowCount() > 1) {
+  } else if (nInputs > 1) {
     alg->setPropertyValue("LogValue", "SourceName");
   } else {
     observeFinish(alg);
@@ -361,8 +337,7 @@ void SequentialFitDialog::accept() {
 void SequentialFitDialog::populateParameters() {
   QStringList names;
   for (size_t i = 0; i < m_fitBrowser->m_compositeFunction->nParams(); ++i) {
-    names << QString::fromStdString(
-        m_fitBrowser->m_compositeFunction->parameterName(i));
+    names << QString::fromStdString(m_fitBrowser->m_compositeFunction->parameterName(i));
   }
   ui.cbParameter->clear();
   ui.cbParameter->insertItems(0, names);
@@ -370,8 +345,7 @@ void SequentialFitDialog::populateParameters() {
 
 void SequentialFitDialog::functionChanged() { populateParameters(); }
 
-void SequentialFitDialog::finishHandle(
-    const Mantid::API::IAlgorithm * /*alg*/) {
+void SequentialFitDialog::finishHandle(const Mantid::API::IAlgorithm * /*alg*/) {
   getFitResults();
   emit needShowPlot(&ui, m_fitBrowser);
   m_fitBrowser->sequentialFitFinished();
@@ -386,17 +360,18 @@ void SequentialFitDialog::getFitResults() {
   if (!Mantid::API::AnalysisDataService::Instance().doesExist(wsName)) {
     return;
   }
-  Mantid::API::ITableWorkspace_sptr ws =
-      std::dynamic_pointer_cast<Mantid::API::ITableWorkspace>(
-          Mantid::API::AnalysisDataService::Instance().retrieve(wsName));
+  Mantid::API::ITableWorkspace_sptr ws = std::dynamic_pointer_cast<Mantid::API::ITableWorkspace>(
+      Mantid::API::AnalysisDataService::Instance().retrieve(wsName));
   if (!ws) {
     return;
   }
   auto columnNames = ws->getColumnNames();
 
   size_t rowNo = 0;
-  if (rowCount() > 1) {
-    // first column contains ws names
+  if (rowCount() > 1 && columnNames[0] == "SourceName") {
+    // first column contains ws names (only if the log value is SourceName)
+    // otherwise, the first column contains the values of the log value and
+    // cannot compare workspace names
     auto firstColumn = ws->getColumn(0);
     for (size_t i = 0; i < ws->rowCount(); ++i) {
       if (firstColumn->cell<std::string>(i) == m_fitBrowser->workspaceName()) {
@@ -415,7 +390,7 @@ void SequentialFitDialog::getFitResults() {
   Mantid::API::TableRow row = ws->getRow(rowNo);
   // results parameter table contains parameter value followed by its error so
   // increment by 2 for each value. Ignore first and last column in row as they
-  // contain name and chi-squared
+  // contain name and chi-squared. Also ignore columns that aren't fitting parameters.
   for (size_t col = 1; col < columnNames.size() - 1; col += 2) {
     auto value = row.Double(col);
     auto error = row.Double(col + 1);
@@ -424,18 +399,19 @@ void SequentialFitDialog::getFitResults() {
     if (m_fitBrowser->count() == 1) {
       name.insert(0, "f0.");
     }
-    size_t paramIndex = m_fitBrowser->compositeFunction()->parameterIndex(name);
+    if (m_fitBrowser->compositeFunction()->hasParameter(name)) {
+      size_t paramIndex = m_fitBrowser->compositeFunction()->parameterIndex(name);
 
-    m_fitBrowser->compositeFunction()->setParameter(paramIndex, value);
-    m_fitBrowser->compositeFunction()->setError(paramIndex, error);
+      m_fitBrowser->compositeFunction()->setParameter(paramIndex, value);
+      m_fitBrowser->compositeFunction()->setError(paramIndex, error);
+    }
   }
   m_fitBrowser->updateParameters();
   m_fitBrowser->getHandler()->updateErrors();
 }
 
 void SequentialFitDialog::helpClicked() {
-  MantidDesktopServices::openUrl(
-      QUrl("http://www.mantidproject.org/PlotPeakByLogValue"));
+  MantidDesktopServices::openUrl(QUrl("http://www.mantidproject.org/PlotPeakByLogValue"));
 }
 
 /**
@@ -451,27 +427,19 @@ void SequentialFitDialog::spectraChanged(int row, int col) {
   QTableWidgetItem *item = ui.tWorkspaces->item(row, 3);
   if (!item)
     return;
-  if ((col == 2 || col == 3) &&
-      item->flags().testFlag(Qt::ItemIsEnabled) == true) { // it's a workspace
-    QString name = ui.tWorkspaces->model()
-                       ->data(ui.tWorkspaces->model()->index(row, 0))
-                       .toString();
+  if ((col == 2 || col == 3) && item->flags().testFlag(Qt::ItemIsEnabled) == true) { // it's a workspace
+    QString name = ui.tWorkspaces->model()->data(ui.tWorkspaces->model()->index(row, 0)).toString();
     Mantid::API::MatrixWorkspace_sptr ws;
     try {
       ws = std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
-          Mantid::API::AnalysisDataService::Instance().retrieve(
-              name.toStdString()));
+          Mantid::API::AnalysisDataService::Instance().retrieve(name.toStdString()));
     } catch (...) { //
       return;
     }
     if (!ws)
       return;
-    int wi = ui.tWorkspaces->model()
-                 ->data(ui.tWorkspaces->model()->index(row, 3))
-                 .toInt();
-    int spec = ui.tWorkspaces->model()
-                   ->data(ui.tWorkspaces->model()->index(row, 2))
-                   .toInt();
+    int wi = ui.tWorkspaces->model()->data(ui.tWorkspaces->model()->index(row, 3)).toInt();
+    int spec = ui.tWorkspaces->model()->data(ui.tWorkspaces->model()->index(row, 2)).toInt();
     Mantid::API::Axis *y = ws->getAxis(1);
     if (wi >= 0 && wi < static_cast<int>(ws->getNumberHistograms())) {
       // this prevents infinite loops
@@ -511,8 +479,7 @@ void SequentialFitDialog::spectraChanged(int row, int col) {
 }
 
 void SequentialFitDialog::setSpectrum(int row, int spec) {
-  ui.tWorkspaces->model()->setData(ui.tWorkspaces->model()->index(row, 2),
-                                   spec);
+  ui.tWorkspaces->model()->setData(ui.tWorkspaces->model()->index(row, 2), spec);
 }
 
 void SequentialFitDialog::setWSIndex(int row, int wi) {
@@ -521,20 +488,15 @@ void SequentialFitDialog::setWSIndex(int row, int wi) {
 
 int SequentialFitDialog::rowCount() const { return ui.tWorkspaces->rowCount(); }
 
-int SequentialFitDialog::defaultSpectrum() const {
-  return ui.sbSpectrum->value();
-}
+int SequentialFitDialog::defaultSpectrum() const { return ui.sbSpectrum->value(); }
 
 QString SequentialFitDialog::name(int row) const {
-  return ui.tWorkspaces->model()
-      ->data(ui.tWorkspaces->model()->index(row, 0))
-      .toString();
+  return ui.tWorkspaces->model()->data(ui.tWorkspaces->model()->index(row, 0)).toString();
 }
 
 void SequentialFitDialog::setRange(int row, double from, double to) {
   QString range = QString::number(from) + ":" + QString::number(to);
-  ui.tWorkspaces->model()->setData(ui.tWorkspaces->model()->index(row, 3),
-                                   range);
+  ui.tWorkspaces->model()->setData(ui.tWorkspaces->model()->index(row, 3), range);
 }
 
 void SequentialFitDialog::plotAgainstLog(bool yes) {

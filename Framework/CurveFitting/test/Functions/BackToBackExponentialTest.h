@@ -30,8 +30,7 @@ public:
   /// overwrite IFunction base class methods
   std::string name() const override { return "B2B"; }
   const std::string category() const override { return "Peak"; }
-  void function1D(double *out, const double *xValues,
-                  const size_t nData) const override {
+  void function1D(double *out, const double *xValues, const size_t nData) const override {
     const double a = getParameter(0);
     const double b = getParameter(1);
     for (size_t i = 0; i < nData; ++i) {
@@ -189,5 +188,20 @@ public:
 
     TS_ASSERT_EQUALS(b2bExp.intensity(), 3.0);
     TS_ASSERT_EQUALS(b2bExp.getParameter("I"), 3.0);
+  }
+
+  void testIntensityError() {
+    const double s = 4.0;
+    const double I = 2.1;
+    BackToBackExponential b2bExp;
+    b2bExp.initialize();
+    b2bExp.setParameter("I", I);
+    b2bExp.setParameter("A", 6.0); // large A and B make
+    b2bExp.setParameter("B", 6.0); // the exponentials narrow
+    b2bExp.setParameter("X0", 0.0);
+    b2bExp.setParameter("S", s);
+
+    TS_ASSERT_EQUALS(b2bExp.intensity(), 2.1);
+    TS_ASSERT_EQUALS(b2bExp.intensityError(), b2bExp.getError("I"));
   }
 };

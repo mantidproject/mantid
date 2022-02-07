@@ -31,8 +31,7 @@
 
 namespace {
 constexpr double MICROSECONDS_PER_SECOND{1000000.0};
-constexpr double MUON_LIFETIME_MICROSECONDS{
-    Mantid::PhysicalConstants::MuonLifetime * MICROSECONDS_PER_SECOND};
+constexpr double MUON_LIFETIME_MICROSECONDS{Mantid::PhysicalConstants::MuonLifetime * MICROSECONDS_PER_SECOND};
 const std::string INSERT_FUNCTION{"f0.f1.f1."};
 
 std::string trimTie(const std::string &stringTie) {
@@ -65,9 +64,7 @@ int findName(const std::vector<std::string> &colNames, const char *name) {
   return -1;
 }
 } // namespace
-namespace Mantid {
-
-namespace Muon {
+namespace Mantid::Muon {
 
 using namespace Kernel;
 using namespace API;
@@ -80,35 +77,34 @@ DECLARE_ALGORITHM(ConvertFitFunctionForMuonTFAsymmetry)
  *
  */
 void ConvertFitFunctionForMuonTFAsymmetry::init() {
-  declareProperty(std::make_unique<FunctionProperty>("InputFunction"),
-                  "The fitting function to be converted.");
+  declareProperty(std::make_unique<FunctionProperty>("InputFunction"), "The fitting function to be converted.");
   // table of name, norms
   // if construct -> read relevant norms into sorted list
-  declareProperty(
-      std::make_unique<API::WorkspaceProperty<API::ITableWorkspace>>(
-          "NormalizationTable", "", Direction::Input,
-          API::PropertyMode::Optional),
-      "Name of the table containing the normalizations for the asymmetries.");
+  declareProperty(std::make_unique<API::WorkspaceProperty<API::ITableWorkspace>>(
+                      "NormalizationTable", "", Direction::Input, API::PropertyMode::Optional),
+                  "Name of the table containing the normalizations for the asymmetries.");
   // list of workspaces
-  declareProperty(std::make_unique<Kernel::ArrayProperty<std::string>>(
-                      "WorkspaceList", std::make_shared<API::ADSValidator>()),
-                  "An ordered list of workspaces (to get the initial values "
-                  "for the normalizations).");
+  declareProperty(
+      std::make_unique<Kernel::ArrayProperty<std::string>>("WorkspaceList", std::make_shared<API::ADSValidator>()),
+      "An ordered list of workspaces (to get the initial values "
+      "for the normalizations).");
 
   std::vector<std::string> allowedModes{"Construct", "Extract"};
   auto modeVal = std::make_shared<Kernel::CompositeValidator>();
   modeVal->add(std::make_shared<Kernel::StringListValidator>(allowedModes));
   modeVal->add(std::make_shared<Kernel::MandatoryValidator<std::string>>());
-  declareProperty(
-      "Mode", "Construct", modeVal,
-      "Mode to run in. Construct will convert the"
-      "input function into one suitable for calculating the"
-      " TF Asymmetry. Extract will find the original user function"
-      " from a function that is suitable for TF Asymmetry calculations.");
+  declareProperty("Mode", "Construct", modeVal,
+                  "Mode to run in. Construct will convert the"
+                  "input function into one suitable for calculating the"
+                  " TF Asymmetry. Extract will find the original user function"
+                  " from a function that is suitable for TF Asymmetry calculations.");
 
-  declareProperty(
-      std::make_unique<FunctionProperty>("OutputFunction", Direction::Output),
-      "The converted fitting function.");
+  declareProperty(std::make_unique<FunctionProperty>("OutputFunction", Direction::Output),
+                  "The converted fitting function.");
+
+  declareProperty("CopyTies", true,
+                  "Set to true to copy over ties from input function"
+                  "(default is true).");
 }
 
 /*
@@ -116,22 +112,19 @@ void ConvertFitFunctionForMuonTFAsymmetry::init() {
  * @returns map with keys corresponding to properties with errors and values
  * containing the error messages.
  */
-std::map<std::string, std::string>
-ConvertFitFunctionForMuonTFAsymmetry::validateInputs() {
+std::map<std::string, std::string> ConvertFitFunctionForMuonTFAsymmetry::validateInputs() {
   // create the map
   std::map<std::string, std::string> result;
   // check norm table is correct
   API::ITableWorkspace_const_sptr tabWS = getProperty("NormalizationTable");
   if (tabWS) {
     if (tabWS->columnCount() == 0) {
-      result["NormalizationTable"] =
-          "Please provide a non-empty NormalizationTable.";
+      result["NormalizationTable"] = "Please provide a non-empty NormalizationTable.";
     }
 
     // NormalizationTable should have three columns: (norm, name, method)
     if (tabWS->columnCount() != 3) {
-      result["NormalizationTable"] =
-          "NormalizationTable must have three columns";
+      result["NormalizationTable"] = "NormalizationTable must have three columns";
     }
     auto names = tabWS->getColumnNames();
     int normCount = 0;
@@ -153,21 +146,15 @@ ConvertFitFunctionForMuonTFAsymmetry::validateInputs() {
       result["NormalizationTable"] = "NormalizationTable needs a name column";
     }
     if (normCount > 1) {
-      result["NormalizationTable"] = "NormalizationTable has " +
-                                     std::to_string(normCount) +
-                                     " norm columns";
+      result["NormalizationTable"] = "NormalizationTable has " + std::to_string(normCount) + " norm columns";
     }
     if (wsNamesCount > 1) {
-      result["NormalizationTable"] = "NormalizationTable has " +
-                                     std::to_string(wsNamesCount) +
-                                     " name columns";
+      result["NormalizationTable"] = "NormalizationTable has " + std::to_string(wsNamesCount) + " name columns";
     }
   } else {
     const std::vector<std::string> wsNames = getProperty("WorkspaceList");
     for (std::string name : wsNames) {
-      API::MatrixWorkspace_const_sptr ws =
-          API::AnalysisDataService::Instance().retrieveWS<API::MatrixWorkspace>(
-              name);
+      API::MatrixWorkspace_const_sptr ws = API::AnalysisDataService::Instance().retrieveWS<API::MatrixWorkspace>(name);
       const Mantid::API::Run &run = ws->run();
       if (!run.hasProperty("analysis_asymmetry_norm")) {
         result["NormalizationTable"] = "NormalizationTable has not been "
@@ -195,14 +182,12 @@ void ConvertFitFunctionForMuonTFAsymmetry::exec() {
       auto outputFitFunction = extractFromTFAsymmFitFunction(inputFitFunction);
       setOutput(outputFitFunction);
     } catch (...) {
-      throw std::runtime_error(
-          "The input function was not of the form N*(1+f)+A*exp(-lambda*t)");
+      throw std::runtime_error("The input function was not of the form N*(1+f)+A*exp(-lambda*t)");
     }
   }
 }
 
-void ConvertFitFunctionForMuonTFAsymmetry::setOutput(
-    const Mantid::API::IFunction_sptr &function) {
+void ConvertFitFunctionForMuonTFAsymmetry::setOutput(const Mantid::API::IFunction_sptr &function) {
   IFunction_sptr outputFitFunction = function;
   const std::vector<std::string> wsNames = getProperty("WorkspaceList");
   if (wsNames.size() == 1) {
@@ -219,8 +204,7 @@ void ConvertFitFunctionForMuonTFAsymmetry::setOutput(
  * @return :: user function
  */
 Mantid::API::IFunction_sptr
-ConvertFitFunctionForMuonTFAsymmetry::extractFromTFAsymmFitFunction(
-    const Mantid::API::IFunction_sptr &original) {
+ConvertFitFunctionForMuonTFAsymmetry::extractFromTFAsymmFitFunction(const Mantid::API::IFunction_sptr &original) {
 
   auto multi = std::make_shared<MultiDomainFunction>();
   IFunction_sptr tmp = original;
@@ -237,7 +221,8 @@ ConvertFitFunctionForMuonTFAsymmetry::extractFromTFAsymmFitFunction(
     multi->addFunction(userFunc);
   }
   // if multi data set we need to do the ties manually
-  if (numDomains > 1) {
+  bool copyTies = getProperty("CopyTies");
+  if (numDomains > 1 && copyTies) {
     auto originalNames = original->getParameterNames();
     for (auto name : originalNames) {
       auto index = original->parameterIndex(name);
@@ -271,8 +256,7 @@ ConvertFitFunctionForMuonTFAsymmetry::extractFromTFAsymmFitFunction(
  * @return :: user function
  */
 
-IFunction_sptr ConvertFitFunctionForMuonTFAsymmetry::extractUserFunction(
-    const IFunction_sptr &TFFuncIn) {
+IFunction_sptr ConvertFitFunctionForMuonTFAsymmetry::extractUserFunction(const IFunction_sptr &TFFuncIn) {
   // N(1+g) + exp
   auto TFFunc = std::dynamic_pointer_cast<CompositeFunction>(TFFuncIn);
   if (TFFunc == nullptr) {
@@ -321,11 +305,9 @@ std::vector<double> ConvertFitFunctionForMuonTFAsymmetry::getNorms() {
     for (size_t wsPosition = 0; wsPosition < wsNames.size(); wsPosition++) {
       std::string wsName = wsNames[wsPosition];
       API::MatrixWorkspace_const_sptr ws =
-          API::AnalysisDataService::Instance().retrieveWS<API::MatrixWorkspace>(
-              wsName);
+          API::AnalysisDataService::Instance().retrieveWS<API::MatrixWorkspace>(wsName);
       const Mantid::API::Run &run = ws->run();
-      norms[wsPosition] =
-          std::stod(run.getProperty("analysis_asymmetry_norm")->value());
+      norms[wsPosition] = std::stod(run.getProperty("analysis_asymmetry_norm")->value());
     }
   }
 
@@ -337,16 +319,14 @@ std::vector<double> ConvertFitFunctionForMuonTFAsymmetry::getNorms() {
  * @returns :: The normalization function N(1+f) +ExpDecay
  */
 Mantid::API::IFunction_sptr
-ConvertFitFunctionForMuonTFAsymmetry::getTFAsymmFitFunction(
-    const Mantid::API::IFunction_sptr &original,
-    const std::vector<double> &norms) {
+ConvertFitFunctionForMuonTFAsymmetry::getTFAsymmFitFunction(const Mantid::API::IFunction_sptr &original,
+                                                            const std::vector<double> &norms) {
   auto multi = std::make_shared<MultiDomainFunction>();
   auto tmp = std::dynamic_pointer_cast<MultiDomainFunction>(original);
   size_t numDomains = original->getNumberDomains();
   for (size_t j = 0; j < numDomains; j++) {
     IFunction_sptr userFunc;
-    auto constant = FunctionFactory::Instance().createInitialized(
-        "name = FlatBackground, A0 = 1.0, ties=(A0=1)");
+    auto constant = FunctionFactory::Instance().createInitialized("name = FlatBackground, A0 = 1.0, ties=(A0=1)");
     if (numDomains == 1) {
       userFunc = original;
     } else {
@@ -356,27 +336,25 @@ ConvertFitFunctionForMuonTFAsymmetry::getTFAsymmFitFunction(
     auto inBrace = std::make_shared<CompositeFunction>();
     inBrace->addFunction(constant);
     inBrace->addFunction(userFunc);
-    auto norm = FunctionFactory::Instance().createInitialized(
-        "name = FlatBackground, A0 "
-        "=" +
-        std::to_string(norms[j]));
-    auto product = std::dynamic_pointer_cast<CompositeFunction>(
-        FunctionFactory::Instance().createFunction("ProductFunction"));
+    auto norm = FunctionFactory::Instance().createInitialized("name = FlatBackground, A0 "
+                                                              "=" +
+                                                              std::to_string(norms[j]));
+    auto product =
+        std::dynamic_pointer_cast<CompositeFunction>(FunctionFactory::Instance().createFunction("ProductFunction"));
     product->addFunction(norm);
     product->addFunction(inBrace);
-    auto composite = std::dynamic_pointer_cast<CompositeFunction>(
-        FunctionFactory::Instance().createFunction("CompositeFunction"));
+    auto composite =
+        std::dynamic_pointer_cast<CompositeFunction>(FunctionFactory::Instance().createFunction("CompositeFunction"));
     constant = FunctionFactory::Instance().createInitialized(
-        "name = ExpDecayMuon, A = 0.0, Lambda = -" +
-        std::to_string(MUON_LIFETIME_MICROSECONDS) +
-        ",ties = (A = 0.0, Lambda = -" +
-        std::to_string(MUON_LIFETIME_MICROSECONDS) + ")");
+        "name = ExpDecayMuon, A = 0.0, Lambda = -" + std::to_string(MUON_LIFETIME_MICROSECONDS) +
+        ",ties = (A = 0.0, Lambda = -" + std::to_string(MUON_LIFETIME_MICROSECONDS) + ")");
     composite->addFunction(product);
     composite->addFunction(constant);
     multi->addFunction(composite);
   }
   // if multi data set we need to do the ties manually
-  if (numDomains > 1) {
+  bool copyTies = getProperty("CopyTies");
+  if (numDomains > 1 && copyTies) {
     auto originalNames = original->getParameterNames();
     for (auto name : originalNames) {
       auto index = original->parameterIndex(name);
@@ -397,5 +375,4 @@ ConvertFitFunctionForMuonTFAsymmetry::getTFAsymmFitFunction(
 
   return std::dynamic_pointer_cast<IFunction>(multi);
 }
-} // namespace Muon
-} // namespace Mantid
+} // namespace Mantid::Muon

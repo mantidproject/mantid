@@ -1,0 +1,77 @@
+<?xml version="1.0" ?>
+<!-- The values below are d-spacing of yttrium iron garnet (YIG) in Angstroem, based on:
+#. A. Nakatsuka, A. Yoshiasa, and S. Takeno.
+   *Site preference of cations and structural variation in Y3Fe5O12 solid solutions with garnet structure
+   Acta Crystallographica Section B **51** (1995) 737–745
+   `doi: 10.1107/S0108768194014813 <https://doi.org/10.1107/S0108768194014813>`_
+-->
+<parameter-file date="2020-08-04" instrument="D7">
+  <component-link name="detector">
+    <parameter name="peak_1">
+      <value val="5.0521"/>
+    </parameter>
+    <parameter name="peak_2">
+      <value val="4.3752"/>
+    </parameter>
+    <parameter name="peak_3">
+      <value val="3.3074"/>
+    </parameter>
+    <parameter name="peak_4">
+      <value val="3.0938"/>
+    </parameter>
+    <parameter name="peak_5">
+      <value val="2.9168"/>
+    </parameter>
+    <parameter name="peak_6">
+      <value val="2.7671"/>
+    </parameter>
+    <parameter name="peak_7">
+      <value val="2.6384"/>
+    </parameter>
+    <parameter name="peak_8">
+      <value val="2.526"/>
+    </parameter>
+    <parameter name="peak_9">
+      <value val="2.4269"/>
+    </parameter>
+    <parameter name="peak_10">
+      <value val="2.2594"/>
+    </parameter>
+    <parameter name="peak_11">
+      <value val="2.1876"/>
+    </parameter>
+    <parameter name="peak_12">
+      <value val="2.0075"/>
+    </parameter>
+    <parameter name="peak_13">
+      <value val="1.9567"/>
+    </parameter>
+    <parameter name="peak_14">
+      <value val="1.9095"/>
+    </parameter>
+    <parameter name="peak_15">
+      <value val="1.8656"/>
+    </parameter>
+    <parameter name="peak_16">
+      <value val="1.8246"/>
+    </parameter>
+    <parameter name="peak_17">
+      <value val="1.7862"/>
+    </parameter>
+    <parameter name="peak_18">
+      <value val="1.7501"/>
+    </parameter>
+    <parameter name="peak_19">
+      <value val="1.7161"/>
+    </parameter>
+    <parameter name="peak_20">
+      <value val="1.684"/>
+    </parameter>
+    <parameter name="peak_21">
+      <value val="1.6537"/>
+    </parameter>
+    <parameter name="peak_22">
+      <value val="1.5716"/>
+    </parameter>
+  </component-link>
+</parameter-file>

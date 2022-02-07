@@ -10,7 +10,7 @@ property types
 import unittest
 import testhelpers
 from mantid.api import (WorkspaceProperty, WorkspaceGroupProperty, MatrixWorkspaceProperty,
-                        IEventWorkspaceProperty, ITableWorkspaceProperty, 
+                        IEventWorkspaceProperty, ITableWorkspaceProperty,
                         IMDWorkspaceProperty, IMDHistoWorkspaceProperty, IMDEventWorkspaceProperty,
                         PropertyMode, LockMode)
 from mantid.kernel import Direction, Property
@@ -64,10 +64,10 @@ class WorkspacePropertiesTest(unittest.TestCase):
 
     def test_IMDHistoWorkspaceProperty_can_be_instantiated(self):
         self._do_test(IMDHistoWorkspaceProperty)
-        
+
     def test_IMDEventWorkspaceProperty_can_be_instantiated(self):
         self._do_test(IMDEventWorkspaceProperty)
-        
+
     def test_IMDWorkspaceProperty_can_be_instantiated(self):
         self._do_test(IMDWorkspaceProperty)
 

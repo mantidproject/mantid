@@ -21,11 +21,10 @@
 #include "MantidAPI/ParameterTie.h"
 
 #include "MantidKernel/Exception.h"
+#include "MantidKernel/Logger.h"
 #include <boost/regex.hpp>
 
-namespace Mantid {
-namespace CurveFitting {
-namespace Functions {
+namespace Mantid::CurveFitting::Functions {
 
 using namespace CurveFitting;
 using namespace Kernel;
@@ -34,6 +33,8 @@ using namespace API;
 DECLARE_FUNCTION(CrystalFieldMultiSpectrum)
 
 namespace {
+
+Kernel::Logger g_log("CrystalFieldMultiSpectrum");
 
 // Regex for the FWHMX# type strings (single-site mode)
 const boost::regex FWHMX_ATTR_REGEX("FWHMX([0-9]+)");
@@ -46,17 +47,13 @@ public:
   Peaks() : CrystalFieldPeaksBase() {}
   std::string name() const override { return "Peaks"; }
   size_t getNumberDomainColumns() const override {
-    throw Exception::NotImplementedError(
-        "This method is intentionally not implemented.");
+    throw Exception::NotImplementedError("This method is intentionally not implemented.");
   }
   size_t getNumberValuesPerArgument() const override {
-    throw Exception::NotImplementedError(
-        "This method is intentionally not implemented.");
+    throw Exception::NotImplementedError("This method is intentionally not implemented.");
   }
-  void functionGeneral(const API::FunctionDomainGeneral & /*domain*/,
-                       API::FunctionValues & /*values*/) const override {
-    throw Exception::NotImplementedError(
-        "This method is intentionally not implemented.");
+  void functionGeneral(const API::FunctionDomainGeneral & /*domain*/, API::FunctionValues & /*values*/) const override {
+    throw Exception::NotImplementedError("This method is intentionally not implemented.");
   }
   std::vector<size_t> m_IntensityScalingIdx;
   std::vector<size_t> m_PPLambdaIdxChild;
@@ -73,12 +70,10 @@ public:
     for (size_t i = 0; i < nSpec; ++i) {
       auto si = std::to_string(i);
       try { // If parameter has already been declared, don't declare it.
-        declareParameter("IntensityScaling" + si, 1.0,
-                         "Intensity scaling factor for spectrum " + si);
+        declareParameter("IntensityScaling" + si, 1.0, "Intensity scaling factor for spectrum " + si);
       } catch (std::invalid_argument &) {
       }
-      m_IntensityScalingIdx.emplace_back(
-          parameterIndex("IntensityScaling" + si));
+      m_IntensityScalingIdx.emplace_back(parameterIndex("IntensityScaling" + si));
     }
   }
   /// Declare the Lambda parameter for susceptibility
@@ -91,13 +86,11 @@ public:
     }
     auto si = std::to_string(iSpec);
     try { // If parameter has already been declared, don't declare it.
-      declareParameter("Lambda" + si, 0.0,
-                       "Effective exchange coupling of dataset " + si);
+      declareParameter("Lambda" + si, 0.0, "Effective exchange coupling of dataset " + si);
     } catch (std::invalid_argument &) {
     }
     try { // If parameter has already been declared, don't declare it.
-      declareParameter("Chi0" + si, 0.0,
-                       "Effective exchange coupling of dataset " + si);
+      declareParameter("Chi0" + si, 0.0, "Effective exchange coupling of dataset " + si);
     } catch (std::invalid_argument &) {
     }
     m_PPLambdaIdxSelf[iSpec] = parameterIndex("Lambda" + si);
@@ -107,8 +100,7 @@ public:
 } // namespace
 
 /// Constructor
-CrystalFieldMultiSpectrum::CrystalFieldMultiSpectrum()
-    : FunctionGenerator(IFunction_sptr(new Peaks)) {
+CrystalFieldMultiSpectrum::CrystalFieldMultiSpectrum() : FunctionGenerator(IFunction_sptr(new Peaks)) {
   declareAttribute("Temperatures", Attribute(std::vector<double>(1, 1.0)));
   declareAttribute("Background", Attribute("FlatBackground", true));
   declareAttribute("PeakShape", Attribute("Lorentzian"));
@@ -118,8 +110,15 @@ CrystalFieldMultiSpectrum::CrystalFieldMultiSpectrum()
   declareAttribute("FWHMVariation", Attribute(0.1));
   declareAttribute("NPeaks", Attribute(0));
   declareAttribute("FixAllPeaks", Attribute(false));
-  declareAttribute("PhysicalProperties",
-                   Attribute(std::vector<double>(1, 0.0)));
+  declareAttribute("PhysicalProperties", Attribute(std::vector<double>(1, 0.0)));
+}
+
+void CrystalFieldMultiSpectrum::init() {
+  try {
+    buildTargetFunction();
+  } catch (std::runtime_error const &ex) {
+    g_log.error(ex.what());
+  }
 }
 
 size_t CrystalFieldMultiSpectrum::getNumberDomains() const {
@@ -134,8 +133,7 @@ size_t CrystalFieldMultiSpectrum::getNumberDomains() const {
   return m_target->getNumberDomains();
 }
 
-std::vector<IFunction_sptr>
-CrystalFieldMultiSpectrum::createEquivalentFunctions() const {
+std::vector<IFunction_sptr> CrystalFieldMultiSpectrum::createEquivalentFunctions() const {
   checkTargetFunction();
   std::vector<IFunction_sptr> funs;
   auto &composite = dynamic_cast<CompositeFunction &>(*m_target);
@@ -146,8 +144,7 @@ CrystalFieldMultiSpectrum::createEquivalentFunctions() const {
 }
 
 /// Perform custom actions on setting certain attributes.
-void CrystalFieldMultiSpectrum::setAttribute(const std::string &name,
-                                             const Attribute &attr) {
+void CrystalFieldMultiSpectrum::setAttribute(const std::string &name, const Attribute &attr) {
   boost::smatch match;
   if (name == "Temperatures") {
     // Define (declare) the parameters for intensity scaling.
@@ -166,7 +163,9 @@ void CrystalFieldMultiSpectrum::setAttribute(const std::string &name,
         }
       }
     }
-    FunctionGenerator::setAttribute("FWHMs", Attribute(new_fwhm));
+    Attribute newVal = attr;
+    newVal.setVector(new_fwhm);
+    FunctionGenerator::setAttribute("FWHMs", newVal);
     for (size_t iSpec = 0; iSpec < nSpec; ++iSpec) {
       const auto suffix = std::to_string(iSpec);
       declareAttribute("FWHMX" + suffix, Attribute(m_fwhmX[iSpec]));
@@ -187,8 +186,7 @@ void CrystalFieldMultiSpectrum::setAttribute(const std::string &name,
         declareAttribute("inverse" + suffix, Attribute(false));
       // fall through
       case Magnetisation: // Hdir, Unit, powder
-        declareAttribute("Hdir" + suffix,
-                         Attribute(std::vector<double>{0., 0., 1.}));
+        declareAttribute("Hdir" + suffix, Attribute(std::vector<double>{0., 0., 1.}));
         declareAttribute("Unit" + suffix, Attribute("bohr"));
         declareAttribute("powder" + suffix, Attribute(false));
         break;
@@ -203,16 +201,14 @@ void CrystalFieldMultiSpectrum::setAttribute(const std::string &name,
     if (m_fwhmX.size() > iSpec) {
       m_fwhmX[iSpec].clear();
     } else {
-      throw std::invalid_argument(
-          "Temperatures must be defined before resolution model");
+      throw std::invalid_argument("Temperatures must be defined before resolution model");
     }
   } else if (boost::regex_match(name, match, FWHMY_ATTR_REGEX)) {
     auto iSpec = std::stoul(match[1]);
     if (m_fwhmY.size() > iSpec) {
       m_fwhmY[iSpec].clear();
     } else {
-      throw std::invalid_argument(
-          "Temperatures must be defined before resolution model");
+      throw std::invalid_argument("Temperatures must be defined before resolution model");
     }
   }
   FunctionGenerator::setAttribute(name, attr);
@@ -252,8 +248,7 @@ void CrystalFieldMultiSpectrum::buildTargetFunction() const {
     } else {
       throw std::runtime_error("Vector of FWHMs must either have same size as "
                                "Temperatures (" +
-                               std::to_string(m_temperatures.size()) +
-                               ") or have size 1.");
+                               std::to_string(m_temperatures.size()) + ") or have size 1.");
     }
   }
   const auto nSpec = m_temperatures.size();
@@ -291,17 +286,15 @@ void CrystalFieldMultiSpectrum::buildTargetFunction() const {
         m_fwhmX[i] = IFunction::getAttribute("FWHMX" + suffix).asVector();
         m_fwhmY[i] = IFunction::getAttribute("FWHMY" + suffix).asVector();
       }
-      fun->addFunction(
-          buildSpectrum(nre, en, wf, m_temperatures[i], m_FWHMs[i], i));
+      fun->addFunction(buildSpectrum(nre, en, wf, m_temperatures[i], m_FWHMs[i], i));
     }
     fun->setDomainIndex(i, i);
   }
 }
 
 /// Calculate excitations at given temperature
-void CrystalFieldMultiSpectrum::calcExcitations(
-    int nre, const DoubleFortranVector &en, const ComplexFortranMatrix &wf,
-    double temperature, FunctionValues &values, size_t iSpec) const {
+void CrystalFieldMultiSpectrum::calcExcitations(int nre, const DoubleFortranVector &en, const ComplexFortranMatrix &wf,
+                                                double temperature, FunctionValues &values, size_t iSpec) const {
   IntFortranVector degeneration;
   DoubleFortranVector eEnergies;
   DoubleFortranMatrix iEnergies;
@@ -309,10 +302,8 @@ void CrystalFieldMultiSpectrum::calcExcitations(
   const double di = getAttribute("ToleranceIntensity").asDouble();
   DoubleFortranVector eExcitations;
   DoubleFortranVector iExcitations;
-  calculateIntensities(nre, en, wf, temperature, de, degeneration, eEnergies,
-                       iEnergies);
-  calculateExcitations(eEnergies, iEnergies, de, di, eExcitations,
-                       iExcitations);
+  calculateIntensities(nre, en, wf, temperature, de, degeneration, eEnergies, iEnergies);
+  calculateExcitations(eEnergies, iEnergies, de, di, eExcitations, iExcitations);
   const size_t nSpec = m_nPeaks.size();
   // Get intensity scaling parameter "IntensityScaling" + std::to_string(iSpec)
   // using an index instead of a name for performance reasons
@@ -332,9 +323,9 @@ void CrystalFieldMultiSpectrum::calcExcitations(
 }
 
 /// Build a function for a single spectrum.
-API::IFunction_sptr CrystalFieldMultiSpectrum::buildSpectrum(
-    int nre, const DoubleFortranVector &en, const ComplexFortranMatrix &wf,
-    double temperature, double fwhm, size_t iSpec) const {
+API::IFunction_sptr CrystalFieldMultiSpectrum::buildSpectrum(int nre, const DoubleFortranVector &en,
+                                                             const ComplexFortranMatrix &wf, double temperature,
+                                                             double fwhm, size_t iSpec) const {
   FunctionValues values;
   calcExcitations(nre, en, wf, temperature, values, iSpec);
   m_nPeaks[iSpec] = CrystalFieldUtils::calculateNPeaks(values);
@@ -345,28 +336,26 @@ API::IFunction_sptr CrystalFieldMultiSpectrum::buildSpectrum(
   const size_t nRequiredPeaks = IFunction::getAttribute("NPeaks").asInt();
   const bool fixAllPeaks = getAttribute("FixAllPeaks").asBool();
 
-  if (!bkgdShape.empty() && bkgdShape.find("name=") != 0 &&
-      bkgdShape.front() != '(') {
+  if (!bkgdShape.empty() && bkgdShape.find("name=") != 0 && bkgdShape.front() != '(') {
     bkgdShape = "name=" + bkgdShape;
   }
 
   auto spectrum = new CompositeFunction;
-  auto background =
-      API::FunctionFactory::Instance().createInitialized(bkgdShape);
+  auto background = API::FunctionFactory::Instance().createInitialized(bkgdShape);
   spectrum->addFunction(background);
   if (fixAllPeaks) {
     background->fixAll();
   }
 
   m_nPeaks[iSpec] = CrystalFieldUtils::buildSpectrumFunction(
-      *spectrum, peakShape, values, m_fwhmX[iSpec], m_fwhmY[iSpec],
-      fwhmVariation, fwhm, nRequiredPeaks, fixAllPeaks);
+      *spectrum, peakShape, values, m_fwhmX[iSpec], m_fwhmY[iSpec], fwhmVariation, fwhm, nRequiredPeaks, fixAllPeaks);
   return IFunction_sptr(spectrum);
 }
 
-API::IFunction_sptr CrystalFieldMultiSpectrum::buildPhysprop(
-    int nre, const DoubleFortranVector &en, const ComplexFortranMatrix &wf,
-    const ComplexFortranMatrix &ham, double temperature, size_t iSpec) const {
+API::IFunction_sptr CrystalFieldMultiSpectrum::buildPhysprop(int nre, const DoubleFortranVector &en,
+                                                             const ComplexFortranMatrix &wf,
+                                                             const ComplexFortranMatrix &ham, double temperature,
+                                                             size_t iSpec) const {
   switch (m_physprops[iSpec]) {
   case HeatCapacity: {
     IFunction_sptr retval = IFunction_sptr(new CrystalFieldHeatCapacity);
@@ -382,17 +371,15 @@ API::IFunction_sptr CrystalFieldMultiSpectrum::buildPhysprop(
     spectrum.setAttribute("Hdir", getAttribute("Hdir" + suffix));
     spectrum.setAttribute("inverse", getAttribute("inverse" + suffix));
     spectrum.setAttribute("powder", getAttribute("powder" + suffix));
-    dynamic_cast<Peaks &>(*m_source).m_PPLambdaIdxChild[iSpec] =
-        spectrum.parameterIndex("Lambda");
-    dynamic_cast<Peaks &>(*m_source).m_PPChi0IdxChild[iSpec] =
-        spectrum.parameterIndex("Chi0");
+    dynamic_cast<Peaks &>(*m_source).m_PPLambdaIdxChild[iSpec] = spectrum.parameterIndex("Lambda");
+    dynamic_cast<Peaks &>(*m_source).m_PPChi0IdxChild[iSpec] = spectrum.parameterIndex("Chi0");
     return retval;
   }
   case Magnetisation: {
     IFunction_sptr retval = IFunction_sptr(new CrystalFieldMagnetisation);
     auto &spectrum = dynamic_cast<CrystalFieldMagnetisation &>(*retval);
     spectrum.setHamiltonian(ham, nre);
-    spectrum.setAttribute("Temperature", Attribute(temperature));
+    spectrum.setAttributeValue("Temperature", temperature);
     const auto suffix = std::to_string(iSpec);
     spectrum.setAttribute("Unit", getAttribute("Unit" + suffix));
     spectrum.setAttribute("Hdir", getAttribute("Hdir" + suffix));
@@ -435,8 +422,7 @@ void CrystalFieldMultiSpectrum::updateTargetFunction() const {
   auto &fun = dynamic_cast<MultiDomainFunction &>(*m_target);
   try {
     for (size_t i = 0; i < m_temperatures.size(); ++i) {
-      updateSpectrum(*fun.getFunction(i), nre, en, wf, ham, m_temperatures[i],
-                     m_FWHMs[i], i);
+      updateSpectrum(*fun.getFunction(i), nre, en, wf, ham, m_temperatures[i], m_FWHMs[i], i);
     }
     fun.checkFunction();
   } catch (std::out_of_range &) {
@@ -446,10 +432,9 @@ void CrystalFieldMultiSpectrum::updateTargetFunction() const {
 }
 
 /// Update a function for a single spectrum.
-void CrystalFieldMultiSpectrum::updateSpectrum(
-    API::IFunction &spectrum, int nre, const DoubleFortranVector &en,
-    const ComplexFortranMatrix &wf, const ComplexFortranMatrix &ham,
-    double temperature, double fwhm, size_t iSpec) const {
+void CrystalFieldMultiSpectrum::updateSpectrum(API::IFunction &spectrum, int nre, const DoubleFortranVector &en,
+                                               const ComplexFortranMatrix &wf, const ComplexFortranMatrix &ham,
+                                               double temperature, double fwhm, size_t iSpec) const {
   switch (m_physprops[iSpec]) {
   case HeatCapacity: {
     auto &heatcap = dynamic_cast<CrystalFieldHeatCapacity &>(spectrum);
@@ -460,10 +445,8 @@ void CrystalFieldMultiSpectrum::updateSpectrum(
     auto &suscept = dynamic_cast<CrystalFieldSusceptibility &>(spectrum);
     suscept.setEigensystem(en, wf, nre);
     auto &source = dynamic_cast<Peaks &>(*m_source);
-    suscept.setParameter(source.m_PPLambdaIdxChild[iSpec],
-                         getParameter(source.m_PPLambdaIdxSelf[iSpec]));
-    suscept.setParameter(source.m_PPChi0IdxChild[iSpec],
-                         getParameter(source.m_PPChi0IdxSelf[iSpec]));
+    suscept.setParameter(source.m_PPLambdaIdxChild[iSpec], getParameter(source.m_PPLambdaIdxSelf[iSpec]));
+    suscept.setParameter(source.m_PPChi0IdxChild[iSpec], getParameter(source.m_PPChi0IdxSelf[iSpec]));
     break;
   }
   case Magnetisation: {
@@ -483,12 +466,9 @@ void CrystalFieldMultiSpectrum::updateSpectrum(
     FunctionValues values;
     calcExcitations(nre, en, wf, temperature, values, iSpec);
     auto &composite = dynamic_cast<API::CompositeFunction &>(spectrum);
-    m_nPeaks[iSpec] = CrystalFieldUtils::updateSpectrumFunction(
-        composite, peakShape, values, 1, m_fwhmX[iSpec], m_fwhmY[iSpec],
-        fwhmVariation, fwhm, fixAllPeaks);
+    m_nPeaks[iSpec] = CrystalFieldUtils::updateSpectrumFunction(composite, peakShape, values, 1, m_fwhmX[iSpec],
+                                                                m_fwhmY[iSpec], fwhmVariation, fwhm, fixAllPeaks);
   }
 }
 
-} // namespace Functions
-} // namespace CurveFitting
-} // namespace Mantid
+} // namespace Mantid::CurveFitting::Functions

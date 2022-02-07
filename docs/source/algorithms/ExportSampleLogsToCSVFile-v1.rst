@@ -11,23 +11,23 @@ Description
 
 Algorithm *LoadSampleLogsToCSVFile* exports a specified set of sample logs
 , which are stored in a MatrixWorkspace, to a CSV file.
-The header for the sample log csv file can also 
-be created by this algorithm in a separate *header* file. 
+The header for the sample log csv file can also
+be created by this algorithm in a separate *header* file.
 
 CSV File format
 ###############
 
-Sample logs are written to a csv file.   
-A tab separates any two adjacent values. 
+Sample logs are written to a csv file.
+A tab separates any two adjacent values.
 
 Each entry of each exported sample log will be an individual entry in the
 output CSV file,
 except in the situation that two entries with time stamps within time tolerance.
 
-The output CSV file has 2+n columns, where n is the number of sample logs 
-to be exported. 
+The output CSV file has 2+n columns, where n is the number of sample logs
+to be exported.
 
-Here is the definition for the columns. 
+Here is the definition for the columns.
 
 -  Column 1: Absolute time (with respect to the Unix epoch) in seconds
 -  Column 2: Relative to first log entry's time
@@ -37,8 +37,8 @@ Here is the definition for the columns.
 Header file
 ###########
 
-A sample log header file can be generated optionally.  
-It contains theree lines described as below. 
+A sample log header file can be generated optionally.
+It contains theree lines described as below.
 
 -  Line 1: Test date: [Test date in string]
 -  Line 2: Test description: [Description of this log file]
@@ -53,7 +53,7 @@ Some users wants to see the exported sample log as the neutron facility's local 
 So the input property 'TimeZone' is for this purpose.
 
 Property *TimeZone* does not support all the time zones
-but only those with facilities that use Mantid. 
+but only those with facilities that use Mantid.
 
 Here is the list of all time zones that are allowed by this algorithm.
 - UTC
@@ -113,7 +113,7 @@ Usage
 
    print("Number of lines in File = {}".format(len(slines)))
    print("Number of lines in Header file = {}".format(len(hlines)))
-   
+
 .. testcleanup:: ExExportSampleToTSV
 
   os.remove(savefile)

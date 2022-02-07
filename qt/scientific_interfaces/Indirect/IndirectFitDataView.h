@@ -11,6 +11,7 @@
 #include "IIndirectFitDataView.h"
 
 #include "DllConfig.h"
+#include "MantidQtWidgets/Common/IndexTypes.h"
 #include "MantidQtWidgets/Common/UserInputValidator.h"
 
 #include <QTabWidget>
@@ -26,48 +27,28 @@ public:
   ~IndirectFitDataView() override = default;
 
   QTableWidget *getDataTable() const override;
-  virtual bool isMultipleDataTabSelected() const override;
-  bool isResolutionHidden() const override;
-  void setResolutionHidden(bool hide) override;
-  void setStartAndEndHidden(bool hidden) override;
-  void disableMultipleDataTab() override;
+  bool isTableEmpty() const;
 
-  virtual std::string getSelectedSample() const override;
-  std::string getSelectedResolution() const override;
-
-  virtual QStringList getSampleWSSuffices() const override;
-  virtual QStringList getSampleFBSuffices() const override;
-  QStringList getResolutionWSSuffices() const override;
-  QStringList getResolutionFBSuffices() const override;
-
-  virtual void setSampleWSSuffices(const QStringList &suffices) override;
-  virtual void setSampleFBSuffices(const QStringList &suffices) override;
-  virtual void setResolutionWSSuffices(const QStringList &suffices) override;
-  virtual void setResolutionFBSuffices(const QStringList &suffices) override;
-
-  bool isSampleWorkspaceSelectorVisible() const override;
-  void setSampleWorkspaceSelectorIndex(const QString &workspaceName) override;
-
-  void readSettings(const QSettings &settings) override;
   UserInputValidator &validate(UserInputValidator &validator) override;
-
-  void setXRange(std::pair<double, double> const &range) override;
+  virtual void addTableEntry(size_t row, FitDataRow newRow) override;
+  virtual int workspaceIndexColumn() const override;
+  virtual int startXColumn() const override;
+  virtual int endXColumn() const override;
+  virtual int excludeColumn() const override;
+  void clearTable() override;
+  QString getText(int row, int column) const override;
+  QModelIndexList getSelectedIndexes() const override;
 
 public slots:
   void displayWarning(const std::string &warning) override;
 
-protected slots:
-  void emitViewSelected(int index);
-  void setStartX(double) override;
-  void setEndX(double) override;
+protected:
+  IndirectFitDataView(const QStringList &headers, QWidget *parent = nullptr);
+  std::unique_ptr<Ui::IndirectFitDataView> m_uiForm;
+  void setCell(std::unique_ptr<QTableWidgetItem> cell, size_t row, size_t column);
 
 private:
-  UserInputValidator &validateMultipleData(UserInputValidator &validator);
-  UserInputValidator &validateSingleData(UserInputValidator &validator);
-  UserInputValidator &validateSample(UserInputValidator &validator);
-  UserInputValidator &validateResolution(UserInputValidator &validator);
-
-  std::unique_ptr<Ui::IndirectFitDataForm> m_dataForm;
+  void setHorizontalHeaders(const QStringList &headers);
 };
 
 } // namespace IDA

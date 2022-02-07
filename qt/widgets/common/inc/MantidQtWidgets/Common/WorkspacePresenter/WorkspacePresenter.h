@@ -26,9 +26,7 @@ using ADSAdapter_uptr = std::unique_ptr<WorkspaceProvider>;
 \date   24-08-2016
 \version 1.0
 */
-class EXPORT_OPT_MANTIDQT_COMMON WorkspacePresenter
-    : public WorkspaceProviderNotifiable,
-      public ViewNotifiable {
+class EXPORT_OPT_MANTIDQT_COMMON WorkspacePresenter : public WorkspaceProviderNotifiable, public ViewNotifiable {
 
 public:
   explicit WorkspacePresenter(IWorkspaceDockView *view);
@@ -36,8 +34,7 @@ public:
 
   void init();
 
-  void
-  notifyFromWorkspaceProvider(WorkspaceProviderNotifiable::Flag flag) override;
+  void notifyFromWorkspaceProvider(WorkspaceProviderNotifiable::Flag flag) override;
   void notifyFromView(ViewNotifiable::Flag flag) override;
 
 private:
@@ -48,6 +45,7 @@ private:
   void ungroupWorkspaces();
   void sortWorkspaces();
   void deleteWorkspaces();
+  void clearWorkspaces();
   void saveSingleWorkspace();
   void saveWorkspaceCollection();
   void filterWorkspaces();
@@ -61,7 +59,6 @@ private:
   void showColourFillPlot();
   void showDetectorsTable();
   void showBoxDataTable();
-  void showVatesGUI();
   void showMDPlot();
   void showListData();
   void showSpectrumViewer();

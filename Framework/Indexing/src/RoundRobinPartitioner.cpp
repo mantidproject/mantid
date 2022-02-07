@@ -6,14 +6,10 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidIndexing/RoundRobinPartitioner.h"
 
-namespace Mantid {
-namespace Indexing {
+namespace Mantid::Indexing {
 
-PartitionIndex
-RoundRobinPartitioner::doIndexOf(const GlobalSpectrumIndex index) const {
-  return PartitionIndex(static_cast<int>(static_cast<size_t>(index) %
-                                         numberOfNonMonitorPartitions()));
+PartitionIndex RoundRobinPartitioner::doIndexOf(const GlobalSpectrumIndex index) const {
+  return PartitionIndex(static_cast<int>(static_cast<size_t>(index) % numberOfNonMonitorPartitions()));
 }
 
-} // namespace Indexing
-} // namespace Mantid
+} // namespace Mantid::Indexing

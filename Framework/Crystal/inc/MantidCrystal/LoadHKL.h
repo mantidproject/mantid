@@ -26,19 +26,13 @@ public:
   /// Algorithm's name for identification
   const std::string name() const override { return "LoadHKL"; };
   /// Summary of algorithms purpose
-  const std::string summary() const override {
-    return "Loads an ASCII .hkl file to a PeaksWorkspace.";
-  }
+  const std::string summary() const override { return "Loads an ASCII .hkl file to a PeaksWorkspace."; }
 
   /// Algorithm's version for identification
   int version() const override { return 1; };
-  const std::vector<std::string> seeAlso() const override {
-    return {"SaveHKL"};
-  }
+  const std::vector<std::string> seeAlso() const override { return {"SaveHKL"}; }
   /// Algorithm's category for identification
-  const std::string category() const override {
-    return "Crystal\\DataHandling;DataHandling\\Text";
-  }
+  const std::string category() const override { return "Crystal\\DataHandling;DataHandling\\Text"; }
 
 private:
   /// Initialise the properties

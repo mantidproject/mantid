@@ -71,7 +71,7 @@ On instruments like IN4 and IN6, these steps would translate to something like t
 
     # Uncomment to add a temporary data search directory.
     #mantid.config.appendDataSearchDir('/data/')
-    
+
     # Vanadium
     DirectILLCollectData(
         Run='ILL/IN4/085801-085802.nxs',
@@ -118,7 +118,7 @@ The basic reduction for IN5 and PANTHER differs slightly with regards to the dia
 
     # Uncomment to add a temporary data search directory.
     #mantid.config.appendDataSearchDir('/data/')
-    
+
     # Vanadium
     DirectILLCollectData(
         Run='085801-085802',
@@ -169,6 +169,8 @@ Every ``DirectILL`` algorithm has an *OutputWorkspace* property which provides t
     ...
 
 As shown above, these optional outputs are sometimes named similarly the corresponding inputs giving a hint were they are supposed to be used.
+
+The information regarding which numors were loaded by relevant NeXus data loaders to create the current workspace is available in the sample logs under the entry `run_list`.
 
 Time-independent background for position sensitive tubes
 ========================================================
@@ -274,7 +276,7 @@ The above workflow would translate to this kind of Python script for IN4 and IN6
 
     # Uncomment to add a temporary data search directory.
     #mantid.config.appendDataSearchDir('/data/')
-    
+
     # Vanadium
     DirectILLCollectData(
         Run='ILL/IN4/085801-085801.nxs',
@@ -417,7 +419,7 @@ A corresponding Python script follows.
 
     # Uncomment to add a temporary data search directory.
     #mantid.config.appendDataSearchDir('/data/')
-    
+
     # Vanadium
     DirectILLCollectData(
         Run='ILL/IN4/085801-085802.nxs',
@@ -586,7 +588,7 @@ Lets put it all together into a complex Python script. The script below reduces 
 
     # Uncomment to add a temporary data search directory.
     #mantid.config.appendDataSearchDir('/data/')
-    
+
     # Vanadium
     DirectILLCollectData(
         Run='ILL/IN4/085801-085802.nxs',
@@ -627,7 +629,7 @@ Lets put it all together into a complex Python script. The script below reduces 
         Run='ILL/IN4/087311-087314.nxs',
         OutputWorkspace='container_100K',
         IncidentEnergyWorkspace='Ei'  # Ensure common TOF axis
-    )    
+    )
     # Sample self-shielding and container subtraction.
     geometry = {
         'Shape': 'HollowCylinder',

@@ -5,6 +5,7 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 import unittest
+
 from testhelpers import run_algorithm
 from mantid.api import mtd, WorkspaceGroup, MatrixWorkspace, AnalysisDataService, WorkspaceFactory
 
@@ -34,9 +35,29 @@ class WorkspaceGroupTest(unittest.TestCase):
         self.assertIsInstance(ws_group, WorkspaceGroup)
 
     def test_that_instantiated_WorkspaceGroup_is_not_added_to_the_ADS(self):
-        ws_group = WorkspaceGroup()
+        _ = WorkspaceGroup()
 
         self.assertEqual(len(AnalysisDataService.getObjectNames()), 0)
+
+    class _HoldWsGroup:
+        def __init__(self):
+            self.group = WorkspaceGroup()
+
+        def __enter__(self):
+            return self.group
+
+        def __exit__(self, exc_type, exc_val, exc_tb):
+            del self.group  # Make our intention explicit for future readers
+
+    def test_that_get_item_scope_works_not_in_ads(self):
+        with self._HoldWsGroup() as group:
+            # Note we want to create this inline so our ref is through getItem
+            group.addWorkspace(WorkspaceFactory.create("Workspace2D", 1, 1, 1))
+            ws = group.getItem(0)
+            self.assertFalse(ws.name())  # Not in ADS so should be no name
+            self.assertEqual(len(AnalysisDataService.getObjectNames()), 0)
+        # Now the group should be deleted, this should continue to work now
+        self.assertFalse(ws.name())
 
     def test_that_instantiated_WorkspaceGroup_can_be_added_to_the_ADS(self):
         ws_group = WorkspaceGroup()
@@ -168,6 +189,10 @@ class WorkspaceGroupTest(unittest.TestCase):
         self.assertEqual(group.getItem(-2).name(), "First")
         with self.assertRaises(IndexError):
             group.getItem(-400)
+
+    def test_isGroup(self):
+        group = self.create_group_via_GroupWorkspace_algorithm()
+        self.assertEqual(group.isGroup(), True)
 
 
 if __name__ == '__main__':

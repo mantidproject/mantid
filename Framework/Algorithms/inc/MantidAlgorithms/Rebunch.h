@@ -46,9 +46,7 @@ public:
   /// Algorithm's name for identification overriding a virtual method
   const std::string name() const override { return "Rebunch"; }
   /// Summary of algorithms purpose
-  const std::string summary() const override {
-    return "Rebins data by adding together 'n_bunch' successive bins.";
-  }
+  const std::string summary() const override { return "Rebins data by adding together 'n_bunch' successive bins."; }
 
   /// Algorithm's version for identification overriding a virtual method
   int version() const override { return 1; }
@@ -60,26 +58,15 @@ private:
   // Overridden Algorithm methods
   void init() override;
   void exec() override;
-  void rebunch_hist_counts(const HistogramData::HistogramX &xold,
-                           const HistogramData::HistogramY &yold,
-                           const HistogramData::HistogramE &eold,
-                           HistogramData::HistogramX &xnew,
-                           HistogramData::HistogramY &ynew,
-                           HistogramData::HistogramE &enew,
-                           const size_t n_bunch);
-  void rebunch_hist_frequencies(const HistogramData::HistogramX &xold,
-                                const HistogramData::HistogramY &yold,
-                                const HistogramData::HistogramE &eold,
-                                HistogramData::HistogramX &xnew,
-                                HistogramData::HistogramY &ynew,
-                                HistogramData::HistogramE &enew,
-                                const size_t n_bunch);
-  void rebunch_point(const HistogramData::HistogramX &xold,
-                     const HistogramData::HistogramY &yold,
-                     const HistogramData::HistogramE &eold,
-                     HistogramData::HistogramX &xnew,
-                     HistogramData::HistogramY &ynew,
-                     HistogramData::HistogramE &enew, const size_t n_bunch);
+  void rebunch_hist_counts(const HistogramData::HistogramX &xold, const HistogramData::HistogramY &yold,
+                           const HistogramData::HistogramE &eold, HistogramData::HistogramX &xnew,
+                           HistogramData::HistogramY &ynew, HistogramData::HistogramE &enew, const size_t n_bunch);
+  void rebunch_hist_frequencies(const HistogramData::HistogramX &xold, const HistogramData::HistogramY &yold,
+                                const HistogramData::HistogramE &eold, HistogramData::HistogramX &xnew,
+                                HistogramData::HistogramY &ynew, HistogramData::HistogramE &enew, const size_t n_bunch);
+  void rebunch_point(const HistogramData::HistogramX &xold, const HistogramData::HistogramY &yold,
+                     const HistogramData::HistogramE &eold, HistogramData::HistogramX &xnew,
+                     HistogramData::HistogramY &ynew, HistogramData::HistogramE &enew, const size_t n_bunch);
 };
 
 } // namespace Algorithms

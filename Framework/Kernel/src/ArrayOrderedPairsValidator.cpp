@@ -10,15 +10,13 @@
 #include <memory>
 #include <sstream>
 
-namespace Mantid {
-namespace Kernel {
+namespace Mantid::Kernel {
 
 /**
  * Create a clone of the current ArrayOrderedPairsValidator.
  * @return The cloned object.
  */
-template <typename TYPE>
-IValidator_sptr ArrayOrderedPairsValidator<TYPE>::clone() const {
+template <typename TYPE> IValidator_sptr ArrayOrderedPairsValidator<TYPE>::clone() const {
   return std::make_shared<ArrayOrderedPairsValidator<TYPE>>(*this);
 }
 
@@ -29,14 +27,12 @@ IValidator_sptr ArrayOrderedPairsValidator<TYPE>::clone() const {
  * @return An error message giving the values of wrong entries.
  */
 template <typename TYPE>
-std::string ArrayOrderedPairsValidator<TYPE>::checkValidity(
-    const std::vector<TYPE> &value) const {
+std::string ArrayOrderedPairsValidator<TYPE>::checkValidity(const std::vector<TYPE> &value) const {
   std::stringstream error;
   error << "";
   // Check the number of entries is even
   if (value.size() % 2 != 0) {
-    error << "Array has an odd number of entries ("
-          << std::to_string(value.size()) << ").";
+    error << "Array has an odd number of entries (" << std::to_string(value.size()) << ").";
   } else {
     // Check that each pair is ordered.
     for (auto it = value.begin(); it != value.end(); it += 2) {
@@ -56,5 +52,4 @@ template class ArrayOrderedPairsValidator<int64_t>;
 template class ArrayOrderedPairsValidator<long>;
 #endif
 
-} // namespace Kernel
-} // namespace Mantid
+} // namespace Mantid::Kernel

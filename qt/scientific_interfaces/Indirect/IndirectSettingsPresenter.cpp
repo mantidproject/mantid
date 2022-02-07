@@ -7,8 +7,7 @@
 #include "IndirectSettingsPresenter.h"
 #include "IndirectSettingsHelper.h"
 
-namespace MantidQt {
-namespace CustomInterfaces {
+namespace MantidQt::CustomInterfaces {
 using namespace IndirectSettingsHelper;
 
 IndirectSettingsPresenter::IndirectSettingsPresenter(QWidget *parent)
@@ -17,15 +16,13 @@ IndirectSettingsPresenter::IndirectSettingsPresenter(QWidget *parent)
   setUpPresenter();
 }
 
-IndirectSettingsPresenter::IndirectSettingsPresenter(
-    IndirectSettingsModel *model, IIndirectSettingsView *view)
+IndirectSettingsPresenter::IndirectSettingsPresenter(IndirectSettingsModel *model, IIndirectSettingsView *view)
     : QObject(nullptr), m_model(model), m_view(view) {
   setUpPresenter();
 }
 
 void IndirectSettingsPresenter::setUpPresenter() {
-  connect(m_view.get(), SIGNAL(okClicked()), this,
-          SLOT(applyAndCloseSettings()));
+  connect(m_view.get(), SIGNAL(okClicked()), this, SLOT(applyAndCloseSettings()));
   connect(m_view.get(), SIGNAL(applyClicked()), this, SLOT(applyChanges()));
   connect(m_view.get(), SIGNAL(cancelClicked()), this, SLOT(closeDialog()));
 
@@ -41,9 +38,7 @@ void IndirectSettingsPresenter::setDefaultRestrictData() const {
     setRestrictInputDataByName(isisFacility);
 }
 
-IIndirectSettingsView *IndirectSettingsPresenter::getView() {
-  return m_view.get();
-}
+IIndirectSettingsView *IndirectSettingsPresenter::getView() { return m_view.get(); }
 
 void IndirectSettingsPresenter::applyAndCloseSettings() {
   saveSettings();
@@ -81,5 +76,4 @@ void IndirectSettingsPresenter::setApplyingChanges(bool applyingChanges) {
   m_view->setCancelEnabled(!applyingChanges);
 }
 
-} // namespace CustomInterfaces
-} // namespace MantidQt
+} // namespace MantidQt::CustomInterfaces

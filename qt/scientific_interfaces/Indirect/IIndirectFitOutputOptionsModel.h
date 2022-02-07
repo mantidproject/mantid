@@ -20,17 +20,14 @@ public:
   IIndirectFitOutputOptionsModel(){};
   virtual ~IIndirectFitOutputOptionsModel() = default;
 
-  virtual void
-  setResultWorkspace(Mantid::API::WorkspaceGroup_sptr groupWorkspace) = 0;
-  virtual void
-  setPDFWorkspace(Mantid::API::WorkspaceGroup_sptr groupWorkspace) = 0;
+  virtual void setResultWorkspace(Mantid::API::WorkspaceGroup_sptr groupWorkspace) = 0;
+  virtual void setPDFWorkspace(Mantid::API::WorkspaceGroup_sptr groupWorkspace) = 0;
   virtual Mantid::API::WorkspaceGroup_sptr getResultWorkspace() const = 0;
   virtual Mantid::API::WorkspaceGroup_sptr getPDFWorkspace() const = 0;
 
   virtual void removePDFWorkspace() = 0;
 
-  virtual bool
-  isSelectedGroupPlottable(std::string const &selectedGroup) const = 0;
+  virtual bool isSelectedGroupPlottable(std::string const &selectedGroup) const = 0;
   virtual bool isResultGroupPlottable() const = 0;
   virtual bool isPDFGroupPlottable() const = 0;
 
@@ -38,20 +35,16 @@ public:
   virtual std::vector<SpectrumToPlot> getSpectraToPlot() const = 0;
 
   virtual void plotResult(std::string const &plotType) = 0;
-  virtual void plotPDF(std::string const &workspaceName,
-                       std::string const &plotType) = 0;
+  virtual void plotPDF(std::string const &workspaceName, std::string const &plotType) = 0;
 
   virtual void saveResult() const = 0;
 
-  virtual std::vector<std::string>
-  getWorkspaceParameters(std::string const &selectedGroup) const = 0;
+  virtual std::vector<std::string> getWorkspaceParameters(std::string const &selectedGroup) const = 0;
   virtual std::vector<std::string> getPDFWorkspaceNames() const = 0;
 
-  virtual bool
-  isResultGroupSelected(std::string const &selectedGroup) const = 0;
+  virtual bool isResultGroupSelected(std::string const &selectedGroup) const = 0;
 
-  virtual void replaceFitResult(std::string const &inputName,
-                                std::string const &singleFitName,
+  virtual void replaceFitResult(std::string const &inputName, std::string const &singleFitName,
                                 std::string const &outputName) = 0;
 };
 

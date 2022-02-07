@@ -20,22 +20,18 @@ class Poldi2DFunctionTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static Poldi2DFunctionTest *createSuite() {
-    return new Poldi2DFunctionTest();
-  }
+  static Poldi2DFunctionTest *createSuite() { return new Poldi2DFunctionTest(); }
   static void destroySuite(Poldi2DFunctionTest *suite) { delete suite; }
 
   void testTypes() {
-    std::shared_ptr<Poldi2DFunction> function2D =
-        std::make_shared<Poldi2DFunction>();
+    std::shared_ptr<Poldi2DFunction> function2D = std::make_shared<Poldi2DFunction>();
 
     TS_ASSERT(std::dynamic_pointer_cast<CompositeFunction>(function2D));
     TS_ASSERT(std::dynamic_pointer_cast<IFunction1DSpectrum>(function2D));
   }
 
   void testSummation() {
-    std::shared_ptr<Poldi2DFunction> function2D =
-        std::make_shared<Poldi2DFunction>();
+    std::shared_ptr<Poldi2DFunction> function2D = std::make_shared<Poldi2DFunction>();
 
     IFunction_sptr first(new SummingFunction);
     IFunction_sptr second(new SummingFunction);
@@ -63,8 +59,7 @@ public:
   }
 
   void testIterationBehavior() {
-    std::shared_ptr<Poldi2DFunction> function2D =
-        std::make_shared<Poldi2DFunction>();
+    std::shared_ptr<Poldi2DFunction> function2D = std::make_shared<Poldi2DFunction>();
 
     IFunction_sptr first(new SummingFunction);
     IFunction_sptr second(new SummingFunction);
@@ -90,14 +85,12 @@ public:
 
     for (size_t i = 0; i < values.size(); ++i) {
       TS_ASSERT_THROWS_NOTHING(values.getFitWeight(i));
-      TS_ASSERT_EQUALS(values.getFitWeight(i),
-                       1.0 / sqrt(fabs(values.getCalculated(i) + 0.1)));
+      TS_ASSERT_EQUALS(values.getFitWeight(i), 1.0 / sqrt(fabs(values.getCalculated(i) + 0.1)));
     }
   }
 
   void testPoldiFunction1D() {
-    std::shared_ptr<Poldi2DFunction> function2D =
-        std::make_shared<Poldi2DFunction>();
+    std::shared_ptr<Poldi2DFunction> function2D = std::make_shared<Poldi2DFunction>();
 
     IFunction_sptr first(new SummingFunction);
     IFunction_sptr second(new TestPoldiFunction1D);
@@ -126,8 +119,7 @@ private:
   public:
     std::string name() const override { return "SummingFunction"; }
 
-    void function1DSpectrum(const FunctionDomain1DSpectrum &domain,
-                            FunctionValues &values) const override {
+    void function1DSpectrum(const FunctionDomain1DSpectrum &domain, FunctionValues &values) const override {
       values.zeroCalculated();
 
       for (size_t i = 0; i < domain.size(); ++i) {
@@ -135,8 +127,7 @@ private:
       }
     }
 
-    void functionDeriv1DSpectrum(const FunctionDomain1DSpectrum &domain,
-                                 Jacobian &jacobian) override {
+    void functionDeriv1DSpectrum(const FunctionDomain1DSpectrum &domain, Jacobian &jacobian) override {
       UNUSED_ARG(domain);
       UNUSED_ARG(jacobian);
     }
@@ -144,8 +135,7 @@ private:
 
   class TestPoldiFunction1D : public SummingFunction, public IPoldiFunction1D {
   public:
-    void poldiFunction1D(const std::vector<int> &indices,
-                         const FunctionDomain1D &domain,
+    void poldiFunction1D(const std::vector<int> &indices, const FunctionDomain1D &domain,
                          FunctionValues &values) const override {
       double totalSize = static_cast<double>(indices.size());
 

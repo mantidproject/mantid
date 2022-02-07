@@ -10,9 +10,7 @@
 #include "MantidCurveFitting/FuncMinimizers/DerivMinimizer.h"
 #include "MantidCurveFitting/CostFunctions/CostFuncFitting.h"
 
-namespace Mantid {
-namespace CurveFitting {
-namespace FuncMinimisers {
+namespace Mantid::CurveFitting::FuncMinimisers {
 
 /** Used by the GSL to calculate the cost function.
  * @param x :: Vector with parameters
@@ -25,8 +23,7 @@ double DerivMinimizer::fun(const gsl_vector *x, void *params) {
     minimizer.m_costFunction->setParameter(i, gsl_vector_get(x, i));
   }
   std::shared_ptr<CostFunctions::CostFuncFitting> fitting =
-      std::dynamic_pointer_cast<CostFunctions::CostFuncFitting>(
-          minimizer.m_costFunction);
+      std::dynamic_pointer_cast<CostFunctions::CostFuncFitting>(minimizer.m_costFunction);
   if (fitting) {
     fitting->getFittingFunction()->applyTies();
   }
@@ -45,8 +42,7 @@ void DerivMinimizer::dfun(const gsl_vector *x, void *params, gsl_vector *g) {
     minimizer.m_costFunction->setParameter(i, gsl_vector_get(x, i));
   }
   std::shared_ptr<CostFunctions::CostFuncFitting> fitting =
-      std::dynamic_pointer_cast<CostFunctions::CostFuncFitting>(
-          minimizer.m_costFunction);
+      std::dynamic_pointer_cast<CostFunctions::CostFuncFitting>(minimizer.m_costFunction);
   if (fitting) {
     fitting->getFittingFunction()->applyTies();
   }
@@ -63,16 +59,14 @@ void DerivMinimizer::dfun(const gsl_vector *x, void *params, gsl_vector *g) {
  * @param f :: Buffer for the fanction value
  * @param g :: Buffer for the derivatives
  */
-void DerivMinimizer::fundfun(const gsl_vector *x, void *params, double *f,
-                             gsl_vector *g) {
+void DerivMinimizer::fundfun(const gsl_vector *x, void *params, double *f, gsl_vector *g) {
   DerivMinimizer &minimizer = *static_cast<DerivMinimizer *>(params);
   size_t n = minimizer.m_costFunction->nParams();
   for (size_t i = 0; i < n; ++i) {
     minimizer.m_costFunction->setParameter(i, gsl_vector_get(x, i));
   }
   std::shared_ptr<CostFunctions::CostFuncFitting> fitting =
-      std::dynamic_pointer_cast<CostFunctions::CostFuncFitting>(
-          minimizer.m_costFunction);
+      std::dynamic_pointer_cast<CostFunctions::CostFuncFitting>(minimizer.m_costFunction);
   if (fitting) {
     fitting->getFittingFunction()->applyTies();
   }
@@ -85,8 +79,7 @@ void DerivMinimizer::fundfun(const gsl_vector *x, void *params, double *f,
 
 /// Constructor
 DerivMinimizer::DerivMinimizer()
-    : m_gslSolver(nullptr), m_x(nullptr), m_stopGradient(1e-3), m_stepSize(0.1),
-      m_tolerance(0.0001) {
+    : m_gslSolver(nullptr), m_x(nullptr), m_stopGradient(1e-3), m_stepSize(0.1), m_tolerance(0.0001) {
   initGSLMMin();
 }
 
@@ -96,8 +89,7 @@ DerivMinimizer::DerivMinimizer()
  * @param tolerance :: Tolerance.
  */
 DerivMinimizer::DerivMinimizer(const double stepSize, const double tolerance)
-    : m_gslSolver(nullptr), m_x(nullptr), m_stopGradient(1e-3),
-      m_stepSize(stepSize), m_tolerance(tolerance) {
+    : m_gslSolver(nullptr), m_x(nullptr), m_stopGradient(1e-3), m_stepSize(stepSize), m_tolerance(tolerance) {
   initGSLMMin();
 }
 
@@ -124,8 +116,7 @@ DerivMinimizer::~DerivMinimizer() {
  * @param function :: A cost function to minimize.
  * @param maxIterations :: Maximum number of iterations.
  */
-void DerivMinimizer::initialize(API::ICostFunction_sptr function,
-                                size_t maxIterations) {
+void DerivMinimizer::initialize(API::ICostFunction_sptr function, size_t maxIterations) {
   UNUSED_ARG(maxIterations);
   m_costFunction = function;
   m_gslMultiminContainer.n = m_costFunction->nParams();
@@ -134,8 +125,7 @@ void DerivMinimizer::initialize(API::ICostFunction_sptr function,
   m_gslMultiminContainer.fdf = &fundfun;
   m_gslMultiminContainer.params = this;
 
-  m_gslSolver = gsl_multimin_fdfminimizer_alloc(getGSLMinimizerType(),
-                                                m_gslMultiminContainer.n);
+  m_gslSolver = gsl_multimin_fdfminimizer_alloc(getGSLMinimizerType(), m_gslMultiminContainer.n);
 
   size_t nParams = m_costFunction->nParams();
   // Starting point
@@ -144,8 +134,7 @@ void DerivMinimizer::initialize(API::ICostFunction_sptr function,
     gsl_vector_set(m_x, i, m_costFunction->getParameter(i));
   }
 
-  gsl_multimin_fdfminimizer_set(m_gslSolver, &m_gslMultiminContainer, m_x,
-                                m_stepSize, m_tolerance);
+  gsl_multimin_fdfminimizer_set(m_gslSolver, &m_gslMultiminContainer, m_x, m_stepSize, m_tolerance);
 }
 
 /**
@@ -154,8 +143,7 @@ void DerivMinimizer::initialize(API::ICostFunction_sptr function,
  */
 bool DerivMinimizer::iterate(size_t /*iteration*/) {
   if (m_gslSolver == nullptr) {
-    throw std::runtime_error("Minimizer " + this->name() +
-                             " was not initialized.");
+    throw std::runtime_error("Minimizer " + this->name() + " was not initialized.");
   }
   int status = gsl_multimin_fdfminimizer_iterate(m_gslSolver);
   if (status) {
@@ -183,6 +171,4 @@ void DerivMinimizer::setStopGradient(const double value) {
 
 double DerivMinimizer::costFunctionVal() { return m_gslSolver->f; }
 
-} // namespace FuncMinimisers
-} // namespace CurveFitting
-} // namespace Mantid
+} // namespace Mantid::CurveFitting::FuncMinimisers

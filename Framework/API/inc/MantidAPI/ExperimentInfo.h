@@ -12,6 +12,8 @@
 #include "MantidGeometry/Instrument_fwd.h"
 
 #include "MantidKernel/DeltaEMode.h"
+#include "MantidKernel/NexusHDF5Descriptor.h"
+#include "MantidKernel/Unit.h"
 #include "MantidKernel/V3D.h"
 #include "MantidKernel/cow_ptr.h"
 
@@ -80,8 +82,7 @@ public:
   void populateInstrumentParameters();
 
   void setNumberOfDetectorGroups(const size_t count) const;
-  void setDetectorGrouping(const size_t index,
-                           const std::set<detid_t> &detIDs) const;
+  void setDetectorGrouping(const size_t index, const std::set<detid_t> &detIDs) const;
 
   /// Sample accessors
   const Sample &sample() const;
@@ -108,31 +109,42 @@ public:
   double getEFixed(const detid_t detID) const;
   /// Easy access to the efixed value for this run & optional detector
   double getEFixed(const std::shared_ptr<const Geometry::IDetector> &detector =
-                       std::shared_ptr<const Geometry::IDetector>{
-                           nullptr}) const;
+                       std::shared_ptr<const Geometry::IDetector>{nullptr}) const;
+  double getEFixedGivenEMode(const std::shared_ptr<const Geometry::IDetector> &detector,
+                             const Kernel::DeltaEMode::Type emode) const;
+  double getEFixedForIndirect(const std::shared_ptr<const Geometry::IDetector> &detector,
+                              const std::vector<std::string> &parameterNames) const;
   /// Set the efixed value for a given detector ID
   void setEFixed(const detid_t detID, const double value);
 
   /// Saves this experiment description to the open NeXus file
-  void saveExperimentInfoNexus(::NeXus::File *file,
-                               bool saveLegacyInstrument = true) const;
+  void saveExperimentInfoNexus(::NeXus::File *file, bool saveLegacyInstrument = true) const;
   /// Saves this experiment description to the open NeXus file
-  void saveExperimentInfoNexus(::NeXus::File *file, bool saveInstrument,
-                               bool saveSample, bool saveLogs) const;
+  void saveExperimentInfoNexus(::NeXus::File *file, bool saveInstrument, bool saveSample, bool saveLogs) const;
+
+  void loadExperimentInfoNexus(const std::string &nxFilename, ::NeXus::File *file, std::string &parameterStr,
+                               const Mantid::Kernel::NexusHDF5Descriptor &fileInfo, const std::string &prefix);
+
   /// Loads an experiment description from the open NeXus file
-  void loadExperimentInfoNexus(const std::string &nxFilename,
-                               ::NeXus::File *file, std::string &parameterStr);
+  void loadExperimentInfoNexus(const std::string &nxFilename, ::NeXus::File *file, std::string &parameterStr);
   /// Load the instrument from an open NeXus file.
-  void loadInstrumentInfoNexus(const std::string &nxFilename,
-                               ::NeXus::File *file, std::string &parameterStr);
+  void loadInstrumentInfoNexus(const std::string &nxFilename, ::NeXus::File *file, std::string &parameterStr);
   /// Load the instrument from an open NeXus file without reading any parameters
-  void loadInstrumentInfoNexus(const std::string &nxFilename,
-                               ::NeXus::File *file);
+  void loadInstrumentInfoNexus(const std::string &nxFilename, ::NeXus::File *file);
   /// Load instrument parameters from an open Nexus file in Instument group if
   /// found there
-  void loadInstrumentParametersNexus(::NeXus::File *file,
-                                     std::string &parameterStr);
+  void loadInstrumentParametersNexus(::NeXus::File *file, std::string &parameterStr);
 
+  /**
+   * @brief Load the sample and log info from an open NeXus file. Overload that uses NexusHDF5Descriptor for faster
+   * metadata lookup
+   *
+   * @param file currently opened NeXus file
+   * @param fileInfo descriptor with in-memory index with all entries
+   * @param prefix indicates current group location in file (absolute name)
+   */
+  void loadSampleAndLogInfoNexus(::NeXus::File *file, const Mantid::Kernel::NexusHDF5Descriptor &fileInfo,
+                                 const std::string &prefix);
   /// Load the sample and log info from an open NeXus file.
   void loadSampleAndLogInfoNexus(::NeXus::File *file);
   /// Populate the parameter map given a string
@@ -147,17 +159,6 @@ public:
   // run end time if available, empty otherwise
   std::string getAvailableWorkspaceEndDate() const;
 
-  /// Utility to retrieve the validity dates for the given IDF
-  static void getValidFromTo(const std::string &IDFfilename,
-                             std::string &outValidFrom,
-                             std::string &outValidTo);
-  /// Utility to retrieve a resource file (IDF, Parameters, ..)
-  static std::vector<std::string> getResourceFilenames(
-      const std::string &prefix, const std::vector<std::string> &fileFormats,
-      const std::vector<std::string> &directoryNames, const std::string &date);
-  /// Get the IDF using the instrument name and date
-  static std::string getInstrumentFilename(const std::string &instrumentName,
-                                           const std::string &date = "");
   const Geometry::DetectorInfo &detectorInfo() const;
   Geometry::DetectorInfo &mutableDetectorInfo();
 
@@ -175,8 +176,7 @@ protected:
   /// Called as the first operation of most public methods.
   virtual void populateIfNotLoaded() const;
 
-  void setSpectrumDefinitions(
-      Kernel::cow_ptr<std::vector<SpectrumDefinition>> spectrumDefinitions);
+  void setSpectrumDefinitions(Kernel::cow_ptr<std::vector<SpectrumDefinition>> spectrumDefinitions);
 
   virtual void updateCachedDetectorGrouping(const size_t index) const;
   /// Parameters modifying the base instrument
@@ -186,23 +186,17 @@ protected:
 
 private:
   /// Fill with given instrument parameter
-  void populateWithParameter(Geometry::ParameterMap &paramMap,
-                             Geometry::ParameterMap &paramMapForPosAndRot,
-                             const std::string &name,
-                             const Geometry::XMLInstrumentParameter &paramInfo,
+  void populateWithParameter(Geometry::ParameterMap &paramMap, Geometry::ParameterMap &paramMapForPosAndRot,
+                             const std::string &name, const Geometry::XMLInstrumentParameter &paramInfo,
                              const Run &runData);
 
   /// Attempt to load instrument embedded in Nexus file. *file must have
   /// instrument group open.
-  void loadEmbeddedInstrumentInfoNexus(::NeXus::File *file,
-                                       std::string &instrumentName,
-                                       std::string &instrumentXml);
+  void loadEmbeddedInstrumentInfoNexus(::NeXus::File *file, std::string &instrumentName, std::string &instrumentXml);
 
   /// Set the instrument given the name and XML leading from IDF file if XML
   /// string is empty
-  void setInstumentFromXML(const std::string &nxFilename,
-                           std::string &instrumentName,
-                           std::string &instrumentXml);
+  void setInstumentFromXML(const std::string &nxFilename, std::string &instrumentName, std::string &instrumentXml);
 
   // Loads the xml from an instrument file with some basic error handling
   std::string loadInstrumentXML(const std::string &filename);

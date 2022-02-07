@@ -12,8 +12,7 @@
 
 using Mantid::Kernel::IValidator_sptr;
 
-namespace Mantid {
-namespace API {
+namespace Mantid::API {
 
 /**
  * Clone the current state
@@ -27,8 +26,7 @@ Kernel::IValidator_sptr OrientedLatticeValidator::clone() const {
  * @param info :: The experiment info to check for an oriented lattice.
  * @return A user level description of the error or "" for no error
  */
-std::string
-OrientedLatticeValidator::checkValidity(const ExperimentInfo_sptr &info) const {
+std::string OrientedLatticeValidator::checkValidity(const ExperimentInfo_sptr &info) const {
   if (!info->sample().hasOrientedLattice()) {
     return "Workspace must have a sample with an orientation matrix defined.";
   } else {
@@ -36,5 +34,4 @@ OrientedLatticeValidator::checkValidity(const ExperimentInfo_sptr &info) const {
   }
 }
 
-} // namespace API
-} // namespace Mantid
+} // namespace Mantid::API

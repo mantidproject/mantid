@@ -47,9 +47,7 @@ public:
   void algoVisible(bool vis) { ui.splitter->setVisible(vis); }
 
   /// @return the name of the selected algorithm
-  QString getSelectedAlgorithm() {
-    return ui.algoSelector->getSelectedAlgorithm();
-  };
+  QString getSelectedAlgorithm() { return ui.algoSelector->getSelectedAlgorithm(); };
   void setSelectedAlgorithm(QString algo);
 
   /// @return the text in the script editor
@@ -59,8 +57,7 @@ public:
 
   void saveInput();
   /// Sets the AlgorithmInputHistory object recording the algorithm properties
-  void
-  setInputHistory(MantidQt::API::AbstractAlgorithmInputHistory *inputHistory) {
+  void setInputHistory(MantidQt::API::AbstractAlgorithmInputHistory *inputHistory) {
     ui.algoProperties->setInputHistory(inputHistory);
   }
 

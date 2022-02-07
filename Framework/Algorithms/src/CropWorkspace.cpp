@@ -8,8 +8,7 @@
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidKernel/BoundedValidator.h"
 
-namespace Mantid {
-namespace Algorithms {
+namespace Mantid::Algorithms {
 
 using std::size_t;
 
@@ -20,11 +19,8 @@ using namespace Kernel;
 using namespace API;
 
 void CropWorkspace::init() {
-  declareProperty(std::make_unique<WorkspaceProperty<>>("InputWorkspace", "",
-                                                        Direction::Input),
-                  "The input workspace");
-  declareProperty(std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
-                                                        Direction::Output),
+  declareProperty(std::make_unique<WorkspaceProperty<>>("InputWorkspace", "", Direction::Input), "The input workspace");
+  declareProperty(std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "", Direction::Output),
                   "Name of the output workspace");
 
   declareProperty("XMin", EMPTY_DBL(),
@@ -45,10 +41,9 @@ void CropWorkspace::init() {
   // As the property takes ownership of the validator pointer, have to take care
   // to pass in a unique
   // pointer to each property.
-  declareProperty(
-      "EndWorkspaceIndex", EMPTY_INT(), mustBePositive,
-      "The index number of the last entry in the Workspace to be loaded\n"
-      "(default: last entry in the Workspace)");
+  declareProperty("EndWorkspaceIndex", EMPTY_INT(), mustBePositive,
+                  "The index number of the last entry in the Workspace to be loaded\n"
+                  "(default: last entry in the Workspace)");
 }
 
 /** Executes the algorithm
@@ -85,5 +80,4 @@ void CropWorkspace::exec() {
   setProperty("OutputWorkspace", outputWorkspace);
 }
 
-} // namespace Algorithms
-} // namespace Mantid
+} // namespace Mantid::Algorithms

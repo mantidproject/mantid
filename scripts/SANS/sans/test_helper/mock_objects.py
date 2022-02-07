@@ -94,6 +94,7 @@ def create_mock_view(user_file_path, batch_file_path=None, row_user_file_path=""
     view.get_user_file_path = mock.Mock(return_value=user_file_path)
     view.get_cell = mock.MagicMock(side_effect=get_cell_mock_with_path)
     view.get_batch_file_path = mock.MagicMock(return_value=batch_file_path)
+    view.batch_file = batch_file_path
     view.get_number_of_rows = mock.MagicMock(return_value=2)
 
     # Older unit test files which do not specify this will cause Mock to substitute

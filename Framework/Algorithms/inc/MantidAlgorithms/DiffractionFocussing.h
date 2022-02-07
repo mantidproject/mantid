@@ -47,9 +47,7 @@ The structure of the grouping file is as follows:
 @author Nick Draper, Tessella
 @date 11/07/2008
 */
-class MANTID_ALGORITHMS_DLL DiffractionFocussing
-    : public API::Algorithm,
-      public API::DeprecatedAlgorithm {
+class MANTID_ALGORITHMS_DLL DiffractionFocussing : public API::Algorithm, public API::DeprecatedAlgorithm {
 public:
   /// Constructor
   DiffractionFocussing();
@@ -64,21 +62,16 @@ public:
   /// Algorithm's version for identification overriding a virtual method
   int version() const override { return 1; }
   /// Algorithm's category for identification overriding a virtual method
-  const std::string category() const override {
-    return "Diffraction\\Focussing";
-  }
+  const std::string category() const override { return "Diffraction\\Focussing"; }
 
 private:
   // Overridden Algorithm methods
   void init() override;
   void exec() override;
-  API::MatrixWorkspace_sptr
-  convertUnitsToDSpacing(const API::MatrixWorkspace_sptr &workspace);
+  API::MatrixWorkspace_sptr convertUnitsToDSpacing(const API::MatrixWorkspace_sptr &workspace);
   void RebinWorkspace(API::MatrixWorkspace_sptr &workspace);
-  void calculateRebinParams(const API::MatrixWorkspace_const_sptr &workspace,
-                            double &min, double &max, double &step);
-  std::multimap<int64_t, int64_t>
-  readGroupingFile(const std::string &groupingFileName);
+  void calculateRebinParams(const API::MatrixWorkspace_const_sptr &workspace, double &min, double &max, double &step);
+  std::multimap<int64_t, int64_t> readGroupingFile(const std::string &groupingFileName);
 };
 
 } // namespace Algorithms

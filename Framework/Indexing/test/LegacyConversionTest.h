@@ -16,9 +16,7 @@ class LegacyConversionTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static LegacyConversionTest *createSuite() {
-    return new LegacyConversionTest();
-  }
+  static LegacyConversionTest *createSuite() { return new LegacyConversionTest(); }
   static void destroySuite(LegacyConversionTest *suite) { delete suite; }
 
   void test_makeSpectrumNumberVector_empty() {

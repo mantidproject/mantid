@@ -49,8 +49,9 @@ public:
   void test_categories() {
     Lorentzian forCat;
     const std::vector<std::string> categories = forCat.categories();
-    TS_ASSERT(categories.size() == 1);
+    TS_ASSERT(categories.size() == 2);
     TS_ASSERT(categories[0] == "Peak");
+    TS_ASSERT(categories[1] == "Muon\\MuonModelling");
   }
 
   void test_FWHM() {
@@ -113,6 +114,17 @@ public:
     TS_ASSERT_DELTA(lor.intensity(), M_PI, 1e-10);
   }
 
+  void testIntensityError() {
+    Lorentzian lor;
+    lor.initialize();
+    lor.setFwhm(1.0);
+    lor.setHeight(2.0);
+    lor.setCentre(3.0);
+
+    TS_ASSERT_DELTA(lor.intensity(), M_PI, 1e-10);
+    TS_ASSERT_DELTA(lor.intensityError(), lor.getError("Amplitude"), 1e-10);
+  }
+
   void testIntensity_special_case() {
     Lorentzian lor;
     lor.initialize();
@@ -131,12 +143,10 @@ public:
 private:
   class TestableLorentzian : public Lorentzian {
   public:
-    void functionLocal(double *out, const double *xValues,
-                       const size_t nData) const override {
+    void functionLocal(double *out, const double *xValues, const size_t nData) const override {
       Lorentzian::functionLocal(out, xValues, nData);
     }
-    void functionDerivLocal(Mantid::API::Jacobian *out, const double *xValues,
-                            const size_t nData) override {
+    void functionDerivLocal(Mantid::API::Jacobian *out, const double *xValues, const size_t nData) override {
       Lorentzian::functionDerivLocal(out, xValues, nData);
     }
   };

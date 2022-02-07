@@ -19,6 +19,5 @@
 #include "MantidKernel/RegistrationHelper.h"
 
 namespace {
-Mantid::Kernel::RegistrationHelper
-    start_framework(((Mantid::API::FrameworkManager::Instance()), 0));
+Mantid::Kernel::RegistrationHelper start_framework(((Mantid::API::FrameworkManager::Instance()), 0));
 }

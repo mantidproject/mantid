@@ -5,8 +5,8 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidDataObjects/EventWorkspace.h"
+#include "MantidPythonInterface/api/RegisterWorkspacePtrToPython.h"
 #include "MantidPythonInterface/core/GetPointer.h"
-#include "MantidPythonInterface/kernel/Registry/RegisterWorkspacePtrToPython.h"
 
 #include <boost/python/class.hpp>
 #include <boost/python/object/inheritance.hpp>
@@ -19,8 +19,7 @@ using namespace boost::python;
 GET_POINTER_SPECIALIZATION(EventWorkspace)
 
 void export_EventWorkspace() {
-  class_<EventWorkspace, bases<IEventWorkspace>, boost::noncopyable>(
-      "EventWorkspace", no_init);
+  class_<EventWorkspace, bases<IEventWorkspace>, boost::noncopyable>("EventWorkspace", no_init);
 
   // register pointers
   RegisterWorkspacePtrToPython<EventWorkspace>();

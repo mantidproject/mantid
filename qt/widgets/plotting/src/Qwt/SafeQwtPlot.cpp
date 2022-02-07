@@ -24,8 +24,7 @@ SafeQwtPlot::SafeQwtPlot(QWidget *parent) : QwtPlot(parent) {}
 //----------------------------------------------------------------------------------------------
 /** Constructor
  */
-SafeQwtPlot::SafeQwtPlot(const QwtText &title, QWidget *parent)
-    : QwtPlot(title, parent) {}
+SafeQwtPlot::SafeQwtPlot(const QwtText &title, QWidget *parent) : QwtPlot(title, parent) {}
 
 //----------------------------------------------------------------------------------------------
 /** Destructor
@@ -37,9 +36,7 @@ SafeQwtPlot::~SafeQwtPlot() {}
  *
  * @param ws :: shared ptr to workspace
  */
-void SafeQwtPlot::setWorkspace(Mantid::API::Workspace_sptr ws) {
-  m_ws = std::move(ws);
-}
+void SafeQwtPlot::setWorkspace(Mantid::API::Workspace_sptr ws) { m_ws = std::move(ws); }
 
 //----------------------------------------------------------------------------------------------
 /** Overridden drawCanvas() that protects the

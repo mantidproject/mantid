@@ -8,12 +8,12 @@
 
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/FrameworkManager.h"
+#include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidHistogramData/LinearGenerator.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/PhysicalConstants.h"
 #include "MantidKernel/VectorHelper.h"
 #include "MantidMuon/CalculateMuonAsymmetry.h"
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include <cxxtest/TestSuite.h>
 
 #include <utility>
@@ -47,10 +47,8 @@ struct eData {
 };
 
 MatrixWorkspace_sptr createWorkspace(size_t nspec, size_t maxt) {
-  MatrixWorkspace_sptr ws =
-      WorkspaceCreationHelper::create2DWorkspaceFromFunction(
-          yData(), static_cast<int>(nspec), 0.0, 10.0,
-          10.0 * (1.0 / static_cast<double>(maxt)), true, eData());
+  MatrixWorkspace_sptr ws = WorkspaceCreationHelper::create2DWorkspaceFromFunction(
+      yData(), static_cast<int>(nspec), 0.0, 10.0, 10.0 * (1.0 / static_cast<double>(maxt)), true, eData());
   ws->setYUnit("Asymmetry");
   return ws;
 }
@@ -70,8 +68,7 @@ void genData() {
 }
 
 ITableWorkspace_sptr genTable() {
-  Mantid::API::ITableWorkspace_sptr table =
-      Mantid::API::WorkspaceFactory::Instance().createTable();
+  Mantid::API::ITableWorkspace_sptr table = Mantid::API::WorkspaceFactory::Instance().createTable();
   table->addColumn("double", "norm");
   table->addColumn("str", "name");
   table->addColumn("str", "method");
@@ -92,10 +89,8 @@ ITableWorkspace_sptr genTable() {
   return table;
 }
 
-IAlgorithm_sptr setUpFuncAlg(const std::vector<std::string> &wsNames,
-                             const IFunction_sptr &func) {
-  IAlgorithm_sptr asymmAlg = AlgorithmManager::Instance().create(
-      "ConvertFitFunctionForMuonTFAsymmetry");
+IAlgorithm_sptr setUpFuncAlg(const std::vector<std::string> &wsNames, const IFunction_sptr &func) {
+  auto asymmAlg = AlgorithmManager::Instance().create("ConvertFitFunctionForMuonTFAsymmetry");
   asymmAlg->initialize();
   asymmAlg->setChild(true);
   asymmAlg->setProperty("WorkspaceList", wsNames);
@@ -106,9 +101,8 @@ IAlgorithm_sptr setUpFuncAlg(const std::vector<std::string> &wsNames,
 }
 
 IFunction_sptr genSingleFunc(const std::vector<std::string> &wsNames) {
-  IFunction_sptr func = FunctionFactory::Instance().createInitialized(
-      "name=GausOsc,Frequency=3.0");
-  IAlgorithm_sptr alg = setUpFuncAlg(std::move(wsNames), func);
+  IFunction_sptr func = FunctionFactory::Instance().createInitialized("name=GausOsc,Frequency=3.0");
+  auto alg = setUpFuncAlg(std::move(wsNames), func);
   alg->execute();
   IFunction_sptr funcOut = alg->getProperty("OutputFunction");
   return funcOut;
@@ -118,21 +112,17 @@ IFunction_sptr genDoubleFunc(const std::vector<std::string> &wsNames) {
   std::string multiFuncString = "composite=MultiDomainFunction,NumDeriv=1;";
   multiFuncString += "name=GausOsc,$domains=i,Frequency=3.0;";
   multiFuncString += "name=GausOsc,$domains=i,Frequency=3.0;";
-  IFunction_sptr func =
-      FunctionFactory::Instance().createInitialized(multiFuncString);
-  IAlgorithm_sptr alg = setUpFuncAlg(std::move(wsNames), func);
+  IFunction_sptr func = FunctionFactory::Instance().createInitialized(multiFuncString);
+  auto alg = setUpFuncAlg(std::move(wsNames), func);
   alg->execute();
   IFunction_sptr funcOut = alg->getProperty("OutputFunction");
   std::cout << funcOut << std::endl;
   return funcOut;
 }
 
-IAlgorithm_sptr setUpAlg(ITableWorkspace_sptr &table,
-                         const IFunction_sptr &func,
-                         const std::vector<std::string> &wsNamesNorm,
-                         const std::vector<std::string> &wsOut) {
-  IAlgorithm_sptr asymmAlg =
-      AlgorithmManager::Instance().create("CalculateMuonAsymmetry");
+IAlgorithm_sptr setUpAlg(ITableWorkspace_sptr &table, const IFunction_sptr &func,
+                         const std::vector<std::string> &wsNamesNorm, const std::vector<std::string> &wsOut) {
+  auto asymmAlg = AlgorithmManager::Instance().create("CalculateMuonAsymmetry");
   asymmAlg->initialize();
   asymmAlg->setChild(true);
   asymmAlg->setProperty("NormalizationTable", table);
@@ -151,18 +141,10 @@ class CalculateMuonAsymmetryTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static CalculateMuonAsymmetryTest *createSuite() {
-    return new CalculateMuonAsymmetryTest();
-  }
+  static CalculateMuonAsymmetryTest *createSuite() { return new CalculateMuonAsymmetryTest(); }
   static void destroySuite(CalculateMuonAsymmetryTest *suite) { delete suite; }
 
   CalculateMuonAsymmetryTest() { FrameworkManager::Instance(); }
-
-  void testInit() {
-    // IAlgorithm_sptr alg = setUpAlg();
-
-    // TS_ASSERT(alg->isInitialized());
-  }
 
   void test_Execute() {
 
@@ -176,8 +158,8 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg->execute());
     TS_ASSERT(alg->isExecuted());
     clearADS();
-    // MatrixWorkspace_sptr outWS = alg->getProperty("OutputWorkspace");
   }
+
   void test_singleFit() {
 
     genData();
@@ -186,14 +168,12 @@ public:
     auto func = genSingleFunc(wsNames);
     auto table = genTable();
 
-    IAlgorithm_sptr alg = setUpAlg(table, func, wsNames, wsOut);
+    auto alg = setUpAlg(table, func, wsNames, wsOut);
     TS_ASSERT_THROWS_NOTHING(alg->execute());
     TS_ASSERT(alg->isExecuted());
-    std::vector<std::string> output =
-        alg->getProperty("ReNormalizedWorkspaceList");
+    std::vector<std::string> output = alg->getProperty("ReNormalizedWorkspaceList");
 
-    MatrixWorkspace_sptr outWS =
-        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(output[0]);
+    MatrixWorkspace_sptr outWS = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(output[0]);
 
     double delta = 0.0001;
 
@@ -223,7 +203,7 @@ public:
     auto func = genSingleFunc(wsNames);
     auto table = genTable();
 
-    IAlgorithm_sptr alg = setUpAlg(table, func, wsNames, wsOut);
+    auto alg = setUpAlg(table, func, wsNames, wsOut);
     alg->setProperty("StartX", 10.);
     alg->setProperty("EndX", 1.);
     TS_ASSERT_THROWS(alg->execute(), const std::runtime_error &);
@@ -266,14 +246,12 @@ public:
     auto func = genSingleFunc(wsNames);
     auto table = genTable();
 
-    IAlgorithm_sptr alg = setUpAlg(table, func, wsNames, wsOut);
+    auto alg = setUpAlg(table, func, wsNames, wsOut);
     TS_ASSERT_THROWS_NOTHING(alg->execute());
     TS_ASSERT(alg->isExecuted());
-    std::vector<std::string> output =
-        alg->getProperty("ReNormalizedWorkspaceList");
+    std::vector<std::string> output = alg->getProperty("ReNormalizedWorkspaceList");
 
-    MatrixWorkspace_sptr outWS =
-        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(output[0]);
+    MatrixWorkspace_sptr outWS = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(output[0]);
 
     TS_ASSERT_EQUALS(outWS->YUnitLabel(), "Asymmetry");
   }
@@ -287,17 +265,14 @@ public:
     auto func = genDoubleFunc(wsNames);
     auto table = genTable();
 
-    IAlgorithm_sptr alg = setUpAlg(table, func, wsNames, wsOut);
+    auto alg = setUpAlg(table, func, wsNames, wsOut);
 
     TS_ASSERT_THROWS_NOTHING(alg->execute());
     TS_ASSERT(alg->isExecuted());
-    std::vector<std::string> output =
-        alg->getProperty("ReNormalizedWorkspaceList");
+    std::vector<std::string> output = alg->getProperty("ReNormalizedWorkspaceList");
 
     for (int j = 0; j < 2; j++) {
-      MatrixWorkspace_sptr outWS =
-          AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-              output[j]);
+      MatrixWorkspace_sptr outWS = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(output[j]);
 
       double delta = 0.0001;
 
@@ -320,15 +295,55 @@ public:
 
     clearADS();
   }
+
+  void test_simultaneous_fit_with_double_pulse_mode_enabled() {
+    genData();
+    // need the 2 here to get multi func
+    std::vector<std::string> wsNames = {"ws1", "ws2"};
+    std::vector<std::string> wsOut = {"ws3", "ws4"};
+    auto func = genDoubleFunc(wsNames);
+    auto table = genTable();
+
+    auto alg = setUpAlg(table, func, wsNames, wsOut);
+    alg->setProperty("EnableDoublePulse", true);
+    alg->setProperty("PulseOffset", 0.33);
+    alg->setProperty("FirstPulseWeight", 0.5);
+
+    TS_ASSERT_THROWS_NOTHING(alg->execute());
+    TS_ASSERT(alg->isExecuted());
+    std::vector<std::string> output = alg->getProperty("ReNormalizedWorkspaceList");
+
+    for (int j = 0; j < 2; j++) {
+      MatrixWorkspace_sptr outWS = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(output[j]);
+
+      double delta = 0.0001;
+
+      TS_ASSERT_DELTA(table->Double(j + 2, 0), 3.4, delta);
+      TS_ASSERT_EQUALS(table->String(j + 2, 1), output[j]);
+      TS_ASSERT_EQUALS(table->String(j + 2, 2), "Calculated");
+
+      TS_ASSERT_DELTA(outWS->x(0)[10], 0.5, delta);
+      TS_ASSERT_DELTA(outWS->x(0)[40], 2.0, delta);
+      TS_ASSERT_DELTA(outWS->x(0)[100], 5.0, delta);
+
+      TS_ASSERT_DELTA(outWS->y(0)[10], 0.1031, delta);
+      TS_ASSERT_DELTA(outWS->y(0)[40], -0.1250, delta);
+      TS_ASSERT_DELTA(outWS->y(0)[100], -0.0065, delta);
+
+      TS_ASSERT_DELTA(outWS->e(0)[10], 0.0015, delta);
+      TS_ASSERT_DELTA(outWS->e(0)[40], 0.0015, delta);
+      TS_ASSERT_DELTA(outWS->e(0)[100], 0.0015, delta);
+    }
+    clearADS();
+  }
 };
 
 class CalculateMuonAsymmetryTestPerformance : public CxxTest::TestSuite {
 public:
-  // This pair of boilerplate methods prevent the suite being created statically
-  // This means the constructor isn't called when running other tests
-  static CalculateMuonAsymmetryTestPerformance *createSuite() {
-    return new CalculateMuonAsymmetryTestPerformance();
-  }
+  // This pair of boilerplate methods prevent the suite being created
+  // statically This means the constructor isn't called when running other
+  // tests
+  static CalculateMuonAsymmetryTestPerformance *createSuite() { return new CalculateMuonAsymmetryTestPerformance(); }
   static void destroySuite(CalculateMuonAsymmetryTestPerformance *suite) {
     AnalysisDataService::Instance().clear();
     delete suite;

@@ -10,8 +10,7 @@
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidKernel/Logger.h"
 
-namespace Mantid {
-namespace DataObjects {
+namespace Mantid::DataObjects {
 
 DECLARE_WORKSPACE(MementoTableWorkspace)
 
@@ -21,9 +20,8 @@ Determines whether the provided column has the same name and type as expected.
 @param candidate : ref to column to check
 @return true if all expectations are met.
 */
-bool MementoTableWorkspace::expectedColumn(
-    const Mantid::API::Column_const_sptr &expected,
-    const Mantid::API::Column_const_sptr &candidate) {
+bool MementoTableWorkspace::expectedColumn(const Mantid::API::Column_const_sptr &expected,
+                                           const Mantid::API::Column_const_sptr &candidate) {
   if (expected->name() != candidate->name()) {
     return false;
   } else if (expected->type() != candidate->type()) {
@@ -41,8 +39,7 @@ MementoTableWorkspace schema.
 table workspace.
 @return true if it is a MementoTableWorkspace.
 */
-bool MementoTableWorkspace::isMementoWorkspace(
-    const Mantid::API::ITableWorkspace &candidate) {
+bool MementoTableWorkspace::isMementoWorkspace(const Mantid::API::ITableWorkspace &candidate) {
   MementoTableWorkspace theStandard;
   size_t nCols = theStandard.columnCount();
   if (nCols != candidate.columnCount()) {
@@ -57,8 +54,7 @@ bool MementoTableWorkspace::isMementoWorkspace(
 }
 
 /// Constructor
-MementoTableWorkspace::MementoTableWorkspace(int nRows)
-    : TableWorkspace(nRows) {
+MementoTableWorkspace::MementoTableWorkspace(int nRows) : TableWorkspace(nRows) {
   // Configure the columns as part of the construction.
   this->addColumn("str", "WSName");
   this->addColumn("str", "ISName");
@@ -72,5 +68,4 @@ MementoTableWorkspace::MementoTableWorkspace(int nRows)
   this->addColumn("double", "gamma");
   this->addColumn("str", "Status");
 }
-} // namespace DataObjects
-} // namespace Mantid
+} // namespace Mantid::DataObjects

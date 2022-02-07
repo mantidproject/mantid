@@ -17,9 +17,8 @@ using namespace testing;
 
 namespace boost {
 template <class CharType, class CharTrait>
-std::basic_ostream<CharType, CharTrait> &
-operator<<(std::basic_ostream<CharType, CharTrait> &out,
-           optional<double> const &maybe) {
+std::basic_ostream<CharType, CharTrait> &operator<<(std::basic_ostream<CharType, CharTrait> &out,
+                                                    optional<double> const &maybe) {
   if (maybe)
     out << maybe;
   return out;
@@ -29,20 +28,17 @@ operator<<(std::basic_ostream<CharType, CharTrait> &out,
 class PeakTransformHKLTest : public CxxTest::TestSuite {
 public:
   void test_throws_with_unknown_xLabel() {
-    TS_ASSERT_THROWS(PeakTransformHKL("?", "K (Lattice)"),
-                     PeakTransformException &);
+    TS_ASSERT_THROWS(PeakTransformHKL("?", "K (Lattice)"), PeakTransformException &);
   }
 
   void test_throws_with_unknown_yLabel() {
-    TS_ASSERT_THROWS(PeakTransformHKL("H (Lattice)", "?"),
-                     PeakTransformException &);
+    TS_ASSERT_THROWS(PeakTransformHKL("H (Lattice)", "?"), PeakTransformException &);
   }
 
   void test_maps_to_hkl_on_ipeak() {
     // Create a peak.
     MockIPeak mockPeak;
-    EXPECT_CALL(mockPeak, getHKL())
-        .WillOnce(Return(V3D())); // Should RUN getHKL!
+    EXPECT_CALL(mockPeak, getHKL()).WillOnce(Return(V3D())); // Should RUN getHKL!
 
     // Use the transform on the peak.
     PeakTransformHKL transform("H", "K");
@@ -227,8 +223,7 @@ public:
     PeakTransformHKL A("H", "L");
     PeakTransform_sptr clone = A.clone();
 
-    TSM_ASSERT("Clone product is the wrong type.",
-               std::dynamic_pointer_cast<PeakTransformHKL>(clone) != nullptr);
+    TSM_ASSERT("Clone product is the wrong type.", std::dynamic_pointer_cast<PeakTransformHKL>(clone) != nullptr);
 
     // Test indirectly via what the transformations produce.
     V3D productA = A.transform(V3D(0, 1, 2));
@@ -243,16 +238,14 @@ public:
   // Test the factory generated about this type.
   void test_factory() {
     // Create the benchmark.
-    PeakTransform_sptr expectedProduct =
-        std::make_shared<PeakTransformHKL>("H", "K");
+    PeakTransform_sptr expectedProduct = std::make_shared<PeakTransformHKL>("H", "K");
 
     // Use the factory to create a product.
     PeakTransformHKLFactory factory;
     PeakTransform_sptr product = factory.createDefaultTransform();
 
     // Check the type of the output product object.
-    TSM_ASSERT("Factory product is the wrong type.",
-               std::dynamic_pointer_cast<PeakTransformHKL>(product) != nullptr);
+    TSM_ASSERT("Factory product is the wrong type.", std::dynamic_pointer_cast<PeakTransformHKL>(product) != nullptr);
 
     // Now test that the benchmark and the factory product are equivalent.
     // Test indirectly via what the transformations produce.

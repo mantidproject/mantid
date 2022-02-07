@@ -26,13 +26,15 @@ namespace Kernel {
    instance
     of which is called, once for each filename.
 */
-class MANTID_KERNEL_DLL MultiFileValidator
-    : public TypedValidator<std::vector<std::vector<std::string>>> {
+class MANTID_KERNEL_DLL MultiFileValidator : public TypedValidator<std::vector<std::vector<std::string>>> {
 public:
   MultiFileValidator();
+  explicit MultiFileValidator(const std::vector<std::string> &extensions, bool testFilesExist = true);
+
+  // Copy constructor / operator
+  friend void swap(MultiFileValidator &obj1, MultiFileValidator &obj2);
   MultiFileValidator(const MultiFileValidator &mfv);
-  explicit MultiFileValidator(const std::vector<std::string> &extensions,
-                              bool testFilesExist = true);
+  MultiFileValidator &operator=(MultiFileValidator);
 
   IValidator_sptr clone() const override;
 
@@ -45,8 +47,7 @@ protected:
 
 private:
   /// Returns an error if at least one of the files is not valid, else "".
-  std::string checkValidity(
-      const std::vector<std::vector<std::string>> &values) const override;
+  std::string checkValidity(const std::vector<std::vector<std::string>> &values) const override;
 };
 
 } // namespace Kernel

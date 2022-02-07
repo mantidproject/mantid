@@ -12,7 +12,7 @@
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/DataProcessorAlgorithm.h"
 #include "MantidAPI/NotebookBuilder.h"
-#include "MantidTestHelpers/FakeObjects.h"
+#include "MantidFrameworkTestHelpers/FakeObjects.h"
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
@@ -27,15 +27,9 @@ class NotebookBuilderTest : public CxxTest::TestSuite {
     int version() const override { return 1; }
     const std::string category() const override { return "Cat;Leopard;Mink"; }
     const std::string summary() const override { return "SubAlgorithm"; }
-    const std::string workspaceMethodName() const override {
-      return "methodname";
-    }
-    const std::string workspaceMethodOnTypes() const override {
-      return "MatrixWorkspace;ITableWorkspace";
-    }
-    const std::string workspaceMethodInputProperty() const override {
-      return "InputWorkspace";
-    }
+    const std::string workspaceMethodName() const override { return "methodname"; }
+    const std::string workspaceMethodOnTypes() const override { return "MatrixWorkspace;ITableWorkspace"; }
+    const std::string workspaceMethodInputProperty() const override { return "InputWorkspace"; }
 
     void init() override {
       declareProperty("PropertyA", "Hello");
@@ -56,15 +50,9 @@ class NotebookBuilderTest : public CxxTest::TestSuite {
     int version() const override { return 1; }
     const std::string category() const override { return "Cat;Leopard;Mink"; }
     const std::string summary() const override { return "BasicAlgorithm"; }
-    const std::string workspaceMethodName() const override {
-      return "methodname";
-    }
-    const std::string workspaceMethodOnTypes() const override {
-      return "MatrixWorkspace;ITableWorkspace";
-    }
-    const std::string workspaceMethodInputProperty() const override {
-      return "InputWorkspace";
-    }
+    const std::string workspaceMethodName() const override { return "methodname"; }
+    const std::string workspaceMethodOnTypes() const override { return "MatrixWorkspace;ITableWorkspace"; }
+    const std::string workspaceMethodInputProperty() const override { return "InputWorkspace"; }
 
     void init() override {
       declareProperty("PropertyA", "Hello");
@@ -90,15 +78,9 @@ class NotebookBuilderTest : public CxxTest::TestSuite {
     int version() const override { return 1; }
     const std::string category() const override { return "Cat;Leopard;Mink"; }
     const std::string summary() const override { return "NestedAlgorithm"; }
-    const std::string workspaceMethodName() const override {
-      return "methodname";
-    }
-    const std::string workspaceMethodOnTypes() const override {
-      return "MatrixWorkspace;ITableWorkspace";
-    }
-    const std::string workspaceMethodInputProperty() const override {
-      return "InputWorkspace";
-    }
+    const std::string workspaceMethodName() const override { return "methodname"; }
+    const std::string workspaceMethodOnTypes() const override { return "MatrixWorkspace;ITableWorkspace"; }
+    const std::string workspaceMethodInputProperty() const override { return "InputWorkspace"; }
 
     void init() override {
       declareProperty("PropertyA", 13);
@@ -128,21 +110,13 @@ class NotebookBuilderTest : public CxxTest::TestSuite {
     int version() const override { return 1; }
     const std::string category() const override { return "Cat;Leopard;Mink"; }
     const std::string summary() const override { return "TopLevelAlgorithm"; }
-    const std::string workspaceMethodName() const override {
-      return "methodname";
-    }
-    const std::string workspaceMethodOnTypes() const override {
-      return "Workspace;MatrixWorkspace;ITableWorkspace";
-    }
-    const std::string workspaceMethodInputProperty() const override {
-      return "InputWorkspace";
-    }
+    const std::string workspaceMethodName() const override { return "methodname"; }
+    const std::string workspaceMethodOnTypes() const override { return "Workspace;MatrixWorkspace;ITableWorkspace"; }
+    const std::string workspaceMethodInputProperty() const override { return "InputWorkspace"; }
 
     void init() override {
-      declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
-          "InputWorkspace", "", Direction::Input));
-      declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
-          "OutputWorkspace", "", Direction::Output));
+      declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>("InputWorkspace", "", Direction::Input));
+      declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>("OutputWorkspace", "", Direction::Output));
     }
     void exec() override {
       auto alg = createChildAlgorithm("NestedAlgorithm");
@@ -153,8 +127,7 @@ class NotebookBuilderTest : public CxxTest::TestSuite {
       alg->initialize();
       alg->execute();
 
-      std::shared_ptr<MatrixWorkspace> output =
-          std::make_shared<WorkspaceTester>();
+      std::shared_ptr<MatrixWorkspace> output = std::make_shared<WorkspaceTester>();
       setProperty("OutputWorkspace", output);
     }
   };
@@ -169,20 +142,16 @@ public:
   }
 
   void tearDown() override {
-    Mantid::API::AlgorithmFactory::Instance().unsubscribe("TopLevelAlgorithm",
-                                                          1);
+    Mantid::API::AlgorithmFactory::Instance().unsubscribe("TopLevelAlgorithm", 1);
     Mantid::API::AlgorithmFactory::Instance().unsubscribe("NestedAlgorithm", 1);
     Mantid::API::AlgorithmFactory::Instance().unsubscribe("BasicAlgorithm", 1);
     Mantid::API::AlgorithmFactory::Instance().unsubscribe("SubAlgorithm", 1);
   }
 
   void test_Build_Simple() {
-    std::string result = "               \"input\" : "
-                         "\"TopLevelAlgorithm(InputWorkspace='test_input_"
-                         "workspace', "
-                         "OutputWorkspace='test_output_workspace')\",";
-    std::shared_ptr<WorkspaceTester> input =
-        std::make_shared<WorkspaceTester>();
+    std::string result = "     \"input\" : \"TopLevelAlgorithm(InputWorkspace=\'test_input_workspace\', "
+                         "OutputWorkspace=\'test_output_workspace\')\",";
+    std::shared_ptr<WorkspaceTester> input = std::make_shared<WorkspaceTester>();
     AnalysisDataService::Instance().addOrReplace("test_input_workspace", input);
 
     auto alg = AlgorithmFactory::Instance().create("TopLevelAlgorithm", 1);
@@ -192,13 +161,11 @@ public:
     alg->setPropertyValue("OutputWorkspace", "test_output_workspace");
     alg->execute();
 
-    auto ws = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-        "test_output_workspace");
+    auto ws = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("test_output_workspace");
     auto wsHist = ws->getHistory();
 
     NotebookBuilder builder(wsHist.createView());
-    std::string notebookText =
-        builder.build("Workspace Name", "Workspace Title", "Workspace Comment");
+    std::string notebookText = builder.build("Workspace Name", "Workspace Title", "Workspace Comment");
 
     std::vector<std::string> notebookLines;
     std::string line;
@@ -207,21 +174,17 @@ public:
       notebookLines.emplace_back(line);
 
     // Check that the expected line does appear in the output
-    TS_ASSERT(std::find(notebookLines.cbegin(), notebookLines.cend(), result) !=
-              notebookLines.cend())
+    TS_ASSERT(std::find(notebookLines.cbegin(), notebookLines.cend(), result) != notebookLines.cend())
 
     AnalysisDataService::Instance().remove("test_output_workspace");
     AnalysisDataService::Instance().remove("test_input_workspace");
   }
 
   void test_Build_Unrolled() {
-    std::string result_markdown =
-        R"(               "source" : "Child algorithms of TopLevelAlgorithm")";
-    std::string result_code =
-        "               \"input\" : \"BasicAlgorithm(PropertyA='FirstOne')\",";
+    std::string result_markdown = "     \"source\" : \"Child algorithms of TopLevelAlgorithm\"";
+    std::string result_code = "     \"input\" : \"BasicAlgorithm(PropertyA=\'FirstOne\')\",";
 
-    std::shared_ptr<WorkspaceTester> input =
-        std::make_shared<WorkspaceTester>();
+    std::shared_ptr<WorkspaceTester> input = std::make_shared<WorkspaceTester>();
     AnalysisDataService::Instance().addOrReplace("test_input_workspace", input);
 
     auto alg = AlgorithmFactory::Instance().create("TopLevelAlgorithm", 1);
@@ -231,15 +194,13 @@ public:
     alg->setPropertyValue("OutputWorkspace", "test_output_workspace");
     alg->execute();
 
-    auto ws = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-        "test_output_workspace");
+    auto ws = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("test_output_workspace");
     auto wsHist = ws->getHistory();
     auto view = wsHist.createView();
 
     view->unrollAll();
     NotebookBuilder builder(view);
-    std::string notebookText =
-        builder.build(ws->getName(), ws->getTitle(), ws->getComment());
+    std::string notebookText = builder.build(ws->getName(), ws->getTitle(), ws->getComment());
 
     std::vector<std::string> notebookLines;
     std::string line;
@@ -248,23 +209,18 @@ public:
       notebookLines.emplace_back(line);
 
     // Check that the expected lines do appear in the output
-    TS_ASSERT(std::find(notebookLines.cbegin(), notebookLines.cend(),
-                        result_markdown) != notebookLines.cend())
-    TS_ASSERT(std::find(notebookLines.cbegin(), notebookLines.cend(),
-                        result_code) != notebookLines.cend())
+    TS_ASSERT(std::find(notebookLines.cbegin(), notebookLines.cend(), result_markdown) != notebookLines.cend())
+    TS_ASSERT(std::find(notebookLines.cbegin(), notebookLines.cend(), result_code) != notebookLines.cend())
 
     AnalysisDataService::Instance().remove("test_output_workspace");
     AnalysisDataService::Instance().remove("test_input_workspace");
   }
 
   void test_Partially_Unrolled() {
-    std::string result_markdown =
-        R"(               "source" : "Child algorithms of TopLevelAlgorithm")";
-    std::string result_code =
-        "               \"input\" : \"BasicAlgorithm(PropertyA='FirstOne')\",";
+    std::string result_markdown = "     \"source\" : \"Child algorithms of TopLevelAlgorithm\"";
+    std::string result_code = "     \"input\" : \"BasicAlgorithm(PropertyA=\'FirstOne\')\",";
 
-    std::shared_ptr<WorkspaceTester> input =
-        std::make_shared<WorkspaceTester>();
+    std::shared_ptr<WorkspaceTester> input = std::make_shared<WorkspaceTester>();
     AnalysisDataService::Instance().addOrReplace("test_input_workspace", input);
 
     auto alg = AlgorithmFactory::Instance().create("TopLevelAlgorithm", 1);
@@ -280,8 +236,7 @@ public:
     alg->setPropertyValue("OutputWorkspace", "test_output_workspace");
     alg->execute();
 
-    auto ws = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-        "test_output_workspace");
+    auto ws = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("test_output_workspace");
     auto wsHist = ws->getHistory();
     auto view = wsHist.createView();
 
@@ -290,8 +245,7 @@ public:
     view->unroll(5);
 
     NotebookBuilder builder(view);
-    std::string notebookText =
-        builder.build(ws->getName(), ws->getTitle(), ws->getComment());
+    std::string notebookText = builder.build(ws->getName(), ws->getTitle(), ws->getComment());
 
     std::vector<std::string> notebookLines;
     std::string line;
@@ -300,10 +254,8 @@ public:
       notebookLines.emplace_back(line);
 
     // Check that the expected lines do appear in the output
-    TS_ASSERT(std::find(notebookLines.cbegin(), notebookLines.cend(),
-                        result_markdown) != notebookLines.cend())
-    TS_ASSERT(std::find(notebookLines.cbegin(), notebookLines.cend(),
-                        result_code) != notebookLines.cend())
+    TS_ASSERT(std::find(notebookLines.cbegin(), notebookLines.cend(), result_markdown) != notebookLines.cend())
+    TS_ASSERT(std::find(notebookLines.cbegin(), notebookLines.cend(), result_code) != notebookLines.cend())
 
     AnalysisDataService::Instance().remove("test_output_workspace");
     AnalysisDataService::Instance().remove("test_input_workspace");
@@ -312,14 +264,10 @@ public:
   void test_Build_Simple_with_backslash() {
     // checks that property values with \ get prefixed with r, eg.
     // filename=r'c:\test\data.txt'
-    std::string result = "               \"input\" : "
-                         "\"TopLevelAlgorithm(InputWorkspace=r'test_inp\\\\ut_"
-                         "workspace', "
-                         "OutputWorkspace='test_output_workspace')\",";
-    std::shared_ptr<WorkspaceTester> input =
-        std::make_shared<WorkspaceTester>();
-    AnalysisDataService::Instance().addOrReplace("test_inp\\ut_workspace",
-                                                 input);
+    std::string result = "     \"input\" : \"TopLevelAlgorithm(InputWorkspace=r\'test_inp\\\\ut_workspace\', "
+                         "OutputWorkspace=\'test_output_workspace\')\",";
+    std::shared_ptr<WorkspaceTester> input = std::make_shared<WorkspaceTester>();
+    AnalysisDataService::Instance().addOrReplace("test_inp\\ut_workspace", input);
 
     auto alg = AlgorithmFactory::Instance().create("TopLevelAlgorithm", 1);
     alg->initialize();
@@ -328,13 +276,11 @@ public:
     alg->setPropertyValue("OutputWorkspace", "test_output_workspace");
     alg->execute();
 
-    auto ws = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-        "test_output_workspace");
+    auto ws = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("test_output_workspace");
     auto wsHist = ws->getHistory();
 
     NotebookBuilder builder(wsHist.createView());
-    std::string notebookText =
-        builder.build(ws->getName(), ws->getTitle(), ws->getComment());
+    std::string notebookText = builder.build(ws->getName(), ws->getTitle(), ws->getComment());
 
     std::vector<std::string> notebookLines;
     std::string line;
@@ -343,8 +289,7 @@ public:
       notebookLines.emplace_back(line);
 
     // Check that the expected line does appear in the output
-    TS_ASSERT(std::find(notebookLines.cbegin(), notebookLines.cend(), result) !=
-              notebookLines.cend())
+    TS_ASSERT(std::find(notebookLines.cbegin(), notebookLines.cend(), result) != notebookLines.cend())
 
     AnalysisDataService::Instance().remove("test_output_workspace");
     AnalysisDataService::Instance().remove("test_inp\\ut_workspace");

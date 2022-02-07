@@ -21,15 +21,15 @@ This documentation assumes the user is familiar with the concepts
 behind diffraction reduction and understand how cycles at ISIS work.
 It also assumes the user has a basic knowledge of Python.
 
-This documentation also avoids discussing the implementation or design of 
+This documentation also avoids discussing the implementation or design of
 the scripts as it is beyond the scope of this documentation.
 
 .. _prerequisites_isis-powder-diffraction-ref:
 
-Prerequisites 
+Prerequisites
 ---------------
 Users must setup their input directories so Mantid can find the input files. Instructions
-on completing this are located `here <http://www.mantidproject.org/ManageUserDirectories>`_.
+on completing this are located :ref:`here <ManageUserDirectories>`.
 *Note: Mantid will not search folders recursively each folder must be added*
 
 Additionally *Search Data Archive* can be ticked if the device is located on the ISIS
@@ -40,7 +40,7 @@ network to automatically handle finding the files whilst it is on the network.
 Tutorials
 ----------
 The links below will take you to the relevant part of a tutorial.
-These will help you setup your scripts and get you familiar with 
+These will help you setup your scripts and get you familiar with
 their usage.
 
 :ref:`isis-powder-diffraction-Tutorials-ref`

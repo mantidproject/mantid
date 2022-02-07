@@ -7,6 +7,7 @@ set(TEST_PY_FILES
     convert_to_q_test.py
     data_test.py
     state_functions_test.py
+    state_instrument_info_test.py
     scale_test.py
     mask_test.py
     move_test.py
@@ -15,12 +16,11 @@ set(TEST_PY_FILES
     slice_event_test.py
     save_test.py
     state_test.py
-    StateRunDataBuilderTest.py
     wavelength_test.py
-    wavelength_and_pixel_adjustment_test.py)
+    wavelength_and_pixel_adjustment_test.py
+)
 
 check_tests_valid(${CMAKE_CURRENT_SOURCE_DIR} ${TEST_PY_FILES})
 
 # Prefix for test name=PythonAlgorithms
-pyunittest_add_test(${CMAKE_CURRENT_SOURCE_DIR} python.SANS.state
-                    ${TEST_PY_FILES})
+pyunittest_add_test(${CMAKE_CURRENT_SOURCE_DIR} python.SANS.state ${TEST_PY_FILES})

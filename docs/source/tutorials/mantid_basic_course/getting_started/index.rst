@@ -1,18 +1,18 @@
-.. _getting_started_index: 
+.. _getting_started_index:
 
 ===============
 Getting Started
 ===============
 
-.. toctree:: 
-   :hidden: 
-   :glob: 
+.. toctree::
+   :hidden:
+   :glob:
    :maxdepth: 1
 
    getting_started
    main_window
 
-**Sections** 
+**Sections**
 
 * :ref:`getting started`
 * :ref:`main_window`

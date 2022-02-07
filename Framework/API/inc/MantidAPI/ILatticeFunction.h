@@ -27,17 +27,14 @@ class MANTID_API_DLL ILatticeFunction : public FunctionParameterDecorator {
 public:
   ILatticeFunction();
 
-  void function(const FunctionDomain &domain,
-                FunctionValues &values) const override;
+  void function(const FunctionDomain &domain, FunctionValues &values) const override;
   void functionDeriv(const FunctionDomain &domain, Jacobian &jacobian) override;
 
   /// Function that should calculate d-values for the HKLs provided in the
   /// domain.
-  virtual void functionLattice(const LatticeDomain &latticeDomain,
-                               FunctionValues &values) const = 0;
+  virtual void functionLattice(const LatticeDomain &latticeDomain, FunctionValues &values) const = 0;
 
-  virtual void functionDerivLattice(const LatticeDomain &latticeDomain,
-                                    Jacobian &jacobian);
+  virtual void functionDerivLattice(const LatticeDomain &latticeDomain, Jacobian &jacobian);
 
   /// A string that names the crystal system.
   virtual void setLatticeSystem(const std::string &crystalSystem) = 0;

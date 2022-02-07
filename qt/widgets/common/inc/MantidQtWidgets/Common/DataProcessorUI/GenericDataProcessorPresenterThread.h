@@ -25,14 +25,12 @@ class GenericDataProcessorPresenterThread : public QThread {
 
 public:
   /// Constructor
-  GenericDataProcessorPresenterThread(QObject *parent, QObject *worker)
-      : QThread(parent), m_worker(worker) {
+  GenericDataProcessorPresenterThread(QObject *parent, QObject *worker) : QThread(parent), m_worker(worker) {
     // Establish connections between parent and worker
     connect(this, SIGNAL(started()), worker, SLOT(startWorker()));
     connect(worker, SIGNAL(finished(int)), this, SLOT(workerFinished(int)));
     // Early deletion of thread and worker
-    connect(this, SIGNAL(finished()), this, SLOT(deleteLater()),
-            Qt::DirectConnection);
+    connect(this, SIGNAL(finished()), this, SLOT(deleteLater()), Qt::DirectConnection);
 
     worker->moveToThread(this);
   }

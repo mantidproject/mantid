@@ -14,7 +14,8 @@ It supports both QENS and FWS types of data, both with or without mirror sense.
 The number of active single detectors, and their actual positions are read from the `.nxs` file overriding the ones in the instrument definition.
 The output workspace will be dimensionless containing the number of counts per energy channel for each detector pixel.
 It will have `empty` x-axis unit.
-
+The `LoadDetectors` allows to choose which data to load for IN16B: those acquired by the spectrometer,
+or those from the diffractometer.
 Usage
 -----
 

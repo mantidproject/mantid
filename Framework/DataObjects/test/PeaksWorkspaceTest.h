@@ -12,21 +12,18 @@
 #include "MantidAPI/Run.h"
 #include "MantidAPI/Sample.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
+#include "MantidFrameworkTestHelpers/ComponentCreationHelper.h"
+#include "MantidFrameworkTestHelpers/NexusTestHelper.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
 #include "MantidGeometry/Instrument/Goniometer.h"
 #include "MantidKernel/PhysicalConstants.h"
 #include "MantidKernel/SpecialCoordinateSystem.h"
 #include "MantidKernel/Strings.h"
-#include "MantidKernel/System.h"
-#include "MantidKernel/Timer.h"
 #include "MantidKernel/V3D.h"
-#include "MantidTestHelpers/ComponentCreationHelper.h"
-#include "MantidTestHelpers/NexusTestHelper.h"
 #include "PropertyManagerHelper.h"
 #include <cmath>
 #include <cxxtest/TestSuite.h>
 #include <fstream>
-#include <stdio.h>
 
 #include <Poco/File.h>
 
@@ -35,33 +32,40 @@ using namespace Mantid::API;
 using namespace Mantid::Geometry;
 using namespace Mantid::Kernel;
 
+/** Build a test PeaksWorkspace with one peak (others peaks can be added)
+ *
+ * @return PeaksWorkspace
+ */
+PeaksWorkspace_sptr buildPW() {
+  Instrument_sptr inst = ComponentCreationHelper::createTestInstrumentRectangular2(1, 10);
+  inst->setName("SillyInstrument");
+  auto pw = std::make_shared<PeaksWorkspace>();
+  pw->setInstrument(inst);
+  std::string val = "value";
+  pw->mutableRun().addProperty("TestProp", val);
+  Peak p(inst, 1, 3.0);
+  pw->addPeak(p);
+  return pw;
+}
+
 class PeaksWorkspaceTest : public CxxTest::TestSuite {
+private:
+  class TestablePeaksWorkspace : public PeaksWorkspace {
+  public:
+    TestablePeaksWorkspace(const PeaksWorkspace &other) : PeaksWorkspace(other) {}
+
+    using ExperimentInfo::numberOfDetectorGroups;
+  };
+
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
   static PeaksWorkspaceTest *createSuite() { return new PeaksWorkspaceTest(); }
   static void destroySuite(PeaksWorkspaceTest *suite) { delete suite; }
 
-  /** Build a test PeaksWorkspace with one peak (others peaks can be added)
-   *
-   * @return PeaksWorkspace
-   */
-  PeaksWorkspace_sptr buildPW() {
-    Instrument_sptr inst =
-        ComponentCreationHelper::createTestInstrumentRectangular2(1, 10);
-    inst->setName("SillyInstrument");
-    auto pw = PeaksWorkspace_sptr(new PeaksWorkspace);
-    pw->setInstrument(inst);
-    std::string val = "value";
-    pw->mutableRun().addProperty("TestProp", val);
-    Peak p(inst, 1, 3.0);
-    pw->addPeak(p);
-    return pw;
-  }
-
   /** Check that the PeaksWorkspace build by buildPW() is correct */
   void checkPW(const PeaksWorkspace &pw) {
-    TS_ASSERT_EQUALS(pw.columnCount(), 18);
+    TS_ASSERT_EQUALS(pw.columnCount(), 20);
     TS_ASSERT_EQUALS(pw.rowCount(), 1);
     TS_ASSERT_EQUALS(pw.getNumberPeaks(), 1);
     if (pw.getNumberPeaks() != 1)
@@ -77,16 +81,11 @@ public:
     checkPW(*pw);
   }
 
-  class TestablePeaksWorkspace : public PeaksWorkspace {
-  public:
-    TestablePeaksWorkspace(const PeaksWorkspace &other)
-        : PeaksWorkspace(other) {}
-  };
-
   void test_copyConstructor() {
     auto pw = buildPW();
-    auto pw2 = PeaksWorkspace_sptr(new TestablePeaksWorkspace(*pw));
+    auto pw2 = std::make_shared<TestablePeaksWorkspace>(*pw);
     checkPW(*pw2);
+    TS_ASSERT_EQUALS(0, pw2->numberOfDetectorGroups());
   }
 
   void test_clone() {
@@ -95,9 +94,65 @@ public:
     checkPW(*pw2);
   }
 
+  void test_column_access() {
+    auto pw = buildPW();
+    auto &peak0 = pw->getPeak(0);
+    const int runNo(1000), detID(10), row(0), col(1), peakNumber(1);
+    const double h(1.), k(-1.), l(2.), lambda(3.5), energy(6.67789), tof(9733.13), dspacing(2.51539), intensity(2.3),
+        sigInt(0.1), binCount(100), tbar(0.4);
+    const V3D q(-1.79284, 0.0717138, 1.73782);
+    const std::string bankName("bank1");
+
+    peak0.setRunNumber(runNo);
+    peak0.setDetectorID(detID);
+    peak0.setH(h);
+    peak0.setK(k);
+    peak0.setL(l);
+    peak0.setWavelength(lambda);
+    peak0.setFinalEnergy(energy);
+    peak0.setIntensity(intensity);
+    peak0.setSigmaIntensity(sigInt);
+    peak0.setBinCount(binCount);
+    peak0.setPeakNumber(peakNumber);
+    peak0.setAbsorptionWeightedPathLength(tbar);
+
+    auto floatToStr = [](const double d, const int precision = -1) {
+      std::stringstream ss;
+      if (precision >= 0)
+        ss << std::fixed << std::setprecision(precision);
+      ss << d;
+      return ss.str();
+    };
+    auto v3dToStr = [](const V3D &pt) {
+      std::stringstream ss;
+      pt.printSelf(ss);
+      return ss.str();
+    };
+    using std::to_string;
+    // clang-format off
+    const std::array<std::string, 20> expected = {\
+      to_string(runNo), to_string(detID),  floatToStr(h, 2), floatToStr(k, 2),
+      floatToStr(l, 2), floatToStr(lambda), floatToStr(energy), floatToStr(tof, 2), floatToStr(dspacing),
+      floatToStr(intensity), floatToStr(sigInt), floatToStr(intensity/sigInt), floatToStr(binCount), bankName,
+      to_string(row), to_string(col),
+      v3dToStr(q), v3dToStr(q),
+      to_string(peakNumber),
+      floatToStr(tbar)
+    };
+    // clang-format on
+
+    for (int i = 0; i < 20; ++i) {
+      const auto column = pw->getColumn(i);
+      TS_ASSERT_EQUALS(1, column->size());
+      std::stringstream os;
+      column->print(0, os);
+      TSM_ASSERT_EQUALS("Mismatch in column " + column->name(), expected[i], os.str());
+    }
+  }
+
   void test_sort() {
     auto pw = buildPW();
-    Instrument_const_sptr inst = pw->getInstrument();
+    const auto inst = pw->getInstrument();
     Peak p0 = Peak(pw->getPeak(0)); // Peak(inst, 1, 3.0)
     Peak p1(inst, 1, 4.0);
     Peak p2(inst, 1, 5.0);
@@ -148,8 +203,7 @@ public:
     nexusHelper.reopenFile();
 
     // Verify that this test_entry has a peaks_workspace entry
-    TS_ASSERT_THROWS_NOTHING(
-        nexusHelper.file->openGroup("peaks_workspace", "NXentry"));
+    TS_ASSERT_THROWS_NOTHING(nexusHelper.file->openGroup("peaks_workspace", "NXentry"));
 
     // Check detector IDs
     TS_ASSERT_THROWS_NOTHING(nexusHelper.file->openData("column_1"));
@@ -190,8 +244,7 @@ public:
     LogManager_const_sptr props = pw->getLogs();
     std::string existingVal;
 
-    TS_ASSERT_THROWS_NOTHING(
-        existingVal = props->getPropertyValueAsType<std::string>("TestProp"));
+    TS_ASSERT_THROWS_NOTHING(existingVal = props->getPropertyValueAsType<std::string>("TestProp"));
     TS_ASSERT_EQUALS("value", existingVal);
 
     // define local scope;
@@ -199,8 +252,7 @@ public:
       // get mutable pointer to existing values;
       LogManager_sptr mprops = pw->logs();
 
-      TS_ASSERT_THROWS_NOTHING(
-          mprops->addProperty<std::string>("TestProp2", "value2"));
+      TS_ASSERT_THROWS_NOTHING(mprops->addProperty<std::string>("TestProp2", "value2"));
 
       TS_ASSERT(mprops->hasProperty("TestProp2"));
       TS_ASSERT(!props->hasProperty("TestProp2"));
@@ -215,8 +267,7 @@ public:
       // cash
       LogManager_sptr mprops1 = pw->logs();
       // and in ideal world this should cause CowPtr to diverge but it does not
-      TS_ASSERT_THROWS_NOTHING(
-          mprops1->addProperty<std::string>("TestProp1-3", "value1-3"));
+      TS_ASSERT_THROWS_NOTHING(mprops1->addProperty<std::string>("TestProp1-3", "value1-3"));
       TS_ASSERT(mprops1->hasProperty("TestProp1-3"));
       // The changes to pw should not affect pw1
       TS_ASSERT(pw->run().hasProperty("TestProp1-3"));
@@ -227,8 +278,7 @@ public:
       // but this will cause it to diverge
       LogManager_sptr mprops2 = pw1->logs();
       // and this  causes CowPtr to diverge
-      TS_ASSERT_THROWS_NOTHING(
-          mprops2->addProperty<std::string>("TestProp2-3", "value2-3"));
+      TS_ASSERT_THROWS_NOTHING(mprops2->addProperty<std::string>("TestProp2-3", "value2-3"));
       TS_ASSERT(mprops2->hasProperty("TestProp2-3"));
       TS_ASSERT(!pw->run().hasProperty("TestProp2-3"));
       TS_ASSERT(pw1->run().hasProperty("TestProp2-3"));
@@ -237,9 +287,7 @@ public:
 
   void test_hasIntegratedPeaks_without_property() {
     PeaksWorkspace ws;
-    TSM_ASSERT(
-        "Should not indicate that there are integrated peaks without property.",
-        !ws.hasIntegratedPeaks());
+    TSM_ASSERT("Should not indicate that there are integrated peaks without property.", !ws.hasIntegratedPeaks());
   }
 
   void test_hasIntegratedPeaks_with_property_when_false() {
@@ -256,8 +304,7 @@ public:
     TS_ASSERT_EQUALS(hasIntegratedPeaks, ws.hasIntegratedPeaks());
   }
 
-  void
-  test_createDetectorTable_With_SinglePeak_And_Centre_Det_Has_Single_Row() {
+  void test_createDetectorTable_With_SinglePeak_And_Centre_Det_Has_Single_Row() {
     auto pw = buildPW(); // single peak with single detector
     auto detTable = pw->createDetectorTable();
     TSM_ASSERT("No table has been created", detTable);
@@ -272,8 +319,7 @@ public:
     TS_ASSERT_EQUALS(1, column1->cell<int>(0));
   }
 
-  void
-  test_createDetectorTable_With_SinglePeak_And_Multiple_Det_Has_Same_Num_Rows_As_Dets() {
+  void test_createDetectorTable_With_SinglePeak_And_Multiple_Det_Has_Same_Num_Rows_As_Dets() {
     auto pw = buildPW(); // 1 peaks each with single detector
     // Add a detector to the peak
     Mantid::Geometry::IPeak &ipeak = pw->getPeak(0);
@@ -300,8 +346,7 @@ public:
   }
 
   void test_createDetectorTable_With_Many_Peaks_And_Multiple_Dets() {
-    auto pw =
-        createSaveTestPeaksWorkspace(); // 5 peaks each with single detector
+    auto pw = createSaveTestPeaksWorkspace(); // 5 peaks each with single detector
 
     // Add some detectors
     Mantid::Geometry::IPeak &ipeak3 = pw->getPeak(2);
@@ -363,27 +408,22 @@ public:
     const auto params = makePeakParameters();
     auto ws = makeWorkspace(params);
     // Create the peak
-    auto peak = ws->createPeakHKL(params.hkl);
-
+    IPeak_uptr ipeak = ws->createPeakHKL(params.hkl);
+    Peak_uptr peak(static_cast<Peak *>(ipeak.release()));
     /*
      Now we check we have made a self - consistent peak
      */
-    TSM_ASSERT_EQUALS("New peak should have HKL we demanded.", params.hkl,
-                      peak->getHKL());
-    TSM_ASSERT_EQUALS("New peak should have QLab we expected.", params.qLab,
-                      peak->getQLabFrame());
-    TSM_ASSERT_EQUALS("New peak should have QSample we expected.",
-                      params.qSample, peak->getQSampleFrame());
+    TSM_ASSERT_EQUALS("New peak should have HKL we demanded.", params.hkl, peak->getHKL());
+    TSM_ASSERT_EQUALS("New peak should have QLab we expected.", params.qLab, peak->getQLabFrame());
+    TSM_ASSERT_EQUALS("New peak should have QSample we expected.", params.qSample, peak->getQSampleFrame());
 
     auto detector = peak->getDetector();
     TSM_ASSERT("No detector", detector);
     TSM_ASSERT_EQUALS("This detector id does not match what we expect from the "
                       "instrument definition",
                       1, detector->getID());
-    TSM_ASSERT_EQUALS("Thie detector position is wrong",
-                      params.detectorPosition, detector->getPos());
-    TSM_ASSERT_EQUALS("Goniometer has not been set properly",
-                      params.goniometer.getR(), peak->getGoniometerMatrix());
+    TSM_ASSERT_EQUALS("Thie detector position is wrong", params.detectorPosition, detector->getPos());
+    TSM_ASSERT_EQUALS("Goniometer has not been set properly", params.goniometer.getR(), peak->getGoniometerMatrix());
   }
 
   void test_create_peak_with_position_hkl() {
@@ -392,12 +432,9 @@ public:
 
     const auto peak = ws->createPeak(params.hkl, Mantid::Kernel::HKL);
 
-    TSM_ASSERT_EQUALS("New peak should have HKL we demanded.", params.hkl,
-                      peak->getHKL());
-    TSM_ASSERT_EQUALS("New peak should have QLab we expected.", params.qLab,
-                      peak->getQLabFrame());
-    TSM_ASSERT_EQUALS("New peak should have QSample we expected.",
-                      params.qSample, peak->getQSampleFrame());
+    TSM_ASSERT_EQUALS("New peak should have HKL we demanded.", params.hkl, peak->getHKL());
+    TSM_ASSERT_EQUALS("New peak should have QLab we expected.", params.qLab, peak->getQLabFrame());
+    TSM_ASSERT_EQUALS("New peak should have QSample we expected.", params.qSample, peak->getQSampleFrame());
   }
 
   void test_create_peak_with_position_qsample() {
@@ -406,10 +443,8 @@ public:
 
     const auto peak = ws->createPeak(params.qSample, Mantid::Kernel::QSample);
 
-    TSM_ASSERT_EQUALS("New peak should have QLab we expected.", params.qLab,
-                      peak->getQLabFrame());
-    TSM_ASSERT_EQUALS("New peak should have QSample we expected.",
-                      params.qSample, peak->getQSampleFrame());
+    TSM_ASSERT_EQUALS("New peak should have QLab we expected.", params.qLab, peak->getQLabFrame());
+    TSM_ASSERT_EQUALS("New peak should have QSample we expected.", params.qSample, peak->getQSampleFrame());
   }
 
   void test_create_peak_with_position_qlab() {
@@ -418,10 +453,8 @@ public:
 
     const auto peak = ws->createPeak(params.qLab, Mantid::Kernel::QLab);
 
-    TSM_ASSERT_EQUALS("New peak should have QLab we expected.", params.qLab,
-                      peak->getQLabFrame());
-    TSM_ASSERT_EQUALS("New peak should have QSample we expected.",
-                      params.qSample, peak->getQSampleFrame());
+    TSM_ASSERT_EQUALS("New peak should have QLab we expected.", params.qLab, peak->getQLabFrame());
+    TSM_ASSERT_EQUALS("New peak should have QSample we expected.", params.qSample, peak->getQSampleFrame());
   }
 
   void test_add_peak_with_position_hkl() {
@@ -431,12 +464,9 @@ public:
     ws->addPeak(params.hkl, Mantid::Kernel::HKL);
     const auto &peak = ws->getPeak(0);
 
-    TSM_ASSERT_EQUALS("New peak should have HKL we demanded.", params.hkl,
-                      peak.getHKL());
-    TSM_ASSERT_EQUALS("New peak should have QLab we expected.", params.qLab,
-                      peak.getQLabFrame());
-    TSM_ASSERT_EQUALS("New peak should have QSample we expected.",
-                      params.qSample, peak.getQSampleFrame());
+    TSM_ASSERT_EQUALS("New peak should have HKL we demanded.", params.hkl, peak.getHKL());
+    TSM_ASSERT_EQUALS("New peak should have QLab we expected.", params.qLab, peak.getQLabFrame());
+    TSM_ASSERT_EQUALS("New peak should have QSample we expected.", params.qSample, peak.getQSampleFrame());
   }
 
   void test_add_peak_with_position_qlab() {
@@ -446,10 +476,8 @@ public:
     ws->addPeak(params.qLab, Mantid::Kernel::QLab);
     const auto &peak = ws->getPeak(0);
 
-    TSM_ASSERT_EQUALS("New peak should have QLab we expected.", params.qLab,
-                      peak.getQLabFrame());
-    TSM_ASSERT_EQUALS("New peak should have QSample we expected.",
-                      params.qSample, peak.getQSampleFrame());
+    TSM_ASSERT_EQUALS("New peak should have QLab we expected.", params.qLab, peak.getQLabFrame());
+    TSM_ASSERT_EQUALS("New peak should have QSample we expected.", params.qSample, peak.getQSampleFrame());
   }
 
   void test_add_peak_with_position_qsample() {
@@ -459,10 +487,8 @@ public:
     ws->addPeak(params.qSample, Mantid::Kernel::QSample);
     const auto &peak = ws->getPeak(0);
 
-    TSM_ASSERT_EQUALS("New peak should have QLab we expected.", params.qLab,
-                      peak.getQLabFrame());
-    TSM_ASSERT_EQUALS("New peak should have QSample we expected.",
-                      params.qSample, peak.getQSampleFrame());
+    TSM_ASSERT_EQUALS("New peak should have QLab we expected.", params.qLab, peak.getQLabFrame());
+    TSM_ASSERT_EQUALS("New peak should have QSample we expected.", params.qSample, peak.getQSampleFrame());
   }
 
   /**
@@ -478,11 +504,9 @@ public:
     // Check property can be obtained as const_sptr or sptr
     PeaksWorkspace_const_sptr wsConst;
     PeaksWorkspace_sptr wsNonConst;
-    TS_ASSERT_THROWS_NOTHING(
-        wsConst = manager.getValue<PeaksWorkspace_const_sptr>(wsName));
+    TS_ASSERT_THROWS_NOTHING(wsConst = manager.getValue<PeaksWorkspace_const_sptr>(wsName));
     TS_ASSERT(wsConst != nullptr);
-    TS_ASSERT_THROWS_NOTHING(wsNonConst =
-                                 manager.getValue<PeaksWorkspace_sptr>(wsName));
+    TS_ASSERT_THROWS_NOTHING(wsNonConst = manager.getValue<PeaksWorkspace_sptr>(wsName));
     TS_ASSERT(wsNonConst != nullptr);
     TS_ASSERT_EQUALS(wsConst, wsNonConst);
 
@@ -510,11 +534,9 @@ public:
     // Check property can be obtained as const_sptr or sptr
     IPeaksWorkspace_const_sptr wsConst;
     IPeaksWorkspace_sptr wsNonConst;
-    TS_ASSERT_THROWS_NOTHING(
-        wsConst = manager.getValue<IPeaksWorkspace_const_sptr>(wsName));
+    TS_ASSERT_THROWS_NOTHING(wsConst = manager.getValue<IPeaksWorkspace_const_sptr>(wsName));
     TS_ASSERT(wsConst != nullptr);
-    TS_ASSERT_THROWS_NOTHING(
-        wsNonConst = manager.getValue<IPeaksWorkspace_sptr>(wsName));
+    TS_ASSERT_THROWS_NOTHING(wsNonConst = manager.getValue<IPeaksWorkspace_sptr>(wsName));
     TS_ASSERT(wsNonConst != nullptr);
     TS_ASSERT_EQUALS(wsConst, wsNonConst);
 
@@ -566,8 +588,7 @@ private:
     const V3D detectorPos(20, 5, 0);
     const V3D beam1 = sample - source;
     const V3D beam2 = detectorPos - sample;
-    auto minimalInstrument = ComponentCreationHelper::createMinimalInstrument(
-        source, sample, detectorPos);
+    auto minimalInstrument = ComponentCreationHelper::createMinimalInstrument(source, sample, detectorPos);
 
     // Derive distances and angles
     const double l1 = beam1.norm();
@@ -578,8 +599,7 @@ private:
 
     // Derive QLab for diffraction
     const double wavenumber_in_angstrom_times_tof_in_microsec =
-        (Mantid::PhysicalConstants::NeutronMass * (l1 + l2) * 1e-10 *
-         microSecsInSec) /
+        (Mantid::PhysicalConstants::NeutronMass * (l1 + l2) * 1e-10 * microSecsInSec) /
         Mantid::PhysicalConstants::h_bar;
 
     Mantid::Geometry::Goniometer goniometer;
@@ -590,25 +610,21 @@ private:
 
     V3D qLab = qLabDir * wavenumber_in_angstrom_times_tof_in_microsec;
 
-    Mantid::Geometry::OrientedLattice orientedLattice(
-        1, 1, 1, 90, 90, 90); // U is identity, real and reciprocal lattice
-                              // vectors are identical.
+    Mantid::Geometry::OrientedLattice orientedLattice(1, 1, 1, 90, 90, 90); // U is identity, real and reciprocal
+                                                                            // lattice vectors are identical.
 
     V3D qSample = Rinv * qLab;
     V3D hkl = qSample / (2 * M_PI); // Given our settings above, this is the
                                     // simplified relationship between qLab and
                                     // hkl.
 
-    return PeakParameters{
-        minimalInstrument, goniometer, orientedLattice, hkl, qLab,
-        qSample,           detectorPos};
+    return PeakParameters{minimalInstrument, goniometer, orientedLattice, hkl, qLab, qSample, detectorPos};
   }
 
   PeaksWorkspace_sptr makeWorkspace(const PeakParameters &params) {
     auto ws = std::make_shared<PeaksWorkspace>();
     ws->setInstrument(params.instrument);
-    ws->mutableSample().setOrientedLattice(
-        std::make_unique<OrientedLattice>(params.lattice));
+    ws->mutableSample().setOrientedLattice(std::make_unique<OrientedLattice>(params.lattice));
     ws->mutableRun().setGoniometer(params.goniometer, false);
     return ws;
   }
@@ -631,9 +647,7 @@ private:
     return pw;
   }
 
-  void
-  check_Detector_Table_Metadata(const Mantid::API::ITableWorkspace &detTable,
-                                const size_t expectedNRows) {
+  void check_Detector_Table_Metadata(const Mantid::API::ITableWorkspace &detTable, const size_t expectedNRows) {
     TS_ASSERT_EQUALS(expectedNRows, detTable.rowCount());
     TS_ASSERT_EQUALS(2, detTable.columnCount());
     if (detTable.columnCount() != 2)

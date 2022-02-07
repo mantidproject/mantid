@@ -28,8 +28,7 @@ public:
 public:
   // ----------------------- Success tests ------------------------
   void testConstructionWithValidCMapAndNormalize() {
-    TS_ASSERT_THROWS_NOTHING(
-        ScalarMappable mappable(Normalize(-1, 1), getCMap("jet")));
+    TS_ASSERT_THROWS_NOTHING(ScalarMappable mappable(Normalize(-1, 1), getCMap("jet")));
   }
 
   void testConstructionWithValidCMapAsStringAndNormalize() {

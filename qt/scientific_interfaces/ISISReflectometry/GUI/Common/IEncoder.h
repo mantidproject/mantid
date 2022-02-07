@@ -24,9 +24,7 @@ interface into a map
 class IEncoder {
 public:
   virtual ~IEncoder(){};
-  virtual QMap<QString, QVariant> encodeBatch(const IMainWindowView *mwv,
-                                              int batchIndex,
-                                              bool projectSave = false) = 0;
+  virtual QMap<QString, QVariant> encodeBatch(const IMainWindowView *mwv, int batchIndex, bool projectSave = false) = 0;
 };
 } // namespace ISISReflectometry
 } // namespace CustomInterfaces

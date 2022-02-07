@@ -32,12 +32,11 @@ template <class Frequencies, class HistogramY> class VectorOf;
   @author Simon Heybrock
   @date 2016
 */
-class MANTID_HISTOGRAMDATA_DLL HistogramY
-    : public detail::FixedLengthVector<HistogramY>,
-      public detail::Addable<HistogramY>,
-      public detail::Offsetable<HistogramY>,
-      public detail::Multipliable<HistogramY>,
-      public detail::Scalable<HistogramY> {
+class MANTID_HISTOGRAMDATA_DLL HistogramY : public detail::FixedLengthVector<HistogramY>,
+                                            public detail::Addable<HistogramY>,
+                                            public detail::Offsetable<HistogramY>,
+                                            public detail::Multipliable<HistogramY>,
+                                            public detail::Scalable<HistogramY> {
 public:
   using detail::FixedLengthVector<HistogramY>::FixedLengthVector;
   using detail::FixedLengthVector<HistogramY>::operator=;

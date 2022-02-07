@@ -1,7 +1,7 @@
 .. _03_displaying_1D_data:
 
 ==================
-Displaying 1D Data 
+Displaying 1D Data
 ==================
 
 .. figure:: /images/SimpleGraph.png
@@ -16,6 +16,7 @@ The Simplest Plot
 #. Right click the workspace in the workspace list.
 #. Select "Plot > Spectrum ...".
 #. In the dialog that appears enter "1-3" in the spectra number box.
+#. Click "OK".
 
 You should get a plot like this with three spectra corresponding to
 spectra 1-3 (which in this case these are the monitors on MARI):
@@ -42,11 +43,12 @@ Another way to plot
       want.
    -  Click while holding Ctrl to select / deselect individual rows.
 
-4. Please highlight rows 0-2 and bring up the right-click
-   menu:
+4. Please highlight rows 0-2 and bring up the following right-click
+   menu. Select ``Plot spectrum (values only)``.
 
 .. figure:: /images/300px-MatrixDisplayRightClickOptions.png
    :align: center
+   :alt: Select "Plot spectrum (values only)"
 
 
 5. You will be presented with options for plotting the selected spectra,
@@ -66,11 +68,11 @@ Adding a curve to an existing plot
 There are two ways to add spectra to an already existing graph, either
 from the same workspace or from another.
 
-A. Drag the Workspace from the Workspace List and drop it onto the 
-graph you want to add the curve to.
+A. Drag the Workspace from the Workspace List and drop it onto the
+   graph you want to add the curve to.
 
 B. Right-click the Workspace from the Workspace list and Select "Plot > Overplot spectrum ...". This will attach your additional spectra to your last active plot.
 
-* In both cases, if the Workspace contains more than one spectra you will 
+* In both cases, if the Workspace contains more than one spectra you will
   be asked which spectra you wish to add to the plot.
 

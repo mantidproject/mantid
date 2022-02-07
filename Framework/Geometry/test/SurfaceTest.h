@@ -33,11 +33,9 @@ public:
     Test the distance of a point from the cone
   */
   {
-    std::vector<std::string> ConeStr{
-        "kx 0 1", "k/x 0 0 0 1"}; // cone at origin, also cone at origin
+    std::vector<std::string> ConeStr{"kx 0 1", "k/x 0 0 0 1"}; // cone at origin, also cone at origin
     Kernel::V3D P(-1, -1.2, 0);
-    const double results[] = {sin(atan(1.2) - M_PI / 4) * sqrt(2.44),
-                              sin(atan(1.2) - M_PI / 4) * sqrt(2.44)};
+    const double results[] = {sin(atan(1.2) - M_PI / 4) * sqrt(2.44), sin(atan(1.2) - M_PI / 4) * sqrt(2.44)};
 
     std::vector<std::string>::const_iterator vc;
     Cone A;

@@ -1,0 +1,39 @@
+digraph ReflectometryILLPreprocess {
+  label = "Direct Beam Preprocessing"
+  $global_style
+
+  subgraph params {
+    $param_style
+    run               [label="Run"]
+    output            [label="OutputWorkspace"]
+    waterReference    [label="WaterWorkspace"]
+  }
+
+  subgraph algorithms {
+    $algorithm_style
+    toWavelength          [label="Convert from TOF\n to wavelength"]
+    extractMonitors       [label="ExtractMonitors"]
+    fluxNorm              [label="Divide by duration/\nmonitor counts"]
+    load                  [label="LoadAndMerge"]
+    waterNorm             [label="Divide by\nwater reference"]
+    slitNorm              [label="Divide by\nslit opening area"]
+    subtractBkg           [label="Subtract background"]
+  }
+
+  subgraph decisions {
+    $decision_style
+    isSlitNorm [label="SlitNormalisation?"]
+  }
+
+  run                   -> load
+  load                  -> extractMonitors
+  extractMonitors       -> waterNorm
+  waterReference        -> waterNorm [label="Rebin"]
+  waterNorm             -> isSlitNorm
+  isSlitNorm            -> slitNorm [label="Slit Normalisation ON"]
+  isSlitNorm            -> fluxNorm [label="Slit Normalisation OFF"]
+  slitNorm              -> fluxNorm
+  fluxNorm              -> subtractBkg
+  subtractBkg           -> toWavelength
+  toWavelength          -> output
+}

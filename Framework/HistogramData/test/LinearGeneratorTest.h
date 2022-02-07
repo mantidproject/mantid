@@ -18,9 +18,7 @@ class LinearGeneratorTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static LinearGeneratorTest *createSuite() {
-    return new LinearGeneratorTest();
-  }
+  static LinearGeneratorTest *createSuite() { return new LinearGeneratorTest(); }
   static void destroySuite(LinearGeneratorTest *suite) { delete suite; }
 
   void test_length0() {

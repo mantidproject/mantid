@@ -58,8 +58,7 @@ class EXPORT_OPT_MANTIDQT_COMMON MantidDialog : public QDialog {
 public:
   /// DefaultConstructor
   MantidDialog(QWidget *parent = nullptr,
-               const Qt::WindowFlags &flags = Qt::WindowCloseButtonHint |
-                                              Qt::WindowType::WindowTitleHint);
+               const Qt::WindowFlags &flags = Qt::WindowCloseButtonHint | Qt::WindowType::WindowTitleHint);
   /// Destructor
   ~MantidDialog() override;
 

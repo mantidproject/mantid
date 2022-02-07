@@ -14,11 +14,13 @@
 import platform as _platform
 import sys as _sys
 
+
 def is_windows():
     """
        Returns True if the current platform is Windows (regardless of version/32- or 64-bit etc)
     """
     return _sys.platform == "win32"
+
 
 def is_mac():
     """
@@ -26,12 +28,14 @@ def is_mac():
     """
     return _sys.platform == "darwin"
 
+
 def is_linux():
     """
         Returns True if the current platform is OS X (regardless of version/32- or 64-bit etc)
         Variant on is_apple
     """
     return _sys.platform.startswith("linux")
+
 
 def is_32bit():
     """
@@ -43,6 +47,7 @@ def is_32bit():
     else:
         bits = _platform.architecture()[0]
         return bits == '32bit'
+
 
 def is_64bit():
     """

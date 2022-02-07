@@ -8,6 +8,7 @@
 #include "Common/DllConfig.h"
 #include "MantidAPI/IAlgorithm_fwd.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
+#include <stdexcept>
 #include <string>
 #include <vector>
 namespace MantidQt {
@@ -18,10 +19,9 @@ enum class NamedFormat { Custom, ThreeColumn, ANSTO, ILLCosmos };
 
 class MANTIDQT_ISISREFLECTOMETRY_DLL FileFormatOptions {
 public:
-  FileFormatOptions(NamedFormat format, std::string const &prefix,
-                    bool includeTitle, std::string const &separator,
+  FileFormatOptions(NamedFormat format, std::string prefix, bool includeHeader, std::string separator,
                     bool includeQResolution);
-  bool shouldIncludeTitle() const;
+  bool shouldIncludeHeader() const;
   bool shouldIncludeQResolution() const;
   std::string const &separator() const;
   std::string const &prefix() const;
@@ -30,7 +30,7 @@ public:
 private:
   NamedFormat m_format;
   std::string m_prefix;
-  bool m_includeTitle;
+  bool m_includeHeader;
   std::string m_separator;
   bool m_includeQResolution;
 };
@@ -44,18 +44,13 @@ private:
   std::string m_path;
 };
 
-inline bool operator==(const FileFormatOptions &lhs,
-                       const FileFormatOptions &rhs) {
-  return lhs.format() == rhs.format() &&
-         lhs.shouldIncludeTitle() == rhs.shouldIncludeTitle() &&
-         lhs.shouldIncludeQResolution() == rhs.shouldIncludeQResolution() &&
-         lhs.separator() == rhs.separator() && lhs.prefix() == rhs.prefix();
+inline bool operator==(const FileFormatOptions &lhs, const FileFormatOptions &rhs) {
+  return lhs.format() == rhs.format() && lhs.shouldIncludeHeader() == rhs.shouldIncludeHeader() &&
+         lhs.shouldIncludeQResolution() == rhs.shouldIncludeQResolution() && lhs.separator() == rhs.separator() &&
+         lhs.prefix() == rhs.prefix();
 }
 
-inline bool operator!=(const FileFormatOptions &lhs,
-                       const FileFormatOptions &rhs) {
-  return !(lhs == rhs);
-}
+inline bool operator!=(const FileFormatOptions &lhs, const FileFormatOptions &rhs) { return !(lhs == rhs); }
 
 class InvalidWorkspaceName : public std::runtime_error {
 public:
@@ -69,10 +64,8 @@ private:
 class IAsciiSaver {
 public:
   virtual bool isValidSaveDirectory(std::string const &filePath) const = 0;
-  virtual void save(std::string const &saveDirectory,
-                    std::vector<std::string> const &workspaceNames,
-                    std::vector<std::string> const &logParameters,
-                    FileFormatOptions const &inputParameters) const = 0;
+  virtual void save(std::string const &saveDirectory, std::vector<std::string> const &workspaceNames,
+                    std::vector<std::string> const &logParameters, FileFormatOptions const &inputParameters) const = 0;
   virtual ~IAsciiSaver() = default;
 };
 } // namespace ISISReflectometry

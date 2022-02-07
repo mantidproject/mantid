@@ -18,19 +18,15 @@ namespace ISISReflectometry {
 class MANTIDQT_ISISREFLECTOMETRY_DLL Clipboard {
 public:
   struct Item {
-    Item(MantidQt::MantidWidgets::Batch::RowLocation location,
-         MantidQt::MantidWidgets::Batch::Subtree subtree)
+    Item(MantidQt::MantidWidgets::Batch::RowLocation location, MantidQt::MantidWidgets::Batch::Subtree subtree)
         : m_location(std::move(location)), m_subtree(std::move(subtree)) {}
     MantidQt::MantidWidgets::Batch::RowLocation m_location;
     MantidQt::MantidWidgets::Batch::Subtree m_subtree;
   };
 
   Clipboard();
-  Clipboard(
-      boost::optional<std::vector<MantidQt::MantidWidgets::Batch::Subtree>>
-          subtrees,
-      boost::optional<std::vector<MantidQt::MantidWidgets::Batch::RowLocation>>
-          subtreeRoots);
+  Clipboard(boost::optional<std::vector<MantidQt::MantidWidgets::Batch::Subtree>> subtrees,
+            boost::optional<std::vector<MantidQt::MantidWidgets::Batch::RowLocation>> subtreeRoots);
 
   bool isInitialized() const;
   int numberOfRoots() const;
@@ -42,28 +38,22 @@ public:
 
   std::vector<MantidQt::MantidWidgets::Batch::Subtree> const &subtrees() const;
   std::vector<MantidQt::MantidWidgets::Batch::Subtree> &mutableSubtrees();
-  std::vector<MantidQt::MantidWidgets::Batch::RowLocation> const &
-  subtreeRoots() const;
-  std::vector<MantidQt::MantidWidgets::Batch::RowLocation> &
-  mutableSubtreeRoots();
+  std::vector<MantidQt::MantidWidgets::Batch::RowLocation> const &subtreeRoots() const;
+  std::vector<MantidQt::MantidWidgets::Batch::RowLocation> &mutableSubtreeRoots();
 
 private:
   // The subtrees for each of the roots. Note that the Rows here contain
   // relative paths
-  boost::optional<std::vector<MantidQt::MantidWidgets::Batch::Subtree>>
-      m_subtrees;
+  boost::optional<std::vector<MantidQt::MantidWidgets::Batch::Subtree>> m_subtrees;
   // The actual locations of the roots that were copied. This allows us to work
   // out the actual paths that were copied and determine whether items are rows
   // or groups in the reflectometry GUI sense. Note that these locations may
   // not be valid in the table if other edits have been made so this should
   // only be used for checking whether copied values were rows/groups.
-  boost::optional<std::vector<MantidQt::MantidWidgets::Batch::RowLocation>>
-      m_subtreeRoots;
+  boost::optional<std::vector<MantidQt::MantidWidgets::Batch::RowLocation>> m_subtreeRoots;
 
-  std::vector<boost::optional<Row>>
-  createRowsForRootChildren(int rootIndex) const;
-  std::vector<boost::optional<Row>> createRowsForSubtree(
-      MantidQt::MantidWidgets::Batch::Subtree const &subtree) const;
+  std::vector<boost::optional<Row>> createRowsForRootChildren(int rootIndex) const;
+  std::vector<boost::optional<Row>> createRowsForSubtree(MantidQt::MantidWidgets::Batch::Subtree const &subtree) const;
 };
 
 bool MANTIDQT_ISISREFLECTOMETRY_DLL containsGroups(Clipboard const &clipboard);

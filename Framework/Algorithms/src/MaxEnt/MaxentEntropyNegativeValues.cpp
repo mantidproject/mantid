@@ -7,8 +7,7 @@
 #include "MantidAlgorithms/MaxEnt/MaxentEntropyNegativeValues.h"
 #include <cmath>
 
-namespace Mantid {
-namespace Algorithms {
+namespace Mantid::Algorithms {
 
 /**
  * Returns the first derivative at a given point.
@@ -16,9 +15,7 @@ namespace Algorithms {
  * @param background : [input] The background
  * @return : The first derivative as a vector
  */
-std::vector<double>
-MaxentEntropyNegativeValues::derivative(const std::vector<double> &values,
-                                        double background) {
+std::vector<double> MaxentEntropyNegativeValues::derivative(const std::vector<double> &values, double background) {
 
   std::vector<double> result(values.size());
 
@@ -36,9 +33,8 @@ MaxentEntropyNegativeValues::derivative(const std::vector<double> &values,
  * @param background : [input] The background
  * @return : The second derivative as a vector
  */
-std::vector<double>
-MaxentEntropyNegativeValues::secondDerivative(const std::vector<double> &values,
-                                              double background) {
+std::vector<double> MaxentEntropyNegativeValues::secondDerivative(const std::vector<double> &values,
+                                                                  double background) {
 
   std::vector<double> result(values.size());
 
@@ -58,9 +54,7 @@ MaxentEntropyNegativeValues::secondDerivative(const std::vector<double> &values,
  * @param newValue : [input] The new value to use (unused variable)
  * @return : The corrected values as a vector
  */
-std::vector<double>
-MaxentEntropyNegativeValues::correctValues(const std::vector<double> &values,
-                                           double newValue) {
+std::vector<double> MaxentEntropyNegativeValues::correctValues(const std::vector<double> &values, double newValue) {
 
   UNUSED_ARG(newValue)
 
@@ -68,5 +62,4 @@ MaxentEntropyNegativeValues::correctValues(const std::vector<double> &values,
   return values;
 }
 
-} // namespace Algorithms
-} // namespace Mantid
+} // namespace Mantid::Algorithms

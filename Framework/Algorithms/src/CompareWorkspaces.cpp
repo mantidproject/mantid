@@ -16,15 +16,16 @@
 #include "MantidAPI/TableRow.h"
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidDataObjects/EventWorkspace.h"
+#include "MantidDataObjects/LeanElasticPeaksWorkspace.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidDataObjects/TableWorkspace.h"
 #include "MantidGeometry/Crystal/IPeak.h"
+#include "MantidGeometry/Instrument/ComponentInfo.h"
 #include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidKernel/Unit.h"
 #include "MantidParallel/Communicator.h"
 
-namespace Mantid {
-namespace Algorithms {
+namespace Mantid::Algorithms {
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
@@ -39,29 +40,20 @@ namespace {
 
 template <class ET> const std::vector<ET> &getEventVector(const EventList &el);
 
-template <>
-const std::vector<Types::Event::TofEvent> &getEventVector(const EventList &el) {
-  return el.getEvents();
-}
+template <> const std::vector<Types::Event::TofEvent> &getEventVector(const EventList &el) { return el.getEvents(); }
 
-template <>
-const std::vector<DataObjects::WeightedEvent> &
-getEventVector(const EventList &el) {
+template <> const std::vector<DataObjects::WeightedEvent> &getEventVector(const EventList &el) {
   return el.getWeightedEvents();
 }
 
-template <>
-const std::vector<DataObjects::WeightedEventNoTime> &
-getEventVector(const EventList &el) {
+template <> const std::vector<DataObjects::WeightedEventNoTime> &getEventVector(const EventList &el) {
   return el.getWeightedEventsNoTime();
 }
 
 template <class ET>
-int compareEventLists(Kernel::Logger &logger, const EventList &el1,
-                      const EventList &el2, double tolTof, double tolWeight,
-                      int64_t tolPulse, bool printdetails, size_t &numdiffpulse,
-                      size_t &numdifftof, size_t &numdiffboth,
-                      size_t &numdiffweight) {
+int compareEventLists(Kernel::Logger &logger, const EventList &el1, const EventList &el2, double tolTof,
+                      double tolWeight, int64_t tolPulse, bool printdetails, size_t &numdiffpulse, size_t &numdifftof,
+                      size_t &numdiffboth, size_t &numdiffweight) {
 
   // Initialize
   numdiffpulse = 0;
@@ -83,8 +75,7 @@ int compareEventLists(Kernel::Logger &logger, const EventList &el1,
     bool diffpulse = false;
     bool difftof = false;
     bool diffweight = false;
-    if (std::abs(e1.pulseTime().totalNanoseconds() -
-                 e2.pulseTime().totalNanoseconds()) > tolPulse) {
+    if (std::abs(e1.pulseTime().totalNanoseconds() - e2.pulseTime().totalNanoseconds()) > tolPulse) {
       diffpulse = true;
       ++numdiffpulse;
     }
@@ -106,13 +97,11 @@ int compareEventLists(Kernel::Logger &logger, const EventList &el1,
         std::stringstream outss;
         outss << "Spectrum ? Event " << i << ": ";
         if (diffpulse)
-          outss << "Diff-Pulse: " << e1.pulseTime() << " vs. " << e2.pulseTime()
-                << "; ";
+          outss << "Diff-Pulse: " << e1.pulseTime() << " vs. " << e2.pulseTime() << "; ";
         if (difftof)
           outss << "Diff-TOF: " << e1.tof() << " vs. " << e2.tof() << ";";
         if (diffweight)
-          outss << "Diff-Weight: " << e1.weight() << " vs. " << e2.weight()
-                << ";";
+          outss << "Diff-Weight: " << e1.weight() << " vs. " << e2.weight() << ";";
 
         logger.information(outss.str());
       }
@@ -127,36 +116,27 @@ int compareEventLists(Kernel::Logger &logger, const EventList &el1,
 /** Initialize the algorithm's properties.
  */
 void CompareWorkspaces::init() {
-  declareProperty(std::make_unique<WorkspaceProperty<Workspace>>(
-                      "Workspace1", "", Direction::Input),
+  declareProperty(std::make_unique<WorkspaceProperty<Workspace>>("Workspace1", "", Direction::Input),
                   "The name of the first input workspace.");
-  declareProperty(std::make_unique<WorkspaceProperty<Workspace>>(
-                      "Workspace2", "", Direction::Input),
+  declareProperty(std::make_unique<WorkspaceProperty<Workspace>>("Workspace2", "", Direction::Input),
                   "The name of the second input workspace.");
 
-  declareProperty(
-      "Tolerance", 0.0,
-      "The maximum amount by which values may differ between the workspaces.");
+  declareProperty("Tolerance", 1e-10, "The maximum amount by which values may differ between the workspaces.");
 
   declareProperty("CheckType", true,
                   "Whether to check that the data types "
                   "(Workspace2D vs EventWorkspace) match.");
   declareProperty("CheckAxes", true, "Whether to check that the axes match.");
-  declareProperty("CheckSpectraMap", true,
-                  "Whether to check that the spectra-detector maps match. ");
-  declareProperty("CheckInstrument", true,
-                  "Whether to check that the instruments match. ");
-  declareProperty("CheckMasking", true,
-                  "Whether to check that the bin masking matches. ");
+  declareProperty("CheckSpectraMap", true, "Whether to check that the spectra-detector maps match. ");
+  declareProperty("CheckInstrument", true, "Whether to check that the instruments match. ");
+  declareProperty("CheckMasking", true, "Whether to check that the bin masking matches. ");
 
   // Have this one false by default - the logs are brittle
-  declareProperty("CheckSample", false,
-                  "Whether to check that the sample (e.g. logs).");
+  declareProperty("CheckSample", false, "Whether to check that the sample (e.g. logs).");
 
-  declareProperty(
-      "ToleranceRelErr", false,
-      "Treat tolerance as relative error rather then the absolute error.\n"
-      "This is only applicable to Matrix workspaces.");
+  declareProperty("ToleranceRelErr", false,
+                  "Treat tolerance as relative error rather then the absolute error.\n"
+                  "This is only applicable to Matrix workspaces.");
 
   // Have this one false by default - it can be a lot of printing.
   declareProperty("CheckAllData", false,
@@ -166,17 +146,13 @@ void CompareWorkspaces::init() {
                   "Very often such logs are huge so making it true should be "
                   "the last option.");
 
-  declareProperty("NumberMismatchedSpectraToPrint", 1,
-                  "Number of mismatched spectra from lowest to be listed. ");
+  declareProperty("NumberMismatchedSpectraToPrint", 1, "Number of mismatched spectra from lowest to be listed. ");
 
-  declareProperty("DetailedPrintIndex", EMPTY_INT(),
-                  "Mismatched spectra that will be printed out in details. ");
+  declareProperty("DetailedPrintIndex", EMPTY_INT(), "Mismatched spectra that will be printed out in details. ");
 
   declareProperty("Result", false, Direction::Output);
-  declareProperty(
-      std::make_unique<WorkspaceProperty<ITableWorkspace>>(
-          "Messages", "compare_msgs", Direction::Output),
-      "TableWorkspace containing messages about any mismatches detected");
+  declareProperty(std::make_unique<WorkspaceProperty<ITableWorkspace>>("Messages", "compare_msgs", Direction::Output),
+                  "TableWorkspace containing messages about any mismatches detected");
 
   m_messages = std::make_shared<TableWorkspace>();
   m_messages->addColumn("str", "Message");
@@ -197,14 +173,11 @@ void CompareWorkspaces::exec() {
 
   if (!m_result) {
     std::string message = m_messages->cell<std::string>(0, 0);
-    g_log.notice() << "The workspaces did not match: " << message << '\n';
+    g_log.warning() << "The workspaces did not match: " << message << '\n';
   } else {
-    std::string ws1 =
-        Workspace_const_sptr(getProperty("Workspace1"))->getName();
-    std::string ws2 =
-        Workspace_const_sptr(getProperty("Workspace2"))->getName();
-    g_log.notice() << "The workspaces \"" << ws1 << "\" and \"" << ws2
-                   << "\" matched!\n";
+    std::string ws1 = Workspace_const_sptr(getProperty("Workspace1"))->getName();
+    std::string ws2 = Workspace_const_sptr(getProperty("Workspace2"))->getName();
+    g_log.notice() << "The workspaces \"" << ws1 << "\" and \"" << ws2 << "\" matched!\n";
   }
 
   setProperty("Result", m_result);
@@ -227,10 +200,8 @@ bool CompareWorkspaces::processGroups() {
   Workspace_const_sptr w2 = getProperty("Workspace2");
 
   // Attempt to cast to WorkspaceGroups (will be nullptr on failure)
-  WorkspaceGroup_const_sptr ws1 =
-      std::dynamic_pointer_cast<const WorkspaceGroup>(w1);
-  WorkspaceGroup_const_sptr ws2 =
-      std::dynamic_pointer_cast<const WorkspaceGroup>(w2);
+  WorkspaceGroup_const_sptr ws1 = std::dynamic_pointer_cast<const WorkspaceGroup>(w1);
+  WorkspaceGroup_const_sptr ws2 = std::dynamic_pointer_cast<const WorkspaceGroup>(w2);
 
   if (ws1 && ws2) { // Both are groups
     processGroups(ws1, ws2);
@@ -240,13 +211,12 @@ bool CompareWorkspaces::processGroups() {
                              "input is a WorkspaceGroup. This is a logical "
                              "error in the code.");
   } else if (!ws1 || !ws2) {
-    recordMismatch(
-        "Type mismatch. One workspace is a group, the other is not.");
+    recordMismatch("Type mismatch. One workspace is a group, the other is not.");
   }
 
   if (m_result && ws1 && ws2) {
-    g_log.notice() << "All workspaces in workspace groups \"" << ws1->getName()
-                   << "\" and \"" << ws2->getName() << "\" matched!\n";
+    g_log.notice() << "All workspaces in workspace groups \"" << ws1->getName() << "\" and \"" << ws2->getName()
+                   << "\" matched!\n";
   }
 
   setProperty("Result", m_result);
@@ -261,9 +231,8 @@ bool CompareWorkspaces::processGroups() {
  * @param groupOne
  * @param groupTwo
  */
-void CompareWorkspaces::processGroups(
-    const std::shared_ptr<const API::WorkspaceGroup> &groupOne,
-    const std::shared_ptr<const API::WorkspaceGroup> &groupTwo) {
+void CompareWorkspaces::processGroups(const std::shared_ptr<const API::WorkspaceGroup> &groupOne,
+                                      const std::shared_ptr<const API::WorkspaceGroup> &groupTwo) {
 
   // Check their sizes
   const auto totalNum = static_cast<size_t>(groupOne->getNumberOfEntries());
@@ -291,9 +260,9 @@ void CompareWorkspaces::processGroups(
   for (size_t i = 0; i < totalNum; ++i) {
     // We should use an algorithm for each so that the output properties are
     // reset properly
-    Algorithm_sptr checker = this->createChildAlgorithm(
-        this->name(), progressFraction * static_cast<double>(i),
-        progressFraction * static_cast<double>(i + 1), false, this->version());
+    Algorithm_sptr checker =
+        this->createChildAlgorithm(this->name(), progressFraction * static_cast<double>(i),
+                                   progressFraction * static_cast<double>(i + 1), false, this->version());
     checker->setPropertyValue("Workspace1", namesOne[i]);
     checker->setPropertyValue("Workspace2", namesTwo[i]);
     for (size_t j = 0; j < numNonDefault; ++j) {
@@ -321,18 +290,41 @@ void CompareWorkspaces::doComparison() {
   // ==============================================================================
   // Peaks workspaces
   // ==============================================================================
+  if (w1->id() == "PeaksWorkspace" || w2->id() == "PeaksWorkspace") {
+    // Check that both workspaces are the same type
+    PeaksWorkspace_sptr pws1 = std::dynamic_pointer_cast<PeaksWorkspace>(w1);
+    PeaksWorkspace_sptr pws2 = std::dynamic_pointer_cast<PeaksWorkspace>(w2);
 
-  // Check that both workspaces are the same type
-  PeaksWorkspace_sptr pws1 = std::dynamic_pointer_cast<PeaksWorkspace>(w1);
-  PeaksWorkspace_sptr pws2 = std::dynamic_pointer_cast<PeaksWorkspace>(w2);
-  if ((pws1 && !pws2) || (!pws1 && pws2)) {
-    recordMismatch("One workspace is a PeaksWorkspace and the other is not.");
-    return;
+    // if any one of the pointer is null, record the error
+    // -- meaning at least one of the input workspace cannot be casted
+    //    into peakworkspace
+    if ((pws1 && !pws2) || (!pws1 && pws2)) {
+      recordMismatch("One workspace is a PeaksWorkspace and the other is not.");
+      return;
+    }
+
+    // Check some peak-based stuff when both pointers are not null
+    if (pws1 && pws2) {
+      doPeaksComparison(pws1, pws2);
+      return;
+    }
   }
-  // Check some peak-based stuff
-  if (pws1 && pws2) {
-    doPeaksComparison(pws1, pws2);
-    return;
+
+  // ==============================================================================
+  // Lean Elastic Peaks workspaces
+  // ==============================================================================
+  if (w1->id() == "LeanElasticPeaksWorkspace" || w2->id() == "LeanElasticPeaksWorkspace") {
+    auto lpws1 = std::dynamic_pointer_cast<LeanElasticPeaksWorkspace>(w1);
+    auto lpws2 = std::dynamic_pointer_cast<LeanElasticPeaksWorkspace>(w2);
+
+    if ((lpws1 && !lpws2) || (!lpws1 && lpws2)) {
+      recordMismatch("One workspace is a LeanElasticPeaksWorkspace and the other is not.");
+    }
+
+    if (lpws1 && lpws2) {
+      doLeanElasticPeaksComparison(lpws1, lpws2);
+      return;
+    }
   }
 
   // ==============================================================================
@@ -356,28 +348,21 @@ void CompareWorkspaces::doComparison() {
   // ==============================================================================
 
   // Check things for IMDEventWorkspaces
-  IMDEventWorkspace_const_sptr mdews1 =
-      std::dynamic_pointer_cast<const IMDEventWorkspace>(w1);
-  IMDEventWorkspace_const_sptr mdews2 =
-      std::dynamic_pointer_cast<const IMDEventWorkspace>(w2);
+  IMDEventWorkspace_const_sptr mdews1 = std::dynamic_pointer_cast<const IMDEventWorkspace>(w1);
+  IMDEventWorkspace_const_sptr mdews2 = std::dynamic_pointer_cast<const IMDEventWorkspace>(w2);
   if ((mdews1 && !mdews2) || (!mdews1 && mdews2)) {
-    recordMismatch(
-        "One workspace is an IMDEventWorkspace and the other is not.");
+    recordMismatch("One workspace is an IMDEventWorkspace and the other is not.");
     return;
   }
   // Check things for IMDHistoWorkspaces
-  IMDHistoWorkspace_const_sptr mdhws1 =
-      std::dynamic_pointer_cast<const IMDHistoWorkspace>(w1);
-  IMDHistoWorkspace_const_sptr mdhws2 =
-      std::dynamic_pointer_cast<const IMDHistoWorkspace>(w2);
+  IMDHistoWorkspace_const_sptr mdhws1 = std::dynamic_pointer_cast<const IMDHistoWorkspace>(w1);
+  IMDHistoWorkspace_const_sptr mdhws2 = std::dynamic_pointer_cast<const IMDHistoWorkspace>(w2);
   if ((mdhws1 && !mdhws2) || (!mdhws1 && mdhws2)) {
-    recordMismatch(
-        "One workspace is an IMDHistoWorkspace and the other is not.");
+    recordMismatch("One workspace is an IMDHistoWorkspace and the other is not.");
     return;
   }
 
-  if (mdhws1 ||
-      mdews1) // The '2' workspaces must match because of the checks above
+  if (mdhws1 || mdews1) // The '2' workspaces must match because of the checks above
   {
     this->doMDComparison(w1, w2);
     return;
@@ -388,19 +373,14 @@ void CompareWorkspaces::doComparison() {
   // ==============================================================================
 
   // These casts must succeed or there's a logical problem in the code
-  MatrixWorkspace_const_sptr ws1 =
-      std::dynamic_pointer_cast<const MatrixWorkspace>(w1);
-  MatrixWorkspace_const_sptr ws2 =
-      std::dynamic_pointer_cast<const MatrixWorkspace>(w2);
+  MatrixWorkspace_const_sptr ws1 = std::dynamic_pointer_cast<const MatrixWorkspace>(w1);
+  MatrixWorkspace_const_sptr ws2 = std::dynamic_pointer_cast<const MatrixWorkspace>(w2);
 
-  EventWorkspace_const_sptr ews1 =
-      std::dynamic_pointer_cast<const EventWorkspace>(ws1);
-  EventWorkspace_const_sptr ews2 =
-      std::dynamic_pointer_cast<const EventWorkspace>(ws2);
+  EventWorkspace_const_sptr ews1 = std::dynamic_pointer_cast<const EventWorkspace>(ws1);
+  EventWorkspace_const_sptr ews2 = std::dynamic_pointer_cast<const EventWorkspace>(ws2);
   if (getProperty("CheckType")) {
     if ((ews1 && !ews2) || (!ews1 && ews2)) {
-      recordMismatch(
-          "One workspace is an EventWorkspace and the other is not.");
+      recordMismatch("One workspace is an EventWorkspace and the other is not.");
       return;
     }
   }
@@ -432,12 +412,10 @@ void CompareWorkspaces::doComparison() {
   if (static_cast<bool>(getProperty("CheckAxes")) && !checkAxes(ws1, ws2))
     return;
   m_progress->reportIncrement(numhist / 5, "SpectraMap");
-  if (static_cast<bool>(getProperty("CheckSpectraMap")) &&
-      !checkSpectraMap(ws1, ws2))
+  if (static_cast<bool>(getProperty("CheckSpectraMap")) && !checkSpectraMap(ws1, ws2))
     return;
   m_progress->reportIncrement(numhist / 5, "Instrument");
-  if (static_cast<bool>(getProperty("CheckInstrument")) &&
-      !checkInstrument(ws1, ws2))
+  if (static_cast<bool>(getProperty("CheckInstrument")) && !checkInstrument(ws1, ws2))
     return;
   m_progress->reportIncrement(numhist / 5, "Masking");
   if (static_cast<bool>(getProperty("CheckMasking")) && !checkMasking(ws1, ws2))
@@ -454,9 +432,8 @@ void CompareWorkspaces::doComparison() {
 //------------------------------------------------------------------------------------------------
 /** Check whether 2 event lists are identical
  */
-bool CompareWorkspaces::compareEventWorkspaces(
-    const DataObjects::EventWorkspace &ews1,
-    const DataObjects::EventWorkspace &ews2) {
+bool CompareWorkspaces::compareEventWorkspaces(const DataObjects::EventWorkspace &ews1,
+                                               const DataObjects::EventWorkspace &ews2) {
   bool checkallspectra = getProperty("CheckAllData");
   int numspec2print = getProperty("NumberMismatchedSpectraToPrint");
   int wsindex2print = getProperty("DetailedPrintIndex");
@@ -488,10 +465,8 @@ bool CompareWorkspaces::compareEventWorkspaces(
   double toleranceTOF = 0.05;
   if ((ews1.getAxis(0)->unit()->label().ascii() != "microsecond") ||
       (ews2.getAxis(0)->unit()->label().ascii() != "microsecond")) {
-    g_log.warning() << "Event workspace has unit as "
-                    << ews1.getAxis(0)->unit()->label().ascii() << " and "
-                    << ews2.getAxis(0)->unit()->label().ascii()
-                    << ".  Tolerance of TOF is set to 0.05 still. "
+    g_log.warning() << "Event workspace has unit as " << ews1.getAxis(0)->unit()->label().ascii() << " and "
+                    << ews2.getAxis(0)->unit()->label().ascii() << ".  Tolerance of TOF is set to 0.05 still. "
                     << "\n";
     toleranceTOF = 0.05;
   }
@@ -508,21 +483,18 @@ bool CompareWorkspaces::compareEventWorkspaces(
   size_t numUnequalWeights = 0;
 
   std::vector<int> vec_mismatchedwsindex;
-  PARALLEL_FOR_IF(m_parallelComparison && ews1.threadSafe() &&
-                  ews2.threadSafe())
+  PARALLEL_FOR_IF(m_parallelComparison && ews1.threadSafe() && ews2.threadSafe())
   for (int i = 0; i < static_cast<int>(ews1.getNumberHistograms()); ++i) {
     PARALLEL_START_INTERUPT_REGION
     m_progress->report("EventLists");
-    if (!mismatchedEvent ||
-        checkallspectra) // This guard will avoid checking unnecessarily
+    if (!mismatchedEvent || checkallspectra) // This guard will avoid checking unnecessarily
     {
       const EventList &el1 = ews1.getSpectrum(i);
       const EventList &el2 = ews2.getSpectrum(i);
       bool printdetail = (i == wsindex2print);
       if (printdetail) {
-        g_log.information()
-            << "Spectrum " << i << " is set to print out in details. "
-            << "\n";
+        g_log.information() << "Spectrum " << i << " is set to print out in details. "
+                            << "\n";
       }
 
       if (!el1.equals(el2, toleranceTOF, toleranceWeight, tolerancePulse)) {
@@ -537,10 +509,9 @@ bool CompareWorkspaces::compareEventWorkspaces(
           // Number of events are different
           tempNumUnequal = -1;
         } else {
-          tempNumUnequal = compareEventsListInDetails(
-              el1, el2, toleranceTOF, toleranceWeight, tolerancePulse,
-              printdetail, tempNumPulses, tempNumTof, tempNumBoth,
-              tempNumWeight);
+          tempNumUnequal =
+              compareEventsListInDetails(el1, el2, toleranceTOF, toleranceWeight, tolerancePulse, printdetail,
+                                         tempNumPulses, tempNumTof, tempNumBoth, tempNumWeight);
         }
 
         mismatchedEvent = true;
@@ -572,26 +543,21 @@ bool CompareWorkspaces::compareEventWorkspaces(
     std::ostringstream mess;
     if (checkallspectra) {
       if (numUnequalNumEventsSpectra > 0)
-        mess << "Total " << numUnequalNumEventsSpectra
-             << " spectra have different number of events. "
+        mess << "Total " << numUnequalNumEventsSpectra << " spectra have different number of events. "
              << "\n";
 
-      mess << "Total " << numUnequalEvents << " (in " << ews1.getNumberEvents()
-           << ") events are differrent. " << numUnequalTOFEvents
-           << " have different TOF; " << numUnequalPulseEvents
-           << " have different pulse time; " << numUnequalBothEvents
-           << " have different in both TOF and pulse time; "
-           << numUnequalWeights << " have different weights."
+      mess << "Total " << numUnequalEvents << " (in " << ews1.getNumberEvents() << ") events are differrent. "
+           << numUnequalTOFEvents << " have different TOF; " << numUnequalPulseEvents << " have different pulse time; "
+           << numUnequalBothEvents << " have different in both TOF and pulse time; " << numUnequalWeights
+           << " have different weights."
            << "\n";
 
-      mess << "Mismatched event lists include " << vec_mismatchedwsindex.size()
-           << " of "
+      mess << "Mismatched event lists include " << vec_mismatchedwsindex.size() << " of "
            << "total " << ews1.getNumberHistograms() << " spectra. "
            << "\n";
 
       std::sort(vec_mismatchedwsindex.begin(), vec_mismatchedwsindex.end());
-      numspec2print = std::min(numspec2print,
-                               static_cast<int>(vec_mismatchedwsindex.size()));
+      numspec2print = std::min(numspec2print, static_cast<int>(vec_mismatchedwsindex.size()));
       for (int i = 0; i < numspec2print; ++i) {
         mess << vec_mismatchedwsindex[i] << ", ";
         if ((i + 1) % 10 == 0)
@@ -599,8 +565,7 @@ bool CompareWorkspaces::compareEventWorkspaces(
       }
     } else {
       mess << "Quick comparison shows 2 workspaces do not match. "
-           << "First found mismatched event list is at workspace index "
-           << mismatchedEventWI;
+           << "First found mismatched event list is at workspace index " << mismatchedEventWI;
     }
     recordMismatch(mess.str());
     wsmatch = false;
@@ -643,8 +608,7 @@ bool CompareWorkspaces::checkData(const API::MatrixWorkspace_const_sptr &ws1,
   bool resultBool = true;
 
   // Now check the data itself
-  PARALLEL_FOR_IF(m_parallelComparison && ws1->threadSafe() &&
-                  ws2->threadSafe())
+  PARALLEL_FOR_IF(m_parallelComparison && ws1->threadSafe() && ws2->threadSafe())
   for (long i = 0; i < static_cast<long>(numHists); ++i) {
     PARALLEL_START_INTERUPT_REGION
     m_progress->report("Histograms");
@@ -662,24 +626,17 @@ bool CompareWorkspaces::checkData(const API::MatrixWorkspace_const_sptr &ws1,
       for (int j = 0; j < static_cast<int>(numBins); ++j) {
         bool err;
         if (RelErr) {
-          err = (relErr(X1[j], X2[j], tolerance) ||
-                 relErr(Y1[j], Y2[j], tolerance) ||
-                 relErr(E1[j], E2[j], tolerance));
+          err = (relErr(X1[j], X2[j], tolerance) || relErr(Y1[j], Y2[j], tolerance) || relErr(E1[j], E2[j], tolerance));
         } else
-          err = (std::fabs(X1[j] - X2[j]) > tolerance ||
-                 std::fabs(Y1[j] - Y2[j]) > tolerance ||
+          err = (std::fabs(X1[j] - X2[j]) > tolerance || std::fabs(Y1[j] - Y2[j]) > tolerance ||
                  std::fabs(E1[j] - E2[j]) > tolerance);
 
         if (err) {
-          g_log.debug() << "Data mismatch at cell (hist#,bin#): (" << i << ","
-                        << j << ")\n";
-          g_log.debug() << " Dataset #1 (X,Y,E) = (" << X1[j] << "," << Y1[j]
-                        << "," << E1[j] << ")\n";
-          g_log.debug() << " Dataset #2 (X,Y,E) = (" << X2[j] << "," << Y2[j]
-                        << "," << E2[j] << ")\n";
-          g_log.debug() << " Difference (X,Y,E) = (" << std::fabs(X1[j] - X2[j])
-                        << "," << std::fabs(Y1[j] - Y2[j]) << ","
-                        << std::fabs(E1[j] - E2[j]) << ")\n";
+          g_log.debug() << "Data mismatch at cell (hist#,bin#): (" << i << "," << j << ")\n";
+          g_log.debug() << " Dataset #1 (X,Y,E) = (" << X1[j] << "," << Y1[j] << "," << E1[j] << ")\n";
+          g_log.debug() << " Dataset #2 (X,Y,E) = (" << X2[j] << "," << Y2[j] << "," << E2[j] << ")\n";
+          g_log.debug() << " Difference (X,Y,E) = (" << std::fabs(X1[j] - X2[j]) << "," << std::fabs(Y1[j] - Y2[j])
+                        << "," << std::fabs(E1[j] - E2[j]) << ")\n";
           PARALLEL_CRITICAL(resultBool)
           resultBool = false;
         }
@@ -688,8 +645,7 @@ bool CompareWorkspaces::checkData(const API::MatrixWorkspace_const_sptr &ws1,
       // Extra one for histogram data
       if (histogram && std::fabs(X1.back() - X2.back()) > tolerance) {
         g_log.debug() << " Data ranges mismatch for spectra N: (" << i << ")\n";
-        g_log.debug() << " Last bin ranges (X1_end vs X2_end) = (" << X1.back()
-                      << "," << X2.back() << ")\n";
+        g_log.debug() << " Last bin ranges (X1_end vs X2_end) = (" << X1.back() << "," << X2.back() << ")\n";
         PARALLEL_CRITICAL(resultBool)
         resultBool = false;
       }
@@ -742,8 +698,7 @@ bool CompareWorkspaces::checkAxes(const API::MatrixWorkspace_const_sptr &ws1,
     Unit_const_sptr ax1_unit = ax1->unit();
     Unit_const_sptr ax2_unit = ax2->unit();
 
-    if ((ax1_unit == nullptr && ax2_unit != nullptr) ||
-        (ax1_unit != nullptr && ax2_unit == nullptr) ||
+    if ((ax1_unit == nullptr && ax2_unit != nullptr) || (ax1_unit != nullptr && ax2_unit == nullptr) ||
         (ax1_unit && ax1_unit->unitID() != ax2_unit->unitID())) {
       recordMismatch(axis_name + " unit mismatch");
       return false;
@@ -766,16 +721,15 @@ bool CompareWorkspaces::checkAxes(const API::MatrixWorkspace_const_sptr &ws1,
   }
 
   if (ws1->YUnit() != ws2->YUnit()) {
-    g_log.debug() << "YUnit strings : WS1 = " << ws1->YUnit()
-                  << " WS2 = " << ws2->YUnit() << "\n";
+    g_log.debug() << "YUnit strings : WS1 = " << ws1->YUnit() << " WS2 = " << ws2->YUnit() << "\n";
     recordMismatch("YUnit mismatch");
     return false;
   }
 
   // Check both have the same distribution flag
   if (ws1->isDistribution() != ws2->isDistribution()) {
-    g_log.debug() << "Distribution flags: WS1 = " << ws1->isDistribution()
-                  << " WS2 = " << ws2->isDistribution() << "\n";
+    g_log.debug() << "Distribution flags: WS1 = " << ws1->isDistribution() << " WS2 = " << ws2->isDistribution()
+                  << "\n";
     recordMismatch("Distribution flag mismatch");
     return false;
   }
@@ -790,8 +744,7 @@ bool CompareWorkspaces::checkAxes(const API::MatrixWorkspace_const_sptr &ws1,
 /// @param ws2 :: the second sp det map
 /// @retval true The maps match
 /// @retval false The maps do not match
-bool CompareWorkspaces::checkSpectraMap(const MatrixWorkspace_const_sptr &ws1,
-                                        const MatrixWorkspace_const_sptr &ws2) {
+bool CompareWorkspaces::checkSpectraMap(const MatrixWorkspace_const_sptr &ws1, const MatrixWorkspace_const_sptr &ws2) {
   if (ws1->getNumberHistograms() != ws2->getNumberHistograms()) {
     recordMismatch("Number of spectra mismatch");
     return false;
@@ -806,15 +759,13 @@ bool CompareWorkspaces::checkSpectraMap(const MatrixWorkspace_const_sptr &ws1,
     }
     if (spec1.getDetectorIDs().size() != spec2.getDetectorIDs().size()) {
       std::ostringstream out;
-      out << "Number of detector IDs mismatch: "
-          << spec1.getDetectorIDs().size() << " vs "
+      out << "Number of detector IDs mismatch: " << spec1.getDetectorIDs().size() << " vs "
           << spec2.getDetectorIDs().size() << " at workspace index " << i;
       recordMismatch(out.str());
       return false;
     }
     auto it2 = spec2.getDetectorIDs().cbegin();
-    for (auto it1 = spec1.getDetectorIDs().cbegin();
-         it1 != spec1.getDetectorIDs().cend(); ++it1, ++it2) {
+    for (auto it1 = spec1.getDetectorIDs().cbegin(); it1 != spec1.getDetectorIDs().cend(); ++it1, ++it2) {
       if (*it1 != *it2) {
         recordMismatch("Detector IDs mismatch");
         return false;
@@ -827,18 +778,26 @@ bool CompareWorkspaces::checkSpectraMap(const MatrixWorkspace_const_sptr &ws1,
 }
 
 //------------------------------------------------------------------------------------------------
-/// Checks that the instruments match
-/// @param ws1 :: the first workspace
-/// @param ws2 :: the second workspace
-/// @retval true The instruments match
-/// @retval false The instruments do not match
-bool CompareWorkspaces::checkInstrument(
-    const API::MatrixWorkspace_const_sptr &ws1,
-    const API::MatrixWorkspace_const_sptr &ws2) {
+/* @brief Checks that the instruments match
+ *
+ * @details the following checks are performed:
+ * - instrument name
+ * - positions and rotations of detectors
+ * - mask of detectors
+ * - position of the source and sample
+ * - instrument parameters
+ *
+ * @param ws1 :: the first workspace
+ * @param ws2 :: the second workspace
+ * @retval true The instruments match
+ *
+ * @retval false The instruments do not match
+ */
+bool CompareWorkspaces::checkInstrument(const API::MatrixWorkspace_const_sptr &ws1,
+                                        const API::MatrixWorkspace_const_sptr &ws2) {
   // First check the name matches
   if (ws1->getInstrument()->getName() != ws2->getInstrument()->getName()) {
-    g_log.debug() << "Instrument names: WS1 = "
-                  << ws1->getInstrument()->getName()
+    g_log.debug() << "Instrument names: WS1 = " << ws1->getInstrument()->getName()
                   << " WS2 = " << ws2->getInstrument()->getName() << "\n";
     recordMismatch("Instrument name mismatch");
     return false;
@@ -850,15 +809,27 @@ bool CompareWorkspaces::checkInstrument(
     return false;
   }
 
+  if (!ws1->componentInfo().hasEquivalentSource(ws2->componentInfo())) {
+    recordMismatch("Source mismatch: either one workspace has a source and the "
+                   "other does not, or the sources are at different positions");
+    return false;
+  }
+
+  if (!ws1->componentInfo().hasEquivalentSample(ws2->componentInfo())) {
+    recordMismatch("Sample mismatch: either one workspace has a sample and the "
+                   "other does not, or the samples are at different positions");
+    return false;
+  }
+
   const Geometry::ParameterMap &ws1_parmap = ws1->constInstrumentParameters();
   const Geometry::ParameterMap &ws2_parmap = ws2->constInstrumentParameters();
 
-  if (ws1_parmap != ws2_parmap) {
-    g_log.debug()
-        << "Here information to help understand parameter map differences:\n";
-    g_log.debug() << ws1_parmap.diff(ws2_parmap);
-    recordMismatch(
-        "Instrument ParameterMap mismatch (differences in ordering ignored)");
+  const bool checkAllData = getProperty("CheckAllData");
+  auto errorStr = ws1_parmap.diff(ws2_parmap, !checkAllData);
+  if (!errorStr.empty()) {
+    g_log.debug() << "Here information to help understand parameter map differences:\n";
+    g_log.debug() << errorStr;
+    recordMismatch("Instrument ParameterMap mismatch (differences in ordering ignored)");
     return false;
   }
 
@@ -867,21 +838,19 @@ bool CompareWorkspaces::checkInstrument(
 }
 
 //------------------------------------------------------------------------------------------------
-/// Checks that the masking matches
+/// Checks that the bin masking matches
 /// @param ws1 :: the first workspace
 /// @param ws2 :: the second workspace
 /// @retval true The masking matches
 /// @retval false The masking does not match
-bool CompareWorkspaces::checkMasking(
-    const API::MatrixWorkspace_const_sptr &ws1,
-    const API::MatrixWorkspace_const_sptr &ws2) {
+bool CompareWorkspaces::checkMasking(const API::MatrixWorkspace_const_sptr &ws1,
+                                     const API::MatrixWorkspace_const_sptr &ws2) {
   const auto numHists = static_cast<int>(ws1->getNumberHistograms());
 
   for (int i = 0; i < numHists; ++i) {
     const bool ws1_masks = ws1->hasMaskedBins(i);
     if (ws1_masks != ws2->hasMaskedBins(i)) {
-      g_log.debug() << "Only one workspace has masked bins for spectrum " << i
-                    << "\n";
+      g_log.debug() << "Only one workspace has masked bins for spectrum " << i << "\n";
       recordMismatch("Masking mismatch");
       return false;
     }
@@ -904,8 +873,7 @@ bool CompareWorkspaces::checkMasking(
 /// @param sample2 :: the second sample
 /// @retval true The sample matches
 /// @retval false The samples does not match
-bool CompareWorkspaces::checkSample(const API::Sample &sample1,
-                                    const API::Sample &sample2) {
+bool CompareWorkspaces::checkSample(const API::Sample &sample1, const API::Sample &sample2) {
   std::string const name1 = sample1.getName();
   std::string const name2 = sample2.getName();
   if (name1 != name2) {
@@ -927,8 +895,7 @@ bool CompareWorkspaces::checkSample(const API::Sample &sample1,
 /// @param run2 :: the second run object
 /// @retval true The sample matches
 /// @retval false The samples does not match
-bool CompareWorkspaces::checkRunProperties(const API::Run &run1,
-                                           const API::Run &run2) {
+bool CompareWorkspaces::checkRunProperties(const API::Run &run1, const API::Run &run2) {
   double run1Charge(-1.0);
   try {
     run1Charge = run1.getProtonCharge();
@@ -957,9 +924,7 @@ bool CompareWorkspaces::checkRunProperties(const API::Run &run1,
     return false;
   } else {
     // Sort logs by name before one-by-one comparison
-    auto compareNames = [](Kernel::Property *p1, Kernel::Property *p2) {
-      return p1->name() < p2->name();
-    };
+    auto compareNames = [](Kernel::Property *p1, Kernel::Property *p2) { return p1->name() < p2->name(); };
     std::sort(ws1logs.begin(), ws1logs.end(), compareNames);
     std::sort(ws2logs.begin(), ws2logs.end(), compareNames);
     for (size_t i = 0; i < ws1logs.size(); ++i) {
@@ -991,37 +956,33 @@ bool CompareWorkspaces::checkRunProperties(const API::Run &run1,
  * @return :: int.  -1: different number of events;  N > 0 : some
  *            events are not same
  */
-int CompareWorkspaces::compareEventsListInDetails(
-    const EventList &el1, const EventList &el2, double tolTof, double tolWeight,
-    int64_t tolPulse, bool printdetails, size_t &numdiffpulse,
-    size_t &numdifftof, size_t &numdiffboth, size_t &numdiffweight) const {
+int CompareWorkspaces::compareEventsListInDetails(const EventList &el1, const EventList &el2, double tolTof,
+                                                  double tolWeight, int64_t tolPulse, bool printdetails,
+                                                  size_t &numdiffpulse, size_t &numdifftof, size_t &numdiffboth,
+                                                  size_t &numdiffweight) const {
   // Check
   if (el1.getNumberEvents() != el2.getNumberEvents())
-    throw std::runtime_error(
-        "compareEventsListInDetails only work on 2 event lists with same "
-        "number of events.");
+    throw std::runtime_error("compareEventsListInDetails only work on 2 event lists with same "
+                             "number of events.");
 
   switch (el1.getEventType()) {
   case EventType::TOF:
-    return compareEventLists<Types::Event::TofEvent>(
-        g_log, el1, el2, tolTof, tolWeight, tolPulse, printdetails,
-        numdiffpulse, numdifftof, numdiffboth, numdiffweight);
+    return compareEventLists<Types::Event::TofEvent>(g_log, el1, el2, tolTof, tolWeight, tolPulse, printdetails,
+                                                     numdiffpulse, numdifftof, numdiffboth, numdiffweight);
   case EventType::WEIGHTED:
-    return compareEventLists<DataObjects::WeightedEvent>(
-        g_log, el1, el2, tolTof, tolWeight, tolPulse, printdetails,
-        numdiffpulse, numdifftof, numdiffboth, numdiffweight);
+    return compareEventLists<DataObjects::WeightedEvent>(g_log, el1, el2, tolTof, tolWeight, tolPulse, printdetails,
+                                                         numdiffpulse, numdifftof, numdiffboth, numdiffweight);
   case EventType::WEIGHTED_NOTIME:
-    return compareEventLists<DataObjects::WeightedEventNoTime>(
-        g_log, el1, el2, tolTof, tolWeight, tolPulse, printdetails,
-        numdiffpulse, numdifftof, numdiffboth, numdiffweight);
+    return compareEventLists<DataObjects::WeightedEventNoTime>(g_log, el1, el2, tolTof, tolWeight, tolPulse,
+                                                               printdetails, numdiffpulse, numdifftof, numdiffboth,
+                                                               numdiffweight);
   default:
     throw std::runtime_error("Cannot compare event lists: unknown event type.");
   }
 }
 
 //------------------------------------------------------------------------------------------------
-void CompareWorkspaces::doPeaksComparison(PeaksWorkspace_sptr tws1,
-                                          PeaksWorkspace_sptr tws2) {
+void CompareWorkspaces::doPeaksComparison(PeaksWorkspace_sptr tws1, PeaksWorkspace_sptr tws2) {
   // Check some table-based stuff
   if (tws1->getNumberPeaks() != tws2->getNumberPeaks()) {
     recordMismatch("Mismatched number of rows.");
@@ -1039,29 +1000,32 @@ void CompareWorkspaces::doPeaksComparison(PeaksWorkspace_sptr tws1,
     sortPeaks->setProperty("ColumnNameToSortBy", "DSpacing");
     sortPeaks->setProperty("SortAscending", true);
     sortPeaks->executeAsChildAlg();
-    tws1 = sortPeaks->getProperty("OutputWorkspace");
+    IPeaksWorkspace_sptr tmp1 = sortPeaks->getProperty("OutputWorkspace");
+    tws1 = std::dynamic_pointer_cast<PeaksWorkspace>(tmp1);
 
     sortPeaks = createChildAlgorithm("SortPeaksWorkspace");
     sortPeaks->setProperty("InputWorkspace", tws2);
     sortPeaks->setProperty("ColumnNameToSortBy", "DSpacing");
     sortPeaks->setProperty("SortAscending", true);
     sortPeaks->executeAsChildAlg();
-    tws2 = sortPeaks->getProperty("OutputWorkspace");
+    IPeaksWorkspace_sptr tmp2 = sortPeaks->getProperty("OutputWorkspace");
+    tws2 = std::dynamic_pointer_cast<PeaksWorkspace>(tmp2);
   }
 
   const double tolerance = getProperty("Tolerance");
+  const bool isRelErr = getProperty("ToleranceRelErr");
   for (int i = 0; i < tws1->getNumberPeaks(); i++) {
-    const IPeak &peak1 = tws1->getPeak(i);
-    const IPeak &peak2 = tws2->getPeak(i);
+    const Peak &peak1 = tws1->getPeak(i);
+    const Peak &peak2 = tws2->getPeak(i);
     for (size_t j = 0; j < tws1->columnCount(); j++) {
       std::shared_ptr<const API::Column> col = tws1->getColumn(j);
       std::string name = col->name();
       double s1 = 0.0;
       double s2 = 0.0;
-      if (name == "runnumber") {
+      if (name == "RunNumber") {
         s1 = double(peak1.getRunNumber());
         s2 = double(peak2.getRunNumber());
-      } else if (name == "detid") {
+      } else if (name == "DetId") {
         s1 = double(peak1.getDetectorID());
         s2 = double(peak2.getDetectorID());
       } else if (name == "h") {
@@ -1073,37 +1037,50 @@ void CompareWorkspaces::doPeaksComparison(PeaksWorkspace_sptr tws1,
       } else if (name == "l") {
         s1 = peak1.getL();
         s2 = peak2.getL();
-      } else if (name == "wavelength") {
+      } else if (name == "Wavelength") {
         s1 = peak1.getWavelength();
         s2 = peak2.getWavelength();
-      } else if (name == "energy") {
+      } else if (name == "Energy") {
         s1 = peak1.getInitialEnergy();
         s2 = peak2.getInitialEnergy();
-      } else if (name == "tof") {
+      } else if (name == "TOF") {
         s1 = peak1.getTOF();
         s2 = peak2.getTOF();
-      } else if (name == "dspacing") {
+      } else if (name == "DSpacing") {
         s1 = peak1.getDSpacing();
         s2 = peak2.getDSpacing();
-      } else if (name == "intens") {
+      } else if (name == "Intens") {
         s1 = peak1.getIntensity();
         s2 = peak2.getIntensity();
-      } else if (name == "sigint") {
+      } else if (name == "SigInt") {
         s1 = peak1.getSigmaIntensity();
         s2 = peak2.getSigmaIntensity();
-      } else if (name == "bincount") {
+      } else if (name == "BinCount") {
         s1 = peak1.getBinCount();
         s2 = peak2.getBinCount();
-      } else if (name == "row") {
+      } else if (name == "Row") {
         s1 = peak1.getRow();
         s2 = peak2.getRow();
-      } else if (name == "col") {
+      } else if (name == "Col") {
         s1 = peak1.getCol();
         s2 = peak2.getCol();
+      } else {
+        g_log.information() << "Column " << name << " is not compared\n";
       }
-      if (std::fabs(s1 - s2) > tolerance) {
-        g_log.debug() << "Data mismatch at cell (row#,col#): (" << i << "," << j
-                      << ")\n";
+      bool mismatch = false;
+      if (isRelErr) {
+        if (relErr(s1, s2, tolerance)) {
+          mismatch = true;
+        }
+      } else if (std::fabs(s1 - s2) > tolerance) {
+        mismatch = true;
+      }
+      if (mismatch) {
+        g_log.notice(name);
+        g_log.notice() << "data mismatch in column name = " << name << "\n"
+                       << "cell (row#, col#): (" << i << "," << j << ")\n"
+                       << "value1 = " << s1 << "\n"
+                       << "value2 = " << s2 << "\n";
         recordMismatch("Data mismatch");
         return;
       }
@@ -1112,21 +1089,129 @@ void CompareWorkspaces::doPeaksComparison(PeaksWorkspace_sptr tws1,
 }
 
 //------------------------------------------------------------------------------------------------
-void CompareWorkspaces::doTableComparison(
-    const API::ITableWorkspace_const_sptr &tws1,
-    const API::ITableWorkspace_const_sptr &tws2) {
+void CompareWorkspaces::doLeanElasticPeaksComparison(const LeanElasticPeaksWorkspace_sptr &tws1,
+                                                     const LeanElasticPeaksWorkspace_sptr &tws2) {
+  // Check some table-based stuff
+  if (tws1->getNumberPeaks() != tws2->getNumberPeaks()) {
+    recordMismatch("Mismatched number of rows.");
+    return;
+  }
+  if (tws1->columnCount() != tws2->columnCount()) {
+    recordMismatch("Mismatched number of columns.");
+    return;
+  }
+
+  // sort the workspaces before comparing
+  auto sortPeaks = createChildAlgorithm("SortPeaksWorkspace");
+  sortPeaks->setProperty("InputWorkspace", tws1);
+  sortPeaks->setProperty("ColumnNameToSortBy", "DSpacing");
+  sortPeaks->setProperty("SortAscending", true);
+  sortPeaks->executeAsChildAlg();
+  IPeaksWorkspace_sptr ipws1 = sortPeaks->getProperty("OutputWorkspace");
+
+  sortPeaks = createChildAlgorithm("SortPeaksWorkspace");
+  sortPeaks->setProperty("InputWorkspace", tws2);
+  sortPeaks->setProperty("ColumnNameToSortBy", "DSpacing");
+  sortPeaks->setProperty("SortAscending", true);
+  sortPeaks->executeAsChildAlg();
+  IPeaksWorkspace_sptr ipws2 = sortPeaks->getProperty("OutputWorkspace");
+
+  const double tolerance = getProperty("Tolerance");
+  const bool isRelErr = getProperty("ToleranceRelErr");
+  for (int peakIndex = 0; peakIndex < ipws1->getNumberPeaks(); peakIndex++) {
+    for (size_t j = 0; j < ipws1->columnCount(); j++) {
+      std::shared_ptr<const API::Column> col = ipws1->getColumn(j);
+      const std::string name = col->name();
+      double s1 = 0.0;
+      double s2 = 0.0;
+      if (name == "RunNumber") {
+        s1 = double(ipws1->getPeak(peakIndex).getRunNumber());
+        s2 = double(ipws2->getPeak(peakIndex).getRunNumber());
+      } else if (name == "h") {
+        s1 = ipws1->getPeak(peakIndex).getH();
+        s2 = ipws2->getPeak(peakIndex).getH();
+      } else if (name == "k") {
+        s1 = ipws1->getPeak(peakIndex).getK();
+        s2 = ipws2->getPeak(peakIndex).getK();
+      } else if (name == "l") {
+        s1 = ipws1->getPeak(peakIndex).getL();
+        s2 = ipws2->getPeak(peakIndex).getL();
+      } else if (name == "Wavelength") {
+        s1 = ipws1->getPeak(peakIndex).getWavelength();
+        s2 = ipws2->getPeak(peakIndex).getWavelength();
+      } else if (name == "DSpacing") {
+        s1 = ipws1->getPeak(peakIndex).getDSpacing();
+        s2 = ipws2->getPeak(peakIndex).getDSpacing();
+      } else if (name == "Intens") {
+        s1 = ipws1->getPeak(peakIndex).getIntensity();
+        s2 = ipws2->getPeak(peakIndex).getIntensity();
+      } else if (name == "SigInt") {
+        s1 = ipws1->getPeak(peakIndex).getSigmaIntensity();
+        s2 = ipws2->getPeak(peakIndex).getSigmaIntensity();
+      } else if (name == "BinCount") {
+        s1 = ipws1->getPeak(peakIndex).getBinCount();
+        s2 = ipws2->getPeak(peakIndex).getBinCount();
+      } else if (name == "QLab") {
+        V3D q1 = ipws1->getPeak(peakIndex).getQLabFrame();
+        V3D q2 = ipws2->getPeak(peakIndex).getQLabFrame();
+        // using s1 here as the diff
+        for (int i = 0; i < 3; ++i) {
+          s1 += (q1[i] - q2[i]) * (q1[i] - q2[i]);
+        }
+        s1 = std::sqrt(s1);
+        if (isRelErr) {
+          // divide diff by avg |Q| and then compare to 0 using absolute tol
+          s1 /= 0.5 * (q1.norm() + q2.norm());
+        }
+      } else if (name == "QSample") {
+        V3D q1 = ipws1->getPeak(peakIndex).getQSampleFrame();
+        V3D q2 = ipws2->getPeak(peakIndex).getQSampleFrame();
+        // using s1 here as the diff
+        for (int i = 0; i < 3; ++i) {
+          s1 += (q1[i] - q2[i]) * (q1[i] - q2[i]);
+        }
+        s1 = std::sqrt(s1);
+        if (isRelErr) {
+          // divide diff by avg |Q| and then compare to 0 using absolute tol
+          s1 /= 0.5 * (q1.norm() + q2.norm());
+        }
+      } else {
+        g_log.information() << "Column " << name << " is not compared\n";
+      }
+      bool mismatch = false;
+      if (isRelErr && name != "QLab" && name != "QSample") {
+        if (relErr(s1, s2, tolerance)) {
+          mismatch = true;
+        }
+      } else if (std::fabs(s1 - s2) > tolerance) {
+        mismatch = true;
+      }
+      if (mismatch) {
+        g_log.notice(name);
+        g_log.notice() << "data mismatch in column name = " << name << "\n"
+                       << "cell (row#, col#): (" << peakIndex << "," << j << ")\n"
+                       << "value1 = " << s1 << "\n"
+                       << "value2 = " << s2 << "\n";
+        recordMismatch("Data mismatch");
+        return;
+      }
+    }
+  }
+}
+
+//------------------------------------------------------------------------------------------------
+void CompareWorkspaces::doTableComparison(const API::ITableWorkspace_const_sptr &tws1,
+                                          const API::ITableWorkspace_const_sptr &tws2) {
   // First the easy things
   const auto numCols = tws1->columnCount();
   if (numCols != tws2->columnCount()) {
-    g_log.debug() << "Number of columns mismatch (" << numCols << " vs "
-                  << tws2->columnCount() << ")\n";
+    g_log.debug() << "Number of columns mismatch (" << numCols << " vs " << tws2->columnCount() << ")\n";
     recordMismatch("Number of columns mismatch");
     return;
   }
   const auto numRows = tws1->rowCount();
   if (numRows != tws2->rowCount()) {
-    g_log.debug() << "Number of rows mismatch (" << numRows << " vs "
-                  << tws2->rowCount() << ")\n";
+    g_log.debug() << "Number of rows mismatch (" << numRows << " vs " << tws2->rowCount() << ")\n";
     recordMismatch("Number of rows mismatch");
     return;
   }
@@ -1136,14 +1221,12 @@ void CompareWorkspaces::doTableComparison(
     auto c2 = tws2->getColumn(i);
 
     if (c1->name() != c2->name()) {
-      g_log.debug() << "Column name mismatch at column " << i << " ("
-                    << c1->name() << " vs " << c2->name() << ")\n";
+      g_log.debug() << "Column name mismatch at column " << i << " (" << c1->name() << " vs " << c2->name() << ")\n";
       recordMismatch("Column name mismatch");
       return;
     }
     if (c1->type() != c2->type()) {
-      g_log.debug() << "Column type mismatch at column " << i << " ("
-                    << c1->type() << " vs " << c2->type() << ")\n";
+      g_log.debug() << "Column type mismatch at column " << i << " (" << c1->type() << " vs " << c2->type() << ")\n";
       recordMismatch("Column type mismatch");
       return;
     }
@@ -1179,13 +1262,12 @@ void CompareWorkspaces::doTableComparison(
 }
 
 //------------------------------------------------------------------------------------------------
-void CompareWorkspaces::doMDComparison(const Workspace_sptr &w1,
-                                       const Workspace_sptr &w2) {
+void CompareWorkspaces::doMDComparison(const Workspace_sptr &w1, const Workspace_sptr &w2) {
   IMDWorkspace_sptr mdws1, mdws2;
   mdws1 = std::dynamic_pointer_cast<IMDWorkspace>(w1);
   mdws2 = std::dynamic_pointer_cast<IMDWorkspace>(w2);
 
-  IAlgorithm_sptr alg = this->createChildAlgorithm("CompareMDWorkspaces");
+  auto alg = createChildAlgorithm("CompareMDWorkspaces");
   alg->setProperty<IMDWorkspace_sptr>("Workspace1", mdws1);
   alg->setProperty<IMDWorkspace_sptr>("Workspace2", mdws2);
   const double tolerance = getProperty("Tolerance");
@@ -1207,8 +1289,7 @@ void CompareWorkspaces::doMDComparison(const Workspace_sptr &w1,
  * @param ws1 Name of first workspace being compared
  * @param ws2 Name of second workspace being compared
  */
-void CompareWorkspaces::recordMismatch(const std::string &msg, std::string ws1,
-                                       std::string ws2) {
+void CompareWorkspaces::recordMismatch(const std::string &msg, std::string ws1, std::string ws2) {
   // Workspace names default to the workspaces currently being compared
   if (ws1.empty()) {
     Workspace_const_sptr w1 = getProperty("Workspace1");
@@ -1249,8 +1330,8 @@ bool CompareWorkspaces::relErr(double x1, double x2, double errorVal) const {
   return (num / den > errorVal);
 }
 
-Parallel::ExecutionMode CompareWorkspaces::getParallelExecutionMode(
-    const std::map<std::string, Parallel::StorageMode> &storageModes) const {
+Parallel::ExecutionMode
+CompareWorkspaces::getParallelExecutionMode(const std::map<std::string, Parallel::StorageMode> &storageModes) const {
   using namespace Parallel;
   if (storageModes.at("Workspace1") == StorageMode::Cloned) {
     if (storageModes.at("Workspace2") == StorageMode::Cloned)
@@ -1272,5 +1353,4 @@ void CompareWorkspaces::execMasterOnly() {
     setProperty("Result", true);
 }
 
-} // namespace Algorithms
-} // namespace Mantid
+} // namespace Mantid::Algorithms

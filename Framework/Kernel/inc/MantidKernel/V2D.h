@@ -60,16 +60,12 @@ public:
   inline double &Y() { return m_pt[1]; }
 
   /// Unchecked index access.
-  inline const double &operator[](const size_t index) const {
-    return m_pt[index];
-  }
+  inline const double &operator[](const size_t index) const { return m_pt[index]; }
 
   ///@name Arithmetic operations
   ///@{
   /// Sum this and the rhs
-  inline V2D operator+(const V2D &rhs) const {
-    return V2D(X() + rhs.X(), Y() + rhs.Y());
-  }
+  inline V2D operator+(const V2D &rhs) const { return V2D(X() + rhs.X(), Y() + rhs.Y()); }
   /// Increment this vector by rhs
   inline V2D &operator+=(const V2D &rhs) {
     X() += rhs.X();
@@ -77,9 +73,7 @@ public:
     return *this;
   }
   /// Subtract rhs
-  inline V2D operator-(const V2D &rhs) const {
-    return V2D(X() - rhs.X(), Y() - rhs.Y());
-  }
+  inline V2D operator-(const V2D &rhs) const { return V2D(X() - rhs.X(), Y() - rhs.Y()); }
   /// Decrement this by rhs
   inline V2D &operator-=(const V2D &rhs) {
     X() -= rhs.X();
@@ -87,9 +81,7 @@ public:
     return *this;
   }
   /// Scale and return
-  inline V2D operator*(const double factor) const {
-    return V2D(X() * factor, Y() * factor);
-  }
+  inline V2D operator*(const double factor) const { return V2D(X() * factor, Y() * factor); }
   /// Scale this
   V2D &operator*=(const double factor) {
     X() *= factor;
@@ -138,25 +130,19 @@ public:
    * Compute the scalar product with another vector
    * @param other :: A second vector
    */
-  inline double scalar_prod(const V2D &other) const {
-    return X() * other.X() + Y() * other.Y();
-  }
+  inline double scalar_prod(const V2D &other) const { return X() * other.X() + Y() * other.Y(); }
 
   /**
    * Cross product
    */
-  inline V3D cross_prod(const V2D &other) const {
-    return V3D(0.0, 0.0, X() * other.Y() - Y() * other.X());
-  }
+  inline V3D cross_prod(const V2D &other) const { return V3D(0.0, 0.0, X() * other.Y() - Y() * other.X()); }
 
   /**
    * Distance (R) between two points defined as vectors
    * @param other :: A second vector
    * @returns The distance between the two points
    */
-  inline double distance(const V2D &other) const {
-    return V2D(X() - other.X(), Y() - other.Y()).norm();
-  }
+  inline double distance(const V2D &other) const { return V2D(X() - other.X(), Y() - other.Y()).norm(); }
 
   // Angle between this and another vector
   double angle(const V2D &other) const;

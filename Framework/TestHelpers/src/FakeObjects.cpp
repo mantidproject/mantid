@@ -4,18 +4,20 @@
 //   NScD Oak Ridge National Laboratory, European Spallation Source,
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#include "MantidTestHelpers/FakeObjects.h"
+#include "MantidFrameworkTestHelpers/FakeObjects.h"
 
 // Property implementations
+#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceProperty.tcc"
 #include "MantidKernel/PropertyWithValue.tcc"
+
+DECLARE_WORKSPACE(WorkspaceTester)
 
 namespace Mantid {
 namespace Kernel {
 ///@cond TEMPLATE
 template class DLLExport PropertyWithValue<std::shared_ptr<WorkspaceTester>>;
-template class DLLExport
-    PropertyWithValue<std::shared_ptr<TableWorkspaceTester>>;
+template class DLLExport PropertyWithValue<std::shared_ptr<TableWorkspaceTester>>;
 ///@endcond TEMPLATE
 } // namespace Kernel
 namespace API {

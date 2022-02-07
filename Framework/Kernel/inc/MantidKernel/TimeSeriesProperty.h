@@ -62,30 +62,21 @@ private:
   TYPE mvalue;
 
 public:
-  TimeValueUnit(const Types::Core::DateAndTime &time, TYPE value) {
-    mtime = time;
-    mvalue = value;
-  }
+  TimeValueUnit(const Types::Core::DateAndTime &time, const TYPE &value) : mtime(time), mvalue(value) {}
 
   ~TimeValueUnit() = default;
 
   bool operator>(const TimeValueUnit &rhs) { return (mtime > rhs.mtime); }
 
-  friend bool operator>(const TimeValueUnit &lhs, const TimeValueUnit &rhs) {
-    return (lhs.mtime > rhs.mtime);
-  }
+  friend bool operator>(const TimeValueUnit &lhs, const TimeValueUnit &rhs) { return (lhs.mtime > rhs.mtime); }
 
   bool operator==(const TimeValueUnit &rhs) { return (mtime == rhs.mtime); }
 
-  friend bool operator==(const TimeValueUnit &lhs, const TimeValueUnit &rhs) {
-    return (lhs.mtime == rhs.mtime);
-  }
+  friend bool operator==(const TimeValueUnit &lhs, const TimeValueUnit &rhs) { return (lhs.mtime == rhs.mtime); }
 
   bool operator<(const TimeValueUnit &rhs) { return (mtime < rhs.mtime); }
 
-  friend bool operator<(const TimeValueUnit &lhs, const TimeValueUnit &rhs) {
-    return (lhs.mtime < rhs.mtime);
-  }
+  friend bool operator<(const TimeValueUnit &lhs, const TimeValueUnit &rhs) { return (lhs.mtime < rhs.mtime); }
 
   Types::Core::DateAndTime time() const { return mtime; }
 
@@ -93,23 +84,18 @@ public:
 
   TYPE value() const { return mvalue; }
 
-  static bool valueCmp(const TimeValueUnit &lhs, const TimeValueUnit &rhs) {
-    return (lhs.mvalue < rhs.mvalue);
-  }
+  static bool valueCmp(const TimeValueUnit &lhs, const TimeValueUnit &rhs) { return (lhs.mvalue < rhs.mvalue); }
 };
 //========================================================================================================
 
 /**
    A specialised Property class for holding a series of time-value pairs.
  */
-template <typename TYPE>
-class DLLExport TimeSeriesProperty : public Property,
-                                     public ITimeSeriesProperty {
+template <typename TYPE> class DLLExport TimeSeriesProperty : public Property, public ITimeSeriesProperty {
 public:
   /// Constructor
   explicit TimeSeriesProperty(const std::string &name);
-  TimeSeriesProperty(const std::string &name,
-                     const std::vector<Types::Core::DateAndTime> &times,
+  TimeSeriesProperty(const std::string &name, const std::vector<Types::Core::DateAndTime> &times,
                      const std::vector<TYPE> &values);
 
   /// Virtual destructor
@@ -147,41 +133,32 @@ public:
   void setName(const std::string &name);
 
   /// Filter out a run by time.
-  void filterByTime(const Types::Core::DateAndTime &start,
-                    const Types::Core::DateAndTime &stop) override;
+  void filterByTime(const Types::Core::DateAndTime &start, const Types::Core::DateAndTime &stop) override;
   /// Filter by a range of times
   void filterByTimes(const std::vector<SplittingInterval> &splittervec);
 
   /// Split out a time series property by time intervals.
-  void splitByTime(std::vector<SplittingInterval> &splitter,
-                   std::vector<Property *> outputs,
+  void splitByTime(std::vector<SplittingInterval> &splitter, std::vector<Property *> outputs,
                    bool isPeriodic) const override;
 
   /// New split method
-  void splitByTimeVector(
-      const std::vector<Types::Core::DateAndTime> &splitter_time_vec,
-      const std::vector<int> &target_vec,
-      const std::vector<TimeSeriesProperty *> &outputs);
+  void splitByTimeVector(const std::vector<Types::Core::DateAndTime> &splitter_time_vec,
+                         const std::vector<int> &target_vec, const std::vector<TimeSeriesProperty *> &outputs);
 
   /// Fill a TimeSplitterType that will filter the events by matching
-  void makeFilterByValue(std::vector<SplittingInterval> &split, double min,
-                         double max, double TimeTolerance = 0.0,
+  void makeFilterByValue(std::vector<SplittingInterval> &split, double min, double max, double TimeTolerance = 0.0,
                          bool centre = false) const override;
   /// Make sure an existing filter covers the full time range given
-  void expandFilterToRange(std::vector<SplittingInterval> &split, double min,
-                           double max,
+  void expandFilterToRange(std::vector<SplittingInterval> &split, double min, double max,
                            const TimeInterval &range) const override;
   /// Calculate the time-weighted average of a property in a filtered range
-  double averageValueInFilter(
-      const std::vector<SplittingInterval> &filter) const override;
+  double averageValueInFilter(const std::vector<SplittingInterval> &filter) const override;
   /// @copydoc Mantid::Kernel::ITimeSeriesProperty::averageAndStdDevInFilter()
-  std::pair<double, double> averageAndStdDevInFilter(
-      const std::vector<SplittingInterval> &filter) const override;
+  std::pair<double, double> averageAndStdDevInFilter(const std::vector<SplittingInterval> &filter) const override;
   /// @copydoc Mantid::Kernel::ITimeSeriesProperty::timeAverageValue()
   double timeAverageValue() const override;
   /// generate constant time-step histogram from the property values
-  void histogramData(const Types::Core::DateAndTime &tMin,
-                     const Types::Core::DateAndTime &tMax,
+  void histogramData(const Types::Core::DateAndTime &tMin, const Types::Core::DateAndTime &tMax,
                      std::vector<double> &counts) const;
 
   ///  Return the time series as a correct C++ map<DateAndTime, TYPE>. All
@@ -204,18 +181,16 @@ public:
   std::vector<double> timesAsVectorSeconds() const;
 
   /// Add a value to the map using a DateAndTime object
-  void addValue(const Types::Core::DateAndTime &time, const TYPE value);
+  void addValue(const Types::Core::DateAndTime &time, const TYPE &value);
   /// Add a value to the map using a string time
-  void addValue(const std::string &time, const TYPE value);
+  void addValue(const std::string &time, const TYPE &value);
   /// Add a value to the map using a time_t
-  void addValue(const std::time_t &time, const TYPE value);
+  void addValue(const std::time_t &time, const TYPE &value);
   /// Adds vectors of values to the map. Should be much faster than repeated
   /// calls to addValue.
-  void addValues(const std::vector<Types::Core::DateAndTime> &times,
-                 const std::vector<TYPE> &values);
+  void addValues(const std::vector<Types::Core::DateAndTime> &times, const std::vector<TYPE> &values);
   /// Replaces the time series with new values time series values
-  void replaceValues(const std::vector<Types::Core::DateAndTime> &times,
-                     const std::vector<TYPE> &values);
+  void replaceValues(const std::vector<Types::Core::DateAndTime> &times, const std::vector<TYPE> &values);
 
   /// Returns the last time
   Types::Core::DateAndTime lastTime() const;
@@ -260,12 +235,10 @@ public:
   /// Deletes all but the 'last entry' in the property
   void clearOutdated() override;
   /// Clears and creates a TimeSeriesProperty from these parameters
-  void create(const Types::Core::DateAndTime &start_time,
-              const std::vector<double> &time_sec,
+  void create(const Types::Core::DateAndTime &start_time, const std::vector<double> &time_sec,
               const std::vector<TYPE> &new_values);
   /// Clears and creates a TimeSeriesProperty from these parameters
-  void create(const std::vector<Types::Core::DateAndTime> &new_times,
-              const std::vector<TYPE> &new_values);
+  void create(const std::vector<Types::Core::DateAndTime> &new_times, const std::vector<TYPE> &new_values);
 
   /// Returns the value at a particular time
   TYPE getSingleValue(const Types::Core::DateAndTime &t) const;
@@ -284,6 +257,8 @@ public:
   void filterWith(const TimeSeriesProperty<bool> *filter);
   /// Restores the property to the unsorted state
   void clearFilter();
+  // Returns whether the time series has been filtered
+  bool isFiltered() const { return m_filterApplied; }
 
   /// Updates size()
   void countSize() const;
@@ -358,9 +333,8 @@ private:
 
 /// Function filtering double TimeSeriesProperties according to the requested
 /// statistics.
-double DLLExport
-filterByStatistic(TimeSeriesProperty<double> const *const propertyToFilter,
-                  Kernel::Math::StatisticType statisticType);
+double DLLExport filterByStatistic(TimeSeriesProperty<double> const *const propertyToFilter,
+                                   Kernel::Math::StatisticType statisticType);
 
 } // namespace Kernel
 } // namespace Mantid

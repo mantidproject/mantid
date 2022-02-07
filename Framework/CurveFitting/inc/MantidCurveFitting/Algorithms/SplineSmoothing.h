@@ -29,9 +29,7 @@ public:
 
   const std::string name() const override;
   int version() const override;
-  const std::vector<std::string> seeAlso() const override {
-    return {"Fit", "SplineInterpolation", "SplineBackground"};
-  }
+  const std::vector<std::string> seeAlso() const override { return {"Fit", "SplineInterpolation", "SplineBackground"}; }
   const std::string category() const override;
   /// Summary of algorithms purpose
   const std::string summary() const override {
@@ -56,44 +54,35 @@ private:
 
   /// setup an output workspace using meta data from inws and taking a number of
   /// spectra
-  API::MatrixWorkspace_sptr
-  setupOutputWorkspace(const API::MatrixWorkspace_sptr &inws,
-                       const int size) const;
+  API::MatrixWorkspace_sptr setupOutputWorkspace(const API::MatrixWorkspace_sptr &inws, const int size) const;
 
   /// Handle converting point data back to histograms
   void convertToHistogram();
 
   /// choose points to define a spline and smooth the data
-  void selectSmoothingPoints(const API::MatrixWorkspace &inputWorkspace,
-                             const size_t row);
+  void selectSmoothingPoints(const API::MatrixWorkspace &inputWorkspace, const size_t row);
 
   /// calculate the spline based on the smoothing points chosen
-  void calculateSmoothing(const API::MatrixWorkspace &inputWorkspace,
-                          API::MatrixWorkspace &outputWorkspace,
+  void calculateSmoothing(const API::MatrixWorkspace &inputWorkspace, API::MatrixWorkspace &outputWorkspace,
                           const size_t row) const;
 
   /// calculate the derivatives for a set of points on the spline
-  void calculateDerivatives(const API::MatrixWorkspace &inputWorkspace,
-                            API::MatrixWorkspace &outputWorkspace,
+  void calculateDerivatives(const API::MatrixWorkspace &inputWorkspace, API::MatrixWorkspace &outputWorkspace,
                             const int order, const size_t row) const;
 
   /// add a set of smoothing points to the spline
-  void addSmoothingPoints(const std::set<int> &points, const double *xs,
-                          const double *ys) const;
+  void addSmoothingPoints(const std::set<int> &points, const double *xs, const double *ys) const;
 
   /// check if the difference between smoothing points and data points is within
   /// a certain error bound
-  bool checkSmoothingAccuracy(const int start, const int end, const double *ys,
-                              const double *ysmooth) const;
+  bool checkSmoothingAccuracy(const int start, const int end, const double *ys, const double *ysmooth) const;
 
   /// Use an existing fit function to tidy smoothing
-  void performAdditionalFitting(const API::MatrixWorkspace_sptr &ws,
-                                const int row);
+  void performAdditionalFitting(const API::MatrixWorkspace_sptr &ws, const int row);
 
   /// Converts histogram data to point data later processing
   /// convert a binned workspace to point data. Uses mean of the bins as point
-  API::MatrixWorkspace_sptr
-  convertBinnedData(API::MatrixWorkspace_sptr workspace);
+  API::MatrixWorkspace_sptr convertBinnedData(API::MatrixWorkspace_sptr workspace);
 
   /// CubicSpline member used to perform smoothing
   std::shared_ptr<Functions::BSpline> m_cspline;

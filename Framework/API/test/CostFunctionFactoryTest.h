@@ -39,16 +39,13 @@ class CostFunctionFactoryTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static CostFunctionFactoryTest *createSuite() {
-    return new CostFunctionFactoryTest();
-  }
+  static CostFunctionFactoryTest *createSuite() { return new CostFunctionFactoryTest(); }
   static void destroySuite(CostFunctionFactoryTest *suite) { delete suite; }
 
   CostFunctionFactoryTest() { Mantid::API::FrameworkManager::Instance(); }
 
   void testCreateFunction() {
-    ICostFunction *cfA =
-        CostFunctionFactory::Instance().createUnwrapped("nedtur");
+    ICostFunction *cfA = CostFunctionFactory::Instance().createUnwrapped("nedtur");
     TS_ASSERT(cfA);
     TS_ASSERT(cfA->name().compare("fido") == 0);
     TS_ASSERT(cfA->shortName().compare("Quality") == 0);

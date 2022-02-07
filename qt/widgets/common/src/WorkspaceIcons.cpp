@@ -10,8 +10,7 @@
 #include "MantidQtWidgets/Common/WorkspaceIcons.h"
 #include "MantidQtWidgets/Common/pixmaps.h"
 
-namespace MantidQt {
-namespace API {
+namespace MantidQt::API {
 //-----------------------------------------------------------------------------
 // Public member functions
 //-----------------------------------------------------------------------------
@@ -64,6 +63,7 @@ void WorkspaceIcons::initInternalLookup() {
   // Table workspace types
   m_idToPixmapName["TableWorkspace"] = "worksheet_xpm";
   m_idToPixmapName["PeaksWorkspace"] = "worksheet_xpm";
+  m_idToPixmapName["LeanElasticPeaksWorkspace"] = "worksheet_xpm";
 
   // Group
   m_idToPixmapName["WorkspaceGroup"] = "mantid_wsgroup_xpm";
@@ -72,5 +72,4 @@ void WorkspaceIcons::initInternalLookup() {
   m_idToPixmapName["MDHistoWorkspace"] = "mantid_mdws_xpm";
   m_idToPixmapName["MDEventWorkspace"] = "mantid_mdws_xpm";
 }
-} // namespace API
-} // namespace MantidQt
+} // namespace MantidQt::API

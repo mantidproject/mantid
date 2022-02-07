@@ -38,21 +38,16 @@ namespace Algorithms {
     File change history is stored at: <https://github.com/mantidproject/mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class MANTID_ALGORITHMS_DLL EQSANSResolution
-    : public Algorithms::TOFSANSResolution {
+class MANTID_ALGORITHMS_DLL EQSANSResolution : public Algorithms::TOFSANSResolution {
 public:
   /// Algorithm's name
   const std::string name() const override { return "EQSANSResolution"; }
   /// Summary of algorithms purpose
-  const std::string summary() const override {
-    return "Calculate the Q resolution for EQSANS data.";
-  }
+  const std::string summary() const override { return "Calculate the Q resolution for EQSANS data."; }
 
   /// Algorithm's version
   int version() const override { return (1); }
-  const std::vector<std::string> seeAlso() const override {
-    return {"ReactorSANSResolution"};
-  }
+  const std::vector<std::string> seeAlso() const override { return {"ReactorSANSResolution"}; }
   /// Algorithm's category for identification
   const std::string category() const override { return "SANS"; }
 

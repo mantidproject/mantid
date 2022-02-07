@@ -10,15 +10,12 @@
 
 using namespace Mantid::Kernel;
 
-namespace MantidQt {
-namespace API {
+namespace MantidQt::API {
 
 //----------------------------------------------------------------------------------------------
 /** Constructor
  */
-TextPropertyWidget::TextPropertyWidget(Mantid::Kernel::Property *prop,
-                                       QWidget *parent, QGridLayout *layout,
-                                       int row)
+TextPropertyWidget::TextPropertyWidget(Mantid::Kernel::Property *prop, QWidget *parent, QGridLayout *layout, int row)
     : PropertyWidget(prop, parent, layout, row) {
   // Label at column 0
   m_label = new QLabel(QString::fromStdString(prop->name()), m_parent);
@@ -31,8 +28,10 @@ TextPropertyWidget::TextPropertyWidget(Mantid::Kernel::Property *prop,
   m_textbox = new QLineEdit(m_parent);
   m_textbox->setToolTip(m_doc);
   setFieldPlaceholderText(prop, m_textbox);
-  connect(m_textbox, SIGNAL(editingFinished()), this,
-          SLOT(userEditedProperty()));
+  // Make current value visible
+  this->setValue(QString::fromStdString(m_prop->value()));
+  // Make sure the connection comes after updating any values
+  connect(m_textbox, SIGNAL(editingFinished()), this, SLOT(userEditedProperty()));
   m_gridLayout->addWidget(m_textbox, m_row, 1, nullptr);
   m_widgets.push_back(m_textbox);
 
@@ -57,9 +56,6 @@ QString TextPropertyWidget::getValue() const { return m_textbox->text(); }
 /** Set the value into the GUI
  *
  * @param value :: string representation of the value */
-void TextPropertyWidget::setValueImpl(const QString &value) {
-  m_textbox->setText(value);
-}
+void TextPropertyWidget::setValueImpl(const QString &value) { m_textbox->setText(value); }
 
-} // namespace API
-} // namespace MantidQt
+} // namespace MantidQt::API

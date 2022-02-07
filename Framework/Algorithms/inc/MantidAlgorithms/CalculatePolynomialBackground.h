@@ -16,8 +16,7 @@ namespace Algorithms {
   background to an input workspace and returns the evaluated background as
   the output workspace.
 */
-class MANTID_ALGORITHMS_DLL CalculatePolynomialBackground
-    : public API::Algorithm {
+class MANTID_ALGORITHMS_DLL CalculatePolynomialBackground : public API::Algorithm {
 public:
   const std::string name() const override;
   int version() const override;

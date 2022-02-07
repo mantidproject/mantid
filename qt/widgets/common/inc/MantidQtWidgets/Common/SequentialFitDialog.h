@@ -26,9 +26,8 @@ class FitPropertyBrowser;
     @author Roman Tolchenov, Tessella plc
     @date 4/06/2010
 */
-class EXPORT_OPT_MANTIDQT_COMMON SequentialFitDialog
-    : public MantidQt::API::MantidDialog,
-      public Mantid::API::AlgorithmObserver {
+class EXPORT_OPT_MANTIDQT_COMMON SequentialFitDialog : public MantidQt::API::MantidDialog,
+                                                       public Mantid::API::AlgorithmObserver {
   Q_OBJECT
 
 public:
@@ -50,8 +49,7 @@ signals:
 
   /// This signal is fired from finishHandle running in the algorithm's thread
   /// and caught by showPlot slot in the GUI thread
-  void needShowPlot(Ui::SequentialFitDialog * /*_t1*/,
-                    MantidQt::MantidWidgets::FitPropertyBrowser * /*_t2*/);
+  void needShowPlot(Ui::SequentialFitDialog * /*_t1*/, MantidQt::MantidWidgets::FitPropertyBrowser * /*_t2*/);
 
 public slots:
 

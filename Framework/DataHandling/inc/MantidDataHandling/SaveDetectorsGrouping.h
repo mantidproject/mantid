@@ -22,19 +22,13 @@ public:
   /// Algorithm's name for identification
   const std::string name() const override { return "SaveDetectorsGrouping"; };
   /// Summary of algorithms purpose
-  const std::string summary() const override {
-    return "Save a GroupingWorkspace to an XML file.";
-  }
+  const std::string summary() const override { return "Save a GroupingWorkspace to an XML file."; }
 
   /// Algorithm's version for identification
   int version() const override { return 1; };
-  const std::vector<std::string> seeAlso() const override {
-    return {"LoadDetectorsGroupingFile", "GroupDetectors"};
-  }
+  const std::vector<std::string> seeAlso() const override { return {"LoadDetectorsGroupingFile", "GroupDetectors"}; }
   /// Algorithm's category for identification
-  const std::string category() const override {
-    return "DataHandling\\Grouping;Transforms\\Grouping";
-  }
+  const std::string category() const override { return "DataHandling\\Grouping;Transforms\\Grouping"; }
 
 private:
   /// Define input parameters
@@ -44,17 +38,14 @@ private:
   void exec() override;
 
   /// Create map for GroupID -- vector<detector ID>
-  void
-  createGroupDetectorIDMap(std::map<int, std::vector<detid_t>> &groupwkspmap);
+  void createGroupDetectorIDMap(std::map<int, std::vector<detid_t>> &groupwkspmap);
 
   /// Convert vector of detector ID to range of Detector ID
-  void convertToDetectorsRanges(
-      std::map<int, std::vector<detid_t>> groupdetidsmap,
-      std::map<int, std::vector<detid_t>> &groupdetidrangemap);
+  void convertToDetectorsRanges(std::map<int, std::vector<detid_t>> groupdetidsmap,
+                                std::map<int, std::vector<detid_t>> &groupdetidrangemap);
 
   /// Print Grouping to XML file
-  void printToXML(const std::map<int, std::vector<detid_t>> &groupdetidrangemap,
-                  const std::string &xmlfilename);
+  void printToXML(const std::map<int, std::vector<detid_t>> &groupdetidrangemap, const std::string &xmlfilename);
 
   // GroupingWorkspace
   DataObjects::GroupingWorkspace_const_sptr mGroupWS;

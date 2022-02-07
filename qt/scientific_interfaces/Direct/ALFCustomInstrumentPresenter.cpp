@@ -13,15 +13,13 @@
 #include <functional>
 #include <tuple>
 
-namespace MantidQt {
-namespace CustomInterfaces {
+namespace MantidQt::CustomInterfaces {
 
-ALFCustomInstrumentPresenter::ALFCustomInstrumentPresenter(
-    ALFCustomInstrumentView *view, ALFCustomInstrumentModel *model,
-    MantidWidgets::PlotFitAnalysisPanePresenter *analysisPane)
-    : BaseCustomInstrumentPresenter(view, model, analysisPane->getView()),
-      m_view(view), m_model(model), m_analysisPane(analysisPane),
-      m_extractSingleTubeObserver(nullptr), m_averageTubeObserver(nullptr) {
+ALFCustomInstrumentPresenter::ALFCustomInstrumentPresenter(IALFCustomInstrumentView *view,
+                                                           IALFCustomInstrumentModel *model,
+                                                           MantidWidgets::IPlotFitAnalysisPanePresenter *analysisPane)
+    : BaseCustomInstrumentPresenter(view, model, analysisPane), m_view(view), m_model(model),
+      m_analysisPane(analysisPane), m_extractSingleTubeObserver(nullptr), m_averageTubeObserver(nullptr) {
   addInstrument();
 }
 
@@ -36,23 +34,17 @@ void ALFCustomInstrumentPresenter::setUpInstrumentAnalysisSplitter() {
   m_view->setupAnalysisPane(m_analysisPane->getView());
 }
 
-void ALFCustomInstrumentPresenter::loadSideEffects() {
-  m_analysisPane->clearCurrentWS();
-}
+void ALFCustomInstrumentPresenter::loadSideEffects() { m_analysisPane->clearCurrentWS(); }
 
-typedef std::pair<std::string,
-                  std::vector<std::function<bool(std::map<std::string, bool>)>>>
-    instrumentSetUp;
-typedef std::vector<std::tuple<std::string, Observer *>>
-    instrumentObserverOptions;
+typedef std::pair<std::string, std::vector<std::function<bool(std::map<std::string, bool>)>>> instrumentSetUp;
+typedef std::vector<std::tuple<std::string, Observer *>> instrumentObserverOptions;
 
 /**
 * This creates the custom instrument widget
 * @return <instrumentSetUp,
     instrumentObserverOptions> : a pair of the conditions and observers
 */
-std::pair<instrumentSetUp, instrumentObserverOptions>
-ALFCustomInstrumentPresenter::setupALFInstrument() {
+std::pair<instrumentSetUp, instrumentObserverOptions> ALFCustomInstrumentPresenter::setupALFInstrument() {
 
   m_extractSingleTubeObserver = new VoidObserver();
   m_averageTubeObserver = new VoidObserver();
@@ -65,30 +57,25 @@ ALFCustomInstrumentPresenter::setupALFInstrument() {
 
   // set up custom context menu conditions
   std::function<bool(std::map<std::string, bool>)> extractConditionBinder =
-      std::bind(&ALFCustomInstrumentModel::extractTubeConditon, m_model,
-                std::placeholders::_1);
-  std::function<bool(std::map<std::string, bool>)> averageTubeConditonBinder =
-      std::bind(&ALFCustomInstrumentModel::averageTubeConditon, m_model,
-                std::placeholders::_1);
+      std::bind(&IALFCustomInstrumentModel::extractTubeCondition, m_model, std::placeholders::_1);
+  std::function<bool(std::map<std::string, bool>)> averageTubeConditionBinder =
+      std::bind(&IALFCustomInstrumentModel::averageTubeCondition, m_model, std::placeholders::_1);
 
   binders.emplace_back(extractConditionBinder);
-  binders.emplace_back(averageTubeConditonBinder);
+  binders.emplace_back(averageTubeConditionBinder);
 
   setUpContextConditions = std::make_pair(m_model->dataFileName(), binders);
 
   // set up single tube extract
-  std::function<void()> extractSingleTubeBinder =
-      std::bind(&ALFCustomInstrumentPresenter::extractSingleTube,
-                this); // binder for slot
-  m_extractSingleTubeObserver->setSlot(
-      extractSingleTubeBinder); // add slot to observer
-  std::tuple<std::string, Observer *> tmp = std::make_tuple(
-      "singleTube", m_extractSingleTubeObserver); // store observer for later
+  std::function<void()> extractSingleTubeBinder = std::bind(&ALFCustomInstrumentPresenter::extractSingleTube,
+                                                            this); // binder for slot
+  m_extractSingleTubeObserver->setSlot(extractSingleTubeBinder);   // add slot to observer
+  std::tuple<std::string, Observer *> tmp =
+      std::make_tuple("singleTube", m_extractSingleTubeObserver); // store observer for later
   customInstrumentOptions.emplace_back(tmp);
 
   // set up average tube
-  std::function<void()> averageTubeBinder =
-      std::bind(&ALFCustomInstrumentPresenter::averageTube, this);
+  std::function<void()> averageTubeBinder = std::bind(&ALFCustomInstrumentPresenter::averageTube, this);
   m_averageTubeObserver->setSlot(averageTubeBinder);
   tmp = std::make_tuple("averageTube", m_averageTubeObserver);
   customInstrumentOptions.emplace_back(tmp);
@@ -100,6 +87,7 @@ void ALFCustomInstrumentPresenter::extractSingleTube() {
   m_model->extractSingleTube();
   const std::string WSName = m_model->WSName();
   m_analysisPane->addSpectrum(WSName);
+  m_analysisPane->updateEstimateAfterExtraction();
 }
 
 void ALFCustomInstrumentPresenter::averageTube() {
@@ -108,5 +96,4 @@ void ALFCustomInstrumentPresenter::averageTube() {
   m_analysisPane->addSpectrum(WSName);
 }
 
-} // namespace CustomInterfaces
-} // namespace MantidQt
+} // namespace MantidQt::CustomInterfaces

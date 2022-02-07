@@ -16,8 +16,7 @@
 using namespace Mantid::Geometry;
 using namespace Mantid::Kernel;
 
-namespace Mantid {
-namespace API {
+namespace Mantid::API {
 
 //----------------------------------------------------------------------------------------------
 /** Constructor. Validates the inputs
@@ -26,17 +25,14 @@ namespace API {
  * @param outD :: output number of dimensions, <= inD
  * @throw std::runtime_error if outD > inD
  */
-CoordTransform::CoordTransform(const size_t inD, const size_t outD)
-    : inD(inD), outD(outD) {
+CoordTransform::CoordTransform(const size_t inD, const size_t outD) : inD(inD), outD(outD) {
   if (outD > inD)
     throw std::runtime_error("CoordTransform: Cannot have more output "
                              "dimensions than input dimensions!");
   if (outD == 0)
-    throw std::runtime_error(
-        "CoordTransform: invalid number of output dimensions!");
+    throw std::runtime_error("CoordTransform: invalid number of output dimensions!");
   if (inD == 0)
-    throw std::runtime_error(
-        "CoordTransform: invalid number of input dimensions!");
+    throw std::runtime_error("CoordTransform: invalid number of input dimensions!");
 }
 
 //----------------------------------------------------------------------------------------------
@@ -46,8 +42,7 @@ CoordTransform::CoordTransform(const size_t inD, const size_t outD)
  * @param inputVector :: an inD-length vector
  * @return the output vector as VMD
  */
-Mantid::Kernel::VMD
-CoordTransform::applyVMD(const Mantid::Kernel::VMD &inputVector) const {
+Mantid::Kernel::VMD CoordTransform::applyVMD(const Mantid::Kernel::VMD &inputVector) const {
   if (inputVector.getNumDims() != inD)
     throw std::runtime_error("CoordTransform::apply(): inputVector has the "
                              "wrong number of coordinates!");
@@ -58,5 +53,4 @@ CoordTransform::applyVMD(const Mantid::Kernel::VMD &inputVector) const {
   return out;
 }
 
-} // namespace API
-} // namespace Mantid
+} // namespace Mantid::API

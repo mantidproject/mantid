@@ -18,7 +18,8 @@ set(SRC_FILES
     src/ICat3/ICat3Catalog.cpp
     src/ICat3/ICat3Helper.cpp
     src/ICat4/ICat4GSoapGenerated.cpp
-    src/ICat4/ICat4Catalog.cpp)
+    src/ICat4/ICat4Catalog.cpp
+)
 
 set(SRC_UNITY_IGNORE_FILES)
 
@@ -48,7 +49,8 @@ set(INC_FILES
     inc/MantidICat/ICat4/GSoapGenerated/ICat4H.h
     inc/MantidICat/ICat4/GSoapGenerated/ICat4ICATPortBindingProxy.h
     inc/MantidICat/ICat4/GSoapGenerated/ICat4Stub.h
-    inc/MantidICat/ICat4/ICat4Catalog.h)
+    inc/MantidICat/ICat4/ICat4Catalog.h
+)
 
 set(TEST_FILES
     CatalogDownloadDataFilesTest.h
@@ -59,13 +61,12 @@ set(TEST_FILES
     CatalogLoginTest.h
     CatalogMyDataSearchTest.h
     CatalogSearchTest.h
-    CompositeCatalogTest.h)
+    CompositeCatalogTest.h
+)
 
-if(COVERALLS)
+if(COVERAGE)
   foreach(loop_var ${SRC_FILES} ${INC_FILES})
-    set_property(GLOBAL APPEND
-                 PROPERTY COVERAGE_SRCS
-                          "${CMAKE_CURRENT_SOURCE_DIR}/${loop_var}")
+    set_property(GLOBAL APPEND PROPERTY COVERAGE_SRCS "${CMAKE_CURRENT_SOURCE_DIR}/${loop_var}")
   endforeach(loop_var)
 endif()
 
@@ -75,24 +76,22 @@ if(UNITY_BUILD)
 endif(UNITY_BUILD)
 
 # Add ssl dependency
-include_directories(${OPENSSL_INCLUDE_DIR})
 add_definitions(-DWITH_OPENSSL -DWITH_NONAMESPACES)
 
 # Add a precompiled header where they are supported
 enable_precompiled_headers(inc/MantidICat/PrecompiledHeader.h SRC_FILES)
 # Add the target for this directory
 add_library(ICat ${SRC_FILES} ${INC_FILES})
+add_library(Mantid::ICat ALIAS ICat)
+
+target_include_directories(
+  ICat PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/inc> $<INSTALL_INTERFACE:include/Mantid>
+)
 # Set the name of the generated library
-set_target_properties(ICat
-                      PROPERTIES OUTPUT_NAME
-                                 MantidICat
-                                 COMPILE_DEFINITIONS
-                                 IN_MANTID_ICAT)
+set_target_properties(ICat PROPERTIES OUTPUT_NAME MantidICat COMPILE_DEFINITIONS IN_MANTID_ICAT)
 
 if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
-  set_target_properties(ICat
-                        PROPERTIES INSTALL_RPATH
-                                   "@loader_path/../Contents/MacOS")
+  set_target_properties(ICat PROPERTIES INSTALL_RPATH "@loader_path/../Contents/MacOS")
 elseif(${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
   set_target_properties(ICat PROPERTIES INSTALL_RPATH "\$ORIGIN/../${LIB_DIR}")
 endif()
@@ -100,21 +99,24 @@ endif()
 # Add to the 'Framework' group in VS
 set_property(TARGET ICat PROPERTY FOLDER "MantidFramework")
 
-include_directories(inc)
-
-target_link_libraries(ICat
-                      LINK_PRIVATE
-                      ${TCMALLOC_LIBRARIES_LINKTIME}
-                      ${MANTIDLIBS}
-                      ${OPENSSL_LIBRARIES}
-                      ${JSONCPP_LIBRARIES})
+target_link_libraries(
+  ICat
+  PUBLIC Mantid::Kernel Mantid::API Mantid::DataObjects OpenSSL::SSL
+  PRIVATE JsonCPP::jsoncpp
+)
 
 # Add the unit tests directory
 add_subdirectory(test)
 
 # Auto-generate exports header
-target_include_directories(ICat PUBLIC ${CMAKE_BINARY_DIR}/Framework/ICat)
-generate_mantid_export_header(ICat TRUE)
+target_include_directories(
+  ICat PUBLIC $<BUILD_INTERFACE:${CMAKE_BINARY_DIR}/Framework/ICat> $<INSTALL_INTERFACE:include/Mantid>
+)
+generate_mantid_export_header(ICat True)
 
 # Installation settings
-install(TARGETS ICat ${SYSTEM_PACKAGE_TARGET} DESTINATION ${PLUGINS_DIR})
+if(CONDA_ENV)
+  mtd_install_framework_lib(TARGETS ICat PLUGIN_LIB)
+else()
+  mtd_install_targets(TARGETS ICat INSTALL_DIRS ${PLUGINS_DIR} ${WORKBENCH_PLUGINS_DIR})
+endif()

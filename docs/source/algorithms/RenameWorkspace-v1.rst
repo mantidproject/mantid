@@ -26,8 +26,8 @@ If the Overwrite flag is set to false and any name is in use RenameWorkspace
 will not rename the workspace and log an error.
 
 .. warning::
-   RenameWorkspace is set to overwrite by default to maintain backwards compatibility. 
-   Ensure the overwrite flag is set to false to prevent any existing workspaces being 
+   RenameWorkspace is set to overwrite by default to maintain backwards compatibility.
+   Ensure the overwrite flag is set to false to prevent any existing workspaces being
    replaced with the renamed workspace.
 
 
@@ -40,16 +40,16 @@ Usage
 
    AnalysisDataService.clear()
    myWs=CreateSampleWorkspace()
-   mon_ws = CreateSampleWorkspace() 
-   myWs.setMonitorWorkspace(mon_ws)  
+   mon_ws = CreateSampleWorkspace()
+   myWs.setMonitorWorkspace(mon_ws)
    print("*********************************************************************")
    print("{0:20}|{1:>20}|{2:>20}|".format("Existing WS names: ",myWs.name(),mon_ws.name()))
    obj_inADS = AnalysisDataService.getObjectNames()
    obj_inADS.sort()
    print("{0:20}|{1:>6}| With Names: |{2:>20}|{3:>20}|".format("Exist in ADS: ",len(obj_inADS),obj_inADS[0],obj_inADS[1]))
-   
+
    NameA = RenameWorkspace(myWs)
-   
+
    print("***** After simple rename:")
    print("{0:20}|{1:>20}|{2:>20}|".format("Existing WS names: ",NameA.name(),mon_ws.name()))
    obj_inADS = AnalysisDataService.getObjectNames()
@@ -59,19 +59,19 @@ Usage
    print("Old pointer to myWs refers to workspace with new name:  {}".format(myWs.name()))
    print("*********************************************************************")
    print("***** After renaming workspace and monitors workspace together:")
-   
+
    NameB = RenameWorkspace(myWs,RenameMonitors=True)
-   
+
    print("{0:20}|{1:>20}|{2:>20}|".format("Existing WS names: ",NameB.name(),mon_ws.name()))
    obj_inADS = AnalysisDataService.getObjectNames()
    obj_inADS.sort()
    print("{0:20}|{1:>6}| With Names: |{2:>20}|{3:>20}|".format("Exist in ADS: ",len(obj_inADS),obj_inADS[0],obj_inADS[1]))
-    
+
    mon_ws1 = NameB.getMonitorWorkspace()
    print("The name of the monitor workspace attached to workspace:{0:>6}| Is:  {1:>10}|".
             format(NameB.name(),mon_ws1.name()))
    print("*********************************************************************")
-             
+
 Output:
 
 .. testoutput:: ExRenameWorkspace
@@ -79,7 +79,7 @@ Output:
     *********************************************************************
     Existing WS names:  |                myWs|              mon_ws|
     Exist in ADS:       |     2| With Names: |              mon_ws|                myWs|
-    ***** After simple rename: 
+    ***** After simple rename:
     Existing WS names:  |               NameA|              mon_ws|
     Exist in ADS:       |     2| With Names: |               NameA|              mon_ws|
     Old pointer to myWs refers to workspace with new name:  NameA
@@ -89,32 +89,32 @@ Output:
     Exist in ADS:       |     2| With Names: |               NameB|      NameB_monitors|
     The name of the monitor workspace attached to workspace: NameB| Is:  NameB_monitors|
     *********************************************************************
-    
+
 **Example - Setting Overwrite on and off:**
 
 .. testcode:: ExOverwriteExisting
 
    #Clear the ADS before starting
    AnalysisDataService.clear()
-       
+
    #Create an existing workspace called 'wsOld'
    CreateWorkspace([0], [0], OutputWorkspace="wsOld")
-       
+
    #Next create a workspace we are going to rename
    CreateWorkspace([0], [0], OutputWorkspace="wsNew")
-       
+
    #This will fail telling us that 'wsOld' already exists
    print('Trying to rename with OverwriteExisting set to false.')
    try:
        RenameWorkspace(InputWorkspace="wsNew", OutputWorkspace="wsOld", OverwriteExisting=False)
    except RuntimeError:
        print('RuntimeError: The workspace wsOld already exists')
-       
+
    #This will succeed in renaming and 'wsOld' will be replaced with 'wsNew'
    print('Trying to rename with OverwriteExisting set to true.')
-   RenameWorkspace(InputWorkspace="wsNew", OutputWorkspace="wsOld", OverwriteExisting=True) 
+   RenameWorkspace(InputWorkspace="wsNew", OutputWorkspace="wsOld", OverwriteExisting=True)
    print('Succeeded')
-   
+
 Output:
 
 .. testoutput:: ExOverwriteExisting
@@ -124,7 +124,7 @@ Output:
    Trying to rename with OverwriteExisting set to true.
    Succeeded
 
-   
+
 .. categories::
 
 .. sourcelink::

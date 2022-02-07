@@ -9,13 +9,14 @@
 
 #include <gsl/gsl_fft_complex.h>
 #include <memory>
+#include <stdexcept>
 
-namespace Mantid {
-namespace Algorithms {
+#include <stdexcept>
+
+namespace Mantid::Algorithms {
 
 /** Constructor */
-MaxentTransformFourier::MaxentTransformFourier(MaxentSpace_sptr dataSpace,
-                                               MaxentSpace_sptr imageSpace)
+MaxentTransformFourier::MaxentTransformFourier(MaxentSpace_sptr dataSpace, MaxentSpace_sptr imageSpace)
     : m_dataSpace(std::move(dataSpace)), m_imageSpace(std::move(imageSpace)) {}
 
 /**
@@ -30,8 +31,7 @@ MaxentTransformFourier::MaxentTransformFourier(MaxentSpace_sptr dataSpace,
  * @param image : [input] Image as a vector
  * @return : The vector in the data space
  */
-std::vector<double>
-MaxentTransformFourier::imageToData(const std::vector<double> &image) {
+std::vector<double> MaxentTransformFourier::imageToData(const std::vector<double> &image) {
 
   std::vector<double> complexImage = m_imageSpace->toComplex(image);
 
@@ -65,8 +65,7 @@ MaxentTransformFourier::imageToData(const std::vector<double> &image) {
  * @param data : [input] Data as a vector
  * @return : The vector in the image space
  */
-std::vector<double>
-MaxentTransformFourier::dataToImage(const std::vector<double> &data) {
+std::vector<double> MaxentTransformFourier::dataToImage(const std::vector<double> &data) {
 
   std::vector<double> complexData = m_dataSpace->toComplex(data);
 
@@ -88,5 +87,4 @@ MaxentTransformFourier::dataToImage(const std::vector<double> &data) {
   return m_imageSpace->fromComplex(complexData);
 }
 
-} // namespace Algorithms
-} // namespace Mantid
+} // namespace Mantid::Algorithms

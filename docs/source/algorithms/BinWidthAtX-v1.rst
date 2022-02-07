@@ -5,10 +5,10 @@
 .. relatedalgorithms::
 
 .. properties::
-  
+
 Description
 -----------
-  
+
 This algorithm takes the bin width at *X* of each histogram in *InputWorkspace* and calculates the average. This value is then placed in the *BinWidth* output property.
 
 Rounding
@@ -23,13 +23,13 @@ The *InputWorkspace* has to contain histogram data. For point data, :ref:`algm-C
 
 Usage
 -----
-  
+
 **Example: rebin a workspace to equidistant bin boundaries.**
 
 .. testcode:: ExBinWidthAtX
 
     import numpy
-    
+
     # Create non-equidistant bin boundaries.
     xs = [x * x for x in  numpy.arange(0.0, 10.0, 0.05)]
     # Convert xs to numpy array.
@@ -37,18 +37,18 @@ Usage
     # There is one less bin than the number of boundaries.
     ys = numpy.zeros(len(xs) - 1)
     ws = CreateWorkspace(DataX=xs, DataY=ys)
-    
+
     newWidth = BinWidthAtX(InputWorkspace=ws, X=1.0, Rounding='10^n')
     print('New bin width: {0}'.format(newWidth))
-    
+
     # Rebin to equidistant grid
     rebinned = Rebin(InputWorkspace=ws, Params=[newWidth], FullBinsOnly=True)
-    
+
     def firstAndLastBinWidths(workspace):
         first = workspace.readX(0)[1] - workspace.readX(0)[0]
         last = workspace.readX(0)[-1] - workspace.readX(0)[-2]
         return (first, last)
-    
+
     first, last = firstAndLastBinWidths(ws)
     print('Bin widths before rebinning, first: {0:.4f}, last: {1:.4f}'.format(first, last))
     first, last = firstAndLastBinWidths(rebinned)

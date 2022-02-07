@@ -62,6 +62,50 @@ MERGED = ReductionMode.MERGED.value
 GENERIC_SETTINGS = "Mantid/ISISSANS"
 
 JSON_SUFFIX = ".json"
+# The following instruments do not scale for specific attributes
+SCALING_EXCLUDED = [SANSInstrument.LARMOR]
+
+
+def apply_selective_view_scaling(getter):
+    """
+    Scales
+    """
+    def wrapper(self):
+        val = getter(self)
+        try:
+            return meter_2_millimeter(val) if self.instrument not in SCALING_EXCLUDED else val
+        except TypeError:
+            return val
+    return wrapper
+
+
+def undo_selective_view_scaling(setter):
+    def wrapper(self, val):
+        try:
+            val = millimeter_2_meter(val) if self.instrument not in SCALING_EXCLUDED else val
+        except TypeError:
+            pass
+        finally:
+            setter(self, val)  # Always take user val including blank string
+    return wrapper
+
+
+def meter_2_millimeter(num):
+    '''
+    Converts from m to mm
+    @param float in m
+    @returns float in mm
+    '''
+    return num * 1000.
+
+
+def millimeter_2_meter(num):
+    '''
+    Converts from mm to m
+    @param float in mm
+    @returns float in m
+    '''
+    return num/1000.
 
 
 def get_detector_strings_for_gui(instrument=None):
@@ -140,20 +184,18 @@ def get_string_for_gui_from_instrument(instrument):
         return None
 
 
-def get_reduction_mode_from_gui_selection(gui_selection):
-    # TODO when we hit only Python 3 this should use casefold rather than lower
-    case_folded_selection = gui_selection.lower()
-    if case_folded_selection == MERGED.lower():
+def get_reduction_mode_from_gui_selection(gui_selection: str):
+    case_folded_selection = gui_selection.strip().casefold()
+    if case_folded_selection == MERGED.casefold():
         return ReductionMode.MERGED
-
-    elif case_folded_selection == ALL.lower():
+    elif case_folded_selection == ALL.casefold():
         return ReductionMode.ALL
-
-    elif any(case_folded_selection == lab.lower() for lab in LAB_STRINGS.values()):
+    elif any(case_folded_selection == lab.casefold() for lab in LAB_STRINGS.values()):
         return ReductionMode.LAB
-
-    elif any(case_folded_selection == hab.lower() for hab in HAB_STRINGS.values()):
+    elif any(case_folded_selection == hab.casefold() for hab in HAB_STRINGS.values()):
         return ReductionMode.HAB
+    elif not case_folded_selection:
+        return ReductionMode.NOT_SET
     else:
         raise RuntimeError("Reduction mode selection {0} is not valid.".format(gui_selection))
 

@@ -8,21 +8,21 @@
 #
 #
 import datetime
+from itertools import tee
 
 import numpy as np
-from matplotlib.collections import PolyCollection
+from matplotlib.collections import PolyCollection, QuadMesh
 from matplotlib.container import ErrorbarContainer
 from matplotlib.colors import LogNorm
 from matplotlib.ticker import LogLocator
-from mpl_toolkits.mplot3d.axes3d import Axes3D
+from mpl_toolkits.mplot3d.art3d import Poly3DCollection
 from scipy.interpolate import interp1d
 
 import mantid.api
 import mantid.kernel
 from mantid.api import MultipleExperimentInfos, MatrixWorkspace
 from mantid.dataobjects import EventWorkspace, MDHistoWorkspace, Workspace2D
-from mantid.plots.legend import convert_color_to_hex
-from mantid.plots.utility import MantidAxType
+from mantid.plots.utility import convert_color_to_hex, MantidAxType
 
 
 # Helper functions for data extraction from a Mantid workspace and plot functionality
@@ -34,10 +34,11 @@ from mantid.plots.utility import MantidAxType
 
 
 def validate_args(*args, **kwargs):
-    return len(args) > 0 and (isinstance(args[0], EventWorkspace) or
-                              isinstance(args[0], Workspace2D) or
-                              isinstance(args[0], MDHistoWorkspace) or
-                              isinstance(args[0], MultipleExperimentInfos) and "LogName" in kwargs)
+    return len(args) > 0 and (isinstance(args[0], EventWorkspace)
+                              or isinstance(args[0], Workspace2D)
+                              or isinstance(args[0], MDHistoWorkspace)
+                              or isinstance(args[0], MultipleExperimentInfos)
+                              and "LogName" in kwargs)
 
 
 # ====================================================
@@ -46,13 +47,15 @@ def validate_args(*args, **kwargs):
 
 def get_distribution(workspace, **kwargs):
     """
-    Determine whether or not the data is a distribution. The value in
-    the kwargs wins. Applies to Matrix workspaces only
-
+    Determine whether or not the data is a distribution.
+    If the workspace is a distribution return true,
+    else the value in kwargs wins.
+    Applies to Matrix workspaces only
     :param workspace: :class:`mantid.api.MatrixWorkspace` to extract the data from
     """
-    distribution = kwargs.pop('distribution', workspace.isDistribution())
-    return bool(distribution), kwargs
+    distribution = kwargs.pop('distribution', False)
+    distribution = True if workspace.isDistribution() else bool(distribution)
+    return distribution, kwargs
 
 
 def get_normalize_by_bin_width(workspace, axes, **kwargs):
@@ -65,7 +68,7 @@ def get_normalize_by_bin_width(workspace, axes, **kwargs):
     :param workspace: :class:`mantid.api.MatrixWorkspace` workspace being plotted
     :param axes: The axes being plotted on
     """
-    normalize_by_bin_width = kwargs.get('normalize_by_bin_width', None)
+    normalize_by_bin_width = kwargs.pop('normalize_by_bin_width', None)
     if normalize_by_bin_width is not None:
         return normalize_by_bin_width, kwargs
     distribution = kwargs.get('distribution', None)
@@ -134,8 +137,8 @@ def get_indices(md_workspace, **kwargs):
     if indices and 'label' not in kwargs:
         ws_name = md_workspace.name()
         labels = '; '.join('{0}={1:.4}'.format(md_workspace.getDimension(n).name,
-                                               (md_workspace.getDimension(n).getX(indices[n]) +
-                                                md_workspace.getDimension(n).getX(indices[n] + 1)) / 2)
+                                               (md_workspace.getDimension(n).getX(indices[n])
+                                                + md_workspace.getDimension(n).getX(indices[n] + 1)) / 2)
                            for n in range(md_workspace.getNumDims()) if indices[n] != slice(None))
         if ws_name:
             kwargs['label'] = '{0}: {1}'.format(ws_name, labels)
@@ -237,12 +240,14 @@ def _get_wksp_index_and_spec_num(workspace, axis, **kwargs):
         try:
             workspace_index = workspace.getIndexFromSpectrumNumber(int(spectrum_number))
         except RuntimeError:
-            raise RuntimeError('Spectrum Number {0} not found in workspace {1}'.format(spectrum_number,workspace.name()))
+            raise RuntimeError(
+                'Spectrum Number {0} not found in workspace {1}'.format(spectrum_number, workspace.name()))
     elif axis == MantidAxType.SPECTRUM:  # Only get a spectrum number if we're traversing the spectra
         try:
             spectrum_number = workspace.getSpectrum(workspace_index).getSpectrumNo()
         except RuntimeError:
-            raise RuntimeError('Workspace index {0} not found in workspace {1}'.format(workspace_index,workspace.name()))
+            raise RuntimeError(
+                'Workspace index {0} not found in workspace {1}'.format(workspace_index, workspace.name()))
 
     return workspace_index, spectrum_number, kwargs
 
@@ -342,26 +347,71 @@ def get_spectrum(workspace, wkspIndex, normalize_by_bin_width, withDy=False, wit
     return x, y, dy, dx
 
 
-def get_bins(workspace, wkspIndex, withDy=False):
+def get_bin_indices(workspace):
     """
-    Extract all the bins for a spectrum
+    Find the bins' indices, without those of the monitors if there are some.
+    (ie every detector which is not a monitor)
 
     :param workspace: a Workspace2D or an EventWorkspace
-    :param wkspIndex: workspace index
+    :return : the bins' indices as a range if possible, else as a numpy array
+    """
+    total_range = workspace.getNumberHistograms()
+    try:
+        spectrum_info = workspace.spectrumInfo()
+    except:
+        return range(total_range)
+
+    monitors_indices = [index for index in range(total_range)
+                        if spectrum_info.hasDetectors(index) and spectrum_info.isMonitor(index)]
+    monitor_count = len(monitors_indices)
+
+    # If possible, ie the detectors' indices are continuous, we return a range.
+    # If not, we return a numpy array
+    range_start = -1
+    range_end = total_range
+    is_range = True
+    for index, monitor_index in enumerate(monitors_indices):
+        if index == monitor_index:
+            range_start = monitor_index
+        else:
+            if monitor_count - index == total_range - monitor_index and monitors_indices[-1] == total_range - 1:
+                range_end = monitor_index
+            else:
+                is_range = False
+            break
+
+    if is_range:
+        return range(range_start + 1, range_end)
+    else:
+        # the following two lines can be replaced by np.isin when > version 1.7.0 is used on RHEL7
+        total_range = np.asarray(range(total_range))
+        indices = np.where(np.in1d(total_range, monitors_indices, invert=True).reshape(total_range.shape))
+        # this check is necessary as numpy may return a tuple or a plain array based on platform.
+        indices = indices[0] if isinstance(indices, tuple) else indices
+        return indices
+
+
+def get_bins(workspace, bin_index, withDy=False):
+    """
+    Extract a requested bin from each spectrum, except if they correspond to monitors
+
+    :param workspace: a Workspace2D or an EventWorkspace
+    :param bin_index: the index of a bin
     :param withDy: if True, it will return the error in the "counts", otherwise None
 
     """
-    num_hist = workspace.getNumberHistograms()
-    x = range(0, num_hist)
-    y = []
+    indices = get_bin_indices(workspace)
+    x_values, y_values = [], []
     dy = [] if withDy else None
-    for i in x:
-        y.append(workspace.readY(i)[wkspIndex])
-        if withDy:
-            dy.append(workspace.readE(i)[wkspIndex])
-
+    for row_index in indices:
+        y_data = workspace.readY(int(row_index))
+        if bin_index < len(y_data):
+            x_values.append(row_index)
+            y_values.append(y_data[bin_index])
+            if withDy:
+                dy.append(workspace.readE(int(row_index))[bin_index])
     dx = None
-    return x, y, dy, dx
+    return x_values, y_values, dy, dx
 
 
 def get_md_data2d_bin_bounds(workspace, normalization, indices=None, transpose=False):
@@ -418,40 +468,150 @@ def common_x(arr):
     return np.all(arr == arr[0, :], axis=(1, 0))
 
 
-def get_matrix_2d_ragged(workspace, normalize_by_bin_width, histogram2D=False, transpose=False):
-    num_hist = workspace.getNumberHistograms()
-    delta = np.finfo(np.float64).max
-    min_value = np.finfo(np.float64).max
-    max_value = np.finfo(np.float64).min
-    for i in range(num_hist):
-        xtmp = workspace.readX(i)
-        if workspace.isHistogramData():
-            # input x is edges
-            xtmp = mantid.plots.datafunctions.points_from_boundaries(xtmp)
-        else:
-            # input x is centers
-            pass
-        min_value = min(min_value, xtmp.min())
-        max_value = max(max_value, xtmp.max())
-        diff = xtmp[1:] - xtmp[:-1]
-        delta = min(delta, diff.min())
-    num_edges = int(np.ceil((max_value - min_value)/delta)) + 1
-    x_centers = np.linspace(min_value, max_value, num=num_edges)
-    y = mantid.plots.datafunctions.boundaries_from_points(workspace.getAxis(1).extractValues())
-    z = np.empty([num_hist, num_edges], dtype=np.float64)
-    for i in range(num_hist):
-        centers, ztmp, _, _ = mantid.plots.datafunctions.get_spectrum(
-            workspace, i, normalize_by_bin_width=normalize_by_bin_width, withDy=False, withDx=False)
-        f = interp1d(centers, ztmp, kind='nearest', bounds_error=False, fill_value=np.nan)
-        z[i] = f(x_centers)
-    if histogram2D:
+def get_matrix_2d_ragged(workspace, normalize_by_bin_width, histogram2D=False, transpose=False,
+                         extent=None, xbins=100, ybins=100, spec_info=None, maxpooling=False):
+    if spec_info is None:
+        try:
+            spec_info = workspace.spectrumInfo()
+        except:
+            spec_info = None
+
+    if extent is None:
+        common_bins = workspace.isCommonBins()
+        delta = np.finfo(np.float64).max
+        min_value = np.finfo(np.float64).max
+        max_value = np.finfo(np.float64).min
+
+        for spectrum_index in range(workspace.getNumberHistograms()):
+            if not (spec_info and spec_info.hasDetectors(spectrum_index) and spec_info.isMonitor(spectrum_index)):
+                xtmp = workspace.readX(spectrum_index)
+                if workspace.isHistogramData():
+                    # input x is edges
+                    xtmp = mantid.plots.datafunctions.points_from_boundaries(xtmp)
+                else:
+                    # input x is centers
+                    pass
+                min_value = min(min_value, xtmp.min())
+                max_value = max(max_value, xtmp.max())
+                diff = np.diff(xtmp)
+                delta = min(delta, diff.min())
+                if common_bins:
+                    break
+                xtmp = workspace.readX(0)
+        if delta == np.finfo(np.float64).max:
+            delta = np.diff(xtmp).min()
+        if min_value == np.finfo(np.float64).max:
+            min_value = xtmp.min()
+        if max_value == np.finfo(np.float64).min:
+            max_value = xtmp.max()
+        num_edges = int(np.ceil((max_value - min_value) / delta)) + 1
+        x_centers = np.linspace(min_value, max_value, num=num_edges)
+        y = mantid.plots.datafunctions.boundaries_from_points(workspace.getAxis(1).extractValues())
+    else:
+        x_low, x_high, y_low, y_high = extent[0], extent[1], extent[2], extent[3]
+        if transpose:
+            x_low, x_high, y_low, y_high = extent[2], extent[3], extent[0], extent[1]
+
+        x_edges = np.linspace(x_low, x_high, int(xbins + 1))
+        x_centers = mantid.plots.datafunctions.points_from_boundaries(x_edges)
+        y = np.linspace(y_low, y_high, int(ybins))
+
+    counts = interpolate_y_data(workspace, x_centers, y, normalize_by_bin_width, spectrum_info=spec_info,
+                                maxpooling=maxpooling)
+
+    if histogram2D and extent is not None:
+        x = x_edges
+    elif histogram2D:
         x = mantid.plots.datafunctions.boundaries_from_points(x_centers)
     else:
         x = x_centers
+
     if transpose:
-        return y.T, x.T, z.T
+        return y.T, x.T, counts.T
     else:
-        return x, y, z
+        return x, y, counts
+
+
+def pairwise(iterable):
+    a, b = tee(iterable)
+    next(b, None)
+    return zip(a, b)
+
+
+def _workspace_indices(y_bins, workspace):
+    workspace_indices = []
+    for y in y_bins:
+        try:
+            workspace_index = workspace.getAxis(1).indexOfValue(y)
+            workspace_indices.append(workspace_index)
+        except IndexError:
+            workspace_indices.append(-1)
+    return workspace_indices
+
+
+def _workspace_indices_maxpooling(y_bins, workspace):
+    summed_spectra_workspace = _integrate_workspace(workspace)
+    summed_spectra = summed_spectra_workspace.extractY()
+    workspace_indices = []
+    for y_range in pairwise(y_bins):
+        try:
+            workspace_range = [workspace.getAxis(1).indexOfValue(y_range[0]),
+                               workspace.getAxis(1).indexOfValue(y_range[1])]
+            # if the range doesn't span more than one spectra just grab the first element
+            # else we need to pick the spectra which has the highest intensity
+            if np.diff(workspace_range)[0] > 1:
+                workspace_range = range(workspace_range[0], workspace_range[1])
+                workspace_index = workspace_range[np.argmax(summed_spectra[workspace_range])]
+            else:
+                workspace_index = workspace_range[0]
+            workspace_indices.append(workspace_index)
+        except IndexError:
+            workspace_indices.append(-1)
+    return workspace_indices
+
+
+def _integrate_workspace(workspace):
+    from mantid.api import AlgorithmManager
+    integration = AlgorithmManager.createUnmanaged("Integration")
+    integration.initialize()
+    integration.setAlwaysStoreInADS(False)
+    integration.setLogging(False)
+    integration.setChild(True)
+    integration.setProperty("InputWorkspace", workspace)
+    integration.setProperty("OutputWorkspace", "__dummy")
+    integration.execute()
+    return integration.getProperty("OutputWorkspace").value
+
+
+def interpolate_y_data(workspace, x, y, normalize_by_bin_width, spectrum_info=None, maxpooling=False):
+    workspace_indices = _workspace_indices_maxpooling(y, workspace) \
+        if maxpooling else _workspace_indices(y, workspace)
+    counts = np.full([len(workspace_indices), x.size], np.nan, dtype=np.float64)
+    previous_index = -1
+    index = -1
+    for workspace_index in workspace_indices:
+        index += 1
+        # if workspace axis is beyond limits carry on
+        if workspace_index == -1:
+            continue
+        # avoid repeating calculations
+        if previous_index == workspace_index:
+            counts[index, :] = counts[index - 1]
+            continue
+        previous_index = workspace_index
+        if not (spectrum_info and spectrum_info.hasDetectors(workspace_index) and spectrum_info.isMonitor(
+                workspace_index)):
+            centers, ztmp, _, _ = get_spectrum(workspace, workspace_index,
+                                               normalize_by_bin_width=normalize_by_bin_width,
+                                               withDy=False, withDx=False)
+            interpolation_function = interp1d(centers, ztmp, kind='nearest', bounds_error=False,
+                                              fill_value="extrapolate")
+            # only set values in the range of workspace
+            x_range = np.where((x >= workspace.readX(workspace_index)[0]) & (x <= workspace.readX(workspace_index)[-1]))
+            # set values outside x data to nan
+            counts[index, x_range] = interpolation_function(x[x_range])
+    counts = np.ma.masked_invalid(counts, copy=False)
+    return counts
 
 
 def get_matrix_2d_data(workspace, distribution, histogram2D=False, transpose=False):
@@ -474,14 +634,18 @@ def get_matrix_2d_data(workspace, distribution, histogram2D=False, transpose=Fal
     except RuntimeError:
         raise ValueError('The spectra are not the same length. Try using pcolor, pcolorfast, or pcolormesh instead')
     x = workspace.extractX()
-    y = workspace.getAxis(1).extractValues()
+    if workspace.getAxis(1).isText():
+        nhist = workspace.getNumberHistograms()
+        y = np.arange(nhist)
+    else:
+        y = workspace.getAxis(1).extractValues()
     z = workspace.extractY()
 
     try:
         specInfo = workspace.spectrumInfo()
         for index in range(workspace.getNumberHistograms()):
-            if specInfo.isMasked(index):
-                z[index,:] = np.nan
+            if specInfo.isMasked(index) or specInfo.isMonitor(index):
+                z[index, :] = np.nan
     except:
         pass
 
@@ -534,6 +698,8 @@ def get_uneven_data(workspace, distribution):
     y = []
     nhist = workspace.getNumberHistograms()
     yvals = workspace.getAxis(1).extractValues()
+    if workspace.getAxis(1).isText():
+        yvals = np.arange(nhist)
     if len(yvals) == nhist:
         yvals = boundaries_from_points(yvals)
     try:
@@ -545,11 +711,11 @@ def get_uneven_data(workspace, distribution):
         zvals = workspace.readY(index)
         if workspace.isHistogramData():
             if not distribution:
-                zvals = zvals/(xvals[1:] - xvals[0:-1])
+                zvals = zvals / (xvals[1:] - xvals[0:-1])
         else:
             xvals = boundaries_from_points(xvals)
-        if specInfo and specInfo.hasDetectors(index) and specInfo.isMasked(index):
-            zvals[:] = np.nan
+        if specInfo and specInfo.hasDetectors(index) and (specInfo.isMasked(index) or specInfo.isMonitor(index)):
+            zvals = np.full_like(zvals, np.nan, dtype=np.double)
         zvals = np.ma.masked_invalid(zvals)
         z.append(zvals)
         x.append(xvals)
@@ -616,7 +782,7 @@ def get_sample_log(workspace, **kwargs):
         raise RuntimeError('This function can only plot Float or Int TimeSeriesProperties objects')
     Filtered = kwargs.pop('Filtered', True)
     if not Filtered:
-        #these methods access the unfiltered data
+        # these methods access the unfiltered data
         times = tsp.times.astype('datetime64[us]')
         y = tsp.value
     else:
@@ -675,7 +841,7 @@ def get_axes_labels(workspace, indices=None, normalize_by_bin_width=True, use_la
                     dims.append(d)
                 else:
                     title += '{0}={1:.4}; '.format(d.name,
-                                                   (d.getX(indices[n]) + d.getX(indices[n] + 1))/2)
+                                                   (d.getX(indices[n]) + d.getX(indices[n] + 1)) / 2)
         for d in dims:
             axis_title = d.name.replace('DeltaE', r'$\Delta E$')
             axis_unit = d.getUnits().replace('Angstrom^-1', r'$\AA^{-1}$')
@@ -707,17 +873,17 @@ def get_data_from_errorbar_container(err_cont):
     if x_segments:
         x_errs = []
         for vertex in x_segments:
-            x_errs.append((vertex[1][0] - vertex[0][0])/2)
-            x.append((vertex[0][0] + vertex[1][0])/2)
-            y.append((vertex[0][1] + vertex[1][1])/2)
+            x_errs.append((vertex[1][0] - vertex[0][0]) / 2)
+            x.append((vertex[0][0] + vertex[1][0]) / 2)
+            y.append((vertex[0][1] + vertex[1][1]) / 2)
         if y_segments:
-            y_errs = [(vertex[1][1] - vertex[0][1])/2 for vertex in y_segments]
+            y_errs = [(vertex[1][1] - vertex[0][1]) / 2 for vertex in y_segments]
     else:
         y_errs = []
         for vertex in y_segments:
-            y_errs.append((vertex[1][1] - vertex[0][1])/2)
-            x.append((vertex[0][0] + vertex[1][0])/2)
-            y.append((vertex[0][1] + vertex[1][1])/2)
+            y_errs.append((vertex[1][1] - vertex[0][1]) / 2)
+            x.append((vertex[0][0] + vertex[1][0]) / 2)
+            y.append((vertex[0][1] + vertex[1][1]) / 2)
     return x, y, x_errs, y_errs
 
 
@@ -780,6 +946,7 @@ def set_errorbars_hidden(container, hide):
         if bar_lines:
             for line in bar_lines:
                 line.set_visible(not hide)
+
 
 # ====================================================
 # Waterfall plots
@@ -1021,14 +1188,17 @@ def update_colorbar_scale(figure, image, scale, vmin, vmax):
     """
     if vmin <= 0 and scale == LogNorm:
         vmin = 0.0001  # Avoid 0 log scale error
-        mantid.kernel.logger.warning("Scale is set to logarithmic so non-positive min value has been changed to 0.0001.")
+        mantid.kernel.logger.warning(
+            "Scale is set to logarithmic so non-positive min value has been changed to 0.0001.")
 
     if vmax <= 0 and scale == LogNorm:
         vmax = 1  # Avoid 0 log scale error
         mantid.kernel.logger.warning("Scale is set to logarithmic so non-positive max value has been changed to 1.")
 
     image.set_norm(scale(vmin=vmin, vmax=vmax))
+
     if image.colorbar:
+        label = image.colorbar._label
         image.colorbar.remove()
         locator = None
         if scale == LogNorm:
@@ -1037,8 +1207,59 @@ def update_colorbar_scale(figure, image, scale, vmin, vmax):
                 locator = LogLocator()
                 mantid.kernel.logger.warning("Minor ticks on colorbar scale cannot be shown "
                                              "as the range between min value and max value is too large")
-        figure.colorbar(image, ticks=locator)
+        figure.subplots_adjust(wspace=0.5, hspace=0.5)
+        colorbar = figure.colorbar(image, ax=figure.axes, ticks=locator, pad=0.06)
+        colorbar.set_label(label)
 
 
-def figure_contains_only_3d_plots(fig) -> bool:
-    return all(isinstance(ax, Axes3D) for ax in fig.get_axes())
+def add_colorbar_label(colorbar, axes):
+    """
+    Adds a label to the colorbar if every axis on the figure has the same label.
+    :param colorbar: the colorbar to label.
+    :param axes: the axes that the colorbar belongs to.
+    """
+    colorbar_labels = [ax.colorbar_label for ax in axes if hasattr(ax, 'colorbar_label')]
+    if colorbar_labels and colorbar_labels.count(colorbar_labels[0]) == len(colorbar_labels):
+        colorbar.set_label(colorbar_labels[0])
+
+
+def get_images_from_figure(figure):
+    """Return a list of images in the given figure excluding any colorbar images"""
+    axes = figure.get_axes()
+
+    all_images = []
+    for ax in axes:
+        all_images += ax.images + [col for col in ax.collections if isinstance(col, QuadMesh)
+                                   or isinstance(col, Poly3DCollection)]
+
+    # remove any colorbar images
+    colorbars = [img.colorbar.solids for img in all_images if img.colorbar]
+    images = [img for img in all_images if img not in colorbars]
+    return images
+
+
+def get_axes_from_figure(figure):
+    """Return a list of axes in the given figure excluding any colorbar axes"""
+    images = get_images_from_figure(figure)
+    axes = [img.axes for img in images]
+
+    return axes
+
+
+def get_legend_handles(ax):
+    """
+    Get a list of the Line2D and ErrorbarContainer objects to be
+    included in the legend so that the order is always the same.
+    """
+    handles = []
+    for line in ax.lines:
+        if line.get_label() == "_nolegend_":
+            # If the line has no label find the ErrorbarContainer that corresponds to it (if one exists)
+            for container in ax.containers:
+                if isinstance(container, ErrorbarContainer) and container[0] == line:
+                    handles.append(container)
+                    break
+        else:
+            handles.append(line)
+
+    return handles

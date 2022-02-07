@@ -18,7 +18,7 @@ A few final tips!
    04_the_end
 
 
-**Sections** 
+**Sections**
 
 * :ref:`01_save_settings`
 * :ref:`02_scripts`

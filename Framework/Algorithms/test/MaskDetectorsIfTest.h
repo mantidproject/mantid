@@ -11,11 +11,12 @@
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/SpectrumInfo.h"
 #include "MantidAlgorithms/MaskDetectorsIf.h"
+#include "MantidFrameworkTestHelpers/ScopedFileHelper.h"
+#include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidGeometry/Instrument/DetectorInfo.h"
-#include "MantidTestHelpers/ScopedFileHelper.h"
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include <Poco/File.h>
 #include <fstream>
+#include <limits>
 
 using namespace Mantid;
 using namespace Mantid::Algorithms;
@@ -26,9 +27,7 @@ class MaskDetectorsIfTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static MaskDetectorsIfTest *createSuite() {
-    return new MaskDetectorsIfTest();
-  }
+  static MaskDetectorsIfTest *createSuite() { return new MaskDetectorsIfTest(); }
   static void destroySuite(MaskDetectorsIfTest *suite) { delete suite; }
 
   void testCalFileDeselectIfNotEqual() {
@@ -124,8 +123,7 @@ public:
 
     // setup and run the algorithm (includes basic checks)
     MaskDetectorsIf alg;
-    setupAlgorithmForCalFiles(alg, "SelectIf", "Equal", 2.2,
-                              inputFile.getFileName());
+    setupAlgorithmForCalFiles(alg, "SelectIf", "Equal", 2.2, inputFile.getFileName());
     std::ifstream file;
     runAlgorithmForCalFiles(alg, file);
 
@@ -140,9 +138,7 @@ public:
   }
 
   void testMaskWorkspaceDeselectIfNotEqual() {
-    auto correctMasking = [](MatrixWorkspace const &ws, const size_t wsIndex) {
-      return ws.y(wsIndex).front() == 2.2;
-    };
+    auto correctMasking = [](MatrixWorkspace const &ws, const size_t wsIndex) { return ws.y(wsIndex).front() == 2.2; };
     MaskDetectorsIf alg;
     MatrixWorkspace_sptr inWS = makeFakeWorkspace();
     maskAllDetectors(inWS);
@@ -153,9 +149,7 @@ public:
   }
 
   void testMaskWorkspaceSelectIfEqual() {
-    auto correctMasking = [](MatrixWorkspace const &ws, const size_t wsIndex) {
-      return ws.y(wsIndex).front() == 2.2;
-    };
+    auto correctMasking = [](MatrixWorkspace const &ws, const size_t wsIndex) { return ws.y(wsIndex).front() == 2.2; };
     MaskDetectorsIf alg;
     MatrixWorkspace_sptr inWS = makeFakeWorkspace();
     setupAlgorithmForOutputWorkspace(alg, inWS, "SelectIf", "Equal", 2.2);
@@ -165,9 +159,7 @@ public:
   }
 
   void testMaskWorkspaceDeselectIfLess() {
-    auto correctMasking = [](MatrixWorkspace const &ws, const size_t wsIndex) {
-      return ws.y(wsIndex).front() >= 2.2;
-    };
+    auto correctMasking = [](MatrixWorkspace const &ws, const size_t wsIndex) { return ws.y(wsIndex).front() >= 2.2; };
     MaskDetectorsIf alg;
     MatrixWorkspace_sptr inWS = makeFakeWorkspace();
     maskAllDetectors(inWS);
@@ -178,12 +170,26 @@ public:
   }
 
   void testMaskWorkspaceSelectIfGreater() {
-    auto correctMasking = [](MatrixWorkspace const &ws, const size_t wsIndex) {
-      return ws.y(wsIndex).front() > 2.2;
-    };
+    auto correctMasking = [](MatrixWorkspace const &ws, const size_t wsIndex) { return ws.y(wsIndex).front() > 2.2; };
     MaskDetectorsIf alg;
     MatrixWorkspace_sptr inWS = makeFakeWorkspace();
     setupAlgorithmForOutputWorkspace(alg, inWS, "SelectIf", "Greater", 2.2);
+    TS_ASSERT_THROWS_NOTHING(alg.execute())
+    TS_ASSERT(alg.isExecuted())
+    checkOutputWorkspace(alg, correctMasking);
+  }
+
+  void testMaskWorkspaceSelectIfNotFinite() {
+    auto correctMasking = [](MatrixWorkspace const &ws, const size_t wsIndex) {
+      return !isfinite(ws.y(wsIndex).front());
+    };
+    MaskDetectorsIf alg;
+    MatrixWorkspace_sptr inWS = makeFakeWorkspace();
+    // add some non finite values
+    inWS->mutableY(1)[0] = std::numeric_limits<double>::quiet_NaN();
+    inWS->mutableY(3)[0] = std::numeric_limits<double>::infinity();
+
+    setupAlgorithmForOutputWorkspace(alg, inWS, "SelectIf", "NotFinite", 0.0);
     TS_ASSERT_THROWS_NOTHING(alg.execute())
     TS_ASSERT(alg.isExecuted())
     checkOutputWorkspace(alg, correctMasking);
@@ -195,8 +201,7 @@ private:
   constexpr static int numBins{1};
   constexpr static int numHist{numBanks * numPixels * numPixels};
 
-  template <typename T>
-  void checkOutputWorkspace(MaskDetectorsIf &alg, T correctMasking) {
+  template <typename T> void checkOutputWorkspace(MaskDetectorsIf &alg, T correctMasking) {
     MatrixWorkspace_sptr inW = alg.getProperty("InputWorkspace");
     MatrixWorkspace_sptr mask = alg.getProperty("OutputWorkspace");
     TS_ASSERT(mask)
@@ -204,7 +209,13 @@ private:
     const auto &spectrumInfo = mask->spectrumInfo();
     for (size_t i = 0; i < numHist; ++i) {
       TS_ASSERT_EQUALS(spectrumInfo.isMasked(i), correctMasking(*inW, i))
-      TS_ASSERT_EQUALS(mask->y(i).front(), inW->y(i).front())
+      if (std::isfinite(mask->y(i).front())) {
+        if (spectrumInfo.isMasked(i)) {
+          TS_ASSERT_EQUALS(mask->y(i).front(), 0.);
+        } else {
+          TS_ASSERT_EQUALS(mask->y(i).front(), inW->y(i).front());
+        }
+      }
     }
   }
 
@@ -226,8 +237,7 @@ private:
   static const MatrixWorkspace_sptr makeFakeWorkspace() {
     // create the workspace
     MatrixWorkspace_sptr ws =
-        WorkspaceCreationHelper::create2DWorkspaceWithRectangularInstrument(
-            numBanks, numPixels, numBins);
+        WorkspaceCreationHelper::create2DWorkspaceWithRectangularInstrument(numBanks, numPixels, numBins);
 
     // Default y values are all 2.0. Change them so they're different
     // for each spectrum (this gives us the values 2.0, 2.1, 2.2, ...)
@@ -247,10 +257,9 @@ private:
 
   // Initialise the algorithm and set the properties. Creates a fake
   // workspace for the input.
-  static void setupAlgorithmForCalFiles(
-      MaskDetectorsIf &alg, const std::string &mode, const std::string &op,
-      const double value,
-      const std::string &inputFile = "4detector_cal_example_file.cal") {
+  static void setupAlgorithmForCalFiles(MaskDetectorsIf &alg, const std::string &mode, const std::string &op,
+                                        const double value,
+                                        const std::string &inputFile = "4detector_cal_example_file.cal") {
     // create the workspace
     const MatrixWorkspace_sptr inWS = makeFakeWorkspace();
 
@@ -268,11 +277,8 @@ private:
 
   // Initialise the algorithm and set the properties. Creates a fake
   // workspace for the input.
-  static void setupAlgorithmForOutputWorkspace(MaskDetectorsIf &alg,
-                                               const MatrixWorkspace_sptr &inWS,
-                                               const std::string &mode,
-                                               const std::string &op,
-                                               const double value) {
+  static void setupAlgorithmForOutputWorkspace(MaskDetectorsIf &alg, const MatrixWorkspace_sptr &inWS,
+                                               const std::string &mode, const std::string &op, const double value) {
     // set up the algorithm
     if (!alg.isInitialized())
       alg.initialize();
@@ -287,8 +293,7 @@ private:
 
   // Run the algorithm and do some basic checks. Opens the output file
   // stream if everything is ok (leaves it closed if not).
-  static void runAlgorithmForCalFiles(MaskDetectorsIf &alg,
-                                      std::ifstream &outFile) {
+  static void runAlgorithmForCalFiles(MaskDetectorsIf &alg, std::ifstream &outFile) {
     // run the algorithm
     TS_ASSERT_THROWS_NOTHING(alg.execute());
     TS_ASSERT(alg.isExecuted());
@@ -324,8 +329,7 @@ private:
 
   // Read the next line from the given file and check
   // that the values match those given.
-  static void readAndCheckLine(std::ifstream &file, const int num,
-                               const int udet, const double offset,
+  static void readAndCheckLine(std::ifstream &file, const int num, const int udet, const double offset,
                                const int select, const int group) {
     TS_ASSERT(!file.eof());
 

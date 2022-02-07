@@ -42,78 +42,47 @@ public:
     TS_ASSERT_EQUALS(fn.getLatticeSystem(), PointGroup::LatticeSystem::Cubic);
 
     // Tetragonal
-    TS_ASSERT_THROWS_NOTHING(
-        fn.setAttributeValue("LatticeSystem", "tetragonal"));
-    TS_ASSERT_EQUALS(fn.getLatticeSystem(),
-                     PointGroup::LatticeSystem::Tetragonal);
-    TS_ASSERT_THROWS_NOTHING(
-        fn.setAttributeValue("LatticeSystem", "Tetragonal"));
-    TS_ASSERT_EQUALS(fn.getLatticeSystem(),
-                     PointGroup::LatticeSystem::Tetragonal);
-    TS_ASSERT_THROWS_NOTHING(
-        fn.setAttributeValue("LatticeSystem", "TETRAGONAL"));
-    TS_ASSERT_EQUALS(fn.getLatticeSystem(),
-                     PointGroup::LatticeSystem::Tetragonal);
+    TS_ASSERT_THROWS_NOTHING(fn.setAttributeValue("LatticeSystem", "tetragonal"));
+    TS_ASSERT_EQUALS(fn.getLatticeSystem(), PointGroup::LatticeSystem::Tetragonal);
+    TS_ASSERT_THROWS_NOTHING(fn.setAttributeValue("LatticeSystem", "Tetragonal"));
+    TS_ASSERT_EQUALS(fn.getLatticeSystem(), PointGroup::LatticeSystem::Tetragonal);
+    TS_ASSERT_THROWS_NOTHING(fn.setAttributeValue("LatticeSystem", "TETRAGONAL"));
+    TS_ASSERT_EQUALS(fn.getLatticeSystem(), PointGroup::LatticeSystem::Tetragonal);
 
     // Hexagonal
-    TS_ASSERT_THROWS_NOTHING(
-        fn.setAttributeValue("LatticeSystem", "hexagonal"));
-    TS_ASSERT_EQUALS(fn.getLatticeSystem(),
-                     PointGroup::LatticeSystem::Hexagonal);
-    TS_ASSERT_THROWS_NOTHING(
-        fn.setAttributeValue("LatticeSystem", "Hexagonal"));
-    TS_ASSERT_EQUALS(fn.getLatticeSystem(),
-                     PointGroup::LatticeSystem::Hexagonal);
-    TS_ASSERT_THROWS_NOTHING(
-        fn.setAttributeValue("LatticeSystem", "HEXAGONAL"));
-    TS_ASSERT_EQUALS(fn.getLatticeSystem(),
-                     PointGroup::LatticeSystem::Hexagonal);
+    TS_ASSERT_THROWS_NOTHING(fn.setAttributeValue("LatticeSystem", "hexagonal"));
+    TS_ASSERT_EQUALS(fn.getLatticeSystem(), PointGroup::LatticeSystem::Hexagonal);
+    TS_ASSERT_THROWS_NOTHING(fn.setAttributeValue("LatticeSystem", "Hexagonal"));
+    TS_ASSERT_EQUALS(fn.getLatticeSystem(), PointGroup::LatticeSystem::Hexagonal);
+    TS_ASSERT_THROWS_NOTHING(fn.setAttributeValue("LatticeSystem", "HEXAGONAL"));
+    TS_ASSERT_EQUALS(fn.getLatticeSystem(), PointGroup::LatticeSystem::Hexagonal);
 
     // Orthorhombic
-    TS_ASSERT_THROWS_NOTHING(
-        fn.setAttributeValue("LatticeSystem", "orthorhombic"));
-    TS_ASSERT_EQUALS(fn.getLatticeSystem(),
-                     PointGroup::LatticeSystem::Orthorhombic);
-    TS_ASSERT_THROWS_NOTHING(
-        fn.setAttributeValue("LatticeSystem", "Orthorhombic"));
-    TS_ASSERT_EQUALS(fn.getLatticeSystem(),
-                     PointGroup::LatticeSystem::Orthorhombic);
-    TS_ASSERT_THROWS_NOTHING(
-        fn.setAttributeValue("LatticeSystem", "ORTHORHOMBIC"));
-    TS_ASSERT_EQUALS(fn.getLatticeSystem(),
-                     PointGroup::LatticeSystem::Orthorhombic);
+    TS_ASSERT_THROWS_NOTHING(fn.setAttributeValue("LatticeSystem", "orthorhombic"));
+    TS_ASSERT_EQUALS(fn.getLatticeSystem(), PointGroup::LatticeSystem::Orthorhombic);
+    TS_ASSERT_THROWS_NOTHING(fn.setAttributeValue("LatticeSystem", "Orthorhombic"));
+    TS_ASSERT_EQUALS(fn.getLatticeSystem(), PointGroup::LatticeSystem::Orthorhombic);
+    TS_ASSERT_THROWS_NOTHING(fn.setAttributeValue("LatticeSystem", "ORTHORHOMBIC"));
+    TS_ASSERT_EQUALS(fn.getLatticeSystem(), PointGroup::LatticeSystem::Orthorhombic);
 
     // Monoclinic
-    TS_ASSERT_THROWS_NOTHING(
-        fn.setAttributeValue("LatticeSystem", "monoclinic"));
-    TS_ASSERT_EQUALS(fn.getLatticeSystem(),
-                     PointGroup::LatticeSystem::Monoclinic);
-    TS_ASSERT_THROWS_NOTHING(
-        fn.setAttributeValue("LatticeSystem", "Monoclinic"));
-    TS_ASSERT_EQUALS(fn.getLatticeSystem(),
-                     PointGroup::LatticeSystem::Monoclinic);
-    TS_ASSERT_THROWS_NOTHING(
-        fn.setAttributeValue("LatticeSystem", "MONOCLINIC"));
-    TS_ASSERT_EQUALS(fn.getLatticeSystem(),
-                     PointGroup::LatticeSystem::Monoclinic);
+    TS_ASSERT_THROWS_NOTHING(fn.setAttributeValue("LatticeSystem", "monoclinic"));
+    TS_ASSERT_EQUALS(fn.getLatticeSystem(), PointGroup::LatticeSystem::Monoclinic);
+    TS_ASSERT_THROWS_NOTHING(fn.setAttributeValue("LatticeSystem", "Monoclinic"));
+    TS_ASSERT_EQUALS(fn.getLatticeSystem(), PointGroup::LatticeSystem::Monoclinic);
+    TS_ASSERT_THROWS_NOTHING(fn.setAttributeValue("LatticeSystem", "MONOCLINIC"));
+    TS_ASSERT_EQUALS(fn.getLatticeSystem(), PointGroup::LatticeSystem::Monoclinic);
 
     // Triclinic
-    TS_ASSERT_THROWS_NOTHING(
-        fn.setAttributeValue("LatticeSystem", "triclinic"));
-    TS_ASSERT_EQUALS(fn.getLatticeSystem(),
-                     PointGroup::LatticeSystem::Triclinic);
-    TS_ASSERT_THROWS_NOTHING(
-        fn.setAttributeValue("LatticeSystem", "Triclinic"));
-    TS_ASSERT_EQUALS(fn.getLatticeSystem(),
-                     PointGroup::LatticeSystem::Triclinic);
-    TS_ASSERT_THROWS_NOTHING(
-        fn.setAttributeValue("LatticeSystem", "TRICLINIC"));
-    TS_ASSERT_EQUALS(fn.getLatticeSystem(),
-                     PointGroup::LatticeSystem::Triclinic);
+    TS_ASSERT_THROWS_NOTHING(fn.setAttributeValue("LatticeSystem", "triclinic"));
+    TS_ASSERT_EQUALS(fn.getLatticeSystem(), PointGroup::LatticeSystem::Triclinic);
+    TS_ASSERT_THROWS_NOTHING(fn.setAttributeValue("LatticeSystem", "Triclinic"));
+    TS_ASSERT_EQUALS(fn.getLatticeSystem(), PointGroup::LatticeSystem::Triclinic);
+    TS_ASSERT_THROWS_NOTHING(fn.setAttributeValue("LatticeSystem", "TRICLINIC"));
+    TS_ASSERT_EQUALS(fn.getLatticeSystem(), PointGroup::LatticeSystem::Triclinic);
 
     // invalid string
-    TS_ASSERT_THROWS(fn.setAttributeValue("LatticeSystem", "invalid"),
-                     const std::invalid_argument &);
+    TS_ASSERT_THROWS(fn.setAttributeValue("LatticeSystem", "invalid"), const std::invalid_argument &);
   }
 
   void testLatticeSystemConstraintsCubic() {
@@ -304,24 +273,20 @@ public:
     PawleyParameterFunction fn;
     fn.initialize();
 
-    TS_ASSERT_THROWS_NOTHING(
-        fn.setAttributeValue("ProfileFunction", "Gaussian"));
+    TS_ASSERT_THROWS_NOTHING(fn.setAttributeValue("ProfileFunction", "Gaussian"));
     TS_ASSERT_EQUALS(fn.getProfileFunctionName(), "Gaussian");
 
     // works only with IPeakFunctions
-    TS_ASSERT_THROWS(fn.setAttributeValue("ProfileFunction", "Chebyshev"),
-                     const std::invalid_argument &);
+    TS_ASSERT_THROWS(fn.setAttributeValue("ProfileFunction", "Chebyshev"), const std::invalid_argument &);
 
-    TS_ASSERT_THROWS(fn.setAttributeValue("ProfileFunction", "DoesNotExist"),
-                     const Exception::NotFoundError &);
+    TS_ASSERT_THROWS(fn.setAttributeValue("ProfileFunction", "DoesNotExist"), const Exception::NotFoundError &);
   }
 
   void testPawleyFunctionInitialization() {
     PawleyFunction fn;
     fn.initialize();
 
-    TS_ASSERT(std::dynamic_pointer_cast<CompositeFunction>(
-        fn.getDecoratedFunction()));
+    TS_ASSERT(std::dynamic_pointer_cast<CompositeFunction>(fn.getDecoratedFunction()));
 
     // The base parameters of PawleyParameterFunction
     TS_ASSERT_EQUALS(fn.nParams(), 7);
@@ -430,8 +395,7 @@ public:
   }
 
 private:
-  void cellParametersAre(const UnitCell &cell, double a, double b, double c,
-                         double alpha, double beta, double gamma) {
+  void cellParametersAre(const UnitCell &cell, double a, double b, double c, double alpha, double beta, double gamma) {
     TS_ASSERT_DELTA(cell.a(), a, 1e-9);
     TS_ASSERT_DELTA(cell.b(), b, 1e-9);
     TS_ASSERT_DELTA(cell.c(), c, 1e-9);

@@ -1,6 +1,5 @@
-# CMake version check. Require CMake 3.13 - Required for add_link_options
-# 3.15 is required on Windows, but is not available to RHEL yet
-cmake_minimum_required(VERSION 3.13)
+# CMake version check.
+cmake_minimum_required(VERSION 3.16)
 
 # Define the project name.
 project(Mantid)
@@ -18,25 +17,79 @@ if(POLICY CMP0074)
   cmake_policy(SET CMP0074 NEW)
 endif()
 
-# System package target is important for the windows builds as it allows us to
-# package only the dlls and exes and exclude libs. Defaults to empty for other
-# platforms.
+# System package target is important for the windows builds as it allows us to package only the dlls and exes and
+# exclude libs. Defaults to empty for other platforms.
 set(SYSTEM_PACKAGE_TARGET "")
 
 # Add the path to our custom 'find' modules
 set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/buildconfig/CMake")
-# Send libraries to common place, reference in several places so must be at top
-# level
+# Send libraries to common place, reference in several places so must be at top level
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/bin)
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/bin)
 
-option(ENABLE_MANTIDPLOT "Enable Qt4-based gui & components" ON)
-option(ENABLE_WORKBENCH "Enable Qt5-based gui & components" ON)
+option(ENABLE_MANTIDQT "Enable Qt5-based components" ON)
+option(ENABLE_WORKBENCH "Enable Qt5-based gui" ON)
+
+set(MANTID_FRAMEWORK_LIB
+    "BUILD"
+    CACHE STRING "Mantid framework build options, valid options are (BUILD, SYSTEM).
+If system is specificed a valid mantid framework installation must be present on the system, e.g from conda"
+)
+set_property(CACHE MANTID_FRAMEWORK_LIB PROPERTY STRINGS "BUILD" "SYSTEM")
+
+# set this for compatability, as previously if enable_workbench was off we didn't build the qt element we can override
+# this behavior on the command line.
+if(NOT ENABLE_WORKBENCH)
+  set(_mantidqt_option "OFF")
+else()
+  set(_mantidqt_option "BUILD")
+endif()
+
+set(MANTID_QT_LIB
+    ${_mantidqt_option}
+    CACHE STRING "Mantid qt build options, valid options are (OFF, BUILD, SYSTEM).
+If system is specificed a valid mantid qt installation must be present on the system, e.g. from conda"
+)
+set_property(CACHE MANTID_QT_LIB PROPERTY STRINGS "OFF" "BUILD" "SYSTEM")
+
+if(NOT
+   (ENABLE_WORKBENCH
+    OR MANTID_QT_LIB STREQUAL "BUILD"
+    OR MANTID_FRAMEWORK_LIB STREQUAL "BUILD")
+)
+  message(FATAL_ERROR "Must select atleast one component to build")
+endif()
+
+# Create two internal BUILD_* variables. With these, we can do consistent checks throughout, e.g: if(BUILD_MANTIDQT OR
+# ENABLE_WORKBENCH) .... endif() to check if we are building the mantidqt libs or the workbench application
+if(MANTID_QT_LIB STREQUAL "BUILD")
+  set(BUILD_MANTIDQT ON)
+endif()
+if(MANTID_FRAMEWORK_LIB STREQUAL "BUILD")
+  set(BUILD_MANTIDFRAMEWORK ON)
+endif()
 
 set(CPACK_INSTALL_CMAKE_PROJECTS "${CMAKE_BINARY_DIR}" "Mantid" "ALL" "/")
 
-# Ensure that if we are running any sanitizers the compiler options are
-# known in sub targets
+# Conda build variables
+set(CONDA_ENV
+    FALSE
+    CACHE BOOL "If True then we are building in a conda environment.
+          This predominately changes the operation of some the finders FindXXX.cmake
+          On windows it also prevents the use of the 3rdparty dependency directory"
+)
+set(CONDA_BUILD
+    FALSE
+    CACHE
+      BOOL
+      "If True then we are using conda-build to build and package mantid.
+          This stops a few things from occuring:
+          - A bundle is no longer generated on OSX
+          - Linux custom handling on the install is ommitted
+          - Prevents site-package manipulation by the installer"
+)
+
+# Ensure that if we are running any sanitizers the compiler options are known in sub targets
 include(Sanitizers)
 
 # Quick exit if we only want data targets
@@ -48,14 +101,19 @@ if(DATA_TARGETS_ONLY)
 endif()
 
 # Packaging configuration
-set(CPACK_PACKAGE_SUFFIX "unstable"
-    CACHE STRING "suffix used to determine the deployment type")
-set_property(CACHE CPACK_PACKAGE_SUFFIX
-             PROPERTY STRINGS
-                      nightly
-                      unstable
-                      "")
+set(CPACK_PACKAGE_SUFFIX
+    "unstable"
+    CACHE STRING "suffix used to determine the deployment type"
+)
+set_property(CACHE CPACK_PACKAGE_SUFFIX PROPERTY STRINGS nightly unstable "")
 # empty string and release are treated as the same thing
+if(CPACK_PACKAGE_SUFFIX)
+  # Camelcase version of suffix for Windows/Mac
+  string(TOUPPER ${CPACK_PACKAGE_SUFFIX} CPACK_PACKAGE_SUFFIX_CAMELCASE)
+  string(SUBSTRING ${CPACK_PACKAGE_SUFFIX_CAMELCASE} 0 1 CPACK_PACKAGE_SUFFIX_CAMELCASE)
+  string(SUBSTRING ${CPACK_PACKAGE_SUFFIX} 1 -1 _tmp_suffix_remainder)
+  string(CONCAT CPACK_PACKAGE_SUFFIX_CAMELCASE ${CPACK_PACKAGE_SUFFIX_CAMELCASE} ${_tmp_suffix_remainder})
+endif()
 
 # Set package name here
 set(CPACK_PACKAGE_NAME "mantid${CPACK_PACKAGE_SUFFIX}")
@@ -63,38 +121,19 @@ set(CPACK_PACKAGE_NAME "mantid${CPACK_PACKAGE_SUFFIX}")
 # Bootstrap any dependencies
 include(Bootstrap)
 
-# Configure Eigen early
-include(Eigen)
-
-include(Span)
-
-# Set ParaView information since later items depend on it
-
-# VATES flag. Requires ParaView
-option(MAKE_VATES "Switch for compiling the Vates project")
-if(ENABLE_MANTIDPLOT AND MAKE_VATES)
-  find_package(ParaView)
-  if(ParaView_FOUND)
-    add_definitions(-DMAKE_VATES)
-    # Poco::File throws an exception when a backslash is used.
-    string(REPLACE "\\"
-                   "/"
-                   ParaView_DIR
-                   ${ParaView_DIR})
-  endif()
-endif()
-if(ENABLE_MANTIDPLOT)
-  include(ParaViewSetup)
-endif()
-
-if( MSVC )
-  include ( MSVCSetup )
+if(MSVC)
+  include(MSVCSetup)
 elseif(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
   include(DarwinSetup)
 endif()
 
 # Cross-platform setup
 include(CommonSetup)
+
+if(BUILD_MANTIDFRAMEWORK)
+  include(Eigen)
+endif()
+include(Span)
 
 # Find OpenGL
 if(ENABLE_OPENGL)
@@ -105,54 +144,25 @@ if(ENABLE_OPENGL)
   endif()
 endif()
 
-find_package(TBB REQUIRED)
-
 # We probably don't want this to run on every build.
-option(COVERALLS "Generate coveralls data" OFF)
+option(COVERAGE "Generate coverage data" OFF)
 
-if(COVERALLS)
-  include(Coveralls)
-  coveralls_turn_on_coverage()
+if(COVERAGE)
+  include(Coverage)
+  coverage_turn_on()
 endif()
 
-# Qt/Qwt/PyQt/sip
-if(ENABLE_MANTIDPLOT)
-  set(QT_USE_IMPORTED_TARGETS ON)
-  find_package(Qt4
-               COMPONENTS QtCore
-                          QtGui
-                          QtOpenGL
-                          QtXml
-                          QtSvg
-               REQUIRED)
-
-  find_package(Qwt5 REQUIRED)
-  if(QWT5_VERSION VERSION_LESS 5.0
-     OR QWT5_VERSION VERSION_EQUAL 6.0
-     OR QWT5_VERSION VERSION_GREATER 6.0)
-    message(FATAL_ERROR "Qwt version 5 is required, found: ${QWT5_VERSION}")
-  endif()
-
-  if(PYTHON_VERSION_MAJOR EQUAL 3 AND
-     UNIX_DIST MATCHES "RedHatEnterprise" AND UNIX_RELEASE MATCHES "7\..*")
-    set(USE_PRIVATE_SIPPYQT4 ON)
-    include(ExternalSipPyQt4)
-  else()
-    find_package(PyQt4 REQUIRED)
-    find_package(SIP REQUIRED)
-  endif()
-  separate_arguments(PYQT4_SIP_FLAGS)
-endif()
-
-if(ENABLE_WORKBENCH)
-  find_package(Qt5
-               COMPONENTS Core
-                          Gui
-                          Widgets
-                          OpenGL
-               REQUIRED)
+if(ENABLE_WORKBENCH OR BUILD_MANTIDQT)
+  find_package(
+    Qt5
+    COMPONENTS Core Gui Widgets OpenGL Test
+    REQUIRED
+  )
   if(Qt5_FOUND)
     message(STATUS "Found Qt ${Qt5_VERSION}: ${Qt5_DIR}")
+  endif()
+  if(BUILD_MANTIDQT)
+    find_package(QScintillaQt5 REQUIRED)
   endif()
   find_package(PyQt5 REQUIRED)
   find_package(SIP REQUIRED)
@@ -163,59 +173,36 @@ endif()
 
 # Flag that this is a full build, i.e not framework only
 set(FULL_PACKAGE_BUILD 1)
-# Set the path to the built docs directory here so that it can be used in the
-# Kernel project for populating the properties file
+# Set the path to the built docs directory here so that it can be used in the Kernel project for populating the
+# properties file
 set(DOCS_BUILDDIR ${CMAKE_BINARY_DIR}/docs)
 
 # Framework Build options
-option(CXXTEST_ADD_PERFORMANCE
-       "Switch to add Performance tests to the list of tests run by ctest?")
+option(CXXTEST_ADD_PERFORMANCE "Switch to add performance tests to the list of tests run by ctest?")
 
-add_subdirectory(Framework)
+include(TargetFunctions)
 
-include_directories(Framework/Kernel/inc)
-include_directories(Framework/HistogramData/inc)
-include_directories(Framework/Indexing/inc)
-include_directories(Framework/Parallel/inc)
-include_directories(Framework/Beamline/inc)
-include_directories(Framework/Geometry/inc)
-include_directories(Framework/API/inc)
-include_directories(Framework/Types/inc)
-include_directories(Framework/NexusGeometry/inc)
-
-set(CORE_MANTIDLIBS Kernel HistogramData Indexing Beamline Geometry API Types)
-
-if(ENABLE_MANTIDPLOT AND MAKE_VATES)
-
-  if(NOT APPLE)
-    list(APPEND CPACK_INSTALL_CMAKE_PROJECTS
-                "${ParaView_DIR}"
-                "ParaView Runtime Libs"
-                "Runtime"
-                "${INBUNDLE}/")
-    list(APPEND CPACK_INSTALL_CMAKE_PROJECTS
-                "${ParaView_DIR}"
-                "VTK Runtime Libs"
-                "RuntimeLibraries"
-                "${INBUNDLE}/")
-    list(APPEND CPACK_INSTALL_CMAKE_PROJECTS
-                "${ParaView_DIR}"
-                "HDF5 Core Library"
-                "libraries"
-                "${INBUNDLE}/")
-    list(APPEND CPACK_INSTALL_CMAKE_PROJECTS
-                "${ParaView_DIR}"
-                "HDF5 HL Library"
-                "hllibraries"
-                "${INBUNDLE}/")
+if(MANTID_FRAMEWORK_LIB STREQUAL "SYSTEM")
+  if(BUILD_MANTIDQT)
+    find_package(MantidFramework REQUIRED)
   endif()
+else()
+  add_subdirectory(Framework)
+endif()
 
-endif(ENABLE_MANTIDPLOT AND MAKE_VATES)
+set(CORE_MANTIDLIBS
+    Mantid::Kernel
+    Mantid::HistogramData
+    Mantid::Indexing
+    Mantid::Beamline
+    Mantid::Geometry
+    Mantid::API
+    Mantid::Types
+)
 
 if(UNIX)
   # Experimental feature. Unix only at this point.
-  option(UNITY_BUILD
-         "Switch for utilising unity builds. Faster builds for selected components.")
+  option(UNITY_BUILD "Switch for utilising unity builds. Faster builds for selected components.")
 endif(UNIX)
 
 if(MSVC)
@@ -223,9 +210,12 @@ if(MSVC)
 endif()
 
 add_custom_target(AllTests)
-add_dependencies(AllTests FrameworkTests)
 
-if(ENABLE_MANTIDPLOT OR ENABLE_WORKBENCH)
+if(BUILD_MANTIDFRAMEWORK)
+  add_dependencies(AllTests FrameworkTests)
+endif()
+
+if(BUILD_MANTIDQT OR ENABLE_WORKBENCH)
   add_custom_target(GUITests)
   add_dependencies(check GUITests)
   # Collect all tests together
@@ -233,73 +223,61 @@ if(ENABLE_MANTIDPLOT OR ENABLE_WORKBENCH)
   add_subdirectory(qt)
 endif()
 
-if(ENABLE_MANTIDPLOT)
-  add_subdirectory(MantidPlot)
+if(BUILD_MANTIDFRAMEWORK)
+  add_subdirectory(scripts)
 endif()
-
-add_subdirectory(scripts)
 
 # Docs requirements
 option(ENABLE_DOCS "Enable Building user and developer documentation" ON)
-if (ENABLE_DOCS)
-  find_package(Sphinx 1.2)
-  if(SPHINX_FOUND)
-    # run python to see if the theme is installed
-    execute_process(COMMAND ${PYTHON_EXECUTABLE} -c
-                            "import sphinx_bootstrap_theme"
-                    OUTPUT_VARIABLE SPHINX_BOOTSTRAP_THEME_OUT
-                    ERROR_VARIABLE SPHINX_BOOTSTRAP_THEME_ERR
-                    OUTPUT_STRIP_TRAILING_WHITESPACE
-                    ERROR_STRIP_TRAILING_WHITESPACE)
-    if(SPHINX_BOOTSTRAP_THEME_ERR)
-      message(ERROR " Did not find sphinx_bootstrap_theme")
-      message(STATUS "${PYTHON_EXECUTABLE} -c \"import sphinx_bootstrap_theme\"")
-      message(STATUS "${SPHINX_BOOTSTRAP_THEME_ERR}")
-      message(
-        FATAL_ERROR
-          " Install instructions at https://pypi.python.org/pypi/sphinx-bootstrap-theme/"
-        )
-    endif()
-
-    add_subdirectory(dev-docs)
-    if(ENABLE_MANTIDPLOT)
-      add_subdirectory(docs)
-    endif()
+if(ENABLE_DOCS)
+  find_package(Sphinx REQUIRED)
+  # run python to see if the theme is installed
+  execute_process(
+    COMMAND ${Python_EXECUTABLE} -c "import sphinx_bootstrap_theme"
+    OUTPUT_VARIABLE SPHINX_BOOTSTRAP_THEME_OUT
+    ERROR_VARIABLE SPHINX_BOOTSTRAP_THEME_ERR
+    OUTPUT_STRIP_TRAILING_WHITESPACE ERROR_STRIP_TRAILING_WHITESPACE
+  )
+  if(SPHINX_BOOTSTRAP_THEME_ERR)
+    message(ERROR " Did not find sphinx_bootstrap_theme")
+    message(STATUS "${Python_EXECUTABLE} -c \"import sphinx_bootstrap_theme\"")
+    message(STATUS "${SPHINX_BOOTSTRAP_THEME_ERR}")
+    message(FATAL_ERROR " Install instructions at https://pypi.python.org/pypi/sphinx-bootstrap-theme/")
   endif()
+
+  add_subdirectory(dev-docs)
+  add_subdirectory(docs)
 endif()
 
 # System test data target
 add_subdirectory(Testing/SystemTests/scripts)
 
-if(COVERALLS)
+if(COVERAGE)
   get_property(ALL_SRCS GLOBAL PROPERTY COVERAGE_SRCS)
   set(SRCS_FILE "")
   foreach(SRC ${ALL_SRCS})
     set(SRCS_FILE "${SRCS_FILE}\n${SRC}")
   endforeach()
   # remove initial \n
-  string(SUBSTRING ${SRCS_FILE}
-                   1
-                   -1
-                   SRCS_FILE)
+  string(SUBSTRING ${SRCS_FILE} 1 -1 SRCS_FILE)
   set(SRCS_FILENAME "${CMAKE_CURRENT_BINARY_DIR}/sources.txt")
   file(WRITE ${SRCS_FILENAME} ${SRCS_FILE})
-  coveralls_setup(${SRCS_FILENAME} OFF "${CMAKE_SOURCE_DIR}/buildconfig/CMake")
+  coverage_setup(${SRCS_FILENAME} OFF "${CMAKE_SOURCE_DIR}/buildconfig/CMake")
 endif()
 
 # Installation settings
 
-# N.B. INBUNDLE variable is empty except on Mac (set in DarwinSetup.cmake)
-install(DIRECTORY installers/colormaps/ DESTINATION ${INBUNDLE}colormaps)
-
 # Install the files (.desktop and icon) to create a menu items
-if(${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
+if(${CMAKE_SYSTEM_NAME} STREQUAL "Linux" AND NOT CONDA_BUILD)
   function(uppercase_first_letter output_var input)
-  string(LENGTH ${input} _inputlen)
-  string(TOUPPER ${input} _allupper)
-  string(SUBSTRING ${_allupper} 0 1 _first)
-  string(SUBSTRING ${input} 1 ${_inputlen} _rest)
-  set(${output_var} ${_first}${_rest} PARENT_SCOPE)
+    string(LENGTH ${input} _inputlen)
+    string(TOUPPER ${input} _allupper)
+    string(SUBSTRING ${_allupper} 0 1 _first)
+    string(SUBSTRING ${input} 1 ${_inputlen} _rest)
+    set(${output_var}
+        ${_first}${_rest}
+        PARENT_SCOPE
+    )
   endfunction()
 
   function(install_desktop_files filename app_name exec_cmd icon_file icon_install_file)
@@ -308,39 +286,31 @@ if(${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
     get_filename_component(DESKTOP_ICON ${icon_install_file} NAME_WE)
     set(_output_file ${CMAKE_CURRENT_BINARY_DIR}/${filename}.install)
     configure_file(
-      ${CMAKE_CURRENT_SOURCE_DIR}/installers/LinuxInstaller/launcher-template.desktop.in
-      ${_output_file} @ONLY)
-    install(FILES ${_output_file}
-            DESTINATION /usr/share/applications
-            RENAME ${filename})
-    install(FILES ${icon_file}
-            DESTINATION /usr/share/pixmaps
-            RENAME ${icon_install_file})
+      ${CMAKE_CURRENT_SOURCE_DIR}/installers/LinuxInstaller/launcher-template.desktop.in ${_output_file} @ONLY
+    )
+    install(
+      FILES ${_output_file}
+      DESTINATION /usr/share/applications
+      RENAME ${filename}
+    )
+    install(
+      FILES ${icon_file}
+      DESTINATION /usr/share/pixmaps
+      RENAME ${icon_install_file}
+    )
   endfunction()
 
   set(_icon_suffix)
   if(CPACK_PACKAGE_SUFFIX)
-    if (${CPACK_PACKAGE_SUFFIX} STREQUAL "nightly" OR
-        ${CPACK_PACKAGE_SUFFIX} STREQUAL "unstable")
+    if(${CPACK_PACKAGE_SUFFIX} STREQUAL "nightly" OR ${CPACK_PACKAGE_SUFFIX} STREQUAL "unstable")
       set(_icon_suffix ${CPACK_PACKAGE_SUFFIX})
     endif()
   endif()
 
-  set( IMAGES_DIR ${CMAKE_CURRENT_SOURCE_DIR}/images )
+  set(IMAGES_DIR ${CMAKE_CURRENT_SOURCE_DIR}/images)
   set(_app_name_suffix)
   if(CPACK_PACKAGE_SUFFIX)
     uppercase_first_letter(_app_name_suffix ${CPACK_PACKAGE_SUFFIX})
-  endif()
-  if(ENABLE_MANTIDPLOT)
-    set(_icon_filename ${IMAGES_DIR}/mantidplot)
-    if(_icon_suffix)
-      set(_icon_filename ${_icon_filename}${_icon_suffix})
-    endif()
-    install_desktop_files(mantidplot${CPACK_PACKAGE_SUFFIX}.desktop
-                          "Mantid Plot ${_app_name_suffix}"
-                          ${CMAKE_INSTALL_PREFIX}/bin/MantidPlot
-                          ${_icon_filename}.png
-                          mantidplot${CPACK_PACKAGE_SUFFIX}.png )
   endif()
 
   if(ENABLE_WORKBENCH)
@@ -348,16 +318,14 @@ if(${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
     if(_icon_suffix)
       set(_icon_filename ${_icon_filename}${_icon_suffix})
     endif()
-    install_desktop_files(mantidworkbench${CPACK_PACKAGE_SUFFIX}.desktop
-                          "Mantid Workbench ${_app_name_suffix}"
-                          ${CMAKE_INSTALL_PREFIX}/bin/mantidworkbench
-                          ${_icon_filename}.png
-                          mantid_workbench${CPACK_PACKAGE_SUFFIX}.png)
+    install_desktop_files(
+      mantidworkbench${CPACK_PACKAGE_SUFFIX}.desktop "Mantid Workbench ${_app_name_suffix}"
+      ${CMAKE_INSTALL_PREFIX}/bin/mantidworkbench ${_icon_filename}.png mantid_workbench${CPACK_PACKAGE_SUFFIX}.png
+    )
   endif()
 endif()
 
-# THIS MUST BE THE LAST SUB_DIRECTORY ADDED. See
-# Framework/PostInstall/CMakeLists for an explanation
+# THIS MUST BE THE LAST SUB_DIRECTORY ADDED. See Framework/PostInstall/CMakeLists for an explanation
 add_subdirectory(Framework/PostInstall)
 
 # Conda
@@ -374,8 +342,7 @@ if(ENABLE_CPACK)
   include(CPackCommon)
 
   # Mac package settings
-  set(CPACK_RESOURCE_FILE_LICENSE
-      ${CMAKE_SOURCE_DIR}/installers/WinInstaller/License.txt)
+  set(CPACK_RESOURCE_FILE_LICENSE ${CMAKE_SOURCE_DIR}/installers/WinInstaller/License.txt)
 
   if(CMAKE_HOST_WIN32)
     include(WindowsNSIS)
@@ -383,199 +350,97 @@ if(ENABLE_CPACK)
     include(CPackLinuxSetup)
 
     # rhel requirements - only used if package requested is rpm
-    set(
-      CPACK_RPM_PACKAGE_REQUIRES
-      "boost169-date-time,"
-      "boost169-regex,"
-      "boost169-serialization,"
-      "boost169-filesystem,"
-      "boost169-system,"
-      "nexus >= 4.3.1,gsl,glibc,muParser,tbb,librdkafka,"
-      "OCE-draw,OCE-foundation,OCE-modeling,OCE-ocaf,OCE-visualization,"
-      "poco-crypto,poco-data,poco-mysql,poco-sqlite,poco-odbc,poco-util,poco-xml,poco-zip,poco-net,poco-netssl,poco-foundation,"
-      "hdf,hdf5,jsoncpp >= 0.7.0")
-    if(ENABLE_MANTIDPLOT)
-      set(CPACK_RPM_PACKAGE_REQUIRES
-          "${CPACK_RPM_PACKAGE_REQUIRES},qt4 >= 4.2,qscintilla,qwt5-qt4,qwtplot3d-qt4")
-    endif()
+    set(CPACK_RPM_PACKAGE_REQUIRES
+        "boost169-date-time,"
+        "boost169-regex,"
+        "boost169-serialization,"
+        "boost169-filesystem,"
+        "boost169-system,"
+        "nexus >= 4.3.1,gsl,glibc,muParser,tbb,librdkafka,"
+        "OCE-draw,OCE-foundation,OCE-modeling,OCE-ocaf,OCE-visualization,"
+        "poco-crypto,poco-data,poco-mysql,poco-sqlite,poco-odbc,poco-util,poco-xml,poco-zip,poco-net,poco-netssl,poco-foundation,"
+        "hdf,hdf5,jsoncpp >= 0.7.0"
+    )
     if(ENABLE_WORKBENCH)
-      set(CPACK_RPM_PACKAGE_REQUIRES
-          "${CPACK_RPM_PACKAGE_REQUIRES},qt5-qtbase,qscintilla-qt5")
+      set(CPACK_RPM_PACKAGE_REQUIRES "${CPACK_RPM_PACKAGE_REQUIRES},qt5-qtbase,qscintilla-qt5")
     endif()
-
-    if(PYTHON_VERSION_MAJOR EQUAL 3)
-      set(
-        CPACK_RPM_PACKAGE_REQUIRES
-        "${CPACK_RPM_PACKAGE_REQUIRES},"
-        "boost169-python3,"
+    # python requirements
+    set(CPACK_RPM_PACKAGE_REQUIRES
+        "${CPACK_RPM_PACKAGE_REQUIRES}," "boost169-python3,"
         "python36-numpy,python36-scipy,python36-h5py,python36-PyCifRW,"
-        "python36-six,python36-PyYAML,python36-requests,python36-toml,"
-        "python36-ipython,python36-ipython-notebook"
+        "python36-six,python36-PyYAML,python36-requests,python36-toml," "python36-ipython,python36-ipython-notebook"
+    )
+    if(ENABLE_WORKBENCH)
+      set(CPACK_RPM_PACKAGE_REQUIRES "${CPACK_RPM_PACKAGE_REQUIRES},python36-qt5,python36-QtPy,"
+                                     "python36-matplotlib-qt5,python36-psutil,python36-ipython-gui"
       )
-      if(ENABLE_MANTIDPLOT)
-        set(CPACK_RPM_PACKAGE_REQUIRES
-            "${CPACK_RPM_PACKAGE_REQUIRES},python36-QtPy,"
-            "python36-matplotlib-qt4,python36-ipython-gui")
-      endif()
-      if(ENABLE_WORKBENCH)
-        set(CPACK_RPM_PACKAGE_REQUIRES
-            "${CPACK_RPM_PACKAGE_REQUIRES},python36-qt5,python36-QtPy,"
-            "python36-matplotlib-qt5,python36-psutil,python36-ipython-gui")
-      endif()
-    else()
-      set(
-        CPACK_RPM_PACKAGE_REQUIRES
-        "${CPACK_RPM_PACKAGE_REQUIRES},"
-        "boost169-python2,"
-        "numpy,scipy,h5py >= 2.3.1,PyCifRW >= 4.2.1,"
-        "python-enum34,python-six,PyYAML,python-requests,"
-        "python-ipython >= 1.1.0,python-ipython-notebook"
-      )
-      if(ENABLE_MANTIDPLOT)
-        set(CPACK_RPM_PACKAGE_REQUIRES
-            "${CPACK_RPM_PACKAGE_REQUIRES},sip >= 4.18,PyQt4,python2-QtPy,"
-            "python2-matplotlib-qt4 >= 1.5.2,python-ipython-gui")
-      endif()
-      if(ENABLE_WORKBENCH)
-        set(CPACK_RPM_PACKAGE_REQUIRES
-            "${CPACK_RPM_PACKAGE_REQUIRES},python2-qt5,python2-QtPy,"
-            "python2-matplotlib-qt4 >= 1.5.2,python-psutil,python-ipython-gui")
-      endif()
     endif()
 
-    string(REPLACE ";"
-                   ","
-                   CPACK_RPM_PACKAGE_REQUIRES
-                   ${CPACK_RPM_PACKAGE_REQUIRES}) # fix up the fact that it was
-                                                  # made as an array
-    string(REPLACE ",,"
-                   ","
-                   CPACK_RPM_PACKAGE_REQUIRES
-                   ${CPACK_RPM_PACKAGE_REQUIRES})
+    string(REPLACE ";" "," CPACK_RPM_PACKAGE_REQUIRES ${CPACK_RPM_PACKAGE_REQUIRES}) # fix up the fact that it was made
+                                                                                     # as an array
+    string(REPLACE ",," "," CPACK_RPM_PACKAGE_REQUIRES ${CPACK_RPM_PACKAGE_REQUIRES})
 
     # ubuntu requirements - only used if package requested is deb
-    set(
-      CPACK_DEBIAN_PACKAGE_DEPENDS
-      "libboost-date-time${Boost_MAJOR_VERSION}.${Boost_MINOR_VERSION}.${Boost_SUBMINOR_VERSION},"
-      "libboost-regex${Boost_MAJOR_VERSION}.${Boost_MINOR_VERSION}.${Boost_SUBMINOR_VERSION},"
-      "libboost-python${Boost_MAJOR_VERSION}.${Boost_MINOR_VERSION}.${Boost_SUBMINOR_VERSION},"
-      "libboost-serialization${Boost_MAJOR_VERSION}.${Boost_MINOR_VERSION}.${Boost_SUBMINOR_VERSION},"
-      "libboost-filesystem${Boost_MAJOR_VERSION}.${Boost_MINOR_VERSION}.${Boost_SUBMINOR_VERSION},"
-      "libnexus0v5 (>= 4.3),"
-      "libjsoncpp1 (>=0.7.0),"
-      "libmuparser2v5,"
-      "libtbb2,"
-      "librdkafka1,librdkafka++1,"
-      "libpocofoundation${POCO_SOLIB_VERSION},libpocoutil${POCO_SOLIB_VERSION},libpoconet${POCO_SOLIB_VERSION},libpoconetssl${POCO_SOLIB_VERSION},libpococrypto${POCO_SOLIB_VERSION},libpocoxml${POCO_SOLIB_VERSION}"
+    set(CPACK_DEBIAN_PACKAGE_DEPENDS
+        "libboost-date-time${Boost_MAJOR_VERSION}.${Boost_MINOR_VERSION}.${Boost_SUBMINOR_VERSION},"
+        "libboost-regex${Boost_MAJOR_VERSION}.${Boost_MINOR_VERSION}.${Boost_SUBMINOR_VERSION},"
+        "libboost-python${Boost_MAJOR_VERSION}.${Boost_MINOR_VERSION}.${Boost_SUBMINOR_VERSION},"
+        "libboost-serialization${Boost_MAJOR_VERSION}.${Boost_MINOR_VERSION}.${Boost_SUBMINOR_VERSION},"
+        "libboost-filesystem${Boost_MAJOR_VERSION}.${Boost_MINOR_VERSION}.${Boost_SUBMINOR_VERSION},"
+        "libnexus0v5 (>= 4.3),"
+        "libjsoncpp1 (>=0.7.0),"
+        "libmuparser2v5,"
+        "libtbb2,"
+        "librdkafka1,librdkafka++1,"
+        "libpocofoundation${POCO_SOLIB_VERSION},libpocoutil${POCO_SOLIB_VERSION},libpoconet${POCO_SOLIB_VERSION},libpoconetssl${POCO_SOLIB_VERSION},libpococrypto${POCO_SOLIB_VERSION},libpocoxml${POCO_SOLIB_VERSION}"
+    )
+
+    if("${UNIX_CODENAME}" STREQUAL "bionic")
+      set(CPACK_DEBIAN_PACKAGE_DEPENDS
+          "${CPACK_DEBIAN_PACKAGE_DEPENDS},libgsl23," "liboce-foundation11,liboce-modeling11," "libqscintilla2-qt4-13,"
+          "jupyter-notebook," "libhdf5-cpp-100"
       )
-    if(ENABLE_MANTIDPLOT)
-      set(CPACK_DEBIAN_PACKAGE_DEPENDS
-          "${CPACK_DEBIAN_PACKAGE_DEPENDS},libqtcore4 (>= 4.2),"
-          "libqtgui4 (>= 4.2),"
-          "libqt4-opengl (>= 4.2),"
-          "libqt4-xml (>= 4.2),"
-          "libqt4-svg (>= 4.2),"
-          "libqt4-qt3support (>= 4.2),"
-          "qt4-dev-tools,"
-          "libqwt5-qt4,"
-          "libqwtplot3d-qt4-0v5,"
-          "libqtwebkit4")
+      if(ENABLE_WORKBENCH)
+        set(CPACK_DEBIAN_PACKAGE_DEPENDS "${CPACK_DEBIAN_PACKAGE_DEPENDS},libqscintilla2-qt5-13")
+      endif()
+    elseif("${UNIX_DIST}" MATCHES "Ubuntu")
+      message(WARNING "Unsupported Debian-like OS: ${UNIX_CODENAME}. Packaging is unlikely to work correctly.")
+    endif()
+    # python requirements
+    set(CPACK_DEBIAN_PACKAGE_DEPENDS
+        "${CPACK_DEBIAN_PACKAGE_DEPENDS},python3-h5py,"
+        "python3-numpy,"
+        "python3-requests,"
+        "python3-sip,"
+        "python3-six,"
+        "python3-matplotlib,"
+        "python3-qtpy,"
+        "python3-scipy,"
+        "python3-toml,"
+        "python3-pycifrw (>= 4.2.1),"
+        "python3-yaml,"
+        "ipython3-qtconsole"
+    ) # transitional package for bionic
+
+    if(ENABLE_WORKBENCH)
+      set(CPACK_DEBIAN_PACKAGE_DEPENDS "${CPACK_DEBIAN_PACKAGE_DEPENDS},python3-pyqt5,python3-psutil")
     endif()
 
-    if("${UNIX_CODENAME}" STREQUAL "xenial")
-      set(CPACK_DEBIAN_PACKAGE_DEPENDS
-          "${CPACK_DEBIAN_PACKAGE_DEPENDS},libgsl2,"
-          "liboce-foundation10,liboce-modeling10,"
-          "libqscintilla2-12v5,"
-          "ipython-notebook,"
-          "libhdf5-cpp-11")
-      if(ENABLE_WORKBENCH)
-        set(CPACK_DEBIAN_PACKAGE_DEPENDS
-            "${CPACK_DEBIAN_PACKAGE_DEPENDS},libqt5scintilla2-12v5")
-      endif()
-    else() # bionic and newer
-      set(CPACK_DEBIAN_PACKAGE_DEPENDS
-          "${CPACK_DEBIAN_PACKAGE_DEPENDS},libgsl23,"
-          "liboce-foundation11,liboce-modeling11,"
-          "libqscintilla2-qt4-13,"
-          "jupyter-notebook,"
-          "libhdf5-cpp-100")
-      if(ENABLE_WORKBENCH)
-        set(CPACK_DEBIAN_PACKAGE_DEPENDS
-            "${CPACK_DEBIAN_PACKAGE_DEPENDS},libqscintilla2-qt5-13")
-      endif()
-    endif()
-
-    if(PYTHON_VERSION_MAJOR EQUAL 3)
-      set(CPACK_DEBIAN_PACKAGE_DEPENDS
-          "${CPACK_DEBIAN_PACKAGE_DEPENDS},python3-h5py,"
-          "python3-numpy,"
-          "python3-requests,"
-          "python3-sip,"
-          "python3-six,"
-          "python3-matplotlib,"
-          "python3-qtpy,"
-          "python3-scipy,"
-          "python3-toml,"
-          "python3-pycifrw (>= 4.2.1),"
-          "python3-yaml,"
-          "ipython3-qtconsole") # transitional package for bionic
-
-      if(ENABLE_MANTIDPLOT)
-        set(CPACK_DEBIAN_PACKAGE_DEPENDS
-            "${CPACK_DEBIAN_PACKAGE_DEPENDS},python3-pyqt4")
-      endif()
-      if(ENABLE_WORKBENCH)
-        set(CPACK_DEBIAN_PACKAGE_DEPENDS
-            "${CPACK_DEBIAN_PACKAGE_DEPENDS},python3-pyqt5,python3-psutil")
-      endif()
-    else() # python 2
-      set(CPACK_DEBIAN_PACKAGE_DEPENDS
-          "${CPACK_DEBIAN_PACKAGE_DEPENDS},python-h5py,"
-          "python-numpy,"
-          "python-requests,"
-          "python-sip,"
-          "python-six,"
-          "python-matplotlib,"
-          "python-qtpy,"
-          "python-scipy,"
-          "python-pycifrw (>= 4.2.1),"
-          "python-yaml,"
-          "ipython-qtconsole")
-
-      if(ENABLE_MANTIDPLOT)
-        set(CPACK_DEBIAN_PACKAGE_DEPENDS
-            "${CPACK_DEBIAN_PACKAGE_DEPENDS},python-qt4")
-      endif()
-      if(ENABLE_WORKBENCH)
-        set(CPACK_DEBIAN_PACKAGE_DEPENDS
-            "${CPACK_DEBIAN_PACKAGE_DEPENDS},python-pyqt5,python-psutil")
-      endif()
-    endif()
     # parse list to string required for deb package
-    string(REPLACE ";"
-                   ","
-                   CPACK_DEBIAN_PACKAGE_DEPENDS
-                   ${CPACK_DEBIAN_PACKAGE_DEPENDS}) # fix up the fact that it
-                                                    # was made as an array
-    string(REPLACE ",,"
-                   ","
-                   CPACK_DEBIAN_PACKAGE_DEPENDS
-                   ${CPACK_DEBIAN_PACKAGE_DEPENDS})
+    string(REPLACE ";" "," CPACK_DEBIAN_PACKAGE_DEPENDS ${CPACK_DEBIAN_PACKAGE_DEPENDS}) # fix up the fact that it was
+                                                                                         # made as an array
+    string(REPLACE ",," "," CPACK_DEBIAN_PACKAGE_DEPENDS ${CPACK_DEBIAN_PACKAGE_DEPENDS})
   endif()
 
-  # soft requirement of tcmalloc if selected
-  if(USE_TCMALLOC)
-    message(STATUS "Adding gperftools to the package requirements")
-    set(CPACK_RPM_PACKAGE_REQUIRES
-        "${CPACK_RPM_PACKAGE_REQUIRES},gperftools-libs >= 2.0")
-    set(CPACK_DEBIAN_PACKAGE_DEPENDS
-        "${CPACK_DEBIAN_PACKAGE_DEPENDS},libgoogle-perftools4 (>= 1.7)")
+  # soft requirement of jemalloc if selected
+  if(USE_JEMALLOC)
+    message(STATUS "Adding jemalloc to the package requirements")
+    set(CPACK_RPM_PACKAGE_REQUIRES "${CPACK_RPM_PACKAGE_REQUIRES}, jemalloc >= 3.0")
+    set(CPACK_DEBIAN_PACKAGE_DEPENDS "${CPACK_DEBIAN_PACKAGE_DEPENDS}, libjemalloc1 (>= 3.0)")
   endif()
 
   # run cpack configuration
   include(CPack)
-  # let people know what is coming out the other end - must be after cpack
-  # generates value for rpm
+  # let people know what is coming out the other end - must be after cpack generates value for rpm
   message(STATUS "CPACK_PACKAGE_FILE_NAME = ${CPACK_PACKAGE_FILE_NAME}")
 endif()

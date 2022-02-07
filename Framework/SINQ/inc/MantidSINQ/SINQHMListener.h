@@ -34,8 +34,7 @@ public:
   bool buffersEvents() const override { return false; }
 
   bool connect(const Poco::Net::SocketAddress &address) override;
-  void start(Mantid::Types::Core::DateAndTime startTime =
-                 Mantid::Types::Core::DateAndTime()) override;
+  void start(Mantid::Types::Core::DateAndTime startTime = Mantid::Types::Core::DateAndTime()) override;
   std::shared_ptr<Mantid::API::Workspace> extractData() override;
   bool isConnected() override;
   ILiveListener::RunStatus runStatus() override;
@@ -56,9 +55,8 @@ private:
   void loadDimensions();
   void doSpecialDim();
   void readHMData(const Mantid::API::IMDHistoWorkspace_sptr &ws);
-  void recurseDim(int *data, const Mantid::API::IMDHistoWorkspace_sptr &ws,
-                  int currentDim, Mantid::coord_t *idx);
-  int calculateCAddress(Mantid::coord_t *pos);
+  void recurseDim(int *data, const Mantid::API::IMDHistoWorkspace_sptr &ws, int currentDim, Mantid::coord_t *idx);
+  int calculateCAddress(const Mantid::coord_t *pos);
 
   ILiveListener::RunStatus oldStatus;
 };

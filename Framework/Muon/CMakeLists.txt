@@ -16,11 +16,13 @@ set(SRC_FILES
     src/MuonGroupingCounts.cpp
     src/MuonGroupingAsymmetry.cpp
     src/MuonPreProcess.cpp
+    src/PSIBackgroundSubtraction.cpp
     src/MuonPairingAsymmetry.cpp
     src/PhaseQuadMuon.cpp
     src/PlotAsymmetryByLogValue.cpp
     src/RemoveExpDecay.cpp
-    src/RRFMuon.cpp)
+    src/RRFMuon.cpp
+)
 
 set(INC_FILES
     inc/MantidMuon/AlphaCalc.h
@@ -41,10 +43,12 @@ set(INC_FILES
     inc/MantidMuon/MuonPairingAsymmetry.h
     inc/MantidMuon/MuonGroupingAsymmetry.h
     inc/MantidMuon/MuonPreProcess.h
+    inc/MantidMuon/PSIBackgroundSubtraction.h
     inc/MantidMuon/PhaseQuadMuon.h
     inc/MantidMuon/PlotAsymmetryByLogValue.h
     inc/MantidMuon/RemoveExpDecay.h
-    inc/MantidMuon/RRFMuon.h)
+    inc/MantidMuon/RRFMuon.h
+)
 
 set(TEST_FILES
     AlphaCalcTest.h
@@ -64,34 +68,32 @@ set(TEST_FILES
     MuonGroupingCountsTest.h
     MuonGroupingAsymmetryTest.h
     MuonPreProcessTest.h
+    PSIBackgroundSubtractionTest.h
     PhaseQuadMuonTest.h
     PlotAsymmetryByLogValueTest.h
     RemoveExpDecayTest.h
-    RRFMuonTest.h)
+    RRFMuonTest.h
+)
 
-if(COVERALLS)
+if(COVERAGE)
   foreach(loop_var ${SRC_FILES} ${C_SRC_FILES} ${INC_FILES})
-    set_property(GLOBAL APPEND
-                 PROPERTY COVERAGE_SRCS
-                          "${CMAKE_CURRENT_SOURCE_DIR}/${loop_var}")
+    set_property(GLOBAL APPEND PROPERTY COVERAGE_SRCS "${CMAKE_CURRENT_SOURCE_DIR}/${loop_var}")
   endforeach(loop_var)
 endif()
 
-# Add a precompiled header where they are supported 
-# enable_precompiled_headers (inc/MantidAlgorithms/PrecompiledHeader.h SRC_FILES )
-# Add the target for this directory
+# Add a precompiled header where they are supported enable_precompiled_headers (inc/MantidAlgorithms/PrecompiledHeader.h
+# SRC_FILES ) Add the target for this directory
 add_library(Muon ${SRC_FILES} ${C_SRC_FILES} ${INC_FILES})
+add_library(Mantid::Muon ALIAS Muon)
+
+target_include_directories(
+  Muon PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/inc> $<INSTALL_INTERFACE:include/Mantid>
+)
 # Set the name of the generated library
-set_target_properties(Muon
-                      PROPERTIES OUTPUT_NAME
-                                 MantidMuon
-                                 COMPILE_DEFINITIONS
-                                 "IN_MANTID_MUON")
+set_target_properties(Muon PROPERTIES OUTPUT_NAME MantidMuon COMPILE_DEFINITIONS "IN_MANTID_MUON")
 
 if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
-  set_target_properties(Muon
-                        PROPERTIES INSTALL_RPATH
-                                   "@loader_path/../Contents/MacOS")
+  set_target_properties(Muon PROPERTIES INSTALL_RPATH "@loader_path/../Contents/MacOS")
 elseif(${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
   set_target_properties(Muon PROPERTIES INSTALL_RPATH "\$ORIGIN/../${LIB_DIR}")
 endif()
@@ -99,24 +101,24 @@ endif()
 # Add to the 'Framework' group in VS
 set_property(TARGET Muon PROPERTY FOLDER "MantidFramework")
 
-include_directories(inc)
-
-target_link_libraries(Muon
-                      LINK_PRIVATE
-                      ${TCMALLOC_LIBRARIES_LINKTIME}
-                      ${MANTIDLIBS}
-                      ${GSL_LIBRARIES})
-
+target_link_libraries(
+  Muon
+  PUBLIC Mantid::API Mantid::Kernel Mantid::Muon Mantid::Geometry
+  PRIVATE Mantid::DataObjects Mantid::Indexing
+)
 # Add the unit tests directory
 add_subdirectory(test)
 
 # Auto-generate exports header
-target_include_directories(Muon PUBLIC ${CMAKE_BINARY_DIR}/Framework/Muon)
+target_include_directories(
+  Muon PUBLIC $<BUILD_INTERFACE:${CMAKE_BINARY_DIR}/Framework/Muon> $<INSTALL_INTERFACE:include/Mantid>
+)
 generate_mantid_export_header(Muon FALSE)
 
 # Installation settings
-mtd_install_targets(TARGETS
-                    Muon
-                    INSTALL_DIRS
-                    ${PLUGINS_DIR}
-                    ${WORKBENCH_PLUGINS_DIR})
+if(CONDA_ENV)
+  set(TARGET_EXPORT_NAME "MantidMuonTargets")
+  mtd_install_framework_lib(TARGETS Muon PLUGIN_LIB)
+else()
+  mtd_install_targets(TARGETS Muon INSTALL_DIRS ${PLUGINS_DIR} ${WORKBENCH_PLUGINS_DIR})
+endif()

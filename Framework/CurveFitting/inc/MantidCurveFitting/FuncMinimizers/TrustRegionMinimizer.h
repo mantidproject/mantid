@@ -21,14 +21,12 @@ namespace CurveFitting {
 namespace FuncMinimisers {
 /** Trust Region minimizer class using the DTRS method of GALAHAD.
  */
-class MANTID_CURVEFITTING_DLL TrustRegionMinimizer
-    : public API::IFuncMinimizer {
+class MANTID_CURVEFITTING_DLL TrustRegionMinimizer : public API::IFuncMinimizer {
 public:
   /// constructor and destructor
   TrustRegionMinimizer();
   /// Initialize minimizer, i.e. pass a function to minimize.
-  void initialize(API::ICostFunction_sptr costFunction,
-                  size_t maxIterations = 0) override;
+  void initialize(API::ICostFunction_sptr costFunction, size_t maxIterations = 0) override;
   /// Do one iteration.
   bool iterate(size_t) override;
   /// Return current value of the cost function
@@ -42,13 +40,10 @@ private:
   /// Evaluate the Jacobian
   void evalJ(const DoubleFortranVector &x, DoubleFortranMatrix &J) const;
   /// Evaluate the Hessian
-  void evalHF(const DoubleFortranVector &x, const DoubleFortranVector &f,
-              DoubleFortranMatrix &h) const;
+  void evalHF(const DoubleFortranVector &x, const DoubleFortranVector &f, DoubleFortranMatrix &h) const;
   /// Find a correction vector to the parameters.
-  void calculateStep(const DoubleFortranMatrix &J, const DoubleFortranVector &f,
-                     const DoubleFortranMatrix &hf, double Delta,
-                     DoubleFortranVector &d, double &normd,
-                     const NLLS::nlls_options &options);
+  void calculateStep(const DoubleFortranMatrix &J, const DoubleFortranVector &f, const DoubleFortranMatrix &hf,
+                     double Delta, DoubleFortranVector &d, double &normd, const NLLS::nlls_options &options);
 
   /// Stored cost function
   std::shared_ptr<CostFunctions::CostFuncLeastSquares> m_leastSquares;

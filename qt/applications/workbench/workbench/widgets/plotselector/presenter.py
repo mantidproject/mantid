@@ -140,10 +140,11 @@ class PlotSelectorPresenter(object):
         if active_plot_number > 0:
             try:
                 self.view.set_active_font(active_plot_number, False)
-            except TypeError:
-                pass
+            except ValueError:
                 # The last active plot could have been closed
                 # already, so there is nothing to do
+                pass
+
         self.view.set_active_font(plot_number, True)
         self.view.active_plot_number = plot_number
 

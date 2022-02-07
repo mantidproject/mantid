@@ -1,0 +1,95 @@
+digraph Sample {
+  $global_style
+
+  subgraph decisions {
+    $decision_style
+    AverageCounts
+    IsotropicMagnetism
+    NormalisationMethod
+    CrossSectionSeparationMethod
+    AbsoluteNormalisation
+    SingleCrystal
+    OutputTreatment
+    OutputUnits
+  }
+
+  subgraph params {
+    $param_style
+    InputWorkspace
+    RotatedXYZWorkspace
+    VanadiumInputWorkspace
+    SampleAndEnvironmentProperties
+    ScatteringAngleBinSize
+  }
+
+  subgraph values {
+    $value_style
+    OutputWorkspace
+  }
+
+  subgraph algorithms {
+    $algorithm_style
+    Minus [label="Separate cross-sections"]
+    Minus2 [label="Uniaxial"]
+    Minus3 [label="6-point Ehlers"]
+    Minus31 [label="6-point Schweika"]
+    Minus4 [label="10-point"]
+    Divide [label="Normalise data"]
+    Divide2 [label="Vanadium"]
+    Divide3 [label="Paramagnetic"]
+    Divide4 [label="Incoherent"]
+    Divide5 [label="Absolute normalisation"]
+    Plus [label="Average counts"]
+    Plus2 [label="QRebin"]
+    SOfQWNormalisedPolygon
+    SumOverlappingTubes
+  }
+
+  InputWorkspace -> CrossSectionSeparationMethod
+  CrossSectionSeparationMethod -> NormalisationMethod #skip
+  CrossSectionSeparationMethod -> Minus
+  Minus -> Minus2
+  Minus -> IsotropicMagnetism
+  IsotropicMagnetism -> Minus3
+  IsotropicMagnetism -> Minus31
+  RotatedXYZWorkspace -> Minus4
+  Minus -> Minus4
+  Minus2 -> NormalisationMethod
+  Minus3 -> NormalisationMethod
+  Minus31 -> NormalisationMethod
+  Minus4 -> NormalisationMethod
+  NormalisationMethod -> OutputTreatment
+  NormalisationMethod -> Divide
+  SampleAndEnvironmentProperties -> Divide
+  VanadiumInputWorkspace -> Divide2
+  Divide -> Divide2
+  Divide -> Divide3
+  Divide -> Divide4
+  Divide2 -> AbsoluteNormalisation
+  Divide3 -> AbsoluteNormalisation
+  Divide4 -> AbsoluteNormalisation
+  AbsoluteNormalisation -> Divide5
+  AbsoluteNormalisation -> OutputTreatment
+  Divide5 -> OutputTreatment
+  OutputTreatment -> AverageCounts
+  OutputTreatment -> OutputUnits
+  ScatteringAngleBinSize -> SumOverlappingTubes
+  AverageCounts -> SumOverlappingTubes
+  AverageCounts -> Plus
+  AverageCounts -> OutputUnits
+  SumOverlappingTubes -> OutputUnits
+  Plus -> OutputUnits
+  OutputUnits -> SingleCrystal
+  SingleCrystal -> Plus2
+  OutputUnits -> ConvertTo2Theta
+  OutputUnits -> ConvertToQ
+  OutputUnits -> ConvertToSofQW
+  Plus2 -> OutputWorkspace
+  ConvertToQ -> OutputWorkspace
+  ConvertTo2Theta -> OutputWorkspace
+  ConvertToSofQW -> SOfQWNormalisedPolygon
+  SOfQWNormalisedPolygon -> OutputWorkspace
+}
+
+
+

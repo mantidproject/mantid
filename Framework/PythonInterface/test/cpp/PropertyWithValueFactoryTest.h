@@ -30,12 +30,8 @@ using Mantid::PythonInterface::Registry::PropertyWithValueFactory;
 
 class PropertyWithValueFactoryTest : public CxxTest::TestSuite {
 public:
-  static PropertyWithValueFactoryTest *createSuite() {
-    return new PropertyWithValueFactoryTest();
-  }
-  static void destroySuite(PropertyWithValueFactoryTest *suite) {
-    delete suite;
-  }
+  static PropertyWithValueFactoryTest *createSuite() { return new PropertyWithValueFactoryTest(); }
+  static void destroySuite(PropertyWithValueFactoryTest *suite) { delete suite; }
 
 #if PY_MAJOR_VERSION >= 3
 #define FROM_INT PyLong_FromLong
@@ -45,15 +41,14 @@ public:
 #define FROM_CSTRING PyString_FromString
 #endif
 
-#define CREATE_PROPERTY_TEST_BODY(CType, PythonCall)                           \
-                                                                               \
-  {                                                                            \
-    using namespace boost::python;                                             \
-    using namespace Mantid::Kernel;                                            \
-    object pyvalue = object(handle<>(PythonCall));                             \
-    auto valueProp = createAndCheckPropertyTraits<CType>(                      \
-        "TestProperty", pyvalue, Direction::Input);                            \
-    checkPropertyValue<CType>(std::move(valueProp), pyvalue);                  \
+#define CREATE_PROPERTY_TEST_BODY(CType, PythonCall)                                                                   \
+                                                                                                                       \
+  {                                                                                                                    \
+    using namespace boost::python;                                                                                     \
+    using namespace Mantid::Kernel;                                                                                    \
+    object pyvalue = object(handle<>(PythonCall));                                                                     \
+    auto valueProp = createAndCheckPropertyTraits<CType>("TestProperty", pyvalue, Direction::Input);                   \
+    checkPropertyValue<CType>(std::move(valueProp), pyvalue);                                                          \
   }
 
   void test_builtin_type_creates_int_type_property_without_error() {
@@ -73,13 +68,11 @@ public:
   }
 
   void test_builtin_type_create_string_array_from_tuple_type_property() {
-    testCreateArrayProperty<std::string>(
-        Py_BuildValue("(ss)", "Test1", "Pass2"));
+    testCreateArrayProperty<std::string>(Py_BuildValue("(ss)", "Test1", "Pass2"));
   }
 
   void test_builtin_type_create_long_array_from_list_type_property() {
-    testCreateArrayProperty<long>(
-        Py_BuildValue("[NN]", PyLong_FromLong(-10), PyLong_FromLong(4)));
+    testCreateArrayProperty<long>(Py_BuildValue("[NN]", PyLong_FromLong(-10), PyLong_FromLong(4)));
   }
 
   void test_builtin_type_create_int_array_from_list_type_property() {
@@ -91,13 +84,11 @@ public:
   }
 
 private:
-  template <typename CType>
-  void testCreateSingleValueProperty(PyObject *pyValue) {
+  template <typename CType> void testCreateSingleValueProperty(PyObject *pyValue) {
     using namespace boost::python;
     using namespace Mantid::Kernel;
     object pyvalue = object(handle<>(pyValue));
-    auto valueProp = createAndCheckPropertyTraits<CType>(
-        "TestProperty", pyvalue, Direction::Input);
+    auto valueProp = createAndCheckPropertyTraits<CType>("TestProperty", pyvalue, Direction::Input);
     checkPropertyValue<CType>(std::move(valueProp), pyvalue);
   }
 
@@ -106,20 +97,17 @@ private:
     using namespace Mantid::Kernel;
     using TypeVec = std::vector<CType>;
     object pyvalue = object(handle<>(pyValue));
-    auto valueProp = createAndCheckPropertyTraits<TypeVec>(
-        "TestProperty", pyvalue, Direction::Input);
+    auto valueProp = createAndCheckPropertyTraits<TypeVec>("TestProperty", pyvalue, Direction::Input);
     checkArrayPropertyValue<CType>(std::move(valueProp), pyvalue);
   }
 
   template <typename ExpectedType>
-  std::unique_ptr<PropertyWithValue<ExpectedType>>
-  createAndCheckPropertyTraits(const std::string &name,
-                               const boost::python::object &value,
-                               const unsigned int direction) {
+  std::unique_ptr<PropertyWithValue<ExpectedType>> createAndCheckPropertyTraits(const std::string &name,
+                                                                                const boost::python::object &value,
+                                                                                const unsigned int direction) {
     using Mantid::Kernel::Property;
     std::unique_ptr<Property> namedProp;
-    TS_ASSERT_THROWS_NOTHING(
-        namedProp = PropertyWithValueFactory::create(name, value, direction));
+    TS_ASSERT_THROWS_NOTHING(namedProp = PropertyWithValueFactory::create(name, value, direction));
     TS_ASSERT(namedProp);
     // Is it correctly typed
     std::unique_ptr<PropertyWithValue<ExpectedType>> typedProp(
@@ -133,18 +121,16 @@ private:
   }
 
   template <typename ValueType>
-  void
-  checkPropertyValue(std::unique_ptr<PropertyWithValue<ValueType>> valueProp,
-                     const boost::python::object &expectedValue) {
+  void checkPropertyValue(std::unique_ptr<PropertyWithValue<ValueType>> valueProp,
+                          const boost::python::object &expectedValue) {
     const ValueType srcValue = boost::python::extract<ValueType>(expectedValue);
     const ValueType propValue = (*valueProp)();
     TS_ASSERT_EQUALS(srcValue, propValue);
   }
 
   template <typename ValueType>
-  void checkArrayPropertyValue(
-      std::shared_ptr<PropertyWithValue<std::vector<ValueType>>> valueProp,
-      const boost::python::object &expectedValue) {
+  void checkArrayPropertyValue(std::shared_ptr<PropertyWithValue<std::vector<ValueType>>> valueProp,
+                               const boost::python::object &expectedValue) {
     const auto srcValue = PySequenceToVector<ValueType>(expectedValue)();
     const auto propValue = (*valueProp)();
     // Check size

@@ -23,16 +23,12 @@ public:
   /// Algorithm's name for identification
   const std::string name() const override { return "ApplyDetailedBalance"; };
   /// Summary of algorithms purpose
-  const std::string summary() const override {
-    return "Transform scattering intensity to dynamic susceptibility.";
-  }
+  const std::string summary() const override { return "Transform scattering intensity to dynamic susceptibility."; }
 
   /// Algorithm's version for identification
   int version() const override { return 1; };
   /// Algorithm's category for identification
-  const std::string category() const override {
-    return "Inelastic\\Corrections";
-  }
+  const std::string category() const override { return "Inelastic\\Corrections"; }
 
 private:
   /// Initialise the properties

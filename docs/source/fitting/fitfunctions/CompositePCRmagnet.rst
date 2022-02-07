@@ -21,7 +21,7 @@ When :math:`B > 0` ,
 
 where,
 
-:math:`A_0` is the amplitude, 
+:math:`A_0` is the amplitude,
 
 :math:`\sigma` (MHz) is the gaussian relaxation rate,
 
@@ -30,7 +30,7 @@ where,
 and :math:`\Delta` is the relaxation rate of the extra term when :math:`B>0` .
 
 .. plot::
-	
+
    from mantid.simpleapi import FunctionWrapper
    import matplotlib.pyplot as plt
    import numpy as np

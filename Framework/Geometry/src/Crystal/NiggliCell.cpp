@@ -10,8 +10,7 @@
 #include <algorithm>
 #include <stdexcept>
 
-namespace Mantid {
-namespace Geometry {
+namespace Mantid::Geometry {
 using Mantid::Kernel::DblMatrix;
 using Mantid::Kernel::Matrix;
 using Mantid::Kernel::V3D;
@@ -94,8 +93,7 @@ NiggliCell::NiggliCell(const DblMatrix &Umatrix) : UnitCell() {
 90^\circ \f$
 @param Umatrix :: orientation matrix U
 */
-NiggliCell::NiggliCell(const double _a, const double _b, const double _c,
-                       const DblMatrix &Umatrix)
+NiggliCell::NiggliCell(const double _a, const double _b, const double _c, const DblMatrix &Umatrix)
     : UnitCell(_a, _b, _c) {
   if (Umatrix.isRotation()) {
     U = Umatrix;
@@ -114,10 +112,8 @@ NiggliCell::NiggliCell(const double _a, const double _b, const double _c,
 @param angleunit :: units for angle, of type #AngleUnits. Default is degrees.
 @param Umatrix :: orientation matrix U
 */
-NiggliCell::NiggliCell(const double _a, const double _b, const double _c,
-                       const double _alpha, const double _beta,
-                       const double _gamma, const DblMatrix &Umatrix,
-                       const int angleunit)
+NiggliCell::NiggliCell(const double _a, const double _b, const double _c, const double _alpha, const double _beta,
+                       const double _gamma, const DblMatrix &Umatrix, const int angleunit)
     : UnitCell(_a, _b, _c, _alpha, _beta, _gamma, angleunit) {
   if (Umatrix.isRotation()) {
     U = Umatrix;
@@ -130,8 +126,7 @@ NiggliCell::NiggliCell(const double _a, const double _b, const double _c,
 @param uc :: UnitCell
 @param Umatrix :: orientation matrix U. By default this will be identity matrix
 */
-NiggliCell::NiggliCell(const UnitCell &uc, const DblMatrix &Umatrix)
-    : UnitCell(uc), U(Umatrix) {
+NiggliCell::NiggliCell(const UnitCell &uc, const DblMatrix &Umatrix) : UnitCell(uc), U(Umatrix) {
   if (Umatrix.isRotation()) {
     U = Umatrix;
     UB = U * getB();
@@ -156,8 +151,7 @@ NiggliCell::NiggliCell(const UnitCell &uc, const DblMatrix &Umatrix)
     @return true if all angles are less than 90 degrees, or if all angles
             are greater than or equal to 90 degrees.
  */
-bool NiggliCell::HasNiggliAngles(const V3D &a_dir, const V3D &b_dir,
-                                 const V3D &c_dir, double epsilon) {
+bool NiggliCell::HasNiggliAngles(const V3D &a_dir, const V3D &b_dir, const V3D &c_dir, double epsilon) {
   double alpha = b_dir.angle(c_dir) * RAD_TO_DEG;
   double beta = c_dir.angle(a_dir) * RAD_TO_DEG;
   double gamma = a_dir.angle(b_dir) * RAD_TO_DEG;
@@ -298,5 +292,4 @@ bool NiggliCell::MakeNiggliUB(const DblMatrix &UB, DblMatrix &newUB) {
   return true;
 }
 
-} // Namespace Geometry
-} // Namespace Mantid
+} // namespace Mantid::Geometry

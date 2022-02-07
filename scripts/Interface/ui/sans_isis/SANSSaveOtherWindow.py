@@ -13,15 +13,6 @@ from mantid import UsageService
 from mantid.kernel import FeatureType
 from sans.common.enums import SaveType
 
-from qtpy import PYQT4
-if PYQT4:
-    IN_MANTIDPLOT = False
-    try:
-        from pymantidplot import proxies
-        IN_MANTIDPLOT = True
-    except ImportError:
-        pass
-
 
 Ui_SaveOtherDialog, _ = load_ui(__file__, "save_other_dialog.ui")
 
@@ -105,8 +96,11 @@ class SANSSaveOtherDialog(QtWidgets.QDialog, Ui_SaveOtherDialog):
         self.filename_label.setText(name)
 
     def _on_help_button_clicked(self):
-        if PYQT4:
-            proxies.showCustomInterfaceHelp('sans_save_other')
+        try:
+            import mantidqt
+            mantidqt.interfacemanager.InterfaceManager().showCustomInterfaceHelp('sans_save_other','isis_sans')
+        except:
+            pass
 
     @property
     def progress_bar_minimum(self):

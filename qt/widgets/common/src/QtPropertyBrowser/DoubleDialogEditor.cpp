@@ -21,10 +21,8 @@
  * @param property :: A property to edit.
  * @param parent :: A widget parent for the editor widget.
  */
-DoubleDialogEditor::DoubleDialogEditor(QtProperty *property, QWidget *parent,
-                                       bool hasOption, bool isOptionSet)
-    : QWidget(parent), m_property(property), m_hasOption(hasOption),
-      m_isOptionSet(isOptionSet) {
+DoubleDialogEditor::DoubleDialogEditor(QtProperty *property, QWidget *parent, bool hasOption, bool isOptionSet)
+    : QWidget(parent), m_property(property), m_hasOption(hasOption), m_isOptionSet(isOptionSet) {
   auto *layout = new QHBoxLayout;
   m_editor = new DoubleEditor(property, this);
   layout->addWidget(m_editor);
@@ -93,8 +91,7 @@ QString DoubleDialogEditor::getText() const { return m_editor->text(); }
  * Slot which sets the property with the current text in the editor.
  */
 void DoubleDialogEditor::updateProperty() {
-  auto mgr =
-      dynamic_cast<ParameterPropertyManager *>(m_property->propertyManager());
+  auto mgr = dynamic_cast<ParameterPropertyManager *>(m_property->propertyManager());
   if (mgr) {
     mgr->setValue(m_property, m_editor->text().toDouble());
     mgr->setGlobal(m_property, m_isOptionSet);
@@ -109,14 +106,11 @@ void DoubleDialogEditor::optionToggled(bool option) {
   updateProperty();
 }
 
-QWidget *DoubleDialogEditorFactory::createEditorForManager(
-    ParameterPropertyManager *mgr, QtProperty *property, QWidget *parent) {
+QWidget *DoubleDialogEditorFactory::createEditorForManager(ParameterPropertyManager *mgr, QtProperty *property,
+                                                           QWidget *parent) {
   bool isOptionSet = m_hasOption ? mgr->isGlobal(property) : false;
-  auto editor =
-      new DoubleDialogEditor(property, parent, m_hasOption, isOptionSet);
-  connect(editor, SIGNAL(buttonClicked(QtProperty *)), this,
-          SIGNAL(buttonClicked(QtProperty *)));
-  connect(editor, SIGNAL(closeEditor()), this, SIGNAL(closeEditor()),
-          Qt::QueuedConnection);
+  auto editor = new DoubleDialogEditor(property, parent, m_hasOption, isOptionSet);
+  connect(editor, SIGNAL(buttonClicked(QtProperty *)), this, SIGNAL(buttonClicked(QtProperty *)));
+  connect(editor, SIGNAL(closeEditor()), this, SIGNAL(closeEditor()), Qt::QueuedConnection);
   return editor;
 }

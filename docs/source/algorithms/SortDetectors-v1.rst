@@ -20,7 +20,7 @@ Usage
    ws = CreateSampleWorkspace()
 
    upIDs,upDistances,downIDs,downDistances=SortDetectors(ws)
-   
+
    # No upstream detectors
    print("Type of upID: {}".format(type(upIDs)))
    print("Number of upDistances: {}".format(upDistances.shape[0]))
@@ -41,7 +41,7 @@ Output:
    Number of upDistances: 0
    First few values of downIDs: [ 0  1 10 11  2]
    First few values of downDistances: 5.0 5.000006... 5.000006... 5.00001279... 5.00002559...
-   
+
 .. categories::
 
 .. sourcelink::

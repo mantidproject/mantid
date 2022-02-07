@@ -19,30 +19,21 @@ on subclasses of AnalysisDataServiceObserver.
 This allows the virtual methods to be overriden by python subclasses.
  */
 
-class DLLExport AnalysisDataServiceObserverAdapter
-    : public API::AnalysisDataServiceObserver {
+class DLLExport AnalysisDataServiceObserverAdapter : public API::AnalysisDataServiceObserver {
 public:
   explicit AnalysisDataServiceObserverAdapter(PyObject *self);
-  AnalysisDataServiceObserverAdapter(
-      const AnalysisDataServiceObserverAdapter &) = delete;
-  AnalysisDataServiceObserverAdapter &
-  operator=(const AnalysisDataServiceObserverAdapter &) = delete;
+  AnalysisDataServiceObserverAdapter(const AnalysisDataServiceObserverAdapter &) = delete;
+  AnalysisDataServiceObserverAdapter &operator=(const AnalysisDataServiceObserverAdapter &) = delete;
 
   void anyChangeHandle() override;
   void addHandle(const std::string &wsName, const Workspace_sptr &ws) override;
-  void replaceHandle(const std::string &wsName,
-                     const Workspace_sptr &ws) override;
-  void deleteHandle(const std::string &wsName,
-                    const Workspace_sptr &ws) override;
+  void replaceHandle(const std::string &wsName, const Workspace_sptr &ws) override;
+  void deleteHandle(const std::string &wsName, const Workspace_sptr &ws) override;
   void clearHandle() override;
-  void renameHandle(const std::string &wsName,
-                    const std::string &newName) override;
-  void groupHandle(const std::string &wsName,
-                   const Workspace_sptr &ws) override;
-  void unGroupHandle(const std::string &wsName,
-                     const Workspace_sptr &ws) override;
-  void groupUpdateHandle(const std::string &wsName,
-                         const Workspace_sptr &ws) override;
+  void renameHandle(const std::string &wsName, const std::string &newName) override;
+  void groupHandle(const std::string &wsName, const Workspace_sptr &ws) override;
+  void unGroupHandle(const std::string &wsName, const Workspace_sptr &ws) override;
+  void groupUpdateHandle(const std::string &wsName, const Workspace_sptr &ws) override;
 
 private:
   /// Return the PyObject that owns this wrapper, i.e. self

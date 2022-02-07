@@ -86,18 +86,18 @@ Output:
   LoadFullprofFile(Filename=r'LB4854b3.hkl',
       PeakParameterWorkspace='LaB6_Ref_Table',
       OutputWorkspace='Fake')
-  
+
   fakedataws = mtd["Fake"]
   reftablews = mtd["LaB6_Ref_Table"]
-  
+
   print("Reflection table imported {} peaks.  Faked data workspace contains {} data points.".format(
       reftablews.rowCount(), len(fakedataws.readX(0))))
-  
+
   index = 0
-  print("Peak {} of ({}, {}, {}): Alpha = {:.5f}, Beta = {:.5f}, FWHM = {:.5f}".format(index, reftablews.cell(index, 0), 
+  print("Peak {} of ({}, {}, {}): Alpha = {:.5f}, Beta = {:.5f}, FWHM = {:.5f}".format(index, reftablews.cell(index, 0),
       reftablews.cell(index, 1), reftablews.cell(index, 2), reftablews.cell(index, 3), reftablews.cell(index, 4), reftablews.cell(index, 7)))
   index = 75
-  print("Peak {} of ({}, {}, {}): Alpha = {:.5f}, Beta = {:.5f}, FWHM = {:.5f}".format(index, reftablews.cell(index, 0), 
+  print("Peak {} of ({}, {}, {}): Alpha = {:.5f}, Beta = {:.5f}, FWHM = {:.5f}".format(index, reftablews.cell(index, 0),
       reftablews.cell(index, 1), reftablews.cell(index, 2), reftablews.cell(index, 3), reftablews.cell(index, 4), reftablews.cell(index, 7)))
 
 

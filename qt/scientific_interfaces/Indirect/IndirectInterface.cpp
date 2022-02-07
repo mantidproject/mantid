@@ -11,21 +11,17 @@
 
 using namespace MantidQt::API;
 
-namespace MantidQt {
-namespace CustomInterfaces {
+namespace MantidQt::CustomInterfaces {
 
 IndirectInterface::IndirectInterface(QWidget *parent)
     : UserSubWindow(parent),
-      m_settings(dynamic_cast<IndirectSettings *>(
-          InterfaceManager().createSubWindow("Settings", this))) {
+      m_settings(dynamic_cast<IndirectSettings *>(InterfaceManager().createSubWindow("Settings", this))) {
 
-  connect(m_settings.get(), SIGNAL(applySettings()), this,
-          SLOT(applySettings()));
+  connect(m_settings.get(), SIGNAL(applySettings()), this, SLOT(applySettings()));
 }
 
 void IndirectInterface::help() {
-  HelpWindow::showCustomInterface(nullptr,
-                                  QString::fromStdString(documentationPage()));
+  HelpWindow::showCustomInterface(nullptr, QString::fromStdString(documentationPage()), QString("indirect"));
 }
 
 void IndirectInterface::settings() {
@@ -34,27 +30,14 @@ void IndirectInterface::settings() {
   m_settings->show();
 }
 
-void IndirectInterface::applySettings() {
-  applySettings(getInterfaceSettings());
-}
+void IndirectInterface::applySettings() { applySettings(getInterfaceSettings()); }
 
-void IndirectInterface::applySettings(
-    std::map<std::string, QVariant> const &settings) {
-  UNUSED_ARG(settings);
-}
+void IndirectInterface::applySettings(std::map<std::string, QVariant> const &settings) { UNUSED_ARG(settings); }
 
-std::map<std::string, QVariant>
-IndirectInterface::getInterfaceSettings() const {
-  return m_settings->getSettings();
-}
+std::map<std::string, QVariant> IndirectInterface::getInterfaceSettings() const { return m_settings->getSettings(); }
 
-void IndirectInterface::manageUserDirectories() {
-  ManageUserDirectories::openManageUserDirectories();
-}
+void IndirectInterface::manageUserDirectories() { ManageUserDirectories::openManageUserDirectories(); }
 
-void IndirectInterface::showMessageBox(QString const &message) {
-  showInformationBox(message);
-}
+void IndirectInterface::showMessageBox(QString const &message) { showInformationBox(message); }
 
-} // namespace CustomInterfaces
-} // namespace MantidQt
+} // namespace MantidQt::CustomInterfaces

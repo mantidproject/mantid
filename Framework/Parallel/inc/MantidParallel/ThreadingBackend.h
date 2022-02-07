@@ -44,58 +44,40 @@ public:
 
   int size() const;
 
-  template <typename... T>
-  void send(int source, int dest, int tag, T &&... args);
+  template <typename... T> void send(int source, int dest, int tag, T &&...args);
 
-  template <typename... T>
-  Status recv(int dest, int source, int tag, T &&... args);
+  template <typename... T> Status recv(int dest, int source, int tag, T &&...args);
 
-  template <typename... T>
-  Request isend(int source, int dest, int tag, T &&... args);
+  template <typename... T> Request isend(int source, int dest, int tag, T &&...args);
 
   template <typename T> Request irecv(int dest, int source, int tag, T &&data);
-  template <typename T>
-  Request irecv(int dest, int source, int tag, T *data, const size_t count);
+  template <typename T> Request irecv(int dest, int source, int tag, T *data, const size_t count);
 
 private:
   int m_size{1};
-  std::map<std::tuple<int, int, int>,
-           std::vector<std::unique_ptr<std::stringbuf>>>
-      m_buffer;
+  std::map<std::tuple<int, int, int>, std::vector<std::unique_ptr<std::stringbuf>>> m_buffer;
   std::mutex m_mutex;
 };
 
 namespace detail {
-template <class T>
-void saveToStream(boost::archive::binary_oarchive &oa, const T &data) {
+template <class T> void saveToStream(boost::archive::binary_oarchive &oa, const T &data) { oa.operator<<(data); }
+template <class T> void saveToStream(boost::archive::binary_oarchive &oa, const std::vector<T> &data) {
   oa.operator<<(data);
 }
-template <class T>
-void saveToStream(boost::archive::binary_oarchive &oa,
-                  const std::vector<T> &data) {
-  oa.operator<<(data);
-}
-template <class T>
-void saveToStream(boost::archive::binary_oarchive &oa, const T *data,
-                  const size_t count) {
+template <class T> void saveToStream(boost::archive::binary_oarchive &oa, const T *data, const size_t count) {
   oa.operator<<(count);
   for (size_t i = 0; i < count; ++i)
     oa.operator<<(data[i]);
 }
-template <class T>
-size_t loadFromStream(boost::archive::binary_iarchive &ia, T &data) {
+template <class T> size_t loadFromStream(boost::archive::binary_iarchive &ia, T &data) {
   ia.operator>>(data);
   return sizeof(T);
 }
-template <class T>
-size_t loadFromStream(boost::archive::binary_iarchive &ia,
-                      std::vector<T> &data) {
+template <class T> size_t loadFromStream(boost::archive::binary_iarchive &ia, std::vector<T> &data) {
   ia.operator>>(data);
   return data.size() * sizeof(T);
 }
-template <class T>
-size_t loadFromStream(boost::archive::binary_iarchive &ia, T *data,
-                      const size_t count) {
+template <class T> size_t loadFromStream(boost::archive::binary_iarchive &ia, T *data, const size_t count) {
   size_t received;
   ia.operator>>(received);
   for (size_t i = 0; i < count; ++i) {
@@ -107,8 +89,7 @@ size_t loadFromStream(boost::archive::binary_iarchive &ia, T *data,
 }
 } // namespace detail
 
-template <typename... T>
-void ThreadingBackend::send(int source, int dest, int tag, T &&... args) {
+template <typename... T> void ThreadingBackend::send(int source, int dest, int tag, T &&...args) {
   // Must wrap std::stringbuf in a unique_ptr since gcc on RHEL7 does not
   // support moving a stringbuf (incomplete C++11 support?).
   auto buf = std::make_unique<std::stringbuf>();
@@ -126,8 +107,7 @@ void ThreadingBackend::send(int source, int dest, int tag, T &&... args) {
   m_buffer[std::make_tuple(source, dest, tag)].emplace_back(std::move(buf));
 }
 
-template <typename... T>
-Status ThreadingBackend::recv(int dest, int source, int tag, T &&... args) {
+template <typename... T> Status ThreadingBackend::recv(int dest, int source, int tag, T &&...args) {
   const auto key = std::make_tuple(source, dest, tag);
   std::unique_ptr<std::stringbuf> buf;
   while (true) {
@@ -150,24 +130,17 @@ Status ThreadingBackend::recv(int dest, int source, int tag, T &&... args) {
   return Status(detail::loadFromStream(ia, std::forward<T>(args)...));
 }
 
-template <typename... T>
-Request ThreadingBackend::isend(int source, int dest, int tag, T &&... args) {
+template <typename... T> Request ThreadingBackend::isend(int source, int dest, int tag, T &&...args) {
   send(source, dest, tag, std::forward<T>(args)...);
   return Request{};
 }
 
-template <typename T>
-Request ThreadingBackend::irecv(int dest, int source, int tag, T &&data) {
-  return Request(std::bind(&ThreadingBackend::recv<T>, this, dest, source, tag,
-                           std::ref(std::forward<T>(data))));
+template <typename T> Request ThreadingBackend::irecv(int dest, int source, int tag, T &&data) {
+  return Request(std::bind(&ThreadingBackend::recv<T>, this, dest, source, tag, std::ref(std::forward<T>(data))));
 }
-template <typename T>
-Request ThreadingBackend::irecv(int dest, int source, int tag, T *data,
-                                const size_t count) {
+template <typename T> Request ThreadingBackend::irecv(int dest, int source, int tag, T *data, const size_t count) {
   // Pass (pointer) by value since reference to it may go out of scope.
-  return Request([this, dest, source, tag, data, count]() mutable {
-    recv(dest, source, tag, data, count);
-  });
+  return Request([this, dest, source, tag, data, count]() mutable { recv(dest, source, tag, data, count); });
 }
 
 } // namespace detail

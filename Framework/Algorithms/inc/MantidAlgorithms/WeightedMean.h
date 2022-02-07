@@ -39,20 +39,14 @@ public:
 
 private:
   // Overridden BinaryOperation methods
-  void performBinaryOperation(const HistogramData::Histogram &lhs,
-                              const HistogramData::Histogram &rhs,
-                              HistogramData::HistogramY &YOut,
-                              HistogramData::HistogramE &EOut) override;
-  void performBinaryOperation(const HistogramData::Histogram &lhs,
-                              const double rhsY, const double rhsE,
-                              HistogramData::HistogramY &YOut,
-                              HistogramData::HistogramE &EOut) override;
-  bool
-  checkCompatibility(const API::MatrixWorkspace_const_sptr lhs,
-                     const API::MatrixWorkspace_const_sptr rhs) const override;
-  std::string checkSizeCompatibility(
-      const API::MatrixWorkspace_const_sptr lhs,
-      const API::MatrixWorkspace_const_sptr rhs) const override;
+  void performBinaryOperation(const HistogramData::Histogram &lhs, const HistogramData::Histogram &rhs,
+                              HistogramData::HistogramY &YOut, HistogramData::HistogramE &EOut) override;
+  void performBinaryOperation(const HistogramData::Histogram &lhs, const double rhsY, const double rhsE,
+                              HistogramData::HistogramY &YOut, HistogramData::HistogramE &EOut) override;
+  bool checkCompatibility(const API::MatrixWorkspace_const_sptr lhs,
+                          const API::MatrixWorkspace_const_sptr rhs) const override;
+  std::string checkSizeCompatibility(const API::MatrixWorkspace_const_sptr lhs,
+                                     const API::MatrixWorkspace_const_sptr rhs) const override;
 
   /// The name of the first input workspace property for BinaryOperation
   std::string inputPropName1() const override { return "InputWorkspace1"; }

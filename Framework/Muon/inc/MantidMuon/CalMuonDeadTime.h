@@ -24,15 +24,11 @@ public:
   /// Algorithm's name for identification overriding a virtual method
   const std::string name() const override { return "CalMuonDeadTime"; }
   /// Summary of algorithms purpose
-  const std::string summary() const override {
-    return "Calculate Muon deadtime for each spectra in a workspace.";
-  }
+  const std::string summary() const override { return "Calculate Muon deadtime for each spectra in a workspace."; }
 
   /// Algorithm's version for identification overriding a virtual method
   int version() const override { return 1; }
-  const std::vector<std::string> seeAlso() const override {
-    return {"ApplyDeadTimeCorr"};
-  }
+  const std::vector<std::string> seeAlso() const override { return {"ApplyDeadTimeCorr"}; }
   /// Algorithm's category for identification overriding a virtual method
   const std::string category() const override { return "Muon"; }
 

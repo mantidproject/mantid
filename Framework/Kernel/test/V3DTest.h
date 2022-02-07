@@ -12,9 +12,9 @@
 #include <sstream>
 #include <vector>
 
+#include "MantidFrameworkTestHelpers/NexusTestHelper.h"
 #include "MantidKernel/Matrix.h"
 #include "MantidKernel/V3D.h"
-#include "MantidTestHelpers/NexusTestHelper.h"
 
 using Mantid::Kernel::V3D;
 
@@ -581,9 +581,8 @@ public:
 
   void test_normalize_nullVector_throws() {
     constexpr V3D nullVector;
-    TS_ASSERT_THROWS_EQUALS(
-        normalize(nullVector), const std::runtime_error &e, e.what(),
-        std::string("Unable to normalize a zero length vector."))
+    TS_ASSERT_THROWS_EQUALS(normalize(nullVector), const std::runtime_error &e, e.what(),
+                            std::string("Unable to normalize a zero length vector."))
   }
 };
 

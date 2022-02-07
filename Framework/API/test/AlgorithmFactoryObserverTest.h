@@ -15,8 +15,7 @@
 
 using namespace Mantid::API;
 
-class FakeAlgorithmFactoryObserver
-    : public Mantid::API::AlgorithmFactoryObserver {
+class FakeAlgorithmFactoryObserver : public Mantid::API::AlgorithmFactoryObserver {
 
 public:
   FakeAlgorithmFactoryObserver() : m_updateHandleCalled(false) {}
@@ -37,17 +36,11 @@ private:
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static AlgorithmFactoryObserverTest *createSuite() {
-    return new AlgorithmFactoryObserverTest();
-  }
-  static void destroySuite(AlgorithmFactoryObserverTest *suite) {
-    delete suite;
-  }
+  static AlgorithmFactoryObserverTest *createSuite() { return new AlgorithmFactoryObserverTest(); }
+  static void destroySuite(AlgorithmFactoryObserverTest *suite) { delete suite; }
 
   AlgorithmFactoryObserverTest()
-      : af(AlgorithmFactory::Instance()),
-        m_mockInheritingClass(
-            std::make_unique<FakeAlgorithmFactoryObserver>()) {}
+      : af(AlgorithmFactory::Instance()), m_mockInheritingClass(std::make_unique<FakeAlgorithmFactoryObserver>()) {}
 
   void setUp() override {
     af.unsubscribe("ToyAlgorithm", 1);
@@ -59,8 +52,7 @@ public:
     m_mockInheritingClass->observeUpdate();
 
     std::unique_ptr<Mantid::Kernel::AbstractInstantiator<Algorithm>> newAlg =
-        std::make_unique<
-            Mantid::Kernel::Instantiator<ToyAlgorithm, Algorithm>>();
+        std::make_unique<Mantid::Kernel::Instantiator<ToyAlgorithm, Algorithm>>();
     af.subscribe(std::move(newAlg));
 
     TS_ASSERT(!m_mockInheritingClass->m_updateHandleCalled)
@@ -72,8 +64,7 @@ public:
     af.enableNotifications();
 
     std::unique_ptr<Mantid::Kernel::AbstractInstantiator<Algorithm>> newAlg =
-        std::make_unique<
-            Mantid::Kernel::Instantiator<ToyAlgorithm, Algorithm>>();
+        std::make_unique<Mantid::Kernel::Instantiator<ToyAlgorithm, Algorithm>>();
     af.subscribe(std::move(newAlg));
 
     TS_ASSERT(m_mockInheritingClass->m_updateHandleCalled)

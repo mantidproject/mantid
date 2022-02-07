@@ -20,9 +20,7 @@ namespace ISISReflectometry {
 EventPresenter is a presenter class for the widget 'Event' in the
 ISIS Reflectometry Interface.
 */
-class MANTIDQT_ISISREFLECTOMETRY_DLL EventPresenter
-    : public IEventPresenter,
-      public EventViewSubscriber {
+class MANTIDQT_ISISREFLECTOMETRY_DLL EventPresenter : public IEventPresenter, public EventViewSubscriber {
 public:
   explicit EventPresenter(IEventView *view);
 
@@ -35,10 +33,8 @@ public:
   void notifySliceTypeChanged(SliceType newSliceType) override;
   void notifyUniformSliceCountChanged(int sliceCount) override;
   void notifyUniformSecondsChanged(double sliceLengthInSeconds) override;
-  void
-  notifyCustomSliceValuesChanged(std::string pythonListOfSliceTimes) override;
-  void
-  notifyLogSliceBreakpointsChanged(std::string logValueBreakpoints) override;
+  void notifyCustomSliceValuesChanged(std::string pythonListOfSliceTimes) override;
+  void notifyLogSliceBreakpointsChanged(std::string logValueBreakpoints) override;
   void notifyLogBlockNameChanged(std::string blockName) override;
 
   Slicing const &slicing() const override;

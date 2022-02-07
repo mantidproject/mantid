@@ -5,6 +5,7 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "IndirectPlotOptionsModel.h"
+#include "IndirectSettingsHelper.h"
 
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/MatrixWorkspace.h"
@@ -21,14 +22,11 @@ void removeFromIterable(BeginIter const &beginIter, Iterable &iterable) {
   iterable.erase(beginIter, iterable.end());
 }
 
-std::vector<std::string> splitStringBy(std::string const &str,
-                                       std::string const &delimiter) {
+std::vector<std::string> splitStringBy(std::string const &str, std::string const &delimiter) {
   std::vector<std::string> subStrings;
   boost::split(subStrings, str, boost::is_any_of(delimiter));
   removeFromIterable(std::remove_if(subStrings.begin(), subStrings.end(),
-                                    [](std::string const &subString) {
-                                      return subString.empty();
-                                    }),
+                                    [](std::string const &subString) { return subString.empty(); }),
                      subStrings);
   return subStrings;
 }
@@ -70,40 +68,32 @@ std::string formatIndicesString(std::string str) {
   return joinCompress(indices.begin(), indices.end());
 }
 
-void insertWorkspaceNames(std::vector<std::string> &allNames,
-                          std::string const &workspaceName) {
+void insertWorkspaceNames(std::vector<std::string> &allNames, std::string const &workspaceName) {
   auto &ads = AnalysisDataService::Instance();
   if (ads.doesExist(workspaceName)) {
     if (auto const group = ads.retrieveWS<WorkspaceGroup>(workspaceName)) {
       auto const groupContents = group->getNames();
-      allNames.insert(allNames.end(), groupContents.begin(),
-                      groupContents.end());
-    } else if (auto const workspace =
-                   ads.retrieveWS<MatrixWorkspace>(workspaceName)) {
+      allNames.insert(allNames.end(), groupContents.begin(), groupContents.end());
+    } else if (auto const workspace = ads.retrieveWS<MatrixWorkspace>(workspaceName)) {
       allNames.emplace_back(workspace->getName());
     }
   }
 }
 
-boost::optional<std::string>
-checkWorkspaceSpectrumSize(const MatrixWorkspace_const_sptr &workspace) {
+boost::optional<std::string> checkWorkspaceSpectrumSize(const MatrixWorkspace_const_sptr &workspace) {
   if (workspace->y(0).size() < 2)
-    return "Plot Spectra failed: There is only one data point to plot in " +
-           workspace->getName() + ".";
+    return "Plot Spectra failed: There is only one data point to plot in " + workspace->getName() + ".";
   return boost::none;
 }
 
-boost::optional<std::string>
-checkWorkspaceBinSize(const MatrixWorkspace_const_sptr &workspace) {
+boost::optional<std::string> checkWorkspaceBinSize(const MatrixWorkspace_const_sptr &workspace) {
   if (workspace->getNumberHistograms() < 2)
-    return "Plot Bins failed: There is only one data point to plot in " +
-           workspace->getName() + ".";
+    return "Plot Bins failed: There is only one data point to plot in " + workspace->getName() + ".";
   return boost::none;
 }
 
 std::map<std::string, std::string>
-constructActions(boost::optional<std::map<std::string, std::string>> const
-                     &availableActions) {
+constructActions(boost::optional<std::map<std::string, std::string>> const &availableActions) {
   std::map<std::string, std::string> actions;
   if (availableActions)
     actions = availableActions.get();
@@ -120,54 +110,43 @@ constructActions(boost::optional<std::map<std::string, std::string>> const
 
 } // namespace
 
-namespace MantidQt {
-namespace CustomInterfaces {
+namespace MantidQt::CustomInterfaces {
 
 IndirectPlotOptionsModel::IndirectPlotOptionsModel(
-    IPyRunner *pythonRunner,
     boost::optional<std::map<std::string, std::string>> const &availableActions)
-    : m_actions(constructActions(availableActions)), m_fixedIndices(false),
-      m_workspaceIndices(boost::none), m_workspaceName(boost::none),
-      m_plotter(std::make_unique<IndirectPlotter>(pythonRunner)) {}
+    : m_actions(constructActions(availableActions)), m_fixedIndices(false), m_workspaceIndices(boost::none),
+      m_workspaceName(boost::none), m_plotter(std::make_unique<ExternalPlotter>()) {}
 
 /// Used by the unit tests so that m_plotter can be mocked
 IndirectPlotOptionsModel::IndirectPlotOptionsModel(
-    IndirectPlotter *plotter,
-    boost::optional<std::map<std::string, std::string>> const &availableActions)
-    : m_actions(constructActions(availableActions)), m_fixedIndices(false),
-      m_workspaceIndices(boost::none), m_workspaceName(boost::none),
-      m_plotter(std::move(plotter)) {}
+    ExternalPlotter *plotter, boost::optional<std::map<std::string, std::string>> const &availableActions)
+    : m_actions(constructActions(availableActions)), m_fixedIndices(false), m_workspaceIndices(boost::none),
+      m_workspaceName(boost::none), m_plotter(plotter) {}
 
 IndirectPlotOptionsModel::~IndirectPlotOptionsModel() {}
 
 bool IndirectPlotOptionsModel::setWorkspace(std::string const &workspaceName) {
   auto &ads = AnalysisDataService::Instance();
-  if (ads.doesExist(workspaceName) &&
-      ads.retrieveWS<MatrixWorkspace>(workspaceName)) {
+  if (ads.doesExist(workspaceName) && ads.retrieveWS<MatrixWorkspace>(workspaceName)) {
     m_workspaceName = workspaceName;
     return true;
   }
   return false;
 }
 
-boost::optional<std::string> IndirectPlotOptionsModel::workspace() const {
-  return m_workspaceName;
-}
+boost::optional<std::string> IndirectPlotOptionsModel::workspace() const { return m_workspaceName; }
 
-void IndirectPlotOptionsModel::removeWorkspace() {
-  m_workspaceName = boost::none;
-}
+void IndirectPlotOptionsModel::removeWorkspace() { m_workspaceName = boost::none; }
 
-std::vector<std::string> IndirectPlotOptionsModel::getAllWorkspaceNames(
-    std::vector<std::string> const &workspaceNames) const {
+std::vector<std::string>
+IndirectPlotOptionsModel::getAllWorkspaceNames(std::vector<std::string> const &workspaceNames) const {
   std::vector<std::string> allNames;
   for (auto const &workspaceName : workspaceNames)
     insertWorkspaceNames(allNames, workspaceName);
   return allNames;
 }
 
-std::string
-IndirectPlotOptionsModel::formatIndices(std::string const &indices) const {
+std::string IndirectPlotOptionsModel::formatIndices(std::string const &indices) const {
   return formatIndicesString(indices);
 }
 
@@ -188,17 +167,12 @@ bool IndirectPlotOptionsModel::setIndices(std::string const &indices) {
   return valid;
 }
 
-boost::optional<std::string> IndirectPlotOptionsModel::indices() const {
-  return m_workspaceIndices;
-}
+boost::optional<std::string> IndirectPlotOptionsModel::indices() const { return m_workspaceIndices; }
 
-bool IndirectPlotOptionsModel::validateIndices(
-    std::string const &indices, MantidAxis const &axisType) const {
+bool IndirectPlotOptionsModel::validateIndices(std::string const &indices, MantidAxis const &axisType) const {
   auto &ads = AnalysisDataService::Instance();
-  if (!indices.empty() && m_workspaceName &&
-      ads.doesExist(m_workspaceName.get())) {
-    if (auto const workspace =
-            ads.retrieveWS<MatrixWorkspace>(m_workspaceName.get())) {
+  if (!indices.empty() && m_workspaceName && ads.doesExist(m_workspaceName.get())) {
+    if (auto const workspace = ads.retrieveWS<MatrixWorkspace>(m_workspaceName.get())) {
       if (axisType == MantidAxis::Spectrum)
         return validateSpectra(workspace, indices);
       return validateBins(workspace, indices);
@@ -207,15 +181,14 @@ bool IndirectPlotOptionsModel::validateIndices(
   return false;
 }
 
-bool IndirectPlotOptionsModel::validateSpectra(
-    const MatrixWorkspace_sptr &workspace, std::string const &spectra) const {
+bool IndirectPlotOptionsModel::validateSpectra(const MatrixWorkspace_sptr &workspace,
+                                               std::string const &spectra) const {
   auto const numberOfHistograms = workspace->getNumberHistograms();
   auto const lastIndex = std::stoul(splitStringBy(spectra, ",-").back());
   return lastIndex < numberOfHistograms;
 }
 
-bool IndirectPlotOptionsModel::validateBins(
-    const MatrixWorkspace_sptr &workspace, std::string const &bins) const {
+bool IndirectPlotOptionsModel::validateBins(const MatrixWorkspace_sptr &workspace, std::string const &bins) const {
   auto const numberOfBins = workspace->y(0).size();
   auto const lastIndex = std::stoul(splitStringBy(bins, ",-").back());
   return lastIndex < numberOfBins;
@@ -225,12 +198,12 @@ void IndirectPlotOptionsModel::plotSpectra() {
   auto const workspaceName = workspace();
   auto const indicesString = indices();
   if (workspaceName && indicesString)
-    m_plotter->plotSpectra(workspaceName.get(), indicesString.get());
+    m_plotter->plotSpectra(workspaceName.get(), indicesString.get(), IndirectSettingsHelper::externalPlotErrorBars());
 }
 
 void IndirectPlotOptionsModel::plotBins(std::string const &binIndices) {
   if (auto const workspaceName = workspace())
-    m_plotter->plotBins(workspaceName.get(), binIndices);
+    m_plotter->plotBins(workspaceName.get(), binIndices, IndirectSettingsHelper::externalPlotErrorBars());
 }
 
 void IndirectPlotOptionsModel::plotContour() {
@@ -242,19 +215,17 @@ void IndirectPlotOptionsModel::plotTiled() {
   auto const workspaceName = workspace();
   auto const indicesString = indices();
   if (workspaceName && indicesString)
-    m_plotter->plotTiled(workspaceName.get(), indicesString.get());
+    m_plotter->plotTiled(workspaceName.get(), indicesString.get(), IndirectSettingsHelper::externalPlotErrorBars());
 }
 
-boost::optional<std::string>
-IndirectPlotOptionsModel::singleDataPoint(MantidAxis const &axisType) const {
+boost::optional<std::string> IndirectPlotOptionsModel::singleDataPoint(MantidAxis const &axisType) const {
   if (auto const workspaceName = workspace())
     return checkWorkspaceSize(workspaceName.get(), axisType);
   return boost::none;
 }
 
-boost::optional<std::string>
-IndirectPlotOptionsModel::checkWorkspaceSize(std::string const &workspaceName,
-                                             MantidAxis const &axisType) const {
+boost::optional<std::string> IndirectPlotOptionsModel::checkWorkspaceSize(std::string const &workspaceName,
+                                                                          MantidAxis const &axisType) const {
   auto &ads = AnalysisDataService::Instance();
   if (ads.doesExist(workspaceName)) {
     if (auto const workspace = ads.retrieveWS<MatrixWorkspace>(workspaceName)) {
@@ -266,10 +237,6 @@ IndirectPlotOptionsModel::checkWorkspaceSize(std::string const &workspaceName,
   return boost::none;
 }
 
-std::map<std::string, std::string>
-IndirectPlotOptionsModel::availableActions() const {
-  return m_actions;
-}
+std::map<std::string, std::string> IndirectPlotOptionsModel::availableActions() const { return m_actions; }
 
-} // namespace CustomInterfaces
-} // namespace MantidQt
+} // namespace MantidQt::CustomInterfaces

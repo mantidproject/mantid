@@ -27,9 +27,7 @@ std::tuple<bool, size_t, std::string> isARGUSDateTime(const std::string &date) {
 }
 } // namespace
 
-namespace Mantid {
-namespace Kernel {
-namespace DateAndTimeHelpers {
+namespace Mantid::Kernel::DateAndTimeHelpers {
 // Initialize the logger
 Logger g_log("DateAndTime");
 
@@ -50,8 +48,7 @@ Types::Core::DateAndTime createFromSanitizedISO8601(const std::string &date) {
  *@param displayWarnings display warning messages in the log if the date is non
  *conforming.
  */
-std::string verifyAndSanitizeISO8601(const std::string &date,
-                                     bool displayWarnings) {
+std::string verifyAndSanitizeISO8601(const std::string &date, bool displayWarnings) {
   auto res = isARGUSDateTime(date);
 
   if (std::get<0>(res)) {
@@ -85,8 +82,7 @@ std::string verifyAndSanitizeISO8601(const std::string &date,
  * @brief averageSorted Assuming that the vector is sorted, find the average
  * time
  */
-Types::Core::DateAndTime
-averageSorted(const std::vector<Types::Core::DateAndTime> &times) {
+Types::Core::DateAndTime averageSorted(const std::vector<Types::Core::DateAndTime> &times) {
   if (times.empty())
     throw std::invalid_argument("Cannot find average of empty vector");
 
@@ -94,24 +90,21 @@ averageSorted(const std::vector<Types::Core::DateAndTime> &times) {
   // and find the average in between
   const int64_t first = times.begin()->totalNanoseconds();
   int64_t total =
-      std::accumulate(times.begin(), times.end(), int64_t{0},
-                      [first](int64_t a, const Types::Core::DateAndTime time) {
-                        return std::move(a) + (time.totalNanoseconds() - first);
-                      });
+      std::accumulate(times.begin(), times.end(), int64_t{0}, [first](int64_t a, const Types::Core::DateAndTime time) {
+        return a + (time.totalNanoseconds() - first);
+      });
 
   double avg = static_cast<double>(total) / static_cast<double>(times.size());
 
   return times.front() + static_cast<int64_t>(avg);
 }
 
-Types::Core::DateAndTime
-averageSorted(const std::vector<Types::Core::DateAndTime> &times,
-              const std::vector<double> &weights) {
+Types::Core::DateAndTime averageSorted(const std::vector<Types::Core::DateAndTime> &times,
+                                       const std::vector<double> &weights) {
   if (times.empty())
     throw std::invalid_argument("Cannot find average of empty vector");
   if (times.size() != weights.size())
-    throw std::invalid_argument(
-        "time and weight vectors must be the same length");
+    throw std::invalid_argument("time and weight vectors must be the same length");
   if (times.size() == 1)
     return times.front();
 
@@ -123,16 +116,13 @@ averageSorted(const std::vector<Types::Core::DateAndTime> &times,
 
   // second operation is done to each parallel vector element
   // first operation accumulates the result
-  double totalValue = std::inner_product(
-      times.begin(), times.end(), weights.begin(), double{0.}, std::plus<>(),
-      [first](const Types::Core::DateAndTime time, const double weight) {
-        return static_cast<double>(time.totalNanoseconds() - first) * weight;
-      });
+  double totalValue = std::inner_product(times.begin(), times.end(), weights.begin(), double{0.}, std::plus<>(),
+                                         [first](const Types::Core::DateAndTime time, const double weight) {
+                                           return static_cast<double>(time.totalNanoseconds() - first) * weight;
+                                         });
 
   // add the result to the original first value
   return times.front() + static_cast<int64_t>(totalValue / totalWeight);
 }
 
-} // namespace DateAndTimeHelpers
-} // namespace Kernel
-} // namespace Mantid
+} // namespace Mantid::Kernel::DateAndTimeHelpers

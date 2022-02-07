@@ -24,9 +24,12 @@ namespace LiveData {
 class KafkaEventStreamDecoder;
 
 /**
-  Implementation of a live listener to consume messages from the Kafka system
-  at ISIS. It currently parses the events directly using flatbuffers so will
+  Implementation of a live listener to consume messages from Apache Kafka.
+  This system is developed primarily for the ESS, but is also used to some
+  extent elsewhere (ISIS, ANSTO).
+  It currently parses the events directly using flatbuffers so will
   need updating if the schema changes.
+  Some further documentation is in docs/source/concepts/KafkaLiveStreams.rst
  */
 class DLLExport KafkaEventListener : public API::LiveListener {
 public:
@@ -49,8 +52,7 @@ public:
   //----------------------------------------------------------------------
 
   bool connect(const Poco::Net::SocketAddress &address) override;
-  void start(
-      Types::Core::DateAndTime startTime = Types::Core::DateAndTime()) override;
+  void start(Types::Core::DateAndTime startTime = Types::Core::DateAndTime()) override;
   std::shared_ptr<API::Workspace> extractData() override;
   void setAlgorithm(const Mantid::API::IAlgorithm &callingAlgorithm) override;
 

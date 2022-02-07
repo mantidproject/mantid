@@ -26,7 +26,7 @@ Usage
    # Create Workspace with peak around x=15.0
    ws = CreateSampleWorkspace(BankPixelWidth=1, Xmax=30, BinWidth=1)
 
-   # Apply algorithm. 
+   # Apply algorithm.
    wsD = GeneralisedSecondDifference(ws,M=2,Z=2)
 
    # Show values around the peak

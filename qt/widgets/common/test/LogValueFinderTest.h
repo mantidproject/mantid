@@ -36,12 +36,10 @@ public:
     ScopedWorkspace ws1(createTestWS(1));
     ScopedWorkspace ws2(createTestWS(2));
     QStringList wsNames;
-    wsNames << QString::fromStdString(ws1.name())
-            << QString::fromStdString(ws2.name());
+    wsNames << QString::fromStdString(ws1.name()) << QString::fromStdString(ws2.name());
     LogValueFinder finder(wsNames);
     std::vector<std::string> logNames;
-    const std::vector<std::string> expectedNames = {
-        "stringProp", "dblProp", "intProp", "boolProp", "timeSeries"};
+    const std::vector<std::string> expectedNames = {"stringProp", "dblProp", "intProp", "boolProp", "timeSeries"};
     TS_ASSERT_THROWS_NOTHING(logNames = finder.getLogNames());
     TS_ASSERT_EQUALS(logNames.size(), expectedNames.size());
     TS_ASSERT_EQUALS(logNames, expectedNames);
@@ -51,21 +49,16 @@ public:
     ScopedWorkspace ws0(createTestWS(0));
     ScopedWorkspace ws1(createTestWS(1));
     QStringList wsNames;
-    wsNames << QString::fromStdString(ws0.name())
-            << QString::fromStdString(ws1.name());
+    wsNames << QString::fromStdString(ws0.name()) << QString::fromStdString(ws1.name());
     LogValueFinder finder(wsNames);
     double valIndex0 = 0.;
-    TS_ASSERT_THROWS_NOTHING(
-        valIndex0 = finder.getLogValue("dblProp", StatisticType::Mean, 0));
+    TS_ASSERT_THROWS_NOTHING(valIndex0 = finder.getLogValue("dblProp", StatisticType::Mean, 0));
     double valIndex1 = 0.;
-    TS_ASSERT_THROWS_NOTHING(
-        valIndex1 = finder.getLogValue("dblProp", StatisticType::Mean, 1));
+    TS_ASSERT_THROWS_NOTHING(valIndex1 = finder.getLogValue("dblProp", StatisticType::Mean, 1));
     double valString0 = 0.;
-    TS_ASSERT_THROWS_NOTHING(valString0 = finder.getLogValue(
-                                 "dblProp", StatisticType::Mean, wsNames[0]));
+    TS_ASSERT_THROWS_NOTHING(valString0 = finder.getLogValue("dblProp", StatisticType::Mean, wsNames[0]));
     double valString1 = 0.;
-    TS_ASSERT_THROWS_NOTHING(valString1 = finder.getLogValue(
-                                 "dblProp", StatisticType::Mean, wsNames[1]));
+    TS_ASSERT_THROWS_NOTHING(valString1 = finder.getLogValue("dblProp", StatisticType::Mean, wsNames[1]));
     TS_ASSERT_EQUALS(valIndex0, valString0);
     TS_ASSERT_EQUALS(valIndex1, valString1);
     TS_ASSERT_DELTA(valIndex0, 0.0, 1.e-7);
@@ -76,14 +69,11 @@ public:
     ScopedWorkspace ws0(createTestWS(0));
     ScopedWorkspace ws1(createTestWS(1));
     QStringList wsNames;
-    wsNames << QString::fromStdString(ws0.name())
-            << QString::fromStdString(ws1.name());
+    wsNames << QString::fromStdString(ws0.name()) << QString::fromStdString(ws1.name());
     LogValueFinder finder(wsNames);
     double val0, val1;
-    TS_ASSERT_THROWS_NOTHING(
-        val0 = finder.getLogValue("intProp", StatisticType::Mean, 0));
-    TS_ASSERT_THROWS_NOTHING(
-        val1 = finder.getLogValue("intProp", StatisticType::Mean, 1));
+    TS_ASSERT_THROWS_NOTHING(val0 = finder.getLogValue("intProp", StatisticType::Mean, 0));
+    TS_ASSERT_THROWS_NOTHING(val1 = finder.getLogValue("intProp", StatisticType::Mean, 1));
     TS_ASSERT_DELTA(val0, 0.0, 1.e-7);
     TS_ASSERT_DELTA(val1, 1.0, 1.e-7);
   }
@@ -92,14 +82,11 @@ public:
     ScopedWorkspace ws0(createTestWS(0));
     ScopedWorkspace ws1(createTestWS(1));
     QStringList wsNames;
-    wsNames << QString::fromStdString(ws0.name())
-            << QString::fromStdString(ws1.name());
+    wsNames << QString::fromStdString(ws0.name()) << QString::fromStdString(ws1.name());
     LogValueFinder finder(wsNames);
     double val0, val1;
-    TS_ASSERT_THROWS_NOTHING(
-        val0 = finder.getLogValue("timeSeries", StatisticType::Mean, 0));
-    TS_ASSERT_THROWS_NOTHING(
-        val1 = finder.getLogValue("timeSeries", StatisticType::Mean, 1));
+    TS_ASSERT_THROWS_NOTHING(val0 = finder.getLogValue("timeSeries", StatisticType::Mean, 0));
+    TS_ASSERT_THROWS_NOTHING(val1 = finder.getLogValue("timeSeries", StatisticType::Mean, 1));
     TS_ASSERT_DELTA(val0, 4.5, 1.e-7);
     TS_ASSERT_DELTA(val1, 5.5, 1.e-7);
   }
@@ -108,36 +95,28 @@ public:
     ScopedWorkspace ws0(createTestWS(0));
     ScopedWorkspace ws1(createTestWS(1));
     QStringList wsNames;
-    wsNames << QString::fromStdString(ws0.name())
-            << QString::fromStdString(ws1.name());
+    wsNames << QString::fromStdString(ws0.name()) << QString::fromStdString(ws1.name());
     LogValueFinder finder(wsNames);
-    TS_ASSERT_THROWS(finder.getLogValue("boolProp", StatisticType::Mean, 0),
-                     const std::invalid_argument &);
-    TS_ASSERT_THROWS(finder.getLogValue("boolProp", StatisticType::Mean, 1),
-                     const std::invalid_argument &);
+    TS_ASSERT_THROWS(finder.getLogValue("boolProp", StatisticType::Mean, 0), const std::invalid_argument &);
+    TS_ASSERT_THROWS(finder.getLogValue("boolProp", StatisticType::Mean, 1), const std::invalid_argument &);
   }
 
   void test_getLogValue_nonExistentWorkspace_throws() {
     ScopedWorkspace ws0(createTestWS(0));
     ScopedWorkspace ws1(createTestWS(1));
     QStringList wsNames;
-    wsNames << QString::fromStdString(ws0.name())
-            << QString::fromStdString(ws1.name());
+    wsNames << QString::fromStdString(ws0.name()) << QString::fromStdString(ws1.name());
     LogValueFinder finder(wsNames);
-    TS_ASSERT_THROWS(
-        finder.getLogValue("dblProp", StatisticType::Mean, "no_workspace"),
-        const std::invalid_argument &);
+    TS_ASSERT_THROWS(finder.getLogValue("dblProp", StatisticType::Mean, "no_workspace"), const std::invalid_argument &);
   }
 
   void test_getLogValue_indexOutOfRange_throws() {
     ScopedWorkspace ws0(createTestWS(0));
     ScopedWorkspace ws1(createTestWS(1));
     QStringList wsNames;
-    wsNames << QString::fromStdString(ws0.name())
-            << QString::fromStdString(ws1.name());
+    wsNames << QString::fromStdString(ws0.name()) << QString::fromStdString(ws1.name());
     LogValueFinder finder(wsNames);
-    TS_ASSERT_THROWS(finder.getLogValue("dblProp", StatisticType::Mean, 2),
-                     const std::invalid_argument &);
+    TS_ASSERT_THROWS(finder.getLogValue("dblProp", StatisticType::Mean, 2), const std::invalid_argument &);
   }
 
 private:

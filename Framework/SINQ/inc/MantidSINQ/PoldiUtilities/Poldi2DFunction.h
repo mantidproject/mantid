@@ -30,16 +30,12 @@ class MANTID_SINQ_DLL Poldi2DFunction : public API::IFunction1DSpectrum,
 public:
   Poldi2DFunction();
 
-  void function(const API::FunctionDomain &domain,
-                API::FunctionValues &values) const override;
-  void functionDeriv(const API::FunctionDomain &domain,
-                     API::Jacobian &jacobian) override;
+  void function(const API::FunctionDomain &domain, API::FunctionValues &values) const override;
+  void functionDeriv(const API::FunctionDomain &domain, API::Jacobian &jacobian) override;
 
-  void function1DSpectrum(const API::FunctionDomain1DSpectrum &domain,
-                          API::FunctionValues &values) const override;
+  void function1DSpectrum(const API::FunctionDomain1DSpectrum &domain, API::FunctionValues &values) const override;
 
-  void poldiFunction1D(const std::vector<int> &indices,
-                       const API::FunctionDomain1D &domain,
+  void poldiFunction1D(const std::vector<int> &indices, const API::FunctionDomain1D &domain,
                        API::FunctionValues &values) const override;
 
   void iterationFinished() override;

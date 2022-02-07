@@ -48,64 +48,47 @@ public:
   const std::string category() const override { return "SINQ\\Poldi"; }
 
 protected:
-  MantidVec
-  getNeighborSums(const HistogramData::HistogramY &correlationCounts) const;
+  MantidVec getNeighborSums(const HistogramData::HistogramY &correlationCounts) const;
+
+  std::list<MantidVec::const_iterator> findPeaks(MantidVec::const_iterator begin, MantidVec::const_iterator end);
+  std::list<MantidVec::const_iterator> findPeaksRecursive(MantidVec::const_iterator begin,
+                                                          MantidVec::const_iterator end) const;
 
   std::list<MantidVec::const_iterator>
-  findPeaks(MantidVec::const_iterator begin, MantidVec::const_iterator end);
-  std::list<MantidVec::const_iterator>
-  findPeaksRecursive(MantidVec::const_iterator begin,
-                     MantidVec::const_iterator end) const;
+  mapPeakPositionsToCorrelationData(std::list<MantidVec::const_iterator> peakPositions,
+                                    MantidVec::const_iterator baseDataStart,
+                                    MantidVec::const_iterator originalDataStart) const;
 
-  std::list<MantidVec::const_iterator> mapPeakPositionsToCorrelationData(
-      std::list<MantidVec::const_iterator> peakPositions,
-      MantidVec::const_iterator baseDataStart,
-      MantidVec::const_iterator originalDataStart) const;
+  UncertainValue getBackgroundWithSigma(const std::list<MantidVec::const_iterator> &peakPositions,
+                                        const MantidVec &correlationCounts) const;
+  MantidVec getBackground(const std::list<MantidVec::const_iterator> &peakPositions,
+                          const MantidVec &correlationCounts) const;
+  bool distanceToPeaksGreaterThanMinimum(std::list<MantidVec::const_iterator> peakPositions,
+                                         MantidVec::const_iterator point) const;
+  size_t getNumberOfBackgroundPoints(const std::list<MantidVec::const_iterator> &peakPositions,
+                                     const MantidVec &correlationCounts) const;
 
-  UncertainValue getBackgroundWithSigma(
-      const std::list<MantidVec::const_iterator> &peakPositions,
-      const MantidVec &correlationCounts) const;
-  MantidVec
-  getBackground(const std::list<MantidVec::const_iterator> &peakPositions,
-                const MantidVec &correlationCounts) const;
-  bool distanceToPeaksGreaterThanMinimum(
-      std::list<MantidVec::const_iterator> peakPositions,
-      MantidVec::const_iterator point) const;
-  size_t getNumberOfBackgroundPoints(
-      const std::list<MantidVec::const_iterator> &peakPositions,
-      const MantidVec &correlationCounts) const;
+  double getMedianFromSortedVector(MantidVec::const_iterator begin, MantidVec::const_iterator end) const;
+  double getSn(MantidVec::const_iterator begin, MantidVec::const_iterator end) const;
 
-  double getMedianFromSortedVector(MantidVec::const_iterator begin,
-                                   MantidVec::const_iterator end) const;
-  double getSn(MantidVec::const_iterator begin,
-               MantidVec::const_iterator end) const;
+  double minimumPeakHeightFromBackground(UncertainValue backgroundWithSigma) const;
 
-  double
-  minimumPeakHeightFromBackground(UncertainValue backgroundWithSigma) const;
+  double getTransformedCenter(double value, const Kernel::Unit_sptr &unit) const;
+  std::vector<PoldiPeak_sptr> getPeaks(const MantidVec::const_iterator &baseListStart,
+                                       const MantidVec::const_iterator &baseListEnd,
+                                       std::list<MantidVec::const_iterator> peakPositions, const MantidVec &xData,
+                                       const Kernel::Unit_sptr &unit) const;
 
-  double getTransformedCenter(double value,
-                              const Kernel::Unit_sptr &unit) const;
-  std::vector<PoldiPeak_sptr>
-  getPeaks(const MantidVec::const_iterator &baseListStart,
-           const MantidVec::const_iterator &baseListEnd,
-           std::list<MantidVec::const_iterator> peakPositions,
-           const MantidVec &xData, const Kernel::Unit_sptr &unit) const;
+  double getFWHMEstimate(const MantidVec::const_iterator &baseListStart, const MantidVec::const_iterator &baseListEnd,
+                         MantidVec::const_iterator peakPosition, const MantidVec &xData) const;
 
-  double getFWHMEstimate(const MantidVec::const_iterator &baseListStart,
-                         const MantidVec::const_iterator &baseListEnd,
-                         MantidVec::const_iterator peakPosition,
-                         const MantidVec &xData) const;
-
-  void setErrorsOnWorkspace(
-      const DataObjects::Workspace2D_sptr &correlationWorkspace,
-      double error) const;
+  void setErrorsOnWorkspace(const DataObjects::Workspace2D_sptr &correlationWorkspace, double error) const;
 
   void setMinimumDistance(int newMinimumDistance);
   void setMinimumPeakHeight(double newMinimumPeakHeight);
   void setMaximumPeakNumber(int newMaximumPeakNumber);
 
-  static bool vectorElementGreaterThan(MantidVec::const_iterator first,
-                                       MantidVec::const_iterator second);
+  static bool vectorElementGreaterThan(MantidVec::const_iterator first, MantidVec::const_iterator second);
   bool isLessThanMinimum(const PoldiPeak_sptr &peak);
 
   int m_minimumDistance;

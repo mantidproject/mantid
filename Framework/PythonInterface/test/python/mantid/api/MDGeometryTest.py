@@ -28,6 +28,9 @@ class MDGeometryTest(unittest.TestCase):
     def test_numDims_returns_expected_number(self):
         self.assertEqual(self._test_ndims, self._test_mdws.getNumDims())
 
+    def test_numNonIntegratedDims_returns_expected_number(self):
+        self.assertEqual(self._test_ndims, self._test_mdws.getNumNonIntegratedDims())
+
     def test_getDimension_by_index_returns_IMDDimension_object_for_valid_index(self):
         dimension =  self._test_mdws.getDimension(0) # positional
         self._check_is_dimension_with_id(dimension, "x")

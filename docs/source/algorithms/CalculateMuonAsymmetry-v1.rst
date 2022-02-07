@@ -28,7 +28,7 @@ and the fitting function is given by
 
 and the renormalized data is transformed via the equation:
 
-.. math:: \textrm{NewData} = (\textrm{NormalisedCounts}/(N_0) - 1.0. 
+.. math:: \textrm{NewData} = (\textrm{NormalisedCounts}/(N_0) - 1.0.
 
 Usage
 -----
@@ -56,11 +56,11 @@ This example is for calculating the Asymmetry for a single data set.
 
    tab.addRow([11.,"a","Estimate"])
    tab.addRow([22.,"b","Estimate"])
-   
+
    ws= makeData("a",2.30)
    ws2= makeData("b",1.10)
-   
-   myFunc='name=GausOsc,$domains=i,Frequency=5.;'  
+
+   myFunc='name=GausOsc,$domains=i,Frequency=5.;'
 
    TFFunc = ConvertFitFunctionForMuonTFAsymmetry(InputFunction=myFunc,NormalizationTable=tab,WorkspaceList=["a"],Mode="Construct")
    CalculateMuonAsymmetry(NormalizationTable=tab, unNormalizedWorkspaceList=["a"],
@@ -127,7 +127,47 @@ Output:
 
    Normalization constant for b: 2.30
    Normalization constant for d: 4.10
-   
+
+**Example - Calculating Asymmetry for double pulse data:**
+
+.. testcode:: AsymmDoublePulse
+
+   import math
+   import numpy as np
+
+   delta = 0.33
+   x = np.linspace(0.,15.,100)
+   x_offset = np.linspace(delta/2, 15. + delta/2, 100)
+   x_offset_neg = np.linspace(-delta/2, 15. - delta/2, 100)
+
+   testFunction = GausOsc(Frequency = 1.5, A=0.22)
+   y1 = testFunction(x_offset_neg)
+   y2 = testFunction(x_offset)
+   N0 = 6.38
+   y = N0 * (1 + y1/2+y2/2)
+   y_norm = y1/2+y2/2
+   unnormalised_workspace = CreateWorkspace(x,y)
+   ws_to_normalise = CreateWorkspace(x,y)
+   ws_correctly_normalised = CreateWorkspace(x,y_norm)
+   AddSampleLog(Workspace='ws_to_normalise', LogName="analysis_asymmetry_norm", LogText="1")
+
+   innerFunction = FunctionFactory.createInitialized('name=GausOsc,A=0.20,Sigma=0.2,Frequency=1.0,Phi=0')
+   tf_function = ConvertFitFunctionForMuonTFAsymmetry(InputFunction=innerFunction, WorkspaceList=['ws_to_normalise'])
+
+   CalculateMuonAsymmetry(MaxIterations=100, EnableDoublePulse=True, PulseOffset=delta, UnNormalizedWorkspaceList='unnormalised_workspace', ReNormalizedWorkspaceList='ws_to_normalise',
+                           OutputFitWorkspace='DoublePulseFit', StartX=0, InputFunction=str(tf_function), Minimizer='Levenberg-Marquardt')
+
+   double_parameter_workspace = AnalysisDataService.retrieve('DoublePulseFit_Parameters')
+   values_column = double_parameter_workspace.column(1)
+
+   print("Normalization constant is: {0:.2f}".format(values_column[0]))
+
+Output:
+
+.. testoutput:: AsymmDoublePulse
+
+   Normalization constant is: 6.38
+
 .. categories::
 
 .. sourcelink::

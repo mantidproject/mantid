@@ -428,7 +428,7 @@ class ExportExperimentLogTest(unittest.TestCase):
             FileMode = "new",
             FileFormat = "tab",
             OverrideLogValue = ["Duration", "12345", "ProtonCharge-Avg", "32.921"],
-            RemoveDuplicateRecord = True, 
+            RemoveDuplicateRecord = True,
             OrderByTitle = 'RUN')
 
         # Record 0B
@@ -441,7 +441,7 @@ class ExportExperimentLogTest(unittest.TestCase):
             FileMode = "fastappend",
             FileFormat = "tab",
             OverrideLogValue = ["Duration", "12345", "ProtonCharge-Avg", "32.921"],
-            RemoveDuplicateRecord = True, 
+            RemoveDuplicateRecord = True,
             OrderByTitle = 'RUN')
 
         # Record 1
@@ -457,7 +457,7 @@ class ExportExperimentLogTest(unittest.TestCase):
             FileMode = "fastappend",
             FileFormat = "tab",
             OverrideLogValue = ["Duration", "23456", "ProtonCharge-Avg", "22.921"],
-            RemoveDuplicateRecord = True, 
+            RemoveDuplicateRecord = True,
             OrderByTitle = 'RUN')
 
         # Record 2
@@ -473,7 +473,7 @@ class ExportExperimentLogTest(unittest.TestCase):
             FileMode = "fastappend",
             FileFormat = "tab",
             OverrideLogValue = ["Duration", "34567", "ProtonCharge-Avg", "12.921"],
-            RemoveDuplicateRecord = True, 
+            RemoveDuplicateRecord = True,
             OrderByTitle = 'RUN')
 
         # Record 2B
@@ -486,7 +486,7 @@ class ExportExperimentLogTest(unittest.TestCase):
             FileMode = "fastappend",
             FileFormat = "tab",
             OverrideLogValue = ["Duration", "34567", "ProtonCharge-Avg", "12.921"],
-            RemoveDuplicateRecord = True, 
+            RemoveDuplicateRecord = True,
             OrderByTitle = 'RUN')
 
         # Verify
@@ -724,7 +724,7 @@ class ExportExperimentLogTest(unittest.TestCase):
         tsp_b=kernel.FloatTimeSeriesProperty("SensorA")
         for i in arange(25):
             tmptime = strftime("%Y-%m-%d %H:%M:%S", gmtime(mktime(gmtime())+i))
-            if run == 23456: 
+            if run == 23456:
                 shift = 0
             else:
                 shift = int(run)

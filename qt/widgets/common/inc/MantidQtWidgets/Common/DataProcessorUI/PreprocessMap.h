@@ -28,9 +28,8 @@ public:
   // Destructor
   virtual ~PreprocessMap();
   // Add a column to pre-process
-  void addElement(const QString &column, const QString &algorithm,
-                  const QString &prefix = "", const QString &separator = "",
-                  const QString &blacklist = "");
+  void addElement(const QString &column, const QString &algorithm, const QString &prefix = "",
+                  const QString &separator = "", const QString &blacklist = "");
   // Returns a map where keys are columns and values pre-processing algorithms
   std::map<QString, PreprocessingAlgorithm> asMap() const;
 

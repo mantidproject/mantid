@@ -1,3 +1,5 @@
+.. _mantid.kernel.StringArrayLengthValidator:
+
 ============================
  StringArrayLengthValidator
 ============================
@@ -8,7 +10,7 @@ This is a Python binding to the C++ class Mantid::Kernel::ArrayLengthValidator.
 
 .. module:`mantid.kernel`
 
-.. autoclass:: mantid.kernel.StringArrayLengthValidator 
+.. autoclass:: mantid.kernel.StringArrayLengthValidator
     :members:
     :undoc-members:
     :inherited-members:

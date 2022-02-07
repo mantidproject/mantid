@@ -6,6 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidDataHandling/LoadNexusLogs.h"
 #include "MantidAPI/FileProperty.h"
+#include "MantidAPI/LogManager.h"
 #include "MantidAPI/Run.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/TimeSeriesProperty.h"
@@ -22,8 +23,7 @@
 
 #include <algorithm>
 
-namespace Mantid {
-namespace DataHandling {
+namespace Mantid::DataHandling {
 // Register the algorithm into the algorithm factory
 DECLARE_ALGORITHM(LoadNexusLogs)
 
@@ -43,8 +43,7 @@ namespace {
  * @param workspace : Pointer to the workspace to set logs on
  * @return True only if reading and execution successful.
  */
-bool loadAndApplyMeasurementInfo(::NeXus::File *const file,
-                                 API::MatrixWorkspace &workspace) {
+bool loadAndApplyMeasurementInfo(::NeXus::File *const file, API::MatrixWorkspace &workspace) {
 
   bool successfullyApplied = false;
   try {
@@ -54,23 +53,19 @@ bool loadAndApplyMeasurementInfo(::NeXus::File *const file,
     // be available.
     file->openData("id");
     workspace.mutableRun().addLogData(
-        new Mantid::Kernel::PropertyWithValue<std::string>("measurement_id",
-                                                           file->getStrData()));
+        new Mantid::Kernel::PropertyWithValue<std::string>("measurement_id", file->getStrData()));
     file->closeData();
     file->openData("label");
     workspace.mutableRun().addLogData(
-        new Mantid::Kernel::PropertyWithValue<std::string>("measurement_label",
-                                                           file->getStrData()));
+        new Mantid::Kernel::PropertyWithValue<std::string>("measurement_label", file->getStrData()));
     file->closeData();
     file->openData("subid");
     workspace.mutableRun().addLogData(
-        new Mantid::Kernel::PropertyWithValue<std::string>("measurement_subid",
-                                                           file->getStrData()));
+        new Mantid::Kernel::PropertyWithValue<std::string>("measurement_subid", file->getStrData()));
     file->closeData();
     file->openData("type");
     workspace.mutableRun().addLogData(
-        new Mantid::Kernel::PropertyWithValue<std::string>("measurement_type",
-                                                           file->getStrData()));
+        new Mantid::Kernel::PropertyWithValue<std::string>("measurement_type", file->getStrData()));
     file->closeData();
     file->closeGroup();
     successfullyApplied = true;
@@ -86,15 +81,13 @@ bool loadAndApplyMeasurementInfo(::NeXus::File *const file,
  * @param workspace : Pointer to the workspace to set logs on
  * @return True only if reading and execution successful.
  */
-bool loadAndApplyRunTitle(::NeXus::File *const file,
-                          API::MatrixWorkspace &workspace) {
+bool loadAndApplyRunTitle(::NeXus::File *const file, API::MatrixWorkspace &workspace) {
 
   bool successfullyApplied = false;
   try {
     file->openData("title");
     workspace.mutableRun().addLogData(
-        new Mantid::Kernel::PropertyWithValue<std::string>("run_title",
-                                                           file->getStrData()));
+        new Mantid::Kernel::PropertyWithValue<std::string>("run_title", file->getStrData()));
     file->closeData();
     successfullyApplied = true;
   } catch (::NeXus::Exception &) {
@@ -116,8 +109,7 @@ bool loadAndApplyRunTitle(::NeXus::File *const file,
  * @param log :: Reference to logger to print out to
  * @return :: True if control character OR invalid. Else False
  */
-bool isControlValue(const char &c, const std::string &propName,
-                    Kernel::Logger &log) {
+bool isControlValue(const char &c, const std::string &propName, Kernel::Logger &log) {
   // Have to check it falls within range accepted by c style check
   if (c <= -1) {
     log.warning("Found an invalid character in property " + propName);
@@ -143,10 +135,8 @@ bool isControlValue(const char &c, const std::string &propName,
  * @param log :: Reference to logger to print out to
  * @returns A pointer to a new property containing the time series
  */
-std::unique_ptr<Kernel::Property> createTimeSeries(::NeXus::File &file,
-                                                   const std::string &propName,
-                                                   const std::string &freqStart,
-                                                   Kernel::Logger &log) {
+std::unique_ptr<Kernel::Property> createTimeSeries(::NeXus::File &file, const std::string &propName,
+                                                   const std::string &freqStart, Kernel::Logger &log) {
   file.openData("time");
   //----- Start time is an ISO8601 string date and time. ------
   std::string start;
@@ -181,8 +171,7 @@ std::unique_ptr<Kernel::Property> createTimeSeries(::NeXus::File &file,
   try {
     file.getDataCoerce(time_double);
   } catch (::NeXus::Exception &e) {
-    log.warning() << "Log entry's time field could not be loaded: '" << e.what()
-                  << "'.\n";
+    log.warning() << "Log entry's time field could not be loaded: '" << e.what() << "'.\n";
     file.closeData();
     throw;
   }
@@ -195,6 +184,7 @@ std::unique_ptr<Kernel::Property> createTimeSeries(::NeXus::File &file,
     std::transform(time_double.begin(), time_double.end(), time_double.begin(),
                    std::bind(std::multiplies<double>(), _1, 60.0));
   }
+
   // Now the values: Could be a string, int or double
   file.openData("value");
   // Get the units of the property
@@ -246,15 +236,13 @@ std::unique_ptr<Kernel::Property> createTimeSeries(::NeXus::File &file,
     // The string may contain non-printable (i.e. control) characters, replace
     // these
     std::replace_if(
-        values.begin(), values.end(),
-        [&](const char &c) { return isControlValue(c, propName, log); }, ' ');
+        values.begin(), values.end(), [&](const char &c) { return isControlValue(c, propName, log); }, ' ');
     auto tsp = std::make_unique<TimeSeriesProperty<std::string>>(propName);
     std::vector<DateAndTime> times;
     DateAndTime::createVector(start_time, time_double, times);
     const size_t ntimes = times.size();
     for (size_t i = 0; i < ntimes; ++i) {
-      std::string value_i =
-          std::string(values.data() + i * item_length, item_length);
+      std::string value_i = std::string(values.data() + i * item_length, item_length);
       tsp->addValue(times[i], value_i);
     }
     tsp->setUnits(value_units);
@@ -275,9 +263,80 @@ std::unique_ptr<Kernel::Property> createTimeSeries(::NeXus::File &file,
     log.debug() << "   done reading \"value\" array\n";
     return tsp;
   } else {
-    throw ::NeXus::Exception(
-        "Invalid value type for time series. Only int, double or strings are "
-        "supported");
+    throw ::NeXus::Exception("Invalid value type for time series. Only int, double or strings are "
+                             "supported");
+  }
+}
+
+/**
+ * Creates a time series validity filter property from the currently opened log
+ * entry. It is assumed to have been checked to have a time field and the value
+ * entry's name is given as an argument
+ * @param file :: A reference to the file handle
+ * @param prop :: The property to check for a validity array
+ * @param log :: Reference to logger to print out to
+ * @returns A pointer to a new property containing the time series filter or
+ * null
+ */
+std::unique_ptr<Kernel::Property> createTimeSeriesValidityFilter(::NeXus::File &file, const Kernel::Property &prop,
+                                                                 Kernel::Logger &log) {
+  const auto tsProp = dynamic_cast<const Kernel::ITimeSeriesProperty *>(&prop);
+  const auto times = tsProp->timesAsVector();
+  std::vector<int> values;
+  std::vector<bool> boolValues;
+  // Now the the validity of the values
+  // this should be a match int array to the data values (or times)
+  // If not present assume all data is valid
+  try {
+    file.openData("value_valid");
+
+    // Now the validity data
+    ::NeXus::Info info = file.getInfo();
+    // Check the size
+    if (size_t(info.dims[0]) != times.size()) {
+      throw ::NeXus::Exception("Invalid value entry for validity data");
+    }
+    if (file.isDataInt()) // Int type
+    {
+      try {
+        file.getDataCoerce(values);
+        file.closeData();
+      } catch (::NeXus::Exception &) {
+        throw;
+      }
+    } else {
+      throw ::NeXus::Exception("Invalid value type for validity data. Only int is supported");
+    }
+  } catch (::NeXus::Exception &ex) {
+    std::string error_msg = ex.what();
+    if (error_msg != "NXopendata(value_valid) failed") {
+      log.warning() << error_msg << "\n";
+      file.closeData();
+      // no data found
+      return std::unique_ptr<Kernel::Property>(nullptr);
+    }
+  }
+
+  bool invalidDataFound = false;
+  boolValues.reserve(values.size());
+  // convert the integer values to boolean with 0=invalid data
+  for (size_t i = 0; i < values.size(); i++) {
+    bool isInvalidData = (values[i] == 0);
+    boolValues.emplace_back(!isInvalidData);
+    if (isInvalidData && !invalidDataFound) {
+      invalidDataFound = true;
+    }
+  }
+  if (invalidDataFound) {
+    const auto tspName = API::LogManager::getInvalidValuesFilterLogName(prop.name());
+    auto tsp = std::make_unique<TimeSeriesProperty<bool>>(tspName);
+    tsp->create(times, boolValues);
+    log.debug() << "   done reading \"value_valid\" array\n";
+
+    return tsp;
+  } else {
+    // no data found
+    return std::unique_ptr<Kernel::Property>(nullptr);
   }
 }
 
@@ -301,8 +360,7 @@ void appendEndTimeLog(Kernel::Property *prop, const API::Run &run) {
     const auto endTime = run.endTime();
 
     // First check if it is valid to add a additional log entry
-    if (!tsLog || tsLog->size() == 0 || endTime <= tsLog->lastTime() ||
-        prop->name() == "proton_charge")
+    if (!tsLog || tsLog->size() == 0 || endTime <= tsLog->lastTime() || prop->name() == "proton_charge")
       return;
 
     tsLog->addValue(endTime, tsLog->lastValue());
@@ -340,23 +398,25 @@ LoadNexusLogs::LoadNexusLogs() {}
 
 /// Initialisation method.
 void LoadNexusLogs::init() {
-  declareProperty(
-      std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
-          "Workspace", "Anonymous", Direction::InOut),
-      "The name of the workspace that will be filled with the logs.");
+  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>("Workspace", "Anonymous", Direction::InOut),
+                  "The name of the workspace that will be filled with the logs.");
   const std::vector<std::string> exts{".nxs", ".n*"};
-  declareProperty(
-      std::make_unique<FileProperty>("Filename", "", FileProperty::Load, exts),
-      "Path to the .nxs file to load. Can be an EventNeXus or a "
-      "histogrammed NeXus.");
-  declareProperty(
-      std::make_unique<PropertyWithValue<bool>>("OverwriteLogs", true,
-                                                Direction::Input),
-      "If true then some existing logs will be overwritten, if false they will "
-      "not.");
-  declareProperty(std::make_unique<PropertyWithValue<std::string>>(
-                      "NXentryName", "", Direction::Input),
+  declareProperty(std::make_unique<FileProperty>("Filename", "", FileProperty::Load, exts),
+                  "Path to the .nxs file to load. Can be an EventNeXus or a "
+                  "histogrammed NeXus.");
+  declareProperty(std::make_unique<PropertyWithValue<bool>>("OverwriteLogs", true, Direction::Input),
+                  "If true then some existing logs will be overwritten, if false they will "
+                  "not.");
+  declareProperty(std::make_unique<PropertyWithValue<std::string>>("NXentryName", "", Direction::Input),
                   "Entry in the nexus file from which to read the logs");
+  declareProperty(std::make_unique<PropertyWithValue<std::vector<std::string>>>("AllowList", std::vector<std::string>(),
+                                                                                Direction::Input),
+                  "If specified, only these logs will be loaded from the file (each "
+                  "separated by a comma).");
+  declareProperty(std::make_unique<PropertyWithValue<std::vector<std::string>>>("BlockList", std::vector<std::string>(),
+                                                                                Direction::Input),
+                  "If specified, these logs will NOT be loaded from the file (each "
+                  "separated by a comma).");
 }
 
 /** Executes the algorithm. Reading in the file and creating and populating
@@ -371,6 +431,10 @@ void LoadNexusLogs::execLoader() {
   MatrixWorkspace_sptr workspace = getProperty("Workspace");
 
   std::string entry_name = getPropertyValue("NXentryName");
+
+  std::vector<std::string> allow_list = getProperty("AllowList");
+  std::vector<std::string> block_list = getProperty("BlockList");
+
   // Find the entry name to use (normally "entry" for SNS, "raw_data_1" for
   // ISIS) if entry name is empty
   if (entry_name.empty()) {
@@ -381,8 +445,7 @@ void LoadNexusLogs::execLoader() {
   try {
     file.openGroup(entry_name, "NXentry");
   } catch (::NeXus::Exception &) {
-    throw std::invalid_argument("Unknown NeXus file format found in file '" +
-                                filename + "', or '" + entry_name +
+    throw std::invalid_argument("Unknown NeXus file format found in file '" + filename + "', or '" + entry_name +
                                 "' is not a valid NXentry");
   }
 
@@ -424,11 +487,14 @@ void LoadNexusLogs::execLoader() {
 
   readStartAndEndTime(file, workspace->mutableRun());
 
-  const std::map<std::string, std::set<std::string>> &allEntries =
-      getFileInfo()->getAllEntries();
+  if (!allow_list.empty() && !block_list.empty()) {
+    throw std::runtime_error("BlockList and AllowList are mutually exclusive! "
+                             "Please only enter values for one of these fields.");
+  }
 
-  auto lf_LoadLogsByClass = [&](const std::string &group_class,
-                                const bool isLog) {
+  const std::map<std::string, std::set<std::string>> &allEntries = getFileInfo()->getAllEntries();
+
+  auto lf_LoadLogsByClass = [&](const std::string &group_class, const bool isLog) {
     auto itGroupClass = allEntries.find(group_class);
     if (itGroupClass == allEntries.end()) {
       return;
@@ -439,7 +505,7 @@ void LoadNexusLogs::execLoader() {
       // match for 2nd level entry /a/b
       if (std::count(entry.begin(), entry.end(), '/') == 2) {
         if (isLog) {
-          loadLogs(file, entry, group_class, workspace);
+          loadLogs(file, entry, group_class, workspace, allow_list, block_list);
         } else {
           loadNPeriods(file, workspace);
         }
@@ -451,8 +517,7 @@ void LoadNexusLogs::execLoader() {
   lf_LoadLogsByClass("IXperiods", false);
 
   auto lf_LoadLogsByName = [&](const std::string &group_name) {
-    for (auto itGroupClass = allEntries.begin();
-         itGroupClass != allEntries.end(); ++itGroupClass) {
+    for (auto itGroupClass = allEntries.begin(); itGroupClass != allEntries.end(); ++itGroupClass) {
 
       const std::string &group_class = itGroupClass->first;
       const std::set<std::string> &entries = itGroupClass->second;
@@ -463,7 +528,7 @@ void LoadNexusLogs::execLoader() {
         continue;
       }
       // here we must search only in NxLogs and NXpositioner sets
-      loadLogs(file, absoluteGroupName, group_class, workspace);
+      loadLogs(file, absoluteGroupName, group_class, workspace, allow_list, block_list);
     }
   };
 
@@ -487,8 +552,7 @@ void LoadNexusLogs::execLoader() {
   // the code below will allow current SANS2D files to load
   if (workspace->mutableRun().hasProperty("proton_log")) {
     std::vector<int> event_frame_number;
-    this->getLogger().notice()
-        << "Using old ISIS proton_log and event_frame_number indirection...\n";
+    this->getLogger().notice() << "Using old ISIS proton_log and event_frame_number indirection...\n";
     try {
       // Find the bank/name corresponding to the first event data entry, i.e.
       // one with type NXevent_data.
@@ -497,41 +561,33 @@ void LoadNexusLogs::execLoader() {
       if (itEventData != allEntries.end()) {
         const std::set<std::string> &events = itEventData->second;
         for (const std::string &event : events) {
-          const std::string eventEntry =
-              event.substr(event.find_last_of("/") + 1);
+          const std::string eventEntry = event.substr(event.find_last_of("/") + 1);
 
-          this->getLogger().debug()
-              << "Opening"
-              << " /" + entry_name + "/" + eventEntry + "/event_frame_number"
-              << " to find the event_frame_number\n";
-          file.openPath("/" + entry_name + "/" + eventEntry +
-                        "/event_frame_number");
+          this->getLogger().debug() << "Opening"
+                                    << " /" + entry_name + "/" + eventEntry + "/event_frame_number"
+                                    << " to find the event_frame_number\n";
+          file.openPath("/" + entry_name + "/" + eventEntry + "/event_frame_number");
           file.getData(event_frame_number);
         }
       }
     } catch (const ::NeXus::Exception &) {
-      this->getLogger().warning()
-          << "Unable to load event_frame_number - "
-             "filtering events by time will not work \n";
+      this->getLogger().warning() << "Unable to load event_frame_number - "
+                                     "filtering events by time will not work \n";
     }
     file.openPath("/" + entry_name);
     if (!event_frame_number.empty()) // ISIS indirection - see above comments
     {
       Kernel::TimeSeriesProperty<double> *plog =
-          dynamic_cast<Kernel::TimeSeriesProperty<double> *>(
-              workspace->mutableRun().getProperty("proton_log"));
+          dynamic_cast<Kernel::TimeSeriesProperty<double> *>(workspace->mutableRun().getProperty("proton_log"));
       if (!plog)
-        throw std::runtime_error(
-            "Could not cast (interpret) proton_log as a time "
-            "series property. Cannot continue.");
-      Kernel::TimeSeriesProperty<double> *pcharge =
-          new Kernel::TimeSeriesProperty<double>("proton_charge");
+        throw std::runtime_error("Could not cast (interpret) proton_log as a time "
+                                 "series property. Cannot continue.");
+      Kernel::TimeSeriesProperty<double> *pcharge = new Kernel::TimeSeriesProperty<double>("proton_charge");
       std::vector<double> pval;
       std::vector<Mantid::Types::Core::DateAndTime> ptime;
       pval.reserve(event_frame_number.size());
       ptime.reserve(event_frame_number.size());
-      std::vector<Mantid::Types::Core::DateAndTime> plogt =
-          plog->timesAsVector();
+      std::vector<Mantid::Types::Core::DateAndTime> plogt = plog->timesAsVector();
       std::vector<double> plogv = plog->valuesAsVector();
       for (auto number : event_frame_number) {
         ptime.emplace_back(plogt[number]);
@@ -567,8 +623,30 @@ void LoadNexusLogs::execLoader() {
     }
   }
 
+  if (!allow_list.empty()) {
+    for (const auto &allow : allow_list) {
+      if (!workspace->run().hasProperty(allow)) {
+        g_log.notice() << "could not load entry '" << allow << "' that was specified in the allow list"
+                       << "\n";
+      }
+    }
+  }
+
   // Close the file
   file.close();
+
+  if (m_logsWithInvalidValues.size() > 0) {
+    if (m_logsWithInvalidValues.size() == 1) {
+      g_log.warning() << "Sample Log \"" << m_logsWithInvalidValues[0]
+                      << "\" contains invalid values, click \"Show Sample Logs\" "
+                         "for details.\n";
+    }
+    auto other_string = (m_logsWithInvalidValues.size() < 2) ? " other " : " others";
+    g_log.warning() << "Sample Log \"" << m_logsWithInvalidValues[0] << "\" and " << m_logsWithInvalidValues.size() - 1
+                    << other_string
+                    << " contain invalid values, click \"Show Sample Logs\" for "
+                       "details.\n";
+  }
 }
 
 /** Try to load the "Veto_pulse" field in DASLogs
@@ -577,9 +655,7 @@ void LoadNexusLogs::execLoader() {
  * @param file :: open nexus file at the DASLogs group
  * @param workspace :: workspace to add to.
  */
-void LoadNexusLogs::loadVetoPulses(
-    ::NeXus::File &file,
-    const std::shared_ptr<API::MatrixWorkspace> &workspace) const {
+void LoadNexusLogs::loadVetoPulses(::NeXus::File &file, const std::shared_ptr<API::MatrixWorkspace> &workspace) const {
   try {
     file.openGroup("Veto_pulse", "NXgroup");
   } catch (::NeXus::Exception &) {
@@ -599,8 +675,7 @@ void LoadNexusLogs::loadVetoPulses(
 
   // Fake values with zeroes.
   std::vector<double> values(time_double.size(), 0.0);
-  TimeSeriesProperty<double> *tsp =
-      new TimeSeriesProperty<double>("veto_pulse_time");
+  TimeSeriesProperty<double> *tsp = new TimeSeriesProperty<double>("veto_pulse_time");
   tsp->create(start, time_double, values);
   tsp->setUnits("");
 
@@ -611,9 +686,7 @@ void LoadNexusLogs::loadVetoPulses(
   file.closeGroup();
 }
 
-void LoadNexusLogs::loadNPeriods(
-    ::NeXus::File &file,
-    const std::shared_ptr<API::MatrixWorkspace> &workspace) const {
+void LoadNexusLogs::loadNPeriods(::NeXus::File &file, const std::shared_ptr<API::MatrixWorkspace> &workspace) const {
   int value = 1; // Default to 1-period unless
   try {
     file.openGroup("periods", "IXperiods");
@@ -652,8 +725,7 @@ void LoadNexusLogs::loadNPeriods(
     // Add the proton charge vector
     const std::string protonChargeByPeriodLabel = "proton_charge_by_period";
     if (!run.hasProperty(protonChargeByPeriodLabel)) {
-      run.addProperty(new ArrayProperty<double>(
-          protonChargeByPeriodLabel, std::move(protonChargeByPeriod)));
+      run.addProperty(new ArrayProperty<double>(protonChargeByPeriodLabel, std::move(protonChargeByPeriod)));
     }
     file.closeGroup();
   } catch (::NeXus::Exception &) {
@@ -674,17 +746,17 @@ void LoadNexusLogs::loadNPeriods(
  * @param absolute_entry_name :: The name of the log entry
  * @param entry_class :: The class type of the log entry
  * @param workspace :: A pointer to the workspace to store the logs
+ * @param allow_list :: Names of specific log entries to load
+ * @param block_list :: Names of specific log entries to skip when loading
  */
-void LoadNexusLogs::loadLogs(
-    ::NeXus::File &file, const std::string &absolute_entry_name,
-    const std::string &entry_class,
-    const std::shared_ptr<API::MatrixWorkspace> &workspace) const {
+void LoadNexusLogs::loadLogs(::NeXus::File &file, const std::string &absolute_entry_name,
+                             const std::string &entry_class, const std::shared_ptr<API::MatrixWorkspace> &workspace,
+                             const std::vector<std::string> &allow_list,
+                             const std::vector<std::string> &block_list) const {
 
-  const std::map<std::string, std::set<std::string>> &allEntries =
-      getFileInfo()->getAllEntries();
+  const std::map<std::string, std::set<std::string>> &allEntries = getFileInfo()->getAllEntries();
 
-  auto lf_LoadByLogClass = [&](const std::string &logClass,
-                               const bool isNxLog) {
+  auto lf_LoadByLogClass = [&](const std::string &logClass, const bool isNxLog) {
     auto itLogClass = allEntries.find(logClass);
     if (itLogClass == allEntries.end()) {
       return;
@@ -692,23 +764,53 @@ void LoadNexusLogs::loadLogs(
     const std::set<std::string> &logsSet = itLogClass->second;
     auto itPrefixBegin = logsSet.lower_bound(absolute_entry_name);
 
-    for (auto it = itPrefixBegin;
-         it != logsSet.end() &&
-         it->compare(0, absolute_entry_name.size(), absolute_entry_name) == 0;
-         ++it) {
-      // must be third level entry
-      if (std::count(it->begin(), it->end(), '/') == 3) {
-        if (isNxLog) {
-          loadNXLog(file, *it, logClass, workspace);
-        } else {
-          loadSELog(file, *it, workspace);
+    if (allow_list.empty()) {
+      for (auto it = itPrefixBegin;
+           it != logsSet.end() && it->compare(0, absolute_entry_name.size(), absolute_entry_name) == 0; ++it) {
+        // must be third level entry
+        if (std::count(it->begin(), it->end(), '/') == 3) {
+          if (!block_list.empty()) {
+            bool skip = false;
+            for (const auto &block : block_list) {
+              if ((*it).substr((*it).find_last_of("/") + 1) == block) {
+                skip = true;
+                break;
+              }
+            }
+            if (skip) {
+              continue;
+            }
+          }
+
+          if (isNxLog) {
+            loadNXLog(file, *it, logClass, workspace);
+          } else {
+            loadSELog(file, *it, workspace);
+          }
+        }
+      }
+    } else {
+      for (const auto &allow : allow_list) {
+        itPrefixBegin = logsSet.find(absolute_entry_name + "/" + allow);
+        if (itPrefixBegin == logsSet.end()) {
+          // don't print warning yet since it might be found in another log
+          // class
+          continue;
+        }
+        auto it = itPrefixBegin;
+        // must be third level entry
+        if (std::count(it->begin(), it->end(), '/') == 3) {
+          if (isNxLog) {
+            loadNXLog(file, *it, logClass, workspace);
+          } else {
+            loadSELog(file, *it, workspace);
+          }
         }
       }
     }
   };
 
-  const std::string entry_name =
-      absolute_entry_name.substr(absolute_entry_name.find_last_of("/") + 1);
+  const std::string entry_name = absolute_entry_name.substr(absolute_entry_name.find_last_of("/") + 1);
   file.openGroup(entry_name, entry_class);
   lf_LoadByLogClass("NXlog", true);
   lf_LoadByLogClass("NXpositioner", true);
@@ -726,13 +828,11 @@ void LoadNexusLogs::loadLogs(
  * @param entry_class :: The type of the entry
  * @param workspace :: A pointer to the workspace to store the logs
  */
-void LoadNexusLogs::loadNXLog(
-    ::NeXus::File &file, const std::string &absolute_entry_name,
-    const std::string &entry_class,
-    const std::shared_ptr<API::MatrixWorkspace> &workspace) const {
+void LoadNexusLogs::loadNXLog(::NeXus::File &file, const std::string &absolute_entry_name,
+                              const std::string &entry_class,
+                              const std::shared_ptr<API::MatrixWorkspace> &workspace) const {
 
-  const std::string entry_name =
-      absolute_entry_name.substr(absolute_entry_name.find_last_of("/") + 1);
+  const std::string entry_name = absolute_entry_name.substr(absolute_entry_name.find_last_of("/") + 1);
   g_log.debug() << "processing " << entry_name << ":" << entry_class << "\n";
   file.openGroup(entry_name, entry_class);
   // Validate the NX log class.
@@ -742,8 +842,7 @@ void LoadNexusLogs::loadNXLog(
   bool foundValue = false;
   bool foundTime = false;
 
-  const std::map<std::string, std::set<std::string>> &allEntries =
-      getFileInfo()->getAllEntries();
+  const std::map<std::string, std::set<std::string>> &allEntries = getFileInfo()->getAllEntries();
   // reverse search to take advantage of the fact that these are located in SDS
   for (auto it = allEntries.rbegin(); it != allEntries.rend(); ++it) {
     const std::set<std::string> &entriesSet = it->second;
@@ -759,8 +858,7 @@ void LoadNexusLogs::loadNXLog(
   }
 
   if (!foundTime || !foundValue) {
-    g_log.warning() << "Invalid NXlog entry " << entry_name
-                    << " found. Did not contain 'value' and 'time'.\n";
+    g_log.warning() << "Invalid NXlog entry " << entry_name << " found. Did not contain 'value' and 'time'.\n";
     file.closeGroup();
     return;
   }
@@ -770,23 +868,28 @@ void LoadNexusLogs::loadNXLog(
   try {
     if (overwritelogs || !(workspace->run().hasProperty(entry_name))) {
       auto logValue = createTimeSeries(file, entry_name, freqStart, g_log);
+      auto validityLogValue = createTimeSeriesValidityFilter(file, *logValue, g_log);
+      if (validityLogValue) {
+        appendEndTimeLog(validityLogValue.get(), workspace->run());
+        workspace->mutableRun().addProperty(std::move(validityLogValue), overwritelogs);
+        m_logsWithInvalidValues.emplace_back(entry_name);
+      }
       appendEndTimeLog(logValue.get(), workspace->run());
       workspace->mutableRun().addProperty(std::move(logValue), overwritelogs);
     }
   } catch (::NeXus::Exception &e) {
-    g_log.warning() << "NXlog entry " << entry_name
-                    << " gave an error when loading:'" << e.what() << "'.\n";
+    g_log.warning() << "NXlog entry " << entry_name << " gave an error when loading:'" << e.what() << "'.\n";
+  } catch (std::invalid_argument &e) {
+    g_log.warning() << "NXlog entry " << entry_name << " gave an error when loading:'" << e.what() << "'.\n";
   }
 
   file.closeGroup();
 }
 
-void LoadNexusLogs::loadSELog(
-    ::NeXus::File &file, const std::string &absolute_entry_name,
-    const std::shared_ptr<API::MatrixWorkspace> &workspace) const {
+void LoadNexusLogs::loadSELog(::NeXus::File &file, const std::string &absolute_entry_name,
+                              const std::shared_ptr<API::MatrixWorkspace> &workspace) const {
   // Open the entry
-  const std::string entry_name =
-      absolute_entry_name.substr(absolute_entry_name.find_last_of("/") + 1);
+  const std::string entry_name = absolute_entry_name.substr(absolute_entry_name.find_last_of("/") + 1);
 
   file.openGroup(entry_name, "IXseblock");
   std::string propName = entry_name;
@@ -802,8 +905,7 @@ void LoadNexusLogs::loadSELog(
   bool foundValue = false;
   bool foundValueLog = false;
 
-  const std::map<std::string, std::set<std::string>> &allEntries =
-      getFileInfo()->getAllEntries();
+  const std::map<std::string, std::set<std::string>> &allEntries = getFileInfo()->getAllEntries();
 
   for (auto it = allEntries.rbegin(); it != allEntries.rend(); ++it) {
     const std::set<std::string> &entriesSet = it->second;
@@ -828,12 +930,17 @@ void LoadNexusLogs::loadSELog(
       }
 
       logValue = createTimeSeries(file, propName, freqStart, g_log);
+      auto validityLogValue = createTimeSeriesValidityFilter(file, *logValue, g_log);
+      if (validityLogValue) {
+        appendEndTimeLog(validityLogValue.get(), workspace->run());
+        workspace->mutableRun().addProperty(std::move(validityLogValue));
+        m_logsWithInvalidValues.emplace_back(propName);
+      }
       appendEndTimeLog(logValue.get(), workspace->run());
 
       file.closeGroup();
     } catch (std::exception &e) {
-      g_log.warning() << "IXseblock entry '" << entry_name
-                      << "' gave an error when loading "
+      g_log.warning() << "IXseblock entry '" << entry_name << "' gave an error when loading "
                       << "a time series:'" << e.what() << "'. Skipping entry\n";
       file.closeGroup(); // value_log
       file.closeGroup(); // entry_name
@@ -849,23 +956,20 @@ void LoadNexusLogs::loadSELog(
         boost::scoped_array<float> value(new float[info.dims[0]]);
         file.getData(value.get());
         file.closeData();
-        logValue = std::make_unique<Kernel::PropertyWithValue<double>>(
-            propName, static_cast<double>(value[0]), true);
+        logValue = std::make_unique<Kernel::PropertyWithValue<double>>(propName, static_cast<double>(value[0]), true);
       } else {
         file.closeGroup();
         return;
       }
     } catch (::NeXus::Exception &e) {
-      g_log.warning() << "IXseblock entry " << entry_name
-                      << " gave an error when loading "
+      g_log.warning() << "IXseblock entry " << entry_name << " gave an error when loading "
                       << "a single value:'" << e.what() << "'.\n";
       file.closeData();
       file.closeGroup();
       return;
     }
   } else {
-    g_log.warning() << "IXseblock entry " << entry_name
-                    << " cannot be read, skipping entry.\n";
+    g_log.warning() << "IXseblock entry " << entry_name << " cannot be read, skipping entry.\n";
     file.closeGroup();
     return;
   }
@@ -873,5 +977,4 @@ void LoadNexusLogs::loadSELog(
   file.closeGroup();
 }
 
-} // namespace DataHandling
-} // namespace Mantid
+} // namespace Mantid::DataHandling

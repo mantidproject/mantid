@@ -30,7 +30,7 @@ Usage
 .. testcode:: ExOSIRISDiffractionReductionSimple
 
     import os
-    
+
     def createDummyOSIRISWorkspace(name, func, xmin, xmax, bin_width):
       """Creates a workspace that looks something like an OSIRIS diffraction run"""
       #create workspace according to function
@@ -73,7 +73,7 @@ Output:
 
 .. testoutput:: ExOSIRISDiffractionReductionSimple
 
-    Number of Spectra: 1, Number of bins: 7582
+    Number of Spectra: 1, Number of bins: 7581
 
 .. testcleanup:: ExOSIRISDiffractionReductionSimple
 

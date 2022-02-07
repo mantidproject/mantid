@@ -10,8 +10,7 @@
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
 
-namespace Mantid {
-namespace MDAlgorithms {
+namespace Mantid::MDAlgorithms {
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(LogarithmMD)
@@ -45,15 +44,13 @@ void LogarithmMD::initExtraProperties() {
 /// Check the inputs and throw if the algorithm cannot be run
 void LogarithmMD::checkInputs() {
   if (!m_in_histo)
-    throw std::runtime_error(this->name() +
-                             " can only be run on a MDHistoWorkspace.");
+    throw std::runtime_error(this->name() + " can only be run on a MDHistoWorkspace.");
 }
 
 //----------------------------------------------------------------------------------------------
 /// Run the algorithm on a MDEventWorkspace
 void LogarithmMD::execEvent(Mantid::API::IMDEventWorkspace_sptr /*out*/) {
-  throw std::runtime_error(this->name() +
-                           " can only be run on a MDHistoWorkspace.");
+  throw std::runtime_error(this->name() + " can only be run on a MDHistoWorkspace.");
 }
 
 //----------------------------------------------------------------------------------------------
@@ -67,5 +64,4 @@ void LogarithmMD::execHisto(Mantid::DataObjects::MDHistoWorkspace_sptr out) {
     out->log10(filler);
 }
 
-} // namespace MDAlgorithms
-} // namespace Mantid
+} // namespace Mantid::MDAlgorithms

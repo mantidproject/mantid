@@ -19,9 +19,7 @@ using namespace Mantid::API;
 
 using namespace Mantid::CurveFitting;
 
-namespace Mantid {
-namespace CurveFitting {
-namespace Functions {
+namespace Mantid::CurveFitting::Functions {
 
 using namespace CurveFitting;
 
@@ -39,8 +37,7 @@ void ThermalNeutronBk2BkExpSigma::init() {
 //----------------------------------------------------------------------------------------------
 /** Function 1D
  */
-void ThermalNeutronBk2BkExpSigma::function1D(double *out, const double *xValues,
-                                             const size_t nData) const {
+void ThermalNeutronBk2BkExpSigma::function1D(double *out, const double *xValues, const size_t nData) const {
   double sig0 = getParameter("Sig0");
   double sig1 = getParameter("Sig1");
   double sig2 = getParameter("Sig2");
@@ -56,17 +53,14 @@ void ThermalNeutronBk2BkExpSigma::function1D(double *out, const double *xValues,
 
 /** Derivative: use numerical derivative
  */
-void ThermalNeutronBk2BkExpSigma::functionDeriv(const FunctionDomain &domain,
-                                                Jacobian &jacobian) {
+void ThermalNeutronBk2BkExpSigma::functionDeriv(const FunctionDomain &domain, Jacobian &jacobian) {
   calNumericalDeriv(domain, jacobian);
 }
 
 //----------------------------------------------------------------------------------------------
 /** Core function
  */
-double ThermalNeutronBk2BkExpSigma::corefunction(double dh, double sig0sq,
-                                                 double sig1sq,
-                                                 double sig2sq) const {
+double ThermalNeutronBk2BkExpSigma::corefunction(double dh, double sig0sq, double sig1sq, double sig2sq) const {
   double sigma2 = sig0sq + sig1sq * dh * dh + sig2sq * pow(dh, 4);
   if (sigma2 <= 0.0) {
     throw runtime_error("Sigma^2 cannot be equal to or less than Zero!");
@@ -77,6 +71,4 @@ double ThermalNeutronBk2BkExpSigma::corefunction(double dh, double sig0sq,
   return sigma;
 }
 
-} // namespace Functions
-} // namespace CurveFitting
-} // namespace Mantid
+} // namespace Mantid::CurveFitting::Functions

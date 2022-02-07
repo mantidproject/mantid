@@ -21,4 +21,4 @@ import_mantid_cext('._geometry', 'mantid.geometry', globals())
 ###############################################################################
 # Make aliases accessible in this namespace
 ###############################################################################
-from mantid.geometry._aliases import *
+from mantid.geometry._aliases import *   # noqa: E402,F401

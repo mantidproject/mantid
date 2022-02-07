@@ -12,7 +12,8 @@
         <stlfile filename="Gasket_inner.stl" scale="mm">
           <rotation ydegrees="270"/>
         </stlfile>
-        <samplestlfile filename="SampleRotatedAndTranslatedToOrigin.stl" scale="mm">
+        <samplestlfile filename="Sample.stl" scale="mm">
+          <rotation ydegrees="90"/>
         </samplestlfile>
       </container>
     </containers>

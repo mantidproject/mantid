@@ -20,27 +20,19 @@
  * with a name, different form the class name and specified by the
  transformation ID.
  */
-#define DECLARE_MD_TRANSF(classname)                                           \
-  namespace {                                                                  \
-  Mantid::Kernel::RegistrationHelper register_alg_##classname((                \
-      (Mantid::MDAlgorithms::MDTransfFactory::Instance().subscribe<classname>( \
-          #classname)),                                                        \
-      0));                                                                     \
-  }                                                                            \
-  const std::string Mantid::MDAlgorithms::classname::transfID() const {        \
-    return #classname;                                                         \
-  }
+#define DECLARE_MD_TRANSF(classname)                                                                                   \
+  namespace {                                                                                                          \
+  Mantid::Kernel::RegistrationHelper register_alg_##classname(                                                         \
+      ((Mantid::MDAlgorithms::MDTransfFactory::Instance().subscribe<classname>(#classname)), 0));                      \
+  }                                                                                                                    \
+  const std::string Mantid::MDAlgorithms::classname::transfID() const { return #classname; }
 
-#define DECLARE_MD_TRANSFID(classname, regID)                                  \
-  namespace {                                                                  \
-  Mantid::Kernel::RegistrationHelper register_alg_##classname((                \
-      (Mantid::MDAlgorithms::MDTransfFactory::Instance().subscribe<classname>( \
-          #regID)),                                                            \
-      0));                                                                     \
-  }                                                                            \
-  const std::string Mantid::MDAlgorithms::classname::transfID() const {        \
-    return #regID;                                                             \
-  }
+#define DECLARE_MD_TRANSFID(classname, regID)                                                                          \
+  namespace {                                                                                                          \
+  Mantid::Kernel::RegistrationHelper                                                                                   \
+      register_alg_##classname(((Mantid::MDAlgorithms::MDTransfFactory::Instance().subscribe<classname>(#regID)), 0)); \
+  }                                                                                                                    \
+  const std::string Mantid::MDAlgorithms::classname::transfID() const { return #regID; }
 
 //----------------------------------------------------------------------
 // Includes
@@ -74,11 +66,9 @@ namespace MDAlgorithms {
 
     @date 17/05/2012
 */
-class MANTID_MDALGORITHMS_DLL MDTransfFactoryImpl
-    : public Kernel::DynamicFactory<MDTransfInterface> {
+class MANTID_MDALGORITHMS_DLL MDTransfFactoryImpl : public Kernel::DynamicFactory<MDTransfInterface> {
 public:
-  std::shared_ptr<MDTransfInterface>
-  create(const std::string &className) const override;
+  std::shared_ptr<MDTransfInterface> create(const std::string &className) const override;
   MDTransfFactoryImpl(const MDTransfFactoryImpl &) = delete;
   MDTransfFactoryImpl &operator=(const MDTransfFactoryImpl &) = delete;
 
@@ -88,8 +78,7 @@ private:
   friend struct Kernel::CreateUsingNew<MDTransfFactoryImpl>;
   /// Stores pointers to already created unit instances, with their name as the
   /// key
-  mutable std::map<std::string, std::shared_ptr<MDTransfInterface>>
-      m_createdTransf;
+  mutable std::map<std::string, std::shared_ptr<MDTransfInterface>> m_createdTransf;
 };
 
 /// The specialization of the SingletonHolder class that holds the

@@ -11,8 +11,7 @@
 #include <boost/algorithm/string.hpp>
 #include <cctype>
 
-namespace MantidQt {
-namespace CustomInterfaces {
+namespace MantidQt::CustomInterfaces {
 
 /**
  * Gets the most recently modified valid Nexus file in the same directory as the
@@ -73,8 +72,7 @@ bool ALCLatestFileFinder::isValid(const std::string &path) const {
     if (numPos == std::string::npos) {
       return std::make_pair<std::string, std::string>(std::string(name), "");
     } else {
-      return std::make_pair<std::string, std::string>(name.substr(0, numPos),
-                                                      name.substr(numPos));
+      return std::make_pair<std::string, std::string>(name.substr(0, numPos), name.substr(numPos));
     }
   };
 
@@ -89,8 +87,7 @@ bool ALCLatestFileFinder::isValid(const std::string &path) const {
         auto fileSplit = getInstrumentAndRun(fileName);
         if (boost::iequals(fileSplit.first, firstRunInstrument)) {
           // 3. Must end in a number
-          valid = std::all_of(fileSplit.second.begin(), fileSplit.second.end(),
-                              ::isdigit);
+          valid = std::all_of(fileSplit.second.begin(), fileSplit.second.end(), ::isdigit);
         }
       }
     }
@@ -98,5 +95,4 @@ bool ALCLatestFileFinder::isValid(const std::string &path) const {
   return valid;
 }
 
-} // namespace CustomInterfaces
-} // namespace MantidQt
+} // namespace MantidQt::CustomInterfaces

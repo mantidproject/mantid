@@ -26,9 +26,7 @@ class ILatticeFunctionTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static ILatticeFunctionTest *createSuite() {
-    return new ILatticeFunctionTest();
-  }
+  static ILatticeFunctionTest *createSuite() { return new ILatticeFunctionTest(); }
   static void destroySuite(ILatticeFunctionTest *suite) { delete suite; }
 
   void testFunctionLatticeIsCalled() {
@@ -69,12 +67,10 @@ public:
     EXPECT_CALL(wrongDomain, size()).WillRepeatedly(Return(1));
     FunctionValues values(wrongDomain);
 
-    TS_ASSERT_THROWS(fn.function(wrongDomain, values),
-                     const std::invalid_argument &);
+    TS_ASSERT_THROWS(fn.function(wrongDomain, values), const std::invalid_argument &);
 
     MockJacobian jacobian;
-    TS_ASSERT_THROWS(fn.functionDeriv(wrongDomain, jacobian),
-                     const std::invalid_argument &);
+    TS_ASSERT_THROWS(fn.functionDeriv(wrongDomain, jacobian), const std::invalid_argument &);
   }
 
 private:
@@ -84,8 +80,7 @@ private:
   class MockLatticeFunction : public ILatticeFunction {
   public:
     MOCK_CONST_METHOD0(name, std::string());
-    MOCK_CONST_METHOD2(functionLattice,
-                       void(const LatticeDomain &, FunctionValues &));
+    MOCK_CONST_METHOD2(functionLattice, void(const LatticeDomain &, FunctionValues &));
 
     MOCK_METHOD2(functionDerivLattice, void(const LatticeDomain &, Jacobian &));
 

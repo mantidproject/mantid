@@ -27,9 +27,7 @@ class LoadSpiceXML2DDetTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static LoadSpiceXML2DDetTest *createSuite() {
-    return new LoadSpiceXML2DDetTest();
-  }
+  static LoadSpiceXML2DDetTest *createSuite() { return new LoadSpiceXML2DDetTest(); }
   static void destroySuite(LoadSpiceXML2DDetTest *suite) { delete suite; }
 
   ITableWorkspace_sptr scantablews;
@@ -61,8 +59,7 @@ public:
 
     const std::string filename("HB3A_exp355_scan0001_0522.xml");
     TS_ASSERT_THROWS_NOTHING(loader.setProperty("Filename", filename));
-    TS_ASSERT_THROWS_NOTHING(
-        loader.setProperty("OutputWorkspace", "Exp0335_S0038"));
+    TS_ASSERT_THROWS_NOTHING(loader.setProperty("OutputWorkspace", "Exp0335_S0038"));
     std::vector<size_t> sizelist(2);
     sizelist[0] = 256;
     sizelist[1] = 256;
@@ -73,8 +70,8 @@ public:
     TS_ASSERT(loader.isExecuted());
 
     // Get data
-    MatrixWorkspace_sptr outws = std::dynamic_pointer_cast<MatrixWorkspace>(
-        AnalysisDataService::Instance().retrieve("Exp0335_S0038"));
+    MatrixWorkspace_sptr outws =
+        std::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("Exp0335_S0038"));
     TS_ASSERT(outws);
 
     size_t numspec = outws->getNumberHistograms();
@@ -146,8 +143,7 @@ public:
 
     const std::string filename("HB3A_exp355_scan0001_0522.xml");
     TS_ASSERT_THROWS_NOTHING(loader.setProperty("Filename", filename));
-    TS_ASSERT_THROWS_NOTHING(
-        loader.setProperty("OutputWorkspace", "Exp0335_S0038"));
+    TS_ASSERT_THROWS_NOTHING(loader.setProperty("OutputWorkspace", "Exp0335_S0038"));
     std::vector<size_t> sizelist(2);
     sizelist[0] = 256;
     sizelist[1] = 256;
@@ -161,8 +157,8 @@ public:
     TS_ASSERT(loader.isExecuted());
 
     // Get data
-    MatrixWorkspace_sptr outws = std::dynamic_pointer_cast<MatrixWorkspace>(
-        AnalysisDataService::Instance().retrieve("Exp0335_S0038"));
+    MatrixWorkspace_sptr outws =
+        std::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("Exp0335_S0038"));
     TS_ASSERT(outws);
     TS_ASSERT_EQUALS(outws->getNumberHistograms(), 256 * 256);
 
@@ -299,8 +295,7 @@ public:
     // set up properties
     const std::string filename("HB3A_exp355_scan0001_0522.xml");
     TS_ASSERT_THROWS_NOTHING(loader.setProperty("Filename", filename));
-    TS_ASSERT_THROWS_NOTHING(
-        loader.setProperty("OutputWorkspace", "Exp0335_S0038C"));
+    TS_ASSERT_THROWS_NOTHING(loader.setProperty("OutputWorkspace", "Exp0335_S0038C"));
     std::vector<size_t> sizelist(2);
     sizelist[0] = 256;
     sizelist[1] = 256;
@@ -312,8 +307,8 @@ public:
     TS_ASSERT(loader.isExecuted());
 
     // Get data
-    MatrixWorkspace_sptr outws = std::dynamic_pointer_cast<MatrixWorkspace>(
-        AnalysisDataService::Instance().retrieve("Exp0335_S0038C"));
+    MatrixWorkspace_sptr outws =
+        std::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("Exp0335_S0038C"));
     TS_ASSERT(outws);
     TS_ASSERT_EQUALS(outws->getNumberHistograms(), 256 * 256);
 
@@ -328,8 +323,7 @@ public:
     TS_ASSERT(outws->getInstrument());
 
     // get 2theta from workspace
-    double twotheta_raw =
-        std::stod(outws->run().getProperty("_2theta")->value());
+    double twotheta_raw = std::stod(outws->run().getProperty("_2theta")->value());
 
     Kernel::Property *raw_property = outws->run().getProperty("2theta");
     Kernel::TimeSeriesProperty<double> *twotheta_property =
@@ -389,8 +383,7 @@ public:
 
     const std::string filename("HB3A_exp355_scan0001_0522.xml");
     TS_ASSERT_THROWS_NOTHING(loader.setProperty("Filename", filename));
-    TS_ASSERT_THROWS_NOTHING(
-        loader.setProperty("OutputWorkspace", "Exp0335_S0038D"));
+    TS_ASSERT_THROWS_NOTHING(loader.setProperty("OutputWorkspace", "Exp0335_S0038D"));
     std::vector<size_t> sizelist(2);
     sizelist[0] = 256;
     sizelist[1] = 256;
@@ -404,8 +397,8 @@ public:
     TS_ASSERT(loader.isExecuted());
 
     // Get data
-    MatrixWorkspace_sptr outws = std::dynamic_pointer_cast<MatrixWorkspace>(
-        AnalysisDataService::Instance().retrieve("Exp0335_S0038D"));
+    MatrixWorkspace_sptr outws =
+        std::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("Exp0335_S0038D"));
     TS_ASSERT(outws);
     TS_ASSERT_EQUALS(outws->getNumberHistograms(), 256 * 256);
 
@@ -454,12 +447,9 @@ public:
     size_t ws_index_ur = row_ur + col_ur * 256;
 
     // Check symmetry
-    TS_ASSERT_DELTA(spectrumInfo.l2(ws_index_ll), spectrumInfo.l2(ws_index_lr),
-                    0.0000001);
-    TS_ASSERT_DELTA(spectrumInfo.l2(ws_index_ll), spectrumInfo.l2(ws_index_ul),
-                    0.0000001);
-    TS_ASSERT_DELTA(spectrumInfo.l2(ws_index_ll), spectrumInfo.l2(ws_index_ur),
-                    0.0000001);
+    TS_ASSERT_DELTA(spectrumInfo.l2(ws_index_ll), spectrumInfo.l2(ws_index_lr), 0.0000001);
+    TS_ASSERT_DELTA(spectrumInfo.l2(ws_index_ll), spectrumInfo.l2(ws_index_ul), 0.0000001);
+    TS_ASSERT_DELTA(spectrumInfo.l2(ws_index_ll), spectrumInfo.l2(ws_index_ur), 0.0000001);
 
     // Clean
     AnalysisDataService::Instance().remove("Exp0335_S0038D");
@@ -484,17 +474,14 @@ public:
 
     // calculate shift of the detector center from (115, 128) to (127, 127)
     double det_step_x = -0.0001984375;
-    double shift_x = static_cast<double>(137 - 128) * det_step_x *
-                     -1.; // shift x comes from column
+    double shift_x = static_cast<double>(137 - 128) * det_step_x * -1.; // shift x comes from column
     double det_step_y = 0.0001984375;
-    double shift_y = static_cast<double>(127 - 115) * det_step_y *
-                     -1; // shift y comes from row
+    double shift_y = static_cast<double>(127 - 115) * det_step_y * -1; // shift y comes from row
 
     // set up properties
     const std::string filename("HB3A_exp355_scan0001_0522.xml");
     TS_ASSERT_THROWS_NOTHING(loader.setProperty("Filename", filename));
-    TS_ASSERT_THROWS_NOTHING(
-        loader.setProperty("OutputWorkspace", "Exp0335_S0038C"));
+    TS_ASSERT_THROWS_NOTHING(loader.setProperty("OutputWorkspace", "Exp0335_S0038C"));
     std::vector<size_t> sizelist(2);
     sizelist[0] = 256;
     sizelist[1] = 256;
@@ -508,8 +495,8 @@ public:
     TS_ASSERT(loader.isExecuted());
 
     // Get data
-    MatrixWorkspace_sptr outws = std::dynamic_pointer_cast<MatrixWorkspace>(
-        AnalysisDataService::Instance().retrieve("Exp0335_S0038C"));
+    MatrixWorkspace_sptr outws =
+        std::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("Exp0335_S0038C"));
     TS_ASSERT(outws);
     TS_ASSERT_EQUALS(outws->getNumberHistograms(), 256 * 256);
 
@@ -524,8 +511,7 @@ public:
     TS_ASSERT(outws->getInstrument());
 
     // get 2theta from workspace
-    double twotheta_raw =
-        std::stod(outws->run().getProperty("_2theta")->value());
+    double twotheta_raw = std::stod(outws->run().getProperty("_2theta")->value());
 
     Kernel::Property *raw_property = outws->run().getProperty("2theta");
     Kernel::TimeSeriesProperty<double> *twotheta_property =
@@ -558,27 +544,23 @@ public:
     size_t ws_d_row = 10;
     size_t ws_d_col = 15;
 
-    size_t ll_ws_index =
-        (center_row - ws_d_row) + (center_col - ws_d_col) * 256;
+    size_t ll_ws_index = (center_row - ws_d_row) + (center_col - ws_d_col) * 256;
 
     double ll_sample_r = spectrumInfo.l2(ll_ws_index);
 
-    size_t lr_ws_index =
-        (center_row + ws_d_row) + (center_col - ws_d_col) * 256;
+    size_t lr_ws_index = (center_row + ws_d_row) + (center_col - ws_d_col) * 256;
 
     double lr_sample_r = spectrumInfo.l2(lr_ws_index);
 
     TS_ASSERT_DELTA(ll_sample_r, lr_sample_r, 0.0000001);
 
-    size_t ur_ws_index =
-        (center_row + ws_d_row) + (center_col + ws_d_col) * 256;
+    size_t ur_ws_index = (center_row + ws_d_row) + (center_col + ws_d_col) * 256;
 
     double ur_sample_r = spectrumInfo.l2(ur_ws_index);
 
     TS_ASSERT_DELTA(ll_sample_r, ur_sample_r, 0.0000001);
 
-    size_t ul_ws_index =
-        (center_row - ws_d_row) + (center_col + ws_d_col) * 256;
+    size_t ul_ws_index = (center_row - ws_d_row) + (center_col + ws_d_col) * 256;
     double ul_sample_r = spectrumInfo.l2(ul_ws_index);
 
     TS_ASSERT_DELTA(ul_sample_r, ur_sample_r, 0.0000001);
@@ -608,8 +590,7 @@ public:
     // set up properties
     const std::string filename("HB3A_exp355_scan0001_0522.xml");
     TS_ASSERT_THROWS_NOTHING(loader.setProperty("Filename", filename));
-    TS_ASSERT_THROWS_NOTHING(
-        loader.setProperty("OutputWorkspace", "Exp0335_S0038F"));
+    TS_ASSERT_THROWS_NOTHING(loader.setProperty("OutputWorkspace", "Exp0335_S0038F"));
     std::vector<size_t> geometryvec;
     geometryvec.emplace_back(0);
     geometryvec.emplace_back(0);
@@ -621,8 +602,8 @@ public:
     TS_ASSERT(loader.isExecuted());
 
     // Get data
-    MatrixWorkspace_sptr outws = std::dynamic_pointer_cast<MatrixWorkspace>(
-        AnalysisDataService::Instance().retrieve("Exp0335_S0038F"));
+    MatrixWorkspace_sptr outws =
+        std::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("Exp0335_S0038F"));
     TS_ASSERT(outws);
     TS_ASSERT_EQUALS(outws->getNumberHistograms(), 256 * 256);
 
@@ -637,8 +618,7 @@ public:
     TS_ASSERT(outws->getInstrument());
 
     // get 2theta from workspace
-    double twotheta_raw =
-        std::stod(outws->run().getProperty("_2theta")->value());
+    double twotheta_raw = std::stod(outws->run().getProperty("_2theta")->value());
 
     Kernel::Property *raw_property = outws->run().getProperty("2theta");
     Kernel::TimeSeriesProperty<double> *twotheta_property =
@@ -693,8 +673,7 @@ public:
     // set up properties
     const std::string filename("LaB6_10kev_35deg.bin");
     TS_ASSERT_THROWS_NOTHING(loader.setProperty("Filename", filename));
-    TS_ASSERT_THROWS_NOTHING(
-        loader.setProperty("OutputWorkspace", "Exp0335_S0038F"));
+    TS_ASSERT_THROWS_NOTHING(loader.setProperty("OutputWorkspace", "Exp0335_S0038F"));
     std::vector<size_t> geometryvec;
     geometryvec.emplace_back(0);
     geometryvec.emplace_back(0);
@@ -704,8 +683,8 @@ public:
     TS_ASSERT(loader.isExecuted());
 
     // Get data
-    MatrixWorkspace_sptr outws = std::dynamic_pointer_cast<MatrixWorkspace>(
-        AnalysisDataService::Instance().retrieve("Exp0335_S0038F"));
+    MatrixWorkspace_sptr outws =
+        std::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("Exp0335_S0038F"));
     TS_ASSERT(outws);
     TS_ASSERT_EQUALS(outws->getNumberHistograms(), 1024 * 1024);
 
@@ -727,8 +706,7 @@ public:
    */
   ITableWorkspace_sptr createSpiceScanTable() {
     ITableWorkspace_sptr datatablews =
-        std::dynamic_pointer_cast<ITableWorkspace>(
-            std::make_shared<DataObjects::TableWorkspace>());
+        std::dynamic_pointer_cast<ITableWorkspace>(std::make_shared<DataObjects::TableWorkspace>());
     datatablews->addColumn("int", "Pt.");
     datatablews->addColumn("double", "2theta");
     datatablews->addColumn("double", "m1");

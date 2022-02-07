@@ -11,6 +11,7 @@
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/Run.h"
 #include "MantidAPI/Workspace.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataObjects/Workspace2D.h"
@@ -29,17 +30,14 @@ using namespace Mantid::DataObjects;
 
 class LoadParameterFileTest : public CxxTest::TestSuite {
 public:
-  void
-  testExecIDF_for_unit_testing2() // IDF stands for Instrument Definition File
+  void testExecIDF_for_unit_testing2() // IDF stands for Instrument Definition File
   {
 
     MatrixWorkspace_sptr output;
 
     // Create workspace wsName
     load_IDF2();
-    TS_ASSERT_THROWS_NOTHING(
-        output = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-            wsName));
+    TS_ASSERT_THROWS_NOTHING(output = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(wsName));
     const auto &paramMap = output->constInstrumentParameters();
     std::string descr = paramMap.getDescription("nickel-holder", "fjols");
     TS_ASSERT_EQUALS(descr, "test fjols description.");
@@ -48,16 +46,13 @@ public:
     auto pLoaderPF = AlgorithmManager::Instance().create("LoadParameterFile");
 
     TS_ASSERT_THROWS_NOTHING(pLoaderPF->initialize());
-    pLoaderPF->setPropertyValue(
-        "Filename", "unit_testing/IDF_for_UNIT_TESTING2_paramFile.xml");
+    pLoaderPF->setPropertyValue("Filename", "unit_testing/IDF_for_UNIT_TESTING2_paramFile.xml");
     pLoaderPF->setPropertyValue("Workspace", wsName);
     TS_ASSERT_THROWS_NOTHING(pLoaderPF->execute());
     TS_ASSERT(pLoaderPF->isExecuted());
 
     // Get back the saved workspace
-    TS_ASSERT_THROWS_NOTHING(
-        output = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-            wsName));
+    TS_ASSERT_THROWS_NOTHING(output = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(wsName));
 
     const auto &detectorInfo = output->detectorInfo();
     const auto &det = detectorInfo.detector(detectorInfo.indexOf(1008));
@@ -84,8 +79,7 @@ public:
     param = paramMap.get(&det2, "testString");
     TS_ASSERT_EQUALS(param->getShortDescription(), "its test hello word.");
     TS_ASSERT_EQUALS(param->getDescription(), "its test hello word.");
-    TS_ASSERT_EQUALS(paramMap.getDescription("pixel", "testString"),
-                     "its test hello word.");
+    TS_ASSERT_EQUALS(paramMap.getDescription("pixel", "testString"), "its test hello word.");
 
     std::vector<double> dummy = paramMap.getDouble("nickel-holder", "klovn");
     TS_ASSERT_DELTA(dummy[0], 1.0, 0.0001);
@@ -111,28 +105,27 @@ public:
     load_IDF2();
 
     // Define parameter XML string
-    std::string parameterXML =
-        "<?xml version=\"1.0\" encoding=\"UTF-8\" ?>"
-        "<parameter-file instrument=\"IDF_for_UNIT_TESTING2\" "
-        "valid-from=\"blah...\">"
-        "	<component-link name=\"nickel-holder\">"
-        "  <parameter name=\"fjols-test-paramfile\"> <value val=\"2010.0\" /> "
-        "</parameter>"
-        " </component-link>"
-        " <component-link name=\"IDF_for_UNIT_TESTING2.xml/combined "
-        "translation6\" >"
-        "  <parameter name=\"fjols-test-paramfile\"> <value val=\"52.0\" />"
-        "  <description is = \"test description2. Full test description2.\"/>"
-        "</parameter>"
-        "	</component-link>"
-        " <component-link id=\"1301\" >"
-        "  <parameter name=\"testDouble\"> <value val=\"27.0\" /> </parameter>"
-        "  <parameter name=\"testString\" type=\"string\"> <value "
-        "val=\"goodbye world\" />"
-        "  <description is = \"its test goodbye world.\"/>"
-        "</parameter>"
-        "	</component-link>"
-        "</parameter-file>";
+    std::string parameterXML = "<?xml version=\"1.0\" encoding=\"UTF-8\" ?>"
+                               "<parameter-file instrument=\"IDF_for_UNIT_TESTING2\" "
+                               "valid-from=\"blah...\">"
+                               "	<component-link name=\"nickel-holder\">"
+                               "  <parameter name=\"fjols-test-paramfile\"> <value val=\"2010.0\" /> "
+                               "</parameter>"
+                               " </component-link>"
+                               " <component-link name=\"IDF_for_UNIT_TESTING2.xml/combined "
+                               "translation6\" >"
+                               "  <parameter name=\"fjols-test-paramfile\"> <value val=\"52.0\" />"
+                               "  <description is = \"test description2. Full test description2.\"/>"
+                               "</parameter>"
+                               "	</component-link>"
+                               " <component-link id=\"1301\" >"
+                               "  <parameter name=\"testDouble\"> <value val=\"27.0\" /> </parameter>"
+                               "  <parameter name=\"testString\" type=\"string\"> <value "
+                               "val=\"goodbye world\" />"
+                               "  <description is = \"its test goodbye world.\"/>"
+                               "</parameter>"
+                               "	</component-link>"
+                               "</parameter-file>";
 
     // load in additional parameters
     auto pLoaderPF = AlgorithmManager::Instance().create("LoadParameterFile");
@@ -145,9 +138,7 @@ public:
 
     // Get back the saved workspace
     MatrixWorkspace_sptr output;
-    TS_ASSERT_THROWS_NOTHING(
-        output = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-            wsName));
+    TS_ASSERT_THROWS_NOTHING(output = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(wsName));
 
     const auto &paramMap = output->constInstrumentParameters();
     const auto &detectorInfo = output->detectorInfo();
@@ -173,8 +164,7 @@ public:
     param = paramMap.get(&det2, "testString");
     TS_ASSERT_EQUALS(param->getShortDescription(), "its test goodbye world.");
     TS_ASSERT_EQUALS(param->getDescription(), "its test goodbye world.");
-    TS_ASSERT_EQUALS(paramMap.getDescription("pixel", "testString"),
-                     "its test goodbye world.");
+    TS_ASSERT_EQUALS(paramMap.getDescription("pixel", "testString"), "its test goodbye world.");
 
     std::vector<double> dummy = paramMap.getDouble("nickel-holder", "klovn");
     TS_ASSERT_DELTA(dummy[0], 1.0, 0.0001);
@@ -206,29 +196,65 @@ public:
   }
 
   void load_IDF2() {
-    auto pLoadInstrument =
-        AlgorithmManager::Instance().create("LoadInstrument");
+    auto pLoadInstrument = AlgorithmManager::Instance().create("LoadInstrument");
 
     TS_ASSERT_THROWS_NOTHING(pLoadInstrument->initialize());
 
     // create a workspace with some sample data
     wsName = "LoadParameterFileTestIDF2";
-    Workspace_sptr ws =
-        WorkspaceFactory::Instance().create("Workspace2D", 1, 1, 1);
+    Workspace_sptr ws = WorkspaceFactory::Instance().create("Workspace2D", 1, 1, 1);
     Workspace2D_sptr ws2D = std::dynamic_pointer_cast<Workspace2D>(ws);
 
     // put this workspace in the data service
     TS_ASSERT_THROWS_NOTHING(AnalysisDataService::Instance().add(wsName, ws2D));
 
     // Path to test input file assumes Test directory checked out from git
-    pLoadInstrument->setPropertyValue("Filename",
-                                      "unit_testing/IDF_for_UNIT_TESTING2.xml");
+    pLoadInstrument->setPropertyValue("Filename", "unit_testing/IDF_for_UNIT_TESTING2.xml");
     // inputFile = loaderIDF2.getPropertyValue("Filename");
     pLoadInstrument->setPropertyValue("Workspace", wsName);
-    pLoadInstrument->setProperty("RewriteSpectraMap",
-                                 Mantid::Kernel::OptionalBool(true));
+    pLoadInstrument->setProperty("RewriteSpectraMap", Mantid::Kernel::OptionalBool(true));
     TS_ASSERT_THROWS_NOTHING(pLoadInstrument->execute());
     TS_ASSERT(pLoadInstrument->isExecuted());
+  }
+
+  void test_load_IPF_time_validity() {
+    auto ws = AnalysisDataService::Instance().retrieve(wsName);
+    Workspace2D_sptr ws2D = std::dynamic_pointer_cast<Workspace2D>(ws);
+
+    // set a date for the experiment
+    std::string start_time = "1900-01-01 00:00:00";
+    ws2D->mutableRun().addProperty("run_start", start_time);
+
+    // load in additional parameters
+    auto pLoaderPF = AlgorithmManager::Instance().create("LoadParameterFile");
+
+    TS_ASSERT_THROWS_NOTHING(pLoaderPF->initialize());
+    pLoaderPF->setPropertyValue("Filename", "unit_testing/IDF_for_UNIT_TESTING2_paramFile_with_dates.xml");
+    pLoaderPF->setPropertyValue("Workspace", wsName);
+    TS_ASSERT_THROWS_NOTHING(pLoaderPF->execute());
+    TS_ASSERT(pLoaderPF->isExecuted());
+    MatrixWorkspace_sptr output;
+
+    // Get back the saved workspace
+    TS_ASSERT_THROWS_NOTHING(output = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(wsName));
+    const auto &paramMap = output->constInstrumentParameters();
+    const auto &detectorInfo = output->detectorInfo();
+    const auto &det = detectorInfo.detector(detectorInfo.indexOf(1008));
+    Parameter_sptr param;
+    param = paramMap.get(&det, "date-most-recent");
+    TS_ASSERT_EQUALS(param->value<double>(), 1);
+    param = paramMap.get(&det, "date-within-bound");
+    TS_ASSERT_EQUALS(param->value<double>(), 1);
+    param = paramMap.get(&det, "date-no-bounds-vs-end");
+    TS_ASSERT_EQUALS(param->value<double>(), 1);
+    param = paramMap.get(&det, "date-same-start-no-end");
+    TS_ASSERT_EQUALS(param->value<double>(), 1);
+    param = paramMap.get(&det, "date-no-bounds-vs-start");
+    TS_ASSERT_EQUALS(param->value<double>(), 1);
+    param = paramMap.get(&det, "date-same-start");
+    TS_ASSERT_EQUALS(param->value<double>(), 1);
+    param = paramMap.get(&det, "date-no-bounds-vs-invalid");
+    TS_ASSERT_EQUALS(param->value<double>(), 1);
   }
 
 private:

@@ -4,6 +4,8 @@
 //   NScD Oak Ridge National Laboratory, European Spallation Source,
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
+#include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/MatrixWorkspace_fwd.h"
 #pragma once
 
 #include "MantidAPI/AnalysisDataService.h"
@@ -23,39 +25,35 @@ public:
   static QxyTest *createSuite() { return new QxyTest(); }
   static void destroySuite(QxyTest *suite) { delete suite; }
 
-  QxyTest() : m_inputWS("QxyTest_input_in_wav") {}
+  void tearDown() override {
+    auto &adsInstance = Mantid::API::AnalysisDataService::Instance();
 
-  void testName() { TS_ASSERT_EQUALS(qxy.name(), "Qxy") }
+    if (adsInstance.doesExist(m_inputWS)) {
+      adsInstance.remove(m_inputWS);
+    }
 
-  void testVersion() { TS_ASSERT_EQUALS(qxy.version(), 1) }
+    if (adsInstance.doesExist(m_outWs)) {
+      adsInstance.remove(m_outWs);
+    }
+  }
 
-  void testCategory() { TS_ASSERT_EQUALS(qxy.category(), "SANS") }
+  void testAlgBasics() {
+    Mantid::Algorithms::Qxy qxy;
+    TS_ASSERT_EQUALS(qxy.name(), "Qxy");
+    TS_ASSERT_EQUALS(qxy.version(), 1);
+    TS_ASSERT_EQUALS(qxy.category(), "SANS");
 
-  void testInit() {
     TS_ASSERT_THROWS_NOTHING(qxy.initialize())
     TS_ASSERT(qxy.isInitialized())
   }
 
-  void testNoGravity() {
-    Mantid::DataHandling::LoadRaw3 loader;
-    loader.initialize();
-    loader.setPropertyValue("Filename", "LOQ48098.raw");
-    loader.setPropertyValue("OutputWorkspace", m_inputWS);
-    loader.setPropertyValue("SpectrumMin", "30");
-    loader.setPropertyValue("SpectrumMax", "130");
-    loader.execute();
+  void test_det_ids_not_copied() {
+    Mantid::Algorithms::Qxy qxy;
+    qxy.initialize();
 
-    Mantid::Algorithms::ConvertUnits convert;
-    convert.initialize();
-    convert.setPropertyValue("InputWorkspace", m_inputWS);
-    convert.setPropertyValue("OutputWorkspace", m_inputWS);
-    convert.setPropertyValue("Target", "Wavelength");
-    convert.execute();
+    std::string testWs = prepareTestWs();
 
-    if (!qxy.isInitialized())
-      qxy.initialize();
-
-    TS_ASSERT_THROWS_NOTHING(qxy.setPropertyValue("InputWorkspace", m_inputWS))
+    TS_ASSERT_THROWS_NOTHING(qxy.setPropertyValue("InputWorkspace", testWs))
     const std::string outputWS("result");
     TS_ASSERT_THROWS_NOTHING(qxy.setPropertyValue("OutputWorkspace", outputWS))
     TS_ASSERT_THROWS_NOTHING(qxy.setPropertyValue("MaxQxy", "0.1"))
@@ -65,9 +63,36 @@ public:
     TS_ASSERT(qxy.isExecuted())
 
     Mantid::API::MatrixWorkspace_sptr result;
-    TS_ASSERT_THROWS_NOTHING(
-        result = std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
-            Mantid::API::AnalysisDataService::Instance().retrieve(outputWS)))
+    TS_ASSERT_THROWS_NOTHING(result = std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
+                                 Mantid::API::AnalysisDataService::Instance().retrieve(outputWS)))
+
+    TS_ASSERT_EQUALS(result->getNumberHistograms(), 100)
+    for (size_t i = 0; i < result->getNumberHistograms(); i++) {
+      const auto &detectorIds = result->getSpectrum(i).getDetectorIDs();
+      TS_ASSERT(detectorIds.empty());
+    }
+
+    Mantid::API::AnalysisDataService::Instance().remove(outputWS);
+  }
+
+  void testNoGravity() {
+    Mantid::Algorithms::Qxy qxy;
+    qxy.initialize();
+
+    std::string testWs = prepareTestWs();
+
+    TS_ASSERT_THROWS_NOTHING(qxy.setPropertyValue("InputWorkspace", testWs))
+    const std::string outputWS("result");
+    TS_ASSERT_THROWS_NOTHING(qxy.setPropertyValue("OutputWorkspace", outputWS))
+    TS_ASSERT_THROWS_NOTHING(qxy.setPropertyValue("MaxQxy", "0.1"))
+    TS_ASSERT_THROWS_NOTHING(qxy.setPropertyValue("DeltaQ", "0.002"))
+    TS_ASSERT_THROWS_NOTHING(qxy.setProperty("OutputParts", true))
+    TS_ASSERT_THROWS_NOTHING(qxy.execute())
+    TS_ASSERT(qxy.isExecuted())
+
+    Mantid::API::MatrixWorkspace_sptr result;
+    TS_ASSERT_THROWS_NOTHING(result = std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
+                                 Mantid::API::AnalysisDataService::Instance().retrieve(outputWS)))
 
     TS_ASSERT_EQUALS(result->getNumberHistograms(), 100)
     TS_ASSERT_EQUALS(result->blocksize(), 100)
@@ -92,21 +117,15 @@ public:
     TS_ASSERT_DELTA(result->e(18)[80], 344640, 1)
 
     Mantid::API::MatrixWorkspace_sptr sumOfCounts;
-    TS_ASSERT_THROWS_NOTHING(
-        sumOfCounts = std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
-            Mantid::API::AnalysisDataService::Instance().retrieve(
-                outputWS + "_sumOfCounts")))
+    TS_ASSERT_THROWS_NOTHING(sumOfCounts = std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
+                                 Mantid::API::AnalysisDataService::Instance().retrieve(outputWS + "_sumOfCounts")))
 
     Mantid::API::MatrixWorkspace_sptr sumOfNormFactors;
-    TS_ASSERT_THROWS_NOTHING(
-        sumOfNormFactors =
-            std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
-                Mantid::API::AnalysisDataService::Instance().retrieve(
-                    outputWS + "_sumOfNormFactors")))
+    TS_ASSERT_THROWS_NOTHING(sumOfNormFactors = std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
+                                 Mantid::API::AnalysisDataService::Instance().retrieve(outputWS + "_sumOfNormFactors")))
 
     TS_ASSERT_DELTA(sumOfCounts->y(28)[71], 2.0000, 0.01)
-    TS_ASSERT_DELTA(sumOfNormFactors->y(28)[71], 8.6988767154375003e-006,
-                    0.00000001)
+    TS_ASSERT_DELTA(sumOfNormFactors->y(28)[71], 8.6988767154375003e-006, 0.00000001)
 
     TS_ASSERT_DELTA(sumOfCounts->e(28)[71], 1.4142135623730951, 0.01)
     TS_ASSERT_DELTA(sumOfNormFactors->e(28)[71], 0.0, 0.00000001)
@@ -123,9 +142,9 @@ public:
     Mantid::Algorithms::Qxy qxy;
     qxy.initialize();
 
-    // inputWS was set up by the previous test, not ideal but it does save a lot
-    // of CPU time!
-    TS_ASSERT_THROWS_NOTHING(qxy.setPropertyValue("InputWorkspace", m_inputWS))
+    std::string testWs = prepareTestWs();
+
+    TS_ASSERT_THROWS_NOTHING(qxy.setPropertyValue("InputWorkspace", testWs))
     const std::string outputWS("result");
     TS_ASSERT_THROWS_NOTHING(qxy.setPropertyValue("OutputWorkspace", outputWS))
     TS_ASSERT_THROWS_NOTHING(qxy.setPropertyValue("MaxQxy", "0.1"))
@@ -136,9 +155,8 @@ public:
     TS_ASSERT(qxy.isExecuted())
 
     Mantid::API::MatrixWorkspace_sptr result;
-    TS_ASSERT_THROWS_NOTHING(
-        result = std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
-            Mantid::API::AnalysisDataService::Instance().retrieve(outputWS)))
+    TS_ASSERT_THROWS_NOTHING(result = std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
+                                 Mantid::API::AnalysisDataService::Instance().retrieve(outputWS)))
     TS_ASSERT_EQUALS(result->getNumberHistograms(), 100)
     TS_ASSERT_EQUALS(result->blocksize(), 100)
     TS_ASSERT_EQUALS((*(result->getAxis(1)))(0), -0.1)
@@ -159,8 +177,26 @@ public:
   }
 
 private:
-  Mantid::Algorithms::Qxy qxy;
-  const std::string m_inputWS;
+  std::string prepareTestWs() {
+    Mantid::DataHandling::LoadRaw3 loader;
+    loader.initialize();
+    loader.setPropertyValue("Filename", "LOQ48098.raw");
+    loader.setPropertyValue("OutputWorkspace", m_inputWS);
+    loader.setPropertyValue("SpectrumMin", "30");
+    loader.setPropertyValue("SpectrumMax", "130");
+    loader.execute();
+
+    Mantid::Algorithms::ConvertUnits convert;
+    convert.initialize();
+    convert.setPropertyValue("InputWorkspace", m_inputWS);
+    convert.setPropertyValue("OutputWorkspace", m_inputWS);
+    convert.setPropertyValue("Target", "Wavelength");
+    convert.execute();
+    return convert.getPropertyValue("OutputWorkspace");
+  }
+
+  const std::string m_inputWS = "Qxy_test_in";
+  const std::string m_outWs = "Qxy_result";
 };
 
 class QxyTestPerformance : public CxxTest::TestSuite {
@@ -168,8 +204,7 @@ public:
   std::string m_inputWS;
   std::string m_outputWS;
 
-  QxyTestPerformance()
-      : m_inputWS("QxyTest_input_in_wav"), m_outputWS("result") {}
+  QxyTestPerformance() : m_inputWS("QxyTest_input_in_wav"), m_outputWS("result") {}
 
   void setUp() override {
     Mantid::DataHandling::LoadRaw3 loader;
@@ -186,9 +221,7 @@ public:
     convert.execute();
   }
 
-  void tearDown() override {
-    Mantid::API::AnalysisDataService::Instance().remove(m_outputWS);
-  }
+  void tearDown() override { Mantid::API::AnalysisDataService::Instance().remove(m_outputWS); }
 
   void test_slow_performance() {
     Mantid::Algorithms::Qxy qxy;

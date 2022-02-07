@@ -21,12 +21,10 @@ namespace Batch {
 
 class EXPORT_OPT_MANTIDQT_COMMON FindSubtreeRoots {
 public:
-  boost::optional<std::vector<RowLocation>>
-  operator()(std::vector<RowLocation> region);
+  boost::optional<std::vector<RowLocation>> operator()(std::vector<RowLocation> region);
 
 private:
-  void removeIfDepthNotEqualTo(std::vector<RowLocation> &region,
-                               int expectedDepth) const;
+  void removeIfDepthNotEqualTo(std::vector<RowLocation> &region, int expectedDepth) const;
 };
 
 } // namespace Batch

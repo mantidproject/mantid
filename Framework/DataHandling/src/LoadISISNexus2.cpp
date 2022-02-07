@@ -10,6 +10,7 @@
 #include "MantidDataHandling/LoadISISNexus2.h"
 #include "MantidDataHandling/DataBlockGenerator.h"
 #include "MantidDataHandling/LoadEventNexus.h"
+#include "MantidDataHandling/LoadISISNexusHelper.h"
 #include "MantidDataHandling/LoadRawHelper.h"
 
 #include "MantidAPI/Axis.h"
@@ -22,7 +23,6 @@
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/ListValidator.h"
-//#include "MantidKernel/LogParser.h"
 #include "MantidKernel/LogFilter.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/UnitFactory.h"
@@ -31,11 +31,6 @@
 #include <nexus/NeXusFile.hpp>
 #include <nexus/NeXusException.hpp>
 // clang-format on
-
-#include <Poco/Path.h>
-#include <Poco/DateTimeFormatter.h>
-#include <Poco/DateTimeParser.h>
-#include <Poco/DateTimeFormat.h>
 
 #include <algorithm>
 #include <cmath>
@@ -46,16 +41,13 @@
 #include <vector>
 
 namespace {
-Mantid::DataHandling::DataBlockComposite
-getMonitorsFromComposite(Mantid::DataHandling::DataBlockComposite &composite,
-                         Mantid::DataHandling::DataBlockComposite &monitors) {
+Mantid::DataHandling::DataBlockComposite getMonitorsFromComposite(Mantid::DataHandling::DataBlockComposite &composite,
+                                                                  Mantid::DataHandling::DataBlockComposite &monitors) {
   auto dataBlocks = composite.getDataBlocks();
   auto monitorBlocks = monitors.getDataBlocks();
-  auto matchesMonitorBlock =
-      [&monitorBlocks](Mantid::DataHandling::DataBlock &dataBlock) {
-        return std::find(std::begin(monitorBlocks), std::end(monitorBlocks),
-                         dataBlock) != std::end(monitorBlocks);
-      };
+  auto matchesMonitorBlock = [&monitorBlocks](Mantid::DataHandling::DataBlock &dataBlock) {
+    return std::find(std::begin(monitorBlocks), std::end(monitorBlocks), dataBlock) != std::end(monitorBlocks);
+  };
 
   Mantid::DataHandling::DataBlockComposite newComposite;
   for (auto &dataBlock : dataBlocks) {
@@ -68,8 +60,7 @@ getMonitorsFromComposite(Mantid::DataHandling::DataBlockComposite &composite,
 }
 } // namespace
 
-namespace Mantid {
-namespace DataHandling {
+namespace Mantid::DataHandling {
 
 DECLARE_NEXUS_FILELOADER_ALGORITHM(LoadISISNexus2)
 
@@ -81,12 +72,10 @@ using std::size_t;
 
 /// Empty default constructor
 LoadISISNexus2::LoadISISNexus2()
-    : m_filename(), m_instrument_name(), m_samplename(), m_detBlockInfo(),
-      m_monBlockInfo(), m_loadBlockInfo(), m_have_detector(false),
-      m_load_selected_spectra(false), m_wsInd2specNum_map(), m_spec2det_map(),
-      m_entrynumber(0), m_tof_data(), m_proton_charge(0.), m_spec(),
-      m_spec_end(nullptr), m_monitors(), m_logCreator(), m_progress(),
-      m_nexusFile() {}
+    : m_filename(), m_instrument_name(), m_samplename(), m_detBlockInfo(), m_monBlockInfo(), m_loadBlockInfo(),
+      m_have_detector(false), m_hasVMSBlock(false), m_load_selected_spectra(false), m_wsInd2specNum_map(),
+      m_spec2det_map(), m_entrynumber(0), m_tof_data(), m_spec(), m_spec_end(nullptr), m_monitors(), m_logCreator(),
+      m_progress(), m_nexusFile() {}
 
 /**
  * Return the confidence criteria for this algorithm can load the file
@@ -106,18 +95,16 @@ int LoadISISNexus2::confidence(Kernel::NexusDescriptor &descriptor) const {
 /// Initialization method.
 void LoadISISNexus2::init() {
   const std::vector<std::string> exts{".nxs", ".n*"};
-  declareProperty(
-      std::make_unique<FileProperty>("Filename", "", FileProperty::Load, exts),
-      "The name of the Nexus file to load");
-  declareProperty(std::make_unique<WorkspaceProperty<Workspace>>(
-      "OutputWorkspace", "", Direction::Output));
+  declareProperty(std::make_unique<FileProperty>("Filename", "", FileProperty::Load, exts),
+                  "The name of the Nexus file to load");
+  declareProperty(std::make_unique<WorkspaceProperty<Workspace>>("OutputWorkspace", "", Direction::Output));
 
+  auto mustBePositiveSpectrum = std::make_shared<BoundedValidator<specnum_t>>();
+  mustBePositiveSpectrum->setLower(0);
+  declareProperty("SpectrumMin", static_cast<specnum_t>(0), mustBePositiveSpectrum);
+  declareProperty("SpectrumMax", static_cast<specnum_t>(EMPTY_INT()), mustBePositiveSpectrum);
+  declareProperty(std::make_unique<ArrayProperty<specnum_t>>("SpectrumList"));
   auto mustBePositive = std::make_shared<BoundedValidator<int64_t>>();
-  mustBePositive->setLower(0);
-  declareProperty("SpectrumMin", static_cast<int64_t>(0), mustBePositive);
-  declareProperty("SpectrumMax", static_cast<int64_t>(EMPTY_INT()),
-                  mustBePositive);
-  declareProperty(std::make_unique<ArrayProperty<int64_t>>("SpectrumList"));
   declareProperty("EntryNumber", static_cast<int64_t>(0), mustBePositive,
                   "0 indicates that every entry is loaded, into a separate "
                   "workspace within a group. "
@@ -128,24 +115,22 @@ void LoadISISNexus2::init() {
   std::map<std::string, std::string> monitorOptionsAliases;
   monitorOptionsAliases["1"] = "Separate";
   monitorOptionsAliases["0"] = "Exclude";
-  declareProperty(
-      "LoadMonitors", "Include",
-      std::make_shared<Kernel::StringListValidator>(monitorOptions,
-                                                    monitorOptionsAliases),
-      "Option to control the loading of monitors.\n"
-      "Allowed options are Include,Exclude, Separate.\n"
-      "Include:The default is Include option would load monitors with the "
-      "workspace if monitors spectra are within the range of loaded "
-      "detectors.\n"
-      "If the time binning for the monitors is different from the\n"
-      "binning of the detectors this option is equivalent to the Separate "
-      "option\n"
-      "Exclude:Exclude option excludes monitors from the output workspace.\n"
-      "Separate:Separate option loads monitors into a separate workspace "
-      "called: OutputWorkspace_monitors.\n"
-      "Defined aliases:\n"
-      "1:  Equivalent to Separate.\n"
-      "0:  Equivalent to Exclude.\n");
+  declareProperty("LoadMonitors", "Include",
+                  std::make_shared<Kernel::StringListValidator>(monitorOptions, monitorOptionsAliases),
+                  "Option to control the loading of monitors.\n"
+                  "Allowed options are Include,Exclude, Separate.\n"
+                  "Include:The default is Include option would load monitors with the "
+                  "workspace if monitors spectra are within the range of loaded "
+                  "detectors.\n"
+                  "If the time binning for the monitors is different from the\n"
+                  "binning of the detectors this option is equivalent to the Separate "
+                  "option\n"
+                  "Exclude:Exclude option excludes monitors from the output workspace.\n"
+                  "Separate:Separate option loads monitors into a separate workspace "
+                  "called: OutputWorkspace_monitors.\n"
+                  "Defined aliases:\n"
+                  "1:  Equivalent to Separate.\n"
+                  "0:  Equivalent to Exclude.\n");
 }
 
 /** Executes the algorithm. Reading in the file and creating and populating
@@ -160,8 +145,7 @@ void LoadISISNexus2::exec() {
   //**********************************************************************
   // process load monitor options request
   bool bincludeMonitors, bseparateMonitors, bexcludeMonitors;
-  LoadRawHelper::ProcessLoadMonitorOptions(bincludeMonitors, bseparateMonitors,
-                                           bexcludeMonitors, this);
+  LoadRawHelper::ProcessLoadMonitorOptions(bincludeMonitors, bseparateMonitors, bexcludeMonitors, this);
 
   //**********************************************************************
   m_filename = getPropertyValue("Filename");
@@ -177,8 +161,13 @@ void LoadISISNexus2::exec() {
   // Read in the instrument name from the Nexus file
   m_instrument_name = entry.getString("name");
 
-  // Test if we have a detector block
-  size_t ndets(0);
+  // Test if we have a vms block
+  if (entry.containsGroup("isis_vms_compat")) {
+    m_hasVMSBlock = true;
+  }
+
+  // Get number of detectors and spectrum list
+  size_t ndets{0};
   try {
     NXClass det_class = entry.openNXGroup("detector_1");
     NXInt spectrum_index = det_class.openNXInt("spectrum_index");
@@ -192,24 +181,19 @@ void LoadISISNexus2::exec() {
     ndets = 0;
   }
 
-  NXInt nsp1 = entry.openNXInt("isis_vms_compat/NSP1");
-  nsp1.load();
-  NXInt udet = entry.openNXInt("isis_vms_compat/UDET");
-  udet.load();
-  NXInt spec = entry.openNXInt("isis_vms_compat/SPEC");
-  spec.load();
-
-  size_t nmons(0);
+  // Load detector and spectra ids, and number of monitors + detectors?
+  auto [udet, spec] = LoadISISNexusHelper::findDetectorIDsAndSpectrumNumber(entry, m_hasVMSBlock);
+  int64_t nsp1 = LoadISISNexusHelper::findNumberOfSpectra(entry, m_hasVMSBlock);
 
   // Pull out the monitor blocks, if any exist
-  for (std::vector<NXClassInfo>::const_iterator it = entry.groups().begin();
-       it != entry.groups().end(); ++it) {
+  size_t nmons{0};
+
+  for (auto it = entry.groups().cbegin(); it != entry.groups().cend(); ++it) {
     if (it->nxclass == "NXmonitor") // Count monitors
     {
-      NXInt index =
-          entry.openNXInt(std::string(it->nxname) + "/spectrum_index");
+      NXInt index = entry.openNXInt(std::string(it->nxname) + "/spectrum_index");
       index.load();
-      int64_t ind = *index();
+      specnum_t ind = static_cast<specnum_t>(*index());
       // Spectrum index of 0 means no spectrum associated with that monitor,
       // so only count those with index > 0
       if (ind > 0) {
@@ -225,56 +209,45 @@ void LoadISISNexus2::exec() {
                          "loading requested";
       return;
     } else {
-      g_log.error()
-          << "Invalid NeXus structure, cannot find detector or monitor blocks.";
+      g_log.error() << "Invalid NeXus structure, cannot find detector or monitor blocks.";
       throw std::runtime_error("Inconsistent NeXus file structure.");
     }
   }
 
   // Determine the the data block for the detectors and monitors
   bseparateMonitors =
-      findSpectraDetRangeInFile(entry, m_spec, ndets, nsp1[0], m_monitors,
-                                bexcludeMonitors, bseparateMonitors);
+      findSpectraDetRangeInFile(entry, m_spec, ndets, nsp1, m_monitors, bexcludeMonitors, bseparateMonitors);
 
   size_t x_length = m_loadBlockInfo.getNumberOfChannels() + 1;
 
   // Check input is consistent with the file, throwing if not
-  bseparateMonitors =
-      checkOptionalProperties(bseparateMonitors, bexcludeMonitors);
+  bseparateMonitors = checkOptionalProperties(bseparateMonitors, bexcludeMonitors);
   // Fill up m_spectraBlocks
   size_t total_specs = prepareSpectraBlocks(m_monitors, m_loadBlockInfo);
 
-  m_progress = std::make_shared<API::Progress>(
-      this, 0.0, 1.0, total_specs * m_detBlockInfo.getNumberOfPeriods());
+  m_progress = std::make_shared<API::Progress>(this, 0.0, 1.0, total_specs * m_detBlockInfo.getNumberOfPeriods());
 
-  DataObjects::Workspace2D_sptr local_workspace =
-      std::dynamic_pointer_cast<DataObjects::Workspace2D>(
-          WorkspaceFactory::Instance().create(
-              "Workspace2D", total_specs, x_length,
-              m_loadBlockInfo.getNumberOfChannels()));
+  DataObjects::Workspace2D_sptr local_workspace = std::dynamic_pointer_cast<DataObjects::Workspace2D>(
+      WorkspaceFactory::Instance().create("Workspace2D", total_specs, x_length, m_loadBlockInfo.getNumberOfChannels()));
   // Set the units on the workspace to TOF & Counts
   local_workspace->getAxis(0)->unit() = UnitFactory::Instance().create("TOF");
   local_workspace->setYUnit("Counts");
 
-  //
   // Load instrument and other data once then copy it later
-  //
   m_progress->report("Loading instrument and run details");
 
   // load run details
   loadRunDetails(local_workspace, entry);
 
   // Test if IDF exists in Nexus otherwise load default instrument
-  bool foundInstrument = LoadEventNexus::runLoadIDFFromNexus(
-      m_filename, local_workspace, "raw_data_1", this);
+  bool foundInstrument = LoadEventNexus::runLoadIDFFromNexus(m_filename, local_workspace, "raw_data_1", this);
   if (m_load_selected_spectra)
     m_spec2det_map = SpectrumDetectorMapping(spec(), udet(), udet.dim0());
   else if (bseparateMonitors) {
     m_spec2det_map = SpectrumDetectorMapping(spec(), udet(), udet.dim0());
     local_workspace->updateSpectraUsing(m_spec2det_map);
   } else {
-    local_workspace->updateSpectraUsing(
-        SpectrumDetectorMapping(spec(), udet(), udet.dim0()));
+    local_workspace->updateSpectraUsing(SpectrumDetectorMapping(spec(), udet(), udet.dim0()));
   }
 
   if (!foundInstrument) {
@@ -293,27 +266,23 @@ void LoadISISNexus2::exec() {
 
   // Load first period outside loop
   m_progress->report("Loading data");
+  // Get X Data
   if (ndets > 0) {
-    // Get the X data
-    NXFloat timeBins = entry.openNXFloat("detector_1/time_of_flight");
-    timeBins.load();
-    m_tof_data =
-        std::make_shared<HistogramX>(timeBins(), timeBins() + x_length);
+    m_tof_data = LoadISISNexusHelper::loadTimeData(entry);
   }
+
   int64_t firstentry = (m_entrynumber > 0) ? m_entrynumber : 1;
   loadPeriodData(firstentry, entry, local_workspace, m_load_selected_spectra);
 
   // Clone the workspace at this point to provide a base object for future
   // workspace generation.
   DataObjects::Workspace2D_sptr period_free_workspace =
-      std::dynamic_pointer_cast<DataObjects::Workspace2D>(
-          WorkspaceFactory::Instance().create(local_workspace));
+      std::dynamic_pointer_cast<DataObjects::Workspace2D>(WorkspaceFactory::Instance().create(local_workspace));
 
   createPeriodLogs(firstentry, local_workspace);
 
   WorkspaceGroup_sptr wksp_group(new WorkspaceGroup);
   if (m_loadBlockInfo.getNumberOfPeriods() > 1 && m_entrynumber == 0) {
-
     wksp_group->setTitle(local_workspace->getTitle());
 
     // This forms the name of the group
@@ -333,18 +302,15 @@ void LoadISISNexus2::exec() {
         // warnings where necessary.
         validateMultiPeriodLogs(local_workspace);
       }
-      declareProperty(std::make_unique<WorkspaceProperty<Workspace>>(
-          prop_name + os.str(), base_name + os.str(), Direction::Output));
+      declareProperty(std::make_unique<WorkspaceProperty<Workspace>>(prop_name + os.str(), base_name + os.str(),
+                                                                     Direction::Output));
       wksp_group->addWorkspace(local_workspace);
-      setProperty(prop_name + os.str(),
-                  std::static_pointer_cast<Workspace>(local_workspace));
+      setProperty(prop_name + os.str(), std::static_pointer_cast<Workspace>(local_workspace));
     }
     // The group is the root property value
-    setProperty("OutputWorkspace",
-                std::dynamic_pointer_cast<Workspace>(wksp_group));
+    setProperty("OutputWorkspace", std::dynamic_pointer_cast<Workspace>(wksp_group));
   } else {
-    setProperty("OutputWorkspace",
-                std::dynamic_pointer_cast<Workspace>(local_workspace));
+    setProperty("OutputWorkspace", std::dynamic_pointer_cast<Workspace>(local_workspace));
   }
 
   //***************************************************************************************************
@@ -355,14 +321,10 @@ void LoadISISNexus2::exec() {
     if (m_monBlockInfo.getNumberOfSpectra() > 0) {
       x_length = m_monBlockInfo.getNumberOfChannels() + 1;
       // reset the size of the period free workspace to the monitor size
-      period_free_workspace =
-          std::dynamic_pointer_cast<DataObjects::Workspace2D>(
-              WorkspaceFactory::Instance().create(
-                  period_free_workspace, m_monBlockInfo.getNumberOfSpectra(),
-                  x_length, m_monBlockInfo.getNumberOfChannels()));
-      auto monitor_workspace =
-          std::dynamic_pointer_cast<DataObjects::Workspace2D>(
-              WorkspaceFactory::Instance().create(period_free_workspace));
+      period_free_workspace = std::dynamic_pointer_cast<DataObjects::Workspace2D>(WorkspaceFactory::Instance().create(
+          period_free_workspace, m_monBlockInfo.getNumberOfSpectra(), x_length, m_monBlockInfo.getNumberOfChannels()));
+      auto monitor_workspace = std::dynamic_pointer_cast<DataObjects::Workspace2D>(
+          WorkspaceFactory::Instance().create(period_free_workspace));
 
       m_spectraBlocks.clear();
       m_wsInd2specNum_map.clear();
@@ -370,8 +332,7 @@ void LoadISISNexus2::exec() {
       // monitors from the spectra block (wiring table bug).
       // if monitor's spectra present in the detectors block due to this bug
       // should be read from monitors, this map should be dealt with properly.
-      buildSpectraInd2SpectraNumMap(true /*hasRange*/, false /*hasSpectraList*/,
-                                    m_monBlockInfo);
+      buildSpectraInd2SpectraNumMap(true /*hasRange*/, false /*hasSpectraList*/, m_monBlockInfo);
 
       // lo
       prepareSpectraBlocks(m_monitors, m_monBlockInfo);
@@ -394,42 +355,34 @@ void LoadISISNexus2::exec() {
           os << "_" << p;
           m_progress->report("Loading period " + os.str());
           if (p > 1) {
-            monitor_workspace =
-                std::dynamic_pointer_cast<DataObjects::Workspace2D>(
-                    WorkspaceFactory::Instance().create(period_free_workspace));
-            loadPeriodData(p, entry, monitor_workspace,
-                           m_load_selected_spectra);
+            monitor_workspace = std::dynamic_pointer_cast<DataObjects::Workspace2D>(
+                WorkspaceFactory::Instance().create(period_free_workspace));
+            loadPeriodData(p, entry, monitor_workspace, m_load_selected_spectra);
             monLogCreator.addPeriodLogs(p, monitor_workspace->mutableRun());
             // Check consistency of logs data for multi-period workspaces and
             // raise
             // warnings where necessary.
             validateMultiPeriodLogs(monitor_workspace);
-            auto data_ws = std::static_pointer_cast<API::MatrixWorkspace>(
-                wksp_group->getItem(p - 1));
+            auto data_ws = std::static_pointer_cast<API::MatrixWorkspace>(wksp_group->getItem(p - 1));
             data_ws->setMonitorWorkspace(monitor_workspace);
           }
           declareProperty(std::make_unique<WorkspaceProperty<Workspace>>(
-              monitorPropBase + os.str(), monitorWsNameBase + os.str(),
-              Direction::Output));
+              monitorPropBase + os.str(), monitorWsNameBase + os.str(), Direction::Output));
           monitor_group->addWorkspace(monitor_workspace);
-          setProperty(monitorPropBase + os.str(),
-                      std::static_pointer_cast<Workspace>(monitor_workspace));
+          setProperty(monitorPropBase + os.str(), std::static_pointer_cast<Workspace>(monitor_workspace));
         }
         // The group is the root property value
-        declareProperty(std::make_unique<WorkspaceProperty<Workspace>>(
-            monitorPropBase, monitorWsNameBase, Direction::Output));
-        setProperty(monitorPropBase,
-                    std::dynamic_pointer_cast<Workspace>(monitor_group));
+        declareProperty(
+            std::make_unique<WorkspaceProperty<Workspace>>(monitorPropBase, monitorWsNameBase, Direction::Output));
+        setProperty(monitorPropBase, std::dynamic_pointer_cast<Workspace>(monitor_group));
 
       } else {
-        declareProperty(std::make_unique<WorkspaceProperty<Workspace>>(
-            monitorPropBase, monitorWsNameBase, Direction::Output));
-        setProperty(monitorPropBase,
-                    std::static_pointer_cast<Workspace>(monitor_workspace));
+        declareProperty(
+            std::make_unique<WorkspaceProperty<Workspace>>(monitorPropBase, monitorWsNameBase, Direction::Output));
+        setProperty(monitorPropBase, std::static_pointer_cast<Workspace>(monitor_workspace));
       }
     } else {
-      g_log.information() << " no monitors to load for workspace: " << wsName
-                          << '\n';
+      g_log.information() << " no monitors to load for workspace: " << wsName << '\n';
     }
   }
 
@@ -439,27 +392,11 @@ void LoadISISNexus2::exec() {
   m_monitors.clear();
   m_wsInd2specNum_map.clear();
 }
-
-// Function object for remove_if STL algorithm
-namespace {
-// Check the numbers supplied are not in the range and erase the ones that are
-struct range_check {
-  range_check(int64_t min, int64_t max) : m_min(min), m_max(max) {}
-
-  bool operator()(int64_t x) { return (x >= m_min && x <= m_max); }
-
-private:
-  int64_t m_min;
-  int64_t m_max;
-};
-} // namespace
-
 /**
 Check for a set of synthetic logs associated with multi-period log data. Raise
 warnings where necessary.
 */
-void LoadISISNexus2::validateMultiPeriodLogs(
-    const Mantid::API::MatrixWorkspace_sptr &ws) {
+void LoadISISNexus2::validateMultiPeriodLogs(const Mantid::API::MatrixWorkspace_sptr &ws) {
   const Run &run = ws->run();
   if (!run.hasProperty("current_period")) {
     g_log.warning("Workspace has no current_period log.");
@@ -479,14 +416,13 @@ void LoadISISNexus2::validateMultiPeriodLogs(
  * separately
  * @param bexcludeMonitor: flag indicating if the monitors are to be excluded
  */
-bool LoadISISNexus2::checkOptionalProperties(bool bseparateMonitors,
-                                             bool bexcludeMonitor) {
+bool LoadISISNexus2::checkOptionalProperties(bool bseparateMonitors, bool bexcludeMonitor) {
   // optional properties specify that only some spectra have to be loaded
   bool range_supplied(false);
 
   // Get the spectrum selection which were specfied by the user
-  int64_t spec_min = getProperty("SpectrumMin");
-  int64_t spec_max = getProperty("SpectrumMax");
+  specnum_t spec_min = getProperty("SpectrumMin");
+  specnum_t spec_max = getProperty("SpectrumMax");
 
   // If spearate monitors or excluded monitors is selected then we
   // need to build up a wsIndex to spectrum number map as well,
@@ -516,20 +452,17 @@ bool LoadISISNexus2::checkOptionalProperties(bool bseparateMonitors,
   }
 
   if (spec_max > m_loadBlockInfo.getMaxSpectrumID()) {
-    std::string err =
-        "Inconsistent range property. SpectrumMax is larger than number of "
-        "spectra: " +
-        std::to_string(m_loadBlockInfo.getMaxSpectrumID());
+    std::string err = "Inconsistent range property. SpectrumMax is larger than number of "
+                      "spectra: " +
+                      std::to_string(m_loadBlockInfo.getMaxSpectrumID());
     throw std::invalid_argument(err);
   }
 
   // Check the entry number
   m_entrynumber = getProperty("EntryNumber");
-  if (static_cast<int>(m_entrynumber) > m_loadBlockInfo.getNumberOfPeriods() ||
-      m_entrynumber < 0) {
+  if (static_cast<int>(m_entrynumber) > m_loadBlockInfo.getNumberOfPeriods() || m_entrynumber < 0) {
     std::string err = "Invalid entry number entered. File contains " +
-                      std::to_string(m_loadBlockInfo.getNumberOfPeriods()) +
-                      " period. ";
+                      std::to_string(m_loadBlockInfo.getNumberOfPeriods()) + " period. ";
     throw std::invalid_argument(err);
   }
 
@@ -538,7 +471,7 @@ bool LoadISISNexus2::checkOptionalProperties(bool bseparateMonitors,
   }
 
   // Did the user provide a spectrum list
-  std::vector<int64_t> spec_list = getProperty("SpectrumList");
+  std::vector<specnum_t> spec_list = getProperty("SpectrumList");
   auto hasSpecList = false;
 
   if (!spec_list.empty()) {
@@ -549,9 +482,7 @@ bool LoadISISNexus2::checkOptionalProperties(bool bseparateMonitors,
 
     // Check if the spectra list entries are outside of the bounds
     // If we load the monitors separately, then we need to make sure that we
-    // take
-    // them
-    // into account
+    // take them into account
     bool isSpectraListTooLarge;
     bool isSpectraListTooSmall;
     auto maxLoadBlock = m_loadBlockInfo.getMaxSpectrumID();
@@ -559,10 +490,8 @@ bool LoadISISNexus2::checkOptionalProperties(bool bseparateMonitors,
     if (bseparateMonitors) {
       auto maxMonBlock = m_monBlockInfo.getMaxSpectrumID();
       auto minMonBlock = m_monBlockInfo.getMinSpectrumID();
-      isSpectraListTooLarge =
-          spec_list.back() > std::max(maxMonBlock, maxLoadBlock);
-      isSpectraListTooSmall =
-          spec_list.front() < std::min(minMonBlock, minLoadBlock);
+      isSpectraListTooLarge = spec_list.back() > std::max(maxMonBlock, maxLoadBlock);
+      isSpectraListTooSmall = spec_list.front() < std::min(minMonBlock, minLoadBlock);
 
     } else {
       isSpectraListTooLarge = spec_list.back() > maxLoadBlock;
@@ -570,23 +499,21 @@ bool LoadISISNexus2::checkOptionalProperties(bool bseparateMonitors,
     }
 
     if (isSpectraListTooLarge) {
-      std::string err =
-          "The specified spectrum list contains a spectrum number which is "
-          "larger "
-          "than the largest loadable spectrum number for your selection of "
-          "excluded/included/separate monitors. The largest loadable "
-          "spectrum number is " +
-          std::to_string(m_loadBlockInfo.getMinSpectrumID());
+      std::string err = "The specified spectrum list contains a spectrum number which is "
+                        "larger "
+                        "than the largest loadable spectrum number for your selection of "
+                        "excluded/included/separate monitors. The largest loadable "
+                        "spectrum number is " +
+                        std::to_string(m_loadBlockInfo.getMinSpectrumID());
       throw std::invalid_argument(err);
     }
     if (isSpectraListTooSmall) {
-      std::string err =
-          "The specified spectrum list contains a spectrum number which is "
-          "smaller "
-          "than the smallest loadable spectrum number for your selection of "
-          "excluded/included/separate monitors. The smallest loadable "
-          "spectrum number is " +
-          std::to_string(m_loadBlockInfo.getMinSpectrumID());
+      std::string err = "The specified spectrum list contains a spectrum number which is "
+                        "smaller "
+                        "than the smallest loadable spectrum number for your selection of "
+                        "excluded/included/separate monitors. The smallest loadable "
+                        "spectrum number is " +
+                        std::to_string(m_loadBlockInfo.getMinSpectrumID());
       throw std::invalid_argument(err);
     }
 
@@ -595,29 +522,23 @@ bool LoadISISNexus2::checkOptionalProperties(bool bseparateMonitors,
     if (range_supplied) {
       // First remove all entries which are inside of the min and max spectrum,
       // to avoid duplicates
-      auto isInRange = [&spec_min, &spec_max](int64_t x) {
-        return (spec_min <= x) && (x <= spec_max);
-      };
+      auto isInRange = [&spec_min, &spec_max](specnum_t x) { return (spec_min <= x) && (x <= spec_max); };
 
-      spec_list.erase(remove_if(spec_list.begin(), spec_list.end(), isInRange),
-                      spec_list.end());
+      spec_list.erase(remove_if(spec_list.begin(), spec_list.end(), isInRange), spec_list.end());
 
       // The spec_min - spec_max range needs to be added to the spec list
-      for (int64_t i = spec_min; i < spec_max + 1; ++i) {
-        auto spec_num = static_cast<specnum_t>(i);
-        spec_list.emplace_back(spec_num);
-        std::sort(spec_list.begin(), spec_list.end());
-        // supplied range converted into the list, so no more supplied range
+      for (auto i = spec_min; i < spec_max + 1; ++i) {
+        spec_list.emplace_back(i);
       }
+      std::sort(spec_list.begin(), spec_list.end());
     }
 
     auto monitorSpectra = m_monBlockInfo.getAllSpectrumNumbers();
     // Create DataBlocks from the spectrum list
     DataBlockComposite composite;
-    populateDataBlockCompositeWithContainer(
-        composite, spec_list, spec_list.size(),
-        m_loadBlockInfo.getNumberOfPeriods(),
-        m_loadBlockInfo.getNumberOfChannels(), monitorSpectra);
+    populateDataBlockCompositeWithContainer(composite, spec_list, spec_list.size(),
+                                            m_loadBlockInfo.getNumberOfPeriods(), m_loadBlockInfo.getNumberOfChannels(),
+                                            monitorSpectra);
 
     // If the monitors are to be loaded separately, then we have
     // to remove them at this point, but we also have to check if the
@@ -633,10 +554,8 @@ bool LoadISISNexus2::checkOptionalProperties(bool bseparateMonitors,
       }
 
       // Handle case where the composite is empty since it only contained
-      // monitors, but
-      // we want to load the monitors sepearately. In this case we should set
-      // the loadBlock
-      // to the selected monitors.
+      // monitors, but we want to load the monitors sepearately. In this case we
+      // should set the loadBlock to the selected monitors.
       if (bseparateMonitors && composite.isEmpty()) {
         composite = m_monBlockInfo;
         bseparateMonitors = false;
@@ -650,8 +569,7 @@ bool LoadISISNexus2::checkOptionalProperties(bool bseparateMonitors,
     // At this point we don't have a spectrum list but there might have been a
     // spectrum range which we need to take into account, by truncating
     // the current range. If we load the monitors separately, we need to
-    // truncate
-    // them as well (provided they are affected)
+    // truncate them as well (provided they are affected)
     if (range_supplied) {
       m_loadBlockInfo.truncate(spec_min, spec_max);
 
@@ -667,11 +585,10 @@ bool LoadISISNexus2::checkOptionalProperties(bool bseparateMonitors,
 
   // Check that the load blocks contain anything at all.
   if (m_loadBlockInfo.isEmpty()) {
-    throw std::invalid_argument(
-        "Your spectrum number selection was not valid. "
-        "Make sure that you select spectrum numbers "
-        "and ranges which are compatible with your "
-        "selection of excluded/included/separate monitors. ");
+    throw std::invalid_argument("Your spectrum number selection was not valid. "
+                                "Make sure that you select spectrum numbers "
+                                "and ranges which are compatible with your "
+                                "selection of excluded/included/separate monitors. ");
   }
 
   return bseparateMonitors;
@@ -687,9 +604,8 @@ below have to be processed rather then spectra list
 @param dataBlockComposite: a data block composite specfiying the spectra
 intervals
 **/
-void LoadISISNexus2::buildSpectraInd2SpectraNumMap(
-    bool range_supplied, bool hasSpectraList,
-    DataBlockComposite &dataBlockComposite) {
+void LoadISISNexus2::buildSpectraInd2SpectraNumMap(bool range_supplied, bool hasSpectraList,
+                                                   DataBlockComposite &dataBlockComposite) {
 
   if (range_supplied || hasSpectraList || true) {
     auto generator = dataBlockComposite.getGenerator();
@@ -708,32 +624,26 @@ void LoadISISNexus2::buildSpectraInd2SpectraNumMap(
  * in a separate block.
  * @return :: Number of spectra to load.
  */
-size_t
-LoadISISNexus2::prepareSpectraBlocks(std::map<int64_t, std::string> &monitors,
-                                     DataBlockComposite &LoadBlock) {
-  std::vector<int64_t> includedMonitors;
+size_t LoadISISNexus2::prepareSpectraBlocks(std::map<specnum_t, std::string> &monitors, DataBlockComposite &LoadBlock) {
+  std::vector<specnum_t> includedMonitors;
   // Setup the SpectraBlocks based on the DataBlocks
   auto dataBlocks = LoadBlock.getDataBlocks();
-  auto isMonitor = [&monitors](int64_t spectrumNumber) {
-    return monitors.find(spectrumNumber) != monitors.end();
-  };
+  auto isMonitor = [&monitors](specnum_t spectrumNumber) { return monitors.find(spectrumNumber) != monitors.end(); };
   for (const auto &dataBlock : dataBlocks) {
     auto min = dataBlock.getMinSpectrumID();
     if (isMonitor(min)) {
-      m_spectraBlocks.emplace_back(
-          SpectraBlock(min, min, true, monitors.find(min)->second));
+      m_spectraBlocks.emplace_back(SpectraBlock(min, min, true, monitors.find(min)->second));
       includedMonitors.emplace_back(min);
     } else {
       auto max = dataBlock.getMaxSpectrumID();
-      m_spectraBlocks.emplace_back(SpectraBlock(min, max, false, ""));
+      m_spectraBlocks.emplace_back(min, max, false, "");
     }
   }
 
   // sort and check for overlapping
   if (m_spectraBlocks.size() > 1) {
     std::sort(m_spectraBlocks.begin(), m_spectraBlocks.end(),
-              [](const LoadISISNexus2::SpectraBlock &block1,
-                 const LoadISISNexus2::SpectraBlock &block2) {
+              [](const LoadISISNexus2::SpectraBlock &block1, const LoadISISNexus2::SpectraBlock &block2) {
                 return block1.last < block2.first;
               });
     checkOverlappingSpectraRange();
@@ -743,8 +653,7 @@ LoadISISNexus2::prepareSpectraBlocks(std::map<int64_t, std::string> &monitors,
   auto allMonitorsIncluded = monitors.size() == includedMonitors.size();
   if (!includedMonitors.empty() && !allMonitorsIncluded) {
     for (auto it = monitors.begin(); it != monitors.end();) {
-      if (std::find(includedMonitors.begin(), includedMonitors.end(),
-                    it->first) != includedMonitors.end()) {
+      if (std::find(includedMonitors.begin(), includedMonitors.end(), it->first) != includedMonitors.end()) {
         auto it1 = it;
         ++it;
         monitors.erase(it1);
@@ -757,9 +666,7 @@ LoadISISNexus2::prepareSpectraBlocks(std::map<int64_t, std::string> &monitors,
   // Count the number of spectra.
   const auto nSpec = std::accumulate(
       m_spectraBlocks.cbegin(), m_spectraBlocks.cend(), static_cast<size_t>(0),
-      [](size_t sum, const auto &spectraBlock) {
-        return sum + spectraBlock.last - spectraBlock.first + 1;
-      });
+      [](size_t sum, const auto &spectraBlock) { return sum + spectraBlock.last - spectraBlock.first + 1; });
   return nSpec;
 }
 
@@ -777,8 +684,7 @@ void LoadISISNexus2::checkOverlappingSpectraRange() {
     if (block1.first > block1.last && block2.first > block2.last)
       throw std::runtime_error("LoadISISNexus2: inconsistent spectra ranges");
     if (block1.last >= block2.first) {
-      throw std::runtime_error(
-          "LoadISISNexus2: the range of SpectraBlocks must not overlap");
+      throw std::runtime_error("LoadISISNexus2: the range of SpectraBlocks must not overlap");
     }
   }
 }
@@ -792,15 +698,12 @@ void LoadISISNexus2::checkOverlappingSpectraRange() {
  * @param update_spectra2det_mapping :: reset spectra-detector map to the one
  * calculated earlier. (Warning! -- this map has to be calculated correctly!)
  */
-void LoadISISNexus2::loadPeriodData(
-    int64_t period, NXEntry &entry,
-    DataObjects::Workspace2D_sptr &local_workspace,
-    bool update_spectra2det_mapping) {
+void LoadISISNexus2::loadPeriodData(int64_t period, NXEntry &entry, DataObjects::Workspace2D_sptr &local_workspace,
+                                    bool update_spectra2det_mapping) {
   int64_t hist_index = 0;
   int64_t period_index(period - 1);
-  // int64_t first_monitor_spectrum = 0;
 
-  for (auto &spectraBlock : m_spectraBlocks) {
+  for (const auto &spectraBlock : m_spectraBlocks) {
     if (spectraBlock.isMonitor) {
       NXData monitor = entry.openNXData(spectraBlock.monName);
       NXInt mondata = monitor.openIntData();
@@ -808,17 +711,13 @@ void LoadISISNexus2::loadPeriodData(
       mondata.load(1, static_cast<int>(period - 1)); // TODO this is just wrong
       NXFloat timeBins = monitor.openNXFloat("time_of_flight");
       timeBins.load();
-      local_workspace->setHistogram(
-          hist_index, BinEdges(timeBins(), timeBins() + timeBins.dim0()),
-          Counts(mondata(), mondata() + m_monBlockInfo.getNumberOfChannels()));
+      local_workspace->setHistogram(hist_index, BinEdges(timeBins(), timeBins() + timeBins.dim0()),
+                                    Counts(mondata(), mondata() + m_monBlockInfo.getNumberOfChannels()));
 
       if (update_spectra2det_mapping) {
-        // local_workspace->getAxis(1)->setValue(hist_index,
-        // static_cast<specnum_t>(it->first));
         auto &spec = local_workspace->getSpectrum(hist_index);
         specnum_t specNum = m_wsInd2specNum_map.at(hist_index);
-        spec.setDetectorIDs(
-            m_spec2det_map.getDetectorIDsForSpectrumNo(specNum));
+        spec.setDetectorIDs(m_spec2det_map.getDetectorIDsForSpectrumNo(specNum));
         spec.setSpectrumNo(specNum);
       }
       hist_index++;
@@ -838,19 +737,16 @@ void LoadISISNexus2::loadPeriodData(
 
       // For this to work correctly, we assume that the spectrum list increases
       // monotonically
-      int64_t filestart =
-          std::lower_bound(spec_begin, m_spec_end, spectra_no) - spec_begin;
+      int64_t filestart = std::lower_bound(spec_begin, m_spec_end, spectra_no) - spec_begin;
       if (fullblocks > 0) {
         for (int64_t i = 0; i < fullblocks; ++i) {
-          loadBlock(data, blocksize, period_index, filestart, hist_index,
-                    spectra_no, local_workspace);
+          loadBlock(data, blocksize, period_index, filestart, hist_index, spectra_no, local_workspace);
           filestart += blocksize;
         }
       }
       int64_t finalblock = rangesize - (fullblocks * blocksize);
       if (finalblock > 0) {
-        loadBlock(data, finalblock, period_index, filestart, hist_index,
-                  spectra_no, local_workspace);
+        loadBlock(data, finalblock, period_index, filestart, hist_index, spectra_no, local_workspace);
       }
     }
   }
@@ -861,8 +757,7 @@ void LoadISISNexus2::loadPeriodData(
     // write the title into the log file (run object)
     local_workspace->mutableRun().addProperty("run_title", title, true);
   } catch (std::runtime_error &) {
-    g_log.debug() << "No title was found in the input file, "
-                  << getPropertyValue("Filename") << '\n';
+    g_log.debug() << "No title was found in the input file, " << getPropertyValue("Filename") << '\n';
   }
 }
 
@@ -871,10 +766,8 @@ void LoadISISNexus2::loadPeriodData(
  * @param period :: period number
  * @param local_workspace :: workspace to add period log data to.
  */
-void LoadISISNexus2::createPeriodLogs(
-    int64_t period, DataObjects::Workspace2D_sptr &local_workspace) {
-  m_logCreator->addPeriodLogs(static_cast<int>(period),
-                              local_workspace->mutableRun());
+void LoadISISNexus2::createPeriodLogs(int64_t period, DataObjects::Workspace2D_sptr &local_workspace) {
+  m_logCreator->addPeriodLogs(static_cast<int>(period), local_workspace->mutableRun());
 }
 
 /**
@@ -888,10 +781,8 @@ void LoadISISNexus2::createPeriodLogs(
  * @param spec_num :: The spectrum number that matches the hist variable
  * @param local_workspace :: The workspace to fill the data with
  */
-void LoadISISNexus2::loadBlock(NXDataSetTyped<int> &data, int64_t blocksize,
-                               int64_t period, int64_t start, int64_t &hist,
-                               int64_t &spec_num,
-                               DataObjects::Workspace2D_sptr &local_workspace) {
+void LoadISISNexus2::loadBlock(NXDataSetTyped<int> &data, int64_t blocksize, int64_t period, int64_t start,
+                               int64_t &hist, int64_t &spec_num, DataObjects::Workspace2D_sptr &local_workspace) {
   data.load(static_cast<int>(blocksize), static_cast<int>(period),
             static_cast<int>(start)); // TODO this is just wrong
   int *data_start = data();
@@ -899,13 +790,10 @@ void LoadISISNexus2::loadBlock(NXDataSetTyped<int> &data, int64_t blocksize,
   int64_t final(hist + blocksize);
   while (hist < final) {
     m_progress->report("Loading data");
-    local_workspace->setHistogram(hist, BinEdges(m_tof_data),
-                                  Counts(data_start, data_end));
+    local_workspace->setHistogram(hist, BinEdges(m_tof_data), Counts(data_start, data_end));
     data_start += m_detBlockInfo.getNumberOfChannels();
     data_end += m_detBlockInfo.getNumberOfChannels();
     if (m_load_selected_spectra) {
-      // local_workspace->getAxis(1)->setValue(hist,
-      // static_cast<specnum_t>(spec_num));
       auto &spec = local_workspace->getSpectrum(hist);
       specnum_t specNum = m_wsInd2specNum_map.at(hist);
       // set detectors corresponding to spectra Number
@@ -920,40 +808,34 @@ void LoadISISNexus2::loadBlock(NXDataSetTyped<int> &data, int64_t blocksize,
 }
 
 /// Run the Child Algorithm LoadInstrument (or LoadInstrumentFromNexus)
-void LoadISISNexus2::runLoadInstrument(
-    DataObjects::Workspace2D_sptr &localWorkspace) {
+void LoadISISNexus2::runLoadInstrument(DataObjects::Workspace2D_sptr &localWorkspace) {
 
-  IAlgorithm_sptr loadInst = createChildAlgorithm("LoadInstrument");
+  auto loadInst = createChildAlgorithm("LoadInstrument");
 
   // Now execute the Child Algorithm. Catch and log any error, but don't stop.
   bool executionSuccessful(true);
   try {
     loadInst->setPropertyValue("InstrumentName", m_instrument_name);
     loadInst->setProperty<MatrixWorkspace_sptr>("Workspace", localWorkspace);
-    loadInst->setProperty("RewriteSpectraMap",
-                          Mantid::Kernel::OptionalBool(false));
+    loadInst->setProperty("RewriteSpectraMap", Mantid::Kernel::OptionalBool(false));
     loadInst->execute();
   } catch (std::invalid_argument &) {
     g_log.information("Invalid argument to LoadInstrument Child Algorithm");
     executionSuccessful = false;
   } catch (std::runtime_error &) {
-    g_log.information(
-        "Unable to successfully run LoadInstrument Child Algorithm");
+    g_log.information("Unable to successfully run LoadInstrument Child Algorithm");
     executionSuccessful = false;
   }
   if (executionSuccessful) {
     // If requested update the instrument to positions in the data file
     const auto &pmap = localWorkspace->constInstrumentParameters();
-    if (pmap.contains(localWorkspace->getInstrument()->getComponentID(),
-                      "det-pos-source")) {
-      std::shared_ptr<Geometry::Parameter> updateDets = pmap.get(
-          localWorkspace->getInstrument()->getComponentID(), "det-pos-source");
+    if (pmap.contains(localWorkspace->getInstrument()->getComponentID(), "det-pos-source")) {
+      std::shared_ptr<Geometry::Parameter> updateDets =
+          pmap.get(localWorkspace->getInstrument()->getComponentID(), "det-pos-source");
       std::string value = updateDets->value<std::string>();
       if (value.substr(0, 8) == "datafile") {
-        IAlgorithm_sptr updateInst =
-            createChildAlgorithm("UpdateInstrumentFromFile");
-        updateInst->setProperty<MatrixWorkspace_sptr>("Workspace",
-                                                      localWorkspace);
+        auto updateInst = createChildAlgorithm("UpdateInstrumentFromFile");
+        updateInst->setProperty<MatrixWorkspace_sptr>("Workspace", localWorkspace);
         updateInst->setPropertyValue("Filename", m_filename);
         if (value == "datafile-ignore-phi") {
           updateInst->setProperty("IgnorePhi", true);
@@ -976,131 +858,16 @@ void LoadISISNexus2::runLoadInstrument(
  *   @param local_workspace :: The workspace to load the run information in to
  *   @param entry :: The Nexus entry
  */
-void LoadISISNexus2::loadRunDetails(
-    DataObjects::Workspace2D_sptr &local_workspace, NXEntry &entry) {
+void LoadISISNexus2::loadRunDetails(DataObjects::Workspace2D_sptr &local_workspace, NXEntry &entry) {
+
   API::Run &runDetails = local_workspace->mutableRun();
-  // Charge is stored as a float
-  m_proton_charge = static_cast<double>(entry.getFloat("proton_charge"));
-  runDetails.setProtonCharge(m_proton_charge);
-
-  std::string run_num = std::to_string(entry.getInt("run_number"));
-  runDetails.addProperty("run_number", run_num);
-
-  //
-  // Some details are only stored in the VMS comparability block so we'll pull
-  // everything from there
-  // for consistency
-
-  NXClass vms_compat = entry.openNXGroup("isis_vms_compat");
-  // Run header
-  NXChar char_data = vms_compat.openNXChar("HDR");
-  char_data.load();
-
-  // Space-separate the fields
-  char *nxsHdr = char_data();
-  char header[86] = {};
-  const size_t byte = sizeof(char);
-  const char fieldSep(' ');
-  size_t fieldWidths[7] = {3, 5, 20, 24, 12, 8, 8};
-
-  char *srcStart = nxsHdr;
-  char *destStart = header;
-  for (size_t i = 0; i < 7; ++i) {
-    size_t width = fieldWidths[i];
-    memcpy(destStart, srcStart, width * byte);
-    if (i < 6) // no space after last field
-    {
-      srcStart += width;
-      destStart += width;
-      memset(destStart, fieldSep, byte); // insert separator
-      destStart += 1;
-    }
-  }
-  runDetails.addProperty("run_header", std::string(header, header + 86));
 
   // Data details on run not the workspace
-  runDetails.addProperty(
-      "nspectra", static_cast<int>(m_loadBlockInfo.getNumberOfSpectra()));
-  runDetails.addProperty(
-      "nchannels", static_cast<int>(m_loadBlockInfo.getNumberOfChannels()));
-  runDetails.addProperty(
-      "nperiods", static_cast<int>(m_loadBlockInfo.getNumberOfPeriods()));
+  runDetails.addProperty("nspectra", static_cast<int>(m_loadBlockInfo.getNumberOfSpectra()));
+  runDetails.addProperty("nchannels", static_cast<int>(m_loadBlockInfo.getNumberOfChannels()));
+  runDetails.addProperty("nperiods", static_cast<int>(m_loadBlockInfo.getNumberOfPeriods()));
 
-  // RPB struct info
-  NXInt rpb_int = vms_compat.openNXInt("IRPB");
-  rpb_int.load();
-  runDetails.addProperty("dur", rpb_int[0]); // actual run duration
-  runDetails.addProperty("durunits",
-                         rpb_int[1]); // scaler for above (1=seconds)
-  runDetails.addProperty("dur_freq",
-                         rpb_int[2]);        // testinterval for above (seconds)
-  runDetails.addProperty("dmp", rpb_int[3]); // dump interval
-  runDetails.addProperty("dmp_units", rpb_int[4]); // scaler for above
-  runDetails.addProperty("dmp_freq", rpb_int[5]);  // interval for above
-  runDetails.addProperty("freq",
-                         rpb_int[6]); // 2**k where source frequency = 50 / 2**k
-
-  // Now double data
-  NXFloat rpb_dbl = vms_compat.openNXFloat("RRPB");
-  rpb_dbl.load();
-  runDetails.addProperty(
-      "gd_prtn_chrg",
-      static_cast<double>(rpb_dbl[7])); // good proton charge (uA.hour)
-  runDetails.addProperty(
-      "tot_prtn_chrg",
-      static_cast<double>(rpb_dbl[8])); // total proton charge (uA.hour)
-  runDetails.addProperty("goodfrm", rpb_int[9]); // good frames
-  runDetails.addProperty("rawfrm", rpb_int[10]); // raw frames
-  runDetails.addProperty(
-      "dur_wanted",
-      rpb_int[11]); // requested run duration (units as for "duration" above)
-  runDetails.addProperty("dur_secs",
-                         rpb_int[12]); // actual run duration in seconds
-  runDetails.addProperty("mon_sum1", rpb_int[13]); // monitor sum 1
-  runDetails.addProperty("mon_sum2", rpb_int[14]); // monitor sum 2
-  runDetails.addProperty("mon_sum3", rpb_int[15]); // monitor sum 3
-
-  // End date and time is stored separately in ISO format in the
-  // "raw_data1/endtime" class
-  char_data = entry.openNXChar("end_time");
-  char_data.load();
-  std::string end_time_iso = std::string(char_data(), 19);
-  runDetails.addProperty("run_end", end_time_iso);
-
-  char_data = entry.openNXChar("start_time");
-  char_data.load();
-  std::string start_time_iso = std::string(char_data(), 19);
-  runDetails.addProperty("run_start", start_time_iso);
-
-  runDetails.addProperty("rb_proposal", rpb_int[21]); // RB (proposal) number
-  vms_compat.close();
-}
-
-/**
- * Parse an ISO formatted date-time string into separate date and time strings
- * @param datetime_iso :: The string containing the ISO formatted date-time
- * @param date :: An output parameter containing the date from the original
- * string or ??-??-???? if the format is unknown
- * @param time :: An output parameter containing the time from the original
- * string or ??-??-?? if the format is unknown
- */
-void LoadISISNexus2::parseISODateTime(const std::string &datetime_iso,
-                                      std::string &date,
-                                      std::string &time) const {
-  try {
-    Poco::DateTime datetime_output;
-    int timezone_diff(0);
-    Poco::DateTimeParser::parse(Poco::DateTimeFormat::ISO8601_FORMAT,
-                                datetime_iso, datetime_output, timezone_diff);
-    date = Poco::DateTimeFormatter::format(datetime_output, "%d-%m-%Y",
-                                           timezone_diff);
-    time = Poco::DateTimeFormatter::format(datetime_output, "%H:%M:%S",
-                                           timezone_diff);
-  } catch (Poco::SyntaxException &) {
-    date = R"(??-??-????)";
-    time = R"(??:??:??)";
-    g_log.warning() << "Cannot parse end time from entry in Nexus file.\n";
-  }
+  LoadISISNexusHelper::loadRunDetails(runDetails, entry, m_hasVMSBlock);
 }
 
 /**
@@ -1108,28 +875,14 @@ void LoadISISNexus2::parseISODateTime(const std::string &datetime_iso,
  *   @param local_workspace :: The workspace to load the logs to.
  *   @param entry :: The Nexus entry
  */
-void LoadISISNexus2::loadSampleData(
-    DataObjects::Workspace2D_sptr &local_workspace, NXEntry &entry) {
-  /// Sample geometry
-  NXInt spb = entry.openNXInt("isis_vms_compat/SPB");
-  // Just load the index we need, not the whole block. The flag is the third
-  // value in
-  spb.load(1, 2);
-  int geom_id = spb[0];
-  local_workspace->mutableSample().setGeometryFlag(spb[0]);
+void LoadISISNexus2::loadSampleData(DataObjects::Workspace2D_sptr &local_workspace, NXEntry &entry) {
 
-  NXFloat rspb = entry.openNXFloat("isis_vms_compat/RSPB");
-  // Just load the indices we need, not the whole block. The values start from
-  // the 4th onward
-  rspb.load(3, 3);
-  double thick(rspb[0]), height(rspb[1]), width(rspb[2]);
-  local_workspace->mutableSample().setThickness(thick);
-  local_workspace->mutableSample().setHeight(height);
-  local_workspace->mutableSample().setWidth(width);
-
-  g_log.debug() << "Sample geometry -  ID: " << geom_id
-                << ", thickness: " << thick << ", height: " << height
-                << ", width: " << width << "\n";
+  // load sample geometry - Id and dimensions
+  LoadISISNexusHelper::loadSampleGeometry(local_workspace->mutableSample(), entry, m_hasVMSBlock);
+  g_log.debug() << "Sample geometry -  ID: " << local_workspace->mutableSample().getGeometryFlag()
+                << ", thickness: " << local_workspace->mutableSample().getThickness()
+                << ", height: " << local_workspace->mutableSample().getHeight()
+                << ", width: " << local_workspace->mutableSample().getWidth() << "\n";
 }
 
 /**  Load logs from Nexus file. Logs are expected to be in
@@ -1138,7 +891,7 @@ void LoadISISNexus2::loadSampleData(
  *   @param ws :: The workspace to load the logs to.
  */
 void LoadISISNexus2::loadLogs(DataObjects::Workspace2D_sptr &ws) {
-  IAlgorithm_sptr alg = createChildAlgorithm("LoadNexusLogs", 0.0, 0.5);
+  auto alg = createChildAlgorithm("LoadNexusLogs", 0.0, 0.5);
   alg->setPropertyValue("Filename", this->getProperty("Filename"));
   alg->setProperty<MatrixWorkspace_sptr>("Workspace", ws);
   try {
@@ -1183,10 +936,9 @@ double LoadISISNexus2::dblSqrt(double in) { return sqrt(in); }
  *                               (contain different number of time channels)
  *
  */
-bool LoadISISNexus2::findSpectraDetRangeInFile(
-    NXEntry &entry, std::vector<int> &spectrum_index, int64_t ndets,
-    int64_t n_vms_compat_spectra, std::map<int64_t, std::string> &monitors,
-    bool excludeMonitors, bool separateMonitors) {
+bool LoadISISNexus2::findSpectraDetRangeInFile(NXEntry &entry, std::vector<specnum_t> &spectrum_index, int64_t ndets,
+                                               int64_t n_vms_compat_spectra, std::map<specnum_t, std::string> &monitors,
+                                               bool excludeMonitors, bool separateMonitors) {
   size_t nmons = monitors.size();
 
   if (nmons > 0) {
@@ -1194,7 +946,7 @@ bool LoadISISNexus2::findSpectraDetRangeInFile(
 
     // Iterate over each monitor and create a data block for each monitor
     for (const auto &monitor : monitors) {
-      auto monID = static_cast<int64_t>(monitor.first);
+      auto monID = monitor.first;
       auto monTemp = DataBlock(chans);
       monTemp.setMinSpectrumID(monID);
       monTemp.setMaxSpectrumID(monID);
@@ -1210,7 +962,6 @@ bool LoadISISNexus2::findSpectraDetRangeInFile(
   // a separate workspace.
   if (ndets == 0) {
     separateMonitors = false;
-    // Possible function exit point
     return separateMonitors;
   }
 
@@ -1221,9 +972,8 @@ bool LoadISISNexus2::findSpectraDetRangeInFile(
   NXInt data = nxData.openIntData();
 
   auto monitorSpectra = m_monBlockInfo.getAllSpectrumNumbers();
-  populateDataBlockCompositeWithContainer(
-      m_detBlockInfo, spectrum_index, ndets, data.dim0() /*Number of Periods*/,
-      data.dim2() /*Number of channels*/, monitorSpectra);
+  populateDataBlockCompositeWithContainer(m_detBlockInfo, spectrum_index, ndets, data.dim0() /*Number of Periods*/,
+                                          data.dim2() /*Number of channels*/, monitorSpectra);
 
   // We should handle legacy files which include the spectrum number of the
   // monitors
@@ -1240,21 +990,15 @@ bool LoadISISNexus2::findSpectraDetRangeInFile(
   // If the monitors are to be pulled into the same workspace as the detector
   // information,
   // then the number of periods and the number of channels has to conincide
-  if (nmons > 0 && ((m_detBlockInfo.getNumberOfPeriods() !=
-                     m_monBlockInfo.getNumberOfPeriods()) ||
-                    (m_detBlockInfo.getNumberOfChannels() !=
-                     m_monBlockInfo.getNumberOfChannels()))) {
+  if (nmons > 0 && ((m_detBlockInfo.getNumberOfPeriods() != m_monBlockInfo.getNumberOfPeriods()) ||
+                    (m_detBlockInfo.getNumberOfChannels() != m_monBlockInfo.getNumberOfChannels()))) {
     if (!removeMonitors) {
       g_log.warning() << " Performing separate loading as can not load spectra "
                          "and monitors in the single workspace:\n";
-      g_log.warning() << " Monitors data contain :"
-                      << m_monBlockInfo.getNumberOfChannels()
-                      << " time channels and: "
-                      << m_monBlockInfo.getNumberOfPeriods() << " period(s)\n";
-      g_log.warning() << " Spectra  data contain :"
-                      << m_detBlockInfo.getNumberOfChannels()
-                      << " time channels and: "
-                      << m_detBlockInfo.getNumberOfPeriods() << " period(s)\n";
+      g_log.warning() << " Monitors data contain :" << m_monBlockInfo.getNumberOfChannels()
+                      << " time channels and: " << m_monBlockInfo.getNumberOfPeriods() << " period(s)\n";
+      g_log.warning() << " Spectra  data contain :" << m_detBlockInfo.getNumberOfChannels()
+                      << " time channels and: " << m_detBlockInfo.getNumberOfPeriods() << " period(s)\n";
     }
 
     // Force the monitors to be removed and separate if the periods and channels
@@ -1264,12 +1008,9 @@ bool LoadISISNexus2::findSpectraDetRangeInFile(
     removeMonitors = true;
   }
 
-  int64_t spectraID_min = std::min(m_monBlockInfo.getMinSpectrumID(),
-                                   m_detBlockInfo.getMinSpectrumID());
-  int64_t spectraID_max = std::max(m_monBlockInfo.getMaxSpectrumID(),
-                                   m_detBlockInfo.getMaxSpectrumID());
-  size_t totNumOfSpectra =
-      m_monBlockInfo.getNumberOfSpectra() + m_detBlockInfo.getNumberOfSpectra();
+  int64_t spectraID_min = std::min(m_monBlockInfo.getMinSpectrumID(), m_detBlockInfo.getMinSpectrumID());
+  int64_t spectraID_max = std::max(m_monBlockInfo.getMaxSpectrumID(), m_detBlockInfo.getMaxSpectrumID());
+  size_t totNumOfSpectra = m_monBlockInfo.getNumberOfSpectra() + m_detBlockInfo.getNumberOfSpectra();
 
   // In case we want to load everything into a one workspace, we should combine
   // the
@@ -1286,8 +1027,7 @@ bool LoadISISNexus2::findSpectraDetRangeInFile(
 
   // Perform a sanity check of the spectrum numbers
   if ((totNumOfSpectra != static_cast<size_t>(n_vms_compat_spectra)) ||
-      (spectraID_max - spectraID_min + 1 !=
-       static_cast<int64_t>(n_vms_compat_spectra))) {
+      (spectraID_max - spectraID_min + 1 != static_cast<int64_t>(n_vms_compat_spectra))) {
     // At this point we normally throw since there is a mismatch between the
     // number
     // spectra of the detectors+monitors and the entry in NSP1, but in the
@@ -1321,5 +1061,4 @@ bool LoadISISNexus2::isMultipleTimeRegimeFile(NeXus::NXEntry &entry) const {
   return hasMultipleTimeRegimes;
 }
 
-} // namespace DataHandling
-} // namespace Mantid
+} // namespace Mantid::DataHandling

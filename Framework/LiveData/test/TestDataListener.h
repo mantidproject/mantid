@@ -22,13 +22,16 @@ public:
   TestDataListener();
   ~TestDataListener() override;
 
+  // Cannot copy the RNG so implicitly we delete ours
+  TestDataListener(const TestDataListener &) = delete;
+  TestDataListener &operator=(TestDataListener) = delete;
+
   std::string name() const override { return "TestDataListener"; }
   bool supportsHistory() const override { return false; }
   bool buffersEvents() const override { return true; }
 
   bool connect(const Poco::Net::SocketAddress &address) override;
-  void start(
-      Types::Core::DateAndTime startTime = Types::Core::DateAndTime()) override;
+  void start(Types::Core::DateAndTime startTime = Types::Core::DateAndTime()) override;
   std::shared_ptr<API::Workspace> extractData() override;
 
   bool isConnected() override;

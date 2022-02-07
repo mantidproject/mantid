@@ -42,8 +42,7 @@ public:
   /// this function to the category "General" and the sub-category
   /// "Muon\\Custom"
   const std::string category() const override { return "C++ User Defined"; }
-  void functionDeriv(const API::FunctionDomain &domain,
-                     API::Jacobian &out) override;
+  void functionDeriv(const API::FunctionDomain &domain, API::Jacobian &out) override;
 
   // ** OPTIONALLY MODIFY THIS **
   virtual const std::string summary() const {
@@ -52,10 +51,8 @@ public:
   }
 
 protected:
-  void functionLocal(double *out, const double *xValues,
-                     const size_t nData) const override;
-  void functionDerivLocal(API::Jacobian *, const double *,
-                          const size_t) override {}
+  void functionLocal(double *out, const double *xValues, const size_t nData) const override;
+  void functionDerivLocal(API::Jacobian *, const double *, const size_t) override {}
   /// overwrite IFunction base class method, which declare function parameters
   void init() override;
 };

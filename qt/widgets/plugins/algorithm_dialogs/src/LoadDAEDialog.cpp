@@ -15,8 +15,7 @@
 #include <QLineEdit>
 #include <QValidator>
 
-namespace MantidQt {
-namespace CustomDialogs {
+namespace MantidQt::CustomDialogs {
 
 DECLARE_DIALOG(LoadDAEDialog)
 
@@ -30,9 +29,8 @@ public:
 };
 
 LoadDAEDialog::LoadDAEDialog(QWidget *parent)
-    : MantidQt::API::AlgorithmDialog(parent), lineHost(nullptr),
-      lineName(nullptr), minSpLineEdit(nullptr), maxSpLineEdit(nullptr),
-      listSpLineEdit(nullptr), updateLineEdit(nullptr) {}
+    : MantidQt::API::AlgorithmDialog(parent), lineHost(nullptr), lineName(nullptr), minSpLineEdit(nullptr),
+      maxSpLineEdit(nullptr), listSpLineEdit(nullptr), updateLineEdit(nullptr) {}
 
 LoadDAEDialog::~LoadDAEDialog() {}
 
@@ -91,5 +89,4 @@ void LoadDAEDialog::initLayout() {
   setWindowTitle(tr("Load Workspace from DAE"));
   setFixedHeight(sizeHint().height());
 }
-} // namespace CustomDialogs
-} // namespace MantidQt
+} // namespace MantidQt::CustomDialogs

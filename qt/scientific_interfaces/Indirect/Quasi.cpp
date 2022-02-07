@@ -5,6 +5,7 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "Quasi.h"
+#include "IndirectSettingsHelper.h"
 
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/TextAxis.h"
@@ -16,18 +17,15 @@ namespace {
 Mantid::Kernel::Logger g_log("Quasi");
 }
 
-namespace MantidQt {
-namespace CustomInterfaces {
+namespace MantidQt::CustomInterfaces {
 
 Quasi::Quasi(QWidget *parent) : IndirectBayesTab(parent), m_previewSpec(0) {
   m_uiForm.setupUi(parent);
 
   // Create range selector
   auto eRangeSelector = m_uiForm.ppPlot->addRangeSelector("QuasiERange");
-  connect(eRangeSelector, SIGNAL(minValueChanged(double)), this,
-          SLOT(minValueChanged(double)));
-  connect(eRangeSelector, SIGNAL(maxValueChanged(double)), this,
-          SLOT(maxValueChanged(double)));
+  connect(eRangeSelector, SIGNAL(minValueChanged(double)), this, SLOT(minValueChanged(double)));
+  connect(eRangeSelector, SIGNAL(maxValueChanged(double)), this, SLOT(maxValueChanged(double)));
 
   // Add the properties browser to the UI form
   m_uiForm.treeSpace->addWidget(m_propTree);
@@ -56,29 +54,23 @@ Quasi::Quasi(QWidget *parent) : IndirectBayesTab(parent), m_previewSpec(0) {
   m_dblManager->setMinimum(m_properties["ResBinning"], 1);
 
   // Connect optional form elements with enabling checkboxes
-  connect(m_uiForm.chkFixWidth, SIGNAL(toggled(bool)), m_uiForm.mwFixWidthDat,
-          SLOT(setEnabled(bool)));
-  connect(m_uiForm.chkUseResNorm, SIGNAL(toggled(bool)), m_uiForm.dsResNorm,
-          SLOT(setEnabled(bool)));
+  connect(m_uiForm.chkFixWidth, SIGNAL(toggled(bool)), m_uiForm.mwFixWidthDat, SLOT(setEnabled(bool)));
+  connect(m_uiForm.chkUseResNorm, SIGNAL(toggled(bool)), m_uiForm.dsResNorm, SLOT(setEnabled(bool)));
 
   // Connect the data selector for the sample to the mini plot
-  connect(m_uiForm.dsSample, SIGNAL(dataReady(const QString &)), this,
-          SLOT(handleSampleInputReady(const QString &)));
+  connect(m_uiForm.dsSample, SIGNAL(dataReady(const QString &)), this, SLOT(handleSampleInputReady(const QString &)));
 
   connect(m_uiForm.dsResolution, SIGNAL(dataReady(const QString &)), this,
           SLOT(handleResolutionInputReady(const QString &)));
 
   // Connect the program selector to its handler
-  connect(m_uiForm.cbProgram, SIGNAL(currentIndexChanged(int)), this,
-          SLOT(handleProgramChange(int)));
+  connect(m_uiForm.cbProgram, SIGNAL(currentIndexChanged(int)), this, SLOT(handleProgramChange(int)));
 
   // Connect preview spectrum spinner to handler
-  connect(m_uiForm.spPreviewSpectrum, SIGNAL(valueChanged(int)), this,
-          SLOT(previewSpecChanged(int)));
+  connect(m_uiForm.spPreviewSpectrum, SIGNAL(valueChanged(int)), this, SLOT(previewSpecChanged(int)));
 
   // Plot current preview
-  connect(m_uiForm.pbPlotPreview, SIGNAL(clicked()), this,
-          SLOT(plotCurrentPreview()));
+  connect(m_uiForm.pbPlotPreview, SIGNAL(clicked()), this, SLOT(plotCurrentPreview()));
 
   connect(m_uiForm.pbRun, SIGNAL(clicked()), this, SLOT(runClicked()));
   connect(m_uiForm.pbSave, SIGNAL(clicked()), this, SLOT(saveClicked()));
@@ -105,14 +97,10 @@ void Quasi::loadSettings(const QSettings &settings) {
 void Quasi::setFileExtensionsByName(bool filter) {
   QStringList const noSuffixes{""};
   auto const tabName("Quasi");
-  m_uiForm.dsSample->setFBSuffixes(filter ? getSampleFBSuffixes(tabName)
-                                          : getExtensions(tabName));
-  m_uiForm.dsSample->setWSSuffixes(filter ? getSampleWSSuffixes(tabName)
-                                          : noSuffixes);
-  m_uiForm.dsResolution->setFBSuffixes(filter ? getResolutionFBSuffixes(tabName)
-                                              : getExtensions(tabName));
-  m_uiForm.dsResolution->setWSSuffixes(filter ? getResolutionWSSuffixes(tabName)
-                                              : noSuffixes);
+  m_uiForm.dsSample->setFBSuffixes(filter ? getSampleFBSuffixes(tabName) : getExtensions(tabName));
+  m_uiForm.dsSample->setWSSuffixes(filter ? getSampleWSSuffixes(tabName) : noSuffixes);
+  m_uiForm.dsResolution->setFBSuffixes(filter ? getResolutionFBSuffixes(tabName) : getExtensions(tabName));
+  m_uiForm.dsResolution->setWSSuffixes(filter ? getResolutionWSSuffixes(tabName) : noSuffixes);
 }
 
 void Quasi::setup() {}
@@ -135,7 +123,7 @@ bool Quasi::validate() {
 
   // check fixed width file exists
   if (m_uiForm.chkFixWidth->isChecked() && !m_uiForm.mwFixWidthDat->isValid()) {
-    uiv.checkMWRunFilesIsValid("Width", m_uiForm.mwFixWidthDat);
+    uiv.checkFileFinderWidgetIsValid("Width", m_uiForm.mwFixWidthDat);
   }
 
   // check eMin and eMax values
@@ -180,10 +168,8 @@ void Quasi::run() {
   bool useResNorm = false;
   std::string resNormFile("");
 
-  std::string const sampleName =
-      m_uiForm.dsSample->getCurrentDataName().toStdString();
-  std::string const resName =
-      m_uiForm.dsResolution->getCurrentDataName().toStdString();
+  std::string const sampleName = m_uiForm.dsSample->getCurrentDataName().toStdString();
+  std::string const resName = m_uiForm.dsResolution->getCurrentDataName().toStdString();
 
   std::string program = m_uiForm.cbProgram->currentText().toStdString();
 
@@ -194,8 +180,7 @@ void Quasi::run() {
   }
 
   // Collect input from fit options section
-  std::string const background =
-      m_uiForm.cbBackground->currentText().toStdString();
+  std::string const background = m_uiForm.cbBackground->currentText().toStdString();
 
   if (m_uiForm.chkElasticPeak->isChecked()) {
     elasticPeak = true;
@@ -243,8 +228,7 @@ void Quasi::run() {
 
   m_QuasiAlg = runAlg;
   m_batchAlgoRunner->addAlgorithm(runAlg);
-  connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this,
-          SLOT(algorithmComplete(bool)));
+  connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this, SLOT(algorithmComplete(bool)));
 
   m_batchAlgoRunner->executeBatchAsync();
 }
@@ -296,19 +280,16 @@ void Quasi::updateMiniPlot() {
       program += "d";
   }
 
-  QString outWsName = sampleName.left(sampleName.size() - 3) + program +
-                      "_Workspace_" + QString::number(m_previewSpec);
+  QString outWsName = sampleName.left(sampleName.size() - 3) + program + "_Workspace_" + QString::number(m_previewSpec);
   if (!AnalysisDataService::Instance().doesExist(outWsName.toStdString()))
     return;
 
   MatrixWorkspace_sptr outputWorkspace =
-      AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-          outWsName.toStdString());
+      AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(outWsName.toStdString());
 
   TextAxis *axis = dynamic_cast<TextAxis *>(outputWorkspace->getAxis(1));
 
-  for (std::size_t histIndex = 0;
-       histIndex < outputWorkspace->getNumberHistograms(); histIndex++) {
+  for (std::size_t histIndex = 0; histIndex < outputWorkspace->getNumberHistograms(); histIndex++) {
     QString specName = QString::fromStdString(axis->label(histIndex));
     QColor curveColour;
 
@@ -326,8 +307,7 @@ void Quasi::updateMiniPlot() {
       continue;
 
     try {
-      m_uiForm.ppPlot->addSpectrum(specName, outputWorkspace, histIndex,
-                                   curveColour);
+      m_uiForm.ppPlot->addSpectrum(specName, outputWorkspace, histIndex, curveColour);
     } catch (std::exception const &ex) {
       g_log.warning(ex.what());
     }
@@ -341,9 +321,7 @@ void Quasi::updateMiniPlot() {
  * @param filename :: The name of the workspace to plot
  */
 void Quasi::handleSampleInputReady(const QString &filename) {
-  MatrixWorkspace_sptr inWs =
-      AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-          filename.toStdString());
+  MatrixWorkspace_sptr inWs = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(filename.toStdString());
   int numHist = static_cast<int>(inWs->getNumberHistograms()) - 1;
   m_uiForm.spPreviewSpectrum->setMaximum(numHist);
   updateMiniPlot();
@@ -352,10 +330,8 @@ void Quasi::handleSampleInputReady(const QString &filename) {
 
   auto eRangeSelector = m_uiForm.ppPlot->getRangeSelector("QuasiERange");
 
-  setRangeSelector(eRangeSelector, m_properties["EMin"], m_properties["EMax"],
-                   range);
-  setPlotPropertyRange(eRangeSelector, m_properties["EMin"],
-                       m_properties["EMax"], range);
+  setRangeSelector(eRangeSelector, m_properties["EMin"], m_properties["EMax"], range);
+  setPlotPropertyRange(eRangeSelector, m_properties["EMin"], m_properties["EMax"], range);
   eRangeSelector->setMinimum(range.first);
   eRangeSelector->setMaximum(range.second);
 }
@@ -364,6 +340,7 @@ void Quasi::handleSampleInputReady(const QString &filename) {
  * Plots the current preview on the miniplot
  */
 void Quasi::plotCurrentPreview() {
+  auto const errorBars = IndirectSettingsHelper::externalPlotErrorBars();
 
   if (m_uiForm.ppPlot->hasCurve("fit.1")) {
     QString program = m_uiForm.cbProgram->currentText();
@@ -373,13 +350,12 @@ void Quasi::plotCurrentPreview() {
     auto fitWS = fitName + "_";
     fitWS += std::to_string(m_previewSpec);
     if (program == "Lorentzians")
-      m_plotter->plotSpectra(fitWS, "0-4");
+      m_plotter->plotSpectra(fitWS, "0-4", errorBars);
     else
-      m_plotter->plotSpectra(fitWS, "0-2");
+      m_plotter->plotSpectra(fitWS, "0-2", errorBars);
   } else if (m_uiForm.ppPlot->hasCurve("Sample")) {
-    m_plotter->plotSpectra(
-        m_uiForm.dsSample->getCurrentDataName().toStdString(),
-        std::to_string(m_previewSpec));
+    m_plotter->plotSpectra(m_uiForm.dsSample->getCurrentDataName().toStdString(), std::to_string(m_previewSpec),
+                           errorBars);
   }
 }
 
@@ -405,8 +381,7 @@ void Quasi::minValueChanged(double min) {
   disconnect(m_dblManager, SIGNAL(valueChanged(QtProperty *, double)), this,
              SLOT(updateProperties(QtProperty *, double)));
   m_dblManager->setValue(m_properties["EMin"], min);
-  connect(m_dblManager, SIGNAL(valueChanged(QtProperty *, double)), this,
-          SLOT(updateProperties(QtProperty *, double)));
+  connect(m_dblManager, SIGNAL(valueChanged(QtProperty *, double)), this, SLOT(updateProperties(QtProperty *, double)));
 }
 
 /**
@@ -418,8 +393,7 @@ void Quasi::maxValueChanged(double max) {
   disconnect(m_dblManager, SIGNAL(valueChanged(QtProperty *, double)), this,
              SLOT(updateProperties(QtProperty *, double)));
   m_dblManager->setValue(m_properties["EMax"], max);
-  connect(m_dblManager, SIGNAL(valueChanged(QtProperty *, double)), this,
-          SLOT(updateProperties(QtProperty *, double)));
+  connect(m_dblManager, SIGNAL(valueChanged(QtProperty *, double)), this, SLOT(updateProperties(QtProperty *, double)));
 }
 
 /**
@@ -435,15 +409,12 @@ void Quasi::updateProperties(QtProperty *prop, double val) {
              SLOT(updateProperties(QtProperty *, double)));
 
   if (prop == m_properties["EMin"]) {
-    setRangeSelectorMin(m_properties["EMin"], m_properties["EMax"],
-                        eRangeSelector, val);
+    setRangeSelectorMin(m_properties["EMin"], m_properties["EMax"], eRangeSelector, val);
   } else if (prop == m_properties["EMax"]) {
-    setRangeSelectorMax(m_properties["EMin"], m_properties["EMax"],
-                        eRangeSelector, val);
+    setRangeSelectorMax(m_properties["EMin"], m_properties["EMax"], eRangeSelector, val);
   }
 
-  connect(m_dblManager, SIGNAL(valueChanged(QtProperty *, double)), this,
-          SLOT(updateProperties(QtProperty *, double)));
+  connect(m_dblManager, SIGNAL(valueChanged(QtProperty *, double)), this, SLOT(updateProperties(QtProperty *, double)));
 }
 
 /**
@@ -478,9 +449,8 @@ void Quasi::previewSpecChanged(int value) {
  * Handles saving the workspace when save is clicked
  */
 void Quasi::saveClicked() {
-  QString saveDirectory = QString::fromStdString(
-      Mantid::Kernel::ConfigService::Instance().getString(
-          "defaultsave.directory"));
+  QString saveDirectory =
+      QString::fromStdString(Mantid::Kernel::ConfigService::Instance().getString("defaultsave.directory"));
   auto const fitWS = m_QuasiAlg->getPropertyValue("OutputWorkspaceFit");
   IndirectTab::checkADSForPlotSaveWorkspace(fitWS, false);
   QString const QfitWS = QString::fromStdString(fitWS);
@@ -497,9 +467,7 @@ void Quasi::saveClicked() {
 
 void Quasi::runClicked() {
   if (validateTab()) {
-    auto const saveDirectory =
-        Mantid::Kernel::ConfigService::Instance().getString(
-            "defaultsave.directory");
+    auto const saveDirectory = Mantid::Kernel::ConfigService::Instance().getString("defaultsave.directory");
     displayMessageAndRun(saveDirectory);
   }
 }
@@ -518,14 +486,12 @@ void Quasi::displayMessageAndRun(std::string const &saveDirectory) {
 }
 
 int Quasi::displaySaveDirectoryMessage() {
-  char const *textMessage =
-      "BayesQuasi requires a default save directory and "
-      "one is not currently set."
-      " If run, the algorithm will default to saving files "
-      "to the current working directory."
-      " Would you still like to run the algorithm?";
-  return QMessageBox::question(nullptr, tr("Save Directory"), tr(textMessage),
-                               QMessageBox::Yes, QMessageBox::No,
+  char const *textMessage = "BayesQuasi requires a default save directory and "
+                            "one is not currently set."
+                            " If run, the algorithm will default to saving files "
+                            "to the current working directory."
+                            " Would you still like to run the algorithm?";
+  return QMessageBox::question(nullptr, tr("Save Directory"), tr(textMessage), QMessageBox::Yes, QMessageBox::No,
                                QMessageBox::NoButton);
 }
 
@@ -534,6 +500,7 @@ int Quasi::displaySaveDirectoryMessage() {
  */
 void Quasi::plotClicked() {
   setPlotResultIsPlotting(true);
+  auto const errorBars = IndirectSettingsHelper::externalPlotErrorBars();
 
   // Output options
   std::string const plot = m_uiForm.cbPlot->currentText().toStdString();
@@ -543,11 +510,10 @@ void Quasi::plotClicked() {
     auto const probWS = m_QuasiAlg->getPropertyValue("OutputWorkspaceProb");
     // Check workspace exists
     IndirectTab::checkADSForPlotSaveWorkspace(probWS, true);
-    m_plotter->plotSpectra(probWS, "1-2");
+    m_plotter->plotSpectra(probWS, "1-2", errorBars);
   }
 
-  auto const resultWS =
-      AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(resultName);
+  auto const resultWS = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(resultName);
   int const numSpectra = (int)resultWS->getNumberHistograms();
   IndirectTab::checkADSForPlotSaveWorkspace(resultName, true);
   auto const paramNames = {"Amplitude", "FWHM", "Beta"};
@@ -564,15 +530,12 @@ void Quasi::plotClicked() {
 
           if (program == "Lorentzians") {
             if (spectraIndices.size() == 3) {
-              auto const workspaceIndices =
-                  std::to_string(spectraIndices[0]) + "," +
-                  std::to_string(spectraIndices[1]) + "," +
-                  std::to_string(spectraIndices[1]);
-              m_plotter->plotSpectra(resultName, workspaceIndices);
+              auto const workspaceIndices = std::to_string(spectraIndices[0]) + "," +
+                                            std::to_string(spectraIndices[1]) + "," + std::to_string(spectraIndices[2]);
+              m_plotter->plotSpectra(resultName, workspaceIndices, errorBars);
             }
           } else
-            m_plotter->plotSpectra(resultName,
-                                   std::to_string(spectraIndices[0]));
+            m_plotter->plotSpectra(resultName, std::to_string(spectraIndices[0]), errorBars);
         }
       }
     }
@@ -587,9 +550,7 @@ void Quasi::setPlotResultEnabled(bool enabled) {
   m_uiForm.cbPlot->setEnabled(enabled);
 }
 
-void Quasi::setSaveResultEnabled(bool enabled) {
-  m_uiForm.pbSave->setEnabled(enabled);
-}
+void Quasi::setSaveResultEnabled(bool enabled) { m_uiForm.pbSave->setEnabled(enabled); }
 
 void Quasi::setButtonsEnabled(bool enabled) {
   setRunEnabled(enabled);
@@ -607,5 +568,4 @@ void Quasi::setPlotResultIsPlotting(bool plotting) {
   setButtonsEnabled(!plotting);
 }
 
-} // namespace CustomInterfaces
-} // namespace MantidQt
+} // namespace MantidQt::CustomInterfaces

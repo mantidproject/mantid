@@ -5,8 +5,10 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidCrystal/SelectCellOfType.h"
+#include "MantidAPI/IPeaksWorkspace.h"
 #include "MantidAPI/Sample.h"
 #include "MantidCrystal/SelectCellWithForm.h"
+#include "MantidDataObjects/LeanElasticPeaksWorkspace.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidGeometry/Crystal/IndexingUtils.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
@@ -14,8 +16,7 @@
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/ListValidator.h"
 
-namespace Mantid {
-namespace Crystal {
+namespace Mantid::Crystal {
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(SelectCellOfType)
 
@@ -27,8 +28,7 @@ using namespace Mantid::Geometry;
 /** Initialize the algorithm's properties.
  */
 void SelectCellOfType::init() {
-  this->declareProperty(std::make_unique<WorkspaceProperty<PeaksWorkspace>>(
-                            "PeaksWorkspace", "", Direction::InOut),
+  this->declareProperty(std::make_unique<WorkspaceProperty<IPeaksWorkspace>>("PeaksWorkspace", "", Direction::InOut),
                         "Input Peaks Workspace");
 
   std::vector<std::string> type_list;
@@ -40,8 +40,7 @@ void SelectCellOfType::init() {
   type_list.emplace_back(ReducedCell::MONOCLINIC());
   type_list.emplace_back(ReducedCell::TRICLINIC());
 
-  declareProperty("CellType", type_list[0],
-                  std::make_shared<Kernel::StringListValidator>(type_list),
+  declareProperty("CellType", type_list[0], std::make_shared<Kernel::StringListValidator>(type_list),
                   "The conventional cell type to use");
 
   std::vector<std::string> centering_list;
@@ -51,45 +50,38 @@ void SelectCellOfType::init() {
   centering_list.emplace_back(ReducedCell::P_CENTERED());
   centering_list.emplace_back(ReducedCell::R_CENTERED());
 
-  declareProperty("Centering", centering_list[3],
-                  std::make_shared<Kernel::StringListValidator>(centering_list),
+  declareProperty("Centering", centering_list[3], std::make_shared<Kernel::StringListValidator>(centering_list),
                   "The centering for the conventional cell");
 
   this->declareProperty("Apply", false, "Update UB and re-index the peaks");
   this->declareProperty("Tolerance", 0.12, "Indexing Tolerance");
 
-  this->declareProperty(std::make_unique<PropertyWithValue<int>>(
-                            "NumIndexed", 0, Direction::Output),
+  this->declareProperty(std::make_unique<PropertyWithValue<int>>("NumIndexed", 0, Direction::Output),
                         "The number of indexed peaks if apply==true.");
 
-  this->declareProperty(std::make_unique<PropertyWithValue<double>>(
-                            "AverageError", 0.0, Direction::Output),
+  this->declareProperty(std::make_unique<PropertyWithValue<double>>("AverageError", 0.0, Direction::Output),
                         "The average HKL indexing error if apply==true.");
 
-  this->declareProperty("AllowPermutations", true,
-                        "Allow permutations of conventional cells");
+  this->declareProperty("AllowPermutations", true, "Allow permutations of conventional cells");
 
-  this->declareProperty(std::make_unique<ArrayProperty<double>>(
-                            "TransformationMatrix", Direction::Output),
+  this->declareProperty(std::make_unique<ArrayProperty<double>>("TransformationMatrix", Direction::Output),
                         "The transformation matrix");
 }
 
 /** Execute the algorithm.
  */
 void SelectCellOfType::exec() {
-  PeaksWorkspace_sptr ws = this->getProperty("PeaksWorkspace");
+  IPeaksWorkspace_sptr ws = this->getProperty("PeaksWorkspace");
   if (!ws) {
     throw std::runtime_error("Could not read the peaks workspace");
   }
 
   // copy current lattice
-  auto o_lattice = std::make_unique<OrientedLattice>(
-      ws->mutableSample().getOrientedLattice());
+  auto o_lattice = std::make_unique<OrientedLattice>(ws->mutableSample().getOrientedLattice());
   Matrix<double> UB = o_lattice->getUB();
 
   if (!IndexingUtils::CheckUB(UB)) {
-    throw std::runtime_error(
-        "ERROR: The stored UB is not a valid orientation matrix");
+    throw std::runtime_error("ERROR: The stored UB is not a valid orientation matrix");
   }
 
   std::string cell_type = this->getProperty("CellType");
@@ -98,15 +90,13 @@ void SelectCellOfType::exec() {
   double tolerance = this->getProperty("Tolerance");
   bool allowPermutations = this->getProperty("AllowPermutations");
 
-  std::vector<ConventionalCell> list =
-      ScalarUtils::GetCells(UB, cell_type, centering, allowPermutations);
+  std::vector<ConventionalCell> list = ScalarUtils::GetCells(UB, cell_type, centering, allowPermutations);
 
   ConventionalCell info = ScalarUtils::GetCellBestError(list, true);
 
   DblMatrix newUB = info.GetNewUB();
 
-  std::string message = info.GetDescription() + " Lat Par:" +
-                        IndexingUtils::GetLatticeParameterString(newUB);
+  std::string message = info.GetDescription() + " Lat Par:" + IndexingUtils::GetLatticeParameterString(newUB);
 
   g_log.notice(std::string(message));
 
@@ -120,11 +110,9 @@ void SelectCellOfType::exec() {
     //----------------------------------------------
     o_lattice->setUB(newUB);
 
-    o_lattice->setError(sigabc[0], sigabc[1], sigabc[2], sigabc[3], sigabc[4],
-                        sigabc[5]);
+    o_lattice->setError(sigabc[0], sigabc[1], sigabc[2], sigabc[3], sigabc[4], sigabc[5]);
 
-    std::vector<Peak> &peaks = ws->getPeaks();
-    size_t n_peaks = ws->getNumberPeaks();
+    int n_peaks = ws->getNumberPeaks();
 
     int num_indexed = 0;
     double average_error = 0.0;
@@ -132,31 +120,30 @@ void SelectCellOfType::exec() {
     if (o_lattice->getMaxOrder() == 0) {
       std::vector<V3D> miller_indices;
       std::vector<V3D> q_vectors;
-      for (size_t i = 0; i < n_peaks; i++) {
-        q_vectors.emplace_back(peaks[i].getQSampleFrame());
+      for (int i = 0; i < n_peaks; i++) {
+        q_vectors.emplace_back(ws->getPeak(i).getQSampleFrame());
       }
-      num_indexed = IndexingUtils::CalculateMillerIndices(
-          newUB, q_vectors, tolerance, miller_indices, average_error);
+      num_indexed = IndexingUtils::CalculateMillerIndices(newUB, q_vectors, tolerance, miller_indices, average_error);
 
-      for (size_t i = 0; i < n_peaks; i++) {
-        peaks[i].setIntHKL(miller_indices[i]);
-        peaks[i].setHKL(miller_indices[i]);
+      for (int i = 0; i < n_peaks; i++) {
+        IPeak &peak = ws->getPeak(i);
+        peak.setIntHKL(miller_indices[i]);
+        peak.setHKL(miller_indices[i]);
       }
     } else {
       num_indexed = static_cast<int>(num_indexed);
-      for (size_t i = 0; i < n_peaks; i++) {
-        average_error += (peaks[i].getHKL()).hklError();
-        peaks[i].setIntHKL(T * peaks[i].getIntHKL());
-        peaks[i].setHKL(T * peaks[i].getHKL());
+      for (int i = 0; i < n_peaks; i++) {
+        IPeak &peak = ws->getPeak(i);
+        average_error += (peak.getHKL()).hklError();
+        peak.setIntHKL(T * peak.getIntHKL());
+        peak.setHKL(T * peak.getHKL());
       }
     }
     ws->mutableSample().setOrientedLattice(std::move(o_lattice));
 
     // Tell the user what happened.
     g_log.notice() << "Re-indexed the peaks with the new UB. \n";
-    g_log.notice() << "Now, " << num_indexed
-                   << " are indexed with average error " << average_error
-                   << '\n';
+    g_log.notice() << "Now, " << num_indexed << " are indexed with average error " << average_error << '\n';
 
     // Save output properties
     this->setProperty("NumIndexed", num_indexed);
@@ -164,5 +151,4 @@ void SelectCellOfType::exec() {
   }
 }
 
-} // namespace Crystal
-} // namespace Mantid
+} // namespace Mantid::Crystal

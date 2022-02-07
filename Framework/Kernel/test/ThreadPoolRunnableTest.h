@@ -20,10 +20,7 @@ int ThreadPoolRunnableTest_value;
 
 class ThreadPoolRunnableTest : public CxxTest::TestSuite {
 public:
-  void test_constructor() {
-    TS_ASSERT_THROWS(ThreadPoolRunnable(0, nullptr),
-                     const std::invalid_argument &);
-  }
+  void test_constructor() { TS_ASSERT_THROWS(ThreadPoolRunnable(0, nullptr), const std::invalid_argument &); }
 
   //=======================================================================================
   class SimpleTask : public Task {
@@ -32,8 +29,7 @@ public:
 
   void test_run() {
     std::unique_ptr<ThreadPoolRunnable> tpr;
-    std::unique_ptr<ThreadScheduler> sc =
-        std::make_unique<ThreadSchedulerFIFO>();
+    std::unique_ptr<ThreadScheduler> sc = std::make_unique<ThreadSchedulerFIFO>();
     tpr = std ::make_unique<ThreadPoolRunnable>(0, sc.get());
     sc->push(std::make_shared<SimpleTask>());
     TS_ASSERT_EQUALS(sc->size(), 1);
@@ -53,15 +49,13 @@ public:
   class TaskThatThrows : public Task {
     void run() override {
       ThreadPoolRunnableTest_value += 1;
-      throw Mantid::Kernel::Exception::NotImplementedError(
-          "Test exception from TaskThatThrows.");
+      throw Mantid::Kernel::Exception::NotImplementedError("Test exception from TaskThatThrows.");
     }
   };
 
   void test_run_throws() {
     std::unique_ptr<ThreadPoolRunnable> tpr;
-    std::unique_ptr<ThreadScheduler> sc =
-        std::make_unique<ThreadSchedulerFIFO>();
+    std::unique_ptr<ThreadScheduler> sc = std::make_unique<ThreadSchedulerFIFO>();
     tpr = std::make_unique<ThreadPoolRunnable>(0, sc.get());
 
     // Put 10 tasks in

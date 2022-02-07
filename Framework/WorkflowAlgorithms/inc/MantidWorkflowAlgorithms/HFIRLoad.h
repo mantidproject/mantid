@@ -57,17 +57,14 @@ public:
   /// Algorithm's version
   int version() const override { return (1); }
   /// Algorithm's category for identification
-  const std::string category() const override {
-    return "Workflow\\SANS\\UsesPropertyManager";
-  }
+  const std::string category() const override { return "Workflow\\SANS\\UsesPropertyManager"; }
 
 private:
   /// Initialisation code
   void init() override;
   /// Execution code
   void exec() override;
-  void moveToBeamCenter(API::MatrixWorkspace_sptr &dataWS, double &center_x,
-                        double &center_y);
+  void moveToBeamCenter(API::MatrixWorkspace_sptr &dataWS, double &center_x, double &center_y);
 };
 
 } // namespace WorkflowAlgorithms

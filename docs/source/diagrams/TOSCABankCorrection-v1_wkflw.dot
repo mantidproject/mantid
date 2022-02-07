@@ -35,14 +35,14 @@ digraph TOSCABankCorrection {
   PeakFunction                   -> FindPeak
   PeakPosition                   -> FindPeak
   FindPeak                       -> SortTableWorkspace             [label="Sort peaks by height"]
-  SortTableWorkspace             -> Peaks                          
+  SortTableWorkspace             -> Peaks
   Peaks                          -> TargetPeakCentre               [label="Output"]
   ClosePeakTolerance             -> Bank1_ScaleFactor
   Peaks                          -> Bank1_ScaleFactor
   ClosePeaktolerance             -> Bank2_ScaleFactor
-  Peaks                          -> Bank2_ScaleFactor              
+  Peaks                          -> Bank2_ScaleFactor
   Croppedworkspace               -> ScaleX                         [label="Workspace containing bank spectra"]
-  Bank1_ScaleFactor              -> ScaleX                      
+  Bank1_ScaleFactor              -> ScaleX
   Bank2_ScaleFactor              -> ScaleX
   ScaleX                         -> ScaledWorkspace
   ScaledWorkspace                -> RebinToWorkspace               [label="Rebin to original input binning"]

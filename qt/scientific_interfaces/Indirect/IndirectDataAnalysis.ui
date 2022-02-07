@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>799</width>
-    <height>764</height>
+    <width>1100</width>
+    <height>1100</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -23,7 +23,7 @@
    </size>
   </property>
   <property name="windowTitle">
-   <string>Indirect Data Analysis</string>
+   <string>Inelastic Data Analysis</string>
   </property>
   <widget class="QWidget" name="centralwidget">
    <property name="sizePolicy">

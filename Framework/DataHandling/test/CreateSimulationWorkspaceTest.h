@@ -21,12 +21,8 @@ class CreateSimulationWorkspaceTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static CreateSimulationWorkspaceTest *createSuite() {
-    return new CreateSimulationWorkspaceTest();
-  }
-  static void destroySuite(CreateSimulationWorkspaceTest *suite) {
-    delete suite;
-  }
+  static CreateSimulationWorkspaceTest *createSuite() { return new CreateSimulationWorkspaceTest(); }
+  static void destroySuite(CreateSimulationWorkspaceTest *suite) { delete suite; }
 
   CreateSimulationWorkspaceTest() : m_wsName("CreateSimulationWorkspaceTest") {}
 
@@ -44,11 +40,10 @@ public:
 
   void test_Execute_With_Unknown_Instrument_Throws() {
     using namespace Mantid::API;
-    Mantid::API::IAlgorithm_sptr alg = createAlgorithm(m_wsName);
+    auto alg = createAlgorithm(m_wsName);
     TS_ASSERT_THROWS_NOTHING(alg->setPropertyValue("BinParams", "1,1,10"));
 
-    TS_ASSERT_THROWS_NOTHING(
-        alg->setPropertyValue("Instrument", "__NOT_AN_INSTRUMENT__"));
+    TS_ASSERT_THROWS_NOTHING(alg->setPropertyValue("Instrument", "__NOT_AN_INSTRUMENT__"));
     TS_ASSERT_THROWS(alg->execute(), const std::runtime_error &);
   }
 
@@ -140,8 +135,7 @@ public:
     auto alg = std::make_shared<CreateSimulationWorkspace>();
     alg->initialize();
 
-    TS_ASSERT_THROWS(alg->setPropertyValue("UnitX", "NOT_A_UNIT"),
-                     const std::invalid_argument &);
+    TS_ASSERT_THROWS(alg->setPropertyValue("UnitX", "NOT_A_UNIT"), const std::invalid_argument &);
   }
 
   void test_UnitX_Parameter_Is_DeltaE_By_Default() {
@@ -157,29 +151,42 @@ public:
     TS_ASSERT_EQUALS(outputWS->getAxis(0)->unit()->unitID(), unitx);
   }
 
+  void test_Bin_Errors() {
+    auto outputWS = runAlgorithm("HET");
+
+    const Mantid::MantidVec &bins = outputWS->readE(0);
+    for (size_t i = 0; i < bins.size(); ++i) {
+      TS_ASSERT_DELTA(bins[i], sqrt(outputWS->readY(0)[i]), 1e-10);
+    }
+
+    // Re-run to verify errors are 0 when flag is unset
+    outputWS = runAlgorithm("HET", "", "", false);
+    const Mantid::MantidVec &binsNoErr = outputWS->readE(0);
+    for (size_t i = 0; i < binsNoErr.size(); ++i) {
+      TS_ASSERT_DELTA(binsNoErr[i], 0.0, 1e-10);
+    }
+  }
+
 private:
-  Mantid::API::MatrixWorkspace_sptr
-  runAlgorithm(const std::string &inst, const std::string &unitx = "",
-               const std::string &maptable = "") {
+  Mantid::API::MatrixWorkspace_sptr runAlgorithm(const std::string &inst, const std::string &unitx = "",
+                                                 const std::string &maptable = "", bool setErrors = true) {
     using namespace Mantid::API;
-    IAlgorithm_sptr alg = createAlgorithm(m_wsName);
+    auto alg = createAlgorithm(m_wsName);
 
     TS_ASSERT_THROWS_NOTHING(alg->setPropertyValue("Instrument", inst));
     TS_ASSERT_THROWS_NOTHING(alg->setPropertyValue("BinParams", "-30,3,279"));
     if (!unitx.empty())
       TS_ASSERT_THROWS_NOTHING(alg->setPropertyValue("UnitX", unitx));
     if (!maptable.empty())
-      TS_ASSERT_THROWS_NOTHING(
-          alg->setPropertyValue("DetectorTableFilename", maptable));
+      TS_ASSERT_THROWS_NOTHING(alg->setPropertyValue("DetectorTableFilename", maptable));
+    TS_ASSERT_THROWS_NOTHING(alg->setProperty("SetErrors", setErrors));
 
     TS_ASSERT_THROWS_NOTHING(alg->execute());
 
-    return Mantid::API::AnalysisDataService::Instance()
-        .retrieveWS<MatrixWorkspace>(m_wsName);
+    return Mantid::API::AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(m_wsName);
   }
 
-  void doBinCheck(const Mantid::API::MatrixWorkspace_sptr &outputWS,
-                  const size_t expectedSize) {
+  void doBinCheck(const Mantid::API::MatrixWorkspace_sptr &outputWS, const size_t expectedSize) {
     TS_ASSERT_EQUALS(outputWS->readX(0).size(), expectedSize);
     // Check bins are correct
     const Mantid::MantidVec &bins = outputWS->readX(0);
@@ -189,8 +196,8 @@ private:
     }
   }
 
-  void doInstrumentCheck(const Mantid::API::MatrixWorkspace_sptr &outputWS,
-                         const std::string &name, const size_t ndets) {
+  void doInstrumentCheck(const Mantid::API::MatrixWorkspace_sptr &outputWS, const std::string &name,
+                         const size_t ndets) {
     Mantid::Geometry::Instrument_const_sptr instr = outputWS->getInstrument();
 
     TS_ASSERT(instr);
@@ -207,12 +214,10 @@ private:
     return alg;
   }
 
-  void compareSimulationWorkspaceIDFWithFileIDF(
-      const Mantid::API::MatrixWorkspace_sptr &simulationWorkspace,
-      const std::string &filename, const std::string &algorithmName) {
+  void compareSimulationWorkspaceIDFWithFileIDF(const Mantid::API::MatrixWorkspace_sptr &simulationWorkspace,
+                                                const std::string &filename, const std::string &algorithmName) {
     std::string outputWSName = "outWSIDFCompareNexus";
-    auto alg = Mantid::API::AlgorithmManager::Instance().createUnmanaged(
-        algorithmName);
+    auto alg = Mantid::API::AlgorithmManager::Instance().createUnmanaged(algorithmName);
     alg->initialize();
     alg->setChild(true);
     alg->setProperty("Filename", filename);
@@ -222,10 +227,8 @@ private:
     Mantid::API::Workspace_sptr outWS = alg->getProperty("OutputWorkspace");
     auto matWS = std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(outWS);
     auto idfForOriginal = matWS->getInstrument()->getFilename();
-    auto idfForSimulationWS =
-        simulationWorkspace->getInstrument()->getFilename();
-    TSM_ASSERT_EQUALS("Should have the same IDF", idfForOriginal,
-                      idfForSimulationWS);
+    auto idfForSimulationWS = simulationWorkspace->getInstrument()->getFilename();
+    TSM_ASSERT_EQUALS("Should have the same IDF", idfForOriginal, idfForSimulationWS);
   }
 
   std::string m_wsName;
@@ -243,13 +246,9 @@ public:
     alg.setRethrows(true);
   }
 
-  void testCreateSimulationWorkspacePerformance() {
-    TS_ASSERT_THROWS_NOTHING(alg.execute());
-  }
+  void testCreateSimulationWorkspacePerformance() { TS_ASSERT_THROWS_NOTHING(alg.execute()); }
 
-  void tearDown() override {
-    Mantid::API::AnalysisDataService::Instance().remove(outWsName);
-  }
+  void tearDown() override { Mantid::API::AnalysisDataService::Instance().remove(outWsName); }
 
 private:
   CreateSimulationWorkspace alg;

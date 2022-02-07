@@ -11,21 +11,19 @@
 #include <cmath>
 #include <numeric>
 
-namespace MantidQt {
-namespace CustomInterfaces {
-namespace ISISReflectometry {
+namespace MantidQt::CustomInterfaces::ISISReflectometry {
 
-Group::Group( // cppcheck-suppress passedByValue
-    std::string name, std::vector<boost::optional<Row>> rows)
-    : m_name(std::move(name)), m_postprocessedWorkspaceName(),
-      m_rows(std::move(rows)) {}
+Group::Group(std::string name, std::vector<boost::optional<Row>> rows)
+    : m_name(std::move(name)), m_postprocessedWorkspaceName(), m_rows(std::move(rows)) {}
 
 Group::Group(
-    // cppcheck-suppress passedByValue
+
     std::string name)
     : m_name(std::move(name)), m_rows() {}
 
 bool Group::isGroup() const { return true; }
+
+bool Group::isPreview() const { return false; }
 
 std::string const &Group::name() const { return m_name; }
 
@@ -33,9 +31,8 @@ std::string const &Group::name() const { return m_name; }
  * has multiple valid rows whose outputs will be stitched
  */
 bool Group::hasPostprocessing() const {
-  auto numberOfValidRows = std::count_if(
-      m_rows.cbegin(), m_rows.cend(),
-      [](boost::optional<Row> const &row) { return row.is_initialized(); });
+  auto numberOfValidRows = std::count_if(m_rows.cbegin(), m_rows.cend(),
+                                         [](boost::optional<Row> const &row) { return row.is_initialized(); });
   return numberOfValidRows > 1;
 }
 
@@ -44,10 +41,9 @@ bool Group::hasPostprocessing() const {
  * postprocessing)
  */
 bool Group::requiresProcessing(bool reprocessFailed) const {
-  return std::any_of(m_rows.cbegin(), m_rows.cend(),
-                     [&reprocessFailed](boost::optional<Row> const &row) {
-                       return row && row->requiresProcessing(reprocessFailed);
-                     });
+  return std::any_of(m_rows.cbegin(), m_rows.cend(), [&reprocessFailed](boost::optional<Row> const &row) {
+    return row && row->requiresProcessing(reprocessFailed);
+  });
 }
 
 /** Returns true if the group is ready to be postprocessed, i.e. if its rows
@@ -64,22 +60,16 @@ bool Group::requiresPostprocessing(bool reprocessFailed) const {
     return false;
 
   // If all rows are valid and complete then we're ready to postprocess
-  return std::all_of(
-      m_rows.cbegin(), m_rows.cend(),
-      [](boost::optional<Row> const &row) { return row && row->success(); });
+  return std::all_of(m_rows.cbegin(), m_rows.cend(),
+                     [](boost::optional<Row> const &row) { return row && row->success(); });
 }
 
-std::string Group::postprocessedWorkspaceName() const {
-  return m_postprocessedWorkspaceName;
-}
+std::string Group::postprocessedWorkspaceName() const { return m_postprocessedWorkspaceName; }
 
-boost::optional<int> Group::indexOfRowWithTheta(double theta,
-                                                double tolerance) const {
-  return indexOf(m_rows,
-                 [theta, tolerance](boost::optional<Row> const &row) -> bool {
-                   return row.is_initialized() &&
-                          std::abs(row.get().theta() - theta) < tolerance;
-                 });
+boost::optional<int> Group::indexOfRowWithTheta(double theta, double tolerance) const {
+  return indexOf(m_rows, [theta, tolerance](boost::optional<Row> const &row) -> bool {
+    return row.is_initialized() && std::abs(row.get().theta() - theta) < tolerance;
+  });
 }
 
 void Group::setName(std::string const &name) { m_name = name; }
@@ -99,13 +89,6 @@ void Group::resetSkipped() {
   for (auto &row : m_rows)
     if (row)
       row->setSkipped(false);
-}
-
-bool Group::allRowsAreValid() const {
-  return std::all_of(m_rows.cbegin(), m_rows.cend(),
-                     [](boost::optional<Row> const &row) -> bool {
-                       return row.is_initialized();
-                     });
 }
 
 std::vector<boost::optional<Row>> const &Group::rows() const { return m_rows; }
@@ -136,13 +119,19 @@ void Group::insertRow(boost::optional<Row> const &row, int beforeRowAtIndex) {
   m_rows.insert(m_rows.begin() + beforeRowAtIndex, row);
 }
 
+/** Insert a row into a group and sort rows by the angle column. If the
+ * row/angle is not initialized, add it at the end of the group.
+ *
+ * @param row : the row to insert
+ * @returns : the index of the inserted row in the group's list of rows
+ */
 int Group::insertRowSortedByAngle(boost::optional<Row> const &row) {
   Item::resetState();
 
   // If the row is not sortable, or there is nothing in the list yet, append it
   if (!row.is_initialized() || m_rows.size() == 0) {
     appendRow(row);
-    return static_cast<int>(m_rows.size());
+    return static_cast<int>(m_rows.size() - 1);
   }
 
   // Find the first row with theta greater than the row we're inserting (or
@@ -152,8 +141,7 @@ int Group::insertRowSortedByAngle(boost::optional<Row> const &row) {
       return false;
     return lhs < rhs->theta();
   };
-  auto insertIter = std::upper_bound(m_rows.cbegin(), m_rows.cend(),
-                                     row->theta(), valueLessThanRowTheta);
+  auto insertIter = std::upper_bound(m_rows.cbegin(), m_rows.cend(), row->theta(), valueLessThanRowTheta);
   auto const insertedRowIndex = std::distance(m_rows.cbegin(), insertIter);
   m_rows.insert(insertIter, row); // invalidates iterator
   return static_cast<int>(insertedRowIndex);
@@ -172,12 +160,9 @@ void Group::updateRow(int rowIndex, boost::optional<Row> const &row) {
   m_rows[rowIndex] = row;
 }
 
-boost::optional<Row> const &Group::operator[](int rowIndex) const {
-  return m_rows[rowIndex];
-}
+boost::optional<Row> const &Group::operator[](int rowIndex) const { return m_rows[rowIndex]; }
 
-boost::optional<Item &>
-Group::getItemWithOutputWorkspaceOrNone(std::string const &wsName) {
+boost::optional<Item &> Group::getItemWithOutputWorkspaceOrNone(std::string const &wsName) {
   // Check if any of the child rows have this workspace output
   for (auto &row : m_rows) {
     if (row && row->hasOutputWorkspace(wsName)) {
@@ -188,8 +173,7 @@ Group::getItemWithOutputWorkspaceOrNone(std::string const &wsName) {
   return boost::none;
 }
 
-void Group::renameOutputWorkspace(std::string const &oldName,
-                                  std::string const &newName) {
+void Group::renameOutputWorkspace(std::string const &oldName, std::string const &newName) {
   UNUSED_ARG(oldName);
   m_postprocessedWorkspaceName = newName;
 }
@@ -198,35 +182,30 @@ int Group::totalItems() const {
   // Include the group if postprocessing is applicable
   auto initCount = hasPostprocessing() ? 1 : 0;
   // Include all valid rows
-  return std::accumulate(rows().cbegin(), rows().cend(), initCount,
-                         [](int &count, boost::optional<Row> const &row) {
-                           if (row.is_initialized())
-                             return count + 1;
-                           else
-                             return count;
-                         });
+  return std::accumulate(rows().cbegin(), rows().cend(), initCount, [](int &count, boost::optional<Row> const &row) {
+    if (row.is_initialized())
+      return count + 1;
+    else
+      return count;
+  });
 }
 
 int Group::completedItems() const {
   // Include the group if it has been postprocessing
   auto initCount = complete() ? 1 : 0;
   // Include all valid rows that have been processed
-  return std::accumulate(rows().cbegin(), rows().cend(), initCount,
-                         [](int &count, boost::optional<Row> const &row) {
-                           if (row.is_initialized() && row->complete())
-                             return count + 1;
-                           else
-                             return count;
-                         });
+  return std::accumulate(rows().cbegin(), rows().cend(), initCount, [](int &count, boost::optional<Row> const &row) {
+    if (row.is_initialized() && row->complete())
+      return count + 1;
+    else
+      return count;
+  });
 }
 
 bool operator!=(Group const &lhs, Group const &rhs) { return !(lhs == rhs); }
 
 bool operator==(Group const &lhs, Group const &rhs) {
-  return lhs.name() == rhs.name() &&
-         lhs.postprocessedWorkspaceName() == rhs.postprocessedWorkspaceName() &&
+  return lhs.name() == rhs.name() && lhs.postprocessedWorkspaceName() == rhs.postprocessedWorkspaceName() &&
          lhs.rows() == rhs.rows();
 }
-} // namespace ISISReflectometry
-} // namespace CustomInterfaces
-} // namespace MantidQt
+} // namespace MantidQt::CustomInterfaces::ISISReflectometry

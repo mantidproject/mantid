@@ -17,9 +17,7 @@ namespace Detail {
 template <typename T> DLLExport bool checkIsEmpty(const T &);
 
 /// Specialization for any vector type
-template <typename T> bool checkIsEmpty(const std::vector<T> &value) {
-  return value.empty();
-}
+template <typename T> bool checkIsEmpty(const std::vector<T> &value) { return value.empty(); }
 
 /// Defines the concept of emptiness
 template <typename T> struct IsEmpty {
@@ -42,12 +40,9 @@ template <typename T> struct IsEmpty {
     @author Nick Draper, Tessella Support Services plc
     @date 28/11/2007
 */
-template <typename TYPE>
-class DLLExport MandatoryValidator : public TypedValidator<TYPE> {
+template <typename TYPE> class DLLExport MandatoryValidator : public TypedValidator<TYPE> {
 public:
-  IValidator_sptr clone() const override {
-    return std::make_shared<MandatoryValidator>();
-  }
+  IValidator_sptr clone() const override { return std::make_shared<MandatoryValidator>(); }
 
 private:
   /**

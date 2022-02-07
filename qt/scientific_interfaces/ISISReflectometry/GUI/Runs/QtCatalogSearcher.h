@@ -6,54 +6,54 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
+#include "Common/DllConfig.h"
 #include "GUI/Runs/IRunsView.h"
 #include "ISearcher.h"
 #include "MantidAPI/AlgorithmObserver.h"
 #include "MantidAPI/IAlgorithm_fwd.h"
+#include "MantidAPI/ITableWorkspace_fwd.h"
 
 namespace MantidQt {
 namespace CustomInterfaces {
 namespace ISISReflectometry {
-
-class IMainWindowView;
 
 /** @class QtCatalogSearcher
 
 QtCatalogSearcher implements ISearcher to provide ICAT search
 functionality.
 */
-class QtCatalogSearcher : public QObject,
-                          public ISearcher,
-                          public RunsViewSearchSubscriber,
-                          public Mantid::API::AlgorithmObserver {
+class MANTIDQT_ISISREFLECTOMETRY_DLL QtCatalogSearcher : public QObject,
+                                                         public ISearcher,
+                                                         public RunsViewSearchSubscriber,
+                                                         public Mantid::API::AlgorithmObserver {
   Q_OBJECT
 public:
-  explicit QtCatalogSearcher(IRunsView *m_view);
-  ~QtCatalogSearcher() override{};
+  explicit QtCatalogSearcher(IRunsView *view);
+  virtual ~QtCatalogSearcher() = default;
 
   // ISearcher overrides
   void subscribe(SearcherSubscriber *notifyee) override;
-  Mantid::API::ITableWorkspace_sptr search(const std::string &text,
-                                           const std::string &instrument,
-                                           SearchType searchType) override;
-  bool startSearchAsync(const std::string &text, const std::string &instrument,
-                        SearchType searchType) override;
+  SearchResults search(SearchCriteria searchCriteria) override;
+  bool startSearchAsync(SearchCriteria searchCriteria) override;
   bool searchInProgress() const override;
   SearchResult const &getSearchResult(int index) const override;
-  void setSearchResultError(int index,
-                            const std::string &errorMessage) override;
   void reset() override;
-  bool searchSettingsChanged(const std::string &text,
-                             const std::string &instrument,
-                             SearchType searchType) const override;
+  bool hasUnsavedChanges() const override;
+  void setSaved() override;
+  SearchCriteria searchCriteria() const override;
 
   // RunsViewSearchSubscriber overrides
   void notifySearchComplete() override;
+  void notifySearchResultsChanged() override;
 
 protected:
   void finishHandle(const Mantid::API::IAlgorithm *alg) override;
-  void errorHandle(const Mantid::API::IAlgorithm *alg,
-                   const std::string &what) override;
+  void errorHandle(const Mantid::API::IAlgorithm *alg, const std::string &what) override;
+  virtual bool hasActiveCatalogSession() const;
+  virtual Mantid::API::IAlgorithm_sptr createSearchAlgorithm();
+  virtual Mantid::API::ITableWorkspace_sptr getSearchAlgorithmResultsTable(Mantid::API::IAlgorithm_sptr searchAlg);
+  bool requiresICat() const;
+  virtual void logInToCatalog();
 
 private slots:
   void dialogClosed();
@@ -61,20 +61,21 @@ private slots:
 private:
   IRunsView *m_view;
   SearcherSubscriber *m_notifyee;
-  std::string m_searchText;
-  std::string m_instrument;
-  SearchType m_searchType;
+  SearchCriteria m_searchCriteria;
   bool m_searchInProgress;
 
-  bool hasActiveSession() const;
-  void logInToCatalog();
   void execLoginDialog(const Mantid::API::IAlgorithm_sptr &alg);
   std::string activeSessionId() const;
-  Mantid::API::IAlgorithm_sptr createSearchAlgorithm(const std::string &text);
   ISearchModel &results() const;
   void searchAsync();
+  SearchResults convertResultsTableToSearchResults(const Mantid::API::ITableWorkspace_sptr &resultsTable);
+  SearchResults convertICatResultsTableToSearchResults(const Mantid::API::ITableWorkspace_sptr &tableWorkspace);
+  SearchResults convertJournalResultsTableToSearchResults(const Mantid::API::ITableWorkspace_sptr &tableWorkspace);
+
+  friend class Encoder;
+  friend class Decoder;
+  friend class CoderCommonTester;
 };
-bool hasActiveCatalogSession();
 } // namespace ISISReflectometry
 } // namespace CustomInterfaces
 } // namespace MantidQt

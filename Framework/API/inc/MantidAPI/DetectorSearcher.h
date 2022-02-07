@@ -43,8 +43,7 @@ public:
   using DetectorSearchResult = std::tuple<bool, size_t>;
 
   /// Create a new DetectorSearcher with the given instrument & detectors
-  DetectorSearcher(const Geometry::Instrument_const_sptr &instrument,
-                   const Geometry::DetectorInfo &detInfo);
+  DetectorSearcher(const Geometry::Instrument_const_sptr &instrument, const Geometry::DetectorInfo &detInfo);
   /// Find a detector that intsects with the given Qlab vector
   DetectorSearchResult findDetectorIndex(const Kernel::V3D &q);
 
@@ -55,18 +54,16 @@ private:
   DetectorSearchResult searchUsingNearestNeighbours(const Kernel::V3D &q);
   /// Check whether the given direction in detector space intercepts with a
   /// detector
-  std::tuple<bool, size_t> checkInteceptWithNeighbours(
-      const Kernel::V3D &direction,
-      const Kernel::NearestNeighbours<3>::NearestNeighbourResults &neighbours)
-      const;
+  std::tuple<bool, size_t>
+  checkInteceptWithNeighbours(const Kernel::V3D &direction,
+                              const Kernel::NearestNeighbours<3>::NearestNeighbourResults &neighbours) const;
   /// Helper function to build the nearest neighbour tree
   void createDetectorCache();
   /// Helper function to convert a Qlab vector to a direction in detector space
   Kernel::V3D convertQtoDirection(const Kernel::V3D &q) const;
   /// Helper function to handle the tube gap parameter in tube instruments
-  DetectorSearchResult handleTubeGap(
-      const Kernel::V3D &detectorDir,
-      const Kernel::NearestNeighbours<3>::NearestNeighbourResults &neighbours);
+  DetectorSearchResult handleTubeGap(const Kernel::V3D &detectorDir,
+                                     const Kernel::NearestNeighbours<3>::NearestNeighbourResults &neighbours);
 
   // Instance variables
 

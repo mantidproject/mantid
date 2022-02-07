@@ -8,15 +8,12 @@
 
 #include "MantidMDAlgorithms/UnitsConversionHelper.h"
 
-namespace Mantid {
-namespace MDAlgorithms {
+namespace Mantid::MDAlgorithms {
 /**function converts particular list of events of type T into MD workspace and
  * adds these events to the workspace itself  */
-template <class T>
-size_t ConvToMDEventsWS::convertEventList(size_t workspaceIndex) {
+template <class T> size_t ConvToMDEventsWS::convertEventList(size_t workspaceIndex) {
 
-  const Mantid::DataObjects::EventList &el =
-      m_EventWS->getSpectrum(workspaceIndex);
+  const Mantid::DataObjects::EventList &el = m_EventWS->getSpectrum(workspaceIndex);
   size_t numEvents = el.getNumberEvents();
   if (numEvents == 0)
     return 0;
@@ -25,7 +22,7 @@ size_t ConvToMDEventsWS::convertEventList(size_t workspaceIndex) {
   UnitsConversionHelper localUnitConv(m_UnitConversion);
 
   uint32_t detID = m_detID[workspaceIndex];
-  uint16_t runIndexLoc = m_RunIndex;
+  uint16_t expInfoIndexLoc = m_ExpInfoIndex;
 
   std::vector<coord_t> locCoord(m_Coord);
   // set up unit conversion and calculate up all coordinates, which depend on
@@ -37,13 +34,15 @@ size_t ConvToMDEventsWS::convertEventList(size_t workspaceIndex) {
   // allocate temporary buffers for MD Events data
   // MD events coordinates buffer
   std::vector<coord_t> allCoord;
-  std::vector<float> sig_err;      // array for signal and error.
-  std::vector<uint16_t> run_index; // Buffer for run index for each event
-  std::vector<uint32_t> det_ids;   // Buffer of det Id-s for each event
+  std::vector<float> sig_err;             // array for signal and error.
+  std::vector<uint16_t> expInfoIndex;     // Buffer for associated experiment-info index for each event
+  std::vector<uint16_t> goniometer_index; // Buffer for goniometer index for each event
+  std::vector<uint32_t> det_ids;          // Buffer of det Id-s for each event
 
   allCoord.reserve(this->m_NDims * numEvents);
   sig_err.reserve(2 * numEvents);
-  run_index.reserve(numEvents);
+  expInfoIndex.reserve(numEvents);
+  goniometer_index.reserve(numEvents);
   det_ids.reserve(numEvents);
 
   // This little dance makes the getting vector of events more general (since
@@ -62,15 +61,15 @@ size_t ConvToMDEventsWS::convertEventList(size_t workspaceIndex) {
 
     sig_err.emplace_back(static_cast<float>(signal));
     sig_err.emplace_back(static_cast<float>(errorSq));
-    run_index.emplace_back(runIndexLoc);
+    expInfoIndex.emplace_back(expInfoIndexLoc);
+    goniometer_index.emplace_back(0); // default value
     det_ids.emplace_back(detID);
     allCoord.insert(allCoord.end(), locCoord.begin(), locCoord.end());
   }
 
   // Add them to the MDEW
-  size_t n_added_events = run_index.size();
-  m_OutWSWrapper->addMDData(sig_err, run_index, det_ids, allCoord,
-                            n_added_events);
+  size_t n_added_events = expInfoIndex.size();
+  m_OutWSWrapper->addMDData(sig_err, expInfoIndex, goniometer_index, det_ids, allCoord, n_added_events);
   return n_added_events;
 }
 
@@ -80,14 +79,11 @@ size_t ConvToMDEventsWS::conversionChunk(size_t workspaceIndex) {
 
   switch (m_EventWS->getSpectrum(workspaceIndex).getEventType()) {
   case Mantid::API::TOF:
-    return this->convertEventList<Mantid::Types::Event::TofEvent>(
-        workspaceIndex);
+    return this->convertEventList<Mantid::Types::Event::TofEvent>(workspaceIndex);
   case Mantid::API::WEIGHTED:
-    return this->convertEventList<Mantid::DataObjects::WeightedEvent>(
-        workspaceIndex);
+    return this->convertEventList<Mantid::DataObjects::WeightedEvent>(workspaceIndex);
   case Mantid::API::WEIGHTED_NOTIME:
-    return this->convertEventList<Mantid::DataObjects::WeightedEventNoTime>(
-        workspaceIndex);
+    return this->convertEventList<Mantid::DataObjects::WeightedEventNoTime>(workspaceIndex);
   default:
     throw std::runtime_error("EventList had an unexpected data type!");
   }
@@ -101,17 +97,13 @@ workspaces
 @param inWSWrapper -- the class wrapping the target MD workspace
 @param ignoreZeros  -- if zero value signals should be rejected
 */
-size_t
-ConvToMDEventsWS::initialize(const MDWSDescription &WSD,
-                             std::shared_ptr<MDEventWSWrapper> inWSWrapper,
-                             bool ignoreZeros) {
+size_t ConvToMDEventsWS::initialize(const MDWSDescription &WSD, std::shared_ptr<MDEventWSWrapper> inWSWrapper,
+                                    bool ignoreZeros) {
   size_t numSpec = ConvToMDBase::initialize(WSD, inWSWrapper, ignoreZeros);
 
-  m_EventWS =
-      std::dynamic_pointer_cast<const DataObjects::EventWorkspace>(m_InWS2D);
+  m_EventWS = std::dynamic_pointer_cast<const DataObjects::EventWorkspace>(m_InWS2D);
   if (!m_EventWS)
-    throw(std::logic_error(
-        " ConvertToMDEventWS should work with defined event workspace"));
+    throw(std::logic_error(" ConvertToMDEventWS should work with defined event workspace"));
 
   // Record any special coordinate system known to the description.
   m_coordinateSystem = WSD.getCoordinateSystem();
@@ -121,8 +113,7 @@ ConvToMDEventsWS::initialize(const MDWSDescription &WSD,
 void ConvToMDEventsWS::runConversion(API::Progress *pProgress) {
 
   // Get the box controller
-  Mantid::API::BoxController_sptr bc =
-      m_OutWSWrapper->pWorkspace()->getBoxController();
+  Mantid::API::BoxController_sptr bc = m_OutWSWrapper->pWorkspace()->getBoxController();
 
   // if any property dimension is outside of the data range requested, the job
   // is done;
@@ -137,8 +128,7 @@ void ConvToMDEventsWS::runConversion(API::Progress *pProgress) {
   m_OutWSWrapper->pWorkspace()->setCoordinateSystem(m_coordinateSystem);
 }
 
-void ConvToMDEventsWS::appendEventsFromInputWS(
-    API::Progress *pProgress, const API::BoxController_sptr &bc) {
+void ConvToMDEventsWS::appendEventsFromInputWS(API::Progress *pProgress, const API::BoxController_sptr &bc) {
   // Is the access to input events thread-safe?
   // bool MultiThreadedAdding = m_EventWS->threadSafe();
   // preprocessed detectors insure that each detector has its own spectra
@@ -178,15 +168,12 @@ void ConvToMDEventsWS::appendEventsFromInputWS(
         if (ts->size() > 0)
           tp.joinAll();
       } else {
-        m_OutWSWrapper->pWorkspace()->splitAllIfNeeded(
-            nullptr); // it is done this way as it is possible trying to do
-                      // single
-                      // threaded split more efficiently
+        m_OutWSWrapper->pWorkspace()->splitAllIfNeeded(nullptr); // it is done this way as it is possible trying to do
+                                                                 // single
+                                                                 // threaded split more efficiently
       }
       // Count the new # of boxes.
-      lastNumBoxes = m_OutWSWrapper->pWorkspace()
-                         ->getBoxController()
-                         ->getTotalNumMDBoxes();
+      lastNumBoxes = m_OutWSWrapper->pWorkspace()->getBoxController()->getTotalNumMDBoxes();
       eventsAdded = 0;
       pProgress->report(wi);
     }
@@ -203,5 +190,4 @@ void ConvToMDEventsWS::appendEventsFromInputWS(
   m_OutWSWrapper->pWorkspace()->refreshCache();
 }
 
-} // namespace MDAlgorithms
-} // namespace Mantid
+} // namespace Mantid::MDAlgorithms

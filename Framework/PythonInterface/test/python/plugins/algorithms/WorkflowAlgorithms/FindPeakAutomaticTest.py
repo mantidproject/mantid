@@ -28,12 +28,13 @@ class FindPeaksAutomaticTest(unittest.TestCase):
     def setUp(self):
         # Creating two peaks on an exponential background with gaussian noise
         self.x_values = np.linspace(0, 100, 1001)
-        self.x_values = np.linspace(0, 100, 1001)
-        self.centre = [25, 75]
-        self.height = [35, 20]
+        self.centre =  [25, 75]
+        self.height =  [35, 20]
         self.width = [10, 5]
         self.y_values = self.gaussian(self.x_values, self.centre[0], self.height[0], self.width[0])
+
         self.y_values += self.gaussian(self.x_values, self.centre[1], self.height[1], self.width[1])
+
         self.background = 10 * np.ones(len(self.x_values))
         self.y_values += self.background
 
@@ -118,6 +119,20 @@ class FindPeaksAutomaticTest(unittest.TestCase):
                                AcceptanceThreshold=-0.1,
                                PlotPeaks=False)
 
+    def test_algorithm_with_invalid_spectrum_number(self):
+        #tests that a float spectrum number throws an error
+        with self.assertRaises(TypeError):
+            FindPeaksAutomatic(InputWorkspace=self.data_ws,
+                               PlotPeaks=False,
+                               SpectrumNumber = 3.4)
+
+        #tests that a negative integer throws an error
+        with self.assertRaises(ValueError):
+            FindPeaksAutomatic(InputWorkspace=self.data_ws,
+                               PlotPeaks=False,
+                               SpectrumNumber = -1 )
+
+
     def test_algorithm_with_negative_smooth_window_throws(self):
         with self.assertRaises(ValueError):
             FindPeaksAutomatic(InputWorkspace=self.data_ws, SmoothWindow=-5, PlotPeaks=False)
@@ -145,6 +160,65 @@ class FindPeaksAutomaticTest(unittest.TestCase):
         self.assertIn('{}_with_errors'.format(ws_name), mtd)
         self.assertIn('{}_{}'.format(self.raw_ws.getName(), 'properties'), mtd)
         self.assertIn('{}_{}'.format(self.raw_ws.getName(), 'refit_properties'), mtd)
+
+    def test_algorithm_works_on_specified_spectrum(self):
+        x_values = np.array([np.linspace(0, 100, 1001), np.linspace(0, 100, 1001)], dtype=float)
+        centre = np.array([[25, 75], [10, 60]], dtype=float)
+        height = np.array([[35, 20], [40, 50]], dtype=float)
+        width = np.array([[10, 5], [8, 6]], dtype=float)
+        y_values = np.array(
+            [self.gaussian(x_values[0], centre[0, 0], height[0, 0], width[0, 0]),
+             self.gaussian(x_values[1], centre[1, 0], height[1, 0], width[1, 0])])
+
+        y_values += np.array(
+            [self.gaussian(x_values[0], centre[0, 1], height[0, 1], width[0, 1]),
+             self.gaussian(x_values[1], centre[1, 1], height[1, 1], width[1, 1])])
+        background = 10 * np.ones(x_values.shape)
+        y_values += background
+
+        raw_ws = CreateWorkspace(DataX=x_values,
+                                      DataY=y_values,
+                                      OutputWorkspace='raw_ws',NSpec = 2)
+
+        FindPeaksAutomatic(
+            InputWorkspace=raw_ws,
+            SpectrumNumber = 2,
+            SmoothWindow=500,
+            EstimatePeakSigma=6,
+            MinPeakSigma=3,
+            MaxPeakSigma=15,
+        )
+        peak_table  = mtd['{}_{}'.format(raw_ws.getName(), 'properties')]
+        print(peak_table.row(1))
+        self.assertPeakFound(peak_table.row(0), 10, 40, 8)
+        self.assertPeakFound(peak_table.row(1), 60, 50, 6)
+
+    def test_algorithm_throws_RuntimeError_when_called_with_invalid_spectrum_number(self):
+        x_values = np.array([np.linspace(0, 100, 1001), np.linspace(0, 100, 1001)], dtype=float)
+        centre = np.array([[25, 75], [10, 60]], dtype=float)
+        height = np.array([[35, 20], [40, 50]], dtype=float)
+        width = np.array([[10, 5], [8, 6]], dtype=float)
+        y_values = np.array(
+            [self.gaussian(x_values[0], centre[0, 0], height[0, 0], width[0, 0]),
+             self.gaussian(x_values[1], centre[1, 0], height[1, 0], width[1, 0])])
+
+        y_values += np.array(
+            [self.gaussian(x_values[0], centre[0, 1], height[0, 1], width[0, 1]),
+             self.gaussian(x_values[1], centre[1, 1], height[1, 1], width[1, 1])])
+        background = 10 * np.ones(x_values.shape)
+        y_values += background
+
+        raw_ws = CreateWorkspace(DataX=x_values,
+                                      DataY=y_values,
+                                      OutputWorkspace='raw_ws',NSpec = 2)
+        with self.assertRaises(RuntimeError):
+            FindPeaksAutomatic(
+                InputWorkspace=raw_ws,
+                SpectrumNumber = 3,
+                SmoothWindow=500,
+                EstimatePeakSigma=6,
+                MinPeakSigma=3,
+                MaxPeakSigma=15,)
 
     def test_algorithm_does_not_create_temporary_workspaces(self):
         FindPeaksAutomatic(self.raw_ws)

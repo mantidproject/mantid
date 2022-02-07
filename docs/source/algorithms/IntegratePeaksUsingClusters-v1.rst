@@ -38,8 +38,7 @@ considered background.
 This algorithm uses an imaging technique, and it is therefore important
 that the MDHistoWorkspace you are using is binned to a sufficient
 resolution via :ref:`algm-BinMD`. You can overlay the integrated peaks
-workspace in the `Slice
-Viewer <MantidPlot:_SliceViewer#Viewing_Peaks_Workspaces>`__ over the
+workspace in the :ref:`Sliceviewer <sliceviewer_peaks_overlay>` over the
 generated Cluster Labeled OutputWorkspaceMD to see what the iteration
 region used for each peak amounts to.
 

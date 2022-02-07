@@ -14,8 +14,7 @@ using namespace Mantid::Kernel;
 using namespace Mantid::API;
 using Mantid::Types::Core::DateAndTime;
 
-namespace MantidQt {
-namespace MantidWidgets {
+namespace MantidQt::MantidWidgets {
 /**Constructor.
  * Must be passed its parent MantidTreeWidget, to facilitate correct sorting.
  */
@@ -25,8 +24,7 @@ MantidTreeWidgetItem::MantidTreeWidgetItem(MantidTreeWidget *parent)
 /**Constructor.
  * Must be passed its parent MantidTreeWidget, to facilitate correct sorting.
  */
-MantidTreeWidgetItem::MantidTreeWidgetItem(const QStringList &list,
-                                           MantidTreeWidget *parent)
+MantidTreeWidgetItem::MantidTreeWidgetItem(const QStringList &list, MantidTreeWidget *parent)
     : QTreeWidgetItem(list), m_parent(parent), m_sortPos(0) {}
 
 /**Overidden operator.
@@ -113,5 +111,4 @@ DateAndTime MantidTreeWidgetItem::getLastModified(const QTreeWidgetItem *item) {
 std::size_t MantidTreeWidgetItem::getMemorySize() const {
   return this->data(0, Qt::UserRole).value<Workspace_sptr>()->getMemorySize();
 }
-} // namespace MantidWidgets
-} // namespace MantidQt
+} // namespace MantidQt::MantidWidgets

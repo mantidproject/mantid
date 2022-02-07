@@ -9,8 +9,7 @@
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
 
-namespace Mantid {
-namespace Crystal {
+namespace Mantid::Crystal {
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(HasUB)
@@ -31,13 +30,10 @@ const std::string HasUB::category() const { return "Crystal\\UBMatrix"; }
 /** Initialize the algorithm's properties.
  */
 void HasUB::init() {
-  declareProperty(std::make_unique<WorkspaceProperty<Workspace>>(
-                      "Workspace", "", Direction::Input),
+  declareProperty(std::make_unique<WorkspaceProperty<Workspace>>("Workspace", "", Direction::Input),
                   "Workspace to clear the UB from.");
-  declareProperty(
-      std::make_unique<PropertyWithValue<bool>>("HasUB", false,
-                                                Direction::Output),
-      "Indicates action performed, or predicted to perform if DryRun.");
+  declareProperty(std::make_unique<PropertyWithValue<bool>>("HasUB", false, Direction::Output),
+                  "Indicates action performed, or predicted to perform if DryRun.");
 }
 
 //----------------------------------------------------------------------------------------------
@@ -49,5 +45,4 @@ void HasUB::exec() {
   this->setProperty("HasUB", hasUB);
 }
 
-} // namespace Crystal
-} // namespace Mantid
+} // namespace Mantid::Crystal

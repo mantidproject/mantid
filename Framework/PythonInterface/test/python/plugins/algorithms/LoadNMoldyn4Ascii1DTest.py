@@ -23,7 +23,7 @@ class LoadNMoldyn4Ascii1DTest(unittest.TestCase):
         self.assertTrue(isinstance(workspace, MatrixWorkspace))
         self.assertEqual(workspace.getNumberHistograms(), 1)
         self.assertEqual(workspace.blocksize(), 999)
-        self.assertEqual(str(workspace.getAxis(0).getUnit().unitID()), 
+        self.assertEqual(str(workspace.getAxis(0).getUnit().unitID()),
                          'Energy_inWavenumber')
 
     def _validate_dos_total_convolution(self, workspace):
@@ -41,8 +41,8 @@ class LoadNMoldyn4Ascii1DTest(unittest.TestCase):
     # ================================ Test cases ======================================#
 
     def test_load_single_dos_function(self):
-        function_wsg = LoadNMoldyn4Ascii1D(Directory=self._data_directory, 
-                                           Functions='dos_total', 
+        function_wsg = LoadNMoldyn4Ascii1D(Directory=self._data_directory,
+                                           Functions='dos_total',
                                            OutputWorkspace='__LoadNMoldyn4Ascii1D_test')
         self.assertTrue(isinstance(function_wsg, WorkspaceGroup))
         self.assertEqual(len(function_wsg), 1)
@@ -50,8 +50,8 @@ class LoadNMoldyn4Ascii1DTest(unittest.TestCase):
         self._validate_dos_ws(mtd['__LoadNMoldyn4Ascii1D_test(dos_total)'])
 
     def test_load_single_vacf_function(self):
-        function_wsg = LoadNMoldyn4Ascii1D(Directory=self._data_directory, 
-                                           Functions='vacf_total', 
+        function_wsg = LoadNMoldyn4Ascii1D(Directory=self._data_directory,
+                                           Functions='vacf_total',
                                            OutputWorkspace='__LoadNMoldyn4Ascii1D_test')
         self.assertTrue(isinstance(function_wsg, WorkspaceGroup))
         self.assertEqual(len(function_wsg), 1)
@@ -59,8 +59,8 @@ class LoadNMoldyn4Ascii1DTest(unittest.TestCase):
         self._validate_vacf_ws(mtd['__LoadNMoldyn4Ascii1D_test(vacf_total)'])
 
     def test_load_multiple_functions(self):
-        function_wsg = LoadNMoldyn4Ascii1D(Directory=self._data_directory, 
-                                           Functions='vacf_total, dos_total', 
+        function_wsg = LoadNMoldyn4Ascii1D(Directory=self._data_directory,
+                                           Functions='vacf_total, dos_total',
                                            OutputWorkspace='__LoadNMoldyn4Ascii1D_test')
         self.assertTrue(isinstance(function_wsg, WorkspaceGroup))
         self.assertEqual(len(function_wsg), 2)
@@ -70,7 +70,7 @@ class LoadNMoldyn4Ascii1DTest(unittest.TestCase):
         self._validate_dos_ws(mtd['__LoadNMoldyn4Ascii1D_test(dos_total)'])
 
     def test_load_dos_function_and_convolute(self):
-        function_wsg = LoadNMoldyn4Ascii1D(Directory=self._data_directory, 
+        function_wsg = LoadNMoldyn4Ascii1D(Directory=self._data_directory,
                                            Functions='dos_total',
                                            ResolutionConvolution='TOSCA',
                                            OutputWorkspace='__LoadNMoldyn4Ascii1D_test')
@@ -81,8 +81,8 @@ class LoadNMoldyn4Ascii1DTest(unittest.TestCase):
         self._validate_dos_total_convolution(mtd['__LoadNMoldyn4Ascii1D_test(dos_total)'])
 
     def test_load_multiple_functions_some_skipped(self):
-        function_wsg = LoadNMoldyn4Ascii1D(Directory=self._data_directory, 
-                                           Functions='vacf_total, dos_total, something', 
+        function_wsg = LoadNMoldyn4Ascii1D(Directory=self._data_directory,
+                                           Functions='vacf_total, dos_total, something',
                                            OutputWorkspace='__LoadNMoldyn4Ascii1D_test')
         self.assertTrue(isinstance(function_wsg, WorkspaceGroup))
         self.assertEqual(len(function_wsg), 2)
@@ -90,9 +90,9 @@ class LoadNMoldyn4Ascii1DTest(unittest.TestCase):
         self._validate_vacf_ws(mtd['__LoadNMoldyn4Ascii1D_test(vacf_total)'])
         self.assertTrue(function_wsg.contains('__LoadNMoldyn4Ascii1D_test(dos_total)'))
         self._validate_dos_ws(mtd['__LoadNMoldyn4Ascii1D_test(dos_total)'])
-        
+
     def test_load_multiple_functions_some_convoluted(self):
-        function_wsg = LoadNMoldyn4Ascii1D(Directory=self._data_directory, 
+        function_wsg = LoadNMoldyn4Ascii1D(Directory=self._data_directory,
                                            Functions='dos_total, vacf_total',
                                            ResolutionConvolution='TOSCA',
                                            OutputWorkspace='__LoadNMoldyn4Ascii1D_test')
@@ -102,7 +102,7 @@ class LoadNMoldyn4Ascii1DTest(unittest.TestCase):
         self._validate_vacf_ws(mtd['__LoadNMoldyn4Ascii1D_test(vacf_total)'])
         self.assertTrue(function_wsg.contains('__LoadNMoldyn4Ascii1D_test(dos_total)'))
         self._validate_dos_ws(mtd['__LoadNMoldyn4Ascii1D_test(dos_total)'])
-        self._validate_dos_total_convolution(mtd['__LoadNMoldyn4Ascii1D_test(dos_total)'])            
+        self._validate_dos_total_convolution(mtd['__LoadNMoldyn4Ascii1D_test(dos_total)'])
 
     # ============================= Test failure cases =========================================#
 

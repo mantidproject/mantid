@@ -15,6 +15,5 @@ GET_POINTER_SPECIALIZATION(WorkspaceProperty<IMDHistoWorkspace>)
 
 void export_IMDHistoWorkspaceProperty() {
   using Mantid::PythonInterface::WorkspacePropertyExporter;
-  WorkspacePropertyExporter<IMDHistoWorkspace>::define(
-      "IMDHistoWorkspaceProperty");
+  WorkspacePropertyExporter<IMDHistoWorkspace>::define("IMDHistoWorkspaceProperty");
 }

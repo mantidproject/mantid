@@ -10,14 +10,12 @@
 #include "MantidAPI/IConstraint.h"
 #include "MantidAPI/ParameterTie.h"
 
-namespace Mantid {
-namespace API {
+namespace Mantid::API {
 
 using namespace Kernel;
 
 /// Constructor
-FunctionGenerator::FunctionGenerator(const IFunction_sptr &source)
-    : m_source(source), m_dirty(true) {
+FunctionGenerator::FunctionGenerator(const IFunction_sptr &source) : m_source(source), m_dirty(true) {
   if (source) {
     m_nOwnParams = source->nParams();
   }
@@ -28,13 +26,10 @@ void FunctionGenerator::init() {}
 
 /// Set the source function
 /// @param source :: New source function.
-void FunctionGenerator::setSource(IFunction_sptr source) const {
-  m_source = std::move(source);
-}
+void FunctionGenerator::setSource(IFunction_sptr source) const { m_source = std::move(source); }
 
 /// Set i-th parameter
-void FunctionGenerator::setParameter(size_t i, const double &value,
-                                     bool explicitlySet) {
+void FunctionGenerator::setParameter(size_t i, const double &value, bool explicitlySet) {
   if (i < m_nOwnParams) {
     m_source->setParameter(i, value, explicitlySet);
     m_dirty = true;
@@ -45,8 +40,7 @@ void FunctionGenerator::setParameter(size_t i, const double &value,
 }
 
 /// Set i-th parameter description
-void FunctionGenerator::setParameterDescription(
-    size_t i, const std::string &description) {
+void FunctionGenerator::setParameterDescription(size_t i, const std::string &description) {
   if (i < m_nOwnParams) {
     m_source->setParameterDescription(i, description);
   } else {
@@ -76,15 +70,13 @@ bool FunctionGenerator::hasParameter(const std::string &name) const {
 }
 
 /// Set parameter by name.
-void FunctionGenerator::setParameter(const std::string &name,
-                                     const double &value, bool explicitlySet) {
+void FunctionGenerator::setParameter(const std::string &name, const double &value, bool explicitlySet) {
   auto i = parameterIndex(name);
   setParameter(i, value, explicitlySet);
 }
 
 /// Set description of parameter by name.
-void FunctionGenerator::setParameterDescription(
-    const std::string &name, const std::string &description) {
+void FunctionGenerator::setParameterDescription(const std::string &name, const std::string &description) {
   auto i = parameterIndex(name);
   setParameterDescription(i, description);
 }
@@ -151,6 +143,12 @@ double FunctionGenerator::getError(size_t i) const {
   }
 }
 
+/// Get the fitting error for a parameter by name
+double FunctionGenerator::getError(const std::string &name) const {
+  auto index = parameterIndex(name);
+  return getError(index);
+}
+
 /// Set the fitting error for a parameter
 void FunctionGenerator::setError(size_t i, double err) {
   if (i < m_nOwnParams) {
@@ -161,9 +159,14 @@ void FunctionGenerator::setError(size_t i, double err) {
   }
 }
 
+/// Set the fitting error for a parameter by name
+void FunctionGenerator::setError(const std::string &name, double err) {
+  auto index = parameterIndex(name);
+  setError(index, err);
+}
+
 /// Change status of parameter
-void FunctionGenerator::setParameterStatus(size_t i,
-                                           IFunction::ParameterStatus status) {
+void FunctionGenerator::setParameterStatus(size_t i, IFunction::ParameterStatus status) {
   if (i < m_nOwnParams) {
     m_source->setParameterStatus(i, status);
   } else {
@@ -173,8 +176,7 @@ void FunctionGenerator::setParameterStatus(size_t i,
 }
 
 /// Get status of parameter
-IFunction::ParameterStatus
-FunctionGenerator::getParameterStatus(size_t i) const {
+IFunction::ParameterStatus FunctionGenerator::getParameterStatus(size_t i) const {
   if (i < m_nOwnParams) {
     return m_source->getParameterStatus(i);
   } else {
@@ -184,8 +186,7 @@ FunctionGenerator::getParameterStatus(size_t i) const {
 }
 
 /// Return parameter index from a parameter reference.
-size_t
-FunctionGenerator::getParameterIndex(const ParameterReference &ref) const {
+size_t FunctionGenerator::getParameterIndex(const ParameterReference &ref) const {
   if (ref.getLocalFunction() == this) {
     auto index = ref.getLocalIndex();
     auto np = nParams();
@@ -205,34 +206,25 @@ void FunctionGenerator::setUpForFit() {
 }
 
 /// Declare a new parameter
-void FunctionGenerator::declareParameter(const std::string & /*name*/,
-                                         double /*initValue*/,
+void FunctionGenerator::declareParameter(const std::string & /*name*/, double /*initValue*/,
                                          const std::string & /*description*/) {
-  throw Kernel::Exception::NotImplementedError(
-      "FunctionGenerator cannot not have its own parameters.");
+  throw Kernel::Exception::NotImplementedError("FunctionGenerator cannot not have its own parameters.");
 }
 
 /// Returns the number of attributes associated with the function
 size_t FunctionGenerator::nAttributes() const {
   checkTargetFunction();
-  return IFunction::nAttributes() + m_source->nAttributes() +
-         m_target->nAttributes();
+  return IFunction::nAttributes() + m_source->nAttributes() + m_target->nAttributes();
 }
 
 /// Returns a list of attribute names
 std::vector<std::string> FunctionGenerator::getAttributeNames() const {
   checkTargetFunction();
-  std::vector<std::string> attNames = IFunction::getAttributeNames();
-  auto cfNames = m_source->getAttributeNames();
-  auto spNames = m_target->getAttributeNames();
-  attNames.insert(attNames.end(), cfNames.begin(), cfNames.end());
-  attNames.insert(attNames.end(), spNames.begin(), spNames.end());
-  return attNames;
+  return IFunction::getAttributeNames();
 }
 
 /// Return a value of attribute attName
-IFunction::Attribute
-FunctionGenerator::getAttribute(const std::string &attName) const {
+IFunction::Attribute FunctionGenerator::getAttribute(const std::string &attName) const {
   if (IFunction::hasAttribute(attName)) {
     return IFunction::getAttribute(attName);
   } else if (isSourceName(attName)) {
@@ -244,8 +236,7 @@ FunctionGenerator::getAttribute(const std::string &attName) const {
 }
 
 /// Set a value to attribute attName
-void FunctionGenerator::setAttribute(const std::string &attName,
-                                     const IFunction::Attribute &att) {
+void FunctionGenerator::setAttribute(const std::string &attName, const IFunction::Attribute &att) {
   if (IFunction::hasAttribute(attName)) {
     IFunction::setAttribute(attName, att);
     m_dirty = true;
@@ -271,14 +262,31 @@ bool FunctionGenerator::hasAttribute(const std::string &attName) const {
     return m_target->hasAttribute(attName);
   }
 }
+/**
+ * Return the name of the ith attribute. This method assumes that:
+ * The first [0,IFunction::nAttributes()) belong to the function held in this
+ * class. The next [IFunction::nAttributes, IFunction::nAttributes +
+ * m_source->nAttributes()) belong to the m_source function. And finally, the
+ * remaining attributes belong to the m_target function
+ * @param i:: Index of the attribute to return
+ */
+std::string FunctionGenerator::attributeName(size_t i) const {
+  if (i < IFunction::nAttributes()) {
+    return IFunction::attributeName(i);
+  } else if (i < IFunction::nAttributes() + m_source->nAttributes()) {
+    return m_source->attributeName(i - IFunction::nAttributes());
+  } else if (i < nAttributes()) {
+    return m_target->attributeName(i - (IFunction::nAttributes() + m_source->nAttributes()));
+  } else {
+    throw(std::runtime_error("Attribute index out of range"));
+  }
+}
 
 // Evaluates the function
-void FunctionGenerator::function(const FunctionDomain &domain,
-                                 FunctionValues &values) const {
+void FunctionGenerator::function(const FunctionDomain &domain, FunctionValues &values) const {
   updateTargetFunction();
   if (!m_target) {
-    throw std::logic_error(
-        "FunctionGenerator failed to generate target function.");
+    throw std::logic_error("FunctionGenerator failed to generate target function.");
   }
   m_target->function(domain, values);
 }
@@ -287,8 +295,7 @@ void FunctionGenerator::function(const FunctionDomain &domain,
 /// @param aName :: A name to test.
 bool FunctionGenerator::isSourceName(const std::string &aName) const {
   if (aName.empty()) {
-    throw std::invalid_argument(
-        "Parameter or attribute name cannot be empty string.");
+    throw std::invalid_argument("Parameter or attribute name cannot be empty string.");
   }
   return (aName.front() != 'f' || aName.find('.') == std::string::npos);
 }
@@ -299,8 +306,7 @@ void FunctionGenerator::checkTargetFunction() const {
     updateTargetFunction();
   }
   if (!m_target) {
-    throw std::logic_error(
-        "FunctionGenerator failed to generate target function.");
+    throw std::logic_error("FunctionGenerator failed to generate target function.");
   }
 }
 
@@ -333,5 +339,4 @@ IConstraint *FunctionGenerator::getConstraint(size_t i) const {
   return constraint;
 }
 
-} // namespace API
-} // namespace Mantid
+} // namespace Mantid::API

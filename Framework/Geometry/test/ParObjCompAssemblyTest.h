@@ -120,8 +120,7 @@ public:
     obj_str << "<radius val=\"0.1\" />";
     obj_str << "<height val=\"0.2\" />";
     obj_str << "</cylinder>";
-    std::shared_ptr<IObject> s =
-        Mantid::Geometry::ShapeFactory().createShape(obj_str.str());
+    std::shared_ptr<IObject> s = Mantid::Geometry::ShapeFactory().createShape(obj_str.str());
 
     ObjCompAssembly bank("BankName");
     Component *det1 = new ObjComponent("Det1Name", s);
@@ -148,10 +147,8 @@ public:
     TS_ASSERT_EQUALS(height, 0.6);
 
     ParameterMap_sptr pmap(new ParameterMap());
-    std::shared_ptr<ObjCompAssembly> pcomp(
-        new ObjCompAssembly(&bank, pmap.get()));
+    std::shared_ptr<ObjCompAssembly> pcomp(new ObjCompAssembly(&bank, pmap.get()));
     std::shared_ptr<Component> ic = std::dynamic_pointer_cast<Component>(pcomp);
-    std::shared_ptr<ICompAssembly> ica =
-        std::dynamic_pointer_cast<ICompAssembly>(ic);
+    std::shared_ptr<ICompAssembly> ica = std::dynamic_pointer_cast<ICompAssembly>(ic);
   }
 };

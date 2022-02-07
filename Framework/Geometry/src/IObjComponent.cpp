@@ -10,19 +10,14 @@
 #include "MantidGeometry/IObjComponent.h"
 #include "MantidGeometry/Rendering/GeometryHandler.h"
 
-namespace Mantid {
-namespace Geometry {
+namespace Mantid::Geometry {
 
-IObjComponent::IObjComponent() {
-  handle = std::make_unique<GeometryHandler>(this);
-}
+IObjComponent::IObjComponent() { handle = std::make_unique<GeometryHandler>(this); }
 
 /** Constructor, specifying the GeometryHandler (renderer engine)
  * for this IObjComponent.
  */
-IObjComponent::IObjComponent(GeometryHandler *the_handler) {
-  handle.reset(the_handler);
-}
+IObjComponent::IObjComponent(GeometryHandler *the_handler) { handle.reset(the_handler); }
 
 // Looking to get rid of the first of these constructors in due course (and
 // probably add others)
@@ -59,5 +54,4 @@ IObjComponent &IObjComponent::operator=(const IObjComponent &rhs) {
   }
   return *this;
 }
-} // namespace Geometry
-} // namespace Mantid
+} // namespace Mantid::Geometry

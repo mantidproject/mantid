@@ -24,7 +24,7 @@ namespace CxxTest
         virtual OutputStream &operator<<( const char * /*string*/ ) { return *this; }
 
         typedef void (*Manipulator)( OutputStream & );
-        
+
         virtual OutputStream &operator<<( Manipulator m ) { m( *this ); return *this; }
         static void endl( OutputStream &o ) { (o << "\n").flush(); }
     };
@@ -220,7 +220,7 @@ namespace CxxTest
     private:
         ErrorFormatter( const ErrorFormatter & );
         ErrorFormatter &operator=( const ErrorFormatter & );
-        
+
         OutputStream &stop( const char *file, unsigned line )
         {
             newLine();
@@ -256,7 +256,7 @@ namespace CxxTest
         {
             (*_o) << "   (null)" << endl;
         }
-        
+
         void dumpBuffer( const void *buffer, unsigned size )
         {
             unsigned dumpSize = size;

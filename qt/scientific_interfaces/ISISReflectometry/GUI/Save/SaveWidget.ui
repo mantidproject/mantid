@@ -189,9 +189,9 @@
          <number>6</number>
         </property>
         <item>
-         <widget class="QCheckBox" name="titleCheckBox">
+         <widget class="QCheckBox" name="headerCheckBox">
           <property name="text">
-           <string>Title</string>
+           <string>Header</string>
           </property>
          </widget>
         </item>

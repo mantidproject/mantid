@@ -21,9 +21,7 @@ using namespace Mantid::Kernel;
 
 class LiveListenerInfoTest : public CxxTest::TestSuite {
 public:
-  void test_xml_throws_no_connection() {
-    TS_ASSERT_THROWS_NOTHING(createMinimalFacility("<livedata />"));
-  }
+  void test_xml_throws_no_connection() { TS_ASSERT_THROWS_NOTHING(createMinimalFacility("<livedata />")); }
 
   void test_xml_empty_connection() {
     const std::string xml = "<livedata>"
@@ -155,18 +153,16 @@ public:
   }
 
 private:
-  std::unique_ptr<FacilityInfo>
-  createMinimalFacility(const std::string &livedataXml) {
-    const std::string xmlStr =
-        "<?xml version=\"1.0\" encoding=\"UTF-8\"?>"
-        "<facilities>"
-        "  <facility name=\"MyFacility\" FileExtensions=\".xyz\">"
-        "    <instrument name=\"INST\">"
-        "      <technique>Technique</technique>" +
-        livedataXml +
-        "    </instrument>"
-        "  </facility>"
-        "</facilities>";
+  std::unique_ptr<FacilityInfo> createMinimalFacility(const std::string &livedataXml) {
+    const std::string xmlStr = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>"
+                               "<facilities>"
+                               "  <facility name=\"MyFacility\" FileExtensions=\".xyz\">"
+                               "    <instrument name=\"INST\">"
+                               "      <technique>Technique</technique>" +
+                               livedataXml +
+                               "    </instrument>"
+                               "  </facility>"
+                               "</facilities>";
 
     return createFacility(xmlStr);
   }

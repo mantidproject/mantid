@@ -42,19 +42,13 @@ public:
   /// Algorithm's name
   const std::string name() const override { return "SmoothData"; }
   /// Summary of algorithms purpose
-  const std::string summary() const override {
-    return "Smooths out statistical fluctuations in a workspace's data.";
-  }
+  const std::string summary() const override { return "Smooths out statistical fluctuations in a workspace's data."; }
 
   /// Algorithm's version
   int version() const override { return (1); }
-  const std::vector<std::string> seeAlso() const override {
-    return {"SmoothNeighbours"};
-  }
+  const std::vector<std::string> seeAlso() const override { return {"SmoothNeighbours"}; }
   /// Algorithm's category for identification
-  const std::string category() const override {
-    return "Transforms\\Smoothing";
-  }
+  const std::string category() const override { return "Transforms\\Smoothing"; }
 
 private:
   /// Initialisation code
@@ -69,8 +63,7 @@ private:
   API::MatrixWorkspace_const_sptr inputWorkspace;
 };
 
-HistogramData::Histogram smooth(const HistogramData::Histogram &histogram,
-                                int npts);
+HistogramData::Histogram smooth(const HistogramData::Histogram &histogram, int npts);
 
 } // namespace Algorithms
 } // namespace Mantid

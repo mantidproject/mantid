@@ -9,24 +9,20 @@
 
 #include <iomanip>
 
-namespace Mantid {
-namespace Geometry {
+namespace Mantid::Geometry {
 
 using namespace Kernel;
 
 StructureFactorCalculatorSummation::StructureFactorCalculatorSummation()
-    : StructureFactorCalculator(),
-      m_unitCellScatterers(CompositeBraggScatterer::create()) {}
+    : StructureFactorCalculator(), m_unitCellScatterers(CompositeBraggScatterer::create()) {}
 
 /// Returns the structure factor obtained from the stored scatterers.
-StructureFactor
-StructureFactorCalculatorSummation::getF(const Kernel::V3D &hkl) const {
+StructureFactor StructureFactorCalculatorSummation::getF(const Kernel::V3D &hkl) const {
   return m_unitCellScatterers->calculateStructureFactor(hkl);
 }
 
 /// Calls updateUnitCellScatterers() to rebuild the complete list of scatterers.
-void StructureFactorCalculatorSummation::crystalStructureSetHook(
-    const CrystalStructure &crystalStructure) {
+void StructureFactorCalculatorSummation::crystalStructureSetHook(const CrystalStructure &crystalStructure) {
   updateUnitCellScatterers(crystalStructure);
 }
 
@@ -39,27 +35,22 @@ void StructureFactorCalculatorSummation::crystalStructureSetHook(
  *
  * @param crystalStructure :: CrystalStructure for structure factor calculation.
  */
-void StructureFactorCalculatorSummation::updateUnitCellScatterers(
-    const CrystalStructure &crystalStructure) {
+void StructureFactorCalculatorSummation::updateUnitCellScatterers(const CrystalStructure &crystalStructure) {
   m_unitCellScatterers->removeAllScatterers();
 
-  CompositeBraggScatterer_sptr scatterersInAsymmetricUnit =
-      crystalStructure.getScatterers();
+  CompositeBraggScatterer_sptr scatterersInAsymmetricUnit = crystalStructure.getScatterers();
   SpaceGroup_const_sptr spaceGroup = crystalStructure.spaceGroup();
 
   if (spaceGroup) {
     std::vector<BraggScatterer_sptr> braggScatterers;
-    braggScatterers.reserve(scatterersInAsymmetricUnit->nScatterers() *
-                            spaceGroup->order());
+    braggScatterers.reserve(scatterersInAsymmetricUnit->nScatterers() * spaceGroup->order());
 
     for (size_t i = 0; i < scatterersInAsymmetricUnit->nScatterers(); ++i) {
       BraggScattererInCrystalStructure_sptr current =
-          std::dynamic_pointer_cast<BraggScattererInCrystalStructure>(
-              scatterersInAsymmetricUnit->getScatterer(i));
+          std::dynamic_pointer_cast<BraggScattererInCrystalStructure>(scatterersInAsymmetricUnit->getScatterer(i));
 
       if (current) {
-        std::vector<V3D> positions =
-            spaceGroup->getEquivalentPositions(current->getPosition());
+        std::vector<V3D> positions = spaceGroup->getEquivalentPositions(current->getPosition());
 
         for (auto &position : positions) {
           BraggScatterer_sptr clone = current->clone();
@@ -75,8 +66,7 @@ void StructureFactorCalculatorSummation::updateUnitCellScatterers(
 }
 
 /// Return V3D as string without losing precision.
-std::string
-StructureFactorCalculatorSummation::getV3DasString(const V3D &point) const {
+std::string StructureFactorCalculatorSummation::getV3DasString(const V3D &point) const {
   std::ostringstream posStream;
   posStream << std::setprecision(17);
   posStream << point;
@@ -84,5 +74,4 @@ StructureFactorCalculatorSummation::getV3DasString(const V3D &point) const {
   return posStream.str();
 }
 
-} // namespace Geometry
-} // namespace Mantid
+} // namespace Mantid::Geometry

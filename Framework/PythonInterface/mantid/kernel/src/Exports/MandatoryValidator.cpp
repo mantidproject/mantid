@@ -14,9 +14,8 @@ using namespace boost::python;
 
 namespace {
 /// A macro for generating exports for each type
-#define EXPORT_MANDATORYVALIDATOR(ElementType, prefix)                         \
-  class_<MandatoryValidator<ElementType>, bases<IValidator>,                   \
-         boost::noncopyable>(#prefix "MandatoryValidator");
+#define EXPORT_MANDATORYVALIDATOR(ElementType, prefix)                                                                 \
+  class_<MandatoryValidator<ElementType>, bases<IValidator>, boost::noncopyable>(#prefix "MandatoryValidator");
 } // namespace
 
 void export_MandatoryValidator() {

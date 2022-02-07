@@ -45,8 +45,8 @@ Usage
 .. testcode:: exCreateMDHisto
 
    S  =range(0,100);
-   ERR=range(0,100);   
-   # create Histo workspace   
+   ERR=range(0,100);
+   # create Histo workspace
    ws=CreateMDHistoWorkspace(Dimensionality=2,Extents='-3,3,-10,10',SignalInput=S,ErrorInput=ERR,\
                               NumberOfBins='10,10',Names='Dim1,Dim2',Units='MomentumTransfer,EnergyTransfer')
 
@@ -57,17 +57,17 @@ Usage
    d1=ws.getDimension(0)
    print('dimension 0 has ID: {0}; nBins={1}; min: {2}; max: {3} in units of: {4}'.
          format(d1.getDimensionId(), d1.getNBins(), d1.getMinimum(), d1.getMaximum(),d1.getUnits()))
-   d1=ws.getDimension(1)   
+   d1=ws.getDimension(1)
    print('dimension 1 has ID: {0}; nBins={1}; min: {2}; max: {3} in units of: {4}'.
          format(d1.getDimensionId(), d1.getNBins(), d1.getMinimum(), d1.getMaximum(), d1.getUnits()))
 
-  
+
 **Output:**
 
 .. testoutput:: exCreateMDHisto
 
    created workspace is of type: MDHistoWorkspace
-   and has 2 dimensions with 100 points and 0 events 
+   and has 2 dimensions with 100 points and 0 events
    dimension 0 has ID: Dim1; nBins=10; min: -3.0; max: 3.0 in units of: MomentumTransfer
    dimension 1 has ID: Dim2; nBins=10; min: -10.0; max: 10.0 in units of: EnergyTransfer
 

@@ -33,16 +33,10 @@ public:
   /// Base methods implemented in derived classes
   virtual void loadSettings(const QSettings &settings) = 0;
 
-signals:
-  /// Send signal to parent window to execute python script
-  void executePythonScript(const QString &pyInput, bool output);
-
 protected:
   void setup() override = 0;
   void run() override = 0;
   bool validate() override = 0;
-
-  void runPythonScript(const QString &pyInput);
 };
 } // namespace CustomInterfaces
 } // namespace MantidQt

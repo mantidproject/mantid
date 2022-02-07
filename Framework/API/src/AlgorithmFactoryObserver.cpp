@@ -7,21 +7,17 @@
 #include "MantidAPI/AlgorithmFactoryObserver.h"
 
 namespace {
-template <typename Observer>
-void modifyObserver(const bool turnOn, bool &isObserving, Observer &observer) {
+template <typename Observer> void modifyObserver(const bool turnOn, bool &isObserving, Observer &observer) {
   if (turnOn && !isObserving) {
-    Mantid::API::AlgorithmFactory::Instance().notificationCenter.addObserver(
-        observer);
+    Mantid::API::AlgorithmFactory::Instance().notificationCenter.addObserver(observer);
   } else if (!turnOn && isObserving) {
-    Mantid::API::AlgorithmFactory::Instance().notificationCenter.removeObserver(
-        observer);
+    Mantid::API::AlgorithmFactory::Instance().notificationCenter.removeObserver(observer);
   }
   isObserving = turnOn;
 }
 } // namespace
 
-namespace Mantid {
-namespace API {
+namespace Mantid::API {
 
 AlgorithmFactoryObserver::AlgorithmFactoryObserver()
     : m_updateObserver(*this, &AlgorithmFactoryObserver::_updateHandle) {}
@@ -61,11 +57,9 @@ void AlgorithmFactoryObserver::updateHandle() {}
 // ------------------------------------------------------------
 // Private Methods
 // ------------------------------------------------------------
-void AlgorithmFactoryObserver::_updateHandle(
-    AlgorithmFactoryUpdateNotification_ptr pNf) {
+void AlgorithmFactoryObserver::_updateHandle(AlgorithmFactoryUpdateNotification_ptr pNf) {
   UNUSED_ARG(pNf)
   this->updateHandle();
 }
 
-} // namespace API
-} // namespace Mantid
+} // namespace Mantid::API

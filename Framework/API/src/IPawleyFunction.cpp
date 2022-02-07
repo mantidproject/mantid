@@ -6,10 +6,8 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAPI/IPawleyFunction.h"
 
-namespace Mantid {
-namespace API {
+namespace Mantid::API {
 /// Default constructor
 IPawleyFunction::IPawleyFunction() : FunctionParameterDecorator() {}
 
-} // namespace API
-} // namespace Mantid
+} // namespace Mantid::API

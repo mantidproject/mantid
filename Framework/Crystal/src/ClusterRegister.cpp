@@ -20,8 +20,7 @@ template <typename T> std::pair<T, T> ordered_pair(const T &a, const T &b) {
 }
 } // namespace
 
-namespace Mantid {
-namespace Crystal {
+namespace Mantid::Crystal {
 
 class ImplClusterRegister {
 public:
@@ -131,8 +130,7 @@ ClusterRegister::~ClusterRegister() = default;
  * @param label : Label as key
  * @param cluster : Cluster with label
  */
-void ClusterRegister::add(const size_t &label,
-                          const std::shared_ptr<ICluster> &cluster) {
+void ClusterRegister::add(const size_t &label, const std::shared_ptr<ICluster> &cluster) {
   m_Impl->m_register.emplace(label, cluster);
   m_Impl->m_unique.emplace(label, cluster);
 }
@@ -142,22 +140,19 @@ void ClusterRegister::add(const size_t &label,
  * @param a : Disjoint element which is part of pair
  * @param b : Disjoint element with is part of pair
  */
-void ClusterRegister::merge(const DisjointElement &a,
-                            const DisjointElement &b) const {
+void ClusterRegister::merge(const DisjointElement &a, const DisjointElement &b) const {
   if (!a.isEmpty() && !b.isEmpty()) {
     const int &aId = a.getId();
     const int &bId = b.getId();
 
     size_t hash = m_Impl->m_labelHasher(ordered_pair(aId, bId));
-    if (m_Impl->m_labelHash.find(hash) ==
-        m_Impl->m_labelHash.end()) // Only if this pair combination has not
-                                   // already been processed
+    if (m_Impl->m_labelHash.find(hash) == m_Impl->m_labelHash.end()) // Only if this pair combination has not
+                                                                     // already been processed
     {
       m_Impl->insert(a, b);
       m_Impl->m_unique.erase(aId);
       m_Impl->m_unique.erase(bId);
-      m_Impl->m_labelHash.insert(
-          hash); // So that we don't process this pair again.
+      m_Impl->m_labelHash.insert(hash); // So that we don't process this pair again.
     }
   }
 }
@@ -182,8 +177,7 @@ ClusterRegister::MapCluster ClusterRegister::clusters() const {
  * @param elements
  * @return: Map of merged clusters.
  */
-ClusterRegister::MapCluster
-ClusterRegister::clusters(std::vector<DisjointElement> &elements) const {
+ClusterRegister::MapCluster ClusterRegister::clusters(std::vector<DisjointElement> &elements) const {
   MapCluster temp;
   temp.insert(m_Impl->m_unique.begin(), m_Impl->m_unique.end());
   auto mergedClusters = m_Impl->makeCompositeClusters();
@@ -194,5 +188,4 @@ ClusterRegister::clusters(std::vector<DisjointElement> &elements) const {
   return temp;
 }
 
-} // namespace Crystal
-} // namespace Mantid
+} // namespace Mantid::Crystal

@@ -25,9 +25,7 @@ namespace {
 Mantid::Kernel::Logger g_log("ElasticDiffSphere");
 }
 
-namespace Mantid {
-namespace CurveFitting {
-namespace Functions {
+namespace Mantid::CurveFitting::Functions {
 
 DECLARE_FUNCTION(ElasticDiffSphere)
 
@@ -46,12 +44,10 @@ ElasticDiffSphere::ElasticDiffSphere() {
  */
 void ElasticDiffSphere::init() {
   // Ensure positive values for Height and Radius
-  auto HeightConstraint = std::make_unique<BConstraint>(
-      this, "Height", std::numeric_limits<double>::epsilon(), true);
+  auto HeightConstraint = std::make_unique<BConstraint>(this, "Height", std::numeric_limits<double>::epsilon(), true);
   this->addConstraint(std::move(HeightConstraint));
 
-  auto RadiusConstraint = std::make_unique<BConstraint>(
-      this, "Radius", std::numeric_limits<double>::epsilon(), true);
+  auto RadiusConstraint = std::make_unique<BConstraint>(this, "Radius", std::numeric_limits<double>::epsilon(), true);
   this->addConstraint(std::move(RadiusConstraint));
 }
 
@@ -70,6 +66,4 @@ double ElasticDiffSphere::HeightPrefactor() const {
   return pow(3 * boost::math::sph_bessel(1, Q * R) / (Q * R), 2);
 }
 
-} // namespace Functions
-} // namespace CurveFitting
-} // namespace Mantid
+} // namespace Mantid::CurveFitting::Functions

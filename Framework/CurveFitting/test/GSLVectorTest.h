@@ -201,8 +201,7 @@ public:
   void test_norm() {
     auto v = makeVector1();
     TS_ASSERT_DELTA(v.norm2(), 5.0 * 5.0 + 55.0 * 55.0 + 555.0 * 555.0, 1e-10);
-    TS_ASSERT_DELTA(v.norm(), sqrt(5.0 * 5.0 + 55.0 * 55.0 + 555.0 * 555.0),
-                    1e-10);
+    TS_ASSERT_DELTA(v.norm(), sqrt(5.0 * 5.0 + 55.0 * 55.0 + 555.0 * 555.0), 1e-10);
     v.normalize();
     TS_ASSERT_DELTA(v.norm(), 1.0, 1e-10);
   }

@@ -19,13 +19,10 @@ namespace Functions {
   function from
   Thermal Neutron Function's beta0, Alph1, Alph0t, Alph1t, Dtt1, and etc.
 */
-class MANTID_CURVEFITTING_DLL ThermalNeutronBk2BkExpBeta
-    : virtual public API::IFunction1D,
-      public API::ParamFunction {
+class MANTID_CURVEFITTING_DLL ThermalNeutronBk2BkExpBeta : virtual public API::IFunction1D, public API::ParamFunction {
 public:
   /// Override
-  void function1D(double *out, const double *xValues,
-                  const size_t nData) const override;
+  void function1D(double *out, const double *xValues, const size_t nData) const override;
 
   /// overwrite IFunction base class methods
   std::string name() const override { return "ThermalNeutronBk2BkExpBeta"; }
@@ -42,17 +39,14 @@ private:
   void functionDerivLocal(API::Jacobian *, const double *, const size_t);
 
   /// Derivative to overwrite
-  void functionDeriv(const API::FunctionDomain &domain,
-                     API::Jacobian &jacobian) override;
+  void functionDeriv(const API::FunctionDomain &domain, API::Jacobian &jacobian) override;
 
   /// Core function (inline) to calcualte TOF_h from d-spacing
-  inline double corefunction(double dh, double width, double tcross,
-                             double beta0, double beta1, double beta0t,
+  inline double corefunction(double dh, double width, double tcross, double beta0, double beta1, double beta0t,
                              double beta1t) const;
 };
 
-using ThermalNeutronBk2BkExpBeta_sptr =
-    std::shared_ptr<ThermalNeutronBk2BkExpBeta>;
+using ThermalNeutronBk2BkExpBeta_sptr = std::shared_ptr<ThermalNeutronBk2BkExpBeta>;
 
 } // namespace Functions
 } // namespace CurveFitting

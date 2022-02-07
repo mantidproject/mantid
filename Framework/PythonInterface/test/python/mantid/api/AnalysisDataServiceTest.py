@@ -7,7 +7,7 @@
 import unittest
 from testhelpers import run_algorithm
 from mantid.api import (AnalysisDataService, AnalysisDataServiceImpl,
-                        FrameworkManagerImpl, MatrixWorkspace, Workspace)
+                        FrameworkManagerImpl, MatrixWorkspace)
 from mantid import mtd
 
 
@@ -41,6 +41,15 @@ class AnalysisDataServiceTest(unittest.TestCase):
         data = [1.0,2.0,3.0]
         alg = run_algorithm('CreateWorkspace',DataX=data,DataY=data,NSpec=1,UnitX='Wavelength', child=True)
         AnalysisDataService.addOrReplace(wsname, alg.getProperty("OutputWorkspace").value)
+
+    def test_contains(self):
+        # verify check against None
+        self.assertFalse(None in mtd)
+        # verify check against things that bool to False
+        self.assertFalse('' in mtd)
+        self.assertFalse(0 in mtd)
+        # verify check for converting checked value to string
+        self.assertFalse(1 in mtd)
 
     def test_len_increases_when_item_added(self):
         wsname = 'ADSTest_test_len_increases_when_item_added'
@@ -110,8 +119,8 @@ class AnalysisDataServiceTest(unittest.TestCase):
         for name in ws_names:
             self._run_createws(name)
         group_name = 'group1'
-        alg = run_algorithm('GroupWorkspaces', InputWorkspaces=ws_names,
-                            OutputWorkspace=group_name)
+        _ = run_algorithm('GroupWorkspaces', InputWorkspaces=ws_names,
+                          OutputWorkspace=group_name)
 
         workspaces = AnalysisDataService.retrieveWorkspaces([group_name], True)
         self.assertEqual(2, len(workspaces))

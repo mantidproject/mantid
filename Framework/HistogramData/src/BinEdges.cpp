@@ -7,8 +7,7 @@
 #include "MantidHistogramData/BinEdges.h"
 #include "MantidHistogramData/Points.h"
 
-namespace Mantid {
-namespace HistogramData {
+namespace Mantid::HistogramData {
 
 /// Constructs BinEdges from points, approximating each bin edges as mid-point
 /// between two points.
@@ -35,10 +34,8 @@ BinEdges::BinEdges(const Points &points) {
   }
   // Now deal with the end points
   data[0] = points[0] - (data[1] - points[0]);
-  data[numPoints] =
-      points[numPoints - 1] + (points[numPoints - 1] - data[numEdges - 2]);
+  data[numPoints] = points[numPoints - 1] + (points[numPoints - 1] - data[numEdges - 2]);
   m_data = Kernel::make_cow<HistogramX>(std::move(data));
 }
 
-} // namespace HistogramData
-} // namespace Mantid
+} // namespace Mantid::HistogramData

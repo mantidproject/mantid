@@ -6,8 +6,8 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidDataObjects/TableWorkspace.h"
 #include "MantidAPI/WorkspaceFactory.h"
+#include "MantidPythonInterface/api/RegisterWorkspacePtrToPython.h"
 #include "MantidPythonInterface/core/GetPointer.h"
-#include "MantidPythonInterface/kernel/Registry/RegisterWorkspacePtrToPython.h"
 #include <boost/python/class.hpp>
 #include <boost/python/make_constructor.hpp>
 
@@ -21,15 +21,12 @@ using namespace boost::python;
 GET_POINTER_SPECIALIZATION(TableWorkspace)
 
 namespace {
-Mantid::API::Workspace_sptr makeTableWorkspace() {
-  return WorkspaceFactory::Instance().createTable();
-}
+Mantid::API::Workspace_sptr makeTableWorkspace() { return WorkspaceFactory::Instance().createTable(); }
 } // namespace
 
 void export_TableWorkspace() {
 
-  class_<TableWorkspace, bases<ITableWorkspace>, boost::noncopyable>(
-      "TableWorkspace", no_init)
+  class_<TableWorkspace, bases<ITableWorkspace>, boost::noncopyable>("TableWorkspace", no_init)
       .def("__init__", make_constructor(&makeTableWorkspace));
 
   // register pointers

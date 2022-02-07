@@ -10,8 +10,9 @@
 
 #include <Poco/Message.h>
 
-namespace MantidQt {
-namespace MantidWidgets {
+#include <utility>
+
+namespace MantidQt::MantidWidgets {
 
 /**
  * Creates a QtSignalChannel. This channel receives
@@ -20,8 +21,7 @@ namespace MantidWidgets {
  * source are emitted.
  * @param source A string specifying a source for the message
  */
-QtSignalChannel::QtSignalChannel(const QString &source)
-    : QObject(), Poco::Channel(), m_source(source) {}
+QtSignalChannel::QtSignalChannel(QString source) : QObject(), Poco::Channel(), m_source(std::move(source)) {}
 
 QtSignalChannel::~QtSignalChannel() {}
 
@@ -40,8 +40,7 @@ void QtSignalChannel::setSource(const QString &source) { m_source = source; }
  */
 void QtSignalChannel::log(const Poco::Message &msg) {
   if (m_source.isEmpty() || this->source() == msg.getSource().c_str()) {
-    emit messageReceived(Message(QString::fromStdString(msg.getText() + "\n"),
-                                 msg.getPriority()));
+    emit messageReceived(Message(QString::fromStdString(msg.getText() + "\n"), msg.getPriority()));
   }
 }
 
@@ -53,5 +52,4 @@ void QtSignalChannel::setGlobalLogLevel(int priority) {
   using Mantid::Kernel::Logger;
   Logger::setLevelForAll(priority);
 }
-} // namespace MantidWidgets
-} // namespace MantidQt
+} // namespace MantidQt::MantidWidgets

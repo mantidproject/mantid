@@ -27,6 +27,7 @@ class ProjectRecoveryPresenterTest(unittest.TestCase):
     def setUp(self):
         self.prp = ProjectRecoveryPresenter(mock.MagicMock(), model=mock.MagicMock())
         self.prp.current_view = mock.MagicMock()
+        self.prp.model.rows.__len__.return_value = 1
 
     @mock.patch(PATCH_PROJECT_RECOVERY_VIEW)
     def test_start_recovery_view_exception_raised(self, view):
@@ -94,6 +95,14 @@ class ProjectRecoveryPresenterTest(unittest.TestCase):
 
         self.assertTrue(self.prp.start_recovery_failure())
         self.assertEqual(1, self.prp.current_view.exec_.call_count)
+
+    @mock.patch(PATCH_PROJECT_RECOVERY_FAILURE_VIEW)
+    @mock.patch(PATCH_PROJECT_RECOVERY_MODEL)
+    def test_start_recovery_failure_successful_when_no_rows(self, _, __):
+        self.prp.current_view = None
+        self.prp.model.rows.__len__.return_value = 0
+
+        self.assertTrue(self.prp.start_recovery_failure())
 
     def test_get_row_empty_list(self):
         self.prp.model.get_row.return_value = []

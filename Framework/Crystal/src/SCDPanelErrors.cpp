@@ -25,8 +25,7 @@
 #include <sstream>
 #include <utility>
 
-namespace Mantid {
-namespace Crystal {
+namespace Mantid::Crystal {
 
 using namespace CurveFitting;
 
@@ -72,23 +71,18 @@ SCDPanelErrors::SCDPanelErrors() : m_setupFinished(false) {
  * @param inputW :: The workspace
  */
 
-void SCDPanelErrors::moveDetector(double x, double y, double z, double rotx,
-                                  double roty, double rotz, double scalex,
-                                  double scaley, std::string detname,
-                                  const Workspace_sptr &inputW) const {
+void SCDPanelErrors::moveDetector(double x, double y, double z, double rotx, double roty, double rotz, double scalex,
+                                  double scaley, std::string detname, const Workspace_sptr &inputW) const {
   if (detname.compare("none") == 0.0)
     return;
   // CORELLI has sixteenpack under bank
-  DataObjects::PeaksWorkspace_sptr inputP =
-      std::dynamic_pointer_cast<DataObjects::PeaksWorkspace>(inputW);
-  Geometry::Instrument_sptr inst =
-      std::const_pointer_cast<Geometry::Instrument>(inputP->getInstrument());
+  DataObjects::PeaksWorkspace_sptr inputP = std::dynamic_pointer_cast<DataObjects::PeaksWorkspace>(inputW);
+  Geometry::Instrument_sptr inst = std::const_pointer_cast<Geometry::Instrument>(inputP->getInstrument());
   if (inst->getName().compare("CORELLI") == 0.0 && detname != "moderator")
     detname.append("/sixteenpack");
 
   if (x != 0.0 || y != 0.0 || z != 0.0) {
-    IAlgorithm_sptr alg1 = Mantid::API::AlgorithmFactory::Instance().create(
-        "MoveInstrumentComponent", -1);
+    auto alg1 = Mantid::API::AlgorithmFactory::Instance().create("MoveInstrumentComponent", -1);
     alg1->initialize();
     alg1->setChild(true);
     alg1->setLogging(false);
@@ -103,8 +97,7 @@ void SCDPanelErrors::moveDetector(double x, double y, double z, double rotx,
   }
 
   if (rotx != 0.0) {
-    IAlgorithm_sptr algx = Mantid::API::AlgorithmFactory::Instance().create(
-        "RotateInstrumentComponent", -1);
+    auto algx = Mantid::API::AlgorithmFactory::Instance().create("RotateInstrumentComponent", -1);
     algx->initialize();
     algx->setChild(true);
     algx->setLogging(false);
@@ -119,8 +112,7 @@ void SCDPanelErrors::moveDetector(double x, double y, double z, double rotx,
   }
 
   if (roty != 0.0) {
-    IAlgorithm_sptr algy = Mantid::API::AlgorithmFactory::Instance().create(
-        "RotateInstrumentComponent", -1);
+    auto algy = Mantid::API::AlgorithmFactory::Instance().create("RotateInstrumentComponent", -1);
     algy->initialize();
     algy->setChild(true);
     algy->setLogging(false);
@@ -135,8 +127,7 @@ void SCDPanelErrors::moveDetector(double x, double y, double z, double rotx,
   }
 
   if (rotz != 0.0) {
-    IAlgorithm_sptr algz = Mantid::API::AlgorithmFactory::Instance().create(
-        "RotateInstrumentComponent", -1);
+    auto algz = Mantid::API::AlgorithmFactory::Instance().create("RotateInstrumentComponent", -1);
     algz->initialize();
     algz->setChild(true);
     algz->setLogging(false);
@@ -165,18 +156,15 @@ void SCDPanelErrors::moveDetector(double x, double y, double z, double rotx,
         relscaley /= oldscaley[0];
       pmap.addDouble(rectDet.get(), "scalex", scalex);
       pmap.addDouble(rectDet.get(), "scaley", scaley);
-      applyRectangularDetectorScaleToComponentInfo(
-          inputP->mutableComponentInfo(), rectDet->getComponentID(), relscalex,
-          relscaley);
+      applyRectangularDetectorScaleToComponentInfo(inputP->mutableComponentInfo(), rectDet->getComponentID(), relscalex,
+                                                   relscaley);
     }
   }
 }
 
 /// Evaluate the function for a list of arguments and given scaling factor
-void SCDPanelErrors::eval(double xshift, double yshift, double zshift,
-                          double xrotate, double yrotate, double zrotate,
-                          double scalex, double scaley, double *out,
-                          const double *xValues, const size_t nData,
+void SCDPanelErrors::eval(double xshift, double yshift, double zshift, double xrotate, double yrotate, double zrotate,
+                          double scalex, double scaley, double *out, const double *xValues, const size_t nData,
                           double tShift) const {
   UNUSED_ARG(xValues);
   if (nData == 0)
@@ -185,36 +173,30 @@ void SCDPanelErrors::eval(double xshift, double yshift, double zshift,
   setupData();
 
   std::shared_ptr<API::Workspace> cloned = m_workspace->clone();
-  moveDetector(xshift, yshift, zshift, xrotate, yrotate, zrotate, scalex,
-               scaley, m_bank, cloned);
+  moveDetector(xshift, yshift, zshift, xrotate, yrotate, zrotate, scalex, scaley, m_bank, cloned);
 
   auto inputP = std::dynamic_pointer_cast<DataObjects::PeaksWorkspace>(cloned);
-  IAlgorithm_sptr alg =
-      Mantid::API::AlgorithmFactory::Instance().create("IndexPeaks", -1);
-  alg->initialize();
-  alg->setChild(true);
-  alg->setLogging(false);
-  alg->setProperty("PeaksWorkspace", inputP);
-  alg->setProperty("Tolerance", 0.15);
-  alg->execute();
+  // IAlgorithm_sptr alg =
+  //     Mantid::API::AlgorithmFactory::Instance().create("IndexPeaks", -1);
+  // alg->initialize();
+  // alg->setChild(true);
+  // alg->setLogging(false);
+  // alg->setProperty("PeaksWorkspace", inputP);
+  // alg->setProperty("Tolerance", 0.15);
+  // alg->execute();
   auto inst = inputP->getInstrument();
-  Geometry::OrientedLattice lattice =
-      inputP->mutableSample().getOrientedLattice();
+  Geometry::OrientedLattice lattice = inputP->mutableSample().getOrientedLattice();
   for (int i = 0; i < inputP->getNumberPeaks(); i++) {
     const DataObjects::Peak &peak = inputP->getPeak(i);
-    V3D hkl =
-        V3D(boost::math::iround(peak.getH()), boost::math::iround(peak.getK()),
-            boost::math::iround(peak.getL()));
+    V3D hkl = V3D(boost::math::iround(peak.getH()), boost::math::iround(peak.getK()), boost::math::iround(peak.getL()));
     V3D Q2 = lattice.qFromHKL(hkl);
     try {
       if (hkl == V3D(0, 0, 0))
         throw std::runtime_error("unindexed peak");
-      DataObjects::Peak peak2(inst, peak.getDetectorID(), peak.getWavelength(),
-                              hkl, peak.getGoniometerMatrix());
+      DataObjects::Peak peak2(inst, peak.getDetectorID(), peak.getWavelength(), hkl, peak.getGoniometerMatrix());
       Units::Wavelength wl;
 
-      wl.initialize(peak2.getL1(), peak2.getL2(), peak2.getScattering(), 0,
-                    peak2.getInitialEnergy(), 0.0);
+      wl.initialize(peak2.getL1(), 0, {{UnitParams::l2, peak2.getL2()}, {UnitParams::twoTheta, peak2.getScattering()}});
       peak2.setWavelength(wl.singleFromTOF(peak.getTOF() + tShift));
       V3D Q3 = peak2.getQSampleFrame();
       out[i * 3] = Q3[0] - Q2[0];
@@ -235,8 +217,7 @@ void SCDPanelErrors::eval(double xshift, double yshift, double zshift,
  * @param xValues :: The array of x-values.
  * @param nData :: The size of the data.
  */
-void SCDPanelErrors::function1D(double *out, const double *xValues,
-                                const size_t nData) const {
+void SCDPanelErrors::function1D(double *out, const double *xValues, const size_t nData) const {
   const double xshift = getParameter("XShift");
   const double yshift = getParameter("YShift");
   const double zshift = getParameter("ZShift");
@@ -246,8 +227,7 @@ void SCDPanelErrors::function1D(double *out, const double *xValues,
   const double scalex = getParameter("ScaleWidth");
   const double scaley = getParameter("ScaleHeight");
   const double tShift = getParameter("T0Shift");
-  eval(xshift, yshift, zshift, xrotate, yrotate, zrotate, scalex, scaley, out,
-       xValues, nData, tShift);
+  eval(xshift, yshift, zshift, xrotate, yrotate, zrotate, scalex, scaley, out, xValues, nData, tShift);
 }
 
 /**
@@ -257,8 +237,7 @@ void SCDPanelErrors::function1D(double *out, const double *xValues,
  * @param xValues :: The function arguments
  * @param nData :: The size of xValues.
  */
-void SCDPanelErrors::functionDeriv1D(API::Jacobian *out, const double *xValues,
-                                     const size_t nData) {
+void SCDPanelErrors::functionDeriv1D(API::Jacobian *out, const double *xValues, const size_t nData) {
   FunctionDomain1DView domain(xValues, nData);
   this->calNumericalDeriv(domain, *out);
 }
@@ -270,8 +249,7 @@ void SCDPanelErrors::clear() const { m_setupFinished = false; }
  * @param attName :: The attribute name
  * @param value :: The new value
  */
-void SCDPanelErrors::setAttribute(const std::string &attName,
-                                  const IFunction::Attribute &value) {
+void SCDPanelErrors::setAttribute(const std::string &attName, const IFunction::Attribute &value) {
   if (attName == "FileName") {
     std::string fileName = value.asUnquotedString();
     if (fileName.empty()) {
@@ -306,8 +284,7 @@ void SCDPanelErrors::setAttribute(const std::string &attName,
  * @param fname :: The file name
  */
 void SCDPanelErrors::load(const std::string &fname) {
-  IAlgorithm_sptr loadAlg =
-      Mantid::API::AlgorithmFactory::Instance().create("Load", -1);
+  auto loadAlg = Mantid::API::AlgorithmFactory::Instance().create("Load", -1);
   loadAlg->initialize();
   loadAlg->setChild(true);
   loadAlg->setLogging(false);
@@ -316,13 +293,11 @@ void SCDPanelErrors::load(const std::string &fname) {
     loadAlg->setPropertyValue("OutputWorkspace", "_SCDPanelErrors_fit_data_");
     loadAlg->execute();
   } catch (std::runtime_error &) {
-    throw std::runtime_error(
-        "Unable to load Nexus file for SCDPanelErrors function.");
+    throw std::runtime_error("Unable to load Nexus file for SCDPanelErrors function.");
   }
 
   Workspace_sptr ws = loadAlg->getProperty("OutputWorkspace");
-  API::Workspace_sptr resData =
-      std::dynamic_pointer_cast<Mantid::API::Workspace>(ws);
+  API::Workspace_sptr resData = std::dynamic_pointer_cast<Mantid::API::Workspace>(ws);
   loadWorkspace(resData);
 }
 
@@ -363,11 +338,9 @@ void SCDPanelErrors::setupData() const {
 
   m_bank = getAttribute("Bank").asString();
 
-  g_log.debug() << "Setting up " << m_workspace->getName() << " bank " << m_bank
-                << '\n';
+  g_log.debug() << "Setting up " << m_workspace->getName() << " bank " << m_bank << '\n';
 
   m_setupFinished = true;
 }
 
-} // namespace Crystal
-} // namespace Mantid
+} // namespace Mantid::Crystal

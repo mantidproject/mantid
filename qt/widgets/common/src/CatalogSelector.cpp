@@ -14,10 +14,7 @@ namespace MantidWidgets {
 /**
  * Constructor
  */
-CatalogSelector::CatalogSelector(QWidget *parent)
-    : QWidget(parent), m_uiForm() {
-  initLayout();
-}
+CatalogSelector::CatalogSelector(QWidget *parent) : QWidget(parent), m_uiForm() { initLayout(); }
 
 /**
  * Obtain the session information for the facilities selected.
@@ -28,10 +25,7 @@ std::vector<std::string> CatalogSelector::getSelectedCatalogSessions() {
   std::vector<std::string> selectedSessions;
   for (int row = 0; row < m_uiForm.selectedCatalogs->count(); ++row) {
     if (m_uiForm.selectedCatalogs->item(row)->isSelected()) {
-      selectedSessions.emplace_back(m_uiForm.selectedCatalogs->item(row)
-                                        ->data(Qt::UserRole)
-                                        .toString()
-                                        .toStdString());
+      selectedSessions.emplace_back(m_uiForm.selectedCatalogs->item(row)->data(Qt::UserRole).toString().toStdString());
     }
   }
   return selectedSessions;
@@ -47,17 +41,13 @@ void CatalogSelector::populateFacilitySelection() {
   for (unsigned row = 0; row < session.size(); ++row) {
     // This prevents the same items being appended (again) to the list widget.
     if (!m_uiForm.selectedCatalogs->item(row)) {
-      QListWidgetItem *item = new QListWidgetItem(
-          QString::fromStdString(session.at(row)->getFacility()));
+      QListWidgetItem *item = new QListWidgetItem(QString::fromStdString(session.at(row)->getFacility()));
       // Set sessionID to user specific meta-data to easily obtain it later.
-      item->setData(Qt::UserRole, QVariant(QString::fromStdString(
-                                      session.at(row)->getSessionId())));
+      item->setData(Qt::UserRole, QVariant(QString::fromStdString(session.at(row)->getSessionId())));
       // Add tooltip to see the difference if logged into two facilities with
       // different end-points.
-      item->setData(Qt::ToolTipRole,
-                    QVariant(QString::fromStdString(
-                        "The soap-endpoint for this catalog is: " +
-                        session.at(row)->getSoapEndpoint())));
+      item->setData(Qt::ToolTipRole, QVariant(QString::fromStdString("The soap-endpoint for this catalog is: " +
+                                                                     session.at(row)->getSoapEndpoint())));
       // When a new item is added, we want to select & check it by default.
       item->setCheckState(Qt::Checked);
       m_uiForm.selectedCatalogs->insertItem(row, item);
@@ -80,12 +70,11 @@ void CatalogSelector::initLayout() {
   connect(m_uiForm.cancelBtn, SIGNAL(clicked()), this, SLOT(close()));
 
   // Check/un-check the checkbox when an item is clicked or selected.
-  connect(m_uiForm.selectedCatalogs, SIGNAL(itemClicked(QListWidgetItem *)),
-          this, SLOT(checkSelectedFacility(QListWidgetItem *)));
+  connect(m_uiForm.selectedCatalogs, SIGNAL(itemClicked(QListWidgetItem *)), this,
+          SLOT(checkSelectedFacility(QListWidgetItem *)));
 
   // Centre the GUI on screen.
-  this->setGeometry(QStyle::alignedRect(Qt::LeftToRight, Qt::AlignCenter,
-                                        this->window()->size(),
+  this->setGeometry(QStyle::alignedRect(Qt::LeftToRight, Qt::AlignCenter, this->window()->size(),
                                         QDesktopWidget().availableGeometry()));
 }
 

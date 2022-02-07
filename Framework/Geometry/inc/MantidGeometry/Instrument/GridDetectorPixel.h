@@ -33,14 +33,11 @@ public:
   /// A string representation of the component type
   virtual std::string type() const override { return "GridDetectorPixel"; }
 
-  GridDetectorPixel(const std::string &name, int id,
-                    const std::shared_ptr<IObject> &shape, IComponent *parent,
-                    const GridDetector *panel, size_t col, size_t row,
-                    size_t layer);
+  GridDetectorPixel(const std::string &name, int id, const std::shared_ptr<IObject> &shape, IComponent *parent,
+                    const GridDetector *panel, size_t col, size_t row, size_t layer);
 
   /// Create a cloned instance with a parameter map applied
-  GridDetectorPixel *
-  cloneParameterized(const ParameterMap *map) const override {
+  GridDetectorPixel *cloneParameterized(const ParameterMap *map) const override {
     return new GridDetectorPixel(this, map);
   }
 

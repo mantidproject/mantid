@@ -7,10 +7,13 @@
 #pragma once
 
 #include "MantidDataHandling/DllConfig.h"
+#include "MantidGeometry/IDTypes.h"
 #include "MantidNexus/NexusClasses.h"
 
 namespace Mantid {
 namespace DataHandling {
+
+using SpectrumPair = std::pair<specnum_t, specnum_t>;
 
 class DataBlockGenerator;
 
@@ -24,16 +27,15 @@ class DLLExport DataBlock {
 public:
   DataBlock();
   DataBlock(const Mantid::NeXus::NXInt &data);
-  DataBlock(int numberOfperiods, size_t numberOfSpectra,
-            size_t numberOfChannels);
+  DataBlock(int numberOfperiods, size_t numberOfSpectra, size_t numberOfChannels);
 
   virtual ~DataBlock() = default;
 
-  virtual int64_t getMinSpectrumID() const;
-  virtual void setMinSpectrumID(int64_t minSpecID);
+  virtual specnum_t getMinSpectrumID() const;
+  virtual void setMinSpectrumID(specnum_t minSpecID);
 
-  virtual int64_t getMaxSpectrumID() const;
-  virtual void setMaxSpectrumID(int64_t minSpecID);
+  virtual specnum_t getMaxSpectrumID() const;
+  virtual void setMaxSpectrumID(specnum_t minSpecID);
 
   virtual size_t getNumberOfSpectra() const;
   virtual int getNumberOfPeriods() const;
@@ -51,9 +53,9 @@ protected:
   size_t m_numberOfChannels;
 
   // minimal spectra Id (by default 1, undefined -- max_value)
-  int64_t m_minSpectraID;
+  specnum_t m_minSpectraID;
   // maximal spectra Id (by default 1, undefined  -- 0)
-  int64_t m_maxSpectraID;
+  specnum_t m_maxSpectraID;
 };
 
 } // namespace DataHandling

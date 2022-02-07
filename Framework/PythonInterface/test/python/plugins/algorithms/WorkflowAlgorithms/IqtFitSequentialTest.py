@@ -78,7 +78,7 @@ class IqtFitSequentialTest(unittest.TestCase):
         nbins = sub_ws.blocksize()
         nhists = sub_ws.getNumberHistograms()
         self.assertEqual(nbins, 58)
-        self.assertEqual(nhists, 5)
+        self.assertEqual(nhists, 3)
 
         # Check histogram names
         text_axis = sub_ws.getAxis(1)
@@ -138,8 +138,8 @@ class IqtFitSequentialTest(unittest.TestCase):
     def _validate_sample_log_values(self, matrixWS):
         run = matrixWS.getRun()
         # Check additionally added logs
-        self.assertEqual(run.getProperty('end_x').value, 0.24)
-        self.assertEqual(run.getProperty('start_x').value, 0.0)
+        self.assertEqual(float(run.getProperty('end_x').value), 0.24)
+        self.assertEqual(float(run.getProperty('start_x').value), 0.0)
 
         # Check copied logs from input
         self.assertEqual(run.getProperty('current_period').value, 1)
@@ -156,8 +156,8 @@ class IqtFitSequentialTest(unittest.TestCase):
         """
         result, params, fit_group = IqtFitSequential(InputWorkspace=self._iqt_ws,
                                                      Function=self._function,
-                                                     StartX=0,
-                                                     EndX=0.24,
+                                                     StartX="0.0",
+                                                     EndX="0.24",
                                                      SpecMin=0,
                                                      SpecMax=16)
         self._validate_output(params, result, fit_group)
@@ -168,7 +168,8 @@ class IqtFitSequentialTest(unittest.TestCase):
         self.assertRaises(ValueError, IqtFitSequential,
                           InputWorkspace=self._iqt_ws,
                           Function=self._function,
-                          EndX=0.2,
+                          startX="0.0",
+                          EndX="0.2",
                           SpecMin=-1,
                           SpecMax=16,
                           OutputWorkspace='result',
@@ -178,7 +179,8 @@ class IqtFitSequentialTest(unittest.TestCase):
     def test_maximum_spectra_more_than_workspace_spectra(self):
         self.assertRaises(RuntimeError, IqtFitSequential, InputWorkspace=self._iqt_ws,
                           Function=self._function,
-                          EndX=0.2,
+                          startX="0.0",
+                          EndX="0.2",
                           SpecMin=0,
                           SpecMax=20,
                           OutputWorkspace='result',
@@ -188,7 +190,8 @@ class IqtFitSequentialTest(unittest.TestCase):
     def test_minimum_spectra_more_than_maximum_spectra(self):
         self.assertRaises(RuntimeError, IqtFitSequential, InputWorkspace=self._iqt_ws,
                           Function=self._function,
-                          EndX=0.2,
+                          startX="0.0",
+                          EndX="0.2",
                           SpecMin=10,
                           SpecMax=5,
                           OutputWorkspace='result',
@@ -198,8 +201,8 @@ class IqtFitSequentialTest(unittest.TestCase):
     def test_minimum_x_less_than_0(self):
         self.assertRaises(RuntimeError, IqtFitSequential, InputWorkspace=self._iqt_ws,
                           Function=self._function,
-                          StartX=-0.2,
-                          EndX=0.2,
+                          StartX="-0.2",
+                          EndX="0.2",
                           SpecMin=0,
                           SpecMax=16,
                           OutputWorkspace='result',
@@ -209,8 +212,8 @@ class IqtFitSequentialTest(unittest.TestCase):
     def test_maximum_x_more_than_workspace_max_x(self):
         self.assertRaises(RuntimeError, IqtFitSequential, InputWorkspace=self._iqt_ws,
                           Function=self._function,
-                          StartX=0,
-                          EndX=0.4,
+                          StartX="0",
+                          EndX="0.4",
                           SpecMin=0,
                           SpecMax=16,
                           OutputWorkspace='result',

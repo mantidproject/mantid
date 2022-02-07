@@ -26,16 +26,22 @@
 #include <QVBoxLayout>
 #include <limits>
 
-namespace MantidQt {
-namespace CustomInterfaces {
-namespace IDA {
+namespace MantidQt::CustomInterfaces::IDA {
 
 /**
  * Constructor
  * @param parent :: The parent widget.
  */
-FunctionTemplateBrowser::FunctionTemplateBrowser(QWidget *parent)
-    : QWidget(parent), m_decimals(6) {}
+FunctionTemplateBrowser::FunctionTemplateBrowser(QWidget *parent) : QWidget(parent), m_decimals(6) {}
+
+FunctionTemplateBrowser::~FunctionTemplateBrowser() {
+  m_browser->unsetFactoryForManager(m_stringManager);
+  m_browser->unsetFactoryForManager(m_doubleManager);
+  m_browser->unsetFactoryForManager(m_intManager);
+  m_browser->unsetFactoryForManager(m_boolManager);
+  m_browser->unsetFactoryForManager(m_enumManager);
+  m_browser->unsetFactoryForManager(m_parameterManager);
+}
 
 void FunctionTemplateBrowser::createBrowser() {
   m_stringManager = new QtStringPropertyManager(this);
@@ -47,7 +53,9 @@ void FunctionTemplateBrowser::createBrowser() {
   m_parameterManager = new ParameterPropertyManager(this, true);
 
   // create editor factories
-  auto *spinBoxFactory = new QtSpinBoxFactory(this);
+  // Here we create a spin box factory with a custom timer method
+  // This avoids the slot double incrementing the box
+  auto *spinBoxFactoryNoTimer = new QtSpinBoxFactoryNoTimer(this);
   auto *doubleEditorFactory = new DoubleEditorFactory(this);
   auto *lineEditFactory = new QtLineEditFactory(this);
   auto *checkBoxFactory = new QtCheckBoxFactory(this);
@@ -58,31 +66,24 @@ void FunctionTemplateBrowser::createBrowser() {
   // assign factories to property managers
   m_browser->setFactoryForManager(m_stringManager, lineEditFactory);
   m_browser->setFactoryForManager(m_doubleManager, doubleEditorFactory);
-  m_browser->setFactoryForManager(m_intManager, spinBoxFactory);
+  m_browser->setFactoryForManager(m_intManager, spinBoxFactoryNoTimer);
   m_browser->setFactoryForManager(m_boolManager, checkBoxFactory);
   m_browser->setFactoryForManager(m_enumManager, comboBoxFactory);
   m_browser->setFactoryForManager(m_parameterManager, doubleDialogFactory);
 
-  connect(m_intManager, SIGNAL(propertyChanged(QtProperty *)), this,
-          SLOT(intChanged(QtProperty *)));
-  connect(m_boolManager, SIGNAL(propertyChanged(QtProperty *)), this,
-          SLOT(boolChanged(QtProperty *)));
-  connect(m_enumManager, SIGNAL(propertyChanged(QtProperty *)), this,
-          SLOT(enumChanged(QtProperty *)));
-  connect(m_parameterManager, SIGNAL(propertyChanged(QtProperty *)), this,
-          SLOT(parameterChanged(QtProperty *)));
+  connect(m_intManager, SIGNAL(propertyChanged(QtProperty *)), this, SLOT(intChanged(QtProperty *)));
+  connect(m_boolManager, SIGNAL(propertyChanged(QtProperty *)), this, SLOT(boolChanged(QtProperty *)));
+  connect(m_enumManager, SIGNAL(propertyChanged(QtProperty *)), this, SLOT(enumChanged(QtProperty *)));
+  connect(m_parameterManager, SIGNAL(propertyChanged(QtProperty *)), this, SLOT(parameterChanged(QtProperty *)));
 
-  connect(doubleDialogFactory, SIGNAL(buttonClicked(QtProperty *)), this,
-          SLOT(parameterButtonClicked(QtProperty *)));
-  connect(doubleDialogFactory, SIGNAL(closeEditor()), m_browser,
-          SLOT(closeEditor()));
+  connect(doubleDialogFactory, SIGNAL(buttonClicked(QtProperty *)), this, SLOT(parameterButtonClicked(QtProperty *)));
+  connect(doubleDialogFactory, SIGNAL(closeEditor()), m_browser, SLOT(closeEditor()));
 
   m_browser->setContextMenuPolicy(Qt::CustomContextMenu);
-  connect(m_browser, SIGNAL(customContextMenuRequested(const QPoint &)), this,
-          SLOT(popupMenu(const QPoint &)));
+  connect(m_browser, SIGNAL(customContextMenuRequested(const QPoint &)), this, SLOT(popupMenu(const QPoint &)));
 
-  connect(m_browser, SIGNAL(optionChanged(QtProperty *, const QString &, bool)),
-          this, SLOT(globalChanged(QtProperty *, const QString &, bool)));
+  connect(m_browser, SIGNAL(optionChanged(QtProperty *, const QString &, bool)), this,
+          SLOT(globalChanged(QtProperty *, const QString &, bool)));
 }
 
 void FunctionTemplateBrowser::init() {
@@ -95,6 +96,4 @@ void FunctionTemplateBrowser::init() {
 
 void FunctionTemplateBrowser::clear() { m_browser->clear(); }
 
-} // namespace IDA
-} // namespace CustomInterfaces
-} // namespace MantidQt
+} // namespace MantidQt::CustomInterfaces::IDA

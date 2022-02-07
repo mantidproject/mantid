@@ -11,7 +11,7 @@
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/FunctionParameterDecorator.h"
 #include "MantidDataObjects/Workspace2D.h"
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
+#include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
 #include <cxxtest/TestSuite.h>
 
 #include "MantidCurveFitting/Algorithms/Fit.h"
@@ -35,20 +35,16 @@ public:
   SimpleFunctionParameterDecorator() {}
   ~SimpleFunctionParameterDecorator() override {}
 
-  std::string name() const override {
-    return "SimpleFunctionParameterDecorator";
-  }
+  std::string name() const override { return "SimpleFunctionParameterDecorator"; }
 
-  void function(const FunctionDomain &domain,
-                FunctionValues &values) const override {
+  void function(const FunctionDomain &domain, FunctionValues &values) const override {
     throwIfNoFunctionSet();
 
     IFunction_sptr fn = getDecoratedFunction();
     fn->function(domain, values);
   }
 
-  void functionDeriv(const FunctionDomain &domain,
-                     Jacobian &jacobian) override {
+  void functionDeriv(const FunctionDomain &domain, Jacobian &jacobian) override {
     throwIfNoFunctionSet();
 
     IFunction_sptr fn = getDecoratedFunction();
@@ -62,32 +58,25 @@ class FunctionParameterDecoratorFitTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static FunctionParameterDecoratorFitTest *createSuite() {
-    return new FunctionParameterDecoratorFitTest();
-  }
-  static void destroySuite(FunctionParameterDecoratorFitTest *suite) {
-    delete suite;
-  }
+  static FunctionParameterDecoratorFitTest *createSuite() { return new FunctionParameterDecoratorFitTest(); }
+  static void destroySuite(FunctionParameterDecoratorFitTest *suite) { delete suite; }
 
   FunctionParameterDecoratorFitTest() { FrameworkManager::Instance(); }
 
   void testFunctionIsRegistered() {
-    IFunction_sptr fn = FunctionFactory::Instance().createFunction(
-        "SimpleFunctionParameterDecorator");
+    IFunction_sptr fn = FunctionFactory::Instance().createFunction("SimpleFunctionParameterDecorator");
 
     TS_ASSERT(fn);
   }
 
   void testFit() {
-    Workspace2D_sptr ws =
-        WorkspaceCreationHelper::create1DWorkspaceConstant(20, 1.5, 0.5, true);
+    Workspace2D_sptr ws = WorkspaceCreationHelper::create1DWorkspaceConstant(20, 1.5, 0.5, true);
 
-    FunctionParameterDecorator_sptr fn =
-        std::make_shared<SimpleFunctionParameterDecorator>();
+    FunctionParameterDecorator_sptr fn = std::make_shared<SimpleFunctionParameterDecorator>();
     fn->setDecoratedFunction("FlatBackground");
     fn->setParameter("A0", 10.5);
 
-    IAlgorithm_sptr fitAlg = AlgorithmManager::Instance().create("Fit");
+    auto fitAlg = AlgorithmManager::Instance().create("Fit");
     fitAlg->setProperty("Function", std::static_pointer_cast<IFunction>(fn));
     fitAlg->setProperty("InputWorkspace", ws);
 

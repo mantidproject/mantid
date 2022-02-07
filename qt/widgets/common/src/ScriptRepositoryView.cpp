@@ -23,58 +23,53 @@
 #include <QTime>
 #include <QVBoxLayout>
 
-namespace MantidQt {
-namespace API {
+namespace MantidQt::API {
 namespace {
 /// static logger
 Mantid::Kernel::Logger g_log("ScriptRepositoryView");
 } // namespace
 
-const QString install_mantid_label =
-    "<html><head/><body><p>The <span style=\" font-weight:600;\">"
-    "Script Repository</span> allows you to:</p>"
-    "<p>  * Share your scripts and reduction algorithms;</p>"
-    "<p>  * Get <span style=\" font-weight:600;\">Mantid</span> Scripts from "
-    "the mantid developers and the community. </p>"
-    "<p><span style=\" font-style:italic;\">"
-    "N.B. The installation usually requires a couple of minutes, depending on "
-    "your network bandwidth. </span></p>"
-    "<p>More Information available at "
-    "<a href=\"http://www.mantidproject.org/ScriptRepository\"><span style=\" "
-    "text-decoration: underline; color:#0000ff;\">"
-    "http://www.mantidproject.org/ScriptRepository</span></a></p></br><p><span "
-    "style=\" font-weight:600;\">"
-    "Would you like to install it now?</span></p></body></html>";
+const QString install_mantid_label = "<html><head/><body><p>The <span style=\" font-weight:600;\">"
+                                     "Script Repository</span> allows you to:</p>"
+                                     "<p>  * Share your scripts and reduction algorithms;</p>"
+                                     "<p>  * Get <span style=\" font-weight:600;\">Mantid</span> Scripts from "
+                                     "the mantid developers and the community. </p>"
+                                     "<p><span style=\" font-style:italic;\">"
+                                     "N.B. The installation usually requires a couple of minutes, depending on "
+                                     "your network bandwidth. </span></p>"
+                                     "<p>More Information available at "
+                                     "<a href=\"http://www.mantidproject.org/ScriptRepository\"><span style=\" "
+                                     "text-decoration: underline; color:#0000ff;\">"
+                                     "http://www.mantidproject.org/ScriptRepository</span></a></p></br><p><span "
+                                     "style=\" font-weight:600;\">"
+                                     "Would you like to install it now?</span></p></body></html>";
 
-const QString installation_in_progress =
-    "<html><head/><body><p><span style=\" font-weight:600;\">"
-    "Installing Script Repository Installation in background!</span></p>"
-    "<p>You may continue to use mantid.</p>"
-    "<p>The Result Log willl give you information of the installation "
-    "progress.</p>"
-    "<p>When finished, please, reopen the <span style=\" "
-    "font-weight:600;\">Script Repository</span>. </p></body></html>";
+const QString installation_in_progress = "<html><head/><body><p><span style=\" font-weight:600;\">"
+                                         "Installing Script Repository Installation in background!</span></p>"
+                                         "<p>You may continue to use mantid.</p>"
+                                         "<p>The Result Log willl give you information of the installation "
+                                         "progress.</p>"
+                                         "<p>When finished, please, reopen the <span style=\" "
+                                         "font-weight:600;\">Script Repository</span>. </p></body></html>";
 
-const QString installation_failed =
-    "<html><head/><body><p>The installation of Script Repository "
-    "<span style=\" font-weight:600;\">Failed</span>!</p>"
-    "<p>Please, check the Result Log to see why the installation failed. "
-    "</p></body></html>";
+const QString installation_failed = "<html><head/><body><p>The installation of Script Repository "
+                                    "<span style=\" font-weight:600;\">Failed</span>!</p>"
+                                    "<p>Please, check the Result Log to see why the installation failed. "
+                                    "</p></body></html>";
 
-const QString dir_not_empty_label =
-    "<html><head/><body><p>The directory/folder that you have selected is not "
-    "empty</p>"
-    "<p>Are you sure that you want to install the script repository here? All "
-    "the files and directories found in "
-    "the selected directory/folder could be shared in the repository by "
-    "mistake.</p>"
-    "<p>If you are not sure, please choose 'no' and then select an empty (or "
-    "newly created) directory/folder.</p>"
-    "<p>If this is your home directory, desktop or similar you should "
-    "definitely choose 'no'.</p>"
-    "<p>If you are sure of what you are doing, please choose 'yes'. The "
-    "installation may take a couple of minutes.</p>"
-    "</body></html>";
+const QString dir_not_empty_label = "<html><head/><body><p>The directory/folder that you have selected is not "
+                                    "empty</p>"
+                                    "<p>Are you sure that you want to install the script repository here? All "
+                                    "the files and directories found in "
+                                    "the selected directory/folder could be shared in the repository by "
+                                    "mistake.</p>"
+                                    "<p>If you are not sure, please choose 'no' and then select an empty (or "
+                                    "newly created) directory/folder.</p>"
+                                    "<p>If this is your home directory, desktop or similar you should "
+                                    "definitely choose 'no'.</p>"
+                                    "<p>If you are sure of what you are doing, please choose 'yes'. The "
+                                    "installation may take a couple of minutes.</p>"
+                                    "</body></html>";
 
 //----------------------------------------------------------------------------------------------
 /** Creates the widget for the ScriptRepositoryView
@@ -93,8 +88,7 @@ const QString dir_not_empty_label =
  *  and ScriptRepositoryView::RemoveEntryDelegate.
  *
  */
-ScriptRepositoryView::ScriptRepositoryView(QWidget *parent)
-    : MantidDialog(parent), ui(new Ui::ScriptRepositoryView) {
+ScriptRepositoryView::ScriptRepositoryView(QWidget *parent) : MantidDialog(parent), ui(new Ui::ScriptRepositoryView) {
   using Mantid::API::ScriptRepositoryFactory;
   using Mantid::Kernel::ConfigService;
   using Mantid::Kernel::ConfigServiceImpl;
@@ -103,31 +97,26 @@ ScriptRepositoryView::ScriptRepositoryView(QWidget *parent)
   try {
 
     // create and instance of ScriptRepository
-    Mantid::API::ScriptRepository_sptr repo_ptr =
-        ScriptRepositoryFactory::Instance().create("ScriptRepositoryImpl");
+    Mantid::API::ScriptRepository_sptr repo_ptr = ScriptRepositoryFactory::Instance().create("ScriptRepositoryImpl");
 
     // check if the ScriptRepository was ever installed
     if (!repo_ptr->isValid()) {
       // No. It has never been installed.
       // Ask the user if he wants to install the ScriptRepository
-      if (QMessageBox::Ok !=
-          QMessageBox::question(this, "Install Script Repository?",
-                                install_mantid_label,
-                                QMessageBox::Ok | QMessageBox::Cancel)) {
+      if (QMessageBox::Ok != QMessageBox::question(this, "Install Script Repository?", install_mantid_label,
+                                                   QMessageBox::Ok | QMessageBox::Cancel)) {
         throw NOTWANTED;
       }
       // get the directory to install the script repository
       ConfigServiceImpl &config = ConfigService::Instance();
-      QString loc =
-          QString::fromStdString(config.getString("ScriptLocalRepository"));
+      QString loc = QString::fromStdString(config.getString("ScriptLocalRepository"));
 
       bool sureAboutDir = false;
 
       QString dir;
       while (!sureAboutDir) {
-        dir = QFileDialog::getExistingDirectory(
-            this, tr("Where do you want to install Script Repository?"), loc,
-            QFileDialog::ShowDirsOnly | QFileDialog::DontResolveSymlinks);
+        dir = QFileDialog::getExistingDirectory(this, tr("Where do you want to install Script Repository?"), loc,
+                                                QFileDialog::ShowDirsOnly | QFileDialog::DontResolveSymlinks);
 
         // configuring
         if (dir.isEmpty()) {
@@ -135,18 +124,15 @@ ScriptRepositoryView::ScriptRepositoryView(QWidget *parent)
         }
 
         // warn if dir is not empty
-        if (0 == QDir(dir)
-                     .entryInfoList(QDir::AllEntries | QDir::NoDotAndDotDot)
-                     .count()) {
+        if (0 == QDir(dir).entryInfoList(QDir::AllEntries | QDir::NoDotAndDotDot).count()) {
           // empty dir, just go ahead
           sureAboutDir = true;
         } else {
           // warn user in case the repo is being installed in its home, etc.
           // directory
-          QMessageBox::StandardButton sel = QMessageBox::question(
-              this,
-              "Are you sure you want to install the Script Repository here?",
-              dir_not_empty_label, QMessageBox::Yes | QMessageBox::No);
+          QMessageBox::StandardButton sel =
+              QMessageBox::question(this, "Are you sure you want to install the Script Repository here?",
+                                    dir_not_empty_label, QMessageBox::Yes | QMessageBox::No);
           if (QMessageBox::Yes == sel)
             sureAboutDir = true;
         }
@@ -154,8 +140,7 @@ ScriptRepositoryView::ScriptRepositoryView(QWidget *parent)
 
       // attempt to install
       repo_ptr->install(dir.toStdString());
-      g_log.information() << "ScriptRepository installed at "
-                          << dir.toStdString() << '\n';
+      g_log.information() << "ScriptRepository installed at " << dir.toStdString() << '\n';
     }
     // create the model
     model = new RepoModel(this);
@@ -163,8 +148,7 @@ ScriptRepositoryView::ScriptRepositoryView(QWidget *parent)
   } catch (EXC_OPTIONS &ex) {
     if (ex == NODIRECTORY)
       // probably the user change mind. He does not want to install any more.
-      QMessageBox::warning(this, "Installation Failed",
-                           "Invalid Folder to install Script Repository!\n");
+      QMessageBox::warning(this, "Installation Failed", "Invalid Folder to install Script Repository!\n");
 
     close();
     deleteLater();
@@ -172,9 +156,7 @@ ScriptRepositoryView::ScriptRepositoryView(QWidget *parent)
   } catch (Mantid::API::ScriptRepoException &ex) {
     // means that the installation failed
     g_log.warning() << "ScriptRepository installation: " << ex.what() << '\n';
-    g_log.information()
-        << "ScriptRepository installation failed with this information: "
-        << ex.systemError() << '\n';
+    g_log.information() << "ScriptRepository installation failed with this information: " << ex.systemError() << '\n';
     QMessageBox::warning(this, "Installation Failed", QString(ex.what()));
     close();
     deleteLater();
@@ -192,8 +174,7 @@ ScriptRepositoryView::ScriptRepositoryView(QWidget *parent)
   ui->setupUi(this);
   connect(ui->reloadPushButton, SIGNAL(clicked()), this, SLOT(updateModel()));
   connect(ui->pbHelp, SIGNAL(clicked()), this, SLOT(helpClicked()));
-  connect(model, SIGNAL(executingThread(bool)), ui->reloadPushButton,
-          SLOT(setDisabled(bool)));
+  connect(model, SIGNAL(executingThread(bool)), ui->reloadPushButton, SLOT(setDisabled(bool)));
 
   // setup the model and delegates
   ui->repo_treeView->setModel(model);
@@ -203,17 +184,14 @@ ScriptRepositoryView::ScriptRepositoryView(QWidget *parent)
   ui->repo_treeView->setColumnWidth(0, 290);
 
   // stablish the connections.
-  connect(ui->repo_treeView, SIGNAL(activated(const QModelIndex &)), this,
-          SLOT(cell_activated(const QModelIndex &)));
-  connect(ui->repo_treeView, SIGNAL(currentCell(const QModelIndex &)), this,
-          SLOT(currentChanged(const QModelIndex &)));
+  connect(ui->repo_treeView, SIGNAL(activated(const QModelIndex &)), this, SLOT(cell_activated(const QModelIndex &)));
+  connect(ui->repo_treeView, SIGNAL(currentCell(const QModelIndex &)), this, SLOT(currentChanged(const QModelIndex &)));
 
-  ConfigServiceImpl &config = ConfigService::Instance();
-  QString loc =
-      QString::fromStdString(config.getString("ScriptLocalRepository"));
-  QString loc_info = "<html><head/><body><p><a href=\"%1\"><span style=\" "
-                     "text-decoration: underline; "
-                     "color:#0000ff;\">%2</span></a></p></body></html>";
+  const ConfigServiceImpl &config = ConfigService::Instance();
+  const QString loc = QString::fromStdString(config.getString("ScriptLocalRepository"));
+  const QString loc_info = "<html><head/><body><p><a href=\"%1\"><span style=\" "
+                           "text-decoration: underline; "
+                           "color:#0000ff;\">%2</span></a></p></body></html>";
   QString path_label;
   if (loc.size() < 50)
     path_label = loc;
@@ -222,10 +200,8 @@ ScriptRepositoryView::ScriptRepositoryView(QWidget *parent)
   }
 
   ui->folderPathLabel->setText(loc_info.arg(loc).arg(path_label));
-  ui->folderPathLabel->setToolTip(
-      QString("Click here to open Script Repository Folder: %1.").arg(loc));
-  connect(ui->folderPathLabel, SIGNAL(linkActivated(QString)), this,
-          SLOT(openFolderLink(QString)));
+  ui->folderPathLabel->setToolTip(QString("Click here to open Script Repository Folder: %1.").arg(loc));
+  connect(ui->folderPathLabel, SIGNAL(linkActivated(QString)), this, SLOT(openFolderLink(QString)));
 }
 
 /** This method refreshes the ScriptRepository and allows it
@@ -238,8 +214,7 @@ ScriptRepositoryView::ScriptRepositoryView(QWidget *parent)
 void ScriptRepositoryView::updateModel() {
   RepoModel *before = model;
   model = new RepoModel();
-  connect(model, SIGNAL(executingThread(bool)), ui->reloadPushButton,
-          SLOT(setDisabled(bool)));
+  connect(model, SIGNAL(executingThread(bool)), ui->reloadPushButton, SLOT(setDisabled(bool)));
   ui->repo_treeView->setModel(model);
   delete before;
 }
@@ -292,8 +267,7 @@ void ScriptRepositoryView::currentChanged(const QModelIndex &in) {
 
 /** Open the ScriptRepository Page on Web Browser*/
 void ScriptRepositoryView::helpClicked() {
-  MantidDesktopServices::openUrl(
-      QUrl("http://www.mantidproject.org/ScriptRepository"));
+  MantidDesktopServices::openUrl(QUrl("http://www.mantidproject.org/ScriptRepository"));
 }
 
 //////////////////////////////////////////////////
@@ -301,8 +275,7 @@ void ScriptRepositoryView::helpClicked() {
 // Improve the User Experience.
 ///////////////////////////////////////////////////
 
-ScriptRepositoryView::RepoDelegate::RepoDelegate(QObject *parent)
-    : QStyledItemDelegate(parent) {}
+ScriptRepositoryView::RepoDelegate::RepoDelegate(QObject *parent) : QStyledItemDelegate(parent) {}
 /** Draws the column 1 (Status) of ScriptRepositoryView.
  *
  *  This function is called every time the ScriptRepository needs to
@@ -327,9 +300,8 @@ ScriptRepositoryView::RepoDelegate::RepoDelegate(QObject *parent)
  * @param index: Identifies the entry inside the RepoModel (indirectly
  * the file/folder).
  */
-void ScriptRepositoryView::RepoDelegate::paint(
-    QPainter *painter, const QStyleOptionViewItem &option,
-    const QModelIndex &index) const {
+void ScriptRepositoryView::RepoDelegate::paint(QPainter *painter, const QStyleOptionViewItem &option,
+                                               const QModelIndex &index) const {
 
   if (!index.isValid())
     return;
@@ -342,8 +314,7 @@ void ScriptRepositoryView::RepoDelegate::paint(
 
   // define the region to draw the icon
   QRect buttonRect(option.rect);
-  int min_val = buttonRect.width() < buttonRect.height() ? buttonRect.width()
-                                                         : buttonRect.height();
+  int min_val = buttonRect.width() < buttonRect.height() ? buttonRect.width() : buttonRect.height();
   // make it square
   buttonRect.setWidth(min_val);
   buttonRect.setHeight(min_val);
@@ -364,31 +335,24 @@ QIcon ScriptRepositoryView::RepoDelegate::getIcon(const QString &state) const {
   QIcon icon;
 #if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
   if (state == RepoModel::remoteOnlySt())
-    icon = QIcon::fromTheme("system-software-install",
-                            QIcon(QPixmap(":/win/download")));
-  else if (state == RepoModel::remoteChangedSt() ||
-           state == RepoModel::bothChangedSt())
-    icon = QIcon::fromTheme("bottom",
-                            QIcon(QPixmap(":win/system-software-update")));
+    icon = QIcon::fromTheme("system-software-install", QIcon(QPixmap(":/win/download")));
+  else if (state == RepoModel::remoteChangedSt() || state == RepoModel::bothChangedSt())
+    icon = QIcon::fromTheme("bottom", QIcon(QPixmap(":win/system-software-update")));
   else if (state == RepoModel::updatedSt())
     icon = QIcon::fromTheme("dialog-ok", QIcon(QPixmap(":/win/dialog-ok")));
-  else if (state == RepoModel::localOnlySt() ||
-           state == RepoModel::localChangedSt())
-    icon =
-        QIcon::fromTheme("add-files-to-archive", QIcon(QPixmap(":win/upload")));
+  else if (state == RepoModel::localOnlySt() || state == RepoModel::localChangedSt())
+    icon = QIcon::fromTheme("add-files-to-archive", QIcon(QPixmap(":win/upload")));
   else if (state == RepoModel::downloadSt() || state == RepoModel::uploadSt())
     icon = QIcon(QPixmap(":win/running_process"));
   return icon;
 #else
   if (state == RepoModel::remoteOnlySt())
     icon = Icons::getIcon("mdi.download");
-  else if (state == RepoModel::remoteChangedSt() ||
-           state == RepoModel::bothChangedSt()) {
+  else if (state == RepoModel::remoteChangedSt() || state == RepoModel::bothChangedSt()) {
     icon = Icons::getIcon("mdi.transfer-down");
   } else if (state == RepoModel::updatedSt())
     icon = Icons::getIcon("mdi.check-bold");
-  else if (state == RepoModel::localOnlySt() ||
-           state == RepoModel::localChangedSt())
+  else if (state == RepoModel::localOnlySt() || state == RepoModel::localChangedSt())
     icon = Icons::getIcon("mdi.upload");
   else if (state == RepoModel::downloadSt())
     icon = Icons::getIcon("mdi.progress-download");
@@ -420,15 +384,14 @@ QIcon ScriptRepositoryView::RepoDelegate::getIcon(const QString &state) const {
  * @param option: Provided by the framewor, and passed on to the base class.
  * @return true if it handles or false to ignore.
  */
-bool ScriptRepositoryView::RepoDelegate::editorEvent(
-    QEvent *event, QAbstractItemModel *model,
-    const QStyleOptionViewItem & /*option*/, const QModelIndex &index) {
+bool ScriptRepositoryView::RepoDelegate::editorEvent(QEvent *event, QAbstractItemModel *model,
+                                                     const QStyleOptionViewItem & /*option*/,
+                                                     const QModelIndex &index) {
   // if event is mouse click
   if (event->type() == QEvent::MouseButtonPress) {
     QString value = model->data(index, Qt::DisplayRole).toString();
     QString action = "Download";
-    if (value == RepoModel::localOnlySt() ||
-        value == RepoModel::localChangedSt())
+    if (value == RepoModel::localOnlySt() || value == RepoModel::localChangedSt())
       action = "Upload";
     if (value == RepoModel::updatedSt())
       return false; // ignore
@@ -441,9 +404,8 @@ bool ScriptRepositoryView::RepoDelegate::editorEvent(
 /** Provides the ideal size for this column
  *  @return ideal size for this column
  */
-QSize ScriptRepositoryView::RepoDelegate::sizeHint(
-    const QStyleOptionViewItem & /*option*/,
-    const QModelIndex & /*index*/) const {
+QSize ScriptRepositoryView::RepoDelegate::sizeHint(const QStyleOptionViewItem & /*option*/,
+                                                   const QModelIndex & /*index*/) const {
   return QSize(35, 35);
 }
 
@@ -451,8 +413,7 @@ QSize ScriptRepositoryView::RepoDelegate::sizeHint(
 // CheckBoxDelegate
 ///////////////////////////////////////////////////
 
-ScriptRepositoryView::CheckBoxDelegate::CheckBoxDelegate(QObject *parent)
-    : QStyledItemDelegate(parent) {}
+ScriptRepositoryView::CheckBoxDelegate::CheckBoxDelegate(QObject *parent) : QStyledItemDelegate(parent) {}
 /** Draws the column 2 (AutoUpdate) of ScriptRepositoryView.
  *
  *  This function is called every time the ScriptRepository needs to
@@ -474,9 +435,8 @@ ScriptRepositoryView::CheckBoxDelegate::CheckBoxDelegate(QObject *parent)
  * @param index: Identifies the entry inside the RepoModel
  * (indirectly the file / folder).
  */
-void ScriptRepositoryView::CheckBoxDelegate::paint(
-    QPainter *painter, const QStyleOptionViewItem &option,
-    const QModelIndex &index) const {
+void ScriptRepositoryView::CheckBoxDelegate::paint(QPainter *painter, const QStyleOptionViewItem &option,
+                                                   const QModelIndex &index) const {
   if (!index.isValid())
     return;
   if (painter->device() == nullptr)
@@ -490,8 +450,7 @@ void ScriptRepositoryView::CheckBoxDelegate::paint(
 
   QPoint p = modifiedOption.rect.center();
   QSize curr = modifiedOption.rect.size();
-  int min_value =
-      (int)((curr.width() < curr.height()) ? curr.width() : curr.height() * .8);
+  int min_value = (int)((curr.width() < curr.height()) ? curr.width() : curr.height() * .8);
   // make the checkbox a square in the center of the cell
   modifiedOption.rect.setSize(QSize(min_value, min_value));
   modifiedOption.rect.moveCenter(p);
@@ -505,8 +464,7 @@ void ScriptRepositoryView::CheckBoxDelegate::paint(
   else
     return;
   // draw it
-  QApplication::style()->drawPrimitive(QStyle::PE_IndicatorItemViewItemCheck,
-                                       &modifiedOption, painter);
+  QApplication::style()->drawPrimitive(QStyle::PE_IndicatorItemViewItemCheck, &modifiedOption, painter);
 }
 
 /** Reacts to the iteraction with the user when he clicks on the buttons
@@ -531,9 +489,9 @@ void ScriptRepositoryView::CheckBoxDelegate::paint(
  * @param option: Provided by the framewor, and passed on to the base class.
  * @return true if it handles or false to ignore.
  */
-bool ScriptRepositoryView::CheckBoxDelegate::editorEvent(
-    QEvent *event, QAbstractItemModel *model,
-    const QStyleOptionViewItem & /*option*/, const QModelIndex &index) {
+bool ScriptRepositoryView::CheckBoxDelegate::editorEvent(QEvent *event, QAbstractItemModel *model,
+                                                         const QStyleOptionViewItem & /*option*/,
+                                                         const QModelIndex &index) {
   if (event->type() == QEvent::MouseButtonPress) {
     QString value = model->data(index, Qt::DisplayRole).toString();
     QString action = "setFalse";
@@ -549,8 +507,7 @@ bool ScriptRepositoryView::CheckBoxDelegate::editorEvent(
 // RemoveEntryDelegate
 /////////////////////
 
-ScriptRepositoryView::RemoveEntryDelegate::RemoveEntryDelegate(QObject *parent)
-    : QStyledItemDelegate(parent) {}
+ScriptRepositoryView::RemoveEntryDelegate::RemoveEntryDelegate(QObject *parent) : QStyledItemDelegate(parent) {}
 /** Draws the column 3 (delete) of ScriptRepositoryView.
  *
  *  This function is called every time the ScriptRepository needs to
@@ -564,9 +521,8 @@ ScriptRepositoryView::RemoveEntryDelegate::RemoveEntryDelegate(QObject *parent)
  * @param index: Identifies the entry inside the RepoModel (indirectly
  * the file / folder).
  */
-void ScriptRepositoryView::RemoveEntryDelegate::paint(
-    QPainter *painter, const QStyleOptionViewItem &option,
-    const QModelIndex &index) const {
+void ScriptRepositoryView::RemoveEntryDelegate::paint(QPainter *painter, const QStyleOptionViewItem &option,
+                                                      const QModelIndex &index) const {
 
   if (!index.isValid())
     return;
@@ -588,8 +544,7 @@ void ScriptRepositoryView::RemoveEntryDelegate::paint(
 
   // define the region to draw the icon
   QRect buttonRect(option.rect);
-  int min_val = buttonRect.width() < buttonRect.height() ? buttonRect.width()
-                                                         : buttonRect.height();
+  int min_val = buttonRect.width() < buttonRect.height() ? buttonRect.width() : buttonRect.height();
   // make it square
   buttonRect.setWidth(min_val);
   buttonRect.setHeight(min_val);
@@ -625,9 +580,9 @@ void ScriptRepositoryView::RemoveEntryDelegate::paint(
  * @param option: Provided by the framewor, and passed on to the base class.
  * @return true if it handles or false to ignore.
  */
-bool ScriptRepositoryView::RemoveEntryDelegate::editorEvent(
-    QEvent *event, QAbstractItemModel *model,
-    const QStyleOptionViewItem & /*option*/, const QModelIndex &index) {
+bool ScriptRepositoryView::RemoveEntryDelegate::editorEvent(QEvent *event, QAbstractItemModel *model,
+                                                            const QStyleOptionViewItem & /*option*/,
+                                                            const QModelIndex &index) {
   // if event is mouse click
   if (event->type() == QEvent::MouseButtonPress) {
     QString entry = index.model()->data(index, Qt::DisplayRole).toString();
@@ -647,8 +602,7 @@ bool ScriptRepositoryView::RemoveEntryDelegate::editorEvent(
  * @param link :: the folder link to open.
  */
 void ScriptRepositoryView::openFolderLink(const QString &link) {
-  const std::string error_msg =
-      "Unable to open \"" + link.toStdString() + "\".  Reason: ";
+  const std::string error_msg = "Unable to open \"" + link.toStdString() + "\".  Reason: ";
 
   // QUrl::fromLocalFile seems to be the most robust way of constructing QUrls
   // on
@@ -664,5 +618,4 @@ void ScriptRepositoryView::openFolderLink(const QString &link) {
     g_log.error() << error_msg << "Could not find directory.\n";
 }
 
-} // namespace API
-} // namespace MantidQt
+} // namespace MantidQt::API

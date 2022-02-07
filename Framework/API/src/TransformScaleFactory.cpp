@@ -8,8 +8,7 @@
 #include "MantidAPI/ITransformScale.h"
 #include "MantidKernel/Logger.h"
 
-namespace Mantid {
-namespace API {
+namespace Mantid::API {
 namespace {
 /// static logger
 Kernel::Logger g_log("TransformScaleFactory");
@@ -21,8 +20,7 @@ Kernel::Logger g_log("TransformScaleFactory");
  *  @throws Exception::NotFoundError If the requested transform is not
  * registered
  */
-ITransformScale_sptr
-TransformScaleFactoryImpl::create(const std::string &type) const {
+ITransformScale_sptr TransformScaleFactoryImpl::create(const std::string &type) const {
   ITransformScale_sptr scaling;
   try {
     scaling = Kernel::DynamicFactory<ITransformScale>::create(type);
@@ -41,12 +39,9 @@ TransformScaleFactoryImpl::create(const std::string &type) const {
  *  @returns Never
  *  @throws Exception::NotImplementedError every time!
  */
-ITransformScale *
-TransformScaleFactoryImpl::createUnwrapped(const std::string &className) const {
+ITransformScale *TransformScaleFactoryImpl::createUnwrapped(const std::string &className) const {
   UNUSED_ARG(className)
-  throw Kernel::Exception::NotImplementedError(
-      "Don't use this method - use the safe one!!!");
+  throw Kernel::Exception::NotImplementedError("Don't use this method - use the safe one!!!");
 }
 
-} // namespace API
-} // namespace Mantid
+} // namespace Mantid::API

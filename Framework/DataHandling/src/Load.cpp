@@ -55,8 +55,7 @@ bool isSingleFile(const std::vector<std::vector<std::string>> &fileNames) {
  * @returns a string containing a suggested ws name based on the given file
  *names.
  */
-std::string
-generateWsNameFromFileNames(const std::vector<std::string> &filenames) {
+std::string generateWsNameFromFileNames(const std::vector<std::string> &filenames) {
   std::string wsName;
 
   for (auto &filename : filenames) {
@@ -74,8 +73,7 @@ generateWsNameFromFileNames(const std::vector<std::string> &filenames) {
  * Helper function that takes a vector of vectors of items and flattens it into
  * a single vector of items.
  */
-std::vector<std::string>
-flattenVecOfVec(std::vector<std::vector<std::string>> vecOfVec) {
+std::vector<std::string> flattenVecOfVec(std::vector<std::vector<std::string>> vecOfVec) {
   std::vector<std::string> flattenedVec;
 
   std::vector<std::vector<std::string>>::const_iterator it = vecOfVec.begin();
@@ -88,8 +86,7 @@ flattenVecOfVec(std::vector<std::vector<std::string>> vecOfVec) {
 }
 } // namespace
 
-namespace Mantid {
-namespace DataHandling {
+namespace Mantid::DataHandling {
 // Register the algorithm into the algorithm factory
 DECLARE_ALGORITHM(Load)
 
@@ -120,11 +117,10 @@ void Load::setPropertyValue(const std::string &name, const std::string &value) {
   if (NAME == "FILENAME") {
     // Get back full path before passing to getFileLoader method, and also
     // find out whether this is a multi file load.
-    std::vector<std::string> fileNames =
-        flattenVecOfVec(getProperty("Filename"));
+    std::vector<std::string> fileNames = flattenVecOfVec(getProperty("Filename"));
     // If it's a single file load, then it's fine to change loader.
     if (fileNames.size() == 1) {
-      IAlgorithm_sptr loader = getFileLoader(getPropertyValue(name));
+      auto loader = getFileLoader(getPropertyValue(name));
       assert(loader); // (getFileLoader should throw if no loader is found.)
       declareLoaderProperties(loader);
     }
@@ -134,30 +130,25 @@ void Load::setPropertyValue(const std::string &name, const std::string &value) {
     // class user (for example
     // "LoadLogFiles") are potentially ambiguous.
     else if (fileNames.size() > 1) {
-      IAlgorithm_sptr loader = getFileLoader(fileNames[0]);
+      auto loader = getFileLoader(fileNames[0]);
 
       // If the first file has a loader ...
       if (loader) {
-        // ... store it's name and version and check that all other files have
+        // ... store its name and version and check that all other files have
         // loaders with the same name and version.
-        std::string name = loader->name();
+        const std::string loaderName = loader->name();
         int version = loader->version();
 
         // std::string ext =
         // fileNames[0].substr(fileNames[0].find_last_of("."));
 
-        auto ifl =
-            std::dynamic_pointer_cast<IFileLoader<Kernel::FileDescriptor>>(
-                loader);
-        auto iflNexus =
-            std::dynamic_pointer_cast<IFileLoader<Kernel::NexusDescriptor>>(
-                loader);
+        auto ifl = std::dynamic_pointer_cast<IFileLoader<Kernel::FileDescriptor>>(loader);
+        auto iflNexus = std::dynamic_pointer_cast<IFileLoader<Kernel::NexusDescriptor>>(loader);
 
         for (size_t i = 1; i < fileNames.size(); ++i) {
           // If it's loading into a single file, perform a cursory check on file
           // extensions only.
-          if ((ifl && ifl->loadMutipleAsOne()) ||
-              (iflNexus && iflNexus->loadMutipleAsOne())) {
+          if ((ifl && ifl->loadMutipleAsOne()) || (iflNexus && iflNexus->loadMutipleAsOne())) {
             // Currently disabled for ticket
             // http://trac.mantidproject.org/mantid/ticket/10397 : should be put
             // back in when completing 10231
@@ -169,7 +160,7 @@ void Load::setPropertyValue(const std::string &name, const std::string &value) {
           } else {
             loader = getFileLoader(fileNames[i]);
 
-            if (name != loader->name() || version != loader->version())
+            if (loaderName != loader->name() || version != loader->version())
               throw std::runtime_error("Cannot load multiple files when more "
                                        "than one Loader is needed.");
           }
@@ -200,10 +191,9 @@ API::IAlgorithm_sptr Load::getFileLoader(const std::string &filePath) {
     // Clear what may have been here previously
     setPropertyValue("LoaderName", "");
     setProperty("LoaderVersion", -1);
-    throw std::runtime_error(
-        "Cannot find an algorithm that is able to load \"" + filePath +
-        "\".\n"
-        "Check that the file is a supported type.");
+    throw std::runtime_error("Cannot find an algorithm that is able to load \"" + filePath +
+                             "\".\n"
+                             "Check that the file is a supported type.");
   }
   winningLoader->initialize();
   setUpLoader(winningLoader, 0, 1);
@@ -244,8 +234,7 @@ void Load::findFilenameProperty(const API::IAlgorithm_sptr &loader) {
     setProperty("LoaderVersion", -1);
 
     std::stringstream msg;
-    msg << "Cannot find FileProperty on \"" << loader->name() << "\" v"
-        << loader->version() << " algorithm.";
+    msg << "Cannot find FileProperty on \"" << loader->name() << "\" v" << loader->version() << " algorithm.";
     throw std::runtime_error(msg.str());
   }
 }
@@ -289,8 +278,7 @@ void Load::declareLoaderProperties(const API::IAlgorithm_sptr &loader) {
 /// Initialisation method.
 void Load::init() {
   // Take extensions first from Facility object
-  const FacilityInfo &defaultFacility =
-      Mantid::Kernel::ConfigService::Instance().getFacility();
+  const FacilityInfo &defaultFacility = Mantid::Kernel::ConfigService::Instance().getFacility();
   std::vector<std::string> exts = defaultFacility.extensions();
   // Add in some other known extensions
   exts.emplace_back(".xml");
@@ -307,18 +295,15 @@ void Load::init() {
   exts.emplace_back(".bin");
   exts.emplace_back(".edb");
 
-  declareProperty(
-      std::make_unique<MultipleFileProperty>("Filename", exts),
-      "The name of the file(s) to read, including the full or relative "
-      "path. (N.B. case sensitive if running on Linux). Multiple runs "
-      "can be loaded and added together, e.g. INST10,11+12,13.ext");
-  declareProperty(
-      std::make_unique<WorkspaceProperty<Workspace>>("OutputWorkspace", "",
-                                                     Direction::Output),
-      "The name of the workspace that will be created, filled with the "
-      "read-in data and stored in the Analysis Data Service. Some algorithms "
-      "can created additional OutputWorkspace properties on the fly, e.g. "
-      "multi-period data.");
+  declareProperty(std::make_unique<MultipleFileProperty>("Filename", exts),
+                  "The name of the file(s) to read, including the full or relative "
+                  "path. (N.B. case sensitive if running on Linux). Multiple runs "
+                  "can be loaded and added together, e.g. INST10,11+12,13.ext");
+  declareProperty(std::make_unique<WorkspaceProperty<Workspace>>("OutputWorkspace", "", Direction::Output),
+                  "The name of the workspace that will be created, filled with the "
+                  "read-in data and stored in the Analysis Data Service. Some algorithms "
+                  "can created additional OutputWorkspace properties on the fly, e.g. "
+                  "multi-period data.");
 
   declareProperty("LoaderName", std::string(""),
                   "When an algorithm has been found that will load the given "
@@ -343,14 +328,11 @@ void Load::exec() {
   std::vector<std::vector<std::string>> fileNames = getProperty("Filename");
 
   // Test for loading as a single file
-  IAlgorithm_sptr loader = getFileLoader(fileNames[0][0]);
-  auto ifl =
-      std::dynamic_pointer_cast<IFileLoader<Kernel::FileDescriptor>>(loader);
-  auto iflNexus =
-      std::dynamic_pointer_cast<IFileLoader<Kernel::NexusDescriptor>>(loader);
+  auto loader = getFileLoader(fileNames[0][0]);
+  auto ifl = std::dynamic_pointer_cast<IFileLoader<Kernel::FileDescriptor>>(loader);
+  auto iflNexus = std::dynamic_pointer_cast<IFileLoader<Kernel::NexusDescriptor>>(loader);
 
-  if (isSingleFile(fileNames) || (ifl && ifl->loadMutipleAsOne()) ||
-      (iflNexus && iflNexus->loadMutipleAsOne())) {
+  if (isSingleFile(fileNames) || (ifl && ifl->loadMutipleAsOne()) || (iflNexus && iflNexus->loadMutipleAsOne())) {
     // This is essentially just the same code that was called before multiple
     // files were supported.
     loadSingleFile();
@@ -358,6 +340,9 @@ void Load::exec() {
     // Code that supports multiple file loading.
     loadMultipleFiles();
   }
+
+  // Set the remaining properties of the loader
+  setOutputProperties(m_loader);
 }
 
 void Load::loadSingleFile() {
@@ -369,11 +354,9 @@ void Load::loadSingleFile() {
     m_loader = createLoader(0, 1);
     findFilenameProperty(m_loader);
   }
-  g_log.information() << "Using " << loaderName << " version "
-                      << m_loader->version() << ".\n";
+  g_log.information() << "Using " << loaderName << " version " << m_loader->version() << ".\n";
   /// get the list properties for the concrete loader load algorithm
-  const std::vector<Kernel::Property *> &loader_props =
-      m_loader->getProperties();
+  const std::vector<Kernel::Property *> &loader_props = m_loader->getProperties();
 
   // Loop through and set the properties on the Child Algorithm
   std::vector<Kernel::Property *>::const_iterator itr;
@@ -388,21 +371,21 @@ void Load::loadSingleFile() {
 
   // Execute the concrete loader
   m_loader->execute();
-  // Set the workspace. Deals with possible multiple periods
-  setOutputWorkspace(m_loader);
+
+  // Set the output Workspace
+  Workspace_sptr wks = getOutputWorkspace("OutputWorkspace", m_loader);
+  setProperty("OutputWorkspace", wks);
 }
 
 void Load::loadMultipleFiles() {
   // allFilenames contains "rows" of filenames. If the row has more than 1 file
   // in it
   // then that row is to be summed across each file in the row
-  const std::vector<std::vector<std::string>> allFilenames =
-      getProperty("Filename");
+  const std::vector<std::vector<std::string>> allFilenames = getProperty("Filename");
   std::string outputWsName = getProperty("OutputWorkspace");
 
   std::vector<std::string> wsNames(allFilenames.size());
-  std::transform(allFilenames.begin(), allFilenames.end(), wsNames.begin(),
-                 generateWsNameFromFileNames);
+  std::transform(allFilenames.begin(), allFilenames.end(), wsNames.begin(), generateWsNameFromFileNames);
 
   auto wsName = wsNames.cbegin();
   assert(allFilenames.size() == wsNames.size());
@@ -413,8 +396,7 @@ void Load::loadMultipleFiles() {
   Workspace_sptr tempWs;
 
   // Cycle through the filenames and wsNames.
-  for (auto filenames = allFilenames.cbegin(); filenames != allFilenames.cend();
-       ++filenames, ++wsName) {
+  for (auto filenames = allFilenames.cbegin(); filenames != allFilenames.cend(); ++filenames, ++wsName) {
     auto filename = filenames->cbegin();
     Workspace_sptr sumWS = loadFileToWs(*filename, *wsName);
 
@@ -424,16 +406,14 @@ void Load::loadMultipleFiles() {
       sumWS = plusWs(sumWS, tempWs);
     }
 
-    API::WorkspaceGroup_sptr group =
-        std::dynamic_pointer_cast<WorkspaceGroup>(sumWS);
+    API::WorkspaceGroup_sptr group = std::dynamic_pointer_cast<WorkspaceGroup>(sumWS);
     if (group) {
       std::vector<std::string> childWsNames = group->getNames();
       auto childWsName = childWsNames.begin();
       size_t count = 1;
       for (; childWsName != childWsNames.end(); ++childWsName, ++count) {
         Workspace_sptr childWs = group->getItem(*childWsName);
-        const std::string childName =
-            group->getName() + "_" + std::to_string(count);
+        const std::string childName = group->getName() + "_" + std::to_string(count);
         API::AnalysisDataService::Instance().addOrReplace(childName, childWs);
         // childWs->setName(group->getName() + "_" +
         // boost::lexical_cast<std::string>(count));
@@ -446,8 +426,7 @@ void Load::loadMultipleFiles() {
   // If we only have one loaded ws, set it as the output.
   if (loadedWsList.size() == 1) {
     setProperty("OutputWorkspace", loadedWsList[0]);
-    AnalysisDataService::Instance().rename(loadedWsList[0]->getName(),
-                                           outputWsName);
+    AnalysisDataService::Instance().rename(loadedWsList[0]->getName(), outputWsName);
   }
   // Else we have multiple loaded workspaces - group them and set the group as
   // output.
@@ -462,8 +441,7 @@ void Load::loadMultipleFiles() {
         Mantid::API::Workspace_sptr child = group->getItem(childWsName);
         // child->setName(child->getName() + "_" +
         // boost::lexical_cast<std::string>(count));
-        const std::string childName =
-            child->getName() + "_" + std::to_string(count);
+        const std::string childName = child->getName() + "_" + std::to_string(count);
         API::AnalysisDataService::Instance().addOrReplace(childName, child);
         count++;
       }
@@ -475,16 +453,14 @@ void Load::loadMultipleFiles() {
       Workspace_sptr childWs = group->getItem(childWsName);
       std::string outWsPropName = "OutputWorkspace_" + std::to_string(count);
       ++count;
-      declareProperty(std::make_unique<WorkspaceProperty<Workspace>>(
-          outWsPropName, childWsName, Direction::Output));
+      declareProperty(std::make_unique<WorkspaceProperty<Workspace>>(outWsPropName, childWsName, Direction::Output));
       setProperty(outWsPropName, childWs);
     }
   }
 
   // Clean up.
   if (tempWs) {
-    Algorithm_sptr alg =
-        AlgorithmManager::Instance().createUnmanaged("DeleteWorkspace");
+    Algorithm_sptr alg = AlgorithmManager::Instance().createUnmanaged("DeleteWorkspace");
     alg->initialize();
     alg->setChild(true);
     alg->setProperty("Workspace", tempWs);
@@ -500,17 +476,14 @@ void Load::loadMultipleFiles() {
  * algorithm where this child algorithm ends
  * @param logging :: Set to false to disable logging from the child algorithm
  */
-API::IAlgorithm_sptr Load::createLoader(const double startProgress,
-                                        const double endProgress,
+API::IAlgorithm_sptr Load::createLoader(const double startProgress, const double endProgress,
                                         const bool logging) const {
   std::string name = getPropertyValue("LoaderName");
   int version = getProperty("LoaderVersion");
-  API::IAlgorithm_sptr loader =
-      API::AlgorithmManager::Instance().createUnmanaged(name, version);
+  auto loader = API::AlgorithmManager::Instance().createUnmanaged(name, version);
   loader->initialize();
   if (!loader) {
-    throw std::runtime_error("Cannot create loader for \"" +
-                             getPropertyValue("Filename") + "\"");
+    throw std::runtime_error("Cannot create loader for \"" + getPropertyValue("Filename") + "\"");
   }
   setUpLoader(loader, startProgress, endProgress, logging);
   return loader;
@@ -523,8 +496,8 @@ API::IAlgorithm_sptr Load::createLoader(const double startProgress,
  * @param endProgress :: The end progress fraction
  * @param logging:: If true, enable logging
  */
-void Load::setUpLoader(API::IAlgorithm_sptr &loader, const double startProgress,
-                       const double endProgress, const bool logging) const {
+void Load::setUpLoader(const API::IAlgorithm_sptr &loader, const double startProgress, const double endProgress,
+                       const bool logging) const {
   // Set as a child so that we are in control of output storage
   loader->setChild(true);
   loader->setLogging(logging);
@@ -534,8 +507,7 @@ void Load::setUpLoader(API::IAlgorithm_sptr &loader, const double startProgress,
   for (auto prop : props) {
     auto wsProp = dynamic_cast<IWorkspaceProperty *>(prop);
 
-    if (wsProp && !wsProp->isOptional() &&
-        prop->direction() == Direction::Output) {
+    if (wsProp && !wsProp->isOptional() && prop->direction() == Direction::Output) {
       if (prop->value().empty())
         prop->setValue("LoadChildWorkspace");
     }
@@ -548,26 +520,17 @@ void Load::setUpLoader(API::IAlgorithm_sptr &loader, const double startProgress,
 }
 
 /**
- * Set the output workspace(s) if the load's return workspace has type
- * API::Workspace
- * @param loader :: Shared pointer to load algorithm
+ * Set all the output properties from the loader used to Load algorithm itself
+ * @param loader :: Shared pointer to the load algorithm
  */
-void Load::setOutputWorkspace(const API::IAlgorithm_sptr &loader) {
-  // Go through each OutputWorkspace property and check whether we need to make
-  // a counterpart here
-  const std::vector<Property *> &loaderProps = loader->getProperties();
-  const size_t count = loader->propertyCount();
-  for (size_t i = 0; i < count; ++i) {
-    Property *prop = loaderProps[i];
-    if (dynamic_cast<IWorkspaceProperty *>(prop) &&
-        prop->direction() == Direction::Output) {
-      const std::string &name = prop->name();
-      if (!this->existsProperty(name)) {
-        declareProperty(std::make_unique<WorkspaceProperty<Workspace>>(
-            name, loader->getPropertyValue(name), Direction::Output));
-      }
-      Workspace_sptr wkspace = getOutputWorkspace(name, loader);
-      setProperty(name, wkspace);
+void Load::setOutputProperties(const API::IAlgorithm_sptr &loader) {
+  // Set output properties by looping the loaders properties and taking them until we have none left
+  while (loader->propertyCount() > 0) {
+    auto prop = loader->takeProperty(0);
+    if (prop && prop->direction() == Direction::Output) {
+      // We skip OutputWorkspace as this is set already from loadSingleFile and loadMultipleFiles
+      if (prop->name() != "OutputWorkspace")
+        declareOrReplaceProperty(std::move(prop));
     }
   }
 }
@@ -580,9 +543,7 @@ void Load::setOutputWorkspace(const API::IAlgorithm_sptr &loader) {
  * @param loader :: The loader algorithm
  * @returns A pointer to the OutputWorkspace property of the Child Algorithm
  */
-API::Workspace_sptr
-Load::getOutputWorkspace(const std::string &propName,
-                         const API::IAlgorithm_sptr &loader) const {
+API::Workspace_sptr Load::getOutputWorkspace(const std::string &propName, const API::IAlgorithm_sptr &loader) const {
   // @todo Need to try and find a better way using the getValue methods
   try {
     return loader->getProperty(propName);
@@ -624,6 +585,13 @@ Load::getOutputWorkspace(const std::string &propName,
   } catch (std::runtime_error &) {
   }
 
+  // WorkspaceGroup?
+  try {
+    WorkspaceGroup_sptr childWS = loader->getProperty(propName);
+    return childWS;
+  } catch (std::runtime_error &) {
+  }
+
   // Just workspace?
   try {
     Workspace_sptr childWS = loader->getProperty(propName);
@@ -654,9 +622,8 @@ void Load::cancel() {
  *
  * @returns a pointer to the loaded workspace
  */
-API::Workspace_sptr Load::loadFileToWs(const std::string &fileName,
-                                       const std::string &wsName) {
-  Mantid::API::IAlgorithm_sptr loadAlg = createChildAlgorithm("Load", 1);
+API::Workspace_sptr Load::loadFileToWs(const std::string &fileName, const std::string &wsName) {
+  auto loadAlg = createChildAlgorithm("Load", 1);
 
   // Get the list properties for the concrete loader load algorithm
   const std::vector<Kernel::Property *> &props = getProperties();
@@ -681,6 +648,7 @@ API::Workspace_sptr Load::loadFileToWs(const std::string &fileName,
   Workspace_sptr ws = loadAlg->getProperty("OutputWorkspace");
   // ws->setName(wsName);
   AnalysisDataService::Instance().addOrReplace(wsName, ws);
+  m_loader = loadAlg;
   return ws;
 }
 
@@ -692,8 +660,7 @@ API::Workspace_sptr Load::loadFileToWs(const std::string &fileName,
  *
  * @returns a pointer to the result (the first workspace).
  */
-API::Workspace_sptr Load::plusWs(Workspace_sptr ws1,
-                                 const Workspace_sptr &ws2) {
+API::Workspace_sptr Load::plusWs(Workspace_sptr ws1, const Workspace_sptr &ws2) {
   WorkspaceGroup_sptr group1 = std::dynamic_pointer_cast<WorkspaceGroup>(ws1);
   WorkspaceGroup_sptr group2 = std::dynamic_pointer_cast<WorkspaceGroup>(ws2);
 
@@ -711,26 +678,24 @@ API::Workspace_sptr Load::plusWs(Workspace_sptr ws1,
     auto group1ChildWsName = group1ChildWsNames.begin();
     auto group2ChildWsName = group2ChildWsNames.begin();
 
-    for (; group1ChildWsName != group1ChildWsNames.end();
-         ++group1ChildWsName, ++group2ChildWsName) {
+    for (; group1ChildWsName != group1ChildWsNames.end(); ++group1ChildWsName, ++group2ChildWsName) {
       Workspace_sptr group1ChildWs = group1->getItem(*group1ChildWsName);
       Workspace_sptr group2ChildWs = group2->getItem(*group2ChildWsName);
 
-      Mantid::API::IAlgorithm_sptr plusAlg = createChildAlgorithm("Plus", 1);
+      auto plusAlg = createChildAlgorithm("Plus", 1);
       plusAlg->setProperty<Workspace_sptr>("LHSWorkspace", group1ChildWs);
       plusAlg->setProperty<Workspace_sptr>("RHSWorkspace", group2ChildWs);
       plusAlg->setProperty<Workspace_sptr>("OutputWorkspace", group1ChildWs);
       plusAlg->executeAsChildAlg();
     }
   } else if (!group1 && !group2) {
-    Mantid::API::IAlgorithm_sptr plusAlg = createChildAlgorithm("Plus", 1);
+    auto plusAlg = createChildAlgorithm("Plus", 1);
     plusAlg->setProperty<Workspace_sptr>("LHSWorkspace", ws1);
     plusAlg->setProperty<Workspace_sptr>("RHSWorkspace", ws2);
     plusAlg->setProperty<Workspace_sptr>("OutputWorkspace", ws1);
     plusAlg->executeAsChildAlg();
   } else {
-    throw std::runtime_error(
-        "Unable to add a group workspace to a non-group workspace");
+    throw std::runtime_error("Unable to add a group workspace to a non-group workspace");
   }
 
   return ws1;
@@ -743,8 +708,7 @@ API::Workspace_sptr Load::plusWs(Workspace_sptr ws1,
  *
  * @param wsList :: the list of workspaces to group
  */
-API::WorkspaceGroup_sptr
-Load::groupWsList(const std::vector<API::Workspace_sptr> &wsList) {
+API::WorkspaceGroup_sptr Load::groupWsList(const std::vector<API::Workspace_sptr> &wsList) {
   auto group = std::make_shared<WorkspaceGroup>();
 
   for (const auto &ws : wsList) {
@@ -753,8 +717,7 @@ Load::groupWsList(const std::vector<API::Workspace_sptr> &wsList) {
     if (isGroup) {
       std::vector<std::string> childrenNames = isGroup->getNames();
       size_t count = 1;
-      for (auto childName = childrenNames.begin();
-           childName != childrenNames.end(); ++childName, ++count) {
+      for (auto childName = childrenNames.begin(); childName != childrenNames.end(); ++childName, ++count) {
         Workspace_sptr childWs = isGroup->getItem(*childName);
         isGroup->remove(*childName);
         // childWs->setName(isGroup->getName() + "_" +
@@ -772,8 +735,8 @@ Load::groupWsList(const std::vector<API::Workspace_sptr> &wsList) {
   return group;
 }
 
-Parallel::ExecutionMode Load::getParallelExecutionMode(
-    const std::map<std::string, Parallel::StorageMode> &storageModes) const {
+Parallel::ExecutionMode
+Load::getParallelExecutionMode(const std::map<std::string, Parallel::StorageMode> &storageModes) const {
   static_cast<void>(storageModes);
   // The actually relevant execution mode is that of the underlying loader. Here
   // we simply default to ExecutionMode::Distributed to guarantee that the
@@ -781,5 +744,4 @@ Parallel::ExecutionMode Load::getParallelExecutionMode(
   return Parallel::ExecutionMode::Distributed;
 }
 
-} // namespace DataHandling
-} // namespace Mantid
+} // namespace Mantid::DataHandling

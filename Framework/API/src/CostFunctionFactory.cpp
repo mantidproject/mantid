@@ -8,16 +8,13 @@
 #include "MantidAPI/ICostFunction.h"
 #include "MantidKernel/LibraryManager.h"
 
-namespace Mantid {
-namespace API {
+namespace Mantid::API {
 
-CostFunctionFactoryImpl::CostFunctionFactoryImpl()
-    : Kernel::DynamicFactory<ICostFunction>() {
+CostFunctionFactoryImpl::CostFunctionFactoryImpl() : Kernel::DynamicFactory<ICostFunction>() {
   // we need to make sure the library manager has been loaded before we
   // are constructed so that it is destroyed after us and thus does
   // not close any loaded DLLs with loaded algorithms in them
   Mantid::Kernel::LibraryManager::Instance();
 }
 
-} // namespace API
-} // namespace Mantid
+} // namespace Mantid::API

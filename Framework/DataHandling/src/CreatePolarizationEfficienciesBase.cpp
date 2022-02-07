@@ -22,8 +22,7 @@ using namespace Mantid::API;
 using namespace Mantid::Kernel;
 using namespace Mantid::Geometry;
 
-namespace Mantid {
-namespace DataHandling {
+namespace Mantid::DataHandling {
 
 std::string const CreatePolarizationEfficienciesBase::Pp("Pp");
 std::string const CreatePolarizationEfficienciesBase::Ap("Ap");
@@ -34,14 +33,11 @@ std::string const CreatePolarizationEfficienciesBase::P2("P2");
 std::string const CreatePolarizationEfficienciesBase::F1("F1");
 std::string const CreatePolarizationEfficienciesBase::F2("F2");
 
-const std::string CreatePolarizationEfficienciesBase::category() const {
-  return "Reflectometry";
-}
+const std::string CreatePolarizationEfficienciesBase::category() const { return "Reflectometry"; }
 
 void CreatePolarizationEfficienciesBase::initOutputWorkspace() {
   declareProperty(
-      std::make_unique<WorkspaceProperty<Mantid::API::MatrixWorkspace>>(
-          "OutputWorkspace", "", Direction::Output),
+      std::make_unique<WorkspaceProperty<Mantid::API::MatrixWorkspace>>("OutputWorkspace", "", Direction::Output),
       "An output workspace.");
 }
 
@@ -50,13 +46,11 @@ void CreatePolarizationEfficienciesBase::exec() {
   auto const labelsWildes = getNonDefaultProperties({P1, P2, F1, F2});
 
   if (labelsFredrikze.empty() && labelsWildes.empty()) {
-    throw std::invalid_argument(
-        "At least one of the efficiencies must be set.");
+    throw std::invalid_argument("At least one of the efficiencies must be set.");
   }
 
   if (!labelsFredrikze.empty() && !labelsWildes.empty()) {
-    throw std::invalid_argument(
-        "Efficiencies belonging to different methods cannot mix.");
+    throw std::invalid_argument("Efficiencies belonging to different methods cannot mix.");
   }
 
   MatrixWorkspace_sptr efficiencies;
@@ -72,8 +66,7 @@ void CreatePolarizationEfficienciesBase::exec() {
 /// Get names of non-default properties out of a list of names
 /// @param labels :: Names of properties to check.
 std::vector<std::string>
-CreatePolarizationEfficienciesBase::getNonDefaultProperties(
-    std::vector<std::string> const &labels) const {
+CreatePolarizationEfficienciesBase::getNonDefaultProperties(std::vector<std::string> const &labels) const {
   std::vector<std::string> outputLabels;
   for (auto const &label : labels) {
     if (!isDefault(label)) {
@@ -83,5 +76,4 @@ CreatePolarizationEfficienciesBase::getNonDefaultProperties(
   return outputLabels;
 }
 
-} // namespace DataHandling
-} // namespace Mantid
+} // namespace Mantid::DataHandling

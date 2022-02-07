@@ -22,9 +22,7 @@ class DLLExport DgsReduction : public API::DataProcessorAlgorithm {
 public:
   const std::string name() const override;
   /// Summary of algorithms purpose
-  const std::string summary() const override {
-    return "Top-level workflow algorithm for DGS reduction.";
-  }
+  const std::string summary() const override { return "Top-level workflow algorithm for DGS reduction."; }
 
   int version() const override;
   const std::string category() const override;
@@ -32,13 +30,10 @@ public:
 private:
   void init() override;
   void exec() override;
-  API::Workspace_sptr loadInputData(const std::string &prop,
-                                    const bool mustLoad = true);
+  API::Workspace_sptr loadInputData(const std::string &prop, const bool mustLoad = true);
   API::MatrixWorkspace_sptr loadGroupingFile(const std::string &prop);
   API::MatrixWorkspace_sptr loadHardMask();
-  double getParameter(const std::string &algParam,
-                      const API::MatrixWorkspace_sptr &ws,
-                      const std::string &altParam);
+  double getParameter(const std::string &algParam, const API::MatrixWorkspace_sptr &ws, const std::string &altParam);
 
   std::shared_ptr<Kernel::PropertyManager> reductionManager;
 };

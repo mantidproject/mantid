@@ -23,6 +23,8 @@ public:
 
   virtual void updateSelectedSpectra() = 0;
 
+  void closeEvent(QCloseEvent *) override { emit closeDialog(); }
+
 signals:
   void addData();
   void closeDialog();

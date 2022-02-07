@@ -18,7 +18,7 @@ public:
         EightBytes() {}
         unsigned char data[8];
     };
-    
+
     void testSmallDefaultTraits()
     {
         EightBytes x;
@@ -32,7 +32,7 @@ public:
         NineBytes() {}
         unsigned char data[9];
     };
-    
+
     void testBigDefaultTraits()
     {
         NineBytes x;

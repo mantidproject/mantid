@@ -18,8 +18,7 @@ namespace Algorithms {
  * factor:  TOF correction factor to multiply with
  */
 struct Correction {
-  Correction(double tOffset, double tFactor)
-      : offset(tOffset), factor(tFactor) {}
+  Correction(double tOffset, double tFactor) : offset(tOffset), factor(tFactor) {}
   double offset;
   double factor;
 };

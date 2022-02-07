@@ -11,8 +11,7 @@
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/PropertyWithValue.tcc"
 
-namespace Mantid {
-namespace Kernel {
+namespace Mantid::Kernel {
 /**
  * Constructor
  * @param propName :: Name of the property
@@ -21,8 +20,7 @@ namespace Kernel {
  * @param direction :: The direction
  */
 template <typename TYPE>
-MatrixProperty<TYPE>::MatrixProperty(const std::string &propName,
-                                     const IValidator_sptr &validator,
+MatrixProperty<TYPE>::MatrixProperty(const std::string &propName, const IValidator_sptr &validator,
                                      unsigned int direction)
     : PropertyWithValue<HeldType>(propName, HeldType(), validator, direction) {}
 
@@ -31,8 +29,7 @@ MatrixProperty<TYPE>::MatrixProperty(const std::string &propName,
  * @param rhs :: Contruct this object from rhs
  */
 template <typename TYPE>
-MatrixProperty<TYPE>::MatrixProperty(const MatrixProperty &rhs)
-    : PropertyWithValue<HeldType>(rhs) {}
+MatrixProperty<TYPE>::MatrixProperty(const MatrixProperty &rhs) : PropertyWithValue<HeldType>(rhs) {}
 
 /// Destructor
 template <typename TYPE> MatrixProperty<TYPE>::~MatrixProperty() {}
@@ -43,8 +40,7 @@ template class MANTID_KERNEL_DLL MatrixProperty<double>;
 template class MANTID_KERNEL_DLL MatrixProperty<int>;
 template class MANTID_KERNEL_DLL MatrixProperty<float>;
 ///@endcond
-} // namespace Kernel
-} // namespace Mantid
+} // namespace Mantid::Kernel
 
 ///@cond
 /**

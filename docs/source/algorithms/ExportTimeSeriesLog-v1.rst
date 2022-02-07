@@ -17,7 +17,7 @@ If the output workspace is chosen to be an EventWorkspace, there are some limita
 Output TimeSeries Log to MatrixWorkspace
 ########################################
 
-The output MatrixWorkspace has one spectrum.  
+The output MatrixWorkspace has one spectrum.
 X-vector and Y-vector have the same size, which is the size of exported TimeSeriesProperty.
 
 The unit of X-vector is either *second* or *nano second*.

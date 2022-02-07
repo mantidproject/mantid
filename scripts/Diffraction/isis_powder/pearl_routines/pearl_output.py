@@ -5,6 +5,7 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 import mantid.simpleapi as mantid
+from mantid.kernel import logger
 
 from isis_powder.routines.common_enums import WORKSPACE_UNITS
 from isis_powder.pearl_routines import pearl_algs
@@ -14,8 +15,11 @@ from isis_powder.pearl_routines import pearl_algs
 
 def generate_and_save_focus_output(instrument, processed_spectra, run_details, attenuation_filepath, focus_mode):
     output_file_paths = instrument._generate_out_file_paths(run_details=run_details)
-
-    if focus_mode == "all":
+    if instrument._inst_settings.tt_mode == "custom" and len(processed_spectra) != 14:
+        logger.warning('Custom grouping file does not contain 14 groups so switching to focus_mode=Mods')
+        processed_nexus_files = _focus_mode_mods(output_file_paths=output_file_paths,
+                                                 calibrated_spectra=processed_spectra)
+    elif focus_mode == "all":
         processed_nexus_files = _focus_mode_all(output_file_paths=output_file_paths,
                                                 processed_spectra=processed_spectra,
                                                 attenuation_filepath=attenuation_filepath)
@@ -35,35 +39,29 @@ def generate_and_save_focus_output(instrument, processed_spectra, run_details, a
     return processed_nexus_files
 
 
-def _attenuate_workspace(output_file_paths, attenuated_ws, attenuation_filepath):
-    # Clone a workspace which is not attenuated
-    no_att = output_file_paths["output_name"] + "_noatten"
-    mantid.CloneWorkspace(InputWorkspace=attenuated_ws, OutputWorkspace=no_att)
-    return pearl_algs.attenuate_workspace(attenuation_file_path=attenuation_filepath, ws_to_correct=attenuated_ws)
-
-
 def _focus_mode_all(output_file_paths, processed_spectra, attenuation_filepath):
     summed_spectra_name = output_file_paths["output_name"] + "_mods1-9"
     summed_spectra = mantid.MergeRuns(InputWorkspaces=processed_spectra[:9], OutputWorkspace=summed_spectra_name)
     xList = summed_spectra.readX(0)
 
-    summed_spectra = mantid.CropWorkspace(InputWorkspace=summed_spectra, XMin=xList[1], Xmax=xList[-2])
+    summed_spectra = mantid.CropWorkspace(InputWorkspace=summed_spectra, XMin=xList[1], Xmax=xList[-2],
+                                          OutputWorkspace=summed_spectra_name)
     summed_spectra = mantid.Scale(InputWorkspace=summed_spectra, Factor=0.111111111111111,
                                   OutputWorkspace=summed_spectra_name)
     if attenuation_filepath:
-        summed_spectra = _attenuate_workspace(output_file_paths=output_file_paths, attenuated_ws=summed_spectra,
-                                              attenuation_filepath=attenuation_filepath)
+        summed_spectra = pearl_algs.attenuate_workspace(attenuation_file_path=attenuation_filepath, ws_to_correct=summed_spectra)
 
     summed_spectra = mantid.ConvertUnits(InputWorkspace=summed_spectra, Target="TOF",
                                          OutputWorkspace=summed_spectra_name)
 
     mantid.SaveGSS(InputWorkspace=summed_spectra, Filename=output_file_paths["gss_filename"], Append=False, Bank=1)
+    mantid.SaveFocusedXYE(InputWorkspace=summed_spectra_name, Filename=output_file_paths["tof_xye_filename"],
+                          Append=False, IncludeHeader=False)
 
     summed_spectra = mantid.ConvertUnits(InputWorkspace=summed_spectra, Target="dSpacing",
                                          OutputWorkspace=summed_spectra_name)
     mantid.SaveNexus(Filename=output_file_paths["nxs_filename"], InputWorkspace=summed_spectra, Append=False)
-    mantid.SaveFocusedXYE(InputWorkspace=summed_spectra_name, Filename=output_file_paths["tof_xye_filename"],
-                          Append=False, IncludeHeader=False)
+
     output_list = [summed_spectra]
     for i in range(0, 5):
         spectra_index = (i + 9)  # Compensate for 0 based index
@@ -158,8 +156,7 @@ def _focus_mode_trans(output_file_paths, attenuation_filepath, calibrated_spectr
     summed_ws = mantid.Scale(InputWorkspace=summed_ws, Factor=0.111111111111111)
 
     if attenuation_filepath:
-        summed_ws = _attenuate_workspace(output_file_paths=output_file_paths, attenuated_ws=summed_ws,
-                                         attenuation_filepath=attenuation_filepath)
+        summed_ws = pearl_algs.attenuate_workspace(attenuation_file_path=attenuation_filepath, ws_to_correct=summed_ws)
 
     summed_ws = mantid.ConvertUnits(InputWorkspace=summed_ws, Target="TOF")
     mantid.SaveGSS(InputWorkspace=summed_ws, Filename=output_file_paths["gss_filename"], Append=False, Bank=1)

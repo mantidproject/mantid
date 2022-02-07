@@ -30,8 +30,7 @@ public:
 
   VoigtTest() {
     using namespace Mantid::API;
-    m_domain = std::shared_ptr<FunctionDomain1DVector>(
-        new FunctionDomain1DVector(-5.5, 3.5, g_domainSize));
+    m_domain = std::shared_ptr<FunctionDomain1DVector>(new FunctionDomain1DVector(-5.5, 3.5, g_domainSize));
   }
 
   void test_intialized_function_has_4_parameters_with_expected_names() {
@@ -57,9 +56,8 @@ public:
     Mantid::API::FunctionValues outputs(*m_domain);
     voigtFn->function(*m_domain, outputs);
 
-    double expectedOutput[g_domainSize] = {
-        0.0495194770, 0.0813462678, 0.1570475305, 0.4136676242, 2.2481604925,
-        2.2481604925, 0.4136676242, 0.1570475305, 0.0813462678, 0.0495194770};
+    double expectedOutput[g_domainSize] = {0.0495194770, 0.0813462678, 0.1570475305, 0.4136676242, 2.2481604925,
+                                           2.2481604925, 0.4136676242, 0.1570475305, 0.0813462678, 0.0495194770};
 
     const size_t nValues(g_domainSize);
     for (size_t i = 0; i < nValues; ++i) {
@@ -69,17 +67,16 @@ public:
 
   void test_function_has_jacobian_matrix_for_given_input() {
 
-    double dxDa[g_domainSize][4] = {
-        {0.00990389541, -0.02179640604, 0.10895223988, 0.00026811273},
-        {0.01626925356, -0.04574679593, 0.17782530103, 0.00071014811},
-        {0.03140950610, -0.12178875967, 0.33801701863, 0.00256582413},
-        {0.08273352484, -0.50687692061, 0.84298568363, 0.01628265653},
-        {0.44963209851, -4.95613687209, 2.73013742868, 0.20944750234},
-        {0.44963209851, 4.95613687209, 2.73013742868, 0.20944750234},
-        {0.08273352484, 0.50687692061, 0.84298568363, 0.01628265653},
-        {0.03140950610, 0.12178875967, 0.33801701863, 0.00256582413},
-        {0.01626925356, 0.04574679593, 0.17782530103, 0.00071014811},
-        {0.00990389541, 0.02179640604, 0.10895223988, 0.00026811273}};
+    double dxDa[g_domainSize][4] = {{0.00990389541, -0.02179640604, 0.10895223988, 0.00026811273},
+                                    {0.01626925356, -0.04574679593, 0.17782530103, 0.00071014811},
+                                    {0.03140950610, -0.12178875967, 0.33801701863, 0.00256582413},
+                                    {0.08273352484, -0.50687692061, 0.84298568363, 0.01628265653},
+                                    {0.44963209851, -4.95613687209, 2.73013742868, 0.20944750234},
+                                    {0.44963209851, 4.95613687209, 2.73013742868, 0.20944750234},
+                                    {0.08273352484, 0.50687692061, 0.84298568363, 0.01628265653},
+                                    {0.03140950610, 0.12178875967, 0.33801701863, 0.00256582413},
+                                    {0.01626925356, 0.04574679593, 0.17782530103, 0.00071014811},
+                                    {0.00990389541, 0.02179640604, 0.10895223988, 0.00026811273}};
 
     const double a_L(5), pos(-1), gamma_L(0.9), gamma_G(0.1);
     auto voigtFn = createFunction(a_L, pos, gamma_L, gamma_G);
@@ -98,16 +95,14 @@ public:
     const double a_L(5), pos(-1), gamma_L(0.9), gamma_G(0.1);
     auto voigtFn = createFunction(a_L, pos, gamma_L, gamma_G);
 
-    auto peakFn =
-        std::dynamic_pointer_cast<Mantid::API::IPeakFunction>(voigtFn);
+    auto peakFn = std::dynamic_pointer_cast<Mantid::API::IPeakFunction>(voigtFn);
     TSM_ASSERT("Voigt function should be a PeakFunction", peakFn);
   }
 
   void test_peak_functions_return_expected_results() {
     const double a_L(5), pos(-1), gamma_L(0.9), gamma_G(0.1);
     auto voigtFn = createFunction(a_L, pos, gamma_L, gamma_G);
-    auto peakFn =
-        std::dynamic_pointer_cast<Mantid::API::IPeakFunction>(voigtFn);
+    auto peakFn = std::dynamic_pointer_cast<Mantid::API::IPeakFunction>(voigtFn);
 
     TS_ASSERT_DELTA(peakFn->centre(), pos, 1e-12);
     TS_ASSERT_DELTA(peakFn->height(), 4.9570, 1e-4);
@@ -117,8 +112,7 @@ public:
   void test_setting_peak_functions_set_expected_parameters() {
     double a_L(5), pos(-1), gamma_L(0.9), gamma_G(0.1);
     auto voigtFn = createFunction(a_L, pos, gamma_L, gamma_G);
-    auto peakFn =
-        std::dynamic_pointer_cast<Mantid::API::IPeakFunction>(voigtFn);
+    auto peakFn = std::dynamic_pointer_cast<Mantid::API::IPeakFunction>(voigtFn);
 
     pos = 1.2;
     peakFn->setCentre(pos);
@@ -272,12 +266,10 @@ public:
   }
 
 private:
-  std::shared_ptr<Mantid::API::IPeakFunction>
-  createFunction(const double a_L, const double pos, const double gamma_L,
-                 const double gamma_G) {
+  std::shared_ptr<Mantid::API::IPeakFunction> createFunction(const double a_L, const double pos, const double gamma_L,
+                                                             const double gamma_G) {
     std::shared_ptr<IFunction> voigtFn = std::make_shared<Voigt>();
-    auto peakFn =
-        std::dynamic_pointer_cast<Mantid::API::IPeakFunction>(voigtFn);
+    auto peakFn = std::dynamic_pointer_cast<Mantid::API::IPeakFunction>(voigtFn);
     voigtFn->initialize();
 
     voigtFn->setParameter("LorentzAmp", a_L);

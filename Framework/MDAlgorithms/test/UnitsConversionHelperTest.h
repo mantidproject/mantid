@@ -6,13 +6,14 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
+#include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/NumericAxis.h"
+#include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidKernel/PhysicalConstants.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidMDAlgorithms/MDWSDescription.h"
 #include "MantidMDAlgorithms/UnitsConversionHelper.h"
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
 #include <cxxtest/TestSuite.h>
 
@@ -29,9 +30,7 @@ class UnitsConversionHelperTest : public CxxTest::TestSuite {
   Mantid::DataObjects::TableWorkspace_sptr detLoc;
 
 public:
-  static UnitsConversionHelperTest *createSuite() {
-    return new UnitsConversionHelperTest();
-  }
+  static UnitsConversionHelperTest *createSuite() { return new UnitsConversionHelperTest(); }
   static void destroySuite(UnitsConversionHelperTest *suite) { delete suite; }
 
   void testSpecialConversionTOF() {
@@ -45,13 +44,13 @@ public:
 
     auto pSourceWSUnit = UnitFactory::Instance().create("Wavelength");
     auto pWSUnit = UnitFactory::Instance().create("MomentumTransfer");
-    double delta;
     double L1(10), L2(10), TwoTheta(0.1), efix(10);
+
     int emode(0);
-    TS_ASSERT_THROWS_NOTHING(
-        pWSUnit->initialize(L1, L2, TwoTheta, emode, efix, delta));
-    TS_ASSERT_THROWS_NOTHING(
-        pSourceWSUnit->initialize(L1, L2, TwoTheta, emode, efix, delta));
+    TS_ASSERT_THROWS_NOTHING(pWSUnit->initialize(
+        L1, emode, {{UnitParams::l2, L2}, {UnitParams::twoTheta, TwoTheta}, {UnitParams::efixed, efix}}));
+    TS_ASSERT_THROWS_NOTHING(pSourceWSUnit->initialize(
+        L1, emode, {{UnitParams::l2, L2}, {UnitParams::twoTheta, TwoTheta}, {UnitParams::efixed, efix}}));
 
     double X0(5);
     double tof(0);
@@ -112,8 +111,7 @@ public:
     const auto &X = ws2D->readX(0);
     size_t n_bins = X.size() - 1;
     for (size_t i = 0; i < n_bins; i++) {
-      TS_ASSERT_DELTA(X[i] * Mantid::PhysicalConstants::meVtoFrequency,
-                      Conv.convertUnits(X[i]), 1.e-4);
+      TS_ASSERT_DELTA(X[i] * Mantid::PhysicalConstants::meVtoFrequency, Conv.convertUnits(X[i]), 1.e-4);
     }
 
     auto range = Conv.getConversionRange(0, 10);
@@ -284,9 +282,14 @@ public:
     azimutal[4] = (180. / 180.) * M_PI;
 
     int numBins = 10;
-    ws2D = WorkspaceCreationHelper::createProcessedInelasticWS(
-        L2, polar, azimutal, numBins, -1, 3, 3);
+    ws2D = WorkspaceCreationHelper::createProcessedInelasticWS(L2, polar, azimutal, numBins, -1, 3, 3);
 
-    detLoc = WorkspaceCreationHelper::buildPreprocessedDetectorsWorkspace(ws2D);
+    auto ppDets_alg = Mantid::API::AlgorithmManager::Instance().createUnmanaged("PreprocessDetectorsToMD");
+    ppDets_alg->initialize();
+    ppDets_alg->setChild(true);
+    ppDets_alg->setProperty("InputWorkspace", ws2D);
+    ppDets_alg->setProperty("OutputWorkspace", "UnitsConversionHelperTableWs");
+    ppDets_alg->execute();
+    detLoc = ppDets_alg->getProperty("OutputWorkspace");
   }
 };

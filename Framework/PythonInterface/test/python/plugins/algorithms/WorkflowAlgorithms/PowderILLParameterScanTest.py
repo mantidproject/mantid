@@ -13,10 +13,13 @@ class PowderILLParameterScanTest(unittest.TestCase):
 
     _runs = '967087:967088'
 
+    @classmethod
+    def setUpClass(cls):
+        config.appendDataSearchSubDir('ILL/D20/')
+
     def setUp(self):
         config['default.facility'] = 'ILL'
         config['default.instrument'] = 'D20'
-        config.appendDataSearchSubDir('ILL/D20/')
 
     def tearDown(self):
         mtd.remove('red')

@@ -27,21 +27,15 @@ class MANTID_ALGORITHMS_DLL RemoveSpectra : public API::Algorithm {
   }
   /// Algorithm's version for identification overriding a virtual method
   int version() const override { return (1); }
-  const std::vector<std::string> seeAlso() const override {
-    return {"ExtractSpectra"};
-  }
+  const std::vector<std::string> seeAlso() const override { return {"ExtractSpectra"}; }
   /// Algorithm's category for identification overriding a virtual method
-  const std::string category() const override {
-    return "Transforms\\Splitting";
-  }
+  const std::string category() const override { return "Transforms\\Splitting"; }
 
 private:
   void init() override;
   void exec() override;
   std::map<std::string, std::string> validateInputs() override;
-  MatrixWorkspace_sptr
-  copySpectraFromInputToOutput(MatrixWorkspace_sptr inputWS,
-                               const std::vector<size_t> &specList);
+  MatrixWorkspace_sptr copySpectraFromInputToOutput(MatrixWorkspace_sptr inputWS, const std::vector<size_t> &specList);
 };
 } // namespace Algorithms
 } // namespace Mantid

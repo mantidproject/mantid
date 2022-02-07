@@ -9,8 +9,7 @@
 //----------------------------------------------------------------------
 #include "MantidAPI/IFuncMinimizer.h"
 
-namespace Mantid {
-namespace API {
+namespace Mantid::API {
 
 /**
  * Do minimization of the set function.
@@ -38,12 +37,10 @@ bool IFuncMinimizer::minimize(size_t maxIterations) {
     if (!m_errorString.empty()) {
       m_errorString += '\n';
     }
-    m_errorString += "Failed to converge after " +
-                     std::to_string(maxIterations) + " iterations.";
+    m_errorString += "Failed to converge after " + std::to_string(maxIterations) + " iterations.";
   }
 
   return success;
 }
 
-} // namespace API
-} // namespace Mantid
+} // namespace Mantid::API

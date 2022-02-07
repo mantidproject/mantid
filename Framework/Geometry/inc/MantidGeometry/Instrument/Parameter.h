@@ -45,6 +45,8 @@ public:
   const std::string &name() const { return m_name; }
   /// Parameter name
   const char *nameAsCString() const { return m_name.c_str(); }
+  /// Parameter visibility in InstrumentViewer
+  const bool &visible() const { return m_visible; }
 
   /// type-independent clone method;
   virtual Parameter *clone() const = 0;
@@ -59,17 +61,16 @@ public:
   /// ParameterType<T>
   template <class T> const T &value();
   /// set description:
-  virtual void setDescription(const std::string &source) {
-    m_description.assign(source);
-  }
+  virtual void setDescription(const std::string &source) { m_description.assign(source); }
   /// get description
   virtual const std::string &getDescription() const { return m_description; }
   /// get short description
   virtual std::string getShortDescription() const;
+  /// set visibility:
+  virtual void setVisible(const bool &visible) { m_visible = visible; }
   /// Equality operator
   bool operator==(const Parameter &rhs) const {
-    if (this->name() == rhs.name() && this->type() == rhs.type() &&
-        this->asString() == rhs.asString())
+    if (this->name() == rhs.name() && this->type() == rhs.type() && this->asString() == rhs.asString())
       return true;
     else
       return false;
@@ -86,7 +87,7 @@ protected:
 
   friend class ParameterFactory;
   /// Constructor
-  Parameter() : m_type(""), m_name(""), m_str_value(""), m_description("") {}
+  Parameter() : m_type(""), m_name(""), m_str_value(""), m_visible(true), m_description("") {}
 
 private:
   /// The type of the property
@@ -94,6 +95,7 @@ private:
   /// The name of the property
   std::string m_name;
   std::string m_str_value; ///< Parameter value as a string
+  bool m_visible;          /// whether the parameter should be visible in InstrumentViewer
   /// parameter's description -- string containing the description
   /// of this parameter
   std::string m_description;
@@ -122,7 +124,6 @@ private:
   friend class Parameter;
   /// Set the value of the parameter
   void setValue(const Type &value);
-  /// Set the value of the parameter
   ParameterType &operator=(const Type &value);
 
 private:
@@ -165,8 +166,7 @@ template <class T> void Parameter::set(const T &t) {
  * @tparam T The type of the parameter
  * @param value :: A string representation of the parameter's value
  */
-template <class Type>
-void ParameterType<Type>::fromString(const std::string &value) {
+template <class Type> void ParameterType<Type>::fromString(const std::string &value) {
   std::istringstream istr(value);
   istr >> m_value;
 }
@@ -174,25 +174,19 @@ void ParameterType<Type>::fromString(const std::string &value) {
 /**
  * Specialization for a string.
  */
-template <>
-inline void ParameterType<std::string>::fromString(const std::string &value) {
-  m_value = value;
-}
+template <> inline void ParameterType<std::string>::fromString(const std::string &value) { m_value = value; }
 
 /** Set the value of the parameter via the assignment operator
  * @tparam The parameter type
- * @param value :: The vlue of the parameter
+ * @param value :: The value of the parameter
  */
-template <class Type> void ParameterType<Type>::setValue(const Type &value) {
-  m_value = value;
-}
+template <class Type> void ParameterType<Type>::setValue(const Type &value) { m_value = value; }
 
 /** Set the value of the parameter via the assignment operator
  * @param value :: The value of the parameter
  * @returns A reference to the parameter
  */
-template <class Type>
-ParameterType<Type> &ParameterType<Type>::operator=(const Type &value) {
+template <class Type> ParameterType<Type> &ParameterType<Type>::operator=(const Type &value) {
   setValue(value);
   return *this;
 }

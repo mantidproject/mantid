@@ -13,9 +13,7 @@
                    return
 """
 
-import opcode
 import inspect
-import sys
 import dis
 
 
@@ -71,10 +69,86 @@ def customise_func(func, name, signature, docstring):
     """
     func.__name__ = str(name)
     func.__doc__ = docstring
-    replace_signature(func, signature)
+    func.__signature__ = signature
     return func
 
 #-------------------------------------------------------------------------------
+
+
+class LazyFunctionSignature(inspect.Signature):
+    """
+    Allows for lazy access to the signature of a function, only generating it when it is requested
+    to reduce the time spent initialising algorithms.
+    """
+    __slots__ = ('_alg_name', '__sig')
+
+    def __init__(self, *args, **kwargs):
+        if "alg_name" not in kwargs:
+            super().__init__(*args, **kwargs)
+            self.__sig = self
+        else:
+            self._alg_name = kwargs.pop("alg_name")
+            self.__sig = None
+
+    @property
+    def _signature(self):
+        if self.__sig is None:
+            self.__sig = self._create_signature(self._alg_name)
+
+        return self.__sig
+
+    def __getattr__(self, item):
+        # Called for each attribute access.
+        if item in LazyFunctionSignature.__slots__:
+            return getattr(self, item)
+        else:
+            return getattr(self._signature, item)
+
+    def _create_signature(self, alg_name):
+        from inspect import Signature
+        return Signature(self._create_parameters(alg_name))
+
+    def _create_parameters(self, alg_name):
+        from mantid.api import AlgorithmManager
+        alg_object = AlgorithmManager.Instance().createUnmanaged(alg_name)
+        alg_object.initialize()
+        from inspect import Parameter
+        pos_or_keyword = Parameter.POSITIONAL_OR_KEYWORD
+        parameters = []
+        for name in alg_object.mandatoryProperties():
+            prop = alg_object.getProperty(name)
+            # Mandatory parameters are those for which the default value is not valid
+            if isinstance(prop.isValid, str):
+                valid_str = prop.isValid
+            else:
+                valid_str = prop.isValid()
+            if len(valid_str) > 0:
+                parameters.append(Parameter(name, pos_or_keyword))
+            else:
+                # None is not quite accurate here, but we are reproducing the
+                # behavior found in the C++ code for SimpleAPI.
+                parameters.append(Parameter(name, pos_or_keyword, default=None))
+        # Add a self parameter since these are called from a class.
+        parameters.insert(0, Parameter("self", Parameter.POSITIONAL_ONLY))
+        return parameters
+
+
+class LazyMethodSignature(LazyFunctionSignature):
+    """
+    Alternate LazyFunctionSignature intended for use in workspace methods. Replaces the input workspace
+    parameter with self.
+    """
+    def _create_parameters(self, alg_name):
+        from inspect import Parameter
+        parameters = super()._create_parameters(alg_name)
+        try:
+            parameters.pop(0)
+        except IndexError:
+            pass
+        parameters.insert(0, Parameter("self", Parameter.POSITIONAL_ONLY))
+        return parameters
+
+# -------------------------------------------------------------------------------
 
 
 def decompile(code_object):
@@ -112,24 +186,17 @@ def decompile(code_object):
         instructions.append( (ins.offset, ins.opcode, ins.opname, ins.arg, ins.argval) )
     return instructions
 
-#-------------------------------------------------------------------------------
 
 # A must list all of the operators that behave like a function calls in byte-code
 # This is for the lhs functionality
-__operator_names = set(['CALL_FUNCTION', 'CALL_FUNCTION_VAR', 'CALL_FUNCTION_KW',
-                        'CALL_FUNCTION_VAR_KW','UNARY_POSITIVE',
-                        'UNARY_NEGATIVE','UNARY_NOT', 'UNARY_CONVERT','UNARY_INVERT',
-                        'GET_ITER', 'BINARY_POWER', 'BINARY_MULTIPLY','BINARY_DIVIDE',
-                        'BINARY_FLOOR_DIVIDE', 'BINARY_TRUE_DIVIDE', 'BINARY_MODULO',
-                        'BINARY_ADD','BINARY_SUBTRACT', 'BINARY_SUBSCR','BINARY_LSHIFT',
-                        'BINARY_RSHIFT','BINARY_AND', 'BINARY_XOR','BINARY_OR',
-                        'INPLACE_POWER', 'INPLACE_MULTIPLY', 'INPLACE_DIVIDE',
-                        'INPLACE_TRUE_DIVIDE','INPLACE_FLOOR_DIVIDE',
-                        'INPLACE_MODULO', 'INPLACE_ADD', 'INPLACE_SUBTRACT',
-                        'INPLACE_LSHIFT','INPLACE_RSHIFT','INPLACE_AND', 'INPLACE_XOR',
-                        'INPLACE_OR', 'COMPARE_OP',
-                        'CALL_FUNCTION_EX', 'LOAD_METHOD', 'CALL_METHOD'])
-#--------------------------------------------------------------------------------------
+__operator_names = {'CALL_FUNCTION', 'CALL_FUNCTION_VAR', 'CALL_FUNCTION_KW', 'CALL_FUNCTION_VAR_KW', 'UNARY_POSITIVE',
+                    'UNARY_NEGATIVE', 'UNARY_NOT', 'UNARY_CONVERT', 'UNARY_INVERT', 'GET_ITER', 'BINARY_POWER',
+                    'BINARY_MULTIPLY', 'BINARY_DIVIDE', 'BINARY_FLOOR_DIVIDE', 'BINARY_TRUE_DIVIDE', 'BINARY_MODULO',
+                    'BINARY_ADD', 'BINARY_SUBTRACT', 'BINARY_SUBSCR', 'BINARY_LSHIFT', 'BINARY_RSHIFT', 'BINARY_AND',
+                    'BINARY_XOR', 'BINARY_OR', 'INPLACE_POWER', 'INPLACE_MULTIPLY', 'INPLACE_DIVIDE',
+                    'INPLACE_TRUE_DIVIDE', 'INPLACE_FLOOR_DIVIDE', 'INPLACE_MODULO', 'INPLACE_ADD', 'INPLACE_SUBTRACT',
+                    'INPLACE_LSHIFT', 'INPLACE_RSHIFT', 'INPLACE_AND', 'INPLACE_XOR', 'INPLACE_OR', 'COMPARE_OP',
+                    'CALL_FUNCTION_EX', 'LOAD_METHOD', 'CALL_METHOD'}
 
 
 def process_frame(frame):
@@ -198,14 +265,14 @@ def process_frame(frame):
         # put this in a loop and stack the results in an array.
         count = 0
         max_returns = 0 # Must count the max_returns ourselves in this case
-        while count < len(ins_stack[call_function_locs[i][0]:call_function_locs[i][1]]):
-            (offset_, op_, name_, argument_, argvalue_) = ins[call_function_locs[i][0]+count]
+        while count < len(ins_stack[call_function_locs[last_i][0]:call_function_locs[last_i][1]]):
+            (offset_, op_, name_, argument_, argvalue_) = ins_stack[call_function_locs[last_i][0]+count]
             if name_ == 'UNPACK_SEQUENCE': # Many Return Values, One equal sign
                 hold = []
                 if argvalue_ > max_returns:
                     max_returns = argvalue_
                 for index in range(argvalue_):
-                    (_offset_, _op_, _name_, _argument_, _argvalue_) = ins[call_function_locs[i][0] + count+1+index]
+                    (_offset_, _op_, _name_, _argument_, _argvalue_) = ins_stack[call_function_locs[last_i][0] + count+1+index]
                     hold.append(_argvalue_)
                 count = count + argvalue_
                 output_var_names.append(hold)

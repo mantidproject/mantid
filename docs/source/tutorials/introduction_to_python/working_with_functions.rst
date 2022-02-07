@@ -1,7 +1,7 @@
 .. _working_with_functions:
 
 ======================
-Working With Functions 
+Working With Functions
 ======================
 
 -  Functions are useful for splitting out common code that can be reused
@@ -72,10 +72,10 @@ more useful.
    def foo(A, B, C, D, E):
        # ... Do something
        return
-    
+
    foo(1, 2, 3, 4, 5)      # Correct, no names given
    foo(1, 2, 3, D=4, E=5)  # Correct as the first 3 get assigned to the first
-                       # 3 of the function and then the last two are 
+                       # 3 of the function and then the last two are
                        # specified by name
    foo(C=3, 1, 2, 4, 5)   # Incorrect and will fail as a name has been
                        # specified first but then Python doesn't know
@@ -91,14 +91,14 @@ Default Arguments
 -  In some situations extra function parameters maybe required for extra
    functionality but a user may want a certain default value to be
    specified so that the majority of the time the function call can be
-   executed without specifying the parameter,where the second argument is 
-   now optional and will be assigned the given value if the function is 
+   executed without specifying the parameter,where the second argument is
+   now optional and will be assigned the given value if the function is
    called without it.
 
 .. testcode:: function2
 
    def printSquare(n, verbose = False):
-        
+
        if verbose == True:
            print( 'The square of ' + str(n) + ' is: ' + str(n*n))
        elif verbose == False:
@@ -151,7 +151,7 @@ Gives the output:
        return x*x, y*y
 
    t = square(2,3)
-   print(t)  
+   print(t)
    # Now access the tuple with usual operations
 
 Gives the output:
@@ -172,7 +172,7 @@ Gives the output:
 
    xsq, ysq = square(2,3)
    print(xsq)  # Prints 4
-   print(ysq)  # Prints 9  
+   print(ysq)  # Prints 9
    # Tuple has vanished!
 
 Gives the output:

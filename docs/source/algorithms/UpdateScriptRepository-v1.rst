@@ -9,7 +9,7 @@
 Description
 -----------
 
-Updates the local meta-information about the `script repository <http://www.mantidproject.org/ScriptRepository>`__. Any files
+Updates the local meta-information about the :ref:`script repository <mantid.api.ScriptRepository>`. Any files
 marked as *AutoUpdate* will be downloaded.
 
 Usage

@@ -12,13 +12,11 @@
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/StringTokenizer.h"
 
-namespace Mantid {
-namespace API {
+namespace Mantid::API {
 
 using tokenizer = Mantid::Kernel::StringTokenizer;
 
-const std::string DEFAULT_OPS_STR[] = {
-    ";", ",", "=", "== != > < <= >=", "&& || ^^", "+ -", "* /", "^"};
+const std::string DEFAULT_OPS_STR[] = {";", ",", "=", "== != > < <= >=", "&& || ^^", "+ -", "* /", "^"};
 
 const std::string EMPTY_EXPRESSION_NAME = "EMPTY";
 namespace {
@@ -27,8 +25,7 @@ namespace {
 /// @param expr :: An expression string that caused the error.
 /// @param i :: An index of a symbol in expr that may help identify the location
 ///             of the error.
-std::string makeErrorMessage(const std::string &msg, const std::string &expr,
-                             size_t i) {
+std::string makeErrorMessage(const std::string &msg, const std::string &expr, size_t i) {
   const size_t MAX_LEFT_SIZE = 10;
   const size_t MAX_RIGHT_SIZE = 10;
   std::ostringstream res;
@@ -64,14 +61,12 @@ Kernel::Logger logger("Expression");
 /// @param expr :: An expression string that caused the error.
 /// @param i :: An index of a symbol in expr that may help identify the location
 ///             of the error.
-Expression::ParsingError::ParsingError(const std::string &msg,
-                                       const std::string &expr, size_t i)
+Expression::ParsingError::ParsingError(const std::string &msg, const std::string &expr, size_t i)
     : std::runtime_error(makeErrorMessage(msg, expr, i)) {}
 
 /// Constructor
 /// @param msg :: The text of the error message.
-Expression::ParsingError::ParsingError(const std::string &msg)
-    : std::runtime_error(msg) {}
+Expression::ParsingError::ParsingError(const std::string &msg) : std::runtime_error(msg) {}
 
 Expression::Expression() {
   m_operators.reset(new Operators());
@@ -96,8 +91,7 @@ Expression::Expression(const std::vector<std::string> &ops) {
 }
 
 /// contructor
-Expression::Expression(const std::vector<std::string> &binary,
-                       const std::unordered_set<std::string> &unary) {
+Expression::Expression(const std::vector<std::string> &binary, const std::unordered_set<std::string> &unary) {
   m_operators.reset(new Operators());
   add_operators(binary);
   add_unary(unary);
@@ -106,10 +100,8 @@ Expression::Expression(const std::vector<std::string> &binary,
 Expression::Expression(const Expression &expr)
     : // m_tokens(expr.m_tokens),
       // m_expr(expr.m_expr),
-      m_funct(expr.m_funct), m_op(expr.m_op), m_terms(expr.m_terms),
-      m_operators(expr.m_operators) {}
-Expression::Expression(const Expression *pexpr)
-    : m_operators(pexpr->m_operators) {}
+      m_funct(expr.m_funct), m_op(expr.m_op), m_terms(expr.m_terms), m_operators(expr.m_operators) {}
+Expression::Expression(const Expression *pexpr) : m_operators(pexpr->m_operators) {}
 
 /// Assignment operator
 Expression &Expression::operator=(const Expression &expr) {
@@ -127,8 +119,7 @@ void Expression::add_operators(const std::vector<std::string> &ops) {
   // Fill in the precedence table (m_op_precedence)
   for (size_t i = 0; i < m_operators->binary.size(); i++) {
     char j = 0;
-    tokenizer tkz(m_operators->binary[i], " ",
-                  tokenizer::TOK_IGNORE_EMPTY | tokenizer::TOK_TRIM);
+    tokenizer tkz(m_operators->binary[i], " ", tokenizer::TOK_IGNORE_EMPTY | tokenizer::TOK_TRIM);
     for (const auto &index : tkz) {
       m_operators->precedence[index] = i + 1;
       m_operators->op_number[index] = j++;
@@ -152,8 +143,7 @@ void Expression::add_unary(const std::unordered_set<std::string> &ops) {
 }
 
 size_t Expression::op_prec(const std::string &op) const {
-  std::map<std::string, size_t>::const_iterator i =
-      m_operators->precedence.find(op);
+  std::map<std::string, size_t>::const_iterator i = m_operators->precedence.find(op);
   if (i == m_operators->precedence.end())
     return 0;
   return i->second;
@@ -163,9 +153,7 @@ bool Expression::is_unary(const std::string &op) const {
   return m_operators->unary.find(op) != m_operators->unary.end();
 }
 
-bool Expression::is_op_symbol(const char c) const {
-  return m_operators->symbols.find(c) != m_operators->symbols.end();
-}
+bool Expression::is_op_symbol(const char c) const { return m_operators->symbols.find(c) != m_operators->symbols.end(); }
 
 void Expression::trim(std::string &str) {
   size_t i = str.find_first_not_of(" \t\n\r");
@@ -199,8 +187,7 @@ void Expression::parse(const std::string &str) {
   std::string op = GetOp(0);
   // size_t prec = m_operators->precedence[op];
   size_t prec = op_prec(op);
-  tokenizer tkz(m_operators->binary[prec - 1], " ",
-                tokenizer::TOK_IGNORE_EMPTY | tokenizer::TOK_TRIM);
+  tokenizer tkz(m_operators->binary[prec - 1], " ", tokenizer::TOK_IGNORE_EMPTY | tokenizer::TOK_TRIM);
 
   setFunct(*tkz.begin());
 
@@ -274,8 +261,7 @@ void Expression::tokenize() {
             m_expr.resize(last);
             break;
           } else {
-            throw ParsingError("A binary operator isn't followed by a value",
-                               m_expr, i);
+            throw ParsingError("A binary operator isn't followed by a value", m_expr, i);
           }
         }
         auto is1 = i + (is_op_symbol(m_expr[i + 1]) ? 2 : 1);
@@ -367,7 +353,7 @@ void Expression::tokenize() {
     // remove operators of higher prec
     m_tokens.emplace_back(tokens[0]);
     for (size_t i = 0; i < tokens.size(); i++) {
-      Token &tok = tokens[i];
+      const Token &tok = tokens[i];
       std::string op = m_expr.substr(tok.ie + 1, tok.is1 - tok.ie - 1); //?
       if (m_operators->precedence[op] == min_prec) {
         Token &last_tok = m_tokens.back();
@@ -385,12 +371,12 @@ std::string Expression::GetToken(size_t i) {
     return m_expr;
 
   if (i < m_tokens.size()) {
-    Token &tok = m_tokens[i];
+    const Token &tok = m_tokens[i];
     return m_expr.substr(tok.is, tok.ie - tok.is + 1);
   }
 
   if (i == m_tokens.size()) {
-    Token &tok = m_tokens[i - 1];
+    const Token &tok = m_tokens[i - 1];
     return m_expr.substr(tok.is1);
   }
 
@@ -401,7 +387,7 @@ std::string Expression::GetOp(size_t i) {
   if (m_tokens.empty() || i >= m_tokens.size())
     return "";
 
-  Token &tok = m_tokens[i];
+  const Token &tok = m_tokens[i];
   return m_expr.substr(tok.ie + 1, tok.is1 - tok.ie - 1);
 }
 
@@ -471,8 +457,7 @@ void Expression::setFunct(const std::string &name) {
       std::string f = name.substr(0, i);
       Expression tmp(this);
       tmp.parse(args);
-      if (tmp.name() != EMPTY_EXPRESSION_NAME &&
-          (!tmp.isFunct() || tmp.name() != ",")) {
+      if (tmp.name() != EMPTY_EXPRESSION_NAME && (!tmp.isFunct() || tmp.name() != ",")) {
         m_terms.emplace_back(tmp);
       } else {
         if (f.empty() && tmp.name() == ",") {
@@ -570,8 +555,7 @@ std::unordered_set<std::string> Expression::getVariables() const {
 
 void Expression::rename(const std::string &newName) { m_funct = newName; }
 
-void Expression::renameAll(const std::string &oldName,
-                           const std::string &newName) {
+void Expression::renameAll(const std::string &oldName, const std::string &newName) {
   if (!isFunct() && name() == oldName) {
     rename(newName);
   } else {
@@ -590,5 +574,4 @@ void Expression::toList(const std::string &sep) {
   setFunct(sep);
 }
 
-} // namespace API
-} // namespace Mantid
+} // namespace Mantid::API

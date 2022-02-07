@@ -14,8 +14,7 @@
 using Mantid::HistogramData::detail::Iterable;
 using Mantid::HistogramData::detail::VectorOf;
 
-class IterableTester : public VectorOf<IterableTester, std::vector<double>>,
-                       public Iterable<IterableTester> {
+class IterableTester : public VectorOf<IterableTester, std::vector<double>>, public Iterable<IterableTester> {
   using VectorOf<IterableTester, std::vector<double>>::VectorOf;
   using VectorOf<IterableTester, std::vector<double>>::operator=;
 };

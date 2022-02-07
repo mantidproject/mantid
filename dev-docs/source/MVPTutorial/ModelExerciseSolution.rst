@@ -4,11 +4,11 @@
 Model Exercise Solution
 =======================
 
-The model should now contain the following class:
+The model should now contain the following top level function:
 
 .. code-block:: python
 
-    def line_colours(object):
+    def line_colours():
         colour_table = ["red", "blue", "black"]
         return colour_table
 
@@ -27,7 +27,7 @@ The presenter initialisation should now be:
      def __init__(self, view, data_model, colour_list):
         self.view = view
         self.data_model = data_model
-        
+
         self.view.setColours(colour_list)
         # connect statements
         self.view.plotSignal.connect(self.updatePlot)
@@ -37,7 +37,7 @@ And the Main module should now pass the two models into the presenter:
 .. code-block:: python
 
     def __init__(self, parent=None):
-        super(Demo,self).__init__(parent)
+        super().__init__(parent)
 
         self.window = QtWidgets.QMainWindow()
         my_view = view.View()

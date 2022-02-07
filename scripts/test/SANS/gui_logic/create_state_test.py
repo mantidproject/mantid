@@ -7,23 +7,21 @@
 import unittest
 
 from unittest import mock
-from sans.common.enums import (SANSFacility, SaveType)
+from sans.common.enums import SANSFacility
 from sans.gui_logic.models.RowEntries import RowEntries
-from sans.gui_logic.models.create_state import (create_states, create_gui_state_from_userfile)
+from sans.gui_logic.models.create_state import create_states
 from sans.gui_logic.models.state_gui_model import StateGuiModel
 from sans.state.AllStates import AllStates
-from sans.gui_logic.models.table_model import TableModel
 
 
 class GuiCommonTest(unittest.TestCase):
     def setUp(self):
-        self.state_gui_model = StateGuiModel({})
+        self.state_gui_model = StateGuiModel(AllStates())
         self._good_row_one = RowEntries(sample_scatter='LOQ74044')
         self._good_row_two = RowEntries(sample_scatter='LOQ74044')
 
-        self.fake_state = mock.MagicMock(spec=AllStates)
         self.gui_state_director_instance = mock.MagicMock()
-        self.gui_state_director_instance.create_state.return_value = self.fake_state
+        self.gui_state_director_instance.create_state.return_value = self.state_gui_model
         self.patcher = mock.patch('sans.gui_logic.models.create_state.GuiStateDirector')
         self.addCleanup(self.patcher.stop)
         self.gui_state_director = self.patcher.start()
@@ -40,25 +38,22 @@ class GuiCommonTest(unittest.TestCase):
         states, errors = create_states(self.state_gui_model, SANSFacility.ISIS, row_entries=rows)
         self.assertEqual(2, len(states))
 
-    @mock.patch('sans.gui_logic.models.create_state.create_gui_state_from_userfile')
-    def test_create_state_from_user_file_if_specified(self, create_gui_state_mock):
-        create_gui_state_mock.returns = StateGuiModel({})
+    @mock.patch('sans.gui_logic.models.create_state._get_thickness_for_row')
+    def test_create_state_from_user_file_if_specified(self, thickness_mock):
+        expected_user_file = 'MaskLOQData.txt'
 
-        rows = [RowEntries(sample_scatter="LOQ74044", user_file="MaskLOQData.txt"),
-                RowEntries(), RowEntries()]
+        # Mock out row entry so it does not lookup file information
+        mock_row_entry = mock.Mock(spec=RowEntries)
+        mock_row_entry.is_empty.return_value = False
+        mock_row_entry.user_file = expected_user_file
+        rows = [mock_row_entry, RowEntries(), RowEntries()]
 
         states, errors = create_states(self.state_gui_model, row_entries=rows, facility=SANSFacility.ISIS)
 
         self.assertEqual(len(states), 1)
-        create_gui_state_mock.assert_called_once_with('MaskLOQData.txt', self.state_gui_model)
-
-    def test_create_gui_state_from_userfile_adds_save_format_from_gui(self):
-        gui_state = StateGuiModel({})
-        gui_state.save_types = [SaveType.NX_CAN_SAS]
-
-        row_state = create_gui_state_from_userfile('MaskLOQData.txt', gui_state)
-
-        self.assertEqual(gui_state.save_types, row_state.save_types)
+        self.gui_state_director_instance.create_state.assert_called_once_with(
+            mock_row_entry, file_lookup=mock.ANY, row_user_file=expected_user_file)
+        thickness_mock.assert_called()
 
 
 if __name__ == '__main__':

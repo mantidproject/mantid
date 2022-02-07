@@ -8,6 +8,7 @@
 
 #include <cxxtest/TestSuite.h>
 
+#include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/FileFinder.h"
 #include "MantidAPI/IMDEventWorkspace.h"
@@ -23,9 +24,7 @@ class ConvertHFIRSCDtoMDETest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static ConvertHFIRSCDtoMDETest *createSuite() {
-    return new ConvertHFIRSCDtoMDETest();
-  }
+  static ConvertHFIRSCDtoMDETest *createSuite() { return new ConvertHFIRSCDtoMDETest(); }
   static void destroySuite(ConvertHFIRSCDtoMDETest *suite) { delete suite; }
 
   void test_Init() {
@@ -38,26 +37,30 @@ public:
     // Create test input if necessary
     LoadMD loader;
     loader.initialize();
-    loader.setPropertyValue(
-        "Filename",
-        Mantid::API::FileFinder::Instance().getFullPath("HB3A_data.nxs"));
+    loader.setPropertyValue("Filename", Mantid::API::FileFinder::Instance().getFullPath("HB3A_data.nxs"));
     loader.setPropertyValue("OutputWorkspace", "ConvertHFIRSCDtoMDETest_data");
     loader.setProperty("FileBackEnd", false);
     loader.execute();
-    auto inputWS = Mantid::API::AnalysisDataService::Instance()
-                       .retrieveWS<Mantid::API::IMDHistoWorkspace>(
-                           "ConvertHFIRSCDtoMDETest_data");
+    auto inputWS = Mantid::API::AnalysisDataService::Instance().retrieveWS<Mantid::API::IMDHistoWorkspace>(
+        "ConvertHFIRSCDtoMDETest_data");
+
+    auto setGoniometer = AlgorithmManager::Instance().create("SetGoniometer");
+    setGoniometer->initialize();
+    setGoniometer->setProperty("Workspace", inputWS);
+    setGoniometer->setPropertyValue("Axis0", "omega,0,1,0,-1");
+    setGoniometer->setPropertyValue("Axis1", "chi,0,0,1,-1");
+    setGoniometer->setPropertyValue("Axis2", "phi,0,1,0,-1");
+    setGoniometer->setProperty("Average", false);
+    setGoniometer->execute();
 
     ConvertHFIRSCDtoMDE alg;
     // Don't put output in ADS by default
     alg.setChild(true);
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
     TS_ASSERT(alg.isInitialized())
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setProperty("InputWorkspace", "ConvertHFIRSCDtoMDETest_data"));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", "ConvertHFIRSCDtoMDETest_data"));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("Wavelength", "1.008"));
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("OutputWorkspace", "_unused_for_child"));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", "_unused_for_child"));
     TS_ASSERT_THROWS_NOTHING(alg.execute(););
     TS_ASSERT(alg.isExecuted());
 
@@ -69,8 +72,7 @@ public:
 
     // check dimensions
     TS_ASSERT_EQUALS(3, outWS->getNumDims());
-    TS_ASSERT_EQUALS(Mantid::Kernel::QSample,
-                     outWS->getSpecialCoordinateSystem());
+    TS_ASSERT_EQUALS(Mantid::Kernel::QSample, outWS->getSpecialCoordinateSystem());
     TS_ASSERT_EQUALS("QSample", outWS->getDimension(0)->getMDFrame().name());
     TS_ASSERT_EQUALS(true, outWS->getDimension(0)->getMDUnits().isQUnit());
     TS_ASSERT_EQUALS(-10, outWS->getDimension(0)->getMinimum());
@@ -85,12 +87,26 @@ public:
     TS_ASSERT_EQUALS(10, outWS->getDimension(2)->getMaximum());
 
     // check other things
+    const Mantid::coord_t coords[3] = {-0.42f, 1.71f, 2.3f}; // roughly the location of maximum instenity
     TS_ASSERT_EQUALS(1, outWS->getNumExperimentInfo());
     TS_ASSERT_EQUALS(9038, outWS->getNEvents());
-    const Mantid::coord_t coords[3] = {
-        -0.42f, 1.71f, 2.3f}; // roughly the location of maximum instenity
-    TS_ASSERT_DELTA(
-        outWS->getSignalAtCoord(coords, Mantid::API::NoNormalization), 568,
-        1e-5);
+    TS_ASSERT_DELTA(outWS->getSignalAtCoord(coords, Mantid::API::NoNormalization), 568, 1e-5);
+
+    // check coeff behavior
+    TS_ASSERT_THROWS_NOTHING(alg.initialize())
+    TS_ASSERT(alg.isInitialized())
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", "ConvertHFIRSCDtoMDETest_data"));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("Wavelength", "1.008"));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("ObliquityParallaxCoefficient", "1.5"));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", "_unused_for_child"));
+    TS_ASSERT_THROWS_NOTHING(alg.execute(););
+    TS_ASSERT(alg.isExecuted());
+
+    outWS = alg.getProperty("OutputWorkspace");
+    TS_ASSERT(outWS);
+
+    TS_ASSERT_EQUALS(1, outWS->getNumExperimentInfo());
+    TS_ASSERT_EQUALS(9038, outWS->getNEvents());
+    TS_ASSERT_DELTA(outWS->getSignalAtCoord(coords, Mantid::API::NoNormalization), 453, 1e-5);
   }
 };

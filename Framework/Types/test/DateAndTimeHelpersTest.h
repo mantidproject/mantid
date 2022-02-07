@@ -15,9 +15,7 @@ class DateAndTimeHelpersTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static DateAndTimeHelpersTest *createSuite() {
-    return new DateAndTimeHelpersTest();
-  }
+  static DateAndTimeHelpersTest *createSuite() { return new DateAndTimeHelpersTest(); }
   static void destroySuite(DateAndTimeHelpersTest *suite) { delete suite; }
 
   void test_stringIsISO8601_basic_format() {

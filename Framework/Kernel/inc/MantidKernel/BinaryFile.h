@@ -69,8 +69,7 @@ public:
       throw std::invalid_argument("File does not exist.");
     }
     // Open the file
-    this->handle =
-        std::make_unique<std::ifstream>(filename.c_str(), std::ios::binary);
+    this->handle = std::make_unique<std::ifstream>(filename.c_str(), std::ios::binary);
     // Count the # of elements.
     this->num_elements = this->getFileSize();
     // Make sure we are starting at 0
@@ -123,13 +122,11 @@ public:
     offset = 0;
     handle->seekg(0, std::ios::beg);
 
-    size_t loaded_size;
     while (offset < num_elements) {
       // Load that block of data
-      loaded_size = loadBlock(buffer.get(), buffer_size);
+      const auto loaded_size = loadBlock(buffer.get(), buffer_size);
       // Insert into the data
-      data.insert(data.end(), buffer.get(),
-                  std::next(buffer.get(), loaded_size));
+      data.insert(data.end(), buffer.get(), std::next(buffer.get(), loaded_size));
     }
 
     // Close the file, since we are done.
@@ -159,10 +156,9 @@ public:
     offset = 0;
     handle->seekg(0, std::ios::beg);
 
-    size_t loaded_size;
     while (offset < num_elements) {
       // Load that block of data
-      loaded_size = loadBlock(buffer, buffer_size);
+      const auto loaded_size = loadBlock(buffer, buffer_size);
       // Insert into the data
       data.insert(data.end(), buffer, (buffer + loaded_size));
     }

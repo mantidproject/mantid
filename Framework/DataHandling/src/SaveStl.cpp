@@ -11,8 +11,7 @@
 #include <Poco/File.h>
 #include <fstream>
 #include <vector>
-namespace Mantid {
-namespace DataHandling {
+namespace Mantid::DataHandling {
 
 namespace {
 
@@ -22,8 +21,7 @@ namespace {
  * @param streamWriter The binary stream to write to.
  * @param numberTrianglesLong The number of triangles to write out.
  */
-void writeNumberTriangles(Kernel::BinaryStreamWriter streamWriter,
-                          uint32_t numberTrianglesLong) {
+void writeNumberTriangles(Kernel::BinaryStreamWriter streamWriter, uint32_t numberTrianglesLong) {
 
   // Write the number of triangles.
   streamWriter << numberTrianglesLong;
@@ -52,12 +50,8 @@ void writeNormal(Kernel::BinaryStreamWriter StreamWriter) {
  * @param streamWriter The binary stream to write to.
  */
 void SaveStl::writeHeader(Kernel::BinaryStreamWriter streamWriter) {
-  const std::string headerStart =
-      "Binary STL File created using Mantid Environment:";
-  const auto timeString =
-      Types::Core::DateAndTime::getCurrentTime().toFormattedString(
-          "%Y-%b-%dT%H:%M:%S") +
-      ":";
+  const std::string headerStart = "Binary STL File created using Mantid Environment:";
+  const auto timeString = Types::Core::DateAndTime::getCurrentTime().toFormattedString("%Y-%b-%dT%H:%M:%S") + ":";
   std::string unitString;
   switch (m_scaleType) {
   case ScaleUnits::centimetres:
@@ -73,10 +67,8 @@ void SaveStl::writeHeader(Kernel::BinaryStreamWriter streamWriter) {
     // not mandatory to have units in header so just output blank
     unitString = ":";
   }
-  const size_t emptySize = 80 - size_t(headerStart.size() + timeString.size() +
-                                       4 + unitString.size());
-  streamWriter << headerStart + timeString + unitString +
-                      std::string(emptySize, ' ');
+  const size_t emptySize = 80 - size_t(headerStart.size() + timeString.size() + 4 + unitString.size());
+  streamWriter << headerStart + timeString + unitString + std::string(emptySize, ' ');
 }
 
 /**
@@ -109,8 +101,7 @@ void SaveStl::writeStl() {
  * @param streamWriter The binary stream to write to.
  * @param triangle the first index of the triangles in the m_triangles vector.
  */
-void SaveStl::writeTriangle(Kernel::BinaryStreamWriter streamWriter,
-                            uint32_t triangle) {
+void SaveStl::writeTriangle(Kernel::BinaryStreamWriter streamWriter, uint32_t triangle) {
   // for each vertex
   for (int i = 0; i < 3; ++i) {
     // write out the coords
@@ -125,5 +116,4 @@ void SaveStl::writeTriangle(Kernel::BinaryStreamWriter streamWriter,
   }
 }
 
-} // namespace DataHandling
-} // namespace Mantid
+} // namespace Mantid::DataHandling

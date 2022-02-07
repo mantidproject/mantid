@@ -6,10 +6,10 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
+#include "MantidFrameworkTestHelpers/JSONGeometryParserTestHelper.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidNexusGeometry/JSONGeometryParser.h"
 #include "MantidNexusGeometry/JSONInstrumentBuilder.h"
-#include "MantidTestHelpers/JSONGeometryParserTestHelper.h"
 #include <cxxtest/TestSuite.h>
 #include <json/json.h>
 
@@ -20,13 +20,11 @@ class JSONInstrumentBuilderTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static JSONInstrumentBuilderTest *createSuite() {
-    return new JSONInstrumentBuilderTest();
-  }
+  static JSONInstrumentBuilderTest *createSuite() { return new JSONInstrumentBuilderTest(); }
   static void destroySuite(JSONInstrumentBuilderTest *suite) { delete suite; }
 
   void test_constructor_pass_valid_instrument() {
-    auto json = TestHelpers::getFullJSONInstrumentSimpleWithChopper();
+    auto json = FrameworkTestHelpers::getFullJSONInstrumentSimpleWithChopper();
     TS_ASSERT_THROWS_NOTHING((JSONInstrumentBuilder(json)));
   }
 
@@ -35,13 +33,13 @@ public:
   }
 
   void test_build_geometry() {
-    auto json = TestHelpers::getFullJSONInstrumentSimpleWithChopper();
+    auto json = FrameworkTestHelpers::getFullJSONInstrumentSimpleWithChopper();
     JSONInstrumentBuilder builder(json);
     TS_ASSERT_THROWS_NOTHING((builder.buildGeometry()));
   }
 
   void test_simple_instrument() {
-    auto json = TestHelpers::getFullJSONInstrumentSimpleWithMonitor();
+    auto json = FrameworkTestHelpers::getFullJSONInstrumentSimpleWithMonitor();
     JSONInstrumentBuilder builder(json);
     auto instrument = builder.buildGeometry();
 

@@ -12,8 +12,7 @@
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
 
-namespace Mantid {
-namespace DataObjects {
+namespace Mantid::DataObjects {
 namespace {
 /// static logger
 Kernel::Logger g_log("SplittersWorkspace");
@@ -30,8 +29,7 @@ SplittersWorkspace::SplittersWorkspace() {
 /*
  * Add a Splitter to
  */
-void SplittersWorkspace::addSplitter(
-    Mantid::Kernel::SplittingInterval splitter) {
+void SplittersWorkspace::addSplitter(const Mantid::Kernel::SplittingInterval &splitter) {
   Mantid::API::TableRow row = this->appendRow();
   row << splitter.start().totalNanoseconds();
   row << splitter.stop().totalNanoseconds();
@@ -46,15 +44,12 @@ Kernel::SplittingInterval SplittersWorkspace::getSplitter(size_t index) {
   row >> stop;
   row >> wsgroup;
 
-  Kernel::SplittingInterval splitter(Types::Core::DateAndTime(start),
-                                     Types::Core::DateAndTime(stop), wsgroup);
+  Kernel::SplittingInterval splitter(Types::Core::DateAndTime(start), Types::Core::DateAndTime(stop), wsgroup);
 
   return splitter;
 }
 
-size_t SplittersWorkspace::getNumberSplitters() const {
-  return this->rowCount();
-}
+size_t SplittersWorkspace::getNumberSplitters() const { return this->rowCount(); }
 
 bool SplittersWorkspace::removeSplitter(size_t index) {
   bool removed;
@@ -69,48 +64,39 @@ bool SplittersWorkspace::removeSplitter(size_t index) {
   return removed;
 }
 
-} // namespace DataObjects
-} // namespace Mantid
+} // namespace Mantid::DataObjects
 
 ///\cond TEMPLATE
 
-namespace Mantid {
-namespace Kernel {
+namespace Mantid::Kernel {
 
 template <>
 DLLExport Mantid::DataObjects::SplittersWorkspace_sptr
-IPropertyManager::getValue<Mantid::DataObjects::SplittersWorkspace_sptr>(
-    const std::string &name) const {
-  auto *prop = dynamic_cast<
-      PropertyWithValue<Mantid::DataObjects::SplittersWorkspace_sptr> *>(
-      getPointerToProperty(name));
+IPropertyManager::getValue<Mantid::DataObjects::SplittersWorkspace_sptr>(const std::string &name) const {
+  auto *prop =
+      dynamic_cast<PropertyWithValue<Mantid::DataObjects::SplittersWorkspace_sptr> *>(getPointerToProperty(name));
   if (prop) {
     return *prop;
   } else {
     std::string message =
-        "Attempt to assign property " + name +
-        " to incorrect type. Expected shared_ptr<SplittersWorkspace>.";
+        "Attempt to assign property " + name + " to incorrect type. Expected shared_ptr<SplittersWorkspace>.";
     throw std::runtime_error(message);
   }
 }
 
 template <>
 DLLExport Mantid::DataObjects::SplittersWorkspace_const_sptr
-IPropertyManager::getValue<Mantid::DataObjects::SplittersWorkspace_const_sptr>(
-    const std::string &name) const {
-  auto *prop = dynamic_cast<
-      PropertyWithValue<Mantid::DataObjects::SplittersWorkspace_sptr> *>(
-      getPointerToProperty(name));
+IPropertyManager::getValue<Mantid::DataObjects::SplittersWorkspace_const_sptr>(const std::string &name) const {
+  auto *prop =
+      dynamic_cast<PropertyWithValue<Mantid::DataObjects::SplittersWorkspace_sptr> *>(getPointerToProperty(name));
   if (prop) {
     return prop->operator()();
   } else {
     std::string message =
-        "Attempt to assign property " + name +
-        " to incorrect type. Expected const shared_ptr<SplittersWorkspace>.";
+        "Attempt to assign property " + name + " to incorrect type. Expected const shared_ptr<SplittersWorkspace>.";
     throw std::runtime_error(message);
   }
 }
 
-} // namespace Kernel
-} // namespace Mantid
+} // namespace Mantid::Kernel
 ///\endcond

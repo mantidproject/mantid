@@ -69,37 +69,77 @@ public:
 
 private:
   /// Create an output workspace
-  API::MatrixWorkspace_sptr
-  createOutputWorkspace(const API::MatrixWorkspace_const_sptr &, const size_t,
-                        const std::vector<double> &);
+  API::MatrixWorkspace_sptr createOutputWorkspace(const API::MatrixWorkspace_const_sptr &, const size_t,
+                                                  const std::vector<double> &, const size_t);
 
   void bootstrap(const API::MatrixWorkspace_const_sptr &);
   void calculate(const API::MatrixWorkspace_const_sptr &);
   void finalize(const API::MatrixWorkspace_const_sptr &);
+  void fillMonochromaticOutput(API::MatrixWorkspace_sptr &, const size_t);
+  void fillTOFOutput(API::MatrixWorkspace_sptr &, const size_t);
+
+  struct Wedge {
+    Wedge(double innerRadius, double outerRadius, double centerX, double centerY, double angleMiddle, double angleRange)
+        : innerRadius(innerRadius), outerRadius(outerRadius), centerX(centerX), centerY(centerY),
+          angleMiddle(angleMiddle), angleRange(angleRange) {}
+    double innerRadius;
+    double outerRadius;
+    double centerX;
+    double centerY;
+    double angleMiddle;
+    double angleRange;
+
+    /**
+     * @brief isSymmetric determines if the two wedges have a center symmetry
+     * with one another.
+     * @param other the wedge to compare to
+     * @return
+     */
+    bool isSymmetric(const Wedge &other) {
+      double diffAngle = std::fabs(std::fmod(this->angleMiddle - other.angleMiddle, M_PI));
+
+      double epsilon = 1e-3;
+      bool hasSameRadii = this->innerRadius == other.innerRadius && this->outerRadius == other.outerRadius;
+
+      bool hasSameCenter = this->centerX == other.centerX && this->centerY == other.centerY;
+
+      bool hasSameAngleRange = std::fabs(this->angleRange - other.angleRange) < epsilon;
+
+      bool hasSymmetricalAngle = std::fabs(diffAngle - M_PI) < epsilon || diffAngle < epsilon;
+
+      return (hasSameRadii && hasSameCenter && hasSameAngleRange && hasSymmetricalAngle);
+    }
+  };
+
+  void getTableShapes();
+  void getViewportParams(const std::string &, std::map<std::string, std::vector<double>> &);
+  void getWedgeParams(const std::vector<std::string> &, const std::map<std::string, std::vector<double>> &);
+  bool checkIfSymetricalWedge(Wedge &Wedge);
+  void checkIfSuperposedWedges();
 
   std::vector<std::vector<std::vector<double>>> m_intensities;
   std::vector<std::vector<std::vector<double>>> m_errors;
   std::vector<std::vector<std::vector<double>>> m_normalisation;
   std::vector<double> m_qBinEdges;
   size_t m_nQ;
-  size_t m_nLambda;
+  size_t m_nBins;
   size_t m_nWedges;
+
+  std::vector<Wedge> m_wedgesParameters;
+
   size_t m_nSpec;
   int m_nSubPixels;
-  double m_wedgeFullAngle;
-  double m_wedgeOffset;
-  double m_wedgeAngle;
   double m_pixelSizeY;
   double m_pixelSizeX;
   bool m_asymmWedges;
   bool m_errorWeighting;
   bool m_correctGravity;
+  bool m_isMonochromatic;
 
   /// Initialisation code
   void init() override;
   /// Execution code
   void exec() override;
 };
-
 } // namespace Algorithms
 } // namespace Mantid

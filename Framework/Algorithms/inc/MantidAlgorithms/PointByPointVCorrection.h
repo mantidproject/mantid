@@ -43,11 +43,9 @@ private:
   // Overridden Algorithm methods
   void init() override;
   void exec() override;
-  void check_validity(API::MatrixWorkspace_const_sptr &w1,
-                      API::MatrixWorkspace_const_sptr &w2,
+  void check_validity(API::MatrixWorkspace_const_sptr &w1, API::MatrixWorkspace_const_sptr &w2,
                       API::MatrixWorkspace_sptr &out);
-  void check_masks(const API::MatrixWorkspace_const_sptr &w1,
-                   const API::MatrixWorkspace_const_sptr &w2,
+  void check_masks(const API::MatrixWorkspace_const_sptr &w1, const API::MatrixWorkspace_const_sptr &w2,
                    const int &index) const;
 };
 

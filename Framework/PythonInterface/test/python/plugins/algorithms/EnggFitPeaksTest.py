@@ -262,7 +262,7 @@ class EnggFitPeaksTest(unittest.TestCase):
         except RuntimeError as e:
             error_msg = e.args[0].split("\n")[0]
 
-        self.assertEqual(error_msg, "Expected peak centres lie outside the limits of the workspace x axis")
+        self.assertEqual(error_msg, "EnggFitPeaks-v1: Expected peak centres lie outside the limits of the workspace x axis")
 
     def test_expected_peaks_can_be_in_tof(self):
         """

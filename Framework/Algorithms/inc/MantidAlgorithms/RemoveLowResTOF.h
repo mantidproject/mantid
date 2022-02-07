@@ -21,9 +21,7 @@ public:
   int version() const override;
   const std::string category() const override;
   /// Summary of algorithms purpose
-  const std::string summary() const override {
-    return "Removes low resolution Time of Flight data.";
-  }
+  const std::string summary() const override { return "Removes low resolution Time of Flight data."; }
 
 private:
   void init() override;

@@ -20,13 +20,13 @@ namespace API {
 
   @date 2012-02-17
 */
+
 class DLLExport OptionsPropertyWidget : public PropertyWidget {
   Q_OBJECT
 
 public:
-  OptionsPropertyWidget(Mantid::Kernel::Property *prop,
-                        QWidget *parent = nullptr,
-                        QGridLayout *layout = nullptr, int row = -1);
+  OptionsPropertyWidget(Mantid::Kernel::Property *prop, QWidget *parent = nullptr, QGridLayout *layout = nullptr,
+                        int row = -1);
   ~OptionsPropertyWidget() override;
   QString getValue() const override;
   void setValueImpl(const QString &value) override;
@@ -40,6 +40,9 @@ protected:
 
   /// Combo box with the allowed options
   QComboBox *m_combo;
+
+public slots:
+  void editingFinished();
 };
 
 } // namespace API

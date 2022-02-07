@@ -1,0 +1,59 @@
+digraph PowderReduceP2D {
+  label="PowderReduceP2D Flowchart"
+  $global_style
+
+  subgraph params {
+    $param_style
+    SampleData
+    CalibrationFile
+    OutputP2dFile
+  }
+
+  subgraph algorithms {
+    $algorithm_style
+    ProcessSampleRun    [label="Process Sample Run\n(see workflow diagram)"]
+    ProcessCanRun       [label="Process Container Run\n(see workflow diagram)"]
+    Minus               [label="Substract Container Run\nfrom Sample Run\nusing Minus v1."]
+    processVanRun       [label="Process Vanadium Run\n(see workflow diagram)"]
+    Divide              [label="Divide Sample Run\nby Vanadium Run\nusing Divide v1."]
+    resetNegatives2D    [label="ResetNegatives2D v1"]
+    SaveP2D             [label="Create p2d File"]
+  }
+
+
+  subgraph decisions{
+    $decision_style
+    isCanRunDefined [label="Is container run\nspecified?"]
+    isVanRunDefined [label="Is Vanadium run\nspecified?"]
+    mustDataPositive [label="Does data have to\nbe positive?"]
+  }
+
+
+  subgraph values {
+    $value_style
+    SamRun [label="Processed\nSample"]
+  }
+
+  SampleData	    -> ProcessSampleRun
+  CalibrationFile   -> ProcessSampleRun
+
+  ProcessSampleRun  -> SamRun
+  SamRun            -> isCanRunDefined
+
+  isCanRunDefined   -> isVanRunDefined	[label="No"]
+  isCanRunDefined   -> ProcessCanRun	[label="Yes"]
+  ProcessCanRun	    -> Minus
+  Minus             -> isVanRunDefined
+
+  isVanRunDefined   -> mustDataPositive	[label="No"]
+  isVanRunDefined   -> processVanRun	[label="Yes"]
+  processVanRun	    -> Divide
+  Divide            -> mustDataPositive
+
+  mustDataPositive  -> resetNegatives2D [label="Yes"]
+  resetNegatives2D  -> SaveP2D
+  mustDataPositive  -> SaveP2D  [label="No"]
+  SaveP2D	        -> OutputP2dFile
+
+
+}

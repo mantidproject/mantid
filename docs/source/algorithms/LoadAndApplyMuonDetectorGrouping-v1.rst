@@ -16,7 +16,7 @@ The analysis is performed via the :ref:`algm-ApplyMuonDetectorGrouping` and :ref
 Analysis
 ########
 
-All the grouping information (the groupings of detector IDs, and the pairs of groups) is loaded from the XML file specified by the **Filename** property. This information specifies how to perform grouping/pairing analysis on the contents of **InputWorkspace**, which are saved to **WorkspaceGroup**. 
+All the grouping information (the groupings of detector IDs, and the pairs of groups) is loaded from the XML file specified by the **Filename** property. This information specifies how to perform grouping/pairing analysis on the contents of **InputWorkspace**, which are saved to **WorkspaceGroup**.
 
 If WorkspaceGroup is not specified then the default format is "<INSTRUMENT><RUN NUMBER>" where for example if the data is from the "EMU" instrument for run number "12345" the name would be "EMU00012345", with the run numbers padded by zero up to 8 digits. If the instrument is not recognized (e.g. "LHC") run numbers below 100 are padded to three digits with zeros, so for run number 10 this would be "LHC010".
 
@@ -62,7 +62,7 @@ Usage
 
 .. testcode:: ExMUSRPairAsymmetry
 
-    
+
 
 
 Output:
@@ -75,25 +75,25 @@ Output:
 	# Create the workspace group in which the analysed workspaces will be placed
 	ws = CreateSampleWorkspace()
 	wsGroup = GroupWorkspaces("ws")
-	RenameWorkspace(  
-					  InputWorkspace="wsGroup", 
-					  OutputWorkspace='MUSR00015189', 
+	RenameWorkspace(
+					  InputWorkspace="wsGroup",
+					  OutputWorkspace='MUSR00015189',
 					  OverwriteExisting=True)
 
 	# Load the data
-	LoadMuonNexus(  Filename='MUSR00015189.nxs', 
+	LoadMuonNexus(  Filename='MUSR00015189.nxs',
 					OutputWorkspace='MuonAnalysis')
 
 	LoadAndApplyMuonDetectorGrouping(
-		Filename='MUSRGrouping.xml', 
-		InputWorkspace='MuonAnalysis', 
-		WorkspaceGroup='MUSR00015189', 
+		Filename='MUSRGrouping.xml',
+		InputWorkspace='MuonAnalysis',
+		WorkspaceGroup='MUSR00015189',
 		ApplyAsymmetryToGroups=False)
-		
-	
+
+
 	MUSR_asym = mtd["MUSR00015189; Pair; long; Asym; #1"]
 
-	
+
 	print(map('{0:.2f}'.format, MUSR_asym.readY(0)[1:10]))
 
 Output:

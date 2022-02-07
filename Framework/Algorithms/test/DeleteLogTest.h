@@ -9,8 +9,8 @@
 #include <cxxtest/TestSuite.h>
 
 #include "MantidAlgorithms/DeleteLog.h"
+#include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidKernel/TimeSeriesProperty.h"
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
 class DeleteLogTest : public CxxTest::TestSuite {
 public:
@@ -78,7 +78,6 @@ public:
   void test_empty_log_name_throws_invalid_argument() {
     Mantid::Algorithms::DeleteLog alg;
     alg.initialize();
-    TS_ASSERT_THROWS(alg.setProperty("Name", ""),
-                     const std::invalid_argument &);
+    TS_ASSERT_THROWS(alg.setProperty("Name", ""), const std::invalid_argument &);
   }
 };

@@ -17,8 +17,7 @@
 #include <Poco/File.h>
 #include <Poco/Path.h>
 
-namespace Mantid {
-namespace DataHandling {
+namespace Mantid::DataHandling {
 namespace {
 /// static logger
 Kernel::Logger g_log("ISISDataArchive");
@@ -42,9 +41,8 @@ const char *URL_PREFIX = "http://data.isis.rl.ac.uk/where.py/unixdir?name=";
  * @param exts :: A vector of file extensions to search over.
  * @returns The full path to the first found
  */
-std::string
-ISISDataArchive::getArchivePath(const std::set<std::string> &filenames,
-                                const std::vector<std::string> &exts) const {
+std::string ISISDataArchive::getArchivePath(const std::set<std::string> &filenames,
+                                            const std::vector<std::string> &exts) const {
   if (g_log.is(Kernel::Logger::Priority::PRIO_DEBUG)) {
     for (const auto &filename : filenames) {
       g_log.debug() << filename << ")\n";
@@ -89,8 +87,7 @@ std::string ISISDataArchive::getPath(const std::string &fName) const {
  * @return ostringstream object containing path to file (without filename
  * itself)
  */
-std::ostringstream
-ISISDataArchive::sendRequest(const std::string &fName) const {
+std::ostringstream ISISDataArchive::sendRequest(const std::string &fName) const {
   Kernel::InternetHelper inetHelper;
   std::ostringstream os;
   try {
@@ -110,8 +107,7 @@ ISISDataArchive::sendRequest(const std::string &fName) const {
  * @return The full path to the file or an empty string in case of
  * error/non-existing file.
  */
-std::string ISISDataArchive::getCorrectExtension(
-    const std::string &path, const std::vector<std::string> &exts) const {
+std::string ISISDataArchive::getCorrectExtension(const std::string &path, const std::vector<std::string> &exts) const {
   for (const auto &ext : exts) {
     std::string temp_path = path + ext;
     if (fileExists(temp_path))
@@ -136,5 +132,4 @@ bool ISISDataArchive::fileExists(const std::string &path) const {
   return false;
 }
 
-} // namespace DataHandling
-} // namespace Mantid
+} // namespace Mantid::DataHandling

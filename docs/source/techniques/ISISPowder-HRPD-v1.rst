@@ -55,7 +55,7 @@ The following methods can be executed on an HRPD object:
 - :ref:`create_vanadium_hrpd_isis-powder-diffraction-ref`
 - :ref:`focus_hrpd_isis-powder-diffraction-ref`
 - :ref:`set_sample_hrpd_isis-powder-diffraction-ref`
-  
+
 .. _create_vanadium_hrpd_isis-powder-diffraction-ref:
 
 create_vanadium
@@ -73,7 +73,7 @@ On HRPD the following parameters are required when executing
 - :ref:`do_absorb_corrections_hrpd_isis-powder-diffraction-ref`
 - :ref:`first_cycle_run_no_hrpd_isis-powder-diffraction-ref`
 - :ref:`window_hrpd_isis-powder-diffraction-ref`
-  
+
 If :ref:`do_absorb_corrections_hrpd_isis-powder-diffraction-ref` is set to
 **True** the following parameter is required in addition to the above:
 
@@ -95,7 +95,7 @@ Example
                                first_cycle_run_no=66058, window="10-110",
 			       do_absorb_correction=True,
 			       multiple_scattering=False)
-  
+
 .. _focus_hrpd_isis-powder-diffraction-ref:
 
 focus
@@ -142,7 +142,7 @@ Example
                      vanadium_normalisation=True, do_absorb_corrections=True,
 		     sample_empty=66829, sample_empty_scale=1,
 		     multiple_scattering=False, window="10-110")
-  
+
 .. _set_sample_hrpd_isis-powder-diffraction-ref:
 
 set_sample
@@ -171,8 +171,8 @@ Example
   hrpd_example.set_sample(sample=sample_obj)
 
 
-.. _calibration_mapping_hrpd_isis-powder-diffraction-ref: 
-  
+.. _calibration_mapping_hrpd_isis-powder-diffraction-ref:
+
 Calibration Mapping File
 ------------------------
 The calibration mapping file holds the mapping between run numbers,
@@ -290,7 +290,7 @@ Example Input:
   hrpd_example.create_vanadium(do_absorb_corrections=True, ...)
   # Or (this assumes sample details have already been set)
   hrpd_example.focus(do_absorb_corrections=True, ...)
-  
+
 .. _first_cycle_run_no_hrpd_isis-powder-diffraction-ref:
 
 first_cycle_run_no
@@ -355,13 +355,13 @@ run_number
 Specifies the run number(s) to process when calling the
 :ref:`focus_hrpd_isis-powder-diffraction-ref` method.
 
-This parameter accepts a single value or a range 
+This parameter accepts a single value or a range
 of values with the following syntax:
 
-**-** : Indicates a range of runs inclusive 
+**-** : Indicates a range of runs inclusive
 (e.g. *1-10* would process 1, 2, 3....8, 9, 10)
 
-**,** : Indicates a gap between runs 
+**,** : Indicates a gap between runs
 (e.g. *1, 3, 5, 7* would process run numbers 1, 3, 5, 7)
 
 These can be combined like so:
@@ -393,7 +393,7 @@ This input uses the same syntax as
 *Note: If this is set to anything other than* **False**,
 :ref:`sample_empty_scale_hrpd_isis-powder-diffraction-ref` *must also
 be specified*
-     
+
 Example Input:
 
 ..  code-block:: python
@@ -466,8 +466,8 @@ Example Input
 
 ..code-block:: python
 
-  hrpd_example.create_vanadium(do_solid_angle_corrections=True, ...)  
-  hrpd_example.focus(do_solid_angle_corrections=True, ...)  
+  hrpd_example.create_vanadium(do_solid_angle_corrections=True, ...)
+  hrpd_example.focus(do_solid_angle_corrections=True, ...)
 
 .. _user_name_hrpd_isis-powder-diffraction-ref:
 
@@ -502,7 +502,7 @@ Example Input:
 ..  code-block:: python
 
   hrpd_example.focus(do_van_normalisation=True, ...)
-  
+
 .. _window_hrpd_isis-powder-diffraction-ref:
 
 window
@@ -551,7 +551,7 @@ On HRPD this is set to the following:
         -0.0007,  # Bank 2
         -0.0012   # Bank 3
   ]
-  
+
 focused_cropping_values
 ^^^^^^^^^^^^^^^^^^^^^^^
 
@@ -574,14 +574,14 @@ On HRPD this is set to the following:
         (1e4, 1.2e5),    # Bank 2
         (1.1e4, 1.15e5)  # Bank 3
   ]
-  
+
   # window = "30-130"
   focused_cropping_values = [
         (3e4, 1.3e5),      # Bank 1
         (2.84e4, 1.42e5),  # Bank 2
         (3e4, 1.37e5)      # Bank 3
   ]
-  
+
   # window = "100-200"
   focused_cropping_values = [
         (1e5, 2.02e5),    # Bank 1
@@ -597,7 +597,7 @@ On HRPD this is set to the following:
   ]
 
 .. _grouping_file_name_hrpd_isis-powder-diffraction-ref:
-  
+
 grouping_file_name
 ^^^^^^^^^^^^^^^^^^
 The name of the grouping calibration file which is located within the
@@ -610,7 +610,7 @@ is used when focusing the spectra into banks.
 On HRPD this is set to the following:
 
 ..  code-block:: python
-		 
+
   grouping_file_name = "hrpd_new_072_01_corr.cal"
 
 .. _nxs_filename_hrpd_isis-powder-diffraction-ref:
@@ -674,7 +674,7 @@ On HRPD this is set to the following:
 
   spline_coefficient = 70
 
-  
+
 vanadium_tof_cropping
 ^^^^^^^^^^^^^^^^^^^^^
 

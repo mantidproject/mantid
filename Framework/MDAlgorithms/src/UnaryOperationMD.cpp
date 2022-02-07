@@ -16,8 +16,7 @@ using namespace Mantid::Kernel;
 using namespace Mantid::API;
 using namespace Mantid::DataObjects;
 
-namespace Mantid {
-namespace MDAlgorithms {
+namespace Mantid::MDAlgorithms {
 
 //----------------------------------------------------------------------------------------------
 /// Algorithm's name for identification. @see Algorithm::name
@@ -27,20 +26,16 @@ const std::string UnaryOperationMD::name() const { return "UnaryOperationMD"; }
 int UnaryOperationMD::version() const { return 1; }
 
 /// Algorithm's category for identification. @see Algorithm::category
-const std::string UnaryOperationMD::category() const {
-  return "MDAlgorithms\\MDArithmetic";
-}
+const std::string UnaryOperationMD::category() const { return "MDAlgorithms\\MDArithmetic"; }
 
 //----------------------------------------------------------------------------------------------
 /** Initialize the algorithm's properties.
  */
 void UnaryOperationMD::init() {
-  declareProperty(std::make_unique<WorkspaceProperty<IMDWorkspace>>(
-                      inputPropName(), "", Direction::Input),
+  declareProperty(std::make_unique<WorkspaceProperty<IMDWorkspace>>(inputPropName(), "", Direction::Input),
                   "A MDEventWorkspace or MDHistoWorkspace on which to apply "
                   "the operation.");
-  declareProperty(std::make_unique<WorkspaceProperty<IMDWorkspace>>(
-                      outputPropName(), "", Direction::Output),
+  declareProperty(std::make_unique<WorkspaceProperty<IMDWorkspace>>(outputPropName(), "", Direction::Output),
                   "Name of the output MDEventWorkspace or MDHistoWorkspace.");
   this->initExtraProperties();
 }
@@ -62,7 +57,7 @@ void UnaryOperationMD::exec() {
     // Pass-through to the same function without "MD"
     std::string matrixAlg = this->name();
     matrixAlg = matrixAlg.substr(0, matrixAlg.size() - 2);
-    IAlgorithm_sptr alg = this->createChildAlgorithm(matrixAlg);
+    auto alg = createChildAlgorithm(matrixAlg);
     // Copy all properties from THIS to the non-MD version
     std::vector<Property *> props = this->getProperties();
     for (auto prop : props) {
@@ -83,8 +78,7 @@ void UnaryOperationMD::exec() {
 
   if (m_out != m_in) {
     // B = f(A) -> So first we clone A (lhs) into B
-    IAlgorithm_sptr clone =
-        this->createChildAlgorithm("CloneMDWorkspace", 0.0, 0.5, true);
+    auto clone = createChildAlgorithm("CloneMDWorkspace", 0.0, 0.5, true);
     clone->setProperty("InputWorkspace", m_in);
     clone->executeAsChildAlg();
     m_out = clone->getProperty("OutputWorkspace");
@@ -95,10 +89,8 @@ void UnaryOperationMD::exec() {
   if (!m_out)
     throw std::runtime_error("Error creating the output workspace");
 
-  IMDEventWorkspace_sptr m_out_event =
-      std::dynamic_pointer_cast<IMDEventWorkspace>(m_out);
-  MDHistoWorkspace_sptr m_out_histo =
-      std::dynamic_pointer_cast<MDHistoWorkspace>(m_out);
+  IMDEventWorkspace_sptr m_out_event = std::dynamic_pointer_cast<IMDEventWorkspace>(m_out);
+  MDHistoWorkspace_sptr m_out_histo = std::dynamic_pointer_cast<MDHistoWorkspace>(m_out);
 
   // Call the appropriate sub-function
   if (m_out_event)
@@ -106,15 +98,13 @@ void UnaryOperationMD::exec() {
   else if (m_out_histo)
     this->execHisto(m_out_histo);
   else {
-    throw std::runtime_error(
-        "Unexpected output workspace type. Expected MDEventWorkspace or "
-        "MDHistoWorkspace, got " +
-        m_out->id());
+    throw std::runtime_error("Unexpected output workspace type. Expected MDEventWorkspace or "
+                             "MDHistoWorkspace, got " +
+                             m_out->id());
   }
 
   // Give the output
   setProperty("OutputWorkspace", m_out);
 }
 
-} // namespace MDAlgorithms
-} // namespace Mantid
+} // namespace Mantid::MDAlgorithms

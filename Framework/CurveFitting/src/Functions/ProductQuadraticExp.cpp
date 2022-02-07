@@ -10,9 +10,7 @@
 #include "MantidCurveFitting/Functions/ProductFunction.h"
 #include "MantidCurveFitting/Functions/Quadratic.h"
 
-namespace Mantid {
-namespace CurveFitting {
-namespace Functions {
+namespace Mantid::CurveFitting::Functions {
 
 using namespace CurveFitting;
 
@@ -35,9 +33,7 @@ Calculate the 1D function derivatives.
 @param xValues : Domain x-values.
 @param nData : Number of elements.
 */
-void ProductQuadraticExp::functionDeriv1D(API::Jacobian *out,
-                                          const double *xValues,
-                                          const size_t nData) {
+void ProductQuadraticExp::functionDeriv1D(API::Jacobian *out, const double *xValues, const size_t nData) {
   const double A0 = getParameter("A0");
   const double A1 = getParameter("A1");
   const double A2 = getParameter("A2");
@@ -63,8 +59,7 @@ Evaluate the 1D function
 @param xValues : Domain x-values.
 @param nData : Number of elements.
 */
-void ProductQuadraticExp::function1D(double *out, const double *xValues,
-                                     const size_t nData) const {
+void ProductQuadraticExp::function1D(double *out, const double *xValues, const size_t nData) const {
   const double A0 = getParameter("A0");
   const double A1 = getParameter("A1");
   const double A2 = getParameter("A2");
@@ -72,11 +67,8 @@ void ProductQuadraticExp::function1D(double *out, const double *xValues,
   const double Lifetime = getParameter("Lifetime");
 
   for (size_t i = 0; i < nData; ++i) {
-    out[i] = (A0 + (A1 * xValues[i]) + (A2 * xValues[i] * xValues[i])) *
-             Height * std::exp(-xValues[i] / Lifetime);
+    out[i] = (A0 + (A1 * xValues[i]) + (A2 * xValues[i] * xValues[i])) * Height * std::exp(-xValues[i] / Lifetime);
   }
 }
 
-} // namespace Functions
-} // namespace CurveFitting
-} // namespace Mantid
+} // namespace Mantid::CurveFitting::Functions

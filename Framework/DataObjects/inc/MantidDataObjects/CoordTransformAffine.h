@@ -36,6 +36,11 @@ namespace DataObjects {
 class DLLExport CoordTransformAffine : public Mantid::API::CoordTransform {
 public:
   CoordTransformAffine(const size_t inD, const size_t outD);
+
+  CoordTransformAffine(const CoordTransformAffine &);
+  friend void swap(CoordTransformAffine &, CoordTransformAffine &);
+  CoordTransformAffine &operator=(CoordTransformAffine);
+
   CoordTransform *clone() const override;
   ~CoordTransformAffine() override;
   std::string toXMLString() const override;
@@ -44,18 +49,15 @@ public:
   const Mantid::Kernel::Matrix<coord_t> &getMatrix() const;
   Mantid::Kernel::Matrix<coord_t> makeAffineMatrix() const override;
   void setMatrix(const Mantid::Kernel::Matrix<coord_t> &newMatrix);
-  void buildOrthogonal(const Mantid::Kernel::VMD &origin,
-                       const std::vector<Mantid::Kernel::VMD> &axes,
+  void buildOrthogonal(const Mantid::Kernel::VMD &origin, const std::vector<Mantid::Kernel::VMD> &axes,
                        const Mantid::Kernel::VMD &scaling);
 
-  void buildNonOrthogonal(const Mantid::Kernel::VMD &origin,
-                          const std::vector<Mantid::Kernel::VMD> &axes,
+  void buildNonOrthogonal(const Mantid::Kernel::VMD &origin, const std::vector<Mantid::Kernel::VMD> &axes,
                           const Mantid::Kernel::VMD &scaling);
 
   void apply(const coord_t *inputVector, coord_t *outVector) const override;
 
-  static CoordTransformAffine *combineTransformations(CoordTransform *first,
-                                                      CoordTransform *second);
+  static CoordTransformAffine *combineTransformations(CoordTransform *first, CoordTransform *second);
 
 protected:
   /** Affine Matrix to perform the transformation. The matrix has inD+1 columns,

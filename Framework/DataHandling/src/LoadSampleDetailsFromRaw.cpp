@@ -16,8 +16,7 @@
 #include "LoadRaw/isisraw2.h"
 #include <cstdio> //MG: Required for gcc 4.4
 
-namespace Mantid {
-namespace DataHandling {
+namespace Mantid::DataHandling {
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
@@ -30,13 +29,11 @@ DECLARE_ALGORITHM(LoadSampleDetailsFromRaw)
  * Initialize the algorithm
  */
 void LoadSampleDetailsFromRaw::init() {
-  declareProperty(std::make_unique<WorkspaceProperty<>>("InputWorkspace", "",
-                                                        Direction::Input),
+  declareProperty(std::make_unique<WorkspaceProperty<>>("InputWorkspace", "", Direction::Input),
                   "The sample details are attached to this workspace.");
   const std::vector<std::string> exts{"raw", ".s*"};
-  declareProperty(
-      std::make_unique<FileProperty>("Filename", "", FileProperty::Load, exts),
-      "The raw file containing the sample geometry information.");
+  declareProperty(std::make_unique<FileProperty>("Filename", "", FileProperty::Load, exts),
+                  "The raw file containing the sample geometry information.");
 }
 
 /**
@@ -58,24 +55,18 @@ void LoadSampleDetailsFromRaw::exec() {
 
   // Pick out the geometry information
   data_ws->mutableSample().setGeometryFlag(isis_raw.spb.e_geom);
-  data_ws->mutableSample().setThickness(
-      static_cast<double>(isis_raw.spb.e_thick));
-  data_ws->mutableSample().setHeight(
-      static_cast<double>(isis_raw.spb.e_height));
+  data_ws->mutableSample().setThickness(static_cast<double>(isis_raw.spb.e_thick));
+  data_ws->mutableSample().setHeight(static_cast<double>(isis_raw.spb.e_height));
   data_ws->mutableSample().setWidth(static_cast<double>(isis_raw.spb.e_width));
 
   g_log.debug() << "Raw file sample details:\n"
                 << "\tsample geometry flag: " << isis_raw.spb.e_geom << "\n"
-                << "\tsample thickness: "
-                << data_ws->mutableSample().getThickness() << "\n"
-                << "\tsample height: " << data_ws->mutableSample().getHeight()
-                << "\n"
-                << "\tsample width: " << data_ws->mutableSample().getWidth()
-                << '\n';
+                << "\tsample thickness: " << data_ws->mutableSample().getThickness() << "\n"
+                << "\tsample height: " << data_ws->mutableSample().getHeight() << "\n"
+                << "\tsample width: " << data_ws->mutableSample().getWidth() << '\n';
 
   // Not much happens really
   progress(1.);
 }
 
-} // namespace DataHandling
-} // namespace Mantid
+} // namespace Mantid::DataHandling

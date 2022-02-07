@@ -43,8 +43,7 @@ class EXPORT_OPT_MANTIDQT_PLOTTING PreviewPlot : public QWidget {
 
   Q_PROPERTY(QColor canvasColour READ canvasColour WRITE setCanvasColour)
   Q_PROPERTY(bool showLegend READ legendIsVisible WRITE showLegend)
-  Q_PROPERTY(
-      QStringList curveErrorBars READ linesWithErrors WRITE setLinesWithErrors)
+  Q_PROPERTY(QStringList curveErrorBars READ linesWithErrors WRITE setLinesWithErrors)
 
 public:
   PreviewPlot(QWidget *parent = nullptr, bool observeADS = true);
@@ -57,25 +56,19 @@ public:
 
   void setTightLayout(QHash<QString, QVariant> const &args);
 
-  void addSpectrum(
-      const QString &lineLabel, const Mantid::API::MatrixWorkspace_sptr &ws,
-      const size_t wsIndex = 0, const QColor &lineColour = QColor(),
-      const QHash<QString, QVariant> &plotKwargs = QHash<QString, QVariant>());
-  void addSpectrum(
-      const QString &lineName, const QString &wsName, const size_t wsIndex = 0,
-      const QColor &lineColour = QColor(),
-      const QHash<QString, QVariant> &plotKwargs = QHash<QString, QVariant>());
+  void addSpectrum(const QString &lineLabel, const Mantid::API::MatrixWorkspace_sptr &ws, const size_t wsIndex = 0,
+                   const QColor &lineColour = QColor(),
+                   const QHash<QString, QVariant> &plotKwargs = QHash<QString, QVariant>());
+  void addSpectrum(const QString &lineName, const QString &wsName, const size_t wsIndex = 0,
+                   const QColor &lineColour = QColor(),
+                   const QHash<QString, QVariant> &plotKwargs = QHash<QString, QVariant>());
   void removeSpectrum(const QString &lineName);
 
-  RangeSelector *
-  addRangeSelector(const QString &name,
-                   RangeSelector::SelectType type = RangeSelector::XMINMAX);
+  RangeSelector *addRangeSelector(const QString &name, RangeSelector::SelectType type = RangeSelector::XMINMAX);
   RangeSelector *getRangeSelector(const QString &name) const;
 
-  SingleSelector *
-  addSingleSelector(const QString &name,
-                    SingleSelector::SelectType type = SingleSelector::XSINGLE,
-                    double position = 0.0);
+  SingleSelector *addSingleSelector(const QString &name, SingleSelector::SelectType type = SingleSelector::XSINGLE,
+                                    double position = 0.0);
   SingleSelector *getSingleSelector(const QString &name) const;
 
   void setSelectorActive(bool active);
@@ -84,11 +77,12 @@ public:
   bool hasCurve(const QString &lineName) const;
 
   void setOverrideAxisLabel(AxisID const &axisID, char const *const label);
-
-  void setAxisRange(const QPair<double, double> &range,
-                    AxisID axisID = AxisID::XBottom);
+  void tickLabelFormat(char *axis, char *style, bool useOffset);
+  void setAxisRange(const QPair<double, double> &range, AxisID axisID = AxisID::XBottom);
   std::tuple<double, double> getAxisRange(AxisID axisID = AxisID::XBottom);
-  void disableContextMenu();
+
+  void allowRedraws(bool state);
+  void replotData();
 
 public slots:
   void clear();
@@ -96,6 +90,7 @@ public slots:
   void resetView();
   void setCanvasColour(const QColor &colour);
   void setLinesWithErrors(const QStringList &labels);
+  void setLinesWithoutErrors(const QStringList &labels);
   void showLegend(bool visible);
   void replot();
 
@@ -127,8 +122,7 @@ private:
   void createActions();
 
   void onWorkspaceRemoved(Mantid::API::WorkspacePreDeleteNotification_ptr nf);
-  void
-  onWorkspaceReplaced(Mantid::API::WorkspaceBeforeReplaceNotification_ptr nf);
+  void onWorkspaceReplaced(Mantid::API::WorkspaceBeforeReplaceNotification_ptr nf);
 
   void regenerateLegend();
   void removeLegend();
@@ -136,16 +130,37 @@ private:
   void switchPlotTool(QAction *selected);
   void setXScaleType(QAction *selected);
   void setYScaleType(QAction *selected);
+  void setErrorBars(QAction *selected);
   void setScaleType(AxisID id, const QString &actionName);
   void toggleLegend(const bool checked);
 
   boost::optional<char const *> overrideAxisLabel(AxisID const &axisID);
   void setAxisLabel(AxisID const &axisID, char const *const label);
 
+  // Block redrawing from taking place
+  bool m_allowRedraws = true;
+
+  // Curve configuration
+  struct PlotCurveConfiguration {
+    Mantid::API::MatrixWorkspace_sptr ws;
+    QString lineName;
+    size_t wsIndex;
+    QColor lineColour;
+    QHash<QString, QVariant> plotKwargs;
+
+    PlotCurveConfiguration(Mantid::API::MatrixWorkspace_sptr ws, QString lineName, size_t wsIndex, QColor lineColour,
+                           QHash<QString, QVariant> plotKwargs)
+        : ws(ws), lineName(lineName), wsIndex(wsIndex), lineColour(lineColour), plotKwargs(plotKwargs){};
+  };
+
   // Canvas objects
   Widgets::MplCpp::FigureCanvasQt *m_canvas;
   // Map a line label to the boolean indicating whether error bars are shown
   QHash<QString, bool> m_lines;
+  // Map a line name to a plot configuration
+  QMap<QString, QSharedPointer<PlotCurveConfiguration>> m_plottedLines;
+  // Cache of line names which always have errors
+  QHash<QString, bool> m_linesErrorsCache;
   // Map an axis to an override axis label
   QMap<AxisID, char const *> m_axisLabels;
   // Range selector widgets
@@ -159,17 +174,24 @@ private:
   Widgets::MplCpp::PanZoomTool m_panZoomTool;
 
   // Observers for ADS Notifications
-  Poco::NObserver<PreviewPlot, Mantid::API::WorkspacePreDeleteNotification>
-      m_wsRemovedObserver;
-  Poco::NObserver<PreviewPlot, Mantid::API::WorkspaceBeforeReplaceNotification>
-      m_wsReplacedObserver;
+  Poco::NObserver<PreviewPlot, Mantid::API::WorkspacePreDeleteNotification> m_wsRemovedObserver;
+  Poco::NObserver<PreviewPlot, Mantid::API::WorkspaceBeforeReplaceNotification> m_wsReplacedObserver;
+
+  // Tick label style
+  char *m_axis;
+  char *m_style;
+  bool m_useOffset;
+
+  // Axis scales
+  std::string m_xAxisScale;
+  std::string m_yAxisScale;
 
   // Context menu actions
   QActionGroup *m_contextPlotTools;
   QAction *m_contextResetView;
   QActionGroup *m_contextXScale, *m_contextYScale;
   QAction *m_contextLegend;
-  bool m_context_enabled;
+  QActionGroup *m_contextErrorBars;
 };
 
 } // namespace MantidWidgets

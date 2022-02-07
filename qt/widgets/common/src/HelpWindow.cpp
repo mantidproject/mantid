@@ -16,8 +16,7 @@
 #include <QWidget>
 #include <boost/lexical_cast.hpp>
 
-namespace MantidQt {
-namespace API {
+namespace MantidQt::API {
 namespace {
 /// static logger
 Mantid::Kernel::Logger g_log("HelpWindow");
@@ -40,9 +39,7 @@ void connectParent(MantidHelpInterface *gui, QWidget *parent) {
 
 using std::string;
 
-void HelpWindow::showPage(QWidget *parent, const std::string &url) {
-  showPage(parent, QString(url.c_str()));
-}
+void HelpWindow::showPage(QWidget *parent, const std::string &url) { showPage(parent, QString(url.c_str())); }
 
 void HelpWindow::showPage(QWidget *parent, const QString &url) {
   InterfaceManager interfaceManager;
@@ -51,8 +48,7 @@ void HelpWindow::showPage(QWidget *parent, const QString &url) {
     connectParent(gui, parent);
     gui->showPage(url);
   } else {
-    g_log.error() << "Failed to launch help for page " << url.toStdString()
-                  << "\n";
+    g_log.error() << "Failed to launch help for page " << url.toStdString() << "\n";
   }
 }
 
@@ -63,18 +59,15 @@ void HelpWindow::showPage(QWidget *parent, const QUrl &url) {
     connectParent(gui, parent);
     gui->showPage(url);
   } else {
-    g_log.error() << "Failed to launch help for page "
-                  << url.toString().toStdString() << "\n";
+    g_log.error() << "Failed to launch help for page " << url.toString().toStdString() << "\n";
   }
 }
 
-void HelpWindow::showAlgorithm(QWidget *parent, const std::string &name,
-                               const int version) {
+void HelpWindow::showAlgorithm(QWidget *parent, const std::string &name, const int version) {
   showAlgorithm(parent, QString(name.c_str()), version);
 }
 
-void HelpWindow::showAlgorithm(QWidget *parent, const QString &name,
-                               const int version) {
+void HelpWindow::showAlgorithm(QWidget *parent, const QString &name, const int version) {
   InterfaceManager interfaceManager;
   MantidHelpInterface *gui = interfaceManager.createHelpWindow();
   if (gui) {
@@ -89,9 +82,7 @@ void HelpWindow::showAlgorithm(QWidget *parent, const QString &name,
   }
 }
 
-void HelpWindow::showConcept(QWidget *parent, const std::string &name) {
-  showConcept(parent, QString(name.c_str()));
-}
+void HelpWindow::showConcept(QWidget *parent, const std::string &name) { showConcept(parent, QString(name.c_str())); }
 
 void HelpWindow::showConcept(QWidget *parent, const QString &name) {
   InterfaceManager interfaceManager;
@@ -100,8 +91,7 @@ void HelpWindow::showConcept(QWidget *parent, const QString &name) {
     connectParent(gui, parent);
     gui->showConcept(name);
   } else {
-    g_log.error() << "Failed to launch help for concept " << name.toStdString()
-                  << "\n";
+    g_log.error() << "Failed to launch help for concept " << name.toStdString() << "\n";
   }
 }
 
@@ -116,27 +106,29 @@ void HelpWindow::showFitFunction(QWidget *parent, const std::string &name) {
   }
 }
 
-void HelpWindow::showCustomInterface(QWidget *parent, const std::string &name,
+void HelpWindow::showCustomInterface(QWidget *parent, const std::string &name, const std::string &area,
                                      const std::string &section) {
-  showCustomInterface(parent, QString::fromStdString(name),
+  showCustomInterface(parent, QString::fromStdString(name), QString::fromStdString(area),
                       QString::fromStdString(section));
 }
 
-void HelpWindow::showCustomInterface(QWidget *parent, const QString &name,
+void HelpWindow::showCustomInterface(QWidget *parent, const QString &name, const QString &area,
                                      const QString &section) {
   InterfaceManager interfaceManager;
   MantidHelpInterface *gui = interfaceManager.createHelpWindow();
   if (gui) {
     connectParent(gui, parent);
-    gui->showCustomInterface(name, section);
+    gui->showCustomInterface(name, area, section);
   } else {
     // Open online help
     QString baseUrl = "https://docs.mantidproject.org/interfaces/";
+    if (!area.toStdString().empty()) {
+      baseUrl += area + "/";
+    }
     QString url = baseUrl + name + ".html";
     MantidDesktopServices::openUrl(QUrl(url));
     g_log.debug("Opening online help page:\n" + url.toStdString());
   }
 }
 
-} // namespace API
-} // namespace MantidQt
+} // namespace MantidQt::API

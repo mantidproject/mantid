@@ -55,8 +55,7 @@ public:
       auto constraint = static_cast<BConstraint *>(func->getConstraint(i));
       TS_ASSERT(constraint);
       TS_ASSERT_EQUALS(constraint->hasLower(), true);
-      TS_ASSERT_EQUALS(constraint->lower(),
-                       std::numeric_limits<double>::epsilon());
+      TS_ASSERT_EQUALS(constraint->lower(), std::numeric_limits<double>::epsilon());
     }
   }
 
@@ -71,9 +70,7 @@ public:
 private:
   class TestableElasticIsoRotDiff : public ElasticIsoRotDiff {
   public:
-    double HeightPrefactor() const override {
-      return ElasticIsoRotDiff::HeightPrefactor();
-    }
+    double HeightPrefactor() const override { return ElasticIsoRotDiff::HeightPrefactor(); }
   };
 
   std::shared_ptr<TestableElasticIsoRotDiff> createTestElasticIsoRotDiff() {

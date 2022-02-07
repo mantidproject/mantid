@@ -34,6 +34,8 @@ public:
 
   MaterialBuilder &setNumberDensity(double rho);
   MaterialBuilder &setNumberDensityUnit(NumberDensityUnit unit);
+  MaterialBuilder &setEffectiveNumberDensity(double rho_eff);
+  MaterialBuilder &setPackingFraction(double fraction);
   MaterialBuilder &setZParameter(double zparam);
   MaterialBuilder &setUnitCellVolume(double cellVolume);
   MaterialBuilder &setMassDensity(double massDensity);
@@ -43,6 +45,7 @@ public:
   MaterialBuilder &setIncoherentXSection(double xsec);
   MaterialBuilder &setAbsorptionXSection(double xsec);
   MaterialBuilder &setAttenuationProfileFilename(std::string filename);
+  MaterialBuilder &setXRayAttenuationProfileFilename(std::string filename);
 
   void setAttenuationSearchPath(std::string path);
 
@@ -57,17 +60,25 @@ private:
 
   // Material::ChemicalFormula createCompositionFromFormula() const;
   Material::ChemicalFormula createCompositionFromAtomicNumber() const;
-  double getOrCalculateRho(const Material::ChemicalFormula &formula) const;
+
+  struct density_packing {
+    double number_density;
+    double effective_number_density;
+    double packing_fraction;
+  };
+  density_packing getOrCalculateRhoAndPacking(const Material::ChemicalFormula &formula) const;
 
   std::string m_name;
   Material::ChemicalFormula m_formula;
   boost::optional<int> m_atomicNo;
   int m_massNo;
-  boost::optional<double> m_numberDensity, m_zParam, m_cellVol, m_massDensity;
-  boost::optional<double> m_totalXSection, m_cohXSection, m_incXSection,
-      m_absSection;
+  boost::optional<double> m_numberDensity, m_packingFraction;
+  boost::optional<double> m_numberDensityEff;
+  boost::optional<double> m_zParam, m_cellVol, m_massDensity;
+  boost::optional<double> m_totalXSection, m_cohXSection, m_incXSection, m_absSection;
   NumberDensityUnit m_numberDensityUnit;
   boost::optional<std::string> m_attenuationProfileFileName;
+  boost::optional<std::string> m_xRayAttenuationProfileFileName;
   std::string m_attenuationFileSearchPath;
 };
 

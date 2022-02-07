@@ -21,12 +21,12 @@ If the LogText contains a numeric value, the created log will be of
 integer type if an integer is passed and floating point (double)
 otherwise. This applies to both the Number & Number Series options.
 
-The algorithm can be forced to create a log of integer or floating point 
-type by using the optional NumberType property as 'Int' or 'Double'. For 
-example, with NumberType='Double' the log for LogText='12' would be 
+The algorithm can be forced to create a log of integer or floating point
+type by using the optional NumberType property as 'Int' or 'Double'. For
+example, with NumberType='Double' the log for LogText='12' would be
 created as a floating point (double) rather than an integer. NumberType defaults
 to 'AutoDetect' which decides whether to use integer or floating point based
-on the format of the string, e.g. LogText='12' would create an integer type 
+on the format of the string, e.g. LogText='12' would create an integer type
 log and LogText='12.0' would create a floating point type log.
 
 To add logs that vary over time (Time Series Logs) use :ref:`algm-AddTimeSeriesLog`.
@@ -59,7 +59,7 @@ Usage
 
 Output:
 
-.. testoutput:: AddSampleLogExample 
+.. testoutput:: AddSampleLogExample
 
   hello world
   1

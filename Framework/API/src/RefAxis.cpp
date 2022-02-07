@@ -7,16 +7,14 @@
 #include "MantidAPI/RefAxis.h"
 #include "MantidAPI/MatrixWorkspace.h"
 
-namespace Mantid {
-namespace API {
+namespace Mantid::API {
 
 /** Constructor
  *  @param parentWorkspace :: A pointer to the workspace that holds this axis
  */
 // NumericAxis is set to length 0 since we do not need its internal storage. We
 // override public functions of NumericAxis that would access it.
-RefAxis::RefAxis(const MatrixWorkspace *const parentWorkspace)
-    : NumericAxis(0), m_parentWS(parentWorkspace) {}
+RefAxis::RefAxis(const MatrixWorkspace *const parentWorkspace) : NumericAxis(0), m_parentWS(parentWorkspace) {}
 
 /** Private, specialised copy constructor. Needed because it's necessary to pass
  * in
@@ -26,8 +24,7 @@ RefAxis::RefAxis(const MatrixWorkspace *const parentWorkspace)
  *  @param right :: The axis to copy
  *  @param parentWorkspace :: A pointer to the parent workspace of the new axis
  */
-RefAxis::RefAxis(const RefAxis &right,
-                 const MatrixWorkspace *const parentWorkspace)
+RefAxis::RefAxis(const RefAxis &right, const MatrixWorkspace *const parentWorkspace)
     : NumericAxis(right), m_parentWS(parentWorkspace) {}
 
 /** Virtual constructor
@@ -35,12 +32,9 @@ RefAxis::RefAxis(const RefAxis &right,
  * axis
  *  @return A pointer to a copy of the Axis on which the method is called
  */
-Axis *RefAxis::clone(const MatrixWorkspace *const parentWorkspace) {
-  return new RefAxis(*this, parentWorkspace);
-}
+Axis *RefAxis::clone(const MatrixWorkspace *const parentWorkspace) { return new RefAxis(*this, parentWorkspace); }
 
-Axis *RefAxis::clone(const std::size_t length,
-                     const MatrixWorkspace *const parentWorkspace) {
+Axis *RefAxis::clone(const std::size_t length, const MatrixWorkspace *const parentWorkspace) {
   static_cast<void>(length);
   return clone(parentWorkspace);
 }
@@ -57,12 +51,10 @@ std::size_t RefAxis::length() const { return m_parentWS->x(0).size(); }
  *  @throw  std::range_error If 'verticalIndex' is not in the range of the
  * parent workspace
  */
-double RefAxis::operator()(const std::size_t &index,
-                           const std::size_t &verticalIndex) const {
+double RefAxis::operator()(const std::size_t &index, const std::size_t &verticalIndex) const {
   const auto &x = m_parentWS->x(verticalIndex);
   if (index >= x.size()) {
-    throw Kernel::Exception::IndexError(index, x.size() - 1,
-                                        "Axis: Index out of range.");
+    throw Kernel::Exception::IndexError(index, x.size() - 1, "Axis: Index out of range.");
   }
   return x[index];
 }
@@ -94,8 +86,7 @@ bool RefAxis::operator==(const Axis &axis2) const {
  *  @param tolerance :: Tolerance to compare to
  *  @return true if self and second axis are equal
  */
-bool RefAxis::equalWithinTolerance(const Axis &axis2,
-                                   const double tolerance) const {
+bool RefAxis::equalWithinTolerance(const Axis &axis2, const double tolerance) const {
   UNUSED_ARG(tolerance);
   return this->operator==(axis2);
 }
@@ -106,8 +97,7 @@ size_t RefAxis::indexOfValue(const double value) const {
 }
 
 std::vector<double> RefAxis::createBinBoundaries() const {
-  throw std::runtime_error(
-      "Calling createBinBoundaries() on RefAxis is forbidden.");
+  throw std::runtime_error("Calling createBinBoundaries() on RefAxis is forbidden.");
 }
 
 const std::vector<double> &RefAxis::getValues() const {
@@ -123,5 +113,4 @@ double RefAxis::getMax() const {
                            "on the workspace instead");
 }
 
-} // namespace API
-} // namespace Mantid
+} // namespace Mantid::API

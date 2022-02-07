@@ -11,21 +11,16 @@
 #include "IEventView.h"
 #include <boost/algorithm/string.hpp>
 
-namespace MantidQt {
-namespace CustomInterfaces {
-namespace ISISReflectometry {
+namespace MantidQt::CustomInterfaces::ISISReflectometry {
 
 /** Constructor
  * @param view :: The view we are handling
  */
-EventPresenter::EventPresenter(IEventView *view)
-    : m_view(view), m_sliceType(SliceType::None) {
+EventPresenter::EventPresenter(IEventView *view) : m_view(view), m_sliceType(SliceType::None) {
   m_view->subscribe(this);
 }
 
-void EventPresenter::acceptMainPresenter(IBatchPresenter *mainPresenter) {
-  m_mainPresenter = mainPresenter;
-}
+void EventPresenter::acceptMainPresenter(IBatchPresenter *mainPresenter) { m_mainPresenter = mainPresenter; }
 
 Slicing const &EventPresenter::slicing() const { return m_slicing; }
 
@@ -81,9 +76,7 @@ void EventPresenter::notifyReductionResumed() { updateWidgetEnabledState(); }
 
 void EventPresenter::notifyAutoreductionPaused() { updateWidgetEnabledState(); }
 
-void EventPresenter::notifyAutoreductionResumed() {
-  updateWidgetEnabledState();
-}
+void EventPresenter::notifyAutoreductionResumed() { updateWidgetEnabledState(); }
 
 void EventPresenter::setUniformSlicingByTimeFromView() {
   m_slicing = UniformSlicingByTime(m_view->uniformSliceLength());
@@ -94,8 +87,7 @@ void EventPresenter::setUniformSlicingByNumberOfSlicesFromView() {
 }
 
 void EventPresenter::setCustomSlicingFromView() {
-  auto maybeCustomBreakpoints =
-      parseList(m_view->customBreakpoints(), parseNonNegativeDouble);
+  auto maybeCustomBreakpoints = parseList(m_view->customBreakpoints(), parseNonNegativeDouble);
   if (maybeCustomBreakpoints.is_initialized()) {
     m_view->showCustomBreakpointsValid();
     m_slicing = CustomSlicingByList(maybeCustomBreakpoints.get());
@@ -106,8 +98,7 @@ void EventPresenter::setCustomSlicingFromView() {
 }
 
 void EventPresenter::setLogValueSlicingFromView() {
-  auto maybeBreakpoints =
-      parseList(m_view->logBreakpoints(), parseNonNegativeDouble);
+  auto maybeBreakpoints = parseList(m_view->logBreakpoints(), parseNonNegativeDouble);
   auto blockName = m_view->logBlockName();
   // Currently we don't support multiple log intervals, so for now if we have
   // more than one item in the list then show that as invalid. We intend to add
@@ -144,13 +135,7 @@ void EventPresenter::setSlicingFromView() {
   }
 }
 
-bool EventPresenter::isProcessing() const {
-  return m_mainPresenter->isProcessing();
-}
+bool EventPresenter::isProcessing() const { return m_mainPresenter->isProcessing(); }
 
-bool EventPresenter::isAutoreducing() const {
-  return m_mainPresenter->isAutoreducing();
-}
-} // namespace ISISReflectometry
-} // namespace CustomInterfaces
-} // namespace MantidQt
+bool EventPresenter::isAutoreducing() const { return m_mainPresenter->isAutoreducing(); }
+} // namespace MantidQt::CustomInterfaces::ISISReflectometry

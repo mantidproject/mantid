@@ -13,7 +13,7 @@ Description
 The algorithm calculates what part of the reciprocal space is covered by direct geometry spectrometers. It is supposed to be used
 in planning tools. The input workspace should contain the incident energy log, a goniometer, and the :ref:`UB matrix <Lattice>`. The
 incident energy can be overwritten by setting the IncidentEnergy parameter. The output is an MDHisto workspace. You can visualize it with
-SliceViewer.
+:ref:`sliceviewer`.
 
 
 The parameters Q1Basis, Q2Basis, Q3Basis can be used to look at different directions in the reciprocal space, such as [H,H,0]

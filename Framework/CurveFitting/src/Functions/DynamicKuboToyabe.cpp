@@ -5,6 +5,7 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidCurveFitting/Functions/DynamicKuboToyabe.h"
+
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/Jacobian.h"
 #include "MantidAPI/MatrixWorkspace.h"
@@ -14,19 +15,16 @@
 #include <sstream>
 #include <vector>
 
-namespace Mantid {
-namespace CurveFitting {
-namespace Functions {
-
-using namespace CurveFitting;
-
-using namespace Kernel;
+namespace Mantid::CurveFitting::Functions {
 
 using namespace API;
+using namespace CurveFitting;
+using namespace Kernel;
 
 DECLARE_FUNCTION(DynamicKuboToyabe)
 
 void DynamicKuboToyabe::init() {
+  declareAttribute("BinWidth", Attribute(m_eps));
   declareParameter("Asym", 0.2, "Amplitude at time 0");
   declareParameter("Delta", 0.2, "Local field");
   declareParameter("Field", 0.0, "External field");
@@ -37,9 +35,8 @@ void DynamicKuboToyabe::init() {
 // From Numerical Recipes
 
 // Midpoint method
-double midpnt(double func(const double, const double, const double),
-              const double a, const double b, const int n, const double g,
-              const double w0) {
+double midpnt(double func(const double, const double, const double), const double a, const double b, const int n,
+              const double g, const double w0) {
   // quote & modified from numerical recipe 2nd edtion (page147)
 
   static double s;
@@ -69,7 +66,7 @@ double midpnt(double func(const double, const double, const double),
 }
 
 // Polynomial interpolation
-void polint(double xa[], double ya[], int n, double x, double &y, double &dy) {
+void polint(double xa[], const double ya[], int n, double x, double &y, double &dy) {
   int i, m, ns = 1;
   double dif;
 
@@ -104,8 +101,7 @@ void polint(double xa[], double ya[], int n, double x, double &y, double &dy) {
 }
 
 // Integration
-double integral(double func(const double, const double, const double),
-                const double a, const double b, const double g,
+double integral(double func(const double, const double, const double), const double a, const double b, const double g,
                 const double w0) {
 
   const int JMAX = 14;
@@ -174,8 +170,7 @@ double HKT(const double x, const double G, const double F) {
     ig = 0;
   }
 
-  const double ktb =
-      (1 - 2 * r * (1 - exp(-q / 2) * cos(w * x)) + 2 * r * r * w * ig);
+  const double ktb = (1 - 2 * r * (1 - exp(-q / 2) * cos(w * x)) + 2 * r * r * w * ig);
 
   if (F > 2 * G) {
     // longitudinal Gaussian field
@@ -188,8 +183,7 @@ double HKT(const double x, const double G, const double F) {
 }
 
 // Dynamic Kubo-Toyabe
-double DynamicKuboToyabe::getDKT(double t, double G, double F, double v,
-                                 double eps) const {
+double DynamicKuboToyabe::getDKT(double t, double G, double F, double v, double eps) const {
 
   const auto tsmax = static_cast<int>(std::ceil(32.768 / eps));
 
@@ -252,8 +246,7 @@ double DynamicKuboToyabe::getDKT(double t, double G, double F, double v,
 }
 
 // Dynamic Kubo Toyabe function
-void DynamicKuboToyabe::function1D(double *out, const double *xValues,
-                                   const size_t nData) const {
+void DynamicKuboToyabe::function1D(double *out, const double *xValues, const size_t nData) const {
   const double &A = getParameter("Asym");
   const double &G = fabs(getParameter("Delta"));
   const double &F = fabs(getParameter("Field"));
@@ -288,25 +281,21 @@ void DynamicKuboToyabe::function1D(double *out, const double *xValues,
 //----------------------------------------------------------------------------------------------
 /** Constructor
  */
-DynamicKuboToyabe::DynamicKuboToyabe()
-    : m_eps(0.05), m_minEps(0.001), m_maxEps(0.1) {}
+DynamicKuboToyabe::DynamicKuboToyabe() : m_eps(0.05), m_minEps(0.001), m_maxEps(0.1) {}
 
 //----------------------------------------------------------------------------------------------
 /** Function to calculate derivative numerically
  */
-void DynamicKuboToyabe::functionDeriv(const API::FunctionDomain &domain,
-                                      API::Jacobian &jacobian) {
+void DynamicKuboToyabe::functionDeriv(const API::FunctionDomain &domain, API::Jacobian &jacobian) {
   calNumericalDeriv(domain, jacobian);
 }
 
 //----------------------------------------------------------------------------------------------
 /** Function to calculate derivative analytically
  */
-void DynamicKuboToyabe::functionDeriv1D(API::Jacobian * /*jacobian*/,
-                                        const double * /*xValues*/,
+void DynamicKuboToyabe::functionDeriv1D(API::Jacobian * /*jacobian*/, const double * /*xValues*/,
                                         const size_t /*nData*/) {
-  throw Mantid::Kernel::Exception::NotImplementedError(
-      "functionDeriv1D is not implemented for DynamicKuboToyabe.");
+  throw Mantid::Kernel::Exception::NotImplementedError("functionDeriv1D is not implemented for DynamicKuboToyabe.");
 }
 
 //----------------------------------------------------------------------------------------------
@@ -314,62 +303,32 @@ void DynamicKuboToyabe::functionDeriv1D(API::Jacobian * /*jacobian*/,
  * @param i :: parameter index
  * @param value :: new value
  */
-void DynamicKuboToyabe::setActiveParameter(size_t i, double value) {
-
-  setParameter(i, fabs(value), false);
-}
-
-//----------------------------------------------------------------------------------------------
-/** Get Attribute names
- * @return A list of attribute names
- */
-std::vector<std::string> DynamicKuboToyabe::getAttributeNames() const {
-  return {"BinWidth"};
-}
-
-//----------------------------------------------------------------------------------------------
-/** Get Attribute
- * @param attName :: Attribute name. If it is not "eps" an exception is thrown.
- * @return a value of attribute attName
- */
-API::IFunction::Attribute
-DynamicKuboToyabe::getAttribute(const std::string &attName) const {
-
-  if (attName == "BinWidth") {
-    return Attribute(m_eps);
-  }
-  throw std::invalid_argument("DynamicKuboToyabe: Unknown attribute " +
-                              attName);
-}
+void DynamicKuboToyabe::setActiveParameter(size_t i, double value) { setParameter(i, fabs(value), false); }
 
 //----------------------------------------------------------------------------------------------
 /** Set Attribute
  * @param attName :: The attribute name. If it is not "eps" exception is thrown.
  * @param att :: A double attribute containing a new positive value.
  */
-void DynamicKuboToyabe::setAttribute(const std::string &attName,
-                                     const API::IFunction::Attribute &att) {
+void DynamicKuboToyabe::setAttribute(const std::string &attName, const API::IFunction::Attribute &att) {
   if (attName == "BinWidth") {
 
     double newVal = att.asDouble();
 
     if (newVal < 0) {
       clearAllParameters();
-      throw std::invalid_argument(
-          "DKT: Attribute BinWidth cannot be negative.");
+      throw std::invalid_argument("DKT: Attribute BinWidth cannot be negative.");
 
     } else if (newVal < m_minEps) {
       clearAllParameters();
       std::stringstream ss;
-      ss << "DKT: Attribute BinWidth too small (BinWidth < "
-         << std::setprecision(3) << m_minEps << ")";
+      ss << "DKT: Attribute BinWidth too small (BinWidth < " << std::setprecision(3) << m_minEps << ")";
       throw std::invalid_argument(ss.str());
 
     } else if (newVal > m_maxEps) {
       clearAllParameters();
       std::stringstream ss;
-      ss << "DKT: Attribute BinWidth too large (BinWidth > "
-         << std::setprecision(3) << m_maxEps << ")";
+      ss << "DKT: Attribute BinWidth too large (BinWidth > " << std::setprecision(3) << m_maxEps << ")";
       throw std::invalid_argument(ss.str());
     }
 
@@ -377,21 +336,11 @@ void DynamicKuboToyabe::setAttribute(const std::string &attName,
       init();
     }
     m_eps = newVal;
+    IFunction::setAttribute(attName, Attribute(m_eps));
 
   } else {
-    throw std::invalid_argument("DynamicKuboToyabe: Unknown attribute " +
-                                attName);
+    throw std::invalid_argument("DynamicKuboToyabe: Unknown attribute " + attName);
   }
 }
 
-//----------------------------------------------------------------------------------------------
-/** Check if attribute attName exists
- * @param attName :: The attribute name.
- */
-bool DynamicKuboToyabe::hasAttribute(const std::string &attName) const {
-  return attName == "BinWidth";
-}
-
-} // namespace Functions
-} // namespace CurveFitting
-} // namespace Mantid
+} // namespace Mantid::CurveFitting::Functions

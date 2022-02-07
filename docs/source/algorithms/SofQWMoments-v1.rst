@@ -24,7 +24,7 @@ Usage
 **Example - Running SofQWMoments from with an SofQW workspace.**
 
 .. testcode:: ExSofQWMomentsSimple
-    
+
     #create a dummy workspace
     function = "name=Lorentzian,Amplitude=1,PeakCentre=5,FWHM=1"
     ws = CreateSampleWorkspace("Histogram", Function="User Defined", UserDefinedFunction=function, XMin=0, XMax=10, BinWidth=0.01, XUnit="DeltaE")

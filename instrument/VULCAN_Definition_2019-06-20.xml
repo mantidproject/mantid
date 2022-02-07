@@ -1,12 +1,12 @@
 <?xml version='1.0' encoding='UTF-8'?>
-<!-- For help on the notation used to specify an Instrument Definition File 
+<!-- For help on the notation used to specify an Instrument Definition File
      see http://www.mantidproject.org/IDF -->
-<instrument xmlns="http://www.mantidproject.org/IDF/1.0" 
+<instrument xmlns="http://www.mantidproject.org/IDF/1.0"
             xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
             xsi:schemaLocation="http://www.mantidproject.org/IDF/1.0 http://schema.mantidproject.org/IDF/1.0/IDFSchema.xsd"
- name="VULCAN" valid-from   ="2017-05-19 23:59:59"
-                          valid-to     ="2029-06-19 23:59:59"
-		          last-modified="2019-06-20 10:30:00">
+            name="VULCAN" valid-from   ="2017-05-19 23:59:59"
+                          valid-to     ="2020-12-31 23:59:59"
+		          last-modified="2021-02-19 11:00:00">
   <!--Data taken from VULCAN_geom_2010_06_03.xml-->
   <!--Created by Vickie Lynch-->
   <!--DEFAULTS-->
@@ -268,7 +268,7 @@
       <location x="-0.0145075" name="tube8"/>
     </component>
   </type>
-  
+
   <!--STANDARD 1.2m 128 PIXEL TUBE-->
   <type name="tube" outline="yes">
     <properties/>
@@ -591,4 +591,3 @@
     <id val="-2"/>
   </idlist>
 </instrument>
-

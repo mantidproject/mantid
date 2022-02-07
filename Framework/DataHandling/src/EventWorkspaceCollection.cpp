@@ -8,6 +8,7 @@
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/Run.h"
 #include "MantidAPI/Sample.h"
+#include "MantidDataHandling/ISISRunLogs.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/WorkspaceCreation.h"
 #include "MantidGeometry/Instrument.h"
@@ -19,8 +20,7 @@
 #include <unordered_set>
 #include <vector>
 
-namespace Mantid {
-namespace DataHandling {
+namespace Mantid::DataHandling {
 
 using namespace Mantid::DataObjects;
 using namespace Mantid::Kernel;
@@ -50,15 +50,13 @@ void copyLogs(const EventWorkspace_sptr &from, EventWorkspace_sptr &to) {
 
 /** Constructor
  */
-EventWorkspaceCollection::EventWorkspaceCollection()
-    : m_WsVec(1, createEmptyEventWorkspace()) {}
+EventWorkspaceCollection::EventWorkspaceCollection() : m_WsVec(1, createEmptyEventWorkspace()) {}
 
 /**
  * Create a blank event workspace
  * @returns A shared pointer to a new empty EventWorkspace object
  */
-EventWorkspace_sptr
-EventWorkspaceCollection::createEmptyEventWorkspace() const {
+EventWorkspace_sptr EventWorkspaceCollection::createEmptyEventWorkspace() const {
   // Create the output workspace
   EventWorkspace_sptr eventWS(new EventWorkspace());
   // Make sure to initialize.
@@ -73,9 +71,7 @@ EventWorkspaceCollection::createEmptyEventWorkspace() const {
   return eventWS;
 }
 
-void EventWorkspaceCollection::setNPeriods(
-    size_t nPeriods,
-    std::unique_ptr<const TimeSeriesProperty<int>> &periodLog) {
+void EventWorkspaceCollection::setNPeriods(size_t nPeriods, std::unique_ptr<const TimeSeriesProperty<int>> &periodLog) {
 
   // Create vector where size is the number of periods and initialize workspaces
   // in each.
@@ -83,33 +79,21 @@ void EventWorkspaceCollection::setNPeriods(
   m_WsVec = std::vector<DataObjects::EventWorkspace_sptr>(nPeriods);
 
   std::vector<int> periodNumbers = periodLog->valuesAsVector();
-  std::unordered_set<int> uniquePeriods(periodNumbers.begin(),
-                                        periodNumbers.end());
+  std::unordered_set<int> uniquePeriods(periodNumbers.begin(), periodNumbers.end());
   const bool addBoolTimeSeries = (uniquePeriods.size() == nPeriods);
+
+  auto logCreator = ISISRunLogs(temp->run());
+  logCreator.addStatusLog(temp->mutableRun());
 
   for (size_t i = 0; i < m_WsVec.size(); ++i) {
     const auto periodNumber = int(i + 1);
     m_WsVec[i] = createEmptyEventWorkspace();
     m_WsVec[i]->copyExperimentInfoFrom(temp.get());
     if (addBoolTimeSeries) {
-      std::stringstream buffer;
-      buffer << "period " << periodNumber;
-      auto *periodBoolLog = new Kernel::TimeSeriesProperty<bool>(buffer.str());
-      for (int j = 0; j < int(periodLog->size()); ++j) {
-        periodBoolLog->addValue(periodLog->nthTime(j),
-                                periodNumber == periodLog->nthValue(j));
-      }
-      Run &mutableRun = m_WsVec[i]->mutableRun();
-      mutableRun.addProperty(periodBoolLog);
-
-      Kernel::PropertyWithValue<int> *currentPeriodProperty =
-          new Kernel::PropertyWithValue<int>("current_period", periodNumber);
-      mutableRun.addProperty(currentPeriodProperty);
+      logCreator.addPeriodLogs(periodNumber, m_WsVec[i]->mutableRun());
     }
-
-    copyLogs(
-        temp,
-        m_WsVec[i]); // Copy all logs from dummy workspace to period workspaces.
+    copyLogs(temp,
+             m_WsVec[i]); // Copy all logs from dummy workspace to period workspaces.
     m_WsVec[i]->setInstrument(temp->getInstrument());
   }
 }
@@ -122,10 +106,7 @@ void EventWorkspaceCollection::reserveEventListAt(size_t wi, size_t size) {
 
 size_t EventWorkspaceCollection::nPeriods() const { return m_WsVec.size(); }
 
-DataObjects::EventWorkspace_sptr
-EventWorkspaceCollection::getSingleHeldWorkspace() {
-  return m_WsVec.front();
-}
+DataObjects::EventWorkspace_sptr EventWorkspaceCollection::getSingleHeldWorkspace() { return m_WsVec.front(); }
 
 API::Workspace_sptr EventWorkspaceCollection::combinedWorkspace() {
   API::Workspace_sptr final;
@@ -141,28 +122,15 @@ API::Workspace_sptr EventWorkspaceCollection::combinedWorkspace() {
   return final;
 }
 
-Geometry::Instrument_const_sptr
-EventWorkspaceCollection::getInstrument() const {
-  return m_WsVec[0]->getInstrument();
-}
-const API::Run &EventWorkspaceCollection::run() const {
-  return m_WsVec[0]->run();
-}
-API::Run &EventWorkspaceCollection::mutableRun() {
-  return m_WsVec[0]->mutableRun();
-}
-API::Sample &EventWorkspaceCollection::mutableSample() {
-  return m_WsVec[0]->mutableSample();
-}
-EventList &EventWorkspaceCollection::getSpectrum(const size_t index) {
+Geometry::Instrument_const_sptr EventWorkspaceCollection::getInstrument() const { return m_WsVec[0]->getInstrument(); }
+const API::Run &EventWorkspaceCollection::run() const { return m_WsVec[0]->run(); }
+API::Run &EventWorkspaceCollection::mutableRun() { return m_WsVec[0]->mutableRun(); }
+API::Sample &EventWorkspaceCollection::mutableSample() { return m_WsVec[0]->mutableSample(); }
+EventList &EventWorkspaceCollection::getSpectrum(const size_t index) { return m_WsVec[0]->getSpectrum(index); }
+const EventList &EventWorkspaceCollection::getSpectrum(const size_t index) const {
   return m_WsVec[0]->getSpectrum(index);
 }
-const EventList &
-EventWorkspaceCollection::getSpectrum(const size_t index) const {
-  return m_WsVec[0]->getSpectrum(index);
-}
-void EventWorkspaceCollection::setSpectrumNumbersFromUniqueSpectra(
-    const std::set<int> &uniqueSpectra) {
+void EventWorkspaceCollection::setSpectrumNumbersFromUniqueSpectra(const std::set<int> &uniqueSpectra) {
   // For each workspace, update all the spectrum numbers
   for (auto &ws : m_WsVec) {
     size_t counter = 0;
@@ -173,54 +141,41 @@ void EventWorkspaceCollection::setSpectrumNumbersFromUniqueSpectra(
   }
 }
 
-void EventWorkspaceCollection::setSpectrumNumberForAllPeriods(
-    const size_t spectrumNumber, const specnum_t specid) {
+void EventWorkspaceCollection::setSpectrumNumberForAllPeriods(const size_t spectrumNumber, const specnum_t specid) {
   for (auto &ws : m_WsVec) {
     auto &spec = ws->getSpectrum(spectrumNumber);
     spec.setSpectrumNo(specid);
   }
 }
 
-void EventWorkspaceCollection::setDetectorIdsForAllPeriods(
-    const size_t spectrumNumber, const detid_t id) {
+void EventWorkspaceCollection::setDetectorIdsForAllPeriods(const size_t spectrumNumber, const detid_t id) {
   for (auto &ws : m_WsVec) {
     auto &spec = ws->getSpectrum(spectrumNumber);
     spec.setDetectorID(id);
   }
 }
 
-Mantid::API::Axis *EventWorkspaceCollection::getAxis(const size_t &i) const {
-  return m_WsVec[0]->getAxis(i);
-}
-size_t EventWorkspaceCollection::getNumberHistograms() const {
-  return m_WsVec[0]->getNumberHistograms();
-}
+Mantid::API::Axis *EventWorkspaceCollection::getAxis(const size_t &i) const { return m_WsVec[0]->getAxis(i); }
+size_t EventWorkspaceCollection::getNumberHistograms() const { return m_WsVec[0]->getNumberHistograms(); }
 
-const DataObjects::EventList &
-EventWorkspaceCollection::getSpectrum(const size_t workspace_index,
-                                      const size_t periodNumber) const {
+const DataObjects::EventList &EventWorkspaceCollection::getSpectrum(const size_t workspace_index,
+                                                                    const size_t periodNumber) const {
   return m_WsVec[periodNumber]->getSpectrum(workspace_index);
 }
 
-DataObjects::EventList &
-EventWorkspaceCollection::getSpectrum(const size_t workspace_index,
-                                      const size_t periodNumber) {
+DataObjects::EventList &EventWorkspaceCollection::getSpectrum(const size_t workspace_index, const size_t periodNumber) {
   return m_WsVec[periodNumber]->getSpectrum(workspace_index);
 }
 
-std::vector<size_t> EventWorkspaceCollection::getSpectrumToWorkspaceIndexVector(
-    Mantid::specnum_t &offset) const {
+std::vector<size_t> EventWorkspaceCollection::getSpectrumToWorkspaceIndexVector(Mantid::specnum_t &offset) const {
   return m_WsVec[0]->getSpectrumToWorkspaceIndexVector(offset);
 }
-std::vector<size_t>
-EventWorkspaceCollection::getDetectorIDToWorkspaceIndexVector(
-    Mantid::specnum_t &offset, bool dothrow) const {
+std::vector<size_t> EventWorkspaceCollection::getDetectorIDToWorkspaceIndexVector(Mantid::specnum_t &offset,
+                                                                                  bool dothrow) const {
   return m_WsVec[0]->getDetectorIDToWorkspaceIndexVector(offset, dothrow);
 }
 
-Types::Core::DateAndTime EventWorkspaceCollection::getFirstPulseTime() const {
-  return m_WsVec[0]->getFirstPulseTime();
-}
+Types::Core::DateAndTime EventWorkspaceCollection::getFirstPulseTime() const { return m_WsVec[0]->getFirstPulseTime(); }
 void EventWorkspaceCollection::setAllX(const HistogramData::BinEdges &x) {
   for (auto &ws : m_WsVec) {
     ws->setAllX(x);
@@ -230,28 +185,23 @@ size_t EventWorkspaceCollection::getNumberEvents() const {
   return m_WsVec[0]->getNumberEvents(); // Should be the sum across all periods?
 }
 
-void EventWorkspaceCollection::setIndexInfo(
-    const Indexing::IndexInfo &indexInfo) {
+void EventWorkspaceCollection::setIndexInfo(const Indexing::IndexInfo &indexInfo) {
   const HistogramData::BinEdges edges(2);
   for (auto &ws : m_WsVec)
     ws = create<EventWorkspace>(*ws, indexInfo, edges);
 }
 
-void EventWorkspaceCollection::setInstrument(
-    const Geometry::Instrument_const_sptr &inst) {
+void EventWorkspaceCollection::setInstrument(const Geometry::Instrument_const_sptr &inst) {
   for (auto &ws : m_WsVec) {
     ws->setInstrument(inst);
   }
 }
-void EventWorkspaceCollection::setMonitorWorkspace(
-    const std::shared_ptr<API::MatrixWorkspace> &monitorWS) {
+void EventWorkspaceCollection::setMonitorWorkspace(const std::shared_ptr<API::MatrixWorkspace> &monitorWS) {
   for (auto &ws : m_WsVec) {
-    ws->setMonitorWorkspace(
-        monitorWS); // TODO, do we really set the same monitor on all periods???
+    ws->setMonitorWorkspace(monitorWS); // TODO, do we really set the same monitor on all periods???
   }
 }
-void EventWorkspaceCollection::updateSpectraUsing(
-    const API::SpectrumDetectorMapping &map) {
+void EventWorkspaceCollection::updateSpectraUsing(const API::SpectrumDetectorMapping &map) {
   for (auto &ws : m_WsVec) {
     ws->updateSpectraUsing(map);
   }
@@ -285,10 +235,16 @@ void EventWorkspaceCollection::setTitle(const std::string &title) {
   }
 }
 
-void EventWorkspaceCollection::applyFilter(
-    const boost::function<void(MatrixWorkspace_sptr)> &func) {
+void EventWorkspaceCollection::applyFilterInPlace(const boost::function<void(MatrixWorkspace_sptr)> &func) {
   for (auto &ws : m_WsVec) {
     func(ws);
+  }
+}
+
+void EventWorkspaceCollection::applyFilter(
+    const boost::function<DataObjects::EventWorkspace_sptr(DataObjects::EventWorkspace_sptr)> &func) {
+  for (auto &ws : m_WsVec) {
+    ws = func(ws);
   }
 }
 
@@ -301,5 +257,4 @@ bool EventWorkspaceCollection::threadSafe() const {
   return true;
 }
 
-} // namespace DataHandling
-} // namespace Mantid
+} // namespace Mantid::DataHandling

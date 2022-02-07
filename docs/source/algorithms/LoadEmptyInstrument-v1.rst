@@ -10,7 +10,7 @@ Description
 -----------
 
 This algorithm is to enable you to inspect the instrument geometry without having
-to load a full data file. 
+to load a full data file.
 
 This algorithm works with both :ref:`Instrument Definition Files <InstrumentDefinitionFile>` and `NeXus format <https://www.nexusformat.org/>`_ (hdf5) files.
 

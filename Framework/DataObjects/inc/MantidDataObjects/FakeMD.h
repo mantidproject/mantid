@@ -21,32 +21,29 @@ namespace DataObjects {
   */
 class MANTID_DATAOBJECTS_DLL FakeMD {
 public:
-  FakeMD(const std::vector<double> &uniformParams,
-         const std::vector<double> &peakParams, const int randomSeed,
-         const bool randomizeSignal);
+  FakeMD(const std::vector<double> &uniformParams, const std::vector<double> &peakParams,
+         const std::vector<double> &ellipsoidParams, const int randomSeed, const bool randomizeSignal);
 
   void fill(const API::IMDEventWorkspace_sptr &workspace);
 
 private:
   void setupDetectorCache(const API::IMDEventWorkspace &workspace);
 
-  template <typename MDE, size_t nd>
-  void addFakePeak(typename MDEventWorkspace<MDE, nd>::sptr ws);
-  template <typename MDE, size_t nd>
-  void addFakeUniformData(typename MDEventWorkspace<MDE, nd>::sptr ws);
+  template <typename MDE, size_t nd> void addFakePeak(typename MDEventWorkspace<MDE, nd>::sptr ws);
+  template <typename MDE, size_t nd> void addFakeEllipsoid(typename MDEventWorkspace<MDE, nd>::sptr ws);
+  template <typename MDE, size_t nd> void addFakeUniformData(typename MDEventWorkspace<MDE, nd>::sptr ws);
 
   template <typename MDE, size_t nd>
-  void addFakeRandomData(const std::vector<double> &params,
-                         typename MDEventWorkspace<MDE, nd>::sptr ws);
+  void addFakeRandomData(const std::vector<double> &params, typename MDEventWorkspace<MDE, nd>::sptr ws);
   template <typename MDE, size_t nd>
-  void addFakeRegularData(const std::vector<double> &params,
-                          typename MDEventWorkspace<MDE, nd>::sptr ws);
+  void addFakeRegularData(const std::vector<double> &params, typename MDEventWorkspace<MDE, nd>::sptr ws);
 
   detid_t pickDetectorID();
 
   //------------------ Member variables ------------------------------------
   std::vector<double> m_uniformParams;
   std::vector<double> m_peakParams;
+  std::vector<double> m_ellipsoidParams;
   const int m_randomSeed;
   const bool m_randomizeSignal;
   mutable std::vector<detid_t> m_detIDs;

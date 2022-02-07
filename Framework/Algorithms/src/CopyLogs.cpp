@@ -11,8 +11,7 @@
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/Property.h"
 
-namespace Mantid {
-namespace Algorithms {
+namespace Mantid::Algorithms {
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(CopyLogs)
@@ -36,16 +35,13 @@ const std::string CopyLogs::category() const { return "Utility\\Workspaces"; }
 /** Initialize the algorithm's properties.
  */
 void CopyLogs::init() {
-  declareProperty(std::make_unique<WorkspaceProperty<>>("InputWorkspace", "",
-                                                        Direction::Input),
+  declareProperty(std::make_unique<WorkspaceProperty<>>("InputWorkspace", "", Direction::Input),
                   "Workspace to copy logs from.");
-  declareProperty(std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
-                                                        Direction::InOut),
+  declareProperty(std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "", Direction::InOut),
                   "Workspace to copy logs to.");
 
   // options for the type of strategy to take
-  std::vector<std::string> strategies{"WipeExisting", "MergeKeepExisting",
-                                      "MergeReplaceExisting"};
+  std::vector<std::string> strategies{"WipeExisting", "MergeKeepExisting", "MergeReplaceExisting"};
 
   auto strategiesValidator = std::make_shared<StringListValidator>(strategies);
   declareProperty("MergeStrategy", "MergeReplaceExisting", strategiesValidator,
@@ -60,13 +56,13 @@ void CopyLogs::exec() {
   MatrixWorkspace_sptr outputWs = getProperty("OutputWorkspace");
 
   // get logs from input workspace
-  Run &inputRun = inputWs->mutableRun();
+  const Run &inputRun = inputWs->run();
   const auto &inputLogs = inputRun.getLogData();
 
   // get run from output workspace
   Run &outputRun = outputWs->mutableRun();
 
-  std::string mode = getProperty("MergeStrategy");
+  const std::string mode = getProperty("MergeStrategy");
 
   if (mode == "WipeExisting") {
     wipeExisting(inputLogs, outputRun);
@@ -86,8 +82,7 @@ void CopyLogs::exec() {
  * Copy logs from the input workspace to the output workspace
  * and replace any matching logs with the ones from the input workspace.
  */
-void CopyLogs::mergeReplaceExisting(
-    const std::vector<Kernel::Property *> &inputLogs, Run &outputRun) {
+void CopyLogs::mergeReplaceExisting(const std::vector<Kernel::Property *> &inputLogs, Run &outputRun) {
   for (auto prop : inputLogs) {
     // if the log exists, remove and replace it
     if (outputRun.hasProperty(prop->name())) {
@@ -101,8 +96,7 @@ void CopyLogs::mergeReplaceExisting(
  * Copy logs from the input workspace to the output workspace
  * and don't replace any mathcing logs in the output workspace.
  */
-void CopyLogs::mergeKeepExisting(
-    const std::vector<Kernel::Property *> &inputLogs, Run &outputRun) {
+void CopyLogs::mergeKeepExisting(const std::vector<Kernel::Property *> &inputLogs, Run &outputRun) {
   for (auto prop : inputLogs) {
     // add the log only if it doesn't already exist
     if (!outputRun.hasProperty(prop->name())) {
@@ -115,8 +109,7 @@ void CopyLogs::mergeKeepExisting(
  * Wipe any existing logs in the output workspace and replace
  * them with the logs from the input workspace.
  */
-void CopyLogs::wipeExisting(const std::vector<Kernel::Property *> &inputLogs,
-                            Run &outputRun) {
+void CopyLogs::wipeExisting(const std::vector<Kernel::Property *> &inputLogs, Run &outputRun) {
   auto outputLogs = outputRun.getLogData();
 
   // remove each of the logs from the second workspace
@@ -130,5 +123,4 @@ void CopyLogs::wipeExisting(const std::vector<Kernel::Property *> &inputLogs,
   }
 }
 
-} // namespace Algorithms
-} // namespace Mantid
+} // namespace Mantid::Algorithms

@@ -15,8 +15,7 @@
 
 #include <boost/lexical_cast.hpp>
 
-namespace Mantid {
-namespace Geometry {
+namespace Mantid::Geometry {
 namespace {
 /// static logger object
 Kernel::Logger g_log("FitParameter");
@@ -39,15 +38,13 @@ std::string FitParameter::getConstraint() const {
   double max = 0;
   if (!m_constraintMin.empty()) {
     if (foundMinPercentage != std::string::npos)
-      min = std::stod(m_constraintMin.substr(0, m_constraintMin.size() - 1)) *
-            m_value * 0.01;
+      min = std::stod(m_constraintMin.substr(0, m_constraintMin.size() - 1)) * m_value * 0.01;
     else
       min = std::stod(m_constraintMin);
   }
   if (!m_constraintMax.empty()) {
     if (foundMaxPercentage != std::string::npos)
-      max = std::stod(m_constraintMax.substr(0, m_constraintMax.size() - 1)) *
-            m_value * 0.01;
+      max = std::stod(m_constraintMax.substr(0, m_constraintMax.size() - 1)) * m_value * 0.01;
     else
       max = std::stod(m_constraintMax);
   }
@@ -120,11 +117,9 @@ double FitParameter::getValue() const { return m_value; }
   @param os :: the Stream to output to
 */
 void FitParameter::printSelf(std::ostream &os) const {
-  os << m_value << " , " << m_function << " , " << m_name << " , "
-     << m_constraintMin << " , " << m_constraintMax << " , "
-     << m_constraintPenaltyFactor << " , " << m_tie << " , " << m_formula
-     << " , " << m_formulaUnit << " , " << m_resultUnit << " , "
-     << m_lookUpTable;
+  os << m_value << " , " << m_function << " , " << m_name << " , " << m_constraintMin << " , " << m_constraintMax
+     << " , " << m_constraintPenaltyFactor << " , " << m_tie << " , " << m_formula << " , " << m_formulaUnit << " , "
+     << m_resultUnit << " , " << m_lookUpTable;
 }
 
 /**
@@ -171,16 +166,14 @@ std::istream &operator>>(std::istream &in, FitParameter &f) {
   getline(in, str);
 
   // allow a comma in the final position.
-  tokenizer tokens(
-      str, ",", tokenizer::TOK_TRIM | tokenizer::TOK_IGNORE_FINAL_EMPTY_TOKEN);
+  tokenizer tokens(str, ",", tokenizer::TOK_TRIM | tokenizer::TOK_IGNORE_FINAL_EMPTY_TOKEN);
   auto values = tokens.asVector();
 
   if (values.size() < 3) {
-    g_log.warning()
-        << "Expecting a comma separated list of at each three entries"
-        << " (any of which may be empty strings) to set information about a "
-           "fitting parameter"
-        << " instead of: " << str << '\n';
+    g_log.warning() << "Expecting a comma separated list of at each three entries"
+                    << " (any of which may be empty strings) to set information about a "
+                       "fitting parameter"
+                    << " instead of: " << str << '\n';
     return in;
   }
 
@@ -191,8 +184,7 @@ std::istream &operator>>(std::istream &in, FitParameter &f) {
 
     if (!values.at(0).empty()) {
       g_log.warning() << "Could not read " << values[0] << " as double for "
-                      << " fitting parameter: " << values[1] << ":" << values[2]
-                      << '\n';
+                      << " fitting parameter: " << values[1] << ":" << values[2] << '\n';
     }
   }
 
@@ -223,5 +215,4 @@ std::istream &operator>>(std::istream &in, FitParameter &f) {
 
   return in;
 }
-} // namespace Geometry
-} // namespace Mantid
+} // namespace Mantid::Geometry

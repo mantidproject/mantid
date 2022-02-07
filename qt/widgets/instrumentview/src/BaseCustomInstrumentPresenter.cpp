@@ -8,33 +8,34 @@
 #include "MantidAPI/FileFinder.h"
 #include "MantidQtWidgets/InstrumentView/BaseCustomInstrumentModel.h"
 #include "MantidQtWidgets/InstrumentView/BaseCustomInstrumentView.h"
+#include "MantidQtWidgets/InstrumentView/PlotFitAnalysisPanePresenter.h"
 
 #include <functional>
+#include <qobject.h>
 #include <tuple>
 
-namespace MantidQt {
-namespace MantidWidgets {
+#include <iostream>
 
-BaseCustomInstrumentPresenter::BaseCustomInstrumentPresenter(
-    BaseCustomInstrumentView *view, BaseCustomInstrumentModel *model,
-    QWidget *analysisPaneView)
-    : m_view(view), m_model(model), m_currentRun(0), m_currentFile(""),
-      m_loadRunObserver(nullptr), m_analysisPaneView(analysisPaneView) {
+namespace MantidQt::MantidWidgets {
+
+BaseCustomInstrumentPresenter::BaseCustomInstrumentPresenter(IBaseCustomInstrumentView *view,
+                                                             IBaseCustomInstrumentModel *model,
+                                                             IPlotFitAnalysisPanePresenter *analysisPanePresenter)
+    : m_view(view), m_model(model), m_currentRun(0), m_currentFile(""), m_loadRunObserver(nullptr),
+      m_analysisPanePresenter(analysisPanePresenter) {
   m_loadRunObserver = new VoidObserver();
   m_model->loadEmptyInstrument();
 }
 
 void BaseCustomInstrumentPresenter::addInstrument() {
   auto setUp = setupInstrument();
-  initLayout(&setUp);
+  initLayout(setUp);
 }
 
-void BaseCustomInstrumentPresenter::initLayout(
-    std::pair<instrumentSetUp, instrumentObserverOptions> *setUp) {
+void BaseCustomInstrumentPresenter::initLayout(std::pair<instrumentSetUp, instrumentObserverOptions> *setUp) {
   // connect to new run
   m_view->observeLoadRun(m_loadRunObserver);
-  std::function<void()> loadBinder =
-      std::bind(&BaseCustomInstrumentPresenter::loadRunNumber, this);
+  std::function<void()> loadBinder = std::bind(&BaseCustomInstrumentPresenter::loadRunNumber, this);
   m_loadRunObserver->setSlot(loadBinder);
   initInstrument(setUp);
   setUpInstrumentAnalysisSplitter();
@@ -42,11 +43,11 @@ void BaseCustomInstrumentPresenter::initLayout(
 }
 
 void BaseCustomInstrumentPresenter::setUpInstrumentAnalysisSplitter() {
-  m_view->setupInstrumentAnalysisSplitters(m_analysisPaneView);
+  auto paneView = m_analysisPanePresenter->getView();
+  m_view->setupInstrumentAnalysisSplitters(paneView->getQWidget());
 }
 
-void BaseCustomInstrumentPresenter::loadAndAnalysis(
-    const std::string &pathToRun) {
+void BaseCustomInstrumentPresenter::loadAndAnalysis(const std::string &pathToRun) {
   try {
     auto loadedResult = m_model->loadData(pathToRun);
 
@@ -75,8 +76,7 @@ void BaseCustomInstrumentPresenter::loadRunNumber() {
   loadAndAnalysis(pathToRun);
 }
 
-void BaseCustomInstrumentPresenter::initInstrument(
-    std::pair<instrumentSetUp, instrumentObserverOptions> *setUp) {
+void BaseCustomInstrumentPresenter::initInstrument(std::pair<instrumentSetUp, instrumentObserverOptions> *setUp) {
   if (!setUp) {
     return;
   }
@@ -91,24 +91,4 @@ void BaseCustomInstrumentPresenter::initInstrument(
   }
 }
 
-typedef std::pair<std::string,
-                  std::vector<std::function<bool(std::map<std::string, bool>)>>>
-    instrumentSetUp;
-typedef std::vector<std::tuple<std::string, Observer *>>
-    instrumentObserverOptions;
-std::pair<instrumentSetUp, instrumentObserverOptions>
-
-BaseCustomInstrumentPresenter::setupInstrument() {
-  instrumentSetUp setUpContextConditions;
-
-  // set up the slots for the custom context menu
-  std::vector<std::tuple<std::string, Observer *>> customInstrumentOptions;
-  std::vector<std::function<bool(std::map<std::string, bool>)>> binders;
-
-  setUpContextConditions = std::make_pair(m_model->dataFileName(), binders);
-
-  return std::make_pair(setUpContextConditions, customInstrumentOptions);
-}
-
-} // namespace MantidWidgets
-} // namespace MantidQt
+} // namespace MantidQt::MantidWidgets

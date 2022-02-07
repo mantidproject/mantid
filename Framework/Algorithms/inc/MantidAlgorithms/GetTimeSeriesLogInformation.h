@@ -21,26 +21,17 @@ namespace Algorithms {
 
   @date 2011-12-22
 */
-class MANTID_ALGORITHMS_DLL GetTimeSeriesLogInformation
-    : public API::Algorithm {
+class MANTID_ALGORITHMS_DLL GetTimeSeriesLogInformation : public API::Algorithm {
 public:
   GetTimeSeriesLogInformation();
 
-  const std::string name() const override {
-    return "GetTimeSeriesLogInformation";
-  }
+  const std::string name() const override { return "GetTimeSeriesLogInformation"; }
   /// Summary of algorithms purpose
-  const std::string summary() const override {
-    return "Get information from a TimeSeriesProperty log.";
-  }
+  const std::string summary() const override { return "Get information from a TimeSeriesProperty log."; }
 
   int version() const override { return 1; }
-  const std::vector<std::string> seeAlso() const override {
-    return {"AddSampleLogMultiple"};
-  }
-  const std::string category() const override {
-    return "Diffraction\\Utility;Events\\EventFiltering";
-  }
+  const std::vector<std::string> seeAlso() const override { return {"AddSampleLogMultiple"}; }
+  const std::string category() const override { return "Diffraction\\Utility;Events\\EventFiltering"; }
 
 private:
   API::MatrixWorkspace_sptr m_dataWS;
@@ -72,29 +63,20 @@ private:
   void processTimeRange();
 
   /// Calcualte the distribution of delta T in time stamps
-  DataObjects::Workspace2D_sptr
-  calDistributions(std::vector<Types::Core::DateAndTime> timevec,
-                   double stepsize);
+  DataObjects::Workspace2D_sptr calDistributions(std::vector<Types::Core::DateAndTime> timevec, double stepsize);
 
-  void exportLog(API::MatrixWorkspace_sptr ws,
-                 std::vector<Types::Core::DateAndTime> abstimevec, double dts);
+  void exportLog(API::MatrixWorkspace_sptr ws, std::vector<Types::Core::DateAndTime> abstimevec, double dts);
 
-  void setupEventWorkspace(int numentries,
-                           std::vector<Types::Core::DateAndTime> &times,
-                           std::vector<double> values);
+  void setupEventWorkspace(int numentries, std::vector<Types::Core::DateAndTime> &times, std::vector<double> values);
 
-  void setupWorkspace2D(int numentries,
-                        std::vector<Types::Core::DateAndTime> &times,
-                        std::vector<double> values);
+  void setupWorkspace2D(int numentries, std::vector<Types::Core::DateAndTime> &times, std::vector<double> values);
 
   void execQuickStatistics();
 
-  void exportErrorLog(const API::MatrixWorkspace_sptr &ws,
-                      std::vector<Types::Core::DateAndTime> abstimevec,
+  void exportErrorLog(const API::MatrixWorkspace_sptr &ws, std::vector<Types::Core::DateAndTime> abstimevec,
                       double dts);
 
-  void checkLogValueChanging(std::vector<Types::Core::DateAndTime> timevec,
-                             std::vector<double> values, double delta);
+  void checkLogValueChanging(std::vector<Types::Core::DateAndTime> timevec, std::vector<double> values, double delta);
 
   void checkLogBasicInforamtion();
 

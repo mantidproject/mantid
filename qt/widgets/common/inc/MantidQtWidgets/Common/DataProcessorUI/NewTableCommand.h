@@ -17,20 +17,15 @@ NewTableCommand defines the action "New Table"
 */
 class NewTableCommand : public CommandBase {
 public:
-  NewTableCommand(DataProcessorPresenter *tablePresenter)
-      : CommandBase(tablePresenter){};
+  NewTableCommand(DataProcessorPresenter *tablePresenter) : CommandBase(tablePresenter){};
   NewTableCommand(const QDataProcessorWidget &widget) : CommandBase(widget){};
   virtual ~NewTableCommand(){};
 
-  void execute() override {
-    m_presenter->notify(DataProcessorPresenter::NewTableFlag);
-  };
+  void execute() override { m_presenter->notify(DataProcessorPresenter::NewTableFlag); };
   QString name() override { return QString("New Table"); }
   QString icon() override { return QString("://new.png"); }
   QString tooltip() override { return QString("New Table"); }
-  QString whatsthis() override {
-    return QString("Loads a blank table into the interface");
-  }
+  QString whatsthis() override { return QString("Loads a blank table into the interface"); }
   QString shortcut() override { return QString(); }
 };
 } // namespace DataProcessor

@@ -26,10 +26,10 @@ namespace MantidQt {
 namespace MantidWidgets {
 class IAlgorithmProgressDialogWidget {
 public:
+  virtual ~IAlgorithmProgressDialogWidget() = default;
   /// Adds an algorithm to the dialog. Returns the item in the tree widget, and
   /// the progress bar within it
-  virtual std::pair<QTreeWidgetItem *, QProgressBar *>
-  addAlgorithm(Mantid::API::IAlgorithm_sptr alg) = 0;
+  virtual std::pair<QTreeWidgetItem *, QProgressBar *> addAlgorithm(Mantid::API::IAlgorithm_sptr alg) = 0;
 };
 } // namespace MantidWidgets
 } // namespace MantidQt

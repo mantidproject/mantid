@@ -24,21 +24,18 @@ You must specify:
 -  Both AbsoluteStartTime and AbsoluteStop time.
 -  But not another combination of the four, or the algorithm will abort.
 
-Comparing with other event filtering algorithms
-###############################################
-
-Wiki page :ref:`EventFiltering` has a detailed
-introduction on event filtering in MantidPlot.
+A more detailed introduction to event filtering can be found
+:ref:`here <EventFiltering>`.
 
 Usage
 -----
 
-**Example - Using a relative and absolute times**  
+**Example - Using a relative and absolute times**
 
 .. testcode:: ExFilter
 
     ws = CreateSampleWorkspace("Event",BankPixelWidth=1)
-    AddTimeSeriesLog(ws, Name="proton_charge", Time="2010-01-01T00:00:00", Value=100) 
+    AddTimeSeriesLog(ws, Name="proton_charge", Time="2010-01-01T00:00:00", Value=100)
     AddTimeSeriesLog(ws, Name="proton_charge", Time="2010-01-01T00:10:00", Value=100)
     AddTimeSeriesLog(ws, Name="proton_charge", Time="2010-01-01T00:20:00", Value=100)
     AddTimeSeriesLog(ws, Name="proton_charge", Time="2010-01-01T00:30:00", Value=100)

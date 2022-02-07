@@ -16,8 +16,7 @@
 using namespace Mantid;
 using namespace Mantid::API;
 
-class ImmutableCompositeFunctionTest_Linear : public ParamFunction,
-                                              public IFunction1D {
+class ImmutableCompositeFunctionTest_Linear : public ParamFunction, public IFunction1D {
 public:
   ImmutableCompositeFunctionTest_Linear() {
     declareParameter("a");
@@ -26,16 +25,14 @@ public:
 
   std::string name() const override { return "Linear"; }
 
-  void function1D(double *out, const double *xValues,
-                  const size_t nData) const override {
+  void function1D(double *out, const double *xValues, const size_t nData) const override {
     double a = getParameter("a");
     double b = getParameter("b");
     for (size_t i = 0; i < nData; i++) {
       out[i] = a + b * xValues[i];
     }
   }
-  void functionDeriv1D(Jacobian *out, const double *xValues,
-                       const size_t nData) override {
+  void functionDeriv1D(Jacobian *out, const double *xValues, const size_t nData) override {
     for (size_t i = 0; i < nData; i++) {
       out->set(static_cast<int>(i), 0, 1.);
       out->set(static_cast<int>(i), 1, xValues[i]);
@@ -44,8 +41,7 @@ public:
 };
 
 //---------------------------------------------------------------------------------
-class ImmutableCompositeFunctionTest_Function
-    : public ImmutableCompositeFunction {
+class ImmutableCompositeFunctionTest_Function : public ImmutableCompositeFunction {
 public:
   ImmutableCompositeFunctionTest_Function() : ImmutableCompositeFunction() {
     IFunction *fun1 = new ImmutableCompositeFunctionTest_Linear;
@@ -63,19 +59,15 @@ public:
     setAlias("f1.a", "a2");
     setAlias("f1.b", "b2");
   }
-  std::string name() const override {
-    return "ImmutableCompositeFunctionTest_Function";
-  }
+  std::string name() const override { return "ImmutableCompositeFunctionTest_Function"; }
 };
 
 DECLARE_FUNCTION(ImmutableCompositeFunctionTest_Function)
 
 //---------------------------------------------------------------------------------
-class ImmutableCompositeFunctionTest_FunctionWithTies
-    : public ImmutableCompositeFunction {
+class ImmutableCompositeFunctionTest_FunctionWithTies : public ImmutableCompositeFunction {
 public:
-  ImmutableCompositeFunctionTest_FunctionWithTies()
-      : ImmutableCompositeFunction() {
+  ImmutableCompositeFunctionTest_FunctionWithTies() : ImmutableCompositeFunction() {
     IFunction *fun1 = new ImmutableCompositeFunctionTest_Linear;
     fun1->setParameter("a", 1.0);
     fun1->setParameter("b", 2.0);
@@ -93,19 +85,15 @@ public:
 
     addDefaultTies("b2 = a1, a2 = a1/4");
   }
-  std::string name() const override {
-    return "ImmutableCompositeFunctionTest_FunctionWithTies";
-  }
+  std::string name() const override { return "ImmutableCompositeFunctionTest_FunctionWithTies"; }
 };
 
 DECLARE_FUNCTION(ImmutableCompositeFunctionTest_FunctionWithTies)
 
 //---------------------------------------------------------------------------------
-class ImmutableCompositeFunctionTest_FunctionThrow
-    : public ImmutableCompositeFunction {
+class ImmutableCompositeFunctionTest_FunctionThrow : public ImmutableCompositeFunction {
 public:
-  ImmutableCompositeFunctionTest_FunctionThrow()
-      : ImmutableCompositeFunction() {
+  ImmutableCompositeFunctionTest_FunctionThrow() : ImmutableCompositeFunction() {
     IFunction *fun1 = new ImmutableCompositeFunctionTest_Linear;
     fun1->setParameter("a", 1.0);
     fun1->setParameter("b", 2.0);
@@ -124,11 +112,9 @@ public:
 };
 
 //---------------------------------------------------------------------------------
-class ImmutableCompositeFunctionTest_FunctionThrow1
-    : public ImmutableCompositeFunction {
+class ImmutableCompositeFunctionTest_FunctionThrow1 : public ImmutableCompositeFunction {
 public:
-  ImmutableCompositeFunctionTest_FunctionThrow1()
-      : ImmutableCompositeFunction() {
+  ImmutableCompositeFunctionTest_FunctionThrow1() : ImmutableCompositeFunction() {
     IFunction *fun1 = new ImmutableCompositeFunctionTest_Linear;
     fun1->setParameter("a", 1.0);
     fun1->setParameter("b", 2.0);
@@ -159,8 +145,7 @@ public:
   }
 
   void testFactoryCreate() {
-    auto fun = FunctionFactory::Instance().createInitialized(
-        "name=ImmutableCompositeFunctionTest_Function");
+    auto fun = FunctionFactory::Instance().createInitialized("name=ImmutableCompositeFunctionTest_Function");
     TS_ASSERT(fun);
     TS_ASSERT_EQUALS(fun->nParams(), 4);
     TS_ASSERT_EQUALS(fun->getParameter(0), 1.0);
@@ -247,13 +232,11 @@ public:
   }
 
   void testParameterAliasUnique() {
-    TS_ASSERT_THROWS(ImmutableCompositeFunctionTest_FunctionThrow icf,
-                     const Mantid::Kernel::Exception::ExistsError &);
+    TS_ASSERT_THROWS(ImmutableCompositeFunctionTest_FunctionThrow icf, const Mantid::Kernel::Exception::ExistsError &);
   }
 
   void testSetAliasThrowsIfNameDoesntExist() {
-    TS_ASSERT_THROWS(ImmutableCompositeFunctionTest_FunctionThrow1 icf,
-                     const std::invalid_argument &);
+    TS_ASSERT_THROWS(ImmutableCompositeFunctionTest_FunctionThrow1 icf, const std::invalid_argument &);
   }
 
   void testAddTies() {
@@ -285,9 +268,8 @@ public:
     icf.applyTies();
 
     auto icfString = icf.asString();
-    TS_ASSERT_EQUALS(icfString.substr(0, 91),
-                     "name=ImmutableCompositeFunctionTest_"
-                     "Function,NumDeriv=false,a1=11,b1=12,a2=2.2,b2=12,ties=(");
+    TS_ASSERT_EQUALS(icfString.substr(0, 91), "name=ImmutableCompositeFunctionTest_"
+                                              "Function,NumDeriv=false,a1=11,b1=12,a2=2.2,b2=12,ties=(");
     auto icfTies = icfString.substr(91);
     TS_ASSERT(icfTies.find("a2=a1/5") != std::string::npos)
     TS_ASSERT(icfTies.find("b2=b1") != std::string::npos)

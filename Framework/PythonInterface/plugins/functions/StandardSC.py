@@ -8,6 +8,7 @@
 
 from mantid.api import IFunction1D, FunctionFactory
 import numpy as np
+from mantid.kernel import PhysicalConstants as const
 
 
 class StandardSC(IFunction1D):
@@ -32,8 +33,9 @@ class StandardSC(IFunction1D):
         FieldBG = self.getParameterValue("FieldBG")
         phi = self.getParameterValue("Phi")
         Abg = self.getParameterValue("Abg")
-        omegaSC = FieldSC * 0.1355 * 2 * np.pi
-        omegaBG = FieldBG * 0.1355 * 2 * np.pi
+        gamma_mu = const.MuonGyromagneticRatio
+        omegaSC = FieldSC * gamma_mu * 2 * np.pi
+        omegaBG = FieldBG * gamma_mu * 2 * np.pi
         return A0 * np.exp(- 0.5 * sigma * sigma * x * x) * np.cos(omegaSC * x + phi) + Abg * np.cos(omegaBG * x + phi)
 
 

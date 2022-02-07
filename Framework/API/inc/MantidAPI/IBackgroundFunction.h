@@ -24,8 +24,7 @@ public:
   /// Fits the function
   /// @param X :: a vector of x values
   /// @param Y :: a matching vector of Y values
-  virtual void fit(const std::vector<double> &X,
-                   const std::vector<double> &Y) = 0;
+  virtual void fit(const std::vector<double> &X, const std::vector<double> &Y) = 0;
 };
 
 using IBackgroundFunction_sptr = std::shared_ptr<IBackgroundFunction>;

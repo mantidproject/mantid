@@ -66,6 +66,21 @@ The output workspace can be saved to ``XYE``, ``Maud`` and ``TOPAS`` format usin
    # Maud format
    SaveFocusedXYE(ws, Filename='data.xye', SplitFiles=False, Format='MAUD')
 
+You can also save the reduced data as ``GSAS`` or ``XYE`` format by adding additional arguments to the reduction call
+
+.. code-block:: python
+
+   ws = HB2AReduce(
+      '/HFIR/HB2A/IPTS-21073/exp666/Datafiles/HB2A_exp0666_scan0024.dat',
+      SaveData=True,
+      OutputFormat="GSAS",
+      OutputDirectory="/tmp",
+      )
+
+**Warning**
+- Do not specify ``OutputFormat`` or ``OutputDirectory`` if ``SaveData`` is set to False.
+- If ``def_x = 2theta`` is not the in the header of any one of the input files, do not set ``OutputFormat`` to ``GSAS``.
+
 Usage
 -----
 

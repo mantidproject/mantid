@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<parameter-file instrument="D7" valid-from="1900-01-01T00:00:00">
+
+  <component-link name="D7">
+    <parameter name="number_banks" type="int" visible="false">
+      <value val="3" />
+    </parameter>
+    <parameter name="number_pixels_per_bank" type="int" visible="false">
+      <value val="44" />
+    </parameter>
+
+    <!-- formula for Detector efficiency calculation. Algorithm: DetectorEfficiencyCorUser
+	 See http://muparser.sourceforge.net/mup_features.html#idDef2 for available
+	 operators -->
+    <parameter name="formula_eff" type="string" visible="false">
+      <value val="1.0 - exp(-13.153/sqrt(e))" />
+    </parameter>
+
+    <parameter name="sample_logs_sum" type="string">
+      <value val="duration,monitor1.monsum" />
+    </parameter>
+
+    <!-- Distance from the sample of odd and even detectors, and the Fermi chopper in metres -->
+    <parameter name="sample_distance_chopper" type="number" visible="false">
+      <value val="0.48" />
+    </parameter>
+    <parameter name="sample_distance_odd" type="number" visible="false">
+      <value val="1.5177" />
+    </parameter>
+    <parameter name="sample_distance_even" type="number" visible="false">
+      <value val="1.50518" />
+    </parameter>
+
+    <parameter name="logbook_default_parameters" type="string" visible="false">
+      <value val="proposal_number:/entry0/user/proposal:s,
+		  experiment_identifier:/entry0/experiment_identifier:s,
+		  start_time:/entry0/start_time:s,
+		  total_duration:/entry0/duration+/entry1/duration+/entry2/duration+/entry3/duration+/entry4/duration+/entry5/duration:d,
+		  count_repeater:/entry0/duration//entry1/duration:f,
+		  polarisation:/entry0/D7/POL/actual_state+/entry2/D7/POL/actual_state+/entry4/D7/POL/actual_state:s" />
+    </parameter>
+    <parameter name="logbook_optional_parameters" type="string" visible="false">
+      <value val="wavelength:/entry0/D7/monochromator/wavelength:f,
+		  TOF:/entry0/acquisition_mode:d" />
+    </parameter>
+
+  </component-link>
+</parameter-file>

@@ -8,7 +8,7 @@ import math
 
 from mantid.kernel import *
 from mantid.api import *
-from mantid.simpleapi import SaveAscii
+from mantid.simpleapi import SaveAscii, logger
 import EnggUtils
 
 
@@ -25,7 +25,8 @@ class EnggCalibrateFull(PythonAlgorithm):
         return "EnggCalibrateFull"
 
     def summary(self):
-        return "Calibrates every detector/pixel position by performing single peak fitting."
+        return ("This algorithm is deprecated as of May 2021, consider using PDCalibration instead."
+                "Calibrates every detector/pixel position by performing single peak fitting.")
 
     def PyInit(self):
         self.declareProperty(MatrixWorkspaceProperty("Workspace", "", Direction.InOut),
@@ -117,6 +118,7 @@ class EnggCalibrateFull(PythonAlgorithm):
         self.setPropertyGroup('ExpectedPeaksFromFile', peaks_grp)
 
     def PyExec(self):
+        logger.warning("EnggCalibrateFull is deprecated as of May 2021. Please use PDCalibration instead.")
         # Get peaks in dSpacing from file, and check we have what we need, before doing anything
         expected_peaks_d = EnggUtils.read_in_expected_peaks(self.getPropertyValue("ExpectedPeaksFromFile"),
                                                             self.getProperty('ExpectedPeaks').value)

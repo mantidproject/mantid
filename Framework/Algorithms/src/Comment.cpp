@@ -7,8 +7,7 @@
 #include "MantidAlgorithms/Comment.h"
 #include "MantidKernel/MandatoryValidator.h"
 
-namespace Mantid {
-namespace Algorithms {
+namespace Mantid::Algorithms {
 
 using Mantid::API::Workspace;
 using Mantid::API::WorkspaceProperty;
@@ -30,22 +29,17 @@ int Comment::version() const { return 1; }
 const std::string Comment::category() const { return "Utility\\Workspaces"; }
 
 /// Algorithm's summary for use in the GUI and help. @see Algorithm::summary
-const std::string Comment::summary() const {
-  return "Adds a comment into the history record of a workspace";
-}
+const std::string Comment::summary() const { return "Adds a comment into the history record of a workspace"; }
 
 //----------------------------------------------------------------------------------------------
 /** Initialize the algorithm's properties.
  */
 void Comment::init() {
-  declareProperty(std::make_unique<WorkspaceProperty<Workspace>>(
-                      "Workspace", "", Direction::InOut),
+  declareProperty(std::make_unique<WorkspaceProperty<Workspace>>("Workspace", "", Direction::InOut),
                   "An InOut workspace that will store the new history comment");
 
-  declareProperty("Text", "",
-                  std::make_shared<MandatoryValidator<std::string>>(),
-                  "The text you want to store in the history of the workspace",
-                  Direction::Input);
+  declareProperty("Text", "", std::make_shared<MandatoryValidator<std::string>>(),
+                  "The text you want to store in the history of the workspace", Direction::Input);
 
   // always record history for this algorithm
   enableHistoryRecordingForChild(true);
@@ -58,5 +52,4 @@ void Comment::exec() {
   // do nothing
 }
 
-} // namespace Algorithms
-} // namespace Mantid
+} // namespace Mantid::Algorithms

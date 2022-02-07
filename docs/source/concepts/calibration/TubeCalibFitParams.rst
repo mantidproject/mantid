@@ -3,7 +3,7 @@
 TubeCalibFitParams
 ==================
 
-An object of the python class (defined in tube_calib_fit_param.py) holds the parameters needed for fitting the positions of the peaks formed by the slits or edges. The constructor has the following arguments: 
+An object of the python class (defined in tube_calib_fit_param.py) holds the parameters needed for fitting the positions of the peaks formed by the slits or edges. The constructor has the following arguments:
 
 +-----+-----------------+------------+----------+--------------------------------------------------+
 |Order|Name             |Type        |Default   |Description                                       |
@@ -19,6 +19,6 @@ An object of the python class (defined in tube_calib_fit_param.py) holds the par
 |     |                 |            |          |is used, else it's peak fitting of slits          |
 +-----+-----------------+------------+----------+--------------------------------------------------+
 
-After creation it just needs to be passed to getCalibration of :ref:`Tube_calib`. 
+After creation it just needs to be passed to getCalibration of :ref:`Tube_calib`.
 
-If ThreePointMethod is True, then the other arguments are ignored and Peaks can be an empty array. 
+If ThreePointMethod is True, then the other arguments are ignored and Peaks can be an empty array.

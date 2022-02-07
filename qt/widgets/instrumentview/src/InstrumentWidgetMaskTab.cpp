@@ -19,7 +19,7 @@
 #include "MantidAPI/IMaskWorkspace.h"
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/MatrixWorkspace.h"
-// #include "MantidDataObjects/TableWorkspace.h"
+#include "MantidGeometry/Instrument/ComponentInfo.h"
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/Strings.h"
 
@@ -71,14 +71,11 @@
 
 using Mantid::API::AlgorithmManager;
 
-namespace MantidQt {
-namespace MantidWidgets {
+namespace MantidQt::MantidWidgets {
 InstrumentWidgetMaskTab::InstrumentWidgetMaskTab(InstrumentWidget *instrWidget)
-    : InstrumentWidgetTab(instrWidget), m_activity(Select),
-      m_hasMaskToApply(false), m_maskBins(false), m_userEditing(true),
-      m_groupManager(nullptr), m_stringManager(nullptr),
-      m_doubleManager(nullptr), m_browser(nullptr), m_left(nullptr),
-      m_top(nullptr), m_right(nullptr), m_bottom(nullptr) {
+    : InstrumentWidgetTab(instrWidget), m_activity(Select), m_hasMaskToApply(false), m_maskBins(false),
+      m_userEditing(true), m_groupManager(nullptr), m_stringManager(nullptr), m_doubleManager(nullptr),
+      m_browser(nullptr), m_left(nullptr), m_top(nullptr), m_right(nullptr), m_bottom(nullptr), m_rotation(nullptr) {
 
   // main layout
   QVBoxLayout *layout = new QVBoxLayout(this);
@@ -130,6 +127,25 @@ InstrumentWidgetMaskTab::InstrumentWidgetMaskTab(InstrumentWidget *instrWidget)
   m_ring_rectangle->setToolTip("Draw a rectangular ring (Shift+Alt+R)");
   m_ring_rectangle->setShortcut(QKeySequence("Shift+Alt+R"));
 
+  m_sector = new QPushButton();
+  m_sector->setCheckable(true);
+  m_sector->setAutoExclusive(true);
+  m_sector->setIcon(QIcon(":/MaskTools/selection-sector.png"));
+  m_sector->setToolTip("Draw a circle sector (Shift+Alt+S)");
+  m_sector->setShortcut(QKeySequence("Shift+Alt+S"));
+
+  m_pixel = new QPushButton();
+  m_pixel->setCheckable(true);
+  m_pixel->setAutoExclusive(true);
+  m_pixel->setIcon(QIcon(":/PickTools/selection-pointer.png"));
+  m_pixel->setToolTip("Select a pixel");
+
+  m_tube = new QPushButton();
+  m_tube->setCheckable(true);
+  m_tube->setAutoExclusive(true);
+  m_tube->setIcon(QIcon(":/PickTools/selection-tube.png"));
+  m_tube->setToolTip("Select a tube/bank");
+
   m_free_draw = new QPushButton();
   m_free_draw->setCheckable(true);
   m_free_draw->setAutoExclusive(true);
@@ -137,17 +153,21 @@ InstrumentWidgetMaskTab::InstrumentWidgetMaskTab(InstrumentWidget *instrWidget)
   m_free_draw->setToolTip("Draw an arbitrary shape (Shift+Alt+A)");
   m_free_draw->setShortcut(QKeySequence("Shift+Alt+A"));
 
-  auto *toolBox = new QHBoxLayout();
-  toolBox->addWidget(m_move);
-  toolBox->addWidget(m_pointer);
-  toolBox->addWidget(m_ellipse);
-  toolBox->addWidget(m_rectangle);
-  toolBox->addWidget(m_ring_ellipse);
-  toolBox->addWidget(m_ring_rectangle);
-  toolBox->addWidget(m_free_draw);
-  toolBox->addStretch();
+  auto *toolBox = new QGridLayout();
+  layout->addLayout(toolBox);
+
+  toolBox->addWidget(m_move, 0, 0);
+  toolBox->addWidget(m_pointer, 0, 1);
+  toolBox->addWidget(m_ellipse, 0, 2);
+  toolBox->addWidget(m_rectangle, 0, 3);
+  toolBox->addWidget(m_ring_ellipse, 0, 4);
+  toolBox->addWidget(m_ring_rectangle, 0, 5);
+  toolBox->addWidget(m_sector, 0, 6);
+  toolBox->addWidget(m_free_draw, 0, 7);
+  toolBox->addWidget(m_pixel, 1, 0);
+  toolBox->addWidget(m_tube, 1, 1);
+  toolBox->setColumnStretch(8, 1);
   toolBox->setSpacing(2);
-  toolBox->setMargin(0);
 
   connect(m_move, SIGNAL(clicked()), this, SLOT(setActivity()));
   connect(m_pointer, SIGNAL(clicked()), this, SLOT(setActivity()));
@@ -155,12 +175,11 @@ InstrumentWidgetMaskTab::InstrumentWidgetMaskTab(InstrumentWidget *instrWidget)
   connect(m_rectangle, SIGNAL(clicked()), this, SLOT(setActivity()));
   connect(m_ring_ellipse, SIGNAL(clicked()), this, SLOT(setActivity()));
   connect(m_ring_rectangle, SIGNAL(clicked()), this, SLOT(setActivity()));
+  connect(m_sector, SIGNAL(clicked()), this, SLOT(setActivity()));
+  connect(m_tube, SIGNAL(clicked()), this, SLOT(setActivity()));
+  connect(m_pixel, SIGNAL(clicked()), this, SLOT(setActivity()));
   connect(m_free_draw, SIGNAL(clicked()), this, SLOT(setActivity()));
   m_move->setChecked(true);
-  auto *toolGroup = new QFrame();
-  toolGroup->setLayout(toolBox);
-
-  layout->addWidget(toolGroup);
 
   // create mask/group switch
   m_masking_on = new QRadioButton("Mask");
@@ -188,8 +207,7 @@ InstrumentWidgetMaskTab::InstrumentWidgetMaskTab(InstrumentWidget *instrWidget)
 
   m_groupManager = new QtGroupPropertyManager(this);
   m_doubleManager = new QtDoublePropertyManager(this);
-  connect(m_doubleManager, SIGNAL(propertyChanged(QtProperty *)), this,
-          SLOT(doubleChanged(QtProperty *)));
+  connect(m_doubleManager, SIGNAL(propertyChanged(QtProperty *)), this, SLOT(doubleChanged(QtProperty *)));
 
   /* Create editors and assign them to the managers */
 
@@ -202,7 +220,7 @@ InstrumentWidgetMaskTab::InstrumentWidgetMaskTab(InstrumentWidget *instrWidget)
 
   // Algorithm buttons
 
-  m_applyToData = new QPushButton("Apply to Data");
+  m_applyToData = new QPushButton("Apply to Data (Cannot be reverted)");
   m_applyToData->setToolTip("Apply current detector and bin masks to the data "
                             "workspace. Cannot be reverted.");
   connect(m_applyToData, SIGNAL(clicked()), this, SLOT(applyMask()));
@@ -212,90 +230,63 @@ InstrumentWidgetMaskTab::InstrumentWidgetMaskTab(InstrumentWidget *instrWidget)
   connect(m_applyToView, SIGNAL(clicked()), this, SLOT(applyMaskToView()));
 
   m_saveShapesToTable = new QPushButton("Save Shapes to Table");
-  m_saveShapesToTable->setToolTip(
-      "Store the current Mask/ROI/Group shapes as a table");
-  connect(m_saveShapesToTable, SIGNAL(clicked()), this,
-          SLOT(saveShapesToTable()));
+  m_saveShapesToTable->setToolTip("Store the current Mask/ROI/Group shapes as a table");
+  connect(m_saveShapesToTable, SIGNAL(clicked()), this, SLOT(saveShapesToTable()));
 
   m_clearAll = new QPushButton("Clear All");
-  m_clearAll->setToolTip(
-      "Clear all masking that have not been applied to the data.");
+  m_clearAll->setToolTip("Clear all masking that have not been applied to the data.");
   connect(m_clearAll, SIGNAL(clicked()), this, SLOT(clearMask()));
 
-  m_save_as_workspace_exclude =
-      new QAction("As Detector Mask to workspace", this);
-  m_save_as_workspace_exclude->setToolTip(
-      "Save current detector mask to mask workspace.");
-  connect(m_save_as_workspace_exclude, SIGNAL(triggered()), this,
-          SLOT(saveMaskToWorkspace()));
+  m_save_as_workspace_exclude = new QAction("As Detector Mask to workspace", this);
+  m_save_as_workspace_exclude->setToolTip("Save current detector mask to mask workspace.");
+  connect(m_save_as_workspace_exclude, SIGNAL(triggered()), this, SLOT(saveMaskToWorkspace()));
 
-  m_save_as_workspace_include =
-      new QAction("As Detector ROI to workspace", this);
-  m_save_as_workspace_include->setToolTip(
-      "Save current detector mask as ROI to mask workspace.");
-  connect(m_save_as_workspace_include, SIGNAL(triggered()), this,
-          SLOT(saveInvertedMaskToWorkspace()));
+  m_save_as_workspace_include = new QAction("As Detector ROI to workspace", this);
+  m_save_as_workspace_include->setToolTip("Save current detector mask as ROI to mask workspace.");
+  connect(m_save_as_workspace_include, SIGNAL(triggered()), this, SLOT(saveInvertedMaskToWorkspace()));
 
   m_save_as_file_exclude = new QAction("As Detector Mask to file", this);
-  m_save_as_file_exclude->setToolTip(
-      "Save current detector mask to mask file.");
-  connect(m_save_as_file_exclude, SIGNAL(triggered()), this,
-          SLOT(saveMaskToFile()));
+  m_save_as_file_exclude->setToolTip("Save current detector mask to mask file.");
+  connect(m_save_as_file_exclude, SIGNAL(triggered()), this, SLOT(saveMaskToFile()));
 
   m_save_as_file_include = new QAction("As Detector ROI to file", this);
   m_save_as_file_include->setToolTip("Save current mask as ROI to mask file.");
-  connect(m_save_as_file_include, SIGNAL(triggered()), this,
-          SLOT(saveInvertedMaskToFile()));
+  connect(m_save_as_file_include, SIGNAL(triggered()), this, SLOT(saveInvertedMaskToFile()));
 
-  m_save_as_cal_file_exclude =
-      new QAction("As Detector Mask to cal file", this);
-  m_save_as_cal_file_exclude->setToolTip(
-      "Save current detector mask to cal file.");
-  connect(m_save_as_cal_file_exclude, SIGNAL(triggered()), this,
-          SLOT(saveMaskToCalFile()));
+  m_save_as_cal_file_exclude = new QAction("As Detector Mask to cal file", this);
+  m_save_as_cal_file_exclude->setToolTip("Save current detector mask to cal file.");
+  connect(m_save_as_cal_file_exclude, SIGNAL(triggered()), this, SLOT(saveMaskToCalFile()));
 
   m_save_as_cal_file_include = new QAction("As Detector ROI to cal file", this);
-  m_save_as_cal_file_include->setToolTip(
-      "Save current detector mask as ROI to cal file.");
-  connect(m_save_as_cal_file_include, SIGNAL(triggered()), this,
-          SLOT(saveInvertedMaskToCalFile()));
+  m_save_as_cal_file_include->setToolTip("Save current detector mask as ROI to cal file.");
+  connect(m_save_as_cal_file_include, SIGNAL(triggered()), this, SLOT(saveInvertedMaskToCalFile()));
 
-  m_save_as_table_xrange_exclude =
-      new QAction("As Detector Mask to table", this);
-  m_save_as_table_xrange_exclude->setToolTip(
-      "Save current detector mask to a table workspace with x-range. "
-      "The name of output table workspace is 'MaskBinTable'. "
-      "If the output table workspace has alrady exist, then "
-      "the newly masked detectors will be added to output workspace.");
-  connect(m_save_as_table_xrange_exclude, SIGNAL(triggered()), this,
-          SLOT(saveMaskToTable()));
+  m_save_as_table_xrange_exclude = new QAction("As Detector Mask to table", this);
+  m_save_as_table_xrange_exclude->setToolTip("Save current detector mask to a table workspace with x-range. "
+                                             "The name of output table workspace is 'MaskBinTable'. "
+                                             "If the output table workspace has alrady exist, then "
+                                             "the newly masked detectors will be added to output workspace.");
+  connect(m_save_as_table_xrange_exclude, SIGNAL(triggered()), this, SLOT(saveMaskToTable()));
 
   m_save_group_file_include = new QAction("As include group to file", this);
-  m_save_group_file_include->setToolTip(
-      "Save current mask as include group to a file.");
-  connect(m_save_group_file_include, SIGNAL(triggered()), this,
-          SLOT(saveIncludeGroupToFile()));
+  m_save_group_file_include->setToolTip("Save current mask as include group to a file.");
+  connect(m_save_group_file_include, SIGNAL(triggered()), this, SLOT(saveIncludeGroupToFile()));
 
   m_save_group_file_exclude = new QAction("As exclude group to file", this);
-  m_save_group_file_exclude->setToolTip(
-      "Save current mask as exclude group to a file.");
-  connect(m_save_group_file_exclude, SIGNAL(triggered()), this,
-          SLOT(saveExcludeGroupToFile()));
+  m_save_group_file_exclude->setToolTip("Save current mask as exclude group to a file.");
+  connect(m_save_group_file_exclude, SIGNAL(triggered()), this, SLOT(saveExcludeGroupToFile()));
 
   m_extract_to_workspace = new QAction("Extract detectors to workspace", this);
   m_extract_to_workspace->setToolTip("Extract detectors to workspace.");
-  connect(m_extract_to_workspace, SIGNAL(triggered()), this,
-          SLOT(extractDetsToWorkspace()));
+  connect(m_extract_to_workspace, SIGNAL(triggered()), this, SLOT(extractDetsToWorkspace()));
 
   m_sum_to_workspace = new QAction("Sum detectors to workspace", this);
   m_sum_to_workspace->setToolTip("Sum detectors to workspace.");
-  connect(m_sum_to_workspace, SIGNAL(triggered()), this,
-          SLOT(sumDetsToWorkspace()));
+  connect(m_sum_to_workspace, SIGNAL(triggered()), this, SLOT(sumDetsToWorkspace()));
 
   // Save button and its menus
   m_saveButton = new QPushButton("Apply and Save");
-  m_saveButton->setToolTip(
-      "Save current masking/grouping to a file or a workspace.");
+  m_saveButton->setToolTip("Save current masking/grouping to a file or a workspace.");
 
   m_saveMask = new QMenu(this);
   m_saveMask->addAction(m_save_as_workspace_exclude);
@@ -303,8 +294,7 @@ InstrumentWidgetMaskTab::InstrumentWidgetMaskTab(InstrumentWidget *instrWidget)
   m_saveMask->addAction(m_save_as_cal_file_exclude);
   m_saveMask->addSeparator();
   m_saveMask->addAction(m_save_as_table_xrange_exclude);
-  connect(m_saveMask, SIGNAL(hovered(QAction *)), this,
-          SLOT(showSaveMenuTooltip(QAction *)));
+  connect(m_saveMask, SIGNAL(hovered(QAction *)), this, SLOT(showSaveMenuTooltip(QAction *)));
 
   m_saveButton->setMenu(m_saveMask);
 
@@ -313,8 +303,7 @@ InstrumentWidgetMaskTab::InstrumentWidgetMaskTab(InstrumentWidget *instrWidget)
   m_saveGroup->addAction(m_sum_to_workspace);
   m_saveGroup->addSeparator();
 
-  connect(m_saveGroup, SIGNAL(hovered(QAction *)), this,
-          SLOT(showSaveMenuTooltip(QAction *)));
+  connect(m_saveGroup, SIGNAL(hovered(QAction *)), this, SLOT(showSaveMenuTooltip(QAction *)));
 
   m_saveROI = new QMenu(this);
   m_saveROI->addAction(m_save_as_workspace_include);
@@ -324,8 +313,7 @@ InstrumentWidgetMaskTab::InstrumentWidgetMaskTab(InstrumentWidget *instrWidget)
   m_saveROI->addAction(m_extract_to_workspace);
   m_saveROI->addAction(m_sum_to_workspace);
 
-  connect(m_saveROI, SIGNAL(hovered(QAction *)), this,
-          SLOT(showSaveMenuTooltip(QAction *)));
+  connect(m_saveROI, SIGNAL(hovered(QAction *)), this, SLOT(showSaveMenuTooltip(QAction *)));
 
   auto *box = new QGroupBox("View");
   auto *buttons = new QGridLayout();
@@ -343,24 +331,22 @@ InstrumentWidgetMaskTab::InstrumentWidgetMaskTab(InstrumentWidget *instrWidget)
   box->setLayout(buttons);
   layout->addWidget(box);
 
-  connect(m_instrWidget, SIGNAL(maskedWorkspaceOverlayed()), this,
-          SLOT(enableApplyButtons()));
+  connect(m_instrWidget, SIGNAL(maskedWorkspaceOverlayed()), this, SLOT(enableApplyButtons()));
 }
+
+InstrumentWidgetMaskTab::~InstrumentWidgetMaskTab() { m_browser->unsetFactoryForManager(m_doubleManager); }
 
 /**
  * Initialize the tab when new projection surface is created.
  */
 void InstrumentWidgetMaskTab::initSurface() {
-  connect(m_instrWidget->getSurface().get(), SIGNAL(shapeCreated()), this,
-          SLOT(shapeCreated()));
-  connect(m_instrWidget->getSurface().get(), SIGNAL(shapeSelected()), this,
-          SLOT(shapeSelected()));
-  connect(m_instrWidget->getSurface().get(), SIGNAL(shapesDeselected()), this,
-          SLOT(shapesDeselected()));
-  connect(m_instrWidget->getSurface().get(), SIGNAL(shapeChanged()), this,
-          SLOT(shapeChanged()));
-  connect(m_instrWidget->getSurface().get(), SIGNAL(shapesCleared()), this,
-          SLOT(shapesCleared()));
+  connect(m_instrWidget->getSurface().get(), SIGNAL(singleComponentPickedForMasking(size_t)), this,
+          SLOT(singlePixelPicked(size_t)));
+  connect(m_instrWidget->getSurface().get(), SIGNAL(shapeCreated()), this, SLOT(shapeCreated()));
+  connect(m_instrWidget->getSurface().get(), SIGNAL(shapeSelected()), this, SLOT(shapeSelected()));
+  connect(m_instrWidget->getSurface().get(), SIGNAL(shapesDeselected()), this, SLOT(shapesDeselected()));
+  connect(m_instrWidget->getSurface().get(), SIGNAL(shapeChanged()), this, SLOT(shapeChanged()));
+  connect(m_instrWidget->getSurface().get(), SIGNAL(shapesCleared()), this, SLOT(shapesCleared()));
   enableApplyButtons();
 }
 
@@ -405,8 +391,17 @@ void InstrumentWidgetMaskTab::selectTool(Activity tool) {
   case DrawRectangularRing:
     m_ring_rectangle->setChecked(true);
     break;
+  case DrawSector:
+    m_sector->setChecked(true);
+    break;
   case DrawFree:
     m_free_draw->setChecked(true);
+    break;
+  case Pixel:
+    m_pixel->setChecked(true);
+    break;
+  case Tube:
+    m_tube->setChecked(true);
     break;
   default:
     throw std::invalid_argument("Invalid tool type.");
@@ -420,55 +415,117 @@ void InstrumentWidgetMaskTab::selectTool(Activity tool) {
 void InstrumentWidgetMaskTab::setActivity() {
   const QColor borderColor = getShapeBorderColor();
   const QColor fillColor = getShapeFillColor();
-  QString whatIsBeingSelected = m_maskBins && getMode() == Mode::Mask
-                                    ? "Selecting bins"
-                                    : "Selecting detectors";
+  QString whatIsBeingSelected = m_maskBins && getMode() == Mode::Mask ? "Selecting bins" : "Selecting detectors";
   if (m_move->isChecked()) {
     m_activity = Move;
-    m_instrWidget->getSurface()->setInteractionMode(
-        ProjectionSurface::MoveMode);
+    m_instrWidget->getSurface()->setInteractionMode(ProjectionSurface::MoveMode);
     m_activeTool->setText("Tool: Navigation");
   } else if (m_pointer->isChecked()) {
     m_activity = Select;
-    m_instrWidget->getSurface()->setInteractionMode(
-        ProjectionSurface::DrawRegularMode);
+    m_instrWidget->getSurface()->setInteractionMode(ProjectionSurface::EditShapeMode);
     m_activeTool->setText("Tool: Shape editing. " + whatIsBeingSelected);
   } else if (m_ellipse->isChecked()) {
     m_activity = DrawEllipse;
-    m_instrWidget->getSurface()->startCreatingShape2D("ellipse", borderColor,
-                                                      fillColor);
-    m_instrWidget->getSurface()->setInteractionMode(
-        ProjectionSurface::DrawRegularMode);
+    m_instrWidget->getSurface()->startCreatingShape2D("ellipse", borderColor, fillColor);
+    m_instrWidget->getSurface()->setInteractionMode(ProjectionSurface::EditShapeMode);
     m_activeTool->setText("Tool: Ellipse. " + whatIsBeingSelected);
   } else if (m_rectangle->isChecked()) {
     m_activity = DrawRectangle;
-    m_instrWidget->getSurface()->startCreatingShape2D("rectangle", borderColor,
-                                                      fillColor);
-    m_instrWidget->getSurface()->setInteractionMode(
-        ProjectionSurface::DrawRegularMode);
+    m_instrWidget->getSurface()->startCreatingShape2D("rectangle", borderColor, fillColor);
+    m_instrWidget->getSurface()->setInteractionMode(ProjectionSurface::EditShapeMode);
     m_activeTool->setText("Tool: Rectangle. " + whatIsBeingSelected);
   } else if (m_ring_ellipse->isChecked()) {
     m_activity = DrawEllipticalRing;
-    m_instrWidget->getSurface()->startCreatingShape2D("ring ellipse",
-                                                      borderColor, fillColor);
-    m_instrWidget->getSurface()->setInteractionMode(
-        ProjectionSurface::DrawRegularMode);
+    m_instrWidget->getSurface()->startCreatingShape2D("ring ellipse", borderColor, fillColor);
+    m_instrWidget->getSurface()->setInteractionMode(ProjectionSurface::EditShapeMode);
     m_activeTool->setText("Tool: Elliptical ring. " + whatIsBeingSelected);
   } else if (m_ring_rectangle->isChecked()) {
     m_activity = DrawRectangularRing;
-    m_instrWidget->getSurface()->startCreatingShape2D("ring rectangle",
-                                                      borderColor, fillColor);
-    m_instrWidget->getSurface()->setInteractionMode(
-        ProjectionSurface::DrawRegularMode);
+    m_instrWidget->getSurface()->startCreatingShape2D("ring rectangle", borderColor, fillColor);
+    m_instrWidget->getSurface()->setInteractionMode(ProjectionSurface::EditShapeMode);
     m_activeTool->setText("Tool: Rectangular ring. " + whatIsBeingSelected);
+  } else if (m_sector->isChecked()) {
+    m_activity = DrawSector;
+    m_instrWidget->getSurface()->startCreatingShape2D("sector", borderColor, fillColor);
+    m_instrWidget->getSurface()->setInteractionMode(ProjectionSurface::EditShapeMode);
+    m_activeTool->setText("Tool: Sector. " + whatIsBeingSelected);
+
   } else if (m_free_draw->isChecked()) {
     m_activity = DrawFree;
     m_instrWidget->getSurface()->startCreatingFreeShape(borderColor, fillColor);
-    m_instrWidget->getSurface()->setInteractionMode(
-        ProjectionSurface::DrawFreeMode);
+    m_instrWidget->getSurface()->setInteractionMode(ProjectionSurface::DrawFreeMode);
     m_activeTool->setText("Tool: Free draw. " + whatIsBeingSelected);
+  } else if (m_pixel->isChecked()) {
+    m_activity = Pixel;
+    m_instrWidget->getSurface()->setInteractionMode(ProjectionSurface::PickSingleMode);
+    m_activeTool->setText("Tool: Pixel mask. " + whatIsBeingSelected);
+  } else if (m_tube->isChecked()) {
+    m_activity = Tube;
+    m_instrWidget->getSurface()->setInteractionMode(ProjectionSurface::PickTubeMode);
+    m_activeTool->setText("Tool: Tube/bank mask. " + whatIsBeingSelected);
   }
   m_instrWidget->updateInfoText();
+}
+
+/**
+ * Slot responding on the pick of a single detector pixel for masking.
+ * Can be used either to mask the picked pixel or its parent.
+ */
+void InstrumentWidgetMaskTab::singlePixelPicked(size_t pickID) {
+  const auto &actor = m_instrWidget->getInstrumentActor();
+  const auto &componentInfo = actor.componentInfo();
+  if (!componentInfo.isDetector(pickID)) {
+    return;
+  }
+
+  size_t parent;
+
+  QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
+  std::vector<size_t> detectorsId{pickID};
+  m_instrWidget->updateInstrumentView(); // to refresh the pick image
+
+  if (m_masking_on->isChecked() || m_roi_on->isChecked()) {
+    if (m_tube->isChecked()) {
+      if (!componentInfo.hasParent(pickID)) {
+        return;
+      }
+      parent = componentInfo.parent(pickID);
+      detectorsId = componentInfo.detectorsInSubtree(parent);
+    }
+    storeDetectorMask(m_roi_on->isChecked(), detectorsId);
+
+  } else if (m_grouping_on->isChecked()) {
+    if (m_pixel->isChecked()) {
+      Mantid::detid_t detId = actor.getDetID(pickID);
+      m_detectorsToGroup.clear();
+      m_detectorsToGroup.push_back(detId);
+    } else if (m_tube->isChecked()) {
+      if (!componentInfo.hasParent(pickID)) {
+        return;
+      }
+      parent = componentInfo.parent(pickID);
+      const auto dets = actor.getDetIDs(componentInfo.detectorsInSubtree(parent));
+      m_detectorsToGroup.clear();
+      std::copy(dets.cbegin(), dets.cend(), std::back_inserter(m_detectorsToGroup));
+    }
+  }
+
+  // update detector colours
+  m_instrWidget->getInstrumentActor().updateColors();
+  m_instrWidget->updateInstrumentDetectors();
+  QApplication::restoreOverrideCursor();
+  enableApplyButtons();
+
+  if (m_grouping_on->isChecked()) {
+    if (m_pixel->isChecked()) {
+      m_instrWidget->updateInfoText(QString("Pixel %0 picked for grouping").arg(pickID));
+
+    } else if (m_tube->isChecked()) {
+      QString message = QString("Component %0 picked for grouping")
+                            .arg(QString::fromStdString(componentInfo.componentID(parent)->getName()));
+      m_instrWidget->updateInfoText(message);
+    }
+  }
 }
 
 /**
@@ -498,21 +555,19 @@ void InstrumentWidgetMaskTab::shapesDeselected() { clearProperties(); }
  */
 void InstrumentWidgetMaskTab::shapeChanged() {
   if (!m_left)
-    return; // check that everything is ok
-  m_userEditing =
-      false; // this prevents resetting shape properties by doubleChanged(...)
+    return;              // check that everything is ok
+  m_userEditing = false; // this prevents resetting shape properties by doubleChanged(...)
   RectF rect = m_instrWidget->getSurface()->getCurrentBoundingRect();
-  m_doubleManager->setValue(m_left, rect.x0());
-  m_doubleManager->setValue(m_top, rect.y1());
-  m_doubleManager->setValue(m_right, rect.x1());
-  m_doubleManager->setValue(m_bottom, rect.y0());
-  for (QMap<QtProperty *, QString>::iterator it = m_doublePropertyMap.begin();
-       it != m_doublePropertyMap.end(); ++it) {
-    m_doubleManager->setValue(
-        it.key(), m_instrWidget->getSurface()->getCurrentDouble(it.value()));
+
+  m_doubleManager->setValue(m_left, std::min(rect.x0(), rect.x1()));
+  m_doubleManager->setValue(m_top, std::max(rect.y0(), rect.y1()));
+  m_doubleManager->setValue(m_right, std::max(rect.x0(), rect.x1()));
+  m_doubleManager->setValue(m_bottom, std::min(rect.y0(), rect.y1()));
+
+  for (QMap<QtProperty *, QString>::iterator it = m_doublePropertyMap.begin(); it != m_doublePropertyMap.end(); ++it) {
+    m_doubleManager->setValue(it.key(), m_instrWidget->getSurface()->getCurrentDouble(it.value()));
   }
-  for (QMap<QString, QtProperty *>::iterator it = m_pointPropertyMap.begin();
-       it != m_pointPropertyMap.end(); ++it) {
+  for (QMap<QString, QtProperty *>::iterator it = m_pointPropertyMap.begin(); it != m_pointPropertyMap.end(); ++it) {
     QtProperty *prop = it.value();
     QList<QtProperty *> subs = prop->subProperties();
     if (subs.size() != 2)
@@ -554,6 +609,7 @@ void InstrumentWidgetMaskTab::clearProperties() {
   m_top = nullptr;
   m_right = nullptr;
   m_bottom = nullptr;
+  m_rotation = nullptr;
 }
 
 void InstrumentWidgetMaskTab::setProperties() {
@@ -567,14 +623,19 @@ void InstrumentWidgetMaskTab::setProperties() {
   m_top = addDoubleProperty("top");
   m_right = addDoubleProperty("right");
   m_bottom = addDoubleProperty("bottom");
+
   boundingRectGroup->addSubProperty(m_left);
   boundingRectGroup->addSubProperty(m_top);
   boundingRectGroup->addSubProperty(m_right);
   boundingRectGroup->addSubProperty(m_bottom);
 
+  if (isRotationSupported()) {
+    m_rotation = addDoubleProperty("rotation");
+    boundingRectGroup->addSubProperty(m_rotation);
+  }
+
   // point properties
-  QStringList pointProperties =
-      m_instrWidget->getSurface()->getCurrentPointNames();
+  QStringList pointProperties = m_instrWidget->getSurface()->getCurrentPointNames();
   foreach (QString name, pointProperties) {
     QtProperty *point = m_groupManager->addProperty(name);
     QtProperty *prop_x = addDoubleProperty("x");
@@ -588,13 +649,16 @@ void InstrumentWidgetMaskTab::setProperties() {
   }
 
   // double properties
-  QStringList doubleProperties =
-      m_instrWidget->getSurface()->getCurrentDoubleNames();
+  QStringList doubleProperties = m_instrWidget->getSurface()->getCurrentDoubleNames();
   foreach (QString name, doubleProperties) {
     QtProperty *prop = addDoubleProperty(name);
     m_browser->addProperty(prop);
     m_doublePropertyMap[prop] = name;
   }
+
+  // rotation property
+  if (isRotationSupported())
+    m_doubleManager->setValue(m_rotation, m_instrWidget->getSurface()->getCurrentBoundingRotation());
 
   shapeChanged();
 }
@@ -602,24 +666,29 @@ void InstrumentWidgetMaskTab::setProperties() {
 /**
  * Save shapes to a table workspace
  */
-void InstrumentWidgetMaskTab::saveShapesToTable() const {
-  m_instrWidget->getSurface()->saveShapesToTableWorkspace();
-}
+void InstrumentWidgetMaskTab::saveShapesToTable() const { m_instrWidget->getSurface()->saveShapesToTableWorkspace(); }
 
 void InstrumentWidgetMaskTab::doubleChanged(QtProperty *prop) {
   if (!m_userEditing)
     return;
-  if (prop == m_left || prop == m_top || prop == m_right || prop == m_bottom) {
-    QRectF rect(
-        QPointF(m_doubleManager->value(m_left), m_doubleManager->value(m_top)),
-        QPointF(m_doubleManager->value(m_right),
-                m_doubleManager->value(m_bottom)));
+
+  if (prop == m_left || prop == m_top || prop == m_right || prop == m_bottom || prop == m_rotation) {
+    m_userEditing = false;
+    double x0 = std::min(m_doubleManager->value(m_left), m_doubleManager->value(m_right));
+    double x1 = std::max(m_doubleManager->value(m_left), m_doubleManager->value(m_right));
+    double y0 = std::min(m_doubleManager->value(m_top), m_doubleManager->value(m_bottom));
+    double y1 = std::max(m_doubleManager->value(m_top), m_doubleManager->value(m_bottom));
+
+    QRectF rect(QPointF(x0, y0), QPointF(x1, y1));
     m_instrWidget->getSurface()->setCurrentBoundingRect(RectF(rect));
+
+    if (isRotationSupported())
+      m_instrWidget->getSurface()->setCurrentBoundingRotation(m_doubleManager->value(m_rotation));
+
   } else {
     QString name = m_doublePropertyMap[prop];
     if (!name.isEmpty()) {
-      m_instrWidget->getSurface()->setCurrentDouble(
-          name, m_doubleManager->value(prop));
+      m_instrWidget->getSurface()->setCurrentDouble(name, m_doubleManager->value(prop));
     } else {
       name = m_pointComponentsMap[prop];
       if (!name.isEmpty()) {
@@ -627,12 +696,13 @@ void InstrumentWidgetMaskTab::doubleChanged(QtProperty *prop) {
         QList<QtProperty *> subs = point_prop->subProperties();
         if (subs.size() != 2)
           return;
-        QPointF p(m_doubleManager->value(subs[0]),
-                  m_doubleManager->value(subs[1]));
+        QPointF p(m_doubleManager->value(subs[0]), m_doubleManager->value(subs[1]));
         m_instrWidget->getSurface()->setCurrentPoint(name, p);
       }
     }
   }
+  // when the user validates the field's edit, the view is immediatly updated
+  m_instrWidget->updateInstrumentView();
   m_instrWidget->update();
 }
 
@@ -644,6 +714,7 @@ void InstrumentWidgetMaskTab::applyMask() {
   storeMask();
   QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
   m_instrWidget->getInstrumentActor().applyMaskWorkspace();
+  m_instrWidget->setupColorMap();
   enableApplyButtons();
   QApplication::restoreOverrideCursor();
 }
@@ -653,6 +724,7 @@ void InstrumentWidgetMaskTab::applyMask() {
  */
 void InstrumentWidgetMaskTab::applyMaskToView() {
   storeMask();
+  m_instrWidget->setupColorMap();
   enableApplyButtons();
 }
 
@@ -661,7 +733,10 @@ void InstrumentWidgetMaskTab::applyMaskToView() {
  */
 void InstrumentWidgetMaskTab::clearMask() {
   clearShapes();
+  m_detectorsToGroup.clear();
   m_instrWidget->getInstrumentActor().clearMasks();
+  m_instrWidget->getInstrumentActor().updateColors();
+  m_instrWidget->setupColorMap();
   m_instrWidget->updateInstrumentView();
   enableApplyButtons();
 }
@@ -673,11 +748,9 @@ void InstrumentWidgetMaskTab::clearMask() {
  * @param temp :: Set true to create a temporary workspace with a fixed name. If
  * false the name will be unique.
  */
-Mantid::API::MatrixWorkspace_sptr
-InstrumentWidgetMaskTab::createMaskWorkspace(bool invertMask, bool temp) const {
+Mantid::API::MatrixWorkspace_sptr InstrumentWidgetMaskTab::createMaskWorkspace(bool invertMask, bool temp) const {
   m_instrWidget->updateInstrumentView(); // to refresh the pick image
-  Mantid::API::MatrixWorkspace_sptr inputWS =
-      m_instrWidget->getInstrumentActor().getMaskMatrixWorkspace();
+  Mantid::API::MatrixWorkspace_sptr inputWS = m_instrWidget->getInstrumentActor().getMaskMatrixWorkspace();
   Mantid::API::MatrixWorkspace_sptr outputWS;
   const std::string outputWorkspaceName = generateMaskWorkspaceName(temp);
 
@@ -687,12 +760,10 @@ InstrumentWidgetMaskTab::createMaskWorkspace(bool invertMask, bool temp) const {
   alg->execute();
 
   outputWS = std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
-      Mantid::API::AnalysisDataService::Instance().retrieve(
-          outputWorkspaceName));
+      Mantid::API::AnalysisDataService::Instance().retrieve(outputWorkspaceName));
 
   if (invertMask) {
-    auto invertAlg =
-        AlgorithmManager::Instance().create("BinaryOperateMasks", -1);
+    auto invertAlg = AlgorithmManager::Instance().create("BinaryOperateMasks", -1);
     invertAlg->setPropertyValue("InputWorkspace1", outputWorkspaceName);
     invertAlg->setPropertyValue("OutputWorkspace", outputWorkspaceName);
     invertAlg->setPropertyValue("OperationType", "NOT");
@@ -706,30 +777,22 @@ InstrumentWidgetMaskTab::createMaskWorkspace(bool invertMask, bool temp) const {
   return outputWS;
 }
 
-void InstrumentWidgetMaskTab::saveInvertedMaskToWorkspace() {
-  saveMaskingToWorkspace(true);
-}
+void InstrumentWidgetMaskTab::saveInvertedMaskToWorkspace() { saveMaskingToWorkspace(true); }
 
-void InstrumentWidgetMaskTab::saveMaskToWorkspace() {
-  saveMaskingToWorkspace(false);
-}
+void InstrumentWidgetMaskTab::saveMaskToWorkspace() { saveMaskingToWorkspace(false); }
 
-void InstrumentWidgetMaskTab::saveInvertedMaskToFile() {
-  saveMaskingToFile(true);
-}
+void InstrumentWidgetMaskTab::saveInvertedMaskToFile() { saveMaskingToFile(true); }
 
 void InstrumentWidgetMaskTab::saveMaskToFile() { saveMaskingToFile(false); }
 
-void InstrumentWidgetMaskTab::saveMaskToCalFile() {
-  saveMaskingToCalFile(false);
-}
+void InstrumentWidgetMaskTab::saveMaskToCalFile() { saveMaskingToCalFile(false); }
 
-void InstrumentWidgetMaskTab::saveInvertedMaskToCalFile() {
-  saveMaskingToCalFile(true);
-}
+void InstrumentWidgetMaskTab::saveInvertedMaskToCalFile() { saveMaskingToCalFile(true); }
 
-void InstrumentWidgetMaskTab::saveMaskToTable() {
-  saveMaskingToTableWorkspace(false);
+void InstrumentWidgetMaskTab::saveMaskToTable() { saveMaskingToTableWorkspace(false); }
+
+void InstrumentWidgetMaskTab::showMessageBox(const QString &message) {
+  QMessageBox::information(this, "GroupDetectors Error", message, "OK");
 }
 
 /**
@@ -740,15 +803,22 @@ void InstrumentWidgetMaskTab::extractDetsToWorkspace() {
   std::vector<size_t> dets;
   m_instrWidget->getSurface()->getMaskedDetectors(dets);
   const auto &actor = m_instrWidget->getInstrumentActor();
-  DetXMLFile mapFile(actor.getDetIDs(dets));
+  auto detectorIDs = actor.getDetIDs(dets);
+  if (m_pixel->isChecked() || m_tube->isChecked())
+    detectorIDs.insert(detectorIDs.end(), m_detectorsToGroup.cbegin(), m_detectorsToGroup.cend());
+  DetXMLFile mapFile(detectorIDs);
   std::string fname = mapFile();
   if (!fname.empty()) {
     std::string workspaceName = m_instrWidget->getWorkspaceName().toStdString();
     auto alg = AlgorithmManager::Instance().create("GroupDetectors");
-    alg->setPropertyValue("InputWorkspace", workspaceName);
-    alg->setPropertyValue("MapFile", fname);
-    alg->setPropertyValue("OutputWorkspace", workspaceName + "_selection");
-    alg->execute();
+    try {
+      alg->setPropertyValue("InputWorkspace", workspaceName);
+      alg->setPropertyValue("MapFile", fname);
+      alg->setPropertyValue("OutputWorkspace", workspaceName + "_selection");
+      alg->execute();
+    } catch (std::exception &e) {
+      showMessageBox(e.what());
+    }
   }
   QApplication::restoreOverrideCursor();
 }
@@ -760,35 +830,38 @@ void InstrumentWidgetMaskTab::sumDetsToWorkspace() {
   QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
   std::vector<size_t> dets;
   m_instrWidget->getSurface()->getMaskedDetectors(dets);
-  DetXMLFile mapFile(m_instrWidget->getInstrumentActor().getDetIDs(dets),
-                     DetXMLFile::Sum);
+  auto detectorIDs = m_instrWidget->getInstrumentActor().getDetIDs(dets);
+  if (m_pixel->isChecked() || m_tube->isChecked())
+    detectorIDs.insert(detectorIDs.end(), m_detectorsToGroup.cbegin(), m_detectorsToGroup.cend());
+  DetXMLFile mapFile(detectorIDs, DetXMLFile::Sum);
   std::string fname = mapFile();
 
   if (!fname.empty()) {
     std::string workspaceName = m_instrWidget->getWorkspaceName().toStdString();
     auto alg = AlgorithmManager::Instance().create("GroupDetectors");
-    alg->setPropertyValue("InputWorkspace", workspaceName);
-    alg->setPropertyValue("MapFile", fname);
-    alg->setPropertyValue("OutputWorkspace", workspaceName + "_sum");
-    alg->execute();
+    try {
+      alg->setPropertyValue("InputWorkspace", workspaceName);
+      alg->setPropertyValue("MapFile", fname);
+      alg->setPropertyValue("OutputWorkspace", workspaceName + "_sum");
+      alg->execute();
+    } catch (std::exception &e) {
+      showMessageBox(e.what());
+    }
   }
   QApplication::restoreOverrideCursor();
 }
 
 void InstrumentWidgetMaskTab::saveIncludeGroupToFile() {
-  QString fname = m_instrWidget->getSaveFileName("Save grouping file",
-                                                 "XML files (*.xml);;All (*)");
+  QString fname = m_instrWidget->getSaveFileName("Save grouping file", "XML files (*.xml);;All (*)");
   if (!fname.isEmpty()) {
     std::vector<size_t> dets;
     m_instrWidget->getSurface()->getMaskedDetectors(dets);
-    DetXMLFile mapFile(m_instrWidget->getInstrumentActor().getDetIDs(dets),
-                       DetXMLFile::Sum, fname);
+    DetXMLFile mapFile(m_instrWidget->getInstrumentActor().getDetIDs(dets), DetXMLFile::Sum, fname);
   }
 }
 
 void InstrumentWidgetMaskTab::saveExcludeGroupToFile() {
-  QString fname = m_instrWidget->getSaveFileName("Save grouping file",
-                                                 "XML files (*.xml);;All (*)");
+  QString fname = m_instrWidget->getSaveFileName("Save grouping file", "XML files (*.xml);;All (*)");
   if (!fname.isEmpty()) {
     std::vector<size_t> dets;
     m_instrWidget->getSurface()->getMaskedDetectors(dets);
@@ -866,19 +939,15 @@ void InstrumentWidgetMaskTab::saveMaskingToFile(bool invertMask) {
     clearShapes();
 
     QApplication::restoreOverrideCursor();
-    QString fileName = m_instrWidget->getSaveFileName(
-        "Select location and name for the mask file",
-        "XML files (*.xml);;All (*)");
+    QString fileName =
+        m_instrWidget->getSaveFileName("Select location and name for the mask file", "XML files (*.xml);;All (*)");
     QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
 
     if (!fileName.isEmpty()) {
 
       // Call "SaveMask()"
-      Mantid::API::IAlgorithm_sptr alg =
-          Mantid::API::AlgorithmManager::Instance().create("SaveMask", -1);
-      alg->setProperty(
-          "InputWorkspace",
-          std::dynamic_pointer_cast<Mantid::API::Workspace>(outputWS));
+      Mantid::API::IAlgorithm_sptr alg = Mantid::API::AlgorithmManager::Instance().create("SaveMask", -1);
+      alg->setProperty("InputWorkspace", std::dynamic_pointer_cast<Mantid::API::Workspace>(outputWS));
       alg->setPropertyValue("OutputFile", fileName.toStdString());
       alg->execute();
     }
@@ -904,12 +973,10 @@ void InstrumentWidgetMaskTab::saveMaskingToCalFile(bool invertMask) {
   Mantid::API::MatrixWorkspace_sptr outputWS = createMaskWorkspace(false, true);
   if (outputWS) {
     clearShapes();
-    QString fileName = m_instrWidget->getSaveFileName(
-        "Select location and name for the mask file", "cal files (*.cal)");
+    QString fileName =
+        m_instrWidget->getSaveFileName("Select location and name for the mask file", "cal files (*.cal)");
     if (!fileName.isEmpty()) {
-      Mantid::API::IAlgorithm_sptr alg =
-          Mantid::API::AlgorithmManager::Instance().create(
-              "MaskWorkspaceToCalFile", -1);
+      Mantid::API::IAlgorithm_sptr alg = Mantid::API::AlgorithmManager::Instance().create("MaskWorkspaceToCalFile", -1);
       alg->setPropertyValue("InputWorkspace", outputWS->getName());
       alg->setPropertyValue("OutputFile", fileName.toStdString());
       alg->setProperty("Invert", false);
@@ -937,8 +1004,7 @@ void InstrumentWidgetMaskTab::saveMaskingToTableWorkspace(bool invertMask) {
   setSelectActivity();
 
   // Apply the view (no workspace) to a buffered mask workspace
-  Mantid::API::MatrixWorkspace_sptr inputWS =
-      m_instrWidget->getInstrumentActor().getMaskMatrixWorkspace();
+  Mantid::API::MatrixWorkspace_sptr inputWS = m_instrWidget->getInstrumentActor().getMaskMatrixWorkspace();
 
   // Extract from MaskWorkspace to a TableWorkspace
   double xmin = m_instrWidget->getInstrumentActor().minBinValue();
@@ -953,11 +1019,9 @@ void InstrumentWidgetMaskTab::saveMaskingToTableWorkspace(bool invertMask) {
   bool overwrite = false;
   try {
     temptablews = std::dynamic_pointer_cast<Mantid::API::ITableWorkspace>(
-        Mantid::API::AnalysisDataService::Instance().retrieve(
-            outputWorkspaceName));
+        Mantid::API::AnalysisDataService::Instance().retrieve(outputWorkspaceName));
   } catch (const Mantid::Kernel::Exception::NotFoundError &) {
-    std::cout << "TableWorkspace " << outputWorkspaceName
-              << " cannot be found in ADS."
+    std::cout << "TableWorkspace " << outputWorkspaceName << " cannot be found in ADS."
               << ".\n";
   }
 
@@ -982,15 +1046,12 @@ void InstrumentWidgetMaskTab::saveMaskingToTableWorkspace(bool invertMask) {
 
   if (alg->isExecuted()) {
     // Mantid::API::MatrixWorkspace_sptr outputWS
-    Mantid::API::ITableWorkspace_sptr outputWS =
-        std::dynamic_pointer_cast<Mantid::API::ITableWorkspace>(
-            Mantid::API::AnalysisDataService::Instance().retrieve(
-                outputWorkspaceName));
+    Mantid::API::ITableWorkspace_sptr outputWS = std::dynamic_pointer_cast<Mantid::API::ITableWorkspace>(
+        Mantid::API::AnalysisDataService::Instance().retrieve(outputWorkspaceName));
 
     outputWS->setTitle("MaskBinTable");
   } else {
-    QMessageBox::critical(this, "MantidPlot - Error",
-                          "Algorithm ExtractMaskToTable fails to execute. ");
+    QMessageBox::critical(this, "MantidPlot - Error", "Algorithm ExtractMaskToTable fails to execute. ");
   }
 }
 
@@ -998,8 +1059,7 @@ void InstrumentWidgetMaskTab::saveMaskingToTableWorkspace(bool invertMask) {
  * Generate a unique name for the mask worspace which will be saved in the ADS.
  * It will have a form MaskWorkspace[_#]
  */
-std::string
-InstrumentWidgetMaskTab::generateMaskWorkspaceName(bool temp) const {
+std::string InstrumentWidgetMaskTab::generateMaskWorkspaceName(bool temp) const {
   if (temp)
     return "__MaskTab_MaskWorkspace";
   auto wsNames = Mantid::API::AnalysisDataService::Instance().getObjectNames();
@@ -1034,7 +1094,7 @@ void InstrumentWidgetMaskTab::enableApplyButtons() {
   bool hasBinMask = instrActor.hasBinMask();
   bool hasDetectorMask = hasMaskShapes || hasMaskWorkspace;
   bool hasMask = hasDetectorMask || hasBinMask;
-
+  bool canGroup = (m_detectorsToGroup.size() != 0) && (mode == Mode::Group);
   bool enableBinMasking = hasMaskShapes && m_maskBins && mode == Mode::Mask;
 
   if (m_maskBins && mode == Mode::Mask) {
@@ -1052,8 +1112,8 @@ void InstrumentWidgetMaskTab::enableApplyButtons() {
     m_applyToView->setEnabled(false);
   }
   m_saveShapesToTable->setEnabled(hasMaskShapes);
-  m_saveButton->setEnabled(hasDetectorMask && (!enableBinMasking));
-  m_clearAll->setEnabled(hasMask);
+  m_saveButton->setEnabled((hasDetectorMask || canGroup) && (!enableBinMasking));
+  m_clearAll->setEnabled(hasMask || canGroup);
   setActivity();
 }
 
@@ -1093,12 +1153,9 @@ QColor InstrumentWidgetMaskTab::getShapeBorderColor() const {
 /**
  * Shape fill color.
  */
-QColor InstrumentWidgetMaskTab::getShapeFillColor() const {
-  return QColor(255, 255, 255, 100);
-}
+QColor InstrumentWidgetMaskTab::getShapeFillColor() const { return QColor(255, 255, 255, 100); }
 
-QtProperty *
-InstrumentWidgetMaskTab::addDoubleProperty(const QString &name) const {
+QtProperty *InstrumentWidgetMaskTab::addDoubleProperty(const QString &name) const {
   QtProperty *prop = m_doubleManager->addProperty(name);
   m_doubleManager->setDecimals(prop, 6);
   return prop;
@@ -1107,17 +1164,20 @@ InstrumentWidgetMaskTab::addDoubleProperty(const QString &name) const {
 /**
  * Store the mask defined by the shape tools to the helper m_maskWorkspace.
  */
-void InstrumentWidgetMaskTab::storeDetectorMask(bool isROI) {
+void InstrumentWidgetMaskTab::storeDetectorMask(bool isROI, const std::vector<size_t> &onClickDets) {
   QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
-  m_pointer->setChecked(true);
-  setActivity();
   m_instrWidget->updateInstrumentView(); // to refresh the pick image
   Mantid::API::IMaskWorkspace_sptr wsFresh;
 
   const auto &actor = m_instrWidget->getInstrumentActor();
   std::vector<size_t> dets;
-  // get detectors covered by the shapes
-  m_instrWidget->getSurface()->getMaskedDetectors(dets);
+  if (onClickDets.size() == 0) {
+    // get detectors covered by the shapes
+    m_instrWidget->getSurface()->getMaskedDetectors(dets);
+    m_pointer->setChecked(true);
+    setActivity();
+  }
+  dets.insert(dets.end(), onClickDets.begin(), onClickDets.end());
   if (!dets.empty()) {
     auto wsMask = actor.getMaskWorkspace();
     // have to cast up to the MaskWorkspace to get access to clone()
@@ -1127,8 +1187,7 @@ void InstrumentWidgetMaskTab::storeDetectorMask(bool isROI) {
       // need to invert the mask before adding the new shape
       // but not if the mask is fresh and empty
       if (wsMask->getNumberMasked() > 0) {
-        wsFresh = std::dynamic_pointer_cast<Mantid::API::IMaskWorkspace>(
-            actor.extractCurrentMask());
+        wsFresh = std::dynamic_pointer_cast<Mantid::API::IMaskWorkspace>(actor.extractCurrentMask());
         actor.invertMaskWorkspace();
       }
     }
@@ -1160,8 +1219,10 @@ void InstrumentWidgetMaskTab::storeDetectorMask(bool isROI) {
       m_instrWidget->updateInstrumentDetectors();
     }
   }
-  // remove masking shapes
-  clearShapes();
+  if (onClickDets.size() == 0) {
+    // remove masking shapes
+    clearShapes();
+  }
   QApplication::restoreOverrideCursor();
 }
 
@@ -1185,9 +1246,10 @@ void InstrumentWidgetMaskTab::storeMask() {
   }
 }
 
-void InstrumentWidgetMaskTab::changedIntegrationRange(double /*unused*/,
-                                                      double /*unused*/) {
-  enableApplyButtons();
+void InstrumentWidgetMaskTab::changedIntegrationRange(double /*unused*/, double /*unused*/) {
+  if (m_instrWidget->isCurrentTab(this)) {
+    enableApplyButtons();
+  }
 }
 
 /** Load mask tab state from a Mantid project file
@@ -1204,9 +1266,8 @@ void InstrumentWidgetMaskTab::loadFromProject(const std::string &lines) {
   tsv >> tabLines;
   API::TSVSerialiser tab(tabLines);
 
-  std::vector<QPushButton *> buttons{
-      m_move,         m_pointer,        m_ellipse,  m_rectangle,
-      m_ring_ellipse, m_ring_rectangle, m_free_draw};
+  std::vector<QPushButton *> buttons{m_move,         m_pointer,        m_ellipse,  m_rectangle,
+                                     m_ring_ellipse, m_ring_rectangle, m_free_draw};
 
   tab.selectLine("ActiveTools");
   for (auto button : buttons) {
@@ -1215,8 +1276,7 @@ void InstrumentWidgetMaskTab::loadFromProject(const std::string &lines) {
     button->setChecked(value);
   }
 
-  std::vector<QRadioButton *> typeButtons{m_masking_on, m_grouping_on,
-                                          m_roi_on};
+  std::vector<QRadioButton *> typeButtons{m_masking_on, m_grouping_on, m_roi_on};
 
   tab.selectLine("ActiveType");
   for (auto type : typeButtons) {
@@ -1234,8 +1294,7 @@ void InstrumentWidgetMaskTab::loadFromProject(const std::string &lines) {
   }
 #else
   Q_UNUSED(lines);
-  throw std::runtime_error(
-      "InstrumentWidgetMaskTab::loadFromProject() not implemented for Qt >= 5");
+  throw std::runtime_error("InstrumentWidgetMaskTab::loadFromProject() not implemented for Qt >= 5");
 #endif
 }
 
@@ -1274,8 +1333,7 @@ void InstrumentWidgetMaskTab::loadMaskViewFromProject(const std::string &name) {
  * @param fileName :: the full path to the mask file on disk
  * @return a pointer to the loaded mask workspace
  */
-Mantid::API::MatrixWorkspace_sptr
-InstrumentWidgetMaskTab::loadMask(const std::string &fileName) {
+Mantid::API::MatrixWorkspace_sptr InstrumentWidgetMaskTab::loadMask(const std::string &fileName) {
   using namespace Mantid::API;
 
   // build path and input properties etc.
@@ -1315,17 +1373,15 @@ std::string InstrumentWidgetMaskTab::saveToProject() const {
   API::TSVSerialiser tsv;
   API::TSVSerialiser tab;
 
-  std::vector<QPushButton *> buttons{
-      m_move,         m_pointer,        m_ellipse,  m_rectangle,
-      m_ring_ellipse, m_ring_rectangle, m_free_draw};
+  std::vector<QPushButton *> buttons{m_move,         m_pointer,        m_ellipse,  m_rectangle,
+                                     m_ring_ellipse, m_ring_rectangle, m_free_draw};
 
   tab.writeLine("ActiveTools");
   for (auto button : buttons) {
     tab << button->isChecked();
   }
 
-  std::vector<QRadioButton *> typeButtons{m_masking_on, m_grouping_on,
-                                          m_roi_on};
+  std::vector<QRadioButton *> typeButtons{m_masking_on, m_grouping_on, m_roi_on};
 
   tab.writeLine("ActiveType");
   for (auto type : typeButtons) {
@@ -1333,8 +1389,7 @@ std::string InstrumentWidgetMaskTab::saveToProject() const {
   }
 
   // Save the masks applied to view but not saved to a workspace
-  auto wsName =
-      m_instrWidget->getWorkspaceName().toStdString() + "MaskView.xml";
+  auto wsName = m_instrWidget->getWorkspaceName().toStdString() + "MaskView.xml";
   bool success = saveMaskViewToProject(wsName);
   if (success)
     tab.writeLine("MaskViewWorkspace") << wsName;
@@ -1342,8 +1397,7 @@ std::string InstrumentWidgetMaskTab::saveToProject() const {
   tsv.writeSection("masktab", tab.outputLines());
   return tsv.outputLines();
 #else
-  throw std::runtime_error(
-      "InstrumentWidgetMaskTab::saveToProject() not implemented for Qt >= 5");
+  throw std::runtime_error("InstrumentWidgetMaskTab::saveToProject() not implemented for Qt >= 5");
 #endif
 }
 
@@ -1356,8 +1410,7 @@ std::string InstrumentWidgetMaskTab::saveToProject() const {
  * @param name :: the name to call the workspace in the project folder
  * @return whether a workspace was successfully saved to the project
  */
-bool InstrumentWidgetMaskTab::saveMaskViewToProject(
-    const std::string &name, const std::string &projectPath) const {
+bool InstrumentWidgetMaskTab::saveMaskViewToProject(const std::string &name, const std::string &projectPath) const {
   using namespace Mantid::API;
   using namespace Mantid::Kernel;
 
@@ -1379,8 +1432,7 @@ bool InstrumentWidgetMaskTab::saveMaskViewToProject(
       // save mask to file inside project folder
       auto alg = AlgorithmManager::Instance().createUnmanaged("SaveMask", -1);
       alg->setChild(true);
-      alg->setProperty("InputWorkspace",
-                       std::dynamic_pointer_cast<Workspace>(outputWS));
+      alg->setProperty("InputWorkspace", std::dynamic_pointer_cast<Workspace>(outputWS));
       alg->setPropertyValue("OutputFile", fileName);
       alg->setLogging(false);
       alg->execute();
@@ -1396,5 +1448,9 @@ bool InstrumentWidgetMaskTab::saveMaskViewToProject(
   return true;
 }
 
-} // namespace MantidWidgets
-} // namespace MantidQt
+bool InstrumentWidgetMaskTab::isRotationSupported() {
+  const auto shapeType = m_instrWidget->getSurface()->getCurrentShapeType();
+  return shapeType == "rectangle" || shapeType == "ellipse";
+}
+
+} // namespace MantidQt::MantidWidgets

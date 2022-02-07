@@ -26,8 +26,7 @@ namespace CustomInterfaces {
   widgets
 */
 
-class MANTIDQT_MUONINTERFACE_DLL ALCDataLoadingView
-    : public IALCDataLoadingView {
+class MANTIDQT_MUONINTERFACE_DLL ALCDataLoadingView : public IALCDataLoadingView {
 public:
   ALCDataLoadingView(QWidget *widget);
   ~ALCDataLoadingView();
@@ -37,8 +36,9 @@ public:
 
   void initialize() override;
 
-  std::string firstRun() const override;
-  std::string lastRun() const override;
+  void initInstruments() override;
+  std::string getInstrument() const override;
+  std::string getPath() const override;
   std::string log() const override;
   std::string function() const override;
   std::string deadTimeType() const override;
@@ -51,10 +51,12 @@ public:
   bool subtractIsChecked() const override;
   std::string calculationType() const override;
   boost::optional<std::pair<double, double>> timeRange() const override;
+  std::string getRunsText() const override;
+  std::string getRunsFirstRunText() const override;
 
-  void setDataCurve(Mantid::API::MatrixWorkspace_sptr workspace,
-                    std::size_t const &workspaceIndex = 0) override;
+  void setDataCurve(Mantid::API::MatrixWorkspace_sptr workspace, std::size_t const &workspaceIndex = 0) override;
   void displayError(const std::string &error) override;
+  bool displayWarning(const std::string &warning) override;
   void setAvailableLogs(const std::vector<std::string> &logs) override;
   void setAvailablePeriods(const std::vector<std::string> &periods) override;
   void setTimeLimits(double tMin, double tMax) override;
@@ -62,25 +64,33 @@ public:
   void help() override;
   void disableAll() override;
   void enableAll() override;
-  void checkBoxAutoChanged(int state) override;
-  void handleFirstFileChanged() override;
-
-  /// returns the string "Auto"
-  std::string autoString() const override { return g_autoString; }
-
-  /// If Auto mode on, store name of currently loaded file
-  /// @param file :: [input] name of file loaded
-  void setCurrentAutoFile(const std::string &file) override {
-    m_currentAutoFile = file;
-  }
-
+  void setAvailableInfoToEmpty() override;
+  void instrumentChanged(QString instrument) override;
+  void enableLoad(bool enable) override;
+  void setPath(const std::string &path) override;
+  void enableRunsAutoAdd(bool enable) override;
+  void setInstrument(const std::string &instrument) override;
+  std::string getRunsError() override;
+  std::vector<std::string> getFiles() override;
+  std::string getFirstFile() override;
+  void setLoadStatus(const std::string &status, const std::string &colour) override;
+  void runsAutoAddToggled(bool on) override;
+  void setRunsTextWithoutSearch(const std::string &text) override;
+  void toggleRunsAutoAdd(const bool autoAdd) override;
+  void enableAlpha(const bool alpha) override;
+  bool isAlphaEnabled() const override;
+  void setAlphaValue(const std::string &alpha) override;
+  std::string getAlphaValue() const override;
+  void showAlphaMessage(const bool alpha) override;
+  void setFileExtensions(const std::vector<std::string> &extensions) override;
   // -- End of IALCDataLoadingView interface
   // -----------------------------------------------------
 
 private:
   /// Common function to set available items in a combo box
-  void setAvailableItems(QComboBox *comboBox,
-                         const std::vector<std::string> &items);
+  void setAvailableItems(QComboBox *comboBox, const std::vector<std::string> &items);
+
+  bool setCurrentLog(const QString &log);
 
   /// UI form
   Ui::ALCDataLoadingView m_ui;
@@ -88,11 +98,8 @@ private:
   /// The widget used
   QWidget *const m_widget;
 
-  /// the string "Auto"
-  static const std::string g_autoString;
-
-  /// If Auto in use, the file last loaded
-  std::string m_currentAutoFile;
+  QString m_selectedLog;
+  size_t m_numPeriods;
 };
 
 } // namespace CustomInterfaces

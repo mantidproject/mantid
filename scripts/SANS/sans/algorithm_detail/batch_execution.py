@@ -7,9 +7,11 @@
 from copy import deepcopy
 
 from mantid.api import AnalysisDataService, WorkspaceGroup
+from mantid.dataobjects import Workspace2D
 from sans.common.general_functions import (create_managed_non_child_algorithm,
                                            create_unmanaged_algorithm, get_output_name,
-                                           get_base_name_from_multi_period_name, get_transmission_output_name)
+                                           get_base_name_from_multi_period_name, get_transmission_output_name,
+                                           get_wav_range_from_ws)
 from sans.common.enums import (SANSDataType, SaveType, OutputMode, ReductionMode, DataType)
 from sans.common.constants import (TRANS_SUFFIX, SANS_SUFFIX, ALL_PERIODS,
                                    LAB_CAN_SUFFIX, LAB_CAN_COUNT_SUFFIX, LAB_CAN_NORM_SUFFIX,
@@ -107,6 +109,7 @@ def single_reduction_for_batch(state, use_optimizations, output_mode, plot_resul
     reduction_alg = create_managed_non_child_algorithm(single_reduction_name, version=alg_version,
                                                        **single_reduction_options)
     reduction_alg.setChild(False)
+    reduction_alg.setAlwaysStoreInADS(False)
     # Perform the data reduction
     for reduction_package in reduction_packages:
         # -----------------------------------
@@ -124,32 +127,9 @@ def single_reduction_for_batch(state, use_optimizations, output_mode, plot_resul
         # -----------------------------------
         # Get the output of the algorithm
         # -----------------------------------
-        reduction_package.reduced_lab = get_workspace_from_algorithm(reduction_alg, "OutputWorkspaceLAB")
-        reduction_package.reduced_hab = get_workspace_from_algorithm(reduction_alg, "OutputWorkspaceHAB")
-        reduction_package.reduced_merged = get_workspace_from_algorithm(reduction_alg, "OutputWorkspaceMerged")
+        _get_ws_from_alg(reduction_alg, reduction_package)
 
-        reduction_package.reduced_lab_can = get_workspace_from_algorithm(reduction_alg, "OutputWorkspaceLABCan")
-        reduction_package.reduced_lab_can_count = get_workspace_from_algorithm(reduction_alg,
-                                                                               "OutputWorkspaceLABCanCount")
-        reduction_package.reduced_lab_can_norm = get_workspace_from_algorithm(reduction_alg,
-                                                                              "OutputWorkspaceLABCanNorm")
-        reduction_package.reduced_hab_can = get_workspace_from_algorithm(reduction_alg, "OutputWorkspaceHABCan")
-        reduction_package.reduced_hab_can_count = get_workspace_from_algorithm(reduction_alg,
-                                                                               "OutputWorkspaceHABCanCount")
-        reduction_package.reduced_hab_can_norm = get_workspace_from_algorithm(reduction_alg,
-                                                                              "OutputWorkspaceHABCanNorm")
-        reduction_package.calculated_transmission = get_workspace_from_algorithm(reduction_alg,
-                                                                                 "OutputWorkspaceCalculatedTransmission")
-        reduction_package.unfitted_transmission = get_workspace_from_algorithm(reduction_alg,
-                                                                               "OutputWorkspaceUnfittedTransmission")
-        reduction_package.calculated_transmission_can = get_workspace_from_algorithm(reduction_alg,
-                                                                                     "OutputWorkspaceCalculatedTransmissionCan")
-        reduction_package.unfitted_transmission_can = get_workspace_from_algorithm(reduction_alg,
-                                                                                   "OutputWorkspaceUnfittedTransmissionCan")
-
-        reduction_package.reduced_lab_sample = get_workspace_from_algorithm(reduction_alg, "OutputWorkspaceLABSample")
-        reduction_package.reduced_hab_sample = get_workspace_from_algorithm(reduction_alg, "OutputWorkspaceHABSample")
-
+        set_alg_output_names(reduction_package, event_slice_optimisation)
         out_scale_factor, out_shift_factor = get_shift_and_scale_factors_from_algorithm(reduction_alg,
                                                                                         event_slice_optimisation)
         reduction_package.out_scale_factor = out_scale_factor
@@ -207,6 +187,32 @@ def single_reduction_for_batch(state, use_optimizations, output_mode, plot_resul
     return out_scale_factors, out_shift_factors
 
 
+def _get_ws_from_alg(reduction_alg, reduction_package):
+    reduction_package.reduced_lab = get_workspace_from_algorithm(reduction_alg, "OutputWorkspaceLAB")
+    reduction_package.reduced_hab = get_workspace_from_algorithm(reduction_alg, "OutputWorkspaceHAB")
+    reduction_package.reduced_merged = get_workspace_from_algorithm(reduction_alg, "OutputWorkspaceMerged")
+    reduction_package.reduced_lab_can = get_workspace_from_algorithm(reduction_alg, "OutputWorkspaceLABCan")
+    reduction_package.reduced_lab_can_count = get_workspace_from_algorithm(reduction_alg,
+                                                                           "OutputWorkspaceLABCanCount")
+    reduction_package.reduced_lab_can_norm = get_workspace_from_algorithm(reduction_alg,
+                                                                          "OutputWorkspaceLABCanNorm")
+    reduction_package.reduced_hab_can = get_workspace_from_algorithm(reduction_alg, "OutputWorkspaceHABCan")
+    reduction_package.reduced_hab_can_count = get_workspace_from_algorithm(reduction_alg,
+                                                                           "OutputWorkspaceHABCanCount")
+    reduction_package.reduced_hab_can_norm = get_workspace_from_algorithm(reduction_alg,
+                                                                          "OutputWorkspaceHABCanNorm")
+    reduction_package.calculated_transmission = get_workspace_from_algorithm(reduction_alg,
+                                                                             "OutputWorkspaceCalculatedTransmission")
+    reduction_package.unfitted_transmission = get_workspace_from_algorithm(reduction_alg,
+                                                                           "OutputWorkspaceUnfittedTransmission")
+    reduction_package.calculated_transmission_can = get_workspace_from_algorithm(
+        reduction_alg, "OutputWorkspaceCalculatedTransmissionCan")
+    reduction_package.unfitted_transmission_can = get_workspace_from_algorithm(
+        reduction_alg, "OutputWorkspaceUnfittedTransmissionCan")
+    reduction_package.reduced_lab_sample = get_workspace_from_algorithm(reduction_alg, "OutputWorkspaceLABSample")
+    reduction_package.reduced_hab_sample = get_workspace_from_algorithm(reduction_alg, "OutputWorkspaceHABSample")
+
+
 def load_workspaces_from_states(state):
     workspace_to_name = {SANSDataType.SAMPLE_SCATTER: "SampleScatterWorkspace",
                          SANSDataType.SAMPLE_TRANSMISSION: "SampleTransmissionWorkspace",
@@ -232,38 +238,7 @@ def plot_workspace(reduction_package, output_graph):
     :param output_graph: Name to the plot window
     """
     plotting_module = get_plotting_module()
-    if hasattr(plotting_module, 'graph'):
-        plot_workspace_mantidplot(reduction_package, output_graph, plotting_module)
-    else:
-        plot_workspace_mantidqt(reduction_package, output_graph, plotting_module)
-
-
-def plot_workspace_mantidplot(reduction_package, output_graph, plotting_module):
-    """
-    Plotting continuous output when on MantidPlot
-    This function should be deleted if and when MantidPlot is no longer a part of Mantid
-
-    :param reduction_package: An object containing the reduced workspaces
-    :param output_graph: Name to the plot window
-    :param plotting_module: The MantidPlot plotting module
-    """
-    plotSpectrum, graph = plotting_module.plotSpectrum, plotting_module.graph
-
-    if reduction_package.reduction_mode == ReductionMode.ALL:
-        graph_handle = plotSpectrum([reduction_package.reduced_hab, reduction_package.reduced_lab], 0,
-                                    window=graph(output_graph), clearWindow=True)
-        graph_handle.activeLayer().logLogAxes()
-    elif reduction_package.reduction_mode == ReductionMode.HAB:
-        graph_handle = plotSpectrum(reduction_package.reduced_hab, 0, window=graph(output_graph), clearWindow=True)
-        graph_handle.activeLayer().logLogAxes()
-    elif reduction_package.reduction_mode == ReductionMode.LAB:
-        graph_handle = plotSpectrum(reduction_package.reduced_lab, 0, window=graph(output_graph), clearWindow=True)
-        graph_handle.activeLayer().logLogAxes()
-    elif reduction_package.reduction_mode == ReductionMode.MERGED:
-        graph_handle = plotSpectrum([reduction_package.reduced_merged,
-                                     reduction_package.reduced_hab, reduction_package.reduced_lab], 0,
-                                    window=graph(output_graph), clearWindow=True)
-        graph_handle.activeLayer().logLogAxes()
+    plot_workspace_mantidqt(reduction_package, output_graph, plotting_module)
 
 
 def plot_workspace_mantidqt(reduction_package, output_graph, plotting_module):
@@ -278,18 +253,20 @@ def plot_workspace_mantidqt(reduction_package, output_graph, plotting_module):
 
     plot_kwargs = {"scalex": True,
                    "scaley": True}
+    ax_options = {"xscale": "linear", "yscale": "linear"}
+
     if reduction_package.reduction_mode == ReductionMode.ALL:
         plot([reduction_package.reduced_hab, reduction_package.reduced_lab],
-             wksp_indices=[0], overplot=True, fig=output_graph, plot_kwargs=plot_kwargs)
+             wksp_indices=[0], overplot=True, fig=output_graph, plot_kwargs=plot_kwargs, ax_properties=ax_options)
     elif reduction_package.reduction_mode == ReductionMode.HAB:
         plot([reduction_package.reduced_hab],
-             wksp_indices=[0], overplot=True, fig=output_graph, plot_kwargs=plot_kwargs)
+             wksp_indices=[0], overplot=True, fig=output_graph, plot_kwargs=plot_kwargs, ax_properties=ax_options)
     elif reduction_package.reduction_mode == ReductionMode.LAB:
         plot([reduction_package.reduced_lab],
-             wksp_indices=[0], overplot=True, fig=output_graph, plot_kwargs=plot_kwargs)
+             wksp_indices=[0], overplot=True, fig=output_graph, plot_kwargs=plot_kwargs, ax_properties=ax_options)
     elif reduction_package.reduction_mode == ReductionMode.MERGED:
         plot([reduction_package.reduced_merged, reduction_package.reduced_hab, reduction_package.reduced_lab],
-             wksp_indices=[0], overplot=True, fig=output_graph, plot_kwargs=plot_kwargs)
+             wksp_indices=[0], overplot=True, fig=output_graph, plot_kwargs=plot_kwargs, ax_properties=ax_options)
 
 
 # ----------------------------------------------------------------------------------------------------------------------
@@ -541,9 +518,8 @@ def get_reduction_packages(state, workspaces, monitors):
     This function creates a set of reduction packages which contain the necessary state for a single reduction
     as well as the required workspaces.
 
-    There are several reasons why a state can (and should) split up:
-    1. Multi-period files were loaded. This means that we need to perform one reduction per (loaded) period
-    2. Event slices were specified. We event slice after initial reduction has taken place, as some operations can
+    There is one workflow where a state can (and should) split up:
+    Event slices were specified. We event slice after initial reduction has taken place, as some operations can
             be performed before event slicing. We do this for more efficient reduction, as we are not performing the
             same operations multiple times needlessly.
 
@@ -552,11 +528,7 @@ def get_reduction_packages(state, workspaces, monitors):
     :param monitors: The monitors contributing to the reduction
     :return: A set of "Reduction packages" where each reduction package defines a single reduction.
     """
-    # First: Split the state on a per-period basis
     reduction_packages = create_initial_reduction_packages(state, workspaces, monitors)
-
-    if reduction_packages_require_splitting_for_wavelength_range(reduction_packages):
-        reduction_packages = split_reduction_packages_for_wavelength_range(reduction_packages)
     return reduction_packages
 
 
@@ -580,70 +552,6 @@ def reduction_packages_require_splitting_for_event_slices(reduction_packages):
     else:
         requires_split = False
     return requires_split
-
-
-def reduction_packages_require_splitting_for_wavelength_range(reduction_packages):
-    """
-        Creates reduction packages from a list of reduction packages by splitting up wavelength ranges.
-
-        The SANSSingleReduction algorithm can handle only a single wavelength range. For each wavelength range, we require an individual
-        reduction. Hence we split the states up at this point.
-        :param reduction_packages: a list of reduction packages.
-        :return: a list of reduction packages which has at least the same length as the input
-        """
-    # Determine if the event slice sub-state object contains multiple event slice requests. This is given
-    # by the number of elements in start_tof
-    reduction_package = reduction_packages[0]
-    state = reduction_package.state
-    wavelength_info = state.wavelength
-    start_wavelength = wavelength_info.wavelength_low
-    if start_wavelength is not None and len(start_wavelength) > 1:
-        requires_split = True
-    else:
-        requires_split = False
-    return requires_split
-
-
-def split_reduction_packages_for_wavelength_range(reduction_packages):
-    reduction_packages_split = []
-    for reduction_package in reduction_packages:
-        state = reduction_package.state
-        wavelength_info = state.wavelength
-        start_wavelength = wavelength_info.wavelength_low
-        end_wavelength = wavelength_info.wavelength_high
-
-        states = []
-        for start, end in zip(start_wavelength, end_wavelength):
-            state_copy = deepcopy(state)
-
-            state_copy.wavelength.wavelength_low = [start]
-            state_copy.wavelength.wavelength_high = [end]
-
-            state_copy.adjustment.normalize_to_monitor.wavelength_low = [start]
-            state_copy.adjustment.normalize_to_monitor.wavelength_high = [end]
-
-            state_copy.adjustment.calculate_transmission.wavelength_low = [start]
-            state_copy.adjustment.calculate_transmission.wavelength_high = [end]
-
-            state_copy.adjustment.wavelength_and_pixel_adjustment.wavelength_low = [start]
-            state_copy.adjustment.wavelength_and_pixel_adjustment.wavelength_high = [end]
-
-            states.append(state_copy)
-
-        workspaces = reduction_package.workspaces
-        monitors = reduction_package.monitors
-        is_part_of_multi_period_reduction = reduction_package.is_part_of_multi_period_reduction
-        is_part_of_event_slice_reduction = reduction_package.is_part_of_event_slice_reduction
-        for state in states:
-            new_state = deepcopy(state)
-            new_reduction_package = ReductionPackage(state=new_state,
-                                                     workspaces=workspaces,
-                                                     monitors=monitors,
-                                                     is_part_of_multi_period_reduction=is_part_of_multi_period_reduction,
-                                                     is_part_of_event_slice_reduction=is_part_of_event_slice_reduction,
-                                                     is_part_of_wavelength_range_reduction=True)
-            reduction_packages_split.append(new_reduction_package)
-    return reduction_packages_split
 
 
 def split_reduction_packages_for_event_slice_packages(reduction_packages):
@@ -675,12 +583,14 @@ def split_reduction_packages_for_event_slice_packages(reduction_packages):
         workspaces = reduction_package.workspaces
         monitors = reduction_package.monitors
         is_part_of_multi_period_reduction = reduction_package.is_part_of_multi_period_reduction
+        is_wav_range = reduction_package.is_part_of_wavelength_range_reduction
 
         for state in states:
             new_state = deepcopy(state)
             new_reduction_package = ReductionPackage(state=new_state,
                                                      workspaces=workspaces,
                                                      monitors=monitors,
+                                                     is_part_of_wavelength_range_reduction=is_wav_range,
                                                      is_part_of_multi_period_reduction=is_part_of_multi_period_reduction,
                                                      is_part_of_event_slice_reduction=True)
             reduction_packages_split.append(new_reduction_package)
@@ -716,6 +626,7 @@ def create_initial_reduction_packages(state, workspaces, monitors):
                                     and sample_scatter_period == ALL_PERIODS  # noqa
 
     is_multi_period = len(workspaces[SANSDataType.SAMPLE_SCATTER]) > 1
+    is_multi_wavelength = len(state.wavelength.wavelength_interval.selected_ranges) > 1
 
     for index in range(0, len(workspaces[SANSDataType.SAMPLE_SCATTER])):
         workspaces_for_package = {}
@@ -737,8 +648,8 @@ def create_initial_reduction_packages(state, workspaces, monitors):
         packages.append(ReductionPackage(state=state_copy,
                                          workspaces=workspaces_for_package,
                                          monitors=monitors_for_package,
-                                         is_part_of_multi_period_reduction=is_multi_period,
-                                         is_part_of_event_slice_reduction=False))
+                                         is_part_of_wavelength_range_reduction=is_multi_wavelength,
+                                         is_part_of_multi_period_reduction=is_multi_period))
     return packages
 
 
@@ -775,70 +686,6 @@ def set_properties_for_reduction_algorithm(reduction_alg, reduction_package, wor
     :param event_slice_optimisation: optional bool. If true then using SANSSingleReductionEventSlice algorithm.
                         In this base, names and base names should not include time slice information.
     """
-    def _set_output_name(_reduction_alg, _reduction_package, _is_group, _reduction_mode, _property_name,
-                         _attr_out_name, _atrr_out_name_base, multi_reduction_type, _suffix=None, transmission=False):
-        if not transmission:
-            # Use event_slice from set_properties_for_reduction_algorithm scope
-            _out_name, _out_name_base = get_output_name(_reduction_package.state, _reduction_mode, _is_group,
-                                                        multi_reduction_type=multi_reduction_type,
-                                                        event_slice_optimisation=event_slice_optimisation)
-        else:
-            _out_name, _out_name_base = get_transmission_output_name(_reduction_package.state, _reduction_mode
-                                                                     , multi_reduction_type=multi_reduction_type)
-
-        if _suffix is not None:
-            _out_name += _suffix
-            _out_name_base += _suffix
-
-        _reduction_alg.setProperty(_property_name, _out_name)
-        setattr(_reduction_package, _attr_out_name, _out_name)
-        setattr(_reduction_package, _atrr_out_name_base, _out_name_base)
-
-    def _set_output_name_from_string(reduction_alg, reduction_package, algorithm_property_name, workspace_name,
-                                     workspace_name_base, package_attribute_name, package_attribute_name_base):
-        reduction_alg.setProperty(algorithm_property_name, workspace_name)
-        setattr(reduction_package, package_attribute_name, workspace_name)
-        setattr(reduction_package, package_attribute_name_base, workspace_name_base)
-
-    def _set_lab(_reduction_alg, _reduction_package, _is_group):
-        _set_output_name(_reduction_alg, _reduction_package, _is_group, ReductionMode.LAB,
-                         "OutputWorkspaceLABCan", "reduced_lab_can_name", "reduced_lab_can_base_name",
-                         multi_reduction_type, LAB_CAN_SUFFIX)
-
-        # Lab Can Count workspace - this is a partial workspace
-        _set_output_name(_reduction_alg, _reduction_package, _is_group, ReductionMode.LAB,
-                         "OutputWorkspaceLABCanCount", "reduced_lab_can_count_name", "reduced_lab_can_count_base_name",
-                         multi_reduction_type, LAB_CAN_COUNT_SUFFIX)
-
-        # Lab Can Norm workspace - this is a partial workspace
-        _set_output_name(_reduction_alg, _reduction_package, _is_group, ReductionMode.LAB,
-                         "OutputWorkspaceLABCanNorm", "reduced_lab_can_norm_name", "reduced_lab_can_norm_base_name",
-                         multi_reduction_type, LAB_CAN_NORM_SUFFIX)
-
-        _set_output_name(_reduction_alg, _reduction_package, _is_group, ReductionMode.LAB,
-                         "OutputWorkspaceLABSample", "reduced_lab_sample_name", "reduced_lab_sample_base_name",
-                         multi_reduction_type, LAB_SAMPLE_SUFFIX)
-
-    def _set_hab(_reduction_alg, _reduction_package, _is_group):
-        # Hab Can Workspace
-        _set_output_name(_reduction_alg, _reduction_package, _is_group, ReductionMode.HAB,
-                         "OutputWorkspaceHABCan", "reduced_hab_can_name", "reduced_hab_can_base_name",
-                         multi_reduction_type, HAB_CAN_SUFFIX)
-
-        # Hab Can Count workspace - this is a partial workspace
-        _set_output_name(_reduction_alg, _reduction_package, _is_group, ReductionMode.HAB,
-                         "OutputWorkspaceHABCanCount", "reduced_hab_can_count_name", "reduced_hab_can_count_base_name",
-                         multi_reduction_type, HAB_CAN_COUNT_SUFFIX)
-
-        # Hab Can Norm workspace - this is a partial workspace
-        _set_output_name(_reduction_alg, _reduction_package, _is_group, ReductionMode.HAB,
-                         "OutputWorkspaceHABCanNorm", "reduced_hab_can_norm_name", "reduced_hab_can_norm_base_name",
-                         multi_reduction_type, HAB_CAN_NORM_SUFFIX)
-
-        _set_output_name(_reduction_alg, _reduction_package, _is_group, ReductionMode.HAB,
-                         "OutputWorkspaceHABSample", "reduced_hab_sample_name", "reduced_hab_sample_base_name",
-                         multi_reduction_type, HAB_SAMPLE_SUFFIX)
-
     # Go through the elements of the reduction package and set them on the reduction algorithm
     # Set the SANSState
     state = reduction_package.state
@@ -861,13 +708,7 @@ def set_properties_for_reduction_algorithm(reduction_alg, reduction_package, wor
     # Set the output workspaces for LAB, HAB and Merged
     # ------------------------------------------------------------------------------------------------------------------
     is_part_of_multi_period_reduction = reduction_package.is_part_of_multi_period_reduction
-    is_part_of_event_slice_reduction = reduction_package.is_part_of_event_slice_reduction
     is_part_of_wavelength_range_reduction = reduction_package.is_part_of_wavelength_range_reduction
-    is_group = (is_part_of_multi_period_reduction or is_part_of_event_slice_reduction
-                or is_part_of_wavelength_range_reduction or event_slice_optimisation)
-    multi_reduction_type = {"period": is_part_of_multi_period_reduction,
-                            "event_slice": is_part_of_event_slice_reduction,
-                            "wavelength_range": is_part_of_wavelength_range_reduction}
 
     # SANSSingleReduction version 2 only properties
     if event_slice_optimisation:
@@ -878,79 +719,169 @@ def set_properties_for_reduction_algorithm(reduction_alg, reduction_package, wor
         reduction_alg.setProperty("Period", is_part_of_multi_period_reduction)
         reduction_alg.setProperty("WavelengthRange", is_part_of_wavelength_range_reduction)
 
-    reduction_mode = reduction_package.reduction_mode
-    if reduction_mode is ReductionMode.MERGED:
-        _set_output_name(reduction_alg, reduction_package, is_group, ReductionMode.MERGED,
-                         "OutputWorkspaceMerged", "reduced_merged_name", "reduced_merged_base_name",
-                         multi_reduction_type)
-        _set_output_name(reduction_alg, reduction_package, is_group, ReductionMode.LAB,
-                         "OutputWorkspaceLAB", "reduced_lab_name", "reduced_lab_base_name", multi_reduction_type)
-        _set_output_name(reduction_alg, reduction_package, is_group, ReductionMode.HAB,
-                         "OutputWorkspaceHAB", "reduced_hab_name", "reduced_hab_base_name", multi_reduction_type)
-    elif reduction_mode is ReductionMode.LAB:
-        _set_output_name(reduction_alg, reduction_package, is_group, ReductionMode.LAB,
-                         "OutputWorkspaceLAB", "reduced_lab_name", "reduced_lab_base_name", multi_reduction_type)
-    elif reduction_mode is ReductionMode.HAB:
-        _set_output_name(reduction_alg, reduction_package, is_group, ReductionMode.HAB,
-                         "OutputWorkspaceHAB", "reduced_hab_name", "reduced_hab_base_name", multi_reduction_type)
-    elif reduction_mode is ReductionMode.ALL:
-        _set_output_name(reduction_alg, reduction_package, is_group, ReductionMode.LAB,
-                         "OutputWorkspaceLAB", "reduced_lab_name", "reduced_lab_base_name", multi_reduction_type)
-        _set_output_name(reduction_alg, reduction_package, is_group, ReductionMode.HAB,
-                         "OutputWorkspaceHAB", "reduced_hab_name", "reduced_hab_base_name", multi_reduction_type)
-    else:
-        raise RuntimeError("The reduction mode {0} is not known".format(reduction_mode))
 
-    # ------------------------------------------------------------------------------------------------------------------
-    # Set the output workspaces for the can reduction and the partial can reductions
-    # ------------------------------------------------------------------------------------------------------------------
-    # Set the output workspaces for the can reductions -- note that these will only be set if optimizations
+def set_alg_output_names(reduction_package, event_slice_optimisation):
+    ads_instance = AnalysisDataService.Instance()
+
+    is_part_of_multi_period_reduction = reduction_package.is_part_of_multi_period_reduction
+    is_part_of_event_slice_reduction = reduction_package.is_part_of_event_slice_reduction
+    is_part_of_wavelength_range_reduction = reduction_package.is_part_of_wavelength_range_reduction
+    is_group = (is_part_of_multi_period_reduction or is_part_of_event_slice_reduction
+                or is_part_of_wavelength_range_reduction or event_slice_optimisation)
+    multi_reduction_type = {"period": is_part_of_multi_period_reduction,
+                            "event_slice": is_part_of_event_slice_reduction,
+                            "wavelength_range": is_part_of_wavelength_range_reduction}
+
+    def _set_output_name(ws_group, _reduction_package, _is_group, _reduction_mode,
+                         _attr_out_name, _atrr_out_name_base, multi_reduction_type, _suffix=None, transmission=False):
+        setattr(_reduction_package, _attr_out_name, [])
+        setattr(_reduction_package, _atrr_out_name_base, [])
+
+        if not ws_group:
+            return
+
+        for ws in ws_group:
+            if not transmission:
+                # Use event_slice from set_properties_for_reduction_algorithm scope
+                wav_range = get_wav_range_from_ws(ws)
+                _out_name, _out_name_base = get_output_name(_reduction_package.state, _reduction_mode, _is_group,
+                                                            multi_reduction_type=multi_reduction_type,
+                                                            wav_range=wav_range,
+                                                            event_slice_optimisation=event_slice_optimisation)
+            else:
+                _out_name, _out_name_base = get_transmission_output_name(_reduction_package.state, _reduction_mode
+                                                                         , multi_reduction_type=multi_reduction_type)
+
+            if _suffix is not None:
+                _out_name += _suffix
+                _out_name_base += _suffix
+
+            ads_instance.addOrReplace(_out_name, ws)
+            getattr(_reduction_package, _attr_out_name).append(_out_name)
+            getattr(_reduction_package, _atrr_out_name_base).append(_out_name_base)
+
+    def _set_custom_output_name(ws, reduction_package, workspace_names,
+                                workspace_name_base, package_attribute_name, package_attribute_name_base):
+        if not ws:
+            setattr(reduction_package, package_attribute_name, None)
+            setattr(reduction_package, package_attribute_name_base, None)
+            return
+
+        if isinstance(ws, Workspace2D):
+            setattr(reduction_package, package_attribute_name, workspace_names)
+            setattr(reduction_package, package_attribute_name_base, workspace_name_base)
+            ads_instance.addOrReplace(workspace_names, ws)
+        else:
+            setattr(reduction_package, package_attribute_name, [])
+            setattr(reduction_package, package_attribute_name_base, workspace_name_base)
+            assert isinstance(ws, WorkspaceGroup), f"Expected Ws2D or WsGroup, got {repr(ws)} instead"
+            for i in range(ws.size()):
+                ws_i = ws.getItem(i)
+                ads_instance.addOrReplace(workspace_names[i], ws_i)
+                getattr(reduction_package, package_attribute_name).append(workspace_names[i])
+
+    def _set_lab(_reduction_package, _is_group):
+        _set_output_name(_reduction_package.reduced_lab_can, _reduction_package, _is_group, ReductionMode.LAB,
+                         "reduced_lab_can_name", "reduced_lab_can_base_name",
+                         multi_reduction_type, LAB_CAN_SUFFIX)
+
+        # Lab Can Count workspace - this is a partial workspace
+        _set_output_name(_reduction_package.reduced_lab_can_count, _reduction_package, _is_group, ReductionMode.LAB,
+                         "reduced_lab_can_count_name", "reduced_lab_can_count_base_name", multi_reduction_type,
+                         LAB_CAN_COUNT_SUFFIX)
+
+        # Lab Can Norm workspace - this is a partial workspace
+        _set_output_name(_reduction_package.reduced_lab_can_norm, _reduction_package, _is_group, ReductionMode.LAB,
+                         "reduced_lab_can_norm_name", "reduced_lab_can_norm_base_name",
+                         multi_reduction_type, LAB_CAN_NORM_SUFFIX)
+
+        _set_output_name(_reduction_package.reduced_lab_sample, _reduction_package, _is_group, ReductionMode.LAB,
+                         "reduced_lab_sample_name", "reduced_lab_sample_base_name",
+                         multi_reduction_type, LAB_SAMPLE_SUFFIX)
+
+    def _set_hab(_reduction_package, _is_group):
+        # Hab Can Workspace
+        _set_output_name(_reduction_package.reduced_hab_can, _reduction_package, _is_group, ReductionMode.HAB,
+                         "reduced_hab_can_name", "reduced_hab_can_base_name",
+                         multi_reduction_type, HAB_CAN_SUFFIX)
+
+        # Hab Can Count workspace - this is a partial workspace
+        _set_output_name(_reduction_package.reduced_hab_can_count, _reduction_package, _is_group, ReductionMode.HAB,
+                         "reduced_hab_can_count_name", "reduced_hab_can_count_base_name",
+                         multi_reduction_type, HAB_CAN_COUNT_SUFFIX)
+
+        # Hab Can Norm workspace - this is a partial workspace
+        _set_output_name(_reduction_package.reduced_hab_can_norm, _reduction_package, _is_group, ReductionMode.HAB,
+                         "reduced_hab_can_norm_name", "reduced_hab_can_norm_base_name",
+                         multi_reduction_type, HAB_CAN_NORM_SUFFIX)
+
+        _set_output_name(_reduction_package.reduced_hab_sample, _reduction_package, _is_group, ReductionMode.HAB,
+                         "reduced_hab_sample_name", "reduced_hab_sample_base_name",
+                         multi_reduction_type, HAB_SAMPLE_SUFFIX)
+
+    # Set the output workspaces for the can reductions too -- note that these will only be set if optimizations
     # are enabled
-    # Lab Can Workspace
+    reduction_mode = reduction_package.reduction_mode
+    if reduction_mode in (ReductionMode.MERGED, ReductionMode.LAB, ReductionMode.ALL):
+        _set_output_name(reduction_package.reduced_lab, reduction_package, is_group, ReductionMode.LAB,
+                         "reduced_lab_name", "reduced_lab_base_name", multi_reduction_type)
+        _set_lab(reduction_package, is_group)
+
+    if reduction_mode in (ReductionMode.MERGED, ReductionMode.HAB, ReductionMode.ALL):
+        _set_output_name(reduction_package.reduced_hab, reduction_package, is_group, ReductionMode.HAB,
+                         "reduced_hab_name", "reduced_hab_base_name", multi_reduction_type)
+        _set_hab(reduction_package, is_group)
+
     if reduction_mode is ReductionMode.MERGED:
-        _set_lab(reduction_alg, reduction_package, is_group)
-        _set_hab(reduction_alg, reduction_package, is_group)
-    elif reduction_mode is ReductionMode.LAB:
-        _set_lab(reduction_alg, reduction_package, is_group)
-    elif reduction_mode is ReductionMode.HAB:
-        _set_hab(reduction_alg, reduction_package, is_group)
-    elif reduction_mode is ReductionMode.ALL:
-        _set_lab(reduction_alg, reduction_package, is_group)
-        _set_hab(reduction_alg, reduction_package, is_group)
-    else:
-        raise RuntimeError("The reduction mode {0} is not known".format(reduction_mode))
+        _set_output_name(reduction_package.reduced_merged, reduction_package, is_group, ReductionMode.MERGED,
+                         "reduced_merged_name", "reduced_merged_base_name", multi_reduction_type)
 
     # ------------------------------------------------------------------------------------------------------------------
     # Set the output workspaces for the calculated and unfitted transmission
     # ------------------------------------------------------------------------------------------------------------------
+    def get_transmission_names(_trans_ws_group, data_type, is_fitted):
+        output_names = []
+        base_name = None
+
+        if not _trans_ws_group:
+            return output_names, base_name
+
+        for ws in _trans_ws_group:
+            range_str = ws.getRun().getProperty("Wavelength Range").valueAsStr
+            wav_range = range_str.split('-')
+            trans_name, base_name = get_transmission_output_name(reduction_package.state, wav_range,
+                                                                 data_type, multi_reduction_type, is_fitted)
+            output_names.append(trans_name)
+        return output_names, base_name
+
     sample_calculated_transmission, \
-        sample_calculated_transmission_base = get_transmission_output_name(reduction_package.state, DataType.SAMPLE,
-                                                                           multi_reduction_type, True)
+        sample_calculated_transmission_base = get_transmission_names(reduction_package.calculated_transmission,
+                                                                     DataType.SAMPLE, True)
     can_calculated_transmission, \
-        can_calculated_transmission_base = get_transmission_output_name(reduction_package.state, DataType.CAN,
-                                                                        multi_reduction_type, True)
+        can_calculated_transmission_base = get_transmission_names(reduction_package.calculated_transmission_can,
+                                                                  DataType.CAN, True)
     sample_unfitted_transmission, \
-        sample_unfitted_transmission_base = get_transmission_output_name(reduction_package.state, DataType.SAMPLE,
-                                                                         multi_reduction_type, False)
+        sample_unfitted_transmission_base = get_transmission_names(reduction_package.unfitted_transmission,
+                                                                   DataType.SAMPLE, False)
     can_unfitted_transmission, \
-        can_unfitted_transmission_base = get_transmission_output_name(reduction_package.state, DataType.CAN,
-                                                                      multi_reduction_type, False)
+        can_unfitted_transmission_base = get_transmission_names(reduction_package.unfitted_transmission_can,
+                                                                DataType.CAN, False)
 
-    _set_output_name_from_string(reduction_alg, reduction_package, "OutputWorkspaceCalculatedTransmission",
-                                 sample_calculated_transmission, sample_calculated_transmission_base
-                                 , "calculated_transmission_name", "calculated_transmission_base_name")
+    _set_custom_output_name(reduction_package.calculated_transmission, reduction_package,
+                            sample_calculated_transmission, sample_calculated_transmission_base,
+                            "calculated_transmission_name", "calculated_transmission_base_name")
 
-    _set_output_name_from_string(reduction_alg, reduction_package, "OutputWorkspaceUnfittedTransmission",
-                                 sample_unfitted_transmission, sample_unfitted_transmission_base
-                                 , "unfitted_transmission_name", "unfitted_transmission_base_name")
+    _set_custom_output_name(reduction_package.unfitted_transmission, reduction_package,
+                            sample_unfitted_transmission, sample_unfitted_transmission_base,
+                            "unfitted_transmission_name", "unfitted_transmission_base_name")
 
-    _set_output_name_from_string(reduction_alg, reduction_package, "OutputWorkspaceCalculatedTransmissionCan",
-                                 can_calculated_transmission, can_calculated_transmission_base
-                                 , "calculated_transmission_can_name", "calculated_transmission_can_base_name")
+    _set_custom_output_name(reduction_package.calculated_transmission_can, reduction_package,
+                            can_calculated_transmission, can_calculated_transmission_base,
+                            "calculated_transmission_can_name", "calculated_transmission_can_base_name")
 
-    _set_output_name_from_string(reduction_alg, reduction_package, "OutputWorkspaceUnfittedTransmissionCan",
-                                 can_unfitted_transmission, can_unfitted_transmission_base
-                                 , "unfitted_transmission_can_name", "unfitted_transmission_can_base_name")
+    _set_custom_output_name(reduction_package.unfitted_transmission_can, reduction_package,
+                            can_unfitted_transmission, can_unfitted_transmission_base,
+                            "unfitted_transmission_can_name", "unfitted_transmission_can_base_name")
 
 
 def get_workspace_from_algorithm(alg, output_property_name):
@@ -965,7 +896,8 @@ def get_workspace_from_algorithm(alg, output_property_name):
     output_workspace_name = alg.getProperty(output_property_name).valueAsStr
 
     if not output_workspace_name:
-        return None
+        # Try to return by pointer
+        return alg.getProperty(output_property_name).value
 
     if AnalysisDataService.doesExist(output_workspace_name):
         ws = AnalysisDataService.retrieve(output_workspace_name)
@@ -1073,58 +1005,44 @@ def add_to_group(workspace, name_of_group_workspace):
     Creates a group workspace with the base name for the workspace
 
     :param workspace: the workspace to add to the WorkspaceGroup. This can be a group workspace
-    :param name_of_group_workspace: the name of the WorkspaceGroup
+    :param name_of_group_workspace: the name of the WorkspaceGroup, or a list relating to a ws group
     """
     if workspace is None:
         return
-    name_of_workspace = workspace.name()
-    if AnalysisDataService.doesExist(name_of_group_workspace):
-        add_to_group_when_group_workspace_exists_in_ADS(workspace, name_of_workspace, name_of_group_workspace)
-    else:
-        if type(workspace) is WorkspaceGroup:
-            if workspace.size() > 0:
-                rename_group_workspace(name_of_workspace, name_of_group_workspace)
+
+    ads_inst = AnalysisDataService.Instance()
+
+    def _add_single_ws_to_group(_workspace, _group_ws_name):
+        name_of_workspace = _workspace.name()
+        if ads_inst.doesExist(_group_ws_name):
+            if name_of_workspace not in ads_inst.retrieve(_group_ws_name).getNames():
+                ads_inst.addToGroup(_group_ws_name, name_of_workspace)
         else:
-            make_group_from_workspace(name_of_workspace, name_of_group_workspace)
+            make_group_from_workspace(name_of_workspace, _group_ws_name)
 
-
-def add_to_group_when_group_workspace_exists_in_ADS(workspace, name_of_workspace, name_of_group_workspace):
-    """
-    Group workspace to a group workspace, given that the group workspace already exists on the ADS.
-    :param workspace: A MatrixWorkspace object to add to group
-    :param name_of_workspace: str. Name of workspace to add to group
-    :param name_of_group_workspace: str. Name of workspace group into which workspace should be added
-    """
-    group_workspace = AnalysisDataService.retrieve(name_of_group_workspace)
-    if type(group_workspace) is WorkspaceGroup:
-        if type(workspace) is WorkspaceGroup:
-            add_group_to_group(name_of_workspace, name_of_group_workspace)
-        elif not group_workspace.contains(name_of_workspace):
-            group_workspace.add(name_of_workspace)
+    if isinstance(name_of_group_workspace, list):
+        for i, ws_name in enumerate(name_of_group_workspace):
+            _add_single_ws_to_group(workspace.getItem(i), ws_name)
+    elif isinstance(workspace, WorkspaceGroup):
+        for i in range(workspace.size()):
+            _add_single_ws_to_group(workspace.getItem(i), name_of_group_workspace)
     else:
-        group_name = "GroupWorkspaces"
-        group_options = {"InputWorkspaces": [name_of_workspace],
-                         "OutputWorkspace": name_of_group_workspace}
-        group_alg = create_unmanaged_algorithm(group_name, **group_options)
-
-        group_alg.setAlwaysStoreInADS(True)
-        group_alg.execute()
+        _add_single_ws_to_group(workspace, name_of_group_workspace)
 
 
-def add_group_to_group(name_of_group_workspace, name_of_target_group_workspace):
+def add_group_to_group(group_workspace, name_of_target_group_workspace):
     """
     Adds a group workspace to an existing group workspace.
     This is used when using SANSSingleEventSlice algorithm, which returns group workspaces
     containing the workspaces from each time slice.
-    :param name_of_group_workspace: str. The name of the group workspace
+    :param group_workspace: str. The group workspace to merge in
     :param name_of_target_group_workspace: str. The name of the group workspace we want as output
     :return:
     """
-    if name_of_group_workspace == name_of_target_group_workspace:
-        # Do nothing as we already have the group workspace we want
-        return
     group_name = "GroupWorkspaces"
-    group_options = {"InputWorkspaces": [name_of_target_group_workspace, name_of_group_workspace],
+    AnalysisDataService.Instance().add("__tmp_grp", group_workspace)
+
+    group_options = {"InputWorkspaces": [name_of_target_group_workspace, "__tmp_grp"],
                      "OutputWorkspace": name_of_target_group_workspace}
     group_alg = create_unmanaged_algorithm(group_name, **group_options)
     group_alg.setAlwaysStoreInADS(True)
@@ -1181,15 +1099,15 @@ def save_to_file(reduction_packages, save_can, additional_run_numbers, event_sli
     state = reduction_packages[0].state
     save_info = state.save
     file_formats = save_info.file_format
-    for name_to_save in workspaces_names_to_save:
-        if isinstance(name_to_save, tuple):
-            transmission = name_to_save[1]
-            transmission_can = name_to_save[2]
-            name_to_save = name_to_save[0]
-            save_workspace_to_file(name_to_save, file_formats, name_to_save, additional_run_numbers,
-                                   transmission, transmission_can)
+    for to_save in workspaces_names_to_save:
+        if isinstance(to_save, tuple):
+            for i, ws_name_to_save in enumerate(to_save[0]):
+                transmission = to_save[1][i] if to_save[1] else ''
+                transmission_can = to_save[2][i] if to_save[2] else ''
+                save_workspace_to_file(ws_name_to_save, file_formats, ws_name_to_save, additional_run_numbers,
+                                       transmission, transmission_can)
         else:
-            save_workspace_to_file(name_to_save, file_formats, name_to_save, additional_run_numbers)
+            save_workspace_to_file(to_save, file_formats, to_save, additional_run_numbers)
 
 
 def delete_reduced_workspaces(reduction_packages, include_non_transmission=True):
@@ -1202,7 +1120,7 @@ def delete_reduced_workspaces(reduction_packages, include_non_transmission=True)
     def _delete_workspaces(_delete_alg, _workspaces):
         for _workspace in _workspaces:
             if _workspace is not None:
-                _delete_alg.setProperty("Workspace", _workspace.name())
+                _delete_alg.setProperty("Workspace", _workspace)
                 _delete_alg.execute()
     # Get all names which were saved out to workspaces
     # Delete each workspace
@@ -1294,19 +1212,22 @@ def get_transmission_names_to_save(reduction_package, can):
     """
     if can:
         base_name = reduction_package.unfitted_transmission_can_base_name
-        ws_name = reduction_package.unfitted_transmission_can_name
+        ws_names = reduction_package.unfitted_transmission_can_name
     else:
         base_name = reduction_package.unfitted_transmission_base_name
-        ws_name = reduction_package.unfitted_transmission_name
-    if base_name in (None, '') or ws_name in (None, ''):
-        return ''
+        ws_names = reduction_package.unfitted_transmission_name
+    if base_name in (None, '') or ws_names in (None, '', []):
+        return []
+
+    ws_in_ads = []
 
     if AnalysisDataService.doesExist(base_name):
         group = AnalysisDataService.retrieve(base_name)
-        if group.contains(ws_name):
-            return ws_name
+        for ws_name in ws_names:
+            if group.contains(ws_name):
+                ws_in_ads.append(ws_name)
 
-    return ''
+    return ws_in_ads
 
 
 def get_all_names_to_save(reduction_packages, save_can):
@@ -1317,6 +1238,9 @@ def get_all_names_to_save(reduction_packages, save_can):
     :param save_can: a bool, whether or not to save unsubtracted can workspace
     :return: a list of workspace names to save.
     """
+    def get_ws_names_from_group(ws_group):
+        return [ws.name() for ws in ws_group]
+
     names_to_save = []
     for reduction_package in reduction_packages:
         reduced_lab = reduction_package.reduced_lab
@@ -1332,31 +1256,30 @@ def get_all_names_to_save(reduction_packages, save_can):
 
         if save_can:
             if reduced_merged:
-                names_to_save.append((reduced_merged.name(), trans_name, trans_can_name))
+                names_to_save.append((get_ws_names_from_group(reduced_merged), trans_name, trans_can_name))
             if reduced_lab:
-                names_to_save.append((reduced_lab.name(), trans_name, trans_can_name))
+                names_to_save.append((get_ws_names_from_group(reduced_lab), trans_name, trans_can_name))
             if reduced_hab:
-                names_to_save.append((reduced_hab.name(), trans_name, trans_can_name))
+                names_to_save.append((get_ws_names_from_group(reduced_hab), trans_name, trans_can_name))
             if reduced_lab_can:
-                names_to_save.append((reduced_lab_can.name(), '', trans_can_name))
+                names_to_save.append((get_ws_names_from_group(reduced_lab_can), [], trans_can_name))
             if reduced_hab_can:
-                names_to_save.append((reduced_hab_can.name(), '', trans_can_name))
+                names_to_save.append((get_ws_names_from_group(reduced_hab_can), [], trans_can_name))
             if reduced_lab_sample:
-                names_to_save.append((reduced_lab_sample.name(), trans_name, ''))
+                names_to_save.append((get_ws_names_from_group(reduced_lab_sample), trans_name, []))
             if reduced_hab_sample:
-                names_to_save.append((reduced_hab_sample.name(), trans_name, ''))
+                names_to_save.append((get_ws_names_from_group(reduced_hab_sample), trans_name, []))
 
         # If we have merged reduction then store the
         elif reduced_merged:
-            names_to_save.append((reduced_merged.name(), trans_name, trans_can_name))
+            names_to_save.append((get_ws_names_from_group(reduced_merged), trans_name, trans_can_name))
         else:
             if reduced_lab:
-                names_to_save.append((reduced_lab.name(), trans_name, trans_can_name))
+                names_to_save.append((get_ws_names_from_group(reduced_lab), trans_name, trans_can_name))
             if reduced_hab:
-                names_to_save.append((reduced_hab.name(), trans_name, trans_can_name))
+                names_to_save.append((get_ws_names_from_group(reduced_hab), trans_name, trans_can_name))
 
-    # We might have some workspaces as duplicates (the group workspaces), so make them unique
-    return set(names_to_save)
+    return names_to_save
 
 
 def get_event_slice_names_to_save(reduction_packages, save_can):
@@ -1533,6 +1456,9 @@ class ReductionPackage(object):
 
         self.out_scale_factor = None
         self.out_shift_factor = None
+
+        self.calculated_transmission = None
+        self.calculated_transmission_can = None
 
         # Unfitted transmission names
         self.unfitted_transmission_name = None

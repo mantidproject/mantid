@@ -6,13 +6,9 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidGeometry/MDGeometry/NullImplicitFunction.h"
 
-namespace Mantid {
-namespace Geometry {
+namespace Mantid::Geometry {
 
-std::string NullImplicitFunction::getName() const {
-  return NullImplicitFunction::functionName();
-}
+std::string NullImplicitFunction::getName() const { return NullImplicitFunction::functionName(); }
 
 std::string NullImplicitFunction::toXMLString() const { return std::string(); }
-} // namespace Geometry
-} // namespace Mantid
+} // namespace Mantid::Geometry

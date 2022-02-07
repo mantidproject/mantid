@@ -24,19 +24,13 @@ public:
   /// Algorithm's name
   const std::string name() const override { return "LoadILLTOF"; }
   /// Summary of algorithms purpose
-  const std::string summary() const override {
-    return "Loads an ILL TOF NeXus file.";
-  }
+  const std::string summary() const override { return "Loads an ILL TOF NeXus file."; }
 
   /// Algorithm's version
   int version() const override { return 2; }
-  const std::vector<std::string> seeAlso() const override {
-    return {"LoadNexus"};
-  }
+  const std::vector<std::string> seeAlso() const override { return {"LoadNexus"}; }
   /// Algorithm's category for identification
-  const std::string category() const override {
-    return "DataHandling\\Nexus;ILL\\Direct";
-  }
+  const std::string category() const override { return "DataHandling\\Nexus;ILL\\Direct"; }
 
   /// Returns a confidence value that this algorithm can load a file
   int confidence(Kernel::NexusDescriptor &descriptor) const override;
@@ -49,8 +43,7 @@ private:
 
   void loadInstrumentDetails(NeXus::NXEntry &);
   std::vector<std::vector<int>> getMonitorInfo(NeXus::NXEntry &firstEntry);
-  void initWorkSpace(NeXus::NXEntry &entry,
-                     const std::vector<std::vector<int>> &);
+  void initWorkSpace(NeXus::NXEntry &entry, const std::vector<std::vector<int>> &);
   void initInstrumentSpecific();
   void addAllNexusFieldsAsProperties(const std::string &filename);
   void addEnergyToRun();
@@ -58,11 +51,8 @@ private:
   void addPulseInterval();
 
   void loadTimeDetails(NeXus::NXEntry &entry);
-  void loadDataIntoTheWorkSpace(NeXus::NXEntry &entry,
-                                const std::vector<std::vector<int>> &,
-                                bool convertToTOF);
-  void loadSpectra(size_t &spec, const size_t numberOfTubes,
-                   const std::vector<Mantid::detid_t> &detectorIDs,
+  void loadDataIntoTheWorkSpace(NeXus::NXEntry &entry, const std::vector<std::vector<int>> &, bool convertToTOF);
+  void loadSpectra(size_t &spec, const size_t numberOfTubes, const std::vector<Mantid::detid_t> &detectorIDs,
                    const NeXus::NXInt &data, Mantid::API::Progress &progress);
 
   void runLoadInstrument();
@@ -72,19 +62,19 @@ private:
 
   API::MatrixWorkspace_sptr m_localWorkspace;
 
-  std::string m_instrumentName = ""; ///< Name of the instrument
-  std::string m_instrumentPath = ""; ///< Name of the instrument path
+  std::string m_instrumentName; ///< Name of the instrument
+  std::string m_instrumentPath; ///< Name of the instrument path
 
   // Variables describing the data in the detector
-  size_t m_numberOfTubes = 0;         // number of tubes - X
-  size_t m_numberOfPixelsPerTube = 0; // number of pixels per tube - Y
-  size_t m_numberOfChannels = 0;      // time channels - Z
-  size_t m_numberOfHistograms = 0;
+  size_t m_numberOfTubes;         // number of tubes - X
+  size_t m_numberOfPixelsPerTube; // number of pixels per tube - Y
+  size_t m_numberOfChannels;      // time channels - Z
+  size_t m_numberOfHistograms;
 
   /* Values parsed from the nexus file */
-  double m_wavelength = 0;
-  double m_channelWidth = 0;
-  double m_timeOfFlightDelay = 0;
+  double m_wavelength;
+  double m_channelWidth;
+  double m_timeOfFlightDelay;
   std::string m_monitorName;
 
   LoadHelper m_loader;

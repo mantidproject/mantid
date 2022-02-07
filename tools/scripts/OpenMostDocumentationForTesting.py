@@ -13,10 +13,10 @@
 #
 # Author: Samuel Jones - ISIS
 
-# Need to install BeautifulSoup:
-# pip install beautifulsoup
-from BeautifulSoup import BeautifulSoup
-import urllib2
+# Need to install BeautifulSoup4:
+# pip install beautifulsoup4
+from bs4 import BeautifulSoup
+import urllib.request as urllib2
 import re
 import webbrowser
 import time
@@ -37,7 +37,6 @@ def crawl_url_for_html_addons(url):
 
 def open_urls(list_of_urls, delay=1):
     """
-
     :param list_of_urls:
     :param delay: in seconds
     :return:
@@ -86,7 +85,7 @@ mantid_simpleapi_urls = ["http://docs.mantidproject.org/nightly/api/python/manti
 # Only one
 mantid_fitfunctions = ["http://docs.mantidproject.org/nightly/api/python/mantid/fitfunctions.html"]
 
-mantidplot_urls = crawl_url_for_html_addons("http://docs.mantidproject.org/nightly/api/python/mantidplot/index.html")
+mantid_utils = ["https://docs.mantidproject.org/nightly/api/python/mantid/utils/index.html"]
 
 all_urls.extend(mantid_api_urls)
 all_urls.extend(mantid_fitfunctions)
@@ -94,7 +93,7 @@ all_urls.extend(mantid_geometry_urls)
 all_urls.extend(mantid_kernel_urls)
 all_urls.extend(mantid_plots_urls)
 all_urls.extend(mantid_simpleapi_urls)
-all_urls.extend(mantidplot_urls)
+all_urls.extend(mantid_utils)
 
 print("All webpages crawled")
 

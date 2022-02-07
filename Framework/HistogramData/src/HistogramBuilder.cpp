@@ -6,14 +6,11 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidHistogramData/HistogramBuilder.h"
 
-namespace Mantid {
-namespace HistogramData {
+namespace Mantid::HistogramData {
 
 /// Set the `distribution` property. true = Frequencies, false = Counts. If not
 /// set, the default is Counts.
-void HistogramBuilder::setDistribution(bool isDistribution) {
-  m_isDistribution = isDistribution;
-}
+void HistogramBuilder::setDistribution(bool isDistribution) { m_isDistribution = isDistribution; }
 
 /// Return a Histogram based on previously set information. Throws if
 /// information is incomplete are inconsisten.
@@ -24,8 +21,7 @@ Histogram HistogramBuilder::build() const {
     throw std::runtime_error("HistogramBuilder: No Y data has been set");
 
   std::unique_ptr<Histogram> histogram;
-  if (getHistogramXMode(m_x->size(), m_y->size()) ==
-      Histogram::XMode::BinEdges) {
+  if (getHistogramXMode(m_x->size(), m_y->size()) == Histogram::XMode::BinEdges) {
     if (m_isDistribution)
       histogram = std::make_unique<Histogram>(BinEdges(m_x), Frequencies(m_y));
     else
@@ -43,5 +39,4 @@ Histogram HistogramBuilder::build() const {
   return *histogram;
 }
 
-} // namespace HistogramData
-} // namespace Mantid
+} // namespace Mantid::HistogramData

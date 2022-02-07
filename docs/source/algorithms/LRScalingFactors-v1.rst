@@ -10,7 +10,7 @@ Description
 -----------
 
 Used in the Liquids Reflectometer reduction at the SNS, this algorithm
-computes the absolute scaling factors for the data sets that we are going to stitch 
+computes the absolute scaling factors for the data sets that we are going to stitch
 together.
 
 The algorithm runs through a sequence of direct beam data sets
@@ -25,7 +25,7 @@ no attenuators.
 
 The normalization run for a data set taken in a given slit setting
 configuration can then be expressed in terms of the standard 0-attenuator
-data set with: :math:`D_i = F_i D_0` 
+data set with: :math:`D_i = F_i D_0`
 
 Here's an example of runs and how they are related to F.
 

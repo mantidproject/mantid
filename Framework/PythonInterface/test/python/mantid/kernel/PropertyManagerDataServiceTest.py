@@ -42,5 +42,14 @@ class PropertyManagerDataServiceTest(unittest.TestCase):
         self.assertEqual(value2['key2'], pmgr['key2'].value)
         pmds.remove(name)
 
+    def test_contains(self):
+        # verify check against None
+        self.assertFalse(None in PropertyManagerDataService)
+        # verify check against things that bool to False
+        self.assertFalse('' in PropertyManagerDataService)
+        self.assertFalse(0 in PropertyManagerDataService)
+        # verify check for converting checked value to string
+        self.assertFalse(1 in PropertyManagerDataService)
+
 if __name__ == "__main__":
     unittest.main()

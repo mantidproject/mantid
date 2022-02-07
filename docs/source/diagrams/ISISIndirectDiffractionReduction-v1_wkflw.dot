@@ -53,7 +53,7 @@ digraph ISISIndirectDiffractionReduction {
     e_mode                        [label="Elastic"]
     dspacing_unit                 [label="dSpacing"]
   }
-  
+
   subgraph decision {
     $decision_style
     has_calib_file                [label="Using Calibration File"]

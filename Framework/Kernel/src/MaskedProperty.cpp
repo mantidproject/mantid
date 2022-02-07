@@ -8,10 +8,10 @@
 #include "MantidKernel/PropertyHistory.h"
 
 // PropertyWithValue implementation
+#include "MantidKernel/PropertyWithValue.h"
 #include "MantidKernel/PropertyWithValue.tcc"
 
-namespace Mantid {
-namespace Kernel {
+namespace Mantid::Kernel {
 
 /** Constructor  for Maskedproperty class
  * @param name :: name of the property
@@ -21,10 +21,9 @@ namespace Kernel {
  * Direction::InOut (Input & Output) property
  */
 template <typename TYPE>
-MaskedProperty<TYPE>::MaskedProperty(const std::string &name, TYPE defaultvalue,
-                                     const IValidator_sptr &validator,
+MaskedProperty<TYPE>::MaskedProperty(std::string name, TYPE defaultvalue, IValidator_sptr validator,
                                      const unsigned int direction)
-    : Kernel::PropertyWithValue<TYPE>(name, defaultvalue, validator, direction),
+    : Kernel::PropertyWithValue<TYPE>(std::move(name), std::move(defaultvalue), std::move(validator), direction),
       m_maskedValue("") {
   this->setRemember(false);
 }
@@ -36,29 +35,23 @@ MaskedProperty<TYPE>::MaskedProperty(const std::string &name, TYPE defaultvalue,
  * Direction::InOut (Input & Output) property
  */
 template <typename TYPE>
-MaskedProperty<TYPE>::MaskedProperty(const std::string &name,
-                                     const TYPE &defaultvalue,
-                                     const unsigned int direction)
-    : Kernel::PropertyWithValue<TYPE>(name, defaultvalue, direction),
-      m_maskedValue("") {
+MaskedProperty<TYPE>::MaskedProperty(std::string name, TYPE defaultvalue, const unsigned int direction)
+    : Kernel::PropertyWithValue<TYPE>(std::move(name), std::move(defaultvalue), direction), m_maskedValue("") {
   this->setRemember(false);
 }
 
 /**
  * Virtual copy
  */
-template <typename TYPE>
-MaskedProperty<TYPE> *MaskedProperty<TYPE>::clone() const {
+template <typename TYPE> MaskedProperty<TYPE> *MaskedProperty<TYPE>::clone() const {
   return new MaskedProperty<TYPE>(*this);
 }
 
 /**
  * @return A new PropertyHistory object with the value masked out
  */
-template <typename TYPE>
-const Kernel::PropertyHistory MaskedProperty<TYPE>::createHistory() const {
-  return Kernel::PropertyHistory(this->name(), this->getMaskedValue(),
-                                 this->type(), this->isDefault(),
+template <typename TYPE> const Kernel::PropertyHistory MaskedProperty<TYPE>::createHistory() const {
+  return Kernel::PropertyHistory(this->name(), this->getMaskedValue(), this->type(), this->isDefault(),
                                  Kernel::PropertyWithValue<TYPE>::direction());
 }
 
@@ -89,5 +82,4 @@ template <typename TYPE> void MaskedProperty<TYPE>::doMasking() const {
 template class MANTID_KERNEL_DLL Mantid::Kernel::MaskedProperty<std::string>;
 ///@endcond TEMPLATE
 
-} // namespace Kernel
-} // namespace Mantid
+} // namespace Mantid::Kernel

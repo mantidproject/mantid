@@ -18,13 +18,13 @@ values are multiplied by the value of this function.
 Usage
 -----
 
-**Example - A sample correction**  
+**Example - A sample correction**
 
 .. testcode:: Ex1
 
   # a sample workspace with a sample instrument
   ws = CreateSampleWorkspace(Function="Flat background")
- 
+
   #Now we are ready to run the correction
   wsCorrected = PowerLawCorrection(ws,C0=3,C1=2)
 

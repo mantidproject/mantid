@@ -23,22 +23,16 @@ namespace MDAlgorithms {
 class DLLExport ConvertSpiceDataToRealSpace : public API::Algorithm {
 public:
   /// Algorithm's name
-  const std::string name() const override {
-    return "ConvertSpiceDataToRealSpace";
-  }
+  const std::string name() const override { return "ConvertSpiceDataToRealSpace"; }
 
   /// Summary of algorithms purpose
-  const std::string summary() const override {
-    return "Load a HFIR powder diffractometer SPICE file.";
-  }
+  const std::string summary() const override { return "Load a HFIR powder diffractometer SPICE file."; }
 
   /// Algorithm's version
   int version() const override { return (1); }
 
   /// Algorithm's category for identification
-  const std::string category() const override {
-    return "Diffraction\\ConstantWavelength;DataHandling\\Text";
-  }
+  const std::string category() const override { return "Diffraction\\ConstantWavelength;DataHandling\\Text"; }
 
   /// Returns a confidence value that this algorithm can load a file
   // virtual int confidence(Kernel::FileDescriptor &descriptor) const;
@@ -54,64 +48,53 @@ private:
   void exec() override;
 
   /// Load data by call
-  DataObjects::TableWorkspace_sptr
-  loadSpiceData(const std::string &spicefilename);
+  DataObjects::TableWorkspace_sptr loadSpiceData(const std::string &spicefilename);
 
   /// Parse data table workspace to a vector of matrix workspaces
-  std::vector<API::MatrixWorkspace_sptr> convertToMatrixWorkspace(
-      const DataObjects::TableWorkspace_sptr &tablews,
-      const API::MatrixWorkspace_const_sptr &parentws,
-      Types::Core::DateAndTime runstart,
-      std::map<std::string, std::vector<double>> &logvecmap,
-      std::vector<Types::Core::DateAndTime> &vectimes);
+  std::vector<API::MatrixWorkspace_sptr> convertToMatrixWorkspace(const DataObjects::TableWorkspace_sptr &tablews,
+                                                                  const API::MatrixWorkspace_const_sptr &parentws,
+                                                                  Types::Core::DateAndTime runstart,
+                                                                  std::map<std::string, std::vector<double>> &logvecmap,
+                                                                  std::vector<Types::Core::DateAndTime> &vectimes);
 
   /// Create an MDEventWorspace by converting vector of matrix workspace data
-  API::IMDEventWorkspace_sptr
-  createDataMDWorkspace(const std::vector<API::MatrixWorkspace_sptr> &vec_ws2d);
+  API::IMDEventWorkspace_sptr createDataMDWorkspace(const std::vector<API::MatrixWorkspace_sptr> &vec_ws2d);
 
   /// Create an MDWorkspace for monitor counts
-  API::IMDEventWorkspace_sptr createMonitorMDWorkspace(
-      const std::vector<API::MatrixWorkspace_sptr> &vec_ws2d,
-      const std::vector<double> &vecmonitor);
+  API::IMDEventWorkspace_sptr createMonitorMDWorkspace(const std::vector<API::MatrixWorkspace_sptr> &vec_ws2d,
+                                                       const std::vector<double> &vecmonitor);
 
   /// Read parameter information from table workspace
-  void readTableInfo(const DataObjects::TableWorkspace_const_sptr &tablews,
-                     size_t &ipt, size_t &irotangle, size_t &itime,
-                     std::vector<std::pair<size_t, size_t>> &anodelist,
+  void readTableInfo(const DataObjects::TableWorkspace_const_sptr &tablews, size_t &ipt, size_t &irotangle,
+                     size_t &itime, std::vector<std::pair<size_t, size_t>> &anodelist,
                      std::map<std::string, size_t> &samplenameindexmap);
 
   /// Return sample logs
-  void parseSampleLogs(const DataObjects::TableWorkspace_sptr &tablews,
-                       const std::map<std::string, size_t> &indexlist,
+  void parseSampleLogs(const DataObjects::TableWorkspace_sptr &tablews, const std::map<std::string, size_t> &indexlist,
                        std::map<std::string, std::vector<double>> &logvecmap);
 
   /// Load one run (one pt.) to a matrix workspace
-  API::MatrixWorkspace_sptr loadRunToMatrixWS(
-      const DataObjects::TableWorkspace_sptr &tablews, size_t irow,
-      const API::MatrixWorkspace_const_sptr &parentws,
-      Types::Core::DateAndTime runstart, size_t ipt, size_t irotangle,
-      size_t itime, const std::vector<std::pair<size_t, size_t>> &anodelist,
-      double &duration);
+  API::MatrixWorkspace_sptr loadRunToMatrixWS(const DataObjects::TableWorkspace_sptr &tablews, size_t irow,
+                                              const API::MatrixWorkspace_const_sptr &parentws,
+                                              Types::Core::DateAndTime runstart, size_t ipt, size_t irotangle,
+                                              size_t itime, const std::vector<std::pair<size_t, size_t>> &anodelist,
+                                              double &duration);
 
   /// Append Experiment Info
-  void
-  addExperimentInfos(const API::IMDEventWorkspace_sptr &mdws,
-                     const std::vector<API::MatrixWorkspace_sptr> &vec_ws2d);
+  void addExperimentInfos(const API::IMDEventWorkspace_sptr &mdws,
+                          const std::vector<API::MatrixWorkspace_sptr> &vec_ws2d);
 
   /// Append sample logs to MD workspace
-  void
-  appendSampleLogs(const API::IMDEventWorkspace_sptr &mdws,
-                   const std::map<std::string, std::vector<double>> &logvecmap,
-                   const std::vector<Types::Core::DateAndTime> &vectimes);
+  void appendSampleLogs(const API::IMDEventWorkspace_sptr &mdws,
+                        const std::map<std::string, std::vector<double>> &logvecmap,
+                        const std::vector<Types::Core::DateAndTime> &vectimes);
 
   /// Parse detector efficiency table workspace to map
-  std::map<detid_t, double> parseDetectorEfficiencyTable(
-      const DataObjects::TableWorkspace_sptr &detefftablews);
+  std::map<detid_t, double> parseDetectorEfficiencyTable(const DataObjects::TableWorkspace_sptr &detefftablews);
 
   /// Apply the detector's efficiency correction to
-  void
-  correctByDetectorEfficiency(std::vector<API::MatrixWorkspace_sptr> vec_ws2d,
-                              const std::map<detid_t, double> &detEffMap);
+  void correctByDetectorEfficiency(std::vector<API::MatrixWorkspace_sptr> vec_ws2d,
+                                   const std::map<detid_t, double> &detEffMap);
 
   /// Name of instrument
   std::string m_instrumentName;

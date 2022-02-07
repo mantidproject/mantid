@@ -9,6 +9,7 @@ from Direct.PropertiesDescriptors import *
 from Direct.RunDescriptor import RunDescriptor,RunDescriptorDependent
 from mantid.simpleapi import *
 from mantid import geometry
+from sys import platform
 
 
 class NonIDF_Properties(object):
@@ -30,6 +31,18 @@ class NonIDF_Properties(object):
           "information" : (4,lambda msg:   logger.information(msg)),
           "debug" :       (5,lambda msg:   logger.debug(msg))}
 
+    # The default location of the archive load log file
+    if platform.startswith("linux"):
+        # linux default log file location
+        archive_upload_log_template = '/archive/NDX{0}/Instrument/logs/lastrun.txt'
+    elif platform == "win32":
+        # windows default log file location
+        archive_upload_log_template = r'\\isis\inst$\NDX{0}\Instrument\logs\lastrun.txt'
+    else:
+        archive_upload_log_template = ''
+    #----------------------------------------------------------------------------------
+
+    #
     def __init__(self,Instrument,run_workspace=None):
         """ initialize main properties, defined by the class
             @parameter Instrument  -- name or pointer to the instrument,
@@ -44,6 +57,7 @@ class NonIDF_Properties(object):
         object.__setattr__(self,'_log_to_mantid',False)
 
         object.__setattr__(self,'_current_log_level',3)
+        object.__setattr__(self,'_archive_upload_log_file',None)
 
         self._set_instrument_and_facility(Instrument,run_workspace)
 
@@ -56,9 +70,13 @@ class NonIDF_Properties(object):
         super(NonIDF_Properties,self).__setattr__('sample_run',None)
         super(NonIDF_Properties,self).__setattr__('wb_run',None)
         super(NonIDF_Properties,self).__setattr__('monovan_run',None)
+        super(NonIDF_Properties,self).__setattr__('empty_bg_run',None)
+        super(NonIDF_Properties,self).__setattr__('empty_bg_run_for_wb',None)
+        super(NonIDF_Properties,self).__setattr__('empty_bg_run_for_monovan',None)
 
         super(NonIDF_Properties,self).__setattr__('mask_run',None)
         super(NonIDF_Properties,self).__setattr__('wb_for_monovan_run',None)
+        super(NonIDF_Properties,self).__setattr__('empty_bg_run_for_monoWb',None)
         super(NonIDF_Properties,self).__setattr__('second_white',None)
         super(NonIDF_Properties,self).__setattr__('_tmp_run',None)
         super(NonIDF_Properties,self).__setattr__('_cashe_sum_ws',False)
@@ -75,6 +93,13 @@ class NonIDF_Properties(object):
         # TODO: reconcile this with Mantid.
             if lev <= self._current_log_level:
                 print(msg)
+
+    def get_prop_class(self,prop_name):
+        """ Return the instance of a property if such property exist"""
+
+        prop = NonIDF_Properties.__getattribute__(NonIDF_Properties,prop_name)
+        return prop
+
     #-----------------------------------------------------------------------------
     # Complex properties with personal descriptors
     #-----------------------------------------------------------------------------
@@ -100,13 +125,22 @@ class NonIDF_Properties(object):
     monovan_run = RunDescriptor("MV_","""Run number, workspace or symbolic presentation of such run
                   containing results of monochromatic neutron beam scattering from vanadium sample
                   used in absolute units normalization.\n None disables absolute units calculations.""")
+    empty_bg_run = RunDescriptor("EBG_","""Run number, workspace or symbolic presentation of such run
+                  containing results of the empty instrument background measurements""")
+    empty_bg_run_for_wb = RunDescriptor("EBG4WB_","""Run number, workspace or symbolic presentation of such run
+                  containing results of the empty instrument background measurements for Vanadium""")
 
     mask_run    = RunDescriptorDependent(sample_run,"MSK_","""Run number, workspace or symbolic presentation of such run
                   containing results of experiment, used to find masks.\n If not explicitly set, sample_run is used.""")
+    empty_bg_run_for_monovan = RunDescriptorDependent(empty_bg_run,"EBG4Mono_","""Run number, workspace or symbolic presentation of such run
+                  containing results of the empty instrument background measurements for monochromatic vanadium (WB normalisatiion)""")
     wb_for_monovan_run = RunDescriptorDependent(wb_run,"MV_WB_","""Run number, workspace or symbolic presentation of such run
                          containing results of white beam neutrons scattering from vanadium, used to calculate monovanadium
                          integrals for monochromatic vanadium.\n
                          If not explicitly set, white beam for sample run is used.""")
+    empty_bg_run_for_monoWb = RunDescriptorDependent(empty_bg_run_for_wb,"EBG4MonoWB_","""Run number, workspace or symbolic presentation of such run
+                  containing results of the empty instrument background measurements for detector Vanadium for Mono""")
+
     # TODO: do something about it.  Second white is explicitly used in
     # diagnostics but not accessed at all
     second_white  = RunDescriptor("""Second white beam run results currently unused in the workflow
@@ -179,9 +213,39 @@ class NonIDF_Properties(object):
         object.__setattr__(self,'_mapmask_ref_ws',val)
 
     # -----------------------------------------------------------------------------
+    @property
+    def archive_upload_log_file(self):
+        """ The full path to the file, containing log describing the last run number,
+            uploaded to archive on ISIS. Only after a file has been added to the archive,
+            the data are available for reduction. The information is used by reduction
+            script, which runs during experiment and waits until data files redy for reduction.
+        """
+        if self._archive_upload_log_file is None:
+            if len(NonIDF_Properties.archive_upload_log_template)>0:
+                trial_file = NonIDF_Properties.archive_upload_log_template.format(self.instr_name)
+                self._set_archive_update_log(trial_file,False)
+            else:
+                object.__setattr__(self,'_archive_upload_log_file','')
+
+        return self._archive_upload_log_file
+
+    @archive_upload_log_file.setter
+    def archive_upload_log_file(self,filename):
+        self._set_archive_update_log(filename)
+
+    def _set_archive_update_log(self,filename,report_failure = True):
+        if os.path.isfile(filename):
+            object.__setattr__(self,'_archive_upload_log_file',filename)
+        else:
+            object.__setattr__(self,'_archive_upload_log_file','')
+            if report_failure:
+                self.log("archive upload file log {0} does not exist. Ignoring it.".format(filename), 'warning')
+
+    # -----------------------------------------------------------------------------
     # Service properties (used by class itself)
-    #
-    def _set_instrument_and_facility(self,Instrument,run_workspace=None):
+    # -----------------------------------------------------------------------------
+
+    def _set_instrument_and_facility(self,Instrument,run_workspace = None):
         """Obtain default instrument and facility and store it in properties"""
 
         if run_workspace:

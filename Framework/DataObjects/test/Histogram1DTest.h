@@ -43,10 +43,8 @@ public:
     std::fill(pa->begin(), pa->end(), rand());
     pb = std::make_shared<HistogramE>(nel);
     std::fill(pb->begin(), pb->end(), rand());
-    h.setHistogram(Histogram(Points(100, LinearGenerator(0.0, 1.0)),
-                             Counts(100, 0.0), CountVariances(100, 0.0)));
-    h2.setHistogram(Histogram(Points(100, LinearGenerator(0.0, 1.0)),
-                              Counts(100, 0.0), CountVariances(100, 0.0)));
+    h.setHistogram(Histogram(Points(100, LinearGenerator(0.0, 1.0)), Counts(100, 0.0), CountVariances(100, 0.0)));
+    h2.setHistogram(Histogram(Points(100, LinearGenerator(0.0, 1.0)), Counts(100, 0.0), CountVariances(100, 0.0)));
     h.setCounts(100);
     h.setCountStandardDeviations(100);
     h2.setCounts(100);
@@ -58,12 +56,10 @@ public:
     histogram.setHistogram(Points(1), Counts(1));
     EventList eventList;
     eventList.setHistogram(BinEdges(2));
-    std::unique_ptr<const ISpectrum> specHist =
-        std::make_unique<Histogram1D>(histogram);
-    std::unique_ptr<const ISpectrum> specEvent =
-        std::make_unique<EventList>(eventList);
-    std::unique_ptr<ISpectrum> target = std::make_unique<Histogram1D>(
-        Histogram::XMode::Points, Histogram::YMode::Counts);
+    std::unique_ptr<const ISpectrum> specHist = std::make_unique<Histogram1D>(histogram);
+    std::unique_ptr<const ISpectrum> specEvent = std::make_unique<EventList>(eventList);
+    std::unique_ptr<ISpectrum> target =
+        std::make_unique<Histogram1D>(Histogram::XMode::Points, Histogram::YMode::Counts);
 
     TS_ASSERT_THROWS_NOTHING(target->copyDataFrom(*specHist));
     TS_ASSERT(target->points());
@@ -79,12 +75,10 @@ public:
     histogram.setHistogram(Points(1), Counts(1));
     EventList eventList;
     eventList.setHistogram(BinEdges(2));
-    std::unique_ptr<const ISpectrum> specHist =
-        std::make_unique<Histogram1D>(histogram);
-    std::unique_ptr<const ISpectrum> specEvent =
-        std::make_unique<EventList>(eventList);
-    std::unique_ptr<ISpectrum> target = std::make_unique<Histogram1D>(
-        Histogram::XMode::Points, Histogram::YMode::Counts);
+    std::unique_ptr<const ISpectrum> specHist = std::make_unique<Histogram1D>(histogram);
+    std::unique_ptr<const ISpectrum> specEvent = std::make_unique<EventList>(eventList);
+    std::unique_ptr<ISpectrum> target =
+        std::make_unique<Histogram1D>(Histogram::XMode::Points, Histogram::YMode::Counts);
     target->setSpectrumNo(37);
     target->setDetectorID(42);
 
@@ -170,33 +164,20 @@ public:
   }
   void testrangeexceptionX() {
     h.setPoints(x1);
-    // vector.at() is marked nodiscard in MSVC but we just want to test it
-    // throws so suppress the warning
-    MSVC_DIAG_OFF(4834)
     TS_ASSERT_THROWS(h.dataX().at(nel), const std::out_of_range &);
-    MSVC_DIAG_ON(4834)
   }
   void testrangeexceptionY() {
     h.setCounts(y1);
-    // vector.at() is marked nodiscard in MSVC but we just want to test it
-    // throws so suppress the warning
-    MSVC_DIAG_OFF(4834)
     TS_ASSERT_THROWS(h.dataY().at(nel), const std::out_of_range &);
-    MSVC_DIAG_ON(4834)
   }
   void testrangeexceptionE() {
     h.setCounts(y1);
     h.setCountStandardDeviations(e1);
-    // vector.at() is marked nodiscard in MSVC but we just want to test it
-    // throws so suppress the warning
-    MSVC_DIAG_OFF(4834)
     TS_ASSERT_THROWS(h.dataE().at(nel), const std::out_of_range &);
-    MSVC_DIAG_ON(4834)
   }
 
   void test_copy_constructor() {
-    const Histogram1D source(Histogram::XMode::Points,
-                             Histogram::YMode::Counts);
+    const Histogram1D source(Histogram::XMode::Points, Histogram::YMode::Counts);
     Histogram1D clone(source);
     TS_ASSERT_EQUALS(&clone.readX(), &source.readX());
     TS_ASSERT_EQUALS(&clone.readY(), &source.readY());
@@ -235,8 +216,7 @@ public:
   }
 
   void test_copy_assignment() {
-    const Histogram1D source(Histogram::XMode::Points,
-                             Histogram::YMode::Counts);
+    const Histogram1D source(Histogram::XMode::Points, Histogram::YMode::Counts);
     Histogram1D clone(Histogram::XMode::Points, Histogram::YMode::Counts);
     clone = source;
     TS_ASSERT_EQUALS(&clone.readX(), &source.readX());

@@ -4,15 +4,11 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from mantiddoc.directives.base import BaseDirective #pylint: disable=unused-import
-from sphinx.locale import _ #pylint: disable=unused-import
+from mantiddoc.directives.base import BaseDirective  #pylint: disable=unused-import
+from sphinx.locale import _  # noqa: F401
 import os
 from string import Template
 import subprocess
-
-######################
-#CONFIGURABLE OPTIONS#
-######################
 
 STYLE = dict()
 
@@ -24,19 +20,15 @@ node[fontname="Helvetica", style = filled]
 edge[fontname="Helvetica"]
 """
 
-STYLE['param_style']     = 'node[fillcolor = khaki, shape = oval]'
-STYLE['decision_style']  = 'node[fillcolor = limegreen, shape = diamond]'
-STYLE['algorithm_style'] = 'node[style = "rounded,filled", fillcolor = lightskyblue, shape = rectangle]'
-STYLE['process_style']   = 'node[fillcolor = lightseagreen, shape = rectangle]'
-STYLE['value_style']     = 'node[fontname = "Times-Roman", fillcolor = grey, shape = parallelogram]'
-
-#############################
-#END OF CONFIGURABLE OPTIONS#
-#############################
+STYLE['param_style'] = 'node[fillcolor = khaki, shape = oval]'
+STYLE['decision_style'] = 'node[fillcolor = limegreen, shape = diamond]'
+STYLE[
+    'algorithm_style'] = 'node[style = "rounded,filled", fillcolor = lightskyblue, shape = rectangle]'
+STYLE['process_style'] = 'node[fillcolor = lightseagreen, shape = rectangle]'
+STYLE['value_style'] = 'node[fontname = "Times-Roman", fillcolor = grey, shape = parallelogram]'
 
 
 class DiagramDirective(BaseDirective):
-
     """
     Adds a diagram from a dot source file
 
@@ -46,6 +38,17 @@ class DiagramDirective(BaseDirective):
     """
 
     required_arguments, optional_arguments = 1, 0
+
+    @property
+    def diagrams_dir(self):
+        """Return the directory generated diagrams should be stored in or
+        None if they should not be created
+        """
+        diagrams_dir = os.environ.get("DIAGRAMS_DIR", None)
+        if diagrams_dir is None or diagrams_dir == "":
+            return None
+        else:
+            return diagrams_dir
 
     def run(self):
         """
@@ -61,48 +64,50 @@ class DiagramDirective(BaseDirective):
 
     def execute(self):
         env = self.state.document.settings.env
-
-        try:
-            out_dir = os.environ["DIAGRAMS_DIR"]
-        except:
-            raise RuntimeError("The '.. diagram::' directive requires a DIAGRAMS_DIR environment variable to be set.")
+        diagrams_dir = self.diagrams_dir
+        if diagrams_dir is None:
+            self.add_rst(".. figure:: /images/ImageNotFound.png\n\n"
+                         "    diagram generation was disabled")
+            return []
 
         try:
             dot_executable = os.environ["DOT_EXECUTABLE"]
         except KeyError:
-            self.add_rst(".. figure:: /images/ImageNotFound.png\n\n" +
+            self.add_rst(".. figure:: /images/ImageNotFound.png\n\n"
                          "    graphviz not found - diagram could not be rendered.")
             return []
 
-        #Make sure we have an output directory
-        if not os.path.exists(out_dir):
-            os.makedirs(out_dir)
-
+        # Make sure we have an output directory
+        if not os.path.exists(diagrams_dir):
+            os.makedirs(diagrams_dir)
         diagram_name = self.arguments[0]
         if diagram_name[-4:] != ".dot":
-            raise RuntimeError("Diagrams need to be referred to by their filename, including '.dot' extension.")
+            raise RuntimeError(
+                "Diagrams need to be referred to by their filename, including '.dot' extension.")
 
         in_path = os.path.join(env.srcdir, "diagrams", diagram_name)
-        out_path = os.path.join(out_dir, diagram_name[:-4] + ".png")
+        out_path = os.path.join(diagrams_dir, diagram_name[:-4] + ".svg")
 
         #Generate the diagram
         try:
             in_src = open(in_path, 'r').read()
-        except:
-            raise RuntimeError("Cannot find dot-file: '" + diagram_name + "' in '" + os.path.join(env.srcdir,"diagrams"))
+        except Exception:
+            raise RuntimeError("Cannot find dot-file: '" + diagram_name + "' in '"
+                               + os.path.join(env.srcdir, "diagrams"))
 
         out_src = Template(in_src).substitute(STYLE)
         out_src = out_src.encode()
-        gviz = subprocess.Popen([dot_executable,"-Tpng","-o",out_path], stdin=subprocess.PIPE)
+        gviz = subprocess.Popen([dot_executable, "-Tsvg", "-o", out_path], stdin=subprocess.PIPE)
         gviz.communicate(input=out_src)
         gviz.wait()
 
-        #relative path to image, in unix style
-        rel_path = os.path.relpath(out_path, env.srcdir).replace("\\","/")
+        # relative path to image, in unix style
+        rel_path = os.path.relpath(out_path, env.srcdir).replace("\\", "/")
 
         self.add_rst(".. image:: /" + rel_path + "\n\n")
 
         return []
+
 
 #------------------------------------------------------------------------------------------------------------
 

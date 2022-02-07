@@ -20,19 +20,15 @@ namespace Functions {
 class MANTID_CURVEFITTING_DLL FlatBackground : public BackgroundFunction {
 public:
   std::string name() const override;
-  void function1D(double *out, const double *xValues,
-                  const size_t nData) const override;
-  void functionDeriv1D(API::Jacobian *out, const double *xValues,
-                       const size_t nData) override;
+  void function1D(double *out, const double *xValues, const size_t nData) const override;
+  void functionDeriv1D(API::Jacobian *out, const double *xValues, const size_t nData) override;
 
 private:
   void init() override;
   /// Calculate histogram data.
-  void histogram1D(double *out, double left, const double *right,
-                   const size_t nBins) const override;
+  void histogram1D(double *out, double left, const double *right, const size_t nBins) const override;
   /// Devivatives of the histogram.
-  void histogramDerivative1D(API::Jacobian *jacobian, double left,
-                             const double *right,
+  void histogramDerivative1D(API::Jacobian *jacobian, double left, const double *right,
                              const size_t nBins) const override;
 };
 

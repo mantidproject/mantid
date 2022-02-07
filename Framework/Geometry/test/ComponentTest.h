@@ -164,8 +164,7 @@ public:
     // name and parent
     Component q("Child", V3D(5, 6, 7), Quat(1, 1, 1, 1), &parent);
 
-    TS_ASSERT_THROWS(parent.setDescription("descr"),
-                     const Mantid::Kernel::Exception::NotImplementedError &);
+    TS_ASSERT_THROWS(parent.setDescription("descr"), const Mantid::Kernel::Exception::NotImplementedError &);
 
     ParameterMap_sptr pmap(new ParameterMap());
     pmap->addString(&q, "ChildMessage", "Message from a child");
@@ -177,17 +176,13 @@ public:
     TS_ASSERT(pq.getParent());
     TS_ASSERT(pq.getParent()->isParametrized());
 
-    TS_ASSERT_THROWS_NOTHING(pq.setDescription(
-        "This is child description. This is long child description."));
+    TS_ASSERT_THROWS_NOTHING(pq.setDescription("This is child description. This is long child description."));
 
     TS_ASSERT_EQUALS(parent.getShortDescription(), "");
     TS_ASSERT_EQUALS(pq.getShortDescription(), "This is child description.");
-    TS_ASSERT_EQUALS(pq.getParamShortDescription("Child"),
-                     "This is child description.");
+    TS_ASSERT_EQUALS(pq.getParamShortDescription("Child"), "This is child description.");
 
-    TS_ASSERT_EQUALS(
-        pq.getDescription(),
-        "This is child description. This is long child description.");
+    TS_ASSERT_EQUALS(pq.getDescription(), "This is child description. This is long child description.");
   }
 
   void testGetFullName() {
@@ -292,8 +287,7 @@ public:
     TS_ASSERT_EQUALS(comp.getRelativeRot(), rot12);
 
     // Rotate by angle+axis not implemented yet. Check for exception throw
-    TS_ASSERT_THROWS(comp.rotate(45, V3D(1, 1, 1)),
-                     const Mantid::Kernel::Exception::NotImplementedError &);
+    TS_ASSERT_THROWS(comp.rotate(45, V3D(1, 1, 1)), const Mantid::Kernel::Exception::NotImplementedError &);
   }
 
   void testRelativeRotate() {
@@ -354,6 +348,19 @@ public:
     TS_ASSERT_EQUALS(compOrigin.getDistance(comp3), 5);
     TS_ASSERT_DELTA(compOrigin.getDistance(comp4), 17.3205, 0.001);
     TS_ASSERT_DELTA(comp1.getDistance(comp2), 14.1421, 0.001);
+  }
+
+  void testGetParameterVisibile() {
+    V3D origin(0, 0, 0);
+
+    Component comp("origin", origin);
+    ParameterMap_sptr pmap(new ParameterMap());
+    pmap->addString(&comp, "Hidden string parameter", "hidden values", nullptr, "false");
+    pmap->addDouble(&comp, "Hidden double parameter", 0.0, nullptr, "false");
+    auto names = comp.getParameterNames();
+    for (auto name : names) {
+      TS_ASSERT_EQUALS(comp.getParameterVisible(name, false), false);
+    }
   }
 
   void testType() {

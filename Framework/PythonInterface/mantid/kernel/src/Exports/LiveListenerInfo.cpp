@@ -19,15 +19,12 @@ void export_LiveListenerInfo() {
   std_vector_exporter<LiveListenerInfo>::wrap("std_vector_LiveListenerInfo");
 
   class_<LiveListenerInfo>("LiveListenerInfo", no_init)
-      .def("name", &LiveListenerInfo::name, arg("self"),
-           return_value_policy<copy_const_reference>(),
+      .def("name", &LiveListenerInfo::name, arg("self"), return_value_policy<copy_const_reference>(),
            "Returns the name of this LiveListener connection")
 
-      .def("address", &LiveListenerInfo::address, arg("self"),
-           return_value_policy<copy_const_reference>(),
+      .def("address", &LiveListenerInfo::address, arg("self"), return_value_policy<copy_const_reference>(),
            "Returns the address of this LiveListener connection")
 
-      .def("listener", &LiveListenerInfo::listener, arg("self"),
-           return_value_policy<copy_const_reference>(),
+      .def("listener", &LiveListenerInfo::listener, arg("self"), return_value_policy<copy_const_reference>(),
            "Returns the name of the specific LiveListener class used");
 }

@@ -13,8 +13,7 @@
 
 #include <cfloat>
 
-namespace Mantid {
-namespace Geometry {
+namespace Mantid::Geometry {
 using Kernel::V3D;
 
 //---------------------------------------------------------
@@ -28,16 +27,12 @@ using Kernel::V3D;
  */
 bool BoundingBox::isPointInside(const V3D &point) const {
   if (!this->isAxisAligned()) {
-    throw(Kernel::Exception::NotImplementedError(
-        "this function has not been modified properly"));
+    throw(Kernel::Exception::NotImplementedError("this function has not been modified properly"));
   }
 
-  return point.X() <= xMax() + Kernel::Tolerance &&
-         point.X() >= xMin() - Kernel::Tolerance &&
-         point.Y() <= yMax() + Kernel::Tolerance &&
-         point.Y() >= yMin() - Kernel::Tolerance &&
-         point.Z() <= zMax() + Kernel::Tolerance &&
-         point.Z() >= zMin() - Kernel::Tolerance;
+  return point.X() <= xMax() + Kernel::Tolerance && point.X() >= xMin() - Kernel::Tolerance &&
+         point.Y() <= yMax() + Kernel::Tolerance && point.Y() >= yMin() - Kernel::Tolerance &&
+         point.Z() <= zMax() + Kernel::Tolerance && point.Z() >= zMin() - Kernel::Tolerance;
 }
 
 /**
@@ -57,11 +52,9 @@ bool BoundingBox::doesLineIntersect(const Track &track) const {
  * @param lineDir :: The direction of the line
  * @returns True if the line intersects this bounding box, false otherwise.
  */
-bool BoundingBox::doesLineIntersect(const V3D &startPoint,
-                                    const V3D &lineDir) const {
+bool BoundingBox::doesLineIntersect(const V3D &startPoint, const V3D &lineDir) const {
   if (!this->isAxisAligned()) {
-    throw(Kernel::Exception::NotImplementedError(
-        "this function has not been modified properly"));
+    throw(Kernel::Exception::NotImplementedError("this function has not been modified properly"));
   }
   // Method - Loop through planes looking for ones that are visible and check
   // intercept
@@ -71,60 +64,48 @@ bool BoundingBox::doesLineIntersect(const V3D &startPoint,
   if (startPoint.X() > xMax()) {
     if (lineDir.X() < -tol) {
       lambda = (xMax() - startPoint.X()) / lineDir.X();
-      if (yMin() <= startPoint.Y() + lambda * lineDir.Y() &&
-          yMax() >= startPoint.Y() + lambda * lineDir.Y())
-        if (zMin() <= startPoint.Z() + lambda * lineDir.Z() &&
-            zMax() >= startPoint.Z() + lambda * lineDir.Z())
+      if (yMin() <= startPoint.Y() + lambda * lineDir.Y() && yMax() >= startPoint.Y() + lambda * lineDir.Y())
+        if (zMin() <= startPoint.Z() + lambda * lineDir.Z() && zMax() >= startPoint.Z() + lambda * lineDir.Z())
           return true;
     }
   }
   if (startPoint.X() < xMin()) {
     if (lineDir.X() > tol) {
       lambda = (xMin() - startPoint.X()) / lineDir.X();
-      if (yMin() <= startPoint.Y() + lambda * lineDir.Y() &&
-          yMax() >= startPoint.Y() + lambda * lineDir.Y())
-        if (zMin() <= startPoint.Z() + lambda * lineDir.Z() &&
-            zMax() >= startPoint.Z() + lambda * lineDir.Z())
+      if (yMin() <= startPoint.Y() + lambda * lineDir.Y() && yMax() >= startPoint.Y() + lambda * lineDir.Y())
+        if (zMin() <= startPoint.Z() + lambda * lineDir.Z() && zMax() >= startPoint.Z() + lambda * lineDir.Z())
           return true;
     }
   }
   if (startPoint.Y() > yMax()) {
     if (lineDir.Y() < -tol) {
       lambda = (yMax() - startPoint.Y()) / lineDir.Y();
-      if (xMin() <= startPoint.X() + lambda * lineDir.X() &&
-          xMax() >= startPoint.X() + lambda * lineDir.X())
-        if (zMin() <= startPoint.Z() + lambda * lineDir.Z() &&
-            zMax() >= startPoint.Z() + lambda * lineDir.Z())
+      if (xMin() <= startPoint.X() + lambda * lineDir.X() && xMax() >= startPoint.X() + lambda * lineDir.X())
+        if (zMin() <= startPoint.Z() + lambda * lineDir.Z() && zMax() >= startPoint.Z() + lambda * lineDir.Z())
           return true;
     }
   }
   if (startPoint.Y() < yMin()) {
     if (lineDir.Y() > tol) {
       lambda = (yMin() - startPoint.Y()) / lineDir.Y();
-      if (xMin() <= startPoint.X() + lambda * lineDir.X() &&
-          xMax() >= startPoint.X() + lambda * lineDir.X())
-        if (zMin() <= startPoint.Z() + lambda * lineDir.Z() &&
-            zMax() >= startPoint.Z() + lambda * lineDir.Z())
+      if (xMin() <= startPoint.X() + lambda * lineDir.X() && xMax() >= startPoint.X() + lambda * lineDir.X())
+        if (zMin() <= startPoint.Z() + lambda * lineDir.Z() && zMax() >= startPoint.Z() + lambda * lineDir.Z())
           return true;
     }
   }
   if (startPoint.Z() > zMax()) {
     if (lineDir.Z() < -tol) {
       lambda = (zMax() - startPoint.Z()) / lineDir.Z();
-      if (yMin() <= startPoint.Y() + lambda * lineDir.Y() &&
-          yMax() >= startPoint.Y() + lambda * lineDir.Y())
-        if (xMin() <= startPoint.X() + lambda * lineDir.X() &&
-            xMax() >= startPoint.X() + lambda * lineDir.X())
+      if (yMin() <= startPoint.Y() + lambda * lineDir.Y() && yMax() >= startPoint.Y() + lambda * lineDir.Y())
+        if (xMin() <= startPoint.X() + lambda * lineDir.X() && xMax() >= startPoint.X() + lambda * lineDir.X())
           return true;
     }
   }
   if (startPoint.Z() < zMin()) {
     if (lineDir.Z() > tol) {
       lambda = (zMin() - startPoint.Z()) / lineDir.Z();
-      if (yMin() <= startPoint.Y() + lambda * lineDir.Y() &&
-          yMax() >= startPoint.Y() + lambda * lineDir.Y())
-        if (xMin() <= startPoint.X() + lambda * lineDir.X() &&
-            xMax() >= startPoint.X() + lambda * lineDir.X())
+      if (yMin() <= startPoint.Y() + lambda * lineDir.Y() && yMax() >= startPoint.Y() + lambda * lineDir.Y())
+        if (xMin() <= startPoint.X() + lambda * lineDir.X() && xMax() >= startPoint.X() + lambda * lineDir.X())
           return true;
     }
   }
@@ -162,14 +143,11 @@ double BoundingBox::angularWidth(const Kernel::V3D &observer) const {
  * @param r3 Flat random number in range (0,1)
  * @return A new point within the box such that isPointInside(pt) == true
  */
-Kernel::V3D BoundingBox::generatePointInside(double r1, double r2,
-                                             double r3) const {
-  return V3D(xMin() + r1 * (xMax() - xMin()), yMin() + r2 * (yMax() - yMin()),
-             zMin() + r3 * (zMax() - zMin()));
+Kernel::V3D BoundingBox::generatePointInside(double r1, double r2, double r3) const {
+  return V3D(xMin() + r1 * (xMax() - xMin()), yMin() + r2 * (yMax() - yMin()), zMin() + r3 * (zMax() - zMin()));
 }
 
-void BoundingBox::getFullBox(std::vector<Kernel::V3D> &box,
-                             const Kernel::V3D &observer) const {
+void BoundingBox::getFullBox(std::vector<Kernel::V3D> &box, const Kernel::V3D &observer) const {
   box.resize(8);
   box[0] = Kernel::V3D(xMin(), yMin(), zMin()) - observer;
   box[1] = Kernel::V3D(xMax(), yMin(), zMin()) - observer;
@@ -181,8 +159,7 @@ void BoundingBox::getFullBox(std::vector<Kernel::V3D> &box,
   box[7] = Kernel::V3D(xMax(), yMax(), zMax()) - observer;
 }
 
-void BoundingBox::setBoxAlignment(const Kernel::V3D &R0,
-                                  const std::vector<Kernel::V3D> &orts) {
+void BoundingBox::setBoxAlignment(const Kernel::V3D &R0, const std::vector<Kernel::V3D> &orts) {
   this->coord_system.resize(4);
   coord_system[0] = R0;
   coord_system[1] = orts[0];
@@ -252,28 +229,29 @@ void BoundingBox::realign(std::vector<Kernel::V3D> const *const pCS) {
  * @param other :: The bounding box that should be encompassed
  */
 void BoundingBox::grow(const BoundingBox &other) {
-  m_null &= other.isNull();
+
   // If the current box is empty then we definitely need to grow
-  if (minPoint() == V3D() && maxPoint() == V3D()) {
+  if (m_null) {
     m_minPoint = other.minPoint();
     m_maxPoint = other.maxPoint();
-    return;
-  }
+  } else {
 
-  // Simply checks if an of the points in the given box are outside this one and
-  // changes the coordinate appropriately
-  V3D otherPoint = other.minPoint();
-  for (size_t i = 0; i < 3; ++i) {
-    if (otherPoint[i] < m_minPoint[i]) {
-      m_minPoint[i] = otherPoint[i];
+    // Simply checks if an of the points in the given box are outside this one
+    // and changes the coordinate appropriately
+    V3D otherPoint = other.minPoint();
+    for (size_t i = 0; i < 3; ++i) {
+      if (otherPoint[i] < m_minPoint[i]) {
+        m_minPoint[i] = otherPoint[i];
+      }
+    }
+    otherPoint = other.maxPoint();
+    for (size_t i = 0; i < 3; ++i) {
+      if (otherPoint[i] > m_maxPoint[i]) {
+        m_maxPoint[i] = otherPoint[i];
+      }
     }
   }
-  otherPoint = other.maxPoint();
-  for (size_t i = 0; i < 3; ++i) {
-    if (otherPoint[i] > m_maxPoint[i]) {
-      m_maxPoint[i] = otherPoint[i];
-    }
-  }
+  m_null &= other.isNull();
 }
 
 //--------------------------------------------------------------------------
@@ -287,10 +265,8 @@ void BoundingBox::grow(const BoundingBox &other) {
  * @return the stream representation of the bounding box
  */
 std::ostream &operator<<(std::ostream &os, const BoundingBox &box) {
-  os << "X from " << box.xMin() << " to " << box.xMax() << "; Y from "
-     << box.yMin() << " to " << box.yMax() << "; Z from " << box.zMin()
-     << " to " << box.zMax();
+  os << "X from " << box.xMin() << " to " << box.xMax() << "; Y from " << box.yMin() << " to " << box.yMax()
+     << "; Z from " << box.zMin() << " to " << box.zMax();
   return os;
 }
-} // namespace Geometry
-} // namespace Mantid
+} // namespace Mantid::Geometry

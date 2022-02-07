@@ -35,8 +35,7 @@ public:
   }
 
   void testClone() {
-    std::shared_ptr<BoundedValidator<int>> bv =
-        std::make_shared<BoundedValidator<int>>(1, 10, true);
+    std::shared_ptr<BoundedValidator<int>> bv = std::make_shared<BoundedValidator<int>>(1, 10, true);
     IValidator_sptr vv = bv->clone();
     TS_ASSERT_DIFFERS(bv, vv);
     std::shared_ptr<BoundedValidator<int>> bvv;
@@ -214,8 +213,7 @@ public:
     TS_ASSERT_EQUALS(pd.isValid(0.9), start + "0.9" + lessThan + "1" + end);
     TS_ASSERT_EQUALS(pd.isValid(1.0), "");
     TS_ASSERT_EQUALS(pd.isValid(10.0), "");
-    TS_ASSERT_EQUALS(pd.isValid(10.1),
-                     start + "10.1" + greaterThan + "10" + end);
+    TS_ASSERT_EQUALS(pd.isValid(10.1), start + "10.1" + greaterThan + "10" + end);
 
     pd.clearUpper();
     TS_ASSERT_EQUALS(pd.isValid(0.9), start + "0.9" + lessThan + "1" + end);
@@ -278,10 +276,8 @@ public:
 
     // upper bounds
     TS_ASSERT_EQUALS(pd.isValid(9.9), "");
-    TS_ASSERT_EQUALS(pd.isValid(10.0),
-                     start + "10" + greaterThanEq + "10" + end);
-    TS_ASSERT_EQUALS(pd.isValid(10.1),
-                     start + "10.1" + greaterThanEq + "10" + end);
+    TS_ASSERT_EQUALS(pd.isValid(10.0), start + "10" + greaterThanEq + "10" + end);
+    TS_ASSERT_EQUALS(pd.isValid(10.1), start + "10.1" + greaterThanEq + "10" + end);
 
     pd.clearUpper();
     TS_ASSERT_EQUALS(pd.isValid(0.9), start + "0.9" + lessThanEq + "1" + end);
@@ -303,16 +299,14 @@ public:
     // upper bounds
     TS_ASSERT_EQUALS(ps.isValid("S"), "");
     TS_ASSERT_EQUALS(ps.isValid("T"), start + "T" + greaterThanEq + "T" + end);
-    TS_ASSERT_EQUALS(ps.isValid("TA"),
-                     start + "TA" + greaterThanEq + "T" + end);
+    TS_ASSERT_EQUALS(ps.isValid("TA"), start + "TA" + greaterThanEq + "T" + end);
 
     ps.clearLower();
     TS_ASSERT_EQUALS(ps.isValid("AZ"), "");
     TS_ASSERT_EQUALS(ps.isValid("B"), "");
     TS_ASSERT_EQUALS(ps.isValid("S"), "");
     TS_ASSERT_EQUALS(ps.isValid("T"), start + "T" + greaterThanEq + "T" + end);
-    TS_ASSERT_EQUALS(ps.isValid("TA"),
-                     start + "TA" + greaterThanEq + "T" + end);
+    TS_ASSERT_EQUALS(ps.isValid("TA"), start + "TA" + greaterThanEq + "T" + end);
     ps.clearUpper();
     TS_ASSERT_EQUALS(ps.isValid("T"), "");
     TS_ASSERT_EQUALS(ps.isValid("TA"), "");

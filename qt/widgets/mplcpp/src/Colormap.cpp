@@ -15,22 +15,18 @@ using Mantid::PythonInterface::GlobalInterpreterLock;
 using Mantid::PythonInterface::PythonException;
 using namespace MantidQt::Widgets::Common;
 
-namespace MantidQt {
-namespace Widgets {
-namespace MplCpp {
+namespace MantidQt::Widgets::MplCpp {
 
 /**
  * @brief Construct a Colormap object given a name
  */
-Colormap::Colormap(Python::Object obj)
-    : Python::InstanceHolder(std::move(obj), "is_gray") {}
+Colormap::Colormap(Python::Object obj) : Python::InstanceHolder(std::move(obj), "is_gray") {}
 
 /**
  * @return A reference to the matplotlib.cm module
  */
 Python::Object cmModule() {
-  Python::Object cmModule{
-      Python::NewRef(PyImport_ImportModule("matplotlib.cm"))};
+  Python::Object cmModule{Python::NewRef(PyImport_ImportModule("matplotlib.cm"))};
   return cmModule;
 }
 
@@ -75,6 +71,4 @@ QString defaultCMapName() {
   }
 }
 
-} // namespace MplCpp
-} // namespace Widgets
-} // namespace MantidQt
+} // namespace MantidQt::Widgets::MplCpp

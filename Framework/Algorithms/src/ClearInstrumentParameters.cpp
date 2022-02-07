@@ -9,8 +9,7 @@
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidGeometry/Instrument.h"
 
-namespace Mantid {
-namespace Algorithms {
+namespace Mantid::Algorithms {
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(ClearInstrumentParameters)
@@ -19,9 +18,7 @@ using namespace Kernel;
 using namespace API;
 
 /// Algorithm's name for identification. @see Algorithm::name
-const std::string ClearInstrumentParameters::name() const {
-  return "ClearInstrumentParameters";
-}
+const std::string ClearInstrumentParameters::name() const { return "ClearInstrumentParameters"; }
 
 /// Summary of the algorithm's purpose. @see Algorithm::summary
 const std::string ClearInstrumentParameters::summary() const {
@@ -32,17 +29,14 @@ const std::string ClearInstrumentParameters::summary() const {
 int ClearInstrumentParameters::version() const { return 1; }
 
 /// Algorithm's category for identification. @see Algorithm::category
-const std::string ClearInstrumentParameters::category() const {
-  return "DataHandling\\Instrument";
-}
+const std::string ClearInstrumentParameters::category() const { return "DataHandling\\Instrument"; }
 
 /** Initialize the algorithm's properties.
  */
 void ClearInstrumentParameters::init() {
-  declareProperty(std::make_unique<WorkspaceProperty<>>(
-                      "Workspace", "", Direction::InOut,
-                      std::make_shared<InstrumentValidator>()),
-                  "Workspace whose instrument parameters are to be cleared.");
+  declareProperty(
+      std::make_unique<WorkspaceProperty<>>("Workspace", "", Direction::InOut, std::make_shared<InstrumentValidator>()),
+      "Workspace whose instrument parameters are to be cleared.");
 }
 
 /** Execute the algorithm.
@@ -58,5 +52,4 @@ void ClearInstrumentParameters::exec() {
   ws->setInstrument(instrument->baseInstrument());
 }
 
-} // namespace Algorithms
-} // namespace Mantid
+} // namespace Mantid::Algorithms

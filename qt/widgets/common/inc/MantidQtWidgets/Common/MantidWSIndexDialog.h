@@ -117,8 +117,6 @@ public:
   explicit IntervalList(const QString & /*intervals*/);
   /// Constructor - with a list containing a single Interval
   explicit IntervalList(const Interval & /*interval*/);
-  /// Copy Constructor
-  IntervalList(const IntervalList & /*copy*/);
 
   /// Returns a reference to the list of Intervals.
   const QList<Interval> &getList() const;
@@ -169,17 +167,14 @@ public:
   /// can
   /// then be contained
   /// in the IntervalList given, else false.
-  static bool isParsable(const QString & /*input*/,
-                         const IntervalList & /*container*/);
+  static bool isParsable(const QString & /*input*/, const IntervalList & /*container*/);
 
   /// Returns an IntervalList which is the intersection of the given
   /// IntervalList and Interval
-  static IntervalList intersect(const IntervalList & /*aList*/,
-                                const Interval & /*bInterval*/);
+  static IntervalList intersect(const IntervalList & /*aList*/, const Interval & /*bInterval*/);
   /// Returns an IntervalList which is the intersection of the given
   /// IntervalLists
-  static IntervalList intersect(const IntervalList & /*a*/,
-                                const IntervalList & /*b*/);
+  static IntervalList intersect(const IntervalList & /*a*/, const IntervalList & /*b*/);
 
 private:
   /// A list of all the Intervals in this IntervalList
@@ -192,7 +187,7 @@ class EXPORT_OPT_MANTIDQT_COMMON IntervalListValidator : public QValidator {
 public:
   /// Constructor - This object must know its parent QObject, as well as the
   /// IntervalList it is validating against.
-  IntervalListValidator(QObject *parent, const IntervalList &intervals);
+  IntervalListValidator(QObject *parent, IntervalList intervals);
 
   /// Overriden method to validate a given QString, at a particular position
   State validate(QString & /*unused*/, int & /*unused*/) const override;
@@ -268,10 +263,8 @@ public:
   /// Constructor - same parameters as one of the parent constructors, along
   /// with a
   /// list of the names of workspaces to be plotted.
-  MantidWSIndexWidget(QWidget *parent, const Qt::WindowFlags &flags,
-                      const QList<QString> &wsNames,
-                      const bool showWaterfallOption = false,
-                      const bool showTiledOption = false,
+  MantidWSIndexWidget(QWidget *parent, const Qt::WindowFlags &flags, const QList<QString> &wsNames,
+                      const bool showWaterfallOption = false, const bool showTiledOption = false,
                       const bool isAdvanced = false);
 
   /// Returns a structure holding all of the selected options
@@ -323,8 +316,7 @@ private:
   /// Populate the log combo box
   void populateLogComboBox();
   /// Get a handle a workspace by name
-  Mantid::API::MatrixWorkspace_const_sptr
-  getWorkspace(const QString &workspaceName) const;
+  Mantid::API::MatrixWorkspace_const_sptr getWorkspace(const QString &workspaceName) const;
   /// Check if workspaces are suitable for contour or surface plot
   bool isSuitableForContourOrSurfacePlot() const;
   /// Check if workspaces are suitable for use of log values
@@ -366,8 +358,8 @@ private:
   bool m_advanced;
 
   /// Pointers to the obligatory Qt objects:
-  QLabel *m_wsMessage, *m_spectraMessage, *m_orMessage, *m_plotOptionLabel,
-      *m_logLabel, *m_customLogLabel, *m_axisLabel;
+  QLabel *m_wsMessage, *m_spectraMessage, *m_orMessage, *m_plotOptionLabel, *m_logLabel, *m_customLogLabel,
+      *m_axisLabel;
   QLineEditWithErrorMark *m_wsField, *m_spectraField, *m_logValues;
   QGroupBox *m_logOptionsGroup;
   QVBoxLayout *m_outer, *m_wsBox, *m_spectraBox, *m_logBox, *m_optionsBox;
@@ -391,12 +383,9 @@ class EXPORT_OPT_MANTIDQT_COMMON MantidWSIndexDialog : public QDialog {
 
 public:
   /// Constructor - has a list of the names of workspaces to be plotted.
-  MantidWSIndexDialog(QWidget *parent, const Qt::WindowFlags &flags,
-                      const QList<QString> &wsNames,
-                      const bool showWaterfallOption = false,
-                      const bool showPlotAll = true,
-                      const bool showTiledOption = false,
-                      const bool isAdvanced = false);
+  MantidWSIndexDialog(QWidget *parent, const Qt::WindowFlags &flags, const QList<QString> &wsNames,
+                      const bool showWaterfallOption = false, const bool showPlotAll = true,
+                      const bool showTiledOption = false, const bool isAdvanced = false);
   /// Returns a structure holding all of the selected options
   MantidWSIndexWidget::UserInput getSelections();
   /// Returns the QMultiMap that contains all the workspaces that are to be

@@ -26,8 +26,7 @@ constexpr auto EOL_CRLF = "\r\n";
  * @param data Contents as a string
  * @param header An optional string to prepend to the data
  */
-std::string createSHA1(const std::string &data,
-                       const std::string &header = "") {
+std::string createSHA1(const std::string &data, const std::string &header = "") {
   using Poco::DigestEngine;
   using Poco::DigestOutputStream;
   using Poco::SHA1Engine;
@@ -69,17 +68,14 @@ std::string md5FromString(const std::string &input) { return createMD5(input); }
  * @param input The string to checksum
  * @returns a checksum string
  **/
-std::string sha1FromString(const std::string &input) {
-  return createSHA1(input);
-}
+std::string sha1FromString(const std::string &input) { return createSHA1(input); }
 
 /** Creates a SHA-1 checksum from a file
  * @param filepath The path to the file
  * @param unixEOL If true convert all lineendings to Unix-style \n
  * @returns a checksum string
  **/
-std::string sha1FromFile(const std::string &filepath,
-                         const bool unixEOL = false) {
+std::string sha1FromFile(const std::string &filepath, const bool unixEOL = false) {
   if (filepath.empty())
     return "";
   return createSHA1(loadFile(filepath, unixEOL));

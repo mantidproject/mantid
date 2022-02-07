@@ -24,13 +24,9 @@ public:
   /// Algorithm's version for identification overriding a virtual method
   int version() const override { return 2; };
   /// Algorithm's category for identification overriding a virtual method
-  const std::string category() const override {
-    return "Events\\EventFiltering";
-  }
+  const std::string category() const override { return "Events\\EventFiltering"; }
   /// Algorithm's summary for identification overriding a virtual method
-  const std::string summary() const override {
-    return "Filter event data by time.";
-  }
+  const std::string summary() const override { return "Filter event data by time."; }
 
 private:
   /// Sets documentation strings for this algorithm

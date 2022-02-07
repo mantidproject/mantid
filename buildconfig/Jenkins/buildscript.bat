@@ -5,10 +5,9 @@ setlocal enableextensions enabledelayedexpansion
 :: Notes:
 ::
 :: WORKSPACE & JOB_NAME are environment variables that are set by Jenkins.
-:: BUILD_THREADS & PARAVIEW_DIR should be set in the configuration of each slave.
+:: BUILD_THREADS should be set in the configuration of each slave.
 :: CMake, git & git-lfs should be on the PATH
 ::
-:: All nodes currently have PARAVIEW_DIR=5.3.0 and PARAVIEW_NEXT_DIR=5.4.0
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 call cmake.exe --version
 echo %sha1%
@@ -33,8 +32,6 @@ if !_grep_exe! == "" (
 )
 @echo Using grep: !_grep_exe!
 
-:: ParaView version
-set PARAVIEW_DIR=%PARAVIEW_DIR%-python3
 
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 :: Pre-processing steps on the workspace itself
@@ -124,7 +121,9 @@ if "!CLEANBUILD!" == "yes" (
 
 if EXIST %BUILD_DIR% (
   rmdir /S /Q %BUILD_DIR%\bin %BUILD_DIR%\ExternalData %BUILD_DIR%\Testing
+  pushd %BUILD_DIR%
   for /f %%F in ('dir /b /a-d /S "TEST-*.xml"') do del /Q %%F >/nul
+  popd
   if "!CLEAN_EXTERNAL_PROJECTS!" == "true" (
     rmdir /S /Q %BUILD_DIR%\eigen-prefix
     rmdir /S /Q %BUILD_DIR%\googletest-download %BUILD_DIR%\googletest-src
@@ -145,12 +144,16 @@ if "%BUILDPKG%" == "yes" (
     echo Using PACKAGE_SUFFIX=%PACKAGE_SUFFIX% from job parameter
   ) else if not "%JOB_NAME%" == "%JOB_NAME:release=%" (
     set PACKAGE_SUFFIX=
-  ) else if not "%JOB_NAME%" == "%JOB_NAME:master=%" (
+  ) else if not "%JOB_NAME%" == "%JOB_NAME:main=%" (
     set PACKAGE_SUFFIX=nightly
   ) else (
     set PACKAGE_SUFFIX=unstable
   )
-  set PACKAGE_OPTS=-DPACKAGE_DOCS=ON -DCPACK_PACKAGE_SUFFIX=!PACKAGE_SUFFIX!
+  set PACKAGE_OPTS=-DPACKAGE_DOCS=ON -DCPACK_PACKAGE_SUFFIX=!PACKAGE_SUFFIX! -DDOCS_DOTDIAGRAMS=ON -DDOCS_SCREENSHOTS=ON -DDOCS_MATH_EXT=sphinx.ext.imgmath -DDOCS_PLOTDIRECTIVE=ON
+  :: add the github token if provided
+  if not "%GITHUB_AUTHORIZATION_TOKEN%" == "" (
+    set PACKAGE_OPTS=!PACKAGE_OPTS! -DGITHUB_AUTHORIZATION_TOKEN=%GITHUB_AUTHORIZATION_TOKEN%
+  )
 )
 
 cd %BUILD_DIR%
@@ -178,14 +181,8 @@ if not "%JOB_NAME%"=="%JOB_NAME:debug=%" (
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 :: CMake configuration
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
-:: Note the exception: Vates disabled in Debug mode for now.
-if not "%JOB_NAME%"=="%JOB_NAME:debug=%" (
-  set VATES_OPT_VAL=OFF
-) else (
-  set VATES_OPT_VAL=ON
-)
 
-call cmake.exe -G "%CM_GENERATOR%" -A %CM_ARCH% -DCMAKE_SYSTEM_VERSION=%SDK_VERS% -DCONSOLE=OFF -DENABLE_CPACK=ON -DWITH_PYTHON3=ON -DMAKE_VATES=%VATES_OPT_VAL% -DParaView_DIR=!PARAVIEW_DIR! -DMANTID_DATA_STORE=!MANTID_DATA_STORE! -DUSE_PRECOMPILED_HEADERS=ON %PACKAGE_OPTS% ..
+call cmake.exe -G "%CM_GENERATOR%" -A %CM_ARCH% -DCMAKE_SYSTEM_VERSION=%SDK_VERS% -DCONSOLE=OFF -DENABLE_PRECOMMIT=OFF -DENABLE_CPACK=ON -DMANTID_DATA_STORE=!MANTID_DATA_STORE! -DUSE_PRECOMPILED_HEADERS=ON %PACKAGE_OPTS% ..
 
 if ERRORLEVEL 1 exit /B %ERRORLEVEL%
 
@@ -217,15 +214,7 @@ echo MultiThreaded.MaxCores=2 > %USERPROPS%
 call ctest.exe -C %BUILD_CONFIG%  --no-compress-output -T Test -j%BUILD_THREADS% --schedule-random --output-on-failure
 if ERRORLEVEL 1 exit /B %ERRORLEVEL%
 
-:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
-:: Run docs-tests if in the special Debug builds
-:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 echo Note: not running doc-test target as it currently takes too long
-:: if not "%JOB_NAME%"=="%JOB_NAME:debug=%" (
-::   del /Q %USERPROPS%
-::   call cmake.exe --build . --target StandardTestData
-::   call cmake.exe --build . --target docs-test
-:: )
 
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 :: Create the install kit if required

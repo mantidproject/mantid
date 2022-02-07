@@ -37,10 +37,11 @@ public:
   /// Default constructor
   WorkspaceHistory();
   /// Destructor
-  virtual ~WorkspaceHistory();
+  virtual ~WorkspaceHistory() = default;
   /// Copy constructor
-  WorkspaceHistory(const WorkspaceHistory &);
-  /// Deleted copy assignment operator
+  WorkspaceHistory(const WorkspaceHistory &) = default;
+  /// Deleted copy assignment operator since m_environment has no copy
+  /// assignment.
   WorkspaceHistory &operator=(const WorkspaceHistory &) = delete;
   /// Retrieve the algorithm history list
   const AlgorithmHistories &getAlgorithmHistories() const;
@@ -79,9 +80,8 @@ public:
 
 private:
   /// Recursive function to load the algorithm history tree from file
-  void loadNestedHistory(
-      ::NeXus::File *file,
-      AlgorithmHistory_sptr parent = std::shared_ptr<AlgorithmHistory>());
+  void loadNestedHistory(::NeXus::File *file,
+                         const AlgorithmHistory_sptr &parent = std::shared_ptr<AlgorithmHistory>());
   /// Parse an algorithm history string loaded from file
   AlgorithmHistory_sptr parseAlgorithmHistory(const std::string &rawData);
   /// Find the history entries at this level in the file.
@@ -92,8 +92,7 @@ private:
   Mantid::API::AlgorithmHistories m_algorithms;
 };
 
-MANTID_API_DLL std::ostream &operator<<(std::ostream &,
-                                        const WorkspaceHistory &);
+MANTID_API_DLL std::ostream &operator<<(std::ostream &, const WorkspaceHistory &);
 
 } // namespace API
 } // namespace Mantid

@@ -18,10 +18,22 @@ defines the offset from the reference spectrum.
 
 The algorithm iterates over each spectrum in the workspace and fits a PeakFunction (default is a
 :ref:`Gaussian <func-Gaussian>` function) to the reference peaks. The fit is used
-to calculate the centre of the fitted peak, and the offset is then
-calculated as:
+to calculate the centre of the fitted peak. Using the fitted peak center,
+there are 3 options for calculating offset, depending on the choice for the "OffsetMode"
+input parameter:
 
-:math:`-peakCentre*step/(dreference+PeakCentre*step)`
+Relative (offset relative to reference position):
+
+:math:`offset = -peakCentre*step/(dreference+PeakCentre*step)`
+
+Absolute (offset relative to ideal position):
+
+:math:`offset = -peakCentre*step/(dreference+PeakCentre*step) + (dideal - dreference) / dreference`
+
+
+Signed (offset in raw number of bins):
+
+:math:`offset = -peakCentre`
 
 This is then written into a :ref:`.cal file <CalFile>` for every detector
 that contributes to that spectrum. All of the entries in the cal file

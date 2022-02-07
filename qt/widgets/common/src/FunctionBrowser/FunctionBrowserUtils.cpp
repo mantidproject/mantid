@@ -7,10 +7,11 @@
 #include "MantidQtWidgets/Common/FunctionBrowser/FunctionBrowserUtils.h"
 #include "MantidAPI/CompositeFunction.h"
 #include "MantidAPI/Expression.h"
+
+#include <boost/algorithm/string.hpp>
 #include <boost/lexical_cast.hpp>
 
-namespace MantidQt {
-namespace MantidWidgets {
+namespace MantidQt::MantidWidgets {
 
 using namespace Mantid::API;
 
@@ -26,8 +27,7 @@ std::pair<QString, QString> splitParameterName(const QString &paramName) {
   return std::make_pair(functionIndex, parameterName);
 }
 
-IFunction_sptr getFunctionWithPrefix(const QString &prefix,
-                                     const IFunction_sptr &fun) {
+IFunction_sptr getFunctionWithPrefix(const QString &prefix, const IFunction_sptr &fun) {
   if (prefix.isEmpty() || !fun) {
     return fun;
   }
@@ -37,18 +37,18 @@ IFunction_sptr getFunctionWithPrefix(const QString &prefix,
   }
   auto j = prefix.indexOf('.');
   if (j < 0) {
-    throw std::runtime_error(
-        "Error in fit function prefix: " + prefix.toStdString() +
-        "\nIt must end with a dot (.)");
+    throw std::runtime_error("Error in fit function prefix: " + prefix.toStdString() + "\nIt must end with a dot (.)");
   }
   if (j < 2 || prefix[0] != 'f') {
-    throw std::runtime_error(
-        "Error in fit function prefix: " + prefix.toStdString() +
-        "\nIt must start with an 'f' followed by an integer.");
+    throw std::runtime_error("Error in fit function prefix: " + prefix.toStdString() +
+                             "\nIt must start with an 'f' followed by an integer.");
   }
   auto funIndex = prefix.mid(1, j - 1).toInt();
-  return getFunctionWithPrefix(prefix.mid(j + 1),
-                               compFun->getFunction(funIndex));
+  return getFunctionWithPrefix(prefix.mid(j + 1), compFun->getFunction(funIndex));
+}
+
+std::pair<QString, int> splitFunctionPrefix(const std::string &prefix) {
+  return splitFunctionPrefix(QString::fromStdString(prefix));
 }
 
 std::pair<QString, int> splitFunctionPrefix(const QString &prefix) {
@@ -60,8 +60,11 @@ std::pair<QString, int> splitFunctionPrefix(const QString &prefix) {
   return std::make_pair(parentPrefix, funIndex);
 }
 
-std::pair<QString, std::pair<QString, QString>>
-splitConstraintString(const QString &constraint) {
+std::pair<QString, std::pair<QString, QString>> splitConstraintString(const std::string &constraint) {
+  return splitConstraintString(QString::fromStdString(constraint));
+}
+
+std::pair<QString, std::pair<QString, QString>> splitConstraintString(const QString &constraint) {
   std::pair<QString, std::pair<QString, QString>> error;
   if (constraint.isEmpty())
     return error;
@@ -94,7 +97,8 @@ splitConstraintString(const QString &constraint) {
     try // find position of the parameter name in expression
     {
       boost::lexical_cast<double>(expr[1].name());
-    } catch (...) {
+    }
+    catch (...) {
       paramPos = 1;
     }
     std::string op = expr[1].operator_name();
@@ -119,9 +123,31 @@ splitConstraintString(const QString &constraint) {
       paramName = QString::fromStdString(expr[1].str());
     }
   }
-  return std::make_pair(paramName,
-                        std::make_pair(lowerBoundStr, upperBoundStr));
+  return std::make_pair(paramName, std::make_pair(lowerBoundStr, upperBoundStr));
 }
 
-} // namespace MantidWidgets
-} // namespace MantidQt
+bool isNumber(std::string const &str) {
+  return !str.empty() && str.find_first_not_of("0123456789.-") == std::string::npos;
+}
+
+std::vector<std::string> splitStringBy(std::string const &str, std::string const &delimiter) {
+  std::vector<std::string> subStrings;
+  boost::split(subStrings, str, boost::is_any_of(delimiter));
+  subStrings.erase(std::remove_if(subStrings.begin(), subStrings.end(),
+                                  [](std::string const &subString) { return subString.empty(); }),
+                   subStrings.cend());
+  return subStrings;
+}
+
+std::size_t getFunctionIndexAt(std::string const &parameter, std::size_t const &index) {
+  auto const subStrings = splitStringBy(parameter, ".");
+  if (index < subStrings.size()) {
+    auto const functionIndex = splitStringBy(subStrings[index], "f");
+    if (functionIndex.size() == 1 && isNumber(functionIndex[0]))
+      return std::stoull(functionIndex[0]);
+  }
+
+  throw std::invalid_argument("No function index was found.");
+}
+
+} // namespace MantidQt::MantidWidgets

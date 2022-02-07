@@ -15,11 +15,9 @@
 using namespace Mantid::API;
 using namespace MantidQt::MantidWidgets;
 
-namespace MantidQt {
-namespace CustomInterfaces {
+namespace MantidQt::CustomInterfaces {
 ALCBaselineModellingView::ALCBaselineModellingView(QWidget *widget)
-    : m_widget(widget), m_ui(), m_rangeSelectors(),
-      m_selectorModifiedMapper(new QSignalMapper(this)) {}
+    : m_widget(widget), m_ui(), m_rangeSelectors(), m_selectorModifiedMapper(new QSignalMapper(this)) {}
 
 ALCBaselineModellingView::~ALCBaselineModellingView() {}
 
@@ -38,82 +36,60 @@ void ALCBaselineModellingView::initialize() {
 
   // Context menu for sections table
   m_ui.sections->setContextMenuPolicy(Qt::CustomContextMenu);
-  connect(m_ui.sections, SIGNAL(customContextMenuRequested(const QPoint &)),
-          SLOT(sectionsContextMenu(const QPoint &)));
+  connect(m_ui.sections, SIGNAL(customContextMenuRequested(const QPoint &)), SLOT(sectionsContextMenu(const QPoint &)));
 
   // Make columns non-resizeable and to fill all the available space
-#if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
-  m_ui.sections->horizontalHeader()->setResizeMode(QHeaderView::Stretch);
-#elif QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
   m_ui.sections->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
-#endif
 
-  connect(m_ui.sections, SIGNAL(cellChanged(int, int)),
-          SIGNAL(sectionRowModified(int)));
+  connect(m_ui.sections, SIGNAL(cellChanged(int, int)), SIGNAL(sectionRowModified(int)));
 
-  connect(m_selectorModifiedMapper, SIGNAL(mapped(int)),
-          SIGNAL(sectionSelectorModified(int)));
+  connect(m_selectorModifiedMapper, SIGNAL(mapped(int)), SIGNAL(sectionSelectorModified(int)));
 
   connect(m_ui.help, SIGNAL(clicked()), this, SLOT(help()));
 }
 
-QString ALCBaselineModellingView::function() const {
-  return m_ui.function->getFunctionString();
-}
+QString ALCBaselineModellingView::function() const { return m_ui.function->getFunctionString(); }
 
-IALCBaselineModellingView::SectionRow
-ALCBaselineModellingView::sectionRow(int row) const {
+IALCBaselineModellingView::SectionRow ALCBaselineModellingView::sectionRow(int row) const {
   QString first = m_ui.sections->item(row, 0)->text();
   QString second = m_ui.sections->item(row, 1)->text();
   return SectionRow(first, second);
 }
 
-IALCBaselineModellingView::SectionSelector
-ALCBaselineModellingView::sectionSelector(int index) const {
+IALCBaselineModellingView::SectionSelector ALCBaselineModellingView::sectionSelector(int index) const {
   auto rangeSelector = m_rangeSelectors.find(index)->second;
-  return std::make_pair(rangeSelector->getMinimum(),
-                        rangeSelector->getMaximum());
+  return std::make_pair(rangeSelector->getMinimum(), rangeSelector->getMaximum());
 }
 
-int ALCBaselineModellingView::noOfSectionRows() const {
-  return m_ui.sections->rowCount();
-}
+int ALCBaselineModellingView::noOfSectionRows() const { return m_ui.sections->rowCount(); }
 
-void ALCBaselineModellingView::setDataCurve(MatrixWorkspace_sptr workspace,
-                                            std::size_t const &workspaceIndex) {
+void ALCBaselineModellingView::setDataCurve(MatrixWorkspace_sptr workspace, std::size_t const &workspaceIndex) {
   const auto kwargs = getPlotKwargs(m_ui.dataPlot, "Data");
 
   m_ui.dataPlot->clear();
-  m_ui.dataPlot->addSpectrum("Data", workspace, workspaceIndex, Qt::black,
-                             kwargs);
+  m_ui.dataPlot->addSpectrum("Data", workspace, workspaceIndex, Qt::black, kwargs);
 }
 
-void ALCBaselineModellingView::setCorrectedCurve(
-    MatrixWorkspace_sptr workspace, std::size_t const &workspaceIndex) {
+void ALCBaselineModellingView::setCorrectedCurve(MatrixWorkspace_sptr workspace, std::size_t const &workspaceIndex) {
   const auto kwargs = getPlotKwargs(m_ui.correctedPlot, "Corrected");
-  m_ui.correctedPlot->addSpectrum("Corrected", workspace, workspaceIndex,
-                                  Qt::blue, kwargs);
+
+  m_ui.correctedPlot->clear();
+  m_ui.correctedPlot->addSpectrum("Corrected", workspace, workspaceIndex, Qt::blue, kwargs);
 }
 
-QHash<QString, QVariant>
-ALCBaselineModellingView::getPlotKwargs(PreviewPlot *plot,
-                                        const QString &curveName) {
+QHash<QString, QVariant> ALCBaselineModellingView::getPlotKwargs(PreviewPlot *plot, const QString &curveName) {
   // Ensures the plot is plotted only with data points and no lines
   QHash<QString, QVariant> kwargs;
-#if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
-  plot->setCurveStyle(curveName, -1);
-  plot->setCurveSymbol(curveName, 0);
-#else
   UNUSED_ARG(plot);
   UNUSED_ARG(curveName);
   kwargs.insert("linestyle", QString("None").toLatin1().constData());
   kwargs.insert("marker", QString(".").toLatin1().constData());
-#endif
+  kwargs.insert("distribution", QString("False").toLatin1().constData());
+
   return kwargs;
 }
 
-void ALCBaselineModellingView::setBaselineCurve(
-    MatrixWorkspace_sptr workspace, std::size_t const &workspaceIndex) {
+void ALCBaselineModellingView::setBaselineCurve(MatrixWorkspace_sptr workspace, std::size_t const &workspaceIndex) {
   m_ui.dataPlot->addSpectrum("Baseline", workspace, workspaceIndex, Qt::red);
   m_ui.dataPlot->replot();
 }
@@ -140,14 +116,10 @@ void ALCBaselineModellingView::setFunction(IFunction_const_sptr func) {
   }
 }
 
-void ALCBaselineModellingView::setNoOfSectionRows(int rows) {
-  m_ui.sections->setRowCount(rows);
-}
+void ALCBaselineModellingView::setNoOfSectionRows(int rows) { m_ui.sections->setRowCount(rows); }
 
-void ALCBaselineModellingView::setSectionRow(
-    int row, IALCBaselineModellingView::SectionRow values) {
-  m_ui.sections->blockSignals(
-      true); // Setting values, no need for 'modified' signals
+void ALCBaselineModellingView::setSectionRow(int row, IALCBaselineModellingView::SectionRow values) {
+  m_ui.sections->blockSignals(true); // Setting values, no need for 'modified' signals
   m_ui.sections->setFocus();
   m_ui.sections->selectRow(row);
   m_ui.sections->setItem(row, 0, new QTableWidgetItem(values.first));
@@ -155,8 +127,7 @@ void ALCBaselineModellingView::setSectionRow(
   m_ui.sections->blockSignals(false);
 }
 
-void ALCBaselineModellingView::addSectionSelector(
-    int index, IALCBaselineModellingView::SectionSelector values) {
+void ALCBaselineModellingView::addSectionSelector(int index, IALCBaselineModellingView::SectionSelector values) {
   auto *newSelector = new RangeSelector(m_ui.dataPlot);
 
   if (index % 3 == 0) {
@@ -168,13 +139,13 @@ void ALCBaselineModellingView::addSectionSelector(
   }
 
   m_selectorModifiedMapper->setMapping(newSelector, index);
-  connect(newSelector, SIGNAL(selectionChanged(double, double)),
-          m_selectorModifiedMapper, SLOT(map()));
+  connect(newSelector, SIGNAL(selectionChanged(double, double)), m_selectorModifiedMapper, SLOT(map()));
 
   m_rangeSelectors[index] = newSelector;
 
   // Set initial values
   newSelector->setRange(values.first, values.second);
+  newSelector->setBounds(values.first, values.second);
   setSelectorValues(newSelector, values);
 
   m_ui.dataPlot->replot();
@@ -189,8 +160,7 @@ void ALCBaselineModellingView::deleteSectionSelector(int index) {
   delete rangeSelector;
 }
 
-void ALCBaselineModellingView::updateSectionSelector(
-    int index, IALCBaselineModellingView::SectionSelector values) {
+void ALCBaselineModellingView::updateSectionSelector(int index, IALCBaselineModellingView::SectionSelector values) {
   setSelectorValues(m_rangeSelectors[index], values);
 }
 
@@ -204,23 +174,20 @@ void ALCBaselineModellingView::sectionsContextMenu(const QPoint &widgetPoint) {
 
   // Helper mapper to map removal action to row id
   QSignalMapper removalActionMapper;
-  connect(&removalActionMapper, SIGNAL(mapped(int)),
-          SIGNAL(removeSectionRequested(int)));
+  connect(&removalActionMapper, SIGNAL(mapped(int)), SIGNAL(removeSectionRequested(int)));
 
   int row = m_ui.sections->rowAt(widgetPoint.y());
   if (row != -1) {
     // Add removal action
-    QAction *removeAction =
-        menu.addAction("Remove section", &removalActionMapper, SLOT(map()));
+    QAction *removeAction = menu.addAction("Remove section", &removalActionMapper, SLOT(map()));
     removalActionMapper.setMapping(removeAction, row);
   }
 
   menu.exec(QCursor::pos());
 }
 
-void ALCBaselineModellingView::setSelectorValues(
-    RangeSelector *selector,
-    IALCBaselineModellingView::SectionSelector values) {
+void ALCBaselineModellingView::setSelectorValues(RangeSelector *selector,
+                                                 IALCBaselineModellingView::SectionSelector values) {
   // if the values are not increasing then reverse them
   if (values.first > values.second) {
     const double tempSwapValue = values.first;
@@ -232,10 +199,9 @@ void ALCBaselineModellingView::setSelectorValues(
 }
 
 void ALCBaselineModellingView::help() {
-  MantidQt::API::HelpWindow::showCustomInterface(nullptr, QString("Muon ALC"));
+  MantidQt::API::HelpWindow::showCustomInterface(nullptr, QString("Muon ALC"), QString("muon"));
 }
 
 void ALCBaselineModellingView::emitFitRequested() { emit fitRequested(); }
 
-} // namespace CustomInterfaces
-} // namespace MantidQt
+} // namespace MantidQt::CustomInterfaces

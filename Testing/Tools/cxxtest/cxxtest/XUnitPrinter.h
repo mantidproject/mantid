@@ -16,7 +16,7 @@ namespace CxxTest
 
         XmlPrinter xml_printer;
         ErrorPrinter error_printer;
-        
+
         XUnitPrinter( CXXTEST_STD(ostream) &o = CXXTEST_STD(cout) )
             : xml_printer(o)
         {

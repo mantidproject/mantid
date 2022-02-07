@@ -87,7 +87,7 @@
        <item>
         <widget class="QPushButton" name="pushButton_4">
          <property name="text">
-          <string>Try last 
+          <string>Try last
 checkpoint again</string>
          </property>
         </widget>
@@ -95,7 +95,7 @@ checkpoint again</string>
        <item>
         <widget class="QPushButton" name="pushButton">
          <property name="text">
-          <string>Try selected 
+          <string>Try selected
 checkpoint</string>
          </property>
         </widget>
@@ -103,7 +103,7 @@ checkpoint</string>
        <item>
         <widget class="QPushButton" name="pushButton_2">
          <property name="text">
-          <string>Open selected 
+          <string>Open selected
 in script editor</string>
          </property>
         </widget>

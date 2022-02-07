@@ -10,7 +10,6 @@
 #include "IqtFunctionModel.h"
 #include "ParameterEstimation.h"
 
-#include <QMap>
 #include <QWidget>
 
 class QtProperty;
@@ -50,13 +49,12 @@ public:
   void updateParameters(const IFunction &fun);
   void setCurrentDataset(int i);
   int getCurrentDataset();
-  void setDatasetNames(const QStringList &names);
+  void setDatasets(const QList<FunctionModelDataset> &datasets);
   void setViewParameterDescriptions();
   void setErrorsEnabled(bool enabled);
   void tieIntensities(bool on);
   bool canTieIntensities() const;
-  void
-  updateParameterEstimationData(DataForParameterEstimationCollection &&data);
+  void updateParameterEstimationData(DataForParameterEstimationCollection &&data);
   void setBackgroundA0(double value);
 
 signals:
@@ -70,6 +68,7 @@ private slots:
 private:
   void updateViewParameters();
   QStringList getDatasetNames() const;
+  QStringList getDatasetDomainNames() const;
   double getLocalParameterValue(const QString &parName, int i) const;
   bool isLocalParameterFixed(const QString &parName, int i) const;
   QString getLocalParameterTie(const QString &parName, int i) const;

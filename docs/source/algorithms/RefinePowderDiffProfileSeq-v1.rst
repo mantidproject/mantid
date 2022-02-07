@@ -40,15 +40,15 @@ Input and output workspaces
 - SeqControlInfoWorkspace : table workspace used to track refinement. Below is the introduction on the fields\/columns of this workspace.
 
 - *Step* : refinement step. User can start a refinement from the result of any previous step;
-  
+
 - *OutProfile* : name of the table workspace containing refined profile parameters;
   
 - *OutReflection* : name of the table workspace containing Bragg peaks' peak parameters calculated from refined parameters value;
   
 - *OutBackgroud* : name of the table workspace containing the value of the output background parameter;
-  
+
 - *OutBckgroundParam* : name of the output background parameters;
-  
+
 - *Refine* : profile parameters that are refined in this step;
 
 - *RwpOut* : output Rwp from refinement;

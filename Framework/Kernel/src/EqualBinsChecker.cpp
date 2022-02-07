@@ -8,6 +8,7 @@
 #include "MantidKernel/Logger.h"
 #include <cmath>
 #include <ostream>
+#include <sstream>
 #include <stdexcept>
 #include <vector>
 
@@ -16,8 +17,7 @@ namespace {
 Mantid::Kernel::Logger g_log("EqualBinsChecker");
 } // namespace
 
-namespace Mantid {
-namespace Kernel {
+namespace Mantid::Kernel {
 
 /**
  * Constructor, setting data and thresholds for errors and warnings.
@@ -29,12 +29,9 @@ namespace Kernel {
  * larger than this, the user is warned but the check doesn't necessarily fail.
  * If set negative, warnings are off and only error level is used (default).
  */
-EqualBinsChecker::EqualBinsChecker(const MantidVec &xData,
-                                   const double errorLevel,
-                                   const double warningLevel)
-    : m_xData(xData), m_errorLevel(errorLevel), m_warn(warningLevel > 0),
-      m_warningLevel(warningLevel), m_refBinType(ReferenceBin::Average),
-      m_errorType(ErrorType::Cumulative) {}
+EqualBinsChecker::EqualBinsChecker(const MantidVec &xData, const double errorLevel, const double warningLevel)
+    : m_xData(xData), m_errorLevel(errorLevel), m_warn(warningLevel > 0), m_warningLevel(warningLevel),
+      m_refBinType(ReferenceBin::Average), m_errorType(ErrorType::Cumulative) {}
 
 /**
  * Set whether to compare each bin to the first bin width or the average.
@@ -42,9 +39,7 @@ EqualBinsChecker::EqualBinsChecker(const MantidVec &xData,
  * behaviour.
  * @param refBinType :: [input] Either average bin or first bin
  */
-void EqualBinsChecker::setReferenceBin(const ReferenceBin &refBinType) {
-  m_refBinType = refBinType;
-}
+void EqualBinsChecker::setReferenceBin(const ReferenceBin &refBinType) { m_refBinType = refBinType; }
 
 /**
  * Set whether to use cumulative errors or compare each in turn.
@@ -52,9 +47,7 @@ void EqualBinsChecker::setReferenceBin(const ReferenceBin &refBinType) {
  * behaviour.
  * @param errorType :: [input] Either cumulative or individual errors
  */
-void EqualBinsChecker::setErrorType(const ErrorType &errorType) {
-  m_errorType = errorType;
-}
+void EqualBinsChecker::setErrorType(const ErrorType &errorType) { m_errorType = errorType; }
 
 /**
  * Perform validation of the given X array
@@ -76,10 +69,10 @@ std::string EqualBinsChecker::validate() const {
   for (size_t bin = 0; bin < xSize - 2; bin++) {
     const double diff = getDifference(bin, dx);
     if (diff > m_errorLevel) {
-      // return an actual error
-      g_log.error() << "dx=" << xData[bin + 1] - xData[bin] << ' ' << dx << ' '
-                    << bin << std::endl;
-      return "X axis must be linear (all bins must have the same width)";
+      std::stringstream errorStr;
+      errorStr << "X axis must be linear (all bins must have the same width) ";
+      errorStr << "dx=" << xData[bin + 1] - xData[bin] << " reference dx=" << dx << " bin number=" << bin;
+      return errorStr.str();
     } else if (m_warn && diff > m_warningLevel) {
       // just warn the user
       printWarning = true;
@@ -87,8 +80,7 @@ std::string EqualBinsChecker::validate() const {
   }
 
   if (printWarning) {
-    g_log.warning() << "Bin widths differ by more than " << m_warningLevel * 100
-                    << "% of average." << std::endl;
+    g_log.warning() << "Bin widths differ by more than " << m_warningLevel * 100 << "% of average." << std::endl;
   }
 
   return std::string();
@@ -122,8 +114,7 @@ double EqualBinsChecker::getReferenceDx() const {
  * @returns :: error, simple or cumulative depending on options
  * @throws std::invalid_argument if there is no such bin in the data
  */
-double EqualBinsChecker::getDifference(const size_t bin,
-                                       const double dx) const {
+double EqualBinsChecker::getDifference(const size_t bin, const double dx) const {
   if (bin > m_xData.size() - 2) {
     throw std::invalid_argument("Not enough bins in input X data");
   }
@@ -132,11 +123,8 @@ double EqualBinsChecker::getDifference(const size_t bin,
     return std::fabs(dx - m_xData[bin + 1] + m_xData[bin]) / dx;
   } else {
     // cumulative errors
-    return std::fabs(
-        (m_xData[bin + 1] - m_xData[0] - static_cast<double>(bin + 1) * dx) /
-        dx);
+    return std::fabs((m_xData[bin + 1] - m_xData[0] - static_cast<double>(bin + 1) * dx) / dx);
   }
 }
 
-} // namespace Kernel
-} // namespace Mantid
+} // namespace Mantid::Kernel

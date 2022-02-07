@@ -22,9 +22,10 @@ This is used in the equation
 This algorithm uses the same underlying calculation as :ref:`algm-ConvertUnits`
 and :ref:`algm-AlignDetectors`.
 
-When specifying the ``CalibrationWorkspace``, this algorithm uses the
-values in the ``detid`` and ``difc`` columns of the calibration
-only. It ignores any other calibration constants.
+When specifying the ``CalibrationWorkspace``, this algorithm copies the
+values in the ``detid`` and ``difc`` columns of the calibration workspace.
+It ignores any other calibration constants, such as ``difa`` and
+``tzero`` (for more information, see the :ref:`DiffractionCalibrationWorkspace` concept page).
 
 Assumptions: There are no assumptions and this algorithm works on the results
 of :ref:`algm-LoadEmptyInstrument`.

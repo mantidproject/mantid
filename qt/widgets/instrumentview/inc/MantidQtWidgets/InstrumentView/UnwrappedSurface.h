@@ -10,6 +10,7 @@
 #include "MantidGeometry/Objects/IObject.h"
 #include "MantidKernel/Quat.h"
 #include "MantidKernel/V3D.h"
+#include "MantidQtWidgets/Common/WidgetDllOption.h"
 #include "ProjectionSurface.h"
 #include "UnwrappedDetector.h"
 #include <memory>
@@ -57,7 +58,7 @@ namespace MantidWidgets {
  *
  */
 
-class UnwrappedSurface : public ProjectionSurface {
+class EXPORT_OPT_MANTIDQT_INSTRUMENTVIEW UnwrappedSurface : public ProjectionSurface {
   Q_OBJECT
 public:
   explicit UnwrappedSurface(const InstrumentActor *rootActor);
@@ -67,8 +68,7 @@ public:
   void componentSelected(size_t componentIndex) override;
   void getSelectedDetectors(std::vector<size_t> &detIndices) override;
   void getMaskedDetectors(std::vector<size_t> &detIndices) const override;
-  void
-  setPeaksWorkspace(const std::shared_ptr<Mantid::API::IPeaksWorkspace> &pws);
+  void setPeaksWorkspace(const std::shared_ptr<Mantid::API::IPeaksWorkspace> &pws);
   QString getInfoText() const override;
   RectF getSurfaceBounds() const override;
   //@}
@@ -90,8 +90,7 @@ public:
    * @param uscale (output) :: The scaling factor along the u-coordinate.
    * @param vscale (output) :: The scaling factor along the v-coordinate.
    */
-  virtual void project(const Mantid::Kernel::V3D &pos, double &u, double &v,
-                       double &uscale, double &vscale) const = 0;
+  virtual void project(const Mantid::Kernel::V3D &pos, double &u, double &v, double &uscale, double &vscale) const = 0;
   //@}
 
   /** @name Public methods */
@@ -108,8 +107,7 @@ public:
   /// Save settings for the unwrapped surface to a project file
   virtual std::string saveToProject() const override;
   /// Get a handle to a peaks workspace from a name
-  std::shared_ptr<Mantid::API::IPeaksWorkspace>
-  retrievePeaksWorkspace(const std::string &name) const;
+  std::shared_ptr<Mantid::API::IPeaksWorkspace> retrievePeaksWorkspace(const std::string &name) const;
 
 protected slots:
 
@@ -123,7 +121,7 @@ protected slots:
 protected:
   /** @name Implemented protected virtual methods */
   //@{
-  void drawSurface(MantidGLWidget *widget, bool picking = false) const override;
+  void drawSurface(GLDisplay *widget, bool picking = false) const override;
   void drawSimpleToImage(QImage *image, bool picking = false) const override;
   void changeColorMap() override;
   //@}
@@ -139,8 +137,7 @@ protected:
    * @param udet :: A detector.
    * @param R :: The result rotaion.
    */
-  virtual void rotate(const UnwrappedDetector &udet,
-                      Mantid::Kernel::Quat &R) const = 0;
+  virtual void rotate(const UnwrappedDetector &udet, Mantid::Kernel::Quat &R) const = 0;
   virtual void calcUV(UnwrappedDetector &udet, Mantid::Kernel::V3D &pos);
   virtual void calcSize(UnwrappedDetector &udet);
   virtual QString getDimInfo() const;

@@ -41,7 +41,7 @@ Usage
 
     from mantid.kernel import DeltaEModeType, UnitConversion
     import numpy
-    
+
     CreateSampleWorkspace(
         OutputWorkspace='exWS',
         Function='Flat background',
@@ -71,11 +71,11 @@ Usage
         ys += peak(ws.dataX(i), tof)
     # The 'Ei' sample log shall hold the incident energy.
     ws.mutableRun().addProperty('Ei', Ei, True)
-    
+
     # Compare CreateEPP and FindEPP results.
     createEPPWS = CreateEPP(InputWorkspace=ws)
     findEPPWS = FindEPP(InputWorkspace='exWS')
-    
+
     epp1 = createEPPWS.cell('PeakCentre', 0)
     print('CreateEPP gives {0:.8f} as the first elastic peak position.'.format(epp1))
     epp2 = findEPPWS.cell('PeakCentre', 0)

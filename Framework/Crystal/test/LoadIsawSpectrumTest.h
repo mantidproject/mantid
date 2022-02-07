@@ -9,11 +9,11 @@
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidCrystal/LoadIsawSpectrum.h"
 #include "MantidDataObjects/Workspace2D.h"
+#include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
 #include "MantidKernel/Matrix.h"
 #include "MantidKernel/System.h"
 #include "MantidKernel/Timer.h"
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include <cxxtest/TestSuite.h>
 
 using namespace Mantid::Crystal;
@@ -35,19 +35,15 @@ public:
     LoadIsawSpectrum alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
     TS_ASSERT(alg.isInitialized())
-    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("InstrumentFilename",
-                                                  "TOPAZ_Definition_2010.xml"));
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("SpectraFile", "Spectrum_ISAW.dat"));
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("OutputWorkspace", "LoadIsawSpectrumTest_ws"));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("InstrumentFilename", "TOPAZ_Definition_2010.xml"));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("SpectraFile", "Spectrum_ISAW.dat"));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", "LoadIsawSpectrumTest_ws"));
     TS_ASSERT_THROWS_NOTHING(alg.execute(););
     TS_ASSERT(alg.isExecuted());
 
     MatrixWorkspace_sptr ws;
     TS_ASSERT_THROWS_NOTHING(
-        ws = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-            "LoadIsawSpectrumTest_ws"));
+        ws = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("LoadIsawSpectrumTest_ws"));
 
     TS_ASSERT(ws);
     if (!ws)

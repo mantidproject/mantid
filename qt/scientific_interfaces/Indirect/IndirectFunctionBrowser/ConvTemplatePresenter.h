@@ -49,11 +49,9 @@ public:
   void updateMultiDatasetParameters(const ITableWorkspace &paramTable);
   void updateParameters(const IFunction &fun);
   void setCurrentDataset(int i);
-  void setDatasetNames(const QStringList &names);
+  void setDatasets(const QList<FunctionModelDataset> &datasets);
   void setErrorsEnabled(bool enabled);
-  void setResolution(std::string const &name, TableDatasetIndex const &index);
-  void
-  setResolution(const std::vector<std::pair<std::string, int>> &fitResolutions);
+  void setResolution(const std::vector<std::pair<std::string, size_t>> &fitResolutions);
   void setBackgroundA0(double value);
   void setQValues(const std::vector<double> &qValues);
 
@@ -68,6 +66,7 @@ private slots:
 private:
   void updateViewParameters();
   QStringList getDatasetNames() const;
+  QStringList getDatasetDomainNames() const;
   double getLocalParameterValue(const QString &parName, int i) const;
   bool isLocalParameterFixed(const QString &parName, int i) const;
   QString getLocalParameterTie(const QString &parName, int i) const;

@@ -25,8 +25,7 @@ public:
   /// Default constructor
   SplittingInterval();
 
-  SplittingInterval(const Types::Core::DateAndTime &start,
-                    const Types::Core::DateAndTime &stop, const int index = 0);
+  SplittingInterval(const Types::Core::DateAndTime &start, const Types::Core::DateAndTime &stop, const int index = 0);
 
   Types::Core::DateAndTime start() const;
   Types::Core::DateAndTime stop() const;
@@ -61,12 +60,9 @@ private:
 using TimeSplitterType = std::vector<SplittingInterval>;
 
 // -------------- Operators ---------------------
-MANTID_KERNEL_DLL TimeSplitterType operator+(const TimeSplitterType &a,
-                                             const TimeSplitterType &b);
-MANTID_KERNEL_DLL TimeSplitterType operator&(const TimeSplitterType &a,
-                                             const TimeSplitterType &b);
-MANTID_KERNEL_DLL TimeSplitterType operator|(const TimeSplitterType &a,
-                                             const TimeSplitterType &b);
+MANTID_KERNEL_DLL TimeSplitterType operator+(const TimeSplitterType &a, const TimeSplitterType &b);
+MANTID_KERNEL_DLL TimeSplitterType operator&(const TimeSplitterType &a, const TimeSplitterType &b);
+MANTID_KERNEL_DLL TimeSplitterType operator|(const TimeSplitterType &a, const TimeSplitterType &b);
 MANTID_KERNEL_DLL TimeSplitterType operator~(const TimeSplitterType &a);
 
 } // Namespace Kernel

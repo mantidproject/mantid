@@ -29,8 +29,7 @@ class WorkspaceHistory;
  */
 class MANTID_API_DLL Workspace : public Kernel::DataItem {
 public:
-  Workspace(
-      const Parallel::StorageMode storageMode = Parallel::StorageMode::Cloned);
+  Workspace(const Parallel::StorageMode storageMode = Parallel::StorageMode::Cloned);
   ~Workspace();
 
   /** Returns a clone (copy) of the workspace with covariant return type in all

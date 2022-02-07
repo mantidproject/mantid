@@ -17,7 +17,7 @@ Usage
 
 .. include:: ../usagedata-note.txt
 
-**Example - Only for .Raw Files**  
+**Example - Only for .Raw Files**
 
 .. testcode:: raw
 

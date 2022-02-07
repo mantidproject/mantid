@@ -28,19 +28,20 @@ public:
   // Indices must match the order in static string array
   enum class Value : uint8_t { Linear, CSpline };
 
-  void set(Value kind);
-  void set(const std::string &kind);
+  void set(const Value &kind, const bool calculateErrors, const bool independentErrors);
+  void set(const std::string &kind, const bool calculateErrors, const bool independentErrors);
 
   std::unique_ptr<Kernel::Property> property() const;
   std::string propertyDoc() const;
   std::string validateInputSize(const size_t size) const;
 
   void applyInplace(HistogramData::Histogram &inOut, size_t stepSize) const;
-  void applyInPlace(const HistogramData::Histogram &in,
-                    HistogramData::Histogram &out) const;
+  void applyInPlace(const HistogramData::Histogram &in, HistogramData::Histogram &out) const;
 
 private:
   Value m_value = Value::Linear;
+  bool m_calculateErrors;
+  bool m_independentErrors;
 };
 
 } // namespace Algorithms

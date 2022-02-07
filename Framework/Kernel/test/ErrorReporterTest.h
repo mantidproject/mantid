@@ -8,6 +8,7 @@
 
 #include <cxxtest/TestSuite.h>
 
+#include "MantidJson/Json.h"
 #include "MantidKernel/ErrorReporter.h"
 #include <algorithm>
 #include <json/json.h>
@@ -19,9 +20,7 @@ public:
   using ErrorReporter::ErrorReporter;
 
   /// generates the message body for a error message
-  std::string generateErrorMessage() override {
-    return ErrorReporter::generateErrorMessage();
-  }
+  std::string generateErrorMessage() const override { return ErrorReporter::generateErrorMessage(); }
 
 protected:
   /// sends a report over the internet
@@ -46,18 +45,15 @@ public:
     TestableErrorReporter errorService(name, upTime, "0", false);
     const std::string message = errorService.generateErrorMessage();
 
-    ::Json::Reader reader;
     ::Json::Value root;
-    reader.parse(message, root);
+    Mantid::JsonHelpers::parse(message, &root);
     auto members = root.getMemberNames();
     const std::vector<std::string> expectedMembers{
-        "ParaView", "application", "host",       "mantidSha1", "mantidVersion",
-        "osArch",   "osName",      "osReadable", "osVersion",  "uid",
-        "facility", "upTime",      "exitCode"};
+        "ParaView",   "application", "host", "mantidSha1", "mantidVersion", "osArch",  "osName",
+        "osReadable", "osVersion",   "uid",  "facility",   "upTime",        "exitCode"};
     for (auto expectedMember : expectedMembers) {
       TSM_ASSERT(expectedMember + " not found",
-                 std::find(members.begin(), members.end(), expectedMember) !=
-                     members.end());
+                 std::find(members.begin(), members.end(), expectedMember) != members.end());
     }
 
     TS_ASSERT_EQUALS(root["application"].asString(), name);
@@ -65,26 +61,33 @@ public:
     TS_ASSERT_EQUALS(root["exitCode"].asString(), "0");
   }
 
+  void test_stackTraceWithQuotes() {
+    const std::string appName = "My testing application name";
+    const Mantid::Types::Core::time_duration upTime(5, 0, 7, 0);
+    const std::string stackTrace = "File \" C :\\file\\path\\file.py\", line 194, in broken_function";
+    TestableErrorReporter reporter(appName, upTime, "0", true, "name", "email", "textBox", stackTrace);
+    const std::string message = reporter.generateErrorMessage();
+
+    ::Json::Value root;
+    Mantid::JsonHelpers::parse(message, &root);
+    TS_ASSERT_EQUALS(root["stacktrace"].asString(), stackTrace);
+  }
+
   void test_errorMessageWithShare() {
     const std::string name = "My testing application name";
     const Mantid::Types::Core::time_duration upTime(5, 0, 7, 0);
-    TestableErrorReporter errorService(name, upTime, "0", true, "name", "email",
-                                       "textBox");
+    TestableErrorReporter errorService(name, upTime, "0", true, "name", "email", "textBox");
     const std::string message = errorService.generateErrorMessage();
 
-    ::Json::Reader reader;
     ::Json::Value root;
-    reader.parse(message, root);
+    Mantid::JsonHelpers::parse(message, &root);
     auto members = root.getMemberNames();
     const std::vector<std::string> expectedMembers{
-        "ParaView",      "application", "host",     "mantidSha1",
-        "mantidVersion", "osArch",      "osName",   "osReadable",
-        "osVersion",     "uid",         "facility", "upTime",
-        "exitCode",      "textBox",     "name",     "email"};
+        "ParaView",  "application", "host",     "mantidSha1", "mantidVersion", "osArch",  "osName", "osReadable",
+        "osVersion", "uid",         "facility", "upTime",     "exitCode",      "textBox", "name",   "email"};
     for (auto expectedMember : expectedMembers) {
       TSM_ASSERT(expectedMember + " not found",
-                 std::find(members.begin(), members.end(), expectedMember) !=
-                     members.end());
+                 std::find(members.begin(), members.end(), expectedMember) != members.end());
     }
 
     TS_ASSERT_EQUALS(root["application"].asString(), name);
@@ -98,23 +101,19 @@ public:
   void test_errorMessageWithShareAndRecoveryFileHash() {
     const std::string name = "My testing application name";
     const Mantid::Types::Core::time_duration upTime(5, 0, 7, 0);
-    TestableErrorReporter errorService(name, upTime, "0", true, "name", "email",
-                                       "textBox", "stacktrace");
+    TestableErrorReporter errorService(name, upTime, "0", true, "name", "email", "textBox", "stacktrace");
     const std::string message = errorService.generateErrorMessage();
 
-    ::Json::Reader reader;
     ::Json::Value root;
-    reader.parse(message, root);
+    Mantid::JsonHelpers::parse(message, &root);
     auto members = root.getMemberNames();
     const std::vector<std::string> expectedMembers{
-        "ParaView", "application", "host",       "mantidSha1", "mantidVersion",
-        "osArch",   "osName",      "osReadable", "osVersion",  "uid",
-        "facility", "upTime",      "exitCode",   "textBox",    "name",
-        "email",    "stacktrace"};
+        "ParaView", "application", "host",      "mantidSha1", "mantidVersion", "osArch",
+        "osName",   "osReadable",  "osVersion", "uid",        "facility",      "upTime",
+        "exitCode", "textBox",     "name",      "email",      "stacktrace"};
     for (auto expectedMember : expectedMembers) {
       TSM_ASSERT(expectedMember + " not found",
-                 std::find(members.begin(), members.end(), expectedMember) !=
-                     members.end());
+                 std::find(members.begin(), members.end(), expectedMember) != members.end());
     }
 
     TS_ASSERT_EQUALS(root["application"].asString(), name);
@@ -129,23 +128,19 @@ public:
   void test_errorMessageWithNoShareAndRecoveryFileHash() {
     const std::string name = "My testing application name";
     const Mantid::Types::Core::time_duration upTime(5, 0, 7, 0);
-    TestableErrorReporter errorService(name, upTime, "0", false, "name",
-                                       "email", "textBox", "stacktrace");
+    TestableErrorReporter errorService(name, upTime, "0", false, "name", "email", "textBox", "stacktrace");
     const std::string message = errorService.generateErrorMessage();
 
-    ::Json::Reader reader;
     ::Json::Value root;
-    reader.parse(message, root);
+    Mantid::JsonHelpers::parse(message, &root);
     auto members = root.getMemberNames();
     const std::vector<std::string> expectedMembers{
-        "ParaView", "application", "host",       "mantidSha1", "mantidVersion",
-        "osArch",   "osName",      "osReadable", "osVersion",  "uid",
-        "facility", "upTime",      "exitCode",   "textBox",    "name",
-        "email",    "stacktrace"};
+        "ParaView", "application", "host",      "mantidSha1", "mantidVersion", "osArch",
+        "osName",   "osReadable",  "osVersion", "uid",        "facility",      "upTime",
+        "exitCode", "textBox",     "name",      "email",      "stacktrace"};
     for (auto expectedMember : expectedMembers) {
       TSM_ASSERT(expectedMember + " not found",
-                 std::find(members.begin(), members.end(), expectedMember) !=
-                     members.end());
+                 std::find(members.begin(), members.end(), expectedMember) != members.end());
     }
 
     TS_ASSERT_EQUALS(root["application"].asString(), name);
@@ -153,7 +148,7 @@ public:
     TS_ASSERT_EQUALS(root["exitCode"].asString(), "0");
     TS_ASSERT_EQUALS(root["name"].asString(), "");
     TS_ASSERT_EQUALS(root["email"].asString(), "");
-    TS_ASSERT_EQUALS(root["textBox"].asString(), "");
+    TS_ASSERT_EQUALS(root["textBox"].asString(), "textBox");
     TS_ASSERT_EQUALS(root["stacktrace"].asString(), "");
   }
 };

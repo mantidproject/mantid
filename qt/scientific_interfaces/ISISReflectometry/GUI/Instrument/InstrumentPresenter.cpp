@@ -10,15 +10,12 @@
 #include "MantidGeometry/Instrument_fwd.h"
 #include <ostream>
 
-namespace MantidQt {
-namespace CustomInterfaces {
-namespace ISISReflectometry {
+namespace MantidQt::CustomInterfaces::ISISReflectometry {
 
 namespace {
 Mantid::Kernel::Logger g_log("Reflectometry GUI");
 
-boost::optional<RangeInLambda> rangeOrNone(RangeInLambda &range,
-                                           bool bothOrNoneMustBeSet) {
+boost::optional<RangeInLambda> rangeOrNone(RangeInLambda &range, bool bothOrNoneMustBeSet) {
   if (range.unset() || !range.isValid(bothOrNoneMustBeSet))
     return boost::none;
   else
@@ -26,17 +23,13 @@ boost::optional<RangeInLambda> rangeOrNone(RangeInLambda &range,
 }
 } // namespace
 
-InstrumentPresenter::InstrumentPresenter(
-    IInstrumentView *view, Instrument instrument,
-    std::unique_ptr<IInstrumentOptionDefaults> instrumentDefaults)
-    : m_instrumentDefaults(std::move(instrumentDefaults)), m_view(view),
-      m_model(std::move(instrument)) {
+InstrumentPresenter::InstrumentPresenter(IInstrumentView *view, Instrument instrument,
+                                         std::unique_ptr<IInstrumentOptionDefaults> instrumentDefaults)
+    : m_instrumentDefaults(std::move(instrumentDefaults)), m_view(view), m_model(std::move(instrument)) {
   m_view->subscribe(this);
 }
 
-void InstrumentPresenter::acceptMainPresenter(IBatchPresenter *mainPresenter) {
-  m_mainPresenter = mainPresenter;
-}
+void InstrumentPresenter::acceptMainPresenter(IBatchPresenter *mainPresenter) { m_mainPresenter = mainPresenter; }
 
 void InstrumentPresenter::notifySettingsChanged() {
   updateModelFromView();
@@ -51,13 +44,9 @@ void InstrumentPresenter::notifyRestoreDefaultsRequested() {
 
 Instrument const &InstrumentPresenter::instrument() const { return m_model; }
 
-bool InstrumentPresenter::isProcessing() const {
-  return m_mainPresenter->isProcessing();
-}
+bool InstrumentPresenter::isProcessing() const { return m_mainPresenter->isProcessing(); }
 
-bool InstrumentPresenter::isAutoreducing() const {
-  return m_mainPresenter->isAutoreducing();
-}
+bool InstrumentPresenter::isAutoreducing() const { return m_mainPresenter->isAutoreducing(); }
 
 /** Tells the view to update the enabled/disabled state of all widgets
  * depending on whether they are currently applicable or not
@@ -86,37 +75,26 @@ void InstrumentPresenter::updateWidgetValidState() {
   else
     m_view->showLambdaRangeInvalid();
 
-  if (!m_model.monitorBackgroundRange() ||
-      m_model.monitorBackgroundRange()->isValid(true))
+  if (!m_model.monitorBackgroundRange() || m_model.monitorBackgroundRange()->isValid(true))
     m_view->showMonitorBackgroundRangeValid();
   else
     m_view->showMonitorBackgroundRangeInvalid();
 
-  if (!m_model.monitorIntegralRange() ||
-      m_model.monitorIntegralRange()->isValid(false))
+  if (!m_model.monitorIntegralRange() || m_model.monitorIntegralRange()->isValid(false))
     m_view->showMonitorIntegralRangeValid();
   else
     m_view->showMonitorIntegralRangeInvalid();
 }
 
-void InstrumentPresenter::notifyReductionPaused() {
-  updateWidgetEnabledState();
-}
+void InstrumentPresenter::notifyReductionPaused() { updateWidgetEnabledState(); }
 
-void InstrumentPresenter::notifyReductionResumed() {
-  updateWidgetEnabledState();
-}
+void InstrumentPresenter::notifyReductionResumed() { updateWidgetEnabledState(); }
 
-void InstrumentPresenter::notifyAutoreductionPaused() {
-  updateWidgetEnabledState();
-}
+void InstrumentPresenter::notifyAutoreductionPaused() { updateWidgetEnabledState(); }
 
-void InstrumentPresenter::notifyAutoreductionResumed() {
-  updateWidgetEnabledState();
-}
+void InstrumentPresenter::notifyAutoreductionResumed() { updateWidgetEnabledState(); }
 
-void InstrumentPresenter::notifyInstrumentChanged(
-    std::string const &instrumentName) {
+void InstrumentPresenter::notifyInstrumentChanged(std::string const &instrumentName) {
   UNUSED_ARG(instrumentName);
   restoreDefaults();
 }
@@ -127,8 +105,7 @@ void InstrumentPresenter::restoreDefaults() {
     m_model = m_instrumentDefaults->get(instrument);
   } catch (std::invalid_argument &ex) {
     std::ostringstream msg;
-    msg << "Error setting default Instrument Settings: " << ex.what()
-        << ". Please check the " << instrument->getName()
+    msg << "Error setting default Instrument Settings: " << ex.what() << ". Please check the " << instrument->getName()
         << " parameters file.";
     g_log.error(msg.str());
     m_model = Instrument();
@@ -148,10 +125,8 @@ boost::optional<RangeInLambda> InstrumentPresenter::wavelengthRangeFromView() {
   return rangeOrNone(range, bothOrNoneMustBeSet);
 }
 
-boost::optional<RangeInLambda>
-InstrumentPresenter::monitorBackgroundRangeFromView() {
-  auto range = RangeInLambda(m_view->getMonitorBackgroundMin(),
-                             m_view->getMonitorBackgroundMax());
+boost::optional<RangeInLambda> InstrumentPresenter::monitorBackgroundRangeFromView() {
+  auto range = RangeInLambda(m_view->getMonitorBackgroundMin(), m_view->getMonitorBackgroundMax());
   bool const bothOrNoneMustBeSet = true;
 
   if (range.isValid(bothOrNoneMustBeSet))
@@ -162,10 +137,8 @@ InstrumentPresenter::monitorBackgroundRangeFromView() {
   return rangeOrNone(range, bothOrNoneMustBeSet);
 }
 
-boost::optional<RangeInLambda>
-InstrumentPresenter::monitorIntegralRangeFromView() {
-  auto range = RangeInLambda(m_view->getMonitorIntegralMin(),
-                             m_view->getMonitorIntegralMax());
+boost::optional<RangeInLambda> InstrumentPresenter::monitorIntegralRangeFromView() {
+  auto range = RangeInLambda(m_view->getMonitorIntegralMin(), m_view->getMonitorIntegralMax());
   bool const bothOrNoneMustBeSet = false;
 
   if (range.isValid(bothOrNoneMustBeSet))
@@ -181,8 +154,7 @@ MonitorCorrections InstrumentPresenter::monitorCorrectionsFromView() {
   auto const integrate = m_view->getIntegrateMonitors();
   auto const backgroundRange = monitorBackgroundRangeFromView();
   auto const integralRange = monitorIntegralRangeFromView();
-  return MonitorCorrections(monitorIndex, integrate, backgroundRange,
-                            integralRange);
+  return MonitorCorrections(monitorIndex, integrate, backgroundRange, integralRange);
 }
 
 DetectorCorrectionType InstrumentPresenter::detectorCorrectionTypeFromView() {
@@ -206,8 +178,7 @@ void InstrumentPresenter::updateModelFromView() {
   auto const wavelengthRange = wavelengthRangeFromView();
   auto const monitorCorrections = monitorCorrectionsFromView();
   auto const detectorCorrections = detectorCorrectionsFromView();
-  m_model =
-      Instrument(wavelengthRange, monitorCorrections, detectorCorrections);
+  m_model = Instrument(wavelengthRange, monitorCorrections, detectorCorrections);
 }
 
 void InstrumentPresenter::updateViewFromModel() {
@@ -230,8 +201,7 @@ void InstrumentPresenter::updateViewFromModel() {
     m_view->setMonitorBackgroundMax(m_model.monitorBackgroundRange()->max());
   }
   m_view->setCorrectDetectors(m_model.correctDetectors());
-  m_view->setDetectorCorrectionType(
-      detectorCorrectionTypeToString(m_model.detectorCorrectionType()));
+  m_view->setDetectorCorrectionType(detectorCorrectionTypeToString(m_model.detectorCorrectionType()));
 
   updateWidgetEnabledState();
   updateWidgetValidState();
@@ -239,6 +209,4 @@ void InstrumentPresenter::updateViewFromModel() {
   // Reconnect settings change notifications
   m_view->connectInstrumentSettingsWidgets();
 }
-} // namespace ISISReflectometry
-} // namespace CustomInterfaces
-} // namespace MantidQt
+} // namespace MantidQt::CustomInterfaces::ISISReflectometry

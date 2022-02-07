@@ -14,8 +14,7 @@ namespace Geometry {
 
 /** ComponentInfoIterator for random access iteration over ComponentInfo
  */
-template <typename T>
-class ComponentInfoIterator : public InfoIteratorBase<T, ComponentInfoItem> {
+template <typename T> class ComponentInfoIterator : public InfoIteratorBase<T, ComponentInfoItem> {
 public:
   using InfoIteratorBase<T, ComponentInfoItem>::InfoIteratorBase;
 };

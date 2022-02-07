@@ -22,15 +22,11 @@ public:
   /// Algorithm's name for identification
   const std::string name() const override { return "WeightedMeanMD"; };
   /// Summary of algorithms purpose
-  const std::string summary() const override {
-    return "Find weighted mean of two MDHistoWorkspaces.";
-  }
+  const std::string summary() const override { return "Find weighted mean of two MDHistoWorkspaces."; }
 
   /// Algorithm's version for identification
   int version() const override { return 1; };
-  const std::vector<std::string> seeAlso() const override {
-    return {"WeightedMean"};
-  }
+  const std::vector<std::string> seeAlso() const override { return {"WeightedMean"}; }
 
 private:
   /// Is the operation commutative?
@@ -43,14 +39,12 @@ private:
   void execEvent() override;
 
   /// Run the algorithm with a MDHisotWorkspace as output and operand
-  void execHistoHisto(
-      Mantid::DataObjects::MDHistoWorkspace_sptr out,
-      Mantid::DataObjects::MDHistoWorkspace_const_sptr operand) override;
+  void execHistoHisto(Mantid::DataObjects::MDHistoWorkspace_sptr out,
+                      Mantid::DataObjects::MDHistoWorkspace_const_sptr operand) override;
 
   /// Run the algorithm with a MDHisotWorkspace as output, scalar and operand
-  void execHistoScalar(
-      Mantid::DataObjects::MDHistoWorkspace_sptr out,
-      Mantid::DataObjects::WorkspaceSingleValue_const_sptr scalar) override;
+  void execHistoScalar(Mantid::DataObjects::MDHistoWorkspace_sptr out,
+                       Mantid::DataObjects::WorkspaceSingleValue_const_sptr scalar) override;
 };
 
 } // namespace MDAlgorithms

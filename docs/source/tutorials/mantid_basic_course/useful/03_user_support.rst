@@ -4,15 +4,15 @@
 User Support
 ============
 
-Mantid is actively developed and as part of that we offer some User Support. While often your Instrument Scientist is your first port of call, you can contact us in a number of ways. 
+Mantid is actively developed and as part of that we offer some User Support. While often your Instrument Scientist is your first port of call, you can contact us in a number of ways.
 
 
 Contact Us
 ----------
 
-We are always keen for feedback, so if you have any suggestions for improving Mantid, then please contact us. 
+We are always keen for feedback, so if you have any suggestions for improving Mantid, then please contact us.
 
-1. Through the `Mantid Help Forum <https://forum.mantidproject.org/>`_. Report a problem or ask for help. Remember to tag an appropriate topic. 
+1. Through the `Mantid Help Forum <https://forum.mantidproject.org/>`_. Report a problem or ask for help. Remember to tag an appropriate topic.
 
 This is quickly accessible through the top Toolbar in Mantid "Help > Mantid Forum"
 
@@ -20,7 +20,7 @@ This is quickly accessible through the top Toolbar in Mantid "Help > Mantid Foru
    :alt: Mantid Help Forum
    :align: center
 
-2. Mantid Help email: mantid-help@mantidproject.org 
+2. Mantid Help email: mantid-help@mantidproject.org
 
 Both of these methods go straight to our User Support Officer.
 
@@ -38,4 +38,4 @@ At some stage you will inevitably see an Error Reporter. Please provide your nam
 Documentation
 -------------
 
-Most of the functionality of Mantid is encompassed in our User Documentation. You can access it via the `webpage <https://www.mantidproject.org/Main_Page>`_ and in the drop-down menu "Help > Mantid Help, Algorithms, Concepts".
+Most of the functionality of Mantid is encompassed in our User Documentation. You can access it via the :ref:`User Documentation <contents>` and in the drop-down menu "Help > Mantid Help, Algorithms, Concepts".

@@ -20,7 +20,7 @@ described in the :ref:`FindSatellitePeaks <algm-FindSatellitePeaks-v1>`
 algorithm. The basis set is then chosen from this list. If there are multiple
 choices of vectors the algorithm will always choose the smallest one. This
 defines the number of additional dimensions required to index the crystal with
-integer indices. 
+integer indices.
 
 Once a basis of `q` vectors has been chosen for indexing the system all integer
 multiples of the basis set are generated. Each `q` vector is then compared with
@@ -32,7 +32,7 @@ tolerance are set to (0,0,0).
 .. warning:: The current version of the algorithm returns a
     :ref:`TableWorkspace <Table Workspaces>` and not a :ref:`PeaksWorkspace
     <PeaksWorkspace>`. This means that the workspace cannot be overlaid on the
-    slice viewer or the instrument view. 
+    slice viewer or the instrument view.
 
 .. seealso:: As well as being able to export the data to the nexus file format,
     saving the data to the Jana format is supported via the :ref:`SaveReflections
@@ -40,12 +40,12 @@ tolerance are set to (0,0,0).
 
 For more information on superspace crystallography see:
 
-- Van Smaalen, Sander. "An elementary introduction to superspace 
-  crystallography." Zeitschrift für Kristallographie-Crystalline Materials 
-  219, no. 11 (2004): 681-691. 
+- Van Smaalen, Sander. "An elementary introduction to superspace
+  crystallography." Zeitschrift für Kristallographie-Crystalline Materials
+  219, no. 11 (2004): 681-691.
 
-- Van Smaalen, Sander. "Incommensurate crystal structures." Crystallography 
-  Reviews 4, no. 2 (1995): 79-202. 
+- Van Smaalen, Sander. "Incommensurate crystal structures." Crystallography
+  Reviews 4, no. 2 (1995): 79-202.
 
 Related Algorithms
 ------------------

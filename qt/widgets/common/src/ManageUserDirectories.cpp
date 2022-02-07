@@ -9,24 +9,76 @@
 #include "MantidQtWidgets/Common/HelpWindow.h"
 #include <QDir>
 #include <QFileDialog>
+#include <QPointer>
 #include <QSettings>
 #include <QUrl>
 
+using Mantid::Kernel::ConfigService;
 using namespace MantidQt::API;
 
 namespace {
-std::unique_ptr<ManageUserDirectories> CURRENTLY_OPEN_MUD;
+
+namespace ButtonPrefix {
+const QString DATA{"pbData"};
+const QString SCRIPT{"pbScript"};
+const QString EXTENSIONS{"pbExt"};
+} // namespace ButtonPrefix
+
+namespace ConfigKeys {
+const std::string DATASEARCH_DIRS{"datasearch.directories"};
+const std::string PYTHONSCRIPTS_DIRS{"pythonscripts.directories"};
+const std::string USERPYTHONPLUGINS_DIRS{"user.python.plugins.directories"};
+const std::string DATASEARCH_ARCHIVE{"datasearch.searcharchive"};
+const std::string DEFAULT_FACILITY{"default.facility"};
+const std::string DEFAULTSAVE_DIR{"defaultsave.directory"};
+} // namespace ConfigKeys
+
+namespace QSettingsKeys {
+const auto LastDirectory{"ManageUserSettings/last_directory"};
+} // namespace QSettingsKeys
+
+// ID for help page in docs
+const QString HELP_ID{"ManageUserDirectories"};
+
+// Current instance opened with openManageUserDirectories
+QPointer<ManageUserDirectories> CURRENTLY_OPEN_MUD;
+} // namespace
+
+/**
+ * Show the default dialog or raise the existing one if it exists. It wraps
+ * the Mantid::Kernel::ConfigService by default.
+ */
+ManageUserDirectories *ManageUserDirectories::openManageUserDirectories() {
+  if (CURRENTLY_OPEN_MUD.isNull()) {
+    CURRENTLY_OPEN_MUD = QPointer<ManageUserDirectories>(new ManageUserDirectories);
+    CURRENTLY_OPEN_MUD->show();
+  } else {
+    CURRENTLY_OPEN_MUD->raise();
+  }
+  return CURRENTLY_OPEN_MUD;
 }
 
-ManageUserDirectories::ManageUserDirectories(QWidget *parent)
-    : MantidDialog(parent) {
+/**
+ * Constructor
+ * @param parent A parent QWidget for the dialog
+ */
+ManageUserDirectories::ManageUserDirectories(QWidget *parent) : BaseClass(parent), m_saveToFile(true) {
   setAttribute(Qt::WA_DeleteOnClose);
   m_uiForm.setupUi(this);
   initLayout();
 }
 
-ManageUserDirectories::~ManageUserDirectories() {}
+/**
+ * Control if the config service changes are persisted to the user file.
+ * @param enabled If true the config is persisted to the user file
+ * after updating the service otherwise only the in-memory store is
+ * affected.
+ */
+void ManageUserDirectories::enableSaveToFile(bool enabled) { m_saveToFile = enabled; }
 
+/**
+ * Create the UI layout, fill the widgets and connect the relevant signals
+ */
 void ManageUserDirectories::initLayout() {
   loadProperties();
 
@@ -35,63 +87,45 @@ void ManageUserDirectories::initLayout() {
   connect(m_uiForm.pbCancel, SIGNAL(clicked()), this, SLOT(cancelClicked()));
   connect(m_uiForm.pbConfirm, SIGNAL(clicked()), this, SLOT(confirmClicked()));
 
-  connect(m_uiForm.pbAddDirectory, SIGNAL(clicked()), this,
-          SLOT(addDirectory()));
-  connect(m_uiForm.pbAddDirectoryPython, SIGNAL(clicked()), this,
-          SLOT(addDirectory()));
-  connect(m_uiForm.pbBrowseToDir, SIGNAL(clicked()), this,
-          SLOT(browseToDirectory()));
-  connect(m_uiForm.pbBrowseToDirPython, SIGNAL(clicked()), this,
-          SLOT(browseToDirectory()));
-  connect(m_uiForm.pbRemDir, SIGNAL(clicked()), this, SLOT(remDir()));
-  connect(m_uiForm.pbRemDirPython, SIGNAL(clicked()), this, SLOT(remDir()));
-  connect(m_uiForm.pbMoveUp, SIGNAL(clicked()), this, SLOT(moveUp()));
-  connect(m_uiForm.pbMoveUpPython, SIGNAL(clicked()), this, SLOT(moveUp()));
-  connect(m_uiForm.pbMoveDown, SIGNAL(clicked()), this, SLOT(moveDown()));
-  connect(m_uiForm.pbMoveDownPython, SIGNAL(clicked()), this, SLOT(moveDown()));
+  connect(m_uiForm.pbDataAddDirectory, SIGNAL(clicked()), this, SLOT(addDirectory()));
+  connect(m_uiForm.pbScriptAddDirectory, SIGNAL(clicked()), this, SLOT(addDirectory()));
+  connect(m_uiForm.pbDataBrowseToDir, SIGNAL(clicked()), this, SLOT(browseToDirectory()));
+  connect(m_uiForm.pbScriptBrowseToDir, SIGNAL(clicked()), this, SLOT(browseToDirectory()));
+  connect(m_uiForm.pbExtBrowseToDir, SIGNAL(clicked()), this, SLOT(browseToDirectory()));
+  connect(m_uiForm.pbDataRemDir, SIGNAL(clicked()), this, SLOT(remDir()));
+  connect(m_uiForm.pbScriptRemDir, SIGNAL(clicked()), this, SLOT(remDir()));
+  connect(m_uiForm.pbExtRemoveDir, SIGNAL(clicked()), this, SLOT(remDir()));
+  connect(m_uiForm.pbDataMoveUp, SIGNAL(clicked()), this, SLOT(moveUp()));
+  connect(m_uiForm.pbScriptMoveUp, SIGNAL(clicked()), this, SLOT(moveUp()));
+  connect(m_uiForm.pbExtMoveUp, SIGNAL(clicked()), this, SLOT(moveUp()));
+  connect(m_uiForm.pbDataMoveDown, SIGNAL(clicked()), this, SLOT(moveDown()));
+  connect(m_uiForm.pbScriptMoveDown, SIGNAL(clicked()), this, SLOT(moveDown()));
+  connect(m_uiForm.pbExtMoveDown, SIGNAL(clicked()), this, SLOT(moveDown()));
 
-  connect(m_uiForm.pbSaveBrowse, SIGNAL(clicked()), this,
-          SLOT(selectSaveDir()));
+  connect(m_uiForm.pbSaveBrowse, SIGNAL(clicked()), this, SLOT(selectSaveDir()));
 }
 
+/**
+ * Load config properties into the form widgets
+ */
 void ManageUserDirectories::loadProperties() {
-  m_userPropFile =
-      QString::fromStdString(
-          Mantid::Kernel::ConfigService::Instance().getUserFilename())
-          .trimmed();
-
-  // get data search directories and populate the list widget (lwDataSearchDirs)
-  QString directories = QString::fromStdString(
-                            Mantid::Kernel::ConfigService::Instance().getString(
-                                "datasearch.directories"))
-                            .trimmed();
-  QStringList list = directories.split(";", QString::SkipEmptyParts);
-  m_uiForm.lwDataSearchDirs->clear();
-  m_uiForm.lwDataSearchDirs->addItems(list);
-
-  // Do the same thing for the "pythonscripts.directories" property.
-  directories = QString::fromStdString(
-                    Mantid::Kernel::ConfigService::Instance().getString(
-                        "pythonscripts.directories"))
-                    .trimmed();
-  list = directories.split(";", QString::SkipEmptyParts);
-  m_uiForm.lwUserSearchDirs->clear();
-  m_uiForm.lwUserSearchDirs->addItems(list);
+  auto &config = ConfigService::Instance();
+  auto populateListWidget = [&config](QListWidget *widget, const std::string &key) {
+    const auto directories = QString::fromStdString(config.getString(key)).trimmed();
+    const auto items = directories.split(";", QString::SkipEmptyParts);
+    widget->clear();
+    widget->addItems(items);
+  };
+  // fill lists
+  populateListWidget(m_uiForm.lwDataSearchDirs, ConfigKeys::DATASEARCH_DIRS);
+  populateListWidget(m_uiForm.lwScriptSearchDirs, ConfigKeys::PYTHONSCRIPTS_DIRS);
+  populateListWidget(m_uiForm.lwExtSearchDirs, ConfigKeys::USERPYTHONPLUGINS_DIRS);
 
   // set flag of whether to search the data archive
-  QString archive = QString::fromStdString(
-                        Mantid::Kernel::ConfigService::Instance().getString(
-                            "datasearch.searcharchive"))
-                        .trimmed()
-                        .toLower();
-  QString defaultFacility =
-      QString::fromStdString(
-          Mantid::Kernel::ConfigService::Instance().getString(
-              "default.facility"))
-          .trimmed()
-          .toUpper();
-  m_uiForm.cbSearchArchive->addItem(QString("default facility only - ") +
-                                    defaultFacility);
+  const auto archive = QString::fromStdString(config.getString(ConfigKeys::DATASEARCH_ARCHIVE)).trimmed().toLower();
+  const auto defaultFacility =
+      QString::fromStdString(config.getString(ConfigKeys::DEFAULT_FACILITY)).trimmed().toUpper();
+  m_uiForm.cbSearchArchive->addItem(QString("default facility only - ") + defaultFacility);
   m_uiForm.cbSearchArchive->addItem("all");
   m_uiForm.cbSearchArchive->addItem("off");
   if (archive == "on") {
@@ -106,13 +140,16 @@ void ManageUserDirectories::loadProperties() {
   }
 
   // default save directory
-  QString saveDir = QString::fromStdString(
-                        Mantid::Kernel::ConfigService::Instance().getString(
-                            "defaultsave.directory"))
-                        .trimmed();
+  const auto saveDir = QString::fromStdString(config.getString(ConfigKeys::DEFAULTSAVE_DIR)).trimmed();
   m_uiForm.leDefaultSave->setText(saveDir);
 }
+
+/**
+ *  Save the current contents of the widgets back to the main config
+ */
 void ManageUserDirectories::saveProperties() {
+  auto &config = ConfigService::Instance();
+
   QString newSearchArchive = m_uiForm.cbSearchArchive->currentText().toLower();
   if (newSearchArchive == "all" || newSearchArchive == "off") {
     // do nothing
@@ -121,125 +158,120 @@ void ManageUserDirectories::saveProperties() {
   } else {
     // the only way "custom" gets set is by using the value in ConfigService
     // already, so just copy it
-    newSearchArchive = QString::fromStdString(
-                           Mantid::Kernel::ConfigService::Instance().getString(
-                               "datasearch.searcharchive"))
-                           .trimmed()
-                           .toLower();
+    newSearchArchive =
+        QString::fromStdString(Mantid::Kernel::ConfigService::Instance().getString("datasearch.searcharchive"))
+            .trimmed()
+            .toLower();
   }
 
-  QStringList dataDirs;
-  QStringList userDirs;
+  // convert a path from the list to something the configservice will
+  // understand. replaces all \ with / and
+  auto toConfigPath = [](QString path) {
+    if (path.isEmpty())
+      return path;
+    auto unixStylePath = path.replace('\\', '/');
+    if (!unixStylePath.endsWith('/'))
+      unixStylePath.append('/');
+    return unixStylePath;
+  };
+  auto toConfigString = [&toConfigPath](QListWidget *itemsWidget) {
+    QStringList paths;
+    for (int i = 0; i < itemsWidget->count(); i++) {
+      const auto path = itemsWidget->item(i)->text().trimmed();
+      if (!path.isEmpty())
+        paths.append(toConfigPath(path));
+    }
+    return paths.join(";").toStdString();
+  };
 
-  for (int i = 0; i < m_uiForm.lwDataSearchDirs->count(); i++) {
-    QString dir = m_uiForm.lwDataSearchDirs->item(i)->text();
-    appendSlashIfNone(dir);
-    dataDirs.append(dir);
-  }
+  // data directories
+  config.setString(ConfigKeys::DATASEARCH_ARCHIVE, newSearchArchive.toStdString());
+  config.setString(ConfigKeys::DATASEARCH_DIRS, toConfigString(m_uiForm.lwDataSearchDirs));
+  config.setString(ConfigKeys::DEFAULTSAVE_DIR, toConfigPath(m_uiForm.leDefaultSave->text().trimmed()).toStdString());
+  // python directories
+  config.setString(ConfigKeys::PYTHONSCRIPTS_DIRS, toConfigString(m_uiForm.lwScriptSearchDirs));
+  config.setString(ConfigKeys::USERPYTHONPLUGINS_DIRS, toConfigString(m_uiForm.lwExtSearchDirs));
 
-  for (int i = 0; i < m_uiForm.lwUserSearchDirs->count(); i++) {
-    QString dir = m_uiForm.lwUserSearchDirs->item(i)->text();
-    appendSlashIfNone(dir);
-    userDirs.append(dir);
-  }
-
-  QString newDataDirs;
-  QString newUserDirs;
-  QString newSaveDir;
-
-  newDataDirs = dataDirs.join(";");
-  newUserDirs = userDirs.join(";");
-  newDataDirs.replace('\\', '/');
-  newUserDirs.replace('\\', '/');
-
-  newSaveDir = m_uiForm.leDefaultSave->text();
-  newSaveDir.replace('\\', '/');
-  appendSlashIfNone(newSaveDir);
-
-  Mantid::Kernel::ConfigServiceImpl &config =
-      Mantid::Kernel::ConfigService::Instance();
-
-  config.setString("datasearch.searcharchive", newSearchArchive.toStdString());
-  config.setString("datasearch.directories", newDataDirs.toStdString());
-  config.setString("defaultsave.directory", newSaveDir.toStdString());
-  config.setString("pythonscripts.directories", newUserDirs.toStdString());
-  config.saveConfig(m_userPropFile.toStdString());
+  if (m_saveToFile)
+    config.saveConfig(config.getUserFilename());
 }
 
 /**
- * Appends a forward slash to the end of a path if there is no slash (forward or
- * back) there already, and strip whitespace from the path.
- *
- * @param path :: A reference to the path
+ * Return the QListWidget related to the given sender
+ * @param sender A pointer to the QObject that caused this slot to be called
+ * @return QListWidget if sender is a known button else nullptr
  */
-void ManageUserDirectories::appendSlashIfNone(QString &path) const {
-  path = path.trimmed();
-  if (!(path.endsWith("/") || path.endsWith("\\") || path.isEmpty())) {
-    // Don't need to add to a \\, as it would just get changed to a /
-    // immediately after
-    path.append("/");
-  }
-}
-
-QListWidget *ManageUserDirectories::listWidget() {
-  if (m_uiForm.tabWidget->currentWidget() == m_uiForm.tabDataSearch) {
+QListWidget *ManageUserDirectories::listWidget(QObject *sender) {
+  const auto objectName = sender->objectName();
+  if (objectName.contains(ButtonPrefix::DATA)) {
     return m_uiForm.lwDataSearchDirs;
-  } else if (m_uiForm.tabWidget->currentWidget() ==
-             m_uiForm.tabPythonDirectories) {
-    return m_uiForm.lwUserSearchDirs;
+  } else if (objectName.contains(ButtonPrefix::SCRIPT)) {
+    return m_uiForm.lwScriptSearchDirs;
+  } else if (objectName.contains(ButtonPrefix::EXTENSIONS)) {
+    return m_uiForm.lwExtSearchDirs;
   } else {
     return nullptr;
   }
 }
 
-// SLOTS
-void ManageUserDirectories::helpClicked() {
-  HelpWindow::showCustomInterface(nullptr, QString("ManageUserDirectories"));
-}
+/// Show the help for ManageUserDirectories
+void ManageUserDirectories::helpClicked() { HelpWindow::showCustomInterface(nullptr, HELP_ID, "framework"); }
+
+/// Close the dialog without saving the configuration
 void ManageUserDirectories::cancelClicked() { this->close(); }
+
+/// Persist the properties to the config store and close the dialog
 void ManageUserDirectories::confirmClicked() {
   saveProperties();
   this->close();
 }
 
+/**
+ * Handle the add directory button to take the text from a text
+ * box based on the signal sender to the correct list
+ */
 void ManageUserDirectories::addDirectory() {
   QLineEdit *input(nullptr);
 
   if (m_uiForm.tabWidget->currentWidget() == m_uiForm.tabDataSearch) {
     input = m_uiForm.leDirectoryPath;
-  } else if (m_uiForm.tabWidget->currentWidget() ==
-             m_uiForm.tabPythonDirectories) {
+  } else if (m_uiForm.tabWidget->currentWidget() == m_uiForm.tabPythonDirectories) {
     input = m_uiForm.leDirectoryPathPython;
   }
 
   if (input && input->text() != "") {
-    listWidget()->addItem(input->text());
+    listWidget(sender())->addItem(input->text());
     input->clear();
   }
 }
 
+/// Browse to find a new directory. The start directory
+/// is the last directory accessed by the application. The
+/// directory is added to the list based on the object sender
 void ManageUserDirectories::browseToDirectory() {
   QSettings settings;
-  QString lastDirectory =
-      settings.value("ManageUserSettings/last_directory", "").toString();
+  const auto lastDirectory = settings.value(QSettingsKeys::LastDirectory, "").toString();
 
-  QString newDir = QFileDialog::getExistingDirectory(
-      this, tr("Select New Data Directory"), lastDirectory,
-      QFileDialog::ShowDirsOnly);
+  const auto newDir = QFileDialog::getExistingDirectory(this, tr("Select New Data Directory"), lastDirectory,
+                                                        QFileDialog::ShowDirsOnly);
 
-  if (newDir != "") {
-    settings.setValue("ManageUserSettings/last_directory", newDir);
-    listWidget()->addItem(newDir);
+  if (!newDir.isEmpty()) {
+    settings.setValue(QSettingsKeys::LastDirectory, newDir);
+    listWidget(sender())->addItem(newDir);
   }
 }
+
+/// Remove a directory from the list based on the sender
 void ManageUserDirectories::remDir() {
-  QList<QListWidgetItem *> selected = listWidget()->selectedItems();
+  QList<QListWidgetItem *> selected = listWidget(sender())->selectedItems();
   for (auto &i : selected) {
     delete i;
   }
 }
+
+/// Raise an item up in the list based on the sender of the signal
 void ManageUserDirectories::moveUp() {
-  QListWidget *list = listWidget();
+  QListWidget *list = listWidget(sender());
   QList<QListWidgetItem *> selected = list->selectedItems();
   for (auto &i : selected) {
     int index = list->row(i);
@@ -250,8 +282,10 @@ void ManageUserDirectories::moveUp() {
     list->setCurrentItem(i);
   }
 }
+
+/// Lower an item down in the list based on the sender of the signal
 void ManageUserDirectories::moveDown() {
-  QListWidget *list = listWidget();
+  QListWidget *list = listWidget(sender());
   int count = list->count();
   QList<QListWidgetItem *> selected = list->selectedItems();
   for (auto &i : selected) {
@@ -263,35 +297,20 @@ void ManageUserDirectories::moveDown() {
     list->setCurrentItem(i);
   }
 }
+
+/// Find an existing directory to be used for the save directory path
 void ManageUserDirectories::selectSaveDir() {
   QSettings settings;
-  QString lastDirectory = m_uiForm.leDefaultSave->text();
-  if (lastDirectory.trimmed() == "")
-    lastDirectory =
-        settings.value("ManageUserSettings/last_directory", "").toString();
+  auto lastDirectory = m_uiForm.leDefaultSave->text().trimmed();
+  if (lastDirectory.isEmpty())
+    lastDirectory = settings.value(QSettingsKeys::LastDirectory, "").toString();
 
-  const QString newDir = QFileDialog::getExistingDirectory(
-      this, tr("Select New Default Save Directory"), lastDirectory,
-      QFileDialog::ShowDirsOnly);
+  const auto newDir = QFileDialog::getExistingDirectory(this, tr("Select New Default Save Directory"), lastDirectory,
+                                                        QFileDialog::ShowDirsOnly);
 
-  if (newDir != "") {
-    QString path = newDir + QDir::separator();
-    path.replace('\\', '/');
-    settings.setValue("ManageUserSettings/last_directory", path);
+  if (!newDir.isEmpty()) {
+    const auto path = newDir + QDir::separator();
+    settings.setValue(QSettingsKeys::LastDirectory, path);
     m_uiForm.leDefaultSave->setText(path);
   }
-}
-
-void ManageUserDirectories::openManageUserDirectories() {
-  if (CURRENTLY_OPEN_MUD) {
-    CURRENTLY_OPEN_MUD->raise();
-  } else {
-    CURRENTLY_OPEN_MUD = std::make_unique<ManageUserDirectories>();
-    CURRENTLY_OPEN_MUD->show();
-  }
-}
-
-void ManageUserDirectories::closeEvent(QCloseEvent *event) {
-  CURRENTLY_OPEN_MUD.reset();
-  QWidget::closeEvent(event);
 }

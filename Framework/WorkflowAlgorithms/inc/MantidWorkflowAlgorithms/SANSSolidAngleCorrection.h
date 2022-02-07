@@ -46,14 +46,10 @@ public:
   /// Algorithm's name
   const std::string name() const override { return "SANSSolidAngleCorrection"; }
   /// Summary of algorithms purpose
-  const std::string summary() const override {
-    return "Performs solid angle correction on SANS 2D data.";
-  }
+  const std::string summary() const override { return "Performs solid angle correction on SANS 2D data."; }
   /// Algorithm's version
   int version() const override { return (1); }
-  const std::vector<std::string> seeAlso() const override {
-    return {"SolidAngle", "SANSBeamFluxCorrection"};
-  }
+  const std::vector<std::string> seeAlso() const override { return {"SolidAngle", "SANSBeamFluxCorrection"}; }
   /// Algorithm's category for identification
   const std::string category() const override {
     return "Workflow\\SANS\\UsesPropertyManager;"

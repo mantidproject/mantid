@@ -4,7 +4,7 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from mantiddoc.directives.base import AlgorithmBaseDirective #pylint: disable=unused-import
+from mantiddoc.directives.base import AlgorithmBaseDirective  #pylint: disable=unused-import
 import os
 import re
 REDIRECT_TEMPLATE = "redirect.html"
@@ -20,7 +20,6 @@ SCREENSHOT_MAX_HEIGHT = 250
 
 
 class AlgorithmDirective(AlgorithmBaseDirective):
-
     """
     Inserts details of an algorithm by querying Mantid
 
@@ -79,7 +78,7 @@ class AlgorithmDirective(AlgorithmBaseDirective):
         # title
         title = "%s v%d" % (alg_name, version)
         self.add_rst(self.make_header(title, True))
-        self.add_rst(u"\n.. index:: %s-v%d\n\n" % (alg_name, version))
+        self.add_rst("\n.. index:: %s-v%d\n\n" % (alg_name, version))
 
     def _insert_toc(self):
         """
@@ -89,29 +88,29 @@ class AlgorithmDirective(AlgorithmBaseDirective):
 
     def _create_screenshot(self):
         """
-        Creates a screenshot for the named algorithm in the "images/screenshots"
-        subdirectory.
+        Creates a screenshot for the named algorithm in the directory provided
+        by the SCREENSHOTS_DIR environment variable.
 
         The file will be named "algorithmname-vX_dlg.png", e.g. Rebin-v1_dlg.png
 
         Returns:
           screenshot: A mantiddoc.tools.Screenshot object
         """
-        try:
-            screenshots_dir = self._screenshot_directory()
-        except RuntimeError:
-            return None
+        screenshots_dir = self.screenshots_dir
+        if screenshots_dir is None:
+            return []
 
         # Generate image
         from mantiddoc.tools.screenshot import algorithm_screenshot
-        if not os.path.exists(screenshots_dir):
-            os.makedirs(screenshots_dir)
-
         try:
-            picture = algorithm_screenshot(self.algorithm_name(), screenshots_dir, version=self.algorithm_version())
+            picture = algorithm_screenshot(self.algorithm_name(),
+                                           screenshots_dir,
+                                           version=self.algorithm_version())
         except RuntimeError as exc:
             env = self.state.document.settings.env
-            env.warn(env.docname, "Unable to generate screenshot for '%s' - %s" % (self.algorithm_name(), str(exc)))
+            env.warn(
+                env.docname,
+                "Unable to generate screenshot for '%s' - %s" % (self.algorithm_name(), str(exc)))
             picture = None
 
         return picture
@@ -142,41 +141,24 @@ class AlgorithmDirective(AlgorithmBaseDirective):
             width, height = picture.width, picture.height
 
             if height > SCREENSHOT_MAX_HEIGHT:
-                aspect_ratio = float(width)/height
-                width = int(SCREENSHOT_MAX_HEIGHT*aspect_ratio)
+                aspect_ratio = float(width) / height
+                width = int(SCREENSHOT_MAX_HEIGHT * aspect_ratio)
             #endif
 
             # relative path to image
             rel_path = os.path.relpath(screenshots_dir, env.srcdir)
             # This is a href link so is expected to be in unix style
-            rel_path = rel_path.replace("\\","/")
+            rel_path = rel_path.replace("\\", "/")
             # stick a "/" as the first character so Sphinx computes relative location from source directory
             path = "/" + rel_path + "/" + filename
+            caption = "**" + self.algorithm_name() + "** dialog."
         else:
             # use stock not found image
             path = "/images/ImageNotFound.png"
             width = 200
+            caption = "Enable screenshots using DOCS_SCREENSHOTS in CMake"
 
-        caption = "**" + self.algorithm_name() + "** dialog."
         self.add_rst(format_str % (path, width, caption))
-
-    def _screenshot_directory(self):
-        """
-        Returns a full path where the screenshots should be generated. They are
-        put in a screenshots subdirectory of the main images directory in the source
-        tree. Sphinx then handles copying them to the final location
-
-        Arguments:
-          env (BuildEnvironment): Allows access to find the source directory
-
-        Returns:
-          str: A string containing a path to where the screenshots should be created. This will
-          be a filesystem path
-        """
-        try:
-            return os.environ["SCREENSHOTS_DIR"]
-        except:
-            raise RuntimeError("The '.. algorithm::' directive requires a SCREENSHOTS_DIR environment variable to be set.")
 
     def _insert_deprecation_warning(self):
         """
@@ -209,6 +191,7 @@ class AlgorithmDirective(AlgorithmBaseDirective):
 
 #------------------------------------------------------------------------------------------------------------
 
+
 def html_collect_pages(dummy_app):
     """
     Write out unversioned algorithm pages that redirect to the highest version of the algorithm
@@ -223,8 +206,9 @@ def html_collect_pages(dummy_app):
         versions.sort()
         highest_version = versions[-1]
         target = "%s-v%d.html" % (name, highest_version)
-        context = {"name" : name, "target" : target}
+        context = {"name": name, "target": target}
         yield (redirect_pagename, context, template)
+
 
 #------------------------------------------------------------------------------------------------------------
 
@@ -236,7 +220,10 @@ def setup(app):
     Args:
       app: The main Sphinx application object
     """
+    from mantid.api import FrameworkManager
     app.add_directive('algorithm', AlgorithmDirective)
-
     # connect event html collection to handler
     app.connect("html-collect-pages", html_collect_pages)
+
+    # start framework manager to load plugins once
+    FrameworkManager.Instance()

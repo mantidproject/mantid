@@ -32,11 +32,9 @@ public:
   /// @param domain :: The space on which the function acts
   /// @param values :: The buffer for writing the calculated values. Must be big
   /// enough to accept dataSize() values
-  void function(const API::FunctionDomain &domain,
-                API::FunctionValues &values) const override;
+  void function(const API::FunctionDomain &domain, API::FunctionValues &values) const override;
   /// Calculate the derivatives
-  void functionDeriv(const API::FunctionDomain &domain,
-                     API::Jacobian &jacobian) override;
+  void functionDeriv(const API::FunctionDomain &domain, API::Jacobian &jacobian) override;
 
 protected:
   /// overwrite IFunction base class method, which declare function parameters

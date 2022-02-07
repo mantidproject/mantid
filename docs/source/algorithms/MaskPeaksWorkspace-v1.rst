@@ -10,9 +10,12 @@ Description
 -----------
 
 Mask pixels in an Workspace close to peak positions from a
-PeaksWorkspace. Peaks could come from ISAW diamond stripping routine for
-SNAP data. Only works on Workspaces and for instruments with
-RectangularDetector's.
+PeaksWorkspace.
+Peaks could come from ISAW diamond stripping routine for
+SNAP data.
+This algorithm was originally developed for instruments with
+RectangularDetector's, but is now adapted to work for tube type
+detector of the two instruments (WISH and CORELLI).
 
 Usage
 -----
@@ -33,6 +36,11 @@ Usage
     #This will mask out the data in the event workspace relating to the peaks
     MaskPeaksWorkspace(ws,wsPeaks)
 
+Note
+-----
+
+Running the algorithm will trigger a deprecation warning regarding the `SpectraList`.
+This is a known issue and will be addressed at a later date.
 
 .. categories::
 

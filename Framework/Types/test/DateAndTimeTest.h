@@ -31,8 +31,7 @@ class DateAndTimeTest : public CxxTest::TestSuite {
 public:
   void test_constructors_and_set() {
     // Expected will be Jan 2, 1990, at 00:01:02
-    boost::posix_time::ptime expected =
-        boost::posix_time::from_iso_string(std::string("19900102T000102.345"));
+    boost::posix_time::ptime expected = boost::posix_time::from_iso_string(std::string("19900102T000102.345"));
     DateAndTime d;
     // 1day, 1 minute, 2 seconds, 0.345 seconds = 86462345000000 nanosec
     // Nanoseconds constructor
@@ -62,12 +61,9 @@ public:
   }
 
   void test_constructor_fails_invalid_string() {
-    TS_ASSERT_THROWS(DateAndTime("invalid time string"),
-                     const std::invalid_argument &);
-    TS_ASSERT_THROWS(DateAndTime("1909-01-31  22:59:59"),
-                     const std::invalid_argument &);
-    TS_ASSERT_THROWS(DateAndTime("2017-09-27T 07:03:49+00:00"),
-                     const std::invalid_argument &);
+    TS_ASSERT_THROWS(DateAndTime("invalid time string"), const std::invalid_argument &);
+    TS_ASSERT_THROWS(DateAndTime("1909-01-31  22:59:59"), const std::invalid_argument &);
+    TS_ASSERT_THROWS(DateAndTime("2017-09-27T 07:03:49+00:00"), const std::invalid_argument &);
   }
 
   void test_limits_on_construction() {
@@ -184,15 +180,13 @@ public:
     a = DateAndTime("1990-01-02 00:01:02.345");
     b = DateAndTime("1990-01-02 00:00:02.000");
     td = a - b;
-    TS_ASSERT_EQUALS(
-        td, DateAndTime::durationFromNanoseconds(int64_t(60345000000LL)));
+    TS_ASSERT_EQUALS(td, DateAndTime::durationFromNanoseconds(int64_t(60345000000LL)));
 
     a = DateAndTime("1990-01-02 00:01:02.345");
     p = boost::posix_time::from_iso_string("19900102T000002.000");
     // boost ptime gets converted to ptime implicitely
     td = a - p;
-    TS_ASSERT_EQUALS(
-        td, DateAndTime::durationFromNanoseconds(int64_t(60345000000LL)));
+    TS_ASSERT_EQUALS(td, DateAndTime::durationFromNanoseconds(int64_t(60345000000LL)));
   }
 
   void test_subtraction_of_times_limits() {
@@ -298,8 +292,7 @@ public:
     // std::cout << "UTC time is " << current->tm_hour << "h" << current->tm_min
     // << "\n";
     // Compare
-    TS_ASSERT(current->tm_year >=
-              110); // Wrote this in 2010, so the year must be > 110
+    TS_ASSERT(current->tm_year >= 110); // Wrote this in 2010, so the year must be > 110
   }
 
   void test_timezones() {
@@ -355,9 +348,7 @@ public:
     DateAndTime time_no_fraction = DateAndTime("2010-03-24T14:12:51");
 
     // The conversion should handle the fraction
-    TS_ASSERT_DELTA(
-        DateAndTime::secondsFromDuration(time_no_tz - time_no_fraction), 0.562,
-        0.0005);
+    TS_ASSERT_DELTA(DateAndTime::secondsFromDuration(time_no_tz - time_no_fraction), 0.562, 0.0005);
 
     // ZULU specified
     DateAndTime time_z = DateAndTime("2010-03-24T14:12:51.562Z");
@@ -370,20 +361,11 @@ public:
     DateAndTime time_negative_tz2 = DateAndTime("2010-03-24T06:12:51.562-08");
 
     // Now check the time zone difference
-    TS_ASSERT_DELTA(DateAndTime::secondsFromDuration(time_no_tz - time_z), 0.0,
-                    1e-4);
-    TS_ASSERT_DELTA(
-        DateAndTime::secondsFromDuration(time_no_tz - time_positive_tz), 0.0,
-        1e-4);
-    TS_ASSERT_DELTA(
-        DateAndTime::secondsFromDuration(time_no_tz - time_negative_tz), 0.0,
-        1e-4);
-    TS_ASSERT_DELTA(
-        DateAndTime::secondsFromDuration(time_no_tz - time_positive_tz2), 0.0,
-        1e-4);
-    TS_ASSERT_DELTA(
-        DateAndTime::secondsFromDuration(time_no_tz - time_negative_tz2), 0.0,
-        1e-4);
+    TS_ASSERT_DELTA(DateAndTime::secondsFromDuration(time_no_tz - time_z), 0.0, 1e-4);
+    TS_ASSERT_DELTA(DateAndTime::secondsFromDuration(time_no_tz - time_positive_tz), 0.0, 1e-4);
+    TS_ASSERT_DELTA(DateAndTime::secondsFromDuration(time_no_tz - time_negative_tz), 0.0, 1e-4);
+    TS_ASSERT_DELTA(DateAndTime::secondsFromDuration(time_no_tz - time_positive_tz2), 0.0, 1e-4);
+    TS_ASSERT_DELTA(DateAndTime::secondsFromDuration(time_no_tz - time_negative_tz2), 0.0, 1e-4);
   }
 
   void testDurations() {

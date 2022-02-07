@@ -20,8 +20,7 @@
 #include "MantidKernel/OptionalBool.h"
 #include "MantidNexusGeometry/NexusGeometryParser.h"
 
-namespace Mantid {
-namespace DataHandling {
+namespace Mantid::DataHandling {
 // Register the algorithm into the algorithm factory as a file loading algorithm
 DECLARE_FILELOADER_ALGORITHM(LoadEmptyInstrument)
 
@@ -62,8 +61,7 @@ int LoadEmptyInstrument::confidence(Kernel::FileDescriptor &descriptor) const {
 /// Initialisation method.
 void LoadEmptyInstrument::init() {
   declareProperty(
-      std::make_unique<FileProperty>("Filename", "", FileProperty::OptionalLoad,
-                                     LoadGeometry::validExtensions()),
+      std::make_unique<FileProperty>("Filename", "", FileProperty::OptionalLoad, LoadGeometry::validExtensions()),
       "The filename (including its full or relative path) of an instrument "
       "definition file. The file extension must either be .xml or .XML when "
       "specifying an instrument definition file. Files can also be .hdf5 or "
@@ -72,26 +70,21 @@ void LoadEmptyInstrument::init() {
   declareProperty("InstrumentName", "",
                   "Name of instrument. Can be used instead of Filename to "
                   "specify an IDF");
-  declareProperty(
-      std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
-          "OutputWorkspace", "", Direction::Output),
-      "The name of the workspace in which to store the imported instrument");
+  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>("OutputWorkspace", "", Direction::Output),
+                  "The name of the workspace in which to store the imported instrument");
 
   auto mustBePositive = std::make_shared<BoundedValidator<double>>();
   mustBePositive->setLower(0.0);
-  declareProperty(
-      "DetectorValue", 1.0, mustBePositive,
-      "This value affects the colour of the detectors in the instrument\n"
-      "display window (default 1)");
-  declareProperty(
-      "MonitorValue", 2.0, mustBePositive,
-      "This value affects the colour of the monitors in the instrument\n"
-      "display window (default 2)");
+  declareProperty("DetectorValue", 1.0, mustBePositive,
+                  "This value affects the colour of the detectors in the instrument\n"
+                  "display window (default 1)");
+  declareProperty("MonitorValue", 2.0, mustBePositive,
+                  "This value affects the colour of the monitors in the instrument\n"
+                  "display window (default 2)");
 
-  declareProperty(
-      std::make_unique<PropertyWithValue<bool>>("MakeEventWorkspace", false),
-      "Set to True to create an EventWorkspace (with no events) "
-      "instead of a Workspace2D.");
+  declareProperty(std::make_unique<PropertyWithValue<bool>>("MakeEventWorkspace", false),
+                  "Set to True to create an EventWorkspace (with no events) "
+                  "instead of a Workspace2D.");
 }
 
 /** Executes the algorithm. Reading in the file and creating and populating
@@ -120,10 +113,8 @@ void LoadEmptyInstrument::exec() {
 
   // Check that we have some spectra for the workspace
   if (number_spectra == 0) {
-    g_log.error(
-        "Instrument has no detectors, unable to create workspace for it");
-    throw Kernel::Exception::InstrumentDefinitionError(
-        "No detectors found in instrument");
+    g_log.error("Instrument has no detectors, unable to create workspace for it");
+    throw Kernel::Exception::InstrumentDefinitionError("No detectors found in instrument");
   }
 
   Indexing::IndexInfo indexInfo(number_spectra);
@@ -131,16 +122,13 @@ void LoadEmptyInstrument::exec() {
   prog.reportIncrement(5, "Creating Data");
   if (MakeEventWorkspace) {
     setProperty("OutputWorkspace",
-                create<EventWorkspace>(
-                    std::move(instrument), indexInfo,
-                    BinEdges{0.0, std::numeric_limits<double>::min()}));
+                create<EventWorkspace>(instrument, indexInfo, BinEdges{0.0, std::numeric_limits<double>::min()}));
   } else {
     const double detector_value = getProperty("DetectorValue");
     const double monitor_value = getProperty("MonitorValue");
     auto ws2D = create<Workspace2D>(
-        std::move(instrument), indexInfo,
-        Histogram(BinEdges{0.0, 1.0}, Counts(1, detector_value),
-                  CountStandardDeviations(1, detector_value)));
+        instrument, indexInfo,
+        Histogram(BinEdges{0.0, 1.0}, Counts(1, detector_value), CountStandardDeviations(1, detector_value)));
 
     Counts v_monitor_y(1, monitor_value);
     CountStandardDeviations v_monitor_e(1, monitor_value);
@@ -159,10 +147,9 @@ void LoadEmptyInstrument::exec() {
 }
 
 /// Run the Child Algorithm LoadInstrument (or LoadInstrumentFromRaw)
-API::MatrixWorkspace_sptr
-LoadEmptyInstrument::runLoadInstrument(const std::string &filename,
-                                       const std::string &instrumentname) {
-  IAlgorithm_sptr loadInst = createChildAlgorithm("LoadInstrument", 0, 0.5);
+API::MatrixWorkspace_sptr LoadEmptyInstrument::runLoadInstrument(const std::string &filename,
+                                                                 const std::string &instrumentname) {
+  auto loadInst = createChildAlgorithm("LoadInstrument", 0, 0.5);
   loadInst->setPropertyValue("Filename", filename);
   loadInst->setPropertyValue("InstrumentName", instrumentname);
   loadInst->setProperty("RewriteSpectraMap", OptionalBool(true));
@@ -174,5 +161,4 @@ LoadEmptyInstrument::runLoadInstrument(const std::string &filename,
   return ws;
 }
 
-} // namespace DataHandling
-} // namespace Mantid
+} // namespace Mantid::DataHandling

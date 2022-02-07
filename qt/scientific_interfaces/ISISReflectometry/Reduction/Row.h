@@ -27,12 +27,12 @@ namespace ISISReflectometry {
 // Immutability here makes update notification easier.
 class MANTIDQT_ISISREFLECTOMETRY_DLL Row : public Item {
 public:
-  Row(std::vector<std::string> number, double theta,
-      TransmissionRunPair tranmissionRuns, RangeInQ qRange,
+  Row(std::vector<std::string> number, double theta, TransmissionRunPair tranmissionRuns, RangeInQ qRange,
       boost::optional<double> scaleFactor, ReductionOptionsMap reductionOptions,
       ReductionWorkspaces reducedWorkspaceNames);
 
   bool isGroup() const override;
+  bool isPreview() const override;
   std::vector<std::string> const &runNumbers() const;
   TransmissionRunPair const &transmissionWorkspaceNames() const;
   double theta() const;
@@ -46,8 +46,7 @@ public:
   void setOutputQRange(RangeInQ qRange);
   void resetOutputs() override;
   bool hasOutputWorkspace(std::string const &wsName) const;
-  void renameOutputWorkspace(std::string const &oldName,
-                             std::string const &newName) override;
+  void renameOutputWorkspace(std::string const &oldName, std::string const &newName) override;
 
   Row withExtraRunNumbers(std::vector<std::string> const &runNumbers) const;
 

@@ -10,8 +10,7 @@
 #include "MantidAPI/IFunctionMW.h"
 #include "MantidAPI/MatrixWorkspace.h"
 
-namespace Mantid {
-namespace API {
+namespace Mantid::API {
 using namespace Geometry;
 
 /** Initialize the function providing it the workspace
@@ -20,9 +19,8 @@ using namespace Geometry;
  * @param startX :: The lower bin index
  * @param endX :: The upper bin index
  */
-void IFunctionMW::setMatrixWorkspace(
-    std::shared_ptr<const API::MatrixWorkspace> workspace, size_t wi,
-    double startX, double endX) {
+void IFunctionMW::setMatrixWorkspace(std::shared_ptr<const API::MatrixWorkspace> workspace, size_t wi, double startX,
+                                     double endX) {
   m_workspace = workspace;
   m_workspaceIndex = wi;
 
@@ -32,10 +30,6 @@ void IFunctionMW::setMatrixWorkspace(
 /**
  * Get a shared pointer to the saved matrix workspace.
  */
-std::shared_ptr<const API::MatrixWorkspace>
-IFunctionMW::getMatrixWorkspace() const {
-  return m_workspace.lock();
-}
+std::shared_ptr<const API::MatrixWorkspace> IFunctionMW::getMatrixWorkspace() const { return m_workspace.lock(); }
 
-} // namespace API
-} // namespace Mantid
+} // namespace Mantid::API

@@ -19,7 +19,7 @@ Usage
 **Example: Taking the derivative of logs**
 
 .. testcode:: AddLogDerivative
-    
+
     ws = CreateSampleWorkspace("Event")
     wsOut = SignalOverError(ws)
 

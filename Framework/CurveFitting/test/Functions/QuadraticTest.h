@@ -38,12 +38,9 @@ public:
     Quadratic quad;
     quad.initialize();
 
-    TS_ASSERT_THROWS(quad.setParameter("X", 1.0),
-                     const std::invalid_argument &);
-    TS_ASSERT_THROWS(quad.setAttributeValue("n", 3),
-                     const std::invalid_argument &);
-    TS_ASSERT_THROWS(quad.setParameter("A99", 0.0),
-                     const std::invalid_argument &);
+    TS_ASSERT_THROWS(quad.setParameter("X", 1.0), const std::invalid_argument &);
+    TS_ASSERT_THROWS(quad.setAttributeValue("n", 3), const std::invalid_argument &);
+    TS_ASSERT_THROWS(quad.setParameter("A99", 0.0), const std::invalid_argument &);
   }
 
   void test_calculate() {
@@ -67,8 +64,7 @@ public:
     for (size_t i = 0; i < numPoints; i++) {
       auto i2 = static_cast<double>(i);
       i2 *= i2;
-      TS_ASSERT_DELTA(yValues[i], a0 + a1 * static_cast<double>(i) + a2 * i2,
-                      1e-12);
+      TS_ASSERT_DELTA(yValues[i], a0 + a1 * static_cast<double>(i) + a2 * i2, 1e-12);
     }
   }
 };

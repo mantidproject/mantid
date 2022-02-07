@@ -10,9 +10,7 @@
 #include "MantidCurveFitting/Functions/LinearBackground.h"
 #include "MantidCurveFitting/Functions/ProductFunction.h"
 
-namespace Mantid {
-namespace CurveFitting {
-namespace Functions {
+namespace Mantid::CurveFitting::Functions {
 
 using namespace CurveFitting;
 
@@ -38,9 +36,7 @@ Calculate the 1D function derivatives.
 @param xValues : Domain x-values.
 @param nData : Number of elements.
 */
-void ProductLinearExp::functionDeriv1D(API::Jacobian *out,
-                                       const double *xValues,
-                                       const size_t nData) {
+void ProductLinearExp::functionDeriv1D(API::Jacobian *out, const double *xValues, const size_t nData) {
   const double A0 = getParameter("A0");
   const double A1 = getParameter("A1");
   const double Height = getParameter("Height");
@@ -64,19 +60,15 @@ Evaluate the 1D function
 @param xValues : Domain x-values.
 @param nData : Number of elements.
 */
-void ProductLinearExp::function1D(double *out, const double *xValues,
-                                  const size_t nData) const {
+void ProductLinearExp::function1D(double *out, const double *xValues, const size_t nData) const {
   const double A0 = getParameter("A0");
   const double A1 = getParameter("A1");
   const double Height = getParameter("Height");
   const double Lifetime = getParameter("Lifetime");
 
   for (size_t i = 0; i < nData; ++i) {
-    out[i] =
-        ((A1 * xValues[i]) + A0) * Height * std::exp(-xValues[i] / Lifetime);
+    out[i] = ((A1 * xValues[i]) + A0) * Height * std::exp(-xValues[i] / Lifetime);
   }
 }
 
-} // namespace Functions
-} // namespace CurveFitting
-} // namespace Mantid
+} // namespace Mantid::CurveFitting::Functions

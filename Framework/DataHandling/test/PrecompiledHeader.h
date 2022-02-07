@@ -10,9 +10,11 @@
 #include <cxxtest/WrappedTestSuite.h>
 
 #include "MantidAPI/Algorithm.h"
+#include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidKernel/System.h"
 
 // STL
-#include <set>
-#include <string>
-#include <vector>
+
+// Poco
+#include <Poco/File.h>
+#include <Poco/Path.h>

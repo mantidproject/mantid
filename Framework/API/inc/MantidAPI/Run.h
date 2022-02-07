@@ -51,11 +51,9 @@ public:
   Run &operator+=(const Run &rhs);
 
   /// Filter the logs by time
-  void filterByTime(const Types::Core::DateAndTime start,
-                    const Types::Core::DateAndTime stop) override;
+  void filterByTime(const Types::Core::DateAndTime start, const Types::Core::DateAndTime stop) override;
   /// Split the logs based on the given intervals
-  void splitByTime(Kernel::TimeSplitterType &splitter,
-                   std::vector<LogManager *> outputs) const override;
+  void splitByTime(Kernel::TimeSplitterType &splitter, std::vector<LogManager *> outputs) const override;
 
   /// Return an approximate memory size for the object in bytes
   size_t getMemorySize() const override;
@@ -66,8 +64,7 @@ public:
   double getProtonCharge() const;
   /// Integrate the proton charge over the whole run time - default log
   /// proton_charge
-  void
-  integrateProtonCharge(const std::string &logname = "proton_charge") const;
+  void integrateProtonCharge(const std::string &logname = "proton_charge") const;
 
   /// Store the given values as a set of histogram bin boundaries
   void storeHistogramBinBoundaries(const std::vector<double> &histoBins);
@@ -76,38 +73,70 @@ public:
   /// Returns the vector of bin boundaries
   std::vector<double> getBinBoundaries() const;
 
-  /// Set the gonoimeter & read the values from the logs if told to do so
-  void setGoniometer(const Geometry::Goniometer &goniometer,
-                     const bool useLogValues);
-  /** @return A reference to the const Goniometer object for this run */
-  inline const Geometry::Goniometer &getGoniometer() const {
-    return *m_goniometer;
-  }
-  /** @return A reference to the non-const Goniometer object for this run */
-  inline Geometry::Goniometer &mutableGoniometer() { return *m_goniometer; }
+  /// Set a single gonoimeter & read the average values from the logs if told to
+  /// do so
+  void setGoniometer(const Geometry::Goniometer &goniometer, const bool useLogValues);
+  /// Set the gonoimeters using the individual values
+  void setGoniometers(const Geometry::Goniometer &goniometer);
+  /// Return reference to the first const Goniometer object for this run
+  const Geometry::Goniometer &getGoniometer() const;
 
-  // Retrieve the goniometer rotation matrix
+  /// Return reference to the first non-const Goniometer object for this run
+  Geometry::Goniometer &mutableGoniometer();
+
+  /// Retrieve the first goniometer rotation matrix
   const Kernel::Matrix<double> &getGoniometerMatrix() const;
 
+  /// Return reference to a const Goniometer object for the run
+  const Geometry::Goniometer &getGoniometer(const size_t index) const;
+  /// Return reference to a non-const Goniometer object for the run
+  Geometry::Goniometer &mutableGoniometer(const size_t index);
+  /// Get the number of goniometers in the Run
+  size_t getNumGoniometers() const;
+  /// Retrieve the a goniometer rotation matrix
+  const Kernel::Matrix<double> &getGoniometerMatrix(const size_t index) const;
+  /// Append a goniometer to the run
+  size_t addGoniometer(const Geometry::Goniometer &goniometer);
+  /// Clear all goniometers on the Run
+  void clearGoniometers();
+  /// Get vector of all goniometer matrices in the Run
+  const std::vector<Kernel::Matrix<double>> getGoniometerMatrices() const;
+
   /// Save the run to a NeXus file with a given group name
-  void saveNexus(::NeXus::File *file, const std::string &group,
-                 bool keepOpen = false) const override;
+  void saveNexus(::NeXus::File *file, const std::string &group, bool keepOpen = false) const override;
+
+  /**
+   * @brief Load the run from a NeXus file with a given group name. Overload that uses NexusHDF5Descriptor for faster
+   * metadata lookup
+   *
+   * @param file currently opened NeXus file
+   * @param group current group (relative name)
+   * @param fileInfo descriptor with in-memory index with all entries
+   * @param prefix indicates current group location in file (absolute name)
+   * @param keepOpen
+   */
+  void loadNexus(::NeXus::File *file, const std::string &group, const Mantid::Kernel::NexusHDF5Descriptor &fileInfo,
+                 const std::string &prefix, bool keepOpen = false) override;
   /// Load the run from a NeXus file with a given group name
-  void loadNexus(::NeXus::File *file, const std::string &group,
-                 bool keepOpen = false) override;
+  void loadNexus(::NeXus::File *file, const std::string &group, bool keepOpen = false) override;
 
 private:
-  /// Calculate the gonoimeter matrix
-  void calculateGoniometerMatrix();
+  /// Calculate the average gonoimeter matrix
+  void calculateAverageGoniometerMatrix();
+  /// Calculate the gonoimeter matrices from logs
+  void calculateGoniometerMatrices(const Geometry::Goniometer &goniometer);
 
   /// Goniometer for this run
-  std::unique_ptr<Geometry::Goniometer> m_goniometer;
+  std::vector<std::unique_ptr<Geometry::Goniometer>> m_goniometers;
   /// A set of histograms that can be stored here for future reference
   std::vector<double> m_histoBins;
 
   /// Adds all the time series in from one property manager into another
-  void mergeMergables(Mantid::Kernel::PropertyManager &sum,
-                      const Mantid::Kernel::PropertyManager &toAdd);
+  void mergeMergables(Mantid::Kernel::PropertyManager &sum, const Mantid::Kernel::PropertyManager &toAdd);
+  void copyGoniometers(const Run &other);
+
+  // Function common to loadNexus overloads populating relevant members
+  void loadNexusCommon(::NeXus::File *file, const std::string &nameClass);
 };
 } // namespace API
 } // namespace Mantid

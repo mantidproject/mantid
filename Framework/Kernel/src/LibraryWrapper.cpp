@@ -7,16 +7,13 @@
 #include "MantidKernel/LibraryWrapper.h"
 #include "MantidKernel/DllOpen.h"
 
-namespace Mantid {
-namespace Kernel {
+namespace Mantid::Kernel {
 
 /**
  * Move constructor
  * @param src Constructor from this temporary
  */
-LibraryWrapper::LibraryWrapper(LibraryWrapper &&src) noexcept {
-  *this = std::move(src);
-}
+LibraryWrapper::LibraryWrapper(LibraryWrapper &&src) noexcept { *this = std::move(src); }
 
 /**
  * Move assignment
@@ -52,5 +49,4 @@ bool LibraryWrapper::openLibrary(const std::string &filepath) {
   return true;
 }
 
-} // namespace Kernel
-} // namespace Mantid
+} // namespace Mantid::Kernel

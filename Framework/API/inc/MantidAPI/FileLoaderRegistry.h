@@ -65,19 +65,16 @@ public:
     // If the factory didn't throw then the name is valid
     m_names[format].insert(nameVersion);
     m_totalSize += 1;
-    m_log.debug() << "Registered '" << nameVersion.first << "' version '"
-                  << nameVersion.second << "' as file loader\n";
+    m_log.debug() << "Registered '" << nameVersion.first << "' version '" << nameVersion.second << "' as file loader\n";
   }
 
   /// Unsubscribe a named algorithm and version from the loader registration
   void unsubscribe(const std::string &name, const int version = -1);
 
   /// Returns the name of an Algorithm that can load the given filename
-  const std::shared_ptr<IAlgorithm>
-  chooseLoader(const std::string &filename) const;
+  const std::shared_ptr<IAlgorithm> chooseLoader(const std::string &filename) const;
   /// Checks whether the given algorithm can load the file
-  bool canLoad(const std::string &algorithmName,
-               const std::string &filename) const;
+  bool canLoad(const std::string &algorithmName, const std::string &filename) const;
 
 private:
   /// Friend so that CreateUsingNew
@@ -94,33 +91,26 @@ private:
       switch (format) {
       case Nexus:
         if (!std::is_base_of<IFileLoader<Kernel::NexusDescriptor>, T>::value) {
-          throw std::runtime_error(
-              std::string("FileLoaderRegistryImpl::subscribe - Class '") +
-              typeid(T).name() +
-              "' registered as Nexus loader but it does not "
-              "inherit from "
-              "API::IFileLoader<Kernel::NexusDescriptor>");
+          throw std::runtime_error(std::string("FileLoaderRegistryImpl::subscribe - Class '") + typeid(T).name() +
+                                   "' registered as Nexus loader but it does not "
+                                   "inherit from "
+                                   "API::IFileLoader<Kernel::NexusDescriptor>");
         }
         break;
       case NexusHDF5:
-        if (!std::is_base_of<IFileLoader<Kernel::NexusHDF5Descriptor>,
-                             T>::value) {
-          throw std::runtime_error(
-              std::string("FileLoaderRegistryImpl::subscribe - Class '") +
-              typeid(T).name() +
-              "' registered as NexusHDF5 loader but it does not "
-              "inherit from "
-              "API::IFileLoader<Kernel::NexusHDF5Descriptor>");
+        if (!std::is_base_of<IFileLoader<Kernel::NexusHDF5Descriptor>, T>::value) {
+          throw std::runtime_error(std::string("FileLoaderRegistryImpl::subscribe - Class '") + typeid(T).name() +
+                                   "' registered as NexusHDF5 loader but it does not "
+                                   "inherit from "
+                                   "API::IFileLoader<Kernel::NexusHDF5Descriptor>");
         }
         break;
       case Generic:
         if (!std::is_base_of<IFileLoader<Kernel::FileDescriptor>, T>::value) {
-          throw std::runtime_error(
-              std::string("FileLoaderRegistryImpl::subscribe - Class '") +
-              typeid(T).name() +
-              "' registered as Generic loader but it does "
-              "not inherit from "
-              "API::IFileLoader<Kernel::FileDescriptor>");
+          throw std::runtime_error(std::string("FileLoaderRegistryImpl::subscribe - Class '") + typeid(T).name() +
+                                   "' registered as Generic loader but it does "
+                                   "not inherit from "
+                                   "API::IFileLoader<Kernel::FileDescriptor>");
         }
         break;
       default:
@@ -130,8 +120,7 @@ private:
   };
 
   /// Remove a named algorithm & version from the given map
-  void removeAlgorithm(const std::string &name, const int version,
-                       std::multimap<std::string, int> &typedLoaders);
+  void removeAlgorithm(const std::string &name, const int version, std::multimap<std::string, int> &typedLoaders);
 
   /// The list of names. The index pointed to by LoaderFormat defines a set for
   /// that format. The length is equal to the length of the LoaderFormat enum
@@ -144,15 +133,13 @@ private:
 };
 
 /// Type for the actual singleton instance
-using FileLoaderRegistry =
-    Mantid::Kernel::SingletonHolder<FileLoaderRegistryImpl>;
+using FileLoaderRegistry = Mantid::Kernel::SingletonHolder<FileLoaderRegistryImpl>;
 
 } // namespace API
 } // namespace Mantid
 
 namespace Mantid {
 namespace Kernel {
-EXTERN_MANTID_API template class MANTID_API_DLL
-    Mantid::Kernel::SingletonHolder<Mantid::API::FileLoaderRegistryImpl>;
+EXTERN_MANTID_API template class MANTID_API_DLL Mantid::Kernel::SingletonHolder<Mantid::API::FileLoaderRegistryImpl>;
 }
 } // namespace Mantid

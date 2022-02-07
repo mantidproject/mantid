@@ -9,20 +9,27 @@ THISFILE=$(readlink -f "$0")
 INSTALLDIR=$(dirname $THISFILE)   # directory of executable
 INSTALLDIR=$(dirname $INSTALLDIR) # root install directory
 
-@TCMALLOC_DEFINITIONS@
+@JEMALLOC_DEFINITIONS@
 
 @VIRTUAL_GL_WRAPPER@
 
 # Define where python libraries are
-LOCAL_PYTHONPATH=@LOCAL_PYPATH@@PARAVIEW_PYTHON_PATHS@
+LOCAL_PYTHONPATH=@LOCAL_PYPATH@
 if [ -n "${PYTHONPATH}" ]; then
     LOCAL_PYTHONPATH=${LOCAL_PYTHONPATH}:${PYTHONPATH}
 fi
 
+SETUP_TOOLS_VERS=`@PYTHON_EXECUTABLE@ -m pip show setuptools | grep Version | cut -d. -f1 | cut -d' ' -f2`
+if [ "$SETUP_TOOLS_VERS" -ge "49" ]; then
+   # Print red so people notice it when they get a stack trace
+   echo "\e[31mSetup tools is >= 49. You may run into issues with a clean build.\e[0m"
+   echo "If you are failing to launch with missing modules see https://github.com/mantidproject/mantid/issues/29010"
+fi
+
 @GDB_DEFINITIONS@
 
-LD_PRELOAD=${LOCAL_PRELOAD} TCMALLOC_RELEASE_RATE=${TCM_RELEASE} \
-    TCMALLOC_LARGE_ALLOC_REPORT_THRESHOLD=${TCM_REPORT} \
-    PYTHONPATH=${LOCAL_PYTHONPATH} \
-    @WRAPPER_PREFIX@$VGLRUN $GDB @PYTHON_EXECUTABLE@ @PYTHON_ARGS@ $INSTALLDIR/bin/@MANTIDWORKBENCH_EXEC@ "$@"@WRAPPER_POSTFIX@ \
-    || PYTHONPATH=${LOCAL_PYTHONPATH} @PYTHON_EXECUTABLE@ @SCRIPTSDIR@/@ERROR_CMD@ --application=workbench
+LD_PRELOAD=${LOCAL_PRELOAD} \
+    PYTHONPATH=${LOCAL_PYTHONPATH} @QT_QPA@ \
+    @WRAPPER_PREFIX@$VGLRUN $GDB \
+    @PYTHON_EXECUTABLE@ @PYTHON_ARGS@ $INSTALLDIR/bin/@MANTIDWORKBENCH_EXEC@ "$@"@WRAPPER_POSTFIX@ \
+    || PYTHONPATH=${LOCAL_PYTHONPATH} @PYTHON_EXECUTABLE@ @ERROR_CMD@ --application=workbench

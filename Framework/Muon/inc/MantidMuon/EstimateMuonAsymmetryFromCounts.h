@@ -36,9 +36,7 @@ Required Properties:
 class MANTID_MUON_DLL EstimateMuonAsymmetryFromCounts : public API::Algorithm {
 public:
   /// Algorithm's name for identification overriding a virtual method
-  const std::string name() const override {
-    return "EstimateMuonAsymmetryFromCounts";
-  }
+  const std::string name() const override { return "EstimateMuonAsymmetryFromCounts"; }
   /// Summary of algorithms purpose
   const std::string summary() const override {
     return "This algorithm gives an estimate "

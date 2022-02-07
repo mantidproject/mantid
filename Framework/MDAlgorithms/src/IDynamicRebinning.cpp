@@ -6,9 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidMDAlgorithms/IDynamicRebinning.h"
 
-namespace Mantid {
-namespace MDAlgorithms {
+namespace Mantid::MDAlgorithms {
 
 Kernel::Logger IDynamicRebinning::bin_log("MD rebinning Operations");
-} // namespace MDAlgorithms
-} // namespace Mantid
+} // namespace Mantid::MDAlgorithms

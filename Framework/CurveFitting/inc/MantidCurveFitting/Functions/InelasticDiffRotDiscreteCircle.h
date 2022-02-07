@@ -25,8 +25,7 @@ namespace Functions {
 /* Class representing the inelastic portion of DiffRotDiscreteCircle
  * Contains a linear combination of Lorentzians.
  */
-class MANTID_CURVEFITTING_DLL InelasticDiffRotDiscreteCircle
-    : public FunctionQDepends {
+class MANTID_CURVEFITTING_DLL InelasticDiffRotDiscreteCircle : public FunctionQDepends {
 public:
   /// Constructor
   InelasticDiffRotDiscreteCircle();
@@ -38,8 +37,7 @@ public:
   void init() override;
 
 protected:
-  void function1D(double *out, const double *xValues,
-                  const size_t nData) const override;
+  void function1D(double *out, const double *xValues, const size_t nData) const override;
 
 private:
   /// Cache Q values from the workspace

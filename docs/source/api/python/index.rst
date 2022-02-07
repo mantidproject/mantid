@@ -6,9 +6,7 @@
 
 The following pages document the Python bindings to the Mantid C++ libraries.
 
-If you are new to Python in Mantid then we advise first looking at our `Mantid training courses <http://www.mantidproject.org/Documentation>`_.
-
-For tutorials on how to use python in MantidPlot please see `MantidPlot: Python Scripting <https://www.mantidproject.org/MantidPlot:_Python_Scripting>`_.
+If you are new to Python in Mantid then we advise first looking at our :ref:`Python In Mantid course <pim_intro>`.
 
 
 Reference
@@ -17,7 +15,6 @@ Reference
    :maxdepth: 1
 
    mantid <mantid/index>
-   mantidplot <mantidplot/index>
 
 
 .. toctree::

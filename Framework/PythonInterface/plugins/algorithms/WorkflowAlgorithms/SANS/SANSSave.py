@@ -10,7 +10,7 @@
 
 from mantid.api import (DataProcessorAlgorithm, MatrixWorkspaceProperty, AlgorithmFactory, PropertyMode,
                         FileProperty, FileAction, Progress)
-from mantid.kernel import (Direction)
+from mantid.kernel import (Direction, logger)
 from sans.algorithm_detail.save_workspace import (save_to_file, get_zero_error_free_workspace, file_format_with_append)
 from sans.common.enums import (SaveType)
 
@@ -115,7 +115,13 @@ class SANSSave(DataProcessorAlgorithm):
             progress_message = "Saving to {0}.".format(file_format.file_format.value)
             progress.report(progress_message)
             progress.report(progress_message)
-            save_to_file(workspace, file_format, file_name, transmission_workspaces, additional_run_numbers)
+            try:
+                save_to_file(workspace, file_format, file_name, transmission_workspaces, additional_run_numbers)
+            except (RuntimeError, ValueError) as e:
+                logger.warning(f"Cannot save workspace using SANSSave. "
+                               "This workspace needs to be the result of a SANS reduction, "
+                               "and must be appropriate for saving 1D or 2D reduced data.")
+                raise e
         progress.report("Finished saving workspace to files.")
 
     def validateInputs(self):

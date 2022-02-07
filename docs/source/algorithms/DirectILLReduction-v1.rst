@@ -36,7 +36,7 @@ Normalisation to absolute units can be enabled by setting *AbsoluteUnitsNormalis
 
     :math:`f = \frac{N_V \sigma_V}{N_S}`
 
-after normalisation to vanadium giving units of barn to the data. In the above, :math:`N_V` stands for the vanadium number density, :math:`\sigma_V` for vanadium total scattering cross section and :math:`N_S` sample number density. 
+after normalisation to vanadium giving units of barn to the data. In the above, :math:`N_V` stands for the vanadium number density, :math:`\sigma_V` for vanadium total scattering cross section and :math:`N_S` sample number density.
 
 The material properties should be set for *InputWorkspace* and *IntegratedVanadiumWorkspace* by :ref:`SetSample <algm-SetSample>` before running this algorithm .
 

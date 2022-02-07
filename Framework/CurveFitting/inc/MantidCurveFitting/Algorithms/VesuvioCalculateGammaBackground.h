@@ -29,8 +29,7 @@ namespace Algorithms {
 //---------------------------------------------------------------------------
 struct DetectorParams;
 
-class MANTID_CURVEFITTING_DLL VesuvioCalculateGammaBackground
-    : public API::Algorithm {
+class MANTID_CURVEFITTING_DLL VesuvioCalculateGammaBackground : public API::Algorithm {
 public:
   VesuvioCalculateGammaBackground();
   ~VesuvioCalculateGammaBackground() override;
@@ -41,9 +40,7 @@ public:
     return "Calculates the background due to gamma rays produced when neutrons "
            "are absorbed by shielding.";
   }
-  const std::vector<std::string> seeAlso() const override {
-    return {"VesuvioCorrections"};
-  }
+  const std::vector<std::string> seeAlso() const override { return {"VesuvioCorrections"}; }
 
   int version() const override;
   const std::string category() const override;
@@ -66,23 +63,17 @@ private:
   /// Calculate & correct the given index of the input workspace
   void applyCorrection(const size_t inputIndex, const size_t outputIndex);
   /// Compute the expected spectrum from a given detector
-  void calculateSpectrumFromDetector(const size_t inputIndex,
-                                     const size_t outputIndex);
+  void calculateSpectrumFromDetector(const size_t inputIndex, const size_t outputIndex);
   /// Compute the expected background from the foils
-  void calculateBackgroundFromFoils(const size_t inputIndex,
-                                    const size_t outputIndex);
+  void calculateBackgroundFromFoils(const size_t inputIndex, const size_t outputIndex);
   /// Compute expected background from single foil for spectrum at wsIndex
-  void calculateBackgroundSingleFoil(
-      std::vector<double> &ctfoil, const size_t wsIndex,
-      const FoilInfo &foilInfo, const Kernel::V3D &detPos,
-      const DetectorParams &detPar,
-      const CurveFitting::Functions::ResolutionParams &detRes);
+  void calculateBackgroundSingleFoil(std::vector<double> &ctfoil, const size_t wsIndex, const FoilInfo &foilInfo,
+                                     const Kernel::V3D &detPos, const DetectorParams &detPar,
+                                     const CurveFitting::Functions::ResolutionParams &detRes);
   /// Compute a TOF spectrum for the given inputs & spectrum
-  std::vector<double>
-  calculateTofSpectrum(const std::vector<double> &inSpectrum,
-                       std::vector<double> &tmpWork, const size_t wsIndex,
-                       const DetectorParams &detpar,
-                       const CurveFitting::Functions::ResolutionParams &respar);
+  std::vector<double> calculateTofSpectrum(const std::vector<double> &inSpectrum, std::vector<double> &tmpWork,
+                                           const size_t wsIndex, const DetectorParams &detpar,
+                                           const CurveFitting::Functions::ResolutionParams &respar);
 
   /// Check and store appropriate input data
   void retrieveInputs();
@@ -91,9 +82,8 @@ private:
   /// Compute & store the parameters that are fixed during the correction
   void cacheInstrumentGeometry();
   /// Compute the theta range for a given foil
-  std::pair<double, double>
-  calculateThetaRange(const Geometry::IComponent_const_sptr &foilComp,
-                      const double radius, const unsigned int horizDir) const;
+  std::pair<double, double> calculateThetaRange(const Geometry::IComponent_const_sptr &foilComp, const double radius,
+                                                const unsigned int horizDir) const;
 
   /// Input TOF data
   API::MatrixWorkspace_const_sptr m_inputWS;

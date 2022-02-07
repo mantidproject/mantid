@@ -12,8 +12,7 @@
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/MandatoryValidator.h"
 
-namespace Mantid {
-namespace DataHandling {
+namespace Mantid::DataHandling {
 // Register the algorithm into the algorithm factory
 DECLARE_ALGORITHM(MaskDetectorsInShape)
 
@@ -21,11 +20,8 @@ using namespace Kernel;
 using namespace API;
 
 void MaskDetectorsInShape::init() {
-  declareProperty(
-      std::make_unique<WorkspaceProperty<>>("Workspace", "", Direction::InOut),
-      "The input workspace");
-  declareProperty("ShapeXML", "",
-                  std::make_shared<MandatoryValidator<std::string>>(),
+  declareProperty(std::make_unique<WorkspaceProperty<>>("Workspace", "", Direction::InOut), "The input workspace");
+  declareProperty("ShapeXML", "", std::make_shared<MandatoryValidator<std::string>>(),
                   "The XML definition of the user defined shape.");
   declareProperty("IncludeMonitors", false,
                   "Whether to include monitors if "
@@ -40,11 +36,9 @@ void MaskDetectorsInShape::exec() {
   const bool includeMonitors = getProperty("IncludeMonitors");
   const std::string shapeXML = getProperty("ShapeXML");
 
-  std::vector<int> foundDets =
-      runFindDetectorsInShape(WS, shapeXML, includeMonitors);
+  std::vector<int> foundDets = runFindDetectorsInShape(WS, shapeXML, includeMonitors);
   if (foundDets.empty()) {
-    g_log.information(
-        "No detectors were found in the shape, nothing was masked");
+    g_log.information("No detectors were found in the shape, nothing was masked");
     return;
   }
   runMaskDetectors(WS, foundDets);
@@ -52,10 +46,10 @@ void MaskDetectorsInShape::exec() {
 }
 
 /// Run the FindDetectorsInShape Child Algorithm
-std::vector<int> MaskDetectorsInShape::runFindDetectorsInShape(
-    const API::MatrixWorkspace_sptr &workspace, const std::string &shapeXML,
-    const bool includeMonitors) {
-  IAlgorithm_sptr alg = createChildAlgorithm("FindDetectorsInShape");
+std::vector<int> MaskDetectorsInShape::runFindDetectorsInShape(const API::MatrixWorkspace_sptr &workspace,
+                                                               const std::string &shapeXML,
+                                                               const bool includeMonitors) {
+  auto alg = createChildAlgorithm("FindDetectorsInShape");
   alg->setPropertyValue("IncludeMonitors", includeMonitors ? "1" : "0");
   alg->setPropertyValue("ShapeXML", shapeXML);
   alg->setProperty<MatrixWorkspace_sptr>("Workspace", workspace);
@@ -65,8 +59,7 @@ std::vector<int> MaskDetectorsInShape::runFindDetectorsInShape(
                                "executed successfully\n");
     }
   } catch (std::runtime_error &) {
-    g_log.error(
-        "Unable to successfully execute FindDetectorsInShape Child Algorithm");
+    g_log.error("Unable to successfully execute FindDetectorsInShape Child Algorithm");
     throw;
   }
   progress(0.5);
@@ -75,9 +68,8 @@ std::vector<int> MaskDetectorsInShape::runFindDetectorsInShape(
   return alg->getProperty("DetectorList");
 }
 
-void MaskDetectorsInShape::runMaskDetectors(
-    const API::MatrixWorkspace_sptr &workspace,
-    const std::vector<int> &detectorIds) {
+void MaskDetectorsInShape::runMaskDetectors(const API::MatrixWorkspace_sptr &workspace,
+                                            const std::vector<int> &detectorIds) {
   auto &detectorInfo = workspace->mutableDetectorInfo();
   for (const auto &id : detectorIds)
     detectorInfo.setMasked(detectorInfo.indexOf(id), true);
@@ -88,5 +80,4 @@ void MaskDetectorsInShape::runMaskDetectors(
   progress(1);
 }
 
-} // namespace DataHandling
-} // namespace Mantid
+} // namespace Mantid::DataHandling

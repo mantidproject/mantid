@@ -9,7 +9,7 @@ import sys
 import math
 from testhelpers import create_algorithm, run_algorithm, can_be_instantiated, WorkspaceCreationHelper
 from mantid.api import (MatrixWorkspace, MatrixWorkspaceProperty, WorkspaceProperty, Workspace,
-                        ExperimentInfo, AnalysisDataService, WorkspaceFactory)
+                        ExperimentInfo, AnalysisDataService, WorkspaceFactory, NumericAxis)
 from mantid.geometry import Detector
 from mantid.kernel import Direction, V3D
 from mantid.simpleapi import CreateSampleWorkspace, Rebin
@@ -17,7 +17,6 @@ import numpy as np
 
 
 class MatrixWorkspaceTest(unittest.TestCase):
-
     _test_ws_prop = None
     _test_ws = None
 
@@ -41,6 +40,7 @@ class MatrixWorkspaceTest(unittest.TestCase):
         self.assertEqual(self._test_ws.isDirty(), False)
         self.assertGreater(self._test_ws.getMemorySize(), 0.0)
         self.assertEqual(self._test_ws.threadSafe(), True)
+        self.assertEqual(self._test_ws.isGroup(), False)
 
     def test_workspace_data_information(self):
         self.assertEqual(self._test_ws.getNumberHistograms(), 2)
@@ -69,6 +69,18 @@ class MatrixWorkspaceTest(unittest.TestCase):
         self.assertEqual(yunit.caption(), "Spectrum")
         self.assertEqual(str(yunit.symbol()), "")
         self.assertEqual(yunit.unitID(), "Label")
+
+    def test_replace_axis(self):
+        x_axis = NumericAxis.create(1)
+        x_axis.setValue(0, 0)
+        ws1 = WorkspaceCreationHelper.create2DWorkspaceWithFullInstrument(2, 1, False)
+        ws1.replaceAxis(0, x_axis)
+        ws2 = WorkspaceCreationHelper.create2DWorkspaceWithFullInstrument(2, 1, False)
+        ws2.replaceAxis(0, x_axis)
+        try:
+            del ws1, ws2
+        except:
+            self.fail("Segmentation violation when deleting the same axis twice")
 
     def test_detector_retrieval(self):
         det = self._test_ws.getDetector(0)
@@ -188,9 +200,9 @@ class MatrixWorkspaceTest(unittest.TestCase):
     def test_setxy_data_coerced_correctly_to_float64(self):
         nbins = 10
         nspec = 2
-        xdata = np.arange(nbins+1)
+        xdata = np.arange(nbins + 1)
         ydata = np.arange(nbins)
-        ws = WorkspaceFactory.create("Workspace2D", NVectors=nspec, XLength=nbins+1, YLength=nbins)
+        ws = WorkspaceFactory.create("Workspace2D", NVectors=nspec, XLength=nbins + 1, YLength=nbins)
         for i in range(nspec):
             ws.setX(i, xdata)
             ws.setY(i, ydata)
@@ -204,9 +216,9 @@ class MatrixWorkspaceTest(unittest.TestCase):
     def test_setxy_accepts_python_list(self):
         nbins = 10
         nspec = 2
-        xdata = list(range(nbins+1))
+        xdata = list(range(nbins + 1))
         ydata = list(range(nbins))
-        ws = WorkspaceFactory.create("Workspace2D", NVectors=nspec, XLength=nbins+1, YLength=nbins)
+        ws = WorkspaceFactory.create("Workspace2D", NVectors=nspec, XLength=nbins + 1, YLength=nbins)
         for i in range(nspec):
             ws.setX(i, xdata)
             ws.setY(i, ydata)
@@ -235,7 +247,7 @@ class MatrixWorkspaceTest(unittest.TestCase):
         else:
             nhist = 1
             start = index
-            end = index+nhist
+            end = index + nhist
 
         blocksize = workspace.blocksize()
         for arr in (x_np, y_np, e_np):
@@ -290,11 +302,11 @@ class MatrixWorkspaceTest(unittest.TestCase):
 
     def test_operators_with_workspaces_in_ADS(self):
         run_algorithm('CreateWorkspace', OutputWorkspace='a', DataX=[
-                      1., 2., 3.], DataY=[2., 3.], DataE=[2., 3.], UnitX='TOF')
+            1., 2., 3.], DataY=[2., 3.], DataE=[2., 3.], UnitX='TOF')
         ads = AnalysisDataService
         A = ads['a']
         run_algorithm('CreateWorkspace', OutputWorkspace='b', DataX=[
-                      1., 2., 3.], DataY=[2., 3.], DataE=[2., 3.], UnitX='TOF')
+            1., 2., 3.], DataY=[2., 3.], DataE=[2., 3.], UnitX='TOF')
         B = ads['b']
 
         # Equality
@@ -324,7 +336,7 @@ class MatrixWorkspaceTest(unittest.TestCase):
         ads.remove('C')
         self.assertTrue('C' not in ads)
         run_algorithm('CreateWorkspace', OutputWorkspace='ca', DataX=[
-                      1., 2., 3.], DataY=[2., 3.], DataE=[2., 3.], UnitX='TOF')
+            1., 2., 3.], DataY=[2., 3.], DataE=[2., 3.], UnitX='TOF')
         C = ads['ca']
 
         C *= B
@@ -349,9 +361,9 @@ class MatrixWorkspaceTest(unittest.TestCase):
 
     def test_complex_binary_ops_do_not_leave_temporary_workspaces_behind(self):
         run_algorithm('CreateWorkspace', OutputWorkspace='ca', DataX=[
-                      1., 2., 3.], DataY=[2., 3.], DataE=[2., 3.], UnitX='TOF')
+            1., 2., 3.], DataY=[2., 3.], DataE=[2., 3.], UnitX='TOF')
         ads = AnalysisDataService
-        w1 = (ads['ca']*0.0)+1.0
+        w1 = (ads['ca'] * 0.0) + 1.0
 
         self.assertTrue('w1' in ads)
         self.assertTrue('ca' in ads)
@@ -359,7 +371,7 @@ class MatrixWorkspaceTest(unittest.TestCase):
 
     def test_history_access(self):
         run_algorithm('CreateWorkspace', OutputWorkspace='raw', DataX=[
-                      1., 2., 3.], DataY=[2., 3.], DataE=[2., 3.], UnitX='TOF')
+            1., 2., 3.], DataY=[2., 3.], DataE=[2., 3.], UnitX='TOF')
         run_algorithm('Rebin', InputWorkspace='raw', Params=[1., 0.5, 3.], OutputWorkspace='raw')
         raw = AnalysisDataService['raw']
         history = raw.getHistory()
@@ -373,7 +385,7 @@ class MatrixWorkspaceTest(unittest.TestCase):
 
     def test_setTitleAndComment(self):
         run_algorithm('CreateWorkspace', OutputWorkspace='ws1', DataX=[
-                      1., 2., 3.], DataY=[2., 3.], DataE=[2., 3.], UnitX='TOF')
+            1., 2., 3.], DataY=[2., 3.], DataE=[2., 3.], UnitX='TOF')
         ws1 = AnalysisDataService['ws1']
         title = 'test_title'
         ws1.setTitle(title)
@@ -385,9 +397,9 @@ class MatrixWorkspaceTest(unittest.TestCase):
 
     def test_setGetMonitorWS(self):
         run_algorithm('CreateWorkspace', OutputWorkspace='ws1', DataX=[
-                      1., 2., 3.], DataY=[2., 3.], DataE=[2., 3.], UnitX='TOF')
+            1., 2., 3.], DataY=[2., 3.], DataE=[2., 3.], UnitX='TOF')
         run_algorithm('CreateWorkspace', OutputWorkspace='ws_mon', DataX=[
-                      1., 2., 3.], DataY=[2., 3.], DataE=[2., 3.], UnitX='TOF')
+            1., 2., 3.], DataY=[2., 3.], DataE=[2., 3.], UnitX='TOF')
 
         ws1 = AnalysisDataService.retrieve('ws1')
         try:
@@ -434,33 +446,42 @@ class MatrixWorkspaceTest(unittest.TestCase):
 
     def test_isCommonLogBins(self):
         self.assertFalse(self._test_ws.isCommonLogBins())
-        ws=CreateSampleWorkspace('Event')
-        ws=Rebin(ws, '1,-1,10000')
+        ws = CreateSampleWorkspace('Event')
+        ws = Rebin(ws, '1,-1,10000')
         self.assertTrue(ws.isCommonLogBins())
-        ws=Rebin(ws, '1,-0.1,10000')
+        ws = Rebin(ws, '1,-0.1,10000')
         self.assertTrue(ws.isCommonLogBins())
 
     def test_hasMaskedBins(self):
         numBins = 10
-        numHist=11
+        numHist = 11
         ws = WorkspaceCreationHelper.create2DWorkspace123WithMaskedBin(numHist, numBins, 0, 1)
         self.assertTrue(ws.hasMaskedBins(0))
         self.assertFalse(ws.hasMaskedBins(1))
 
     def test_hasAnyMaskedBins(self):
         numBins = 10
-        numHist=11
+        numHist = 11
         ws = WorkspaceCreationHelper.create2DWorkspace123WithMaskedBin(numHist, numBins, 0, 1)
         self.assertTrue(ws.hasAnyMaskedBins())
 
     def test_maskedBinsIndices(self):
         numBins = 10
-        numHist=11
+        numHist = 11
         ws = WorkspaceCreationHelper.create2DWorkspace123WithMaskedBin(numHist, numBins, 0, 1)
         maskedBinsIndices = ws.maskedBinsIndices(0)
         self.assertEqual(1, len(maskedBinsIndices))
         for index in maskedBinsIndices:
             self.assertEqual(1, index)
+
+    def test_getIndicesFromDetectorIDs(self):
+        detinfo = self._test_ws.detectorInfo()
+        detIDs = detinfo.detectorIDs()  # [1, 2]
+        # from test_spectrum_retrieval we know
+        # self._test_ws.getSpectrum(1).hasDetectorID(2) == True
+        index = self._test_ws.getIndicesFromDetectorIDs([int(detIDs[1])])
+        self.assertEqual(1, index[0])
+        # index == None!
 
     def test_rebinnedOutput(self):
         rebin = WorkspaceFactory.create("RebinnedOutput", 2, 3, 2)
@@ -510,24 +531,24 @@ class MatrixWorkspaceTest(unittest.TestCase):
     def test_findY(self):
         # Check that zero is not present
         idx = self._test_ws.findY(0.)
-        self.assertEquals(idx[0],-1)
-        self.assertEquals(idx[1],-1)
+        self.assertEquals(idx[0], -1)
+        self.assertEquals(idx[1], -1)
         # Check that 5. is the first element
         idx = self._test_ws.findY(5.)
-        self.assertEquals(idx[0],0)
-        self.assertEquals(idx[1],0)
+        self.assertEquals(idx[0], 0)
+        self.assertEquals(idx[1], 0)
         # Check that no other elements are 5
         idx = self._test_ws.findY(5., (0, 1))
-        self.assertEquals(idx[0],-1)
-        self.assertEquals(idx[1],-1)
+        self.assertEquals(idx[0], -1)
+        self.assertEquals(idx[1], -1)
         # Check that 2. is the next element
         idx = self._test_ws.findY(2.)
-        self.assertEquals(idx[0],0)
-        self.assertEquals(idx[1],1)
+        self.assertEquals(idx[0], 0)
+        self.assertEquals(idx[1], 1)
         # Check that 2. is the next element
         idx = self._test_ws.findY(2., (0, 2))
-        self.assertEquals(idx[0],0)
-        self.assertEquals(idx[1],2)
+        self.assertEquals(idx[0], 0)
+        self.assertEquals(idx[1], 2)
 
 
 if __name__ == '__main__':

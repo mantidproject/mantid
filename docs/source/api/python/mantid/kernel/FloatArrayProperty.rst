@@ -1,3 +1,5 @@
+.. _mantid.kernel.FloatArrayProperty:
+
 ====================
  FloatArrayProperty
 ====================
@@ -8,7 +10,7 @@ This is a Python binding to the C++ class Mantid::Kernel::ArrayProperty.
 
 .. module:`mantid.kernel`
 
-.. autoclass:: mantid.kernel.FloatArrayProperty 
+.. autoclass:: mantid.kernel.FloatArrayProperty
     :members:
     :undoc-members:
     :inherited-members:

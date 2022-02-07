@@ -5,7 +5,6 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
-
 #include "MantidAPI/ExperimentInfo.h"
 #include "MantidAPI/Run.h"
 #include "MantidAPI/Sample.h"
@@ -21,18 +20,19 @@
 #include "MantidKernel/SingletonHolder.h"
 
 #include "MantidAPI/FileFinder.h"
-#include "MantidTestHelpers/ComponentCreationHelper.h"
-#include "MantidTestHelpers/NexusTestHelper.h"
+#include "MantidFrameworkTestHelpers/ComponentCreationHelper.h"
+#include "MantidFrameworkTestHelpers/NexusTestHelper.h"
 #include "PropertyManagerHelper.h"
 
-// clang-format off
-#include <nexus/NeXusFile.hpp>
 #include <nexus/NeXusException.hpp>
-// clang-format on
+#include <nexus/NeXusFile.hpp>
 
-#include <cxxtest/TestSuite.h>
-#include <boost/regex.hpp>
 #include <Poco/DirectoryIterator.h>
+#include <Poco/File.h>
+#include <Poco/Path.h>
+
+#include <boost/regex.hpp>
+#include <cxxtest/TestSuite.h>
 
 #include <set>
 #include <unordered_map>
@@ -98,19 +98,16 @@ public:
     TS_ASSERT_THROWS(expt.getLog("__NOTALOG__"), const std::invalid_argument &);
   }
 
-  void
-  test_GetLog_Throws_If_Instrument_Contains_LogName_Parameter_But_Log_Does_Not_Exist() {
+  void test_GetLog_Throws_If_Instrument_Contains_LogName_Parameter_But_Log_Does_Not_Exist() {
     ExperimentInfo expt;
     const std::string instPar = "temperature_log";
     const std::string actualLogName = "SAMPLE_TEMP";
     addInstrumentWithParameter(expt, instPar, actualLogName);
 
-    TS_ASSERT_THROWS(expt.getLog(instPar),
-                     const Mantid::Kernel::Exception::NotFoundError &);
+    TS_ASSERT_THROWS(expt.getLog(instPar), const Mantid::Kernel::Exception::NotFoundError &);
   }
 
-  void
-  test_GetLog_Returns_Value_Of_Log_Named_In_Instrument_Parameter_If_It_Exists_And_Actual_Log_Entry_Exists() {
+  void test_GetLog_Returns_Value_Of_Log_Named_In_Instrument_Parameter_If_It_Exists_And_Actual_Log_Entry_Exists() {
     ExperimentInfo expt;
     const std::string instPar = "temperature_log";
     const std::string actualLogName = "SAMPLE_TEMP";
@@ -137,23 +134,19 @@ public:
       TS_ASSERT_EQUALS(log->name(), actualLogName);
   }
 
-  void
-  test_GetLogAsSingleValue_Throws_If_No_Log_Or_Instrument_Parameter_Exists() {
+  void test_GetLogAsSingleValue_Throws_If_No_Log_Or_Instrument_Parameter_Exists() {
     ExperimentInfo expt;
 
-    TS_ASSERT_THROWS(expt.getLogAsSingleValue("__NOTALOG__"),
-                     const std::invalid_argument &);
+    TS_ASSERT_THROWS(expt.getLogAsSingleValue("__NOTALOG__"), const std::invalid_argument &);
   }
 
-  void
-  test_GetLogAsSingleValue_Throws_If_Instrument_Contains_LogName_Parameter_But_Log_Does_Not_Exist() {
+  void test_GetLogAsSingleValue_Throws_If_Instrument_Contains_LogName_Parameter_But_Log_Does_Not_Exist() {
     ExperimentInfo expt;
     const std::string instPar = "temperature_log";
     const std::string actualLogName = "SAMPLE_TEMP";
     addInstrumentWithParameter(expt, instPar, actualLogName);
 
-    TS_ASSERT_THROWS(expt.getLogAsSingleValue(instPar),
-                     const Mantid::Kernel::Exception::NotFoundError &);
+    TS_ASSERT_THROWS(expt.getLogAsSingleValue(instPar), const Mantid::Kernel::Exception::NotFoundError &);
   }
 
   void
@@ -170,8 +163,7 @@ public:
     TS_ASSERT_DELTA(value, logValue, 1e-12);
   }
 
-  void
-  test_GetLogAsSingleValue_Picks_Run_Log_Over_Instrument_Parameter_Of_Same_Name() {
+  void test_GetLogAsSingleValue_Picks_Run_Log_Over_Instrument_Parameter_Of_Same_Name() {
     ExperimentInfo expt;
     const std::string actualLogName = "SAMPLE_TEMP";
     const double logValue(11.5);
@@ -209,8 +201,7 @@ public:
     ExperimentInfo ws;
     ws.mutableRun().setProtonCharge(1.234);
     ws.mutableSample().setName("test");
-    ws.mutableSample().setOrientedLattice(
-        std::make_unique<OrientedLattice>(1, 2, 3, 90, 90, 90));
+    ws.mutableSample().setOrientedLattice(std::make_unique<OrientedLattice>(1, 2, 3, 90, 90, 90));
     std::shared_ptr<Instrument> inst1 = std::make_shared<Instrument>();
     inst1->setName("MyTestInst");
     ws.setInstrument(inst1);
@@ -224,8 +215,7 @@ public:
     ExperimentInfo ws;
     ws.mutableRun().setProtonCharge(1.234);
     ws.mutableSample().setName("test");
-    ws.mutableSample().setOrientedLattice(
-        std::make_unique<OrientedLattice>(1, 2, 3, 90, 90, 90));
+    ws.mutableSample().setOrientedLattice(std::make_unique<OrientedLattice>(1, 2, 3, 90, 90, 90));
     std::shared_ptr<Instrument> inst1 = std::make_shared<Instrument>();
     inst1->setName("MyTestInst");
     ws.setInstrument(inst1);
@@ -239,8 +229,7 @@ public:
     ExperimentInfo ws;
     ws.mutableRun().setProtonCharge(1.234);
     ws.mutableSample().setName("test");
-    ws.mutableSample().setOrientedLattice(
-        std::make_unique<OrientedLattice>(1, 2, 3, 90, 90, 90));
+    ws.mutableSample().setOrientedLattice(std::make_unique<OrientedLattice>(1, 2, 3, 90, 90, 90));
     std::shared_ptr<Instrument> inst1 = std::make_shared<Instrument>();
     inst1->setName("MyTestInst");
     ws.setInstrument(inst1);
@@ -278,15 +267,13 @@ public:
     ExperimentInfo_sptr exptInfo(new ExperimentInfo);
     addInstrumentWithIndirectEmodeParameter(exptInfo);
 
-    TS_ASSERT_EQUALS(exptInfo->getEMode(),
-                     Mantid::Kernel::DeltaEMode::Indirect);
+    TS_ASSERT_EQUALS(exptInfo->getEMode(), Mantid::Kernel::DeltaEMode::Indirect);
   }
 
   void test_getEFixed_throws_exception_if_detID_does_not_exist() {
     ExperimentInfo_sptr exptInfo = createTestInfoWithDirectEModeLog();
 
-    TS_ASSERT_THROWS(exptInfo->getEFixed(1),
-                     const Mantid::Kernel::Exception::NotFoundError &);
+    TS_ASSERT_THROWS(exptInfo->getEFixed(1), const Mantid::Kernel::Exception::NotFoundError &);
   }
 
   void test_correct_efixed_value_is_returned_for_direct_run() {
@@ -304,8 +291,7 @@ public:
     TS_ASSERT_THROWS(exptInfo->getEFixed(), const std::runtime_error &);
   }
 
-  void
-  test_getEfixed_throws_for_indirect_mode_when_passed_a_detector_without_parameter() {
+  void test_getEfixed_throws_for_indirect_mode_when_passed_a_detector_without_parameter() {
     ExperimentInfo_sptr exptInfo(new ExperimentInfo);
     addInstrumentWithIndirectEmodeParameter(exptInfo);
     IDetector_const_sptr det = exptInfo->getInstrument()->getDetector(3);
@@ -313,8 +299,7 @@ public:
     TS_ASSERT_THROWS(exptInfo->getEFixed(det), const std::runtime_error &);
   }
 
-  void
-  test_getEfixed_in_indirect_mode_returns_detector_level_EFixed_parameter() {
+  void test_getEfixed_in_indirect_mode_returns_detector_level_EFixed_parameter() {
     ExperimentInfo_sptr exptInfo(new ExperimentInfo);
     Instrument_sptr inst = addInstrumentWithIndirectEmodeParameter(exptInfo);
     const double test_ef(32.7);
@@ -327,8 +312,7 @@ public:
     TS_ASSERT_EQUALS(exptInfo->getEFixed(test_id), test_ef);
   }
 
-  void
-  test_getEfixed_in_indirect_mode_looks_recursively_for_Efixed_parameter() {
+  void test_getEfixed_in_indirect_mode_looks_recursively_for_Efixed_parameter() {
     ExperimentInfo_sptr exptInfo(new ExperimentInfo);
     Instrument_sptr inst = addInstrumentWithIndirectEmodeParameter(exptInfo);
     const double test_ef(32.7);
@@ -346,146 +330,9 @@ public:
     addInstrumentWithParameter(*exptInfo, "a", "b");
 
     const auto &spectrumInfo = exptInfo->spectrumInfo();
-    const auto *detGroup = dynamic_cast<const Geometry::DetectorGroup *>(
-        &spectrumInfo.detector(0));
+    const auto *detGroup = dynamic_cast<const Geometry::DetectorGroup *>(&spectrumInfo.detector(0));
     TS_ASSERT(!detGroup);
     TS_ASSERT_EQUALS(spectrumInfo.detector(0).getID(), 1);
-  }
-
-  struct fromToEntry {
-    std::string path;
-    DateAndTime from;
-    DateAndTime to;
-  };
-
-  // Test that all the IDFs contain valid-to and valid-from dates and that
-  // for a single instrument none of the valid-from dates are equal
-  void testAllDatesInIDFs() {
-    ExperimentInfo helper;
-
-    // Collect all IDF filenames and put them in a multimap where the instrument
-    // identifier is the key
-    std::unordered_multimap<std::string, fromToEntry> idfFiles;
-    std::unordered_set<std::string> idfIdentifiers;
-
-    boost::regex regex(".*_Definition.*\\.xml", boost::regex_constants::icase);
-    Poco::DirectoryIterator end_iter;
-    for (Poco::DirectoryIterator dir_itr(ConfigService::Instance().getString(
-             "instrumentDefinition.directory"));
-         dir_itr != end_iter; ++dir_itr) {
-      if (!Poco::File(dir_itr->path()).isFile())
-        continue;
-
-      std::string l_filenamePart = Poco::Path(dir_itr->path()).getFileName();
-
-      if (boost::regex_match(l_filenamePart, regex)) {
-        std::string validFrom, validTo;
-        helper.getValidFromTo(dir_itr->path(), validFrom, validTo);
-
-        size_t found;
-        found = l_filenamePart.find("_Definition");
-        fromToEntry ft;
-        ft.path = dir_itr->path();
-        ft.from.setFromISO8601(validFrom);
-        // Valid TO is optional
-        if (validTo.length() > 0)
-          ft.to.setFromISO8601(validTo);
-        else
-          ft.to.setFromISO8601("2100-01-01T00:00:00");
-
-        idfFiles.emplace(l_filenamePart.substr(0, found), ft);
-        idfIdentifiers.insert(l_filenamePart.substr(0, found));
-      }
-    }
-
-    // iterator to browse through the multimap: paramInfoFromIDF
-    std::unordered_multimap<std::string, fromToEntry>::const_iterator it1, it2;
-    std::pair<std::unordered_multimap<std::string, fromToEntry>::iterator,
-              std::unordered_multimap<std::string, fromToEntry>::iterator>
-        ret;
-
-    for (const auto &idfIdentifier : idfIdentifiers) {
-      ret = idfFiles.equal_range(idfIdentifier);
-      for (it1 = ret.first; it1 != ret.second; ++it1) {
-        for (it2 = ret.first; it2 != ret.second; ++it2) {
-          if (it1 != it2) {
-            // some more intelligent stuff here later
-            std::stringstream messageBuffer;
-            messageBuffer
-                << "Two IDFs for one instrument have equal valid-from dates"
-                << "IDFs are: " << it1->first << " and " << it2->first
-                << " Date One: " << it1->second.from.toFormattedString()
-                << " Date Two: " << it2->second.from.toFormattedString();
-            TSM_ASSERT_DIFFERS(messageBuffer.str(), it2->second.from,
-                               it1->second.from);
-          }
-        }
-      }
-    }
-  }
-
-  //
-  void testHelperFunctions() {
-    ConfigService::Instance().updateFacilities();
-    ExperimentInfo helper;
-    std::string boevs =
-        helper.getInstrumentFilename("BIOSANS", "2100-01-31 22:59:59");
-    TS_ASSERT(!boevs.empty());
-  }
-
-  //
-  void testHelper_TOPAZ_No_To_Date() {
-    ExperimentInfo helper;
-    std::string boevs =
-        helper.getInstrumentFilename("TOPAZ", "2011-01-31 22:59:59");
-    TS_ASSERT(!boevs.empty());
-  }
-
-  void testHelper_ValidDateOverlap() {
-    const std::string instDir =
-        ConfigService::Instance().getInstrumentDirectory();
-    const std::string testDir = instDir + "unit_testing";
-    ConfigService::Instance().setString("instrumentDefinition.directory",
-                                        testDir);
-    ExperimentInfo helper;
-    std::string boevs =
-        helper.getInstrumentFilename("ARGUS", "1909-01-31 22:59:59");
-    TS_ASSERT_DIFFERS(boevs.find("TEST1_ValidDateOverlap"), std::string::npos);
-    boevs = helper.getInstrumentFilename("ARGUS", "1909-03-31 22:59:59");
-    TS_ASSERT_DIFFERS(boevs.find("TEST2_ValidDateOverlap"), std::string::npos);
-    boevs = helper.getInstrumentFilename("ARGUS", "1909-05-31 22:59:59");
-    TS_ASSERT_DIFFERS(boevs.find("TEST1_ValidDateOverlap"), std::string::npos);
-    ConfigService::Instance().setString("instrumentDefinition.directory",
-                                        instDir);
-
-    std::vector<std::string> formats = {"xml"};
-    std::vector<std::string> dirs;
-    dirs.emplace_back(testDir);
-    std::vector<std::string> fnames = helper.getResourceFilenames(
-        "ARGUS", formats, dirs, "1909-01-31 22:59:59");
-    TS_ASSERT_DIFFERS(fnames[0].find("TEST1_ValidDateOverlap"),
-                      std::string::npos);
-    TS_ASSERT_EQUALS(fnames.size(), 1);
-    fnames = helper.getResourceFilenames("ARGUS", formats, dirs,
-                                         "1909-03-31 22:59:59");
-    TS_ASSERT_DIFFERS(fnames[0].find("TEST2_ValidDateOverlap"),
-                      std::string::npos);
-    TS_ASSERT_DIFFERS(fnames[1].find("TEST1_ValidDateOverlap"),
-                      std::string::npos);
-    fnames = helper.getResourceFilenames("ARGUS", formats, dirs,
-                                         "1909-05-31 22:59:59");
-    TS_ASSERT_DIFFERS(fnames[0].find("TEST1_ValidDateOverlap"),
-                      std::string::npos);
-    TS_ASSERT_EQUALS(fnames.size(), 1);
-  }
-
-  void test_nexus_geometry_getInstrumentFilename() {
-    const std::string instrumentName = "LOKI";
-    ExperimentInfo info;
-    const auto path = info.getInstrumentFilename(instrumentName, "");
-    TS_ASSERT(!path.empty());
-    TS_ASSERT(
-        boost::regex_match(path, boost::regex(".*LOKI_Definition\\.hdf5$")));
   }
 
   void test_nexus() {
@@ -505,12 +352,10 @@ public:
     ExperimentInfo ws2;
     std::string parameterStr;
     th.reopenFile();
-    TS_ASSERT_THROWS_NOTHING(
-        ws2.loadExperimentInfoNexus(filename, th.file.get(), parameterStr));
+    TS_ASSERT_THROWS_NOTHING(ws2.loadExperimentInfoNexus(filename, th.file.get(), parameterStr));
     Instrument_const_sptr inst = ws2.getInstrument();
     TS_ASSERT_EQUALS(inst->getName(), "GEM");
-    TS_ASSERT(inst->getFilename().find("GEM_Definition.xml", 0) !=
-              std::string::npos);
+    TS_ASSERT(inst->getFilename().find("GEM_Definition.xml", 0) != std::string::npos);
     TS_ASSERT_EQUALS(parameterStr, "");
   }
 
@@ -531,8 +376,7 @@ public:
     ExperimentInfo ws2;
     std::string parameterStr;
     th.reopenFile();
-    TS_ASSERT_THROWS_NOTHING(
-        ws2.loadExperimentInfoNexus(filename, th.file.get(), parameterStr));
+    TS_ASSERT_THROWS_NOTHING(ws2.loadExperimentInfoNexus(filename, th.file.get(), parameterStr));
     Instrument_const_sptr inst = ws2.getInstrument();
     TS_ASSERT_EQUALS(inst->getName(), "");
     TS_ASSERT_EQUALS(parameterStr, "");
@@ -564,11 +408,9 @@ public:
 
     ExperimentInfo other;
     std::string InstrParameters;
-    TS_ASSERT_THROWS_NOTHING(other.loadExperimentInfoNexus(
-        filename, th.file.get(), InstrParameters));
+    TS_ASSERT_THROWS_NOTHING(other.loadExperimentInfoNexus(filename, th.file.get(), InstrParameters));
 
-    std::vector<double> wMatrRestored =
-        other.run().getPropertyValueAsType<std::vector<double>>("W_MATRIX");
+    std::vector<double> wMatrRestored = other.run().getPropertyValueAsType<std::vector<double>>("W_MATRIX");
 
     for (int i = 0; i < 9; i++) {
       TS_ASSERT_DELTA(wTrVector[i], wMatrRestored[i], 1.e-9);
@@ -591,8 +433,7 @@ public:
 
     // Load the Nexus IDF info
     std::string params;
-    TS_ASSERT_THROWS_NOTHING(
-        ei.loadInstrumentInfoNexus(testFile, &nxFile, params));
+    TS_ASSERT_THROWS_NOTHING(ei.loadInstrumentInfoNexus(testFile, &nxFile, params));
     Instrument_const_sptr inst = ei.getInstrument();
     TS_ASSERT_EQUALS(inst->getName(), "LOQ"); // Check instrument name
     TS_ASSERT_EQUALS(params.size(), 613);     // Check size of parameter string
@@ -633,11 +474,9 @@ public:
     // Check property can be obtained as const_sptr or sptr
     ExperimentInfo_const_sptr eiConst;
     ExperimentInfo_sptr eiNonConst;
-    TS_ASSERT_THROWS_NOTHING(
-        eiConst = manager.getValue<ExperimentInfo_const_sptr>(eiName));
+    TS_ASSERT_THROWS_NOTHING(eiConst = manager.getValue<ExperimentInfo_const_sptr>(eiName));
     TS_ASSERT(eiConst != nullptr);
-    TS_ASSERT_THROWS_NOTHING(eiNonConst =
-                                 manager.getValue<ExperimentInfo_sptr>(eiName));
+    TS_ASSERT_THROWS_NOTHING(eiNonConst = manager.getValue<ExperimentInfo_sptr>(eiName));
     TS_ASSERT(eiNonConst != nullptr);
     TS_ASSERT_EQUALS(eiConst, eiNonConst);
 
@@ -682,8 +521,7 @@ public:
 
     const int nPixels = 10;
     auto inst = ComponentCreationHelper::createTestInstrumentRectangular(
-        1 /*n banks*/, nPixels /*10 by 10 dets in bank*/,
-        1 /*sample-bank distance*/);
+        1 /*n banks*/, nPixels /*10 by 10 dets in bank*/, 1 /*sample-bank distance*/);
 
     ExperimentInfo expInfo;
     expInfo.setInstrument(inst);
@@ -702,8 +540,7 @@ public:
 
     const int nPixels = 10;
     auto inst = ComponentCreationHelper::createTestInstrumentRectangular(
-        1 /*n banks*/, nPixels /*10 by 10 dets in bank*/,
-        1 /*sample-bank distance*/);
+        1 /*n banks*/, nPixels /*10 by 10 dets in bank*/, 1 /*sample-bank distance*/);
 
     ExperimentInfo expInfo;
     expInfo.setInstrument(inst);
@@ -712,31 +549,24 @@ public:
     // Test the single bank
     auto bank = inst->getComponentByName("bank1");
     auto bankID = bank->getComponentID();
-    auto allBankDetectorIndexes =
-        compInfo.detectorsInSubtree(compInfo.indexOf(bankID));
+    auto allBankDetectorIndexes = compInfo.detectorsInSubtree(compInfo.indexOf(bankID));
 
-    TSM_ASSERT_EQUALS("Should have all detectors under this bank",
-                      allBankDetectorIndexes.size(),
+    TSM_ASSERT_EQUALS("Should have all detectors under this bank", allBankDetectorIndexes.size(),
                       detInfo.size()); //
 
     // Test one of the bank rows
     auto bankRowID =
-        std::dynamic_pointer_cast<const Mantid::Geometry::ICompAssembly>(bank)
-            ->getChild(0)
-            ->getComponentID();
-    auto allRowDetectorIndexes =
-        compInfo.detectorsInSubtree(compInfo.indexOf(bankRowID));
+        std::dynamic_pointer_cast<const Mantid::Geometry::ICompAssembly>(bank)->getChild(0)->getComponentID();
+    auto allRowDetectorIndexes = compInfo.detectorsInSubtree(compInfo.indexOf(bankRowID));
 
-    TSM_ASSERT_EQUALS("Should have all detectors under this row",
-                      allRowDetectorIndexes.size(),
+    TSM_ASSERT_EQUALS("Should have all detectors under this row", allRowDetectorIndexes.size(),
                       10); //
   }
   void test_component_info_detector_indices_for_detector_component_types() {
 
     const int nPixels = 10;
     auto inst = ComponentCreationHelper::createTestInstrumentRectangular(
-        1 /*n banks*/, nPixels /*10 by 10 dets in bank*/,
-        1 /*sample-bank distance*/);
+        1 /*n banks*/, nPixels /*10 by 10 dets in bank*/, 1 /*sample-bank distance*/);
 
     ExperimentInfo expInfo;
     expInfo.setInstrument(inst);
@@ -744,32 +574,24 @@ public:
     const auto &detInfo = expInfo.detectorInfo();
     // Test one of the detectors
     const auto targetDetectorIndex = 0;
-    const auto detCompId =
-        detInfo.detector(targetDetectorIndex).getComponentID();
-    TSM_ASSERT_EQUALS(
-        "Detector should report the detector index of itself",
-        compInfo.detectorsInSubtree(compInfo.indexOf(detCompId)).size(), 1);
-    TS_ASSERT_EQUALS(
-        compInfo.detectorsInSubtree(compInfo.indexOf(detCompId))[0],
-        targetDetectorIndex);
+    const auto detCompId = detInfo.detector(targetDetectorIndex).getComponentID();
+    TSM_ASSERT_EQUALS("Detector should report the detector index of itself",
+                      compInfo.detectorsInSubtree(compInfo.indexOf(detCompId)).size(), 1);
+    TS_ASSERT_EQUALS(compInfo.detectorsInSubtree(compInfo.indexOf(detCompId))[0], targetDetectorIndex);
 
-    size_t detectorIndex =
-        0; // interchangeable as either component or detector index
+    size_t detectorIndex = 0; // interchangeable as either component or detector index
     TSM_ASSERT_EQUALS("Gurantee violated of detectorindex == componentIndex",
-                      compInfo.detectorsInSubtree(detectorIndex),
-                      std::vector<size_t>{detectorIndex});
+                      compInfo.detectorsInSubtree(detectorIndex), std::vector<size_t>{detectorIndex});
 
     detectorIndex = 99; // interchangeable as either component or detector index
     TSM_ASSERT_EQUALS("Gurantee violated of detectorindex == componentIndex",
-                      compInfo.detectorsInSubtree(detectorIndex),
-                      std::vector<size_t>{detectorIndex});
+                      compInfo.detectorsInSubtree(detectorIndex), std::vector<size_t>{detectorIndex});
   }
 
   void test_component_info_detector_indices_for_generic_component_types() {
     const int nPixels = 10;
     auto inst = ComponentCreationHelper::createTestInstrumentRectangular(
-        1 /*n banks*/, nPixels /*10 by 10 dets in bank*/,
-        1 /*sample-bank distance*/);
+        1 /*n banks*/, nPixels /*10 by 10 dets in bank*/, 1 /*sample-bank distance*/);
 
     ExperimentInfo expInfo;
     expInfo.setInstrument(inst);
@@ -777,21 +599,18 @@ public:
 
     // Test non-detector, non-assembly components
     auto sampleId = inst->getComponentByName("sample")->getComponentID();
-    TSM_ASSERT_EQUALS(
-        "Sample should not report any nested detector indexes",
-        compInfo.detectorsInSubtree(compInfo.indexOf(sampleId)).size(), 0);
+    TSM_ASSERT_EQUALS("Sample should not report any nested detector indexes",
+                      compInfo.detectorsInSubtree(compInfo.indexOf(sampleId)).size(), 0);
 
     auto sourceId = inst->getComponentByName("source")->getComponentID();
-    TSM_ASSERT_EQUALS(
-        "Source should not report any nested detector indexes",
-        compInfo.detectorsInSubtree(compInfo.indexOf(sourceId)).size(), 0);
+    TSM_ASSERT_EQUALS("Source should not report any nested detector indexes",
+                      compInfo.detectorsInSubtree(compInfo.indexOf(sourceId)).size(), 0);
   }
 
   void test_component_info_source_sample_l1() {
 
-    auto inst = ComponentCreationHelper::createMinimalInstrument(
-        V3D{-2, 0, 0} /*source*/, V3D{10, 0, 0} /*sample*/,
-        V3D{12, 0, 0} /*detector*/);
+    auto inst = ComponentCreationHelper::createMinimalInstrument(V3D{-2, 0, 0} /*source*/, V3D{10, 0, 0} /*sample*/,
+                                                                 V3D{12, 0, 0} /*detector*/);
 
     ExperimentInfo expInfo;
     expInfo.setInstrument(inst);
@@ -808,8 +627,7 @@ public:
 
     const int nPixels = 10;
     auto inst = ComponentCreationHelper::createTestInstrumentRectangular(
-        1 /*n banks*/, nPixels /*10 by 10 dets in bank*/,
-        1 /*sample-bank distance*/);
+        1 /*n banks*/, nPixels /*10 by 10 dets in bank*/, 1 /*sample-bank distance*/);
 
     ExperimentInfo expInfo;
     expInfo.setInstrument(inst);
@@ -817,18 +635,14 @@ public:
 
     // Test non-detector, non-assembly components
     auto sampleId = inst->getComponentByName("sample")->getComponentID();
-    TS_ASSERT_EQUALS(
-        compInfo.componentsInSubtree(compInfo.indexOf(sampleId)).size(), 1);
+    TS_ASSERT_EQUALS(compInfo.componentsInSubtree(compInfo.indexOf(sampleId)).size(), 1);
 
     auto sourceId = inst->getComponentByName("source")->getComponentID();
-    TS_ASSERT_EQUALS(
-        compInfo.componentsInSubtree(compInfo.indexOf(sourceId)).size(), 1);
+    TS_ASSERT_EQUALS(compInfo.componentsInSubtree(compInfo.indexOf(sourceId)).size(), 1);
 
     auto bankId = inst->getComponentByName("bank1")->getComponentID();
-    TSM_ASSERT_EQUALS(
-        "Bank should yield entire sub-tree of component indices",
-        compInfo.componentsInSubtree(compInfo.indexOf(bankId)).size(),
-        (nPixels * nPixels) + nPixels + 1);
+    TSM_ASSERT_EQUALS("Bank should yield entire sub-tree of component indices",
+                      compInfo.componentsInSubtree(compInfo.indexOf(bankId)).size(), (nPixels * nPixels) + nPixels + 1);
 
     auto instrumentId = inst->getComponentID();
     size_t nComponents = nPixels * nPixels;
@@ -837,19 +651,15 @@ public:
     nComponents += 1;       // source
     nComponents += 1;       // sample
     nComponents += 1;       // self
-    TSM_ASSERT_EQUALS(
-        "Instrument should yield entire tree of component indices",
-        compInfo.componentsInSubtree(compInfo.indexOf(instrumentId)).size(),
-        nComponents);
+    TSM_ASSERT_EQUALS("Instrument should yield entire tree of component indices",
+                      compInfo.componentsInSubtree(compInfo.indexOf(instrumentId)).size(), nComponents);
 
-    TS_ASSERT_EQUALS(compInfo.indexOf(inst->getComponentID()),
-                     compInfo.parent(compInfo.indexOf(bankId)));
+    TS_ASSERT_EQUALS(compInfo.indexOf(inst->getComponentID()), compInfo.parent(compInfo.indexOf(bankId)));
   }
 
   void test_readParameterMap_semicolons_in_value() {
-    auto inst = ComponentCreationHelper::createMinimalInstrument(
-        V3D{-2, 0, 0} /*source*/, V3D{10, 0, 0} /*sample*/,
-        V3D{12, 0, 0} /*detector*/);
+    auto inst = ComponentCreationHelper::createMinimalInstrument(V3D{-2, 0, 0} /*source*/, V3D{10, 0, 0} /*sample*/,
+                                                                 V3D{12, 0, 0} /*detector*/);
     ExperimentInfo expInfo;
     expInfo.setInstrument(inst);
     expInfo.readParameterMap("detID:1;string;par;11;22;33;44");
@@ -860,16 +670,13 @@ public:
   }
 
 private:
-  void addInstrumentWithParameter(ExperimentInfo &expt, const std::string &name,
-                                  const std::string &value) {
-    Instrument_sptr inst =
-        ComponentCreationHelper::createTestInstrumentCylindrical(1);
+  void addInstrumentWithParameter(ExperimentInfo &expt, const std::string &name, const std::string &value) {
+    Instrument_sptr inst = ComponentCreationHelper::createTestInstrumentCylindrical(1);
     expt.setInstrument(inst);
     expt.instrumentParameters().addString(inst.get(), name, value);
   }
 
-  void addRunWithLog(ExperimentInfo &expt, const std::string &name,
-                     const double value) {
+  void addRunWithLog(ExperimentInfo &expt, const std::string &name, const double value) {
     expt.mutableRun().addProperty(name, value);
   }
 
@@ -879,17 +686,14 @@ private:
     return exptInfo;
   }
 
-  Instrument_sptr
-  addInstrumentWithIndirectEmodeParameter(const ExperimentInfo_sptr &exptInfo) {
+  Instrument_sptr addInstrumentWithIndirectEmodeParameter(const ExperimentInfo_sptr &exptInfo) {
     Instrument_sptr inst = addInstrument(exptInfo);
-    exptInfo->instrumentParameters().addString(inst.get(), "deltaE-mode",
-                                               "indirect");
+    exptInfo->instrumentParameters().addString(inst.get(), "deltaE-mode", "indirect");
     return inst;
   }
 
   Instrument_sptr addInstrument(const ExperimentInfo_sptr &exptInfo) {
-    Instrument_sptr inst =
-        ComponentCreationHelper::createTestInstrumentCylindrical(1);
+    Instrument_sptr inst = ComponentCreationHelper::createTestInstrumentCylindrical(1);
     exptInfo->setInstrument(inst);
     return inst;
   }
@@ -903,26 +707,21 @@ private:
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static ExperimentInfoTestPerformance *createSuite() {
-    return new ExperimentInfoTestPerformance();
-  }
-  static void destroySuite(ExperimentInfoTestPerformance *suite) {
-    delete suite;
-  }
+  static ExperimentInfoTestPerformance *createSuite() { return new ExperimentInfoTestPerformance(); }
+  static void destroySuite(ExperimentInfoTestPerformance *suite) { delete suite; }
 
   ExperimentInfoTestPerformance() {
 
     const int nPixels = 1000;
-    m_bareInstrument = ComponentCreationHelper::createTestInstrumentRectangular(
-        1 /*n banks*/, nPixels, 1 /*sample-bank distance*/);
+    m_bareInstrument =
+        ComponentCreationHelper::createTestInstrumentRectangular(1 /*n banks*/, nPixels, 1 /*sample-bank distance*/);
 
     ExperimentInfo tmp;
     tmp.setInstrument(m_bareInstrument);
     m_provisionedInstrument = tmp.getInstrument();
   }
 
-  void
-  test_setInstrument_when_instrument_lacks_detectorInfo_and_componentInfo() {
+  void test_setInstrument_when_instrument_lacks_detectorInfo_and_componentInfo() {
     /*
      * This is similar to what will happen during LoadEmptyInstrument
      */

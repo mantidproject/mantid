@@ -8,9 +8,9 @@
 
 #include "MantidAPI/MatrixWorkspaceMDIterator.h"
 #include "MantidAPI/SpectrumInfo.h"
+#include "MantidFrameworkTestHelpers/FakeObjects.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/Detector.h"
-#include "MantidTestHelpers/FakeObjects.h"
 
 #include <cxxtest/TestSuite.h>
 
@@ -42,8 +42,7 @@ public:
     // number
     for (size_t i = 0; i < ws->getNumberHistograms(); ++i) {
       // Create a detector for each spectra
-      Detector *det =
-          new Detector("pixel", static_cast<detid_t>(i), inst.get());
+      Detector *det = new Detector("pixel", static_cast<detid_t>(i), inst.get());
       inst->add(det);
       inst->markAsDetector(det);
       ws->getSpectrum(i).addDetectorID(static_cast<detid_t>(i));

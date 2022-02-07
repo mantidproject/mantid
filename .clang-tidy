@@ -1,0 +1,28 @@
+# Yaml file format
+Checks: >
+  *,
+  -abseil-*,-android-*,-altera-*,-fuchsia-*,-llvmlibc-*,-objc-*,
+  -google-build-using-namespace,
+  -google-readability-braces-around-statements,-hicpp-braces-around-statements,-readability-braces-around-statements,
+  -modernize-use-trailing-return-type,
+  -readability-implicit-bool-conversion
+
+# Skip the following family of checks (for perf as we don't touch these libs at all):
+# abseil-*
+# android-*
+# altera-*
+# fuchsia-*
+# llvmlibc-*
+# objc-*
+
+# The following checks are additionally disabled above:
+# -google-build-using-namespace                 Useful for headers, but we can't filter out .cpp where it's used frequently
+
+# -google-readability-braces-around-statements  We use if blocks without braces throughout
+# -readability-braces-around-statements         Ditto
+# -hicpp-braces-around-statements               Ditto
+
+# -modernize-use-trailing-return-type           We use the old style throughout
+
+# -readability-implicit-bool-conversion         Allow if(!ptr) rather than (ptr==nullptr)
+

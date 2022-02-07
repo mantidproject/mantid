@@ -28,29 +28,22 @@ DEFINE_IPROPERTYMANAGER_GETVALUE(std::vector<double>)
 DEFINE_IPROPERTYMANAGER_GETVALUE(std::vector<std::string>)
 DEFINE_IPROPERTYMANAGER_GETVALUE(std::vector<std::vector<std::string>>)
 
-namespace Mantid {
-namespace Kernel {
+namespace Mantid::Kernel {
 // This template implementation has been left in because although you can't
 // assign to an existing string
 // via the getProperty() method, you can construct a local variable by saying,
 // e.g.: std::string s = getProperty("myProperty")
-template <>
-DLLExport std::string
-IPropertyManager::getValue<std::string>(const std::string &name) const {
+template <> DLLExport std::string IPropertyManager::getValue<std::string>(const std::string &name) const {
   return getPropertyValue(name);
 }
 
-template <>
-DLLExport Property *
-IPropertyManager::getValue<Property *>(const std::string &name) const {
+template <> DLLExport Property *IPropertyManager::getValue<Property *>(const std::string &name) const {
   return getPointerToProperty(name);
 }
 
 // If a string is given in the argument, we can be more flexible
 template <>
-IPropertyManager *
-IPropertyManager::setProperty<std::string>(const std::string &name,
-                                           const std::string &value) {
+IPropertyManager *IPropertyManager::setProperty<std::string>(const std::string &name, const std::string &value) {
   this->setPropertyValue(name, value);
   return this;
 }
@@ -61,8 +54,7 @@ IPropertyManager::setProperty<std::string>(const std::string &name,
  */
 bool IPropertyManager::existsProperty(const std::string &name) const {
   auto props = this->getProperties();
-  for (std::vector<Property *>::const_iterator prop = props.begin();
-       prop != props.end(); ++prop) {
+  for (std::vector<Property *>::const_iterator prop = props.begin(); prop != props.end(); ++prop) {
     if (name == (*prop)->name())
       return true;
   }
@@ -89,8 +81,7 @@ void IPropertyManager::updatePropertyValues(const IPropertyManager &other) {
  * property
  * @param name :: property name
  * @param settings :: IPropertySettings     */
-void IPropertyManager::setPropertySettings(
-    const std::string &name, std::unique_ptr<IPropertySettings> settings) {
+void IPropertyManager::setPropertySettings(const std::string &name, std::unique_ptr<IPropertySettings> settings) {
   Property *prop = getPointerToProperty(name);
   if (prop)
     prop->setSettings(std::move(settings));
@@ -100,8 +91,7 @@ void IPropertyManager::setPropertySettings(
  * Get all properties in a group.
  * @param group Name of a group.
  */
-std::vector<Property *>
-IPropertyManager::getPropertiesInGroup(const std::string &group) const {
+std::vector<Property *> IPropertyManager::getPropertiesInGroup(const std::string &group) const {
   auto props = getProperties();
   for (auto prop = props.begin(); prop != props.end();) {
     if ((**prop).getGroup() == group) {
@@ -115,58 +105,26 @@ IPropertyManager::getPropertiesInGroup(const std::string &group) const {
 
 // Definitions for TypedValue cast operators
 // Have to come after getValue definitions above to keep MSVS2010 happy
-IPropertyManager::TypedValue::operator int16_t() {
-  return pm.getValue<int16_t>(prop);
-}
-IPropertyManager::TypedValue::operator uint16_t() {
-  return pm.getValue<uint16_t>(prop);
-}
-IPropertyManager::TypedValue::operator int32_t() {
-  return pm.getValue<int32_t>(prop);
-}
-IPropertyManager::TypedValue::operator uint32_t() {
-  return pm.getValue<uint32_t>(prop);
-}
-IPropertyManager::TypedValue::operator int64_t() {
-  return pm.getValue<int64_t>(prop);
-}
-IPropertyManager::TypedValue::operator uint64_t() {
-  return pm.getValue<uint64_t>(prop);
-}
-IPropertyManager::TypedValue::operator bool() {
-  return pm.getValue<bool>(prop);
-}
-IPropertyManager::TypedValue::operator double() {
-  return pm.getValue<double>(prop);
-}
-IPropertyManager::TypedValue::operator std::string() {
-  return pm.getPropertyValue(prop);
-}
-IPropertyManager::TypedValue::operator OptionalBool() {
-  return pm.getValue<OptionalBool>(prop);
-}
-IPropertyManager::TypedValue::operator Property *() {
-  return pm.getPointerToProperty(prop);
-}
+IPropertyManager::TypedValue::operator int16_t() { return pm.getValue<int16_t>(prop); }
+IPropertyManager::TypedValue::operator uint16_t() { return pm.getValue<uint16_t>(prop); }
+IPropertyManager::TypedValue::operator int32_t() { return pm.getValue<int32_t>(prop); }
+IPropertyManager::TypedValue::operator uint32_t() { return pm.getValue<uint32_t>(prop); }
+IPropertyManager::TypedValue::operator int64_t() { return pm.getValue<int64_t>(prop); }
+IPropertyManager::TypedValue::operator uint64_t() { return pm.getValue<uint64_t>(prop); }
+IPropertyManager::TypedValue::operator bool() { return pm.getValue<bool>(prop); }
+IPropertyManager::TypedValue::operator double() { return pm.getValue<double>(prop); }
+IPropertyManager::TypedValue::operator std::string() { return pm.getPropertyValue(prop); }
+IPropertyManager::TypedValue::operator OptionalBool() { return pm.getValue<OptionalBool>(prop); }
+IPropertyManager::TypedValue::operator Property *() { return pm.getPointerToProperty(prop); }
 
 #ifdef __APPLE__
-} // namespace Kernel
-} // namespace Mantid
-// These must precede the operator() declaration
+// These must precede the operator() declaration, temporarily switch batch to global namespace
+}
 DEFINE_IPROPERTYMANAGER_GETVALUE(unsigned long);
 DEFINE_IPROPERTYMANAGER_GETVALUE(std::vector<unsigned long>);
-namespace Mantid {
-namespace Kernel {
 // Intel 64-bit size_t
-IPropertyManager::TypedValue::operator unsigned long() {
-  return pm.getValue<unsigned long>(prop);
-}
-} // namespace Kernel
-} // namespace Mantid
-
-#else
-} // namespace Kernel
-} // namespace Mantid
+namespace Mantid::Kernel {
+IPropertyManager::TypedValue::operator unsigned long() { return pm.getValue<unsigned long>(prop); }
 #endif
-
+} // namespace Mantid::Kernel
 /// @endcond

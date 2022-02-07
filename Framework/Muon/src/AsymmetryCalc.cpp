@@ -15,8 +15,7 @@
 #include <cmath>
 #include <vector>
 
-namespace Mantid {
-namespace Algorithms {
+namespace Mantid::Algorithms {
 
 using namespace Kernel;
 using API::Progress;
@@ -30,20 +29,14 @@ DECLARE_ALGORITHM(AsymmetryCalc)
  */
 void AsymmetryCalc::init() {
 
-  declareProperty(std::make_unique<API::WorkspaceProperty<>>(
-                      "InputWorkspace", "", Direction::Input),
+  declareProperty(std::make_unique<API::WorkspaceProperty<>>("InputWorkspace", "", Direction::Input),
                   "Name of the input workspace");
-  declareProperty(
-      std::make_unique<API::WorkspaceProperty<>>("OutputWorkspace", "",
-                                                 Direction::Output),
-      "The name of the workspace to be created as the output of the algorithm");
+  declareProperty(std::make_unique<API::WorkspaceProperty<>>("OutputWorkspace", "", Direction::Output),
+                  "The name of the workspace to be created as the output of the algorithm");
 
-  declareProperty(std::make_unique<ArrayProperty<int>>("ForwardSpectra"),
-                  "The spectra numbers of the forward group");
-  declareProperty(std::make_unique<ArrayProperty<int>>("BackwardSpectra"),
-                  "The spectra numbers of the backward group");
-  declareProperty("Alpha", 1.0, "The balance parameter (default 1)",
-                  Direction::Input);
+  declareProperty(std::make_unique<ArrayProperty<int>>("ForwardSpectra"), "The spectra numbers of the forward group");
+  declareProperty(std::make_unique<ArrayProperty<int>>("BackwardSpectra"), "The spectra numbers of the backward group");
+  declareProperty("Alpha", 1.0, "The balance parameter (default 1)", Direction::Input);
 }
 
 //----------------------------------------------------------------------------------------------
@@ -60,14 +53,12 @@ std::map<std::string, std::string> AsymmetryCalc::validateInputs() {
   if (inputWS) {
     auto list = inputWS->getIndicesFromSpectra(forwd);
     if (forwd.size() != list.size()) {
-      result["ForwardSpectra"] =
-          "Some of the spectra can not be found in the input workspace";
+      result["ForwardSpectra"] = "Some of the spectra can not be found in the input workspace";
     }
 
     list = inputWS->getIndicesFromSpectra(backwd);
     if (backwd.size() != list.size()) {
-      result["BackwardSpectra"] =
-          "Some of the spectra can not be found in the input workspace";
+      result["BackwardSpectra"] = "Some of the spectra can not be found in the input workspace";
     }
   }
   return result;
@@ -93,7 +84,7 @@ void AsymmetryCalc::exec() {
     // grouped
 
     // First group spectra from the backward list leaving the rest ungrouped
-    API::IAlgorithm_sptr group = createChildAlgorithm("GroupDetectors");
+    auto group = createChildAlgorithm("GroupDetectors");
     group->setProperty("InputWorkspace", inputWS);
     group->setProperty("SpectraList", backward_list);
     group->setProperty("KeepUngroupedSpectra", true);
@@ -133,8 +124,7 @@ void AsymmetryCalc::exec() {
   assert(tmpWS->blocksize() == blocksize);
 
   // Create a point data workspace with only one spectra for forward
-  auto outputWS = DataObjects::create<API::HistoWorkspace>(
-      *inputWS, 1, tmpWS->points(forward));
+  auto outputWS = DataObjects::create<API::HistoWorkspace>(*inputWS, 1, tmpWS->points(forward));
   outputWS->getSpectrum(0).setDetectorID(static_cast<detid_t>(1));
 
   // Calculate asymmetry for each time bin
@@ -173,5 +163,4 @@ void AsymmetryCalc::exec() {
   setProperty("OutputWorkspace", std::move(outputWS));
 }
 
-} // namespace Algorithms
-} // namespace Mantid
+} // namespace Mantid::Algorithms

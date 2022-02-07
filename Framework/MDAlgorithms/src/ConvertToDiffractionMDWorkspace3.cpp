@@ -20,6 +20,8 @@
 #include "MantidMDAlgorithms/MDTransfFactory.h"
 #include "MantidMDAlgorithms/MDWSTransform.h"
 
+#include <boost/math/special_functions/sign.hpp>
+
 #include <algorithm>
 #include <limits>
 
@@ -28,8 +30,7 @@ using namespace Mantid::Kernel;
 using namespace Mantid::DataObjects;
 using namespace Mantid::Geometry;
 
-namespace Mantid {
-namespace MDAlgorithms {
+namespace Mantid::MDAlgorithms {
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(ConvertToDiffractionMDWorkspace3)
@@ -42,12 +43,11 @@ void ConvertToDiffractionMDWorkspace3::init() {
   BaseConvertToDiffractionMDWorkspace::init();
 
   std::vector<double> extents;
-  declareProperty(
-      std::make_unique<ArrayProperty<double>>("Extents", std::move(extents)),
-      "A comma separated list of min, max for each dimension,\n"
-      "specifying the extents of each dimension. Optional, default "
-      "will use ConvertToMDMinMaxLocal to calculate extents for each "
-      "dimension.");
+  declareProperty(std::make_unique<ArrayProperty<double>>("Extents", std::move(extents)),
+                  "A comma separated list of min, max for each dimension,\n"
+                  "specifying the extents of each dimension. Optional, default "
+                  "will use ConvertToMDMinMaxLocal to calculate extents for each "
+                  "dimension.");
   setPropertyGroup("Extents", getBoxSettingsGroupName());
 }
 
@@ -61,9 +61,8 @@ void ConvertToDiffractionMDWorkspace3::init() {
  * @return minVal and maxVal -- two vectors with minimal and maximal values of
  *the momentums in the target workspace.
  */
-void ConvertToDiffractionMDWorkspace3::convertExtents(
-    const std::vector<double> &Extents, std::vector<double> &minVal,
-    std::vector<double> &maxVal) {
+void ConvertToDiffractionMDWorkspace3::convertExtents(const std::vector<double> &Extents, std::vector<double> &minVal,
+                                                      std::vector<double> &maxVal) {
   minVal.resize(3);
   maxVal.resize(3);
   if (Extents.size() == 2) {
@@ -79,8 +78,7 @@ void ConvertToDiffractionMDWorkspace3::convertExtents(
   } else if (Extents.empty()) {
     calculateExtentsFromData(minVal, maxVal);
   } else
-    throw std::invalid_argument(
-        "You must specify either 2 or 6 extents (min,max).");
+    throw std::invalid_argument("You must specify either 2 or 6 extents (min,max).");
 }
 
 /** Calculate the extents to use for the conversion from the input workspace.
@@ -88,20 +86,17 @@ void ConvertToDiffractionMDWorkspace3::convertExtents(
  * @param minVal :: the minimum bounds of the MD space.
  * @param maxVal :: the maximum bounds of the MD space.
  */
-void ConvertToDiffractionMDWorkspace3::calculateExtentsFromData(
-    std::vector<double> &minVal, std::vector<double> &maxVal) {
+void ConvertToDiffractionMDWorkspace3::calculateExtentsFromData(std::vector<double> &minVal,
+                                                                std::vector<double> &maxVal) {
   auto alg = createChildAlgorithm("ConvertToMDMinMaxLocal");
   alg->initialize();
-  alg->setProperty<MatrixWorkspace_sptr>("InputWorkspace",
-                                         getProperty("InputWorkspace"));
+  alg->setProperty<MatrixWorkspace_sptr>("InputWorkspace", getProperty("InputWorkspace"));
   alg->setPropertyValue("QDimensions", "Q3D");
   std::vector<std::string> dE_modes = Kernel::DeltaEMode::availableTypes();
-  alg->setPropertyValue("dEAnalysisMode",
-                        dE_modes[Kernel::DeltaEMode::Elastic]);
+  alg->setPropertyValue("dEAnalysisMode", dE_modes[Kernel::DeltaEMode::Elastic]);
 
   std::string TargetFrame, Scaling;
-  convertFramePropertyNames(getPropertyValue("OutputDimensions"), TargetFrame,
-                            Scaling);
+  convertFramePropertyNames(getPropertyValue("OutputDimensions"), TargetFrame, Scaling);
   alg->setProperty("Q3DFrames", TargetFrame);
   alg->setProperty("QConversionScales", Scaling);
 
@@ -136,5 +131,4 @@ void ConvertToDiffractionMDWorkspace3::calculateExtentsFromData(
   }
 }
 
-} // namespace MDAlgorithms
-} // namespace Mantid
+} // namespace Mantid::MDAlgorithms

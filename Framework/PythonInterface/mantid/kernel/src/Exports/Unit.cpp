@@ -8,6 +8,7 @@
 #include "MantidPythonInterface/core/GetPointer.h"
 
 #include <boost/python/class.hpp>
+#include <boost/python/enum.hpp>
 #include <boost/python/register_ptr_to_python.hpp>
 #include <boost/python/tuple.hpp>
 
@@ -22,9 +23,8 @@ namespace {
  * Returns the full name of the unit & raises a deprecation warning
  * @param self A reference to calling object
  */
-const std::string deprecatedName(Unit &self) {
-  PyErr_Warn(PyExc_DeprecationWarning,
-             "'name' is deprecated, use 'caption' instead.");
+const std::string deprecatedName(const Unit &self) {
+  PyErr_Warn(PyExc_DeprecationWarning, "'name' is deprecated, use 'caption' instead.");
   return self.caption();
 }
 
@@ -32,21 +32,17 @@ const std::string deprecatedName(Unit &self) {
  * Returns the label of the unit as a std::string & raises a deprecation warning
  * @param self A reference to calling object
  */
-const std::string deprecatedLabel(Unit &self) {
-  PyErr_Warn(PyExc_DeprecationWarning,
-             "'unit.label()' is deprecated, use 'str(unit.symbol())' instead.");
+const std::string deprecatedLabel(const Unit &self) {
+  PyErr_Warn(PyExc_DeprecationWarning, "'unit.label()' is deprecated, use 'str(unit.symbol())' instead.");
   return self.label().ascii();
 }
 
-template <class T>
-tuple quickConversionWrapper(Unit &self, const T &destUnitName) {
+template <class T> tuple quickConversionWrapper(const Unit &self, const T &destUnitName) {
   double wavelengthFactor = 0;
   double wavelengthPower = 0;
-  bool converted =
-      self.quickConversion(destUnitName, wavelengthFactor, wavelengthPower);
+  bool converted = self.quickConversion(destUnitName, wavelengthFactor, wavelengthPower);
   if (!converted) {
-    throw std::runtime_error("Quick conversion is not possible from unit:" +
-                             std::string(self.unitID()) +
+    throw std::runtime_error("Quick conversion is not possible from unit:" + std::string(self.unitID()) +
                              " to the desired unit.");
   }
   return boost::python::make_tuple<double>(wavelengthFactor, wavelengthPower);
@@ -57,11 +53,18 @@ void export_Unit() {
 
   register_ptr_to_python<std::shared_ptr<Unit>>();
 
+  enum_<Mantid::Kernel::UnitParams>("UnitParams")
+      .value("l2", Mantid::Kernel::UnitParams::l2)
+      .value("twoTheta", Mantid::Kernel::UnitParams::twoTheta)
+      .value("delta", Mantid::Kernel::UnitParams::delta)
+      .value("efixed", Mantid::Kernel::UnitParams::efixed)
+      .value("difa", Mantid::Kernel::UnitParams::difa)
+      .value("difc", Mantid::Kernel::UnitParams::difc)
+      .value("tzero", Mantid::Kernel::UnitParams::tzero);
+
   class_<Unit, boost::noncopyable>("Unit", no_init)
-      .def("name", &deprecatedName, arg("self"),
-           "Return the full name of the unit (deprecated, use caption)")
-      .def("caption", &Unit::caption, arg("self"),
-           "Return the full name of the unit")
+      .def("name", &deprecatedName, arg("self"), "Return the full name of the unit (deprecated, use caption)")
+      .def("caption", &Unit::caption, arg("self"), "Return the full name of the unit")
       .def("label", &deprecatedLabel, arg("self"),
            "Returns a plain-text label to be used "
            "as the symbol for the unit (deprecated, "
@@ -72,12 +75,10 @@ void export_Unit() {
       .def("unitID", &Unit::unitID, arg("self"),
            "Returns the string ID of the unit. This may/may not match "
            "its name")
-      .def("quickConversion", &quickConversionWrapper<Unit>,
-           (arg("self"), arg("destUnitName")),
+      .def("quickConversion", &quickConversionWrapper<Unit>, (arg("self"), arg("destUnitName")),
            "Check whether the unit can be converted to another via a "
            "simple factor")
-      .def("quickConversion", &quickConversionWrapper<std::string>,
-           (arg("self"), arg("destination")),
+      .def("quickConversion", &quickConversionWrapper<std::string>, (arg("self"), arg("destination")),
            "Check whether the unit can be converted to another via a "
            "simple factor");
 }

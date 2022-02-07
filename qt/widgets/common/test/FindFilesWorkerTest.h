@@ -14,7 +14,7 @@
 #include <boost/algorithm/string/predicate.hpp>
 #include <cxxtest/TestSuite.h>
 
-using MantidQt::API::FakeMWRunFiles;
+using MantidQt::API::FakeFileFinderWidget;
 using MantidQt::API::FindFilesSearchParameters;
 using MantidQt::API::FindFilesSearchResults;
 using MantidQt::API::FindFilesWorker;
@@ -23,9 +23,7 @@ class FindFilesWorkerTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static FindFilesWorkerTest *createSuite() {
-    return new FindFilesWorkerTest();
-  }
+  static FindFilesWorkerTest *createSuite() { return new FindFilesWorkerTest(); }
   static void destroySuite(FindFilesWorkerTest *suite) { delete suite; }
 
   void test_find_file_with_algorithm() {
@@ -42,8 +40,7 @@ public:
     TS_ASSERT(widget->isFinishedSignalRecieved())
     TS_ASSERT_EQUALS(results.error, "")
     TS_ASSERT_EQUALS(results.filenames.size(), 1)
-    TS_ASSERT(
-        boost::algorithm::contains(results.filenames[0], parameters.searchText))
+    TS_ASSERT(boost::algorithm::contains(results.filenames[0], parameters.searchText))
     TS_ASSERT_EQUALS(results.valueForProperty, results.filenames[0])
   }
 
@@ -64,8 +61,7 @@ public:
     TS_ASSERT(widget->isFinishedSignalRecieved())
     TS_ASSERT_EQUALS(results.error, "")
     TS_ASSERT_EQUALS(results.filenames.size(), 1)
-    TS_ASSERT(
-        boost::algorithm::contains(results.filenames[0], parameters.searchText))
+    TS_ASSERT(boost::algorithm::contains(results.filenames[0], parameters.searchText))
     TS_ASSERT_EQUALS(results.valueForProperty, results.filenames[0])
   }
 
@@ -118,6 +114,50 @@ public:
     TS_ASSERT_EQUALS(results.filenames.size(), 0)
   }
 
+  void test_that_a_single_dot_will_return_an_error_when_file_searching() {
+    const auto parameters = createFileSearch(".");
+    const auto worker = new FindFilesWorker(parameters);
+    const auto widget = createWidget(worker);
+
+    executeWorker(worker);
+
+    const auto results = widget->getResults();
+    TS_ASSERT(widget->isFinishedSignalRecieved())
+    TS_ASSERT_DIFFERS(results.error, "")
+    TS_ASSERT_EQUALS(results.filenames.size(), 0)
+  }
+
+  void test_that_a_non_ascii_symbol_does_not_cause_a_crash_when_file_searching_using_a_filename() {
+    const auto searchText = QString("£");
+    auto parameters = createFileSearch(searchText.toStdString());
+    const auto worker = new FindFilesWorker(parameters);
+    const auto widget = createWidget(worker);
+
+    executeWorker(worker);
+
+    auto results = widget->getResults();
+    TS_ASSERT(widget->isFinishedSignalRecieved())
+    TS_ASSERT_DIFFERS(results.error, "")
+    TS_ASSERT_EQUALS(results.filenames.size(), 0)
+  }
+
+  void test_that_a_non_ascii_symbol_does_not_cause_a_crash_when_file_searching_using_runs() {
+    const auto searchText = QString("£");
+    auto parameters = createFileSearch(searchText.toStdString());
+    parameters.algorithmName = "";
+    parameters.algorithmProperty = "";
+    parameters.isForRunFiles = true;
+    const auto worker = new FindFilesWorker(parameters);
+    const auto widget = createWidget(worker);
+
+    executeWorker(worker);
+
+    auto results = widget->getResults();
+    TS_ASSERT(widget->isFinishedSignalRecieved())
+    TS_ASSERT_DIFFERS(results.error, "")
+    TS_ASSERT_EQUALS(results.filenames.size(), 0)
+  }
+
 private:
   FindFilesSearchParameters createFileSearch(const std::string &searchText) {
     FindFilesSearchParameters parameters;
@@ -129,14 +169,11 @@ private:
     return parameters;
   }
 
-  FakeMWRunFiles *createWidget(FindFilesWorker *worker) {
-    auto widget = new FakeMWRunFiles();
-    widget->connect(worker, SIGNAL(finished(const FindFilesSearchResults &)),
-                    widget,
-                    SLOT(inspectThreadResult(const FindFilesSearchResults &)),
-                    Qt::QueuedConnection);
-    widget->connect(worker, SIGNAL(finished(const FindFilesSearchResults &)),
-                    widget, SIGNAL(fileFindingFinished()),
+  FakeFileFinderWidget *createWidget(FindFilesWorker *worker) {
+    auto widget = new FakeFileFinderWidget();
+    widget->connect(worker, SIGNAL(finished(const FindFilesSearchResults &)), widget,
+                    SLOT(inspectThreadResult(const FindFilesSearchResults &)), Qt::QueuedConnection);
+    widget->connect(worker, SIGNAL(finished(const FindFilesSearchResults &)), widget, SIGNAL(fileFindingFinished()),
                     Qt::QueuedConnection);
     return widget;
   }
@@ -145,6 +182,6 @@ private:
     auto threadPool = QThreadPool::globalInstance();
     threadPool->start(worker);
     threadPool->waitForDone();
-    QCoreApplication::processEvents();
+    QCoreApplication::sendPostedEvents();
   }
 };

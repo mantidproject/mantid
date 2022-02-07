@@ -21,8 +21,7 @@ private:
   HistogramData::Histogram m_histogram;
 
 public:
-  Histogram1D(HistogramData::Histogram::XMode xmode,
-              HistogramData::Histogram::YMode ymode);
+  Histogram1D(HistogramData::Histogram::XMode xmode, HistogramData::Histogram::YMode ymode);
 
   Histogram1D(const Histogram1D &) = default;
   Histogram1D(Histogram1D &&) = default;
@@ -57,17 +56,14 @@ public:
   /// Deprecated, use mutableE() instead. Returns the error data
   MantidVec &dataE() override { return m_histogram.dataE(); }
 
-  virtual std::size_t size() const {
-    return m_histogram.readY().size();
-  } ///< get pseudo size
+  virtual std::size_t size() const { return m_histogram.readY().size(); } ///< get pseudo size
 
   /// Checks for errors
   bool isError() const { return readE().empty(); }
 
   /// Gets the memory size of the histogram
   size_t getMemorySize() const override {
-    return ((readX().size() + readY().size() + readE().size()) *
-            sizeof(double));
+    return ((readX().size() + readY().size() + readE().size()) * sizeof(double));
   }
 
 private:
@@ -75,12 +71,8 @@ private:
   void copyDataInto(Histogram1D &sink) const override;
 
   void checkAndSanitizeHistogram(HistogramData::Histogram &histogram) override;
-  const HistogramData::Histogram &histogramRef() const override {
-    return m_histogram;
-  }
-  HistogramData::Histogram &mutableHistogramRef() override {
-    return m_histogram;
-  }
+  const HistogramData::Histogram &histogramRef() const override { return m_histogram; }
+  HistogramData::Histogram &mutableHistogramRef() override { return m_histogram; }
 };
 
 } // namespace DataObjects

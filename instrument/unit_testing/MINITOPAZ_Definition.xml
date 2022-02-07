@@ -31,6 +31,19 @@ This is a mini version similar to TOPAZ but used for unit testing.
   </component>
   <type name="sample-position" is="SamplePos"/>
 
+  <!--MONITORS-->
+  <component type="monitors" idlist="monitors">
+    <location/>
+  </component>
+  <type name="monitors">
+    <component type="monitor">
+      <location z="-2.488" name="monitor1"/>
+    </component>
+    <component type="monitor">
+      <location z="1.049" name="monitor2"/>
+    </component>
+  </type>
+
 <!--- Make a single panel:
 	0.5 meters from sample, along the +X axis (0.5,0,0) center coord
 	0.5 meters wide and high.
@@ -60,5 +73,22 @@ This is a mini version similar to TOPAZ but used for unit testing.
     <algebra val="pixel-shape"/>
   </type>
 
+  <!-- Shape for Monitors-->
+  <!-- TODO: Update to real shape -->
+  <type is="monitor" name="monitor">
+    <cylinder id="some-shape">
+      <centre-of-bottom-base p="0.0" r="0.0" t="0.0"/>
+      <axis y="0.0" x="0.0" z="1.0"/>
+      <radius val="0.01"/>
+      <height val="0.03"/>
+    </cylinder>
+    <algebra val="some-shape"/>
+  </type>
+
+  <!--MONITOR IDs-->
+  <idlist idname="monitors">
+    <id val="-1"/>
+    <id val="-2"/>
+  </idlist>
 </instrument>
 

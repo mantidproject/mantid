@@ -36,17 +36,13 @@
 
 class ScaleEngine;
 
-class EXPORT_OPT_MANTIDQT_PLOTTING ScaleTransformation
-    : public QwtScaleTransformation {
+class EXPORT_OPT_MANTIDQT_PLOTTING ScaleTransformation : public QwtScaleTransformation {
 public:
   enum Type { Linear, Log10, Power };
 
-  ScaleTransformation(const ScaleEngine *engine)
-      : QwtScaleTransformation(Other), d_engine(engine){};
-  double xForm(double x, double /*s1*/, double /*s2*/, double p1,
-               double p2) const override;
-  double invXForm(double p, double p1, double p2, double s1,
-                  double s2) const override;
+  ScaleTransformation(const ScaleEngine *engine) : QwtScaleTransformation(Other), d_engine(engine){};
+  double xForm(double x, double /*s1*/, double /*s2*/, double p1, double p2) const override;
+  double invXForm(double p, double p1, double p2, double s1, double s2) const override;
   QwtScaleTransformation *copy() const override;
   ~ScaleTransformation() override;
 
@@ -58,17 +54,14 @@ protected:
 
 class EXPORT_OPT_MANTIDQT_PLOTTING ScaleEngine : public QwtScaleEngine {
 public:
-  ScaleEngine(ScaleTransformation::Type type = ScaleTransformation::Linear,
-              double left_break = -DBL_MAX, double right_break = DBL_MAX);
+  ScaleEngine(ScaleTransformation::Type type = ScaleTransformation::Linear, double left_break = -DBL_MAX,
+              double right_break = DBL_MAX);
 
   ~ScaleEngine() override;
 
   QwtScaleTransformation *transformation() const override;
-  QwtScaleDiv divideScale(double x1, double x2, int maxMajSteps,
-                          int maxMinSteps,
-                          double stepSize = 0.0) const override;
-  void autoScale(int maxNumSteps, double &x1, double &x2,
-                 double &stepSize) const override;
+  QwtScaleDiv divideScale(double x1, double x2, int maxMajSteps, int maxMinSteps, double stepSize = 0.0) const override;
+  void autoScale(int maxNumSteps, double &x1, double &x2, double &stepSize) const override;
 
   double axisBreakLeft() const;
   double axisBreakRight() const;

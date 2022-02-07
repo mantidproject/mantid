@@ -50,8 +50,8 @@ public:
   /// Calculate if the point R is within the cone (return -1) or outside (return
   /// 1)
   int side(const Kernel::V3D &R) const override;
-  /// Calculate if the point R is on the cone(1=on the surface, 0=not)
-  int onSurface(const Kernel::V3D &R) const override;
+  /// Calculate if the point R is on the cone
+  bool onSurface(const Kernel::V3D &R) const override;
 
   /// Accept visitor for line calculation
   void acceptVisitor(BaseVisit &A) const override { A.Accept(*this); }
@@ -82,13 +82,12 @@ public:
   void write(std::ostream &) const override;
 
   /// This will get the bounding box for the cone
-  void getBoundingBox(double &xmax, double &ymax, double &zmax, double &xmin,
-                      double &ymin, double &zmin) override;
+  void getBoundingBox(double &xmax, double &ymax, double &zmax, double &xmin, double &ymin, double &zmin) override;
 
   /// The number of slices to approximate a cone
-  constexpr static int g_nslices = 10;
+  constexpr static int g_NSLICES = 10;
   /// The number of stacks to approximate a cone
-  constexpr static int g_nstacks = 1;
+  constexpr static int g_NSTACKS = 1;
 #ifdef ENABLE_OPENCASCADE
   TopoDS_Shape createShape() override;
 #endif

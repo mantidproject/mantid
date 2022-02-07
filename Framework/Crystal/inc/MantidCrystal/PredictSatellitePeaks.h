@@ -9,8 +9,10 @@
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/IPeaksWorkspace.h"
 #include "MantidCrystal/DllConfig.h"
+#include "MantidDataObjects/LeanElasticPeaksWorkspace.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidGeometry/Crystal/HKLFilterWavelength.h"
+#include "MantidGeometry/Crystal/IPeak.h"
 #include "MantidKernel/System.h"
 
 namespace Mantid {
@@ -36,17 +38,28 @@ public:
 
   /// Algorithm's version for identification
   int version() const override { return 1; };
-  const std::vector<std::string> seeAlso() const override {
-    return {"PredictPeaks"};
-  }
+  const std::vector<std::string> seeAlso() const override { return {"PredictPeaks"}; }
 
   /// Algorithm's category for identification
   const std::string category() const override { return "Crystal\\Peaks"; }
 
+  /* Determine which type of workspace we're dealing with */
+  enum class workspace_type_enum { regular_peaks, lean_elastic_peaks, invalid };
+
 private:
+  workspace_type_enum determineWorkspaceType(const API::IPeaksWorkspace_sptr &iPeaksWorkspace) const;
+
+  std::shared_ptr<Geometry::IPeak> createPeakForOutputWorkspace(const Kernel::Matrix<double> &peakGoniometerMatrix,
+                                                                const Kernel::V3D &satelliteHKL);
+
+  void addPeakToOutputWorkspace(const std::shared_ptr<Geometry::IPeak> &iPeak,
+                                const Kernel::Matrix<double> &peak_goniometer_matrix, const Kernel::V3D &hkl,
+                                const Kernel::V3D &satelliteHKL, const int runNumber,
+                                std::vector<std::vector<int>> &alreadyDonePeaks, const Kernel::V3D &mnp);
+
   const size_t MAX_NUMBER_HKLS = 10000000000;
   double m_qConventionFactor;
-  DataObjects::PeaksWorkspace_sptr Peaks;
+  API::IPeaksWorkspace_sptr Peaks;
   API::IPeaksWorkspace_sptr outPeaks;
   /// Initialise the properties
   void init() override;
@@ -55,16 +68,17 @@ private:
   void exec() override;
   void exec_peaks();
   Kernel::V3D getOffsetVector(const std::string &label);
-  void predictOffsets(int iVector, Kernel::V3D offsets, int &maxOrder,
-                      Kernel::V3D &hkl,
-                      Geometry::HKLFilterWavelength &lambdaFilter,
-                      bool &includePeaksInRange, bool &includeOrderZero,
-                      std::vector<std::vector<int>> &AlreadyDonePeaks);
-  void predictOffsetsWithCrossTerms(
-      Kernel::V3D offsets1, Kernel::V3D offsets2, Kernel::V3D offsets3,
-      int &maxOrder, Kernel::V3D &hkl,
-      Geometry::HKLFilterWavelength &lambdaFilter, bool &includePeaksInRange,
-      bool &includeOrderZero, std::vector<std::vector<int>> &AlreadyDonePeaks);
+
+  void predictOffsets(const int indexModulatedVector, const Kernel::V3D &offsets, const int maxOrder,
+                      const int runNumber, const Kernel::Matrix<double> &goniometer, const Kernel::V3D &hkl,
+                      const Geometry::HKLFilterWavelength &lambdaFilter, const bool includePeaksInRange,
+                      const bool includeOrderZero, std::vector<std::vector<int>> &alreadyDonePeaks);
+
+  void predictOffsetsWithCrossTerms(Kernel::V3D offsets1, Kernel::V3D offsets2, Kernel::V3D offsets3,
+                                    const int maxOrder, const int RunNumber,
+                                    Kernel::Matrix<double> const &peakGoniometerMatrix, Kernel::V3D &hkl,
+                                    const Geometry::HKLFilterWavelength &lambdaFilter, const bool includePeaksInRange,
+                                    const bool includeOrderZero, std::vector<std::vector<int>> &alreadyDonePeaks);
 };
 
 } // namespace Crystal

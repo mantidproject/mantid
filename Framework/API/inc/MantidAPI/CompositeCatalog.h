@@ -27,27 +27,21 @@ public:
   /// Adds a catalog to the list of catalogs (m_catalogs)
   void add(const ICatalog_sptr &catalog);
   /// Log the user into the catalog system.
-  CatalogSession_sptr login(const std::string &username,
-                            const std::string &password,
-                            const std::string &endpoint,
+  CatalogSession_sptr login(const std::string &username, const std::string &password, const std::string &endpoint,
                             const std::string &facility) override;
   /// Log the user out of the catalog system.
   void logout() override;
   /// Search the catalog for data.
-  void search(const ICat::CatalogSearchParam &inputs,
-              ITableWorkspace_sptr &outputws, const int &offset,
+  void search(const ICat::CatalogSearchParam &inputs, ITableWorkspace_sptr &outputws, const int &offset,
               const int &limit) override;
   /// Obtain the number of results returned by the search method.
-  int64_t
-  getNumberOfSearchResults(const ICat::CatalogSearchParam &inputs) override;
+  int64_t getNumberOfSearchResults(const ICat::CatalogSearchParam &inputs) override;
   /// Show the logged in user's investigations search results.
   void myData(ITableWorkspace_sptr &outputws) override;
   /// Get datasets.
-  void getDataSets(const std::string &investigationId,
-                   ITableWorkspace_sptr &outputws) override;
+  void getDataSets(const std::string &investigationId, ITableWorkspace_sptr &outputws) override;
   /// Get datafiles
-  void getDataFiles(const std::string &investigationId,
-                    ITableWorkspace_sptr &outputws) override;
+  void getDataFiles(const std::string &investigationId, ITableWorkspace_sptr &outputws) override;
   /// Get instruments list
   void listInstruments(std::vector<std::string> &instruments) override;
   /// Get investigationtypes list

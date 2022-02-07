@@ -7,8 +7,7 @@
 #include "MantidGeometry/MDGeometry/QLab.h"
 #include "MantidGeometry/MDGeometry/MDFrame.h"
 
-namespace Mantid {
-namespace Geometry {
+namespace Mantid::Geometry {
 
 //----------------------------------------------------------------------------------------------
 /** Constructor
@@ -24,9 +23,7 @@ Kernel::UnitLabel QLab::getUnitLabel() const {
 
 const Kernel::MDUnit &QLab::getMDUnit() const { return *m_unit; }
 
-bool QLab::setMDUnit(const Mantid::Kernel::MDUnit & /*newUnit*/) {
-  return false;
-}
+bool QLab::setMDUnit(const Mantid::Kernel::MDUnit & /*newUnit*/) { return false; }
 
 bool QLab::canConvertTo(const Mantid::Kernel::MDUnit &otherUnit) const {
   /*
@@ -40,8 +37,7 @@ std::string QLab::name() const { return QLab::QLabName; }
 
 QLab *QLab::clone() const { return new QLab; }
 
-Mantid::Kernel::SpecialCoordinateSystem
-QLab::equivalientSpecialCoordinateSystem() const {
+Mantid::Kernel::SpecialCoordinateSystem QLab::equivalientSpecialCoordinateSystem() const {
   return Mantid::Kernel::SpecialCoordinateSystem::QLab;
 }
 
@@ -58,5 +54,4 @@ bool QLab::isSameType(const MDFrame &frame) const {
   return isSameType;
 }
 
-} // namespace Geometry
-} // namespace Mantid
+} // namespace Mantid::Geometry

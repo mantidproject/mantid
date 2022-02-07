@@ -25,17 +25,13 @@ public:
   /// Algorithm's name
   const std::string name() const override { return "DeleteWorkspaces"; }
   /// Summary of algorithms purpose
-  const std::string summary() const override {
-    return "Removes a list of workspaces from memory.";
-  }
+  const std::string summary() const override { return "Removes a list of workspaces from memory."; }
 
   /// Algorithm's category for identification
   const std::string category() const override { return "Utility\\Workspaces"; }
   /// Algorithm's version for identification overriding a virtual method
   int version() const override { return 1; }
-  const std::vector<std::string> seeAlso() const override {
-    return {"DeleteWorkspace"};
-  }
+  const std::vector<std::string> seeAlso() const override { return {"DeleteWorkspace"}; }
 
 private:
   /// Overridden init

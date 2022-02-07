@@ -26,8 +26,7 @@ namespace QwtHelper {
  * @param wsIndex :: Workspace index to use
  * @return Pointer to created QwtData
  */
-std::shared_ptr<QwtData> curveDataFromWs(const MatrixWorkspace_const_sptr &ws,
-                                         size_t wsIndex) {
+std::shared_ptr<QwtData> curveDataFromWs(const MatrixWorkspace_const_sptr &ws, size_t wsIndex) {
   const double *x = &ws->x(wsIndex)[0];
   const double *y = &ws->y(wsIndex)[0];
   size_t size = ws->y(wsIndex).size();
@@ -41,8 +40,7 @@ std::shared_ptr<QwtData> curveDataFromWs(const MatrixWorkspace_const_sptr &ws,
  * @param ws :: Workspace with X and Y values to use
  * @return Pointer to created Vector QwtData
  */
-std::vector<std::shared_ptr<QwtData>>
-curveDataFromWs(const MatrixWorkspace_const_sptr &ws) {
+std::vector<std::shared_ptr<QwtData>> curveDataFromWs(const MatrixWorkspace_const_sptr &ws) {
 
   std::vector<std::shared_ptr<QwtData>> dataVector;
   auto histograms = ws->getNumberHistograms();
@@ -60,8 +58,7 @@ curveDataFromWs(const MatrixWorkspace_const_sptr &ws) {
  * @param wsIndex :: Workspace index to use
  * @return Vector of errors
  */
-std::vector<double> curveErrorsFromWs(const MatrixWorkspace_const_sptr &ws,
-                                      size_t wsIndex) {
+std::vector<double> curveErrorsFromWs(const MatrixWorkspace_const_sptr &ws, size_t wsIndex) {
   return ws->e(wsIndex).rawData();
 }
 
@@ -73,9 +70,7 @@ std::vector<double> curveErrorsFromWs(const MatrixWorkspace_const_sptr &ws,
  * those as well.
  * @return Pointer to create QwtData
  */
-std::shared_ptr<QwtData>
-curveDataFromFunction(const IFunction_const_sptr &func,
-                      const std::vector<double> &xValues) {
+std::shared_ptr<QwtData> curveDataFromFunction(const IFunction_const_sptr &func, const std::vector<double> &xValues) {
   MatrixWorkspace_sptr ws = createWsFromFunction(std::move(func), xValues);
   return curveDataFromWs(ws, 0);
 }
@@ -87,11 +82,9 @@ curveDataFromFunction(const IFunction_const_sptr &func,
  * @param xValues :: X values to use
  * @return Single-spectrum workspace with calculated function values
  */
-MatrixWorkspace_sptr createWsFromFunction(const IFunction_const_sptr &func,
-                                          const std::vector<double> &xValues) {
+MatrixWorkspace_sptr createWsFromFunction(const IFunction_const_sptr &func, const std::vector<double> &xValues) {
   auto inputWs = std::dynamic_pointer_cast<MatrixWorkspace>(
-      WorkspaceFactory::Instance().create("Workspace2D", 1, xValues.size(),
-                                          xValues.size()));
+      WorkspaceFactory::Instance().create("Workspace2D", 1, xValues.size(), xValues.size()));
   inputWs->mutableX(0) = xValues;
 
   IAlgorithm_sptr fit = AlgorithmManager::Instance().create("Fit");
@@ -105,8 +98,7 @@ MatrixWorkspace_sptr createWsFromFunction(const IFunction_const_sptr &func,
 
   MatrixWorkspace_sptr fitOutput = fit->getProperty("OutputWorkspace");
 
-  IAlgorithm_sptr extract =
-      AlgorithmManager::Instance().create("ExtractSingleSpectrum");
+  IAlgorithm_sptr extract = AlgorithmManager::Instance().create("ExtractSingleSpectrum");
   extract->setChild(true); // Don't want workspace in the ADS
   extract->setProperty("InputWorkspace", fitOutput);
   extract->setProperty("WorkspaceIndex", 1); // "Calc"

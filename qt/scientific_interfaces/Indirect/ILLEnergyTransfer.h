@@ -37,10 +37,8 @@ private slots:
 
   void runClicked();
   void setRunEnabled(bool enabled);
-  void updateRunButton(bool enabled = true,
-                       std::string const &enableOutputButtons = "unchanged",
-                       QString const &message = "Run",
-                       QString const &tooltip = "");
+  void updateRunButton(bool enabled = true, std::string const &enableOutputButtons = "unchanged",
+                       QString const &message = "Run", QString const &tooltip = "");
 
 private:
   Ui::ILLEnergyTransfer m_uiForm;

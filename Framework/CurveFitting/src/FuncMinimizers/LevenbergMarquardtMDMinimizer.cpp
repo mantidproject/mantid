@@ -19,9 +19,7 @@
 #include <cmath>
 #include <gsl/gsl_blas.h>
 
-namespace Mantid {
-namespace CurveFitting {
-namespace FuncMinimisers {
+namespace Mantid::CurveFitting::FuncMinimisers {
 namespace {
 /// static logger object
 Kernel::Logger g_log("LevenbergMarquardMD");
@@ -33,10 +31,8 @@ DECLARE_FUNCMINIMIZER(LevenbergMarquardtMDMinimizer, Levenberg-MarquardtMD)
 
 /// Constructor
 LevenbergMarquardtMDMinimizer::LevenbergMarquardtMDMinimizer()
-    : IFuncMinimizer(), m_tau(1e-6), m_mu(1e-6), m_nu(2.0), m_rho(1.0),
-      m_F(0.0) {
-  declareProperty("MuMax", 1e6,
-                  "Maximum value of mu - a stopping parameter in failure.");
+    : IFuncMinimizer(), m_tau(1e-6), m_mu(1e-6), m_nu(2.0), m_rho(1.0), m_F(0.0) {
+  declareProperty("MuMax", 1e6, "Maximum value of mu - a stopping parameter in failure.");
   declareProperty("AbsError", 0.0001,
                   "Absolute error allowed for parameters - "
                   "a stopping parameter in success.");
@@ -44,14 +40,11 @@ LevenbergMarquardtMDMinimizer::LevenbergMarquardtMDMinimizer()
 }
 
 /// Initialize minimizer, i.e. pass a function to minimize.
-void LevenbergMarquardtMDMinimizer::initialize(API::ICostFunction_sptr function,
-                                               size_t /*maxIterations*/) {
-  m_costFunction =
-      std::dynamic_pointer_cast<CostFunctions::CostFuncFitting>(function);
+void LevenbergMarquardtMDMinimizer::initialize(API::ICostFunction_sptr function, size_t /*maxIterations*/) {
+  m_costFunction = std::dynamic_pointer_cast<CostFunctions::CostFuncFitting>(function);
   if (!m_costFunction) {
-    throw std::invalid_argument(
-        "Levenberg-Marquardt minimizer works only with "
-        "functions which define the Hessian. Different function was given.");
+    throw std::invalid_argument("Levenberg-Marquardt minimizer works only with "
+                                "functions which define the Hessian. Different function was given.");
   }
   m_mu = 0;
   m_nu = 2.0;
@@ -95,8 +88,7 @@ bool LevenbergMarquardtMDMinimizer::iterate(size_t /*iteration*/) {
   }
 
   if (verbose) {
-    g_log.warning()
-        << "===========================================================\n";
+    g_log.warning() << "===========================================================\n";
     g_log.warning() << "mu=" << m_mu << "\n\n";
   }
 
@@ -120,8 +112,7 @@ bool LevenbergMarquardtMDMinimizer::iterate(size_t /*iteration*/) {
     H.set(i, i, tmp);
     sf[i] = sqrt(tmp);
     if (tmp == 0.0) {
-      m_errorString = "Function doesn't depend on parameter " +
-                      m_costFunction->parameterName(i);
+      m_errorString = "Function doesn't depend on parameter " + m_costFunction->parameterName(i);
       return false;
     }
   }
@@ -201,8 +192,7 @@ bool LevenbergMarquardtMDMinimizer::iterate(size_t /*iteration*/) {
 
   double dL;
   // der -> - der - 0.5 * hessian * dx
-  gsl_blas_dgemv(CblasNoTrans, -0.5, m_costFunction->getHessian().gsl(),
-                 dx.gsl(), 1., dd.gsl());
+  gsl_blas_dgemv(CblasNoTrans, -0.5, m_costFunction->getHessian().gsl(), dx.gsl(), 1., dd.gsl());
   // calculate the linear part of the change in cost function
   // dL = - der * dx - 0.5 * dx * hessian * dx
   gsl_blas_ddot(dd.gsl(), dx.gsl(), &dL);
@@ -222,8 +212,7 @@ bool LevenbergMarquardtMDMinimizer::iterate(size_t /*iteration*/) {
     double dx_norm = gsl_blas_dnrm2(dx.gsl());
     if (dx_norm < absError) {
       if (verbose) {
-        g_log.warning() << "Successful fit, parameters changed by less than "
-                        << absError << '\n';
+        g_log.warning() << "Successful fit, parameters changed by less than " << absError << '\n';
       }
       return false;
     }
@@ -278,8 +267,7 @@ bool LevenbergMarquardtMDMinimizer::iterate(size_t /*iteration*/) {
     m_costFunction->pop();
     m_F = m_costFunction->val();
     if (verbose) {
-      g_log.warning()
-          << "Bad iteration, increase mu and revert changes to parameters.\n";
+      g_log.warning() << "Bad iteration, increase mu and revert changes to parameters.\n";
     }
   }
 
@@ -294,6 +282,4 @@ double LevenbergMarquardtMDMinimizer::costFunctionVal() {
   return m_costFunction->val();
 }
 
-} // namespace FuncMinimisers
-} // namespace CurveFitting
-} // namespace Mantid
+} // namespace Mantid::CurveFitting::FuncMinimisers

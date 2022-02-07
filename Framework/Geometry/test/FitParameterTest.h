@@ -31,8 +31,7 @@ public:
   void testReadInOut() {
     FitParameter fitP1;
 
-    std::istringstream input(
-        "9.1 , fido , , , , 8.2 , tie , formula, TOF , dSpacing,");
+    std::istringstream input("9.1 , fido , , , , 8.2 , tie , formula, TOF , dSpacing,");
     input >> fitP1;
     std::stringstream inout;
     inout << fitP1;
@@ -53,8 +52,7 @@ public:
   void test2() {
     FitParameter fitP;
 
-    std::istringstream input(
-        "9.1 , fido , , , , , tie , formula, TOF, dSpacing ,");
+    std::istringstream input("9.1 , fido , , , , , tie , formula, TOF, dSpacing ,");
 
     input >> fitP;
 

@@ -22,9 +22,7 @@ public:
   const std::string summary() const override;
 
   int version() const override;
-  const std::vector<std::string> seeAlso() const override {
-    return {"Fit", "EstimateFitParameters"};
-  }
+  const std::vector<std::string> seeAlso() const override { return {"Fit", "EstimateFitParameters"}; }
   const std::string category() const override;
 
 private:

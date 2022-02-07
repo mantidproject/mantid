@@ -18,8 +18,7 @@
 #include <cmath>
 #include <vector>
 
-namespace Mantid {
-namespace Algorithms {
+namespace Mantid::Algorithms {
 
 using namespace Kernel;
 using namespace DataObjects;
@@ -32,13 +31,11 @@ DECLARE_ALGORITHM(CalMuonDeadTime)
  */
 void CalMuonDeadTime::init() {
 
-  declareProperty(std::make_unique<API::WorkspaceProperty<>>(
-                      "InputWorkspace", "", Direction::Input),
+  declareProperty(std::make_unique<API::WorkspaceProperty<>>("InputWorkspace", "", Direction::Input),
                   "Name of the input workspace");
 
   declareProperty(
-      std::make_unique<API::WorkspaceProperty<API::ITableWorkspace>>(
-          "DeadTimeTable", "", Direction::Output),
+      std::make_unique<API::WorkspaceProperty<API::ITableWorkspace>>("DeadTimeTable", "", Direction::Output),
       "The name of the TableWorkspace in which to store the list "
       "of deadtimes for each spectrum");
 
@@ -54,8 +51,7 @@ void CalMuonDeadTime::init() {
                   "zero (default to 5.0)",
                   Direction::Input);
 
-  declareProperty(std::make_unique<API::WorkspaceProperty<API::Workspace>>(
-                      "DataFitted", "", Direction::Output),
+  declareProperty(std::make_unique<API::WorkspaceProperty<API::Workspace>>("DataFitted", "", Direction::Output),
                   "The data which the deadtime equation is fitted to");
 }
 
@@ -65,8 +61,7 @@ void CalMuonDeadTime::init() {
 void CalMuonDeadTime::exec() {
   // Muon lifetime
 
-  const double muonLifetime = Mantid::PhysicalConstants::MuonLifetime *
-                              1e6; // in units of micro-seconds
+  const double muonLifetime = Mantid::PhysicalConstants::MuonLifetime * 1e6; // in units of micro-seconds
 
   // get input properties
 
@@ -89,9 +84,8 @@ void CalMuonDeadTime::exec() {
     if (run.hasProperty("goodfrm")) {
       return boost::lexical_cast<double>(run.getProperty("goodfrm")->value());
     } else {
-      throw std::runtime_error(
-          "To calculate Muon deadtime requires that goodfrm (number of "
-          "good frames) is stored in InputWorkspace Run object");
+      throw std::runtime_error("To calculate Muon deadtime requires that goodfrm (number of "
+                               "good frames) is stored in InputWorkspace Run object");
     }
   }();
 
@@ -106,8 +100,7 @@ void CalMuonDeadTime::exec() {
   // and lastgooddata
 
   std::string wsName = "TempForMuonCalDeadTime";
-  API::IAlgorithm_sptr cropWS;
-  cropWS = createChildAlgorithm("CropWorkspace", -1, -1);
+  auto cropWS = createChildAlgorithm("CropWorkspace", -1, -1);
   cropWS->setProperty("InputWorkspace", inputWS);
   cropWS->setPropertyValue("OutputWorkspace", "croppedWS");
   cropWS->setProperty("XMin", firstgooddata);
@@ -116,8 +109,7 @@ void CalMuonDeadTime::exec() {
 
   // get cropped input workspace
 
-  std::shared_ptr<API::MatrixWorkspace> wsCrop =
-      cropWS->getProperty("OutputWorkspace");
+  std::shared_ptr<API::MatrixWorkspace> wsCrop = cropWS->getProperty("OutputWorkspace");
 
   // next step is to take these data. Create a point workspace
   // which will change the x-axis values to mid-point time values
@@ -125,16 +117,14 @@ void CalMuonDeadTime::exec() {
   // x-axis with measured counts
   // y-axis with measured counts * exp(t/t_mu)
 
-  API::IAlgorithm_sptr convertToPW;
-  convertToPW = createChildAlgorithm("ConvertToPointData", -1, -1);
+  auto convertToPW = createChildAlgorithm("ConvertToPointData", -1, -1);
   convertToPW->setProperty("InputWorkspace", wsCrop);
   convertToPW->setPropertyValue("OutputWorkspace", wsName);
   convertToPW->executeAsChildAlg();
 
   // get pointworkspace
 
-  std::shared_ptr<API::MatrixWorkspace> wsFitAgainst =
-      convertToPW->getProperty("OutputWorkspace");
+  std::shared_ptr<API::MatrixWorkspace> wsFitAgainst = convertToPW->getProperty("OutputWorkspace");
 
   const size_t numSpec = wsFitAgainst->getNumberHistograms();
   size_t timechannels = wsFitAgainst->y(0).size();
@@ -179,8 +169,7 @@ void CalMuonDeadTime::exec() {
     const double in_bg0 = inputWS->y(i)[0];
     const double in_bg1 = 0.0;
 
-    API::IAlgorithm_sptr fit;
-    fit = createChildAlgorithm("Fit", -1, -1, true);
+    auto fit = createChildAlgorithm("Fit", -1, -1, true);
 
     std::stringstream ss;
     ss << "name=LinearBackground,A0=" << in_bg0 << ",A1=" << in_bg1;
@@ -201,16 +190,12 @@ void CalMuonDeadTime::exec() {
 
     // Check order of names
     if (result->parameterName(0) != "A0") {
-      g_log.error() << "Parameter 0 should be A0, but is "
-                    << result->parameterName(0) << '\n';
-      throw std::invalid_argument(
-          "Parameters are out of order @ 0, should be A0");
+      g_log.error() << "Parameter 0 should be A0, but is " << result->parameterName(0) << '\n';
+      throw std::invalid_argument("Parameters are out of order @ 0, should be A0");
     }
     if (result->parameterName(1) != "A1") {
-      g_log.error() << "Parameter 1 should be A1, but is "
-                    << result->parameterName(1) << '\n';
-      throw std::invalid_argument(
-          "Parameters are out of order @ 0, should be A1");
+      g_log.error() << "Parameter 1 should be A1, but is " << result->parameterName(1) << '\n';
+      throw std::invalid_argument("Parameters are out of order @ 0, should be A1");
     }
 
     // time bin - assumed constant for histogram
@@ -224,8 +209,7 @@ void CalMuonDeadTime::exec() {
       API::TableRow t = outTable->appendRow();
       t << wsindex + 1 << -(A1 / A0) * time_bin * numGoodFrames;
     } else {
-      g_log.warning() << "Fit falled. Status = " << fitStatus
-                      << "\nFor workspace index " << i << '\n';
+      g_log.warning() << "Fit falled. Status = " << fitStatus << "\nFor workspace index " << i << '\n';
     }
   }
 
@@ -234,5 +218,4 @@ void CalMuonDeadTime::exec() {
   setProperty("DeadTimeTable", outTable);
 }
 
-} // namespace Algorithms
-} // namespace Mantid
+} // namespace Mantid::Algorithms

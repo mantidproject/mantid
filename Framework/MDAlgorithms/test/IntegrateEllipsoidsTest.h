@@ -5,6 +5,7 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAPI/AlgorithmManager.h"
+#include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/NumericAxis.h"
 #include "MantidAPI/Sample.h"
@@ -12,28 +13,33 @@
 #include "MantidDataObjects/PeakShapeEllipsoid.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidDataObjects/WorkspaceSingleValue.h"
+#include "MantidFrameworkTestHelpers/ComponentCreationHelper.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
+#include "MantidMDAlgorithms/ConvertToMD.h"
+#include "MantidMDAlgorithms/FindPeaksMD.h"
 #include "MantidMDAlgorithms/IntegrateEllipsoids.h"
-#include "MantidTestHelpers/ComponentCreationHelper.h"
 #include <boost/tuple/tuple.hpp>
 #include <cxxtest/TestSuite.h>
 #include <memory>
 
 using namespace Mantid;
+using namespace Mantid::API;
 using namespace Mantid::MDAlgorithms;
 using namespace Mantid::Kernel;
 using namespace Mantid::Geometry;
+using Mantid::Geometry::IPeak_uptr;
 using namespace Mantid::DataObjects;
+using Mantid::DataObjects::Peak;
+using Mantid::DataObjects::Peak_uptr;
 using Mantid::Types::Event::TofEvent;
 
 namespace {
 // Add A Fake 'Peak' to both the event data and to the peaks workspace
-void addFakeEllipsoid(const V3D &peakHKL, const int &totalNPixels,
-                      const int &nEvents, const double tofGap,
-                      EventWorkspace_sptr &eventWS,
-                      PeaksWorkspace_sptr &peaksWS) {
+void addFakeEllipsoid(const V3D &peakHKL, const int &totalNPixels, const int &nEvents, const double tofGap,
+                      EventWorkspace_sptr &eventWS, PeaksWorkspace_sptr &peaksWS) {
   // Create the peak and add it to the peaks ws
-  auto peak = peaksWS->createPeakHKL(peakHKL);
+  IPeak_uptr ipeak = peaksWS->createPeakHKL(peakHKL);
+  Peak_uptr peak(dynamic_cast<Peak *>(ipeak.release()));
   peaksWS->addPeak(*peak);
   const auto detectorId = peak->getDetectorID();
   const auto tofExact = peak->getTOF();
@@ -76,7 +82,9 @@ void addFakeEllipsoid(const V3D &peakHKL, const int &totalNPixels,
     auto detId = detectorId;
     do {
       step_perp[ivect] += 0.02;
-      auto pk = peaksWS->createPeak(Q + eigvects[ivect] * step_perp[ivect]);
+      auto q = Q + eigvects[ivect] * step_perp[ivect];
+      IPeak_uptr ipk = peaksWS->createPeak(q);
+      Peak_uptr pk(dynamic_cast<Peak *>(ipk.release()));
       detId = pk->getDetectorID();
     } while (detId == detectorId);
   }
@@ -85,7 +93,8 @@ void addFakeEllipsoid(const V3D &peakHKL, const int &totalNPixels,
   for (int istep = -1; istep < 2; istep += 2) {
     for (size_t ivect = 0; ivect < step_perp.size(); ivect++) {
       auto q = Q + eigvects[ivect] * step_perp[ivect] * istep;
-      auto pk = peaksWS->createPeak(q);
+      IPeak_uptr ipk = peaksWS->createPeak(q);
+      Peak_uptr pk(dynamic_cast<Peak *>(ipk.release()));
       // add event
       auto detId = pk->getDetectorID();
       EventList &el = eventWS->getSpectrum(detId - totalNPixels);
@@ -94,14 +103,11 @@ void addFakeEllipsoid(const V3D &peakHKL, const int &totalNPixels,
   }
 }
 
-// Create diffraction data for test schenarios
+// Create diffraction data for test scenarios
 boost::tuple<EventWorkspace_sptr, PeaksWorkspace_sptr>
-createDiffractionData(const int nPixels = 200, const int nEventsPerPeak = 24,
-                      const double tofGapBetweenEvents = 10) {
-  Mantid::Geometry::Instrument_sptr inst =
-      ComponentCreationHelper::createTestInstrumentRectangular(
-          1 /*num_banks*/, nPixels /*pixels in each direction yields n by n*/,
-          0.01, 1.0);
+createDiffractionData(const int nPixels = 200, const int nEventsPerPeak = 24, const double tofGapBetweenEvents = 10) {
+  Mantid::Geometry::Instrument_sptr inst = ComponentCreationHelper::createTestInstrumentRectangular(
+      1 /*num_banks*/, nPixels /*pixels in each direction yields n by n*/, 0.01, 1.0);
 
   // Create a peaks workspace
   auto peaksWS = std::make_shared<PeaksWorkspace>();
@@ -115,8 +121,7 @@ createDiffractionData(const int nPixels = 200, const int nEventsPerPeak = 24,
   // Make an event workspace and add fake peak data
   auto eventWS = std::make_shared<EventWorkspace>();
   eventWS->setInstrument(inst);
-  eventWS->initialize(nPixels * nPixels /*n spectra*/, 3 /* x-size */,
-                      3 /* y-size */);
+  eventWS->initialize(nPixels * nPixels /*n spectra*/, 3 /* x-size */, 3 /* y-size */);
   eventWS->getAxis(0)->setUnit("TOF");
   // Give the spectra-detector mapping for all event lists
   const int nPixelsTotal = nPixels * nPixels;
@@ -127,22 +132,53 @@ createDiffractionData(const int nPixels = 200, const int nEventsPerPeak = 24,
 
   // Add some peaks which should correspond to real reflections (could
   // calculate these). Same function also adds a fake ellipsoid
-  addFakeEllipsoid(V3D(1, -5, -3), nPixelsTotal, nEventsPerPeak,
-                   tofGapBetweenEvents, eventWS, peaksWS);
-  addFakeEllipsoid(V3D(1, -4, -4), nPixelsTotal, nEventsPerPeak,
-                   tofGapBetweenEvents, eventWS, peaksWS);
-  addFakeEllipsoid(V3D(1, -3, -5), nPixelsTotal, nEventsPerPeak,
-                   tofGapBetweenEvents, eventWS, peaksWS);
-  addFakeEllipsoid(V3D(1, -4, -2), nPixelsTotal, nEventsPerPeak,
-                   tofGapBetweenEvents, eventWS, peaksWS);
-  addFakeEllipsoid(V3D(1, -5, -1), nPixelsTotal, nEventsPerPeak,
-                   tofGapBetweenEvents, eventWS, peaksWS);
-  addFakeEllipsoid(V3D(1, -3, -4), nPixelsTotal, nEventsPerPeak,
-                   tofGapBetweenEvents, eventWS, peaksWS);
+  addFakeEllipsoid(V3D(1, -5, -3), nPixelsTotal, nEventsPerPeak, tofGapBetweenEvents, eventWS, peaksWS);
+  addFakeEllipsoid(V3D(1, -4, -4), nPixelsTotal, nEventsPerPeak, tofGapBetweenEvents, eventWS, peaksWS);
+  addFakeEllipsoid(V3D(1, -3, -5), nPixelsTotal, nEventsPerPeak, tofGapBetweenEvents, eventWS, peaksWS);
+  addFakeEllipsoid(V3D(1, -4, -2), nPixelsTotal, nEventsPerPeak, tofGapBetweenEvents, eventWS, peaksWS);
+  addFakeEllipsoid(V3D(1, -5, -1), nPixelsTotal, nEventsPerPeak, tofGapBetweenEvents, eventWS, peaksWS);
+  addFakeEllipsoid(V3D(1, -3, -4), nPixelsTotal, nEventsPerPeak, tofGapBetweenEvents, eventWS, peaksWS);
 
   // Return test data.
-  return boost::tuple<EventWorkspace_sptr, PeaksWorkspace_sptr>(eventWS,
-                                                                peaksWS);
+  return boost::tuple<EventWorkspace_sptr, PeaksWorkspace_sptr>(eventWS, peaksWS);
+}
+
+EventWorkspace_sptr createSatelliteData() {
+  auto loadalg = AlgorithmManager::Instance().createUnmanaged("LoadNexusProcessed");
+  TS_ASSERT_THROWS_NOTHING(loadalg->initialize());
+  TS_ASSERT_THROWS_NOTHING(loadalg->setPropertyValue("Filename", "TOPAZ_36079_crop.nxs"));
+  TS_ASSERT_THROWS_NOTHING(loadalg->setProperty("OutputWorkspace", "TOPAZ_36079_event"));
+  TS_ASSERT_THROWS_NOTHING(loadalg->execute());
+  TS_ASSERT_THROWS_NOTHING(loadalg->isExecuted());
+
+  auto loadinstralg = Mantid::API::AlgorithmManager::Instance().createUnmanaged("LoadInstrument");
+  TS_ASSERT_THROWS_NOTHING(loadinstralg->initialize());
+  TS_ASSERT_THROWS_NOTHING(loadinstralg->setProperty("Workspace", "TOPAZ_36079_event"));
+  TS_ASSERT_THROWS_NOTHING(loadinstralg->setProperty("InstrumentName", "TOPAZ"));
+  TS_ASSERT_THROWS_NOTHING(loadinstralg->setProperty("RewriteSpectraMap", "False"));
+  TS_ASSERT_THROWS_NOTHING(loadinstralg->execute());
+
+  auto loadcalalg = Mantid::API::AlgorithmManager::Instance().createUnmanaged("LoadIsawDetCal");
+  TS_ASSERT_THROWS_NOTHING(loadcalalg->initialize());
+  TS_ASSERT_THROWS_NOTHING(loadcalalg->setProperty("Filename", "TOPAZ_2020A.DetCal"));
+  TS_ASSERT_THROWS_NOTHING(loadcalalg->setProperty("InputWorkspace", "TOPAZ_36079_event"));
+  TS_ASSERT_THROWS_NOTHING(loadcalalg->execute());
+
+  auto convertalg = Mantid::API::AlgorithmManager::Instance().createUnmanaged("ConvertToMD");
+  TS_ASSERT_THROWS_NOTHING(convertalg->initialize());
+  TS_ASSERT_THROWS_NOTHING(convertalg->setProperty("InputWorkspace", "TOPAZ_36079_event"));
+  TS_ASSERT_THROWS_NOTHING(convertalg->setProperty("OutputWorkspace", "TOPAZ_36079_md"));
+  TS_ASSERT_THROWS_NOTHING(convertalg->setProperty("QDimensions", "Q3D"));
+  TS_ASSERT_THROWS_NOTHING(convertalg->setProperty("dEAnalysisMode", "Elastic"));
+  TS_ASSERT_THROWS_NOTHING(convertalg->setProperty("Q3DFrames", "Q_sample"));
+  TS_ASSERT_THROWS_NOTHING(convertalg->setProperty("LorentzCorrection", true));
+  TS_ASSERT_THROWS_NOTHING(convertalg->setProperty("MinValues", std::vector<double>{1.0, 1.0, 1.675}));
+  TS_ASSERT_THROWS_NOTHING(convertalg->setProperty("MaxValues", std::vector<double>{10.0, 5.0, 8.425}));
+  TS_ASSERT_THROWS_NOTHING(convertalg->execute());
+
+  EventWorkspace_sptr eventWS = AnalysisDataService::Instance().retrieveWS<EventWorkspace>("TOPAZ_36079_event");
+
+  return eventWS;
 }
 } // namespace
 
@@ -151,11 +187,11 @@ class IntegrateEllipsoidsTest : public CxxTest::TestSuite {
 private:
   Mantid::DataObjects::EventWorkspace_sptr m_eventWS;
   Mantid::DataObjects::PeaksWorkspace_sptr m_peaksWS;
+  Mantid::DataObjects::EventWorkspace_sptr m_satelliteEventWS;
   Mantid::API::MatrixWorkspace_sptr m_histoWS;
 
   // Check that n-peaks from the workspace are integrated as we expect
-  void do_test_n_peaks(PeaksWorkspace_sptr &integratedPeaksWS,
-                       const int nPeaks) {
+  void do_test_n_peaks(PeaksWorkspace_sptr &integratedPeaksWS, const int nPeaks) {
     auto instrument = integratedPeaksWS->getInstrument();
     const V3D samplePos = instrument->getComponentByName("sample")->getPos();
     const V3D sourcePos = instrument->getComponentByName("source")->getPos();
@@ -166,13 +202,11 @@ private:
       const Peak &peak = integratedPeaksWS->getPeak(i);
       const PeakShape &peakShape = peak.getPeakShape();
 
-      TSM_ASSERT_RELATION("Peak should be integrated", std::greater<double>,
-                          peak.getIntensity(), 0);
+      TSM_ASSERT_RELATION("Peak should be integrated", std::greater<double>, peak.getIntensity(), 0);
 
       std::stringstream stream;
       stream << "Wrong shape name for peak " << i;
-      TSM_ASSERT_EQUALS(stream.str(), PeakShapeEllipsoid::ellipsoidShapeName(),
-                        peakShape.shapeName());
+      TSM_ASSERT_EQUALS(stream.str(), PeakShapeEllipsoid::ellipsoidShapeName(), peakShape.shapeName());
 
       // Calculate the q direction based on geometry
       const V3D detPos = peak.getDetectorPosition();
@@ -180,8 +214,7 @@ private:
       const V3D qDir = normalize(detDir - beamDir);
 
       // Get the q-direction off the ellipsoid
-      PeakShapeEllipsoid const *const ellipsoid =
-          dynamic_cast<const PeakShapeEllipsoid *>(&peakShape);
+      PeakShapeEllipsoid const *const ellipsoid = dynamic_cast<const PeakShapeEllipsoid *>(&peakShape);
       auto dirs = ellipsoid->directions();
 
       /* We expect an axis of the ellipsoid to be mostly
@@ -201,14 +234,55 @@ private:
     }
   }
 
+  PeaksWorkspace_sptr createPeaksForSatelliteTests(const std::vector<V3D> peaksHKL) {
+
+    const std::vector<double> ub = {0.15468228,  0.10908475,  -0.14428671, -0.08922105, -0.08617147,
+                                    -0.22976459, -0.05616441, 0.12536522,  -0.03238277};
+
+    auto peaksalg = Mantid::API::AlgorithmManager::Instance().createUnmanaged("CreatePeaksWorkspace");
+    TS_ASSERT_THROWS_NOTHING(peaksalg->initialize());
+    TS_ASSERT_THROWS_NOTHING(peaksalg->setProperty("InstrumentWorkspace", "TOPAZ_36079_event"));
+    TS_ASSERT_THROWS_NOTHING(peaksalg->setProperty("NumberOfPeaks", 0));
+    TS_ASSERT_THROWS_NOTHING(peaksalg->setProperty("OutputWorkspace", "TOPAZ_36079_peaks"));
+    TS_ASSERT_THROWS_NOTHING(peaksalg->execute());
+
+    auto setubalg = Mantid::API::AlgorithmManager::Instance().createUnmanaged("SetUB");
+    TS_ASSERT_THROWS_NOTHING(setubalg->initialize());
+    TS_ASSERT_THROWS_NOTHING(setubalg->setProperty("Workspace", "TOPAZ_36079_peaks"));
+    TS_ASSERT_THROWS_NOTHING(setubalg->setProperty("UB", ub));
+    TS_ASSERT_THROWS_NOTHING(setubalg->execute());
+
+    // add some peaks for testing
+    PeaksWorkspace_sptr peakWS = AnalysisDataService::Instance().retrieveWS<PeaksWorkspace>("TOPAZ_36079_peaks");
+    for (const V3D &hkl : peaksHKL) {
+      peakWS->addPeak(*peakWS->createPeakHKL(hkl));
+    }
+    TS_ASSERT_EQUALS(peakWS->getNumberPeaks(), peaksHKL.size());
+
+    // index the peaks
+    auto indexalg = Mantid::API::AlgorithmManager::Instance().createUnmanaged("IndexPeaks");
+    TS_ASSERT_THROWS_NOTHING(indexalg->initialize());
+    TS_ASSERT_THROWS_NOTHING(indexalg->setProperty("PeaksWorkspace", "TOPAZ_36079_peaks"));
+    TS_ASSERT_THROWS_NOTHING(indexalg->setProperty("Tolerance", 0.06));
+    TS_ASSERT_THROWS_NOTHING(indexalg->setProperty("ToleranceForSatellite", 0.05));
+    TS_ASSERT_THROWS_NOTHING(indexalg->setProperty("RoundHKLs", false));
+    TS_ASSERT_THROWS_NOTHING(indexalg->setProperty("ModVector1", std::vector<double>{0.125, 0.0, 0.0}));
+    TS_ASSERT_THROWS_NOTHING(indexalg->setProperty("ModVector2", std::vector<double>{0.0, 0.125, 0.0}));
+    TS_ASSERT_THROWS_NOTHING(indexalg->setProperty("ModVector3", std::vector<double>{-0.125, 0.125, 0.0}));
+    TS_ASSERT_THROWS_NOTHING(indexalg->setProperty("MaxOrder", 1));
+    TS_ASSERT_THROWS_NOTHING(indexalg->setProperty("CrossTerms", false));
+    TS_ASSERT_THROWS_NOTHING(indexalg->setProperty("SaveModulationInfo", true));
+    TS_ASSERT_THROWS_NOTHING(indexalg->execute());
+
+    return peakWS;
+  }
+
 public:
   static void destroySuite(IntegrateEllipsoidsTest *suite) { delete suite; }
 
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static IntegrateEllipsoidsTest *createSuite() {
-    return new IntegrateEllipsoidsTest();
-  }
+  static IntegrateEllipsoidsTest *createSuite() { return new IntegrateEllipsoidsTest(); }
 
   IntegrateEllipsoidsTest() {
 
@@ -220,12 +294,13 @@ public:
     m_eventWS = data.get<0>();
     m_peaksWS = data.get<1>();
 
+    m_satelliteEventWS = createSatelliteData();
+
     /*
      Simply rebin the event workspace to a histo workspace to create the input
      we need.
     */
-    auto rebinAlg =
-        Mantid::API::AlgorithmManager::Instance().createUnmanaged("Rebin");
+    auto rebinAlg = Mantid::API::AlgorithmManager::Instance().createUnmanaged("Rebin");
     rebinAlg->setChild(true);
     rebinAlg->initialize();
     rebinAlg->setProperty("InputWorkspace", m_eventWS);
@@ -253,9 +328,7 @@ public:
     alg.setChild(true);
     alg.setRethrows(true);
     alg.initialize();
-    TS_ASSERT_THROWS(
-        alg.setProperty("InputWorkspace", inputWorkspaceNoInstrument),
-        std::invalid_argument &);
+    TS_ASSERT_THROWS(alg.setProperty("InputWorkspace", inputWorkspaceNoInstrument), std::invalid_argument &);
   }
 
   void test_execution_events() {
@@ -269,8 +342,7 @@ public:
     alg.setPropertyValue("OutputWorkspace", "dummy");
     alg.execute();
     PeaksWorkspace_sptr integratedPeaksWS = alg.getProperty("OutputWorkspace");
-    TSM_ASSERT_EQUALS("Wrong number of peaks in output workspace",
-                      integratedPeaksWS->getNumberPeaks(),
+    TSM_ASSERT_EQUALS("Wrong number of peaks in output workspace", integratedPeaksWS->getNumberPeaks(),
                       m_peaksWS->getNumberPeaks());
 
     do_test_n_peaks(integratedPeaksWS, 3 /*check first 3 peaks*/);
@@ -301,8 +373,7 @@ public:
     alg.setPropertyValue("OutputWorkspace", "dummy");
     alg.execute();
     PeaksWorkspace_sptr integratedPeaksWS = alg.getProperty("OutputWorkspace");
-    TSM_ASSERT_EQUALS("Wrong number of peaks in output workspace",
-                      integratedPeaksWS->getNumberPeaks(),
+    TSM_ASSERT_EQUALS("Wrong number of peaks in output workspace", integratedPeaksWS->getNumberPeaks(),
                       m_peaksWS->getNumberPeaks());
 
     do_test_n_peaks(integratedPeaksWS, 3 /*check first 3 peaks*/);
@@ -345,8 +416,7 @@ public:
     alg.setPropertyValue("OutputWorkspace", "dummy");
     alg.execute();
     PeaksWorkspace_sptr integratedPeaksWS = alg.getProperty("OutputWorkspace");
-    TSM_ASSERT_EQUALS("Wrong number of peaks in output workspace",
-                      integratedPeaksWS->getNumberPeaks(),
+    TSM_ASSERT_EQUALS("Wrong number of peaks in output workspace", integratedPeaksWS->getNumberPeaks(),
                       m_peaksWS->getNumberPeaks());
 
     do_test_n_peaks(integratedPeaksWS, 3 /*check first 3 peaks*/);
@@ -378,22 +448,15 @@ public:
     alg.setPropertyValue("OutputWorkspace", "dummy");
     alg.execute();
     PeaksWorkspace_sptr integratedPeaksWS = alg.getProperty("OutputWorkspace");
-    TSM_ASSERT_EQUALS("Wrong number of peaks in output workspace",
-                      integratedPeaksWS->getNumberPeaks(),
+    TSM_ASSERT_EQUALS("Wrong number of peaks in output workspace", integratedPeaksWS->getNumberPeaks(),
                       m_peaksWS->getNumberPeaks());
 
-    TSM_ASSERT_DELTA("Wrong intensity for peak 0",
-                     integratedPeaksWS->getPeak(0).getIntensity(), 8., 0.01);
-    TSM_ASSERT_DELTA("Wrong intensity for peak 1",
-                     integratedPeaksWS->getPeak(1).getIntensity(), 9., 0.01);
-    TSM_ASSERT_DELTA("Wrong intensity for peak 2",
-                     integratedPeaksWS->getPeak(2).getIntensity(), 8., 0.01);
-    TSM_ASSERT_DELTA("Wrong intensity for peak 3",
-                     integratedPeaksWS->getPeak(3).getIntensity(), 16., 0.01);
-    TSM_ASSERT_DELTA("Wrong intensity for peak 4",
-                     integratedPeaksWS->getPeak(4).getIntensity(), 12., 0.01);
-    TSM_ASSERT_DELTA("Wrong intensity for peak 5",
-                     integratedPeaksWS->getPeak(5).getIntensity(), 9.97, 0.01);
+    TSM_ASSERT_DELTA("Wrong intensity for peak 0", integratedPeaksWS->getPeak(0).getIntensity(), 8., 0.01);
+    TSM_ASSERT_DELTA("Wrong intensity for peak 1", integratedPeaksWS->getPeak(1).getIntensity(), 9., 0.01);
+    TSM_ASSERT_DELTA("Wrong intensity for peak 2", integratedPeaksWS->getPeak(2).getIntensity(), 8., 0.01);
+    TSM_ASSERT_DELTA("Wrong intensity for peak 3", integratedPeaksWS->getPeak(3).getIntensity(), 16., 0.01);
+    TSM_ASSERT_DELTA("Wrong intensity for peak 4", integratedPeaksWS->getPeak(4).getIntensity(), 12., 0.01);
+    TSM_ASSERT_DELTA("Wrong intensity for peak 5", integratedPeaksWS->getPeak(5).getIntensity(), 9.97, 0.01);
   }
 
   void test_execution_histograms_adaptive() {
@@ -413,80 +476,136 @@ public:
     alg.setPropertyValue("OutputWorkspace", "dummy");
     alg.execute();
     PeaksWorkspace_sptr integratedPeaksWS = alg.getProperty("OutputWorkspace");
-    TSM_ASSERT_EQUALS("Wrong number of peaks in output workspace",
-                      integratedPeaksWS->getNumberPeaks(),
+    TSM_ASSERT_EQUALS("Wrong number of peaks in output workspace", integratedPeaksWS->getNumberPeaks(),
                       m_peaksWS->getNumberPeaks());
-    TSM_ASSERT_DELTA("Wrong intensity for peak 0",
-                     integratedPeaksWS->getPeak(0).getIntensity(), 5., 0.01);
-    TSM_ASSERT_DELTA("Wrong intensity for peak 1",
-                     integratedPeaksWS->getPeak(1).getIntensity(), 8., 0.01);
-    TSM_ASSERT_DELTA("Wrong intensity for peak 2",
-                     integratedPeaksWS->getPeak(2).getIntensity(), 4., 0.01);
-    TSM_ASSERT_DELTA("Wrong intensity for peak 3",
-                     integratedPeaksWS->getPeak(3).getIntensity(), 16., 0.01);
-    TSM_ASSERT_DELTA("Wrong intensity for peak 4",
-                     integratedPeaksWS->getPeak(4).getIntensity(), 12., 0.01);
-    TSM_ASSERT_DELTA("Wrong intensity for peak 5",
-                     integratedPeaksWS->getPeak(5).getIntensity(), 13., 0.01);
+    TSM_ASSERT_DELTA("Wrong intensity for peak 0", integratedPeaksWS->getPeak(0).getIntensity(), 5., 0.01);
+    TSM_ASSERT_DELTA("Wrong intensity for peak 1", integratedPeaksWS->getPeak(1).getIntensity(), 8., 0.01);
+    TSM_ASSERT_DELTA("Wrong intensity for peak 2", integratedPeaksWS->getPeak(2).getIntensity(), 4., 0.01);
+    TSM_ASSERT_DELTA("Wrong intensity for peak 3", integratedPeaksWS->getPeak(3).getIntensity(), 16., 0.01);
+    TSM_ASSERT_DELTA("Wrong intensity for peak 4", integratedPeaksWS->getPeak(4).getIntensity(), 12., 0.01);
+    TSM_ASSERT_DELTA("Wrong intensity for peak 5", integratedPeaksWS->getPeak(5).getIntensity(), 13., 0.01);
   }
 
-  void test_execution_events_hkl() {
+  void test_execution_background_shell() {
 
+    const std::vector<V3D> peaksHKL = {V3D(0.15, 1.85, -1.0), V3D(1.0, 4.0, -3.0), V3D(1.0, 5.0, -3.0)};
+
+    // creates the peak workspace, sets UB, and indexes them
+    PeaksWorkspace_sptr peaksWS = createPeaksForSatelliteTests(peaksHKL);
+
+    // integrate without satellite background for comparison
     IntegrateEllipsoids alg;
-    alg.setChild(true);
-    alg.setRethrows(true);
-    alg.initialize();
-    alg.setProperty("InputWorkspace", m_eventWS);
-    alg.setProperty("PeaksWorkspace", m_peaksWS);
-    alg.setPropertyValue("OutputWorkspace", "dummy");
-    alg.setProperty("IntegrateInHKL", true); // Check hkl option
-    alg.execute();
-    PeaksWorkspace_sptr integratedPeaksWS = alg.getProperty("OutputWorkspace");
-    TSM_ASSERT_EQUALS("Wrong number of peaks in output workspace",
-                      integratedPeaksWS->getNumberPeaks(),
-                      m_peaksWS->getNumberPeaks());
+    TS_ASSERT_THROWS_NOTHING(alg.setChild(true));
+    TS_ASSERT_THROWS_NOTHING(alg.setRethrows(true));
+    TS_ASSERT_THROWS_NOTHING(alg.initialize());
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", m_satelliteEventWS));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("PeaksWorkspace", peaksWS));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("OutputWorkspace", "peaks_integrated_nosatellite"));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("RegionRadius", 0.055));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("SpecifySize", true));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("PeakSize", 0.0425));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("BackgroundInnerSize", 0.043));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("BackgroundOuterSize", 0.055));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("CutoffIsigI", 5.0));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("UseOnePercentBackgroundCorrection", false));
+    TS_ASSERT_THROWS_NOTHING(alg.execute());
+    TS_ASSERT_THROWS_NOTHING(alg.isExecuted());
 
-    TSM_ASSERT_DELTA("Wrong intensity for peak 0",
-                     integratedPeaksWS->getPeak(0).getIntensity(), 7., 0.01);
-    TSM_ASSERT_DELTA("Wrong intensity for peak 1",
-                     integratedPeaksWS->getPeak(1).getIntensity(), 7., 0.01);
-    TSM_ASSERT_DELTA("Wrong intensity for peak 2",
-                     integratedPeaksWS->getPeak(2).getIntensity(), 8., 0.01);
-    TSM_ASSERT_DELTA("Wrong intensity for peak 3",
-                     integratedPeaksWS->getPeak(3).getIntensity(), 19., 0.01);
-    TSM_ASSERT_DELTA("Wrong intensity for peak 4",
-                     integratedPeaksWS->getPeak(4).getIntensity(), 11., 0.01);
-    TSM_ASSERT_DELTA("Wrong intensity for peak 5",
-                     integratedPeaksWS->getPeak(5).getIntensity(), 11, 0.01);
+    PeaksWorkspace_sptr peaksNoSatellite = alg.getProperty("OutputWorkspace");
+    TS_ASSERT_EQUALS(peaksNoSatellite->getNumberPeaks(), 3);
+
+    // integrate the data now with satellite background options
+    TS_ASSERT_THROWS_NOTHING(alg.initialize());
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", m_satelliteEventWS));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("PeaksWorkspace", peaksWS));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("OutputWorkspace", "peaks_integrated_satellite"));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("RegionRadius", 0.055));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("SpecifySize", true));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("PeakSize", 0.0425));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("BackgroundInnerSize", 0.043));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("BackgroundOuterSize", 0.055));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("CutoffIsigI", 5.0));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("UseOnePercentBackgroundCorrection", false));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("SatelliteRegionRadius", 0.1));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("SatellitePeakSize", 0.08));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("SatelliteBackgroundInnerSize", 0.081));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("SatelliteBackgroundOuterSize", 0.1));
+    TS_ASSERT_THROWS_NOTHING(alg.execute());
+    TS_ASSERT_THROWS_NOTHING(alg.isExecuted());
+
+    PeaksWorkspace_sptr peaksSatellite = alg.getProperty("OutputWorkspace");
+    TS_ASSERT_EQUALS(peaksSatellite->getNumberPeaks(), 3);
+
+    for (int peakind = 0; peakind < peaksSatellite->getNumberPeaks(); peakind++) {
+      const Peak &peakNoSatellite = peaksNoSatellite->getPeak(peakind);
+      const Peak &peakSatellite = peaksSatellite->getPeak(peakind);
+
+      // first peak is satellite peak and should have different intensity than first run of algorithm
+      // last two peaks should be identical to algorithm without satellite background options
+      if (peakind == 0) {
+        TS_ASSERT_DELTA(peakNoSatellite.getIntensity(), 17.0, 1e-6);
+        TS_ASSERT_DELTA(peakSatellite.getIntensity(), 13.0, 1e-6);
+      } else {
+        TS_ASSERT_DELTA(peakNoSatellite.getIntensity(), peakSatellite.getIntensity(), 1e-6);
+      }
+
+      TS_ASSERT_EQUALS(peakNoSatellite.getDetectorPosition(), peakSatellite.getDetectorPosition());
+    }
+
+    AnalysisDataService::Instance().remove("TOPAZ_36079_md");
+    AnalysisDataService::Instance().remove("peaks_integrated_satellite");
+    AnalysisDataService::Instance().remove("peaks_integrated_nosatellite");
+    AnalysisDataService::Instance().remove(peaksWS->getName());
   }
 
-  void test_execution_histograms_hkl() {
+  void test_execution_shared_background() {
 
+    const std::vector<V3D> peaksHKL = {V3D(0.0, 2.0, 1.0), V3D(0.15, 1.85, 1.0), V3D(-0.15, 2.15, 1.0),
+                                       V3D(1.0, 4.0, -3.0)};
+
+    // creates the peak workspace, sets UB, and indexes them
+    PeaksWorkspace_sptr peaksWS = createPeaksForSatelliteTests(peaksHKL);
+
+    // integrate with sharing background region to satellite peaks
     IntegrateEllipsoids alg;
-    alg.setChild(true);
-    alg.setRethrows(true);
-    alg.initialize();
-    alg.setProperty("InputWorkspace", m_histoWS);
-    alg.setProperty("PeaksWorkspace", m_peaksWS);
-    alg.setPropertyValue("OutputWorkspace", "dummy");
-    alg.setProperty("IntegrateInHKL", true); // Check hkl option
-    alg.execute();
-    PeaksWorkspace_sptr integratedPeaksWS = alg.getProperty("OutputWorkspace");
-    TSM_ASSERT_EQUALS("Wrong number of peaks in output workspace",
-                      integratedPeaksWS->getNumberPeaks(),
-                      m_peaksWS->getNumberPeaks());
-    TSM_ASSERT_DELTA("Wrong intensity for peak 0",
-                     integratedPeaksWS->getPeak(0).getIntensity(), 6., 0.01);
-    TSM_ASSERT_DELTA("Wrong intensity for peak 1",
-                     integratedPeaksWS->getPeak(1).getIntensity(), 9., 0.01);
-    TSM_ASSERT_DELTA("Wrong intensity for peak 2",
-                     integratedPeaksWS->getPeak(2).getIntensity(), 3., 0.01);
-    TSM_ASSERT_DELTA("Wrong intensity for peak 3",
-                     integratedPeaksWS->getPeak(3).getIntensity(), 19., 0.01);
-    TSM_ASSERT_DELTA("Wrong intensity for peak 4",
-                     integratedPeaksWS->getPeak(4).getIntensity(), 11., 0.01);
-    TSM_ASSERT_DELTA("Wrong intensity for peak 5",
-                     integratedPeaksWS->getPeak(5).getIntensity(), 11., 0.01);
+    TS_ASSERT_THROWS_NOTHING(alg.initialize());
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", m_satelliteEventWS));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("PeaksWorkspace", peaksWS));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("OutputWorkspace", "peaks_integrated_shared"));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("RegionRadius", 0.11));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("SpecifySize", true));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("PeakSize", 0.085));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("BackgroundInnerSize", 0.086));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("BackgroundOuterSize", 0.11));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("UseOnePercentBackgroundCorrection", false));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("SatelliteRegionRadius", 0.11));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("SatellitePeakSize", 0.10));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("ShareBackground", true));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("SatelliteBackgroundInnerSize", 0.101));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("SatelliteBackgroundOuterSize", 0.11));
+    TS_ASSERT_THROWS_NOTHING(alg.execute());
+    TS_ASSERT_THROWS_NOTHING(alg.isExecuted());
+
+    PeaksWorkspace_sptr peaksShared = alg.getProperty("OutputWorkspace");
+    TS_ASSERT_EQUALS(peaksShared->getNumberPeaks(), peaksHKL.size());
+
+    // first peak is a bragg peak: intensity = 46372 - 0.883704*3086 = 43644.889456
+    // second peak is a satellite with intensity = 4540 - 3.32558*722 = 2138.93124
+    // However, sat peak should share background of bragg: 4540 - 0.883704*3086 = 1812.889456
+    const Peak braggPeak = peaksShared->getPeak(0);
+    const Peak satellitePeak = peaksShared->getPeak(1);
+
+    TS_ASSERT_DELTA(braggPeak.getIntensity(), 43644.889456, 1e-2);
+    TS_ASSERT_DELTA(satellitePeak.getIntensity(), 1812.889456, 1e-2);
+    TS_ASSERT_DELTA(satellitePeak.getSigmaIntensity(), 83.3664, 1e-2);
+
+    // check that the background radii are the same as the peak radii
+    const PeakShapeEllipsoid satelliteShape = static_cast<const PeakShapeEllipsoid &>(satellitePeak.getPeakShape());
+    TS_ASSERT_EQUALS(satelliteShape.abcRadiiBackgroundInner(), satelliteShape.abcRadii());
+    TS_ASSERT_EQUALS(satelliteShape.abcRadiiBackgroundOuter(), satelliteShape.abcRadii());
+
+    AnalysisDataService::Instance().remove("peaks_integrated_shared");
+    AnalysisDataService::Instance().remove(peaksWS->getName());
   }
 };
 
@@ -498,22 +617,17 @@ private:
   Mantid::API::MatrixWorkspace_sptr m_histoWS;
 
 public:
-  static void destroySuite(IntegrateEllipsoidsTestPerformance *suite) {
-    delete suite;
-  }
+  static void destroySuite(IntegrateEllipsoidsTestPerformance *suite) { delete suite; }
 
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static IntegrateEllipsoidsTestPerformance *createSuite() {
-    return new IntegrateEllipsoidsTestPerformance();
-  }
+  static IntegrateEllipsoidsTestPerformance *createSuite() { return new IntegrateEllipsoidsTestPerformance(); }
 
   IntegrateEllipsoidsTestPerformance() {
     // Need to get and run algorithms from elsewhere in the framework.
     Mantid::API::FrameworkManager::Instance();
 
-    auto data = createDiffractionData(200 /*sqrt total pixels*/,
-                                      60 /*events per peak*/, 2 /*tof gap*/);
+    auto data = createDiffractionData(200 /*sqrt total pixels*/, 60 /*events per peak*/, 2 /*tof gap*/);
 
     m_eventWS = data.get<0>();
     m_peaksWS = data.get<1>();
@@ -522,8 +636,7 @@ public:
      Simply rebin the event workspace to a histo workspace to create the input
      we need.
     */
-    auto rebinAlg =
-        Mantid::API::AlgorithmManager::Instance().createUnmanaged("Rebin");
+    auto rebinAlg = Mantid::API::AlgorithmManager::Instance().createUnmanaged("Rebin");
     rebinAlg->setChild(true);
     rebinAlg->initialize();
     rebinAlg->setProperty("InputWorkspace", m_eventWS);
@@ -535,7 +648,6 @@ public:
     rebinAlg->setProperty("PreserveEvents", false); // Make a histo workspace
     rebinAlg->setPropertyValue("OutputWorkspace", "dummy");
     rebinAlg->execute();
-
     m_histoWS = rebinAlg->getProperty("OutputWorkspace");
   }
 
@@ -552,8 +664,7 @@ public:
 
     PeaksWorkspace_sptr integratedPeaksWS = alg.getProperty("OutputWorkspace");
 
-    TSM_ASSERT_EQUALS("Wrong number of peaks in output workspace",
-                      integratedPeaksWS->getNumberPeaks(),
+    TSM_ASSERT_EQUALS("Wrong number of peaks in output workspace", integratedPeaksWS->getNumberPeaks(),
                       m_peaksWS->getNumberPeaks());
   }
 
@@ -569,8 +680,7 @@ public:
     alg.execute();
     PeaksWorkspace_sptr integratedPeaksWS = alg.getProperty("OutputWorkspace");
 
-    TSM_ASSERT_EQUALS("Wrong number of peaks in output workspace",
-                      integratedPeaksWS->getNumberPeaks(),
+    TSM_ASSERT_EQUALS("Wrong number of peaks in output workspace", integratedPeaksWS->getNumberPeaks(),
                       m_peaksWS->getNumberPeaks());
   }
 };

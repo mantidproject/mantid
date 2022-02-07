@@ -22,19 +22,13 @@ public:
   /// Algorithm's name for identification overriding a virtual method
   const std::string name() const override { return "FFTSmooth"; }
   /// Summary of algorithms purpose
-  const std::string summary() const override {
-    return "Performs smoothing of a spectrum using various filters.";
-  }
+  const std::string summary() const override { return "Performs smoothing of a spectrum using various filters."; }
 
   /// Algorithm's version for identification overriding a virtual method
   int version() const override { return 2; }
-  const std::vector<std::string> seeAlso() const override {
-    return {"FFT", "WienerSmooth"};
-  }
+  const std::vector<std::string> seeAlso() const override { return {"FFT", "WienerSmooth"}; }
   /// Algorithm's category for identification overriding a virtual method
-  const std::string category() const override {
-    return "Arithmetic\\FFT;Transforms\\Smoothing";
-  }
+  const std::string category() const override { return "Arithmetic\\FFT;Transforms\\Smoothing"; }
 
 private:
   // Overridden Algorithm methods
@@ -42,11 +36,9 @@ private:
   void exec() override;
 
   // Smoothing by zeroing.
-  void zero(int n, API::MatrixWorkspace_sptr &unfilteredWS,
-            API::MatrixWorkspace_sptr &filteredWS);
+  void zero(int n, API::MatrixWorkspace_sptr &unfilteredWS, API::MatrixWorkspace_sptr &filteredWS);
   // Smoothing using Butterworth filter of any positive order.
-  void Butterworth(int n, int order, API::MatrixWorkspace_sptr &unfilteredWS,
-                   API::MatrixWorkspace_sptr &filteredWS);
+  void Butterworth(int n, int order, API::MatrixWorkspace_sptr &unfilteredWS, API::MatrixWorkspace_sptr &filteredWS);
 };
 
 } // namespace Algorithms

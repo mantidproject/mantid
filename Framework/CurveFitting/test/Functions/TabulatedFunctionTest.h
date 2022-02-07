@@ -17,7 +17,7 @@
 #include "MantidCurveFitting/Functions/UserFunction.h"
 #include "MantidCurveFitting/Jacobian.h"
 
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
+#include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
 
 #include <Poco/File.h>
 
@@ -37,15 +37,12 @@ class TabulatedFunctionTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static TabulatedFunctionTest *createSuite() {
-    return new TabulatedFunctionTest();
-  }
+  static TabulatedFunctionTest *createSuite() { return new TabulatedFunctionTest(); }
   static void destroySuite(TabulatedFunctionTest *suite) { delete suite; }
 
   TabulatedFunctionTest()
       : m_asciiFileName("TabulatedFunctionTest_testAsciiFile.txt"),
-        m_nexusFileName(Mantid::API::FileFinder::Instance().getFullPath(
-            "argus0026287.nxs")) {
+        m_nexusFileName(Mantid::API::FileFinder::Instance().getFullPath("argus0026287.nxs")) {
     FunctionDomain1DVector x(-5.0, 5.0, 100);
     FunctionValues y(x);
     UserFunction fun;
@@ -78,8 +75,7 @@ public:
       const double tol = fabs(xx) > 4.0 ? 0.2 : 0.06;
       TS_ASSERT_DELTA(fabs(y[i] - exp(-xx * xx)) / y[i], 0, tol);
     }
-    TS_ASSERT_EQUALS(fun.getAttribute("FileName").asUnquotedString(),
-                     m_asciiFileName);
+    TS_ASSERT_EQUALS(fun.getAttribute("FileName").asUnquotedString(), m_asciiFileName);
     TS_ASSERT_EQUALS(fun.getAttribute("Workspace").asString(), "");
     TS_ASSERT_EQUALS(fun.getAttribute("WorkspaceIndex").asInt(), 0);
   }
@@ -88,9 +84,9 @@ public:
     TS_ASSERT(true);
     TabulatedFunction fun;
     fun.setAttributeValue("FileName", m_nexusFileName);
+
     TS_ASSERT_EQUALS(fun.getParameter("Scaling"), 1.0);
-    TS_ASSERT_EQUALS(fun.getAttribute("FileName").asUnquotedString(),
-                     m_nexusFileName);
+    TS_ASSERT_EQUALS(fun.getAttribute("FileName").asUnquotedString(), m_nexusFileName);
     TS_ASSERT_EQUALS(fun.getAttribute("Workspace").asString(), "");
     TS_ASSERT_EQUALS(fun.getAttribute("WorkspaceIndex").asInt(), 0);
 
@@ -111,8 +107,7 @@ public:
     fun.setAttributeValue("FileName", m_nexusFileName);
     fun.setAttributeValue("WorkspaceIndex", 10);
     TS_ASSERT_EQUALS(fun.getParameter("Scaling"), 1.0);
-    TS_ASSERT_EQUALS(fun.getAttribute("FileName").asUnquotedString(),
-                     m_nexusFileName);
+    TS_ASSERT_EQUALS(fun.getAttribute("FileName").asUnquotedString(), m_nexusFileName);
     TS_ASSERT_EQUALS(fun.getAttribute("Workspace").asString(), "");
     TS_ASSERT_EQUALS(fun.getAttribute("WorkspaceIndex").asInt(), 10);
 
@@ -128,8 +123,7 @@ public:
   }
 
   void test_loadWorkspace() {
-    auto ws = WorkspaceCreationHelper::create2DWorkspaceFromFunction(
-        Fun(), 1, -5.0, 5.0, 0.1, false);
+    auto ws = WorkspaceCreationHelper::create2DWorkspaceFromFunction(Fun(), 1, -5.0, 5.0, 0.1, false);
     AnalysisDataService::Instance().add("TABULATEDFUNCTIONTEST_WS", ws);
     TabulatedFunction fun;
     fun.setAttributeValue("Workspace", "TABULATEDFUNCTIONTEST_WS");
@@ -142,8 +136,7 @@ public:
       const double tol = fabs(xx) > 4.0 ? 0.2 : 0.07;
       TS_ASSERT_DELTA(fabs(y[i] - exp(-xx * xx)) / y[i], 0, tol);
     }
-    TS_ASSERT_EQUALS(fun.getAttribute("Workspace").asString(),
-                     "TABULATEDFUNCTIONTEST_WS");
+    TS_ASSERT_EQUALS(fun.getAttribute("Workspace").asString(), "TABULATEDFUNCTIONTEST_WS");
     TS_ASSERT_EQUALS(fun.getAttribute("FileName").asUnquotedString(), "");
     auto X = fun.getAttribute("X").asVector();
     TS_ASSERT_EQUALS(X.size(), 0);
@@ -153,8 +146,7 @@ public:
   }
 
   void test_loadWorkspace_nondefault_index() {
-    auto ws = WorkspaceCreationHelper::create2DWorkspaceFromFunction(
-        Fun(), 3, -5.0, 5.0, 0.1, false);
+    auto ws = WorkspaceCreationHelper::create2DWorkspaceFromFunction(Fun(), 3, -5.0, 5.0, 0.1, false);
     AnalysisDataService::Instance().add("TABULATEDFUNCTIONTEST_WS", ws);
     TabulatedFunction fun;
     fun.setAttributeValue("Workspace", "TABULATEDFUNCTIONTEST_WS");
@@ -169,16 +161,14 @@ public:
       const double tol = fabs(xx) > 4.0 ? 0.2 : 0.07;
       TS_ASSERT_DELTA(fabs(y[i] - exp(-xx * xx) - 2.0) / y[i], 0, tol);
     }
-    TS_ASSERT_EQUALS(fun.getAttribute("Workspace").asString(),
-                     "TABULATEDFUNCTIONTEST_WS");
+    TS_ASSERT_EQUALS(fun.getAttribute("Workspace").asString(), "TABULATEDFUNCTIONTEST_WS");
     TS_ASSERT_EQUALS(fun.getAttribute("WorkspaceIndex").asInt(), 2);
     TS_ASSERT_EQUALS(fun.getAttribute("FileName").asUnquotedString(), "");
     AnalysisDataService::Instance().clear();
   }
 
   void test_loadWorkspace_nondefault_wrong_index() {
-    auto ws = WorkspaceCreationHelper::create2DWorkspaceFromFunction(
-        Fun(), 3, -5.0, 5.0, 0.1, false);
+    auto ws = WorkspaceCreationHelper::create2DWorkspaceFromFunction(Fun(), 3, -5.0, 5.0, 0.1, false);
     AnalysisDataService::Instance().add("TABULATEDFUNCTIONTEST_WS", ws);
     TabulatedFunction fun;
     fun.setAttributeValue("Workspace", "TABULATEDFUNCTIONTEST_WS");
@@ -196,8 +186,7 @@ public:
   }
 
   void test_Derivatives() {
-    auto ws = WorkspaceCreationHelper::create2DWorkspaceFromFunction(
-        Fun(), 1, -5.0, 5.0, 0.1, false);
+    auto ws = WorkspaceCreationHelper::create2DWorkspaceFromFunction(Fun(), 1, -5.0, 5.0, 0.1, false);
     AnalysisDataService::Instance().add("TABULATEDFUNCTIONTEST_WS", ws);
     TabulatedFunction fun;
     fun.setAttributeValue("Workspace", "TABULATEDFUNCTIONTEST_WS");
@@ -244,30 +233,25 @@ public:
   void test_factory_create_from_file() {
     std::string inif = "name=TabulatedFunction,FileName=\"" + m_nexusFileName +
                        "\",WorkspaceIndex=17,Scaling=2,Shift=0.02,XScaling=0.2";
-    auto funf =
-        Mantid::API::FunctionFactory::Instance().createInitialized(inif);
+    auto funf = Mantid::API::FunctionFactory::Instance().createInitialized(inif);
     TS_ASSERT(funf);
     TS_ASSERT_EQUALS(funf->getAttribute("Workspace").asString(), "");
     TS_ASSERT_EQUALS(funf->getAttribute("WorkspaceIndex").asInt(), 17);
-    TS_ASSERT_EQUALS(funf->getAttribute("FileName").asUnquotedString(),
-                     m_nexusFileName);
+    TS_ASSERT_EQUALS(funf->getAttribute("FileName").asUnquotedString(), m_nexusFileName);
     TS_ASSERT_EQUALS(funf->getParameter("Scaling"), 2.0);
     TS_ASSERT_EQUALS(funf->getParameter("Shift"), 0.02);
     TS_ASSERT_EQUALS(funf->getParameter("XScaling"), 0.2);
   }
 
   void test_factory_create_from_workspace() {
-    auto ws = WorkspaceCreationHelper::create2DWorkspaceFromFunction(
-        Fun(), 1, -5.0, 5.0, 0.1, false);
+    auto ws = WorkspaceCreationHelper::create2DWorkspaceFromFunction(Fun(), 1, -5.0, 5.0, 0.1, false);
     AnalysisDataService::Instance().add("TABULATEDFUNCTIONTEST_WS", ws);
     std::string inif = "name=TabulatedFunction,Workspace=TABULATEDFUNCTIONTEST_"
                        "WS,WorkspaceIndex=71,Scaling=3.14,Shift=0.02,XScaling="
                        "0.2";
-    auto funf =
-        Mantid::API::FunctionFactory::Instance().createInitialized(inif);
+    auto funf = Mantid::API::FunctionFactory::Instance().createInitialized(inif);
     TS_ASSERT(funf);
-    TS_ASSERT_EQUALS(funf->getAttribute("Workspace").asString(),
-                     "TABULATEDFUNCTIONTEST_WS");
+    TS_ASSERT_EQUALS(funf->getAttribute("Workspace").asString(), "TABULATEDFUNCTIONTEST_WS");
     TS_ASSERT_EQUALS(funf->getAttribute("WorkspaceIndex").asInt(), 71);
     TS_ASSERT_EQUALS(funf->getAttribute("FileName").asUnquotedString(), "");
     TS_ASSERT_EQUALS(funf->getParameter("Scaling"), 3.14);

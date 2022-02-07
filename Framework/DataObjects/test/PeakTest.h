@@ -19,7 +19,7 @@
 #include <gmock/gmock.h>
 
 #include "MantidDataObjects/Peak.h"
-#include "MantidTestHelpers/ComponentCreationHelper.h"
+#include "MantidFrameworkTestHelpers/ComponentCreationHelper.h"
 
 using namespace Mantid::DataObjects;
 using namespace Mantid::Geometry;
@@ -27,9 +27,8 @@ using namespace Mantid::Kernel;
 
 namespace boost {
 template <class CharType, class CharTrait>
-std::basic_ostream<CharType, CharTrait> &
-operator<<(std::basic_ostream<CharType, CharTrait> &out,
-           optional<double> const &maybe) {
+std::basic_ostream<CharType, CharTrait> &operator<<(std::basic_ostream<CharType, CharTrait> &out,
+                                                    optional<double> const &maybe) {
   if (maybe)
     out << maybe;
   return out;
@@ -49,10 +48,7 @@ public:
   static void destroySuite(PeakTest *suite) { delete suite; }
 
   // Constructor
-  PeakTest()
-      : inst(ComponentCreationHelper::createTestInstrumentRectangular(5, 100)) {
-
-  }
+  PeakTest() : inst(ComponentCreationHelper::createTestInstrumentRectangular(5, 100)) {}
 
   void test_constructor() {
     // detector IDs start at 10000
@@ -123,6 +119,72 @@ public:
     check_Contributing_Detectors(p2, expectedIDs);
   }
 
+  void test_ConstructorFromLeanElasticPeak() {
+    // step_1: constructing a peak (follow example in LeanElasticPeakTest)
+    Matrix<double> r(3, 3, false);
+    r[0][2] = 1;
+    r[1][1] = 1;
+    r[2][0] = -1;
+    // NOTE: the detector ID here (19999) is an arbitrary number and will most
+    //       likely no the same as the one from find_detector(). DO NOT compare
+    //       detector verbatim
+    Peak peak(inst, 19999, 2.0, V3D(1, 2, 3), r);
+    peak.setRunNumber(1234);
+    peak.setPeakNumber(42);
+    peak.setIntensity(900);
+    peak.setSigmaIntensity(30);
+    peak.setBinCount(90);
+
+    // step_2: extract qsample, goniometer, [wavelength] to construct a leanpeak
+    V3D qsample = peak.getQSampleFrame();
+    // NOTE: the goniometer matrix should be handled by BasePeak, and it should
+    // be an exact copy of r created above
+    auto goniometerMatrix = peak.getGoniometerMatrix();
+    // construct the LeanPeak using QSample and goniometerMatrix
+    const LeanElasticPeak &lpeak = LeanElasticPeak(qsample, goniometerMatrix);
+
+    // step_3: construct Peak based on leanpeak and check
+    //           - qlab
+    //           - qsample
+    //           - goniometer
+    //           - sacttering
+    //           - wavelength
+    //           - d-spacing
+    //           - initial and final energy
+    //           - getAzimuthal angle
+    //           - check detector id is any number (using LeanPeak test peak)
+    const double tolerance{1e-10};
+    Peak plp(lpeak, inst); // peak->leanpeak->peak
+    TS_ASSERT_EQUALS(plp.getQLabFrame(), peak.getQLabFrame());
+    TS_ASSERT_EQUALS(plp.getQSampleFrame(), peak.getQSampleFrame());
+    TS_ASSERT_EQUALS(plp.getGoniometerMatrix(), r);
+    TS_ASSERT_EQUALS(plp.getGoniometerMatrix(), goniometerMatrix);
+    TS_ASSERT_EQUALS(plp.getScattering(), peak.getScattering());
+    // NOTE: reasons to use TS_ASSERT_DELTA for some values
+    //                  LeanPeak          Peak
+    // wavelength    2.000000000000018    2
+    // dspacing      9.093899818222381    9.093899818222283
+    // initialEnergy 20.45105062499033    20.45105062499069
+    // finalEnergy   20.45105062499033    20.45105062499069
+    TS_ASSERT_DELTA(plp.getWavelength(), peak.getWavelength(), tolerance);
+    TS_ASSERT_DELTA(plp.getDSpacing(), peak.getDSpacing(), tolerance);
+    TS_ASSERT_DELTA(plp.getInitialEnergy(), peak.getInitialEnergy(), tolerance);
+    TS_ASSERT_DELTA(plp.getFinalEnergy(), peak.getFinalEnergy(), tolerance);
+    //
+    TS_ASSERT_EQUALS(plp.getAzimuthal(), peak.getAzimuthal());
+    // Actually check that we found the same detector ID
+    TS_ASSERT_EQUALS(plp.getDetectorID(), 19999);
+
+    std::ostringstream msg;
+    msg.precision(16);
+    msg << "\t\tLeanPeak\t\tPeak\n"
+        << "wavelength\t\t" << plp.getWavelength() << "\t\t" << peak.getWavelength() << "\n"
+        << "dspacing\t\t" << plp.getDSpacing() << "\t\t" << peak.getDSpacing() << "\n"
+        << "initialEnergy\t\t" << plp.getInitialEnergy() << "\t\t" << peak.getInitialEnergy() << "\n"
+        << "finalEnergy\t\t" << plp.getFinalEnergy() << "\t\t" << peak.getFinalEnergy() << "\n";
+    std::cout << msg.str();
+  }
+
   void test_copyConstructor() {
     Peak p(inst, 10102, 2.0);
     p.setHKL(1, 2, 3);
@@ -138,8 +200,7 @@ public:
     TS_ASSERT_EQUALS(p.getRunNumber(), p2.getRunNumber());
     TS_ASSERT_EQUALS(p.getDetector(), p2.getDetector());
     TS_ASSERT_EQUALS(p.getInstrument(), p2.getInstrument());
-    TS_ASSERT_EQUALS(p.getPeakShape().shapeName(),
-                     p2.getPeakShape().shapeName());
+    TS_ASSERT_EQUALS(p.getPeakShape().shapeName(), p2.getPeakShape().shapeName());
     check_Contributing_Detectors(p2, std::vector<int>(1, 10102));
   }
 
@@ -153,7 +214,7 @@ public:
     TS_ASSERT_EQUALS(p.getValueByColName("K"), p.getK());
     TS_ASSERT_EQUALS(p.getValueByColName("L"), p.getL());
     TS_ASSERT_EQUALS(p.getValueByColName("RunNumber"), p.getRunNumber());
-    TS_ASSERT_EQUALS(p.getValueByColName("DetId"), p.getDetectorID())
+    TS_ASSERT_EQUALS(p.getValueByColName("DetID"), p.getDetectorID())
     TS_ASSERT_THROWS_ANYTHING(p.getValueByColName("bankname"));
   }
 
@@ -180,14 +241,12 @@ public:
     TS_ASSERT_THROWS_ANYTHING(p.setDetectorID(7));
   }
 
-  void
-  test_setDetector_Adds_ID_To_Contributing_List_And_Does_Not_Remove_Old_From_Contrib_List() {
+  void test_setDetector_Adds_ID_To_Contributing_List_And_Does_Not_Remove_Old_From_Contrib_List() {
     int expectedIDs[2] = {10000, 10001};
     Peak peak(inst, expectedIDs[0], 2.0);
     peak.setDetectorID(expectedIDs[1]);
 
-    check_Contributing_Detectors(
-        peak, std::vector<int>(expectedIDs, expectedIDs + 2));
+    check_Contributing_Detectors(peak, std::vector<int>(expectedIDs, expectedIDs + 2));
   }
 
   void test_runNumber() {
@@ -208,8 +267,7 @@ public:
     mat[0][0] = 1.0;
     mat[1][2] = 1.0;
     mat[2][1] = 1.0;
-    TS_ASSERT_THROWS_NOTHING(
-        p.setGoniometerMatrix(mat)); // matrix is not singular
+    TS_ASSERT_THROWS_NOTHING(p.setGoniometerMatrix(mat)); // matrix is not singular
     TS_ASSERT_EQUALS(p.getGoniometerMatrix(), mat);
     // Matrix must be 3x3
     Matrix<double> mat2(4, 3);
@@ -286,8 +344,7 @@ public:
   }
 
   void test_getQLabFrame() {
-    Instrument_sptr inst =
-        ComponentCreationHelper::createTestInstrumentRectangular2(1, 10);
+    Instrument_sptr inst = ComponentCreationHelper::createTestInstrumentRectangular2(1, 10);
     Peak p(inst, 0, 1.5);
     p.setQLabFrame(V3D(1, 1, 1));
     auto q = p.getQLabFrame();
@@ -345,8 +402,7 @@ public:
     const V3D detectorPos(20, 5, 0);
     const V3D beam1 = sample - source;
     const V3D beam2 = detectorPos - sample;
-    auto minimalInstrument = ComponentCreationHelper::createMinimalInstrument(
-        source, sample, detectorPos);
+    auto minimalInstrument = ComponentCreationHelper::createMinimalInstrument(source, sample, detectorPos);
 
     // Derive distances and angles
     const double l1 = beam1.norm();
@@ -357,15 +413,13 @@ public:
 
     // Derive QLab for diffraction
     const double wavenumber_in_angstrom_times_tof_in_microsec =
-        (Mantid::PhysicalConstants::NeutronMass * (l1 + l2) * 1e-10 *
-         microSecsInSec) /
+        (Mantid::PhysicalConstants::NeutronMass * (l1 + l2) * 1e-10 * microSecsInSec) /
         Mantid::PhysicalConstants::h_bar;
 
     V3D qLab = qLabDir * wavenumber_in_angstrom_times_tof_in_microsec;
 
-    Peak peak; // Everything will be default
-    peak.setInstrument(
-        minimalInstrument); // Can't do anything without the instrument
+    Peak peak;                             // Everything will be default
+    peak.setInstrument(minimalInstrument); // Can't do anything without the instrument
     peak.setQLabFrame(qLab);
     auto detector = peak.getDetector();
 
@@ -398,12 +452,9 @@ public:
 
   void test_setQSampleFrameVirtualDetectorWithQLab() {
     constexpr auto radius = 10.;
-    auto sphereInst =
-        ComponentCreationHelper::createTestInstrumentRectangular(5, 100);
-    auto extendedSpaceObj =
-        ComponentCreationHelper::createSphere(10., V3D(0, 0, 0));
-    auto extendedSpace = std::make_unique<ObjComponent>(
-        "extended-detector-space", extendedSpaceObj, sphereInst.get());
+    auto sphereInst = ComponentCreationHelper::createTestInstrumentRectangular(5, 100);
+    auto extendedSpaceObj = ComponentCreationHelper::createSphere(10., V3D(0, 0, 0));
+    auto extendedSpace = std::make_unique<ObjComponent>("extended-detector-space", extendedSpaceObj, sphereInst.get());
     extendedSpace->setPos(V3D(0.0, 0.0, 0.0));
     sphereInst->add(extendedSpace.release());
     const auto refFrame = sphereInst->getReferenceFrame();
@@ -450,17 +501,15 @@ public:
     // create x values of the range -1 to 1
     int index = 0;
     double startValue = -1;
-    std::generate(
-        xDirections.begin(), xDirections.end(),
-        [&index, &startValue]() { return startValue + index++ * 0.1; });
+    std::generate(xDirections.begin(), xDirections.end(),
+                  [&index, &startValue]() { return startValue + index++ * 0.1; });
 
     // create z values of the range 0.1 to 1
     // ignore negative z values as these are not physical!
     index = 0;
     startValue = 0.1;
-    std::generate(
-        zDirections.begin(), zDirections.end(),
-        [&index, &startValue]() { return startValue + index++ * 0.1; });
+    std::generate(zDirections.begin(), zDirections.end(),
+                  [&index, &startValue]() { return startValue + index++ * 0.1; });
 
     yDirections = xDirections;
 
@@ -474,12 +523,9 @@ public:
   }
 
   void test_setQSampleFrameVirtualDetectorWithScatteringAngle() {
-    auto sphereInst =
-        ComponentCreationHelper::createTestInstrumentRectangular(5, 100);
-    auto extendedSpaceObj =
-        ComponentCreationHelper::createSphere(10., V3D(0, 0, 0));
-    auto extendedSpace = std::make_unique<ObjComponent>(
-        "extended-detector-space", extendedSpaceObj, sphereInst.get());
+    auto sphereInst = ComponentCreationHelper::createTestInstrumentRectangular(5, 100);
+    auto extendedSpaceObj = ComponentCreationHelper::createSphere(10., V3D(0, 0, 0));
+    auto extendedSpace = std::make_unique<ObjComponent>("extended-detector-space", extendedSpaceObj, sphereInst.get());
     extendedSpace->setPos(V3D(0.0, 0.0, 0.0));
     sphereInst->add(extendedSpace.release());
 
@@ -507,8 +553,7 @@ public:
     int index = 0;
     std::vector<double> angles(8);
     std::generate(angles.begin(), angles.end(), [&index, &angles]() {
-      return static_cast<double>(index++) * M_PI /
-             static_cast<double>(angles.size());
+      return static_cast<double>(index++) * M_PI / static_cast<double>(angles.size());
     });
 
     std::for_each(angles.begin(), angles.end(), testTheta);
@@ -546,11 +591,9 @@ public:
     const int detectorId = 19999;
     const double wavelength = 2;
     Peak p(inst, detectorId, wavelength);
-    TSM_ASSERT_THROWS_NOTHING("Nothing wrong here, detector is valid",
-                              p.getDetectorPosition());
-    p.setQLabFrame(
-        V3D(1, 1, 1),
-        1.0); // This sets the detector pointer to null and detector id to -1;
+    TSM_ASSERT_THROWS_NOTHING("Nothing wrong here, detector is valid", p.getDetectorPosition());
+    p.setQLabFrame(V3D(1, 1, 1),
+                   1.0); // This sets the detector pointer to null and detector id to -1;
     TSM_ASSERT_THROWS("Detector is not valid", p.getDetectorPosition(),
                       Mantid::Kernel::Exception::NullPointerException &);
   }
@@ -618,13 +661,11 @@ public:
   }
 
 private:
-  void check_Contributing_Detectors(const Peak &peak,
-                                    const std::vector<int> &expected) {
+  void check_Contributing_Detectors(const Peak &peak, const std::vector<int> &expected) {
     auto peakIDs = peak.getContributingDetIDs();
     for (int id : expected) {
-      TSM_ASSERT_EQUALS("Expected " + boost::lexical_cast<std::string>(id) +
-                            " in contribution list",
-                        1, peakIDs.count(id))
+      TSM_ASSERT_EQUALS("Expected " + boost::lexical_cast<std::string>(id) + " in contribution list", 1,
+                        peakIDs.count(id))
     }
   }
 };

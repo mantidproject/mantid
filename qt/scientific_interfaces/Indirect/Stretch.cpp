@@ -5,11 +5,12 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "Stretch.h"
-#include "MantidQtWidgets/Common/UserInputValidator.h"
+#include "IndirectSettingsHelper.h"
 
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceGroup.h"
+#include "MantidQtWidgets/Common/UserInputValidator.h"
 
 using namespace Mantid::API;
 
@@ -21,29 +22,23 @@ bool doesExistInADS(std::string const &workspaceName) {
 }
 
 WorkspaceGroup_sptr getADSWorkspaceGroup(std::string const &workspaceName) {
-  return AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(
-      workspaceName);
+  return AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(workspaceName);
 }
 
 MatrixWorkspace_sptr getADSMatrixWorkspace(std::string const &workspaceName) {
-  return AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-      workspaceName);
+  return AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(workspaceName);
 }
 
 } // namespace
 
-namespace MantidQt {
-namespace CustomInterfaces {
-Stretch::Stretch(QWidget *parent)
-    : IndirectBayesTab(parent), m_previewSpec(0), m_save(false) {
+namespace MantidQt::CustomInterfaces {
+Stretch::Stretch(QWidget *parent) : IndirectBayesTab(parent), m_previewSpec(0), m_save(false) {
   m_uiForm.setupUi(parent);
 
   // Create range selector
   auto eRangeSelector = m_uiForm.ppPlot->addRangeSelector("StretchERange");
-  connect(eRangeSelector, SIGNAL(minValueChanged(double)), this,
-          SLOT(minValueChanged(double)));
-  connect(eRangeSelector, SIGNAL(maxValueChanged(double)), this,
-          SLOT(maxValueChanged(double)));
+  connect(eRangeSelector, SIGNAL(minValueChanged(double)), this, SLOT(minValueChanged(double)));
+  connect(eRangeSelector, SIGNAL(maxValueChanged(double)), this, SLOT(maxValueChanged(double)));
 
   // Add the properties browser to the ui form
   m_uiForm.treeSpace->addWidget(m_propTree);
@@ -79,23 +74,18 @@ Stretch::Stretch(QWidget *parent)
   m_dblManager->setMinimum(m_properties["SampleBinning"], 1);
 
   // Connect the data selector for the sample to the mini plot
-  connect(m_uiForm.dsSample, SIGNAL(dataReady(const QString &)), this,
-          SLOT(handleSampleInputReady(const QString &)));
-  connect(m_uiForm.chkSequentialFit, SIGNAL(toggled(bool)), m_uiForm.cbPlot,
-          SLOT(setEnabled(bool)));
+  connect(m_uiForm.dsSample, SIGNAL(dataReady(const QString &)), this, SLOT(handleSampleInputReady(const QString &)));
+  connect(m_uiForm.chkSequentialFit, SIGNAL(toggled(bool)), m_uiForm.cbPlot, SLOT(setEnabled(bool)));
   // Connect preview spectrum spinner to handler
-  connect(m_uiForm.spPreviewSpectrum, SIGNAL(valueChanged(int)), this,
-          SLOT(previewSpecChanged(int)));
+  connect(m_uiForm.spPreviewSpectrum, SIGNAL(valueChanged(int)), this, SLOT(previewSpecChanged(int)));
   m_uiForm.spPreviewSpectrum->setMaximum(0);
 
   // Connect the plot and save push buttons
   connect(m_uiForm.pbRun, SIGNAL(clicked()), this, SLOT(runClicked()));
   connect(m_uiForm.pbPlot, SIGNAL(clicked()), this, SLOT(plotWorkspaces()));
-  connect(m_uiForm.pbPlotContour, SIGNAL(clicked()), this,
-          SLOT(plotContourClicked()));
+  connect(m_uiForm.pbPlotContour, SIGNAL(clicked()), this, SLOT(plotContourClicked()));
   connect(m_uiForm.pbSave, SIGNAL(clicked()), this, SLOT(saveWorkspaces()));
-  connect(m_uiForm.pbPlotPreview, SIGNAL(clicked()), this,
-          SLOT(plotCurrentPreview()));
+  connect(m_uiForm.pbPlotPreview, SIGNAL(clicked()), this, SLOT(plotCurrentPreview()));
 
   // Allows empty workspace selector when initially selected
   m_uiForm.dsSample->isOptional(true);
@@ -105,14 +95,10 @@ Stretch::Stretch(QWidget *parent)
 void Stretch::setFileExtensionsByName(bool filter) {
   QStringList const noSuffixes{""};
   auto const tabName("Stretch");
-  m_uiForm.dsSample->setFBSuffixes(filter ? getSampleFBSuffixes(tabName)
-                                          : getExtensions(tabName));
-  m_uiForm.dsSample->setWSSuffixes(filter ? getSampleWSSuffixes(tabName)
-                                          : noSuffixes);
-  m_uiForm.dsResolution->setFBSuffixes(filter ? getResolutionFBSuffixes(tabName)
-                                              : getExtensions(tabName));
-  m_uiForm.dsResolution->setWSSuffixes(filter ? getResolutionWSSuffixes(tabName)
-                                              : noSuffixes);
+  m_uiForm.dsSample->setFBSuffixes(filter ? getSampleFBSuffixes(tabName) : getExtensions(tabName));
+  m_uiForm.dsSample->setWSSuffixes(filter ? getSampleWSSuffixes(tabName) : noSuffixes);
+  m_uiForm.dsResolution->setFBSuffixes(filter ? getResolutionFBSuffixes(tabName) : getExtensions(tabName));
+  m_uiForm.dsResolution->setWSSuffixes(filter ? getResolutionWSSuffixes(tabName) : noSuffixes);
 }
 
 void Stretch::setup() {}
@@ -145,8 +131,7 @@ void Stretch::run() {
 
   // Workspace input
   auto const sampleName = m_uiForm.dsSample->getCurrentDataName().toStdString();
-  auto const resName =
-      m_uiForm.dsResolution->getCurrentDataName().toStdString();
+  auto const resName = m_uiForm.dsResolution->getCurrentDataName().toStdString();
 
   // Collect input from options section
   auto const background = m_uiForm.cbBackground->currentText().toStdString();
@@ -184,8 +169,7 @@ void Stretch::run() {
   stretch->setProperty("OutputWorkspaceContour", m_contourWorkspaceName);
 
   m_batchAlgoRunner->addAlgorithm(stretch);
-  connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this,
-          SLOT(algorithmComplete(bool)));
+  connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this, SLOT(algorithmComplete(bool)));
   m_batchAlgoRunner->executeBatchAsync();
 }
 
@@ -193,8 +177,7 @@ void Stretch::run() {
  * Handles the saving and plotting of workspaces after execution
  */
 void Stretch::algorithmComplete(const bool &error) {
-  disconnect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this,
-             SLOT(algorithmComplete(bool)));
+  disconnect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this, SLOT(algorithmComplete(bool)));
 
   setRunIsRunning(false);
   if (error) {
@@ -231,22 +214,19 @@ void Stretch::saveWorkspaces() {
   IndirectTab::checkADSForPlotSaveWorkspace(m_fitWorkspaceName, false);
   IndirectTab::checkADSForPlotSaveWorkspace(m_contourWorkspaceName, false);
 
-  auto saveDir = QString::fromStdString(
-      Mantid::Kernel::ConfigService::Instance().getString(
-          "defaultsave.directory"));
+  const auto saveDir =
+      QString::fromStdString(Mantid::Kernel::ConfigService::Instance().getString("defaultsave.directory"));
   // Check validity of save path
-  const auto fitFullPath = saveDir.append(fitWorkspace).append(".nxs");
-  const auto contourFullPath = saveDir.append(contourWorkspace).append(".nxs");
+  const auto fitFullPath = saveDir + fitWorkspace + QString::fromStdString(".nxs");
+  const auto contourFullPath = saveDir + contourWorkspace + QString::fromStdString(".nxs");
   addSaveWorkspaceToQueue(fitWorkspace, fitFullPath);
-  addSaveWorkspaceToQueue(contourWorkspace, fitFullPath);
+  addSaveWorkspaceToQueue(contourWorkspace, contourFullPath);
   m_batchAlgoRunner->executeBatchAsync();
 }
 
 void Stretch::runClicked() {
   if (validateTab()) {
-    auto const saveDirectory =
-        Mantid::Kernel::ConfigService::Instance().getString(
-            "defaultsave.directory");
+    auto const saveDirectory = Mantid::Kernel::ConfigService::Instance().getString("defaultsave.directory");
     displayMessageAndRun(saveDirectory);
   }
 }
@@ -265,14 +245,12 @@ void Stretch::displayMessageAndRun(std::string const &saveDirectory) {
 }
 
 int Stretch::displaySaveDirectoryMessage() {
-  char const *textMessage =
-      "BayesStretch requires a default save directory and "
-      "one is not currently set."
-      " If run, the algorithm will default to saving files "
-      "to the current working directory."
-      " Would you still like to run the algorithm?";
-  return QMessageBox::question(nullptr, tr("Save Directory"), tr(textMessage),
-                               QMessageBox::Yes, QMessageBox::No,
+  char const *textMessage = "BayesStretch requires a default save directory and "
+                            "one is not currently set."
+                            " If run, the algorithm will default to saving files "
+                            "to the current working directory."
+                            " Would you still like to run the algorithm?";
+  return QMessageBox::question(nullptr, tr("Save Directory"), tr(textMessage), QMessageBox::Yes, QMessageBox::No,
                                QMessageBox::NoButton);
 }
 
@@ -286,17 +264,15 @@ void Stretch::plotWorkspaces() {
   auto sigma = QString::fromStdString(fitWorkspace->getItem(0)->getName());
   auto beta = QString::fromStdString(fitWorkspace->getItem(1)->getName());
   // Check Sigma and Beta workspaces exist
-  if (sigma.right(5).compare("Sigma") == 0 &&
-      beta.right(4).compare("Beta") == 0) {
+  if (sigma.right(5).compare("Sigma") == 0 && beta.right(4).compare("Beta") == 0) {
 
     std::string const plotType = m_uiForm.cbPlot->currentText().toStdString();
     if (plotType == "All" || plotType == "Beta")
-      m_plotter->plotSpectra(beta.toStdString(), "0");
+      m_plotter->plotSpectra(beta.toStdString(), "0", IndirectSettingsHelper::externalPlotErrorBars());
     if (plotType == "All" || plotType == "Sigma")
-      m_plotter->plotSpectra(sigma.toStdString(), "0");
+      m_plotter->plotSpectra(sigma.toStdString(), "0", IndirectSettingsHelper::externalPlotErrorBars());
   } else {
-    g_log.error(
-        "Beta and Sigma workspace were not found and could not be plotted.");
+    g_log.error("Beta and Sigma workspace were not found and could not be plotted.");
   }
   setPlotResultIsPlotting(false);
 }
@@ -304,8 +280,7 @@ void Stretch::plotWorkspaces() {
 void Stretch::plotContourClicked() {
   setPlotContourIsPlotting(true);
 
-  auto const workspaceName =
-      m_uiForm.cbPlotContour->currentText().toStdString();
+  auto const workspaceName = m_uiForm.cbPlotContour->currentText().toStdString();
   if (checkADSForPlotSaveWorkspace(workspaceName, true))
     m_plotter->plotContour(workspaceName);
 
@@ -341,17 +316,14 @@ void Stretch::handleSampleInputReady(const QString &filename) {
   // update the maximum and minimum range bar positions
   auto const range = getXRangeFromWorkspace(filename.toStdString());
   auto eRangeSelector = m_uiForm.ppPlot->getRangeSelector("StretchERange");
-  setRangeSelector(eRangeSelector, m_properties["EMin"], m_properties["EMax"],
-                   range);
-  setPlotPropertyRange(eRangeSelector, m_properties["EMin"],
-                       m_properties["EMax"], range);
+  setRangeSelector(eRangeSelector, m_properties["EMin"], m_properties["EMax"], range);
+  setPlotPropertyRange(eRangeSelector, m_properties["EMin"], m_properties["EMax"], range);
   // update the current positions of the range bars
   eRangeSelector->setMinimum(range.first);
   eRangeSelector->setMaximum(range.second);
 
   // set the max spectrum
-  MatrixWorkspace_const_sptr sampleWs =
-      getADSMatrixWorkspace(filename.toStdString());
+  MatrixWorkspace_const_sptr sampleWs = getADSMatrixWorkspace(filename.toStdString());
   const int spectra = static_cast<int>(sampleWs->getNumberHistograms());
   m_uiForm.spPreviewSpectrum->setMaximum(spectra - 1);
 }
@@ -382,9 +354,8 @@ void Stretch::previewSpecChanged(int value) {
  */
 void Stretch::plotCurrentPreview() {
   if (m_uiForm.ppPlot->hasCurve("Sample")) {
-    m_plotter->plotSpectra(
-        m_uiForm.dsSample->getCurrentDataName().toStdString(),
-        std::to_string(m_previewSpec));
+    m_plotter->plotSpectra(m_uiForm.dsSample->getCurrentDataName().toStdString(), std::to_string(m_previewSpec),
+                           IndirectSettingsHelper::externalPlotErrorBars());
   }
 }
 
@@ -397,8 +368,7 @@ void Stretch::minValueChanged(double min) {
   disconnect(m_dblManager, SIGNAL(valueChanged(QtProperty *, double)), this,
              SLOT(updateProperties(QtProperty *, double)));
   m_dblManager->setValue(m_properties["EMin"], min);
-  connect(m_dblManager, SIGNAL(valueChanged(QtProperty *, double)), this,
-          SLOT(updateProperties(QtProperty *, double)));
+  connect(m_dblManager, SIGNAL(valueChanged(QtProperty *, double)), this, SLOT(updateProperties(QtProperty *, double)));
 }
 
 /**
@@ -410,8 +380,7 @@ void Stretch::maxValueChanged(double max) {
   disconnect(m_dblManager, SIGNAL(valueChanged(QtProperty *, double)), this,
              SLOT(updateProperties(QtProperty *, double)));
   m_dblManager->setValue(m_properties["EMax"], max);
-  connect(m_dblManager, SIGNAL(valueChanged(QtProperty *, double)), this,
-          SLOT(updateProperties(QtProperty *, double)));
+  connect(m_dblManager, SIGNAL(valueChanged(QtProperty *, double)), this, SLOT(updateProperties(QtProperty *, double)));
 }
 
 /**
@@ -427,20 +396,15 @@ void Stretch::updateProperties(QtProperty *prop, double val) {
              SLOT(updateProperties(QtProperty *, double)));
 
   if (prop == m_properties["EMin"]) {
-    setRangeSelectorMin(m_properties["EMin"], m_properties["EMax"],
-                        eRangeSelector, val);
+    setRangeSelectorMin(m_properties["EMin"], m_properties["EMax"], eRangeSelector, val);
   } else if (prop == m_properties["EMax"]) {
-    setRangeSelectorMax(m_properties["EMin"], m_properties["EMax"],
-                        eRangeSelector, val);
+    setRangeSelectorMax(m_properties["EMin"], m_properties["EMax"], eRangeSelector, val);
   }
 
-  connect(m_dblManager, SIGNAL(valueChanged(QtProperty *, double)), this,
-          SLOT(updateProperties(QtProperty *, double)));
+  connect(m_dblManager, SIGNAL(valueChanged(QtProperty *, double)), this, SLOT(updateProperties(QtProperty *, double)));
 }
 
-void Stretch::setRunEnabled(bool enabled) {
-  m_uiForm.pbRun->setEnabled(enabled);
-}
+void Stretch::setRunEnabled(bool enabled) { m_uiForm.pbRun->setEnabled(enabled); }
 
 void Stretch::setPlotResultEnabled(bool enabled) {
   m_uiForm.pbPlot->setEnabled(enabled);
@@ -452,9 +416,7 @@ void Stretch::setPlotContourEnabled(bool enabled) {
   m_uiForm.cbPlotContour->setEnabled(enabled);
 }
 
-void Stretch::setSaveResultEnabled(bool enabled) {
-  m_uiForm.pbSave->setEnabled(enabled);
-}
+void Stretch::setSaveResultEnabled(bool enabled) { m_uiForm.pbSave->setEnabled(enabled); }
 
 void Stretch::setButtonsEnabled(bool enabled) {
   setRunEnabled(enabled);
@@ -478,5 +440,4 @@ void Stretch::setPlotContourIsPlotting(bool plotting) {
   setButtonsEnabled(!plotting);
 }
 
-} // namespace CustomInterfaces
-} // namespace MantidQt
+} // namespace MantidQt::CustomInterfaces

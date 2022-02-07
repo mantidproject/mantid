@@ -39,9 +39,7 @@ public:
   /// Algorithm's version
   int version() const override { return (1); }
   /// Algorithm's category for identification
-  const std::string category() const override {
-    return "SANS;DataHandling\\Text";
-  }
+  const std::string category() const override { return "SANS;DataHandling\\Text"; }
 
 private:
   /// Initialisation code

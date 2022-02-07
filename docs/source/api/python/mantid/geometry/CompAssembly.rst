@@ -8,7 +8,7 @@ This is a Python binding to the C++ class Mantid::Geometry::CompAssembly.
 
 .. module:`mantid.geometry`
 
-.. autoclass:: mantid.geometry.CompAssembly 
+.. autoclass:: mantid.geometry.CompAssembly
     :members:
     :undoc-members:
     :inherited-members:

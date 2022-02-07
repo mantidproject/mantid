@@ -45,8 +45,7 @@ public:
   virtual void addNumberToColumn(const double &value, const size_t &iActiveP) {
     (void)value;
     (void)iActiveP; // Avoid compiler warning
-    throw Kernel::Exception::NotImplementedError(
-        "No addNumberToColumn() method of Jacobian provided");
+    throw Kernel::Exception::NotImplementedError("No addNumberToColumn() method of Jacobian provided");
   }
   ///@endcond
 

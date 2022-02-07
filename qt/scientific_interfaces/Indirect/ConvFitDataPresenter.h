@@ -6,6 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
+#include "ConvFitDataView.h"
 #include "ConvFitModel.h"
 #include "IndirectFitDataPresenter.h"
 
@@ -15,35 +16,19 @@ namespace IDA {
 
 class ConvFitAddWorkspaceDialog;
 
-class MANTIDQT_INDIRECT_DLL ConvFitDataPresenter
-    : public IndirectFitDataPresenter {
+class MANTIDQT_INDIRECT_DLL ConvFitDataPresenter : public IndirectFitDataPresenter {
   Q_OBJECT
 public:
-  ConvFitDataPresenter(ConvFitModel *model, IIndirectFitDataView *view);
+  ConvFitDataPresenter(IIndirectFitDataModel *model, IIndirectFitDataView *view);
 
 signals:
-  void modelResolutionAdded(std::string const &name,
-                            TableDatasetIndex const &index);
-
-private slots:
-  void setModelResolution(const QString &name);
+  void modelResolutionAdded(std::string const &name, WorkspaceID const &workspaceID);
 
 protected:
-  void addModelData(const std::string &name) override;
+  void addTableEntry(FitDomainIndex row) override;
 
 private:
-  void setModelResolution(std::string const &name,
-                          TableDatasetIndex const &index);
-  void addDataToModel(IAddWorkspaceDialog const *dialog) override;
-  std::unique_ptr<IAddWorkspaceDialog>
-  getAddWorkspaceDialog(QWidget *parent) const override;
-  void addWorkspace(ConvFitAddWorkspaceDialog const &dialog,
-                    IndirectFittingModel &model);
-
-  void setMultiInputResolutionFBSuffixes(IAddWorkspaceDialog *dialog) override;
-  void setMultiInputResolutionWSSuffixes(IAddWorkspaceDialog *dialog) override;
-
-  ConvFitModel *m_convModel;
+  std::unique_ptr<IAddWorkspaceDialog> getAddWorkspaceDialog(QWidget *parent) const override;
 };
 
 } // namespace IDA

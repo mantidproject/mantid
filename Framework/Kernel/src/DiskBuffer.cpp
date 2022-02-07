@@ -11,15 +11,14 @@
 
 using namespace Mantid::Kernel;
 
-namespace Mantid {
-namespace Kernel {
+namespace Mantid::Kernel {
 
 //----------------------------------------------------------------------------------------------
 /** Constructor
  */
 DiskBuffer::DiskBuffer()
-    : m_writeBufferSize(50), m_writeBufferUsed(0), m_nObjectsToWrite(0),
-      m_free(), m_free_bySize(m_free.get<1>()), m_fileLength(0) {
+    : m_writeBufferSize(50), m_writeBufferUsed(0), m_nObjectsToWrite(0), m_free(), m_free_bySize(m_free.get<1>()),
+      m_fileLength(0) {
   m_free.clear();
 }
 
@@ -31,9 +30,8 @@ DiskBuffer::DiskBuffer()
  * @return
  */
 DiskBuffer::DiskBuffer(uint64_t m_writeBufferSize)
-    : m_writeBufferSize(m_writeBufferSize), m_writeBufferUsed(0),
-      m_nObjectsToWrite(0), m_free(), m_free_bySize(m_free.get<1>()),
-      m_fileLength(0) {
+    : m_writeBufferSize(m_writeBufferSize), m_writeBufferUsed(0), m_nObjectsToWrite(0), m_free(),
+      m_free_bySize(m_free.get<1>()), m_fileLength(0) {
   m_free.clear();
 }
 
@@ -137,8 +135,7 @@ void DiskBuffer::writeOldObjects() {
         if (NumObjEvents != NumFileEvents) {
           // Event list changed size. The MRU can tell us where it best fits
           // now.
-          fileIndexStart = this->relocate(obj->getFilePosition(), NumFileEvents,
-                                          NumObjEvents);
+          fileIndexStart = this->relocate(obj->getFilePosition(), NumFileEvents, NumObjEvents);
           // Write to the disk; this will call the object specific save
           // function;
           obj->saveAt(fileIndexStart, NumObjEvents);
@@ -341,8 +338,7 @@ uint64_t DiskBuffer::allocate(uint64_t const newSize) {
  * @param newSize :: new size of the data
  * @return a new position at which the data can be saved.
  */
-uint64_t DiskBuffer::relocate(uint64_t const oldPos, uint64_t const oldSize,
-                              const uint64_t newSize) {
+uint64_t DiskBuffer::relocate(uint64_t const oldPos, uint64_t const oldSize, const uint64_t newSize) {
   // std::cout << "Relocating " << oldPos << ", " << oldSize << ", " << newSize
   // << '\n';
   // First, release the space in the old block.
@@ -386,10 +382,8 @@ void DiskBuffer::setFreeSpaceVector(std::vector<uint64_t> &free) {
 /// @return a string describing the memory buffers, for debugging.
 std::string DiskBuffer::getMemoryStr() const {
   std::ostringstream mess;
-  mess << "Buffer: " << m_writeBufferUsed << " in " << m_nObjectsToWrite
-       << " objects. ";
+  mess << "Buffer: " << m_writeBufferUsed << " in " << m_nObjectsToWrite << " objects. ";
   return mess.str();
 }
 
-} // namespace Kernel
-} // namespace Mantid
+} // namespace Mantid::Kernel

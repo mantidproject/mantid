@@ -36,9 +36,7 @@ public:
   int version() const override { return (1); }
 
   /// Algorithm's category for identification
-  const std::string category() const override {
-    return "Diffraction\\ConstantWavelength";
-  }
+  const std::string category() const override { return "Diffraction\\ConstantWavelength"; }
 
 private:
   /// Initialisation code
@@ -47,35 +45,25 @@ private:
   /// Execution code
   void exec() override;
 
-  void exportEvents(const API::IMDEventWorkspace_sptr &mdws,
-                    std::vector<Kernel::V3D> &vec_event_qsample,
-                    std::vector<signal_t> &vec_event_signal,
-                    std::vector<detid_t> &vec_event_det);
+  void exportEvents(const API::IMDEventWorkspace_sptr &mdws, std::vector<Kernel::V3D> &vec_event_qsample,
+                    std::vector<signal_t> &vec_event_signal, std::vector<detid_t> &vec_event_det);
 
-  void convertFromQSampleToHKL(const std::vector<Kernel::V3D> &q_vectors,
-                               std::vector<Kernel::V3D> &miller_indices);
+  void convertFromQSampleToHKL(const std::vector<Kernel::V3D> &q_vectors, std::vector<Kernel::V3D> &miller_indices);
 
-  API::IMDEventWorkspace_sptr
-  createHKLMDWorkspace(const std::vector<Kernel::V3D> &vec_hkl,
-                       const std::vector<signal_t> &vec_signal,
-                       const std::vector<detid_t> &vec_detid);
+  API::IMDEventWorkspace_sptr createHKLMDWorkspace(const std::vector<Kernel::V3D> &vec_hkl,
+                                                   const std::vector<signal_t> &vec_signal,
+                                                   const std::vector<detid_t> &vec_detid);
 
-  void addMDEvents(std::vector<std::vector<coord_t>> &vec_q_sample,
-                   std::vector<float> &vec_signal);
+  void addMDEvents(std::vector<std::vector<coord_t>> &vec_q_sample, std::vector<float> &vec_signal);
 
-  void
-  saveMDToFile(std::vector<std::vector<Mantid::coord_t>> &vec_event_qsample,
-               std::vector<float> &vec_event_signal);
+  void saveMDToFile(std::vector<std::vector<Mantid::coord_t>> &vec_event_qsample, std::vector<float> &vec_event_signal);
 
-  void saveEventsToFile(const std::string &filename,
-                        std::vector<Kernel::V3D> &vec_event_pos,
-                        std::vector<signal_t> &vec_event_signal,
-                        std::vector<detid_t> &vec_event_detid);
+  void saveEventsToFile(const std::string &filename, std::vector<Kernel::V3D> &vec_event_pos,
+                        std::vector<signal_t> &vec_event_signal, std::vector<detid_t> &vec_event_detid);
 
   void getUBMatrix();
 
-  void getRange(const std::vector<Kernel::V3D> &vec_hkl,
-                std::vector<double> &extentMins,
+  void getRange(const std::vector<Kernel::V3D> &vec_hkl, std::vector<double> &extentMins,
                 std::vector<double> &extentMaxs);
 
   API::IMDEventWorkspace_sptr m_outputWS;

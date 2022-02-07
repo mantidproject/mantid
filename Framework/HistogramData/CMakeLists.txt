@@ -14,7 +14,8 @@ set(SRC_FILES
     src/Interpolate.cpp
     src/Points.cpp
     src/Rebin.cpp
-    src/Slice.cpp)
+    src/Slice.cpp
+)
 
 set(INC_FILES
     inc/MantidHistogramData/Addable.h
@@ -56,7 +57,8 @@ set(INC_FILES
     inc/MantidHistogramData/VarianceVectorOf.h
     inc/MantidHistogramData/VectorOf.h
     inc/MantidHistogramData/XValidation.h
-    inc/MantidHistogramData/YValidation.h)
+    inc/MantidHistogramData/YValidation.h
+)
 
 set(TEST_FILES
     AddableTest.h
@@ -95,13 +97,12 @@ set(TEST_FILES
     VarianceVectorOfTest.h
     VectorOfTest.h
     XValidationTest.h
-    YValidationTest.h)
+    YValidationTest.h
+)
 
-if(COVERALLS)
+if(COVERAGE)
   foreach(loop_var ${SRC_FILES} ${INC_FILES})
-    set_property(GLOBAL APPEND
-                 PROPERTY COVERAGE_SRCS
-                          "${CMAKE_CURRENT_SOURCE_DIR}/${loop_var}")
+    set_property(GLOBAL APPEND PROPERTY COVERAGE_SRCS "${CMAKE_CURRENT_SOURCE_DIR}/${loop_var}")
   endforeach(loop_var)
 endif()
 
@@ -112,42 +113,42 @@ endif(UNITY_BUILD)
 
 # Add the target for this directory
 add_library(HistogramData ${SRC_FILES} ${INC_FILES})
+add_library(Mantid::HistogramData ALIAS HistogramData)
+
 # Set the name of the generated library
-set_target_properties(HistogramData
-                      PROPERTIES OUTPUT_NAME
-                                 MantidHistogramData
-                                 COMPILE_DEFINITIONS
-                                 IN_MANTID_HISTOGRAMDATA)
+set_target_properties(
+  HistogramData PROPERTIES OUTPUT_NAME MantidHistogramData COMPILE_DEFINITIONS IN_MANTID_HISTOGRAMDATA
+)
 
 if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
-  set_target_properties(HistogramData
-                        PROPERTIES INSTALL_RPATH "@loader_path/../MacOS;@loader_path/../Frameworks")
+  set_target_properties(HistogramData PROPERTIES INSTALL_RPATH "@loader_path/../MacOS;@loader_path/../Frameworks")
 elseif(${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
-  set_target_properties(HistogramData
-                        PROPERTIES INSTALL_RPATH "\$ORIGIN/../${LIB_DIR}")
+  set_target_properties(HistogramData PROPERTIES INSTALL_RPATH "\$ORIGIN/../${LIB_DIR}")
 endif()
 
 # Add to the 'Framework' group in VS
 set_property(TARGET HistogramData PROPERTY FOLDER "MantidFramework")
 
-target_include_directories (HistogramData SYSTEM PUBLIC ${Boost_INCLUDE_DIRS})
-target_link_libraries(HistogramData
-                      LINK_PRIVATE
-                      ${TCMALLOC_LIBRARIES_LINKTIME}
-                      ${GSL_LIBRARIES}
-                      Kernel
-                      ${MANTIDLIBS})
+target_include_directories(
+  HistogramData PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/inc> $<INSTALL_INTERFACE:include/Mantid>
+)
+
+target_link_libraries(HistogramData PUBLIC Kernel)
 
 # Add the unit tests directory
 add_subdirectory(test)
 
 # Auto-generate exports header
-target_include_directories(HistogramData PUBLIC ${CMAKE_BINARY_DIR}/Framework/HistogramData)
+target_include_directories(
+  HistogramData PUBLIC $<BUILD_INTERFACE:${CMAKE_BINARY_DIR}/Framework/HistogramData>
+                       $<INSTALL_INTERFACE:include/Mantid>
+)
 generate_mantid_export_header(HistogramData FALSE)
 
 # Installation settings
-mtd_install_targets(TARGETS
-                    HistogramData
-                    INSTALL_DIRS
-                    ${LIB_DIR}
-                    ${WORKBENCH_LIB_DIR})
+if(CONDA_ENV)
+  set(TARGET_EXPORT_NAME "MantidHistogramDataTargets")
+  mtd_install_framework_lib(TARGETS HistogramData INSTALL_EXPORT_FILE EXPORT_NAME ${TARGET_EXPORT_NAME})
+else()
+  mtd_install_targets(TARGETS HistogramData INSTALL_DIRS ${LIB_DIR} ${WORKBENCH_LIB_DIR})
+endif()

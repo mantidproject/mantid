@@ -9,20 +9,24 @@
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/IPeakFunction.h"
+#include "MantidAPI/NumericAxis.h"
+#include "MantidAPI/SpectraAxis.h"
 #include "MantidAPI/SpectrumInfo.h"
+#include "MantidAPI/TextAxis.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
+#include "MantidAlgorithms/PeakParameterHelper.h"
 #include "MantidDataObjects/MaskWorkspace.h"
 #include "MantidDataObjects/OffsetsWorkspace.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/ListValidator.h"
 
-namespace Mantid {
-namespace Algorithms {
+namespace Mantid::Algorithms {
 
 // Register the class into the algorithm factory
 DECLARE_ALGORITHM(GetDetectorOffsets)
 
 using namespace Kernel;
+using namespace Algorithms::PeakParameterHelper;
 using namespace API;
 using std::size_t;
 using namespace DataObjects;
@@ -32,55 +36,56 @@ using namespace DataObjects;
  */
 void GetDetectorOffsets::init() {
 
-  declareProperty(std::make_unique<WorkspaceProperty<>>(
-                      "InputWorkspace", "", Direction::Input,
-                      std::make_shared<WorkspaceUnitValidator>("dSpacing")),
+  declareProperty(std::make_unique<WorkspaceProperty<>>("InputWorkspace", "", Direction::Input),
+
                   "A 2D workspace with X values of d-spacing");
 
   auto mustBePositive = std::make_shared<BoundedValidator<double>>();
   mustBePositive->setLower(0);
 
-  declareProperty("Step", 0.001, mustBePositive,
-                  "Step size used to bin d-spacing data");
-  declareProperty("DReference", 2.0, mustBePositive,
-                  "Center of reference peak in d-space");
-  declareProperty(
-      "XMin", 0.0,
-      "Minimum of CrossCorrelation data to search for peak, usually negative");
-  declareProperty(
-      "XMax", 0.0,
-      "Maximum of CrossCorrelation data to search for peak, usually positive");
+  declareProperty("Step", 0.001, mustBePositive, "Step size used to bin d-spacing data");
+  declareProperty("DReference", 2.0, mustBePositive, "Center of reference peak in d-space");
+  declareProperty("XMin", 0.0, "Minimum of CrossCorrelation data to search for peak, usually negative");
+  declareProperty("XMax", 0.0, "Maximum of CrossCorrelation data to search for peak, usually positive");
 
-  declareProperty(std::make_unique<FileProperty>("GroupingFileName", "",
-                                                 FileProperty::OptionalSave,
-                                                 ".cal"),
+  declareProperty(std::make_unique<FileProperty>("GroupingFileName", "", FileProperty::OptionalSave, ".cal"),
                   "Optional: The name of the output CalFile to save the "
                   "generated OffsetsWorkspace.");
-  declareProperty(std::make_unique<WorkspaceProperty<OffsetsWorkspace>>(
-                      "OutputWorkspace", "", Direction::Output),
+  declareProperty(std::make_unique<WorkspaceProperty<OffsetsWorkspace>>("OutputWorkspace", "", Direction::Output),
                   "An output workspace containing the offsets.");
-  declareProperty(std::make_unique<WorkspaceProperty<>>("MaskWorkspace", "Mask",
-                                                        Direction::Output),
+  declareProperty(std::make_unique<WorkspaceProperty<>>("MaskWorkspace", "Mask", Direction::Output),
                   "An output workspace containing the mask.");
   // Only keep peaks
-  declareProperty(
-      "PeakFunction", "Gaussian",
-      std::make_shared<StringListValidator>(
-          FunctionFactory::Instance().getFunctionNames<IPeakFunction>()),
-      "The function type for fitting the peaks.");
-  declareProperty("MaxOffset", 1.0,
-                  "Maximum absolute value of offsets; default is 1");
+  declareProperty("PeakFunction", "Gaussian",
+                  std::make_shared<StringListValidator>(FunctionFactory::Instance().getFunctionNames<IPeakFunction>()),
+                  "The function type for fitting the peaks.");
+  declareProperty(std::make_unique<Kernel::PropertyWithValue<bool>>("EstimateFWHM", false),
+                  "Whether to esimate FWHM of peak function when estimating fit parameters");
+  declareProperty("MaxOffset", 1.0, "Maximum absolute value of offsets; default is 1");
 
-  std::vector<std::string> modes{"Relative", "Absolute"};
+  /* Signed mode calculates offset in number of bins */
+  std::vector<std::string> modes{"Relative", "Absolute", "Signed"};
 
-  declareProperty("OffsetMode", "Relative",
-                  std::make_shared<StringListValidator>(modes),
-                  "Whether to calculate a relative or absolute offset");
+  declareProperty("OffsetMode", "Relative", std::make_shared<StringListValidator>(modes),
+                  "Whether to calculate a relative, absolute, or signed offset");
   declareProperty("DIdeal", 2.0, mustBePositive,
                   "The known peak centre value from the NIST standard "
                   "information, this is only used in Absolute OffsetMode.");
 }
 
+std::map<std::string, std::string> GetDetectorOffsets::validateInputs() {
+  std::map<std::string, std::string> result;
+
+  MatrixWorkspace_const_sptr inputWS = getProperty("InputWorkspace");
+  const auto unit = inputWS->getAxis(0)->unit()->caption();
+  const auto unitErrorMsg =
+      "GetDetectorOffsets only supports input workspaces with units 'Bins of Shift' or 'd-Spacing', your unit was : " +
+      unit;
+  if (unit != "Bins of Shift" && unit != "d-Spacing") {
+    result["InputWorkspace"] = unitErrorMsg;
+  }
+  return result;
+}
 //-----------------------------------------------------------------------------------------
 /** Executes the algorithm
  *
@@ -96,11 +101,20 @@ void GetDetectorOffsets::exec() {
     throw std::runtime_error("Must specify m_Xmin<m_Xmax");
   m_dreference = getProperty("DReference");
   m_step = getProperty("Step");
+  m_estimateFWHM = getProperty("EstimateFWHM");
 
-  std::string mode = getProperty("OffsetMode");
-  bool isAbsolute = false;
-  if (mode == "Absolute") {
-    isAbsolute = true;
+  std::string mode_str = getProperty("OffsetMode");
+
+  if (mode_str == "Absolute") {
+    mode = offset_mode::absolute_offset;
+  }
+
+  else if (mode_str == "Relative") {
+    mode = offset_mode::relative_offset;
+  }
+
+  else if (mode_str == "Signed") {
+    mode = offset_mode::signed_offset;
   }
 
   m_dideal = getProperty("DIdeal");
@@ -111,8 +125,7 @@ void GetDetectorOffsets::exec() {
   // Create the output MaskWorkspace
   auto maskWS = std::make_shared<MaskWorkspace>(inputW->getInstrument());
   // To get the workspace index from the detector ID
-  const detid2index_map pixel_to_wi =
-      maskWS->getDetectorIDToWorkspaceIndexMap(true);
+  const detid2index_map pixel_to_wi = maskWS->getDetectorIDToWorkspaceIndexMap(true);
 
   // Fit all the spectra with a gaussian
   Progress prog(this, 0.0, 1.0, nspec);
@@ -121,7 +134,7 @@ void GetDetectorOffsets::exec() {
   for (int64_t wi = 0; wi < nspec; ++wi) {
     PARALLEL_START_INTERUPT_REGION
     // Fit the peak
-    double offset = fitSpectra(wi, isAbsolute);
+    double offset = fitSpectra(wi);
     double mask = 0.0;
     if (std::abs(offset) > m_maxOffset) {
       offset = 0.0;
@@ -165,7 +178,7 @@ void GetDetectorOffsets::exec() {
   std::string filename = getProperty("GroupingFileName");
   if (!filename.empty()) {
     progress(0.9, "Saving .cal file");
-    IAlgorithm_sptr childAlg = createChildAlgorithm("SaveCalFile");
+    auto childAlg = createChildAlgorithm("SaveCalFile");
     childAlg->setProperty("OffsetsWorkspace", outputW);
     childAlg->setProperty("MaskWorkspace", maskWS);
     childAlg->setPropertyValue("Filename", filename);
@@ -177,19 +190,44 @@ void GetDetectorOffsets::exec() {
 /** Calls Gaussian1D as a child algorithm to fit the offset peak in a spectrum
  *
  *  @param s :: The Workspace Index to fit
- *  @param isAbsolbute :: Whether to calculate an absolute offset
  *  @return The calculated offset value
  */
-double GetDetectorOffsets::fitSpectra(const int64_t s, bool isAbsolbute) {
+double GetDetectorOffsets::fitSpectra(const int64_t s) {
   // Find point of peak centre
   const auto &yValues = inputW->y(s);
   auto it = std::max_element(yValues.cbegin(), yValues.cend());
-  const double peakHeight = *it;
+
+  // Set the default peak height and location
+  double peakHeight = *it;
   const double peakLoc = inputW->x(s)[it - yValues.begin()];
+
   // Return if peak of Cross Correlation is nan (Happens when spectra is zero)
   // Pixel with large offset will be masked
   if (std::isnan(peakHeight))
     return (1000.);
+
+  IFunction_sptr fun_ptr = createFunction(peakHeight, peakLoc);
+
+  // Try to observe the peak height and location
+  const auto &histogram = inputW->histogram(s);
+  const auto &vector_x = histogram.points();
+  const auto start_index = findXIndex(vector_x, m_Xmin);
+  const auto stop_index = findXIndex(vector_x, m_Xmax, start_index);
+  // observe parameters if we found a peak range, otherwise use defaults
+  if (start_index != stop_index) {
+    // create a background function
+    auto bkgdFunction = std::dynamic_pointer_cast<IBackgroundFunction>(fun_ptr->getFunction(0));
+    auto peakFunction = std::dynamic_pointer_cast<IPeakFunction>(fun_ptr->getFunction(1));
+    int result = estimatePeakParameters(histogram, std::pair<size_t, size_t>(start_index, stop_index), peakFunction,
+                                        bkgdFunction, m_estimateFWHM, EstimatePeakWidth::Observation, EMPTY_DBL(), 0.0);
+    if (result != PeakFitResult::GOOD) {
+      g_log.debug() << "ws index: " << s
+                    << " bad result for observing peak parameters, using default peak height and loc\n";
+    }
+  } else {
+    g_log.notice() << "ws index: " << s
+                   << " range size is zero in estimatePeakParameters, using default peak height and loc\n";
+  }
 
   IAlgorithm_sptr fit_alg;
   try {
@@ -199,20 +237,16 @@ double GetDetectorOffsets::fitSpectra(const int64_t s, bool isAbsolbute) {
     g_log.error("Can't locate Fit algorithm");
     throw;
   }
-  auto fun = createFunction(peakHeight, peakLoc);
-  fit_alg->setProperty("Function", fun);
+
+  fit_alg->setProperty("Function", fun_ptr);
 
   fit_alg->setProperty("InputWorkspace", inputW);
-  fit_alg->setProperty<int>(
-      "WorkspaceIndex",
-      static_cast<int>(s)); // TODO what is the right thing to do here?
+  fit_alg->setProperty<int>("WorkspaceIndex",
+                            static_cast<int>(s)); // TODO what is the right thing to do here?
   fit_alg->setProperty("StartX", m_Xmin);
   fit_alg->setProperty("EndX", m_Xmax);
   fit_alg->setProperty("MaxIterations", 100);
 
-  IFunction_sptr fun_ptr = createFunction(peakHeight, peakLoc);
-
-  fit_alg->setProperty("Function", fun_ptr);
   fit_alg->executeAsChildAlg();
   std::string fitStatus = fit_alg->getProperty("OutputStatus");
   // Pixel with large offset will be masked
@@ -221,16 +255,33 @@ double GetDetectorOffsets::fitSpectra(const int64_t s, bool isAbsolbute) {
 
   // std::vector<double> params = fit_alg->getProperty("Parameters");
   API::IFunction_sptr function = fit_alg->getProperty("Function");
-  double offset = function->getParameter(3); // params[3]; // f1.PeakCentre
-  offset = -1. * offset * m_step / (m_dreference + offset * m_step);
-  // factor := factor * (1+offset) for d-spacemap conversion so factor cannot be
-  // negative
 
-  if (isAbsolbute) {
+  double offset = function->getParameter(3); // params[3]; // f1.PeakCentre
+
+  if (mode == offset_mode::signed_offset) {
+    // factor := factor * (1+offset) for d-spacemap conversion so factor cannot be
+    // negative
+    offset *= -1;
+  }
+
+  /* offset relative to the reference */
+  else if (mode == offset_mode::relative_offset) {
+    // factor := factor * (1+offset) for d-spacemap conversion so factor cannot be
+    // negative
+    offset = -1. * offset * m_step / (m_dreference + offset * m_step);
+  }
+
+  /* Offset relative to the ideal */
+  else if (mode == offset_mode::absolute_offset) {
+
+    offset = -1. * offset * m_step / (m_dreference + offset * m_step);
+
     // translated from(DIdeal - FittedPeakCentre)/(FittedPeakCentre)
     // given by Matt Tucker in ticket #10642
+
     offset += (m_dideal - m_dreference) / m_dreference;
   }
+
   return offset;
 }
 
@@ -239,12 +290,10 @@ double GetDetectorOffsets::fitSpectra(const int64_t s, bool isAbsolbute) {
  * @param peakHeight :: The height of the peak
  * @param peakLoc :: The location of the peak
  */
-IFunction_sptr GetDetectorOffsets::createFunction(const double peakHeight,
-                                                  const double peakLoc) {
-  FunctionFactoryImpl &creator = FunctionFactory::Instance();
+IFunction_sptr GetDetectorOffsets::createFunction(const double peakHeight, const double peakLoc) {
+  const FunctionFactoryImpl &creator = FunctionFactory::Instance();
   auto background = creator.createFunction("LinearBackground");
-  auto peak = std::dynamic_pointer_cast<IPeakFunction>(
-      creator.createFunction(getProperty("PeakFunction")));
+  auto peak = std::dynamic_pointer_cast<IPeakFunction>(creator.createFunction(getProperty("PeakFunction")));
   peak->setHeight(peakHeight);
   peak->setCentre(peakLoc);
   const double sigma(10.0);
@@ -257,5 +306,4 @@ IFunction_sptr GetDetectorOffsets::createFunction(const double peakHeight,
   return std::shared_ptr<IFunction>(fitFunc);
 }
 
-} // namespace Algorithms
-} // namespace Mantid
+} // namespace Mantid::Algorithms

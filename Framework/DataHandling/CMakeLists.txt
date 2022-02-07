@@ -1,6 +1,5 @@
 set(SRC_FILES
-    src/AppendGeometryToSNSNexus.cpp
-    src/AsciiPointBase.cpp
+    src/ApplyDiffCal.cpp
     src/BankPulseTimes.cpp
     src/CheckMantidVersion.cpp
     src/CompressEvents.cpp
@@ -30,6 +29,7 @@ set(SRC_FILES
     src/H5Util.cpp
     src/ISISDataArchive.cpp
     src/ISISJournal.cpp
+    src/ISISJournalGetExperimentRuns.cpp
     src/ISISRunLogs.cpp
     src/JoinISISPolarizationEfficiencies.cpp
     src/Load.cpp
@@ -43,10 +43,12 @@ set(SRC_FILES
     src/LoadCalFile.cpp
     src/LoadCanSAS1D.cpp
     src/LoadCanSAS1D2.cpp
+    src/LoadCSNSNexus.cpp
     src/LoadDaveGrp.cpp
     src/LoadDetectorInfo.cpp
     src/LoadDetectorsGroupingFile.cpp
     src/LoadDiffCal.cpp
+    src/LoadDNSEvent.cpp
     src/LoadDspacemap.cpp
     src/LoadEMU.cpp
     src/LoadEmptyInstrument.cpp
@@ -64,10 +66,12 @@ set(SRC_FILES
     src/LoadILLDiffraction.cpp
     src/LoadILLIndirect2.cpp
     src/LoadILLPolarizationFactors.cpp
+    src/LoadILLPolarizedDiffraction.cpp
     src/LoadILLReflectometry.cpp
     src/LoadILLSANS.cpp
     src/LoadILLTOF2.cpp
     src/LoadISISNexus2.cpp
+    src/LoadISISNexusHelper.cpp
     src/LoadISISPolarizationEfficiencies.cpp
     src/LoadInstrument.cpp
     src/LoadInstrumentFromNexus.cpp
@@ -84,6 +88,11 @@ set(SRC_FILES
     src/LoadMuonNexus.cpp
     src/LoadMuonNexus1.cpp
     src/LoadMuonNexus2.cpp
+    src/LoadMuonNexusV2.cpp
+    src/LoadMuonNexusV2NexusHelper.cpp
+    src/LoadMuonStrategy.cpp
+    src/SinglePeriodLoadMuonStrategy.cpp
+    src/MultiPeriodLoadMuonStrategy.cpp
     src/LoadNXSPE.cpp
     src/LoadNXcanSAS.cpp
     src/LoadNexus.cpp
@@ -119,6 +128,7 @@ set(SRC_FILES
     src/LoadSampleEnvironment.cpp
     src/LoadSampleShape.cpp
     src/LoadSassena.cpp
+    src/LoadSingleMesh.cpp
     src/LoadSpec.cpp
     src/LoadSpice2D.cpp
     src/LoadSpiceAscii.cpp
@@ -148,7 +158,6 @@ set(SRC_FILES
     src/SampleEnvironmentFactory.cpp
     src/SampleEnvironmentSpec.cpp
     src/SampleEnvironmentSpecParser.cpp
-    src/SaveANSTOAscii.cpp
     src/SaveAscii.cpp
     src/SaveAscii2.cpp
     src/SaveBankScatteringAngles.cpp
@@ -167,7 +176,6 @@ set(SRC_FILES
     src/SaveGDA.cpp
     src/SaveGSASInstrumentFile.cpp
     src/SaveGSS.cpp
-    src/SaveILLCosmosAscii.cpp
     src/SaveISISNexus.cpp
     src/SaveIsawDetCal.cpp
     src/SaveMask.cpp
@@ -185,8 +193,6 @@ set(SRC_FILES
     src/SavePHX.cpp
     src/SaveParameterFile.cpp
     src/SaveRKH.cpp
-    src/SaveReflCustomAscii.cpp
-    src/SaveReflThreeColumnAscii.cpp
     src/SaveReflectometryAscii.cpp
     src/SaveRMCProfile.cpp
     src/SaveSESANS.cpp
@@ -200,15 +206,17 @@ set(SRC_FILES
     src/SetSample.cpp
     src/SetSampleMaterial.cpp
     src/SetScalingPSD.cpp
+    src/SNSAppendGeometryToNexus.cpp
     src/SortTableWorkspace.cpp
     src/StartAndEndTimeFromNexusFileExtractor.cpp
     src/UpdateInstrumentFromFile.cpp
-    src/XmlHandler.cpp)
+    src/XmlHandler.cpp
+)
 
 set(INC_FILES
-    inc/MantidDataHandling/AppendGeometryToSNSNexus.h
-    inc/MantidDataHandling/AsciiPointBase.h
+    inc/MantidDataHandling/ApplyDiffCal.h
     inc/MantidDataHandling/BankPulseTimes.h
+    inc/MantidDataHandling/BitStream.h
     inc/MantidDataHandling/CheckMantidVersion.h
     inc/MantidDataHandling/CompressEvents.h
     inc/MantidDataHandling/CreateChunkingFromInstrument.h
@@ -237,6 +245,7 @@ set(INC_FILES
     inc/MantidDataHandling/H5Util.h
     inc/MantidDataHandling/ISISDataArchive.h
     inc/MantidDataHandling/ISISJournal.h
+    inc/MantidDataHandling/ISISJournalGetExperimentRuns.h
     inc/MantidDataHandling/ISISRunLogs.h
     inc/MantidDataHandling/JoinISISPolarizationEfficiencies.h
     inc/MantidDataHandling/Load.h
@@ -251,10 +260,12 @@ set(INC_FILES
     inc/MantidDataHandling/LoadCalFile.h
     inc/MantidDataHandling/LoadCanSAS1D.h
     inc/MantidDataHandling/LoadCanSAS1D2.h
+    inc/MantidDataHandling/LoadCSNSNexus.h
     inc/MantidDataHandling/LoadDaveGrp.h
     inc/MantidDataHandling/LoadDetectorInfo.h
     inc/MantidDataHandling/LoadDetectorsGroupingFile.h
     inc/MantidDataHandling/LoadDiffCal.h
+    inc/MantidDataHandling/LoadDNSEvent.h
     inc/MantidDataHandling/LoadDspacemap.h
     inc/MantidDataHandling/LoadEMU.h
     inc/MantidDataHandling/LoadEmptyInstrument.h
@@ -272,10 +283,12 @@ set(INC_FILES
     inc/MantidDataHandling/LoadILLDiffraction.h
     inc/MantidDataHandling/LoadILLIndirect2.h
     inc/MantidDataHandling/LoadILLPolarizationFactors.h
+    inc/MantidDataHandling/LoadILLPolarizedDiffraction.h
     inc/MantidDataHandling/LoadILLReflectometry.h
     inc/MantidDataHandling/LoadILLSANS.h
     inc/MantidDataHandling/LoadILLTOF2.h
     inc/MantidDataHandling/LoadISISNexus2.h
+    inc/MantidDataHandling/LoadISISNexusHelper.h
     inc/MantidDataHandling/LoadISISPolarizationEfficiencies.h
     inc/MantidDataHandling/LoadInstrument.h
     inc/MantidDataHandling/LoadInstrumentFromNexus.h
@@ -292,6 +305,11 @@ set(INC_FILES
     inc/MantidDataHandling/LoadMuonNexus.h
     inc/MantidDataHandling/LoadMuonNexus1.h
     inc/MantidDataHandling/LoadMuonNexus2.h
+    inc/MantidDataHandling/LoadMuonNexusV2.h
+    inc/MantidDataHandling/LoadMuonNexusV2NexusHelper.h
+    inc/MantidDataHandling/LoadMuonStrategy.h
+    inc/MantidDataHandling/SinglePeriodLoadMuonStrategy.h
+    inc/MantidDataHandling/MultiPeriodLoadMuonStrategy.h
     inc/MantidDataHandling/LoadNXSPE.h
     inc/MantidDataHandling/LoadNXcanSAS.h
     inc/MantidDataHandling/LoadNexus.h
@@ -322,6 +340,7 @@ set(INC_FILES
     inc/MantidDataHandling/LoadSampleEnvironment.h
     inc/MantidDataHandling/LoadSampleShape.h
     inc/MantidDataHandling/LoadSassena.h
+    inc/MantidDataHandling/LoadSingleMesh.h
     inc/MantidDataHandling/LoadSpec.h
     inc/MantidDataHandling/LoadSpice2D.h
     inc/MantidDataHandling/LoadSpiceAscii.h
@@ -353,7 +372,6 @@ set(INC_FILES
     inc/MantidDataHandling/SampleEnvironmentFactory.h
     inc/MantidDataHandling/SampleEnvironmentSpec.h
     inc/MantidDataHandling/SampleEnvironmentSpecParser.h
-    inc/MantidDataHandling/SaveANSTOAscii.h
     inc/MantidDataHandling/SaveAscii.h
     inc/MantidDataHandling/SaveAscii2.h
     inc/MantidDataHandling/SaveBankScatteringAngles.h
@@ -372,7 +390,6 @@ set(INC_FILES
     inc/MantidDataHandling/SaveGDA.h
     inc/MantidDataHandling/SaveGSASInstrumentFile.h
     inc/MantidDataHandling/SaveGSS.h
-    inc/MantidDataHandling/SaveILLCosmosAscii.h
     inc/MantidDataHandling/SaveISISNexus.h
     inc/MantidDataHandling/SaveIsawDetCal.h
     inc/MantidDataHandling/SaveMask.h
@@ -390,8 +407,6 @@ set(INC_FILES
     inc/MantidDataHandling/SavePHX.h
     inc/MantidDataHandling/SaveParameterFile.h
     inc/MantidDataHandling/SaveRKH.h
-    inc/MantidDataHandling/SaveReflCustomAscii.h
-    inc/MantidDataHandling/SaveReflThreeColumnAscii.h
     inc/MantidDataHandling/SaveReflectometryAscii.h
     inc/MantidDataHandling/SaveRMCProfile.h
     inc/MantidDataHandling/SaveSESANS.h
@@ -405,6 +420,7 @@ set(INC_FILES
     inc/MantidDataHandling/SetSample.h
     inc/MantidDataHandling/SetSampleMaterial.h
     inc/MantidDataHandling/SetScalingPSD.h
+    inc/MantidDataHandling/SNSAppendGeometryToNexus.h
     inc/MantidDataHandling/SortTableWorkspace.h
     inc/MantidDataHandling/StartAndEndTimeFromNexusFileExtractor.h
     inc/MantidDataHandling/UpdateInstrumentFromFile.h
@@ -413,10 +429,11 @@ set(INC_FILES
     src/LoadRaw/isisraw.h
     src/LoadRaw/isisraw2.h
     src/LoadRaw/item_struct.h
-    src/LoadRaw/vms_convert.h)
+    src/LoadRaw/vms_convert.h
+)
 
 set(TEST_FILES
-    AppendGeometryToSNSNexusTest.h
+    ApplyDiffCalTest.h
     CheckMantidVersionTest.h
     CompressEventsTest.h
     CreateChunkingFromInstrumentTest.h
@@ -443,6 +460,7 @@ set(TEST_FILES
     H5UtilTest.h
     ISISDataArchiveTest.h
     ISISJournalTest.h
+    ISISJournalGetExperimentRunsTest.h
     InstrumentRayTracerTest.h
     JoinISISPolarizationEfficienciesTest.h
     LoadAscii2Test.h
@@ -452,10 +470,12 @@ set(TEST_FILES
     LoadBinaryStlTest.h
     LoadCalFileTest.h
     LoadCanSAS1dTest.h
+    LoadCSNSNexusTest.h
     LoadDaveGrpTest.h
     LoadDetectorInfoTest.h
     LoadDetectorsGroupingFileTest.h
     LoadDiffCalTest.h
+    LoadDNSEventTest.h
     LoadDspacemapTest.h
     LoadEMUauTest.h
     LoadEmptyInstrumentTest.h
@@ -471,6 +491,7 @@ set(TEST_FILES
     LoadILLDiffractionTest.h
     LoadILLIndirect2Test.h
     LoadILLPolarizationFactorsTest.h
+    LoadILLPolarizedDiffractionTest.h
     LoadILLReflectometryTest.h
     LoadILLSANSTest.h
     LoadILLTOF2Test.h
@@ -491,6 +512,7 @@ set(TEST_FILES
     LoadMuonLogTest.h
     LoadMuonNexus1Test.h
     LoadMuonNexus2Test.h
+    LoadMuonNexusV2Test.h
     LoadNGEMTest.h
     LoadNXSPETest.h
     LoadNXcanSASTest.h
@@ -548,7 +570,6 @@ set(TEST_FILES
     SampleEnvironmentSpecFileFinderTest.h
     SampleEnvironmentSpecParserTest.h
     SampleEnvironmentSpecTest.h
-    SaveANSTOAsciiTest.h
     SaveAscii2Test.h
     SaveAsciiTest.h
     SaveBankScatteringAnglesTest.h
@@ -566,7 +587,6 @@ set(TEST_FILES
     SaveGDATest.h
     SaveGSASInstrumentFileTest.h
     SaveGSSTest.h
-    SaveILLCosmosAsciiTest.h
     SaveIsawDetCalTest.h
     SaveMaskTest.h
     SaveNISTDATTest.h
@@ -583,8 +603,6 @@ set(TEST_FILES
     SavePHXTest.h
     SaveParameterFileTest.h
     SaveRKHTest.h
-    SaveReflCustomAsciiTest.h
-    SaveReflThreeColumnAsciiTest.h
     SaveReflectometryAsciiTest.h
     SaveRMCProfileTest.h
     SaveSESANSTest.h
@@ -597,16 +615,16 @@ set(TEST_FILES
     SetSampleMaterialTest.h
     SetSampleTest.h
     SetScalingPSDTest.h
+    SNSAppendGeometryToNexusTest.h
     SortTableWorkspaceTest.h
     StartAndEndTimeFromNexusFileExtractorTest.h
     UpdateInstrumentFromFileTest.h
-    XMLInstrumentParameterTest.h)
+    XMLInstrumentParameterTest.h
+)
 
-if(COVERALLS)
+if(COVERAGE)
   foreach(loop_var ${SRC_FILES} ${INC_FILES})
-    set_property(GLOBAL APPEND
-                 PROPERTY COVERAGE_SRCS
-                          "${CMAKE_CURRENT_SOURCE_DIR}/${loop_var}")
+    set_property(GLOBAL APPEND PROPERTY COVERAGE_SRCS "${CMAKE_CURRENT_SOURCE_DIR}/${loop_var}")
   endforeach(loop_var)
 endif()
 
@@ -621,15 +639,9 @@ endif()
 
 if(ENABLE_LIB3MF)
   add_definitions(-DENABLE_LIB3MF)
-  list(APPEND
-    INC_FILES
-    inc/MantidDataHandling/Mantid3MFFileIO.h)
-  list(APPEND
-    SRC_FILES
-    src/Mantid3MFFileIO.cpp)
-  list(APPEND
-    TEST_FILES
-    Mantid3MFFileIOTest.h)
+  list(APPEND INC_FILES inc/MantidDataHandling/Mantid3MFFileIO.h)
+  list(APPEND SRC_FILES src/Mantid3MFFileIO.cpp)
+  list(APPEND TEST_FILES Mantid3MFFileIOTest.h)
   find_package(Lib3mf REQUIRED)
 endif()
 
@@ -637,55 +649,55 @@ endif()
 enable_precompiled_headers(inc/MantidDataHandling/PrecompiledHeader.h SRC_FILES)
 # Add the target for this directory
 add_library(DataHandling ${SRC_FILES} ${INC_FILES})
+add_library(Mantid::DataHandling ALIAS DataHandling)
+
+target_include_directories(
+  DataHandling PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/inc> $<INSTALL_INTERFACE:include/Mantid>
+)
 # Set the name of the generated library
-set_target_properties(DataHandling
-                      PROPERTIES OUTPUT_NAME
-                                 MantidDataHandling
-                                 COMPILE_DEFINITIONS
-                                 "IN_MANTID_DATAHANDLING")
+set_target_properties(
+  DataHandling PROPERTIES OUTPUT_NAME MantidDataHandling COMPILE_DEFINITIONS "IN_MANTID_DATAHANDLING"
+)
 
 if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
-  set_target_properties(DataHandling
-                        PROPERTIES INSTALL_RPATH
-                                   "@loader_path/../Contents/MacOS")
+  set_target_properties(DataHandling PROPERTIES INSTALL_RPATH "@loader_path/../Contents/MacOS")
 elseif(${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
-  set_target_properties(
-    DataHandling
-    PROPERTIES INSTALL_RPATH "\$ORIGIN/../${LIB_DIR};\$ORIGIN/../${PLUGINS_DIR}"
-    )
+  set_target_properties(DataHandling PROPERTIES INSTALL_RPATH "\$ORIGIN/../${LIB_DIR};\$ORIGIN/../${PLUGINS_DIR}")
 endif()
 
 # Add to the 'Framework' group in VS
 set_property(TARGET DataHandling PROPERTY FOLDER "MantidFramework")
 
-target_include_directories(DataHandling PUBLIC inc ../Nexus/inc)
-target_include_directories(DataHandling SYSTEM PRIVATE ${HDF5_INCLUDE_DIRS} ${Boost_INCLUDE_DIRS})
+target_link_libraries(
+  DataHandling
+  PUBLIC Mantid::Nexus
+         Mantid::API
+         Mantid::HistogramData
+         Mantid::Catalog
+         Mantid::DataObjects
+         Mantid::Geometry
+         Mantid::Kernel
+         Mantid::Indexing
+         Mantid::Parallel
+  PRIVATE Mantid::Json Boost::filesystem Mantid::NexusGeometry
+)
 
-target_link_libraries(DataHandling
-                      LINK_PRIVATE
-                      ${TCMALLOC_LIBRARIES_LINKTIME}
-                      ${MANTIDLIBS}
-                      Nexus
-                      HistogramData
-                      DataObjects
-                      ${NEXUS_LIBRARIES}
-                      ${HDF5_LIBRARIES}
-                      ${HDF5_HL_LIBRARIES}
-                      ${JSONCPP_LIBRARIES}
-                      Catalog)
-
+# Lib3mf is technically a public dependency as it is in our public headers. We are assuming here that it won't be used.
 if(ENABLE_LIB3MF)
-  target_link_libraries(DataHandling LINK_PRIVATE 
-                        ${LIB3MF_LIBRARIES})
+  target_link_libraries(DataHandling PRIVATE ${LIB3MF_LIBRARIES})
+  if(CONDA_ENV)
+    target_include_directories(DataHandling PRIVATE ${LIB3MF_INCLUDE_DIR})
+  else()
+    target_include_directories(DataHandling PRIVATE ${LIB3MF_INCLUDE_DIR}/lib3mf)
+  endif()
 endif()
 
 # Add the unit tests directory
 add_subdirectory(test)
 
 # Installation settings
-
-mtd_install_targets(TARGETS
-                    DataHandling
-                    INSTALL_DIRS
-                    ${PLUGINS_DIR}
-                    ${WORKBENCH_PLUGINS_DIR})
+if(CONDA_ENV)
+  mtd_install_framework_lib(TARGETS DataHandling PLUGIN_LIB)
+else()
+  mtd_install_targets(TARGETS DataHandling INSTALL_DIRS ${PLUGINS_DIR} ${WORKBENCH_PLUGINS_DIR})
+endif()

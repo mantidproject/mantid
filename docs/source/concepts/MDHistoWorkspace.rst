@@ -29,24 +29,14 @@ created in up to 9 dimensions.
    -  You can use :ref:`CreateMDWorkspace <algm-CreateMDWorkspace>` to create a
       blank MDWorkspace first, if you do not have data to bin.
 
--  Paraview and the `Vates Simple
-   Interface <http://www.mantidproject.org/VatesSimpleInterface>`__ will create a MDHistoWorkspace
-   from a :ref:`MDWorkspace <MDWorkspace>` when rebinning on a regular
-   grid.
-
 Viewing a MDHistoWorkspace
 --------------------------
 
--  MDHistoWorkspaces can be created and visualized directly within
-   Paraview and the `Vates Simple
-   Interface <http://www.mantidproject.org/VatesSimpleInterface>`__ when rebinning along a regular
-   grid.
 -  You can right-click on the workspace and select:
 
    -  **Plot MD**: to perform a 1D plot of the signal in the workspace
       (only works on 1D MDHistoWorkspaces).
-   -  **Show Slice Viewer**: to open the `Slice
-      Viewer <http://www.mantidproject.org/MantidPlot:_SliceViewer>`__, which shows 2D slices of the
+   -  **Show Slice Viewer**: to open the :ref:`sliceviewer`, which shows 2D slices of the
       multiple-dimension workspace.
 
 
@@ -162,8 +152,8 @@ Accessing the Data
    ws=CreateMDHistoWorkspace(Dimensionality=2,Extents='-3,3,-10,10', \
                               SignalInput=range(0,100),ErrorInput=range(0,100),\
                               NumberOfBins='10,10',Names='Dim1,Dim2',Units='MomentumTransfer,EnergyTransfer')
-                                    
-   # To get the signal and error at a prticular position                            
+
+   # To get the signal and error at a prticular position
    index = ws.getLinearIndex(5,5)
    print(ws.signalAt(index))
    print(ws.errorSquaredAt(index))
@@ -203,7 +193,7 @@ The basic arithmetic operators are available from python. For example:
    A=CreateMDHistoWorkspace(Dimensionality=2,Extents='-3,3,-10,10', \
                                     SignalInput=range(0,100),ErrorInput=range(0,100),\
                                     NumberOfBins='10,10',Names='Dim1,Dim2',Units='MomentumTransfer,EnergyTransfer')
-   B = A.clone() 
+   B = A.clone()
 
    # Creating a new workspace
    C = A + B
@@ -250,7 +240,7 @@ For example:
    A=CreateMDHistoWorkspace(Dimensionality=2,Extents='-3,3,-10,10', \
                                     SignalInput=range(0,100),ErrorInput=range(0,100),\
                                     NumberOfBins='10,10',Names='Dim1,Dim2',Units='MomentumTransfer,EnergyTransfer')
-   B = A.clone() 
+   B = A.clone()
 
    # Create boolean workspaces by comparisons
    C = A > B
@@ -268,7 +258,7 @@ For example:
 
 Using Boolean Masks
 ###################
-      
+
 The :ref:`SetMDUsingMask <algm-SetMDUsingMask>` algorithm allows you to modify
 the values in a MDHistoWorkspace using a mask created using the boolean
 operations above. See the :ref:`algorithm wiki page <algm-SetMDUsingMask>` for

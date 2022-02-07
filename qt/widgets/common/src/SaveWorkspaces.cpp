@@ -29,13 +29,10 @@
 #include <QVBoxLayout>
 
 namespace {
-void setDetectorNamesOnCanSasFormat(QString &saveCommands,
-                                    const QList<QListWidgetItem *> &wspaces,
-                                    int j) {
+void setDetectorNamesOnCanSasFormat(QString &saveCommands, const QList<QListWidgetItem *> &wspaces, int j) {
   saveCommands += ", DetectorNames=";
   Mantid::API::Workspace_sptr workspace_ptr =
-      Mantid::API::AnalysisDataService::Instance().retrieve(
-          wspaces[j]->text().toStdString());
+      Mantid::API::AnalysisDataService::Instance().retrieve(wspaces[j]->text().toStdString());
   Mantid::API::MatrixWorkspace_sptr matrix_workspace =
       std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(workspace_ptr);
   if (matrix_workspace) {
@@ -62,11 +59,9 @@ using namespace Mantid::API;
  * errors replaced by a default value or not
  */
 SaveWorkspaces::SaveWorkspaces(QWidget *parent, const QString &suggFname,
-                               QHash<const QCheckBox *const, QString> &defSavs,
-                               bool saveAsZeroErrorFree)
-    : API::MantidDialog(parent), m_saveAsZeroErrorFree(saveAsZeroErrorFree),
-      m_geometryID(""), m_sampleHeight(""), m_sampleWidth(""),
-      m_sampleThickness("") {
+                               QHash<const QCheckBox *const, QString> &defSavs, bool saveAsZeroErrorFree)
+    : API::MantidDialog(parent), m_saveAsZeroErrorFree(saveAsZeroErrorFree), m_geometryID(""), m_sampleHeight(""),
+      m_sampleWidth(""), m_sampleThickness("") {
   setAttribute(Qt::WA_DeleteOnClose);
   setWindowTitle("Save Workspaces");
 
@@ -110,23 +105,19 @@ void SaveWorkspaces::setupLine1(QHBoxLayout *const lineOne) {
  *  @param lineTwo :: the layout on to which the controls will be placed
  *  @param defSavs the formats to save into, sets the check boxes to be checked
  */
-void SaveWorkspaces::setupLine2(
-    QHBoxLayout *const lineTwo,
-    const QHash<const QCheckBox *const, QString> &defSavs) {
+void SaveWorkspaces::setupLine2(QHBoxLayout *const lineTwo, const QHash<const QCheckBox *const, QString> &defSavs) {
   m_workspaces = new QListWidget();
   auto ws = AnalysisDataService::Instance().getObjectNames();
   auto it = ws.begin(), wsEnd = ws.end();
   for (; it != wsEnd; ++it) {
     Workspace *wksp = FrameworkManager::Instance().getWorkspace(*it);
-    if (dynamic_cast<MatrixWorkspace *>(
-            wksp)) { // only include matrix workspaces, not groups or tables
+    if (dynamic_cast<MatrixWorkspace *>(wksp)) { // only include matrix workspaces, not groups or tables
       m_workspaces->addItem(QString::fromStdString(*it));
     }
   }
   // allow users to select more than one workspace in the list
   m_workspaces->setSelectionMode(QAbstractItemView::ExtendedSelection);
-  connect(m_workspaces, SIGNAL(currentRowChanged(int)), this,
-          SLOT(setFileName(int)));
+  connect(m_workspaces, SIGNAL(currentRowChanged(int)), this, SLOT(setFileName(int)));
 
   auto *save = new QPushButton("Save");
   connect(save, SIGNAL(clicked()), this, SLOT(saveSel()));
@@ -165,8 +156,7 @@ void SaveWorkspaces::setupLine2(
   lineTwo->addLayout(ly_saveConts);
 
   m_workspaces->setToolTip("Select one or more workspaces");
-  const QString formatsTip =
-      "Some formats support appending multiple workspaces in one file";
+  const QString formatsTip = "Some formats support appending multiple workspaces in one file";
   gb_saveForms->setToolTip(formatsTip);
   save->setToolTip(formatsTip);
   cancel->setToolTip(formatsTip);
@@ -198,16 +188,13 @@ void SaveWorkspaces::setFileName(const QString &newName) {
  * main form
  * @param defSavs the formats to save into
  */
-void SaveWorkspaces::setupFormatTicks(
-    const QHash<const QCheckBox *const, QString> &defSavs) {
-  for (SavFormatsConstIt i = m_savFormats.begin(); i != m_savFormats.end();
-       ++i) {
+void SaveWorkspaces::setupFormatTicks(const QHash<const QCheckBox *const, QString> &defSavs) {
+  for (SavFormatsConstIt i = m_savFormats.begin(); i != m_savFormats.end(); ++i) {
     // find the setting that has been passed for this save format
     QHash<const QCheckBox *const, QString>::const_iterator j = defSavs.begin();
     for (; j != defSavs.end(); ++j) {
       // the values are the algorithm names
-      if (j.value() ==
-          i.value()) { // copy over the checked status of the check box
+      if (j.value() == i.value()) { // copy over the checked status of the check box
         i.key()->setChecked(j.key()->isChecked());
       }
     }
@@ -230,10 +217,8 @@ void SaveWorkspaces::closeEvent(QCloseEvent *event) {
   emit closing();
   event->accept();
 }
-QString SaveWorkspaces::saveList(const QList<QListWidgetItem *> &wspaces,
-                                 const QString &algorithm, QString fileBase,
-                                 bool toAppend,
-                                 QHash<QString, QString> workspaceMap) {
+QString SaveWorkspaces::saveList(const QList<QListWidgetItem *> &wspaces, const QString &algorithm, QString fileBase,
+                                 bool toAppend, QHash<QString, QString> workspaceMap) {
   if (wspaces.count() < 1) {
     throw std::logic_error("");
   }
@@ -247,8 +232,7 @@ QString SaveWorkspaces::saveList(const QList<QListWidgetItem *> &wspaces,
   QString saveCommands;
   for (int j = 0; j < wspaces.count(); ++j) {
     if (workspaceMap.count(wspaces[j]->text())) {
-      saveCommands +=
-          algorithm + "('" + workspaceMap[wspaces[j]->text()] + "','";
+      saveCommands += algorithm + "('" + workspaceMap[wspaces[j]->text()] + "','";
     } else {
       saveCommands += algorithm + "('" + wspaces[j]->text() + "','";
     }
@@ -256,10 +240,9 @@ QString SaveWorkspaces::saveList(const QList<QListWidgetItem *> &wspaces,
     QString outFile = fileBase;
     if (outFile.isEmpty()) { // if no filename was given use the workspace names
       outFile = wspaces[j]->text();
-    } else { // we have a file name
-      if ((wspaces.count() > 1) &&
-          (!toAppend)) { // but multiple output files, number the files
-        if (outFile.endsWith(exten)) { // put the number before the extension
+    } else {                                      // we have a file name
+      if ((wspaces.count() > 1) && (!toAppend)) { // but multiple output files, number the files
+        if (outFile.endsWith(exten)) {            // put the number before the extension
           outFile = outFile.split(exten)[0];
         }
         outFile += "-" + QString::number(j + 1);
@@ -282,10 +265,8 @@ QString SaveWorkspaces::saveList(const QList<QListWidgetItem *> &wspaces,
       // Add the geometry information
       emit updateGeometryInformation();
       // Remove the first three characters, since they are unwanted
-      saveCommands += ", Geometry='" + m_geometryID +
-                      "', SampleHeight=" + m_sampleHeight +
-                      ", SampleWidth=" + m_sampleWidth +
-                      ", SampleThickness=" + m_sampleThickness;
+      saveCommands += ", Geometry='" + m_geometryID + "', SampleHeight=" + m_sampleHeight +
+                      ", SampleWidth=" + m_sampleWidth + ", SampleThickness=" + m_sampleThickness;
     }
     if (algorithm == "SaveNXcanSAS") {
       setDetectorNamesOnCanSasFormat(saveCommands, wspaces, j);
@@ -301,8 +282,7 @@ QString SaveWorkspaces::saveList(const QList<QListWidgetItem *> &wspaces,
  * extension list or ""
  */
 QString SaveWorkspaces::getSaveAlgExt(const QString &algName) {
-  IAlgorithm_sptr alg =
-      AlgorithmManager::Instance().create(algName.toStdString());
+  IAlgorithm_sptr alg = AlgorithmManager::Instance().create(algName.toStdString());
   Property *prop = alg->getProperty("Filename");
   FileProperty *fProp = dynamic_cast<FileProperty *>(prop);
   if (fProp) {
@@ -322,24 +302,19 @@ void SaveWorkspaces::saveSel() {
   }
 
   // For each selected workspace, provide an zero-error free clone
-  QHash<QString, QString> workspaceMap =
-      provideZeroFreeWorkspaces(m_workspaces);
+  QHash<QString, QString> workspaceMap = provideZeroFreeWorkspaces(m_workspaces);
 
   QString saveCommands;
-  for (SavFormatsConstIt i = m_savFormats.begin(); i != m_savFormats.end();
-       ++i) { // the key to a pointer to the check box that the user may have
-              // clicked
-    if (i.key()->isChecked()) { // we need to save in this format
+  for (SavFormatsConstIt i = m_savFormats.begin(); i != m_savFormats.end(); ++i) { // the key to a pointer to the check
+                                                                                   // box that the user may have clicked
+    if (i.key()->isChecked()) {                                                    // we need to save in this format
 
       bool toAppend = m_append->isChecked();
 
       try {
-        saveCommands += saveList(m_workspaces->selectedItems(), i.value(),
-                                 m_fNameEdit->text(), toAppend, workspaceMap);
+        saveCommands += saveList(m_workspaces->selectedItems(), i.value(), m_fNameEdit->text(), toAppend, workspaceMap);
       } catch (std::logic_error &) {
-        QMessageBox::information(
-            this, "No workspace to save",
-            "You must select at least one workspace to save");
+        QMessageBox::information(this, "No workspace to save", "You must select at least one workspace to save");
         return;
       }
     } // end if save in this format
@@ -371,9 +346,7 @@ bool SaveWorkspaces::isValid() {
   auto workspacesList = m_workspaces->selectedItems();
   for (auto &it : workspacesList) {
     auto wsName = it->text();
-    auto workspace =
-        AnalysisDataService::Instance()
-            .retrieveWS<Mantid::API::MatrixWorkspace>(wsName.toStdString());
+    auto workspace = AnalysisDataService::Instance().retrieveWS<Mantid::API::MatrixWorkspace>(wsName.toStdString());
     if (workspace->getNumberHistograms() != 1) {
       is2D = true;
     }
@@ -381,10 +354,9 @@ bool SaveWorkspaces::isValid() {
 
   // Check if CanSAS was selected
   auto isCanSAS = false;
-  for (SavFormatsConstIt i = m_savFormats.begin(); i != m_savFormats.end();
-       ++i) { // the key to a pointer to the check box that the user may have
-              // clicked
-    if (i.key()->isChecked()) { // we need to save in this format
+  for (SavFormatsConstIt i = m_savFormats.begin(); i != m_savFormats.end(); ++i) { // the key to a pointer to the check
+                                                                                   // box that the user may have clicked
+    if (i.key()->isChecked()) {                                                    // we need to save in this format
       if (i.value() == "SaveCanSAS1D") {
         isCanSAS = true;
       }
@@ -413,9 +385,7 @@ bool SaveWorkspaces::isValid() {
 /** Sets the filename to the name of the selected workspace
  *  @param row number of the row that is selected
  */
-void SaveWorkspaces::setFileName(int row) {
-  setFileName(m_workspaces->item(row)->text());
-}
+void SaveWorkspaces::setFileName(int row) { setFileName(m_workspaces->item(row)->text()); }
 /** Raises a browse dialog and inserts the selected file into the
  *  save text edit box, outfile_edit
  */
@@ -426,18 +396,13 @@ void SaveWorkspaces::saveFileBrowse() {
   prevValues.beginGroup("CustomInterfaces/SANSRunWindow/SaveWorkspaces");
   // use their previous directory first and go to their default if that fails
   QString prevPath =
-      prevValues
-          .value("dir",
-                 QString::fromStdString(ConfigService::Instance().getString(
-                     "defaultsave.directory")))
+      prevValues.value("dir", QString::fromStdString(ConfigService::Instance().getString("defaultsave.directory")))
           .toString();
 
   QString filter = ";;AllFiles (*)";
-  QFileDialog::Option userCon = m_append->isChecked()
-                                    ? QFileDialog::DontConfirmOverwrite
-                                    : static_cast<QFileDialog::Option>(0);
-  QString oFile = QFileDialog::getSaveFileName(this, title, prevPath, filter,
-                                               nullptr, userCon);
+  QFileDialog::Option userCon =
+      m_append->isChecked() ? QFileDialog::DontConfirmOverwrite : static_cast<QFileDialog::Option>(0);
+  QString oFile = QFileDialog::getSaveFileName(this, title, prevPath, filter, nullptr, userCon);
 
   if (!oFile.isEmpty()) {
     m_fNameEdit->setText(oFile);
@@ -456,8 +421,7 @@ void SaveWorkspaces::saveFileBrowse() {
  * @returns a hash which maps the original workspace to the zero-error free
  * workspace
  */
-QHash<QString, QString>
-SaveWorkspaces::provideZeroFreeWorkspaces(const QListWidget *workspaces) {
+QHash<QString, QString> SaveWorkspaces::provideZeroFreeWorkspaces(const QListWidget *workspaces) {
   auto wsList = workspaces->selectedItems();
   QHash<QString, QString> workspaceMap;
   for (auto &it : wsList) {
@@ -481,8 +445,7 @@ SaveWorkspaces::provideZeroFreeWorkspaces(const QListWidget *workspaces) {
  * @param workspaces :: a map containing the names of all zero-error-free
  * workspaces.
  */
-void SaveWorkspaces::removeZeroFreeWorkspaces(
-    const QHash<QString, QString> &workspaces) {
+void SaveWorkspaces::removeZeroFreeWorkspaces(const QHash<QString, QString> &workspaces) {
   auto zeroFreeWorkspaceNames = workspaces.values();
   for (auto &zeroFreeWorkspaceName : zeroFreeWorkspaceNames) {
     emit deleteZeroErrorFreeWorkspace(zeroFreeWorkspaceName);
@@ -506,9 +469,7 @@ void SaveWorkspaces::onSaveAsZeroErrorFreeChanged(int state) {
 /**
  * Recieves an update for the geometry information
  */
-void SaveWorkspaces::onUpdateGeomtryInformation(QString &geometryID,
-                                                QString &sampleHeight,
-                                                QString &sampleWidth,
+void SaveWorkspaces::onUpdateGeomtryInformation(QString &geometryID, QString &sampleHeight, QString &sampleWidth,
                                                 QString &sampleThickness) {
   m_geometryID = geometryID;
   m_sampleHeight = sampleHeight;

@@ -11,21 +11,17 @@
  * is used in the call to its constructor to effect a call to the factory's
  * subscribe method.
  */
-#define DECLARE_SUBWINDOW(classname)                                           \
-  namespace {                                                                  \
-  Mantid::Kernel::RegistrationHelper register_subwindow_##classname(           \
-      ((MantidQt::API::UserSubWindowFactory::Instance()                        \
-            .subscribe<classname>()),                                          \
-       0));                                                                    \
+#define DECLARE_SUBWINDOW(classname)                                                                                   \
+  namespace {                                                                                                          \
+  Mantid::Kernel::RegistrationHelper                                                                                   \
+      register_subwindow_##classname(((MantidQt::API::UserSubWindowFactory::Instance().subscribe<classname>()), 0));   \
   }
 
-#define DECLARE_SUBWINDOW_AND_CODERS(classname, encodertype, decodertype,      \
-                                     decodertag)                               \
-  namespace {                                                                  \
-  Mantid::Kernel::RegistrationHelper register_subwindow_##classname(           \
-      ((MantidQt::API::UserSubWindowFactory::Instance()                        \
-            .subscribe<classname, encodertype, decodertype>(decodertag)),      \
-       0));                                                                    \
+#define DECLARE_SUBWINDOW_AND_CODERS(classname, encodertype, decodertype, decodertag)                                  \
+  namespace {                                                                                                          \
+  Mantid::Kernel::RegistrationHelper register_subwindow_##classname(                                                   \
+      ((MantidQt::API::UserSubWindowFactory::Instance().subscribe<classname, encodertype, decodertype>(decodertag)),   \
+       0));                                                                                                            \
   }
 
 //----------------------------------
@@ -76,9 +72,7 @@ class EXPORT_OPT_MANTIDQT_COMMON UserSubWindow : public QMainWindow {
 
 public:
   /// Name of the interface
-  static std::string name() {
-    return "UserSubWindow::name() default Reimplement static name() method.";
-  }
+  static std::string name() { return "UserSubWindow::name() default Reimplement static name() method."; }
   /// A list of aliases
   static std::set<std::string> aliases() { return std::set<std::string>(); }
 
@@ -100,8 +94,7 @@ signals:
   void runAsPythonScript(const QString &code, bool /*_t2*/);
 
   /// Thrown when used fit property browser should be changed to given one
-  void
-  setFitPropertyBrowser(MantidQt::MantidWidgets::FitPropertyBrowser *browser);
+  void setFitPropertyBrowser(MantidQt::MantidWidgets::FitPropertyBrowser *browser);
 
 protected:
   /// To be overridden to set the appropriate layout
@@ -110,15 +103,10 @@ protected:
   virtual void initLocalPython() {}
 
   /// To be overridden in order to connect a signal between two interfaces
-  virtual void otherUserSubWindowCreated(QPointer<UserSubWindow> window) {
-    UNUSED_ARG(window);
-  }
+  virtual void otherUserSubWindowCreated(QPointer<UserSubWindow> window) { UNUSED_ARG(window); }
 
   /// To be overridden in order to connect a signal between two interfaces
-  virtual void
-  otherUserSubWindowCreated(QList<QPointer<UserSubWindow>> &windows) {
-    UNUSED_ARG(windows);
-  }
+  virtual void otherUserSubWindowCreated(QList<QPointer<UserSubWindow>> &windows) { UNUSED_ARG(windows); }
 
   /// Raise a dialog box giving some information
   void showInformationBox(const QString &message) const;

@@ -22,8 +22,7 @@ template <class PointStandardDeviations, class HistogramDx> class VectorOf;
 
 /** HistogramDx
  */
-class MANTID_HISTOGRAMDATA_DLL HistogramDx
-    : public detail::FixedLengthVector<HistogramDx> {
+class MANTID_HISTOGRAMDATA_DLL HistogramDx : public detail::FixedLengthVector<HistogramDx> {
 public:
   using detail::FixedLengthVector<HistogramDx>::FixedLengthVector;
   using detail::FixedLengthVector<HistogramDx>::operator=;

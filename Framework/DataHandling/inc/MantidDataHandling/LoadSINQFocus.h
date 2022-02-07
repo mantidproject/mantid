@@ -27,21 +27,15 @@ namespace DataHandling {
  <LI> Workspace - The name to give to the output workspace </LI>
  </UL>
  */
-class DLLExport LoadSINQFocus
-    : public API::IFileLoader<Kernel::NexusDescriptor>,
-      public API::DeprecatedAlgorithm {
+class DLLExport LoadSINQFocus : public API::IFileLoader<Kernel::NexusDescriptor>, public API::DeprecatedAlgorithm {
 public:
   LoadSINQFocus();
   const std::string name() const override;
   /// Summary of algorithms purpose
-  const std::string summary() const override {
-    return "Loads a FOCUS nexus file from the PSI";
-  }
+  const std::string summary() const override { return "Loads a FOCUS nexus file from the PSI"; }
 
   int version() const override;
-  const std::vector<std::string> seeAlso() const override {
-    return {"LoadSINQ", "LoadSINQFile"};
-  }
+  const std::vector<std::string> seeAlso() const override { return {"LoadSINQ", "LoadSINQFile"}; }
   const std::string category() const override;
 
   /// Returns a confidence value that this algorithm can load a file

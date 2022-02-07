@@ -9,7 +9,8 @@ set(SRC_FILES
     src/NexusGeometryUtilities.cpp
     src/NexusShapeFactory.cpp
     src/TubeBuilder.cpp
-    src/TubeHelpers.cpp)
+    src/TubeHelpers.cpp
+)
 
 set(INC_FILES
     inc/MantidNexusGeometry/AbstractLogger.h
@@ -24,7 +25,8 @@ set(INC_FILES
     inc/MantidNexusGeometry/NexusGeometryUtilities.h
     inc/MantidNexusGeometry/NexusShapeFactory.h
     inc/MantidNexusGeometry/TubeBuilder.h
-    inc/MantidNexusGeometry/TubeHelpers.h)
+    inc/MantidNexusGeometry/TubeHelpers.h
+)
 
 set(TEST_FILES
     InstrumentBuilderTest.h
@@ -34,51 +36,54 @@ set(TEST_FILES
     JSONGeometryParserTest.h
     NexusShapeFactoryTest.h
     TubeBuilderTest.h
-    TubeHelpersTest.h)
+    TubeHelpersTest.h
+)
 
-if(COVERALLS)
+if(COVERAGE)
   foreach(loop_var ${SRC_FILES} ${INC_FILES})
-    set_property(GLOBAL APPEND
-                 PROPERTY COVERAGE_SRCS
-                          "${CMAKE_CURRENT_SOURCE_DIR}/${loop_var}")
+    set_property(GLOBAL APPEND PROPERTY COVERAGE_SRCS "${CMAKE_CURRENT_SOURCE_DIR}/${loop_var}")
   endforeach(loop_var)
 endif()
 
 # Add the target for this directory
 add_library(NexusGeometry ${SRC_FILES} ${INC_FILES})
+add_library(Mantid::NexusGeometry ALIAS NexusGeometry)
+
+target_include_directories(
+  NexusGeometry PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/inc> $<INSTALL_INTERFACE:include/Mantid>
+)
 # Set the name of the generated library
-set_target_properties(NexusGeometry
-                      PROPERTIES OUTPUT_NAME
-                                 MantidNexusGeometry
-                                 COMPILE_DEFINITIONS
-                                 IN_MANTID_NEXUS_GEOMETRY)
+set_target_properties(
+  NexusGeometry PROPERTIES OUTPUT_NAME MantidNexusGeometry COMPILE_DEFINITIONS IN_MANTID_NEXUS_GEOMETRY
+)
 
 if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
-  set_target_properties(NexusGeometry
-                        PROPERTIES INSTALL_RPATH "@loader_path/../MacOS;@loader_path/../Frameworks")
+  set_target_properties(NexusGeometry PROPERTIES INSTALL_RPATH "@loader_path/../MacOS;@loader_path/../Frameworks")
 endif()
 
-# Include HDF5 libraries
-target_include_directories(NexusGeometry SYSTEM PRIVATE ${HDF5_INCLUDE_DIRS})
 # Add to the 'Framework' group in VS
 set_property(TARGET NexusGeometry PROPERTY FOLDER "MantidFramework")
 
-target_link_libraries(NexusGeometry
-                      LINK_PRIVATE
-                      ${MANTIDLIBS}
-                      ${HDF5_LIBRARIES}
-                      ${HDF5_HL_LIBRARIES}
-                      ${HDF5_CXX_LIBRARIES})
+target_link_libraries(
+  NexusGeometry
+  PUBLIC Mantid::Geometry Mantid::API
+  PRIVATE Mantid::Kernel Mantid::Json Mantid::Indexing Boost::filesystem
+)
 
 # Add the unit tests directory
 add_subdirectory(test)
 
 # Auto-generate exports header
-target_include_directories(NexusGeometry PUBLIC ${CMAKE_BINARY_DIR}/Framework/NexusGeometry)
+target_include_directories(
+  NexusGeometry PUBLIC $<BUILD_INTERFACE:${CMAKE_BINARY_DIR}/Framework/NexusGeometry>
+                       $<INSTALL_INTERFACE:include/Mantid>
+)
 generate_mantid_export_header(NexusGeometry TRUE)
 
-mtd_install_targets(TARGETS
-                    NexusGeometry
-                    INSTALL_DIRS
-                    ${LIB_DIR}
-                    ${WORKBENCH_LIB_DIR})
+# Installation settings
+if(CONDA_ENV)
+  set(TARGET_EXPORT_NAME "MantidNexusGeometryTargets")
+  mtd_install_framework_lib(TARGETS NexusGeometry INSTALL_EXPORT_FILE EXPORT_NAME ${TARGET_EXPORT_NAME})
+else()
+  mtd_install_targets(TARGETS NexusGeometry INSTALL_DIRS ${LIB_DIR} ${WORKBENCH_LIB_DIR})
+endif()

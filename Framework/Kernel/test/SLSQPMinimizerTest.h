@@ -20,18 +20,11 @@ public:
   static SLSQPMinimizerTest *createSuite() { return new SLSQPMinimizerTest(); }
   static void destroySuite(SLSQPMinimizerTest *suite) { delete suite; }
 
-  enum CONSTRAINT_TYPE {
-    NOCONSTRAINTS,
-    EMPTYCONSTRAINTS,
-    EQUALITYCONSTRAINT,
-    INEQUALITYCONSTRAINT,
-    BOTHCONSTRAINTS
-  };
+  enum CONSTRAINT_TYPE { NOCONSTRAINTS, EMPTYCONSTRAINTS, EQUALITYCONSTRAINT, INEQUALITYCONSTRAINT, BOTHCONSTRAINTS };
 
   SLSQPMinimizerTest() : CxxTest::TestSuite(), m_nparams(2) {}
 
-  void
-  test_constuctor_with_equality_matrix_whose_num_columns_dont_match_nparams_throws() {
+  void test_constuctor_with_equality_matrix_whose_num_columns_dont_match_nparams_throws() {
     using Mantid::Kernel::DblMatrix;
     using Mantid::Kernel::Math::SLSQPMinimizer;
 
@@ -40,16 +33,13 @@ public:
     DblMatrix inequality;               // Empty indicates no constraint
 
     ObjFunction userFunc;
-    TS_ASSERT_THROWS(SLSQPMinimizer(nparams, userFunc, equality, inequality),
-                     const std::invalid_argument &);
+    TS_ASSERT_THROWS(SLSQPMinimizer(nparams, userFunc, equality, inequality), const std::invalid_argument &);
 
     equality = DblMatrix(1, nparams - 1); // cols < number parameters
-    TS_ASSERT_THROWS(SLSQPMinimizer(nparams, userFunc, equality, inequality),
-                     const std::invalid_argument &);
+    TS_ASSERT_THROWS(SLSQPMinimizer(nparams, userFunc, equality, inequality), const std::invalid_argument &);
   }
 
-  void
-  test_constuctor_with_inequality_matrix_whose_num_columns_dont_match_nparams_throws() {
+  void test_constuctor_with_inequality_matrix_whose_num_columns_dont_match_nparams_throws() {
     using Mantid::Kernel::DblMatrix;
     using Mantid::Kernel::Math::SLSQPMinimizer;
 
@@ -58,12 +48,10 @@ public:
     DblMatrix inequality(1, nparams + 1);
 
     ObjFunction userFunc;
-    TS_ASSERT_THROWS(SLSQPMinimizer(nparams, userFunc, equality, inequality),
-                     const std::invalid_argument &);
+    TS_ASSERT_THROWS(SLSQPMinimizer(nparams, userFunc, equality, inequality), const std::invalid_argument &);
 
     inequality = DblMatrix(1, nparams - 1); // cols < number parameters
-    TS_ASSERT_THROWS(SLSQPMinimizer(nparams, userFunc, equality, inequality),
-                     const std::invalid_argument &);
+    TS_ASSERT_THROWS(SLSQPMinimizer(nparams, userFunc, equality, inequality), const std::invalid_argument &);
   }
 
   void test_minimizer_calls_user_function() {
@@ -153,24 +141,19 @@ private:
 
     switch (type) {
     case NOCONSTRAINTS:
-      lsqmin = std::shared_ptr<SLSQPMinimizer>(
-          new SLSQPMinimizer(nparams, userFunc));
+      lsqmin = std::shared_ptr<SLSQPMinimizer>(new SLSQPMinimizer(nparams, userFunc));
       break;
     case EMPTYCONSTRAINTS:
-      lsqmin = std::shared_ptr<SLSQPMinimizer>(
-          new SLSQPMinimizer(nparams, userFunc, DblMatrix(), DblMatrix()));
+      lsqmin = std::shared_ptr<SLSQPMinimizer>(new SLSQPMinimizer(nparams, userFunc, DblMatrix(), DblMatrix()));
       break;
     case EQUALITYCONSTRAINT:
-      lsqmin = std::shared_ptr<SLSQPMinimizer>(
-          new SLSQPMinimizer(nparams, userFunc, equality, DblMatrix()));
+      lsqmin = std::shared_ptr<SLSQPMinimizer>(new SLSQPMinimizer(nparams, userFunc, equality, DblMatrix()));
       break;
     case INEQUALITYCONSTRAINT:
-      lsqmin = std::shared_ptr<SLSQPMinimizer>(
-          new SLSQPMinimizer(nparams, userFunc, DblMatrix(), inequality));
+      lsqmin = std::shared_ptr<SLSQPMinimizer>(new SLSQPMinimizer(nparams, userFunc, DblMatrix(), inequality));
       break;
     case BOTHCONSTRAINTS:
-      lsqmin = std::shared_ptr<SLSQPMinimizer>(
-          new SLSQPMinimizer(nparams, userFunc, equality, inequality));
+      lsqmin = std::shared_ptr<SLSQPMinimizer>(new SLSQPMinimizer(nparams, userFunc, equality, inequality));
       break;
     };
 

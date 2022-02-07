@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>765</width>
-    <height>593</height>
+    <height>875</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -33,8 +33,8 @@
        <rect>
         <x>0</x>
         <y>0</y>
-        <width>728</width>
-        <height>631</height>
+        <width>745</width>
+        <height>855</height>
        </rect>
       </property>
       <property name="sizePolicy">
@@ -104,7 +104,7 @@
                </widget>
               </item>
               <item>
-               <widget class="QComboBox" name="instrument">
+               <widget class="QComboBox" name="instrument_dummy">
                 <property name="minimumSize">
                  <size>
                   <width>0</width>
@@ -351,6 +351,16 @@
               </item>
              </layout>
             </item>
+            <item>
+             <widget class="QLabel" name="restart_warning_label">
+              <property name="styleSheet">
+               <string notr="true">color : #CC0000</string>
+              </property>
+              <property name="text">
+               <string>(Workbench must be restarted for any changes to Project Recovery settings to take effect!)</string>
+              </property>
+             </widget>
+            </item>
            </layout>
           </widget>
          </item>
@@ -365,10 +375,23 @@
            <property name="title">
             <string>General</string>
            </property>
-           <layout class="QVBoxLayout" name="verticalLayout_11">
-            <property name="spacing">
-             <number>3</number>
-            </property>
+           <layout class="QVBoxLayout" name="verticalLayout_5">
+            <item>
+             <widget class="QCheckBox" name="completion_enabled">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+              <property name="text">
+               <string>Provide auto-completion suggestions in the script editor</string>
+              </property>
+              <property name="checked">
+               <bool>true</bool>
+              </property>
+             </widget>
+            </item>
             <item>
              <layout class="QHBoxLayout" name="horizontalLayout_7">
               <item>
@@ -399,6 +422,33 @@
               </item>
              </layout>
             </item>
+            <item>
+             <layout class="QHBoxLayout" name="horizontalLayout">
+              <item>
+               <widget class="QLabel" name="window_behaviour_label">
+                <property name="text">
+                 <string>Additional Windows Behaviour</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QComboBox" name="window_behaviour">
+                <property name="sizePolicy">
+                 <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+                  <horstretch>0</horstretch>
+                  <verstretch>0</verstretch>
+                 </sizepolicy>
+                </property>
+                <property name="maximumSize">
+                 <size>
+                  <width>202</width>
+                  <height>16777215</height>
+                 </size>
+                </property>
+               </widget>
+              </item>
+             </layout>
+            </item>
            </layout>
           </widget>
          </item>
@@ -418,17 +468,13 @@
               </property>
              </widget>
             </item>
+            <item row="1" column="0" colspan="4">
+             <widget class="QListWidget" name="layout_display"/>
+            </item>
             <item row="3" column="3">
              <widget class="QPushButton" name="save_layout">
               <property name="text">
                <string>Save Layout</string>
-              </property>
-             </widget>
-            </item>
-            <item row="3" column="0">
-             <widget class="QLabel" name="label">
-              <property name="text">
-               <string>Layout Name:</string>
               </property>
              </widget>
             </item>
@@ -442,8 +488,12 @@
             <item row="3" column="1" colspan="2">
              <widget class="QLineEdit" name="new_layout_name"/>
             </item>
-            <item row="1" column="0" colspan="4">
-             <widget class="QListWidget" name="layout_display"/>
+            <item row="3" column="0">
+             <widget class="QLabel" name="label">
+              <property name="text">
+               <string>Layout Name:</string>
+              </property>
+             </widget>
             </item>
            </layout>
           </widget>

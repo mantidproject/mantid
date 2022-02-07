@@ -12,17 +12,19 @@ set_extent.
 import matplotlib
 rcParams = matplotlib.rcParams
 
-import matplotlib.image as mi
-import matplotlib.colors as mcolors
-import matplotlib.cbook as cbook
-from matplotlib.transforms import IdentityTransform, Affine2D
+import matplotlib.image as mi  # noqa: E402
+import matplotlib.colors as mcolors  # noqa: E402
+import matplotlib.cbook as cbook  # noqa: E402
+from matplotlib.transforms import IdentityTransform, Affine2D  # noqa: E402
 
-import numpy as np
+from mantid.plots.mantidimage import MantidImage  # noqa: E402
+
+import numpy as np  # noqa: E402
 
 IDENTITY_TRANSFORM = IdentityTransform()
 
 
-class ModestImage(mi.AxesImage):
+class ModestImage(MantidImage):
 
     """
     Computationally modest image class.
@@ -43,6 +45,7 @@ class ModestImage(mi.AxesImage):
 
     def __init__(self, *args, **kwargs):
         self._full_res = None
+        self.transpose = kwargs.pop('transpose', False)
         self._full_extent = kwargs.get('extent', None)
         super(ModestImage, self).__init__(*args, **kwargs)
         self.invalidate_cache()
@@ -54,15 +57,14 @@ class ModestImage(mi.AxesImage):
         ACCEPTS: numpy/PIL Image A
         """
         self._full_res = A
-        self._A = A
+        self._A = cbook.safe_masked_invalid(A)
 
         if self._A.dtype != np.uint8 and not np.can_cast(self._A.dtype,
                                                          np.float):
             raise TypeError("Image data can not convert to float")
 
-        if (self._A.ndim not in (2, 3) or
-                (self._A.ndim == 3 and self._A.shape[-1] not in (3, 4))):
-                raise TypeError("Invalid dimensions for image data")
+        if self._A.ndim not in (2, 3) or (self._A.ndim == 3 and self._A.shape[-1] not in (3, 4)):
+            raise TypeError("Invalid dimensions for image data")
 
         self.invalidate_cache()
 
@@ -85,6 +87,25 @@ class ModestImage(mi.AxesImage):
         """Override to return the full-resolution array"""
         return self._full_res
 
+    def get_array_clipped_to_bounds(self):
+        # Get the extents of the axes and transform to pixel coordinates
+        xlim, ylim = self.axes.get_xlim(), self.axes.get_ylim()
+        transform=self._world2pixel
+        ind0 = transform.transform([min(xlim), min(ylim)])
+        ind1 = transform.transform([max(xlim), max(ylim)])
+
+        # Add 0.5 to get the edge of the pixel. Also add 1 to the max values which need to be one past the end
+        # for when we slice.
+        y0 = max(int(np.floor(ind0[1] + 0.5)), 0)
+        y1 = max(int(np.floor(ind1[1] + 0.5)) + 1, 0)
+        x0 = max(int(np.floor(ind0[0] + 0.5)), 0)
+        x1 = max(int(np.floor(ind1[0] + 0.5)) + 1, 0)
+
+        # Clip the data to the extents
+        data = self._full_res[y0:y1, x0:x1]
+        data = cbook.safe_masked_invalid(data)
+        return data
+
     @property
     def _pixel2world(self):
 
@@ -97,15 +118,11 @@ class ModestImage(mi.AxesImage):
             extent = self._full_extent
 
             if extent is None:
-
                 self._pixel2world_cache = IDENTITY_TRANSFORM
 
             else:
-
                 self._pixel2world_cache = Affine2D()
-
                 self._pixel2world.translate(+0.5, +0.5)
-
                 self._pixel2world.scale((extent[1] - extent[0]) / self._full_res.shape[1],
                                         (extent[3] - extent[2]) / self._full_res.shape[0])
 
@@ -136,10 +153,10 @@ class ModestImage(mi.AxesImage):
 
         # Check whether we've already calculated what we need, and if so just
         # return without doing anything further.
-        if (self._bounds is not None and
-                sx >= self._sx and sy >= self._sy and
-                x0 >= self._bounds[0] and x1 <= self._bounds[1] and
-                y0 >= self._bounds[2] and y1 <= self._bounds[3]):
+        if (self._bounds is not None
+                and sx >= self._sx and sy >= self._sy
+                and x0 >= self._bounds[0] and x1 <= self._bounds[1]
+                and y0 >= self._bounds[2] and y1 <= self._bounds[3]):
             return
 
         # Slice the array using the slices determined previously to optimally
@@ -210,7 +227,7 @@ def main():
 def imshow(axes, X, cmap=None, norm=None, aspect=None,
            interpolation=None, alpha=None, vmin=None, vmax=None,
            origin=None, extent=None, shape=None, filternorm=1,
-           filterrad=4.0, imlim=None, resample=None, url=None, **kwargs):
+           filterrad=4.0, imlim=None, resample=None, url=None, transpose=None, **kwargs):
     """Similar to matplotlib's imshow command, but produces a ModestImage
 
     Unlike matplotlib version, must explicitly specify axes
@@ -222,7 +239,7 @@ def imshow(axes, X, cmap=None, norm=None, aspect=None,
     axes.set_aspect(aspect)
     im = ModestImage(axes, cmap=cmap, norm=norm, interpolation=interpolation,
                      origin=origin, extent=extent, filternorm=filternorm,
-                     filterrad=filterrad, resample=resample, **kwargs)
+                     filterrad=filterrad, resample=resample, transpose=transpose, **kwargs)
 
     im.set_data(X)
     im.set_alpha(alpha)
@@ -235,6 +252,11 @@ def imshow(axes, X, cmap=None, norm=None, aspect=None,
     # if norm is None and shape is None:
     #    im.set_clim(vmin, vmax)
     if vmin is not None or vmax is not None:
+        if norm is not None and isinstance(norm, mcolors.LogNorm):
+            if vmin <= 0:
+                vmin = 0.0001
+            if vmax <= 0:
+                vmax = 1
         im.set_clim(vmin, vmax)
     elif norm is None:
         im.autoscale_None()

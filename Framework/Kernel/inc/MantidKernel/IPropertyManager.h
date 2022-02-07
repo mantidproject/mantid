@@ -1,4 +1,5 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
+// Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2007 ISIS Rutherford Appleton Laboratory UKRI,
 //   NScD Oak Ridge National Laboratory, European Spallation Source,
@@ -59,12 +60,10 @@ public:
   virtual ~IPropertyManager() = default;
 
   /// Function to declare properties (i.e. store them)
-  virtual void declareProperty(std::unique_ptr<Property> p,
-                               const std::string &doc = "") = 0;
+  virtual void declareProperty(std::unique_ptr<Property> p, const std::string &doc = "") = 0;
 
   /// Function to declare properties (i.e. store them)
-  virtual void declareOrReplaceProperty(std::unique_ptr<Property> p,
-                                        const std::string &doc = "") = 0;
+  virtual void declareOrReplaceProperty(std::unique_ptr<Property> p, const std::string &doc = "") = 0;
 
   /** Add a property of the template type to the list of managed properties
    *  @param name :: The name to assign to the property
@@ -78,14 +77,9 @@ public:
    *  @throw std::invalid_argument  if the name argument is empty
    */
   template <typename T>
-  void
-  declareProperty(const std::string &name, T value,
-                  IValidator_sptr validator = std::make_shared<NullValidator>(),
-                  const std::string &doc = "",
-                  const unsigned int direction = Direction::Input) {
-    std::unique_ptr<PropertyWithValue<T>> p =
-        std::make_unique<PropertyWithValue<T>>(name, value, validator,
-                                               direction);
+  void declareProperty(const std::string &name, T value, IValidator_sptr validator = std::make_shared<NullValidator>(),
+                       const std::string &doc = "", const unsigned int direction = Direction::Input) {
+    std::unique_ptr<PropertyWithValue<T>> p = std::make_unique<PropertyWithValue<T>>(name, value, validator, direction);
     declareProperty(std::move(p), doc);
   }
 
@@ -103,8 +97,7 @@ public:
   void declareProperty(const std::string &name, T value, const std::string &doc,
                        const unsigned int direction = Direction::Input) {
     std::unique_ptr<PropertyWithValue<T>> p =
-        std::make_unique<PropertyWithValue<T>>(
-            name, value, std::make_shared<NullValidator>(), direction);
+        std::make_unique<PropertyWithValue<T>>(name, value, std::make_shared<NullValidator>(), direction);
     declareProperty(std::move(p), doc);
   }
 
@@ -116,12 +109,9 @@ public:
    * exists
    *  @throw std::invalid_argument  if the name argument is empty
    */
-  template <typename T>
-  void declareProperty(const std::string &name, T value,
-                       const unsigned int direction) {
+  template <typename T> void declareProperty(const std::string &name, T value, const unsigned int direction) {
     std::unique_ptr<PropertyWithValue<T>> p =
-        std::make_unique<PropertyWithValue<T>>(
-            name, value, std::make_shared<NullValidator>(), direction);
+        std::make_unique<PropertyWithValue<T>>(name, value, std::make_shared<NullValidator>(), direction);
     declareProperty(std::move(p));
   }
 
@@ -140,16 +130,16 @@ public:
    * inout
    *  @throw Exception::ExistsError if a property with the given name already
    * exists
-   *  @throw std::invalid_argument  if the name argument is empty
+   *  @throw std::invalid_argument if the name argument is empty
+   *  @throw std::invalid_argument if value is a nullptr
    */
-  void
-  declareProperty(const std::string &name, const char *value,
-                  IValidator_sptr validator = std::make_shared<NullValidator>(),
-                  const std::string &doc = std::string(),
-                  const unsigned int direction = Direction::Input) {
+  void declareProperty(const std::string &name, const char *value,
+                       IValidator_sptr validator = std::make_shared<NullValidator>(),
+                       const std::string &doc = std::string(), const unsigned int direction = Direction::Input) {
+    if (value == nullptr)
+      throw std::invalid_argument("Attempted to set " + name + " to nullptr");
     // Simply call templated method, converting character array to a string
-    declareProperty(name, std::string(value), std::move(validator), doc,
-                    direction);
+    declareProperty(name, std::string(value), std::move(validator), doc, direction);
   }
 
   /** Specialised version of declareProperty template method to prevent the
@@ -163,20 +153,22 @@ public:
    *  @param doc :: The (optional) documentation string
    *  @param validator :: Pointer to the (optional) validator. Ownership will be
    * taken over.
+   *
+   *
    *  @param direction :: The (optional) direction of the property, in, out or
    * inout
    *  @throw Exception::ExistsError if a property with the given name already
    * exists
-   *  @throw std::invalid_argument  if the name argument is empty
+   *  @throw std::invalid_argument if the name argument is empty
+   *  @throw std::invalid_argument if value is a nullptr
    */
-  void
-  declareProperty(const std::string &name, const char *value,
-                  const std::string &doc,
-                  IValidator_sptr validator = std::make_shared<NullValidator>(),
-                  const unsigned int direction = Direction::Input) {
+  void declareProperty(const std::string &name, const char *value, const std::string &doc,
+                       IValidator_sptr validator = std::make_shared<NullValidator>(),
+                       const unsigned int direction = Direction::Input) {
+    if (value == nullptr)
+      throw std::invalid_argument("Attempted to set " + name + " to nullptr");
     // Simply call templated method, converting character array to a string
-    declareProperty(name, std::string(value), std::move(validator), doc,
-                    direction);
+    declareProperty(name, std::string(value), std::move(validator), doc, direction);
   }
 
   /** Add a property of string type to the list of managed properties
@@ -187,15 +179,17 @@ public:
    * exists
    *  @throw std::invalid_argument  if the name argument is empty
    */
-  void declareProperty(const std::string &name, const char *value,
-                       const unsigned int direction) {
-    declareProperty(name, std::string(value), std::make_shared<NullValidator>(),
-                    "", direction);
+  void declareProperty(const std::string &name, const char *value, const unsigned int direction) {
+    declareProperty(name, std::string(value), std::make_shared<NullValidator>(), "", direction);
   }
 
   /// Removes the property from management
-  virtual void removeProperty(const std::string &name,
-                              const bool delproperty = true) = 0;
+  virtual void removeProperty(const std::string &name, const bool delproperty = true) = 0;
+
+  /// Removes the property from management and returns a pointer to it
+  virtual std::unique_ptr<Property> takeProperty(const size_t index) = 0;
+
+  virtual void resetProperties() = 0;
 
   /** Sets all the declared properties from a string.
     @param propertiesString :: A list of name = value pairs separated by a
@@ -205,8 +199,7 @@ public:
   */
   virtual void setPropertiesWithString(
       const std::string &propertiesString,
-      const std::unordered_set<std::string> &ignoreProperties =
-          std::unordered_set<std::string>()) = 0;
+      const std::unordered_set<std::string> &ignoreProperties = std::unordered_set<std::string>()) = 0;
 
   /** Sets all properties from a string.
       @param propertiesJson :: A string of name = value pairs formatted
@@ -217,8 +210,7 @@ public:
    */
   virtual void
   setProperties(const std::string &propertiesJson,
-                const std::unordered_set<std::string> &ignoreProperties =
-                    std::unordered_set<std::string>(),
+                const std::unordered_set<std::string> &ignoreProperties = std::unordered_set<std::string>(),
                 bool createMissing = false) = 0;
 
   /** Sets all the properties from a json object
@@ -229,27 +221,23 @@ public:
   */
   virtual void
   setProperties(const ::Json::Value &jsonValue,
-                const std::unordered_set<std::string> &ignoreProperties =
-                    std::unordered_set<std::string>(),
+                const std::unordered_set<std::string> &ignoreProperties = std::unordered_set<std::string>(),
                 bool createMissing = false) = 0;
 
   /** Sets property value from a string
       @param name :: Property name
       @param value :: New property value
    */
-  virtual void setPropertyValue(const std::string &name,
-                                const std::string &value) = 0;
+  virtual void setPropertyValue(const std::string &name, const std::string &value) = 0;
 
   /** Sets property value from a Json::Value
       @param name :: Property name
       @param value :: New property value
    */
-  virtual void setPropertyValueFromJson(const std::string &name,
-                                        const Json::Value &value) = 0;
+  virtual void setPropertyValueFromJson(const std::string &name, const Json::Value &value) = 0;
 
   /// Set the value of a property by an index
-  virtual void setPropertyOrdinal(const int &index,
-                                  const std::string &value) = 0;
+  virtual void setPropertyOrdinal(const int &index, const std::string &value) = 0;
 
   /// Checks whether the named property is already in the list of managed
   /// property.
@@ -265,6 +253,9 @@ public:
   /// Get the list of managed properties.
   virtual const std::vector<Property *> &getProperties() const = 0;
 
+  /// Get the list of managed property names.
+  virtual std::vector<std::string> getDeclaredPropertyNames() const noexcept = 0;
+
   /** Templated method to set the value of a PropertyWithValue
    *  @param name :: The name of the property (case insensitive)
    *  @param value :: The value to assign to the property
@@ -272,8 +263,7 @@ public:
    *  @throw std::invalid_argument If an attempt is made to assign to a property
    * of different type
    */
-  template <typename T>
-  IPropertyManager *setProperty(const std::string &name, const T &value) {
+  template <typename T> IPropertyManager *setProperty(const std::string &name, const T &value) {
     return doSetProperty(name, value);
   }
 
@@ -285,12 +275,8 @@ public:
    *  @throw std::invalid_argument If an attempt is made to assign to a property
    * of different type
    */
-  template <typename T>
-  IPropertyManager *setProperty(const std::string &name,
-                                std::unique_ptr<T> value) {
-    setTypedProperty(
-        name, std::move(value),
-        std::is_convertible<std::unique_ptr<T>, std::shared_ptr<DataItem>>());
+  template <typename T> IPropertyManager *setProperty(const std::string &name, std::unique_ptr<T> value) {
+    setTypedProperty(name, std::move(value), std::is_convertible<std::unique_ptr<T>, std::shared_ptr<DataItem>>());
     this->afterPropertySet(name);
     return this;
   }
@@ -300,11 +286,13 @@ public:
    *  @param value :: The value to assign to the property
    *  @throw Exception::NotFoundError If the named property is unknown
    *  @throw std::invalid_argument If an attempt is made to assign to a property
+   *  @throw std::invalid_argument If value is a nullptr
    * of different type
    */
   IPropertyManager *setProperty(const std::string &name, const char *value) {
-    this->setPropertyValue(name, std::string(value));
-    return this;
+    if (value == nullptr)
+      throw std::invalid_argument("Attempted to set " + name + " to nullptr");
+    return setProperty(name, std::string(value));
   }
 
   /** Specialised version of setProperty template method to handle std::string
@@ -314,8 +302,7 @@ public:
    *  @throw std::invalid_argument If an attempt is made to assign to a property
    * of different type
    */
-  IPropertyManager *setProperty(const std::string &name,
-                                const std::string &value) {
+  IPropertyManager *setProperty(const std::string &name, const std::string &value) {
     this->setPropertyValue(name, value);
     return this;
   }
@@ -329,8 +316,7 @@ public:
   /// Return the property manager serialized as a json object.
   virtual ::Json::Value asJson(bool withDefaultValues = false) const = 0;
 
-  void setPropertySettings(const std::string &name,
-                           std::unique_ptr<IPropertySettings> settings);
+  void setPropertySettings(const std::string &name, std::unique_ptr<IPropertySettings> settings);
 
   /** Set the group for a given property
    * @param name :: property name
@@ -344,12 +330,12 @@ public:
   /// Get the list of managed properties in a given group.
   std::vector<Property *> getPropertiesInGroup(const std::string &group) const;
 
-  virtual void filterByTime(const Types::Core::DateAndTime & /*start*/,
-                            const Types::Core::DateAndTime & /*stop*/) = 0;
-  virtual void
-  splitByTime(std::vector<SplittingInterval> & /*splitter*/,
-              std::vector<PropertyManager *> /* outputs*/) const = 0;
-  virtual void filterByProperty(const TimeSeriesProperty<bool> & /*filte*/) = 0;
+  virtual void filterByTime(const Types::Core::DateAndTime & /*start*/, const Types::Core::DateAndTime & /*stop*/) = 0;
+  virtual void splitByTime(std::vector<SplittingInterval> & /*splitter*/,
+                           std::vector<PropertyManager *> /* outputs*/) const = 0;
+
+  virtual void filterByProperty(const TimeSeriesProperty<bool> & /*filter*/, const std::vector<std::string> &
+                                /* excludedFromFiltering */) = 0;
 
 protected:
   /// Get a property by an index
@@ -383,8 +369,7 @@ protected:
     const std::string prop;
 
     /// Constructor
-    TypedValue(const IPropertyManager &p, const std::string &name)
-        : pm(p), prop(name) {}
+    TypedValue(const IPropertyManager &p, const std::string &name) : pm(p), prop(name) {}
 
     // Unfortunately, MSVS2010 can't handle just having a single templated cast
     // operator T()
@@ -416,25 +401,17 @@ protected:
     operator Property *();
 
     /// explicit specialization for std::vector
-    template <typename T> operator std::vector<T>() {
-      return pm.getValue<std::vector<T>>(prop);
-    }
+    template <typename T> operator std::vector<T>() { return pm.getValue<std::vector<T>>(prop); }
     /// explicit specialization for std::vector
     template <typename T> operator std::vector<std::vector<T>>() {
       return pm.getValue<std::vector<std::vector<T>>>(prop);
     }
     /// explicit specialization for std::shared_ptr
-    template <typename T> operator std::shared_ptr<T>() {
-      return pm.getValue<std::shared_ptr<T>>(prop);
-    }
+    template <typename T> operator std::shared_ptr<T>() { return pm.getValue<std::shared_ptr<T>>(prop); }
     /// explicit specialization for std::shared_ptr to const T
-    template <typename T> operator std::shared_ptr<const T>() {
-      return pm.getValue<std::shared_ptr<T>>(prop);
-    }
+    template <typename T> operator std::shared_ptr<const T>() { return pm.getValue<std::shared_ptr<T>>(prop); }
     /// explicit version for Matrices
-    template <typename T> operator Matrix<T>() {
-      return pm.getValue<Matrix<T>>(prop);
-    }
+    template <typename T> operator Matrix<T>() { return pm.getValue<Matrix<T>>(prop); }
   };
 
 public:
@@ -451,10 +428,8 @@ private:
    *  @throw std::invalid_argument If an attempt is made to assign to a property
    * of different type
    */
-  template <typename T>
-  IPropertyManager *doSetProperty(const std::string &name, const T &value) {
-    setTypedProperty(name, value,
-                     std::is_convertible<T, std::shared_ptr<DataItem>>());
+  template <typename T> IPropertyManager *doSetProperty(const std::string &name, const T &value) {
+    setTypedProperty(name, value, std::is_convertible<T, std::shared_ptr<DataItem>>());
     this->afterPropertySet(name);
     return this;
   }
@@ -468,9 +443,7 @@ private:
    *  @throw std::invalid_argument If an attempt is made to assign to a property
    * of different type
    */
-  template <typename T>
-  IPropertyManager *doSetProperty(const std::string &name,
-                                  const std::shared_ptr<T> &value) {
+  template <typename T> IPropertyManager *doSetProperty(const std::string &name, const std::shared_ptr<T> &value) {
     // CAREFUL: is_convertible has undefined behavior for incomplete types. If T
     // is forward-declared in the calling code, e.g., an algorithm that calls
     // setProperty, compilation and linking do work. However, the BEHAVIOR IS
@@ -492,15 +465,12 @@ private:
    * of different type
    */
   template <typename T>
-  IPropertyManager *setTypedProperty(const std::string &name, const T &value,
-                                     const std::false_type &) {
-    PropertyWithValue<T> *prop =
-        dynamic_cast<PropertyWithValue<T> *>(getPointerToProperty(name));
+  IPropertyManager *setTypedProperty(const std::string &name, const T &value, const std::false_type &) {
+    PropertyWithValue<T> *prop = dynamic_cast<PropertyWithValue<T> *>(getPointerToProperty(name));
     if (prop) {
       *prop = value;
     } else {
-      throw std::invalid_argument("Attempt to assign to property (" + name +
-                                  ") of incorrect type");
+      throw std::invalid_argument("Attempt to assign to property (" + name + ") of incorrect type");
     }
     return this;
   }
@@ -513,8 +483,7 @@ private:
    * of different type
    */
   template <typename T>
-  IPropertyManager *setTypedProperty(const std::string &name, const T &value,
-                                     const std::true_type &) {
+  IPropertyManager *setTypedProperty(const std::string &name, const T &value, const std::true_type &) {
     // T is convertible to DataItem_sptr
     std::shared_ptr<DataItem> data = std::static_pointer_cast<DataItem>(value);
     std::string error = getPointerToProperty(name)->setDataItem(data);
@@ -534,9 +503,7 @@ private:
    * of different type
    */
   template <typename T>
-  IPropertyManager *setTypedProperty(const std::string &name,
-                                     std::unique_ptr<T> value,
-                                     const std::true_type &) {
+  IPropertyManager *setTypedProperty(const std::string &name, std::unique_ptr<T> value, const std::true_type &) {
     // T is convertible to DataItem_sptr
     std::shared_ptr<DataItem> data(std::move(value));
     std::string error = getPointerToProperty(name)->setDataItem(data);
@@ -553,21 +520,17 @@ private:
 /// A macro for defining getValue functions for new types. Puts them in the
 /// Mantid::Kernel namespace so
 /// the macro should be used outside of any namespace scope
-#define DEFINE_IPROPERTYMANAGER_GETVALUE(type)                                 \
-  namespace Mantid {                                                           \
-  namespace Kernel {                                                           \
-  template <>                                                                  \
-  DLLExport type                                                               \
-  IPropertyManager::getValue<type>(const std::string &name) const {            \
-    PropertyWithValue<type> *prop =                                            \
-        dynamic_cast<PropertyWithValue<type> *>(getPointerToProperty(name));   \
-    if (prop) {                                                                \
-      return *prop;                                                            \
-    } else {                                                                   \
-      std::string message = "Attempt to assign property " + name +             \
-                            " to incorrect type. Expected type " #type;        \
-      throw std::runtime_error(message);                                       \
-    }                                                                          \
-  }                                                                            \
-  }                                                                            \
+#define DEFINE_IPROPERTYMANAGER_GETVALUE(type)                                                                         \
+  namespace Mantid {                                                                                                   \
+  namespace Kernel {                                                                                                   \
+  template <> DLLExport type IPropertyManager::getValue<type>(const std::string &name) const {                         \
+    PropertyWithValue<type> *prop = dynamic_cast<PropertyWithValue<type> *>(getPointerToProperty(name));               \
+    if (prop) {                                                                                                        \
+      return *prop;                                                                                                    \
+    } else {                                                                                                           \
+      std::string message = "Attempt to assign property " + name + " to incorrect type. Expected type " #type;         \
+      throw std::runtime_error(message);                                                                               \
+    }                                                                                                                  \
+  }                                                                                                                    \
+  }                                                                                                                    \
   }

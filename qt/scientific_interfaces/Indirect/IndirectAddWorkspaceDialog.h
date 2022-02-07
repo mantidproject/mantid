@@ -13,10 +13,10 @@ namespace MantidQt {
 namespace CustomInterfaces {
 namespace IDA {
 
-class AddWorkspaceDialog : public IAddWorkspaceDialog {
+class IndirectAddWorkspaceDialog : public IAddWorkspaceDialog {
   Q_OBJECT
 public:
-  explicit AddWorkspaceDialog(QWidget *parent);
+  explicit IndirectAddWorkspaceDialog(QWidget *parent);
 
   std::string workspaceName() const override;
   std::string workspaceIndices() const;
@@ -25,6 +25,8 @@ public:
   void setFBSuffices(const QStringList &suffices) override;
 
   void updateSelectedSpectra() override;
+
+  std::string getFileName() const;
 
 private slots:
   void selectAllSpectra(int state);

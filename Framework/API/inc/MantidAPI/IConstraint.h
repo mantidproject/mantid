@@ -26,8 +26,7 @@ class Expression;
 class MANTID_API_DLL IConstraint : public ParameterReference {
 public:
   /// Initialize the constraint from an expression
-  virtual void initialize(IFunction *fun, const Expression &expr,
-                          bool isDefault = false) = 0;
+  virtual void initialize(IFunction *fun, const Expression &expr, bool isDefault = false) = 0;
 
   /// Returns a penalty number which is bigger than or equal to zero
   /// If zero it means that the constraint is not penalized. If larger

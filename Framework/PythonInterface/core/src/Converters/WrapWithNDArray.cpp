@@ -31,10 +31,8 @@ template <typename T> void capsule_cleanup(PyObject *capsule) {
 
 } // namespace
 
-namespace Mantid {
-namespace PythonInterface {
-namespace Converters {
-
+namespace Mantid::PythonInterface::Converters {
+#ifdef __APPLE__
 extern template int NDArrayTypeIndex<bool>::typenum;
 extern template int NDArrayTypeIndex<int>::typenum;
 extern template int NDArrayTypeIndex<long>::typenum;
@@ -44,8 +42,8 @@ extern template int NDArrayTypeIndex<unsigned long>::typenum;
 extern template int NDArrayTypeIndex<unsigned long long>::typenum;
 extern template int NDArrayTypeIndex<float>::typenum;
 extern template int NDArrayTypeIndex<double>::typenum;
+#endif
 
-namespace Impl {
 namespace {
 /**
  * Flip the writable flag to ensure the array is read only
@@ -62,6 +60,8 @@ void markReadOnly(PyArrayObject *arr) {
 }
 } // namespace
 
+namespace Impl {
+
 /**
  * Defines the wrapWithNDArray specialization for C array types
  *
@@ -76,17 +76,14 @@ void markReadOnly(PyArrayObject *arr) {
  * @return A pointer to a numpy ndarray object
  */
 template <typename ElementType>
-PyObject *wrapWithNDArray(const ElementType *carray, const int ndims,
-                          Py_intptr_t *dims, const NumpyWrapMode mode,
+PyObject *wrapWithNDArray(const ElementType *carray, const int ndims, Py_intptr_t *dims, const NumpyWrapMode mode,
                           const OwnershipMode oMode /* = Cpp */) {
   int datatype = NDArrayTypeIndex<ElementType>::typenum;
-  auto *nparray = (PyArrayObject *)PyArray_SimpleNewFromData(
-      ndims, dims, datatype,
-      static_cast<void *>(const_cast<ElementType *>(carray)));
+  auto *nparray = (PyArrayObject *)PyArray_SimpleNewFromData(ndims, dims, datatype,
+                                                             static_cast<void *>(const_cast<ElementType *>(carray)));
 
   if (oMode == Python) {
-    PyObject *capsule = PyCapsule_New(const_cast<ElementType *>(carray), NULL,
-                                      capsule_cleanup<ElementType>);
+    PyObject *capsule = PyCapsule_New(const_cast<ElementType *>(carray), NULL, capsule_cleanup<ElementType>);
     PyArray_SetBaseObject((PyArrayObject *)nparray, capsule);
   }
 
@@ -98,10 +95,9 @@ PyObject *wrapWithNDArray(const ElementType *carray, const int ndims,
 //-----------------------------------------------------------------------
 // Explicit instantiations
 //-----------------------------------------------------------------------
-#define INSTANTIATE_WRAPNUMPY(ElementType)                                     \
-  template DLLExport PyObject *wrapWithNDArray<ElementType>(                   \
-      const ElementType *, const int ndims, Py_intptr_t *dims,                 \
-      const NumpyWrapMode mode, const OwnershipMode oMode);
+#define INSTANTIATE_WRAPNUMPY(ElementType)                                                                             \
+  template DLLExport PyObject *wrapWithNDArray<ElementType>(const ElementType *, const int ndims, Py_intptr_t *dims,   \
+                                                            const NumpyWrapMode mode, const OwnershipMode oMode);
 
 ///@cond Doxygen doesn't seem to like this...
 INSTANTIATE_WRAPNUMPY(int)
@@ -114,6 +110,4 @@ INSTANTIATE_WRAPNUMPY(double)
 INSTANTIATE_WRAPNUMPY(float)
 ///@endcond
 } // namespace Impl
-} // namespace Converters
-} // namespace PythonInterface
-} // namespace Mantid
+} // namespace Mantid::PythonInterface::Converters

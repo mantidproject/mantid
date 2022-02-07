@@ -43,8 +43,7 @@ const std::string HISTO_MESSAGE_ID = "hs00";
 
 using namespace HistoSchema;
 
-namespace Mantid {
-namespace LiveData {
+namespace Mantid::LiveData {
 
 // -----------------------------------------------------------------------------
 // Public members
@@ -54,15 +53,12 @@ namespace LiveData {
  * Constructor
  * @param broker Kafka broker
  * @param histoTopic The name of the topic streaming the histo data
- * @param spDetTopic The name of the topic streaming the spectrum-detector
  * run mapping
  */
-KafkaHistoStreamDecoder::KafkaHistoStreamDecoder(
-    std::shared_ptr<IKafkaBroker> broker, const std::string &histoTopic,
-    const std::string &runInfoTopic, const std::string &spDetTopic,
-    const std::string &sampleEnvTopic, const std::string &chopperTopic)
-    : IKafkaStreamDecoder(std::move(broker), histoTopic, runInfoTopic,
-                          spDetTopic, sampleEnvTopic, chopperTopic, ""),
+KafkaHistoStreamDecoder::KafkaHistoStreamDecoder(std::shared_ptr<IKafkaBroker> broker, const std::string &histoTopic,
+                                                 const std::string &runInfoTopic, const std::string &sampleEnvTopic,
+                                                 const std::string &chopperTopic)
+    : IKafkaStreamDecoder(std::move(broker), histoTopic, runInfoTopic, sampleEnvTopic, chopperTopic, ""),
       m_workspace() {}
 
 /**
@@ -71,8 +67,7 @@ KafkaHistoStreamDecoder::KafkaHistoStreamDecoder(
  */
 KafkaHistoStreamDecoder::~KafkaHistoStreamDecoder() = default;
 
-KafkaHistoStreamDecoder::KafkaHistoStreamDecoder(
-    KafkaHistoStreamDecoder &&rval) noexcept
+KafkaHistoStreamDecoder::KafkaHistoStreamDecoder(KafkaHistoStreamDecoder &&rval) noexcept
     : IKafkaStreamDecoder(std::move(rval)) {
   {
     std::lock_guard lck(m_mutex);
@@ -121,8 +116,7 @@ API::Workspace_sptr KafkaHistoStreamDecoder::extractDataImpl() {
   auto *bindata = xbins->data();
   HistogramData::BinEdges binedges(&bindata[0], &bindata[xbins->size()]);
 
-  API::MatrixWorkspace_sptr ws{DataObjects::create<DataObjects::Workspace2D>(
-      *m_workspace, nspectra, binedges)};
+  API::MatrixWorkspace_sptr ws{DataObjects::create<DataObjects::Workspace2D>(*m_workspace, nspectra, binedges)};
 
   ws->setIndexInfo(m_workspace->indexInfo());
   auto data = histoMsg->data_as_ArrayDouble()->value();
@@ -156,8 +150,7 @@ void KafkaHistoStreamDecoder::captureImplExcept() {
   int32_t partition;
   std::string topicName;
   auto runStartStruct = getRunStartMessage(runBuffer);
-  m_spDetStream->consumeMessage(&buffer, offset, partition, topicName);
-  initLocalCaches(buffer, runStartStruct);
+  initLocalCaches(runStartStruct);
 
   // Keep track of whether we've reached the end of a run
   std::unordered_map<std::string, std::vector<int64_t>> stopOffsets;
@@ -187,8 +180,7 @@ void KafkaHistoStreamDecoder::captureImplExcept() {
       }
 
       if (checkOffsets) {
-        checkRunEnd(topicName, checkOffsets, offset, partition, stopOffsets,
-                    reachedEnd);
+        checkRunEnd(topicName, checkOffsets, offset, partition, stopOffsets, reachedEnd);
         if (offset > stopOffsets[topicName][static_cast<size_t>(partition)]) {
           // If the offset is beyond the end of the current run, then skip to
           // the next iteration and don't process the message
@@ -199,9 +191,8 @@ void KafkaHistoStreamDecoder::captureImplExcept() {
 
       // Check if we have a histo message
       // Most will be event messages so we check for this type first
-      if (flatbuffers::BufferHasIdentifier(
-              reinterpret_cast<const uint8_t *>(buffer.c_str()),
-              HISTO_MESSAGE_ID.c_str())) {
+      if (flatbuffers::BufferHasIdentifier(reinterpret_cast<const uint8_t *>(buffer.c_str()),
+                                           HISTO_MESSAGE_ID.c_str())) {
         // Data being accumulated before being streamed so no need to store
         // messages.
         m_buffer = buffer;
@@ -215,15 +206,14 @@ void KafkaHistoStreamDecoder::captureImplExcept() {
   g_log.debug("Histo capture finished");
 }
 
-void KafkaHistoStreamDecoder::initLocalCaches(
-    const std::string &rawMsgBuffer, const RunStartStruct &runStartData) {
+void KafkaHistoStreamDecoder::initLocalCaches(const RunStartStruct &runStartData) {
   m_runId = runStartData.runId;
 
   const auto jsonGeometry = runStartData.nexusStructure;
   const auto instName = runStartData.instrumentName;
 
   DataObjects::Workspace2D_sptr histoBuffer;
-  if (rawMsgBuffer.empty()) {
+  if (!runStartData.detSpecMapSpecified) {
     /* Load the instrument to get the number of spectra :c */
     auto ws = API::WorkspaceFactory::Instance().create("Workspace2D", 1, 2, 1);
     loadInstrument<API::MatrixWorkspace>(instName, ws, jsonGeometry);
@@ -232,40 +222,23 @@ void KafkaHistoStreamDecoder::initLocalCaches(
     // Create buffer
     histoBuffer = std::static_pointer_cast<DataObjects::Workspace2D>(
         API::WorkspaceFactory::Instance().create("Workspace2D", nspec, 2, 1));
-    histoBuffer->getAxis(0)->unit() =
-        Kernel::UnitFactory::Instance().create("TOF");
+    histoBuffer->getAxis(0)->unit() = Kernel::UnitFactory::Instance().create("TOF");
     histoBuffer->setYUnit("Counts");
 
     /* Need a mapping with spectra numbers starting at zero */
     histoBuffer->rebuildSpectraMapping(true, 0);
-    histoBuffer->getAxis(0)->unit() =
-        Kernel::UnitFactory::Instance().create("TOF");
+    histoBuffer->getAxis(0)->unit() = Kernel::UnitFactory::Instance().create("TOF");
     histoBuffer->setYUnit("Counts");
   } else {
-    auto spDetMsg = GetSpectraDetectorMapping(
-        reinterpret_cast<const uint8_t *>(rawMsgBuffer.c_str()));
-    auto nspec = static_cast<uint32_t>(spDetMsg->n_spectra());
-    auto nudet = spDetMsg->detector_id()->size();
-    if (nudet != nspec) {
-      std::ostringstream os;
-      os << "KafkaEventStreamDecoder::initLocalEventBuffer() - Invalid "
-            "spectra/detector mapping. Expected matched length arrays but "
-            "found nspec="
-         << nspec << ", ndet=" << nudet;
-      throw std::runtime_error(os.str());
-    }
-
     // Create buffer
     histoBuffer = createBufferWorkspace<DataObjects::Workspace2D>(
-        "Workspace2D", static_cast<size_t>(spDetMsg->n_spectra()),
-        spDetMsg->spectrum()->data(), spDetMsg->detector_id()->data(), nudet);
+        "Workspace2D", runStartData.numberOfSpectra, runStartData.spectrumNumbers.data(),
+        runStartData.detectorIDs.data(), static_cast<uint32_t>(runStartData.detectorIDs.size()));
   }
 
   // Load the instrument if possible but continue if we can't
-  if (!loadInstrument<DataObjects::Workspace2D>(instName, histoBuffer,
-                                                jsonGeometry))
-    g_log.warning(
-        "Instrument could not be loaded. Continuing without instrument");
+  if (!loadInstrument<DataObjects::Workspace2D>(instName, histoBuffer, jsonGeometry))
+    g_log.warning("Instrument could not be loaded. Continuing without instrument");
 
   auto &mutableRun = histoBuffer->mutableRun();
   // Run start. Cache locally for computing frame times
@@ -277,18 +250,12 @@ void KafkaHistoStreamDecoder::initLocalCaches(
   mutableRun.addProperty(RUN_START_PROPERTY, std::string(timeString));
   mutableRun.addProperty(RUN_NUMBER_PROPERTY, runStartData.runId);
   // Create the proton charge property
-  mutableRun.addProperty(
-      new Kernel::TimeSeriesProperty<double>(PROTON_CHARGE_PROPERTY));
-
-  // Cache spec->index mapping. We assume it is the same across all periods
-  m_specToIdx =
-      histoBuffer->getSpectrumToWorkspaceIndexVector(m_specToIdxOffset);
+  mutableRun.addProperty(new Kernel::TimeSeriesProperty<double>(PROTON_CHARGE_PROPERTY));
 
   // Buffers for each period
   const size_t nperiods = runStartData.nPeriods;
   if (nperiods > 1) {
-    throw std::runtime_error(
-        "KafkaHistoStreamDecoder - Does not support multi-period data.");
+    throw std::runtime_error("KafkaHistoStreamDecoder - Does not support multi-period data.");
   }
   // New caches so LoadLiveData's output workspace needs to be replaced
   m_dataReset = true;
@@ -296,12 +263,10 @@ void KafkaHistoStreamDecoder::initLocalCaches(
   m_workspace = histoBuffer;
 }
 
-void KafkaHistoStreamDecoder::sampleDataFromMessage(
-    const std::string & /*buffer*/) {
+void KafkaHistoStreamDecoder::sampleDataFromMessage(const std::string & /*buffer*/) {
   throw Kernel::Exception::NotImplementedError("This method will require "
                                                "implementation when processing "
                                                "sample environment messages.");
 }
 
-} // namespace LiveData
-} // namespace Mantid
+} // namespace Mantid::LiveData

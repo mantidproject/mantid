@@ -7,6 +7,7 @@
 #pragma once
 
 #include "DllConfig.h"
+#include "IDAFunctionParameterEstimation.h"
 #include "IFQFitObserver.h"
 #include "ParameterEstimation.h"
 #include "SingleFunctionTemplateModel.h"
@@ -33,12 +34,12 @@ class SingleFunctionTemplateBrowser;
 class MANTIDQT_INDIRECT_DLL SingleFunctionTemplatePresenter : public QObject {
   Q_OBJECT
 public:
-  explicit SingleFunctionTemplatePresenter(
-      SingleFunctionTemplateBrowser *view,
-      const std::map<std::string, std::string> &functionInitialisationStrings);
-  void updateAvailableFunctions(
-      const std::map<std::string, std::string> &functionInitialisationStrings);
+  explicit SingleFunctionTemplatePresenter(SingleFunctionTemplateBrowser *view,
+                                           const std::map<std::string, std::string> &functionInitialisationStrings,
+                                           std::unique_ptr<IDAFunctionParameterEstimation> parameterEstimation);
+  void updateAvailableFunctions(const std::map<std::string, std::string> &functionInitialisationStrings);
   void setFitType(const QString &name);
+
   void init();
 
   void setNumberOfDatasets(int);
@@ -54,10 +55,10 @@ public:
   void updateMultiDatasetParameters(const IFunction &fun);
   void updateParameters(const IFunction &fun);
   void setCurrentDataset(int i);
-  void setDatasetNames(const QStringList &names);
+  void setDatasets(const QList<FunctionModelDataset> &datasets);
   void setErrorsEnabled(bool enabled);
-  void
-  updateParameterEstimationData(DataForParameterEstimationCollection &&data);
+  void updateParameterEstimationData(DataForParameterEstimationCollection &&data);
+  void estimateFunctionParameters();
 
 signals:
   void functionStructureChanged();
@@ -69,6 +70,7 @@ private slots:
 
 private:
   QStringList getDatasetNames() const;
+  QStringList getDatasetDomainNames() const;
   double getLocalParameterValue(const QString &parName, int i) const;
   bool isLocalParameterFixed(const QString &parName, int i) const;
   QString getLocalParameterTie(const QString &parName, int i) const;

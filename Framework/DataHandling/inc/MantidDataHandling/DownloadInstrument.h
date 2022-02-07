@@ -24,9 +24,7 @@ public:
 
   const std::string name() const override;
   int version() const override;
-  const std::vector<std::string> seeAlso() const override {
-    return {"LoadInstrument", "UpdateScriptRepository"};
-  }
+  const std::vector<std::string> seeAlso() const override { return {"LoadInstrument", "UpdateScriptRepository"}; }
   const std::string category() const override;
   const std::string summary() const override;
 
@@ -37,20 +35,16 @@ protected:
 private:
   void init() override;
   void exec() override;
-  virtual int
-  doDownloadFile(const std::string &urlFile,
-                 const std::string &localFilePath = "",
-                 const StringToStringMap &headers = StringToStringMap());
+  virtual int doDownloadFile(const std::string &urlFile, const std::string &localFilePath = "",
+                             const StringToStringMap &headers = StringToStringMap());
   StringToStringMap getFileShas(const std::string &directoryPath);
   const std::string getDownloadableRepoUrl(const std::string &filename) const;
   StringToStringMap processRepository();
-  std::string getValueOrDefault(const StringToStringMap &mapping,
-                                const std::string &key,
+  std::string getValueOrDefault(const StringToStringMap &mapping, const std::string &key,
                                 const std::string &defaultValue) const;
 
-  size_t removeOrphanedFiles(
-      const std::string &directoryPath,
-      const std::unordered_set<std::string> &filenamesToKeep) const;
+  size_t removeOrphanedFiles(const std::string &directoryPath,
+                             const std::unordered_set<std::string> &filenamesToKeep) const;
 
   Kernel::ProxyInfo m_proxyInfo;
 };

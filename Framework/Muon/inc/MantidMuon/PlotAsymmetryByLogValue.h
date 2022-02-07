@@ -49,9 +49,7 @@ public:
   /// Algorithm's name for identification overriding a virtual method
   const std::string name() const override { return "PlotAsymmetryByLogValue"; }
   /// Summary of algorithms purpose
-  const std::string summary() const override {
-    return "Calculates asymmetry for a series of log values";
-  }
+  const std::string summary() const override { return "Calculates asymmetry for a series of log values"; }
   /// Algorithm's version for identification overriding a virtual method
   int version() const override { return 1; }
   const std::vector<std::string> seeAlso() const override {
@@ -59,47 +57,48 @@ public:
   }
   /// Algorithm's category for identification overriding a virtual method
   const std::string category() const override { return "Muon"; }
+  std::map<std::string, std::string> validateInputs() override;
+  int extractRunNumberFromRunName(std::string runName);
 
 private:
   // Overridden Algorithm methods
   void init() override;
   void exec() override;
   // Load run, apply dead time corrections and detector grouping
-  API::Workspace_sptr doLoad(size_t runNumber);
+  API::Workspace_sptr doLoad(const std::string &fileName);
   // Analyse loaded run
   void doAnalysis(const API::Workspace_sptr &loadedWs, size_t index);
   // Parse run names
-  void parseRunNames(std::string &firstFN, std::string &lastFN,
-                     std::string &fnBase, std::string &fnExt, int &fnZeros);
+  void parseRunNames(std::string &firstFN, std::string &lastFN, std::string &fnBase, std::string &fnExt, int &fnZeros);
   // Load dead-time corrections from specified file
   API::Workspace_sptr loadCorrectionsFromFile(const std::string &deadTimeFile);
   // Apply dead-time corrections
-  void applyDeadtimeCorr(API::Workspace_sptr &loadedWs,
-                         API::Workspace_sptr deadTimes);
+  void applyDeadtimeCorr(API::Workspace_sptr &loadedWs, const API::Workspace_sptr &deadTimes);
   /// Create custom detector grouping
-  API::Workspace_sptr createCustomGrouping(const std::vector<int> &fwd,
-                                           const std::vector<int> &bwd);
+  API::Workspace_sptr createCustomGrouping(const std::vector<int> &fwd, const std::vector<int> &bwd);
   /// Group detectors
-  void groupDetectors(API::Workspace_sptr &loadedWs,
-                      API::Workspace_sptr grouping);
+  void groupDetectors(API::Workspace_sptr &loadedWs, const API::Workspace_sptr &grouping);
   /// Calculate the integral asymmetry for a workspace (single period)
-  void calcIntAsymmetry(const API::MatrixWorkspace_sptr &ws, double &Y,
-                        double &E);
+  void calcIntAsymmetry(const API::MatrixWorkspace_sptr &ws, double &Y, double &E);
   /// Calculate the integral asymmetry for a workspace (red & green)
-  void calcIntAsymmetry(const API::MatrixWorkspace_sptr &ws_red,
-                        const API::MatrixWorkspace_sptr &ws_green, double &Y,
+  void calcIntAsymmetry(const API::MatrixWorkspace_sptr &ws_red, const API::MatrixWorkspace_sptr &ws_green, double &Y,
                         double &E);
   /// Group detectors
-  void groupDetectors(API::MatrixWorkspace_sptr &ws,
-                      const std::vector<int> &spectraList);
+  void groupDetectors(API::MatrixWorkspace_sptr &ws, const std::vector<int> &spectraList);
   /// Get log value
   double getLogValue(API::MatrixWorkspace &ws);
   /// Populate output workspace with results
-  void populateOutputWorkspace(API::MatrixWorkspace_sptr &outWS, int nplots);
+  void populateOutputWorkspace(API::MatrixWorkspace_sptr &outWS, int nplots, const std::string &units);
+  /// get log units
+  const std::string getLogUnits(const std::string &fileName);
   /// Populate the hidden ws storing current results
   void saveResultsToADS(API::MatrixWorkspace_sptr &outWS, int nplots);
   /// Check input properties
-  void checkProperties(size_t &is, size_t &ie);
+  void checkProperties(size_t &firstRunNumber, size_t &lastRunNumber);
+  /// Get path to the direcotry from a file name
+  std::string getDirectoryFromFileName(const std::string &fileName) const;
+  /// Uses FirstRun and LastRun to populate filenames vector
+  void populateFileNamesFromFirstLast(std::string firstRun, std::string lastRun);
 
   /// Properties needed to load a run
   /// Stores base name shared by all runs
@@ -116,6 +115,10 @@ private:
   std::vector<int> m_forward_list;
   /// Store backward spectra
   std::vector<int> m_backward_list;
+  /// Store workspaces
+  std::vector<std::string> m_fileNames;
+  /// The map holding extracted run numbers from filenames
+  std::map<std::string, int> m_rmap;
 
   /// Properties needed to analyse a run
   /// Type of calculation: integral or differential
@@ -128,6 +131,8 @@ private:
   double m_minTime;
   /// Maximum time for the analysis
   double m_maxTime;
+  /// Balance parameter
+  double m_alpha;
 
   /// Properties needed to get the log value
   // LogValue name

@@ -27,6 +27,8 @@ public:
   virtual ~Item() = default;
 
   virtual bool isGroup() const = 0;
+  virtual bool isPreview() const = 0;
+
   State state() const;
   void setState(State state);
   std::string message() const;
@@ -34,11 +36,10 @@ public:
 
   virtual void resetState(bool resetChildren = true);
   virtual void setSkipped(bool skipped);
-  virtual void renameOutputWorkspace(std::string const &oldName,
-                                     std::string const &newName) = 0;
+  virtual void renameOutputWorkspace(std::string const &oldName, std::string const &newName) = 0;
 
   virtual void setOutputNames(std::vector<std::string> const &outputNames) = 0;
-  virtual void resetOutputs() = 0;
+  virtual void resetOutputs(){};
 
   virtual int totalItems() const = 0;
   virtual int completedItems() const = 0;

@@ -16,8 +16,7 @@ namespace Histogram {
 class BinEdges;
 }
 namespace Algorithms {
-class MANTID_ALGORITHMS_DLL MaskBinsFromWorkspace
-    : public API::DistributedAlgorithm {
+class MANTID_ALGORITHMS_DLL MaskBinsFromWorkspace : public API::DistributedAlgorithm {
 public:
   /// Algorithm's name
   const std::string name() const override { return "MaskBinsFromWorkspace"; }
@@ -28,9 +27,7 @@ public:
 
   /// Algorithm's version
   int version() const override { return (1); }
-  const std::vector<std::string> seeAlso() const override {
-    return {"MaskBinsFromTable"};
-  }
+  const std::vector<std::string> seeAlso() const override { return {"MaskBinsFromTable"}; }
   /// Algorithm's category for identification
   const std::string category() const override { return "Transforms\\Masking"; }
 
@@ -39,8 +36,7 @@ private:
   void init() override;
   /// Execution code
   void exec() override;
-  Indexing::SpectrumIndexSet
-      m_indexSet; ///< the list of Spectra (workspace index) to load
+  Indexing::SpectrumIndexSet m_indexSet; ///< the list of Spectra (workspace index) to load
 };
 
 } // namespace Algorithms

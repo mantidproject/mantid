@@ -11,8 +11,7 @@
 #include "MantidAPI/HistogramValidator.h"
 #include "MantidKernel/BoundedValidator.h"
 
-namespace Mantid {
-namespace Algorithms {
+namespace Mantid::Algorithms {
 
 // Register the class into the algorithm factory
 DECLARE_ALGORITHM(Min)
@@ -24,24 +23,18 @@ using namespace API;
  *
  */
 void Min::init() {
-  declareProperty(std::make_unique<WorkspaceProperty<>>(
-                      "InputWorkspace", "", Direction::Input,
-                      std::make_shared<HistogramValidator>()),
+  declareProperty(std::make_unique<WorkspaceProperty<>>("InputWorkspace", "", Direction::Input,
+                                                        std::make_shared<HistogramValidator>()),
                   "The name of the Workspace2D to take as input");
-  declareProperty(std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
-                                                        Direction::Output),
+  declareProperty(std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "", Direction::Output),
                   "The name of the workspace in which to store the result");
 
-  declareProperty("RangeLower", EMPTY_DBL(),
-                  "The X value to search from (default min)");
-  declareProperty("RangeUpper", EMPTY_DBL(),
-                  "The X value to search to (default max)");
+  declareProperty("RangeLower", EMPTY_DBL(), "The X value to search from (default min)");
+  declareProperty("RangeUpper", EMPTY_DBL(), "The X value to search to (default max)");
   auto mustBePositive = std::make_shared<BoundedValidator<int>>();
   mustBePositive->setLower(0);
-  declareProperty("StartWorkspaceIndex", 0, mustBePositive,
-                  "Start spectrum number (default 0)");
-  declareProperty("EndWorkspaceIndex", EMPTY_INT(), mustBePositive,
-                  "End spectrum number  (default max)");
+  declareProperty("StartWorkspaceIndex", 0, mustBePositive, "Start spectrum number (default 0)");
+  declareProperty("EndWorkspaceIndex", EMPTY_INT(), mustBePositive, "End spectrum number  (default max)");
 }
 
 /** Executes the algorithm
@@ -60,7 +53,7 @@ void Min::exec() {
 
   // Child Algorithme does all of the actual work - do not set the output
   // workspace
-  IAlgorithm_sptr minAlgo = createChildAlgorithm("MaxMin", 0., 1.);
+  auto minAlgo = createChildAlgorithm("MaxMin", 0., 1.);
   minAlgo->setProperty("InputWorkspace", inworkspace);
   minAlgo->setProperty("RangeLower", m_MinRange);
   minAlgo->setProperty("RangeUpper", m_MaxRange);
@@ -74,5 +67,4 @@ void Min::exec() {
   this->setProperty("OutputWorkspace", outputWS);
 }
 
-} // namespace Algorithms
-} // namespace Mantid
+} // namespace Mantid::Algorithms

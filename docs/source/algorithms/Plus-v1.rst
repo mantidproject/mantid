@@ -8,7 +8,7 @@
 
 Description
 -----------
-   
+
 .. |sym| replace:: \+
 
 .. |verb| replace:: added

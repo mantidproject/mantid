@@ -5,9 +5,9 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 import unittest
-import mantid
-from mantid.simpleapi import *
+
 import isis_instrument as instruments
+from mantid.simpleapi import *
 
 
 class SANSIsisInstrumentTest(unittest.TestCase):
@@ -43,14 +43,14 @@ class SANSIsisInstrumentTest(unittest.TestCase):
 
 class TestParameterMapModifications(unittest.TestCase):
     def create_sample_workspace(self, ws_name, types, values, names):
-        ws = CreateSampleWorkspace(OutputWorkspace = ws_name)
+        ws = CreateSampleWorkspace(OutputWorkspace=ws_name)
         length = len(types)
         if any(len(element) != length for element in [types, values, names]):
-               return
+            return
         for i in range(0, length):
             SetInstrumentParameter(ws, ParameterName=names[i],
-                                       ParameterType= types[i],
-                                       Value = values[i])
+                                   ParameterType=types[i],
+                                   Value=values[i])
 
     def test_that_calibration_workspace_has_absent_entries_copied_over(self):
         # Arrange
@@ -78,11 +78,11 @@ class TestParameterMapModifications(unittest.TestCase):
         self.assertTrue(ws2.getInstrument().hasParameter("val3"))
         self.assertTrue(ws2.getInstrument().hasParameter("val4"))
 
-        self.assertEqual(len(ws2.getInstrument().getNumberParameter("val1")),  1)
-        self.assertEqual(ws2.getInstrument().getNumberParameter("val1")[0],  2.4)
+        self.assertEqual(len(ws2.getInstrument().getNumberParameter("val1")), 1)
+        self.assertEqual(ws2.getInstrument().getNumberParameter("val1")[0], 2.4)
 
-        self.assertEqual(len(ws2.getInstrument().getIntParameter("val3")),  1)
-        self.assertEqual(ws2.getInstrument().getIntParameter("val3")[0],  200)
+        self.assertEqual(len(ws2.getInstrument().getIntParameter("val3")), 1)
+        self.assertEqual(ws2.getInstrument().getIntParameter("val3")[0], 200)
 
         # Clean up
         DeleteWorkspace(ws_name1)

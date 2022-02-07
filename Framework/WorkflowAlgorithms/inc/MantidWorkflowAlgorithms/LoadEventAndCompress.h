@@ -19,21 +19,17 @@ class DLLExport LoadEventAndCompress : public API::DataProcessorAlgorithm {
 public:
   const std::string name() const override;
   int version() const override;
-  const std::vector<std::string> seeAlso() const override {
-    return {"LoadEventNexus", "CompressEvents"};
-  }
+  const std::vector<std::string> seeAlso() const override { return {"LoadEventNexus", "CompressEvents"}; }
   const std::string category() const override;
   const std::string summary() const override;
 
 protected:
-  API::ITableWorkspace_sptr
-  determineChunk(const std::string &filename) override;
+  API::ITableWorkspace_sptr determineChunk(const std::string &filename) override;
   API::MatrixWorkspace_sptr loadChunk(const size_t rowIndex) override;
   API::MatrixWorkspace_sptr processChunk(API::MatrixWorkspace_sptr &wksp);
 
-  Parallel::ExecutionMode getParallelExecutionMode(
-      const std::map<std::string, Parallel::StorageMode> &storageModes)
-      const override;
+  Parallel::ExecutionMode
+  getParallelExecutionMode(const std::map<std::string, Parallel::StorageMode> &storageModes) const override;
 
 private:
   void init() override;

@@ -8,8 +8,7 @@
 #include "MantidAPI/Algorithm.h"
 
 namespace Mantid {
-Instrumentation::AlgoTimeRegister
-    Instrumentation::AlgoTimeRegister::globalAlgoTimeRegister;
+Instrumentation::AlgoTimeRegister Instrumentation::AlgoTimeRegister::globalAlgoTimeRegister;
 namespace API {
 
 //---------------------------------------------------------------------------------------------
@@ -27,6 +26,10 @@ bool Algorithm::execute() {
   Instrumentation::AlgoTimeRegister::AlgoTimeRegister::Dump dmp(
       Instrumentation::AlgoTimeRegister::globalAlgoTimeRegister, name());
   return executeInternal();
+}
+void Algorithm::addTimer(const std::string &name, const Kernel::time_point_ns &begin,
+                         const Kernel::time_point_ns &end) {
+  Instrumentation::AlgoTimeRegister::globalAlgoTimeRegister.addTime(name, begin, end);
 }
 } // namespace API
 } // namespace Mantid

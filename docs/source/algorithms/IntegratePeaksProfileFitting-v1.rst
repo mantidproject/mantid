@@ -40,7 +40,7 @@ Instrument-Defined Parameters
 In addition to the input parameters defined above, there are several other parameters
 to be aware of which are pre-defined for each instrument.  The instrument is determined
 from the instrument that is loaded into PeaksWorkspace. If the instrument parameters file
-does not contain parameters, the algorithm defaults to MaNDi parameters. Default 
+does not contain parameters, the algorithm defaults to MaNDi parameters. Default
 values are below:
 
 +--------------+----------------------------+----------+----------+---------+
@@ -81,10 +81,10 @@ Constructing the Measured Intensity Distribution
 ##################################################
 To construct the measured distribution to be fit, a histogram of events is made around the peak.
 This histogram is in (q\ :sub:`x`\ ,  q\ :sub:`y`\, q\ :sub:`z`\) and composed of voxels of side
-length **DQPixel**.  To minimize the effect of neighboring peaks on profile fitting, the variable 
+length **DQPixel**.  To minimize the effect of neighboring peaks on profile fitting, the variable
 **qMask** is used to only consider a region around the peak in (h,k,l) space.  It will filter voxels
 outside of (h ± **FracHKL**, k ± **FracHKL**, l ± **FracHKL**) from calculations used for profile
-fitting. In practice, values of 0.25 < **fracHKL** < 0.5 seem to work best. 
+fitting. In practice, values of 0.25 < **fracHKL** < 0.5 seem to work best.
 
 Fitting the Time-of-Flight Coordinate
 #####################################
@@ -93,10 +93,10 @@ The time-of-flight (TOF), t, of each voxel is determined as:
 .. math::
     t = k \times \frac{(L_1 + L_2)\sin(\theta)}{|\vec{q}|}
 
-The events are histogrammed by their `t` values to create a TOF profile.  This profile can then be fit 
+The events are histogrammed by their `t` values to create a TOF profile.  This profile can then be fit
 to the Ikeda Carpenter function.  To separate the peak and background, different levels of intensity are
 filtered out.  The predicted background level is determined as the average background not near the peak or off the edge
-and values within **Minppl_frac** and **Maxppl_frac** times the predicted value are tried.  The best fit to the expected 
+and values within **Minppl_frac** and **Maxppl_frac** times the predicted value are tried.  The best fit to the expected
 moderator emission (determined by the moderator coefficients defined in **ModeratorCoefficientsFile**) is
 taken and these voxels are considered to be signal.
 
@@ -109,25 +109,25 @@ which is fit to a bivariate normal distribution.  The histogram has **NTheta** :
 
 For weak peaks or peaks near detector edges, the 2D histogram likely does not reflect the full profile.  To address this, the
 profile of the nearest strong peaks is forced when doing the BVG fit.  The profile is fit (allowed to vary 10% in
-:math:`\sigma_x, \sigma_y, \rho` ) and location and amplitude are not fixed.  Weak peaks are defined as peaks with fewer 
+:math:`\sigma_x, \sigma_y, \rho` ) and location and amplitude are not fixed.  Weak peaks are defined as peaks with fewer
 than **IntensityCutoff** counts from peak-minus-background integration or within **EdgeCutoff** pixels of the detector edge.
 
 The strong peaks library can be generated in two ways.  First, it can be provided as an input file through **StrongPeakParamsFile**.
 The **StrongPeakParamsFile** should be a .pkl file which contains a Numpy array containing the parameters used for strong peaks.
 Alternatively, if no file is provided, the algorithm will go through and fit strong peaks first, building the strong peaks library
-as it goes.  After fitting all of the strong peaks, defined as peaks with spherical intensities above **IntensityCutoff** and further 
+as it goes.  After fitting all of the strong peaks, defined as peaks with spherical intensities above **IntensityCutoff** and further
 than **EdgeCutoff** pixels from the edge, it will fit weak peaks using those profiles. For initial guesses, the algorithm will fit
 the first 30 peaks using the instrument default parameters.  After that, it will use already fit peaks to determine initial guesses.
 
 Integrating the Model
 #####################
-The final intensity profile is given by 
+The final intensity profile is given by
 
 .. math::
     Y(\vec{q}) = A \times Y_{TOF}(\vec{q}) \times Y_{BVG}(\vec{q}) + B
 
-where :math:`A` and :math:`B` are scaling constants.  Here the background is assumed to be constant :math:`B` over the volume of 
-the peak, so the model of the peak itself is :math:`Y_{model}(\vec{q}) = A \times Y_{TOF}(\vec{q}) \times Y_{BVG}(\vec{q})`. 
+where :math:`A` and :math:`B` are scaling constants.  Here the background is assumed to be constant :math:`B` over the volume of
+the peak, so the model of the peak itself is :math:`Y_{model}(\vec{q}) = A \times Y_{TOF}(\vec{q}) \times Y_{BVG}(\vec{q})`.
 The peak intensity :math:`I`, is given by summing :math:`Y_{model}(\vec{q})` over voxels which are greater than **FracStop** of the maximum.
 
 :math:`\sigma(I)` is given  as
@@ -135,21 +135,21 @@ The peak intensity :math:`I`, is given by summing :math:`Y_{model}(\vec{q})` ove
 .. math::
     \sigma(I) = \sqrt{\Sigma N_{obs} + \Sigma N_{BG} + \frac{\Sigma N_{obs}(N_{obs}-N_{model})^2}{\Sigma N_{obs}}}
 
-where the first two terms come from Poissionian statistics and the final term is the variance of the fit. Those 
+where the first two terms come from Poissionian statistics and the final term is the variance of the fit. Those
 sums are over the same voxels used to calculate intensity.
 
- 
+
 Usage
 ------
 
 **Example - IntegratePeaksProfileFitting**
 
-.. The code itself works but disabled from doc tests as takes too long to complete. 
+.. The code itself works but disabled from doc tests as takes too long to complete.
 .. .. testcode:: exIntegratePeaksMD
 
 .. code-block:: python
    :linenos:
-     
+
     Load(Filename='/SNS/MANDI/IPTS-8776/0/5921/NeXus/MANDI_5921_event.nxs', OutputWorkspace='MANDI_5921_event')
     MANDI_5921_md = ConvertToMD(InputWorkspace='MANDI_5921_event',  QDimensions='Q3D', dEAnalysisMode='Elastic',
                              Q3DFrames='Q_lab', QConversionScales='Q in A^-1',

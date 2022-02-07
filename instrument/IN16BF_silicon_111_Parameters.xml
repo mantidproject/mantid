@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<parameter-file instrument = "IN16BF" valid-from = "2014-05-06T00:00:00">
+
+  <component-link name = "IN16BF">
+
+    <parameter name="analysis-type" type="string">
+      <value val="spectroscopy" />
+    </parameter>
+
+    <parameter name="analyser" type="string">
+      <value val="silicon" />
+    </parameter>
+
+    <parameter name="reflection" type="string">
+      <value val="111" />
+    </parameter>
+
+    <parameter name="Efixed">
+      <value val="2.082" />
+    </parameter>
+
+    <parameter name="Vfixed">
+      <value val="631.12" />
+    </parameter>
+
+    <parameter name="resolution">
+      <value val="0.00075" />
+    </parameter>
+
+  </component-link>
+
+</parameter-file>

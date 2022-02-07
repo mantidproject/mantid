@@ -10,7 +10,6 @@
 import json
 import os
 import shutil
-import sys
 import tempfile
 import unittest
 
@@ -19,8 +18,7 @@ from mantid.simpleapi import CreateSampleWorkspace, GroupWorkspaces
 from unittest import mock
 from workbench.projectrecovery.projectrecovery import ProjectRecovery
 
-if sys.version_info.major >= 3:
-    unicode = str
+unicode = str
 
 
 class FakeEncoder(object):

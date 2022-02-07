@@ -29,8 +29,7 @@ namespace IDA {
 #if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
 class SplitterHandle : public QSplitterHandle {
 public:
-  SplitterHandle(QIcon icon, Qt::Orientation orientation,
-                 QSplitter *parent = nullptr)
+  SplitterHandle(QIcon icon, Qt::Orientation orientation, QSplitter *parent = nullptr)
       : QSplitterHandle(orientation, parent), m_icon(std::move(icon)) {}
 
   void paintEvent(QPaintEvent *e) override {
@@ -47,12 +46,9 @@ private:
 
 class Splitter : public QSplitter {
 public:
-  Splitter(QIcon icon, QWidget *parent = nullptr)
-      : QSplitter(parent), m_icon(std::move(icon)) {}
+  Splitter(QIcon icon, QWidget *parent = nullptr) : QSplitter(parent), m_icon(std::move(icon)) {}
 
-  QSplitterHandle *createHandle() override {
-    return new SplitterHandle(m_icon, Qt::Vertical, this);
-  }
+  QSplitterHandle *createHandle() override { return new SplitterHandle(m_icon, Qt::Vertical, this); }
 
 private:
   QIcon m_icon;
@@ -69,35 +65,24 @@ public:
   void watchADS(bool watch) override;
 
   WorkspaceIndex getSelectedSpectrum() const override;
-  TableRowIndex getSelectedSpectrumIndex() const override;
-  TableDatasetIndex getSelectedDataIndex() const override;
-  TableDatasetIndex dataSelectionSize() const override;
+  WorkspaceID getSelectedDataIndex() const override;
+  WorkspaceID dataSelectionSize() const override;
   bool isPlotGuessChecked() const override;
 
-  void hideMultipleDataSelection() override;
-  void showMultipleDataSelection() override;
-
-  void setAvailableSpectra(WorkspaceIndex minimum,
-                           WorkspaceIndex maximum) override;
-  void setAvailableSpectra(
-      const std::vector<WorkspaceIndex>::const_iterator &from,
-      const std::vector<WorkspaceIndex>::const_iterator &to) override;
+  void setAvailableSpectra(WorkspaceIndex minimum, WorkspaceIndex maximum) override;
+  void setAvailableSpectra(const std::vector<WorkspaceIndex>::const_iterator &from,
+                           const std::vector<WorkspaceIndex>::const_iterator &to) override;
 
   void setMinimumSpectrum(int minimum) override;
   void setMaximumSpectrum(int maximum) override;
   void setPlotSpectrum(WorkspaceIndex spectrum) override;
   void appendToDataSelection(const std::string &dataName) override;
-  void setNameInDataSelection(const std::string &dataName,
-                              TableDatasetIndex index) override;
+  void setNameInDataSelection(const std::string &dataName, WorkspaceID workspaceID) override;
   void clearDataSelection() override;
 
-  void plotInTopPreview(const QString &name,
-                        Mantid::API::MatrixWorkspace_sptr workspace,
-                        WorkspaceIndex spectrum,
+  void plotInTopPreview(const QString &name, Mantid::API::MatrixWorkspace_sptr workspace, WorkspaceIndex spectrum,
                         Qt::GlobalColor colour) override;
-  void plotInBottomPreview(const QString &name,
-                           Mantid::API::MatrixWorkspace_sptr workspace,
-                           WorkspaceIndex spectrum,
+  void plotInBottomPreview(const QString &name, Mantid::API::MatrixWorkspace_sptr workspace, WorkspaceIndex spectrum,
                            Qt::GlobalColor colour) override;
 
   void removeFromTopPreview(const QString &name) override;
@@ -115,12 +100,16 @@ public:
   void setFitRange(double minimum, double maximum) override;
   void setFitRangeMinimum(double minimum) override;
   void setFitRangeMaximum(double maximum) override;
+  void setFitRangeBounds(std::pair<double, double> const &bounds) override;
 
   void setBackgroundRangeVisible(bool visible) override;
   void setHWHMRangeVisible(bool visible) override;
 
   void displayMessage(const std::string &message) const override;
   void disableSpectrumPlotSelection() override;
+
+  void allowRedraws(bool state) override;
+  void redrawPlots() override;
 
 public slots:
   void clearTopPreview() override;
@@ -144,12 +133,9 @@ private:
   void createSplitter();
   MantidWidgets::PreviewPlot *createTopPlot();
   MantidWidgets::PreviewPlot *createBottomPlot();
-  MantidWidgets::PreviewPlot *
-  createPlot(MantidQt::MantidWidgets::PreviewPlot *plot,
-             QSize const &minimumSize, unsigned char horizontalStretch,
-             unsigned char verticalStretch) const;
-  void setPlotSizePolicy(MantidQt::MantidWidgets::PreviewPlot *plot,
-                         unsigned char horizontalStretch,
+  MantidWidgets::PreviewPlot *createPlot(MantidQt::MantidWidgets::PreviewPlot *plot, QSize const &minimumSize,
+                                         unsigned char horizontalStretch, unsigned char verticalStretch) const;
+  void setPlotSizePolicy(MantidQt::MantidWidgets::PreviewPlot *plot, unsigned char horizontalStretch,
                          unsigned char verticalStretch) const;
 
   std::string getSpectrumText() const;

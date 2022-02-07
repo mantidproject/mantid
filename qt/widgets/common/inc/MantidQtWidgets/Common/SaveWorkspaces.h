@@ -27,22 +27,19 @@ class EXPORT_OPT_MANTIDQT_COMMON SaveWorkspaces : public API::MantidDialog {
   Q_OBJECT
 
 public:
-  SaveWorkspaces(QWidget *parent, const QString &suggFname,
-                 QHash<const QCheckBox *const, QString> &defSavs,
+  SaveWorkspaces(QWidget *parent, const QString &suggFname, QHash<const QCheckBox *const, QString> &defSavs,
                  bool saveAsZeroErrorFree);
   void initLayout();
   /// Returns the save extension expected the name algorithm
   static QString getSaveAlgExt(const QString &algName);
 public slots:
   void onSaveAsZeroErrorFreeChanged(int state);
-  void onUpdateGeomtryInformation(QString &geometryID, QString &sampleHeight,
-                                  QString &sampleWidth,
+  void onUpdateGeomtryInformation(QString &geometryID, QString &sampleHeight, QString &sampleWidth,
                                   QString &sampleThickness);
 
 signals:
   void closing();
-  void createZeroErrorFreeWorkspace(QString &originalWorkspace,
-                                    QString &zeroFreeWorkspace);
+  void createZeroErrorFreeWorkspace(QString &originalWorkspace, QString &zeroFreeWorkspace);
   void deleteZeroErrorFreeWorkspace(QString &zeroFreeWorkspace);
   void updateGeometryInformation();
 
@@ -61,8 +58,7 @@ private:
   using SavFormatsConstIt = QHash<QCheckBox *const, QString>::const_iterator;
 
   void setupLine1(QHBoxLayout *const lineOne);
-  void setupLine2(QHBoxLayout *const lineTwo,
-                  const QHash<const QCheckBox *const, QString> &defSavs);
+  void setupLine2(QHBoxLayout *const lineTwo, const QHash<const QCheckBox *const, QString> &defSavs);
   void readSettings();
   void setFileName(const QString &newName);
   void setupFormatTicks(const QHash<const QCheckBox *const, QString> &defSavs);
@@ -70,11 +66,9 @@ private:
 
   void addButtonsDisab(int row);
   void closeEvent(QCloseEvent *event) override;
-  QString saveList(const QList<QListWidgetItem *> &list,
-                   const QString &algorithm, QString fileBase, bool toAppend,
+  QString saveList(const QList<QListWidgetItem *> &list, const QString &algorithm, QString fileBase, bool toAppend,
                    QHash<QString, QString> workspaceMap);
-  QHash<QString, QString>
-  provideZeroFreeWorkspaces(const QListWidget *workspaces);
+  QHash<QString, QString> provideZeroFreeWorkspaces(const QListWidget *workspaces);
   void removeZeroFreeWorkspaces(const QHash<QString, QString> &workspaces);
   bool isValid();
 private slots:

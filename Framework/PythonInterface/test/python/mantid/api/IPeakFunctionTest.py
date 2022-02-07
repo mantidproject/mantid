@@ -6,6 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 import unittest
 from mantid.api import *
+from mantid.simpleapi import LoadEmptyInstrument, LoadParameterFile
 import numpy as np
 
 
@@ -17,14 +18,17 @@ class MyPeak(IPeakFunction):
         self.declareAttribute("Width", 1.5)
 
     def functionLocal(self, xvals):
-        return 5*xvals
+        return 5 * xvals
 
 
 class RectangularFunction(IPeakFunction):
     def init(self):
-        self.declareParameter("Height")
-        self.declareParameter("Fwhm")
-        self.declareParameter("Center")
+        if not self.hasParameter("Height"):
+            self.declareParameter("Height")
+        if not self.hasParameter("Fwhm"):
+            self.declareParameter("Fwhm")
+        if not self.hasParameter("Center"):
+            self.declareParameter("Center")
 
     def centre(self):
         return self.getParameterValue("Center")
@@ -50,10 +54,23 @@ class RectangularFunction(IPeakFunction):
         height = self.getParameterValue("Height")
 
         values = np.zeros(xvals.shape)
-        nonZero = (xvals > (center - fwhm/2.0)) & (xvals < (center + fwhm / 2.0))
+        nonZero = (xvals > (center - fwhm / 2.0)) & (xvals < (center + fwhm / 2.0))
         values[nonZero] = height
 
         return values
+
+    def intensityErrorLocal(self):
+        r"""Analytical expression for the error in the integrated intensity arising from errors in
+        uncorrelated fit paramaters"""
+        height = self.getParameterValue("Height")
+        height_error = self.getError("Height")
+        fwhm = self.getParameterValue("Fwhm")
+        fwhm_error = self.getError("Fwhm")
+        intensity = height * fwhm
+        return intensity * np.sqrt((height_error / height)**2 + (fwhm_error / fwhm)**2)
+
+
+FunctionFactory.subscribe(RectangularFunction)
 
 
 class IPeakFunctionTest(unittest.TestCase):
@@ -74,7 +91,7 @@ class IPeakFunctionTest(unittest.TestCase):
     def test_functionLocal_can_be_called_directly(self):
         func = MyPeak()
         func.initialize()
-        xvals=np.array([1.,2.,3.])
+        xvals = np.array([1., 2., 3.])
         out = func.functionLocal(xvals)
         self.assertEqual(3, out.shape[0])
         self.assertEqual(5., out[0])
@@ -98,6 +115,34 @@ class IPeakFunctionTest(unittest.TestCase):
         self.assertEqual(func.fwhm(), 3.0)
         self.assertAlmostEquals(func.height(), 4.0, places=10)
         self.assertAlmostEquals(func.intensity(), 12.0, places=10)
+
+    def test_get_set_matrix_workspace(self):
+        ws = LoadEmptyInstrument(InstrumentName='ENGIN-X', OutputWorkspace='ws')
+        LoadParameterFile(Workspace=ws, Filename='ENGIN-X_Parameters.xml')
+        axis = ws.getAxis(0)
+        unit = axis.getUnit()
+        axis.setUnit("TOF")
+
+        func = FunctionFactory.Instance().createPeakFunction("BackToBackExponential")
+        func.setParameter(3, 24000)  # set centre
+        func.setMatrixWorkspace(ws, 800, 0.0, 0.0)  # calculate A,B,S
+        self.assertTrue(func.isExplicitlySet(1))
+
+    def test_intensityError(self):
+        func = RectangularFunction()
+        func.initialize()
+        func.setCentre(1.0)
+        func.setHeight(2.0)
+        func.setFwhm(3.0)
+        # shifting the box doesn't change its area
+        func.setError("Center", 0.1)
+        self.assertEqual(func.intensityError(), 0.0, 1e-6)
+        # general case
+        func.setError("Center", 0.1)
+        func.setError("Height", 0.2)
+        func.setError("Fwhm", 0.3)
+        self.assertAlmostEquals(func.intensityError(), func.intensityErrorLocal(), places=6)
+
 
 if __name__ == '__main__':
     unittest.main()

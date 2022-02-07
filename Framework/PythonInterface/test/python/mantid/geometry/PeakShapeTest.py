@@ -18,7 +18,7 @@ class PeakShapeTest(unittest.TestCase):
         peak_shape = peak.getPeakShape()
         self.assertTrue(isinstance(peak_shape, PeakShape))
         self.assertEqual(peak_shape.shapeName(), "none")
-    
+
 
 if __name__ == '__main__':
     unittest.main()

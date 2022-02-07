@@ -168,8 +168,7 @@ public:
 
   void test_GetCellForForm() {
     size_t good_forms[] = {1, 2, 9, 19, 10, 20, 27, 31};
-    double errors[] = {0.0074, 0.0129,    0.0042328, 0.0050198,
-                       0.0057, 0.0053090, 0.0050,    0.0000000};
+    double errors[] = {0.0074, 0.0129, 0.0042328, 0.0050198, 0.0057, 0.0053090, 0.0050, 0.0000000};
 
     Matrix<double> UB = getSiliconNiggliUB(); // cubic case
     for (size_t i = 0; i < 8; i++) {
@@ -182,8 +181,7 @@ public:
     std::vector<ConventionalCell> list;
 
     Matrix<double> UB = getSapphireNiggliUB(); // rhombohedral case
-    list = ScalarUtils::GetCells(UB, ReducedCell::RHOMBOHEDRAL(),
-                                 ReducedCell::R_CENTERED());
+    list = ScalarUtils::GetCells(UB, ReducedCell::RHOMBOHEDRAL(), ReducedCell::R_CENTERED());
 
     ConventionalCell info = ScalarUtils::GetCellBestError(list, true);
     TS_ASSERT_EQUALS(info.GetFormNum(), 9);
@@ -204,21 +202,18 @@ public:
     std::vector<ConventionalCell> list;
 
     Matrix<double> UB = getSiliconNiggliUB(); // cubic case
-    list = ScalarUtils::GetCells(UB, ReducedCell::CUBIC(),
-                                 ReducedCell::F_CENTERED());
+    list = ScalarUtils::GetCells(UB, ReducedCell::CUBIC(), ReducedCell::F_CENTERED());
     TS_ASSERT_EQUALS(list.size(), 1);
     TS_ASSERT_EQUALS(list[0].GetFormNum(), 1);
 
     UB = getQuartzNiggliUB(); // hexagonal case
-    list = ScalarUtils::GetCells(UB, ReducedCell::HEXAGONAL(),
-                                 ReducedCell::P_CENTERED());
+    list = ScalarUtils::GetCells(UB, ReducedCell::HEXAGONAL(), ReducedCell::P_CENTERED());
     TS_ASSERT_EQUALS(list.size(), 2);
     TS_ASSERT_EQUALS(list[0].GetFormNum(), 12);
     TS_ASSERT_EQUALS(list[1].GetFormNum(), 22);
 
     UB = getSapphireNiggliUB(); // rhombohedral case
-    list = ScalarUtils::GetCells(UB, ReducedCell::RHOMBOHEDRAL(),
-                                 ReducedCell::R_CENTERED());
+    list = ScalarUtils::GetCells(UB, ReducedCell::RHOMBOHEDRAL(), ReducedCell::R_CENTERED());
     TS_ASSERT_EQUALS(list.size(), 4);
     TS_ASSERT_EQUALS(list[0].GetFormNum(), 2);
     TS_ASSERT_EQUALS(list[1].GetFormNum(), 4);
@@ -226,8 +221,7 @@ public:
     TS_ASSERT_EQUALS(list[3].GetFormNum(), 24);
 
     UB = getBaFeAsNiggliUB(); // tetragonal case
-    list = ScalarUtils::GetCells(UB, ReducedCell::TETRAGONAL(),
-                                 ReducedCell::I_CENTERED());
+    list = ScalarUtils::GetCells(UB, ReducedCell::TETRAGONAL(), ReducedCell::I_CENTERED());
     TS_ASSERT_EQUALS(list.size(), 4);
     TS_ASSERT_EQUALS(list[0].GetFormNum(), 6);
     TS_ASSERT_EQUALS(list[1].GetFormNum(), 7);
@@ -235,23 +229,20 @@ public:
     TS_ASSERT_EQUALS(list[3].GetFormNum(), 18);
 
     UB = getNatroliteNiggliUB(); // orthorhombic case
-    list = ScalarUtils::GetCells(UB, ReducedCell::ORTHORHOMBIC(),
-                                 ReducedCell::F_CENTERED());
+    list = ScalarUtils::GetCells(UB, ReducedCell::ORTHORHOMBIC(), ReducedCell::F_CENTERED());
     TS_ASSERT_EQUALS(list.size(), 2);
     TS_ASSERT_EQUALS(list[0].GetFormNum(), 16);
     TS_ASSERT_EQUALS(list[1].GetFormNum(), 26);
 
     UB = getOxalicAcidNiggliUB(); // monoclinic case
-    list = ScalarUtils::GetCells(UB, ReducedCell::MONOCLINIC(),
-                                 ReducedCell::P_CENTERED());
+    list = ScalarUtils::GetCells(UB, ReducedCell::MONOCLINIC(), ReducedCell::P_CENTERED());
     TS_ASSERT_EQUALS(list.size(), 3);
     TS_ASSERT_EQUALS(list[0].GetFormNum(), 33);
     TS_ASSERT_EQUALS(list[1].GetFormNum(), 34);
     TS_ASSERT_EQUALS(list[2].GetFormNum(), 35);
 
     UB = getTestNiggliUB(); // triclinic case
-    list = ScalarUtils::GetCells(UB, ReducedCell::TRICLINIC(),
-                                 ReducedCell::P_CENTERED());
+    list = ScalarUtils::GetCells(UB, ReducedCell::TRICLINIC(), ReducedCell::P_CENTERED());
     TS_ASSERT_EQUALS(list.size(), 2);
     TS_ASSERT_EQUALS(list[0].GetFormNum(), 31);
     TS_ASSERT_EQUALS(list[1].GetFormNum(), 44);
@@ -260,18 +251,12 @@ public:
   void test_GetRelatedUBs() {
 
     double TOPAZ_7424_mats[6][9] = {
-        {-0.042452, -0.132196, 0.230460, -0.003637, -0.176881, -0.027427,
-         0.203573, -0.030337, -0.022467},
-        {0.042452, 0.230460, -0.132196, 0.003637, -0.027427, -0.176881,
-         -0.203573, -0.022467, -0.030337},
-        {-0.132196, 0.230460, -0.042452, -0.176881, -0.027427, -0.003637,
-         -0.030337, -0.022467, 0.203573},
-        {0.132196, -0.042452, 0.230460, 0.176881, -0.003637, -0.027427,
-         0.030337, 0.203573, -0.022467},
-        {0.230460, -0.042452, -0.132196, -0.027427, -0.003637, -0.176881,
-         -0.022467, 0.203573, -0.030337},
-        {-0.230460, -0.132196, -0.042452, 0.027427, -0.176881, -0.003637,
-         0.022467, -0.030337, 0.203573}};
+        {-0.042452, -0.132196, 0.230460, -0.003637, -0.176881, -0.027427, 0.203573, -0.030337, -0.022467},
+        {0.042452, 0.230460, -0.132196, 0.003637, -0.027427, -0.176881, -0.203573, -0.022467, -0.030337},
+        {-0.132196, 0.230460, -0.042452, -0.176881, -0.027427, -0.003637, -0.030337, -0.022467, 0.203573},
+        {0.132196, -0.042452, 0.230460, 0.176881, -0.003637, -0.027427, 0.030337, 0.203573, -0.022467},
+        {0.230460, -0.042452, -0.132196, -0.027427, -0.003637, -0.176881, -0.022467, 0.203573, -0.030337},
+        {-0.230460, -0.132196, -0.042452, 0.027427, -0.176881, -0.003637, 0.022467, -0.030337, 0.203573}};
 
     double tolerance = 3; // tolerance on angles, in degrees
     double factor = 1.05; // tolerance factor for equal sides
@@ -280,8 +265,7 @@ public:
     // near 90 degrees, so only one cell
     Matrix<double> Triclinic_UB = getTestNiggliUB();
     std::vector<Matrix<double>> Triclinic_list;
-    Triclinic_list =
-        ScalarUtils::GetRelatedUBs(Triclinic_UB, factor, tolerance);
+    Triclinic_list = ScalarUtils::GetRelatedUBs(Triclinic_UB, factor, tolerance);
     TS_ASSERT_EQUALS(Triclinic_list.size(), 1);
 
     // Silicon UB.  Three angles 60 degrees, none near 90.  Three equal
@@ -311,8 +295,7 @@ public:
     // permutations for related UBs.
     Matrix<double> TOPAZ_7424_UB = getTopaz7424UB();
     std::vector<Matrix<double>> TOPAZ_7424_list;
-    TOPAZ_7424_list =
-        ScalarUtils::GetRelatedUBs(TOPAZ_7424_UB, factor, tolerance);
+    TOPAZ_7424_list = ScalarUtils::GetRelatedUBs(TOPAZ_7424_UB, factor, tolerance);
     TS_ASSERT_EQUALS(TOPAZ_7424_list.size(), 6);
 
     // Check all of the related UBs that are returned in this case

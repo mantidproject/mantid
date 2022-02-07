@@ -41,9 +41,7 @@ public:
   static const int Nprecision = 10; ///< Precision of the output
 
   Surface();
-  std::unique_ptr<Surface> clone() const {
-    return std::unique_ptr<Surface>(doClone());
-  };
+  std::unique_ptr<Surface> clone() const { return std::unique_ptr<Surface>(doClone()); };
 
   Surface &operator=(const Surface &) = delete;
   virtual ~Surface() = default;
@@ -62,7 +60,7 @@ public:
   virtual int side(const Kernel::V3D &) const;
 
   /// is point valid on surface
-  virtual int onSurface(const Kernel::V3D &R) const = 0;
+  virtual bool onSurface(const Kernel::V3D &R) const = 0;
 
   /// returns the minimum distance to the surface
   virtual double distance(const Kernel::V3D &) const = 0;
@@ -78,8 +76,7 @@ public:
   virtual void write(std::ostream &) const;
   virtual void print() const;
   /// bounding box for the surface
-  virtual void getBoundingBox(double &xmax, double &ymax, double &zmax,
-                              double &xmin, double &ymin, double &zmin) = 0;
+  virtual void getBoundingBox(double &xmax, double &ymax, double &zmax, double &xmin, double &ymin, double &zmin) = 0;
 #ifdef ENABLE_OPENCASCADE
   virtual TopoDS_Shape createShape();
 #endif

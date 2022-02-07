@@ -115,9 +115,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(grouper2.execute());
     TS_ASSERT(grouper2.isExecuted());
 
-    MatrixWorkspace_sptr outputWS =
-        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-            "GroupTestWS");
+    MatrixWorkspace_sptr outputWS = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("GroupTestWS");
     const HistogramX tens{10, 11, 12, 13, 14, 15};
     const HistogramY yOnes(5, 1.0);
     const HistogramE eOnes(5, 1.0);

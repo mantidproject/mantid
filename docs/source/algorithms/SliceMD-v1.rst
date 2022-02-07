@@ -45,9 +45,9 @@ For 1D slices, it may make sense to specify a SplitInto parameter of 1
 in every other dimension - that way, boxes will only be split along the
 1D direction.
 
-To force the box structure to match that defined in OutputBins, the 
-MaxRecursionDepth property can be set to 1. If this is not the case then 
-boxes will split further if sufficient events fall in the same box. Further 
+To force the box structure to match that defined in OutputBins, the
+MaxRecursionDepth property can be set to 1. If this is not the case then
+boxes will split further if sufficient events fall in the same box. Further
 splitting uses the value of "SplitInto" from the InputWorkspace.
 
 Slicing a MDHistoWorkspace
@@ -106,7 +106,7 @@ Output:
    # Create a host workspace
    mdew = CreateMDWorkspace(Dimensions=2, Extents=[-10,10,-10,10], Names='A, B', Units='U, U')
    # Add a peak at -5,-5
-   FakeMDEventData(mdew, PeakParams=[100000, -5, -5, 1]) 
+   FakeMDEventData(mdew, PeakParams=[100000, -5, -5, 1])
    # Add a peak at 5, 5
    FakeMDEventData(mdew, PeakParams=[100000, 5, 5, 1])
    # Slice at 45 degrees. BasisVector0 now runs through both peaks

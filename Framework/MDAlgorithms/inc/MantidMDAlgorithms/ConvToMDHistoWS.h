@@ -37,8 +37,7 @@ public:
   /// Default constructor
   ConvToMDHistoWS();
 
-  size_t initialize(const MDWSDescription &WSD,
-                    std::shared_ptr<MDEventWSWrapper> inWSWrapper,
+  size_t initialize(const MDWSDescription &WSD, std::shared_ptr<MDEventWSWrapper> inWSWrapper,
                     bool ignoreZeros) override;
 
   void runConversion(API::Progress *pProgress) override;
@@ -50,8 +49,7 @@ private:
   // these data to target MD workspace;
   size_t m_bufferSize;
   // internal function used to identify m_spectraChunk and m_bufferSize
-  void estimateThreadWork(size_t nThreads, size_t specSize,
-                          size_t nPointsToProcess);
+  void estimateThreadWork(size_t nThreads, size_t specSize, size_t nPointsToProcess);
   // the function does a chunk of work. Expected to run on a thread.
   size_t conversionChunk(size_t startSpectra) override;
 };

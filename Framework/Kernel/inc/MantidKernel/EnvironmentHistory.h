@@ -31,14 +31,9 @@ public:
   std::string osVersion() const;
   /// print contents of object
   void printSelf(std::ostream &, const int indent = 0) const;
-
-private:
-  /// Private, unimplemented copy assignment operator
-  EnvironmentHistory &operator=(const EnvironmentHistory &);
 };
 
-MANTID_KERNEL_DLL std::ostream &operator<<(std::ostream &,
-                                           const EnvironmentHistory &);
+MANTID_KERNEL_DLL std::ostream &operator<<(std::ostream &, const EnvironmentHistory &);
 
 } // namespace Kernel
 } // namespace Mantid

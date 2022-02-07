@@ -44,8 +44,7 @@ template <typename T> struct IsConstSharedPtr : std::false_type {};
 
 /// Specialization for std::shared_ptr<const T> types to inherit from
 /// std::true_type
-template <typename T>
-struct IsConstSharedPtr<std::shared_ptr<const T>> : std::true_type {};
+template <typename T> struct IsConstSharedPtr<std::shared_ptr<const T>> : std::true_type {};
 
 //-----------------------------------------------------------------------
 // Polciy implementations
@@ -62,14 +61,12 @@ template <typename ConstPtrType> struct RemoveConstImpl {
 
   inline PyObject *operator()(const ConstPtrType &p) const {
     using namespace boost::python;
-    return to_python_value<NonConstValueType *>()(
-        const_cast<NonConstValueType *>(p));
+    return to_python_value<NonConstValueType *>()(const_cast<NonConstValueType *>(p));
   }
 
   inline PyTypeObject const *get_pytype() const {
     using namespace boost::python;
-    return converter::registered<NonConstValueType *>::converters
-        .to_python_target_type();
+    return converter::registered<NonConstValueType *>::converters.to_python_target_type();
   }
 };
 
@@ -84,14 +81,12 @@ template <typename T> struct RemoveConst_Requires_Pointer_Return_Value {};
 // call to this struct
 template <typename ConstSharedPtr> struct RemoveConstSharedPtrImpl {
   using ConstElementType = typename ConstSharedPtr::element_type;
-  using NonConstElementType =
-      typename std::remove_const<ConstElementType>::type;
+  using NonConstElementType = typename std::remove_const<ConstElementType>::type;
   using NonConstSharedPtr = typename std::shared_ptr<NonConstElementType>;
 
   inline PyObject *operator()(const ConstSharedPtr &p) const {
     using namespace boost::python;
-    return to_python_value<NonConstSharedPtr>()(
-        std::const_pointer_cast<NonConstElementType>(p));
+    return to_python_value<NonConstSharedPtr>()(std::const_pointer_cast<NonConstElementType>(p));
   }
 
   inline PyTypeObject const *get_pytype() const {
@@ -103,8 +98,7 @@ template <typename ConstSharedPtr> struct RemoveConstSharedPtrImpl {
 // Error handler for shared pointer types. If return type is wrong then user
 // sees the name of this
 // class in the output, which hopefully gives a clue as to what is going on
-template <typename T>
-struct RemoveConstSharedPtr_Requires_SharedPtr_Const_T_Pointer_Return_Value {};
+template <typename T> struct RemoveConstSharedPtr_Requires_SharedPtr_Const_T_Pointer_Return_Value {};
 
 } // namespace
 
@@ -114,9 +108,8 @@ struct RemoveConstSharedPtr_Requires_SharedPtr_Const_T_Pointer_Return_Value {};
 struct RemoveConst {
   template <class T> struct apply {
     // Deduce if type is correct for policy, needs to be a "T*"
-    using type = typename boost::mpl::if_c<
-        std::is_pointer<T>::value, RemoveConstImpl<T>,
-        RemoveConst_Requires_Pointer_Return_Value<T>>::type;
+    using type = typename boost::mpl::if_c<std::is_pointer<T>::value, RemoveConstImpl<T>,
+                                           RemoveConst_Requires_Pointer_Return_Value<T>>::type;
   };
 };
 
@@ -127,10 +120,9 @@ struct RemoveConstSharedPtr {
   template <class T> struct apply {
     // Deduce if type is correct for policy, needs to be a
     // "std::shared_ptr<T>"
-    using type = typename boost::mpl::if_c<
-        IsConstSharedPtr<T>::value, RemoveConstSharedPtrImpl<T>,
-        RemoveConstSharedPtr_Requires_SharedPtr_Const_T_Pointer_Return_Value<
-            T>>::type;
+    using type =
+        typename boost::mpl::if_c<IsConstSharedPtr<T>::value, RemoveConstSharedPtrImpl<T>,
+                                  RemoveConstSharedPtr_Requires_SharedPtr_Const_T_Pointer_Return_Value<T>>::type;
   };
 };
 

@@ -25,18 +25,10 @@ This is an implementation of ProjectionSurface for viewing the instrument in 3D.
 */
 class Projection3D : public ProjectionSurface {
   Q_OBJECT
-  enum AxisDirection {
-    XPOSITIVE,
-    YPOSITIVE,
-    ZPOSITIVE,
-    XNEGATIVE,
-    YNEGATIVE,
-    ZNEGATIVE
-  };
+  enum AxisDirection { XPOSITIVE, YPOSITIVE, ZPOSITIVE, XNEGATIVE, YNEGATIVE, ZNEGATIVE };
 
 public:
-  Projection3D(const InstrumentActor *rootActor, int winWidth, int winHeight);
-  ~Projection3D() override;
+  Projection3D(const InstrumentActor *rootActor, QSize viewportSize);
   RectF getSurfaceBounds() const override;
 
   void setViewDirection(const QString &vd);
@@ -52,6 +44,7 @@ public:
   virtual void loadFromProject(const std::string &lines) override;
   /// Save settings for the 3D projection to a project file
   virtual std::string saveToProject() const override;
+  virtual void saveShapesToTableWorkspace() override;
 
 signals:
   void finishedMove();
@@ -68,7 +61,7 @@ protected slots:
 
 protected:
   void init() override {}
-  void drawSurface(MantidGLWidget *widget, bool picking = false) const override;
+  void drawSurface(GLDisplay *widget, bool picking = false) const override;
   void changeColorMap() override;
 
   void drawAxes(double axis_length = 100.0) const;

@@ -11,10 +11,10 @@
 #include "MantidAPI/Sample.h"
 #include "MantidCrystal/AddPeakHKL.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
+#include "MantidFrameworkTestHelpers/ComponentCreationHelper.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
 #include "MantidGeometry/Instrument/Goniometer.h"
 #include "MantidKernel/V3D.h"
-#include "MantidTestHelpers/ComponentCreationHelper.h"
 #include <cxxtest/TestSuite.h>
 
 using Mantid::Crystal::AddPeakHKL;
@@ -53,8 +53,7 @@ public:
     const V3D detectorPos(20, 5, 0);
     const V3D beam1 = sample - source;
     const V3D beam2 = detectorPos - sample;
-    auto minimalInstrument = ComponentCreationHelper::createMinimalInstrument(
-        source, sample, detectorPos);
+    auto minimalInstrument = ComponentCreationHelper::createMinimalInstrument(source, sample, detectorPos);
 
     // Derive distances and angles
     const double l1 = beam1.norm();
@@ -65,22 +64,19 @@ public:
 
     // Derive QLab for diffraction
     const double wavenumber_in_angstrom_times_tof_in_microsec =
-        (Mantid::PhysicalConstants::NeutronMass * (l1 + l2) * 1e-10 *
-         microSecsInSec) /
+        (Mantid::PhysicalConstants::NeutronMass * (l1 + l2) * 1e-10 * microSecsInSec) /
         Mantid::PhysicalConstants::h_bar;
     V3D qLab = qLabDir * wavenumber_in_angstrom_times_tof_in_microsec;
 
     Mantid::Geometry::Goniometer goniometer; // identity
-    V3D hkl = qLab / (2 * M_PI); // Given our settings above, this is the
-                                 // simplified relationship between qLab and
-                                 // hkl.
+    V3D hkl = qLab / (2 * M_PI);             // Given our settings above, this is the
+                                             // simplified relationship between qLab and
+                                             // hkl.
 
     // Now create a peaks workspace around the simple fictional instrument
     PeaksWorkspace_sptr ws = std::make_shared<PeaksWorkspace>();
     ws->setInstrument(minimalInstrument);
-    ws->mutableSample().setOrientedLattice(
-        std::make_unique<Mantid::Geometry::OrientedLattice>(1, 1, 1, 90, 90,
-                                                            90));
+    ws->mutableSample().setOrientedLattice(std::make_unique<Mantid::Geometry::OrientedLattice>(1, 1, 1, 90, 90, 90));
     ws->mutableRun().setGoniometer(goniometer, false);
 
     AddPeakHKL alg;
@@ -96,15 +92,12 @@ public:
     IPeaksWorkspace_sptr ws_out = alg.getProperty("Workspace");
 
     // Get the peak just added.
-    const IPeak &peak = ws_out->getPeak(0);
-
+    auto peak = dynamic_cast<const Peak &>(ws_out->getPeak(0));
     /*
      Now we check we have made a self - consistent peak
      */
-    TSM_ASSERT_EQUALS("New peak should have HKL we demanded.", hkl,
-                      peak.getHKL());
-    TSM_ASSERT_EQUALS("New peak should have QLab we expected.", qLab,
-                      peak.getQLabFrame());
+    TSM_ASSERT_EQUALS("New peak should have HKL we demanded.", hkl, peak.getHKL());
+    TSM_ASSERT_EQUALS("New peak should have QLab we expected.", qLab, peak.getQLabFrame());
     TSM_ASSERT_EQUALS("QSample and QLab should be identical given the identity "
                       "goniometer settings.",
                       peak.getQLabFrame(), peak.getQSampleFrame());
@@ -113,9 +106,7 @@ public:
     TSM_ASSERT_EQUALS("This detector id does not match what we expect from the "
                       "instrument definition",
                       1, detector->getID());
-    TSM_ASSERT_EQUALS("Thie detector position is wrong", detectorPos,
-                      detector->getPos());
-    TSM_ASSERT_EQUALS("Goniometer has not been set properly", goniometer.getR(),
-                      peak.getGoniometerMatrix());
+    TSM_ASSERT_EQUALS("This detector position is wrong", detectorPos, detector->getPos());
+    TSM_ASSERT_EQUALS("Goniometer has not been set properly", goniometer.getR(), peak.getGoniometerMatrix());
   }
 };

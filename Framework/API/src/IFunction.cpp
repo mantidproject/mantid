@@ -30,6 +30,7 @@
 #include "MantidKernel/ProgressBase.h"
 #include "MantidKernel/Strings.h"
 #include "MantidKernel/UnitFactory.h"
+#include "MantidKernel/UsageService.h"
 
 #include <boost/lexical_cast.hpp>
 
@@ -40,8 +41,7 @@
 #include <sstream>
 #include <utility>
 
-namespace Mantid {
-namespace API {
+namespace Mantid::API {
 using namespace Geometry;
 
 namespace {
@@ -57,11 +57,15 @@ struct TieNode {
   // This tie must be applied before the other if the RHS of the other
   // contains this (left) parameter.
   bool operator<(TieNode const &other) const {
-    return std::find(other.right.begin(), other.right.end(), left) !=
-           other.right.end();
+    return std::find(other.right.begin(), other.right.end(), left) != other.right.end();
   }
 };
+const std::vector<std::string> EXCLUDEUSAGE = {"CompositeFunction"};
 } // namespace
+/**
+ * Constructor
+ */
+IFunction ::IFunction() : m_isParallel(false), m_handler(nullptr), m_chiSquared(0.0) {}
 
 /**
  * Destructor
@@ -69,11 +73,22 @@ struct TieNode {
 IFunction::~IFunction() { m_attrs.clear(); }
 
 /**
+Registers the usage of the function with the UsageService
+ */
+void IFunction::registerFunctionUsage(bool internal) {
+  if (!Kernel::UsageService::Instance().isEnabled()) {
+    return;
+  }
+  if (std::find(EXCLUDEUSAGE.cbegin(), EXCLUDEUSAGE.cend(), name()) == EXCLUDEUSAGE.cend() && !m_isRegistered) {
+    m_isRegistered = true;
+    Kernel::UsageService::Instance().registerFeatureUsage(Kernel::FeatureType::Function, name(), internal);
+  }
+}
+/**
  * Virtual copy constructor
  */
 std::shared_ptr<IFunction> IFunction::clone() const {
-  auto clonedFunction =
-      FunctionFactory::Instance().createInitialized(this->asString());
+  auto clonedFunction = FunctionFactory::Instance().createInitialized(this->asString());
   for (size_t i = 0; i < this->nParams(); i++) {
     double error = this->getError(i);
     clonedFunction->setError(i, error);
@@ -86,8 +101,7 @@ std::shared_ptr<IFunction> IFunction::clone() const {
  * @param reporter :: A pointer to a progress reporter that can be called during
  * function evaluation
  */
-void IFunction::setProgressReporter(
-    std::shared_ptr<Kernel::ProgressBase> reporter) {
+void IFunction::setProgressReporter(std::shared_ptr<Kernel::ProgressBase> reporter) {
   m_progReporter = std::move(reporter);
   m_progReporter->setNotifyStep(0.01);
 }
@@ -119,17 +133,12 @@ bool IFunction::cancellationRequestReceived() const {
  * @param jacobian :: A Jacobian matrix. It is expected to have dimensions of
  * domain.size() by nParams().
  */
-void IFunction::functionDeriv(const FunctionDomain &domain,
-                              Jacobian &jacobian) {
-  calNumericalDeriv(domain, jacobian);
-}
+void IFunction::functionDeriv(const FunctionDomain &domain, Jacobian &jacobian) { calNumericalDeriv(domain, jacobian); }
 
 /** Check if an active parameter i is actually active
  * @param i :: Index of a parameter.
  */
-bool IFunction::isActive(size_t i) const {
-  return getParameterStatus(i) == Active;
-}
+bool IFunction::isActive(size_t i) const { return getParameterStatus(i) == Active; }
 
 /**
  * Query if the parameter is fixed
@@ -144,9 +153,7 @@ bool IFunction::isFixed(size_t i) const {
 /// Check if a parameter i is fixed by default (not by user).
 /// @param i :: The index of a parameter
 /// @return true if parameter i is fixed by default
-bool IFunction::isFixedByDefault(size_t i) const {
-  return getParameterStatus(i) == FixedByDefault;
-}
+bool IFunction::isFixedByDefault(size_t i) const { return getParameterStatus(i) == FixedByDefault; }
 
 /// This method doesn't create a tie
 /// @param i :: A declared parameter index to be fixed
@@ -155,8 +162,8 @@ bool IFunction::isFixedByDefault(size_t i) const {
 void IFunction::fix(size_t i, bool isDefault) {
   auto status = getParameterStatus(i);
   if (status == Tied) {
-    throw std::runtime_error("Cannot fix parameter " + std::to_string(i) +
-                             " (" + parameterName(i) + "): it has a tie.");
+    throw std::runtime_error("Cannot fix parameter " + std::to_string(i) + " (" + parameterName(i) +
+                             "): it has a tie.");
   }
   if (isDefault) {
     setParameterStatus(i, FixedByDefault);
@@ -171,8 +178,8 @@ void IFunction::fix(size_t i, bool isDefault) {
 void IFunction::unfix(size_t i) {
   auto status = getParameterStatus(i);
   if (status == Tied) {
-    throw std::runtime_error("Cannot unfix parameter " + std::to_string(i) +
-                             " (" + parameterName(i) + "): it has a tie.");
+    throw std::runtime_error("Cannot unfix parameter " + std::to_string(i) + " (" + parameterName(i) +
+                             "): it has a tie.");
   }
   setParameterStatus(i, Active);
 }
@@ -185,8 +192,7 @@ void IFunction::unfix(size_t i) {
  * with this reference: a tie or a constraint.
  * @return newly ties parameters
  */
-void IFunction::tie(const std::string &parName, const std::string &expr,
-                    bool isDefault) {
+void IFunction::tie(const std::string &parName, const std::string &expr, bool isDefault) {
   auto ti = std::make_unique<ParameterTie>(this, parName, expr, isDefault);
   if (!isDefault && ti->isConstant()) {
     setParameter(parName, ti->eval());
@@ -304,14 +310,11 @@ class ReferenceEqual {
 
 public:
   /// Constructor
-  explicit ReferenceEqual(const IFunction &fun, size_t i)
-      : m_fun(fun), m_i(i) {}
+  explicit ReferenceEqual(const IFunction &fun, size_t i) : m_fun(fun), m_i(i) {}
   /// Bracket operator
   /// @param p :: the element you are looking for
   /// @return True if found
-  template <class T> bool operator()(const std::unique_ptr<T> &p) {
-    return m_fun.getParameterIndex(*p) == m_i;
-  }
+  template <class T> bool operator()(const std::unique_ptr<T> &p) { return m_fun.getParameterIndex(*p) == m_i; }
 };
 
 /** Removes i-th parameter's tie if it is tied or does nothing.
@@ -322,8 +325,7 @@ bool IFunction::removeTie(size_t i) {
   if (i >= nParams()) {
     throw std::out_of_range("Function parameter index out of range.");
   }
-  auto it =
-      std::find_if(m_ties.begin(), m_ties.end(), ReferenceEqual(*this, i));
+  auto it = std::find_if(m_ties.begin(), m_ties.end(), ReferenceEqual(*this, i));
   if (it != m_ties.end()) {
     m_ties.erase(it);
     setParameterStatus(i, Active);
@@ -338,8 +340,7 @@ bool IFunction::removeTie(size_t i) {
  * @return A pointer to the tie
  */
 ParameterTie *IFunction::getTie(size_t i) const {
-  auto it =
-      std::find_if(m_ties.cbegin(), m_ties.cend(), ReferenceEqual(*this, i));
+  auto it = std::find_if(m_ties.cbegin(), m_ties.cend(), ReferenceEqual(*this, i));
   if (it != m_ties.cend()) {
     return it->get();
   }
@@ -378,8 +379,7 @@ void IFunction::addConstraint(std::unique_ptr<IConstraint> ic) {
  * @return A pointer to the constraint or NULL
  */
 IConstraint *IFunction::getConstraint(size_t i) const {
-  auto it = std::find_if(m_constraints.cbegin(), m_constraints.cend(),
-                         ReferenceEqual(*this, i));
+  auto it = std::find_if(m_constraints.cbegin(), m_constraints.cend(), ReferenceEqual(*this, i));
   if (it != m_constraints.cend()) {
     return it->get();
   }
@@ -403,8 +403,7 @@ void IFunction::removeConstraint(const std::string &parName) {
  * @param parName :: The name of a constraint
  * @param c :: The penalty
  */
-void IFunction::setConstraintPenaltyFactor(const std::string &parName,
-                                           const double &c) {
+void IFunction::setConstraintPenaltyFactor(const std::string &parName, const double &c) {
   size_t iPar = parameterIndex(parName);
   for (auto &constraint : m_constraints) {
     if (iPar == constraint->getLocalIndex()) {
@@ -412,10 +411,8 @@ void IFunction::setConstraintPenaltyFactor(const std::string &parName,
       return;
     }
   }
-  g_log.warning()
-      << parName
-      << " does not have constraint so setConstraintPenaltyFactor failed"
-      << "\n";
+  g_log.warning() << parName << " does not have constraint so setConstraintPenaltyFactor failed"
+                  << "\n";
 }
 
 /// Remove all constraints.
@@ -459,8 +456,7 @@ std::string IFunction::asString() const { return writeToString(); }
  * CompositeFunction (eg MultiDomainFunction).
  * @return string representation of the function
  */
-std::string
-IFunction::writeToString(const std::string &parentLocalAttributesStr) const {
+std::string IFunction::writeToString(const std::string &parentLocalAttributesStr) const {
   std::ostringstream ostr;
   ostr << "name=" << this->name();
   // print the attributes
@@ -497,8 +493,7 @@ IFunction::writeToString(const std::string &parentLocalAttributesStr) const {
   }
   // print the ties
   if (!ties.empty()) {
-    ostr << ",ties=(" << Kernel::Strings::join(ties.begin(), ties.end(), ",")
-         << ")";
+    ostr << ",ties=(" << Kernel::Strings::join(ties.begin(), ties.end(), ",") << ")";
   }
   // "local" attributes of a parent composite function
   ostr << parentLocalAttributesStr;
@@ -523,22 +518,16 @@ void IFunction::addConstraints(const std::string &str, bool isDefault) {
     if ((it + 1) != list.end()) {
       auto next_expr = *(it + 1);
       if (next_expr.terms()[0].str().compare("penalty") == 0) {
-        auto c = std::unique_ptr<IConstraint>(
-            ConstraintFactory::Instance().createInitialized(this, expr,
-                                                            isDefault));
+        auto c = std::unique_ptr<IConstraint>(ConstraintFactory::Instance().createInitialized(this, expr, isDefault));
         double penalty_factor = std::stof(next_expr.terms()[1].str(), NULL);
         c->setPenaltyFactor(penalty_factor);
         this->addConstraint(std::move(c));
       } else {
-        auto c = std::unique_ptr<IConstraint>(
-            ConstraintFactory::Instance().createInitialized(this, expr,
-                                                            isDefault));
+        auto c = std::unique_ptr<IConstraint>(ConstraintFactory::Instance().createInitialized(this, expr, isDefault));
         this->addConstraint(std::move(c));
       }
     } else {
-      auto c = std::unique_ptr<IConstraint>(
-          ConstraintFactory::Instance().createInitialized(this, expr,
-                                                          isDefault));
+      auto c = std::unique_ptr<IConstraint>(ConstraintFactory::Instance().createInitialized(this, expr, isDefault));
       this->addConstraint(std::move(c));
     }
   }
@@ -569,10 +558,9 @@ void IFunction::setHandler(std::unique_ptr<FunctionHandler> handler) {
 
 /// Function to return all of the categories that contain this function
 const std::vector<std::string> IFunction::categories() const {
-  Mantid::Kernel::StringTokenizer tokenizer(
-      category(), categorySeparator(),
-      Mantid::Kernel::StringTokenizer::TOK_TRIM |
-          Mantid::Kernel::StringTokenizer::TOK_IGNORE_EMPTY);
+  Mantid::Kernel::StringTokenizer tokenizer(category(), categorySeparator(),
+                                            Mantid::Kernel::StringTokenizer::TOK_TRIM |
+                                                Mantid::Kernel::StringTokenizer::TOK_IGNORE_EMPTY);
   return tokenizer.asVector();
 }
 
@@ -593,9 +581,7 @@ namespace {
 class AttType : public IFunction::ConstAttributeVisitor<std::string> {
 protected:
   /// Apply if string
-  std::string apply(const std::string & /*str*/) const override {
-    return "std::string";
-  }
+  std::string apply(const std::string & /*str*/) const override { return "std::string"; }
   /// Apply if int
   std::string apply(const int & /*i*/) const override { return "int"; }
   /// Apply if double
@@ -603,9 +589,7 @@ protected:
   /// Apply if bool
   std::string apply(const bool & /*i*/) const override { return "bool"; }
   /// Apply if vector
-  std::string apply(const std::vector<double> & /*unused*/) const override {
-    return "std::vector<double>";
-  }
+  std::string apply(const std::vector<double> & /*unused*/) const override { return "std::vector<double>"; }
 };
 } // namespace
 
@@ -621,8 +605,7 @@ namespace {
 class AttValue : public IFunction::ConstAttributeVisitor<std::string> {
 public:
   explicit AttValue(bool quoteString = false)
-      : IFunction::ConstAttributeVisitor<std::string>(),
-        m_quoteString(quoteString) {}
+      : IFunction::ConstAttributeVisitor<std::string>(), m_quoteString(quoteString) {}
 
 protected:
   /// Apply if string
@@ -632,13 +615,9 @@ protected:
   /// Apply if int
   std::string apply(const int &i) const override { return std::to_string(i); }
   /// Apply if double
-  std::string apply(const double &d) const override {
-    return boost::lexical_cast<std::string>(d);
-  }
+  std::string apply(const double &d) const override { return boost::lexical_cast<std::string>(d); }
   /// Apply if bool
-  std::string apply(const bool &b) const override {
-    return b ? "true" : "false";
-  }
+  std::string apply(const bool &b) const override { return b ? "true" : "false"; }
   /// Apply if vector
   std::string apply(const std::vector<double> &v) const override {
     std::string res = "(";
@@ -657,13 +636,6 @@ private:
   bool m_quoteString;
 };
 } // namespace
-
-/// Copy assignment. Do not copy m_quoteValue flag.
-/// @param attr :: The attribute to copy from.
-IFunction::Attribute &IFunction::Attribute::operator=(const Attribute &attr) {
-  m_data = attr.m_data;
-  return *this;
-}
 
 std::string IFunction::Attribute::value() const {
   AttValue tmp(m_quoteValue);
@@ -865,8 +837,7 @@ bool IFunction::Attribute::isEmpty() const {
   try {
     return boost::get<std::string>(m_data).empty();
   } catch (...) {
-    throw std::runtime_error("Trying to access a " + type() +
-                             " attribute as string");
+    throw std::runtime_error("Trying to access a " + type() + " attribute as string");
   }
 }
 
@@ -880,7 +851,7 @@ public:
    * Constructor
    * @param value :: The value to set
    */
-  explicit SetValue(const std::string &value) : m_value(value) {}
+  explicit SetValue(std::string value) : m_value(std::move(value)) {}
 
 protected:
   /// Apply if string
@@ -904,9 +875,7 @@ protected:
                                   m_value);
   }
   /// Apply if bool
-  void apply(bool &b) const override {
-    b = (m_value == "true" || m_value == "TRUE" || m_value == "1");
-  }
+  void apply(bool &b) const override { b = (m_value == "true" || m_value == "TRUE" || m_value == "1"); }
   /// Apply if vector
   void apply(std::vector<double> &v) const override {
     if (m_value.empty() || m_value == "EMPTY") {
@@ -920,8 +889,7 @@ protected:
         m_value.erase(m_value.size() - 1);
       }
     }
-    Mantid::Kernel::StringTokenizer tokenizer(
-        m_value, ",", Mantid::Kernel::StringTokenizer::TOK_TRIM);
+    Mantid::Kernel::StringTokenizer tokenizer(m_value, ",", Mantid::Kernel::StringTokenizer::TOK_TRIM);
     v.resize(tokenizer.count());
     for (size_t i = 0; i < v.size(); ++i) {
       v[i] = boost::lexical_cast<double>(tokenizer[i]);
@@ -945,8 +913,7 @@ void IFunction::Attribute::fromString(const std::string &str) {
 /// parameters different from the declared
 double IFunction::activeParameter(size_t i) const {
   if (!isActive(i)) {
-    throw std::runtime_error("Attempt to use an inactive parameter " +
-                             parameterName(i));
+    throw std::runtime_error("Attempt to use an inactive parameter " + parameterName(i));
   }
   return getParameter(i);
 }
@@ -955,8 +922,7 @@ double IFunction::activeParameter(size_t i) const {
 /// parameters different from the declared
 void IFunction::setActiveParameter(size_t i, double value) {
   if (!isActive(i)) {
-    throw std::runtime_error("Attempt to use an inactive parameter " +
-                             parameterName(i));
+    throw std::runtime_error("Attempt to use an inactive parameter " + parameterName(i));
   }
   setParameter(i, value);
 }
@@ -967,8 +933,7 @@ void IFunction::setActiveParameter(size_t i, double value) {
  */
 std::string IFunction::nameOfActive(size_t i) const {
   if (!isActive(i)) {
-    throw std::runtime_error("Attempt to use an inactive parameter " +
-                             parameterName(i));
+    throw std::runtime_error("Attempt to use an inactive parameter " + parameterName(i));
   }
   return parameterName(i);
 }
@@ -979,8 +944,7 @@ std::string IFunction::nameOfActive(size_t i) const {
  */
 std::string IFunction::descriptionOfActive(size_t i) const {
   if (!isActive(i)) {
-    throw std::runtime_error("Attempt to use an inactive parameter " +
-                             parameterName(i));
+    throw std::runtime_error("Attempt to use an inactive parameter " + parameterName(i));
   }
   return parameterDescription(i);
 }
@@ -990,8 +954,7 @@ std::string IFunction::descriptionOfActive(size_t i) const {
  * @param jacobian :: A Jacobian matrix. It is expected to have dimensions of
  * domain.size() by nParams().
  */
-void IFunction::calNumericalDeriv(const FunctionDomain &domain,
-                                  Jacobian &jacobian) {
+void IFunction::calNumericalDeriv(const FunctionDomain &domain, Jacobian &jacobian) {
   /*
    * There is a similar more specialized method for 1D functions in IFunction1D
    * but the method takes different parameters and uses slightly different
@@ -1001,8 +964,7 @@ void IFunction::calNumericalDeriv(const FunctionDomain &domain,
 
   constexpr double epsilon = std::numeric_limits<double>::epsilon() * 100;
   constexpr double stepPercentage = 0.001;
-  constexpr double cutoff =
-      100.0 * std::numeric_limits<double>::min() / stepPercentage;
+  constexpr double cutoff = 100.0 * std::numeric_limits<double>::min() / stepPercentage;
   const size_t nParam = nParams();
   size_t nData = getValuesSize(domain);
 
@@ -1035,9 +997,7 @@ void IFunction::calNumericalDeriv(const FunctionDomain &domain,
 
       step = paramPstep - val;
       for (size_t i = 0; i < nData; i++) {
-        jacobian.set(i, iP,
-                     (plusStep.getCalculated(i) - minusStep.getCalculated(i)) /
-                         step);
+        jacobian.set(i, iP, (plusStep.getCalculated(i) - minusStep.getCalculated(i)) / step);
       }
     }
   }
@@ -1049,9 +1009,8 @@ void IFunction::calNumericalDeriv(const FunctionDomain &domain,
  * @param startX :: The lower bin index
  * @param endX :: The upper bin index
  */
-void IFunction::setMatrixWorkspace(
-    std::shared_ptr<const API::MatrixWorkspace> workspace, size_t wi,
-    double startX, double endX) {
+void IFunction::setMatrixWorkspace(std::shared_ptr<const API::MatrixWorkspace> workspace, size_t wi, double startX,
+                                   double endX) {
   UNUSED_ARG(startX);
   UNUSED_ARG(endX);
 
@@ -1071,8 +1030,7 @@ void IFunction::setMatrixWorkspace(
       // the first detector
       // Note JZ oct 2011 - I'm not sure why the code uses the first detector
       // and not the group. Ask Roman.
-      auto firstDetectorId =
-          *workspace->getSpectrum(wi).getDetectorIDs().begin();
+      auto firstDetectorId = *workspace->getSpectrum(wi).getDetectorIDs().begin();
 
       const auto &detectorInfo = workspace->detectorInfo();
       const auto detectorIndex = detectorInfo.indexOf(firstDetectorId);
@@ -1087,8 +1045,7 @@ void IFunction::setMatrixWorkspace(
 
     for (size_t i = 0; i < nParams(); i++) {
       if (!isExplicitlySet(i)) {
-        Geometry::Parameter_sptr param =
-            paramMap.getRecursive(detectorPtr, parameterName(i), "fitting");
+        Geometry::Parameter_sptr param = paramMap.getRecursive(detectorPtr, parameterName(i), "fitting");
         if (param != Geometry::Parameter_sptr()) {
           // get FitParameter
           const auto &fitParam = param->value<Geometry::FitParameter>();
@@ -1097,11 +1054,9 @@ void IFunction::setMatrixWorkspace(
           // function
           if (name() == fitParam.getFunction()) {
             // update value
-            auto *testWithLocation =
-                dynamic_cast<IFunctionWithLocation *>(this);
+            auto *testWithLocation = dynamic_cast<IFunctionWithLocation *>(this);
             if (testWithLocation == nullptr ||
-                (!fitParam.getLookUpTable().containData() &&
-                 fitParam.getFormula().empty())) {
+                (!fitParam.getLookUpTable().containData() && fitParam.getFormula().empty())) {
               setParameter(i, fitParam.getValue());
             } else {
               double centreValue = testWithLocation->centre();
@@ -1112,13 +1067,10 @@ void IFunction::setMatrixWorkspace(
               else {
                 if (!fitParam.getFormulaUnit().empty()) {
                   try {
-                    centreUnit = Kernel::UnitFactory::Instance().create(
-                        fitParam.getFormulaUnit()); // from formula
+                    centreUnit = Kernel::UnitFactory::Instance().create(fitParam.getFormulaUnit()); // from formula
                   } catch (...) {
-                    g_log.warning()
-                        << fitParam.getFormulaUnit()
-                        << " Is not an recognised formula unit for parameter "
-                        << fitParam.getName() << "\n";
+                    g_log.warning() << fitParam.getFormulaUnit() << " Is not an recognised formula unit for parameter "
+                                    << fitParam.getName() << "\n";
                   }
                 }
               }
@@ -1126,15 +1078,11 @@ void IFunction::setMatrixWorkspace(
               // if unit specified convert centre value to unit required by
               // formula or look-up-table
               if (centreUnit) {
-                g_log.debug()
-                    << "For FitParameter " << parameterName(i)
-                    << " centre of peak before any unit convertion is "
-                    << centreValue << '\n';
-                centreValue =
-                    convertValue(centreValue, centreUnit, workspace, wi);
                 g_log.debug() << "For FitParameter " << parameterName(i)
-                              << " centre of peak after any unit convertion is "
-                              << centreValue << '\n';
+                              << " centre of peak before any unit conversion is " << centreValue << '\n';
+                centreValue = convertValue(centreValue, centreUnit, workspace, wi);
+                g_log.debug() << "For FitParameter " << parameterName(i)
+                              << " centre of peak after any unit conversion is " << centreValue << '\n';
               }
 
               double paramValue = fitParam.getValue(centreValue);
@@ -1146,30 +1094,25 @@ void IFunction::setMatrixWorkspace(
               // www.mantidproject.org/IDF
               if (fitParam.getFormula().empty()) {
                 // so from look up table
-                Kernel::Unit_sptr resultUnit =
-                    fitParam.getLookUpTable().getYUnit(); // from table
-                g_log.debug()
-                    << "The FitParameter " << parameterName(i) << " = "
-                    << paramValue << " before y-unit convertion\n";
+                Kernel::Unit_sptr resultUnit = fitParam.getLookUpTable().getYUnit(); // from table
+                g_log.debug() << "The FitParameter " << parameterName(i) << " = " << paramValue
+                              << " before y-unit conversion\n";
                 paramValue /= convertValue(1.0, resultUnit, workspace, wi);
-                g_log.debug()
-                    << "The FitParameter " << parameterName(i) << " = "
-                    << paramValue << " after y-unit convertion\n";
+                g_log.debug() << "The FitParameter " << parameterName(i) << " = " << paramValue
+                              << " after y-unit conversion\n";
               } else {
                 // so from formula
 
                 std::string resultUnitStr = fitParam.getResultUnit();
 
                 if (!resultUnitStr.empty()) {
-                  std::vector<std::string> allUnitStr =
-                      Kernel::UnitFactory::Instance().getKeys();
+                  std::vector<std::string> allUnitStr = Kernel::UnitFactory::Instance().getKeys();
                   for (auto &iUnit : allUnitStr) {
                     size_t found = resultUnitStr.find(iUnit);
                     if (found != std::string::npos) {
                       size_t len = iUnit.size();
                       std::stringstream readDouble;
-                      Kernel::Unit_sptr unt =
-                          Kernel::UnitFactory::Instance().create(iUnit);
+                      Kernel::Unit_sptr unt = Kernel::UnitFactory::Instance().create(iUnit);
                       readDouble << 1.0 / convertValue(1.0, unt, workspace, wi);
                       resultUnitStr.replace(found, len, readDouble.str());
                     }
@@ -1178,24 +1121,18 @@ void IFunction::setMatrixWorkspace(
                   try {
                     mu::Parser p;
                     p.SetExpr(resultUnitStr);
-                    g_log.debug() << "The FitParameter " << parameterName(i)
-                                  << " = " << paramValue
-                                  << " before result-unit convertion (using "
-                                  << resultUnitStr << ")\n";
+                    g_log.debug() << "The FitParameter " << parameterName(i) << " = " << paramValue
+                                  << " before result-unit conversion (using " << resultUnitStr << ")\n";
                     paramValue *= p.Eval();
-                    g_log.debug()
-                        << "The FitParameter " << parameterName(i) << " = "
-                        << paramValue << " after result-unit convertion\n";
+                    g_log.debug() << "The FitParameter " << parameterName(i) << " = " << paramValue
+                                  << " after result-unit conversion\n";
                   } catch (mu::Parser::exception_type &e) {
-                    g_log.error()
-                        << "Cannot convert formula unit to workspace unit"
-                        << " Formula unit which cannot be passed is "
-                        << resultUnitStr
-                        << ". Muparser error message is: " << e.GetMsg()
-                        << '\n';
+                    g_log.error() << "Cannot convert formula unit to workspace unit"
+                                  << " Formula unit which cannot be passed is " << resultUnitStr
+                                  << ". Muparser error message is: " << e.GetMsg() << '\n';
                   }
                 } // end if
-              } // end trying to convert result-unit from formula or y-unit for
+              }   // end trying to convert result-unit from formula or y-unit for
               // lookuptable
 
               setParameter(i, paramValue);
@@ -1212,17 +1149,13 @@ void IFunction::setMatrixWorkspace(
             // add constraint if specified for this parameter in instrument
             // definition file
             if (!fitParam.getConstraint().empty()) {
-              IConstraint *constraint =
-                  ConstraintFactory::Instance().createInitialized(
-                      this, fitParam.getConstraint());
+              IConstraint *constraint = ConstraintFactory::Instance().createInitialized(this, fitParam.getConstraint());
               if (!fitParam.getConstraintPenaltyFactor().empty()) {
                 try {
-                  double penalty =
-                      std::stod(fitParam.getConstraintPenaltyFactor());
+                  double penalty = std::stod(fitParam.getConstraintPenaltyFactor());
                   constraint->setPenaltyFactor(penalty);
                 } catch (...) {
-                  g_log.warning()
-                      << "Can't set penalty factor for constraint\n";
+                  g_log.warning() << "Can't set penalty factor for constraint\n";
                 }
               }
               addConstraint(std::unique_ptr<IConstraint>(constraint));
@@ -1244,8 +1177,7 @@ void IFunction::setMatrixWorkspace(
  *  @return converted value
  */
 double IFunction::convertValue(double value, Kernel::Unit_sptr &outUnit,
-                               const std::shared_ptr<const MatrixWorkspace> &ws,
-                               size_t wsIndex) const {
+                               const std::shared_ptr<const MatrixWorkspace> &ws, size_t wsIndex) const {
   // only required if formula or look-up-table different from ws unit
   const auto &wsUnit = ws->getAxis(0)->unit();
   if (outUnit->unitID() == wsUnit->unitID())
@@ -1271,10 +1203,8 @@ double IFunction::convertValue(double value, Kernel::Unit_sptr &outUnit,
  *  @param ws ::      workspace
  *  @param wsIndex :: workspace index
  */
-void IFunction::convertValue(std::vector<double> &values,
-                             Kernel::Unit_sptr &outUnit,
-                             const std::shared_ptr<const MatrixWorkspace> &ws,
-                             size_t wsIndex) const {
+void IFunction::convertValue(std::vector<double> &values, Kernel::Unit_sptr &outUnit,
+                             const std::shared_ptr<const MatrixWorkspace> &ws, size_t wsIndex) const {
   // only required if  formula or look-up-table different from ws unit
   const auto &wsUnit = ws->getAxis(0)->unit();
   if (outUnit->unitID() == wsUnit->unitID())
@@ -1291,33 +1221,24 @@ void IFunction::convertValue(std::vector<double> &values,
     Instrument_const_sptr instrument = ws->getInstrument();
     Geometry::IComponent_const_sptr sample = instrument->getSample();
     if (sample == nullptr) {
-      g_log.error()
-          << "No sample defined instrument. Cannot convert units for function\n"
-          << "Ignore convertion.";
+      g_log.error() << "No sample defined instrument. Cannot convert units for function\n"
+                    << "Ignore conversion.";
       return;
     }
     const auto &spectrumInfo = ws->spectrumInfo();
     double l1 = spectrumInfo.l1();
     // If this is a monitor then l1+l2 = source-detector distance and twoTheta=0
-    double l2 = spectrumInfo.l2(wsIndex);
-    double twoTheta(0.0);
-    if (!spectrumInfo.isMonitor(wsIndex))
-      twoTheta = spectrumInfo.twoTheta(wsIndex);
-    auto emode = static_cast<int>(ws->getEMode());
-    double efixed(0.0);
-    try {
-      std::shared_ptr<const Geometry::IDetector> det(
-          &spectrumInfo.detector(wsIndex), NoDeleting());
-      efixed = ws->getEFixed(det);
-    } catch (std::exception &) {
-      // assume elastic
-      efixed = 0.0;
-      emode = 0;
-    }
+    auto emode = ws->getEMode();
 
+    Kernel::UnitParametersMap pmap{};
+    spectrumInfo.getDetectorValues(*wsUnit, *outUnit, emode, false, wsIndex, pmap);
     std::vector<double> emptyVec;
-    wsUnit->toTOF(values, emptyVec, l1, l2, twoTheta, emode, efixed, 0.0);
-    outUnit->fromTOF(values, emptyVec, l1, l2, twoTheta, emode, efixed, 0.0);
+    try {
+      wsUnit->toTOF(values, emptyVec, l1, emode, pmap);
+      outUnit->fromTOF(values, emptyVec, l1, emode, pmap);
+    } catch (std::exception &) {
+      throw std::runtime_error("Unable to perform unit conversion to " + outUnit->unitID());
+    }
   }
 }
 
@@ -1327,17 +1248,14 @@ void IFunction::convertValue(std::vector<double> &values,
 size_t IFunction::nAttributes() const { return m_attrs.size(); }
 
 /// Check if attribute named exists
-bool IFunction::hasAttribute(const std::string &name) const {
-  return m_attrs.find(name) != m_attrs.end();
-}
+bool IFunction::hasAttribute(const std::string &name) const { return m_attrs.find(name) != m_attrs.end(); }
 
 /**
  * Overload for const char* values.
  * @param attName :: Attribute name
  * @param value :: New attribute value to set
  */
-void IFunction::setAttributeValue(const std::string &attName,
-                                  const char *value) {
+void IFunction::setAttributeValue(const std::string &attName, const char *value) {
   std::string str(value);
   setAttributeValue(attName, str);
 }
@@ -1347,8 +1265,7 @@ void IFunction::setAttributeValue(const std::string &attName,
  * @param attName :: Attribute name
  * @param value :: New attribute value to set
  */
-void IFunction::setAttributeValue(const std::string &attName,
-                                  const std::string &value) {
+void IFunction::setAttributeValue(const std::string &attName, const std::string &value) {
   Attribute att = getAttribute(attName);
   att.setString(value);
   setAttribute(attName, att);
@@ -1362,26 +1279,35 @@ IFunction_sptr IFunction::getFunction(std::size_t) const {
 /// Returns a list of attribute names
 std::vector<std::string> IFunction::getAttributeNames() const {
   std::vector<std::string> names;
-  names.reserve(m_attrs.size());
-
-  std::transform(m_attrs.begin(), m_attrs.end(), std::back_inserter(names),
-                 [](const auto &attr) { return attr.first; });
-
+  names.reserve(nAttributes());
+  for (size_t i = 0; i < nAttributes(); ++i) {
+    names.emplace_back(attributeName(i));
+  }
   return names;
+}
+
+/**
+ * Return the name of the ith attribute by querying the stored attributes in
+ * m_attrs
+ * @param index :: Index of the attribute to return
+ */
+std::string IFunction::attributeName(size_t index) const {
+  if (index >= nAttributes()) {
+    throw std::out_of_range("Function attribute index out of range.");
+  }
+  auto itr = std::next(m_attrs.begin(), index);
+  return itr->first;
 }
 
 /**
  * Return a value of attribute attName
  * @param name :: Returns the named attribute
  */
-API::IFunction::Attribute
-IFunction::getAttribute(const std::string &name) const {
+API::IFunction::Attribute IFunction::getAttribute(const std::string &name) const {
   if (hasAttribute(name)) {
     return m_attrs.at(name);
   } else {
-    throw std::invalid_argument(
-        "ParamFunctionAttributeHolder::getAttribute - Unknown attribute '" +
-        name + "'");
+    throw std::invalid_argument("ParamFunctionAttributeHolder::getAttribute - Unknown attribute '" + name + "'");
   }
 }
 
@@ -1392,8 +1318,7 @@ IFunction::getAttribute(const std::string &name) const {
  *  @param name :: The name of the attribute
  *  @param value :: The value of the attribute
  */
-void IFunction::setAttribute(const std::string &name,
-                             const API::IFunction::Attribute &value) {
+void IFunction::setAttribute(const std::string &name, const API::IFunction::Attribute &value) {
   storeAttributeValue(name, value);
 }
 
@@ -1402,8 +1327,7 @@ void IFunction::setAttribute(const std::string &name,
  * @param name :: The name of the attribute
  * @param defaultValue :: A default value
  */
-void IFunction::declareAttribute(
-    const std::string &name, const API::IFunction::Attribute &defaultValue) {
+void IFunction::declareAttribute(const std::string &name, const API::IFunction::Attribute &defaultValue) {
   m_attrs.emplace(name, defaultValue);
 }
 
@@ -1418,14 +1342,11 @@ void IFunction::init() {
  *  @param name :: The name of the attribute
  *  @param value :: The value of the attribute
  */
-void IFunction::storeAttributeValue(const std::string &name,
-                                    const API::IFunction::Attribute &value) {
+void IFunction::storeAttributeValue(const std::string &name, const API::IFunction::Attribute &value) {
   if (hasAttribute(name)) {
     m_attrs[name] = value;
   } else {
-    throw std::invalid_argument(
-        "ParamFunctionAttributeHolder::setAttribute - Unknown attribute '" +
-        name + "'");
+    throw std::invalid_argument("ParamFunctionAttributeHolder::setAttribute - Unknown attribute '" + name + "'");
   }
 }
 
@@ -1435,8 +1356,7 @@ void IFunction::storeAttributeValue(const std::string &name,
  *  @param name :: The name of the attribute
  *  @param value :: The value of the attribute
  */
-void IFunction::storeReadOnlyAttribute(
-    const std::string &name, const API::IFunction::Attribute &value) const {
+void IFunction::storeReadOnlyAttribute(const std::string &name, const API::IFunction::Attribute &value) const {
   const_cast<IFunction *>(this)->storeAttributeValue(name, value);
 }
 
@@ -1449,26 +1369,21 @@ void IFunction::storeReadOnlyAttribute(
  * this function.
  * @param covar :: A matrix to set.
  */
-void IFunction::setCovarianceMatrix(
-    const std::shared_ptr<Kernel::Matrix<double>> &covar) {
+void IFunction::setCovarianceMatrix(const std::shared_ptr<Kernel::Matrix<double>> &covar) {
   // the matrix shouldn't be empty
   if (!covar) {
-    throw std::invalid_argument(
-        "IFunction: Cannot set an empty covariance matrix");
+    throw std::invalid_argument("IFunction: Cannot set an empty covariance matrix");
   }
   // the matrix should relate to this function
   if (covar->numRows() != nParams() || covar->numCols() != nParams()) {
-    throw std::invalid_argument(
-        "IFunction: Covariance matrix has a wrong size");
+    throw std::invalid_argument("IFunction: Covariance matrix has a wrong size");
   }
   m_covar = covar;
 }
 
 /// Get number of values for a given domain.
 /// @param domain :: A domain.
-size_t IFunction::getValuesSize(const FunctionDomain &domain) const {
-  return domain.size();
-}
+size_t IFunction::getValuesSize(const FunctionDomain &domain) const { return domain.size(); }
 
 /// Fix a parameter
 /// @param name :: A name of a parameter to fix
@@ -1538,8 +1453,7 @@ size_t IFunction::getNumberDomains() const { return 1; }
 /// created functions on their domains must be the same as if this function
 /// was evaluated on the composition of those domains.
 std::vector<IFunction_sptr> IFunction::createEquivalentFunctions() const {
-  return std::vector<IFunction_sptr>(
-      1, FunctionFactory::Instance().createInitialized(asString()));
+  return std::vector<IFunction_sptr>(1, FunctionFactory::Instance().createInitialized(asString()));
 }
 
 /// Put all ties in order in which they will be applied correctly.
@@ -1559,8 +1473,7 @@ void IFunction::sortTies() {
       newNode.right.emplace_back(this->getParameterIndex(p));
     }
     if (newNode < newNode) {
-      throw std::runtime_error("Parameter is tied to itself: " +
-                               tie->asString(this));
+      throw std::runtime_error("Parameter is tied to itself: " + tie->asString(this));
     }
     bool before(false), after(false);
     size_t indexBefore(0), indexAfter(0);
@@ -1576,8 +1489,7 @@ void IFunction::sortTies() {
     }
     if (before) {
       if (after) {
-        std::string message =
-            "Circular dependency in ties:\n" + tie->asString(this) + '\n';
+        std::string message = "Circular dependency in ties:\n" + tie->asString(this) + '\n';
         message += getTie(indexBefore)->asString(this);
         if (indexAfter != indexBefore) {
           message += '\n' + getTie(indexAfter)->asString(this);
@@ -1595,46 +1507,35 @@ void IFunction::sortTies() {
   }
 }
 
-} // namespace API
-} // namespace Mantid
+} // namespace Mantid::API
 
 ///\cond TEMPLATE
-namespace Mantid {
-namespace Kernel {
+namespace Mantid::Kernel {
 
 template <>
 MANTID_API_DLL std::shared_ptr<Mantid::API::IFunction>
-IPropertyManager::getValue<std::shared_ptr<Mantid::API::IFunction>>(
-    const std::string &name) const {
-  auto *prop = dynamic_cast<
-      PropertyWithValue<std::shared_ptr<Mantid::API::IFunction>> *>(
-      getPointerToProperty(name));
+IPropertyManager::getValue<std::shared_ptr<Mantid::API::IFunction>>(const std::string &name) const {
+  auto *prop = dynamic_cast<PropertyWithValue<std::shared_ptr<Mantid::API::IFunction>> *>(getPointerToProperty(name));
   if (prop) {
     return *prop;
   } else {
-    std::string message = "Attempt to assign property " + name +
-                          " to incorrect type. Expected shared_ptr<IFunction>.";
+    std::string message = "Attempt to assign property " + name + " to incorrect type. Expected shared_ptr<IFunction>.";
     throw std::runtime_error(message);
   }
 }
 
 template <>
 MANTID_API_DLL std::shared_ptr<const Mantid::API::IFunction>
-IPropertyManager::getValue<std::shared_ptr<const Mantid::API::IFunction>>(
-    const std::string &name) const {
-  auto *prop = dynamic_cast<
-      PropertyWithValue<std::shared_ptr<Mantid::API::IFunction>> *>(
-      getPointerToProperty(name));
+IPropertyManager::getValue<std::shared_ptr<const Mantid::API::IFunction>>(const std::string &name) const {
+  auto *prop = dynamic_cast<PropertyWithValue<std::shared_ptr<Mantid::API::IFunction>> *>(getPointerToProperty(name));
   if (prop) {
     return prop->operator()();
   } else {
     std::string message =
-        "Attempt to assign property " + name +
-        " to incorrect type. Expected const shared_ptr<IFunction>.";
+        "Attempt to assign property " + name + " to incorrect type. Expected const shared_ptr<IFunction>.";
     throw std::runtime_error(message);
   }
 }
 
-} // namespace Kernel
-} // namespace Mantid
+} // namespace Mantid::Kernel
 ///\endcond TEMPLATE

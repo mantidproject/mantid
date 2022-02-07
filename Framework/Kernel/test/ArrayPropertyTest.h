@@ -77,8 +77,7 @@ public:
     // should only be the size of the
     // parent vector that is counted.
     std::vector<std::vector<int>> input{{10}};
-    Property *b =
-        new ArrayProperty<std::vector<int>>("vec_property", std::move(input));
+    Property *b = new ArrayProperty<std::vector<int>>("vec_property", std::move(input));
     TS_ASSERT_EQUALS(1, b->size());
     delete b;
   }
@@ -122,12 +121,9 @@ public:
     TS_ASSERT_EQUALS(i7.operator()()[2], 1);
 
     // bad step size
-    TS_ASSERT_THROWS(ArrayProperty<int> i8("i", "1:5:0"),
-                     const std::logic_error &);
-    TS_ASSERT_THROWS(ArrayProperty<int> i9("i", "1:5:-2"),
-                     const std::logic_error &);
-    TS_ASSERT_THROWS(ArrayProperty<int> i10("i", "5:1"),
-                     const std::logic_error &);
+    TS_ASSERT_THROWS(ArrayProperty<int> i8("i", "1:5:0"), const std::logic_error &);
+    TS_ASSERT_THROWS(ArrayProperty<int> i9("i", "1:5:-2"), const std::logic_error &);
+    TS_ASSERT_THROWS(ArrayProperty<int> i10("i", "5:1"), const std::logic_error &);
 
     ArrayProperty<unsigned int> u1("i", "0:2,5");
     TS_ASSERT_EQUALS(u1.operator()()[0], 0);
@@ -165,12 +161,9 @@ public:
     TS_ASSERT(!s.operator()()[1].compare("b"))
     TS_ASSERT(!s.operator()()[2].compare("c"))
 
-    TS_ASSERT_THROWS(ArrayProperty<int> ii("ii", "aa,bb"),
-                     const std::bad_cast &)
-    TS_ASSERT_THROWS(ArrayProperty<int> ii("ii", "5.5,6.6"),
-                     const std::bad_cast &)
-    TS_ASSERT_THROWS(ArrayProperty<double> dd("dd", "aa,bb"),
-                     const std::bad_cast &)
+    TS_ASSERT_THROWS(ArrayProperty<int> ii("ii", "aa,bb"), const std::bad_cast &)
+    TS_ASSERT_THROWS(ArrayProperty<int> ii("ii", "5.5,6.6"), const std::bad_cast &)
+    TS_ASSERT_THROWS(ArrayProperty<double> dd("dd", "aa,bb"), const std::bad_cast &)
   }
 
   void testConstructorByString_long() {
@@ -219,17 +212,12 @@ public:
   }
 
   void testSetValueAndIsDefault() {
-    std::string couldnt = "Could not set property ",
-                cant = ". Can not convert \"";
+    std::string couldnt = "Could not set property ", cant = ". Can not convert \"";
 
-    TS_ASSERT_EQUALS(iProp->setValue("1.1,2,2"), couldnt + iProp->name() +
-                                                     cant + "1.1,2,2\" to " +
-                                                     iProp->type())
+    TS_ASSERT_EQUALS(iProp->setValue("1.1,2,2"), couldnt + iProp->name() + cant + "1.1,2,2\" to " + iProp->type())
     TS_ASSERT(iProp->operator()().empty())
     TS_ASSERT(iProp->isDefault())
-    TS_ASSERT_EQUALS(iProp->setValue("aaa,bbb"), couldnt + iProp->name() +
-                                                     cant + "aaa,bbb\" to " +
-                                                     iProp->type())
+    TS_ASSERT_EQUALS(iProp->setValue("aaa,bbb"), couldnt + iProp->name() + cant + "aaa,bbb\" to " + iProp->type())
     TS_ASSERT(iProp->operator()().empty())
     TS_ASSERT(iProp->isDefault())
     TS_ASSERT_EQUALS(iProp->setValue("1,2,3,4"), "")
@@ -242,9 +230,7 @@ public:
     TS_ASSERT(iProp->operator()().empty())
     TS_ASSERT(iProp->isDefault())
 
-    TS_ASSERT_EQUALS(dProp->setValue("aaa,bbb"), couldnt + dProp->name() +
-                                                     cant + "aaa,bbb\" to " +
-                                                     dProp->type())
+    TS_ASSERT_EQUALS(dProp->setValue("aaa,bbb"), couldnt + dProp->name() + cant + "aaa,bbb\" to " + dProp->type())
     TS_ASSERT(dProp->operator()().empty())
     TS_ASSERT(dProp->isDefault())
     TS_ASSERT_EQUALS(dProp->setValue("1,2"), "")
@@ -339,53 +325,38 @@ public:
   }
 
   void testCasting() {
-    TS_ASSERT_DIFFERS(
-        dynamic_cast<PropertyWithValue<std::vector<int>> *>(iProp),
-        static_cast<PropertyWithValue<std::vector<int>> *>(nullptr))
-    TS_ASSERT_DIFFERS(
-        dynamic_cast<PropertyWithValue<std::vector<double>> *>(dProp),
-        static_cast<PropertyWithValue<std::vector<double>> *>(nullptr))
-    TS_ASSERT_DIFFERS(
-        dynamic_cast<PropertyWithValue<std::vector<std::string>> *>(sProp),
-        static_cast<PropertyWithValue<std::vector<std::string>> *>(nullptr))
+    TS_ASSERT_DIFFERS(dynamic_cast<PropertyWithValue<std::vector<int>> *>(iProp),
+                      static_cast<PropertyWithValue<std::vector<int>> *>(nullptr))
+    TS_ASSERT_DIFFERS(dynamic_cast<PropertyWithValue<std::vector<double>> *>(dProp),
+                      static_cast<PropertyWithValue<std::vector<double>> *>(nullptr))
+    TS_ASSERT_DIFFERS(dynamic_cast<PropertyWithValue<std::vector<std::string>> *>(sProp),
+                      static_cast<PropertyWithValue<std::vector<std::string>> *>(nullptr))
 
-    TS_ASSERT_DIFFERS(dynamic_cast<Property *>(iProp),
-                      static_cast<Property *>(nullptr))
-    TS_ASSERT_DIFFERS(dynamic_cast<Property *>(dProp),
-                      static_cast<Property *>(nullptr))
-    TS_ASSERT_DIFFERS(dynamic_cast<Property *>(sProp),
-                      static_cast<Property *>(nullptr))
+    TS_ASSERT_DIFFERS(dynamic_cast<Property *>(iProp), static_cast<Property *>(nullptr))
+    TS_ASSERT_DIFFERS(dynamic_cast<Property *>(dProp), static_cast<Property *>(nullptr))
+    TS_ASSERT_DIFFERS(dynamic_cast<Property *>(sProp), static_cast<Property *>(nullptr))
   }
 
   void testPrettyPrinting() {
-    const std::vector<std::string> inputList{
-        "1,2,3", "-1,0,1", "356,366,367,368,370,371,372,375", "7,6,5,6,7,8,10",
-        "1-9998, 9999, 2000, 20002-29999"};
-    const std::vector<std::string> resultList{
-        "1-3", "-1-1", "356,366-368,370-372,375", "7,6,5-8,10",
-        "1-9999,2000,20002-29999"};
+    const std::vector<std::string> inputList{"1,2,3", "-1,0,1", "356,366,367,368,370,371,372,375", "7,6,5,6,7,8,10",
+                                             "1-9998, 9999, 2000, 20002-29999"};
+    const std::vector<std::string> resultList{"1-3", "-1-1", "356,366-368,370-372,375", "7,6,5-8,10",
+                                              "1-9999,2000,20002-29999"};
 
-    TSM_ASSERT("Test Failed for vectors of int",
-               listShorteningwithType<int>(inputList, resultList));
-    TSM_ASSERT("Test Failed for vectors of long",
-               listShorteningwithType<long>(inputList, resultList));
+    TSM_ASSERT("Test Failed for vectors of int", listShorteningwithType<int>(inputList, resultList));
+    TSM_ASSERT("Test Failed for vectors of long", listShorteningwithType<long>(inputList, resultList));
     // explicit test for in32_t with matches det_id_t and spec_id_t
-    TSM_ASSERT("Test Failed for vectors of int32_t",
-               listShorteningwithType<int32_t>(inputList, resultList));
+    TSM_ASSERT("Test Failed for vectors of int32_t", listShorteningwithType<int32_t>(inputList, resultList));
 
     // unsigned types
-    const std::vector<std::string> inputListUnsigned{
-        "1,2,3", "356,366,367,368,370,371,372,375", "7,6,5,6,7,8,10",
-        "1-9998, 9999, 2000, 20002-29999"};
-    const std::vector<std::string> resultListUnsigned{
-        "1-3", "356,366-368,370-372,375", "7,6,5-8,10",
-        "1-9999,2000,20002-29999"};
+    const std::vector<std::string> inputListUnsigned{"1,2,3", "356,366,367,368,370,371,372,375", "7,6,5,6,7,8,10",
+                                                     "1-9998, 9999, 2000, 20002-29999"};
+    const std::vector<std::string> resultListUnsigned{"1-3", "356,366-368,370-372,375", "7,6,5-8,10",
+                                                      "1-9999,2000,20002-29999"};
     TSM_ASSERT("Test Failed for vectors of unsigned int",
-               listShorteningwithType<unsigned int>(inputListUnsigned,
-                                                    resultListUnsigned));
-    TSM_ASSERT(
-        "Test Failed for vectors of size_t",
-        listShorteningwithType<size_t>(inputListUnsigned, resultListUnsigned));
+               listShorteningwithType<unsigned int>(inputListUnsigned, resultListUnsigned));
+    TSM_ASSERT("Test Failed for vectors of size_t",
+               listShorteningwithType<size_t>(inputListUnsigned, resultListUnsigned));
 
     // check shortening does not happen for floating point types
     const std::vector<std::string> inputListFloat{
@@ -398,15 +369,12 @@ public:
         "1,1.5,2,3",
         "-1,0,1",
     };
-    TSM_ASSERT("Test Failed for vectors of float",
-               listShorteningwithType<float>(inputListFloat, resultListFloat));
-    TSM_ASSERT("Test Failed for vectors of double",
-               listShorteningwithType<double>(inputListFloat, resultListFloat));
+    TSM_ASSERT("Test Failed for vectors of float", listShorteningwithType<float>(inputListFloat, resultListFloat));
+    TSM_ASSERT("Test Failed for vectors of double", listShorteningwithType<double>(inputListFloat, resultListFloat));
   }
 
   template <typename T>
-  bool listShorteningwithType(const std::vector<std::string> &inputList,
-                              const std::vector<std::string> &resultList) {
+  bool listShorteningwithType(const std::vector<std::string> &inputList, const std::vector<std::string> &resultList) {
 
     bool success = true;
     for (size_t i = 0; i < inputList.size(); i++) {

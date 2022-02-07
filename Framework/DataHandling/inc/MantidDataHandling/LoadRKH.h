@@ -36,19 +36,13 @@ public:
   /// Algorithm's name
   const std::string name() const override { return "LoadRKH"; }
   /// Summary of algorithms purpose
-  const std::string summary() const override {
-    return "Load a file written in the RKH format";
-  }
+  const std::string summary() const override { return "Load a file written in the RKH format"; }
 
   /// Algorithm's version
   int version() const override { return (1); }
-  const std::vector<std::string> seeAlso() const override {
-    return {"SaveRKH"};
-  }
+  const std::vector<std::string> seeAlso() const override { return {"SaveRKH"}; }
   /// Algorithm's category for identification
-  const std::string category() const override {
-    return "DataHandling\\Text;SANS\\DataHandling";
-  }
+  const std::string category() const override { return "DataHandling\\Text;SANS\\DataHandling"; }
 
   /// Returns a confidence value that this algorithm can load a file
   int confidence(Kernel::FileDescriptor &descriptor) const override;
@@ -69,9 +63,7 @@ private:
   bool is2D(const std::string &testLine);
   const API::MatrixWorkspace_sptr read1D();
   const API::MatrixWorkspace_sptr read2D(const std::string &firstLine);
-  API::Progress read2DHeader(const std::string &initalLine,
-                             API::MatrixWorkspace_sptr &outWrksp,
-                             MantidVec &axis0Data);
+  API::Progress read2DHeader(const std::string &initalLine, API::MatrixWorkspace_sptr &outWrksp, MantidVec &axis0Data);
   const std::string readUnit(const std::string &line);
   void readNumEntrys(const int nEntries, MantidVec &output);
   void binCenter(const MantidVec &oldBoundaries, MantidVec &toCenter) const;
@@ -83,11 +75,9 @@ private:
   bool hasXerror(std::ifstream &stream);
 
   /// Read data from the RKH file
-  void readLinesForRKH1D(std::istream &stream, int readStart, int readEnd,
-                         HistogramData::Points &x, HistogramData::Counts &y,
-                         HistogramData::CountStandardDeviations &ye,
-                         HistogramData::PointStandardDeviations &xe,
-                         API::Progress &prog, bool readXError = false);
+  void readLinesForRKH1D(std::istream &stream, int readStart, int readEnd, HistogramData::Points &x,
+                         HistogramData::Counts &y, HistogramData::CountStandardDeviations &ye,
+                         HistogramData::PointStandardDeviations &xe, API::Progress &prog, bool readXError = false);
 };
 } // namespace DataHandling
 } // namespace Mantid

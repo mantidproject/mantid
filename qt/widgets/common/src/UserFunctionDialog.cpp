@@ -24,30 +24,26 @@
 using MantidQt::API::MantidDesktopServices;
 using namespace MantidQt::MantidWidgets;
 
-UserFunctionDialog::UserFunctionDialog(QWidget *parent, const QString &formula)
-    : QDialog(parent) {
+UserFunctionDialog::UserFunctionDialog(QWidget *parent, const QString &formula) : QDialog(parent) {
   m_uiForm.setupUi(this);
-  connect(m_uiForm.lstCategory, SIGNAL(currentTextChanged(const QString &)),
-          this, SLOT(selectCategory(const QString &)));
-  connect(m_uiForm.lstFunction, SIGNAL(currentTextChanged(const QString &)),
-          this, SLOT(selectFunction(const QString &)));
+  connect(m_uiForm.lstCategory, SIGNAL(currentTextChanged(const QString &)), this,
+          SLOT(selectCategory(const QString &)));
+  connect(m_uiForm.lstFunction, SIGNAL(currentTextChanged(const QString &)), this,
+          SLOT(selectFunction(const QString &)));
   connect(m_uiForm.btnSave, SIGNAL(clicked()), this, SLOT(saveFunction()));
-  connect(m_uiForm.btnRemove, SIGNAL(clicked()), this,
-          SLOT(removeCurrentFunction()));
+  connect(m_uiForm.btnRemove, SIGNAL(clicked()), this, SLOT(removeCurrentFunction()));
   connect(m_uiForm.btnAdd, SIGNAL(clicked()), this, SLOT(addExpression()));
   connect(m_uiForm.btnUse, SIGNAL(clicked()), this, SLOT(accept()));
   connect(m_uiForm.btnCancel, SIGNAL(clicked()), this, SLOT(reject()));
   connect(m_uiForm.btnHelp, SIGNAL(clicked()), this, SLOT(helpClicked()));
-  connect(m_uiForm.teUserFunction, SIGNAL(textChanged()), this,
-          SLOT(updateFunction()));
+  connect(m_uiForm.teUserFunction, SIGNAL(textChanged()), this, SLOT(updateFunction()));
   m_uiForm.teUserFunction->installEventFilter(this);
 
   loadFunctions();
   updateCategories();
   if (!formula.isEmpty()) {
     QRect rect = m_uiForm.teUserFunction->cursorRect();
-    QTextCursor cursor =
-        m_uiForm.teUserFunction->cursorForPosition(rect.topLeft());
+    QTextCursor cursor = m_uiForm.teUserFunction->cursorForPosition(rect.topLeft());
     cursor.insertText(formula);
     // updateFunction();
   }
@@ -87,14 +83,11 @@ void UserFunctionDialog::loadFunctions() {
   setFunction("Base", "sign", "sign(x)", "Sign of x");
   setFunction("Base", "rint", "rint(x)", "Round to nearest integer");
   setFunction("Base", "erf", "erf(x)", "error function of x");
-  setFunction("Base", "erfc", "erfc(x)",
-              "Complementary error function erfc(x) = 1 - erf(x)");
+  setFunction("Base", "erfc", "erfc(x)", "Complementary error function erfc(x) = 1 - erf(x)");
   setFunction("Built-in", "Gauss", "h*exp(-s*(x-c)^2)");
   setFunction("Built-in", "ExpDecay", "h*exp(-x/t)");
-  QFile funFile(
-      QString::fromStdString(
-          Mantid::Kernel::ConfigService::Instance().getUserPropertiesDir()) +
-      "Mantid.user.functions");
+  QFile funFile(QString::fromStdString(Mantid::Kernel::ConfigService::Instance().getUserPropertiesDir()) +
+                "Mantid.user.functions");
   if (funFile.exists() && funFile.open(QIODevice::ReadOnly | QIODevice::Text)) {
     QTextStream in(&funFile);
     while (!in.atEnd()) {
@@ -117,8 +110,7 @@ void UserFunctionDialog::updateCategories() {
   QSet<QString> cats = categoryNames();
   foreach (QString cat, cats) { m_uiForm.lstCategory->addItem(cat); }
   // try to restore current item selection
-  auto items =
-      m_uiForm.lstCategory->findItems(currentCategory, Qt::MatchExactly);
+  auto items = m_uiForm.lstCategory->findItems(currentCategory, Qt::MatchExactly);
   if (!items.isEmpty()) {
     m_uiForm.lstCategory->setCurrentItem(items[0]);
   }
@@ -182,8 +174,7 @@ void UserFunctionDialog::addExpression() {
     return;
 
   QRect rect = m_uiForm.teUserFunction->cursorRect();
-  QTextCursor cursor =
-      m_uiForm.teUserFunction->cursorForPosition(rect.topLeft());
+  QTextCursor cursor = m_uiForm.teUserFunction->cursorForPosition(rect.topLeft());
   if (cursor.position() > 0) {
     expr.prepend('+');
   }
@@ -219,18 +210,15 @@ void UserFunctionDialog::checkParameters(QString &expr) {
 
   // combine all names frm the two sets
   std::vector<std::string> all(vars1.size() + vars2.size(), "");
-  std::set_union(vars1.begin(), vars1.end(), vars2.begin(), vars2.end(),
-                 all.begin());
+  std::set_union(vars1.begin(), vars1.end(), vars2.begin(), vars2.end(), all.begin());
   std::vector<std::string>::iterator it = std::find(all.begin(), all.end(), "");
   if (it != all.end()) {
     all.erase(it, all.end());
   }
 
   // compare variable names and collect common names
-  std::vector<std::string> common(std::min<size_t>(vars1.size(), vars2.size()),
-                                  "");
-  std::set_intersection(vars1.begin(), vars1.end(), vars2.begin(), vars2.end(),
-                        common.begin());
+  std::vector<std::string> common(std::min<size_t>(vars1.size(), vars2.size()), "");
+  std::set_intersection(vars1.begin(), vars1.end(), vars2.begin(), vars2.end(), common.begin());
   it = std::find(common.begin(), common.end(), "");
   if (it != common.end()) {
     common.erase(it, common.end());
@@ -339,24 +327,20 @@ void UserFunctionDialog::saveFunction() {
     QString comment;
     dlg->getFunctionName(cat, fun, comment);
     if (fun.isEmpty()) {
-      QMessageBox::critical(this, "Mantid - Error",
-                            "The function name is empty");
+      QMessageBox::critical(this, "Mantid - Error", "The function name is empty");
       return;
     }
     // check if the category already exists
-    QList<QListWidgetItem *> items =
-        m_uiForm.lstCategory->findItems(cat, Qt::MatchExactly);
+    QList<QListWidgetItem *> items = m_uiForm.lstCategory->findItems(cat, Qt::MatchExactly);
     if (!items.isEmpty()) { // check if a function with this name already exists
       const QSet<QString> functions = functionNames(cat);
       QSet<QString>::const_iterator found = functions.find(fun);
       if (found != functions.end() &&
           QMessageBox::question(this, "Mantid",
-                                "A function with name " + fun +
-                                    " already exists in category " + cat +
+                                "A function with name " + fun + " already exists in category " + cat +
                                     ".\n"
                                     "Would you like to replace it?",
-                                QMessageBox::Yes | QMessageBox::No) ==
-              QMessageBox::No) {
+                                QMessageBox::Yes | QMessageBox::No) == QMessageBox::No) {
         return;
       }
     }
@@ -368,10 +352,8 @@ void UserFunctionDialog::saveFunction() {
 }
 
 void UserFunctionDialog::saveToFile() {
-  QFile funFile(
-      QString::fromStdString(
-          Mantid::Kernel::ConfigService::Instance().getUserPropertiesDir()) +
-      "Mantid.user.functions");
+  QFile funFile(QString::fromStdString(Mantid::Kernel::ConfigService::Instance().getUserPropertiesDir()) +
+                "Mantid.user.functions");
   if (funFile.open(QIODevice::WriteOnly | QIODevice::Text)) {
     QMap<QString, QString>::const_iterator it = m_funs.begin();
     for (; it != m_funs.end(); ++it) {
@@ -394,10 +376,8 @@ void UserFunctionDialog::removeCurrentFunction() {
   }
 
   QString fun = m_uiForm.lstFunction->currentItem()->text();
-  if (QMessageBox::question(
-          this, "Mantid",
-          "Are you sure you want to remove function " + fun + "?",
-          QMessageBox::Yes | QMessageBox::No) == QMessageBox::Yes) {
+  if (QMessageBox::question(this, "Mantid", "Are you sure you want to remove function " + fun + "?",
+                            QMessageBox::Yes | QMessageBox::No) == QMessageBox::Yes) {
     QString fun_key = cat + "." + fun;
     QMap<QString, QString>::iterator it = m_funs.find(fun_key);
     if (it != m_funs.end()) {
@@ -440,8 +420,7 @@ bool UserFunctionDialog::eventFilter(QObject *obj, QEvent *ev) {
  * @param fun :: The name of the function
  * @return An expression that can be used as mu::Parser formula
  */
-QString UserFunctionDialog::getFunction(const QString &cat,
-                                        const QString &fun) const {
+QString UserFunctionDialog::getFunction(const QString &cat, const QString &fun) const {
   if (cat.isEmpty() || fun.isEmpty())
     return "";
   QMap<QString, QString>::const_iterator it = m_funs.find(cat + "." + fun);
@@ -457,12 +436,10 @@ QString UserFunctionDialog::getFunction(const QString &cat,
  * @param cat :: The category
  * @param fun :: The name of the function
  */
-QString UserFunctionDialog::getComment(const QString &cat,
-                                       const QString &fun) const {
+QString UserFunctionDialog::getComment(const QString &cat, const QString &fun) const {
   if (cat.isEmpty() || fun.isEmpty())
     return "";
-  QMap<QString, QString>::const_iterator it =
-      m_funs.find(cat + "." + fun + ".comment");
+  QMap<QString, QString>::const_iterator it = m_funs.find(cat + "." + fun + ".comment");
   if (it != m_funs.end())
     return it.value();
   return "";
@@ -477,8 +454,7 @@ QString UserFunctionDialog::getComment(const QString &cat,
  * @param expr :: The expression
  * @param comment :: The comment
  */
-void UserFunctionDialog::setFunction(const QString &cat, const QString &fun,
-                                     const QString &expr,
+void UserFunctionDialog::setFunction(const QString &cat, const QString &fun, const QString &expr,
                                      const QString &comment) {
   if (cat.isEmpty() || fun.isEmpty() || expr.isEmpty())
     return;
@@ -499,16 +475,13 @@ void UserFunctionDialog::setFunction(const QString &cat, const QString &fun,
 /**
  * Checks if a category is a buil-in one and cannot be changed
  */
-bool UserFunctionDialog::isBuiltin(const QString &cat) const {
-  return cat == "Base" || cat == "Built-in";
-}
+bool UserFunctionDialog::isBuiltin(const QString &cat) const { return cat == "Base" || cat == "Built-in"; }
 
 /**
  * Open the help wiki page in the web browser.
  */
 void UserFunctionDialog::helpClicked() {
-  MantidDesktopServices::openUrl(
-      QUrl("http://www.mantidproject.org/MantidPlot:_User_Function_Dialog"));
+  MantidDesktopServices::openUrl(QUrl("http://www.mantidproject.org/MantidPlot:_User_Function_Dialog"));
 }
 
 /**
@@ -516,9 +489,7 @@ void UserFunctionDialog::helpClicked() {
  * @param parent :: The parent for this dialog
  * @param category :: The initial suggestion for the category
  */
-InputFunctionNameDialog::InputFunctionNameDialog(QWidget *parent,
-                                                 const QString &category)
-    : QDialog(parent) {
+InputFunctionNameDialog::InputFunctionNameDialog(QWidget *parent, const QString &category) : QDialog(parent) {
   auto *layout = new QVBoxLayout();
   layout->addWidget(new QLabel("Enter new or select a category"));
   QStringList cats = ((UserFunctionDialog *)parent)->categories();
@@ -532,8 +503,7 @@ InputFunctionNameDialog::InputFunctionNameDialog(QWidget *parent,
     m_category->setCurrentIndex(index);
   }
   layout->addWidget(m_category);
-  connect(m_category, SIGNAL(currentIndexChanged(const QString &)), parent,
-          SLOT(selectCategory(const QString &)));
+  connect(m_category, SIGNAL(currentIndexChanged(const QString &)), parent, SLOT(selectCategory(const QString &)));
   layout->addWidget(new QLabel("Enter a name for the new function"));
   m_name = new QLineEdit();
   layout->addWidget(m_name);
@@ -557,8 +527,7 @@ InputFunctionNameDialog::InputFunctionNameDialog(QWidget *parent,
  * @param name :: A string to recieve the function name
  * @param comment ::
  */
-void InputFunctionNameDialog::getFunctionName(QString &category, QString &name,
-                                              QString &comment) {
+void InputFunctionNameDialog::getFunctionName(QString &category, QString &name, QString &comment) {
   category = m_category->currentText();
   name = m_name->text();
   comment = m_comment->toPlainText();

@@ -22,8 +22,7 @@ directly.
 
 A specialised type exists for std::shared_ptr types
  */
-template <typename HeldType>
-class DLLExport TypedValidator : public IValidator {
+template <typename HeldType> class DLLExport TypedValidator : public IValidator {
 protected:
   /// Override this function to check the validity of the type
   virtual std::string checkValidity(const HeldType &) const = 0;
@@ -57,9 +56,7 @@ private:
  * The advantage of this is that Validator types then don't have to match
  * their types exactly.
  */
-template <typename ElementType>
-class DLLExport TypedValidator<std::shared_ptr<ElementType>>
-    : public IValidator {
+template <typename ElementType> class DLLExport TypedValidator<std::shared_ptr<ElementType>> : public IValidator {
   /// Shared ptr type
   using ElementType_sptr = std::shared_ptr<ElementType>;
 
@@ -114,8 +111,7 @@ private:
     // First try and push it up to the type of the validator
     ElementType_sptr typedValue = std::dynamic_pointer_cast<ElementType>(data);
     if (!typedValue) {
-      throw std::invalid_argument("DataItem \"" + data->getName() +
-                                  "\" is not of the expected type.");
+      throw std::invalid_argument("DataItem \"" + data->getName() + "\" is not of the expected type.");
     }
     return typedValue;
   }
@@ -141,8 +137,7 @@ private:
 /** Intialize the DataItem_sptr typeinfo
  */
 template <typename T>
-const std::type_info &TypedValidator<std::shared_ptr<T>>::m_dataitemTypeID =
-    typeid(std::shared_ptr<DataItem>);
+const std::type_info &TypedValidator<std::shared_ptr<T>>::m_dataitemTypeID = typeid(std::shared_ptr<DataItem>);
 } // namespace Kernel
 /// @endcond
 } // namespace Mantid

@@ -21,9 +21,7 @@ using boost::python::handle;
 using boost::python::len;
 using boost::python::object;
 
-namespace Mantid {
-namespace PythonInterface {
-namespace Converters {
+namespace Mantid::PythonInterface::Converters {
 /**
  * Construct the converter object with the given Python object
  * @param p :: A boost::python object that should support
@@ -47,10 +45,8 @@ PyObjectToV3D::PyObjectToV3D(const object &p) : m_obj(p), m_alreadyV3D(false) {
     // Can we index the object
     p.attr("__getitem__")(0);
   } catch (boost::python::error_already_set &) {
-    throw std::invalid_argument(
-        std::string(
-            "Cannot convert object to V3D. Expected a python sequence found ") +
-        p.ptr()->ob_type->tp_name);
+    throw std::invalid_argument(std::string("Cannot convert object to V3D. Expected a python sequence found ") +
+                                p.ptr()->ob_type->tp_name);
   }
 }
 
@@ -64,12 +60,7 @@ Kernel::V3D PyObjectToV3D::operator()() {
   if (m_alreadyV3D) {
     return extract<Kernel::V3D>(m_obj)();
   }
-  auto toDouble = [](const object &obj) {
-    return extract<double>(object(handle<>(PyNumber_Float(obj.ptr()))))();
-  };
-  return Kernel::V3D(toDouble(m_obj[0]), toDouble(m_obj[1]),
-                     toDouble(m_obj[2]));
+  auto toDouble = [](const object &obj) { return extract<double>(object(handle<>(PyNumber_Float(obj.ptr()))))(); };
+  return Kernel::V3D(toDouble(m_obj[0]), toDouble(m_obj[1]), toDouble(m_obj[2]));
 }
-} // namespace Converters
-} // namespace PythonInterface
-} // namespace Mantid
+} // namespace Mantid::PythonInterface::Converters

@@ -36,8 +36,7 @@ class CostFuncFitting;
     - exec()
     - initConcrete() to declare more properties
 */
-class MANTID_CURVEFITTING_DLL IFittingAlgorithm
-    : public API::ParallelAlgorithm {
+class MANTID_CURVEFITTING_DLL IFittingAlgorithm : public API::ParallelAlgorithm {
 public:
   const std::string category() const override;
 
@@ -50,8 +49,7 @@ private:
   virtual void execConcrete() = 0;
 
   void afterPropertySet(const std::string &propName) override;
-  void addWorkspace(const std::string &workspacePropertyName,
-                    bool addProperties = true);
+  void addWorkspace(const std::string &workspacePropertyName, bool addProperties = true);
   /// Read domain type property and cache the value
   void setDomainType();
 
@@ -60,8 +58,7 @@ protected:
   void addWorkspaces();
   std::vector<std::string> getCostFunctionNames() const;
   void declareCostFunctionProperty();
-  std::shared_ptr<CostFunctions::CostFuncFitting>
-  getCostFunctionInitialized() const;
+  std::shared_ptr<CostFunctions::CostFuncFitting> getCostFunctionInitialized() const;
 
   /// Keep the domain type
   API::IDomainCreator::DomainType m_domainType{API::IDomainCreator::Simple};

@@ -17,16 +17,13 @@
 #include <limits>
 #include <utility>
 
-namespace Mantid {
-namespace CurveFitting {
-namespace CostFunctions {
+namespace Mantid::CurveFitting::CostFunctions {
 
 /**
  * Constructor.
  */
 CostFuncFitting::CostFuncFitting()
-    : m_dirtyVal(true), m_dirtyDeriv(true), m_dirtyHessian(true),
-      m_includePenalty(true), m_value(0), m_pushed(false),
+    : m_dirtyVal(true), m_dirtyDeriv(true), m_dirtyHessian(true), m_includePenalty(true), m_value(0), m_pushed(false),
       m_pushedValue(false) {}
 
 /**
@@ -79,8 +76,7 @@ size_t CostFuncFitting::nParams() const {
  *  also contains the data to fit to and the fitting weights (reciprocal
  * errors).
  */
-void CostFuncFitting::setFittingFunction(API::IFunction_sptr function,
-                                         API::FunctionDomain_sptr domain,
+void CostFuncFitting::setFittingFunction(API::IFunction_sptr function, API::FunctionDomain_sptr domain,
                                          API::FunctionValues_sptr values) {
   m_function = std::move(function);
   m_domain = std::move(domain);
@@ -123,8 +119,7 @@ void CostFuncFitting::checkValidity() const {
 /**
  * Calculates covariance matrix for fitting function's active parameters.
  */
-void CostFuncFitting::calActiveCovarianceMatrix(GSLMatrix &covar,
-                                                double epsrel) {
+void CostFuncFitting::calActiveCovarianceMatrix(GSLMatrix &covar, double epsrel) {
   // construct the jacobian
   GSLJacobian J(*m_function, m_values->size());
   size_t na = this->nParams(); // number of active parameters
@@ -156,8 +151,7 @@ void CostFuncFitting::calCovarianceMatrix(GSLMatrix &covar, double epsrel) {
     if (!m_function->isActive(i))
       continue;
     isTransformationIdentity =
-        isTransformationIdentity &&
-        (m_function->activeParameter(i) == m_function->getParameter(i));
+        isTransformationIdentity && (m_function->activeParameter(i) == m_function->getParameter(i));
   }
 
   if (isTransformationIdentity) {
@@ -180,8 +174,7 @@ void CostFuncFitting::calCovarianceMatrix(GSLMatrix &covar, double epsrel) {
 void CostFuncFitting::calFittingErrors(const GSLMatrix &covar, double chi2) {
   checkValidity();
   size_t np = m_function->nParams();
-  auto covarMatrix = std::shared_ptr<Kernel::Matrix<double>>(
-      new Kernel::Matrix<double>(np, np));
+  auto covarMatrix = std::shared_ptr<Kernel::Matrix<double>>(new Kernel::Matrix<double>(np, np));
   m_function->setCovarianceMatrix(covarMatrix);
   size_t ia = 0;
   for (size_t i = 0; i < np; ++i) {
@@ -193,15 +186,21 @@ void CostFuncFitting::calFittingErrors(const GSLMatrix &covar, double chi2) {
         if (m_function->isActive(j)) {
           (*covarMatrix)[i][j] = covar.get(ia, ja);
           ++ja;
+
+          if (ja >= covar.size2())
+            break;
         }
       }
       double err = sqrt(covar.get(ia, ia));
       m_function->setError(i, err);
       ++ia;
+
+      if (ia >= covar.size1())
+        break;
     }
   }
   m_function->setCovarianceMatrix(covarMatrix);
-  m_function->setChiSquared(chi2);
+  m_function->setReducedChiSquared(chi2 / static_cast<double>((m_values->size() - np)));
 }
 
 /**
@@ -356,8 +355,7 @@ double CostFuncFitting::valAndDeriv(std::vector<double> &der) const {
  *  @param evalDeriv :: flag for evaluation of the first derivatives
  *  @param evalHessian :: flag for evaluation of the second derivatives
  */
-double CostFuncFitting::valDerivHessian(bool evalDeriv,
-                                        bool evalHessian) const {
+double CostFuncFitting::valDerivHessian(bool evalDeriv, bool evalHessian) const {
   if (m_pushed || !evalDeriv) {
     return val();
   }
@@ -384,8 +382,7 @@ double CostFuncFitting::valDerivHessian(bool evalDeriv,
   auto seqDomain = std::dynamic_pointer_cast<SeqDomain>(m_domain);
 
   if (seqDomain) {
-    seqDomain->additiveCostFunctionValDerivHessian(*this, evalDeriv,
-                                                   evalHessian);
+    seqDomain->additiveCostFunctionValDerivHessian(*this, evalDeriv, evalHessian);
   } else {
     if (!m_values) {
       throw std::runtime_error("CostFunction: undefined FunctionValues.");
@@ -427,7 +424,7 @@ double CostFuncFitting::valDerivHessian(bool evalDeriv,
         if (!m_function->isActive(ip))
           continue;
         API::IConstraint *c = m_function->getConstraint(ip);
-        if (c) {
+        if (c && !m_hessian.isEmpty()) {
           double d = m_hessian.get(i, i) + c->checkDeriv2();
           m_hessian.set(i, i, d);
         }
@@ -506,6 +503,4 @@ void CostFuncFitting::drop() {
   setDirty();
 }
 
-} // namespace CostFunctions
-} // namespace CurveFitting
-} // namespace Mantid
+} // namespace Mantid::CurveFitting::CostFunctions

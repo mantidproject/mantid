@@ -60,7 +60,7 @@ Usage
 Output:
 
 .. testoutput:: IntegrateByComponent
-    
+
     For LevelsUp=1 we found that:
      - two pixels in the same tube have the same value True
      - two pixels in different tubes have the same value False

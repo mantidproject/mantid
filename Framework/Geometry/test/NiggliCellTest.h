@@ -6,10 +6,10 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
+#include "MantidFrameworkTestHelpers/NexusTestHelper.h"
 #include "MantidGeometry/Crystal/NiggliCell.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
 #include "MantidKernel/Matrix.h"
-#include "MantidTestHelpers/NexusTestHelper.h"
 #include <cxxtest/TestSuite.h>
 
 using namespace Mantid::Geometry;
@@ -69,9 +69,8 @@ public:
   }
 
   void test_MakeNiggliUB() {
-    double answer[3][3] = {{-0.147196, -0.141218, 0.304286},
-                           {0.106642, 0.120341, 0.090518},
-                           {-0.261273, 0.258426, -0.006190}};
+    double answer[3][3] = {
+        {-0.147196, -0.141218, 0.304286}, {0.106642, 0.120341, 0.090518}, {-0.261273, 0.258426, -0.006190}};
 
     Matrix<double> newUB(3, 3, false);
     Matrix<double> UB = getSiliconUB();

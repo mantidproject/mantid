@@ -24,24 +24,17 @@
 
 namespace Mantid {
 namespace API {
-class MANTID_API_DLL ImplicitFunctionParserFactoryImpl
-    : public Kernel::DynamicFactory<ImplicitFunctionParser> {
+class MANTID_API_DLL ImplicitFunctionParserFactoryImpl : public Kernel::DynamicFactory<ImplicitFunctionParser> {
 public:
-  ImplicitFunctionParserFactoryImpl(const ImplicitFunctionParserFactoryImpl &) =
-      delete;
-  ImplicitFunctionParserFactoryImpl &
-  operator=(const ImplicitFunctionParserFactoryImpl &) = delete;
-  std::shared_ptr<ImplicitFunctionParser>
-  create(const std::string &xmlString) const override;
-  ImplicitFunctionParser *
-  createImplicitFunctionParserFromXML(const std::string &functionXML) const;
+  ImplicitFunctionParserFactoryImpl(const ImplicitFunctionParserFactoryImpl &) = delete;
+  ImplicitFunctionParserFactoryImpl &operator=(const ImplicitFunctionParserFactoryImpl &) = delete;
+  std::shared_ptr<ImplicitFunctionParser> create(const std::string &xmlString) const override;
+  ImplicitFunctionParser *createImplicitFunctionParserFromXML(const std::string &functionXML) const;
 
-  ImplicitFunctionParser *createImplicitFunctionParserFromXML(
-      Poco::XML::Element *functionElement) const;
+  ImplicitFunctionParser *createImplicitFunctionParserFromXML(Poco::XML::Element *functionElement) const;
 
 private:
-  friend struct Mantid::Kernel::CreateUsingNew<
-      ImplicitFunctionParserFactoryImpl>;
+  friend struct Mantid::Kernel::CreateUsingNew<ImplicitFunctionParserFactoryImpl>;
 
   /// Private Constructor for singleton class
   ImplicitFunctionParserFactoryImpl() = default;
@@ -49,14 +42,13 @@ private:
   ~ImplicitFunctionParserFactoryImpl() override = default;
 };
 
-using ImplicitFunctionParserFactory =
-    Mantid::Kernel::SingletonHolder<ImplicitFunctionParserFactoryImpl>;
+using ImplicitFunctionParserFactory = Mantid::Kernel::SingletonHolder<ImplicitFunctionParserFactoryImpl>;
 } // namespace API
 } // namespace Mantid
 
 namespace Mantid {
 namespace Kernel {
-EXTERN_MANTID_API template class MANTID_API_DLL Mantid::Kernel::SingletonHolder<
-    Mantid::API::ImplicitFunctionParserFactoryImpl>;
+EXTERN_MANTID_API template class MANTID_API_DLL
+    Mantid::Kernel::SingletonHolder<Mantid::API::ImplicitFunctionParserFactoryImpl>;
 }
 } // namespace Mantid

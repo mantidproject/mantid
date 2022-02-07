@@ -46,7 +46,7 @@ A (MHz) is the isotropic hyperfine coupling constant,
 and :math:`f_\text{cut} = 10^{32}` (MHz).
 
 .. plot::
-	
+
    from mantid.simpleapi import FunctionWrapper
    import matplotlib.pyplot as plt
    import numpy as np

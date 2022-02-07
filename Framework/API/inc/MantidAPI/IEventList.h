@@ -46,26 +46,19 @@ public:
   /// Get memory size of event list
   size_t getMemorySize() const override = 0;
   /// Get copy of counts and errors, rebinned using on the given X values
-  virtual void generateHistogram(const MantidVec &X, MantidVec &Y, MantidVec &E,
-                                 bool skipError = false) const = 0;
+  virtual void generateHistogram(const MantidVec &X, MantidVec &Y, MantidVec &E, bool skipError = false) const = 0;
   /// Get copy of counts and errors rebinned using the given X values w.r.t
   /// pulse time.
-  virtual void generateHistogramPulseTime(const MantidVec &X, MantidVec &Y,
-                                          MantidVec &E,
+  virtual void generateHistogramPulseTime(const MantidVec &X, MantidVec &Y, MantidVec &E,
                                           bool skipError = false) const = 0;
   /// Get copy of counts and errors rebinning using the given X values w.r.t
   /// absolute time at the sample.
-  virtual void generateHistogramTimeAtSample(const MantidVec &X, MantidVec &Y,
-                                             MantidVec &E,
-                                             const double &tofFactor,
-                                             const double &tofOffset,
-                                             bool skipError = false) const = 0;
+  virtual void generateHistogramTimeAtSample(const MantidVec &X, MantidVec &Y, MantidVec &E, const double &tofFactor,
+                                             const double &tofOffset, bool skipError = false) const = 0;
   /// Integrate the event list
-  virtual double integrate(const double minX, const double maxX,
-                           const bool entireRange) const = 0;
+  virtual double integrate(const double minX, const double maxX, const bool entireRange) const = 0;
   /// Convert the TOF values
-  virtual void convertTof(std::function<double(double)> func,
-                          const int sorting = 0) = 0;
+  virtual void convertTof(std::function<double(double)> func, const int sorting = 0) = 0;
   /// Convert the TOF values
   virtual void convertTof(const double factor, const double offset = 0.) = 0;
   /// Scale the TOF values by a constant
@@ -93,8 +86,7 @@ public:
   /// Return the list of event weight error values
   virtual void getWeightErrors(std::vector<double> &weightErrors) const = 0;
   /// Return the list of pulse time values
-  virtual std::vector<Mantid::Types::Core::DateAndTime>
-  getPulseTimes() const = 0;
+  virtual std::vector<Mantid::Types::Core::DateAndTime> getPulseTimes() const = 0;
   /// Get the minimum TOF from the list
   virtual double getTofMin() const = 0;
   /// Get the maximum TOF from the list
@@ -104,13 +96,11 @@ public:
   /// Get the maximum pulse time from the list
   virtual Mantid::Types::Core::DateAndTime getPulseTimeMax() const = 0;
   /// Get the maximum time at sample.
-  virtual Mantid::Types::Core::DateAndTime
-  getTimeAtSampleMax(const double &tofFactor,
-                     const double &tofOffset) const = 0;
+  virtual Mantid::Types::Core::DateAndTime getTimeAtSampleMax(const double &tofFactor,
+                                                              const double &tofOffset) const = 0;
   /// Get the minimum time at sample
-  virtual Mantid::Types::Core::DateAndTime
-  getTimeAtSampleMin(const double &tofFactor,
-                     const double &tofOffset) const = 0;
+  virtual Mantid::Types::Core::DateAndTime getTimeAtSampleMin(const double &tofFactor,
+                                                              const double &tofOffset) const = 0;
   /// Set the TOFs from the given list
   virtual void setTofs(const MantidVec &tofs) = 0;
   /// Multiply event list by a constant with error
@@ -118,11 +108,9 @@ public:
   /// Divide event list by a constant with error
   virtual void divide(const double value, const double error = 0.0) = 0;
   /// Multiply event list by a histogram
-  virtual void multiply(const MantidVec &X, const MantidVec &Y,
-                        const MantidVec &E) = 0;
+  virtual void multiply(const MantidVec &X, const MantidVec &Y, const MantidVec &E) = 0;
   /// Divide event list by a histogram
-  virtual void divide(const MantidVec &X, const MantidVec &Y,
-                      const MantidVec &E) = 0;
+  virtual void divide(const MantidVec &X, const MantidVec &Y, const MantidVec &E) = 0;
 };
 
 } // namespace API

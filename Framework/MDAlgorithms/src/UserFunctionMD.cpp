@@ -13,8 +13,7 @@
 
 #include <boost/tokenizer.hpp>
 
-namespace Mantid {
-namespace MDAlgorithms {
+namespace Mantid::MDAlgorithms {
 
 // Subscribe the function into the factory.
 DECLARE_FUNCTION(UserFunctionMD)
@@ -32,19 +31,13 @@ UserFunctionMD::UserFunctionMD() {
 /**
  * @return A list of attribute names
  */
-std::vector<std::string> UserFunctionMD::getAttributeNames() const {
-  return std::vector<std::string>(1, "Formula");
-}
+std::vector<std::string> UserFunctionMD::getAttributeNames() const { return std::vector<std::string>(1, "Formula"); }
 
 /// Has attribute "Formula"
-bool UserFunctionMD::hasAttribute(const std::string &attName) const {
-  UNUSED_ARG(attName);
-  return attName == "Formula";
-}
+bool UserFunctionMD::hasAttribute(const std::string &attName) const { return attName == "Formula"; }
 
 /// Return Formula
-UserFunctionMD::Attribute
-UserFunctionMD::getAttribute(const std::string &attName) const {
+UserFunctionMD::Attribute UserFunctionMD::getAttribute(const std::string &attName) const {
   UNUSED_ARG(attName);
   return Attribute(m_formula);
 }
@@ -53,8 +46,7 @@ UserFunctionMD::getAttribute(const std::string &attName) const {
  * @param attName :: Attribute name - must be "Formula"
  * @param attr :: Attribute value - the formula
  */
-void UserFunctionMD::setAttribute(const std::string &attName,
-                                  const UserFunctionMD::Attribute &attr) {
+void UserFunctionMD::setAttribute(const std::string &attName, const UserFunctionMD::Attribute &attr) {
   UNUSED_ARG(attName);
   m_formula = attr.asString();
   if (!m_vars.empty()) {
@@ -155,5 +147,4 @@ void UserFunctionMD::setFormula() {
   m_parser.SetExpr(m_formula);
 }
 
-} // namespace MDAlgorithms
-} // namespace Mantid
+} // namespace Mantid::MDAlgorithms

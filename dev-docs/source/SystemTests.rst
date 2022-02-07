@@ -28,21 +28,24 @@ repository at
 `mantidproject/mantid <https://github.com/mantidproject/mantid>`__, under
 the ``Testing/SystemTests`` directory.
 
-System tests inherit from the :class:`systemtesting.MantidSystemTest` class. 
-The methods that need to be overridden are ``runTest(self)``, where the Python 
-code that runs the test should be placed, and ``validate(self)``, which should 
-simply return a pair of strings: the name of the final workspace that results 
-from the ``runTest`` method and the name of a nexus file that should be saved 
-in the ``ReferenceResults`` sub-directory in the repository. The test code 
-itself is likely to be the output of a *Save History* command, though it can 
-be any Python code. In the unlikely case of files being used during a system 
-test, implement the method ``requiredFiles`` which should return a list of 
-filenames without paths. The file to validate against should be included as 
+System tests inherit from the :class:`systemtesting.MantidSystemTest` class.
+The methods that need to be overridden are ``runTest(self)``, where the Python
+code that runs the test should be placed, and ``validate(self)``, which should
+simply return a pair of strings: the name of the final workspace that results
+from the ``runTest`` method and the name of a nexus file that should be saved
+in the ``ReferenceResults`` sub-directory in the repository. The test code
+itself is likely to be the output of a *Save History* command, though it can
+be any Python code. In the unlikely case of files being used during a system
+test, implement the method ``requiredFiles`` which should return a list of
+filenames without paths. The file to validate against should be included as
 well. If any of those files are missing the test will be marked as skipped.
 
-The tests should be added to the ``Testing/SystemTests/tests/analysis``,
+The tests should be added to the ``Testing/SystemTests/tests/framework``,
 with the template result going in the ``reference`` sub-folder. It will
 then be included in the suite of tests from the following night.
+
+Alternatively, any tests relating to testing qt interfaces should be added to
+the ``Testing/SystemTests/tests/qt`` directory.
 
 Specifying Validation
 ---------------------
@@ -175,6 +178,14 @@ Usage differs depending on whether you are using a single-configuration
 generator with CMake, for example Makefiles/Ninja, or a
 multi-configuration generator such as Visual Studio or Xcode.
 
+Downloading the test data
+-------------------------
+
+The ``systemtest`` script will automatically attempt to download any missing
+data files but will time-out after 2 minutes. The time out limit can be set in two
+variables ``ExternalData_TIMEOUT_INACTIVITY`` and ``ExternalData_TIMEOUT_ABSOLUTE``.
+If using CMake these will need to be added as new string entries (value is in seconds).
+
 Visual Studio/Xcode
 -------------------
 
@@ -201,6 +212,15 @@ fixed when running CMake, e.g.
    cd build
    systemtest
 
+Systems Lacking pyqt4
+---------------------
+
+Recent systems using Qt5 as default should set environment variable ``QT_API``
+while invoking the script
+
+.. code-block:: sh
+
+    > QT_API=pyqt5 systemtest
 
 Selecting Tests to Run From IDE
 -------------------------------
@@ -216,6 +236,32 @@ properties, go to ```Command Arguments``` and append flags as appropriate.
 For example, adding ``-R ISIS`` will run any tests which match the regular
 expression ``ISIS``.
 
+Debugging System Tests in Pycharm
+---------------------------------
+
+System tests can be debugged from Pycharm without finding and attaching to
+the process, or using a remote debugger.
+
+To do this, create a new Configuration (Run -> Edit Configurations), and add
+a new Python configuration with the script path set to ``runSystemtests.py``
+This is found in ``/Testing/SystemTests/Scripts/runSystemTests.py``
+
+The parameters for the configuration can be set just like the command line
+args when running the tests from the ``systemtest.bat``/``systemtest`` script, e.g pass
+``-R="EnginX"`` to run all tests containing the string ``EnginX`` in their
+name.
+
+Note that running the system tests this way will not update the system test
+data, so if your data need to be updated, the system tests should be called
+via the normal method in the first case.
+
+Do not use the multiprocessing ``-j`` flag in your configuration parameters
+as this will render you unable to debug the system tests directly, as they
+will no longer be running under the parent Python process.
+
+N.B. Windows users do not need to specify the configuration with the ``-C``
+flag as when using the ``systemtest.bat`` script, as this is not passed to
+``runSystemtests.py`` and will result in an error.
 
 Selecting Tests To Run
 ----------------------
@@ -251,7 +297,7 @@ would run the tests on 8 cores.
 Some tests write or delete in the same directories, using the same file
 names, which causes issues when running in parallel. To resolve this,
 a global list of test modules (= different Python files in the
-``Testing/SystemTests/tests/analysis`` directory) is first created.
+``Testing/SystemTests/tests/framework`` directory) is first created.
 Now we scan each test module line by line and list all the data files
 that are used by that module. The possible ways files are being
 specified are:

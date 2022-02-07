@@ -448,11 +448,10 @@
 </parameter>
 
 
-
 <!-- List of the words which can be used as a command line arguments to define reducer keywords
-     the form is reducer_keword1=synonim1=synonim2=synonim3;reducer_keword1=synonim1a, so, 
+     The form is reducer_keword1=synonim1=synonim2=synonim3;reducer_keword1=synonim1a, so, 
      the reducer keywords are the leftmost values of the keyword assignments below
-     Each keyword met in command line or file above are converted into reducer keyword as below
+     Each keyword met in command line or this file is converted into reducer_keyword as below
 -->  
 <parameter name="synonims" type="string">
    <value val="normalise_method=norm_method;

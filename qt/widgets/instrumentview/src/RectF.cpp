@@ -6,8 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidQtWidgets/InstrumentView/RectF.h"
 
-namespace MantidQt {
-namespace MantidWidgets {
+namespace MantidQt::MantidWidgets {
 void RectF::moveCenter(const QPointF &p) {
   double xShift = xSpan() / 2;
   double yShift = ySpan() / 2;
@@ -61,9 +60,7 @@ bool RectF::contains(double x, double y) const {
   return !(dy < 0 || dy > height());
 }
 
-bool RectF::contains(const RectF &rect) {
-  return contains(rect.p0()) && contains(rect.p1());
-}
+bool RectF::contains(const RectF &rect) { return contains(rect.p0()) && contains(rect.p1()); }
 
 /**
  * Create a transformation from this rectangle to a QRectF.
@@ -96,5 +93,4 @@ void RectF::unite(const RectF &rect) {
   include(rect.p1());
 }
 
-} // namespace MantidWidgets
-} // namespace MantidQt
+} // namespace MantidQt::MantidWidgets

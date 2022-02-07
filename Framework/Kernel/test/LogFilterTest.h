@@ -67,34 +67,24 @@ public:
 
     TS_ASSERT_EQUALS(flt.data()->size(), 5);
 
-    TS_ASSERT_EQUALS(flt.data()->nthInterval(0).begin_str(),
-                     "2007-Nov-30 16:17:00");
-    TS_ASSERT_EQUALS(flt.data()->nthInterval(0).end_str(),
-                     "2007-Nov-30 16:17:10");
+    TS_ASSERT_EQUALS(flt.data()->nthInterval(0).begin_str(), "2007-Nov-30 16:17:00");
+    TS_ASSERT_EQUALS(flt.data()->nthInterval(0).end_str(), "2007-Nov-30 16:17:10");
     TS_ASSERT_EQUALS(flt.data()->nthValue(0), 1);
 
-    TS_ASSERT_EQUALS(flt.data()->nthInterval(1).begin_str(),
-                     "2007-Nov-30 16:17:10");
-    TS_ASSERT_EQUALS(flt.data()->nthInterval(1).end_str(),
-                     "2007-Nov-30 16:17:20");
+    TS_ASSERT_EQUALS(flt.data()->nthInterval(1).begin_str(), "2007-Nov-30 16:17:10");
+    TS_ASSERT_EQUALS(flt.data()->nthInterval(1).end_str(), "2007-Nov-30 16:17:20");
     TS_ASSERT_EQUALS(flt.data()->nthValue(1), 2);
 
-    TS_ASSERT_EQUALS(flt.data()->nthInterval(2).begin_str(),
-                     "2007-Nov-30 16:17:20");
-    TS_ASSERT_EQUALS(flt.data()->nthInterval(2).end_str(),
-                     "2007-Nov-30 16:17:25");
+    TS_ASSERT_EQUALS(flt.data()->nthInterval(2).begin_str(), "2007-Nov-30 16:17:20");
+    TS_ASSERT_EQUALS(flt.data()->nthInterval(2).end_str(), "2007-Nov-30 16:17:25");
     TS_ASSERT_EQUALS(flt.data()->nthValue(2), 3);
 
-    TS_ASSERT_EQUALS(flt.data()->nthInterval(3).begin_str(),
-                     "2007-Nov-30 16:17:39");
-    TS_ASSERT_EQUALS(flt.data()->nthInterval(3).end_str(),
-                     "2007-Nov-30 16:17:40");
+    TS_ASSERT_EQUALS(flt.data()->nthInterval(3).begin_str(), "2007-Nov-30 16:17:39");
+    TS_ASSERT_EQUALS(flt.data()->nthInterval(3).end_str(), "2007-Nov-30 16:17:40");
     TS_ASSERT_EQUALS(flt.data()->nthValue(3), 4);
 
-    TS_ASSERT_EQUALS(flt.data()->nthInterval(4).begin_str(),
-                     "2007-Nov-30 16:17:40");
-    TS_ASSERT_EQUALS(flt.data()->nthInterval(4).end_str(),
-                     "2007-Nov-30 16:17:41");
+    TS_ASSERT_EQUALS(flt.data()->nthInterval(4).begin_str(), "2007-Nov-30 16:17:40");
+    TS_ASSERT_EQUALS(flt.data()->nthInterval(4).end_str(), "2007-Nov-30 16:17:41");
     TS_ASSERT_EQUALS(flt.data()->nthValue(4), 5);
   }
 
@@ -106,16 +96,12 @@ public:
 
     TS_ASSERT_EQUALS(flt.data()->size(), 2);
 
-    TS_ASSERT_EQUALS(flt.data()->nthInterval(0).begin_str(),
-                     "2007-Nov-30 16:17:25");
-    TS_ASSERT_EQUALS(flt.data()->nthInterval(0).end_str(),
-                     "2007-Nov-30 16:17:30");
+    TS_ASSERT_EQUALS(flt.data()->nthInterval(0).begin_str(), "2007-Nov-30 16:17:25");
+    TS_ASSERT_EQUALS(flt.data()->nthInterval(0).end_str(), "2007-Nov-30 16:17:30");
     TS_ASSERT_EQUALS(flt.data()->nthValue(0), 3);
 
-    TS_ASSERT_EQUALS(flt.data()->nthInterval(1).begin_str(),
-                     "2007-Nov-30 16:17:30");
-    TS_ASSERT_EQUALS(flt.data()->nthInterval(1).end_str(),
-                     "2007-Nov-30 16:17:39");
+    TS_ASSERT_EQUALS(flt.data()->nthInterval(1).begin_str(), "2007-Nov-30 16:17:30");
+    TS_ASSERT_EQUALS(flt.data()->nthInterval(1).end_str(), "2007-Nov-30 16:17:39");
     TS_ASSERT_EQUALS(flt.data()->nthValue(1), 4);
   }
 
@@ -133,34 +119,24 @@ public:
 
     TS_ASSERT_EQUALS(flt.data()->size(), 5);
 
-    TS_ASSERT_EQUALS(flt.data()->nthInterval(0).begin_str(),
-                     "2007-Nov-30 16:17:00");
-    TS_ASSERT_EQUALS(flt.data()->nthInterval(0).end_str(),
-                     "2007-Nov-30 16:17:05");
+    TS_ASSERT_EQUALS(flt.data()->nthInterval(0).begin_str(), "2007-Nov-30 16:17:00");
+    TS_ASSERT_EQUALS(flt.data()->nthInterval(0).end_str(), "2007-Nov-30 16:17:05");
     TS_ASSERT_EQUALS(flt.data()->nthValue(0), 1);
 
-    TS_ASSERT_EQUALS(flt.data()->nthInterval(1).begin_str(),
-                     "2007-Nov-30 16:17:12");
-    TS_ASSERT_EQUALS(flt.data()->nthInterval(1).end_str(),
-                     "2007-Nov-30 16:17:20");
+    TS_ASSERT_EQUALS(flt.data()->nthInterval(1).begin_str(), "2007-Nov-30 16:17:12");
+    TS_ASSERT_EQUALS(flt.data()->nthInterval(1).end_str(), "2007-Nov-30 16:17:20");
     TS_ASSERT_EQUALS(flt.data()->nthValue(1), 2);
 
-    TS_ASSERT_EQUALS(flt.data()->nthInterval(2).begin_str(),
-                     "2007-Nov-30 16:17:20");
-    TS_ASSERT_EQUALS(flt.data()->nthInterval(2).end_str(),
-                     "2007-Nov-30 16:17:25");
+    TS_ASSERT_EQUALS(flt.data()->nthInterval(2).begin_str(), "2007-Nov-30 16:17:20");
+    TS_ASSERT_EQUALS(flt.data()->nthInterval(2).end_str(), "2007-Nov-30 16:17:25");
     TS_ASSERT_EQUALS(flt.data()->nthValue(2), 3);
 
-    TS_ASSERT_EQUALS(flt.data()->nthInterval(3).begin_str(),
-                     "2007-Nov-30 16:17:39");
-    TS_ASSERT_EQUALS(flt.data()->nthInterval(3).end_str(),
-                     "2007-Nov-30 16:17:40");
+    TS_ASSERT_EQUALS(flt.data()->nthInterval(3).begin_str(), "2007-Nov-30 16:17:39");
+    TS_ASSERT_EQUALS(flt.data()->nthInterval(3).end_str(), "2007-Nov-30 16:17:40");
     TS_ASSERT_EQUALS(flt.data()->nthValue(3), 4);
 
-    TS_ASSERT_EQUALS(flt.data()->nthInterval(4).begin_str(),
-                     "2007-Nov-30 16:17:40");
-    TS_ASSERT_EQUALS(flt.data()->nthInterval(4).end_str(),
-                     "2007-Nov-30 16:17:41");
+    TS_ASSERT_EQUALS(flt.data()->nthInterval(4).begin_str(), "2007-Nov-30 16:17:40");
+    TS_ASSERT_EQUALS(flt.data()->nthInterval(4).end_str(), "2007-Nov-30 16:17:41");
     TS_ASSERT_EQUALS(flt.data()->nthValue(4), 5);
   }
 
@@ -177,46 +153,33 @@ public:
 
     TS_ASSERT_EQUALS(6, finalFilter->size());
 
-    TS_ASSERT_EQUALS(finalFilter->nthInterval(0).begin_str(),
-                     "2007-Nov-30 16:16:50");
-    TS_ASSERT_EQUALS(finalFilter->nthInterval(0).end_str(),
-                     "2007-Nov-30 16:17:00");
+    TS_ASSERT_EQUALS(finalFilter->nthInterval(0).begin_str(), "2007-Nov-30 16:16:50");
+    TS_ASSERT_EQUALS(finalFilter->nthInterval(0).end_str(), "2007-Nov-30 16:17:00");
     TS_ASSERT_EQUALS(finalFilter->nthValue(0), false);
 
-    TS_ASSERT_EQUALS(finalFilter->nthInterval(1).begin_str(),
-                     "2007-Nov-30 16:17:00");
-    TS_ASSERT_EQUALS(finalFilter->nthInterval(1).end_str(),
-                     "2007-Nov-30 16:17:05");
+    TS_ASSERT_EQUALS(finalFilter->nthInterval(1).begin_str(), "2007-Nov-30 16:17:00");
+    TS_ASSERT_EQUALS(finalFilter->nthInterval(1).end_str(), "2007-Nov-30 16:17:05");
     TS_ASSERT_EQUALS(finalFilter->nthValue(1), true);
 
-    TS_ASSERT_EQUALS(finalFilter->nthInterval(2).begin_str(),
-                     "2007-Nov-30 16:17:05");
-    TS_ASSERT_EQUALS(finalFilter->nthInterval(2).end_str(),
-                     "2007-Nov-30 16:17:12");
+    TS_ASSERT_EQUALS(finalFilter->nthInterval(2).begin_str(), "2007-Nov-30 16:17:05");
+    TS_ASSERT_EQUALS(finalFilter->nthInterval(2).end_str(), "2007-Nov-30 16:17:12");
     TS_ASSERT_EQUALS(finalFilter->nthValue(2), false);
 
-    TS_ASSERT_EQUALS(finalFilter->nthInterval(3).begin_str(),
-                     "2007-Nov-30 16:17:12");
-    TS_ASSERT_EQUALS(finalFilter->nthInterval(3).end_str(),
-                     "2007-Nov-30 16:17:25");
+    TS_ASSERT_EQUALS(finalFilter->nthInterval(3).begin_str(), "2007-Nov-30 16:17:12");
+    TS_ASSERT_EQUALS(finalFilter->nthInterval(3).end_str(), "2007-Nov-30 16:17:25");
     TS_ASSERT_EQUALS(finalFilter->nthValue(3), true);
 
-    TS_ASSERT_EQUALS(finalFilter->nthInterval(4).begin_str(),
-                     "2007-Nov-30 16:17:25");
-    TS_ASSERT_EQUALS(finalFilter->nthInterval(4).end_str(),
-                     "2007-Nov-30 16:17:39");
+    TS_ASSERT_EQUALS(finalFilter->nthInterval(4).begin_str(), "2007-Nov-30 16:17:25");
+    TS_ASSERT_EQUALS(finalFilter->nthInterval(4).end_str(), "2007-Nov-30 16:17:39");
     TS_ASSERT_EQUALS(finalFilter->nthValue(4), false);
 
-    TS_ASSERT_EQUALS(finalFilter->nthInterval(5).begin_str(),
-                     "2007-Nov-30 16:17:39");
-    TS_ASSERT_EQUALS(finalFilter->nthInterval(5).end_str(),
-                     "2007-Nov-30 16:17:53");
+    TS_ASSERT_EQUALS(finalFilter->nthInterval(5).begin_str(), "2007-Nov-30 16:17:39");
+    TS_ASSERT_EQUALS(finalFilter->nthInterval(5).end_str(), "2007-Nov-30 16:17:53");
     TS_ASSERT_EQUALS(finalFilter->nthValue(5), true);
   }
 
   void test_filtered_size_when_combined_filter_is_invalid() {
-    TimeSeriesProperty<double> *p =
-        new TimeSeriesProperty<double>("doubleProp");
+    TimeSeriesProperty<double> *p = new TimeSeriesProperty<double>("doubleProp");
     TS_ASSERT_THROWS_NOTHING(p->addValue("2009-Apr-28 09:20:52", -0.00161));
     TS_ASSERT_THROWS_NOTHING(p->addValue("2009-Apr-28 09:21:57", -0.00161));
     TS_ASSERT_THROWS_NOTHING(p->addValue("2009-Apr-28 09:23:01", -0.00161));
@@ -248,16 +211,12 @@ public:
 
     return;
 
-    TS_ASSERT_EQUALS(flt.data()->nthInterval(0).begin_str(),
-                     "2007-Nov-30 16:17:40");
-    TS_ASSERT_EQUALS(flt.data()->nthInterval(0).end_str(),
-                     "2007-Nov-30 16:17:45");
+    TS_ASSERT_EQUALS(flt.data()->nthInterval(0).begin_str(), "2007-Nov-30 16:17:40");
+    TS_ASSERT_EQUALS(flt.data()->nthInterval(0).end_str(), "2007-Nov-30 16:17:45");
     TS_ASSERT_EQUALS(flt.data()->nthValue(0), 5);
 
-    TS_ASSERT_EQUALS(flt.data()->nthInterval(1).begin_str(),
-                     "2007-Nov-30 16:17:50");
-    TS_ASSERT_EQUALS(flt.data()->nthInterval(1).end_str(),
-                     "2007-Nov-30 16:18:00");
+    TS_ASSERT_EQUALS(flt.data()->nthInterval(1).begin_str(), "2007-Nov-30 16:17:50");
+    TS_ASSERT_EQUALS(flt.data()->nthInterval(1).end_str(), "2007-Nov-30 16:18:00");
     TS_ASSERT_EQUALS(flt.data()->nthValue(1), 5);
 
     return;
@@ -340,8 +299,7 @@ private:
   /// Creates a test boolean filter
   /// @param type :: Which variant to create
   std::shared_ptr<TimeSeriesProperty<bool>> createTestFilter(const int type) {
-    std::shared_ptr<TimeSeriesProperty<bool>> filter(
-        new TimeSeriesProperty<bool>("filter"));
+    std::shared_ptr<TimeSeriesProperty<bool>> filter(new TimeSeriesProperty<bool>("filter"));
     if (type == 1) {
       filter->addValue("2007-11-30T16:16:50", true);
       filter->addValue("2007-11-30T16:17:25", false);

@@ -219,42 +219,42 @@ _cell_volume                           255.38771
 _symmetry_cell_setting                 trigonal
 _symmetry_space_group_name_H-M         "R -3 c"
 loop_ _symmetry_equiv_pos_site_id _symmetry_equiv_pos_as_xyz
-       1 +x,+y,+z 
-       2 -y,x-y,+z 
-       3 y-x,-x,+z 
-       4 y-x,+y,+z+1/2 
-       5 -y,-x,+z+1/2 
-       6 +x,x-y,+z+1/2 
-      -1 -x,-y,-z 
-      -2 +y,y-x,-z 
-      -3 x-y,+x,-z 
-      -4 x-y,-y,-z+1/2 
-      -5 +y,+x,-z+1/2 
-      -6 -x,y-x,-z+1/2 
-     101 +x+1/3,+y+2/3,+z+2/3 
-     102 -y+1/3,x-y+2/3,+z+2/3 
-     103 y-x+1/3,-x+2/3,+z+2/3 
-     104 y-x+1/3,+y+2/3,+z+1/6 
-     105 -y+1/3,-x+2/3,+z+1/6 
-     106 +x+1/3,x-y+2/3,+z+1/6 
-    -101 -x+2/3,-y+1/3,-z+1/3 
-    -102 +y+2/3,y-x+1/3,-z+1/3 
-    -103 x-y+2/3,+x+1/3,-z+1/3 
-    -104 x-y+2/3,-y+1/3,-z+5/6 
-    -105 +y+2/3,+x+1/3,-z+5/6 
-    -106 -x+2/3,y-x+1/3,-z+5/6 
-     201 +x+2/3,+y+1/3,+z+1/3 
-     202 -y+2/3,x-y+1/3,+z+1/3 
-     203 y-x+2/3,-x+1/3,+z+1/3 
-     204 y-x+2/3,+y+1/3,+z+5/6 
-     205 -y+2/3,-x+1/3,+z+5/6 
-     206 +x+2/3,x-y+1/3,+z+5/6 
-    -201 -x+1/3,-y+2/3,-z+2/3 
-    -202 +y+1/3,y-x+2/3,-z+2/3 
-    -203 x-y+1/3,+x+2/3,-z+2/3 
-    -204 x-y+1/3,-y+2/3,-z+1/6 
-    -205 +y+1/3,+x+2/3,-z+1/6 
-    -206 -x+1/3,y-x+2/3,-z+1/6 
+       1 +x,+y,+z
+       2 -y,x-y,+z
+       3 y-x,-x,+z
+       4 y-x,+y,+z+1/2
+       5 -y,-x,+z+1/2
+       6 +x,x-y,+z+1/2
+      -1 -x,-y,-z
+      -2 +y,y-x,-z
+      -3 x-y,+x,-z
+      -4 x-y,-y,-z+1/2
+      -5 +y,+x,-z+1/2
+      -6 -x,y-x,-z+1/2
+     101 +x+1/3,+y+2/3,+z+2/3
+     102 -y+1/3,x-y+2/3,+z+2/3
+     103 y-x+1/3,-x+2/3,+z+2/3
+     104 y-x+1/3,+y+2/3,+z+1/6
+     105 -y+1/3,-x+2/3,+z+1/6
+     106 +x+1/3,x-y+2/3,+z+1/6
+    -101 -x+2/3,-y+1/3,-z+1/3
+    -102 +y+2/3,y-x+1/3,-z+1/3
+    -103 x-y+2/3,+x+1/3,-z+1/3
+    -104 x-y+2/3,-y+1/3,-z+5/6
+    -105 +y+2/3,+x+1/3,-z+5/6
+    -106 -x+2/3,y-x+1/3,-z+5/6
+     201 +x+2/3,+y+1/3,+z+1/3
+     202 -y+2/3,x-y+1/3,+z+1/3
+     203 y-x+2/3,-x+1/3,+z+1/3
+     204 y-x+2/3,+y+1/3,+z+5/6
+     205 -y+2/3,-x+1/3,+z+5/6
+     206 +x+2/3,x-y+1/3,+z+5/6
+    -201 -x+1/3,-y+2/3,-z+2/3
+    -202 +y+1/3,y-x+2/3,-z+2/3
+    -203 x-y+1/3,+x+2/3,-z+2/3
+    -204 x-y+1/3,-y+2/3,-z+1/6
+    -205 +y+1/3,+x+2/3,-z+1/6
+    -206 -x+1/3,y-x+2/3,-z+1/6
 
 # ATOMIC COORDINATES AND DISPLACEMENT PARAMETERS
 
@@ -271,9 +271,9 @@ loop_
       _atom_site_symmetry_multiplicity
 Al
         0.0          0.0          0.3523       1.0        Uiso   0.025        12
-O 
+O
 O2      0.3064       0.0          0.25         1.0        Uiso   0.025        18
- 
+
 # If you change Z, be sure to change all 3 of the following
 _chemical_formula_sum                  "Al2 O3"
 _chemical_formula_weight               101.96
@@ -410,7 +410,7 @@ _refine_ls_R_Fsqd_factor               ""
 _pd_proc_ls_background_function
 ;   GSAS Background function number 4 with  4 terms.
  Power series in Q**2n/n!
-      1:    1.00000     2:    0.00000     3:    0.00000     4:    0.00000    
+      1:    1.00000     2:    0.00000     3:    0.00000     4:    0.00000
 ;
 
 _exptl_absorpt_process_details

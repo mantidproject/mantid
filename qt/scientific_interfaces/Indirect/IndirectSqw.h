@@ -36,10 +36,8 @@ private slots:
   void runClicked();
   void saveClicked();
 
-  void updateRunButton(bool enabled = true,
-                       std::string const &enableOutputButtons = "unchanged",
-                       QString const &message = "Run",
-                       QString const &tooltip = "");
+  void updateRunButton(bool enabled = true, std::string const &enableOutputButtons = "unchanged",
+                       QString const &message = "Run", QString const &tooltip = "");
 
 private:
   void plotRqwContour(std::string const &sampleName);

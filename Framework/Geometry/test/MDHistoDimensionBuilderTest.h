@@ -60,8 +60,7 @@ public:
     TS_ASSERT_EQUALS(0, product->getMinimum());
     TS_ASSERT_EQUALS(2, product->getMaximum());
     TS_ASSERT_EQUALS(1, product->getNBins());
-    TSM_ASSERT_EQUALS("Should have selected QLab as the frame",
-                      Mantid::Geometry::QLab::QLabName,
+    TSM_ASSERT_EQUALS("Should have selected QLab as the frame", Mantid::Geometry::QLab::QLabName,
                       product->getMDFrame().name());
 
     delete product;
@@ -86,8 +85,7 @@ public:
     TS_ASSERT_EQUALS(0, product->getMinimum());
     TS_ASSERT_EQUALS(2, product->getMaximum());
     TS_ASSERT_EQUALS(1, product->getNBins());
-    TSM_ASSERT_EQUALS("Should have selected QSample as the frame",
-                      Mantid::Geometry::QSample::QSampleName,
+    TSM_ASSERT_EQUALS("Should have selected QSample as the frame", Mantid::Geometry::QSample::QSampleName,
                       product->getMDFrame().name());
   }
 
@@ -109,8 +107,7 @@ public:
     TS_ASSERT_EQUALS(0, product->getMinimum());
     TS_ASSERT_EQUALS(2, product->getMaximum());
     TS_ASSERT_EQUALS(1, product->getNBins());
-    TSM_ASSERT_EQUALS("Should have selected GeneralFrame as the frame",
-                      "testDimName", product->getMDFrame().name());
+    TSM_ASSERT_EQUALS("Should have selected GeneralFrame as the frame", "testDimName", product->getMDFrame().name());
   }
 
   void testCopy() {

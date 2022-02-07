@@ -104,41 +104,59 @@ class FitGaussianPeaksTest(unittest.TestCase):
         return table
 
     def test_algorithm_with_bad_input_workspace_throws(self):
-        with self.assertRaises(Exception):
+        with self.assertRaises(ValueError):
             FitGaussianPeaks(InputWorkspace='ws-that-does-not-exist')
 
     def test_algorithm_with_negative_centre_tolerance_throws(self):
-        with self.assertRaises(Exception):
+        with self.assertRaises(ValueError):
             FitGaussianPeaks(InputWorkspace=self.data_ws,
                              PeakGuessTable=self.peak_guess_table,
                              CentreTolerance=-1.0)
 
     def test_algorithm_with_negative_estimated_peak_sigma_throws(self):
-        with self.assertRaises(Exception):
+        with self.assertRaises(ValueError):
             FitGaussianPeaks(InputWorkspace=self.data_ws,
                              PeakGuessTable=self.peak_guess_table,
                              EstimatedPeakSigma=-1.0)
 
     def test_algorithm_with_negative_min_peak_sigma_throws(self):
-        with self.assertRaises(Exception):
+        with self.assertRaises(ValueError):
             FitGaussianPeaks(InputWorkspace=self.data_ws,
                              PeakGuessTable=self.peak_guess_table,
                              MinPeakSigma=-1.0)
 
     def test_algorithm_with_negative_max_peak_sigma_throws(self):
-        with self.assertRaises(Exception):
+        with self.assertRaises(ValueError):
             FitGaussianPeaks(InputWorkspace=self.data_ws,
                              PeakGuessTable=self.peak_guess_table,
                              MaxPeakSigma=-1.0)
 
+    def test_algorithm_with_even_fit_window_throws(self):
+        with self.assertRaises(RuntimeError):
+            FitGaussianPeaks(InputWorkspace=self.data_ws,
+                             PeakGuessTable=self.peak_guess_table,
+                             FitWindowSize=6)
+
+    def test_algorithm_with_fit_window_lower_than_5_throws(self):
+        with self.assertRaises(ValueError):
+            FitGaussianPeaks(InputWorkspace=self.data_ws,
+                             PeakGuessTable=self.peak_guess_table,
+                             FitWindowSize=3)
+
+    def test_algorithm_with_float_fit_window_throws(self):
+        with self.assertRaises(TypeError):
+            FitGaussianPeaks(InputWorkspace=self.data_ws,
+                             PeakGuessTable=self.peak_guess_table,
+                             FitWindowSize=5.5)
+
     def test_algorithm_with_negative_general_fit_tolerance_throws(self):
-        with self.assertRaises(Exception):
+        with self.assertRaises(ValueError):
             FitGaussianPeaks(InputWorkspace=self.data_ws,
                              PeakGuessTable=self.peak_guess_table,
                              GeneralFitTolerance=-1.0)
 
     def test_algorithm_with_negative_refit_tolerance_throws(self):
-        with self.assertRaises(Exception):
+        with self.assertRaises(ValueError):
             FitGaussianPeaks(InputWorkspace=self.data_ws,
                              PeakGuessTable=self.peak_guess_table,
                              RefitTolerance=-1.0)
@@ -410,7 +428,7 @@ class FitGaussianPeaksTest(unittest.TestCase):
         np.testing.assert_equal(yvals, [7, 8])
         mock_fit.assert_called_with(
             Function='name=Gaussian,PeakCentre=1.000000,Height=2.000000,Sigma=3.000000;'
-            'name=Gaussian,PeakCentre=4.000000,Height=5.000000,Sigma=6.000000;',
+                     'name=Gaussian,PeakCentre=4.000000,Height=5.000000,Sigma=6.000000;',
             InputWorkspace=mock_get_property().value,
             Output='fit_result',
             Minimizer='Levenberg-MarquardtMD',
@@ -475,6 +493,99 @@ class FitGaussianPeaksTest(unittest.TestCase):
         self.assertAlmostEqual(height2, self.height[1])
         self.assertAlmostEqual(sigma1, self.width[0])
         self.assertAlmostEqual(sigma2, self.width[1])
+
+    def test_algorithm_skips_invalid_peak(self):
+        ws = CreateWorkspace([0, 2, 4, 6, 8, 10, 12, 14, 16, 18, 20, 22] * 2,
+                             [0, 0, 0, 0, 1, 7, 0, 0, 0, 0, 10, 7] + [0] * 12, NSpec=2)
+        table = CreateEmptyTableWorkspace()
+        table.addColumn("float", "Centre")
+        table.addRow([10])
+        table.addRow([20])
+
+        FitGaussianPeaks(InputWorkspace=ws,
+                         PeakGuessTable=table)
+
+        peak_table = mtd["peak_table"]
+        row = peak_table.row(0)
+
+        self.assertEqual(mtd["peak_table"].rowCount(), 1)
+        self.assertEqual(mtd["refit_peak_table"].rowCount(), 0)
+        self.assertAlmostEqual(row["centre"], 9.641, places=3)
+        self.assertAlmostEqual(row["error centre"], 0.225, places=3)
+        self.assertAlmostEqual(row["height"], 7.7, places=3)
+        self.assertAlmostEqual(row["error height"], 0.02242, places=3)
+        self.assertAlmostEqual(row["sigma"], 0.8087, places=3)
+        self.assertAlmostEqual(row["error sigma"], 0.1898, places=3)
+        self.assertAlmostEqual(row["area"], 15.6085, places=3)
+        self.assertAlmostEqual(row["error area"], 0.2347, places=3)
+
+    def test_algorithm_does_not_throw_an_error_when_no_valid_peaks_fitted(self):
+        x_val = [0, 2, 4, 6, 8, 10, 12, 14, 16, 18, 20, 22]
+        y_val = [0, 0, 0, 0, 1, 7, 0, 0, 0, 0, 10, 7]
+        ws = CreateWorkspace(x_val * 2, y_val + [0] * len(y_val), NSpec=2)
+        table = CreateEmptyTableWorkspace()
+        table.addColumn("float", "Centre")
+        table.addRow([20])
+
+        FitGaussianPeaks(InputWorkspace=ws,
+                         PeakGuessTable=table)
+
+        self.assertEqual(mtd["peak_table"].rowCount(), 0)
+        self.assertEqual(mtd["refit_peak_table"].rowCount(), 0)
+
+    def test_algorithm_uses_right_fit_window(self):
+        x_val = [0, 2, 4, 6, 8, 10, 12, 14, 16, 18, 20, 22]
+        y_val = [0, 0, 0, 0, 1, 7, 0, 0, 0, 0, 10, 7]
+        ws = CreateWorkspace(x_val * 2, y_val + [0] * len(y_val), NSpec=2)
+
+        table = CreateEmptyTableWorkspace()
+        table.addColumn("float", "Centre")
+        table.addRow([20])
+        with mock.patch('plugins.algorithms.WorkflowAlgorithms.FitGaussianPeaks.FitGaussianPeaks.'
+                        'estimate_single_parameters') as mock_estimate_params:
+            mock_estimate_params.return_value = None
+            FitGaussianPeaks(InputWorkspace=ws,
+                             PeakGuessTable=table,
+                             EstimateFitWindow=False,
+                             FitWindowSize=11)
+            centre_index = 10
+            # win_size is ( FitWindowSize -1)/2 as method estimate_single_parameters expects in this form
+            win_size = 5
+            arguements = mock_estimate_params.call_args_list[0][0]
+            self.assertSequenceEqual(list(arguements[0]), x_val)
+            self.assertSequenceEqual(list(arguements[1]), y_val)
+            self.assertEqual(arguements[2], centre_index)
+            self.assertEqual(arguements[3], win_size)
+            self.assertEqual(len(arguements), 4)
+
+    def test_algorithm_estimates_fit_window(self):
+        x_val = [0, 2, 4, 6, 8, 10, 12, 14, 16, 18, 20, 22]
+        y_val = [0, 0, 0, 0, 1, 7, 0, 0, 0, 0, 10, 7]
+        ws = CreateWorkspace(x_val * 2, y_val + [0] * len(y_val), NSpec=2)
+
+        table = CreateEmptyTableWorkspace()
+        table.addColumn("float", "Centre")
+        table.addRow([20])
+        with mock.patch('plugins.algorithms.WorkflowAlgorithms.FitGaussianPeaks.FitGaussianPeaks.'
+                        'estimate_single_parameters') as mock_estimate_params:
+            mock_estimate_params.return_value = None
+            FitGaussianPeaks(InputWorkspace=ws,
+                             PeakGuessTable=table,
+                             EstimateFitWindow=True,
+                             FitWindowSize=11)
+
+            centre_index = 10
+            """
+                win_size in this case is calculated from EstimatePeakSigma and is estimated to be 2 and FitWindowSize
+                is ignored
+            """
+            win_size = 2
+            arguements = mock_estimate_params.call_args_list[0][0]
+            self.assertSequenceEqual(list(arguements[0]), x_val)
+            self.assertSequenceEqual(list(arguements[1]), y_val)
+            self.assertEqual(arguements[2], centre_index)
+            self.assertEqual(arguements[3], win_size)
+            self.assertEqual(len(arguements), 4)
 
 
 if __name__ == '__main__':

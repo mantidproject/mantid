@@ -5,6 +5,7 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidQtWidgets/InstrumentView/PeakMarker2D.h"
+#include "MantidDataObjects/Peak.h"
 #include "MantidQtWidgets/InstrumentView/PeakOverlay.h"
 
 #include <QFontMetrics>
@@ -17,9 +18,10 @@
 #include <cmath>
 #include <stdexcept>
 
-namespace MantidQt {
-namespace MantidWidgets {
+namespace MantidQt::MantidWidgets {
 
+using Mantid::DataObjects::Peak;
+using Mantid::Geometry::IPeak;
 /// Default size in screen pixels of the marker's symbol
 const int PeakMarker2D::g_defaultMarkerSize = 5;
 
@@ -30,10 +32,8 @@ const int PeakMarker2D::g_defaultMarkerSize = 5;
  * @param v :: y screen coordinate of peak center
  * @param style :: marker symbol style
  */
-PeakMarker2D::PeakMarker2D(PeakOverlay &peakOverlay, double u, double v,
-                           const Style &style)
-    : m_peakOverlay(peakOverlay), m_symbol(style.symbol), m_h(-99.0),
-      m_k(-99.0), m_l(-99.0), m_detID(-99), m_row(-1) {
+PeakMarker2D::PeakMarker2D(PeakOverlay &peakOverlay, double u, double v, const Style &style)
+    : m_peakOverlay(peakOverlay), m_symbol(style.symbol), m_h(-99.0), m_k(-99.0), m_l(-99.0), m_detID(-99), m_row(-1) {
   setColor(style.color);
   if (style.size > 0) {
     m_markerSize = style.size;
@@ -41,18 +41,15 @@ PeakMarker2D::PeakMarker2D(PeakOverlay &peakOverlay, double u, double v,
     m_markerSize = g_defaultMarkerSize;
   }
   const QPointF &centre = QPointF(u, v);
-  m_boundingRect =
-      RectF(centre - QPointF((qreal)m_markerSize / 2, (qreal)m_markerSize / 2),
-            QSizeF((qreal)m_markerSize, (qreal)m_markerSize));
+  m_boundingRect = RectF(centre - QPointF((qreal)m_markerSize / 2, (qreal)m_markerSize / 2),
+                         QSizeF((qreal)m_markerSize, (qreal)m_markerSize));
   setScalable(false);
 }
 
 /**
  * Return the style of the marker.
  */
-PeakMarker2D::Style PeakMarker2D::getStyle() const {
-  return Style(m_symbol, getColor(), m_markerSize);
-}
+PeakMarker2D::Style PeakMarker2D::getStyle() const { return Style(m_symbol, getColor(), m_markerSize); }
 
 bool PeakMarker2D::selectAt(const QPointF &p) const { return contains(p); }
 
@@ -75,13 +72,10 @@ void PeakMarker2D::drawShape(QPainter &painter) const {
   QFontMetrics fm(painter.font());
   QRect r = fm.boundingRect(m_label);
   m_labelRect = QRectF(r);
-  m_labelRect.moveTo(m_boundingRect.x1() + m_markerSize,
-                     m_boundingRect.y1() - m_markerSize);
+  m_labelRect.moveTo(m_boundingRect.x1() + m_markerSize, m_boundingRect.y1() - m_markerSize);
 }
 
-void PeakMarker2D::addToPath(QPainterPath &path) const {
-  path.addRect(m_boundingRect.toQRectF());
-}
+void PeakMarker2D::addToPath(QPainterPath &path) const { path.addRect(m_boundingRect.toQRectF()); }
 
 /// Set new marker size to s
 void PeakMarker2D::setMarkerSize(const int &s) {
@@ -122,23 +116,21 @@ void PeakMarker2D::drawSquare(QPainter &painter) const {
 /**
  * Save some peak information.
  */
-void PeakMarker2D::setPeak(const Mantid::Geometry::IPeak &peak, int row) {
-  m_h = peak.getH();
-  m_k = peak.getK();
-  m_l = peak.getL();
-  m_label = QString("%1 %2 %3")
-                .arg(QString::number(m_h, 'g', 2), QString::number(m_k, 'g', 2),
-                     QString::number(m_l, 'g', 2));
-  m_detID = peak.getDetectorID();
+void PeakMarker2D::setPeak(const IPeak &ipeak, int row) {
+  m_h = ipeak.getH();
+  m_k = ipeak.getK();
+  m_l = ipeak.getL();
+  m_label =
+      QString("%1 %2 %3").arg(QString::number(m_h, 'g', 2), QString::number(m_k, 'g', 2), QString::number(m_l, 'g', 2));
+  auto peak = dynamic_cast<const Peak *>(&ipeak);
+  if (peak)
+    m_detID = peak->getDetectorID();
   m_row = row;
 }
 
 /**
  * Return reference to the peak.
  */
-const Mantid::Geometry::IPeak &PeakMarker2D::getPeak() const {
-  return m_peakOverlay.getPeak(m_row);
-}
+const Mantid::Geometry::IPeak &PeakMarker2D::getPeak() const { return m_peakOverlay.getPeak(m_row); }
 
-} // namespace MantidWidgets
-} // namespace MantidQt
+} // namespace MantidQt::MantidWidgets

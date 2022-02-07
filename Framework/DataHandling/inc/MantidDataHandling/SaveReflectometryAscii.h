@@ -25,17 +25,11 @@ public:
   /// Algorithm's version. @see Algorithm::version
   int version() const override { return 1; }
   /// Algorithm's category for identification. @see Algorithm::category
-  const std::string category() const override {
-    return "DataHandling\\Text;ILL\\Reflectometry;Reflectometry";
-  }
+  const std::string category() const override { return "DataHandling\\Text;ILL\\Reflectometry;Reflectometry"; }
   /// Summary of algorithms purpose. @see Algorithm::summary
-  const std::string summary() const override {
-    return "Saves a 2D workspace to an ascii file";
-  }
+  const std::string summary() const override { return "Saves a 2D workspace to an ascii file"; }
   /// Algorithm's with similar purpose. @see Algorithm::seeAlso
-  const std::vector<std::string> seeAlso() const override {
-    return {"SaveAscii"};
-  }
+  const std::vector<std::string> seeAlso() const override { return {"SaveAscii"}; }
   /// Cross-check properties with each other. @see IAlgorithm::validateInputs
   std::map<std::string, std::string> validateInputs() override;
   /// Check if input workspace is a group. @see Algorithm::checkGroups
@@ -52,23 +46,20 @@ private:
   void checkFile(const std::string &filename);
   /// Write the data
   void data();
-  /// Print a double value to file
-  void outputval(double val);
-  /// Write a string value
-  bool writeString(bool write, const std::string &s);
-  /// Print a string value to file
-  void outputval(const std::string &val);
+  /// Print a value to file
+  template <typename T> void outputval(const T &val, bool firstColumn = false);
   /// Retrieve sample log value
   std::string sampleLogValue(const std::string &logName);
   /// Retrieve sample log unit
   std::string sampleLogUnit(const std::string &logName);
   /// Write one header line
-  void writeInfo(const std::string &logName,
-                 const std::string &logNameFixed = "");
+  void writeInfo(const std::string &logName, const std::string &logNameFixed = "");
   /// Write header
   void header();
   /// Determine the separator
   void separator();
+  /// Whether the Q resolution should be included in the output
+  bool includeQResolution() const;
   /// Separator
   char m_sep{'\t'};
   /// Filename

@@ -23,9 +23,7 @@ using boost::python::object;
 
 GNU_DIAG_OFF("strict-aliasing")
 
-namespace Mantid {
-namespace PythonInterface {
-namespace Converters {
+namespace Mantid::PythonInterface::Converters {
 /**
  * Construct the converter object with the given Python object
  * @param p :: A boost::python object that should support
@@ -49,10 +47,9 @@ PyObjectToVMD::PyObjectToVMD(const object &p) : m_obj(p), m_alreadyVMD(false) {
     // Can we index the object
     p.attr("__getitem__")(0);
   } catch (boost::python::error_already_set &) {
-    throw std::invalid_argument(
-        std::string("Cannot convert object to VMD. "
-                    "Expected a python sequence found: ") +
-        p.ptr()->ob_type->tp_name);
+    throw std::invalid_argument(std::string("Cannot convert object to VMD. "
+                                            "Expected a python sequence found: ") +
+                                p.ptr()->ob_type->tp_name);
   }
 }
 
@@ -73,6 +70,4 @@ Kernel::VMD PyObjectToVMD::operator()() {
   }
   return ret;
 }
-} // namespace Converters
-} // namespace PythonInterface
-} // namespace Mantid
+} // namespace Mantid::PythonInterface::Converters

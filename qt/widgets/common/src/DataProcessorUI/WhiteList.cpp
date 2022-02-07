@@ -20,8 +20,7 @@ namespace DataProcessor {
  * something that uniquely identifies the row within the group
  * @param prefix : the prefix to be added to the value of this column
  */
-void WhiteList::addElement(const QString &colName, const QString &algProperty,
-                           const QString &description, bool isShown,
+void WhiteList::addElement(const QString &colName, const QString &algProperty, const QString &description, bool isShown,
                            const QString &prefix, bool isKey) {
   m_names.emplace_back(colName);
   m_algorithmProperties.emplace_back(algProperty);
@@ -50,16 +49,12 @@ QString WhiteList::name(int index) const { return m_names.at(index); }
 /** Returns the algorithm property linked to a column specified via its index
     @param index : The column index
 */
-QString WhiteList::algorithmProperty(int index) const {
-  return m_algorithmProperties.at(index);
-}
+QString WhiteList::algorithmProperty(int index) const { return m_algorithmProperties.at(index); }
 
 /** Returns the column description for a column specified via its index
     @param index : The column index
 */
-QString WhiteList::description(int index) const {
-  return m_descriptions.at(index);
-}
+QString WhiteList::description(int index) const { return m_descriptions.at(index); }
 
 /** Returns the size of this whitelist, i.e. the number of columns
  */
@@ -74,8 +69,7 @@ bool WhiteList::isShown(int index) const { return m_isShown.at(index); }
 /** Check whether any of the columns are marked as a key column
  */
 bool WhiteList::hasKeyColumns() const {
-  return std::any_of(m_isKey.cbegin(), m_isKey.cend(),
-                     [](const auto isKey) { return isKey; });
+  return std::any_of(m_isKey.cbegin(), m_isKey.cend(), [](const auto isKey) { return isKey; });
 }
 
 /** Returns true if the contents of this column should be used to identify the
@@ -100,42 +94,36 @@ auto WhiteList::begin() const -> const_iterator { return cbegin(); }
 
 /// Returns a ForwardIterator pointing to the first entry in the whitelist.
 auto WhiteList::cbegin() const -> const_iterator {
-  return const_iterator(m_names.cbegin(), m_descriptions.cbegin(),
-                        m_algorithmProperties.cbegin(), m_isShown.cbegin(),
+  return const_iterator(m_names.cbegin(), m_descriptions.cbegin(), m_algorithmProperties.cbegin(), m_isShown.cbegin(),
                         m_prefixes.cbegin(), m_isKey.cbegin());
 }
 
 /// Returns a ForwardIterator pointing to one past the last entry in the
 /// whitelist.
 auto WhiteList::cend() const -> const_iterator {
-  return const_iterator(m_names.cend(), m_descriptions.cend(),
-                        m_algorithmProperties.cend(), m_isShown.cend(),
+  return const_iterator(m_names.cend(), m_descriptions.cend(), m_algorithmProperties.cend(), m_isShown.cend(),
                         m_prefixes.cend(), m_isKey.cend());
 }
 
-ConstColumnIterator operator+(const ConstColumnIterator &lhs,
-                              typename ConstColumnIterator::difference_type n) {
+ConstColumnIterator operator+(const ConstColumnIterator &lhs, typename ConstColumnIterator::difference_type n) {
   auto result = lhs;
   result += n;
   return result;
 }
 
-ConstColumnIterator operator+(typename ConstColumnIterator::difference_type n,
-                              const ConstColumnIterator &rhs) {
+ConstColumnIterator operator+(typename ConstColumnIterator::difference_type n, const ConstColumnIterator &rhs) {
   auto result = rhs;
   result += n;
   return result;
 }
 
-ConstColumnIterator operator-(const ConstColumnIterator &lhs,
-                              typename ConstColumnIterator::difference_type n) {
+ConstColumnIterator operator-(const ConstColumnIterator &lhs, typename ConstColumnIterator::difference_type n) {
   auto result = lhs;
   result -= n;
   return result;
 }
 
-ConstColumnIterator operator-(typename ConstColumnIterator::difference_type n,
-                              const ConstColumnIterator &rhs) {
+ConstColumnIterator operator-(typename ConstColumnIterator::difference_type n, const ConstColumnIterator &rhs) {
   auto result = rhs;
   result -= n;
   return result;

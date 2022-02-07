@@ -11,8 +11,7 @@ using Mantid::API::IAlgorithm_sptr;
 using Mantid::API::MatrixWorkspace_sptr;
 using Mantid::API::Workspace_sptr;
 
-namespace Mantid {
-namespace WorkflowAlgorithms {
+namespace Mantid::WorkflowAlgorithms {
 
 //----------------------------------------------------------------------------------------------
 /** Constructor
@@ -26,14 +25,13 @@ namespace WorkflowAlgorithms {
  * group of the pair
  * @param alpha :: [input] Alpha (balance) value of the pair
  */
-MuonPairAsymmetryCalculator::MuonPairAsymmetryCalculator(
-    const API::WorkspaceGroup_sptr &inputWS,
-    const std::vector<int> &summedPeriods,
-    const std::vector<int> &subtractedPeriods, const int firstPairIndex,
-    const int secondPairIndex, const double alpha)
-    : IMuonAsymmetryCalculator(inputWS, summedPeriods, subtractedPeriods),
-      m_alpha(alpha), m_firstPairIndex(firstPairIndex),
-      m_secondPairIndex(secondPairIndex) {}
+MuonPairAsymmetryCalculator::MuonPairAsymmetryCalculator(const API::WorkspaceGroup_sptr &inputWS,
+                                                         const std::vector<int> &summedPeriods,
+                                                         const std::vector<int> &subtractedPeriods,
+                                                         const int firstPairIndex, const int secondPairIndex,
+                                                         const double alpha)
+    : IMuonAsymmetryCalculator(inputWS, summedPeriods, subtractedPeriods), m_alpha(alpha),
+      m_firstPairIndex(firstPairIndex), m_secondPairIndex(secondPairIndex) {}
 
 /**
  * Calculates asymmetry for the given pair of groups, using the alpha value
@@ -73,8 +71,7 @@ MatrixWorkspace_sptr MuonPairAsymmetryCalculator::calculate() const {
  * @param inputWS :: [input] Workspace to calculate asymmetry from
  * @returns Result of the calculation
  */
-MatrixWorkspace_sptr MuonPairAsymmetryCalculator::asymmetryCalc(
-    const Workspace_sptr &inputWS) const {
+MatrixWorkspace_sptr MuonPairAsymmetryCalculator::asymmetryCalc(const Workspace_sptr &inputWS) const {
   MatrixWorkspace_sptr outWS;
 
   if (inputWS) {
@@ -82,7 +79,7 @@ MatrixWorkspace_sptr MuonPairAsymmetryCalculator::asymmetryCalc(
     std::vector<int> fwd(1, m_firstPairIndex + 1);
     std::vector<int> bwd(1, m_secondPairIndex + 1);
 
-    IAlgorithm_sptr alg = AlgorithmManager::Instance().create("AsymmetryCalc");
+    auto alg = AlgorithmManager::Instance().create("AsymmetryCalc");
     alg->setChild(true);
     alg->setProperty("InputWorkspace", inputWS);
     alg->setProperty("ForwardSpectra", fwd);
@@ -96,5 +93,4 @@ MatrixWorkspace_sptr MuonPairAsymmetryCalculator::asymmetryCalc(
   return outWS;
 }
 
-} // namespace WorkflowAlgorithms
-} // namespace Mantid
+} // namespace Mantid::WorkflowAlgorithms

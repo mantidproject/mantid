@@ -36,17 +36,21 @@ public:
     /// The mass number to set, defaults to 0
     int massNumber = 0;
     /// The sample number density to set, defaults to EMPTY_DBL()
-    double sampleNumberDensity = EMPTY_DBL();
+    double numberDensity = EMPTY_DBL();
+    /// The sample effective number density
+    double numberDensityEffective = EMPTY_DBL();
+    /// The sample packing fraction
+    double packingFraction = EMPTY_DBL();
     /// The zParameter to set, defaults to EMPTY_DBL()
     double zParameter = EMPTY_DBL();
     /// The unit cell volume to set, defaults to EMPTY_DBL()
     double unitCellVolume = EMPTY_DBL();
     /// The sample mass density to set, defaults to EMPTY_DBL()
-    double sampleMassDensity = EMPTY_DBL();
+    double massDensity = EMPTY_DBL();
     /// The sample mass to set, defaults to EMPTY_DBL()
-    double sampleMass = EMPTY_DBL();
+    double mass = EMPTY_DBL();
     /// The sample volume to set, defaults to EMPTY_DBL()
-    double sampleVolume = EMPTY_DBL();
+    double volume = EMPTY_DBL();
     /// The coherent scattering cross section to set, defaults to EMPTY_DBL()
     double coherentXSection = EMPTY_DBL();
     /// The incoherent scattering cross section to set, defaults to EMPTY_DBL()
@@ -57,9 +61,10 @@ public:
     double scatteringXSection = EMPTY_DBL();
     /// The name or path of a file containing an attenuation profile
     std::string attenuationProfileFileName = "";
+    /// The name or path of a file containing an x ray attenuation profile
+    std::string xRayAttenuationProfileFileName = "";
     /// A flag indicating the unit of sampleNumberDensity
-    Kernel::MaterialBuilder::NumberDensityUnit numberDensityUnit =
-        Kernel::MaterialBuilder::NumberDensityUnit::Atoms;
+    Kernel::MaterialBuilder::NumberDensityUnit numberDensityUnit = Kernel::MaterialBuilder::NumberDensityUnit::Atoms;
   };
   /**
    * Validate the parameters to build the material from, this returns
@@ -90,16 +95,14 @@ private:
    */
   Kernel::MaterialBuilder builder;
 
-  void setMaterial(const std::string &chemicalSymbol, const int atomicNumber,
-                   const int massNumber);
+  void setMaterial(const std::string &chemicalSymbol, const int atomicNumber, const int massNumber);
 
-  void
-  setNumberDensity(const double rho_m, const double rho,
-                   const Kernel::MaterialBuilder::NumberDensityUnit rhoUnit,
-                   const double zParameter, const double unitCellVolume);
-  void setScatteringInfo(double coherentXSection, double incoherentXSection,
-                         double attenuationXSection, double scatteringXSection,
-                         std::string attenuationProfileFileName);
+  void setNumberDensity(const double rho_m, const double rho, const double rho_eff, const double pFrac,
+                        const Kernel::MaterialBuilder::NumberDensityUnit rhoUnit, const double zParameter,
+                        const double unitCellVolume);
+  void setScatteringInfo(double coherentXSection, double incoherentXSection, double attenuationXSection,
+                         double scatteringXSection, std::string attenuationProfileFileName,
+                         std::string xRayAttenuationProfileFileName);
 
   static bool isEmpty(const double toCheck);
 };

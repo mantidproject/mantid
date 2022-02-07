@@ -10,13 +10,13 @@
 #include "MantidCrystal/NormaliseVanadium.h"
 #include "MantidDataHandling/LoadInstrument.h"
 #include "MantidDataObjects/EventWorkspace.h"
+#include "MantidFrameworkTestHelpers/ComponentCreationHelper.h"
+#include "MantidFrameworkTestHelpers/FacilityHelper.h"
+#include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidHistogramData/LinearGenerator.h"
 #include "MantidKernel/OptionalBool.h"
 #include "MantidKernel/System.h"
 #include "MantidKernel/Timer.h"
-#include "MantidTestHelpers/ComponentCreationHelper.h"
-#include "MantidTestHelpers/FacilityHelper.h"
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include <cmath>
 #include <cxxtest/TestSuite.h>
 #include <random>
@@ -39,8 +39,7 @@ namespace {
  * @return EventWorkspace_sptr
  */
 EventWorkspace_sptr createDiffractionEventWorkspace(int numEvents) {
-  FacilityHelper::ScopedFacilities loadTESTFacility(
-      "unit_testing/UnitTestFacilities.xml", "TEST");
+  FacilityHelper::ScopedFacilities loadTESTFacility("unit_testing/UnitTestFacilities.xml", "TEST");
 
   int numPixels = 10000;
   int numBins = 16;
@@ -52,11 +51,9 @@ EventWorkspace_sptr createDiffractionEventWorkspace(int numEvents) {
   // --------- Load the instrument -----------
   LoadInstrument *loadInst = new LoadInstrument();
   loadInst->initialize();
-  loadInst->setPropertyValue("Filename",
-                             "unit_testing/MINITOPAZ_Definition.xml");
+  loadInst->setPropertyValue("Filename", "unit_testing/MINITOPAZ_Definition.xml");
   loadInst->setProperty<MatrixWorkspace_sptr>("Workspace", retVal);
-  loadInst->setProperty("RewriteSpectraMap",
-                        Mantid::Kernel::OptionalBool(true));
+  loadInst->setProperty("RewriteSpectraMap", Mantid::Kernel::OptionalBool(false));
   loadInst->execute();
   delete loadInst;
   // Populate the instrument parameters in this workspace - this works around
@@ -79,12 +76,9 @@ EventWorkspace_sptr createDiffractionEventWorkspace(int numEvents) {
 
     // Peak
     int r = static_cast<int>(
-        numEvents / std::sqrt((pix / 100 - 50.5) * (pix / 100 - 50.5) +
-                              (pix % 100 - 50.5) * (pix % 100 - 50.5)));
+        numEvents / std::sqrt((pix / 100 - 50.5) * (pix / 100 - 50.5) + (pix % 100 - 50.5) * (pix % 100 - 50.5)));
     for (int i = 0; i < r; i++) {
-      el += TofEvent(0.75 + binDelta *
-                                ((flat(rng) + flat(rng) + flat(rng)) * 2. - 3.),
-                     run_start + double(i));
+      el += TofEvent(0.75 + binDelta * ((flat(rng) + flat(rng) + flat(rng)) * 2. - 3.), run_start + double(i));
     }
   }
 
@@ -95,7 +89,7 @@ EventWorkspace_sptr createDiffractionEventWorkspace(int numEvents) {
   TS_ASSERT_EQUALS(retVal->getInstrument()->getName(), "MINITOPAZ");
   std::map<int, Geometry::IDetector_const_sptr> dets;
   retVal->getInstrument()->getDetectors(dets);
-  TS_ASSERT_EQUALS(dets.size(), 100 * 100);
+  TS_ASSERT_EQUALS(dets.size(), 100 * 100 + 2);
 
   return retVal;
 }
@@ -110,7 +104,7 @@ IAlgorithm_sptr createAlgorithm() {
   MatrixWorkspace_sptr inputW = createDiffractionEventWorkspace(numEventsPer);
   inputW->getAxis(0)->setUnit("Wavelength");
 
-  IAlgorithm_sptr alg = std::make_shared<NormaliseVanadium>();
+  auto alg = std::make_shared<NormaliseVanadium>();
   TS_ASSERT_THROWS_NOTHING(alg->initialize())
   TS_ASSERT(alg->isInitialized())
   alg->setProperty("InputWorkspace", inputW);
@@ -136,9 +130,7 @@ public:
     TS_ASSERT(alg->isExecuted())
 
     MatrixWorkspace_sptr ws;
-    TS_ASSERT_THROWS_NOTHING(
-        ws = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-            "TOPAZ"));
+    TS_ASSERT_THROWS_NOTHING(ws = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("TOPAZ"));
     TS_ASSERT(ws);
     if (!ws)
       return;
@@ -149,20 +141,14 @@ public:
 
 class NormaliseVanadiumTestPerformance : public CxxTest::TestSuite {
 public:
-  static NormaliseVanadiumTestPerformance *createSuite() {
-    return new NormaliseVanadiumTestPerformance();
-  }
-  static void destroySuite(NormaliseVanadiumTestPerformance *suite) {
-    delete suite;
-  }
+  static NormaliseVanadiumTestPerformance *createSuite() { return new NormaliseVanadiumTestPerformance(); }
+  static void destroySuite(NormaliseVanadiumTestPerformance *suite) { delete suite; }
 
   void setUp() override { normaliseVanadiumAlg = createAlgorithm(); }
 
   void tearDown() override { AnalysisDataService::Instance().remove("TOPAZ"); }
 
-  void testNormaliseVanadiumPerformance() {
-    TS_ASSERT_THROWS_NOTHING(normaliseVanadiumAlg->execute());
-  }
+  void testNormaliseVanadiumPerformance() { TS_ASSERT_THROWS_NOTHING(normaliseVanadiumAlg->execute()); }
 
 private:
   IAlgorithm_sptr normaliseVanadiumAlg;

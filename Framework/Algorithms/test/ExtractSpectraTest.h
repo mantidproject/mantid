@@ -16,10 +16,10 @@
 #include "MantidIndexing/IndexInfo.h"
 #include "MantidKernel/UnitFactory.h"
 
-#include "MantidTestHelpers/ComponentCreationHelper.h"
-#include "MantidTestHelpers/ParallelAlgorithmCreation.h"
-#include "MantidTestHelpers/ParallelRunner.h"
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
+#include "MantidFrameworkTestHelpers/ComponentCreationHelper.h"
+#include "MantidFrameworkTestHelpers/ParallelAlgorithmCreation.h"
+#include "MantidFrameworkTestHelpers/ParallelRunner.h"
+#include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
 
 using Mantid::Algorithms::ExtractSpectra;
 using namespace Mantid;
@@ -37,10 +37,9 @@ void run_parallel_DetectorList_fails(const Parallel::Communicator &comm) {
   if (comm.size() == 1) {
     TS_ASSERT_THROWS_NOTHING(alg->execute());
   } else {
-    TS_ASSERT_THROWS_EQUALS(
-        alg->execute(), const std::runtime_error &e, std::string(e.what()),
-        "MatrixWorkspace: Using getIndicesFromDetectorIDs in "
-        "a parallel run is most likely incorrect. Aborting.");
+    TS_ASSERT_THROWS_EQUALS(alg->execute(), const std::runtime_error &e, std::string(e.what()),
+                            "MatrixWorkspace: Using getIndicesFromDetectorIDs in "
+                            "a parallel run is most likely incorrect. Aborting.");
   }
 }
 
@@ -60,8 +59,7 @@ void run_parallel_WorkspaceIndexList(const Parallel::Communicator &comm) {
 }
 
 void run_parallel_WorkspaceIndexRange(const Parallel::Communicator &comm) {
-  Indexing::IndexInfo indexInfo(3 * comm.size(),
-                                Parallel::StorageMode::Distributed, comm);
+  Indexing::IndexInfo indexInfo(3 * comm.size(), Parallel::StorageMode::Distributed, comm);
   auto alg = ParallelTestHelpers::create<ExtractSpectra>(comm);
   alg->setProperty("InputWorkspace", create<Workspace2D>(indexInfo, Points(1)));
   alg->setProperty("StartWorkspaceIndex", std::to_string(comm.size() + 1));
@@ -77,6 +75,11 @@ void run_parallel_WorkspaceIndexRange(const Parallel::Communicator &comm) {
 } // namespace
 
 class ExtractSpectraTest : public CxxTest::TestSuite {
+private:
+  const size_t nSpec{5};
+  const size_t nBins{6};
+  const std::string outWSName{"ExtractSpectraTest_OutputWS"};
+
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
@@ -85,9 +88,6 @@ public:
     AnalysisDataService::Instance().clear();
     delete suite;
   }
-
-  ExtractSpectraTest()
-      : nSpec(5), nBins(6), outWSName("ExtractSpectraTest_OutputWS") {}
 
   void test_Init() {
     ExtractSpectra alg;
@@ -114,7 +114,7 @@ public:
 
   // ---- test histo ----
 
-  void test_x_range() {
+  void test_x_range_more_than_one_bin() {
     Parameters params;
     params.setXRange();
 
@@ -124,6 +124,37 @@ public:
 
     TS_ASSERT_EQUALS(ws->getNumberHistograms(), nSpec);
     params.testXRange(*ws);
+  }
+
+  void test_equal_x_range_extracts_single_bin_histogram() {
+    Parameters params;
+    params.XMin = 3.4;
+    params.XMax = 3.4;
+
+    const auto ws = runAlgorithm(params);
+    TS_ASSERT_EQUALS(ws->getNumberHistograms(), nSpec);
+    TS_ASSERT_EQUALS(ws->blocksize(), 1);
+    TS_ASSERT_EQUALS(ws->x(0)[0], 3.0);
+    TS_ASSERT_EQUALS(ws->x(1)[0], 3.0);
+    TS_ASSERT_EQUALS(ws->x(2)[0], 3.0);
+    TS_ASSERT_EQUALS(ws->x(3)[0], 3.0);
+    TS_ASSERT_EQUALS(ws->x(4)[0], 3.0);
+  }
+
+  void test_equal_x_range_extracts_single_pt_points() {
+    Parameters params("points");
+    params.XMin = 3.4;
+    params.XMax = 3.4;
+
+    const auto ws = runAlgorithm(params);
+    TS_ASSERT_EQUALS(ws->getNumberHistograms(), nSpec);
+    TS_ASSERT_EQUALS(ws->blocksize(), 1);
+    // finds closest point
+    TS_ASSERT_EQUALS(ws->x(0)[0], 3.0);
+    TS_ASSERT_EQUALS(ws->x(1)[0], 3.0);
+    TS_ASSERT_EQUALS(ws->x(2)[0], 3.0);
+    TS_ASSERT_EQUALS(ws->x(3)[0], 3.0);
+    TS_ASSERT_EQUALS(ws->x(4)[0], 3.0);
   }
 
   void test_index_range() {
@@ -439,27 +470,18 @@ public:
     auto ws = runAlgorithm(params, false);
   }
 
-  void test_parallel_DetectorList_fails() {
-    ParallelTestHelpers::runParallel(run_parallel_DetectorList_fails);
-  }
-  void test_parallel_WorkspaceIndexList() {
-    ParallelTestHelpers::runParallel(run_parallel_WorkspaceIndexList);
-  }
-  void test_parallel_WorkspaceIndexRange() {
-    ParallelTestHelpers::runParallel(run_parallel_WorkspaceIndexRange);
-  }
+  void test_parallel_DetectorList_fails() { ParallelTestHelpers::runParallel(run_parallel_DetectorList_fails); }
+  void test_parallel_WorkspaceIndexList() { ParallelTestHelpers::runParallel(run_parallel_WorkspaceIndexList); }
+  void test_parallel_WorkspaceIndexRange() { ParallelTestHelpers::runParallel(run_parallel_WorkspaceIndexRange); }
 
 private:
   // -----------------------  helper methods ------------------------
 
-  const size_t nSpec;
-  const size_t nBins;
-  const std::string outWSName;
-
-  MatrixWorkspace_sptr
-  createInputWorkspace(const std::string &workspaceType) const {
+  MatrixWorkspace_sptr createInputWorkspace(const std::string &workspaceType) const {
     if (workspaceType == "histo")
       return createInputWorkspaceHisto();
+    else if (workspaceType == "points")
+      return createInputWorkspacePoints();
     else if (workspaceType == "event")
       return createInputWorkspaceEvent();
     else if (workspaceType == "histo-ragged")
@@ -477,10 +499,22 @@ private:
 
   MatrixWorkspace_sptr createInputWorkspaceHisto() const {
     // Set up a small workspace for testing
-    MatrixWorkspace_sptr space = WorkspaceFactory::Instance().create(
-        "Workspace2D", nSpec, nBins + 1, nBins);
+    MatrixWorkspace_sptr space = WorkspaceFactory::Instance().create("Workspace2D", nSpec, nBins + 1, nBins);
     for (size_t j = 0; j < nSpec; ++j) {
       for (size_t k = 0; k <= nBins; ++k) {
+        space->mutableX(j)[k] = double(k);
+      }
+      space->mutableY(j) = HistogramData::HistogramY(nBins, double(j));
+      space->mutableE(j) = HistogramData::HistogramE(nBins, sqrt(double(j)));
+    }
+    return space;
+  }
+
+  MatrixWorkspace_sptr createInputWorkspacePoints() const {
+    // Set up a small workspace for testing
+    MatrixWorkspace_sptr space = WorkspaceFactory::Instance().create("Workspace2D", nSpec, nBins, nBins);
+    for (size_t j = 0; j < nSpec; ++j) {
+      for (size_t k = 0; k < nBins; ++k) {
         space->mutableX(j)[k] = double(k);
       }
       space->mutableY(j) = HistogramData::HistogramY(nBins, double(j));
@@ -504,8 +538,7 @@ private:
 
   MatrixWorkspace_sptr createInputWorkspaceHistoRagged() const {
     // Set up a small workspace for testing
-    MatrixWorkspace_sptr space = WorkspaceFactory::Instance().create(
-        "Workspace2D", nSpec, nBins + 1, nBins);
+    MatrixWorkspace_sptr space = WorkspaceFactory::Instance().create("Workspace2D", nSpec, nBins + 1, nBins);
     for (size_t j = 0; j < nSpec; ++j) {
       auto &X = space->mutableX(j);
       for (size_t k = 0; k <= nBins; ++k) {
@@ -518,11 +551,9 @@ private:
   }
 
   MatrixWorkspace_sptr createInputWorkspaceEvent() const {
-    EventWorkspace_sptr ws = WorkspaceCreationHelper::createEventWorkspace(
-        int(nSpec), int(nBins), 50, 0.0, 1., 2);
+    EventWorkspace_sptr ws = WorkspaceCreationHelper::createEventWorkspace(int(nSpec), int(nBins), 50, 0.0, 1., 2);
     ws->getAxis(0)->unit() = UnitFactory::Instance().create("TOF");
-    ws->setInstrument(
-        ComponentCreationHelper::createTestInstrumentCylindrical(1));
+    ws->setInstrument(ComponentCreationHelper::createTestInstrumentCylindrical(1));
     for (size_t i = 0; i < ws->getNumberHistograms(); ++i) {
       ws->getSpectrum(i).setDetectorID(detid_t(i + 1));
     }
@@ -543,8 +574,7 @@ private:
     return ws;
   }
 
-  MatrixWorkspace_sptr
-  createInputWithDetectors(const std::string &workspaceType) const {
+  MatrixWorkspace_sptr createInputWithDetectors(const std::string &workspaceType) const {
     MatrixWorkspace_sptr ws;
 
     // Set the type of underlying workspace
@@ -564,9 +594,8 @@ private:
 
   struct Parameters {
     Parameters(const std::string &workspaceType = "histo")
-        : XMin(EMPTY_DBL()), XMax(EMPTY_DBL()), StartWorkspaceIndex(0),
-          EndWorkspaceIndex(EMPTY_INT()), WorkspaceIndexList(),
-          wsType(workspaceType) {}
+        : XMin(EMPTY_DBL()), XMax(EMPTY_DBL()), StartWorkspaceIndex(0), EndWorkspaceIndex(EMPTY_INT()),
+          WorkspaceIndexList(), wsType(workspaceType) {}
     double XMin;
     double XMax;
     int StartWorkspaceIndex;
@@ -717,15 +746,14 @@ private:
     }
   };
 
-  MatrixWorkspace_sptr runAlgorithm(const Parameters &params,
-                                    bool expectSuccess = true) const {
+  MatrixWorkspace_sptr runAlgorithm(const Parameters &params, bool expectExecuteSuccess = true) const {
     auto ws = createInputWorkspace(params.wsType);
     ExtractSpectra alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
     TS_ASSERT(alg.isInitialized())
+
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", ws));
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("OutputWorkspace", outWSName));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", outWSName));
 
     if (params.XMin != EMPTY_DBL()) {
       TS_ASSERT_THROWS_NOTHING(alg.setProperty("XMin", params.XMin));
@@ -734,33 +762,26 @@ private:
       TS_ASSERT_THROWS_NOTHING(alg.setProperty("XMax", params.XMax));
     }
     if (params.StartWorkspaceIndex != 0) {
-      TS_ASSERT_THROWS_NOTHING(
-          alg.setProperty("StartWorkspaceIndex", params.StartWorkspaceIndex));
+      TS_ASSERT_THROWS_NOTHING(alg.setProperty("StartWorkspaceIndex", params.StartWorkspaceIndex));
     }
     if (params.EndWorkspaceIndex != EMPTY_INT()) {
-      TS_ASSERT_THROWS_NOTHING(
-          alg.setProperty("EndWorkspaceIndex", params.EndWorkspaceIndex));
+      TS_ASSERT_THROWS_NOTHING(alg.setProperty("EndWorkspaceIndex", params.EndWorkspaceIndex));
     }
     if (!params.WorkspaceIndexList.empty()) {
-      TS_ASSERT_THROWS_NOTHING(
-          alg.setProperty("WorkspaceIndexList", params.WorkspaceIndexList));
+      TS_ASSERT_THROWS_NOTHING(alg.setProperty("WorkspaceIndexList", params.WorkspaceIndexList));
     }
     if (!params.DetectorList.empty()) {
-      TS_ASSERT_THROWS_NOTHING(
-          alg.setProperty("DetectorList", params.DetectorList));
+      TS_ASSERT_THROWS_NOTHING(alg.setProperty("DetectorList", params.DetectorList));
     }
 
-    TS_ASSERT_THROWS_NOTHING(alg.execute(););
-
-    if (expectSuccess) {
+    if (expectExecuteSuccess) {
+      TS_ASSERT_THROWS_NOTHING(alg.execute());
       TS_ASSERT(alg.isExecuted());
 
-      // Retrieve the workspace from data service. TODO: Change to your desired
-      // type
+      // Retrieve the workspace from data service. TODO: Change to your
+      // desired type
       MatrixWorkspace_sptr ws;
-      TS_ASSERT_THROWS_NOTHING(
-          ws = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-              outWSName));
+      TS_ASSERT_THROWS_NOTHING(ws = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(outWSName));
       return ws;
     } else {
       TS_ASSERT(!alg.isExecuted());
@@ -772,11 +793,10 @@ private:
 
 class ExtractSpectraTestPerformance : public CxxTest::TestSuite {
 public:
-  // This pair of boilerplate methods prevent the suite being created statically
-  // This means the constructor isn't called when running other tests
-  static ExtractSpectraTestPerformance *createSuite() {
-    return new ExtractSpectraTestPerformance();
-  }
+  // This pair of boilerplate methods prevent the suite being created
+  // statically This means the constructor isn't called when running other
+  // tests
+  static ExtractSpectraTestPerformance *createSuite() { return new ExtractSpectraTestPerformance(); }
   static void destroySuite(ExtractSpectraTestPerformance *suite) {
     AnalysisDataService::Instance().clear();
     delete suite;
@@ -784,8 +804,7 @@ public:
 
   ExtractSpectraTestPerformance() {
     input = WorkspaceCreationHelper::create2DWorkspaceBinned(40000, 10000);
-    inputEvent =
-        WorkspaceCreationHelper::createEventWorkspace(40000, 10000, 2000);
+    inputEvent = WorkspaceCreationHelper::createEventWorkspace(40000, 10000, 2000);
   }
 
   void testExec2D() {

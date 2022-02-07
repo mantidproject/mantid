@@ -8,13 +8,13 @@
 
 #include <cxxtest/TestSuite.h>
 
+#include "MantidFrameworkTestHelpers/ComponentCreationHelper.h"
 #include "MantidGeometry/Instrument/ComponentInfo.h"
 #include "MantidGeometry/Instrument/ComponentInfoItem.h"
 #include "MantidGeometry/Instrument/ComponentInfoIterator.h"
 #include "MantidGeometry/Instrument/Detector.h"
 #include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidGeometry/Instrument/InstrumentVisitor.h"
-#include "MantidTestHelpers/ComponentCreationHelper.h"
 #include <iterator>
 
 using namespace ComponentCreationHelper;
@@ -24,13 +24,10 @@ class ComponentInfoIteratorTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static ComponentInfoIteratorTest *createSuite() {
-    return new ComponentInfoIteratorTest();
-  }
+  static ComponentInfoIteratorTest *createSuite() { return new ComponentInfoIteratorTest(); }
   static void destroySuite(ComponentInfoIteratorTest *suite) { delete suite; }
 
-  std::unique_ptr<Mantid::Geometry::ComponentInfo>
-  create_component_info_object() {
+  std::unique_ptr<Mantid::Geometry::ComponentInfo> create_component_info_object() {
 
     // Create a very basic instrument to visit
     auto visitee = createMinimalInstrument(V3D(0, 0, 0),   // Source position

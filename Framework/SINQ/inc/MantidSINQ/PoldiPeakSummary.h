@@ -33,12 +33,10 @@ public:
   const std::string summary() const override;
 
 protected:
-  DataObjects::TableWorkspace_sptr
-  getSummaryTable(const PoldiPeakCollection_sptr &peakCollection) const;
+  DataObjects::TableWorkspace_sptr getSummaryTable(const PoldiPeakCollection_sptr &peakCollection) const;
   DataObjects::TableWorkspace_sptr getInitializedResultWorkspace() const;
 
-  void storePeakSummary(API::TableRow tableRow,
-                        const PoldiPeak_sptr &peak) const;
+  void storePeakSummary(API::TableRow tableRow, const PoldiPeak_sptr &peak) const;
 
 private:
   void init() override;

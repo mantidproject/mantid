@@ -14,13 +14,12 @@ Request
 #######
 
 *  Anyone may request a patch release, but that request must be intially
-   approved by Project manager (Nick) or one of the team leaders (Pete
-   or Mattieu).
+   approved by one of the local PMs.
 
 Authorisation
 #############
 
-*  The Project Manager and Team leaders must meet to authorise the patch
+*  The Project Management Team must meet to authorise the patch
    release.
 *  During the meeting other high value, low impact changes may be
    considered for inclusion for the release. Any that are to be included
@@ -36,8 +35,8 @@ Development
 The patch release will be prepared based off the tag used to mark
 the last minor release. A branch called ``release-next`` will be created from this tag.
 Changes for the patch should be made using the standard GitHub
-workflow for merging code with ``master``. The issue and pull request should then have the ``PatchCandidate`` label applied to them. These
-commits will then be cherry picked from ``master`` on to the release branch.
+workflow for merging code with ``main``. The issue and pull request should then have the ``PatchCandidate`` label applied to them. These
+commits will then be cherry picked from ``main`` on to the release branch.
 
 Release Branch
 ##############
@@ -54,7 +53,7 @@ Release Notes
 
 Once the patch version has been unfixed the main reviewer should
 create a skeleton set of patch release notes on the release branch
-using the `python helper tool <https://www.github.com/mantidproject/mantid/blob/master/tools/release_generator/patch.py>`__.
+using the `python helper tool <https://www.github.com/mantidproject/mantid/blob/main/tools/release_generator/patch.py>`__.
 
 Cherry Picking & Code Review
 ----------------------------
@@ -139,13 +138,14 @@ Once the testing has passed:
   deploy an MPI version of the patch release.
 * Create new DOI using the scripts in the codebase and instructions on
   :ref:`release checklist <ReleaseChecklist>`.
+* Open a PR to update the relevant metadata in the ``CITATION.cff`` file as
+  explained in the :ref:`release checklist <ReleaseChecklist>`.
 * Send an email, including the text of the release notes, to the
   following lists
-* ``mantid-announce@mantidproject.org``
-* ``mantid-developers@mantidproject.org``
 * ``nobugs@nobugsconference.org``
 * ``news@neutronsources.org``
 * ``neutron@neutronsources.org``
+* Also post the contents of the message on Announcements on Slack
 * Add topic to the news page on the `forum <http://forum.mantidproject.org/>`__
 * Close the release milestone in github
 * Remove the patch candidate tag from pull requests (if not already done)

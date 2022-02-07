@@ -17,8 +17,7 @@
 #include "Poco/Path.h"
 #include "Poco/String.h"
 
-namespace Mantid {
-namespace WorkflowAlgorithms {
+namespace Mantid::WorkflowAlgorithms {
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(EQSANSDarkCurrentSubtraction)
@@ -30,24 +29,18 @@ using namespace DataObjects;
 
 void EQSANSDarkCurrentSubtraction::init() {
   auto wsValidator = std::make_shared<WorkspaceUnitValidator>("Wavelength");
-  declareProperty(std::make_unique<WorkspaceProperty<>>(
-      "InputWorkspace", "", Direction::Input, wsValidator));
+  declareProperty(std::make_unique<WorkspaceProperty<>>("InputWorkspace", "", Direction::Input, wsValidator));
 
-  declareProperty(
-      std::make_unique<API::FileProperty>(
-          "Filename", "", API::FileProperty::Load, "_event.nxs"),
-      "The name of the input event Nexus file to load as dark current.");
+  declareProperty(std::make_unique<API::FileProperty>("Filename", "", API::FileProperty::Load, "_event.nxs"),
+                  "The name of the input event Nexus file to load as dark current.");
 
-  declareProperty(std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
-                                                        Direction::Output));
+  declareProperty(std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "", Direction::Output));
   declareProperty("PersistentCorrection", true,
                   "If true, the algorithm will be persistent and re-used when "
                   "other data sets are processed");
-  declareProperty("ReductionProperties", "__sans_reduction_properties",
-                  Direction::Input);
-  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
-      "OutputDarkCurrentWorkspace", "", Direction::Output,
-      PropertyMode::Optional));
+  declareProperty("ReductionProperties", "__sans_reduction_properties", Direction::Input);
+  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>("OutputDarkCurrentWorkspace", "",
+                                                                       Direction::Output, PropertyMode::Optional));
   declareProperty("OutputMessage", "", Direction::Output);
 }
 
@@ -57,12 +50,10 @@ void EQSANSDarkCurrentSubtraction::exec() {
   const std::string reductionManagerName = getProperty("ReductionProperties");
   std::shared_ptr<PropertyManager> reductionManager;
   if (PropertyManagerDataService::Instance().doesExist(reductionManagerName)) {
-    reductionManager =
-        PropertyManagerDataService::Instance().retrieve(reductionManagerName);
+    reductionManager = PropertyManagerDataService::Instance().retrieve(reductionManagerName);
   } else {
     reductionManager = std::make_shared<PropertyManager>();
-    PropertyManagerDataService::Instance().addOrReplace(reductionManagerName,
-                                                        reductionManager);
+    PropertyManagerDataService::Instance().addOrReplace(reductionManagerName, reductionManager);
   }
 
   // If the load algorithm isn't in the reduction properties, add it
@@ -122,13 +113,11 @@ void EQSANSDarkCurrentSubtraction::exec() {
       output_message += "   |" + Poco::replace(msg, "\n", "\n   |") + "\n";
     }
 
-    std::string darkWSOutputName =
-        getPropertyValue("OutputDarkCurrentWorkspace");
+    std::string darkWSOutputName = getPropertyValue("OutputDarkCurrentWorkspace");
     if (!darkWSOutputName.empty())
       setProperty("OutputDarkCurrentWorkspace", darkWS);
     AnalysisDataService::Instance().addOrReplace(darkWSName, darkWS);
-    reductionManager->declareProperty(std::make_unique<WorkspaceProperty<>>(
-        entryName, "", Direction::Output));
+    reductionManager->declareProperty(std::make_unique<WorkspaceProperty<>>(entryName, "", Direction::Output));
     reductionManager->setPropertyValue(entryName, darkWSName);
     reductionManager->setProperty(entryName, darkWS);
   }
@@ -149,16 +138,14 @@ void EQSANSDarkCurrentSubtraction::exec() {
     ;
     scaling_factor = duration / dark_duration;
   } else {
-    output_message +=
-        "\n   Could not find proton charge or duration in sample logs";
-    g_log.error()
-        << "ERROR: Could not find proton charge or duration in sample logs\n";
+    output_message += "\n   Could not find proton charge or duration in sample logs";
+    g_log.error() << "ERROR: Could not find proton charge or duration in sample logs\n";
   };
 
   progress.report("Scaling dark current");
 
   // Scale the stored dark current by the counting time
-  IAlgorithm_sptr rebinAlg = createChildAlgorithm("RebinToWorkspace", 0.4, 0.5);
+  auto rebinAlg = createChildAlgorithm("RebinToWorkspace", 0.4, 0.5);
   rebinAlg->setProperty("WorkspaceToRebin", darkWS);
   rebinAlg->setProperty("WorkspaceToMatch", inputWS);
   rebinAlg->setProperty("OutputWorkspace", darkWS);
@@ -166,7 +153,7 @@ void EQSANSDarkCurrentSubtraction::exec() {
   MatrixWorkspace_sptr scaledDarkWS = rebinAlg->getProperty("OutputWorkspace");
 
   // Perform subtraction
-  IAlgorithm_sptr scaleAlg = createChildAlgorithm("Scale", 0.5, 0.6);
+  auto scaleAlg = createChildAlgorithm("Scale", 0.5, 0.6);
   scaleAlg->setProperty("InputWorkspace", scaledDarkWS);
   scaleAlg->setProperty("Factor", scaling_factor);
   scaleAlg->setProperty("OutputWorkspace", scaledDarkWS);
@@ -174,7 +161,7 @@ void EQSANSDarkCurrentSubtraction::exec() {
   scaleAlg->executeAsChildAlg();
   scaledDarkWS = rebinAlg->getProperty("OutputWorkspace");
 
-  IAlgorithm_sptr minusAlg = createChildAlgorithm("Minus", 0.6, 0.7);
+  auto minusAlg = createChildAlgorithm("Minus", 0.6, 0.7);
   minusAlg->setProperty("LHSWorkspace", inputWS);
   minusAlg->setProperty("RHSWorkspace", scaledDarkWS);
   const std::string outputWSname = getPropertyValue("OutputWorkspace");
@@ -188,5 +175,4 @@ void EQSANSDarkCurrentSubtraction::exec() {
   progress.report("Subtracted dark current");
 }
 
-} // namespace WorkflowAlgorithms
-} // namespace Mantid
+} // namespace Mantid::WorkflowAlgorithms

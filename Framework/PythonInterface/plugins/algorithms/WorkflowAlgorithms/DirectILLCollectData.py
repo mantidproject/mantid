@@ -14,10 +14,17 @@ from mantid.kernel import (CompositeValidator, Direct, Direction, FloatBoundedVa
                            IntMandatoryValidator, Property, StringListValidator, UnitConversion)
 from mantid.simpleapi import (AddSampleLog, CalculateFlatBackground, CorrectTOFAxis, CreateEPP,
                               CreateSingleValuedWorkspace, CreateWorkspace, CropWorkspace, DeleteWorkspace, ExtractMonitors,
-                              FindEPP, GetEiMonDet, LoadAndMerge, Minus, NormaliseToMonitor, Scale)
+                              FindEPP, GetEiMonDet, LoadAndMerge, Minus, NormaliseToMonitor, Scale, SetInstrumentParameter)
 import numpy
 
 _MONSUM_LIMIT = 100
+
+
+def _addEfixedInstrumentParameter(ws):
+    """Adds the [calibrated] Ei as Efixed instrument parameter.
+    This is needed for subsequent QENS analysis routines, if one wishes to do in Mantid."""
+    efixed = ws.getRun().getLogData('Ei').value
+    SetInstrumentParameter(Workspace=ws, ParameterName='Efixed', ParameterType='Number', Value=str(efixed))
 
 
 def _applyIncidentEnergyCalibration(ws, eiWS, wsNames, report, algorithmLogging):
@@ -57,22 +64,28 @@ def _calculateEPP(ws, sigma, wsNames, algorithmLogging):
 
 def _calibratedIncidentEnergy(detWorkspace, monWorkspace, monEPPWorkspace, eiCalibrationMon, wsNames, log, algorithmLogging):
     """Return the calibrated incident energy."""
-    instrument = detWorkspace.getInstrument().getName()
+    instrument = detWorkspace.getInstrument()
+    instrument_name = instrument.getName()
     eiWorkspace = None
-    if instrument in ['IN4', 'IN6']:
-        if instrument == 'IN4':
-            run = detWorkspace.run()
-            fermiChopperSpeed = run.getProperty('FC.setpoint_rotation_speed').value
-            backgroundChopperSpeed = run.getProperty('BC1.setpoint_rotation_speed').value
-            if abs(fermiChopperSpeed / 4. - backgroundChopperSpeed) > 10.:
-                log.warning('Fermi speed not four times the background chopper speed. Omitting incident energy calibration.')
-                return None
-            eiCalibrationDets = '0-299'
+    if instrument_name in ['IN4', 'IN6', 'PANTHER']:
+        run = detWorkspace.run()
+        eiCalibrationDets = instrument.getStringParameter('Ei_calibration_detectors')[0]
+        maximumEnergy = 10.
+        timeFrame = None
+        if instrument_name in ['IN4', 'PANTHER']:
             maximumEnergy = 1000.
-        else:
-            # IN6
-            eiCalibrationDets = '0-336'
-            maximumEnergy = 10.
+            # This could be changed in real rotation speed...
+            fermiChopperSpeed = run.getProperty('FC.rotation_speed').value
+            backgroundChopperSpeed = run.getProperty('BC1.rotation_speed').value
+            # timeFrame should be calculated according to BC1 to avoid pb in higher order mode
+            timeFrame = 60.e6 / backgroundChopperSpeed / 8
+            if abs(fermiChopperSpeed / 4. - backgroundChopperSpeed) > 10.:
+                log.warning(
+                    'Fermi speed not four times the background chopper speed. Omitting incident energy calibration.')
+                return None
+        elif instrument_name == 'IN6':
+            suppressorChopperSpeed = run.getProperty('Suppressor.rotation_speed').value
+            timeFrame = 60.e6 / suppressorChopperSpeed / 2
         energy = GetEiMonDet(DetectorWorkspace=detWorkspace,
                              DetectorWorkspaceIndexType='WorkspaceIndex',
                              DetectorWorkspaceIndexSet=eiCalibrationDets,
@@ -80,14 +93,15 @@ def _calibratedIncidentEnergy(detWorkspace, monWorkspace, monEPPWorkspace, eiCal
                              MonitorEPPTable=monEPPWorkspace,
                              MonitorIndex=eiCalibrationMon,
                              MaximumEnergy=maximumEnergy,
-                             EnableLogging=algorithmLogging)
+                             EnableLogging=algorithmLogging,
+                             PulseInterval=timeFrame)
         eiWSName = wsNames.withSuffix('incident_energy')
         eiWorkspace = CreateSingleValuedWorkspace(OutputWorkspace=eiWSName,
                                                   DataValue=energy,
                                                   EnableLogging=algorithmLogging)
         return eiWorkspace
     else:
-        log.error('Instrument ' + instrument + ' not supported for incident energy calibration')
+        log.error('Instrument ' + instrument_name + ' not supported for incident energy calibration')
         return None
 
 
@@ -314,6 +328,9 @@ class DirectILLCollectData(DataProcessorAlgorithm):
         mainWS, monWS = self._calibrateEi(mainWS, monWS, monEPPWS)
         self._cleanup.cleanup(monWS, monEPPWS)
 
+        # Add the Ei as Efixed instrument parameter
+        _addEfixedInstrumentParameter(mainWS)
+
         progress.report('Correcting TOF')
         mainWS = self._correctTOFAxis(mainWS)
         self._outputRaw(mainWS, rawWS)
@@ -459,7 +476,7 @@ class DirectILLCollectData(DataProcessorAlgorithm):
                              doc='Normalisation method.')
         self.setPropertyGroup(common.PROP_NORMALISATION, PROPGROUP_MON_NORMALISATION)
         self.declareProperty(name=common.PROP_MON_PEAK_SIGMA_MULTIPLIER,
-                             defaultValue=3.0,
+                             defaultValue=7.0,
                              validator=positiveFloat,
                              direction=Direction.Input,
                              doc="Width of the monitor peak in multiples " + " of 'Sigma' in monitor's EPP table.")
@@ -727,7 +744,8 @@ class DirectILLCollectData(DataProcessorAlgorithm):
         if inputFiles:
             mergedWSName = self._names.withSuffix('merged')
             mainWS = LoadAndMerge(Filename=inputFiles, OutputWorkspace=mergedWSName,
-                                  LoaderName='LoadILLTOF', LoaderOptions={"ConvertToTOF": True}, EnableLogging=self._subalgLogging)
+                                  LoaderName='LoadILLTOF', LoaderOptions={"ConvertToTOF": True},
+                                  EnableLogging=self._subalgLogging)
         else:
             mainWS = self.getProperty(common.PROP_INPUT_WS).value
             self._cleanup.protect(mainWS)

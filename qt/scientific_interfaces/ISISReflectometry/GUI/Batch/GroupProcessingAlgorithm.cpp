@@ -14,15 +14,14 @@
 #include "BatchJobAlgorithm.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/IAlgorithm.h"
+#include "MantidQtWidgets/Common/AlgorithmRuntimeProps.h"
 #include "MantidQtWidgets/Common/BatchAlgorithmRunner.h"
+#include "MantidQtWidgets/Common/IAlgorithmRuntimeProps.h"
 
-namespace MantidQt {
-namespace CustomInterfaces {
-namespace ISISReflectometry {
+namespace MantidQt::CustomInterfaces::ISISReflectometry {
 
 using API::IConfiguredAlgorithm_sptr;
 using Mantid::API::IAlgorithm_sptr;
-using AlgorithmRuntimeProps = std::map<std::string, std::string>;
 namespace { // unnamed namespace
 
 std::string removePrefix(std::string const &value, std::string const &prefix) {
@@ -33,20 +32,17 @@ std::string removePrefix(std::string const &value, std::string const &prefix) {
   return value.substr(prefix.size());
 }
 
-void updateWorkspaceProperties(AlgorithmRuntimeProps &properties,
-                               Group const &group) {
+void updateWorkspaceProperties(AlgorithmRuntimeProps &properties, Group const &group) {
   // There must be more than workspace to stitch
   if (group.rows().size() < 2)
     throw std::runtime_error("Must have at least two workspaces for stitching");
 
   // Get the list of input workspaces from the output of each row
   auto workspaces = std::vector<std::string>();
-  std::for_each(group.rows().cbegin(), group.rows().cend(),
-                [&workspaces](boost::optional<Row> const &row) -> void {
-                  if (row)
-                    workspaces.emplace_back(
-                        row->reducedWorkspaceNames().iVsQ());
-                });
+  std::for_each(group.rows().cbegin(), group.rows().cend(), [&workspaces](boost::optional<Row> const &row) -> void {
+    if (row)
+      workspaces.emplace_back(row->reducedWorkspaceNames().iVsQ());
+  });
   AlgorithmProperties::update("InputWorkspaces", workspaces, properties);
 
   // The stitched name is the row output names concatenated but without the
@@ -61,15 +57,12 @@ void updateWorkspaceProperties(AlgorithmRuntimeProps &properties,
   AlgorithmProperties::update("OutputWorkspace", outputName, properties);
 }
 
-void updateGroupFromOutputProperties(const IAlgorithm_sptr &algorithm,
-                                     Item &group) {
-  auto const stitched = AlgorithmProperties::getOutputWorkspace(
-      std::move(algorithm), "OutputWorkspace");
+void updateGroupFromOutputProperties(const IAlgorithm_sptr &algorithm, Item &group) {
+  auto const stitched = AlgorithmProperties::getOutputWorkspace(algorithm, "OutputWorkspace");
   group.setOutputNames(std::vector<std::string>{stitched});
 }
 
-void updateParamsFromResolution(AlgorithmRuntimeProps &properties,
-                                boost::optional<double> const &resolution) {
+void updateParamsFromResolution(AlgorithmRuntimeProps &properties, boost::optional<double> const &resolution) {
   if (!resolution.is_initialized())
     return;
 
@@ -77,16 +70,14 @@ void updateParamsFromResolution(AlgorithmRuntimeProps &properties,
   AlgorithmProperties::update("Params", -(resolution.get()), properties);
 }
 
-void updatePerThetaDefaultProperties(AlgorithmRuntimeProps &properties,
-                                     PerThetaDefaults const *perThetaDefaults) {
-  if (!perThetaDefaults)
+void updateLookupRowProperties(AlgorithmRuntimeProps &properties, LookupRow const *lookupRow) {
+  if (!lookupRow)
     return;
 
-  updateParamsFromResolution(properties, perThetaDefaults->qRange().step());
+  updateParamsFromResolution(properties, lookupRow->qRange().step());
 }
 
-void updateGroupProperties(AlgorithmRuntimeProps &properties,
-                           Group const &group) {
+void updateGroupProperties(AlgorithmRuntimeProps &properties, Group const &group) {
   auto resolution = boost::make_optional<double>(false, double());
 
   for (auto const &row : group.rows()) {
@@ -109,9 +100,8 @@ void updateGroupProperties(AlgorithmRuntimeProps &properties,
   updateParamsFromResolution(properties, resolution);
 }
 
-void updateStitchProperties(
-    AlgorithmRuntimeProps &properties,
-    std::map<std::string, std::string> const &stitchParameters) {
+void updateStitchProperties(AlgorithmRuntimeProps &properties,
+                            std::map<std::string, std::string> const &stitchParameters) {
   AlgorithmProperties::updateFromMap(properties, stitchParameters);
 }
 } // unnamed namespace
@@ -121,8 +111,7 @@ void updateStitchProperties(
  * @param model : the reduction configuration model
  * @param group : the row from the runs table
  */
-IConfiguredAlgorithm_sptr createConfiguredAlgorithm(Batch const &model,
-                                                    Group &group) {
+IConfiguredAlgorithm_sptr createConfiguredAlgorithm(Batch const &model, Group &group) {
   // Create the algorithm
   auto alg = Mantid::API::AlgorithmManager::Instance().create("Stitch1DMany");
   alg->setRethrows(true);
@@ -131,24 +120,22 @@ IConfiguredAlgorithm_sptr createConfiguredAlgorithm(Batch const &model,
   auto properties = createAlgorithmRuntimeProps(model, group);
 
   // Return the configured algorithm
-  auto jobAlgorithm = std::make_shared<BatchJobAlgorithm>(
-      alg, properties, updateGroupFromOutputProperties, &group);
+  auto jobAlgorithm = std::make_shared<BatchJobAlgorithm>(std::move(alg), std::move(properties),
+                                                          updateGroupFromOutputProperties, &group);
   return jobAlgorithm;
 }
 
-AlgorithmRuntimeProps createAlgorithmRuntimeProps(Batch const &model,
-                                                  Group const &group) {
-  auto properties = AlgorithmRuntimeProps();
-  updateWorkspaceProperties(properties, group);
-  // Set the rebin Params from the per theta defaults resolution, if given
-  updatePerThetaDefaultProperties(properties, model.wildcardDefaults());
-  // Override the per theta defaults params with the group's rows' resolution,
+std::unique_ptr<MantidQt::API::IAlgorithmRuntimeProps> createAlgorithmRuntimeProps(Batch const &model,
+                                                                                   Group const &group) {
+  auto properties = std::make_unique<MantidQt::API::AlgorithmRuntimeProps>();
+  updateWorkspaceProperties(*properties, group);
+  // Set the rebin Params from the lookup row resolution, if given
+  updateLookupRowProperties(*properties, model.findLookupRow());
+  // Override the lookup row with the group's rows' resolution,
   // if given
-  updateGroupProperties(properties, group);
+  updateGroupProperties(*properties, group);
   // Override the rebin Params from the user-specified stitch params, if given
-  updateStitchProperties(properties, model.experiment().stitchParameters());
+  updateStitchProperties(*properties, model.experiment().stitchParameters());
   return properties;
 }
-} // namespace ISISReflectometry
-} // namespace CustomInterfaces
-} // namespace MantidQt
+} // namespace MantidQt::CustomInterfaces::ISISReflectometry

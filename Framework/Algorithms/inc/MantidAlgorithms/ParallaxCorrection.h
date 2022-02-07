@@ -25,8 +25,7 @@ public:
 private:
   void init() override;
   void exec() override;
-  void performCorrection(const API::MatrixWorkspace_sptr &,
-                         const std::vector<size_t> &, const std::string &,
+  void performCorrection(const API::MatrixWorkspace_sptr &, const std::vector<size_t> &, const std::string &,
                          const std::string &);
 };
 

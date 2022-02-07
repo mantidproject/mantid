@@ -23,14 +23,11 @@ namespace {
 Mantid::Kernel::Logger g_log("RotationSurface");
 } // namespace
 
-namespace MantidQt {
-namespace MantidWidgets {
+namespace MantidQt::MantidWidgets {
 
-RotationSurface::RotationSurface(const InstrumentActor *rootActor,
-                                 const Mantid::Kernel::V3D &origin,
+RotationSurface::RotationSurface(const InstrumentActor *rootActor, const Mantid::Kernel::V3D &origin,
                                  const Mantid::Kernel::V3D &axis)
-    : UnwrappedSurface(rootActor), m_pos(origin), m_zaxis(axis),
-      m_manual_u_correction(false) {}
+    : UnwrappedSurface(rootActor), m_pos(origin), m_zaxis(axis), m_manual_u_correction(false) {}
 
 void RotationSurface::findAxes() {
   // First detector defines the surface's x axis
@@ -79,8 +76,7 @@ std::vector<size_t> RotationSurface::retrieveSurfaceDetectors() const {
         auto layer = layers[renderer.selectedLayer()];
         auto dets = componentInfo.detectorsInSubtree(layer);
         detectors.insert(detectors.end(), dets.begin(), dets.end());
-      } else if (component != root && parentType != ComponentType::Grid &&
-                 grandparentType != ComponentType::Grid) {
+      } else if (component != root && parentType != ComponentType::Grid && grandparentType != ComponentType::Grid) {
         // Add detectors not in any way related to a grid
         auto dets = componentInfo.detectorsInSubtree(component);
         detectors.insert(detectors.end(), dets.begin(), dets.end());
@@ -115,7 +111,7 @@ void RotationSurface::createUnwrappedDetectors() {
   auto detectors = retrieveSurfaceDetectors();
   bool exceptionThrown = false;
   // For each detector in the order of actors
-  // cppcheck-suppress syntaxError
+
   PRAGMA_OMP(parallel for)
   for (int ii = 0; ii < int(detectors.size()); ++ii) {
     if (!exceptionThrown) {
@@ -236,8 +232,7 @@ void RotationSurface::findUVBounds() {
   m_v_min = DBL_MAX;
   m_v_max = -DBL_MAX;
   for (const auto &udet : m_unwrappedDetectors) {
-    if (udet.empty() ||
-        !m_instrActor->componentInfo().hasValidShape(udet.detIndex))
+    if (udet.empty() || !m_instrActor->componentInfo().hasValidShape(udet.detIndex))
       continue;
     if (udet.u < m_u_min)
       m_u_min = udet.u;
@@ -257,20 +252,11 @@ void RotationSurface::findAndCorrectUGap() {
   const int nbins = 1000;
   std::vector<bool> ubins(nbins);
   double bin_width = fabs(m_u_max - m_u_min) / (nbins - 1);
-  if (bin_width == 0.0) {
-    QApplication::setOverrideCursor(QCursor(Qt::ArrowCursor));
-    QMessageBox::warning(
-        nullptr, tr("Mantid - Instrument view warning"),
-        tr("Rotation surface: failed to build unwrapped surface"));
-    QApplication::restoreOverrideCursor();
-    m_u_min = 0.0;
-    m_u_max = 1.0;
+  if (bin_width == 0.0)
     return;
-  }
 
   for (const auto &udet : m_unwrappedDetectors) {
-    if (udet.empty() ||
-        !m_instrActor->componentInfo().hasValidShape(udet.detIndex))
+    if (udet.empty() || !m_instrActor->componentInfo().hasValidShape(udet.detIndex))
       continue;
     double u = udet.u;
     int i = int((u - m_u_min) / bin_width);
@@ -307,8 +293,7 @@ void RotationSurface::findAndCorrectUGap() {
     }
 
     for (auto &udet : m_unwrappedDetectors) {
-      if (udet.empty() ||
-          !m_instrActor->componentInfo().hasValidShape(udet.detIndex))
+      if (udet.empty() || !m_instrActor->componentInfo().hasValidShape(udet.detIndex))
         continue;
       double &u = udet.u;
       u = applyUCorrection(u);
@@ -366,5 +351,4 @@ void RotationSurface::setAutomaticUCorrection() {
   updateViewRectForUCorrection();
 }
 
-} // namespace MantidWidgets
-} // namespace MantidQt
+} // namespace MantidQt::MantidWidgets

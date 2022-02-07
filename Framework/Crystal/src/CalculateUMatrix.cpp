@@ -6,12 +6,12 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidCrystal/CalculateUMatrix.h"
 #include "MantidAPI/Sample.h"
+#include "MantidDataObjects/LeanElasticPeaksWorkspace.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
 #include "MantidKernel/BoundedValidator.h"
 
-namespace Mantid {
-namespace Crystal {
+namespace Mantid::Crystal {
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(CalculateUMatrix)
@@ -24,14 +24,11 @@ using Mantid::Geometry::OrientedLattice;
 /** Initialize the algorithm's properties.
  */
 void CalculateUMatrix::init() {
-  this->declareProperty(std::make_unique<WorkspaceProperty<PeaksWorkspace>>(
-                            "PeaksWorkspace", "", Direction::InOut),
+  this->declareProperty(std::make_unique<WorkspaceProperty<IPeaksWorkspace>>("PeaksWorkspace", "", Direction::InOut),
                         "An input workspace.");
-  std::shared_ptr<BoundedValidator<double>> mustBePositive =
-      std::make_shared<BoundedValidator<double>>();
+  std::shared_ptr<BoundedValidator<double>> mustBePositive = std::make_shared<BoundedValidator<double>>();
   mustBePositive->setLower(0.0);
-  std::shared_ptr<BoundedValidator<double>> reasonable_angle =
-      std::make_shared<BoundedValidator<double>>();
+  std::shared_ptr<BoundedValidator<double>> reasonable_angle = std::make_shared<BoundedValidator<double>>();
   reasonable_angle->setLower(5.0);
   reasonable_angle->setUpper(175.0);
   // put in negative values, so user is forced to input all parameters. no
@@ -39,12 +36,9 @@ void CalculateUMatrix::init() {
   this->declareProperty("a", -1.0, mustBePositive, "Lattice parameter a");
   this->declareProperty("b", -1.0, mustBePositive, "Lattice parameter b");
   this->declareProperty("c", -1.0, mustBePositive, "Lattice parameter c");
-  this->declareProperty("alpha", -1.0, reasonable_angle,
-                        "Lattice parameter alpha");
-  this->declareProperty("beta", -1.0, reasonable_angle,
-                        "Lattice parameter beta");
-  this->declareProperty("gamma", -1.0, reasonable_angle,
-                        "Lattice parameter gamma");
+  this->declareProperty("alpha", -1.0, reasonable_angle, "Lattice parameter alpha");
+  this->declareProperty("beta", -1.0, reasonable_angle, "Lattice parameter beta");
+  this->declareProperty("gamma", -1.0, reasonable_angle, "Lattice parameter gamma");
 }
 
 /** Execute the algorithm.
@@ -59,7 +53,7 @@ void CalculateUMatrix::exec() {
   auto lattice = std::make_unique<OrientedLattice>(a, b, c, alpha, beta, gamma);
   Matrix<double> B = lattice->getB();
 
-  PeaksWorkspace_sptr ws = this->getProperty("PeaksWorkspace");
+  IPeaksWorkspace_sptr ws = this->getProperty("PeaksWorkspace");
   if (!ws)
     throw std::runtime_error("Problems reading the peaks workspace");
 
@@ -68,7 +62,7 @@ void CalculateUMatrix::exec() {
   V3D old(0, 0, 0);
   Matrix<double> Hi(4, 4), Si(4, 4), HS(4, 4), zero(4, 4);
   for (int i = 0; i < ws->getNumberPeaks(); i++) {
-    Peak p = ws->getPeaks()[i];
+    Mantid::Geometry::IPeak &p = ws->getPeak(i);
     double H = p.getH();
     double K = p.getK();
     double L = p.getL();
@@ -131,14 +125,12 @@ void CalculateUMatrix::exec() {
   Matrix<double> Diag;
   HS.Diagonalise(Eval, Diag);
   Eval.sortEigen(Diag);
-  Mantid::Kernel::Quat qR(
-      Eval[0][0], Eval[1][0], Eval[2][0],
-      Eval[3][0]); // the first column corresponds to the highest eigenvalue
+  Mantid::Kernel::Quat qR(Eval[0][0], Eval[1][0], Eval[2][0],
+                          Eval[3][0]); // the first column corresponds to the highest eigenvalue
   DblMatrix U(qR.getRotation());
   lattice->setU(U);
 
   ws->mutableSample().setOrientedLattice(std::move(lattice));
 }
 
-} // namespace Crystal
-} // namespace Mantid
+} // namespace Mantid::Crystal

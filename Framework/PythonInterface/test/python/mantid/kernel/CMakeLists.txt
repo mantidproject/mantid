@@ -22,10 +22,12 @@ set(TEST_PY_FILES
     LogFilterTest.py
     LoggerTest.py
     MandatoryValidatorTest.py
+    MantidVersionTest.py
     MaterialBuilderTest.py
     MemoryStatsTest.py
     NullValidatorTest.py
     OptionalBoolTest.py
+    PhysicalConstantsTest.py
     ProgressBaseTest.py
     PropertyHistoryTest.py
     PropertyWithValueTest.py
@@ -45,7 +47,8 @@ set(TEST_PY_FILES
     UsageServiceTest.py
     V3DTest.py
     VisibleWhenPropertyTest.py
-    VMDTest.py)
+    VMDTest.py
+)
 
 check_tests_valid(${CMAKE_CURRENT_SOURCE_DIR} ${TEST_PY_FILES})
 

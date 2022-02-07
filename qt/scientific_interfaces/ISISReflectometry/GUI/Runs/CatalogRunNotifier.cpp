@@ -6,21 +6,13 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "CatalogRunNotifier.h"
 
-namespace MantidQt {
-namespace CustomInterfaces {
-namespace ISISReflectometry {
+namespace MantidQt::CustomInterfaces::ISISReflectometry {
 
-CatalogRunNotifier::CatalogRunNotifier(IRunsView *view) : m_view(view) {
-  m_view->subscribeTimer(this);
-}
+CatalogRunNotifier::CatalogRunNotifier(IRunsView *view) : m_view(view) { m_view->subscribeTimer(this); }
 
-void CatalogRunNotifier::subscribe(RunNotifierSubscriber *notifyee) {
-  m_notifyee = notifyee;
-}
+void CatalogRunNotifier::subscribe(RunNotifierSubscriber *notifyee) { m_notifyee = notifyee; }
 
-void CatalogRunNotifier::startPolling() {
-  m_view->startTimer(POLLING_INTERVAL_MILLISECONDS);
-}
+void CatalogRunNotifier::startPolling() { m_view->startTimer(POLLING_INTERVAL_MILLISECONDS); }
 
 void CatalogRunNotifier::stopPolling() { m_view->stopTimer(); }
 
@@ -28,6 +20,4 @@ void CatalogRunNotifier::notifyTimerEvent() {
   if (m_notifyee)
     m_notifyee->notifyCheckForNewRuns();
 }
-} // namespace ISISReflectometry
-} // namespace CustomInterfaces
-} // namespace MantidQt
+} // namespace MantidQt::CustomInterfaces::ISISReflectometry

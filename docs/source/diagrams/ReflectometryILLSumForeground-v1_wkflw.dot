@@ -21,7 +21,7 @@ digraph ReflectometryILLSumForeground {
     crop                      [label="CropWorkspace"]
     extract_spectrum          [label="ExtractSingleSpectrum"]
     sum_foreground_q          [label="Sum foreground spectra\nin Q"]
-    sum_foreground_wavelength [label="Sum foreground spectra\nin wavelength"] 
+    sum_foreground_wavelength [label="Sum foreground spectra\nin wavelength"]
     l_rebin                   [label="Rebin reflected to direct"]
     q_rebin                   [label="Rebin reflected to direct"]
     divide_before             [label="Divide"]

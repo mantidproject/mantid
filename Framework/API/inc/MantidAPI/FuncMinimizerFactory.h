@@ -33,8 +33,7 @@ class IFuncMinimizer;
     @date 20/05/2010
 */
 
-class MANTID_API_DLL FuncMinimizerFactoryImpl
-    : public Kernel::DynamicFactory<IFuncMinimizer> {
+class MANTID_API_DLL FuncMinimizerFactoryImpl : public Kernel::DynamicFactory<IFuncMinimizer> {
 public:
   /// Creates an instance of a minimizer
   std::shared_ptr<IFuncMinimizer> createMinimizer(const std::string &str) const;
@@ -45,16 +44,14 @@ private:
   FuncMinimizerFactoryImpl();
 };
 
-using FuncMinimizerFactory =
-    Mantid::Kernel::SingletonHolder<FuncMinimizerFactoryImpl>;
+using FuncMinimizerFactory = Mantid::Kernel::SingletonHolder<FuncMinimizerFactoryImpl>;
 
 } // namespace API
 } // namespace Mantid
 
 namespace Mantid {
 namespace Kernel {
-EXTERN_MANTID_API template class MANTID_API_DLL
-    Mantid::Kernel::SingletonHolder<Mantid::API::FuncMinimizerFactoryImpl>;
+EXTERN_MANTID_API template class MANTID_API_DLL Mantid::Kernel::SingletonHolder<Mantid::API::FuncMinimizerFactoryImpl>;
 }
 } // namespace Mantid
 
@@ -62,10 +59,8 @@ EXTERN_MANTID_API template class MANTID_API_DLL
  * Macro for declaring a new type of minimizers to be used with the
  * FuncMinimizerFactory
  */
-#define DECLARE_FUNCMINIMIZER(classname, username)                             \
-  namespace {                                                                  \
-  Mantid::Kernel::RegistrationHelper register_funcminimizer_##classname(       \
-      ((Mantid::API::FuncMinimizerFactory::Instance().subscribe<classname>(    \
-           #username)),                                                        \
-       0));                                                                    \
+#define DECLARE_FUNCMINIMIZER(classname, username)                                                                     \
+  namespace {                                                                                                          \
+  Mantid::Kernel::RegistrationHelper register_funcminimizer_##classname(                                               \
+      ((Mantid::API::FuncMinimizerFactory::Instance().subscribe<classname>(#username)), 0));                           \
   }

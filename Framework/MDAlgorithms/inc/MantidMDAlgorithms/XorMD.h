@@ -21,14 +21,11 @@ class DLLExport XorMD : public BooleanBinaryOperationMD {
 public:
   const std::string name() const override;
   int version() const override;
-  const std::vector<std::string> seeAlso() const override {
-    return {"AndMD", "OrMD", "NotMD"};
-  }
+  const std::vector<std::string> seeAlso() const override { return {"AndMD", "OrMD", "NotMD"}; }
 
 private:
-  void execHistoHisto(
-      Mantid::DataObjects::MDHistoWorkspace_sptr out,
-      Mantid::DataObjects::MDHistoWorkspace_const_sptr operand) override;
+  void execHistoHisto(Mantid::DataObjects::MDHistoWorkspace_sptr out,
+                      Mantid::DataObjects::MDHistoWorkspace_const_sptr operand) override;
 };
 
 } // namespace MDAlgorithms

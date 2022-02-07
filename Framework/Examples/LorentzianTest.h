@@ -94,15 +94,11 @@ public:
   /// "Muon\\Custom"
   const std::string category() const override { return "C++ User Defined"; }
 
-  virtual const std::string summary() const {
-    return "C++ User defined algorithm.";
-  }
+  virtual const std::string summary() const { return "C++ User defined algorithm."; }
 
 protected:
-  void functionLocal(double *out, const double *xValues,
-                     const size_t nData) const override;
-  void functionDerivLocal(API::Jacobian *out, const double *xValues,
-                          const size_t nData) override;
+  void functionLocal(double *out, const double *xValues, const size_t nData) const override;
+  void functionDerivLocal(API::Jacobian *out, const double *xValues, const size_t nData) override;
   void init() override;
 };
 

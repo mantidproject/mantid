@@ -15,12 +15,10 @@
  * The second operation that this macro performs is to provide the definition
  * of the CatalogID method for the concrete Catalog.
  */
-#define DECLARE_CATALOG(classname)                                             \
-  namespace {                                                                  \
-  Mantid::Kernel::RegistrationHelper                                           \
-      register_alg_##classname(((Mantid::API::CatalogFactory::Instance()       \
-                                     .subscribe<classname>(#classname)),       \
-                                0));                                           \
+#define DECLARE_CATALOG(classname)                                                                                     \
+  namespace {                                                                                                          \
+  Mantid::Kernel::RegistrationHelper                                                                                   \
+      register_alg_##classname(((Mantid::API::CatalogFactory::Instance().subscribe<classname>(#classname)), 0));       \
   }
 
 //----------------------------------------------------------------------
@@ -44,8 +42,7 @@ class ICatalog;
  @author Sofia Antony, ISIS Rutherford Appleton Laboratory
  @date 01/10/2010
 */
-class MANTID_API_DLL CatalogFactoryImpl
-    : public Kernel::DynamicFactory<ICatalog> {
+class MANTID_API_DLL CatalogFactoryImpl : public Kernel::DynamicFactory<ICatalog> {
 public:
   CatalogFactoryImpl(const CatalogFactoryImpl &) = delete;
   CatalogFactoryImpl &operator=(const CatalogFactoryImpl &) = delete;
@@ -70,7 +67,6 @@ using CatalogFactory = Mantid::Kernel::SingletonHolder<CatalogFactoryImpl>;
 
 namespace Mantid {
 namespace Kernel {
-EXTERN_MANTID_API template class MANTID_API_DLL
-    Mantid::Kernel::SingletonHolder<Mantid::API::CatalogFactoryImpl>;
+EXTERN_MANTID_API template class MANTID_API_DLL Mantid::Kernel::SingletonHolder<Mantid::API::CatalogFactoryImpl>;
 }
 } // namespace Mantid

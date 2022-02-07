@@ -16,6 +16,7 @@ from qtpy.QtWidgets import QVBoxLayout
 # local package imports
 from mantid.kernel import logger
 from mantidqt.widgets.codeeditor.multifileinterpreter import MultiPythonFileInterpreter
+from workbench.config import CONF
 from ..config import DEFAULT_SCRIPT_CONTENT
 from ..config.fonts import text_font
 from ..plugins.base import PluginWidget
@@ -28,6 +29,7 @@ ACCEPTED_FILE_EXTENSIONS = ['.py', '.pyw']
 # QSettings key for session tabs
 TAB_SETTINGS_KEY = "Editors/SessionTabs"
 ZOOM_LEVEL_KEY = "Editors/ZoomLevel"
+ENABLE_COMPLETION_KEY = "Editors/completion_enabled"
 
 
 class MultiFileEditor(PluginWidget):
@@ -40,10 +42,14 @@ class MultiFileEditor(PluginWidget):
         if not font:
             font = text_font()
 
+        completion_enabled = True
+        if CONF.has(ENABLE_COMPLETION_KEY):
+            completion_enabled = CONF.get(ENABLE_COMPLETION_KEY)
+
         # layout
         self.editors = MultiPythonFileInterpreter(font=font,
                                                   default_content=DEFAULT_SCRIPT_CONTENT,
-                                                  parent=self)
+                                                  parent=self, completion_enabled=completion_enabled)
         layout = QVBoxLayout()
         layout.addWidget(self.editors)
         layout.setContentsMargins(0, 0, 0, 0)

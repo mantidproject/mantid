@@ -45,17 +45,14 @@ namespace CurveFitting {
 
 class MANTID_CURVEFITTING_DLL HistogramDomainCreator : public IMWDomainCreator {
 public:
-  HistogramDomainCreator(Kernel::IPropertyManager &manager,
-                         const std::string &workspacePropertyName);
+  HistogramDomainCreator(Kernel::IPropertyManager &manager, const std::string &workspacePropertyName);
 
-  void createDomain(std::shared_ptr<API::FunctionDomain> &domain,
-                    std::shared_ptr<API::FunctionValues> &values,
+  void createDomain(std::shared_ptr<API::FunctionDomain> &domain, std::shared_ptr<API::FunctionValues> &values,
                     size_t i0 = 0) override;
-  std::shared_ptr<API::Workspace> createOutputWorkspace(
-      const std::string &baseName, API::IFunction_sptr function,
-      std::shared_ptr<API::FunctionDomain> domain,
-      std::shared_ptr<API::FunctionValues> values,
-      const std::string &outputWorkspacePropertyName) override;
+  std::shared_ptr<API::Workspace> createOutputWorkspace(const std::string &baseName, API::IFunction_sptr function,
+                                                        std::shared_ptr<API::FunctionDomain> domain,
+                                                        std::shared_ptr<API::FunctionValues> values,
+                                                        const std::string &outputWorkspacePropertyName) override;
 };
 
 } // namespace CurveFitting

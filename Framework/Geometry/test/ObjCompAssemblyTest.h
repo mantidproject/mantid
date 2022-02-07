@@ -56,9 +56,7 @@ public:
   void testAddBad() {
     ObjCompAssembly bank("BankName");
     Component det1("Det1Name");
-    TS_ASSERT_THROWS(
-        bank.add(&det1),
-        const Mantid::Kernel::Exception::InstrumentDefinitionError &);
+    TS_ASSERT_THROWS(bank.add(&det1), const Mantid::Kernel::Exception::InstrumentDefinitionError &);
   }
 
   void testAdd() {
@@ -395,7 +393,6 @@ public:
     bank.add(det2);
     bank.add(det3);
 
-    TS_ASSERT_THROWS(std::shared_ptr<IObject> shape = bank.createOutline(),
-                     const std::runtime_error &);
+    TS_ASSERT_THROWS(std::shared_ptr<IObject> shape = bank.createOutline(), const std::runtime_error &);
   }
 };

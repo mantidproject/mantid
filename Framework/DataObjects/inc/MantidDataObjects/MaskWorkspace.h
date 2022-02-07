@@ -15,30 +15,23 @@
 namespace Mantid {
 namespace DataObjects {
 
-class DLLExport MaskWorkspace : public SpecialWorkspace2D,
-                                public API::IMaskWorkspace {
+class DLLExport MaskWorkspace : public SpecialWorkspace2D, public API::IMaskWorkspace {
 public:
   MaskWorkspace() = default;
   MaskWorkspace(std::size_t numvectors);
-  MaskWorkspace(const Mantid::Geometry::Instrument_const_sptr &instrument,
-                const bool includeMonitors = false);
+  MaskWorkspace(const Mantid::Geometry::Instrument_const_sptr &instrument, const bool includeMonitors = false);
   MaskWorkspace(const API::MatrixWorkspace_const_sptr &parent);
 
   /// Returns a clone of the workspace
-  std::unique_ptr<MaskWorkspace> clone() const {
-    return std::unique_ptr<MaskWorkspace>(doClone());
-  }
+  std::unique_ptr<MaskWorkspace> clone() const { return std::unique_ptr<MaskWorkspace>(doClone()); }
   /// Returns a default-initialized clone of the workspace
-  std::unique_ptr<MaskWorkspace> cloneEmpty() const {
-    return std::unique_ptr<MaskWorkspace>(doCloneEmpty());
-  }
+  std::unique_ptr<MaskWorkspace> cloneEmpty() const { return std::unique_ptr<MaskWorkspace>(doCloneEmpty()); }
   MaskWorkspace &operator=(const MaskWorkspace &other) = delete;
   bool isMasked(const detid_t detectorID) const override;
   bool isMasked(const std::set<detid_t> &detectorIDs) const override;
   bool isMaskedIndex(const std::size_t wkspIndex) const;
   void setMasked(const detid_t detectorID, const bool mask = true) override;
-  void setMasked(const std::set<detid_t> &detectorIDs,
-                 const bool mask = true) override;
+  void setMasked(const std::set<detid_t> &detectorIDs, const bool mask = true) override;
   void setMaskedIndex(const std::size_t wkspIndex, const bool mask = true);
   std::size_t getNumberMasked() const override;
   std::set<detid_t> getMaskedDetectors() const;

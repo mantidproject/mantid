@@ -8,8 +8,7 @@
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 
-namespace Mantid {
-namespace API {
+namespace Mantid::API {
 
 /// Clone the current state
 Kernel::IValidator_sptr IncreasingAxisValidator::clone() const {
@@ -22,8 +21,7 @@ Kernel::IValidator_sptr IncreasingAxisValidator::clone() const {
  * @param value The workspace to check
  * @return "" if is valid, otherwise a user level description of a problem
  */
-std::string IncreasingAxisValidator::checkValidity(
-    const MatrixWorkspace_sptr &value) const {
+std::string IncreasingAxisValidator::checkValidity(const MatrixWorkspace_sptr &value) const {
   const Axis *xAxis{nullptr};
   try {
     // 0 for X axis
@@ -34,13 +32,11 @@ std::string IncreasingAxisValidator::checkValidity(
 
   // Left-most axis value should be less than the right-most, if ws has
   // more than one X axis value
-  if (xAxis->length() > 1 &&
-      xAxis->getValue(0) >= xAxis->getValue(xAxis->length() - 1))
+  if (xAxis->length() > 1 && xAxis->getValue(0) >= xAxis->getValue(xAxis->length() - 1))
     return "X axis of the workspace should be increasing from left to "
            "right";
   else
     return "";
 }
 
-} // namespace API
-} // namespace Mantid
+} // namespace Mantid::API

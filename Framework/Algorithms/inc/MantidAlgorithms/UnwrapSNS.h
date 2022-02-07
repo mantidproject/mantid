@@ -46,9 +46,7 @@ public:
 
   int version() const override { return 1; }
 
-  const std::string category() const override {
-    return "CorrectionFunctions\\InstrumentCorrections";
-  }
+  const std::string category() const override { return "CorrectionFunctions\\InstrumentCorrections"; }
 
 private:
   void init() override;
@@ -56,20 +54,18 @@ private:
   void execEvent();
   void runMaskDetectors();
 
-  int unwrapX(const Mantid::HistogramData::HistogramX &,
-              std::vector<double> &dataout, const double &Ld);
+  int unwrapX(const Mantid::HistogramData::HistogramX &, std::vector<double> &dataout, const double &Ld);
   void getTofRangeData(const bool);
   double m_conversionConstant; ///< The constant used in the conversion from TOF
   /// to wavelength
-  API::MatrixWorkspace_const_sptr m_inputWS; ///< Pointer to the input workspace
-  DataObjects::EventWorkspace_const_sptr
-      m_inputEvWS;       ///< Pointer to the input event workspace
-  double m_LRef;         ///< The 'reference' flightpath
-  double m_Tmin;         ///< The start of the time-of-flight frame
-  double m_Tmax;         ///< The end of the time-of-flight frame
-  double m_frameWidth;   ///< The width of the frame cached to speed up things
-  int m_numberOfSpectra; ///< The number of spectra in the workspace
-  int m_XSize;           ///< The size of the X vectors in the input workspace
+  API::MatrixWorkspace_const_sptr m_inputWS;          ///< Pointer to the input workspace
+  DataObjects::EventWorkspace_const_sptr m_inputEvWS; ///< Pointer to the input event workspace
+  double m_LRef;                                      ///< The 'reference' flightpath
+  double m_Tmin;                                      ///< The start of the time-of-flight frame
+  double m_Tmax;                                      ///< The end of the time-of-flight frame
+  double m_frameWidth;                                ///< The width of the frame cached to speed up things
+  int m_numberOfSpectra;                              ///< The number of spectra in the workspace
+  int m_XSize;                                        ///< The size of the X vectors in the input workspace
   /// Progress reporting
   std::unique_ptr<API::Progress> m_progress;
 };

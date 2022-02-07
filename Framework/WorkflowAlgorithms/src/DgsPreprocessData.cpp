@@ -27,43 +27,32 @@ using namespace Mantid::Kernel;
 using namespace Mantid::API;
 using namespace WorkflowAlgorithmHelpers;
 
-namespace Mantid {
-namespace WorkflowAlgorithms {
+namespace Mantid::WorkflowAlgorithms {
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(DgsPreprocessData)
 
 /// Algorithm's name for identification. @see Algorithm::name
-const std::string DgsPreprocessData::name() const {
-  return "DgsPreprocessData";
-}
+const std::string DgsPreprocessData::name() const { return "DgsPreprocessData"; }
 
 /// Algorithm's version for identification. @see Algorithm::version
 int DgsPreprocessData::version() const { return 1; }
 
 /// Algorithm's category for identification. @see Algorithm::category
-const std::string DgsPreprocessData::category() const {
-  return "Workflow\\Inelastic\\UsesPropertyManager";
-}
+const std::string DgsPreprocessData::category() const { return "Workflow\\Inelastic\\UsesPropertyManager"; }
 
 /** Initialize the algorithm's properties.
  */
 void DgsPreprocessData::init() {
-  this->declareProperty(std::make_unique<WorkspaceProperty<>>(
-                            "InputWorkspace", "", Direction::Input),
+  this->declareProperty(std::make_unique<WorkspaceProperty<>>("InputWorkspace", "", Direction::Input),
                         "An input workspace.");
   this->declareProperty(
-      std::make_unique<WorkspaceProperty<>>("InputMonitorWorkspace", "",
-                                            Direction::Input,
-                                            PropertyMode::Optional),
+      std::make_unique<WorkspaceProperty<>>("InputMonitorWorkspace", "", Direction::Input, PropertyMode::Optional),
       "A monitor workspace associated with the input workspace.");
-  this->declareProperty(std::make_unique<WorkspaceProperty<>>(
-                            "OutputWorkspace", "", Direction::Output),
+  this->declareProperty(std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "", Direction::Output),
                         "The name for the output workspace.");
-  this->declareProperty("TofRangeOffset", 0.0,
-                        "An addition to the TOF axis for monitor integration.");
-  this->declareProperty("ReductionProperties", "__dgs_reduction_properties",
-                        Direction::Input);
+  this->declareProperty("TofRangeOffset", 0.0, "An addition to the TOF axis for monitor integration.");
+  this->declareProperty("ReductionProperties", "__dgs_reduction_properties", Direction::Input);
 }
 
 /** Execute the algorithm.
@@ -71,15 +60,12 @@ void DgsPreprocessData::init() {
 void DgsPreprocessData::exec() {
   g_log.notice() << "Starting DgsPreprocessData\n";
   // Get the reduction property manager
-  const std::string reductionManagerName =
-      this->getProperty("ReductionProperties");
+  const std::string reductionManagerName = this->getProperty("ReductionProperties");
   std::shared_ptr<PropertyManager> reductionManager;
   if (PropertyManagerDataService::Instance().doesExist(reductionManagerName)) {
-    reductionManager =
-        PropertyManagerDataService::Instance().retrieve(reductionManagerName);
+    reductionManager = PropertyManagerDataService::Instance().retrieve(reductionManagerName);
   } else {
-    throw std::runtime_error(
-        "DgsPreprocessData cannot run without a reduction PropertyManager.");
+    throw std::runtime_error("DgsPreprocessData cannot run without a reduction PropertyManager.");
   }
 
   // Log name that will indicate if the preprocessing has been done.
@@ -88,8 +74,7 @@ void DgsPreprocessData::exec() {
   MatrixWorkspace_sptr inputWS = this->getProperty("InputWorkspace");
   MatrixWorkspace_sptr outputWS = this->getProperty("OutputWorkspace");
 
-  std::string incidentBeamNorm =
-      reductionManager->getProperty("IncidentBeamNormalisation");
+  std::string incidentBeamNorm = reductionManager->getProperty("IncidentBeamNormalisation");
   g_log.notice() << "Incident beam norm method = " << incidentBeamNorm << '\n';
 
   // Check to see if preprocessing has already been done.
@@ -102,29 +87,25 @@ void DgsPreprocessData::exec() {
       incidentBeamNorm = "ByCurrent";
     }
     const std::string normAlg = "Normalise" + incidentBeamNorm;
-    IAlgorithm_sptr norm = this->createChildAlgorithm(normAlg);
+    auto norm = createChildAlgorithm(normAlg);
     norm->setProperty("InputWorkspace", inputWS);
     norm->setProperty("OutputWorkspace", outputWS);
     if ("ToMonitor" == incidentBeamNorm) {
       // Perform extra setup for monitor normalisation
       double rangeOffset = this->getProperty("TofRangeOffset");
-      double rangeMin = getDblPropOrParam(
-          "MonitorIntRangeLow", reductionManager, "norm-mon1-min", inputWS);
+      double rangeMin = getDblPropOrParam("MonitorIntRangeLow", reductionManager, "norm-mon1-min", inputWS);
       rangeMin += rangeOffset;
 
-      double rangeMax = getDblPropOrParam(
-          "MonitorIntRangeHigh", reductionManager, "norm-mon1-max", inputWS);
+      double rangeMax = getDblPropOrParam("MonitorIntRangeHigh", reductionManager, "norm-mon1-max", inputWS);
       rangeMax += rangeOffset;
 
-      specnum_t monSpec = static_cast<specnum_t>(
-          inputWS->getInstrument()->getNumberParameter("norm-mon1-spec")[0]);
+      specnum_t monSpec = static_cast<specnum_t>(inputWS->getInstrument()->getNumberParameter("norm-mon1-spec")[0]);
       if ("ISIS" == facility) {
         norm->setProperty("MonitorSpectrum", monSpec);
       }
       // Do SNS
       else {
-        MatrixWorkspace_const_sptr monitorWS =
-            this->getProperty("MonitorWorkspace");
+        MatrixWorkspace_const_sptr monitorWS = this->getProperty("MonitorWorkspace");
         if (!monitorWS) {
           throw std::runtime_error("SNS instruments require monitor workspaces "
                                    "for monitor normalisation.");
@@ -141,15 +122,14 @@ void DgsPreprocessData::exec() {
 
     outputWS = norm->getProperty("OutputWorkspace");
 
-    IAlgorithm_sptr addLog = this->createChildAlgorithm("AddSampleLog");
+    auto addLog = createChildAlgorithm("AddSampleLog");
     addLog->setProperty("Workspace", outputWS);
     addLog->setProperty("LogName", doneLog);
     addLog->setProperty("LogText", normAlg);
     addLog->executeAsChildAlg();
   } else {
     if (normAlreadyDone) {
-      g_log.information() << "Preprocessing already done on "
-                          << inputWS->getName() << '\n';
+      g_log.information() << "Preprocessing already done on " << inputWS->getName() << '\n';
     }
     outputWS = inputWS;
   }
@@ -157,5 +137,4 @@ void DgsPreprocessData::exec() {
   this->setProperty("OutputWorkspace", outputWS);
 }
 
-} // namespace WorkflowAlgorithms
-} // namespace Mantid
+} // namespace Mantid::WorkflowAlgorithms

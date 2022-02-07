@@ -53,7 +53,7 @@ class SANSILLIntegrationTest(unittest.TestCase):
         azimuth_axis = mtd['iq'].getAxis(1)
         self.assertTrue(azimuth_axis.isNumeric())
         self.assertEqual(len(azimuth_axis),36)
-        self.assertEqual(azimuth_axis.getUnit().unitID(), "Degrees")
+        self.assertEqual(azimuth_axis.getUnit().unitID(), "Phi")
         for phi in range(36):
             self.assertTrue(mtd['iq'].hasDx(phi))
 
@@ -102,7 +102,7 @@ class SANSILLIntegrationTest(unittest.TestCase):
         # TOF resolution is not yet implemented
         SANSILLIntegration(InputWorkspace='sample', OutputWorkspace='iq')
         self._check_output(mtd['iq'])
-        self.assertEqual(mtd['iq'].blocksize(), 217)
+        self.assertEqual(mtd['iq'].blocksize(), 162)
 
     def _check_output(self, ws, spectra = 1):
         self.assertTrue(ws)

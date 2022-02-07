@@ -19,17 +19,17 @@ data is then used to compute the scaling factor according to
 
 where :math:`N_b` is the total count within the distance of a beam diameter of the beam center.
 
-:math:`M` is the monitor count. 
+:math:`M` is the monitor count.
 
-:math:`T` is the attenuator transmission. 
+:math:`T` is the attenuator transmission.
 
-:math:`d` is the detector pixel width. 
+:math:`d` is the detector pixel width.
 
-:math:`L` is the sample-detector distance. 
+:math:`L` is the sample-detector distance.
 
 The input workspace is then scaled by :math:`1/f`.
 
-This algorithm is rarely called directly. It is called by 
+This algorithm is rarely called directly. It is called by
 :ref:`HFIRSANSReduction <algm-HFIRSANSReduction>`.
 
 .. categories::

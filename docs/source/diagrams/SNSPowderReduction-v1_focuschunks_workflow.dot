@@ -60,7 +60,7 @@ digraph FocusChunks {
   plusAmongChunks	-> allChunksProcessed
 
   allChunksProcessed	-> getChunk  [label="No"]
- 
+
   allChunksProcessed	-> haveMPI [label="Yes"]
 
   haveMPI	      -> gatherWorkspace [label="Yes"]

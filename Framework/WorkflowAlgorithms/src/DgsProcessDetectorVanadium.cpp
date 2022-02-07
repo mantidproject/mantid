@@ -18,25 +18,20 @@ using namespace Mantid::Kernel;
 using namespace Mantid::API;
 using namespace WorkflowAlgorithmHelpers;
 
-namespace Mantid {
-namespace WorkflowAlgorithms {
+namespace Mantid::WorkflowAlgorithms {
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(DgsProcessDetectorVanadium)
 
 //----------------------------------------------------------------------------------------------
 /// Algorithm's name for identification. @see Algorithm::name
-const std::string DgsProcessDetectorVanadium::name() const {
-  return "DgsProcessDetectorVanadium";
-}
+const std::string DgsProcessDetectorVanadium::name() const { return "DgsProcessDetectorVanadium"; }
 
 /// Algorithm's version for identification. @see Algorithm::version
 int DgsProcessDetectorVanadium::version() const { return 1; }
 
 /// Algorithm's category for identification. @see Algorithm::category
-const std::string DgsProcessDetectorVanadium::category() const {
-  return "Workflow\\Inelastic\\UsesPropertyManager";
-}
+const std::string DgsProcessDetectorVanadium::category() const { return "Workflow\\Inelastic\\UsesPropertyManager"; }
 
 //----------------------------------------------------------------------------------------------
 
@@ -46,24 +41,17 @@ const std::string DgsProcessDetectorVanadium::category() const {
 void DgsProcessDetectorVanadium::init() {
   // auto wsValidator = std::make_shared<CompositeValidator>();
   // wsValidator->add<WorkspaceUnitValidator>("TOF");
+  this->declareProperty(std::make_unique<WorkspaceProperty<>>("InputWorkspace", "", Direction::Input),
+                        "An input workspace containing the detector vanadium data in TOF units.");
   this->declareProperty(
-      std::make_unique<WorkspaceProperty<>>("InputWorkspace", "",
-                                            Direction::Input),
-      "An input workspace containing the detector vanadium data in TOF units.");
-  this->declareProperty(
-      std::make_unique<WorkspaceProperty<>>("InputMonitorWorkspace", "",
-                                            Direction::Input,
-                                            PropertyMode::Optional),
+      std::make_unique<WorkspaceProperty<>>("InputMonitorWorkspace", "", Direction::Input, PropertyMode::Optional),
       "A monitor workspace associated with the input workspace.");
   this->declareProperty(
-      std::make_unique<WorkspaceProperty<>>(
-          "MaskWorkspace", "", Direction::Input, PropertyMode::Optional),
+      std::make_unique<WorkspaceProperty<>>("MaskWorkspace", "", Direction::Input, PropertyMode::Optional),
       "A mask workspace");
-  this->declareProperty(std::make_unique<WorkspaceProperty<>>(
-                            "OutputWorkspace", "", Direction::Output),
+  this->declareProperty(std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "", Direction::Output),
                         "The name for the output workspace.");
-  this->declareProperty("ReductionProperties", "__dgs_reduction_properties",
-                        Direction::Output);
+  this->declareProperty("ReductionProperties", "__dgs_reduction_properties", Direction::Output);
 }
 
 //----------------------------------------------------------------------------------------------
@@ -72,12 +60,10 @@ void DgsProcessDetectorVanadium::init() {
 void DgsProcessDetectorVanadium::exec() {
   g_log.notice() << "Starting DgsProcessDetectorVanadium\n";
   // Get the reduction property manager
-  const std::string reductionManagerName =
-      this->getProperty("ReductionProperties");
+  const std::string reductionManagerName = this->getProperty("ReductionProperties");
   std::shared_ptr<PropertyManager> reductionManager;
   if (PropertyManagerDataService::Instance().doesExist(reductionManagerName)) {
-    reductionManager =
-        PropertyManagerDataService::Instance().retrieve(reductionManagerName);
+    reductionManager = PropertyManagerDataService::Instance().retrieve(reductionManagerName);
   } else {
     throw std::runtime_error("DgsProcessDetectorVanadium cannot run without a "
                              "reduction PropertyManager.");
@@ -88,7 +74,7 @@ void DgsProcessDetectorVanadium::exec() {
   MatrixWorkspace_sptr monWS = this->getProperty("InputMonitorWorkspace");
 
   // Normalise result workspace to incident beam parameter
-  IAlgorithm_sptr norm = this->createChildAlgorithm("DgsPreprocessData");
+  auto norm = createChildAlgorithm("DgsPreprocessData");
   norm->setProperty("InputWorkspace", inputWS);
   norm->setProperty("OutputWorkspace", inputWS);
   norm->setProperty("InputMonitorWorkspace", monWS);
@@ -96,18 +82,15 @@ void DgsProcessDetectorVanadium::exec() {
   inputWS.reset();
   inputWS = norm->getProperty("OutputWorkspace");
 
-  double detVanIntRangeLow = getDblPropOrParam(
-      "DetVanIntRangeLow", reductionManager, "wb-integr-min", inputWS);
+  double detVanIntRangeLow = getDblPropOrParam("DetVanIntRangeLow", reductionManager, "wb-integr-min", inputWS);
 
-  double detVanIntRangeHigh = getDblPropOrParam(
-      "DetVanIntRangeHigh", reductionManager, "wb-integr-max", inputWS);
+  double detVanIntRangeHigh = getDblPropOrParam("DetVanIntRangeHigh", reductionManager, "wb-integr-max", inputWS);
 
-  const std::string detVanIntRangeUnits =
-      reductionManager->getProperty("DetVanIntRangeUnits");
+  const std::string detVanIntRangeUnits = reductionManager->getProperty("DetVanIntRangeUnits");
 
   if ("TOF" != detVanIntRangeUnits) {
     // Convert the data to the appropriate units
-    IAlgorithm_sptr cnvun = this->createChildAlgorithm("ConvertUnits");
+    auto cnvun = createChildAlgorithm("ConvertUnits");
     cnvun->setProperty("InputWorkspace", inputWS);
     cnvun->setProperty("OutputWorkspace", inputWS);
     cnvun->setProperty("Target", detVanIntRangeUnits);
@@ -117,11 +100,9 @@ void DgsProcessDetectorVanadium::exec() {
   }
 
   // Rebin the data (not Integration !?!?!?)
-  std::vector<double> binning{detVanIntRangeLow,
-                              detVanIntRangeHigh - detVanIntRangeLow,
-                              detVanIntRangeHigh};
+  std::vector<double> binning{detVanIntRangeLow, detVanIntRangeHigh - detVanIntRangeLow, detVanIntRangeHigh};
 
-  IAlgorithm_sptr rebin = this->createChildAlgorithm("Rebin");
+  auto rebin = createChildAlgorithm("Rebin");
   rebin->setProperty("InputWorkspace", inputWS);
   rebin->setProperty("OutputWorkspace", outputWS);
   rebin->setProperty("PreserveEvents", false);
@@ -133,7 +114,7 @@ void DgsProcessDetectorVanadium::exec() {
   MatrixWorkspace_sptr maskWS = this->getProperty("MaskWorkspace");
   //!!! I see masks here but where is the map workspace used for vanadium
   // grouping (In ISIS)?
-  IAlgorithm_sptr remap = this->createChildAlgorithm("DgsRemap");
+  auto remap = createChildAlgorithm("DgsRemap");
   remap->setProperty("InputWorkspace", outputWS);
   remap->setProperty("OutputWorkspace", outputWS);
   remap->setProperty("MaskWorkspace", maskWS);
@@ -143,8 +124,7 @@ void DgsProcessDetectorVanadium::exec() {
   const std::string facility = ConfigService::Instance().getFacility().name();
   if ("ISIS" == facility) {
     // Scale results by a constant
-    double wbScaleFactor =
-        inputWS->getInstrument()->getNumberParameter("wb-scale-factor")[0];
+    double wbScaleFactor = inputWS->getInstrument()->getNumberParameter("wb-scale-factor")[0];
     outputWS *= wbScaleFactor;
   }
 
@@ -153,8 +133,7 @@ void DgsProcessDetectorVanadium::exec() {
     if (saveProc) {
       std::string outputFile;
       if (reductionManager->existsProperty("SaveProcDetVanFilename")) {
-        outputFile =
-            reductionManager->getPropertyValue("SaveProcDetVanFilename");
+        outputFile = reductionManager->getPropertyValue("SaveProcDetVanFilename");
       }
       if (outputFile.empty()) {
         outputFile = this->getPropertyValue("OutputWorkspace");
@@ -162,10 +141,9 @@ void DgsProcessDetectorVanadium::exec() {
       }
 
       // Don't save private calculation workspaces
-      if (!outputFile.empty() &&
-          !boost::starts_with(outputFile, "ChildAlgOutput") &&
+      if (!outputFile.empty() && !boost::starts_with(outputFile, "ChildAlgOutput") &&
           !boost::starts_with(outputFile, "__")) {
-        IAlgorithm_sptr save = this->createChildAlgorithm("SaveNexus");
+        auto save = createChildAlgorithm("SaveNexus");
         save->setProperty("InputWorkspace", outputWS);
         save->setProperty("FileName", outputFile);
         save->execute();
@@ -176,5 +154,4 @@ void DgsProcessDetectorVanadium::exec() {
   this->setProperty("OutputWorkspace", outputWS);
 }
 
-} // namespace WorkflowAlgorithms
-} // namespace Mantid
+} // namespace Mantid::WorkflowAlgorithms

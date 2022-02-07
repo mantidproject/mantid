@@ -18,20 +18,17 @@
 
 using namespace Mantid::Kernel;
 
-namespace Mantid {
-namespace Kernel {
+namespace Mantid::Kernel {
 /** Constructor
  * @param otherPropName :: Name of the OTHER property that we will check.
  * @param when :: Criterion to evaluate
  * @param value :: For the IS_EQUAL_TO or IS_NOT_EQUAL_TO condition, the value
  * (as string) to check for
  */
-EnabledWhenProperty::EnabledWhenProperty(const std::string &otherPropName,
-                                         const ePropertyCriterion when,
+EnabledWhenProperty::EnabledWhenProperty(const std::string &otherPropName, const ePropertyCriterion when,
                                          const std::string &value)
     : IPropertySettings() {
-  m_propertyDetails = std::make_shared<PropertyDetails>(
-      PropertyDetails{otherPropName, when, value});
+  m_propertyDetails = std::make_shared<PropertyDetails>(PropertyDetails{otherPropName, when, value});
 }
 
 /** Multiple conditions constructor - takes two enable when property
@@ -43,15 +40,13 @@ EnabledWhenProperty::EnabledWhenProperty(const std::string &otherPropName,
  * @param logicOperator :: The logic operator to apply across both
  * conditions
  */
-EnabledWhenProperty::EnabledWhenProperty(
-    const EnabledWhenProperty &conditionOne,
-    const EnabledWhenProperty &conditionTwo, eLogicOperator logicOperator)
+EnabledWhenProperty::EnabledWhenProperty(const EnabledWhenProperty &conditionOne,
+                                         const EnabledWhenProperty &conditionTwo, eLogicOperator logicOperator)
     : // This method allows the Python interface to easily construct these
       // objects
       // Copy the object then forward onto our move constructor
       EnabledWhenProperty(std::make_shared<EnabledWhenProperty>(conditionOne),
-                          std::make_shared<EnabledWhenProperty>(conditionTwo),
-                          logicOperator) {}
+                          std::make_shared<EnabledWhenProperty>(conditionTwo), logicOperator) {}
 
 /** Multiple conditions constructor - takes two shared pointers to
  * EnabledWhenProperty objects and returns the product of them
@@ -63,21 +58,17 @@ EnabledWhenProperty::EnabledWhenProperty(
  *conditions
  *
  */
-EnabledWhenProperty::EnabledWhenProperty(
-    std::shared_ptr<EnabledWhenProperty> &&conditionOne,
-    std::shared_ptr<EnabledWhenProperty> &&conditionTwo,
-    eLogicOperator logicOperator)
+EnabledWhenProperty::EnabledWhenProperty(std::shared_ptr<EnabledWhenProperty> &&conditionOne,
+                                         std::shared_ptr<EnabledWhenProperty> &&conditionTwo,
+                                         eLogicOperator logicOperator)
     : IPropertySettings() {
   // Initialise with POD compatible syntax
-  m_comparisonDetails =
-      std::make_shared<ComparisonDetails<EnabledWhenProperty>>(
-          ComparisonDetails<EnabledWhenProperty>{
-              std::move(conditionOne), std::move(conditionTwo), logicOperator});
+  m_comparisonDetails = std::make_shared<ComparisonDetails<EnabledWhenProperty>>(
+      ComparisonDetails<EnabledWhenProperty>{std::move(conditionOne), std::move(conditionTwo), logicOperator});
 }
 
 EnabledWhenProperty::EnabledWhenProperty(const EnabledWhenProperty &other)
-    : IPropertySettings(), m_propertyDetails{other.m_propertyDetails},
-      m_comparisonDetails{other.m_comparisonDetails} {}
+    : IPropertySettings(), m_propertyDetails{other.m_propertyDetails}, m_comparisonDetails{other.m_comparisonDetails} {}
 
 /**
  * Checks if the user specified combination of enabled criterion
@@ -155,12 +146,10 @@ bool EnabledWhenProperty::checkCriterion(const IPropertyManager *algo) const {
  * @return :: The value contained by said property
  * @throw :: Throws if anything is wrong with the property or algorithm
  */
-std::string
-EnabledWhenProperty::getPropertyValue(const IPropertyManager *algo) const {
+std::string EnabledWhenProperty::getPropertyValue(const IPropertyManager *algo) const {
   // Find the property
   if (algo == nullptr)
-    throw std::runtime_error(
-        "Algorithm properties passed to EnabledWhenProperty was null");
+    throw std::runtime_error("Algorithm properties passed to EnabledWhenProperty was null");
 
   Property *prop = nullptr;
   try {
@@ -169,8 +158,7 @@ EnabledWhenProperty::getPropertyValue(const IPropertyManager *algo) const {
     prop = nullptr; // Ensure we still have null pointer
   }
   if (!prop)
-    throw std::runtime_error("Property " + m_propertyDetails->otherPropName +
-                             " was not found in EnabledWhenProperty");
+    throw std::runtime_error("Property " + m_propertyDetails->otherPropName + " was not found in EnabledWhenProperty");
   return prop->value();
 }
 
@@ -216,9 +204,6 @@ void EnabledWhenProperty::modify_allowed_values(Property *const /*unused*/) {}
  *
  * @return Pointer to cloned EnabledWhenProperty object
  */
-IPropertySettings *EnabledWhenProperty::clone() const {
-  return new EnabledWhenProperty(*this);
-}
+IPropertySettings *EnabledWhenProperty::clone() const { return new EnabledWhenProperty(*this); }
 
-} // namespace Kernel
-} // namespace Mantid
+} // namespace Mantid::Kernel

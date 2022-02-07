@@ -14,8 +14,7 @@ using namespace Mantid::Geometry;
 
 class ReflectionConditionTest : public CxxTest::TestSuite {
 public:
-  void checkRC(ReflectionCondition &rc, int *h, int *k, int *l, int *valid,
-               size_t count) {
+  void checkRC(ReflectionCondition &rc, int *h, int *k, int *l, int *valid, size_t count) {
     for (size_t i = 0; i < count; i++) {
       bool v = rc.isAllowed(h[i], k[i], l[i]);
       TS_ASSERT_EQUALS((valid[i] == 1), v)
@@ -62,9 +61,7 @@ public:
 
     const auto &refs = getAllReflectionConditions();
     for (auto &ref : refs) {
-      TSM_ASSERT_DIFFERS(ref->getSymbol(),
-                         centeringSymbols.find(ref->getSymbol()),
-                         centeringSymbols.end())
+      TSM_ASSERT_DIFFERS(ref->getSymbol(), centeringSymbols.find(ref->getSymbol()), centeringSymbols.end())
       centeringSymbols.erase(ref->getSymbol());
     }
 
@@ -100,23 +97,19 @@ public:
     auto names = getAllReflectionConditionNames();
 
     for (auto name : names) {
-      TSM_ASSERT_THROWS_NOTHING("Problem with ReflectionCondition: " + name,
-                                getReflectionConditionByName(name))
+      TSM_ASSERT_THROWS_NOTHING("Problem with ReflectionCondition: " + name, getReflectionConditionByName(name))
     }
 
-    TS_ASSERT_THROWS(getReflectionConditionByName("invalid"),
-                     const std::invalid_argument &)
+    TS_ASSERT_THROWS(getReflectionConditionByName("invalid"), const std::invalid_argument &)
   }
 
   void test_getReflectionConditionBySymbol() {
     auto symbols = getAllReflectionConditionSymbols();
 
     for (auto symbol : symbols) {
-      TSM_ASSERT_THROWS_NOTHING("Problem with ReflectionCondition: " + symbol,
-                                getReflectionConditionBySymbol(symbol))
+      TSM_ASSERT_THROWS_NOTHING("Problem with ReflectionCondition: " + symbol, getReflectionConditionBySymbol(symbol))
     }
 
-    TS_ASSERT_THROWS(getReflectionConditionBySymbol("Q"),
-                     const std::invalid_argument &)
+    TS_ASSERT_THROWS(getReflectionConditionBySymbol("Q"), const std::invalid_argument &)
   }
 };

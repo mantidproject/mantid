@@ -15,8 +15,7 @@
 using std::size_t;
 using namespace Mantid::API;
 
-namespace Mantid {
-namespace DataObjects {
+namespace Mantid::DataObjects {
 // Register the workspace
 DECLARE_WORKSPACE(GroupingWorkspace)
 
@@ -25,9 +24,7 @@ DECLARE_WORKSPACE(GroupingWorkspace)
  * workspace
  * @return created GroupingWorkspace
  */
-GroupingWorkspace::GroupingWorkspace(size_t numvectors) {
-  this->init(numvectors, 1, 1);
-}
+GroupingWorkspace::GroupingWorkspace(size_t numvectors) { this->init(numvectors, 1, 1); }
 
 //----------------------------------------------------------------------------------------------
 /** Constructor, building from an instrument
@@ -35,9 +32,7 @@ GroupingWorkspace::GroupingWorkspace(size_t numvectors) {
  * @param inst :: input instrument that is the base for this workspace
  * @return created GroupingWorkspace
  */
-GroupingWorkspace::GroupingWorkspace(
-    const Geometry::Instrument_const_sptr &inst)
-    : SpecialWorkspace2D(std::move(inst)) {}
+GroupingWorkspace::GroupingWorkspace(const Geometry::Instrument_const_sptr &inst) : SpecialWorkspace2D(inst) {}
 
 //----------------------------------------------------------------------------------------------
 /** Fill a map with key = detector ID, value = group number
@@ -48,8 +43,7 @@ GroupingWorkspace::GroupingWorkspace(
  * @param[out] ngroups :: the number of groups found (equal to the largest group
  *number found)
  */
-void GroupingWorkspace::makeDetectorIDToGroupMap(
-    std::map<detid_t, int> &detIDToGroup, int64_t &ngroups) const {
+void GroupingWorkspace::makeDetectorIDToGroupMap(std::map<detid_t, int> &detIDToGroup, int64_t &ngroups) const {
   ngroups = 0;
   for (size_t wi = 0; wi < getNumberHistograms(); ++wi) {
     // Convert the Y value to a group number
@@ -74,8 +68,7 @@ void GroupingWorkspace::makeDetectorIDToGroupMap(
  * @param[out] ngroups :: the number of groups found (equal to the largest group
  *number found)
  */
-void GroupingWorkspace::makeDetectorIDToGroupVector(
-    std::vector<int> &detIDToGroup, int64_t &ngroups) const {
+void GroupingWorkspace::makeDetectorIDToGroupVector(std::vector<int> &detIDToGroup, int64_t &ngroups) const {
   ngroups = 0;
   for (size_t wi = 0; wi < getNumberHistograms(); ++wi) {
     // Convert the Y value to a group number
@@ -96,49 +89,40 @@ void GroupingWorkspace::makeDetectorIDToGroupVector(
   }
 }
 
-} // namespace DataObjects
-} // namespace Mantid
+} // namespace Mantid::DataObjects
 
 ///\cond TEMPLATE
 
-namespace Mantid {
-namespace Kernel {
+namespace Mantid::Kernel {
 
 template <>
 DLLExport Mantid::DataObjects::GroupingWorkspace_sptr
-IPropertyManager::getValue<Mantid::DataObjects::GroupingWorkspace_sptr>(
-    const std::string &name) const {
-  auto *prop = dynamic_cast<
-      PropertyWithValue<Mantid::DataObjects::GroupingWorkspace_sptr> *>(
-      getPointerToProperty(name));
+IPropertyManager::getValue<Mantid::DataObjects::GroupingWorkspace_sptr>(const std::string &name) const {
+  auto *prop =
+      dynamic_cast<PropertyWithValue<Mantid::DataObjects::GroupingWorkspace_sptr> *>(getPointerToProperty(name));
   if (prop) {
     return *prop;
   } else {
     std::string message =
-        "Attempt to assign property " + name +
-        " to incorrect type. Expected shared_ptr<GroupingWorkspace>.";
+        "Attempt to assign property " + name + " to incorrect type. Expected shared_ptr<GroupingWorkspace>.";
     throw std::runtime_error(message);
   }
 }
 
 template <>
 DLLExport Mantid::DataObjects::GroupingWorkspace_const_sptr
-IPropertyManager::getValue<Mantid::DataObjects::GroupingWorkspace_const_sptr>(
-    const std::string &name) const {
-  auto *prop = dynamic_cast<
-      PropertyWithValue<Mantid::DataObjects::GroupingWorkspace_sptr> *>(
-      getPointerToProperty(name));
+IPropertyManager::getValue<Mantid::DataObjects::GroupingWorkspace_const_sptr>(const std::string &name) const {
+  auto *prop =
+      dynamic_cast<PropertyWithValue<Mantid::DataObjects::GroupingWorkspace_sptr> *>(getPointerToProperty(name));
   if (prop) {
     return prop->operator()();
   } else {
     std::string message =
-        "Attempt to assign property " + name +
-        " to incorrect type. Expected const shared_ptr<GroupingWorkspace>.";
+        "Attempt to assign property " + name + " to incorrect type. Expected const shared_ptr<GroupingWorkspace>.";
     throw std::runtime_error(message);
   }
 }
 
-} // namespace Kernel
-} // namespace Mantid
+} // namespace Mantid::Kernel
 
 ///\endcond TEMPLATE

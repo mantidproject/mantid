@@ -7,8 +7,7 @@
 #include "MantidAPI/HistogramValidator.h"
 #include "MantidAPI/MatrixWorkspace.h"
 
-namespace Mantid {
-namespace API {
+namespace Mantid::API {
 
 /** Constructor
  *
@@ -20,17 +19,14 @@ HistogramValidator::HistogramValidator(const bool &mustBeHistogram)
     : MatrixWorkspaceValidator(), m_mustBeHistogram(mustBeHistogram) {}
 
 /// Clone the current state
-Kernel::IValidator_sptr HistogramValidator::clone() const {
-  return std::make_shared<HistogramValidator>(*this);
-}
+Kernel::IValidator_sptr HistogramValidator::clone() const { return std::make_shared<HistogramValidator>(*this); }
 
 /** Checks if the workspace contains a histogram when it shouldn't and
  * vice-versa
  *  @param value :: The workspace to test
  *  @return A user level description if a problem exists or ""
  */
-std::string
-HistogramValidator::checkValidity(const MatrixWorkspace_sptr &value) const {
+std::string HistogramValidator::checkValidity(const MatrixWorkspace_sptr &value) const {
   if (m_mustBeHistogram) {
     if (value->isHistogramData())
       return "";
@@ -44,5 +40,4 @@ HistogramValidator::checkValidity(const MatrixWorkspace_sptr &value) const {
   }
 }
 
-} // namespace API
-} // namespace Mantid
+} // namespace Mantid::API

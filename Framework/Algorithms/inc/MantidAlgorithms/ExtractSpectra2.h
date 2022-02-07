@@ -29,8 +29,7 @@ public:
 private:
   void init() override;
   void exec() override;
-  template <class T>
-  void exec(const T &inputWS, const Indexing::SpectrumIndexSet &indexSet);
+  template <class T> void exec(const T &inputWS, const Indexing::SpectrumIndexSet &indexSet);
 };
 
 } // namespace Algorithms

@@ -25,8 +25,7 @@ public:
   void testConstructor() {
     LineIntersectVisit A(V3D(-1.0, -1.0, -1.0), V3D(1.0, 0.0, 0.0));
     TS_ASSERT_EQUALS(A.getNPoints(), 0);
-    TS_ASSERT_EQUALS(A.getPoints(), std::vector<Kernel::V3D>());
-    TS_ASSERT_EQUALS(A.getDistance(), std::vector<double>());
+    TS_ASSERT_EQUALS(A.getDistance(), LineIntersectVisit::DistancesType());
   }
 
   void testAcceptPlane() {
@@ -35,10 +34,12 @@ public:
     B.setPlane(V3D(0.0, 0.0, 0.0), V3D(1.0, 0.0, 0.0));
     TS_ASSERT_EQUALS(extractString(B), "-1 px 0\n");
     A.Accept(B);
+    A.sortAndRemoveDuplicates();
     TS_ASSERT_EQUALS(A.getNPoints(), 1);
-    std::vector<Kernel::V3D> Pnts{{0.0, -1.0, -1.0}};
+    Line::PType Pnts{{0.0, -1.0, -1.0}};
     TS_ASSERT_EQUALS(A.getPoints(), Pnts);
-    std::vector<double> Dist{1.0};
+    LineIntersectVisit::DistancesType Dist{1.0};
+
     TS_ASSERT_EQUALS(A.getDistance(), Dist);
   }
 
@@ -48,13 +49,14 @@ public:
     Sphere B;
     B.setSurface("s 0.0 0.0 0.0 2");
     A.Accept(B);
+    A.sortAndRemoveDuplicates();
 
     // changed for forward going only intercepts on quadratice surfaces
     // pntOut.emplace_back(-2.0,0.0,0.0);
-    std::vector<V3D> pntOut{{2.0, 0.0, 0.0}};
+    Line::PType pntOut{{2.0, 0.0, 0.0}};
     TS_ASSERT_EQUALS(A.getNPoints(), 1);
     TS_ASSERT_EQUALS(A.getPoints(), pntOut);
-    std::vector<double> Dist;
+    LineIntersectVisit::DistancesType Dist;
     Dist.emplace_back(2.0);
     TS_ASSERT_EQUALS(A.getDistance(), Dist);
   }
@@ -67,6 +69,7 @@ public:
     TS_ASSERT_EQUALS(B.getCentre(), V3D(0.0, 1.0, 0.0));
 
     A.Accept(B);
+    A.sortAndRemoveDuplicates();
     // change for forward only intercept
     TS_ASSERT_EQUALS(A.getNPoints(), 1);
     const auto &pntOut = A.getPoints();
@@ -88,13 +91,14 @@ public:
     TS_ASSERT_EQUALS(B.getNormal(), V3D(0, 1, 0));
 
     A.Accept(B);
+    A.sortAndRemoveDuplicates();
 
     // forward only
     // pntOut.emplace_back(-1.0,0.0,0.0);
-    std::vector<V3D> pntOut{{1.0, 0.0, 0.0}};
+    Line::PType pntOut{{1.0, 0.0, 0.0}};
     TS_ASSERT_EQUALS(A.getNPoints(), 1);
     TS_ASSERT_EQUALS(A.getPoints(), pntOut);
-    std::vector<double> Dist;
+    LineIntersectVisit::DistancesType Dist;
     // Dist.emplace_back(1.0);
     Dist.emplace_back(1.0);
     TS_ASSERT_EQUALS(A.getDistance(), Dist);
@@ -102,7 +106,7 @@ public:
     LineIntersectVisit C(V3D(1.1, 0.0, 0.0), V3D(-1.0, 0.0, 0.0));
     C.Accept(B);
     TS_ASSERT_EQUALS(C.getNPoints(), 2);
-    std::vector<V3D> pntOut2{{-1.0, 0.0, 0.0}, {1.0, 0.0, 0.0}};
+    Line::PType pntOut2{{-1.0, 0.0, 0.0}, {1.0, 0.0, 0.0}};
     TS_ASSERT_EQUALS(C.getPoints(), pntOut2);
   }
 

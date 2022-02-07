@@ -58,7 +58,7 @@ The number density is defined as
 
 .. math:: \rho_n = \frac{N_{atoms}ZParameter}{UnitCellVolume}
 
-It can can be generated in one of three ways:
+It can can be generated in one of several ways:
 
 1. Specifying it directly with ``SampleNumberDensity``.
 2. Specifying the ``ZParameter`` and the ``UnitCellVolume`` (or letting
@@ -66,9 +66,18 @@ It can can be generated in one of three ways:
    ``InputWorkspace``).
 3. Specifying the mass density. In this case the number density is calculated as
 
-.. math:: \rho_n = \frac{N_{atoms} \rho_m N_A}{M_r}
+.. math:: \rho_{n,eff} = f \rho_n = \frac{N_{atoms} \rho_m N_A}{\sum_{i}n_{i}M_i}
 
-where :math:`\rho_m` is the mass density, :math:`N_A` is the Avogadro constant, and :math:`M_r` the relative molecular mass.
+where :math:`f` is the packing fraction, :math:`\rho_m` is the mass density, :math:`N_A` is the Avogadro constant, and :math:`M_i` is the relative molecular mass of the ith atom.
+
+4. Specifying ``SampleEffectiveNumberDensity`` and ``SamplePackingFraction`` to calculate it from the equation above.
+5. Specifying only ``SampleEffectiveNumberDensity`` (in this case, the packing fraction is assumed to be 1).
+6. A combination of ``SampleEffectiveNumberDensity`` or ``SamplePackingFraction`` with the parameters from method 2 or 3.
+
+The effective number density, :math:`\rho_{n,eff}`, should be used for :ref:`absorption calculations<Sample Corrections>`.
+However, the number density, :math:`\rho_n` should be used for refinements and converting between real space representations.
+
+When the number density is provided or generated from one of the above methods, both the packing fraction :math:`f` and effective number density :math:`\rho_{n,eff}` are computed from the above equation if they were not specified.
 
 Attenuation Coefficients
 ##############################
@@ -90,6 +99,12 @@ The sum of the two attenuation coefficients can be replaced by an externally mea
 Mantid supports a space delimited text file format for the externally measured profile containing the following columns:
 
 - wavelength (in :math:`\AA`)
+- attenuation factor (in :math:`mm^{-1}`)
+- error (currently ignored)
+
+The Xray Attenuation coefficients can also be provided by text file with the following columns containing:
+
+- energy (in :math:`KeV`)
 - attenuation factor (in :math:`mm^{-1}`)
 - error (currently ignored)
 

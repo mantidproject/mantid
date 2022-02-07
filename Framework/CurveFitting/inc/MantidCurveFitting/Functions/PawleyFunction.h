@@ -31,36 +31,28 @@ namespace Functions {
   Additionally it stores the crystal system and the name of the profile function
   that is used to model the Bragg peaks as attributes.
 */
-class MANTID_CURVEFITTING_DLL PawleyParameterFunction
-    : virtual public API::IFunction,
-      virtual public API::ParamFunction {
+class MANTID_CURVEFITTING_DLL PawleyParameterFunction : virtual public API::IFunction,
+                                                        virtual public API::ParamFunction {
 public:
   PawleyParameterFunction();
 
   /// Returns the function name
   std::string name() const override { return "PawleyParameterFunction"; }
 
-  void setAttribute(const std::string &attName,
-                    const Attribute &attValue) override;
+  void setAttribute(const std::string &attName, const Attribute &attValue) override;
 
   Geometry::PointGroup::LatticeSystem getLatticeSystem() const;
   Geometry::UnitCell getUnitCellFromParameters() const;
   void setParametersFromUnitCell(const Geometry::UnitCell &cell);
 
   /// Returns the stored profile function name
-  std::string getProfileFunctionName() const {
-    return getAttribute("ProfileFunction").asString();
-  }
+  std::string getProfileFunctionName() const { return getAttribute("ProfileFunction").asString(); }
 
   /// Returns the name of the stored function's center parameter
-  std::string getProfileFunctionCenterParameterName() const {
-    return m_profileFunctionCenterParameterName;
-  }
+  std::string getProfileFunctionCenterParameterName() const { return m_profileFunctionCenterParameterName; }
 
-  void function(const API::FunctionDomain &domain,
-                API::FunctionValues &values) const override;
-  void functionDeriv(const API::FunctionDomain &domain,
-                     API::Jacobian &jacobian) override;
+  void function(const API::FunctionDomain &domain, API::FunctionValues &values) const override;
+  void functionDeriv(const API::FunctionDomain &domain, API::Jacobian &jacobian) override;
 
 protected:
   void init() override;
@@ -68,14 +60,12 @@ protected:
   void setProfileFunction(const std::string &profileFunction);
   void setLatticeSystem(const std::string &latticeSystem);
 
-  void createLatticeSystemParameters(
-      Geometry::PointGroup::LatticeSystem latticeSystem);
+  void createLatticeSystemParameters(Geometry::PointGroup::LatticeSystem latticeSystem);
 
   void addLengthConstraint(const std::string &parameterName);
   void addAngleConstraint(const std::string &parameterName);
 
-  void setCenterParameterNameFromFunction(
-      const API::IPeakFunction_sptr &profileFunction);
+  void setCenterParameterNameFromFunction(const API::IPeakFunction_sptr &profileFunction);
 
   Geometry::PointGroup::LatticeSystem m_latticeSystem;
   std::string m_profileFunctionCenterParameterName;
@@ -105,24 +95,21 @@ public:
   /// Returns the name of the function.
   std::string name() const override { return "PawleyFunction"; }
 
-  void setMatrixWorkspace(std::shared_ptr<const API::MatrixWorkspace> workspace,
-                          size_t wi, double startX, double endX) override;
+  void setMatrixWorkspace(std::shared_ptr<const API::MatrixWorkspace> workspace, size_t wi, double startX,
+                          double endX) override;
 
   void setLatticeSystem(const std::string &latticeSystem) override;
   void setProfileFunction(const std::string &profileFunction) override;
   void setUnitCell(const std::string &unitCellString) override;
 
-  void function(const API::FunctionDomain &domain,
-                API::FunctionValues &values) const override;
+  void function(const API::FunctionDomain &domain, API::FunctionValues &values) const override;
 
   /// Derivates are calculated numerically.
-  void functionDeriv(const API::FunctionDomain &domain,
-                     API::Jacobian &jacobian) override {
+  void functionDeriv(const API::FunctionDomain &domain, API::Jacobian &jacobian) override {
     calNumericalDeriv(domain, jacobian);
   }
 
-  void setPeaks(const std::vector<Kernel::V3D> &hkls, double fwhm,
-                double height) override;
+  void setPeaks(const std::vector<Kernel::V3D> &hkls, double fwhm, double height) override;
   void clearPeaks() override;
 
   void addPeak(const Kernel::V3D &hkl, double fwhm, double height) override;
@@ -133,11 +120,9 @@ public:
   PawleyParameterFunction_sptr getPawleyParameterFunction() const;
 
 protected:
-  void setPeakPositions(const std::string &centreName, double zeroShift,
-                        const Geometry::UnitCell &cell) const;
+  void setPeakPositions(const std::string &centreName, double zeroShift, const Geometry::UnitCell &cell) const;
 
-  size_t calculateFunctionValues(const API::IPeakFunction_sptr &peak,
-                                 const API::FunctionDomain1D &domain,
+  size_t calculateFunctionValues(const API::IPeakFunction_sptr &peak, const API::FunctionDomain1D &domain,
                                  API::FunctionValues &localValues) const;
 
   double getTransformedCenter(double d) const;

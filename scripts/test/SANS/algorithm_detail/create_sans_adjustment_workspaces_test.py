@@ -80,13 +80,15 @@ class CreateSANSAdjustmentWorkspacesTest(unittest.TestCase):
     def _run_test(state, sample_data, sample_monitor_data, transmission_data, direct_data, is_lab=True, is_sample=True):
         data_type = DataType.SAMPLE.value if is_sample else DataType.CAN.value
         component = DetectorType.LAB.value if is_lab else DetectorType.HAB.value
+        wav_range = state.adjustment.wavelength_and_pixel_adjustment.wavelength_interval.wavelength_full_range
 
-        alg = CreateSANSAdjustmentWorkspaces(state_adjustment=state.adjustment,
+        alg = CreateSANSAdjustmentWorkspaces(state=state,
                                              component=component, data_type=data_type)
         returned = alg.create_sans_adjustment_workspaces(direct_ws=direct_data,
                                                          monitor_ws=sample_monitor_data,
                                                          transmission_ws=transmission_data,
-                                                         sample_data=sample_data)
+                                                         sample_data=sample_data,
+                                                         wav_range=wav_range)
 
         wavelength_adjustment = returned["wavelength_adj"]
         pixel_adjustment = returned["pixel_adj"]

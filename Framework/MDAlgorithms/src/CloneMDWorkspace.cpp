@@ -17,8 +17,7 @@ using namespace Mantid::Kernel;
 using namespace Mantid::API;
 using namespace Mantid::DataObjects;
 
-namespace Mantid {
-namespace MDAlgorithms {
+namespace Mantid::MDAlgorithms {
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(CloneMDWorkspace)
@@ -27,24 +26,20 @@ DECLARE_ALGORITHM(CloneMDWorkspace)
 /** Initialize the algorithm's properties.
  */
 void CloneMDWorkspace::init() {
-  declareProperty(std::make_unique<WorkspaceProperty<IMDWorkspace>>(
-                      "InputWorkspace", "", Direction::Input),
+  declareProperty(std::make_unique<WorkspaceProperty<IMDWorkspace>>("InputWorkspace", "", Direction::Input),
                   "An input MDEventWorkspace/MDHistoWorkspace.");
-  declareProperty(std::make_unique<WorkspaceProperty<IMDWorkspace>>(
-                      "OutputWorkspace", "", Direction::Output),
+  declareProperty(std::make_unique<WorkspaceProperty<IMDWorkspace>>("OutputWorkspace", "", Direction::Output),
                   "Name of the output MDEventWorkspace/MDHistoWorkspace.");
 
   std::vector<std::string> exts(1, ".nxs");
-  declareProperty(
-      std::make_unique<FileProperty>("Filename", "", FileProperty::OptionalSave,
-                                     exts),
-      "If the input workspace is file-backed, specify a file to which to save "
-      "the cloned workspace.\n"
-      "If the workspace is file-backed but this parameter is NOT specified, "
-      "then a new filename with '_clone' appended is created next to the "
-      "original file.\n"
-      "No effect if the input workspace is NOT file-backed.\n"
-      "");
+  declareProperty(std::make_unique<FileProperty>("Filename", "", FileProperty::OptionalSave, exts),
+                  "If the input workspace is file-backed, specify a file to which to save "
+                  "the cloned workspace.\n"
+                  "If the workspace is file-backed but this parameter is NOT specified, "
+                  "then a new filename with '_clone' appended is created next to the "
+                  "original file.\n"
+                  "No effect if the input workspace is NOT file-backed.\n"
+                  "");
 }
 
 //----------------------------------------------------------------------------------------------
@@ -52,9 +47,7 @@ void CloneMDWorkspace::init() {
  *
  * @param ws ::  MDEventWorkspace to clone
  */
-template <typename MDE, size_t nd>
-void CloneMDWorkspace::doClone(
-    const typename MDEventWorkspace<MDE, nd>::sptr ws) {
+template <typename MDE, size_t nd> void CloneMDWorkspace::doClone(const typename MDEventWorkspace<MDE, nd>::sptr &ws) {
   BoxController_sptr bc = ws->getBoxController();
 
   if (!bc)
@@ -63,7 +56,7 @@ void CloneMDWorkspace::doClone(
     if (ws->fileNeedsUpdating()) {
       // Data was modified! You need to save first.
       g_log.notice() << "InputWorkspace's file-backend being updated. \n";
-      IAlgorithm_sptr alg = createChildAlgorithm("SaveMD", 0.0, 0.4, false);
+      auto alg = createChildAlgorithm("SaveMD", 0.0, 0.4, false);
       alg->setProperty("InputWorkspace", ws);
       alg->setPropertyValue("UpdateFileBackEnd", "1");
       alg->executeAsChildAlg();
@@ -75,20 +68,18 @@ void CloneMDWorkspace::doClone(
     if (outFilename.empty()) {
       // Auto-generated name
       Poco::Path path = Poco::Path(originalFile).absolute();
-      std::string newName =
-          path.getBaseName() + "_clone." + path.getExtension();
+      std::string newName = path.getBaseName() + "_clone." + path.getExtension();
       path.setFileName(newName);
       outFilename = path.toString();
     }
 
     // Perform the copying
-    g_log.notice() << "Cloned workspace file being copied to: " << outFilename
-                   << '\n';
+    g_log.notice() << "Cloned workspace file being copied to: " << outFilename << '\n';
     Poco::File(originalFile).copyTo(outFilename);
     g_log.information() << "File copied successfully.\n";
 
     // Now load it back
-    IAlgorithm_sptr alg = createChildAlgorithm("LoadMD", 0.5, 1.0, false);
+    auto alg = createChildAlgorithm("LoadMD", 0.5, 1.0, false);
     alg->setPropertyValue("Filename", outFilename);
     alg->setPropertyValue("FileBackEnd", "1");
     alg->setPropertyValue("Memory", "0"); // TODO: How much memory?
@@ -96,8 +87,7 @@ void CloneMDWorkspace::doClone(
 
     // Set the output workspace to this
     IMDWorkspace_sptr outWS = alg->getProperty("OutputWorkspace");
-    this->setProperty("OutputWorkspace",
-                      std::dynamic_pointer_cast<IMDWorkspace>(outWS));
+    this->setProperty("OutputWorkspace", std::dynamic_pointer_cast<IMDWorkspace>(outWS));
   } else {
     // Perform the clone in memory.
     IMDWorkspace_sptr outWS(ws->clone());
@@ -110,10 +100,8 @@ void CloneMDWorkspace::doClone(
  */
 void CloneMDWorkspace::exec() {
   IMDWorkspace_sptr inBaseWS = getProperty("InputWorkspace");
-  IMDEventWorkspace_sptr inWS =
-      std::dynamic_pointer_cast<IMDEventWorkspace>(inBaseWS);
-  MDHistoWorkspace_sptr inHistoWS =
-      std::dynamic_pointer_cast<MDHistoWorkspace>(inBaseWS);
+  IMDEventWorkspace_sptr inWS = std::dynamic_pointer_cast<IMDEventWorkspace>(inBaseWS);
+  MDHistoWorkspace_sptr inHistoWS = std::dynamic_pointer_cast<MDHistoWorkspace>(inBaseWS);
 
   if (inWS) {
     CALL_MDEVENT_FUNCTION(this->doClone, inWS);
@@ -130,5 +118,4 @@ void CloneMDWorkspace::exec() {
   }
 }
 
-} // namespace MDAlgorithms
-} // namespace Mantid
+} // namespace Mantid::MDAlgorithms

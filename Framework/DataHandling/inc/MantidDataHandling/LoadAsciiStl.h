@@ -23,17 +23,15 @@ namespace DataHandling {
 class DLLExport LoadAsciiStl : public LoadStl {
 public:
   LoadAsciiStl(std::string filename, ScaleUnits scaleType)
-      : LoadStl(std::move(filename), scaleType) {}
-  LoadAsciiStl(std::string filename, ScaleUnits scaleType,
-               ReadMaterial::MaterialParameters params)
-      : LoadStl(std::move(filename), scaleType, std::move(params)) {}
-  std::unique_ptr<Geometry::MeshObject> readStl() override;
+      : LoadStl(std::move(filename), std::ios_base::in, scaleType) {}
+  LoadAsciiStl(std::string filename, ScaleUnits scaleType, ReadMaterial::MaterialParameters params)
+      : LoadStl(std::move(filename), std::ios_base::in, scaleType, std::move(params)) {}
+  std::unique_ptr<Geometry::MeshObject> readShape() override;
   static bool isAsciiSTL(const std::string &filename);
 
 private:
   int m_lineNumber = 0;
-  bool readSTLTriangle(std::ifstream &file, Kernel::V3D &v1, Kernel::V3D &v2,
-                       Kernel::V3D &v3);
+  bool readSTLTriangle(std::ifstream &file, Kernel::V3D &v1, Kernel::V3D &v2, Kernel::V3D &v3);
   bool readSTLVertex(std::ifstream &file, Kernel::V3D &vertex);
   bool readSTLLine(std::ifstream &file, std::string const &type);
 };

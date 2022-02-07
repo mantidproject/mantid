@@ -9,7 +9,8 @@
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAlgorithms/RunCombinationHelpers/SampleLogsBehaviour.h"
 #include "MantidDataHandling/LoadParameterFile.h"
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
+#include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
+#include "MantidTypes/Core/DateAndTime.h"
 #include <cxxtest/TestSuite.h>
 
 #include "MantidKernel/TimeSeriesProperty.h"
@@ -19,14 +20,13 @@ using namespace Mantid::API;
 using namespace Mantid::DataHandling;
 using namespace Mantid::Kernel;
 using namespace WorkspaceCreationHelper;
+using namespace Mantid::Types::Core;
 
 class SampleLogsBehaviourTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static SampleLogsBehaviourTest *createSuite() {
-    return new SampleLogsBehaviourTest();
-  }
+  static SampleLogsBehaviourTest *createSuite() { return new SampleLogsBehaviourTest(); }
   static void destroySuite(SampleLogsBehaviourTest *suite) { delete suite; }
 
   // Please note that many tests are currently present in MergeRunsTest.
@@ -55,8 +55,7 @@ public:
     SampleLogsBehaviour::ParameterName parameterNames;
     parameterNames.SUM_MERGE = "logs_sum";
     parameterNames.LIST_MERGE = "logs_list";
-    SampleLogsBehaviour sbh =
-        SampleLogsBehaviour(base, log, {}, parameterNames);
+    SampleLogsBehaviour sbh = SampleLogsBehaviour(base, log, {}, parameterNames);
     TS_ASSERT_THROWS_NOTHING(sbh.mergeSampleLogs(ws, base))
     const std::string A = base->run().getLogData("A")->value();
     const std::string B = base->run().getLogData("B")->value();
@@ -77,8 +76,7 @@ public:
     parameterNames.SUM_MERGE = "logs_sum";
     SampleLogsBehaviour::SampleLogNames sampleLogNames;
     sampleLogNames.sampleLogsSum = "A";
-    SampleLogsBehaviour sbh =
-        SampleLogsBehaviour(base, log, sampleLogNames, parameterNames);
+    SampleLogsBehaviour sbh = SampleLogsBehaviour(base, log, sampleLogNames, parameterNames);
     TS_ASSERT_THROWS_NOTHING(sbh.mergeSampleLogs(ws, base));
     const std::string A = base->run().getLogData("A")->value();
     const std::string B = base->run().getLogData("B")->value();
@@ -98,8 +96,7 @@ public:
     SampleLogsBehaviour::SampleLogNames sampleLogNames;
     SampleLogsBehaviour::ParameterName parameterNames;
     parameterNames.SUM_MERGE = "other_logs_sum";
-    SampleLogsBehaviour sbh =
-        SampleLogsBehaviour(base, log, sampleLogNames, parameterNames);
+    SampleLogsBehaviour sbh = SampleLogsBehaviour(base, log, sampleLogNames, parameterNames);
     sbh.mergeSampleLogs(ws, base);
     const std::string A = base->run().getLogData("A")->value();
     const std::string B = base->run().getLogData("B")->value();
@@ -120,8 +117,7 @@ public:
     sampleLogNames.sampleLogsSum = "B";
     SampleLogsBehaviour::ParameterName parameterNames;
     parameterNames.SUM_MERGE = "other_logs_sum";
-    SampleLogsBehaviour sbh =
-        SampleLogsBehaviour(base, log, sampleLogNames, parameterNames);
+    SampleLogsBehaviour sbh = SampleLogsBehaviour(base, log, sampleLogNames, parameterNames);
     sbh.mergeSampleLogs(ws, base);
     const std::string A = base->run().getLogData("A")->value();
     const std::string B = base->run().getLogData("B")->value();
@@ -144,8 +140,7 @@ public:
     parameterNames.LIST_MERGE = "logs_list";
     SampleLogsBehaviour::SampleLogNames sampleLogNames;
     sampleLogNames.sampleLogsSum = "A";
-    SampleLogsBehaviour sbh =
-        SampleLogsBehaviour(ws, log, sampleLogNames, parameterNames);
+    SampleLogsBehaviour sbh = SampleLogsBehaviour(ws, log, sampleLogNames, parameterNames);
     TS_ASSERT_THROWS_NOTHING(sbh.mergeSampleLogs(ws, base));
     // A units must not have changed:
     TS_ASSERT_EQUALS(ws->getLog("A")->units(), "A_unit")
@@ -162,15 +157,15 @@ public:
     parameterNames.LIST_MERGE = "logs_list";
     SampleLogsBehaviour::SampleLogNames sampleLogNames;
     sampleLogNames.sampleLogsList = "A";
-    SampleLogsBehaviour sbh =
-        SampleLogsBehaviour(ws, log, sampleLogNames, parameterNames);
+    SampleLogsBehaviour sbh = SampleLogsBehaviour(ws, log, sampleLogNames, parameterNames);
     TS_ASSERT_THROWS_NOTHING(sbh.mergeSampleLogs(ws, base));
     // A units must not have changed:
     TS_ASSERT_EQUALS(ws->getLog("A")->units(), "A_unit")
     TS_ASSERT_EQUALS(base->getLog("A")->units(), "A_unit")
   }
 
-  void test_time_series_unit() {
+  void test_time_series_from_scalars() {
+    // Tests when no time series logs are merged into a time series log
     Logger log("testLog");
     auto ws = createWorkspace(2.65, 1.56, 8.55, "2018-11-30T16:17:01");
     auto base = createWorkspace(4.5, 3.2, 7.9, "2018-11-30T16:17:03");
@@ -181,29 +176,58 @@ public:
     SampleLogsBehaviour sbh = SampleLogsBehaviour(base, log, sampleLogNames);
     TS_ASSERT_THROWS_NOTHING(sbh.mergeSampleLogs(ws, base));
     const std::string B = base->run().getLogData("B")->value();
-    TS_ASSERT_EQUALS(B,
-                     "2018-Nov-30 16:17:01  1.56\n2018-Nov-30 16:17:03  3.2\n")
+    TS_ASSERT_EQUALS(B, "2018-Nov-30 16:17:01  1.56\n2018-Nov-30 16:17:03  3.2\n")
     // B units must not have changed:
     TS_ASSERT_EQUALS(ws->getLog("B")->units(), "B_unit")
     TS_ASSERT_EQUALS(base->getLog("B")->units(), "B_unit")
   }
 
-  MatrixWorkspace_sptr createWorkspace(const double A, const double B,
-                                       const double C,
-                                       const std::string &time = "") {
-    MatrixWorkspace_sptr ws = create2DWorkspaceWithFullInstrument(
-        3, 3, true, false, true, m_instrName);
+  void test_time_series_merge() {
+    // Tests when two time series logs are merged
+    Logger log("testLog");
+    auto ws1 = createWorkspaceWithTimeSeriesLog(2.65, "2018-11-30T16:17:01");
+    auto ws2 = createWorkspaceWithTimeSeriesLog(3.15, "2018-11-30T16:25:01");
+    SampleLogsBehaviour::SampleLogNames sampleLogNames;
+    sampleLogNames.sampleLogsTimeSeries = "A";
+    SampleLogsBehaviour sbh = SampleLogsBehaviour(ws1, log, sampleLogNames);
+    TS_ASSERT_THROWS_NOTHING(sbh.mergeSampleLogs(ws2, ws1));
+    const std::string A = ws1->run().getLogData("A")->value();
+    TS_ASSERT_EQUALS(A, "2018-Nov-30 16:17:01  2.65\n2018-Nov-30 16:25:01  3.15\n")
+  }
+
+  void test_time_series_merge_with_scalar() {
+    // Tests when one time series log is merged with a scalar log as time series
+    Logger log("testLog");
+    auto ws1 = createWorkspaceWithTimeSeriesLog(4.47, "2018-11-30T16:17:01");
+    auto ws2 = createWorkspace(2.65, 1.56, 8.55, "2018-11-30T16:25:01");
+    SampleLogsBehaviour::SampleLogNames sampleLogNames;
+    sampleLogNames.sampleLogsTimeSeries = "A";
+    SampleLogsBehaviour sbh = SampleLogsBehaviour(ws1, log, sampleLogNames);
+    TS_ASSERT_THROWS_NOTHING(sbh.mergeSampleLogs(ws2, ws1));
+    const std::string A = ws1->run().getLogData("A")->value();
+    TS_ASSERT_EQUALS(A, "2018-Nov-30 16:17:01  4.47\n2018-Nov-30 16:25:01  2.65\n")
+  }
+
+  MatrixWorkspace_sptr createWorkspaceWithTimeSeriesLog(const double A, const std::string &time) {
+    MatrixWorkspace_sptr ws = create2DWorkspaceWithFullInstrument(3, 3, true, false, true, m_instrName);
+    DateAndTime dateTime;
+    dateTime.setFromISO8601(time);
+    std::vector<DateAndTime> series;
+    series.emplace_back(dateTime);
+    TimeSeriesProperty<double> *ts = new TimeSeriesProperty<double>("A", series, std::vector<double>({A}));
+    ws->mutableRun().addLogData(ts);
+    return ws;
+  }
+
+  MatrixWorkspace_sptr createWorkspace(const double A, const double B, const double C, const std::string &time = "") {
+    MatrixWorkspace_sptr ws = create2DWorkspaceWithFullInstrument(3, 3, true, false, true, m_instrName);
     // Add sample logs
-    TS_ASSERT_THROWS_NOTHING(
-        ws->mutableRun().addLogData(new PropertyWithValue<double>("A", A)))
-    TS_ASSERT_THROWS_NOTHING(
-        ws->mutableRun().addLogData(new PropertyWithValue<double>("B", B)))
-    TS_ASSERT_THROWS_NOTHING(
-        ws->mutableRun().addLogData(new PropertyWithValue<double>("C", C)))
+    TS_ASSERT_THROWS_NOTHING(ws->mutableRun().addLogData(new PropertyWithValue<double>("A", A)))
+    TS_ASSERT_THROWS_NOTHING(ws->mutableRun().addLogData(new PropertyWithValue<double>("B", B)))
+    TS_ASSERT_THROWS_NOTHING(ws->mutableRun().addLogData(new PropertyWithValue<double>("C", C)))
     if (!time.empty()) {
       // add start times
-      Property *tprop = new Mantid::Kernel::PropertyWithValue<std::string>(
-          "start_time", time);
+      Property *tprop = new Mantid::Kernel::PropertyWithValue<std::string>("start_time", time);
       ws->mutableRun().addLogData(tprop);
     }
     // Add units to the sample logs
@@ -232,25 +256,24 @@ private:
   // Test instrument name
   const std::string m_instrName = "INSTR";
   // Define parameter XML string
-  std::string m_parameterXML =
-      "<?xml version=\"1.0\" encoding=\"UTF-8\" ?>"
-      "<parameter-file instrument=\"INSTR\" valid-from=\"2018-11-07 "
-      "12:00:00\">"
-      "  <component-link name=\"INSTR\">"
-      "    <!-- Some algorithm.-->"
-      "    <parameter name=\"logs_sum\" type=\"string\">"
-      "	      <value val=\"B\" />"
-      "    </parameter>"
-      "    <parameter name=\"logs_list\" type=\"string\">"
-      "	      <value val=\"A\" />"
-      "    </parameter>"
-      "    <parameter name=\"logs_time_series\" type=\"string\">"
-      "	      <value val=\"D\" />"
-      "    </parameter>"
-      "    <!-- Some other algorithm. -->"
-      "    <parameter name=\"other_logs_sum\" type=\"string\">"
-      "       <value val=\"A, C\" />"
-      "    </parameter>"
-      "  </component-link>"
-      "</parameter-file>";
+  std::string m_parameterXML = "<?xml version=\"1.0\" encoding=\"UTF-8\" ?>"
+                               "<parameter-file instrument=\"INSTR\" valid-from=\"2018-11-07 "
+                               "12:00:00\">"
+                               "  <component-link name=\"INSTR\">"
+                               "    <!-- Some algorithm.-->"
+                               "    <parameter name=\"logs_sum\" type=\"string\">"
+                               "	      <value val=\"B\" />"
+                               "    </parameter>"
+                               "    <parameter name=\"logs_list\" type=\"string\">"
+                               "	      <value val=\"A\" />"
+                               "    </parameter>"
+                               "    <parameter name=\"logs_time_series\" type=\"string\">"
+                               "	      <value val=\"D\" />"
+                               "    </parameter>"
+                               "    <!-- Some other algorithm. -->"
+                               "    <parameter name=\"other_logs_sum\" type=\"string\">"
+                               "       <value val=\"A, C\" />"
+                               "    </parameter>"
+                               "  </component-link>"
+                               "</parameter-file>";
 };

@@ -10,11 +10,11 @@
 
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/FrameworkManager.h"
+#include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/Component.h"
 #include "MantidGeometry/Instrument/ReferenceFrame.h"
 #include "MantidKernel/V3D.h"
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
 using namespace Mantid::API;
 using namespace Mantid::DataObjects;
@@ -47,7 +47,7 @@ public:
     instr->markAsSource(source);
 
     // The sample
-    ObjComponent *sample = new ObjComponent("sample");
+    Component *sample = new Component("sample");
     sample->setPos(V3D(0, 0, 0));
     instr->add(sample);
     instr->markAsSamplePos(sample);
@@ -58,7 +58,7 @@ public:
     // The angle
     double theta = 90.;
 
-    IAlgorithm_sptr alg = AlgorithmManager::Instance().create("RotateSource");
+    auto alg = AlgorithmManager::Instance().create("RotateSource");
     alg->setChild(true);
     alg->setProperty("Workspace", ws);
     alg->setProperty("Angle", theta);
@@ -85,7 +85,7 @@ public:
     instr->markAsSource(source);
 
     // The sample
-    ObjComponent *sample = new ObjComponent("sample");
+    Component *sample = new Component("sample");
     sample->setPos(V3D(0, 0, 0));
     instr->add(sample);
     instr->markAsSamplePos(sample);
@@ -96,7 +96,7 @@ public:
     // The angle
     double theta = -90.;
 
-    IAlgorithm_sptr alg = AlgorithmManager::Instance().create("RotateSource");
+    auto alg = AlgorithmManager::Instance().create("RotateSource");
     alg->setChild(true);
     alg->setProperty("Workspace", ws);
     alg->setProperty("Angle", theta);
@@ -123,7 +123,7 @@ public:
     instr->markAsSource(source);
 
     // The sample
-    ObjComponent *sample = new ObjComponent("sample");
+    Component *sample = new Component("sample");
     sample->setPos(V3D(0, 0, 1));
     instr->add(sample);
     instr->markAsSamplePos(sample);
@@ -134,7 +134,7 @@ public:
     // The angle
     double theta = 90.;
 
-    IAlgorithm_sptr alg = AlgorithmManager::Instance().create("RotateSource");
+    auto alg = AlgorithmManager::Instance().create("RotateSource");
     alg->setChild(true);
     alg->setProperty("Workspace", ws);
     alg->setProperty("Angle", theta);
@@ -161,7 +161,7 @@ public:
     instr->markAsSource(source);
 
     // The sample
-    ObjComponent *sample = new ObjComponent("sample");
+    Component *sample = new Component("sample");
     sample->setPos(V3D(1, 1, 1));
     instr->add(sample);
     instr->markAsSamplePos(sample);
@@ -172,7 +172,7 @@ public:
     // The angle
     double theta = 90.;
 
-    IAlgorithm_sptr alg = AlgorithmManager::Instance().create("RotateSource");
+    auto alg = AlgorithmManager::Instance().create("RotateSource");
     alg->setChild(true);
     alg->setProperty("Workspace", ws);
     alg->setProperty("Angle", theta);

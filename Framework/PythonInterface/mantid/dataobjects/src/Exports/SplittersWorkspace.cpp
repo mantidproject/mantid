@@ -5,8 +5,8 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidDataObjects/SplittersWorkspace.h"
+#include "MantidPythonInterface/api/RegisterWorkspacePtrToPython.h"
 #include "MantidPythonInterface/core/GetPointer.h"
-#include "MantidPythonInterface/kernel/Registry/RegisterWorkspacePtrToPython.h"
 #include <boost/python/class.hpp>
 
 using Mantid::API::ISplittersWorkspace;
@@ -18,8 +18,8 @@ using namespace boost::python;
 GET_POINTER_SPECIALIZATION(SplittersWorkspace)
 
 void export_SplittersWorkspace() {
-  class_<SplittersWorkspace, bases<TableWorkspace, ISplittersWorkspace>,
-         boost::noncopyable>("SplittersWorkspace", no_init);
+  class_<SplittersWorkspace, bases<TableWorkspace, ISplittersWorkspace>, boost::noncopyable>("SplittersWorkspace",
+                                                                                             no_init);
 
   // register pointers
   RegisterWorkspacePtrToPython<SplittersWorkspace>();

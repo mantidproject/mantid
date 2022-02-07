@@ -23,15 +23,11 @@ public:
   ~SaveNXcanSAS() override {}
   const std::string name() const override { return "SaveNXcanSAS"; }
   /// Summary of algorithms purpose
-  const std::string summary() const override {
-    return "Writes a MatrixWorkspace to a file in the NXcanSAS format.";
-  }
+  const std::string summary() const override { return "Writes a MatrixWorkspace to a file in the NXcanSAS format."; }
 
   /// Algorithm's version
   int version() const override { return (1); }
-  const std::vector<std::string> seeAlso() const override {
-    return {"SaveCanSAS1D", "LoadNXcanSAS"};
-  }
+  const std::vector<std::string> seeAlso() const override { return {"SaveCanSAS1D", "LoadNXcanSAS"}; }
   /// Algorithm's category for identification
   const std::string category() const override { return "DataHandling\\Nexus"; }
 
@@ -44,8 +40,7 @@ private:
   void exec() override;
 };
 
-std::string MANTID_DATAHANDLING_DLL
-makeCanSASRelaxedName(const std::string &input);
+std::string MANTID_DATAHANDLING_DLL makeCanSASRelaxedName(const std::string &input);
 
 } // namespace DataHandling
 } // namespace Mantid

@@ -28,8 +28,7 @@ public:
   /// Initialize minimizer.
   /// @param function :: Function to minimize
   /// @param maxIterations :: Maximum number of iterations.
-  virtual void initialize(API::ICostFunction_sptr function,
-                          size_t maxIterations = 1000) = 0;
+  virtual void initialize(API::ICostFunction_sptr function, size_t maxIterations = 1000) = 0;
 
   /// Get name of minimizer
   virtual std::string name() const = 0;

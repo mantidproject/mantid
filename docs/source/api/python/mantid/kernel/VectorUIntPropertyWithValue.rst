@@ -8,7 +8,7 @@ This is a Python binding to the C++ class Mantid::Kernel::VectorUIntPropertyWith
 
 .. module:`mantid.kernel`
 
-.. autoclass:: mantid.kernel.VectorUIntPropertyWithValue 
+.. autoclass:: mantid.kernel.VectorUIntPropertyWithValue
     :members:
     :undoc-members:
     :inherited-members:

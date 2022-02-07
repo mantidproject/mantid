@@ -24,8 +24,7 @@ public:
     TSM_ASSERT("Is not a valid proxy object", proxyInfo.emptyProxy());
     TS_ASSERT_THROWS(proxyInfo.host(), std::logic_error &);
     TS_ASSERT_THROWS(proxyInfo.port(), std::logic_error &);
-    TSM_ASSERT("Cannot be a http proxy if not a proxy at all.",
-               !proxyInfo.isHttpProxy());
+    TSM_ASSERT("Cannot be a http proxy if not a proxy at all.", !proxyInfo.isHttpProxy());
   }
 
   void test_empty_host_is_empy_proxy() {

@@ -9,6 +9,7 @@
 #include "MantidGeometry/Surfaces/BaseVisit.h"
 #include "MantidGeometry/Surfaces/Line.h"
 #include "MantidKernel/V3D.h"
+#include <boost/container/small_vector.hpp>
 #include <list>
 
 namespace Mantid {
@@ -36,12 +37,13 @@ class General;
 Creates interaction with a line
 */
 class MANTID_GEOMETRY_DLL LineIntersectVisit : public BaseVisit {
-private:
-  Line ATrack;                    ///< The line
-  std::vector<Kernel::V3D> PtOut; ///< The intersection point
-  std::vector<double> DOut;       ///< The distance
+public:
+  using DistancesType = boost::container::small_vector<double, 5>;
 
-  void procTrack();
+private:
+  Line m_line;                         ///< The line
+  Line::PType m_intersectionPointsOut; ///< The intersection point
+  DistancesType m_distancesOut;        ///< The distance
 
 public:
   LineIntersectVisit(const Kernel::V3D &, const Kernel::V3D &);
@@ -55,14 +57,17 @@ public:
 
   // Accessor
   /// Get the distance
-  const std::vector<double> &getDistance() const { return DOut; }
+  const DistancesType &getDistance() const { return m_distancesOut; }
   /// Get the intersection points
-  const std::vector<Kernel::V3D> &getPoints() const { return PtOut; }
+  const Line::PType &getPoints() const { return m_intersectionPointsOut; }
   /// Get the number of intersection points
-  unsigned long getNPoints() const { return (unsigned long)PtOut.size(); }
+  unsigned long getNPoints() const { return (unsigned long)m_intersectionPointsOut.size(); }
 
   /// Re-set the line
   void setLine(const Kernel::V3D &, const Kernel::V3D &);
+
+  /// Prune out duplicated points and sort by distance to starting point
+  void sortAndRemoveDuplicates();
 };
 
 } // namespace Geometry

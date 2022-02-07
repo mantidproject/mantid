@@ -10,8 +10,7 @@
 #include "MantidAPI/Progress.h"
 #include "MantidAPI/Algorithm.h"
 
-namespace Mantid {
-namespace API {
+namespace Mantid::API {
 
 namespace {
 void checkEnd(double end) {
@@ -76,8 +75,7 @@ void Progress::doReport(const std::string &msg) {
     p = m_end;
   if (!m_alg)
     return;
-  m_alg->progress(p, msg, this->getEstimatedTime(),
-                  this->m_notifyStepPrecision);
+  m_alg->progress(p, msg, this->getEstimatedTime(), this->m_notifyStepPrecision);
   m_alg->interruption_point();
 }
 
@@ -91,5 +89,4 @@ bool Progress::hasCancellationBeenRequested() const {
     return false;
 }
 
-} // namespace API
-} // namespace Mantid
+} // namespace Mantid::API

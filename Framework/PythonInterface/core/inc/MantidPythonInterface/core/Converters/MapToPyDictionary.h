@@ -18,8 +18,7 @@ namespace Mantid {
 namespace PythonInterface {
 namespace Converters {
 
-template <typename KeyType, typename ValueType>
-struct DLLExport MapToPyDictionary {
+template <typename KeyType, typename ValueType> struct DLLExport MapToPyDictionary {
 
 public:
   using MapType = std::map<KeyType, ValueType>;

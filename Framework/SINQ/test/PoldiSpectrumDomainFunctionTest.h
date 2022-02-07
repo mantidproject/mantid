@@ -26,22 +26,16 @@ class PoldiSpectrumDomainFunctionTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static PoldiSpectrumDomainFunctionTest *createSuite() {
-    return new PoldiSpectrumDomainFunctionTest();
-  }
-  static void destroySuite(PoldiSpectrumDomainFunctionTest *suite) {
-    delete suite;
-  }
+  static PoldiSpectrumDomainFunctionTest *createSuite() { return new PoldiSpectrumDomainFunctionTest(); }
+  static void destroySuite(PoldiSpectrumDomainFunctionTest *suite) { delete suite; }
 
   PoldiSpectrumDomainFunctionTest() {
-    m_detector =
-        std::shared_ptr<ConfiguredHeliumDetector>(new ConfiguredHeliumDetector);
+    m_detector = std::shared_ptr<ConfiguredHeliumDetector>(new ConfiguredHeliumDetector);
     m_chopper = std::make_shared<MockChopper>();
 
     m_spectrum = PoldiSourceSpectrum_sptr(new ConfiguredSpectrum);
 
-    EXPECT_CALL(*m_chopper, distanceFromSample())
-        .WillRepeatedly(Return(11800.0));
+    EXPECT_CALL(*m_chopper, distanceFromSample()).WillRepeatedly(Return(11800.0));
 
     EXPECT_CALL(*m_chopper, zeroOffset()).WillRepeatedly(Return(0.15));
 
@@ -66,16 +60,14 @@ public:
     TS_ASSERT_THROWS_NOTHING(function.setDecoratedFunction("Gaussian"));
 
     // Make sure the parameters are exposed correctly
-    IFunction_sptr gaussian =
-        FunctionFactory::Instance().createFunction("Gaussian");
+    IFunction_sptr gaussian = FunctionFactory::Instance().createFunction("Gaussian");
     TS_ASSERT_EQUALS(function.nParams(), gaussian->nParams());
     for (size_t i = 0; i < gaussian->nParams(); ++i) {
       TS_ASSERT_EQUALS(function.parameterName(i), gaussian->parameterName(i));
     }
 
     TS_ASSERT_THROWS_NOTHING(function.setDecoratedFunction("DeltaFunction"));
-    IFunction_sptr delta =
-        FunctionFactory::Instance().createFunction("DeltaFunction");
+    IFunction_sptr delta = FunctionFactory::Instance().createFunction("DeltaFunction");
     TS_ASSERT_EQUALS(function.nParams(), delta->nParams());
     for (size_t i = 0; i < delta->nParams(); ++i) {
       TS_ASSERT_EQUALS(function.parameterName(i), delta->parameterName(i));
@@ -88,8 +80,7 @@ public:
     std::vector<double> offsets = function.getChopperSlitOffsets(m_chopper);
 
     for (size_t i = 0; i < offsets.size(); ++i) {
-      TS_ASSERT_EQUALS(offsets[i],
-                       m_chopper->slitTimes()[i] + m_chopper->zeroOffset());
+      TS_ASSERT_EQUALS(offsets[i], m_chopper->slitTimes()[i] + m_chopper->zeroOffset());
     }
   }
 
@@ -97,8 +88,7 @@ public:
     TestablePoldiSpectrumDomainFunction function;
     function.initializeInstrumentParameters(m_instrument);
 
-    TS_ASSERT_EQUALS(function.m_chopperSlitOffsets.size(),
-                     m_chopper->slitPositions().size());
+    TS_ASSERT_EQUALS(function.m_chopperSlitOffsets.size(), m_chopper->slitPositions().size());
   }
 
   void testFunction() {
@@ -106,8 +96,7 @@ public:
     function.initialize();
     function.setDecoratedFunction("Gaussian");
     function.setParameter("Height", 679.59369981039407842726); // 1.9854805);
-    function.setParameter("Sigma",
-                          0.0027446316797104233 / (2.0 * sqrt(2.0 * M_LN2)));
+    function.setParameter("Sigma", 0.0027446316797104233 / (2.0 * sqrt(2.0 * M_LN2)));
     function.setParameter("PeakCentre", 1.1086444);
 
     function.m_deltaT = 3.0;
@@ -122,12 +111,11 @@ public:
 
     function.function(domain, values);
 
-    std::array<double, 19> reference{
-        {0.214381692355321, 1.4396533098854, 7.69011673999647, 32.6747845396612,
-         110.432605589092, 296.883931458002, 634.864220660384, 1079.89069118744,
-         1461.11207069126, 1572.50503614829, 1346.18685763306, 916.691981263516,
-         496.502218342172, 213.861997764049, 73.2741206547921, 19.9697293956518,
-         4.32910692237627, 0.746498624291666, 0.102391587633906}};
+    std::array<double, 19> reference{{0.214381692355321, 1.4396533098854, 7.69011673999647, 32.6747845396612,
+                                      110.432605589092, 296.883931458002, 634.864220660384, 1079.89069118744,
+                                      1461.11207069126, 1572.50503614829, 1346.18685763306, 916.691981263516,
+                                      496.502218342172, 213.861997764049, 73.2741206547921, 19.9697293956518,
+                                      4.32910692237627, 0.746498624291666, 0.102391587633906}};
 
     for (size_t i = 0; i < reference.size(); ++i) {
       TS_ASSERT_DELTA(values[479 + i] / reference[i], 1.0, 1e-14);
@@ -139,8 +127,7 @@ public:
     function.initialize();
     function.setDecoratedFunction("Gaussian");
     function.setParameter("Height", 679.59369981039407842726); // 1.9854805);
-    function.setParameter("Sigma",
-                          0.0027446316797104233 / (2.0 * sqrt(2.0 * M_LN2)));
+    function.setParameter("Sigma", 0.0027446316797104233 / (2.0 * sqrt(2.0 * M_LN2)));
     function.setParameter("PeakCentre", 1.1086444);
 
     function.m_deltaT = 3.0;
@@ -153,28 +140,23 @@ public:
 
     function.functionDeriv(domain, jacobian);
 
-    std::array<double, 19> reference{
-        {0.214381692355321, 1.4396533098854, 7.69011673999647, 32.6747845396612,
-         110.432605589092, 296.883931458002, 634.864220660384, 1079.89069118744,
-         1461.11207069126, 1572.50503614829, 1346.18685763306, 916.691981263516,
-         496.502218342172, 213.861997764049, 73.2741206547921, 19.9697293956518,
-         4.32910692237627, 0.746498624291666, 0.102391587633906}};
+    std::array<double, 19> reference{{0.214381692355321, 1.4396533098854, 7.69011673999647, 32.6747845396612,
+                                      110.432605589092, 296.883931458002, 634.864220660384, 1079.89069118744,
+                                      1461.11207069126, 1572.50503614829, 1346.18685763306, 916.691981263516,
+                                      496.502218342172, 213.861997764049, 73.2741206547921, 19.9697293956518,
+                                      4.32910692237627, 0.746498624291666, 0.102391587633906}};
 
     for (size_t i = 0; i < reference.size(); ++i) {
-      TS_ASSERT_DELTA((jacobian.get(479 + i, 0)) /
-                          (reference[i] / 679.59369981039407842726),
-                      1.0, 1e-14);
+      TS_ASSERT_DELTA((jacobian.get(479 + i, 0)) / (reference[i] / 679.59369981039407842726), 1.0, 1e-14);
     }
   }
 
   void testAccessThroughBasePointer() {
-    TestablePoldiSpectrumDomainFunction *function =
-        new TestablePoldiSpectrumDomainFunction();
+    TestablePoldiSpectrumDomainFunction *function = new TestablePoldiSpectrumDomainFunction();
     function->initialize();
     function->setDecoratedFunction("Gaussian");
     function->setParameter("Height", 1.9854805);
-    function->setParameter("Sigma",
-                           0.0027446316797104233 / (2.0 * sqrt(2.0 * M_LN2)));
+    function->setParameter("Sigma", 0.0027446316797104233 / (2.0 * sqrt(2.0 * M_LN2)));
     function->setParameter("PeakCentre", 1.1086444);
 
     function->m_deltaT = 3.0;
@@ -185,9 +167,7 @@ public:
     MultiDomainFunction mdf;
     mdf.addFunction(IFunction_sptr(dynamic_cast<IFunction *>(function)));
 
-    TS_ASSERT_EQUALS(
-        static_cast<IFunction *>(&mdf)->getParameter("f0.PeakCentre"),
-        1.1086444);
+    TS_ASSERT_EQUALS(static_cast<IFunction *>(&mdf)->getParameter("f0.PeakCentre"), 1.1086444);
   }
 
   void testLocalJacobianConstruction() {
@@ -252,8 +232,7 @@ public:
    * conversion to/from strings
    */
   void ___testCreateInitialized() {
-    IFunction_sptr function =
-        FunctionFactory::Instance().createFunction("Gaussian");
+    IFunction_sptr function = FunctionFactory::Instance().createFunction("Gaussian");
     function->initialize();
     function->setParameter(0, 1.23456);
     function->setParameter(1, 1.234567);

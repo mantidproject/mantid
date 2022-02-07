@@ -3,19 +3,74 @@
 
     <component-link name="D16">
       <!-- Logs to sum when merging the runs -->
-      <parameter name="sample_logs_sum" type="string">
+      <parameter name="sample_logs_sum" type="string" visible="false">
         <value val="time, duration, timer" />
       </parameter>
       <!-- The width of the detector in pixels -->
       <parameter name="detector-width" type="number">
         <value val="320"/>
       </parameter>
-      <!-- The pixel sizes used by SolidAngle -->
+      <!-- The pixel sizes [mm] used by SolidAngle, resolution and default Q binning calculations.
+      Note that for the panels, often pixels have transposed shape, but the surface is the same.
+      Q binning is based on the maximum of the 2 dimensions, so it is also invariant.-->
       <parameter name="x-pixel-size" type="number">
         <value val="1"/>
       </parameter>
       <parameter name="y-pixel-size" type="number">
         <value val="1"/>
+      </parameter>
+      <!-- The size of the detector (in mm or pixel) -->
+      <parameter name="detector-width" type="number">
+        <value val="320"/>
+      </parameter>
+      <parameter name="detector-height" type="number">
+        <value val="320"/>
+      </parameter>
+
+      <!-- These parameters are used to define headers and entries for GenerateLogbook algorithm -->
+      <parameter name="logbook_default_parameters" type="string" visible="false">
+	<value val="SampleDescription:/entry0/experiment_identifier:s,
+		    StartTime:/entry0/start_time:s,
+		    Gamma:/entry0/instrument/Gamma/value:f,
+		    TotalTime:/entry0/duration:f,
+		    Attenuator:/entry0/instrument/attenuator/attenuation_value:d" />
+      </parameter>
+      <parameter name="logbook_optional_parameters" type="string" visible="false">
+	<value val="SetpointTemperature:/entry0/sample/setpoint_temperature:f,
+		    SampleTemperature:/entry0/sample/temperature:f,
+		    RegulationTemperature:/entry0/sample/regulation_temperature:f,
+		    TotalCountsDet:/entry0/instrument/Detector1/detsum:f,
+		    RateCountsDet:/entry0/instrument/Detector1/detrate:f,
+		    TotalCountsMonitor1:/entry0/monitor1/monsum:f,
+		    TotalCountsMonitor2:/entry0/monitor2/monsum:f,
+		    RateMonitor1:/entry0/monitor1/monrate:f,
+		    RateMonitor2:/entry0/monitor2/monrate:f,
+		    Omega:/entry0/instrument/Omega/value:f,
+		    OmegaOffset:/entry0/instrument/Omega/offset_value:f,
+		    Wavelength:/entry0/instrument/Beam/wavelength:f,
+		    Det:/entry0/instrument/Det/value:f,
+		    Mode:/entry0/mode:d,
+		    BeamStopYOffset:/entry0/instrument/BStopY/offset_value:f,
+		    BeamStopYValue:/entry0/instrument/BStopY/value:f,
+		    BeamStopXOffset:/entry0/instrument/BStopX/offset_value:f,
+		    BeamStopXValue:/entry0/instrument/BStopX/value:f,
+		    BeamstopX:/entry0/instrument/beamstop/bx_actual:f,
+		    BeamstopY:/entry0/instrument/beamstop/by_actual:f,
+		    ReactorPower:/entry0/reactor_power:f,
+		    Phi:/entry0/instrument/Phi/value:f,
+		    PhiOffset:/entry0/instrument/Phi/offset_value:f,
+		    Khi:/entry0/instrument/Khi/value:f,
+		    KhiOffset:/entry0/instrument/Khi/offset_value:f,
+		    Str:/entry0/instrument/Str/value:f,
+		    StrOffset:/entry0/instrument/Str/offset_value:f,
+		    Slitr:/entry0/instrument/Slitr/value:f,
+		    SlitrOffset:/entry0/instrument/Slitr/offset_value:f,
+		    SampleChangerPos:/entry0/instrument/VirtualSampleChanger/sample_changer_slot_value:f" />
+      </parameter>
+      <parameter name="log_list_to_save" type="string" visible="false">
+	<value val="facility,instrument.name,experiment_identifier,
+		    start_time,end_time,numor_list,processedAs,
+		    wavelength,sample_transmission_numors,L2"/>
       </parameter>
     </component-link>
 

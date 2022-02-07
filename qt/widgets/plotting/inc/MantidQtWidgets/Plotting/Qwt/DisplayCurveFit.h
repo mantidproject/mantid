@@ -54,21 +54,15 @@ public:
   };
   DisplayCurveFit(QWidget *parent = nullptr);
   ~DisplayCurveFit() override;
-  void setAxisRange(QPair<double, double> range,
-                    AxisID axisID = AxisID::XBottom);
-  curveTypes
-  getCurvesForWorkspace(const Mantid::API::MatrixWorkspace_sptr &workspace);
+  void setAxisRange(QPair<double, double> range, AxisID axisID = AxisID::XBottom);
+  curveTypes getCurvesForWorkspace(const Mantid::API::MatrixWorkspace_sptr &workspace);
   QPair<double, double> getCurveRange(const curveType &atype);
-  QPair<double, double>
-  getCurveRange(const Mantid::API::MatrixWorkspace_sptr &workspace);
-  void addSpectrum(const curveType &aType,
-                   const Mantid::API::MatrixWorkspace_sptr &workspace,
+  QPair<double, double> getCurveRange(const Mantid::API::MatrixWorkspace_sptr &workspace);
+  void addSpectrum(const curveType &aType, const Mantid::API::MatrixWorkspace_sptr &workspace,
                    const size_t specIndex = 0);
   void removeSpectrum(const curveType &aType);
   bool hasCurve(const curveType &aType);
-  void
-  addRangeSelector(const dcRange &adcRange,
-                   RangeSelector::SelectType type = RangeSelector::XMINMAX);
+  void addRangeSelector(const dcRange &adcRange, RangeSelector::SelectType type = RangeSelector::XMINMAX);
   void addResidualsZeroline();
   static std::map<curveType, QString> const m_curveTypeToQString;
   static std::map<curveType, Qt::GlobalColor> const m_curveTypeToColor;

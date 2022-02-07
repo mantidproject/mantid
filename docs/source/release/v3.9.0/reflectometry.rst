@@ -85,7 +85,7 @@ ISIS Reflectometry (Polref)
 - An issue by which the interface was not populating ``dQ/Q``, ``Q min`` and ``Q max`` correctly for multi-period datasets has been fixed.
 - A shift in Y between different slices has been fixed.
 - When the instrument is changed from the GUI, the Mantid default instrument is updated accordingly.
-- Error messages are displayed if the user either attempts to transfer zero runs or transfer runs with a different strategy to the one they used to search for runs with. 
+- Error messages are displayed if the user either attempts to transfer zero runs or transfer runs with a different strategy to the one they used to search for runs with.
 - Fixed a bug where if the user answered 'no' to a popup asking if they wanted to process all runs, the progress bar would show activity as though a data reduction was occurring.
 - Documentation regarding the interface has been updated accordingly.
 

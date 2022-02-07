@@ -10,11 +10,28 @@ from mantid.kernel import DateAndTime
 from unittest import mock
 from sans.common.enums import SampleShape
 from sans.common.file_information import (SANSFileInformationFactory, FileType,
-                                          SANSInstrument, get_instrument_paths_for_sans_file)
+                                          SANSInstrument, get_instrument_paths_for_sans_file,
+                                          SANSFileInformationISISAdded, SANSFileInformationISISNexus)
 from sans.test_helper.file_information_mock import SANSFileInformationMock
 
 
 class SANSFileInformationTest(unittest.TestCase):
+    def test_add_file_without_add_extension_is_found(self):
+        file_name = "ZOOM9947-a"
+        factory = SANSFileInformationFactory()
+        file_information = factory.create_sans_file_information(file_name)
+
+        self.assertIsInstance(file_information, SANSFileInformationISISAdded)
+        self.assertTrue(file_information.is_event_mode())
+
+    def test_event_data_not_added_is_detected(self):
+        file_name = "ZOOM9898"
+        factory = SANSFileInformationFactory()
+        file_information = factory.create_sans_file_information(file_name)
+
+        self.assertIsInstance(file_information, SANSFileInformationISISNexus)
+        self.assertTrue(file_information.is_event_mode())
+
     def test_that_can_extract_information_from_file_for_SANS2D_single_period_and_ISISNexus(self):
         # Arrange
         # The file is a single period
@@ -79,6 +96,19 @@ class SANSFileInformationTest(unittest.TestCase):
         self.assertEqual(file_information.get_height(),  8.0)
         self.assertEqual(file_information.get_thickness(),  2.0)
         self.assertEqual(file_information.get_shape(), SampleShape.FLAT_PLATE)
+
+    def test_two_file_informations_are_eq(self):
+        # Arrange
+        # The file is a multi period and event-based
+        file_name = "LARMOR00003368"
+        factory = SANSFileInformationFactory()
+
+        # Act
+        file_information = factory.create_sans_file_information(file_name)
+        file_information_2 = factory.create_sans_file_information(file_name)
+
+        # Two identical file informations should be equal even if they are different objects
+        self.assertEqual(file_information, file_information_2)
 
     def test_that_can_extract_information_for_added_histogram_data_and_nexus_format(self):
         # Arrange

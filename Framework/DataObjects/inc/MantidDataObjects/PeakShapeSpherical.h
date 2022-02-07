@@ -20,15 +20,11 @@ namespace DataObjects {
 class DLLExport PeakShapeSpherical : public PeakShapeBase {
 public:
   /// Constructor
-  PeakShapeSpherical(const double &peakRadius,
-                     Kernel::SpecialCoordinateSystem frame,
-                     std::string algorithmName = std::string(),
-                     int algorithmVersion = -1);
+  PeakShapeSpherical(const double &peakRadius, Kernel::SpecialCoordinateSystem frame,
+                     std::string algorithmName = std::string(), int algorithmVersion = -1);
   /// Constructor
-  PeakShapeSpherical(const double &peakRadius, const double &peakInnerRadius,
-                     const double &peakOuterRadius,
-                     Kernel::SpecialCoordinateSystem frame,
-                     std::string algorithmName = std::string(),
+  PeakShapeSpherical(const double &peakRadius, const double &peakInnerRadius, const double &peakOuterRadius,
+                     Kernel::SpecialCoordinateSystem frame, std::string algorithmName = std::string(),
                      int algorithmVersion = -1);
   /// Serialization method
   std::string toJSON() const override;
@@ -39,8 +35,7 @@ public:
   /// Equals operator
   bool operator==(const PeakShapeSpherical &other) const;
   /// Peak radius
-  boost::optional<double>
-  radius(RadiusType type = RadiusType::Radius) const override;
+  boost::optional<double> radius(RadiusType type = RadiusType::Radius) const override;
   /// Peak outer background radius
   boost::optional<double> backgroundOuterRadius() const;
   /// Peak inner background radius

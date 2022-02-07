@@ -28,6 +28,8 @@ set(SRC_FILES
     src/NoShape.cpp
     src/OffsetsWorkspace.cpp
     src/Peak.cpp
+    src/LeanElasticPeak.cpp
+    src/BasePeak.cpp
     src/PeakColumn.cpp
     src/PeakNoShapeFactory.cpp
     src/PeakShapeBase.cpp
@@ -36,6 +38,7 @@ set(SRC_FILES
     src/PeakShapeSpherical.cpp
     src/PeakShapeSphericalFactory.cpp
     src/PeaksWorkspace.cpp
+    src/LeanElasticPeaksWorkspace.cpp
     src/PropertyWithValue.cpp
     src/RebinnedOutput.cpp
     src/ReflectometryTransform.cpp
@@ -48,12 +51,10 @@ set(SRC_FILES
     src/Workspace2D.cpp
     src/WorkspaceCreation.cpp
     src/WorkspaceProperty.cpp
-    src/WorkspaceSingleValue.cpp)
-
-set(SRC_UNITY_IGNORE_FILES
-    src/Workspace2D.cpp
     src/WorkspaceSingleValue.cpp
-    src/EventWorkspace.cpp)
+)
+
+set(SRC_UNITY_IGNORE_FILES src/Workspace2D.cpp src/WorkspaceSingleValue.cpp src/EventWorkspace.cpp)
 
 set(INC_FILES
     inc/MantidDataObjects/AffineMatrixParameter.h
@@ -71,6 +72,7 @@ set(INC_FILES
     inc/MantidDataObjects/DllConfig.h
     inc/MantidDataObjects/EventList.h
     inc/MantidDataObjects/EventWorkspace.h
+    inc/MantidDataObjects/EventWorkspace_fwd.h
     inc/MantidDataObjects/EventWorkspaceHelpers.h
     inc/MantidDataObjects/EventWorkspaceMRU.h
     inc/MantidDataObjects/Events.h
@@ -108,6 +110,8 @@ set(INC_FILES
     inc/MantidDataObjects/NoShape.h
     inc/MantidDataObjects/OffsetsWorkspace.h
     inc/MantidDataObjects/Peak.h
+    inc/MantidDataObjects/LeanElasticPeak.h
+    inc/MantidDataObjects/BasePeak.h
     inc/MantidDataObjects/PeakColumn.h
     inc/MantidDataObjects/PeakNoShapeFactory.h
     inc/MantidDataObjects/PeakShapeBase.h
@@ -117,6 +121,7 @@ set(INC_FILES
     inc/MantidDataObjects/PeakShapeSpherical.h
     inc/MantidDataObjects/PeakShapeSphericalFactory.h
     inc/MantidDataObjects/PeaksWorkspace.h
+    inc/MantidDataObjects/LeanElasticPeaksWorkspace.h
     inc/MantidDataObjects/RebinnedOutput.h
     inc/MantidDataObjects/ReflectometryTransform.h
     inc/MantidDataObjects/ScanningWorkspaceBuilder.h
@@ -125,10 +130,13 @@ set(INC_FILES
     inc/MantidDataObjects/SplittersWorkspace.h
     inc/MantidDataObjects/TableColumn.h
     inc/MantidDataObjects/TableWorkspace.h
+    inc/MantidDataObjects/TableWorkspace_fwd.h
     inc/MantidDataObjects/VectorColumn.h
     inc/MantidDataObjects/Workspace2D.h
+    inc/MantidDataObjects/Workspace2D_fwd.h
     inc/MantidDataObjects/WorkspaceCreation.h
-    inc/MantidDataObjects/WorkspaceSingleValue.h)
+    inc/MantidDataObjects/WorkspaceSingleValue.h
+)
 
 set(TEST_FILES
     AffineMatrixParameterParserTest.h
@@ -173,7 +181,9 @@ set(TEST_FILES
     PeakShapeSphericalFactoryTest.h
     PeakShapeSphericalTest.h
     PeakTest.h
+    LeanElasticPeakTest.h
     PeaksWorkspaceTest.h
+    LeanElasticPeaksWorkspaceTest.h
     RebinnedOutputTest.h
     RefAxisTest.h
     ReflectometryTransformTest.h
@@ -191,18 +201,17 @@ set(TEST_FILES
     WorkspaceCreationTest.h
     WorkspaceSingleValueTest.h
     WorkspaceValidatorsTest.h
-    MortonIndex/BitInterleavingTest.h)
+    MortonIndex/BitInterleavingTest.h
+)
 
 if(UNITY_BUILD)
   include(UnityBuild)
   enable_unity_build(DataObjects SRC_FILES SRC_UNITY_IGNORE_FILES 10)
 endif(UNITY_BUILD)
 
-if(COVERALLS)
+if(COVERAGE)
   foreach(loop_var ${SRC_FILES} ${INC_FILES})
-    set_property(GLOBAL APPEND
-                 PROPERTY COVERAGE_SRCS
-                          "${CMAKE_CURRENT_SOURCE_DIR}/${loop_var}")
+    set_property(GLOBAL APPEND PROPERTY COVERAGE_SRCS "${CMAKE_CURRENT_SOURCE_DIR}/${loop_var}")
   endforeach(loop_var)
 endif()
 
@@ -210,46 +219,37 @@ endif()
 enable_precompiled_headers(inc/MantidDataObjects/PrecompiledHeader.h SRC_FILES)
 # Add the target for this directory
 add_library(DataObjects ${SRC_FILES} ${INC_FILES})
+add_library(Mantid::DataObjects ALIAS DataObjects)
+
+target_include_directories(
+  DataObjects PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/inc> $<INSTALL_INTERFACE:include/Mantid>
+)
+
 # Set the name of the generated library
-set_target_properties(DataObjects PROPERTIES
-                      OUTPUT_NAME
-                        MantidDataObjects
-                      COMPILE_DEFINITIONS
-                        IN_MANTID_DATAOBJECTS
-                      INTERFACE_INCLUDE_DIRECTORIES
-                        ${CMAKE_CURRENT_LIST_DIR}/inc)
+set_target_properties(DataObjects PROPERTIES OUTPUT_NAME MantidDataObjects COMPILE_DEFINITIONS IN_MANTID_DATAOBJECTS)
 
 if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
-  set_target_properties(DataObjects
-                        PROPERTIES INSTALL_RPATH "@loader_path/../MacOS;@loader_path/../Frameworks")
+  set_target_properties(DataObjects PROPERTIES INSTALL_RPATH "@loader_path/../MacOS;@loader_path/../Frameworks")
 elseif(${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
-  set_target_properties(DataObjects
-                        PROPERTIES INSTALL_RPATH "\$ORIGIN/../${LIB_DIR}")
-endif()
-
-# Intensive use of templated libaries can cause large objects to be generated.
-# These require an additional flag in MSVC.
-if(MSVC)
-  set_target_properties(DataObjects PROPERTIES COMPILE_FLAGS "/bigobj")
+  set_target_properties(DataObjects PROPERTIES INSTALL_RPATH "\$ORIGIN/../${LIB_DIR}")
 endif()
 
 # Add to the 'Framework' group in VS
 set_property(TARGET DataObjects PROPERTY FOLDER "MantidFramework")
 
-target_link_libraries(DataObjects
-                      LINK_PRIVATE
-                      ${TCMALLOC_LIBRARIES_LINKTIME}
-                      ${MANTIDLIBS}
-                      ${JSONCPP_LIBRARIES}
-                      ${NEXUS_LIBRARIES})
+target_link_libraries(
+  DataObjects
+  PUBLIC Mantid::API Mantid::Geometry Mantid::HistogramData Mantid::Kernel
+  PRIVATE Mantid::Json Mantid::Indexing
+)
 
 # Add the unit tests directory
 add_subdirectory(test)
 
 # Installation settings
-
-mtd_install_targets(TARGETS
-                    DataObjects
-                    INSTALL_DIRS
-                    ${LIB_DIR}
-                    ${WORKBENCH_LIB_DIR})
+if(CONDA_ENV)
+  set(TARGET_EXPORT_NAME "MantidDataObjectsTargets")
+  mtd_install_framework_lib(TARGETS DataObjects EXPORT_NAME ${TARGET_EXPORT_NAME})
+else()
+  mtd_install_targets(TARGETS DataObjects INSTALL_DIRS ${LIB_DIR} ${WORKBENCH_LIB_DIR})
+endif()

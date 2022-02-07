@@ -1,7 +1,7 @@
 .. _more_sequence_types:
 
 ===================
-More Sequence Types 
+More Sequence Types
 ===================
 
 Tuples
@@ -31,6 +31,18 @@ Tuples
 -  Tuples are most useful when returning values from functions as they
    allow returns of more than 1 item as will be shown later.
 
+-  A meaning can be assigned to each position of the tuples through the use of the ``namedtuple`` type. This leads to unambiguous
+   tuple assignment and creates self-documenting code. For instance, consider a tuple representing a geometric point:
+
+.. code:: python
+
+   from collections import namedtuple
+   Point = namedtuple('Point', ['x', 'y', 'z'])
+   p = Point(x=2, y=3, z=4)
+   print(p.x, p[0]) # elements can be accessed using the field name or by index
+
+- The meaning of the import ``from collections import nametuple`` will be outlined further on in this tutorial.
+
 Dictionaries
 ============
 
@@ -56,7 +68,7 @@ Dictionaries
    empty_dict = {}      # Empty dictionary
    my_lookup = {'a' : 1, 'b' : 2} # A dictionary with two keys, each
                                   # mapped to the respective value
-   print(my_lookup['b'])  
+   print(my_lookup['b'])
 
 Gives the output:
 
@@ -117,10 +129,10 @@ Sets
 .. code:: python
 
    values = set([1,1,3])
-   print(values) 
+   print(values)
    values.add(4)
    values.remove(1)
-   print(values) 
+   print(values)
 
 Gives the output:
 
@@ -150,13 +162,13 @@ Common Operations
 
 .. testcode:: operations1
 
-   s = [1,2,3,4,5,6]      # Also works with all other sequence types 
-   print(len(s)) 
-    
+   s = [1,2,3,4,5,6]      # Also works with all other sequence types
+   print(len(s))
+
    test = 3 in s
-   print(test)   
+   print(test)
    test = 7 not in s
-   print(test)  
+   print(test)
 
 Gives the output:
 

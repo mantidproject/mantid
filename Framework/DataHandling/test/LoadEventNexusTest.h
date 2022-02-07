@@ -14,6 +14,8 @@
 #include "MantidAPI/Workspace.h"
 #include "MantidDataHandling/LoadEventNexus.h"
 #include "MantidDataObjects/EventWorkspace.h"
+#include "MantidFrameworkTestHelpers/ParallelAlgorithmCreation.h"
+#include "MantidFrameworkTestHelpers/ParallelRunner.h"
 #include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidIndexing/IndexInfo.h"
 #include "MantidIndexing/SpectrumIndexSet.h"
@@ -23,9 +25,8 @@
 #include "MantidNexusGeometry/Hdf5Version.h"
 #include "MantidParallel/Collectives.h"
 #include "MantidParallel/Communicator.h"
-#include "MantidTestHelpers/ParallelAlgorithmCreation.h"
-#include "MantidTestHelpers/ParallelRunner.h"
 
+#include "Poco/Path.h"
 #include <cxxtest/TestSuite.h>
 
 using namespace Mantid;
@@ -50,8 +51,7 @@ void run_multiprocess_load(const std::string &file, bool precount) {
   TS_ASSERT_THROWS_NOTHING(ld.execute());
   TS_ASSERT(ld.isExecuted())
 
-  EventWorkspace_sptr ws =
-      AnalysisDataService::Instance().retrieveWS<EventWorkspace>(outws_name);
+  EventWorkspace_sptr ws = AnalysisDataService::Instance().retrieveWS<EventWorkspace>(outws_name);
   TS_ASSERT(ws);
 
   LoadEventNexus ldRef;
@@ -65,33 +65,28 @@ void run_multiprocess_load(const std::string &file, bool precount) {
   TS_ASSERT_THROWS_NOTHING(ldRef.execute());
   TS_ASSERT(ldRef.isExecuted())
 
-  EventWorkspace_sptr wsRef =
-      AnalysisDataService::Instance().retrieveWS<EventWorkspace>(outws_name);
+  EventWorkspace_sptr wsRef = AnalysisDataService::Instance().retrieveWS<EventWorkspace>(outws_name);
   TS_ASSERT(wsRef);
 
-  TSM_ASSERT_EQUALS("Different spectrum number in reference ws.",
-                    wsRef->getNumberHistograms(), ws->getNumberHistograms());
+  TSM_ASSERT_EQUALS("Different spectrum number in reference ws.", wsRef->getNumberHistograms(),
+                    ws->getNumberHistograms());
   if (wsRef->getNumberHistograms() != ws->getNumberHistograms())
     return;
   for (size_t i = 0; i < wsRef->getNumberHistograms(); ++i) {
     auto &eventList = ws->getSpectrum(i).getEvents();
     auto &eventListRef = wsRef->getSpectrum(i).getEvents();
-    TSM_ASSERT_EQUALS("Different events number in reference spectra",
-                      eventList.size(), eventListRef.size());
+    TSM_ASSERT_EQUALS("Different events number in reference spectra", eventList.size(), eventListRef.size());
     if (eventList.size() != eventListRef.size())
       return;
     for (size_t j = 0; j < eventListRef.size(); ++j) {
-      TSM_ASSERT_EQUALS("Events are not equal", eventList[j].tof(),
-                        eventListRef[j].tof());
-      TSM_ASSERT_EQUALS("Events are not equal", eventList[j].pulseTime(),
-                        eventListRef[j].pulseTime());
+      TSM_ASSERT_EQUALS("Events are not equal", eventList[j].tof(), eventListRef[j].tof());
+      TSM_ASSERT_EQUALS("Events are not equal", eventList[j].pulseTime(), eventListRef[j].pulseTime());
     }
   }
 }
 
 namespace {
-std::shared_ptr<const EventWorkspace>
-load_reference_workspace(const std::string &filename) {
+std::shared_ptr<const EventWorkspace> load_reference_workspace(const std::string &filename) {
   // Construct default communicator *without* threading backend. In non-MPI run
   // (such as when running unit tests) this will thus just be a communicator
   // containing a single rank, independently on all ranks, which is what we want
@@ -105,8 +100,7 @@ load_reference_workspace(const std::string &filename) {
   Workspace_const_sptr out = alg->getProperty("OutputWorkspace");
   return std::dynamic_pointer_cast<const EventWorkspace>(out);
 }
-void run_MPI_load(const Parallel::Communicator &comm,
-                  const std::shared_ptr<std::mutex> &mutex,
+void run_MPI_load(const Parallel::Communicator &comm, const std::shared_ptr<std::mutex> &mutex,
                   const std::string &filename) {
   std::shared_ptr<const EventWorkspace> reference;
   std::shared_ptr<const EventWorkspace> eventWS;
@@ -131,12 +125,9 @@ void run_MPI_load(const Parallel::Communicator &comm,
   Parallel::gather(comm, localSize, localSizes, 0);
   Parallel::gather(comm, localEventCount, localEventCounts, 0);
   if (comm.rank() == 0) {
-    TS_ASSERT_EQUALS(std::accumulate(localSizes.begin(), localSizes.end(),
-                                     static_cast<size_t>(0)),
+    TS_ASSERT_EQUALS(std::accumulate(localSizes.begin(), localSizes.end(), static_cast<size_t>(0)),
                      reference->getNumberHistograms());
-    TS_ASSERT_EQUALS(std::accumulate(localEventCounts.begin(),
-                                     localEventCounts.end(),
-                                     static_cast<size_t>(0)),
+    TS_ASSERT_EQUALS(std::accumulate(localEventCounts.begin(), localEventCounts.end(), static_cast<size_t>(0)),
                      reference->getNumberEvents());
   }
 
@@ -144,8 +135,7 @@ void run_MPI_load(const Parallel::Communicator &comm,
   size_t localCompared = 0;
   for (size_t i = 0; i < reference->getNumberHistograms(); ++i) {
     for (const auto &index :
-         indexInfo.makeIndexSet({static_cast<Indexing::SpectrumNumber>(
-             reference->getSpectrum(i).getSpectrumNo())})) {
+         indexInfo.makeIndexSet({static_cast<Indexing::SpectrumNumber>(reference->getSpectrum(i).getSpectrumNo())})) {
       TS_ASSERT_EQUALS(eventWS->getSpectrum(index), reference->getSpectrum(i));
       ++localCompared;
     }
@@ -155,8 +145,7 @@ void run_MPI_load(const Parallel::Communicator &comm,
   std::vector<size_t> compared;
   Parallel::gather(comm, localCompared, compared, 0);
   if (comm.rank() == 0) {
-    TS_ASSERT_EQUALS(std::accumulate(compared.begin(), compared.end(),
-                                     static_cast<size_t>(0)),
+    TS_ASSERT_EQUALS(std::accumulate(compared.begin(), compared.end(), static_cast<size_t>(0)),
                      reference->getNumberHistograms());
   }
 }
@@ -164,8 +153,7 @@ void run_MPI_load(const Parallel::Communicator &comm,
 
 class LoadEventNexusTest : public CxxTest::TestSuite {
 private:
-  void
-  do_test_filtering_start_and_end_filtered_loading(const bool metadataonly) {
+  void do_test_filtering_start_and_end_filtered_loading(const bool metadataonly) {
     const std::string wsName = "test_filtering";
     const double filterStart = 1;
     const double filterEnd = 1000;
@@ -180,23 +168,31 @@ private:
 
     TS_ASSERT(ld.execute());
 
-    auto outWs =
-        AnalysisDataService::Instance().retrieveWS<EventWorkspace>(wsName);
+    auto outWs = AnalysisDataService::Instance().retrieveWS<EventWorkspace>(wsName);
 
     Property *prop = outWs->run().getLogData("SampleTemp");
-    TSM_ASSERT_EQUALS("Should have 16 elements after filtering.", 16,
-                      prop->size());
+    TSM_ASSERT_EQUALS("Should have 16 elements after filtering.", 16, prop->size());
     if (prop->size() != 16)
       return;
     // Further tests
-    TimeSeriesProperty<double> *sampleTemps =
-        dynamic_cast<TimeSeriesProperty<double> *>(prop);
+    TimeSeriesProperty<double> *sampleTemps = dynamic_cast<TimeSeriesProperty<double> *>(prop);
     auto filteredLogStartTime = sampleTemps->nthTime(0);
     auto filteredLogEndTime = sampleTemps->nthTime(sampleTemps->size() - 1);
-    TS_ASSERT_EQUALS("2010-Mar-25 16:09:27.620000000",
-                     filteredLogStartTime.toSimpleString());
-    TS_ASSERT_EQUALS("2010-Mar-25 16:11:51.558003540",
-                     filteredLogEndTime.toSimpleString());
+    TS_ASSERT_EQUALS("2010-Mar-25 16:09:27.620000000", filteredLogStartTime.toSimpleString());
+    TS_ASSERT_EQUALS("2010-Mar-25 16:11:51.558003540", filteredLogEndTime.toSimpleString());
+  }
+
+  void validate_pulse_time_sorting(EventWorkspace_sptr eventWS) {
+    for (size_t i = 0; i < eventWS->getNumberHistograms(); i++) {
+      auto eventList = eventWS->getSpectrum(i);
+      if (eventList.getSortType() == DataObjects::PULSETIME_SORT) {
+        std::vector<DateAndTime> pulsetimes;
+        for (auto &event : eventList.getEvents()) {
+          pulsetimes.emplace_back(event.pulseTime());
+        }
+        TS_ASSERT(std::is_sorted(pulsetimes.cbegin(), pulsetimes.cend()));
+      }
+    }
   }
 
 public:
@@ -216,6 +212,30 @@ public:
     TS_ASSERT_EQUALS(eventWS->getNumberEvents(), 1439);
     TS_ASSERT_EQUALS(eventWS->detectorInfo().size(),
                      (150 * 150) + 2) // Two monitors
+  }
+
+  void test_load_event_nexus_v20_ess_log_filtered() {
+    const std::string file = "V20_ESS_example.nxs";
+    std::vector<std::string> allowed = {"proton_charge", "S2HGap", "S2VGap"};
+
+    LoadEventNexus alg;
+    alg.setChild(true);
+    alg.setRethrows(true);
+    alg.initialize();
+    alg.setProperty("Filename", file);
+    alg.setProperty("AllowList", allowed);
+    alg.setProperty("OutputWorkspace", "dummy_for_child");
+    alg.execute();
+    Workspace_sptr ws = alg.getProperty("OutputWorkspace");
+    auto eventWS = std::dynamic_pointer_cast<EventWorkspace>(ws);
+    TS_ASSERT(eventWS);
+
+    TS_ASSERT_EQUALS(eventWS->getNumberEvents(), 1439);
+    TS_ASSERT_EQUALS(eventWS->detectorInfo().size(),
+                     (150 * 150) + 2) // Two monitors
+
+    // this file contains events that are sorted in pulse time order
+    validate_pulse_time_sorting(eventWS);
   }
 
   void test_load_event_nexus_v20_ess_integration_2018() {
@@ -238,7 +258,43 @@ public:
                        (300 * 300) + 2) // Two monitors
       TS_ASSERT_DELTA(eventWS->getTofMin(), 9.815, 1.0e-3);
       TS_ASSERT_DELTA(eventWS->getTofMax(), 130748.563, 1.0e-3);
+
+      // this file contains events that aren't sorted in pulse time order but the event lists per spectra are sorted
+      validate_pulse_time_sorting(eventWS);
     }
+  }
+
+  void test_load_event_nexus_POLARIS() {
+    // POLARIS file slow to create geometry cache so use a pregenerated vtp file. Details of the geometry don't matter
+    // for this test
+    const std::string vtpDirectoryKey = "instrumentDefinition.vtp.directory";
+    std::string foundFile =
+        Kernel::ConfigService::Instance().getFullPath("POLARIS9fbf7121b4274c833043ae8933ec643ff7b9313d.vtp", true, 0);
+    bool hasVTPDirectory = ConfigService::Instance().hasProperty(vtpDirectoryKey);
+    auto origVTPDirectory = ConfigService::Instance().getString(vtpDirectoryKey);
+    ConfigService::Instance().setString(vtpDirectoryKey, Poco::Path(foundFile).parent().toString());
+    const std::string file = "POLARIS00130512.nxs";
+    LoadEventNexus alg;
+    alg.setChild(true);
+    alg.setRethrows(true);
+    alg.initialize();
+    alg.setProperty("Filename", file);
+    alg.setProperty("OutputWorkspace", "dummy_for_child");
+    alg.execute();
+    Workspace_sptr ws = alg.getProperty("OutputWorkspace");
+    auto eventWS = std::dynamic_pointer_cast<EventWorkspace>(ws);
+    TS_ASSERT(eventWS);
+
+    TS_ASSERT_EQUALS(eventWS->getNumberEvents(), 19268117);
+    TS_ASSERT_DELTA(eventWS->getTofMin(), 0., 1.0e-3);
+    TS_ASSERT_DELTA(eventWS->getTofMax(), 19994.945, 1.0e-3);
+
+    // this file contains events that aren't sorted in pulse time order, even per spectra
+    validate_pulse_time_sorting(eventWS);
+    if (hasVTPDirectory)
+      ConfigService::Instance().setString(vtpDirectoryKey, origVTPDirectory);
+    else
+      ConfigService::Instance().remove(vtpDirectoryKey);
   }
 
   void test_NumberOfBins() {
@@ -322,8 +378,7 @@ public:
     Workspace_sptr ws = alg.getProperty("OutputWorkspace");
     auto eventWS = std::dynamic_pointer_cast<EventWorkspace>(ws);
     TS_ASSERT(eventWS);
-    const double duration =
-        eventWS->mutableRun().getPropertyValueAsType<double>("duration");
+    const double duration = eventWS->mutableRun().getPropertyValueAsType<double>("duration");
     TS_ASSERT_DELTA(duration, 7200.012, 0.01);
   }
 
@@ -341,8 +396,7 @@ public:
     ld.execute();
     TS_ASSERT(ld.isExecuted());
 
-    EventWorkspace_sptr WS =
-        AnalysisDataService::Instance().retrieveWS<EventWorkspace>(outws_name);
+    EventWorkspace_sptr WS = AnalysisDataService::Instance().retrieveWS<EventWorkspace>(outws_name);
     // Valid WS and it is an EventWorkspace
     TS_ASSERT(WS);
     // Pixels have to be padded
@@ -359,17 +413,14 @@ public:
     TS_ASSERT_EQUALS(*WS->getSpectrum(0).getDetectorIDs().begin(), 0);
 
     // Check one event from one pixel - does it have a reasonable pulse time
-    TS_ASSERT(WS->getSpectrum(1000).getEvents()[0].pulseTime() >
-              DateAndTime(int64_t(1e9 * 365 * 10)));
+    TS_ASSERT(WS->getSpectrum(1000).getEvents()[0].pulseTime() > DateAndTime(int64_t(1e9 * 365 * 10)));
 
     // Check filename
-    TS_ASSERT_EQUALS(ld.getPropertyValue("Filename"),
-                     WS->run().getProperty("Filename")->value());
+    TS_ASSERT_EQUALS(ld.getPropertyValue("Filename"), WS->run().getProperty("Filename")->value());
 
     // Test that asking not to load the logs did what it should
     // Make sure that we throw if we try to read a log (that shouldn't be there)
-    TS_ASSERT_THROWS(WS->getLog("proton_charge"),
-                     const std::invalid_argument &);
+    TS_ASSERT_THROWS(WS->getLog("proton_charge"), const std::invalid_argument &);
 
     //----- Now we re-load with precounting and compare memory use ----
     LoadEventNexus ld2;
@@ -383,8 +434,7 @@ public:
     ld2.execute();
     TS_ASSERT(ld2.isExecuted());
 
-    EventWorkspace_sptr WS2 =
-        AnalysisDataService::Instance().retrieveWS<EventWorkspace>(outws_name2);
+    EventWorkspace_sptr WS2 = AnalysisDataService::Instance().retrieveWS<EventWorkspace>(outws_name2);
     // Valid WS and it is an EventWorkspace
     TS_ASSERT(WS2);
 
@@ -394,28 +444,23 @@ public:
 
     // Longer, more thorough test
     if (false) {
-      IAlgorithm_sptr load =
-          AlgorithmManager::Instance().create("LoadEventPreNexus", 1);
+      auto load = AlgorithmManager::Instance().create("LoadEventPreNexus", 1);
       load->setPropertyValue("OutputWorkspace", "cncs_pre");
       load->setPropertyValue("EventFilename", "CNCS_7860_neutron_event.dat");
       load->setPropertyValue("PulseidFilename", "CNCS_7860_pulseid.dat");
       load->setPropertyValue("MappingFilename", "CNCS_TS_2008_08_18.dat");
       load->execute();
       TS_ASSERT(load->isExecuted());
-      EventWorkspace_sptr WS2 =
-          AnalysisDataService::Instance().retrieveWS<EventWorkspace>(
-              "cncs_pre");
+      EventWorkspace_sptr WS2 = AnalysisDataService::Instance().retrieveWS<EventWorkspace>("cncs_pre");
       // Valid WS and it is an EventWorkspace
       TS_ASSERT(WS2);
 
       // Let's compare the proton_charge logs
       TimeSeriesProperty<double> *log =
-          dynamic_cast<TimeSeriesProperty<double> *>(
-              WS->mutableRun().getProperty("proton_charge"));
+          dynamic_cast<TimeSeriesProperty<double> *>(WS->mutableRun().getProperty("proton_charge"));
       std::map<DateAndTime, double> logMap = log->valueAsCorrectMap();
       TimeSeriesProperty<double> *log2 =
-          dynamic_cast<TimeSeriesProperty<double> *>(
-              WS2->mutableRun().getProperty("proton_charge"));
+          dynamic_cast<TimeSeriesProperty<double> *>(WS2->mutableRun().getProperty("proton_charge"));
       std::map<DateAndTime, double> logMap2 = log2->valueAsCorrectMap();
       std::map<DateAndTime, double>::iterator it, it2;
 
@@ -426,9 +471,8 @@ public:
         // TS_ASSERT_DELTA( it->first, it2->first,
         // DateAndTime::durationFromSeconds(1e-3));
         // Same times?
-        TS_ASSERT_LESS_THAN(
-            fabs(DateAndTime::secondsFromDuration(it->first - it2->first)),
-            1); // TODO: Fix the nexus file times here
+        TS_ASSERT_LESS_THAN(fabs(DateAndTime::secondsFromDuration(it->first - it2->first)),
+                            1); // TODO: Fix the nexus file times here
         // Same proton charge?
         TS_ASSERT_DELTA(it->second, it2->second, 1e-5);
         it++;
@@ -471,8 +515,7 @@ public:
 
     TS_ASSERT(ld.execute());
 
-    auto outWs =
-        AnalysisDataService::Instance().retrieveWS<EventWorkspace>(wsName);
+    auto outWs = AnalysisDataService::Instance().retrieveWS<EventWorkspace>(wsName);
 
     auto eventList = outWs->getSpectrum(4348);
     auto events = eventList.getEvents();
@@ -509,8 +552,7 @@ public:
 
     TS_ASSERT(ld.execute());
 
-    auto outWs =
-        AnalysisDataService::Instance().retrieveWS<EventWorkspace>(wsName);
+    auto outWs = AnalysisDataService::Instance().retrieveWS<EventWorkspace>(wsName);
 
     TSM_ASSERT("The number of spectra in the workspace should be equal to the "
                "spectra filtered",
@@ -544,14 +586,12 @@ public:
     // Spectrum numbers match those that same detector would have in unfiltered
     // load, in this case detID + 1 since IDs in instrument start at 0.
     for (size_t specIdx = 0; specIdx < numSpecs; specIdx++) {
-      TS_ASSERT_EQUALS(outWs->getSpectrum(specIdx).getSpectrumNo(),
-                       static_cast<int>(specMin + specIdx + 1));
+      TS_ASSERT_EQUALS(outWs->getSpectrum(specIdx).getSpectrumNo(), static_cast<int>(specMin + specIdx + 1));
     }
 
     // C) test SpectrumList + SpectrumMin and SpectrumMax
     // This will make: 17, 20, 21, 22, 23
-    wsSpecFilterAndEventMonitors =
-        "test_partial_spectra_loading_SpectrumList_SpectrumMin_SpectrumMax";
+    wsSpecFilterAndEventMonitors = "test_partial_spectra_loading_SpectrumList_SpectrumMin_SpectrumMax";
     const size_t sMin = 20;
     const size_t sMax = 22;
     specList.clear();
@@ -572,11 +612,10 @@ public:
 
     TS_ASSERT(ldLMM.execute());
 
-    outWs = AnalysisDataService::Instance().retrieveWS<EventWorkspace>(
-        wsSpecFilterAndEventMonitors);
+    outWs = AnalysisDataService::Instance().retrieveWS<EventWorkspace>(wsSpecFilterAndEventMonitors);
 
     // check number and indices of spectra
-    const size_t n = sMax - sMin + 1; // this n is the 20...22, excluding '17'
+    const size_t n = sMax - sMin + 1;                      // this n is the 20...22, excluding '17'
     TS_ASSERT_EQUALS(outWs->getNumberHistograms(), n + 1); // +1 is the '17'
     // Spectrum numbers match those that same detector would have in unfiltered
     // load, in this case detID + 1 since IDs in instrument start at 0.
@@ -584,8 +623,7 @@ public:
     TS_ASSERT_EQUALS(outWs->getSpectrum(0).getSpectrumNo(), 18);
     // and then sMin(20)...sMax(22)
     for (size_t specIdx = 0; specIdx < n; specIdx++) {
-      TS_ASSERT_EQUALS(outWs->getSpectrum(specIdx + 1).getSpectrumNo(),
-                       static_cast<int>(sMin + specIdx + 1));
+      TS_ASSERT_EQUALS(outWs->getSpectrum(specIdx + 1).getSpectrumNo(), static_cast<int>(sMin + specIdx + 1));
     }
   }
 
@@ -622,25 +660,19 @@ public:
 
     TS_ASSERT(ld2.execute());
 
-    auto outWs =
-        AnalysisDataService::Instance().retrieveWS<EventWorkspace>(wsName);
-    auto outWs2 =
-        AnalysisDataService::Instance().retrieveWS<EventWorkspace>(wsName2);
+    auto outWs = AnalysisDataService::Instance().retrieveWS<EventWorkspace>(wsName);
+    auto outWs2 = AnalysisDataService::Instance().retrieveWS<EventWorkspace>(wsName2);
 
-    TSM_ASSERT_EQUALS("The number of spectra in the workspace should be 12",
-                      outWs->getNumberHistograms(), 12);
+    TSM_ASSERT_EQUALS("The number of spectra in the workspace should be 12", outWs->getNumberHistograms(), 12);
 
     TSM_ASSERT_EQUALS("The number of events in the precount and not precount "
                       "workspaces do not match",
                       outWs->getNumberEvents(), outWs2->getNumberEvents());
 
-    TSM_ASSERT("Some spectra were not found in the workspace",
-               outWs->getSpectrum(0).getSpectrumNo() == 10);
+    TSM_ASSERT("Some spectra were not found in the workspace", outWs->getSpectrum(0).getSpectrumNo() == 10);
 
-    TSM_ASSERT("Some spectra were not found in the workspace",
-               outWs->getSpectrum(10).getSpectrumNo() == 20);
-    TSM_ASSERT("Some spectra were not found in the workspace",
-               outWs->getSpectrum(11).getSpectrumNo() == 45);
+    TSM_ASSERT("Some spectra were not found in the workspace", outWs->getSpectrum(10).getSpectrumNo() == 20);
+    TSM_ASSERT("Some spectra were not found in the workspace", outWs->getSpectrum(11).getSpectrumNo() == 45);
 
     AnalysisDataService::Instance().remove(wsName);
     AnalysisDataService::Instance().remove(wsName2);
@@ -654,8 +686,7 @@ public:
     // (monitors). Real/intensive testing happens in `LoadNexusMonitors` and
     // system
     // tests.
-    const std::string mon_outws_name =
-        wsSpecFilterAndEventMonitors + "_monitors";
+    const std::string mon_outws_name = wsSpecFilterAndEventMonitors + "_monitors";
     auto &ads = AnalysisDataService::Instance();
 
     // Valid workspace and it is an event workspace
@@ -665,9 +696,7 @@ public:
     TS_ASSERT_EQUALS(monWS->getTitle(), "test after manual intervention");
 
     // Check link data --> monitor workspaces
-    TS_ASSERT_EQUALS(
-        monWS, ads.retrieveWS<MatrixWorkspace>(wsSpecFilterAndEventMonitors)
-                   ->monitorWorkspace());
+    TS_ASSERT_EQUALS(monWS, ads.retrieveWS<MatrixWorkspace>(wsSpecFilterAndEventMonitors)->monitorWorkspace());
   }
 
   void test_Load_And_CompressEvents() {
@@ -686,9 +715,7 @@ public:
     TS_ASSERT(ld.isExecuted());
 
     EventWorkspace_sptr WS;
-    TS_ASSERT_THROWS_NOTHING(
-        WS = AnalysisDataService::Instance().retrieveWS<EventWorkspace>(
-            outws_name));
+    TS_ASSERT_THROWS_NOTHING(WS = AnalysisDataService::Instance().retrieveWS<EventWorkspace>(outws_name));
     // Valid WS and it is an EventWorkspace
     TS_ASSERT(WS);
     // Pixels have to be padded
@@ -726,17 +753,13 @@ public:
     const auto &specInfo = WS->spectrumInfo();
     TS_ASSERT(specInfo.isMonitor(2));
     TS_ASSERT_EQUALS(specInfo.detector(2).getID(), -3);
-    TS_ASSERT_DELTA(specInfo.samplePosition().distance(specInfo.position(2)),
-                    1.426, 1e-6);
+    TS_ASSERT_DELTA(specInfo.samplePosition().distance(specInfo.position(2)), 1.426, 1e-6);
 
     // Check monitor workspace pointer held in main workspace
-    TS_ASSERT_EQUALS(
-        WS,
-        ads.retrieveWS<MatrixWorkspace>("cncs_compressed")->monitorWorkspace());
+    TS_ASSERT_EQUALS(WS, ads.retrieveWS<MatrixWorkspace>("cncs_compressed")->monitorWorkspace());
   }
 
-  void doTestSingleBank(bool SingleBankPixelsOnly, bool Precount,
-                        const std::string &BankName = "bank36",
+  void doTestSingleBank(bool SingleBankPixelsOnly, bool Precount, const std::string &BankName = "bank36",
                         bool willFail = false) {
     Mantid::API::FrameworkManager::Instance();
     LoadEventNexus ld;
@@ -758,16 +781,12 @@ public:
     }
 
     TS_ASSERT(ld.isExecuted());
-    TS_ASSERT_THROWS_NOTHING(
-        WS = AnalysisDataService::Instance().retrieveWS<EventWorkspace>(
-            outws_name));
+    TS_ASSERT_THROWS_NOTHING(WS = AnalysisDataService::Instance().retrieveWS<EventWorkspace>(outws_name));
     // Valid WS and it is an EventWorkspace
     TS_ASSERT(WS);
-    if (!WS)
-      return;
+
     // Pixels have to be padded
-    TS_ASSERT_EQUALS(WS->getNumberHistograms(),
-                     SingleBankPixelsOnly ? 1024 : 51200);
+    TS_ASSERT_EQUALS(WS->getNumberHistograms(), SingleBankPixelsOnly ? 1024 : 51200);
     // Events - there are fewer now.
     TS_ASSERT_EQUALS(WS->getNumberEvents(), 7274);
   }
@@ -776,19 +795,14 @@ public:
 
   void test_SingleBank_AllPixels_Precount() { doTestSingleBank(false, true); }
 
-  void test_SingleBank_PixelsOnlyInThatBank_Precount() {
-    doTestSingleBank(true, true);
-  }
+  void test_SingleBank_PixelsOnlyInThatBank_Precount() { doTestSingleBank(true, true); }
 
-  void test_SingleBank_ThatDoesntExist() {
-    doTestSingleBank(false, false, "bankDoesNotExist", true);
-  }
+  void test_SingleBank_ThatDoesntExist() { doTestSingleBank(false, false, "bankDoesNotExist", true); }
 
   void test_SingleBank_with_no_events() {
     LoadEventNexus load;
     TS_ASSERT_THROWS_NOTHING(load.initialize());
-    TS_ASSERT_THROWS_NOTHING(
-        load.setPropertyValue("Filename", "HYSA_12509.nxs.h5"));
+    TS_ASSERT_THROWS_NOTHING(load.setPropertyValue("Filename", "HYSA_12509.nxs.h5"));
     TS_ASSERT_THROWS_NOTHING(load.setPropertyValue("BankName", "bank10"));
     const std::string outws("AnEmptyWS");
     TS_ASSERT_THROWS_NOTHING(load.setPropertyValue("OutputWorkspace", outws));
@@ -804,8 +818,7 @@ public:
   void test_instrument_inside_nexus_file() {
     LoadEventNexus load;
     TS_ASSERT_THROWS_NOTHING(load.initialize());
-    TS_ASSERT_THROWS_NOTHING(
-        load.setPropertyValue("Filename", "HYSA_12509.nxs.h5"));
+    TS_ASSERT_THROWS_NOTHING(load.setPropertyValue("Filename", "HYSA_12509.nxs.h5"));
     const std::string outws("InstInNexus");
     TS_ASSERT_THROWS_NOTHING(load.setPropertyValue("OutputWorkspace", outws));
     TS_ASSERT(load.execute());
@@ -813,8 +826,7 @@ public:
     auto ws = AnalysisDataService::Instance().retrieveWS<EventWorkspace>(outws);
     auto inst = ws->getInstrument();
     TS_ASSERT_EQUALS(inst->getName(), "HYSPECA");
-    TS_ASSERT_EQUALS(inst->getValidFromDate(),
-                     std::string("2011-Jul-20 17:02:48.437294000"));
+    TS_ASSERT_EQUALS(inst->getValidFromDate(), std::string("2011-Jul-20 17:02:48.437294000"));
     TS_ASSERT_EQUALS(inst->getNumberDetectors(), 20483);
     TS_ASSERT_EQUALS(inst->baseInstrument()->getMonitors().size(), 3);
     auto params = inst->getParameterMap();
@@ -834,8 +846,7 @@ public:
   void test_instrument_and_default_param_loaded_when_inst_not_in_nexus_file() {
     LoadEventNexus load;
     TS_ASSERT_THROWS_NOTHING(load.initialize());
-    TS_ASSERT_THROWS_NOTHING(
-        load.setPropertyValue("Filename", "CNCS_7860_event.nxs"));
+    TS_ASSERT_THROWS_NOTHING(load.setPropertyValue("Filename", "CNCS_7860_event.nxs"));
     load.setProperty<bool>("LoadLogs", false); // Time-saver
     const std::string outws("InstNotInNexus");
     TS_ASSERT_THROWS_NOTHING(load.setPropertyValue("OutputWorkspace", outws));
@@ -876,20 +887,16 @@ public:
     TS_ASSERT(ld.isExecuted());
 
     EventWorkspace_sptr WS;
-    TS_ASSERT_THROWS_NOTHING(
-        WS = AnalysisDataService::Instance().retrieveWS<EventWorkspace>(
-            outws_name));
+    TS_ASSERT_THROWS_NOTHING(WS = AnalysisDataService::Instance().retrieveWS<EventWorkspace>(outws_name));
     // Valid WS and it is an EventWorkspace
     TS_ASSERT(WS);
-    if (!WS)
-      return;
+
     TS_ASSERT_EQUALS(WS->getNumberHistograms(), 117760);
     TS_ASSERT_EQUALS(WS->getNumberEvents(), 10730347);
     for (size_t wi = 0; wi < WS->getNumberHistograms(); wi++) {
       // Times are NON-zero for ALL pixels.
       if (WS->getSpectrum(wi).getNumberEvents() > 0) {
-        int64_t nanosec =
-            WS->getSpectrum(wi).getEvents()[0].pulseTime().totalNanoseconds();
+        int64_t nanosec = WS->getSpectrum(wi).getEvents()[0].pulseTime().totalNanoseconds();
         TS_ASSERT_DIFFERS(nanosec, 0)
         if (nanosec == 0) {
           std::cout << "Failure at WI " << wi << '\n';
@@ -922,13 +929,10 @@ public:
     TS_ASSERT(ld.execute());
 
     EventWorkspace_sptr WS;
-    TS_ASSERT_THROWS_NOTHING(
-        WS =
-            AnalysisDataService::Instance().retrieveWS<EventWorkspace>(wsname));
+    TS_ASSERT_THROWS_NOTHING(WS = AnalysisDataService::Instance().retrieveWS<EventWorkspace>(wsname));
     // Valid WS and it is an EventWorkspace
     TS_ASSERT(WS);
-    if (!WS)
-      return;
+
     const auto numHist = WS->getNumberHistograms();
     TS_ASSERT_EQUALS(numHist, 117760);
     TS_ASSERT_EQUALS(WS->getNumberEvents(), 2);
@@ -937,10 +941,8 @@ public:
       TS_ASSERT_EQUALS(WS->getSpectrum(wi).getEventType(), WEIGHTED);
     }
     // Check one event
-    TS_ASSERT_DELTA(WS->getSpectrum(26798).getWeightedEvents()[0].weight(),
-                    1.8124e-11, 1.0e-4);
-    TS_ASSERT_EQUALS(WS->getSpectrum(26798).getWeightedEvents()[0].tof(),
-                     1476.0);
+    TS_ASSERT_DELTA(WS->getSpectrum(26798).getWeightedEvents()[0].weight(), 1.8124e-11, 1.0e-4);
+    TS_ASSERT_EQUALS(WS->getSpectrum(26798).getWeightedEvents()[0].tof(), 1476.0);
   }
 
   void test_extract_nperiod_data() {
@@ -952,21 +954,18 @@ public:
     loader.setPropertyValue("Filename", "LARMOR00003368.nxs");
     loader.execute();
     Workspace_sptr outWS = loader.getProperty("OutputWorkspace");
-    WorkspaceGroup_sptr outGroup =
-        std::dynamic_pointer_cast<WorkspaceGroup>(outWS);
+    WorkspaceGroup_sptr outGroup = std::dynamic_pointer_cast<WorkspaceGroup>(outWS);
     TSM_ASSERT("Invalid Output Workspace Type", outGroup);
 
-    IEventWorkspace_sptr firstWS =
-        std::dynamic_pointer_cast<IEventWorkspace>(outGroup->getItem(0));
+    IEventWorkspace_sptr firstWS = std::dynamic_pointer_cast<IEventWorkspace>(outGroup->getItem(0));
     auto run = firstWS->run();
     const int nPeriods = run.getPropertyValueAsType<int>("nperiods");
     TSM_ASSERT_EQUALS("Wrong number of periods extracted", nPeriods, 4);
-    TSM_ASSERT_EQUALS("Groups size should be same as nperiods",
-                      outGroup->size(), nPeriods);
-
+    TSM_ASSERT_EQUALS("Groups size should be same as nperiods", outGroup->size(), nPeriods);
+    // mean of proton charge for each period
+    std::array<double, 4> protonChargeMeans = {0.00110488, 0.00110392, 0.00110343, 0.00110404};
     for (size_t i = 0; i < outGroup->size(); ++i) {
-      EventWorkspace_sptr ws =
-          std::dynamic_pointer_cast<EventWorkspace>(outGroup->getItem(i));
+      EventWorkspace_sptr ws = std::dynamic_pointer_cast<EventWorkspace>(outGroup->getItem(i));
       TS_ASSERT(ws);
       TSM_ASSERT("Non-zero events in each period", ws->getNumberEvents() > 0);
 
@@ -974,22 +973,23 @@ public:
       buffer << "period " << i + 1;
       std::string periodBoolLog = buffer.str();
 
-      const int currentPeriod =
-          ws->run().getPropertyValueAsType<int>("current_period");
+      const int currentPeriod = ws->run().getPropertyValueAsType<int>("current_period");
 
-      TSM_ASSERT(
-          "Each period should have a boolean array for masking period numbers",
-          ws->run().hasProperty(periodBoolLog));
-      TSM_ASSERT_EQUALS("Current period is not what was expected.",
-                        currentPeriod, i + 1);
+      TSM_ASSERT("Each period should have a boolean array for masking period numbers",
+                 ws->run().hasProperty(periodBoolLog));
+      TSM_ASSERT_EQUALS("Current period is not what was expected.", currentPeriod, i + 1);
+
+      // Check we have correctly filtered sample logs based on the period
+      auto protonLog = ws->run().getTimeSeriesProperty<double>("proton_charge");
+      TS_ASSERT(protonLog->isFiltered());
+      TS_ASSERT_DELTA(protonLog->mean(), protonChargeMeans[i], 1e-8);
     }
     // Make sure that the spectraNo are equal for all child workspaces.
     auto isFirstChildWorkspace = true;
     std::vector<Mantid::specnum_t> specids;
 
     for (size_t i = 0; i < outGroup->size(); ++i) {
-      EventWorkspace_sptr ws =
-          std::dynamic_pointer_cast<EventWorkspace>(outGroup->getItem(i));
+      EventWorkspace_sptr ws = std::dynamic_pointer_cast<EventWorkspace>(outGroup->getItem(i));
       if (isFirstChildWorkspace) {
         specids.reserve(ws->getNumberHistograms());
       }
@@ -997,9 +997,8 @@ public:
         if (isFirstChildWorkspace) {
           specids.emplace_back(ws->getSpectrum(index).getSpectrumNo());
         } else {
-          TSM_ASSERT_EQUALS(
-              "The spectrNo should be the same for all child workspaces.",
-              specids[index], ws->getSpectrum(index).getSpectrumNo());
+          TSM_ASSERT_EQUALS("The spectrNo should be the same for all child workspaces.", specids[index],
+                            ws->getSpectrum(index).getSpectrumNo());
         }
       }
 
@@ -1020,7 +1019,8 @@ public:
     // Test reads from multiple threads, which is not supported by our HDF5
     // libraries, so we need a mutex.
     auto hdf5Mutex = std::make_shared<std::mutex>();
-    runner.run(run_MPI_load, hdf5Mutex, "CNCS_7860_event.nxs");
+    runner.runSerial(run_MPI_load, hdf5Mutex, "CNCS_7860_event.nxs");
+    runner.runParallel(run_MPI_load, hdf5Mutex, "CNCS_7860_event.nxs");
   }
 
   void test_MPI_load_ISIS() {
@@ -1029,7 +1029,28 @@ public:
     // Test reads from multiple threads, which is not supported by our HDF5
     // libraries, so we need a mutex.
     auto hdf5Mutex = std::make_shared<std::mutex>();
-    runner.run(run_MPI_load, hdf5Mutex, "SANS2D00022048.nxs");
+    runner.runSerial(run_MPI_load, hdf5Mutex, "SANS2D00022048.nxs");
+    runner.runParallel(run_MPI_load, hdf5Mutex, "SANS2D00022048.nxs");
+  }
+
+  void test_load_CG3_bad_event_id() {
+    // The test file CG3_13118.nxs.h5 being loaded has:
+    // bank1: all correct data, only events in this file should end up loaded (6052 events)
+    // bank2: all event_id are out of range and should be ignored (91 events)
+    // bank_error: all correct data but should be skipped because this bank is junk output (6052 events)
+    // bank_unmapped: all junk data and shouldn't be loaded (91 events)
+
+    LoadEventNexus load;
+    TS_ASSERT_THROWS_NOTHING(load.initialize());
+    TS_ASSERT_THROWS_NOTHING(load.setPropertyValue("Filename", "CG3_13118.nxs.h5"));
+    const std::string outws("CG3_bad_id_test");
+    TS_ASSERT_THROWS_NOTHING(load.setPropertyValue("OutputWorkspace", outws));
+    TS_ASSERT(load.execute());
+
+    auto ws = AnalysisDataService::Instance().retrieveWS<EventWorkspace>(outws);
+
+    // only events from bank1 should be loaded
+    TS_ASSERT_EQUALS(ws->getNumberEvents(), 6052);
   }
 
   void test_load_fails_on_corrupted_run() {
@@ -1043,6 +1064,62 @@ public:
     loader.setPropertyValue("OutputWorkspace", "dummy");
     loader.setPropertyValue("Filename", "SANS2D00059115_corrupted.nxs");
     TS_ASSERT_THROWS(loader.execute(), const InvalidLogPeriods &);
+  }
+
+  void test_load_ILL_no_triggers() {
+    // ILL runs don't have any pulses, so in event mode, they are replaced in the event nexus by trigger signals.
+    // But some of these nexuses don't have any triggers either, so they are modified to be allowed to be loaded.
+
+    LoadEventNexus loader;
+
+    loader.initialize();
+    loader.setPropertyValue("Filename", "ILL/D22B/000242_trunc.event.nxs");
+    loader.setPropertyValue("OutputWorkspace", "dummy");
+    loader.setProperty("LoadAllLogs", true);
+    TS_ASSERT_THROWS_NOTHING(loader.execute());
+
+    EventWorkspace_sptr eventWS;
+    TS_ASSERT_THROWS_NOTHING(eventWS = AnalysisDataService::Instance().retrieveWS<EventWorkspace>("dummy"));
+    // Valid WS and it is an EventWorkspace
+    TS_ASSERT(eventWS);
+
+    TS_ASSERT_EQUALS(eventWS->getNumberEvents(), 1000);
+    TS_ASSERT_EQUALS(eventWS->run().startTime(), DateAndTime("2021-01-28T18:07:12"));
+    TS_ASSERT_EQUALS(eventWS->getPulseTimeMin(), eventWS->getPulseTimeMax());
+    TS_ASSERT_EQUALS(eventWS->getPulseTimeMin().totalNanoseconds(), 980705232000000000);
+    TS_ASSERT_DELTA(eventWS->getTofMax(), 13515.0517592763, 1e-2);
+
+    // check that the logs have been loaded by looking at some random example
+    TS_ASSERT_DELTA(eventWS->run().getPropertyAsSingleValue("reactor_power"), 43.21, 1e-2);
+
+    AnalysisDataService::Instance().remove("dummy");
+  }
+
+  void test_load_ILL_triggers() {
+    // ILL runs don't have any pulses, so in event mode, they are replaced in the event nexus by trigger signals.
+
+    LoadEventNexus loader;
+
+    loader.initialize();
+    loader.setPropertyValue("Filename", "ILL/D22B/042730_trunc.event.nxs");
+    loader.setPropertyValue("OutputWorkspace", "dummy");
+    loader.setProperty("LoadAllLogs", true);
+    TS_ASSERT_THROWS_NOTHING(loader.execute());
+
+    EventWorkspace_sptr eventWS;
+    TS_ASSERT_THROWS_NOTHING(eventWS = AnalysisDataService::Instance().retrieveWS<EventWorkspace>("dummy"));
+    // Valid WS and it is an EventWorkspace
+    TS_ASSERT(eventWS);
+
+    TS_ASSERT_EQUALS(eventWS->getNumberEvents(), 1000);
+    TS_ASSERT_EQUALS(eventWS->run().startTime(), DateAndTime("2021-03-24T20:52:50"));
+    TS_ASSERT_EQUALS(eventWS->getPulseTimeMin().totalNanoseconds(), 985467170046478105);
+    TS_ASSERT_EQUALS(eventWS->getPulseTimeMax().totalNanoseconds(), 985467770208320643);
+
+    // check that the logs have been loaded by looking at some random example
+    TS_ASSERT_DELTA(eventWS->run().getPropertyAsSingleValue("reactor_power"), 43.2, 1e-2);
+
+    AnalysisDataService::Instance().remove("dummy");
   }
 
 private:

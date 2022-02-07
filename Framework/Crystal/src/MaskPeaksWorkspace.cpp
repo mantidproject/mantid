@@ -9,15 +9,16 @@
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/IPeakFunction.h"
 #include "MantidAPI/InstrumentValidator.h"
+#include "MantidAPI/TableRow.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
+#include "MantidDataObjects/TableWorkspace.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/Strings.h"
 #include "MantidKernel/VectorHelper.h"
 
 #include <boost/math/special_functions/round.hpp>
 
-namespace Mantid {
-namespace Crystal {
+namespace Mantid::Crystal {
 
 // Register the class into the algorithm factory
 DECLARE_ALGORITHM(MaskPeaksWorkspace)
@@ -29,37 +30,26 @@ using namespace Geometry;
 using std::string;
 
 /// Constructor
-MaskPeaksWorkspace::MaskPeaksWorkspace()
-    : m_xMin{0}, m_xMax{0}, m_yMin{0}, m_yMax{0}, m_tofMin{0}, m_tofMax{0} {}
+MaskPeaksWorkspace::MaskPeaksWorkspace() : m_xMin{0}, m_xMax{0}, m_yMin{0}, m_yMax{0}, m_tofMin{0}, m_tofMax{0} {}
 
 /** Initialisation method. Declares properties to be used in algorithm.
  *
  */
 void MaskPeaksWorkspace::init() {
 
-  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
-                      "InputWorkspace", "", Direction::Input,
-                      std::make_shared<InstrumentValidator>()),
+  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>("InputWorkspace", "", Direction::Input,
+                                                                       std::make_shared<InstrumentValidator>()),
                   "A workspace containing one or more rectangular area "
                   "detectors. Each spectrum needs to correspond to only one "
                   "pixelID (e.g. no grouping or previous calls to "
                   "SumNeighbours).");
-  declareProperty(std::make_unique<WorkspaceProperty<PeaksWorkspace>>(
-                      "InPeaksWorkspace", "", Direction::Input),
+  declareProperty(std::make_unique<WorkspaceProperty<PeaksWorkspace>>("InPeaksWorkspace", "", Direction::Input),
                   "The name of the workspace that will be created. Can replace "
                   "the input workspace.");
-  declareProperty(
-      "XMin", -2,
-      "Minimum of X (col) Range to mask peak relative to peak's center");
-  declareProperty(
-      "XMax", 2,
-      "Maximum of X (col) Range to mask peak relative to peak's center");
-  declareProperty(
-      "YMin", -2,
-      "Minimum of Y (row) Range to mask peak relative to peak's center");
-  declareProperty(
-      "YMax", 2,
-      "Maximum of Y (row) Range to mask peak relative to peak's center");
+  declareProperty("XMin", -2, "Minimum of X (col) Range to mask peak relative to peak's center");
+  declareProperty("XMax", 2, "Maximum of X (col) Range to mask peak relative to peak's center");
+  declareProperty("YMin", -2, "Minimum of Y (row) Range to mask peak relative to peak's center");
+  declareProperty("YMax", 2, "Maximum of Y (row) Range to mask peak relative to peak's center");
   declareProperty("TOFMin", EMPTY_DBL(),
                   "Optional(all TOF if not specified): "
                   "Minimum TOF relative to peak's "
@@ -81,14 +71,12 @@ void MaskPeaksWorkspace::exec() {
   PeaksWorkspace_const_sptr peaksW = getProperty("InPeaksWorkspace");
 
   // To get the workspace index from the detector ID
-  const detid2index_map pixel_to_wi =
-      m_inputW->getDetectorIDToWorkspaceIndexMap();
+  const detid2index_map pixel_to_wi = m_inputW->getDetectorIDToWorkspaceIndexMap();
   // Get some stuff from the input workspace
   Geometry::Instrument_const_sptr inst = m_inputW->getInstrument();
 
   // Init a table workspace
-  DataObjects::TableWorkspace_sptr tablews =
-      std::make_shared<DataObjects::TableWorkspace>();
+  DataObjects::TableWorkspace_sptr tablews = std::make_shared<DataObjects::TableWorkspace>();
   tablews->addColumn("double", "XMin");
   tablews->addColumn("double", "XMax");
   tablews->addColumn("str", "SpectraList");
@@ -104,8 +92,7 @@ void MaskPeaksWorkspace::exec() {
     double row = peak.getRow();
     int xPeak = boost::math::iround(col) - 1;
     int yPeak = boost::math::iround(row) - 1;
-    g_log.debug() << "Generating information for peak at x=" << xPeak
-                  << " y=" << yPeak << "\n";
+    g_log.debug() << "Generating information for peak at x=" << xPeak << " y=" << yPeak << "\n";
 
     // the detector component for the peak will have all pixels that we mask
     const string &bankName = peak.getBankName();
@@ -113,8 +100,7 @@ void MaskPeaksWorkspace::exec() {
       continue;
     Geometry::IComponent_const_sptr comp = inst->getComponentByName(bankName);
     if (!comp) {
-      g_log.debug() << "Component " + bankName +
-                           " does not exist in instrument\n";
+      g_log.debug() << "Component " + bankName + " does not exist in instrument\n";
       continue;
     }
 
@@ -123,8 +109,7 @@ void MaskPeaksWorkspace::exec() {
     double xf;
     bool tofRangeSet(false);
     size_t wi = this->getWkspIndex(pixel_to_wi, comp, xPeak, yPeak);
-    if (wi !=
-        static_cast<size_t>(EMPTY_INT())) { // scope limit the workspace index
+    if (wi != static_cast<size_t>(EMPTY_INT())) { // scope limit the workspace index
       this->getTofRange(x0, xf, peak.getTOF(), m_inputW->x(wi));
       tofRangeSet = true;
     }
@@ -134,8 +119,7 @@ void MaskPeaksWorkspace::exec() {
     for (int ix = m_xMin; ix <= m_xMax; ix++) {
       for (int iy = m_yMin; iy <= m_yMax; iy++) {
         // Find the pixel ID at that XY position on the rectangular detector
-        size_t wj =
-            this->getWkspIndex(pixel_to_wi, comp, xPeak + ix, yPeak + iy);
+        size_t wj = this->getWkspIndex(pixel_to_wi, comp, xPeak + ix, yPeak + iy);
         if (wj == static_cast<size_t>(EMPTY_INT()))
           continue;
         spectra.insert(wj);
@@ -148,12 +132,11 @@ void MaskPeaksWorkspace::exec() {
 
     // sanity check the results
     if (!tofRangeSet) {
-      g_log.warning() << "Failed to set time-of-flight range for peak (x="
-                      << xPeak << ", y=" << yPeak << ", tof=" << peak.getTOF()
-                      << ")\n";
+      g_log.warning() << "Failed to set time-of-flight range for peak (x=" << xPeak << ", y=" << yPeak
+                      << ", tof=" << peak.getTOF() << ")\n";
     } else if (spectra.empty()) {
-      g_log.warning() << "Failed to find spectra for peak (x=" << xPeak
-                      << ", y=" << yPeak << ", tof=" << peak.getTOF() << ")\n";
+      g_log.warning() << "Failed to find spectra for peak (x=" << xPeak << ", y=" << yPeak << ", tof=" << peak.getTOF()
+                      << ")\n";
       continue;
     } else
       PARALLEL_CRITICAL(tablews) {
@@ -166,8 +149,7 @@ void MaskPeaksWorkspace::exec() {
   PARALLEL_CHECK_INTERUPT_REGION
 
   // Mask bins
-  API::IAlgorithm_sptr maskbinstb =
-      this->createChildAlgorithm("MaskBinsFromTable", 0.5, 1.0, true);
+  auto maskbinstb = createChildAlgorithm("MaskBinsFromTable", 0.5, 1.0, true);
   maskbinstb->setProperty("InputWorkspace", m_inputW);
   maskbinstb->setPropertyValue("OutputWorkspace", m_inputW->getName());
   maskbinstb->setProperty("MaskingInformation", tablews);
@@ -193,30 +175,26 @@ void MaskPeaksWorkspace::retrieveProperties() {
   if ((!isEmpty(m_tofMin)) && (!isEmpty(m_tofMax))) {
     if (m_tofMin >= m_tofMax)
       throw std::runtime_error("Must specify TOFMin < TOFMax");
-  } else if ((!isEmpty(m_tofMin)) ||
-             (!isEmpty(m_tofMax))) // check if only one is empty
+  } else if ((!isEmpty(m_tofMin)) || (!isEmpty(m_tofMax))) // check if only one is empty
   {
     throw std::runtime_error("Must specify both TOFMin and TOFMax or neither");
   }
 }
 
-size_t
-MaskPeaksWorkspace::getWkspIndex(const detid2index_map &pixel_to_wi,
-                                 const Geometry::IComponent_const_sptr &comp,
-                                 const int x, const int y) {
-  Geometry::RectangularDetector_const_sptr det =
-      std::dynamic_pointer_cast<const Geometry::RectangularDetector>(comp);
+size_t MaskPeaksWorkspace::getWkspIndex(const detid2index_map &pixel_to_wi, const Geometry::IComponent_const_sptr &comp,
+                                        const int x, const int y) {
+  Geometry::RectangularDetector_const_sptr det = std::dynamic_pointer_cast<const Geometry::RectangularDetector>(comp);
+  Geometry::Instrument_const_sptr Iptr = m_inputW->getInstrument();
+
   if (det) {
     if (x >= det->xpixels() || x < 0 || y >= det->ypixels() || y < 0)
       return EMPTY_INT();
-    if ((x >= det->xpixels()) ||
-        (x < 0) // this check is unnecessary as callers are doing it too
-        || (y >= det->ypixels()) ||
-        (y < 0)) // but just to make debugging easier
+    if ((x >= det->xpixels()) || (x < 0)     // this check is unnecessary as callers are doing it too
+        || (y >= det->ypixels()) || (y < 0)) // but just to make debugging easier
     {
       std::stringstream msg;
-      msg << "Failed to find workspace index for x=" << x << " y=" << y
-          << "(max x=" << det->xpixels() << ", max y=" << det->ypixels() << ")";
+      msg << "Failed to find workspace index for x=" << x << " y=" << y << "(max x=" << det->xpixels()
+          << ", max y=" << det->ypixels() << ")";
       throw std::runtime_error(msg.str());
     }
 
@@ -235,15 +213,40 @@ MaskPeaksWorkspace::getWkspIndex(const detid2index_map &pixel_to_wi,
     std::shared_ptr<const Geometry::ICompAssembly> asmb =
         std::dynamic_pointer_cast<const Geometry::ICompAssembly>(comp);
     asmb->getChildren(children, false);
+
     std::shared_ptr<const Geometry::ICompAssembly> asmb2 =
         std::dynamic_pointer_cast<const Geometry::ICompAssembly>(children[0]);
     std::vector<Geometry::IComponent_const_sptr> grandchildren;
     asmb2->getChildren(grandchildren, false);
+
     auto NROWS = static_cast<int>(grandchildren.size());
     auto NCOLS = static_cast<int>(children.size());
+
+    std::ostringstream msg;
+    if (Iptr->getName().compare("CORELLI") == 0) {
+      msg << "Instrument is CORELLI\n";
+      // CORELLI has one extra layer than WISH
+      std::shared_ptr<const Geometry::ICompAssembly> asmb3 =
+          std::dynamic_pointer_cast<const Geometry::ICompAssembly>(grandchildren[0]);
+      std::vector<Geometry::IComponent_const_sptr> greatgrandchildren;
+      asmb3->getChildren(greatgrandchildren, false);
+      // update for CORELLI
+      NCOLS = static_cast<int>(grandchildren.size());
+      NROWS = static_cast<int>(greatgrandchildren.size());
+    } else {
+      msg << "Instrument is WISH\n";
+    }
+
     // Wish pixels and tubes start at 1 not 0
-    if (x - 1 >= NCOLS || x - 1 < 0 || y - 1 >= NROWS || y - 1 < 0)
+    if (x - 1 >= NCOLS || x - 1 < 0 || y - 1 >= NROWS || y - 1 < 0) {
+      // useful for future dev in plan
+      // msg << "--(x,y) = (" << x << "," << y << ")\n"
+      //     << "--NCOLS = " << NCOLS << "\n"
+      //     << "--NROWS = " << NROWS << "\n";
+      // g_log.warning() << msg.str();
       return EMPTY_INT();
+    }
+
     std::string bankName = comp->getName();
     auto it = pixel_to_wi.find(findPixelID(bankName, x, y));
     if (it == pixel_to_wi.end())
@@ -259,8 +262,7 @@ MaskPeaksWorkspace::getWkspIndex(const detid2index_map &pixel_to_wi,
  * @param tof tof-of-flight axis for the spectrum where the peak supposedly
  * exists
  */
-void MaskPeaksWorkspace::getTofRange(double &tofMin, double &tofMax,
-                                     const double tofPeak,
+void MaskPeaksWorkspace::getTofRange(double &tofMin, double &tofMax, const double tofPeak,
                                      const HistogramData::HistogramX &tof) {
   tofMin = tof.front();
   tofMax = tof.back() - 1;
@@ -271,30 +273,48 @@ void MaskPeaksWorkspace::getTofRange(double &tofMin, double &tofMax,
     tofMax = tofPeak + m_tofMax;
   }
 }
-int MaskPeaksWorkspace::findPixelID(const std::string &bankName, int col,
-                                    int row) {
+
+/**
+ * @brief
+ *
+ * @param bankName
+ * @param col
+ * @param row
+ * @return int
+ */
+int MaskPeaksWorkspace::findPixelID(const std::string &bankName, int col, int row) {
   Geometry::Instrument_const_sptr Iptr = m_inputW->getInstrument();
   std::shared_ptr<const IComponent> parent = Iptr->getComponentByName(bankName);
+
   if (parent->type() == "RectangularDetector") {
-    std::shared_ptr<const RectangularDetector> RDet =
-        std::dynamic_pointer_cast<const RectangularDetector>(parent);
+    std::shared_ptr<const RectangularDetector> RDet = std::dynamic_pointer_cast<const RectangularDetector>(parent);
 
     std::shared_ptr<Detector> pixel = RDet->getAtXY(col, row);
+    return pixel->getID();
+  } else if (Iptr->getName().compare("CORELLI") == 0) {
+    // Checking for CORELLI
+    // pixel full name example
+    //      /CORELLI/A row/bank10/sixteenpack/tube10/pixel23
+    //                                ^ the extra layer that makes CORELLI different from WISH
+    std::ostringstream pixelString;
+    pixelString << parent->getFullName() // /CORELLI/A row/bank10
+                << "/sixteenpack"        // /sixteenpack
+                << "/tube" << col        // /tube10
+                << "/pixel" << row;      // /pixel23
+    std::shared_ptr<const Geometry::IComponent> component = Iptr->getComponentByName(pixelString.str());
+    std::shared_ptr<const Detector> pixel = std::dynamic_pointer_cast<const Detector>(component);
+    //
     return pixel->getID();
   } else {
     std::string bankName0 = bankName;
     // Only works for WISH
     bankName0.erase(0, 4);
     std::ostringstream pixelString;
-    pixelString << Iptr->getName() << "/" << bankName0 << "/" << bankName
-                << "/tube" << std::setw(3) << std::setfill('0') << col
-                << "/pixel" << std::setw(4) << std::setfill('0') << row;
-    std::shared_ptr<const Geometry::IComponent> component =
-        Iptr->getComponentByName(pixelString.str());
-    std::shared_ptr<const Detector> pixel =
-        std::dynamic_pointer_cast<const Detector>(component);
+    pixelString << Iptr->getName() << "/" << bankName0 << "/" << bankName << "/tube" << std::setw(3)
+                << std::setfill('0') << col << "/pixel" << std::setw(4) << std::setfill('0') << row;
+    std::shared_ptr<const Geometry::IComponent> component = Iptr->getComponentByName(pixelString.str());
+    std::shared_ptr<const Detector> pixel = std::dynamic_pointer_cast<const Detector>(component);
     return pixel->getID();
   }
 }
-} // namespace Crystal
-} // namespace Mantid
+} // namespace Mantid::Crystal

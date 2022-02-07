@@ -32,7 +32,7 @@ enum class TopicType { Event, Chopper, Sample, Run, Monitor };
 class MANTID_KERNEL_DLL TopicInfo {
 public:
   TopicInfo(InstrumentInfo *inst, const Poco::XML::Element *elem);
-  TopicInfo(const std::string &name, TopicType type);
+  TopicInfo(std::string name, TopicType type);
   const std::string &name() const { return m_name; }
   TopicType type() const { return m_type; }
 
@@ -42,8 +42,7 @@ private:
 };
 
 /// Allow this object to be printed to a stream
-MANTID_KERNEL_DLL std::ostream &operator<<(std::ostream &buffer,
-                                           const TopicInfo &topic);
+MANTID_KERNEL_DLL std::ostream &operator<<(std::ostream &buffer, const TopicInfo &topic);
 
 } // namespace Kernel
 } // namespace Mantid

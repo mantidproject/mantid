@@ -33,7 +33,7 @@ The default range is [5.86, 6.75].
 **OutputWorkspace**: a two-dimensional :ref:`MDHistoWorkspace <MDHistoWorkspace>`
 containing the intensities projected onto the reciprocal slice, integrated over
 the independent axis *Wproj*. The diffraction pattern can be visualized with
-the `SliceViewer <http://www.mantidproject.org/SliceViewer>`_.
+the :ref:`sliceviewer`.
 
 **Background runs**: one or more run numbers to describe the background, and a
 scaling factor between zero and one.
@@ -113,5 +113,3 @@ Usage
 .. categories::
 
 .. sourcelink::
-
-

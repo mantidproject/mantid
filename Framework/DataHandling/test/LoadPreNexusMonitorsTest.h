@@ -16,9 +16,7 @@
 
 class LoadPreNexusMonitorsTest : public CxxTest::TestSuite {
 public:
-  static LoadPreNexusMonitorsTest *createSuite() {
-    return new LoadPreNexusMonitorsTest();
-  }
+  static LoadPreNexusMonitorsTest *createSuite() { return new LoadPreNexusMonitorsTest(); }
   static void destroySuite(LoadPreNexusMonitorsTest *suite) { delete suite; }
 
   LoadPreNexusMonitorsTest() {
@@ -40,8 +38,7 @@ public:
     std::string outWS("outWS");
 
     // Check we can set the properties
-    TS_ASSERT_THROWS_NOTHING(
-        loader.setPropertyValue("RunInfoFilename", runinfoFile));
+    TS_ASSERT_THROWS_NOTHING(loader.setPropertyValue("RunInfoFilename", runinfoFile));
     TS_ASSERT_THROWS_NOTHING(loader.setPropertyValue("OutputWorkspace", outWS));
     // Actually run it and test is has been run.
     TS_ASSERT_THROWS_NOTHING(loader.execute());
@@ -49,9 +46,8 @@ public:
 
     // Get back the saved workspace
     Mantid::API::MatrixWorkspace_const_sptr ws;
-    TS_ASSERT_THROWS_NOTHING(
-        ws = std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
-            Mantid::API::AnalysisDataService::Instance().retrieve(outWS)));
+    TS_ASSERT_THROWS_NOTHING(ws = std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
+                                 Mantid::API::AnalysisDataService::Instance().retrieve(outWS)));
 
     TS_ASSERT_EQUALS(ws->getNumberHistograms(), 3);
     TS_ASSERT_EQUALS(ws->blocksize(), 200001);
@@ -64,8 +60,7 @@ public:
     TS_ASSERT_EQUALS(ws->y(1)[3424], 858);
 
     for (int i = 0; i < 3; ++i) {
-      TS_ASSERT_EQUALS(*ws->getSpectrum(i).getDetectorIDs().begin(),
-                       -1 * (i + 1));
+      TS_ASSERT_EQUALS(*ws->getSpectrum(i).getDetectorIDs().begin(), -1 * (i + 1));
     }
 
     Mantid::API::AnalysisDataService::Instance().remove(outWS);

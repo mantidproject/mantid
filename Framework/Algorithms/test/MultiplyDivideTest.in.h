@@ -11,7 +11,7 @@
 #include <cmath>
 #include <stdexcept>
 
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
+#include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidAlgorithms/Divide.h"
 #include "MantidAlgorithms/Multiply.h"
 #include "MantidAPI/AnalysisDataService.h"
@@ -136,7 +136,7 @@ public:
     performTest(work_in1,work_in2, false /*not event*/,
         DO_DIVIDE ? 1.0 : 4.0, DO_DIVIDE ? 1.0 : 4.0, false, false, true /*in place*/);
   }
-    
+
   void test_2D_1D_different_spectrum_number()
   {
     if(DO_DIVIDE)

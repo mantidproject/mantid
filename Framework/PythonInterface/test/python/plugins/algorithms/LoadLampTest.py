@@ -5,12 +5,14 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 from mantid.simpleapi import config, mtd, LoadLamp
+from mantid.api import MatrixWorkspace, Run
 import unittest
 
 
 class LoadLampTest(unittest.TestCase):
 
-    def setUp(self):
+    @classmethod
+    def setUpClass(cls):
         config.appendDataSearchSubDir('ILL/LAMP/')
 
     def tearDown(self):
@@ -52,6 +54,19 @@ class LoadLampTest(unittest.TestCase):
         ws = LoadLamp('no_parameters.hdf')
         self.assertTrue(ws)
         self.assertEqual(ws.blocksize(), 310)
+
+    def test_parameters(self):
+        ws = LoadLamp('D1B_2D_Export.hdf')
+        self.assertTrue(ws)
+        self.assertTrue(isinstance(ws, MatrixWorkspace))
+        self.assertEqual(ws.blocksize(), 1280)
+        self.assertEqual(ws.getNumberHistograms(), 833)
+        run = ws.getRun()
+        self.assertTrue(run)
+        self.assertTrue(isinstance(run, Run))
+        self.assertEquals(len(run.keys()), 31)
+        self.assertTrue(run.hasProperty('4) Wavelength'))
+        self.assertEquals(run.getProperty('4) Wavelength').value, 2.52)
 
 if __name__ == '__main__':
     unittest.main()

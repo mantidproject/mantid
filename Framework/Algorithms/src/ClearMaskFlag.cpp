@@ -11,8 +11,7 @@
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/DetectorInfo.h"
 
-namespace Mantid {
-namespace Algorithms {
+namespace Mantid::Algorithms {
 
 using namespace Geometry;
 using namespace API;
@@ -28,16 +27,13 @@ const std::string ClearMaskFlag::name() const { return "ClearMaskFlag"; }
 int ClearMaskFlag::version() const { return 1; }
 
 /// Algorithm's category for identification. @see Algorithm::category
-const std::string ClearMaskFlag::category() const {
-  return "Transforms\\Masking";
-}
+const std::string ClearMaskFlag::category() const { return "Transforms\\Masking"; }
 
 /** Initialize the algorithm's properties.
  */
 void ClearMaskFlag::init() {
-  declareProperty(
-      std::make_unique<WorkspaceProperty<>>("Workspace", "", Direction::InOut),
-      "Workspace to clear the mask flag of.");
+  declareProperty(std::make_unique<WorkspaceProperty<>>("Workspace", "", Direction::InOut),
+                  "Workspace to clear the mask flag of.");
   declareProperty("ComponentName", "",
                   "Specify the instrument component to clear the "
                   "mask. If empty clears the mask flag for "
@@ -63,5 +59,4 @@ void ClearMaskFlag::exec() {
   }
 }
 
-} // namespace Algorithms
-} // namespace Mantid
+} // namespace Mantid::Algorithms

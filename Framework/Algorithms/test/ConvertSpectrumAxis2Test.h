@@ -14,29 +14,48 @@
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/SpectrumInfo.h"
 #include "MantidAlgorithms/CreateSampleWorkspace.h"
+#include "MantidDataHandling/MoveInstrumentComponent.h"
 #include "MantidDataObjects/EventWorkspace.h"
+#include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidKernel/Unit.h"
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
 using namespace Mantid::API;
 using namespace Mantid::HistogramData::detail;
 
 class ConvertSpectrumAxis2Test : public CxxTest::TestSuite {
 private:
-  void do_algorithm_run(const std::string &target, const std::string &inputWS,
-                        const std::string &outputWS, bool startYNegative = true,
-                        bool isHistogram = true) {
-    auto testWS = WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(
-        3, 1, false, startYNegative, isHistogram);
+  void do_algorithm_run(const std::string &target, const std::string &inputWS, const std::string &outputWS,
+                        bool startYNegative = true, bool isHistogram = true) {
+    auto testWS =
+        WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(3, 1, false, startYNegative, isHistogram);
     AnalysisDataService::Instance().addOrReplace(inputWS, testWS);
 
     Mantid::Algorithms::ConvertSpectrumAxis2 conv;
 
+    if (target == "SignedInPlaneTwoTheta" || target == "InPlaneTwoTheta") {
+      // three positions for the pixel : -45, 0 and 45 degrees
+      double xPos[3] = {-1., 0., 1.};
+      for (size_t i = 0; i < 3; i++) {
+        Mantid::DataHandling::MoveInstrumentComponent moveComp;
+        moveComp.initialize();
+        moveComp.setChild(true);
+        moveComp.setProperty("Workspace", inputWS);
+        moveComp.setProperty("X", xPos[i]);
+        moveComp.setProperty("Y", 0.);
+        moveComp.setProperty("Z", 1.);
+        std::ostringstream lexer;
+        lexer << "pixel-" << i << ")";
+        moveComp.setProperty("ComponentName", lexer.str());
+        moveComp.setProperty("RelativePosition", false);
+
+        moveComp.execute();
+      }
+    }
+
     conv.initialize();
 
     TS_ASSERT_THROWS_NOTHING(conv.setPropertyValue("InputWorkspace", inputWS));
-    TS_ASSERT_THROWS_NOTHING(
-        conv.setPropertyValue("OutputWorkspace", outputWS));
+    TS_ASSERT_THROWS_NOTHING(conv.setPropertyValue("OutputWorkspace", outputWS));
     TS_ASSERT_THROWS_NOTHING(conv.setPropertyValue("Target", target));
     TS_ASSERT_THROWS_NOTHING(conv.setPropertyValue("EFixed", "10.0"));
 
@@ -44,13 +63,10 @@ private:
     TS_ASSERT(conv.isExecuted());
   }
 
-  void check_output_values_for_signed_theta_conversion(
-      const std::string &outputWSSignedTheta) {
+  void check_output_values_for_signed_theta_conversion(const std::string &outputWSSignedTheta) {
     MatrixWorkspace_const_sptr outputSignedTheta;
-    TS_ASSERT_THROWS_NOTHING(
-        outputSignedTheta =
-            AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-                outputWSSignedTheta));
+    TS_ASSERT_THROWS_NOTHING(outputSignedTheta =
+                                 AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(outputWSSignedTheta));
 
     // Check the signed theta axes of the workspaces.
     const Axis *thetaAxis = nullptr;
@@ -58,8 +74,7 @@ private:
     TS_ASSERT(thetaAxis->isNumeric());
 
     // Check axis is correct length for the workspaces.
-    TS_ASSERT_THROWS((*thetaAxis)(3),
-                     const Mantid::Kernel::Exception::IndexError &);
+    TS_ASSERT_THROWS((*thetaAxis)(3), const Mantid::Kernel::Exception::IndexError &);
 
     // Check the outputs for the workspaces are correct.
     TS_ASSERT_EQUALS(thetaAxis->unit()->caption(), "Scattering angle");
@@ -69,16 +84,10 @@ private:
     TS_ASSERT_DELTA((*thetaAxis)(2), 1.1458, 0.0001);
   }
 
-  void
-  check_output_values_for_theta_conversion(const std::string &inputWSTheta,
-                                           const std::string &outputWSTheta) {
+  void check_output_values_for_theta_conversion(const std::string &inputWSTheta, const std::string &outputWSTheta) {
     MatrixWorkspace_const_sptr input, output;
-    TS_ASSERT_THROWS_NOTHING(
-        input = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-            inputWSTheta));
-    TS_ASSERT_THROWS_NOTHING(
-        output = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-            outputWSTheta));
+    TS_ASSERT_THROWS_NOTHING(input = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(inputWSTheta));
+    TS_ASSERT_THROWS_NOTHING(output = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(outputWSTheta));
     // Workspaces should now have a numeric axes up the side, with units of
     // angle.
     const Axis *thetaAxis = nullptr;
@@ -98,12 +107,52 @@ private:
     TS_ASSERT_EQUALS(input->e(1), output->e(1));
 
     // Check workspace axes are of correct length.
-    TS_ASSERT_THROWS((*thetaAxis)(3),
-                     const Mantid::Kernel::Exception::IndexError &);
+    TS_ASSERT_THROWS((*thetaAxis)(3), const Mantid::Kernel::Exception::IndexError &);
   }
 
-  void clean_up_workspaces(const std::string &inputWS,
-                           const std::string &outputWS) {
+  void check_output_values_for_InPlaneTwoTheta_conversion(const std::string &inputWSTheta,
+                                                          const std::string &outputWSTheta) {
+    MatrixWorkspace_const_sptr input, output;
+    TS_ASSERT_THROWS_NOTHING(input = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(inputWSTheta));
+    TS_ASSERT_THROWS_NOTHING(output = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(outputWSTheta));
+    // Workspaces should now have a numeric axes up the side, with units of angle.
+    const Axis *thetaAxis = nullptr;
+    TS_ASSERT_THROWS_NOTHING(thetaAxis = output->getAxis(1));
+    TS_ASSERT(thetaAxis->isNumeric());
+    TS_ASSERT_EQUALS(thetaAxis->unit()->caption(), "Scattering angle");
+    TS_ASSERT_EQUALS(thetaAxis->unit()->label(), "degrees");
+
+    // the axis is sorted
+    TS_ASSERT_DELTA((*thetaAxis)(0), 0, 0.0001);
+    TS_ASSERT_DELTA((*thetaAxis)(1), 45, 0.0001);
+    TS_ASSERT_DELTA((*thetaAxis)(2), 45, 0.0001);
+
+    // Check workspace axes are of correct length.
+    TS_ASSERT_THROWS((*thetaAxis)(3), const Mantid::Kernel::Exception::IndexError &);
+  }
+
+  void check_output_values_for_SignedInPlaneTwoTheta_conversion(const std::string &inputWSTheta,
+                                                                const std::string &outputWSTheta) {
+    MatrixWorkspace_const_sptr input, output;
+    TS_ASSERT_THROWS_NOTHING(input = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(inputWSTheta));
+    TS_ASSERT_THROWS_NOTHING(output = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(outputWSTheta));
+    // Workspaces should now have a numeric axes up the side, with units of
+    // angle.
+    const Axis *thetaAxis = nullptr;
+    TS_ASSERT_THROWS_NOTHING(thetaAxis = output->getAxis(1));
+    TS_ASSERT(thetaAxis->isNumeric());
+    TS_ASSERT_EQUALS(thetaAxis->unit()->caption(), "Scattering angle");
+    TS_ASSERT_EQUALS(thetaAxis->unit()->label(), "degrees");
+
+    TS_ASSERT_DELTA((*thetaAxis)(0), -45, 0.0001);
+    TS_ASSERT_DELTA((*thetaAxis)(1), 0, 0.0001);
+    TS_ASSERT_DELTA((*thetaAxis)(2), 45, 0.0001);
+
+    // Check workspace axes are of correct length.
+    TS_ASSERT_THROWS((*thetaAxis)(3), const Mantid::Kernel::Exception::IndexError &);
+  }
+
+  void clean_up_workspaces(const std::string &inputWS, const std::string &outputWS) {
     AnalysisDataService::Instance().remove(inputWS);
     AnalysisDataService::Instance().remove(outputWS);
   }
@@ -138,8 +187,7 @@ public:
     clean_up_workspaces(inputWS, outputSignedThetaAxisWS);
 
     // No histogram
-    do_algorithm_run("signed_theta", inputWS, outputSignedThetaAxisWS, true,
-                     false);
+    do_algorithm_run("signed_theta", inputWS, outputSignedThetaAxisWS, true, false);
 
     // Check output values for the workspace then clean up.
     check_output_values_for_signed_theta_conversion(outputSignedThetaAxisWS);
@@ -153,8 +201,7 @@ public:
     clean_up_workspaces(inputWS, outputSignedThetaAxisWS2);
 
     // No histogram
-    do_algorithm_run("SignedTheta", inputWS, outputSignedThetaAxisWS2, true,
-                     false);
+    do_algorithm_run("SignedTheta", inputWS, outputSignedThetaAxisWS2, true, false);
 
     // Check output values for the workspace then clean up.
     check_output_values_for_signed_theta_conversion(outputSignedThetaAxisWS2);
@@ -179,22 +226,39 @@ public:
     clean_up_workspaces(inputWS, outputWS2);
   }
 
-  void
-  test_Target_ElasticQ_Throws_When_No_Efixed_Set_In_Algorithm_And_Not_In_Workspace() {
+  void test_Target_InPlaneTwoTheta_Returns_Correct_Value() {
+    const std::string inputWS("inWS");
+    const std::string outputWS("outWS");
+
+    do_algorithm_run("InPlaneTwoTheta", inputWS, outputWS);
+    // Check output values for the workspace then clean up.
+    check_output_values_for_InPlaneTwoTheta_conversion(inputWS, outputWS);
+    clean_up_workspaces(inputWS, outputWS);
+  }
+
+  void test_Target_SignedInPlaneTwoTheta_Returns_Correct_Value() {
+    const std::string inputWS("inWS");
+    const std::string outputWS("outWS");
+
+    do_algorithm_run("SignedInPlaneTwoTheta", inputWS, outputWS);
+    // Check output values for the workspace then clean up.
+    check_output_values_for_SignedInPlaneTwoTheta_conversion(inputWS, outputWS);
+    clean_up_workspaces(inputWS, outputWS);
+  }
+
+  void test_Target_ElasticQ_Throws_When_No_Efixed_Set_In_Algorithm_And_Not_In_Workspace() {
     std::string inputWS("inWS");
     const std::string outputWS("outWS");
     const std::string target("ElasticQ");
 
-    auto testWS = WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(
-        3, 1, false);
+    auto testWS = WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(3, 1, false);
     AnalysisDataService::Instance().addOrReplace(inputWS, testWS);
 
     Mantid::Algorithms::ConvertSpectrumAxis2 conv;
     conv.initialize();
     conv.setRethrows(true);
     TS_ASSERT_THROWS_NOTHING(conv.setPropertyValue("InputWorkspace", inputWS));
-    TS_ASSERT_THROWS_NOTHING(
-        conv.setPropertyValue("OutputWorkspace", outputWS));
+    TS_ASSERT_THROWS_NOTHING(conv.setPropertyValue("OutputWorkspace", outputWS));
     TS_ASSERT_THROWS_NOTHING(conv.setPropertyValue("Target", target));
 
     TS_ASSERT_THROWS(conv.execute(), const std::invalid_argument &);
@@ -204,20 +268,15 @@ public:
     clean_up_workspaces(inputWS, outputWS);
   }
 
-  void
-  test_Target_ElasticQ_Returns_Correct_Value_When_EFixed_Is_Set_In_Algorithm() {
+  void test_Target_ElasticQ_Returns_Correct_Value_When_EFixed_Is_Set_In_Algorithm() {
     std::string inputWS("inWS");
     const std::string outputWS("outWS");
 
     do_algorithm_run("ElasticQ", inputWS, outputWS, false);
 
     MatrixWorkspace_const_sptr input, output;
-    TS_ASSERT_THROWS_NOTHING(
-        input = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-            inputWS));
-    TS_ASSERT_THROWS_NOTHING(
-        output = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-            outputWS));
+    TS_ASSERT_THROWS_NOTHING(input = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(inputWS));
+    TS_ASSERT_THROWS_NOTHING(output = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(outputWS));
 
     // Should now have a numeric axis up the side, with units of Q
     const Axis *qAxis = nullptr;
@@ -230,8 +289,7 @@ public:
     TS_ASSERT_DELTA((*qAxis)(2), 0.0878, 1.0000e-4);
 
     // Check axis is correct length
-    TS_ASSERT_THROWS((*qAxis)(3),
-                     const Mantid::Kernel::Exception::IndexError &);
+    TS_ASSERT_THROWS((*qAxis)(3), const Mantid::Kernel::Exception::IndexError &);
 
     TS_ASSERT_EQUALS(input->x(0), output->x(0));
     TS_ASSERT_EQUALS(input->y(0), output->y(0));
@@ -247,20 +305,15 @@ public:
     clean_up_workspaces(inputWS, outputWS);
   }
 
-  void
-  test_Target_ElasticDSpacing_Returns_Correct_Value_When_EFixed_Is_Set_In_Algorithm() {
+  void test_Target_ElasticDSpacing_Returns_Correct_Value_When_EFixed_Is_Set_In_Algorithm() {
     const std::string inputWS("inWS");
     const std::string outputWS("outWS");
 
     do_algorithm_run("ElasticDSpacing", inputWS, outputWS, false);
 
     MatrixWorkspace_const_sptr input, output;
-    TS_ASSERT_THROWS_NOTHING(
-        input = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-            inputWS));
-    TS_ASSERT_THROWS_NOTHING(
-        output = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-            outputWS));
+    TS_ASSERT_THROWS_NOTHING(input = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(inputWS));
+    TS_ASSERT_THROWS_NOTHING(output = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(outputWS));
 
     // Should now have a numeric axis up the side, with units of d
     const Axis *qAxis = nullptr;
@@ -273,8 +326,7 @@ public:
     TS_ASSERT_DELTA((*qAxis)(2), 2 * M_PI / DBL_MIN, 1e-10);
 
     // Check axis is correct length
-    TS_ASSERT_THROWS((*qAxis)(3),
-                     const Mantid::Kernel::Exception::IndexError &);
+    TS_ASSERT_THROWS((*qAxis)(3), const Mantid::Kernel::Exception::IndexError &);
 
     TS_ASSERT_EQUALS(input->x(0), output->x(0));
     TS_ASSERT_EQUALS(input->y(0), output->y(0));
@@ -290,20 +342,15 @@ public:
     clean_up_workspaces(inputWS, outputWS);
   }
 
-  void
-  test_Target_ElasticQSquared_Returns_Correct_Value_When_EFixed_Is_Set_In_Algorithm() {
+  void test_Target_ElasticQSquared_Returns_Correct_Value_When_EFixed_Is_Set_In_Algorithm() {
     std::string inputWS("inWS");
     const std::string outputWS("outWS");
 
     do_algorithm_run("ElasticQSquared", inputWS, outputWS, false);
 
     MatrixWorkspace_const_sptr input, output;
-    TS_ASSERT_THROWS_NOTHING(
-        input = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-            inputWS));
-    TS_ASSERT_THROWS_NOTHING(
-        output = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-            outputWS));
+    TS_ASSERT_THROWS_NOTHING(input = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(inputWS));
+    TS_ASSERT_THROWS_NOTHING(output = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(outputWS));
 
     // Should now have a numeric axis up the side, with units of Q^2
     const Axis *q2Axis = nullptr;
@@ -316,8 +363,7 @@ public:
     TS_ASSERT_DELTA((*q2Axis)(2), 0.00771, 1.0000e-5);
 
     // Check axis is correct length
-    TS_ASSERT_THROWS((*q2Axis)(3),
-                     const Mantid::Kernel::Exception::IndexError &);
+    TS_ASSERT_THROWS((*q2Axis)(3), const Mantid::Kernel::Exception::IndexError &);
 
     TS_ASSERT_EQUALS(input->x(0), output->x(0));
     TS_ASSERT_EQUALS(input->y(0), output->y(0));
@@ -333,8 +379,7 @@ public:
     clean_up_workspaces(inputWS, outputWS);
   }
 
-  void
-  test_Target_ElasticQ_For_Direct_Uses_Workspace_Ei_If_No_EFixed_Is_Set_In_Algorithm() {
+  void test_Target_ElasticQ_For_Direct_Uses_Workspace_Ei_If_No_EFixed_Is_Set_In_Algorithm() {
     std::string inputWS("inWS");
     const std::string outputWS("outWS");
     const std::string target("ElasticQ");
@@ -342,8 +387,7 @@ public:
     const double efixed(2.5);
 
     // Setup a workspace which contains a value for Ei.
-    auto testWS = WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(
-        3, 1, false);
+    auto testWS = WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(3, 1, false);
     auto &run = testWS->mutableRun();
     run.addProperty("Ei", efixed);
     AnalysisDataService::Instance().addOrReplace(inputWS, testWS);
@@ -351,8 +395,7 @@ public:
     Mantid::Algorithms::ConvertSpectrumAxis2 conv;
     conv.initialize();
     TS_ASSERT_THROWS_NOTHING(conv.setPropertyValue("InputWorkspace", inputWS));
-    TS_ASSERT_THROWS_NOTHING(
-        conv.setPropertyValue("OutputWorkspace", outputWS));
+    TS_ASSERT_THROWS_NOTHING(conv.setPropertyValue("OutputWorkspace", outputWS));
     TS_ASSERT_THROWS_NOTHING(conv.setPropertyValue("Target", target));
     TS_ASSERT_THROWS_NOTHING(conv.setPropertyValue("EMode", emode));
 
@@ -361,12 +404,8 @@ public:
     TS_ASSERT(conv.isExecuted());
 
     MatrixWorkspace_const_sptr input, output;
-    TS_ASSERT_THROWS_NOTHING(
-        input = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-            inputWS));
-    TS_ASSERT_THROWS_NOTHING(
-        output = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-            outputWS));
+    TS_ASSERT_THROWS_NOTHING(input = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(inputWS));
+    TS_ASSERT_THROWS_NOTHING(output = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(outputWS));
 
     // Should now have a numeric axis up the side, with units of Q
     const Axis *qAxis = nullptr;
@@ -379,23 +418,20 @@ public:
     TS_ASSERT_DELTA((*qAxis)(2), 0.0439, 1.0000e-4);
 
     // Check axis is of correct length.
-    TS_ASSERT_THROWS((*qAxis)(3),
-                     const Mantid::Kernel::Exception::IndexError &);
+    TS_ASSERT_THROWS((*qAxis)(3), const Mantid::Kernel::Exception::IndexError &);
 
     // Clean up workspaces.
     clean_up_workspaces(inputWS, outputWS);
   }
 
-  void
-  test_Target_ElasticQ_For_Indirect_Uses_Detector_If_No_EFixed_Is_Set_In_Algorithm() {
+  void test_Target_ElasticQ_For_Indirect_Uses_Detector_If_No_EFixed_Is_Set_In_Algorithm() {
     std::string inputWS("inWS");
     const std::string outputWS("outWS");
     const std::string target("ElasticQ");
     const std::string emode("Indirect");
 
     // Setup workspace with detectors which have different values for Efixed.
-    auto testWS = WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(
-        3, 1, false);
+    auto testWS = WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(3, 1, false);
     AnalysisDataService::Instance().addOrReplace(inputWS, testWS);
 
     auto &pmap = testWS->instrumentParameters();
@@ -408,20 +444,15 @@ public:
     conv.initialize();
 
     TS_ASSERT_THROWS_NOTHING(conv.setPropertyValue("InputWorkspace", inputWS));
-    TS_ASSERT_THROWS_NOTHING(
-        conv.setPropertyValue("OutputWorkspace", outputWS));
+    TS_ASSERT_THROWS_NOTHING(conv.setPropertyValue("OutputWorkspace", outputWS));
     TS_ASSERT_THROWS_NOTHING(conv.setPropertyValue("Target", target));
     TS_ASSERT_THROWS_NOTHING(conv.setPropertyValue("EMode", emode));
 
     conv.execute();
 
     MatrixWorkspace_const_sptr input, output;
-    TS_ASSERT_THROWS_NOTHING(
-        input = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-            inputWS));
-    TS_ASSERT_THROWS_NOTHING(
-        output = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-            outputWS));
+    TS_ASSERT_THROWS_NOTHING(input = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(inputWS));
+    TS_ASSERT_THROWS_NOTHING(output = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(outputWS));
 
     // Should now have a numeric axis up the side, with units of Q.
     const Axis *qAxis = nullptr;
@@ -434,8 +465,7 @@ public:
     TS_ASSERT_DELTA((*qAxis)(2), 0.004393, 1.0000e-6);
 
     // Check axis is of correct length.
-    TS_ASSERT_THROWS((*qAxis)(3),
-                     const Mantid::Kernel::Exception::IndexError &);
+    TS_ASSERT_THROWS((*qAxis)(3), const Mantid::Kernel::Exception::IndexError &);
 
     TS_ASSERT(conv.isExecuted());
 
@@ -480,8 +510,7 @@ public:
   void test_eventWS() {
     const std::string outputWS("outWS");
     const std::string target("theta");
-    auto testWS =
-        WorkspaceCreationHelper::createEventWorkspaceWithFullInstrument(500, 3);
+    auto testWS = WorkspaceCreationHelper::createEventWorkspaceWithFullInstrument(500, 3);
     Mantid::Algorithms::ConvertSpectrumAxis2 conv;
     conv.setChild(true);
     conv.initialize();
@@ -503,17 +532,12 @@ public:
 
 class ConvertSpectrumAxis2TestPerformance : public CxxTest::TestSuite {
 public:
-  static ConvertSpectrumAxis2TestPerformance *createSuite() {
-    return new ConvertSpectrumAxis2TestPerformance();
-  }
-  static void destroySuite(ConvertSpectrumAxis2TestPerformance *suite) {
-    delete suite;
-  }
+  static ConvertSpectrumAxis2TestPerformance *createSuite() { return new ConvertSpectrumAxis2TestPerformance(); }
+  static void destroySuite(ConvertSpectrumAxis2TestPerformance *suite) { delete suite; }
 
   ConvertSpectrumAxis2TestPerformance() {
     FrameworkManager::Instance();
-    m_testWS = WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(
-        20000, 20000);
+    m_testWS = WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(20000, 20000);
     m_creator.initialize();
     m_creator.setChild(true);
     m_creator.setProperty("NumBanks", 100);

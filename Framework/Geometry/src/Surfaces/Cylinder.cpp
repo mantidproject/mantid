@@ -30,9 +30,7 @@ GNU_DIAG_ON("conversion")
 GNU_DIAG_ON("cast-qual")
 #endif
 
-namespace Mantid {
-
-namespace Geometry {
+namespace Mantid::Geometry {
 namespace {
 Kernel::Logger logger("Cylinder");
 }
@@ -40,7 +38,7 @@ using Kernel::Tolerance;
 using Kernel::V3D;
 
 Cylinder::Cylinder()
-    : Quadratic(), Centre(), Normal(1, 0, 0), Nvec(0), Radius(0.0)
+    : Quadratic(), m_centre(), m_normal(1, 0, 0), m_normVec(0), m_radius(0.0)
 /**
  Standard Constructor creats a cylinder (radius 0)
  along the x axis
@@ -83,8 +81,8 @@ int Cylinder::setSurface(const std::string &Pstr)
 
   std::string Line = Pstr;
   std::string item;
-  if (!Mantid::Kernel::Strings::section(Line, item) ||
-      tolower(item[0]) != 'c' || item.length() < 2 || item.length() > 3)
+  if (!Mantid::Kernel::Strings::section(Line, item) || tolower(item[0]) != 'c' || item.length() < 2 ||
+      item.length() > 3)
     return errDesc;
 
   // Cylinders on X/Y/Z axis
@@ -112,10 +110,10 @@ int Cylinder::setSurface(const std::string &Pstr)
   if (!Mantid::Kernel::Strings::section(Line, R) || R <= 0.0)
     return errRadius;
 
-  Centre = Kernel::V3D(cent[0], cent[1], cent[2]);
-  Normal = Kernel::V3D(norm[0], norm[1], norm[2]);
-  Nvec = ptype + 1;
-  Radius = R;
+  m_centre = Kernel::V3D(cent[0], cent[1], cent[2]);
+  m_normal = Kernel::V3D(norm[0], norm[1], norm[2]);
+  m_normVec = ptype + 1;
+  setRadiusInternal(R);
   setBaseEqn();
   return 0;
 }
@@ -130,16 +128,15 @@ int Cylinder::side(const Kernel::V3D &Pt) const
  @retval 0 :: on the surface
  */
 {
-  if (Nvec) // Nvec =1-3 (point to exclude == Nvec-1)
+  if (m_normVec) // m_normVec =1-3 (point to exclude == m_normVec-1)
   {
-    if (Radius > 0.0) {
-      double x = Pt[Nvec % 3] - Centre[Nvec % 3];
+    if (m_radius > 0.0) {
+      double x = Pt[m_normVec % 3] - m_centre[m_normVec % 3];
       x *= x;
-      double y = Pt[(Nvec + 1) % 3] - Centre[(Nvec + 1) % 3];
-      ;
+      double y = Pt[(m_normVec + 1) % 3] - m_centre[(m_normVec + 1) % 3];
       y *= y;
-      const double displace = x + y - Radius * Radius;
-      if (fabs(displace / Radius) < Tolerance)
+      double displace = x + y - m_radius * m_radius;
+      if (fabs(displace * m_oneoverradius) < Tolerance)
         return 0;
       return (displace > 0.0) ? 1 : -1;
     } else {
@@ -149,36 +146,34 @@ int Cylinder::side(const Kernel::V3D &Pt) const
   return Quadratic::side(Pt);
 }
 
-int Cylinder::onSurface(const Kernel::V3D &Pt) const
+bool Cylinder::onSurface(const Kernel::V3D &Pt) const
 /**
  Calculate if the point PT on the cylinder
  @param Pt :: Kernel::V3D to test
- @retval 1 :: on the surface
- @retval 0 :: not on the surface
  */
 {
-  if (Nvec) // Nvec =1-3 (point to exclude == Nvec-1)
+  if (m_normVec > 0) // m_normVec =1-3 (point to exclude == m_normVec-1)
   {
-    double x = Pt[Nvec % 3] - Centre[Nvec % 3];
+    double x = Pt[m_normVec % 3] - m_centre[m_normVec % 3];
     x *= x;
-    double y = Pt[(Nvec + 1) % 3] - Centre[(Nvec + 1) % 3];
+    double y = Pt[(m_normVec + 1) % 3] - m_centre[(m_normVec + 1) % 3];
     y *= y;
-    return (std::abs((x + y) - Radius * Radius) > Tolerance) ? 0 : 1;
+    return (std::abs((x + y) - m_radius * m_radius) <= Tolerance);
   }
   return Quadratic::onSurface(Pt);
 }
 
-void Cylinder::setNvec()
+void Cylinder::setNormVec()
 /**
  Find if the normal vector allows it to be a special
  type of cylinder on the x,y or z axis
  @return 1,2,3 :: corresponding to a x,y,z alignment
  */
 {
-  Nvec = 0;
+  m_normVec = 0;
   for (std::size_t i = 0; i < 3; i++) {
-    if (fabs(Normal[i]) > (1.0 - Tolerance)) {
-      Nvec = i + 1;
+    if (fabs(m_normal[i]) > (1.0 - Tolerance)) {
+      m_normVec = i + 1;
       return;
     }
   }
@@ -191,10 +186,10 @@ void Cylinder::rotate(const Kernel::Matrix<double> &MA)
  @param MA :: Rotation Matrix (not inverted)
  */
 {
-  Centre.rotate(MA);
-  Normal.rotate(MA);
-  Normal.normalize();
-  setNvec();
+  m_centre.rotate(MA);
+  m_normal.rotate(MA);
+  m_normal.normalize();
+  setNormVec();
   Quadratic::rotate(MA);
 }
 
@@ -204,11 +199,11 @@ void Cylinder::displace(const Kernel::V3D &Pt)
  @param Pt :: Displacement to add to the centre
  */
 {
-  if (Nvec) {
-    Centre[Nvec % 3] += Pt[Nvec % 3];
-    Centre[(Nvec + 1) % 3] += Pt[(Nvec + 1) % 3];
+  if (m_normVec > 0) {
+    m_centre[m_normVec % 3] += Pt[m_normVec % 3];
+    m_centre[(m_normVec + 1) % 3] += Pt[(m_normVec + 1) % 3];
   } else
-    Centre += Pt;
+    m_centre += Pt;
   Quadratic::displace(Pt);
 }
 
@@ -218,7 +213,7 @@ void Cylinder::setCentre(const Kernel::V3D &A)
  @param A :: centre point
  */
 {
-  Centre = A;
+  m_centre = A;
   setBaseEqn();
 }
 
@@ -229,9 +224,9 @@ void Cylinder::setNorm(const Kernel::V3D &A)
  @param A :: Vector along the centre line
  */
 {
-  Normal = normalize(A);
+  m_normal = normalize(A);
   setBaseEqn();
-  setNvec();
+  setNormVec();
 }
 
 void Cylinder::setBaseEqn()
@@ -240,18 +235,17 @@ void Cylinder::setBaseEqn()
  \f[ Ax^2+By^2+Cz^2+Dxy+Exz+Fyz+Gx+Hy+Jz+K=0 \f]
  */
 {
-  const double CdotN(Centre.scalar_prod(Normal));
-  BaseEqn[0] = 1.0 - Normal[0] * Normal[0];           // A x^2
-  BaseEqn[1] = 1.0 - Normal[1] * Normal[1];           // B y^2
-  BaseEqn[2] = 1.0 - Normal[2] * Normal[2];           // C z^2
-  BaseEqn[3] = -2 * Normal[0] * Normal[1];            // D xy
-  BaseEqn[4] = -2 * Normal[0] * Normal[2];            // E xz
-  BaseEqn[5] = -2 * Normal[1] * Normal[2];            // F yz
-  BaseEqn[6] = 2.0 * (Normal[0] * CdotN - Centre[0]); // G x
-  BaseEqn[7] = 2.0 * (Normal[1] * CdotN - Centre[1]); // H y
-  BaseEqn[8] = 2.0 * (Normal[2] * CdotN - Centre[2]); // J z
-  BaseEqn[9] =
-      Centre.scalar_prod(Centre) - CdotN * CdotN - Radius * Radius; // K const
+  const double CdotN(m_centre.scalar_prod(m_normal));
+  BaseEqn[0] = 1.0 - m_normal[0] * m_normal[0];                                      // A x^2
+  BaseEqn[1] = 1.0 - m_normal[1] * m_normal[1];                                      // B y^2
+  BaseEqn[2] = 1.0 - m_normal[2] * m_normal[2];                                      // C z^2
+  BaseEqn[3] = -2 * m_normal[0] * m_normal[1];                                       // D xy
+  BaseEqn[4] = -2 * m_normal[0] * m_normal[2];                                       // E xz
+  BaseEqn[5] = -2 * m_normal[1] * m_normal[2];                                       // F yz
+  BaseEqn[6] = 2.0 * (m_normal[0] * CdotN - m_centre[0]);                            // G x
+  BaseEqn[7] = 2.0 * (m_normal[1] * CdotN - m_centre[1]);                            // H y
+  BaseEqn[8] = 2.0 * (m_normal[2] * CdotN - m_centre[2]);                            // J z
+  BaseEqn[9] = m_centre.scalar_prod(m_centre) - CdotN * CdotN - m_radius * m_radius; // K const
 }
 
 double Cylinder::distance(const Kernel::V3D &A) const
@@ -266,11 +260,11 @@ double Cylinder::distance(const Kernel::V3D &A) const
  */
 {
   // First find the normal going to the point
-  const Kernel::V3D Amov = A - Centre;
-  double lambda = Amov.scalar_prod(Normal);
-  const Kernel::V3D Ccut = Normal * lambda;
+  const Kernel::V3D Amov = A - m_centre;
+  double lambda = Amov.scalar_prod(m_normal);
+  const Kernel::V3D Ccut = m_normal * lambda;
   // The distance is from the centre line to the
-  return fabs(Ccut.distance(Amov) - Radius);
+  return fabs(Ccut.distance(Amov) - m_radius);
 }
 
 void Cylinder::write(std::ostream &OX) const
@@ -281,43 +275,42 @@ void Cylinder::write(std::ostream &OX) const
 {
   //               -3 -2 -1 0 1 2 3
   const char Tailends[] = "zyx xyz";
-  const int Ndir = Normal.masterDir(Tolerance);
+  const int Ndir = m_normal.masterDir(Tolerance);
   if (Ndir == 0) {
     // general surface
     Quadratic::write(OX);
     return;
   }
 
-  const int Cdir = Centre.masterDir(Tolerance);
+  const int Cdir = m_centre.masterDir(Tolerance);
   std::ostringstream cx;
 
   writeHeader(cx);
   cx.precision(Surface::Nprecision);
   // Name and transform
 
-  if (Cdir * Cdir == Ndir * Ndir || Centre.nullVector(Tolerance)) {
+  if (Cdir * Cdir == Ndir * Ndir || m_centre.nullVector(Tolerance)) {
     cx << "c";
     cx << Tailends[Ndir + 3] << " "; // set x,y,z based on Ndir
-    cx << Radius;
+    cx << m_radius;
   } else {
     cx << " c/";
     cx << Tailends[Ndir + 3] << " "; // set x,y,z based on Ndir
 
     if (Ndir == 1 || Ndir == -1)
-      cx << Centre[1] << " " << Centre[2] << " ";
+      cx << m_centre[1] << " " << m_centre[2] << " ";
     else if (Ndir == 2 || Ndir == -2)
-      cx << Centre[0] << " " << Centre[2] << " ";
+      cx << m_centre[0] << " " << m_centre[2] << " ";
     else
-      cx << Centre[0] << " " << Centre[1] << " ";
+      cx << m_centre[0] << " " << m_centre[1] << " ";
 
-    cx << Radius;
+    cx << m_radius;
   }
 
   Mantid::Kernel::Strings::writeMCNPX(cx.str(), OX);
 }
 
-double Cylinder::lineIntersect(const Kernel::V3D &Pt,
-                               const Kernel::V3D &uVec) const
+double Cylinder::lineIntersect(const Kernel::V3D &Pt, const Kernel::V3D &uVec) const
 /**
  Given a track starting from Pt and traveling along
  uVec determine the intersection point (distance)
@@ -338,13 +331,12 @@ void Cylinder::print() const
  */
 {
   Quadratic::print();
-  logger.debug() << "Axis ==" << Normal << " ";
-  logger.debug() << "Centre == " << Centre << " ";
-  logger.debug() << "Radius == " << Radius << '\n';
+  logger.debug() << "Axis ==" << m_normal << " ";
+  logger.debug() << "Centre == " << m_centre << " ";
+  logger.debug() << "Radius == " << m_radius << '\n';
 }
 
-void Cylinder::getBoundingBox(double &xmax, double &ymax, double &zmax,
-                              double &xmin, double &ymin, double &zmin) {
+void Cylinder::getBoundingBox(double &xmax, double &ymax, double &zmax, double &xmin, double &ymin, double &zmin) {
   /**
    Cylinder bounding box
    find the intersection points of the axis of cylinder with the input bounding
@@ -370,34 +362,33 @@ void Cylinder::getBoundingBox(double &xmax, double &ymax, double &zmax,
   tzmin = zmin;
   V3D xminPoint, xmaxPoint, yminPoint, ymaxPoint, zminPoint, zmaxPoint;
   // xmin and max plane
-  if (Normal[0] != 0) {
-    xminPoint = Centre + Normal * ((xmin - Centre[0]) / Normal[0]);
-    xmaxPoint = Centre + Normal * ((xmax - Centre[0]) / Normal[0]);
+  if (m_normal[0] != 0) {
+    xminPoint = m_centre + m_normal * ((xmin - m_centre[0]) / m_normal[0]);
+    xmaxPoint = m_centre + m_normal * ((xmax - m_centre[0]) / m_normal[0]);
     listOfPoints.emplace_back(xminPoint);
     listOfPoints.emplace_back(xmaxPoint);
   }
 
-  if (Normal[1] != 0) {
+  if (m_normal[1] != 0) {
     // ymin plane
-    yminPoint = Centre + Normal * ((ymin - Centre[1]) / Normal[1]);
+    yminPoint = m_centre + m_normal * ((ymin - m_centre[1]) / m_normal[1]);
     // ymax plane
-    ymaxPoint = Centre + Normal * ((ymax - Centre[1]) / Normal[1]);
+    ymaxPoint = m_centre + m_normal * ((ymax - m_centre[1]) / m_normal[1]);
     listOfPoints.emplace_back(yminPoint);
     listOfPoints.emplace_back(ymaxPoint);
   }
-  if (Normal[2] != 0) {
+  if (m_normal[2] != 0) {
     // zmin plane
-    zminPoint = Centre + Normal * ((zmin - Centre[2]) / Normal[2]);
+    zminPoint = m_centre + m_normal * ((zmin - m_centre[2]) / m_normal[2]);
     // zmax plane
-    zmaxPoint = Centre + Normal * ((zmax - Centre[2]) / Normal[2]);
+    zmaxPoint = m_centre + m_normal * ((zmax - m_centre[2]) / m_normal[2]);
     listOfPoints.emplace_back(zminPoint);
     listOfPoints.emplace_back(zmaxPoint);
   }
   if (!listOfPoints.empty()) {
     xmin = ymin = zmin = std::numeric_limits<double>::max();
-    xmax = ymax = zmax = std::numeric_limits<double>::min();
-    for (std::vector<V3D>::const_iterator it = listOfPoints.begin();
-         it != listOfPoints.end(); ++it) {
+    xmax = ymax = zmax = std::numeric_limits<double>::lowest();
+    for (std::vector<V3D>::const_iterator it = listOfPoints.begin(); it != listOfPoints.end(); ++it) {
       //			std::cout<<(*it)<<'\n';
       if ((*it)[0] < xmin)
         xmin = (*it)[0];
@@ -412,12 +403,12 @@ void Cylinder::getBoundingBox(double &xmax, double &ymax, double &zmax,
       if ((*it)[2] > zmax)
         zmax = (*it)[2];
     }
-    xmax += Radius;
-    ymax += Radius;
-    zmax += Radius;
-    xmin -= Radius;
-    ymin -= Radius;
-    zmin -= Radius;
+    xmax += m_radius;
+    ymax += m_radius;
+    zmax += m_radius;
+    xmin -= m_radius;
+    ymin -= m_radius;
+    zmin -= m_radius;
     if (xmax > txmax)
       xmax = txmax;
     if (xmin < txmin)
@@ -436,13 +427,11 @@ void Cylinder::getBoundingBox(double &xmax, double &ymax, double &zmax,
 #ifdef ENABLE_OPENCASCADE
 TopoDS_Shape Cylinder::createShape() {
   gp_Pnt center;
-  center.SetX(Centre[0] - Normal[0] * 500.0);
-  center.SetY(Centre[1] - Normal[1] * 500.0);
-  center.SetZ(Centre[2] - Normal[2] * 500.0);
-  gp_Ax2 gpA(center, gp_Dir(Normal[0], Normal[1], Normal[2]));
-  return BRepPrimAPI_MakeCylinder(gpA, Radius, 1000.0, 2.0 * M_PI).Solid();
+  center.SetX(m_centre[0] - m_normal[0] * 500.0);
+  center.SetY(m_centre[1] - m_normal[1] * 500.0);
+  center.SetZ(m_centre[2] - m_normal[2] * 500.0);
+  gp_Ax2 gpA(center, gp_Dir(m_normal[0], m_normal[1], m_normal[2]));
+  return BRepPrimAPI_MakeCylinder(gpA, m_radius, 1000.0, 2.0 * M_PI).Solid();
 }
 #endif
-} // namespace Geometry
-
-} // NAMESPACE Mantid
+} // namespace Mantid::Geometry

@@ -13,13 +13,16 @@ matplotlib.use("Agg")  # noqa
 import matplotlib.pyplot as plt
 from copy import copy
 from matplotlib.container import ErrorbarContainer
+from mantid.plots.utility import MantidAxType
 
 from unittest.mock import Mock, patch
-from mantid.simpleapi import CreateWorkspace
+from mantid.simpleapi import CreateWorkspace, AddTimeSeriesLog
 from workbench.plotting.plotscriptgenerator.lines import (_get_plot_command_kwargs_from_line2d,
                                                           _get_errorbar_specific_plot_kwargs,
                                                           generate_plot_command,
-                                                          get_plot_command_kwargs)
+                                                          get_plot_command_kwargs,
+                                                          _get_mantid_specific_plot_kwargs)
+
 from workbench.plotting.plotscriptgenerator.utils import convert_args_to_string
 
 LINE2D_KWARGS = {
@@ -49,8 +52,9 @@ ERRORBAR_ONLY_KWARGS = {
 }
 ERRORBAR_KWARGS = copy(LINE2D_KWARGS)
 ERRORBAR_KWARGS.update(ERRORBAR_ONLY_KWARGS)
-MANTID_ONLY_KWARGS = {'specNum': 1, 'distribution': True}
-
+MANTID_ONLY_KWARGS = {'wkspIndex': 0, 'distribution': True}
+MANTID_PLOTBIN_KWARGS = {'wkspIndex': 0, 'distribution': True, 'axis': MantidAxType.BIN}
+MANTID_PLOTSPECTRUM_KWARGS = {'wkspIndex': 0, 'distribution': False, 'axis': MantidAxType.SPECTRUM}
 ERRORBARS_HIDDEN_FUNC = 'workbench.plotting.plotscriptgenerator.lines.errorbars_hidden'
 GET_MANTID_PLOT_KWARGS = 'workbench.plotting.plotscriptgenerator.lines._get_mantid_specific_plot_kwargs'
 GET_PLOT_CMD_KWARGS_LINE2D = 'workbench.plotting.plotscriptgenerator.lines._get_plot_command_kwargs_from_line2d'
@@ -88,6 +92,32 @@ class PlotScriptGeneratorLinesTest(unittest.TestCase):
         expected_command = ("plot({}, {})".format(self.test_ws.name(),
                                                   convert_args_to_string(None, kwargs)))
         self.assertEqual(expected_command, output)
+
+    def test_generate_plot_command_returns_correct_string_for_sample_log(self):
+        kwargs = copy(LINE2D_KWARGS)
+        kwargs["drawstyle"] = 'steps-post'
+        kwargs.update({"LogName": "my_log", "ExperimentInfo": 0, "Filtered": True})
+        # add a log
+        AddTimeSeriesLog(self.test_ws, Name="my_log", Time="2010-01-01T00:00:00", Value=100)
+        AddTimeSeriesLog(self.test_ws, Name="my_log", Time="2010-01-01T00:30:00", Value=15)
+        AddTimeSeriesLog(self.test_ws, Name="my_log", Time="2010-01-01T00:50:00", Value=100.2)
+        line = self.ax.plot(self.test_ws, **kwargs)[0]
+        output = generate_plot_command(line)
+        expected_command = ("plot({}, {})".format(self.test_ws.name(),
+                                                  convert_args_to_string(None, kwargs)))
+        self.assertEqual(expected_command, output)
+
+    def test_generate_mantid_plot_kwargs_returns_correctly_for_plot_bin(self):
+        line = self.ax.plot(self.test_ws, wkspIndex=0, **LINE2D_KWARGS, axis=MantidAxType.BIN)[0]
+        plot_kwargs = _get_mantid_specific_plot_kwargs(line)
+        for key, value in MANTID_PLOTBIN_KWARGS.items():
+            self.assertEqual(value, plot_kwargs[key])
+
+    def test_generate_mantid_plot_kwargs_returns_correctly_for_plot_spectrum(self):
+        line = self.ax.plot(self.test_ws, wkspIndex=0, **LINE2D_KWARGS, axis=MantidAxType.SPECTRUM)[0]
+        plot_kwargs = _get_mantid_specific_plot_kwargs(line)
+        for key, value in MANTID_PLOTSPECTRUM_KWARGS.items():
+            self.assertEqual(value, plot_kwargs[key])
 
     def test_get_errorbar_specific_plot_kwargs_returns_dict_with_correct_properties(self):
         errorbar_kwargs = copy(ERRORBAR_KWARGS)

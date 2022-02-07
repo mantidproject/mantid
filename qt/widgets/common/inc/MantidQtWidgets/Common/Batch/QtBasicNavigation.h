@@ -20,8 +20,7 @@ QModelIndex above(QModelIndex const &index);
 QModelIndex leftOf(QModelIndex const &index);
 QModelIndex rightOf(QModelIndex const &index);
 QModelIndex firstCellOnRowOf(QModelIndex const &index);
-QModelIndex lastChildRowOf(QModelIndex const &index,
-                           QAbstractItemModel const &model);
+QModelIndex lastChildRowOf(QModelIndex const &index, QAbstractItemModel const &model);
 bool hasCellOnTheLeft(QModelIndex const &index);
 bool hasCellOnTheRight(QModelIndex const &index);
 bool hasRowAbove(QModelIndex const &index);

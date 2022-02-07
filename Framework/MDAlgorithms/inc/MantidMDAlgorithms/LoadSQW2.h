@@ -29,17 +29,14 @@ class DLLExport LoadSQW2 : public API::IFileLoader<Kernel::FileDescriptor> {
 public:
   const std::string name() const override;
   int version() const override;
-  const std::vector<std::string> seeAlso() const override {
-    return {"LoadNXSPE", "SaveNXSPE"};
-  }
+  const std::vector<std::string> seeAlso() const override { return {"LoadNXSPE", "SaveNXSPE"}; }
   const std::string category() const override;
   const std::string summary() const override;
   int confidence(Kernel::FileDescriptor &descriptor) const override;
 
 private:
   /// Local typedef for
-  using SQWWorkspace =
-      DataObjects::MDEventWorkspace<DataObjects::MDEvent<4>, 4>;
+  using SQWWorkspace = DataObjects::MDEventWorkspace<DataObjects::MDEvent<4>, 4>;
 
   void init() override;
   void exec() override;
@@ -57,11 +54,9 @@ private:
   void readSQWDimensions();
   std::vector<int32_t> readProjection();
   std::vector<float> calculateDimLimitsFromData();
-  Geometry::IMDDimension_sptr createQDimension(size_t index, float dimMin,
-                                               float dimMax, size_t nbins,
+  Geometry::IMDDimension_sptr createQDimension(size_t index, float dimMin, float dimMax, size_t nbins,
                                                const Kernel::DblMatrix &bmat);
-  Geometry::IMDDimension_sptr createEnDimension(float umin, float umax,
-                                                size_t nbins);
+  Geometry::IMDDimension_sptr createEnDimension(float umin, float umax, size_t nbins);
   void setupBoxController();
   void setupFileBackend(const std::string &filebackPath);
   void readPixelDataIntoWorkspace();

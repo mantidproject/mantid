@@ -29,6 +29,8 @@ class FigureWindow(QMainWindow, ObservingView):
     visibility_changed = Signal()
     show_context_menu = Signal()
     close_signal = Signal()
+    plot_updated = Signal()
+    resized = Signal()
 
     def __init__(self, canvas, parent=None, window_flags=None):
         if window_flags is not None:
@@ -105,6 +107,14 @@ class FigureWindow(QMainWindow, ObservingView):
 
         self._plot_on_here(workspace_names, ax)
         QMainWindow.dropEvent(self, event)
+        self.plot_updated.emit()
+
+    def resizeEvent(self, event):
+        """
+        Override QMainWindow::resizeEvent().
+        """
+        super().resizeEvent(event)
+        self.resized.emit()
 
     # private api
 
@@ -121,12 +131,18 @@ class FigureWindow(QMainWindow, ObservingView):
         if len(names) == 0:
             return
         # local import to avoid circular import with FigureManager
-        from mantidqt.plotting.functions import pcolormesh_from_names, plot_from_names
+        from mantidqt.plotting.functions import pcolormesh, plot_from_names, plot_surface, plot_wireframe, plot_contour
 
         fig = self._canvas.figure
         fig_type = figure_type(fig, ax)
         if fig_type == FigureType.Image:
-            pcolormesh_from_names(names, fig=fig)
+            pcolormesh(names, fig=fig)
+        elif fig_type == FigureType.Surface:
+            plot_surface(names, fig=fig)
+        elif fig_type == FigureType.Wireframe:
+            plot_wireframe(names, fig=fig)
+        elif fig_type == FigureType.Contour:
+            plot_contour(names, fig=fig)
         else:
             plot_from_names(names, errors=(fig_type == FigureType.Errorbar),
                             overplot=ax, fig=fig)

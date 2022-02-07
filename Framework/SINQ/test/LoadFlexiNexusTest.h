@@ -44,9 +44,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(loader.execute());
 
     // test data
-    IMDHistoWorkspace_sptr data =
-        AnalysisDataService::Instance().retrieveWS<IMDHistoWorkspace>(
-            outputSpace);
+    IMDHistoWorkspace_sptr data = AnalysisDataService::Instance().retrieveWS<IMDHistoWorkspace>(outputSpace);
     long nBin = static_cast<long>(data->getNPoints());
     long sum = 0;
     auto sdata = data->getSignalArray();
@@ -97,9 +95,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(loader.execute());
 
     // test data
-    MatrixWorkspace_sptr data =
-        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-            outputSpace);
+    MatrixWorkspace_sptr data = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(outputSpace);
     TS_ASSERT_EQUALS(data->getNumberHistograms(), 1);
     const auto &X = data->x(0);
     const auto &Y = data->y(0);

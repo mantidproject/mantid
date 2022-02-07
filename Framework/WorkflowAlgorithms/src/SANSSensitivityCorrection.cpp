@@ -24,8 +24,7 @@
 #include "Poco/NumberFormatter.h"
 #include "Poco/Path.h"
 #include "Poco/String.h"
-namespace Mantid {
-namespace WorkflowAlgorithms {
+namespace Mantid::WorkflowAlgorithms {
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(SANSSensitivityCorrection)
@@ -36,29 +35,24 @@ using namespace Geometry;
 using namespace DataObjects;
 
 void SANSSensitivityCorrection::init() {
-  declareProperty(std::make_unique<WorkspaceProperty<>>(
-      "InputWorkspace", "", Direction::Input, PropertyMode::Optional));
+  declareProperty(
+      std::make_unique<WorkspaceProperty<>>("InputWorkspace", "", Direction::Input, PropertyMode::Optional));
   const std::vector<std::string> fileExts{"_event.nxs", ".xml"};
-  declareProperty(std::make_unique<API::FileProperty>(
-                      "Filename", "", API::FileProperty::Load, fileExts),
+  declareProperty(std::make_unique<API::FileProperty>("Filename", "", API::FileProperty::Load, fileExts),
                   "Flood field or sensitivity file.");
   declareProperty("UseSampleDC", true,
                   "If true, the dark current subtracted "
                   "from the sample data will also be "
                   "subtracted from the flood field.");
-  declareProperty(
-      std::make_unique<API::FileProperty>(
-          "DarkCurrentFile", "", API::FileProperty::OptionalLoad, fileExts),
-      "The name of the input file to load as dark current.");
+  declareProperty(std::make_unique<API::FileProperty>("DarkCurrentFile", "", API::FileProperty::OptionalLoad, fileExts),
+                  "The name of the input file to load as dark current.");
 
   auto positiveDouble = std::make_shared<BoundedValidator<double>>();
   positiveDouble->setLower(0);
-  declareProperty(
-      "MinEfficiency", EMPTY_DBL(), positiveDouble,
-      "Minimum efficiency for a pixel to be considered (default: no minimum).");
-  declareProperty(
-      "MaxEfficiency", EMPTY_DBL(), positiveDouble,
-      "Maximum efficiency for a pixel to be considered (default: no maximum).");
+  declareProperty("MinEfficiency", EMPTY_DBL(), positiveDouble,
+                  "Minimum efficiency for a pixel to be considered (default: no minimum).");
+  declareProperty("MaxEfficiency", EMPTY_DBL(), positiveDouble,
+                  "Maximum efficiency for a pixel to be considered (default: no maximum).");
 
   declareProperty("FloodTransmissionValue", EMPTY_DBL(), positiveDouble,
                   "Transmission value for the flood field material "
@@ -73,21 +67,16 @@ void SANSSensitivityCorrection::init() {
   declareProperty("BeamCenterY", EMPTY_DBL(),
                   "Beam position in Y pixel coordinates (optional: otherwise "
                   "sample beam center is used)");
-  declareProperty("MaskedFullComponent", "",
-                  "Component Name to fully mask according to the IDF file.");
-  declareProperty(
-      std::make_unique<ArrayProperty<int>>("MaskedEdges"),
-      "Number of pixels to mask on the edges: X-low, X-high, Y-low, Y-high");
-  declareProperty(
-      "MaskedComponent", "",
-      "Component Name to mask the edges according to the IDF file.");
+  declareProperty("MaskedFullComponent", "", "Component Name to fully mask according to the IDF file.");
+  declareProperty(std::make_unique<ArrayProperty<int>>("MaskedEdges"),
+                  "Number of pixels to mask on the edges: X-low, X-high, Y-low, Y-high");
+  declareProperty("MaskedComponent", "", "Component Name to mask the edges according to the IDF file.");
 
-  declareProperty(std::make_unique<WorkspaceProperty<>>(
-      "OutputWorkspace", "", Direction::Output, PropertyMode::Optional));
+  declareProperty(
+      std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "", Direction::Output, PropertyMode::Optional));
   declareProperty("ReductionProperties", "__sans_reduction_properties");
-  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
-      "OutputSensitivityWorkspace", "", Direction::Output,
-      PropertyMode::Optional));
+  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>("OutputSensitivityWorkspace", "",
+                                                                       Direction::Output, PropertyMode::Optional));
   declareProperty("OutputMessage", "", Direction::Output);
 }
 
@@ -128,12 +117,10 @@ void SANSSensitivityCorrection::exec() {
   const std::string reductionManagerName = getProperty("ReductionProperties");
   std::shared_ptr<PropertyManager> reductionManager;
   if (PropertyManagerDataService::Instance().doesExist(reductionManagerName)) {
-    reductionManager =
-        PropertyManagerDataService::Instance().retrieve(reductionManagerName);
+    reductionManager = PropertyManagerDataService::Instance().retrieve(reductionManagerName);
   } else {
     reductionManager = std::make_shared<PropertyManager>();
-    PropertyManagerDataService::Instance().addOrReplace(reductionManagerName,
-                                                        reductionManager);
+    PropertyManagerDataService::Instance().addOrReplace(reductionManagerName, reductionManager);
   }
 
   if (!reductionManager->existsProperty("SensitivityAlgorithm")) {
@@ -153,20 +140,17 @@ void SANSSensitivityCorrection::exec() {
 
   if (reductionManager->existsProperty(entryName)) {
     std::string wsName = reductionManager->getPropertyValue(entryName);
-    floodWS = std::dynamic_pointer_cast<MatrixWorkspace>(
-        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(wsName));
+    floodWS =
+        std::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(wsName));
     m_output_message += "   |Using " + wsName + "\n";
-    g_log.debug()
-        << "SANSSensitivityCorrection :: Using sensitivity workspace: "
-        << wsName << "\n";
+    g_log.debug() << "SANSSensitivityCorrection :: Using sensitivity workspace: " << wsName << "\n";
   } else {
     // Load the flood field if we don't have it already
     // First, try to determine whether we need to load data or a sensitivity
     // workspace...
     if (!floodWS && fileCheck(fileName)) {
-      g_log.debug() << "SANSSensitivityCorrection :: Loading sensitivity file: "
-                    << fileName << "\n";
-      IAlgorithm_sptr loadAlg = createChildAlgorithm("Load", 0.1, 0.3);
+      g_log.debug() << "SANSSensitivityCorrection :: Loading sensitivity file: " << fileName << "\n";
+      auto loadAlg = createChildAlgorithm("Load", 0.1, 0.3);
       loadAlg->setProperty("Filename", fileName);
       loadAlg->executeAsChildAlg();
       Workspace_sptr floodWS_ws = loadAlg->getProperty("OutputWorkspace");
@@ -191,10 +175,8 @@ void SANSSensitivityCorrection::exec() {
             reductionManager->existsProperty("LatestBeamCenterY")) {
           center_x = reductionManager->getProperty("LatestBeamCenterX");
           center_y = reductionManager->getProperty("LatestBeamCenterY");
-          m_output_message +=
-              "   |Setting beam center to [" +
-              Poco::NumberFormatter::format(center_x, 1) + ", " +
-              Poco::NumberFormatter::format(center_y, 1) + "]\n";
+          m_output_message += "   |Setting beam center to [" + Poco::NumberFormatter::format(center_x, 1) + ", " +
+                              Poco::NumberFormatter::format(center_y, 1) + "]\n";
         } else
           m_output_message += "   |No beam center provided: skipping!\n";
       }
@@ -202,7 +184,7 @@ void SANSSensitivityCorrection::exec() {
       const std::string rawFloodWSName = "__flood_data_" + path.getBaseName();
       MatrixWorkspace_sptr rawFloodWS;
       if (!reductionManager->existsProperty("LoadAlgorithm")) {
-        IAlgorithm_sptr loadAlg = createChildAlgorithm("Load", 0.1, 0.3);
+        auto loadAlg = createChildAlgorithm("Load", 0.1, 0.3);
         loadAlg->setProperty("Filename", fileName);
         if (!isEmpty(center_x) && loadAlg->existsProperty("BeamCenterX"))
           loadAlg->setProperty("BeamCenterX", center_x);
@@ -216,10 +198,9 @@ void SANSSensitivityCorrection::exec() {
       } else {
         // Get load algorithm as a string so that we can create a completely
         // new proxy and ensure that we don't overwrite existing properties
-        IAlgorithm_sptr loadAlg0 =
-            reductionManager->getProperty("LoadAlgorithm");
+        IAlgorithm_sptr loadAlg0 = reductionManager->getProperty("LoadAlgorithm");
         const std::string loadString = loadAlg0->toString();
-        IAlgorithm_sptr loadAlg = Algorithm::fromString(loadString);
+        auto loadAlg = Algorithm::fromString(loadString);
         loadAlg->setChild(true);
         loadAlg->setProperty("Filename", fileName);
         loadAlg->setPropertyValue("OutputWorkspace", rawFloodWSName);
@@ -232,8 +213,7 @@ void SANSSensitivityCorrection::exec() {
         m_output_message += "   |Loaded " + fileName + "\n";
         if (loadAlg->existsProperty("OutputMessage")) {
           std::string msg = loadAlg->getPropertyValue("OutputMessage");
-          m_output_message +=
-              "   |" + Poco::replace(msg, "\n", "\n   |") + "\n";
+          m_output_message += "   |" + Poco::replace(msg, "\n", "\n   |") + "\n";
         }
       }
 
@@ -245,8 +225,7 @@ void SANSSensitivityCorrection::exec() {
         // Look for a dark current subtraction algorithm
         std::string dark_result;
         if (reductionManager->existsProperty("DarkCurrentAlgorithm")) {
-          IAlgorithm_sptr darkAlg =
-              reductionManager->getProperty("DarkCurrentAlgorithm");
+          IAlgorithm_sptr darkAlg = reductionManager->getProperty("DarkCurrentAlgorithm");
           darkAlg->setChild(true);
           darkAlg->setProperty("InputWorkspace", rawFloodWS);
           darkAlg->setProperty("OutputWorkspace", rawFloodWS);
@@ -273,8 +252,7 @@ void SANSSensitivityCorrection::exec() {
           // current subtraction was set for the sample! Use the default dark
           // current algorithm if we can find it.
           if (reductionManager->existsProperty("DefaultDarkCurrentAlgorithm")) {
-            IAlgorithm_sptr darkAlg =
-                reductionManager->getProperty("DefaultDarkCurrentAlgorithm");
+            IAlgorithm_sptr darkAlg = reductionManager->getProperty("DefaultDarkCurrentAlgorithm");
             darkAlg->setChild(true);
             darkAlg->setProperty("InputWorkspace", rawFloodWS);
             darkAlg->setProperty("OutputWorkspace", rawFloodWS);
@@ -285,19 +263,16 @@ void SANSSensitivityCorrection::exec() {
               dark_result = darkAlg->getPropertyValue("OutputMessage");
           } else {
             // We are running out of options
-            g_log.error() << "No dark current algorithm provided to load ["
-                          << getPropertyValue("DarkCurrentFile")
+            g_log.error() << "No dark current algorithm provided to load [" << getPropertyValue("DarkCurrentFile")
                           << "]: skipped!\n";
             dark_result = "   No dark current algorithm provided: skipped\n";
           }
         }
-        m_output_message +=
-            "   |" + Poco::replace(dark_result, "\n", "\n   |") + "\n";
+        m_output_message += "   |" + Poco::replace(dark_result, "\n", "\n   |") + "\n";
 
         // Look for solid angle correction algorithm
         if (reductionManager->existsProperty("SANSSolidAngleCorrection")) {
-          IAlgorithm_sptr solidAlg =
-              reductionManager->getProperty("SANSSolidAngleCorrection");
+          IAlgorithm_sptr solidAlg = reductionManager->getProperty("SANSSolidAngleCorrection");
           solidAlg->setChild(true);
           solidAlg->setProperty("InputWorkspace", rawFloodWS);
           solidAlg->setProperty("OutputWorkspace", rawFloodWS);
@@ -305,8 +280,7 @@ void SANSSensitivityCorrection::exec() {
           std::string msg = "Solid angle correction applied\n";
           if (solidAlg->existsProperty("OutputMessage"))
             msg = solidAlg->getPropertyValue("OutputMessage");
-          m_output_message +=
-              "   |" + Poco::replace(msg, "\n", "\n   |") + "\n";
+          m_output_message += "   |" + Poco::replace(msg, "\n", "\n   |") + "\n";
         }
 
         // Apply transmission correction as needed
@@ -316,8 +290,7 @@ void SANSSensitivityCorrection::exec() {
         if (!isEmpty(floodTransmissionValue)) {
           g_log.debug() << "SANSSensitivityCorrection :: Applying transmission "
                            "to flood field\n";
-          IAlgorithm_sptr transAlg =
-              createChildAlgorithm("ApplyTransmissionCorrection");
+          auto transAlg = createChildAlgorithm("ApplyTransmissionCorrection");
           transAlg->setProperty("InputWorkspace", rawFloodWS);
           transAlg->setProperty("OutputWorkspace", rawFloodWS);
           transAlg->setProperty("TransmissionValue", floodTransmissionValue);
@@ -329,14 +302,12 @@ void SANSSensitivityCorrection::exec() {
         }
 
         // Calculate detector sensitivity
-        IAlgorithm_sptr effAlg =
-            createChildAlgorithm("CalculateEfficiency", -1, -1, true, 1);
+        auto effAlg = createChildAlgorithm("CalculateEfficiency", -1, -1, true, 1);
         effAlg->setProperty("InputWorkspace", rawFloodWS);
 
         const double minEff = getProperty("MinEfficiency");
         const double maxEff = getProperty("MaxEfficiency");
-        const std::string maskFullComponent =
-            getPropertyValue("MaskedFullComponent");
+        const std::string maskFullComponent = getPropertyValue("MaskedFullComponent");
         const std::string maskEdges = getPropertyValue("MaskedEdges");
         const std::string maskComponent = getPropertyValue("MaskedComponent");
 
@@ -352,8 +323,7 @@ void SANSSensitivityCorrection::exec() {
       }
       // Patch as needed
       if (reductionManager->existsProperty("SensitivityPatchAlgorithm")) {
-        IAlgorithm_sptr patchAlg =
-            reductionManager->getProperty("SensitivityPatchAlgorithm");
+        IAlgorithm_sptr patchAlg = reductionManager->getProperty("SensitivityPatchAlgorithm");
         patchAlg->setChild(true);
         patchAlg->setProperty("Workspace", floodWS);
         patchAlg->execute();
@@ -362,13 +332,12 @@ void SANSSensitivityCorrection::exec() {
 
       floodWS->mutableRun().addProperty("is_sensitivity", 1, "", true);
     }
-    std::string floodWSOutputName =
-        getPropertyValue("OutputSensitivityWorkspace");
+    std::string floodWSOutputName = getPropertyValue("OutputSensitivityWorkspace");
     if (floodWSOutputName.empty()) {
       setPropertyValue("OutputSensitivityWorkspace", floodWSName);
       AnalysisDataService::Instance().addOrReplace(floodWSName, floodWS);
-      reductionManager->declareProperty(std::make_unique<WorkspaceProperty<>>(
-          entryName, floodWSName, Direction::InOut));
+      reductionManager->declareProperty(
+          std::make_unique<WorkspaceProperty<>>(entryName, floodWSName, Direction::InOut));
       reductionManager->setPropertyValue(entryName, floodWSName);
       reductionManager->setProperty(entryName, floodWS);
     }
@@ -381,25 +350,23 @@ void SANSSensitivityCorrection::exec() {
   MatrixWorkspace_sptr inputWS = getProperty("InputWorkspace");
   if (inputWS) {
     // Divide sample data by detector efficiency
-    IAlgorithm_sptr divideAlg = createChildAlgorithm("Divide", 0.6, 0.7);
+    auto divideAlg = createChildAlgorithm("Divide", 0.6, 0.7);
     divideAlg->setProperty("LHSWorkspace", inputWS);
     divideAlg->setProperty("RHSWorkspace", floodWS);
     divideAlg->executeAsChildAlg();
     MatrixWorkspace_sptr outputWS = divideAlg->getProperty("OutputWorkspace");
 
     // Copy over the efficiency's masked pixels to the reduced workspace
-    IAlgorithm_sptr maskAlg = createChildAlgorithm("MaskDetectors", 0.75, 0.85);
+    auto maskAlg = createChildAlgorithm("MaskDetectors", 0.75, 0.85);
     maskAlg->setProperty("Workspace", outputWS);
     maskAlg->setProperty("MaskedWorkspace", floodWS);
     maskAlg->executeAsChildAlg();
 
     setProperty("OutputWorkspace", outputWS);
   }
-  setProperty("OutputMessage",
-              "Sensitivity correction computed\n" + m_output_message);
+  setProperty("OutputMessage", "Sensitivity correction computed\n" + m_output_message);
 
   progress.report("Performed sensitivity correction");
 }
 
-} // namespace WorkflowAlgorithms
-} // namespace Mantid
+} // namespace Mantid::WorkflowAlgorithms

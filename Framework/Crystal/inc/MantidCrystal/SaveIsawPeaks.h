@@ -25,19 +25,13 @@ public:
   /// Algorithm's name for identification
   const std::string name() const override { return "SaveIsawPeaks"; };
   /// Summary of algorithms purpose
-  const std::string summary() const override {
-    return "Save a PeaksWorkspace to a ISAW-style ASCII .peaks file.";
-  }
+  const std::string summary() const override { return "Save a PeaksWorkspace to a ISAW-style ASCII .peaks file."; }
 
   /// Algorithm's version for identification
   int version() const override { return 1; };
-  const std::vector<std::string> seeAlso() const override {
-    return {"LoadIsawPeaks"};
-  }
+  const std::vector<std::string> seeAlso() const override { return {"LoadIsawPeaks"}; }
   /// Algorithm's category for identification
-  const std::string category() const override {
-    return "Crystal\\DataHandling;DataHandling\\Isaw";
-  }
+  const std::string category() const override { return "Crystal\\DataHandling;DataHandling\\Isaw"; }
 
 private:
   /// Flag for writing modulated structures
@@ -49,12 +43,9 @@ private:
   void exec() override;
   /// find position for rectangular and non-rectangular
   Kernel::V3D findPixelPos(const std::string &bankName, int col, int row);
-  void sizeBanks(const std::string &bankName, int &NCOLS, int &NROWS,
-                 double &xsize, double &ysize);
-  bool bankMasked(const Geometry::IComponent_const_sptr &parent,
-                  const Geometry::DetectorInfo &detectorInfo);
-  void writeOffsets(std::ofstream &out, double qSign,
-                    std::vector<double> offset);
+  void sizeBanks(const std::string &bankName, int &NCOLS, int &NROWS, double &xsize, double &ysize);
+  bool bankMasked(const Geometry::IComponent_const_sptr &parent, const Geometry::DetectorInfo &detectorInfo);
+  void writeOffsets(std::ofstream &out, double qSign, std::vector<double> offset);
   Geometry::Instrument_const_sptr inst;
 };
 

@@ -148,20 +148,23 @@ class PeakReport(object):
             svw.saveImage(filename)
 
             # Create an image
-            img = Image(filename, width=150, height = 100)
+            img = Image(filename, width=150, height=100)
             # Get the peak object
             peak = peaks_workspace.getPeak(i)
 
-            infoData = [['PeakNumber:', i],['Run Number:', peak.getRunNumber()], ['Intensity:', peak.getIntensity()],
+            infoData = [['PeakNumber:', i], ['Run Number:', peak.getRunNumber()], ['Intensity:', peak.getIntensity()],
                         ['TOF:', peak.getTOF()]]
-            coordData = [['Detector Id:', peak.getDetectorID()], ['Q Lab:', peak.getQLabFrame()],
-                         ['Q Sample:', peak.getQSampleFrame()], ['HKL:', peak.getHKL()]]
-            data = [[ img , Table(infoData), Table(coordData)]]
+            coordData = [['Q Lab:', peak.getQLabFrame()], ['Q Sample:', peak.getQSampleFrame()],
+                         ['HKL:', peak.getHKL()]]
+            if 'DetID' in peaks_workspace.getColumnNames():
+                detector_id = peaks_workspace.row(i)['DetID']
+                coordData = [['Detector Id:', detector_id]] + coordData
+            data = [[img , Table(infoData), Table(coordData)]]
 
             colwidths = (150, 160, 160)
 
             table = Table(data, colwidths, hAlign='LEFT')
             parts.append(table)
-            parts.append(Spacer(0,10))
+            parts.append(Spacer(0, 10))
 
         doc.build(parts)

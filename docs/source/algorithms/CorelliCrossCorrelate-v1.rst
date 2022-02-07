@@ -18,15 +18,15 @@ The algorithm requires the timing offset of the TDC signal from the correlation 
 
 Usage
 -----
-..  Try not to use files in your examples, 
-    but if you cannot avoid it then the (small) files must be added to 
+..  Try not to use files in your examples,
+    but if you cannot avoid it then the (small) files must be added to
     autotestdata\UsageData and the following tag unindented
     .. include:: ../usagedata-note.txt
 
 **Example - CorelliCrossCorrelate**
 
 .. testcode:: CorelliCrossCorrelateExample
-    
+
     # Load a Corelli data file.
     ws = Load('CORELLI_2100')
 
@@ -42,7 +42,7 @@ Usage
 
 Output:
 
-.. testoutput:: CorelliCrossCorrelateExample 
+.. testoutput:: CorelliCrossCorrelateExample
 
     The detector 172305 has 3 events.
     The event weights before cross-correlation are [ 1.  1.  1.]

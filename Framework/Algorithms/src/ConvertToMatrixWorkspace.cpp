@@ -12,8 +12,7 @@
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidDataObjects/WorkspaceCreation.h"
 
-namespace Mantid {
-namespace Algorithms {
+namespace Mantid::Algorithms {
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(ConvertToMatrixWorkspace)
@@ -24,11 +23,9 @@ using namespace DataObjects;
 using std::size_t;
 
 void ConvertToMatrixWorkspace::init() {
-  declareProperty(std::make_unique<WorkspaceProperty<>>("InputWorkspace", "",
-                                                        Direction::Input),
+  declareProperty(std::make_unique<WorkspaceProperty<>>("InputWorkspace", "", Direction::Input),
                   "An input EventWorkspace.");
-  declareProperty(std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
-                                                        Direction::Output),
+  declareProperty(std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "", Direction::Output),
                   "An output Workspace2D.");
 }
 
@@ -37,8 +34,7 @@ void ConvertToMatrixWorkspace::exec() {
   // Let's see if we have to do anything first. Basically we want to avoid the
   // data copy if we can
   DataObjects::EventWorkspace_const_sptr eventW =
-      std::dynamic_pointer_cast<const DataObjects::EventWorkspace>(
-          inputWorkspace);
+      std::dynamic_pointer_cast<const DataObjects::EventWorkspace>(inputWorkspace);
   MatrixWorkspace_sptr outputWorkspace;
   if (eventW) {
     g_log.information() << "Converting EventWorkspace to Workspace2D.\n";
@@ -74,11 +70,9 @@ void ConvertToMatrixWorkspace::exec() {
     if (inputWorkspace == outputWorkspace) {
       g_log.information("InputWorkspace does not need converting. Pointing "
                         "OutputWorkspace property to input.");
-      outputWorkspace =
-          std::const_pointer_cast<MatrixWorkspace>(inputWorkspace);
+      outputWorkspace = std::const_pointer_cast<MatrixWorkspace>(inputWorkspace);
     } else {
-      g_log.information(
-          "InputWorkspace does not need converting. Cloning InputWorkspace.");
+      g_log.information("InputWorkspace does not need converting. Cloning InputWorkspace.");
       outputWorkspace = inputWorkspace->clone();
     }
   }
@@ -86,5 +80,4 @@ void ConvertToMatrixWorkspace::exec() {
   setProperty("OutputWorkspace", outputWorkspace);
 }
 
-} // namespace Algorithms
-} // namespace Mantid
+} // namespace Mantid::Algorithms

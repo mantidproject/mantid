@@ -6,10 +6,10 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
+#include "MantidFrameworkTestHelpers/NexusGeometryTestHelpers.h"
 #include "MantidGeometry/Objects/IObject.h"
 #include "MantidNexusGeometry/NexusShapeFactory.h"
 #include "MantidNexusGeometry/TubeHelpers.h"
-#include "MantidTestHelpers/NexusGeometryTestHelpers.h"
 #include <cxxtest/TestSuite.h>
 
 using namespace Mantid;
@@ -37,8 +37,7 @@ public:
     TS_ASSERT_EQUALS(tubes[0].size(), 2);
 
     auto notInTubes = TubeHelpers::notInTubes(tubes, detIds);
-    TSM_ASSERT_EQUALS("Should have no detectors outside tubes",
-                      notInTubes.size(), 0);
+    TSM_ASSERT_EQUALS("Should have no detectors outside tubes", notInTubes.size(), 0);
   }
 
   void test_NonColinearDetectorsDoNotProduceTubes() {

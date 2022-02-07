@@ -8,6 +8,7 @@
 
 #include "MantidGeometry/Objects/CSGObject.h"
 
+#include "MantidFrameworkTestHelpers/ComponentCreationHelper.h"
 #include "MantidGeometry/Math/Algebra.h"
 #include "MantidGeometry/Objects/Rules.h"
 #include "MantidGeometry/Objects/ShapeFactory.h"
@@ -19,7 +20,6 @@
 #include "MantidGeometry/Surfaces/SurfaceFactory.h"
 #include "MantidKernel/Material.h"
 #include "MantidKernel/MersenneTwister.h"
-#include "MantidTestHelpers/ComponentCreationHelper.h"
 #include "MockRNG.h"
 
 #include <cxxtest/TestSuite.h>
@@ -41,20 +41,16 @@ public:
   void testDefaultObjectHasEmptyMaterial() {
     CSGObject obj;
 
-    TSM_ASSERT_DELTA("Expected a zero number density", 0.0,
-                     obj.material().numberDensity(), 1e-12);
+    TSM_ASSERT_DELTA("Expected a zero number density", 0.0, obj.material().numberDensity(), 1e-12);
   }
 
   void testObjectSetMaterialReplacesExisting() {
     using Mantid::Kernel::Material;
     CSGObject obj;
 
-    TSM_ASSERT_DELTA("Expected a zero number density", 0.0,
-                     obj.material().numberDensity(), 1e-12);
-    obj.setMaterial(
-        Material("arm", PhysicalConstants::getNeutronAtom(13), 45.0));
-    TSM_ASSERT_DELTA("Expected a number density of 45", 45.0,
-                     obj.material().numberDensity(), 1e-12);
+    TSM_ASSERT_DELTA("Expected a zero number density", 0.0, obj.material().numberDensity(), 1e-12);
+    obj.setMaterial(Material("arm", PhysicalConstants::getNeutronAtom(13), 45.0));
+    TSM_ASSERT_DELTA("Expected a number density of 45", 45.0, obj.material().numberDensity(), 1e-12);
   }
 
   void testCopyConstructorGivesObjectWithSameAttributes() {
@@ -118,14 +114,11 @@ public:
 
   void testCloneWithMaterial() {
     using Mantid::Kernel::Material;
-    auto testMaterial =
-        Material("arm", PhysicalConstants::getNeutronAtom(13), 45.0);
+    auto testMaterial = Material("arm", PhysicalConstants::getNeutronAtom(13), 45.0);
     auto geom_obj = createUnitCube();
     std::unique_ptr<IObject> cloned_obj;
-    TS_ASSERT_THROWS_NOTHING(
-        cloned_obj.reset(geom_obj->cloneWithMaterial(testMaterial)));
-    TSM_ASSERT_DELTA("Expected a number density of 45", 45.0,
-                     cloned_obj->material().numberDensity(), 1e-12);
+    TS_ASSERT_THROWS_NOTHING(cloned_obj.reset(geom_obj->cloneWithMaterial(testMaterial)));
+    TSM_ASSERT_DELTA("Expected a number density of 45", 45.0, cloned_obj->material().numberDensity(), 1e-12);
   }
 
   void testIsOnSideCappedCylinder() {
@@ -241,31 +234,20 @@ public:
   void testCalcValidTypeSphere() {
     auto geom_obj = ComponentCreationHelper::createSphere(4.1);
     // entry on the normal
-    TS_ASSERT_EQUALS(geom_obj->calcValidType(V3D(-4.1, 0, 0), V3D(1, 0, 0)),
-                     TrackDirection::ENTERING);
-    TS_ASSERT_EQUALS(geom_obj->calcValidType(V3D(-4.1, 0, 0), V3D(-1, 0, 0)),
-                     TrackDirection::LEAVING);
-    TS_ASSERT_EQUALS(geom_obj->calcValidType(V3D(4.1, 0, 0), V3D(1, 0, 0)),
-                     TrackDirection::LEAVING);
-    TS_ASSERT_EQUALS(geom_obj->calcValidType(V3D(4.1, 0, 0), V3D(-1, 0, 0)),
-                     TrackDirection::ENTERING);
-    TS_ASSERT_EQUALS(geom_obj->calcValidType(V3D(0, -4.1, 0), V3D(0, 1, 0)),
-                     TrackDirection::ENTERING);
-    TS_ASSERT_EQUALS(geom_obj->calcValidType(V3D(0, -4.1, 0), V3D(0, -1, 0)),
-                     TrackDirection::LEAVING);
-    TS_ASSERT_EQUALS(geom_obj->calcValidType(V3D(0, 4.1, 0), V3D(0, 1, 0)),
-                     TrackDirection::LEAVING);
-    TS_ASSERT_EQUALS(geom_obj->calcValidType(V3D(0, 4.1, 0), V3D(0, -1, 0)),
-                     TrackDirection::ENTERING);
+    TS_ASSERT_EQUALS(geom_obj->calcValidType(V3D(-4.1, 0, 0), V3D(1, 0, 0)), TrackDirection::ENTERING);
+    TS_ASSERT_EQUALS(geom_obj->calcValidType(V3D(-4.1, 0, 0), V3D(-1, 0, 0)), TrackDirection::LEAVING);
+    TS_ASSERT_EQUALS(geom_obj->calcValidType(V3D(4.1, 0, 0), V3D(1, 0, 0)), TrackDirection::LEAVING);
+    TS_ASSERT_EQUALS(geom_obj->calcValidType(V3D(4.1, 0, 0), V3D(-1, 0, 0)), TrackDirection::ENTERING);
+    TS_ASSERT_EQUALS(geom_obj->calcValidType(V3D(0, -4.1, 0), V3D(0, 1, 0)), TrackDirection::ENTERING);
+    TS_ASSERT_EQUALS(geom_obj->calcValidType(V3D(0, -4.1, 0), V3D(0, -1, 0)), TrackDirection::LEAVING);
+    TS_ASSERT_EQUALS(geom_obj->calcValidType(V3D(0, 4.1, 0), V3D(0, 1, 0)), TrackDirection::LEAVING);
+    TS_ASSERT_EQUALS(geom_obj->calcValidType(V3D(0, 4.1, 0), V3D(0, -1, 0)), TrackDirection::ENTERING);
 
     // a glancing blow
-    TS_ASSERT_EQUALS(geom_obj->calcValidType(V3D(-4.1, 0, 0), V3D(0, 1, 0)),
-                     TrackDirection::INVALID);
+    TS_ASSERT_EQUALS(geom_obj->calcValidType(V3D(-4.1, 0, 0), V3D(0, 1, 0)), TrackDirection::INVALID);
     // not quite on the normal
-    TS_ASSERT_EQUALS(geom_obj->calcValidType(V3D(-4.1, 0, 0), V3D(0.5, 0.5, 0)),
-                     TrackDirection::ENTERING);
-    TS_ASSERT_EQUALS(geom_obj->calcValidType(V3D(4.1, 0, 0), V3D(0.5, 0.5, 0)),
-                     TrackDirection::LEAVING);
+    TS_ASSERT_EQUALS(geom_obj->calcValidType(V3D(-4.1, 0, 0), V3D(0.5, 0.5, 0)), TrackDirection::ENTERING);
+    TS_ASSERT_EQUALS(geom_obj->calcValidType(V3D(4.1, 0, 0), V3D(0.5, 0.5, 0)), TrackDirection::LEAVING);
   }
 
   void testGetBoundingBoxForSphere() {
@@ -285,31 +267,20 @@ public:
   void testCalcValidTypeCappedCylinder() {
     auto geom_obj = createCappedCylinder();
     // entry on the normal
-    TS_ASSERT_EQUALS(geom_obj->calcValidType(V3D(-3.2, 0, 0), V3D(1, 0, 0)),
-                     TrackDirection::ENTERING);
-    TS_ASSERT_EQUALS(geom_obj->calcValidType(V3D(-3.2, 0, 0), V3D(-1, 0, 0)),
-                     TrackDirection::LEAVING);
-    TS_ASSERT_EQUALS(geom_obj->calcValidType(V3D(1.2, 0, 0), V3D(1, 0, 0)),
-                     TrackDirection::LEAVING);
-    TS_ASSERT_EQUALS(geom_obj->calcValidType(V3D(1.2, 0, 0), V3D(-1, 0, 0)),
-                     TrackDirection::ENTERING);
-    TS_ASSERT_EQUALS(geom_obj->calcValidType(V3D(0, -3, 0), V3D(0, 1, 0)),
-                     TrackDirection::ENTERING);
-    TS_ASSERT_EQUALS(geom_obj->calcValidType(V3D(0, -3, 0), V3D(0, -1, 0)),
-                     TrackDirection::LEAVING);
-    TS_ASSERT_EQUALS(geom_obj->calcValidType(V3D(0, 3, 0), V3D(0, 1, 0)),
-                     TrackDirection::LEAVING);
-    TS_ASSERT_EQUALS(geom_obj->calcValidType(V3D(0, 3, 0), V3D(0, -1, 0)),
-                     TrackDirection::ENTERING);
+    TS_ASSERT_EQUALS(geom_obj->calcValidType(V3D(-3.2, 0, 0), V3D(1, 0, 0)), TrackDirection::ENTERING);
+    TS_ASSERT_EQUALS(geom_obj->calcValidType(V3D(-3.2, 0, 0), V3D(-1, 0, 0)), TrackDirection::LEAVING);
+    TS_ASSERT_EQUALS(geom_obj->calcValidType(V3D(1.2, 0, 0), V3D(1, 0, 0)), TrackDirection::LEAVING);
+    TS_ASSERT_EQUALS(geom_obj->calcValidType(V3D(1.2, 0, 0), V3D(-1, 0, 0)), TrackDirection::ENTERING);
+    TS_ASSERT_EQUALS(geom_obj->calcValidType(V3D(0, -3, 0), V3D(0, 1, 0)), TrackDirection::ENTERING);
+    TS_ASSERT_EQUALS(geom_obj->calcValidType(V3D(0, -3, 0), V3D(0, -1, 0)), TrackDirection::LEAVING);
+    TS_ASSERT_EQUALS(geom_obj->calcValidType(V3D(0, 3, 0), V3D(0, 1, 0)), TrackDirection::LEAVING);
+    TS_ASSERT_EQUALS(geom_obj->calcValidType(V3D(0, 3, 0), V3D(0, -1, 0)), TrackDirection::ENTERING);
 
     // a glancing blow
-    TS_ASSERT_EQUALS(geom_obj->calcValidType(V3D(-3.2, 0, 0), V3D(0, 1, 0)),
-                     TrackDirection::INVALID);
+    TS_ASSERT_EQUALS(geom_obj->calcValidType(V3D(-3.2, 0, 0), V3D(0, 1, 0)), TrackDirection::INVALID);
     // not quite on the normal
-    TS_ASSERT_EQUALS(geom_obj->calcValidType(V3D(-3.2, 0, 0), V3D(0.5, 0.5, 0)),
-                     TrackDirection::ENTERING);
-    TS_ASSERT_EQUALS(geom_obj->calcValidType(V3D(1.2, 0, 0), V3D(0.5, 0.5, 0)),
-                     TrackDirection::LEAVING);
+    TS_ASSERT_EQUALS(geom_obj->calcValidType(V3D(-3.2, 0, 0), V3D(0.5, 0.5, 0)), TrackDirection::ENTERING);
+    TS_ASSERT_EQUALS(geom_obj->calcValidType(V3D(1.2, 0, 0), V3D(0.5, 0.5, 0)), TrackDirection::LEAVING);
   }
 
   void testInterceptSurfaceSphereZ() {
@@ -325,8 +296,7 @@ public:
     // A sphere
     std::string ObjSphere = "-41";
 
-    std::shared_ptr<CSGObject> geom_obj =
-        std::shared_ptr<CSGObject>(new CSGObject);
+    std::shared_ptr<CSGObject> geom_obj = std::shared_ptr<CSGObject>(new CSGObject);
     geom_obj->setObject(41, ObjSphere);
     geom_obj->populate(SphSurMap);
 
@@ -334,9 +304,7 @@ public:
 
     // format = startPoint, endPoint, total distance so far
     // forward only intercepts means that start point should be track origin
-    expectedResults.emplace_back(Link(V3D(-1, 1.5, 1),
-                                      V3D(sqrt(16 - 0.25) + 1, 1.5, 1.0),
-                                      sqrt(15.75) + 2, *geom_obj));
+    expectedResults.emplace_back(Link(V3D(-1, 1.5, 1), V3D(sqrt(16 - 0.25) + 1, 1.5, 1.0), sqrt(15.75) + 2, *geom_obj));
 
     checkTrackIntercept(geom_obj, track, expectedResults);
   }
@@ -347,8 +315,7 @@ public:
     Track track(V3D(0, -10, 0), V3D(0, 1, 0));
 
     // format = startPoint, endPoint, total distance so far
-    expectedResults.emplace_back(
-        Link(V3D(0, -4.1, 0), V3D(0, 4.1, 0), 14.1, *geom_obj));
+    expectedResults.emplace_back(Link(V3D(0, -4.1, 0), V3D(0, 4.1, 0), 14.1, *geom_obj));
 
     checkTrackIntercept(geom_obj, track, expectedResults);
   }
@@ -359,8 +326,7 @@ public:
     Track track(V3D(-10, 0, 0), V3D(1, 0, 0));
 
     // format = startPoint, endPoint, total distance so far
-    expectedResults.emplace_back(
-        Link(V3D(-4.1, 0, 0), V3D(4.1, 0, 0), 14.1, *geom_obj));
+    expectedResults.emplace_back(Link(V3D(-4.1, 0, 0), V3D(4.1, 0, 0), 14.1, *geom_obj));
     checkTrackIntercept(geom_obj, track, expectedResults);
   }
 
@@ -368,8 +334,7 @@ public:
     std::vector<Link> expectedResults;
     auto geom_obj = createCappedCylinder();
     // format = startPoint, endPoint, total distance so far
-    expectedResults.emplace_back(
-        Link(V3D(0, -3, 0), V3D(0, 3, 0), 13, *geom_obj));
+    expectedResults.emplace_back(Link(V3D(0, -3, 0), V3D(0, 3, 0), 13, *geom_obj));
 
     Track track(V3D(0, -10, 0), V3D(0, 1, 0));
     checkTrackIntercept(geom_obj, track, expectedResults);
@@ -381,14 +346,12 @@ public:
     Track track(V3D(-10, 0, 0), V3D(1, 0, 0));
 
     // format = startPoint, endPoint, total distance so far
-    expectedResults.emplace_back(
-        Link(V3D(-3.2, 0, 0), V3D(1.2, 0, 0), 11.2, *geom_obj));
+    expectedResults.emplace_back(Link(V3D(-3.2, 0, 0), V3D(1.2, 0, 0), 11.2, *geom_obj));
     checkTrackIntercept(geom_obj, track, expectedResults);
   }
 
   void testInterceptSurfaceCappedCylinderMiss() {
-    std::vector<Link>
-        expectedResults; // left empty as there are no expected results
+    std::vector<Link> expectedResults; // left empty as there are no expected results
     auto geom_obj = createCappedCylinder();
     V3D dir(1., 1., 0.);
     dir.normalize();
@@ -397,16 +360,12 @@ public:
     checkTrackIntercept(geom_obj, track, expectedResults);
   }
 
-  void checkTrackIntercept(Track &track,
-                           const std::vector<Link> &expectedResults) {
+  void checkTrackIntercept(Track &track, const std::vector<Link> &expectedResults) {
     size_t index = 0;
-    for (Track::LType::const_iterator it = track.cbegin(); it != track.cend();
-         ++it) {
+    for (Track::LType::const_iterator it = track.cbegin(); it != track.cend(); ++it) {
       if (index < expectedResults.size()) {
-        TS_ASSERT_DELTA(it->distFromStart, expectedResults[index].distFromStart,
-                        1e-6);
-        TS_ASSERT_DELTA(it->distInsideObject,
-                        expectedResults[index].distInsideObject, 1e-6);
+        TS_ASSERT_DELTA(it->distFromStart, expectedResults[index].distFromStart, 1e-6);
+        TS_ASSERT_DELTA(it->distInsideObject, expectedResults[index].distInsideObject, 1e-6);
         TS_ASSERT_EQUALS(it->componentID, expectedResults[index].componentID);
         TS_ASSERT_EQUALS(it->entryPoint, expectedResults[index].entryPoint);
         TS_ASSERT_EQUALS(it->exitPoint, expectedResults[index].exitPoint);
@@ -416,8 +375,7 @@ public:
     TS_ASSERT_EQUALS(index, expectedResults.size());
   }
 
-  void checkTrackIntercept(const IObject_sptr &obj, Track &track,
-                           const std::vector<Link> &expectedResults) {
+  void checkTrackIntercept(const IObject_sptr &obj, Track &track, const std::vector<Link> &expectedResults) {
     int unitCount = obj->interceptSurface(track);
     TS_ASSERT_EQUALS(unitCount, expectedResults.size());
     checkTrackIntercept(track, expectedResults);
@@ -467,8 +425,7 @@ public:
 
     std::vector<Link> expectedResults;
     expectedResults.emplace_back(Link(V3D(-1, 0, 0), V3D(1, 0, 0), 6, object1));
-    expectedResults.emplace_back(
-        Link(V3D(4.5, 0, 0), V3D(6.5, 0, 0), 11.5, object2));
+    expectedResults.emplace_back(Link(V3D(4.5, 0, 0), V3D(6.5, 0, 0), 11.5, object2));
     checkTrackIntercept(TL, expectedResults);
   }
 
@@ -498,8 +455,7 @@ public:
 
     std::vector<Link> expectedResults;
     expectedResults.emplace_back(Link(V3D(-1, 0, 0), V3D(1, 0, 0), 6, object1));
-    expectedResults.emplace_back(
-        Link(V3D(1, 0, 0), V3D(6.5, 0, 0), 11.5, object2));
+    expectedResults.emplace_back(Link(V3D(1, 0, 0), V3D(6.5, 0, 0), 11.5, object2));
 
     checkTrackIntercept(TL, expectedResults);
   }
@@ -529,12 +485,9 @@ public:
     TS_ASSERT(object2.interceptSurface(TL) != 0);
 
     std::vector<Link> expectedResults;
-    expectedResults.emplace_back(
-        Link(V3D(-1, 0, 0), V3D(-0.8, 0, 0), 4.2, object1));
-    expectedResults.emplace_back(
-        Link(V3D(-0.8, 0, 0), V3D(0.8, 0, 0), 5.8, object1));
-    expectedResults.emplace_back(
-        Link(V3D(0.8, 0, 0), V3D(1, 0, 0), 6, object2));
+    expectedResults.emplace_back(Link(V3D(-1, 0, 0), V3D(-0.8, 0, 0), 4.2, object1));
+    expectedResults.emplace_back(Link(V3D(-0.8, 0, 0), V3D(0.8, 0, 0), 5.8, object1));
+    expectedResults.emplace_back(Link(V3D(0.8, 0, 0), V3D(1, 0, 0), 6, object2));
     checkTrackIntercept(TL, expectedResults);
   }
 
@@ -563,12 +516,9 @@ public:
     TS_ASSERT(object2.interceptSurface(TL) != 0);
 
     std::vector<Link> expectedResults;
-    expectedResults.emplace_back(
-        Link(V3D(-1, 0, 0), V3D(-0.4, 0, 0), 4.6, object1));
-    expectedResults.emplace_back(
-        Link(V3D(-0.4, 0, 0), V3D(0.2, 0, 0), 5.2, object1));
-    expectedResults.emplace_back(
-        Link(V3D(0.2, 0, 0), V3D(1, 0, 0), 6, object2));
+    expectedResults.emplace_back(Link(V3D(-1, 0, 0), V3D(-0.4, 0, 0), 4.6, object1));
+    expectedResults.emplace_back(Link(V3D(-0.4, 0, 0), V3D(0.2, 0, 0), 5.2, object1));
+    expectedResults.emplace_back(Link(V3D(0.2, 0, 0), V3D(1, 0, 0), 6, object2));
     checkTrackIntercept(TL, expectedResults);
   }
 
@@ -637,9 +587,7 @@ public:
     // total traversed distance -> 2*(r2-r1)
     double distanceInside(0.0);
     std::for_each(p1.cbegin(), p1.cend(),
-                  [&distanceInside](const Link &segment) {
-                    distanceInside += segment.distInsideObject;
-                  });
+                  [&distanceInside](const Link &segment) { distanceInside += segment.distInsideObject; });
     TS_ASSERT_DELTA(1.0, distanceInside, 1e-10);
   }
 
@@ -654,8 +602,7 @@ public:
     TS_ASSERT_EQUALS(geom_obj->getPointInObject(pt), 1);
     TS_ASSERT_EQUALS(pt, V3D(0, 0, 0));
     // initial guess not in object, but on x-axis
-    std::vector<std::string> planes{"px 10",  "px 11",   "py -0.5",
-                                    "py 0.5", "pz -0.5", "pz 0.5"};
+    std::vector<std::string> planes{"px 10", "px 11", "py -0.5", "py 0.5", "pz -0.5", "pz 0.5"};
     std::shared_ptr<CSGObject> B = createCuboid(planes);
     TS_ASSERT_EQUALS(B->getPointInObject(pt), 1);
     TS_ASSERT_EQUALS(pt, V3D(10, 0, 0));
@@ -706,8 +653,7 @@ public:
     TS_ASSERT_EQUALS(F->getPointInObject(pt), 1); // This now succeeds
     // Test use of defineBoundingBox to explictly set the bounding box, when the
     // automatic method fails
-    F->defineBoundingBox(0.5, -0.5 * M_SQRT1_2, -0.5 * M_SQRT1_2, -0.5,
-                         -M_SQRT2 - 0.5 * M_SQRT1_2,
+    F->defineBoundingBox(0.5, -0.5 * M_SQRT1_2, -0.5 * M_SQRT1_2, -0.5, -M_SQRT2 - 0.5 * M_SQRT1_2,
                          -M_SQRT2 - 0.5 * M_SQRT1_2);
     TS_ASSERT_EQUALS(F->getPointInObject(pt), 1);
     auto S = ComponentCreationHelper::createSphere(4.1);
@@ -754,11 +700,9 @@ public:
     constexpr double xLength{0.3};
     constexpr double yLength{0.5};
     constexpr double zLength{0.2};
-    auto cuboid =
-        ComponentCreationHelper::createCuboid(xLength, yLength, zLength);
+    auto cuboid = ComponentCreationHelper::createCuboid(xLength, yLength, zLength);
     constexpr size_t maxAttempts{0};
-    boost::optional<V3D> point =
-        cuboid->generatePointInObject(rng, maxAttempts);
+    boost::optional<V3D> point = cuboid->generatePointInObject(rng, maxAttempts);
     TS_ASSERT_EQUALS(!point, false);
 
     constexpr double tolerance{1e-10};
@@ -788,11 +732,9 @@ public:
         2.,
         -3.,
     };
-    auto cylinder = ComponentCreationHelper::createCappedCylinder(
-        radius, height, bottomCentre, axis, "cyl");
+    auto cylinder = ComponentCreationHelper::createCappedCylinder(radius, height, bottomCentre, axis, "cyl");
     constexpr size_t maxAttempts{0};
-    boost::optional<V3D> point =
-        cylinder->generatePointInObject(rng, maxAttempts);
+    boost::optional<V3D> point = cylinder->generatePointInObject(rng, maxAttempts);
     TS_ASSERT_EQUALS(!point, false);
     // Global->cylinder local coordinates
     *point -= bottomCentre;
@@ -827,8 +769,8 @@ public:
         2.,
         -3.,
     };
-    auto hollowCylinder = ComponentCreationHelper::createHollowCylinder(
-        innerRadius, radius, height, bottomCentre, axis, "hol-cyl");
+    auto hollowCylinder =
+        ComponentCreationHelper::createHollowCylinder(innerRadius, radius, height, bottomCentre, axis, "hol-cyl");
     constexpr size_t maxAttempts{0};
     boost::optional<V3D> point;
     point = hollowCylinder->generatePointInObject(rng, maxAttempts);
@@ -844,6 +786,481 @@ public:
     TS_ASSERT_DELTA(radialLength * std::cos(polarAngle), point->X(), tolerance);
     TS_ASSERT_DELTA(radialLength * std::sin(polarAngle), point->Y(), tolerance);
     TS_ASSERT_DELTA(axisLength, point->Z(), tolerance);
+  }
+
+  void testTracksForSphere() {
+    // Sphere centered at origin, 3 mm diameter
+    constexpr double RADIUS{0.0015};
+
+    const V3D BEAM_X{1.0, 0.0, 0.0};
+    const V3D BEAM_Y{0.0, 1.0, 0.0};
+    const V3D BEAM_Z{0.0, 0.0, 1.0};
+
+    auto sphere = ComponentCreationHelper::createSphere(RADIUS);
+
+    // Test center of sphere
+    Track origin(V3D{0.0, 0.0, 0.0}, BEAM_X);
+    sphere->interceptSurface(origin);
+    TS_ASSERT_EQUALS(origin.totalDistInsideObject(), RADIUS);
+
+    Track front_midpoint(V3D{0.5 * RADIUS, 0.0, 0.0}, BEAM_X);
+    sphere->interceptSurface(front_midpoint);
+    TS_ASSERT_EQUALS(front_midpoint.totalDistInsideObject(), 0.5 * RADIUS);
+
+    Track back_midpoint(V3D{-0.5 * RADIUS, 0.0, 0.0}, BEAM_X);
+    sphere->interceptSurface(back_midpoint);
+    TS_ASSERT_EQUALS(back_midpoint.totalDistInsideObject(), 1.5 * RADIUS);
+
+    // Y axis tests
+    origin = Track(V3D{0.0, 0.0, 0.0}, BEAM_Y);
+    sphere->interceptSurface(origin);
+    TS_ASSERT_EQUALS(origin.totalDistInsideObject(), RADIUS);
+
+    front_midpoint = Track(V3D{0.0, 0.5 * RADIUS, 0.0}, BEAM_Y);
+    sphere->interceptSurface(front_midpoint);
+    TS_ASSERT_EQUALS(front_midpoint.totalDistInsideObject(), 0.5 * RADIUS);
+
+    back_midpoint = Track(V3D{0.0, -0.5 * RADIUS, 0.0}, BEAM_Y);
+    sphere->interceptSurface(back_midpoint);
+    TS_ASSERT_EQUALS(back_midpoint.totalDistInsideObject(), 1.5 * RADIUS);
+
+    // Z axis tests
+    origin = Track(V3D{0.0, 0.0, 0.0}, BEAM_Z);
+    sphere->interceptSurface(origin);
+    TS_ASSERT_EQUALS(origin.totalDistInsideObject(), RADIUS);
+
+    front_midpoint = Track(V3D{0.0, 0.0, 0.5 * RADIUS}, BEAM_Z);
+    sphere->interceptSurface(front_midpoint);
+    TS_ASSERT_EQUALS(front_midpoint.totalDistInsideObject(), 0.5 * RADIUS);
+
+    back_midpoint = Track(V3D{0.0, 0.0, -0.5 * RADIUS}, BEAM_Z);
+    sphere->interceptSurface(back_midpoint);
+    TS_ASSERT_EQUALS(back_midpoint.totalDistInsideObject(), 1.5 * RADIUS);
+  }
+
+  void testTracksForSolidCylinder() {
+    // solid cylinder at the origin with the symmetry axis along y
+    // using PAC06 dimensions: 2.95mm radius x 5.68cm height
+    constexpr double RADIUS{0.00295};
+    constexpr double HEIGHT{0.0568};
+    V3D BOTTOM_CENTRE{0., -.5 * HEIGHT, 0.};
+    V3D AXIS_SYMM{0., 1., 0.};
+    auto cylinder = ComponentCreationHelper::createCappedCylinder(RADIUS, HEIGHT, BOTTOM_CENTRE, AXIS_SYMM, "cyl");
+
+    const V3D BEAM_DIRECTION{0., 0., 1.}; // along z-axis
+
+    // centre of sample
+    Track origin(V3D{0., 0., 0.}, BEAM_DIRECTION);
+    cylinder->interceptSurface(origin);
+    TS_ASSERT_EQUALS(origin.totalDistInsideObject(), RADIUS);
+
+    constexpr double HALF_RADIUS{0.5 * RADIUS};
+
+    // Right midpoint between origin and radius (front wrt beam dir)
+    Track front_midpt(V3D{0., 0., HALF_RADIUS}, BEAM_DIRECTION);
+    cylinder->interceptSurface(front_midpt);
+    TS_ASSERT_EQUALS(front_midpt.totalDistInsideObject(), 0.5 * RADIUS);
+
+    // Left midpoint between origin and radius (back wrt beam dir)
+    Track back_midpt(V3D{0., 0., -HALF_RADIUS}, BEAM_DIRECTION);
+    cylinder->interceptSurface(back_midpt);
+    TS_ASSERT_EQUALS(back_midpt.totalDistInsideObject(), 1.5 * RADIUS);
+
+    // Put the cylinder with the symmetry axis along Z and repeat tests
+    AXIS_SYMM = V3D{0.0, 0.0, 1.0};
+    BOTTOM_CENTRE = V3D{0.0, 0.0, -0.5 * HEIGHT};
+    cylinder = ComponentCreationHelper::createCappedCylinder(RADIUS, HEIGHT, BOTTOM_CENTRE, AXIS_SYMM, "cyl");
+
+    origin = Track(V3D{0.0, 0.0, 0.0}, BEAM_DIRECTION);
+    cylinder->interceptSurface(origin);
+    TS_ASSERT_EQUALS(origin.totalDistInsideObject(), 0.5 * HEIGHT);
+
+    // Front midpoint between origin and top (height/2)
+    front_midpt = Track(V3D{0., 0., 0.25 * HEIGHT}, BEAM_DIRECTION);
+    cylinder->interceptSurface(front_midpt);
+    TS_ASSERT_EQUALS(front_midpt.totalDistInsideObject(), 0.25 * HEIGHT);
+
+    // Back midpoint between origin and bottom (-height/2)
+    back_midpt = Track(V3D{0., 0., -0.25 * HEIGHT}, BEAM_DIRECTION);
+    cylinder->interceptSurface(back_midpt);
+    TS_ASSERT_EQUALS(back_midpt.totalDistInsideObject(), 0.75 * HEIGHT);
+  }
+
+  void testTracksForSolidCylinderAngle() {
+    // solid cylinder at origin with symmetry along y axis
+    // using PAC06 dimensions: 2.95mm radius x 5.68cm height
+    // Beam is hitting surface at 30, 45, and 60 degrees from the y-z axis
+    constexpr double RADIUS{0.00295};
+    constexpr double HEIGHT{0.05680};
+    constexpr double TOLERANCE{1.0e-10};
+
+    V3D BOTTOM_CENTRE{0., -.5 * HEIGHT, 0.};
+    V3D AXIS_SYMM{0., 1., 0.};
+    auto cylinder = ComponentCreationHelper::createCappedCylinder(RADIUS, HEIGHT, BOTTOM_CENTRE, AXIS_SYMM, "cyl");
+
+    // Test sample at 30 degrees
+    V3D BEAM_DIRECTION{0.0, sin(30.0 * (M_PI / 180.0)), cos(30.0 * (M_PI / 180.0))};
+    BEAM_DIRECTION.normalize();
+    double ANGLE{atan((BEAM_DIRECTION.Y()) / BEAM_DIRECTION.Z())};
+
+    // centre of sample
+    Track origin(V3D{0., 0., 0.}, BEAM_DIRECTION);
+    int nsegments = cylinder->interceptSurface(origin);
+    TS_ASSERT_EQUALS(nsegments, 1);
+
+    double base = origin.totalDistInsideObject() * (BEAM_DIRECTION.Z());
+    double height = base * tan(ANGLE);
+
+    TS_ASSERT_DELTA(origin.totalDistInsideObject(), sqrt(pow(height, 2) + pow(base, 2)), TOLERANCE);
+
+    // Test sample at 45 degrees
+    BEAM_DIRECTION = V3D{0.0, sin(45.0 * (M_PI / 180.0)), cos(45.0 * (M_PI / 180.0))};
+    BEAM_DIRECTION.normalize();
+    ANGLE = atan((BEAM_DIRECTION.Y()) / BEAM_DIRECTION.Z());
+
+    origin = Track(V3D{0., 0., 0.}, BEAM_DIRECTION);
+    nsegments = cylinder->interceptSurface(origin);
+    TS_ASSERT_EQUALS(nsegments, 1);
+
+    base = origin.totalDistInsideObject() * (BEAM_DIRECTION.Z());
+    height = base * tan(ANGLE);
+
+    TS_ASSERT_DELTA(origin.totalDistInsideObject(), sqrt(pow(height, 2) + pow(base, 2)), TOLERANCE);
+
+    // Test sample at 60 degrees
+    BEAM_DIRECTION = V3D{0.0, sin(60.0 * (M_PI / 180.0)), cos(60.0 * (M_PI / 180.0))};
+    BEAM_DIRECTION.normalize();
+    ANGLE = atan((BEAM_DIRECTION.Y()) / BEAM_DIRECTION.Z());
+
+    origin = Track(V3D{0., 0., 0.}, BEAM_DIRECTION);
+    nsegments = cylinder->interceptSurface(origin);
+    TS_ASSERT_EQUALS(nsegments, 1);
+
+    base = origin.totalDistInsideObject() * (BEAM_DIRECTION.Z());
+    height = base * tan(ANGLE);
+
+    TS_ASSERT_DELTA(origin.totalDistInsideObject(), sqrt(pow(height, 2) + pow(base, 2)), TOLERANCE);
+
+    // Test sample at the top corner
+    BEAM_DIRECTION = V3D{0.0, HEIGHT * 0.5, RADIUS};
+    BEAM_DIRECTION.normalize();
+    ANGLE = atan((BEAM_DIRECTION.Y()) / BEAM_DIRECTION.Z());
+
+    origin = Track(V3D{0., 0., 0.}, BEAM_DIRECTION);
+    nsegments = cylinder->interceptSurface(origin);
+    TS_ASSERT_EQUALS(nsegments, 1);
+
+    // Since this is at the corner, triangle sides should be the same as the
+    // cylinder dimensions
+    TS_ASSERT_DELTA(origin.totalDistInsideObject(), sqrt(pow(HEIGHT * 0.5, 2) + pow(RADIUS, 2)), TOLERANCE);
+
+    // Test sample at the top corner, but the beam direction is going into
+    // the shape
+    BEAM_DIRECTION = V3D{0.0, -HEIGHT, -RADIUS * 2};
+    BEAM_DIRECTION.normalize();
+    origin = Track(V3D{0., HEIGHT, RADIUS * 2.0}, BEAM_DIRECTION);
+    nsegments = cylinder->interceptSurface(origin);
+    TS_ASSERT_EQUALS(nsegments, 1);
+    const auto distInside = sqrt(pow(HEIGHT, 2) + pow(RADIUS * 2, 2));
+    TS_ASSERT_DELTA(origin.totalDistInsideObject(), distInside, TOLERANCE);
+  }
+
+  void testTracksForHollowCylinder() {
+    // hollow cylinder at the origin with the symmetry axis along y
+    // using PAC06 dimensions: 2.95mm inner radius, 3.15mm outer radius
+    //   x 5.68cm height
+    constexpr double INNER_RADIUS{0.00295};
+    constexpr double OUTER_RADIUS{0.00315};
+    constexpr double WALL_THICKNESS{OUTER_RADIUS - INNER_RADIUS};
+    constexpr double HEIGHT{0.0568};
+    constexpr double TOLERANCE{1e-12};
+    constexpr V3D BOTTOM_CENTRE{0., -.5 * HEIGHT, 0.};
+    constexpr V3D AXIS_SYMM{0., 1., 0.};
+    auto cylinder = ComponentCreationHelper::createHollowCylinder(INNER_RADIUS, OUTER_RADIUS, HEIGHT, BOTTOM_CENTRE,
+                                                                  AXIS_SYMM, "cyl");
+
+    constexpr V3D BEAM_DIRECTION{0., 0., 1.}; // along z-axis
+
+    // centre of sample
+    Track origin(V3D{0., 0., 0.}, BEAM_DIRECTION);
+    cylinder->interceptSurface(origin);
+    // this test should equal wall thickness since this track should
+    //  only be summing distances on the inside of an object
+    TS_ASSERT_DELTA(origin.totalDistInsideObject(), WALL_THICKNESS, TOLERANCE);
+
+    constexpr double WALL_CENTER{0.5 * (OUTER_RADIUS + INNER_RADIUS)};
+    // Right midpoint in wall between origin and radius (front wrt beam dir)
+    Track front_midpt(V3D{0., 0., WALL_CENTER}, BEAM_DIRECTION);
+    cylinder->interceptSurface(front_midpt);
+    TS_ASSERT_DELTA(front_midpt.totalDistInsideObject(), 0.5 * WALL_THICKNESS, TOLERANCE);
+
+    // Left midpoint in wall between origin and radius (back wrt beam dir)
+    Track back_midpt(V3D{0., 0., -WALL_CENTER}, BEAM_DIRECTION);
+    cylinder->interceptSurface(back_midpt);
+    TS_ASSERT_DELTA(back_midpt.totalDistInsideObject(), 1.5 * WALL_THICKNESS, TOLERANCE);
+
+    // Add a quarter offset to the midpoint
+    constexpr double WALL_CENTER_OFFSET{0.25 * INNER_RADIUS + 0.75 * OUTER_RADIUS};
+
+    front_midpt = Track(V3D{0., 0., WALL_CENTER_OFFSET}, BEAM_DIRECTION);
+    cylinder->interceptSurface(front_midpt);
+    TS_ASSERT_DELTA(front_midpt.totalDistInsideObject(), 0.25 * WALL_THICKNESS, TOLERANCE);
+
+    // Left midpoint in wall between origin and radius (back wrt beam dir)
+    back_midpt = Track(V3D{0., 0., -WALL_CENTER_OFFSET}, BEAM_DIRECTION);
+    cylinder->interceptSurface(back_midpt);
+    TS_ASSERT_DELTA(back_midpt.totalDistInsideObject(), 1.75 * WALL_THICKNESS, TOLERANCE);
+  }
+
+  void testTracksForHollowCylinderShifted() {
+    // hollow cylinder shifted right with the symmetry axis along z
+    // using PAC06 dimensions: 2.95mm inner radius, 3.15mm outer radius
+    //   x 5.68cm height
+    constexpr double INNER_RADIUS{0.00295};
+    constexpr double OUTER_RADIUS{0.00315};
+    constexpr double WALL_THICKNESS{OUTER_RADIUS - INNER_RADIUS};
+    constexpr double HEIGHT{0.0568};
+    constexpr double TOLERANCE{1e-12};
+    V3D BOTTOM_CENTRE{0.0, 0.0, -0.5 * HEIGHT};
+
+    // Put the cylinder with the symmetry axis along Z, this should go
+    //  straight through
+    constexpr V3D AXIS_SYMM{0., 0., 1.};
+    auto cylinder = ComponentCreationHelper::createHollowCylinder(INNER_RADIUS, OUTER_RADIUS, HEIGHT, BOTTOM_CENTRE,
+                                                                  AXIS_SYMM, "cyl");
+
+    constexpr V3D BEAM_DIRECTION{0., 0., 1.}; // along z-axis
+
+    Track origin = Track(V3D{0.0, 0.0, 0.0}, BEAM_DIRECTION);
+    cylinder->interceptSurface(origin);
+    TS_ASSERT_EQUALS(origin.totalDistInsideObject(), 0.0);
+
+    // Now shift the cylinder over a bit to the test a line through the wall
+    // midpoint
+    BOTTOM_CENTRE = V3D{1.0 - OUTER_RADIUS, 0.0, -0.5 * HEIGHT};
+    cylinder = ComponentCreationHelper::createHollowCylinder(INNER_RADIUS, OUTER_RADIUS, HEIGHT, BOTTOM_CENTRE,
+                                                             AXIS_SYMM, "cyl");
+
+    // Front midpoint between right wall and top (height/2)
+    Track front_midpt = Track(V3D{1.0 - WALL_THICKNESS, 0.0, 0.25 * HEIGHT}, BEAM_DIRECTION);
+    cylinder->interceptSurface(front_midpt);
+    TS_ASSERT_DELTA(front_midpt.totalDistInsideObject(), 0.25 * HEIGHT, TOLERANCE);
+
+    // Back midpoint between right wall and bottom (-height/2)
+    Track back_midpt = Track(V3D{1.0 - WALL_THICKNESS, 0.0, -0.25 * HEIGHT}, BEAM_DIRECTION);
+    cylinder->interceptSurface(back_midpt);
+    TS_ASSERT_DELTA(back_midpt.totalDistInsideObject(), 0.75 * HEIGHT, TOLERANCE);
+
+    // Offset from the midpoint
+    front_midpt = Track(V3D{1.0 - 0.5 * WALL_THICKNESS, 0.0, 0.25 * HEIGHT}, BEAM_DIRECTION);
+    cylinder->interceptSurface(front_midpt);
+    TS_ASSERT_DELTA(front_midpt.totalDistInsideObject(), 0.25 * HEIGHT, TOLERANCE);
+
+    back_midpt = Track(V3D{1.0 - 0.5 * WALL_THICKNESS, 0.0, -0.25 * HEIGHT}, BEAM_DIRECTION);
+    cylinder->interceptSurface(back_midpt);
+    TS_ASSERT_DELTA(back_midpt.totalDistInsideObject(), 0.75 * HEIGHT, TOLERANCE);
+  }
+
+  void testTracksForHollowCylinderAngle() {
+    // hollow cylinder at origin with symmetry along y axis
+    // using PAC06 dimensions: 2.95mm radius x 5.68cm height
+    // Beam is hitting surface at 30, 45, and 60 degrees from the y-z axis
+    constexpr double INNER_RADIUS{0.00295};
+    constexpr double OUTER_RADIUS{0.00315};
+    constexpr double HEIGHT{0.0568};
+    constexpr double TOLERANCE{1e-12};
+    V3D BOTTOM_CENTRE{0.0, -0.5 * HEIGHT, 0.0};
+
+    constexpr V3D AXIS_SYMM{0., 1., 0.};
+    auto cylinder = ComponentCreationHelper::createHollowCylinder(INNER_RADIUS, OUTER_RADIUS, HEIGHT, BOTTOM_CENTRE,
+                                                                  AXIS_SYMM, "cyl");
+
+    // Test at 45 degrees
+    V3D BEAM_DIRECTION{0.0, sin(45.0 * (M_PI / 180.0)), cos(45.0 * (M_PI / 180.0))};
+    BEAM_DIRECTION.normalize();
+    double ANGLE{atan((BEAM_DIRECTION.Y()) / BEAM_DIRECTION.Z())};
+
+    // centre of sample
+    Track origin(V3D{0., 0., 0.}, BEAM_DIRECTION);
+    int nsegments = cylinder->interceptSurface(origin);
+    TS_ASSERT_EQUALS(nsegments, 1);
+
+    // Treat pt where beam exits wall as triangle, so same case as
+    // solid cylinder, just with a smaller and shifted triangle
+    double base = origin.totalDistInsideObject() * (BEAM_DIRECTION.Z());
+    double height = base * tan(ANGLE);
+    double dist = sqrt(pow(height, 2) + pow(base, 2));
+
+    TS_ASSERT_DELTA(origin.totalDistInsideObject(), dist, TOLERANCE);
+
+    // Test at same angle, but through entire cylinder:
+    Track bottom_right(V3D{0., -0.5 * HEIGHT, -OUTER_RADIUS}, BEAM_DIRECTION);
+    nsegments = cylinder->interceptSurface(bottom_right);
+    TS_ASSERT_EQUALS(nsegments, 2);
+
+    // Assuming the origin test above passed, this should technically be twice
+    //  that distance due to symmetry
+    TS_ASSERT_DELTA(bottom_right.totalDistInsideObject(), dist * 2.0, TOLERANCE);
+
+    // Test at 30 degrees
+    BEAM_DIRECTION = V3D{0.0, sin(30.0 * (M_PI / 180.0)), cos(30.0 * (M_PI / 180.0))};
+    BEAM_DIRECTION.normalize();
+    ANGLE = double{atan((BEAM_DIRECTION.Y()) / BEAM_DIRECTION.Z())};
+
+    origin = Track(V3D{0., 0., 0.}, BEAM_DIRECTION);
+    nsegments = cylinder->interceptSurface(origin);
+    TS_ASSERT_EQUALS(nsegments, 1);
+
+    base = origin.totalDistInsideObject() * (BEAM_DIRECTION.Z());
+    height = base * tan(ANGLE);
+    dist = sqrt(pow(height, 2) + pow(base, 2));
+
+    TS_ASSERT_DELTA(origin.totalDistInsideObject(), dist, TOLERANCE);
+
+    // Test at 60 degrees
+    BEAM_DIRECTION = V3D{0.0, sin(60.0 * (M_PI / 180.0)), cos(60.0 * (M_PI / 180.0))};
+    BEAM_DIRECTION.normalize();
+    ANGLE = double{atan((BEAM_DIRECTION.Y()) / BEAM_DIRECTION.Z())};
+
+    origin = Track(V3D{0., 0., 0.}, BEAM_DIRECTION);
+    nsegments = cylinder->interceptSurface(origin);
+    TS_ASSERT_EQUALS(nsegments, 1);
+
+    base = origin.totalDistInsideObject() * (BEAM_DIRECTION.Z());
+    height = base * tan(ANGLE);
+    dist = sqrt(pow(height, 2) + pow(base, 2));
+
+    TS_ASSERT_DELTA(origin.totalDistInsideObject(), dist, TOLERANCE);
+
+    // Test sample from the top corner
+    BEAM_DIRECTION = V3D{0.0, HEIGHT * 0.5, OUTER_RADIUS};
+    BEAM_DIRECTION.normalize();
+    ANGLE = atan((BEAM_DIRECTION.Y()) / BEAM_DIRECTION.Z());
+
+    origin = Track(V3D{0., 0., 0.}, BEAM_DIRECTION);
+    nsegments = cylinder->interceptSurface(origin);
+    TS_ASSERT_EQUALS(nsegments, 1);
+
+    base = origin.totalDistInsideObject() * (BEAM_DIRECTION.Z());
+    height = base * tan(ANGLE);
+    dist = sqrt(pow(height, 2) + pow(base, 2));
+
+    TS_ASSERT_DELTA(origin.totalDistInsideObject(), dist, TOLERANCE);
+
+    // Test sample from the inner top corner (should miss and be 0)
+    BEAM_DIRECTION = V3D{0.0, HEIGHT * 0.5, INNER_RADIUS};
+    BEAM_DIRECTION.normalize();
+
+    origin = Track(V3D{0., 0., 0.}, BEAM_DIRECTION);
+    nsegments = cylinder->interceptSurface(origin);
+    TS_ASSERT_EQUALS(nsegments, 0);
+    TS_ASSERT_EQUALS(origin.totalDistInsideObject(), 0.0);
+  }
+
+  void testTracksForFlatPlate() {
+    // Flat plate centered at origin, 5 mm x 5 mm x 2 mm
+    // Thin side of plate (2mm) is facing the beam
+    constexpr double WIDTH{0.005};  // along x axis
+    constexpr double LENGTH{0.005}; // along y axis
+    constexpr double HEIGHT{0.002}; // along z axis
+
+    // Beam is along X assuming z is "up" y is "right" and x is out of page
+    // This puts the thin side facing the +x axis
+    constexpr V3D BEAM_DIRECTION{1.0, 0.0, 0.0};
+
+    auto plate = ComponentCreationHelper::createCuboid(0.5 * WIDTH, 0.5 * LENGTH, 0.5 * HEIGHT, 0.0, BEAM_DIRECTION);
+
+    // Test center of plate
+    Track origin(V3D{0.0, 0.0, 0.0}, BEAM_DIRECTION);
+    plate->interceptSurface(origin);
+    TS_ASSERT_EQUALS(origin.totalDistInsideObject(), WIDTH * 0.5);
+
+    Track front_midpoint(V3D{0.25 * WIDTH, 0.0, 0.0}, BEAM_DIRECTION);
+    plate->interceptSurface(front_midpoint);
+    TS_ASSERT_EQUALS(front_midpoint.totalDistInsideObject(), 0.25 * WIDTH);
+
+    Track back_midpoint(V3D{-0.25 * WIDTH, 0.0, 0.0}, BEAM_DIRECTION);
+    plate->interceptSurface(back_midpoint);
+    TS_ASSERT_EQUALS(back_midpoint.totalDistInsideObject(), 0.75 * WIDTH);
+
+    // Repeat above tests but shift plate to the midpoint along the +y axis
+    Track yshifted(V3D{0.0, 0.25 * LENGTH, 0.0}, BEAM_DIRECTION);
+    plate->interceptSurface(yshifted);
+    TS_ASSERT_EQUALS(yshifted.totalDistInsideObject(), WIDTH * 0.5);
+
+    front_midpoint = Track(V3D{0.25 * WIDTH, 0.25 * LENGTH, 0.0}, BEAM_DIRECTION);
+    plate->interceptSurface(front_midpoint);
+    TS_ASSERT_EQUALS(front_midpoint.totalDistInsideObject(), 0.25 * WIDTH);
+
+    back_midpoint = Track(V3D{-0.25 * WIDTH, 0.25 * LENGTH, 0.0}, BEAM_DIRECTION);
+    plate->interceptSurface(back_midpoint);
+    TS_ASSERT_EQUALS(back_midpoint.totalDistInsideObject(), 0.75 * WIDTH);
+
+    // shift plate to the midpoint along the +z axis
+    Track zshifted(V3D{0.0, 0.0, 0.25 * HEIGHT}, BEAM_DIRECTION);
+    plate->interceptSurface(zshifted);
+    TS_ASSERT_EQUALS(zshifted.totalDistInsideObject(), WIDTH * 0.5);
+
+    front_midpoint = Track(V3D{0.25 * WIDTH, 0.0, 0.25 * HEIGHT}, BEAM_DIRECTION);
+    plate->interceptSurface(front_midpoint);
+    TS_ASSERT_EQUALS(front_midpoint.totalDistInsideObject(), 0.25 * WIDTH);
+
+    back_midpoint = Track(V3D{-0.25 * WIDTH, 0.0, 0.25 * HEIGHT}, BEAM_DIRECTION);
+    plate->interceptSurface(back_midpoint);
+    TS_ASSERT_EQUALS(back_midpoint.totalDistInsideObject(), 0.75 * WIDTH);
+  }
+
+  void testTracksForFlatPlateAngle() {
+    // Flat plate centered at origin, 5 mm x 5 mm x 2 mm
+    // Thin side of plate (2mm) is facing the beam
+    constexpr double WIDTH{0.005};  // along x axis
+    constexpr double LENGTH{0.005}; // along y axis
+    constexpr double HEIGHT{0.002}; // along z axis
+    constexpr double TOLERANCE{1e-12};
+
+    V3D BEAM_DIRECTION{0.0, sin(30.0 * (M_PI / 180.0)), cos(30.0 * (M_PI / 180.0))};
+    BEAM_DIRECTION.normalize();
+    double ANGLE{atan((BEAM_DIRECTION.Y()) / BEAM_DIRECTION.Z())};
+
+    auto plate = ComponentCreationHelper::createCuboid(0.5 * WIDTH, 0.5 * LENGTH, 0.5 * HEIGHT, 0.0, BEAM_DIRECTION);
+
+    // Test center of plate at 30 degrees
+    Track origin(V3D{0.0, 0.0, 0.0}, BEAM_DIRECTION);
+    int nsegments = plate->interceptSurface(origin);
+    TS_ASSERT_EQUALS(nsegments, 1);
+
+    double base = origin.totalDistInsideObject() * (BEAM_DIRECTION.Z());
+    double height = base * tan(ANGLE);
+
+    TS_ASSERT_DELTA(origin.totalDistInsideObject(), sqrt(pow(height, 2) + pow(base, 2)), TOLERANCE);
+
+    // Test at 45 degrees
+    BEAM_DIRECTION = V3D{0.0, sin(45.0 * (M_PI / 180.0)), cos(45.0 * (M_PI / 180.0))};
+    BEAM_DIRECTION.normalize();
+    ANGLE = double{atan((BEAM_DIRECTION.Y()) / BEAM_DIRECTION.Z())};
+
+    origin = Track(V3D{0.0, 0.0, 0.0}, BEAM_DIRECTION);
+    nsegments = plate->interceptSurface(origin);
+    TS_ASSERT_EQUALS(nsegments, 1);
+
+    base = origin.totalDistInsideObject() * (BEAM_DIRECTION.Z());
+    height = base * tan(ANGLE);
+
+    TS_ASSERT_DELTA(origin.totalDistInsideObject(), sqrt(pow(height, 2) + pow(base, 2)), TOLERANCE);
+
+    // Test at 60 degrees
+    BEAM_DIRECTION = V3D{0.0, sin(60.0 * (M_PI / 180.0)), cos(60.0 * (M_PI / 180.0))};
+    BEAM_DIRECTION.normalize();
+    ANGLE = double{atan((BEAM_DIRECTION.Y()) / BEAM_DIRECTION.Z())};
+
+    origin = Track(V3D{0.0, 0.0, 0.0}, BEAM_DIRECTION);
+    nsegments = plate->interceptSurface(origin);
+    TS_ASSERT_EQUALS(nsegments, 1);
+
+    base = origin.totalDistInsideObject() * (BEAM_DIRECTION.Z());
+    height = base * tan(ANGLE);
+
+    TS_ASSERT_DELTA(origin.totalDistInsideObject(), sqrt(pow(height, 2) + pow(base, 2)), TOLERANCE);
   }
 
   void testGeneratePointInsideSphere() {
@@ -870,10 +1287,8 @@ public:
     const double azimuthalAngle{2. * M_PI * randT};
     const double polarAngle{std::acos(2. * randF - 1.)};
     const double r{radius * randR};
-    TS_ASSERT_DELTA(r * std::cos(azimuthalAngle) * std::sin(polarAngle),
-                    point->X(), tolerance);
-    TS_ASSERT_DELTA(r * std::sin(azimuthalAngle) * std::sin(polarAngle),
-                    point->Y(), tolerance);
+    TS_ASSERT_DELTA(r * std::cos(azimuthalAngle) * std::sin(polarAngle), point->X(), tolerance);
+    TS_ASSERT_DELTA(r * std::sin(azimuthalAngle) * std::sin(polarAngle), point->Y(), tolerance);
     TS_ASSERT_DELTA(r * std::cos(polarAngle), point->Z(), tolerance);
   }
 
@@ -909,18 +1324,40 @@ public:
     EXPECT_CALL(rng, nextValue()).InSequence(rand).WillOnce(Return(randZ));
 
     constexpr double halfWidth{0.75};
-    auto ball = ComponentCreationHelper::createCuboid(halfWidth);
+    auto cuboid = ComponentCreationHelper::createCuboid(halfWidth);
     // Create a thin infinite rectangular region to restrict point generation
     BoundingBox activeRegion(0.1, 0.1, 0.1, -0.1, -0.1, -0.1);
     constexpr size_t maxAttempts{1};
-    boost::optional<V3D> point =
-        ball->generatePointInObject(rng, activeRegion, maxAttempts);
+    boost::optional<V3D> point = cuboid->generatePointInObject(rng, activeRegion, maxAttempts);
     TS_ASSERT_EQUALS(!point, false);
-    // We should get the point generated from the second 'random' triplet.
     constexpr double tolerance{1e-10};
     TS_ASSERT_DELTA(-0.1 + randX * 0.2, point->X(), tolerance)
     TS_ASSERT_DELTA(-0.1 + randY * 0.2, point->Y(), tolerance)
     TS_ASSERT_DELTA(-0.1 + randZ * 0.2, point->Z(), tolerance)
+  }
+
+  void testGeneratePointSometimesMisses() {
+    // if there's a requirement to fairly sample scatter points between different sample environment
+    // parts then it's important the generatePointInObject method misses sometimes
+    using namespace ::testing;
+
+    // Generate "random" sequence.
+    MockRNG rng;
+    Sequence rand;
+    constexpr double randX{0.92};
+    constexpr double randY{0.14};
+    constexpr double randZ{0.83};
+    EXPECT_CALL(rng, nextValue()).InSequence(rand).WillOnce(Return(randX));
+    EXPECT_CALL(rng, nextValue()).InSequence(rand).WillOnce(Return(randY));
+    EXPECT_CALL(rng, nextValue()).InSequence(rand).WillOnce(Return(randZ));
+
+    constexpr double halfWidth{0.075};
+    auto cuboid = ComponentCreationHelper::createCuboid(halfWidth);
+    // Create a rectangular region to restrict point generation
+    BoundingBox activeRegion(0.1, 0.1, 0.1, -0.1, -0.1, -0.1);
+    constexpr size_t maxAttempts{1};
+    boost::optional<V3D> point = cuboid->generatePointInObject(rng, activeRegion, maxAttempts);
+    TS_ASSERT_EQUALS(!point, true);
   }
 
   void testSolidAngleSphere()
@@ -936,14 +1373,11 @@ public:
     // Expected solid angle calculated values from sa=2pi(1-cos(arcsin(R/r))
     // where R is sphere radius and r is distance of observer from sphere centre
     // Intercept for track in reverse direction now worked round
-    TS_ASSERT_DELTA(geom_obj->rayTraceSolidAngle(V3D(8.1, 0, 0)), 0.864364,
-                    satol);
+    TS_ASSERT_DELTA(geom_obj->rayTraceSolidAngle(V3D(8.1, 0, 0)), 0.864364, satol);
     // internal point (should be 4pi)
-    TS_ASSERT_DELTA(geom_obj->rayTraceSolidAngle(V3D(0, 0, 0)), 4 * M_PI,
-                    satol);
+    TS_ASSERT_DELTA(geom_obj->rayTraceSolidAngle(V3D(0, 0, 0)), 4 * M_PI, satol);
     // surface point
-    TS_ASSERT_DELTA(geom_obj->rayTraceSolidAngle(V3D(4.1, 0, 0)), 2 * M_PI,
-                    satol);
+    TS_ASSERT_DELTA(geom_obj->rayTraceSolidAngle(V3D(4.1, 0, 0)), 2 * M_PI, satol);
   }
 
   void testSolidAngleCappedCylinder()
@@ -955,8 +1389,7 @@ public:
     // Want to test triangulation so setup a geometry handler
     auto h = std::make_shared<GeometryHandler>(geom_obj);
     detail::ShapeInfo shapeInfo;
-    shapeInfo.setCylinder(V3D(-0.0015, 0.0, 0.0), V3D(1., 0.0, 0.0), 0.005,
-                          0.003);
+    shapeInfo.setCylinder(V3D(-0.0015, 0.0, 0.0), V3D(1., 0.0, 0.0), 0.005, 0.003);
     h->setShapeInfo(std::move(shapeInfo));
     geom_obj->setGeometryHandler(h);
 
@@ -966,31 +1399,23 @@ public:
     // approx WISH cylinder
     // We intentionally exclude the cylinder end caps so they this should
     // produce 0
-    TS_ASSERT_DELTA(geom_obj->triangulatedSolidAngle(V3D(-0.5, 0.0, 0.0)), 0.0,
-                    satol);
+    TS_ASSERT_DELTA(geom_obj->triangulatedSolidAngle(V3D(-0.5, 0.0, 0.0)), 0.0, satol);
     // Other end
-    TS_ASSERT_DELTA(geom_obj->triangulatedSolidAngle(V3D(-1.497, 0.0, 0.0)),
-                    0.0, satol);
+    TS_ASSERT_DELTA(geom_obj->triangulatedSolidAngle(V3D(-1.497, 0.0, 0.0)), 0.0, satol);
 
     // Side values
-    TS_ASSERT_DELTA(geom_obj->triangulatedSolidAngle(V3D(0, 0, 0.1)),
-                    0.00301186, satol);
-    TS_ASSERT_DELTA(geom_obj->triangulatedSolidAngle(V3D(0, 0, -0.1)),
-                    0.00301186, satol);
+    TS_ASSERT_DELTA(geom_obj->triangulatedSolidAngle(V3D(0, 0, 0.1)), 0.00301186, satol);
+    TS_ASSERT_DELTA(geom_obj->triangulatedSolidAngle(V3D(0, 0, -0.1)), 0.00301186, satol);
     // Sweep in the axis of the cylinder angle to see if the solid angle
     // decreases (as we are excluding the end caps)
-    TS_ASSERT_DELTA(geom_obj->triangulatedSolidAngle(V3D(0.1, 0.0, 0.1)),
-                    0.00100267, satol);
+    TS_ASSERT_DELTA(geom_obj->triangulatedSolidAngle(V3D(0.1, 0.0, 0.1)), 0.00100267, satol);
 
     // internal point (should be 4pi)
-    TS_ASSERT_DELTA(geom_obj->triangulatedSolidAngle(V3D(-0.999, 0.0, 0.0)),
-                    4 * M_PI, satol);
+    TS_ASSERT_DELTA(geom_obj->triangulatedSolidAngle(V3D(-0.999, 0.0, 0.0)), 4 * M_PI, satol);
 
     // surface points
-    TS_ASSERT_DELTA(geom_obj->triangulatedSolidAngle(V3D(-1.0, 0.0, 0.0)),
-                    2 * M_PI, satol);
-    TS_ASSERT_DELTA(geom_obj->triangulatedSolidAngle(V3D(-0.997, 0.0, 0.0)),
-                    2 * M_PI, satol);
+    TS_ASSERT_DELTA(geom_obj->triangulatedSolidAngle(V3D(-1.0, 0.0, 0.0)), 2 * M_PI, satol);
+    TS_ASSERT_DELTA(geom_obj->triangulatedSolidAngle(V3D(-0.997, 0.0, 0.0)), 2 * M_PI, satol);
   }
 
   void testSolidAngleCubeTriangles()
@@ -1006,18 +1431,12 @@ public:
     //
     // tests for Triangulated cube
     //
-    TS_ASSERT_DELTA(geom_obj->triangulatedSolidAngle(V3D(1.0, 0, 0)),
-                    M_PI * 2.0 / 3.0, satol);
-    TS_ASSERT_DELTA(geom_obj->triangulatedSolidAngle(V3D(-1.0, 0, 0)),
-                    M_PI * 2.0 / 3.0, satol);
-    TS_ASSERT_DELTA(geom_obj->triangulatedSolidAngle(V3D(0, 1.0, 0)),
-                    M_PI * 2.0 / 3.0, satol);
-    TS_ASSERT_DELTA(geom_obj->triangulatedSolidAngle(V3D(0, -1.0, 0)),
-                    M_PI * 2.0 / 3.0, satol);
-    TS_ASSERT_DELTA(geom_obj->triangulatedSolidAngle(V3D(0, 0, 1.0)),
-                    M_PI * 2.0 / 3.0, satol);
-    TS_ASSERT_DELTA(geom_obj->triangulatedSolidAngle(V3D(0, 0, -1.0)),
-                    M_PI * 2.0 / 3.0, satol);
+    TS_ASSERT_DELTA(geom_obj->triangulatedSolidAngle(V3D(1.0, 0, 0)), M_PI * 2.0 / 3.0, satol);
+    TS_ASSERT_DELTA(geom_obj->triangulatedSolidAngle(V3D(-1.0, 0, 0)), M_PI * 2.0 / 3.0, satol);
+    TS_ASSERT_DELTA(geom_obj->triangulatedSolidAngle(V3D(0, 1.0, 0)), M_PI * 2.0 / 3.0, satol);
+    TS_ASSERT_DELTA(geom_obj->triangulatedSolidAngle(V3D(0, -1.0, 0)), M_PI * 2.0 / 3.0, satol);
+    TS_ASSERT_DELTA(geom_obj->triangulatedSolidAngle(V3D(0, 0, 1.0)), M_PI * 2.0 / 3.0, satol);
+    TS_ASSERT_DELTA(geom_obj->triangulatedSolidAngle(V3D(0, 0, -1.0)), M_PI * 2.0 / 3.0, satol);
   }
 
   /** Add a scale factor */
@@ -1027,9 +1446,7 @@ public:
     // solid angle at distance 0.5 should be 4pi/6 by symmetry
     double expected = M_PI * 2.0 / 3.0;
     V3D scaleFactor(2.0, 2.0, 2.0);
-    TS_ASSERT_DELTA(
-        geom_obj->triangulatedSolidAngle(V3D(2.0, 0, 0), scaleFactor), expected,
-        satol);
+    TS_ASSERT_DELTA(geom_obj->triangulatedSolidAngle(V3D(2.0, 0, 0), scaleFactor), expected, satol);
   }
 
   void testExactVolumeCuboid() {
@@ -1040,11 +1457,9 @@ public:
     AutoPtr<Document> shapeDescription = new Document;
     AutoPtr<Element> typeElement = shapeDescription->createElement("type");
     typeElement->setAttribute("name", "testCuboid");
-    AutoPtr<Element> shapeElement = createCuboidTypeElement(
-        "cuboid-shape", width, height, thickness, shapeDescription);
+    AutoPtr<Element> shapeElement = createCuboidTypeElement("cuboid-shape", width, height, thickness, shapeDescription);
     typeElement->appendChild(shapeElement);
-    AutoPtr<Element> algebraElement =
-        shapeDescription->createElement("algebra");
+    AutoPtr<Element> algebraElement = shapeDescription->createElement("algebra");
     algebraElement->setAttribute("val", "cuboid-shape");
     typeElement->appendChild(algebraElement);
     ShapeFactory shapeFactory;
@@ -1059,11 +1474,9 @@ public:
     AutoPtr<Document> shapeDescription = new Document;
     AutoPtr<Element> typeElement = shapeDescription->createElement("type");
     typeElement->setAttribute("name", "testSphere");
-    AutoPtr<Element> shapeElement =
-        createSphereTypeElement("sphere-shape", radius, shapeDescription);
+    AutoPtr<Element> shapeElement = createSphereTypeElement("sphere-shape", radius, shapeDescription);
     typeElement->appendChild(shapeElement);
-    AutoPtr<Element> algebraElement =
-        shapeDescription->createElement("algebra");
+    AutoPtr<Element> algebraElement = shapeDescription->createElement("algebra");
     algebraElement->setAttribute("val", "sphere-shape");
     typeElement->appendChild(algebraElement);
     ShapeFactory shapeFactory;
@@ -1079,11 +1492,9 @@ public:
     AutoPtr<Document> shapeDescription = new Document;
     AutoPtr<Element> typeElement = shapeDescription->createElement("type");
     typeElement->setAttribute("name", "testCylinder");
-    AutoPtr<Element> shapeElement = createCylinderTypeElement(
-        "cylinder-shape", height, radius, shapeDescription);
+    AutoPtr<Element> shapeElement = createCylinderTypeElement("cylinder-shape", height, radius, shapeDescription);
     typeElement->appendChild(shapeElement);
-    AutoPtr<Element> algebraElement =
-        shapeDescription->createElement("algebra");
+    AutoPtr<Element> algebraElement = shapeDescription->createElement("algebra");
     algebraElement->setAttribute("val", "cylinder-shape");
     typeElement->appendChild(algebraElement);
     ShapeFactory shapeFactory;
@@ -1100,17 +1511,15 @@ public:
     AutoPtr<Document> shapeDescription = new Document;
     AutoPtr<Element> typeElement = shapeDescription->createElement("type");
     typeElement->setAttribute("name", "testHollowCylinder");
-    AutoPtr<Element> shapeElement = createHollowCylinderTypeElement(
-        "hollow-cylinder-shape", height, innerRadius, radius, shapeDescription);
+    AutoPtr<Element> shapeElement =
+        createHollowCylinderTypeElement("hollow-cylinder-shape", height, innerRadius, radius, shapeDescription);
     typeElement->appendChild(shapeElement);
-    AutoPtr<Element> algebraElement =
-        shapeDescription->createElement("algebra");
+    AutoPtr<Element> algebraElement = shapeDescription->createElement("algebra");
     algebraElement->setAttribute("val", "hollow-cylinder-shape");
     typeElement->appendChild(algebraElement);
     ShapeFactory shapeFactory;
     auto cuboid = shapeFactory.createShape(typeElement);
-    const double hollowCylinderVolume =
-        M_PI * height * (radius * radius - innerRadius * innerRadius);
+    const double hollowCylinderVolume = M_PI * height * (radius * radius - innerRadius * innerRadius);
     TS_ASSERT_DELTA(cuboid->volume(), hollowCylinderVolume, 1e-6)
   }
 
@@ -1123,15 +1532,12 @@ public:
     AutoPtr<Document> shapeDescription = new Document;
     AutoPtr<Element> typeElement = shapeDescription->createElement("type");
     typeElement->setAttribute("name", "testShape");
-    AutoPtr<Element> shapeElement = createCuboidTypeElement(
-        "solid-cuboid", width, height, thickness, shapeDescription);
+    AutoPtr<Element> shapeElement = createCuboidTypeElement("solid-cuboid", width, height, thickness, shapeDescription);
     typeElement->appendChild(shapeElement);
     const double radius = 0.47 * std::min(std::min(width, height), thickness);
-    shapeElement =
-        createSphereTypeElement("void-sphere", radius, shapeDescription);
+    shapeElement = createSphereTypeElement("void-sphere", radius, shapeDescription);
     typeElement->appendChild(shapeElement);
-    AutoPtr<Element> algebraElement =
-        shapeDescription->createElement("algebra");
+    AutoPtr<Element> algebraElement = shapeDescription->createElement("algebra");
     algebraElement->setAttribute("val", "solid-cuboid (# void-sphere)");
     typeElement->appendChild(algebraElement);
     ShapeFactory shapeFactory;
@@ -1221,8 +1627,7 @@ public:
     ymin = -3.0;
     zmin = -3.0;
 
-    TS_ASSERT_THROWS_NOTHING(
-        geom_obj->defineBoundingBox(xmax, ymax, zmax, xmin, ymin, zmin));
+    TS_ASSERT_THROWS_NOTHING(geom_obj->defineBoundingBox(xmax, ymax, zmax, xmin, ymin, zmin));
 
     const BoundingBox &boundBox = geom_obj->getBoundingBox();
 
@@ -1236,9 +1641,7 @@ public:
     // Inconsistent bounding box
     xmax = 1.2;
     xmin = 3.0;
-    TS_ASSERT_THROWS(
-        geom_obj->defineBoundingBox(xmax, ymax, zmax, xmin, ymin, zmin),
-        const std::invalid_argument &);
+    TS_ASSERT_THROWS(geom_obj->defineBoundingBox(xmax, ymax, zmax, xmin, ymin, zmin), const std::invalid_argument &);
   }
   void testSurfaceTriangulation()
   /**
@@ -1272,10 +1675,8 @@ public:
     TS_ASSERT_DELTA(saRay, 1.25663708, 0.001);
 
     // No analytic value for side on SA, using hi-res value
-    TS_ASSERT_DELTA(geom_obj->triangulatedSolidAngle(V3D(0, 0, 7)), 0.7531,
-                    0.753 * satol);
-    TS_ASSERT_DELTA(geom_obj->triangulatedSolidAngle(V3D(0, 7, 0)), 0.7531,
-                    0.753 * satol);
+    TS_ASSERT_DELTA(geom_obj->triangulatedSolidAngle(V3D(0, 0, 7)), 0.7531, 0.753 * satol);
+    TS_ASSERT_DELTA(geom_obj->triangulatedSolidAngle(V3D(0, 7, 0)), 0.7531, 0.753 * satol);
 
     saTri = geom_obj->triangulatedSolidAngle(V3D(20, 0, 0));
     TS_ASSERT_DELTA(saTri, 0.07850147, satol * 0.0785);
@@ -1297,14 +1698,11 @@ public:
     // Expected solid angle calculated values from sa=2pi(1-cos(arcsin(R/r))
     // where R is sphere radius and r is distance of observer from sphere centre
     // Intercept for track in reverse direction now worked round
-    TS_ASSERT_DELTA(geom_obj->triangulatedSolidAngle(V3D(8.1, 0, 0)), 0.864364,
-                    satol);
+    TS_ASSERT_DELTA(geom_obj->triangulatedSolidAngle(V3D(8.1, 0, 0)), 0.864364, satol);
     // internal point (should be 4pi)
-    TS_ASSERT_DELTA(geom_obj->triangulatedSolidAngle(V3D(0, 0, 0)), 4 * M_PI,
-                    satol);
+    TS_ASSERT_DELTA(geom_obj->triangulatedSolidAngle(V3D(0, 0, 0)), 4 * M_PI, satol);
     // surface point
-    TS_ASSERT_DELTA(geom_obj->triangulatedSolidAngle(V3D(4.1, 0, 0)), 2 * M_PI,
-                    satol);
+    TS_ASSERT_DELTA(geom_obj->triangulatedSolidAngle(V3D(4.1, 0, 0)), 2 * M_PI, satol);
   }
 
 private:
@@ -1338,8 +1736,7 @@ private:
     // using surface ids: 31 (cylinder) 32 (plane (top) ) and 33 (plane (base))
     std::string ObjCapCylinder = "-31 -32 33";
 
-    std::shared_ptr<CSGObject> retVal =
-        std::shared_ptr<CSGObject>(new CSGObject);
+    std::shared_ptr<CSGObject> retVal = std::shared_ptr<CSGObject>(new CSGObject);
     retVal->setObject(21, ObjCapCylinder);
     retVal->populate(CylSurMap);
 
@@ -1352,8 +1749,7 @@ private:
   // size
   // for a detector cylinder
   std::shared_ptr<CSGObject> createSmallCappedCylinder() {
-    std::string C31 =
-        "cx 0.005"; // cylinder x-axis radius 0.005 and height 0.003
+    std::string C31 = "cx 0.005"; // cylinder x-axis radius 0.005 and height 0.003
     std::string C32 = "px -0.997";
     std::string C33 = "px -1.0";
 
@@ -1374,8 +1770,7 @@ private:
     // using surface ids: 31 (cylinder) 32 (plane (top) ) and 33 (plane (base))
     std::string ObjCapCylinder = "-31 -32 33";
 
-    std::shared_ptr<CSGObject> retVal =
-        std::shared_ptr<CSGObject>(new CSGObject);
+    std::shared_ptr<CSGObject> retVal = std::shared_ptr<CSGObject>(new CSGObject);
     retVal->setObject(21, ObjCapCylinder);
     retVal->populate(CylSurMap);
 
@@ -1434,8 +1829,7 @@ private:
       auto A = Geometry::SurfaceFactory::Instance()->processLine(vc.second);
       TSM_ASSERT("Expected a non-null surface from the factory", A);
       A->setName(vc.first);
-      SMap.insert(
-          STYPE::value_type(vc.first, std::shared_ptr<Surface>(A.release())));
+      SMap.insert(STYPE::value_type(vc.first, std::shared_ptr<Surface>(A.release())));
     }
 
     return;
@@ -1475,8 +1869,7 @@ private:
     // using surface ids:  1-6
     std::string ObjCube = "1 -2 3 -4 5 -6";
 
-    std::shared_ptr<CSGObject> retVal =
-        std::shared_ptr<CSGObject>(new CSGObject);
+    std::shared_ptr<CSGObject> retVal = std::shared_ptr<CSGObject>(new CSGObject);
     retVal->setObject(68, ObjCube);
     retVal->populate(CubeSurMap);
 
@@ -1517,8 +1910,7 @@ private:
     // using surface ids:  1-6
     std::string ObjCube = "1 -2 3 -4 5 -6";
 
-    std::shared_ptr<CSGObject> retVal =
-        std::shared_ptr<CSGObject>(new CSGObject);
+    std::shared_ptr<CSGObject> retVal = std::shared_ptr<CSGObject>(new CSGObject);
     retVal->setObject(68, ObjCube);
     retVal->populate(CubeSurMap);
 
@@ -1598,15 +1990,13 @@ private:
 
     std::string ObjHex = "-1 2 3 -4 -5 6";
 
-    std::shared_ptr<CSGObject> retVal =
-        std::shared_ptr<CSGObject>(new CSGObject);
+    std::shared_ptr<CSGObject> retVal = std::shared_ptr<CSGObject>(new CSGObject);
 
     // Explicitly setting the GluGeometryHanler hexahedron allows
     // for the correct bounding box calculation.
     auto handler = std::make_shared<GeometryHandler>(retVal);
     detail::ShapeInfo shapeInfo;
-    shapeInfo.setHexahedron(hex.lbb, hex.lfb, hex.rfb, hex.rbb, hex.lbt,
-                            hex.lft, hex.rft, hex.rbt);
+    shapeInfo.setHexahedron(hex.lbb, hex.lfb, hex.rfb, hex.rbb, hex.lbt, hex.lft, hex.rft, hex.rbt);
     handler->setShapeInfo(std::move(shapeInfo));
     retVal->setGeometryHandler(handler);
 
@@ -1616,14 +2006,12 @@ private:
   }
 
   static Poco::XML::AutoPtr<Poco::XML::Element>
-  createCuboidTypeElement(const std::string &id, const double width,
-                          const double height, const double thickness,
+  createCuboidTypeElement(const std::string &id, const double width, const double height, const double thickness,
                           Poco::XML::AutoPtr<Poco::XML::Document> &document) {
     using namespace Poco::XML;
     AutoPtr<Element> shapeElement = document->createElement("cuboid");
     shapeElement->setAttribute("id", id);
-    AutoPtr<Element> element =
-        document->createElement("left-front-bottom-point");
+    AutoPtr<Element> element = document->createElement("left-front-bottom-point");
     element->setAttribute("x", std::to_string(-width / 2));
     element->setAttribute("y", std::to_string(-height / 2));
     element->setAttribute("z", std::to_string(thickness / 2));
@@ -1664,8 +2052,7 @@ private:
   }
 
   static Poco::XML::AutoPtr<Poco::XML::Element>
-  createCylinderTypeElement(const std::string &id, const double height,
-                            const double radius,
+  createCylinderTypeElement(const std::string &id, const double height, const double radius,
                             Poco::XML::AutoPtr<Poco::XML::Document> &document) {
     using namespace Poco::XML;
     AutoPtr<Element> shapeElement = document->createElement("cylinder");
@@ -1689,9 +2076,9 @@ private:
     return shapeElement;
   }
 
-  static Poco::XML::AutoPtr<Poco::XML::Element> createHollowCylinderTypeElement(
-      const std::string &id, const double height, const double innerRadius,
-      const double radius, Poco::XML::AutoPtr<Poco::XML::Document> &document) {
+  static Poco::XML::AutoPtr<Poco::XML::Element>
+  createHollowCylinderTypeElement(const std::string &id, const double height, const double innerRadius,
+                                  const double radius, Poco::XML::AutoPtr<Poco::XML::Document> &document) {
     using namespace Poco::XML;
     AutoPtr<Element> shapeElement = document->createElement("hollow-cylinder");
     shapeElement->setAttribute("id", id);
@@ -1725,21 +2112,16 @@ class CSGObjectTestPerformance : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static CSGObjectTestPerformance *createSuite() {
-    return new CSGObjectTestPerformance();
-  }
+  static CSGObjectTestPerformance *createSuite() { return new CSGObjectTestPerformance(); }
   static void destroySuite(CSGObjectTestPerformance *suite) { delete suite; }
 
   CSGObjectTestPerformance()
       : m_rng(200000), m_activeRegion(0.1, 0.1, 0.1, -0.1, -0.1, -0.1),
         m_cuboid(ComponentCreationHelper::createCuboid(0.2, 0.2, 0.1)),
-        m_cylinder(ComponentCreationHelper::createCappedCylinder(
-            0.1, 0.4, V3D{0., 0., 0.}, V3D{0., 1., 0.}, "cyl")),
-        m_rotatedCuboid(
-            ComponentCreationHelper::createCuboid(0.01, 0.12, 0.12, M_PI / 4.)),
+        m_cylinder(ComponentCreationHelper::createCappedCylinder(0.1, 0.4, V3D{0., 0., 0.}, V3D{0., 1., 0.}, "cyl")),
+        m_rotatedCuboid(ComponentCreationHelper::createCuboid(0.01, 0.12, 0.12, M_PI / 4., V3D{0, 0, 1})),
         m_sphere(ComponentCreationHelper::createSphere(0.1)),
-        m_sphericalShell(
-            ComponentCreationHelper::createHollowShell(0.009, 0.01)) {}
+        m_sphericalShell(ComponentCreationHelper::createHollowShell(0.009, 0.01)) {}
 
   void test_generatePointInside_Cuboid_With_ActiveRegion() {
     constexpr size_t maxAttempts{500};
@@ -1765,8 +2147,7 @@ public:
   void test_generatePointInside_Rotated_Cuboid_With_ActiveRegion() {
     constexpr size_t maxAttempts{500};
     for (size_t i = 0; i < m_npoints; ++i) {
-      m_rotatedCuboid->generatePointInObject(m_rng, m_activeRegion,
-                                             maxAttempts);
+      m_rotatedCuboid->generatePointInObject(m_rng, m_activeRegion, maxAttempts);
     }
   }
 

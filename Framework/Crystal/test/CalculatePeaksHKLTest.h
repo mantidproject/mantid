@@ -8,9 +8,10 @@
 
 #include "MantidAPI/Sample.h"
 #include "MantidCrystal/CalculatePeaksHKL.h"
+#include "MantidDataObjects/LeanElasticPeaksWorkspace.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
+#include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include <cxxtest/TestSuite.h>
 
 using Mantid::Crystal::CalculatePeaksHKL;
@@ -20,9 +21,7 @@ class CalculatePeaksHKLTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static CalculatePeaksHKLTest *createSuite() {
-    return new CalculatePeaksHKLTest();
-  }
+  static CalculatePeaksHKLTest *createSuite() { return new CalculatePeaksHKLTest(); }
   static void destroySuite(CalculatePeaksHKLTest *suite) { delete suite; }
 
   void test_Constructor() { TS_ASSERT_THROWS_NOTHING(CalculatePeaksHKL alg); }
@@ -45,8 +44,7 @@ public:
     alg.setRethrows(true);
     alg.initialize();
     alg.setPropertyValue("PeaksWorkspace", "ws");
-    TSM_ASSERT_THROWS("Should throw. No UB has been given.", alg.execute(),
-                      std::runtime_error &);
+    TSM_ASSERT_THROWS("Should throw. No UB has been given.", alg.execute(), std::runtime_error &);
   }
 
   void test_Execute() {
@@ -70,12 +68,37 @@ public:
 
     for (int i = 0; i < ws->getNumberPeaks(); i++) {
       Peak &peak = ws->getPeak(i);
-      Mantid::Kernel::V3D expectedHKL =
-          peak.getQSampleFrame() /
-          (2.0 * M_PI); // Simulate the transform. UB is unity.
+      Mantid::Kernel::V3D expectedHKL = peak.getQSampleFrame() / (2.0 * M_PI); // Simulate the transform. UB is unity.
 
       TS_ASSERT_EQUALS(expectedHKL, peak.getHKL());
     }
+  }
+
+  void test_Execute_LeanElasticPeaks() {
+    auto lattice = std::make_unique<Mantid::Geometry::OrientedLattice>();
+
+    auto ws = std::make_shared<LeanElasticPeaksWorkspace>();
+    ws->mutableSample().setOrientedLattice(std::move(lattice));
+    ws->addPeak(LeanElasticPeak(Mantid::Kernel::V3D(2, 0, 0), 1.));
+    ws->addPeak(LeanElasticPeak(Mantid::Kernel::V3D(0, 4, 0), 1.));
+
+    Mantid::API::AnalysisDataService::Instance().addOrReplace("ws", ws);
+
+    CalculatePeaksHKL alg;
+    alg.setRethrows(true);
+    alg.initialize();
+    alg.setPropertyValue("PeaksWorkspace", "ws");
+    alg.execute();
+    int numberIndexed = alg.getProperty("NumIndexed");
+    TS_ASSERT_EQUALS(numberIndexed, ws->getNumberPeaks());
+
+    TS_ASSERT_DELTA(ws->getPeak(0).getH(), M_1_PI, 1e-9)
+    TS_ASSERT_DELTA(ws->getPeak(0).getK(), 0, 1e-9)
+    TS_ASSERT_DELTA(ws->getPeak(0).getL(), 0, 1e-9)
+
+    TS_ASSERT_DELTA(ws->getPeak(1).getH(), 0, 1e-9)
+    TS_ASSERT_DELTA(ws->getPeak(1).getK(), M_2_PI, 1e-9)
+    TS_ASSERT_DELTA(ws->getPeak(1).getL(), 0, 1e-9)
   }
 
   // Don't index peaks that are already indexed.

@@ -64,11 +64,11 @@ class SelectNexusFilesByMetadataTest(unittest.TestCase):
 
     def test_string_criteria(self):
 
-        filelist = 'ILLD33_001030.nxs'
+        filelist = 'ILL/D33/001030.nxs'
         criteria = '$entry0/D33/name$ == "D33"'
         res = SelectNexusFilesByMetadata(FileList=filelist,NexusCriteria=criteria)
         outfiles = res.split(',')
-        self.assertTrue(outfiles[0].endswith('ILLD33_001030.nxs'),'Should be the file name')
+        self.assertTrue(outfiles[0].endswith('001030.nxs'),'Should be the file name')
 
 if __name__=="__main__":
     # run the test if only if the required package is present

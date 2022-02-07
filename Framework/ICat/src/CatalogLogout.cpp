@@ -9,8 +9,7 @@
 #include "MantidAPI/AlgorithmProperty.h"
 #include "MantidAPI/CatalogManager.h"
 
-namespace Mantid {
-namespace ICat {
+namespace Mantid::ICat {
 DECLARE_ALGORITHM(CatalogLogout)
 
 /// Init method to declare algorithm properties
@@ -29,12 +28,10 @@ void CatalogLogout::exec() {
   if (logoutSession.empty())
     API::CatalogManager::Instance().destroyCatalog("");
 
-  auto keepAliveInstances =
-      API::AlgorithmManager::Instance().runningInstancesOf("CatalogKeepAlive");
+  auto keepAliveInstances = API::AlgorithmManager::Instance().runningInstancesOf("CatalogKeepAlive");
 
   for (auto &instance : keepAliveInstances) {
-    auto keepAliveInstance = API::AlgorithmManager::Instance().getAlgorithm(
-        instance->getAlgorithmID());
+    auto keepAliveInstance = API::AlgorithmManager::Instance().getAlgorithm(instance->getAlgorithmID());
 
     if (logoutSession == instance->getPropertyValue("Session")) {
       keepAliveInstance->cancel();
@@ -45,5 +42,4 @@ void CatalogLogout::exec() {
     }
   }
 }
-} // namespace ICat
-} // namespace Mantid
+} // namespace Mantid::ICat

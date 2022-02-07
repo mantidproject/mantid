@@ -9,7 +9,7 @@
 #include <cxxtest/TestSuite.h>
 
 #include "MantidAPI/WorkspaceUnitValidator.h"
-#include "MantidTestHelpers/FakeObjects.h"
+#include "MantidFrameworkTestHelpers/FakeObjects.h"
 
 using Mantid::API::WorkspaceUnitValidator;
 
@@ -17,9 +17,7 @@ class WorkspaceUnitValidatorTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static WorkspaceUnitValidatorTest *createSuite() {
-    return new WorkspaceUnitValidatorTest();
-  }
+  static WorkspaceUnitValidatorTest *createSuite() { return new WorkspaceUnitValidatorTest(); }
   static void destroySuite(WorkspaceUnitValidatorTest *suite) { delete suite; }
 
   void test_fail() {

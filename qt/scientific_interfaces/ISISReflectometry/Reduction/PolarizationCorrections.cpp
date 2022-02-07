@@ -5,27 +5,16 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "PolarizationCorrections.h"
-namespace MantidQt {
-namespace CustomInterfaces {
-namespace ISISReflectometry {
+namespace MantidQt::CustomInterfaces::ISISReflectometry {
 
-PolarizationCorrections::PolarizationCorrections(
-    PolarizationCorrectionType correctionType)
+PolarizationCorrections::PolarizationCorrections(PolarizationCorrectionType correctionType)
     : m_correctionType(correctionType) {}
 
-PolarizationCorrectionType PolarizationCorrections::correctionType() const {
-  return m_correctionType;
-}
+PolarizationCorrectionType PolarizationCorrections::correctionType() const { return m_correctionType; }
 
-bool operator!=(PolarizationCorrections const &lhs,
-                PolarizationCorrections const &rhs) {
-  return !(lhs == rhs);
-}
+bool operator!=(PolarizationCorrections const &lhs, PolarizationCorrections const &rhs) { return !(lhs == rhs); }
 
-bool operator==(PolarizationCorrections const &lhs,
-                PolarizationCorrections const &rhs) {
+bool operator==(PolarizationCorrections const &lhs, PolarizationCorrections const &rhs) {
   return lhs.correctionType() == rhs.correctionType();
 }
-} // namespace ISISReflectometry
-} // namespace CustomInterfaces
-} // namespace MantidQt
+} // namespace MantidQt::CustomInterfaces::ISISReflectometry

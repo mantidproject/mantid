@@ -8,8 +8,8 @@
 
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceGroup.h"
-#include "MantidTestHelpers/MuonWorkspaceCreationHelper.h"
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
+#include "MantidFrameworkTestHelpers/MuonWorkspaceCreationHelper.h"
+#include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
 
 #include <cxxtest/TestSuite.h>
 
@@ -174,8 +174,7 @@ public:
 
     auto wsGroup = createMultiPeriodWorkspaceGroup(5, 2, 10, "muonGroup");
 
-    MatrixWorkspace_sptr ws1 = std::dynamic_pointer_cast<MatrixWorkspace>(
-        wsGroup->getItem("MuonDataPeriod_1"));
+    MatrixWorkspace_sptr ws1 = std::dynamic_pointer_cast<MatrixWorkspace>(wsGroup->getItem("MuonDataPeriod_1"));
     const std::set<detid_t> detids0 = ws1->getSpectrum(0).getDetectorIDs();
     const std::set<detid_t> detids1 = ws1->getSpectrum(1).getDetectorIDs();
 
@@ -192,8 +191,7 @@ public:
 
     auto wsGroup = createMultiPeriodWorkspaceGroup(5, 2, 10, "muonGroup");
 
-    MatrixWorkspace_sptr ws1 = std::dynamic_pointer_cast<MatrixWorkspace>(
-        wsGroup->getItem("MuonDataPeriod_1"));
+    MatrixWorkspace_sptr ws1 = std::dynamic_pointer_cast<MatrixWorkspace>(wsGroup->getItem("MuonDataPeriod_1"));
 
     Mantid::MantidVec vecX1 = ws1->getSpectrum(0).readX();
     Mantid::MantidVec vecX2 = ws1->getSpectrum(1).readX();
@@ -209,8 +207,7 @@ public:
     TS_ASSERT_DELTA(vecY2.at(0), 11, 0.1);
     TS_ASSERT_DELTA(vecY2.at(9), 20, 0.1);
 
-    MatrixWorkspace_sptr ws5 = std::dynamic_pointer_cast<MatrixWorkspace>(
-        wsGroup->getItem("MuonDataPeriod_5"));
+    MatrixWorkspace_sptr ws5 = std::dynamic_pointer_cast<MatrixWorkspace>(wsGroup->getItem("MuonDataPeriod_5"));
 
     Mantid::MantidVec vecY3 = ws5->getSpectrum(0).readY();
     Mantid::MantidVec vecY4 = ws5->getSpectrum(1).readY();
@@ -251,22 +248,36 @@ public:
     TS_ASSERT_DELTA(deadTimeTable->getColumn(1)->toDouble(4), 0.005, 0.0001);
   }
 
-  void
-  test_createWorkspaceWithInstrumentandRun_run_number_and_instrument_set_correctly() {
-    MatrixWorkspace_sptr ws =
-        createWorkspaceWithInstrumentandRun("MUSR", 12345, 10);
+  void test_createTimeZeroTable_empty_for_incorrect_length() {
+    std::vector<double> timeZeros = {0.5, 1.0};
+    ITableWorkspace_sptr timeZeroTable = createTimeZeroTable(3, timeZeros);
 
-    TS_ASSERT_EQUALS(ws->mutableRun().getPropertyAsIntegerValue("run_number"),
-                     12345);
+    TS_ASSERT_EQUALS(timeZeroTable->columnCount(), 1);
+    TS_ASSERT_EQUALS(timeZeroTable->rowCount(), 0);
+  }
+
+  void test_createTimeZeroTable_correct_value() {
+    std::vector<double> timeZeros = {0.5, 1.0, 1.5};
+    ITableWorkspace_sptr timeZeroTable = createTimeZeroTable(3, timeZeros);
+
+    TS_ASSERT_EQUALS(timeZeroTable->columnCount(), 1);
+    TS_ASSERT_EQUALS(timeZeroTable->rowCount(), 3);
+    TS_ASSERT_DELTA(timeZeroTable->getColumn(0)->toDouble(0), 0.5, 0.01);
+    TS_ASSERT_DELTA(timeZeroTable->getColumn(0)->toDouble(1), 1.0, 0.01);
+    TS_ASSERT_DELTA(timeZeroTable->getColumn(0)->toDouble(2), 1.5, 0.01);
+  }
+
+  void test_createWorkspaceWithInstrumentandRun_run_number_and_instrument_set_correctly() {
+    MatrixWorkspace_sptr ws = createWorkspaceWithInstrumentandRun("MUSR", 12345, 10);
+
+    TS_ASSERT_EQUALS(ws->mutableRun().getPropertyAsIntegerValue("run_number"), 12345);
     TS_ASSERT_EQUALS(ws->getInstrument()->getName(), "MUSR");
   }
 
-  void
-  test_createWorkspaceGroupConsecutiveDetectorIDs_correct_workspace_names() {
+  void test_createWorkspaceGroupConsecutiveDetectorIDs_correct_workspace_names() {
 
     AnalysisDataServiceImpl &ads = AnalysisDataService::Instance();
-    auto wsGroup =
-        createWorkspaceGroupConsecutiveDetectorIDs(3, 3, 10, "MuonAnalysis");
+    auto wsGroup = createWorkspaceGroupConsecutiveDetectorIDs(3, 3, 10, "MuonAnalysis");
     // group
     TS_ASSERT(ads.doesExist("MuonAnalysis"));
     // workspaces in group
@@ -274,11 +285,9 @@ public:
     TS_ASSERT(ads.doesExist("MuonDataPeriod_2"));
     TS_ASSERT(ads.doesExist("MuonDataPeriod_3"));
 
-    WorkspaceGroup_sptr group =
-        std::dynamic_pointer_cast<WorkspaceGroup>(ads.retrieve("MuonAnalysis"));
+    WorkspaceGroup_sptr group = std::dynamic_pointer_cast<WorkspaceGroup>(ads.retrieve("MuonAnalysis"));
     TS_ASSERT_EQUALS(group->getNumberOfEntries(), 3);
-    MatrixWorkspace_sptr ws = std::dynamic_pointer_cast<MatrixWorkspace>(
-        group->getItem("MuonDataPeriod_1"));
+    MatrixWorkspace_sptr ws = std::dynamic_pointer_cast<MatrixWorkspace>(group->getItem("MuonDataPeriod_1"));
     TS_ASSERT_EQUALS(ws->getNumberHistograms(), 3);
 
     ads.clear();
@@ -287,13 +296,10 @@ public:
   void test_createWorkspaceGroupConsecutiveDetectorIDs_IDs_are_consequtive() {
 
     AnalysisDataServiceImpl &ads = AnalysisDataService::Instance();
-    auto wsGroup =
-        createWorkspaceGroupConsecutiveDetectorIDs(3, 3, 10, "MuonAnalysis");
+    auto wsGroup = createWorkspaceGroupConsecutiveDetectorIDs(3, 3, 10, "MuonAnalysis");
 
-    MatrixWorkspace_sptr wsFirst = std::dynamic_pointer_cast<MatrixWorkspace>(
-        ads.retrieve("MuonDataPeriod_1"));
-    MatrixWorkspace_sptr wsLast = std::dynamic_pointer_cast<MatrixWorkspace>(
-        ads.retrieve("MuonDataPeriod_3"));
+    MatrixWorkspace_sptr wsFirst = std::dynamic_pointer_cast<MatrixWorkspace>(ads.retrieve("MuonDataPeriod_1"));
+    MatrixWorkspace_sptr wsLast = std::dynamic_pointer_cast<MatrixWorkspace>(ads.retrieve("MuonDataPeriod_3"));
 
     TS_ASSERT(wsFirst->getSpectrum(0).hasDetectorID(1));
     TS_ASSERT(wsFirst->getSpectrum(1).hasDetectorID(2));

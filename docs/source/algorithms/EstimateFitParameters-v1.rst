@@ -15,8 +15,8 @@ The user needs to provide the search intervals for each parameters that requires
 These intervals are set by defining boundary constraints in the fitting function. For example::
 
     name=UserFunction,Formula=a*x+b,a=0,b=0,constraints=(1<a<4, 0<b<4)
-  
-Here the algorithm will search intervals [1, 4] and [0, 4] for values of parameters `a` and `b` 
+
+Here the algorithm will search intervals [1, 4] and [0, 4] for values of parameters `a` and `b`
 respectively such that the cost function is the smallest.
 
 If a parameter will be fixed or tied in a fit don't include it in the `constraints`. For example::
@@ -34,7 +34,7 @@ In this strategy a number (defined by `NSamples` property) of parameter sets are
 gives the smallest cost function is considered the winner. These best parameters are set to `Function`
 property (it has the `InOut` direction).
 
-If `OutputWorkspace` property is set then more than 1 parameter set can be output. The output workspace is 
+If `OutputWorkspace` property is set then more than 1 parameter set can be output. The output workspace is
 a table workspace in which the first column contains the names of the parameters and the subsequent columns
 have the parameter sets with the smallest cost fnction values. Below is an example of such a workspace.
 
@@ -59,7 +59,7 @@ Finding Bad Parameters
 ######################
 
 It may happen that some of the parameters cannot be determined from the data set in the `InputWorkspace`. If this is the case :ref:`algm-Fit` may diverge
-or fail with an error. To try and find such parameters set `FixBadParameters` to `true`. 
+or fail with an error. To try and find such parameters set `FixBadParameters` to `true`.
 If the algorithm decides that some of the parameters may cause problems it will fix them.
 
 Usage
@@ -78,7 +78,7 @@ Usage
             2.847186128946,     1.726807862958,     1.047276595461,
             0.6351380161499,    0.3851804649058,    0.1957211887562]
     ws = CreateWorkspace(x, y)
-    
+
     # Define a function, constraints set the search intervals.
     fun = 'name=BackToBackExponential,S=1.1,constraints=(50<I<200,0.1<A<300,0.01<B<10,-5<X0<0,0.001<S<4)'
 
@@ -92,7 +92,7 @@ Usage
     alg.setProperty('CostFunction', 'Unweighted least squares')
     # How many points to try.
     alg.setProperty('NSamples', 1000)
-    # A seed for the random number generator. Only to make this test reproducible. 
+    # A seed for the random number generator. Only to make this test reproducible.
     alg.setProperty('Seed', 1234)
     # Execute the algorithm.
     alg.execute()
@@ -103,10 +103,10 @@ Usage
     EvaluateFunction(str(function),ws,OutputWorkspace='estimation')
     # Run Fit starting with the new parameters.
     Fit(str(function),ws,Output='fit')
-    
+
 .. figure:: /images/EstimateFitParameters_mcest.png
 .. figure:: /images/EstimateFitParameters_mcfit.png
-    
+
 Output:
 
 (You may see different numbers for the parameters when you run this example on your machine.)
@@ -129,7 +129,7 @@ Output:
         0.0391638950989871, 0.00504176025969098, 0.000393669040655079,
         1.86437423315169e-05, 5.35534780279311e-07, 1.43072419185677e-08]
     ws = CreateWorkspace(x, y)
-    
+
     # Define a function, constraints set the search intervals.
     fun = 'name=BackToBackExponential,S=1.1,constraints=(0.01<I<200,0.001<A<300,0.001<B<300,-5<X0<5,0.001<S<4)'
 
@@ -160,7 +160,7 @@ Output:
     EvaluateFunction(str(function),ws,OutputWorkspace='estimation')
     # Run Fit starting with the new parameters.
     Fit(str(function),ws,Output='fit')
-    
+
 .. figure:: /images/EstimateFitParameters_ceest.png
 .. figure:: /images/EstimateFitParameters_cefit.png
 
@@ -172,7 +172,7 @@ Output:
     :options: +ELLIPSIS, +NORMALIZE_WHITESPACE
 
     name=BackToBackExponential,I=...,X0=...,S=...,constraints=(0.01<I<200,0.001<A<300,0.001<B<300,-5<X0<5,0.001<S<4),ties=(A=...,B=...)
-    
+
 .. categories::
 
 .. sourcelink::

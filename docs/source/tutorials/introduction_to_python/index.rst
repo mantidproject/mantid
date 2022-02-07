@@ -1,20 +1,20 @@
-.. _introduction_to_python: 
+.. _introduction_to_python:
 
 ======================
 Introduction to Python
 ======================
 
-The following set of slides provides an introduction to the Python language. 
-It is designed for those with some programming experience and does not cover 
-advanced material such as object oriented programming. For information regarding 
-these topics see other references, e.g. "Core Python Programming", W. J. Chun, 
-Prentice-Hall 2008; `"Learning Python", M. Lutz, O'Reilly, 2007; 
+The following set of slides provides an introduction to the Python language.
+It is designed for those with some programming experience and does not cover
+advanced material such as object oriented programming. For information regarding
+these topics see other references, e.g. "Core Python Programming", W. J. Chun,
+Prentice-Hall 2008; `"Learning Python", M. Lutz, O'Reilly, 2007;
 <http://docs.python.org/tutorial/>`_.
 
-.. toctree:: 
-   :hidden: 
-   :glob: 
-   :maxdepth: 1 
+.. toctree::
+   :hidden:
+   :glob:
+   :maxdepth: 1
 
    basic_language_principles
    type_conversions
@@ -32,7 +32,7 @@ Prentice-Hall 2008; `"Learning Python", M. Lutz, O'Reilly, 2007;
    basic_python_exercises_5
    solutions_to_exercises
 
-**Sections** 
+**Sections**
 
 * :ref:`basic_language_principles`
 * :ref:`type_conversions`

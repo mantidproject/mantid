@@ -8,7 +8,7 @@ This is a Python binding to the C++ class Mantid::Kernel::CompositeValidator.
 
 .. module:`mantid.kernel`
 
-.. autoclass:: mantid.kernel.CompositeValidator 
+.. autoclass:: mantid.kernel.CompositeValidator
     :members:
     :undoc-members:
     :inherited-members:

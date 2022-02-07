@@ -25,14 +25,14 @@ script.
 ::
 
     Const BELOW_NORMAL = 16384
-     
+
     strComputer = "."
     Set objWMIService = GetObject("winmgmts:\\" & strComputer & "\root\cimv2")
 
     Set colProcesses = objWMIService.ExecQuery _
         ("Select * from Win32_Process Where Name = 'MSBuild.exe'")
     For Each objProcess in colProcesses
-        objProcess.SetPriority(BELOW_NORMAL) 
+        objProcess.SetPriority(BELOW_NORMAL)
     Next
 
 Save it as Reduce_Build_Impact.vbs, and use when things are running like
@@ -47,14 +47,14 @@ that keeps a watch on your system every 5 seconds.
 ::
 
     Const BELOW_NORMAL = 16384
-     
+
     strComputer = "."
     Set objWMIService = GetObject("winmgmts:\\" & strComputer & "\root\cimv2")
     Do While true
       Set colProcesses = objWMIService.ExecQuery _
           ("Select * from Win32_Process Where Name = 'MSBuild.exe'")
       For Each objProcess in colProcesses
-          objProcess.SetPriority(BELOW_NORMAL) 
+          objProcess.SetPriority(BELOW_NORMAL)
       Next
       WScript.Sleep 5000
     loop

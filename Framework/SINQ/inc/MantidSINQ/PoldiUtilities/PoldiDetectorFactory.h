@@ -27,8 +27,7 @@ public:
   virtual ~PoldiDetectorFactory() = default;
 
   virtual PoldiAbstractDetector *createDetector(std::string detectorType);
-  virtual PoldiAbstractDetector *
-  createDetector(boost::gregorian::date experimentDate);
+  virtual PoldiAbstractDetector *createDetector(boost::gregorian::date experimentDate);
 
 protected:
   boost::gregorian::date m_newDetectorDate;

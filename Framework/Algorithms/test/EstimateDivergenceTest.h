@@ -20,9 +20,7 @@ class EstimateDivergenceTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static EstimateDivergenceTest *createSuite() {
-    return new EstimateDivergenceTest();
-  }
+  static EstimateDivergenceTest *createSuite() { return new EstimateDivergenceTest(); }
   static void destroySuite(EstimateDivergenceTest *suite) { delete suite; }
 
   void test_Init() {
@@ -41,8 +39,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
     TS_ASSERT(alg.isInitialized())
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", inputWS));
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("OutputWorkspace", "_unused_for_child"));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", "_unused_for_child"));
     TS_ASSERT_THROWS_NOTHING(alg.execute(););
     TS_ASSERT(alg.isExecuted());
 
@@ -75,8 +72,8 @@ public:
     loader.execute();
     TS_ASSERT(loader.isExecuted());
 
-    MatrixWorkspace_sptr ws = std::dynamic_pointer_cast<MatrixWorkspace>(
-        AnalysisDataService::Instance().retrieve("PG3_EstimateDivergence"));
+    MatrixWorkspace_sptr ws =
+        std::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("PG3_EstimateDivergence"));
 
     return ws;
   }

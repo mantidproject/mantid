@@ -18,9 +18,7 @@ class QuadraticGeneratorTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static QuadraticGeneratorTest *createSuite() {
-    return new QuadraticGeneratorTest();
-  }
+  static QuadraticGeneratorTest *createSuite() { return new QuadraticGeneratorTest(); }
   static void destroySuite(QuadraticGeneratorTest *suite) { delete suite; }
 
   void test_length0() {

@@ -10,9 +10,7 @@
 #include "MantidCurveFitting/Functions/LinearBackground.h"
 #include "MantidAPI/FunctionFactory.h"
 
-namespace Mantid {
-namespace CurveFitting {
-namespace Functions {
+namespace Mantid::CurveFitting::Functions {
 
 using namespace CurveFitting;
 
@@ -27,8 +25,7 @@ void LinearBackground::init() {
   declareParameter("A1", 0.0, "coefficient for linear term");
 }
 
-void LinearBackground::function1D(double *out, const double *xValues,
-                                  const size_t nData) const {
+void LinearBackground::function1D(double *out, const double *xValues, const size_t nData) const {
   const double a0 = getParameter("A0");
   const double a1 = getParameter("A1");
 
@@ -37,8 +34,7 @@ void LinearBackground::function1D(double *out, const double *xValues,
   }
 }
 
-void LinearBackground::functionDeriv1D(Jacobian *out, const double *xValues,
-                                       const size_t nData) {
+void LinearBackground::functionDeriv1D(Jacobian *out, const double *xValues, const size_t nData) {
   for (size_t i = 0; i < nData; i++) {
     out->set(i, 0, 1);
     out->set(i, 1, xValues[i]);
@@ -50,8 +46,7 @@ void LinearBackground::functionDeriv1D(Jacobian *out, const double *xValues,
  * @param X :: Vector with x-values
  * @param Y :: Vector with y-values
  */
-void LinearBackground::fit(const std::vector<double> &X,
-                           const std::vector<double> &Y) {
+void LinearBackground::fit(const std::vector<double> &X, const std::vector<double> &Y) {
   if (X.size() != Y.size()) {
     throw std::runtime_error("Background fit: different array sizes");
   }
@@ -96,9 +91,7 @@ void LinearBackground::fit(const std::vector<double> &X,
 /// @param right :: A pointer to an array of successive right bin boundaries
 /// (size = nBins).
 /// @param nBins :: Number of bins.
-void LinearBackground::histogram1D(double *out, double left,
-                                   const double *right,
-                                   const size_t nBins) const {
+void LinearBackground::histogram1D(double *out, double left, const double *right, const size_t nBins) const {
 
   const double a0 = getParameter("A0");
   const double a1 = getParameter("A1");
@@ -119,8 +112,7 @@ void LinearBackground::histogram1D(double *out, double left,
 /// @param right :: A pointer to an array of successive right bin boundaries
 /// (size = nBins).
 /// @param nBins :: Number of bins.
-void LinearBackground::histogramDerivative1D(Jacobian *jacobian, double left,
-                                             const double *right,
+void LinearBackground::histogramDerivative1D(Jacobian *jacobian, double left, const double *right,
                                              const size_t nBins) const {
 
   double xl = left;
@@ -132,6 +124,4 @@ void LinearBackground::histogramDerivative1D(Jacobian *jacobian, double left,
   }
 }
 
-} // namespace Functions
-} // namespace CurveFitting
-} // namespace Mantid
+} // namespace Mantid::CurveFitting::Functions

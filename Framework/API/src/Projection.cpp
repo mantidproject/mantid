@@ -7,8 +7,7 @@
 #include "MantidAPI/Projection.h"
 #include "MantidAPI/ITableWorkspace.h"
 
-namespace Mantid {
-namespace API {
+namespace Mantid::API {
 
 using Mantid::Kernel::V3D;
 
@@ -49,8 +48,7 @@ Projection::Projection(const V3D &u, const V3D &v, const V3D &w) {
 
 Projection::Projection(const ITableWorkspace &ws) {
   if (ws.columnCount() != 4)
-    throw std::runtime_error(
-        "4 columns must be provided to create a projection");
+    throw std::runtime_error("4 columns must be provided to create a projection");
 
   const size_t numRows = ws.rowCount();
   if (numRows != 3)
@@ -124,7 +122,7 @@ void Projection::setOffset(size_t nd, double offset) {
     m_offsets[nd] = offset;
 }
 
-void Projection::setAxis(size_t nd, V3D axis) {
+void Projection::setAxis(size_t nd, const V3D &axis) {
   if (nd >= 3)
     throw std::invalid_argument("given axis out of range");
   else
@@ -138,5 +136,4 @@ void Projection::setUnit(size_t nd, ProjectionUnit unit) {
     m_units[nd] = unit;
 }
 
-} // namespace API
-} // namespace Mantid
+} // namespace Mantid::API

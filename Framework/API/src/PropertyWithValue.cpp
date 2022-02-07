@@ -24,39 +24,23 @@
 // PropertyWithValue implementation
 #include "MantidKernel/PropertyWithValue.tcc"
 
-namespace Mantid {
-namespace Kernel {
+namespace Mantid::Kernel {
 
 /// @cond
-template class MANTID_API_DLL
-    PropertyWithValue<std::shared_ptr<API::IAlgorithm>>;
-template class MANTID_API_DLL
-    PropertyWithValue<std::shared_ptr<API::IEventWorkspace>>;
-template class MANTID_API_DLL
-    PropertyWithValue<std::shared_ptr<API::IFunction>>;
-template class MANTID_API_DLL
-    PropertyWithValue<std::shared_ptr<API::IMaskWorkspace>>;
-template class MANTID_API_DLL
-    PropertyWithValue<std::shared_ptr<API::IMDEventWorkspace>>;
-template class MANTID_API_DLL
-    PropertyWithValue<std::shared_ptr<API::IMDHistoWorkspace>>;
-template class MANTID_API_DLL
-    PropertyWithValue<std::shared_ptr<API::IMDWorkspace>>;
-template class MANTID_API_DLL
-    PropertyWithValue<std::shared_ptr<API::IPeaksWorkspace>>;
-template class MANTID_API_DLL
-    PropertyWithValue<std::shared_ptr<API::ISplittersWorkspace>>;
-template class MANTID_API_DLL
-    PropertyWithValue<std::shared_ptr<API::ITableWorkspace>>;
-template class MANTID_API_DLL
-    PropertyWithValue<std::shared_ptr<API::MatrixWorkspace>>;
-template class MANTID_API_DLL
-    PropertyWithValue<std::shared_ptr<API::Workspace>>;
-template class MANTID_API_DLL
-    PropertyWithValue<std::shared_ptr<API::WorkspaceGroup>>;
-template class MANTID_API_DLL
-    PropertyWithValue<std::shared_ptr<API::ExperimentInfo>>;
+template class MANTID_API_DLL PropertyWithValue<std::shared_ptr<API::IAlgorithm>>;
+template class MANTID_API_DLL PropertyWithValue<std::shared_ptr<API::IEventWorkspace>>;
+template class MANTID_API_DLL PropertyWithValue<std::shared_ptr<API::IFunction>>;
+template class MANTID_API_DLL PropertyWithValue<std::shared_ptr<API::IMaskWorkspace>>;
+template class MANTID_API_DLL PropertyWithValue<std::shared_ptr<API::IMDEventWorkspace>>;
+template class MANTID_API_DLL PropertyWithValue<std::shared_ptr<API::IMDHistoWorkspace>>;
+template class MANTID_API_DLL PropertyWithValue<std::shared_ptr<API::IMDWorkspace>>;
+template class MANTID_API_DLL PropertyWithValue<std::shared_ptr<API::IPeaksWorkspace>>;
+template class MANTID_API_DLL PropertyWithValue<std::shared_ptr<API::ISplittersWorkspace>>;
+template class MANTID_API_DLL PropertyWithValue<std::shared_ptr<API::ITableWorkspace>>;
+template class MANTID_API_DLL PropertyWithValue<std::shared_ptr<API::MatrixWorkspace>>;
+template class MANTID_API_DLL PropertyWithValue<std::shared_ptr<API::Workspace>>;
+template class MANTID_API_DLL PropertyWithValue<std::shared_ptr<API::WorkspaceGroup>>;
+template class MANTID_API_DLL PropertyWithValue<std::shared_ptr<API::ExperimentInfo>>;
 /// @endcond
 
-} // namespace Kernel
-} // namespace Mantid
+} // namespace Mantid::Kernel

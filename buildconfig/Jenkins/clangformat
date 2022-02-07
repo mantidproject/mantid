@@ -5,6 +5,25 @@
 # running environment
 
 # clang-format executable
+
+# Rely on pre-commit if clang format is in the config.yaml
+if grep -F "id: clang-format" $WORKSPACE/.pre-commit-config.yaml; then
+  echo "Pre-commit will handle clang-format. Skipping check."
+  exit 0
+fi
+
+SCRIPT_DIR=$(dirname "$0")
+if [[ ${JOB_NAME} == *pull_requests* ]]; then
+    # This relies on the fact pull requests use pull/$PR-NAME
+    # which squashes the branch into a single merge commit
+    cd $WORKSPACE
+
+    if ${SCRIPT_DIR}/check_for_changes cpp; then
+        echo "No C++ files have changed. Skipping check."
+        exit 0
+    fi
+fi
+
 CLANG_FORMAT_EXE=clang-format-6.0
 CLANG_FORMAT=$(which $CLANG_FORMAT_EXE)
 if [ -z "$CLANG_FORMAT" ]; then

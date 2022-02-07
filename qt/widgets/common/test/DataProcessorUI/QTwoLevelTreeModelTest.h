@@ -19,9 +19,7 @@ using namespace Mantid::API;
 class QTwoLevelTreeModelTest : public CxxTest::TestSuite {
 public:
   // This means the constructor isn't called when running other tests
-  static QTwoLevelTreeModelTest *createSuite() {
-    return new QTwoLevelTreeModelTest();
-  }
+  static QTwoLevelTreeModelTest *createSuite() { return new QTwoLevelTreeModelTest(); }
   static void destroySuite(QTwoLevelTreeModelTest *suite) { delete suite; }
 
   // Constructor (initializes whitelist)
@@ -108,13 +106,11 @@ public:
     auto ws = oneRowTable();
 
     ws->removeColumn("Group");
-    TS_ASSERT_THROWS(QTwoLevelTreeModel(ws, m_whitelist),
-                     const std::invalid_argument &);
+    TS_ASSERT_THROWS(QTwoLevelTreeModel(ws, m_whitelist), const std::invalid_argument &);
 
     ws->addColumn("str", "Group1");
     ws->addColumn("str", "Group2");
-    TS_ASSERT_THROWS(QTwoLevelTreeModel(ws, m_whitelist),
-                     const std::invalid_argument &);
+    TS_ASSERT_THROWS(QTwoLevelTreeModel(ws, m_whitelist), const std::invalid_argument &);
   }
 
   void testConstructorOneRowTable() {
@@ -128,27 +124,16 @@ public:
 
     // Test data
     // Group name
-    TS_ASSERT_EQUALS(model.data(model.index(0, 0)).toString().toStdString(),
-                     "group_0");
+    TS_ASSERT_EQUALS(model.data(model.index(0, 0)).toString().toStdString(), "group_0");
     // Data in row
-    TS_ASSERT_EQUALS(model.data(model.index(0, 0, model.index(0, 0)))
-                         .toString()
-                         .toStdString(),
-                     "row_00");
-    TS_ASSERT_EQUALS(model.data(model.index(0, 1, model.index(0, 0)))
-                         .toString()
-                         .toStdString(),
-                     "row_01");
+    TS_ASSERT_EQUALS(model.data(model.index(0, 0, model.index(0, 0))).toString().toStdString(), "row_00");
+    TS_ASSERT_EQUALS(model.data(model.index(0, 1, model.index(0, 0))).toString().toStdString(), "row_01");
 
     // Header data
-    TS_ASSERT_EQUALS(model.headerData(0, Qt::Horizontal, Qt::DisplayRole),
-                     "Column1");
-    TS_ASSERT_EQUALS(model.headerData(1, Qt::Horizontal, Qt::DisplayRole),
-                     "Column2");
-    TS_ASSERT_EQUALS(model.headerData(0, Qt::Horizontal, Qt::WhatsThisRole),
-                     "Description1");
-    TS_ASSERT_EQUALS(model.headerData(1, Qt::Horizontal, Qt::WhatsThisRole),
-                     "Description2");
+    TS_ASSERT_EQUALS(model.headerData(0, Qt::Horizontal, Qt::DisplayRole), "Column1");
+    TS_ASSERT_EQUALS(model.headerData(1, Qt::Horizontal, Qt::DisplayRole), "Column2");
+    TS_ASSERT_EQUALS(model.headerData(0, Qt::Horizontal, Qt::WhatsThisRole), "Description1");
+    TS_ASSERT_EQUALS(model.headerData(1, Qt::Horizontal, Qt::WhatsThisRole), "Description2");
   }
 
   void testConstructorFourRowTable() {
@@ -163,43 +148,17 @@ public:
 
     // Test data
     // Group names
-    TS_ASSERT_EQUALS(model.data(model.index(0, 0)).toString().toStdString(),
-                     "group0");
-    TS_ASSERT_EQUALS(model.data(model.index(1, 0)).toString().toStdString(),
-                     "group1");
+    TS_ASSERT_EQUALS(model.data(model.index(0, 0)).toString().toStdString(), "group0");
+    TS_ASSERT_EQUALS(model.data(model.index(1, 0)).toString().toStdString(), "group1");
     // Data in rows
-    TS_ASSERT_EQUALS(model.data(model.index(0, 0, model.index(0, 0)))
-                         .toString()
-                         .toStdString(),
-                     "group0_row0_col0");
-    TS_ASSERT_EQUALS(model.data(model.index(0, 1, model.index(0, 0)))
-                         .toString()
-                         .toStdString(),
-                     "group0_row0_col1");
-    TS_ASSERT_EQUALS(model.data(model.index(1, 0, model.index(0, 0)))
-                         .toString()
-                         .toStdString(),
-                     "group0_row1_col0");
-    TS_ASSERT_EQUALS(model.data(model.index(1, 1, model.index(0, 0)))
-                         .toString()
-                         .toStdString(),
-                     "group0_row1_col1");
-    TS_ASSERT_EQUALS(model.data(model.index(0, 0, model.index(1, 0)))
-                         .toString()
-                         .toStdString(),
-                     "group1_row0_col0");
-    TS_ASSERT_EQUALS(model.data(model.index(0, 1, model.index(1, 0)))
-                         .toString()
-                         .toStdString(),
-                     "group1_row0_col1");
-    TS_ASSERT_EQUALS(model.data(model.index(1, 0, model.index(1, 0)))
-                         .toString()
-                         .toStdString(),
-                     "group1_row1_col0");
-    TS_ASSERT_EQUALS(model.data(model.index(1, 1, model.index(1, 0)))
-                         .toString()
-                         .toStdString(),
-                     "group1_row1_col1");
+    TS_ASSERT_EQUALS(model.data(model.index(0, 0, model.index(0, 0))).toString().toStdString(), "group0_row0_col0");
+    TS_ASSERT_EQUALS(model.data(model.index(0, 1, model.index(0, 0))).toString().toStdString(), "group0_row0_col1");
+    TS_ASSERT_EQUALS(model.data(model.index(1, 0, model.index(0, 0))).toString().toStdString(), "group0_row1_col0");
+    TS_ASSERT_EQUALS(model.data(model.index(1, 1, model.index(0, 0))).toString().toStdString(), "group0_row1_col1");
+    TS_ASSERT_EQUALS(model.data(model.index(0, 0, model.index(1, 0))).toString().toStdString(), "group1_row0_col0");
+    TS_ASSERT_EQUALS(model.data(model.index(0, 1, model.index(1, 0))).toString().toStdString(), "group1_row0_col1");
+    TS_ASSERT_EQUALS(model.data(model.index(1, 0, model.index(1, 0))).toString().toStdString(), "group1_row1_col0");
+    TS_ASSERT_EQUALS(model.data(model.index(1, 1, model.index(1, 0))).toString().toStdString(), "group1_row1_col1");
   }
 
   void testColumnCount() {
@@ -232,14 +191,10 @@ public:
     TS_ASSERT_EQUALS(model.parent(model.index(1, 0)), QModelIndex());
 
     // Row parent
-    TS_ASSERT_EQUALS(model.parent(model.index(0, 0, model.index(0, 0))),
-                     model.index(0, 0));
-    TS_ASSERT_EQUALS(model.parent(model.index(1, 0, model.index(0, 0))),
-                     model.index(0, 0));
-    TS_ASSERT_EQUALS(model.parent(model.index(0, 0, model.index(1, 0))),
-                     model.index(1, 0));
-    TS_ASSERT_EQUALS(model.parent(model.index(1, 0, model.index(1, 0))),
-                     model.index(1, 0));
+    TS_ASSERT_EQUALS(model.parent(model.index(0, 0, model.index(0, 0))), model.index(0, 0));
+    TS_ASSERT_EQUALS(model.parent(model.index(1, 0, model.index(0, 0))), model.index(0, 0));
+    TS_ASSERT_EQUALS(model.parent(model.index(0, 0, model.index(1, 0))), model.index(1, 0));
+    TS_ASSERT_EQUALS(model.parent(model.index(1, 0, model.index(1, 0))), model.index(1, 0));
   }
 
   void testSetData() {
@@ -249,10 +204,8 @@ public:
     // Rename groups
     model.setData(model.index(0, 0), "new_group_0");
     model.setData(model.index(1, 0), "new_group_1");
-    TS_ASSERT_EQUALS(model.data(model.index(0, 0)).toString().toStdString(),
-                     "new_group_0");
-    TS_ASSERT_EQUALS(model.data(model.index(1, 0)).toString().toStdString(),
-                     "new_group_1");
+    TS_ASSERT_EQUALS(model.data(model.index(0, 0)).toString().toStdString(), "new_group_0");
+    TS_ASSERT_EQUALS(model.data(model.index(1, 0)).toString().toStdString(), "new_group_1");
 
     // Update some cells with new data
     model.setData(model.index(0, 0, model.index(0, 0)), "new_value1");
@@ -261,39 +214,15 @@ public:
 
     // Test all data in model
     // First group
-    TS_ASSERT_EQUALS(model.data(model.index(0, 0, model.index(0, 0)))
-                         .toString()
-                         .toStdString(),
-                     "new_value1");
-    TS_ASSERT_EQUALS(model.data(model.index(0, 1, model.index(0, 0)))
-                         .toString()
-                         .toStdString(),
-                     "group0_row0_col1");
-    TS_ASSERT_EQUALS(model.data(model.index(1, 0, model.index(0, 0)))
-                         .toString()
-                         .toStdString(),
-                     "group0_row1_col0");
-    TS_ASSERT_EQUALS(model.data(model.index(1, 1, model.index(0, 0)))
-                         .toString()
-                         .toStdString(),
-                     "new_value2");
+    TS_ASSERT_EQUALS(model.data(model.index(0, 0, model.index(0, 0))).toString().toStdString(), "new_value1");
+    TS_ASSERT_EQUALS(model.data(model.index(0, 1, model.index(0, 0))).toString().toStdString(), "group0_row0_col1");
+    TS_ASSERT_EQUALS(model.data(model.index(1, 0, model.index(0, 0))).toString().toStdString(), "group0_row1_col0");
+    TS_ASSERT_EQUALS(model.data(model.index(1, 1, model.index(0, 0))).toString().toStdString(), "new_value2");
     // Second group
-    TS_ASSERT_EQUALS(model.data(model.index(0, 0, model.index(1, 0)))
-                         .toString()
-                         .toStdString(),
-                     "group1_row0_col0");
-    TS_ASSERT_EQUALS(model.data(model.index(0, 1, model.index(1, 0)))
-                         .toString()
-                         .toStdString(),
-                     "group1_row0_col1");
-    TS_ASSERT_EQUALS(model.data(model.index(1, 0, model.index(1, 0)))
-                         .toString()
-                         .toStdString(),
-                     "group1_row1_col0");
-    TS_ASSERT_EQUALS(model.data(model.index(1, 1, model.index(1, 0)))
-                         .toString()
-                         .toStdString(),
-                     "new_value3");
+    TS_ASSERT_EQUALS(model.data(model.index(0, 0, model.index(1, 0))).toString().toStdString(), "group1_row0_col0");
+    TS_ASSERT_EQUALS(model.data(model.index(0, 1, model.index(1, 0))).toString().toStdString(), "group1_row0_col1");
+    TS_ASSERT_EQUALS(model.data(model.index(1, 0, model.index(1, 0))).toString().toStdString(), "group1_row1_col0");
+    TS_ASSERT_EQUALS(model.data(model.index(1, 1, model.index(1, 0))).toString().toStdString(), "new_value3");
   }
 
   void testInsertRowsOneRowTable() {
@@ -414,36 +343,16 @@ public:
 
     // Test tree data
     // Groups
-    TS_ASSERT_EQUALS(model.data(model.index(0, 0)).toString().toStdString(),
-                     "group0");
-    TS_ASSERT_EQUALS(model.data(model.index(1, 0)).toString().toStdString(),
-                     "group1");
+    TS_ASSERT_EQUALS(model.data(model.index(0, 0)).toString().toStdString(), "group0");
+    TS_ASSERT_EQUALS(model.data(model.index(1, 0)).toString().toStdString(), "group1");
     // Rows in first group
-    TS_ASSERT_EQUALS(model.data(model.index(0, 0, model.index(0, 0)))
-                         .toString()
-                         .toStdString(),
-                     "group0_row0_col0");
-    TS_ASSERT_EQUALS(model.data(model.index(0, 1, model.index(0, 0)))
-                         .toString()
-                         .toStdString(),
-                     "group0_row0_col1");
-    TS_ASSERT_EQUALS(model.data(model.index(1, 0, model.index(0, 0)))
-                         .toString()
-                         .toStdString(),
-                     "group0_row1_col0");
-    TS_ASSERT_EQUALS(model.data(model.index(1, 1, model.index(0, 0)))
-                         .toString()
-                         .toStdString(),
-                     "group0_row1_col1");
+    TS_ASSERT_EQUALS(model.data(model.index(0, 0, model.index(0, 0))).toString().toStdString(), "group0_row0_col0");
+    TS_ASSERT_EQUALS(model.data(model.index(0, 1, model.index(0, 0))).toString().toStdString(), "group0_row0_col1");
+    TS_ASSERT_EQUALS(model.data(model.index(1, 0, model.index(0, 0))).toString().toStdString(), "group0_row1_col0");
+    TS_ASSERT_EQUALS(model.data(model.index(1, 1, model.index(0, 0))).toString().toStdString(), "group0_row1_col1");
     // Rows in second group
-    TS_ASSERT_EQUALS(model.data(model.index(0, 0, model.index(1, 0)))
-                         .toString()
-                         .toStdString(),
-                     "group1_row0_col0");
-    TS_ASSERT_EQUALS(model.data(model.index(0, 1, model.index(1, 0)))
-                         .toString()
-                         .toStdString(),
-                     "group1_row0_col1");
+    TS_ASSERT_EQUALS(model.data(model.index(0, 0, model.index(1, 0))).toString().toStdString(), "group1_row0_col0");
+    TS_ASSERT_EQUALS(model.data(model.index(0, 1, model.index(1, 0))).toString().toStdString(), "group1_row0_col1");
   }
 
   void testRemoveRowsFourRowTableTwoGroups() {
@@ -482,30 +391,12 @@ public:
     TS_ASSERT_EQUALS(model.rowCount(model.index(0, 0)), 1);
     TS_ASSERT_EQUALS(model.rowCount(model.index(1, 0)), 2);
 
-    TS_ASSERT_EQUALS(model.data(model.index(0, 0, model.index(0, 0)))
-                         .toString()
-                         .toStdString(),
-                     "13462");
-    TS_ASSERT_EQUALS(model.data(model.index(0, 1, model.index(0, 0)))
-                         .toString()
-                         .toStdString(),
-                     "2.3");
-    TS_ASSERT_EQUALS(model.data(model.index(0, 0, model.index(1, 0)))
-                         .toString()
-                         .toStdString(),
-                     "13460");
-    TS_ASSERT_EQUALS(model.data(model.index(0, 1, model.index(1, 0)))
-                         .toString()
-                         .toStdString(),
-                     "0.7");
-    TS_ASSERT_EQUALS(model.data(model.index(1, 0, model.index(1, 0)))
-                         .toString()
-                         .toStdString(),
-                     "13469");
-    TS_ASSERT_EQUALS(model.data(model.index(1, 1, model.index(1, 0)))
-                         .toString()
-                         .toStdString(),
-                     "0.7");
+    TS_ASSERT_EQUALS(model.data(model.index(0, 0, model.index(0, 0))).toString().toStdString(), "13462");
+    TS_ASSERT_EQUALS(model.data(model.index(0, 1, model.index(0, 0))).toString().toStdString(), "2.3");
+    TS_ASSERT_EQUALS(model.data(model.index(0, 0, model.index(1, 0))).toString().toStdString(), "13460");
+    TS_ASSERT_EQUALS(model.data(model.index(0, 1, model.index(1, 0))).toString().toStdString(), "0.7");
+    TS_ASSERT_EQUALS(model.data(model.index(1, 0, model.index(1, 0))).toString().toStdString(), "13469");
+    TS_ASSERT_EQUALS(model.data(model.index(1, 1, model.index(1, 0))).toString().toStdString(), "0.7");
   }
 
   void testRemoveRowUnsortedTable() {
@@ -520,12 +411,9 @@ public:
     // Test remaining values
     TS_ASSERT_EQUALS(model.data(model.index(0, 0)), "group0");
     TS_ASSERT_EQUALS(model.data(model.index(1, 0)), "group1");
-    TS_ASSERT_EQUALS(model.data(model.index(0, 0, model.index(0, 0))),
-                     "group0_row0_col0");
-    TS_ASSERT_EQUALS(model.data(model.index(0, 0, model.index(1, 0))),
-                     "group1_row0_col0");
-    TS_ASSERT_EQUALS(model.data(model.index(1, 0, model.index(1, 0))),
-                     "group1_row1_col0");
+    TS_ASSERT_EQUALS(model.data(model.index(0, 0, model.index(0, 0))), "group0_row0_col0");
+    TS_ASSERT_EQUALS(model.data(model.index(0, 0, model.index(1, 0))), "group1_row0_col0");
+    TS_ASSERT_EQUALS(model.data(model.index(1, 0, model.index(1, 0))), "group1_row1_col0");
   }
 
   void testRemoveRowsUnsortedTable() {
@@ -540,10 +428,8 @@ public:
 
     // Test remaining values
     TS_ASSERT_EQUALS(model.data(model.index(0, 0)), "group0");
-    TS_ASSERT_EQUALS(model.data(model.index(0, 0, model.index(0, 0))),
-                     "group0_row0_col0");
-    TS_ASSERT_EQUALS(model.data(model.index(1, 0, model.index(0, 0))),
-                     "group0_row1_col0");
+    TS_ASSERT_EQUALS(model.data(model.index(0, 0, model.index(0, 0))), "group0_row0_col0");
+    TS_ASSERT_EQUALS(model.data(model.index(1, 0, model.index(0, 0))), "group0_row1_col0");
   }
 
   void testRemoveGroupUnsortedTable() {
@@ -558,10 +444,8 @@ public:
     // Test remaining values
     TS_ASSERT_EQUALS(model.rowCount(), 1);
     TS_ASSERT_EQUALS(model.data(model.index(0, 0)), "group0");
-    TS_ASSERT_EQUALS(model.data(model.index(0, 0, model.index(0, 0))),
-                     "group0_row0_col0");
-    TS_ASSERT_EQUALS(model.data(model.index(1, 0, model.index(0, 0))),
-                     "group0_row1_col0");
+    TS_ASSERT_EQUALS(model.data(model.index(0, 0, model.index(0, 0))), "group0_row0_col0");
+    TS_ASSERT_EQUALS(model.data(model.index(1, 0, model.index(0, 0))), "group0_row1_col0");
   }
 
   void testRemoveGroupsUnsortedTable() {
@@ -587,10 +471,8 @@ public:
     // Test remaining values
     TS_ASSERT_EQUALS(model.rowCount(), 1);
     TS_ASSERT_EQUALS(model.data(model.index(0, 0)), "group0");
-    TS_ASSERT_EQUALS(model.data(model.index(0, 0, model.index(0, 0))),
-                     "group0_row0_col0");
-    TS_ASSERT_EQUALS(model.data(model.index(1, 0, model.index(0, 0))),
-                     "group0_row1_col0");
+    TS_ASSERT_EQUALS(model.data(model.index(0, 0, model.index(0, 0))), "group0_row0_col0");
+    TS_ASSERT_EQUALS(model.data(model.index(1, 0, model.index(0, 0))), "group0_row1_col0");
   }
 
   void testUnsortedTableGetsSorted() {
@@ -662,34 +544,13 @@ public:
     TS_ASSERT_EQUALS(model.setProcessed(true, 1), true);
 
     // Only the 1st row of 1st group and 2nd group should be highlighted
-    TS_ASSERT_EQUALS(model.data(model.index(0, 0), Qt::BackgroundRole)
-                         .toString()
-                         .toStdString(),
-                     "");
-    TS_ASSERT_EQUALS(
-        model.data(model.index(0, 0, model.index(0, 0)), Qt::BackgroundRole)
-            .toString()
-            .toStdString(),
-        Colour::SUCCESS);
-    TS_ASSERT_EQUALS(
-        model.data(model.index(1, 0, model.index(0, 0)), Qt::BackgroundRole)
-            .toString()
-            .toStdString(),
-        "");
-    TS_ASSERT_EQUALS(model.data(model.index(1, 0), Qt::BackgroundRole)
-                         .toString()
-                         .toStdString(),
+    TS_ASSERT_EQUALS(model.data(model.index(0, 0), Qt::BackgroundRole).toString().toStdString(), "");
+    TS_ASSERT_EQUALS(model.data(model.index(0, 0, model.index(0, 0)), Qt::BackgroundRole).toString().toStdString(),
                      Colour::SUCCESS);
-    TS_ASSERT_EQUALS(
-        model.data(model.index(0, 0, model.index(1, 0)), Qt::BackgroundRole)
-            .toString()
-            .toStdString(),
-        "");
-    TS_ASSERT_EQUALS(
-        model.data(model.index(1, 0, model.index(1, 0)), Qt::BackgroundRole)
-            .toString()
-            .toStdString(),
-        "");
+    TS_ASSERT_EQUALS(model.data(model.index(1, 0, model.index(0, 0)), Qt::BackgroundRole).toString().toStdString(), "");
+    TS_ASSERT_EQUALS(model.data(model.index(1, 0), Qt::BackgroundRole).toString().toStdString(), Colour::SUCCESS);
+    TS_ASSERT_EQUALS(model.data(model.index(0, 0, model.index(1, 0)), Qt::BackgroundRole).toString().toStdString(), "");
+    TS_ASSERT_EQUALS(model.data(model.index(1, 0, model.index(1, 0)), Qt::BackgroundRole).toString().toStdString(), "");
   }
 
   void testIsProcessed() {
@@ -701,22 +562,18 @@ public:
     model.setProcessed(true, 1);
 
     // Non-existent row
-    TS_ASSERT_THROWS(model.isProcessed(10, model.index(0, 0)),
-                     const std::invalid_argument &);
-    TS_ASSERT_THROWS(model.isProcessed(-1, model.index(0, 0)),
-                     const std::invalid_argument &);
+    TS_ASSERT_THROWS(model.isProcessed(10, model.index(0, 0)), const std::invalid_argument &);
+    TS_ASSERT_THROWS(model.isProcessed(-1, model.index(0, 0)), const std::invalid_argument &);
 
     // Non-existent group
     TS_ASSERT_THROWS(model.isProcessed(10), const std::invalid_argument &);
     TS_ASSERT_THROWS(model.isProcessed(-1), const std::invalid_argument &);
 
     // Only the 1st row of 1st group and 2nd group should be highlighted
-    TS_ASSERT_EQUALS(model.isProcessed(model.index(0, 0).row(), QModelIndex()),
-                     false);
+    TS_ASSERT_EQUALS(model.isProcessed(model.index(0, 0).row(), QModelIndex()), false);
     TS_ASSERT_EQUALS(model.isProcessed(0, model.index(0, 0)), true);
     TS_ASSERT_EQUALS(model.isProcessed(1, model.index(0, 0)), false);
-    TS_ASSERT_EQUALS(model.isProcessed(model.index(1, 0).row(), QModelIndex()),
-                     true);
+    TS_ASSERT_EQUALS(model.isProcessed(model.index(1, 0).row(), QModelIndex()), true);
     TS_ASSERT_EQUALS(model.isProcessed(0, model.index(1, 0)), false);
     TS_ASSERT_EQUALS(model.isProcessed(1, model.index(1, 0)), false);
   }
@@ -725,11 +582,9 @@ public:
     auto ws = oneRowTable();
     QTwoLevelTreeModel model(ws, m_whitelist);
 
-    auto rowValues = std::map<QString, QString>{{"Column1", "row_10"},
-                                                {"Column2", "row_11"}};
+    auto rowValues = std::map<QString, QString>{{"Column1", "row_10"}, {"Column2", "row_11"}};
     auto rowsToTransfer = std::vector<std::map<QString, QString>>{{rowValues}};
-    TS_ASSERT_THROWS(model.transfer(rowsToTransfer),
-                     const std::invalid_argument &);
+    TS_ASSERT_THROWS(model.transfer(rowsToTransfer), const std::invalid_argument &);
   }
 
   void testTransferToExistingGroup() {
@@ -737,8 +592,7 @@ public:
     QTwoLevelTreeModel model(ws, m_whitelist);
 
     constexpr int group = 0;
-    auto rowValues = std::map<QString, QString>{
-        {"Group", "group_0"}, {"Column1", "row_10"}, {"Column2", "row_11"}};
+    auto rowValues = std::map<QString, QString>{{"Group", "group_0"}, {"Column1", "row_10"}, {"Column2", "row_11"}};
     auto rowsToTransfer = std::vector<std::map<QString, QString>>{{rowValues}};
     model.transfer(rowsToTransfer);
 
@@ -757,8 +611,7 @@ public:
     QTwoLevelTreeModel model(ws, whitelistWithKeyColumn());
 
     constexpr int group = 0;
-    auto rowValues = std::map<QString, QString>{
-        {"Group", "group_0"}, {"Column1", "arow_10"}, {"Column2", "arow_11"}};
+    auto rowValues = std::map<QString, QString>{{"Group", "group_0"}, {"Column1", "arow_10"}, {"Column2", "arow_11"}};
     auto rowsToTransfer = std::vector<std::map<QString, QString>>{{rowValues}};
     model.transfer(rowsToTransfer);
 
@@ -777,8 +630,7 @@ public:
     QTwoLevelTreeModel model(ws, whitelistWithKeyColumn());
 
     constexpr int group = 0;
-    auto rowValues = std::map<QString, QString>{
-        {"Group", "group_0"}, {"Column1", "zrow_10"}, {"Column2", "zrow_11"}};
+    auto rowValues = std::map<QString, QString>{{"Group", "group_0"}, {"Column1", "zrow_10"}, {"Column2", "zrow_11"}};
     auto rowsToTransfer = std::vector<std::map<QString, QString>>{{rowValues}};
     model.transfer(rowsToTransfer);
 
@@ -798,8 +650,7 @@ public:
 
     // If the whole row is a duplicate nothing will be added
     constexpr int group = 0;
-    auto rowValues = std::map<QString, QString>{
-        {"Group", "group_0"}, {"Column1", "row_00"}, {"Column2", "row_01"}};
+    auto rowValues = std::map<QString, QString>{{"Group", "group_0"}, {"Column1", "row_00"}, {"Column2", "row_01"}};
     auto rowsToTransfer = std::vector<std::map<QString, QString>>{{rowValues}};
     model.transfer(rowsToTransfer);
 
@@ -817,8 +668,7 @@ public:
     // If the group and key column matches, the existing row will be
     // overwritten
     constexpr int group = 0;
-    auto rowValues = std::map<QString, QString>{
-        {"Group", "group_0"}, {"Column1", "row_00"}, {"Column2", "new_row_01"}};
+    auto rowValues = std::map<QString, QString>{{"Group", "group_0"}, {"Column1", "row_00"}, {"Column2", "new_row_01"}};
     auto rowsToTransfer = std::vector<std::map<QString, QString>>{{rowValues}};
     model.transfer(rowsToTransfer);
 
@@ -834,8 +684,7 @@ public:
     QTwoLevelTreeModel model(ws, m_whitelist);
 
     constexpr int group = 0;
-    auto rowValues = std::map<QString, QString>{
-        {"Group", "group_1"}, {"Column1", "row_10"}, {"Column2", "row_11"}};
+    auto rowValues = std::map<QString, QString>{{"Group", "group_1"}, {"Column1", "row_10"}, {"Column2", "row_11"}};
     auto rowsToTransfer = std::vector<std::map<QString, QString>>{{rowValues}};
     model.transfer(rowsToTransfer);
 

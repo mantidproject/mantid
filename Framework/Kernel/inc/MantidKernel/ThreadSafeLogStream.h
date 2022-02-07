@@ -41,20 +41,21 @@ namespace Kernel {
 class MANTID_KERNEL_DLL ThreadSafeLogStreamBuf : public Poco::LogStreamBuf {
 public:
   /// Constructor
-  ThreadSafeLogStreamBuf(Poco::Logger &logger,
-                         Poco::Message::Priority priority);
-
-public:
+  ThreadSafeLogStreamBuf(Poco::Logger &logger, Poco::Message::Priority priority);
   int overflow(char c);
   using Poco::LogStreamBuf::overflow;
+  void accumulate(const std::string &message);
+  std::string flush();
 
 private:
-  /// Overridden fron base to write to the device in a thread-safe manner.
+  /// Overridden from base to write to the device in a thread-safe manner.
   int writeToDevice(char c) override;
 
 private:
   /// Store a map of thread indices to messages
   std::map<Poco::Thread::TID, std::string> m_messages;
+  /// Store a map of thread indices to accummulators of messages
+  std::map<Poco::Thread::TID, std::string> m_accumulator;
   /// mutex protecting logstream
   std::mutex m_mutex;
 };
@@ -93,19 +94,15 @@ protected:
       ls << "Some informational message\n";
       ls.error() << "Some error message\n";
  */
-class MANTID_KERNEL_DLL ThreadSafeLogStream : public ThreadSafeLogIOS,
-                                              public std::ostream {
+class MANTID_KERNEL_DLL ThreadSafeLogStream : public ThreadSafeLogIOS, public std::ostream {
 public:
   /// Creates the ThreadSafeLogStream, using the given logger and priority.
-  ThreadSafeLogStream(
-      Poco::Logger &logger,
-      Poco::Message::Priority priority = Poco::Message::PRIO_INFORMATION);
+  ThreadSafeLogStream(Poco::Logger &logger, Poco::Message::Priority priority = Poco::Message::PRIO_INFORMATION);
 
   /// Creates the ThreadSafeLogStream, using the logger identified
   /// by loggerName, and sets the priority.
-  ThreadSafeLogStream(
-      const std::string &loggerName,
-      Poco::Message::Priority priority = Poco::Message::PRIO_INFORMATION);
+  ThreadSafeLogStream(const std::string &loggerName,
+                      Poco::Message::Priority priority = Poco::Message::PRIO_INFORMATION);
   /// Sets the priority for log messages to Poco::Message::PRIO_FATAL.
   ThreadSafeLogStream &fatal();
   /// Sets the priority for log messages to Poco::Message::PRIO_FATAL
@@ -143,6 +140,10 @@ public:
   ThreadSafeLogStream &debug(const std::string &message);
   /// Sets the priority for log messages.
   ThreadSafeLogStream &priority(Poco::Message::Priority priority);
+  /// accumulates the message to the accummulator buffer
+  ThreadSafeLogStream &accumulate(const std::string &message);
+  /// Returns and flushes the accumulated messages
+  std::string flush();
 };
 } // namespace Kernel
 } // namespace Mantid

@@ -8,19 +8,21 @@ Sample
 .. contents::
   :local:
 
-What the Sample object
-----------------------
-    
-The sample object holds details of the samples in an experiment.  While most of the time this will refer to a single sample, it can describe a collection of samples.  Specifically this holds information about a samples.
+What is the Sample object?
+--------------------------
 
-* Material properties and chenmical copmosition
+The sample object holds details of the samples in an experiment.
+While most of the time this will refer to a single sample, it can also describe a collection of samples.
+Specifically this holds information about a samples:
+
+* Material properties and chemical composition
 * Shape and dimensions
-* Crystal Structure
+* Crystal structure
 
-Working with Sample object in Python
-------------------------------------
+Working with Sample objects in Python
+-------------------------------------
 
-You can look at the :ref:`Sample API reference <mantid.api.Sample>` for a full list of properties and operations, but here are some of the key ones.
+A full list of properties and operations can be found in :ref:`Sample API reference <mantid.api.Sample>`, but here are some of the key ones.
 
 Getting the Sample Object from a Workspace
 ##########################################
@@ -68,19 +70,19 @@ Sample Properties
   Material Name V
   Total scattering X-Section: 5.1
   Data lattice parameters are: 2.0 3.0 4.0 90.0 90.0 90.0
-  
+
 
 Multiple Samples
 ################
 
-The ``Sample()`` method actually returns a collection, however if you do not specify which sample you are after you will get he first member of the collection. So 
+The ``Sample()`` method actually returns a collection, however if you do not specify which sample you want you will get the first member of the collection.
 
 .. testcode:: MultiSample
 
   ws = CreateSampleWorkspace("Histogram",NumBanks=1,BankPixelWidth=1)
 
   s = ws.sample()
-  # Is the same as 
+  # Is the same as
   s = ws.sample()[0]
 
   # You can ask how many samples there are with

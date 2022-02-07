@@ -16,8 +16,7 @@
 
 #include <fstream> // used to get ofstream
 
-namespace Mantid {
-namespace DataHandling {
+namespace Mantid::DataHandling {
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(SaveNISTDAT)
@@ -28,13 +27,10 @@ using namespace Geometry;
 
 void SaveNISTDAT::init() {
   auto wsValidator = std::make_shared<CompositeValidator>();
-  wsValidator->add(
-      std::make_shared<WorkspaceUnitValidator>("MomentumTransfer"));
+  wsValidator->add(std::make_shared<WorkspaceUnitValidator>("MomentumTransfer"));
   wsValidator->add<HistogramValidator>();
-  declareProperty(std::make_unique<WorkspaceProperty<>>(
-      "InputWorkspace", "", Direction::Input, wsValidator));
-  declareProperty(std::make_unique<FileProperty>("Filename", "",
-                                                 FileProperty::Save, ".dat"),
+  declareProperty(std::make_unique<WorkspaceProperty<>>("InputWorkspace", "", Direction::Input, wsValidator));
+  declareProperty(std::make_unique<FileProperty>("Filename", "", FileProperty::Save, ".dat"),
                   "The filename of the output text file");
 }
 
@@ -81,5 +77,4 @@ void SaveNISTDAT::exec() {
   progress.report("Save I(Qx,Qy)");
 }
 
-} // namespace DataHandling
-} // namespace Mantid
+} // namespace Mantid::DataHandling

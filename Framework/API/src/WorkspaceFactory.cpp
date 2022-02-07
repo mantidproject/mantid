@@ -16,8 +16,7 @@
 #include "MantidAPI/WorkspaceOpOverloads.h"
 #include "MantidKernel/ConfigService.h"
 
-namespace Mantid {
-namespace API {
+namespace Mantid::API {
 namespace {
 /// static logger object
 Kernel::Logger g_log("WorkspaceFactory");
@@ -26,8 +25,7 @@ Kernel::Logger g_log("WorkspaceFactory");
 using std::size_t;
 
 /// Private constructor for singleton class
-WorkspaceFactoryImpl::WorkspaceFactoryImpl()
-    : Mantid::Kernel::DynamicFactory<Workspace>() {
+WorkspaceFactoryImpl::WorkspaceFactoryImpl() : Mantid::Kernel::DynamicFactory<Workspace>() {
   g_log.debug() << "WorkspaceFactory created.\n";
 }
 
@@ -56,10 +54,8 @@ WorkspaceFactoryImpl::WorkspaceFactoryImpl()
  *  @throw  std::out_of_range If invalid (0 or less) size arguments are given
  *  @throw  NotFoundException If the class is not registered in the factory
  */
-MatrixWorkspace_sptr
-WorkspaceFactoryImpl::create(const MatrixWorkspace_const_sptr &parent,
-                             size_t NVectors, size_t XLength,
-                             size_t YLength) const {
+MatrixWorkspace_sptr WorkspaceFactoryImpl::create(const MatrixWorkspace_const_sptr &parent, size_t NVectors,
+                                                  size_t XLength, size_t YLength) const {
   bool differentSize(true);
   // Use the parent sizes if new ones are not specified
   if (NVectors == size_t(-1))
@@ -96,9 +92,8 @@ WorkspaceFactoryImpl::create(const MatrixWorkspace_const_sptr &parent,
  * @param differentSize :: A flag to indicate if the two workspace will be
  *different sizes
  */
-void WorkspaceFactoryImpl::initializeFromParent(
-    const MatrixWorkspace &parent, MatrixWorkspace &child,
-    const bool differentSize) const {
+void WorkspaceFactoryImpl::initializeFromParent(const MatrixWorkspace &parent, MatrixWorkspace &child,
+                                                const bool differentSize) const {
   child.setTitle(parent.getTitle());
   child.setComment(parent.getComment());
   child.copyExperimentInfoFrom(&parent);
@@ -133,10 +128,8 @@ void WorkspaceFactoryImpl::initializeFromParent(
       // does not need to get cloned from the parent.
       continue;
     }
-    const bool isBinEdge = dynamic_cast<const BinEdgeAxis *const>(
-                               parent.m_axes[i].get()) != nullptr;
-    const size_t newAxisLength =
-        child.m_axes[i]->length() + (isBinEdge ? 1 : 0);
+    const bool isBinEdge = dynamic_cast<const BinEdgeAxis *const>(parent.m_axes[i].get()) != nullptr;
+    const size_t newAxisLength = child.m_axes[i]->length() + (isBinEdge ? 1 : 0);
     const size_t oldAxisLength = parent.m_axes[i]->length();
 
     // Need to delete the existing axis created in init above
@@ -147,8 +140,7 @@ void WorkspaceFactoryImpl::initializeFromParent(
       child.m_axes[i] = std::unique_ptr<Axis>(parent.m_axes[i]->clone(&child));
     } else {
       // Call the 'different length' clone variant
-      child.m_axes[i] =
-          std::unique_ptr<Axis>(parent.m_axes[i]->clone(newAxisLength, &child));
+      child.m_axes[i] = std::unique_ptr<Axis>(parent.m_axes[i]->clone(newAxisLength, &child));
     }
   }
 }
@@ -168,12 +160,9 @@ void WorkspaceFactoryImpl::initializeFromParent(
  *  @throw  std::out_of_range If invalid (0 or less) size arguments are given
  *  @throw  NotFoundException If the class is not registered in the factory
  */
-MatrixWorkspace_sptr WorkspaceFactoryImpl::create(const std::string &className,
-                                                  const size_t &NVectors,
-                                                  const size_t &XLength,
-                                                  const size_t &YLength) const {
-  MatrixWorkspace_sptr ws =
-      std::dynamic_pointer_cast<MatrixWorkspace>(this->create(className));
+MatrixWorkspace_sptr WorkspaceFactoryImpl::create(const std::string &className, const size_t &NVectors,
+                                                  const size_t &XLength, const size_t &YLength) const {
+  MatrixWorkspace_sptr ws = std::dynamic_pointer_cast<MatrixWorkspace>(this->create(className));
 
   if (!ws) {
     g_log.error("Workspace was not created");
@@ -185,14 +174,12 @@ MatrixWorkspace_sptr WorkspaceFactoryImpl::create(const std::string &className,
 }
 
 /// Create a ITableWorkspace
-ITableWorkspace_sptr
-WorkspaceFactoryImpl::createTable(const std::string &className) const {
+ITableWorkspace_sptr WorkspaceFactoryImpl::createTable(const std::string &className) const {
   ITableWorkspace_sptr ws;
   try {
     ws = std::dynamic_pointer_cast<ITableWorkspace>(this->create(className));
     if (!ws) {
-      throw std::runtime_error("Class " + className +
-                               " cannot be cast to ITableWorkspace");
+      throw std::runtime_error("Class " + className + " cannot be cast to ITableWorkspace");
     }
   } catch (Kernel::Exception::NotFoundError &) {
     throw;
@@ -201,14 +188,12 @@ WorkspaceFactoryImpl::createTable(const std::string &className) const {
 }
 
 /// Create a IPeaksWorkspace
-IPeaksWorkspace_sptr
-WorkspaceFactoryImpl::createPeaks(const std::string &className) const {
+IPeaksWorkspace_sptr WorkspaceFactoryImpl::createPeaks(const std::string &className) const {
   IPeaksWorkspace_sptr ws;
   try {
     ws = std::dynamic_pointer_cast<IPeaksWorkspace>(this->create(className));
     if (!ws) {
-      throw std::runtime_error("Class " + className +
-                               " cannot be cast to IPeaksWorkspace");
+      throw std::runtime_error("Class " + className + " cannot be cast to IPeaksWorkspace");
     }
   } catch (Kernel::Exception::NotFoundError &) {
     throw;
@@ -216,5 +201,4 @@ WorkspaceFactoryImpl::createPeaks(const std::string &className) const {
   return ws;
 }
 
-} // namespace API
-} // Namespace Mantid
+} // namespace Mantid::API

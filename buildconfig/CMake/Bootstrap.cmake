@@ -1,11 +1,14 @@
-# ##############################################################################
+# ######################################################################################################################
 # Configure required dependencies if necessary
-# ##############################################################################
-option(WITH_PYTHON3 "If true build against Python 3, else use Python 2" ON)
+# ######################################################################################################################
+# Find git for everything
+if(WIN32)
+  set(_git_requires 1.9.5)
+endif()
+find_package(Git ${_git_requires})
 
-if(MSVC)
+if(MSVC AND NOT CONDA_ENV)
   # Git LFS does not work properly with <= 1.9
-  find_package(Git 1.9.5 REQUIRED)
   find_package(GitLFS REQUIRED)
 
   # Use ExternalProject functionality as it already knows how to do clone/update
@@ -14,10 +17,8 @@ if(MSVC)
       ${PROJECT_SOURCE_DIR}/external
       CACHE PATH "Location to clone third party dependencies to"
   )
-  set(THIRD_PARTY_GIT_URL
-      "https://github.com/mantidproject/thirdparty-msvc2015.git"
-  )
-  set(THIRD_PARTY_GIT_SHA1 51ae2facb5bd9267dee7369478446f689c1be13b)
+  set(THIRD_PARTY_GIT_URL "https://github.com/mantidproject/thirdparty-msvc2015.git")
+  set(THIRD_PARTY_GIT_SHA1 02d17753f5232c2e8ba0faf94e1d189e4241ca9d)
   set(THIRD_PARTY_DIR ${EXTERNAL_ROOT}/src/ThirdParty)
   # Generates a script to do the clone/update in tmp
   set(_project_name ThirdParty)
@@ -31,30 +32,22 @@ if(MSVC)
     INSTALL_COMMAND ""
     TEST_COMMAND ""
   )
-  set_target_properties(
-    ${_project_name} PROPERTIES EXCLUDE_FROM_DEFAULT_BUILD 1 EXCLUDE_FROM_ALL 1
-  )
+  set_target_properties(${_project_name} PROPERTIES EXCLUDE_FROM_DEFAULT_BUILD 1 EXCLUDE_FROM_ALL 1)
 
   # Do fetch/update now as we need the dependencies to configure
   set(_tmp_dir ${EXTERNAL_ROOT}/tmp)
   if(NOT EXISTS ${THIRD_PARTY_DIR}/.git)
     message(STATUS "Fetching third party dependencies")
-    # As of git lfs 1.02 the default 'git checkout' behaviour is very slow for a
-    # large amount of data. Running the 'git lfs fetch' command however produces
-    # better suitable performance as it downloads everything in parallel. We
-    # there for first clone the bare repository containing the data pointers and
-    # update them manually see https://github.com/github/git-lfs/issues/376 for
-    # more information
+    # As of git lfs 1.02 the default 'git checkout' behaviour is very slow for a large amount of data. Running the 'git
+    # lfs fetch' command however produces better suitable performance as it downloads everything in parallel. We there
+    # for first clone the bare repository containing the data pointers and update them manually see
+    # https://github.com/github/git-lfs/issues/376 for more information
     set(ENV{GIT_LFS_SKIP_SMUDGE} 1)
     execute_process(
-      COMMAND ${CMAKE_COMMAND} ARGS -P
-              ${_tmp_dir}/${_project_name}-gitclone.cmake
-      RESULT_VARIABLE error_code
+      COMMAND ${CMAKE_COMMAND} ARGS -P ${_tmp_dir}/${_project_name}-gitclone.cmake RESULT_VARIABLE error_code
     )
     if(error_code)
-      message(
-        FATAL_ERROR "Failed to clone repository: '${THIRD_PARTY_GIT_URL}'"
-      )
+      message(FATAL_ERROR "Failed to clone repository: '${THIRD_PARTY_GIT_URL}'")
     endif()
     unset(ENV{GIT_LFS_SKIP_SMUDGE})
     # Fetch the binary data
@@ -64,10 +57,7 @@ if(MSVC)
       RESULT_VARIABLE error_code
     )
     if(error_code)
-      message(
-        FATAL_ERROR
-          "Failed to download third party binary data. Check your network connection"
-      )
+      message(FATAL_ERROR "Failed to download third party binary data. Check your network connection")
     endif()
     # Checkout the data from the index to the working directory
     execute_process(
@@ -79,48 +69,34 @@ if(MSVC)
     message(STATUS "Updating third party dependencies")
     # Assume the updates are small & don't run git lfs fetch
     execute_process(
-      COMMAND ${CMAKE_COMMAND} ARGS -P
-              ${_tmp_dir}/${_project_name}-gitupdate.cmake
-      RESULT_VARIABLE error_code
+      COMMAND ${CMAKE_COMMAND} ARGS -P ${_tmp_dir}/${_project_name}-gitupdate.cmake RESULT_VARIABLE error_code
     )
     if(error_code)
-      message(
-        FATAL_ERROR "Failed to update repository: '${THIRD_PARTY_GIT_URL}'"
-      )
+      message(FATAL_ERROR "Failed to update repository: '${THIRD_PARTY_GIT_URL}'")
     endif()
   endif()
   unset(_tmp_dir)
 
   # Print out where we are looking for 3rd party stuff
-  if(WITH_PYTHON3)
-    set(PYTHON_VERSION_MAJOR 3)
-    set(PYTHON_VERSION_MINOR 8)
-  else()
-    set(PYTHON_VERSION_MAJOR 2)
-    set(PYTHON_VERSION_MINOR 7)
-  endif()
+  set(Python_VERSION_MAJOR 3)
+  set(Python_VERSION_MINOR 8)
+  set(Python_FIND_REGISTRY NEVER)
   # used in later parts for MSVC to bundle Python
-  set(MSVC_PYTHON_EXECUTABLE_DIR
-      ${THIRD_PARTY_DIR}/lib/python${PYTHON_VERSION_MAJOR}.${PYTHON_VERSION_MINOR}
-  )
-  set(PYTHON_EXECUTABLE
-      ${THIRD_PARTY_DIR}/lib/python${PYTHON_VERSION_MAJOR}.${PYTHON_VERSION_MINOR}/python.exe
-  )
-  set(PYTHONW_EXECUTABLE
+  set(MSVC_PYTHON_EXECUTABLE_DIR ${THIRD_PARTY_DIR}/lib/python${Python_VERSION_MAJOR}.${Python_VERSION_MINOR})
+  set(Python_EXECUTABLE ${THIRD_PARTY_DIR}/lib/python${Python_VERSION_MAJOR}.${Python_VERSION_MINOR}/python.exe)
+  set(Python_W_EXECUTABLE
       "${MSVC_PYTHON_EXECUTABLE_DIR}/pythonw.exe"
-      CACHE
-        FILEPATH
-        "The location of the pythonw executable. This suppresses the new terminal window on startup"
-        FORCE
+      CACHE FILEPATH "The location of the pythonw executable. This suppresses the new terminal window on startup" FORCE
   )
 
   set(THIRD_PARTY_BIN
       "${THIRD_PARTY_DIR}/bin;${THIRD_PARTY_DIR}/lib/qt4/bin;${THIRD_PARTY_DIR}/lib/qt5/bin;${MSVC_PYTHON_EXECUTABLE_DIR}"
   )
   message(STATUS "Third party dependencies are in ${THIRD_PARTY_DIR}")
-  # Add to the path so that cmake can configure correctly without the user
-  # having to do it
+  # Add to the path so that cmake can configure correctly without the user having to do it
   set(ENV{PATH} "${THIRD_PARTY_BIN};$ENV{PATH}")
+  # Set PATH for custom command or target build steps. Avoids the need to make external PATH updates
+  set(CMAKE_MSVCIDE_RUN_PATH ${THIRD_PARTY_BIN})
 
   # Set variables to help CMake find components
   set(CMAKE_INCLUDE_PATH "${THIRD_PARTY_DIR}/include")
@@ -130,36 +106,30 @@ if(MSVC)
   set(BOOST_INCLUDEDIR "${CMAKE_INCLUDE_PATH}")
   set(BOOST_LIBRARYDIR "${CMAKE_LIBRARY_PATH}")
   set(Boost_NO_SYSTEM_PATHS TRUE)
+elseif(MSVC AND CONDA_ENV)
+  # Print out where we are looking for 3rd party stuff
+  set(Python_FIND_REGISTRY NEVER)
+  # used in later parts for MSVC to bundle Python
+  set(MSVC_PYTHON_EXECUTABLE_DIR $ENV{CONDA_PREFIX})
+  set(THIRD_PARTY_BIN "$ENV{CONDA_PREFIX}/Library/bin;$ENV{CONDA_PREFIX}/Library/lib;${MSVC_PYTHON_EXECUTABLE_DIR}")
+  # Add to the path so that cmake can configure correctly without the user having to do it
+  set(ENV{PATH} "${THIRD_PARTY_BIN};$ENV{PATH}")
+  # Set PATH for custom command or target build steps. Avoids the need to make external PATH updates
+  set(CMAKE_MSVCIDE_RUN_PATH ${THIRD_PARTY_BIN})
 else()
-  unset(PYTHON_EXECUTABLE CACHE)
-  if(WITH_PYTHON3)
-    find_program(PYTHON_EXECUTABLE python3)
-    if(NOT PYTHON_EXECUTABLE)
-      message(FATAL_ERROR "Unable to find python3 executable")
-    endif()
-  else()
-    find_program(PYTHON_EXECUTABLE python)
-    if(NOT PYTHON_EXECUTABLE)
-      message(FATAL_ERROR "Unable to find python executable")
-    endif()
-  endif()
-
   if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
-    # Homebrew adds qt4 here and we require it to be unlinked from /usr/local to
-    # avoid qt4/qt5 cross talk
+    # Homebrew adds qt4 here and we require it to be unlinked from /usr/local to avoid qt4/qt5 cross talk
     list(APPEND CMAKE_PREFIX_PATH /usr/local/opt/qt@4)
   endif()
-  find_package(Git)
 endif()
 
-# Clean out python variables set from a previous build so they can be
-# rediscovered again
-function(unset_cached_python_variables)
+# Clean out python variables set from a previous build so they can be rediscovered again
+function(unset_cached_Python_variables)
   foreach(
     _var
-    PYTHON_INCLUDE_DIR
-    PYTHON_LIBRARY
-    PYTHON_NUMPY_INCLUDE_DIR
+    Python_INCLUDE_DIR
+    Python_LIBRARY
+    Python_NUMPY_INCLUDE_DIR
     SIP_INCLUDE_DIR
     PYQT4_PYUIC
     PYQT4_SIP_DIR
@@ -180,21 +150,43 @@ function(unset_cached_python_variables)
 endfunction()
 
 # Find python interpreter
-find_package(PythonInterp REQUIRED)
-message(
-  STATUS "Python version is "
-         ${PYTHON_VERSION_MAJOR}.${PYTHON_VERSION_MINOR}.${PYTHON_VERSION_PATCH}
-)
-# Ensure FindPythonLibs finds the correct libraries
-set(Python_ADDITIONAL_VERSIONS ${PYTHON_VERSION_MAJOR}.${PYTHON_VERSION_MINOR})
+set(MINIMUM_PYTHON_VERSION 3.6)
+# If we are not building the mantid framework we don't need the numpy developer env
+if(MANTID_FRAMEWORK_LIB STREQUAL "BUILD")
+  find_package(Python ${MINIMUM_PYTHON_VERSION} REQUIRED COMPONENTS Interpreter Development NumPy)
+else()
+  find_package(Python ${MINIMUM_PYTHON_VERSION} REQUIRED COMPONENTS Interpreter Development)
+endif()
 
-# Handle switching between previously configured Python 2 & Python 3 builds
-if(PYTHON_INCLUDE_DIR
-   AND NOT PYTHON_INCLUDE_DIR MATCHES
-       ".*${PYTHON_VERSION_MAJOR}\.${PYTHON_VERSION_MINOR}.*"
-)
-  message(
-    STATUS "Python version has changed. Clearing previous Python configuration."
+# If anything external uses find_package(PythonInterp) then make sure it finds the correct version and executable
+set(PYTHON_EXECUTABLE ${Python_EXECUTABLE})
+set(Python_ADDITIONAL_VERSIONS ${Python_VERSION_MAJOR}.${Python_VERSION_MINOR})
+
+# Search for the pythonw executable if it has not already been found Will only look in the folder containing the current
+# python.exe
+if(NOT Python_W_EXECUTABLE)
+  get_filename_component(Python_Binary_Dir ${PYTHON_EXECUTABLE} DIRECTORY)
+  find_program(
+    Python_W_EXECUTABLE
+    PATHS ${Python_Binary_Dir}
+    NAMES pythonw
+    NO_DEFAULT_PATH
   )
+endif()
+
+# Handle switching between previously configured Python verions
+if(Python_INCLUDE_DIR AND NOT Python_INCLUDE_DIR MATCHES ".*${Python_VERSION_MAJOR}\.${Python_VERSION_MINOR}.*")
+  message(STATUS "Python version has changed. Clearing previous Python configuration.")
   unset_cached_python_variables()
+endif()
+
+# What version of setuptools are we using?
+execute_process(
+  COMMAND ${Python_EXECUTABLE} -c "import setuptools;print(setuptools.__version__)"
+  RESULT_VARIABLE _setuptools_version_check_result
+  OUTPUT_VARIABLE Python_SETUPTOOLS_VERSION
+  ERROR_VARIABLE _setuptools_version_check_error
+)
+if(NOT _setuptools_version_check_result EQUAL 0)
+  message(FATAL_ERROR "Unable to determine setuptools version:\n" "    ${_setuptools_version_check_error}")
 endif()

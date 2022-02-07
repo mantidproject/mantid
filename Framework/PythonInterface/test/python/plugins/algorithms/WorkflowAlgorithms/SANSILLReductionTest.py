@@ -15,10 +15,12 @@ class SANSILLReductionTest(unittest.TestCase):
     _facility = None
     _instrument = None
 
-    def setUp(self):
+    @classmethod
+    def setUpClass(cls):
         config.appendDataSearchSubDir('ILL/D11/')
         config.appendDataSearchSubDir('ILL/D33/')
 
+    def setUp(self):
         self._facility = config['default.facility']
         self._instrument = config['default.instrument']
 
@@ -69,7 +71,8 @@ class SANSILLReductionTest(unittest.TestCase):
         self._check_process_flag(mtd['sens'], 'Sensitivity')
 
     def test_sample(self):
-        SANSILLReduction(Run='010569', ProcessAs='Sample', OutputWorkspace='sample')
+        SANSILLReduction(Run='010569', ProcessAs='Sample',
+                         OutputWorkspace='sample')
         self._check_output(mtd['sample'], True, 1, 128*128+2)
         self._check_process_flag(mtd['sample'], 'Sample')
 
@@ -110,6 +113,13 @@ class SANSILLReductionTest(unittest.TestCase):
         self._check_output(mtd['sample'], True, 30, 256*256+2)
         self._check_process_flag(mtd['sample'], 'Sample')
 
+    def test_sample_thickness(self):
+        SANSILLReduction(Run='010569', ProcessAs='Sample', SampleThickness=-1,
+                         OutputWorkspace='sample')
+        a = mtd["sample"].getHistory().lastAlgorithm()
+        thickness = a.getProperty("SampleThickness").value
+        self.assertEqual(thickness, 0.1)
+
     def _check_process_flag(self, ws, value):
         self.assertTrue(ws.getRun().getLogData('ProcessedAs').value, value)
 
@@ -128,8 +138,6 @@ class SANSILLReductionTest(unittest.TestCase):
             self.assertTrue(ws.getRun().hasProperty('qmin'))
             self.assertTrue(ws.getRun().hasProperty('qmax'))
             self.assertTrue(ws.getRun().hasProperty('l2'))
-            self.assertTrue(ws.getRun().hasProperty('pixel_height'))
-            self.assertTrue(ws.getRun().hasProperty('pixel_width'))
             self.assertTrue(ws.getRun().hasProperty('collimation.actual_position'))
 
 if __name__ == '__main__':

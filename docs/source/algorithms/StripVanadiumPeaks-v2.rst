@@ -36,8 +36,9 @@ Usage
 Output:
 
 .. testoutput:: ExStripPeak
+   :options: +ELLIPSIS
 
-    This peak at 0.8116 Angstroms has been reduced from 11569 to a background level of 10845
+   This peak at ... Angstroms has been reduced from ... to a background level of ...
 
 .. categories::
 

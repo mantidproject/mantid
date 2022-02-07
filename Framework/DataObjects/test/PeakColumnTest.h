@@ -11,7 +11,7 @@
 #include "MantidKernel/Exception.h"
 #include <cxxtest/TestSuite.h>
 
-#include "MantidTestHelpers/ComponentCreationHelper.h"
+#include "MantidFrameworkTestHelpers/ComponentCreationHelper.h"
 
 #include <locale>
 #include <memory>
@@ -19,10 +19,9 @@
 using namespace Mantid::DataObjects;
 
 // Allow testing of protected methods
-class PeakColumnTestHelper : public PeakColumn {
+class PeakColumnTestHelper : public PeakColumn<Peak> {
 public:
-  PeakColumnTestHelper(std::vector<Peak> &peaks, const std::string &name)
-      : PeakColumn(peaks, name) {}
+  PeakColumnTestHelper(std::vector<Peak> &peaks, const std::string &name) : PeakColumn<Peak>(peaks, name) {}
 
   using PeakColumn::insert;
   using PeakColumn::remove;
@@ -43,19 +42,18 @@ public:
   }
 
   void test_constructor_create_valid_object_when_given_valid_name() {
-    PeakColumn pc(m_peaks, "h");
+    PeakColumn<Peak> pc(m_peaks, "h");
     TS_ASSERT_EQUALS(pc.name(), "h");
     TS_ASSERT_EQUALS(pc.size(), 2);
   }
 
   void test_constructor_throws_given_unknown_name() {
-    TS_ASSERT_THROWS(PeakColumn(m_peaks, "NotPeakColumn"),
-                     const std::runtime_error &);
+    TS_ASSERT_THROWS(PeakColumn<Peak>(m_peaks, "NotPeakColumn"), const std::runtime_error &);
   }
 
   void test_clone() {
-    PeakColumn pc(m_peaks, "h");
-    PeakColumn *cloned = pc.clone();
+    PeakColumn<Peak> pc(m_peaks, "h");
+    PeakColumn<Peak> *cloned = pc.clone();
 
     TS_ASSERT_EQUALS(pc.name(), cloned->name());
     TS_ASSERT_EQUALS(2, cloned->size());
@@ -83,30 +81,27 @@ public:
 
   void test_PeakColumn_Cannot_Be_Resized() {
     PeakColumnTestHelper pc(m_peaks, "DetID");
-    TS_ASSERT_THROWS(pc.resize(10),
-                     const Mantid::Kernel::Exception::NotImplementedError &);
+    TS_ASSERT_THROWS(pc.resize(10), const Mantid::Kernel::Exception::NotImplementedError &);
   }
 
   void test_Row_Cannot_Be_Inserted_Into_PeakColumn() {
     PeakColumnTestHelper pc(m_peaks, "DetID");
-    TS_ASSERT_THROWS(pc.insert(0),
-                     const Mantid::Kernel::Exception::NotImplementedError &);
+    TS_ASSERT_THROWS(pc.insert(0), const Mantid::Kernel::Exception::NotImplementedError &);
   }
 
   void test_Row_Cannot_Be_Removed_From_PeakColumn() {
     PeakColumnTestHelper pc(m_peaks, "DetID");
-    TS_ASSERT_THROWS(pc.remove(0),
-                     const Mantid::Kernel::Exception::NotImplementedError &);
+    TS_ASSERT_THROWS(pc.remove(0), const Mantid::Kernel::Exception::NotImplementedError &);
   }
 
   void test_cell_returns_correct_value_from_PeakColumn() {
-    PeakColumn pc1(m_peaks, "DetID");
+    PeakColumn<Peak> pc1(m_peaks, "DetID");
     int detId = pc1.cell<int>(0);
     TS_ASSERT_EQUALS(1, detId);
     detId = pc1.cell<int>(1);
     TS_ASSERT_EQUALS(2, detId);
 
-    PeakColumn pc2(m_peaks, "QLab");
+    PeakColumn<Peak> pc2(m_peaks, "QLab");
     const Mantid::Kernel::V3D &qlab0 = pc2.cell<Mantid::Kernel::V3D>(0);
     TS_ASSERT_EQUALS(qlab0, m_peaks[0].getQLabFrame());
     const Mantid::Kernel::V3D &qlab1 = pc2.cell<Mantid::Kernel::V3D>(1);
@@ -114,11 +109,11 @@ public:
   }
 
   void test_get_read_only_returns_correct_value() {
-    PeakColumn pc1(m_peaks, "h");
+    PeakColumn<Peak> pc1(m_peaks, "h");
     auto readOnly = pc1.getReadOnly();
     TS_ASSERT(!readOnly);
 
-    PeakColumn pc2(m_peaks, "DetID");
+    PeakColumn<Peak> pc2(m_peaks, "DetID");
     readOnly = pc2.getReadOnly();
     TS_ASSERT(readOnly);
   }
@@ -129,7 +124,7 @@ public:
     TestingNumpunctFacet numpunct;
     const std::locale testLocale(std::locale::classic(), &numpunct);
     for (size_t i = 0; i < columnNames.size(); ++i) {
-      PeakColumn pc(m_peaks, columnNames[i]);
+      PeakColumn<Peak> pc(m_peaks, columnNames[i]);
       // Use a fake punctuation facet for numeric formatting.
       std::ostringstream out;
       out.imbue(testLocale);
@@ -158,7 +153,7 @@ public:
   }
 
   void test_cannot_be_converted_to_double() {
-    PeakColumn col(m_peaks, "DetID");
+    PeakColumn<Peak> col(m_peaks, "DetID");
     TS_ASSERT(!col.isNumber());
   }
 

@@ -9,18 +9,43 @@
 Description
 -----------
 
-This is a workflow algorithm that crops each spectrum of a workspace
-independently. This is intended for workspaces with a relatively small
-number of spectra (e.g. <10), but places no restrictions on the input
-workspace.
+This is an algorithm that crops each spectrum of a workspace
+independently.
 
 The minimum and maximum values that are specified are interpreted as follows:
 
 * One value per spectrum. If there is only one value overall, it is used for all of the spectra.
-* ``numpy.nan``, ``math.nan``, and ``np.inf`` are interpreted to mean use the data's minimum or maximum x-value.
+* If the given value is smaller than the first data point, it will use the first data point.
+* If the given value is larger than the last data point, it will use the last data point.
 
 Usage
 -----
+
+**Example - Crop a workspace.**
+
+.. testcode:: CropRagged
+
+    ws = CreateWorkspace([0,1,2,3,4,2, 3,4,5,6],[0,1,2,3,4,3,4,5,6,7], NSpec=2)
+    x_min=[]
+    x_max =[]
+
+    for j in range(ws.getNumberHistograms()):
+        x_min.append(1.0+j)
+        x_max.append(14.0)
+
+    new=CropWorkspaceRagged(ws,x_min,x_max)
+
+    print("The number of bins in spectrum 1 is: {}".format(new.readX(0).size))
+    print("The number of bins in spectrum 2 is: {}".format(new.readX(1).size))
+
+Output:
+
+.. testoutput:: CropRagged
+
+    The number of bins in spectrum 1 is: 4
+    The number of bins in spectrum 2 is: 5
+
+**Example - Crop a workspace as part of a workflow.**
 
 .. include:: ../usagedata-note.txt
 
@@ -29,7 +54,7 @@ the end of a workflow to generate a real-space distribution of data
 after it had been reduced into a number of "banks" or "spectra." As
 mentioned above, ``numpy.nan`` or ``math.nan`` can both be used.
 
-.. code-block:: python
+.. testcode:: RaggedWorkFlow
 
     from numpy import nan
     NOM_91796 = LoadNexusProcessed(Filename='NOM_91796_banks.nxs')
@@ -42,9 +67,18 @@ mentioned above, ``numpy.nan`` or ``math.nan`` can both be used.
     # put into a single spectrum and Fourier transform
     SumSpectra(InputWorkspace='cropped', OutputWorkspace='FQ',
                WeightedSum=True, RemoveSpecialValues=True)
-    PDFFourierTransform(InputWorkspace='FQ', OutputWorkspace='Gr',
-                        InputSofQType='Q[S(Q)-1]', DeltaR=.02)
+    gr=PDFFourierTransform(InputWorkspace='FQ', OutputWorkspace='Gr',
+                        Direction="Backward", DeltaR=.02)
+    for j in range(10,13):
+            print("y values: {:.4f}".format(gr.readY(0)[j]))
 
+Output:
+
+.. testoutput:: RaggedWorkFlow
+
+    y values: 0.6287
+    y values: 0.6235
+    y values: 0.6487
 
 .. categories::
 

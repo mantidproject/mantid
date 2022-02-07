@@ -11,8 +11,9 @@
 
 namespace {
 
-const int64_t invalidIntervalValue = std::numeric_limits<int64_t>::min();
-
+using Mantid::specnum_t;
+const specnum_t INVALIDINTERVALVALUE = std::numeric_limits<specnum_t>::min();
+using Mantid::DataHandling::SpectrumPair;
 /**
  * Gets all removal intervals which have an overlap with the original interval.
  * This can be either
@@ -22,22 +23,17 @@ const int64_t invalidIntervalValue = std::numeric_limits<int64_t>::min();
  * 3. remove interval contains original interval: check start value of original
  * in range
  */
-std::vector<std::pair<int64_t, int64_t>>
-getRemovalIntervalsRelevantForTheCurrentOriginalInterval(
-    const std::pair<int64_t, int64_t> &original,
-    const std::vector<std::pair<int64_t, int64_t>> &removeIntervals) {
+std::vector<SpectrumPair>
+getRemovalIntervalsRelevantForTheCurrentOriginalInterval(const SpectrumPair &original,
+                                                         const std::vector<SpectrumPair> &removeIntervals) {
 
-  auto hasOverlap = [](const std::pair<int64_t, int64_t> &original,
-                       const std::pair<int64_t, int64_t> &toRemove) {
-    return ((original.first <= toRemove.first) &&
-            (toRemove.first <= original.second)) ||
-           ((original.first <= toRemove.second) &&
-            (toRemove.second <= original.second)) ||
-           ((toRemove.first <= original.first) &&
-            (original.first <= toRemove.second));
+  auto hasOverlap = [](const SpectrumPair &original, const SpectrumPair &toRemove) {
+    return ((original.first <= toRemove.first) && (toRemove.first <= original.second)) ||
+           ((original.first <= toRemove.second) && (toRemove.second <= original.second)) ||
+           ((toRemove.first <= original.first) && (original.first <= toRemove.second));
   };
 
-  std::vector<std::pair<int64_t, int64_t>> overlaps;
+  std::vector<SpectrumPair> overlaps;
   for (auto &removeInterval : removeIntervals) {
     if (hasOverlap(original, removeInterval)) {
       overlaps.emplace_back(removeInterval);
@@ -54,8 +50,7 @@ getRemovalIntervalsRelevantForTheCurrentOriginalInterval(
          cut             |---....
          return: NONE
 */
-void handleLeftHandSideOverlap(std::pair<int64_t, int64_t> &original,
-                               const std::pair<int64_t, int64_t> &toRemove) {
+void handleLeftHandSideOverlap(SpectrumPair &original, const SpectrumPair &toRemove) {
   original.first = toRemove.second + 1;
 }
 
@@ -67,12 +62,10 @@ void handleLeftHandSideOverlap(std::pair<int64_t, int64_t> &original,
         cut     we are at the end, set interval to invalid
      return     ...-|
 */
-std::pair<int64_t, int64_t>
-handleRightHandSideOverlap(std::pair<int64_t, int64_t> &original,
-                           const std::pair<int64_t, int64_t> &toRemove) {
+SpectrumPair handleRightHandSideOverlap(SpectrumPair &original, const SpectrumPair &toRemove) {
   auto newInterval = std::make_pair(original.first, toRemove.first - 1);
-  original.first = invalidIntervalValue;
-  original.second = invalidIntervalValue;
+  original.first = INVALIDINTERVALVALUE;
+  original.second = INVALIDINTERVALVALUE;
   return newInterval;
 }
 
@@ -84,21 +77,17 @@ handleRightHandSideOverlap(std::pair<int64_t, int64_t> &original,
        cut                  |---...
     return      ...--|
 */
-std::pair<int64_t, int64_t>
-handleFullyContained(std::pair<int64_t, int64_t> &original,
-                     const std::pair<int64_t, int64_t> &toRemove) {
+SpectrumPair handleFullyContained(SpectrumPair &original, const SpectrumPair &toRemove) {
   // It is important to first creat the new pair and then perform the cut
   auto newPair = std::make_pair(original.first, toRemove.first - 1);
   original.first = toRemove.second + 1;
   return newPair;
 }
 
-std::vector<std::pair<int64_t, int64_t>> getSlicedIntervals(
-    std::pair<int64_t, int64_t> original,
-    const std::vector<std::pair<int64_t, int64_t>> &removeIntervals) {
+std::vector<SpectrumPair> getSlicedIntervals(SpectrumPair original, const std::vector<SpectrumPair> &removeIntervals) {
   // If there is nothing to remove return the original
   if (removeIntervals.empty()) {
-    return std::vector<std::pair<int64_t, int64_t>>{original};
+    return std::vector<SpectrumPair>{original};
   }
 
   // There are several overlap scenarios.
@@ -115,40 +104,29 @@ std::vector<std::pair<int64_t, int64_t>> getSlicedIntervals(
   //    original :  ...-------...
   //    toRemove:       |---|
 
-  auto isFullOverlap = [](const std::pair<int64_t, int64_t> &original,
-                          const std::pair<int64_t, int64_t> &toRemove) {
-    return (toRemove.first <= original.first) &&
-           (original.first <= toRemove.second) &&
-           (toRemove.first <= original.second) &&
+  auto isFullOverlap = [](const SpectrumPair &original, const SpectrumPair &toRemove) {
+    return (toRemove.first <= original.first) && (original.first <= toRemove.second) &&
+           (toRemove.first <= original.second) && (original.second <= toRemove.second);
+  };
+
+  auto isLeftHandSideOverlap = [](const SpectrumPair &original, const SpectrumPair &toRemove) {
+    return (toRemove.first <= original.first) && (original.first <= toRemove.second) &&
+           (toRemove.second < original.second);
+  };
+
+  auto isRightHandSideOverlap = [](const SpectrumPair &original, const SpectrumPair &toRemove) {
+    return (original.first < toRemove.first) && (toRemove.first <= original.second) &&
            (original.second <= toRemove.second);
   };
 
-  auto isLeftHandSideOverlap = [](const std::pair<int64_t, int64_t> &original,
-                                  const std::pair<int64_t, int64_t> &toRemove) {
-    return (toRemove.first <= original.first) &&
-           (original.first <= toRemove.second) &&
-           (toRemove.second < original.second);
-  };
-
-  auto isRightHandSideOverlap =
-      [](const std::pair<int64_t, int64_t> &original,
-         const std::pair<int64_t, int64_t> &toRemove) {
-        return (original.first < toRemove.first) &&
-               (toRemove.first <= original.second) &&
-               (original.second <= toRemove.second);
-      };
-
-  auto isFullyContained = [](const std::pair<int64_t, int64_t> &original,
-                             const std::pair<int64_t, int64_t> &toRemove) {
-    return (original.first < toRemove.first) &&
-           (toRemove.first < original.second) &&
-           (original.first < toRemove.second) &&
-           (toRemove.second < original.second);
+  auto isFullyContained = [](const SpectrumPair &original, const SpectrumPair &toRemove) {
+    return (original.first < toRemove.first) && (toRemove.first < original.second) &&
+           (original.first < toRemove.second) && (toRemove.second < original.second);
   };
 
   // Use that removeIntervals has oredred, non-overlapping intervals
   // Subtract all the removeIntervals
-  std::vector<std::pair<int64_t, int64_t>> newIntervals;
+  std::vector<SpectrumPair> newIntervals;
   for (auto &removeInterval : removeIntervals) {
 
     if (isFullOverlap(original, removeInterval)) {
@@ -162,8 +140,8 @@ std::vector<std::pair<int64_t, int64_t>> getSlicedIntervals(
       // Set the remainder of the original to invalid, such that we don't
       // pick
       // it up at the very end
-      original.first = invalidIntervalValue;
-      original.second = invalidIntervalValue;
+      original.first = INVALIDINTERVALVALUE;
+      original.second = INVALIDINTERVALVALUE;
       break;
     } else if (isRightHandSideOverlap(original, removeInterval)) {
       auto newInterval = handleRightHandSideOverlap(original, removeInterval);
@@ -174,8 +152,7 @@ std::vector<std::pair<int64_t, int64_t>> getSlicedIntervals(
       auto newInterval = handleFullyContained(original, removeInterval);
       newIntervals.emplace_back(newInterval);
     } else {
-      throw std::runtime_error(
-          "DataBlockComposite: The intervals don't seem to overlap.");
+      throw std::runtime_error("DataBlockComposite: The intervals don't seem to overlap.");
     }
   }
 
@@ -183,8 +160,7 @@ std::vector<std::pair<int64_t, int64_t>> getSlicedIntervals(
   // wasn't
   // a full overlap removal
   // or no righ-hand-side overlap of a removal interval
-  if ((original.first != invalidIntervalValue) &&
-      (original.second != invalidIntervalValue)) {
+  if ((original.first != INVALIDINTERVALVALUE) && (original.second != INVALIDINTERVALVALUE)) {
     newIntervals.emplace_back(original);
   }
 
@@ -200,29 +176,23 @@ template <typename T> void sortDataBlocks(T &dataBlcokCollection) {
   auto comparison = [](const DataBlock &el1, const DataBlock &el2) {
     return el1.getMinSpectrumID() < el2.getMinSpectrumID();
   };
-  std::sort(std::begin(dataBlcokCollection), std::end(dataBlcokCollection),
-            comparison);
+  std::sort(std::begin(dataBlcokCollection), std::end(dataBlcokCollection), comparison);
 }
 
-std::vector<std::pair<int64_t, int64_t>> spectrumIDIntervals(
-    const std::vector<Mantid::DataHandling::DataBlock> &blocks) {
-  std::vector<std::pair<int64_t, int64_t>> intervals;
+std::vector<SpectrumPair> spectrumIDIntervals(const std::vector<Mantid::DataHandling::DataBlock> &blocks) {
+  std::vector<SpectrumPair> intervals;
   intervals.reserve(blocks.size());
 
   std::transform(blocks.begin(), blocks.end(), std::back_inserter(intervals),
-                 [](const auto &block) {
-                   return std::make_pair(block.getMinSpectrumID(),
-                                         block.getMaxSpectrumID());
-                 });
+                 [](const auto &block) { return std::make_pair(block.getMinSpectrumID(), block.getMaxSpectrumID()); });
   return intervals;
 }
 } // namespace
 
-namespace Mantid {
-namespace DataHandling {
+namespace Mantid::DataHandling {
 
-int64_t DataBlockComposite::getMinSpectrumID() const {
-  int64_t min = std::numeric_limits<int64_t>::max();
+specnum_t DataBlockComposite::getMinSpectrumID() const {
+  specnum_t min = std::numeric_limits<specnum_t>::max();
   for (const auto &child : m_dataBlocks) {
     auto temp = child.getMinSpectrumID();
     if (temp < min) {
@@ -232,12 +202,12 @@ int64_t DataBlockComposite::getMinSpectrumID() const {
   return min;
 }
 
-void DataBlockComposite::setMinSpectrumID(int64_t /*minSpecID*/) {
+void DataBlockComposite::setMinSpectrumID(specnum_t /*minSpecID*/) {
   // DO NOTHING
 }
 
-int64_t DataBlockComposite::getMaxSpectrumID() const {
-  int64_t max = std::numeric_limits<int64_t>::min();
+specnum_t DataBlockComposite::getMaxSpectrumID() const {
+  specnum_t max = std::numeric_limits<specnum_t>::min();
   for (const auto &child : m_dataBlocks) {
     auto temp = child.getMaxSpectrumID();
     if (temp > max) {
@@ -247,7 +217,7 @@ int64_t DataBlockComposite::getMaxSpectrumID() const {
   return max;
 }
 
-void DataBlockComposite::setMaxSpectrumID(int64_t /*minSpecID*/) {
+void DataBlockComposite::setMaxSpectrumID(specnum_t /*minSpecID*/) {
   // DO NOTHING
 }
 
@@ -267,11 +237,8 @@ void DataBlockComposite::addDataBlock(const DataBlock &dataBlock) {
 }
 
 size_t DataBlockComposite::getNumberOfSpectra() const {
-  return std::accumulate(m_dataBlocks.cbegin(), m_dataBlocks.cend(),
-                         static_cast<size_t>(0),
-                         [](size_t sum, const auto &element) {
-                           return sum + element.getNumberOfSpectra();
-                         });
+  return std::accumulate(m_dataBlocks.cbegin(), m_dataBlocks.cend(), static_cast<size_t>(0),
+                         [](size_t sum, const auto &element) { return sum + element.getNumberOfSpectra(); });
 }
 
 size_t DataBlockComposite::getNumberOfChannels() const {
@@ -282,13 +249,10 @@ int DataBlockComposite::getNumberOfPeriods() const {
   return m_dataBlocks.empty() ? 0 : m_dataBlocks[0].getNumberOfPeriods();
 }
 
-DataBlockComposite DataBlockComposite::
-operator+(const DataBlockComposite &other) {
+DataBlockComposite DataBlockComposite::operator+(const DataBlockComposite &other) {
   DataBlockComposite output;
-  output.m_dataBlocks.insert(std::end(output.m_dataBlocks),
-                             std::begin(m_dataBlocks), std::end(m_dataBlocks));
-  output.m_dataBlocks.insert(std::end(output.m_dataBlocks),
-                             std::begin(other.m_dataBlocks),
+  output.m_dataBlocks.insert(std::end(output.m_dataBlocks), std::begin(m_dataBlocks), std::end(m_dataBlocks));
+  output.m_dataBlocks.insert(std::end(output.m_dataBlocks), std::begin(other.m_dataBlocks),
                              std::end(other.m_dataBlocks));
   return output;
 }
@@ -299,41 +263,36 @@ std::vector<DataBlock> DataBlockComposite::getDataBlocks() {
   return m_dataBlocks;
 }
 
-void DataBlockComposite::truncate(int64_t specMin, int64_t specMax) {
+void DataBlockComposite::truncate(specnum_t specMin, specnum_t specMax) {
   sortDataBlocks(m_dataBlocks);
   // Find the first data block which is not completely cut off by specMin
   // original: |-----|      |--------|   |------|
   // spec_min:         | or | or | or|
   // result:                 this one
-  auto isNotCompletelyCutOffFromMin = [&specMin](DataBlock &block) {
-    return (specMin <= block.getMinSpectrumID()) ||
-           (specMin <= block.getMaxSpectrumID());
+  auto isNotCompletelyCutOffFromMin = [&specMin](const DataBlock &block) {
+    return (specMin <= block.getMinSpectrumID()) || (specMin <= block.getMaxSpectrumID());
   };
 
   // Find the last data block which is not completely cut off by specMax
   // original: |-----|      |--------|         |------|
   // spec_min:              | or | or| or  |
   // result:                 this one
-  auto isNotCompletelyCutOffFromMax = [&specMax](DataBlock &block) {
-    return (block.getMinSpectrumID() <= specMax) ||
-           (block.getMaxSpectrumID() <= specMax);
+  auto isNotCompletelyCutOffFromMax = [&specMax](const DataBlock &block) {
+    return (block.getMinSpectrumID() <= specMax) || (block.getMaxSpectrumID() <= specMax);
   };
 
-  auto firstDataBlock =
-      std::find_if(std::begin(m_dataBlocks), std::end(m_dataBlocks),
-                   isNotCompletelyCutOffFromMin);
+  auto firstDataBlock = std::find_if(std::begin(m_dataBlocks), std::end(m_dataBlocks), isNotCompletelyCutOffFromMin);
 
   // Note that we have to start from the back.
-  auto lastDataBlockReverseIterator = std::find_if(
-      m_dataBlocks.rbegin(), m_dataBlocks.rend(), isNotCompletelyCutOffFromMax);
+  auto lastDataBlockReverseIterator =
+      std::find_if(m_dataBlocks.rbegin(), m_dataBlocks.rend(), isNotCompletelyCutOffFromMax);
 
   // Check the case where the actuall don't have any spectrum numbers in the
   // truncation interval
   // e.g    |-----|   |------|   |----|    or |-----|   |------|   |----|
   //     | |                                         | |
   auto isFirstDataBlockAtEnd = firstDataBlock == m_dataBlocks.end();
-  auto isLastDataBlockReverseIteratorAtREnd =
-      lastDataBlockReverseIterator == m_dataBlocks.rend();
+  auto isLastDataBlockReverseIteratorAtREnd = lastDataBlockReverseIterator == m_dataBlocks.rend();
 
   if (isFirstDataBlockAtEnd || isLastDataBlockReverseIteratorAtREnd) {
     std::vector<DataBlock> newDataBlocks;
@@ -342,8 +301,7 @@ void DataBlockComposite::truncate(int64_t specMin, int64_t specMax) {
   }
 
   // Check if we have an empty interval in the truncation
-  auto isEmptyInterval = firstDataBlock->getMinSpectrumID() >
-                         lastDataBlockReverseIterator->getMaxSpectrumID();
+  auto isEmptyInterval = firstDataBlock->getMinSpectrumID() > lastDataBlockReverseIterator->getMaxSpectrumID();
 
   if (isEmptyInterval) {
     std::vector<DataBlock> newDataBlocks;
@@ -351,9 +309,7 @@ void DataBlockComposite::truncate(int64_t specMin, int64_t specMax) {
     return;
   }
 
-  auto lastDataBlock =
-      std::find(std::begin(m_dataBlocks), std::end(m_dataBlocks),
-                *lastDataBlockReverseIterator);
+  auto lastDataBlock = std::find(std::begin(m_dataBlocks), std::end(m_dataBlocks), *lastDataBlockReverseIterator);
 
   // Create datablocks
   // Increment since we want to include the last data block
@@ -364,8 +320,7 @@ void DataBlockComposite::truncate(int64_t specMin, int64_t specMax) {
   // the it cuts the block.
   if (newDataBlocks[0].getMinSpectrumID() < specMin) {
     auto numberOfSpectra = newDataBlocks[0].getMaxSpectrumID() - specMin + 1;
-    DataBlock block(newDataBlocks[0].getNumberOfPeriods(), numberOfSpectra,
-                    newDataBlocks[0].getNumberOfChannels());
+    DataBlock block(newDataBlocks[0].getNumberOfPeriods(), numberOfSpectra, newDataBlocks[0].getNumberOfChannels());
     block.setMinSpectrumID(specMin);
     block.setMaxSpectrumID(newDataBlocks[0].getMaxSpectrumID());
     newDataBlocks[0] = block;
@@ -373,10 +328,8 @@ void DataBlockComposite::truncate(int64_t specMin, int64_t specMax) {
 
   auto lastIndex = newDataBlocks.size() - 1;
   if (specMax < newDataBlocks[lastIndex].getMaxSpectrumID()) {
-    auto numberOfSpectra =
-        specMax - newDataBlocks[lastIndex].getMaxSpectrumID() + 1;
-    DataBlock block(newDataBlocks[lastIndex].getNumberOfPeriods(),
-                    numberOfSpectra,
+    auto numberOfSpectra = specMax - newDataBlocks[lastIndex].getMaxSpectrumID() + 1;
+    DataBlock block(newDataBlocks[lastIndex].getNumberOfPeriods(), numberOfSpectra,
                     newDataBlocks[lastIndex].getNumberOfChannels());
     block.setMinSpectrumID(newDataBlocks[lastIndex].getMinSpectrumID());
     block.setMaxSpectrumID(specMax);
@@ -426,17 +379,14 @@ void DataBlockComposite::removeSpectra(DataBlockComposite &toRemove) {
 
   // Now create the new intervals which don't include the removeInterval
   // values
-  std::vector<std::pair<int64_t, int64_t>> newIntervals;
+  std::vector<SpectrumPair> newIntervals;
   for (auto &originalInterval : originalIntervals) {
     // Find all relevant remove intervals. In principal this could
     // be made more efficient.
     auto currentRemovalIntervals =
-        getRemovalIntervalsRelevantForTheCurrentOriginalInterval(
-            originalInterval, toRemoveIntervals);
-    auto slicedIntervals =
-        getSlicedIntervals(originalInterval, currentRemovalIntervals);
-    newIntervals.insert(std::end(newIntervals), std::begin(slicedIntervals),
-                        std::end(slicedIntervals));
+        getRemovalIntervalsRelevantForTheCurrentOriginalInterval(originalInterval, toRemoveIntervals);
+    auto slicedIntervals = getSlicedIntervals(originalInterval, currentRemovalIntervals);
+    newIntervals.insert(std::end(newIntervals), std::begin(slicedIntervals), std::end(slicedIntervals));
   }
 
   // Create a new set of data blocks
@@ -445,9 +395,7 @@ void DataBlockComposite::removeSpectra(DataBlockComposite &toRemove) {
 
   m_dataBlocks.clear();
   for (const auto &newInterval : newIntervals) {
-    DataBlock dataBlock(numberOfPeriods,
-                        newInterval.second - newInterval.first + 1,
-                        numberOfChannels);
+    DataBlock dataBlock(numberOfPeriods, newInterval.second - newInterval.first + 1, numberOfChannels);
     dataBlock.setMinSpectrumID(newInterval.first);
     dataBlock.setMaxSpectrumID(newInterval.second);
     m_dataBlocks.emplace_back(dataBlock);
@@ -458,9 +406,9 @@ void DataBlockComposite::removeSpectra(DataBlockComposite &toRemove) {
  * Provides a container with all spectrum numbers
  * @returns a container with all sepctrum numbers
  */
-std::vector<int64_t> DataBlockComposite::getAllSpectrumNumbers() {
+std::vector<specnum_t> DataBlockComposite::getAllSpectrumNumbers() {
   auto generator = getGenerator();
-  std::vector<int64_t> allSpectra;
+  std::vector<specnum_t> allSpectra;
 
   for (; !generator->isDone(); generator->next()) {
     allSpectra.emplace_back(generator->getValue());
@@ -470,5 +418,4 @@ std::vector<int64_t> DataBlockComposite::getAllSpectrumNumbers() {
 }
 
 bool DataBlockComposite::isEmpty() { return m_dataBlocks.empty(); }
-} // namespace DataHandling
-} // namespace Mantid
+} // namespace Mantid::DataHandling

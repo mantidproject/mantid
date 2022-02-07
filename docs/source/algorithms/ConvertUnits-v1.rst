@@ -15,7 +15,7 @@ Factory <Unit Factory>`. If the Y data is 'dimensioned' (i.e. has been
 divided by the bin width), then this will be correctly handled, but at
 present nothing else is done to the Y data. If the sample-detector
 distance cannot be calculated then the affected spectrum will be zeroed,
-and a warning message will be output on the `logging <http://www.mantidproject.org/logging>`__
+and a warning message will be output on the :ref:`logging <05_logging>`
 service.
 
 If AlignBins is false or left at the default the output workspace may be

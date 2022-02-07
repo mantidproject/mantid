@@ -29,16 +29,14 @@ private:
   /// Return the code string to execute
   std::string scriptCode() const;
   /// Sets up the code context & executes it
-  std::shared_ptr<API::Workspace>
-  executeScript(const std::string &script) const;
+  std::shared_ptr<API::Workspace> executeScript(const std::string &script) const;
   /// Execute the code in the given local context
   boost::python::dict doExecuteScript(const std::string &script) const;
   /// Builds the local dictionary that defines part of the execution context of
   /// the script
   boost::python::dict buildLocals() const;
   /// Extracts any output workspace pointer that was created
-  std::shared_ptr<API::Workspace>
-  extractOutputWorkspace(const boost::python::dict &locals) const;
+  std::shared_ptr<API::Workspace> extractOutputWorkspace(const boost::python::dict &locals) const;
 };
 
 } // namespace PythonInterface

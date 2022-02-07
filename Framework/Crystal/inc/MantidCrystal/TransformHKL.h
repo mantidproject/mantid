@@ -25,9 +25,7 @@ public:
 
   /// Algorithm's version for identification
   int version() const override;
-  const std::vector<std::string> seeAlso() const override {
-    return {"SortHKL"};
-  }
+  const std::vector<std::string> seeAlso() const override { return {"SortHKL"}; }
 
   /// Algorithm's category for identification
   const std::string category() const override;

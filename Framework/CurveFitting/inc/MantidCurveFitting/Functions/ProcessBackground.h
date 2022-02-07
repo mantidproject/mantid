@@ -24,21 +24,16 @@ class RemovePeaks {
 public:
   void setup(const DataObjects::TableWorkspace_sptr &peaktablews);
 
-  DataObjects::Workspace2D_sptr
-  removePeaks(const API::MatrixWorkspace_const_sptr &dataws, int wsindex,
-              double numfwhm);
+  DataObjects::Workspace2D_sptr removePeaks(const API::MatrixWorkspace_const_sptr &dataws, int wsindex, double numfwhm);
 
 private:
   /// Parse peak centre and FWHM from a table workspace
-  void
-  parsePeakTableWorkspace(const DataObjects::TableWorkspace_sptr &peaktablews,
-                          std::vector<double> &vec_peakcentre,
-                          std::vector<double> &vec_peakfwhm);
+  void parsePeakTableWorkspace(const DataObjects::TableWorkspace_sptr &peaktablews, std::vector<double> &vec_peakcentre,
+                               std::vector<double> &vec_peakfwhm);
 
   /// Exclude peak regions
-  size_t excludePeaks(std::vector<double> v_inX, std::vector<bool> &v_useX,
-                      std::vector<double> v_centre, std::vector<double> v_fwhm,
-                      double num_fwhm);
+  size_t excludePeaks(std::vector<double> v_inX, std::vector<bool> &v_useX, std::vector<double> v_centre,
+                      std::vector<double> v_fwhm, double num_fwhm);
 
   std::vector<double> m_vecPeakCentre;
   std::vector<double> m_vecPeakFWHM;
@@ -83,16 +78,13 @@ private:
   void selectFromGivenFunction();
 
   /// Select background points automatically
-  DataObjects::Workspace2D_sptr
-  autoBackgroundSelection(const DataObjects::Workspace2D_sptr &bkgdWS);
+  DataObjects::Workspace2D_sptr autoBackgroundSelection(const DataObjects::Workspace2D_sptr &bkgdWS);
 
   /// Create a background function from input properties
-  BackgroundFunction_sptr
-  createBackgroundFunction(const std::string &backgroundtype);
+  BackgroundFunction_sptr createBackgroundFunction(const std::string &backgroundtype);
 
   /// Filter non-background data points out and create a background workspace
-  DataObjects::Workspace2D_sptr
-  filterForBackground(const BackgroundFunction_sptr &bkgdfunction);
+  DataObjects::Workspace2D_sptr filterForBackground(const BackgroundFunction_sptr &bkgdfunction);
 
   DataObjects::Workspace2D_const_sptr m_dataWS;
   DataObjects::Workspace2D_sptr m_outputWS;

@@ -20,7 +20,7 @@ Usage
 
 .. testcode:: ExSortByQVectors
 
-  
+
     ws = LoadSassena("outputSassena_1.4.1.h5", TimeUnit=1.0)
     print('workspaces instantiated: ' + ', '.join(ws.getNames()))
     SortByQVectors(InputWorkspace='ws')

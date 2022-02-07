@@ -11,7 +11,9 @@ Description
 -----------
 
 This is the loader for the raw `.nxs` files produced by the powder diffractometers at ILL.
-Currently it supports the instruments D20 and D2B.
+Currently it supports the instruments D20, D1B and D2B, as well as IN5, PANTHER, and SHARP in the data scan mode.
+
+The *TwoThetaOffset* parameter corresponding to the rotation of the detector is optional and only used for D1B. It is to be provided in degrees.
 
 Loading D20
 ###########
@@ -37,12 +39,12 @@ The loader is able to load the following scan configurations:
 
 - **detector scan**, used always for D2B, and for D20 calibration runs, when the detector moves during the run. In this configuration the output is a *scanning workspace* containing one spectrum for each pixel at each time index. The x-axis is again a single point.
 
-- **other scan**, e.g. omega scan for D20, which is another type of motor scan, but it is not the detector that moves, but the sample. In this case, the data in the raw file is organised just as for *detector scan*, but the output workspace is not a *scanning workspace*. It is a regular workspace with x-axis corresponding to the scanned variable, e.g. omega angle.
+- **other scan**, e.g. omega scan for D20, IN5, PANTHER, and SHARP, which is another type of motor scan, but it is not the detector that moves, but the sample. In this case, the data in the raw file is organised just as for *detector scan*, but the output workspace is not a *scanning workspace*. It is a regular workspace with x-axis corresponding to the scanned variable, e.g. omega angle.
 
 Logs
 ####
 
-The loader creates time series logs for each of the scanned variable in the `.nxs` file.
+The loader creates time series logs for each of the scanned variable in the `.nxs` file. The scanned variable name is added under `ScanVar` log.
 
 D2B alignment
 -------------
@@ -102,6 +104,34 @@ Output:
 .. testoutput:: LoadILLDiffractionDetectorScanExample
 
    The output has 1 bins (detector scan) and 409625 spectra
+
+**Example - LoadILLDiffraction - D1B**
+
+.. testcode:: LoadILLDiffractionD1BExample
+
+  ws = LoadILLDiffraction(Filename='ILL/D1B/473432.nxs')
+
+  print('The output has {0} bin (detector scan) and {1} spectra'.format(ws.blocksize(), ws.getNumberHistograms()))
+
+Output:
+
+.. testoutput:: LoadILLDiffractionD1BExample
+
+  The output has 1 bin (detector scan) and 1281 spectra
+
+**Example - LoadILLDiffraction - IN5**
+
+.. testcode:: LoadILLDiffractionIN5Example
+
+  ws = LoadILLDiffraction(Filename='ILL/IN5/199857.nxs')
+
+  print('The output has {0} bin (omega scan) and {1} spectra'.format(ws.blocksize(), ws.getNumberHistograms()))
+
+Output:
+
+.. testoutput:: LoadILLDiffractionIN5Example
+
+  The output has 17 bin (omega scan) and 98305 spectra
 
 .. categories::
 

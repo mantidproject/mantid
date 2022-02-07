@@ -21,8 +21,7 @@ namespace PythonInterface {
  * Exception type that captures the current Python error state
  * as a generic C++ exception for any general Python exception
  */
-class MANTID_PYTHONINTERFACE_CORE_DLL PythonException
-    : public std::runtime_error {
+class MANTID_PYTHONINTERFACE_CORE_DLL PythonException : public std::runtime_error {
 public:
   PythonException(bool withTrace = true);
 };

@@ -16,6 +16,19 @@ the X-values, followed by pairs of Y and E values. Columns are separated by
 commas. The resulting file can normally be loaded into a workspace by the
 :ref:`algm-LoadAscii` algorithm.
 
+It is possible to create a header for the ASCII file containing selected sample log entries and its unit,
+specified through `LogList` property. In case the requested log does not exist, it will be printed as
+`Not defined`. This feature is not enabled for :ref:`TableWorkspace <Table Workspaces>`.
+
+If the workspace (matrix workspace) contains several spectra, two options are
+available:
+
+* if OneSpectrumPerFile if false (default value), all spectra will be appended
+  into the same file
+* if OneSpectrumPerFile is true, each spectrum will be written in a separate
+  file. The name of the file will be created as follows: <Filename property>_
+  <spectrum index>_<axis value><axis unit>.<extension>
+
 Limitations
 ###########
 

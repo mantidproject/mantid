@@ -26,9 +26,7 @@ class MANTID_CRYSTAL_DLL CountReflections : public API::Algorithm {
 public:
   const std::string name() const override;
   int version() const override;
-  const std::vector<std::string> seeAlso() const override {
-    return {"PredictPeaks", "SortHKL"};
-  }
+  const std::vector<std::string> seeAlso() const override { return {"PredictPeaks", "SortHKL"}; }
   const std::string category() const override;
   const std::string summary() const override;
 
@@ -36,10 +34,9 @@ private:
   void init() override;
   void exec() override;
 
-  DataObjects::PeaksWorkspace_sptr getPeaksWorkspace(
-      const DataObjects::PeaksWorkspace_sptr &templateWorkspace,
-      const PeakStatisticsTools::UniqueReflectionCollection &reflections,
-      const Geometry::PointGroup_sptr &pointGroup) const;
+  DataObjects::PeaksWorkspace_sptr getPeaksWorkspace(const DataObjects::PeaksWorkspace_sptr &templateWorkspace,
+                                                     const PeakStatisticsTools::UniqueReflectionCollection &reflections,
+                                                     const Geometry::PointGroup_sptr &pointGroup) const;
 };
 
 } // namespace Crystal

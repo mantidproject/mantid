@@ -8,6 +8,8 @@
 
 #include "MantidAPI/DllConfig.h"
 #include "MantidAPI/SpectrumInfoIterator.h"
+#include "MantidKernel/DeltaEMode.h"
+#include "MantidKernel/Unit.h"
 #include "MantidKernel/V3D.h"
 #include "MantidKernel/cow_ptr.h"
 
@@ -50,8 +52,7 @@ class ExperimentInfo;
 */
 class MANTID_API_DLL SpectrumInfo {
 public:
-  SpectrumInfo(const Beamline::SpectrumInfo &spectrumInfo,
-               const ExperimentInfo &experimentInfo,
+  SpectrumInfo(const Beamline::SpectrumInfo &spectrumInfo, const ExperimentInfo &experimentInfo,
                Geometry::DetectorInfo &detectorInfo);
   ~SpectrumInfo();
 
@@ -59,8 +60,7 @@ public:
   size_t detectorCount() const;
 
   const SpectrumDefinition &spectrumDefinition(const size_t index) const;
-  const Kernel::cow_ptr<std::vector<SpectrumDefinition>> &
-  sharedSpectrumDefinitions() const;
+  const Kernel::cow_ptr<std::vector<SpectrumDefinition>> &sharedSpectrumDefinitions() const;
 
   bool isMonitor(const size_t index) const;
   bool isMasked(const size_t index) const;
@@ -68,7 +68,11 @@ public:
   double twoTheta(const size_t index) const;
   double signedTwoTheta(const size_t index) const;
   double azimuthal(const size_t index) const;
+  std::pair<double, double> geographicalAngles(const size_t index) const;
   Kernel::V3D position(const size_t index) const;
+  Kernel::UnitParametersMap diffractometerConstants(const size_t index, std::vector<detid_t> &uncalibratedDets) const;
+  Kernel::UnitParametersMap diffractometerConstants(const size_t index) const;
+  double difcUncalibrated(const size_t index) const;
   bool hasDetectors(const size_t index) const;
   bool hasUniqueDetector(const size_t index) const;
 
@@ -85,6 +89,11 @@ public:
   Kernel::V3D samplePosition() const;
   double l1() const;
 
+  void getDetectorValues(const Kernel::Unit &inputUnit, const Kernel::Unit &outputUnit,
+                         const Kernel::DeltaEMode::Type emode, const bool signedTheta, int64_t wsIndex,
+                         Kernel::UnitParametersMap &pmap) const;
+  void createDetectorIdLogMessages(const std::vector<detid_t> &detids, int64_t wsIndex) const;
+
   SpectrumInfoIterator<SpectrumInfo> begin();
   SpectrumInfoIterator<SpectrumInfo> end();
   const SpectrumInfoIterator<const SpectrumInfo> cbegin() const;
@@ -94,14 +103,12 @@ public:
 
 private:
   const Geometry::IDetector &getDetector(const size_t index) const;
-  const SpectrumDefinition &
-  checkAndGetSpectrumDefinition(const size_t index) const;
+  const SpectrumDefinition &checkAndGetSpectrumDefinition(const size_t index) const;
 
   const ExperimentInfo &m_experimentInfo;
   Geometry::DetectorInfo &m_detectorInfo;
   const Beamline::SpectrumInfo &m_spectrumInfo;
-  mutable std::vector<std::shared_ptr<const Geometry::IDetector>>
-      m_lastDetector;
+  mutable std::vector<std::shared_ptr<const Geometry::IDetector>> m_lastDetector;
   mutable std::vector<size_t> m_lastIndex;
 };
 

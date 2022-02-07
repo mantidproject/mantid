@@ -13,7 +13,7 @@ This is a part of multi-algorithm reduction workflow for **IN16B** indirect geom
 It handles the first steps of the reduction chain, such as grouping of the detectors, normalizing to monitor dependent on the reduction type.
 It performs transformation of the axes; x-axis from channel number to energy transfer, and optionally y-axis to scattering angle or elastic momentum transfer.
 It handles **automatically** all four types of data (QENS, EFWS, IFWS, BATS) recorded with or without mirror sense.
-Note, that following the standard, the ``Unit`` for energy transfer (``DeltaE``) will be mili-elevtron-volts (``mev``).
+Note, that following the standard, the ``Unit`` for energy transfer (``DeltaE``) will be milli-electron-volts (``mev``).
 This algorithm is intended to handle only single file at a time, although if multiple files are given, they will be automatically summed at raw level, i.e. while loading.
 In this case ``MergeRuns`` algorithm will be invoked, which will forbid the merges across different types of data
 (e.g. different mirror senses, doppler energy or velocity profiles).
@@ -41,6 +41,7 @@ However in the output there will be no grouping of pixels by default.
 The actual energy transfer range will be derived from the monitor window, taking the user defined cutoff value into account.
 The frame offset of the monitor will be deduced automatically.
 ElasticChannelWorkspace can be optionally output, which can be used as input for the measurements with inelastic offset, where there is no elastic peak in the recorded frame.
+Values for single detectors will be computed similarly but separately, and they can be ignored if needed, using the ``DiscardSingleDetectors`` flag.
 
 Usage
 -----

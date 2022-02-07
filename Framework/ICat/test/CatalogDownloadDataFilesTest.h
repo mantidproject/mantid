@@ -8,49 +8,38 @@
 
 #include "ICatTestHelper.h"
 #include "MantidAPI/AnalysisDataService.h"
-#include "MantidAPI/FrameworkManager.h"
-#include "MantidDataObjects/WorkspaceSingleValue.h"
 #include "MantidICat/CatalogDownloadDataFiles.h"
 #include "MantidICat/CatalogGetDataFiles.h"
-#include "MantidICat/CatalogLogin.h"
 #include "MantidICat/CatalogSearch.h"
-#include "MantidKernel/ConfigService.h"
-#include <Poco/File.h>
-#include <Poco/Path.h>
 #include <cxxtest/TestSuite.h>
-#include <fstream>
-#include <iomanip>
 
-using namespace Mantid;
 using namespace Mantid::ICat;
 using namespace Mantid::API;
+using namespace ICatTestHelper;
 
 class CatalogDownloadDataFilesTest : public CxxTest::TestSuite {
 public:
   // This means the constructor isn't called when running other tests
-  static CatalogDownloadDataFilesTest *createSuite() {
-    return new CatalogDownloadDataFilesTest();
-  }
-  static void destroySuite(CatalogDownloadDataFilesTest *suite) {
-    delete suite;
-  }
+  static CatalogDownloadDataFilesTest *createSuite() { return new CatalogDownloadDataFilesTest(); }
 
-  /// Skip all unit tests if ICat server is down
-  bool skipTests() override { return ICatTestHelper::skipTests(); }
+  static void destroySuite(CatalogDownloadDataFilesTest *suite) { delete suite; }
 
-  CatalogDownloadDataFilesTest() { FrameworkManager::Instance(); }
+  CatalogDownloadDataFilesTest()
+      : m_fakeLogin(std::make_unique<FakeICatLogin>()), m_sessionID(m_fakeLogin->getSessionId()) {}
+
+  void tearDown() override { AnalysisDataService::Instance().clear(); }
 
   void testInit() {
     TS_ASSERT_THROWS_NOTHING(downloadobj.initialize());
     TS_ASSERT(downloadobj.isInitialized());
   }
-  void xtestDownLoadDataFile() {
-    TS_ASSERT(ICatTestHelper::login());
 
+  void testDownLoadDataFile() {
     if (!searchobj.isInitialized())
       searchobj.initialize();
     searchobj.setPropertyValue("RunRange", "100-102");
     searchobj.setPropertyValue("Instrument", "HET");
+    searchobj.setPropertyValue("Session", m_sessionID);
     searchobj.setPropertyValue("OutputWorkspace", "investigations");
 
     TS_ASSERT_THROWS_NOTHING(searchobj.execute());
@@ -59,55 +48,29 @@ public:
     if (!invstObj.isInitialized())
       invstObj.initialize();
     invstObj.setPropertyValue("InvestigationId", "13539191");
+    invstObj.setPropertyValue("Session", m_sessionID);
     invstObj.setPropertyValue("OutputWorkspace",
                               "investigation"); // selected invesigation
-    //
+
     TS_ASSERT_THROWS_NOTHING(invstObj.execute());
     TS_ASSERT(invstObj.isExecuted());
 
-    clock_t start = clock();
     if (!downloadobj.isInitialized())
       downloadobj.initialize();
 
     downloadobj.setPropertyValue("Filenames", "HET00097.RAW");
+    downloadobj.setPropertyValue("Session", m_sessionID);
 
     TS_ASSERT_THROWS_NOTHING(downloadobj.execute());
-
-    clock_t end = clock();
-    float diff = float(end - start) / CLOCKS_PER_SEC;
-
-    std::string filepath =
-        Kernel::ConfigService::Instance().getString("defaultsave.directory");
-    filepath += "download_time.txt";
-
-    std::ofstream ofs(filepath.c_str(), std::ios_base::out);
-    if (ofs.rdstate() & std::ios::failbit) {
-      throw Mantid::Kernel::Exception::FileError("Error on creating File",
-                                                 "download_time.txt");
-    }
-    ofs << "Time taken to  download files with investigation id 12576918 is "
-        << std::fixed << std::setprecision(2) << diff << " seconds\n";
-
-    ICatTestHelper::logout();
-
     TS_ASSERT(downloadobj.isExecuted());
-    // delete the file after execution
-    // remove("HET00097.RAW");
-
-    AnalysisDataService::Instance().remove("investigations");
-    AnalysisDataService::Instance().remove("investigation");
-    // Clean up test files
-    if (Poco::File(filepath).exists())
-      Poco::File(filepath).remove();
   }
 
-  void xtestDownLoadNexusFile() {
-    TS_ASSERT(ICatTestHelper::login());
-
+  void testDownLoadNexusFile() {
     if (!searchobj.isInitialized())
       searchobj.initialize();
     searchobj.setPropertyValue("RunRange", "17440-17556");
     searchobj.setPropertyValue("Instrument", "EMU");
+    searchobj.setPropertyValue("Session", m_sessionID);
     searchobj.setPropertyValue("OutputWorkspace", "investigations");
 
     TS_ASSERT_THROWS_NOTHING(searchobj.execute());
@@ -117,55 +80,28 @@ public:
       invstObj.initialize();
 
     invstObj.setPropertyValue("InvestigationId", "24070400");
-
+    invstObj.setPropertyValue("Session", m_sessionID);
     invstObj.setPropertyValue("OutputWorkspace", "investigation");
 
     TS_ASSERT_THROWS_NOTHING(invstObj.execute());
     TS_ASSERT(invstObj.isExecuted());
 
-    clock_t start = clock();
     if (!downloadobj.isInitialized())
       downloadobj.initialize();
 
     downloadobj.setPropertyValue("Filenames", "EMU00017452.nxs");
+    downloadobj.setPropertyValue("Session", m_sessionID);
+
     TS_ASSERT_THROWS_NOTHING(downloadobj.execute());
-
-    clock_t end = clock();
-    float diff = float(end - start) / CLOCKS_PER_SEC;
-
-    std::string filepath =
-        Kernel::ConfigService::Instance().getString("defaultsave.directory");
-    filepath += "download_time.txt";
-
-    std::ofstream ofs(filepath.c_str(),
-                      std::ios_base::out | std::ios_base::app);
-    if (ofs.rdstate() & std::ios::failbit) {
-      throw Mantid::Kernel::Exception::FileError("Error on creating File",
-                                                 "download_time.txt");
-    }
-    ofs << "Time taken to download files with investigation id 24070400 is "
-        << std::fixed << std::setprecision(2) << diff << " seconds\n";
-    // ofs.close();
-
-    ICatTestHelper::logout();
-
     TS_ASSERT(downloadobj.isExecuted());
-    // delete the file after execution
-    // remove("EMU00017452.nxs");
-    AnalysisDataService::Instance().remove("investigations");
-    AnalysisDataService::Instance().remove("investigation");
-    // Clean up test files
-    if (Poco::File(filepath).exists())
-      Poco::File(filepath).remove();
   }
 
-  void xtestDownLoadDataFile_Merlin() {
-    TS_ASSERT(ICatTestHelper::login());
-
+  void testDownLoadDataFile_Merlin() {
     if (!searchobj.isInitialized())
       searchobj.initialize();
     searchobj.setPropertyValue("RunRange", "600-601");
     searchobj.setPropertyValue("Instrument", "MERLIN");
+    searchobj.setPropertyValue("Session", m_sessionID);
     searchobj.setPropertyValue("OutputWorkspace", "investigations");
 
     TS_ASSERT_THROWS_NOTHING(searchobj.execute());
@@ -174,96 +110,28 @@ public:
     if (!invstObj.isInitialized())
       invstObj.initialize();
     invstObj.setPropertyValue("InvestigationId", "24022007");
+    invstObj.setPropertyValue("Session", m_sessionID);
     invstObj.setPropertyValue("OutputWorkspace",
                               "investigation"); // selected invesigation
-    //
+
     TS_ASSERT_THROWS_NOTHING(invstObj.execute());
     TS_ASSERT(invstObj.isExecuted());
 
-    clock_t start = clock();
     if (!downloadobj.isInitialized())
       downloadobj.initialize();
 
     downloadobj.setPropertyValue("Filenames", "MER00599.raw");
+    downloadobj.setPropertyValue("Session", m_sessionID);
 
     TS_ASSERT_THROWS_NOTHING(downloadobj.execute());
-
-    clock_t end = clock();
-    float diff = float(end - start) / CLOCKS_PER_SEC;
-
-    std::string filepath =
-        Kernel::ConfigService::Instance().getString("defaultsave.directory");
-    filepath += "download_time.txt";
-
-    std::ofstream ofs(filepath.c_str(),
-                      std::ios_base::out | std::ios_base::app);
-    if (ofs.rdstate() & std::ios::failbit) {
-      throw Mantid::Kernel::Exception::FileError("Error on creating File",
-                                                 "download_time.txt");
-    }
-    ofs << "Time taken to download files with investigation id 24022007 is "
-        << std::fixed << std::setprecision(2) << diff << " seconds\n";
-
-    ICatTestHelper::logout();
-
     TS_ASSERT(downloadobj.isExecuted());
-    AnalysisDataService::Instance().remove("investigations");
-    AnalysisDataService::Instance().remove("investigation");
-
-    // Clean up test files
-    if (Poco::File(filepath).exists())
-      Poco::File(filepath).remove();
-  }
-
-  void xtestDownloaddataFile1() {
-    std::string filepath =
-        Kernel::ConfigService::Instance().getString("defaultsave.directory");
-    filepath += "download_time.txt";
-    std::ofstream ofs(filepath.c_str(),
-                      std::ios_base::out | std::ios_base::app);
-    if (ofs.rdstate() & std::ios::failbit) {
-      throw Mantid::Kernel::Exception::FileError("Error on creating File",
-                                                 "download_time.txt");
-    }
-
-    CatalogDownloadDataFiles downloadobj1;
-
-    // As the algorithm now uses setProperty to allow us to save it to a
-    // directory we must pass in the default for testing.
-    std::string fName =
-        Kernel::ConfigService::Instance().getString("defaultsave.directory");
-    // Need to initialize the algorithm in order to set the "downloadPath"
-    // property.
-    if (!downloadobj1.isInitialized())
-      downloadobj1.initialize();
-    downloadobj1.setPropertyValue("DownloadPath", fName);
-
-    clock_t start = clock();
-    // this gets the main doc page, which should always be there
-    // it's a wiki page so it can be relatively slow
-    std::string fullPathDownloadedFile = downloadobj1.testDownload(
-        "http://www.mantidproject.org/Documentation", "test.htm");
-    clock_t end = clock();
-    float diff = float(end - start) / CLOCKS_PER_SEC;
-
-    ofs << "Time taken for http download from mantidwebserver over internet "
-           "for a small file of size 1KB is "
-        << std::fixed << std::setprecision(2) << diff << " seconds\n";
-
-    ICatTestHelper::logout();
-
-    // delete the file after execution
-    remove("test.htm");
-
-    // test if fullPathDownloadedFile ok
-    Poco::Path defaultSaveDir(
-        Kernel::ConfigService::Instance().getString("defaultsave.directory"));
-    Poco::Path path(defaultSaveDir, "test.htm");
-    TS_ASSERT(fullPathDownloadedFile == path.toString());
   }
 
 private:
   CatalogSearch searchobj;
   CatalogGetDataFiles invstObj;
   CatalogDownloadDataFiles downloadobj;
+
+  std::unique_ptr<FakeICatLogin> m_fakeLogin;
+  std::string m_sessionID;
 };

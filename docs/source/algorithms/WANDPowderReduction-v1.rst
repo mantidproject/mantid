@@ -17,12 +17,10 @@ monitor count or time.  The output workspace can be saved to various
 formats with :ref:`SaveFocusedXYE <algm-SaveFocusedXYE>`.
 
 It is recommenced to load WAND data with :ref:`LoadWAND
-<algm-LoadWAND>` as the wavelength/energy will be set correctly and
-monitor counts correctly taken into account for normalization. This
-algorithm will work on data loaded with :ref:`LoadEventNexus
+<algm-LoadWAND>`.
+This algorithm will work on data loaded with :ref:`LoadEventNexus
 <algm-LoadEventNexus>` or the grouped output from :ref:`FilterEvents
-<algm-FilterEvents>` but you will need to specify `EFixed` if
-converting to anything except `Theta`.
+<algm-FilterEvents>`.
 
 
 MaskAngle
@@ -50,7 +48,8 @@ Usage
                        CalibrationWorkspace=vanadium,
                        Target='Theta',
                        NumberBins=1000,
-                       OutputWorkspace='silicon_powder')
+                       OutputWorkspace='silicon_powder',
+                       Sum=False)
 
 .. figure:: /images/WANDPowderReduction_silicon_powder.png
 
@@ -67,7 +66,8 @@ Usage
                        XMin=4.5,
                        Xmax=6.25,
                        NumberBins=500,
-                       OutputWorkspace='silicon_powder_q')
+                       OutputWorkspace='silicon_powder_q',
+                       Sum=False)
 
 .. figure:: /images/WANDPowderReduction_silicon_powder_q.png
 
@@ -82,7 +82,8 @@ Usage
                        CalibrationWorkspace=vanadium,
                        Target='ElasticDSpacing',
                        NumberBins=1000,
-                       OutputWorkspace='silicon_powder_d_spacing')
+                       OutputWorkspace='silicon_powder_d_spacing',
+                       Sum=False)
 
 .. figure:: /images/WANDPowderReduction_silicon_powder_d.png
 
@@ -104,7 +105,8 @@ Usage
                        BackgroundWorkspace=bkg,
                        Target='Theta',
                        NumberBins=1000,
-                       OutputWorkspace='silicon_powder_background')
+                       OutputWorkspace='silicon_powder_background',
+                       Sum=False)
 
    # Scale background by 50%
    WANDPowderReduction(InputWorkspace=silicon,
@@ -113,9 +115,64 @@ Usage
                        BackgroundScale=0.5,
                        Target='Theta',
                        NumberBins=1000,
-                       OutputWorkspace='silicon_powder_background_0.5')
+                       OutputWorkspace='silicon_powder_background_0.5',
+                       Sum=False)
 
 .. figure:: /images/WANDPowderReduction_silicon_powder_bkg.png
+
+**Using multiple input workspaces**
+
+.. code-block:: python
+
+   si1 = LoadWAND('/HFIR/HB2C/IPTS-22745/nexus/HB2C_320234.nxs.h5')
+   si2 = LoadWAND('/HFIR/HB2C/IPTS-22745/nexus/HB2C_320235.nxs.h5')
+   va0 = LoadWAND('/HFIR/HB2C/IPTS-23858/nexus/HB2C_320259.nxs.h5')
+
+   # single ws
+   WANDPowderReduction(
+         InputWorkspace=si1,
+         CalibrationWorkspace=va0,
+         Target='Theta',
+         NumberBins=1000,
+         NormaliseBy='Time',
+         OutputWorkspace=f'si1_reduced',
+         Sum=False,
+         )
+
+   # single ws
+   WANDPowderReduction(
+         InputWorkspace=si2,
+         CalibrationWorkspace=va0,
+         Target='Theta',
+         NumberBins=1000,
+         NormaliseBy='Time',
+         OutputWorkspace=f'si2_reduced',
+         Sum=False,
+         )
+
+   # merged ws - single (summed) output ws
+   WANDPowderReduction(
+         InputWorkspace=[si1, si2],
+         CalibrationWorkspace=va0,
+         Target='Theta',
+         NumberBins=1000,
+         NormaliseBy='Time',
+         OutputWorkspace=f'si_reduced',
+         Sum=True,
+         )
+
+   # merged ws - group output ws
+   WANDPowderReduction(
+         InputWorkspace=[si1, si2],
+         CalibrationWorkspace=va0,
+         Target='Theta',
+         NumberBins=1000,
+         NormaliseBy='Time',
+         OutputWorkspace=f'si_reduced',
+         Sum=False,
+         )
+
+.. figure:: /images/WANDPowderReduction_silicon_powder_multiple_input.png
 
 .. categories::
 

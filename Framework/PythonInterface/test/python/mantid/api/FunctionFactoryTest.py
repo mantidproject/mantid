@@ -6,7 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 import unittest
 
-from mantid.api import FrameworkManagerImpl, IFunction1D, FunctionFactory
+from mantid.api import FrameworkManagerImpl, IFunction1D, FunctionFactory, IPeakFunction
 
 
 class TestFunctionNoAttrs(IFunction1D):
@@ -54,6 +54,13 @@ class FunctionFactoryTest(unittest.TestCase):
         self.assertEqual(func.name(),  name)
         self.assertGreater(len(func.__repr__()), len(name))
         self.assertTrue("Peak" in func.categories())
+
+    def test_get_Gaussian_as_IPeakFunction(self):
+        func = FunctionFactory.createPeakFunction("Gaussian")
+        self.assertTrue(isinstance(func, IPeakFunction))
+
+    def test_LinearBackground_not_IPeakFunction(self):
+        self.assertRaises(ValueError, FunctionFactory.createPeakFunction, "LinearBackground")
 
     def test_function_subscription_of_non_class_type_raises_error(self):
         def not_a_fit_function(*args, **kwargs):

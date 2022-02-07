@@ -19,7 +19,7 @@ namespace CxxTest
         TestListener() {}
         virtual ~TestListener() {}
         virtual void process_commandline(int& /*argc*/, char** /*argv*/) {}
-        
+
         virtual void enterWorld( const WorldDescription & /*desc*/ ) {}
         virtual void enterSuite( const SuiteDescription & /*desc*/ ) {}
         virtual void enterTest( const TestDescription & /*desc*/ ) {}

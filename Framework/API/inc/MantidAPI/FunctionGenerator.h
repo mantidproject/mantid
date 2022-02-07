@@ -37,18 +37,15 @@ public:
   /// m_source and m_target.
   //@{
   /// Set i-th parameter
-  void setParameter(size_t, const double &value,
-                    bool explicitlySet = true) override;
+  void setParameter(size_t, const double &value, bool explicitlySet = true) override;
   /// Set i-th parameter description
   void setParameterDescription(size_t, const std::string &description) override;
   /// Get i-th parameter
   double getParameter(size_t i) const override;
   /// Set parameter by name.
-  void setParameter(const std::string &name, const double &value,
-                    bool explicitlySet = true) override;
+  void setParameter(const std::string &name, const double &value, bool explicitlySet = true) override;
   /// Set description of parameter by name.
-  void setParameterDescription(const std::string &name,
-                               const std::string &description) override;
+  void setParameterDescription(const std::string &name, const std::string &description) override;
   /// Get parameter by name.
   double getParameter(const std::string &name) const override;
   /// Check if function has a parameter with this name.
@@ -65,8 +62,12 @@ public:
   bool isExplicitlySet(size_t i) const override;
   /// Get the fitting error for a parameter
   double getError(size_t i) const override;
+  /// Get the fitting error for a parameter by name
+  double getError(const std::string &name) const override;
   /// Set the fitting error for a parameter
   void setError(size_t i, double err) override;
+  /// Set the fitting error for a parameter by name
+  void setError(const std::string &name, double err) override;
 
   /// Return parameter index from a parameter reference.
   size_t getParameterIndex(const ParameterReference &ref) const override;
@@ -82,8 +83,7 @@ public:
 
 protected:
   /// Declare a new parameter
-  void declareParameter(const std::string &name, double initValue = 0,
-                        const std::string &description = "") override;
+  void declareParameter(const std::string &name, double initValue = 0, const std::string &description = "") override;
   /// Change status of parameter
   void setParameterStatus(size_t i, ParameterStatus status) override;
   /// Get status of parameter
@@ -103,11 +103,13 @@ public:
   void setAttribute(const std::string &name, const Attribute &) override;
   /// Check if attribute attName exists
   bool hasAttribute(const std::string &name) const override;
+  // Get ith attribute name
+  std::string attributeName(size_t i) const override;
+
   //@}
 
   /// Evaluate the function
-  void function(const FunctionDomain &domain,
-                FunctionValues &values) const override;
+  void function(const FunctionDomain &domain, FunctionValues &values) const override;
 
 protected:
   /// overwrite IFunction base class method, which declare function parameters

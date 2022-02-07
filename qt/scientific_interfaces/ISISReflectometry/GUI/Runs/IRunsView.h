@@ -51,6 +51,7 @@ class RunsViewSearchSubscriber {
 public:
   virtual ~RunsViewSearchSubscriber() = default;
   virtual void notifySearchComplete() = 0;
+  virtual void notifySearchResultsChanged() = 0;
 };
 
 /** @class IRunsView
@@ -59,8 +60,7 @@ IRunsView is the base view class for the Reflectometry Interface. It
 contains no QT specific functionality as that should be handled by a subclass.
 */
 
-class MANTIDQT_ISISREFLECTOMETRY_DLL IRunsView
-    : public MantidQt::MantidWidgets::ProgressableView {
+class MANTIDQT_ISISREFLECTOMETRY_DLL IRunsView : public MantidQt::MantidWidgets::ProgressableView {
 public:
   virtual ~IRunsView() = default;
 
@@ -75,12 +75,14 @@ public:
 
   // Search methods
   virtual void resizeSearchResultsColumnsToContents() = 0;
-  virtual ISearchModel const &searchResults() = 0;
+  virtual int getSearchResultsTableWidth() const = 0;
+  virtual int getSearchResultsColumnWidth(int column) const = 0;
+  virtual void setSearchResultsColumnWidth(int column, int width) = 0;
+  virtual ISearchModel const &searchResults() const = 0;
   virtual ISearchModel &mutableSearchResults() = 0;
 
   // Setter methods
-  virtual void
-  setInstrumentList(const std::vector<std::string> &instruments) = 0;
+  virtual void setInstrumentList(const std::vector<std::string> &instruments) = 0;
   virtual void updateMenuEnabledState(bool isProcessing) = 0;
   virtual void setAutoreduceButtonEnabled(bool enabled) = 0;
   virtual void setAutoreducePauseButtonEnabled(bool enabled) = 0;
@@ -88,6 +90,7 @@ public:
   virtual void setInstrumentComboEnabled(bool enabled) = 0;
   virtual void setSearchTextEntryEnabled(bool enabled) = 0;
   virtual void setSearchButtonEnabled(bool enabled) = 0;
+  virtual void setSearchResultsEnabled(bool enabled) = 0;
   virtual void setSearchInstrument(std::string const &instrumentName) = 0;
   virtual void setStartMonitorButtonEnabled(bool enabled) = 0;
   virtual void setStopMonitorButtonEnabled(bool enabled) = 0;
@@ -98,12 +101,11 @@ public:
   virtual std::set<int> getAllSearchRows() const = 0;
   virtual std::string getSearchInstrument() const = 0;
   virtual std::string getSearchString() const = 0;
+  virtual std::string getSearchCycle() const = 0;
   virtual int getLiveDataUpdateInterval() const = 0;
 
-  virtual std::shared_ptr<MantidQt::API::AlgorithmRunner>
-  getAlgorithmRunner() const = 0;
-  virtual std::shared_ptr<MantidQt::API::AlgorithmRunner>
-  getMonitorAlgorithmRunner() const = 0;
+  virtual std::shared_ptr<MantidQt::API::AlgorithmRunner> getAlgorithmRunner() const = 0;
+  virtual std::shared_ptr<MantidQt::API::AlgorithmRunner> getMonitorAlgorithmRunner() const = 0;
 
   // Start live data monitoring
   virtual void startMonitor() = 0;

@@ -7,15 +7,12 @@
 #include "MantidDataObjects/MDBoxSaveable.h"
 #include "MantidDataObjects/MDBox.h"
 
-namespace Mantid {
-namespace DataObjects {
+namespace Mantid::DataObjects {
 
 MDBoxSaveable::MDBoxSaveable(API::IMDNode *const Host) : m_MDNode(Host) {}
 
 /** flush data out of the file buffer to the HDD */
-void MDBoxSaveable::flushData() const {
-  m_MDNode->getBoxController()->getFileIO()->flushData();
-}
+void MDBoxSaveable::flushData() const { m_MDNode->getBoxController()->getFileIO()->flushData(); }
 
 //-----------------------------------------------------------------------------------------------
 /** Physically save the box data. Tries to load any previous data from HDD
@@ -41,10 +38,8 @@ void MDBoxSaveable::load() {
   // Is the data in memory right now (cached copy)?
   if (!m_isLoaded) {
     API::IBoxControllerIO *fileIO = m_MDNode->getBoxController()->getFileIO();
-    m_MDNode->loadAndAddFrom(fileIO, this->getFilePosition(),
-                             this->getFileSize());
+    m_MDNode->loadAndAddFrom(fileIO, this->getFilePosition(), this->getFileSize());
     this->setLoaded(true);
   }
 }
-} // namespace DataObjects
-} // namespace Mantid
+} // namespace Mantid::DataObjects

@@ -16,8 +16,8 @@ The recommended set of steps to get started is to:
 - Use an editor, which is :ref:`XML schema aware  <Using_XML_Schema>`
 - Use the full :ref:`IDF <InstrumentDefinitionFile>` page for detailed documentation
 
-The above are suggestive steps for generating an IDF. In addition there have 
-been created several scripts for automatic the creation of IDFs. Such scripts 
+The above are suggestive steps for generating an IDF. In addition there have
+been created several scripts for automatic the creation of IDFs. Such scripts
 can be found `here <https://github.com/mantidproject/mantidgeometry>`__.
 
 Using the Schema
@@ -35,12 +35,12 @@ Find a Similar existing IDF
 It may be that an instrument already exists that is similar to the one you wish to add. To see the existing instruments follow the procedure below.
 
 - Install Mantid
-- Open MantidPlot
-- Execute the algorithm LoadEmptyInstrument
+- Open MantidWorkbench
+- Execute the algorithm :ref:`algm-LoadEmptyInstrument`
 - This open the algorithm window for this algorithm. Click the Browse button and browse to the instrument folder of your Mantid install directory
 - The instrument folder contains all the instruments that Mantid currently support. Select for example SANS2D_Definition.xml. Fill in the output workspace name, and and click 'Run'
 - The created workspace will appear in the Workspaces window. Right click on the workspace and chose 'Show Instrument'
-- A new window appears, which is called the `Instrument view <http://www.mantidproject.org/MantidPlot:_Instrument_View>`__.
+- A new window appears, which is called the :ref:`InstrumentViewer`
 
 In addition below is a list (for now just containing one item) of existing IDFs which have been annotated with the purpose of (hopefully) quickly learn the basis of creating an IDF:
 

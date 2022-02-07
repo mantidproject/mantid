@@ -26,8 +26,7 @@ namespace API {
 /// Class for when an algorithm is starting asynchronously
 class AlgorithmStartingNotification : public Poco::Notification {
 public:
-  AlgorithmStartingNotification(IAlgorithm_sptr alg)
-      : Poco::Notification(), m_alg(std::move(alg)) {}
+  AlgorithmStartingNotification(IAlgorithm_sptr alg) : Poco::Notification(), m_alg(std::move(alg)) {}
   /// Returns the algorithm that is starting
   IAlgorithm_sptr getAlgorithm() const { return m_alg; }
 
@@ -44,8 +43,7 @@ public:
   /// Creates a managed algorithm with the option of choosing a version
   IAlgorithm_sptr create(const std::string &algName, const int &version = -1);
   /// Creates an unmanaged algorithm with the option of choosing a version
-  std::shared_ptr<Algorithm> createUnmanaged(const std::string &algName,
-                                             const int &version = -1) const;
+  std::shared_ptr<Algorithm> createUnmanaged(const std::string &algName, const int &version = -1) const;
 
   std::size_t size() const;
 
@@ -53,8 +51,7 @@ public:
   void removeById(AlgorithmID id);
 
   std::vector<IAlgorithm_const_sptr> runningInstances() const;
-  std::vector<IAlgorithm_const_sptr>
-  runningInstancesOf(const std::string &algorithmName) const;
+  std::vector<IAlgorithm_const_sptr> runningInstancesOf(const std::string &algorithmName) const;
 
   /// Sends notifications to observers. Observers can subscribe to
   /// notificationCenter
@@ -81,8 +78,7 @@ private:
   size_t removeFinishedAlgorithms();
 
   /// The list of managed algorithms
-  std::deque<IAlgorithm_sptr>
-      m_managed_algs; ///<  pointers to managed algorithms [policy???]
+  std::deque<IAlgorithm_sptr> m_managed_algs; ///<  pointers to managed algorithms [policy???]
   /// Mutex for modifying/accessing the m_managed_algs member.
   mutable std::mutex m_managedMutex;
 };
@@ -94,7 +90,6 @@ using AlgorithmManager = Mantid::Kernel::SingletonHolder<AlgorithmManagerImpl>;
 
 namespace Mantid {
 namespace Kernel {
-EXTERN_MANTID_API template class MANTID_API_DLL
-    Mantid::Kernel::SingletonHolder<Mantid::API::AlgorithmManagerImpl>;
+EXTERN_MANTID_API template class MANTID_API_DLL Mantid::Kernel::SingletonHolder<Mantid::API::AlgorithmManagerImpl>;
 }
 } // namespace Mantid

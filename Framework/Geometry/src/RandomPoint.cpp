@@ -9,9 +9,7 @@
 #include "MantidKernel/PseudoRandomNumberGenerator.h"
 #include <boost/math/special_functions/pow.hpp>
 
-namespace Mantid {
-namespace Geometry {
-namespace RandomPoint {
+namespace Mantid::Geometry::RandomPoint {
 
 /**
  * Return a local point in a cylinder shape
@@ -22,9 +20,8 @@ namespace RandomPoint {
  * @param radialLength radial position of point in a cylinder
  * @return a local point inside the cylinder
  */
-Kernel::V3D localPointInCylinder(const Kernel::V3D &basis,
-                                 const Kernel::V3D &alongAxis,
-                                 double polarAngle, double radialLength) {
+Kernel::V3D localPointInCylinder(const Kernel::V3D &basis, const Kernel::V3D &alongAxis, double polarAngle,
+                                 double radialLength) {
   // Use basis to get a second perpendicular vector to define basis2
   Kernel::V3D basis2;
   if (basis.X() == 0) {
@@ -39,10 +36,8 @@ Kernel::V3D localPointInCylinder(const Kernel::V3D &basis,
     basis2.normalize();
   }
   const Kernel::V3D basis3{basis.cross_prod(basis2)};
-  const Kernel::V3D localPoint{
-      ((basis2 * std::cos(polarAngle) + basis3 * std::sin(polarAngle)) *
-       radialLength) +
-      alongAxis};
+  const Kernel::V3D localPoint{((basis2 * std::cos(polarAngle) + basis3 * std::sin(polarAngle)) * radialLength) +
+                               alongAxis};
   return localPoint;
 }
 
@@ -52,16 +47,14 @@ Kernel::V3D localPointInCylinder(const Kernel::V3D &basis,
  * @param rng a random number generate
  * @return a random point inside the cuboid
  */
-Kernel::V3D inCuboid(const detail::ShapeInfo &shapeInfo,
-                     Kernel::PseudoRandomNumberGenerator &rng) {
+Kernel::V3D inCuboid(const detail::ShapeInfo &shapeInfo, Kernel::PseudoRandomNumberGenerator &rng) {
   const auto geometry = shapeInfo.cuboidGeometry();
   const double r1{rng.nextValue()};
   const double r2{rng.nextValue()};
   const double r3{rng.nextValue()};
   const Kernel::V3D basis1{geometry.leftFrontTop - geometry.leftFrontBottom};
   const Kernel::V3D basis2{geometry.leftBackBottom - geometry.leftFrontBottom};
-  const Kernel::V3D basis3{geometry.rightFrontBottom -
-                           geometry.leftFrontBottom};
+  const Kernel::V3D basis3{geometry.rightFrontBottom - geometry.leftFrontBottom};
   return geometry.leftFrontBottom + (basis1 * r1 + basis2 * r2 + basis3 * r3);
 }
 
@@ -71,8 +64,7 @@ Kernel::V3D inCuboid(const detail::ShapeInfo &shapeInfo,
  * @param rng a random number generator
  * @return a point
  */
-Kernel::V3D inCylinder(const detail::ShapeInfo &shapeInfo,
-                       Kernel::PseudoRandomNumberGenerator &rng) {
+Kernel::V3D inCylinder(const detail::ShapeInfo &shapeInfo, Kernel::PseudoRandomNumberGenerator &rng) {
   const auto geometry = shapeInfo.cylinderGeometry();
   const double r1{rng.nextValue()};
   const double r2{rng.nextValue()};
@@ -92,8 +84,7 @@ Kernel::V3D inCylinder(const detail::ShapeInfo &shapeInfo,
  * @param rng a random number generator
  * @return a point
  */
-Kernel::V3D inHollowCylinder(const detail::ShapeInfo &shapeInfo,
-                             Kernel::PseudoRandomNumberGenerator &rng) {
+Kernel::V3D inHollowCylinder(const detail::ShapeInfo &shapeInfo, Kernel::PseudoRandomNumberGenerator &rng) {
   const auto geometry = shapeInfo.hollowCylinderGeometry();
   const double r1{rng.nextValue()};
   const double r2{rng.nextValue()};
@@ -116,8 +107,7 @@ Kernel::V3D inHollowCylinder(const detail::ShapeInfo &shapeInfo,
  * @param rng a random number generator
  * @return a point
  */
-Kernel::V3D inSphere(const detail::ShapeInfo &shapeInfo,
-                     Kernel::PseudoRandomNumberGenerator &rng) {
+Kernel::V3D inSphere(const detail::ShapeInfo &shapeInfo, Kernel::PseudoRandomNumberGenerator &rng) {
   const auto geometry = shapeInfo.sphereGeometry();
   const double r1{rng.nextValue()};
   const double r2{rng.nextValue()};
@@ -139,9 +129,8 @@ Kernel::V3D inSphere(const detail::ShapeInfo &shapeInfo,
  * @param maxAttempts maximum number of random numbers to use before giving up
  * @return a point
  */
-boost::optional<Kernel::V3D>
-inGenericShape(const IObject &object, Kernel::PseudoRandomNumberGenerator &rng,
-               size_t maxAttempts) {
+boost::optional<Kernel::V3D> inGenericShape(const IObject &object, Kernel::PseudoRandomNumberGenerator &rng,
+                                            size_t maxAttempts) {
   return bounded(object, rng, object.getBoundingBox(), maxAttempts);
 }
 
@@ -153,14 +142,11 @@ inGenericShape(const IObject &object, Kernel::PseudoRandomNumberGenerator &rng,
  * @param maxAttempts number of attempts to find a suitable point
  * @return a point or none if maxAttempts was exceeded
  */
-boost::optional<Kernel::V3D> bounded(const IObject &object,
-                                     Kernel::PseudoRandomNumberGenerator &rng,
-                                     const BoundingBox &box,
-                                     size_t maxAttempts) {
+boost::optional<Kernel::V3D> bounded(const IObject &object, Kernel::PseudoRandomNumberGenerator &rng,
+                                     const BoundingBox &box, size_t maxAttempts) {
   boost::optional<Kernel::V3D> point{boost::none};
   if (box.isNull()) {
-    throw std::invalid_argument(
-        "Invalid bounding box. Cannot generate random point.");
+    throw std::invalid_argument("Invalid bounding box. Cannot generate random point.");
   }
   for (size_t attempts{0}; attempts < maxAttempts; ++attempts) {
     const double r1 = rng.nextValue();
@@ -174,6 +160,4 @@ boost::optional<Kernel::V3D> bounded(const IObject &object,
   };
   return point;
 }
-} // namespace RandomPoint
-} // namespace Geometry
-} // namespace Mantid
+} // namespace Mantid::Geometry::RandomPoint

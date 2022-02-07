@@ -7,9 +7,9 @@
 #include "MantidAPI/IPeaksWorkspace.h"
 #include "MantidAPI/Run.h"
 #include "MantidGeometry/Crystal/IPeak.h"
+#include "MantidPythonInterface/api/RegisterWorkspacePtrToPython.h"
 #include "MantidPythonInterface/core/Converters/PyObjectToV3D.h"
 #include "MantidPythonInterface/core/GetPointer.h"
-#include "MantidPythonInterface/kernel/Registry/RegisterWorkspacePtrToPython.h"
 #include <boost/none.hpp>
 #include <boost/optional.hpp>
 #include <boost/python/class.hpp>
@@ -22,7 +22,9 @@ using namespace boost::python;
 using namespace Mantid::Geometry;
 using namespace Mantid::API;
 using Mantid::API::Column_sptr;
+using Mantid::Kernel::SpecialCoordinateSystem;
 using Mantid::Kernel::V3D;
+using Mantid::PythonInterface::Converters::PyObjectToV3D;
 using Mantid::PythonInterface::Registry::RegisterWorkspacePtrToPython;
 
 GET_POINTER_SPECIALIZATION(IPeaksWorkspace)
@@ -30,32 +32,50 @@ GET_POINTER_SPECIALIZATION(IPeaksWorkspace)
 namespace {
 
 /// Create a peak via it's HKL value from a list or numpy array
-IPeak *createPeakHKL(IPeaksWorkspace &self, const object &data) {
-  auto peak = self.createPeakHKL(
-      Mantid::PythonInterface::Converters::PyObjectToV3D(data)());
+IPeak *createPeakHKL(const IPeaksWorkspace &self, const object &data) {
+  auto peak = self.createPeakHKL(Mantid::PythonInterface::Converters::PyObjectToV3D(data)());
   // Python will manage it
   return peak.release();
 }
 
 /// Create a peak via it's QLab value from a list or numpy array
-IPeak *createPeakQLab(IPeaksWorkspace &self, const object &data) {
-  auto peak = self.createPeak(
-      Mantid::PythonInterface::Converters::PyObjectToV3D(data)(), boost::none);
+IPeak *createPeakQLab(const IPeaksWorkspace &self, const object &data) {
+  auto peak = self.createPeak(Mantid::PythonInterface::Converters::PyObjectToV3D(data)(), boost::none);
   // Python will manage it
   return peak.release();
 }
 
 /// Create a peak via it's QLab value from a list or numpy array
-IPeak *createPeakQLabWithDistance(IPeaksWorkspace &self, const object &data,
-                                  double detectorDistance) {
-  auto peak = self.createPeak(
-      Mantid::PythonInterface::Converters::PyObjectToV3D(data)(),
-      detectorDistance);
+IPeak *createPeakQLabWithDistance(const IPeaksWorkspace &self, const object &data, double detectorDistance) {
+  auto peak = self.createPeak(Mantid::PythonInterface::Converters::PyObjectToV3D(data)(), detectorDistance);
   // Python will manage the object
   return peak.release();
 }
+
+/// Create a peak via it's QSample value from a list or numpy array
+IPeak *createPeakQSample(const IPeaksWorkspace &self, const object &data) {
+  auto peak = self.createPeakQSample(Mantid::PythonInterface::Converters::PyObjectToV3D(data)());
+  // Python will manage it
+  return peak.release();
+}
+
 /// Create a peak via it's QLab value from a list or numpy array
-void addPeak(IPeaksWorkspace &self, const IPeak &peak) { self.addPeak(peak); }
+void addPeak(IPeaksWorkspace &self, const IPeak &peak) {
+  self.addPeak(peak);
+  self.modified();
+}
+
+/// Add a peak with its Q-vector (using a list of numpy array) and the coordinate frm (Qlab, Qsmaple, HKL)
+void addPeak2(IPeaksWorkspace &self, const object &data, const SpecialCoordinateSystem &frame) {
+  self.addPeak(PyObjectToV3D(data)(), frame);
+  self.modified();
+}
+
+/// Remove a peak and send an AfterReplaceNotification for subscribed viewers, such as sliceviewer's
+void removePeak(IPeaksWorkspace &self, int peak_num) {
+  self.removePeak(peak_num);
+  self.modified();
+}
 
 /**
  * PeakWorkspaceTableAdaptor
@@ -71,12 +91,10 @@ public:
    *
    * @param peaksWorkspace reference to a peaks workspace to convert values for.
    */
-  explicit PeakWorkspaceTableAdaptor(IPeaksWorkspace &peaksWorkspace)
-      : m_peaksWorkspace(peaksWorkspace) {
+  explicit PeakWorkspaceTableAdaptor(IPeaksWorkspace &peaksWorkspace) : m_peaksWorkspace(peaksWorkspace) {
     // Create a map of string -> setter functions
     // Each function will extract the given value from the passed python type.
     m_setterMap = {{"RunNumber", setterFunction(&IPeak::setRunNumber)},
-                   {"DetID", setterFunction(&IPeak::setDetectorID)},
                    {"h", setterFunction(&IPeak::setH)},
                    {"k", setterFunction(&IPeak::setK)},
                    {"l", setterFunction(&IPeak::setL)},
@@ -96,12 +114,10 @@ public:
    * @param rowIndex index of the peak to set the value for.
    * @param value value to set the property to.
    */
-  void setProperty(const std::string &columnName, const int rowIndex,
-                   object value) {
+  void setProperty(const std::string &columnName, const int rowIndex, object value) {
     auto &peak = m_peaksWorkspace.getPeak(rowIndex);
     if (m_setterMap.find(columnName) == m_setterMap.end()) {
-      throw std::runtime_error(columnName +
-                               " is a read only column of a peaks workspace");
+      throw std::runtime_error(columnName + " is a read only column of a peaks workspace");
     }
     m_setterMap[columnName](peak, std::move(value));
   }
@@ -110,8 +126,7 @@ private:
   // type alias for the member function to wrap
   template <typename T> using MemberFunc = void (IPeak::*)(T value);
   // special type alias for V3D functions that take an addtional parameter
-  using MemberFuncV3D = void (IPeak::*)(const V3D &value,
-                                        boost::optional<double>);
+  using MemberFuncV3D = void (IPeak::*)(const V3D &value, boost::optional<double>);
   // type alias for the setter function
   using SetterType = std::function<void(IPeak &peak, const object)>;
 
@@ -126,8 +141,7 @@ private:
     return [func](IPeak &peak, const object &value) {
       extract<T> extractor{value};
       if (!extractor.check()) {
-        throw std::runtime_error(
-            "Cannot set value. Value was not of the expected type!");
+        throw std::runtime_error("Cannot set value. Value was not of the expected type!");
       }
       (peak.*func)(extractor());
     };
@@ -136,7 +150,7 @@ private:
   /**
    * Wrap a setter function on a IPeak with the bpl::extract function.
    *
-   * This is a specilization of the templated function to handle the
+   * This is a specialization of the templated function to handle the
    * 2 parameter signature of V3D setter functions.
    *
    * @param func A pointer to a member function to wrap.
@@ -147,8 +161,7 @@ private:
     return [func](IPeak &peak, const object &value) {
       extract<const V3D &> extractor{value};
       if (!extractor.check()) {
-        throw std::runtime_error(
-            "Cannot set value. Value was not of the expected type!");
+        throw std::runtime_error("Cannot set value. Value was not of the expected type!");
       }
       (peak.*func)(extractor(), boost::none);
     };
@@ -170,9 +183,7 @@ private:
  * @param row_or_col An integer giving the row if value is a string or the
  * column if value is an index
  */
-std::pair<int, std::string> getRowAndColumnName(IPeaksWorkspace &self,
-                                                const object &col_or_row,
-                                                const int row_or_col) {
+std::pair<int, std::string> getRowAndColumnName(IPeaksWorkspace &self, const object &col_or_row, const int row_or_col) {
   extract<std::string> columnNameExtractor{col_or_row};
   std::string columnName;
   int rowIndex;
@@ -198,12 +209,10 @@ std::pair<int, std::string> getRowAndColumnName(IPeaksWorkspace &self,
  * @param row_or_col An integer giving the row if value is a string or the
  * column if value is an index
  */
-void setCell(IPeaksWorkspace &self, const object &col_or_row,
-             const int row_or_col, const object &value) {
+void setCell(IPeaksWorkspace &self, const object &col_or_row, const int row_or_col, const object &value) {
   std::string columnName;
   int rowIndex;
-  std::tie(rowIndex, columnName) =
-      getRowAndColumnName(self, col_or_row, row_or_col);
+  std::tie(rowIndex, columnName) = getRowAndColumnName(self, col_or_row, row_or_col);
 
   PeakWorkspaceTableAdaptor tableMap{self};
   tableMap.setProperty(columnName, rowIndex, value);
@@ -212,8 +221,7 @@ void setCell(IPeaksWorkspace &self, const object &col_or_row,
 /// Internal helper to support iteration on PeaksWorkspace in Python
 struct IPeaksWorkspaceIterator {
   explicit IPeaksWorkspaceIterator(IPeaksWorkspace *const workspace)
-      : m_workspace{workspace}, m_numPeaks{workspace->getNumberPeaks()},
-        m_rowIndex{-1} {
+      : m_workspace{workspace}, m_numPeaks{workspace->getNumberPeaks()}, m_rowIndex{-1} {
     assert(workspace);
   }
   IPeak *next() {
@@ -231,61 +239,44 @@ private:
 };
 
 // Create an iterator from the given workspace
-IPeaksWorkspaceIterator makePyIterator(IPeaksWorkspace &self) {
-  return IPeaksWorkspaceIterator(&self);
-}
+IPeaksWorkspaceIterator makePyIterator(IPeaksWorkspace &self) { return IPeaksWorkspaceIterator(&self); }
 
 } // namespace
 
 void export_IPeaksWorkspaceIterator() {
   class_<IPeaksWorkspaceIterator>("IPeaksWorkspaceIterator", no_init)
-      .def(
-#if PY_VERSION_HEX >= 0x03000000
-          "__next__"
-#else
-          "next"
-#endif
-          ,
-          &IPeaksWorkspaceIterator::next,
-          return_value_policy<reference_existing_object>())
+      .def("__next__", &IPeaksWorkspaceIterator::next, return_value_policy<reference_existing_object>())
       .def("__iter__", objects::identity_function());
 }
 
 void export_IPeaksWorkspace() {
   // IPeaksWorkspace class
-  class_<IPeaksWorkspace, bases<ITableWorkspace, ExperimentInfo>,
-         boost::noncopyable>("IPeaksWorkspace", no_init)
+  class_<IPeaksWorkspace, bases<ITableWorkspace, ExperimentInfo>, boost::noncopyable>("IPeaksWorkspace", no_init)
       .def("getNumberPeaks", &IPeaksWorkspace::getNumberPeaks, arg("self"),
            "Returns the number of peaks within the workspace")
-      .def("addPeak", addPeak, (arg("self"), arg("peak")),
-           "Add a peak to the workspace")
-      .def("removePeak", &IPeaksWorkspace::removePeak,
-           (arg("self"), arg("peak_num")), "Remove a peak from the workspace")
-      .def("getPeak", &IPeaksWorkspace::getPeakPtr,
-           (arg("self"), arg("peak_num")), return_internal_reference<>(),
+      .def("addPeak", addPeak, (arg("self"), arg("peak")), "Add a peak to the workspace")
+      .def("addPeak", addPeak2, (arg("self"), arg("data"), arg("coord_system")), "Add a peak to the workspace")
+      .def("removePeak", removePeak, (arg("self"), arg("peak_num")), "Remove a peak from the workspace")
+      .def("getPeak", &IPeaksWorkspace::getPeakPtr, (arg("self"), arg("peak_num")), return_internal_reference<>(),
            "Returns a peak at the given index")
-      .def("createPeak", createPeakQLab, (arg("self"), arg("data")),
-           return_value_policy<manage_new_object>(),
+      .def("createPeak", createPeakQLab, (arg("self"), arg("data")), return_value_policy<manage_new_object>(),
            "Create a Peak and return it from its coordinates in the QLab frame")
-      .def("createPeak", createPeakQLabWithDistance,
-           (arg("self"), arg("data"), arg("detector_distance")),
+      .def("createPeak", createPeakQLabWithDistance, (arg("self"), arg("data"), arg("detector_distance")),
            return_value_policy<manage_new_object>(),
            "Create a Peak and return it from its coordinates in the QLab "
            "frame, detector-sample distance explicitly provided")
-      .def("createPeakHKL", createPeakHKL, (arg("self"), arg("data")),
-           return_value_policy<manage_new_object>(),
+      .def("createPeakQSample", createPeakQSample, (arg("self"), arg("data")), return_value_policy<manage_new_object>(),
+           "Create a Peak and return it from its coordinates in the QSample "
+           "frame")
+      .def("createPeakHKL", createPeakHKL, (arg("self"), arg("data")), return_value_policy<manage_new_object>(),
            "Create a Peak and return it from its coordinates in the HKL frame")
-      .def("hasIntegratedPeaks", &IPeaksWorkspace::hasIntegratedPeaks,
-           arg("self"), "Determine if the peaks have been integrated")
-      .def("getRun", &IPeaksWorkspace::mutableRun, arg("self"),
-           return_internal_reference<>(),
+      .def("hasIntegratedPeaks", &IPeaksWorkspace::hasIntegratedPeaks, arg("self"),
+           "Determine if the peaks have been integrated")
+      .def("getRun", &IPeaksWorkspace::mutableRun, arg("self"), return_internal_reference<>(),
            "Return the Run object for this workspace")
-      .def("peakInfoNumber", &IPeaksWorkspace::peakInfoNumber,
-           (arg("self"), arg("qlab_frame"), arg("lab_coordinate")),
+      .def("peakInfoNumber", &IPeaksWorkspace::peakInfoNumber, (arg("self"), arg("qlab_frame"), arg("lab_coordinate")),
            "Peak info number at Q vector for this workspace")
-      .def("setCell", &setCell,
-           (arg("self"), arg("row_or_column"), arg("column_or_row"),
-            arg("value")),
+      .def("setCell", &setCell, (arg("self"), arg("row_or_column"), arg("column_or_row"), arg("value")),
            "Sets the value of a given cell. If the row_or_column argument is a "
            "number then it is interpreted as a row otherwise it "
            "is interpreted as a column name.")

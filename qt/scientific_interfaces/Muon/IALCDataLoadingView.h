@@ -23,13 +23,14 @@ class MANTIDQT_MUONINTERFACE_DLL IALCDataLoadingView : public QObject {
   Q_OBJECT
 
 public:
-  /// @return Full path to first run data file, or empty string if invalid/not
-  /// selected
-  virtual std::string firstRun() const = 0;
+  /// Init instrument combo box
+  virtual void initInstruments() = 0;
 
-  /// @return Full path to last run data file, or empty string if invalid/not
-  /// selected
-  virtual std::string lastRun() const = 0;
+  /// @return std::string of instrument name
+  virtual std::string getInstrument() const = 0;
+
+  /// @return std::string of path
+  virtual std::string getPath() const = 0;
 
   /// Returns the name of the log to use
   /// @return Log name
@@ -70,12 +71,32 @@ public:
   /// disabled
   virtual boost::optional<std::pair<double, double>> timeRange() const = 0;
 
-  /// @return The string "Auto"
-  virtual std::string autoString() const = 0;
+  /// Sets all available info to empty
+  virtual void setAvailableInfoToEmpty() = 0;
 
-  /// If Auto mode on, store name of currently loaded file
-  /// @param file :: [input] name of file loaded
-  virtual void setCurrentAutoFile(const std::string &file) = 0;
+  /// Get text input for runs
+  virtual std::string getRunsText() const = 0;
+
+  /// Manual override of Auto add runs
+  virtual void toggleRunsAutoAdd(const bool on) = 0;
+
+  virtual std::string getRunsFirstRunText() const = 0;
+
+  /// Enable/disable alpha to be editable
+  virtual void enableAlpha(const bool alpha) = 0;
+
+  virtual bool isAlphaEnabled() const = 0;
+
+  /// Set value of alpha
+  virtual void setAlphaValue(const std::string &alpha) = 0;
+
+  /// Get alpha value
+  virtual std::string getAlphaValue() const = 0;
+
+  /// Show/hide alpha explanation
+  virtual void showAlphaMessage(const bool alpha) = 0;
+
+  virtual void setFileExtensions(const std::vector<std::string> &extensions) = 0;
 
 public slots:
   /// Performs any necessary initialization
@@ -84,12 +105,16 @@ public slots:
   /// Updates the plotted data
   /// @param workspace :: The workspace containing the data
   /// @param workspaceIndex :: the index to plot
-  virtual void setDataCurve(Mantid::API::MatrixWorkspace_sptr workspace,
-                            std::size_t const &workspaceIndex = 0) = 0;
+  virtual void setDataCurve(Mantid::API::MatrixWorkspace_sptr workspace, std::size_t const &workspaceIndex = 0) = 0;
 
   /// Displays an error
   /// @param error :: Error message to display
   virtual void displayError(const std::string &error) = 0;
+
+  /// Displays a warning to the user
+  /// @param warning :: Warning message to display
+  /// @return Users response
+  virtual bool displayWarning(const std::string &warning) = 0;
 
   /// Update the list of logs user can select
   /// @param logs :: New list of log names
@@ -118,24 +143,66 @@ public slots:
   /// Enables all the widgets
   virtual void enableAll() = 0;
 
-  /// Toggles "auto" mode for last file
-  virtual void checkBoxAutoChanged(int state) = 0;
+  /// Instrument Changed
+  virtual void instrumentChanged(QString instrument) = 0;
 
-  /// Gets directory from first file and sets last file directory
-  virtual void handleFirstFileChanged() = 0;
+  /// Enables/Disables the load button when ready
+  virtual void enableLoad(bool enable) = 0;
+
+  /// Sets path from where data loaded from
+  virtual void setPath(const std::string &path) = 0;
+
+  /// Sets the instrument in runs box if user changes it from combobox
+  virtual void setInstrument(const std::string &instrument) = 0;
+
+  /// Enables/Disables auto add
+  virtual void enableRunsAutoAdd(bool enable) = 0;
+
+  /// Get runs errors
+  virtual std::string getRunsError() = 0;
+
+  // Get files for loading
+  virtual std::vector<std::string> getFiles() = 0;
+
+  // Get first file only for loading
+  virtual std::string getFirstFile() = 0;
+
+  /// Set status label for loading
+  virtual void setLoadStatus(const std::string &status, const std::string &colour) = 0;
+
+  /// Handle check/uncheck of runs auto add
+  virtual void runsAutoAddToggled(bool autoAdd) = 0;
+
+  /// Sets text and ensure runs are not searched for
+  virtual void setRunsTextWithoutSearch(const std::string &text) = 0;
 
 signals:
   /// Request to load data
   void loadRequested();
 
-  /// User has selected the first run
-  void firstRunSelected();
+  /// User has started editing the runs
+  void runsEditingSignal();
 
-  /// New data have been loaded
+  /// User has finished editing the runs
+  void runsEditingFinishedSignal();
+
+  /// New data has been loaded
   void dataChanged();
 
-  /// "Auto" box has been checked/unchecked
-  void lastRunAutoCheckedChanged(int state);
+  /// Instrument has been changed
+  void instrumentChangedSignal(std::string);
+
+  // Manage user directories has been clicked
+  void manageDirectoriesClicked();
+
+  /// Searching finished
+  void runsFoundSignal();
+
+  /// Runs Auto Add state changed
+  void autoAddToggledSignal(bool);
+
+  /// Period Info Button Clicked
+  void periodInfoClicked();
 };
 
 } // namespace CustomInterfaces

@@ -35,11 +35,9 @@ public:
   public:
     using FnType = std::function<void()>;
 
-    Callback(const Callback::FnType &callback) : m_mutex(), m_callback() {
-      setFunction(callback);
-    }
+    explicit Callback(const Callback::FnType &callback) : m_mutex(), m_callback() { setFunction(callback); }
 
-    Callback(Callback &&other) {
+    Callback(Callback &&other) noexcept {
       {
         // We must lock the other obj - not ourself
         std::lock_guard lck(other.m_mutex);
@@ -62,20 +60,14 @@ public:
   };
 
 public:
-  IKafkaStreamDecoder(std::shared_ptr<IKafkaBroker> broker,
-                      const std::string &streamTopic,
-                      const std::string &runInfoTopic,
-                      const std::string &spDetTopic,
-                      const std::string &sampleEnvTopic,
-                      const std::string &chopperTopic,
-                      const std::string &monitorTopic);
+  IKafkaStreamDecoder(std::shared_ptr<IKafkaBroker> broker, std::string streamTopic, std::string runInfoTopic,
+                      std::string sampleEnvTopic, std::string chopperTopic, std::string monitorTopic);
   virtual ~IKafkaStreamDecoder();
   IKafkaStreamDecoder(const IKafkaStreamDecoder &) = delete;
   IKafkaStreamDecoder &operator=(const IKafkaStreamDecoder &) = delete;
 
   IKafkaStreamDecoder(IKafkaStreamDecoder &&) noexcept;
 
-public:
   ///@name Start/stop
   ///@{
   void startCapture(bool startNow = true);
@@ -94,12 +86,8 @@ public:
 
   ///@name Callbacks
   ///@{
-  virtual void registerIterationEndCb(const Callback::FnType &cb) {
-    m_cbIterationEnd.setFunction(cb);
-  }
-  virtual void registerErrorCb(const Callback::FnType &cb) {
-    m_cbError.setFunction(cb);
-  }
+  virtual void registerIterationEndCb(const Callback::FnType &cb) { m_cbIterationEnd.setFunction(cb); }
+  virtual void registerErrorCb(const Callback::FnType &cb) { m_cbError.setFunction(cb); }
   ///@}
 
   ///@name Modifying
@@ -115,6 +103,12 @@ protected:
     size_t nPeriods;
     std::string nexusStructure;
     int64_t runStartMsgOffset;
+
+    // Detector-Spectrum mapping information
+    bool detSpecMapSpecified = false;
+    size_t numberOfSpectra = 0;
+    std::vector<int32_t> spectrumNumbers;
+    std::vector<int32_t> detectorIDs;
   };
 
   /// Main loop of listening for data messages and populating the cache
@@ -123,8 +117,7 @@ protected:
   virtual void captureImplExcept() = 0;
 
   /// Create the cache workspaces, LoadLiveData extracts data from these
-  virtual void initLocalCaches(const std::string &rawMsgBuffer,
-                               const RunStartStruct &runStartData) = 0;
+  virtual void initLocalCaches(const RunStartStruct &runStartData) = 0;
 
   /// Get an expected message from the run information topic
   int64_t getRunInfoMessage(std::string &rawMsgBuffer);
@@ -135,8 +128,7 @@ protected:
   /// Populate cache workspaces with data from messages
   virtual void sampleDataFromMessage(const std::string &buffer) = 0;
 
-  template <typename T = API::MatrixWorkspace>
-  void writeChopperTimestampsToWorkspaceLogs(std::vector<T> workspaces);
+  template <typename T = API::MatrixWorkspace> void writeChopperTimestampsToWorkspaceLogs(std::vector<T> workspaces);
 
   /// For LoadLiveData to extract the cached data
   virtual API::Workspace_sptr extractDataImpl() = 0;
@@ -146,7 +138,6 @@ protected:
   /// Topic names
   const std::string m_streamTopic;
   const std::string m_runInfoTopic;
-  const std::string m_spDetTopic;
   const std::string m_sampleEnvTopic;
   const std::string m_chopperTopic;
   const std::string m_monitorTopic;
@@ -154,15 +145,12 @@ protected:
   std::atomic<bool> m_interrupt;
   /// Subscriber for the data stream
   std::unique_ptr<IKafkaStreamSubscriber> m_dataStream;
-  /// Mapping of spectrum number to workspace index.
-  std::vector<size_t> m_specToIdx;
-  specnum_t m_specToIdxOffset;
+  /// Map from detId to workspace index
+  std::function<size_t(uint64_t)> m_eventIdToWkspIdx;
   /// Start time of the run
   Types::Core::DateAndTime m_runStart;
   /// Subscriber for the run info stream
   std::unique_ptr<IKafkaStreamSubscriber> m_runStream;
-  /// Subscriber for the run info stream
-  std::unique_ptr<IKafkaStreamSubscriber> m_spDetStream;
   /// Subscriber for the chopper timestamp stream
   std::unique_ptr<IKafkaStreamSubscriber> m_chopperStream;
   /// Run number
@@ -199,43 +187,32 @@ protected:
   void waitForDataExtraction();
   void waitForRunEndObservation();
 
-  std::map<int32_t, std::set<int32_t>>
-  buildSpectrumToDetectorMap(const int32_t *spec, const int32_t *udet,
-                             uint32_t length);
+  static std::map<int32_t, std::set<int32_t>> buildSpectrumToDetectorMap(const int32_t *spec, const int32_t *udet,
+                                                                         uint32_t length);
 
   template <typename T>
-  std::shared_ptr<T>
-  createBufferWorkspace(const std::string &workspaceClassName, size_t nspectra,
-                        const int32_t *spec, const int32_t *udet,
-                        uint32_t length);
+  std::shared_ptr<T> createBufferWorkspace(const std::string &workspaceClassName, size_t nspectra, const int32_t *spec,
+                                           const int32_t *udet, uint32_t length);
   template <typename T>
-  std::shared_ptr<T>
-  createBufferWorkspace(const std::string &workspaceClassName,
-                        const std::shared_ptr<T> &parent);
+  std::shared_ptr<T> createBufferWorkspace(const std::string &workspaceClassName, const std::shared_ptr<T> &parent);
 
   template <typename T>
-  bool loadInstrument(const std::string &name, std::shared_ptr<T> workspace,
-                      const std::string &jsonGeometry = "");
+  bool loadInstrument(const std::string &name, std::shared_ptr<T> workspace, const std::string &jsonGeometry = "");
 
-  void checkRunMessage(
-      const std::string &buffer, bool &checkOffsets,
-      std::unordered_map<std::string, std::vector<int64_t>> &stopOffsets,
-      std::unordered_map<std::string, std::vector<bool>> &reachedEnd);
+  void checkRunMessage(const std::string &buffer, bool &checkOffsets,
+                       std::unordered_map<std::string, std::vector<int64_t>> &stopOffsets,
+                       std::unordered_map<std::string, std::vector<bool>> &reachedEnd);
 
-  void checkRunEnd(
-      const std::string &topicName, bool &checkOffsets, const int64_t offset,
-      const int32_t partition,
-      std::unordered_map<std::string, std::vector<int64_t>> &stopOffsets,
-      std::unordered_map<std::string, std::vector<bool>> &reachedEnd);
+  void checkRunEnd(const std::string &topicName, bool &checkOffsets, int64_t offset, int32_t partition,
+                   std::unordered_map<std::string, std::vector<int64_t>> &stopOffsets,
+                   std::unordered_map<std::string, std::vector<bool>> &reachedEnd);
 
   /// Methods for checking if the end of a run was reached
-  std::unordered_map<std::string, std::vector<int64_t>> getStopOffsets(
-      std::unordered_map<std::string, std::vector<int64_t>> &stopOffsets,
-      std::unordered_map<std::string, std::vector<bool>> &reachedEnd,
-      uint64_t stopTime) const;
-  void checkIfAllStopOffsetsReached(
-      const std::unordered_map<std::string, std::vector<bool>> &reachedEnd,
-      bool &checkOffsets);
+  std::unordered_map<std::string, std::vector<int64_t>>
+  getStopOffsets(std::unordered_map<std::string, std::vector<int64_t>> &stopOffsets,
+                 std::unordered_map<std::string, std::vector<bool>> &reachedEnd, uint64_t stopTime) const;
+  void checkIfAllStopOffsetsReached(const std::unordered_map<std::string, std::vector<bool>> &reachedEnd,
+                                    bool &checkOffsets);
 
   /// Callbacks for unit tests
   Callback m_cbIterationEnd;
@@ -246,9 +223,9 @@ protected:
   /// Subscribe to data stream at the time specified in a run start message
   void joinStreamAtTime(const RunStartStruct &runStartData);
   /// Convert a duration in nanoseconds to milliseconds
-  int64_t nanosecondsToMilliseconds(uint64_t timeNanoseconds) const;
-  /// Get a det-spec map message using the time specified in a run start message
-  std::string getDetSpecMapForRun(const RunStartStruct &runStartStruct);
+  static int64_t nanosecondsToMilliseconds(uint64_t timeNanoseconds);
+
+  static RunStartStruct extractRunStartDataFromMessage(const std::string &messageBuffer, int64_t offset);
 };
 } // namespace LiveData
 } // namespace Mantid

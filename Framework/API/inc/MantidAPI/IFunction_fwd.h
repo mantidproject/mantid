@@ -34,8 +34,7 @@ class MultiDomainFunction;
 /// Shared pointer to Mantid::API::MultiDomainFunction
 using MultiDomainFunction_sptr = std::shared_ptr<MultiDomainFunction>;
 /// Shared pointer to Mantid::API::MultiDomainFunction (const version)
-using MultiDomainFunction_const_sptr =
-    std::shared_ptr<const MultiDomainFunction>;
+using MultiDomainFunction_const_sptr = std::shared_ptr<const MultiDomainFunction>;
 
 } // namespace API
 } // namespace Mantid

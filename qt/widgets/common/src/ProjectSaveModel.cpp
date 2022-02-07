@@ -23,14 +23,13 @@ using namespace MantidQt::MantidWidgets;
  * @param windows :: vector of handles to windows open in Mantid
  * @param activePythonInterfaces The list of active Python interfaces
  */
-ProjectSaveModel::ProjectSaveModel(
-    const std::vector<IProjectSerialisable *> &windows,
-    std::vector<std::string> activePythonInterfaces)
+ProjectSaveModel::ProjectSaveModel(const std::vector<IProjectSerialisable *> &windows,
+                                   std::vector<std::string> activePythonInterfaces)
     : m_activePythonInterfaces(std::move(activePythonInterfaces)) {
   auto workspaces = getWorkspaces();
   for (auto &ws : workspaces) {
-    std::pair<std::string, std::vector<IProjectSerialisable *>> item(
-        ws->getName(), std::vector<IProjectSerialisable *>());
+    std::pair<std::string, std::vector<IProjectSerialisable *>> item(ws->getName(),
+                                                                     std::vector<IProjectSerialisable *>());
     m_workspaceWindows.insert(item);
   }
 
@@ -57,8 +56,7 @@ ProjectSaveModel::ProjectSaveModel(
  * @param wsName :: the name of the workspace to get window for
  * @return vector of window handles for the workspace
  */
-std::vector<IProjectSerialisable *>
-ProjectSaveModel::getWindows(const std::string &wsName) const {
+std::vector<IProjectSerialisable *> ProjectSaveModel::getWindows(const std::string &wsName) const {
   if (hasWindows(wsName)) {
     return m_workspaceWindows.at(wsName);
   }
@@ -71,8 +69,7 @@ ProjectSaveModel::getWindows(const std::string &wsName) const {
  * @param wsNames :: vector of workspace names to get associated windows for
  * @return an ordered vector of unique window handles sorted by window name
  */
-std::vector<IProjectSerialisable *> ProjectSaveModel::getUniqueWindows(
-    const std::vector<std::string> &wsNames) const {
+std::vector<IProjectSerialisable *> ProjectSaveModel::getUniqueWindows(const std::vector<std::string> &wsNames) const {
   std::unordered_set<IProjectSerialisable *> uniqueWindows;
 
   for (auto &name : wsNames) {
@@ -81,12 +78,10 @@ std::vector<IProjectSerialisable *> ProjectSaveModel::getUniqueWindows(
     }
   }
 
-  std::vector<IProjectSerialisable *> windows(uniqueWindows.cbegin(),
-                                              uniqueWindows.cend());
-  std::sort(windows.begin(), windows.end(),
-            [](IProjectSerialisable *lhs, IProjectSerialisable *rhs) {
-              return lhs->getWindowName() < rhs->getWindowName();
-            });
+  std::vector<IProjectSerialisable *> windows(uniqueWindows.cbegin(), uniqueWindows.cend());
+  std::sort(windows.begin(), windows.end(), [](IProjectSerialisable *lhs, IProjectSerialisable *rhs) {
+    return lhs->getWindowName() < rhs->getWindowName();
+  });
 
   return windows;
 }
@@ -98,8 +93,7 @@ std::vector<IProjectSerialisable *> ProjectSaveModel::getUniqueWindows(
  * for
  * @return an ordered vector of unique window names sorted alphabetically
  */
-std::vector<std::string> ProjectSaveModel::getWindowNames(
-    const std::vector<std::string> &wsNames) const {
+std::vector<std::string> ProjectSaveModel::getWindowNames(const std::vector<std::string> &wsNames) const {
   std::vector<std::string> names;
   auto windows = getUniqueWindows(wsNames);
   names.reserve(windows.size());
@@ -128,9 +122,7 @@ std::vector<std::string> ProjectSaveModel::getWorkspaceNames() const {
  * Get all workspace names in the model
  * @return vector of all python interfaces names in the model
  */
-std::vector<std::string> ProjectSaveModel::getAllPythonInterfaces() const {
-  return m_activePythonInterfaces;
-}
+std::vector<std::string> ProjectSaveModel::getAllPythonInterfaces() const { return m_activePythonInterfaces; }
 
 /**
  * Get window information for a selection of workspaces
@@ -139,9 +131,8 @@ std::vector<std::string> ProjectSaveModel::getAllPythonInterfaces() const {
  * workspace
  * @return vector of window info objects associated with the workpaces
  */
-std::vector<WindowInfo>
-ProjectSaveModel::getWindowInformation(const std::vector<std::string> &wsNames,
-                                       bool includeUnattached) const {
+std::vector<WindowInfo> ProjectSaveModel::getWindowInformation(const std::vector<std::string> &wsNames,
+                                                               bool includeUnattached) const {
   std::vector<WindowInfo> winInfo;
 
   for (auto window : getUniqueWindows(wsNames)) {
@@ -159,8 +150,7 @@ ProjectSaveModel::getWindowInformation(const std::vector<std::string> &wsNames,
   return winInfo;
 }
 
-WindowInfo
-ProjectSaveModel::makeWindowInfoObject(IProjectSerialisable *window) const {
+WindowInfo ProjectSaveModel::makeWindowInfoObject(IProjectSerialisable *window) const {
   WindowIcons icons;
   WindowInfo info;
   info.name = window->getWindowName();
@@ -204,8 +194,7 @@ std::vector<Workspace_sptr> ProjectSaveModel::getWorkspaces() const {
   return ads.getObjects();
 }
 
-WorkspaceInfo ProjectSaveModel::makeWorkspaceInfoObject(
-    const Workspace_const_sptr &ws) const {
+WorkspaceInfo ProjectSaveModel::makeWorkspaceInfoObject(const Workspace_const_sptr &ws) const {
   WorkspaceIcons icons;
   WorkspaceInfo info;
   info.name = ws->getName();
@@ -238,10 +227,8 @@ bool ProjectSaveModel::hasWindows(const std::string &wsName) const {
  * @return true If larger warning.
  * @return false If equal or less than warning.
  */
-bool ProjectSaveModel::needsSizeWarning(
-    const std::vector<std::string> &wsNames) {
-  std::istringstream iss(Mantid::Kernel::ConfigService::Instance().getString(
-      "projectSaving.warningSize"));
+bool ProjectSaveModel::needsSizeWarning(const std::vector<std::string> &wsNames) {
+  std::istringstream iss(Mantid::Kernel::ConfigService::Instance().getString("projectSaving.warningSize"));
   size_t warningSize;
   iss >> warningSize;
   const size_t totalSize = getProjectSize(wsNames);
@@ -254,13 +241,10 @@ bool ProjectSaveModel::needsSizeWarning(
  * @param wsNames List of workspace names to look up.
  * @return size_t The size of the project in bytes.
  */
-size_t
-ProjectSaveModel::getProjectSize(const std::vector<std::string> &wsNames) {
+size_t ProjectSaveModel::getProjectSize(const std::vector<std::string> &wsNames) {
   size_t totalSize = 0;
   for (const auto &ws : wsNames) {
-    totalSize += Mantid::API::AnalysisDataService::Instance()
-                     .retrieve(ws)
-                     ->getMemorySize();
+    totalSize += Mantid::API::AnalysisDataService::Instance().retrieve(ws)->getMemorySize();
   }
   return totalSize;
 }

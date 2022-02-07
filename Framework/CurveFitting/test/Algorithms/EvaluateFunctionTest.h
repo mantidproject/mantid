@@ -29,9 +29,7 @@ class EvaluateFunctionTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static EvaluateFunctionTest *createSuite() {
-    return new EvaluateFunctionTest();
-  }
+  static EvaluateFunctionTest *createSuite() { return new EvaluateFunctionTest(); }
   static void destroySuite(EvaluateFunctionTest *suite) { delete suite; }
 
   void test_Init() {
@@ -120,23 +118,19 @@ public:
     alg->setProperty("Units", "U,V");
     alg->setProperty("OutputWorkspace", "EvaluateFunction_inWS");
     alg->execute();
-    auto inWS =
-        AnalysisDataService::Instance().retrieve("EvaluateFunction_inWS");
+    auto inWS = AnalysisDataService::Instance().retrieve("EvaluateFunction_inWS");
     TS_ASSERT(inWS);
 
     alg = AlgorithmManager::Instance().create("EvaluateFunction");
     alg->initialize();
-    alg->setPropertyValue("Function",
-                          "name=UserFunctionMD,Formula=sin(x)*sin(y)");
+    alg->setPropertyValue("Function", "name=UserFunctionMD,Formula=sin(x)*sin(y)");
     alg->setProperty("InputWorkspace", "EvaluateFunction_inWS");
     alg->setProperty("OutputWorkspace", "EvaluateFunction_outWS");
     alg->execute();
-    auto outWS =
-        AnalysisDataService::Instance().retrieve("EvaluateFunction_outWS");
+    auto outWS = AnalysisDataService::Instance().retrieve("EvaluateFunction_outWS");
     TS_ASSERT(outWS);
 
-    auto mdws = AnalysisDataService::Instance().retrieveWS<IMDHistoWorkspace>(
-        "EvaluateFunction_outWS");
+    auto mdws = AnalysisDataService::Instance().retrieveWS<IMDHistoWorkspace>("EvaluateFunction_outWS");
     TS_ASSERT(mdws);
 
     auto iter = mdws->createIterator();
@@ -192,15 +186,13 @@ private:
       }
       using std::placeholders::_1;
       if (workspaceIndex > 0) {
-        std::transform(
-            xBins.begin(), xBins.end(), xBins.begin(),
-            std::bind(std::plus<double>(), _1, double(workspaceIndex)));
+        std::transform(xBins.begin(), xBins.end(), xBins.begin(),
+                       std::bind(std::plus<double>(), _1, double(workspaceIndex)));
       }
 
       if (isHisto) {
         xValues.resize(nData);
-        std::transform(xBins.begin(), xBins.end() - 1, xValues.begin(),
-                       std::bind(std::plus<double>(), _1, dx / 2));
+        std::transform(xBins.begin(), xBins.end() - 1, xValues.begin(), std::bind(std::plus<double>(), _1, dx / 2));
       } else {
         xValues = xBins;
       }
@@ -208,15 +200,13 @@ private:
 
     void makeWorkspace() {
       size_t dn = isHisto ? 1 : 0;
-      workspace = WorkspaceFactory::Instance().create("Workspace2D", nSpec,
-                                                      nData + dn, nData);
+      workspace = WorkspaceFactory::Instance().create("Workspace2D", nSpec, nData + dn, nData);
       workspace->dataX(workspaceIndex).assign(xBins.begin(), xBins.end());
     }
 
     void makeFunction() {
       const std::string fun = "name=ExpDecay,Height=50,Lifetime=1";
-      function = std::dynamic_pointer_cast<IFunction1D>(
-          FunctionFactory::Instance().createInitialized(fun));
+      function = std::dynamic_pointer_cast<IFunction1D>(FunctionFactory::Instance().createInitialized(fun));
       if (!function) {
         TS_FAIL("A 1D function is expected.");
       }
@@ -236,8 +226,8 @@ private:
     MatrixWorkspace_sptr outputWorkspace;
 
     Tester1D()
-        : nSpec(2), nData(100), isHisto(true), xMin(0.0), xMax(30),
-          workspaceIndex(0), StartX(EMPTY_DBL()), EndX(EMPTY_DBL()) {}
+        : nSpec(2), nData(100), isHisto(true), xMin(0.0), xMax(30), workspaceIndex(0), StartX(EMPTY_DBL()),
+          EndX(EMPTY_DBL()) {}
 
     void setHistograms() { isHisto = true; }
 
@@ -268,22 +258,17 @@ private:
       EvaluateFunction alg;
       TS_ASSERT_THROWS_NOTHING(alg.initialize())
       TS_ASSERT(alg.isInitialized())
-      TS_ASSERT_THROWS_NOTHING(alg.setProperty(
-          "Function", std::dynamic_pointer_cast<IFunction>(function)));
+      TS_ASSERT_THROWS_NOTHING(alg.setProperty("Function", std::dynamic_pointer_cast<IFunction>(function)));
       TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", workspace));
-      TS_ASSERT_THROWS_NOTHING(
-          alg.setProperty("WorkspaceIndex", workspaceIndex));
+      TS_ASSERT_THROWS_NOTHING(alg.setProperty("WorkspaceIndex", workspaceIndex));
       TS_ASSERT_THROWS_NOTHING(alg.setProperty("StartX", StartX));
       TS_ASSERT_THROWS_NOTHING(alg.setProperty("EndX", EndX));
-      TS_ASSERT_THROWS_NOTHING(
-          alg.setProperty("OutputWorkspace", "EvaluateFunction_outWS"));
+      TS_ASSERT_THROWS_NOTHING(alg.setProperty("OutputWorkspace", "EvaluateFunction_outWS"));
       TS_ASSERT_THROWS_NOTHING(alg.execute());
 
       isExecuted = alg.isExecuted();
       if (isExecuted) {
-        outputWorkspace =
-            AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-                "EvaluateFunction_outWS");
+        outputWorkspace = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("EvaluateFunction_outWS");
       }
       AnalysisDataService::Instance().clear();
     }
@@ -323,8 +308,7 @@ private:
       EvaluateFunction alg;
       TS_ASSERT_THROWS_NOTHING(alg.initialize())
       TS_ASSERT(alg.isInitialized())
-      TS_ASSERT_THROWS_NOTHING(alg.setProperty(
-          "Function", std::dynamic_pointer_cast<IFunction>(function)));
+      TS_ASSERT_THROWS_NOTHING(alg.setProperty("Function", std::dynamic_pointer_cast<IFunction>(function)));
       TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", workspace));
       TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", workspace));
     }

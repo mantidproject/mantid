@@ -18,14 +18,11 @@ AppendRowCommand defines the action "Insert Row After"
 */
 class AppendRowCommand : public CommandBase {
 public:
-  AppendRowCommand(DataProcessorPresenter *tablePresenter)
-      : CommandBase(tablePresenter){};
+  AppendRowCommand(DataProcessorPresenter *tablePresenter) : CommandBase(tablePresenter){};
   AppendRowCommand(const QDataProcessorWidget &widget) : CommandBase(widget){};
   virtual ~AppendRowCommand(){};
 
-  void execute() override {
-    m_presenter->notify(DataProcessorPresenter::AppendRowFlag);
-  };
+  void execute() override { m_presenter->notify(DataProcessorPresenter::AppendRowFlag); };
   QString name() override { return QString("Insert Row After"); }
   QString icon() override { return QString("://insert_row.png"); }
   QString tooltip() override { return QString("Inserts row after"); }

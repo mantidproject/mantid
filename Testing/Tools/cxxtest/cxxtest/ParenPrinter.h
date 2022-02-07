@@ -14,7 +14,7 @@
 
 #include <cxxtest/ErrorPrinter.h>
 
-namespace CxxTest 
+namespace CxxTest
 {
     class ParenPrinter : public ErrorPrinter
     {

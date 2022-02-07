@@ -6,7 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
-#include "MantidMDAlgorithms/BoxControllerSettingsAlgorithm.h"
+#include "MantidAPI/BoxControllerSettingsAlgorithm.h"
 #include "MantidMDAlgorithms/ConvToMDBase.h"
 #include "MantidMDAlgorithms/MDWSDescription.h"
 
@@ -28,7 +28,7 @@ namespace MDAlgorithms {
 */
 
 /// Convert to MD Events class itself:
-class DLLExport ConvertToMDParent : public BoxControllerSettingsAlgorithm {
+class DLLExport ConvertToMDParent : public API::BoxControllerSettingsAlgorithm {
 public:
   /// Algorithm's name for identification
   const std::string name() const override = 0;
@@ -40,14 +40,13 @@ public:
 protected:
   void init() override;
   //
-  DataObjects::TableWorkspace_const_sptr preprocessDetectorsPositions(
-      const Mantid::API::MatrixWorkspace_const_sptr &InWS2D,
-      const std::string &dEModeRequested, bool updateMasks,
-      const std::string &OutWSName);
-  DataObjects::TableWorkspace_sptr runPreprocessDetectorsToMDChildUpdatingMasks(
-      const Mantid::API::MatrixWorkspace_const_sptr &InWS2D,
-      const std::string &OutWSName, const std::string &dEModeRequested,
-      Kernel::DeltaEMode::Type &Emode);
+  DataObjects::TableWorkspace_const_sptr
+  preprocessDetectorsPositions(const Mantid::API::MatrixWorkspace_const_sptr &InWS2D,
+                               const std::string &dEModeRequested, bool updateMasks, const std::string &OutWSName);
+  DataObjects::TableWorkspace_sptr
+  runPreprocessDetectorsToMDChildUpdatingMasks(const Mantid::API::MatrixWorkspace_const_sptr &InWS2D,
+                                               const std::string &OutWSName, const std::string &dEModeRequested,
+                                               Kernel::DeltaEMode::Type &Emode);
 
   /// logger -> to provide logging, for MD dataset file operations
   static Mantid::Kernel::Logger &g_Log;

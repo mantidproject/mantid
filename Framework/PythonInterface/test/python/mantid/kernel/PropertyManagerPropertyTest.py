@@ -40,11 +40,11 @@ class PropertyManagerPropertyTest(unittest.TestCase):
     def test_set_property_on_algorithm_from_dictionary(self):
         fake = FakeAlgorithm()
         fake.initialize()
-        fake.setProperty("Args", {'A': 1, 
-                                  'B':10.5, 
-                                  'C':'String arg', 
-                                  'D': [0.0,11.3], 
-                                  'E':{'F':10.4, 
+        fake.setProperty("Args", {'A': 1,
+                                  'B':10.5,
+                                  'C':'String arg',
+                                  'D': [0.0,11.3],
+                                  'E':{'F':10.4,
                                        'G': [1.0,2.0, 3.0],
                                        'H':{'I': "test",
                                        'J': 120.6}}})
@@ -64,7 +64,7 @@ class PropertyManagerPropertyTest(unittest.TestCase):
         self.assertEqual(11.3,array_value[1])
 
         # Check the level-1 nested property manager property
-        # Get the level1-nested property manager 
+        # Get the level1-nested property manager
         nested_l1_pmgr = pmgr['E'].value
         self.assertEqual(3, len(nested_l1_pmgr))
         self.assertTrue('F' in nested_l1_pmgr)
@@ -76,22 +76,24 @@ class PropertyManagerPropertyTest(unittest.TestCase):
         self.assertTrue('H' in nested_l1_pmgr)
         self.assertTrue(isinstance(nested_l1_pmgr['H'].value, PropertyManager))
 
-        # Get the level2-nested property manager 
+        # Get the level2-nested property manager
         nested_l2_pmgr = nested_l1_pmgr['H'].value
         self.assertTrue('I' in nested_l2_pmgr)
         self.assertEqual("test", nested_l2_pmgr['I'].value)
         self.assertTrue('J' in nested_l2_pmgr)
         self.assertEqual(120.6, nested_l2_pmgr['J'].value)
 
+    def test_set_property_on_algorithm_property_manager(self):
+        # set the property directly from a PropertyManager
+        fake = FakeAlgorithm()
+        fake.initialize()
+        fake.setProperty("Args", PropertyManager())
+
     def test_that_empty_sequence_in_property_manager_raises(self):
         fake = FakeAlgorithm()
         fake.initialize()
-        try:
+        with self.assertRaises(RuntimeError):
             fake.setProperty("Args", {'A': []})
-            has_raised = False
-        except RuntimeError:
-            has_raised = True
-        self.assertTrue(has_raised)
 
     def test_create_with_dictionary_as_default_value(self):
         default = { 'A' : {}, 'B' : 1 }

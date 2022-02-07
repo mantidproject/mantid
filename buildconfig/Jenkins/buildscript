@@ -6,8 +6,8 @@
 #
 # WORKSPACE, JOB_NAME, NODE_LABEL, PACKAGE_SUFFIX, GIT_COMMIT are
 # environment variables that are set by Jenkins. The last one
-# corresponds to any labels set on a slave.  BUILD_THREADS &
-# PARAVIEW_DIR should be set in the configuration of each slave.
+# corresponds to any labels set on a slave.  BUILD_THREADS should
+# be set in the configuration of each slave.
 ###############################################################################
 # Set all string comparisons to case insensitive (i.e. Release == release)
 shopt -s nocasematch
@@ -28,38 +28,41 @@ function onexit {
 
 function run_with_xvfb {
     if [ $(command -v xvfb-run) ]; then
-        # -e=--error-file. A bug in Xvfb on RHEL7 means --error-file
-        # produces an error: https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=337703;msg=2
-        xvfb-run --server-args="-screen 0 640x480x24" \
+        # Use -e because a bug on RHEL7 means --error-file produces an error: https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=337703;msg=2
+        # Use -noreset because of an X Display bug caused by a race condition in xvfb: https://gitlab.freedesktop.org/xorg/xserver/-/issues/1102
+        xvfb-run -e /dev/stderr --server-args="-core -noreset -screen 0 640x480x24" \
         --server-num=${XVFB_SERVER_NUM} $@
     else
         eval $@
     fi
 }
 
+function terminate_xvfb_sessions() {
+    if [ $(command -v xvfb-run) ]; then
+        echo "Terminating existing Xvfb sessions"
+
+        # Kill Xvfb processes
+        killall Xvfb || true
+
+        # Remove Xvfb X server lock files
+        rm -f /tmp/.X${XVFB_SERVER_NUM}-lock
+    fi
+}
 
 ###############################################################################
 # Terminate existing Xvfb sessions
 ###############################################################################
-if [ $(command -v xvfb-run) ]; then
-    echo "Terminating existing Xvfb sessions"
-
-    # Kill Xvfb processes
-    killall Xvfb || true
-
-    # Remove Xvfb X server lock files
-    rm -f /tmp/.X${XVFB_SERVER_NUM}-lock
-fi
+terminate_xvfb_sessions
 
 ###############################################################################
 # System discovery
 ###############################################################################
 USE_CORE_DUMPS=true
-if [[ ${NODE_LABELS} == *rhel7* ]] || [[ ${NODE_LABELS} == *centos7* ]] || [[ ${NODE_LABELS} == *scilin7* ]]; then
+if [[ ${NODE_LABELS} == *rhel7* ]] || [[ ${NODE_LABELS} == *centos7* ]] || [[ ${NODE_LABELS} == *scilin7* ]] || [[ ${NODE_LABELS} == *coverity* ]]; then
     ON_RHEL7=true
-    elif [[ ${NODE_LABELS} == *ubuntu* ]]; then
+elif [[ ${NODE_LABELS} == *ubuntu* ]]; then
     ON_UBUNTU=true
-    elif [[ ${NODE_LABELS} == *osx* ]]; then
+elif [[ ${NODE_LABELS} == *osx* ]]; then
     ON_MACOS=true
     USE_CORE_DUMPS=false
 fi
@@ -76,11 +79,6 @@ fi
 # Script cleanup
 ###############################################################################
 trap onexit INT TERM EXIT
-
-###############################################################################
-# All nodes currently have PARAVIEW_DIR and PARAVIEW_NEXT_DIR set
-###############################################################################
-export PARAVIEW_DIR=${PARAVIEW_DIR}
 
 ###############################################################################
 # Some preprocessing steps on the workspace
@@ -115,6 +113,12 @@ if [[ ${JOB_NAME} == *clean* || ${JOB_NAME} == *clang_tidy* ]]; then
     CLEANBUILD=true
 fi
 
+if [[ ${JOB_NAME} == *coverage* ]]; then
+    COVERAGE=ON
+else
+    COVERAGE=OFF
+fi
+
 if [[ ${JOB_NAME} == *pull_requests* ]]; then
     PRBUILD=true
 fi
@@ -132,18 +136,6 @@ if [[ $ON_RHEL7 ]]; then
     SCL_ENABLE="scl enable devtoolset-7"
 else
     SCL_ENABLE="eval"
-fi
-
-# Check if this is a Python 2 build and set CMake arguments.
-PY2_BUILD=false
-PY3_BUILD=false
-if [[ ${JOB_NAME} == *python2* ]]; then
-    PY2_BUILD=true
-    DIST_FLAGS="${DIST_FLAGS} -DWITH_PYTHON3=OFF"
-else
-    PY3_BUILD=true
-    DIST_FLAGS="${DIST_FLAGS} -DWITH_PYTHON3=ON"
-    PARAVIEW_DIR="${PARAVIEW_DIR}-python3"
 fi
 
 # For pull requests decide on what to build based on changeset and Jenkins
@@ -168,10 +160,8 @@ if [[ ${PRBUILD} == true ]]; then
     if [[ ${ON_RHEL7} == true ]]; then
         # rhel does system testing if there are any non-doc or gui changes
         if ! ${SCRIPT_DIR}/check_for_changes docs-gui-only; then
-            if [[ ${PY3_BUILD} == true ]]; then
-               DO_BUILD_PKG=true
-               DO_SYSTEMTESTS=true
-            fi
+            DO_BUILD_PKG=true
+            DO_SYSTEMTESTS=true
         fi
         elif [[ ${ON_UBUNTU} == true ]]; then
         # ubuntu does the docs build
@@ -210,7 +200,7 @@ mkdir -p $BUILD_DIR
 
 # Tidy build dir
 rm -rf ${BUILD_DIR:?}/bin ${BUILD_DIR:?}/ExternalData ${BUILD_DIR:?}/Testing
-find ${BUILD_DIR:?} -name 'TEST-*.xml' -delete
+find ${BUILD_DIR:?} \( -name 'TEST-*.xml' -o -name 'Test.xml' \) -delete
 
 if [[ -n ${CLEAN_EXTERNAL_PROJECTS} && "${CLEAN_EXTERNAL_PROJECTS}" == true ]]; then
     rm -rf $BUILD_DIR/eigen-*
@@ -273,25 +263,28 @@ fi
 # Packaging options
 ###############################################################################
 if [[ ${DO_BUILD_PKG} == true ]]; then
-    PACKAGINGVARS="-DPACKAGE_DOCS=ON"
-    # Set some variables relating to the linux packages
-    if [[ "${ON_MACOS}" == true ]]; then
-        PACKAGINGVARS="${PACKAGINGVARS} -DCPACK_PACKAGE_SUFFIX="
+    PACKAGINGVARS="-DPACKAGE_DOCS=ON -DDOCS_DOTDIAGRAMS=ON -DDOCS_SCREENSHOTS=ON -DDOCS_MATH_EXT=sphinx.ext.imgmath -DDOCS_PLOTDIRECTIVE=ON"
+    # Use different suffix if parameter is not defined
+    if [[ -n "${PACKAGE_SUFFIX}" ]]; then
+        echo "Using PACKAGE_SUFFIX=${PACKAGE_SUFFIX} from job parameter"
+    elif [[ ${JOB_NAME} == release* ]]; then  # starts with "release"
+        PACKAGE_SUFFIX=""
+    elif [[ ${JOB_NAME} == ornl-stable ]]; then
+        PACKAGE_SUFFIX=""
+    elif [[ ${JOB_NAME} == ornl-qa ]]; then
+        PACKAGE_SUFFIX="qa"
+    elif [[ ${JOB_NAME} == main* ]]; then
+        PACKAGE_SUFFIX="nightly"
     else
-        # Use different suffix for linux builds if parameter is not defined
-        if [[ -n "${PACKAGE_SUFFIX}" ]]; then
-            echo "Using PACKAGE_SUFFIX=${PACKAGE_SUFFIX} from job parameter"
-            elif [[ ${JOB_NAME} == *release* ]]; then
-            PACKAGE_SUFFIX=""
-            elif [[ ${JOB_NAME} == *master* ]]; then
-            PACKAGE_SUFFIX="nightly"
-            elif [[ ${JOB_NAME} == *pvnext* ]]; then
-            PACKAGE_SUFFIX="mantidunstable-pvnext"
-        else
-            PACKAGE_SUFFIX="unstable"
-        fi
-
-        if [[ ${JOB_NAME} == *release* ]] && [[ -z "${PACKAGE_SUFFIX}" ]]; then
+        PACKAGE_SUFFIX="unstable"
+    fi
+    if [[ "${ON_MACOS}" == true ]]; then
+        PACKAGINGVARS="${PACKAGINGVARS} -DCPACK_PACKAGE_SUFFIX=${PACKAGE_SUFFIX}"
+    else
+        if [[ ${JOB_NAME} == release* ]] && [[ -z "${PACKAGE_SUFFIX}" ]]; then
+            # Traditional install path for release build
+            PACKAGINGVARS="${PACKAGINGVARS} -DCMAKE_INSTALL_PREFIX=/opt/Mantid -DCPACK_PACKAGE_SUFFIX="
+        elif [[ ${JOB_NAME} == ornl-stable ]] && [[ -z "${PACKAGE_SUFFIX}" ]]; then
             # Traditional install path for release build
             PACKAGINGVARS="${PACKAGINGVARS} -DCMAKE_INSTALL_PREFIX=/opt/Mantid -DCPACK_PACKAGE_SUFFIX="
         else
@@ -300,10 +293,14 @@ if [[ ${DO_BUILD_PKG} == true ]]; then
         fi
 
         if [[ ${ON_RHEL7} == true ]]; then
-            if [[ -n "${RELEASE_NUMBER}" ]]; then
+            if [[ -z "${RELEASE_NUMBER}" ]]; then
                 RELEASE_NUMBER="1"
             fi
             PACKAGINGVARS="${PACKAGINGVARS} -DCPACK_RPM_PACKAGE_RELEASE=${RELEASE_NUMBER}"
+        fi
+
+        if [[ -n "${GITHUB_AUTHORIZATION_TOKEN}" ]]; then
+            PACKAGINGVARS="${PACKAGINGVARS} -DGITHUB_AUTHORIZATION_TOKEN=${GITHUB_AUTHORIZATION_TOKEN}"
         fi
     fi
 fi
@@ -314,13 +311,13 @@ fi
 
 if [[ ${JOB_NAME} == *address* ]]; then
     SANITIZER_FLAGS="-DUSE_SANITIZER=Address"
-    
+
 elif [[ ${JOB_NAME} == *memory* ]]; then
     SANITIZER_FLAGS="-DUSE_SANITIZER=memory"
-    
+
 elif [[ ${JOB_NAME} == *thread* ]]; then
     SANITIZER_FLAGS="-DUSE_SANITIZER=thread"
-    
+
 elif [[ ${JOB_NAME} == *undefined* ]]; then
     SANITIZER_FLAGS="-DUSE_SANITIZER=undefined"
 fi
@@ -357,7 +354,7 @@ rm -f -- *.dmg *.rpm *.deb *.tar.gz *.tar.xz
 ###############################################################################
 # CMake configuration
 ###############################################################################
-$SCL_ENABLE "${CMAKE_EXE} ${CMAKE_GENERATOR} -DCMAKE_BUILD_TYPE=${BUILD_CONFIG} -DENABLE_CPACK=ON -DMAKE_VATES=ON -DParaView_DIR=${PARAVIEW_DIR} -DMANTID_DATA_STORE=${MANTID_DATA_STORE} -DDOCS_HTML=ON -DENABLE_CONDA=ON -DCOLORED_COMPILER_OUTPUT=OFF ${DIST_FLAGS} ${PACKAGINGVARS} ${CLANGTIDYVAR} ${SANITIZER_FLAGS} .."
+$SCL_ENABLE "${CMAKE_EXE} ${CMAKE_GENERATOR} -DCMAKE_BUILD_TYPE=${BUILD_CONFIG} -DENABLE_PRECOMMIT=OFF -DCOVERAGE=${COVERAGE} -DENABLE_CPACK=ON -DMANTID_DATA_STORE=${MANTID_DATA_STORE} -DDOCS_HTML=ON -DENABLE_CONDA=ON -DCOLORED_COMPILER_OUTPUT=OFF ${DIST_FLAGS} ${PACKAGINGVARS} ${CLANGTIDYVAR} ${SANITIZER_FLAGS} .."
 
 ###############################################################################
 # Coverity build should exit early
@@ -403,14 +400,15 @@ fi
 # Prevent race conditions when creating the user config directory
 userconfig_dir=$HOME/.mantid
 rm -fr $userconfig_dir
-# Remove GUI qsettings files
+# Remove old application saved state & crash reports on mac.
+# If we don't do this then when a previous test has crashed macOS
+# will pop up a dialog box and wait for clicking okay. We are heavy
+# handed but builders tend not to be used for anything else.
 if [[ ${ON_MACOS} == true ]] ; then
-    rm -f $HOME/Library/Preferences/com.mantid.MantidPlot.plist
-    rm -f $HOME/Library/Preferences/org.mantidproject.MantidPlot.plist
-    rm -f "$HOME/Library/Saved Application State/org.mantidproject.MantidPlot.savedState/windows.plist"
-else
-    rm -f ~/.config/Mantid/MantidPlot.conf
+    rm -fr "$HOME/Library/Saved Application State/org.python.python"
+    rm -f $HOME/Library/Application\ Support/CrashReporter/*
 fi
+# Remove GUI qsettings files
 rm -f ~/.config/mantidproject/mantidworkbench.ini
 
 mkdir -p $userconfig_dir
@@ -420,6 +418,7 @@ echo MultiThreaded.MaxCores=2 > $userprops_file
 
 if [[ ${DO_UNITTESTS} == true ]]; then
     run_with_xvfb $CTEST_EXE --no-compress-output -T Test -j${BUILD_THREADS:?} --schedule-random --output-on-failure
+    terminate_xvfb_sessions
 fi
 
 ###############################################################################
@@ -435,19 +434,19 @@ if [[ ${DO_DOCTESTS_USER} == true ]]; then
     fi
     # Build HTML to verify that no referencing errors have crept in.
     run_with_xvfb ${CMAKE_EXE} --build . --target docs-html
-    run_with_xvfb ${CMAKE_EXE} --build . --target docs-test
+    terminate_xvfb_sessions
+    run_with_xvfb ${CMAKE_EXE} --build . --target docs-doctest
 fi
 
 ###############################################################################
 # Developer Documentation
 ###############################################################################
 # Uncomment this when the dev-docs are ready to build without warnings
-# if [[ ${DO_BUILD_DEVDOCS} == true ]]; then
-#   if [ -d $BUILD_DIR/dev-docs/doctree ]; then
-#     rm -fr $BUILD_DIR/dev-docs/doctree/*
-#   fi
-#   ${CMAKE_EXE} --build . --target dev-docs-html
-# fi
+if [[ ${DO_BUILD_DEVDOCS} == true ]]; then
+  rm -fr $BUILD_DIR/dev-docs/doctree/*
+  rm -f $BUILD_DIR/dev-docs/dev_docs_warnings.txt
+  ${CMAKE_EXE} --build . --target dev-docs-html
+fi
 
 ###############################################################################
 # Create the install kit if required. This includes building the Qt help

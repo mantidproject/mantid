@@ -6,7 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
-#include "MantidMDAlgorithms/BoxControllerSettingsAlgorithm.h"
+#include "MantidAPI/BoxControllerSettingsAlgorithm.h"
 #include "MantidMDAlgorithms/DllConfig.h"
 
 namespace Mantid {
@@ -14,14 +14,11 @@ namespace MDAlgorithms {
 
 /** ConvertHFIRSCDtoMDE : TODO: DESCRIPTION
  */
-class MANTID_MDALGORITHMS_DLL ConvertHFIRSCDtoMDE
-    : public BoxControllerSettingsAlgorithm {
+class MANTID_MDALGORITHMS_DLL ConvertHFIRSCDtoMDE : public API::BoxControllerSettingsAlgorithm {
 public:
   const std::string name() const override;
   int version() const override;
-  const std::vector<std::string> seeAlso() const override {
-    return {"ConvertWANDSCDtoQ", "LoadWANDSCD"};
-  }
+  const std::vector<std::string> seeAlso() const override { return {"ConvertWANDSCDtoQ", "LoadWANDSCD"}; }
   const std::string category() const override;
   const std::string summary() const override;
   std::map<std::string, std::string> validateInputs() override;

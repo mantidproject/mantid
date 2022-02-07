@@ -33,9 +33,7 @@ public:
   FitOneSinglePeak();
 
   /// Summary of algorithms purpose
-  const std::string summary() const override {
-    return "Fit a single peak with checking mechanism. ";
-  }
+  const std::string summary() const override { return "Fit a single peak with checking mechanism. "; }
 
   /// Set workspaces
   void setWorskpace(const API::MatrixWorkspace_sptr &dataws, size_t wsindex);
@@ -44,8 +42,7 @@ public:
   void setFittingMethod(std::string minimizer, const std::string &costfunction);
 
   /// Set functions
-  void setFunctions(const API::IPeakFunction_sptr &peakfunc,
-                    const API::IBackgroundFunction_sptr &bkgdfunc);
+  void setFunctions(const API::IPeakFunction_sptr &peakfunc, const API::IBackgroundFunction_sptr &bkgdfunc);
 
   /// Set fit range
   void setFitWindow(double leftwindow, double rightwindow);
@@ -54,8 +51,7 @@ public:
   void setPeakRange(double xpeakleft, double xpeakright);
 
   /// Set peak width to guess
-  void setupGuessedFWHM(double usrwidth, int minfwhm, int maxfwhm, int stepsize,
-                        bool fitwithsteppedfwhm);
+  void setupGuessedFWHM(double usrwidth, int minfwhm, int maxfwhm, int stepsize, bool fitwithsteppedfwhm);
 
   void setFitPeakCriteria(bool usepeakpostol, double peakpostol);
 
@@ -95,41 +91,32 @@ private:
   bool hasSetupToFitPeak(std::string &errmsg);
 
   /// Estimate the peak height from a set of data containing pure peaks
-  double estimatePeakHeight(const API::IPeakFunction_const_sptr &peakfunc,
-                            const API::MatrixWorkspace_sptr &dataws,
+  double estimatePeakHeight(const API::IPeakFunction_const_sptr &peakfunc, const API::MatrixWorkspace_sptr &dataws,
                             size_t wsindex, size_t ixmin, size_t ixmax);
 
   /// Check a peak function whether it is valid comparing to user specified
   /// criteria
-  double checkFittedPeak(const API::IPeakFunction_sptr &peakfunc,
-                         double costfuncvalue, std::string &errorreason);
+  double checkFittedPeak(const API::IPeakFunction_sptr &peakfunc, double costfuncvalue, std::string &errorreason);
 
   /// Fit peak function (flexible)
-  double fitPeakFunction(const API::IPeakFunction_sptr &peakfunc,
-                         const API::MatrixWorkspace_sptr &dataws,
+  double fitPeakFunction(const API::IPeakFunction_sptr &peakfunc, const API::MatrixWorkspace_sptr &dataws,
                          size_t wsindex, double startx, double endx);
 
   /// Fit function in single domain
-  double fitFunctionSD(API::IFunction_sptr fitfunc,
-                       const API::MatrixWorkspace_sptr &dataws, size_t wsindex,
+  double fitFunctionSD(API::IFunction_sptr fitfunc, const API::MatrixWorkspace_sptr &dataws, size_t wsindex,
                        double xmin, double xmax);
 
   /// Calculate chi-square of a single domain function
-  double calChiSquareSD(const API::IFunction_sptr &fitfunc,
-                        const API::MatrixWorkspace_sptr &dataws, size_t wsindex,
+  double calChiSquareSD(const API::IFunction_sptr &fitfunc, const API::MatrixWorkspace_sptr &dataws, size_t wsindex,
                         double xmin, double xmax);
 
   /// Fit peak and background composite function
-  double fitCompositeFunction(const API::IPeakFunction_sptr &peakfunc,
-                              const API::IBackgroundFunction_sptr &bkgdfunc,
-                              const API::MatrixWorkspace_sptr &dataws,
-                              size_t wsindex, double startx, double endx);
+  double fitCompositeFunction(const API::IPeakFunction_sptr &peakfunc, const API::IBackgroundFunction_sptr &bkgdfunc,
+                              const API::MatrixWorkspace_sptr &dataws, size_t wsindex, double startx, double endx);
 
   /// Fit function in multiple-domain
-  double fitFunctionMD(const API::IFunction_sptr &fitfunc,
-                       const API::MatrixWorkspace_sptr &dataws, size_t wsindex,
-                       std::vector<double> vec_xmin,
-                       std::vector<double> vec_xmax);
+  double fitFunctionMD(const API::IFunction_sptr &fitfunc, const API::MatrixWorkspace_sptr &dataws, size_t wsindex,
+                       std::vector<double> vec_xmin, std::vector<double> vec_xmax);
   /// remove background
   void removeBackground(const API::MatrixWorkspace_sptr &purePeakWS);
 
@@ -139,15 +126,12 @@ private:
   /// Back up fit result
   std::map<std::string, double> backup(const API::IFunction_const_sptr &func);
 
-  void pop(const std::map<std::string, double> &funcparammap,
-           const API::IFunction_sptr &func);
+  void pop(const std::map<std::string, double> &funcparammap, const API::IFunction_sptr &func);
 
   /// Store function fitting error
-  std::map<std::string, double>
-  storeFunctionError(const API::IFunction_const_sptr &func);
+  std::map<std::string, double> storeFunctionError(const API::IFunction_const_sptr &func);
 
-  API::IBackgroundFunction_sptr
-  fitBackground(API::IBackgroundFunction_sptr bkgdfunc);
+  API::IBackgroundFunction_sptr fitBackground(API::IBackgroundFunction_sptr bkgdfunc);
 
   /// Flag to show whether fitting parameters are set
   bool m_fitMethodSet;
@@ -238,9 +222,7 @@ public:
   /// Algorithm's name
   const std::string name() const override { return "FitPeak"; }
   /// Summary of algorithms purpose
-  const std::string summary() const override {
-    return "Fit a single peak with checking mechanism. ";
-  }
+  const std::string summary() const override { return "Fit a single peak with checking mechanism. "; }
   /// Algorithm's version
   int version() const override { return (1); }
   /// Algorithm's category for identification
@@ -261,38 +243,30 @@ private:
                    const std::map<std::string, double> &m_fitErrorBkgdFunc);
 
   /// Fit a single peak function with pure peak workspace
-  double fitPeakFunction(API::IPeakFunction_sptr peakfunc,
-                         API::MatrixWorkspace_sptr dataws, size_t wsindex,
+  double fitPeakFunction(API::IPeakFunction_sptr peakfunc, API::MatrixWorkspace_sptr dataws, size_t wsindex,
                          double startx, double endx);
 
   /// Fit background with multiple domain
-  API::IBackgroundFunction_sptr
-  fitBackground(API::IBackgroundFunction_sptr bkgdfunc);
+  API::IBackgroundFunction_sptr fitBackground(API::IBackgroundFunction_sptr bkgdfunc);
 
   /// Fit peak and background composite function
-  double fitCompositeFunction(API::IPeakFunction_sptr peakfunc,
-                              API::IBackgroundFunction_sptr bkgdfunc,
-                              API::MatrixWorkspace_sptr dataws, size_t wsindex,
-                              double startx, double endx);
+  double fitCompositeFunction(API::IPeakFunction_sptr peakfunc, API::IBackgroundFunction_sptr bkgdfunc,
+                              API::MatrixWorkspace_sptr dataws, size_t wsindex, double startx, double endx);
 
   /// Make a pure peak WS in the fit window region
   void makePurePeakWS(API::MatrixWorkspace_sptr purePeakWS);
 
   /// Estimate the peak height from a set of data containing pure peaks
-  double estimatePeakHeight(API::IPeakFunction_sptr peakfunc,
-                            API::MatrixWorkspace_sptr dataws, size_t wsindex,
+  double estimatePeakHeight(API::IPeakFunction_sptr peakfunc, API::MatrixWorkspace_sptr dataws, size_t wsindex,
                             size_t ixmin, size_t ixmax);
 
   /// Fit a function.
-  double fitFunctionSD(API::IFunction_sptr fitfunc,
-                       API::MatrixWorkspace_sptr dataws, size_t wsindex,
-                       double xmin, double xmax, bool calmode);
+  double fitFunctionSD(API::IFunction_sptr fitfunc, API::MatrixWorkspace_sptr dataws, size_t wsindex, double xmin,
+                       double xmax, bool calmode);
 
   /// Fit a function in multi-domain
-  double fitFunctionMD(API::IFunction_sptr fitfunc,
-                       API::MatrixWorkspace_sptr dataws, size_t wsindex,
-                       std::vector<double> vec_xmin,
-                       std::vector<double> vec_xmax);
+  double fitFunctionMD(API::IFunction_sptr fitfunc, API::MatrixWorkspace_sptr dataws, size_t wsindex,
+                       std::vector<double> vec_xmin, std::vector<double> vec_xmax);
 
   /// Process and store fit result
   void processNStoreFitResult(double rwp, bool storebkgd);
@@ -301,8 +275,7 @@ private:
   void setupGuessedFWHM(std::vector<double> &vec_FWHM);
 
   /// Pop
-  void pop(const std::map<std::string, double> &funcparammap,
-           API::IFunction_sptr func);
+  void pop(const std::map<std::string, double> &funcparammap, API::IFunction_sptr func);
 
   /// Backup data
   API::MatrixWorkspace_sptr genPurePeakWS();
@@ -311,23 +284,19 @@ private:
   void createFunctions();
 
   /// Check the fitted peak value to see whether it is valud
-  double checkFittedPeak(API::IPeakFunction_sptr peakfunc, double costfuncvalue,
-                         std::string &errorreason);
+  double checkFittedPeak(API::IPeakFunction_sptr peakfunc, double costfuncvalue, std::string &errorreason);
 
   /// Generate table workspace
-  DataObjects::TableWorkspace_sptr
-  genOutputTableWS(const API::IPeakFunction_sptr &peakfunc,
-                   std::map<std::string, double> peakerrormap,
-                   const API::IBackgroundFunction_sptr &bkgdfunc,
-                   std::map<std::string, double> bkgderrormap);
+  DataObjects::TableWorkspace_sptr genOutputTableWS(const API::IPeakFunction_sptr &peakfunc,
+                                                    std::map<std::string, double> peakerrormap,
+                                                    const API::IBackgroundFunction_sptr &bkgdfunc,
+                                                    std::map<std::string, double> bkgderrormap);
 
   /// Add function's parameter names after peak function name
-  std::vector<std::string>
-  addFunctionParameterNames(const std::vector<std::string> &funcnames);
+  std::vector<std::string> addFunctionParameterNames(const std::vector<std::string> &funcnames);
 
   /// Parse peak type from full peak type/parameter names string
-  std::string parseFunctionTypeFull(const std::string &fullstring,
-                                    bool &defaultparorder);
+  std::string parseFunctionTypeFull(const std::string &fullstring, bool &defaultparorder);
 
   /// Input data workspace
   API::MatrixWorkspace_sptr m_dataWS;

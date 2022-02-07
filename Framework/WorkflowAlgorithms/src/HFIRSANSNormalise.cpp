@@ -13,8 +13,7 @@
 
 #include "Poco/NumberFormatter.h"
 
-namespace Mantid {
-namespace WorkflowAlgorithms {
+namespace Mantid::WorkflowAlgorithms {
 
 using namespace Kernel;
 using namespace API;
@@ -23,17 +22,14 @@ using namespace API;
 DECLARE_ALGORITHM(HFIRSANSNormalise)
 
 void HFIRSANSNormalise::init() {
-  declareProperty(std::make_unique<WorkspaceProperty<>>("InputWorkspace", "",
-                                                        Direction::Input),
+  declareProperty(std::make_unique<WorkspaceProperty<>>("InputWorkspace", "", Direction::Input),
                   "Workspace to be corrected");
 
   std::vector<std::string> normOptions{"Monitor", "Timer"};
-  this->declareProperty("NormalisationType", "Monitor",
-                        std::make_shared<StringListValidator>(normOptions),
+  this->declareProperty("NormalisationType", "Monitor", std::make_shared<StringListValidator>(normOptions),
                         "Type of Normalisation to use");
 
-  declareProperty(std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
-                                                        Direction::Output),
+  declareProperty(std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "", Direction::Output),
                   "Corrected workspace");
   declareProperty("OutputMessage", "", Direction::Output);
 }
@@ -45,8 +41,7 @@ void HFIRSANSNormalise::exec() {
 
   // Get the monitor or timer
   boost::algorithm::to_lower(normalisation);
-  auto norm_count =
-      inputWS->run().getPropertyValueAsType<double>(normalisation);
+  auto norm_count = inputWS->run().getPropertyValueAsType<double>(normalisation);
 
   double factor;
   if (boost::iequals(normalisation, "monitor")) {
@@ -55,7 +50,7 @@ void HFIRSANSNormalise::exec() {
     factor = 1.0 / norm_count;
   }
 
-  IAlgorithm_sptr scaleAlg = createChildAlgorithm("Scale");
+  auto scaleAlg = createChildAlgorithm("Scale");
   scaleAlg->setProperty("InputWorkspace", inputWS);
   scaleAlg->setProperty("OutputWorkspace", outputWS);
   scaleAlg->setProperty("Factor", factor);
@@ -64,9 +59,7 @@ void HFIRSANSNormalise::exec() {
   MatrixWorkspace_sptr scaledWS = scaleAlg->getProperty("OutputWorkspace");
 
   setProperty("OutputWorkspace", scaledWS);
-  setProperty("OutputMessage", "Normalisation by " + normalisation + ": " +
-                                   Poco::NumberFormatter::format(norm_count));
+  setProperty("OutputMessage", "Normalisation by " + normalisation + ": " + Poco::NumberFormatter::format(norm_count));
 }
 
-} // namespace WorkflowAlgorithms
-} // namespace Mantid
+} // namespace Mantid::WorkflowAlgorithms

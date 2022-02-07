@@ -18,7 +18,7 @@ namespace Algorithms {
 
 /** RunCombinationHelper : This holds some useful utilities for operations
  * involving transformations of lists of workspaces into single one.
- * E.g. this is used commonly between MergeRuns and ConjoinXRuns
+ * E.g. this is used commonly between MergeRuns, ConjoinXRuns and Stitch
  */
 
 namespace RunCombinationOptions {
@@ -30,14 +30,11 @@ static const std::string FAIL_BEHAVIOUR = "Fail";
 
 class MANTID_ALGORITHMS_DLL RunCombinationHelper {
 public:
-  std::string checkCompatibility(const API::MatrixWorkspace_sptr &,
-                                 bool checkNumberHistograms = false);
+  std::string checkCompatibility(const API::MatrixWorkspace_sptr &, bool checkNumberHistograms = false);
   void setReferenceProperties(const API::MatrixWorkspace_sptr &);
-  static std::vector<std::string>
-  unWrapGroups(const std::vector<std::string> &);
-  std::list<API::MatrixWorkspace_sptr>
-  validateInputWorkspaces(const std::vector<std::string> &inputWorkspaces,
-                          Kernel::Logger &g_log);
+  static std::vector<std::string> unWrapGroups(const std::vector<std::string> &);
+  std::list<API::MatrixWorkspace_sptr> validateInputWorkspaces(const std::vector<std::string> &inputWorkspaces,
+                                                               Kernel::Logger &g_log);
 
 private:
   size_t m_numberSpectra;
@@ -47,6 +44,7 @@ private:
   std::string m_spectrumAxisUnit;
   std::string m_instrumentName;
   bool m_isHistogramData;
+  bool m_isDistribution;
   bool m_isScanning;
   std::vector<bool> m_hasDx;
 };

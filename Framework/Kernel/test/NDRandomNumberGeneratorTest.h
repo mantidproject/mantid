@@ -16,11 +16,9 @@ class NDRandomNumberGeneratorTest : public CxxTest::TestSuite {
 private:
   // RandomNumberGenerator is an interface so provide a trivial implementation
   // for the test
-  class Mock3DRandomNumberGenerator
-      : public Mantid::Kernel::NDRandomNumberGenerator {
+  class Mock3DRandomNumberGenerator : public Mantid::Kernel::NDRandomNumberGenerator {
   public:
-    Mock3DRandomNumberGenerator()
-        : Mantid::Kernel::NDRandomNumberGenerator(3) {}
+    Mock3DRandomNumberGenerator() : Mantid::Kernel::NDRandomNumberGenerator(3) {}
     GNU_DIAG_OFF_SUGGEST_OVERRIDE
     MOCK_METHOD0(generateNextPoint, void());
     MOCK_METHOD0(restart, void());

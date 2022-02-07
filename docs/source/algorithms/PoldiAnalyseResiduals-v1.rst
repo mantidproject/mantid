@@ -54,7 +54,7 @@ The following example shows how to calculate the residuals following a fit perfo
     print("Residuals are in the range: [ {:.2f} ,  {:.2f} ]".format(round(min(residual_data), 2), round(max(residual_data), 2)))
 
 The output contains the range in which residuals are found:
-    
+
 .. testoutput:: ExSiliconMerged
 
     Residuals are in the range: [ -2361.45 ,  2651.65 ]

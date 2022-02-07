@@ -54,6 +54,9 @@ class LiquidsReflectometryReduction(PythonAlgorithm):
         self.declareProperty(IntArrayProperty("SignalBackgroundPixelRange", [123, 137],
                                               IntArrayLengthValidator(2), direction=Direction.Input),
                              "Pixel range defining the background. Default:(123,137)")
+        self.declareProperty("ErrorWeighting", False,
+                             doc='If True, a weighted average is used to to estimate the subtracted background.'
+                                 'Otherwise, a simple average is used.')
         self.declareProperty("NormFlag", True, doc="If true, the data will be normalized")
         self.declareProperty(IntArrayProperty("NormPeakPixelRange", [127, 133],
                                               IntArrayLengthValidator(2), direction=Direction.Input),
@@ -85,6 +88,7 @@ class LiquidsReflectometryReduction(PythonAlgorithm):
         self.declareProperty("AngleOffset", 0.0, doc="angle offset (degrees)")
         self.declareProperty("AngleOffsetError", 0.0, doc="Angle offset error (degrees)")
         self.declareProperty(MatrixWorkspaceProperty("OutputWorkspace", "", Direction.Output), "Output workspace")
+        self.declareProperty("ApplyScalingFactor", True, doc="If true, the scaling from Scaling Factor file will be applied")
         self.declareProperty("ScalingFactorFile", "", doc="Scaling factor configuration file")
         self.declareProperty("SlitTolerance", 0.02, doc="Tolerance for matching slit positions")
         self.declareProperty("SlitsWidthFlag", True,
@@ -209,7 +213,9 @@ class LiquidsReflectometryReduction(PythonAlgorithm):
         normalized_data.setDistribution(True)
 
         # Apply scaling factors
-        normalized_data = self.apply_scaling_factor(normalized_data)
+        apply_scaling_factor = self.getProperty("ApplyScalingFactor").value
+        if apply_scaling_factor:
+            normalized_data = self.apply_scaling_factor(normalized_data)
 
         q_workspace = SumSpectra(InputWorkspace = normalized_data)
         q_workspace.getAxis(0).setUnit("MomentumTransfer")
@@ -409,11 +415,13 @@ class LiquidsReflectometryReduction(PythonAlgorithm):
 
         # Subtract background
         if subtract_background:
+            err_weight = self.getProperty('ErrorWeighting').value
             workspace = LRSubtractAverageBackground(InputWorkspace=workspace,
                                                     PeakRange=peak_range,
                                                     BackgroundRange=background_range,
                                                     LowResolutionRange=[x_min, x_max],
-                                                    OutputWorkspace=str(workspace))
+                                                    OutputWorkspace=str(workspace),
+                                                    ErrorWeighting=err_weight)
         else:
             # If we don't subtract the background, we still have to integrate
             # over the low resolution axis

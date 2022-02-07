@@ -37,9 +37,7 @@ public:
   /// Algorithm's name for identification overriding a virtual method
   const std::string name() const override { return "NormaliseVanadium"; }
   /// Summary of algorithms purpose
-  const std::string summary() const override {
-    return "Normalises all spectra to a specified wavelength.";
-  }
+  const std::string summary() const override { return "Normalises all spectra to a specified wavelength."; }
 
   /// Algorithm's version for identification overriding a virtual method
   int version() const override { return 1; }

@@ -8,8 +8,7 @@
 #include <boost/algorithm/string.hpp>
 #include <boost/regex.hpp>
 
-namespace Mantid {
-namespace Kernel {
+namespace Mantid::Kernel {
 
 std::string ICatalogInfo::transformArchivePath(const std::string &path) const {
   std::string ret;
@@ -38,8 +37,7 @@ std::string ICatalogInfo::transformArchivePath(const std::string &path) const {
  * @param prefix :: Replace result of regex with this prefix.
  * @return A string containing the replacement.
  */
-std::string ICatalogInfo::replacePrefix(const std::string &path,
-                                        const std::string &regex,
+std::string ICatalogInfo::replacePrefix(const std::string &path, const std::string &regex,
                                         const std::string &prefix) const {
   boost::regex re(regex);
   // Assign the result of the replacement back to path and return it.
@@ -54,13 +52,10 @@ std::string ICatalogInfo::replacePrefix(const std::string &path,
  * @param format  :: A substitute string.
  * @return A string containing the replacement.
  */
-std::string
-ICatalogInfo::replaceAllOccurences(const std::string &path,
-                                   const std::string &search,
-                                   const std::string &format) const {
+std::string ICatalogInfo::replaceAllOccurences(const std::string &path, const std::string &search,
+                                               const std::string &format) const {
 
   return boost::replace_all_copy(path, search, format);
 }
 
-} // namespace Kernel
-} // namespace Mantid
+} // namespace Mantid::Kernel

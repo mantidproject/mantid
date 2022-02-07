@@ -9,15 +9,13 @@
 #include "MantidIndexing/SpectrumIndexSet.h"
 #include "MantidTypes/SpectrumDefinition.h"
 
-namespace Mantid {
-namespace Indexing {
+namespace Mantid::Indexing {
 
 namespace {
 void checkStorageMode(const IndexInfo &indexInfo) {
   using namespace Parallel;
   if (indexInfo.storageMode() == StorageMode::Distributed)
-    throw std::runtime_error("extract() does not support " +
-                             Parallel::toString(StorageMode::Distributed));
+    throw std::runtime_error("extract() does not support " + Parallel::toString(StorageMode::Distributed));
 }
 } // namespace
 
@@ -45,8 +43,7 @@ IndexInfo extract(const IndexInfo &source, const std::vector<size_t> &indices) {
 
 /// Extracts IndexInfo from source IndexInfo, extracting data for all indices
 /// specified by range.
-IndexInfo extract(const IndexInfo &source, const size_t minIndex,
-                  const size_t maxIndex) {
+IndexInfo extract(const IndexInfo &source, const size_t minIndex, const size_t maxIndex) {
   checkStorageMode(source);
   std::vector<SpectrumNumber> specNums;
   std::vector<SpectrumDefinition> specDefs;
@@ -60,5 +57,4 @@ IndexInfo extract(const IndexInfo &source, const size_t minIndex,
   return result;
 }
 
-} // namespace Indexing
-} // namespace Mantid
+} // namespace Mantid::Indexing

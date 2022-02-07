@@ -61,11 +61,9 @@ public:
   virtual ~IndirectDataAnalysisTab() override = default;
 
   /// Set the presenter for the output plotting options
-  void setOutputPlotOptionsPresenter(
-      std::unique_ptr<IndirectPlotOptionsPresenter> presenter);
+  void setOutputPlotOptionsPresenter(std::unique_ptr<IndirectPlotOptionsPresenter> presenter);
   /// Set the active workspaces used in the plotting options
-  void setOutputPlotOptionsWorkspaces(
-      std::vector<std::string> const &outputWorkspaces);
+  void setOutputPlotOptionsWorkspaces(std::vector<std::string> const &outputWorkspaces);
   /// Clear the workspaces held by the output plotting options
   void clearOutputPlotOptionsWorkspaces();
 
@@ -80,38 +78,35 @@ protected:
   void runPythonScript(const QString &pyInput);
 
   /// Retrieve input workspace
-  Mantid::API::MatrixWorkspace_sptr inputWorkspace() const;
+  Mantid::API::MatrixWorkspace_sptr getInputWorkspace() const;
 
   /// Set input workspace
   void setInputWorkspace(Mantid::API::MatrixWorkspace_sptr inputWorkspace);
 
   /// Retrieve preview plot workspace
-  Mantid::API::MatrixWorkspace_sptr previewPlotWorkspace();
+  Mantid::API::MatrixWorkspace_sptr getPreviewPlotWorkspace();
 
   /// Set preview plot workspace
-  void setPreviewPlotWorkspace(
-      const Mantid::API::MatrixWorkspace_sptr &previewPlotWorkspace);
+  void setPreviewPlotWorkspace(const Mantid::API::MatrixWorkspace_sptr &previewPlotWorkspace);
 
   /// Retrieve the selected spectrum
-  int selectedSpectrum() const;
+  int getSelectedSpectrum() const;
 
   /// Retrieve the selected minimum spectrum
-  int minimumSpectrum() const;
+  int getMinimumSpectrum() const;
 
   /// Retrieve the selected maximum spectrum
-  int maximumSpectrum() const;
+  int getMaximumSpectrum() const;
 
   void plotInput(MantidQt::MantidWidgets::PreviewPlot *previewPlot);
 
   void clearAndPlotInput(MantidQt::MantidWidgets::PreviewPlot *fitPreviewPlot,
                          MantidQt::MantidWidgets::PreviewPlot *diffPreviewPlot);
 
-  void updatePlot(const std::string &outputWSName, size_t index,
-                  MantidQt::MantidWidgets::PreviewPlot *fitPreviewPlot,
+  void updatePlot(const std::string &outputWSName, size_t index, MantidQt::MantidWidgets::PreviewPlot *fitPreviewPlot,
                   MantidQt::MantidWidgets::PreviewPlot *diffPreviewPlot);
 
-  void updatePlot(const Mantid::API::WorkspaceGroup_sptr &workspaceGroup,
-                  size_t index,
+  void updatePlot(const Mantid::API::WorkspaceGroup_sptr &workspaceGroup, size_t index,
                   MantidQt::MantidWidgets::PreviewPlot *fitPreviewPlot,
                   MantidQt::MantidWidgets::PreviewPlot *diffPreviewPlot);
 
@@ -119,26 +114,33 @@ protected:
                   MantidQt::MantidWidgets::PreviewPlot *fitPreviewPlot,
                   MantidQt::MantidWidgets::PreviewPlot *diffPreviewPlot);
 
-  void updatePlot(const std::string &workspaceName,
-                  MantidQt::MantidWidgets::PreviewPlot *fitPreviewPlot,
+  void updatePlot(const std::string &workspaceName, MantidQt::MantidWidgets::PreviewPlot *fitPreviewPlot,
                   MantidQt::MantidWidgets::PreviewPlot *diffPreviewPlot);
 
   void updatePlot(const Mantid::API::MatrixWorkspace_sptr &outputWS,
                   MantidQt::MantidWidgets::PreviewPlot *fitPreviewPlot,
                   MantidQt::MantidWidgets::PreviewPlot *diffPreviewPlot);
 
-  void updatePlotRange(const QString &rangeName,
-                       MantidQt::MantidWidgets::PreviewPlot *previewPlot,
-                       const QString &startRangePropName = "",
-                       const QString &endRangePropName = "");
-
   /// DoubleEditorFactory
   DoubleEditorFactory *m_dblEdFac;
   /// QtCheckBoxFactory
   QtCheckBoxFactory *m_blnEdFac;
 
+private:
+  virtual void setFileExtensionsByName(bool filter) = 0;
+  virtual void setBrowserWorkspace(){};
+
+  /// A pointer to the parent (friend) IndirectDataAnalysis object.
+  IndirectDataAnalysis *m_parent;
+  Mantid::API::MatrixWorkspace_sptr m_inputWorkspace;
+  std::weak_ptr<Mantid::API::MatrixWorkspace> m_previewPlotWorkspace;
+  int m_selectedSpectrum;
+  int m_minSpectrum;
+  int m_maxSpectrum;
+  std::unique_ptr<IndirectPlotOptionsPresenter> m_plotOptionsPresenter;
+
 protected slots:
-  /// Slot that can be called when a user eidts an input.
+  /// Slot that can be called when a user edits an input.
   void inputChanged();
 
   /// Plots the current preview data
@@ -152,27 +154,6 @@ protected slots:
 
   /// Sets the minimum spectrum
   void setMinimumSpectrum(int spectrum);
-
-private:
-  /// Overidden by child class.
-  void setup() override = 0;
-  /// Overidden by child class.
-  void run() override = 0;
-  /// Overidden by child class.
-  bool validate() override = 0;
-  /// Overidden by child class.
-  virtual void loadSettings(const QSettings &settings) = 0;
-  virtual void setFileExtensionsByName(bool filter) = 0;
-  virtual void setBrowserWorkspace(){};
-
-  /// A pointer to the parent (friend) IndirectDataAnalysis object.
-  IndirectDataAnalysis *m_parent;
-  Mantid::API::MatrixWorkspace_sptr m_inputWorkspace;
-  std::weak_ptr<Mantid::API::MatrixWorkspace> m_previewPlotWorkspace;
-  int m_selectedSpectrum;
-  int m_minSpectrum;
-  int m_maxSpectrum;
-  std::unique_ptr<IndirectPlotOptionsPresenter> m_plotOptionsPresenter;
 };
 
 } // namespace IDA

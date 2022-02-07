@@ -16,11 +16,10 @@ namespace MantidQt {
 namespace CustomInterfaces {
 namespace ISISReflectometry {
 
-class MANTIDQT_ISISREFLECTOMETRY_DLL QtRunsTableView : public QWidget,
-                                                       public IRunsTableView {
+class MANTIDQT_ISISREFLECTOMETRY_DLL QtRunsTableView : public QWidget, public IRunsTableView {
   Q_OBJECT
 public:
-  explicit QtRunsTableView(std::vector<std::string> const &instruments);
+  explicit QtRunsTableView(std::vector<std::string> instruments);
   void subscribe(RunsTableViewSubscriber *notifyee) override;
   void setProgress(int value) override;
   void resetFilterBox() override;
@@ -62,8 +61,7 @@ private slots:
 
 private:
   void addToolbarActions();
-  QAction *addToolbarItem(Action action, std::string const &iconPath,
-                          std::string const &description);
+  QAction *addToolbarItem(Action action, std::string const &iconPath, std::string const &description);
   void showAlgorithmPropertyHintsInOptionsColumn();
   void setSelected(QComboBox &box, std::string const &str);
   void setEnabledStateForAllWidgets(bool enabled);
@@ -81,7 +79,7 @@ private:
 
 class RunsTableViewFactory {
 public:
-  explicit RunsTableViewFactory(std::vector<std::string> const &instruments);
+  explicit RunsTableViewFactory(std::vector<std::string> instruments);
   QtRunsTableView *operator()() const;
   int defaultInstrumentFromConfig() const;
   int indexOfElseFirst(std::string const &instrument) const;

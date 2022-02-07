@@ -12,8 +12,7 @@
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/MandatoryValidator.h"
 
-namespace Mantid {
-namespace Algorithms {
+namespace Mantid::Algorithms {
 // Register the algorithm into the algorithm factory
 DECLARE_ALGORITHM(FilterByLogValue)
 
@@ -30,43 +29,34 @@ std::string CENTRE("Centre");
 std::string LEFT("Left");
 
 void FilterByLogValue::init() {
-  declareProperty(std::make_unique<WorkspaceProperty<EventWorkspace>>(
-                      "InputWorkspace", "", Direction::Input),
+  declareProperty(std::make_unique<WorkspaceProperty<EventWorkspace>>("InputWorkspace", "", Direction::Input),
                   "An input event workspace");
 
-  declareProperty(std::make_unique<WorkspaceProperty<EventWorkspace>>(
-                      "OutputWorkspace", "", Direction::Output),
+  declareProperty(std::make_unique<WorkspaceProperty<EventWorkspace>>("OutputWorkspace", "", Direction::Output),
                   "The name to use for the output workspace");
 
-  declareProperty(
-      "LogName", "", std::make_shared<MandatoryValidator<std::string>>(),
-      "Name of the sample log to use to filter.\n"
-      "For example, the pulse charge is recorded in 'ProtonCharge'.");
+  declareProperty("LogName", "", std::make_shared<MandatoryValidator<std::string>>(),
+                  "Name of the sample log to use to filter.\n"
+                  "For example, the pulse charge is recorded in 'ProtonCharge'.");
 
-  declareProperty("MinimumValue", Mantid::EMPTY_DBL(),
-                  "Minimum log value for which to keep events.");
+  declareProperty("MinimumValue", Mantid::EMPTY_DBL(), "Minimum log value for which to keep events.");
 
-  declareProperty("MaximumValue", Mantid::EMPTY_DBL(),
-                  "Maximum log value for which to keep events.");
+  declareProperty("MaximumValue", Mantid::EMPTY_DBL(), "Maximum log value for which to keep events.");
 
   auto min = std::make_shared<BoundedValidator<double>>();
   min->setLower(0.0);
   declareProperty("TimeTolerance", 0.0, min,
-                  "Tolerance, in seconds, for the event times to keep. A good "
-                  "value is 1/2 your measurement interval. \n"
-                  "For a single log value at time T, all events between "
-                  "T+-Tolerance are kept.\n"
-                  "If there are several consecutive log values matching the "
-                  "filter, events between T1-Tolerance and T2+Tolerance are "
-                  "kept.");
+                  "Tolerance, in seconds, for the event times to keep. How TimeTolerance is applied is highly "
+                  "correlated to LogBoundary and PulseFilter.  Check the help or algorithm documents for details.");
 
   std::vector<std::string> types(2);
   types[0] = CENTRE;
   types[1] = LEFT;
-  declareProperty("LogBoundary", types[0],
-                  std::make_shared<StringListValidator>(types),
+  declareProperty("LogBoundary", types[0], std::make_shared<StringListValidator>(types),
                   "How to treat log values as being measured in the centre of "
-                  "the time, or beginning (left) boundary");
+                  "the time window for which log criteria are satisfied, or left (beginning) of time window boundary. "
+                  "This value must be set to Left if the sample log is recorded upon changing,"
+                  "which applies to most of the sample environment devices in SNS.");
 
   declareProperty("PulseFilter", false,
                   "Optional. Filter out a notch of time for each entry in the "
@@ -88,26 +78,21 @@ std::map<std::string, std::string> FilterByLogValue::validateInputs() {
   // Check that the log exists for the given input workspace
   std::string logname = getPropertyValue("LogName");
   try {
-    auto *log =
-        dynamic_cast<ITimeSeriesProperty *>(inputWS->run().getLogData(logname));
+    auto *log = dynamic_cast<ITimeSeriesProperty *>(inputWS->run().getLogData(logname));
     if (log == nullptr) {
       errors["LogName"] = "'" + logname + "' is not a time-series log.";
       return errors;
     }
   } catch (Exception::NotFoundError &) {
-    errors["LogName"] = "The log '" + logname +
-                        "' does not exist in the workspace '" +
-                        inputWS->getName() + "'.";
+    errors["LogName"] = "The log '" + logname + "' does not exist in the workspace '" + inputWS->getName() + "'.";
     return errors;
   }
 
   const double min = getProperty("MinimumValue");
   const double max = getProperty("MaximumValue");
   if (!isEmpty(min) && !isEmpty(max) && (max < min)) {
-    errors["MinimumValue"] =
-        "MinimumValue must not be larger than MaximumValue";
-    errors["MaximumValue"] =
-        "MinimumValue must not be larger than MaximumValue";
+    errors["MinimumValue"] = "MinimumValue must not be larger than MaximumValue";
+    errors["MaximumValue"] = "MinimumValue must not be larger than MaximumValue";
   }
 
   return errors;
@@ -141,8 +126,7 @@ void FilterByLogValue::exec() {
   // Now make the splitter vector
   TimeSplitterType splitter;
   // This'll throw an exception if the log doesn't exist. That is good.
-  auto *log =
-      dynamic_cast<ITimeSeriesProperty *>(inputWS->run().getLogData(logname));
+  auto *log = dynamic_cast<ITimeSeriesProperty *>(inputWS->run().getLogData(logname));
   if (log) {
     if (PulseFilter) {
       // ----- Filter at pulse times only -----
@@ -164,12 +148,10 @@ void FilterByLogValue::exec() {
       // This function creates the splitter vector we will use to filter out
       // stuff.
       const std::string logBoundary(this->getPropertyValue("LogBoundary"));
-      log->makeFilterByValue(splitter, min, max, tolerance,
-                             (logBoundary == CENTRE));
+      log->makeFilterByValue(splitter, min, max, tolerance, (logBoundary == CENTRE));
 
       if (log->realSize() >= 1 && handle_edge_values) {
-        log->expandFilterToRange(splitter, min, max,
-                                 TimeInterval(run_start, run_stop));
+        log->expandFilterToRange(splitter, min, max, TimeInterval(run_start, run_stop));
       }
     } // (filter by value)
   }
@@ -245,5 +227,4 @@ void FilterByLogValue::exec() {
   }
 }
 
-} // namespace Algorithms
-} // namespace Mantid
+} // namespace Mantid::Algorithms

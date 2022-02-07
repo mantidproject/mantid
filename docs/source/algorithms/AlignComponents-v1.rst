@@ -9,16 +9,39 @@
 Description
 -----------
 
-This algorithm will take a calibration in the form of a
-:ref:`diffractioncalibration
-workspace<DiffractionCalibrationWorkspace>` from the output of *for
-example* :ref:`algm-GetDetOffsetsMultiPeaks` or
-:ref:`algm-CalibrateRectangularDetectors` and minimize the difference
-between the DIFC of the instrument and calibration workspace by moving
-and rotating instrument components.
+This algorithm will take a table of peak-center positions (TOF units) for every pixel,
+and minimize the following quantity by moving and rotating instrument components.
 
-The resulting calibrated geometry can be exported by
-:ref:`algm-ExportGeometry`.
+.. math:: \sum_i^{N_d}\sum_j^{M_i} \frac{|DIFC_i * TOF_{i,j} - d^{exp}_j|}{d^{exp}_j}
+
+where the sums is for all :math:`N_d` detector pixels in a given instrument component and all
+:math:`M_i` peak centers observed at detector pixel :math:`i`. The quantity to be summed is
+the absolute value of the fractional difference between the observed peak center in d-spacing units
+for detector pixel :math:`i` and peak :math:`j`, :math:`DIFC_i * TOF_{i,j}`, and a reference
+experimental value for the d-spacing of peak :math:`j`, :math:`d^{exp}_j`. The conversion from
+peak center in TOF units (:math:`TOF_{i,j}`) to d-spacing units is carried out via the
+geometrical parameter :math:`DIFC_i` -- see :ref:`algm-AlignDetectors` for more information
+regarding this parameter. As we change the location and orientations of the instrument components
+during the minimization, the geometrical parameter :math:`DIFC_i` is bound to change.
+
+Below's an example of the table of peak-center positions in TOF units for a sample having two peaks
+with reference peak centers of 5.1483 and 5.2070 Angstroms for an instrument consisting of one bank
+with four pixels:
+
+===== ======= =======
+detid @5.1483 @7.2070
+===== ======= =======
+1     10000.0 nan
+2     10010.0 nan
+3     nan     6000.0
+4     10030.0 6010.0
+===== ======= =======
+
+The first pixel contains the 5.1483A peak at :math:`TOF = 10000.0 \mu s` and the 7.2070A peak is not
+observed. Similary for the second pixel. The third pixels observes the second peak but not the first,
+and the fourth pixel observes both peaks.
+
+It is required that the reference peak centers in d-spacing have at least a precision of 5 digits.
 
 ComponentList
 #############
@@ -52,106 +75,25 @@ the instrument you don't want to use to align the sample/source
 position (*e.g.* in the *Align sample position in POWGEN* usage
 example below).
 
-The source and sample positions (in that order) are aligned before an
+The source and sample positions (in that order) are aligned before any
 components are aligned.
 
-Usage
------
+Displacements Table
+###################
+This table lists changes in position and orientation for each component
+other than the source and sample.
 
-**Example - Align the Y and Z position of bank26 in POWGEN:**
+- `DeltaR`: change in distance from Component to Sample (in mili-meter)
+- `DeltaX`: change in X-coordinate of Component (in mili-meter)
+- `DeltaY`: change in Y-coordinate of Component (in mili-meter)
+- `DeltaZ`: change in Z-coordinate of Component (in mili-meter)
 
-.. testcode:: position
+Changes in Euler Angles are understood once a Euler convention is selected. If
+`YXZ` is selected, then:
 
-      ws = LoadEmptyInstrument(Filename="POWGEN_Definition_2015-08-01.xml")
-      LoadCalFile(InputWorkspace=ws,
-            CalFilename="PG3_golden.cal",
-            MakeGroupingWorkspace=False,
-            MakeOffsetsWorkspace=True,
-            MakeMaskWorkspace=True,
-            WorkspaceName="PG3")
-      component="bank26"
-      print("Start position is {}".format(ws.getInstrument().getComponentByName(component).getPos()))
-      AlignComponents(CalibrationTable="PG3_cal",
-              Workspace=ws,
-	      MaskWorkspace="PG3_mask",
-	      Yposition=True, ZPosition=True,
-              ComponentList=component)
-      ws=mtd['ws']
-      final_pos = ws.getInstrument().getComponentByName(component).getPos()
-      print("Final position is [{:.2f}.{:.2f},{:.2f}]".format(final_pos[0],final_pos[1],final_pos[2]))
-
-Output:
-
-.. testoutput:: position
-
-    Start position is [1.54436,0.863271,-1.9297]
-    Final position is [1.54.0.85,-1.95]
-
-**Example - Align the Y rotation of bank25 and bank46 in POWGEN:**
-
-.. testcode:: rotation
-
-      ws = LoadEmptyInstrument(Filename="POWGEN_Definition_2015-08-01.xml")
-      LoadCalFile(InputWorkspace=ws,
-	    CalFilename="PG3_golden.cal",
-	    MakeGroupingWorkspace=False,
-	    MakeOffsetsWorkspace=True,
-	    MakeMaskWorkspace=True,
-	    WorkspaceName="PG3")
-      components="bank25,bank46"
-      bank25Rot = ws.getInstrument().getComponentByName("bank25").getRotation().getEulerAngles()
-      bank46Rot = ws.getInstrument().getComponentByName("bank46").getRotation().getEulerAngles()
-      print("Start bank25 rotation is [{:.3f}.{:.3f},{:.3f}]".format(bank25Rot[0], bank25Rot[1], bank25Rot[2]))
-      print("Start bank46 rotation is [{:.3f}.{:.3f},{:.3f}]".format(bank46Rot[0], bank46Rot[1], bank46Rot[2]))
-      AlignComponents(CalibrationTable="PG3_cal",
-	      Workspace=ws,
-	      MaskWorkspace="PG3_mask",
-	      EulerConvention="YZX",
-              AlphaRotation=True,
-	      ComponentList=components)
-      ws=mtd['ws']
-      bank25Rot = ws.getInstrument().getComponentByName("bank25").getRotation().getEulerAngles()
-      bank46Rot = ws.getInstrument().getComponentByName("bank46").getRotation().getEulerAngles()
-      print("Final bank25 rotation is [{:.3f}.{:.3f},{:.3f}]".format(bank25Rot[0], bank25Rot[1], bank25Rot[2]))
-      print("Final bank46 rotation is [{:.2f}.{:.3f},{:.3f}]".format(bank46Rot[0], bank46Rot[1], bank46Rot[2]))
-
-Output:
-
-.. testoutput:: rotation
-
-      Start bank25 rotation is [-24.089.0.179,9.030]
-      Start bank46 rotation is [-41.092.0.061,17.795]
-      Final bank25 rotation is [-24.089.0.179,9.030]
-      Final bank46 rotation is [-37.40.0.061,17.795]
-
-**Example - Align sample position in POWGEN:**
-
-.. testcode:: sample
-
-      ws = LoadEmptyInstrument(Filename="POWGEN_Definition_2015-08-01.xml")
-      LoadCalFile(InputWorkspace=ws,
-	    CalFilename="PG3_golden.cal",
-	    MakeGroupingWorkspace=False,
-	    MakeOffsetsWorkspace=True,
-	    MakeMaskWorkspace=True,
-	    WorkspaceName="PG3")
-      # Mask banks that don't have calibration data
-      MaskBTP(Workspace='PG3_mask', Instrument='POWGEN',
-	      Bank='22-25,42-45,62-66,82-86,102-105,123,124,143,144,164,184,204')
-      print("Start sample position is {}".format(ws.getInstrument().getSample().getPos().getZ()))
-      AlignComponents(CalibrationTable="PG3_cal",
-            Workspace=ws,
-            MaskWorkspace="PG3_mask",
-            FitSamplePosition=True,
-	    Zposition=True)
-      print("Final sample position is {:.3f}".format(mtd['ws'].getInstrument().getSample().getPos().getZ()))
-
-Output:
-
-.. testoutput:: sample
-
-      Start sample position is 0.0
-      Final sample position is 0.028
+- `DeltaAlpha`: change in rotation around the Y-axis (in degrees)
+- `DeltaBeta`: change in rotation around the X-axis (in degrees)
+- `DeltaGamma`: change in rotation around the Z-axis (in degrees)
 
 .. categories::
 

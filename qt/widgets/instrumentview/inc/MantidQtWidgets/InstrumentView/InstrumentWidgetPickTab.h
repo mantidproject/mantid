@@ -6,11 +6,12 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
+#include "MantidQtWidgets/InstrumentView/GLDisplay.h"
 #include "MantidQtWidgets/InstrumentView/InstrumentWidgetTab.h"
-#include "MantidQtWidgets/InstrumentView/MantidGLWidget.h"
 #include "MantidQtWidgets/InstrumentView/MiniPlot.h"
 
 #include "MantidAPI/MatrixWorkspace_fwd.h"
+#include "MantidDataObjects/Peak.h"
 #include "MantidGeometry/Crystal/IPeak.h"
 #include "MantidGeometry/ICompAssembly.h"
 #include "MantidGeometry/IDTypes.h"
@@ -25,11 +26,13 @@ class QLabel;
 class QActionGroup;
 class QSignalMapper;
 class QMenu;
+class QLineEdit;
 
 namespace MantidQt {
 namespace MantidWidgets {
 class InstrumentActor;
 class CollapsiblePanel;
+class CollapsibleStack;
 class ProjectionSurface;
 class ComponentInfoController;
 class DetectorPlotController;
@@ -43,8 +46,7 @@ class DetectorPlotController;
  *  - select and remove peaks
  *
  */
-class EXPORT_OPT_MANTIDQT_INSTRUMENTVIEW InstrumentWidgetPickTab
-    : public InstrumentWidgetTab {
+class EXPORT_OPT_MANTIDQT_INSTRUMENTVIEW InstrumentWidgetPickTab : public InstrumentWidgetTab {
   Q_OBJECT
 public:
   /// Activity type the tab can be in:
@@ -64,12 +66,14 @@ public:
     ComparePeak,
     AlignPeak,
     SingleDetectorSelection,
+    WholeInstrument,
     Tube,
     Draw
   };
   enum ToolType {
     Zoom,
     PixelSelect,
+    WholeInstrumentSelect,
     TubeSelect,
     PeakSelect,
     PeakErase,
@@ -77,6 +81,7 @@ public:
     PeakAlign,
     DrawEllipse,
     DrawRectangle,
+    DrawSector,
     DrawFree,
     EditShape
   };
@@ -88,15 +93,15 @@ public:
   void loadSettings(const QSettings &settings) override;
   bool addToDisplayContextMenu(QMenu & /*unused*/) const override;
   void selectTool(const ToolType tool);
+  SelectionType getSelectionType() const { return m_selectionType; }
   std::shared_ptr<ProjectionSurface> getSurface() const;
   const InstrumentWidget *getInstrumentWidget() const;
+  void clearWidgets();
   /// Load settings for the pick tab from a project file
   virtual void loadFromProject(const std::string &lines) override;
   /// Save settings for the pick tab to a project file
   virtual std::string saveToProject() const override;
-  void addToContextMenu(
-      QAction *action,
-      std::function<bool(std::map<std::string, bool>)> &actionCondition);
+  void addToContextMenu(QAction *action, std::function<bool(std::map<std::string, bool>)> &actionCondition);
 public slots:
   void setTubeXUnits(int units);
   void changedIntegrationRange(double /*unused*/, double /*unused*/);
@@ -112,46 +117,44 @@ private slots:
   void removeCurve(const QString & /*label*/);
   void singleComponentTouched(size_t pickID);
   void singleComponentPicked(size_t pickID);
-  void alignPeaks(const std::vector<Mantid::Kernel::V3D> &planePeaks,
-                  const Mantid::Geometry::IPeak *peak);
+  void alignPeaks(const std::vector<Mantid::Kernel::V3D> &planePeaks, const Mantid::Geometry::IPeak *peak);
   void
-  comparePeaks(const std::pair<std::vector<Mantid::Geometry::IPeak *>,
-                               std::vector<Mantid::Geometry::IPeak *>> &peaks);
+  comparePeaks(const std::pair<std::vector<Mantid::Geometry::IPeak *>, std::vector<Mantid::Geometry::IPeak *>> &peaks);
   void updateSelectionInfoDisplay();
   void shapeCreated();
   void updatePlotMultipleDetectors();
+  void onRunRebin();
+  void onRebinParamsWritten(const QString &text);
 
 private:
   void showEvent(QShowEvent * /*unused*/) override;
   QColor getShapeBorderColor() const;
+  void collapsePlotPanel();
 
   /* Pick tab controls */
-  MiniPlot *m_plot;     ///< Miniplot to display data in the detectors
-  QLabel *m_activeTool; ///< Displays a tip on which tool is currently selected
-  QPushButton *m_zoom;  ///< Button switching on navigation mode
-  QPushButton *m_one;   ///< Button switching on single detector selection mode
-  QPushButton *m_tube; ///< Button switching on detector's parent selection mode
-  QPushButton *m_peak; ///< Button switching on peak creation mode
-  QPushButton *m_peakSelect;  ///< Button switching on peak selection mode
-  QPushButton *m_peakCompare; ///< Button switching on peak comparison mode
-  QPushButton *m_peakAlign;   ///< Button switching on peak alignment mode
-  QPushButton *m_rectangle;   ///< Button switching on drawing a rectangular
-  /// selection region
-  QPushButton
-      *m_ellipse; ///< Button switching on drawing a elliptical selection region
-  QPushButton *m_ring_ellipse; ///< Button switching on drawing a elliptical
-  /// ring selection region
-  QPushButton *m_ring_rectangle; ///< Button switching on drawing a rectangular
-  /// ring selection region
-  QPushButton
-      *m_free_draw; ///< Button switching on drawing a region of arbitrary shape
-  QPushButton *m_edit; ///< Button switching on edditing the selection region
+  MiniPlot *m_plot;              ///< Miniplot to display data in the detectors
+  QLabel *m_activeTool;          ///< Displays a tip on which tool is currently selected
+  QPushButton *m_zoom;           ///< Button switching on navigation mode
+  QPushButton *m_whole;          ///< Button switching on whole instrument selection mode
+  QPushButton *m_one;            ///< Button switching on single detector selection mode
+  QPushButton *m_tube;           ///< Button switching on detector's parent selection mode
+  QPushButton *m_peakAdd;        ///< Button switching on peak creation mode
+  QPushButton *m_peakErase;      ///< Button switching on peak erase mode
+  QPushButton *m_peakCompare;    ///< Button switching on peak comparison mode
+  QPushButton *m_peakAlign;      ///< Button switching on peak alignment mode
+  QPushButton *m_rectangle;      ///< Button switching on drawing a rectangular selection region
+  QPushButton *m_ellipse;        ///< Button switching on drawing a elliptical selection region
+  QPushButton *m_ring_ellipse;   ///< Button switching on drawing a elliptical ring selection region
+  QPushButton *m_ring_rectangle; ///< Button switching on drawing a rectangular ring selection region
+  QPushButton *m_sector;         ///< Button switching on drawing a circular sector
+  QPushButton *m_free_draw;      ///< Button switching on drawing a region of arbitrary shape
+  QPushButton *m_edit;           ///< Button switching on editing the selection region
   bool m_plotSum;
 
   // Actions to set integration option for the detector's parent selection mode
-  QAction *m_sumDetectors; ///< Sets summation over detectors (m_plotSum = true)
-  QAction *m_integrateTimeBins; ///< Sets integration over time bins (m_plotSum
-                                ///= false)
+  QAction *m_sumDetectors;      ///< Sets summation over detectors (m_plotSum = true)
+  QAction *m_integrateTimeBins; ///< Sets integration over time bins (m_plotSum = false)
+
   QActionGroup *m_summationType;
   QAction *m_logY;
   QAction *m_linearY;
@@ -163,13 +166,12 @@ private:
   // Instrument display context menu actions
   QAction *m_storeCurve; ///< add the current curve to the list of permanently
   /// displayed curves
-  QAction *m_savePlotToWorkspace; ///< Save data plotted on the miniplot into a
-  /// MatrixWorkspace
+  QAction *m_savePlotToWorkspace; ///< Save data plotted on the miniplot into a MatrixWorkspace
 
   CollapsiblePanel *m_plotPanel;
-  QTextEdit *m_selectionInfoDisplay; ///< Text control for displaying selection
-  /// information
+  QTextEdit *m_selectionInfoDisplay; ///< Text control for displaying selection information
   CollapsiblePanel *m_infoPanel;
+  CollapsiblePanel *m_rebinPanel;
   SelectionType m_selectionType;
   mutable bool m_freezePlot;
 
@@ -178,13 +180,17 @@ private:
   /// Controller responsible for the plot.
   DetectorPlotController *m_plotController;
 
+  QWidget *m_rebin;
+  QLineEdit *m_rebinParams;
+  QCheckBox *m_rebinUseReverseLog;
+  QCheckBox *m_rebinSaveToHisto;
+  QPushButton *m_runRebin;
+
   // Temporary caches for values from settings
   int m_tubeXUnitsCache;
   int m_plotTypeCache;
   // store added actions and conditions
-  std::vector<
-      std::pair<QAction *, std::function<bool(std::map<std::string, bool>)>>>
-      m_addedActions;
+  std::vector<std::pair<QAction *, std::function<bool(std::map<std::string, bool>)>>> m_addedActions;
   friend class InstrumentWidgetEncoder;
   friend class InstrumentWidgetDecoder;
 };
@@ -197,24 +203,19 @@ class ComponentInfoController : public QObject {
   Q_OBJECT
 public:
   /// Constructor.
-  ComponentInfoController(InstrumentWidgetPickTab *tab,
-                          const InstrumentWidget *instrWidget,
-                          QTextEdit *infoDisplay);
+  ComponentInfoController(InstrumentWidgetPickTab *tab, const InstrumentWidget *instrWidget, QTextEdit *infoDisplay);
 public slots:
   void displayInfo(size_t pickID);
   void displayComparePeaksInfo(
-      const std::pair<std::vector<Mantid::Geometry::IPeak *>,
-                      std::vector<Mantid::Geometry::IPeak *>> &peaks);
-  void displayAlignPeaksInfo(const std::vector<Mantid::Kernel::V3D> &planePeaks,
-                             const Mantid::Geometry::IPeak *peak);
+      const std::pair<std::vector<Mantid::Geometry::IPeak *>, std::vector<Mantid::Geometry::IPeak *>> &peaks);
+  void displayAlignPeaksInfo(const std::vector<Mantid::Kernel::V3D> &planePeaks, const Mantid::Geometry::IPeak *peak);
   void clear();
 
 private:
   QString displayDetectorInfo(size_t index);
   QString displayNonDetectorInfo(Mantid::Geometry::ComponentID compID);
   QString displayPeakInfo(Mantid::Geometry::IPeak *peak);
-  QString displayPeakAngles(const std::pair<Mantid::Geometry::IPeak *,
-                                            Mantid::Geometry::IPeak *> &peaks);
+  QString displayPeakAngles(const std::pair<Mantid::Geometry::IPeak *, Mantid::Geometry::IPeak *> &peaks);
   QString getPeakOverlayInfo();
 
   InstrumentWidgetPickTab *m_tab;
@@ -235,16 +236,9 @@ class DetectorPlotController : public QObject {
 
 public:
   enum PlotType { Single = 0, DetectorSum, TubeSum, TubeIntegral };
-  enum TubeXUnits {
-    DETECTOR_ID = 0,
-    LENGTH,
-    PHI,
-    OUT_OF_PLANE_ANGLE,
-    NUMBER_OF_UNITS
-  };
+  enum TubeXUnits { DETECTOR_ID = 0, LENGTH, PHI, OUT_OF_PLANE_ANGLE, NUMBER_OF_UNITS };
 
-  DetectorPlotController(InstrumentWidgetPickTab *tab,
-                         InstrumentWidget *instrWidget, MiniPlot *plot);
+  DetectorPlotController(InstrumentWidgetPickTab *tab, InstrumentWidget *instrWidget, MiniPlot *plot);
   void setEnabled(bool on) { m_enabled = on; }
   void setPlotData(size_t pickID);
   void setPlotData(const std::vector<size_t> &detIndices);
@@ -271,17 +265,13 @@ private:
   void plotTube(size_t detindex);
   void plotTubeSums(size_t detindex);
   void plotTubeIntegrals(size_t detindex);
-  void prepareDataForSinglePlot(size_t detindex, std::vector<double> &x,
-                                std::vector<double> &y,
+  void prepareDataForSinglePlot(size_t detindex, std::vector<double> &x, std::vector<double> &y,
                                 std::vector<double> *err = nullptr);
-  void prepareDataForSumsPlot(size_t detindex, std::vector<double> &x,
-                              std::vector<double> &y,
+  void prepareDataForSumsPlot(size_t detindex, std::vector<double> &x, std::vector<double> &y,
                               std::vector<double> *err = nullptr);
-  void prepareDataForIntegralsPlot(size_t detindex, std::vector<double> &x,
-                                   std::vector<double> &y,
+  void prepareDataForIntegralsPlot(size_t detindex, std::vector<double> &x, std::vector<double> &y,
                                    std::vector<double> *err = nullptr);
-  static double getOutOfPlaneAngle(const Mantid::Kernel::V3D &pos,
-                                   const Mantid::Kernel::V3D &origin,
+  static double getOutOfPlaneAngle(const Mantid::Kernel::V3D &pos, const Mantid::Kernel::V3D &origin,
                                    const Mantid::Kernel::V3D &normal);
   void addPeakLabels(const std::vector<size_t> &detIndices);
 
@@ -291,8 +281,7 @@ private:
 
   PlotType m_plotType;
   bool m_enabled;
-  TubeXUnits
-      m_tubeXUnits; ///< quantity the time bin integrals to be plotted against
+  TubeXUnits m_tubeXUnits; ///< quantity the time bin integrals to be plotted against
   size_t m_currentPickID;
 };
 

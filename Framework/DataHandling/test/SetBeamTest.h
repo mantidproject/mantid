@@ -10,8 +10,8 @@
 
 #include "MantidDataHandling/SetBeam.h"
 
-#include "MantidTestHelpers/ComponentCreationHelper.h"
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
+#include "MantidFrameworkTestHelpers/ComponentCreationHelper.h"
+#include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
 
 using Mantid::DataHandling::SetBeam;
 
@@ -31,7 +31,7 @@ public:
     TS_ASSERT(alg.isInitialized())
   }
 
-  void test_Beam_Size_Parameters_Stored_On_Instrument_Source() {
+  void test_Slit_Beam_Size_Parameters_Stored_On_Instrument_Source() {
     auto inputWS = WorkspaceCreationHelper::create2DWorkspaceBinned(1, 1);
     auto testInst = ComponentCreationHelper::createTestInstrumentCylindrical(1);
     inputWS->setInstrument(testInst);
@@ -53,6 +53,24 @@ public:
     TS_ASSERT_DELTA(0.0075, heightValue, 1e-10);
   }
 
+  void test_Circle_Beam_Size_Parameters_Stored_On_Instrument_Source() {
+    auto inputWS = WorkspaceCreationHelper::create2DWorkspaceBinned(1, 1);
+    auto testInst = ComponentCreationHelper::createTestInstrumentCylindrical(1);
+    inputWS->setInstrument(testInst);
+
+    auto alg = createAlgorithm();
+    TS_ASSERT_THROWS_NOTHING(alg->setProperty("InputWorkspace", inputWS));
+    alg->setProperty("Geometry", createCircularBeamProps());
+    TS_ASSERT_THROWS_NOTHING(alg->execute());
+
+    auto source = testInst->getSource();
+    const auto &instParams = inputWS->constInstrumentParameters();
+    auto beamRadius = instParams.get(source->getComponentID(), "beam-radius");
+    TS_ASSERT(beamRadius);
+    const double radiusValue = beamRadius->value<double>();
+    TS_ASSERT_DELTA(0.01, radiusValue, 1e-10);
+  }
+
   //----------------------------------------------------------------------------
   // Failure tests
   //----------------------------------------------------------------------------
@@ -60,8 +78,7 @@ public:
     auto inputWS = WorkspaceCreationHelper::create2DWorkspaceBinned(1, 1);
 
     auto alg = createAlgorithm();
-    TS_ASSERT_THROWS(alg->setProperty("InputWorkspace", inputWS),
-                     const std::invalid_argument &);
+    TS_ASSERT_THROWS(alg->setProperty("InputWorkspace", inputWS), const std::invalid_argument &);
   }
 
   void test_No_Geometry_Inputs_Not_Accepted() {
@@ -74,7 +91,7 @@ public:
     TS_ASSERT_THROWS(alg->execute(), const std::runtime_error &);
   }
 
-  void test_Missing_Geometry_Inputs_Not_Accepted() {
+  void test_Slit_Missing_Geometry_Inputs_Not_Accepted() {
     using Mantid::Kernel::PropertyManager;
     auto inputWS = WorkspaceCreationHelper::create2DWorkspaceBinned(1, 1);
     auto testInst = ComponentCreationHelper::createTestInstrumentCylindrical(1);
@@ -94,6 +111,23 @@ public:
     TS_ASSERT_THROWS(alg->execute(), const std::runtime_error &);
   }
 
+  void test_Circle_Missing_Geometry_Inputs_Not_Accepted() {
+    using Mantid::Kernel::PropertyManager;
+    auto inputWS = WorkspaceCreationHelper::create2DWorkspaceBinned(1, 1);
+    auto testInst = ComponentCreationHelper::createTestInstrumentCylindrical(1);
+    inputWS->setInstrument(testInst);
+
+    auto alg = createAlgorithm();
+    alg->setProperty("InputWorkspace", inputWS);
+    auto props = std::make_shared<PropertyManager>();
+    alg->setProperty("Geometry", props);
+    TS_ASSERT_THROWS(alg->execute(), const std::runtime_error &);
+    props = createCircularBeamProps();
+    props->removeProperty("Radius");
+    alg->setProperty("Geometry", props);
+    TS_ASSERT_THROWS(alg->execute(), const std::runtime_error &);
+  }
+
   //----------------------------------------------------------------------------
   // Non-test methods
   //----------------------------------------------------------------------------
@@ -103,7 +137,7 @@ private:
     alg->setChild(true);
     alg->setRethrows(true);
     alg->initialize();
-    return std::move(alg);
+    return alg;
   }
 
   Mantid::Kernel::PropertyManager_sptr createRectangularBeamProps() {
@@ -112,11 +146,20 @@ private:
     using StringProperty = Mantid::Kernel::PropertyWithValue<std::string>;
 
     auto props = std::make_shared<PropertyManager>();
-    props->declareProperty(std::make_unique<StringProperty>("Shape", "Slit"),
-                           "");
+    props->declareProperty(std::make_unique<StringProperty>("Shape", "Slit"), "");
     props->declareProperty(std::make_unique<DoubleProperty>("Width", 1.0), "");
-    props->declareProperty(std::make_unique<DoubleProperty>("Height", 0.75),
-                           "");
+    props->declareProperty(std::make_unique<DoubleProperty>("Height", 0.75), "");
+    return props;
+  }
+
+  Mantid::Kernel::PropertyManager_sptr createCircularBeamProps() {
+    using Mantid::Kernel::PropertyManager;
+    using DoubleProperty = Mantid::Kernel::PropertyWithValue<double>;
+    using StringProperty = Mantid::Kernel::PropertyWithValue<std::string>;
+
+    auto props = std::make_shared<PropertyManager>();
+    props->declareProperty(std::make_unique<StringProperty>("Shape", "Circle"), "");
+    props->declareProperty(std::make_unique<DoubleProperty>("Radius", 1.0), "");
     return props;
   }
 };

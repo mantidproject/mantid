@@ -5,7 +5,6 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAlgorithms/InterpolationOption.h"
-#include "MantidHistogramData/Histogram.h"
 #include "MantidHistogramData/Interpolate.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/PropertyWithValue.h"
@@ -32,25 +31,34 @@ namespace Algorithms {
 /**
  * Set the interpolation option
  * @param kind Set the type of interpolation on the call to apply
+ * @param calculateErrors Whether to calculate the interpolation errors
+ * @param independentErrors Sets whether the errors in the spectra should be considered to be independent
+ * or not when interpolating between them
  */
-void InterpolationOption::set(InterpolationOption::Value kind) {
+void InterpolationOption::set(const InterpolationOption::Value &kind, const bool calculateErrors,
+                              const bool independentErrors) {
   m_value = kind;
+  m_calculateErrors = calculateErrors;
+  m_independentErrors = independentErrors;
 }
 
 /**
  * Set the interpolation option
  * @param kind Set the type of interpolation on the call to apply
+ * @param calculateErrors Whether to calculate the interpolation errors
+ * @param independentErrors Sets whether the errors in the spectra should be considered to be independent
+ * or not when interpolating between them
  */
-void InterpolationOption::set(const std::string &kind) {
+void InterpolationOption::set(const std::string &kind, const bool calculateErrors, const bool independentErrors) {
   if (kind == LINEAR_OPT) {
     m_value = Value::Linear;
   } else if (kind == CSPLINE_OPT) {
     m_value = Value::CSpline;
   } else {
-    throw std::invalid_argument(
-        "InterpolationOption::set() - Unknown interpolation method '" + kind +
-        "'");
+    throw std::invalid_argument("InterpolationOption::set() - Unknown interpolation method '" + kind + "'");
   }
+  m_calculateErrors = calculateErrors;
+  m_independentErrors = independentErrors;
 }
 
 /**
@@ -62,8 +70,7 @@ std::unique_ptr<Property> InterpolationOption::property() const {
   using Kernel::StringListValidator;
   using StringProperty = Kernel::PropertyWithValue<std::string>;
 
-  return std::make_unique<StringProperty>(
-      PROP_NAME, LINEAR_OPT, std::make_shared<StringListValidator>(OPTIONS));
+  return std::make_unique<StringProperty>(PROP_NAME, LINEAR_OPT, std::make_shared<StringListValidator>(OPTIONS));
 }
 
 /**
@@ -84,15 +91,13 @@ std::string InterpolationOption::validateInputSize(const size_t size) const {
   case Value::Linear:
     nMin = minSizeForLinearInterpolation();
     if (size < nMin) {
-      return "Linear interpolation requires at least " + std::to_string(nMin) +
-             " points.";
+      return "Linear interpolation requires at least " + std::to_string(nMin) + " points.";
     }
     break;
   case Value::CSpline:
     nMin = minSizeForCSplineInterpolation();
     if (size < nMin) {
-      return "CSpline interpolation requires at least " + std::to_string(nMin) +
-             " points.";
+      return "CSpline interpolation requires at least " + std::to_string(nMin) + " points.";
     }
     break;
   }
@@ -104,14 +109,13 @@ std::string InterpolationOption::validateInputSize(const size_t size) const {
  * @param inOut A reference to a histogram to interpolate
  * @param stepSize The step size of calculated points
  */
-void InterpolationOption::applyInplace(HistogramData::Histogram &inOut,
-                                       size_t stepSize) const {
+void InterpolationOption::applyInplace(HistogramData::Histogram &inOut, size_t stepSize) const {
   switch (m_value) {
   case Value::Linear:
-    interpolateLinearInplace(inOut, stepSize);
+    interpolateLinearInplace(inOut, stepSize, m_calculateErrors, m_independentErrors);
     return;
   case Value::CSpline:
-    interpolateCSplineInplace(inOut, stepSize);
+    interpolateCSplineInplace(inOut, stepSize, m_calculateErrors, m_independentErrors);
     return;
   default:
     throw std::runtime_error("InterpolationOption::applyInplace() - "
@@ -125,14 +129,13 @@ void InterpolationOption::applyInplace(HistogramData::Histogram &inOut,
  * @param out A histogram where to store the interpolated values
  * @throw runtime_error Indicates unknown interpolatio method.
  */
-void InterpolationOption::applyInPlace(const HistogramData::Histogram &in,
-                                       HistogramData::Histogram &out) const {
+void InterpolationOption::applyInPlace(const HistogramData::Histogram &in, HistogramData::Histogram &out) const {
   switch (m_value) {
   case Value::Linear:
-    interpolateLinearInplace(in, out);
+    interpolateLinearInplace(in, out, m_calculateErrors, m_independentErrors);
     return;
   case Value::CSpline:
-    interpolateCSplineInplace(in, out);
+    interpolateCSplineInplace(in, out, m_calculateErrors, m_independentErrors);
     return;
   default:
     throw std::runtime_error("InterpolationOption::applyInplace() - "

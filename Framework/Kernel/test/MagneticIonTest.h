@@ -43,9 +43,8 @@ public:
                      const std::runtime_error &); // no such ion
     TS_ASSERT_THROWS(getMagneticIon("Am", 12),
                      const std::runtime_error &); // no such charge
-    TS_ASSERT_THROWS(
-        getJL("Am", 12),
-        const std::runtime_error &); // no such charge - pass to getJL
+    TS_ASSERT_THROWS(getJL("Am", 12),
+                     const std::runtime_error &); // no such charge - pass to getJL
     TS_ASSERT_THROWS(getJL("Am", 7, 3),
                      const std::runtime_error &); // no such l
   }
@@ -69,16 +68,14 @@ public:
   }
 
 private:
-  void checkVectorsEqual(const std::string &msgPrefix,
-                         const std::vector<double> &first,
+  void checkVectorsEqual(const std::string &msgPrefix, const std::vector<double> &first,
                          const std::vector<double> &second) {
     TSM_ASSERT_EQUALS(msgPrefix + " Size match", first.size(), second.size());
     if (first.size() != second.size())
       return;
 
     for (size_t i = 0; i < first.size(); ++i) {
-      const std::string msg = msgPrefix + " Value mismatch at element " +
-                              boost::lexical_cast<std::string>(i);
+      const std::string msg = msgPrefix + " Value mismatch at element " + boost::lexical_cast<std::string>(i);
       TSM_ASSERT_DELTA(msg, first[i], second[i], 1e-12);
     }
   }

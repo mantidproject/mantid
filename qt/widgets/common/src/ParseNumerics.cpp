@@ -14,8 +14,7 @@ double parseDouble(QString const &in) {
   if (ok)
     return out;
   else
-    throw std::runtime_error("Failed to parse '" + in.toStdString() +
-                             "' as a double numerical value.");
+    throw std::runtime_error("Failed to parse '" + in.toStdString() + "' as a double numerical value.");
 }
 
 int parseDenaryInteger(QString const &in) {
@@ -25,8 +24,7 @@ int parseDenaryInteger(QString const &in) {
   if (ok)
     return out;
   else
-    throw std::runtime_error("Failed to parse '" + in.toStdString() +
-                             "' as a denary integer.");
+    throw std::runtime_error("Failed to parse '" + in.toStdString() + "' as a denary integer.");
 }
 } // namespace MantidWidgets
 } // namespace MantidQt

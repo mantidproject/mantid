@@ -75,7 +75,7 @@ class DetectorFloodWeightingTest(unittest.TestCase):
         self.assertEqual(x_axis[0], bands[0])
         self.assertEqual(x_axis[-1], bands[-1])
         self.assertEqual(out_ws.readY(0)[0], 1.0)
-        
+
     def test_execute_multiple_bands_no_solid_angle(self):
         alg = AlgorithmManager.create("DetectorFloodWeighting")
         alg.setChild(True)

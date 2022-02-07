@@ -9,7 +9,7 @@
 Description
 -----------
 
-Calculates the arithmetic mean of the *y* values of the workspaces provided. If each input workspace is labelled :math:`w_i` and there 
+Calculates the arithmetic mean of the *y* values of the workspaces provided. If each input workspace is labelled :math:`w_i` and there
 are *N* workspaces then the mean is computed as:
 
 .. math::

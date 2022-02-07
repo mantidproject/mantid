@@ -51,10 +51,10 @@ class from one subproject. CMakeList.txt is adjusted. For details, run:
 
 ``buildconfig/delete_class.py --help``
 
-Profiling an algorithm
-----------------------
+Profiling
+---------
 
-On Linux the build can be configured to generated algorithm profiling information. See :doc:`AlgorithmProfiler <AlgorithmProfiler>` for more details.
+Profiling could mean tracking start-up, the progress of an algoirthm or performance. See :doc:`ProfilingOverview` for more details.
 
 Leak checking etc
 -----------------
@@ -67,6 +67,8 @@ Linux
 -  Keeps track of allocs/deallocs and reports anything missing at exit.
 -  Slow but thorough
 -  Useful options to run with
+-  See :doc:`valgrind <ProfilingWithValgrind>` for details on how to install
+
 
 ``valgrind --tool=memcheck --leak-check=full --show-reachable=yes --num-callers=20 --track-fds=yes --track-origins=yes --freelist-vol=500000000 ``\ \ `` [args...]``
 
@@ -98,36 +100,6 @@ Thread checking
 -  Slow but accurate
 -  A pain to get working with OpenMP. GCC must be recompiled to use a different call to create OMP threads or helgrind/drd cannot "see" the thread calls. Use this `script <https://github.com/UCSCSlang/Adversarial-Helgrind/raw/master/drd/scripts/download-and-build-gcc>`__ to recompile the same version off gcc that is onyour system. The script will need editing to change the appropriate variables.
 
-Profiling
----------
-
-.. _linux-1:
-
-Linux
-~~~~~
-
-`Callgrind/KCachegrind <http://kcachegrind.sourceforge.net/cgi-bin/show.cgi/KcacheGrindIndex>`__
-
--  KCachegrind visualizes callgrind output.
--  See :ref:`Profiling With Valgrind <ProfilingWithValgrind>` for help on
-   running callgrind
-
-`gperftools <https://github.com/gperftools/gperftools>`__
-
--  Takes snapshot of run and prints percentage of calls in functions
-
-See here for a list of other tools:
-http://www.pixelbeat.org/programming/profiling/
-
-.. _windows-1:
-
-Windows
-~~~~~~~
-
-`Very Sleepy <http://www.codersnotes.com/sleepy/>`__ (Windows):
-
--  Start/stop recording of program using a button
--  Not as detailed or flexible as callgrind
 
 IWYU
 ----
@@ -195,9 +167,9 @@ issues when a network interface is still active but very slow. More details can 
 Convert Wiki Docs to Sphinx
 ---------------------------
 
-``wiki2rst`` reads in mediawiki formatted webpages and converts them to ``.rst`` files, for use 
-in ``Sphinx``. The code attempts to take all images and internal links and re-create the 
-documentation structure in the ``Sphinx`` format. 
+``wiki2rst`` reads in mediawiki formatted webpages and converts them to ``.rst`` files, for use
+in ``Sphinx``. The code attempts to take all images and internal links and re-create the
+documentation structure in the ``Sphinx`` format.
 
 Use
 ~~~
@@ -284,34 +256,3 @@ To add optional arguments, add the following onto the end of ``CLANG_TIDY_CHECKS
 For example, to convert all loops classified as *risky* or above, we would append::
 
     ;-config={CheckOptions: [ {key: modernize-loop-convert.MinConfidence, value: risky} ]}
-
-CMake-format
----------------------
-
-`CMake-format <https://github.com/cheshirekow/cmake_format/>`__ is a tool which is used to format individual ``CMakeLists.txt`` to make them easier to read. 
-The package can be installed using ``pip install cmake_format`` or ``sudo pip install cmake_format``.
-
-To use cmake-format on a specific ``CMakeLists.txt`` file in the command line run 
-
-.. code::
-
-	python -m cmake_format -c /path/to/mantid/.cmake-format.json -i /path/to/CMakeLists.txt
-	
-This will format the file using the config file ``.cmake-format.json`` which can be found in the root of the mantid directory.
-
-There is an official Visual Studio extension, details of which can be found `here <https://marketplace.visualstudio.com/items?itemName=cheshirekow.cmake-format>`__.
-
-To format on all the CMakeLists run the following from within the mantid source folder:
-
-.. code::
-
-	import os
-
-	dir = os.getcwd()
-	for path, subdirs, files in os.walk(dir):
-		for file in files:
-			if file.endswith("CMakeLists.txt"):
-				cmakefile = os.path.join(path, file)
-				print("Formatting " + cmakefile)
-				os.system('python -m cmake_format -c ' + os.path.join(dir, '.cmake-format.json') +' -i ' + cmakefile)
-

@@ -18,7 +18,7 @@ The correction goes as follows:
 where
 
         :math:`\Phi_{sample} = \frac{M_{sample}}{M_{ref}} \Phi_{ref}`
-        
+
 Workflow
 ########
 
@@ -30,7 +30,7 @@ Usage
 **Example - Performing a Beam Flux Correction on Dummy Data**
 
 .. testcode:: ExTable
-   
+
    # Create some dummy data, as well as a dummy monitor ws for EQSANS.
    x = [1,2,3,4,5,6,7,8,9,10,11]
    y = 491520*[0.1]
@@ -43,7 +43,7 @@ Usage
 
    print("The expected value of each bin should be {:.11e}.".format(0.1/(49152*0.1)/(49152*0.1)))
    print("The actual value of the first bin is {:.11e}.".format(corrected[0].readY(0)[0]))
-   
+
 
 Output:
 

@@ -21,9 +21,7 @@ public:
   }
   const std::string category() const override;
   /// Algorithm's summary
-  const std::string summary() const override {
-    return "Adds a constant to the times for the requested log.";
-  }
+  const std::string summary() const override { return "Adds a constant to the times for the requested log."; }
 
 private:
   /// Initialise the properties

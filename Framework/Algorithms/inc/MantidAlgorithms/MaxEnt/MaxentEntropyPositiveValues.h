@@ -18,14 +18,11 @@ namespace Algorithms {
 class MANTID_ALGORITHMS_DLL MaxentEntropyPositiveValues : public MaxentEntropy {
 public:
   // First derivative
-  std::vector<double> derivative(const std::vector<double> &values,
-                                 double background) override;
+  std::vector<double> derivative(const std::vector<double> &values, double background) override;
   // Second derivative
-  std::vector<double> secondDerivative(const std::vector<double> &values,
-                                       double background) override;
+  std::vector<double> secondDerivative(const std::vector<double> &values, double background) override;
   // Correct negative values
-  std::vector<double> correctValues(const std::vector<double> &values,
-                                    double newValue) override;
+  std::vector<double> correctValues(const std::vector<double> &values, double newValue) override;
 };
 
 } // namespace Algorithms

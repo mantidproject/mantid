@@ -13,7 +13,7 @@
 from mantid.kernel import (ConfigServiceImpl, Logger, PropertyManagerDataServiceImpl, UnitFactoryImpl, UsageServiceImpl)
 
 
-def lazy_instance_access(cls):
+def lazy_instance_access(cls, key_as_str=False):
     """
     Takes a singleton class and wraps it in an LazySingletonHolder
     that constructs the instance on first access.
@@ -26,6 +26,9 @@ def lazy_instance_access(cls):
 
 
     :param cls: The singleton class type
+    :param key_as_str: When ``True``, the key supplied to ``__getitem__``, ``__setitem__``,
+    ``__delitem__``, and ``__contains__`` will be converted to a str. ``None`` wil return ``False``
+    for ``__contains__``
     :return: A new LazySingletonHolder wrapping cls
     """
 
@@ -44,23 +47,46 @@ def lazy_instance_access(cls):
             return cls.__getattribute__(cls.Instance(), "__len__")()
 
         def __getitem__(self, item):
+            if key_as_str:
+                if item is None:
+                    raise KeyError(item)
+                else:
+                    cls.__getattribute__(cls.Instance(), "__getitem__")(str(item))
             return cls.__getattribute__(cls.Instance(), "__getitem__")(item)
 
         def __setitem__(self, item, value):
+            if key_as_str:
+                if item is None:
+                    raise KeyError(item)
+                else:
+                    return cls.__getattribute__(cls.Instance(), "__setitem__")(str(item), value)
             return cls.__getattribute__(cls.Instance(), "__setitem__")(item, value)
 
         def __delitem__(self, item):
+            if key_as_str:
+                if item is None:
+                    raise KeyError(item)
+                else:
+                    return cls.__getattribute__(cls.Instance(), "__delitem__")(str(item))
             return cls.__getattribute__(cls.Instance(), "__delitem__")(item)
 
         def __contains__(self, item):
-            return cls.__getattribute__(cls.Instance(), "__contains__")(item)
+            if key_as_str:
+                # check for things that evaluate to False
+                if (item is None) or (not bool(item)):
+                    return False
+                else:
+                    # convert the ``item`` to a string
+                    return cls.__getattribute__(cls.Instance(), "__contains__")(str(item))
+            else:
+                return cls.__getattribute__(cls.Instance(), "__contains__")(item)
 
     return LazySingletonHolder()
 
 
 UsageService = lazy_instance_access(UsageServiceImpl)
-ConfigService = lazy_instance_access(ConfigServiceImpl)
-PropertyManagerDataService = lazy_instance_access(PropertyManagerDataServiceImpl)
+ConfigService = lazy_instance_access(ConfigServiceImpl, key_as_str=True)
+PropertyManagerDataService = lazy_instance_access(PropertyManagerDataServiceImpl, key_as_str=True)
 UnitFactory = lazy_instance_access(UnitFactoryImpl)
 
 config = ConfigService

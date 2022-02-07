@@ -10,7 +10,7 @@
 #include "BackgroundSubtraction.h"
 #include "Common/DllConfig.h"
 #include "FloodCorrections.h"
-#include "PerThetaDefaults.h"
+#include "LookupRow.h"
 #include "PolarizationCorrections.h"
 #include "ReductionType.h"
 #include "SummationType.h"
@@ -31,14 +31,11 @@ namespace ISISReflectometry {
 class MANTIDQT_ISISREFLECTOMETRY_DLL Experiment {
 public:
   Experiment();
-  Experiment(AnalysisMode analysisMode, ReductionType reductionType,
-             SummationType summationType, bool includePartialBins, bool debug,
-             BackgroundSubtraction backgroundSubtraction,
-             PolarizationCorrections polarizationCorrections,
-             FloodCorrections floodCorrections,
-             TransmissionStitchOptions transmissionStitchOptions,
-             std::map<std::string, std::string> stitchParameters,
-             std::vector<PerThetaDefaults> perThetaDefaults);
+  Experiment(AnalysisMode analysisMode, ReductionType reductionType, SummationType summationType,
+             bool includePartialBins, bool debug, BackgroundSubtraction backgroundSubtraction,
+             PolarizationCorrections polarizationCorrections, FloodCorrections floodCorrections,
+             TransmissionStitchOptions transmissionStitchOptions, std::map<std::string, std::string> stitchParameters,
+             LookupTable lookupTable);
 
   AnalysisMode analysisMode() const;
   ReductionType reductionType() const;
@@ -51,12 +48,10 @@ public:
   TransmissionStitchOptions transmissionStitchOptions() const;
   std::map<std::string, std::string> stitchParameters() const;
   std::string stitchParametersString() const;
-  std::vector<PerThetaDefaults> const &perThetaDefaults() const;
-  std::vector<PerThetaDefaults::ValueArray> perThetaDefaultsArray() const;
+  LookupTable const &lookupTable() const;
+  std::vector<LookupRow::ValueArray> lookupTableToArray() const;
 
-  PerThetaDefaults const *defaultsForTheta(double thetaAngle,
-                                           double tolerance) const;
-  PerThetaDefaults const *wildcardDefaults() const;
+  LookupRow const *findLookupRow(const boost::optional<double> &thetaAngle, double tolerance) const;
 
 private:
   AnalysisMode m_analysisMode;
@@ -71,13 +66,11 @@ private:
   TransmissionStitchOptions m_transmissionStitchOptions;
 
   std::map<std::string, std::string> m_stitchParameters;
-  std::vector<PerThetaDefaults> m_perThetaDefaults;
+  LookupTable m_lookupTable;
 };
 
-MANTIDQT_ISISREFLECTOMETRY_DLL bool operator==(Experiment const &lhs,
-                                               Experiment const &rhs);
-MANTIDQT_ISISREFLECTOMETRY_DLL bool operator!=(Experiment const &lhs,
-                                               Experiment const &rhs);
+MANTIDQT_ISISREFLECTOMETRY_DLL bool operator==(Experiment const &lhs, Experiment const &rhs);
+MANTIDQT_ISISREFLECTOMETRY_DLL bool operator!=(Experiment const &lhs, Experiment const &rhs);
 } // namespace ISISReflectometry
 } // namespace CustomInterfaces
 } // namespace MantidQt

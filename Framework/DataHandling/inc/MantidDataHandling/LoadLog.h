@@ -62,15 +62,11 @@ public:
   /// Algorithm's name for identification overriding a virtual method
   const std::string name() const override { return "LoadLog"; };
   /// Summary of algorithms purpose
-  const std::string summary() const override {
-    return "Load ISIS log file(s) into a workspace.";
-  }
+  const std::string summary() const override { return "Load ISIS log file(s) into a workspace."; }
 
   /// Algorithm's version for identification overriding a virtual method
   int version() const override { return 1; };
-  const std::vector<std::string> seeAlso() const override {
-    return {"AddSampleLog", "LoadNexusLogs"};
-  }
+  const std::vector<std::string> seeAlso() const override { return {"AddSampleLog", "LoadNexusLogs"}; }
   /// Algorithm's category for identification overriding a virtual method
   const std::string category() const override { return "DataHandling\\Logs"; }
 
@@ -100,29 +96,29 @@ private:
   /// Checks if the file is an ASCII file
   bool isAscii(const std::string &filename);
 
-  /// Check if first 19 characters of a string is data-time string according to
+  /// Check if first 19 characters of a string is date-time string according to
   /// yyyy-mm-ddThh:mm:ss
   bool isDateTimeString(const std::string &str) const;
+
+  /// Check whether the first 24 characters of a string are consistent with
+  /// the date-time format used in older unsupported log files.
+  bool isOldDateTimeFormat(std::ifstream &logFileStream) const;
 
   /// Checks if a log file name was provided (e.g. through setPropertyValue). If
   /// not it creates one based on provided path.
   std::string extractLogName(const std::vector<std::string> &logName);
 
   /// Check for SNS-style text file
-  bool SNSTextFormatColumns(const std::string &str,
-                            std::vector<double> &out) const;
+  bool SNSTextFormatColumns(const std::string &input, std::vector<double> &out) const;
 
   /// Create timeseries property from .log file and adds that to sample object
-  void loadThreeColumnLogFile(std::ifstream &logFileStream,
-                              const std::string &logFileName, API::Run &run);
+  void loadThreeColumnLogFile(std::ifstream &logFileStream, const std::string &logFileName, API::Run &run);
 
   /// Loads two column log file data into local workspace
-  void loadTwoColumnLogFile(std::ifstream &logFileStream,
-                            std::string logFileName, API::Run &run);
+  void loadTwoColumnLogFile(std::ifstream &logFileStream, std::string logFileName, API::Run &run);
 
   /// Returns the number of columns in the log file.
-  int countNumberColumns(std::ifstream &logFileStream,
-                         const std::string &logFileName);
+  int countNumberColumns(std::ifstream &logFileStream, const std::string &logFileName);
 
   /// TimeSeriesProperty<int> containing data periods. Created by LogParser
   std::shared_ptr<Kernel::Property> m_periods;

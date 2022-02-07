@@ -14,13 +14,16 @@
 #include "MantidAPI/IPeakFunction.h"
 #include "MantidAPI/ParameterTie.h"
 #include "MantidCurveFitting/Constraints/BoundaryConstraint.h"
+#include "MantidKernel/Logger.h"
 #include "MantidKernel/Strings.h"
 
 #include <algorithm>
 
-namespace Mantid {
-namespace CurveFitting {
-namespace Functions {
+namespace {
+Mantid::Kernel::Logger g_log("CrystalFieldSpectrum");
+}
+
+namespace Mantid::CurveFitting::Functions {
 
 using namespace CurveFitting;
 using namespace Kernel;
@@ -29,8 +32,7 @@ using namespace API;
 DECLARE_FUNCTION(CrystalFieldSpectrum)
 
 /// Constructor
-CrystalFieldSpectrum::CrystalFieldSpectrum()
-    : FunctionGenerator(IFunction_sptr(new CrystalFieldPeaks)), m_nPeaks(0) {
+CrystalFieldSpectrum::CrystalFieldSpectrum() : FunctionGenerator(IFunction_sptr(new CrystalFieldPeaks)), m_nPeaks(0) {
   declareAttribute("PeakShape", Attribute("Lorentzian"));
   declareAttribute("FWHM", Attribute(0.0));
   std::vector<double> vec;
@@ -39,6 +41,14 @@ CrystalFieldSpectrum::CrystalFieldSpectrum()
   declareAttribute("FWHMVariation", Attribute(0.1));
   declareAttribute("NPeaks", Attribute(0));
   declareAttribute("FixAllPeaks", Attribute(false));
+}
+
+void CrystalFieldSpectrum::init() {
+  try {
+    buildTargetFunction();
+  } catch (std::runtime_error const &ex) {
+    g_log.error(ex.what());
+  }
 }
 
 /// Uses m_crystalField to calculate peak centres and intensities
@@ -52,14 +62,14 @@ void CrystalFieldSpectrum::buildTargetFunction() const {
   FunctionDomainGeneral domain;
   FunctionValues values;
   m_source->function(domain, values);
+  m_source->applyTies();
 
   if (values.size() == 0) {
     return;
   }
 
   if (values.size() % 2 != 0) {
-    throw std::runtime_error(
-        "CrystalFieldPeaks returned odd number of values.");
+    throw std::runtime_error("CrystalFieldPeaks returned odd number of values.");
   }
 
   auto xVec = getAttribute("FWHMX").asVector();
@@ -70,9 +80,8 @@ void CrystalFieldSpectrum::buildTargetFunction() const {
   auto defaultFWHM = getAttribute("FWHM").asDouble();
   size_t nRequiredPeaks = getAttribute("NPeaks").asInt();
   bool fixAllPeaks = getAttribute("FixAllPeaks").asBool();
-  m_nPeaks = CrystalFieldUtils::buildSpectrumFunction(
-      *spectrum, peakShape, values, xVec, yVec, fwhmVariation, defaultFWHM,
-      nRequiredPeaks, fixAllPeaks);
+  m_nPeaks = CrystalFieldUtils::buildSpectrumFunction(*spectrum, peakShape, values, xVec, yVec, fwhmVariation,
+                                                      defaultFWHM, nRequiredPeaks, fixAllPeaks);
   storeReadOnlyAttribute("NPeaks", Attribute(static_cast<int>(m_nPeaks)));
 }
 
@@ -95,15 +104,13 @@ void CrystalFieldSpectrum::updateTargetFunction() const {
   m_target->setAttribute("NumDeriv", this->getAttribute("NumDeriv"));
   auto &spectrum = dynamic_cast<CompositeFunction &>(*m_target);
   m_nPeaks = CrystalFieldUtils::calculateNPeaks(values);
-  CrystalFieldUtils::updateSpectrumFunction(spectrum, peakShape, values, 0,
-                                            xVec, yVec, fwhmVariation,
-                                            defaultFWHM, fixAllPeaks);
+  CrystalFieldUtils::updateSpectrumFunction(spectrum, peakShape, values, 0, xVec, yVec, fwhmVariation, defaultFWHM,
+                                            fixAllPeaks);
   storeReadOnlyAttribute("NPeaks", Attribute(static_cast<int>(m_nPeaks)));
 }
 
 /// Custom string conversion method
-std::string CrystalFieldSpectrum::writeToString(
-    const std::string &parentLocalAttributesStr) const {
+std::string CrystalFieldSpectrum::writeToString(const std::string &parentLocalAttributesStr) const {
   std::ostringstream ostr;
   ostr << "name=" << this->name();
   // Print the attributes
@@ -145,8 +152,7 @@ std::string CrystalFieldSpectrum::writeToString(
     for (size_t i = 0; i < peak.nParams(); i++) {
       const ParameterTie *tie = peak.getTie(i);
       std::ostringstream paramString;
-      paramString << "f" << ip << "." << peak.parameterName(i) << '='
-                  << peak.getParameter(i);
+      paramString << "f" << ip << "." << peak.parameterName(i) << '=' << peak.getParameter(i);
       if (ip < m_nPeaks && (!tie || !tie->isDefault())) {
         ostr << ',' << paramString.str();
       }
@@ -175,13 +181,10 @@ std::string CrystalFieldSpectrum::writeToString(
   }
   // print the ties
   if (!ties.empty()) {
-    ostr << ",ties=(" << Kernel::Strings::join(ties.begin(), ties.end(), ",")
-         << ")";
+    ostr << ",ties=(" << Kernel::Strings::join(ties.begin(), ties.end(), ",") << ")";
   }
 
   return ostr.str();
 }
 
-} // namespace Functions
-} // namespace CurveFitting
-} // namespace Mantid
+} // namespace Mantid::CurveFitting::Functions

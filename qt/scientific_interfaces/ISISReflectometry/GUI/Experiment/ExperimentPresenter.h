@@ -11,7 +11,7 @@
 #include "ExperimentOptionDefaults.h"
 #include "IExperimentPresenter.h"
 #include "IExperimentView.h"
-#include "PerThetaDefaultsTableValidationError.h"
+#include "LookupTableValidationError.h"
 #include "Reduction/Experiment.h"
 #include <boost/optional.hpp>
 
@@ -22,35 +22,29 @@ namespace ISISReflectometry {
 class ExperimentValidationErrors {
 public:
   explicit ExperimentValidationErrors(
-      // cppcheck-suppress passedByValue
-      PerThetaDefaultsTableValidationError perThetaDefaultsErrors)
-      : m_perThetaDefaultsErrors(std::move(perThetaDefaultsErrors)) {}
 
-  PerThetaDefaultsTableValidationError const &perThetaValidationErrors() const {
-    return m_perThetaDefaultsErrors;
-  }
+      LookupTableValidationError lookupTableErrors)
+      : m_lookupTableErrors(std::move(lookupTableErrors)) {}
+
+  LookupTableValidationError const &lookupTableValidationErrors() const { return m_lookupTableErrors; }
 
 private:
-  PerThetaDefaultsTableValidationError m_perThetaDefaultsErrors;
+  LookupTableValidationError m_lookupTableErrors;
 };
 
-using ExperimentValidationResult =
-    ValidationResult<Experiment, ExperimentValidationErrors>;
+using ExperimentValidationResult = ValidationResult<Experiment, ExperimentValidationErrors>;
 
 /** @class ExperimentPresenter
 
 ExperimentPresenter is a presenter class for the widget 'Experiment' in the
 ISIS Reflectometry Interface.
 */
-class MANTIDQT_ISISREFLECTOMETRY_DLL ExperimentPresenter
-    : public ExperimentViewSubscriber,
-      public IExperimentPresenter {
+class MANTIDQT_ISISREFLECTOMETRY_DLL ExperimentPresenter : public ExperimentViewSubscriber,
+                                                           public IExperimentPresenter {
 public:
   ExperimentPresenter(
-      IExperimentView *view, Experiment experiment,
-      double defaultsThetaTolerance,
-      std::unique_ptr<IExperimentOptionDefaults> experimentDefaults =
-          std::make_unique<ExperimentOptionDefaults>());
+      IExperimentView *view, Experiment experiment, double defaultsThetaTolerance,
+      std::unique_ptr<IExperimentOptionDefaults> experimentDefaults = std::make_unique<ExperimentOptionDefaults>());
 
   void acceptMainPresenter(IBatchPresenter *mainPresenter) override;
   Experiment const &experiment() const override;
@@ -58,9 +52,9 @@ public:
   void notifySettingsChanged() override;
   void notifyRestoreDefaultsRequested() override;
   void notifySummationTypeChanged() override;
-  void notifyNewPerAngleDefaultsRequested() override;
-  void notifyRemovePerAngleDefaultsRequested(int index) override;
-  void notifyPerAngleDefaultsChanged(int row, int column) override;
+  void notifyNewLookupRowRequested() override;
+  void notifyRemoveLookupRowRequested(int index) override;
+  void notifyLookupRowChanged(int row, int column) override;
 
   void notifyReductionPaused() override;
   void notifyReductionResumed() override;
@@ -89,8 +83,7 @@ private:
   void updateViewFromModel();
 
   void showValidationResult(ExperimentValidationResult const &result);
-  void
-  showPerThetaTableErrors(PerThetaDefaultsTableValidationError const &errors);
+  void showLookupTableErrors(LookupTableValidationError const &errors);
 
   void updateWidgetEnabledState();
   void updateSummationTypeEnabledState();

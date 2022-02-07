@@ -45,9 +45,8 @@ public:
    * @param url - The website url for which the citation refers
    * @param description - The description of the thing that is being cited
    */
-  Citation(const std::string &doi = "", const std::string &bibtex = "",
-           const std::string &endnote = "", const std::string &url = "",
-           const std::string &description = "");
+  Citation(const std::string &doi = "", const std::string &bibtex = "", const std::string &endnote = "",
+           const std::string &url = "", const std::string &description = "");
 
   // Needed for future Set constructiom
   bool operator==(const Citation &rhs) const;

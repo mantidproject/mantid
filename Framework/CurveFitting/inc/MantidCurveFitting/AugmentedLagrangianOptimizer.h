@@ -16,12 +16,7 @@ namespace CurveFitting {
 /**
  * The results of the optimization
  */
-enum OptimizerResult {
-  Failure = -1,
-  Success = 1,
-  FTolReached = 2,
-  XTolReached = 3
-};
+enum OptimizerResult { Failure = -1, Success = 1, FTolReached = 2, XTolReached = 3 };
 
 //---------------------------------------------------------------------------------------------
 // Forward declaration
@@ -72,8 +67,7 @@ public:
    * at a given pt
    */
   AugmentedLagrangianOptimizer(const size_t nparams, const ObjFunction &objfunc)
-      : m_userfunc(objfunc), m_nparams(nparams), m_neq(0), m_eq(), m_nineq(0),
-        m_ineq(), m_maxIter(500) {}
+      : m_userfunc(objfunc), m_nparams(nparams), m_neq(0), m_eq(), m_nineq(0), m_ineq(), m_maxIter(500) {}
 
   /**
    * Constructor with constraints
@@ -88,12 +82,10 @@ public:
    * @param inequality A matrix of coefficients, \f$A\f$ such that in the final
    * solution \f$A_{eq} x\geq 0\f$
    */
-  AugmentedLagrangianOptimizer(const size_t nparams, const ObjFunction &objfunc,
-                               const Kernel::DblMatrix &equality,
+  AugmentedLagrangianOptimizer(const size_t nparams, const ObjFunction &objfunc, const Kernel::DblMatrix &equality,
                                const Kernel::DblMatrix &inequality)
-      : m_userfunc(objfunc), m_nparams(nparams), m_neq(equality.numRows()),
-        m_eq(equality), m_nineq(inequality.numRows()), m_ineq(inequality),
-        m_maxIter(500) {
+      : m_userfunc(objfunc), m_nparams(nparams), m_neq(equality.numRows()), m_eq(equality),
+        m_nineq(inequality.numRows()), m_ineq(inequality), m_maxIter(500) {
     checkConstraints(equality, inequality);
   }
 
@@ -104,8 +96,7 @@ public:
   AugmentedLagrangianOptimizer(const AugmentedLagrangianOptimizer &) = delete;
 
   /// Disable assignment operator
-  AugmentedLagrangianOptimizer &
-  operator=(const AugmentedLagrangianOptimizer &) = delete;
+  AugmentedLagrangianOptimizer &operator=(const AugmentedLagrangianOptimizer &) = delete;
 
   /// @returns The number of parameters under minimization
   inline size_t numParameters() const { return m_nparams; }
@@ -126,14 +117,11 @@ public:
 private:
   friend class UnconstrainedCostFunction;
   /// Using gradient optimizer to perform limited optimization of current set
-  void unconstrainedOptimization(const std::vector<double> &lambda,
-                                 const std::vector<double> &mu,
-                                 const double rho,
+  void unconstrainedOptimization(const std::vector<double> &lambda, const std::vector<double> &mu, const double rho,
                                  std::vector<double> &xcur) const;
 
   /// Sanity check for constraint inputs
-  void checkConstraints(const Kernel::DblMatrix &equality,
-                        const Kernel::DblMatrix &inequality);
+  void checkConstraints(const Kernel::DblMatrix &equality, const Kernel::DblMatrix &inequality);
 
   /// User-defined function
   // FunctionWrapper m_userfunc;

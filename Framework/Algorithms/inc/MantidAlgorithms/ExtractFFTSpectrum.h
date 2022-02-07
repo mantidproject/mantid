@@ -41,8 +41,7 @@ public:
   /// Algorithm's version
   int version() const override { return (1); }
   const std::vector<std::string> seeAlso() const override {
-    return {"FFT",     "FFTDerivative", "MaxEnt",
-            "RealFFT", "SassenaFFT",    "FFTSmooth"};
+    return {"FFT", "FFTDerivative", "MaxEnt", "RealFFT", "SassenaFFT", "FFTSmooth"};
   }
   /// Algorithm's category for identification
   const std::string category() const override { return "Arithmetic\\FFT"; }

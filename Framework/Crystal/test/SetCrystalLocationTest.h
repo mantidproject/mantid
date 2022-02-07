@@ -20,7 +20,6 @@ using namespace Mantid::DataObjects;
 using Mantid::Crystal::LoadIsawUB;
 using Mantid::Crystal::SetCrystalLocation;
 using Mantid::Crystal::ShowPeakHKLOffsets;
-using Mantid::DataObjects::TableWorkspace;
 using Mantid::Kernel::V3D;
 using namespace Mantid::API;
 
@@ -38,8 +37,7 @@ public:
     TS_ASSERT(loader.isExecuted());
 
     auto workspace = AnalysisDataService::Instance().retrieve(WSName);
-    EventWorkspace_sptr events =
-        std::dynamic_pointer_cast<EventWorkspace>(workspace);
+    EventWorkspace_sptr events = std::dynamic_pointer_cast<EventWorkspace>(workspace);
     TS_ASSERT(events);
     auto inst = events->getInstrument();
     TS_ASSERT(inst);
@@ -92,8 +90,7 @@ public:
 
     // Get pointers to the new workspace
     auto workspace_new = AnalysisDataService::Instance().retrieve("events_new");
-    EventWorkspace_sptr events_new =
-        std::dynamic_pointer_cast<EventWorkspace>(workspace_new);
+    EventWorkspace_sptr events_new = std::dynamic_pointer_cast<EventWorkspace>(workspace_new);
     TS_ASSERT(events_new)
     auto inst_new = events_new->getInstrument();
     TS_ASSERT(inst_new);

@@ -10,12 +10,17 @@ Mantid Git Workflow
 Summary
 -------
 
+Go to the :doc:`GitConfig` page to ensure that Git is set up correctly
+before starting.
+
 This page describes the workflow used in conjunction with `Git
 <http://git-scm.com>`_ and `GitHub <https://www.github.com/>`_ for
 those who have push access to the repository.
 
 Go `here
-<https://services.github.com/on-demand/downloads/github-git-cheat-sheet.pdf>`__
+<https://education.github.com/git-cheat-sheet-education.pdf>`__
+or `here
+<https://www.atlassian.com/git/tutorials/atlassian-git-cheatsheet>`__
 for a cheatsheet of Git commands.
 
 Go `here <https://github.com/k88hudson/git-flight-rules>`__ for a
@@ -32,10 +37,13 @@ The steps for a new piece of work can be summarised as follows:
 
 1. Push up or `create <https://guides.github.com/features/issues>`_ an
    issue `here <https://github.com/mantidproject/mantid/issues>`__
-2. Create a branch from master, using the naming convention described
-   at :ref:`GitWorkflowPublicPrivateBranches`
-3. Do the work and commit changes to the branch. Push the branch
-   regularly to GitHub to make sure no work is accidentally lost
+2. Create a branch from ``main`` using the naming convention described
+   at :ref:`GitWorkflowNamingBranches`
+3. Do the work and commit changes to the branch. On commit, the
+   `pre-commit <https://pre-commit.com/>`_ framework will run, it will
+   check all your changes for formatting, linting, and perform static
+   analysis. Push the branch regularly to GitHub to make sure no work
+   is accidentally lost.
 4. When you are finished with the work, ensure that all of the unit
    tests, documentation tests and system tests if necessary pass on
    your own machine
@@ -48,27 +56,17 @@ The steps for a new piece of work can be summarised as follows:
    - If any issues come up, continue working on your branch and push
      to GitHub - the pull request will update automatically
 
-.. _GitWorkflowPublicPrivateBranches:
+.. _GitWorkflowNamingBranches:
 
-Public and Private Branches
----------------------------
+Naming Branches
+---------------
 
 When naming `public branches
 <http://github.com/mantidproject/mantid/branches>`_ that will be
 pushed to GitHub, please follow the convention of
 ``issuenumber_short_description``. This will allow others to discover
 what the branch is for (issue number) and quickly know what is being
-done there (short description). Please remember that public branches
-should not be rebased.
-
-For private branches please follow the convention
-``yourname/issuenumber_short_description``.  You can sync these with
-GitHub (for backup reasons) and rebase. Since the branch name is
-prefixed with your name people will know, by convention, that it is a
-private branch and can be rebased, deleted, etc at the owner's
-whim. Changing a private branch is done by simply renaming the branch
-to drop the prefix.
-
+done there (short description).
 
 .. _GitWorkflowPullRequests:
 
@@ -89,7 +87,7 @@ When creating a pull request you should:
   If the user would not be easily identified by someone picking up the ticket, be prepared to act as a point of contact with the reporter.
 - Ensure the description follows the format described by the `PR
   template
-  <https://github.com/mantidproject/mantid/blob/master/.github/PULL_REQUEST_TEMPLATE.md>`_
+  <https://github.com/mantidproject/mantid/blob/main/.github/PULL_REQUEST_TEMPLATE.md>`_
   on GitHub
 
 A good example is `here <https://github.com/mantidproject/mantid/pull/18713>`__.
@@ -101,33 +99,25 @@ For further information about the review process see :ref:`reviewing a pull requ
 Checkout a Pull Request
 ^^^^^^^^^^^^^^^^^^^^^^^
 
-To check out a particular pull request for functional testing use the following commmands:
+To check out a particular pull request for functional testing use the ``test-pr`` alias that was set up in the :doc:`GitConfig` instructions.
 
 .. code-block:: sh
 
-   git fetch <main-remote-name>  +pull/<ID>/merge:pr/<ID>-merged
-   git checkout pr/<ID>-merged
+   git test-pr <remote-name> <ID>
 
-where ``<ID>`` is the pull request number given on GitHub and ``<main-remote-name>`` is the name
+where ``<ID>`` is the pull request number given on GitHub and ``<remote-name>`` is the name
 of the remote pointing to the original ``mantid`` repository. If you cloned directly from `mantid <https://github.com/mantidproject/mantid>`_
-then ``main-remote-name=origin`` else if you cloned from a fork then it is the name of remote that points
+then ``remote-name=origin`` else if you cloned from a fork then it is the name of remote that points
 back to the original repository.
 
-Note that these commands will checkout a temporary branch that has the development branch merged with master and not just
-the development branch on its own. This command can be aliased by adding the following to the ``[alias]`` section of your ``~/.gitconfig``
-file:
+Note that these commands will checkout a temporary branch that has the development branch merged with ``main`` and not just
+the development branch on its own.
+
+The :doc:`GitConfig` page also provides the follow alias to delete all ``pr/`` prefixed branches, which is useful if you have several:
 
 .. code-block:: sh
 
-   test-pr="!f() { git fetch <main-remote-name> +pull/$1/merge:pr/$1-merged && git checkout pr/$1-merged; }; f"
-
-where again ``<main-remote-name>`` has the same meaning as above. A given pull request can now be checkout with
-
-.. code-block:: sh
-
-   git test-pr <ID>
-
-where ``<ID>`` is the pull request number given on GitHub.
+   git test-pr-remove-all
 
 Stale Pull Requests
 ^^^^^^^^^^^^^^^^^^^
@@ -163,8 +153,8 @@ At the start of a *code freeze* before a major release there will be a
 release branch created named ``release-next``. At this point
 only bugfixes should be applied to this release branch so that it can
 be stabilized for the release. The release branch will be merged to
-``master`` periodically so bugfixes do not need to be separately
-merged to ``master``.
+``main`` periodically so bugfixes do not need to be separately
+merged to ``main``.
 
 New Branches
 ^^^^^^^^^^^^
@@ -173,7 +163,7 @@ During the code freeze it is important to ensure that a new branch is
 created from the correct base branch depending on the scope of the
 changes:
 
-- ``master``: maintenance fixes, new features. Command: ``git fetch -p && git checkout --no-track -b MYBRANCH_NAME origin/master``
+- ``main``: maintenance fixes, new features. Command: ``git fetch -p && git checkout --no-track -b MYBRANCH_NAME origin/main``
 - ``release-next``: bugfixes. Command: ``git fetch -p && git checkout --no-track -b MYBRANCH_NAME origin/release-next``
 
 Pull Requests
@@ -193,9 +183,9 @@ view shows changes other than your own it is most likely that the base
 branch is incorrect and it needs to be fixed.
 
 As an example consider the scenario where a branch named ``topic`` has
-been based off the ``master`` branch as follows::
+been based off the ``main`` branch as follows::
 
-   o---o---o---o---o  master
+   o---o---o---o---o  main
       |           \
       |            o---o---o  topic
        \
@@ -204,7 +194,7 @@ been based off the ``master`` branch as follows::
 where we actually want the ``topic`` branch based off ``release-next``
 instead i.e. ::
 
-   o---o---o---o---o  master
+   o---o---o---o---o  main
        \
         o---o---o---o---o  release-next
                                 \
@@ -216,4 +206,4 @@ To fix this situation we use the ``rebase`` command, providing the
 .. code-block:: bash
 
     git fetch
-    git rebase --onto origin/release-next origin/master topic
+    git rebase --onto origin/release-next $(git merge-base origin/main origin/topic) topic

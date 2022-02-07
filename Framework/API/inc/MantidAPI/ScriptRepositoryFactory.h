@@ -36,12 +36,10 @@ class ScriptRepository;
     @date 20/12/2012
 */
 
-class MANTID_API_DLL ScriptRepositoryFactoryImpl
-    : public Kernel::DynamicFactory<ScriptRepository> {
+class MANTID_API_DLL ScriptRepositoryFactoryImpl : public Kernel::DynamicFactory<ScriptRepository> {
 public:
   ScriptRepositoryFactoryImpl(const ScriptRepositoryFactoryImpl &) = delete;
-  ScriptRepositoryFactoryImpl &
-  operator=(const ScriptRepositoryFactoryImpl &) = delete;
+  ScriptRepositoryFactoryImpl &operator=(const ScriptRepositoryFactoryImpl &) = delete;
 
 private:
   friend struct Mantid::Kernel::CreateUsingNew<ScriptRepositoryFactoryImpl>;
@@ -52,8 +50,7 @@ private:
   ~ScriptRepositoryFactoryImpl() override = default;
 };
 
-using ScriptRepositoryFactory =
-    Mantid::Kernel::SingletonHolder<ScriptRepositoryFactoryImpl>;
+using ScriptRepositoryFactory = Mantid::Kernel::SingletonHolder<ScriptRepositoryFactoryImpl>;
 
 } // namespace API
 } // namespace Mantid
@@ -69,10 +66,8 @@ EXTERN_MANTID_API template class MANTID_API_DLL
  * Macro for declaring a new type of function to be used with the
  * FunctionFactory
  */
-#define DECLARE_SCRIPTREPOSITORY(classname)                                    \
-  namespace {                                                                  \
-  Mantid::Kernel::RegistrationHelper register_function_##classname(            \
-      ((Mantid::API::ScriptRepositoryFactory::Instance().subscribe<classname>( \
-           #classname)),                                                       \
-       0));                                                                    \
+#define DECLARE_SCRIPTREPOSITORY(classname)                                                                            \
+  namespace {                                                                                                          \
+  Mantid::Kernel::RegistrationHelper register_function_##classname(                                                    \
+      ((Mantid::API::ScriptRepositoryFactory::Instance().subscribe<classname>(#classname)), 0));                       \
   }

@@ -9,14 +9,14 @@
 Description
 -----------
 
-The algorithm is used transform existing :ref:`Event <EventWorkspace>` 
-or :ref:`Matrix <MatrixWorkspace>` workspace into 
+The algorithm is used transform existing :ref:`Event <EventWorkspace>`
+or :ref:`Matrix <MatrixWorkspace>` workspace into
 :ref:`Multidimensional workspace <MDWorkspace>` using
-`MD Transformations Factory <http://www.mantidproject.org/MD_Transformation_factory>`_. 
+`MD Transformations Factory <http://www.mantidproject.org/MD_Transformation_factory>`_.
 
 If  the target workspace does not exist, the algorithm creates :ref:`MDEventWorkspace <MDWorkspace>`
-with selected dimensions, e.g. the reciprocal space of momentums **(Qx, Qy, Qz)** or momentums modules **\|Q|**, energy transfer **dE** if available 
-and any other user specified log values which can be treated as dimensions. If the target workspace do exist, 
+with selected dimensions, e.g. the reciprocal space of momentums **(Qx, Qy, Qz)** or momentums modules **\|Q|**, energy transfer **dE** if available
+and any other user specified log values which can be treated as dimensions. If the target workspace do exist,
 the **MD Events** are added to this workspace.
 
 Using the FileBackEnd and Filename properties the algorithm can produce a file-backed workspace.
@@ -26,7 +26,7 @@ Used Subalgorithms
 ------------------
 
 The algorithm uses :ref:`Unit Factory <Unit Factory>` and existing unit
-conversion procedures from the input Workspace :ref:`units <Unit Factory>` 
+conversion procedures from the input Workspace :ref:`units <Unit Factory>`
 to the :ref:`units <Unit Factory>` , necessary
 for transformation into correspondent **MD Event workspace**. It also uses
 :ref:`algm-PreprocessDetectorsToMD` algorithm to help
@@ -99,7 +99,7 @@ Usage examples
 **Example - Convert re-binned MARI 2D workspace to 3D MD workspace for further analysis/merging with data at different temperatures :**
 
 .. testcode:: ExConvertToMDNoQ
-    
+
    # Load Operation (disabled in test code)
    # Load(Filename='MAR11001.nxspe',OutputWorkspace='MAR11001')
    # Simulates Load of the workspace above #################
@@ -112,23 +112,23 @@ Usage examples
    ws=ConvertToMD(InputWorkspace='MAR11001Qe2',OutputWorkspace='MD3',QDimensions='CopyToMD',OtherDimensions='T',\
    MinValues='-10,0,0',MaxValues='10,6,500',SplitInto='50,50,5')
 
-   
-   #Output **MD3** workspace can be viewed in slice-viewer as 3D workspace with T-axis having single value.   
+
+   #Output **MD3** workspace can be viewed in slice-viewer as 3D workspace with T-axis having single value.
    #Visualize 3D data using slice viewer:
    #plotSlice(ws)
-   
-   # Look at sample results:   
+
+   # Look at sample results:
    # A way to look at these results as a text:
    print("Resulting MD workspace has {0} events and {1} dimensions".format(ws.getNEvents(),ws.getNumDims()))
    print("--------------------------------------------")
 
-    
+
 .. testcleanup:: ExConvertToMDNoQ
 
    DeleteWorkspace('MAR11001')
-   DeleteWorkspace('MAR11001Qe2')   
-   DeleteWorkspace('MD3')      
-   DeleteWorkspace('PreprocessedDetectorsWS')   
+   DeleteWorkspace('MAR11001Qe2')
+   DeleteWorkspace('MD3')
+   DeleteWorkspace('PreprocessedDetectorsWS')
 
 **Output:**
 
@@ -149,7 +149,7 @@ obtained in an experiment and stored in nxspe files are provided to it.
    # set up target ws name and remove target workspace with the same name which can occasionally exist.
    # list of MD files (workspaces) to combine into target MD workspace
    MD_FilesList='';
-   
+
    # define convetr to MD parameters
    pars = dict();
    pars['InputWorkspace']=''
@@ -167,15 +167,15 @@ obtained in an experiment and stored in nxspe files are provided to it.
    # test script combines all contributed files in memory
    pars['OverwriteExisting']=0  # Change this to false, if the files should/can be added in memory
    #
-   #---> Start loop over contributing files 
+   #---> Start loop over contributing files
    for n in range(0,5,1):
         source_file = 'MER19566_22.0meV_one2one125.nxspe'; # redefine source files list as function of loop number
         target  = 'MDMAP_T1'+str(n)+'.nxs';
         # check if the file already been converted to MD and is there
-        if not(os.path.exists(target )): 
+        if not(os.path.exists(target )):
             print('Converting  {}'.format(source_file))
             #current_ws=LoadNXSPE(Filename=source)
-            #### For the sample script, simulate load operation above 
+            #### For the sample script, simulate load operation above
             current_ws = CreateSimulationWorkspace(Instrument='MAR',BinParams=[-3,1,3],UnitX='DeltaE',OutputWorkspace=source_file)
             AddSampleLog(Workspace=current_ws,LogName='Ei',LogText='3.0',LogType='Number')
 
@@ -184,7 +184,7 @@ obtained in an experiment and stored in nxspe files are provided to it.
             SetUB(Workspace=current_ws,a='1.4165',b='1.4165',c='1.4165',u='1,0,0',v='0,1,0')
             # Add crystal rotation (assume rotation abgle Psi=5*n where n is file number. Define list of angles if this is not correct
             AddSampleLog(Workspace=current_ws,LogName='Psi',LogText=str(5*n)+'.',LogType='Number')  # --correct Psi value may be already in nxspe file. This operation is then unnecessary
-            # set crystal rotation 
+            # set crystal rotation
             SetGoniometer(Workspace=current_ws,Axis0='Psi,0,1,0,1')
 
             # Convert to MD
@@ -211,11 +211,11 @@ obtained in an experiment and stored in nxspe files are provided to it.
    print("Resulting MD workspace contains {0} events and {1} dimensions".format(md_ws.getNEvents(),md_ws.getNumDims()))
    print("--------------------------------------------")
 
-    
+
 .. testcleanup:: ExConvertToMDQ3D
 
-   DeleteWorkspace('md_ws')   
-   DeleteWorkspace('preprDetMantid')   
+   DeleteWorkspace('md_ws')
+   DeleteWorkspace('preprDetMantid')
 
 **Output:**
 
@@ -232,7 +232,7 @@ obtained in an experiment and stored in nxspe files are provided to it.
 
 **Example - Convert set of inelastic results obtained in Powder mode (direct) as function of temperature to a 3D workspace:**
 
-This example produces 3-dimensional dataset, with a temperature axis. 
+This example produces 3-dimensional dataset, with a temperature axis.
 
 .. testcode:: ExConvertToMD|Q|T
 
@@ -242,7 +242,7 @@ This example produces 3-dimensional dataset, with a temperature axis.
         DeleteWorkspace(RezWS)
    except ValueError:
         print("Target ws  {}  not found in analysis data service\n".format(RezWS))
-   
+
    # define convert to MD parameters
    pars = dict();
    pars['InputWorkspace']=''
@@ -254,35 +254,35 @@ This example produces 3-dimensional dataset, with a temperature axis.
    pars['MaxValues']='12,10,10'
    pars['SplitInto']='100,100,12'
    pars['OverwriteExisting']=0  # contributed MD worskpaces are added in memory
-   
-   # let's assume this is the temperature range obtained in experiments and 
-   # each data file is obtained for particular temperature. 
-   T = [1.0,2.0,3.0,3.5,4.0,5.0,6.0,7.0,8.0,9.0,9.5,10.0]   
+
+   # let's assume this is the temperature range obtained in experiments and
+   # each data file is obtained for particular temperature.
+   T = [1.0,2.0,3.0,3.5,4.0,5.0,6.0,7.0,8.0,9.0,9.5,10.0]
    for i in range(0,len(T),1):
         # source = sorurce_file_name[i];
-        #current_ws=LoadNXSPE(Filename=source)   
-        # EMULATE LOAD OF DIFFERENT results obtained for different temperatures. ------>      
+        #current_ws=LoadNXSPE(Filename=source)
+        # EMULATE LOAD OF DIFFERENT results obtained for different temperatures. ------>
         current_ws = CreateSimulationWorkspace(Instrument='MAR',BinParams=[-3,0.1,3],UnitX='DeltaE')
         AddSampleLog(Workspace=current_ws,LogName='Ei',LogText='3.0',LogType='Number')
         # if the file does not have temperature log, add it here.
-        AddSampleLog(Workspace=current_ws,LogName='T',LogText=str(T[i]),LogType='Number Series')        
+        AddSampleLog(Workspace=current_ws,LogName='T',LogText=str(T[i]),LogType='Number Series')
         # simulate changes in scattering with temperature
         current_ws = current_ws*T[i];
         # END EMULATION ---------------------------------------------------------------------
-   
+
         pars['InputWorkspace']=current_ws;
         md_ws=ConvertToMD(**pars)
         # delete source workspace from memory;
         DeleteWorkspace(current_ws)
     # end loop
-   
+
    # produce some test output
    print("Resulting MD workspace contains {0} events and {1} dimensions".format(md_ws.getNEvents(),md_ws.getNumDims()))
-    
+
 .. testcleanup:: ExConvertToMD|Q|T
 
-   DeleteWorkspace(md_ws)   
-   DeleteWorkspace('preprDetMantid')   
+   DeleteWorkspace(md_ws)
+   DeleteWorkspace('preprDetMantid')
 
 **Output:**
 

@@ -72,7 +72,7 @@
        </widget>
       </item>
       <item row="0" column="0">
-       <widget class="MantidQt::API::MWRunFiles" name="dsRunFiles" native="true">
+       <widget class="MantidQt::API::FileFinderWidget" name="dsRunFiles" native="true">
         <property name="sizePolicy">
          <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
           <horstretch>0</horstretch>
@@ -251,7 +251,7 @@
         <widget class="QWidget" name="pgMapFile">
          <layout class="QHBoxLayout" name="horizontalLayout_5">
           <item>
-           <widget class="MantidQt::API::MWRunFiles" name="dsMapFile" native="true">
+           <widget class="MantidQt::API::FileFinderWidget" name="dsMapFile" native="true">
             <property name="sizePolicy">
              <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
               <horstretch>0</horstretch>
@@ -273,6 +273,7 @@
             <property name="fileExtensions" stdset="0">
              <stringlist>
               <string>.map</string>
+              <string>.xml</string>
              </stringlist>
             </property>
            </widget>
@@ -335,6 +336,13 @@
             </property>
             <property name="maxLength">
              <number>6000</number>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QPushButton" name="pbSaveCustomGrouping">
+            <property name="text">
+             <string>Save Grouping</string>
             </property>
            </widget>
           </item>
@@ -1147,9 +1155,9 @@
    <container>1</container>
   </customwidget>
   <customwidget>
-   <class>MantidQt::API::MWRunFiles</class>
+   <class>MantidQt::API::FileFinderWidget</class>
    <extends>QWidget</extends>
-   <header>MantidQtWidgets/Common/MWRunFiles.h</header>
+   <header>MantidQtWidgets/Common/FileFinderWidget.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>

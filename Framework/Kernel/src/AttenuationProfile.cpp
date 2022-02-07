@@ -12,25 +12,20 @@
 #include <Poco/Path.h>
 #include <fstream>
 
-namespace Mantid {
-namespace Kernel {
-
-namespace {
-constexpr auto LARGE_LAMBDA = 100; // Lambda likely to be beyond max lambda in
-                                   // any measured spectra. In Angstroms
-}
+namespace Mantid::Kernel {
 
 /**
  * Construct an attenuation profile object
  * @param inputFileName :: The name of the file containing the attenuation
  * profile data. Filename can be a full path or just file name
  * @param searchPath :: Path to search for the input file
+ * @param extrapolationMaxX :: X value at which a point will be inserted
+ * from the tabulated attenuation data to assist with extrapolation
  * @param extrapolationMaterial :: Material whose properties will be used to
  * extrapolate beyond the lambda range of the supplied profile
  */
-AttenuationProfile::AttenuationProfile(const std::string &inputFileName,
-                                       const std::string &searchPath,
-                                       Material *extrapolationMaterial) {
+AttenuationProfile::AttenuationProfile(const std::string &inputFileName, const std::string &searchPath,
+                                       Material *extrapolationMaterial, double extrapolationMaxX) {
   Poco::Path suppliedFileName(inputFileName);
   Poco::Path inputFilePath;
   std::string fileExt = suppliedFileName.getExtension();
@@ -41,17 +36,14 @@ AttenuationProfile::AttenuationProfile(const std::string &inputFileName,
       bool useSearchDirectories = true;
 
       if (!searchPath.empty()) {
-        inputFilePath =
-            Poco::Path(Poco::Path(searchPath).parent(), inputFileName);
+        inputFilePath = Poco::Path(Poco::Path(searchPath).parent(), inputFileName);
         if (Poco::File(inputFilePath).exists()) {
           useSearchDirectories = false;
         }
       }
       if (useSearchDirectories) {
         // ... and if that doesn't work look in the search directories
-        std::string foundFile =
-            Mantid::Kernel::ConfigService::Instance().getFullPath(inputFileName,
-                                                                  false, 0);
+        std::string foundFile = Mantid::Kernel::ConfigService::Instance().getFullPath(inputFileName, false, 0);
         if (!foundFile.empty()) {
           inputFilePath = Poco::Path(foundFile);
         } else {
@@ -64,52 +56,50 @@ AttenuationProfile::AttenuationProfile(const std::string &inputFileName,
     std::ifstream input(inputFilePath.toString(), std::ios_base::in);
     if (input) {
       std::string line;
-      double minLambda = std::numeric_limits<double>::max();
-      double maxLambda = std::numeric_limits<double>::min();
+      double minX = std::numeric_limits<double>::max();
+      double maxX = std::numeric_limits<double>::lowest();
       while (std::getline(input, line)) {
-        double lambda, alpha, error;
-        if (std::stringstream(line) >> lambda >> alpha >> error) {
-          minLambda = std::min(lambda, minLambda);
-          maxLambda = std::max(lambda, maxLambda);
-          m_Interpolator.addPoint(lambda, 1000 * alpha);
+        double x, alpha, error;
+        if (std::stringstream(line) >> x >> alpha >> error) {
+          minX = std::min(x, minX);
+          maxX = std::max(x, maxX);
+          m_Interpolator.addPoint(x, 1000 * alpha);
         }
       }
       input.close();
-      // Assist the extrapolation outside the supplied lambda range to better
+      // Assist the extrapolation outside the supplied x range to better
       // handle noisy data. Add two surrounding points using the attenuation
       // calculated from tabulated absorption\scattering cross sections
       if (m_Interpolator.containData() && extrapolationMaterial) {
-        if ((minLambda > 0) &&
-            (minLambda < std::numeric_limits<double>::max())) {
-          m_Interpolator.addPoint(
-              0, extrapolationMaterial->attenuationCoefficient(0));
+        if ((minX > 0) && (minX < std::numeric_limits<double>::max())) {
+          m_Interpolator.addPoint(0, extrapolationMaterial->attenuationCoefficient(0));
         }
-        if ((maxLambda < LARGE_LAMBDA) &&
-            (maxLambda > std::numeric_limits<double>::min())) {
-          m_Interpolator.addPoint(
-              LARGE_LAMBDA,
-              extrapolationMaterial->attenuationCoefficient(LARGE_LAMBDA));
+        if ((maxX < extrapolationMaxX) && (maxX > std::numeric_limits<double>::lowest())) {
+          m_Interpolator.addPoint(extrapolationMaxX, extrapolationMaterial->attenuationCoefficient(extrapolationMaxX));
         }
       }
     } else {
-      throw Exception::FileError("Error reading attenuation profile file",
-                                 inputFileName);
+      throw Exception::FileError("Error reading attenuation profile file", inputFileName);
     }
   } else {
-    throw Exception::FileError("Attenuation profile file must be a .DAT file",
-                               inputFileName);
+    throw Exception::FileError("Attenuation profile file must be a .DAT file", inputFileName);
   }
 }
 
 /**
- * Returns the attenuation coefficient for the supplied wavelength
- * @param lambda The wavelength the attenuation coefficient is required for
- * (Angstroms)
+ * Returns the attenuation coefficient for the supplied x value
+ * @param x The x value (typically wavelength) that the attenuation coefficient
+ * is required for (Angstroms)
  * @returns Attenuation coefficient ie alpha in I/I0=exp(-alpha*distance)
  */
-double
-AttenuationProfile::getAttenuationCoefficient(const double lambda) const {
-  return m_Interpolator.value(lambda);
+double AttenuationProfile::getAttenuationCoefficient(const double x) const { return m_Interpolator.value(x); }
+/**
+ * Set the attenuation coefficient at x value
+ * @param x The x value (typically wavelength) that the attenuation coefficient
+ * is required for (Angstroms)
+ * @param atten attenuation coefficient at x value
+ */
+void AttenuationProfile::setAttenuationCoefficient(const double x, const double atten) {
+  m_Interpolator.addPoint(x, atten);
 }
-} // namespace Kernel
-} // namespace Mantid
+} // namespace Mantid::Kernel

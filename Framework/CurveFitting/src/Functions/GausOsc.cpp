@@ -11,9 +11,7 @@
 #include "MantidAPI/FunctionFactory.h"
 #include <cmath>
 
-namespace Mantid {
-namespace CurveFitting {
-namespace Functions {
+namespace Mantid::CurveFitting::Functions {
 
 using namespace CurveFitting;
 
@@ -30,8 +28,7 @@ void GausOsc::init() {
   declareParameter("Phi", 0.0, "Frequency of oscillation");
 }
 
-void GausOsc::function1D(double *out, const double *xValues,
-                         const size_t nData) const {
+void GausOsc::function1D(double *out, const double *xValues, const size_t nData) const {
   const double A = getParameter("A");
   const double G = getParameter("Sigma");
   const double gf = getParameter("Frequency");
@@ -43,8 +40,7 @@ void GausOsc::function1D(double *out, const double *xValues,
   }
 }
 
-void GausOsc::functionDeriv1D(Jacobian *out, const double *xValues,
-                              const size_t nData) {
+void GausOsc::functionDeriv1D(Jacobian *out, const double *xValues, const size_t nData) {
   const double A = getParameter("A");
   const double G = getParameter("Sigma");
   const double gf = getParameter("Frequency");
@@ -79,6 +75,4 @@ void GausOsc::setActiveParameter(size_t i, double value) {
     setParameter(j, value, false);
 }
 
-} // namespace Functions
-} // namespace CurveFitting
-} // namespace Mantid
+} // namespace Mantid::CurveFitting::Functions

@@ -7,7 +7,7 @@ This is a Python binding to the C++ class Mantid::Kernel::PropertyManagerDataSer
 
 .. module:`mantid.api`
 
-.. autoclass:: mantid.kernel.PropertyManagerDataServiceImpl 
+.. autoclass:: mantid.kernel.PropertyManagerDataServiceImpl
     :members:
     :undoc-members:
     :inherited-members:

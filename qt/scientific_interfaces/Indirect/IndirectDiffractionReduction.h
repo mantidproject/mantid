@@ -6,7 +6,6 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
-#include "IPythonRunner.h"
 #include "IndirectInterface.h"
 #include "IndirectPlotOptionsPresenter.h"
 
@@ -16,8 +15,7 @@
 
 namespace MantidQt {
 namespace CustomInterfaces {
-class IndirectDiffractionReduction : public IndirectInterface,
-                                     public IPyRunner {
+class IndirectDiffractionReduction : public IndirectInterface {
   Q_OBJECT
 
 public:
@@ -29,13 +27,9 @@ public:
   static std::string name() { return "Diffraction"; }
   /// This interface's categories.
   static QString categoryInfo() { return "Indirect"; }
-  /// Used to run python code
-  void runPythonCode(std::string const &pythonCode) override;
 
 public slots:
-  void instrumentSelected(const QString &instrumentName,
-                          const QString &analyserName,
-                          const QString &reflectionName);
+  void instrumentSelected(const QString &instrumentName, const QString &analyserName, const QString &reflectionName);
   void run();
   void saveReductions();
   void runFilesChanged();
@@ -57,30 +51,22 @@ private:
   void saveSettings();
 
   Mantid::API::IAlgorithm_sptr saveGSSAlgorithm(const std::string &filename);
-  Mantid::API::IAlgorithm_sptr
-  saveASCIIAlgorithm(const std::string &filename,
-                     const std::string &inputWsName);
-  Mantid::API::IAlgorithm_sptr
-  saveNexusProcessedAlgorithm(const std::string &filename,
-                              const std::string &inputWsName);
-  Mantid::API::IAlgorithm_sptr
-  saveAlgorithm(const std::string &saveAlgName, const std::string &filename,
-                const std::string &inputWsName = "", const int &version = -1);
-  Mantid::API::IAlgorithm_sptr
-  convertUnitsAlgorithm(const std::string &inputWsName,
-                        const std::string &outputWsName,
-                        const std::string &target);
+  Mantid::API::IAlgorithm_sptr saveASCIIAlgorithm(const std::string &filename, const std::string &inputWsName);
+  Mantid::API::IAlgorithm_sptr saveNexusProcessedAlgorithm(const std::string &filename, const std::string &inputWsName);
+  Mantid::API::IAlgorithm_sptr saveAlgorithm(const std::string &saveAlgName, const std::string &filename,
+                                             const std::string &inputWsName = "", const int &version = -1);
+  Mantid::API::IAlgorithm_sptr convertUnitsAlgorithm(const std::string &inputWsName, const std::string &outputWsName,
+                                                     const std::string &target);
 
   bool validateRebin();
   bool validateVanCal();
   bool validateCalOnly();
 
-  Mantid::API::MatrixWorkspace_sptr
-  loadInstrument(const std::string &instrumentName,
-                 const std::string &reflection = "");
+  Mantid::API::MatrixWorkspace_sptr loadInstrument(const std::string &instrumentName,
+                                                   const std::string &reflection = "");
 
   void runGenericReduction(const QString &instName, const QString &mode);
-  void connectRunButtonValidation(const MantidQt::API::MWRunFiles *file_field);
+  void connectRunButtonValidation(const MantidQt::API::FileFinderWidget *file_field);
   void runOSIRISdiffonlyReduction();
   void createGroupingWorkspace(const std::string &outputWsName);
 
@@ -91,8 +77,7 @@ private:
 
 private:
   /// The settings dialog
-  Ui::IndirectDiffractionReduction
-      m_uiForm; /// The form generated using Qt Designer
+  Ui::IndirectDiffractionReduction m_uiForm; /// The form generated using Qt Designer
   QDoubleValidator *m_valDbl;
   QString m_settingsGroup; /// The settings group
   MantidQt::API::BatchAlgorithmRunner *m_batchAlgoRunner;

@@ -44,8 +44,7 @@ const static std::string NOT_FOUND("");
 Mantid::Kernel::Logger g_log("ORNLDataArchive");
 } // namespace
 
-namespace Mantid {
-namespace DataHandling {
+namespace Mantid::DataHandling {
 
 DECLARE_ARCHIVESEARCH(ORNLDataArchive, ORNLDataSearch)
 DECLARE_ARCHIVESEARCH(ORNLDataArchive, SNSDataSearch)
@@ -97,9 +96,8 @@ DECLARE_ARCHIVESEARCH(ORNLDataArchive, SNSDataSearch)
  * @return The first matching location of an archived raw datafile, else an
  *     empty string.
  */
-std::string ORNLDataArchive::getArchivePath(
-    const std::set<std::string> &basenames,
-    const std::vector<std::string> &suffixes) const {
+std::string ORNLDataArchive::getArchivePath(const std::set<std::string> &basenames,
+                                            const std::vector<std::string> &suffixes) const {
   if (basenames.size() == 0) {
     return NOT_FOUND;
   }
@@ -110,8 +108,7 @@ std::string ORNLDataArchive::getArchivePath(
   // Validate and parse the basename.
   boost::smatch result;
   if (!boost::regex_match(basename, result, FILE_REGEX)) {
-    g_log.debug() << "Unexpected input passed to getArchivePath():" << std::endl
-                  << basename << std::endl;
+    g_log.debug() << "Unexpected input passed to getArchivePath():" << std::endl << basename << std::endl;
     return NOT_FOUND;
   }
 
@@ -128,8 +125,7 @@ std::string ORNLDataArchive::getArchivePath(
       return NOT_FOUND;
     }
   } catch (Mantid::Kernel::Exception::NotFoundError &) {
-    g_log.debug() << "\"" << instrument
-                  << "\" is not an instrument known to Mantid." << std::endl;
+    g_log.debug() << "\"" << instrument << "\" is not an instrument known to Mantid." << std::endl;
     return NOT_FOUND;
   }
 
@@ -158,15 +154,14 @@ std::string ORNLDataArchive::getArchivePath(
     try {
       return oncat->list("api", "datafiles", params);
     } catch (CatalogError &ce) {
-      g_log.debug() << "Error while calling ONCat:" << std::endl
-                    << ce.what() << std::endl;
+      g_log.debug() << "Error while calling ONCat:" << std::endl << ce.what() << std::endl;
       return std::vector<ONCatEntity>();
     }
   }();
 
   if (datafiles.size() == 0) {
-    g_log.debug() << "ONCat does not know the location of run \"" << run
-                  << "\" for \"" << instrument << "\"." << std::endl;
+    g_log.debug() << "ONCat does not know the location of run \"" << run << "\" for \"" << instrument << "\"."
+                  << std::endl;
     return NOT_FOUND;
   }
 
@@ -202,5 +197,4 @@ std::string ORNLDataArchive::getArchivePath(
 
 void ORNLDataArchive::setONCat(ONCat_uptr oncat) { m_oncat = std::move(oncat); }
 
-} // namespace DataHandling
-} // namespace Mantid
+} // namespace Mantid::DataHandling

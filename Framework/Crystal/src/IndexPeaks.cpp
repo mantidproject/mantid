@@ -5,8 +5,10 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidCrystal/IndexPeaks.h"
+#include "MantidAPI/IPeaksWorkspace.h"
 #include "MantidAPI/Sample.h"
 #include "MantidCrystal/PeakAlgorithmHelpers.h"
+#include "MantidDataObjects/LeanElasticPeaksWorkspace.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidGeometry/Crystal/IndexingUtils.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
@@ -18,15 +20,14 @@
 
 #include <algorithm>
 
-namespace Mantid {
-namespace Crystal {
+namespace Mantid::Crystal {
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(IndexPeaks)
 
-using DataObjects::Peak;
-using DataObjects::PeaksWorkspace;
-using DataObjects::PeaksWorkspace_sptr;
+using API::IPeaksWorkspace;
+using API::IPeaksWorkspace_sptr;
 using Geometry::IndexingUtils;
+using Geometry::IPeak;
 using Geometry::OrientedLattice;
 using Kernel::DblMatrix;
 using Kernel::Logger;
@@ -57,31 +58,49 @@ struct SatelliteIndexingArgs {
 };
 
 struct IndexPeaksArgs {
+  /**
+   * @brief parse input arguments about mod vector and max order
+   * @param alg: reference to algorithm instance
+   * @return: SatelliteIndexingArgs
+   */
   static IndexPeaksArgs parse(const API::Algorithm &alg) {
-    const PeaksWorkspace_sptr peaksWS = alg.getProperty(PEAKSWORKSPACE);
+    const IPeaksWorkspace_sptr peaksWS = alg.getProperty(PEAKSWORKSPACE);
     const int maxOrderFromAlg = alg.getProperty(ModulationProperties::MaxOrder);
 
+    // Init variables
     int maxOrderToUse{0};
     std::vector<V3D> modVectorsToUse;
     modVectorsToUse.reserve(3);
     bool crossTermToUse{false};
-    if (maxOrderFromAlg > 0) {
-      // Use inputs from algorithm
+
+    // Parse mod vectors
+    modVectorsToUse = addModulationVectors(alg.getProperty(ModulationProperties::ModVector1),
+                                           alg.getProperty(ModulationProperties::ModVector2),
+                                           alg.getProperty(ModulationProperties::ModVector3));
+    // check the 3 mod vectors added from properties
+    modVectorsToUse = validModulationVectors(modVectorsToUse[0], modVectorsToUse[1], modVectorsToUse[2]);
+
+    // deal with case: max order > 0 and no mod vector is specified
+    if (maxOrderFromAlg > 0 && modVectorsToUse.size() == 0) {
+      // Max Order is larger than zero but no modulated vector specified
+      // Assume that the caller method will handle this
       maxOrderToUse = maxOrderFromAlg;
-      crossTermToUse = alg.getProperty(ModulationProperties::CrossTerms);
-      modVectorsToUse = validModulationVectors(
-          alg.getProperty(ModulationProperties::ModVector1),
-          alg.getProperty(ModulationProperties::ModVector2),
-          alg.getProperty(ModulationProperties::ModVector3));
-    } else {
+    } else if (maxOrderFromAlg == 0 && modVectorsToUse.size() == 0) {
       // Use lattice definitions if they exist
       const auto &lattice = peaksWS->sample().getOrientedLattice();
-      maxOrderToUse = lattice.getMaxOrder();
-      if (maxOrderToUse > 0) {
-        modVectorsToUse = validModulationVectors(
-            lattice.getModVec(0), lattice.getModVec(1), lattice.getModVec(2));
-      }
       crossTermToUse = lattice.getCrossTerm();
+      maxOrderToUse = lattice.getMaxOrder(); // the lattice can return a 0 here
+
+      // if lattice has maxOrder, we will use the modVec from it, otherwise
+      // stick to the input got from previous assignment
+      if (maxOrderToUse > 0) {
+        modVectorsToUse = validModulationVectors(lattice.getModVec(0), lattice.getModVec(1), lattice.getModVec(2));
+      }
+    } else {
+      // Use user specified
+      // default behavior: map everything automatically
+      maxOrderToUse = maxOrderFromAlg;
+      crossTermToUse = alg.getProperty(ModulationProperties::CrossTerms);
     }
 
     return {peaksWS,
@@ -89,12 +108,10 @@ struct IndexPeaksArgs {
             alg.getProperty(ROUNDHKLS),
             alg.getProperty(COMMONUB),
             alg.getProperty(SAVEMODINFO),
-            SatelliteIndexingArgs{alg.getProperty(SATE_TOLERANCE),
-                                  maxOrderToUse, modVectorsToUse,
-                                  crossTermToUse}};
+            SatelliteIndexingArgs{alg.getProperty(SATE_TOLERANCE), maxOrderToUse, modVectorsToUse, crossTermToUse}};
   }
 
-  PeaksWorkspace_sptr workspace;
+  IPeaksWorkspace_sptr workspace;
   const double mainTolerance;
   const bool roundHKLs;
   const bool commonUB;
@@ -128,9 +145,7 @@ struct CombinedIndexingStats {
   }
 
   /// Return the total number of peaks indexed
-  inline int totalNumIndexed() const {
-    return main.numIndexed + satellites.numIndexed;
-  }
+  inline int totalNumIndexed() const { return main.numIndexed + satellites.numIndexed; }
   /// Return the number of fundamental peaks indexed
   inline double mainError() const {
     if (main.numIndexed == 0)
@@ -144,9 +159,7 @@ struct CombinedIndexingStats {
     return satellites.error / satellites.numIndexed;
   }
   /// Return the average error for both main/satellites indexed
-  inline double averageError() const {
-    return (main.error + satellites.error) / totalNumIndexed();
-  }
+  inline double averageError() const { return (main.error + satellites.error) / totalNumIndexed(); }
 
   PeakIndexingStats main;
   PeakIndexingStats satellites;
@@ -158,16 +171,14 @@ struct CombinedIndexingStats {
  * @param qSample The Q_sample of each peak to optimize
  * @return A new optimized UB
  */
-DblMatrix optimizeUBMatrix(const DblMatrix &ubOrig,
-                           const std::vector<V3D> &qSample,
-                           const double tolerance) {
+DblMatrix optimizeUBMatrix(const DblMatrix &ubOrig, const std::vector<V3D> &qSample, const double tolerance) {
   DblMatrix optimizedUB(ubOrig);
 
   double errorAtStart{0.0};
   std::vector<V3D> millerIndices;
   millerIndices.reserve(qSample.size());
-  const int numIndexedAtStart = IndexingUtils::CalculateMillerIndices(
-      optimizedUB, qSample, tolerance, millerIndices, errorAtStart);
+  const int numIndexedAtStart =
+      IndexingUtils::CalculateMillerIndices(optimizedUB, qSample, tolerance, millerIndices, errorAtStart);
 
   if (numIndexedAtStart < 3) {
     // can't optimize without at least 3 indexed peaks
@@ -186,8 +197,8 @@ DblMatrix optimizeUBMatrix(const DblMatrix &ubOrig,
       break;
     }
     double errorInLoop{0.0};
-    const int numIndexedInLoop = IndexingUtils::CalculateMillerIndices(
-        optimizedUB, qSample, tolerance, millerIndices, errorInLoop);
+    const int numIndexedInLoop =
+        IndexingUtils::CalculateMillerIndices(optimizedUB, qSample, tolerance, millerIndices, errorInLoop);
     if (numIndexedInLoop < numIndexedAtStart) // use the original UB
       break;
   }
@@ -220,17 +231,15 @@ using IndexedSatelliteInfo = std::tuple<V3D, V3D, double>;
  * @return (IntHKL, IntMNP, error) if a peak was indexed, otherwise none
  */
 
-boost::optional<IndexedSatelliteInfo>
-indexSatellite(const V3D &mainHKL, const int maxOrder,
-               const std::vector<V3D> &modVectors, const double tolerance,
-               const bool crossTerms) {
+boost::optional<IndexedSatelliteInfo> indexSatellite(const V3D &mainHKL, const int maxOrder,
+                                                     const std::vector<V3D> &modVectors, const double tolerance,
+                                                     const bool crossTerms) {
   const auto offsets = generateOffsetVectors(modVectors, maxOrder, crossTerms);
   bool foundSatellite{false};
   V3D indexedIntHKL, indexedMNP;
   for (const auto &mnpOffset : offsets) {
     const auto candidateIntHKL = mainHKL - std::get<3>(mnpOffset);
-    const V3D candidateMNP{std::get<0>(mnpOffset), std::get<1>(mnpOffset),
-                           std::get<2>(mnpOffset)};
+    const V3D candidateMNP{std::get<0>(mnpOffset), std::get<1>(mnpOffset), std::get<2>(mnpOffset)};
     if (IndexingUtils::ValidIndex(candidateIntHKL, tolerance)) {
       indexedIntHKL = candidateIntHKL;
       indexedMNP = candidateMNP;
@@ -247,7 +256,7 @@ indexSatellite(const V3D &mainHKL, const int maxOrder,
 
 /**
  * Index the main reflections on the workspace using the given UB matrix
- * @param peaksWS Workspace containing peaks
+ * @param peaks Vector of pointer to peaks
  * @param ub A UB matrix to define the the transform from Q_sample to hkl
  * @param tolerance If an index is within this tolerance of an integer then
  * accept it
@@ -256,17 +265,13 @@ indexSatellite(const V3D &mainHKL, const int maxOrder,
  * indexing fails
  * @return A CombinedIndexingStats detailing the output found
  */
-CombinedIndexingStats
-indexPeaks(const std::vector<Peak *> &peaks, DblMatrix ub,
-           const double mainTolerance, const bool roundHKLs,
-           const bool optimizeUB,
-           const Prop::SatelliteIndexingArgs &satelliteArgs) {
+CombinedIndexingStats indexPeaks(const std::vector<IPeak *> &peaks, DblMatrix ub, const double mainTolerance,
+                                 const bool roundHKLs, const bool optimizeUB,
+                                 const Prop::SatelliteIndexingArgs &satelliteArgs) {
   const auto nPeaks = peaks.size();
   std::vector<V3D> qSample(nPeaks);
-  std::generate(
-      std::begin(qSample), std::end(qSample),
-      [&peaks, i = 0u]() mutable { return peaks[i++]->getQSampleFrame(); });
-
+  std::generate(std::begin(qSample), std::end(qSample),
+                [&peaks, i = 0u]() mutable { return peaks[i++]->getQSampleFrame(); });
   if (optimizeUB) {
     ub = optimizeUBMatrix(ub, qSample, mainTolerance);
   }
@@ -286,9 +291,8 @@ indexPeaks(const std::vector<Peak *> &peaks, DblMatrix ub,
       peak->setIntHKL(nominalHKL);
       peak->setIntMNP(V3D(0, 0, 0));
     } else if (satelliteArgs.maxOrder > 0) {
-      auto result = indexSatellite(
-          nominalHKL, satelliteArgs.maxOrder, satelliteArgs.modVectors,
-          satelliteArgs.tolerance, satelliteArgs.crossTerms);
+      auto result = indexSatellite(nominalHKL, satelliteArgs.maxOrder, satelliteArgs.modVectors,
+                                   satelliteArgs.tolerance, satelliteArgs.crossTerms);
       if (result) {
         const auto &satelliteInfo = result.get();
         if (roundHKLs)
@@ -298,7 +302,17 @@ indexPeaks(const std::vector<Peak *> &peaks, DblMatrix ub,
         peak->setIntMNP(std::get<1>(satelliteInfo));
         stats.satellites.numIndexed++;
         stats.satellites.error += std::get<2>(satelliteInfo) / 3.;
+      } else {
+        // clear these to make sure leftover values from previous index peaks
+        // run are not used
+        peak->setHKL(V3D(0, 0, 0));
+        peak->setIntHKL(V3D(0, 0, 0));
+        peak->setIntMNP(V3D(0, 0, 0));
       }
+    } else {
+      peak->setHKL(V3D(0, 0, 0));
+      peak->setIntHKL(V3D(0, 0, 0));
+      peak->setIntMNP(V3D(0, 0, 0));
     }
   }
   return stats;
@@ -313,32 +327,23 @@ indexPeaks(const std::vector<Peak *> &peaks, DblMatrix ub,
  * indexing
  * @param args Arguments passed to the algorithm
  */
-void logIndexingResults(std::ostream &out,
-                        const CombinedIndexingStats &indexingInfo,
-                        const int runNo, const size_t nPeaksTotal,
-                        const Prop::IndexPeaksArgs &args) {
+void logIndexingResults(std::ostream &out, const CombinedIndexingStats &indexingInfo, const int runNo,
+                        const size_t nPeaksTotal, const Prop::IndexPeaksArgs &args) {
   if (runNo >= 0)
     out << "Run " << runNo;
   else
     out << "All runs";
-  out << " indexed " << indexingInfo.totalNumIndexed() << " peaks out of "
-      << nPeaksTotal;
+  out << " indexed " << indexingInfo.totalNumIndexed() << " peaks out of " << nPeaksTotal;
   if (args.satellites.maxOrder > 0) {
-    out << " of which, " << indexingInfo.main.numIndexed
-        << " main Bragg peaks are indexed with tolerance of "
+    out << " of which, " << indexingInfo.main.numIndexed << " main Bragg peaks are indexed with tolerance of "
         << args.mainTolerance << ", " << indexingInfo.satellites.numIndexed
-        << " satellite peaks are indexed with tolerance of "
-        << args.satellites.tolerance << '\n';
-    out << "  Average error in h,k,l for indexed peaks =  "
-        << indexingInfo.averageError() << '\n';
-    out << "  Average error in h,k,l for indexed main peaks =  "
-        << indexingInfo.main.error << '\n';
-    out << "  Average error in h,k,l for indexed satellite peaks =  "
-        << indexingInfo.satellites.error << '\n';
+        << " satellite peaks are indexed with tolerance of " << args.satellites.tolerance << '\n';
+    out << "  Average error in h,k,l for indexed peaks =  " << indexingInfo.averageError() << '\n';
+    out << "  Average error in h,k,l for indexed main peaks =  " << indexingInfo.main.error << '\n';
+    out << "  Average error in h,k,l for indexed satellite peaks =  " << indexingInfo.satellites.error << '\n';
   } else {
     out << " with tolerance of " << args.mainTolerance << '\n';
-    out << "  Average error in h,k,l for indexed peaks =  "
-        << indexingInfo.mainError() << '\n';
+    out << "  Average error in h,k,l for indexed peaks =  " << indexingInfo.mainError() << '\n';
   }
 }
 
@@ -354,48 +359,33 @@ void IndexPeaks::init() {
   using Kernel::Direction;
 
   // -- inputs --
-  this->declareProperty(
-      std::make_unique<WorkspaceProperty<PeaksWorkspace_sptr::element_type>>(
-          Prop::PEAKSWORKSPACE, "", Direction::InOut),
-      "Input Peaks Workspace");
+  this->declareProperty(std::make_unique<WorkspaceProperty<IPeaksWorkspace_sptr::element_type>>(Prop::PEAKSWORKSPACE,
+                                                                                                "", Direction::InOut),
+                        "Input Peaks Workspace");
 
   auto mustBePositiveDbl = std::make_shared<BoundedValidator<double>>();
   mustBePositiveDbl->setLower(0.0);
-  this->declareProperty(Prop::TOLERANCE, 0.15, mustBePositiveDbl,
-                        "Main peak indexing tolerance", Direction::Input);
-  this->declareProperty(Prop::SATE_TOLERANCE, 0.15, mustBePositiveDbl,
-                        "Satellite peak indexing tolerance", Direction::Input);
-  this->declareProperty(Prop::ROUNDHKLS, true,
-                        "Round H, K and L values to integers");
-  this->declareProperty(Prop::COMMONUB, false,
-                        "Index all orientations with a common UB");
+  this->declareProperty(Prop::TOLERANCE, 0.15, mustBePositiveDbl, "Main peak indexing tolerance", Direction::Input);
+  this->declareProperty(Prop::SATE_TOLERANCE, 0.15, mustBePositiveDbl, "Satellite peak indexing tolerance",
+                        Direction::Input);
+  this->declareProperty(Prop::ROUNDHKLS, true, "Round H, K and L values to integers");
+  this->declareProperty(Prop::COMMONUB, false, "Index all orientations with a common UB");
   ModulationProperties::appendTo(this);
-  this->declareProperty(
-      Prop::SAVEMODINFO, false,
-      "If true, update the OrientedLattice with the maxOrder, "
-      "modulation vectors & cross terms values input to the algorithm");
+  this->declareProperty(Prop::SAVEMODINFO, false,
+                        "If true, update the OrientedLattice with the maxOrder, "
+                        "modulation vectors & cross terms values input to the algorithm");
 
   // -- outputs --
-  this->declareProperty(Prop::NUM_INDEXED, 0,
-                        "Gets set with the number of indexed peaks.",
+  this->declareProperty(Prop::NUM_INDEXED, 0, "Gets set with the number of indexed peaks.", Direction::Output);
+  this->declareProperty(Prop::AVERAGE_ERR, 0.0, "Gets set with the average HKL indexing error.", Direction::Output);
+  this->declareProperty(Prop::MAIN_NUM_INDEXED, 0, "Gets set with the number of indexed main peaks.",
                         Direction::Output);
-  this->declareProperty(Prop::AVERAGE_ERR, 0.0,
-                        "Gets set with the average HKL indexing error.",
+  this->declareProperty(Prop::SATE_NUM_INDEXED, 0, "Gets set with the number of indexed main peaks.",
                         Direction::Output);
-  this->declareProperty(Prop::MAIN_NUM_INDEXED, 0,
-                        "Gets set with the number of indexed main peaks.",
+  this->declareProperty(Prop::MAIN_ERR, 0.0, "Gets set with the average HKL indexing error of Main Peaks.",
                         Direction::Output);
-  this->declareProperty(Prop::SATE_NUM_INDEXED, 0,
-                        "Gets set with the number of indexed main peaks.",
+  this->declareProperty(Prop::SATE_ERR, 0.0, "Gets set with the average HKL indexing error of Satellite Peaks.",
                         Direction::Output);
-  this->declareProperty(
-      Prop::MAIN_ERR, 0.0,
-      "Gets set with the average HKL indexing error of Main Peaks.",
-      Direction::Output);
-  this->declareProperty(
-      Prop::SATE_ERR, 0.0,
-      "Gets set with the average HKL indexing error of Satellite Peaks.",
-      Direction::Output);
 }
 
 /**
@@ -405,30 +395,41 @@ void IndexPeaks::init() {
 std::map<std::string, std::string> IndexPeaks::validateInputs() {
   std::map<std::string, std::string> helpMsgs;
 
-  PeaksWorkspace_sptr ws = this->getProperty(Prop::PEAKSWORKSPACE);
+  IPeaksWorkspace_sptr ws = this->getProperty(Prop::PEAKSWORKSPACE);
   try {
     ws->sample().getOrientedLattice();
-  } catch (std::runtime_error &exc) {
-    helpMsgs[Prop::PEAKSWORKSPACE] = exc.what();
+  } catch (std::runtime_error &) {
+    helpMsgs[Prop::PEAKSWORKSPACE] = "No UB Matrix defined in the lattice.";
+    return helpMsgs;
   }
 
-  // get all runs which have peaksin the table
-  const bool commonUB = this->getProperty(Prop::COMMONUB);
-  if (commonUB) {
-    const auto &allPeaks = ws->getPeaks();
-    std::unordered_map<int, int> peaksPerRun;
-    auto it = allPeaks.cbegin();
-    while (peaksPerRun.size() < 2 && it != allPeaks.cend()) {
-      peaksPerRun[it->getRunNumber()] = 1;
-      ++it;
-    };
-    if (peaksPerRun.size() < 2) {
-      helpMsgs[Prop::COMMONUB] =
-          "CommonUBForAll can only be True if there are peaks from more "
-          "than one run present in the peaks worksapce";
-    };
-  };
-
+  const auto args = Prop::IndexPeaksArgs::parse(*this);
+  const bool isSave = this->getProperty(Prop::SAVEMODINFO);
+  const bool isMOZero = (args.satellites.maxOrder == 0);
+  bool isAllVecZero = true;
+  // parse() validates all the mod vectors. There should not be any modulated
+  // vector in modVectors is equal to (0, 0, 0)
+  for (size_t vecNo = 0; vecNo < args.satellites.modVectors.size(); vecNo++) {
+    if (args.satellites.modVectors[vecNo] != V3D(0.0, 0.0, 0.0)) {
+      isAllVecZero = false;
+    } else {
+      g_log.warning() << "Mod vector " << vecNo << " is invalid (0, 0, 0)"
+                      << "\n";
+    }
+  }
+  if (isMOZero && !isAllVecZero) {
+    helpMsgs["MaxOrder"] = "Max Order cannot be zero if a Modulation Vector has been supplied.";
+  }
+  if (!isMOZero && isAllVecZero) {
+    helpMsgs["ModVector1"] = "At least one Modulation Vector must be supplied if Max Order set.";
+  }
+  if (isSave && isAllVecZero) {
+    helpMsgs[Prop::SAVEMODINFO] = "Modulation info cannot be saved with no "
+                                  "valid Modulation Vectors supplied.";
+  }
+  if (isSave && isMOZero) {
+    helpMsgs["MaxOrder"] = "Modulation info cannot be saved with Max Order = 0.";
+  }
   return helpMsgs;
 }
 
@@ -449,9 +450,27 @@ void IndexPeaks::exec() {
     auto &lattice = args.workspace->mutableSample().getOrientedLattice();
     lattice.setMaxOrder(args.satellites.maxOrder);
     lattice.setCrossTerm(args.satellites.crossTerms);
-    lattice.setModVec1(args.satellites.modVectors[0]);
-    lattice.setModVec2(args.satellites.modVectors[1]);
-    lattice.setModVec3(args.satellites.modVectors[2]);
+
+    if (args.satellites.modVectors.size() >= 1) {
+      lattice.setModVec1(args.satellites.modVectors[0]);
+    } else {
+      g_log.warning("empty modVector 1, skipping saving");
+      lattice.setModVec1(V3D(0.0, 0.0, 0.0));
+    }
+
+    if (args.satellites.modVectors.size() >= 2) {
+      lattice.setModVec2(args.satellites.modVectors[1]);
+    } else {
+      g_log.warning("empty modVector 2, skipping saving");
+      lattice.setModVec2(V3D(0.0, 0.0, 0.0));
+    }
+
+    if (args.satellites.modVectors.size() >= 3) {
+      lattice.setModVec3(args.satellites.modVectors[2]);
+    } else {
+      g_log.warning("empty modVector 3, skipping saving");
+      lattice.setModVec3(V3D(0.0, 0.0, 0.0));
+    }
   }
 
   CombinedIndexingStats indexingInfo;
@@ -459,29 +478,28 @@ void IndexPeaks::exec() {
   const auto &sampleUB = lattice.getUB();
   if (args.commonUB) {
     // Use sample UB an all peaks regardless of run
-    std::vector<Peak *> allPeaksRef(args.workspace->getNumberPeaks());
-    std::transform(std::begin(args.workspace->getPeaks()),
-                   std::end(args.workspace->getPeaks()),
-                   std::begin(allPeaksRef), [](Peak &peak) { return &peak; });
+    std::vector<IPeak *> allPeaksRef;
+    allPeaksRef.reserve(args.workspace->getNumberPeaks());
+    for (int i = 0; i < args.workspace->getNumberPeaks(); i++) {
+      allPeaksRef.emplace_back(args.workspace->getPeakPtr(i));
+    }
     const bool optimizeUB{false};
-    indexingInfo = indexPeaks(allPeaksRef, sampleUB, args.mainTolerance,
-                              args.roundHKLs, optimizeUB, args.satellites);
+    indexingInfo = indexPeaks(allPeaksRef, sampleUB, args.mainTolerance, args.roundHKLs, optimizeUB, args.satellites);
   } else {
     // Use a UB optimized for each run
-    auto &allPeaks = args.workspace->getPeaks();
-    std::unordered_map<int, std::vector<Peak *>> peaksPerRun;
-    std::for_each(std::begin(allPeaks), std::end(allPeaks),
-                  [&peaksPerRun](Peak &peak) {
-                    peaksPerRun[peak.getRunNumber()].emplace_back(&peak);
-                  });
+    std::unordered_map<int, std::vector<IPeak *>> peaksPerRun;
+    for (int i = 0; i < args.workspace->getNumberPeaks(); i++)
+      peaksPerRun[args.workspace->getPeak(i).getRunNumber()].emplace_back(args.workspace->getPeakPtr(i));
+    if (peaksPerRun.size() < 2) {
+      g_log.warning("Peaks from only one run exist but CommonUBForAll=True so peaks will be indexed with an optimised "
+                    "UB which will not be saved in the workspace.");
+    }
     const bool optimizeUB{true};
     for (const auto &runPeaks : peaksPerRun) {
       const auto &peaks = runPeaks.second;
       const auto indexedInRun =
-          indexPeaks(peaks, sampleUB, args.mainTolerance, args.roundHKLs,
-                     optimizeUB, args.satellites);
-      logIndexingResults(g_log.notice(), indexedInRun, runPeaks.first,
-                         peaks.size(), args);
+          indexPeaks(peaks, sampleUB, args.mainTolerance, args.roundHKLs, optimizeUB, args.satellites);
+      logIndexingResults(g_log.notice(), indexedInRun, runPeaks.first, peaks.size(), args);
       indexingInfo += indexedInRun;
     }
   }
@@ -494,11 +512,9 @@ void IndexPeaks::exec() {
   setProperty("SatelliteError", indexingInfo.satelliteError());
 
   // Final results
-  logIndexingResults(g_log.notice(), indexingInfo, -1,
-                     args.workspace->getNumberPeaks(), args);
+  logIndexingResults(g_log.notice(), indexingInfo, -1, args.workspace->getNumberPeaks(), args);
   // Show the lattice parameters
   g_log.notice() << args.workspace->sample().getOrientedLattice() << "\n";
 }
 
-} // namespace Crystal
-} // namespace Mantid
+} // namespace Mantid::Crystal

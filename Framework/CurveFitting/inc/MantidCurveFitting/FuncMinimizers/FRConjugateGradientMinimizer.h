@@ -22,15 +22,12 @@ namespace FuncMinimisers {
     @author Anders Markvardsen, ISIS, RAL
     @date 12/1/2010
 */
-class MANTID_CURVEFITTING_DLL FRConjugateGradientMinimizer
-    : public DerivMinimizer {
+class MANTID_CURVEFITTING_DLL FRConjugateGradientMinimizer : public DerivMinimizer {
 public:
   /// Constructor.
   FRConjugateGradientMinimizer() : DerivMinimizer() {}
   /// Name of the minimizer.
-  std::string name() const override {
-    return "Conjugate gradient (Fletcher-Reeves imp.)";
-  }
+  std::string name() const override { return "Conjugate gradient (Fletcher-Reeves imp.)"; }
 
 protected:
   /// Return a concrete type to initialize m_gslSolver with

@@ -11,11 +11,14 @@ from mantid.simpleapi import LoadAndMerge, config, mtd
 
 class LoadAndMergeTest(unittest.TestCase):
 
+    @classmethod
+    def setUpClass(cls):
+        config.appendDataSearchSubDir('ILL/IN16B/')
+        config.appendDataSearchSubDir('ILL/D20/')
+
     def setUp(self):
         config['default.facility'] = 'ILL'
         config['default.instrument'] = 'IN16B'
-        config.appendDataSearchSubDir('ILL/IN16B/')
-        config.appendDataSearchSubDir('ILL/D20/')
 
     def test_single_run_load(self):
         out1 = LoadAndMerge(Filename='170257')

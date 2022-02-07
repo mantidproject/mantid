@@ -16,9 +16,7 @@
 #include <cmath>
 #include <mutex>
 
-namespace Mantid {
-namespace CurveFitting {
-namespace ParameterEstimator {
+namespace Mantid::CurveFitting::ParameterEstimator {
 
 using namespace Functions;
 
@@ -42,8 +40,7 @@ void initFunctionLookup(FunctionMapType &functionMapType) {
 
   functionMapType["Gaussian"] = std::make_pair(2, Gaussian);
   functionMapType["Lorentzian"] = std::make_pair(2, Lorentzian);
-  functionMapType["BackToBackExponential"] =
-      std::make_pair(4, BackToBackExponential);
+  functionMapType["BackToBackExponential"] = std::make_pair(4, BackToBackExponential);
 }
 
 /// Returns a reference to the static functionMapType
@@ -91,8 +88,7 @@ bool needSettingInitialValues(const API::IFunction &function) {
 /// @param values :: A FunctionValues object with the fitting data.
 /// @param x :: A vector to store the domain values
 /// @param y :: A vector to store the fitting data values.
-void extractValues(const API::FunctionDomain1D &domain,
-                   const API::FunctionValues &values, std::vector<double> &x,
+void extractValues(const API::FunctionDomain1D &domain, const API::FunctionValues &values, std::vector<double> &x,
                    std::vector<double> &y) {
 
   size_t n = domain.size();
@@ -135,8 +131,7 @@ void extractValues(const API::FunctionDomain1D &domain,
 /// @param n :: An order of the zeros to look for. If n == 1 it's the inflection
 ///   points, if n == 2 it's the boundary.
 /// @return :: A pair of zero points on either side of the centre.
-std::pair<double, double>
-getPeakLeftRightWidth(double centre, const SimpleChebfun &der2, size_t n = 1) {
+std::pair<double, double> getPeakLeftRightWidth(double centre, const SimpleChebfun &der2, size_t n = 1) {
   double left = centre;
   double right = centre;
 
@@ -167,8 +162,7 @@ getPeakLeftRightWidth(double centre, const SimpleChebfun &der2, size_t n = 1) {
 /// @param centre :: An approximate peak centre.
 /// @param der2 :: A second derivative of a function.
 /// @return :: The left and right boundaries.
-std::pair<double, double> getPeakLeftRightExtent(double centre,
-                                                 const SimpleChebfun &der2) {
+std::pair<double, double> getPeakLeftRightExtent(double centre, const SimpleChebfun &der2) {
   return getPeakLeftRightWidth(centre, der2, 2);
 }
 
@@ -179,8 +173,7 @@ std::pair<double, double> getPeakLeftRightExtent(double centre,
 /// background.
 /// @param fun :: A function which is expected to be a peak on a background.
 /// @return :: The left and right displacements from peak centre.
-std::pair<double, double> getPeakHWHM(double centre, double height,
-                                      const SimpleChebfun &fun) {
+std::pair<double, double> getPeakHWHM(double centre, double height, const SimpleChebfun &fun) {
   auto roots = fun.roughRoots(height / 2);
   double left = fun.startX();
   double right = fun.endX();
@@ -256,9 +249,7 @@ private:
 /// @param fun :: A smooth approximation of the fitting data.
 /// @param der1 :: The first derivative of the fitting data.
 /// @param der2 :: The second derivative of the fitting data.
-void setBackToBackExponential(API::IFunction &function,
-                              const SimpleChebfun &fun,
-                              const SimpleChebfun &der1,
+void setBackToBackExponential(API::IFunction &function, const SimpleChebfun &fun, const SimpleChebfun &der1,
                               const SimpleChebfun &der2) {
   // Find the actual peak centre and gaussian component of the width
   auto centre = getPeakCentre(function.getParameter("X0"), der1);
@@ -273,8 +264,7 @@ void setBackToBackExponential(API::IFunction &function,
 
   // Estimate the background level
   auto xlr = getPeakLeftRightExtent(centre, der2);
-  g_log.debug() << "extent: " << xlr.first - centre << ' '
-                << xlr.second - centre << '\n';
+  g_log.debug() << "extent: " << xlr.first - centre << ' ' << xlr.second - centre << '\n';
   double yl = fun(xlr.first);
   double yr = fun(xlr.second);
   double slope = (yr - yl) / (xlr.second - xlr.first);
@@ -363,8 +353,8 @@ void setBackToBackExponential(API::IFunction &function,
 /// @param fun :: A smooth approximation of the fitting data.
 /// @param der1 :: The first derivative of the fitting data.
 /// @param der2 :: The second derivative of the fitting data.
-void setValues(API::IFunction &function, const SimpleChebfun &fun,
-               const SimpleChebfun &der1, const SimpleChebfun &der2) {
+void setValues(API::IFunction &function, const SimpleChebfun &fun, const SimpleChebfun &der1,
+               const SimpleChebfun &der2) {
   if (auto cf = dynamic_cast<const API::CompositeFunction *>(&function)) {
     for (size_t i = 0; i < cf->nFunctions(); ++i) {
       setValues(*cf->getFunction(i), fun, der1, der2);
@@ -398,8 +388,7 @@ void setValues(API::IFunction &function, const SimpleChebfun &fun,
 /// @param function :: A function to estimate parameters for.
 /// @param domain :: A domain with fitting data arguments.
 /// @param values :: A FunctionValues object with the fitting data.
-void estimate(API::IFunction &function, const API::FunctionDomain1D &domain,
-              const API::FunctionValues &values) {
+void estimate(API::IFunction &function, const API::FunctionDomain1D &domain, const API::FunctionValues &values) {
   if (!needSettingInitialValues(function))
     return;
   std::vector<double> x;
@@ -413,6 +402,4 @@ void estimate(API::IFunction &function, const API::FunctionDomain1D &domain,
   setValues(function, fun, der1, der2);
 }
 
-} // namespace ParameterEstimator
-} // namespace CurveFitting
-} // namespace Mantid
+} // namespace Mantid::CurveFitting::ParameterEstimator

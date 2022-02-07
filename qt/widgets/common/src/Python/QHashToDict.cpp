@@ -7,10 +7,7 @@
 #include "MantidQtWidgets/Common/Python/QHashToDict.h"
 #include "MantidQtWidgets/Common/Python/Sip.h"
 
-namespace MantidQt {
-namespace Widgets {
-namespace Common {
-namespace Python {
+namespace MantidQt::Widgets::Common::Python {
 
 Python::Dict qHashToDict(const KwArgs &hash) {
   auto mod = PyImport_ImportModule("qtpy.QtCore");
@@ -24,8 +21,7 @@ Python::Dict qHashToDict(const KwArgs &hash) {
 
   while (it != end) {
     auto *k = new KwArgs::key_type(it.key());
-    auto *kobj = sipAPI->api_convert_from_new_type(
-        k, sipAPI->api_find_type("QString"), Py_None);
+    auto *kobj = sipAPI->api_convert_from_new_type(k, sipAPI->api_find_type("QString"), Py_None);
 
     if (!kobj) {
       delete k;
@@ -33,8 +29,7 @@ Python::Dict qHashToDict(const KwArgs &hash) {
     }
 
     auto *v = new KwArgs::mapped_type(it.value());
-    auto *vobj = sipAPI->api_convert_from_new_type(
-        v, sipAPI->api_find_type("QVariant"), Py_None);
+    auto *vobj = sipAPI->api_convert_from_new_type(v, sipAPI->api_find_type("QVariant"), Py_None);
 
     if (!vobj) {
       delete v;
@@ -57,7 +52,4 @@ Python::Dict qHashToDict(const KwArgs &hash) {
   return d;
 }
 
-} // namespace Python
-} // namespace Common
-} // namespace Widgets
-} // namespace MantidQt
+} // namespace MantidQt::Widgets::Common::Python

@@ -46,7 +46,7 @@ class FunctionWrapper(object):
                 for keya in atts:
                     self.fun.setAttributeValue(keya, atts[keya])
             elif self.fun.hasAttribute(key):
-                 self.fun.setAttributeValue(key, kwargs[key])
+                self.fun.setAttributeValue(key, kwargs[key])
 
         # Then deal with parameters
         for key in kwargs:
@@ -89,7 +89,7 @@ class FunctionWrapper(object):
         else:
             self.__dict__[key] = value  # initialize self.key
 
-    def __getitem__ (self, name):
+    def __getitem__(self, name):
         """
         Called from array-like access on RHS
 
@@ -97,7 +97,7 @@ class FunctionWrapper(object):
 
         :param name: name that appears in the []
         """
-        if type(name) == type('string') and self.fun.hasAttribute(name):
+        if isinstance(name, str) and self.fun.hasAttribute(name):
             return self.fun.getAttributeValue(name)
         else:
             if self.fun.hasParameter(name):
@@ -105,7 +105,7 @@ class FunctionWrapper(object):
             else:
                 raise AttributeError("Parameter %s not found" % name)
 
-    def __setitem__ (self, name, value):
+    def __setitem__(self, name, value):
         """
         Called from array-like access on LHS
 
@@ -114,19 +114,19 @@ class FunctionWrapper(object):
         :param name: name that appears in the []
         :param value: new value of this item
         """
-        if type(name) == type('string') and self.fun.hasAttribute(name):
+        if isinstance(name, str) and self.fun.hasAttribute(name):
             self.fun.setAttributeValue(name, value)
         else:
             self.fun.setParameter(name, value)
 
-    def __str__ (self):
+    def __str__(self):
         """
         Return string giving contents of function.
         Used in unit tests.
         """
         return str(self.fun)
 
-    def __add__ (self, other):
+    def __add__(self, other):
         """
         Implement + operator for composite function
 
@@ -137,7 +137,7 @@ class FunctionWrapper(object):
             sum = sum.flatten()
         return sum
 
-    def __mul__ (self, other):
+    def __mul__(self, other):
         """
         Implement * operator for product function
 
@@ -190,7 +190,7 @@ class FunctionWrapper(object):
         else:
             return output_array[0]
 
-    def plot(self, **kwargs):
+    def plot(self, **kwargs):  # noqa: C901
         """
         Plot the function
 
@@ -221,27 +221,27 @@ class FunctionWrapper(object):
             if key == "workspace":
                 isWorkspace = True
                 ws = kwargs[key]
-                if type(ws) == type('string'):
+                if isinstance(ws, str):
                     ws = mtd[ws]
             if key == "workspaceIndex":
-                 workspaceIndex = kwargs[key]
-                 if workspaceIndex > 0:
-                     extractSpectrum = True
+                workspaceIndex = kwargs[key]
+                if workspaceIndex > 0:
+                    extractSpectrum = True
             if key == "xValues":
-                 xvals = kwargs[key]
-                 haveXValues = True
+                xvals = kwargs[key]
+                haveXValues = True
             if key == "startX":
-                 xMin = kwargs[key]
-                 haveStartX = True
+                xMin = kwargs[key]
+                haveStartX = True
             if key == "endX":
-                 xMax = kwargs[key]
-                 haveEndX = True
+                xMax = kwargs[key]
+                haveEndX = True
             if key == "nSteps":
-                 nSteps = kwargs[key]
-                 if nSteps < 1:
+                nSteps = kwargs[key]
+                if nSteps < 1:
                     raise RuntimeError("nSteps must be at least 1")
             if key == "name":
-                 plotName = kwargs[key]
+                plotName = kwargs[key]
 
         if haveStartX and haveEndX:
             if xMin >= xMax:
@@ -270,8 +270,8 @@ class FunctionWrapper(object):
 
         outWs = self(spectrumWs)
         vals = outWs.readY(1)
-        function = CreateWorkspace( DataX=xvals, DataY=vals, OutputWorkspace=plotName)
-        plot(plotName,0)
+        CreateWorkspace(DataX=xvals, DataY=vals, OutputWorkspace=plotName)
+        plot(plotName, 0)
 
     def tie (self, *args, **kwargs):
         """
@@ -316,7 +316,6 @@ class FunctionWrapper(object):
         """
         for i in range(0, self.fun.numParams()):
             self.fun.removeTie(self.getParameterName(i))
-
 
     def constrain(self, expressions):
         """
@@ -545,17 +544,17 @@ class CompositeFunctionWrapper(FunctionWrapper):
         self.fun.add(other.fun)
         return self
 
-    def __delitem__ (self, index):
-       """
-       Delete item of given index from composite function.
+    def __delitem__(self, index):
+        """
+        Delete item of given index from composite function.
 
-       **It should not be called directly.**
+        **It should not be called directly.**
 
-       :param index: index of item
-       """
-       self.fun.__delitem__(index)
+        :param index: index of item
+        """
+        self.fun.__delitem__(index)
 
-    def __len__ (self):
+    def __len__(self):
         """
         Return number of items in composite function.
         Implement len() function.
@@ -775,7 +774,6 @@ def _create_wrapper_function(name):
 
 
 def _wrappers():
-    wrappers = []
     for name in FunctionFactory.getFunctionNames():
         # Wrap all registered functions which are not in the black list
         if name not in _do_not_wrap:

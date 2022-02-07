@@ -14,8 +14,8 @@
 #include "MantidCurveFitting/CostFunctions/CostFuncLeastSquares.h"
 #include "MantidCurveFitting/FuncMinimizers/LevenbergMarquardtMDMinimizer.h"
 
-#include "MantidTestHelpers/FakeObjects.h"
-#include "MantidTestHelpers/MultiDomainFunctionHelper.h"
+#include "MantidFrameworkTestHelpers/FakeObjects.h"
+#include "MantidFrameworkTestHelpers/MultiDomainFunctionHelper.h"
 
 #include <cxxtest/TestSuite.h>
 
@@ -28,23 +28,20 @@ using namespace Mantid::CurveFitting;
 using namespace Mantid::CurveFitting::CostFunctions;
 using namespace Mantid::CurveFitting::Algorithms;
 
-using Mantid::TestHelpers::MultiDomainFunctionTest_Function;
+using Mantid::FrameworkTestHelpers::MultiDomainFunctionTest_Function;
 
 class MultiDomainFunctionTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static MultiDomainFunctionTest *createSuite() {
-    return new MultiDomainFunctionTest();
-  }
+  static MultiDomainFunctionTest *createSuite() { return new MultiDomainFunctionTest(); }
   static void destroySuite(MultiDomainFunctionTest *suite) { delete suite; }
 
   MultiDomainFunctionTest() { FrameworkManager::Instance(); }
 
   void test_multidomain() {
     std::shared_ptr<JointDomain> domain;
-    TS_ASSERT_THROWS_NOTHING(domain =
-                                 Mantid::TestHelpers::makeMultiDomainDomain3());
+    TS_ASSERT_THROWS_NOTHING(domain = Mantid::FrameworkTestHelpers::makeMultiDomainDomain3());
 
     auto values = std::make_shared<FunctionValues>(*domain);
     const double A0 = 0, A1 = 1, A2 = 2;
@@ -67,7 +64,6 @@ public:
     values->setFitWeights(1);
 
     std::shared_ptr<MultiDomainFunction> multi;
-    TS_ASSERT_THROWS_NOTHING(
-        multi = Mantid::TestHelpers::makeMultiDomainFunction3());
+    TS_ASSERT_THROWS_NOTHING(multi = Mantid::FrameworkTestHelpers::makeMultiDomainFunction3());
   }
 };

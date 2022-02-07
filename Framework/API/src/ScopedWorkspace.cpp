@@ -10,8 +10,7 @@
 #include "MantidAPI/ScopedWorkspace.h"
 #include "MantidAPI/WorkspaceGroup.h"
 
-namespace Mantid {
-namespace API {
+namespace Mantid::API {
 
 const size_t ScopedWorkspace::NAME_LENGTH = 16;
 
@@ -24,10 +23,7 @@ ScopedWorkspace::ScopedWorkspace() : m_name(generateUniqueName()) {}
 /**
  * Workspace constructor
  */
-ScopedWorkspace::ScopedWorkspace(const Workspace_sptr &ws)
-    : m_name(generateUniqueName()) {
-  set(std::move(ws));
-}
+ScopedWorkspace::ScopedWorkspace(const Workspace_sptr &ws) : m_name(generateUniqueName()) { set(ws); }
 
 //----------------------------------------------------------------------------------------------
 /**
@@ -40,9 +36,7 @@ ScopedWorkspace::~ScopedWorkspace() { remove(); }
  * the
  * name and it is not null workspace.
  */
-ScopedWorkspace::operator bool() const {
-  return AnalysisDataService::Instance().doesExist(m_name);
-}
+ScopedWorkspace::operator bool() const { return AnalysisDataService::Instance().doesExist(m_name); }
 
 /**
  * Retrieve workspace from the ADS. Null pointer returned if nothing was added
@@ -83,8 +77,7 @@ void ScopedWorkspace::set(const Workspace_sptr &newWS) {
   AnalysisDataServiceImpl &ads = AnalysisDataService::Instance();
 
   if (!newWS->getName().empty() && ads.doesExist(newWS->getName()))
-    throw std::invalid_argument(
-        "Workspace is already in the ADS under the name " + newWS->getName());
+    throw std::invalid_argument("Workspace is already in the ADS under the name " + newWS->getName());
 
   // Remove previous workspace entry
   remove();
@@ -125,5 +118,4 @@ std::string ScopedWorkspace::randomString(size_t len) {
   return result;
 }
 
-} // namespace API
-} // namespace Mantid
+} // namespace Mantid::API

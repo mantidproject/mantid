@@ -25,18 +25,15 @@ namespace IO {
   @author Igor Gudich
   @date 2018
 */
-class MANTID_PARALLEL_DLL EventsListsShmemStorage
-    : public EventsListsShmemManager {
+class MANTID_PARALLEL_DLL EventsListsShmemStorage : public EventsListsShmemManager {
 public:
-  EventsListsShmemStorage(const std::string &segmentName,
-                          const std::string &elName, size_t size,
-                          size_t chunksCnt, size_t pixelsCount);
+  EventsListsShmemStorage(const std::string &segmentName, const std::string &elName, size_t size, size_t chunksCnt,
+                          size_t pixelsCount);
   virtual ~EventsListsShmemStorage() = default;
 
   void reserve(std::size_t chunkN, std::size_t pixelN, std::size_t size);
 
-  MANTID_PARALLEL_DLL friend std::ostream &
-  operator<<(std::ostream &os, const EventsListsShmemStorage &storage);
+  MANTID_PARALLEL_DLL friend std::ostream &operator<<(std::ostream &os, const EventsListsShmemStorage &storage);
 };
 
 } // namespace IO

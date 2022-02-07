@@ -11,9 +11,7 @@
 #include "MantidAPI/FunctionFactory.h"
 #include <cmath>
 
-namespace Mantid {
-namespace CurveFitting {
-namespace Functions {
+namespace Mantid::CurveFitting::Functions {
 
 using namespace CurveFitting;
 
@@ -25,8 +23,7 @@ DECLARE_FUNCTION(StretchExp)
 
 StretchExp::StretchExp() {
   declareParameter("Height", 1.0, "Height at time zero");
-  declareParameter("Lifetime", 1.0,
-                   "Relaxation time of the standard exponential");
+  declareParameter("Lifetime", 1.0, "Relaxation time of the standard exponential");
   declareParameter("Stretching", 1.0, "Stretching exponent");
 }
 
@@ -36,8 +33,7 @@ StretchExp::StretchExp() {
  * @param xValues :: function domain values
  * @param nData :: size of the function domain
  */
-void StretchExp::function1D(double *out, const double *xValues,
-                            const size_t nData) const {
+void StretchExp::function1D(double *out, const double *xValues, const size_t nData) const {
   const double h = getParameter("Height");
   const double t = getParameter("Lifetime");
   const double b = getParameter("Stretching");
@@ -47,8 +43,7 @@ void StretchExp::function1D(double *out, const double *xValues,
     if (x < 0.0) {
       // although it is defined for integer b's we don't allow negative x in
       // fitting
-      throw std::runtime_error(
-          "StretchExp is undefined for negative argument.");
+      throw std::runtime_error("StretchExp is undefined for negative argument.");
     }
     out[i] = h * exp(-pow(x / t, b));
   }
@@ -60,8 +55,7 @@ void StretchExp::function1D(double *out, const double *xValues,
  * @param xValues :: function domain values
  * @param nData :: size of the function domain
  */
-void StretchExp::functionDeriv1D(API::Jacobian *out, const double *xValues,
-                                 const size_t nData) {
+void StretchExp::functionDeriv1D(API::Jacobian *out, const double *xValues, const size_t nData) {
   const double h = getParameter("Height");
   const double t = getParameter("Lifetime");
   const double b = getParameter("Stretching");
@@ -81,6 +75,4 @@ void StretchExp::functionDeriv1D(API::Jacobian *out, const double *xValues,
   }
 }
 
-} // namespace Functions
-} // namespace CurveFitting
-} // namespace Mantid
+} // namespace Mantid::CurveFitting::Functions

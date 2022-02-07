@@ -24,8 +24,7 @@
 #include "MantidKernel/PropertyWithValue.h"
 #include "MantidKernel/UnitFactory.h"
 
-namespace Mantid {
-namespace Algorithms {
+namespace Mantid::Algorithms {
 
 using namespace Kernel;
 using namespace API;
@@ -42,52 +41,39 @@ void CreateWorkspace::init() {
   unitOptions.emplace_back("SpectraNumber");
   unitOptions.emplace_back("Text");
 
-  declareProperty(std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
-                                                        Direction::Output),
+  declareProperty(std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "", Direction::Output),
                   "Name to be given to the created workspace.");
 
   auto required = std::make_shared<MandatoryValidator<std::vector<double>>>();
-  declareProperty(std::make_unique<ArrayProperty<double>>("DataX", required),
-                  "X-axis data values for workspace.");
+  declareProperty(std::make_unique<ArrayProperty<double>>("DataX", required), "X-axis data values for workspace.");
   declareProperty(std::make_unique<ArrayProperty<double>>("DataY", required),
                   "Y-axis data values for workspace (measures).");
-  declareProperty(std::make_unique<ArrayProperty<double>>("DataE"),
-                  "Error values for workspace.");
-  declareProperty(std::make_unique<PropertyWithValue<int>>("NSpec", 1),
-                  "Number of spectra to divide data into.");
+  declareProperty(std::make_unique<ArrayProperty<double>>("DataE"), "Error values for workspace.");
+  declareProperty(std::make_unique<PropertyWithValue<int>>("NSpec", 1), "Number of spectra to divide data into.");
   declareProperty("UnitX", "", "The unit to assign to the XAxis");
 
-  declareProperty("VerticalAxisUnit", "SpectraNumber",
-                  std::make_shared<StringListValidator>(unitOptions),
+  declareProperty("VerticalAxisUnit", "SpectraNumber", std::make_shared<StringListValidator>(unitOptions),
                   "The unit to assign to the second Axis (leave blank for "
                   "default Spectra number)");
-  declareProperty(
-      std::make_unique<ArrayProperty<std::string>>("VerticalAxisValues"),
-      "Values for the VerticalAxis.");
+  declareProperty(std::make_unique<ArrayProperty<std::string>>("VerticalAxisValues"), "Values for the VerticalAxis.");
 
-  declareProperty(
-      std::make_unique<PropertyWithValue<bool>>("Distribution", false),
-      "Whether OutputWorkspace should be marked as a distribution.");
+  declareProperty(std::make_unique<PropertyWithValue<bool>>("Distribution", false),
+                  "Whether OutputWorkspace should be marked as a distribution.");
   declareProperty("YUnitLabel", "", "Label for Y Axis");
 
   declareProperty("WorkspaceTitle", "", "Title for Workspace");
 
-  declareProperty(std::make_unique<WorkspaceProperty<>>("ParentWorkspace", "",
-                                                        Direction::Input,
-                                                        PropertyMode::Optional),
-                  "Name of a parent workspace.");
-  declareProperty(std::make_unique<ArrayProperty<double>>("Dx"),
-                  "X error values for workspace (optional).");
-  std::vector<std::string> propOptions{
-      Parallel::toString(Parallel::StorageMode::Cloned),
-      Parallel::toString(Parallel::StorageMode::Distributed),
-      Parallel::toString(Parallel::StorageMode::MasterOnly)};
   declareProperty(
-      "ParallelStorageMode", Parallel::toString(Parallel::StorageMode::Cloned),
-      std::make_shared<StringListValidator>(propOptions),
-      "The parallel storage mode of the output workspace for MPI builds");
-  setPropertySettings("ParallelStorageMode",
-                      std::make_unique<InvisibleProperty>());
+      std::make_unique<WorkspaceProperty<>>("ParentWorkspace", "", Direction::Input, PropertyMode::Optional),
+      "Name of a parent workspace.");
+  declareProperty(std::make_unique<ArrayProperty<double>>("Dx"), "X error values for workspace (optional).");
+  std::vector<std::string> propOptions{Parallel::toString(Parallel::StorageMode::Cloned),
+                                       Parallel::toString(Parallel::StorageMode::Distributed),
+                                       Parallel::toString(Parallel::StorageMode::MasterOnly)};
+  declareProperty("ParallelStorageMode", Parallel::toString(Parallel::StorageMode::Cloned),
+                  std::make_shared<StringListValidator>(propOptions),
+                  "The parallel storage mode of the output workspace for MPI builds");
+  setPropertySettings("ParallelStorageMode", std::make_unique<InvisibleProperty>());
 }
 
 /// Input validation
@@ -98,8 +84,7 @@ std::map<std::string, std::string> CreateWorkspace::validateInputs() {
   const std::vector<std::string> vAxis = getProperty("VerticalAxisValues");
 
   if (vUnit == "SpectraNumber" && !vAxis.empty())
-    issues["VerticalAxisValues"] =
-        "Axis values cannot be provided when using a spectra axis";
+    issues["VerticalAxisValues"] = "Axis values cannot be provided when using a spectra axis";
 
   return issues;
 }
@@ -112,27 +97,25 @@ void CreateWorkspace::exec() {
   const Property *const dataEprop = getProperty("DataE");
   const Property *const errorDxprop = getProperty("Dx");
 
-  const ArrayProperty<double> *pCheck = nullptr;
-
-  pCheck = dynamic_cast<const ArrayProperty<double> *>(dataXprop);
-  if (!pCheck)
+  const auto xCheck = dynamic_cast<const ArrayProperty<double> *>(dataXprop);
+  if (!xCheck)
     throw std::invalid_argument("DataX cannot be casted to a double vector");
-  const std::vector<double> &dataX = *pCheck;
+  const std::vector<double> &dataX = *xCheck;
 
-  pCheck = dynamic_cast<const ArrayProperty<double> *>(dataYprop);
-  if (!pCheck)
+  const auto yCheck = dynamic_cast<const ArrayProperty<double> *>(dataYprop);
+  if (!yCheck)
     throw std::invalid_argument("DataY cannot be casted to a double vector");
-  const std::vector<double> &dataY = *pCheck;
+  const std::vector<double> &dataY = *yCheck;
 
-  pCheck = dynamic_cast<const ArrayProperty<double> *>(dataEprop);
-  if (!pCheck)
+  const auto eCheck = dynamic_cast<const ArrayProperty<double> *>(dataEprop);
+  if (!eCheck)
     throw std::invalid_argument("DataE cannot be casted to a double vector");
-  const std::vector<double> &dataE = *pCheck;
+  const std::vector<double> &dataE = *eCheck;
 
-  pCheck = dynamic_cast<const ArrayProperty<double> *>(errorDxprop);
-  if (!pCheck)
+  const auto dxCheck = dynamic_cast<const ArrayProperty<double> *>(errorDxprop);
+  if (!dxCheck)
     throw std::invalid_argument("Dx cannot be casted to a double vector");
-  const std::vector<double> &dX = *pCheck;
+  const std::vector<double> &dX = *dxCheck;
 
   const int nSpec = getProperty("NSpec");
   const std::string xUnit = getProperty("UnitX");
@@ -144,8 +127,7 @@ void CreateWorkspace::exec() {
   if (vUnit != "SpectraNumber") {
     // In the case of numerical axis, the vertical axis can represent either
     // point data or bin edges.
-    if ((vUnit == "Text" && vAxisSize != nSpec) ||
-        (vAxisSize != nSpec && vAxisSize != nSpec + 1)) {
+    if ((vUnit == "Text" && vAxisSize != nSpec) || (vAxisSize != nSpec && vAxisSize != nSpec + 1)) {
       throw std::invalid_argument("The number of vertical axis values doesn't "
                                   "match the number of histograms.");
     }
@@ -185,8 +167,7 @@ void CreateWorkspace::exec() {
 
   const bool dataE_provided = !dataE.empty();
   if (dataE_provided && dataY.size() != dataE.size()) {
-    throw std::runtime_error(
-        "DataE (if provided) must be the same size as DataY");
+    throw std::runtime_error("DataE (if provided) must be the same size as DataY");
   }
 
   // Create the OutputWorkspace
@@ -209,8 +190,7 @@ void CreateWorkspace::exec() {
 
     // In an MPI run the global index i is not necessarily on this rank, i.e.,
     // there might not be a corrsponding workspace index.
-    const auto localIndices =
-        indexInfo.makeIndexSet({static_cast<GlobalSpectrumIndex>(i)});
+    const auto localIndices = indexInfo.makeIndexSet({static_cast<GlobalSpectrumIndex>(i)});
     if (localIndices.empty())
       continue;
 
@@ -223,19 +203,15 @@ void CreateWorkspace::exec() {
     // Just set the pointer if common X bins. Otherwise, copy in the right chunk
     // (as we do for Y).
     if (!commonX)
-      outputWS->mutableX(local_i).assign(dataX.begin() + xStart,
-                                         dataX.begin() + xEnd);
+      outputWS->mutableX(local_i).assign(dataX.begin() + xStart, dataX.begin() + xEnd);
 
-    outputWS->mutableY(local_i).assign(dataY.begin() + yStart,
-                                       dataY.begin() + yEnd);
+    outputWS->mutableY(local_i).assign(dataY.begin() + yStart, dataY.begin() + yEnd);
 
     if (dataE_provided)
-      outputWS->mutableE(local_i).assign(dataE.begin() + yStart,
-                                         dataE.begin() + yEnd);
+      outputWS->mutableE(local_i).assign(dataE.begin() + yStart, dataE.begin() + yEnd);
 
     if (!dX.empty())
-      outputWS->mutableDx(local_i).assign(dX.begin() + yStart,
-                                          dX.begin() + yEnd);
+      outputWS->mutableDx(local_i).assign(dX.begin() + yStart, dX.begin() + yEnd);
 
     progress.report();
     PARALLEL_END_INTERUPT_REGION
@@ -248,8 +224,7 @@ void CreateWorkspace::exec() {
   } catch (Exception::NotFoundError &) {
     outputWS->getAxis(0)->unit() = UnitFactory::Instance().create("Label");
     Unit_sptr unit = outputWS->getAxis(0)->unit();
-    std::shared_ptr<Units::Label> label =
-        std::dynamic_pointer_cast<Units::Label>(unit);
+    std::shared_ptr<Units::Label> label = std::dynamic_pointer_cast<Units::Label>(unit);
     label->setLabel(xUnit, xUnit);
   }
 
@@ -268,8 +243,7 @@ void CreateWorkspace::exec() {
       if (vAxisSize == nSpec)
         newAxis = std::make_unique<NumericAxis>(vAxisSize); // treat as points
       else if (vAxisSize == nSpec + 1)
-        newAxis =
-            std::make_unique<BinEdgeAxis>(vAxisSize); // treat as bin edges
+        newAxis = std::make_unique<BinEdgeAxis>(vAxisSize); // treat as bin edges
       else
         throw std::range_error("Invalid vertical axis length. It must be the "
                                "same length as NSpec or 1 longer.");
@@ -278,8 +252,7 @@ void CreateWorkspace::exec() {
       outputWS->replaceAxis(1, std::move(newAxis));
       for (size_t i = 0; i < vAxis.size(); i++) {
         try {
-          newAxisRaw->setValue(
-              i, boost::lexical_cast<double, std::string>(vAxis[i]));
+          newAxisRaw->setValue(i, boost::lexical_cast<double, std::string>(vAxis[i]));
         } catch (boost::bad_lexical_cast &) {
           throw std::invalid_argument("CreateWorkspace - YAxisValues property "
                                       "could not be converted to a double.");
@@ -302,10 +275,9 @@ void CreateWorkspace::exec() {
   setProperty("OutputWorkspace", outputWS);
 }
 
-Parallel::ExecutionMode CreateWorkspace::getParallelExecutionMode(
-    const std::map<std::string, Parallel::StorageMode> &storageModes) const {
-  const auto storageMode =
-      Parallel::fromString(getProperty("ParallelStorageMode"));
+Parallel::ExecutionMode
+CreateWorkspace::getParallelExecutionMode(const std::map<std::string, Parallel::StorageMode> &storageModes) const {
+  const auto storageMode = Parallel::fromString(getProperty("ParallelStorageMode"));
   if (!storageModes.empty())
     if (storageModes.begin()->second != storageMode)
       throw std::invalid_argument("Input workspace storage mode differs from "
@@ -313,5 +285,4 @@ Parallel::ExecutionMode CreateWorkspace::getParallelExecutionMode(
   return Parallel::getCorrespondingExecutionMode(storageMode);
 }
 
-} // namespace Algorithms
-} // namespace Mantid
+} // namespace Mantid::Algorithms

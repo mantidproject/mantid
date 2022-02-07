@@ -30,8 +30,7 @@ public:
   MuonGroupingHelper(Ui::MuonAnalysis &uiForm) : m_uiForm(uiForm){};
 
   /// Saves grouping to the XML file specified
-  static void saveGroupingToXML(const Mantid::API::Grouping &grouping,
-                                const std::string &filename);
+  static void saveGroupingToXML(const Mantid::API::Grouping &grouping, const std::string &filename);
 
   /// Parses information from the grouping table and saves to Grouping struct
   Mantid::API::Grouping parseGroupingTable() const;

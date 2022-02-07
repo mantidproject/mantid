@@ -45,17 +45,14 @@ private:
   /// Create all faces.
   virtual VecVecV3D createFaces() const = 0;
   /// Check that a point is outside any of the extents
-  virtual bool
-  pointOutsideAnyExtents(const Mantid::Kernel::V3D &testPoint) const = 0;
+  virtual bool pointOutsideAnyExtents(const Mantid::Kernel::V3D &testPoint) const = 0;
   /// Check that a point is inside ALL of the extents
-  virtual bool
-  pointInsideAllExtents(const Mantid::Kernel::V3D &testPoints,
-                        const Mantid::Kernel::V3D &peakCenter) const = 0;
+  virtual bool pointInsideAllExtents(const Mantid::Kernel::V3D &testPoints,
+                                     const Mantid::Kernel::V3D &peakCenter) const = 0;
 
   /// Verfifies that the normals have been set up correctly such that the touch
   /// point falls onto the plane. Use for debugging.
-  virtual void checkTouchPoint(const Mantid::Kernel::V3D &touchPoint,
-                               const Mantid::Kernel::V3D &normal,
+  virtual void checkTouchPoint(const Mantid::Kernel::V3D &touchPoint, const Mantid::Kernel::V3D &normal,
                                const Mantid::Kernel::V3D &faceVertex) const = 0;
 
   // The peak radius.

@@ -33,7 +33,7 @@ Usage
 
     #print the values
     print("ChopperStatus5 : %1.3f +/- %1.3f"%(value,error))
-     
+
 
 .. testcleanup:: AverageLogData
 
@@ -42,7 +42,7 @@ Usage
 Output:
 
 .. testoutput:: AverageLogData
-    
+
     ChopperStatus5 : 3.942 +/- 0.309
 
 .. categories::

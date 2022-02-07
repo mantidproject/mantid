@@ -39,9 +39,7 @@ public:
     V3D peak_2(0, 5, 0);
     V3D peak_3(0, 0, 4);
     std::vector<std::pair<std::pair<double, double>, V3D>> peak_q_list{
-        {std::make_pair(1., 1.), peak_1},
-        {std::make_pair(1., 1.), peak_2},
-        {std::make_pair(1., 1.), peak_3}};
+        {std::make_pair(1., 1.), peak_1}, {std::make_pair(1., 1.), peak_2}, {std::make_pair(1., 1.), peak_3}};
 
     // synthesize a UB-inverse to map
     DblMatrix UBinv(3, 3, false); // Q to h,k,l
@@ -57,38 +55,26 @@ public:
     // peak 3.
     std::vector<std::pair<std::pair<double, double>, V3D>> event_Qs;
     for (int i = -100; i <= 100; i++) {
-      event_Qs.emplace_back(std::make_pair(
-          std::make_pair(2., 1.), V3D(peak_1 + V3D((double)i / 100.0, 0, 0))));
-      event_Qs.emplace_back(std::make_pair(
-          std::make_pair(2., 1.), V3D(peak_2 + V3D((double)i / 100.0, 0, 0))));
-      event_Qs.emplace_back(std::make_pair(
-          std::make_pair(2., 1.), V3D(peak_3 + V3D((double)i / 100.0, 0, 0))));
+      event_Qs.emplace_back(std::make_pair(std::make_pair(2., 1.), V3D(peak_1 + V3D((double)i / 100.0, 0, 0))));
+      event_Qs.emplace_back(std::make_pair(std::make_pair(2., 1.), V3D(peak_2 + V3D((double)i / 100.0, 0, 0))));
+      event_Qs.emplace_back(std::make_pair(std::make_pair(2., 1.), V3D(peak_3 + V3D((double)i / 100.0, 0, 0))));
 
-      event_Qs.emplace_back(std::make_pair(
-          std::make_pair(2., 1.), V3D(peak_1 + V3D(0, (double)i / 200.0, 0))));
-      event_Qs.emplace_back(std::make_pair(
-          std::make_pair(2., 1.), V3D(peak_2 + V3D(0, (double)i / 200.0, 0))));
-      event_Qs.emplace_back(std::make_pair(
-          std::make_pair(2., 1.), V3D(peak_3 + V3D(0, (double)i / 200.0, 0))));
+      event_Qs.emplace_back(std::make_pair(std::make_pair(2., 1.), V3D(peak_1 + V3D(0, (double)i / 200.0, 0))));
+      event_Qs.emplace_back(std::make_pair(std::make_pair(2., 1.), V3D(peak_2 + V3D(0, (double)i / 200.0, 0))));
+      event_Qs.emplace_back(std::make_pair(std::make_pair(2., 1.), V3D(peak_3 + V3D(0, (double)i / 200.0, 0))));
 
-      event_Qs.emplace_back(std::make_pair(
-          std::make_pair(2., 1.), V3D(peak_1 + V3D(0, 0, (double)i / 300.0))));
-      event_Qs.emplace_back(std::make_pair(
-          std::make_pair(2., 1.), V3D(peak_2 + V3D(0, 0, (double)i / 300.0))));
-      event_Qs.emplace_back(std::make_pair(
-          std::make_pair(2., 1.), V3D(peak_3 + V3D(0, 0, (double)i / 300.0))));
+      event_Qs.emplace_back(std::make_pair(std::make_pair(2., 1.), V3D(peak_1 + V3D(0, 0, (double)i / 300.0))));
+      event_Qs.emplace_back(std::make_pair(std::make_pair(2., 1.), V3D(peak_2 + V3D(0, 0, (double)i / 300.0))));
+      event_Qs.emplace_back(std::make_pair(std::make_pair(2., 1.), V3D(peak_3 + V3D(0, 0, (double)i / 300.0))));
     }
 
     for (int i = -50; i <= 50; i++) {
-      event_Qs.emplace_back(std::make_pair(
-          std::make_pair(2., 1.), V3D(peak_1 + V3D(0, (double)i / 147.0, 0))));
-      event_Qs.emplace_back(std::make_pair(
-          std::make_pair(2., 1.), V3D(peak_2 + V3D(0, (double)i / 147.0, 0))));
+      event_Qs.emplace_back(std::make_pair(std::make_pair(2., 1.), V3D(peak_1 + V3D(0, (double)i / 147.0, 0))));
+      event_Qs.emplace_back(std::make_pair(std::make_pair(2., 1.), V3D(peak_2 + V3D(0, (double)i / 147.0, 0))));
     }
 
     for (int i = -25; i <= 25; i++) {
-      event_Qs.emplace_back(std::make_pair(
-          std::make_pair(2., 1.), V3D(peak_1 + V3D(0, 0, (double)i / 61.0))));
+      event_Qs.emplace_back(std::make_pair(std::make_pair(2., 1.), V3D(peak_1 + V3D(0, 0, (double)i / 61.0))));
     }
 
     double radius = 1.3;
@@ -107,14 +93,12 @@ public:
     double inti;
     double sigi;
     for (size_t i = 0; i < peak_q_list.size(); i++) {
-      auto shape = integrator.ellipseIntegrateEvents(
-          E1Vec, peak_q_list[i].second, specify_size, peak_radius,
-          back_inner_radius, back_outer_radius, new_sigma, inti, sigi);
+      auto shape = integrator.ellipseIntegrateEvents(E1Vec, peak_q_list[i].second, specify_size, peak_radius,
+                                                     back_inner_radius, back_outer_radius, new_sigma, inti, sigi);
       TS_ASSERT_DELTA(inti, 2 * inti_all[i], 0.1);
       TS_ASSERT_DELTA(sigi, sigi_all[i], 0.01);
 
-      auto ellipsoid_shape = std::dynamic_pointer_cast<
-          const Mantid::DataObjects::PeakShapeEllipsoid>(shape);
+      auto ellipsoid_shape = std::dynamic_pointer_cast<const Mantid::DataObjects::PeakShapeEllipsoid>(shape);
       TSM_ASSERT("Expect to get back an ellipsoid shape", ellipsoid_shape);
     }
 
@@ -123,9 +107,8 @@ public:
     // some counts
     specify_size = false;
     for (size_t i = 0; i < peak_q_list.size(); i++) {
-      integrator.ellipseIntegrateEvents(
-          E1Vec, peak_q_list[i].second, specify_size, peak_radius,
-          back_inner_radius, back_outer_radius, new_sigma, inti, sigi);
+      integrator.ellipseIntegrateEvents(E1Vec, peak_q_list[i].second, specify_size, peak_radius, back_inner_radius,
+                                        back_outer_radius, new_sigma, inti, sigi);
       TS_ASSERT_DELTA(inti, 2 * inti_some[i], 0.1);
       TS_ASSERT_DELTA(sigi, sigi_some[i], 0.01);
     }
@@ -144,9 +127,7 @@ public:
     V3D peak_2(0, 5, 0);
     V3D peak_3(0, 0, 4);
     std::vector<std::pair<std::pair<double, double>, V3D>> peak_q_list{
-        {std::make_pair(1., 1.), peak_1},
-        {std::make_pair(1., 1.), peak_2},
-        {std::make_pair(1., 1.), peak_3}};
+        {std::make_pair(1., 1.), peak_1}, {std::make_pair(1., 1.), peak_2}, {std::make_pair(1., 1.), peak_3}};
 
     // synthesize a UB-inverse to map
     DblMatrix UBinv(3, 3, false); // Q to h,k,l
@@ -172,46 +153,33 @@ public:
     // peak 3.
     std::vector<std::pair<std::pair<double, double>, V3D>> event_Qs;
     for (int i = -100; i <= 100; i++) {
-      event_Qs.emplace_back(std::make_pair(
-          std::make_pair(1., 1.), V3D(peak_1 + V3D((double)i / 100.0, 0, 0))));
-      event_Qs.emplace_back(std::make_pair(
-          std::make_pair(1., 1.), V3D(peak_2 + V3D((double)i / 100.0, 0, 0))));
-      event_Qs.emplace_back(std::make_pair(
-          std::make_pair(1., 1.), V3D(peak_3 + V3D((double)i / 100.0, 0, 0))));
+      event_Qs.emplace_back(std::make_pair(std::make_pair(1., 1.), V3D(peak_1 + V3D((double)i / 100.0, 0, 0))));
+      event_Qs.emplace_back(std::make_pair(std::make_pair(1., 1.), V3D(peak_2 + V3D((double)i / 100.0, 0, 0))));
+      event_Qs.emplace_back(std::make_pair(std::make_pair(1., 1.), V3D(peak_3 + V3D((double)i / 100.0, 0, 0))));
 
-      event_Qs.emplace_back(std::make_pair(
-          std::make_pair(1., 1.), V3D(peak_1 + V3D(0, (double)i / 200.0, 0))));
-      event_Qs.emplace_back(std::make_pair(
-          std::make_pair(1., 1.), V3D(peak_2 + V3D(0, (double)i / 200.0, 0))));
-      event_Qs.emplace_back(std::make_pair(
-          std::make_pair(1., 1.), V3D(peak_3 + V3D(0, (double)i / 200.0, 0))));
+      event_Qs.emplace_back(std::make_pair(std::make_pair(1., 1.), V3D(peak_1 + V3D(0, (double)i / 200.0, 0))));
+      event_Qs.emplace_back(std::make_pair(std::make_pair(1., 1.), V3D(peak_2 + V3D(0, (double)i / 200.0, 0))));
+      event_Qs.emplace_back(std::make_pair(std::make_pair(1., 1.), V3D(peak_3 + V3D(0, (double)i / 200.0, 0))));
 
-      event_Qs.emplace_back(std::make_pair(
-          std::make_pair(1., 1.), V3D(peak_1 + V3D(0, 0, (double)i / 300.0))));
-      event_Qs.emplace_back(std::make_pair(
-          std::make_pair(1., 1.), V3D(peak_2 + V3D(0, 0, (double)i / 300.0))));
-      event_Qs.emplace_back(std::make_pair(
-          std::make_pair(1., 1.), V3D(peak_3 + V3D(0, 0, (double)i / 300.0))));
+      event_Qs.emplace_back(std::make_pair(std::make_pair(1., 1.), V3D(peak_1 + V3D(0, 0, (double)i / 300.0))));
+      event_Qs.emplace_back(std::make_pair(std::make_pair(1., 1.), V3D(peak_2 + V3D(0, 0, (double)i / 300.0))));
+      event_Qs.emplace_back(std::make_pair(std::make_pair(1., 1.), V3D(peak_3 + V3D(0, 0, (double)i / 300.0))));
     }
 
     for (int i = -50; i <= 50; i++) {
-      event_Qs.emplace_back(std::make_pair(
-          std::make_pair(1., 1.), V3D(peak_1 + V3D(0, (double)i / 147.0, 0))));
-      event_Qs.emplace_back(std::make_pair(
-          std::make_pair(1., 1.), V3D(peak_2 + V3D(0, (double)i / 147.0, 0))));
+      event_Qs.emplace_back(std::make_pair(std::make_pair(1., 1.), V3D(peak_1 + V3D(0, (double)i / 147.0, 0))));
+      event_Qs.emplace_back(std::make_pair(std::make_pair(1., 1.), V3D(peak_2 + V3D(0, (double)i / 147.0, 0))));
     }
 
     for (int i = -25; i <= 25; i++) {
-      event_Qs.emplace_back(std::make_pair(
-          std::make_pair(1., 1.), V3D(peak_1 + V3D(0, 0, (double)i / 61.0))));
+      event_Qs.emplace_back(std::make_pair(std::make_pair(1., 1.), V3D(peak_1 + V3D(0, 0, (double)i / 61.0))));
     }
 
     double radius = 0.3;
     double radius_s = 0.1;
     int maxOrder = 1;
     bool crossTerm = false;
-    Integrate3DEvents integrator(peak_q_list, hkl_list, mnp_list, UBinv, ModHKL,
-                                 radius, radius_s, maxOrder, crossTerm);
+    Integrate3DEvents integrator(peak_q_list, hkl_list, mnp_list, UBinv, ModHKL, radius, radius_s, maxOrder, crossTerm);
 
     integrator.addEvents(event_Qs, false);
 
@@ -228,14 +196,13 @@ public:
     for (size_t i = 0; i < peak_q_list.size(); i++) {
       V3D hkl = hkl_list[i];
       V3D mnp = mnp_list[i];
-      auto shape = integrator.ellipseIntegrateModEvents(
-          E1Vec, peak_q_list[i].second, hkl, mnp, specify_size, peak_radius,
-          back_inner_radius, back_outer_radius, new_sigma, inti, sigi);
+      auto shape =
+          integrator.ellipseIntegrateModEvents(E1Vec, peak_q_list[i].second, hkl, mnp, specify_size, peak_radius,
+                                               back_inner_radius, back_outer_radius, new_sigma, inti, sigi);
       TS_ASSERT_DELTA(inti, inti_all[i], 0.1);
       TS_ASSERT_DELTA(sigi, sigi_all[i], 0.01);
 
-      auto ellipsoid_shape = std::dynamic_pointer_cast<
-          const Mantid::DataObjects::PeakShapeEllipsoid>(shape);
+      auto ellipsoid_shape = std::dynamic_pointer_cast<const Mantid::DataObjects::PeakShapeEllipsoid>(shape);
       TSM_ASSERT("Expect to get back an ellipsoid shape", ellipsoid_shape);
     }
 
@@ -246,9 +213,8 @@ public:
     for (size_t i = 0; i < peak_q_list.size(); i++) {
       V3D hkl = hkl_list[i];
       V3D mnp = mnp_list[i];
-      integrator.ellipseIntegrateModEvents(
-          E1Vec, peak_q_list[i].second, hkl, mnp, specify_size, peak_radius,
-          back_inner_radius, back_outer_radius, new_sigma, inti, sigi);
+      integrator.ellipseIntegrateModEvents(E1Vec, peak_q_list[i].second, hkl, mnp, specify_size, peak_radius,
+                                           back_inner_radius, back_outer_radius, new_sigma, inti, sigi);
       TS_ASSERT_DELTA(inti, inti_some[i], 0.1);
       TS_ASSERT_DELTA(sigi, sigi_some[i], 0.01);
     }
@@ -264,9 +230,7 @@ public:
     V3D peak_2(0, 20, 0);
     V3D peak_3(0, 0, 20);
     std::vector<std::pair<std::pair<double, double>, V3D>> peak_q_list{
-        {std::make_pair(1., 1.), peak_1},
-        {std::make_pair(1., 1.), peak_2},
-        {std::make_pair(1., 1.), peak_3}};
+        {std::make_pair(1., 1.), peak_1}, {std::make_pair(1., 1.), peak_2}, {std::make_pair(1., 1.), peak_3}};
 
     // synthesize a UB-inverse to map
     DblMatrix UBinv(3, 3, false); // Q to h,k,l
@@ -279,7 +243,7 @@ public:
     const int numWeakEvents = 100;
     generatePeak(event_Qs, peak_1, 0.1, numStrongEvents, 1); // strong peak
     generatePeak(event_Qs, peak_2, 0.1, numWeakEvents, 1);   // weak peak
-    generatePeak(event_Qs, peak_2, 0.1, 0, 1); // non-existant peak
+    generatePeak(event_Qs, peak_2, 0.1, 0, 1);               // non-existant peak
 
     IntegrationParameters params;
     params.peakRadius = 1.0;
@@ -293,10 +257,8 @@ public:
     integrator.addEvents(event_Qs, false);
 
     double strong_inti = 0, strong_sigi = 0;
-    auto result = integrator.integrateStrongPeak(params, peak_1, strong_inti,
-                                                 strong_sigi);
-    const auto shape =
-        std::dynamic_pointer_cast<const PeakShapeEllipsoid>(result.first);
+    auto result = integrator.integrateStrongPeak(params, peak_1, strong_inti, strong_sigi);
+    const auto shape = std::dynamic_pointer_cast<const PeakShapeEllipsoid>(result.first);
     const auto frac = std::get<0>(result.second);
 
     // Check the fraction of the peak that is contained within a "standard core"
@@ -310,8 +272,7 @@ public:
 
     // Now integrate weak peak using the parameters we got from the strong peak
     double weak_inti, weak_sigi;
-    integrator.integrateWeakPeak(params, shape, result.second, peak_2,
-                                 weak_inti, weak_sigi);
+    integrator.integrateWeakPeak(params, shape, result.second, peak_2, weak_inti, weak_sigi);
 
     // Check the integrated intensity for a weak peak is exactly what we set it
     // to be weighted by the fraction of strong peak contained in a standard
@@ -322,8 +283,7 @@ public:
 
     weak_inti = 0;
     weak_sigi = 0;
-    integrator.integrateWeakPeak(params, shape, result.second, peak_3,
-                                 weak_inti, weak_sigi);
+    integrator.integrateWeakPeak(params, shape, result.second, peak_3, weak_inti, weak_sigi);
 
     // Check the integrated intensity for a weak peak is exactly what we set it
     // to be weighted by the fraction of strong peak contained in a standard
@@ -341,8 +301,8 @@ public:
     // synthesize two peaks
     V3D peak_1(20, 0, 0);
     V3D peak_2(0, 20, 0);
-    std::vector<std::pair<std::pair<double, double>, V3D>> peak_q_list{
-        {std::make_pair(1., 1.), peak_1}, {std::make_pair(1., 1.), peak_2}};
+    std::vector<std::pair<std::pair<double, double>, V3D>> peak_q_list{{std::make_pair(1., 1.), peak_1},
+                                                                       {std::make_pair(1., 1.), peak_2}};
 
     // synthesize a UB-inverse to map
     DblMatrix UBinv(3, 3, false); // Q to h,k,l
@@ -368,10 +328,8 @@ public:
     integrator.addEvents(event_Qs, false);
 
     double strong_inti, strong_sigi;
-    auto result = integrator.integrateStrongPeak(params, peak_1, strong_inti,
-                                                 strong_sigi);
-    const auto shape =
-        std::dynamic_pointer_cast<const PeakShapeEllipsoid>(result.first);
+    auto result = integrator.integrateStrongPeak(params, peak_1, strong_inti, strong_sigi);
+    const auto shape = std::dynamic_pointer_cast<const PeakShapeEllipsoid>(result.first);
     const auto frac = std::get<0>(result.second);
 
     // Check the fraction of the peak that is contained within a "standard core"
@@ -385,8 +343,7 @@ public:
 
     // Now integrate weak peak using the parameters we got from the strong peak
     double weak_inti, weak_sigi;
-    integrator.integrateWeakPeak(params, shape, result.second, peak_2,
-                                 weak_inti, weak_sigi);
+    integrator.integrateWeakPeak(params, shape, result.second, peak_2, weak_inti, weak_sigi);
 
     // Check the integrated intensity for a weak peak is exactly what we set it
     // to be weighted by the fraction of strong peak contained in a standard
@@ -401,9 +358,7 @@ public:
     V3D peak_2(0, 20, 0);
     V3D peak_3(0, 0, 20);
     std::vector<std::pair<std::pair<double, double>, V3D>> peak_q_list{
-        {std::make_pair(1., 1.), peak_1},
-        {std::make_pair(1., 1.), peak_2},
-        {std::make_pair(1., 1.), peak_3}};
+        {std::make_pair(1., 1.), peak_1}, {std::make_pair(1., 1.), peak_2}, {std::make_pair(1., 1.), peak_3}};
 
     // synthesize a UB-inverse to map
     DblMatrix UBinv(3, 3, false); // Q to h,k,l
@@ -438,13 +393,9 @@ public:
     TS_ASSERT_DELTA(ratio3, 7.071, 1e-4);
   }
 
-  void test_estimateSignalToNoiseRatioWithBackgroundAndOnePercentCulling() {
-    doTestSignalToNoiseRatio(true, 0.05);
-  }
+  void test_estimateSignalToNoiseRatioWithBackgroundAndOnePercentCulling() { doTestSignalToNoiseRatio(true, 0.05); }
 
-  void test_estimateSignalToNoiseRatioWithBackgroundAndNoOnePercentCulling() {
-    doTestSignalToNoiseRatio(false, 0.05);
-  }
+  void test_estimateSignalToNoiseRatioWithBackgroundAndNoOnePercentCulling() { doTestSignalToNoiseRatio(false, 0.05); }
 
 private:
   void doTestSignalToNoiseRatio(const bool useOnePercentBackgroundCorrection,
@@ -453,9 +404,7 @@ private:
     V3D peak_2(0, 20, 0);
     V3D peak_3(0, 0, 20);
     std::vector<std::pair<std::pair<double, double>, V3D>> peak_q_list{
-        {std::make_pair(1., 1.), peak_1},
-        {std::make_pair(1., 1.), peak_2},
-        {std::make_pair(1., 1.), peak_3}};
+        {std::make_pair(1., 1.), peak_1}, {std::make_pair(1., 1.), peak_2}, {std::make_pair(1., 1.), peak_3}};
 
     // synthesize a UB-inverse to map
     DblMatrix UBinv(3, 3, false); // Q to h,k,l
@@ -472,34 +421,26 @@ private:
     params.specifySize = true;
     // calculate ratio of background shell to peak region
     const auto volRatio =
-        pow(params.peakRadius, 3) / (pow(params.backgroundOuterRadius, 3) -
-                                     pow(params.backgroundInnerRadius, 3));
+        pow(params.peakRadius, 3) / (pow(params.backgroundOuterRadius, 3) - pow(params.backgroundInnerRadius, 3));
 
     std::vector<std::pair<std::pair<double, double>, V3D>> event_Qs;
     const int nPointsBg = 100000;   // counts in backgroundOuterRadius
     const double ctsPerBgEvent = 1; // counts per bg event
-    const auto nBgEventsInPeakRegion =
-        nPointsBg *
-        (pow(params.peakRadius, 3) / pow(params.backgroundOuterRadius, 3));
+    const auto nBgEventsInPeakRegion = nPointsBg * (pow(params.peakRadius, 3) / pow(params.backgroundOuterRadius, 3));
     const auto nBgEventsInShell = nBgEventsInPeakRegion / volRatio;
 
-    std::vector<double> fracEvents{10, 1,
-                                   0.1}; // fraction of nBgEventsInPeakRegion
+    std::vector<double> fracEvents{10, 1, 0.1}; // fraction of nBgEventsInPeakRegion
     std::vector<int> nPeakEvents;
     double ctsPerPeakEvent = 2;
     for (size_t i = 0; i < peak_q_list.size(); i++) {
-      nPeakEvents.push_back(static_cast<int>(
-          ceil(fracEvents[i] * static_cast<double>(nBgEventsInPeakRegion))));
-      generatePeak(event_Qs, peak_q_list[i].second, 0.08, nPeakEvents.back(),
-                   ctsPerPeakEvent);
-      generateUniformBackgroundSpherical(
-          event_Qs, nPointsBg, peak_q_list[i].second,
-          params.backgroundOuterRadius, ctsPerBgEvent);
+      nPeakEvents.push_back(static_cast<int>(ceil(fracEvents[i] * static_cast<double>(nBgEventsInPeakRegion))));
+      generatePeak(event_Qs, peak_q_list[i].second, 0.08, nPeakEvents.back(), ctsPerPeakEvent);
+      generateUniformBackgroundSpherical(event_Qs, nPointsBg, peak_q_list[i].second, params.backgroundOuterRadius,
+                                         ctsPerBgEvent);
     }
 
     // Create integraton region + events & UB
-    Integrate3DEvents integrator(peak_q_list, UBinv, 1.5,
-                                 useOnePercentBackgroundCorrection);
+    Integrate3DEvents integrator(peak_q_list, UBinv, 1.5, useOnePercentBackgroundCorrection);
     integrator.addEvents(event_Qs, false);
 
     // calculate signal-noise ratio
@@ -507,22 +448,17 @@ private:
 
     for (size_t i = 0; i < peak_q_list.size(); i++) {
 
-      auto ratio = integrator.estimateSignalToNoiseRatio(
-          params, peak_q_list[i].second, true, 0.15);
+      auto ratio = integrator.estimateSignalToNoiseRatio(params, peak_q_list[i].second, true, 0.15);
 
       // calculate the expected value
       double ratioExpected;
       if (useOnePercentBackgroundCorrection) {
-        auto sigi =
-            sqrt(nBgEventsInPeakRegion * ctsPerBgEvent * 0.99 +
-                 nPeakEvents[i] * ctsPerPeakEvent +
-                 pow(volRatio, 2) * nBgEventsInShell * ctsPerBgEvent * 0.99);
-        auto inti = nPeakEvents[i] * ctsPerPeakEvent +
-                    0.01 * nBgEventsInPeakRegion * ctsPerBgEvent;
+        auto sigi = sqrt(nBgEventsInPeakRegion * ctsPerBgEvent * 0.99 + nPeakEvents[i] * ctsPerPeakEvent +
+                         pow(volRatio, 2) * nBgEventsInShell * ctsPerBgEvent * 0.99);
+        auto inti = nPeakEvents[i] * ctsPerPeakEvent + 0.01 * nBgEventsInPeakRegion * ctsPerBgEvent;
         ratioExpected = inti / sigi;
       } else {
-        auto sigi = sqrt(nBgEventsInPeakRegion * ctsPerBgEvent +
-                         nPeakEvents[i] * ctsPerPeakEvent +
+        auto sigi = sqrt(nBgEventsInPeakRegion * ctsPerBgEvent + nPeakEvents[i] * ctsPerPeakEvent +
                          pow(volRatio, 2) * nBgEventsInShell * ctsPerBgEvent);
         ratioExpected = (nPeakEvents[i] * ctsPerPeakEvent) / sigi;
       }
@@ -542,10 +478,8 @@ private:
    * @param numSamples :: number of samples to draw
    * @param seed :: the seed to the pseudo-random number generator
    */
-  void
-  generatePeak(std::vector<std::pair<std::pair<double, double>, V3D>> &event_Qs,
-               V3D center, double sigma = 5, size_t numSamples = 1000,
-               double scale = 1.0, int seed = 1) {
+  void generatePeak(std::vector<std::pair<std::pair<double, double>, V3D>> &event_Qs, V3D center, double sigma = 5,
+                    size_t numSamples = 1000, double scale = 1.0, int seed = 1) {
 
     std::mt19937 gen;
     std::normal_distribution<> d(0, sigma);
@@ -553,8 +487,7 @@ private:
 
     for (size_t i = 0; i < numSamples; ++i) {
       V3D offset(d(gen), d(gen), d(gen));
-      event_Qs.emplace_back(
-          std::make_pair(std::make_pair(scale, scale), center + offset));
+      event_Qs.emplace_back(std::make_pair(std::make_pair(scale, scale), center + offset));
     }
   }
 
@@ -567,10 +500,9 @@ private:
    * @param countVariation :: how much the average background can vary by
    * @param seed :: the random seed to use (default 1)
    */
-  void generateUniformBackground(
-      std::vector<std::pair<std::pair<double, double>, V3D>> &event_Qs,
-      size_t countsPerQ, const double lower, const double upper,
-      const int countVariation = 3, const double step = 0.5, int seed = 1) {
+  void generateUniformBackground(std::vector<std::pair<std::pair<double, double>, V3D>> &event_Qs, size_t countsPerQ,
+                                 const double lower, const double upper, const int countVariation = 3,
+                                 const double step = 0.5, int seed = 1) {
     const auto counts = static_cast<double>(countsPerQ);
     std::mt19937 gen;
     std::uniform_real_distribution<> d(-countVariation, countVariation);
@@ -594,10 +526,8 @@ private:
    * @param scale :: signal per event
    * @param seed :: the random seed to use (default 1)
    */
-  void generateUniformBackgroundSpherical(
-      std::vector<std::pair<std::pair<double, double>, V3D>> &event_Qs,
-      int npts, V3D center, const double radius = 1, const double scale = 1,
-      int seed = 1) {
+  void generateUniformBackgroundSpherical(std::vector<std::pair<std::pair<double, double>, V3D>> &event_Qs, int npts,
+                                          V3D center, const double radius = 1, const double scale = 1, int seed = 1) {
 
     std::mt19937 gen;
     std::uniform_real_distribution<> d(-radius, radius);

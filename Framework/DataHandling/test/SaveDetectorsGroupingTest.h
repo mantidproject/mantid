@@ -24,9 +24,7 @@ class SaveDetectorsGroupingTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static SaveDetectorsGroupingTest *createSuite() {
-    return new SaveDetectorsGroupingTest();
-  }
+  static SaveDetectorsGroupingTest *createSuite() { return new SaveDetectorsGroupingTest(); }
   static void destroySuite(SaveDetectorsGroupingTest *suite) { delete suite; }
 
   void test_Initialize() {
@@ -51,9 +49,8 @@ public:
     load.execute();
     TS_ASSERT(load.isExecuted());
 
-    DataObjects::GroupingWorkspace_sptr gws =
-        std::dynamic_pointer_cast<DataObjects::GroupingWorkspace>(
-            API::AnalysisDataService::Instance().retrieve("Vulcan_Group"));
+    DataObjects::GroupingWorkspace_sptr gws = std::dynamic_pointer_cast<DataObjects::GroupingWorkspace>(
+        API::AnalysisDataService::Instance().retrieve("Vulcan_Group"));
 
     // 3. Save
     savegroup.setProperty("InputWorkspace", gws);
@@ -75,9 +72,8 @@ public:
     load2.execute();
     TS_ASSERT(load2.isExecuted());
 
-    DataObjects::GroupingWorkspace_sptr gws2 =
-        std::dynamic_pointer_cast<DataObjects::GroupingWorkspace>(
-            API::AnalysisDataService::Instance().retrieve("Vulcan_Group2"));
+    DataObjects::GroupingWorkspace_sptr gws2 = std::dynamic_pointer_cast<DataObjects::GroupingWorkspace>(
+        API::AnalysisDataService::Instance().retrieve("Vulcan_Group2"));
 
     TS_ASSERT_DELTA(gws2->y(0)[0], 1.0, 1.0E-5);
     // TS_ASSERT_DELTA(gws2->y(3695)[0], 2.0, 1.0E-5);
@@ -136,8 +132,7 @@ public:
         API::AnalysisDataService::Instance().retrieve(testWs));
 
     // Check that description was saved
-    TS_ASSERT_EQUALS(gws->run().getProperty("Description")->value(),
-                     "musr longitudinal (64 detectors)");
+    TS_ASSERT_EQUALS(gws->run().getProperty("Description")->value(), "musr longitudinal (64 detectors)");
 
     // Check that group names were saved
     TS_ASSERT_EQUALS(gws->run().getProperty("GroupName_1")->value(), "fwd");

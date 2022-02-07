@@ -23,10 +23,7 @@ backgroundintercept & backgroundslope.
 Assumption
 ##########
 
-It is assumed that the values of peaks' profile parameters, such as peak width,
-are somehow correlated within a single spectrum.
-Therefore, the fitted profile parameters values of a peak should be good starting values
-to fit the peaks adjacent to this peak.
+It is assumed that the profile parameters of a peak at a given d-spacing, such as the peak width, are correlated between adjacent spectra (in index).
 
 Required pre-knowledge
 ######################
@@ -44,7 +41,7 @@ For better results
 * Peak fit window: this is an option
 
   a. specified by user
-  b. figured out by :ref:`FindPeakBackground <algm-FindPeakBackground>`, first moments and second moments (NEED TO FIND OUT THE ALGORITHM)
+  b. figured out by :ref:`FindPeakBackground <algm-FindPeakBackground>`, and peak FWHM estimated from the height and integrated intensity in the window assuming a Gaussian distribution (overwriting the peak profile parameters initialised from the reuslt of the previous spectrum).
   c. if the workspace is in unit dSpacing and :math:`\Delta d/d`
 
 * Peak position tolerance: there could be three cases for how the peak position tolerance is specified.
@@ -420,8 +417,7 @@ Output:
 .. testoutput::  ExFitVanadiumPeaks
 
   Spectrum 1: Expected right most 3 peaks at 2.1401000, 1.5133000, 1.2356000
-  Spectrum 1: Found    right most 3 peaks at 2.1485553, 1.5190663, 1.2403992
-
+  Spectrum 1: Found    right most 3 peaks at 2.1485553, 1.5190662, 1.2404027
 
 **Example - Fit back-to-back exponential peaks (Vulcan diamond):**
 

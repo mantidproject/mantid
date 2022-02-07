@@ -64,9 +64,7 @@ public:
 
   /// Algorithm's version for identification overriding a virtual method
   int version() const override { return 2; }
-  const std::vector<std::string> seeAlso() const override {
-    return {"GetAllEi", "GetEiMonDet", "GetEiT0atSNS"};
-  }
+  const std::vector<std::string> seeAlso() const override { return {"GetAllEi", "GetEiMonDet", "GetEiT0atSNS"}; }
   /// Algorithm's category for identification overriding a virtual method
   const std::string category() const override { return "Inelastic\\Ei"; }
 
@@ -75,31 +73,23 @@ private:
   double calculateEi(const double initial_guess);
   /// Get the distance from the source of the detector at the workspace index
   /// given
-  double getDistanceFromSource(const size_t ws_index,
-                               const API::SpectrumInfo &spectrumInfo) const;
+  double getDistanceFromSource(const size_t ws_index, const API::SpectrumInfo &spectrumInfo) const;
   /// Calculate the peak position within the given window
-  double calculatePeakPosition(const size_t ws_index, const double t_min,
-                               const double t_max);
+  double calculatePeakPosition(const size_t ws_index, const double t_min, const double t_max);
   /// Extract the required spectrum from the input workspace
-  API::MatrixWorkspace_sptr
-  extractSpectrum(const size_t ws_index, const double start, const double end);
+  API::MatrixWorkspace_sptr extractSpectrum(const size_t ws_index, const double start, const double end);
   /// Calculate peak width
-  double calculatePeakWidthAtHalfHeight(
-      const API::MatrixWorkspace_sptr &data_ws, const double prominence,
-      std::vector<double> &peak_x, std::vector<double> &peak_y,
-      std::vector<double> &peak_e) const;
+  double calculatePeakWidthAtHalfHeight(const API::MatrixWorkspace_sptr &data_ws, const double prominence,
+                                        std::vector<double> &peak_x, std::vector<double> &peak_y,
+                                        std::vector<double> &peak_e) const;
   /// Calculate the value of the first moment of the given spectrum
-  double calculateFirstMoment(const API::MatrixWorkspace_sptr &monitor_ws,
-                              const double prominence);
+  double calculateFirstMoment(const API::MatrixWorkspace_sptr &monitor_ws, const double prominence);
   /// Rebin the given workspace using the given parameters
-  API::MatrixWorkspace_sptr rebin(const API::MatrixWorkspace_sptr &monitor_ws,
-                                  const double first, const double width,
+  API::MatrixWorkspace_sptr rebin(const API::MatrixWorkspace_sptr &monitor_ws, const double first, const double width,
                                   const double end);
   /// Integrate the point data
-  void integrate(double &integral_val, double &integral_err,
-                 const HistogramData::HistogramX &x,
-                 const HistogramData::HistogramY &s,
-                 const HistogramData::HistogramE &e, const double xmin,
+  void integrate(double &integral_val, double &integral_err, const HistogramData::HistogramX &x,
+                 const HistogramData::HistogramY &s, const HistogramData::HistogramE &e, const double xmin,
                  const double xmax) const;
   /// Store the incident energy within the sample object
   void storeEi(const double ei) const;

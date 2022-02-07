@@ -47,7 +47,7 @@ Usage
     print("")
 
     print("With a High and LowThreshold, as well as restricting the range to consider")
-    (wsOut2,NumberOfFailures)=FindDetectorsOutsideLimits(ws, HighThreshold=1000, 
+    (wsOut2,NumberOfFailures)=FindDetectorsOutsideLimits(ws, HighThreshold=1000,
         LowThreshold=0, RangeLower=200, RangeUpper=10000)
     print("{} spectra were outside the limits.".format(NumberOfFailures))
 
@@ -71,12 +71,12 @@ Output:
     ws = CreateSimulationWorkspace('MARI','0,1,10')
     nh = ws.getNumberHistograms()
     for ind in range(nh):
-        y = ws.dataY(ind)    
+        y = ws.dataY(ind)
         if ind>=100 and ind < 300:
             y.fill(100)
         else:
-            y.fill(1)       
-    
+            y.fill(1)
+
     mws1,nMasked1 = FindDetectorsOutsideLimits(ws,100)
     mws2,nMasked2 = FindDetectorsOutsideLimits(ws,100,startWorkspaceIndex = 200)
 

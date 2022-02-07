@@ -17,26 +17,21 @@
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
 
-namespace Mantid {
-namespace MDAlgorithms {
+namespace Mantid::MDAlgorithms {
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(ConvertToMDMinMaxLocal)
 
 //----------------------------------------------------------------------------------------------
 /// Algorithm's name for identification. @see Algorithm::name
-const std::string ConvertToMDMinMaxLocal::name() const {
-  return "ConvertToMDMinMaxLocal";
-}
+const std::string ConvertToMDMinMaxLocal::name() const { return "ConvertToMDMinMaxLocal"; }
 
 //----------------------------------------------------------------------------------------------
 void ConvertToMDMinMaxLocal::init() {
   ConvertToMDParent::init();
 
-  declareProperty(std::make_unique<Kernel::ArrayProperty<double>>(
-      "MinValues", Direction::Output));
-  declareProperty(std::make_unique<Kernel::ArrayProperty<double>>(
-      "MaxValues", Direction::Output));
+  declareProperty(std::make_unique<Kernel::ArrayProperty<double>>("MinValues", Direction::Output));
+  declareProperty(std::make_unique<Kernel::ArrayProperty<double>>("MaxValues", Direction::Output));
 }
 
 //----------------------------------------------------------------------------------------------
@@ -69,8 +64,7 @@ void ConvertToMDMinMaxLocal::exec() {
 
   // get raw pointer to Q-transformation (do not delete this pointer, it's held
   // by MDTransfFactory!)
-  MDTransfInterface *pQtransf =
-      MDTransfFactory::Instance().create(QModReq).get();
+  MDTransfInterface *pQtransf = MDTransfFactory::Instance().create(QModReq).get();
   // get number of dimensions this Q transformation generates from the
   // workspace.
   auto iEmode = Kernel::DeltaEMode::fromString(dEModReq);
@@ -86,9 +80,9 @@ void ConvertToMDMinMaxLocal::exec() {
   // dimensions defined by properties and min is less max
   targWSDescr.setMinMax(MinValues, MaxValues);
   targWSDescr.buildFromMatrixWS(InWS2D, QModReq, dEModReq, otherDimNames);
-  // add runindex to the target workspace description for further usage as the
+  // add expInfoIndex to the target workspace description for further usage as the
   // identifier for the events, which come from this run.
-  targWSDescr.addProperty("RUN_INDEX", uint16_t(0), true);
+  targWSDescr.addProperty("EXP_INFO_INDEX", uint16_t(0), true);
 
   // instantiate class, responsible for defining Mslice-type projection
   MDAlgorithms::MDWSTransform MsliceProj;
@@ -107,12 +101,11 @@ void ConvertToMDMinMaxLocal::exec() {
 
   // set up target coordinate system and identify/set the (multi) dimension's
   // names to use
-  targWSDescr.m_RotMatrix =
-      MsliceProj.getTransfMatrix(targWSDescr, QFrame, convertTo_);
+  targWSDescr.m_RotMatrix = MsliceProj.getTransfMatrix(targWSDescr, QFrame, convertTo_);
 
   // preprocess detectors (or make fake detectors in CopyMD case)
-  targWSDescr.m_PreprDetTable = this->preprocessDetectorsPositions(
-      InWS2D, dEModReq, false, std::string(getProperty("PreprocDetectorsWS")));
+  targWSDescr.m_PreprDetTable =
+      this->preprocessDetectorsPositions(InWS2D, dEModReq, false, std::string(getProperty("PreprocDetectorsWS")));
 
   // do the job
   findMinMaxValues(targWSDescr, pQtransf, iEmode, MinValues, MaxValues);
@@ -121,10 +114,8 @@ void ConvertToMDMinMaxLocal::exec() {
   setProperty("MaxValues", MaxValues);
 }
 
-void ConvertToMDMinMaxLocal::findMinMaxValues(MDWSDescription &WSDescription,
-                                              MDTransfInterface *const pQtransf,
-                                              Kernel::DeltaEMode::Type iEMode,
-                                              std::vector<double> &MinValues,
+void ConvertToMDMinMaxLocal::findMinMaxValues(MDWSDescription &WSDescription, MDTransfInterface *const pQtransf,
+                                              Kernel::DeltaEMode::Type iEMode, std::vector<double> &MinValues,
                                               std::vector<double> &MaxValues) {
 
   MDAlgorithms::UnitsConversionHelper unitsConverter;
@@ -142,35 +133,34 @@ void ConvertToMDMinMaxLocal::findMinMaxValues(MDWSDescription &WSDescription,
   pQtransf->initialize(WSDescription);
 
   //
-  auto nHist = static_cast<long>(inWS->getNumberHistograms());
-  auto detIDMap =
-      WSDescription.m_PreprDetTable->getColVector<size_t>("detIDMap");
+  auto nSpectra = WSDescription.m_PreprDetTable->getLogs()->getPropertyValueAsType<uint32_t>("ActualDetectorsNum");
+  auto detIDMap = WSDescription.m_PreprDetTable->getColVector<size_t>("detIDMap");
+  auto sp2detMap = WSDescription.m_PreprDetTable->getColVector<size_t>("spec2detMap");
 
   // vector to place transformed coordinates;
   std::vector<coord_t> locCoord(nDims);
 
   pQtransf->calcGenericVariables(locCoord, nDims);
   // PRAGMA_OMP(parallel for reduction(||:rangeChanged))
-  for (long i = 0; i < nHist; i++) {
+  for (size_t i = 0; i < nSpectra; i++) {
     // get valid spectrum number
     size_t iSpctr = detIDMap[i];
 
     // update unit conversion according to current spectra
-    unitsConverter.updateConversion(iSpctr);
+    unitsConverter.updateConversion(i);
     // update coordinate transformation according to the spectra
-    pQtransf->calcYDepCoordinates(locCoord, iSpctr);
+    pQtransf->calcYDepCoordinates(locCoord, i);
 
     // get the range of the input data in the spectra
     auto source_range = inWS->getSpectrum(iSpctr).getXDataRange();
 
     // extract part of this range which has well defined unit conversion
-    source_range = unitsConverter.getConversionRange(source_range.first,
-                                                     source_range.second);
+    source_range = unitsConverter.getConversionRange(source_range.first, source_range.second);
 
     double x1 = unitsConverter.convertUnits(source_range.first);
     double x2 = unitsConverter.convertUnits(source_range.second);
 
-    std::vector<double> range = pQtransf->getExtremumPoints(x1, x2, iSpctr);
+    std::vector<double> range = pQtransf->getExtremumPoints(x1, x2, i);
     // transform coordinates
     for (double &k : range) {
 
@@ -185,5 +175,4 @@ void ConvertToMDMinMaxLocal::findMinMaxValues(MDWSDescription &WSDescription,
     }
   }
 }
-} // namespace MDAlgorithms
-} // namespace Mantid
+} // namespace Mantid::MDAlgorithms

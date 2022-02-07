@@ -7,11 +7,9 @@
 #include "MantidNexusGeometry/NexusGeometryParser.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Objects/CSGObject.h"
-#include "MantidGeometry/Objects/ShapeFactory.h"
 #include "MantidGeometry/Rendering/GeometryHandler.h"
 #include "MantidGeometry/Rendering/ShapeInfo.h"
 #include "MantidKernel/ChecksumHelper.h"
-#include "MantidKernel/EigenConversionHelpers.h"
 #include "MantidNexusGeometry/AbstractLogger.h"
 #include "MantidNexusGeometry/H5ForwardCompatibility.h"
 #include "MantidNexusGeometry/Hdf5Version.h"
@@ -23,28 +21,17 @@
 #include <Eigen/Core>
 #include <Eigen/Geometry>
 #include <H5Cpp.h>
-#include <boost/algorithm/string.hpp>
-#include <boost/optional.hpp>
 #include <boost/regex.hpp>
 #include <numeric>
 #include <sstream>
 #include <tuple>
 #include <type_traits>
 
-namespace Mantid {
-namespace NexusGeometry {
+namespace Mantid::NexusGeometry {
 using namespace H5;
 
 // Anonymous namespace
 namespace {
-using FaceV = std::vector<Eigen::Vector3d>;
-
-struct Face {
-  Eigen::Vector3d v1;
-  Eigen::Vector3d v2;
-  Eigen::Vector3d v3;
-  Eigen::Vector3d v4;
-};
 
 bool isDegrees(const H5std_string &units) {
   using boost::regex;
@@ -52,8 +39,7 @@ bool isDegrees(const H5std_string &units) {
   return regex_match(units, regex("deg(rees)?", regex::icase));
 }
 
-template <typename T, typename R>
-std::vector<R> convertVector(const std::vector<T> &toConvert) {
+template <typename T, typename R> std::vector<R> convertVector(const std::vector<T> &toConvert) {
   std::vector<R> target(toConvert.size());
   for (size_t i = 0; i < target.size(); ++i) {
     target[i] = R(toConvert[i]);
@@ -69,31 +55,28 @@ template <typename ExpectedT> void validateStorageType(const DataSet &data) {
   if (std::is_floating_point<ExpectedT>::value) {
     if (H5T_FLOAT != typeClass) {
       throw std::runtime_error("Storage type mismatch. Expecting to extract a "
-                               "floating point number");
+                               "floating point number from " +
+                               H5_OBJ_NAME(data));
     }
     if (sizeOfType != sizeof(ExpectedT)) {
-      throw std::runtime_error(
-          "Storage type mismatch for floats. This operation "
-          "is dangerous. Nexus stored has byte size:" +
-          std::to_string(sizeOfType));
+      throw std::runtime_error("Storage type mismatch for floats. This operation "
+                               "is dangerous. Nexus stored has byte size:" +
+                               std::to_string(sizeOfType) + " in " + H5_OBJ_NAME(data));
     }
   } else if (std::is_integral<ExpectedT>::value) {
     if (H5T_INTEGER != typeClass) {
-      throw std::runtime_error(
-          "Storage type mismatch. Expecting to extract a integer");
+      throw std::runtime_error("Storage type mismatch. Expecting to extract a integer from " + H5_OBJ_NAME(data));
     }
     if (sizeOfType > sizeof(ExpectedT)) {
       // endianness not checked
-      throw std::runtime_error(
-          "Storage type mismatch for integer. Result "
-          "would result in truncation. Nexus stored has byte size:" +
-          std::to_string(sizeOfType));
+      throw std::runtime_error("Storage type mismatch for integer. Result "
+                               "would result in truncation. Nexus stored has byte size:" +
+                               std::to_string(sizeOfType) + " in " + H5_OBJ_NAME(data));
     }
   }
 }
 
-template <typename ValueType>
-std::vector<ValueType> extractVector(const DataSet &data) {
+template <typename ValueType> std::vector<ValueType> extractVector(const DataSet &data) {
   validateStorageType<ValueType>(data);
   DataSpace dataSpace = data.getSpace();
   std::vector<ValueType> values;
@@ -131,27 +114,23 @@ private:
   // Function to read in a dataset into a vector. Prefer not call directly, use
   // readNX.. functions instead
   template <typename ValueType, typename T>
-  std::vector<ValueType> get1DDataset(const T &host,
-                                      const H5std_string &dataset) {
+  std::vector<ValueType> get1DDataset(const T &host, const H5std_string &dataset) {
     DataSet data = openDataSet(host, dataset);
     return extractVector<ValueType>(data);
   }
 
   // Read NXInts - provides abstraction for reading different sized integers
   // arrays http://download.nexusformat.org/doc/html/nxdl-types.html#nx-int
-  template <typename T>
-  std::vector<int64_t> readNXInts(const T &object, const std::string &dsName) {
+  template <typename T> std::vector<int64_t> readNXInts(const T &object, const std::string &dsName) {
     std::vector<int64_t> ints;
     const auto nxintsize = object.openDataSet(dsName).getDataType().getSize();
     if (nxintsize == sizeof(int32_t)) {
-      ints = convertVector<int32_t, int64_t>(
-          get1DDataset<int32_t>(object, dsName));
+      ints = convertVector<int32_t, int64_t>(get1DDataset<int32_t>(object, dsName));
     } else if (nxintsize == sizeof(int64_t)) {
       ints = get1DDataset<int64_t>(object, dsName);
     } else {
       std::stringstream ss;
-      ss << "Cannot handle reading ints of size " << nxintsize << " from "
-         << dsName << " in " << H5_OBJ_NAME(object)
+      ss << "Cannot handle reading ints of size " << nxintsize << " from " << dsName << " in " << H5_OBJ_NAME(object)
          << ". Only 64 and 32 bit signed ints handled";
       throw std::runtime_error(ss.str());
     }
@@ -161,21 +140,16 @@ private:
   // Read NXInts and cast to Uint32 expecting datasets to be stored as arrays
   // http://download.nexusformat.org/doc/html/nxdl-types.html#nx-int rather than
   // http://download.nexusformat.org/doc/html/nxdl-types.html#nx-uint
-  template <typename T>
-  std::vector<uint32_t> readNXUInts32(const T &object,
-                                      const std::string &dsName) {
+  template <typename T> std::vector<uint32_t> readNXUInts32(const T &object, const std::string &dsName) {
     std::vector<uint32_t> ints;
     const auto nxintsize = object.openDataSet(dsName).getDataType().getSize();
     if (nxintsize == sizeof(int32_t)) {
-      ints = convertVector<int32_t, uint32_t>(
-          get1DDataset<int32_t>(object, dsName));
+      ints = convertVector<int32_t, uint32_t>(get1DDataset<int32_t>(object, dsName));
     } else if (nxintsize == sizeof(int64_t)) {
-      ints = convertVector<int64_t, uint32_t>(
-          get1DDataset<int64_t>(object, dsName));
+      ints = convertVector<int64_t, uint32_t>(get1DDataset<int64_t>(object, dsName));
     } else {
       std::stringstream ss;
-      ss << "Cannot handle reading ints of size " << nxintsize << " from "
-         << dsName << " in " << H5_OBJ_NAME(object)
+      ss << "Cannot handle reading ints of size " << nxintsize << " from " << dsName << " in " << H5_OBJ_NAME(object)
          << ". Only 64 and 32 bit signed ints handled";
       throw std::runtime_error(ss.str());
     }
@@ -183,47 +157,38 @@ private:
   }
 
   template <typename T>
-  typename std::enable_if<std::is_base_of<H5::H5Object, T>::value,
-                          std::string>::type
-  unsupportedNXFloatMessage(size_t nxfloatsize, const T &object,
-                            const std::string &dsName) {
+  typename std::enable_if<std::is_base_of<H5::H5Object, T>::value, std::string>::type
+  unsupportedNXFloatMessage(size_t nxfloatsize, const T &object, const std::string &dsName) {
     std::stringstream ss;
-    ss << "Cannot handle reading ints of size " << nxfloatsize << " from "
-       << dsName << " in " << H5_OBJ_NAME(object)
+    ss << "Cannot handle reading ints of size " << nxfloatsize << " from " << dsName << " in " << H5_OBJ_NAME(object)
        << ". Only 64 and 32 bit floats handled";
     return ss.str();
   }
   template <typename T>
-  typename std::enable_if<!std::is_base_of<H5::H5Object, T>::value,
-                          std::string>::type
-  unsupportedNXFloatMessage(size_t nxfloatsize, const T &,
-                            const std::string &dsName) {
+  typename std::enable_if<!std::is_base_of<H5::H5Object, T>::value, std::string>::type
+  unsupportedNXFloatMessage(size_t nxfloatsize, const T &, const std::string &dsName) {
     std::stringstream ss;
-    ss << "Cannot handle reading ints of size " << nxfloatsize << " from "
-       << dsName << ". Only 64 and 32 bit floats handled";
+    ss << "Cannot handle reading ints of size " << nxfloatsize << " from " << dsName
+       << ". Only 64 and 32 bit floats handled";
     return ss.str();
   }
 
   // Read NXFloats - provides abstraction for reading different sized integers
   // arrays http://download.nexusformat.org/doc/html/nxdl-types.html#nx-float
-  template <typename T>
-  std::vector<double> readNXFloats(const T &object, const std::string &dsName) {
+  template <typename T> std::vector<double> readNXFloats(const T &object, const std::string &dsName) {
     std::vector<double> floats;
     const auto nxfloatsize = object.openDataSet(dsName).getDataType().getSize();
     if (nxfloatsize == sizeof(float_t)) {
-      floats = convertVector<float_t, double_t>(
-          get1DDataset<float_t>(object, dsName));
+      floats = convertVector<float_t, double_t>(get1DDataset<float_t>(object, dsName));
     } else if (nxfloatsize == sizeof(double_t)) {
       floats = get1DDataset<double_t>(object, dsName);
     } else {
-      throw std::runtime_error(
-          unsupportedNXFloatMessage(nxfloatsize, object, dsName));
+      throw std::runtime_error(unsupportedNXFloatMessage(nxfloatsize, object, dsName));
     }
     return floats;
   }
 
-  std::string get1DStringDataset(const std::string &dataset,
-                                 const Group &group) {
+  std::string get1DStringDataset(const std::string &dataset, const Group &group) {
     // Open data set
     DataSet data = openDataSet(group, dataset);
     auto dataType = data.getDataType();
@@ -250,11 +215,10 @@ private:
   }
 
   // Provided to support invalid or null-termination character strings
-  std::string readOrSubsitute(const std::string &dataset, const Group &group,
-                              std::string &substitue) {
+  std::string readOrSubstitute(const std::string &dataset, const Group &group, const std::string &substitute) {
     auto read = get1DStringDataset(dataset, group);
     if (read.empty())
-      read = substitue;
+      read = substitute;
     return read;
   }
 
@@ -262,8 +226,7 @@ private:
    *   If firstEntryOnly=true, only the first match is returned as a vector of
    *   size 1.
    */
-  std::vector<Group> openSubGroups(const Group &parentGroup,
-                                   const H5std_string &CLASS_TYPE) {
+  std::vector<Group> openSubGroups(const Group &parentGroup, const H5std_string &CLASS_TYPE) {
     std::vector<Group> subGroups;
     // Iterate over children, and determine if a group
     for (hsize_t i = 0; i < parentGroup.getNumObjs(); ++i) {
@@ -272,8 +235,7 @@ private:
         // Open the sub group
         Group childGroup = parentGroup.openGroup(childPath);
         // Iterate through attributes to find NX_class
-        for (uint32_t attribute_index = 0;
-             attribute_index < static_cast<uint32_t>(childGroup.getNumAttrs());
+        for (uint32_t attribute_index = 0; attribute_index < static_cast<uint32_t>(childGroup.getNumAttrs());
              ++attribute_index) {
           // Test attribute at current index for NX_class
           Attribute attribute = childGroup.openAttribute(attribute_index);
@@ -308,21 +270,16 @@ private:
     // Open all instrument groups within rawDataGroups
     std::vector<Group> instrumentGroupPaths;
     for (auto const &rawDataGroupPath : rawDataGroupPaths) {
-      std::vector<Group> instrumentGroups =
-          openSubGroups(rawDataGroupPath, NX_INSTRUMENT);
-      instrumentGroupPaths.insert(instrumentGroupPaths.end(),
-                                  instrumentGroups.begin(),
-                                  instrumentGroups.end());
+      std::vector<Group> instrumentGroups = openSubGroups(rawDataGroupPath, NX_INSTRUMENT);
+      instrumentGroupPaths.insert(instrumentGroupPaths.end(), instrumentGroups.begin(), instrumentGroups.end());
     }
     // Open all detector groups within instrumentGroups
     std::vector<Group> detectorGroupPaths;
     for (auto const &instrumentGroupPath : instrumentGroupPaths) {
       // Open sub detector groups
-      std::vector<Group> detectorGroups =
-          openSubGroups(instrumentGroupPath, NX_DETECTOR);
+      std::vector<Group> detectorGroups = openSubGroups(instrumentGroupPath, NX_DETECTOR);
       // Append to detectorGroups vector
-      detectorGroupPaths.insert(detectorGroupPaths.end(),
-                                detectorGroups.begin(), detectorGroups.end());
+      detectorGroupPaths.insert(detectorGroupPaths.end(), detectorGroups.begin(), detectorGroups.end());
     }
     // Return the detector groups
     return detectorGroupPaths;
@@ -405,12 +362,10 @@ private:
    * @param detectorGroup
    * @return
    */
-  Eigen::Transform<double, 3, Eigen::Affine>
-  getTransformations(const H5File &file, const Group &detectorGroup) {
+  Eigen::Transform<double, 3, Eigen::Affine> getTransformations(const H5File &file, const Group &detectorGroup) {
     H5std_string dependency;
     // Get absolute dependency path
-    auto status = H5Gget_objinfo(detectorGroup.getId(), DEPENDS_ON.c_str(),
-                                 false, nullptr);
+    auto status = H5Gget_objinfo(detectorGroup.getId(), DEPENDS_ON.c_str(), false, nullptr);
     if (status == 0) {
       dependency = get1DStringDataset(DEPENDS_ON, detectorGroup);
     } else {
@@ -432,8 +387,7 @@ private:
       Eigen::Vector3d transformVector(0.0, 0.0, 0.0);
       H5std_string transformType;
       H5std_string transformUnits;
-      for (uint32_t i = 0;
-           i < static_cast<uint32_t>(transformation.getNumAttrs()); i++) {
+      for (uint32_t i = 0; i < static_cast<uint32_t>(transformation.getNumAttrs()); i++) {
         // Open attribute at current index
         Attribute attribute = transformation.openAttribute(i);
         H5std_string attributeName = attribute.getName();
@@ -483,8 +437,8 @@ private:
         Eigen::AngleAxisd rotation(angle, transformVector);
         transforms = rotation * transforms;
       } else {
-        throw std::runtime_error(
-            "Unknown Transform type in Nexus Geometry Parsing");
+        throw std::runtime_error("Unknown Transform type \"" + transformType + "\" found in " +
+                                 H5_OBJ_NAME(transformation) + " when parsing Nexus geometry");
       }
     }
     return transforms;
@@ -504,8 +458,7 @@ private:
         const auto data = openDataSet(detectorGroup, objName);
         if (data.getDataType().getSize() == sizeof(int64_t)) {
           // Note the narrowing here!
-          detIds = convertVector<int64_t, Mantid::detid_t>(
-              extractVector<int64_t>(data));
+          detIds = convertVector<int64_t, Mantid::detid_t>(extractVector<int64_t>(data));
         } else {
           detIds = extractVector<Mantid::detid_t>(data);
         }
@@ -515,13 +468,10 @@ private:
   }
 
   // Parse cylinder nexus geometry
-  void
-  parseNexusCylinderDetector(const Group &shapeGroup, const std::string &name,
-                             InstrumentBuilder &builder,
-                             const std::vector<Mantid::detid_t> &detectorIds) {
+  void parseNexusCylinderDetector(const Group &shapeGroup, const std::string &name, InstrumentBuilder &builder,
+                                  const std::vector<Mantid::detid_t> &detectorIds) {
 
-    const auto cylinderIndexToDetId =
-        getDetectorIds(shapeGroup); // 2x detids size
+    const auto cylinderIndexToDetId = getDetectorIds(shapeGroup); // 2x detids size
     const auto cPoints = readNXInts(shapeGroup, "cylinders");
     // 1D reads row first, then columns
     auto vPoints = readNXFloats(shapeGroup, "vertices");
@@ -529,9 +479,9 @@ private:
       throw std::runtime_error("numbers of detector with shape cylinder does "
                                "not match number of detectors");
     if (cPoints.size() % 3 != 0)
-      throw std::runtime_error("cylinders not divisble by 3. Bad input.");
+      throw std::runtime_error("cylinders not divisible by 3. Bad input.");
     if (vPoints.size() % 3 != 0)
-      throw std::runtime_error("vertices not divisble by 3. Bad input.");
+      throw std::runtime_error("vertices not divisible by 3. Bad input.");
 
     for (size_t i = 0; i < cylinderIndexToDetId.size(); i += 2) {
       auto cylinderIndex = cylinderIndexToDetId[i];
@@ -549,14 +499,12 @@ private:
 
       // Note that tube optimisation is not used here. That should be applied as
       // future optimisation.
-      builder.addDetectorToLastBank(name + "_" + std::to_string(cylinderIndex),
-                                    detId, (centre + other) / 2,
+      builder.addDetectorToLastBank(name + "_" + std::to_string(cylinderIndex), detId, (centre + other) / 2,
                                     NexusShapeFactory::createCylinder(vSorted));
     }
   }
 
-  std::shared_ptr<const Geometry::IObject>
-  parseNexusCylinder(const Group &shapeGroup) {
+  std::shared_ptr<const Geometry::IObject> parseNexusCylinder(const Group &shapeGroup) {
     H5std_string pointsToVertices = "cylinders";
     auto cPoints = readNXInts(shapeGroup, pointsToVertices);
 
@@ -573,25 +521,19 @@ private:
   }
 
   // Parse OFF (mesh) nexus geometry
-  std::shared_ptr<const Geometry::IObject>
-  parseNexusMesh(const Group &shapeGroup) {
+  std::shared_ptr<const Geometry::IObject> parseNexusMesh(const Group &shapeGroup) {
     const auto faceIndices = readNXUInts32(shapeGroup, "faces");
     const auto windingOrder = readNXUInts32(shapeGroup, "winding_order");
     const auto vertices = readNXFloats(shapeGroup, "vertices");
-    return NexusShapeFactory::createFromOFFMesh(faceIndices, windingOrder,
-                                                vertices);
+    return NexusShapeFactory::createFromOFFMesh(faceIndices, windingOrder, vertices);
   }
 
-  void
-  extractFacesAndIDs(const std::vector<uint32_t> &detFaces,
-                     const std::vector<uint32_t> &windingOrder,
-                     const std::vector<double> &vertices,
-                     const std::unordered_map<int, uint32_t> &detIdToIndex,
-                     const std::vector<uint32_t> &faceIndices,
-                     std::vector<std::vector<Eigen::Vector3d>> &detFaceVerts,
-                     std::vector<std::vector<uint32_t>> &detFaceIndices,
-                     std::vector<std::vector<uint32_t>> &detWindingOrder,
-                     std::vector<int32_t> &detIds) {
+  void extractFacesAndIDs(const std::vector<uint32_t> &detFaces, const std::vector<uint32_t> &windingOrder,
+                          const std::vector<double> &vertices, const std::unordered_map<int, uint32_t> &detIdToIndex,
+                          const std::vector<uint32_t> &faceIndices,
+                          std::vector<std::vector<Eigen::Vector3d>> &detFaceVerts,
+                          std::vector<std::vector<uint32_t>> &detFaceIndices,
+                          std::vector<std::vector<uint32_t>> &detWindingOrder, std::vector<int32_t> &detIds) {
     for (size_t i = 0; i < detFaces.size(); i += 2) {
       const auto faceIndexOfDetector = detFaces[i];
       const auto faceIndex = faceIndices[faceIndexOfDetector];
@@ -605,13 +547,11 @@ private:
       auto &detWinding = detWindingOrder[detIndex];
       vertsForDet.reserve(nVertsInFace);
       detWinding.reserve(nVertsInFace);
-      detFaceIndices[detIndex].emplace_back(
-          faceIndex); // Associate face with detector index
-                      // Use face index to index into winding order.
+      detFaceIndices[detIndex].emplace_back(faceIndex); // Associate face with detector index
+                                                        // Use face index to index into winding order.
       for (size_t v = 0; v < nVertsInFace; ++v) {
         const auto vi = windingOrder[faceIndex + v] * 3;
-        vertsForDet.emplace_back(vertices[vi], vertices[vi + 1],
-                                 vertices[vi + 2]);
+        vertsForDet.emplace_back(vertices[vi], vertices[vi + 1], vertices[vi + 2]);
         detWinding.emplace_back(static_cast<uint32_t>(detWinding.size()));
       }
       // Index -> Id
@@ -619,67 +559,77 @@ private:
     }
   }
 
-  void extractNexusMeshAndAddDetectors(
-      const std::vector<uint32_t> &detFaces,
-      const std::vector<uint32_t> &faceIndices,
-      const std::vector<uint32_t> &windingOrder,
-      const std::vector<double> &vertices, const size_t numDets,
-      const std::unordered_map<int, uint32_t> &detIdToIndex,
-      const std::string &name, InstrumentBuilder &builder) {
+  void extractNexusMeshAndAddDetectors(const std::vector<uint32_t> &detFaces, const std::vector<uint32_t> &faceIndices,
+                                       const std::vector<uint32_t> &windingOrder, const std::vector<double> &vertices,
+                                       const size_t numDets, const std::unordered_map<int, uint32_t> &detIdToIndex,
+                                       const std::string &name, InstrumentBuilder &builder,
+                                       const Group &detectorGroup) {
     std::vector<std::vector<Eigen::Vector3d>> detFaceVerts(numDets);
     std::vector<std::vector<uint32_t>> detFaceIndices(numDets);
     std::vector<std::vector<uint32_t>> detWindingOrder(numDets);
     std::vector<int> detIds(numDets);
 
-    extractFacesAndIDs(detFaces, windingOrder, vertices, detIdToIndex,
-                       faceIndices, detFaceVerts, detFaceIndices,
+    extractFacesAndIDs(detFaces, windingOrder, vertices, detIdToIndex, faceIndices, detFaceVerts, detFaceIndices,
                        detWindingOrder, detIds);
+
+    Pixels detectorPixels;
+    bool calculatePixelCentre = true;
+    if (detFaces.size() != 2 * numDets) {
+      // At least one pixel is 3D (comprises multiple faces)
+      // We need pixel offsets from the NXdetector in this case, as
+      // calculating centre of mass for a general polyhedron is fairly
+      // complex and computationally expensive
+      Pixels pixelOffsets = getPixelOffsets(detectorGroup);
+      // Calculate pixel relative positions
+      detectorPixels = Eigen::Affine3d::Identity() * pixelOffsets;
+      calculatePixelCentre = false;
+    }
 
     for (size_t i = 0; i < numDets; ++i) {
       auto &detVerts = detFaceVerts[i];
-      const auto &faceIndices = detFaceIndices[i];
+      const auto &singleDetIndices = detFaceIndices[i];
       const auto &detWinding = detWindingOrder[i];
-      // Calculate polygon centre
-      Eigen::Vector3d centre =
-          std::accumulate(detVerts.begin() + 1, detVerts.end(),
-                          detVerts.front()) /
-          detVerts.size();
 
-      // translate shape to origin for shape coordinates.
-      std::for_each(detVerts.begin(), detVerts.end(),
-                    [&centre](Eigen::Vector3d &val) { val -= centre; });
+      Eigen::Vector3d centre;
+      if (calculatePixelCentre) {
+        // Our detector is 2D (described by a single face in the mesh)
+        // Calculate polygon centre
+        centre = std::accumulate(detVerts.begin() + 1, detVerts.end(), detVerts.front()) / detVerts.size();
+      } else {
+        // Our detector is 3D (described by multiple faces in the mesh)
+        // Use pixel offset which was recorded in the NXdetector
+        centre = detectorPixels.col(i);
+      }
 
-      auto shape = NexusShapeFactory::createFromOFFMesh(faceIndices, detWinding,
-                                                        detVerts);
-      builder.addDetectorToLastBank(name + "_" + std::to_string(i), detIds[i],
-                                    centre, std::move(shape));
+      // translate shape to origin for shape coordinates
+      std::for_each(detVerts.begin(), detVerts.end(), [&centre](Eigen::Vector3d &val) { val -= centre; });
+
+      auto shape = NexusShapeFactory::createFromOFFMesh(singleDetIndices, detWinding, detVerts);
+      builder.addDetectorToLastBank(name + "_" + std::to_string(i), detIds[i], centre, std::move(shape));
     }
   }
 
-  void parseMeshAndAddDetectors(InstrumentBuilder &builder,
-                                const Group &shapeGroup,
-                                const std::vector<Mantid::detid_t> &detectorIds,
-                                const std::string &bankName) {
+  void parseMeshAndAddDetectors(InstrumentBuilder &builder, const Group &shapeGroup,
+                                const std::vector<Mantid::detid_t> &detectorIds, const std::string &bankName,
+                                const Group &detectorGroup) {
     // Load mapping between detector IDs and faces, winding order of vertices
-    // for faces, and face corner vertices.
+    // for faces, and face corner vertices
     const auto detFaces = readNXUInts32(shapeGroup, "detector_faces");
     const auto faceIndices = readNXUInts32(shapeGroup, "faces");
     const auto windingOrder = readNXUInts32(shapeGroup, "winding_order");
     const auto vertices = readNXFloats(shapeGroup, "vertices");
 
     // Sanity check entries
-    if (detFaces.size() != 2 * detectorIds.size())
-      throw std::runtime_error("Expect to have as many detector_face entries "
-                               "as detector_number entries");
+    if (detFaces.size() < 2 * detectorIds.size())
+      throw std::runtime_error("Expect to have at least as many detector_face "
+                               "entries as detector_number entries");
     if (detFaces.size() % 2 != 0)
-      throw std::runtime_error("Unequal pairs of face incides to detector "
+      throw std::runtime_error("Unequal pairs of face indices to detector "
                                "indices in detector_faces");
     if (detFaces.size() / 2 > faceIndices.size())
-      throw std::runtime_error(
-          "Cannot have more detector_faces entries than faces entries");
+      throw std::runtime_error("Cannot have more detector_faces entries than faces entries");
     if (vertices.size() % 3 != 0)
-      throw std::runtime_error(
-          "Unequal triple entries for vertices. Must be 3 * n entries");
+      throw std::runtime_error("Unequal triple entries for vertices. Must be 3 * n entries");
 
     // Build a map of detector IDs to the index of occurrence in the
     // "detector_number" dataset
@@ -688,22 +638,20 @@ private:
       detIdToIndex.emplace(detectorIds[i], i);
     }
 
-    extractNexusMeshAndAddDetectors(detFaces, faceIndices, windingOrder,
-                                    vertices, detectorIds.size(), detIdToIndex,
-                                    bankName, builder);
+    extractNexusMeshAndAddDetectors(detFaces, faceIndices, windingOrder, vertices, detectorIds.size(), detIdToIndex,
+                                    bankName, builder, detectorGroup);
   }
 
   void parseAndAddBank(const Group &shapeGroup, InstrumentBuilder &builder,
-                       const std::vector<Mantid::detid_t> &detectorIds,
-                       const std::string &bankName) {
+                       const std::vector<Mantid::detid_t> &detectorIds, const std::string &bankName,
+                       const Group &detectorGroup) {
     if (utilities::hasNXAttribute(shapeGroup, NX_OFF)) {
-      parseMeshAndAddDetectors(builder, shapeGroup, detectorIds, bankName);
+      parseMeshAndAddDetectors(builder, shapeGroup, detectorIds, bankName, detectorGroup);
     } else if (utilities::hasNXAttribute(shapeGroup, NX_CYLINDER)) {
       parseNexusCylinderDetector(shapeGroup, bankName, builder, detectorIds);
     } else {
       std::stringstream ss;
-      ss << "Shape group " << H5_OBJ_NAME(shapeGroup)
-         << " has unknown geometry type specified via " << NX_CLASS;
+      ss << "Shape group " << H5_OBJ_NAME(shapeGroup) << " has unknown geometry type specified via " << NX_CLASS;
       throw std::runtime_error(ss.str());
     }
   }
@@ -713,27 +661,26 @@ private:
    * IObject.
    *
    * Null object return if no shape can be found.
-   * @param detectorGroup : parent group possibily containing sub-group relating
+   * @param detectorGroup : parent group possibly containing sub-group relating
    * to shape
    * @param searchTubes : out parameter, true if tubes can be searched
    * @return shared pointer holding IObject subtype or null shared pointer
    */
-  std::shared_ptr<const Geometry::IObject>
-  parseNexusShape(const Group &detectorGroup, bool &searchTubes) {
+  std::shared_ptr<const Geometry::IObject> parseNexusShape(const Group &detectorGroup, bool &searchTubes) {
     // Note in the following we are NOT looking for named groups, only groups
     // that have NX_class attributes of either NX_CYLINDER or NX_OFF. That way
     // we handle groups called any of the allowed - shape, pixel_shape,
     // detector_shape
-    auto cylinderical = utilities::findGroup(detectorGroup, NX_CYLINDER);
+    auto cylindrical = utilities::findGroup(detectorGroup, NX_CYLINDER);
     auto off = utilities::findGroup(detectorGroup, NX_OFF);
     searchTubes = false;
-    if (off && cylinderical) {
+    if (off && cylindrical) {
       throw std::runtime_error("Can either provide cylindrical OR OFF "
                                "geometries as subgroups, not both");
     }
-    if (cylinderical) {
+    if (cylindrical) {
       searchTubes = true;
-      return parseNexusCylinder(*cylinderical);
+      return parseNexusCylinder(*cylindrical);
     } else if (off)
       return parseNexusMesh(*off);
     else {
@@ -742,42 +689,36 @@ private:
   }
 
   // Parse source and add to instrument
-  void parseAndAddSource(const H5File &file, const Group &root,
-                         InstrumentBuilder &builder) {
+  void parseAndAddSource(const H5File &file, const Group &root, InstrumentBuilder &builder) {
     Group entryGroup = utilities::findGroupOrThrow(root, NX_ENTRY);
-    Group instrumentGroup =
-        utilities::findGroupOrThrow(entryGroup, NX_INSTRUMENT);
+    Group instrumentGroup = utilities::findGroupOrThrow(entryGroup, NX_INSTRUMENT);
     Group sourceGroup = utilities::findGroupOrThrow(instrumentGroup, NX_SOURCE);
-    std::string sourceName = "Unspecfied";
+    std::string sourceName = "Unspecified";
     if (utilities::findDataset(sourceGroup, "name"))
-      sourceName = readOrSubsitute("name", sourceGroup, sourceName);
+      sourceName = readOrSubstitute("name", sourceGroup, sourceName);
     auto sourceTransformations = getTransformations(file, sourceGroup);
     auto defaultPos = Eigen::Vector3d(0.0, 0.0, 0.0);
     builder.addSource(sourceName, sourceTransformations * defaultPos);
   }
 
   // Parse sample and add to instrument
-  void parseAndAddSample(const H5File &file, const Group &root,
-                         InstrumentBuilder &builder) {
+  void parseAndAddSample(const H5File &file, const Group &root, InstrumentBuilder &builder) {
     Group entryGroup = utilities::findGroupOrThrow(root, NX_ENTRY);
     Group sampleGroup = utilities::findGroupOrThrow(entryGroup, NX_SAMPLE);
     auto sampleTransforms = getTransformations(file, sampleGroup);
-    Eigen::Vector3d samplePos =
-        sampleTransforms * Eigen::Vector3d(0.0, 0.0, 0.0);
+    Eigen::Vector3d samplePos = sampleTransforms * Eigen::Vector3d(0.0, 0.0, 0.0);
     std::string sampleName = "Unspecified";
     if (utilities::findDataset(sampleGroup, "name"))
-      sampleName = readOrSubsitute("name", sampleGroup, sampleName);
+      sampleName = readOrSubstitute("name", sampleGroup, sampleName);
     builder.addSample(sampleName, samplePos);
   }
 
-  void parseMonitors(const H5File &file, const H5::Group &root,
-                     InstrumentBuilder &builder) {
+  void parseMonitors(const H5File &file, const H5::Group &root, InstrumentBuilder &builder) {
     std::vector<Group> rawDataGroupPaths = openSubGroups(root, NX_ENTRY);
 
     // Open all instrument groups within rawDataGroups
     for (auto const &rawDataGroupPath : rawDataGroupPaths) {
-      std::vector<Group> instrumentGroups =
-          openSubGroups(rawDataGroupPath, NX_INSTRUMENT);
+      std::vector<Group> instrumentGroups = openSubGroups(rawDataGroupPath, NX_INSTRUMENT);
       for (auto &inst : instrumentGroups) {
         std::vector<Group> monitorGroups = openSubGroups(inst, NX_MONITOR);
         for (auto &monitor : monitorGroups) {
@@ -787,21 +728,17 @@ private:
           bool proxy = false;
           auto monitorShape = parseNexusShape(monitor, proxy);
           auto monitorTransforms = getTransformations(file, monitor);
-          builder.addMonitor(std::to_string(detectorId),
-                             static_cast<Mantid::detid_t>(detectorId),
-                             monitorTransforms * Eigen::Vector3d{0, 0, 0},
-                             monitorShape);
+          builder.addMonitor(std::to_string(detectorId), static_cast<Mantid::detid_t>(detectorId),
+                             monitorTransforms * Eigen::Vector3d{0, 0, 0}, monitorShape);
         }
       }
     }
   }
 
 public:
-  explicit Parser(std::unique_ptr<AbstractLogger> &&logger)
-      : m_logger(std::move(logger)) {}
+  explicit Parser(std::unique_ptr<AbstractLogger> &&logger) : m_logger(std::move(logger)) {}
 
-  std::unique_ptr<const Mantid::Geometry::Instrument>
-  extractInstrument(const H5File &file, const Group &root) {
+  std::unique_ptr<const Mantid::Geometry::Instrument> extractInstrument(const H5File &file, const Group &root) {
     InstrumentBuilder builder(instrumentName(root));
     // Get path to all detector groups
     const std::vector<Group> detectorGroups = openDetectorGroups(root);
@@ -809,8 +746,7 @@ public:
       // Transform in homogenous coordinates. Offsets will be rotated then bank
       // translation applied.
       auto debug = H5_OBJ_NAME(detectorGroup);
-      Eigen::Transform<double, 3, 2> transforms =
-          getTransformations(file, detectorGroup);
+      Eigen::Transform<double, 3, 2> transforms = getTransformations(file, detectorGroup);
       // Absolute bank position
       Eigen::Vector3d bankPos = transforms * Eigen::Vector3d{0, 0, 0};
       // Absolute bank rotation
@@ -824,11 +760,10 @@ public:
       auto detectorIds = getDetectorIds(detectorGroup);
 
       // We preferentially deal with DETECTOR_SHAPE type shapes. Pixel offsets
-      // not needed for this processing
-      auto detector_shape =
-          utilities::findGroupByName(detectorGroup, DETECTOR_SHAPE);
+      // only needed if pixels are 3D for this processing
+      auto detector_shape = utilities::findGroupByName(detectorGroup, DETECTOR_SHAPE);
       if (detector_shape) {
-        parseAndAddBank(*detector_shape, builder, detectorIds, bankName);
+        parseAndAddBank(*detector_shape, builder, detectorIds, bankName, detectorGroup);
         continue;
       }
 
@@ -841,8 +776,7 @@ public:
       auto detShape = parseNexusShape(detectorGroup, searchTubes);
 
       if (searchTubes) {
-        auto tubes = TubeHelpers::findAndSortTubes(*detShape, detectorPixels,
-                                                   detectorIds);
+        auto tubes = TubeHelpers::findAndSortTubes(*detShape, detectorPixels, detectorIds);
         builder.addTubes(bankName, tubes, detShape);
 
         // Even if tubes are searched, we do NOT guarantee all detectors will be
@@ -853,9 +787,8 @@ public:
         auto index = static_cast<int>(i);
         std::string name = bankName + "_" + std::to_string(index);
 
-        Eigen::Vector3d relativePos = detectorPixels.col(index);
-        builder.addDetectorToLastBank(name, detectorIds[index], relativePos,
-                                      detShape);
+        const Eigen::Vector3d &relativePos = detectorPixels.col(index);
+        builder.addDetectorToLastBank(name, detectorIds[index], relativePos, detShape);
       }
     }
     // Sort the detectors
@@ -869,8 +802,7 @@ public:
 } // namespace
 
 std::unique_ptr<const Geometry::Instrument>
-NexusGeometryParser::createInstrument(const std::string &fileName,
-                                      std::unique_ptr<AbstractLogger> logger) {
+NexusGeometryParser::createInstrument(const std::string &fileName, std::unique_ptr<AbstractLogger> logger) {
 
   const H5File file(fileName, H5F_ACC_RDONLY);
   auto rootGroup = file.openGroup("/");
@@ -880,15 +812,12 @@ NexusGeometryParser::createInstrument(const std::string &fileName,
 }
 
 // Create a unique instrument name from Nexus file
-std::string NexusGeometryParser::getMangledName(const std::string &fileName,
-                                                const std::string &instName) {
+std::string NexusGeometryParser::getMangledName(const std::string &fileName, const std::string &instName) {
   std::string mangledName = instName;
   if (!fileName.empty()) {
-    std::string checksum =
-        Mantid::Kernel::ChecksumHelper::sha1FromString(fileName);
+    std::string checksum = Mantid::Kernel::ChecksumHelper::sha1FromString(fileName);
     mangledName += checksum;
   }
   return mangledName;
 }
-} // namespace NexusGeometry
-} // namespace Mantid
+} // namespace Mantid::NexusGeometry

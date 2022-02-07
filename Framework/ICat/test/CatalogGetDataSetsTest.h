@@ -7,52 +7,39 @@
 #pragma once
 
 #include "ICatTestHelper.h"
-#include "MantidAPI/FrameworkManager.h"
-#include "MantidDataObjects/WorkspaceSingleValue.h"
 #include "MantidICat/CatalogGetDataSets.h"
-#include "MantidICat/CatalogLogin.h"
-#include "MantidICat/CatalogSearch.h"
 #include <cxxtest/TestSuite.h>
 
 using namespace Mantid;
 using namespace Mantid::ICat;
+using namespace ICatTestHelper;
 
 class CatalogGetDataSetsTest : public CxxTest::TestSuite {
 public:
   // This means the constructor isn't called when running other tests
-  static CatalogGetDataSetsTest *createSuite() {
-    return new CatalogGetDataSetsTest();
-  }
+  static CatalogGetDataSetsTest *createSuite() { return new CatalogGetDataSetsTest(); }
   static void destroySuite(CatalogGetDataSetsTest *suite) { delete suite; }
 
-  /// Skip all unit tests if ICat server is down
-  bool skipTests() override { return ICatTestHelper::skipTests(); }
-
-  CatalogGetDataSetsTest() { API::FrameworkManager::Instance(); }
+  CatalogGetDataSetsTest() : m_fakeLogin(std::make_unique<FakeICatLogin>()) {}
 
   void testInit() {
-    Mantid::Kernel::ConfigService::Instance().setString("default.facility",
-                                                        "ISIS");
-
     TS_ASSERT_THROWS_NOTHING(datasets.initialize());
     TS_ASSERT(datasets.isInitialized());
   }
 
   void testgetDataFilesExecutes() {
-    TS_ASSERT(ICatTestHelper::login());
-
     if (!datasets.isInitialized())
       datasets.initialize();
     datasets.setPropertyValue("InvestigationId", "12576918");
+    datasets.setPropertyValue("Session", m_fakeLogin->getSessionId());
     datasets.setPropertyValue("OutputWorkspace",
                               "investigation"); // selected invesigation
 
     TS_ASSERT_THROWS_NOTHING(datasets.execute());
     TS_ASSERT(datasets.isExecuted());
-
-    ICatTestHelper::logout();
   }
 
 private:
   CatalogGetDataSets datasets;
+  std::unique_ptr<FakeICatLogin> m_fakeLogin;
 };

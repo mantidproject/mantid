@@ -6,6 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
-#include <set>
-#include <string>
-#include <vector>
+#include "MantidAPI/IFunction1D.h"
+#include "MantidCurveFitting/DllConfig.h"
+
+// STL

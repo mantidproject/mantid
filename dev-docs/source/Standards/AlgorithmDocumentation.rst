@@ -111,7 +111,7 @@ As the **Description** and **Usage** of an algorithm *cannot* be obtained automa
 * Insertion of the Table Of Contents.
 
 ``.. summary::``
-   The content of the summary method declared in your algorithm is output as HTML, for example, the following method is used in Rebin: 
+   The content of the summary method declared in your algorithm is output as HTML, for example, the following method is used in Rebin:
 
 .. code-block:: c++
 
@@ -121,7 +121,7 @@ As the **Description** and **Usage** of an algorithm *cannot* be obtained automa
    }
 
 ``.. relatedalgorithms::``
-   This directive obtains a list of related algorithms from the ``seeAlso`` and ``alias`` methods in the algorithm, for example, the following ``seeAlso`` is used in Rebin: 
+   This directive obtains a list of related algorithms from the ``seeAlso`` and ``alias`` methods in the algorithm, for example, the following ``seeAlso`` is used in Rebin:
 
 .. code-block:: c++
 
@@ -132,7 +132,7 @@ As the **Description** and **Usage** of an algorithm *cannot* be obtained automa
    }
 
 ``.. properties::``
-   As mentioned above, it is *critical* that you include a description for the properties of your algorithm. This directive obtains all of the algorithm's properties (set inside the algorithm's ``init`` method) and outputs in a table format. 
+   As mentioned above, it is *critical* that you include a description for the properties of your algorithm. This directive obtains all of the algorithm's properties (set inside the algorithm's ``init`` method) and outputs in a table format.
 
 ``.. categories::``
    By default, this directive obtains the categories that were set in the ``categories`` method the algorithm. For example, in Rebin the category method is in the header and contains:
@@ -156,7 +156,7 @@ It is possible to add additional categories by passing the directive arguments, 
 Description
 ===========
 
-This section must be manually entered. The description is an extension of the summary, and must contain a detailed overview of the algorithm's functionality. 
+This section must be manually entered. The description is an extension of the summary, and must contain a detailed overview of the algorithm's functionality.
 
 Referencing Other Algorithms
 ----------------------------
@@ -173,7 +173,7 @@ If you need to reference a particular version then you would type
 
    :ref:`DiffractionFocussing version 2 <algm-DiffractionFocussing-v2>`
 
-where the first part outside the angle brackets defines the link text and the part inside the angle brackets references the tag name. 
+where the first part outside the angle brackets defines the link text and the part inside the angle brackets references the tag name.
 
 Usage
 =====
@@ -183,15 +183,9 @@ This section *must* be manually entered. The usage is a 'code' example of the al
 Building the Documentation
 ==========================
 
-One can update the documentation for a particular algorithm after changes have been introduced into the corresponding documentation file. Assuming you are in the build directory and want to update the documentation for Rebin:
+One can update the documentation for a particular algorithm after changes have been introduced into the corresponding documentation file.
+Assuming you are in the build directory and want to update the documentation for Rebin:
 
 ::
 
-   bin/MantidPlot -xq docs/runsphinx_html.py -R Rebin  # builds HTML documentation
-   bin/MantidPlot -xq docs/runsphinx_qthelp.py -R Rebin  # builds Qt-help documentation
-
-or with vanilla python
-
-::
-
-   python docs/runsphinx_html.py -m $PWD/bin -R Rebin
+   bin/mantidpython --classic -m sphinx <sourcedir>/docs/source docs <sourcedir>/docs/source/algorithms/Rebin-v1.rst

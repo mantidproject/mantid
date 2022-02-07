@@ -32,12 +32,9 @@ void export_CatalogManager() {
   register_ptr_to_python<CatalogManagerImpl *>();
 
   class_<CatalogManagerImpl, boost::noncopyable>("CatalogManagerImpl", no_init)
-      .def("numberActiveSessions", &CatalogManagerImpl::numberActiveSessions,
-           "Number of active sessions open")
-      .def("getActiveSessions", &getActiveSessionsAsList,
-           "Get the active sessions")
-      .def("Instance", &CatalogManager::Instance,
-           return_value_policy<reference_existing_object>(),
+      .def("numberActiveSessions", &CatalogManagerImpl::numberActiveSessions, "Number of active sessions open")
+      .def("getActiveSessions", &getActiveSessionsAsList, "Get the active sessions")
+      .def("Instance", &CatalogManager::Instance, return_value_policy<reference_existing_object>(),
            "Returns a reference to the CatalogManger singleton")
       .staticmethod("Instance");
 }

@@ -16,7 +16,6 @@ pressed. First we will start with the view:
 
 .. code-block:: python
 
-    from __future__ import (absolute_import, division, print_function)
     from qtpy import QtWidgets, QtCore, QtGui
 
 
@@ -25,7 +24,7 @@ pressed. First we will start with the view:
         doSomethingSignal = QtCore.Signal()
 
         def __init__(self, parent=None):
-            super(view, self).__init__(parent)
+            super().__init__(parent)
 
             self.button = QtWidgets.QPushButton('Hi', self)
             self.button.setStyleSheet("background-color:lightgrey")
@@ -37,14 +36,14 @@ pressed. First we will start with the view:
 
             # add widgets to layout
             self.sub_layout = QtWidgets.QHBoxLayout()
-            self.sub_layout.addWidget(self.label)            
+            self.sub_layout.addWidget(self.label)
             self.sub_layout.addWidget(self.button)
- 
+
             grid = QtWidgets.QVBoxLayout(self)
             grid.addLayout(self.sub_layout)
             # set the layout for the view widget
             self.setLayout(grid)
- 
+
         #send signals
         def btn_click(self):
             print ("hellow from view")
@@ -63,17 +62,15 @@ custom signal from the view to its own function (``handleButton``).
 
 .. code-block:: python
 
-    from __future__ import (absolute_import, division, print_function)
-
     class Presenter(object):
 
         # pass the view and model into the presenter
         def __init__(self, view):
             self.view = view
 
-            self.view.doSomethingSignal.connect(self.handleButton)             
-       
-        # handle signals 
+            self.view.doSomethingSignal.connect(self.handleButton)
+
+        # handle signals
         def handleButton(self):
             print("hello world, from the presenter")
 
@@ -81,7 +78,6 @@ The main is now:
 
 .. code-block:: python
 
-    from __future__ import (absolute_import, division, print_function)
     from qtpy import QtWidgets, QtCore, QtGui
 
     import sys
@@ -94,7 +90,7 @@ The main is now:
     """
     class Demo(QtWidgets.QMainWindow):
         def __init__(self, parent=None):
-            super(Demo, self).__init__(parent)
+            super().__init__(parent)
 
             self.window = QtWidgets.QMainWindow()
             my_view = view.View(self)

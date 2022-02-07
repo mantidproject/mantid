@@ -19,8 +19,7 @@
 #include <cmath>
 #include <sstream>
 
-namespace Mantid {
-namespace Kernel {
+namespace Mantid::Kernel {
 namespace {
 Logger logger("Statistics");
 }
@@ -49,56 +48,37 @@ Statistics getNanStatistics() {
  * There are enough special cases in determining the median where it useful to
  * put it in a single function.
  */
-template <typename TYPE>
-double getMedian(const vector<TYPE> &data, const size_t num_data,
-                 const bool sorted) {
-  if (num_data == 1)
-    return static_cast<double>(*(data.begin()));
+template <typename TYPE> double getMedian(const vector<TYPE> &data) {
+  const size_t size = data.size();
+  if (size == 1)
+    return static_cast<double>(data[0]);
 
-  bool is_even = ((num_data & 1) == 0);
-  if (is_even) {
-    double left = 0.0;
-    double right = 0.0;
-
-    if (sorted) {
-      // Just get the centre two elements.
-      left = static_cast<double>(*(data.begin() + num_data / 2 - 1));
-      right = static_cast<double>(*(data.begin() + num_data / 2));
-    } else {
-      // If the data is not sorted, make a copy we can mess with
-      vector<TYPE> temp(data.begin(), data.end());
-      // Get what the centre two elements should be...
-      std::nth_element(temp.begin(), temp.begin() + num_data / 2 - 1,
-                       temp.end());
-      left = static_cast<double>(*(temp.begin() + num_data / 2 - 1));
-      std::nth_element(temp.begin(), temp.begin() + num_data / 2, temp.end());
-      right = static_cast<double>(*(temp.begin() + num_data / 2));
-    }
-    // return the average
-    return (left + right) / 2.;
-  } else
-  // Odd number
-  {
-    if (sorted) {
-      // If sorted and odd, just return the centre value
-      return static_cast<double>(*(data.begin() + num_data / 2));
-    } else {
-      // If the data is not sorted, make a copy we can mess with
-      vector<TYPE> temp(data.begin(), data.end());
-      // Make sure the centre value is in the correct position
-      std::nth_element(temp.begin(), temp.begin() + num_data / 2, temp.end());
-      // Now return the centre value
-      return static_cast<double>(*(temp.begin() + num_data / 2));
-    }
+  const bool isSorted = std::is_sorted(data.cbegin(), data.cend());
+  std::vector<TYPE> tmpSortedData;
+  auto sortedDataRef = std::ref(data);
+  if (!isSorted) {
+    tmpSortedData = data;
+    std::sort(tmpSortedData.begin(), tmpSortedData.end());
+    sortedDataRef = std::ref(std::as_const(tmpSortedData));
   }
+
+  const bool is_even = (size % 2 == 0);
+  double retVal = 0;
+  if (is_even) {
+    const auto left = static_cast<double>(sortedDataRef.get()[size / 2 - 1]);
+    const auto right = static_cast<double>(sortedDataRef.get()[size / 2]);
+    retVal = (left + right) / 2;
+  } else {
+    retVal = static_cast<double>(sortedDataRef.get()[size / 2]);
+  }
+  return retVal;
 }
 
 /**
  * There are enough special cases in determining the Z score where it useful to
  * put it in a single function.
  */
-template <typename TYPE>
-std::vector<double> getZscore(const vector<TYPE> &data) {
+template <typename TYPE> std::vector<double> getZscore(const vector<TYPE> &data) {
   std::vector<double> Zscore;
   if (data.size() < 3) {
     Zscore.resize(data.size(), 0.);
@@ -119,9 +99,7 @@ std::vector<double> getZscore(const vector<TYPE> &data) {
  * There are enough special cases in determining the Z score where it useful to
  * put it in a single function.
  */
-template <typename TYPE>
-std::vector<double> getWeightedZscore(const vector<TYPE> &data,
-                                      const vector<TYPE> &weights) {
+template <typename TYPE> std::vector<double> getWeightedZscore(const vector<TYPE> &data, const vector<TYPE> &weights) {
   std::vector<double> Zscore;
   if (data.size() < 3) {
     Zscore.resize(data.size(), 0.);
@@ -141,13 +119,11 @@ std::vector<double> getWeightedZscore(const vector<TYPE> &data,
   }
   double weightedMean = sumWeightedData / sumWeights;
   for (size_t it = 0; it != data.size(); ++it) {
-    weightedVariance +=
-        std::pow(static_cast<double>(data[it]) - weightedMean, 2) *
-        std::pow(static_cast<double>(weights[it]) / sumWeights, 2);
+    weightedVariance += std::pow(static_cast<double>(data[it]) - weightedMean, 2) *
+                        std::pow(static_cast<double>(weights[it]) / sumWeights, 2);
   }
   for (auto it = data.cbegin(); it != data.cend(); ++it) {
-    Zscore.emplace_back(fabs((static_cast<double>(*it) - weightedMean) /
-                             std::sqrt(weightedVariance)));
+    Zscore.emplace_back(fabs((static_cast<double>(*it) - weightedMean) / std::sqrt(weightedVariance)));
   }
   return Zscore;
 }
@@ -156,22 +132,19 @@ std::vector<double> getWeightedZscore(const vector<TYPE> &data,
  * useful to
  * put it in a single function.
  */
-template <typename TYPE>
-std::vector<double> getModifiedZscore(const vector<TYPE> &data,
-                                      const bool sorted) {
+template <typename TYPE> std::vector<double> getModifiedZscore(const vector<TYPE> &data) {
   if (data.size() < 3) {
     std::vector<double> Zscore(data.size(), 0.);
     return Zscore;
   }
   std::vector<double> MADvec;
   double tmp;
-  size_t num_data = data.size(); // cache since it is frequently used
-  double median = getMedian(data, num_data, sorted);
+  double median = getMedian(data);
   for (auto it = data.cbegin(); it != data.cend(); ++it) {
     tmp = static_cast<double>(*it);
     MADvec.emplace_back(fabs(tmp - median));
   }
-  double MAD = getMedian(MADvec, num_data, sorted);
+  double MAD = getMedian(MADvec);
   if (MAD == 0.) {
     std::vector<double> Zscore(data.size(), 0.);
     return Zscore;
@@ -191,16 +164,13 @@ std::vector<double> getModifiedZscore(const vector<TYPE> &data,
  * @param data Data points whose statistics are to be evaluated
  * @param flags A set of flags to control the computation of the stats
  */
-template <typename TYPE>
-Statistics getStatistics(const vector<TYPE> &data, const unsigned int flags) {
+template <typename TYPE> Statistics getStatistics(const vector<TYPE> &data, const unsigned int flags) {
   Statistics statistics = getNanStatistics();
-  size_t num_data = data.size(); // cache since it is frequently used
-  if (num_data == 0) {           // don't do anything
+  if (data.empty()) { // don't do anything
     return statistics;
   }
   // calculate the mean if this or the stddev is requested
-  const bool stddev = ((flags & StatOptions::UncorrectedStdDev) ||
-                       (flags & StatOptions::CorrectedStdDev));
+  const bool stddev = ((flags & StatOptions::UncorrectedStdDev) || (flags & StatOptions::CorrectedStdDev));
   if (stddev) {
     using namespace boost::accumulators;
     accumulator_set<double, stats<tag::min, tag::max, tag::variance>> acc;
@@ -229,26 +199,21 @@ Statistics getStatistics(const vector<TYPE> &data, const unsigned int flags) {
 
   // calculate the median if requested
   if (flags & StatOptions::Median) {
-    statistics.median =
-        getMedian(data, num_data, flags & StatOptions::SortedData);
+    statistics.median = getMedian(data);
   }
 
   return statistics;
 }
 
 /// Getting statistics of a string array should just give a bunch of NaNs
-template <>
-DLLExport Statistics getStatistics<string>(const vector<string> &data,
-                                           const unsigned int flags) {
+template <> DLLExport Statistics getStatistics<string>(const vector<string> &data, const unsigned int flags) {
   UNUSED_ARG(flags);
   UNUSED_ARG(data);
   return getNanStatistics();
 }
 
 /// Getting statistics of a boolean array should just give a bunch of NaNs
-template <>
-DLLExport Statistics getStatistics<bool>(const vector<bool> &data,
-                                         const unsigned int flags) {
+template <> DLLExport Statistics getStatistics<bool>(const vector<bool> &data, const unsigned int flags) {
   UNUSED_ARG(flags);
   UNUSED_ARG(data);
   return getNanStatistics();
@@ -261,16 +226,12 @@ DLLExport Statistics getStatistics<bool>(const vector<bool> &data,
  * @return :: RFactor including Rp and Rwp
  *
  */
-Rfactor getRFactor(const std::vector<double> &obsI,
-                   const std::vector<double> &calI,
-                   const std::vector<double> &obsE) {
+Rfactor getRFactor(const std::vector<double> &obsI, const std::vector<double> &calI, const std::vector<double> &obsE) {
   // 1. Check
   if (obsI.size() != calI.size() || obsI.size() != obsE.size()) {
     std::stringstream errss;
-    errss << "GetRFactor() Input Error!  Observed Intensity (" << obsI.size()
-          << "), Calculated Intensity (" << calI.size()
-          << ") and Observed Error (" << obsE.size()
-          << ") have different number of elements.";
+    errss << "GetRFactor() Input Error!  Observed Intensity (" << obsI.size() << "), Calculated Intensity ("
+          << calI.size() << ") and Observed Error (" << obsE.size() << ") have different number of elements.";
     throw std::runtime_error(errss.str());
   }
   if (obsI.empty()) {
@@ -302,10 +263,8 @@ Rfactor getRFactor(const std::vector<double> &obsI,
       sumdenom += tempden;
 
       if (tempnom != tempnom || tempden != tempden) {
-        logger.error() << "***** Error! ****** Data indexed " << i
-                       << " is NaN. "
-                       << "i = " << i << ": cal = " << calI[i]
-                       << ", obs = " << obs_i << ", weight = " << weight
+        logger.error() << "***** Error! ****** Data indexed " << i << " is NaN. "
+                       << "i = " << i << ": cal = " << calI[i] << ", obs = " << obs_i << ", weight = " << weight
                        << ". \n";
       }
     }
@@ -316,8 +275,7 @@ Rfactor getRFactor(const std::vector<double> &obsI,
   rfactor.Rwp = std::sqrt(sumnom / sumdenom);
 
   if (rfactor.Rwp != rfactor.Rwp)
-    logger.debug() << "Rwp is NaN.  Denominator = " << sumnom
-                   << "; Nominator = " << sumdenom << ". \n";
+    logger.debug() << "Rwp is NaN.  Denominator = " << sumnom << "; Nominator = " << sumdenom << ". \n";
 
   return rfactor;
 }
@@ -334,17 +292,14 @@ Rfactor getRFactor(const std::vector<double> &obsI,
  * @returns The first n-moments.
  */
 template <typename TYPE>
-std::vector<double> getMomentsAboutOrigin(const std::vector<TYPE> &x,
-                                          const std::vector<TYPE> &y,
-                                          const int maxMoment) {
+std::vector<double> getMomentsAboutOrigin(const std::vector<TYPE> &x, const std::vector<TYPE> &y, const int maxMoment) {
   // densities have the same number of x and y
   bool isDensity(x.size() == y.size());
 
   // if it isn't a density then check for histogram
   if ((!isDensity) && (x.size() != y.size() + 1)) {
     std::stringstream msg;
-    msg << "length of x (" << x.size() << ") and y (" << y.size()
-        << ")do not match";
+    msg << "length of x (" << x.size() << ") and y (" << y.size() << ")do not match";
     throw std::out_of_range(msg.str());
   }
 
@@ -393,9 +348,7 @@ std::vector<double> getMomentsAboutOrigin(const std::vector<TYPE> &x,
  * @returns The first n-moments.
  */
 template <typename TYPE>
-std::vector<double> getMomentsAboutMean(const std::vector<TYPE> &x,
-                                        const std::vector<TYPE> &y,
-                                        const int maxMoment) {
+std::vector<double> getMomentsAboutMean(const std::vector<TYPE> &x, const std::vector<TYPE> &y, const int maxMoment) {
   // get the zeroth (integrated value) and first moment (mean)
   std::vector<double> momentsAboutOrigin = getMomentsAboutOrigin(x, y, 1);
   const double mean = momentsAboutOrigin[1];
@@ -423,8 +376,7 @@ std::vector<double> getMomentsAboutMean(const std::vector<TYPE> &x,
   for (size_t j = 0; j < numPoints; ++j) {
     // central x in histogram with a change of variables - and just change for
     // density
-    const double xVal =
-        .5 * static_cast<double>(x[j] + x[j + 1]) - mean; // change of variables
+    const double xVal = .5 * static_cast<double>(x[j] + x[j + 1]) - mean; // change of variables
 
     // this variable will be (x^n)*y
     double temp;
@@ -448,21 +400,15 @@ std::vector<double> getMomentsAboutMean(const std::vector<TYPE> &x,
 
 // -------------------------- Macro to instantiation concrete types
 // --------------------------------
-#define INSTANTIATE(TYPE)                                                      \
-  template MANTID_KERNEL_DLL Statistics getStatistics<TYPE>(                   \
-      const vector<TYPE> &, const unsigned int);                               \
-  template MANTID_KERNEL_DLL std::vector<double> getZscore<TYPE>(              \
-      const vector<TYPE> &);                                                   \
-  template MANTID_KERNEL_DLL std::vector<double> getWeightedZscore<TYPE>(      \
-      const vector<TYPE> &, const vector<TYPE> &);                             \
-  template MANTID_KERNEL_DLL std::vector<double> getModifiedZscore<TYPE>(      \
-      const vector<TYPE> &, const bool);                                       \
-  template MANTID_KERNEL_DLL std::vector<double> getMomentsAboutOrigin<TYPE>(  \
-      const std::vector<TYPE> &x, const std::vector<TYPE> &y,                  \
-      const int maxMoment);                                                    \
-  template MANTID_KERNEL_DLL std::vector<double> getMomentsAboutMean<TYPE>(    \
-      const std::vector<TYPE> &x, const std::vector<TYPE> &y,                  \
-      const int maxMoment);
+#define INSTANTIATE(TYPE)                                                                                              \
+  template MANTID_KERNEL_DLL Statistics getStatistics<TYPE>(const vector<TYPE> &, const unsigned int);                 \
+  template MANTID_KERNEL_DLL std::vector<double> getZscore<TYPE>(const vector<TYPE> &);                                \
+  template MANTID_KERNEL_DLL std::vector<double> getWeightedZscore<TYPE>(const vector<TYPE> &, const vector<TYPE> &);  \
+  template MANTID_KERNEL_DLL std::vector<double> getModifiedZscore<TYPE>(const vector<TYPE> &);                        \
+  template MANTID_KERNEL_DLL std::vector<double> getMomentsAboutOrigin<TYPE>(                                          \
+      const std::vector<TYPE> &x, const std::vector<TYPE> &y, const int maxMoment);                                    \
+  template MANTID_KERNEL_DLL std::vector<double> getMomentsAboutMean<TYPE>(                                            \
+      const std::vector<TYPE> &x, const std::vector<TYPE> &y, const int maxMoment);
 
 // --------------------------- Concrete instantiations
 // ---------------------------------------------
@@ -475,5 +421,4 @@ INSTANTIATE(unsigned int)
 INSTANTIATE(unsigned long)
 INSTANTIATE(unsigned long long)
 
-} // namespace Kernel
-} // namespace Mantid
+} // namespace Mantid::Kernel

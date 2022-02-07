@@ -11,24 +11,19 @@
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
 
-namespace Mantid {
-namespace Algorithms {
+namespace Mantid::Algorithms {
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(RemoveWorkspaceHistory)
 
 /// Algorithm's name for identification. @see Algorithm::name
-const std::string RemoveWorkspaceHistory::name() const {
-  return "RemoveWorkspaceHistory";
-}
+const std::string RemoveWorkspaceHistory::name() const { return "RemoveWorkspaceHistory"; }
 
 /// Algorithm's version for identification. @see Algorithm::version
 int RemoveWorkspaceHistory::version() const { return 1; }
 
 /// Algorithm's category for identification. @see Algorithm::category
-const std::string RemoveWorkspaceHistory::category() const {
-  return "Utility\\Workspaces";
-}
+const std::string RemoveWorkspaceHistory::category() const { return "Utility\\Workspaces"; }
 
 /// Algorithm's summary for identification. @see Algorithm::summary
 const std::string RemoveWorkspaceHistory::summary() const {
@@ -38,8 +33,7 @@ const std::string RemoveWorkspaceHistory::summary() const {
 /** Initialize the algorithm's properties.
  */
 void RemoveWorkspaceHistory::init() {
-  declareProperty(std::make_unique<WorkspaceProperty<Workspace>>(
-                      "Workspace", "", Direction::InOut),
+  declareProperty(std::make_unique<WorkspaceProperty<Workspace>>("Workspace", "", Direction::InOut),
                   "Workspace to remove the algorithm history from.");
 }
 
@@ -50,5 +44,4 @@ void RemoveWorkspaceHistory::exec() {
   ws->history().clearHistory();
 }
 
-} // namespace Algorithms
-} // namespace Mantid
+} // namespace Mantid::Algorithms

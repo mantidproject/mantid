@@ -20,7 +20,7 @@ namespace CxxTest
     TestTracker::~TestTracker()
     {
     }
-    
+
     TestTracker & TestTracker::tracker()
     {
         static TestTracker theTracker;
@@ -44,27 +44,27 @@ namespace CxxTest
     {
         return d ? d : &dummyTest();
     }
-    
+
     const SuiteDescription *TestTracker::fixSuite( const SuiteDescription *d ) const
     {
         return d ? d : &dummySuite();
     }
-    
+
     const WorldDescription *TestTracker::fixWorld( const WorldDescription *d ) const
     {
         return d ? d : &dummyWorld();
     }
-    
+
     const TestDescription &TestTracker::dummyTest() const
     {
         return dummySuite().testDescription(0);
     }
-    
+
     const SuiteDescription &TestTracker::dummySuite() const
     {
         return dummyWorld().suiteDescription(0);
     }
-    
+
     const WorldDescription &TestTracker::dummyWorld() const
     {
         return _dummyWorld;
@@ -88,7 +88,7 @@ namespace CxxTest
         _testFailedAsserts = _suiteFailedTests = 0;
         _l->enterSuite(sd);
     }
-        
+
     void TestTracker::enterTest( const TestDescription &td )
     {
         setTest( &td );
@@ -139,7 +139,7 @@ namespace CxxTest
         countFailure();
         _l->failedTest( file, line, expression );
     }
-        
+
     void TestTracker::failedAssert( const char *file, unsigned line, const char *expression )
     {
         countFailure();
@@ -170,7 +170,7 @@ namespace CxxTest
         countFailure();
         _l->failedAssertDelta( file, line, xStr, yStr, dStr, x, y, d );
     }
-    
+
     void TestTracker::failedAssertDiffers( const char *file, unsigned line,
                                            const char *xStr, const char *yStr,
                                            const char *value )
@@ -178,7 +178,7 @@ namespace CxxTest
         countFailure();
         _l->failedAssertDiffers( file, line, xStr, yStr, value );
     }
-        
+
     void TestTracker::failedAssertLessThan( const char *file, unsigned line,
                                             const char *xStr, const char *yStr,
                                             const char *x, const char *y )
@@ -201,7 +201,7 @@ namespace CxxTest
         countFailure();
         _l->failedAssertPredicate( file, line, predicate, xStr, x );
     }
-        
+
     void TestTracker::failedAssertRelation( const char *file, unsigned line,
                                             const char *relation, const char *xStr, const char *yStr,
                                             const char *x, const char *y )
@@ -209,7 +209,7 @@ namespace CxxTest
         countFailure();
         _l->failedAssertRelation( file, line, relation, xStr, yStr, x, y );
     }
-        
+
     void TestTracker::failedAssertThrows( const char *file, unsigned line,
                                           const char *expression, const char *type,
                                           bool otherThrown )
@@ -217,7 +217,7 @@ namespace CxxTest
         countFailure();
         _l->failedAssertThrows( file, line, expression, type, otherThrown );
     }
-        
+
     void TestTracker::failedAssertThrowsNot( const char *file, unsigned line, const char *expression )
     {
         countFailure();

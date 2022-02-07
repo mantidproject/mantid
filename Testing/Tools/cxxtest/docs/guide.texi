@@ -87,7 +87,7 @@
 @macro screenshot{name}
 @tex
 @ifnum@pdftexversion>13
- @pdfximage width 0.6@pdfpagewidth{\name\.png}@pdfrefximage@pdflastximage 
+ @pdfximage width 0.6@pdfpagewidth{\name\.png}@pdfrefximage@pdflastximage
 @else
  @pdfimage width 0.6@pdfpagewidth{\name\.png}
 @fi
@@ -163,7 +163,7 @@ Here's a simple step-by-step guide:
 
 @enumerate
 
-@item 
+@item
 Tests are organized into ``Test Suites''.
   Test suites are written in header files.
 
@@ -176,7 +176,7 @@ Tests are organized into ``Test Suites''.
 // MyTestSuite.h
 #include <cxxtest/TestSuite.h>
 
-class MyTestSuite : public CxxTest::TestSuite 
+class MyTestSuite : public CxxTest::TestSuite
 {
 public:
    void testAddition( void )
@@ -247,7 +247,7 @@ We will add a failing test to the previous example:
 // MyTestSuite.h
 #include <cxxtest/TestSuite.h>
 
-class MyTestSuite : public CxxTest::TestSuite 
+class MyTestSuite : public CxxTest::TestSuite
 {
 public:
    void testAddition( void )
@@ -286,8 +286,8 @@ Fixing the bug is left as an exercise to the reader.
 your compiler, OS and environment, but try the following pointers:
 @itemize @bullet
 
-@item 
-Under Windows with Visual C++, run @command{python cxxtestgen @w{-o runner.cpp} 
+@item
+Under Windows with Visual C++, run @command{python cxxtestgen @w{-o runner.cpp}
 @w{@emph{--gui=Win32Gui}} MyTestSuite.h}.
 
 @item
@@ -588,7 +588,7 @@ These assertions are used to test whether an expression throws an exception.
 @code{TS_ASSERT_THROWS} is used when you want to verify the type of exception
 thrown, and @code{TS_ASSERT_THROWS_ANYTHING} is used to just make sure something
 is thrown.  As you might have guessed, @code{TS_ASSERT_THROWS_NOTHING} asserts
-that nothing is thrown. 
+that nothing is thrown.
 
 @addedIn{3.10.0}@code{TS_ASSERT_THROWS_EQUALS} checks the type of the
 exception as in @code{TS_ASSERT_THROWS} then allows you to compare two
@@ -606,9 +606,9 @@ void testFunctionsWhichThrowExceptions( void )
    TS_ASSERT_THROWS( checkInput(-11), std::runtime_error );
    TS_ASSERT_THROWS_ANYTHING( thirdPartyFunction() );
 
-   TS_ASSERT_THROWS_EQUALS( validate(), const std::exception &e, 
+   TS_ASSERT_THROWS_EQUALS( validate(), const std::exception &e,
                             e.what(), "Invalid value" );
-   TS_ASSERT_THROWS_ASSERT( validate(), const Error &e, 
+   TS_ASSERT_THROWS_ASSERT( validate(), const Error &e,
                             TS_ASSERT_DIFFERS( e.code(), SUCCESS ) );
 }
 @end verbatim
@@ -633,7 +633,7 @@ void testToDoList( void )
 @end verbatim
 @end smallexample
 
-In the GUI, @code{TS_WARN} sets the bar color to yellow (unless it was 
+In the GUI, @code{TS_WARN} sets the bar color to yellow (unless it was
 already red).
 
 @addedIn{3.9.0}@code{TS_TRACE} is the same, except that it
@@ -655,7 +655,7 @@ void testInterestingThrower()
    TS_ASSERT_EQUALS( foo(2), 4 );
 
    // More elaborate way:
-   try { ETS_ASSERT_EQUALS( foo(2), 4 ); } 
+   try { ETS_ASSERT_EQUALS( foo(2), 4 ); }
    catch( const BadFoo &e ) { TS_FAIL( e.bar() ); }
 }
 @end verbatim
@@ -730,7 +730,7 @@ after each test.
 
 @smallexample
 @verbatim
-class TestFileOps : public CxxTest::TestSuite 
+class TestFileOps : public CxxTest::TestSuite
 {
 public:
    void setUp() { mkdir( "playground" ); }
@@ -781,7 +781,7 @@ For extra points, make the build tool run the tests automatically.
 
 
 @subsection Actually doing it
-Unfortunately, there are way too many different build tools and IDE's for me 
+Unfortunately, there are way too many different build tools and IDE's for me
 to give ways to use CxxTest with all of them.
 
 I will try to outline the usage for some cases.
@@ -818,7 +818,7 @@ runner.cpp: SimpleTest.h ComplicatedTest.h
 
 
 @subsubsection Using Cons
-@uref{http://dsmit.com/cons/, Cons} is a powerful and 
+@uref{http://dsmit.com/cons/, Cons} is a powerful and
 versatile make replacement which uses Perl scripts instead of Makefiles.
 
 See @file{sample/Construct} in the CxxTest distribution for an example of building CxxTest test runners
@@ -855,7 +855,7 @@ Unit testing for device drivers?!  Why not?
 And besides, the @file{build} utility can also be used to build
 user-mode application.
 
-To use CxxTest with the @file{build} utility, 
+To use CxxTest with the @file{build} utility,
 you add the generated tests file as an extra dependency
 using the @code{NTBUILDTARGET0} macro and the @file{Makefile.inc}
 file.
@@ -1074,7 +1074,7 @@ For example, the following code
 @verbatim
 #include <cxxtest/TestSuite.h>
 
-class TestMyData : public CxxTest::TestSuite 
+class TestMyData : public CxxTest::TestSuite
 {
 public:
    struct Data
@@ -1130,7 +1130,7 @@ string. You can use this example as a possible skeleton:
 
 @smallexample
 @verbatim
-class MyClass 
+class MyClass
 {
    int _value;
 
@@ -1152,10 +1152,10 @@ public:
 #include <cxxtest/ValueTraits.h>
 #include <stdio.h>
 
-namespace CxxTest 
+namespace CxxTest
 {
    CXXTEST_TEMPLATE_INSTANTIATION
-   class ValueTraits<MyClass> 
+   class ValueTraits<MyClass>
    {
       char _s[256];
 
@@ -1188,7 +1188,7 @@ public:
 
    // CxxTest requires a copy constructor
    TMyClass( const TMyClass<T> &other ) : _value( other._value ) {}
-   
+
    // If you want to use TS_ASSERT_EQUALS
    bool operator== ( const TMyClass<T> &other ) const { return _value == other._value; }
 };
@@ -1198,15 +1198,15 @@ public:
 #include <typeinfo>
 #include <sstream>
 
-namespace CxxTest 
+namespace CxxTest
 {
    template<class T>
-   class ValueTraits< TMyClass<T> > 
+   class ValueTraits< TMyClass<T> >
    {
       std::ostringstream _s;
 
    public:
-      ValueTraits( const TMyClass<T> &t ) 
+      ValueTraits( const TMyClass<T> &t )
          { _s << typeid(t).name() << "( " << t.value() << " )"; }
       const char *asString() const { return _s.str().c_str(); }
    };
@@ -1281,12 +1281,12 @@ function while testing.  Here is an outline of how it works, before we
 see an actual example:
 @itemize @bullet
 
-@item 
+@item
 For each function you want to override, you use the macro
 @code{CXXTEST_MOCK_GLOBAL} to ``prepare'' the function (all is explained
 below in excruciating detail).
 
-@item 
+@item
 In the tested code you do not call the global functions directly;
 rather, you access them in the @code{T} (for @emph{Test}) namespace. For
 instance, your code needs to call @code{T::fopen()} instead of
@@ -1534,8 +1534,8 @@ functions runs all the test you've defined and reports to the
 @subsection Other test listeners
 If you don't like or can't use the @code{ErrorPrinter}, you can use
 any other test listener.
-To do this you have to omit the @option{--error-printer}, @option{--runner=} 
-or @option{--gui=} switch when generating the tests file.  
+To do this you have to omit the @option{--error-printer}, @option{--runner=}
+or @option{--gui=} switch when generating the tests file.
 It is then up to you to write the @code{main()} function, using the
 test listener of your fancy.
 
@@ -1669,7 +1669,7 @@ A native XLib GUI.  This GUI is very spartan and should work on any X server.
 
 @item --gui=QtGui
 A GUI that uses the Qt library from Troll.  It has been tested with Qt versiond 2.2.1 and 3.0.1.
-@end table 
+@end table
 
 
 @section @option{--include}
@@ -1697,7 +1697,7 @@ are not enough.  One example is the Windows DDK; see
 @addedIn{2.8.4}@command{cxxtestgen} will scan its input files for uses of exception
 handling; if found, the @code{TS_} macros will catch exceptions,
 allowing the testing to continue.  Use @option{--have-eh} to tell
-@command{cxxtestgen} to enable that functionality even if exceptions 
+@command{cxxtestgen} to enable that functionality even if exceptions
 are not used in the input files.
 
 

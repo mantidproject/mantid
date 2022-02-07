@@ -25,14 +25,10 @@ class SpaceGroupFactoryTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static SpaceGroupFactoryTest *createSuite() {
-    return new SpaceGroupFactoryTest();
-  }
+  static SpaceGroupFactoryTest *createSuite() { return new SpaceGroupFactoryTest(); }
   static void destroySuite(SpaceGroupFactoryTest *suite) { delete suite; }
 
-  void testInstance() {
-    TS_ASSERT_THROWS_NOTHING(SpaceGroupFactory::Instance());
-  }
+  void testInstance() { TS_ASSERT_THROWS_NOTHING(SpaceGroupFactory::Instance()); }
 
   void testSubscribeGeneratedSpaceGroup() {
     TestableSpaceGroupFactory factory;
@@ -40,32 +36,25 @@ public:
     TS_ASSERT(!factory.isSubscribed(2));
     TS_ASSERT(!factory.isSubscribed("P-1"));
 
-    TS_ASSERT_THROWS_NOTHING(
-        factory.subscribeGeneratedSpaceGroup(2, "P-1", "-x,-y,-z"));
+    TS_ASSERT_THROWS_NOTHING(factory.subscribeGeneratedSpaceGroup(2, "P-1", "-x,-y,-z"));
 
     TS_ASSERT(factory.isSubscribed(2));
     TS_ASSERT(factory.isSubscribed("P-1"));
 
     // subscribing twice does not work
-    TS_ASSERT_THROWS(factory.subscribeGeneratedSpaceGroup(2, "P-1", "-x,-y,-z"),
-                     const std::invalid_argument &);
+    TS_ASSERT_THROWS(factory.subscribeGeneratedSpaceGroup(2, "P-1", "-x,-y,-z"), const std::invalid_argument &);
 
     // but having a different symbol for the same number is ok.
-    TS_ASSERT_THROWS_NOTHING(
-        factory.subscribeGeneratedSpaceGroup(2, "F-1", "-x,-y,-z"))
+    TS_ASSERT_THROWS_NOTHING(factory.subscribeGeneratedSpaceGroup(2, "F-1", "-x,-y,-z"))
 
     // neither does with a tabulated space group
-    TS_ASSERT_THROWS(
-        factory.subscribeTabulatedSpaceGroup(2, "P-1", "x,y,z; -x,-y,-z"),
-        const std::invalid_argument &);
+    TS_ASSERT_THROWS(factory.subscribeTabulatedSpaceGroup(2, "P-1", "x,y,z; -x,-y,-z"), const std::invalid_argument &);
 
     // Different number with same symbol - does not work
-    TS_ASSERT_THROWS(factory.subscribeGeneratedSpaceGroup(3, "P-1", "-x,-y,-z"),
-                     const std::invalid_argument &);
+    TS_ASSERT_THROWS(factory.subscribeGeneratedSpaceGroup(3, "P-1", "-x,-y,-z"), const std::invalid_argument &);
 
     // invalid generators are caught before anything is done
-    TS_ASSERT_THROWS_ANYTHING(
-        factory.subscribeGeneratedSpaceGroup(4, "Fake", "invalid"));
+    TS_ASSERT_THROWS_ANYTHING(factory.subscribeGeneratedSpaceGroup(4, "Fake", "invalid"));
 
     TS_ASSERT(!factory.isSubscribed(4));
     TS_ASSERT(!factory.isSubscribed("Fake"));
@@ -77,32 +66,25 @@ public:
     TS_ASSERT(!factory.isSubscribed(2));
     TS_ASSERT(!factory.isSubscribed("P-1"));
 
-    TS_ASSERT_THROWS_NOTHING(
-        factory.subscribeTabulatedSpaceGroup(2, "P-1", "x,y,z; -x,-y,-z"));
+    TS_ASSERT_THROWS_NOTHING(factory.subscribeTabulatedSpaceGroup(2, "P-1", "x,y,z; -x,-y,-z"));
 
     TS_ASSERT(factory.isSubscribed(2));
     TS_ASSERT(factory.isSubscribed("P-1"));
 
     // subscribing twice does not work
-    TS_ASSERT_THROWS(
-        factory.subscribeTabulatedSpaceGroup(2, "P-1", "x,y,z; -x,-y,-z"),
-        const std::invalid_argument &);
+    TS_ASSERT_THROWS(factory.subscribeTabulatedSpaceGroup(2, "P-1", "x,y,z; -x,-y,-z"), const std::invalid_argument &);
 
     // but having a different symbol for the same number is ok.
-    TS_ASSERT_THROWS_NOTHING(
-        factory.subscribeTabulatedSpaceGroup(2, "F-1", "x,y,z; -x,-y,-z"))
+    TS_ASSERT_THROWS_NOTHING(factory.subscribeTabulatedSpaceGroup(2, "F-1", "x,y,z; -x,-y,-z"))
 
     // neither does with a generated space group
-    TS_ASSERT_THROWS(factory.subscribeGeneratedSpaceGroup(2, "P-1", "-x,-y,-z"),
-                     const std::invalid_argument &);
+    TS_ASSERT_THROWS(factory.subscribeGeneratedSpaceGroup(2, "P-1", "-x,-y,-z"), const std::invalid_argument &);
 
     // Different number with same symbol - does not work
-    TS_ASSERT_THROWS(factory.subscribeTabulatedSpaceGroup(3, "P-1", "-x,-y,-z"),
-                     const std::invalid_argument &);
+    TS_ASSERT_THROWS(factory.subscribeTabulatedSpaceGroup(3, "P-1", "-x,-y,-z"), const std::invalid_argument &);
 
     // invalid generators are caught before anything is done
-    TS_ASSERT_THROWS_ANYTHING(
-        factory.subscribeTabulatedSpaceGroup(4, "Fake", "invalid"));
+    TS_ASSERT_THROWS_ANYTHING(factory.subscribeTabulatedSpaceGroup(4, "Fake", "invalid"));
 
     TS_ASSERT(!factory.isSubscribed(4));
     TS_ASSERT(!factory.isSubscribed("Fake"));
@@ -116,8 +98,7 @@ public:
     TS_ASSERT(!factory.isSubscribed(2));
     TS_ASSERT(!factory.isSubscribed("P-1"));
 
-    TS_ASSERT_THROWS_NOTHING(
-        factory.subscribeTabulatedSpaceGroup(2, "P-1", "x,y,z; -x,-y,-z"));
+    TS_ASSERT_THROWS_NOTHING(factory.subscribeTabulatedSpaceGroup(2, "P-1", "x,y,z; -x,-y,-z"));
 
     TS_ASSERT(factory.isSubscribed(2));
     TS_ASSERT(factory.isSubscribed("P-1"));
@@ -130,20 +111,16 @@ public:
 
     TS_ASSERT(factory.subscribedSpaceGroupSymbols().empty());
 
-    TS_ASSERT_THROWS_NOTHING(
-        factory.subscribeTabulatedSpaceGroup(2, "P-1", "x,y,z; -x,-y,-z"));
+    TS_ASSERT_THROWS_NOTHING(factory.subscribeTabulatedSpaceGroup(2, "P-1", "x,y,z; -x,-y,-z"));
 
     std::vector<std::string> symbols = factory.subscribedSpaceGroupSymbols();
     TS_ASSERT_EQUALS(symbols.size(), 1);
-    TS_ASSERT_DIFFERS(std::find(symbols.begin(), symbols.end(), "P-1"),
-                      symbols.end());
+    TS_ASSERT_DIFFERS(std::find(symbols.begin(), symbols.end(), "P-1"), symbols.end());
 
-    TS_ASSERT_THROWS_NOTHING(
-        factory.subscribeTabulatedSpaceGroup(1, "P1", "x,y,z"));
+    TS_ASSERT_THROWS_NOTHING(factory.subscribeTabulatedSpaceGroup(1, "P1", "x,y,z"));
     symbols = factory.subscribedSpaceGroupSymbols();
     TS_ASSERT_EQUALS(symbols.size(), 2);
-    TS_ASSERT_DIFFERS(std::find(symbols.begin(), symbols.end(), "P1"),
-                      symbols.end());
+    TS_ASSERT_DIFFERS(std::find(symbols.begin(), symbols.end(), "P1"), symbols.end());
   }
 
   void testSubscribedSpaceGroupNumbers() {
@@ -151,24 +128,19 @@ public:
 
     TS_ASSERT(factory.subscribedSpaceGroupNumbers().empty());
 
-    TS_ASSERT_THROWS_NOTHING(
-        factory.subscribeTabulatedSpaceGroup(2, "P-1", "x,y,z; -x,-y,-z"));
+    TS_ASSERT_THROWS_NOTHING(factory.subscribeTabulatedSpaceGroup(2, "P-1", "x,y,z; -x,-y,-z"));
 
     std::vector<size_t> numbers = factory.subscribedSpaceGroupNumbers();
     TS_ASSERT_EQUALS(numbers.size(), 1);
-    TS_ASSERT_DIFFERS(std::find(numbers.begin(), numbers.end(), 2),
-                      numbers.end());
+    TS_ASSERT_DIFFERS(std::find(numbers.begin(), numbers.end(), 2), numbers.end());
 
-    TS_ASSERT_THROWS_NOTHING(
-        factory.subscribeTabulatedSpaceGroup(1, "P1", "x,y,z"));
+    TS_ASSERT_THROWS_NOTHING(factory.subscribeTabulatedSpaceGroup(1, "P1", "x,y,z"));
     numbers = factory.subscribedSpaceGroupNumbers();
     TS_ASSERT_EQUALS(numbers.size(), 2);
-    TS_ASSERT_DIFFERS(std::find(numbers.begin(), numbers.end(), 1),
-                      numbers.end());
+    TS_ASSERT_DIFFERS(std::find(numbers.begin(), numbers.end(), 1), numbers.end());
 
     // Subscribing the same number twice should not influence vector size
-    TS_ASSERT_THROWS_NOTHING(
-        factory.subscribeTabulatedSpaceGroup(1, "F1", "x,y,z"));
+    TS_ASSERT_THROWS_NOTHING(factory.subscribeTabulatedSpaceGroup(1, "F1", "x,y,z"));
     numbers = factory.subscribedSpaceGroupNumbers();
     TS_ASSERT_EQUALS(numbers.size(), 2);
   }
@@ -207,11 +179,9 @@ public:
   void testUnsubscribeSymbol() {
     TestableSpaceGroupFactory factory;
 
-    TS_ASSERT_THROWS(factory.unsubscribeSpaceGroup("P-1"),
-                     const std::invalid_argument &);
+    TS_ASSERT_THROWS(factory.unsubscribeSpaceGroup("P-1"), const std::invalid_argument &);
 
-    TS_ASSERT_THROWS_NOTHING(
-        factory.subscribeTabulatedSpaceGroup(2, "P-1", "x,y,z; -x,-y,-z"));
+    TS_ASSERT_THROWS_NOTHING(factory.subscribeTabulatedSpaceGroup(2, "P-1", "x,y,z; -x,-y,-z"));
     TS_ASSERT_THROWS_NOTHING(factory.unsubscribeSpaceGroup("P-1"));
   }
 
@@ -246,9 +216,7 @@ public:
      */
     MockSpaceGroupGenerator generator(1, "P 1", "x,y,z");
 
-    EXPECT_CALL(generator, generateGroup())
-        .Times(1)
-        .WillOnce(Return(GroupFactory::create<CyclicGroup>("-x,-y,-z")));
+    EXPECT_CALL(generator, generateGroup()).Times(1).WillOnce(Return(GroupFactory::create<CyclicGroup>("-x,-y,-z")));
 
     SpaceGroup_const_sptr prototype = generator.getPrototype();
     TS_ASSERT(prototype);
@@ -281,8 +249,7 @@ public:
   }
 
   void testTransformationSpaceGroupGenerator_fails_without_registered_base() {
-    TransformationSpaceGroupGenerator generator(1, "fake symbol",
-                                                "Fake base symbol | -x+z,y,-x");
+    TransformationSpaceGroupGenerator generator(1, "fake symbol", "Fake base symbol | -x+z,y,-x");
 
     TS_ASSERT_THROWS(generator.getPrototype(), const std::invalid_argument &);
   }
@@ -291,15 +258,14 @@ public:
     TestableSpaceGroupFactory factory;
     factory.subscribeGeneratedSpaceGroup(1, "Fake base symbol", "x,-y,z+1/2");
 
-    TestableTransformationSpaceGroupGenerator generator(
-        1, "fake symbol", "Fake base symbol | -x+z,y,-x", factory);
+    TestableTransformationSpaceGroupGenerator generator(1, "fake symbol", "Fake base symbol | -x+z,y,-x", factory);
 
     // It should not throw because 'Fake base symbol' is registered.
     TS_ASSERT_THROWS_NOTHING(generator.getPrototype());
 
     // The base symbol is trimmed so white space does not matter.
-    TestableTransformationSpaceGroupGenerator generatorWhiteSpace(
-        1, "fake symbol other", "  Fake base symbol     | -x+z,y,-x", factory);
+    TestableTransformationSpaceGroupGenerator generatorWhiteSpace(1, "fake symbol other",
+                                                                  "  Fake base symbol     | -x+z,y,-x", factory);
     TS_ASSERT_THROWS_NOTHING(generatorWhiteSpace.getPrototype());
   }
 
@@ -308,85 +274,63 @@ public:
     TestableSpaceGroupFactory factory;
     factory.subscribeGeneratedSpaceGroup(1, "P Fake base symbol", "x,-y,z+1/2");
 
-    TestableTransformationSpaceGroupGenerator generator(
-        1, "fake symbol", "P Fake base symbol | -x+z,y,-x", factory);
+    TestableTransformationSpaceGroupGenerator generator(1, "fake symbol", "P Fake base symbol | -x+z,y,-x", factory);
 
     SpaceGroup_const_sptr generatedGroup = generator.getPrototype();
 
     /* The group subscribed to the factory is actually P 1 c 1,
      * after the transformation it is P 1 n 1.
      */
-    Group_const_sptr correctGroup =
-        GroupFactory::create<Group>("x,y,z; x+1/2,-y,z+1/2");
+    Group_const_sptr correctGroup = GroupFactory::create<Group>("x,y,z; x+1/2,-y,z+1/2");
 
     TS_ASSERT_EQUALS(*generatedGroup, *correctGroup);
   }
 
   void test_OperatorSymOpString_too_short() {
     std::vector<std::string> strings{"a", "b"};
-    TS_ASSERT_THROWS(SymmetryOperation("x,y,z") * strings,
-                     const std::invalid_argument &);
+    TS_ASSERT_THROWS(SymmetryOperation("x,y,z") * strings, const std::invalid_argument &);
   }
 
   void test_OperatorSymOpString_correctness() {
     std::vector<std::string> strings{"a", "b", "c"};
 
-    TS_ASSERT(
-        vectorsEqual(SymmetryOperation("x,y,z") * strings, {"a", "b", "c"}));
-    TS_ASSERT(
-        vectorsEqual(SymmetryOperation("-x,-y,-z") * strings, {"a", "b", "c"}));
-    TS_ASSERT(
-        vectorsEqual(SymmetryOperation("y,x,z") * strings, {"b", "a", "c"}));
-    TS_ASSERT(
-        vectorsEqual(SymmetryOperation("-z,x,-y") * strings, {"c", "a", "b"}));
+    TS_ASSERT(vectorsEqual(SymmetryOperation("x,y,z") * strings, {"a", "b", "c"}));
+    TS_ASSERT(vectorsEqual(SymmetryOperation("-x,-y,-z") * strings, {"a", "b", "c"}));
+    TS_ASSERT(vectorsEqual(SymmetryOperation("y,x,z") * strings, {"b", "a", "c"}));
+    TS_ASSERT(vectorsEqual(SymmetryOperation("-z,x,-y") * strings, {"c", "a", "b"}));
   }
 
   void test_OperatorSymOpString_too_long() {
     std::vector<std::string> strings{"a", "b", "c", ":2", "something"};
 
-    TS_ASSERT(vectorsEqual(SymmetryOperation("x,y,z") * strings,
-                           {"a", "b", "c", ":2", "something"}));
-    TS_ASSERT(vectorsEqual(SymmetryOperation("-x,-y,-z") * strings,
-                           {"a", "b", "c", ":2", "something"}));
-    TS_ASSERT(vectorsEqual(SymmetryOperation("y,x,z") * strings,
-                           {"b", "a", "c", ":2", "something"}));
-    TS_ASSERT(vectorsEqual(SymmetryOperation("-z,x,-y") * strings,
-                           {"c", "a", "b", ":2", "something"}));
+    TS_ASSERT(vectorsEqual(SymmetryOperation("x,y,z") * strings, {"a", "b", "c", ":2", "something"}));
+    TS_ASSERT(vectorsEqual(SymmetryOperation("-x,-y,-z") * strings, {"a", "b", "c", ":2", "something"}));
+    TS_ASSERT(vectorsEqual(SymmetryOperation("y,x,z") * strings, {"b", "a", "c", ":2", "something"}));
+    TS_ASSERT(vectorsEqual(SymmetryOperation("-z,x,-y") * strings, {"c", "a", "b", ":2", "something"}));
   }
 
   void test_OrthorhombicSymbolPermutations() {
-    std::vector<std::string> transformations{"y,x,-z", "y,z,x", "z,y,-x",
-                                             "z,x,y", "x,z,-y"};
+    std::vector<std::string> transformations{"y,x,-z", "y,z,x", "z,y,-x", "z,x,y", "x,z,-y"};
 
-    checkOrthorhombicSymbols(
-        "C c c 2", transformations,
-        {"C c c 2", "A 2 a a", "A 2 a a", "B b 2 b", "B b 2 b"});
-    checkOrthorhombicSymbols(
-        "P b c m", transformations,
-        {"P c a m", "P m c a", "P m a b", "P b m a", "P c m b"});
+    checkOrthorhombicSymbols("C c c 2", transformations, {"C c c 2", "A 2 a a", "A 2 a a", "B b 2 b", "B b 2 b"});
+    checkOrthorhombicSymbols("P b c m", transformations, {"P c a m", "P m c a", "P m a b", "P b m a", "P c m b"});
   }
 
 private:
-  void checkOrthorhombicSymbols(
-      const std::string &symbol,
-      const std::vector<std::string> &transformations,
-      const std::vector<std::string> &expectedTransformations) const {
+  void checkOrthorhombicSymbols(const std::string &symbol, const std::vector<std::string> &transformations,
+                                const std::vector<std::string> &expectedTransformations) const {
     TestableSpaceGroupFactory factory;
 
     for (size_t i = 0; i < transformations.size(); ++i) {
-      std::string transformed =
-          factory.getTransformedSymbolOrthorhombic(symbol, transformations[i]);
+      std::string transformed = factory.getTransformedSymbolOrthorhombic(symbol, transformations[i]);
 
-      TSM_ASSERT_EQUALS("Transforming " + symbol + " with " +
-                            transformations[i] + " should give " +
-                            expectedTransformations[i] + ", but gave " +
-                            transformed,
+      TSM_ASSERT_EQUALS("Transforming " + symbol + " with " + transformations[i] + " should give " +
+                            expectedTransformations[i] + ", but gave " + transformed,
                         transformed, expectedTransformations[i]);
     }
   }
 
-  bool vectorsEqual(const std::vector<std::string> &lhs,
-                    const std::vector<std::string> &rhs) {
+  bool vectorsEqual(const std::vector<std::string> &lhs, const std::vector<std::string> &rhs) {
     return std::equal(lhs.cbegin(), lhs.cend(), rhs.cbegin());
   };
 
@@ -400,8 +344,7 @@ private:
 
   class MockSpaceGroupGenerator : public AbstractSpaceGroupGenerator {
   public:
-    MockSpaceGroupGenerator(size_t number, const std::string &hmSymbol,
-                            const std::string &generatorInformation)
+    MockSpaceGroupGenerator(size_t number, const std::string &hmSymbol, const std::string &generatorInformation)
         : AbstractSpaceGroupGenerator(number, hmSymbol, generatorInformation) {}
     GNU_DIAG_OFF_SUGGEST_OVERRIDE
     MOCK_CONST_METHOD0(generateGroup, Group_const_sptr());
@@ -414,20 +357,14 @@ private:
    * the getBaseSpaceGroup()-method, so that this method can be replaced with
    * a custom one using any factory.
    */
-  class TestableTransformationSpaceGroupGenerator
-      : public TransformationSpaceGroupGenerator {
+  class TestableTransformationSpaceGroupGenerator : public TransformationSpaceGroupGenerator {
   public:
-    TestableTransformationSpaceGroupGenerator(
-        size_t number, const std::string &hmSymbol,
-        const std::string &generatorInformation, SpaceGroupFactoryImpl &factory)
-        : TransformationSpaceGroupGenerator(number, hmSymbol,
-                                            generatorInformation),
-          m_factory(factory) {}
+    TestableTransformationSpaceGroupGenerator(size_t number, const std::string &hmSymbol,
+                                              const std::string &generatorInformation, SpaceGroupFactoryImpl &factory)
+        : TransformationSpaceGroupGenerator(number, hmSymbol, generatorInformation), m_factory(factory) {}
 
   protected:
-    SpaceGroup_const_sptr getBaseSpaceGroup() const override {
-      return m_factory.createSpaceGroup(m_baseGroupHMSymbol);
-    }
+    SpaceGroup_const_sptr getBaseSpaceGroup() const override { return m_factory.createSpaceGroup(m_baseGroupHMSymbol); }
 
   private:
     SpaceGroupFactoryImpl &m_factory;

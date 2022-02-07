@@ -33,7 +33,7 @@ Definition of Mask
 ------------------
 
 If a pixel is **masked**, it means that the data from this pixel won't be used.
-In the masking workspace (i.e., `SpecialWorkspace2D <http://www.mantidproject.org/SpecialWorkspace2D>`__), the corresponding value is 1. 
+In the masking workspace (i.e., `SpecialWorkspace2D <http://www.mantidproject.org/SpecialWorkspace2D>`__), the corresponding value is 1.
 
 If a pixel is **NOT masked**, it means that the data from this pixel will be used.  ``
 In the masking workspace (i.e., `SpecialWorkspace2D <http://www.mantidproject.org/SpecialWorkspace2D>`__), the corresponding value is 0.

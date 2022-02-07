@@ -30,9 +30,8 @@ public:
 private:
   void init() override;
   void exec() override;
-  Mantid::Geometry::MDFrame_uptr
-  createMDFrame(const std::string &frameSelection,
-                const Mantid::Geometry::MDFrame &oldFrame) const;
+  Mantid::Geometry::MDFrame_uptr createMDFrame(const std::string &frameSelection,
+                                               const Mantid::Geometry::MDFrame &oldFrame) const;
 };
 
 } // namespace MDAlgorithms

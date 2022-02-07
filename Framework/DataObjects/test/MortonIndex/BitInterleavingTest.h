@@ -14,25 +14,21 @@ using namespace morton_index;
  * Interleaves four 32 bit integers into a single 128 bit integer (represented
  * by 64 bit LSB and MSB).
  */
-inline void Interleave_4_32_128(uint64_t &msb, uint64_t &lsb, const uint32_t a,
-                                const uint32_t b, const uint32_t c,
+inline void Interleave_4_32_128(uint64_t &msb, uint64_t &lsb, const uint32_t a, const uint32_t b, const uint32_t c,
                                 const uint32_t d) {
   const size_t halfBitLen(sizeof(uint32_t) * CHAR_BIT / 2);
 
-  lsb = interleave<4, uint16_t, uint64_t>(
-      {(uint16_t)a, (uint16_t)b, (uint16_t)c, (uint16_t)d});
+  lsb = interleave<4, uint16_t, uint64_t>({(uint16_t)a, (uint16_t)b, (uint16_t)c, (uint16_t)d});
 
-  msb = interleave<4, uint16_t, uint64_t>(
-      {(uint16_t)(a >> halfBitLen), (uint16_t)(b >> halfBitLen),
-       (uint16_t)(c >> halfBitLen), (uint16_t)(d >> halfBitLen)});
+  msb = interleave<4, uint16_t, uint64_t>({(uint16_t)(a >> halfBitLen), (uint16_t)(b >> halfBitLen),
+                                           (uint16_t)(c >> halfBitLen), (uint16_t)(d >> halfBitLen)});
 }
 
 /**
  * Deinterleaves a 128 bit integer (represented by 64 bit MSB and LSB) into four
  * 32 bit integers.
  */
-inline void Deinterleave_4_32_128(const uint64_t msb, const uint64_t lsb,
-                                  uint32_t &a, uint32_t &b, uint32_t &c,
+inline void Deinterleave_4_32_128(const uint64_t msb, const uint64_t lsb, uint32_t &a, uint32_t &b, uint32_t &c,
                                   uint32_t &d) {
   const size_t halfBitLen(sizeof(uint32_t) * CHAR_BIT / 2);
 
@@ -49,17 +45,11 @@ inline void Deinterleave_4_32_128(const uint64_t msb, const uint64_t lsb,
 
 template <typename T> struct reversion_wrapper { T &iterable; };
 
-template <typename T> auto begin(reversion_wrapper<T> w) {
-  return std::rbegin(w.iterable);
-}
+template <typename T> auto begin(reversion_wrapper<T> w) { return std::rbegin(w.iterable); }
 
-template <typename T> auto end(reversion_wrapper<T> w) {
-  return std::rend(w.iterable);
-}
+template <typename T> auto end(reversion_wrapper<T> w) { return std::rend(w.iterable); }
 
-template <typename T> reversion_wrapper<T> reverse(T &&iterable) {
-  return {iterable};
-}
+template <typename T> reversion_wrapper<T> reverse(T &&iterable) { return {iterable}; }
 
 /**
  * Converts from a bit pattern represented as a string to an integer of a given
@@ -81,24 +71,18 @@ class BitInterleavingTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static BitInterleavingTest *createSuite() {
-    return new BitInterleavingTest();
-  }
+  static BitInterleavingTest *createSuite() { return new BitInterleavingTest(); }
   static void destroySuite(BitInterleavingTest *suite) { delete suite; }
 
-  const uint32_t integerA =
-      bit_string_to_int<uint32_t>("10101010101010101010101010101010");
-  const uint32_t integerB =
-      bit_string_to_int<uint32_t>("00000000000000001111111111111111");
-  const uint32_t integerC =
-      bit_string_to_int<uint32_t>("11111111111111110000000000000000");
-  const uint32_t integerD =
-      bit_string_to_int<uint32_t>("00000000111111111111111100000000");
+  const uint32_t integerA = bit_string_to_int<uint32_t>("10101010101010101010101010101010");
+  const uint32_t integerB = bit_string_to_int<uint32_t>("00000000000000001111111111111111");
+  const uint32_t integerC = bit_string_to_int<uint32_t>("11111111111111110000000000000000");
+  const uint32_t integerD = bit_string_to_int<uint32_t>("00000000111111111111111100000000");
 
-  const uint64_t interleavedMsb = bit_string_to_int<uint64_t>(
-      "0101010001010100010101000101010011011100110111001101110011011100");
-  const uint64_t interleavedLsb = bit_string_to_int<uint64_t>(
-      "1011101010111010101110101011101000110010001100100011001000110010");
+  const uint64_t interleavedMsb =
+      bit_string_to_int<uint64_t>("0101010001010100010101000101010011011100110111001101110011011100");
+  const uint64_t interleavedLsb =
+      bit_string_to_int<uint64_t>("1011101010111010101110101011101000110010001100100011001000110010");
 
   void test_BitInterleaving128BitTest_Interleave_4_32_128() {
     uint64_t msb(0);
@@ -121,8 +105,7 @@ public:
   }
 
   void test_BitInterleaving128BitTest_Interleave_4_32_128_std() {
-    uint128_t res = interleave<4, uint32_t, uint128_t>(
-        {integerA, integerB, integerC, integerD});
+    uint128_t res = interleave<4, uint32_t, uint128_t>({integerA, integerB, integerC, integerD});
 
     uint128_t interleaved(interleavedLsb);
     interleaved |= ((uint128_t)interleavedMsb) << 64;

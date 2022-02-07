@@ -1,4 +1,5 @@
 set(SRC_FILES
+    src/SetValueWhenProperty.cpp
     src/ANN_complete.cpp
     src/ArrayBoundedValidator.cpp
     src/ArrayLengthValidator.cpp
@@ -13,7 +14,6 @@ set(SRC_FILES
     src/CatalogInfo.cpp
     src/ChecksumHelper.cpp
     src/CompositeValidator.cpp
-    src/ComputeResourceInfo.cpp
     src/ConfigObserver.cpp
     src/ConfigPropertyObserver.cpp
     src/ConfigService.cpp
@@ -23,7 +23,6 @@ set(SRC_FILES
     src/DateTimeValidator.cpp
     src/DateValidator.cpp
     src/DeltaEMode.cpp
-    src/Diffraction.cpp
     src/DirectoryValidator.cpp
     src/DiskBuffer.cpp
     src/DllOpen.cpp
@@ -80,7 +79,6 @@ set(SRC_FILES
     src/NexusHDF5Descriptor.cpp
     src/NullValidator.cpp
     src/OptionalBool.cpp
-    src/ParaViewVersion.cpp
     src/ProgressBase.cpp
     src/Property.cpp
     src/PropertyHistory.cpp
@@ -97,8 +95,6 @@ set(SRC_FILES
     src/ReadLock.cpp
     src/RebinParamsValidator.cpp
     src/RegexStrings.cpp
-    src/RemoteJobManager.cpp
-    src/SimpleJSON.cpp
     src/SingletonHolder.cpp
     src/SobolSequence.cpp
     src/StartsWithValidator.cpp
@@ -128,7 +124,8 @@ set(SRC_FILES
     src/VMD.cpp
     src/VectorHelper.cpp
     src/VisibleWhenProperty.cpp
-    src/WriteLock.cpp)
+    src/WriteLock.cpp
+)
 
 set(SRC_UNITY_IGNORE_FILES
     src/Atom.cpp
@@ -138,9 +135,11 @@ set(SRC_UNITY_IGNORE_FILES
     src/DirectoryValidator.cpp
     src/PropertyManager.cpp
     src/Unit.cpp
-    src/System.cpp)
+    src/System.cpp
+)
 
 set(INC_FILES
+    inc/MantidKernel/SetValueWhenProperty.h
     inc/MantidKernel/ANN/ANN.h
     inc/MantidKernel/ANN/ANNperf.h
     inc/MantidKernel/ANN/ANNx.h
@@ -163,7 +162,6 @@ set(INC_FILES
     inc/MantidKernel/ChainableFactory.h
     inc/MantidKernel/ChecksumHelper.h
     inc/MantidKernel/CompositeValidator.h
-    inc/MantidKernel/ComputeResourceInfo.h
     inc/MantidKernel/ConfigObserver.h
     inc/MantidKernel/ConfigPropertyObserver.h
     inc/MantidKernel/ConfigService.h
@@ -174,7 +172,6 @@ set(INC_FILES
     inc/MantidKernel/DateTimeValidator.h
     inc/MantidKernel/DateValidator.h
     inc/MantidKernel/DeltaEMode.h
-    inc/MantidKernel/Diffraction.h
     inc/MantidKernel/DirectoryValidator.h
     inc/MantidKernel/DiskBuffer.h
     inc/MantidKernel/DllConfig.h
@@ -247,7 +244,6 @@ set(INC_FILES
     inc/MantidKernel/NexusHDF5Descriptor.h
     inc/MantidKernel/NullValidator.h
     inc/MantidKernel/OptionalBool.h
-    inc/MantidKernel/ParaViewVersion.h
     inc/MantidKernel/PhysicalConstants.h
     inc/MantidKernel/PocoVersion.h
     inc/MantidKernel/ProgressBase.h
@@ -270,8 +266,6 @@ set(INC_FILES
     inc/MantidKernel/RebinParamsValidator.h
     inc/MantidKernel/RegexStrings.h
     inc/MantidKernel/RegistrationHelper.h
-    inc/MantidKernel/RemoteJobManager.h
-    inc/MantidKernel/SimpleJSON.h
     inc/MantidKernel/SingletonHolder.h
     inc/MantidKernel/SobolSequence.h
     inc/MantidKernel/SpecialCoordinateSystem.h
@@ -313,7 +307,8 @@ set(INC_FILES
     inc/MantidKernel/WriteLock.h
     inc/MantidKernel/cow_ptr.h
     inc/MantidKernel/make_cow.h
-    inc/MantidKernel/normal_distribution.h)
+    inc/MantidKernel/normal_distribution.h
+)
 
 set(TEST_FILES
     ArrayBoundedValidatorTest.h
@@ -335,7 +330,6 @@ set(TEST_FILES
     ChebyshevSeriesTest.h
     ChecksumHelperTest.h
     CompositeValidatorTest.h
-    ComputeResourceInfoTest.h
     ConfigObserverTest.h
     ConfigPropertyObserverTest.h
     ConfigServiceTest.h
@@ -345,7 +339,6 @@ set(TEST_FILES
     DateTimeValidatorTest.h
     DateValidatorTest.h
     DeltaEModeTest.h
-    DiffractionTest.h
     DirectoryValidatorTest.h
     DiskBufferISaveableTest.h
     DiskBufferTest.h
@@ -384,6 +377,7 @@ set(TEST_FILES
     MagneticIonTest.h
     MakeCowTest.h
     MandatoryValidatorTest.h
+    MantidVersionTest.h
     MaskedPropertyTest.h
     MaterialBuilderTest.h
     MaterialTest.h
@@ -420,7 +414,6 @@ set(TEST_FILES
     RegexStringsTest.h
     SLSQPMinimizerTest.h
     ShrinkToFitTest.h
-    SimpleJSONTest.h
     SobolSequenceTest.h
     SpecialCoordinateSystemTest.h
     StartsWithValidatorTest.h
@@ -452,22 +445,18 @@ set(TEST_FILES
     VMDTest.h
     VectorHelperTest.h
     VisibleWhenPropertyTest.h
-    WriteLockTest.h)
+    WriteLockTest.h
+)
 
-if(COVERALLS)
+if(COVERAGE)
   foreach(loop_var ${SRC_FILES} ${INC_FILES})
-    set_property(GLOBAL APPEND
-                 PROPERTY COVERAGE_SRCS
-                          "${CMAKE_CURRENT_SOURCE_DIR}/${loop_var}")
+    set_property(GLOBAL APPEND PROPERTY COVERAGE_SRCS "${CMAKE_CURRENT_SOURCE_DIR}/${loop_var}")
   endforeach(loop_var)
 endif()
 
 if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
   list(APPEND SRC_FILES src/NetworkProxyOSX.cpp)
-  set(NETWORK_LIBRARIES
-      "-framework SystemConfiguration"
-      "-framework CoreFoundation"
-      "-framework CoreServices")
+  set(NETWORK_LIBRARIES "-framework SystemConfiguration" "-framework CoreFoundation" "-framework CoreServices")
 elseif(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
   list(APPEND SRC_FILES src/NetworkProxyWin.cpp)
   set(NETWORK_LIBRARIES Winhttp)
@@ -480,99 +469,97 @@ if(UNITY_BUILD)
   enable_unity_build(Kernel SRC_FILES SRC_UNITY_IGNORE_FILES 10)
 endif(UNITY_BUILD)
 
-# Enable precompiled headers where supported (must be done before target is
-# added)
+# Enable precompiled headers where supported (must be done before target is added)
 enable_precompiled_headers(inc/MantidKernel/PrecompiledHeader.h SRC_FILES)
 # Add the target for this directory
 add_library(Kernel ${SRC_FILES} ${INC_FILES})
+add_library(Mantid::Kernel ALIAS Kernel)
 # Set the name of the generated library
-set_target_properties(Kernel
-                      PROPERTIES OUTPUT_NAME
-                                 MantidKernel
-                                 COMPILE_DEFINITIONS
-                                 "IN_MANTID_KERNEL;PSAPI_VERSION=1")
+set_target_properties(Kernel PROPERTIES OUTPUT_NAME MantidKernel COMPILE_DEFINITIONS "IN_MANTID_KERNEL;PSAPI_VERSION=1")
 
-target_include_directories(Kernel SYSTEM
-                           PUBLIC ${Boost_INCLUDE_DIRS} ${POCO_INCLUDE_DIRS}
-                                  ${JSONCPP_INCLUDE_DIR}
-                           PRIVATE ${NEXUS_INCLUDE_DIR} ${GSL_INCLUDE_DIR}
-			   ${OPENSSL_INCLUDE_DIR} ${HDF5_INCLUDE_DIRS})
+target_include_directories(
+  Kernel PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/inc> $<INSTALL_INTERFACE:include/Mantid>
+)
 
 if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
   set_target_properties(Kernel PROPERTIES INSTALL_RPATH "@loader_path/../MacOS;@loader_path/../Frameworks")
 elseif(${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
-  set_target_properties(Kernel
-                        PROPERTIES INSTALL_RPATH "\$ORIGIN/../${LIB_DIR}")
+  set_target_properties(Kernel PROPERTIES INSTALL_RPATH "\$ORIGIN/../${LIB_DIR}")
 endif()
 
 # Add to the 'Framework' group in VS
 set_property(TARGET Kernel PROPERTY FOLDER "MantidFramework")
+target_compile_features(Kernel PUBLIC cxx_std_17)
 
-# For older gcc versions (<4.5) if we do not put stdc++ first then things crash
-# when an exceptions are thrown in Python.
-if(GCC_COMPILER_VERSION AND GCC_COMPILER_VERSION VERSION_LESS "4.5")
-  target_link_libraries(Kernel LINK_PRIVATE stdc++)
+# if we are not in a conda env ${HDF5_LIBRARIES} are full paths to the libs and not cmake targets, therefore we need to
+# include the headers
+if(NOT CONDA_ENV)
+  target_include_directories(Kernel SYSTEM PUBLIC ${HDF5_INCLUDE_DIRS})
 endif()
-target_link_libraries(Kernel
-                      PUBLIC
-                      ${NEXUS_LIBRARIES}
-                      Eigen3::Eigen
-                      ${JSONCPP_LIBRARIES}
-                      ${TBB_LIBRARIES}
-                      ${TBB_MALLOC_LIBRARIES}
-                      PRIVATE
-                      ${TCMALLOC_LIBRARIES_LINKTIME}
-                      ${GSL_LIBRARIES}
-                      ${MANTIDLIBS}
-                      ${NETWORK_LIBRARIES}
-                      span
-                      ${HDF5_LIBRARIES}
-                      )
+
+target_link_libraries(
+  Kernel
+  PUBLIC Mantid::Types
+         Mantid::Json
+         Nexus::nexuscpp
+         Eigen3::Eigen
+         TBB::tbb
+         Poco::Foundation
+         Poco::Net
+         Poco::XML
+         Poco::Util
+         Poco::NetSSL
+         GSL::gsl
+         OpenSSL::SSL
+         ${HDF5_LIBRARIES}
+         ${HDF5_HL_LIBRARIES}
+  PRIVATE ${NETWORK_LIBRARIES} span
+)
 if(WIN32)
-  target_link_libraries(Kernel LINK_PRIVATE Psapi.lib) # For memory usage
-                                                       # queries
+  target_link_libraries(Kernel PRIVATE Psapi.lib) # For memory usage queries
 endif()
+
+# H5_BUILT_AS_DYNAMIC_LIB required https://github.com/conda-forge/hdf5-feedstock/issues/58
+target_compile_definitions(Kernel PUBLIC -DH5_BUILT_AS_DYNAMIC_LIB)
 
 # Add the unit tests directory
 add_subdirectory(test)
 
 # This section deals with creating the MantidVersion implementation
 
-# DON'T try to update the MantidVersion source file if we were not able to
-# determine it from git and the file already exists. This makes sure the version
-# number is correct when building off the source tarball
+# DON'T try to update the MantidVersion source file if we were not able to determine it from git and the file already
+# exists. This makes sure the version number is correct when building off the source tarball
 
-if(NOT NOT_GIT_REPO
-   OR NOT EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/src/MantidVersion.cpp)
-  configure_file(${CMAKE_CURRENT_SOURCE_DIR}/src/MantidVersion.cpp.in
-                 ${CMAKE_CURRENT_SOURCE_DIR}/src/MantidVersion.cpp)
+if(NOT NOT_GIT_REPO OR NOT EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/src/MantidVersion.cpp)
+  configure_file(${CMAKE_CURRENT_SOURCE_DIR}/src/MantidVersion.cpp.in ${CMAKE_CURRENT_SOURCE_DIR}/src/MantidVersion.cpp)
+  configure_file(
+    ${CMAKE_CURRENT_SOURCE_DIR}/test/MantidVersionTest.h.in ${CMAKE_CURRENT_SOURCE_DIR}/test/MantidVersionTest.h
+  )
 endif()
 
 # This section deals with creating the PocoVersion implementation
-configure_file(${CMAKE_CURRENT_SOURCE_DIR}/inc/MantidKernel/PocoVersion.h.in
-               ${CMAKE_CURRENT_SOURCE_DIR}/inc/MantidKernel/PocoVersion.h)
+configure_file(
+  ${CMAKE_CURRENT_SOURCE_DIR}/inc/MantidKernel/PocoVersion.h.in
+  ${CMAKE_CURRENT_SOURCE_DIR}/inc/MantidKernel/PocoVersion.h
+)
 
-# This section deals with creating the ParaViewVersion implementation
-configure_file(${CMAKE_CURRENT_SOURCE_DIR}/src/ParaViewVersion.cpp.in
-               ${CMAKE_CURRENT_SOURCE_DIR}/src/ParaViewVersion.cpp)
 # This section deals with creating the GithubApiHelper implementation
-
-if(WIN32)
-  set(GITHUB_AUTHORIZATION_TOKEN "8ec7afc857540ee60af78cba1cf7779a6ed0b6b9")
-elseif(APPLE)
-  set(GITHUB_AUTHORIZATION_TOKEN "9f1c1acd61ecb87b21ad0382f6b403c8294992c5")
-else()
-  set(GITHUB_AUTHORIZATION_TOKEN "ccacbaf39a7ad8151fca03b4ea99a29b28f0993b")
-endif()
-configure_file(${CMAKE_CURRENT_SOURCE_DIR}/inc/MantidKernel/GitHubApiHelper.h.in
-               ${CMAKE_CURRENT_SOURCE_DIR}/inc/MantidKernel/GitHubApiHelper.h)
+set(GITHUB_AUTHORIZATION_TOKEN
+    ""
+    CACHE STRING "token used for authenticated read access to github"
+)
+configure_file(
+  ${CMAKE_CURRENT_SOURCE_DIR}/inc/MantidKernel/GitHubApiHelper.h.in
+  ${CMAKE_CURRENT_SOURCE_DIR}/inc/MantidKernel/GitHubApiHelper.h
+)
 
 # Manipulate the Mantid.properties file to work wherever you build to
 
-# This needs to be done as a 2-step process for it to work for VS builds First
-# the part that turns relative into absolute paths in the properties file
+# This needs to be done as a 2-step process for it to work for VS builds First the part that turns relative into
+# absolute paths in the properties file
 set(MANTID_ROOT ${CMAKE_SOURCE_DIR})
 # This keeps things working for people building just the framework project
+set(PYTHON_INTERFACES_DIR ${MANTID_ROOT}/qt/python/mantidqtinterfaces/mantidqtinterfaces)
 if(${CMAKE_PROJECT_NAME} STREQUAL "MantidFramework")
   set(MANTID_ROOT ${CMAKE_SOURCE_DIR}/..)
 endif()
@@ -580,67 +567,46 @@ endif()
 set(FRAMEWORK_PLUGINS_DIR ".")
 set(QT_PLUGINS_DIR ".")
 # %V will be replaced with the major version of Qt at runtime
-if(MAKE_VATES)
-  set(PV_PLUGINS_DIR "./plugins/paraview/qt%V")
-  if(MSVC)
-    set(
-      PARAVIEW_PYTHON_PATHS
-      "${ParaView_DIR}/bin/$<$<CONFIG:Release>:Release>$<$<CONFIG:Debug>:Debug>;${ParaView_DIR}/lib/$<$<CONFIG:Release>:Release>$<$<CONFIG:Debug>:Debug>;${ParaView_DIR}/lib/site-packages;"
-      )
-  else()
-    set(PARAVIEW_PYTHON_PATHS
-        "${ParaView_DIR}/lib;${ParaView_DIR}/lib/site-packages;")
-  endif()
-else()
-  set(PV_PLUGINS_DIR "")
-  set(PARAVIEW_PYTHON_PATHS "")
-endif()
-set(IGNORE_PARAVIEW "0")
+set(PV_PLUGINS_DIR "")
 set(UPDATE_INSTRUMENT_DEFINTITIONS "0")
 set(CHECK_FOR_NEW_MANTID_VERSION "0")
 set(ENABLE_USAGE_REPORTS "0")
 set(PYTHONPLUGIN_DIRS "${MANTID_ROOT}/Framework/PythonInterface/plugins")
-set(
-  DATADIRS
-  ${ExternalData_BINARY_ROOT}/Testing/Data/UnitTest;${ExternalData_BINARY_ROOT}/Testing/Data/DocTest;${MANTID_ROOT}/instrument
-  )
+set(PYTHONPLUGIN_MANIFEST "${CMAKE_BINARY_DIR}/Framework/PythonInterface/plugins/python-plugin-manifest.txt")
+set(DATADIRS
+    ${ExternalData_BINARY_ROOT}/Testing/Data/UnitTest;${ExternalData_BINARY_ROOT}/Testing/Data/DocTest;${MANTID_ROOT}/instrument
+)
 set(COLORMAPS_FOLDER ${MANTID_ROOT}/installers/colormaps/)
 set(MANTIDPUBLISHER "https://upload.mantidproject.org/scriptrepository?debug=1")
 set(HTML_ROOT ${DOCS_BUILDDIR}/html)
 
-# For an mpi-enabled build, do not log to file, format console output (which
-# winds up in a file) differently These settings carry down to the installation
-# configuration below
+# For an mpi-enabled build, do not log to file, format console output (which winds up in a file) differently These
+# settings carry down to the installation configuration below
 if(MPI_BUILD)
   set(CONSOLEPATTERN "%H:%M:%S,%i [%N:%P] %p %s - %t")
-  set(PV_PLUGINS_DIR "")
-  set(IGNORE_PARAVIEW "1")
 else()
   set(CONSOLEPATTERN "%s-[%p] %t")
 endif()
 
 set(CONSOLECHANNELCLASS "ConsoleChannel")
-configure_file(../Properties/Mantid.properties.template
-               ${CMAKE_CURRENT_BINARY_DIR}/Mantid.properties.config)
+set(ALIASDEPRECATED "Raise")
+set(ALGORITHMDEPRECATED "Raise")
+configure_file(../Properties/Mantid.properties.template ${CMAKE_CURRENT_BINARY_DIR}/Mantid.properties.config)
 
 # Then, copy into appropriate place
 if(MSVC)
-  file(GENERATE
-       OUTPUT
-       ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/$<CONFIG>/Mantid.properties
-       INPUT
-       ${CMAKE_CURRENT_BINARY_DIR}/Mantid.properties.config)
+  file(
+    GENERATE
+    OUTPUT ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/$<CONFIG>/Mantid.properties
+    INPUT ${CMAKE_CURRENT_BINARY_DIR}/Mantid.properties.config
+  )
 else()
-  file(GENERATE
-       OUTPUT
-       ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/Mantid.properties
-       INPUT
-       ${CMAKE_CURRENT_BINARY_DIR}/Mantid.properties.config)
+  file(
+    GENERATE
+    OUTPUT ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/Mantid.properties
+    INPUT ${CMAKE_CURRENT_BINARY_DIR}/Mantid.properties.config
+  )
 endif()
-
-# Installation settings
-
-mtd_install_targets(TARGETS Kernel INSTALL_DIRS ${LIB_DIR} ${WORKBENCH_LIB_DIR})
 
 # Create the properties file for the installer
 set(MANTID_ROOT_BUILD ${MANTID_ROOT})
@@ -654,20 +620,7 @@ else()
 endif()
 set(FRAMEWORK_PLUGINS_DIR ${MANTID_ROOT}/plugins)
 set(PYTHONPLUGIN_DIRS "${FRAMEWORK_PLUGINS_DIR}/python")
-if(MAKE_VATES)
-  if(APPLE)
-    set(PARAVIEW_PYTHON_PATHS "../Libraries;../Python;")
-  elseif(WIN32)
-    set(PV_LIBS
-        "../lib/paraview-${PARAVIEW_VERSION_MAJOR}.${PARAVIEW_VERSION_MINOR}")
-    set(PARAVIEW_PYTHON_PATHS "${PV_LIBS}/site-packages;")
-  else() # Linux
-    set(PV_LIBS "${CMAKE_INSTALL_PREFIX}/lib/paraview-${PARAVIEW_VERSION}")
-    set(PARAVIEW_PYTHON_PATHS "${PV_LIBS};${PV_LIBS}/site-packages;")
-  endif()
-else()
-  set(PARAVIEW_PYTHON_PATHS "")
-endif()
+set(PYTHONPLUGIN_MANIFEST "${PYTHONPLUGIN_DIRS}/python-plugin-manifest.txt")
 set(UPDATE_INSTRUMENT_DEFINTITIONS "${ENABLE_NETWORK_ACCESS}")
 set(CHECK_FOR_NEW_MANTID_VERSION "${ENABLE_NETWORK_ACCESS}")
 set(ENABLE_USAGE_REPORTS "${ENABLE_NETWORK_ACCESS}")
@@ -675,26 +628,35 @@ set(DATADIRS "")
 set(MANTIDPUBLISHER "https://upload.mantidproject.org/scriptrepository")
 set(HTML_ROOT ../share/doc/html)
 
-# For a framework-only (e.g. MPI) build some of these are not relevant and
-# should be left empty to avoid warnings on starting Mantid
+# For a framework-only (e.g. MPI) build some of these are not relevant and should be left empty to avoid warnings on
+# starting Mantid
 if(${CMAKE_PROJECT_NAME} MATCHES "MantidFramework")
   set(QT_PLUGINS_DIR "")
   set(COLORMAPS_FOLDER "")
-  set(PV_PLUGINS_DIR "")
-  set(IGNORE_PARAVIEW "1")
 else()
   set(QT_PLUGINS_DIR "${MANTID_ROOT}/plugins/qt%V")
-  set(PV_PLUGINS_DIR "${MANTID_ROOT}/plugins/${PVPLUGINS_SUBDIR}/qt%V")
   set(COLORMAPS_FOLDER ${MANTID_ROOT}/colormaps)
 endif()
 
 set(CONSOLECHANNELCLASS "StdoutChannel")
-configure_file(../Properties/Mantid.properties.template
-               ${CMAKE_CURRENT_BINARY_DIR}/Mantid.properties.install)
-install(FILES ${CMAKE_CURRENT_BINARY_DIR}/Mantid.properties.install
-        DESTINATION ${BIN_DIR}
-        RENAME Mantid.properties)
+set(ALIASDEPRECATED "Log")
+set(ALGORITHMDEPRECATED "Log")
+configure_file(../Properties/Mantid.properties.template ${CMAKE_CURRENT_BINARY_DIR}/Mantid.properties.install)
 
-install(FILES ${CMAKE_CURRENT_BINARY_DIR}/Mantid.properties.install
-        DESTINATION ${WORKBENCH_BIN_DIR}
-        RENAME Mantid.properties)
+mtd_install_files(
+  FILES
+  ${CMAKE_CURRENT_BINARY_DIR}/Mantid.properties.install
+  INSTALL_DIRS
+  ${BIN_DIR}
+  ${WORKBENCH_BIN_DIR}
+  RENAME
+  Mantid.properties
+)
+
+# Installation settings
+if(CONDA_ENV)
+  set(TARGET_EXPORT_NAME "MantidKernelTargets")
+  mtd_install_framework_lib(TARGETS Kernel EXPORT_NAME ${TARGET_EXPORT_NAME})
+else()
+  mtd_install_targets(TARGETS Kernel INSTALL_DIRS ${LIB_DIR} ${WORKBENCH_LIB_DIR})
+endif()

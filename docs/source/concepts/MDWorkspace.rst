@@ -98,18 +98,8 @@ Viewing MDWorkspaces
 
 -  Right-click on a MDWorkspace and select:
 
-   -  **Show Vates Simple Interface**: to open a `simplified 3D
-      view <http://www.mantidproject.org/VatesSimpleInterface>`__ based on Paraview.
-   -  **Show Slice Viewer**: to open the `Slice
-      Viewer <http://www.mantidproject.org/MantidPlot:_SliceViewer>`__, which shows 2D slices of the
+   -  **Show Slice Viewer**: to open the :ref:`sliceviewer`, which shows 2D slices of the
       multiple-dimensional workspace.
-
--  You can also `use Python script to open the
-   SliceViewer <http://www.mantidproject.org/SliceViewer_Python_Interface>`__.
-
-Or, you can load a MDWorkspace .nxs file in Paraview if
-the proper plugin is installed.
-
 
 
 Working with Table Workspaces in Python

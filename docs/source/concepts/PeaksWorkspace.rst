@@ -6,8 +6,8 @@ Peaks Workspace
 The PeaksWorkspace is a special Workspace that holds a list of single crystal Peak objects.
 
 Creating a PeaksWorkspace
---------------------------
-        
+-------------------------
+
 * :ref:`FindPeaksMD <algm-FindPeaksMD>` will find peaks in reciprocal space in a :ref:`MDWorkspace <MDWorkspace>`.
 * :ref:`FindSXPeaks <algm-FindSXPeaks>` will find peaks in detector space.
 * :ref:`PredictPeaks <algm-PredictPeaks>` will predict peak positions in a workspace given a UB matrix.
@@ -16,18 +16,14 @@ Creating a PeaksWorkspace
 * :ref:`CreatePeaksWorkspace <algm-CreatePeaksWorkspace>` will create an empty PeaksWorkspace that you can then edit.
 
 Viewing a PeaksWorkspace
---------------------------
+------------------------
 
 * Double-click a PeaksWorkspace to see the full list of data of each Peak object.
-* In MantidPlot, you can drag/drop a PeaksWorkspace from the list of workspaces onto the `Instrument View <http://www.mantidproject.org/MantidPlot:_Instrument_View>`__ . This will overlay the peaks onto the detector face.
-* Right-click a PeaksWorkspace and select the menu to show the peak positions in 3D in the `VatesSimpleInterface <http://www.mantidproject.org/VatesSimpleInterface_v2>`__
-* In paraview, you can load a .Peaks file loader plugin to view a PeaksWorkspace.
-* `PeaksViewer <http://www.mantidproject.org/PeaksViewer>`__ in the `SliceViewer <http://www.mantidproject.org/SliceViewer>`__ 
+* In MantidWorkbench, you can drag/drop a PeaksWorkspace from the list of workspaces onto the
+  :ref:`Instrument View <InstrumentViewer>`. This will overlay the peaks onto the detector face.
+* :ref:`Peaks overlay <sliceviewer_peaks_overlay>` in the :ref:`sliceviewer`.
 
-The Peak Object
---------------------------
-
-Each peak object contains several pieces of information. Not all of them are necessary:
+Each peak object contains several pieces of information. Not all of them are necessary
 
 * Detector position and wavelength
 * Q position (calculated from the detector position/wavelength)
@@ -37,8 +33,10 @@ Each peak object contains several pieces of information. Not all of them are nec
 * Row/column of detector (only for :ref:`RectangularDetectors <RectangularDetector>` )
 * An integration shape (see below)
 
+.. _the-peak-shape:
+
 The Peak Shape
-~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~
 
 Each Peak object contains a PeakShape. Only the integration algorithms which act on, and return PeaksWorkspaces set the shape of the peaks. The PeakShape is owned by the Peak, not the PeaksWorkspace, so when PeaksWorkspaces are split, or concatinated, the integration shapes are unaltered. Aside from the Null Peak Shape, each peak shape contains at least the following information.
 
@@ -84,7 +82,7 @@ PeaksWorkspace Python Interface
     pws = mtd['name_of_peaks_workspace']
     pws.getNumberPeaks()
     p = pws.getPeak(12)
-    pws.removePeak(34) 
+    pws.removePeak(34)
 
 Peak Python Interface
 ~~~~~~~~~~~~~~~~~~~~~
@@ -111,15 +109,15 @@ Once you have a handle on a peak "p" you have several methods to query/modify it
 
     hkl = p.getHKL()
     p.setHKL(-5, 4, 3)
-    
+
     q = p.getQSampleFrame()
     q = p.getQLabFrame()
     detid = p.getDetectorID()
-    
+
     p.setIntensity(1000.0)
     p.setSigmaIntensity(31.6)
     counts = p.getIntensity()
-    
+
     wl = p.getWavelength()
     tof = p.getTOF()
     d = p.getDSpacing()

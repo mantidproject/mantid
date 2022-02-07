@@ -73,6 +73,19 @@ public:
   void information(const std::string &msg);
   /// Logs at debug level
   void debug(const std::string &msg);
+  /// accumulates a message
+  void accumulate(const std::string &msg);
+  /// flushes accumulated messages to the current level
+  void flush();
+  /// flushes accumulated messages to the given priority
+  void flush(Priority);
+  void flushDebug();
+  void flushInformation();
+  void flushNotice();
+  void flushWarning();
+  void flushError();
+  void flushFatal();
+  void purge();
 
   /// Logs at Fatal level
   std::ostream &fatal();
@@ -88,10 +101,10 @@ public:
   std::ostream &debug();
 
   /// Log a message at a given priority
-  void log(const std::string &message, Logger::Priority priority);
+  void log(const std::string &message, const Priority &priority);
 
   /// gets the correct log stream for a priority
-  std::ostream &getLogStream(Logger::Priority priority);
+  std::ostream &getLogStream(const Priority &priority);
 
   /// Logs the given message at debug level, followed by the data in buffer.
   void dump(const std::string &msg, const void *buffer, std::size_t length);

@@ -9,7 +9,7 @@
 Description
 -----------
 
-The algorithm will use the axes of the input workspace to evaluate a functions on them 
+The algorithm will use the axes of the input workspace to evaluate a functions on them
 and store the result in the output workspace.
 
 Usage

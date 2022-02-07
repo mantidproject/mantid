@@ -43,21 +43,16 @@ namespace CustomInterfaces {
 namespace MDF {
 
 /// Constructor
-PlotController::PlotController(MultiDatasetFit *parent, QwtPlot *plot,
-                               QTableWidget *table, QComboBox *plotSelector,
+PlotController::PlotController(MultiDatasetFit *parent, QwtPlot *plot, QTableWidget *table, QComboBox *plotSelector,
                                QPushButton *prev, QPushButton *next)
-    : QObject(parent), m_plot(plot), m_table(table),
-      m_plotSelector(plotSelector), m_prevPlot(prev), m_nextPlot(next),
+    : QObject(parent), m_plot(plot), m_table(table), m_plotSelector(plotSelector), m_prevPlot(prev), m_nextPlot(next),
       m_currentIndex(-1), m_showDataErrors(false), m_showGuessFunction(false) {
   connect(prev, SIGNAL(clicked()), this, SLOT(prevPlot()));
   connect(next, SIGNAL(clicked()), this, SLOT(nextPlot()));
-  connect(plotSelector, SIGNAL(currentIndexChanged(int)), this,
-          SLOT(plotDataSet(int)));
+  connect(plotSelector, SIGNAL(currentIndexChanged(int)), this, SLOT(plotDataSet(int)));
 
-  m_zoomer =
-      new QwtPlotZoomer(QwtPlot::xBottom, QwtPlot::yLeft,
-                        QwtPicker::DragSelection | QwtPicker::CornerToCorner,
-                        QwtPicker::AlwaysOff, plot->canvas());
+  m_zoomer = new QwtPlotZoomer(QwtPlot::xBottom, QwtPlot::yLeft, QwtPicker::DragSelection | QwtPicker::CornerToCorner,
+                               QwtPicker::AlwaysOff, plot->canvas());
 
   m_panner = new QwtPlotPanner(plot->canvas());
 
@@ -67,13 +62,11 @@ PlotController::PlotController(MultiDatasetFit *parent, QwtPlot *plot,
   m_rangeSelector->setRange(-1e30, 1e30);
   m_rangeSelector->setMinimum(10);
   m_rangeSelector->setMaximum(990);
-  connect(m_rangeSelector, SIGNAL(selectionChanged(double, double)), this,
-          SLOT(updateFittingRange(double, double)));
+  connect(m_rangeSelector, SIGNAL(selectionChanged(double, double)), this, SLOT(updateFittingRange(double, double)));
 
   disableAllTools();
 
-  connect(plot->axisWidget(QwtPlot::xBottom), SIGNAL(scaleDivChanged()), this,
-          SLOT(updateGuessPlot()));
+  connect(plot->axisWidget(QwtPlot::xBottom), SIGNAL(scaleDivChanged()), this, SLOT(updateGuessPlot()));
 }
 
 /// Destructor.
@@ -89,8 +82,7 @@ void PlotController::tableUpdated() {
   int rowCount = m_table->rowCount();
   for (int row = 0; row < rowCount; ++row) {
     QString itemText =
-        QString("%1 (%2)").arg(m_table->item(row, wsColumn)->text(),
-                               m_table->item(row, wsIndexColumn)->text());
+        QString("%1 (%2)").arg(m_table->item(row, wsColumn)->text(), m_table->item(row, wsIndexColumn)->text());
     m_plotSelector->insertItem(row, itemText);
   }
   m_plotData.clear();
@@ -128,8 +120,7 @@ std::shared_ptr<DatasetPlotData> PlotController::getData(int index) {
     int wsIndex = owner()->getWorkspaceIndex(index);
     QString outputWorkspaceName = owner()->getOutputWorkspaceName(index);
     try {
-      data = std::make_shared<DatasetPlotData>(wsName, wsIndex,
-                                               outputWorkspaceName);
+      data = std::make_shared<DatasetPlotData>(wsName, wsIndex, outputWorkspaceName);
       m_plotData.insert(index, data);
     } catch (std::exception &e) {
       QMessageBox::critical(owner(), "Mantid - Error", e.what());
@@ -236,9 +227,7 @@ QString PlotController::makePyPlotSource(int index) const {
   auto outputWsorkspaceName = owner()->getOutputWorkspaceName(index);
   auto wsIndex = owner()->getWorkspaceIndex(index);
   if (outputWsorkspaceName.isEmpty()) {
-    pyCode = QString("['%1'], %2")
-                 .arg(owner()->getWorkspaceName(index))
-                 .arg(wsIndex);
+    pyCode = QString("['%1'], %2").arg(owner()->getWorkspaceName(index)).arg(wsIndex);
   } else {
     pyCode = QString("['%1'], [0,1,2]").arg(outputWsorkspaceName);
   }
@@ -264,8 +253,7 @@ void PlotController::exportAllPlots() {
   int exportPlot = QMessageBox::Yes;
   if (nPlots > 20) {
     exportPlot = QMessageBox::question(owner(), "Export All Plot?",
-                                       "Are you sure, you want to export " +
-                                           QString::number(nPlots) +
+                                       "Are you sure, you want to export " + QString::number(nPlots) +
                                            " plots? This may take a long time!",
                                        QMessageBox::Yes, QMessageBox::No);
   }
@@ -329,9 +317,7 @@ bool PlotController::isZoomEnabled() const { return m_zoomer->isEnabled(); }
 bool PlotController::isPanEnabled() const { return m_panner->isEnabled(); }
 
 /// Check if range seletcor is on.
-bool PlotController::isRangeSelectorEnabled() const {
-  return m_rangeSelector->isEnabled();
-}
+bool PlotController::isRangeSelectorEnabled() const { return m_rangeSelector->isEnabled(); }
 
 /// Signal others that fitting range has been updated.
 void PlotController::updateFittingRange(double startX, double endX) {
@@ -351,9 +337,7 @@ void PlotController::updateRange(int index) {
   }
 }
 
-MultiDatasetFit *PlotController::owner() const {
-  return static_cast<MultiDatasetFit *>(parent());
-}
+MultiDatasetFit *PlotController::owner() const { return static_cast<MultiDatasetFit *>(parent()); }
 
 /// Toggle display of the data error bars.
 void PlotController::showDataErrors(bool on) {
@@ -372,8 +356,7 @@ void PlotController::setGuessFunction(const QString &funStr) {
     QwtScaleMap xMap = m_plot->canvasMap(QwtPlot::xBottom);
     double startX = xMap.s1();
     double endX = xMap.s2();
-    auto fun = Mantid::API::FunctionFactory::Instance().createInitialized(
-        funStr.toStdString());
+    auto fun = Mantid::API::FunctionFactory::Instance().createInitialized(funStr.toStdString());
     m_guessFunctionData.reset(new MDFFunctionPlotData(fun, startX, endX));
     if (m_showGuessFunction) {
       plotGuess();

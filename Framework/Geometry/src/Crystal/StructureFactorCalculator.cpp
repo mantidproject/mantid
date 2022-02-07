@@ -6,8 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidGeometry/Crystal/StructureFactorCalculator.h"
 
-namespace Mantid {
-namespace Geometry {
+namespace Mantid::Geometry {
 
 /**
  * Sets the crystal structure for which to calculate structure factors
@@ -20,8 +19,7 @@ namespace Geometry {
  *
  * @param crystalStructure :: Crystal structure for calculations.
  */
-void StructureFactorCalculator::setCrystalStructure(
-    const CrystalStructure &crystalStructure) {
+void StructureFactorCalculator::setCrystalStructure(const CrystalStructure &crystalStructure) {
   crystalStructureSetHook(crystalStructure);
 }
 
@@ -42,8 +40,7 @@ double StructureFactorCalculator::getFSquared(const Kernel::V3D &hkl) const {
  * @param hkls :: Vector of HKLs.
  * @return :: Vector of structure factors for the given HKLs.
  */
-std::vector<StructureFactor>
-StructureFactorCalculator::getFs(const std::vector<Kernel::V3D> &hkls) const {
+std::vector<StructureFactor> StructureFactorCalculator::getFs(const std::vector<Kernel::V3D> &hkls) const {
   std::vector<StructureFactor> structureFactors(hkls.size());
   using namespace std::placeholders;
   std::transform(hkls.begin(), hkls.end(), structureFactors.begin(),
@@ -62,8 +59,7 @@ StructureFactorCalculator::getFs(const std::vector<Kernel::V3D> &hkls) const {
  * @param hkls :: Vector of HKLs.
  * @return :: Vector of squared structure factors for the given HKLs.
  */
-std::vector<double> StructureFactorCalculator::getFsSquared(
-    const std::vector<Kernel::V3D> &hkls) const {
+std::vector<double> StructureFactorCalculator::getFsSquared(const std::vector<Kernel::V3D> &hkls) const {
   std::vector<double> fSquareds(hkls.size());
   using namespace std::placeholders;
   std::transform(hkls.begin(), hkls.end(), fSquareds.begin(),
@@ -75,10 +71,8 @@ std::vector<double> StructureFactorCalculator::getFsSquared(
 /// This function is called from
 /// StructureFactorCalculator::setCrystalStructure() and can be overriden to
 /// perform additional actions.
-void StructureFactorCalculator::crystalStructureSetHook(
-    const CrystalStructure &crystalStructure) {
+void StructureFactorCalculator::crystalStructureSetHook(const CrystalStructure &crystalStructure) {
   UNUSED_ARG(crystalStructure)
 }
 
-} // namespace Geometry
-} // namespace Mantid
+} // namespace Mantid::Geometry

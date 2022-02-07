@@ -29,17 +29,13 @@ private:
   /// Contains only indices of non-detector components
   std::shared_ptr<const std::vector<size_t>> m_assemblySortedComponentIndices;
   /// Ranges of component ids that are contiguous blocks of detectors.
-  std::shared_ptr<const std::vector<std::pair<size_t, size_t>>>
-      m_detectorRanges;
+  std::shared_ptr<const std::vector<std::pair<size_t, size_t>>> m_detectorRanges;
   /// Ranges of component ids that are contiguous blocks of components.
-  std::shared_ptr<const std::vector<std::pair<size_t, size_t>>>
-      m_componentRanges;
+  std::shared_ptr<const std::vector<std::pair<size_t, size_t>>> m_componentRanges;
   std::shared_ptr<const std::vector<size_t>> m_parentIndices;
   std::shared_ptr<std::vector<std::vector<size_t>>> m_children;
   Mantid::Kernel::cow_ptr<std::vector<Eigen::Vector3d>> m_positions;
-  Mantid::Kernel::cow_ptr<std::vector<
-      Eigen::Quaterniond, Eigen::aligned_allocator<Eigen::Quaterniond>>>
-      m_rotations;
+  Mantid::Kernel::cow_ptr<std::vector<Eigen::Quaterniond, Eigen::aligned_allocator<Eigen::Quaterniond>>> m_rotations;
   Mantid::Kernel::cow_ptr<std::vector<Eigen::Vector3d>> m_scaleFactors;
   Mantid::Kernel::cow_ptr<std::vector<ComponentType>> m_componentType;
   std::shared_ptr<const std::vector<std::string>> m_names;
@@ -61,9 +57,8 @@ private:
   std::vector<bool> buildMergeIndices(const ComponentInfo &other) const;
   void checkSizes(const ComponentInfo &other) const;
   void initIndices();
-  void checkIdenticalIntervals(const ComponentInfo &other,
-                               const std::pair<size_t, size_t> indexOther,
-                               const std::pair<size_t, size_t> indexThis) const;
+  void checkIdenticalIntervals(const ComponentInfo &other, const std::pair<size_t, size_t> &indexOther,
+                               const std::pair<size_t, size_t> &indexThis) const;
   void checkSpecialIndices(size_t componentIndex) const;
   size_t nonDetectorSize() const;
   /// Copy constructor is private because of the way DetectorInfo stored
@@ -73,20 +68,15 @@ public:
   ComponentInfo();
   ComponentInfo(
       std::shared_ptr<const std::vector<size_t>> assemblySortedDetectorIndices,
-      std::shared_ptr<const std::vector<std::pair<size_t, size_t>>>
-          detectorRanges,
+      std::shared_ptr<const std::vector<std::pair<size_t, size_t>>> detectorRanges,
       std::shared_ptr<const std::vector<size_t>> assemblySortedComponentIndices,
-      std::shared_ptr<const std::vector<std::pair<size_t, size_t>>>
-          componentRanges,
+      std::shared_ptr<const std::vector<std::pair<size_t, size_t>>> componentRanges,
       std::shared_ptr<const std::vector<size_t>> parentIndices,
       std::shared_ptr<std::vector<std::vector<size_t>>> children,
       std::shared_ptr<std::vector<Eigen::Vector3d>> positions,
-      std::shared_ptr<std::vector<Eigen::Quaterniond,
-                                  Eigen::aligned_allocator<Eigen::Quaterniond>>>
-          rotations,
+      std::shared_ptr<std::vector<Eigen::Quaterniond, Eigen::aligned_allocator<Eigen::Quaterniond>>> rotations,
       std::shared_ptr<std::vector<Eigen::Vector3d>> scaleFactors,
-      std::shared_ptr<std::vector<ComponentType>> componentType,
-      std::shared_ptr<const std::vector<std::string>> names,
+      std::shared_ptr<std::vector<ComponentType>> componentType, std::shared_ptr<const std::vector<std::string>> names,
       int64_t sourceIndex, int64_t sampleIndex);
   /// Copy assignment not permitted because of the way DetectorInfo stored
   ComponentInfo &operator=(const ComponentInfo &other) = delete;
@@ -100,6 +90,7 @@ public:
   bool isDetector(const size_t componentIndex) const {
     return componentIndex < m_assemblySortedDetectorIndices->size();
   }
+  bool isMonitor(const size_t componentIndex) const;
   size_t compOffsetIndex(const size_t componentIndex) const {
     return componentIndex - m_assemblySortedDetectorIndices->size();
   }
@@ -110,21 +101,19 @@ public:
   Eigen::Quaterniond rotation(const std::pair<size_t, size_t> &index) const;
   Eigen::Vector3d relativePosition(const size_t componentIndex) const;
   Eigen::Quaterniond relativeRotation(const size_t componentIndex) const;
-  void setPosition(const size_t componentIndex,
-                   const Eigen::Vector3d &newPosition);
-  void setPosition(const std::pair<size_t, size_t> index,
-                   const Eigen::Vector3d &newPosition);
-  void setRotation(const size_t componentIndex,
-                   const Eigen::Quaterniond &newRotation);
-  void setRotation(const std::pair<size_t, size_t> index,
-                   const Eigen::Quaterniond &newRotation);
+  void setPosition(const size_t componentIndex, const Eigen::Vector3d &newPosition);
+  void setPosition(const std::pair<size_t, size_t> &index, const Eigen::Vector3d &newPosition);
+  void setRotation(const size_t componentIndex, const Eigen::Quaterniond &newRotation);
+  void setRotation(const std::pair<size_t, size_t> &index, const Eigen::Quaterniond &newRotation);
 
   size_t parent(const size_t componentIndex) const;
   bool hasParent(const size_t componentIndex) const;
   bool hasDetectorInfo() const;
   void setDetectorInfo(DetectorInfo *detectorInfo);
   bool hasSource() const;
+  bool hasEquivalentSource(const ComponentInfo &other) const;
   bool hasSample() const;
+  bool hasEquivalentSample(const ComponentInfo &other) const;
   const Eigen::Vector3d &sourcePosition() const;
   const Eigen::Vector3d &samplePosition() const;
   size_t source() const;
@@ -133,9 +122,9 @@ public:
   double l1() const;
   const std::string &name(const size_t componentIndex) const;
   size_t indexOfAny(const std::string &name) const;
+  bool uniqueName(const std::string &name) const;
   Eigen::Vector3d scaleFactor(const size_t componentIndex) const;
-  void setScaleFactor(const size_t componentIndex,
-                      const Eigen::Vector3d &scaleFactor);
+  void setScaleFactor(const size_t componentIndex, const Eigen::Vector3d &scaleFactor);
   ComponentType componentType(const size_t componentIndex) const;
 
   size_t scanCount() const;
@@ -151,8 +140,7 @@ public:
     const std::vector<size_t>::const_iterator m_end;
 
   public:
-    Range(std::vector<size_t>::const_iterator &&begin,
-          std::vector<size_t>::const_iterator &&end)
+    Range(std::vector<size_t>::const_iterator &&begin, std::vector<size_t>::const_iterator &&end)
         : m_begin(std::move(begin)), m_end(std::move(end)) {}
     bool empty() const { return m_begin == m_end; }
     auto begin() const -> decltype(m_begin) { return m_begin; }
@@ -169,11 +157,9 @@ public:
   Range componentRangeInSubtree(const size_t index) const;
 
 private:
-  void doSetPosition(const std::pair<size_t, size_t> &index,
-                     const Eigen::Vector3d &newPosition,
+  void doSetPosition(const std::pair<size_t, size_t> &index, const Eigen::Vector3d &newPosition,
                      const ComponentInfo::Range &detectorRange);
-  void doSetRotation(const std::pair<size_t, size_t> &index,
-                     const Eigen::Quaterniond &newRotation,
+  void doSetRotation(const std::pair<size_t, size_t> &index, const Eigen::Quaterniond &newRotation,
                      const ComponentInfo::Range &detectorRange);
 };
 } // namespace Beamline

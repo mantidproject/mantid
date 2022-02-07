@@ -18,8 +18,7 @@
 #include <cstdio>
 #include <fstream>
 
-namespace Mantid {
-namespace DataHandling {
+namespace Mantid::DataHandling {
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(SavePAR)
@@ -32,13 +31,11 @@ using namespace Mantid::Geometry;
 // It is used to print out information,
 
 void SavePAR::init() {
-  declareProperty(std::make_unique<WorkspaceProperty<>>(
-                      "InputWorkspace", "", Direction::Input,
-                      std::make_shared<InstrumentValidator>()),
+  declareProperty(std::make_unique<WorkspaceProperty<>>("InputWorkspace", "", Direction::Input,
+                                                        std::make_shared<InstrumentValidator>()),
                   "The name of the workspace to save.");
-  declareProperty(
-      std::make_unique<FileProperty>("Filename", "", FileProperty::Save),
-      "The name to give to the saved file.");
+  declareProperty(std::make_unique<FileProperty>("Filename", "", FileProperty::Save),
+                  "The name to give to the saved file.");
 }
 
 void SavePAR::exec() {
@@ -60,8 +57,7 @@ void SavePAR::exec() {
   }
 
   // execute the ChildAlgorithm to calculate the detector's parameters;
-  IAlgorithm_sptr spCalcDetPar =
-      this->createChildAlgorithm("FindDetectorsPar", 0, 1, true, 1);
+  auto spCalcDetPar = createChildAlgorithm("FindDetectorsPar", 0, 1, true, 1);
   spCalcDetPar->initialize();
   spCalcDetPar->setPropertyValue("InputWorkspace", inputWorkspace->getName());
   // calculate linear rather then angular detector's sizes;
@@ -87,8 +83,7 @@ void SavePAR::exec() {
   const std::vector<double> &polar = pCalcDetPar->getPolar();
   const std::vector<double> &azimuthal_width = pCalcDetPar->getAzimWidth();
   const std::vector<double> &polar_width = pCalcDetPar->getPolarWidth();
-  const std::vector<double> &secondary_flightpath =
-      pCalcDetPar->getFlightPath();
+  const std::vector<double> &secondary_flightpath = pCalcDetPar->getFlightPath();
   const std::vector<size_t> &det_ID = pCalcDetPar->getDetID();
 
   size_t nDetectors = pCalcDetPar->getNDetectors();
@@ -122,5 +117,4 @@ void SavePAR::exec() {
   outPAR_file.close();
 }
 
-} // namespace DataHandling
-} // namespace Mantid
+} // namespace Mantid::DataHandling

@@ -6,6 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 from mantid.kernel import *
 from mantid.api import *
+from mantid.simpleapi import *
 
 
 class EnggFitTOFFromPeaks(PythonAlgorithm):
@@ -92,25 +93,25 @@ class EnggFitTOFFromPeaks(PythonAlgorithm):
             raise ValueError('Cannot fit a quadratic function with less than three peaks. Got a table of '
                              + 'peaks with ' + str(num_peaks) + ' peaks')
 
-        convert_tbl_alg = self.createChildAlgorithm('ConvertTableToMatrixWorkspace')
-        convert_tbl_alg.setProperty('InputWorkspace', fitted_peaks_table)
-        convert_tbl_alg.setProperty('ColumnX', 'dSpacing')
-        convert_tbl_alg.setProperty('ColumnY', 'X0')
-        convert_tbl_alg.execute()
-        d_tof_conversion_ws = convert_tbl_alg.getProperty('OutputWorkspace').value
+        d_tof_conversion_ws = ConvertTableToMatrixWorkspace(
+            InputWorkspace=fitted_peaks_table,
+            ColumnX='dSpacing',
+            ColumnY='X0',
+            StoreInADS=False
+        )
 
         # Fit the curve to get linear coefficients of TOF <-> dSpacing relationship for the detector
-        fit_alg = self.createChildAlgorithm('Fit')
-        fit_alg.setProperty('Function', 'name=Quadratic')
-        fit_alg.setProperty('InputWorkspace', d_tof_conversion_ws)
-        fit_alg.setProperty('WorkspaceIndex', 0)
-        fit_alg.setProperty('CreateOutput', True)
-        fit_alg.execute()
-        param_table = fit_alg.getProperty('OutputParameters').value
+        fit_output = Fit(
+            Function='name=Quadratic',
+            InputWorkspace=d_tof_conversion_ws,
+            WorkspaceIndex=0,
+            CreateOutput=True,
+            StoreInADS=False
+        )
 
-        tzero = param_table.cell('Value', 0)  # A0
-        difc = param_table.cell('Value', 1)  # A1
-        difa = param_table.cell('Value', 2)  # A2
+        tzero = fit_output.OutputParameters.cell('Value', 0)  # A0
+        difc = fit_output.OutputParameters.cell('Value', 1)  # A1
+        difa = fit_output.OutputParameters.cell('Value', 2)  # A2
 
         return difa, difc, tzero
 

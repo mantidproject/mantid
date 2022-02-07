@@ -19,13 +19,10 @@ namespace MantidWidgets {
 namespace DataProcessor {
 
 namespace {
-template <typename A>
-std::vector<std::string>
-toStdStringVector(std::vector<QString, A> const &inVec) {
+template <typename A> std::vector<std::string> toStdStringVector(std::vector<QString, A> const &inVec) {
   std::vector<std::string> outVec;
-  std::transform(
-      inVec.begin(), inVec.end(), std::back_inserter(outVec),
-      [](QString const &in) -> std::string { return in.toStdString(); });
+  std::transform(inVec.begin(), inVec.end(), std::back_inserter(outVec),
+                 [](QString const &in) -> std::string { return in.toStdString(); });
   return outVec;
 }
 } // namespace
@@ -35,8 +32,7 @@ Create string of comma separated list of items from a vector
 @param items : Values in the list.
 @return The comma separated list of items.
 */
-template <typename T, typename A>
-QString vectorString(const std::vector<T, A> &items) {
+template <typename T, typename A> QString vectorString(const std::vector<T, A> &items) {
   std::ostringstream vector_string;
   const char *separator = "";
   for (auto paramIt = items.begin(); paramIt != items.end(); ++paramIt) {
@@ -46,8 +42,7 @@ QString vectorString(const std::vector<T, A> &items) {
   return QString::fromStdString(vector_string.str());
 }
 
-template <typename A>
-QString vectorString(const std::vector<QString, A> &items) {
+template <typename A> QString vectorString(const std::vector<QString, A> &items) {
   return vectorString(toStdStringVector(items));
 }
 
@@ -60,8 +55,7 @@ Create string of comma separated list of parameter values from a vector
 @return string of comma separated list of parameter values
 */
 template <typename T, typename A>
-QString vectorParamString(const QString &param_name,
-                          const std::vector<T, A> &param_vec) {
+QString vectorParamString(const QString &param_name, const std::vector<T, A> &param_vec) {
   auto param_vector_string = param_name + " = '";
   param_vector_string += vectorString(param_vec);
   param_vector_string += "'";

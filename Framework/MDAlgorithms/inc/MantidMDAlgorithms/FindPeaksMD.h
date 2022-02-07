@@ -9,7 +9,9 @@
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/ExperimentInfo.h"
 #include "MantidAPI/IMDEventWorkspace_fwd.h"
+#include "MantidAPI/IPeaksWorkspace.h"
 #include "MantidAPI/Progress.h"
+#include "MantidDataObjects/LeanElasticPeaksWorkspace.h"
 #include "MantidDataObjects/MDEventWorkspace.h"
 #include "MantidDataObjects/MDHistoWorkspace.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
@@ -41,13 +43,9 @@ public:
 
   /// Algorithm's version for identification
   int version() const override { return 1; };
-  const std::vector<std::string> seeAlso() const override {
-    return {"FindPeaks"};
-  }
+  const std::vector<std::string> seeAlso() const override { return {"FindPeaks"}; }
   /// Algorithm's category for identification
-  const std::string category() const override {
-    return "Optimization\\PeakFinding;MDAlgorithms\\Peaks";
-  }
+  const std::string category() const override { return "Optimization\\PeakFinding;MDAlgorithms\\Peaks"; }
 
   std::map<std::string, std::string> validateInputs() override;
 
@@ -58,26 +56,31 @@ private:
   void exec() override;
 
   /// Read member variables from experiment info
-  void readExperimentInfo(const Mantid::API::ExperimentInfo_sptr &ei,
-                          const Mantid::API::IMDWorkspace_sptr &ws);
+  void readExperimentInfo(const Mantid::API::ExperimentInfo_sptr &ei);
+  void checkWorkspaceDims(const Mantid::API::IMDWorkspace_sptr &ws);
+  void determineOutputType(const std::string &peakType, const uint16_t numExperimentInfo);
 
   /// Adds a peak based on Q, bin count & a set of detector IDs
-  void addPeak(const Mantid::Kernel::V3D &Q, const double binCount,
-               const Geometry::InstrumentRayTracer &tracer);
+  void addPeak(const Mantid::Kernel::V3D &Q, const double binCount, const Geometry::InstrumentRayTracer &tracer);
 
   /// Adds a peak based on Q, bin count
-  std::shared_ptr<DataObjects::Peak>
-  createPeak(const Mantid::Kernel::V3D &Q, const double binCount,
-             const Geometry::InstrumentRayTracer &tracer);
+  void addLeanElasticPeak(const Mantid::Kernel::V3D &Q, const double binCount, const bool useGoniometer = false);
+
+  /// Adds a peak based on Q, bin count
+  std::shared_ptr<DataObjects::Peak> createPeak(const Mantid::Kernel::V3D &Q, const double binCount,
+                                                const Geometry::InstrumentRayTracer &tracer);
+
+  /// Adds a peak based on Q, bin count
+  std::shared_ptr<DataObjects::LeanElasticPeak>
+  createLeanElasticPeak(const Mantid::Kernel::V3D &Q, const double binCount, const bool useGoniometer = false);
 
   /// Run find peaks on an MDEventWorkspace
-  template <typename MDE, size_t nd>
-  void findPeaks(typename DataObjects::MDEventWorkspace<MDE, nd>::sptr ws);
+  template <typename MDE, size_t nd> void findPeaks(typename DataObjects::MDEventWorkspace<MDE, nd>::sptr ws);
   /// Run find peaks on a histo workspace
   void findPeaksHisto(const Mantid::DataObjects::MDHistoWorkspace_sptr &ws);
 
   /// Output PeaksWorkspace
-  Mantid::DataObjects::PeaksWorkspace_sptr peakWS;
+  Mantid::API::IPeaksWorkspace_sptr peakWS;
 
   /// Estimated radius of peaks. Boxes closer than this are rejected
   coord_t peakRadiusSquared;
@@ -121,6 +124,8 @@ private:
   static const std::string volumeNormalization;
   /// NumberOfEventNormalization
   static const std::string numberOfEventsNormalization;
+
+  bool m_leanElasticPeak = false;
 };
 
 } // namespace MDAlgorithms

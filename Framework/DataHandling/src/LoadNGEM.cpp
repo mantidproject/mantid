@@ -20,8 +20,7 @@
 #include <boost/algorithm/string.hpp>
 #include <fstream>
 
-namespace Mantid {
-namespace DataHandling {
+namespace Mantid::DataHandling {
 
 DECLARE_FILELOADER_ALGORITHM(LoadNGEM)
 
@@ -38,10 +37,8 @@ constexpr int NUM_OF_SPECTRA = 16384;
  * @return uint64_t The swapped word.
  */
 uint64_t swapUint64(uint64_t word) {
-  word = ((word << 8) & 0xFF00FF00FF00FF00ULL) |
-         ((word >> 8) & 0x00FF00FF00FF00FFULL);
-  word = ((word << 16) & 0xFFFF0000FFFF0000ULL) |
-         ((word >> 16) & 0x0000FFFF0000FFFFULL);
+  word = ((word << 8) & 0xFF00FF00FF00FF00ULL) | ((word >> 8) & 0x00FF00FF00FF00FFULL);
+  word = ((word << 16) & 0xFFFF0000FFFF0000ULL) | ((word >> 16) & 0x0000FFFF0000FFFFULL);
   return (word << 32) | (word >> 32);
 }
 
@@ -52,9 +49,9 @@ uint64_t swapUint64(uint64_t word) {
  * @param bigEndian The big endian formatted event.
  * @param smallEndian The resulting small endian formatted event.
  */
-void correctForBigEndian(EventUnion *&bigEndian, EventUnion &smallEndian) {
-  smallEndian.splitWord.words[0] = swapUint64(bigEndian->splitWord.words[1]);
-  smallEndian.splitWord.words[1] = swapUint64(bigEndian->splitWord.words[0]);
+void correctForBigEndian(EventUnion &bigEndian, EventUnion &smallEndian) {
+  smallEndian.splitWord.words[0] = swapUint64(bigEndian.splitWord.words[1]);
+  smallEndian.splitWord.words[1] = swapUint64(bigEndian.splitWord.words[0]);
 }
 
 /**
@@ -69,11 +66,10 @@ void correctForBigEndian(EventUnion *&bigEndian, EventUnion &smallEndian) {
  * @param events The main set of events for the data so far.
  * @param eventsInFrame The set of events for the current frame.
  */
-void addFrameToOutputWorkspace(
-    int &rawFrames, int &goodFrames, const int &eventCountInFrame,
-    const int &minEventsReq, const int &maxEventsReq,
-    MantidVec &frameEventCounts, std::vector<DataObjects::EventList> &events,
-    std::vector<DataObjects::EventList> &eventsInFrame) {
+void addFrameToOutputWorkspace(int &rawFrames, int &goodFrames, const int &eventCountInFrame, const int &minEventsReq,
+                               const int &maxEventsReq, MantidVec &frameEventCounts,
+                               std::vector<DataObjects::EventList> &events,
+                               std::vector<DataObjects::EventList> &eventsInFrame) {
   ++rawFrames;
   if (eventCountInFrame >= minEventsReq && eventCountInFrame <= maxEventsReq) {
     // Add number of event counts to workspace.
@@ -99,13 +95,11 @@ void addFrameToOutputWorkspace(
  * @param events The main events data.
  * @param dataWorkspace The workspace to add the data to.
  */
-void createEventWorkspace(const double &maxToF, const double &binWidth,
-                          std::vector<DataObjects::EventList> &events,
+void createEventWorkspace(const double &maxToF, const double &binWidth, std::vector<DataObjects::EventList> &events,
                           DataObjects::EventWorkspace_sptr &dataWorkspace) {
   // Round up number of bins needed
   std::vector<double> xAxis(int(std::ceil(maxToF / binWidth)));
-  std::generate(xAxis.begin(), xAxis.end(),
-                [i = 0, &binWidth]() mutable { return binWidth * i++; });
+  std::generate(xAxis.begin(), xAxis.end(), [i = 0, &binWidth]() mutable { return binWidth * i++; });
 
   dataWorkspace = DataObjects::create<DataObjects::EventWorkspace>(
       NUM_OF_SPECTRA, HistogramData::Histogram(HistogramData::BinEdges(xAxis)));
@@ -116,8 +110,7 @@ void createEventWorkspace(const double &maxToF, const double &binWidth,
     dataWorkspace->getSpectrum(i).setDetectorID(i + 1);
   }
   dataWorkspace->setAllX(HistogramData::BinEdges{xAxis});
-  dataWorkspace->getAxis(0)->unit() =
-      Kernel::UnitFactory::Instance().create("TOF");
+  dataWorkspace->getAxis(0)->unit() = Kernel::UnitFactory::Instance().create("TOF");
   dataWorkspace->setYUnit("Counts");
 }
 
@@ -129,8 +122,7 @@ void createEventWorkspace(const double &maxToF, const double &binWidth,
  * @param ws The workspace to add the log to.
  */
 template <typename ValueType>
-void addToSampleLog(const std::string &name, const ValueType &value,
-                    DataObjects::EventWorkspace &ws) {
+void addToSampleLog(const std::string &name, const ValueType &value, DataObjects::EventWorkspace &ws) {
   ws.mutableRun().addProperty(name, value, false);
 }
 
@@ -157,14 +149,13 @@ int LoadNGEM::confidence(Kernel::FileDescriptor &descriptor) const {
 void LoadNGEM::init() {
   // Filename property.
   const std::vector<std::string> extentions{".edb"};
-  declareProperty(
-      std::make_unique<API::MultipleFileProperty>("Filename", extentions),
-      "The name of the nGEM file to load. Selecting multiple files will "
-      "combine them into one workspace.");
+  declareProperty(std::make_unique<API::MultipleFileProperty>("Filename", extentions),
+                  "The name of the nGEM file to load. Selecting multiple files will "
+                  "combine them into one workspace.");
   // Output workspace
-  declareProperty(std::make_unique<API::WorkspaceProperty<API::Workspace>>(
-                      "OutputWorkspace", "", Kernel::Direction::Output),
-                  "The output workspace");
+  declareProperty(
+      std::make_unique<API::WorkspaceProperty<API::Workspace>>("OutputWorkspace", "", Kernel::Direction::Output),
+      "The output workspace");
 
   auto mustBePositive = std::make_shared<Kernel::BoundedValidator<int>>();
   mustBePositive->setLower(0);
@@ -173,8 +164,7 @@ void LoadNGEM::init() {
   mustBePositiveDbl->setLower(0.0);
 
   // Bin Width
-  declareProperty("BinWidth", 10.0, mustBePositiveDbl,
-                  "The width of the time bins in the output.");
+  declareProperty("BinWidth", 10.0, mustBePositiveDbl, "The width of the time bins in the output.");
 
   declareProperty("MinEventsPerFrame", 0, mustBePositive,
                   "The minimum number of events required in a frame before a "
@@ -183,8 +173,7 @@ void LoadNGEM::init() {
                   "The maximum number of events allowed in a frame to be "
                   "considered 'good'.");
   declareProperty(
-      std::make_unique<Kernel::PropertyWithValue<bool>>(
-          "GenerateEventsPerFrame", false, Kernel::Direction::Input),
+      std::make_unique<Kernel::PropertyWithValue<bool>>("GenerateEventsPerFrame", false, Kernel::Direction::Input),
       "Generate a workspace to show the number of events captured by each "
       "frame. (optional, default False).");
 }
@@ -200,8 +189,7 @@ void LoadNGEM::exec() {
   const int minEventsReq(getProperty("MinEventsPerFrame"));
   const int maxEventsReq(getProperty("MaxEventsPerFrame"));
 
-  double maxToF{-std::numeric_limits<double>::max()},
-      minToF{std::numeric_limits<double>::max()};
+  double maxToF{-std::numeric_limits<double>::max()}, minToF{std::numeric_limits<double>::max()};
   const double binWidth(getProperty("BinWidth"));
 
   int rawFrames = 0;
@@ -217,13 +205,11 @@ void LoadNGEM::exec() {
   size_t totalFilePaths(filePaths.size());
   int counter(1);
   for (const auto &filePath : filePaths) {
-    loadSingleFile(filePath, eventCountInFrame, maxToF, minToF, rawFrames,
-                   goodFrames, minEventsReq, maxEventsReq, frameEventCounts,
-                   events, eventsInFrame, totalFilePaths, counter);
+    loadSingleFile(filePath, eventCountInFrame, maxToF, minToF, rawFrames, goodFrames, minEventsReq, maxEventsReq,
+                   frameEventCounts, events, eventsInFrame, totalFilePaths, counter);
   }
   // Add the final frame of events (as they are not followed by a T0 event)
-  addFrameToOutputWorkspace(rawFrames, goodFrames, eventCountInFrame,
-                            minEventsReq, maxEventsReq, frameEventCounts,
+  addFrameToOutputWorkspace(rawFrames, goodFrames, eventCountInFrame, minEventsReq, maxEventsReq, frameEventCounts,
                             events, eventsInFrame);
   progress(0.90);
 
@@ -261,13 +247,12 @@ void LoadNGEM::exec() {
  * @param totalFilePaths The total number of file paths.
  * @param fileCount The number of file paths processed.
  */
-void LoadNGEM::loadSingleFile(
-    const std::vector<std::string> &filePath, int &eventCountInFrame,
-    double &maxToF, double &minToF, int &rawFrames, int &goodFrames,
-    const int &minEventsReq, const int &maxEventsReq,
-    MantidVec &frameEventCounts, std::vector<DataObjects::EventList> &events,
-    std::vector<DataObjects::EventList> &eventsInFrame,
-    const size_t &totalFilePaths, int &fileCount) {
+void LoadNGEM::loadSingleFile(const std::vector<std::string> &filePath, int &eventCountInFrame, double &maxToF,
+                              double &minToF, int &rawFrames, int &goodFrames, const int &minEventsReq,
+                              const int &maxEventsReq, MantidVec &frameEventCounts,
+                              std::vector<DataObjects::EventList> &events,
+                              std::vector<DataObjects::EventList> &eventsInFrame, const size_t &totalFilePaths,
+                              int &fileCount) {
   // Create file reader
   if (filePath.size() > 1) {
     throw std::runtime_error("Invalid filename parameter.");
@@ -276,20 +261,26 @@ void LoadNGEM::loadSingleFile(
   if (!file.is_open()) {
     throw std::runtime_error("File could not be found.");
   }
-  std::array<char, 16> buffer;
 
   const size_t totalNumEvents = verifyFileSize(file) / 16;
+  constexpr size_t SKIP_WORD_SIZE = 4;
   size_t numProcessedEvents = 0;
+  size_t numWordsSkipped = 0;
 
-  while (!file.eof()) {
+  while (true) {
     // Load an event into the variable.
-    file.read(buffer.data(), 16);
-    auto eventBigEndian = reinterpret_cast<EventUnion *>(buffer.data());
-
-    // Correct for the big endian format.
-    EventUnion event;
-    correctForBigEndian(eventBigEndian, event);
-
+    // Occasionally we may get a file where the first event has been chopped,
+    // so we seek to the start of a valid event.
+    // Chopping only seems to occur on a 4 byte word, hence seekg() of 4
+    EventUnion event, eventBigEndian;
+    do {
+      file.read(reinterpret_cast<char *>(&eventBigEndian), sizeof(eventBigEndian));
+      // Correct for the big endian format of nGEM datafile.
+      correctForBigEndian(eventBigEndian, event);
+    } while (!event.generic.check() && !file.seekg(SKIP_WORD_SIZE, std::ios_base::cur).eof() && ++numWordsSkipped);
+    if (file.eof()) {
+      break; // we have either not read an event, or only read part of one
+    }
     if (event.coincidence.check()) { // Check for coincidence event.
       ++eventCountInFrame;
       uint64_t pixel = event.coincidence.getPixel();
@@ -304,18 +295,22 @@ void LoadNGEM::loadSingleFile(
       eventsInFrame[pixel].addEventQuickly(Types::Event::TofEvent(tof));
 
     } else if (event.tZero.check()) { // Check for T0 event.
-      addFrameToOutputWorkspace(rawFrames, goodFrames, eventCountInFrame,
-                                minEventsReq, maxEventsReq, frameEventCounts,
+      addFrameToOutputWorkspace(rawFrames, goodFrames, eventCountInFrame, minEventsReq, maxEventsReq, frameEventCounts,
                                 events, eventsInFrame);
 
-      if (reportProgressAndCheckCancel(numProcessedEvents, eventCountInFrame,
-                                       totalNumEvents, totalFilePaths,
+      if (reportProgressAndCheckCancel(numProcessedEvents, eventCountInFrame, totalNumEvents, totalFilePaths,
                                        fileCount)) {
         return;
       }
-    } else { // Catch all other events and notify.
-      g_log.warning() << "Unexpected event type loaded.\n";
+    } else if (event.generic.check()) { // match all other events and notify.
+      g_log.warning() << "Unexpected event type ID=" << event.generic.id << " loaded.\n";
+    } else { // if we were to get to here, must be a corrupt event
+      g_log.warning() << "Corrupt event detected.\n";
     }
+  }
+  if (numWordsSkipped > 0) {
+    g_log.warning() << SKIP_WORD_SIZE * numWordsSkipped
+                    << " bytes of file data were skipped when locating valid events.\n";
   }
   g_log.information() << "Finished loading a file.\n";
   ++fileCount;
@@ -333,10 +328,9 @@ size_t LoadNGEM::verifyFileSize(std::ifstream &file) {
   file.seekg(0, file.end);
   size_t size = file.tellg();
   if (size % 16 != 0) {
-    g_log.warning()
-        << "Invalid file size. File is size is " << size
-        << " bytes which is not a multiple of 16. There may be some bytes "
-           "missing from the data. \n";
+    g_log.warning() << "Invalid file size. File is size is " << size
+                    << " bytes which is not a multiple of 16. There may be some bytes "
+                       "missing from the data. \n";
   }
   file.seekg(0);
   return size;
@@ -353,16 +347,12 @@ size_t LoadNGEM::verifyFileSize(std::ifstream &file) {
  * @return true If user has cancelled the load.
  * @return false If the user has not cancelled.
  */
-bool LoadNGEM::reportProgressAndCheckCancel(size_t &numProcessedEvents,
-                                            int &eventCountInFrame,
-                                            const size_t &totalNumEvents,
-                                            const size_t &totalFilePaths,
+bool LoadNGEM::reportProgressAndCheckCancel(size_t &numProcessedEvents, int &eventCountInFrame,
+                                            const size_t &totalNumEvents, const size_t &totalFilePaths,
                                             const int &fileCount) {
   numProcessedEvents += eventCountInFrame;
-  std::string message(std::to_string(fileCount) + "/" +
-                      std::to_string(totalFilePaths));
-  progress(double(numProcessedEvents) / double(totalNumEvents) / 1.11111,
-           message);
+  std::string message(std::to_string(fileCount) + "/" + std::to_string(totalFilePaths));
+  progress(double(numProcessedEvents) / double(totalNumEvents) / 1.11111, message);
   eventCountInFrame = 0;
   // Check for cancel flag.
   return this->getCancel();
@@ -374,30 +364,25 @@ bool LoadNGEM::reportProgressAndCheckCancel(size_t &numProcessedEvents,
  *
  * @param frameEventCounts A Vector of the number of events per frame.
  */
-void LoadNGEM::createCountWorkspace(
-    const std::vector<double> &frameEventCounts) {
+void LoadNGEM::createCountWorkspace(const std::vector<double> &frameEventCounts) {
   std::vector<double> xAxisCounts(frameEventCounts.size() + 1);
-  std::generate(xAxisCounts.begin(), xAxisCounts.end(),
-                [n = 0.0]() mutable { return ++n; });
+  std::generate(xAxisCounts.begin(), xAxisCounts.end(), [n = 0.0]() mutable { return ++n; });
 
   DataObjects::Workspace2D_sptr countsWorkspace =
-      DataObjects::create<DataObjects::Workspace2D>(
-          1, HistogramData::Histogram(HistogramData::BinEdges(xAxisCounts)));
+      DataObjects::create<DataObjects::Workspace2D>(1, HistogramData::Histogram(HistogramData::BinEdges(xAxisCounts)));
 
   countsWorkspace->mutableY(0) = frameEventCounts;
   std::string countsWorkspaceName(this->getProperty("OutputWorkspace"));
   countsWorkspaceName.append("_event_counts");
   countsWorkspace->setYUnit("Counts");
   std::shared_ptr<Kernel::Units::Label> XLabel =
-      std::dynamic_pointer_cast<Kernel::Units::Label>(
-          Kernel::UnitFactory::Instance().create("Label"));
+      std::dynamic_pointer_cast<Kernel::Units::Label>(Kernel::UnitFactory::Instance().create("Label"));
   XLabel->setLabel("Frame");
   countsWorkspace->getAxis(0)->unit() = XLabel;
 
-  this->declareProperty(
-      std::make_unique<API::WorkspaceProperty<API::Workspace>>(
-          "CountsWorkspace", countsWorkspaceName, Kernel::Direction::Output),
-      "Counts of events per frame.");
+  this->declareProperty(std::make_unique<API::WorkspaceProperty<API::Workspace>>("CountsWorkspace", countsWorkspaceName,
+                                                                                 Kernel::Direction::Output),
+                        "Counts of events per frame.");
   progress(1.00);
   this->setProperty("CountsWorkspace", countsWorkspace);
 }
@@ -410,8 +395,7 @@ void LoadNGEM::createCountWorkspace(
 void LoadNGEM::loadInstrument(DataObjects::EventWorkspace_sptr &dataWorkspace) {
   auto loadInstrument = this->createChildAlgorithm("LoadInstrument");
   loadInstrument->setPropertyValue("InstrumentName", "NGEM");
-  loadInstrument->setProperty<API::MatrixWorkspace_sptr>("Workspace",
-                                                         dataWorkspace);
+  loadInstrument->setProperty<API::MatrixWorkspace_sptr>("Workspace", dataWorkspace);
   loadInstrument->setProperty("RewriteSpectraMap", Kernel::OptionalBool(false));
   loadInstrument->execute();
 }
@@ -430,11 +414,9 @@ std::map<std::string, std::string> LoadNGEM::validateInputs() {
   int MaxEventsPerFrame = getProperty("MaxEventsPerFrame");
 
   if (MaxEventsPerFrame < MinEventsPerFrame) {
-    results["MaxEventsPerFrame"] =
-        "MaxEventsPerFrame is less than MinEvents per frame";
+    results["MaxEventsPerFrame"] = "MaxEventsPerFrame is less than MinEvents per frame";
   }
   return results;
 }
 
-} // namespace DataHandling
-} // namespace Mantid
+} // namespace Mantid::DataHandling

@@ -30,9 +30,7 @@ class DLLExport IntegrateFlux : public API::Algorithm {
 public:
   const std::string name() const override;
   int version() const override;
-  const std::vector<std::string> seeAlso() const override {
-    return {"Integration"};
-  }
+  const std::vector<std::string> seeAlso() const override { return {"Integration"}; }
   const std::string category() const override;
   const std::string summary() const override;
 
@@ -40,19 +38,13 @@ private:
   void init() override;
   void exec() override;
 
-  std::shared_ptr<API::MatrixWorkspace>
-  createOutputWorkspace(const API::MatrixWorkspace &inputWS, size_t nX) const;
-  void integrateSpectra(const API::MatrixWorkspace &inputWS,
-                        API::MatrixWorkspace &integrWS) const;
+  std::shared_ptr<API::MatrixWorkspace> createOutputWorkspace(const API::MatrixWorkspace &inputWS, size_t nX) const;
+  void integrateSpectra(const API::MatrixWorkspace &inputWS, API::MatrixWorkspace &integrWS) const;
   template <class EventType>
-  void integrateSpectraEvents(const DataObjects::EventWorkspace &inputWS,
-                              API::MatrixWorkspace &integrWS) const;
-  void integrateSpectraMatrix(const API::MatrixWorkspace &inputWS,
-                              API::MatrixWorkspace &integrWS) const;
-  void integrateSpectraHistograms(const API::MatrixWorkspace &inputWS,
-                                  API::MatrixWorkspace &integrWS) const;
-  void integrateSpectraPointData(const API::MatrixWorkspace &inputWS,
-                                 API::MatrixWorkspace &integrWS) const;
+  void integrateSpectraEvents(const DataObjects::EventWorkspace &inputWS, API::MatrixWorkspace &integrWS) const;
+  void integrateSpectraMatrix(const API::MatrixWorkspace &inputWS, API::MatrixWorkspace &integrWS) const;
+  void integrateSpectraHistograms(const API::MatrixWorkspace &inputWS, API::MatrixWorkspace &integrWS) const;
+  void integrateSpectraPointData(const API::MatrixWorkspace &inputWS, API::MatrixWorkspace &integrWS) const;
 
   size_t getMaxNumberOfPoints(const API::MatrixWorkspace &inputWS) const;
 };

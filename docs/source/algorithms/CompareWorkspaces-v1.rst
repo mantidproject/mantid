@@ -24,19 +24,27 @@ Workspace2D always fail.
 
 This algorithm has two outputs: A boolean "Result" that indicates whether
 the workspaces matched (true) or not (false), and a TableWorkspace property
-named "Messages" (workspace name defaults to "compare_msgs") with three 
-columns. The first column contains messages about any mismatches that were 
+named "Messages" (workspace name defaults to "compare_msgs") with three
+columns. The first column contains messages about any mismatches that were
 detected. The second and third columns are the names of the workspaces that
-were being compared when the mismatch message was issues. If all the input 
+were being compared when the mismatch message was issues. If all the input
 workspaces matched, the message workspace will be empty.
 
 Please note that details about the comparisons will be only available when the log level is set to debug.
 
+Checking option `CheckInstrument` will enable the following comparisons between the instruments embedded
+in each of the two workspaces:
+
+- instrument name
+- positions and rotations of detectors
+- mask of detectors
+- position of the source and sample
+- instrument parameters
 
 Usage
 -----
 
-**Example - Check that two workspaces are equal to one another:**  
+**Example - Check that two workspaces are equal to one another:**
 
 .. testcode:: ExCompareWorkspacesSimple
 
@@ -61,7 +69,7 @@ Output:
     0
 
 
-**Example - Check that two workspaces match within a certain tolerance:**  
+**Example - Check that two workspaces match within a certain tolerance:**
 
 .. testcode:: ExCompareWorkspacesTolerance
 

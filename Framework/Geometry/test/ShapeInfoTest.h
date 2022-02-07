@@ -71,8 +71,7 @@ public:
     TS_ASSERT_EQUALS(shapeInfo.height(), 0);
     TS_ASSERT_EQUALS(shapeInfo.innerRadius(), 0);
     TS_ASSERT_EQUALS(shapeInfo.points().size(), 8);
-    TS_ASSERT_EQUALS(shapeInfo.points(),
-                     (std::vector<V3D>{p1, p2, p3, p4, p5, p6, p7, p8}));
+    TS_ASSERT_EQUALS(shapeInfo.points(), (std::vector<V3D>{p1, p2, p3, p4, p5, p6, p7, p8}));
   }
 
   void testSetHollowCylinder() {
@@ -82,11 +81,9 @@ public:
     constexpr double innerRadius = 5;
     constexpr double outerRadius = 6;
     constexpr double height = 3;
-    shapeInfo.setHollowCylinder(centerBottomBase, symmetryAxis, innerRadius,
-                                outerRadius, height);
+    shapeInfo.setHollowCylinder(centerBottomBase, symmetryAxis, innerRadius, outerRadius, height);
 
-    TS_ASSERT_EQUALS(shapeInfo.shape(),
-                     ShapeInfo::GeometryShape::HOLLOWCYLINDER);
+    TS_ASSERT_EQUALS(shapeInfo.shape(), ShapeInfo::GeometryShape::HOLLOWCYLINDER);
     TS_ASSERT_EQUALS(shapeInfo.points().size(), 2);
     TS_ASSERT_EQUALS(shapeInfo.points()[0], centerBottomBase);
     TS_ASSERT_EQUALS(shapeInfo.points()[1], symmetryAxis);
@@ -141,8 +138,7 @@ public:
     double testRadius;
     double testInnerRadius;
 
-    shapeInfo.getObjectGeometry(testShape, testPoints, testInnerRadius,
-                                testRadius, testHeight);
+    shapeInfo.getObjectGeometry(testShape, testPoints, testInnerRadius, testRadius, testHeight);
     TS_ASSERT_EQUALS(testRadius, radius);
     TS_ASSERT_EQUALS(testHeight, 0);
     TS_ASSERT_EQUALS(testInnerRadius, 0);
@@ -158,8 +154,7 @@ public:
     constexpr double innerRadius = 1;
     constexpr double outerRadius = 2;
     constexpr double height = 5;
-    shapeInfo.setHollowCylinder(centreBottomBase, symmetryAxis, innerRadius,
-                                outerRadius, height);
+    shapeInfo.setHollowCylinder(centreBottomBase, symmetryAxis, innerRadius, outerRadius, height);
 
     ShapeInfo::GeometryShape testShape;
     std::vector<V3D> testPoint;
@@ -249,8 +244,7 @@ public:
     constexpr double height = 5;
     constexpr double innerRadius = 5;
     constexpr double outerRadius = 6;
-    shapeInfo.setHollowCylinder(centerOfBottomBase, symmetryAxis, innerRadius,
-                                outerRadius, height);
+    shapeInfo.setHollowCylinder(centerOfBottomBase, symmetryAxis, innerRadius, outerRadius, height);
     const auto geometry = shapeInfo.hollowCylinderGeometry();
     TS_ASSERT_EQUALS(geometry.centreOfBottomBase, centerOfBottomBase)
     TS_ASSERT_EQUALS(geometry.axis, symmetryAxis);

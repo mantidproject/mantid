@@ -28,7 +28,7 @@
 #   include <iostream>
 #endif // _CXXTEST_OLD_STD
 
-namespace CxxTest 
+namespace CxxTest
 {
     class ErrorPrinter : public ErrorFormatter
     {

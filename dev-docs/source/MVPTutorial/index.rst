@@ -7,7 +7,7 @@ Interface (GUI) using PyQt. Some knowledge of Python is assumed.
 
 The concepts carry over into Qt in C++.
 
-Duration: 6 hours as a hands-on course with exercises. 
+Duration: 6 hours as a hands-on course with exercises.
 
 .. toctree::
    :maxdepth: 1

@@ -58,9 +58,7 @@ public:
   /// Algorithm's name
   const std::string name() const override { return "SaveGSS"; }
   /// Summary of algorithms purpose
-  const std::string summary() const override {
-    return "Saves a focused data set into a three column GSAS format.";
-  }
+  const std::string summary() const override { return "Saves a focused data set into a three column GSAS format."; }
 
   /// Algorithm's version
   int version() const override { return (1); }
@@ -68,9 +66,7 @@ public:
     return {"LoadGSS", "SaveVulcanGSS", "SaveGSASInstrumentFile", "SaveAscii"};
   }
   /// Algorithm's category for identification
-  const std::string category() const override {
-    return "Diffraction\\DataHandling;DataHandling\\Text";
-  }
+  const std::string category() const override { return "Diffraction\\DataHandling;DataHandling\\Text"; }
 
 private:
   /// Initialisation code
@@ -85,14 +81,11 @@ private:
   void processUserSpecifiedHeaders();
 
   /// Turns the data associated with this spectra into a string stream
-  void generateBankData(std::stringstream &outBuf, size_t specIndex,
-                        const std::string &outputFormat,
+  void generateBankData(std::stringstream &outBuf, size_t specIndex, const std::string &outputFormat,
                         const std::vector<int> &slog_xye_precisions) const;
 
   /// Generates the bank header and returns this as a string stream
-  void generateBankHeader(std::stringstream &out,
-                          const API::SpectrumInfo &spectrumInfo,
-                          size_t specIndex) const;
+  void generateBankHeader(std::stringstream &out, const API::SpectrumInfo &spectrumInfo, size_t specIndex) const;
 
   /// Generates the output which will be written to the GSAS file
   void generateGSASBuffer(size_t numOutFiles, size_t numOutSpectra);
@@ -104,8 +97,7 @@ private:
   void generateOutFileNames(size_t numberOfOutFiles);
 
   /// Returns the log value in a GSAS format as a string stream
-  void getLogValue(std::stringstream &out, const API::Run &runInfo,
-                   const std::string &name,
+  void getLogValue(std::stringstream &out, const API::Run &runInfo, const std::string &name,
                    const std::string &failsafeValue = "UNKNOWN") const;
 
   /// Returns if the input workspace instrument is valid
@@ -115,8 +107,7 @@ private:
   void openFileStream(const std::string &outFilePath, std::ofstream &outStream);
 
   /// sets non workspace properties for the algorithm
-  void setOtherProperties(IAlgorithm *alg, const std::string &propertyName,
-                          const std::string &propertyValue,
+  void setOtherProperties(IAlgorithm *alg, const std::string &propertyName, const std::string &propertyValue,
                           int periodNum) override;
 
   /// Validates the user input and warns / throws on bad conditions
@@ -126,23 +117,18 @@ private:
   void writeBufferToFile(size_t numOutFiles, size_t numSpectra);
 
   // Writes the header for RALF data format to the buffer
-  void writeRALFHeader(std::stringstream &out, int bank,
-                       const HistogramData::Histogram &histo) const;
+  void writeRALFHeader(std::stringstream &out, int bank, const HistogramData::Histogram &histo) const;
 
   /// Write out the data in RALF - ALT format
-  void writeRALF_ALTdata(std::stringstream &out, const int bank,
-                         const HistogramData::Histogram &histo) const;
+  void writeRALF_ALTdata(std::stringstream &out, const int bank, const HistogramData::Histogram &histo) const;
 
   /// Write out the data in RALF - FXYE format
-  void writeRALF_XYEdata(const int bank, const bool MultiplyByBinWidth,
-                         std::stringstream &out,
+  void writeRALF_XYEdata(const int bank, const bool MultiplyByBinWidth, std::stringstream &out,
                          const HistogramData::Histogram &histo) const;
 
   /// Write out the data in SLOG format
-  void writeSLOGdata(const size_t ws_index, const int bank,
-                     const bool MultiplyByBinWidth, std::stringstream &out,
-                     const HistogramData::Histogram &histo,
-                     const std::vector<int> &xye_precision) const;
+  void writeSLOGdata(const size_t ws_index, const int bank, const bool MultiplyByBinWidth, std::stringstream &out,
+                     const HistogramData::Histogram &histo, const std::vector<int> &xye_precision) const;
 
   /// Workspace
   API::MatrixWorkspace_const_sptr m_inputWS;

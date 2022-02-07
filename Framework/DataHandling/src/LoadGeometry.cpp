@@ -8,8 +8,7 @@
 #include "MantidKernel/FileDescriptor.h"
 #include "MantidKernel/NexusDescriptor.h"
 
-namespace Mantid {
-namespace DataHandling {
+namespace Mantid::DataHandling {
 
 /// Determine if the Geometry file type is IDF
 bool LoadGeometry::isIDF(const std::string &filename) {
@@ -22,35 +21,27 @@ bool LoadGeometry::isIDF(const std::string &filename) {
 
 /// Determine if the Geometry file type is Nexus
 bool LoadGeometry::isNexus(const std::string &filename) {
-  if (!filename.empty() &&
-      !Mantid::Kernel::FileDescriptor(filename).isAscii(filename)) {
+  if (!filename.empty() && !Mantid::Kernel::FileDescriptor(filename).isAscii(filename)) {
     Mantid::Kernel::NexusDescriptor descriptor(filename);
     return descriptor.isReadable(filename) &&
-           (descriptor.classTypeExists("NXcylindrical_geometry") ||
-            descriptor.classTypeExists("NXoff_geometry") ||
+           (descriptor.classTypeExists("NXcylindrical_geometry") || descriptor.classTypeExists("NXoff_geometry") ||
             descriptor.classTypeExists("NXtransformations"));
   }
   return false;
 }
 
-bool LoadGeometry::isNexus(
-    const std::string &filename,
-    const std::map<std::string, std::set<std::string>> &allEntries) {
-  if (!filename.empty() &&
-      !Mantid::Kernel::FileDescriptor(filename).isAscii(filename)) {
+bool LoadGeometry::isNexus(const std::string &filename,
+                           const std::map<std::string, std::set<std::string>> &allEntries) {
+  if (!filename.empty() && !Mantid::Kernel::FileDescriptor(filename).isAscii(filename)) {
     Mantid::Kernel::NexusDescriptor descriptor(filename, false);
     return descriptor.isReadable(filename) &&
-           (allEntries.count("NXcylindrical_geometry") == 1 ||
-            allEntries.count("NXoff_geometry") == 1 ||
+           (allEntries.count("NXcylindrical_geometry") == 1 || allEntries.count("NXoff_geometry") == 1 ||
             allEntries.count("NXtransformations") == 1);
   }
   return false;
 }
 
 /// List allowed file extensions for geometry
-const std::vector<std::string> LoadGeometry::validExtensions() {
-  return {".xml", ".nxs", ".hdf5"};
-}
+const std::vector<std::string> LoadGeometry::validExtensions() { return {".xml", ".nxs", ".hdf5"}; }
 
-} // namespace DataHandling
-} // namespace Mantid
+} // namespace Mantid::DataHandling

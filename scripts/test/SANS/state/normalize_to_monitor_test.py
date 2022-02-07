@@ -48,8 +48,8 @@ class StateNormalizeToMonitorTest(unittest.TestCase):
 
     def test_that_normalize_to_monitor_for_loq_has_default_prompt_peak(self):
         state = StateNormalizeToMonitorLOQ()
-        self.assertEqual(state.prompt_peak_correction_max,  20500.)
-        self.assertEqual(state.prompt_peak_correction_min,  19000.)
+        self.assertEqual(state.prompt_peak_correction_max, 20500.)
+        self.assertEqual(state.prompt_peak_correction_min, 19000.)
 
     def test_that_raises_for_partially_set_prompt_peak(self):
         self.assert_raises_for_bad_value_and_raises_nothing_for_good_value("prompt_peak_correction_min", None, 1.)
@@ -103,11 +103,6 @@ class StateReductionBuilderTest(unittest.TestCase):
 
         builder.set_prompt_peak_correction_min(12.0)
         builder.set_prompt_peak_correction_max(17.0)
-        builder.set_rebin_type(RebinType.REBIN)
-        builder.set_wavelength_low([1.5])
-        builder.set_wavelength_high([2.7])
-        builder.set_wavelength_step(0.5)
-        builder.set_wavelength_step_type(RangeStepType.LIN)
         builder.set_incident_monitor(1)
         builder.set_background_TOF_general_start(1.4)
         builder.set_background_TOF_general_stop(34.4)
@@ -117,18 +112,13 @@ class StateReductionBuilderTest(unittest.TestCase):
         state = builder.build()
 
         # Assert
-        self.assertEqual(state.prompt_peak_correction_min,  12.0)
-        self.assertEqual(state.prompt_peak_correction_max,  17.0)
-        self.assertEqual(state.rebin_type, RebinType.REBIN)
-        self.assertEqual(state.wavelength_low,  [1.5])
-        self.assertEqual(state.wavelength_high,  [2.7])
-        self.assertEqual(state.wavelength_step,  0.5)
-        self.assertEqual(state.wavelength_step_type, RangeStepType.LIN)
-        self.assertEqual(state.background_TOF_general_start,  1.4)
-        self.assertEqual(state.background_TOF_general_stop,  34.4)
+        self.assertEqual(state.prompt_peak_correction_min, 12.0)
+        self.assertEqual(state.prompt_peak_correction_max, 17.0)
+        self.assertEqual(state.background_TOF_general_start, 1.4)
+        self.assertEqual(state.background_TOF_general_stop, 34.4)
         self.assertEqual(len(set(state.background_TOF_monitor_start.items()) & set({"1": 123, "2": 123}.items())), 2)
         self.assertEqual(len(set(state.background_TOF_monitor_stop.items()) & set({"1": 234, "2": 2323}.items())), 2)
-        self.assertEqual(state.incident_monitor,  1)
+        self.assertEqual(state.incident_monitor, 1)
 
 
 if __name__ == '__main__':

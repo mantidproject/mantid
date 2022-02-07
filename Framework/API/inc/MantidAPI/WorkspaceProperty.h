@@ -52,28 +52,21 @@ and the overwriting the old one at the end.)
 @date 10/12/2007
 */
 template <typename TYPE = MatrixWorkspace>
-class WorkspaceProperty
-    : public Kernel::PropertyWithValue<std::shared_ptr<TYPE>>,
-      public IWorkspaceProperty {
+class WorkspaceProperty : public Kernel::PropertyWithValue<std::shared_ptr<TYPE>>, public IWorkspaceProperty {
 public:
   explicit WorkspaceProperty(
-      const std::string &name, const std::string &wsName,
-      const unsigned int direction,
-      const Kernel::IValidator_sptr &validator =
-          Kernel::IValidator_sptr(new Kernel::NullValidator));
+      const std::string &name, const std::string &wsName, const unsigned int direction,
+      const Kernel::IValidator_sptr &validator = Kernel::IValidator_sptr(new Kernel::NullValidator));
 
   explicit WorkspaceProperty(
-      const std::string &name, const std::string &wsName,
-      const unsigned int direction, const PropertyMode::Type optional,
-      const Kernel::IValidator_sptr &validator =
-          Kernel::IValidator_sptr(new Kernel::NullValidator));
+      const std::string &name, const std::string &wsName, const unsigned int direction,
+      const PropertyMode::Type optional,
+      const Kernel::IValidator_sptr &validator = Kernel::IValidator_sptr(new Kernel::NullValidator));
 
   explicit WorkspaceProperty(
-      const std::string &name, const std::string &wsName,
-      const unsigned int direction, const PropertyMode::Type optional,
-      const LockMode::Type locking,
-      const Kernel::IValidator_sptr &validator =
-          Kernel::IValidator_sptr(new Kernel::NullValidator));
+      const std::string &name, const std::string &wsName, const unsigned int direction,
+      const PropertyMode::Type optional, const LockMode::Type locking,
+      const Kernel::IValidator_sptr &validator = Kernel::IValidator_sptr(new Kernel::NullValidator));
 
   WorkspaceProperty(const WorkspaceProperty &right);
 
@@ -97,8 +90,7 @@ public:
 
   std::string setValueFromJson(const Json::Value &value) override;
 
-  std::string
-  setDataItem(const std::shared_ptr<Kernel::DataItem> &value) override;
+  std::string setDataItem(const std::shared_ptr<Kernel::DataItem> &value) override;
 
   std::string isValid() const override;
 
@@ -118,8 +110,7 @@ public:
   void setIsMasterRank(bool isMasterRank) override;
 
 private:
-  std::string
-  isValidGroup(const std::shared_ptr<WorkspaceGroup> &wsGroup) const;
+  std::string isValidGroup(const std::shared_ptr<WorkspaceGroup> &wsGroup) const;
 
   std::string isValidOutputWs() const;
 
@@ -146,8 +137,7 @@ private:
   bool m_isMasterRank{true};
 };
 
-template <typename TYPE>
-Kernel::Logger WorkspaceProperty<TYPE>::g_log("WorkspaceProperty");
+template <typename TYPE> Kernel::Logger WorkspaceProperty<TYPE>::g_log("WorkspaceProperty");
 
 } // namespace API
 } // namespace Mantid

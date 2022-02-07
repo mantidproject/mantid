@@ -8,20 +8,17 @@
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/FunctionValues.h"
 
-namespace Mantid {
-namespace Poldi {
+namespace Mantid::Poldi {
 
 using namespace API;
 
 /// Default constructor
-PoldiSpectrumPawleyFunction::PoldiSpectrumPawleyFunction()
-    : PoldiSpectrumDomainFunction(), m_pawleyFunction() {}
+PoldiSpectrumPawleyFunction::PoldiSpectrumPawleyFunction() : PoldiSpectrumDomainFunction(), m_pawleyFunction() {}
 
 /// This function does nothing to prevent setting the workspace on the wrapped
 /// function (unit conversion will not work and is not needed).
-void PoldiSpectrumPawleyFunction::setMatrixWorkspace(
-    std::shared_ptr<const MatrixWorkspace> workspace, size_t wi, double startX,
-    double endX) {
+void PoldiSpectrumPawleyFunction::setMatrixWorkspace(std::shared_ptr<const MatrixWorkspace> workspace, size_t wi,
+                                                     double startX, double endX) {
   UNUSED_ARG(workspace);
   UNUSED_ARG(wi);
   UNUSED_ARG(startX);
@@ -29,8 +26,8 @@ void PoldiSpectrumPawleyFunction::setMatrixWorkspace(
 }
 
 /// Implementation of function1DSpectrum that transforms PawleyFunction output.
-void PoldiSpectrumPawleyFunction::function1DSpectrum(
-    const FunctionDomain1DSpectrum &domain, FunctionValues &values) const {
+void PoldiSpectrumPawleyFunction::function1DSpectrum(const FunctionDomain1DSpectrum &domain,
+                                                     FunctionValues &values) const {
   values.zeroCalculated();
 
   size_t domainSize = domain.size();
@@ -39,8 +36,7 @@ void PoldiSpectrumPawleyFunction::function1DSpectrum(
 
   if (helper) {
     for (size_t i = 0; i < helper->dOffsets.size(); ++i) {
-      double newDOffset =
-          helper->dOffsets[i] * helper->deltaD + helper->dFractionalOffsets[i];
+      double newDOffset = helper->dOffsets[i] * helper->deltaD + helper->dFractionalOffsets[i];
       m_pawleyFunction->setParameter("f0.ZeroShift", newDOffset);
 
       size_t baseOffset = helper->minTOFN;
@@ -48,8 +44,7 @@ void PoldiSpectrumPawleyFunction::function1DSpectrum(
       m_pawleyFunction->function(*(helper->domain), helper->values);
 
       for (size_t j = 0; j < helper->values.size(); ++j) {
-        values.addToCalculated((j + baseOffset) % domainSize,
-                               helper->values[j] * helper->factors[j]);
+        values.addToCalculated((j + baseOffset) % domainSize, helper->values[j] * helper->factors[j]);
       }
     }
 
@@ -58,15 +53,13 @@ void PoldiSpectrumPawleyFunction::function1DSpectrum(
 }
 
 /// Using numerical derivatives turned out to be faster for this case.
-void PoldiSpectrumPawleyFunction::functionDeriv1DSpectrum(
-    const FunctionDomain1DSpectrum &domain, Jacobian &jacobian) {
+void PoldiSpectrumPawleyFunction::functionDeriv1DSpectrum(const FunctionDomain1DSpectrum &domain, Jacobian &jacobian) {
   calNumericalDeriv(domain, jacobian);
 }
 
 /// Calculate 1D function by adding the functions calculated for each index.
-void PoldiSpectrumPawleyFunction::poldiFunction1D(
-    const std::vector<int> &indices, const FunctionDomain1D &domain,
-    FunctionValues &values) const {
+void PoldiSpectrumPawleyFunction::poldiFunction1D(const std::vector<int> &indices, const FunctionDomain1D &domain,
+                                                  FunctionValues &values) const {
   FunctionValues localValues(domain);
 
   m_pawleyFunction->function(domain, localValues);
@@ -78,22 +71,17 @@ void PoldiSpectrumPawleyFunction::poldiFunction1D(
 
     for (size_t i = 0; i < factors.size(); ++i) {
       values.addToCalculated(i, chopperSlitCount * localValues[i] *
-                                    m_timeTransformer->detectorElementIntensity(
-                                        domain[i], static_cast<size_t>(index)));
+                                    m_timeTransformer->detectorElementIntensity(domain[i], static_cast<size_t>(index)));
     }
   }
 }
 
 /// Returns the internally stored Pawley function.
-IPawleyFunction_sptr PoldiSpectrumPawleyFunction::getPawleyFunction() const {
-  return m_pawleyFunction;
-}
+IPawleyFunction_sptr PoldiSpectrumPawleyFunction::getPawleyFunction() const { return m_pawleyFunction; }
 
 /// Makes sure that the decorated function is of the right type.
-void PoldiSpectrumPawleyFunction::beforeDecoratedFunctionSet(
-    const IFunction_sptr &fn) {
-  IPawleyFunction_sptr pawleyFunction =
-      std::dynamic_pointer_cast<IPawleyFunction>(fn);
+void PoldiSpectrumPawleyFunction::beforeDecoratedFunctionSet(const IFunction_sptr &fn) {
+  IPawleyFunction_sptr pawleyFunction = std::dynamic_pointer_cast<IPawleyFunction>(fn);
 
   if (!pawleyFunction) {
     throw std::invalid_argument("Function is not a pawley function.");
@@ -104,5 +92,4 @@ void PoldiSpectrumPawleyFunction::beforeDecoratedFunctionSet(
 
 DECLARE_FUNCTION(PoldiSpectrumPawleyFunction)
 
-} // namespace Poldi
-} // namespace Mantid
+} // namespace Mantid::Poldi

@@ -48,11 +48,9 @@ public:
   using freeSpace_t = boost::multi_index::multi_index_container<
       FreeBlock, boost::multi_index::indexed_by<
                      boost::multi_index::ordered_non_unique<
-                         ::boost::multi_index::const_mem_fun<
-                             FreeBlock, uint64_t, &FreeBlock::getFilePosition>>,
+                         ::boost::multi_index::const_mem_fun<FreeBlock, uint64_t, &FreeBlock::getFilePosition>>,
                      boost::multi_index::ordered_non_unique<
-                         ::boost::multi_index::const_mem_fun<
-                             FreeBlock, uint64_t, &FreeBlock::getSize>>>>;
+                         ::boost::multi_index::const_mem_fun<FreeBlock, uint64_t, &FreeBlock::getSize>>>>;
 
   /// A way to index the free space by their size
   using freeSpace_bySize_t = freeSpace_t::nth_index<1>::type;
@@ -73,8 +71,7 @@ public:
 
   // Allocating
   uint64_t allocate(uint64_t const newSize);
-  uint64_t relocate(uint64_t const oldPos, uint64_t const oldSize,
-                    const uint64_t newSize);
+  uint64_t relocate(uint64_t const oldPos, uint64_t const oldSize, const uint64_t newSize);
 
   // For reporting and saving
   void getFreeSpaceVector(std::vector<uint64_t> &free) const;

@@ -16,8 +16,7 @@ namespace MantidWidgets {
 /// Create a error curve dependent on a data curve.
 /// @param dataCurve :: The curve displaying the data.
 /// @param errors :: A vector with error bars.
-ErrorCurve::ErrorCurve(const QwtPlotCurve *dataCurve,
-                       const std::vector<double> &errors) {
+ErrorCurve::ErrorCurve(const QwtPlotCurve *dataCurve, const std::vector<double> &errors) {
   if (!dataCurve) {
     throw std::runtime_error("Null pointer to a data curve.");
   }
@@ -41,15 +40,13 @@ ErrorCurve::ErrorCurve(const QwtPlotCurve *dataCurve,
 /// @param errors :: A pointer to an array with error bars.
 void ErrorCurve::setErrorBars(const std::vector<double> &errors) {
   if (errors.size() != m_x.size()) {
-    throw std::runtime_error(
-        "Number of error values is different form the number of data points.");
+    throw std::runtime_error("Number of error values is different form the number of data points.");
   }
   m_e = errors;
 }
 
 /// Draw this curve
-void ErrorCurve::draw(QPainter *painter, const QwtScaleMap &xMap,
-                      const QwtScaleMap &yMap,
+void ErrorCurve::draw(QPainter *painter, const QwtScaleMap &xMap, const QwtScaleMap &yMap,
                       const QRect & /*canvasRect*/) const {
   if (m_e.empty())
     return;

@@ -11,14 +11,11 @@ using namespace Mantid::API;
 using namespace Mantid::Kernel;
 
 #include <cmath>
-namespace Mantid {
-namespace Algorithms {
+namespace Mantid::Algorithms {
 // Register the class into the algorithm factory
 DECLARE_ALGORITHM(Logarithm)
 
-Logarithm::Logarithm() : UnaryOperation(), log_Min(0), is_natural(true) {
-  this->useHistogram = true;
-}
+Logarithm::Logarithm() : UnaryOperation(), log_Min(0), is_natural(true) { this->useHistogram = true; }
 
 void Logarithm::defineProperties() {
   declareProperty("Filler", 0.0,
@@ -27,7 +24,7 @@ void Logarithm::defineProperties() {
                   "or less than 0. Default value is 0");
   declareProperty("Natural", true,
                   "Logical value which specifies if user "
-                  "wands to calculate natural or base 10 "
+                  "wants to calculate natural or base 10 "
                   "logarithm.");
 }
 
@@ -36,8 +33,7 @@ void Logarithm::retrieveProperties() {
   this->is_natural = getProperty("Natural");
 }
 
-void Logarithm::performUnaryOperation(const double XIn, const double YIn,
-                                      const double EIn, double &YOut,
+void Logarithm::performUnaryOperation(const double XIn, const double YIn, const double EIn, double &YOut,
                                       double &EOut) {
   (void)XIn; // Avoid compiler warning
   if (YIn <= 0) {
@@ -54,5 +50,4 @@ void Logarithm::performUnaryOperation(const double XIn, const double YIn,
   }
 }
 
-} // End Namespace Algorithms
-} // End Namespace Mantid
+} // namespace Mantid::Algorithms

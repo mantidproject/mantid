@@ -12,6 +12,7 @@
 #include "MantidAPI/WorkspaceProperty.h"
 #include "MantidKernel/V3D.h"
 #include "MantidKernel/WarningSuppressions.h"
+#include "MantidPythonInterface/api/RegisterWorkspacePtrToPython.h"
 #include "MantidPythonInterface/core/Converters/CloneToNDArray.h"
 #include "MantidPythonInterface/core/Converters/NDArrayToVector.h"
 #include "MantidPythonInterface/core/Converters/PySequenceToVector.h"
@@ -19,7 +20,6 @@
 #include "MantidPythonInterface/core/NDArray.h"
 #include "MantidPythonInterface/core/Policies/VectorToNumpy.h"
 #include "MantidPythonInterface/core/VersionCompat.h"
-#include "MantidPythonInterface/kernel/Registry/RegisterWorkspacePtrToPython.h"
 
 #include <boost/preprocessor/list/for_each.hpp>
 #include <boost/preprocessor/tuple/to_list.hpp>
@@ -55,8 +55,7 @@ namespace {
 #define TO_LONG PyLong_AsLong
 #define STR_CHECK PyUnicode_Check
 #if NPY_API_VERSION < 0x0000000a //(1.11)
-#define IS_ARRAY_INTEGER(obj)                                                  \
-  (PyLong_Check(obj) || PyArray_IsScalar((obj), Integer))
+#define IS_ARRAY_INTEGER(obj) (PyLong_Check(obj) || PyArray_IsScalar((obj), Integer))
 #else
 #define IS_ARRAY_INTEGER PyArray_IsIntegerScalar
 #endif
@@ -67,12 +66,9 @@ namespace {
 #endif
 
 /// Boost macro for "looping" over builtin types
-#define BUILTIN_TYPES                                                          \
-  BOOST_PP_TUPLE_TO_LIST(8, (double, std::string, int, size_t, uint32_t,       \
-                             int64_t, float, uint64_t))
+#define BUILTIN_TYPES BOOST_PP_TUPLE_TO_LIST(8, (double, std::string, int, size_t, uint32_t, int64_t, float, uint64_t))
 #define USER_TYPES BOOST_PP_TUPLE_TO_LIST(1, (Mantid::Kernel::V3D))
-#define ARRAY_TYPES                                                            \
-  BOOST_PP_TUPLE_TO_LIST(2, (std::vector<int>, std::vector<double>))
+#define ARRAY_TYPES BOOST_PP_TUPLE_TO_LIST(2, (std::vector<int>, std::vector<double>))
 
 /**
  * Get out the Python value from a specific cell of the supplied column. This is
@@ -82,34 +78,30 @@ namespace {
  * @param typeID The python identifier of the column type.
  * @param row The row to get the value from.
  */
-PyObject *getValue(const Mantid::API::Column_const_sptr &column,
-                   const std::type_info &typeID, const int row) {
+PyObject *getValue(const Mantid::API::Column_const_sptr &column, const std::type_info &typeID, const int row) {
   if (typeID.hash_code() == typeid(Mantid::API::Boolean).hash_code()) {
     bool res = column->cell<Mantid::API::Boolean>(row);
     return to_python_value<const bool &>()(res);
   }
 
-#define GET_BUILTIN(R, _, T)                                                   \
-  else if (typeID.hash_code() == typeid(T).hash_code()) {                      \
-    result = to_python_value<const T &>()(column->cell<T>(row));               \
+#define GET_BUILTIN(R, _, T)                                                                                           \
+  else if (typeID.hash_code() == typeid(T).hash_code()) {                                                              \
+    result = to_python_value<const T &>()(column->cell<T>(row));                                                       \
   }
-#define GET_USER(R, _, T)                                                      \
-  else if (typeID.hash_code() == typeid(T).hash_code()) {                      \
-    const converter::registration *entry =                                     \
-        converter::registry::query(typeid(T));                                 \
-    if (!entry)                                                                \
-      throw std::invalid_argument("Cannot find converter from C++ type.");     \
-    result = entry->to_python((const void *)&column->cell<T>(row));            \
+#define GET_USER(R, _, T)                                                                                              \
+  else if (typeID.hash_code() == typeid(T).hash_code()) {                                                              \
+    const converter::registration *entry = converter::registry::query(typeid(T));                                      \
+    if (!entry)                                                                                                        \
+      throw std::invalid_argument("Cannot find converter from C++ type.");                                             \
+    result = entry->to_python((const void *)&column->cell<T>(row));                                                    \
   }
-#define GET_ARRAY(R, _, T)                                                     \
-  else if (typeID.hash_code() == typeid(T).hash_code()) {                      \
-    result = Converters::Clone::apply<T::value_type>::create1D(                \
-        column->cell<T>(row));                                                 \
+#define GET_ARRAY(R, _, T)                                                                                             \
+  else if (typeID.hash_code() == typeid(T).hash_code()) {                                                              \
+    result = Converters::Clone::apply<T::value_type>::create1D(column->cell<T>(row));                                  \
   }
 
   // -- Use the boost preprocessor to generate a list of else if clause to cut
   // out copy and pasted code.
-  // cppcheck-suppress unreadVariable
   PyObject *result(nullptr);
   if (false) {
   } // So that it always falls through to the list checking
@@ -117,8 +109,7 @@ PyObject *getValue(const Mantid::API::Column_const_sptr &column,
   BOOST_PP_LIST_FOR_EACH(GET_ARRAY, _, ARRAY_TYPES)
   BOOST_PP_LIST_FOR_EACH(GET_USER, _, USER_TYPES)
   else {
-    throw std::invalid_argument("Cannot convert C++ type to Python: " +
-                                column->type());
+    throw std::invalid_argument("Cannot convert C++ type to Python: " + column->type());
   }
   return result;
 }
@@ -140,26 +131,23 @@ void setValue(const Column_sptr &column, const int row, const object &value) {
 
   // Special case: Boost has issues with NumPy ints, so use Python API instead
   // to check this first
-  if (typeID.hash_code() == typeid(int).hash_code() &&
-      IS_ARRAY_INTEGER(value.ptr())) {
+  if (typeID.hash_code() == typeid(int).hash_code() && IS_ARRAY_INTEGER(value.ptr())) {
     column->cell<int>(row) = static_cast<int>(TO_LONG(value.ptr()));
     return;
   }
 
 // Macros for all other types
-#define SET_CELL(R, _, T)                                                      \
-  else if (typeID.hash_code() == typeid(T).hash_code()) {                      \
-    column->cell<T>(row) = extract<T>(value)();                                \
+#define SET_CELL(R, _, T)                                                                                              \
+  else if (typeID.hash_code() == typeid(T).hash_code()) {                                                              \
+    column->cell<T>(row) = extract<T>(value)();                                                                        \
   }
-#define SET_VECTOR_CELL(R, _, T)                                               \
-  else if (typeID.hash_code() == typeid(T).hash_code()) {                      \
-    if (!NDArray::check(value)) {                                              \
-      column->cell<T>(row) =                                                   \
-          Converters::PySequenceToVector<T::value_type>(value)();              \
-    } else {                                                                   \
-      column->cell<T>(row) =                                                   \
-          Converters::NDArrayToVector<T::value_type>(value)();                 \
-    }                                                                          \
+#define SET_VECTOR_CELL(R, _, T)                                                                                       \
+  else if (typeID.hash_code() == typeid(T).hash_code()) {                                                              \
+    if (!NDArray::check(value)) {                                                                                      \
+      column->cell<T>(row) = Converters::PySequenceToVector<T::value_type>(value)();                                   \
+    } else {                                                                                                           \
+      column->cell<T>(row) = Converters::NDArrayToVector<T::value_type>(value)();                                      \
+    }                                                                                                                  \
   }
 
   // -- Use the boost preprocessor to generate a list of else if clause to cut
@@ -170,8 +158,7 @@ void setValue(const Column_sptr &column, const int row, const object &value) {
   BOOST_PP_LIST_FOR_EACH(SET_CELL, _, USER_TYPES)
   BOOST_PP_LIST_FOR_EACH(SET_VECTOR_CELL, _, ARRAY_TYPES)
   else {
-    throw std::invalid_argument("Cannot convert Python type to C++: " +
-                                column->type());
+    throw std::invalid_argument("Cannot convert Python type to C++: " + column->type());
   }
 }
 
@@ -183,8 +170,7 @@ void setValue(const Column_sptr &column, const int row, const object &value) {
  * @param plottype The plot type to set on the column
  * @return Boolean true if successful, false otherwise
  */
-bool addColumnPlotType(ITableWorkspace &self, const std::string &type,
-                       const std::string &name, int plottype) {
+bool addColumnPlotType(ITableWorkspace &self, const std::string &type, const std::string &name, int plottype) {
   auto newColumn = self.addColumn(type, name);
 
   if (newColumn)
@@ -203,9 +189,24 @@ bool addColumnPlotType(ITableWorkspace &self, const std::string &type,
  * to the corresponding C++ method, which returns a pointer to the
  * newly-created column (as the Column class is not exposed to python).
  */
-bool addColumnSimple(ITableWorkspace &self, const std::string &type,
-                     const std::string &name) {
+bool addColumnSimple(ITableWorkspace &self, const std::string &type, const std::string &name) {
   return self.addColumn(type, name) != nullptr;
+}
+
+/**
+ * Add a column to the TableWorkspace that cannot be edited.
+ * @param self A reference to the TableWorkspace python object that we were
+ * called on
+ * @param type The data type of the column to add
+ * @param name The name of the column to add
+ * @return A boolean indicating success or failure. Note that this is different
+ * to the corresponding C++ method, which returns a pointer to the
+ * newly-created column (as the Column class is not exposed to python).
+ */
+bool addReadOnlyColumn(ITableWorkspace &self, const std::string &type, const std::string &name) {
+  auto newColumn = self.addColumn(type, name);
+  newColumn->setReadOnly(true);
+  return true;
 }
 
 /**
@@ -234,8 +235,7 @@ int getPlotType(ITableWorkspace &self, const object &column) {
  * @param linkedCol Index of the column that the column parameter is linked to
  * (typically used for an error column)
  */
-void setPlotType(ITableWorkspace &self, const object &column, int ptype,
-                 int linkedCol = -1) {
+void setPlotType(ITableWorkspace &self, const object &column, int ptype, int linkedCol = -1) {
   // Find the column
   Mantid::API::Column_sptr colptr;
   if (STR_CHECK(column.ptr())) {
@@ -277,6 +277,24 @@ int getLinkedYCol(ITableWorkspace &self, const object &column) {
 }
 
 /**
+ * Link a data column associated with a Y error column
+ * @param self Reference to TableWorkspace this is called on
+ * @param column Name or index of error column
+ * @return index of the associated Y column
+ */
+void setLinkedYCol(ITableWorkspace &self, const object &errColumn, const int dataColomn) {
+  // Find the column
+  Mantid::API::Column_sptr colptr;
+  if (STR_CHECK(errColumn.ptr())) {
+    colptr = self.getColumn(extract<std::string>(errColumn)());
+  } else {
+    colptr = self.getColumn(extract<int>(errColumn)());
+  }
+
+  colptr->setLinkedYCol(dataColomn);
+}
+
+/**
  * Access a cell and return a corresponding Python type
  * @param self A reference to the TableWorkspace python object that we were
  * called on
@@ -312,8 +330,7 @@ PyObject *row(ITableWorkspace &self, int row) {
   if (row < 0)
     throw std::invalid_argument("Cannot specify negative row number");
   if (row >= static_cast<int>(self.rowCount()))
-    throw std::invalid_argument(
-        "Cannot specify row larger than number of rows");
+    throw std::invalid_argument("Cannot specify row larger than number of rows");
 
   auto numCols = static_cast<int>(self.columnCount());
 
@@ -323,8 +340,7 @@ PyObject *row(ITableWorkspace &self, int row) {
     Mantid::API::Column_const_sptr col = self.getColumn(columnIndex);
     const std::type_info &typeID = col->get_type_info();
 
-    if (PyDict_SetItemString(result, col->name().c_str(),
-                             getValue(col, typeID, row)))
+    if (PyDict_SetItemString(result, col->name().c_str(), getValue(col, typeID, row)))
       throw std::runtime_error("Error while building dict");
   }
 
@@ -362,10 +378,9 @@ void addRowFromDict(ITableWorkspace &self, const dict &rowItems) {
   // rowItems must contain an entry for every column
   auto nitems = boost::python::len(rowItems);
   if (nitems != static_cast<decltype(nitems)>(self.columnCount())) {
-    throw std::invalid_argument(
-        "Number of values given does not match the number of columns. "
-        "Expected: " +
-        std::to_string(self.columnCount()));
+    throw std::invalid_argument("Number of values given does not match the number of columns. "
+                                "Expected: " +
+                                std::to_string(self.columnCount()));
   }
 
   // Add a new row to populate with values
@@ -420,10 +435,9 @@ void addRowFromSequence(ITableWorkspace &self, const object &rowItems) {
   // rowItems must contain an entry for every column
   auto nitems = boost::python::len(rowItems);
   if (nitems != static_cast<decltype(nitems)>(self.columnCount())) {
-    throw std::invalid_argument(
-        "Number of values given does not match the number of columns. "
-        "Expected: " +
-        std::to_string(self.columnCount()));
+    throw std::invalid_argument("Number of values given does not match the number of columns. "
+                                "Expected: " +
+                                std::to_string(self.columnCount()));
   }
 
   // Add a new row to populate with values
@@ -463,8 +477,8 @@ void addRowFromSequence(ITableWorkspace &self, const object &rowItems) {
  * @param column [Out]:: The column pointer will be stored here
  * @param rowIndex [Out]:: The row index will be stored here
  */
-void getCellLoc(ITableWorkspace &self, const object &col_or_row,
-                const int row_or_col, Column_sptr &column, int &rowIndex) {
+void getCellLoc(ITableWorkspace &self, const object &col_or_row, const int row_or_col, Column_sptr &column,
+                int &rowIndex) {
   if (STR_CHECK(col_or_row.ptr())) {
     column = self.getColumn(extract<std::string>(col_or_row)());
     rowIndex = row_or_col;
@@ -499,8 +513,7 @@ PyObject *cell(ITableWorkspace &self, const object &value, int row_or_col) {
  * @param row_or_col An integer giving the row if value is a string or the
  * column if value is an index
  */
-void setCell(ITableWorkspace &self, const object &col_or_row,
-             const int row_or_col, const object &value,
+void setCell(ITableWorkspace &self, const object &col_or_row, const int row_or_col, const object &value,
              const bool &notify_replace) {
   Mantid::API::Column_sptr col;
   int rowIndex;
@@ -510,6 +523,41 @@ void setCell(ITableWorkspace &self, const object &col_or_row,
   if (notify_replace) {
     self.modified();
   }
+}
+
+/**
+ * Get whether or not a column given by name or index is read only.
+ * @param self Reference to TableWorkspace this is called on
+ * @param column Name or index of column
+ * @return True if read only, False otherwise.
+ */
+bool isColumnReadOnly(ITableWorkspace &self, const object &column) {
+  // Find the column
+  Mantid::API::Column_const_sptr colptr;
+  if (STR_CHECK(column.ptr())) {
+    colptr = self.getColumn(extract<std::string>(column)());
+  } else {
+    colptr = self.getColumn(extract<int>(column)());
+  }
+  return colptr->getReadOnly();
+}
+
+/**
+ * Set whether or not a column given by name or index should be read only.
+ * @param self Reference to the TableWorkspace this was called on.
+ * @param column Name or index of column.
+ * @param readOnly True if read only, False otherwise.
+ */
+void setColumnReadOnly(ITableWorkspace &self, const object &column, const bool readOnly) {
+  // Find the column
+  Mantid::API::Column_sptr colptr;
+  if (STR_CHECK(column.ptr())) {
+    colptr = self.getColumn(extract<std::string>(column)());
+  } else {
+    colptr = self.getColumn(extract<int>(column)());
+  }
+  colptr->setReadOnly(readOnly);
+  self.modified();
 }
 } // namespace
 
@@ -609,8 +657,7 @@ private:
     for (int rowIndex = 0; rowIndex < numRows; ++rowIndex) {
       ws.appendRow();
       for (const auto &name : names) {
-        setValue(ws.getColumn(name), static_cast<int>(rowIndex),
-                 data[name][rowIndex]);
+        setValue(ws.getColumn(name), static_cast<int>(rowIndex), data[name][rowIndex]);
       }
     }
   }
@@ -619,79 +666,68 @@ private:
 void export_ITableWorkspace() {
   using Mantid::PythonInterface::Policies::VectorToNumpy;
 
-  std::string iTableWorkspace_docstring =
-      "Most of the information from a table workspace is returned ";
-  iTableWorkspace_docstring +=
-      "as native copies. All of the column accessors return lists while the ";
-  iTableWorkspace_docstring +=
-      "rows return dicts. This object does support the idom 'for row in ";
+  std::string iTableWorkspace_docstring = "Most of the information from a table workspace is returned ";
+  iTableWorkspace_docstring += "as native copies. All of the column accessors return lists while the ";
+  iTableWorkspace_docstring += "rows return dicts. This object does support the idom 'for row in ";
   iTableWorkspace_docstring += "ITableWorkspace'.";
 
-  class_<ITableWorkspace, bases<Workspace>, boost::noncopyable>(
-      "ITableWorkspace", iTableWorkspace_docstring.c_str(), no_init)
+  class_<ITableWorkspace, bases<Workspace>, boost::noncopyable>("ITableWorkspace", iTableWorkspace_docstring.c_str(),
+                                                                no_init)
       .def_pickle(ITableWorkspacePickleSuite())
-      .def("addColumn", &addColumnSimple,
-           (arg("self"), arg("type"), arg("name")),
+      .def("addColumn", &addColumnSimple, (arg("self"), arg("type"), arg("name")),
            "Add a named column with the given type. Recognized types are: "
            "int,float,double,bool,str,V3D,long64")
 
-      .def("addColumn", &addColumnPlotType,
-           (arg("self"), arg("type"), arg("name"), arg("plottype")),
+      .def("addColumn", &addColumnPlotType, (arg("self"), arg("type"), arg("name"), arg("plottype")),
            "Add a named column with the given datatype "
            "(int,float,double,bool,str,V3D,long64) "
            "\nand plottype "
            "(0 = None, 1 = X, 2 = Y, 3 = Z, 4 = xErr, 5 = yErr, 6 = Label).")
+
+      .def("addReadOnlyColumn", &addReadOnlyColumn, (arg("self"), arg("type"), arg("name")),
+           "Add a read-only, named column with the given type. Recognized types are: "
+           "int,float,double,bool,str,V3D,long64")
 
       .def("getPlotType", &getPlotType, (arg("self"), arg("column")),
            "Get the plot type of given column as an integer. "
            "Accepts column name or index. \nPossible return values: "
            "(0 = None, 1 = X, 2 = Y, 3 = Z, 4 = xErr, 5 = yErr, 6 = Label).")
 
-      .def(
-          "setPlotType", setPlotType,
-          setPlotType_overloads(
-              (arg("self"), arg("column"), arg("ptype"), arg("linkedCol") = -1),
-              "Set the plot type of given column. "
-              "Accepts column name or index. \nPossible type values: "
-              "(0 = None, 1 = X, 2 = Y, 3 = Z, 4 = xErr, 5 = yErr, 6 = "
-              "Label)."))
+      .def("setPlotType", setPlotType,
+           setPlotType_overloads((arg("self"), arg("column"), arg("ptype"), arg("linkedCol") = -1),
+                                 "Set the plot type of given column. "
+                                 "Accepts column name or index. \nPossible type values: "
+                                 "(0 = None, 1 = X, 2 = Y, 3 = Z, 4 = xErr, 5 = yErr, 6 = "
+                                 "Label)."))
 
       .def("getLinkedYCol", &getLinkedYCol, (arg("self"), arg("column")),
-           "Get the plot type of given column as an integer. "
-           "Accepts column name or index. ")
+           "Get the data column associated with a given error column. ")
 
-      .def("removeColumn", &ITableWorkspace::removeColumn,
-           (arg("self"), arg("name")), "Remove the named column.")
+      .def("setLinkedYCol", &setLinkedYCol, (arg("self"), arg("errColumn"), arg("dataColumn")),
+           "Set the data column associated with a given error column. ")
 
-      .def("columnCount", &ITableWorkspace::columnCount, arg("self"),
-           "Returns the number of columns in the workspace.")
+      .def("removeColumn", &ITableWorkspace::removeColumn, (arg("self"), arg("name")), "Remove the named column.")
 
-      .def("rowCount", &ITableWorkspace::rowCount, arg("self"),
-           "Returns the number of rows within the workspace.")
+      .def("columnCount", &ITableWorkspace::columnCount, arg("self"), "Returns the number of columns in the workspace.")
 
-      .def("setRowCount", &ITableWorkspace::setRowCount,
-           (arg("self"), arg("count")),
+      .def("rowCount", &ITableWorkspace::rowCount, arg("self"), "Returns the number of rows within the workspace.")
+
+      .def("setRowCount", &ITableWorkspace::setRowCount, (arg("self"), arg("count")),
            "Resize the table to contain count rows.")
 
-      .def("__len__", &ITableWorkspace::rowCount, arg("self"),
-           "Returns the number of rows within the workspace.")
+      .def("__len__", &ITableWorkspace::rowCount, arg("self"), "Returns the number of rows within the workspace.")
 
       .def("getColumnNames", &ITableWorkspace::getColumnNames, arg("self"),
-           boost::python::return_value_policy<VectorToNumpy>(),
+           boost::python::return_value_policy<VectorToNumpy>(), "Return a list of the column names.")
+
+      .def("keys", &ITableWorkspace::getColumnNames, arg("self"), boost::python::return_value_policy<VectorToNumpy>(),
            "Return a list of the column names.")
 
-      .def("keys", &ITableWorkspace::getColumnNames, arg("self"),
-           boost::python::return_value_policy<VectorToNumpy>(),
-           "Return a list of the column names.")
+      .def("column", &column, (arg("self"), arg("column")), "Return all values of a specific column as a list.")
 
-      .def("column", &column, (arg("self"), arg("column")),
-           "Return all values of a specific column as a list.")
+      .def("row", &row, (arg("self"), arg("row")), "Return all values of a specific row as a dict.")
 
-      .def("row", &row, (arg("self"), arg("row")),
-           "Return all values of a specific row as a dict.")
-
-      .def("columnTypes", &columnTypes, arg("self"),
-           "Return the types of the columns as a list")
+      .def("columnTypes", &columnTypes, arg("self"), "Return the types of the columns as a list")
 
       // FromSequence must come first since it takes an object parameter
       // Otherwise, FromDict will never be called as object accepts anything
@@ -709,8 +745,7 @@ void export_ITableWorkspace() {
            "is interpreted as a column name.")
 
       .def("setCell", &setCell,
-           (arg("self"), arg("row_or_column"), arg("column_or_row"),
-            arg("value"), arg("notify_replace") = true),
+           (arg("self"), arg("row_or_column"), arg("column_or_row"), arg("value"), arg("notify_replace") = true),
            "Sets the value of a given cell. If the row_or_column argument is a "
            "number then it is interpreted as a row otherwise it "
            "is interpreted as a column name. If notify replace is false, then "
@@ -719,7 +754,15 @@ void export_ITableWorkspace() {
       .def("toDict", &toDict, (arg("self")),
            "Gets the values of this workspace as a dictionary. The keys of the "
            "dictionary will be the names of the columns of the table. The "
-           "values of the entries will be lists of values for each column.");
+           "values of the entries will be lists of values for each column.")
+
+      .def("setColumnReadOnly", &setColumnReadOnly, (arg("self"), arg("column"), arg("read_only")),
+           "Sets whether or not a given column of this workspace should be read-only. Columns can be "
+           "selected by name or by index")
+
+      .def("isColumnReadOnly", &isColumnReadOnly, (arg("self"), arg("column")),
+           "Gets whether or not a given column of this workspace is be read-only. Columns can be "
+           "selected by name or by index");
 
   //-------------------------------------------------------------------------------------------------
 

@@ -22,9 +22,7 @@ class MANTID_ALGORITHMS_DLL FilterByXValue : public API::Algorithm {
 public:
   const std::string name() const override;
   /// Summary of algorithms purpose
-  const std::string summary() const override {
-    return "Filters events according to a min and/or max value of X.";
-  }
+  const std::string summary() const override { return "Filters events according to a min and/or max value of X."; }
 
   int version() const override;
   const std::vector<std::string> seeAlso() const override {

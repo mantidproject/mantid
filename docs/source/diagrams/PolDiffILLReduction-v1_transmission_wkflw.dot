@@ -1,0 +1,31 @@
+digraph Transmission {
+  $global_style
+
+  subgraph params {
+    $param_style
+    Run
+    CadmiumTransmissionWorkspace
+    EmptyBeamWorkspace
+  }
+
+  subgraph values {
+    $value_style
+    OutputWorkspace
+  }
+
+  subgraph algorithms {
+    $algorithm_style
+    LoadAndMerge
+    Divide [label="Normalize to monitor/time"]
+    Divide2 [label="Divide"]
+    Minus
+  }
+
+  Run -> LoadAndMerge
+  LoadAndMerge -> Divide
+  Divide -> Minus
+  CadmiumTransmissionWorkspace -> Minus
+  Minus -> Divide2
+  EmptyBeamWorkspace -> Divide2
+  Divide2 -> OutputWorkspace
+}

@@ -4,7 +4,8 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from mantiddoc.directives.properties import PropertiesDirective #pylint: disable=unused-import
+from mantiddoc.directives.properties import PropertiesDirective
+
 
 class AttributesDirective(PropertiesDirective):
 
@@ -59,6 +60,7 @@ class AttributesDirective(PropertiesDirective):
 
         self.add_rst(self._build_table(header, attributes))
         return True
+
 
 def setup(app):
     """

@@ -14,10 +14,10 @@ Saving and Settings
 Saving
 ------
 
-You have learnt how to fit data, which produces its results as output workspaces. 
+You have learnt how to fit data, which produces its results as output workspaces.
 You have also learnt how to manipulate data with algorithms, and you will do more of this when analysing your data.
 
-But it it is important to be able to save these outputs!
+But it is important to be able to save these outputs!
 
 .. figure:: /images/SaveButton.png
    :align: right
@@ -30,7 +30,7 @@ These are equivalent to Executing the Algorithms :ref:`SaveAscii2 <algm-SaveAsci
 
 You can also save your current session of Mantid as a Project. A Project is saved to a folder (worth creating a new one!) with a (.nxs) file for each workspace and a mantidproject file (ending in :red:`.mtdproj` for Workbench) that has information such as what workspaces were loaded and what plots you had open.
 
-Opening a project will reload the Workspaces in the Workspaces Toolbox and reopen any plots or data tables. It will not, for instance, reopen Interfaces. 
+Opening a project will reload the Workspaces in the Workspaces Toolbox and reopen any plots or data tables. It will not, for instance, reopen Interfaces.
 
 **Note**: MantidPlot projects will not open in Mantid Workbench and vice versa. You can simply reload all of the workspaces from their (.nxs) files (in the same folder as the project file), but plots will not be reproduced!
 
@@ -54,7 +54,7 @@ Use the Categories tab to de/select categories of Algorithms and Interfaces.
 
 Set your basic preferences for plots, such as set Capsize > 0 if you want your error bars to have end caps!
 
-.. figure:: /images/SettingsPlots.png
+.. figure:: /images/PlotSettings.png
    :align: center
    :alt: SettingsPlots
 

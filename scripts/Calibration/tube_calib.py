@@ -16,14 +16,27 @@ Users should not need to directly call any other function other than :func:`getC
 """
 ## Author: Karl palmen ISIS and for readPeakFile Gesner Passos ISIS
 
+# Standard and third-party
+import copy
 import numpy
+import os
+import re
+from typing import Any, Dict, List, Optional, Tuple, Union
+
+# Mantid
+from mantid.api import AnalysisDataService as ADS
+from mantid.dataobjects import EventWorkspace, TableWorkspace, Workspace2D
 from mantid.simpleapi import *
 from mantid.kernel import *
-from tube_spec import TubeSpec
+
+# Calibration
 from ideal_tube import IdealTube
-import re
-import os
-import copy
+from tube_calib_fit_params import TubeCalibFitParams
+from tube_spec import TubeSpec
+
+# Type aliases
+ArrayInt = Union[List[int], numpy.ndarray]
+WorkspaceInput = Union[str, EventWorkspace, Workspace2D]
 
 
 def create_tube_calibration_ws_by_ws_index_list(integrated_workspace, output_workspace, workspace_index_list):
@@ -223,12 +236,11 @@ def getPoints(integrated_ws, func_forms, fit_params, which_tube, show_plot=False
             peak_index = fit_edges(fit_params, i, get_points_ws, calib_points_ws)
         else:
             peak_index = fit_gaussian(fit_params, i, get_points_ws, calib_points_ws)
-
-        peak_centre = mtd[calib_points_ws + '_Parameters'].row(peak_index).items()[1][1]
+        peak_centre = tuple(ADS.retrieve(calib_points_ws + '_Parameters').row(peak_index).items())[1][1]
         results.append(peak_centre)
 
         if show_plot:
-            ws = mtd[calib_points_ws + '_Workspace']
+            ws = ADS.retrieve(calib_points_ws + '_Workspace')
             fitt_y_values.append(copy.copy(ws.dataY(1)))
             fitt_x_values.append(copy.copy(ws.dataX(1)))
 
@@ -290,20 +302,27 @@ def correct_tube(AP, BP, CP, nDets):
     return x_bin_new
 
 
-def correct_tube_to_ideal_tube(tube_points, ideal_tube_points, n_detectors, test_mode=False, polin_fit=2):
-    """
-       Corrects position errors in a tube given an array of points and their ideal positions.
+def correct_tube_to_ideal_tube(tube_points: List,
+                               ideal_tube_points: List,
+                               n_detectors: int,
+                               test_mode: bool = False,
+                               polin_fit: int = 2,
+                               parameters_table: Optional[str] = None) -> numpy.ndarray:
+    r"""
+    Corrects position errors in a tube given an array of points and their ideal positions.
 
-       :param tube_points: Array of Slit Points along tube to be fitted (in pixels)
-       :param ideal_tube_points: The corresponding points in an ideal tube (Y-coords advised)
-       :param n_detectors: Number of pixel detectors in tube
-       :param test_mode: If true, detectors at the position of a slit will be moved out of the way
-                         to show the reckoned slit positions when the instrument is displayed.
-       :param polin_fit: Order of the polynomial to fit for the ideal positions
+    Note that any element of tubePoints not between 0.0 and nDets is considered a rogue point and so is ignored.
 
-       Return Value: Array of corrected Xs  (in same units as ideal tube points)
+    :param tube_points: Array of Slit Points along tube to be fitted (in pixels)
+    :param ideal_tube_points: The corresponding points in an ideal tube (Y-coords advised)
+    :param n_detectors: Number of pixel detectors in tube
+    :param test_mode: If true, detectors at the position of a slit will be moved out of the way
+                      to show the reckoned slit positions when the instrument is displayed.
+    :param polin_fit: Order of the polynomial to fit for the ideal positions
+    :param parameters_table: name of output TableWorkspace containing values and errors for optimized polynomial
+        coefficients, as well as goodness-of-fit chi-square value. If `None`, no table is returned
 
-       Note that any element of tubePoints not between 0.0 and nDets is considered a rogue point and so is ignored.
+    :returns: Array of corrected Xs  (in same units as ideal tube points)
     """
 
     # Check the arguments
@@ -324,7 +343,6 @@ def correct_tube_to_ideal_tube(tube_points, ideal_tube_points, n_detectors, test
             missed_tube_points.append(i + 1)
 
     # State number of rogue slit points, if any
-    if len(tube_points) != len(used_tube_points):
         print("Only {0} out of {1} slit points used. Missed {2}".format(len(used_tube_points), len(tube_points),
                                                                         missed_tube_points))
 
@@ -342,14 +360,14 @@ def correct_tube_to_ideal_tube(tube_points, ideal_tube_points, n_detectors, test
         print("Fit failed")
         return []
 
-    param_q_f = mtd['QF_Parameters']
+    param_q_f = ADS.retrieve('QF_Parameters')
 
     # get the coefficients, get the Value from every row, and exclude the last one because it is the error
     # rowErr is the last one, it could be used to check accuracy of fit
     c = [r['Value'] for r in param_q_f][:-1]
 
     # Modify the output array by the fitted quadratic
-    x_result = numpy.polynomial.polynomial.polyval(range(n_detectors), c)
+    x_result = numpy.polynomial.polynomial.polyval(list(range(n_detectors)), c)
 
     # In test mode, shove the pixels that are closest to the reckoned peaks
     # to the position of the first detector so that the resulting gaps can be seen.
@@ -358,26 +376,38 @@ def correct_tube_to_ideal_tube(tube_points, ideal_tube_points, n_detectors, test
         for i in range(len(used_tube_points)):
             x_result[int(used_tube_points[i])] = x_result[0]
 
+    # Create a copy of the parameters table if the table is requested
+    if isinstance(parameters_table, str) and len(parameters_table) > 0:
+        CloneWorkspace(InputWorkspace=param_q_f, OutputWorkspace=parameters_table)
+
     return x_result
 
 
-def getCalibratedPixelPositions(ws, tube_positions, ideal_tube_positions, which_tube, peak_test_mode=False,
-                                polin_fit=2):
+def getCalibratedPixelPositions(input_workspace: WorkspaceInput,
+                                tube_positions: ArrayInt,
+                                ideal_tube_positions: ArrayInt,
+                                which_tube: ArrayInt,
+                                peak_test_mode: bool = False,
+                                polin_fit: int = 2,
+                                parameters_table: Optional[str] = None) -> Tuple[List[int], List[int]]:
+    r"""
+    Get the calibrated detector positions for one tube.
+
+    The tube is specified by a list of workspace indices of its spectra. The calibration is assumed
+    to be done parallel to the Y-axis.
+
+    :param input_workspace: Workspace with tubes to be calibrated - may be integrated or raw
+    :param tube_positions: Array of calibration positions (in pixels)
+    :param ideal_tube_positions: Where these calibration positions should be (in Y coords)
+    :param which_tube:  a list of workspace indices for the tube
+    :param peak_test_mode: true if shoving detectors that are reckoned to be at peak away (for test purposes)
+    :param polin_fit: Order of the polynomial to fit for the ideal positions
+    :param parameters_table: name of output TableWorkspace containing values and errors for optimized polynomial
+        coefficients, as well as goodness-of-fit chi-square value. If `None`, no table is returned
+
+    :returns: list of pixel detector IDs, and list of their calibrated positions
     """
-       Get the calibrated detector positions for one tube
-       The tube is specified by a list of workspace indices of its spectra
-       Calibration is assumed to be done parallel to the Y-axis
-
-       :param ws: Workspace with tubes to be calibrated - may be integrated or raw
-       :param tube_positions: Array of calibration positions (in pixels)
-       :param ideal_tube_positions: Where these calibration positions should be (in Y coords)
-       :param which_tube:  a list of workspace indices for the tube
-       :param peak_test_mode: true if shoving detectors that are reckoned to be at peak away (for test purposes)
-       :param polin_fit: Order of the polynomial to fit for the ideal positions
-
-       Return  Array of pixel detector IDs and array of their calibrated positions
-    """
-
+    ws = mtd[str(input_workspace)]  # handle to the workspace
     # Arrays to be returned
     det_IDs = []
     det_positions = []
@@ -386,8 +416,9 @@ def getCalibratedPixelPositions(ws, tube_positions, ideal_tube_positions, which_
     if n_dets < 1:
         return det_IDs, det_positions
 
-    # Correct positions of detectors in tube by quadratic fit
-    pixels = correct_tube_to_ideal_tube(tube_positions, ideal_tube_positions, n_dets, test_mode=peak_test_mode, polin_fit=polin_fit)
+    # Correct positions of detectors in tube by quadratic fit. If so requested, store the table of fit parameters
+    pixels = correct_tube_to_ideal_tube(tube_positions, ideal_tube_positions, n_dets, test_mode=peak_test_mode,
+                                        polin_fit=polin_fit, parameters_table=parameters_table)
     if len(pixels) != n_dets:
         print("Tube correction failed.")
         return det_IDs, det_positions
@@ -466,31 +497,48 @@ def read_peak_file(file_name):
 
 ### THESE FUNCTIONS NEXT SHOULD BE THE ONLY FUNCTIONS THE USER CALLS FROM THIS FILE
 
-def getCalibration(ws, tubeSet, calibTable, fitPar, iTube, peaksTable,
-                   overridePeaks=dict(), excludeShortTubes=0.0, plotTube=[],
-                   range_list=None, polinFit=2, peaksTestMode=False):
+def getCalibration(input_workspace: Union[str, Workspace2D],
+                   tubeSet: TubeSpec,
+                   calibTable: TableWorkspace,
+                   fitPar: TubeCalibFitParams,
+                   iTube:IdealTube,
+                   peaksTable: TableWorkspace,
+                   overridePeaks: Dict[int, List[Any]] = dict(),
+                   excludeShortTubes: float = 0.0,
+                   plotTube: List[int] = [],
+                   range_list: Optional[List[int]] = None,
+                   polinFit: int = 2,
+                   peaksTestMode: bool = False,
+                   parameters_table_group: Optional[str] = None) -> None:
     """
     Get the results the calibration and put them in the calibration table provided.
 
-    :param ws: Integrated Workspace with tubes to be calibrated
+    :param input_workspace: Integrated Workspace with tubes to be calibrated
     :param tubeSet: Specification of Set of tubes to be calibrated ( :class:`~tube_spec.TubeSpec` object)
-    :param calibTable: Empty calibration table into which the calibration results are placed. It is composed by 'Detector ID'
-        and a V3D column 'Detector Position'. It will be filled with the IDs and calibrated positions of the detectors.
+    :param calibTable: Empty calibration table into which the calibration results are placed. It is composed
+        by 'Detector ID' and a V3D column 'Detector Position'. It will be filled with the IDs and calibrated
+        positions of the detectors.
     :param fitPar: A :class:`~tube_calib_fit_params.TubeCalibFitParams` object for fitting the peaks
-    :param iTube: The :class:`~ideal_tube.IdealTube` which contains the positions in metres of the shadows of the slits,
-        bars or edges used for calibration.
+    :param iTube: The :class:`~ideal_tube.IdealTube` which contains the positions in metres of the shadows
+        of the slits, bars or edges used for calibration.
     :param peaksTable: Peaks table into which the peaks positions will be put
-    :param overridePeaks: dictionary with tube indexes keys and an array of peaks in pixels to override those that would be
-        fitted for one tube
+    :param overridePeaks: dictionary with tube indexes keys and an array of peaks in pixels to override those
+        that would be fitted for one tube
     :param excludeShortTubes: Exlude tubes shorter than specified length from calibration
     :param plotTube: List of tube indexes that will be ploted
     :param range_list: list of the tube indexes that will be calibrated. Default None, means all the tubes in tubeSet
     :param polinFit: Order of the polynomial to fit against the known positions. Acceptable: 2, 3
     :param peaksTestMode: true if shoving detectors that are reckoned to be at peak away (for test purposes)
-
+    :param parameters_table_group: name of the WorkspaceGroup containing individual TableWorkspace tables. Each
+        table holds values and errors for the optimized coefficients of the polynomial that fits the peak positions (in
+        pixel coordinates) to the known slit positions (along the Y-coordinate). The last entry in the table
+        holds the goodness-of-fit, chi-square value. The name of each individual TableWorkspace is the string
+        `parameters_table_group` plus the suffix `_I`, where `I` is the tube index as given by list `range_list`.
+        If `None`, no group workspace is generated.
 
     This is the main method called from :func:`~tube.calibrate` to perform the calibration.
     """
+    ws = mtd[str(input_workspace)]  # handle to the input workspace
     n_tubes = tubeSet.getNumTubes()
     print("Number of tubes =", n_tubes)
 
@@ -499,6 +547,7 @@ def getCalibration(ws, tubeSet, calibTable, fitPar, iTube, peaksTable,
 
     all_skipped = set()
 
+    parameters_tables = list()  # hold the names of all the fit parameter tables
     for i in range_list:
 
         # Deal with (i+1)st tube specified
@@ -512,7 +561,7 @@ def getCalibration(ws, tubeSet, calibTable, fitPar, iTube, peaksTable,
             # skip this tube
             continue
 
-        # Calibribate the tube, if possible
+        # Calibrate the tube, if possible
         if tubeSet.getTubeLength(i) <= excludeShortTubes:
             # skip this tube
             continue
@@ -538,9 +587,14 @@ def getCalibration(ws, tubeSet, calibTable, fitPar, iTube, peaksTable,
         ##########################################
         # Define the correct position of detectors
         ##########################################
-
+        if parameters_table_group is None:
+            parameters_table = None
+        else:
+            parameters_table = f'{parameters_table_group}_{i}'
+            parameters_tables.append(parameters_table)
         det_id_list, det_position_list = getCalibratedPixelPositions(ws, actual_tube, iTube.getArray(), wht,
-                                                                     peaksTestMode, polinFit)
+                                                                     peaksTestMode, polinFit,
+                                                                     parameters_table=parameters_table)
         # save the detector positions to calibTable
         if len(det_id_list) == len(wht):  # We have corrected positions
             for j in range(len(wht)):
@@ -550,6 +604,10 @@ def getCalibration(ws, tubeSet, calibTable, fitPar, iTube, peaksTable,
     if len(all_skipped) > 0:
         print("%i histogram(s) were excluded from the calibration since they did not have an assigned detector." % len(
             all_skipped))
+
+    # Create the WorkspaceGroup containing the fit parameters tables
+    if len(parameters_tables) > 0:
+        GroupWorkspaces(InputWorkspaces=parameters_tables, OutputWorkspace=parameters_table_group)
 
     # Delete temporary workspaces used in the calibration
     for ws_name in ('TubePlot', 'CalibPoint_NormalisedCovarianceMatrix',

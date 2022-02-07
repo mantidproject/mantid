@@ -15,8 +15,7 @@ namespace Kernel {
 SplittingInterval::SplittingInterval() : m_start(), m_stop(), m_index(-1) {}
 
 /// Constructor using DateAndTime
-SplittingInterval::SplittingInterval(const Types::Core::DateAndTime &start,
-                                     const Types::Core::DateAndTime &stop,
+SplittingInterval::SplittingInterval(const Types::Core::DateAndTime &start, const Types::Core::DateAndTime &stop,
                                      const int index)
     : m_start(start), m_stop(stop), m_index(index) {}
 
@@ -27,9 +26,7 @@ DateAndTime SplittingInterval::start() const { return m_start; }
 DateAndTime SplittingInterval::stop() const { return m_stop; }
 
 /// Returns the duration in seconds
-double SplittingInterval::duration() const {
-  return DateAndTime::secondsFromDuration(m_stop - m_start);
-}
+double SplittingInterval::duration() const { return DateAndTime::secondsFromDuration(m_stop - m_start); }
 
 /// Return the index (destination of this split time block)
 int SplittingInterval::index() const { return m_index; }
@@ -45,8 +42,7 @@ bool SplittingInterval::overlaps(const SplittingInterval &b) const {
 /// @cond DOXYGEN_BUG
 /// And operator. Return the smallest time interval where both intervals are
 /// TRUE.
-SplittingInterval SplittingInterval::
-operator&(const SplittingInterval &b) const {
+SplittingInterval SplittingInterval::operator&(const SplittingInterval &b) const {
   SplittingInterval out(*this);
   if (b.m_start > this->m_start)
     out.m_start = b.m_start;
@@ -57,8 +53,7 @@ operator&(const SplittingInterval &b) const {
 /// @endcond DOXYGEN_BUG
 
 /// Or operator. Return the largest time interval.
-SplittingInterval SplittingInterval::
-operator|(const SplittingInterval &b) const {
+SplittingInterval SplittingInterval::operator|(const SplittingInterval &b) const {
   SplittingInterval out(*this);
   if (!this->overlaps(b))
     throw std::invalid_argument("SplittingInterval: cannot apply the OR (|) "
@@ -73,18 +68,13 @@ operator|(const SplittingInterval &b) const {
 }
 
 /// Compare two splitter by the begin time
-bool SplittingInterval::operator<(const SplittingInterval &b) const {
-  return (this->m_start < b.m_start);
-}
+bool SplittingInterval::operator<(const SplittingInterval &b) const { return (this->m_start < b.m_start); }
 
 /// Compare two splitter by the begin time
-bool SplittingInterval::operator>(const SplittingInterval &b) const {
-  return (this->m_start > b.m_start);
-}
+bool SplittingInterval::operator>(const SplittingInterval &b) const { return (this->m_start > b.m_start); }
 
 /** Comparator for sorting lists of SplittingInterval */
-bool compareSplittingInterval(const SplittingInterval &si1,
-                              const SplittingInterval &si2) {
+bool compareSplittingInterval(const SplittingInterval &si1, const SplittingInterval &si2) {
   return (si1.start() < si2.start());
 }
 
@@ -111,8 +101,7 @@ bool isFilter(const TimeSplitterType &a) {
  * @param b :: TimeSplitterType splitter OR filter.
  * @throw std::invalid_argument if two splitters are given.
  */
-TimeSplitterType operator+(const TimeSplitterType &a,
-                           const TimeSplitterType &b) {
+TimeSplitterType operator+(const TimeSplitterType &a, const TimeSplitterType &b) {
   bool a_filter, b_filter;
   a_filter = isFilter(a);
   b_filter = isFilter(b);
@@ -144,8 +133,7 @@ TimeSplitterType operator+(const TimeSplitterType &a,
  * @param b :: TimeSplitterType filter.
  * @return the ANDed filter
  */
-TimeSplitterType operator&(const TimeSplitterType &a,
-                           const TimeSplitterType &b) {
+TimeSplitterType operator&(const TimeSplitterType &a, const TimeSplitterType &b) {
   TimeSplitterType out;
   // If either is empty, then no entries in the filter (aka everything is
   // removed)
@@ -212,8 +200,7 @@ TimeSplitterType removeFilterOverlap(const TimeSplitterType &a) {
  * @param b :: TimeSplitterType filter.
  * @return the ORed filter
  */
-TimeSplitterType operator|(const TimeSplitterType &a,
-                           const TimeSplitterType &b) {
+TimeSplitterType operator|(const TimeSplitterType &a, const TimeSplitterType &b) {
   TimeSplitterType out;
 
   // Concatenate the two lists

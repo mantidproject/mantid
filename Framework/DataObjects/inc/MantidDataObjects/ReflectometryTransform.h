@@ -27,8 +27,8 @@ class TableWorkspace;
 Simple container for porting detector angular information
  */
 struct MANTID_DATAOBJECTS_DLL DetectorAngularCache {
-  std::vector<double> thetaWidths;
-  std::vector<double> thetas;
+  std::vector<double> twoThetaWidths;
+  std::vector<double> twoThetas;
   std::vector<double> detectorHeights;
 };
 
@@ -38,7 +38,6 @@ struct MANTID_DATAOBJECTS_DLL DetectorAngularCache {
  @date 2012-05-29
  */
 class MANTID_DATAOBJECTS_DLL ReflectometryTransform {
-
 protected:
   const size_t m_d0NumBins;
   const size_t m_d1NumBins;
@@ -52,60 +51,44 @@ protected:
   const std::string m_d1ID;
   std::shared_ptr<CalculateReflectometry> m_calculator;
 
-  /// Two theta angles cache
-  mutable std::vector<double> m_theta;
-  /// Two theta widths cache
-  mutable std::vector<double> m_thetaWidths;
-
   std::shared_ptr<DataObjects::MDEventWorkspace2Lean>
-  createMDWorkspace(const Geometry::IMDDimension_sptr &,
-                    const Geometry::IMDDimension_sptr &,
+  createMDWorkspace(const Geometry::IMDDimension_sptr &, const Geometry::IMDDimension_sptr &,
                     const API::BoxController_sptr &boxController) const;
 
 public:
   // Execute the strategy to produce a transformed, output MDWorkspace
-  Mantid::API::IMDEventWorkspace_sptr
-  executeMD(const Mantid::API::MatrixWorkspace_const_sptr &inputWs,
-            const Mantid::API::BoxController_sptr &boxController,
-            Mantid::Geometry::MDFrame_uptr frame) const;
+  Mantid::API::IMDEventWorkspace_sptr executeMD(const Mantid::API::MatrixWorkspace_const_sptr &inputWs,
+                                                const Mantid::API::BoxController_sptr &boxController,
+                                                Mantid::Geometry::MDFrame_uptr frame) const;
 
   // Execute the strategy to produce a transformed, output group of Matrix (2D)
   // Workspaces
-  Mantid::API::MatrixWorkspace_sptr
-  execute(const Mantid::API::MatrixWorkspace_const_sptr &inputWs) const;
+  Mantid::API::MatrixWorkspace_sptr execute(const Mantid::API::MatrixWorkspace_const_sptr &inputWs) const;
 
   /// Execuate transformation using normalised polynomial binning
-  Mantid::API::MatrixWorkspace_sptr executeNormPoly(
-      const Mantid::API::MatrixWorkspace_const_sptr &inputWS,
-      std::shared_ptr<Mantid::DataObjects::TableWorkspace> &vertexes,
-      bool dumpVertexes, const std::string &outputDimensions) const;
+  Mantid::API::MatrixWorkspace_sptr executeNormPoly(const Mantid::API::MatrixWorkspace_const_sptr &inputWS,
+                                                    std::shared_ptr<Mantid::DataObjects::TableWorkspace> &vertexes,
+                                                    bool dumpVertexes, const std::string &outputDimensions) const;
 
-  Mantid::API::IMDHistoWorkspace_sptr executeMDNormPoly(
-      const Mantid::API::MatrixWorkspace_const_sptr &inputWs) const;
+  Mantid::API::IMDHistoWorkspace_sptr executeMDNormPoly(const Mantid::API::MatrixWorkspace_const_sptr &inputWs) const;
   virtual ~ReflectometryTransform() = default;
-  ReflectometryTransform(const std::string &d0Label, const std::string &d0ID,
-                         double d0Min, double d0Max, const std::string &d1Label,
-                         const std::string &d1ID, double d1Min, double d1Max,
-                         size_t d0NumBins, size_t d1NumBins,
+  ReflectometryTransform(std::string d0Label, std::string d0ID, double d0Min, double d0Max, std::string d1Label,
+                         std::string d1ID, double d1Min, double d1Max, size_t d0NumBins, size_t d1NumBins,
                          CalculateReflectometry *calc);
 };
 
 /// Create a new x-axis for the output workspace
-MANTID_DATAOBJECTS_DLL MantidVec
-createXAxis(Mantid::API::MatrixWorkspace *const ws, const double gradX,
-            const double cxToUnit, const size_t nBins,
-            const std::string &caption, const std::string &units);
+MANTID_DATAOBJECTS_DLL MantidVec createXAxis(Mantid::API::MatrixWorkspace *const ws, const double gradX,
+                                             const double cxToUnit, const size_t nBins, const std::string &caption,
+                                             const std::string &units);
 
 /// Create a new y(vertical)-axis for the output workspace
-MANTID_DATAOBJECTS_DLL void
-createVerticalAxis(Mantid::API::MatrixWorkspace *const ws,
-                   const MantidVec &xAxisVec, const double gradY,
-                   const double cyToUnit, const size_t nBins,
-                   const std::string &caption, const std::string &units);
+MANTID_DATAOBJECTS_DLL void createVerticalAxis(Mantid::API::MatrixWorkspace *const ws, const MantidVec &xAxisVec,
+                                               const double gradY, const double cyToUnit, const size_t nBins,
+                                               const std::string &caption, const std::string &units);
 
 /// Create angular caches.
-MANTID_DATAOBJECTS_DLL DetectorAngularCache
-initAngularCaches(const Mantid::API::MatrixWorkspace *const workspace);
+MANTID_DATAOBJECTS_DLL DetectorAngularCache initAngularCaches(const Mantid::API::MatrixWorkspace *const workspace);
 
 // Helper typedef for scoped pointer of this type.
 using ReflectometryTransform_sptr = std::shared_ptr<ReflectometryTransform>;

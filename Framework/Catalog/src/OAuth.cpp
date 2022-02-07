@@ -9,15 +9,14 @@
 #include "MantidKernel/ConfigService.h"
 
 #include <sstream>
+#include <utility>
 
 #include <Poco/Net/HTMLForm.h>
 #include <Poco/Net/HTTPResponse.h>
 
 #include <json/json.h>
 
-namespace Mantid {
-namespace Catalog {
-namespace OAuth {
+namespace Mantid::Catalog::OAuth {
 
 using Mantid::Catalog::Exception::TokenParsingError;
 
@@ -25,14 +24,11 @@ using Mantid::Catalog::Exception::TokenParsingError;
 // OAuthToken
 //----------------------------------------------------------------------
 
-OAuthToken::OAuthToken(const std::string &tokenType, int expiresIn,
-                       const std::string &accessToken, const std::string &scope,
-                       const boost::optional<std::string> &refreshToken)
-    : m_expiresAt(DateAndTime::getCurrentTime() +
-                  static_cast<double>(expiresIn)),
-      m_tokenType(tokenType), m_expiresIn(expiresIn),
-      m_accessToken(accessToken), m_scope(scope), m_refreshToken(refreshToken) {
-}
+OAuthToken::OAuthToken(std::string tokenType, int expiresIn, std::string accessToken, std::string scope,
+                       boost::optional<std::string> refreshToken)
+    : m_expiresAt(DateAndTime::getCurrentTime() + static_cast<double>(expiresIn)), m_tokenType(std::move(tokenType)),
+      m_expiresIn(expiresIn), m_accessToken(std::move(accessToken)), m_scope(std::move(scope)),
+      m_refreshToken(std::move(refreshToken)) {}
 
 OAuthToken::~OAuthToken() {}
 
@@ -42,16 +38,13 @@ OAuthToken OAuthToken::fromJSONStream(std::istream &tokenStringStream) {
     tokenStringStream >> full_token;
 
     const auto tokenType = full_token["token_type"].asString();
-    const auto expiresIn =
-        static_cast<unsigned int>(full_token["expires_in"].asUInt());
+    const auto expiresIn = static_cast<unsigned int>(full_token["expires_in"].asUInt());
     const auto accessToken = full_token["access_token"].asString();
     const auto scope = full_token["scope"].asString();
 
     const auto parsedRefreshToken = full_token["refresh_token"].asString();
     const boost::optional<std::string> refreshToken =
-        parsedRefreshToken == ""
-            ? boost::none
-            : boost::optional<std::string>(parsedRefreshToken);
+        parsedRefreshToken == "" ? boost::none : boost::optional<std::string>(parsedRefreshToken);
 
     return OAuthToken(tokenType, expiresIn, accessToken, scope, refreshToken);
   } catch (...) {
@@ -59,13 +52,9 @@ OAuthToken OAuthToken::fromJSONStream(std::istream &tokenStringStream) {
   }
 }
 
-bool OAuthToken::isExpired() const {
-  return isExpired(DateAndTime::getCurrentTime());
-}
+bool OAuthToken::isExpired() const { return isExpired(DateAndTime::getCurrentTime()); }
 
-bool OAuthToken::isExpired(const DateAndTime &currentTime) const {
-  return currentTime > m_expiresAt;
-}
+bool OAuthToken::isExpired(const DateAndTime &currentTime) const { return currentTime > m_expiresAt; }
 
 std::string OAuthToken::tokenType() const { return m_tokenType; }
 
@@ -75,9 +64,7 @@ std::string OAuthToken::accessToken() const { return m_accessToken; }
 
 std::string OAuthToken::scope() const { return m_scope; }
 
-boost::optional<std::string> OAuthToken::refreshToken() const {
-  return m_refreshToken;
-}
+boost::optional<std::string> OAuthToken::refreshToken() const { return m_refreshToken; }
 
 //----------------------------------------------------------------------
 // ConfigServiceTokenStore
@@ -107,19 +94,16 @@ ConfigServiceTokenStore::~ConfigServiceTokenStore() {
   }
 }
 
-void ConfigServiceTokenStore::setToken(
-    const boost::optional<OAuthToken> &token) {
+void ConfigServiceTokenStore::setToken(const boost::optional<OAuthToken> &token) {
   auto &config = Mantid::Kernel::ConfigService::Instance();
 
   if (token) {
     config.setString(CONFIG_PATH_BASE + "tokenType", token->tokenType());
-    config.setString(CONFIG_PATH_BASE + "expiresIn",
-                     std::to_string(token->expiresIn()));
+    config.setString(CONFIG_PATH_BASE + "expiresIn", std::to_string(token->expiresIn()));
     config.setString(CONFIG_PATH_BASE + "accessToken", token->accessToken());
     config.setString(CONFIG_PATH_BASE + "scope", token->scope());
     config.setString(CONFIG_PATH_BASE + "refreshToken",
-                     token->refreshToken() ? *token->refreshToken()
-                                           : std::string(""));
+                     token->refreshToken() ? *token->refreshToken() : std::string(""));
   } else {
     config.setString(CONFIG_PATH_BASE + "tokenType", "");
     config.setString(CONFIG_PATH_BASE + "expiresIn", "");
@@ -147,9 +131,8 @@ boost::optional<OAuthToken> ConfigServiceTokenStore::getToken() {
   }
 
   try {
-    return boost::make_optional(
-        OAuthToken(tokenType, std::stoi(expiresIn), accessToken, scope,
-                   boost::make_optional(refreshToken != "", refreshToken)));
+    return boost::make_optional(OAuthToken(tokenType, std::stoi(expiresIn), accessToken, scope,
+                                           boost::make_optional(refreshToken != "", refreshToken)));
   } catch (std::invalid_argument &) {
     // Catching any std::stoi failures silently -- a malformed token is
     // useless and may as well not be there.
@@ -158,6 +141,4 @@ boost::optional<OAuthToken> ConfigServiceTokenStore::getToken() {
   return boost::none;
 }
 
-} // namespace OAuth
-} // namespace Catalog
-} // namespace Mantid
+} // namespace Mantid::Catalog::OAuth

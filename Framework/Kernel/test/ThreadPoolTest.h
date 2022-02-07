@@ -86,8 +86,7 @@ std::mutex TaskThatAddsTasks_mutex;
 class TaskThatAddsTasks : public Task {
 public:
   // ctor
-  TaskThatAddsTasks(ThreadScheduler *scheduler, size_t depth)
-      : Task(), m_scheduler(scheduler), depth(depth) {
+  TaskThatAddsTasks(ThreadScheduler *scheduler, size_t depth) : Task(), m_scheduler(scheduler), depth(depth) {
     // Use a randomized cost function; this will have an effect on the sorted
     // schedulers.
     m_cost = rand();
@@ -98,8 +97,7 @@ public:
     if (depth < 4) {
       // Add ten tasks (one level deeper)
       for (size_t i = 0; i < 10; i++) {
-        m_scheduler->push(
-            std::make_shared<TaskThatAddsTasks>(m_scheduler, depth + 1));
+        m_scheduler->push(std::make_shared<TaskThatAddsTasks>(m_scheduler, depth + 1));
       }
     } else {
       // Lock to ensure you don't step on yourself.
@@ -130,8 +128,7 @@ public:
     for (int i = 0; i < 16; i++) {
       double cost = i; // time is exactly i
       // Bind to a member function of mywaster
-      p.schedule(std::make_shared<FunctionTask>(
-          std::bind(&TimeWaster::waste_time_with_lock, &mywaster, i), cost));
+      p.schedule(std::make_shared<FunctionTask>(std::bind(&TimeWaster::waste_time_with_lock, &mywaster, i), cost));
     }
 
     Timer overall;
@@ -157,8 +154,7 @@ public:
   /** Class for debugging progress reporting */
   class MyTestProgress : public ProgressBase {
   public:
-    MyTestProgress(double start, double end, int64_t numSteps,
-                   ThreadPoolTest *myParent)
+    MyTestProgress(double start, double end, int64_t numSteps, ThreadPoolTest *myParent)
         : ProgressBase(start, end, numSteps), parent(myParent) {}
 
     void doReport(const std::string &msg = "") override {
@@ -179,8 +175,7 @@ public:
 
   void test_with_progress_reporting() {
     last_report_counter = 0;
-    ThreadPool p(new ThreadSchedulerFIFO(), 1,
-                 new MyTestProgress(0.0, 1.0, 10, this));
+    ThreadPool p(new ThreadSchedulerFIFO(), 1, new MyTestProgress(0.0, 1.0, 10, this));
     for (int i = 0; i < 10; i++) {
       double cost = i;
       p.schedule(std::make_shared<FunctionTask>(threadpooltest_function, cost));
@@ -278,8 +273,7 @@ public:
     TS_ASSERT_EQUALS(threadpooltest_vec.size(), 0);
     for (int i = 0; i < 10; i++) {
       double cost = i;
-      p.schedule(std::make_shared<FunctionTask>(
-          std::bind(threadpooltest_adding_stuff, i), cost));
+      p.schedule(std::make_shared<FunctionTask>(std::bind(threadpooltest_adding_stuff, i), cost));
     }
     TS_ASSERT_THROWS_NOTHING(p.joinAll());
     TS_ASSERT_EQUALS(threadpooltest_vec.size(), 10);
@@ -297,8 +291,7 @@ public:
     TS_ASSERT_EQUALS(threadpooltest_vec.size(), 0);
     for (int i = 0; i < 10; i++) {
       double cost = i;
-      p.schedule(std::make_shared<FunctionTask>(
-          std::bind(threadpooltest_adding_stuff, i), cost));
+      p.schedule(std::make_shared<FunctionTask>(std::bind(threadpooltest_adding_stuff, i), cost));
     }
     TS_ASSERT_THROWS_NOTHING(p.joinAll());
     TS_ASSERT_EQUALS(threadpooltest_vec.size(), 10);
@@ -315,8 +308,7 @@ public:
     TS_ASSERT_EQUALS(threadpooltest_vec.size(), 0);
     for (int i = 0; i < 10; i++) {
       double cost = i;
-      p.schedule(std::make_shared<FunctionTask>(
-          std::bind(threadpooltest_adding_stuff, i), cost));
+      p.schedule(std::make_shared<FunctionTask>(std::bind(threadpooltest_adding_stuff, i), cost));
     }
     TS_ASSERT_THROWS_NOTHING(p.joinAll());
     TS_ASSERT_EQUALS(threadpooltest_vec.size(), 10);
@@ -339,9 +331,8 @@ public:
     mywaster.total = 0;
     std::shared_ptr<std::mutex> lastMutex;
     for (size_t i = 0; i <= num; i++) {
-      auto task = std::make_shared<FunctionTask>(
-          std::bind(&TimeWaster::add_to_number, &mywaster, i),
-          static_cast<double>(i));
+      auto task =
+          std::make_shared<FunctionTask>(std::bind(&TimeWaster::add_to_number, &mywaster, i), static_cast<double>(i));
       // Create a new mutex every 1000 tasks. This is more relevant to the
       // ThreadSchedulerMutexes; others ignore it.
       if (i % 1000 == 0)
@@ -359,21 +350,13 @@ public:
     TS_ASSERT_EQUALS(mywaster.total, expected);
   }
 
-  void test_StressTest_ThreadSchedulerFIFO() {
-    do_StressTest_scheduler(new ThreadSchedulerFIFO());
-  }
+  void test_StressTest_ThreadSchedulerFIFO() { do_StressTest_scheduler(new ThreadSchedulerFIFO()); }
 
-  void test_StressTest_ThreadSchedulerLIFO() {
-    do_StressTest_scheduler(new ThreadSchedulerLIFO());
-  }
+  void test_StressTest_ThreadSchedulerLIFO() { do_StressTest_scheduler(new ThreadSchedulerLIFO()); }
 
-  void test_StressTest_ThreadSchedulerLargestCost() {
-    do_StressTest_scheduler(new ThreadSchedulerLargestCost());
-  }
+  void test_StressTest_ThreadSchedulerLargestCost() { do_StressTest_scheduler(new ThreadSchedulerLargestCost()); }
 
-  void test_StressTest_ThreadSchedulerMutexes() {
-    do_StressTest_scheduler(new ThreadSchedulerMutexes());
-  }
+  void test_StressTest_ThreadSchedulerMutexes() { do_StressTest_scheduler(new ThreadSchedulerMutexes()); }
 
   //--------------------------------------------------------------------
   /** Perform a stress test on the given scheduler.
@@ -418,8 +401,7 @@ public:
   class TaskThatThrows : public Task {
     void run() override {
       ThreadPoolTest_TaskThatThrows_counter++;
-      throw Mantid::Kernel::Exception::NotImplementedError(
-          "Test exception from TaskThatThrows.");
+      throw Mantid::Kernel::Exception::NotImplementedError("Test exception from TaskThatThrows.");
     }
   };
 

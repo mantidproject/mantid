@@ -41,8 +41,7 @@ template <> struct Validator<HistogramE> {
 };
 
 template <class T> bool Validator<HistogramX>::isValid(const T &data) {
-  auto it = std::find_if_not(data.begin(), data.end(),
-                             [](const double d) { return std::isnan(d); });
+  auto it = std::find_if_not(data.begin(), data.end(), [](const double d) { return std::isnan(d); });
   if (it == data.end())
     return true;
   for (; it < data.end() - 1; ++it) {
@@ -55,40 +54,32 @@ template <class T> bool Validator<HistogramX>::isValid(const T &data) {
   }
   ++it;
   // after first NAN everything must be NAN
-  return std::find_if_not(it, data.end(), [](const double d) {
-           return std::isnan(d);
-         }) == data.end();
+  return std::find_if_not(it, data.end(), [](const double d) { return std::isnan(d); }) == data.end();
 }
 
 template <class T> void Validator<HistogramX>::checkValidity(const T &data) {
   if (!isValid(data))
-    throw std::runtime_error(
-        "Invalid data found during construction of HistogramX");
+    throw std::runtime_error("Invalid data found during construction of HistogramX");
 }
 
 template <class T> bool Validator<HistogramY>::isValid(const T &data) {
-  auto result = std::find_if(data.begin(), data.end(),
-                             [](const double y) { return std::isinf(y); });
+  auto result = std::find_if(data.begin(), data.end(), [](const double y) { return std::isinf(y); });
   return result == data.end();
 }
 
 template <class T> void Validator<HistogramY>::checkValidity(const T &data) {
   if (!isValid(data))
-    throw std::runtime_error(
-        "Invalid data found during construction of HistogramY");
+    throw std::runtime_error("Invalid data found during construction of HistogramY");
 }
 
 template <class T> bool Validator<HistogramE>::isValid(const T &data) {
-  auto result = std::find_if(data.begin(), data.end(), [](const double e) {
-    return e < 0.0 || std::isinf(e);
-  });
+  auto result = std::find_if(data.begin(), data.end(), [](const double e) { return e < 0.0 || std::isinf(e); });
   return result == data.end();
 }
 
 template <class T> void Validator<HistogramE>::checkValidity(const T &data) {
   if (!isValid(data))
-    throw std::runtime_error(
-        "Invalid data found during construction of HistogramE");
+    throw std::runtime_error("Invalid data found during construction of HistogramE");
 }
 } // namespace detail
 } // namespace HistogramData

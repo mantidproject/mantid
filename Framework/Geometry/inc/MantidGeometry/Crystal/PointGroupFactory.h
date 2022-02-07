@@ -19,9 +19,7 @@ namespace Geometry {
 
 class MANTID_GEOMETRY_DLL PointGroupGenerator {
 public:
-  PointGroupGenerator(const std::string &hmSymbol,
-                      const std::string &generatorInformation,
-                      const std::string &description);
+  PointGroupGenerator(std::string hmSymbol, std::string generatorInformation, std::string description);
 
   inline std::string getHMSymbol() const { return m_hmSymbol; }
   inline std::string getGeneratorString() const { return m_generatorString; }
@@ -30,9 +28,7 @@ public:
   PointGroup_sptr getPrototype();
 
 private:
-  inline bool hasValidPrototype() const {
-    return static_cast<bool>(m_prototype);
-  }
+  inline bool hasValidPrototype() const { return static_cast<bool>(m_prototype); }
 
   PointGroup_sptr generatePrototype();
 
@@ -64,37 +60,30 @@ using PointGroupGenerator_sptr = std::shared_ptr<PointGroupGenerator>;
 class MANTID_GEOMETRY_DLL PointGroupFactoryImpl {
 public:
   PointGroup_sptr createPointGroup(const std::string &hmSymbol);
-  PointGroup_sptr
-  createPointGroupFromSpaceGroup(const SpaceGroup_const_sptr &spaceGroup);
+  PointGroup_sptr createPointGroupFromSpaceGroup(const SpaceGroup_const_sptr &spaceGroup);
   PointGroup_sptr createPointGroupFromSpaceGroup(const SpaceGroup &spaceGroup);
 
   bool isSubscribed(const std::string &hmSymbol) const;
 
   std::vector<std::string> getAllPointGroupSymbols() const;
-  std::vector<std::string>
-  getPointGroupSymbols(const PointGroup::CrystalSystem &crystalSystem);
+  std::vector<std::string> getPointGroupSymbols(const PointGroup::CrystalSystem &crystalSystem);
 
-  void subscribePointGroup(const std::string &hmSymbol,
-                           const std::string &generatorString,
+  void subscribePointGroup(const std::string &hmSymbol, const std::string &generatorString,
                            const std::string &description);
 
   /// Unsubscribes a point group from the factory
-  void unsubscribePointGroup(const std::string &hmSymbol) {
-    m_generatorMap.erase(hmSymbol);
-  }
+  void unsubscribePointGroup(const std::string &hmSymbol) { m_generatorMap.erase(hmSymbol); }
 
 private:
   friend struct Mantid::Kernel::CreateUsingNew<PointGroupFactoryImpl>;
 
   PointGroupFactoryImpl();
 
-  std::string pointGroupSymbolFromSpaceGroupSymbol(
-      const std::string &spaceGroupSymbol) const;
+  std::string pointGroupSymbolFromSpaceGroupSymbol(const std::string &spaceGroupSymbol) const;
 
   PointGroup_sptr getPrototype(const std::string &hmSymbol);
   void subscribe(const PointGroupGenerator_sptr &generator);
-  PointGroup_sptr
-  constructFromPrototype(const PointGroup_sptr &prototype) const;
+  PointGroup_sptr constructFromPrototype(const PointGroup_sptr &prototype) const;
 
   std::map<std::string, PointGroupGenerator_sptr> m_generatorMap;
   std::map<std::string, PointGroup::CrystalSystem> m_crystalSystemMap;
@@ -105,8 +94,7 @@ private:
   boost::regex m_originChoiceRegex;
 };
 
-using PointGroupFactory =
-    Mantid::Kernel::SingletonHolder<PointGroupFactoryImpl>;
+using PointGroupFactory = Mantid::Kernel::SingletonHolder<PointGroupFactoryImpl>;
 
 } // namespace Geometry
 } // namespace Mantid
@@ -121,11 +109,8 @@ EXTERN_MANTID_GEOMETRY template class MANTID_GEOMETRY_DLL
 #define PGF_CONCAT_IMPL(x, y) x##y
 #define PGF_CONCAT(x, y) PGF_CONCAT_IMPL(x, y)
 
-#define DECLARE_POINTGROUP(hmSymbol, generators, description)                  \
-  namespace {                                                                  \
-  Mantid::Kernel::RegistrationHelper PGF_CONCAT(register_pointgroup,           \
-                                                __COUNTER__)(                  \
-      ((Mantid::Geometry::PointGroupFactory::Instance().subscribePointGroup(   \
-           hmSymbol, generators, description)),                                \
-       0));                                                                    \
+#define DECLARE_POINTGROUP(hmSymbol, generators, description)                                                          \
+  namespace {                                                                                                          \
+  Mantid::Kernel::RegistrationHelper PGF_CONCAT(register_pointgroup, __COUNTER__)(                                     \
+      ((Mantid::Geometry::PointGroupFactory::Instance().subscribePointGroup(hmSymbol, generators, description)), 0));  \
   }

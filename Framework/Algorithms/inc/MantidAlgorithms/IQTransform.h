@@ -66,15 +66,12 @@ private:
   void init() override;
   void exec() override;
 
-  inline API::MatrixWorkspace_sptr
-  subtractBackgroundWS(const API::MatrixWorkspace_sptr &ws,
-                       const API::MatrixWorkspace_sptr &background);
+  inline API::MatrixWorkspace_sptr subtractBackgroundWS(const API::MatrixWorkspace_sptr &ws,
+                                                        const API::MatrixWorkspace_sptr &background);
 
-  using TransformFunc =
-      void (IQTransform::*)(const API::MatrixWorkspace_sptr &);
+  using TransformFunc = void (IQTransform::*)(const API::MatrixWorkspace_sptr &);
   using TransformMap = std::map<std::string, TransformFunc>;
-  TransformMap
-      m_transforms; ///< A map of transformation name and function pointers
+  TransformMap m_transforms; ///< A map of transformation name and function pointers
 
   std::shared_ptr<Kernel::Units::Label> m_label;
 

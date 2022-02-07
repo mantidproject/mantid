@@ -20,9 +20,7 @@ namespace Kernel {
     ArrayOrderedPairsValidator validates that an array contains a sequence of
     ordered pairs of numbers.
 */
-template <typename TYPE>
-class MANTID_KERNEL_DLL ArrayOrderedPairsValidator
-    : public TypedValidator<std::vector<TYPE>> {
+template <typename TYPE> class MANTID_KERNEL_DLL ArrayOrderedPairsValidator : public TypedValidator<std::vector<TYPE>> {
 public:
   /// Clone the current state
   IValidator_sptr clone() const override;

@@ -8,10 +8,10 @@
 
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/FrameworkManager.h"
+#include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidHistogramData/LinearGenerator.h"
 #include "MantidKernel/PhysicalConstants.h"
 #include "MantidMuon/RemoveExpDecay.h"
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include <cxxtest/TestSuite.h>
 
 using namespace Mantid::API;
@@ -21,27 +21,25 @@ using Mantid::Algorithms::MuonRemoveExpDecay;
 const std::string outputName = "MuonRemoveExpDecay_Output";
 
 namespace {
-MatrixWorkspace_sptr createWorkspace(size_t nspec, size_t maxt) {
+MatrixWorkspace_sptr createWorkspace(size_t nspec, size_t maxt, bool useBinEdges = false) {
 
   // Create a fake muon dataset
-  double a = 0.1; // Amplitude of the oscillations
-  double w = 25.; // Frequency of the oscillations
-  double tau = Mantid::PhysicalConstants::MuonLifetime *
-               1e6; // Muon life time in microseconds
+  double a = 0.1;                                             // Amplitude of the oscillations
+  double w = 25.;                                             // Frequency of the oscillations
+  double tau = Mantid::PhysicalConstants::MuonLifetime * 1e6; // Muon life time in microseconds
 
   MantidVec X;
   MantidVec Y;
   MantidVec E;
   for (size_t s = 0; s < nspec; s++) {
+    if (useBinEdges) {
+      X.emplace_back(0.0);
+    }
     for (size_t t = 0; t < maxt; t++) {
       double x = static_cast<double>(t) / static_cast<double>(maxt);
       double e = exp(-x / tau);
       X.emplace_back(x);
-      Y.emplace_back(a *
-                         sin(w * x + static_cast<double>(s) * M_PI /
-                                         static_cast<double>(nspec)) *
-                         e +
-                     e);
+      Y.emplace_back(a * sin(w * x + static_cast<double>(s) * M_PI / static_cast<double>(nspec)) * e + e);
       E.emplace_back(0.005);
     }
   }
@@ -71,7 +69,7 @@ public:
   RemoveExpDecayTest() { FrameworkManager::Instance(); }
 
   void testInit() {
-    IAlgorithm_sptr alg = AlgorithmManager::Instance().create("RemoveExpDecay");
+    auto alg = AlgorithmManager::Instance().create("RemoveExpDecay");
     alg->initialize();
     TS_ASSERT(alg->isInitialized())
   }
@@ -80,7 +78,7 @@ public:
 
     auto ws = createWorkspace(1, 50);
 
-    IAlgorithm_sptr alg = AlgorithmManager::Instance().create("RemoveExpDecay");
+    auto alg = AlgorithmManager::Instance().create("RemoveExpDecay");
     alg->initialize();
     alg->setChild(true);
     alg->setProperty("InputWorkspace", ws);
@@ -91,11 +89,11 @@ public:
     MatrixWorkspace_sptr outWS = alg->getProperty("OutputWorkspace");
   }
 
-  void test_EmptySpectrumList() {
+  void test_EmptySpectrumListPointsWorkspace() {
 
     auto ws = createWorkspace(2, 50);
 
-    IAlgorithm_sptr alg = AlgorithmManager::Instance().create("RemoveExpDecay");
+    auto alg = AlgorithmManager::Instance().create("RemoveExpDecay");
     alg->initialize();
     alg->setChild(true);
     alg->setProperty("InputWorkspace", ws);
@@ -134,13 +132,55 @@ public:
     TS_ASSERT_DELTA(outWS->e(1)[49], 0.0078, 0.0001);
   }
 
+  void test_EmptySpectrumListBinEdgesWorkspace() {
+
+    auto ws = createWorkspace(2, 50, true);
+
+    auto alg = AlgorithmManager::Instance().create("RemoveExpDecay");
+    alg->initialize();
+    alg->setChild(true);
+    alg->setProperty("InputWorkspace", ws);
+    alg->setPropertyValue("OutputWorkspace", outputName);
+    TS_ASSERT_THROWS_NOTHING(alg->execute());
+    TS_ASSERT(alg->isExecuted());
+
+    MatrixWorkspace_sptr outWS = alg->getProperty("OutputWorkspace");
+
+    // First spectrum
+    // Test some X values
+    TS_ASSERT_DELTA(outWS->x(0)[10], 0.1800, 0.0001);
+    TS_ASSERT_DELTA(outWS->x(0)[19], 0.3600, 0.0001);
+    TS_ASSERT_DELTA(outWS->x(0)[49], 0.9600, 0.0001);
+    // Test some Y values
+    TS_ASSERT_DELTA(outWS->y(0)[10], -0.0993, 0.0001);
+    TS_ASSERT_DELTA(outWS->y(0)[19], -0.0113, 0.0001);
+    TS_ASSERT_DELTA(outWS->y(0)[49], -0.0627, 0.0001);
+    // Test some E values
+    TS_ASSERT_DELTA(outWS->e(0)[10], 0.0054, 0.0001);
+    TS_ASSERT_DELTA(outWS->e(0)[19], 0.0059, 0.0001);
+    TS_ASSERT_DELTA(outWS->e(0)[49], 0.0077, 0.0001);
+
+    // Second spectrum
+    // Test some X values
+    TS_ASSERT_DELTA(outWS->x(1)[10], 0.1800, 0.0001);
+    TS_ASSERT_DELTA(outWS->x(1)[19], 0.3600, 0.0001);
+    TS_ASSERT_DELTA(outWS->x(1)[49], 0.9600, 0.0001);
+    // Test some Y values
+    TS_ASSERT_DELTA(outWS->y(1)[10], 0.0275, 0.0001);
+    TS_ASSERT_DELTA(outWS->y(1)[19], -0.1005, 0.0001);
+    TS_ASSERT_DELTA(outWS->y(1)[49], 0.0797, 0.0001);
+    // Test some E values
+    TS_ASSERT_DELTA(outWS->e(1)[10], 0.0054, 0.0001);
+    TS_ASSERT_DELTA(outWS->e(1)[19], 0.0059, 0.0001);
+    TS_ASSERT_DELTA(outWS->e(1)[49], 0.0078, 0.0001);
+  }
+
   void test_SpectrumList() {
 
     auto ws = createWorkspace(2, 50);
 
     // First, run the algorithm without specifying any spectrum
-    IAlgorithm_sptr alg1 =
-        AlgorithmManager::Instance().create("RemoveExpDecay");
+    auto alg1 = AlgorithmManager::Instance().create("RemoveExpDecay");
     alg1->initialize();
     alg1->setChild(true);
     alg1->setProperty("InputWorkspace", ws);
@@ -150,8 +190,7 @@ public:
     MatrixWorkspace_sptr out1 = alg1->getProperty("OutputWorkspace");
 
     // Then run the algorithm on the second spectrum only
-    IAlgorithm_sptr alg2 =
-        AlgorithmManager::Instance().create("RemoveExpDecay");
+    auto alg2 = AlgorithmManager::Instance().create("RemoveExpDecay");
     alg2->initialize();
     alg2->setChild(true);
     alg2->setProperty("InputWorkspace", ws);
@@ -180,7 +219,7 @@ public:
 
     auto ws = createWorkspace(4, 50);
 
-    IAlgorithm_sptr alg = AlgorithmManager::Instance().create("RemoveExpDecay");
+    auto alg = AlgorithmManager::Instance().create("RemoveExpDecay");
     alg->initialize();
     alg->setChild(true);
     alg->setProperty("InputWorkspace", ws);
@@ -198,9 +237,7 @@ class RemoveExpDecayTestPerformance : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static RemoveExpDecayTestPerformance *createSuite() {
-    return new RemoveExpDecayTestPerformance();
-  }
+  static RemoveExpDecayTestPerformance *createSuite() { return new RemoveExpDecayTestPerformance(); }
   static void destroySuite(RemoveExpDecayTestPerformance *suite) {
     AnalysisDataService::Instance().clear();
     delete suite;

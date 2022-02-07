@@ -16,7 +16,7 @@ Below, there is an example of the execution of the RingProfile to a
 associated to detector positions, but it is derived from the
 `Axes <Interacting_with_Matrix_Workspaces#Axes>`__.
 
-.. figure:: /images/ExecuteRingProfile.png 
+.. figure:: /images/ExecuteRingProfile.png
    :width: 800px
    :align: center
 
@@ -35,9 +35,9 @@ define the bin where to put the count for that pixel.
 The RingProfile is also defined for Workspace2D which has the positions
 based on the detectors, as you can see in the picture below.
 
-.. figure:: /images/RingProfileInstrument.png 
+.. figure:: /images/RingProfileInstrument.png
    :align: center
-   :width:  800px 
+   :width:  800px
 
 In this case, the inputs of the algorithm is like the image below
 
@@ -64,7 +64,7 @@ RealAngle = StartAngle - Angle
 Usage
 -----
 
-**Example - A complete Circle - no inner radius**  
+**Example - A complete Circle - no inner radius**
 
 .. testcode:: ExCircle
 
@@ -79,7 +79,7 @@ Output:
 
     The RingProfile has been calculated with 100 bins
 
-**Example - A ring**  
+**Example - A ring**
 
 .. testcode:: ExRing
 
@@ -87,7 +87,7 @@ Output:
     wsOut = RingProfile(ws,Centre=[0,5,10],MinRadius=1,MaxRadius=5,NumBins=200)
 
     print("The RingProfile has been calculated with {} bins".format(wsOut.blocksize()))
-    
+
 Output:
 
 .. testoutput:: ExRing

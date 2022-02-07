@@ -272,7 +272,7 @@ class SANSStitchTest(unittest.TestCase):
         y_array = out_ws.readY(0)
 
         expected_y_array = [0.5] * 9
-        
+
         np.testing.assert_equal(y_array, expected_y_array)
 
     def test_scale_both_without_can(self):
@@ -319,7 +319,7 @@ class SANSStitchTest(unittest.TestCase):
         y_array = out_ws.readY(0)
 
         expected_y_array = lab_workspace.readY(0) # We scale and shift to the back (lab) detectors
-        
+
         np.testing.assert_equal(y_array, expected_y_array)
 
     def test_scale_both_without_can_with_q_fit_range(self):
@@ -372,7 +372,7 @@ class SANSStitchTest(unittest.TestCase):
         y_array = out_ws.readY(0)
 
         expected_y_array = [7497.5, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 7502, 10.0]  # We scale and shift to the back (lab) detectors
-        
+
         np.testing.assert_equal(y_array, expected_y_array)
 
     def test_shift_only_without_can(self):
@@ -507,7 +507,7 @@ class SANSStitchTest(unittest.TestCase):
         y_array = out_ws.readY(0)
 
         expected_y_array = [0.5] * 5 + [1.5] * 4
-        
+
         np.testing.assert_equal(y_array, expected_y_array)
 
     def test_scale_none_with_can_and_q_merge_range(self):
@@ -555,7 +555,7 @@ class SANSStitchTest(unittest.TestCase):
         y_array = out_ws.readY(0)
 
         expected_y_array = [0.5] * 2 + [1.0] * 5 + [1.5] * 2
-                
+
         np.testing.assert_equal(y_array, expected_y_array)
 
     def test_that_merge_range_greater_than_overlap_bounds_set_to_upper_bound(self):
@@ -654,7 +654,7 @@ class SANSStitchTest(unittest.TestCase):
         y_array = out_ws.readY(0)
 
         expected_y_array = [1.0] + [1.5] * 8
-        
+
         np.testing.assert_equal(y_array, expected_y_array)
 
     def test_that_zero_merge_range_has_discrete_transition(self):
@@ -704,7 +704,7 @@ class SANSStitchTest(unittest.TestCase):
             y_array = out_ws.readY(0)
 
             expected_y_array = [0.5] * 5 + [1.5] * 4
-            
+
             np.testing.assert_equal(y_array, expected_y_array)
 
     def test_that_can_merge_2D_reduction_when_fitting_set_to_none(self):

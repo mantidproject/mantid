@@ -15,14 +15,11 @@ using namespace boost::python;
 GET_POINTER_SPECIALIZATION(SymmetryElementFactoryImpl)
 
 void export_SymmetryElementFactory() {
-  class_<SymmetryElementFactoryImpl, boost::noncopyable>(
-      "SymmetryElementFactoryImpl", no_init)
-      .def("createSymElement", &SymmetryElementFactoryImpl::createSymElement,
-           (arg("self"), arg("operation")),
+  class_<SymmetryElementFactoryImpl, boost::noncopyable>("SymmetryElementFactoryImpl", no_init)
+      .def("createSymElement", &SymmetryElementFactoryImpl::createSymElement, (arg("self"), arg("operation")),
            "Creates the symmetry element that corresponds to the supplied "
            "symmetry operation.")
-      .def("Instance", &SymmetryElementFactory::Instance,
-           return_value_policy<reference_existing_object>(),
+      .def("Instance", &SymmetryElementFactory::Instance, return_value_policy<reference_existing_object>(),
            "Returns a reference to the SymmetryElementFactory singleton")
       .staticmethod("Instance");
 }

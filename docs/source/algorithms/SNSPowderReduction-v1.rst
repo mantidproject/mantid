@@ -82,7 +82,15 @@ all. The files are loaded using :ref:`algm-PDLoadCharacterizations`
 which also contains the focus positions. Which runs to used are
 determined by :ref:`algm-PDDetermineCharacterizations`.
 
+Caching
+#######
 
+The result of time-consuming tasks that need not be repeated, such as calculating the absorption
+correction of a sample for every value of the temperature in a heating experiment, can be stored
+as cache files in a cache directory. These cache files will be loaded if property `CacheDir`
+is set. User can clean the cache files by setting property `CleanCache` to reclaim drive space
+or to prevent accidental misuse, such as reducing with an instrument of a different geometry
+and/or calibration. Cleaning the cache takes place immediately before reduction.
 
 Workflow
 --------

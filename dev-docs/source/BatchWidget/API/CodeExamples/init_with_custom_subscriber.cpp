@@ -15,11 +15,9 @@ public:
                              // we must remember the call to subscribe.
   }
 
-  void notifyCellChanged(RowLocation const &itemIndex, int column,
-                         std::string const &newValue) override {}
+  void notifyCellChanged(RowLocation const &itemIndex, int column, std::string const &newValue) override {}
   void notifyRowInserted(RowLocation const &newRowLocation) override {}
-  void notifyRemoveRowsRequested(
-      std::vector<RowLocation> const &locationsOfRowsToRemove) override {}
+  void notifyRemoveRowsRequested(std::vector<RowLocation> const &locationsOfRowsToRemove) override {}
   void notifyCopyRowsRequested() override {}
   void notifyPasteRowsRequested() override {}
   void notifyFilterReset() override {}
@@ -29,9 +27,8 @@ private:
 };
 
 // Elsewhere - Inside initialization
-m_treeView = new JobTreeView(
-    {"Heading 1", "Heading 2"}, // The table column headings.
-    Cell(""), // The default style and content for the new 'empty' cells.
-    this      // The parent QObject
-    );
+m_treeView = new JobTreeView({"Heading 1", "Heading 2"}, // The table column headings.
+                             Cell(""),                   // The default style and content for the new 'empty' cells.
+                             this                        // The parent QObject
+);
 m_childPresenter = SimplePresenter(m_treeView);

@@ -194,8 +194,7 @@ public:
 
     ObjComponent pcomp(&comp, pmap.get());
 
-    TS_ASSERT_THROWS(pcomp.interceptSurface(track),
-                     const Exception::NullPointerException &);
+    TS_ASSERT_THROWS(pcomp.interceptSurface(track), const Exception::NullPointerException &);
   }
 
   void testSolidAngleCappedCylinder() {
@@ -230,8 +229,7 @@ public:
 
     ObjComponent pB(&B, pmap.get());
 
-    TS_ASSERT_THROWS(pB.solidAngle(V3D(1, 2, 3)),
-                     const Exception::NullPointerException &);
+    TS_ASSERT_THROWS(pB.solidAngle(V3D(1, 2, 3)), const Exception::NullPointerException &);
   }
 
   void testBoundingBoxCappedCylinder() {
@@ -280,8 +278,7 @@ public:
     TS_ASSERT_DELTA(point.Y(), 10.0, 1e-6);
     TS_ASSERT_DELTA(point.Z(), -10.0, 1e-6);
     // Cuboid not on principle axes
-    std::vector<std::string> planes{"px 0.5", "px 1.5",  "py -22",
-                                    "py -21", "pz -0.5", "pz 0.5"};
+    std::vector<std::string> planes{"px 0.5", "px 1.5", "py -22", "py -21", "pz -0.5", "pz 0.5"};
     ObjComponent D("ocube", createCuboid(planes));
     D.setPos(10, 0, 0);
     D.setRot(Quat(90.0, V3D(0, 0, 1)));

@@ -21,14 +21,11 @@ HintingLineEdits using the given hint strategy.
 */
 class HintingLineEditFactory : public QStyledItemDelegate {
 public:
-  HintingLineEditFactory(QAbstractItemDelegate *cellPainterDelegate,
-                         std::unique_ptr<HintStrategy> hintStrategy,
+  HintingLineEditFactory(QAbstractItemDelegate *cellPainterDelegate, std::unique_ptr<HintStrategy> hintStrategy,
                          QObject *parent = nullptr)
-      : QStyledItemDelegate(parent), m_strategy(std::move(hintStrategy)),
-        m_cellPainterDelegate(cellPainterDelegate){};
+      : QStyledItemDelegate(parent), m_strategy(std::move(hintStrategy)), m_cellPainterDelegate(cellPainterDelegate){};
 
-  QWidget *createEditor(QWidget *parent, const QStyleOptionViewItem &option,
-                        const QModelIndex &index) const override {
+  QWidget *createEditor(QWidget *parent, const QStyleOptionViewItem &option, const QModelIndex &index) const override {
     Q_UNUSED(option);
     Q_UNUSED(index);
 
@@ -38,8 +35,7 @@ public:
     return editor;
   }
 
-  void paint(QPainter *painter, const QStyleOptionViewItem &option,
-             const QModelIndex &index) const override {
+  void paint(QPainter *painter, const QStyleOptionViewItem &option, const QModelIndex &index) const override {
     m_cellPainterDelegate->paint(painter, option, index);
   }
 

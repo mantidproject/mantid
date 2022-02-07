@@ -42,16 +42,14 @@ public:
     xin[size1 - 1] = static_cast<double>(size1 - 1);
     for (std::size_t i = 0; i < size2; i++)
       xout[i] = 0.5 * static_cast<double>(i);
-    Mantid::Kernel::VectorHelper::rebinHistogram(xin, yin, ein, xout, yout,
-                                                 eout, false);
+    Mantid::Kernel::VectorHelper::rebinHistogram(xin, yin, ein, xout, yout, eout, false);
     for (std::size_t i = 0; i < size2 - 1; i++) {
       TS_ASSERT_DELTA(yout[i], 0.5, 1e-7);
       TS_ASSERT_DELTA(eout[i], M_SQRT1_2, 1e-7);
     }
     std::vector<double> returnX(xin), returnY(size1 - 1), returnE(size1 - 1);
 
-    Mantid::Kernel::VectorHelper::rebinHistogram(xout, yout, eout, returnX,
-                                                 returnY, returnE, false);
+    Mantid::Kernel::VectorHelper::rebinHistogram(xout, yout, eout, returnX, returnY, returnE, false);
     for (std::size_t i = 0; i < size1 - 1; i++) {
       TS_ASSERT_DELTA(returnY[i], yin[i], 1e-7);
       TS_ASSERT_DELTA(returnE[i], ein[i], 1e-7);
@@ -61,9 +59,7 @@ public:
 
 class RebinHistogramTestPerformance : public CxxTest::TestSuite {
 public:
-  RebinHistogramTestPerformance *createSuite() {
-    return new RebinHistogramTestPerformance();
-  }
+  RebinHistogramTestPerformance *createSuite() { return new RebinHistogramTestPerformance(); }
 
   void destroySuite(RebinHistogramTestPerformance *suite) { delete suite; }
 
@@ -77,8 +73,7 @@ public:
     for (size_t i = 0; i < nIters; i++) {
       std::vector<double> yout(size);
       std::vector<double> eout(size);
-      Mantid::Kernel::VectorHelper::rebinHistogram(
-          binEdges, counts, errors, smallerBinEdges, yout, eout, false);
+      Mantid::Kernel::VectorHelper::rebinHistogram(binEdges, counts, errors, smallerBinEdges, yout, eout, false);
     }
   }
 
@@ -87,8 +82,7 @@ public:
     for (size_t i = 0; i < nIters; i++) {
       std::vector<double> yout(size);
       std::vector<double> eout(size);
-      Mantid::Kernel::VectorHelper::rebinHistogram(
-          binEdges, counts, errors, largerBinEdges, yout, eout, false);
+      Mantid::Kernel::VectorHelper::rebinHistogram(binEdges, counts, errors, largerBinEdges, yout, eout, false);
     }
   }
 

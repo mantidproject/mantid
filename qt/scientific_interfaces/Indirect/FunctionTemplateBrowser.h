@@ -7,12 +7,15 @@
 #pragma once
 
 #include "DllConfig.h"
-#include "IndexTypes.h"
 #include "MantidAPI/IFunction_fwd.h"
 #include "MantidAPI/ITableWorkspace_fwd.h"
+#include "MantidQtWidgets/Common/FunctionModelDataset.h"
+#include "MantidQtWidgets/Common/IndexTypes.h"
 #include "ParameterEstimation.h"
 
-#include <QMap>
+#include <QList>
+#include <QPair>
+#include <QString>
 #include <QWidget>
 
 class QtBoolPropertyManager;
@@ -30,6 +33,7 @@ namespace CustomInterfaces {
 namespace IDA {
 
 using namespace Mantid::API;
+using namespace MantidWidgets;
 
 /**
  * Class FunctionTemplateBrowser implements QtPropertyBrowser to display
@@ -39,8 +43,8 @@ using namespace Mantid::API;
 class MANTIDQT_INDIRECT_DLL FunctionTemplateBrowser : public QWidget {
   Q_OBJECT
 public:
-  FunctionTemplateBrowser(QWidget *parent);
-  virtual ~FunctionTemplateBrowser() = default;
+  FunctionTemplateBrowser(QWidget *parent = nullptr);
+  virtual ~FunctionTemplateBrowser();
   void init();
 
   virtual void setFunction(const QString &funStr) = 0;
@@ -48,27 +52,22 @@ public:
   virtual IFunction_sptr getFunction() const = 0;
   virtual void setNumberOfDatasets(int) = 0;
   virtual int getNumberOfDatasets() const = 0;
-  virtual void setDatasetNames(const QStringList &names) = 0;
+  virtual void setDatasets(const QList<MantidWidgets::FunctionModelDataset> &datasets) = 0;
   virtual QStringList getGlobalParameters() const = 0;
   virtual QStringList getLocalParameters() const = 0;
   virtual void setGlobalParameters(const QStringList &globals) = 0;
   virtual void updateMultiDatasetParameters(const IFunction &fun) = 0;
-  virtual void
-  updateMultiDatasetParameters(const ITableWorkspace &paramTable) = 0;
+  virtual void updateMultiDatasetParameters(const ITableWorkspace &paramTable) = 0;
   virtual void updateParameters(const IFunction &fun) = 0;
   virtual void setCurrentDataset(int i) = 0;
   virtual int getCurrentDataset() = 0;
-  virtual void
-  updateParameterNames(const QMap<int, QString> &parameterNames) = 0;
+  virtual void updateParameterNames(const QMap<int, QString> &parameterNames) = 0;
   virtual void setErrorsEnabled(bool enabled) = 0;
   virtual void clear() = 0;
-  virtual void updateParameterEstimationData(
-      DataForParameterEstimationCollection &&data) = 0;
+  virtual void updateParameterEstimationData(DataForParameterEstimationCollection &&data) = 0;
+  virtual void estimateFunctionParameters() = 0;
   virtual void setBackgroundA0(double value) = 0;
-  virtual void setResolution(std::string const &name,
-                             TableDatasetIndex const &index) = 0;
-  virtual void setResolution(
-      const std::vector<std::pair<std::string, int>> &fitResolutions) = 0;
+  virtual void setResolution(const std::vector<std::pair<std::string, size_t>> &fitResolutions) = 0;
   virtual void setQValues(const std::vector<double> &qValues) = 0;
 
 signals:
@@ -86,7 +85,7 @@ protected slots:
   virtual void parameterButtonClicked(QtProperty *) = 0;
 
 private:
-  void createBrowser();
+  virtual void createBrowser();
   virtual void createProperties() = 0;
 
 protected:

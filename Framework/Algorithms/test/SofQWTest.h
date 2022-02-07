@@ -31,17 +31,13 @@ public:
     loader.setPropertyValue("OutputWorkspace", "__unused");
     loader.execute();
 
-    Mantid::API::Workspace_sptr loadedWS =
-        loader.getProperty("OutputWorkspace");
-    auto inWS =
-        std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(loadedWS);
+    Mantid::API::Workspace_sptr loadedWS = loader.getProperty("OutputWorkspace");
+    auto inWS = std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(loadedWS);
     WorkspaceHelpers::makeDistribution(inWS);
     return inWS;
   }
 
-  template <typename SQWType>
-  static Mantid::API::MatrixWorkspace_sptr
-  runSQW(const std::string &method = "") {
+  template <typename SQWType> static Mantid::API::MatrixWorkspace_sptr runSQW(const std::string &method = "") {
     auto inWS = loadTestFile();
 
     SQWType sqw;
@@ -51,8 +47,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(sqw.setProperty("InputWorkspace", inWS));
     const std::string wsname{"_tmp_"};
     TS_ASSERT_THROWS_NOTHING(sqw.setPropertyValue("OutputWorkspace", wsname));
-    TS_ASSERT_THROWS_NOTHING(
-        sqw.setPropertyValue("QAxisBinning", "0.5,0.25,2"));
+    TS_ASSERT_THROWS_NOTHING(sqw.setPropertyValue("QAxisBinning", "0.5,0.25,2"));
     TS_ASSERT_THROWS_NOTHING(sqw.setPropertyValue("EMode", "Indirect"));
     TS_ASSERT_THROWS_NOTHING(sqw.setPropertyValue("EFixed", "1.84"));
     TS_ASSERT_THROWS_NOTHING(sqw.setProperty("ReplaceNaNs", true));
@@ -124,14 +119,12 @@ public:
   }
 
   void testExecNansReplaced() {
-    auto result =
-        SofQWTest::runSQW<Mantid::Algorithms::SofQW>("NormalisedPolygon");
+    auto result = SofQWTest::runSQW<Mantid::Algorithms::SofQW>("NormalisedPolygon");
     bool nanFound = false;
 
     for (size_t i = 0; i < result->getNumberHistograms(); i++) {
-      if (std::find_if(result->y(i).begin(), result->y(i).end(), [](double v) {
-            return std::isnan(v);
-          }) != result->y(i).end()) {
+      if (std::find_if(result->y(i).begin(), result->y(i).end(), [](double v) { return std::isnan(v); }) !=
+          result->y(i).end()) {
         nanFound = true;
         break; // NaN found in workspace, no need to keep searching
       }
@@ -149,15 +142,12 @@ public:
     Mantid::Algorithms::SofQCommon emodeProperties;
     emodeProperties.initCachedValues(*inWS, &alg);
     const std::vector<double> eBinParams{-0.5, 0.1, -0.1, 0.2, 0.4};
-    const std::vector<double> expectedEBinEdges{-0.5, -0.4, -0.3, -0.2,
-                                                -0.1, 0.1,  0.3,  0.4};
+    const std::vector<double> expectedEBinEdges{-0.5, -0.4, -0.3, -0.2, -0.1, 0.1, 0.3, 0.4};
     const std::vector<double> qBinParams{0.5, 0.1, 1.0, 0.2, 2.};
-    const std::vector<double> expectedQBinEdges{0.5, 0.6, 0.7, 0.8, 0.9, 1.0,
-                                                1.2, 1.4, 1.6, 1.8, 2.};
+    const std::vector<double> expectedQBinEdges{0.5, 0.6, 0.7, 0.8, 0.9, 1.0, 1.2, 1.4, 1.6, 1.8, 2.};
     std::vector<double> qAxis;
-    auto outWS = Mantid::Algorithms::SofQW::setUpOutputWorkspace<
-        Mantid::DataObjects::Workspace2D>(*inWS, qBinParams, qAxis, eBinParams,
-                                          emodeProperties);
+    auto outWS = Mantid::Algorithms::SofQW::setUpOutputWorkspace<Mantid::DataObjects::Workspace2D>(
+        *inWS, qBinParams, qAxis, eBinParams, emodeProperties);
     TS_ASSERT_EQUALS(outWS->getNumberHistograms(), expectedQBinEdges.size() - 1)
     for (size_t i = 0; i < outWS->getNumberHistograms(); ++i) {
       const auto &x = outWS->x(i);
@@ -195,12 +185,10 @@ public:
     }
     expectedEBinEdges.emplace_back(lastEdge);
     const std::vector<double> qBinParams{0.5, 0.25, 2.};
-    const std::vector<double> expectedQBinEdges{0.5, 0.75, 1., 1.25,
-                                                1.5, 1.75, 2.};
+    const std::vector<double> expectedQBinEdges{0.5, 0.75, 1., 1.25, 1.5, 1.75, 2.};
     std::vector<double> qAxis;
-    auto outWS = Mantid::Algorithms::SofQW::setUpOutputWorkspace<
-        Mantid::DataObjects::Workspace2D>(*inWS, qBinParams, qAxis, eBinParams,
-                                          emodeProperties);
+    auto outWS = Mantid::Algorithms::SofQW::setUpOutputWorkspace<Mantid::DataObjects::Workspace2D>(
+        *inWS, qBinParams, qAxis, eBinParams, emodeProperties);
     TS_ASSERT_EQUALS(outWS->getNumberHistograms(), expectedQBinEdges.size() - 1)
     for (size_t i = 0; i < outWS->getNumberHistograms(); ++i) {
       const auto &x = outWS->x(i);
@@ -231,9 +219,8 @@ public:
     const double dQ{0.023};
     const std::vector<double> qBinParams{dQ};
     std::vector<double> qAxis;
-    auto outWS = Mantid::Algorithms::SofQW::setUpOutputWorkspace<
-        Mantid::DataObjects::Workspace2D>(*inWS, qBinParams, qAxis, eBinParams,
-                                          emodeProperties);
+    auto outWS = Mantid::Algorithms::SofQW::setUpOutputWorkspace<Mantid::DataObjects::Workspace2D>(
+        *inWS, qBinParams, qAxis, eBinParams, emodeProperties);
     for (size_t i = 0; i < outWS->getNumberHistograms(); ++i) {
       const auto &x = outWS->x(i);
       for (size_t j = 0; j < x.size(); ++j) {
@@ -253,8 +240,7 @@ public:
   }
 
 private:
-  static bool isAlgorithmInHistory(const Mantid::API::MatrixWorkspace &result,
-                                   const std::string &name) {
+  static bool isAlgorithmInHistory(const Mantid::API::MatrixWorkspace &result, const std::string &name) {
     // Loaded nexus file has 13 other entries
     const auto &wsHistory = result.getHistory();
     const auto &lastAlg = wsHistory.getAlgorithmHistory(wsHistory.size() - 1);

@@ -32,10 +32,7 @@ public:
 
   void testFn() {
     MockHKLFilter filter;
-    EXPECT_CALL(filter, isAllowed(_))
-        .Times(2)
-        .WillOnce(Return(true))
-        .WillRepeatedly(Return(false));
+    EXPECT_CALL(filter, isAllowed(_)).Times(2).WillOnce(Return(true)).WillRepeatedly(Return(false));
 
     std::function<bool(const V3D &)> f = filter.fn();
 
@@ -54,8 +51,7 @@ public:
     TS_ASSERT_EQUALS(op.getOperand(), filter);
 
     HKLFilter_const_sptr invalid;
-    TS_ASSERT_THROWS(MockHKLFilterUnaryLogicOperation op(invalid),
-                     const std::runtime_error &);
+    TS_ASSERT_THROWS(MockHKLFilterUnaryLogicOperation op(invalid), const std::runtime_error &);
   }
 
   void testBinaryLogicOperation() {
@@ -69,29 +65,22 @@ public:
     TS_ASSERT_EQUALS(op.getRHS(), rhs);
 
     HKLFilter_const_sptr invalid;
-    TS_ASSERT_THROWS(MockHKLFilterBinaryLogicOperation op(invalid, rhs),
-                     const std::runtime_error &);
-    TS_ASSERT_THROWS(MockHKLFilterBinaryLogicOperation op(lhs, invalid),
-                     const std::runtime_error &);
-    TS_ASSERT_THROWS(MockHKLFilterBinaryLogicOperation op(invalid, invalid),
-                     const std::runtime_error &);
+    TS_ASSERT_THROWS(MockHKLFilterBinaryLogicOperation op(invalid, rhs), const std::runtime_error &);
+    TS_ASSERT_THROWS(MockHKLFilterBinaryLogicOperation op(lhs, invalid), const std::runtime_error &);
+    TS_ASSERT_THROWS(MockHKLFilterBinaryLogicOperation op(invalid, invalid), const std::runtime_error &);
   }
 
   void testHKLFilterNot() {
-    std::shared_ptr<const MockHKLFilter> filter =
-        std::make_shared<MockHKLFilter>();
+    std::shared_ptr<const MockHKLFilter> filter = std::make_shared<MockHKLFilter>();
 
-    EXPECT_CALL(*filter, isAllowed(_))
-        .WillOnce(Return(true))
-        .WillOnce(Return(false));
+    EXPECT_CALL(*filter, isAllowed(_)).WillOnce(Return(true)).WillOnce(Return(false));
 
     HKLFilterNot notFilter(filter);
 
     TS_ASSERT_EQUALS(notFilter.isAllowed(V3D(1, 1, 1)), false);
     TS_ASSERT_EQUALS(notFilter.isAllowed(V3D(1, 1, 1)), true);
 
-    TS_ASSERT(Mock::VerifyAndClearExpectations(
-        std::const_pointer_cast<MockHKLFilter>(filter).get()));
+    TS_ASSERT(Mock::VerifyAndClearExpectations(std::const_pointer_cast<MockHKLFilter>(filter).get()));
   }
 
   void testHKLFilterNotOperator() {
@@ -99,26 +88,18 @@ public:
 
     HKLFilter_const_sptr notFilter = ~filter;
 
-    std::shared_ptr<const HKLFilterNot> notFilterCasted =
-        std::dynamic_pointer_cast<const HKLFilterNot>(notFilter);
+    std::shared_ptr<const HKLFilterNot> notFilterCasted = std::dynamic_pointer_cast<const HKLFilterNot>(notFilter);
     TS_ASSERT(notFilterCasted);
 
     TS_ASSERT_EQUALS(notFilterCasted->getOperand(), filter);
   }
 
   void testHKLFilterAnd() {
-    std::shared_ptr<const MockHKLFilter> lhs =
-        std::make_shared<MockHKLFilter>();
-    EXPECT_CALL(*lhs, isAllowed(_))
-        .WillOnce(Return(true))
-        .WillOnce(Return(false))
-        .WillOnce(Return(true));
+    std::shared_ptr<const MockHKLFilter> lhs = std::make_shared<MockHKLFilter>();
+    EXPECT_CALL(*lhs, isAllowed(_)).WillOnce(Return(true)).WillOnce(Return(false)).WillOnce(Return(true));
 
-    std::shared_ptr<const MockHKLFilter> rhs =
-        std::make_shared<MockHKLFilter>();
-    EXPECT_CALL(*rhs, isAllowed(_))
-        .WillOnce(Return(true))
-        .WillOnce(Return(false));
+    std::shared_ptr<const MockHKLFilter> rhs = std::make_shared<MockHKLFilter>();
+    EXPECT_CALL(*rhs, isAllowed(_)).WillOnce(Return(true)).WillOnce(Return(false));
 
     HKLFilterAnd andFilter(lhs, rhs);
 
@@ -126,10 +107,8 @@ public:
     TS_ASSERT_EQUALS(andFilter.isAllowed(V3D(1, 1, 1)), false);
     TS_ASSERT_EQUALS(andFilter.isAllowed(V3D(1, 1, 1)), false);
 
-    TS_ASSERT(Mock::VerifyAndClearExpectations(
-        std::const_pointer_cast<MockHKLFilter>(lhs).get()));
-    TS_ASSERT(Mock::VerifyAndClearExpectations(
-        std::const_pointer_cast<MockHKLFilter>(rhs).get()));
+    TS_ASSERT(Mock::VerifyAndClearExpectations(std::const_pointer_cast<MockHKLFilter>(lhs).get()));
+    TS_ASSERT(Mock::VerifyAndClearExpectations(std::const_pointer_cast<MockHKLFilter>(rhs).get()));
   }
 
   void testHKLFilterAndOperator() {
@@ -138,8 +117,7 @@ public:
 
     HKLFilter_const_sptr andFilter = lhs & rhs;
 
-    std::shared_ptr<const HKLFilterAnd> andFilterCasted =
-        std::dynamic_pointer_cast<const HKLFilterAnd>(andFilter);
+    std::shared_ptr<const HKLFilterAnd> andFilterCasted = std::dynamic_pointer_cast<const HKLFilterAnd>(andFilter);
 
     TS_ASSERT(andFilterCasted);
 
@@ -148,19 +126,15 @@ public:
   }
 
   void testHKLFilterOr() {
-    std::shared_ptr<const MockHKLFilter> lhs =
-        std::make_shared<MockHKLFilter>();
+    std::shared_ptr<const MockHKLFilter> lhs = std::make_shared<MockHKLFilter>();
     EXPECT_CALL(*lhs, isAllowed(_))
         .WillOnce(Return(true))
         .WillOnce(Return(false))
         .WillOnce(Return(true))
         .WillOnce(Return(false));
 
-    std::shared_ptr<const MockHKLFilter> rhs =
-        std::make_shared<MockHKLFilter>();
-    EXPECT_CALL(*rhs, isAllowed(_))
-        .WillOnce(Return(false))
-        .WillOnce(Return(true));
+    std::shared_ptr<const MockHKLFilter> rhs = std::make_shared<MockHKLFilter>();
+    EXPECT_CALL(*rhs, isAllowed(_)).WillOnce(Return(false)).WillOnce(Return(true));
 
     HKLFilterOr orFilter(lhs, rhs);
 
@@ -169,10 +143,8 @@ public:
     TS_ASSERT_EQUALS(orFilter.isAllowed(V3D(1, 1, 1)), true);
     TS_ASSERT_EQUALS(orFilter.isAllowed(V3D(1, 1, 1)), true);
 
-    TS_ASSERT(Mock::VerifyAndClearExpectations(
-        std::const_pointer_cast<MockHKLFilter>(lhs).get()));
-    TS_ASSERT(Mock::VerifyAndClearExpectations(
-        std::const_pointer_cast<MockHKLFilter>(rhs).get()));
+    TS_ASSERT(Mock::VerifyAndClearExpectations(std::const_pointer_cast<MockHKLFilter>(lhs).get()));
+    TS_ASSERT(Mock::VerifyAndClearExpectations(std::const_pointer_cast<MockHKLFilter>(rhs).get()));
   }
 
   void testHKLFilterOrOperator() {
@@ -181,8 +153,7 @@ public:
 
     HKLFilter_const_sptr orFilter = lhs | rhs;
 
-    std::shared_ptr<const HKLFilterOr> orFilterCasted =
-        std::dynamic_pointer_cast<const HKLFilterOr>(orFilter);
+    std::shared_ptr<const HKLFilterOr> orFilterCasted = std::dynamic_pointer_cast<const HKLFilterOr>(orFilter);
 
     TS_ASSERT(orFilterCasted);
 
@@ -199,18 +170,15 @@ private:
 
   class MockHKLFilterUnaryLogicOperation : public HKLFilterUnaryLogicOperation {
   public:
-    MockHKLFilterUnaryLogicOperation(const HKLFilter_const_sptr &filter)
-        : HKLFilterUnaryLogicOperation(filter) {}
+    MockHKLFilterUnaryLogicOperation(const HKLFilter_const_sptr &filter) : HKLFilterUnaryLogicOperation(filter) {}
 
     MOCK_CONST_METHOD0(getDescription, std::string());
     MOCK_CONST_METHOD1(isAllowed, bool(const V3D &));
   };
 
-  class MockHKLFilterBinaryLogicOperation
-      : public HKLFilterBinaryLogicOperation {
+  class MockHKLFilterBinaryLogicOperation : public HKLFilterBinaryLogicOperation {
   public:
-    MockHKLFilterBinaryLogicOperation(const HKLFilter_const_sptr &lhs,
-                                      const HKLFilter_const_sptr &rhs)
+    MockHKLFilterBinaryLogicOperation(const HKLFilter_const_sptr &lhs, const HKLFilter_const_sptr &rhs)
         : HKLFilterBinaryLogicOperation(lhs, rhs) {}
 
     MOCK_CONST_METHOD0(getDescription, std::string());

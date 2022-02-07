@@ -20,9 +20,9 @@ The function definition is given by:
 
 .. math::
 
-   f(x) = A\frac{exp(-z^2)}{\sqrt{2\pi\sigma^2}}(1 + \frac{C4}{(2^4(4/2)!)}H_4(z) +
+   f(x) = A\frac{\exp(-z^2)}{\sqrt{2\pi\sigma^2}}(1 + \frac{C4}{(2^4(4/2)!)}H_4(z) +
      \frac{C6}{(2^6(6/2)!)}H_6(z) + \frac{C8}{(2^8(8/2)!)}H_8(z) + \frac{C10}{(2^10(10/2)!)}H_{10}(z)) +
-          Afse\frac{\sigma\sqrt{2}}{12\sqrt{2\pi\sigma^2}}exp(-z^2)H_3(z)
+          Afse\frac{\sigma\sqrt{2}}{12\sqrt{2\pi\sigma^2}}\exp(-z^2)H_3(z)
 
 where :math:`z=\frac{(x-X_0)}{\sqrt{2\sigma^2}}`, :math:`H_n(z)` is the nth-order
 `Hermite polynomial <http://mathworld.wolfram.com/HermitePolynomial.html>`_ and the other parameters are

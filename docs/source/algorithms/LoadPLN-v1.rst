@@ -30,7 +30,7 @@ Output:
 
    Number of spectra: 12808
 
-   
+
 .. categories::
 
 .. sourcelink::

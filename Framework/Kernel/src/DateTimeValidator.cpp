@@ -11,16 +11,13 @@
 #include <memory>
 #include <stdexcept>
 
-namespace Mantid {
-namespace Kernel {
+namespace Mantid::Kernel {
 
 using namespace DateAndTimeHelpers;
 /**
  * @return A clone of the current state of the validator
  */
-IValidator_sptr DateTimeValidator::clone() const {
-  return std::make_shared<DateTimeValidator>(*this);
-}
+IValidator_sptr DateTimeValidator::clone() const { return std::make_shared<DateTimeValidator>(*this); }
 
 DateTimeValidator::DateTimeValidator() { m_allowedEmpty = false; }
 
@@ -28,9 +25,7 @@ DateTimeValidator::DateTimeValidator() { m_allowedEmpty = false; }
  * Sets the value of the m_allowEmpty variable
  * @param allow The new value of m_allowEmpty
  */
-void DateTimeValidator::allowEmpty(const bool &allow) {
-  m_allowedEmpty = allow;
-}
+void DateTimeValidator::allowEmpty(const bool &allow) { m_allowedEmpty = allow; }
 
 /**
  *  @param value A string to check for an ISO formatted timestamp
@@ -54,5 +49,4 @@ std::string DateTimeValidator::checkValidity(const std::string &value) const {
     return error;
   }
 }
-} // namespace Kernel
-} // namespace Mantid
+} // namespace Mantid::Kernel

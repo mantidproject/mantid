@@ -16,19 +16,18 @@ using namespace Mantid::Kernel;
 using namespace boost::python;
 
 namespace {
-SpaceGroup_sptr getSpaceGroup(CrystalStructure &self) {
+SpaceGroup_sptr getSpaceGroup(const CrystalStructure &self) {
   return std::const_pointer_cast<SpaceGroup>(self.spaceGroup());
 }
 
 std::vector<std::string> getScatterers(const CrystalStructure &self) {
-  CompositeBraggScatterer_sptr scatterers = self.getScatterers();
+  auto scatterers = self.getScatterers();
 
   std::vector<std::string> scattererStrings;
   scattererStrings.reserve(scatterers->nScatterers());
 
   for (size_t i = 0; i < scatterers->nScatterers(); ++i) {
-    scattererStrings.emplace_back(
-        getIsotropicAtomBraggScattererString(scatterers->getScatterer(i)));
+    scattererStrings.emplace_back(getIsotropicAtomBraggScattererString(scatterers->getScatterer(i)));
   }
 
   return scattererStrings;

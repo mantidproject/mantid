@@ -15,23 +15,22 @@ using namespace Mantid::PythonInterface;
 using namespace boost::python;
 
 void observeFinish(AlgorithmObserver &self, const boost::python::object &alg) {
-  IAlgorithm_sptr &calg = boost::python::extract<IAlgorithm_sptr &>(alg);
+  const IAlgorithm_sptr &calg = boost::python::extract<IAlgorithm_sptr &>(alg);
   self.observeFinish(calg);
 }
 
 void observeError(AlgorithmObserver &self, const boost::python::object &alg) {
-  IAlgorithm_sptr &calg = boost::python::extract<IAlgorithm_sptr &>(alg);
+  const IAlgorithm_sptr &calg = boost::python::extract<IAlgorithm_sptr &>(alg);
   self.observeError(calg);
 }
 
-void observeProgress(AlgorithmObserver &self,
-                     const boost::python::object &alg) {
-  IAlgorithm_sptr &calg = boost::python::extract<IAlgorithm_sptr &>(alg);
+void observeProgress(AlgorithmObserver &self, const boost::python::object &alg) {
+  const IAlgorithm_sptr &calg = boost::python::extract<IAlgorithm_sptr &>(alg);
   self.observeProgress(calg);
 }
 
 void stopObserving(AlgorithmObserver &self, const boost::python::object &alg) {
-  IAlgorithm_sptr &calg = boost::python::extract<IAlgorithm_sptr &>(alg);
+  const IAlgorithm_sptr &calg = boost::python::extract<IAlgorithm_sptr &>(alg);
   self.stopObserving(calg);
 }
 
@@ -41,18 +40,13 @@ void export_algorithm_observer() {
 
   register_ptr_to_python<std::shared_ptr<AlgorithmObserver>>();
 
-  class_<AlgorithmObserver, bases<>, std::shared_ptr<AlgorithmObserverAdapter>,
-         boost::noncopyable>(
-      "AlgorithmObserver",
-      "Observes Algorithm notifications: start,progress,finish,error.")
+  class_<AlgorithmObserver, bases<>, std::shared_ptr<AlgorithmObserverAdapter>, boost::noncopyable>(
+      "AlgorithmObserver", "Observes Algorithm notifications: start,progress,finish,error.")
       .def("observeStarting", &AlgorithmObserver::observeStarting, arg("self"),
            "Observe the AlgorithmManager for starting algorithms.")
-      .def("observeFinish", &observeFinish, (arg("self"), arg("alg")),
-           "Observe algorithm for its finish notification.")
-      .def("observeError", &observeError, (arg("self"), arg("alg")),
-           "Observe algorithm for its error notification.")
+      .def("observeFinish", &observeFinish, (arg("self"), arg("alg")), "Observe algorithm for its finish notification.")
+      .def("observeError", &observeError, (arg("self"), arg("alg")), "Observe algorithm for its error notification.")
       .def("observeProgress", &observeProgress, (arg("self"), arg("alg")),
            "Observe algorithm for its progress notification.")
-      .def("stopObserving", &stopObserving, (arg("self"), arg("alg")),
-           "Remove all observers from the algorithm.");
+      .def("stopObserving", &stopObserving, (arg("self"), arg("alg")), "Remove all observers from the algorithm.");
 }

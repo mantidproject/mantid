@@ -13,7 +13,8 @@ set(SRC_FILES
     src/LoadLiveData.cpp
     src/MonitorLiveData.cpp
     src/SNSLiveEventDataListener.cpp
-    src/StartLiveData.cpp)
+    src/StartLiveData.cpp
+)
 
 set(SRC_UNITY_IGNORE_FILES src/ISIS/DAE/idc.cpp src/ISIS/DAE/isisds_command.cpp)
 
@@ -35,7 +36,8 @@ set(INC_FILES
     inc/MantidLiveData/SNSLiveEventDataListener.h
     inc/MantidLiveData/StartLiveData.h
     src/ISIS/DAE/idc.h
-    src/ISIS/DAE/isisds_command.h)
+    src/ISIS/DAE/isisds_command.h
+)
 
 set(TEST_FILES
     # Needs fixing to not rely on network. SNSLiveEventDataListenerTest.h
@@ -46,7 +48,8 @@ set(TEST_FILES
     LiveDataAlgorithmTest.h
     LoadLiveDataTest.h
     MonitorLiveDataTest.h
-    StartLiveDataTest.h)
+    StartLiveDataTest.h
+)
 
 find_package(LibRDKafka 0.11)
 if(LIBRDKAFKA_FOUND)
@@ -58,7 +61,8 @@ if(LIBRDKAFKA_FOUND)
       src/Kafka/KafkaHistoListener.cpp
       src/Kafka/KafkaHistoStreamDecoder.cpp
       src/Kafka/KafkaBroker.cpp
-      src/Kafka/KafkaTopicSubscriber.cpp)
+      src/Kafka/KafkaTopicSubscriber.cpp
+  )
   set(INC_FILES
       ${INC_FILES}
       inc/MantidLiveData/Kafka/KafkaEventListener.h
@@ -74,28 +78,23 @@ if(LIBRDKAFKA_FOUND)
       src/Kafka/private/Schema/flatbuffers/flatbuffers.h
       src/Kafka/private/Schema/flatbuffers/base.h
       src/Kafka/private/Schema/flatbuffers/stl_emulation.h
+      src/Kafka/private/Schema/6s4t_run_stop_generated.h
       src/Kafka/private/Schema/df12_det_spec_map_generated.h
       src/Kafka/private/Schema/dtdb_adc_pulse_debug_generated.h
       src/Kafka/private/Schema/ev42_events_generated.h
       src/Kafka/private/Schema/f142_logdata_generated.h
       src/Kafka/private/Schema/fwdi_forwarder_internal_generated.h
       src/Kafka/private/Schema/is84_isis_events_generated.h
-      src/Kafka/private/Schema/y2gw_run_info_generated.h
+      src/Kafka/private/Schema/pl72_run_start_generated.h
       src/Kafka/private/Schema/tdct_timestamps_generated.h
-      src/Kafka/private/Schema/hs00_event_histogram_generated.h)
-  set(TEST_FILES
-      ${TEST_FILES}
-      KafkaEventStreamDecoderTest.h
-      KafkaHistoStreamDecoderTest.h
-      KafkaTopicSubscriberTest.h
-      )
+      src/Kafka/private/Schema/hs00_event_histogram_generated.h
+  )
+  set(TEST_FILES ${TEST_FILES} KafkaEventStreamDecoderTest.h KafkaHistoStreamDecoderTest.h KafkaTopicSubscriberTest.h)
 endif()
 
-if(COVERALLS)
+if(COVERAGE)
   foreach(loop_var ${SRC_FILES} ${INC_FILES})
-    set_property(GLOBAL APPEND
-                 PROPERTY COVERAGE_SRCS
-                          "${CMAKE_CURRENT_SOURCE_DIR}/${loop_var}")
+    set_property(GLOBAL APPEND PROPERTY COVERAGE_SRCS "${CMAKE_CURRENT_SOURCE_DIR}/${loop_var}")
   endforeach(loop_var)
 endif()
 
@@ -108,47 +107,51 @@ endif(UNITY_BUILD)
 enable_precompiled_headers(inc/MantidLiveData/PrecompiledHeader.h SRC_FILES)
 # Add the target for this directory
 add_library(LiveData ${SRC_FILES} ${INC_FILES})
+add_library(Mantid::LiveData ALIAS LiveData)
+
+target_include_directories(
+  LiveData PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/inc> $<INSTALL_INTERFACE:include/Mantid>
+)
 # Set the name of the generated library
 set_target_properties(LiveData PROPERTIES OUTPUT_NAME MantidLiveData)
 
 if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
-  set_target_properties(LiveData
-                        PROPERTIES INSTALL_RPATH
-                                   "@loader_path/../Contents/MacOS")
+  set_target_properties(LiveData PROPERTIES INSTALL_RPATH "@loader_path/../Contents/MacOS")
 elseif(${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
-  set_target_properties(LiveData
-                        PROPERTIES INSTALL_RPATH "\$ORIGIN/../${LIB_DIR}")
+  set_target_properties(LiveData PROPERTIES INSTALL_RPATH "\$ORIGIN/../${LIB_DIR}")
 endif()
 
 # Add to the 'Framework' group in VS
 set_property(TARGET LiveData PROPERTY FOLDER "MantidFramework")
-
-include_directories(inc)
 
 # Have to link to winsock library on Windows
 if(WIN32)
   set(WINSOCK ws2_32)
 endif()
 
-set(PRIVATE_LINK_LIBRARIES
-    ${TCMALLOC_LIBRARIES_LINKTIME}
-    ${MANTIDLIBS}
-    ${WINSOCK})
+set(PRIVATE_LINK_LIBRARIES ${WINSOCK})
 if(LIBRDKAFKA_FOUND)
   set(PRIVATE_LINK_LIBRARIES ${PRIVATE_LINK_LIBRARIES} ${LibRDKafka_LIBRARIES})
+  target_include_directories(LiveData PRIVATE ${LibRDKafka_INCLUDE_DIR})
 endif()
-target_link_libraries(LiveData LINK_PRIVATE ${PRIVATE_LINK_LIBRARIES})
+target_link_libraries(
+  LiveData
+  PUBLIC Mantid::Kernel Mantid::API Mantid::DataObjects Mantid::Geometry Mantid::NexusGeometry
+  PRIVATE ${PRIVATE_LINK_LIBRARIES} Mantid::Indexing
+)
 
 # Add the unit tests directory
 add_subdirectory(test)
 
 # Auto-generate exports header
-target_include_directories(LiveData PUBLIC ${CMAKE_BINARY_DIR}/Framework/LiveData)
+target_include_directories(
+  LiveData PUBLIC $<BUILD_INTERFACE:${CMAKE_BINARY_DIR}/Framework/LiveData> $<INSTALL_INTERFACE:include/Mantid>
+)
 generate_mantid_export_header(LiveData FALSE)
 
 # Installation settings
-mtd_install_targets(TARGETS
-                    LiveData
-                    INSTALL_DIRS
-                    ${PLUGINS_DIR}
-                    ${WORKBENCH_PLUGINS_DIR})
+if(CONDA_ENV)
+  mtd_install_framework_lib(TARGETS LiveData PLUGIN_LIB)
+else()
+  mtd_install_targets(TARGETS LiveData INSTALL_DIRS ${PLUGINS_DIR} ${WORKBENCH_PLUGINS_DIR})
+endif()

@@ -9,16 +9,17 @@
 Description
 -----------
 
-When interacting with the :ref:`Muon_Analysis-ref` interface, operations such as detector grouping, group and pair asymmetry are performed on data. As part of the workflow, several "pre-processing" steps are also necessary; such as rebinning and cropping the data, applying dead time corrections, and shifting the time axis by a fixed amount (sometimes referred to as "first good data").
+When interacting with the :ref:`Muon_Analysis-ref` interface, operations such as detector grouping, group and pair asymmetry are performed on data. As part of the workflow, several "pre-processing" steps are also necessary; such as rebinning and cropping the data, applying dead time corrections and applying time zero corrections/shifting the time axis by a fixed amount (sometimes referred to as "first good data").
 
 This algorithm intends to capture the common pre-processing steps, which are not muon physics specific concepts, and apply them all at once to produce data which is ready for the muon-specific operations. This way, scripting the workflows of the :ref:`Muon_Analysis-ref` interface is much more intuitive and simple.
 
 Analysis
 ########
 
-As indicated in the input variable names to this algorithm; there are four distinct operations applied to the input data. In order of application these are;
+As indicated in the input variable names to this algorithm; there are five distinct operations applied to the input data. In order of application these are;
 
 #. Apply dead time correction through the **DeadTimeTable** input.
+#. Apply time zero correction through the **TimeZeroTable** input.
 #. Apply a time offset to the time axis through the **TimeOffset** input, which may be positive or negative. This time offset is directly added to all times within the workspace.
 #. Apply a cropping to the upper (lower) ends of the time axis via the **TimeMax** (**TimeMin**) input.
 #. Finally, apply a rebinning via **RebinArgs**, using the same syntax as in :ref:`algm-Rebin`.
@@ -27,7 +28,7 @@ The **InputWorkspace** can be a single workspace object, and multi period data i
 
 The **OutputWorkspace** is always a *Workspace Group*; for single period data the group only contains a single workspace. The reason for this is so that the muon algorithms MuonGroupingCounts, MuonGroupingAsymmetry and MuonPairingAsymmetry can expect a consistent input between single and multi period data, and where single period data is just a limiting case of multi period data.
 
-The four operations listed above correspond to a run of :ref:`algm-ApplyDeadTimeCorr`, :ref:`algm-ChangeBinOffset`, :ref:`algm-CropWorkspace` and :ref:`algm-Rebin` respectively; and so the documentation of these algorithms can be consulted for more detailed discussion of precisely how the operations are applied.
+Four of the operations listed above correspond to a run of :ref:`algm-ApplyDeadTimeCorr`, :ref:`algm-ChangeBinOffset`, :ref:`algm-CropWorkspace` and :ref:`algm-Rebin` respectively; and so the documentation of these algorithms can be consulted for more detailed discussion of precisely how the operations are applied. Time zero correction does not correspond to it's own algorithm.
 
 As already mentioned; the output of this algorithm can (and is intended to be) fed into one of the following algorithms;
 
@@ -168,6 +169,38 @@ Output:
 
     X values are : [ 0.  1.  2.  3.  4.  5.]
     Y values are : [ 100.3  201.2  302.8  201.2  100.3]
+
+**Example - Applying only a time zero correction**
+
+.. testcode:: ExampleTimeZero
+
+    dataX = [0, 1, 2, 3, 4, 5] * 4
+    dataY = [100, 200, 300, 200, 100] * 4
+    input_workspace = CreateWorkspace(dataX, dataY, NSpec=4)
+
+    # Create a time zero table
+    time_zero_table = CreateEmptyTableWorkspace()
+    time_zero_table.addColumn("double", "time zero")
+    [time_zero_table.addRow([i+2]) for i in range(4)]
+
+    output_workspace = MuonPreProcess(InputWorkspace=input_workspace,
+                                      TimeZeroTable=time_zero_table)
+
+    print("X values are : [{:.0f}, {:.0f}, {:.0f}, {:.0f}, {:.0f}, {:.0f}]".format(
+        output_workspace[0].readX(0)[0],output_workspace[0].readX(0)[1],
+        output_workspace[0].readX(0)[2],output_workspace[0].readX(0)[3],
+        output_workspace[0].readX(0)[4],output_workspace[0].readX(0)[5]))
+    print("Y values are : [{:.0f}, {:.0f}, {:.0f}, {:.0f}, {:.0f}]".format(
+        output_workspace[0].readY(0)[0],output_workspace[0].readY(0)[1],
+        output_workspace[0].readY(0)[2],output_workspace[0].readY(0)[3],
+        output_workspace[0].readY(0)[4]))
+
+Output:
+
+.. testoutput:: ExampleTimeZero
+
+    X values are : [-2, -1, 0, 1, 2, 3]
+    Y values are : [100, 200, 300, 200, 100]
 
 .. categories::
 

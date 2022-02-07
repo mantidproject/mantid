@@ -23,14 +23,11 @@ namespace morton_index {
  * @param upper Upper bound
  * @param value Morton value to test
  */
-template <typename MortonT>
-bool morton_contains(const MortonT lower, const MortonT upper,
-                     const MortonT value) {
+template <typename MortonT> bool morton_contains(const MortonT lower, const MortonT upper, const MortonT value) {
   return lower <= value && value <= upper;
 }
 
-template <size_t ND, typename IntT, typename MortonT>
-MortonT calculateDefaultBound(IntT intBound) {
+template <size_t ND, typename IntT, typename MortonT> MortonT calculateDefaultBound(IntT intBound) {
   IntArray<ND, IntT> minCoord;
   minCoord.fill(intBound);
   return Interleaver<ND, IntT, MortonT>::interleave(minCoord);
@@ -41,14 +38,12 @@ MortonT calculateDefaultBound(IntT intBound) {
  * represent coordinates in a given space at a given resolution.
  */
 template <int ND>
-size_t CalculateRequiredCoordinateIntegerWidth(const MDSpaceBounds<ND> &bounds,
-                                               const MDSpaceSteps<ND> &steps) {
+size_t CalculateRequiredCoordinateIntegerWidth(const MDSpaceBounds<ND> &bounds, const MDSpaceSteps<ND> &steps) {
   size_t maxBits(0);
   for (size_t i = 0; i < ND; ++i) {
     /* Calculate the required integer width to accurately represent coordinates
      * on axis i. */
-    size_t bits =
-        std::ceil(std::log2((bounds(i, 1) - bounds(i, 0)) / steps(i)));
+    size_t bits = std::ceil(std::log2((bounds(i, 1) - bounds(i, 0)) / steps(i)));
 
     /* Record highest bit width requirement */
     maxBits = std::max(maxBits, bits);
@@ -66,19 +61,15 @@ size_t CalculateRequiredCoordinateIntegerWidth(const MDSpaceBounds<ND> &bounds,
  */
 template <int ND> void ExpandBounds(MDSpaceBounds<ND> &bounds) {
   for (size_t i = 0; i < ND; ++i) {
-    bounds(i, 0) =
-        std::nexttoward(bounds(i, 0), std::numeric_limits<float>::lowest());
-    bounds(i, 1) =
-        std::nexttoward(bounds(i, 1), std::numeric_limits<float>::max());
+    bounds(i, 0) = std::nexttoward(bounds(i, 0), std::numeric_limits<float>::lowest());
+    bounds(i, 1) = std::nexttoward(bounds(i, 1), std::numeric_limits<float>::max());
   }
 }
 
 /**
  * Checks that a coordinate is within the extents of an MD space.
  */
-template <int ND>
-bool CheckCoordinatesInMDSpace(const MDSpaceBounds<ND> &bounds,
-                               const MDCoordinate<ND> &coord) {
+template <int ND> bool CheckCoordinatesInMDSpace(const MDSpaceBounds<ND> &bounds, const MDCoordinate<ND> &coord) {
   for (size_t i = 0; i < coord.rows(); i++) {
     const float coordValue = coord(i, 0);
     const Eigen::Matrix<float, 1, 2> coordBounds = bounds.row(i);
@@ -96,14 +87,11 @@ bool CheckCoordinatesInMDSpace(const MDSpaceBounds<ND> &bounds,
  * coordinates.
  */
 template <int ND, typename IntT>
-Eigen::Array<IntT, ND, 1>
-ConvertCoordinatesToIntegerRange(const MDSpaceBounds<ND> &bounds,
-                                 const float *crd) {
+Eigen::Array<IntT, ND, 1> ConvertCoordinatesToIntegerRange(const MDSpaceBounds<ND> &bounds, const float *crd) {
   MDCoordinate<ND> coord(crd);
   const MDCoordinate<ND> range = bounds.col(1) - bounds.col(0);
   const MDCoordinate<ND> coordFactorOfRange = (coord - bounds.col(0)) / range;
-  const MDCoordinate<ND> n =
-      coordFactorOfRange * std::numeric_limits<IntT>::max();
+  const MDCoordinate<ND> n = coordFactorOfRange * std::numeric_limits<IntT>::max();
   Eigen::Array<IntT, ND, 1> res = n.template cast<IntT>();
   for (unsigned i = 0; i < ND; ++i)
     if (coord[i] == bounds(i, 1))
@@ -118,20 +106,17 @@ ConvertCoordinatesToIntegerRange(const MDSpaceBounds<ND> &bounds,
  * given bounds of the original coordinate space.
  */
 template <int ND, typename IntT>
-MDCoordinate<ND>
-ConvertCoordinatesFromIntegerRange(const MDSpaceBounds<ND> &bounds,
-                                   const Eigen::Array<IntT, ND, 1> &intCoord) {
+MDCoordinate<ND> ConvertCoordinatesFromIntegerRange(const MDSpaceBounds<ND> &bounds,
+                                                    const Eigen::Array<IntT, ND, 1> &intCoord) {
   const auto range = bounds.col(1) - bounds.col(0);
-  const auto coordFactorOfRange =
-      intCoord.template cast<float>() / (float)std::numeric_limits<IntT>::max();
+  const auto coordFactorOfRange = intCoord.template cast<float>() / (float)std::numeric_limits<IntT>::max();
   return bounds.col(0) + (coordFactorOfRange * range);
 }
 
 /**
  * Converts a single floating point coordinate to an integer range.
  */
-template <typename IntT>
-IntT ConvertCoordinateToIntegerRange(float value, float lower, float upper) {
+template <typename IntT> IntT ConvertCoordinateToIntegerRange(float value, float lower, float upper) {
   const float coordFactorOfRange = (value - lower) / (upper - lower);
   const float intValue = coordFactorOfRange * std::numeric_limits<IntT>::max();
   return (IntT)intValue;
@@ -140,18 +125,15 @@ IntT ConvertCoordinateToIntegerRange(float value, float lower, float upper) {
 /**
  * Converts a single integer coordinate to a floating point.
  */
-template <typename IntT>
-float ConvertCoordinateFromIntegerRange(IntT value, float lower, float upper) {
-  const float coordFactorOfRange =
-      (float)value / (float)std::numeric_limits<IntT>::max();
+template <typename IntT> float ConvertCoordinateFromIntegerRange(IntT value, float lower, float upper) {
+  const float coordFactorOfRange = (float)value / (float)std::numeric_limits<IntT>::max();
   return lower + (coordFactorOfRange * (upper - lower));
 }
 
 template <size_t nd, typename IntT, typename MortonT>
-MDCoordinate<nd> indexToCoordinates(const MortonT &idx,
-                                    const MDSpaceBounds<nd> &space) {
-  return morton_index::ConvertCoordinatesFromIntegerRange<nd, IntT>(
-      space, Interleaver<nd, IntT, MortonT>::deinterleave(idx));
+MDCoordinate<nd> indexToCoordinates(const MortonT &idx, const MDSpaceBounds<nd> &space) {
+  return morton_index::ConvertCoordinatesFromIntegerRange<nd, IntT>(space,
+                                                                    Interleaver<nd, IntT, MortonT>::deinterleave(idx));
 }
 
 template <size_t nd, typename IntT, typename MortonT, typename coord_t = float>

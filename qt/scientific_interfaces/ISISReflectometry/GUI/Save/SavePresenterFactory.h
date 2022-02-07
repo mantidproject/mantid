@@ -19,8 +19,7 @@ namespace ISISReflectometry {
 class SavePresenterFactory {
 public:
   std::unique_ptr<ISavePresenter> make(ISaveView *view) {
-    return std::make_unique<SavePresenter>(view,
-                                           std::make_unique<AsciiSaver>());
+    return std::make_unique<SavePresenter>(view, std::make_unique<AsciiSaver>());
   }
 };
 } // namespace ISISReflectometry

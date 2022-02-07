@@ -47,34 +47,27 @@ struct TCPStreamEventHeader {
   uint32_t type;    ///< #StreamDataType
 
   enum StreamDataType { InvalidStream = 0, Setup = 1, Neutron = 2, SE = 3 };
-  static const uint32_t marker =
-      0xffffffff; ///< magic value for marker1, marker2
+  static const uint32_t marker = 0xffffffff; ///< magic value for marker1, marker2
   TCPStreamEventHeader()
-      : marker1(marker), marker2(marker), version(current_version),
-        length(sizeof(TCPStreamEventHeader)), type(InvalidStream) {}
+      : marker1(marker), marker2(marker), version(current_version), length(sizeof(TCPStreamEventHeader)),
+        type(InvalidStream) {}
   TCPStreamEventHeader(uint32_t type_)
-      : marker1(marker), marker2(marker), version(current_version),
-        length(sizeof(TCPStreamEventHeader)), type(type_) {}
+      : marker1(marker), marker2(marker), version(current_version), length(sizeof(TCPStreamEventHeader)), type(type_) {}
 
   GNU_DIAG_OFF("tautological-compare")
   bool isValid() const {
-    return marker1 == marker && marker2 == marker &&
-           length >= sizeof(TCPStreamEventHeader) &&
+    return marker1 == marker && marker2 == marker && length >= sizeof(TCPStreamEventHeader) &&
            majorVersion() == TCPStreamEventHeader::major_version &&
-           minorVersion() >= TCPStreamEventHeader::minor_version &&
-           type != InvalidStream;
+           minorVersion() >= TCPStreamEventHeader::minor_version && type != InvalidStream;
   }
   GNU_DIAG_ON("tautological-compare")
 
-  static const uint32_t major_version =
-      1; ///< starts at 1, then incremented whenever layout of this or further
+  static const uint32_t major_version = 1; ///< starts at 1, then incremented whenever layout of this or further
   /// packets changes in a non backward compatible way
-  static const uint32_t minor_version =
-      0; ///< reset to 0 in major version change, then incremented whenever
+  static const uint32_t minor_version = 0; ///< reset to 0 in major version change, then incremented whenever
   /// layout of this or further packets changes in a backward compatible
   /// way
-  static const uint32_t current_version =
-      (major_version << 16) | minor_version; ///< starts at 1, then incremented
+  static const uint32_t current_version = (major_version << 16) | minor_version; ///< starts at 1, then incremented
   /// whenever layout of this or
   /// further packets changes
   uint32_t majorVersion() const { return version >> 16; }
@@ -84,12 +77,7 @@ struct TCPStreamEventHeader {
 /// header for initial data packet send on initial connection and on a state
 /// change e.g. run number changes
 struct TCPStreamEventHeaderSetup {
-  enum {
-    StartTime = 0x1,
-    RunNumber = 0x2,
-    RunState = 0x4,
-    InstName = 0x8
-  } ChangedFields;
+  enum { StartTime = 0x1, RunNumber = 0x2, RunState = 0x4, InstName = 0x8 } ChangedFields;
   uint32_t length;    ///< packet size in bytes
   time_t start_time;  ///< run start time from #ISISCRPT_STRUCT
   int run_number;     ///< run number from #ISISCRPT_STRUCT
@@ -97,8 +85,7 @@ struct TCPStreamEventHeaderSetup {
   char inst_name[32]; ///< instrument name
 
   TCPStreamEventHeaderSetup()
-      : ChangedFields(), length(sizeof(TCPStreamEventHeaderSetup)),
-        start_time(0), run_number(0), run_state(0) {
+      : ChangedFields(), length(sizeof(TCPStreamEventHeaderSetup)), start_time(0), run_number(0), run_state(0) {
     inst_name[0] = '\0';
   }
   bool isValid() const { return length >= sizeof(TCPStreamEventHeaderSetup); }
@@ -124,13 +111,12 @@ struct TCPStreamEventHeaderNeutron {
   uint32_t frame_number; ///< ISIS frame number, 0 being first frame of run
   uint32_t period;       ///< period number
   float protons;         ///< proton charge (uAh) for this frame
-  float
-      frame_time_zero; ///< time offset from run_start of this frame, in seconds
-  uint32_t nevents;    ///< number of TCPStreamEvent() structures in this packet
+  float frame_time_zero; ///< time offset from run_start of this frame, in seconds
+  uint32_t nevents;      ///< number of TCPStreamEvent() structures in this packet
 
   TCPStreamEventHeaderNeutron()
-      : length(sizeof(TCPStreamEventHeaderNeutron)), frame_number(0), period(0),
-        protons(0), frame_time_zero(0), nevents(0) {}
+      : length(sizeof(TCPStreamEventHeaderNeutron)), frame_number(0), period(0), protons(0), frame_time_zero(0),
+        nevents(0) {}
   bool isValid() const { return length >= sizeof(TCPStreamEventHeaderNeutron); }
 };
 
@@ -165,8 +151,7 @@ struct TCPStreamEventDataNeutron {
   TCPStreamEventDataNeutron() : head(TCPStreamEventHeader::Neutron) {}
   TCPStreamEventDataNeutron(const TCPStreamEventHeader &head_) : head(head_) {}
   bool isValid() const {
-    return head.isValid() && head_n.isValid() &&
-           (head.type == TCPStreamEventHeader::Neutron) &&
+    return head.isValid() && head_n.isValid() && (head.type == TCPStreamEventHeader::Neutron) &&
            (data.size() == head_n.nevents);
   }
 };
@@ -179,10 +164,7 @@ struct TCPStreamEventDataSetup {
   TCPStreamEventHeaderSetup head_setup;
   TCPStreamEventDataSetup() : head(TCPStreamEventHeader::Setup) {}
   TCPStreamEventDataSetup(const TCPStreamEventHeader &head_) : head(head_) {}
-  bool isValid() const {
-    return head.isValid() && head_setup.isValid() &&
-           (head.type == TCPStreamEventHeader::Setup);
-  }
+  bool isValid() const { return head.isValid() && head_setup.isValid() && (head.type == TCPStreamEventHeader::Setup); }
 };
 
 // placeholder fro SE data

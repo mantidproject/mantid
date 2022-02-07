@@ -42,19 +42,15 @@ Logger logger("MDHistoToWorkspace2D");
 // A reference to the logger is provided by the base class, it is called g_log.
 // It is used to print out information, warning and error messages
 
-MDHistoToWorkspace2D::MDHistoToWorkspace2D()
-    : Mantid::API::Algorithm(), m_rank(0), m_currentSpectra(0) {}
+MDHistoToWorkspace2D::MDHistoToWorkspace2D() : Mantid::API::Algorithm(), m_rank(0), m_currentSpectra(0) {}
 
 void MDHistoToWorkspace2D::init() {
-  declareProperty(std::make_unique<WorkspaceProperty<IMDHistoWorkspace>>(
-      "InputWorkspace", "", Direction::Input));
-  declareProperty(std::make_unique<WorkspaceProperty<Workspace>>(
-      "OutputWorkspace", "", Direction::Output));
+  declareProperty(std::make_unique<WorkspaceProperty<IMDHistoWorkspace>>("InputWorkspace", "", Direction::Input));
+  declareProperty(std::make_unique<WorkspaceProperty<Workspace>>("OutputWorkspace", "", Direction::Output));
 }
 
 void MDHistoToWorkspace2D::exec() {
-  IMDHistoWorkspace_sptr inWS =
-      IMDHistoWorkspace_sptr(getProperty("InputWorkspace"));
+  IMDHistoWorkspace_sptr inWS = IMDHistoWorkspace_sptr(getProperty("InputWorkspace"));
 
   m_rank = inWS->getNumDims();
   size_t nSpectra = calculateNSpectra(inWS);
@@ -65,8 +61,7 @@ void MDHistoToWorkspace2D::exec() {
 
   Mantid::DataObjects::Workspace2D_sptr outWS;
   outWS = std::dynamic_pointer_cast<Mantid::DataObjects::Workspace2D>(
-      WorkspaceFactory::Instance().create(
-          "Workspace2D", nSpectra, lastDim->getNBins(), lastDim->getNBins()));
+      WorkspaceFactory::Instance().create("Workspace2D", nSpectra, lastDim->getNBins(), lastDim->getNBins()));
   for (size_t i = 0; i < nSpectra; ++i)
     outWS->getSpectrum(i).setDetectorID(static_cast<detid_t>(i + 1));
   outWS->setYUnit("Counts");
@@ -74,8 +69,7 @@ void MDHistoToWorkspace2D::exec() {
   struct FreeDeleter {
     void operator()(void *x) { free(x); }
   };
-  auto pos = std::unique_ptr<coord_t, FreeDeleter>(
-      reinterpret_cast<coord_t *>(malloc(m_rank * sizeof(coord_t))));
+  auto pos = std::unique_ptr<coord_t, FreeDeleter>(reinterpret_cast<coord_t *>(malloc(m_rank * sizeof(coord_t))));
   memset(pos.get(), 0, m_rank * sizeof(coord_t));
   m_currentSpectra = 0;
   recurseData(inWS, outWS, 0, pos.get());
@@ -84,8 +78,7 @@ void MDHistoToWorkspace2D::exec() {
   setProperty("OutputWorkspace", std::dynamic_pointer_cast<Workspace>(outWS));
 }
 
-size_t
-MDHistoToWorkspace2D::calculateNSpectra(const IMDHistoWorkspace_sptr &inWS) {
+size_t MDHistoToWorkspace2D::calculateNSpectra(const IMDHistoWorkspace_sptr &inWS) {
   size_t nSpectra = 1;
   for (size_t i = 0; i < m_rank - 1; i++) {
     std::shared_ptr<const IMDDimension> dim = inWS->getDimension(i);
@@ -94,8 +87,7 @@ MDHistoToWorkspace2D::calculateNSpectra(const IMDHistoWorkspace_sptr &inWS) {
   return nSpectra;
 }
 
-void MDHistoToWorkspace2D::recurseData(const IMDHistoWorkspace_sptr &inWS,
-                                       const Workspace2D_sptr &outWS,
+void MDHistoToWorkspace2D::recurseData(const IMDHistoWorkspace_sptr &inWS, const Workspace2D_sptr &outWS,
                                        size_t currentDim, coord_t *pos) {
   std::shared_ptr<const IMDDimension> dim = inWS->getDimension(currentDim);
   if (currentDim == m_rank - 1) {
@@ -104,8 +96,7 @@ void MDHistoToWorkspace2D::recurseData(const IMDHistoWorkspace_sptr &inWS,
 
     for (unsigned int j = 0; j < dim->getNBins(); j++) {
       pos[currentDim] = dim->getX(j);
-      Y[j] = inWS->getSignalAtCoord(
-          pos, static_cast<Mantid::API::MDNormalization>(0));
+      Y[j] = inWS->getSignalAtCoord(pos, static_cast<Mantid::API::MDNormalization>(0));
     }
 
     Points points(dim->getNBins());
@@ -115,8 +106,7 @@ void MDHistoToWorkspace2D::recurseData(const IMDHistoWorkspace_sptr &inWS,
     }
 
     outWS->setHistogram(m_currentSpectra, std::move(points), std::move(counts));
-    outWS->getSpectrum(m_currentSpectra)
-        .setSpectrumNo(static_cast<specnum_t>(m_currentSpectra));
+    outWS->getSpectrum(m_currentSpectra).setSpectrumNo(static_cast<specnum_t>(m_currentSpectra));
     m_currentSpectra++;
   } else {
     // recurse deeper
@@ -127,36 +117,30 @@ void MDHistoToWorkspace2D::recurseData(const IMDHistoWorkspace_sptr &inWS,
   }
 }
 
-void MDHistoToWorkspace2D::checkW2D(
-    const Mantid::DataObjects::Workspace2D_sptr &outWS) {
+void MDHistoToWorkspace2D::checkW2D(const Mantid::DataObjects::Workspace2D_sptr &outWS) {
   size_t nSpectra = outWS->getNumberHistograms();
   size_t length = outWS->blocksize();
 
-  g_log.information() << "W2D has " << nSpectra << " histograms of length "
-                      << length;
+  g_log.information() << "W2D has " << nSpectra << " histograms of length " << length;
   for (size_t i = 0; i < nSpectra; i++) {
     auto &spec = outWS->getSpectrum(i);
     auto &x = spec.x();
     auto &y = spec.y();
     auto &e = spec.e();
     if (x.size() != length) {
-      g_log.information() << "Spectrum " << i << " x-size mismatch, is "
-                          << x.size() << " should be " << length << "\n";
+      g_log.information() << "Spectrum " << i << " x-size mismatch, is " << x.size() << " should be " << length << "\n";
     }
     if (y.size() != length) {
-      g_log.information() << "Spectrum " << i << " y-size mismatch, is "
-                          << y.size() << " should be " << length << "\n";
+      g_log.information() << "Spectrum " << i << " y-size mismatch, is " << y.size() << " should be " << length << "\n";
     }
     if (e.size() != length) {
-      g_log.information() << "Spectrum " << i << " e-size mismatch, is "
-                          << e.size() << " should be " << length << "\n";
+      g_log.information() << "Spectrum " << i << " e-size mismatch, is " << e.size() << " should be " << length << "\n";
     }
   }
 }
 
-void MDHistoToWorkspace2D::copyMetaData(
-    const Mantid::API::IMDHistoWorkspace_sptr &inWS,
-    const Mantid::DataObjects::Workspace2D_sptr &outWS) {
+void MDHistoToWorkspace2D::copyMetaData(const Mantid::API::IMDHistoWorkspace_sptr &inWS,
+                                        const Mantid::DataObjects::Workspace2D_sptr &outWS) {
   if (inWS->getNumExperimentInfo() > 0) {
     ExperimentInfo_sptr info = inWS->getExperimentInfo(0);
     outWS->copyExperimentInfoFrom(info.get());

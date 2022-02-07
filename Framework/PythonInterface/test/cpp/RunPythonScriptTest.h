@@ -25,9 +25,7 @@ class RunPythonScriptTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static RunPythonScriptTest *createSuite() {
-    return new RunPythonScriptTest();
-  }
+  static RunPythonScriptTest *createSuite() { return new RunPythonScriptTest(); }
   static void destroySuite(RunPythonScriptTest *suite) { delete suite; }
 
   void testInit() {

@@ -40,5 +40,14 @@ class WorkspaceHistoryTest(unittest.TestCase):
         alg = history.getAlgorithm(history.size()-1)
         self.assertEqual(alg.name(), "Load")
 
+    def test_get_history_chained_calls(self):
+        ws_name = "GEM38370_Focussed_Legacy"
+        file_name = FileFinder.getFullPath(ws_name + ".nxs")
+        Load(file_name, OutputWorkspace=ws_name)
+        ws = mtd[ws_name]
+        load_filename = ws.getHistory().lastAlgorithm().getProperty("Filename").value
+        self.assertEqual(file_name, load_filename[0])
+
+
 if __name__ == '__main__':
     unittest.main()

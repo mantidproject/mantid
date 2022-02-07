@@ -27,9 +27,7 @@ public:
     return QtStandardItemTreeModelAdapter(*model, Cell(""));
   }
 
-  std::unique_ptr<QStandardItemModel> emptyModel() const {
-    return std::make_unique<QStandardItemModel>();
-  }
+  std::unique_ptr<QStandardItemModel> emptyModel() const { return std::make_unique<QStandardItemModel>(); }
 
   void testInvalidIndexIsRoot() {
     auto model = emptyModel();
@@ -79,8 +77,7 @@ public:
     rootItem->appendRow(sibling1);
 
     auto rootIndex = QModelIndexForMainModel();
-    auto sibling0Index = fromMainModel(
-        model->index(/*row=*/0, /*column=*/0, rootIndex.untyped()), *model);
+    auto sibling0Index = fromMainModel(model->index(/*row=*/0, /*column=*/0, rootIndex.untyped()), *model);
     auto newSiblingCell = Cell("Some Text");
 
     adaptedModel.appendSiblingRow(sibling0Index, {newSiblingCell});
@@ -101,15 +98,12 @@ public:
     rootItem->appendRow({firstCell, secondCell});
 
     auto rootIndex = QModelIndexForMainModel();
-    auto childRowIndex = fromMainModel(
-        model->index(/*row=*/0, /*column=*/0, rootIndex.untyped()), *model);
+    auto childRowIndex = fromMainModel(model->index(/*row=*/0, /*column=*/0, rootIndex.untyped()), *model);
 
     auto cells = adaptedModel.cellsAtRow(childRowIndex);
 
     TS_ASSERT_EQUALS(cells.size(), 2u);
-    TS_ASSERT_EQUALS(firstCellText,
-                     QString::fromStdString(cells[0].contentText()));
-    TS_ASSERT_EQUALS(secondCellText,
-                     QString::fromStdString(cells[1].contentText()));
+    TS_ASSERT_EQUALS(firstCellText, QString::fromStdString(cells[0].contentText()));
+    TS_ASSERT_EQUALS(secondCellText, QString::fromStdString(cells[1].contentText()));
   }
 };

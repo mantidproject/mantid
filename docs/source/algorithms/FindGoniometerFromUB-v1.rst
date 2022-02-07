@@ -26,7 +26,7 @@ Useage
 
 **Example:**
 
-.. code-block:: python 
+.. code-block:: python
 
     # WISH single crystal
     # demonstration of linkedUBs algorithm on D10 Ruby (cyle 18/1)

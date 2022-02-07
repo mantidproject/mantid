@@ -15,9 +15,8 @@ namespace DataProcessor {
  * @param prefix : The prefix that will be added to the output workspace name
  * @param blacklist : The list of properties we don't want to show
  */
-PostprocessingAlgorithm::PostprocessingAlgorithm(
-    const QString &name, const QString &prefix,
-    const std::set<QString> &blacklist)
+PostprocessingAlgorithm::PostprocessingAlgorithm(const QString &name, const QString &prefix,
+                                                 const std::set<QString> &blacklist)
     : ProcessingAlgorithmBase(name, blacklist), m_prefix(prefix) {
 
   auto inputStrListProperties = getInputStrListProperties();
@@ -42,14 +41,11 @@ PostprocessingAlgorithm::PostprocessingAlgorithm(
  * @param prefix : The prefix that will be added to the output workspace name
  * @param blacklist : The list of properties we don't want to show, as a string
  */
-PostprocessingAlgorithm::PostprocessingAlgorithm(const QString &name,
-                                                 const QString &prefix,
-                                                 const QString &blacklist)
+PostprocessingAlgorithm::PostprocessingAlgorithm(const QString &name, const QString &prefix, const QString &blacklist)
     : PostprocessingAlgorithm(name, prefix, convertStringToSet(blacklist)) {}
 
 /** Default constructor: no algorithm defined */
-PostprocessingAlgorithm::PostprocessingAlgorithm()
-    : m_prefix(), m_inputProp(), m_outputProp() {}
+PostprocessingAlgorithm::PostprocessingAlgorithm() : m_prefix(), m_inputProp(), m_outputProp() {}
 
 // Destructor
 PostprocessingAlgorithm::~PostprocessingAlgorithm() {}

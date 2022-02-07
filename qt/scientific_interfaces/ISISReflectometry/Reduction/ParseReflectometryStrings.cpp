@@ -11,18 +11,13 @@
 #include "MantidQtWidgets/Common/ParseKeyValueString.h"
 #include <boost/algorithm/string.hpp>
 #include <set>
-namespace MantidQt {
-namespace CustomInterfaces {
-namespace ISISReflectometry {
+namespace MantidQt::CustomInterfaces::ISISReflectometry {
 
 namespace { // unnamed
-boost::optional<std::vector<std::string>>
-parseRunNumbersOrWhitespace(std::string const &runNumberString) {
+boost::optional<std::vector<std::string>> parseRunNumbersOrWhitespace(std::string const &runNumberString) {
   auto runNumbers = std::vector<std::string>();
-  auto runNumberCandidates =
-      boost::tokenizer<boost::escaped_list_separator<char>>(
-          runNumberString,
-          boost::escaped_list_separator<char>("\\", ",+", "\"'"));
+  auto runNumberCandidates = boost::tokenizer<boost::escaped_list_separator<char>>(
+      runNumberString, boost::escaped_list_separator<char>("\\", ",+", "\"'"));
 
   for (auto const &runNumberCandidate : runNumberCandidates) {
     auto const maybeRunNumber = parseRunNumberOrWhitespace(runNumberCandidate);
@@ -37,8 +32,7 @@ parseRunNumbersOrWhitespace(std::string const &runNumberString) {
 }
 } // unnamed namespace
 
-boost::optional<std::string>
-parseRunNumber(std::string const &runNumberString) {
+boost::optional<std::string> parseRunNumber(std::string const &runNumberString) {
   // We support any workspace name, as well as run numbers, so for just return
   // the input string, but trimmed of whitespace (or none if the result is
   // empty)
@@ -51,8 +45,7 @@ parseRunNumber(std::string const &runNumberString) {
   return result;
 }
 
-boost::optional<std::string>
-parseRunNumberOrWhitespace(std::string const &runNumberString) {
+boost::optional<std::string> parseRunNumberOrWhitespace(std::string const &runNumberString) {
   if (isEntirelyWhitespace(runNumberString)) {
     return std::string();
   } else {
@@ -64,15 +57,14 @@ parseRunNumberOrWhitespace(std::string const &runNumberString) {
 }
 
 boost::optional<double> parseTheta(std::string const &theta) {
-  auto maybeTheta = parseNonNegativeDouble(std::move(theta));
+  auto maybeTheta = parseNonNegativeDouble(theta);
   if (maybeTheta.is_initialized() && maybeTheta.get() > 0.0)
     return maybeTheta;
   else
     return boost::none;
 }
 
-boost::optional<std::map<std::string, std::string>>
-parseOptions(std::string const &options) {
+boost::optional<std::map<std::string, std::string>> parseOptions(std::string const &options) {
   try {
     return MantidQt::MantidWidgets::parseKeyValueString(options);
   } catch (std::runtime_error &) {
@@ -80,14 +72,12 @@ parseOptions(std::string const &options) {
   }
 }
 
-boost::optional<boost::optional<std::string>>
-parseProcessingInstructions(std::string const &instructions) {
+boost::optional<boost::optional<std::string>> parseProcessingInstructions(std::string const &instructions) {
   if (isEntirelyWhitespace(instructions)) {
     return boost::optional<std::string>(boost::none);
   } else {
     try {
-      auto const groups =
-          Mantid::Kernel::Strings::parseGroups<size_t>(instructions);
+      auto const groups = Mantid::Kernel::Strings::parseGroups<size_t>(instructions);
       return boost::optional<std::string>(instructions);
     } catch (std::runtime_error &) {
       return boost::none;
@@ -96,8 +86,7 @@ parseProcessingInstructions(std::string const &instructions) {
   return boost::none;
 }
 
-boost::optional<boost::optional<double>>
-parseScaleFactor(std::string const &scaleFactor) {
+boost::optional<boost::optional<double>> parseScaleFactor(std::string const &scaleFactor) {
   if (isEntirelyWhitespace(scaleFactor)) {
     return boost::optional<double>(boost::none);
   }
@@ -108,9 +97,8 @@ parseScaleFactor(std::string const &scaleFactor) {
   return boost::none;
 }
 
-boost::variant<RangeInQ, std::vector<int>>
-parseQRange(std::string const &min, std::string const &max,
-            std::string const &step) {
+boost::variant<RangeInQ, std::vector<int>> parseQRange(std::string const &min, std::string const &max,
+                                                       std::string const &step) {
   auto invalidParams = std::vector<int>();
   auto minimum = boost::make_optional(false, double());
   auto maximum = boost::make_optional(false, double());
@@ -136,8 +124,7 @@ parseQRange(std::string const &min, std::string const &max,
   }
 
   // Check max is not less than min
-  if (maximum.is_initialized() && minimum.is_initialized() &&
-      maximum.get() < minimum.get()) {
+  if (maximum.is_initialized() && minimum.is_initialized() && maximum.get() < minimum.get()) {
     invalidParams.emplace_back(0);
     invalidParams.emplace_back(1);
   }
@@ -149,13 +136,10 @@ parseQRange(std::string const &min, std::string const &max,
     return RangeInQ(minimum, stepValue, maximum);
 }
 
-boost::optional<std::vector<std::string>>
-parseRunNumbers(std::string const &runNumberString) {
+boost::optional<std::vector<std::string>> parseRunNumbers(std::string const &runNumberString) {
   auto runNumbers = std::vector<std::string>();
-  auto runNumberCandidates =
-      boost::tokenizer<boost::escaped_list_separator<char>>(
-          runNumberString,
-          boost::escaped_list_separator<char>("\\", ",+", "\"'"));
+  auto runNumberCandidates = boost::tokenizer<boost::escaped_list_separator<char>>(
+      runNumberString, boost::escaped_list_separator<char>("\\", ",+", "\"'"));
 
   for (auto const &runNumberCandidate : runNumberCandidates) {
     auto maybeRunNumber = parseRunNumber(runNumberCandidate);
@@ -172,9 +156,8 @@ parseRunNumbers(std::string const &runNumberString) {
     return runNumbers;
 }
 
-boost::variant<TransmissionRunPair, std::vector<int>>
-parseTransmissionRuns(std::string const &firstTransmissionRun,
-                      std::string const &secondTransmissionRun) {
+boost::variant<TransmissionRunPair, std::vector<int>> parseTransmissionRuns(std::string const &firstTransmissionRun,
+                                                                            std::string const &secondTransmissionRun) {
   auto errorColumns = std::vector<int>();
   auto first = parseRunNumbersOrWhitespace(firstTransmissionRun);
   auto second = parseRunNumbersOrWhitespace(secondTransmissionRun);
@@ -195,6 +178,4 @@ parseTransmissionRuns(std::string const &firstTransmissionRun,
   }
 }
 
-} // namespace ISISReflectometry
-} // namespace CustomInterfaces
-} // namespace MantidQt
+} // namespace MantidQt::CustomInterfaces::ISISReflectometry

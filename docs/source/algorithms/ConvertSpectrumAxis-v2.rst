@@ -9,8 +9,8 @@
 Description
 -----------
 
-Converts the representation of the vertical axis (the one up the side of
-a matrix in MantidPlot) of a Workspace2D from its default of holding the
+Converts the representation of the vertical axis of a
+:ref:`MatrixWorkspace <MatrixWorkspace>` from its default of holding the
 spectrum number to the target unit given - theta, elastic Q, elastic
 Q^2 or elastic d-spacing.
 
@@ -19,6 +19,9 @@ In the case of the latter, spectra will preserve correspondence to the original 
 The new unit and duplicates will not be aggregated. Any spectrum for which a detector is
 not found (i.e. if the instrument definition is incomplete) will not
 appear in the output workspace.
+
+InPlane2Theta and SignedInPlane2Theta return the 2theta value of the projection of the pixel on the horizontal scattering plane.
+
 
 Usage
 -----

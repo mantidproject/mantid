@@ -26,8 +26,7 @@ public:
   void testDeprecated() {
     LoadDAE loader;
     TS_ASSERT(dynamic_cast<Mantid::API::DeprecatedAlgorithm *>(&loader));
-    TS_ASSERT_EQUALS(
-        loader.deprecationMsg(&loader),
-        "LoadDAE is deprecated (on 2013-04-22). Use StartLiveData instead.");
+    TS_ASSERT_EQUALS(loader.deprecationMsg(&loader),
+                     "LoadDAE is deprecated (on 2013-04-22). Use StartLiveData instead.");
   }
 };

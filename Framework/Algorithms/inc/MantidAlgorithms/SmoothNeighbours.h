@@ -31,8 +31,7 @@ public:
   */
   RadiusFilter(double cutoff) : m_cutoff(cutoff) {
     if (cutoff < 0) {
-      throw std::invalid_argument(
-          "RadiusFilter - Cannot have a negative cutoff.");
+      throw std::invalid_argument("RadiusFilter - Cannot have a negative cutoff.");
     }
   }
   /**
@@ -43,13 +42,10 @@ public:
   SpectraDistanceMap apply(SpectraDistanceMap &unfiltered) const {
     SpectraDistanceMap neighbSpectra;
     double cutoff{m_cutoff};
-    std::copy_if(
-        unfiltered.begin(), unfiltered.end(),
-        std::inserter(neighbSpectra, neighbSpectra.end()),
-        [cutoff](
-            const std::pair<specnum_t, Mantid::Kernel::V3D> &spectraDistance) {
-          return spectraDistance.second.norm() <= cutoff;
-        });
+    std::copy_if(unfiltered.begin(), unfiltered.end(), std::inserter(neighbSpectra, neighbSpectra.end()),
+                 [cutoff](const std::pair<specnum_t, Mantid::Kernel::V3D> &spectraDistance) {
+                   return spectraDistance.second.norm() <= cutoff;
+                 });
     return neighbSpectra;
   }
 
@@ -77,13 +73,9 @@ public:
 
   /// Algorithm's version for identification overriding a virtual method
   int version() const override { return (1); }
-  const std::vector<std::string> seeAlso() const override {
-    return {"SmoothData"};
-  }
+  const std::vector<std::string> seeAlso() const override { return {"SmoothData"}; }
   /// Algorithm's category for identification overriding a virtual method
-  const std::string category() const override {
-    return "Transforms\\Smoothing";
-  }
+  const std::string category() const override { return "Transforms\\Smoothing"; }
 
 private:
   // Overridden Algorithm methods
@@ -98,8 +90,7 @@ private:
   /// Sets the weighting stragegy.
   void setWeightingStrategy(const std::string &strategyName, double &cutOff);
   /// Translate the entered radius into meters.
-  double translateToMeters(const std::string &radiusUnits,
-                           const double &enteredRadius) const;
+  double translateToMeters(const std::string &radiusUnits, const double &enteredRadius) const;
 
   /// Build the instrument/detector setup in workspace
   void setupNewInstrument(API::MatrixWorkspace &outws) const;

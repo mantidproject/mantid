@@ -66,8 +66,7 @@ public:
     TS_ASSERT_EQUALS(att.asDouble(), 0.5); // it is a copy
     TS_ASSERT_EQUALS(f.getAttribute("DAttr").asDouble(), 3.3);
 
-    TS_ASSERT(f.getAttribute("DAttr").value() == "3.3" ||
-              f.getAttribute("DAttr").value().substr(0, 8) == "3.299999");
+    TS_ASSERT(f.getAttribute("DAttr").value() == "3.3" || f.getAttribute("DAttr").value().substr(0, 8) == "3.299999");
   }
 
   void test_int_attribute() {
@@ -261,8 +260,6 @@ public:
 
   void test_empty_string_attributes_do_not_show_by_asString() {
     detail::IFT_Funct f;
-    TS_ASSERT_EQUALS(
-        f.asString(),
-        "name=IFT_Funct,BAttr=false,DAttr=0,IAttr=0,VAttr=(),VAttr1=(1,2,3)");
+    TS_ASSERT_EQUALS(f.asString(), "name=IFT_Funct,BAttr=false,DAttr=0,IAttr=0,VAttr=(),VAttr1=(1,2,3)");
   }
 };

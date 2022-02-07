@@ -12,9 +12,7 @@
 
 using namespace Mantid::PhysicalConstants;
 
-namespace Mantid {
-namespace API {
-namespace MuParserUtils {
+namespace Mantid::API::MuParserUtils {
 
 // The constant names below try to follow the naming scheme of the
 // scipy.constants Python module.
@@ -48,8 +46,7 @@ void MANTID_API_DLL addDefaultConstants(mu::Parser &parser) {
 }
 
 using oneVarFun = double (*)(double); // pointer to a function of one variable
-const std::map<std::string, oneVarFun> MUPARSER_ONEVAR_FUNCTIONS = {
-    {"erf", gsl_sf_erf}, {"erfc", gsl_sf_erfc}};
+const std::map<std::string, oneVarFun> MUPARSER_ONEVAR_FUNCTIONS = {{"erf", gsl_sf_erf}, {"erfc", gsl_sf_erfc}};
 
 void MANTID_API_DLL extraOneVarFunctions(mu::Parser &parser) {
   for (const auto &function : MUPARSER_ONEVAR_FUNCTIONS) {
@@ -57,6 +54,4 @@ void MANTID_API_DLL extraOneVarFunctions(mu::Parser &parser) {
   }
 }
 
-} // namespace MuParserUtils
-} // namespace API
-} // namespace Mantid
+} // namespace Mantid::API::MuParserUtils

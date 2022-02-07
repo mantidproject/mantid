@@ -58,7 +58,7 @@ digraph isisPowderGenericAlgs{
     subgraph ApplyAbsorbCorrGemPolaris{
         // *GEM
         label_GEM                       ->  if_GEM_isVanadium
-        
+
         // Is Vanadium
         if_GEM_isVanadium               ->  alg_GEM_maskDetector    [label="True"]
         alg_GEM_maskDetector            ->  alg_MayersSampleCorr    [label="Use Adv Config"]

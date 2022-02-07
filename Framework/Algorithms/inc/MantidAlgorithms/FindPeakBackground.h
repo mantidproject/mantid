@@ -28,9 +28,7 @@ public:
   /// Algorithm's name for identification overriding a virtual method
   const std::string name() const override { return "FindPeakBackground"; }
   /// Summary of algorithms purpose
-  const std::string summary() const override {
-    return "Separates background from signal for spectra of a workspace.";
-  }
+  const std::string summary() const override { return "Separates background from signal for spectra of a workspace."; }
 
   /// Algorithm's version for identification overriding a virtual method
   int version() const override { return 1; }
@@ -49,14 +47,11 @@ public:
   void setFitWindow(const std::vector<double> &window);
 
   /// find fit window's data point index
-  void findWindowIndex(const HistogramData::Histogram &histogram, size_t &l0,
-                       size_t &n);
+  void findWindowIndex(const HistogramData::Histogram &histogram, size_t &l0, size_t &n);
 
   /// main method to calculate background
-  int findBackground(const HistogramData::Histogram &histogram,
-                     const size_t &l0, const size_t &n,
-                     std::vector<size_t> &peak_min_max_indexes,
-                     std::vector<double> &bkgd3);
+  int findBackground(const HistogramData::Histogram &histogram, const size_t &l0, const size_t &n,
+                     std::vector<size_t> &peak_min_max_indexes, std::vector<double> &bkgd3);
 
 private:
   std::string m_backgroundType; //< The type of background to fit
@@ -66,10 +61,8 @@ private:
   /// Implement abstract Algorithm methods
   void exec() override;
   double moment4(MantidVec &X, size_t n, double mean);
-  void estimateBackground(const HistogramData::Histogram &histogram,
-                          const size_t i_min, const size_t i_max,
-                          const size_t p_min, const size_t p_max,
-                          const bool hasPeak, double &out_bg0, double &out_bg1,
+  void estimateBackground(const HistogramData::Histogram &histogram, const size_t i_min, const size_t i_max,
+                          const size_t p_min, const size_t p_max, const bool hasPeak, double &out_bg0, double &out_bg1,
                           double &out_bg2);
 
   /// process inputs
@@ -100,9 +93,7 @@ private:
     double maxY;
   };
   struct by_len {
-    bool operator()(cont_peak const &a, cont_peak const &b) {
-      return a.maxY > b.maxY;
-    }
+    bool operator()(cont_peak const &a, cont_peak const &b) { return a.maxY > b.maxY; }
   };
 };
 

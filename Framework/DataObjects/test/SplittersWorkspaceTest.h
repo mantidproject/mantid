@@ -21,20 +21,15 @@ class SplittersWorkspaceTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static SplittersWorkspaceTest *createSuite() {
-    return new SplittersWorkspaceTest();
-  }
+  static SplittersWorkspaceTest *createSuite() { return new SplittersWorkspaceTest(); }
   static void destroySuite(SplittersWorkspaceTest *suite) { delete suite; }
 
   void testClone() {
     SplittersWorkspace splitterws;
 
-    Kernel::SplittingInterval s1(Types::Core::DateAndTime(10000),
-                                 Types::Core::DateAndTime(15000), 1);
-    Kernel::SplittingInterval s2(Types::Core::DateAndTime(20000),
-                                 Types::Core::DateAndTime(30000), 3);
-    Kernel::SplittingInterval s3(Types::Core::DateAndTime(40000),
-                                 Types::Core::DateAndTime(50000), 2);
+    Kernel::SplittingInterval s1(Types::Core::DateAndTime(10000), Types::Core::DateAndTime(15000), 1);
+    Kernel::SplittingInterval s2(Types::Core::DateAndTime(20000), Types::Core::DateAndTime(30000), 3);
+    Kernel::SplittingInterval s3(Types::Core::DateAndTime(40000), Types::Core::DateAndTime(50000), 2);
 
     splitterws.addSplitter(s1);
     splitterws.addSplitter(s2);
@@ -51,12 +46,9 @@ public:
   void test_Add() {
     DataObjects::SplittersWorkspace splitterws;
 
-    Kernel::SplittingInterval s1(Types::Core::DateAndTime(10000),
-                                 Types::Core::DateAndTime(15000), 1);
-    Kernel::SplittingInterval s2(Types::Core::DateAndTime(20000),
-                                 Types::Core::DateAndTime(30000), 3);
-    Kernel::SplittingInterval s3(Types::Core::DateAndTime(40000),
-                                 Types::Core::DateAndTime(50000), 2);
+    Kernel::SplittingInterval s1(Types::Core::DateAndTime(10000), Types::Core::DateAndTime(15000), 1);
+    Kernel::SplittingInterval s2(Types::Core::DateAndTime(20000), Types::Core::DateAndTime(30000), 3);
+    Kernel::SplittingInterval s3(Types::Core::DateAndTime(40000), Types::Core::DateAndTime(50000), 2);
 
     TS_ASSERT_THROWS_NOTHING(splitterws.addSplitter(s1));
     TS_ASSERT_THROWS_NOTHING(splitterws.addSplitter(s2));
@@ -68,12 +60,9 @@ public:
   void test_AddGet() {
     DataObjects::SplittersWorkspace splitterws;
 
-    Kernel::SplittingInterval s1(Types::Core::DateAndTime(10000),
-                                 Types::Core::DateAndTime(15000), 1);
-    Kernel::SplittingInterval s2(Types::Core::DateAndTime(20000),
-                                 Types::Core::DateAndTime(30000), 3);
-    Kernel::SplittingInterval s3(Types::Core::DateAndTime(40000),
-                                 Types::Core::DateAndTime(50000), 2);
+    Kernel::SplittingInterval s1(Types::Core::DateAndTime(10000), Types::Core::DateAndTime(15000), 1);
+    Kernel::SplittingInterval s2(Types::Core::DateAndTime(20000), Types::Core::DateAndTime(30000), 3);
+    Kernel::SplittingInterval s3(Types::Core::DateAndTime(40000), Types::Core::DateAndTime(50000), 2);
 
     std::vector<Kernel::SplittingInterval> splitters;
     splitters.emplace_back(s1);
@@ -93,10 +82,9 @@ public:
   }
 
   void test_known_to_property_for_unmangling() {
-    Mantid::API::WorkspaceProperty<DataObjects::SplittersWorkspace> property(
-        "DummyProperty", "DummyWorkspace", Mantid::Kernel::Direction::Input);
-    TS_ASSERT_EQUALS("SplittersWorkspace", Mantid::Kernel::getUnmangledTypeName(
-                                               *property.type_info()));
+    Mantid::API::WorkspaceProperty<DataObjects::SplittersWorkspace> property("DummyProperty", "DummyWorkspace",
+                                                                             Mantid::Kernel::Direction::Input);
+    TS_ASSERT_EQUALS("SplittersWorkspace", Mantid::Kernel::getUnmangledTypeName(*property.type_info()));
   }
 
   /**
@@ -112,11 +100,9 @@ public:
     // Check property can be obtained as const_sptr or sptr
     SplittersWorkspace_const_sptr wsConst;
     SplittersWorkspace_sptr wsNonConst;
-    TS_ASSERT_THROWS_NOTHING(
-        wsConst = manager.getValue<SplittersWorkspace_const_sptr>(wsName));
+    TS_ASSERT_THROWS_NOTHING(wsConst = manager.getValue<SplittersWorkspace_const_sptr>(wsName));
     TS_ASSERT(wsConst != nullptr);
-    TS_ASSERT_THROWS_NOTHING(
-        wsNonConst = manager.getValue<SplittersWorkspace_sptr>(wsName));
+    TS_ASSERT_THROWS_NOTHING(wsNonConst = manager.getValue<SplittersWorkspace_sptr>(wsName));
     TS_ASSERT(wsNonConst != nullptr);
     TS_ASSERT_EQUALS(wsConst, wsNonConst);
 

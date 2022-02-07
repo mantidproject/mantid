@@ -6,8 +6,8 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAPI/IMaskWorkspace.h"
 #include "MantidKernel/WarningSuppressions.h"
+#include "MantidPythonInterface/api/RegisterWorkspacePtrToPython.h"
 #include "MantidPythonInterface/core/GetPointer.h"
-#include "MantidPythonInterface/kernel/Registry/RegisterWorkspacePtrToPython.h"
 #include <boost/python/class.hpp>
 #include <boost/python/extract.hpp>
 #include <boost/python/list.hpp>
@@ -22,8 +22,7 @@ GET_POINTER_SPECIALIZATION(IMaskWorkspace)
 
 namespace {
 
-bool isMaskedFromList(const IMaskWorkspace &self,
-                      const boost::python::list &ids) {
+bool isMaskedFromList(const IMaskWorkspace &self, const boost::python::list &ids) {
   std::set<Mantid::detid_t> idSet;
   auto length = len(ids);
   for (auto i = 0; i < length; ++i) {
@@ -37,11 +36,8 @@ void export_IMaskWorkspace() {
   class_<IMaskWorkspace, boost::noncopyable>("IMaskWorkspace", no_init)
       .def("getNumberMasked", &IMaskWorkspace::getNumberMasked, arg("self"),
            "Returns the number of masked pixels in the workspace")
-      .def("isMasked",
-           (bool (IMaskWorkspace::*)(const Mantid::detid_t) const) &
-               IMaskWorkspace::isMasked,
-           (arg("self"), arg("detector_id")),
-           "Returns whether the given detector ID is masked")
+      .def("isMasked", (bool (IMaskWorkspace::*)(const Mantid::detid_t) const) & IMaskWorkspace::isMasked,
+           (arg("self"), arg("detector_id")), "Returns whether the given detector ID is masked")
       .def("isMasked", isMaskedFromList, (arg("self"), arg("detector_id_list")),
            "Returns whether all of the given detector ID list are masked");
 

@@ -19,12 +19,8 @@ class CreateChunkingFromInstrumentTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static CreateChunkingFromInstrumentTest *createSuite() {
-    return new CreateChunkingFromInstrumentTest();
-  }
-  static void destroySuite(CreateChunkingFromInstrumentTest *suite) {
-    delete suite;
-  }
+  static CreateChunkingFromInstrumentTest *createSuite() { return new CreateChunkingFromInstrumentTest(); }
+  static void destroySuite(CreateChunkingFromInstrumentTest *suite) { delete suite; }
 
   void test_Init() {
     CreateChunkingFromInstrument alg;
@@ -39,19 +35,16 @@ public:
     CreateChunkingFromInstrument alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
     TS_ASSERT(alg.isInitialized())
-    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue(
-        "InstrumentFilename", "POWGEN_Definition_2015-08-01.xml"));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("InstrumentFilename", "POWGEN_Definition_2015-08-01.xml"));
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("ChunkBy", "Group"););
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("OutputWorkspace", outWSName));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", outWSName));
     TS_ASSERT_THROWS_NOTHING(alg.execute(););
     TS_ASSERT(alg.isExecuted());
 
     // Retrieve the workspace from data service. TODO: Change to your desired
     // type
     Workspace_sptr ws;
-    TS_ASSERT_THROWS_NOTHING(
-        ws = AnalysisDataService::Instance().retrieveWS<Workspace>(outWSName));
+    TS_ASSERT_THROWS_NOTHING(ws = AnalysisDataService::Instance().retrieveWS<Workspace>(outWSName));
     TS_ASSERT(ws);
     if (!ws)
       return;
@@ -75,8 +68,7 @@ public:
     TS_ASSERT(alg.isInitialized())
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("InstrumentName", "seq"));
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("ChunkBy", "All"););
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("OutputWorkspace", outWSName));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", outWSName));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("MaxRecursionDepth", 2););
     TS_ASSERT_THROWS_NOTHING(alg.execute(););
     TS_ASSERT(alg.isExecuted());
@@ -84,8 +76,7 @@ public:
     // Retrieve the workspace from data service. TODO: Change to your desired
     // type
     Workspace_sptr ws;
-    TS_ASSERT_THROWS_NOTHING(
-        ws = AnalysisDataService::Instance().retrieveWS<Workspace>(outWSName));
+    TS_ASSERT_THROWS_NOTHING(ws = AnalysisDataService::Instance().retrieveWS<Workspace>(outWSName));
     TS_ASSERT(ws);
     if (!ws)
       return;
@@ -109,10 +100,8 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
     TS_ASSERT(alg.isInitialized())
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("InstrumentName", "seq"));
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("ChunkNames", "B row,C row,D row"););
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("OutputWorkspace", outWSName));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("ChunkNames", "B row,C row,D row"););
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", outWSName));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("MaxRecursionDepth", 2););
     TS_ASSERT_THROWS_NOTHING(alg.execute()); //, std::runtime_error );
     TS_ASSERT(!alg.isExecuted());

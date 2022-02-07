@@ -5,13 +5,11 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "GetInstrumentParameter.h"
-namespace MantidQt {
-namespace CustomInterfaces {
-namespace ISISReflectometry {
+namespace MantidQt::CustomInterfaces::ISISReflectometry {
 
-std::vector<std::string> InstrumentParameter<std::string>::get(
-    const Mantid::Geometry::Instrument_const_sptr &instrument,
-    std::string const &parameterName) {
+std::vector<std::string>
+InstrumentParameter<std::string>::get(const Mantid::Geometry::Instrument_const_sptr &instrument,
+                                      std::string const &parameterName) {
   try {
     return instrument->getStringParameter(parameterName);
   } catch (std::runtime_error const &ex) {
@@ -19,9 +17,8 @@ std::vector<std::string> InstrumentParameter<std::string>::get(
   }
 }
 
-std::vector<int> InstrumentParameter<int>::get(
-    const Mantid::Geometry::Instrument_const_sptr &instrument,
-    std::string const &parameterName) {
+std::vector<int> InstrumentParameter<int>::get(const Mantid::Geometry::Instrument_const_sptr &instrument,
+                                               std::string const &parameterName) {
   try {
     return instrument->getIntParameter(parameterName);
   } catch (std::runtime_error const &ex) {
@@ -29,9 +26,8 @@ std::vector<int> InstrumentParameter<int>::get(
   }
 }
 
-std::vector<bool> InstrumentParameter<bool>::get(
-    const Mantid::Geometry::Instrument_const_sptr &instrument,
-    std::string const &parameterName) {
+std::vector<bool> InstrumentParameter<bool>::get(const Mantid::Geometry::Instrument_const_sptr &instrument,
+                                                 std::string const &parameterName) {
   try {
     return instrument->getBoolParameter(parameterName);
   } catch (std::runtime_error const &ex) {
@@ -39,9 +35,8 @@ std::vector<bool> InstrumentParameter<bool>::get(
   }
 }
 
-std::vector<double> InstrumentParameter<double>::get(
-    const Mantid::Geometry::Instrument_const_sptr &instrument,
-    std::string const &parameterName) {
+std::vector<double> InstrumentParameter<double>::get(const Mantid::Geometry::Instrument_const_sptr &instrument,
+                                                     std::string const &parameterName) {
   try {
     return instrument->getNumberParameter(parameterName);
   } catch (std::runtime_error const &ex) {
@@ -49,27 +44,17 @@ std::vector<double> InstrumentParameter<double>::get(
   }
 }
 
-InstrumentParameterTypeMissmatch::InstrumentParameterTypeMissmatch(
-    std::string const &parameterName, std::string const &expectedType,
-    std::runtime_error const &ex)
+InstrumentParameterTypeMissmatch::InstrumentParameterTypeMissmatch(std::string const &parameterName,
+                                                                   std::string const &expectedType,
+                                                                   std::runtime_error const &ex)
     : std::runtime_error(std::string("Instrument parameter '") + parameterName +
-                         std::string("' does not have the expected type '") +
-                         expectedType +
+                         std::string("' does not have the expected type '") + expectedType +
                          std::string("'.\n Original Message: \n") + ex.what()),
-      m_parameterName(parameterName), m_expectedType(expectedType),
-      m_originalMessage(ex.what()) {}
+      m_parameterName(parameterName), m_expectedType(expectedType), m_originalMessage(ex.what()) {}
 
-std::string const &InstrumentParameterTypeMissmatch::parameterName() const {
-  return m_parameterName;
-}
+std::string const &InstrumentParameterTypeMissmatch::parameterName() const { return m_parameterName; }
 
-std::string const &InstrumentParameterTypeMissmatch::expectedType() const {
-  return m_expectedType;
-}
+std::string const &InstrumentParameterTypeMissmatch::expectedType() const { return m_expectedType; }
 
-std::string const &InstrumentParameterTypeMissmatch::originalMessage() const {
-  return m_originalMessage;
-}
-} // namespace ISISReflectometry
-} // namespace CustomInterfaces
-} // namespace MantidQt
+std::string const &InstrumentParameterTypeMissmatch::originalMessage() const { return m_originalMessage; }
+} // namespace MantidQt::CustomInterfaces::ISISReflectometry

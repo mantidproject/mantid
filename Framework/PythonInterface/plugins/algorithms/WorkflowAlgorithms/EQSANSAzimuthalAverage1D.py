@@ -372,7 +372,7 @@ class EQSANSAzimuthalAverage1D(PythonAlgorithm):
             beam_ctr_y = workspace.getRun().getProperty("beam_center_y").value
         else:
             property_manager_name = self.getProperty("ReductionProperties").value
-            property_manager = PropertyManagerDataService.retrieve(property_manager_name)
+            property_manager = PropertyManagerDataService[property_manager_name]
             if property_manager.existsProperty("LatestBeamCenterX") and \
                     property_manager.existsProperty("LatestBeamCenterY"):
                 beam_ctr_x = property_manager.getProperty("LatestBeamCenterX").value

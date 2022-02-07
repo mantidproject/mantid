@@ -1,0 +1,26 @@
+digraph CorelliPowderCalibrationCreate {
+  label = "CorelliPowderCalibrationCreate Execution Workflow"
+    $global_style
+
+  subgraph algorithms {
+    $algorithm_style
+    ModeratorTzero [label="remove emission delay from moderator"]
+    PDCalibration [label="DIFC conversion (TOF to dSpacing) factors"]
+    AlignComponents_1 [label="adjust sources"]
+    AlignComponents_2 [label="adjust banks"]
+    fitted_in_dspacing_1 [label="Bank spectra in d-spacing before adjustment"]
+    peak_deviations_1 [label="Histograms of peak deviations before adjustment"]
+    fitted_in_dspacing_2 [label="Bank spectra in d-spacing after adjustment"]
+    peak_deviations_2 [label="Histogram of peak deviations after adjustment"]
+    peak_deviations_2_summary [label="Basic statistics on peak deviation histograms"]
+  }
+
+  ModeratorTzero -> PDCalibration
+  PDCalibration -> fitted_in_dspacing_1
+  PDCalibration -> peak_deviations_1
+  PDCalibration -> AlignComponents_1
+  AlignComponents_1 -> AlignComponents_2
+  AlignComponents_2 -> fitted_in_dspacing_2
+  AlignComponents_2 -> peak_deviations_2
+  AlignComponents_2 -> peak_deviations_2_summary
+}

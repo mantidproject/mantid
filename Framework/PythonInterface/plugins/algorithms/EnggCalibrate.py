@@ -22,7 +22,8 @@ class EnggCalibrate(PythonAlgorithm):
         return "EnggCalibrate"
 
     def summary(self):
-        return ("Calibrates one or more detector banks (or group(s) of detectors) by performing single peak "
+        return ("This algorithm is deprecated as of May 2021, consider using PDCalibration instead."
+                "Calibrates one or more detector banks (or group(s) of detectors) by performing single peak "
                 "fitting.")
 
     def PyInit(self):
@@ -122,6 +123,7 @@ class EnggCalibrate(PythonAlgorithm):
         return issues
 
     def PyExec(self):
+        mantid.logger.warning("EnggCalibrate is deprecated as of May 2021. Please use PDCalibration instead.")
         import EnggUtils
 
         max_reports = 20

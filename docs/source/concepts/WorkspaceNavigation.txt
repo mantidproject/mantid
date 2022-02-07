@@ -5,8 +5,8 @@ Other Information on Workspaces
     -  :ref:`MatrixWorkspace <MatrixWorkspace>` - A base class that contains
        among others:
 
-       -  WorkspaceSingleValue - Holds a single number (and X & error value, 
-          if desired). Mainly used for workspace algebra, e.g. to divide all 
+       -  WorkspaceSingleValue - Holds a single number (and X & error value,
+          if desired). Mainly used for workspace algebra, e.g. to divide all
           bins in a 2D workspace by a single value.
        -  :ref:`Workspace2D <Workspace2D>` - A workspace for holding two
           dimensional data in memory, this is the most commonly used
@@ -19,4 +19,3 @@ Other Information on Workspaces
     -  :ref:`WorkspaceGroup <WorkspaceGroup>` - A container for a collection of
        workspaces. Algorithms given a group as input run sequentially on
        each member of the group.
-       

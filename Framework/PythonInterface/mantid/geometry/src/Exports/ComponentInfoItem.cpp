@@ -27,24 +27,17 @@ void export_ComponentInfoItem() {
   // Export to Python
   class_<ComponentInfoItem<ComponentInfo>>("ComponentInfoItem", no_init)
       .add_property("isDetector", &ComponentInfoItem<ComponentInfo>::isDetector)
-      .add_property(
-          "componentsInSubtree",
-          make_function(&ComponentInfoItem<ComponentInfo>::componentsInSubtree,
-                        return_value_policy<VectorToNumpy>()))
-      .add_property(
-          "detectorsInSubtree",
-          make_function(&ComponentInfoItem<ComponentInfo>::detectorsInSubtree,
-                        return_value_policy<VectorToNumpy>()))
+      .add_property("componentsInSubtree", make_function(&ComponentInfoItem<ComponentInfo>::componentsInSubtree,
+                                                         return_value_policy<VectorToNumpy>()))
+      .add_property("detectorsInSubtree", make_function(&ComponentInfoItem<ComponentInfo>::detectorsInSubtree,
+                                                        return_value_policy<VectorToNumpy>()))
       .add_property("position", &ComponentInfoItem<ComponentInfo>::position)
       .add_property("rotation", &ComponentInfoItem<ComponentInfo>::rotation)
       .add_property("parent", &ComponentInfoItem<ComponentInfo>::parent)
       .add_property("hasParent", &ComponentInfoItem<ComponentInfo>::hasParent)
-      .add_property("scaleFactor",
-                    &ComponentInfoItem<ComponentInfo>::scaleFactor)
+      .add_property("scaleFactor", &ComponentInfoItem<ComponentInfo>::scaleFactor)
       .add_property("name", &ComponentInfoItem<ComponentInfo>::name)
-      .add_property(
-          "children",
-          make_function(&ComponentInfoItem<ComponentInfo>::children,
-                        return_value_policy<VectorRefToNumpy<WrapReadOnly>>()))
+      .add_property("children", make_function(&ComponentInfoItem<ComponentInfo>::children,
+                                              return_value_policy<VectorRefToNumpy<WrapReadOnly>>()))
       .add_property("index", &ComponentInfoItem<ComponentInfo>::index);
 }

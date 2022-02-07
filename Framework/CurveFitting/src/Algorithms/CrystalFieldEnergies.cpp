@@ -13,8 +13,7 @@
 
 #include <sstream>
 
-namespace Mantid {
-namespace CurveFitting {
+namespace Mantid::CurveFitting {
 
 using Mantid::CurveFitting::ComplexFortranMatrix;
 using Mantid::CurveFitting::DoubleFortranMatrix;
@@ -28,9 +27,7 @@ DECLARE_ALGORITHM(CrystalFieldEnergies)
 //----------------------------------------------------------------------------------------------
 
 /// Algorithms name for identification. @see Algorithm::name
-const std::string CrystalFieldEnergies::name() const {
-  return "CrystalFieldEnergies";
-}
+const std::string CrystalFieldEnergies::name() const { return "CrystalFieldEnergies"; }
 
 /// Algorithm's version for identification. @see Algorithm::version
 int CrystalFieldEnergies::version() const { return 1; }
@@ -99,14 +96,11 @@ void CrystalFieldEnergies::init() {
   declareProperty("IB66", 0.0, "Imaginary part of the B66 field parameter.");
 
   // Output
-  declareProperty(std::make_unique<Kernel::ArrayProperty<double>>(
-                      "Energies", Kernel::Direction::Output),
+  declareProperty(std::make_unique<Kernel::ArrayProperty<double>>("Energies", Kernel::Direction::Output),
                   "The energies starting at 0 in ascending order.");
-  declareProperty(std::make_unique<Kernel::ArrayProperty<double>>(
-                      "Eigenvectors", Kernel::Direction::Output),
+  declareProperty(std::make_unique<Kernel::ArrayProperty<double>>("Eigenvectors", Kernel::Direction::Output),
                   "The eigenvectors.");
-  declareProperty(std::make_unique<Kernel::ArrayProperty<double>>(
-                      "Hamiltonian", Kernel::Direction::Output),
+  declareProperty(std::make_unique<Kernel::ArrayProperty<double>>("Hamiltonian", Kernel::Direction::Output),
                   "The Hamiltonian.");
 }
 
@@ -191,5 +185,4 @@ void CrystalFieldEnergies::exec() {
   setProperty("Hamiltonian", ham.packToStdVector());
 }
 
-} // namespace CurveFitting
-} // namespace Mantid
+} // namespace Mantid::CurveFitting

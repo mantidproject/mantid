@@ -28,16 +28,13 @@ public:
   /// Obtain url to download a file from.
   virtual const std::string getDownloadURL(const long long &) = 0;
   /// Obtain the url to upload a file to.
-  virtual const std::string getUploadURL(const std::string &,
-                                         const std::string &,
-                                         const std::string &) = 0;
+  virtual const std::string getUploadURL(const std::string &, const std::string &, const std::string &) = 0;
   /// Obtains the investigations that the user can publish to and saves related
   /// information to a workspace.
   virtual ITableWorkspace_sptr getPublishInvestigations() = 0;
 };
 
 using ICatalogInfoService_sptr = std::shared_ptr<ICatalogInfoService>;
-using ICatalogInfoService_const_sptr =
-    std::shared_ptr<const ICatalogInfoService>;
+using ICatalogInfoService_const_sptr = std::shared_ptr<const ICatalogInfoService>;
 } // namespace API
 } // namespace Mantid

@@ -17,13 +17,14 @@ class EnggFocus(PythonAlgorithm):
         return "Diffraction\\Engineering"
 
     def seeAlso(self):
-        return [ "AlignDetectors","DiffractionFocussing" ]
+        return ["AlignDetectors", "DiffractionFocussing"]
 
     def name(self):
         return "EnggFocus"
 
     def summary(self):
-        return "Focuses a run by summing up all the spectra into a single one."
+        return ("This algorithm is deprecated as of May 2021, consider using DiffractionFocussing instead."
+                "Focuses a run by summing up all the spectra into a single one.")
 
     def PyInit(self):
         self.declareProperty(MatrixWorkspaceProperty("InputWorkspace", "", Direction.Input),
@@ -39,23 +40,23 @@ class EnggFocus(PythonAlgorithm):
         self.declareProperty(MatrixWorkspaceProperty("VanadiumWorkspace", "", Direction.Input,
                                                      PropertyMode.Optional),
                              doc='Workspace with the Vanadium (correction and calibration) run. '
-                             'Alternatively, when the Vanadium run has been already processed, '
-                             'the properties can be used')
+                                 'Alternatively, when the Vanadium run has been already processed, '
+                                 'the properties can be used')
 
         self.declareProperty(ITableWorkspaceProperty('VanIntegrationWorkspace', '',
                                                      Direction.Input, PropertyMode.Optional),
                              doc='Results of integrating the spectra of a Vanadium run, with one column '
-                             '(integration result) and one row per spectrum. This can be used in '
-                             'combination with OutVanadiumCurveFits from a previous execution and '
-                             'VanadiumWorkspace to provide pre-calculated values for Vanadium correction.')
+                                 '(integration result) and one row per spectrum. This can be used in '
+                                 'combination with OutVanadiumCurveFits from a previous execution and '
+                                 'VanadiumWorkspace to provide pre-calculated values for Vanadium correction.')
 
         self.declareProperty(MatrixWorkspaceProperty('VanCurvesWorkspace', '', Direction.Input,
                                                      PropertyMode.Optional),
                              doc='A workspace2D with the fitting workspaces corresponding to '
-                             'the instrument banks. This workspace has three spectra per bank, as produced '
-                             'by the algorithm Fit. This is meant to be used as an alternative input '
-                             'VanadiumWorkspace for testing and performance reasons. If not given, no '
-                             'workspace is generated.')
+                                 'the instrument banks. This workspace has three spectra per bank, as produced '
+                                 'by the algorithm Fit. This is meant to be used as an alternative input '
+                                 'VanadiumWorkspace for testing and performance reasons. If not given, no '
+                                 'workspace is generated.')
 
         vana_grp = 'Vanadium (open beam) properties'
         self.setPropertyGroup('VanadiumWorkspace', vana_grp)
@@ -65,14 +66,14 @@ class EnggFocus(PythonAlgorithm):
         self.declareProperty("Bank", '', StringListValidator(EnggUtils.ENGINX_BANKS),
                              direction=Direction.Input,
                              doc="Which bank to focus: It can be specified as 1 or 2, or "
-                             "equivalently, North or South. See also " + self.INDICES_PROP_NAME + " "
-                             "for a more flexible alternative to select specific detectors")
+                                 "equivalently, North or South. See also " + self.INDICES_PROP_NAME + " "
+                                 "for a more flexible alternative to select specific detectors")
 
         self.declareProperty(self.INDICES_PROP_NAME, '', direction=Direction.Input,
                              doc='Sets the spectrum numbers for the detectors '
-                             'that should be considered in the focusing operation (all others will be '
-                             'ignored). This option cannot be used together with Bank, as they overlap. '
-                             'You can give multiple ranges, for example: "0-99", or "0-9, 50-59, 100-109".')
+                                 'that should be considered in the focusing operation (all others will be '
+                                 'ignored). This option cannot be used together with Bank, as they overlap. '
+                                 'You can give multiple ranges, for example: "0-99", or "0-9, 50-59, 100-109".')
 
         banks_grp = 'Banks / spectra'
         self.setPropertyGroup('Bank', banks_grp)
@@ -80,7 +81,8 @@ class EnggFocus(PythonAlgorithm):
 
         self.declareProperty('NormaliseByCurrent', True, direction=Direction.Input,
                              doc='Normalize the input data by applying the NormaliseByCurrent algorithm '
-                             'which use the log entry gd_proton_charge')
+                                 'which use the log entry gd_proton_charge. If there is no proton charge '
+                                 'the data are not normalised.')
 
         self.declareProperty(FloatArrayProperty('MaskBinsXMins', EnggUtils.ENGINX_MASK_BIN_MINS,
                                                 direction=Direction.Input),
@@ -98,8 +100,8 @@ class EnggFocus(PythonAlgorithm):
     def validateInputs(self):
         issues = dict()
 
-        if not self.getPropertyValue('MaskBinsXMins') and self.getPropertyValue('MaskBinsXMaxs') or\
-           self.getPropertyValue('MaskBinsXMins') and not self.getPropertyValue('MaskBinsXMaxs'):
+        if not self.getPropertyValue('MaskBinsXMins') and self.getPropertyValue('MaskBinsXMaxs') or \
+                self.getPropertyValue('MaskBinsXMins') and not self.getPropertyValue('MaskBinsXMaxs'):
             issues['MaskBinsXMins'] = "Both minimum and maximum values need to be given, or none"
 
         min_list = self.getProperty('MaskBinsXMins').value
@@ -115,6 +117,7 @@ class EnggFocus(PythonAlgorithm):
         return issues
 
     def PyExec(self):
+        logger.warning("EnggFocus is deprecated as of May 2021. Please use DiffractionFocussing instead.")
         # Get the run workspace
         input_ws = self.getProperty('InputWorkspace').value
 
@@ -212,18 +215,13 @@ class EnggFocus(PythonAlgorithm):
 
         @param wks :: workspace (in/out, modified in place)
         """
-        p_charge = wks.getRun().getProtonCharge()
-        if p_charge <= 0:
-            self.log().warning("Cannot normalize by current because the proton charge log value "
-                               "is not positive!")
-
-        self.log().notice("Normalizing by current with proton charge: {0} uamp".
-                          format(p_charge))
-
-        alg = self.createChildAlgorithm('NormaliseByCurrent')
-        alg.setProperty('InputWorkspace', wks)
-        alg.setProperty('OutputWorkspace', wks)
-        alg.execute()
+        if wks.getRun().getProtonCharge() > 0:
+            alg = self.createChildAlgorithm('NormaliseByCurrent')
+            alg.setProperty('InputWorkspace', wks)
+            alg.setProperty('OutputWorkspace', wks)
+            alg.execute()
+        else:
+            self.log().warning(f"Cannot normalize by current because workspace {wks.name()} has invalid proton charge")
 
     def _apply_calibration(self, wks, detector_positions):
         """

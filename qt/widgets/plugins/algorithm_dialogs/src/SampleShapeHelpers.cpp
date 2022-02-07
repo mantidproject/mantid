@@ -110,32 +110,27 @@ void PointGroupBox::changeToSpherical() {
 QString PointGroupBox::write3DElement(const QString &elem_name) const {
   QString valx("0.0"), valy("0.0"), valz("0.0");
   if (!m_midx->text().isEmpty()) {
-    valx = ShapeDetails::convertToMetres(
-        m_midx->text(), ShapeDetails::Unit(m_xunits->currentIndex()));
+    valx = ShapeDetails::convertToMetres(m_midx->text(), ShapeDetails::Unit(m_xunits->currentIndex()));
   }
   if (!m_midy->text().isEmpty()) {
     if (m_icoord == 0) {
-      valy = ShapeDetails::convertToMetres(
-          m_midy->text(), ShapeDetails::Unit(m_yunits->currentIndex()));
+      valy = ShapeDetails::convertToMetres(m_midy->text(), ShapeDetails::Unit(m_yunits->currentIndex()));
     } else {
       valy = m_midy->text();
     }
   }
   if (!m_midz->text().isEmpty()) {
     if (m_icoord == 0) {
-      valz = ShapeDetails::convertToMetres(
-          m_midz->text(), ShapeDetails::Unit(m_zunits->currentIndex()));
+      valz = ShapeDetails::convertToMetres(m_midz->text(), ShapeDetails::Unit(m_zunits->currentIndex()));
     } else {
       valz = m_midz->text();
     }
   }
   QString tag;
   if (m_icoord == 0) {
-    tag = "<" + elem_name + " x=\"" + valx + "\" y=\"" + valy + "\" z= \"" +
-          valz + "\" />\n";
+    tag = "<" + elem_name + " x=\"" + valx + "\" y=\"" + valy + "\" z= \"" + valz + "\" />\n";
   } else {
-    tag = "<" + elem_name + " r=\"" + valx + "\" t=\"" + valy + "\" p= \"" +
-          valz + "\" />\n";
+    tag = "<" + elem_name + " r=\"" + valx + "\" t=\"" + valy + "\" p= \"" + valz + "\" />\n";
   }
   return tag;
 }
@@ -251,11 +246,9 @@ SphereDetails::SphereDetails(QWidget *parent) : ShapeDetails(parent) {
 QString SphereDetails::writeXML() const {
   QString valr("0.0");
   if (!m_radius_box->text().isEmpty()) {
-    valr = convertToMetres(m_radius_box->text(),
-                           ShapeDetails::Unit(m_runits->currentIndex()));
+    valr = convertToMetres(m_radius_box->text(), ShapeDetails::Unit(m_runits->currentIndex()));
   }
-  QString xmldef = "<sphere id=\"" + m_idvalue + "\">\n" +
-                   m_centre->write3DElement("centre") + "<radius val=\"" +
+  QString xmldef = "<sphere id=\"" + m_idvalue + "\">\n" + m_centre->write3DElement("centre") + "<radius val=\"" +
                    valr +
                    "\" />\n"
                    "</sphere>\n";
@@ -310,12 +303,10 @@ CylinderDetails::CylinderDetails(QWidget *parent) : ShapeDetails(parent) {
 QString CylinderDetails::writeXML() const {
   QString valr("0.0"), valh("0.0");
   if (!m_radius_box->text().isEmpty()) {
-    valr = convertToMetres(m_radius_box->text(),
-                           ShapeDetails::Unit(m_runits->currentIndex()));
+    valr = convertToMetres(m_radius_box->text(), ShapeDetails::Unit(m_runits->currentIndex()));
   }
   if (!m_height_box->text().isEmpty()) {
-    valh = convertToMetres(m_height_box->text(),
-                           ShapeDetails::Unit(m_hunits->currentIndex()));
+    valh = convertToMetres(m_height_box->text(), ShapeDetails::Unit(m_hunits->currentIndex()));
   }
   QString xmldef = "<cylinder id=\"" + m_idvalue +
                    "\" >\n"
@@ -323,8 +314,7 @@ QString CylinderDetails::writeXML() const {
                    valr +
                    "\" />\n"
                    "<height val=\"" +
-                   valh + "\" />\n" +
-                   m_lower_centre->write3DElement("centre-of-bottom-base") +
+                   valh + "\" />\n" + m_lower_centre->write3DElement("centre-of-bottom-base") +
                    m_axis->write3DElement("axis") + "</cylinder>\n";
   return xmldef;
 }
@@ -336,8 +326,7 @@ QString CylinderDetails::writeXML() const {
 int InfiniteCylinderDetails::g_ninfcyls = 0;
 
 /// Default constructor
-InfiniteCylinderDetails::InfiniteCylinderDetails(QWidget *parent)
-    : ShapeDetails(parent) {
+InfiniteCylinderDetails::InfiniteCylinderDetails(QWidget *parent) : ShapeDetails(parent) {
   /// Update number of sphere objects and the set the ID of this one
   ++g_ninfcyls;
   m_idvalue = "infcyl_" + QString::number(g_ninfcyls);
@@ -369,14 +358,13 @@ InfiniteCylinderDetails::InfiniteCylinderDetails(QWidget *parent)
 QString InfiniteCylinderDetails::writeXML() const {
   QString valr("0.0");
   if (!m_radius_box->text().isEmpty()) {
-    valr = convertToMetres(m_radius_box->text(),
-                           ShapeDetails::Unit(m_runits->currentIndex()));
+    valr = convertToMetres(m_radius_box->text(), ShapeDetails::Unit(m_runits->currentIndex()));
   }
   QString xmldef = "<infinite-cylinder id=\"" + m_idvalue +
                    "\" >\n"
                    "<radius val=\"" +
-                   valr + "\" />\n" + m_centre->write3DElement("centre") +
-                   m_axis->write3DElement("axis") + "</infinite-cylinder>\n";
+                   valr + "\" />\n" + m_centre->write3DElement("centre") + m_axis->write3DElement("axis") +
+                   "</infinite-cylinder>\n";
   return xmldef;
 }
 
@@ -387,8 +375,7 @@ QString InfiniteCylinderDetails::writeXML() const {
 int SliceOfCylinderRingDetails::g_ncylrings = 0;
 
 /// Default constructor
-SliceOfCylinderRingDetails::SliceOfCylinderRingDetails(QWidget *parent)
-    : ShapeDetails(parent) {
+SliceOfCylinderRingDetails::SliceOfCylinderRingDetails(QWidget *parent) : ShapeDetails(parent) {
   /// Update number of sphere objects and the set the ID of this one
   ++g_ncylrings;
   m_idvalue = "cylslice_" + QString::number(g_ncylrings);
@@ -435,16 +422,13 @@ SliceOfCylinderRingDetails::SliceOfCylinderRingDetails(QWidget *parent)
 QString SliceOfCylinderRingDetails::writeXML() const {
   QString valir("0.0"), valor("0.0"), vald("0.0"), vala("0.0");
   if (!m_rinner_box->text().isEmpty()) {
-    valir = convertToMetres(m_rinner_box->text(),
-                            ShapeDetails::Unit(m_iunits->currentIndex()));
+    valir = convertToMetres(m_rinner_box->text(), ShapeDetails::Unit(m_iunits->currentIndex()));
   }
   if (!m_router_box->text().isEmpty()) {
-    valor = convertToMetres(m_router_box->text(),
-                            ShapeDetails::Unit(m_ounits->currentIndex()));
+    valor = convertToMetres(m_router_box->text(), ShapeDetails::Unit(m_ounits->currentIndex()));
   }
   if (!m_depth_box->text().isEmpty()) {
-    vald = convertToMetres(m_depth_box->text(),
-                           ShapeDetails::Unit(m_dunits->currentIndex()));
+    vald = convertToMetres(m_depth_box->text(), ShapeDetails::Unit(m_dunits->currentIndex()));
   }
   if (!m_arc_box->text().isEmpty()) {
     vala = m_arc_box->text();
@@ -516,8 +500,7 @@ ConeDetails::ConeDetails(QWidget *parent) : ShapeDetails(parent) {
 QString ConeDetails::writeXML() const {
   QString valh("0.0"), valan("0.0");
   if (!m_height_box->text().isEmpty()) {
-    valh = convertToMetres(m_height_box->text(),
-                           ShapeDetails::Unit(m_hunits->currentIndex()));
+    valh = convertToMetres(m_height_box->text(), ShapeDetails::Unit(m_hunits->currentIndex()));
   }
   if (!m_angle_box->text().isEmpty()) {
     valan = m_angle_box->text();
@@ -529,8 +512,8 @@ QString ConeDetails::writeXML() const {
                    valh +
                    "\" />\n"
                    "<angle val=\"" +
-                   valan + "\" />\n" + m_tippoint->write3DElement("tip-point") +
-                   m_axis->write3DElement("axis") + "</cone>\n";
+                   valan + "\" />\n" + m_tippoint->write3DElement("tip-point") + m_axis->write3DElement("axis") +
+                   "</cone>\n";
 
   return xmldef;
 }
@@ -542,8 +525,7 @@ QString ConeDetails::writeXML() const {
 int InfiniteConeDetails::g_ninfcones = 0;
 
 /// Default constructor
-InfiniteConeDetails::InfiniteConeDetails(QWidget *parent)
-    : ShapeDetails(parent) {
+InfiniteConeDetails::InfiniteConeDetails(QWidget *parent) : ShapeDetails(parent) {
   /// Update number of sphere objects and the set the ID of this one
   ++g_ninfcones;
   m_idvalue = "infcone_" + QString::number(g_ninfcones);
@@ -580,8 +562,8 @@ QString InfiniteConeDetails::writeXML() const {
   QString xmldef = "<infinite-cone id=\"" + m_idvalue +
                    "\" >\n"
                    "<angle val=\"" +
-                   valan + "\" />\n" + m_tippoint->write3DElement("tip-point") +
-                   m_axis->write3DElement("axis") + "</infinite-cone>\n";
+                   valan + "\" />\n" + m_tippoint->write3DElement("tip-point") + m_axis->write3DElement("axis") +
+                   "</infinite-cone>\n";
 
   return xmldef;
 }
@@ -593,8 +575,7 @@ QString InfiniteConeDetails::writeXML() const {
 int InfinitePlaneDetails::g_ninfplanes = 0;
 
 /// Default constructor
-InfinitePlaneDetails::InfinitePlaneDetails(QWidget *parent)
-    : ShapeDetails(parent) {
+InfinitePlaneDetails::InfinitePlaneDetails(QWidget *parent) : ShapeDetails(parent) {
   /// Update number of sphere objects and the set the ID of this one
   ++g_ninfplanes;
   m_idvalue = "infplane_" + QString::number(g_ninfplanes);
@@ -616,10 +597,8 @@ InfinitePlaneDetails::InfinitePlaneDetails(QWidget *parent)
  * Write the XML definition
  */
 QString InfinitePlaneDetails::writeXML() const {
-  QString xmldef = "<infinite-plane id=\"" + m_idvalue + "\" >\n" +
-                   m_plane->write3DElement("point-in-plane") +
-                   m_normal->write3DElement("normal-to-plane") +
-                   "</infinite-plane>\n";
+  QString xmldef = "<infinite-plane id=\"" + m_idvalue + "\" >\n" + m_plane->write3DElement("point-in-plane") +
+                   m_normal->write3DElement("normal-to-plane") + "</infinite-plane>\n";
 
   return xmldef;
 }
@@ -661,12 +640,10 @@ CuboidDetails::CuboidDetails(QWidget *parent) : ShapeDetails(parent) {
  * Write the XML definition
  */
 QString CuboidDetails::writeXML() const {
-  QString xmldef = "<cuboid id=\"" + m_idvalue + "\" >\n" +
-                   m_left_frt_bot->write3DElement("left-front-bottom-point") +
+  QString xmldef = "<cuboid id=\"" + m_idvalue + "\" >\n" + m_left_frt_bot->write3DElement("left-front-bottom-point") +
                    m_left_frt_top->write3DElement("left-front-top-point") +
                    m_left_bck_bot->write3DElement("left-back-bottom-point") +
-                   m_right_frt_bot->write3DElement("right-front-bottom-point") +
-                   "</cuboid>\n";
+                   m_right_frt_bot->write3DElement("right-front-bottom-point") + "</cuboid>\n";
   return xmldef;
 }
 
@@ -723,16 +700,14 @@ HexahedronDetails::HexahedronDetails(QWidget *parent) : ShapeDetails(parent) {
  * Write the XML definition
  */
 QString HexahedronDetails::writeXML() const {
-  QString xmldef = "<hexahedron id=\"" + m_idvalue + "\" >\n" +
-                   m_left_bck_bot->write3DElement("left-back-bottom-point") +
-                   m_left_frt_bot->write3DElement("left-front-bottom-point") +
-                   m_right_bck_bot->write3DElement("right-back-bottom-point") +
-                   m_right_frt_bot->write3DElement("right-front-bottom-point") +
-                   m_left_bck_top->write3DElement("left-back-top-point") +
-                   m_left_frt_top->write3DElement("left-front-top-point") +
-                   m_right_bck_top->write3DElement("right-back-top-point") +
-                   m_right_frt_top->write3DElement("right-front-top-point") +
-                   "</hexahedron>\n";
+  QString xmldef =
+      "<hexahedron id=\"" + m_idvalue + "\" >\n" + m_left_bck_bot->write3DElement("left-back-bottom-point") +
+      m_left_frt_bot->write3DElement("left-front-bottom-point") +
+      m_right_bck_bot->write3DElement("right-back-bottom-point") +
+      m_right_frt_bot->write3DElement("right-front-bottom-point") +
+      m_left_bck_top->write3DElement("left-back-top-point") + m_left_frt_top->write3DElement("left-front-top-point") +
+      m_right_bck_top->write3DElement("right-back-top-point") +
+      m_right_frt_top->write3DElement("right-front-top-point") + "</hexahedron>\n";
   return xmldef;
 }
 

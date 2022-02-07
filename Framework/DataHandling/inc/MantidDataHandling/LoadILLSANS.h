@@ -24,14 +24,13 @@ public:
   const std::string name() const override;
   const std::string summary() const override;
   int version() const override;
-  const std::vector<std::string> seeAlso() const override {
-    return {"LoadNexus"};
-  }
+  const std::vector<std::string> seeAlso() const override { return {"LoadNexus"}; }
   const std::string category() const override;
   /// Returns a confidence value that this algorithm can load a file
   int confidence(Kernel::NexusDescriptor &descriptor) const override;
 
 private:
+  enum MultichannelType { TOF, KINETIC };
   struct DetectorPosition {
     double distanceSampleRear;
     double distanceSampleBottomTop;
@@ -55,22 +54,22 @@ private:
   void init() override;
   void exec() override;
   void setInstrumentName(const NeXus::NXEntry &, const std::string &);
-  DetectorPosition getDetectorPositionD33(const NeXus::NXEntry &,
-                                          const std::string &);
+  DetectorPosition getDetectorPositionD33(const NeXus::NXEntry &, const std::string &);
 
   void initWorkSpace(NeXus::NXEntry &, const std::string &);
+  void initWorkSpaceD11B(NeXus::NXEntry &, const std::string &);
+  void initWorkSpaceD22B(NeXus::NXEntry &, const std::string &);
   void initWorkSpaceD33(NeXus::NXEntry &, const std::string &);
   void initWorkSpaceD16(NeXus::NXEntry &, const std::string &);
-  void createEmptyWorkspace(const size_t, const size_t);
+  void createEmptyWorkspace(const size_t, const size_t, const MultichannelType type = MultichannelType::TOF);
 
-  size_t loadDataIntoWorkspaceFromMonitors(NeXus::NXEntry &firstEntry,
-                                           size_t firstIndex = 0);
-  size_t loadDataIntoWorkspaceFromVerticalTubes(NeXus::NXInt &,
-                                                const std::vector<double> &,
-                                                size_t);
+  size_t loadDataFromMonitors(NeXus::NXEntry &firstEntry, size_t firstIndex = 0,
+                              const MultichannelType type = MultichannelType::TOF);
+  size_t loadDataFromTubes(NeXus::NXInt &, const std::vector<double> &, size_t,
+                           const MultichannelType type = MultichannelType::TOF);
   void runLoadInstrument();
   void moveDetectorsD33(const DetectorPosition &);
-  void moveDetectorDistance(double, const std::string &);
+  void moveDetectorDistance(double distance, const std::string &componentName);
   void moveDetectorHorizontal(double, const std::string &);
   void moveDetectorVertical(double, const std::string &);
   Kernel::V3D getComponentPosition(const std::string &componentName);
@@ -81,21 +80,18 @@ private:
   void adjustTOF();
   void moveSource();
 
-  LoadHelper m_loader;          ///< Load helper for metadata
-  std::string m_instrumentName; ///< Name of the instrument
-  std::vector<std::string>
-      m_supportedInstruments;                 ///< List of supported instruments
-  API::MatrixWorkspace_sptr m_localWorkspace; ///< to-be output workspace
-  std::vector<double> m_defaultBinning;       ///< the default x-axis binning
-  std::string m_resMode; ///< Resolution mode for D11 and D22
-  bool m_isTOF;          ///< TOF or monochromatic flag
-  double m_sourcePos;    ///< Source Z (for D33 TOF)
+  LoadHelper m_loadHelper;                         ///< Load helper for metadata
+  std::string m_instrumentName;                    ///< Name of the instrument
+  std::vector<std::string> m_supportedInstruments; ///< List of supported instruments
+  API::MatrixWorkspace_sptr m_localWorkspace;      ///< to-be output workspace
+  std::vector<double> m_defaultBinning;            ///< the default x-axis binning
+  std::string m_resMode;                           ///< Resolution mode for D11 and D22
+  bool m_isTOF;                                    ///< TOF or monochromatic flag
+  double m_sourcePos;                              ///< Source Z (for D33 TOF)
+  bool m_isD16Omega;                               ///< Data come from a D16 omega scan flag
 
   void setFinalProperties(const std::string &filename);
-  void setPixelSize();
-  std::vector<double> getVariableTimeBinning(const NeXus::NXEntry &,
-                                             const std::string &,
-                                             const NeXus::NXInt &,
+  std::vector<double> getVariableTimeBinning(const NeXus::NXEntry &, const std::string &, const NeXus::NXInt &,
                                              const NeXus::NXFloat &) const;
 };
 

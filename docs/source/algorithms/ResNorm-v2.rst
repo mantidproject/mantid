@@ -27,7 +27,7 @@ Usage
 **Example - a basic example using ResNorm.**
 
 .. testcode:: ExIRISResNorm
-    
+
     def createSampleWorkspace(name, num_spec=10, random=False):
       """
       Creates a sample workspace with a single lorentzian that looks like IRIS data

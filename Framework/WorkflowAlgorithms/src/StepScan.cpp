@@ -10,8 +10,7 @@
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/UnitFactory.h"
 
-namespace Mantid {
-namespace WorkflowAlgorithms {
+namespace Mantid::WorkflowAlgorithms {
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(StepScan)
 
@@ -29,34 +28,27 @@ const std::string StepScan::category() const { return "Workflow\\Alignment"; }
 
 void StepScan::init() {
   // TODO: Validator to ensure that this is 'fresh' data???
-  declareProperty(
-      std::make_unique<WorkspaceProperty<DataObjects::EventWorkspace>>(
-          "InputWorkspace", "", Direction::Input,
-          std::make_shared<WorkspaceUnitValidator>("TOF")),
-      "The input workspace. Must hold 'raw' (unweighted) events.");
+  declareProperty(std::make_unique<WorkspaceProperty<DataObjects::EventWorkspace>>(
+                      "InputWorkspace", "", Direction::Input, std::make_shared<WorkspaceUnitValidator>("TOF")),
+                  "The input workspace. Must hold 'raw' (unweighted) events.");
   // Note that this algorithm may modify the input workspace (by masking and/or
   // cropping)
-  declareProperty(std::make_unique<WorkspaceProperty<ITableWorkspace>>(
-                      "OutputWorkspace", "", Direction::Output),
+  declareProperty(std::make_unique<WorkspaceProperty<ITableWorkspace>>("OutputWorkspace", "", Direction::Output),
                   "The output table workspace.");
 
-  declareProperty(
-      std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
-          "MaskWorkspace", "", Direction::Input, PropertyMode::Optional),
-      "A workspace holding pixels to be masked.");
+  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>("MaskWorkspace", "", Direction::Input,
+                                                                       PropertyMode::Optional),
+                  "A workspace holding pixels to be masked.");
 
-  declareProperty("XMin", EMPTY_DBL(),
-                  "The minimum value of X for which an event will be counted.");
+  declareProperty("XMin", EMPTY_DBL(), "The minimum value of X for which an event will be counted.");
   declareProperty("XMax", EMPTY_DBL(),
                   "The maximum value of X for which an "
                   "event will be counted. Must be greater "
                   "than XMin.");
   // N.B. The choice of units is restricted by the upstream StepScan interface,
   // but in fact any convertible unit will work so is allowed here
-  declareProperty(
-      "RangeUnit", "TOF",
-      std::make_shared<StringListValidator>(UnitFactory::Instance().getKeys()),
-      "The units in which XMin and XMax is being given.");
+  declareProperty("RangeUnit", "TOF", std::make_shared<StringListValidator>(UnitFactory::Instance().getKeys()),
+                  "The units in which XMin and XMax is being given.");
 }
 
 void StepScan::exec() {
@@ -87,11 +79,10 @@ void StepScan::exec() {
   }
 
   // Run the SumEventsByLogValue algorithm with the log fixed to 'scan_index'
-  IAlgorithm_sptr sumEvents = createChildAlgorithm("SumEventsByLogValue");
+  auto sumEvents = createChildAlgorithm("SumEventsByLogValue");
   sumEvents->setProperty<EventWorkspace_sptr>("InputWorkspace", inputWorkspace);
   if (monitorWorkspace) {
-    sumEvents->setProperty<EventWorkspace_sptr>("MonitorWorkspace",
-                                                monitorWorkspace);
+    sumEvents->setProperty<EventWorkspace_sptr>("MonitorWorkspace", monitorWorkspace);
   }
   sumEvents->setProperty("LogName", "scan_index");
   sumEvents->executeAsChildAlg();
@@ -113,16 +104,13 @@ void StepScan::exec() {
  *  @return A pointer to the monitor workspace if found, otherwise a null
  * pointer.
  */
-DataObjects::EventWorkspace_sptr
-StepScan::getMonitorWorkspace(const API::MatrixWorkspace_sptr &inputWS) {
+DataObjects::EventWorkspace_sptr StepScan::getMonitorWorkspace(const API::MatrixWorkspace_sptr &inputWS) {
   // See if there's a monitor workspace inside the input one
-  return std::dynamic_pointer_cast<DataObjects::EventWorkspace>(
-      inputWS->monitorWorkspace());
+  return std::dynamic_pointer_cast<DataObjects::EventWorkspace>(inputWS->monitorWorkspace());
 }
 
-DataObjects::EventWorkspace_sptr
-StepScan::cloneInputWorkspace(const API::Workspace_sptr &inputWS) {
-  IAlgorithm_sptr clone = createChildAlgorithm("CloneWorkspace");
+DataObjects::EventWorkspace_sptr StepScan::cloneInputWorkspace(const API::Workspace_sptr &inputWS) {
+  auto clone = createChildAlgorithm("CloneWorkspace");
   clone->setProperty("InputWorkspace", inputWS);
   clone->executeAsChildAlg();
 
@@ -134,9 +122,8 @@ StepScan::cloneInputWorkspace(const API::Workspace_sptr &inputWS) {
  *  @param inputWS The input workspace
  *  @param maskWS  A masking workspace
  */
-void StepScan::runMaskDetectors(const MatrixWorkspace_sptr &inputWS,
-                                const MatrixWorkspace_sptr &maskWS) {
-  IAlgorithm_sptr maskingAlg = createChildAlgorithm("MaskDetectors");
+void StepScan::runMaskDetectors(const MatrixWorkspace_sptr &inputWS, const MatrixWorkspace_sptr &maskWS) {
+  auto maskingAlg = createChildAlgorithm("MaskDetectors");
   maskingAlg->setProperty<MatrixWorkspace_sptr>("Workspace", inputWS);
   maskingAlg->setProperty<MatrixWorkspace_sptr>("MaskedWorkspace", maskWS);
   maskingAlg->executeAsChildAlg();
@@ -147,13 +134,12 @@ void StepScan::runMaskDetectors(const MatrixWorkspace_sptr &inputWS,
  *  @param xmin    The minimum value of the filter
  *  @param xmax    The maximum value of the filter
  */
-void StepScan::runFilterByXValue(const MatrixWorkspace_sptr &inputWS,
-                                 const double xmin, const double xmax) {
+void StepScan::runFilterByXValue(const MatrixWorkspace_sptr &inputWS, const double xmin, const double xmax) {
   std::string rangeUnit = getProperty("RangeUnit");
   // Run ConvertUnits on the input workspace if xmin/max were given in a
   // different unit
   if (rangeUnit != "TOF") {
-    IAlgorithm_sptr convertUnits = createChildAlgorithm("ConvertUnits");
+    auto convertUnits = createChildAlgorithm("ConvertUnits");
     convertUnits->setProperty<MatrixWorkspace_sptr>("InputWorkspace", inputWS);
     convertUnits->setProperty<MatrixWorkspace_sptr>("OutputWorkspace", inputWS);
     convertUnits->setProperty("Target", rangeUnit);
@@ -161,7 +147,7 @@ void StepScan::runFilterByXValue(const MatrixWorkspace_sptr &inputWS,
     convertUnits->executeAsChildAlg();
   }
 
-  IAlgorithm_sptr filter = createChildAlgorithm("FilterByXValue");
+  auto filter = createChildAlgorithm("FilterByXValue");
   filter->setProperty<MatrixWorkspace_sptr>("InputWorkspace", inputWS);
   filter->setProperty<MatrixWorkspace_sptr>("OutputWorkspace", inputWS);
   filter->setProperty("XMin", xmin);
@@ -169,5 +155,4 @@ void StepScan::runFilterByXValue(const MatrixWorkspace_sptr &inputWS,
   filter->executeAsChildAlg();
 }
 
-} // namespace WorkflowAlgorithms
-} // namespace Mantid
+} // namespace Mantid::WorkflowAlgorithms

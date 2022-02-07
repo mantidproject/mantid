@@ -29,7 +29,7 @@ Usage
 **Example: A simple spherical sample with a cuboid gauge volume**
 
 .. testcode:: ExSimpleSpereWithCuboidGuage
-    
+
     #setup the sample shape
     sphere = '''<sphere id="sample-sphere">
           <centre x="0" y="0" z="0"/>

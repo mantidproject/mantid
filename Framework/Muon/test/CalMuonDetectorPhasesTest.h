@@ -29,28 +29,22 @@ const std::string outputName = "MuonRemoveExpDecay_Output";
 /**
  * This is a test class that exists to test the method validateInputs()
  */
-class TestCalMuonDetectorPhases
-    : public Mantid::Algorithms::CalMuonDetectorPhases {
+class TestCalMuonDetectorPhases : public Mantid::Algorithms::CalMuonDetectorPhases {
 public:
-  std::map<std::string, std::string> wrapValidateInputs() {
-    return this->validateInputs();
-  }
+  std::map<std::string, std::string> wrapValidateInputs() { return this->validateInputs(); }
 };
 
 class CalMuonDetectorPhasesTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static CalMuonDetectorPhasesTest *createSuite() {
-    return new CalMuonDetectorPhasesTest();
-  }
+  static CalMuonDetectorPhasesTest *createSuite() { return new CalMuonDetectorPhasesTest(); }
   static void destroySuite(CalMuonDetectorPhasesTest *suite) { delete suite; }
 
   CalMuonDetectorPhasesTest() { FrameworkManager::Instance(); }
 
   void testInit() {
-    IAlgorithm_sptr alg =
-        AlgorithmManager::Instance().create("CalMuonDetectorPhases");
+    IAlgorithm_sptr alg = AlgorithmManager::Instance().create("CalMuonDetectorPhases");
     alg->initialize();
     TS_ASSERT(alg->isInitialized())
   }
@@ -99,10 +93,8 @@ public:
    * We have to use the ADS to test WorkspaceGroups
    */
   void testValidateInputsWithWSGroup() {
-    auto ws1 = std::static_pointer_cast<Workspace>(
-        createWorkspace(2, 4, "Microseconds"));
-    auto ws2 = std::static_pointer_cast<Workspace>(
-        createWorkspace(2, 4, "Microseconds"));
+    auto ws1 = std::static_pointer_cast<Workspace>(createWorkspace(2, 4, "Microseconds"));
+    auto ws2 = std::static_pointer_cast<Workspace>(createWorkspace(2, 4, "Microseconds"));
     AnalysisDataService::Instance().add("workspace1", ws1);
     AnalysisDataService::Instance().add("workspace2", ws2);
     auto group = std::make_shared<WorkspaceGroup>();
@@ -132,14 +124,12 @@ public:
   }
 
 private:
-  MatrixWorkspace_sptr createWorkspace(size_t nspec, size_t maxt,
-                                       const std::string &units) {
+  MatrixWorkspace_sptr createWorkspace(size_t nspec, size_t maxt, const std::string &units) {
 
     // Create a fake muon dataset
-    double a = 0.1; // Amplitude of the oscillations
-    double w = 25.; // Frequency of the oscillations
-    double tau = Mantid::PhysicalConstants::MuonLifetime *
-                 1e6; // Muon life time in microseconds
+    double a = 0.1;                                             // Amplitude of the oscillations
+    double w = 25.;                                             // Frequency of the oscillations
+    double tau = Mantid::PhysicalConstants::MuonLifetime * 1e6; // Muon life time in microseconds
 
     MantidVec X;
     MantidVec Y;
@@ -149,11 +139,7 @@ private:
         double x = static_cast<double>(t) / static_cast<double>(maxt);
         double e = exp(-x / tau);
         X.emplace_back(x);
-        Y.emplace_back(a *
-                           sin(w * x + static_cast<double>(s) * M_PI /
-                                           static_cast<double>(nspec)) *
-                           e +
-                       e);
+        Y.emplace_back(a * sin(w * x + static_cast<double>(s) * M_PI / static_cast<double>(nspec)) * e + e);
         E.emplace_back(0.005);
       }
     }
@@ -174,13 +160,10 @@ private:
   }
 
   /// overload that adds instrument and main field direction log to workspace
-  MatrixWorkspace_sptr createWorkspace(size_t nspec, size_t maxt,
-                                       const std::string &units,
-                                       const std::string &instrumentName,
-                                       const std::string &mainFieldDirection) {
+  MatrixWorkspace_sptr createWorkspace(size_t nspec, size_t maxt, const std::string &units,
+                                       const std::string &instrumentName, const std::string &mainFieldDirection) {
     auto ws = createWorkspace(nspec, maxt, units);
-    auto instrument =
-        std::make_shared<Mantid::Geometry::Instrument>(instrumentName);
+    auto instrument = std::make_shared<Mantid::Geometry::Instrument>(instrumentName);
     ws->setInstrument(instrument);
     ws->mutableRun().addProperty("main_field_direction", mainFieldDirection);
     return ws;

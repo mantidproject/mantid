@@ -23,7 +23,7 @@ for example 3:25 PM on July the 4th 2014 would be 2014-07-04 15:25:00.
 Usage
 -----
 
-.. The examples for this algorithm do not show output as the output 
+.. The examples for this algorithm do not show output as the output
    is a large quantity of JSON. The algorithm is tested by unit tests.
 
 **Example - generate an IPython notebook for a workspace:**
@@ -66,7 +66,7 @@ Usage
 .. code-block:: python
 
     import os
-    
+
     #create a workspace and run some operations on it
     ws = CreateSampleWorkspace()
     ws = CropWorkspace(ws, XMin=7828.162291, XMax=11980.906921)

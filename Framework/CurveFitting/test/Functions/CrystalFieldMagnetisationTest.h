@@ -37,9 +37,8 @@ public:
     fun.function(x, y);
 
     // Test values obtained from McPhase, interpolated by a polynomial
-    auto testFun1 = FunctionFactory::Instance().createInitialized(
-        "name=UserFunction,Formula=a*x*x*x+b*x*x+c*x+d,"
-        "a=4.75436e-5,b=-4.10695e-3,c=0.12358,d=-2.2236e-2");
+    auto testFun1 = FunctionFactory::Instance().createInitialized("name=UserFunction,Formula=a*x*x*x+b*x*x+c*x+d,"
+                                                                  "a=4.75436e-5,b=-4.10695e-3,c=0.12358,d=-2.2236e-2");
     FunctionValues t(x);
     testFun1->function(x, t);
 
@@ -49,11 +48,10 @@ public:
   }
 
   void test_factory() {
-    std::string funDef =
-        "name=CrystalFieldMagnetisation,Ion=Nd,Symmetry=C2v,"
-        "Unit=bohr,Hdir=(1,-1,2),Temperature=11.5,powder=1,"
-        "B20=0.37,B22=3.9, B40=-0.03,B42=-0.1,B44=-0.12, "
-        "ties=(BmolX=0,BmolY=0,BmolZ=0,BextX=0,BextY=0,BextZ=0)";
+    std::string funDef = "name=CrystalFieldMagnetisation,Ion=Nd,Symmetry=C2v,"
+                         "Unit=bohr,Hdir=(1,-1,2),Temperature=11.5,powder=1,"
+                         "B20=0.37,B22=3.9, B40=-0.03,B42=-0.1,B44=-0.12, "
+                         "ties=(BmolX=0,BmolY=0,BmolZ=0,BextX=0,BextY=0,BextZ=0)";
     auto fun = FunctionFactory::Instance().createInitialized(funDef);
     TS_ASSERT(fun);
     TS_ASSERT_EQUALS(fun->name(), "CrystalFieldMagnetisation");

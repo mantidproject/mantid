@@ -7,17 +7,17 @@
 /* Test functions for algorithms for single crystal diffraction
  */
 
-#include "MantidTestHelpers/SingleCrystalDiffractionTestHelper.h"
+#include "MantidFrameworkTestHelpers/SingleCrystalDiffractionTestHelper.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/Run.h"
 #include "MantidAPI/Sample.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
+#include "MantidFrameworkTestHelpers/ComponentCreationHelper.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
 #include "MantidKernel/V3D.h"
 #include "MantidKernel/normal_distribution.h"
-#include "MantidTestHelpers/ComponentCreationHelper.h"
 
 #include <cmath>
 #include <random>
@@ -26,12 +26,13 @@
 using namespace Mantid;
 using namespace Mantid::API;
 using namespace Mantid::DataObjects;
+using DataObjects::Peak_uptr;
 using namespace Mantid::Geometry;
+using Geometry::IPeak_uptr;
 using namespace Mantid::Kernel;
 using Mantid::Types::Event::TofEvent;
 
-namespace Mantid {
-namespace SingleCrystalDiffractionTestHelper {
+namespace Mantid::SingleCrystalDiffractionTestHelper {
 
 void WorkspaceBuilder::setNumPixels(const int numPixels) {
   m_numPixels = numPixels;
@@ -51,9 +52,8 @@ void WorkspaceBuilder::setNumPixels(const int numPixels) {
  * @param numEvents :: the number of events to create for the peak
  * @param sigmas :: tuple controlling the distribution of events
  */
-void WorkspaceBuilder::addPeakByHKL(
-    const V3D &hkl, const int numEvents,
-    const std::tuple<double, double, double> &sigmas) {
+void WorkspaceBuilder::addPeakByHKL(const V3D &hkl, const int numEvents,
+                                    const std::tuple<double, double, double> &sigmas) {
   m_peakDescriptors.emplace_back(hkl, numEvents, sigmas);
 }
 
@@ -68,8 +68,7 @@ void WorkspaceBuilder::addPeakByHKL(
  *
  * @return a tuple containing a matrix workspace and a peaks workspace
  */
-std::tuple<MatrixWorkspace_sptr, PeaksWorkspace_sptr>
-WorkspaceBuilder::build() {
+std::tuple<MatrixWorkspace_sptr, PeaksWorkspace_sptr> WorkspaceBuilder::build() {
   createInstrument();
   createPeaksWorkspace();
   createEventWorkspace();
@@ -90,8 +89,7 @@ WorkspaceBuilder::build() {
  */
 void WorkspaceBuilder::createInstrument() {
   m_instrument = ComponentCreationHelper::createTestInstrumentRectangular(
-      1 /*num_banks*/, m_numPixels /*pixels in each direction yields n by n*/,
-      0.01, 1.0);
+      1 /*num_banks*/, m_numPixels /*pixels in each direction yields n by n*/, 0.01, 1.0);
 }
 
 /** Create an empty peaks workspace
@@ -119,8 +117,7 @@ void WorkspaceBuilder::createEventWorkspace() {
   // Make an event workspace and add fake peak data
   m_eventWorkspace = std::make_shared<EventWorkspace>();
   m_eventWorkspace->setInstrument(m_instrument);
-  m_eventWorkspace->initialize(m_totalNPixels /*n spectra*/, 3 /* x-size */,
-                               3 /* y-size */);
+  m_eventWorkspace->initialize(m_totalNPixels /*n spectra*/, 3 /* x-size */, 3 /* y-size */);
   m_eventWorkspace->getAxis(0)->setUnit("TOF");
   // Give the spectra-detector mapping for all event lists
   for (int i = 0; i < m_totalNPixels; ++i) {
@@ -162,7 +159,8 @@ void WorkspaceBuilder::createPeak(const HKLPeakDescriptor &descriptor) {
   const auto sigmas = std::get<2>(descriptor);
 
   // Create the peak and add it to the peaks ws
-  const auto peak = m_peaksWorkspace->createPeakHKL(hkl);
+  auto ipeak = m_peaksWorkspace->createPeakHKL(hkl);
+  Peak_uptr peak(dynamic_cast<Peak *>(ipeak.release()));
   m_peaksWorkspace->addPeak(*peak);
 
   // Get detector ID and TOF position of peak
@@ -187,8 +185,7 @@ void WorkspaceBuilder::createPeak(const HKLPeakDescriptor &descriptor) {
     const auto tof = tofDist(m_generator);
 
     const auto pos = V3D(detPos[0] + xOffset, detPos[1] + yOffset, detPos[2]);
-    const auto result = m_detectorSearcher->findNearest(
-        Eigen::Vector3d(pos[0], pos[1], pos[2]));
+    const auto result = m_detectorSearcher->findNearest(Eigen::Vector3d(pos[0], pos[1], pos[2]));
     const auto index = std::get<1>(result[0]);
     auto &el = m_eventWorkspace->getSpectrum(index);
     el.addEventQuickly(TofEvent(tof));
@@ -201,10 +198,10 @@ void WorkspaceBuilder::createPeak(const HKLPeakDescriptor &descriptor) {
  * generator to take too long to be used in a unit test. Instead this will
  * generate a uniform background in a "box" around a peak.
  *
- * @param index :: index of the peak to create a uniform background for
+ * @param peakIndex :: index of the peak to create a uniform background for
  */
-void WorkspaceBuilder::createBackground(const int index) {
-  const auto &peak = m_peaksWorkspace->getPeak(index);
+void WorkspaceBuilder::createBackground(const int peakIndex) {
+  const auto &peak = m_peaksWorkspace->getPeak(peakIndex);
   const auto detectorId = peak.getDetectorID();
   const auto tofExact = peak.getTOF();
   const auto &info = m_eventWorkspace->detectorInfo();
@@ -214,12 +211,9 @@ void WorkspaceBuilder::createBackground(const int index) {
   const auto backgroundDetSize = std::get<1>(m_backgroundParameters);
   const auto backgroundTOFSize = std::get<2>(m_backgroundParameters);
 
-  std::uniform_real_distribution<> backgroundXDist(-backgroundDetSize,
-                                                   backgroundDetSize);
-  std::uniform_real_distribution<> backgroundYDist(-backgroundDetSize,
-                                                   backgroundDetSize);
-  std::uniform_real_distribution<> backgroundTOFDist(
-      tofExact - backgroundTOFSize, tofExact + backgroundTOFSize);
+  std::uniform_real_distribution<> backgroundXDist(-backgroundDetSize, backgroundDetSize);
+  std::uniform_real_distribution<> backgroundYDist(-backgroundDetSize, backgroundDetSize);
+  std::uniform_real_distribution<> backgroundTOFDist(tofExact - backgroundTOFSize, tofExact + backgroundTOFSize);
 
   for (int i = 0; i < nBackgroundEvents; ++i) {
     const auto xOffset = backgroundXDist(m_generator);
@@ -227,8 +221,7 @@ void WorkspaceBuilder::createBackground(const int index) {
     const auto tof = backgroundTOFDist(m_generator);
 
     const auto pos = V3D(detPos[0] + xOffset, detPos[1] + yOffset, detPos[2]);
-    const auto result = m_detectorSearcher->findNearest(
-        Eigen::Vector3d(pos[0], pos[1], pos[2]));
+    const auto result = m_detectorSearcher->findNearest(Eigen::Vector3d(pos[0], pos[1], pos[2]));
     const auto index = std::get<1>(result[0]);
 
     auto &el = m_eventWorkspace->getSpectrum(index);
@@ -262,5 +255,4 @@ void WorkspaceBuilder::rebinWorkspace() {
   rebinAlg->execute();
   m_workspace = rebinAlg->getProperty("OutputWorkspace");
 }
-} // namespace SingleCrystalDiffractionTestHelper
-} // namespace Mantid
+} // namespace Mantid::SingleCrystalDiffractionTestHelper

@@ -66,12 +66,13 @@ Usage
 .. testcode:: ExTwoPeaks
 
    # Two BackB2Back exponential peaks
-   peak1 = "name=BackToBackExponential,I=6000,A=1,B=0.5,X0=15000,S=250"
-   peak2 = "name=BackToBackExponential,I=5000,A=1,B=0.7,X0=35000,S=300"
+   peak1 = "name=BackToBackExponential,I=6000,A=0.05,B=0.025,X0=15000,S=100"
+   peak2 = "name=BackToBackExponential,I=5000,A=0.05,B=0.025,X0=35000,S=100"
+   bg = "name=FlatBackground,A0=20"
 
    # Create workpsace with the above peaks and a single detector pixel
    ws = CreateSampleWorkspace(Function="User Defined",
-                              UserDefinedFunction=peak1 + ";" + peak2,
+                              UserDefinedFunction=";".join([peak1, peak2, bg]),
                               NumBanks=1,
                               BankPixelWidth=1,
                               XMin=6000,
@@ -88,10 +89,6 @@ Usage
 
    # Print the results
    print("Number of peaks fitted: {0}".format(peaks_tbl.rowCount()))
-   print("First peak expected (dSpacing): {0}".format(peaks_tbl.column('dSpacing')[0]))
-   print("First fitted peak center (ToF): {0:.1f}".format(peaks_tbl.column('X0')[0]))
-   print("Second peak expected (dSpacing): {0}".format(peaks_tbl.column('dSpacing')[1]))
-   print("Second fitted peak center (ToF): {0:.0f}".format(round(peaks_tbl.column('X0')[1],-1)))
 
 Output:
 
@@ -102,10 +99,6 @@ Output:
 .. testoutput:: ExTwoPeaks
 
    Number of peaks fitted: 2
-   First peak expected (dSpacing): 0.8
-   First fitted peak center (ToF): 15006.0
-   Second peak expected (dSpacing): 1.9
-   Second fitted peak center (ToF): 35010
 
 .. categories::
 

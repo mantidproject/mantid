@@ -16,7 +16,7 @@
 #include "MantidAPI/IFunction.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidAPI/MultiDomainFunction.h"
-#include "MantidTestHelpers/IndirectFitDataCreationHelper.h"
+#include "MantidFrameworkTestHelpers/IndirectFitDataCreationHelper.h"
 
 using namespace Mantid::API;
 using namespace Mantid::IndirectFitDataCreationHelper;
@@ -32,6 +32,8 @@ public:
   static void destroySuite(IqtFitModelTest *suite) { delete suite; }
 
   void setUp() override {
+    // The only difference in IqtFitModel is the default parameters and a currently unused process for constraining
+    // parameters. these tests will be included in the PR for fit functions and function browser formatting.
     m_workspace = createWorkspace(4, 5);
     m_ads = std::make_unique<SetUpADSWithWorkspace>("Name", m_workspace);
     m_model = std::make_unique<IqtFitModel>();
@@ -46,15 +48,11 @@ public:
   }
 
   void test_that_the_model_is_instantiated_and_can_hold_a_workspace() {
-    Spectra const spectra = Spectra("0-1");
+    FunctionModelSpectra const spectra = FunctionModelSpectra("0-1");
 
-    m_model->addWorkspace(m_workspace, spectra);
+    m_model->getFitDataModel()->addWorkspace(m_workspace->getName(), spectra);
 
-    TS_ASSERT_EQUALS(m_model->numberOfWorkspaces(), TableDatasetIndex{1});
-  }
-
-  void test_that_getSpectrumDependentAttributes_will_return_an_empty_vector() {
-    TS_ASSERT(m_model->getSpectrumDependentAttributes().empty());
+    TS_ASSERT_EQUALS(m_model->getNumberOfWorkspaces(), WorkspaceID{1});
   }
 
 private:

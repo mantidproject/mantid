@@ -22,8 +22,7 @@ Provide exponential decay function: h*exp(-(x-c)/t)
 @author Roman Tolchenov, Tessella plc
 @date 05/11/2010
 */
-class MANTID_CURVEFITTING_DLL ExpDecay : public API::ParamFunction,
-                                         public API::IFunction1D {
+class MANTID_CURVEFITTING_DLL ExpDecay : public API::ParamFunction, public API::IFunction1D {
 public:
   /// Constructor
   ExpDecay();
@@ -35,10 +34,8 @@ public:
   const std::string category() const override { return "General"; }
 
 protected:
-  void function1D(double *out, const double *xValues,
-                  const size_t nData) const override;
-  void functionDeriv1D(API::Jacobian *out, const double *xValues,
-                       const size_t nData) override;
+  void function1D(double *out, const double *xValues, const size_t nData) const override;
+  void functionDeriv1D(API::Jacobian *out, const double *xValues, const size_t nData) override;
 };
 
 } // namespace Functions

@@ -18,31 +18,17 @@
 // WorkspaceProperty implementation
 #include "MantidAPI/WorkspaceProperty.tcc"
 
-namespace Mantid {
-// Note that this file is part of DataObjects, but we are injecting explicit
-// instantiations into API. This does not extend or modify API.
-namespace API {
+namespace Mantid::API {
 ///@cond TEMPLATE
-template class MANTID_DATAOBJECTS_DLL
-    Mantid::API::WorkspaceProperty<Mantid::DataObjects::EventWorkspace>;
-template class MANTID_DATAOBJECTS_DLL
-    Mantid::API::WorkspaceProperty<Mantid::DataObjects::SpecialWorkspace2D>;
-template class MANTID_DATAOBJECTS_DLL
-    Mantid::API::WorkspaceProperty<Mantid::DataObjects::SplittersWorkspace>;
-template class MANTID_DATAOBJECTS_DLL
-    Mantid::API::WorkspaceProperty<Mantid::DataObjects::TableWorkspace>;
-template class MANTID_DATAOBJECTS_DLL
-    Mantid::API::WorkspaceProperty<Mantid::DataObjects::Workspace2D>;
-template class MANTID_DATAOBJECTS_DLL
-    Mantid::API::WorkspaceProperty<Mantid::DataObjects::WorkspaceSingleValue>;
-template class MANTID_DATAOBJECTS_DLL
-    Mantid::API::WorkspaceProperty<Mantid::DataObjects::GroupingWorkspace>;
-template class MANTID_DATAOBJECTS_DLL
-    Mantid::API::WorkspaceProperty<Mantid::DataObjects::PeaksWorkspace>;
-template class MANTID_DATAOBJECTS_DLL
-    Mantid::API::WorkspaceProperty<Mantid::DataObjects::MaskWorkspace>;
-template class MANTID_DATAOBJECTS_DLL
-    Mantid::API::WorkspaceProperty<Mantid::DataObjects::OffsetsWorkspace>;
+template class MANTID_DATAOBJECTS_DLL Mantid::API::WorkspaceProperty<Mantid::DataObjects::EventWorkspace>;
+template class MANTID_DATAOBJECTS_DLL Mantid::API::WorkspaceProperty<Mantid::DataObjects::SpecialWorkspace2D>;
+template class MANTID_DATAOBJECTS_DLL Mantid::API::WorkspaceProperty<Mantid::DataObjects::SplittersWorkspace>;
+template class MANTID_DATAOBJECTS_DLL Mantid::API::WorkspaceProperty<Mantid::DataObjects::TableWorkspace>;
+template class MANTID_DATAOBJECTS_DLL Mantid::API::WorkspaceProperty<Mantid::DataObjects::Workspace2D>;
+template class MANTID_DATAOBJECTS_DLL Mantid::API::WorkspaceProperty<Mantid::DataObjects::WorkspaceSingleValue>;
+template class MANTID_DATAOBJECTS_DLL Mantid::API::WorkspaceProperty<Mantid::DataObjects::GroupingWorkspace>;
+template class MANTID_DATAOBJECTS_DLL Mantid::API::WorkspaceProperty<Mantid::DataObjects::PeaksWorkspace>;
+template class MANTID_DATAOBJECTS_DLL Mantid::API::WorkspaceProperty<Mantid::DataObjects::MaskWorkspace>;
+template class MANTID_DATAOBJECTS_DLL Mantid::API::WorkspaceProperty<Mantid::DataObjects::OffsetsWorkspace>;
 ///@endcond TEMPLATE
-} // namespace API
-} // namespace Mantid
+} // namespace Mantid::API

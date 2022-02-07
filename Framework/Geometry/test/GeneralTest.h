@@ -19,47 +19,37 @@ class GeneralTest : public CxxTest::TestSuite {
 public:
   void testConstructor() {
     General A;
-    TS_ASSERT_EQUALS(extractString(A),
-                     "-1 gq  0  0  0  0  0  0  0  0  0  0 \n");
+    TS_ASSERT_EQUALS(extractString(A), "-1 gq  0  0  0  0  0  0  0  0  0  0 \n");
   }
 
   void testSetSurface() {
     General A;
-    TS_ASSERT_EQUALS(extractString(A),
-                     "-1 gq  0  0  0  0  0  0  0  0  0  0 \n");
+    TS_ASSERT_EQUALS(extractString(A), "-1 gq  0  0  0  0  0  0  0  0  0  0 \n");
     A.setSurface("gq 1 1 1 0 0 0 0 0 0 -1"); // A Sphere equation
-    TS_ASSERT_EQUALS(extractString(A),
-                     "-1 gq  1  1  1  0  0  0  0  0  0  -1 \n");
+    TS_ASSERT_EQUALS(extractString(A), "-1 gq  1  1  1  0  0  0  0  0  0  -1 \n");
   }
 
   void testConstructorGeneral() {
     General A;
-    TS_ASSERT_EQUALS(extractString(A),
-                     "-1 gq  0  0  0  0  0  0  0  0  0  0 \n");
+    TS_ASSERT_EQUALS(extractString(A), "-1 gq  0  0  0  0  0  0  0  0  0  0 \n");
     A.setSurface("gq 1 1 1 0 0 0 0 0 0 -1");
-    TS_ASSERT_EQUALS(extractString(A),
-                     "-1 gq  1  1  1  0  0  0  0  0  0  -1 \n");
+    TS_ASSERT_EQUALS(extractString(A), "-1 gq  1  1  1  0  0  0  0  0  0  -1 \n");
   }
 
   void testClone() {
     General A;
-    TS_ASSERT_EQUALS(extractString(A),
-                     "-1 gq  0  0  0  0  0  0  0  0  0  0 \n");
+    TS_ASSERT_EQUALS(extractString(A), "-1 gq  0  0  0  0  0  0  0  0  0  0 \n");
     A.setSurface("gq 1 1 1 0 0 0 0 0 0 -1");
-    TS_ASSERT_EQUALS(extractString(A),
-                     "-1 gq  1  1  1  0  0  0  0  0  0  -1 \n");
+    TS_ASSERT_EQUALS(extractString(A), "-1 gq  1  1  1  0  0  0  0  0  0  -1 \n");
     auto B = A.clone();
-    TS_ASSERT_EQUALS(extractString(*B),
-                     "-1 gq  1  1  1  0  0  0  0  0  0  -1 \n");
+    TS_ASSERT_EQUALS(extractString(*B), "-1 gq  1  1  1  0  0  0  0  0  0  -1 \n");
   }
 
   void testEqualOperator() {
     General A;
-    TS_ASSERT_EQUALS(extractString(A),
-                     "-1 gq  0  0  0  0  0  0  0  0  0  0 \n");
+    TS_ASSERT_EQUALS(extractString(A), "-1 gq  0  0  0  0  0  0  0  0  0  0 \n");
     A.setSurface("gq 1 1 1 0 0 0 0 0 0 -1");
-    TS_ASSERT_EQUALS(extractString(A),
-                     "-1 gq  1  1  1  0  0  0  0  0  0  -1 \n");
+    TS_ASSERT_EQUALS(extractString(A), "-1 gq  1  1  1  0  0  0  0  0  0  -1 \n");
   }
 
 private:

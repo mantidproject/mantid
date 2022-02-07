@@ -42,23 +42,16 @@ public:
   /// Algorithm's version for identification overriding a virtual method
   int version() const override { return (1); }
   /// Algorithm's category for identification overriding a virtual method
-  const std::string category() const override {
-    return "SANS;Arithmetic\\Errors";
-  }
+  const std::string category() const override { return "SANS;Arithmetic\\Errors"; }
 
 private:
   // Overridden BinaryOperation methods
-  void performBinaryOperation(const HistogramData::Histogram &lhs,
-                              const HistogramData::Histogram &rhs,
-                              HistogramData::HistogramY &YOut,
-                              HistogramData::HistogramE &EOut) override;
-  void performBinaryOperation(const HistogramData::Histogram &lhs,
-                              const double rhsY, const double rhsE,
-                              HistogramData::HistogramY &YOut,
-                              HistogramData::HistogramE &EOut) override;
-  std::string checkSizeCompatibility(
-      const API::MatrixWorkspace_const_sptr lhs,
-      const API::MatrixWorkspace_const_sptr rhs) const override;
+  void performBinaryOperation(const HistogramData::Histogram &lhs, const HistogramData::Histogram &rhs,
+                              HistogramData::HistogramY &YOut, HistogramData::HistogramE &EOut) override;
+  void performBinaryOperation(const HistogramData::Histogram &lhs, const double rhsY, const double rhsE,
+                              HistogramData::HistogramY &YOut, HistogramData::HistogramE &EOut) override;
+  std::string checkSizeCompatibility(const API::MatrixWorkspace_const_sptr lhs,
+                                     const API::MatrixWorkspace_const_sptr rhs) const override;
 
   /// The name of the first input workspace property for BinaryOperation
   std::string inputPropName1() const override { return "InputWorkspace"; }

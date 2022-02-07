@@ -5,15 +5,13 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidKernel/OptionalBool.h"
-#include "MantidKernel/Exception.h"
 
 #include <json/value.h>
 
 #include <ostream>
 #include <utility>
 
-namespace Mantid {
-namespace Kernel {
+namespace Mantid::Kernel {
 
 const std::string OptionalBool::StrUnset = "Unset";
 const std::string OptionalBool::StrFalse = "False";
@@ -25,9 +23,7 @@ OptionalBool::OptionalBool(bool arg) { m_arg = arg ? True : False; }
 
 OptionalBool::OptionalBool(Value arg) : m_arg(arg) {}
 
-bool OptionalBool::operator==(const OptionalBool &other) const {
-  return m_arg == other.getValue();
-}
+bool OptionalBool::operator==(const OptionalBool &other) const { return m_arg == other.getValue(); }
 
 OptionalBool::Value OptionalBool::getValue() const { return m_arg; }
 
@@ -44,9 +40,7 @@ std::istream &operator>>(std::istream &istream, OptionalBool &object) {
 }
 
 std::map<std::string, OptionalBool::Value> OptionalBool::strToEmumMap() {
-  return {{StrUnset, OptionalBool::Unset},
-          {StrFalse, OptionalBool::False},
-          {StrTrue, OptionalBool::True}};
+  return {{StrUnset, OptionalBool::Unset}, {StrFalse, OptionalBool::False}, {StrTrue, OptionalBool::True}};
 }
 
 std::map<OptionalBool::Value, std::string> OptionalBool::enumToStrMap() {
@@ -63,10 +57,21 @@ std::map<OptionalBool::Value, std::string> OptionalBool::enumToStrMap() {
  * serialize this type.
  * @return A new Json::Value
  */
-Json::Value encodeAsJson(const OptionalBool & /*unused*/) {
-  throw Exception::NotImplementedError(
-      "encodeAsJson not implemented for OptionalBool type");
+Json::Value encodeAsJson(const OptionalBool &value) {
+  const auto enumValue = value.getValue();
+  if (enumValue == OptionalBool::True)
+    return Json::Value(true);
+  else if (enumValue == OptionalBool::False)
+    return Json::Value(false);
+  else
+    return Json::Value();
 }
 
-} // namespace Kernel
-} // namespace Mantid
+// Specialization of ToCpp for OptionalBool
+namespace pwvjdetail {
+
+bool ToCpp<OptionalBool>::operator()(const Json::Value &value) { return value.asBool(); }
+
+} // namespace pwvjdetail
+
+} // namespace Mantid::Kernel

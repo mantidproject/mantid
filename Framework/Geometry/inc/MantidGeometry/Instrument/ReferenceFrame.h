@@ -28,11 +28,9 @@ public:
   /// Default constructor
   ReferenceFrame();
   /// Constructor
-  ReferenceFrame(PointingAlong up, PointingAlong alongBeam,
-                 Handedness handedness, std::string origin);
+  ReferenceFrame(PointingAlong up, PointingAlong alongBeam, Handedness handedness, std::string origin);
   /// Alternative constructor with theta sign axis
-  ReferenceFrame(PointingAlong up, PointingAlong alongBeam,
-                 PointingAlong thetaSign, Handedness handedness,
+  ReferenceFrame(PointingAlong up, PointingAlong alongBeam, PointingAlong thetaSign, Handedness handedness,
                  std::string origin);
   /// Gets the pointing up direction
   PointingAlong pointingUp() const;

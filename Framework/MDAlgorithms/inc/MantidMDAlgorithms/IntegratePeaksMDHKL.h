@@ -35,13 +35,10 @@ public:
   /// Algorithm's version for identification
   int version() const override { return 1; };
   const std::vector<std::string> seeAlso() const override {
-    return {"IntegratePeaksHybrid", "IntegratePeaksUsingClusters",
-            "IntegratePeaksMD", "IntegratePeaksCWSD"};
+    return {"IntegratePeaksHybrid", "IntegratePeaksUsingClusters", "IntegratePeaksMD", "IntegratePeaksCWSD"};
   }
   /// Algorithm's category for identification
-  const std::string category() const override {
-    return "MDAlgorithms\\Peaks;Crystal\\Integration";
-  }
+  const std::string category() const override { return "MDAlgorithms\\Peaks;Crystal\\Integration"; }
 
 private:
   /// Initialise the properties
@@ -49,19 +46,15 @@ private:
   /// Run the algorithm
   void exec() override;
 
-  DataObjects::MDHistoWorkspace_sptr
-  normalize(int h, int k, int l, double box, int gridPts,
-            const API::MatrixWorkspace_sptr &flux,
-            const API::MatrixWorkspace_sptr &sa,
-            const API::IMDEventWorkspace_sptr &ws);
-  DataObjects::MDHistoWorkspace_sptr binEvent(int h, int k, int l, double box,
-                                              int gridPts,
+  DataObjects::MDHistoWorkspace_sptr normalize(int h, int k, int l, double box, int gridPts,
+                                               const API::MatrixWorkspace_sptr &flux,
+                                               const API::MatrixWorkspace_sptr &sa,
+                                               const API::IMDEventWorkspace_sptr &ws);
+  DataObjects::MDHistoWorkspace_sptr binEvent(int h, int k, int l, double box, int gridPts,
                                               const API::IMDWorkspace_sptr &ws);
-  DataObjects::MDHistoWorkspace_sptr
-  cropHisto(int h, int k, int l, double box, const API::IMDWorkspace_sptr &ws);
-  void integratePeak(const int neighborPts,
-                     const DataObjects::MDHistoWorkspace_sptr &out,
-                     double &intensity, double &errorSquared);
+  DataObjects::MDHistoWorkspace_sptr cropHisto(int h, int k, int l, double box, const API::IMDWorkspace_sptr &ws);
+  void integratePeak(const int neighborPts, const DataObjects::MDHistoWorkspace_sptr &out, double &intensity,
+                     double &errorSquared);
 };
 
 } // namespace MDAlgorithms

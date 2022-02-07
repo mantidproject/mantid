@@ -17,8 +17,7 @@ namespace API {
 
 class BaseEncoder {
 public:
-  virtual QMap<QString, QVariant> encode(const QWidget *window,
-                                         const std::string &directory) = 0;
+  virtual QMap<QString, QVariant> encode(const QWidget *window, const std::string &directory) = 0;
   virtual QList<QString> tags() = 0;
   virtual ~BaseEncoder() = default;
 };

@@ -73,7 +73,7 @@ def run(args):
     # up the tolerance for those taking less time than 10ms.
     timer_resolution_hi = 0.01
     timer_resolution_lo = 0.0011
-    
+
     regression_names = []
     speedup_names = []
 
@@ -111,7 +111,7 @@ def run(args):
                 regression_names.append(name)
             elif pct > tolerance:
                 speedup_names.append(name)
-    
+
     regLinks = ["http://builds.mantidproject.org/job/master_performancetests2/Master_branch_performance_tests/{}.htm".format(name) for name in regression_names]
     speedLinks = ["http://builds.mantidproject.org/job/master_performancetests2/Master_branch_performance_tests/{}.htm".format(name) for name in speedup_names]
     email = secureemail.SendEmailSecure(args.sender, args.pwd, args.recipient, regLinks, speedLinks)
@@ -125,7 +125,7 @@ if __name__ == "__main__":
     parser.add_argument('db', metavar='DBFILE', type=str, nargs=1,
                         default="./MantidSystemTests.db",
                         help='Full path to the SQLite database holding the results (default "./MantidSystemTests.db"). ')
-                        
+
     parser.add_argument('sender', type=str, default="mantidproject@gmail.com",
                         help='Gmail email address')
 

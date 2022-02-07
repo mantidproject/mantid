@@ -19,11 +19,11 @@ subgraph algorithms {
   FitIncidentSpectrum               [label="FitIncidentSpectrum v1"]
   CalculatePlaczekSelfScattering    [label="CalculatePlaczekSelfScattering v1"]
   LoadCalFile                       [label="LoadCalFile v1"]
-  DiffractionFocussing              [label="DiffractionFocussing v2"]
+  GroupDetectors                    [label="GroupDetectors v2"]
   CreateWorkspace                   [label="CreateWorkspace v1"]
   Divide                            [label="Divide v1"]
-  ConvertToDistribution             [label="ConvertToDistribution v1"]
   ConvertUnits2                     [label="ConvertUnits v1"]
+  Rebin                             [label="Rebin v1"]
 }
 
 subgraph process  {
@@ -42,13 +42,13 @@ ExtractSpectra                  -> ConvertUnits1
 ConvertUnits1                   -> FitIncidentSpectrum
 FitIncidentSpectrum             -> CalculatePlaczekSelfScattering
 calFileName                     -> LoadCalFile
-LoadCalFile                     -> DiffractionFocussing
-CalculatePlaczekSelfScattering  -> DiffractionFocussing
+LoadCalFile                     -> GroupDetectors
+CalculatePlaczekSelfScattering  -> ConvertUnits2
+ConvertUnits2                   -> Rebin
+Rebin                           -> GroupDetectors
 LoadCalFile                     -> GetPixelNumberInDetector
 GetPixelNumberInDetector        -> CreateWorkspace
 CreateWorkspace                 -> Divide
-DiffractionFocussing            -> Divide
-Divide                          -> ConvertToDistribution
-ConvertToDistribution           -> ConvertUnits2
-ConvertUnits2                   -> outputWorkspace
+GroupDetectors                  -> Divide
+Divide                          -> outputWorkspace
 }

@@ -6,16 +6,11 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "ItemState.h"
 
-namespace MantidQt {
-namespace CustomInterfaces {
-namespace ISISReflectometry {
+namespace MantidQt::CustomInterfaces::ISISReflectometry {
 
-ItemState::ItemState()
-    : m_state(State::ITEM_NOT_STARTED), m_message(boost::none),
-      m_progress(0.0) {}
+ItemState::ItemState() : m_state(State::ITEM_NOT_STARTED), m_message(boost::none), m_progress(0.0) {}
 
-ItemState::ItemState(State state)
-    : m_state(state), m_message(boost::none), m_progress(0.0) {}
+ItemState::ItemState(State state) : m_state(state), m_message(boost::none), m_progress(0.0) {}
 
 State ItemState::state() const { return m_state; }
 
@@ -52,6 +47,4 @@ void ItemState::reset() {
   m_state = State::ITEM_NOT_STARTED;
   m_message = std::string();
 }
-} // namespace ISISReflectometry
-} // namespace CustomInterfaces
-} // namespace MantidQt
+} // namespace MantidQt::CustomInterfaces::ISISReflectometry

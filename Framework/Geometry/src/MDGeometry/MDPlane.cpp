@@ -13,8 +13,7 @@
 
 using namespace Mantid::Kernel;
 
-namespace Mantid {
-namespace Geometry {
+namespace Mantid::Geometry {
 
 //----------------------------------------------------------------------------------------------
 /** Constructor with normal and point
@@ -23,12 +22,10 @@ namespace Geometry {
  *normal of the plane are considered to be bounded by it.
  * @param point :: any point that is on the plane
  */
-MDPlane::MDPlane(const std::vector<coord_t> &normal,
-                 const std::vector<coord_t> &point) {
+MDPlane::MDPlane(const std::vector<coord_t> &normal, const std::vector<coord_t> &point) {
   m_nd = normal.size();
   if ((m_nd < 1) || (m_nd > 100))
-    throw std::invalid_argument(
-        "MDPlane::ctor(): Invalid number of dimensions in the normal vector !");
+    throw std::invalid_argument("MDPlane::ctor(): Invalid number of dimensions in the normal vector !");
   if (point.size() != normal.size())
     throw std::invalid_argument("MDPlane::ctor(): Inconsistent number of "
                                 "dimensions in the normal/point vectors!");
@@ -42,12 +39,10 @@ MDPlane::MDPlane(const std::vector<coord_t> &normal,
  *normal of the plane are considered to be bounded by it.
  * @param point :: any point that is on the plane
  */
-MDPlane::MDPlane(const Mantid::Kernel::VMD &normal,
-                 const Mantid::Kernel::VMD &point) {
+MDPlane::MDPlane(const Mantid::Kernel::VMD &normal, const Mantid::Kernel::VMD &point) {
   m_nd = normal.getNumDims();
   if ((m_nd < 1) || (m_nd > 100))
-    throw std::invalid_argument(
-        "MDPlane::ctor(): Invalid number of dimensions in the normal vector !");
+    throw std::invalid_argument("MDPlane::ctor(): Invalid number of dimensions in the normal vector !");
   if (point.getNumDims() != normal.getNumDims())
     throw std::invalid_argument("MDPlane::ctor(): Inconsistent number of "
                                 "dimensions in the normal/point vectors!");
@@ -62,11 +57,9 @@ MDPlane::MDPlane(const Mantid::Kernel::VMD &normal,
  *normal of the plane are considered to be bounded by it.
  * @param point :: any point that is on the plane
  */
-MDPlane::MDPlane(const size_t nd, const float *normal, const float *point)
-    : m_nd(nd) {
+MDPlane::MDPlane(const size_t nd, const float *normal, const float *point) : m_nd(nd) {
   if ((m_nd < 1) || (m_nd > 100))
-    throw std::invalid_argument(
-        "MDPlane::ctor(): Invalid number of dimensions in the workspace!");
+    throw std::invalid_argument("MDPlane::ctor(): Invalid number of dimensions in the workspace!");
   construct(normal, point);
 }
 
@@ -78,11 +71,9 @@ MDPlane::MDPlane(const size_t nd, const float *normal, const float *point)
  *normal of the plane are considered to be bounded by it.
  * @param point :: any point that is on the plane
  */
-MDPlane::MDPlane(const size_t nd, const double *normal, const double *point)
-    : m_nd(nd) {
+MDPlane::MDPlane(const size_t nd, const double *normal, const double *point) : m_nd(nd) {
   if ((m_nd < 1) || (m_nd > 100))
-    throw std::invalid_argument(
-        "MDPlane::ctor(): Invalid number of dimensions in the workspace!");
+    throw std::invalid_argument("MDPlane::ctor(): Invalid number of dimensions in the workspace!");
   construct(normal, point);
 }
 
@@ -95,8 +86,7 @@ MDPlane::MDPlane(const size_t nd, const double *normal, const double *point)
  *plane described
  * @throws if the vectors are collinear
  */
-MDPlane::MDPlane(const std::vector<Mantid::Kernel::VMD> &vectors,
-                 const Mantid::Kernel::VMD &origin,
+MDPlane::MDPlane(const std::vector<Mantid::Kernel::VMD> &vectors, const Mantid::Kernel::VMD &origin,
                  const Mantid::Kernel::VMD &insidePoint) {
   // Get the normal vector by the determinant method
   VMD normal = VMD::getNormalVector(vectors);
@@ -235,8 +225,7 @@ MDPlane::MDPlane(const std::vector<Mantid::Kernel::VMD> &vectors,
  *
  * @param other :: MDPlane to copy
  */
-MDPlane::MDPlane(const MDPlane &other)
-    : m_nd(other.m_nd), m_inequality(other.m_inequality) {
+MDPlane::MDPlane(const MDPlane &other) : m_nd(other.m_nd), m_inequality(other.m_inequality) {
   m_normal = new coord_t[m_nd];
   for (size_t d = 0; d < m_nd; d++)
     m_normal[d] = other.m_normal[d];
@@ -266,5 +255,4 @@ MDPlane &MDPlane::operator=(const MDPlane &other) {
  */
 MDPlane::~MDPlane() { delete[] m_normal; }
 
-} // namespace Geometry
-} // namespace Mantid
+} // namespace Mantid::Geometry

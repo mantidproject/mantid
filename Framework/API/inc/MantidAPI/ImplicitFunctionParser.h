@@ -12,12 +12,10 @@
  * subscribe method.
  */
 //#define Parser Parser
-#define DECLARE_IMPLICIT_FUNCTION_PARSER(classname)                            \
-  namespace {                                                                  \
-  Mantid::Kernel::RegistrationHelper register_alg_##classname(                 \
-      ((Mantid::API::ImplicitFunctionParserFactory::Instance()                 \
-            .subscribe<classname>(#classname)),                                \
-       0));                                                                    \
+#define DECLARE_IMPLICIT_FUNCTION_PARSER(classname)                                                                    \
+  namespace {                                                                                                          \
+  Mantid::Kernel::RegistrationHelper register_alg_##classname(                                                         \
+      ((Mantid::API::ImplicitFunctionParserFactory::Instance().subscribe<classname>(#classname)), 0));                 \
   }
 
 //----------------------------------------------------------------------
@@ -52,13 +50,10 @@ namespace API {
 class MANTID_API_DLL ImplicitFunctionParser {
 public:
   /// Successor type. Unique pointer with stack scoped deletion semantics.
-  using SuccessorType =
-      boost::interprocess::unique_ptr<ImplicitFunctionParser,
-                                      DeleterPolicy<ImplicitFunctionParser>>;
+  using SuccessorType = boost::interprocess::unique_ptr<ImplicitFunctionParser, DeleterPolicy<ImplicitFunctionParser>>;
 
 protected:
-  ImplicitFunctionParameterParser::SuccessorType
-      m_paramParserRoot; // Chain of responsibility
+  ImplicitFunctionParameterParser::SuccessorType m_paramParserRoot; // Chain of responsibility
 
   SuccessorType m_successor;
 
@@ -75,11 +70,9 @@ protected:
   }
 
 public:
-  ImplicitFunctionParser(ImplicitFunctionParameterParser *parameterParser)
-      : m_paramParserRoot(parameterParser) {}
+  ImplicitFunctionParser(ImplicitFunctionParameterParser *parameterParser) : m_paramParserRoot(parameterParser) {}
 
-  virtual ImplicitFunctionBuilder *
-  createFunctionBuilder(Poco::XML::Element *functionElement) = 0;
+  virtual ImplicitFunctionBuilder *createFunctionBuilder(Poco::XML::Element *functionElement) = 0;
   virtual void setSuccessorParser(ImplicitFunctionParser *parser) = 0;
   virtual void setParameterParser(ImplicitFunctionParameterParser *parser) = 0;
   virtual ~ImplicitFunctionParser() = default;

@@ -20,35 +20,28 @@ information catalogs
 @author Sofia Antony, ISIS Rutherford Appleton Laboratory
 @date 20/10/2010
 */
-class ICat3Catalog : public Mantid::API::ICatalog,
-                     public Mantid::API::ICatalogInfoService {
+class ICat3Catalog : public Mantid::API::ICatalog, public Mantid::API::ICatalogInfoService {
 public:
   /// constructor
   ICat3Catalog();
   /// destructor
   ~ICat3Catalog() override;
   /// login to isis catalog
-  API::CatalogSession_sptr login(const std::string &username,
-                                 const std::string &password,
-                                 const std::string &endpoint,
+  API::CatalogSession_sptr login(const std::string &username, const std::string &password, const std::string &endpoint,
                                  const std::string &facility) override;
   /// logout from isis catalog
   void logout() override;
   /// search isis data
-  void search(const CatalogSearchParam &inputs,
-              Mantid::API::ITableWorkspace_sptr &ws_sptr, const int &offset,
+  void search(const CatalogSearchParam &inputs, Mantid::API::ITableWorkspace_sptr &ws_sptr, const int &offset,
               const int &limit) override;
   /// Obtain the number of results returned by the search method.
   int64_t getNumberOfSearchResults(const CatalogSearchParam &inputs) override;
   /// logged in user's investigations search
   void myData(Mantid::API::ITableWorkspace_sptr &mydataws_sptr) override;
   /// get datasets
-  void getDataSets(const std::string &investigationId,
-                   Mantid::API::ITableWorkspace_sptr &datasetsws_sptr) override;
+  void getDataSets(const std::string &investigationId, Mantid::API::ITableWorkspace_sptr &datasetsws_sptr) override;
   /// get datafiles
-  void
-  getDataFiles(const std::string &investigationId,
-               Mantid::API::ITableWorkspace_sptr &datafilesws_sptr) override;
+  void getDataFiles(const std::string &investigationId, Mantid::API::ITableWorkspace_sptr &datafilesws_sptr) override;
   /// get instruments list
   void listInstruments(std::vector<std::string> &instruments) override;
   /// get investigationtypes list
@@ -58,10 +51,8 @@ public:
   /// get urls
   const std::string getDownloadURL(const long long &fileID) override;
   /// get URL of where to PUT (publish) files.
-  const std::string
-  getUploadURL(const std::string &investigationID,
-               const std::string &createFileName,
-               const std::string &dataFileDescription) override;
+  const std::string getUploadURL(const std::string &investigationID, const std::string &createFileName,
+                                 const std::string &dataFileDescription) override;
   /// keep alive
   void keepAlive() override;
   /// Obtains the investigations that the user can publish to and saves related

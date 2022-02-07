@@ -8,8 +8,7 @@
 #include "MantidAPI/Algorithm.tcc"
 #include "MantidAPI/HistogramValidator.h"
 
-namespace Mantid {
-namespace Algorithms {
+namespace Mantid::Algorithms {
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(MaskBinsFromWorkspace)
@@ -18,18 +17,16 @@ using namespace Kernel;
 using namespace API;
 
 void MaskBinsFromWorkspace::init() {
-  declareWorkspaceInputProperties<MatrixWorkspace>(
-      "InputWorkspace",
-      "The name of the input workspace. Must contain histogram data.",
-      std::make_shared<HistogramValidator>());
+  declareWorkspaceInputProperties<MatrixWorkspace>("InputWorkspace",
+                                                   "The name of the input workspace. Must contain histogram data.",
+                                                   std::make_shared<HistogramValidator>());
   declareWorkspaceInputProperties<MatrixWorkspace>(
       "MaskedWorkspace",
       "The name of the workspaces containing masked bins to copy over. Must "
       "contain histogram data.",
       std::make_shared<HistogramValidator>());
 
-  declareProperty(std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
-                                                        Direction::Output),
+  declareProperty(std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "", Direction::Output),
                   "The name of the Workspace containing the masked bins.");
 }
 
@@ -37,8 +34,7 @@ void MaskBinsFromWorkspace::init() {
  */
 void MaskBinsFromWorkspace::exec() {
   MatrixWorkspace_sptr inputWS;
-  std::tie(inputWS, m_indexSet) =
-      getWorkspaceAndIndices<MatrixWorkspace>("InputWorkspace");
+  std::tie(inputWS, m_indexSet) = getWorkspaceAndIndices<MatrixWorkspace>("InputWorkspace");
   MatrixWorkspace_sptr maskedWS = getProperty("MaskedWorkspace");
 
   // Only create the output workspace if it's different to the input one
@@ -53,7 +49,7 @@ void MaskBinsFromWorkspace::exec() {
   // in the input workspace
   if (maskedWS->hasMaskedBins(0)) {
     const auto maskedBins = maskedWS->maskedBins(0);
-    for (const auto &wi : m_indexSet) {
+    for (const auto wi : m_indexSet) {
       for (const auto &maskedBin : maskedBins) {
         outputWS->flagMasked(wi, maskedBin.first, maskedBin.second);
       }
@@ -61,5 +57,4 @@ void MaskBinsFromWorkspace::exec() {
   }
 }
 
-} // namespace Algorithms
-} // namespace Mantid
+} // namespace Mantid::Algorithms

@@ -10,11 +10,7 @@
 #include <cmath>
 #include <stdexcept>
 
-namespace Mantid {
-
-namespace Poldi {
-
-namespace Conversions {
+namespace Mantid::Poldi::Conversions {
 
 /* Unit conversion functions dtoTOF and TOFtod
  *
@@ -39,12 +35,10 @@ namespace Conversions {
  */
 double TOFtoD(double tof, double distance, double sinTheta) {
   if (distance <= 0 || sinTheta <= 0.0) {
-    throw std::domain_error(
-        "Distances and sin(theta) less or equal to 0 cannot be processed.");
+    throw std::domain_error("Distances and sin(theta) less or equal to 0 cannot be processed.");
   }
 
-  return PhysicalConstants::h * 1e7 * tof /
-         (2.0 * distance * sinTheta * PhysicalConstants::NeutronMass);
+  return PhysicalConstants::h * 1e7 * tof / (2.0 * distance * sinTheta * PhysicalConstants::NeutronMass);
 }
 
 /** Converts d to TOF, given a distance and sin(theta)
@@ -55,8 +49,7 @@ double TOFtoD(double tof, double distance, double sinTheta) {
  * @return TOF in microseconds.
  */
 double dtoTOF(double d, double distance, double sinTheta) {
-  return 2.0 * distance * sinTheta * d * PhysicalConstants::NeutronMass /
-         (PhysicalConstants::h * 1e7);
+  return 2.0 * distance * sinTheta * d * PhysicalConstants::NeutronMass / (PhysicalConstants::h * 1e7);
 }
 
 /** Converts d-spacing in Angstrom to momentum transfer Q (in reciprocal
@@ -68,8 +61,7 @@ double dtoTOF(double d, double distance, double sinTheta) {
  */
 double dToQ(double d) {
   if (d <= 0.0) {
-    throw std::domain_error(
-        "Can not convert d-spacings less or equal than zero.");
+    throw std::domain_error("Can not convert d-spacings less or equal than zero.");
   }
 
   return (2.0 * M_PI) / d;
@@ -84,8 +76,7 @@ double dToQ(double d) {
  */
 double qToD(double q) {
   if (q <= 0.0) {
-    throw std::domain_error(
-        "Can not convert Q-values less or equal than zero.");
+    throw std::domain_error("Can not convert Q-values less or equal than zero.");
   }
 
   return (2.0 * M_PI) / q;
@@ -102,6 +93,4 @@ double degToRad(double degree) { return degree / 180.0 * M_PI; }
  * @return angle in degrees
  */
 double radToDeg(double radians) { return radians / M_PI * 180.0; }
-} // namespace Conversions
-} // namespace Poldi
-} // namespace Mantid
+} // namespace Mantid::Poldi::Conversions

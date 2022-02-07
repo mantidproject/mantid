@@ -43,8 +43,7 @@ public:
   @param adjY : The number of X (vertical) adjacent pixels to average together
   @param iy : current index y
   */
-  virtual double weightAt(const double &adjX, const double &ix,
-                          const double &adjY, const double &iy) = 0;
+  virtual double weightAt(const double &adjX, const double &ix, const double &adjY, const double &iy) = 0;
 
 protected:
   /// Cutoff member.
@@ -56,8 +55,7 @@ Flat (no weighting) strategy. Concrete WeightingStrategy
 */
 class MANTID_ALGORITHMS_DLL FlatWeighting : public WeightingStrategy {
 public:
-  double weightAt(const double &, const double &, const double &,
-                  const double &) override;
+  double weightAt(const double &, const double &, const double &, const double &) override;
   double weightAt(const Mantid::Kernel::V3D &) override;
 };
 
@@ -68,8 +66,7 @@ class MANTID_ALGORITHMS_DLL LinearWeighting : public WeightingStrategy {
 public:
   LinearWeighting(const double cutOff);
   double weightAt(const Mantid::Kernel::V3D &) override;
-  double weightAt(const double &adjX, const double &ix, const double &adjY,
-                  const double &iy) override;
+  double weightAt(const double &adjX, const double &ix, const double &adjY, const double &iy) override;
 };
 
 /*
@@ -79,8 +76,7 @@ class MANTID_ALGORITHMS_DLL ParabolicWeighting : public WeightingStrategy {
 public:
   ParabolicWeighting(const double cutOff);
   double weightAt(const Mantid::Kernel::V3D &) override;
-  double weightAt(const double &adjX, const double &ix, const double &adjY,
-                  const double &iy) override;
+  double weightAt(const double &adjX, const double &ix, const double &adjY, const double &iy) override;
 };
 
 /*
@@ -89,8 +85,7 @@ Null weighting strategy.
 class MANTID_ALGORITHMS_DLL NullWeighting : public WeightingStrategy {
 public:
   double weightAt(const Mantid::Kernel::V3D &) override;
-  double weightAt(const double &, const double &, const double &,
-                  const double &) override;
+  double weightAt(const double &, const double &, const double &, const double &) override;
 };
 
 /*
@@ -102,8 +97,7 @@ class MANTID_ALGORITHMS_DLL GaussianWeightingnD : public WeightingStrategy {
 public:
   GaussianWeightingnD(double cutOff, double sigma);
   double weightAt(const Mantid::Kernel::V3D &) override;
-  double weightAt(const double &, const double &, const double &,
-                  const double &) override;
+  double weightAt(const double &, const double &, const double &, const double &) override;
 
 private:
   double calculateGaussian(const double normalisedDistanceSq);

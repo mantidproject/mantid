@@ -8,8 +8,7 @@
 #include "MantidKernel/ChecksumHelper.h"
 #include <Poco/String.h>
 
-namespace Mantid {
-namespace Geometry {
+namespace Mantid::Geometry {
 //----------------------------------------------------------------------------------------------
 /**
  * Returns the expected extension of an IDF file
@@ -22,10 +21,8 @@ const std::string AbstractIDFObject::expectedExtension() { return ".xml"; }
 /** Constructor
  */
 IDFObject::IDFObject(const std::string &fileName)
-    : m_defFile(fileName), m_hasFileName(!fileName.empty()),
-      m_cachePath(m_defFile.path()),
-      m_cacheParentDirectory(m_cachePath.parent()),
-      m_cachePathStr(m_cachePath.toString())
+    : m_defFile(fileName), m_hasFileName(!fileName.empty()), m_cachePath(m_defFile.path()),
+      m_cacheParentDirectory(m_cachePath.parent()), m_cachePathStr(m_cachePath.toString())
 
 {}
 
@@ -33,9 +30,7 @@ IDFObject::IDFObject(const std::string &fileName)
 Gets the parent directory of the file.
 @return Parent directory path.
 */
-const Poco::Path IDFObject::getParentDirectory() const {
-  return m_cacheParentDirectory;
-}
+const Poco::Path IDFObject::getParentDirectory() const { return m_cacheParentDirectory; }
 
 /**
 Getter for the full file path.
@@ -43,17 +38,13 @@ Getter for the full file path.
 */
 const Poco::Path &IDFObject::getFileFullPath() const { return m_cachePath; }
 
-const std::string &IDFObject::getFileFullPathStr() const {
-  return m_cachePathStr;
-}
+const std::string &IDFObject::getFileFullPathStr() const { return m_cachePathStr; }
 
 /**
 Gets the filename for the FileObject.
 @return filename only.
 */
-std::string IDFObject::getFileNameOnly() const {
-  return m_cachePath.getFileName();
-}
+std::string IDFObject::getFileNameOnly() const { return m_cachePath.getFileName(); }
 
 /**
  * Gets the extension of this IDF file, including the leading period
@@ -72,10 +63,8 @@ Gets the idf file as a mangled name.
 @return the idf file as a mangled name.
 */
 std::string IDFObject::getMangledName() const {
-  std::string idfText =
-      Kernel::ChecksumHelper::loadFile(getFileFullPathStr(), true);
-  std::string checksum =
-      Kernel::ChecksumHelper::sha1FromString(Poco::trim(idfText));
+  std::string idfText = Kernel::ChecksumHelper::loadFile(getFileFullPathStr(), true);
+  std::string checksum = Kernel::ChecksumHelper::sha1FromString(Poco::trim(idfText));
   return this->getFileNameOnly() + checksum;
 }
 
@@ -85,5 +74,4 @@ Check that the file exists.
 */
 bool IDFObject::exists() const { return m_hasFileName && m_defFile.exists(); }
 
-} // namespace Geometry
-} // namespace Mantid
+} // namespace Mantid::Geometry

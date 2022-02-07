@@ -32,11 +32,9 @@ using namespace ::NeXus;
 #pragma warning(disable : 4805)
 #endif
 
-namespace Mantid {
-namespace Kernel {
+namespace Mantid::Kernel::PropertyNexus {
 
-namespace PropertyNexus {
-
+namespace {
 //----------------------------------------------------------------------------------------------
 /** Helper method to create a property
  *
@@ -46,9 +44,8 @@ namespace PropertyNexus {
  * @return Property *
  */
 template <typename NumT>
-std::unique_ptr<Property>
-makeProperty(::NeXus::File *file, const std::string &name,
-             const std::vector<Types::Core::DateAndTime> &times) {
+std::unique_ptr<Property> makeProperty(::NeXus::File *file, const std::string &name,
+                                       const std::vector<Types::Core::DateAndTime> &times) {
   std::vector<NumT> values;
   file->getData(values);
   if (times.empty()) {
@@ -71,9 +68,8 @@ makeProperty(::NeXus::File *file, const std::string &name,
  * @param times :: vector of times, empty = single property with value
  * @return Property *
  */
-std::unique_ptr<Property>
-makeTimeSeriesBoolProperty(::NeXus::File *file, const std::string &name,
-                           const std::vector<Types::Core::DateAndTime> &times) {
+std::unique_ptr<Property> makeTimeSeriesBoolProperty(::NeXus::File *file, const std::string &name,
+                                                     const std::vector<Types::Core::DateAndTime> &times) {
   std::vector<uint8_t> savedValues;
   file->getData(savedValues);
   const size_t nvals = savedValues.size();
@@ -87,17 +83,15 @@ makeTimeSeriesBoolProperty(::NeXus::File *file, const std::string &name,
 }
 
 /** Make a string/vector\<string\> property */
-std::unique_ptr<Property>
-makeStringProperty(::NeXus::File *file, const std::string &name,
-                   const std::vector<Types::Core::DateAndTime> &times) {
+std::unique_ptr<Property> makeStringProperty(::NeXus::File *file, const std::string &name,
+                                             const std::vector<Types::Core::DateAndTime> &times) {
   std::vector<std::string> values;
   if (times.empty()) {
     std::string bigString = file->getStrData();
     return std::make_unique<PropertyWithValue<std::string>>(name, bigString);
   } else {
     if (file->getInfo().dims.size() != 2)
-      throw std::runtime_error("NXlog loading failed on field " + name +
-                               ". Expected rank 2.");
+      throw std::runtime_error("NXlog loading failed on field " + name + ". Expected rank 2.");
     int64_t numStrings = file->getInfo().dims[0];
     int64_t span = file->getInfo().dims[1];
     auto data = std::make_unique<char[]>(numStrings * span);
@@ -111,37 +105,31 @@ makeStringProperty(::NeXus::File *file, const std::string &name,
     return std::unique_ptr<Property>(std::move(prop));
   }
 }
-
-//----------------------------------------------------------------------------------------------
-/** Opens a NXlog group in a nexus file and
- * creates the correct Property object from it.
- *
- * @param file :: NXS file handle
- * @param group :: name of NXlog group to open
- * @return Property pointer
+/**
+ * Common function to populate "time" and "start" entries from NeXus file
  */
-std::unique_ptr<Property> loadProperty(::NeXus::File *file,
-                                       const std::string &group) {
-  file->openGroup(group, "NXlog");
-
-  // Times in second offsets
-  std::vector<double> timeSec;
-  std::string startStr;
-  std::string unitsStr;
-
-  // Get the entries so that you can check if the "time" field is present
-  std::map<std::string, std::string> entries = file->getEntries();
-  if (entries.find("time") != entries.end()) {
-    file->openData("time");
-    file->getData(timeSec);
-    // Optionally get a start
-    try {
-      file->getAttr("start", startStr);
-    } catch (::NeXus::Exception &) {
-    }
-    file->closeData();
+void getTimeAndStart(::NeXus::File *file, std::vector<double> &timeSec, std::string &startStr) {
+  file->openData("time");
+  file->getData(timeSec);
+  // Optionally get a start
+  try {
+    file->getAttr("start", startStr);
+  } catch (::NeXus::Exception &) {
   }
+  file->closeData();
+}
 
+/**
+ * @brief Common function used by loadProperty overloads populating start and units if required
+ * @param file in
+ * @param group  in
+ * @param timeSec  in
+ * @param startStr  out
+ * @param unitsStr  out
+ * @return std::unique_ptr<Property>
+ */
+std::unique_ptr<Property> loadPropertyCommon(::NeXus::File *file, const std::string &group,
+                                             const std::vector<double> &timeSec, std::string &startStr) {
   // Check the type. Boolean stored as UINT8
   bool typeIsBool(false);
   // Check for boolean attribute
@@ -196,6 +184,7 @@ std::unique_ptr<Property> loadProperty(::NeXus::File *file,
     break;
   }
 
+  std::string unitsStr;
   if (file->hasAttr("units")) {
     try {
       file->getAttr("units", unitsStr);
@@ -207,15 +196,54 @@ std::unique_ptr<Property> loadProperty(::NeXus::File *file,
   // add units
   if (retVal)
     retVal->setUnits(unitsStr);
-
   return retVal;
+}
+
+} // namespace
+//----------------------------------------------------------------------------------------------
+
+std::unique_ptr<Property> loadProperty(::NeXus::File *file, const std::string &group,
+                                       const Mantid::Kernel::NexusHDF5Descriptor &fileInfo, const std::string &prefix) {
+  file->openGroup(group, "NXlog");
+
+  // Times in second offsets
+  std::vector<double> timeSec;
+  std::string startStr;
+
+  // Check if the "time" field is present
+  if (fileInfo.isEntry(prefix + "/" + group + "/time")) {
+    getTimeAndStart(file, timeSec, startStr);
+  }
+
+  return loadPropertyCommon(file, group, timeSec, startStr);
+}
+
+//----------------------------------------------------------------------------------------------
+/** Opens a NXlog group in a nexus file and
+ * creates the correct Property object from it.
+ *
+ * @param file :: NXS file handle
+ * @param group :: name of NXlog group to open
+ * @return Property pointer
+ */
+std::unique_ptr<Property> loadProperty(::NeXus::File *file, const std::string &group) {
+  file->openGroup(group, "NXlog");
+
+  // Times in second offsets
+  std::vector<double> timeSec;
+  std::string startStr;
+
+  // Get the entries so that you can check if the "time" field is present
+  std::map<std::string, std::string> entries = file->getEntries();
+  if (entries.find("time") != entries.end()) {
+    getTimeAndStart(file, timeSec, startStr);
+  }
+
+  return loadPropertyCommon(file, group, timeSec, startStr);
 }
 
 #ifdef _WIN32
 #pragma warning(pop)
 #endif
 
-} // namespace PropertyNexus
-
-} // namespace Kernel
-} // namespace Mantid
+} // namespace Mantid::Kernel::PropertyNexus

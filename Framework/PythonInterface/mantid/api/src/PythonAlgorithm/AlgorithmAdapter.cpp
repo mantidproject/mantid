@@ -22,8 +22,7 @@
 //-----------------------------------------------------------------------------
 // AlgorithmAdapter definition
 //-----------------------------------------------------------------------------
-namespace Mantid {
-namespace PythonInterface {
+namespace Mantid::PythonInterface {
 using namespace boost::python;
 
 /**
@@ -32,8 +31,7 @@ using namespace boost::python;
  */
 template <typename BaseAlgorithm>
 AlgorithmAdapter<BaseAlgorithm>::AlgorithmAdapter(PyObject *self)
-    : BaseAlgorithm(), m_self(self), m_isRunningObj(nullptr),
-      m_wikiSummary("") {
+    : BaseAlgorithm(), m_self(self), m_isRunningObj(nullptr), m_wikiSummary("") {
   // Only cache the isRunning attribute if it is overridden by the
   // inheriting type otherwise we end up with an infinite recursive call
   // as isRunning always exists from the interface
@@ -44,8 +42,7 @@ AlgorithmAdapter<BaseAlgorithm>::AlgorithmAdapter(PyObject *self)
 /**
  * Returns the name of the algorithm. This cannot be overridden in Python.
  */
-template <typename BaseAlgorithm>
-const std::string AlgorithmAdapter<BaseAlgorithm>::name() const {
+template <typename BaseAlgorithm> const std::string AlgorithmAdapter<BaseAlgorithm>::name() const {
   return std::string(getSelf()->ob_type->tp_name);
 }
 
@@ -53,8 +50,7 @@ const std::string AlgorithmAdapter<BaseAlgorithm>::name() const {
  * Returns the version of the algorithm. If not overridden
  * it returns 1
  */
-template <typename BaseAlgorithm>
-int AlgorithmAdapter<BaseAlgorithm>::version() const {
+template <typename BaseAlgorithm> int AlgorithmAdapter<BaseAlgorithm>::version() const {
   try {
     return callMethod<int>(getSelf(), "version");
   } catch (UndefinedAttributeError &) {
@@ -67,8 +63,7 @@ int AlgorithmAdapter<BaseAlgorithm>::version() const {
  * If true, the algorithm will act on each component of the workspace group
  * individually
  */
-template <typename BaseAlgorithm>
-bool AlgorithmAdapter<BaseAlgorithm>::checkGroups() {
+template <typename BaseAlgorithm> bool AlgorithmAdapter<BaseAlgorithm>::checkGroups() {
   try {
     return callMethod<bool>(getSelf(), "checkGroups");
   } catch (UndefinedAttributeError &) {
@@ -80,8 +75,7 @@ bool AlgorithmAdapter<BaseAlgorithm>::checkGroups() {
  * Returns the category of the algorithm. If not overridden
  * it return defaultCategory()
  */
-template <typename BaseAlgorithm>
-const std::string AlgorithmAdapter<BaseAlgorithm>::category() const {
+template <typename BaseAlgorithm> const std::string AlgorithmAdapter<BaseAlgorithm>::category() const {
   const static std::string defaultCategory = "PythonAlgorithms";
   std::string category = defaultCategory;
   try {
@@ -90,10 +84,9 @@ const std::string AlgorithmAdapter<BaseAlgorithm>::category() const {
   }
   if (category == defaultCategory) {
     // output a warning
-    this->getLogger().warning()
-        << "Python Algorithm " << this->name() << " v" << this->version()
-        << " does not have a category defined. See "
-           "http://www.mantidproject.org/Basic_PythonAlgorithm_Structure\n";
+    this->getLogger().warning() << "Python Algorithm " << this->name() << " v" << this->version()
+                                << " does not have a category defined. See "
+                                   "http://www.mantidproject.org/Basic_PythonAlgorithm_Structure\n";
   }
   return category;
 }
@@ -102,17 +95,37 @@ const std::string AlgorithmAdapter<BaseAlgorithm>::category() const {
  * Returns seeAlso related algorithms. If not overridden
  * it returns an empty vector of strings
  */
-template <typename BaseAlgorithm>
-const std::vector<std::string>
-AlgorithmAdapter<BaseAlgorithm>::seeAlso() const {
+template <typename BaseAlgorithm> const std::vector<std::string> AlgorithmAdapter<BaseAlgorithm>::seeAlso() const {
   try {
     // The GIL is required so that the the reference count of the
     // list object can be decremented safely
     GlobalInterpreterLock gil;
-    return Converters::PySequenceToVector<std::string>(
-        callMethod<list>(getSelf(), "seeAlso"))();
+    return Converters::PySequenceToVector<std::string>(callMethod<list>(getSelf(), "seeAlso"))();
   } catch (UndefinedAttributeError &) {
     return {};
+  }
+}
+
+/**
+ * Returns the aliases of the algorithm. If not overridden returns the base algorithm implementation
+ */
+template <typename BaseAlgorithm> const std::string AlgorithmAdapter<BaseAlgorithm>::alias() const {
+  try {
+    return callMethod<std::string>(getSelf(), "alias");
+  } catch (UndefinedAttributeError &) {
+    return BaseAlgorithm::alias();
+  }
+}
+
+/**
+ * Returns the expiration date (in ISO8601 format) of algorithm aliases. If not overridden, returns the
+ * base algorithm implementation
+ */
+template <typename BaseAlgorithm> const std::string AlgorithmAdapter<BaseAlgorithm>::aliasDeprecated() const {
+  try {
+    return callMethod<std::string>(getSelf(), "aliasDeprecated");
+  } catch (UndefinedAttributeError &) {
+    return BaseAlgorithm::aliasDeprecated();
   }
 }
 
@@ -120,8 +133,7 @@ AlgorithmAdapter<BaseAlgorithm>::seeAlso() const {
  * Returns the summary of the algorithm. If not overridden
  * it returns defaultSummary
  */
-template <typename BaseAlgorithm>
-const std::string AlgorithmAdapter<BaseAlgorithm>::summary() const {
+template <typename BaseAlgorithm> const std::string AlgorithmAdapter<BaseAlgorithm>::summary() const {
   try {
     return callMethod<std::string>(getSelf(), "summary");
   } catch (UndefinedAttributeError &) {
@@ -132,8 +144,7 @@ const std::string AlgorithmAdapter<BaseAlgorithm>::summary() const {
 /**
  * Optional documentation URL of the algorithm, empty string if not overridden.
  */
-template <typename BaseAlgorithm>
-const std::string AlgorithmAdapter<BaseAlgorithm>::helpURL() const {
+template <typename BaseAlgorithm> const std::string AlgorithmAdapter<BaseAlgorithm>::helpURL() const {
   try {
     return callMethod<std::string>(getSelf(), "helpURL");
   } catch (UndefinedAttributeError &) {
@@ -144,8 +155,7 @@ const std::string AlgorithmAdapter<BaseAlgorithm>::helpURL() const {
 /**
  *@return True if the algorithm is considered to be running
  */
-template <typename BaseAlgorithm>
-bool AlgorithmAdapter<BaseAlgorithm>::isRunning() const {
+template <typename BaseAlgorithm> bool AlgorithmAdapter<BaseAlgorithm>::isRunning() const {
   if (!m_isRunningObj) {
     return SuperClass::isRunning();
   } else {
@@ -164,14 +174,12 @@ bool AlgorithmAdapter<BaseAlgorithm>::isRunning() const {
 #endif
 
     } else
-      throw std::runtime_error(
-          "Algorithm.isRunning - Expected bool return type.");
+      throw std::runtime_error("Algorithm.isRunning - Expected bool return type.");
   }
   GNU_DIAG_ON("parentheses-equality")
 }
 
-template <typename BaseAlgorithm>
-void AlgorithmAdapter<BaseAlgorithm>::cancel() {
+template <typename BaseAlgorithm> void AlgorithmAdapter<BaseAlgorithm>::cancel() {
   try {
     return callMethod<void>(getSelf(), "cancel");
   } catch (UndefinedAttributeError &) {
@@ -182,9 +190,7 @@ void AlgorithmAdapter<BaseAlgorithm>::cancel() {
 /**
  * @copydoc Mantid::API::Algorithm::validateInputs
  */
-template <typename BaseAlgorithm>
-std::map<std::string, std::string>
-AlgorithmAdapter<BaseAlgorithm>::validateInputs() {
+template <typename BaseAlgorithm> std::map<std::string, std::string> AlgorithmAdapter<BaseAlgorithm>::validateInputs() {
   using boost::python::dict;
   std::map<std::string, std::string> resultMap;
 
@@ -200,14 +206,12 @@ AlgorithmAdapter<BaseAlgorithm>::validateInputs() {
       if (value) {
         try {
           std::string keyAsString = boost::python::extract<std::string>(key);
-          std::string valueAsString =
-              boost::python::extract<std::string>(value);
+          std::string valueAsString = boost::python::extract<std::string>(value);
           resultMap[std::move(keyAsString)] = std::move(valueAsString);
         } catch (boost::python::error_already_set &) {
-          this->getLogger().error()
-              << "In validateInputs(self): Invalid type for key/value pair "
-              << "detected in dict.\n"
-              << "All keys and values must be strings\n";
+          this->getLogger().error() << "In validateInputs(self): Invalid type for key/value pair "
+                                    << "detected in dict.\n"
+                                    << "All keys and values must be strings\n";
         }
       }
     }
@@ -220,18 +224,15 @@ AlgorithmAdapter<BaseAlgorithm>::validateInputs() {
 
 /// Set the summary text
 /// @param summary Wiki text
-template <typename BaseAlgorithm>
-void AlgorithmAdapter<BaseAlgorithm>::setWikiSummary(
-    const std::string &summary) {
-  std::string msg =
-      "self.setWikiSummary() is deprecated and will be removed in a future "
-      "release.\n"
-      "To ensure continued functionality remove the line containing "
-      "'self.setWikiSummary'\n"
-      "and add a new function outside of the current one defined like so:\n"
-      "def summary(self):\n"
-      "    \"" +
-      summary + "\"\n";
+template <typename BaseAlgorithm> void AlgorithmAdapter<BaseAlgorithm>::setWikiSummary(const std::string &summary) {
+  std::string msg = "self.setWikiSummary() is deprecated and will be removed in a future "
+                    "release.\n"
+                    "To ensure continued functionality remove the line containing "
+                    "'self.setWikiSummary'\n"
+                    "and add a new function outside of the current one defined like so:\n"
+                    "def summary(self):\n"
+                    "    \"" +
+                    summary + "\"\n";
 
   PyErr_Warn(PyExc_DeprecationWarning, msg.c_str());
   m_wikiSummary = summary;
@@ -244,9 +245,8 @@ void AlgorithmAdapter<BaseAlgorithm>::setWikiSummary(
  * @param doc :: An optional doc string
  */
 template <typename BaseAlgorithm>
-void AlgorithmAdapter<BaseAlgorithm>::declarePyAlgProperty(
-    boost::python::object &self, Kernel::Property *prop,
-    const std::string &doc) {
+void AlgorithmAdapter<BaseAlgorithm>::declarePyAlgProperty(boost::python::object &self, Kernel::Property *prop,
+                                                           const std::string &doc) {
   BaseAlgorithm &caller = extract<BaseAlgorithm &>(self);
   // We need to clone the property so that python doesn't own the object that
   // gets inserted
@@ -267,15 +267,13 @@ void AlgorithmAdapter<BaseAlgorithm>::declarePyAlgProperty(
  * @param direction :: The direction of the property
  */
 template <typename BaseAlgorithm>
-void AlgorithmAdapter<BaseAlgorithm>::declarePyAlgProperty(
-    boost::python::object &self, const std::string &name,
-    const boost::python::object &defaultValue,
-    const boost::python::object &validator, const std::string &doc,
-    const int direction) {
+void AlgorithmAdapter<BaseAlgorithm>::declarePyAlgProperty(boost::python::object &self, const std::string &name,
+                                                           const boost::python::object &defaultValue,
+                                                           const boost::python::object &validator,
+                                                           const std::string &doc, const int direction) {
   BaseAlgorithm &caller = extract<BaseAlgorithm &>(self);
   auto prop = std::unique_ptr<Kernel::Property>(
-      Registry::PropertyWithValueFactory::create(name, defaultValue, validator,
-                                                 direction));
+      Registry::PropertyWithValueFactory::create(name, defaultValue, validator, direction));
   caller.declareProperty(std::move(prop), doc);
 }
 
@@ -290,14 +288,12 @@ void AlgorithmAdapter<BaseAlgorithm>::declarePyAlgProperty(
  * @param direction :: The direction of the property
  */
 template <typename BaseAlgorithm>
-void AlgorithmAdapter<BaseAlgorithm>::declarePyAlgProperty(
-    boost::python::object &self, const std::string &name,
-    const boost::python::object &defaultValue, const std::string &doc,
-    const int direction) {
+void AlgorithmAdapter<BaseAlgorithm>::declarePyAlgProperty(boost::python::object &self, const std::string &name,
+                                                           const boost::python::object &defaultValue,
+                                                           const std::string &doc, const int direction) {
   BaseAlgorithm &caller = extract<BaseAlgorithm &>(self);
-  auto prop = std::unique_ptr<Kernel::Property>(
-      Registry::PropertyWithValueFactory::create(name, defaultValue,
-                                                 direction));
+  auto prop =
+      std::unique_ptr<Kernel::Property>(Registry::PropertyWithValueFactory::create(name, defaultValue, direction));
   caller.declareProperty(std::move(prop), doc);
 }
 
@@ -310,9 +306,9 @@ void AlgorithmAdapter<BaseAlgorithm>::declarePyAlgProperty(
  * @param direction :: The direction of the property
  */
 template <typename BaseAlgorithm>
-void AlgorithmAdapter<BaseAlgorithm>::declarePyAlgProperty(
-    boost::python::object &self, const std::string &name,
-    const boost::python::object &defaultValue, const int direction) {
+void AlgorithmAdapter<BaseAlgorithm>::declarePyAlgProperty(boost::python::object &self, const std::string &name,
+                                                           const boost::python::object &defaultValue,
+                                                           const int direction) {
   declarePyAlgProperty(self, name, defaultValue, "", direction);
 }
 
@@ -356,5 +352,4 @@ template class AlgorithmAdapter<API::DataProcessorAlgorithm>;
 template class AlgorithmAdapter<API::SerialDataProcessorAlgorithm>;
 template class AlgorithmAdapter<API::ParallelDataProcessorAlgorithm>;
 template class AlgorithmAdapter<API::DistributedDataProcessorAlgorithm>;
-} // namespace PythonInterface
-} // namespace Mantid
+} // namespace Mantid::PythonInterface

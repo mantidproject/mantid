@@ -9,14 +9,14 @@
 Introduction
 ------------
 
-To understand the algorithms options, user should clearly understand the difference between *WorkspaceIndex* 
+To understand the algorithms options, user should clearly understand the difference between *WorkspaceIndex*
 -- the numbers, specified in *WorkspaceIndexList* and *StartWorkspacIndex*, *EndWorkspaceIndex* properties,
-the *Spectra Number* or according to other terminology *Spectra ID* -- values of the **SpectraList** property and *Detector ID* -- the numbers to provide for 
+the *Spectra Number* or according to other terminology *Spectra ID* -- values of the **SpectraList** property and *Detector ID* -- the numbers to provide for
 *DetectorList* property.
 
 The *WorkspaceIndex* is the number a spectrum has in a workspace, e.g. ::
 
-  sp = ws.getSpectrum(0) 
+  sp = ws.getSpectrum(0)
 
 always returns first spectra present in the workspace.
 
@@ -24,16 +24,16 @@ The *Spectra Number* or  *spectra ID* mean the number, assigned to a spectrum. T
 
   print(sp.getSpectrumNo())
 
-from the sample above will often print 1 but not always. The simplest case when this 
+from the sample above will often print 1 but not always. The simplest case when this
 number is different is when you load a second half of a workspace, when the first spectrum number still is **NumTotalSpectraInWorkspace/2+1**,
 while *WorkspaceIndex* of this spectra becomes 0, i.e.: ::
 
 	sp = ws.getSpectrum(0)
 	print(sp.getSpectrumNo())
-	
-prints number equal to **NumTotalSpectraInWorkspace/2+1**. There are other ways to assign a random number to a spectrum. 
 
-And finally, the *detector ID* is the number assigned to a detector in an instrument definition file. Sometimes, 
+prints number equal to **NumTotalSpectraInWorkspace/2+1**. There are other ways to assign a random number to a spectrum.
+
+And finally, the *detector ID* is the number assigned to a detector in an instrument definition file. Sometimes,
 a  first detector corresponds to the first spectra of a workspace, but it is not in any way certain. For example
 the code: ::
 
@@ -44,23 +44,23 @@ the code: ::
 Will print: ::
 
   2 set(1102)
-	
+
 but any *ISIS MARI* workspace obtained from experiment will produce different sequence, e.g. something like: ::
 
   5 set(4101)
 
-  
+
 Description
 -----------
 
-The algorithm zeroes the data in the spectra of the input workspace 
+The algorithm zeroes the data in the spectra of the input workspace
 defined as masked. The detectors corresponding to the masked spectra are also
 flagged as masked (can be verified by the `IDetector::isMasked()` method).
 
 The *Workspace* property specifies the workspace to mask while the other properties
 provide various ways to define the spectra and detectors to mask.
 
-If *Workspace* is PeaksWorkspace, only the detectors listed are masked and 
+If *Workspace* is PeaksWorkspace, only the detectors listed are masked and
 the mask must be specified by a *DetectorList* or *MaskedWorkspace*.
 
 All but the *Workspace* property are optional and at least one of them must be
@@ -80,35 +80,35 @@ changes its action depending on other masking properties being provided, namely:
 Mask Detectors According To Instrument & Masking Workspace
 ##########################################################
 
-If *MaskedWorkspace* is provided, both *MaskedWorkspace* and 
-*Workspace* mask have the same instrument. 
+If *MaskedWorkspace* is provided, both *MaskedWorkspace* and
+*Workspace* mask have the same instrument.
 
-The algorithm works differently depending on *MaskedWorkspace* property 
-being a *Mask Workspace* (SpecialWorkspace2D object) or 
-:ref:`Matrix Workspace <MatrixWorkspace>`. 
+The algorithm works differently depending on *MaskedWorkspace* property
+being a *Mask Workspace* (SpecialWorkspace2D object) or
+:ref:`Matrix Workspace <MatrixWorkspace>`.
 
-If source *MaskedWorkspace* is a *Mask Workspace* and the number of spectra in the source 
-*MaskedWorkspace* is equal to number of spectra in the target *Workspace*, the 
-spectra numbers of the *MaskedWorkspace* are used as source 
-of masking information for the target workspace. 
+If source *MaskedWorkspace* is a *Mask Workspace* and the number of spectra in the source
+*MaskedWorkspace* is equal to number of spectra in the target *Workspace*, the
+spectra numbers of the *MaskedWorkspace* are used as source
+of masking information for the target workspace.
 
 If the numbers of spectra in *Workspace* and *MaskedWorkspace* are different,
 the algorithm extracts list of masked detector IDS from source workspace and
-uses them to mask the corresponding spectra of the target workspace. 
+uses them to mask the corresponding spectra of the target workspace.
 
-Setting property *ForceInstrumentMasking* to true forces algorithm 
+Setting property *ForceInstrumentMasking* to true forces algorithm
 to always use *MaskedWorkspace* detector IDs as the source of the masking
 information. If a detector is masked, then the corresponding detector
 will be masked in the input *Workspace*.
 
-If the input *MaskedWorkspace* is a :ref:`Matrix Workspace <MatrixWorkspace>` 
-and the number of spectra in the source *MaskedWorkspace* is equal to the number 
+If the input *MaskedWorkspace* is a :ref:`Matrix Workspace <MatrixWorkspace>`
+and the number of spectra in the source *MaskedWorkspace* is equal to the number
 of spectra in the target *Workspace*, then workspace indices of the source are
 used.
 
 If the numbers of spectra in *Workspace* and *MaskedWorkspace* are different,
-the algorithm extracts list of detector IDS from source workspace and uses them 
-to mask the corresponding spectra of the target workspace. 
+the algorithm extracts list of detector IDS from source workspace and uses them
+to mask the corresponding spectra of the target workspace.
 
 Definition of Mask
 ##################
@@ -121,10 +121,10 @@ Definition of Mask
    be used. In the masking workspace (i.e.,
    `SpecialWorkspace2D <http://www.mantidproject.org/SpecialWorkspace2D>`__), the corresponding value
    is 0.
--  If masked workspace with a masked spectrum is applied to a target workspace with grouped detectors, 
-   and only one detector in the group of target workspace is masked, all target spectra, 
+-  If masked workspace with a masked spectrum is applied to a target workspace with grouped detectors,
+   and only one detector in the group of target workspace is masked, all target spectra,
    containing this detector become masked.
-   
+
 
 About Input Parameters
 ######################
@@ -327,8 +327,8 @@ Output:
   # workspace created by CreateSampleWorkspace since their
   # names contain a comma ',' which breaks the parsing of the component list.
   MaskDetectors(ws, ComponentList='bank1/bank1(x=3), bank2')
-  
-  
+
+
   # Define a helper function.
   def checkMasked(detsBegin, detsEnd):
       allMasked = True
@@ -341,10 +341,10 @@ Output:
           print('Detectors from {0} to {1} are masked.'.format(detsBegin, detsEnd))
       else:
           print('Some detectors were unmasked.')
-  
+
   # Check the detector column in bank1
   checkMasked(130, 140)
-  
+
   # Check bank2
   checkMasked(200,300)
 
@@ -410,7 +410,7 @@ Output:
   Detector 102 is masked: False
   Detector 103 is masked: True
   Detector 104 is masked: False
-  
+
 **Example 6: specifying a masking range**
 
 .. testcode:: ExMaskInRange
@@ -418,7 +418,7 @@ Output:
   # Create a data workspace
   ws = CreateSampleWorkspace()
   # Mask 3 detectors using the masking range
-  MaskDetectors(ws, StartWorkspaceIndex=2, EndWorkspaceIndex=4)  
+  MaskDetectors(ws, StartWorkspaceIndex=2, EndWorkspaceIndex=4)
 
   # Check masking of first 6 detectors
   for ind in range(0,6):
@@ -436,7 +436,7 @@ Output:
   Detector 103 is masked: True
   Detector 104 is masked: True
   Detector 105 is masked: False
-  
+
 **Example 7: constraining the masking range**
 
 .. testcode:: ExMaskConstrainInRange
@@ -487,7 +487,7 @@ Output:
   Detector 104 is masked: True
   Detector 105 is masked: True
   Detector 106 is masked: False
-    
+
 .. categories::
 
 .. sourcelink::

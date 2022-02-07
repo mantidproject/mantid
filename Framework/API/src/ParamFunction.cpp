@@ -15,8 +15,7 @@
 #include <limits>
 #include <sstream>
 
-namespace Mantid {
-namespace API {
+namespace Mantid::API {
 namespace {
 Kernel::Logger g_log("ParamFunction");
 }
@@ -27,19 +26,16 @@ Kernel::Logger g_log("ParamFunction");
  *  @param explicitlySet :: A boolean falgging the parameter as explicitly set
  * (by user)
  */
-void ParamFunction::setParameter(size_t i, const double &value,
-                                 bool explicitlySet) {
+void ParamFunction::setParameter(size_t i, const double &value, bool explicitlySet) {
   if (std::isnan(value)) {
     // Check for NaN or -NaN
     std::stringstream errmsg;
-    errmsg << "Trying to set a NaN value (" << value << ") to parameter "
-           << this->parameterName(i);
+    errmsg << "Trying to set a NaN value (" << value << ") to parameter " << this->parameterName(i);
     throw std::invalid_argument(errmsg.str());
   } else if (std::isinf(value)) {
     // Infinity value
     std::stringstream errmsg;
-    errmsg << "Trying to set an infinity value (" << value << ") to parameter "
-           << this->parameterName(i);
+    errmsg << "Trying to set an infinity value (" << value << ") to parameter " << this->parameterName(i);
     throw std::invalid_argument(errmsg.str());
   }
 
@@ -54,8 +50,7 @@ void ParamFunction::setParameter(size_t i, const double &value,
  *  @param i :: The parameter index
  *  @param description :: New parameter description
  */
-void ParamFunction::setParameterDescription(size_t i,
-                                            const std::string &description) {
+void ParamFunction::setParameterDescription(size_t i, const std::string &description) {
   checkParameterIndex(i);
   m_parameterDescriptions[i] = description;
 }
@@ -76,13 +71,11 @@ double ParamFunction::getParameter(size_t i) const {
  * @param explicitlySet :: A boolean flagging the parameter as explicitly set
  * (by user)
  */
-void ParamFunction::setParameter(const std::string &name, const double &value,
-                                 bool explicitlySet) {
+void ParamFunction::setParameter(const std::string &name, const double &value, bool explicitlySet) {
   auto it = std::find(m_parameterNames.cbegin(), m_parameterNames.cend(), name);
   if (it == m_parameterNames.cend()) {
     std::ostringstream msg;
-    msg << "ParamFunction tries to set value to non-exist parameter (" << name
-        << ") "
+    msg << "ParamFunction tries to set value to non-exist parameter (" << name << ") "
         << "of function " << this->name();
     msg << "\nAllowed parameters: ";
     for (const auto &parameterName : m_parameterNames) {
@@ -90,8 +83,7 @@ void ParamFunction::setParameter(const std::string &name, const double &value,
     }
     throw std::invalid_argument(msg.str());
   }
-  setParameter(static_cast<int>(it - m_parameterNames.begin()), value,
-               explicitlySet);
+  setParameter(static_cast<int>(it - m_parameterNames.begin()), value, explicitlySet);
 }
 
 /**
@@ -99,20 +91,17 @@ void ParamFunction::setParameter(const std::string &name, const double &value,
  * @param name :: The name of the parameter.
  * @param description :: New parameter description
  */
-void ParamFunction::setParameterDescription(const std::string &name,
-                                            const std::string &description) {
+void ParamFunction::setParameterDescription(const std::string &name, const std::string &description) {
   auto it = std::find(m_parameterNames.cbegin(), m_parameterNames.cend(), name);
   if (it == m_parameterNames.cend()) {
     std::ostringstream msg;
-    msg << "ParamFunction tries to set description to non-exist parameter ("
-        << name << "). ";
+    msg << "ParamFunction tries to set description to non-exist parameter (" << name << "). ";
     msg << "\nAllowed parameters: ";
     for (const auto &parameterName : m_parameterNames)
       msg << parameterName << ", ";
     throw std::invalid_argument(msg.str());
   }
-  setParameterDescription(static_cast<int>(it - m_parameterNames.begin()),
-                          description);
+  setParameterDescription(static_cast<int>(it - m_parameterNames.begin()), description);
 }
 
 /**
@@ -124,8 +113,7 @@ double ParamFunction::getParameter(const std::string &name) const {
   auto it = std::find(m_parameterNames.cbegin(), m_parameterNames.cend(), name);
   if (it == m_parameterNames.cend()) {
     std::ostringstream msg;
-    msg << "ParamFunction tries to get value of non-existing parameter ("
-        << name << ") "
+    msg << "ParamFunction tries to get value of non-existing parameter (" << name << ") "
         << "to function " << this->name();
     msg << "\nAllowed parameters: ";
     for (const auto &parameterName : m_parameterNames)
@@ -136,8 +124,7 @@ double ParamFunction::getParameter(const std::string &name) const {
   double parvalue = m_parameters[it - m_parameterNames.cbegin()];
 
   if (!std::isfinite(parvalue)) {
-    g_log.warning() << "Parameter " << name << " has a NaN or infinity value "
-                    << '\n';
+    g_log.warning() << "Parameter " << name << " has a NaN or infinity value " << '\n';
   }
 
   return parvalue;
@@ -149,8 +136,7 @@ double ParamFunction::getParameter(const std::string &name) const {
  * @return True if the parameter exists.
  */
 bool ParamFunction::hasParameter(const std::string &name) const {
-  return std::find(m_parameterNames.cbegin(), m_parameterNames.cend(), name) !=
-         m_parameterNames.cend();
+  return std::find(m_parameterNames.cbegin(), m_parameterNames.cend(), name) != m_parameterNames.cend();
 }
 
 /**
@@ -162,8 +148,7 @@ size_t ParamFunction::parameterIndex(const std::string &name) const {
   auto it = std::find(m_parameterNames.cbegin(), m_parameterNames.cend(), name);
   if (it == m_parameterNames.cend()) {
     std::ostringstream msg;
-    msg << "ParamFunction " << this->name() << " does not have parameter ("
-        << name << ").";
+    msg << "ParamFunction " << this->name() << " does not have parameter (" << name << ").";
     throw std::invalid_argument(msg.str());
   }
   return std::distance(m_parameterNames.cbegin(), it);
@@ -188,7 +173,7 @@ std::string ParamFunction::parameterDescription(size_t i) const {
 }
 
 /**
- * Get the fitting error for a parameter
+ * Get the fitting error for a parameter.
  * @param i :: The index of a parameter
  * @return :: the error
  */
@@ -198,7 +183,26 @@ double ParamFunction::getError(size_t i) const {
 }
 
 /**
- * Set the fitting error for a parameter
+ * Get the fitting error for a parameter by name.
+ * @param name :: The name of a parameter
+ * @return :: the error
+ */
+double ParamFunction::getError(const std::string &name) const {
+  auto it = std::find(m_parameterNames.cbegin(), m_parameterNames.cend(), name);
+  if (it == m_parameterNames.cend()) {
+    std::ostringstream msg;
+    msg << "ParamFunction tries to get error of non-existing parameter (" << name << ") "
+        << "to function " << this->name();
+    msg << "\nAllowed parameters: ";
+    for (const auto &parameterName : m_parameterNames)
+      msg << parameterName << ", ";
+    throw std::invalid_argument(msg.str());
+  }
+  return m_errors[static_cast<int>(it - m_parameterNames.begin())];
+}
+
+/**
+ * Set the fitting error for a parameter.
  * @param i :: The index of a parameter
  * @param err :: The error value to set
  */
@@ -208,13 +212,31 @@ void ParamFunction::setError(size_t i, double err) {
 }
 
 /**
+ * Get the fitting error for a parameter by name.
+ * @param name :: The name of a parameter
+ * @param err :: The error value to set
+ */
+void ParamFunction::setError(const std::string &name, double err) {
+  auto it = std::find(m_parameterNames.cbegin(), m_parameterNames.cend(), name);
+  if (it == m_parameterNames.cend()) {
+    std::ostringstream msg;
+    msg << "ParamFunction tries to set error of non-existing parameter (" << name << ") "
+        << "to function " << this->name();
+    msg << "\nAllowed parameters: ";
+    for (const auto &parameterName : m_parameterNames)
+      msg << parameterName << ", ";
+    throw std::invalid_argument(msg.str());
+  }
+  m_errors[static_cast<int>(it - m_parameterNames.begin())] = err;
+}
+
+/**
  * Declare a new parameter. To used in the implementation'c constructor.
  * @param name :: The parameter name.
  * @param initValue :: The initial value for the parameter
  * @param description :: The description for the parameter
  */
-void ParamFunction::declareParameter(const std::string &name, double initValue,
-                                     const std::string &description) {
+void ParamFunction::declareParameter(const std::string &name, double initValue, const std::string &description) {
   auto it = std::find(m_parameterNames.cbegin(), m_parameterNames.cend(), name);
   if (it != m_parameterNames.cend()) {
     std::ostringstream msg;
@@ -282,5 +304,4 @@ size_t ParamFunction::getParameterIndex(const ParameterReference &ref) const {
   return nParams();
 }
 
-} // namespace API
-} // namespace Mantid
+} // namespace Mantid::API

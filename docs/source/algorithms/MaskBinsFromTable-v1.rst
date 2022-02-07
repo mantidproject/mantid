@@ -12,7 +12,7 @@ Description
 Masks bins in a workspace. The user specified masking parameters,
 such as spectra, xmin and xmax are given via a TableWorkspace.
 
-It calls algorithm MaskBins underneath. 
+It calls algorithm MaskBins underneath.
 If DetectorIDsList column exists it will convert this list to a list of spectra before calling MaskBins.
 
 The table may have several rows, in which case it calls Maskbins for each row.

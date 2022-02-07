@@ -1,7 +1,7 @@
 .. _control_structures:
 
 ==================
-Control Structures 
+Control Structures
 ==================
 
 -  As in any programming language there are mechanisms to control
@@ -21,7 +21,7 @@ Comparisons testing
    -  ``<=`` Tests if lhs is less than or equal to rhs, e.g. ``x <= 2``
    -  ``>=`` Tests if lhs is greater than or equal rhs, e.g. ``x >= 2``
 
-| 
+|
 
 Control blocks
 ==============

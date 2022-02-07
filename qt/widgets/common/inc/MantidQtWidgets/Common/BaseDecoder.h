@@ -17,8 +17,7 @@ namespace API {
 
 class BaseDecoder {
 public:
-  virtual QWidget *decode(const QMap<QString, QVariant> &map,
-                          const std::string &directory) = 0;
+  virtual QWidget *decode(const QMap<QString, QVariant> &map, const std::string &directory) = 0;
   virtual QList<QString> tags() = 0;
   virtual ~BaseDecoder() = default;
 };

@@ -11,11 +11,11 @@
 #include "MantidAPI/Axis.h"
 #include "MantidAlgorithms/DetectorEfficiencyCor.h"
 #include "MantidDataObjects/WorkspaceCreation.h"
+#include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Objects/CSGObject.h"
 #include "MantidGeometry/Objects/ShapeFactory.h"
 #include "MantidKernel/UnitFactory.h"
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
 using namespace Mantid::HistogramData;
 
@@ -23,9 +23,7 @@ class DetectorEfficiencyCorTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static DetectorEfficiencyCorTest *createSuite() {
-    return new DetectorEfficiencyCorTest();
-  }
+  static DetectorEfficiencyCorTest *createSuite() { return new DetectorEfficiencyCorTest(); }
   static void destroySuite(DetectorEfficiencyCorTest *suite) { delete suite; }
 
   void testInit() {
@@ -37,10 +35,8 @@ public:
   }
 
   void testExecWithoutEiThrowsInvalidArgument() {
-    auto dummyWS =
-        WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(2, 1);
-    dummyWS->getAxis(0)->unit() =
-        Mantid::Kernel::UnitFactory::Instance().create("DeltaE");
+    auto dummyWS = WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(2, 1);
+    dummyWS->getAxis(0)->unit() = Mantid::Kernel::UnitFactory::Instance().create("DeltaE");
 
     Mantid::Algorithms::DetectorEfficiencyCor corrector;
     TS_ASSERT_THROWS_NOTHING(corrector.initialize());
@@ -65,8 +61,7 @@ public:
     grouper.setChild(true);
 
     TS_ASSERT_THROWS_NOTHING(grouper.setProperty("InputWorkspace", inputWS));
-    TS_ASSERT_THROWS_NOTHING(
-        grouper.setPropertyValue("OutputWorkspace", "__unused"));
+    TS_ASSERT_THROWS_NOTHING(grouper.setPropertyValue("OutputWorkspace", "__unused"));
     TS_ASSERT_THROWS_NOTHING(grouper.setProperty("IncidentEnergy", 2.1));
     grouper.execute();
     TS_ASSERT(grouper.isExecuted());
@@ -96,8 +91,7 @@ public:
     grouper.setChild(true);
 
     TS_ASSERT_THROWS_NOTHING(grouper.setProperty("InputWorkspace", inputWS));
-    TS_ASSERT_THROWS_NOTHING(
-        grouper.setPropertyValue("OutputWorkspace", "__unused"));
+    TS_ASSERT_THROWS_NOTHING(grouper.setPropertyValue("OutputWorkspace", "__unused"));
     TS_ASSERT_THROWS_NOTHING(grouper.setProperty("IncidentEnergy", 2.1));
     grouper.execute();
     TS_ASSERT(grouper.isExecuted());
@@ -138,16 +132,15 @@ private:
       instrument->markAsDetector(detector);
       detectors.emplace_back(detector);
     }
-    ObjComponent *sample = new ObjComponent("sample", shape, instrument.get());
+    Component *sample = new Component("sample", instrument.get());
     sample->setPos(0, 0, 0);
     instrument->add(sample);
     instrument->markAsSamplePos(sample);
 
     const int nspecs(1);
-    auto space2D = create<Workspace2D>(
-        instrument, nspecs,
-        Histogram(BinEdges{1e-14, 2e-14, 3e-14, 4e-14, 4.0},
-                  Counts{10, 11, 12, 0}, CountVariances{5.0, 5.0, 5.0, 0.0}));
+    auto space2D = create<Workspace2D>(instrument, nspecs,
+                                       Histogram(BinEdges{1e-14, 2e-14, 3e-14, 4e-14, 4.0}, Counts{10, 11, 12, 0},
+                                                 CountVariances{5.0, 5.0, 5.0, 0.0}));
     space2D->getAxis(0)->unit() = UnitFactory::Instance().create("DeltaE");
 
     ParameterMap &pmap = space2D->instrumentParameters();
@@ -155,6 +148,6 @@ private:
       pmap.add("double", detector, "TubePressure", 10.0);
       pmap.add("double", detector, "TubeThickness", 0.0008);
     }
-    return std::move(space2D);
+    return space2D;
   }
 };

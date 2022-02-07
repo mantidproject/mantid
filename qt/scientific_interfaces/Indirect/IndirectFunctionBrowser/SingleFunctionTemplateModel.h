@@ -8,18 +8,21 @@
 
 #include "DllConfig.h"
 #include "IFQFitObserver.h"
-#include "IndexTypes.h"
 #include "MantidAPI/IFunction_fwd.h"
 #include "MantidAPI/ITableWorkspace_fwd.h"
 #include "MantidQtWidgets/Common/FunctionModel.h"
+#include "MantidQtWidgets/Common/IndexTypes.h"
 #include "ParameterEstimation.h"
 
 #include <QMap>
 #include <boost/optional.hpp>
+#include <string>
 
 namespace MantidQt {
 namespace CustomInterfaces {
 namespace IDA {
+
+class IDAFunctionParameterEstimation;
 
 using namespace Mantid::API;
 using namespace MantidWidgets;
@@ -27,9 +30,9 @@ using namespace MantidWidgets;
 class MANTIDQT_INDIRECT_DLL SingleFunctionTemplateModel : public FunctionModel {
 public:
   SingleFunctionTemplateModel();
+  SingleFunctionTemplateModel(std::unique_ptr<IDAFunctionParameterEstimation> parameterEstimation);
   void setFunction(IFunction_sptr fun) override;
-  void updateAvailableFunctions(
-      const std::map<std::string, std::string> &functionInitialisationStrings);
+  void updateAvailableFunctions(const std::map<std::string, std::string> &functionInitialisationStrings);
 
   void setFitType(const QString &name);
   QString getFitType();
@@ -38,16 +41,19 @@ public:
   int getEnumIndex();
   void setGlobal(const QString &name, bool isGlobal);
 
-  void
-  updateParameterEstimationData(DataForParameterEstimationCollection &&data);
+  void updateParameterEstimationData(DataForParameterEstimationCollection &&data);
+
+  void estimateFunctionParameters();
 
 private:
   QString m_fitType;
   DataForParameterEstimationCollection m_estimationData;
-  QMap<QString, IFunction_sptr> m_functionStore;
+  QMap<QString, IFunction_sptr> m_fitTypeToFunctionStore;
   QMap<QString, QStringList> m_globalParameterStore;
-  std::string m_resolutionName;
-  TableDatasetIndex m_resolutionIndex;
+  QStringList m_fitTypeList;
+  boost::optional<QString> findFitTypeForFunctionName(const QString &name) const;
+  // Parameter estimation
+  std::unique_ptr<IDAFunctionParameterEstimation> m_parameterEstimation;
 };
 
 } // namespace IDA

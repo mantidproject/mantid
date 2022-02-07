@@ -6,26 +6,37 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 """
 Mantid system testing framework. This module contains all of the necessary code
-to run sets of system tests on the Mantid framework by executing scripts directly
-or by importing them into MantidPlot.
-
-File change history is stored at: <https://github.com/mantidproject/systemtests>.
+to run sets of system tests on the Mantid framework.
 """
 # == for testing conda build of mantid-framework ==========
+import functools
 import os
+import pathlib
+from typing import List
+from io import StringIO
+from contextlib import redirect_stdout
 
 if os.environ.get('MANTID_FRAMEWORK_CONDA_SYSTEMTEST'):
     # conda build of mantid-framework sometimes require importing matplotlib before mantid
     import matplotlib
 
 # =========================================================
+try:
+    import mantid
+except ModuleNotFoundError:
+    import setuptools
+    from packaging import version
+    if version.parse(setuptools.__version__) >= version.parse("49.0.0"):
+        raise EnvironmentError("Setup tools is v49 or greater. This is likely causing the Mantid import to fail. See \n"
+                                "https://github.com/mantidproject/mantid/issues/29010")
+
 import datetime
 import difflib
-import imp
+import importlib.util
 import inspect
 from mantid.api import FileFinder
 from mantid.api import FrameworkManager
-from mantid.kernel import config, MemoryStats
+from mantid.kernel import config, MemoryStats, ConfigService
 from mantid.simpleapi import AlgorithmManager, Load, SaveNexus
 import numpy
 import platform
@@ -42,6 +53,17 @@ def santize_backslash(path):
     """ Some windows paths can contain sequences such as \r, e.g. \release_systemtests
         and need escaping to be able to add to the python path"""
     return path.replace('\\', '\\\\')
+
+
+def linux_distro_description():
+    """Human readable string for linux distro description
+    """
+    try:
+        lsb_descr = subprocess.check_output('lsb_release --description', shell=True,
+                                            stderr=subprocess.STDOUT).decode('utf-8')
+        return lsb_descr.strip()[len('Description:')+1:].strip()
+    except subprocess.CalledProcessError as exc:
+        return f'Unknown distribution: lsb_release -d failed {exc}'
 
 
 # Path to this file
@@ -82,6 +104,9 @@ class MantidSystemTest(unittest.TestCase):
         self.stripWhitespace = True
         # Tolerance
         self.tolerance = 0.00000001
+        # Whether or not to check the instrument/parameter map in CompareWorkspaces
+        self.checkInstrument = True
+
         # Store the resident memory of the system (in MB) before starting the test
         FrameworkManager.clear()
         self.memory = MemoryStats().residentMem() / 1024
@@ -111,6 +136,8 @@ class MantidSystemTest(unittest.TestCase):
         The overriding method should return a pair of strings. This could be two workspace
         names, e.g. return 'workspace1','workspace2', or a workspace name and a nexus
         filename (which must have nxs suffix), e.g. return 'workspace1','GEM00001.nxs'.
+        If validating with WorkspaceToNexus, may return a series of workspaces and
+        nexus filenames, e.g. 'workspace1','GEM00001.nxs','workspace2','GEM00002.nxs'.
         '''
         return None
 
@@ -139,6 +166,16 @@ class MantidSystemTest(unittest.TestCase):
     def maxIterations(self):
         '''Override this to perform more than 1 iteration of the implemented test.'''
         return 1
+
+    def temporary_directory(self):
+        '''Creates a temporary directory and registers a cleanup function to remove it
+        at the end of the test and returns the path to the directory'''
+        tempdir = tempfile.mkdtemp()
+        def rm_tempdir():
+            shutil.rmtree(tempdir, ignore_errors=True)
+
+        self.addCleanup(rm_tempdir)
+        return tempdir
 
     def reportResult(self, name, value):
         '''
@@ -214,17 +251,25 @@ class MantidSystemTest(unittest.TestCase):
         if self.excludeInPullRequests():
             sys.exit(TestRunner.SKIP_TEST)
 
-        # Start timer
-        start = time.time()
-        countmax = self.maxIterations() + 1
-        for i in range(1, countmax):
-            istart = time.time()
-            self.runTest()
-            delta_t = time.time() - istart
-            self.reportResult('iteration time_taken', str(i) + ' %.2f' % delta_t)
-        delta_t = float(time.time() - start)
-        # Finish
-        self.reportResult('time_taken', '%.2f' % delta_t)
+        try:
+            self.setUp()
+
+            # Start timer
+            start = time.time()
+            countmax = self.maxIterations() + 1
+            for i in range(1, countmax):
+                istart = time.time()
+                self.runTest()
+                delta_t = time.time() - istart
+                self.reportResult('iteration time_taken', str(i) + ' %.2f' % delta_t)
+            delta_t = float(time.time() - start)
+            # Finish
+            self.reportResult('time_taken', '%.2f' % delta_t)
+        finally:
+            try:
+                self.tearDown()
+            finally:
+                self.doCleanups()
 
     def __prepASCIIFile(self, filename):
         """Prepare an ascii file for comparison using difflib."""
@@ -270,7 +315,8 @@ class MantidSystemTest(unittest.TestCase):
     def validateWorkspaceToNeXus(self):
         '''
         Assumes the second item from self.validate() is a nexus file and loads it
-        to compare to the supplied workspace.
+        to compare to the supplied workspace. Also supports sequential series of
+        comparisons between workspaces and nexus files
         '''
         valNames = list(self.validate())
         numRezToCheck = len(valNames)
@@ -318,6 +364,7 @@ class MantidSystemTest(unittest.TestCase):
         checker.setPropertyValue("Workspace1", valNames[0])
         checker.setPropertyValue("Workspace2", valNames[1])
         checker.setProperty("Tolerance", float(self.tolerance))
+        checker.setProperty("CheckInstrument", self.checkInstrument)
         if hasattr(self, 'tolerance_is_rel_err') and self.tolerance_is_rel_err:
             checker.setProperty("ToleranceRelErr", True)
         for d in self.disableChecking:
@@ -454,6 +501,16 @@ class MantidSystemTest(unittest.TestCase):
         if not was_raised:
             raise Exception('{} not raised'.format(excClass.__name__))
 
+    @staticmethod
+    def mismatchWorkspaceName(reference_filename):
+        """
+        Returns the name of the workspace which will be saved if
+        there is a mismatch between the reference and calculated workspace.
+        :param reference_filename: The reference file name of the form "name_of_file.nxs"
+        :return: Name of the file containing the mismatch workspace
+        """
+        name = reference_filename.split('.')[0]
+        return name + '-mismatch.nxs'
 
 #########################################################################
 # A class to store the results of a test
@@ -505,7 +562,15 @@ class ResultReporter(object):
         '''Initialize a class instance, e.g. connect to a database'''
         self._total_number_of_tests = total_number_of_tests
         self._maximum_name_length = maximum_name_length
-        pass
+        self._show_skipped = False
+
+    @property
+    def total_number_of_tests(self):
+        return self._total_number_of_tests
+
+    @total_number_of_tests.setter
+    def total_number_of_tests(self, ntests):
+        self._total_number_of_tests = ntests
 
     def dispatchResults(self, result, number_of_completed_tests):
         raise NotImplementedError(
@@ -569,7 +634,6 @@ class TextResultReporter(ResultReporter):
         The default text reporter prints to standard out
         '''
         self.printResultsToConsole(result, number_of_completed_tests)
-        return
 
 
 # A class to report results as junit xml
@@ -592,7 +656,7 @@ class TestRunner(object):
     NOT_A_TEST = 98
     SKIP_TEST = 97
 
-    def __init__(self, executable, exec_args=None, escape_quotes=False, clean=False):
+    def __init__(self, executable=None, exec_args=None, escape_quotes=False, clean=False):
         self._executable = executable
         self._exec_args = exec_args
         self._test_dir = ''
@@ -617,6 +681,8 @@ class TestRunner(object):
 
     def start(self, script):
         '''Run the given test code in a new subprocess'''
+        if self._executable is None:
+            return self.start_in_current_process(script)
         exec_call = self._executable
         if self._exec_args:
             exec_call += ' ' + self._exec_args
@@ -628,6 +694,45 @@ class TestRunner(object):
         results = self.spawnSubProcess(cmd)
         os.remove(tmp_file.name)
         return results
+
+    def start_in_current_process(self, script):
+        """Run the given test code within the current Python process
+        Error handling adapted from: https://stackoverflow.com/questions/28836078/how-to-get-the-line-number-of-an-error-from-exec-or-execfile-in-python
+        Do not use in multithreading environment due to stdout context manager"""
+        exec_globals = dict()
+        exec_locals = dict()
+        exitcode = None
+        dual_stdout = DualStdOut()
+        try:
+            write_to_dual_stdout = redirect_stdout(dual_stdout)
+            with write_to_dual_stdout:
+                exec(script.asString(self._clean), exec_globals, exec_locals)
+            exitcode = exec_locals['exitcode']
+            dump = dual_stdout.dump.getvalue()
+            return exitcode, dump
+        except SyntaxError as e:
+            error_class = e.__class__.__name__
+            detail = e.args[0]
+            line_number = e.lineno
+            print(f"{error_class} at line {line_number} of SystemTest for {script._modname}.{script._test_cls_name}: "
+                  f"{detail}")
+        except Exception as ex:
+            import traceback
+            traceback.print_exc()
+        except SystemExit as ex: # catch sys.exit
+            exitcode=ex.args[0]
+        if exitcode is None:
+            if "exitcode" in exec_locals:
+                exitcode = exec_locals['exitcode']
+            else:
+                # assign to generic fail code
+                exitcode = 1
+        if dual_stdout.dump.getvalue():
+            dump = dual_stdout.dump.getvalue()
+        else:
+            # Need to give some string output or caller function will fail when trying to parse results
+            dump = "SystemTest runner script produced no output to StdOut"
+        return exitcode, dump
 
 
 #########################################################################
@@ -641,41 +746,26 @@ class TestScript(object):
         self._exclude_in_pr_builds = not exclude_in_pr_builds
 
     def asString(self, clean=False):
-        code = """
-# If any tests happen to hit a PyQt4 import make sure item uses version 2 of the api
-# Remove this when everything is switched to qtpy
-import sip
-try:
-    sip.setapi('QString', 2)
-    sip.setapi('QVariant', 2)
-    sip.setapi('QDate', 2)
-    sip.setapi('QDateTime', 2)
-    sip.setapi('QTextStream', 2)
-    sip.setapi('QTime', 2)
-    sip.setapi('QUrl', 2)
-except AttributeError:
-    # PyQt < v4.6
-    pass
-
+        code = f"""
 import sys
-for p in ('{test_framework}', '{pythoninterface_test_dir}', '{test_dir}'):
+for p in ('{TESTING_FRAMEWORK_DIR}', '{FRAMEWORK_PYTHONINTERFACE_TEST_DIR}', '{self._test_dir}'):
     sys.path.append(p)
-from {test_modname} import {test_cls}
-systest = {test_cls}()
-if {exclude_in_pr}:
+
+# Ensure sys path matches current to avoid weird import errors
+sys.path.extend({sys.path})
+from {self._modname} import {self._test_cls_name}
+systest = {self._test_cls_name}()
+if {self._exclude_in_pr_builds}:
     systest.excludeInPullRequests = lambda: False
-""".format(test_framework=TESTING_FRAMEWORK_DIR,
-           pythoninterface_test_dir=FRAMEWORK_PYTHONINTERFACE_TEST_DIR,
-           test_dir=self._test_dir,
-           test_modname=self._modname,
-           test_cls=self._test_cls_name,
-           exclude_in_pr=self._exclude_in_pr_builds)
-        if (not clean):
+"""
+
+        if not clean:
             code += "systest.execute()\n" + \
                     "exitcode = systest.returnValidationCode({})\n".format(TestRunner.VALIDATION_FAIL_CODE)
         else:
             code += "exitcode = 0\n"
-        code += "systest.cleanup()\nsys.exit(exitcode)\n"
+        code += "systest.cleanup()\n"
+        code += "sys.exit(exitcode)\n"
         return code
 
 
@@ -708,26 +798,18 @@ class TestSuite(object):
         self._result.addItem(['test_name', self._fqtestname])
         sysinfo = platform.uname()
         self._result.addItem(['host_name', sysinfo[1]])
-        self._result.addItem(['environment', self.envAsString()])
+        self._result.addItem(['environment', envAsString()])
         self._result.status = 'skipped'  # the test has been skipped until it has been executed
 
     name = property(lambda self: self._fqtestname)
     status = property(lambda self: self._result.status)
 
-    def envAsString(self):
-        if os.name == 'nt':
-            system = platform.system().lower()[:3]
-            arch = platform.architecture()[0][:2]
-            env = system + arch
-        elif os.name == 'mac':
-            env = platform.mac_ver()[0]
-        else:
-            env = platform.dist()[0]
-        return env
-
     def markAsSkipped(self, reason):
         self.setOutputMsg(reason)
         self._result.status = 'skipped'
+
+    def getMapResultNameToStatus(self):
+        return {self._result.name: self._result.status}
 
     def execute(self, runner, exclude_in_pr_builds):
         if self._test_cls_name is not None:
@@ -758,7 +840,7 @@ class TestSuite(object):
             status = 'unknown'
 
         # Check return code and add result
-        self._result.status = status
+        self._result.status = status if status in ["success","skipped"] else "failed"
         self._result.addItem(['status', status])
         # Dump std out so we know what happened
         if isinstance(output, bytes):
@@ -788,9 +870,9 @@ class TestManager(object):
     This is the main interaction point for the framework.
     '''
     def __init__(self,
-                 test_loc=None,
+                 mantid_config,
                  runner=None,
-                 output=[TextResultReporter()],
+                 output=None,
                  quiet=False,
                  testsInclude=None,
                  testsExclude=None,
@@ -804,14 +886,14 @@ class TestManager(object):
 
         # Runners and reporters
         self._runner = runner
-        self._reporters = output
+        self._reporters = output if output is not None else [TextResultReporter()]
         for r in self._reporters:
             r._quiet = quiet
             r._output_on_failure = output_on_failure
         self._clean = clean
         self._showSkipped = showSkipped
 
-        self._testDir = test_loc
+        self._config = mantid_config
         self._quiet = quiet
         self._testsInclude = re.compile(testsInclude) if testsInclude is not None else None
         self._testsExclude = re.compile(testsExclude) if testsExclude is not None else None
@@ -825,21 +907,58 @@ class TestManager(object):
 
         self._tests = list_of_tests
 
-    def generateMasterTestList(self):
+    def _get_sub_dirs(self, parent_dir: str) -> List[pathlib.Path]:
+        parent = pathlib.Path(self._config.testDir) / parent_dir
+        found = []
+        for sub_dir in parent.glob('**'):
+            if '__pycache__' not in sub_dir.name:
+                found.append(sub_dir)
+        return found
+
+    def generateMasterTestList(self, test_parent_dirs):
+        mod_counts, mod_tests, mod_sub_directories, mod_required_files = dict(), dict(), dict(), dict()
+        data_file_lock_status = dict()
+        test_stats = [0, 0, 0]
+
+        test_folders = []
+        for parent_dir in test_parent_dirs:
+            test_folders.extend(self._get_sub_dirs(parent_dir))
+
+        for sub_directory in test_folders:
+            counts, tests, sub_directories, stats, files_required, lock_status = self.__generateTestList(sub_directory)
+            mod_counts.update(counts)
+            mod_tests.update(tests)
+            mod_sub_directories.update(sub_directories)
+            test_stats[0] += stats[0]
+            test_stats[1] = max(test_stats[1], stats[1])
+            test_stats[2] += stats[2]
+            mod_required_files.update(files_required)
+            data_file_lock_status.update(lock_status)
+
+        if len(mod_tests.keys()) == 0:
+            print('No tests were found in the test directory {0}. Please ensure all test classes sub class '
+                  'systemtesting.MantidSystemTest.'.format(self._config.testDir))
+            exit(2)
+
+        for reporter in self._reporters:
+            reporter.total_number_of_tests = test_stats[0]
+
+        return mod_counts, mod_tests, mod_sub_directories, test_stats, mod_required_files, data_file_lock_status
+
+    def __generateTestList(self, test_path: pathlib.Path):
+        if not test_path.exists():
+            print(f'Cannot find file {str(test_path)}.py. Please check the path.')
+            exit(2)
+
+        test_dir = str(test_path.resolve())
+        sys.path.append(test_dir)
+        self._runner.setTestDir(test_dir)
+
         # If given option is a directory
-        if os.path.isdir(self._testDir):
-            test_dir = os.path.abspath(self._testDir).replace('\\', '/')
-            sys.path.append(test_dir)
-            self._runner.setTestDir(test_dir)
+        if test_path.is_dir():
             all_loaded, full_test_list = self.loadTestsFromDir(test_dir)
         else:
-            if not os.path.exists(self._testDir):
-                print('Cannot find file ' + self._testDir + '.py. Please check the path.')
-                exit(2)
-            test_dir = os.path.abspath(os.path.dirname(self._testDir)).replace('\\', '/')
-            sys.path.append(test_dir)
-            self._runner.setTestDir(test_dir)
-            all_loaded, full_test_list = self.loadTestsFromModule(os.path.basename(self._testDir))
+            all_loaded, full_test_list = self.loadTestsFromModule(os.path.basename(test_path))
 
         if not all_loaded:
             if self._ignore_failed_imports:
@@ -855,11 +974,6 @@ class TestManager(object):
             if self.__shouldTest(t) or self._showSkipped:
                 reduced_test_list.append(t)
 
-        if len(reduced_test_list) == 0:
-            print('No tests defined in ' + test_dir +
-                  '. Please ensure all test classes sub class systemtesting.MantidSystemTest.')
-            exit(2)
-
         test_stats[0] = len(reduced_test_list)
         for t in reduced_test_list:
             test_stats[1] = max(test_stats[1], len(t._fqtestname))
@@ -869,11 +983,12 @@ class TestManager(object):
         # with data being cleaned up before another process has finished.
         #
         # We create a list of test modules (= different python files in the
-        # 'Testing/SystemTests/tests/analysis' directory) and count how many
+        # 'Testing/SystemTests/tests/<sub_directory>' directory) and count how many
         # tests are in each module. We also create on the fly a list of tests
         # for each module.
         modcounts = dict()
         modtests = dict()
+        mod_sub_directories = dict()
         for t in reduced_test_list:
             key = t._modname
             if key in modcounts.keys():
@@ -882,6 +997,7 @@ class TestManager(object):
             else:
                 modcounts[key] = 1
                 modtests[key] = [t]
+                mod_sub_directories[key] = test_path
 
         # Now we scan each test module (= python file) and list all the data files
         # that are used by that module. The possible ways files are being specified
@@ -914,8 +1030,7 @@ class TestManager(object):
 
             fname = modkey + ".py"
             files_required_by_test_module[modkey] = []
-            with open(os.path.join(os.path.dirname(self._testDir), "analysis", fname),
-                      "r") as pyfile:
+            with open(os.path.join(os.path.dirname(test_path), test_path, fname), "r") as pyfile:
                 for line in pyfile.readlines():
 
                     # Search for all instances of '.nxs' or '.raw'
@@ -968,7 +1083,8 @@ class TestManager(object):
                 for s in files_required_by_test_module[key]:
                     print(s)
 
-        return modcounts, modtests, test_stats, files_required_by_test_module, data_file_lock_status
+        return modcounts, modtests, mod_sub_directories, test_stats, files_required_by_test_module, \
+            data_file_lock_status
 
     def __shouldTest(self, suite):
         if self._testsInclude is not None:
@@ -983,6 +1099,7 @@ class TestManager(object):
 
     def executeTests(self, tests_done=None):
         # Get the defined tests
+        status_dict = dict()
         for suite in self._tests:
             if self.__shouldTest(suite):
                 suite.execute(self._runner, self._exclude_in_pr_builds)
@@ -992,11 +1109,33 @@ class TestManager(object):
                 self._skippedTests += 1
             else:
                 self._failedTests += 1
-            with tests_done.get_lock():
-                tests_done.value += 1
-            if not self._clean:
-                suite.reportResults(self._reporters, tests_done.value)
+            if tests_done:
+                with tests_done.get_lock():
+                    tests_done.value += 1
+                if not self._clean:
+                    suite.reportResults(self._reporters, tests_done.value)
+            else:
+                # tests_done=None indicates running tests on parent thread, no need to worry about the Lock
+                if not self._clean:
+                    sum_tests = self._passedTests + self._skippedTests + self._failedTests
+                    suite.reportResults(self._reporters, sum_tests)
+                status_dict.update(suite.getMapResultNameToStatus())
             self._lastTestRun += 1
+        return status_dict
+
+    def replaceRunner(self, new_runner):
+        self._runner = new_runner
+
+    def executeTestsListUnderCurrentProcess(self, tests_to_run):
+        """This is used when running the tests under the current process, removing the test executable so that the
+         provided test list is run under the current python process"""
+        self._tests = tests_to_run
+        status_dict = self.executeTests()
+        return status_dict
+
+    def getTestResultStats(self):
+        """Return the numbers of skipped, failed, and total tests to be used for result and output collation"""
+        return self._skippedTests, self._failedTests, self._lastTestRun
 
     def markSkipped(self, reason=None, tests_done_value=0):
         for suite in self._tests[self._lastTestRun:]:
@@ -1025,29 +1164,28 @@ class TestManager(object):
         modname = os.path.basename(filename)
         modname = modname.split('.py')[0]
         tests = []
-        module_loaded = False
         try:
-            with open(filename, 'r') as pyfile:
-                mod = imp.load_module(modname, pyfile, filename, ("", "", imp.PY_SOURCE))
-                mod_attrs = dir(mod)
-                for key in mod_attrs:
-                    value = getattr(mod, key)
-                    if key == "MantidSystemTest" or not inspect.isclass(value):
-                        continue
-                    if self.isValidTestClass(value):
-                        test_name = key
-                        tests.append(
-                            TestSuite(self._runner.getTestDir(), modname, test_name, filename))
+            spec = importlib.util.spec_from_file_location("", filename)
+            mod = importlib.util.module_from_spec(spec)
+            spec.loader.exec_module(mod)
+
+            mod_attrs = dir(mod)
+            for key in mod_attrs:
+                value = getattr(mod, key)
+                if key == "MantidSystemTest" or not inspect.isclass(value):
+                    continue
+                if self.isValidTestClass(value):
+                    test_name = key
+                    tests.append(
+                        TestSuite(self._runner.getTestDir(), modname, test_name, filename))
             module_loaded = True
-        except Exception as exc:
+        except Exception:
             print("Error importing module '{}':".format(modname))
             import traceback
             traceback.print_exc()
             module_loaded = False
             # append a test with a blank name to indicate it was skipped
             tests.append(TestSuite(self._runner.getTestDir(), modname, None, filename))
-        finally:
-            pyfile.close()
 
         return module_loaded, tests
 
@@ -1083,7 +1221,7 @@ class MantidFrameworkConfig:
         self.__testDir = self.__locateTestsDir()
 
         # add location of the analysis tests
-        sys.path.insert(0, self.__locateTestsDir())
+        sys.path.insert(0, self.__testDir)
 
         # setup the rest of the magic directories
         self.__saveDir = save_dir
@@ -1129,13 +1267,12 @@ class MantidFrameworkConfig:
             raise RuntimeError("Failed to find source directory")
 
     def __locateTestsDir(self):
-        loc = os.path.join(self.__sourceDir, "..", "..", "tests", "analysis")
+        loc = os.path.join(self.__sourceDir, "..", "..", "tests")
         loc = os.path.abspath(loc)
         if os.path.isdir(loc):
             return loc
         else:
-            raise RuntimeError(
-                "Expected the analysis tests directory at '%s' but it is not a directory " % loc)
+            raise RuntimeError("Expected a tests directory at '%s' but it is not a directory " % loc)
 
     def __getDataDirsAsString(self):
         return self._dataDirs
@@ -1162,6 +1299,10 @@ class MantidFrameworkConfig:
         # Make sure we only save these keys here
         config.reset()
 
+        # With the default facility changed from ISIS to nothing (EMPTY),
+        # the following setting is put in place to avoid failure of tests
+        ConfigService.Instance().setString("default.facility", "ISIS")
+
         # Up the log level so that failures can give useful information
         config['logging.loggers.root.level'] = self.__loglevel
         # Set the correct search path
@@ -1169,9 +1310,6 @@ class MantidFrameworkConfig:
 
         # Save path
         config['defaultsave.directory'] = self.__saveDir
-
-        # Do not show paraview dialog
-        config['paraview.ignore'] = "1"
 
         # Do not update instrument definitions
         config['UpdateInstrumentDefinitions.OnStartup'] = "0"
@@ -1204,19 +1342,21 @@ class MantidFrameworkConfig:
 
 #########################################################################
 # Function to return a string describing the environment
-# (platform) of this test.
+# (platform) of this test. Cache this result so we don't query it n times
+# for every Sytem test that exists
 #########################################################################
+@functools.lru_cache(maxsize=1)
 def envAsString():
-    """Returns a string describing the environment
-    (platform) of this test."""
-    if os.name == 'nt':
+    platform_name = sys.platform
+    if platform_name == 'win32':
         system = platform.system().lower()[:3]
         arch = platform.architecture()[0][:2]
         env = system + arch
-    elif os.name == 'mac':
+    elif platform_name == 'darwin':
         env = platform.mac_ver()[0]
     else:
-        env = platform.dist()[0] + "-" + platform.dist()[1]
+        # assume linux
+        env = linux_distro_description()
     return env
 
 
@@ -1248,11 +1388,11 @@ def using_gsl_v1():
 # and finds the next element that has a 0 value). This aims to have all
 # threads end calculation approximately at the same time.
 #########################################################################
-def testThreadsLoop(testDir, saveDir, dataDir, options, tests_dict, tests_lock, tests_left,
-                    res_array, stat_dict, total_number_of_tests, maximum_name_length, tests_done,
+def testThreadsLoop(mtdconf, options, tests_dict, tests_lock, tests_left, res_array,
+                    stat_dict, total_number_of_tests, maximum_name_length, tests_done,
                     process_number, lock, required_files_dict, locked_files_dict):
     try:
-        testThreadsLoopImpl(testDir, saveDir, dataDir, options, tests_dict, tests_lock, tests_left,
+        testThreadsLoopImpl(mtdconf, options, tests_dict, tests_lock, tests_left,
                             res_array, stat_dict, total_number_of_tests, maximum_name_length,
                             tests_done, process_number, lock, required_files_dict,
                             locked_files_dict)
@@ -1266,9 +1406,9 @@ def testThreadsLoop(testDir, saveDir, dataDir, options, tests_dict, tests_lock, 
     sys.exit(exit_code)
 
 
-def testThreadsLoopImpl(testDir, saveDir, dataDir, options, tests_dict, tests_lock, tests_left,
-                        res_array, stat_dict, total_number_of_tests, maximum_name_length,
-                        tests_done, process_number, lock, required_files_dict, locked_files_dict):
+def testThreadsLoopImpl(mtdconf, options, tests_dict, tests_lock, tests_left, res_array,
+                        stat_dict, total_number_of_tests, maximum_name_length, tests_done,
+                        process_number, lock, required_files_dict, locked_files_dict):
     reporter = XmlResultReporter(showSkipped=options.showskipped,
                                  total_number_of_tests=total_number_of_tests,
                                  maximum_name_length=maximum_name_length)
@@ -1284,6 +1424,8 @@ def testThreadsLoopImpl(testDir, saveDir, dataDir, options, tests_dict, tests_lo
     # Begin loop: as long as there are still some test modules that
     # have not been run, keep looping
     while tests_left.value > 0:
+        # Sub directory of tests
+        test_sub_directory = None
         # Empty test list
         local_test_list = None
         # Get the lock to inspect the global list of tests
@@ -1296,19 +1438,19 @@ def testThreadsLoopImpl(testDir, saveDir, dataDir, options, tests_dict, tests_lo
             # for this particular loop
             if tests_lock[i] == 0:
                 # Check for the lock status of the required files for this test module
-                modname = tests_dict[str(i)][0]._modname
+                modname = tests_dict[str(i)][1][0]._modname
                 no_files_are_locked = True
-                for f in required_files_dict[tests_dict[str(i)][0]._modname]:
+                for f in required_files_dict[modname]:
                     if locked_files_dict[f]:
                         no_files_are_locked = False
                         break
-                # If all failes are available, we can proceed with this module
+                # If all files are available, we can proceed with this module
                 if no_files_are_locked:
                     # Lock the data files for this test module
                     for f in required_files_dict[modname]:
                         locked_files_dict[f] = True
                     # Set the current test list to the chosen module
-                    local_test_list = tests_dict[str(i)]
+                    test_sub_directory, local_test_list = tests_dict[str(i)]
                     tests_lock[i] = 1
                     imodule = i
                     tests_left.value -= 1
@@ -1318,15 +1460,23 @@ def testThreadsLoopImpl(testDir, saveDir, dataDir, options, tests_dict, tests_lo
 
         # Check if local_test_list exists: if all data was locked,
         # then there is no test list
-        if local_test_list:
+        if local_test_list and test_sub_directory:
 
             if not options.quiet:
                 print("##### Thread %2i will execute module: [%3i] %s (%i tests)" \
                       % (process_number, imodule, modname, len(local_test_list)))
                 sys.stdout.flush()
 
+            test_directory = os.path.abspath(os.path.join(mtdconf.testDir, test_sub_directory))
+            if os.path.isdir(test_directory):
+                sys.path.insert(0, test_directory)
+            else:
+                raise RuntimeError("Expected a tests directory at {0}.".format(test_directory))
+
+            runner.setTestDir(test_directory)
+
             # Create a TestManager, giving it a pre-compiled list_of_tests
-            mgr = TestManager(test_loc=testDir,
+            mgr = TestManager(mantid_config=mtdconf,
                               runner=runner,
                               output=[reporter],
                               quiet=options.quiet,
@@ -1360,8 +1510,27 @@ def testThreadsLoopImpl(testDir, saveDir, dataDir, options, tests_dict, tests_lo
 
     # Report the errors
     local_dict = dict()
-    with open(os.path.join(saveDir, "TEST-systemtests-%i.xml" % process_number), 'w') as xml_report:
+    with open(os.path.join(mtdconf.saveDir, "TEST-systemtests-%i.xml" % process_number), 'w') as xml_report:
         xml_report.write(reporter.getResults(local_dict))
 
     for key in local_dict.keys():
         stat_dict[key] = local_dict[key]
+
+
+class DualStdOut:
+    """This helper class is used when running SystemTests under the current Python process, allowing the output of the
+    test to be printed both to for display and a StringIO object to collate the test results from.
+    """
+    def __init__(self):
+        self.stdout = sys.stdout
+        self.dump = StringIO()
+
+    def __del__(self):
+        self.dump.close()
+
+    def write(self, message):
+        self.stdout.write(message)
+        self.dump.write(message)
+
+    def flush(self):
+        self.stdout.flush()

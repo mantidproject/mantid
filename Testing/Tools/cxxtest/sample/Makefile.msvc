@@ -20,8 +20,8 @@ CXXC = cl.exe -GX -W3 -WX -I. -I..
 all: $(TARGETS)
 
 clean:
-	del *~ *.o *.obj 
-	del $(TARGETS) 
+	del *~ *.o *.obj
+	del $(TARGETS)
 	del $(GUI_TARGETS)
 	del tests.cpp error_printer.cpp stdio_printer.cpp file_printer.cpp aborter.cpp only.cpp
 	del win32_runner.cpp qt_runner.cpp

@@ -72,17 +72,14 @@ public:
    * @param rhs: the other TofEvent to compare.
    * @return true if this->m_tof < rhs.m_tof
    */
-  bool operator<(const TofEvent &rhs) const {
-    return (this->m_tof < rhs.m_tof);
-  }
+  bool operator<(const TofEvent &rhs) const { return (this->m_tof < rhs.m_tof); }
   /** < comparison operator, using the TOF to do the comparison.
    * @param rhs_tof: the other time of flight to compare.
    * @return true if this->m_tof < rhs.m_tof
    */
   bool operator<(const double rhs_tof) const { return (this->m_tof < rhs_tof); }
   bool operator>(const TofEvent &rhs) const;
-  bool equals(const TofEvent &rhs, const double tolTof,
-              const int64_t tolPulse) const;
+  bool equals(const TofEvent &rhs, const double tolTof, const int64_t tolPulse) const;
 
   double operator()() const;
   double tof() const;
@@ -105,8 +102,7 @@ inline TofEvent::TofEvent(const double tof) : m_tof(tof), m_pulsetime(0) {}
  * @param tof :: time of flight, in microseconds
  * @param pulsetime :: absolute pulse time of the neutron.
  */
-inline TofEvent::TofEvent(const double tof, const Core::DateAndTime pulsetime)
-    : m_tof(tof), m_pulsetime(pulsetime) {}
+inline TofEvent::TofEvent(const double tof, const Core::DateAndTime pulsetime) : m_tof(tof), m_pulsetime(pulsetime) {}
 
 /// Empty constructor
 inline TofEvent::TofEvent() : m_tof(0), m_pulsetime(0) {}

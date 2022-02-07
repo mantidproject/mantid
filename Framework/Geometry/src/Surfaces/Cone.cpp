@@ -43,9 +43,7 @@ GNU_DIAG_ON("conversion")
 GNU_DIAG_ON("cast-qual")
 #endif
 
-namespace Mantid {
-
-namespace Geometry {
+namespace Mantid::Geometry {
 using Kernel::Tolerance;
 using Kernel::V3D;
 
@@ -68,9 +66,7 @@ Cone *Cone::doClone() const
   return new Cone(*this);
 }
 
-std::unique_ptr<Cone> Cone::clone() const {
-  return std::unique_ptr<Cone>(doClone());
-}
+std::unique_ptr<Cone> Cone::clone() const { return std::unique_ptr<Cone>(doClone()); }
 
 int Cone::setSurface(const std::string &Pstr)
 /**
@@ -84,8 +80,8 @@ int Cone::setSurface(const std::string &Pstr)
 {
   std::string Line = Pstr;
   std::string item;
-  if (!Mantid::Kernel::Strings::section(Line, item) ||
-      tolower(item[0]) != 'k' || item.length() < 2 || item.length() > 3)
+  if (!Mantid::Kernel::Strings::section(Line, item) || tolower(item[0]) != 'k' || item.length() < 2 ||
+      item.length() > 3)
     return -1;
 
   // Cones on X/Y/Z axis
@@ -103,9 +99,7 @@ int Cone::setSurface(const std::string &Pstr)
       return -3;
   } else {
     std::size_t index;
-    for (index = 0;
-         index < 3 && Mantid::Kernel::Strings::section(Line, cent[index]);
-         index++)
+    for (index = 0; index < 3 && Mantid::Kernel::Strings::section(Line, cent[index]); index++)
       ;
     if (index != 3)
       return -4;
@@ -284,16 +278,15 @@ int Cone::side(const Kernel::V3D &R) const {
  since angle calcuation calcuates an angle.
  We need a distance for tolerance!)
  @param R :: Point to check
- @return 1 if on surface and 0 if not not on surface
  */
-int Cone::onSurface(const Kernel::V3D &R) const {
+bool Cone::onSurface(const Kernel::V3D &R) const {
 
   const Kernel::V3D cR = R - Centre;
   double rptAngle = cR.scalar_prod(Normal);
   rptAngle *= rptAngle / cR.scalar_prod(cR);
   const double eqn(sqrt(rptAngle));
 
-  return (std::abs(eqn - cangle) > Tolerance) ? 0 : 1;
+  return (std::abs(eqn - cangle) <= Tolerance);
 }
 
 void Cone::write(std::ostream &OX) const
@@ -320,8 +313,7 @@ void Cone::write(std::ostream &OX) const
   if (Cdir || Centre.nullVector(Tolerance)) {
     cx << " k";
     cx << Tailends[Ndir + 3] << " "; // set x,y,z based on Ndir
-    cx << ((Cdir > 0) ? Centre[static_cast<std::size_t>(Cdir - 1)]
-                      : Centre[static_cast<std::size_t>(-Cdir - 1)]);
+    cx << ((Cdir > 0) ? Centre[static_cast<std::size_t>(Cdir - 1)] : Centre[static_cast<std::size_t>(-Cdir - 1)]);
     cx << " ";
   } else {
     cx << " k/";
@@ -334,8 +326,7 @@ void Cone::write(std::ostream &OX) const
   Mantid::Kernel::Strings::writeMCNPX(cx.str(), OX);
 }
 
-void Cone::getBoundingBox(double &xmax, double &ymax, double &zmax,
-                          double &xmin, double &ymin, double &zmin) {
+void Cone::getBoundingBox(double &xmax, double &ymax, double &zmax, double &xmin, double &ymin, double &zmin) {
   /**
    Cone bounding box
    Intended to improve bounding box for a general quadratic surface
@@ -389,14 +380,8 @@ void Cone::getBoundingBox(double &xmax, double &ymax, double &zmax,
 
 #ifdef ENABLE_OPENCASCADE
 TopoDS_Shape Cone::createShape() {
-  gp_Ax2 gpA(gp_Pnt(Centre[0], Centre[1], Centre[2]),
-             gp_Dir(Normal[0], Normal[1], Normal[2]));
-  return BRepPrimAPI_MakeCone(gpA, 0.0,
-                              1000.0 / tan(acos(cangle * M_PI / 180.0)), 1000.0,
-                              2.0 * M_PI)
-      .Shape();
+  gp_Ax2 gpA(gp_Pnt(Centre[0], Centre[1], Centre[2]), gp_Dir(Normal[0], Normal[1], Normal[2]));
+  return BRepPrimAPI_MakeCone(gpA, 0.0, 1000.0 / tan(acos(cangle * M_PI / 180.0)), 1000.0, 2.0 * M_PI).Shape();
 }
 #endif
-} // NAMESPACE Geometry
-
-} // NAMESPACE Mantid
+} // namespace Mantid::Geometry

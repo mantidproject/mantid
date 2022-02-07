@@ -9,9 +9,9 @@
 Description
 -----------
 
-Uses the Specular reflection condition :math:`\theta_{In} \equiv \theta_{Out}` to calculate and return a corrected :math:`\theta_{In}`. 
+Uses the Specular reflection condition :math:`\theta_{In} \equiv \theta_{Out}` to calculate and return a corrected :math:`\theta_{In}`.
 
-.. math:: 
+.. math::
 
    2\centerdot\theta = tan^{-1}\left(\frac{UpOffset}{BeamOffset}\right)
 
@@ -33,7 +33,7 @@ Usage
    ws = LoadEmptyInstrument(instrument_def)
    inst = ws.getInstrument()
    ref_frame = inst.getReferenceFrame()
-   upoffset = ref_frame.vecPointingUp() 
+   upoffset = ref_frame.vecPointingUp()
    det_position = {ref_frame.pointingUpAxis(): 1.0, ref_frame.pointingAlongBeamAxis(): 1.0, ref_frame.pointingHorizontalAxis():0}
    MoveInstrumentComponent(ws, 'point-detector',RelativePosition=False, **det_position)
    MoveInstrumentComponent(ws, 'some-surface-holder',RelativePosition=False,  X=0, Y= 0, Z=0)
@@ -41,13 +41,13 @@ Usage
    # Calculate the two theta.
    two_theta = SpecularReflectionCalculateTheta(InputWorkspace=ws, DetectorComponentName='point-detector', AnalysisMode='PointDetectorAnalysis', Version=1)
    print(two_theta)
-   
+
 Output:
 
-.. testoutput:: SpecularReflectionCalculateThetaPointDetectorExample 
- 
+.. testoutput:: SpecularReflectionCalculateThetaPointDetectorExample
+
    90.0
-  
+
 .. categories::
 
 .. sourcelink::

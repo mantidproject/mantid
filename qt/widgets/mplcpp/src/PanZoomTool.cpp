@@ -12,8 +12,7 @@
 using Mantid::PythonInterface::callMethodNoCheck;
 using Mantid::PythonInterface::GlobalInterpreterLock;
 
-namespace MantidQt {
-namespace Widgets {
+namespace MantidQt::Widgets {
 namespace Python = Common::Python;
 namespace MplCpp {
 
@@ -37,8 +36,7 @@ constexpr auto TOOLBAR_PAN_METHOD = "pan";
 Python::Object mplNavigationToolbar(FigureCanvasQt *canvas) {
   const auto backend = backendModule();
   bool showCoordinates(false);
-  auto obj = Python::Object(backend.attr(TOOLBAR_CLS)(
-      canvas->pyobj(), canvas->pyobj(), showCoordinates));
+  auto obj = Python::Object(backend.attr(TOOLBAR_CLS)(canvas->pyobj(), canvas->pyobj(), showCoordinates));
   obj.attr("hide")();
   return obj;
 }
@@ -104,5 +102,4 @@ void PanZoomTool::enablePan(const bool on) {
 }
 
 } // namespace MplCpp
-} // namespace Widgets
-} // namespace MantidQt
+} // namespace MantidQt::Widgets

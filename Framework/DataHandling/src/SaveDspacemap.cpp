@@ -11,8 +11,7 @@
 #include "MantidKernel/System.h"
 #include <fstream>
 
-namespace Mantid {
-namespace DataHandling {
+namespace Mantid::DataHandling {
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(SaveDspacemap)
@@ -26,12 +25,10 @@ using namespace Mantid::Geometry;
 /** Initialize the algorithm's properties.
  */
 void SaveDspacemap::init() {
-  declareProperty(std::make_unique<WorkspaceProperty<OffsetsWorkspace>>(
-                      "InputWorkspace", "", Direction::Input),
+  declareProperty(std::make_unique<WorkspaceProperty<OffsetsWorkspace>>("InputWorkspace", "", Direction::Input),
                   "An input OffsetsWorkspace to save.");
 
-  declareProperty(std::make_unique<FileProperty>("DspacemapFile", "",
-                                                 FileProperty::Save, ".dat"),
+  declareProperty(std::make_unique<FileProperty>("DspacemapFile", "", FileProperty::Save, ".dat"),
                   "The DspacemapFile on output contains the d-space mapping");
 
   declareProperty("PadDetID", 300000, "Pad Data to this number of pixels");
@@ -41,8 +38,7 @@ void SaveDspacemap::init() {
 /** Execute the algorithm.
  */
 void SaveDspacemap::exec() {
-  Mantid::DataObjects::OffsetsWorkspace_sptr offsetsWS =
-      getProperty("InputWorkspace");
+  Mantid::DataObjects::OffsetsWorkspace_sptr offsetsWS = getProperty("InputWorkspace");
   std::string filename = getPropertyValue("DspacemapFile");
   CalculateDspaceFromCal(offsetsWS, filename);
 }
@@ -55,9 +51,8 @@ void SaveDspacemap::exec() {
  * @param DFileName name of dspacemap file
  * @param offsetsWS :: OffsetsWorkspace with instrument and offsets
  */
-void SaveDspacemap::CalculateDspaceFromCal(
-    const Mantid::DataObjects::OffsetsWorkspace_sptr &offsetsWS,
-    const std::string &DFileName) {
+void SaveDspacemap::CalculateDspaceFromCal(const Mantid::DataObjects::OffsetsWorkspace_sptr &offsetsWS,
+                                           const std::string &DFileName) {
   const char *filename = DFileName.c_str();
   // Get a pointer to the instrument contained in the workspace
   Instrument_const_sptr instrument = offsetsWS->getInstrument();
@@ -97,8 +92,7 @@ void SaveDspacemap::CalculateDspaceFromCal(
       det = it->second;
       const auto detectorIndex = detectorInfo.indexOf(i);
       factor = Mantid::Geometry::Conversion::tofToDSpacingFactor(
-          l1, detectorInfo.l2(detectorIndex),
-          detectorInfo.twoTheta(detectorIndex), offsetsWS->getValue(i, 0.0));
+          l1, detectorInfo.l2(detectorIndex), detectorInfo.twoTheta(detectorIndex), offsetsWS->getValue(i, 0.0));
       // Factor of 10 between ISAW and Mantid
       factor *= 0.1;
       if (factor < 0)
@@ -114,5 +108,4 @@ void SaveDspacemap::CalculateDspaceFromCal(
   fout.close();
 }
 
-} // namespace DataHandling
-} // namespace Mantid
+} // namespace Mantid::DataHandling

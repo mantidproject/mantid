@@ -4,21 +4,26 @@
 Mantid 5.1.0 Release Notes
 ===========================
 
-.. figure:: ../../images/ImageNotFound.png
+.. figure:: ../../images/ReleaseNotes_v5_1_Main.png
    :class: screenshot
-   :width: 385px
+   :width: 600px
    :align: right
 
 .. contents:: Table of Contents
    :local:
 
-.. warning:: This release is still under construction. The changes can be found in the nightly builds on the `download page`_.
-
 We are proud to announce version 5.1.0 of Mantid.
 
-**TODO: Add paragraph summarizing big changes**
+:doc:`MantidWorkbench <mantidworkbench>` **is replacing MantidPlot**. While :doc:`MantidPlot <mantidplot>` is still fully functional for this release,
+**MantidPlot will not be included in future releases**.
 
-This is just one of many improvements in this release, so please take a
+:doc:`Sliceviewer <sliceviewer>` has been majorly updated this release, with advanced features for peak finding in Single Crystal Diffraction data.
+On top of this, taking slices of data is now possible and there is an interactive data table last seen in the Spectrum Viewer in MantidPlot. **Workbench now also supports 3D and Advanced plotting!**
+
+Check out the brand new :ref:`DrILL interface <DrILL-ref>` for Workbench, that currently supports SANS and Reflectometry at ILL.
+There have also been many upgrades to our existing interfaces, such as providing background subtraction for ISIS Reflectometry and significant  speed up for the Muon and Indirect interfaces.
+
+These are just some of the many improvements in this release, so please take a
 look at the release notes, which are filled with details of the
 important changes and improvements in many areas. The development team
 has put a great effort into making all of these improvements within
@@ -31,7 +36,7 @@ reported any issues to us. Please keep on reporting any problems you
 have, or crashes that occur on our `forum`_.
 
 Installation packages can be found on our `download page`_
-which now links to sourceforge to mirror our download files around the world, you can also
+which now links to sourceforge to mirror our download files around the world. You can also
 access the source code on `GitHub release page`_.
 
 Citation
@@ -57,11 +62,11 @@ Changes
    *
 
 - :doc:`Framework <framework>`
-- :doc:`General UI & Usability <ui>`
+- General UI & Usability
 
   - :doc:`MantidPlot <mantidplot>`
-
   - :doc:`MantidWorkbench <mantidworkbench>`
+  - :doc:`Sliceviewer <sliceviewer>`
 - :doc:`Diffraction <diffraction>`
 - :doc:`Muon Analysis <muon>`
 - Low Q

@@ -33,15 +33,12 @@ class SymmetryOperationTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static SymmetryOperationTest *createSuite() {
-    return new SymmetryOperationTest();
-  }
+  static SymmetryOperationTest *createSuite() { return new SymmetryOperationTest(); }
   static void destroySuite(SymmetryOperationTest *suite) { delete suite; }
 
   SymmetryOperationTest()
-      : m_h(3.0), m_k(2.0), m_l(4.0), m_hkl(m_h, m_k, m_l),
-        m_hhl(m_h, m_h, m_l), m_hk0(m_h, m_k, 0.0), m_h00(m_h, 0.0, 0.0),
-        m_allHkl() {
+      : m_h(3.0), m_k(2.0), m_l(4.0), m_hkl(m_h, m_k, m_l), m_hhl(m_h, m_h, m_l), m_hk0(m_h, m_k, 0.0),
+        m_h00(m_h, 0.0, 0.0), m_allHkl() {
     m_allHkl.emplace_back(m_hkl);
     m_allHkl.emplace_back(m_hhl);
     m_allHkl.emplace_back(m_hk0);
@@ -144,8 +141,7 @@ public:
     SymmetryOperation screw21z("-x,-y,z+1/2");
 
     // should be identity, since 1/2 + 1/2 = 1
-    TS_ASSERT_EQUALS(getUnitCellIntervalOperation(screw21z * screw21z),
-                     SymmetryOperation());
+    TS_ASSERT_EQUALS(getUnitCellIntervalOperation(screw21z * screw21z), SymmetryOperation());
   }
 
   void testInverse() {
@@ -221,44 +217,36 @@ public:
   }
 
   void testGetUnitCellIntervalSymmetryOperation() {
-    SymmetryOperation symOpNegative =
-        getUnitCellIntervalOperation(SymmetryOperation("y,-x,z-1/4"));
+    SymmetryOperation symOpNegative = getUnitCellIntervalOperation(SymmetryOperation("y,-x,z-1/4"));
 
     TS_ASSERT_EQUALS(symOpNegative.vector(), V3R(0, 0, 3) / 4);
 
-    SymmetryOperation symOpGreaterOne =
-        getUnitCellIntervalOperation(SymmetryOperation("y,-x,z+12/4"));
+    SymmetryOperation symOpGreaterOne = getUnitCellIntervalOperation(SymmetryOperation("y,-x,z+12/4"));
 
     TS_ASSERT_EQUALS(symOpGreaterOne.vector(), V3R(0, 0, 0));
 
-    SymmetryOperation symOpLessThanMinusOne =
-        getUnitCellIntervalOperation(SymmetryOperation("y,-x,z-12/4"));
+    SymmetryOperation symOpLessThanMinusOne = getUnitCellIntervalOperation(SymmetryOperation("y,-x,z-12/4"));
 
-    TSM_ASSERT_EQUALS(V3D(symOpLessThanMinusOne.vector()).toString(),
-                      symOpLessThanMinusOne.vector(), V3R(0, 0, 0));
+    TSM_ASSERT_EQUALS(V3D(symOpLessThanMinusOne.vector()).toString(), symOpLessThanMinusOne.vector(), V3R(0, 0, 0));
   }
 
   void testGetOrderFromComponents() {
     TestableSymmetryOperation symOp;
 
     // identity - 0
-    MatrixVectorPair<int, V3R> param1 =
-        SymmetryOperationSymbolParser::parseIdentifier("x, y, z");
+    MatrixVectorPair<int, V3R> param1 = SymmetryOperationSymbolParser::parseIdentifier("x, y, z");
     TS_ASSERT_EQUALS(symOp.getOrderFromMatrix(param1.getMatrix()), 1);
 
     // inversion - 1
-    MatrixVectorPair<int, V3R> param2 =
-        SymmetryOperationSymbolParser::parseIdentifier("-x, -y, -z");
+    MatrixVectorPair<int, V3R> param2 = SymmetryOperationSymbolParser::parseIdentifier("-x, -y, -z");
     TS_ASSERT_EQUALS(symOp.getOrderFromMatrix(param2.getMatrix()), 2);
 
     // mirror perpendicular to z
-    MatrixVectorPair<int, V3R> param3 =
-        SymmetryOperationSymbolParser::parseIdentifier("x, y, -z");
+    MatrixVectorPair<int, V3R> param3 = SymmetryOperationSymbolParser::parseIdentifier("x, y, -z");
     TS_ASSERT_EQUALS(symOp.getOrderFromMatrix(param3.getMatrix()), 2);
 
     // 4_1 screw axis along z
-    MatrixVectorPair<int, V3R> param4 =
-        SymmetryOperationSymbolParser::parseIdentifier("-y, x, z+1/4");
+    MatrixVectorPair<int, V3R> param4 = SymmetryOperationSymbolParser::parseIdentifier("-y, x, z+1/4");
     TS_ASSERT_EQUALS(symOp.getOrderFromMatrix(param4.getMatrix()), 4);
 
     // check that random matrices don't work
@@ -266,8 +254,7 @@ public:
 
     for (int i = 1; i < 10; ++i) {
       randMatrix.setRandom(1, -i, i);
-      TS_ASSERT_THROWS(symOp.getOrderFromMatrix(randMatrix),
-                       const std::runtime_error &);
+      TS_ASSERT_THROWS(symOp.getOrderFromMatrix(randMatrix), const std::runtime_error &);
     }
   }
 
@@ -289,8 +276,7 @@ public:
 
     // 6-fold rotation around [001] in hexagonal
     SymmetryOperation sixFoldZOp("x-y , x, z");
-    testSymmetryOperation(sixFoldZOp, 6, V3D(-m_k, (m_h + m_k), m_l),
-                          "x-y,x,z");
+    testSymmetryOperation(sixFoldZOp, 6, V3D(-m_k, (m_h + m_k), m_l), "x-y,x,z");
   }
 
   void testReducedVector() {
@@ -358,8 +344,7 @@ private:
     return applyNTimes(symOp, vector, symOp.order());
   }
 
-  V3D applyLessThanOrderTimes(const SymmetryOperation &symOp,
-                              const V3D &vector) {
+  V3D applyLessThanOrderTimes(const SymmetryOperation &symOp, const V3D &vector) {
     return applyNTimes(symOp, vector, symOp.order() - 1);
   }
 
@@ -373,8 +358,7 @@ private:
     return vectorCopy;
   }
 
-  void testSymmetryOperation(SymmetryOperation &symOp, size_t expectedOrder,
-                             const V3D &expectedHKL,
+  void testSymmetryOperation(SymmetryOperation &symOp, size_t expectedOrder, const V3D &expectedHKL,
                              const std::string &expectedIdentifier) {
     checkCorrectOrder(symOp, expectedOrder);
     checkCorrectTransformationGeneralHKL(symOp, expectedHKL);
@@ -386,30 +370,23 @@ private:
   void checkCorrectOrder(const SymmetryOperation &symOp, size_t expected) {
     size_t order = symOp.order();
 
-    TSM_ASSERT_EQUALS(symOp.identifier() + ": Order is " +
-                          boost::lexical_cast<std::string>(order) +
-                          ", expected " +
+    TSM_ASSERT_EQUALS(symOp.identifier() + ": Order is " + boost::lexical_cast<std::string>(order) + ", expected " +
                           boost::lexical_cast<std::string>(expected),
                       order, expected);
   }
 
-  void checkCorrectTransformationGeneralHKL(const SymmetryOperation &symOp,
-                                            const V3D &expected) {
+  void checkCorrectTransformationGeneralHKL(const SymmetryOperation &symOp, const V3D &expected) {
     V3D transformed = symOp.transformHKL(m_hkl);
 
-    TSM_ASSERT_EQUALS(symOp.identifier() + ": Transformed hkl is " +
-                          transformed.toString() + ", expected " +
+    TSM_ASSERT_EQUALS(symOp.identifier() + ": Transformed hkl is " + transformed.toString() + ", expected " +
                           expected.toString(),
                       transformed, expected);
   }
 
-  void checkIdentifierString(const SymmetryOperation &symOp,
-                             const std::string &expected) {
+  void checkIdentifierString(const SymmetryOperation &symOp, const std::string &expected) {
     std::string identifier = symOp.identifier();
 
-    TSM_ASSERT_EQUALS(identifier + ": Does not match expected identifier " +
-                          expected,
-                      identifier, expected);
+    TSM_ASSERT_EQUALS(identifier + ": Does not match expected identifier " + expected, identifier, expected);
   }
 
   void performCommonTests(const SymmetryOperation &symOp) {
@@ -421,18 +398,15 @@ private:
   void checkGeneralReflection(const SymmetryOperation &symOp) {
     V3D transformedOrderTimes = applyOrderTimes(symOp, m_hkl);
 
-    TSM_ASSERT_EQUALS(symOp.identifier() + ": Transforming " +
-                          m_hkl.toString() +
-                          " $order times lead to unexpected result " +
-                          transformedOrderTimes.toString(),
+    TSM_ASSERT_EQUALS(symOp.identifier() + ": Transforming " + m_hkl.toString() +
+                          " $order times lead to unexpected result " + transformedOrderTimes.toString(),
                       transformedOrderTimes, m_hkl);
 
     V3D transformedLessThanOrderTimes = applyLessThanOrderTimes(symOp, m_hkl);
-    TSM_ASSERT_DIFFERS(
-        symOp.identifier() + ": Transforming " + m_hkl.toString() +
-            " less than $order times lead to unexpected result " +
-            transformedLessThanOrderTimes.toString(),
-        transformedLessThanOrderTimes, m_hkl);
+    TSM_ASSERT_DIFFERS(symOp.identifier() + ": Transforming " + m_hkl.toString() +
+                           " less than $order times lead to unexpected result " +
+                           transformedLessThanOrderTimes.toString(),
+                       transformedLessThanOrderTimes, m_hkl);
   }
 
   void checkCorrectOrderAll(const SymmetryOperation &symOp) {

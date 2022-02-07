@@ -13,30 +13,24 @@
 using Mantid::coord_t;
 using namespace Mantid::Geometry;
 
-namespace Mantid {
-namespace API {
+namespace Mantid::API {
 
 //-----------------------------------------------------------------------------------------------
 /** Empty constructor */
-IMDEventWorkspace::IMDEventWorkspace()
-    : IMDWorkspace(), MultipleExperimentInfos(), m_fileNeedsUpdating(false) {}
+IMDEventWorkspace::IMDEventWorkspace() : IMDWorkspace(), MultipleExperimentInfos(), m_fileNeedsUpdating(false) {}
 
 //-----------------------------------------------------------------------------------------------
 /** @return the marker set to true when a file-backed workspace needs its
  * back-end file updated (by calling SaveMD(UpdateFileBackEnd=1) )
  */
-bool IMDEventWorkspace::fileNeedsUpdating() const {
-  return m_fileNeedsUpdating;
-}
+bool IMDEventWorkspace::fileNeedsUpdating() const { return m_fileNeedsUpdating; }
 
 //-----------------------------------------------------------------------------------------------
 /** Sets the marker set to true when a file-backed workspace needs its back-end
  * file updated (by calling SaveMD(UpdateFileBackEnd=1) )
  * @param value :: marker value
  */
-void IMDEventWorkspace::setFileNeedsUpdating(bool value) {
-  m_fileNeedsUpdating = value;
-}
+void IMDEventWorkspace::setFileNeedsUpdating(bool value) { m_fileNeedsUpdating = value; }
 
 //-----------------------------------------------------------------------------------------------
 /** Is the workspace thread-safe. For MDEventWorkspaces, this means operations
@@ -65,27 +59,20 @@ const std::string IMDEventWorkspace::toString() const {
 
 //-----------------------------------------------------------------------------------------------
 
-} // namespace API
+} // namespace Mantid::API
 
-} // namespace Mantid
-
-namespace Mantid {
-namespace Kernel {
+namespace Mantid::Kernel {
 /** In order to be able to cast PropertyWithValue classes correctly a definition
  * for the PropertyWithValue<IMDEventWorkspace> is required */
 template <>
 MANTID_API_DLL Mantid::API::IMDEventWorkspace_sptr
-IPropertyManager::getValue<Mantid::API::IMDEventWorkspace_sptr>(
-    const std::string &name) const {
-  auto *prop =
-      dynamic_cast<PropertyWithValue<Mantid::API::IMDEventWorkspace_sptr> *>(
-          getPointerToProperty(name));
+IPropertyManager::getValue<Mantid::API::IMDEventWorkspace_sptr>(const std::string &name) const {
+  auto *prop = dynamic_cast<PropertyWithValue<Mantid::API::IMDEventWorkspace_sptr> *>(getPointerToProperty(name));
   if (prop) {
     return *prop;
   } else {
     std::string message =
-        "Attempt to assign property " + name +
-        " to incorrect type. Expected shared_ptr<IMDEventWorkspace>.";
+        "Attempt to assign property " + name + " to incorrect type. Expected shared_ptr<IMDEventWorkspace>.";
     throw std::runtime_error(message);
   }
 }
@@ -94,11 +81,8 @@ IPropertyManager::getValue<Mantid::API::IMDEventWorkspace_sptr>(
  * for the PropertyWithValue<IMDEventWorkspace> is required */
 template <>
 MANTID_API_DLL Mantid::API::IMDEventWorkspace_const_sptr
-IPropertyManager::getValue<Mantid::API::IMDEventWorkspace_const_sptr>(
-    const std::string &name) const {
-  auto *prop = dynamic_cast<
-      PropertyWithValue<Mantid::API::IMDEventWorkspace_const_sptr> *>(
-      getPointerToProperty(name));
+IPropertyManager::getValue<Mantid::API::IMDEventWorkspace_const_sptr>(const std::string &name) const {
+  auto *prop = dynamic_cast<PropertyWithValue<Mantid::API::IMDEventWorkspace_const_sptr> *>(getPointerToProperty(name));
   if (prop) {
     return prop->operator()();
   } else {
@@ -106,18 +90,15 @@ IPropertyManager::getValue<Mantid::API::IMDEventWorkspace_const_sptr>(
     // property as a shared_ptr<const T>. This class should be consistent, so
     // try that:
     auto *nonConstProp =
-        dynamic_cast<PropertyWithValue<Mantid::API::IMDEventWorkspace_sptr> *>(
-            getPointerToProperty(name));
+        dynamic_cast<PropertyWithValue<Mantid::API::IMDEventWorkspace_sptr> *>(getPointerToProperty(name));
     if (nonConstProp) {
       return nonConstProp->operator()();
     } else {
       std::string message =
-          "Attempt to assign property " + name +
-          " to incorrect type. Expected const shared_ptr<IMDEventWorkspace>.";
+          "Attempt to assign property " + name + " to incorrect type. Expected const shared_ptr<IMDEventWorkspace>.";
       throw std::runtime_error(message);
     }
   }
 }
 
-} // namespace Kernel
-} // namespace Mantid
+} // namespace Mantid::Kernel

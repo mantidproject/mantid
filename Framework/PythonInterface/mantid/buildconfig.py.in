@@ -5,7 +5,7 @@
 import sys
 
 # Constants describing various compile-time dependencies
-PYTHON_VERSION = "@PYTHON_VERSION_MAJOR@.@PYTHON_VERSION_MINOR@"
+PYTHON_VERSION = "@Python_VERSION_MAJOR@.@Python_VERSION_MINOR@"
 GSL_VERSION = "@GSL_VERSION@"
 
 

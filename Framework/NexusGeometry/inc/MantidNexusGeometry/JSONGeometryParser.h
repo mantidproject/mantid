@@ -68,69 +68,37 @@ public:
   const std::string &name() const noexcept { return m_name; }
   const std::string &sampleName() const noexcept { return m_sampleName; }
   const std::string &sourceName() const noexcept { return m_sourceName; }
-  const Eigen::Vector3d &samplePosition() const noexcept {
-    return m_samplePosition;
-  }
-  const Eigen::Quaterniond &sampleOrientation() const noexcept {
-    return m_sampleOrientation;
-  }
-  const Eigen::Vector3d &sourcePosition() const noexcept {
-    return m_sourcePosition;
-  }
-  const Eigen::Quaterniond &sourceOrientation() const noexcept {
-    return m_sourceOrientation;
-  }
+  const Eigen::Vector3d &samplePosition() const noexcept { return m_samplePosition; }
+  const Eigen::Quaterniond &sampleOrientation() const noexcept { return m_sampleOrientation; }
+  const Eigen::Vector3d &sourcePosition() const noexcept { return m_sourcePosition; }
+  const Eigen::Quaterniond &sourceOrientation() const noexcept { return m_sourceOrientation; }
   size_t numberOfBanks() const noexcept { return m_detIDs.size(); }
-  const std::vector<detid_t> &detectorIDs(const size_t index) const noexcept {
-    return m_detIDs[index];
-  }
+  const std::vector<detid_t> &detectorIDs(const size_t index) const noexcept { return m_detIDs[index]; }
 
-  const std::string &detectorName(const size_t index) const noexcept {
-    return m_detectorBankNames[index];
-  }
+  const std::string &detectorName(const size_t index) const noexcept { return m_detectorBankNames[index]; }
 
   const std::vector<Monitor> &monitors() const noexcept { return m_monitors; }
 
   const std::vector<Chopper> &choppers() const noexcept { return m_choppers; }
 
-  const std::vector<double> &xPixelOffsets(const size_t index) const noexcept {
-    return m_x[index];
-  }
+  const std::vector<double> &xPixelOffsets(const size_t index) const noexcept { return m_x[index]; }
 
-  const std::vector<double> &yPixelOffsets(const size_t index) const noexcept {
-    return m_y[index];
-  }
+  const std::vector<double> &yPixelOffsets(const size_t index) const noexcept { return m_y[index]; }
 
-  const std::vector<double> &zPixelOffsets(const size_t index) const noexcept {
-    return m_z[index];
-  }
-  const Eigen::Vector3d &translation(const size_t index) const noexcept {
-    return m_translations[index];
-  }
+  const std::vector<double> &zPixelOffsets(const size_t index) const noexcept { return m_z[index]; }
+  const Eigen::Vector3d &translation(const size_t index) const noexcept { return m_translations[index]; }
 
-  const Eigen::Quaterniond &orientation(const size_t index) const noexcept {
-    return m_orientations[index];
-  }
+  const Eigen::Quaterniond &orientation(const size_t index) const noexcept { return m_orientations[index]; }
 
-  bool isOffGeometry(const size_t index) const noexcept {
-    return m_isOffGeometry[index];
-  }
+  bool isOffGeometry(const size_t index) const noexcept { return m_isOffGeometry[index]; }
 
-  const std::vector<Eigen::Vector3d> &vertices(size_t index) const noexcept {
-    return m_pixelShapeVertices[index];
-  }
+  const std::vector<Eigen::Vector3d> &vertices(size_t index) const noexcept { return m_pixelShapeVertices[index]; }
 
-  const std::vector<uint32_t> &faces(size_t index) const noexcept {
-    return m_pixelShapeFaces[index];
-  }
+  const std::vector<uint32_t> &faces(size_t index) const noexcept { return m_pixelShapeFaces[index]; }
 
-  const std::vector<uint32_t> &windingOrder(size_t index) const noexcept {
-    return m_pixelShapeWindingOrder[index];
-  }
+  const std::vector<uint32_t> &windingOrder(size_t index) const noexcept { return m_pixelShapeWindingOrder[index]; }
 
-  const std::vector<uint32_t> &cylinders(size_t index) const noexcept {
-    return m_pixelShapeCylinders[index];
-  }
+  const std::vector<uint32_t> &cylinders(size_t index) const noexcept { return m_pixelShapeCylinders[index]; }
 
   double degreesToRadians(const double degrees) noexcept;
 
@@ -143,10 +111,8 @@ private:
   void extractDetectorContent();
   void extractMonitorContent();
   void extractChopperContent();
-  void extractTransformationDataset(const Json::Value &transformation,
-                                    double &value, Eigen::Vector3d &axis);
-  void extractTransformations(const Json::Value &transformations,
-                              Eigen::Vector3d &translation,
+  void extractTransformationDataset(const Json::Value &transformation, double &value, Eigen::Vector3d &axis);
+  void extractTransformations(const Json::Value &transformations, Eigen::Vector3d &translation,
                               Eigen::Quaterniond &orientation);
 
 private:

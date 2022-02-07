@@ -44,6 +44,16 @@ class Workspace;
 class MatrixWorkspace;
 class FunctionHandler;
 
+/**
+ * Attribute visitor structure supporting lambda expressions
+ * Example usage: AttributeLambdaVisitor{[](const int val) {...}, [] (const
+ * double val) {}} would create a visitor capable of "visiting" an integer and
+ * double attribute*
+ * It functions by inheriting the () operator defined in each lambda
+ */
+template <class... Ts> struct AttributeLambdaVisitor : Ts... { using Ts::operator()...; };
+template <class... Ts> AttributeLambdaVisitor(Ts...) -> AttributeLambdaVisitor<Ts...>;
+
 /** This is an interface to a fitting function - a semi-abstarct class.
     Functions derived from IFunction can be used with the Fit algorithm.
     IFunction defines the structure of a fitting funtion.
@@ -158,8 +168,7 @@ public:
    * implement the virtual AttributeVisitor::apply methods. See
    * implementation of Attribute::value() method for an example.
    */
-  template <typename T = void>
-  class DLLExport AttributeVisitor : public boost::static_visitor<T> {
+  template <typename T = void> class DLLExport AttributeVisitor : public boost::static_visitor<T> {
   public:
     /// Virtual destructor
     virtual ~AttributeVisitor() = default;
@@ -190,8 +199,7 @@ public:
   /**
    * Const version of AttributeVisitor.
    */
-  template <typename T = void>
-  class DLLExport ConstAttributeVisitor : public boost::static_visitor<T> {
+  template <typename T = void> class DLLExport ConstAttributeVisitor : public boost::static_visitor<T> {
   public:
     /// Virtual destructor
     virtual ~ConstAttributeVisitor() = default;
@@ -227,8 +235,7 @@ public:
     /// Create empty string attribute
     explicit Attribute() : m_data(std::string()), m_quoteValue(false) {}
     /// Create string attribute
-    explicit Attribute(const std::string &str, bool quoteValue = false)
-        : m_data(str), m_quoteValue(quoteValue) {}
+    explicit Attribute(const std::string &str, bool quoteValue = false) : m_data(str), m_quoteValue(quoteValue) {}
     /// Create int attribute
     explicit Attribute(const int &i) : m_data(i), m_quoteValue(false) {}
     /// Create double attribute
@@ -236,22 +243,16 @@ public:
     /// Create bool attribute
     explicit Attribute(const bool &b) : m_data(b), m_quoteValue(false) {}
     /// Create string attribute
-    explicit Attribute(const char *c)
-        : m_data(std::string(c)), m_quoteValue(false) {}
+    explicit Attribute(const char *c) : m_data(std::string(c)), m_quoteValue(false) {}
     /// Create vector attribute
-    explicit Attribute(const std::vector<double> &v)
-        : m_data(v), m_quoteValue(false) {}
-    /// Copy assignment
-    Attribute &operator=(const Attribute &attr);
+    explicit Attribute(const std::vector<double> &v) : m_data(v), m_quoteValue(false) {}
 
     /// Apply an attribute visitor
-    template <typename T> T apply(AttributeVisitor<T> &v) {
-      return boost::apply_visitor(v, m_data);
-    }
+    template <typename T> T apply(AttributeVisitor<T> &v) { return boost::apply_visitor(v, m_data); }
     /// Apply a const attribute visitor
-    template <typename T> T apply(ConstAttributeVisitor<T> &v) const {
-      return boost::apply_visitor(v, m_data);
-    }
+    template <typename T> T apply(ConstAttributeVisitor<T> &v) const { return boost::apply_visitor(v, m_data); }
+    /// Apply a lambda visitor
+    template <typename... Ts> void apply(AttributeLambdaVisitor<Ts...> &v) { boost::apply_visitor(v, m_data); }
 
     /// Returns type of the attribute
     std::string type() const;
@@ -287,43 +288,46 @@ public:
     void setBool(const bool &);
     /// Sets new value if attribute is a vector
     void setVector(const std::vector<double> &);
+    template <typename T>
+    // Set value
+    void setValue(const T &v) {
+      m_data = v;
+    }
     /// Set value from a string.
     void fromString(const std::string &str);
 
   private:
     /// The data holder as boost variant
-    mutable boost::variant<std::string, int, double, bool, std::vector<double>>
-        m_data;
+    mutable boost::variant<std::string, int, double, bool, std::vector<double>> m_data;
     /// Flag indicating if the string value should be returned quoted
-    bool m_quoteValue;
+    bool m_quoteValue = false;
   };
 
   //---------------------------------------------------------//
-
   /// Constructor
-  IFunction() : m_isParallel(false), m_handler(nullptr), m_chiSquared(0.0) {}
+  IFunction();
   /// Virtual destructor
   virtual ~IFunction();
   /// No copying
   IFunction(const IFunction &) = delete;
   /// No copying
   IFunction &operator=(const IFunction &) = delete;
-
   /// Returns the function's name
   virtual std::string name() const = 0;
   /// Writes itself into a string
   std::string asString() const;
   /// Virtual copy constructor
   virtual std::shared_ptr<IFunction> clone() const;
+
+  /** Registers the usage of the algorithm with the UsageService
+   */
+  virtual void registerFunctionUsage(bool internal);
   /// Set the workspace.
   /// @param ws :: Shared pointer to a workspace
-  virtual void setWorkspace(std::shared_ptr<const Workspace> ws) {
-    UNUSED_ARG(ws);
-  }
+  virtual void setWorkspace(std::shared_ptr<const Workspace> ws) { UNUSED_ARG(ws); }
   /// Set matrix workspace
-  virtual void
-  setMatrixWorkspace(std::shared_ptr<const API::MatrixWorkspace> workspace,
-                     size_t wi, double startX, double endX);
+  virtual void setMatrixWorkspace(std::shared_ptr<const API::MatrixWorkspace> workspace, size_t wi, double startX,
+                                  double endX);
   /// Iinialize the function
   virtual void initialize() { this->init(); }
   /// Returns an estimate of the number of progress reports a single evaluation
@@ -354,8 +358,7 @@ public:
   /// @param domain :: Provides arguments for the function.
   /// @param values :: A buffer to store the function values. It must be large
   /// enogh to store domain.size() values.
-  virtual void function(const FunctionDomain &domain,
-                        FunctionValues &values) const = 0;
+  virtual void function(const FunctionDomain &domain, FunctionValues &values) const = 0;
   /// Derivatives of function with respect to active parameters.
   virtual void functionDeriv(const FunctionDomain &domain, Jacobian &jacobian);
 
@@ -369,19 +372,15 @@ public:
   /** @name Function parameters */
   //@{
   /// Set i-th parameter
-  virtual void setParameter(size_t, const double &value,
-                            bool explicitlySet = true) = 0;
+  virtual void setParameter(size_t, const double &value, bool explicitlySet = true) = 0;
   /// Set i-th parameter description
-  virtual void setParameterDescription(size_t,
-                                       const std::string &description) = 0;
+  virtual void setParameterDescription(size_t, const std::string &description) = 0;
   /// Get i-th parameter
   virtual double getParameter(size_t i) const = 0;
   /// Set parameter by name.
-  virtual void setParameter(const std::string &name, const double &value,
-                            bool explicitlySet = true) = 0;
+  virtual void setParameter(const std::string &name, const double &value, bool explicitlySet = true) = 0;
   /// Set description of parameter by name.
-  virtual void setParameterDescription(const std::string &name,
-                                       const std::string &description) = 0;
+  virtual void setParameterDescription(const std::string &name, const std::string &description) = 0;
   /// Get parameter by name.
   virtual double getParameter(const std::string &name) const = 0;
   /// Check if function has a parameter with this name.
@@ -398,13 +397,17 @@ public:
   virtual bool isExplicitlySet(size_t i) const = 0;
   /// Get the fitting error for a parameter
   virtual double getError(size_t i) const = 0;
+  /// Get the fitting error for a parameter by name
+  virtual double getError(const std::string &name) const = 0;
   /// Set the fitting error for a parameter
   virtual void setError(size_t i, double err) = 0;
+  /// Set the fitting error for a parameter by name
+  virtual void setError(const std::string &name, double err) = 0;
 
   /// Check if a parameter i is fixed
-  bool isFixed(size_t i) const;
+  [[nodiscard]] bool isFixed(size_t i) const;
   /// Check if a parameter i is fixed by default (not by user).
-  bool isFixedByDefault(size_t i) const;
+  [[nodiscard]] bool isFixedByDefault(size_t i) const;
   /// Removes a parameter i from the list of active
   void fix(size_t i, bool isDefault = false);
   /// Restores a declared parameter i to the active status
@@ -426,30 +429,29 @@ public:
   /// and ties in composite functions
   virtual size_t getParameterIndex(const ParameterReference &ref) const = 0;
   /// Return a vector with all parameter names
-  std::vector<std::string> getParameterNames() const;
+  [[nodiscard]] std::vector<std::string> getParameterNames() const;
   //@}
 
   /** @name Active parameters */
   //@{
   /// Value of i-th active parameter. Override this method to make fitted
   /// parameters different from the declared
-  virtual double activeParameter(size_t i) const;
+  [[nodiscard]] virtual double activeParameter(size_t i) const;
   /// Set new value of i-th active parameter. Override this method to make
   /// fitted parameters different from the declared
   virtual void setActiveParameter(size_t i, double value);
   /// Returns the name of active parameter i
-  virtual std::string nameOfActive(size_t i) const;
+  [[nodiscard]] virtual std::string nameOfActive(size_t i) const;
   /// Returns the name of active parameter i
-  virtual std::string descriptionOfActive(size_t i) const;
+  [[nodiscard]] virtual std::string descriptionOfActive(size_t i) const;
   /// Check if an active parameter i is actually active
-  bool isActive(size_t i) const;
+  [[nodiscard]] bool isActive(size_t i) const;
   //@}
 
   /** @name Ties */
   //@{
   /// Tie a parameter to other parameters (or a constant)
-  virtual void tie(const std::string &parName, const std::string &expr,
-                   bool isDefault = false);
+  virtual void tie(const std::string &parName, const std::string &expr, bool isDefault = false);
   /// Add several ties
   virtual void addTies(const std::string &ties, bool isDefault = false);
   /// Apply the ties
@@ -465,7 +467,7 @@ public:
   /// Put all ties in order in which they will be applied correctly.
   void sortTies();
   /// Write a parameter tie to a string
-  std::string writeTies() const;
+  [[nodiscard]] std::string writeTies() const;
   //@}
 
   /** @name Constraints */
@@ -475,13 +477,12 @@ public:
   /// Add a constraint to function
   virtual void addConstraint(std::unique_ptr<IConstraint> ic);
   /// Get constraint of i-th parameter
-  virtual IConstraint *getConstraint(size_t i) const;
+  [[nodiscard]] virtual IConstraint *getConstraint(size_t i) const;
   /// Remove a constraint
   virtual void removeConstraint(const std::string &parName);
-  virtual void setConstraintPenaltyFactor(const std::string &parName,
-                                          const double &c);
+  virtual void setConstraintPenaltyFactor(const std::string &parName, const double &c);
   /// Write a parameter constraint to a string
-  std::string writeConstraints() const;
+  [[nodiscard]] std::string writeConstraints() const;
   /// Remove all constraints.
   virtual void clearConstraints();
   //@}
@@ -489,60 +490,61 @@ public:
   /** @name Attributes */
   //@{
   /// Returns the number of attributes associated with the function
-  virtual size_t nAttributes() const;
+  [[nodiscard]] virtual size_t nAttributes() const;
   /// Returns a list of attribute names
-  virtual std::vector<std::string> getAttributeNames() const;
+  [[nodiscard]] virtual std::vector<std::string> getAttributeNames() const;
+  /// Get name of ith attribute
+  [[nodiscard]] virtual std::string attributeName(size_t index) const;
   /// Return a value of attribute attName
-  virtual Attribute getAttribute(const std::string &name) const;
+  [[nodiscard]] virtual Attribute getAttribute(const std::string &name) const;
   /// Set a value to attribute attName
   virtual void setAttribute(const std::string &name, const Attribute &);
   /// Check if attribute attName exists
-  virtual bool hasAttribute(const std::string &name) const;
+  [[nodiscard]] virtual bool hasAttribute(const std::string &name) const;
   /// Set an attribute value
-  template <typename T>
-  void setAttributeValue(const std::string &attName, const T &value) {
-    setAttribute(attName, Attribute(value));
+  template <typename T> void setAttributeValue(const std::string &attName, const T &value) {
+    // Since we can't know T and we would rather not create a universal setter
+    // copy and replace in-place
+    auto attr = getAttribute(attName);
+    attr.setValue(value);
+    setAttribute(attName, attr);
   }
   void setAttributeValue(const std::string &attName, const char *value);
   void setAttributeValue(const std::string &attName, const std::string &value);
   //@}
 
   /// Returns the pointer to i-th child function
-  virtual std::shared_ptr<IFunction> getFunction(size_t i) const;
+  [[nodiscard]] virtual std::shared_ptr<IFunction> getFunction(size_t i) const;
   /// Number of child functions
-  virtual std::size_t nFunctions() const { return 0; }
+  [[nodiscard]] virtual std::size_t nFunctions() const { return 0; }
   /// Set up the function for a fit.
   virtual void setUpForFit();
   /// Get number of values for a given domain.
-  virtual size_t getValuesSize(const FunctionDomain &domain) const;
+  [[nodiscard]] virtual size_t getValuesSize(const FunctionDomain &domain) const;
   /// Get number of domains required by this function
-  virtual size_t getNumberDomains() const;
+  [[nodiscard]] virtual size_t getNumberDomains() const;
   /// Split this function (if needed) into a list of independent functions.
-  virtual std::vector<std::shared_ptr<IFunction>>
-  createEquivalentFunctions() const;
+  [[nodiscard]] virtual std::vector<std::shared_ptr<IFunction>> createEquivalentFunctions() const;
   /// Calculate numerical derivatives
   void calNumericalDeriv(const FunctionDomain &domain, Jacobian &jacobian);
   /// Set the covariance matrix
-  void
-  setCovarianceMatrix(const std::shared_ptr<Kernel::Matrix<double>> &covar);
+  void setCovarianceMatrix(const std::shared_ptr<Kernel::Matrix<double>> &covar);
   /// Get the covariance matrix
-  std::shared_ptr<const Kernel::Matrix<double>> getCovarianceMatrix() const {
-    return m_covar;
-  }
-  /// Set the chi^2
-  void setChiSquared(double chi2) { m_chiSquared = chi2; }
-  /// Get the chi^2
-  double getChiSquared() const { return m_chiSquared; }
+  std::shared_ptr<const Kernel::Matrix<double>> getCovarianceMatrix() const { return m_covar; }
+  /// Set the reduced chi^2
+  void setReducedChiSquared(double chi2) { m_chiSquared = chi2; }
+  /// Get the reduced chi^2
+  [[nodiscard]] double getReducedChiSquared() const { return m_chiSquared; }
 
   /// Set the parallel hint
   void setParallel(bool on) { m_isParallel = on; }
   /// Get the parallel hint
-  bool isParallel() const { return m_isParallel; }
+  [[nodiscard]] bool isParallel() const { return m_isParallel; }
 
   /// Set a function handler
   void setHandler(std::unique_ptr<FunctionHandler> handler);
   /// Return the handler
-  FunctionHandler *getHandler() const { return m_handler.get(); }
+  [[nodiscard]] FunctionHandler *getHandler() const { return m_handler.get(); }
 
   /// Describe parameter status in relation to fitting:
   /// Active: Fit varies such parameter directly.
@@ -554,23 +556,20 @@ public:
   /// Change status of parameter
   virtual void setParameterStatus(size_t i, ParameterStatus status) = 0;
   /// Get status of parameter
-  virtual ParameterStatus getParameterStatus(size_t i) const = 0;
+  [[nodiscard]] virtual ParameterStatus getParameterStatus(size_t i) const = 0;
 
 protected:
   /// Function initialization. Declare function parameters in this method.
   virtual void init();
   /// Declare a new parameter
-  virtual void declareParameter(const std::string &name, double initValue = 0,
-                                const std::string &description = "") = 0;
+  virtual void declareParameter(const std::string &name, double initValue = 0, const std::string &description = "") = 0;
 
   /// Convert a value from one unit (inUnit) to unit defined in workspace (ws)
-  double convertValue(double value, Kernel::Unit_sptr &outUnit,
-                      const std::shared_ptr<const MatrixWorkspace> &ws,
-                      size_t wsIndex) const;
+  [[nodiscard]] double convertValue(double value, Kernel::Unit_sptr &outUnit,
+                                    const std::shared_ptr<const MatrixWorkspace> &ws, size_t wsIndex) const;
 
   void convertValue(std::vector<double> &values, Kernel::Unit_sptr &outUnit,
-                    const std::shared_ptr<const MatrixWorkspace> &ws,
-                    size_t wsIndex) const;
+                    const std::shared_ptr<const MatrixWorkspace> &ws, size_t wsIndex) const;
 
   /// Override to declare function attributes
   virtual void declareAttributes() {}
@@ -578,21 +577,17 @@ protected:
   virtual void declareParameters() {}
 
   /// Declare a single attribute
-  void declareAttribute(const std::string &name,
-                        const API::IFunction::Attribute &defaultValue);
+  void declareAttribute(const std::string &name, const API::IFunction::Attribute &defaultValue);
   /// Store an attribute's value
-  void storeAttributeValue(const std::string &name,
-                           const API::IFunction::Attribute &value);
+  void storeAttributeValue(const std::string &name, const API::IFunction::Attribute &value);
   /// A read-only ("mutable") attribute can be stored in a const method
-  void storeReadOnlyAttribute(const std::string &name,
-                              const API::IFunction::Attribute &value) const;
+  void storeReadOnlyAttribute(const std::string &name, const API::IFunction::Attribute &value) const;
   /// Add a new tie. Derived classes must provide storage for ties
   virtual void addTie(std::unique_ptr<ParameterTie> tie);
-  bool hasOrderedTies() const;
+  [[nodiscard]] bool hasOrderedTies() const;
   void applyOrderedTies();
   /// Writes itself into a string
-  virtual std::string
-  writeToString(const std::string &parentLocalAttributesStr = "") const;
+  [[nodiscard]] virtual std::string writeToString(const std::string &parentLocalAttributesStr = "") const;
 
   friend class ParameterTie;
   friend class CompositeFunction;
@@ -621,6 +616,8 @@ private:
   std::vector<std::unique_ptr<IConstraint>> m_constraints;
   /// Ties ordered in order of correct application
   std::vector<ParameterTie *> m_orderedTies;
+  /// whether the function usage has been registered
+  bool m_isRegistered{false};
 };
 
 /// shared pointer to the function base class

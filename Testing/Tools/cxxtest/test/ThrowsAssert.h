@@ -26,7 +26,7 @@ class ThrowsAssert : public CxxTest::TestSuite
 public:
     void test_TS_ASSERT_THROWS_EQUALS()
     {
-        TS_ASSERT_THROWS_EQUALS( { throw 1; }, int i, i, 2 );        
+        TS_ASSERT_THROWS_EQUALS( { throw 1; }, int i, i, 2 );
         TS_ASSERT_THROWS_EQUALS( { throw Thing( 1 ); }, const Thing &thing, thing.i(), 2 );
     }
 
@@ -75,32 +75,32 @@ public:
     {
         TS_ASSERT_THROWS_ASSERT( { throw 1; }, int i,
                                  TS_ASSERT_EQUALS( i, 2 ) );
-        
+
         TS_ASSERT_THROWS_ASSERT( { throw Thing( 1 ); }, const Thing &thing,
                                  TS_ASSERT_EQUALS( thing.i(), 2 ) );
-        
+
         TS_ASSERT_THROWS_ASSERT( { throw Thing( 1 ); }, const Thing &thing,
                                  TS_FAIL( thing.i() ) );
-        
+
         TS_ASSERT_THROWS_ASSERT( { throw Thing( 1 ); }, const Thing &thing,
                                  TS_ASSERT( thing.i() - 1 ) );
 
         char zero = 0, one = 1;
         TS_ASSERT_THROWS_ASSERT( { throw Thing( 1 ); }, const Thing &,
                                  TS_ASSERT_SAME_DATA( &zero, &one, sizeof(char) ) );
-        
+
         TS_ASSERT_THROWS_ASSERT( { throw Thing( 1 ); }, const Thing &thing,
                                  TS_ASSERT_DELTA( thing.i(), 5, 2 ) );
-        
+
         TS_ASSERT_THROWS_ASSERT( { throw Thing( 1 ); }, const Thing &thing,
                                  TS_ASSERT_DIFFERS( thing.i(), 1 ) );
-        
+
         TS_ASSERT_THROWS_ASSERT( { throw Thing( 1 ); }, const Thing &thing,
                                  TS_ASSERT_LESS_THAN( thing.i(), 1 ) );
-        
+
         TS_ASSERT_THROWS_ASSERT( { throw Thing( 1 ); }, const Thing &thing,
                                  TS_ASSERT_PREDICATE( Fail, thing.i() ) );
-        
+
         TS_ASSERT_THROWS_ASSERT( { throw Thing( 1 ); }, const Thing &thing,
                                  TS_ASSERT_RELATION( Fail, thing.i(), 33 ) );
     }

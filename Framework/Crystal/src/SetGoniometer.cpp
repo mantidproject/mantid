@@ -19,8 +19,7 @@
 using Mantid::Geometry::Goniometer;
 using namespace Mantid::Geometry;
 
-namespace Mantid {
-namespace Crystal {
+namespace Mantid::Crystal {
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(SetGoniometer)
@@ -34,15 +33,11 @@ const size_t NUM_AXES = 6;
 /** Initialize the algorithm's properties.
  */
 void SetGoniometer::init() {
-  declareProperty(
-      std::make_unique<WorkspaceProperty<Workspace>>("Workspace", "",
-                                                     Direction::InOut),
-      "An workspace that will be modified with the new goniometer created.");
+  declareProperty(std::make_unique<WorkspaceProperty<Workspace>>("Workspace", "", Direction::InOut),
+                  "An workspace that will be modified with the new goniometer created.");
 
-  std::vector<std::string> gonOptions{"None, Specify Individually",
-                                      "Universal"};
-  declareProperty("Goniometers", gonOptions[0],
-                  std::make_shared<StringListValidator>(gonOptions),
+  std::vector<std::string> gonOptions{"None, Specify Individually", "Universal"};
+  declareProperty("Goniometers", gonOptions[0], std::make_shared<StringListValidator>(gonOptions),
                   "Set the axes and motor names according to goniometers that "
                   "we define in the code (Universal defined for SNS)");
 
@@ -52,10 +47,12 @@ void SetGoniometer::init() {
   for (size_t i = 0; i < NUM_AXES; i++) {
     std::ostringstream propName;
     propName << "Axis" << i;
-    declareProperty(std::make_unique<PropertyWithValue<std::string>>(
-                        propName.str(), "", Direction::Input),
+    declareProperty(std::make_unique<PropertyWithValue<std::string>>(propName.str(), "", Direction::Input),
                     propName.str() + axisHelp);
   }
+  declareProperty("Average", true,
+                  "Use the average value of the log, if false a separate "
+                  "goniometer will be created for each value in the logs");
 }
 
 /** Execute the algorithm.
@@ -68,8 +65,7 @@ void SetGoniometer::exec() {
     // We're dealing with an MD workspace which has multiple experiment infos
     auto infos = std::dynamic_pointer_cast<MultipleExperimentInfos>(ws);
     if (!infos) {
-      throw std::invalid_argument(
-          "Input workspace does not support Goniometer");
+      throw std::invalid_argument("Input workspace does not support Goniometer");
     }
     if (infos->getNumExperimentInfo() < 1) {
       ExperimentInfo_sptr info(new ExperimentInfo());
@@ -92,12 +88,10 @@ void SetGoniometer::exec() {
 
       if (!axisDesc.empty()) {
         std::vector<std::string> tokens;
-        boost::split(tokens, axisDesc,
-                     boost::algorithm::detail::is_any_ofF<char>(","));
+        boost::split(tokens, axisDesc, boost::algorithm::detail::is_any_ofF<char>(","));
         if (tokens.size() != 5)
-          throw std::invalid_argument(
-              "Wrong number of arguments to parameter " + propName.str() +
-              ". Expected 5 comma-separated arguments.");
+          throw std::invalid_argument("Wrong number of arguments to parameter " + propName.str() +
+                                      ". Expected 5 comma-separated arguments.");
 
         std::string axisName = tokens[0];
         axisName = Strings::strip(axisName);
@@ -107,13 +101,10 @@ void SetGoniometer::exec() {
         // If axisName is a number, add a new log value
         double angle = 0;
         if (Strings::convert(axisName, angle)) {
-          g_log.information()
-              << "Axis " << i << " - create a new log value GoniometerAxis" << i
-              << "_FixedValue\n";
+          g_log.information() << "Axis " << i << " - create a new log value GoniometerAxis" << i << "_FixedValue\n";
           axisName = "GoniometerAxis" + Strings::toString(i) + "_FixedValue";
           try {
-            Types::Core::DateAndTime now =
-                Types::Core::DateAndTime::getCurrentTime();
+            Types::Core::DateAndTime now = Types::Core::DateAndTime::getCurrentTime();
             auto tsp = new Kernel::TimeSeriesProperty<double>(axisName);
             tsp->addValue(now, angle);
             tsp->setUnits("degree");
@@ -128,18 +119,14 @@ void SetGoniometer::exec() {
 
         double x = 0, y = 0, z = 0;
         if (!Strings::convert(tokens[1], x))
-          throw std::invalid_argument("Error converting string '" + tokens[1] +
-                                      "' to a number.");
+          throw std::invalid_argument("Error converting string '" + tokens[1] + "' to a number.");
         if (!Strings::convert(tokens[2], y))
-          throw std::invalid_argument("Error converting string '" + tokens[2] +
-                                      "' to a number.");
+          throw std::invalid_argument("Error converting string '" + tokens[2] + "' to a number.");
         if (!Strings::convert(tokens[3], z))
-          throw std::invalid_argument("Error converting string '" + tokens[3] +
-                                      "' to a number.");
+          throw std::invalid_argument("Error converting string '" + tokens[3] + "' to a number.");
         V3D vec(x, y, z);
         if (vec.norm() < 1e-4)
-          throw std::invalid_argument(
-              "Rotation axis vector should be non-zero!");
+          throw std::invalid_argument("Rotation axis vector should be non-zero!");
 
         int ccw = 0;
         Strings::convert(tokens[4], ccw);
@@ -158,11 +145,13 @@ void SetGoniometer::exec() {
   // All went well, copy the goniometer into it. It will throw if the log values
   // cannot be found
   try {
-    ei->mutableRun().setGoniometer(gon, true);
+    if (getProperty("Average"))
+      ei->mutableRun().setGoniometer(gon, true);
+    else
+      ei->mutableRun().setGoniometers(gon);
   } catch (std::runtime_error &) {
     g_log.error("No log values for goniometers");
   }
 }
 
-} // namespace Crystal
-} // namespace Mantid
+} // namespace Mantid::Crystal

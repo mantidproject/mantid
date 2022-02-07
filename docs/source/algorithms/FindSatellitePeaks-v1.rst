@@ -12,7 +12,7 @@ occurring at fractional HKL locations in reciprocal space. FindSatellitePeaks
 takes a :ref:`MDWorkspace <MDWorkspace>` of experimental data, a
 :ref:`PeaksWorkspace <PeaksWorkspace>` containing the locations of peaks with
 integer HKL, and another PeaksWorkspace containing a subset of peaks found at
-fractional HKL. 
+fractional HKL.
 
 .. figure:: ../images/FindSatellitePeaks-satellites.png
    :align: center
@@ -43,7 +43,7 @@ the :ref:`MDWorkspace <MDWorkspace>`.
    as starting points into distinct sets of `q` vectors. The centroid of each
    cluster is then taken as the "true" value of `q` and is used to predict the
    position of all other fractional peaks with this `q`.
-   
+
 
 For each predicted fractional peak, the local centroid (the radius of which is
 defined by `PeakRadius`) in the MD data is found and this is taken as the actual
@@ -71,21 +71,21 @@ discarded if there I/sigma value is less than the parameter `IOverSigma`.
 The output of the algorithm is a peaks workspace containing all of the
 satellite peaks found by the algorithm in fractional coordinates. Each of the
 peaks will have an intensity value from the :ref:`IntegratePeaksMD
-<algm-IntegratePeaksMD-v2>` algorithm. 
+<algm-IntegratePeaksMD-v2>` algorithm.
 
 .. warning:: This integration is very approximate and may not produce the best
     possible values. It is recommended that satellite peaks are reintegrated
     using one of the many peak integration algorithms and to tune their
-    parameters to obtain the best possible peak integration. 
+    parameters to obtain the best possible peak integration.
 
 For more information on superspace crystallography see:
 
-- Van Smaalen, Sander. "An elementary introduction to superspace 
-  crystallography." Zeitschrift für Kristallographie-Crystalline Materials 
-  219, no. 11 (2004): 681-691. 
+- Van Smaalen, Sander. "An elementary introduction to superspace
+  crystallography." Zeitschrift für Kristallographie-Crystalline Materials
+  219, no. 11 (2004): 681-691.
 
-- Van Smaalen, Sander. "Incommensurate crystal structures." Crystallography 
-  Reviews 4, no. 2 (1995): 79-202. 
+- Van Smaalen, Sander. "Incommensurate crystal structures." Crystallography
+  Reviews 4, no. 2 (1995): 79-202.
 
 Related Algorithms
 ------------------
@@ -93,7 +93,7 @@ Related Algorithms
   position of fractional peaks given a :ref:`PeaksWorkspace <PeaksWorkspace>` of
   nuclear peaks and a set of HKL offsets.
 
-- :ref:`CentroidPeaksMD <algm-CentroidPeaksMD-v2>` is used to find the local 
+- :ref:`CentroidPeaksMD <algm-CentroidPeaksMD-v2>` is used to find the local
   centroid from a predicted peak position.
 
 - :ref:`IntegratePeaksMD <algm-IntegratePeaksMD-v2>` is used to integrate

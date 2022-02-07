@@ -27,8 +27,7 @@ public:
   void testDefaultConstruct() {
 
     cow_ptr<MyType> cow{};
-    TSM_ASSERT_EQUALS("Should give us the default of the default constructed T",
-                      0, cow->value);
+    TSM_ASSERT_EQUALS("Should give us the default of the default constructed T", 0, cow->value);
   }
 
   void testConstructorNullptr() {
@@ -60,10 +59,8 @@ public:
     cow_ptr<MyType> cow{resource};
 
     TS_ASSERT_EQUALS(cow->value, value);
-    TSM_ASSERT("Resource should NOT have been moved",
-               resource.get() != nullptr);
-    TSM_ASSERT_EQUALS("Two shared_ptr objects in scope", resource.use_count(),
-                      2)
+    TSM_ASSERT("Resource should NOT have been moved", resource.get() != nullptr);
+    TSM_ASSERT_EQUALS("Two shared_ptr objects in scope", resource.use_count(), 2)
   }
 
   void test_move_constructor() {
@@ -147,13 +144,11 @@ public:
 
     MyType &copyResource = copy.access(); // The resource should now be copied.
 
-    TSM_ASSERT_EQUALS("Value should NOT have changed", original->value,
-                      copyResource.value);
+    TSM_ASSERT_EQUALS("Value should NOT have changed", original->value, copyResource.value);
 
     copyResource.value = 4;
 
-    TSM_ASSERT_DIFFERS("Value should now have changed", original->value,
-                       copyResource.value);
+    TSM_ASSERT_DIFFERS("Value should now have changed", original->value, copyResource.value);
   }
 
   void test_equals_not_equals() {

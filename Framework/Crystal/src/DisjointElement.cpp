@@ -6,8 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidCrystal/DisjointElement.h"
 
-namespace Mantid {
-namespace Crystal {
+namespace Mantid::Crystal {
 
 /**
  * Default constructor. Creates an 'empty' disjoint element.
@@ -18,8 +17,7 @@ DisjointElement::DisjointElement() : m_parent(this), m_rank(0), m_id(-1) {}
  * Constructor
  * @param id : Element id
  */
-DisjointElement::DisjointElement(const int id)
-    : m_parent(this), m_rank(0), m_id(id) {}
+DisjointElement::DisjointElement(const int id) : m_parent(this), m_rank(0), m_id(id) {}
 
 /**
  * Copy constructor
@@ -161,5 +159,4 @@ Set the id for the element
 */
 void DisjointElement::setId(int id) { m_id = id; }
 
-} // namespace Crystal
-} // namespace Mantid
+} // namespace Mantid::Crystal

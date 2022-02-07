@@ -45,8 +45,7 @@ public:
     AnalysisDataService::Instance().remove("out");
     Fit fit;
     fit.initialize();
-    fit.setPropertyValue(
-        "Function", "name=UserFunction,Formula=b1*(1-exp(-b2*x)),b1=1,b2=1");
+    fit.setPropertyValue("Function", "name=UserFunction,Formula=b1*(1-exp(-b2*x)),b1=1,b2=1");
     fit.setProperty("InputWorkspace", ws);
     fit.setProperty("Minimizer", "Trust Region");
     fit.setRethrows(true);
@@ -55,10 +54,8 @@ public:
 
 private:
   Workspace_sptr make_exp_decay_workspace() {
-    std::vector<double> y({62, 48, 51, 36, 35, 22, 23, 17, 22, 10, 12, 12,
-                           14, 12, 10, 9,  3,  6,  3,  4,  5,  4,  2,  3,
-                           2,  2,  0,  2,  0,  2,  1,  0,  1,  1,  0,  0,
-                           1,  0,  1,  0,  0,  0,  1,  1,  0,  0,  0,  0});
+    std::vector<double> y({62, 48, 51, 36, 35, 22, 23, 17, 22, 10, 12, 12, 14, 12, 10, 9, 3, 6, 3, 4, 5, 4, 2, 3,
+                           2,  2,  0,  2,  0,  2,  1,  0,  1,  1,  0,  0,  1,  0,  1,  0, 0, 0, 1, 1, 0, 0, 0, 0});
     std::vector<double> e({7.87400787401181,
                            6.92820323027551,
                            7.14142842854285,
@@ -138,8 +135,7 @@ private:
     alg->setProperty("DataE", e);
     alg->setProperty("OutputWorkspace", "exp_decay_workspace");
     alg->execute();
-    auto ws = AnalysisDataService::Instance().retrieveWS<Workspace>(
-        "exp_decay_workspace");
+    auto ws = AnalysisDataService::Instance().retrieveWS<Workspace>("exp_decay_workspace");
     AnalysisDataService::Instance().remove("exp_decay_workspace");
     return ws;
   }

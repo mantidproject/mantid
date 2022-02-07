@@ -18,8 +18,7 @@
 #include <QPushButton>
 #include <utility>
 
-namespace MantidQt {
-namespace MantidWidgets {
+namespace MantidQt::MantidWidgets {
 
 /// Constructor
 /// @param parent :: Parent widget.
@@ -32,14 +31,11 @@ namespace MantidWidgets {
 /// @param allOthersFixed :: True if all other local parameters are fixed.
 /// @param othersTied :: True if there are other tied parameters.
 /// @param logOptionsEnabled :: True if the log checkbox is ticked.
-LocalParameterEditor::LocalParameterEditor(
-    QWidget *parent, int index, double value, bool fixed, const QString &tie,
-    const QString &constraint, bool othersFixed, bool allOthersFixed,
-    bool othersTied, bool logOptionsEnabled)
-    : QWidget(parent), m_index(index), m_value(QString::number(value, 'g', 16)),
-      m_fixed(fixed), m_tie(std::move(tie)),
-      m_constraint(std::move(constraint)), m_othersFixed(othersFixed),
-      m_allOthersFixed(allOthersFixed), m_othersTied(othersTied) {
+LocalParameterEditor::LocalParameterEditor(QWidget *parent, int index, double value, bool fixed, const QString &tie,
+                                           const QString &constraint, bool othersFixed, bool allOthersFixed,
+                                           bool othersTied, bool logOptionsEnabled)
+    : QWidget(parent), m_index(index), m_value(QString::number(value, 'g', 16)), m_fixed(fixed), m_tie(tie),
+      m_constraint(constraint), m_othersFixed(othersFixed), m_allOthersFixed(allOthersFixed), m_othersTied(othersTied) {
   auto layout = new QHBoxLayout(this);
   layout->setMargin(0);
   layout->setSpacing(0);
@@ -100,36 +96,28 @@ LocalParameterEditor::LocalParameterEditor(
 
   m_removeAllTiesAction = new QAction("Remove all ties", this);
   m_removeAllTiesAction->setToolTip("Remove ties for all parameters.");
-  connect(m_removeAllTiesAction, SIGNAL(triggered()), this,
-          SLOT(removeAllTies()));
+  connect(m_removeAllTiesAction, SIGNAL(triggered()), this, SLOT(removeAllTies()));
   setMenu->addAction(m_removeAllTiesAction);
 
   setMenu->addSeparator();
   m_setConstraintAction = new QAction("Set constraint", this);
   m_setConstraintAction->setToolTip("Set a constraint for this parameter.");
-  connect(m_setConstraintAction, SIGNAL(triggered()), this,
-          SLOT(setConstraint()));
+  connect(m_setConstraintAction, SIGNAL(triggered()), this, SLOT(setConstraint()));
   setMenu->addAction(m_setConstraintAction);
 
   m_removeConstraintAction = new QAction("Remove constraint", this);
-  m_removeConstraintAction->setToolTip(
-      "Remove the constraint for this parameter.");
-  connect(m_removeConstraintAction, SIGNAL(triggered()), this,
-          SLOT(removeConstraint()));
+  m_removeConstraintAction->setToolTip("Remove the constraint for this parameter.");
+  connect(m_removeConstraintAction, SIGNAL(triggered()), this, SLOT(removeConstraint()));
   setMenu->addAction(m_removeConstraintAction);
 
   m_setConstraintToAllAction = new QAction("Set constraint to all", this);
-  m_setConstraintToAllAction->setToolTip(
-      "Set this constraint for all parameters.");
-  connect(m_setConstraintToAllAction, SIGNAL(triggered()), this,
-          SLOT(setConstraintAll()));
+  m_setConstraintToAllAction->setToolTip("Set this constraint for all parameters.");
+  connect(m_setConstraintToAllAction, SIGNAL(triggered()), this, SLOT(setConstraintAll()));
   setMenu->addAction(m_setConstraintToAllAction);
 
   m_removeAllConstraintsAction = new QAction("Remove all constraints", this);
-  m_removeAllConstraintsAction->setToolTip(
-      "Remove constraints for all parameters.");
-  connect(m_removeAllConstraintsAction, SIGNAL(triggered()), this,
-          SLOT(removeAllConstraints()));
+  m_removeAllConstraintsAction->setToolTip("Remove constraints for all parameters.");
+  connect(m_removeAllConstraintsAction, SIGNAL(triggered()), this, SLOT(removeAllConstraints()));
   setMenu->addAction(m_removeAllConstraintsAction);
 
   setMenu->addSeparator();
@@ -140,10 +128,8 @@ LocalParameterEditor::LocalParameterEditor(
   m_setToLogAction->setEnabled(logOptionsEnabled);
 
   m_setAllToLogAction = new QAction("Set all to log", this);
-  m_setAllToLogAction->setToolTip(
-      "Set all parameters to log value from the relevant workspace");
-  connect(m_setAllToLogAction, SIGNAL(triggered()), this,
-          SIGNAL(setAllValuesToLog()));
+  m_setAllToLogAction->setToolTip("Set all parameters to log value from the relevant workspace");
+  connect(m_setAllToLogAction, SIGNAL(triggered()), this, SIGNAL(setAllValuesToLog()));
   setMenu->addAction(m_setAllToLogAction);
   m_setAllToLogAction->setEnabled(logOptionsEnabled);
 
@@ -151,8 +137,7 @@ LocalParameterEditor::LocalParameterEditor(
 
   m_editor->installEventFilter(this);
 
-  connect(m_editor, SIGNAL(textEdited(const QString &)), this,
-          SLOT(updateValue(const QString &)));
+  connect(m_editor, SIGNAL(textEdited(const QString &)), this, SLOT(updateValue(const QString &)));
 
   setEditorState();
 }
@@ -263,8 +248,7 @@ void LocalParameterEditor::setToLog() { emit setValueToLog(m_index); }
 bool LocalParameterEditor::eventFilter(QObject * /*unused*/, QEvent *evn) {
   if (evn->type() == QEvent::KeyPress) {
     auto keyEvent = static_cast<QKeyEvent *>(evn);
-    if (keyEvent->key() == Qt::Key_F &&
-        keyEvent->modifiers() == Qt::ControlModifier && m_tie.isEmpty()) {
+    if (keyEvent->key() == Qt::Key_F && keyEvent->modifiers() == Qt::ControlModifier && m_tie.isEmpty()) {
       fixParameter();
       return true;
     }
@@ -301,8 +285,7 @@ void LocalParameterEditor::setEditorState() {
     validator->setDecimals(16);
     m_editor->setValidator(validator);
     m_editor->setText(m_value);
-    m_editor->setToolTip(
-        "Edit local parameter value. Press Ctrl+F to fix/unfix it.");
+    m_editor->setToolTip("Edit local parameter value. Press Ctrl+F to fix/unfix it.");
   } else {
     m_editor->setValidator(nullptr);
     m_editor->setText(m_tie);
@@ -335,9 +318,7 @@ QString LocalParameterEditor::setConstraintDialog(const QString &constraint) {
  * SLOT: when user edits value, make sure m_value is updated
  * @param value :: [input] Changed text in the edit box
  */
-void LocalParameterEditor::updateValue(const QString &value) {
-  m_value = value;
-}
+void LocalParameterEditor::updateValue(const QString &value) { m_value = value; }
 
 /**
  * Slot: when log checkbox state changes, enable/disable the "set to log" and
@@ -348,5 +329,4 @@ void LocalParameterEditor::setLogOptionsEnabled(bool enabled) {
   m_setToLogAction->setEnabled(enabled);
   m_setAllToLogAction->setEnabled(enabled);
 }
-} // namespace MantidWidgets
-} // namespace MantidQt
+} // namespace MantidQt::MantidWidgets

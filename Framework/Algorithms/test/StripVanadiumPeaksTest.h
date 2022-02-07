@@ -9,9 +9,9 @@
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAlgorithms/StripVanadiumPeaks.h"
+#include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/VectorHelper.h"
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include <cxxtest/TestSuite.h>
 
 using namespace Mantid::API;
@@ -55,8 +55,7 @@ public:
     TS_ASSERT(strip.isExecuted());
 
     MatrixWorkspace_const_sptr output;
-    output = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-        outputWSName);
+    output = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(outputWSName);
 
     // Get a spectrum
     const auto &X = output->x(2);

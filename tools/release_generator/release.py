@@ -29,7 +29,7 @@ We are proud to announce version {version} of Mantid.
 
 **TODO: Add paragraph summarizing big changes**
 
-This is just one of many improvements in this release, so please take a
+These are just some of the many improvements in this release, so please take a
 look at the release notes, which are filled with details of the
 important changes and improvements in many areas. The development team
 has put a great effort into making all of these improvements within
@@ -42,7 +42,7 @@ reported any issues to us. Please keep on reporting any problems you
 have, or crashes that occur on our `forum`_.
 
 Installation packages can be found on our `download page`_
-which now links to sourceforge to mirror our download files around the world, you can also
+which now links to sourceforge to mirror our download files around the world. You can also
 access the source code on `GitHub release page`_.
 
 Citation
@@ -68,11 +68,7 @@ Changes
    *
 
 - :doc:`Framework <framework>`
-- :doc:`General UI & Usability <ui>`
-
-  - :doc:`MantidPlot <mantidplot>`
-
-  - :doc:`MantidWorkbench <mantidworkbench>`
+- :doc:`Mantid Workbench <mantidworkbench>`
 - :doc:`Diffraction <diffraction>`
 - :doc:`Muon Analysis <muon>`
 - Low Q
@@ -95,7 +91,7 @@ For a full list of all issues addressed during this release please see the `GitH
 
 .. _forum: https://forum.mantidproject.org
 
-.. _GitHub milestone: https://github.com/mantidproject/mantid/pulls?utf8=%E2%9C%93&q=is%3Apr+milestone%3A"Release {milestone}"+is%3Amerged
+.. _GitHub milestone: {milestone_link}
 
 .. _GitHub release page: https://github.com/mantidproject/mantid/releases/tag/v{version}
 ''',
@@ -121,40 +117,17 @@ Data Objects
 
 Python
 ------
-''',
-    'ui.rst':'''======================
-UI & Usability Changes
-======================
-
-.. contents:: Table of Contents
-   :local:
-
-.. warning:: **Developers:** Sort changes under appropriate heading
-    putting new features at the top of the section, followed by
-    improvements, followed by bug fixes.
 
 Installation
 ------------
-
-MantidPlot
-----------
-
-See :doc:`mantidplot`.
 
 MantidWorkbench
 ---------------
 
 See :doc:`mantidworkbench`.
 
-SliceViewer and Vates Simple Interface
---------------------------------------
-''',
-    'mantidplot.rst':'''==================
-MantidPlot Changes
-==================
-
-.. contents:: Table of Contents
-   :local:
+SliceViewer
+-----------
 
 Improvements
 ############
@@ -162,18 +135,18 @@ Improvements
 Bugfixes
 ########
 ''',
-    'mantidworkbench.rst':'''=======================
-MantidWorkbench Changes
-=======================
+    'mantidworkbench.rst':'''========================
+Mantid Workbench Changes
+========================
 
 .. contents:: Table of Contents
    :local:
 
-Improvements
-############
+New and Improved
+----------------
 
 Bugfixes
-########
+--------
 '''
     }
 
@@ -193,9 +166,6 @@ Engineering Diffraction
 
 Single Crystal Diffraction
 --------------------------
-
-Imaging
--------
 '''),
     'direct_geometry.rst':('Direct Geometry Changes', '''
 .. warning:: **Developers:** Sort changes under appropriate heading
@@ -211,7 +181,6 @@ Imaging
 .. warning:: **Developers:** Sort changes under appropriate heading
     putting new features at the top of the section, followed by
     improvements, followed by bug fixes.
-
 '''),
     'sans.rst':('SANS Changes', '''
 .. warning:: **Developers:** Sort changes under appropriate heading
@@ -278,13 +247,12 @@ def fixReleaseName(name):
 
 def toMilestoneName(version):
     version = version[1:].split('.')
-    version = '"Release+{major}.{minor}"'.format(major=version[0], minor=version[1])
+    version = 'Release+{major}.{minor}'.format(major=version[0], minor=version[1])
     return version
 
 
 def addToReleaseList(release_root, version):
     filename = os.path.join(release_root, 'index.rst')
-    newversion = '   %s <%s/index>\n' % (version, version)
 
     # read in the entire old version
     with open(filename, 'r') as handle:
@@ -295,9 +263,9 @@ def addToReleaseList(release_root, version):
         search_for_insertion = True
         for i in range(len(oldtext)):
             line = oldtext[i].strip()
-            if search_for_insertion and line.startswith('v') and line.endswith('/index>'):
+            if search_for_insertion and line.startswith('* :doc:`v') and line.endswith('/index>`'):
                 if version not in line:
-                    handle.write(newversion)
+                    handle.write(f"* :doc:`{version} <{version}/index>`\n")
                 search_for_insertion = False
             handle.write(oldtext[i])
 
@@ -318,7 +286,10 @@ if __name__ == '__main__':
     print('milestone:', args.milestone)
     release_root = getReleaseRoot()
     print('     root:', release_root)
-
+    # Encode the milestone to remove spaces for the GitHub filter URL
+    sanitized_milestone = args.milestone.replace(' ', '+')
+    milestone_link ='https://github.com/mantidproject/mantid/pulls?utf8=%E2%9C%93&q=is%3Apr+' \
+        + f'milestone%3A%22{sanitized_milestone}%22+is%3Amerged'
     # add the new sub-site to the index
     addToReleaseList(release_root, args.release)
 
@@ -327,12 +298,12 @@ if __name__ == '__main__':
     if not os.path.exists(release_root):
         print('creating directory', release_root)
         os.makedirs(release_root)
-
     release_link = '\n:ref:`Release {0} <{1}>`'.format(args.release[1:], args.release)
 
     for filename in DOCS.keys():
         version_maj_min=args.release[1:-2]
-        contents = DOCS[filename].format(milestone=args.milestone, version=args.release[1:], version_maj_min=version_maj_min ,
+        contents = DOCS[filename].format(milestone_link=milestone_link, version=args.release[1:],
+                                         version_maj_min=version_maj_min,
                                          mantid_doi=MANTID_DOI.format(version_maj_min=version_maj_min))
         filename = os.path.join(release_root, filename)
         print('making', filename)
@@ -343,7 +314,7 @@ if __name__ == '__main__':
 
     for filename in TECH_DOCS.keys():
         name, contents = TECH_DOCS[filename]
-        contents = contents.format(milestone=args.milestone, version=args.release[1:])
+        contents = contents.format(sanitized_milestone=sanitized_milestone, version=args.release[1:])
         filename = os.path.join(release_root, filename)
         print('making', filename)
         with open(filename, 'w') as handle:

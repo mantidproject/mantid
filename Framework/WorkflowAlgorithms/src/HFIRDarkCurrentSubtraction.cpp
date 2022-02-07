@@ -15,8 +15,7 @@
 #include "Poco/Path.h"
 #include "Poco/String.h"
 
-namespace Mantid {
-namespace WorkflowAlgorithms {
+namespace Mantid::WorkflowAlgorithms {
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(HFIRDarkCurrentSubtraction)
@@ -27,24 +26,18 @@ using namespace Geometry;
 
 void HFIRDarkCurrentSubtraction::init() {
   auto wsValidator = std::make_shared<WorkspaceUnitValidator>("Wavelength");
-  declareProperty(std::make_unique<WorkspaceProperty<>>(
-      "InputWorkspace", "", Direction::Input, wsValidator));
+  declareProperty(std::make_unique<WorkspaceProperty<>>("InputWorkspace", "", Direction::Input, wsValidator));
 
-  declareProperty(
-      std::make_unique<API::FileProperty>("Filename", "",
-                                          API::FileProperty::Load, ".xml"),
-      "The name of the input event Nexus file to load as dark current.");
+  declareProperty(std::make_unique<API::FileProperty>("Filename", "", API::FileProperty::Load, ".xml"),
+                  "The name of the input event Nexus file to load as dark current.");
 
-  declareProperty(std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
-                                                        Direction::Output));
+  declareProperty(std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "", Direction::Output));
   declareProperty("PersistentCorrection", true,
                   "If true, the algorithm will be persistent and re-used when "
                   "other data sets are processed");
-  declareProperty("ReductionProperties", "__sans_reduction_properties",
-                  Direction::Input);
-  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
-      "OutputDarkCurrentWorkspace", "", Direction::Output,
-      PropertyMode::Optional));
+  declareProperty("ReductionProperties", "__sans_reduction_properties", Direction::Input);
+  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>("OutputDarkCurrentWorkspace", "",
+                                                                       Direction::Output, PropertyMode::Optional));
   declareProperty("OutputMessage", "", Direction::Output);
 }
 
@@ -54,12 +47,10 @@ void HFIRDarkCurrentSubtraction::exec() {
   const std::string reductionManagerName = getProperty("ReductionProperties");
   std::shared_ptr<PropertyManager> reductionManager;
   if (PropertyManagerDataService::Instance().doesExist(reductionManagerName)) {
-    reductionManager =
-        PropertyManagerDataService::Instance().retrieve(reductionManagerName);
+    reductionManager = PropertyManagerDataService::Instance().retrieve(reductionManagerName);
   } else {
     reductionManager = std::make_shared<PropertyManager>();
-    PropertyManagerDataService::Instance().addOrReplace(reductionManagerName,
-                                                        reductionManager);
+    PropertyManagerDataService::Instance().addOrReplace(reductionManagerName, reductionManager);
   }
 
   // If the load algorithm isn't in the reduction properties, add it
@@ -118,8 +109,7 @@ void HFIRDarkCurrentSubtraction::exec() {
     }
 
     setProperty("OutputDarkCurrentWorkspace", darkWS);
-    reductionManager->declareProperty(std::make_unique<WorkspaceProperty<>>(
-        entryName, "", Direction::Output));
+    reductionManager->declareProperty(std::make_unique<WorkspaceProperty<>>(entryName, "", Direction::Output));
     reductionManager->setPropertyValue(entryName, darkWSName);
     reductionManager->setProperty(entryName, darkWS);
   }
@@ -128,7 +118,7 @@ void HFIRDarkCurrentSubtraction::exec() {
   // Perform subtraction
   double darkTimer = getCountingTime(darkWS);
   double dataTimer = getCountingTime(inputWS);
-  IAlgorithm_sptr scaleAlg = createChildAlgorithm("Scale", 0.3, 0.5);
+  auto scaleAlg = createChildAlgorithm("Scale", 0.3, 0.5);
   scaleAlg->setProperty("InputWorkspace", darkWS);
   scaleAlg->setProperty("Factor", dataTimer / darkTimer);
   scaleAlg->setProperty("Operation", "Multiply");
@@ -142,7 +132,7 @@ void HFIRDarkCurrentSubtraction::exec() {
     scaledDarkWS->dataY(DEFAULT_MONITOR_ID)[i] = 0.0;
     scaledDarkWS->dataE(DEFAULT_MONITOR_ID)[i] = 0.0;
   }
-  IAlgorithm_sptr minusAlg = createChildAlgorithm("Minus", 0.5, 0.7);
+  auto minusAlg = createChildAlgorithm("Minus", 0.5, 0.7);
   minusAlg->setProperty("LHSWorkspace", inputWS);
   minusAlg->setProperty("RHSWorkspace", scaledDarkWS);
   MatrixWorkspace_sptr outputWS = getProperty("OutputWorkspace");
@@ -157,8 +147,7 @@ void HFIRDarkCurrentSubtraction::exec() {
 
 /// Get the counting time from a workspace
 /// @param inputWS :: workspace to read the counting time from
-double HFIRDarkCurrentSubtraction::getCountingTime(
-    const MatrixWorkspace_sptr &inputWS) {
+double HFIRDarkCurrentSubtraction::getCountingTime(const MatrixWorkspace_sptr &inputWS) {
   // First, look whether we have the information in the log
   if (inputWS->run().hasProperty("timer")) {
     return inputWS->run().getPropertyValueAsType<double>("timer");
@@ -170,5 +159,4 @@ double HFIRDarkCurrentSubtraction::getCountingTime(
   }
 }
 
-} // namespace WorkflowAlgorithms
-} // namespace Mantid
+} // namespace Mantid::WorkflowAlgorithms

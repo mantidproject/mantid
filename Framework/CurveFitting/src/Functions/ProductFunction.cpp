@@ -10,9 +10,7 @@
 #include "MantidCurveFitting/Functions/ProductFunction.h"
 #include "MantidAPI/FunctionFactory.h"
 
-namespace Mantid {
-namespace CurveFitting {
-namespace Functions {
+namespace Mantid::CurveFitting::Functions {
 
 using namespace CurveFitting;
 
@@ -22,8 +20,7 @@ DECLARE_FUNCTION(ProductFunction)
  *  @param domain :: The buffer for writing the calculated values. Must be big
  * enough to accept dataSize() values
  */
-void ProductFunction::function(const API::FunctionDomain &domain,
-                               API::FunctionValues &values) const {
+void ProductFunction::function(const API::FunctionDomain &domain, API::FunctionValues &values) const {
   API::FunctionValues tmp(domain);
   values.setCalculated(1.0);
   for (size_t iFun = 0; iFun < nFunctions(); ++iFun) {
@@ -38,11 +35,8 @@ void ProductFunction::function(const API::FunctionDomain &domain,
  * @param domain :: Function domein.
  * @param jacobian :: Jacobian - stores the calculated derivatives
  */
-void ProductFunction::functionDeriv(const API::FunctionDomain &domain,
-                                    API::Jacobian &jacobian) {
+void ProductFunction::functionDeriv(const API::FunctionDomain &domain, API::Jacobian &jacobian) {
   calNumericalDeriv(domain, jacobian);
 }
 
-} // namespace Functions
-} // namespace CurveFitting
-} // namespace Mantid
+} // namespace Mantid::CurveFitting::Functions

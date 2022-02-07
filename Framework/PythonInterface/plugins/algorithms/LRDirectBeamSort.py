@@ -8,7 +8,11 @@
 from mantid.api import *
 from mantid.simpleapi import *
 from mantid.kernel import *
-
+import functools
+import numpy as np
+from typing import List, Tuple
+import datetime
+from math import ceil
 
 THI_TOLERANCE = 0.002
 
@@ -120,7 +124,7 @@ class LRDirectBeamSort(PythonAlgorithm):
         self.declareProperty("IncidentMedium", "Air", doc="Name of the incident medium")
         self.declareProperty("OrderDirectBeamsByRunNumber", False,
                              "Force the sequence of direct beam files to be ordered by run number")
-        self.declareProperty(FileProperty("ScalingFactorFile","",
+        self.declareProperty(FileProperty("ScalingFactorFile", "",
                                           action=FileAction.OptionalSave,
                                           extensions=['cfg']),
                              "Scaling factor file to be created")
@@ -136,7 +140,9 @@ class LRDirectBeamSort(PythonAlgorithm):
         run_list = self.getProperty("RunList").value
         if len(run_list) > 0:
             for run in run_list:
-                workspace = LoadEventNexus(Filename="REF_L_%s" % run, OutputWorkspace="__data_file_%s" % run, MetaDataOnly=not compute)
+                workspace = LoadEventNexus(Filename="REF_L_%s" % run,
+                                           OutputWorkspace="__data_file_%s" % run,
+                                           MetaDataOnly=not compute)
                 lr_data.append(workspace)
         else:
             ws_list = self.getProperty("WorkspaceList").value
@@ -147,7 +153,7 @@ class LRDirectBeamSort(PythonAlgorithm):
         if sort_by_runs is True:
             lr_data_sorted = sorted(lr_data, key=lambda r: r.getRunNumber())
         else:
-            lr_data_sorted = sorted(lr_data, cmp=sorter_function)
+            lr_data_sorted = sorted(lr_data, key=functools.cmp_to_key(sorter_function))
 
         # Set the output properties
         run_numbers = [r.getRunNumber() for r in lr_data_sorted]
@@ -158,7 +164,7 @@ class LRDirectBeamSort(PythonAlgorithm):
         # Compute the scaling factors if requested
         if compute:
             sf_file = self.getProperty("ScalingFactorFile").value
-            if len(sf_file)==0:
+            if len(sf_file) == 0:
                 logger.error("Scaling factors were requested but no output file was set")
             else:
                 self._compute_scaling_factors(lr_data_sorted)
@@ -191,7 +197,7 @@ class LRDirectBeamSort(PythonAlgorithm):
 
         tof_steps = self.getProperty("TOFSteps").value
         scaling_file = self.getProperty("ScalingFactorFile").value
-        use_low_res_cut = self.getProperty("UseLowResCut").value
+        # use_low_res_cut = self.getProperty("UseLowResCut").value
         incident_medium = self.getProperty("IncidentMedium").value
         summary = ""
         for g in group_list:
@@ -204,30 +210,8 @@ class LRDirectBeamSort(PythonAlgorithm):
             bck_ranges = []
 
             for run in g:
-                # Create peak workspace
-                number_of_pixels_x = int(run.getInstrument().getNumberParameter("number-of-x-pixels")[0])
-                number_of_pixels_y = int(run.getInstrument().getNumberParameter("number-of-y-pixels")[0])
 
-                # Direct beam signal
-                workspace = RefRoi(InputWorkspace=run, ConvertToQ=False,
-                                   NXPixel=number_of_pixels_x,
-                                   NYPixel=number_of_pixels_y,
-                                   IntegrateY=False,
-                                   OutputWorkspace="__ref_peak")
-                workspace = Transpose(InputWorkspace=workspace)
-                peak, _, _ = LRPeakSelection(InputWorkspace=workspace)
-
-                # Low resolution cut
-                if use_low_res_cut:
-                    workspace = RefRoi(InputWorkspace=run, ConvertToQ=False,
-                                       NXPixel=number_of_pixels_x,
-                                       NYPixel=number_of_pixels_y,
-                                       IntegrateY=True,
-                                       OutputWorkspace="__ref_peak")
-                    workspace = Transpose(InputWorkspace=workspace)
-                    _, low_res, _ = LRPeakSelection(InputWorkspace=workspace)
-                else:
-                    low_res = [0, number_of_pixels_x]
+                peak, low_res = self._find_peak(run)  #, use_low_res_cut)
 
                 att = run.getRun().getProperty('vAtt').value[0]-1
                 wl = run.getRun().getProperty('LambdaRequest').value[0]
@@ -265,14 +249,87 @@ class LRDirectBeamSort(PythonAlgorithm):
             logger.notice("Computing scaling factors for %s" % str(direct_beam_runs))
             slit_tolerance = self.getProperty("SlitTolerance").value
             LRScalingFactors(DirectBeamRuns=direct_beam_runs,
-                             TOFRange=tof_range, TOFSteps=tof_steps,
+                             TOFRange=tof_range,
+                             TOFSteps=tof_steps,
                              SignalPeakPixelRange=peak_ranges,
                              SignalBackgroundPixelRange=bck_ranges,
                              LowResolutionPixelRange=x_ranges,
                              IncidentMedium=incident_medium,
                              SlitTolerance=slit_tolerance,
                              ScalingFactorFile=scaling_file)
+
+        # log output summary
         logger.notice(summary)
+
+    @staticmethod
+    def _find_peak(ws, crop=25, factor=1.) -> Tuple[List[int], List[int]]:
+        """Find peak by Mantid FindPeaks with Gaussian peak in the counts
+        summed from detector pixels on the same row.
+
+        Assumption
+        1. The maximum count is belonged to the real peak
+
+        Parameters
+        ----------
+        ws: MatrixWorkspace
+            workspace to find peak
+        crop: int
+            number of pixels to crop out at the edge of detector
+        factor: float
+            multiplier factor to extend from peak width to peak range
+
+        Returns
+        -------
+        tuple
+            peak range, low resolution range
+
+        """
+        # Sum detector counts into 1D
+        y = ws.extractY()
+        y = np.reshape(y, (256, 304, y.shape[1]))
+        p_vs_t = np.sum(y, axis=0)
+        signal = np.sum(p_vs_t, axis=1)
+
+        # Max index as the "observed" peak center
+        max_index = np.argmax(signal)
+
+        # Fit peak by Gaussian
+        # create workspace
+        now = datetime.datetime.now()
+        ws_name = f'REL{now.hour:02}{now.minute:02}{now.second:02}{now.microsecond:04}.dat'
+        CreateWorkspace(DataX=np.arange(len(signal)), DataY=signal, DataE=np.sqrt(signal), OutputWorkspace=ws_name)
+
+        # prepare fitting
+        model_ws_name = f'{ws_name}_model'
+        param_ws_name = f'{ws_name}_parameter'
+        peak_ws_name = f'{ws_name}_peaks'
+
+        FitPeaks(InputWorkspace=ws_name,
+                 OutputWorkspace=peak_ws_name,
+                 PeakCenters=f'{max_index}',
+                 FitWindowBoundaryList=f'{crop},{signal.shape[0]-crop}',
+                 HighBackground=False,
+                 ConstrainPeakPositions=False,
+                 FittedPeaksWorkspace=model_ws_name,
+                 OutputPeakParametersWorkspace=param_ws_name,
+                 RawPeakParameters=False)
+
+        # Retrieve value
+        peak_width = mtd[param_ws_name].cell(0, 3)
+        peak_center = mtd[param_ws_name].cell(0, 2)
+
+        info_str = f'{ws}: Max = {max_index}, Peak center = {peak_center}, Width = {peak_width}'
+        logger.notice(info_str)
+
+        # Form output
+        peak = [int(peak_center - factor * peak_width),
+                int(ceil(peak_center + factor * peak_width))]
+
+        # Delete workspaces
+        for ws_name in [peak_ws_name, model_ws_name, param_ws_name]:
+            DeleteWorkspace(ws_name)
+
+        return peak, [0, 255]
 
 
 AlgorithmFactory.subscribe(LRDirectBeamSort)

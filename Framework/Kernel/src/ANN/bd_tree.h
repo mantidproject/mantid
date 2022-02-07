@@ -64,9 +64,9 @@ class ANNbd_shrink : public ANNkd_node // splitting node of a kd-tree
   ANNorthHSArray bnds; // list of bounding halfspaces
   ANNkd_ptr child[2];  // in and out children
 public:
-  ANNbd_shrink(           // constructor
-      int nb,             // number of bounding halfspaces
-      ANNorthHSArray bds, // list of bounding halfspaces
+  ANNbd_shrink(                                       // constructor
+      int nb,                                         // number of bounding halfspaces
+      ANNorthHSArray bds,                             // list of bounding halfspaces
       ANNkd_ptr ic = nullptr, ANNkd_ptr oc = nullptr) // children
   {
     n_bnds = nb;        // cutting dimension

@@ -7,13 +7,19 @@
 #pragma once
 
 #include "DllConfig.h"
-#include "IndexTypes.h"
-#include "IndirectFittingModel.h"
 #include "MantidAPI/IFunction_fwd.h"
 #include "MantidAPI/ITableWorkspace_fwd.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
+#include "MantidQtWidgets/Common/FittingMode.h"
+#include "MantidQtWidgets/Common/FunctionModelDataset.h"
+#include "MantidQtWidgets/Common/IndexTypes.h"
+#include "ParameterEstimation.h"
 
 #include <QDockWidget>
+#include <QList>
+#include <QPair>
+#include <QString>
+
 #include <boost/optional.hpp>
 #include <unordered_map>
 
@@ -33,6 +39,7 @@ using namespace Mantid::API;
 using namespace MantidWidgets;
 
 class FunctionTemplateBrowser;
+class FitStatusWidget;
 
 class MANTIDQT_INDIRECT_DLL IndirectFitPropertyBrowser : public QDockWidget {
   Q_OBJECT
@@ -45,40 +52,42 @@ public:
   void setFunction(const QString &funStr);
   int getNumberOfDatasets() const;
   QString getSingleFunctionStr() const;
-  MultiDomainFunction_sptr getFittingFunction() const;
+  MultiDomainFunction_sptr getFitFunction() const;
   std::string minimizer(bool withProperties = false) const;
   int maxIterations() const;
   int getPeakRadius() const;
   std::string costFunction() const;
   bool convolveMembers() const;
+  bool outputCompositeMembers() const;
   std::string fitEvaluationType() const;
   std::string fitType() const;
   bool ignoreInvalidData() const;
   void updateParameters(const IFunction &fun);
   void updateMultiDatasetParameters(const IFunction &fun);
   void updateMultiDatasetParameters(const ITableWorkspace &params);
+  void updateFitStatus(const FitDomainIndex index);
+  void updateFitStatusData(const std::vector<std::string> &status, const std::vector<double> &chiSquared);
+  FittingMode getFittingMode() const;
   QString selectedFitType() const;
-  void setConvolveMembers(bool convolveMembers);
+  void setConvolveMembers(bool convolveEnabled);
+  void setOutputCompositeMembers(bool outputEnabled);
   void setFitEnabled(bool enable);
-  void setCurrentDataset(TableRowIndex i);
-  TableRowIndex currentDataset() const;
-  void updateFunctionBrowserData(
-      TableRowIndex nData, const QStringList &datasetNames,
-      const std::vector<double> &qValues,
-      const std::vector<std::pair<std::string, int>> &fitResolutions);
+  void setCurrentDataset(FitDomainIndex i);
+  FitDomainIndex currentDataset() const;
+  void updateFunctionBrowserData(int nData, const QList<MantidWidgets::FunctionModelDataset> &datasets,
+                                 const std::vector<double> &qValues,
+                                 const std::vector<std::pair<std::string, size_t>> &fitResolutions);
   void updatePlotGuess(const MatrixWorkspace_const_sptr &sampleWorkspace);
   void setErrorsEnabled(bool enabled);
-  void
-  updateParameterEstimationData(DataForParameterEstimationCollection &&data);
+  void updateParameterEstimationData(DataForParameterEstimationCollection &&data);
+  void estimateFunctionParameters();
   void setBackgroundA0(double value);
+  void setHiddenProperties(const std::vector<std::string> &);
 
 public slots:
   void fit();
   void sequentialFit();
-  void setModelResolution(std::string const &name,
-                          TableDatasetIndex const &index);
-  void setModelResolution(
-      const std::vector<std::pair<std::string, int>> &fitResolutions);
+  void setModelResolution(const std::vector<std::pair<std::string, size_t>> &fitResolutions);
 
 protected slots:
   void clear();
@@ -109,8 +118,12 @@ private:
   FunctionBrowser *m_functionBrowser;
   FitOptionsBrowser *m_fitOptionsBrowser;
   FunctionTemplateBrowser *m_templateBrowser;
+  FitStatusWidget *m_fitStatusWidget;
   QStackedWidget *m_functionWidget;
   QCheckBox *m_browserSwitcher;
+
+  std::vector<std::string> m_fitStatus;
+  std::vector<double> m_fitChiSquared;
 };
 
 } // namespace IDA

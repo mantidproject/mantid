@@ -6,8 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAlgorithms/CommutativeBinaryOperation.h"
 
-namespace Mantid {
-namespace Algorithms {
+namespace Mantid::Algorithms {
 /** Performs a simple check to see if the sizes of two workspaces are compatible
  * for a binary operation
  * In order to be size compatible then the larger workspace
@@ -18,9 +17,8 @@ namespace Algorithms {
  * @retval "<reason why not compatible>" The two workspaces are NOT size
  * compatible
  */
-std::string CommutativeBinaryOperation::checkSizeCompatibility(
-    const API::MatrixWorkspace_const_sptr lhs,
-    const API::MatrixWorkspace_const_sptr rhs) const {
+std::string CommutativeBinaryOperation::checkSizeCompatibility(const API::MatrixWorkspace_const_sptr lhs,
+                                                               const API::MatrixWorkspace_const_sptr rhs) const {
   // Don't allow this for EventWorkspaces. See for instance
   // Multiply::checkSizeCompatability
   if (std::dynamic_pointer_cast<const DataObjects::EventWorkspace>(lhs) ||
@@ -42,5 +40,4 @@ std::string CommutativeBinaryOperation::checkSizeCompatibility(
   // call the base routine
   return BinaryOperation::checkSizeCompatibility(wsLarger, wsSmaller);
 }
-} // namespace Algorithms
-} // namespace Mantid
+} // namespace Mantid::Algorithms

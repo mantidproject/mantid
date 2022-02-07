@@ -11,9 +11,7 @@
 #include "MantidAPI/FunctionFactory.h"
 #include <cmath>
 
-namespace Mantid {
-namespace CurveFitting {
-namespace Functions {
+namespace Mantid::CurveFitting::Functions {
 
 using namespace CurveFitting;
 
@@ -28,8 +26,7 @@ void GausDecay::init() {
   declareParameter("Sigma", 0.2, "Decay rate");
 }
 
-void GausDecay::function1D(double *out, const double *xValues,
-                           const size_t nData) const {
+void GausDecay::function1D(double *out, const double *xValues, const size_t nData) const {
   const double A = getParameter("A");
   const double G = getParameter("Sigma");
 
@@ -39,8 +36,7 @@ void GausDecay::function1D(double *out, const double *xValues,
   }
 }
 
-void GausDecay::functionDeriv1D(Jacobian *out, const double *xValues,
-                                const size_t nData) {
+void GausDecay::functionDeriv1D(Jacobian *out, const double *xValues, const size_t nData) {
   const double A = getParameter("A");
   const double G = getParameter("Sigma");
 
@@ -61,6 +57,4 @@ void GausDecay::setActiveParameter(size_t i, double value) {
     setParameter(j, value, false);
 }
 
-} // namespace Functions
-} // namespace CurveFitting
-} // namespace Mantid
+} // namespace Mantid::CurveFitting::Functions

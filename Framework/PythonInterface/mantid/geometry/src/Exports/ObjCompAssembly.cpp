@@ -20,6 +20,6 @@ GET_POINTER_SPECIALIZATION(ObjCompAssembly)
 void export_ObjCompAssembly() {
   register_ptr_to_python<std::shared_ptr<ObjCompAssembly>>();
 
-  class_<ObjCompAssembly, boost::python::bases<ICompAssembly, ObjComponent>,
-         boost::noncopyable>("IObjCompAssembly", no_init);
+  class_<ObjCompAssembly, boost::python::bases<ICompAssembly, ObjComponent>, boost::noncopyable>("IObjCompAssembly",
+                                                                                                 no_init);
 }

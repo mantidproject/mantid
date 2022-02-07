@@ -9,8 +9,10 @@ import platform
 import numpy as np
 from mantid.simpleapi import *
 from mantid.api import MatrixWorkspace, WorkspaceGroup
+from IndirectImport import is_supported_f2py_platform
 
-if platform.system() == "Windows":
+
+if is_supported_f2py_platform():
     class BayesQuasiTest(unittest.TestCase):
 
         _res_ws = None

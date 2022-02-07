@@ -6,6 +6,11 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
+// Mantid
+#include "MantidAPI/AnalysisDataService.h"
+#include "MantidFrameworkTestHelpers/MDEventsTestHelper.h"
+#include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
+
 // cxxtest
 #include <cxxtest/WrappedTestSuite.h>
 

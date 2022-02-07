@@ -7,6 +7,7 @@
 # pylint: disable=too-few-public-methods
 
 """ Finds the beam centre."""
+import json
 
 from mantid.api import (DataProcessorAlgorithm, MatrixWorkspaceProperty, AlgorithmFactory, PropertyMode, Progress,
                         IEventWorkspace)
@@ -20,8 +21,9 @@ from sans.algorithm_detail.scale_sans_workspace import scale_workspace
 from sans.algorithm_detail.slice_sans_event import slice_sans_event
 from sans.algorithm_detail.xml_shapes import quadrant_xml
 from sans.common.constants import EMPTY_NAME
-from sans.common.enums import (DetectorType, DataType, MaskingQuadrant)
+from sans.common.enums import (DetectorType, DataType, MaskingQuadrant, RebinType)
 from sans.common.general_functions import create_child_algorithm, append_to_sans_file_tag
+from sans.state.AllStates import AllStates
 from sans.state.Serializer import Serializer
 
 
@@ -297,12 +299,12 @@ class SANSBeamCentreFinderCore(DataProcessorAlgorithm):
         slice_event_factor = returned["SliceEventFactor"]
         return workspace, monitor_workspace, slice_event_factor
 
-    def _move(self, state, workspace, component, is_transmission=False):
+    def _move(self, state: AllStates, workspace, component, is_transmission=False):
         # First we set the workspace to zero, since it might have been moved around by the user in the ADS
         # Second we use the initial move to bring the workspace into the correct position
-        move_component(move_info=state.move, component_name='', move_type=MoveTypes.RESET_POSITION,
+        move_component(state=state, component_name='', move_type=MoveTypes.RESET_POSITION,
                        workspace=workspace)
-        move_component(component_name=component, move_info=state.move, move_type=MoveTypes.INITIAL_MOVE,
+        move_component(component_name=component, state=state, move_type=MoveTypes.INITIAL_MOVE,
                        workspace=workspace, is_transmission_workspace=is_transmission)
         return workspace
 
@@ -312,19 +314,21 @@ class SANSBeamCentreFinderCore(DataProcessorAlgorithm):
 
     def _convert_to_wavelength(self, state, workspace):
         wavelength_state = state.wavelength
+        wavelength_range = wavelength_state.wavelength_interval.wavelength_full_range
 
         wavelength_name = "SANSConvertToWavelengthAndRebin"
         wavelength_options = {"InputWorkspace": workspace,
                               "OutputWorkspace": EMPTY_NAME,
-                              "WavelengthLow": wavelength_state.wavelength_low[0],
-                              "WavelengthHigh": wavelength_state.wavelength_high[0],
-                              "WavelengthStep": wavelength_state.wavelength_step,
-                              "WavelengthStepType": wavelength_state.wavelength_step_type.value,
-                              "RebinMode": wavelength_state.rebin_type.value}
+                              "WavelengthPairs": json.dumps([(wavelength_range[0], wavelength_range[1])]),
+                              "WavelengthStep": wavelength_state.wavelength_interval.wavelength_step,
+                              "WavelengthStepType": wavelength_state.wavelength_step_type_lin_log.value,
+                              # Non monitor/transmission data does not support interpolating rebin
+                              "RebinMode": RebinType.REBIN.value}
 
         wavelength_alg = create_child_algorithm(self, wavelength_name, **wavelength_options)
         wavelength_alg.execute()
-        return wavelength_alg.getProperty("OutputWorkspace").value
+        grouped_ws = wavelength_alg.getProperty("OutputWorkspace").value
+        return grouped_ws.getItem(0)
 
     def _scale(self, state, workspace):
         instrument = state.data.instrument
@@ -344,10 +348,11 @@ class SANSBeamCentreFinderCore(DataProcessorAlgorithm):
             direct_workspace = self._move(state=state, workspace=direct_workspace,
                                           component=component_as_string, is_transmission=True)
 
-        alg = CreateSANSAdjustmentWorkspaces(state_adjustment=state.adjustment,
+        alg = CreateSANSAdjustmentWorkspaces(state=state,
                                              data_type=data_type, component=component_as_string)
+        wav_range = state.wavelength.wavelength_interval.wavelength_full_range
         returned_dict = alg.create_sans_adjustment_workspaces(direct_ws=direct_workspace, monitor_ws=monitor_workspace,
-                                                              sample_data=workspace,
+                                                              sample_data=workspace, wav_range=wav_range,
                                                               transmission_ws=transmission_workspace)
         wavelength_adjustment = returned_dict["wavelength_adj"]
         pixel_adjustment = returned_dict["pixel_adj"]

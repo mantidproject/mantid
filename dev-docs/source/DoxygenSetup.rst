@@ -33,7 +33,7 @@ Visual Studio Doxygen Setup
 | Rerun CMake     | Run cmake for the build to ensure that the Mantid.doxyfile is created                   |
 +-----------------+-----------------------------------------------------------------------------------------+
 | Add VC++ Tool:  | - Tools\External Tool then click Add                                                    |
-| "DoxyGen"       | - Title: &DoxyGen                                                                       | 
+| "DoxyGen"       | - Title: &DoxyGen                                                                       |
 |                 | - Command: C:\Program Files\Doxygen\bin\doxygen.exe                                     |
 |                 | - Arguments: "$(SolutionDir)\Framework\Doxygen\Mantid.doxyfile" (include the quotes!)   |
 |                 | - Initial Directory: $(SolutionDir)\Build                                               |

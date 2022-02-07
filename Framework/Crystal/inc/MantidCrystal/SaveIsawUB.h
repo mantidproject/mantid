@@ -35,13 +35,9 @@ public:
 
   /// Algorithm's version for identification
   int version() const override { return 1; };
-  const std::vector<std::string> seeAlso() const override {
-    return {"LoadIsawUB"};
-  }
+  const std::vector<std::string> seeAlso() const override { return {"LoadIsawUB"}; }
   /// Algorithm's category for identification
-  const std::string category() const override {
-    return "Crystal\\DataHandling;DataHandling\\Isaw";
-  }
+  const std::string category() const override { return "Crystal\\DataHandling;DataHandling\\Isaw"; }
 
 private:
   /// Initialise the properties

@@ -8,6 +8,7 @@
 
 #include "MantidKernel/Quat.h"
 #include "MantidKernel/V3D.h"
+#include <QSize>
 
 namespace MantidQt {
 namespace MantidWidgets {
@@ -46,22 +47,21 @@ transformation to the model.
 class Viewport {
 public:
   enum ProjectionType { ORTHO, PERSPECTIVE };
-  Viewport(int w,
-           int h); ///< Constructor with Width (w) and Height(h) as inputs
-                   /// Called by the display device when viewport is resized
-  void resize(int /*w*/, int /*h*/);
+  /// Constructor with Width (w) and Height(h) as inputs
+  /// Called by the display device when viewport is resized
+  explicit Viewport(QSize glWidgetDimensions);
+  void resize(QSize glWidgetDimensions);
   /// Get the viewport width and height.
-  void getViewport(int &w, int &h) const;
+  QSize dimensions() const;
   /// Return the projection type.
   ProjectionType getProjectionType() const;
   /// Set a projection.
-  void setProjection(double /*l*/, double /*r*/, double /*b*/, double /*t*/,
-                     double /*nearz*/, double /*farz*/,
+  void setProjection(double /*l*/, double /*r*/, double /*b*/, double /*t*/, double /*nearz*/, double /*farz*/,
                      ProjectionType type = Viewport::ORTHO);
   /// Set a projection.
-  void setProjection(const Mantid::Kernel::V3D &minBounds,
-                     const Mantid::Kernel::V3D &maxBounds,
+  void setProjection(const Mantid::Kernel::V3D &minBounds, const Mantid::Kernel::V3D &maxBounds,
                      ProjectionType type = Viewport::ORTHO);
+  void setProjectionZPlane(const Mantid::Kernel::V3D &minBounds, const Mantid::Kernel::V3D &maxBounds);
   /// Apply the projection to OpenGL engine
   void applyProjection() const;
   /// Rotate the model
@@ -83,6 +83,8 @@ public:
   void setViewToYNegative();
   /// Call to set the View to Z- direction
   void setViewToZNegative();
+
+  void adjustProjection();
 
   /// Init rotation at a point on the screen
   void initRotationFrom(int a, int b);
@@ -114,8 +116,7 @@ public:
   void setTranslation(double /*xval*/, double /*yval*/);
 
   // void getProjection(double&,double&,double&,double&,double&,double&);
-  void getInstantProjection(double & /*xmin*/, double & /*xmax*/,
-                            double & /*ymin*/, double & /*ymax*/,
+  void getInstantProjection(double & /*xmin*/, double & /*xmax*/, double & /*ymin*/, double & /*ymax*/,
                             double & /*zmin*/, double & /*zmax*/) const;
 
   /// Apply the transformation to a vector
@@ -127,8 +128,7 @@ public:
 
 protected:
   /// Correct for aspect ratio
-  void correctForAspectRatioAndZoom(double &xmin, double &xmax, double &ymin,
-                                    double &ymax, double &zmin,
+  void correctForAspectRatioAndZoom(double &xmin, double &xmax, double &ymin, double &ymax, double &zmin,
                                     double &zmax) const;
   /// Project a point onto a sphere centered at rotation point
   void projectOnSphere(int a, int b, Mantid::Kernel::V3D &point) const;
@@ -138,8 +138,7 @@ protected:
   /* Projection */
 
   ProjectionType m_projectionType; ///< Type of display projection
-  int m_width;                     ///< Width of the viewport in pixels
-  int m_height;                    ///< Height of the viewport in pixels
+  QSize m_dimensions;
   double m_left; ///< Ortho/Prespective Projection xmin value (Left side of the
   /// x axis)
   double m_right; ///< Ortho/Prespective Projection xmax value (Right side of
@@ -152,6 +151,14 @@ protected:
   /// z axis)
   double m_far; ///< Ortho/Prespective Projection zmax value (Far side of the z
   /// axis)
+  double m_leftOrig;
+  double m_rightOrig;
+  double m_bottomOrig;
+  double m_topOrig;
+  double m_zminOrig;
+  double m_zmaxOrig;
+  double m_zmin;
+  double m_zmax;
 
   /* Trackball rotation */
 

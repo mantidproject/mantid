@@ -18,24 +18,19 @@ using namespace Mantid::Kernel;
 using namespace Mantid::PhysicalConstants;
 using namespace WorkflowAlgorithmHelpers;
 
-namespace Mantid {
-namespace WorkflowAlgorithms {
+namespace Mantid::WorkflowAlgorithms {
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(DgsAbsoluteUnitsReduction)
 
 //----------------------------------------------------------------------------------------------
 /// Algorithm's name for identification. @see Algorithm::name
-const std::string DgsAbsoluteUnitsReduction::name() const {
-  return "DgsAbsoluteUnitsReduction";
-}
+const std::string DgsAbsoluteUnitsReduction::name() const { return "DgsAbsoluteUnitsReduction"; }
 
 /// Algorithm's version for identification. @see Algorithm::version
 int DgsAbsoluteUnitsReduction::version() const { return 1; }
 
 /// Algorithm's category for identification. @see Algorithm::category
-const std::string DgsAbsoluteUnitsReduction::category() const {
-  return "Workflow\\Inelastic\\UsesPropertyManager";
-}
+const std::string DgsAbsoluteUnitsReduction::category() const { return "Workflow\\Inelastic\\UsesPropertyManager"; }
 
 //----------------------------------------------------------------------------------------------
 
@@ -43,41 +38,30 @@ const std::string DgsAbsoluteUnitsReduction::category() const {
 /** Initialize the algorithm's properties.
  */
 void DgsAbsoluteUnitsReduction::init() {
-  this->declareProperty(std::make_unique<WorkspaceProperty<>>(
-                            "InputWorkspace", "", Direction::Input),
+  this->declareProperty(std::make_unique<WorkspaceProperty<>>("InputWorkspace", "", Direction::Input),
                         "The absolute units sample workspace.");
-  this->declareProperty(std::make_unique<WorkspaceProperty<>>(
-                            "InputMonitorWorkspace", "", Direction::Input,
-                            PropertyMode::Optional),
-                        "A monitor workspace associated with the absolute "
-                        "units sample workspace");
-  this->declareProperty(std::make_unique<WorkspaceProperty<>>(
-                            "DetectorVanadiumWorkspace", "", Direction::Input,
-                            PropertyMode::Optional),
-                        "An absolute units detector vanadium workspace.");
   this->declareProperty(
-      std::make_unique<WorkspaceProperty<>>("DetectorVanadiumMonitorWorkspace",
-                                            "", Direction::Input,
-                                            PropertyMode::Optional),
-      "A monitor workspace associated with the absolute units detector "
-      "vanadium workspace.");
+      std::make_unique<WorkspaceProperty<>>("InputMonitorWorkspace", "", Direction::Input, PropertyMode::Optional),
+      "A monitor workspace associated with the absolute "
+      "units sample workspace");
   this->declareProperty(
-      std::make_unique<WorkspaceProperty<>>(
-          "MaskWorkspace", "", Direction::Input, PropertyMode::Optional),
+      std::make_unique<WorkspaceProperty<>>("DetectorVanadiumWorkspace", "", Direction::Input, PropertyMode::Optional),
+      "An absolute units detector vanadium workspace.");
+  this->declareProperty(std::make_unique<WorkspaceProperty<>>("DetectorVanadiumMonitorWorkspace", "", Direction::Input,
+                                                              PropertyMode::Optional),
+                        "A monitor workspace associated with the absolute units detector "
+                        "vanadium workspace.");
+  this->declareProperty(
+      std::make_unique<WorkspaceProperty<>>("MaskWorkspace", "", Direction::Input, PropertyMode::Optional),
       "A masking workspace to apply to the data.");
   this->declareProperty(
-      std::make_unique<WorkspaceProperty<>>(
-          "GroupingWorkspace", "", Direction::Input, PropertyMode::Optional),
+      std::make_unique<WorkspaceProperty<>>("GroupingWorkspace", "", Direction::Input, PropertyMode::Optional),
       "A grouping workspace for the absolute units data.");
-  this->declareProperty("ReductionProperties", "__dgs_reduction_properties",
-                        Direction::Input);
-  this->declareProperty(std::make_unique<WorkspaceProperty<>>(
-                            "OutputWorkspace", "", Direction::Output),
+  this->declareProperty("ReductionProperties", "__dgs_reduction_properties", Direction::Input);
+  this->declareProperty(std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "", Direction::Output),
                         "The integrated absolute units workspace.");
-  this->declareProperty(
-      std::make_unique<WorkspaceProperty<>>("OutputMaskWorkspace", "",
-                                            Direction::Output),
-      "The diagnostic mask from the absolute units workspace");
+  this->declareProperty(std::make_unique<WorkspaceProperty<>>("OutputMaskWorkspace", "", Direction::Output),
+                        "The diagnostic mask from the absolute units workspace");
 }
 
 //----------------------------------------------------------------------------------------------
@@ -86,12 +70,10 @@ void DgsAbsoluteUnitsReduction::init() {
 void DgsAbsoluteUnitsReduction::exec() {
   g_log.notice() << "Starting DgsAbsoluteUnitsReduction\n";
   // Get the reduction property manager
-  const std::string reductionManagerName =
-      this->getProperty("ReductionProperties");
+  const std::string reductionManagerName = this->getProperty("ReductionProperties");
   std::shared_ptr<PropertyManager> reductionManager;
   if (PropertyManagerDataService::Instance().doesExist(reductionManagerName)) {
-    reductionManager =
-        PropertyManagerDataService::Instance().retrieve(reductionManagerName);
+    reductionManager = PropertyManagerDataService::Instance().retrieve(reductionManagerName);
   } else {
     throw std::runtime_error("DgsAbsoluteUnitsReduction cannot run without a "
                              "reduction PropertyManager.");
@@ -99,20 +81,16 @@ void DgsAbsoluteUnitsReduction::exec() {
 
   // Gather all of the input workspaces
   MatrixWorkspace_sptr absSampleWS = this->getProperty("InputWorkspace");
-  MatrixWorkspace_sptr absSampleMonWS =
-      this->getProperty("InputMonitorWorkspace");
-  MatrixWorkspace_sptr absDetVanWS =
-      this->getProperty("DetectorVanadiumWorkspace");
-  MatrixWorkspace_sptr absDetVanMonWS =
-      this->getProperty("DetectorVanadiumMonitorWorkspace");
+  MatrixWorkspace_sptr absSampleMonWS = this->getProperty("InputMonitorWorkspace");
+  MatrixWorkspace_sptr absDetVanWS = this->getProperty("DetectorVanadiumWorkspace");
+  MatrixWorkspace_sptr absDetVanMonWS = this->getProperty("DetectorVanadiumMonitorWorkspace");
   MatrixWorkspace_sptr absGroupingWS = this->getProperty("GroupingWorkspace");
   MatrixWorkspace_sptr maskWS = this->getProperty("MaskWorkspace");
 
   // Process absolute units detector vanadium if necessary
   MatrixWorkspace_sptr absIdetVanWS;
   if (absDetVanWS) {
-    IAlgorithm_sptr detVan =
-        this->createChildAlgorithm("DgsProcessDetectorVanadium");
+    auto detVan = createChildAlgorithm("DgsProcessDetectorVanadium");
     detVan->setProperty("InputWorkspace", absDetVanWS);
     detVan->setProperty("InputMonitorWorkspace", absDetVanMonWS);
     detVan->setProperty("ReductionProperties", reductionManagerName);
@@ -126,8 +104,7 @@ void DgsAbsoluteUnitsReduction::exec() {
   }
 
   const std::string absWsName = absSampleWS->getName() + "_absunits";
-  IAlgorithm_sptr etConv =
-      this->createChildAlgorithm("DgsConvertToEnergyTransfer");
+  auto etConv = createChildAlgorithm("DgsConvertToEnergyTransfer");
   etConv->setProperty("InputWorkspace", absSampleWS);
   etConv->setProperty("InputMonitorWorkspace", absSampleMonWS);
   etConv->setProperty("OutputWorkspace", absWsName);
@@ -145,8 +122,7 @@ void DgsAbsoluteUnitsReduction::exec() {
   etConv->executeAsChildAlg();
   MatrixWorkspace_sptr outputWS = etConv->getProperty("OutputWorkspace");
 
-  const double vanadiumMass = getDblPropOrParam(
-      "VanadiumMass", reductionManager, "vanadium-mass", outputWS);
+  const double vanadiumMass = getDblPropOrParam("VanadiumMass", reductionManager, "vanadium-mass", outputWS);
 
   // Get the vanadium mass from the Mantid physical constants
   Atom vanadium = getAtom("V");
@@ -155,43 +131,33 @@ void DgsAbsoluteUnitsReduction::exec() {
   outputWS /= (vanadiumMass / vanadiumRmm);
 
   // Set integration range for absolute units sample
-  double eMin = getDblPropOrParam("AbsUnitsMinimumEnergy", reductionManager,
-                                  "monovan-integr-min", outputWS);
-  double eMax = getDblPropOrParam("AbsUnitsMaximumEnergy", reductionManager,
-                                  "monovan-integr-max", outputWS);
+  double eMin = getDblPropOrParam("AbsUnitsMinimumEnergy", reductionManager, "monovan-integr-min", outputWS);
+  double eMax = getDblPropOrParam("AbsUnitsMaximumEnergy", reductionManager, "monovan-integr-max", outputWS);
 
   std::vector<double> params{eMin, eMax - eMin, eMax};
 
-  IAlgorithm_sptr rebin = this->createChildAlgorithm("Rebin");
+  auto rebin = createChildAlgorithm("Rebin");
   rebin->setProperty("InputWorkspace", outputWS);
   rebin->setProperty("OutputWorkspace", outputWS);
   rebin->setProperty("Params", params);
   rebin->executeAsChildAlg();
   outputWS = rebin->getProperty("OutputWorkspace");
 
-  IAlgorithm_sptr cToMWs =
-      this->createChildAlgorithm("ConvertToMatrixWorkspace");
+  auto cToMWs = createChildAlgorithm("ConvertToMatrixWorkspace");
   cToMWs->setProperty("InputWorkspace", outputWS);
   cToMWs->setProperty("OutputWorkspace", outputWS);
   outputWS = cToMWs->getProperty("OutputWorkspace");
 
   // Run diagnostics
-  const double huge =
-      getDblPropOrParam("HighCounts", reductionManager, "diag_huge", outputWS);
-  const double tiny =
-      getDblPropOrParam("LowCounts", reductionManager, "diag_tiny", outputWS);
-  const double vanOutLo = getDblPropOrParam(
-      "AbsUnitsLowOutlier", reductionManager, "monovan_lo_bound", outputWS);
-  const double vanOutHi = getDblPropOrParam(
-      "AbsUnitsHighOutlier", reductionManager, "monovan_hi_bound", outputWS);
-  const double vanLo = getDblPropOrParam(
-      "AbsUnitsMedianTestLow", reductionManager, "monovan_lo_frac", outputWS);
-  const double vanHi = getDblPropOrParam(
-      "AbsUnitsMedianTestHigh", reductionManager, "monovan_hi_frac", outputWS);
-  const double vanSigma = getDblPropOrParam(
-      "AbsUnitsErrorBarCriterion", reductionManager, "diag_samp_sig", outputWS);
+  const double huge = getDblPropOrParam("HighCounts", reductionManager, "diag_huge", outputWS);
+  const double tiny = getDblPropOrParam("LowCounts", reductionManager, "diag_tiny", outputWS);
+  const double vanOutLo = getDblPropOrParam("AbsUnitsLowOutlier", reductionManager, "monovan_lo_bound", outputWS);
+  const double vanOutHi = getDblPropOrParam("AbsUnitsHighOutlier", reductionManager, "monovan_hi_bound", outputWS);
+  const double vanLo = getDblPropOrParam("AbsUnitsMedianTestLow", reductionManager, "monovan_lo_frac", outputWS);
+  const double vanHi = getDblPropOrParam("AbsUnitsMedianTestHigh", reductionManager, "monovan_hi_frac", outputWS);
+  const double vanSigma = getDblPropOrParam("AbsUnitsErrorBarCriterion", reductionManager, "diag_samp_sig", outputWS);
 
-  IAlgorithm_sptr diag = this->createChildAlgorithm("DetectorDiagnostic");
+  auto diag = createChildAlgorithm("DetectorDiagnostic");
   diag->setProperty("InputWorkspace", outputWS);
   diag->setProperty("OutputWorkspace", "absUnitsDiagMask");
   diag->setProperty("LowThreshold", tiny);
@@ -204,19 +170,18 @@ void DgsAbsoluteUnitsReduction::exec() {
   diag->executeAsChildAlg();
   MatrixWorkspace_sptr absMaskWS = diag->getProperty("OutputWorkspace");
 
-  IAlgorithm_sptr mask = this->createChildAlgorithm("MaskDetectors");
+  auto mask = createChildAlgorithm("MaskDetectors");
   mask->setProperty("Workspace", outputWS);
   mask->setProperty("MaskedWorkspace", absMaskWS);
   mask->executeAsChildAlg();
   outputWS = mask->getProperty("Workspace");
 
-  IAlgorithm_sptr cFrmDist =
-      this->createChildAlgorithm("ConvertFromDistribution");
+  auto cFrmDist = createChildAlgorithm("ConvertFromDistribution");
   cFrmDist->setProperty("Workspace", outputWS);
   cFrmDist->executeAsChildAlg();
   outputWS = cFrmDist->getProperty("Workspace");
 
-  IAlgorithm_sptr wMean = this->createChildAlgorithm("WeightedMeanOfWorkspace");
+  auto wMean = createChildAlgorithm("WeightedMeanOfWorkspace");
   wMean->setProperty("InputWorkspace", outputWS);
   wMean->setProperty("OutputWorkspace", outputWS);
   wMean->executeAsChildAlg();
@@ -225,9 +190,8 @@ void DgsAbsoluteUnitsReduction::exec() {
   // If the absolute units detector vanadium is used, do extra correction.
   if (absIdetVanWS) {
     NeutronAtom neutronVanadium = getNeutronAtom(vanadium.z_number);
-    double xsection =
-        (neutronVanadium.inc_scatt_xs + neutronVanadium.coh_scatt_xs) * 1e3 /
-        4. / M_PI; // cross section per steradian in millibarns
+    double xsection = (neutronVanadium.inc_scatt_xs + neutronVanadium.coh_scatt_xs) * 1e3 / 4. /
+                      M_PI; // cross section per steradian in millibarns
 
     outputWS /= xsection;
     const double sampleMass = reductionManager->getProperty("SampleMass");
@@ -239,5 +203,4 @@ void DgsAbsoluteUnitsReduction::exec() {
   this->setProperty("OutputWorkspace", outputWS);
 }
 
-} // namespace WorkflowAlgorithms
-} // namespace Mantid
+} // namespace Mantid::WorkflowAlgorithms

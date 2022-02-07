@@ -6,10 +6,12 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/DeprecatedAlgorithm.h"
+#include "MantidAPI/DeprecatedAlias.h"
 #include <boost/python/class.hpp>
 
 using Mantid::API::AlgorithmManager;
 using Mantid::API::DeprecatedAlgorithm;
+using Mantid::API::DeprecatedAlias;
 using Mantid::API::IAlgorithm_sptr;
 
 using namespace boost::python;
@@ -43,8 +45,13 @@ public:
   const std::string isDeprecated() const {
     std::string deprecMessage;
     auto *depr = dynamic_cast<DeprecatedAlgorithm *>(m_alg.get());
+    auto *deprecatedAliasAlg = dynamic_cast<DeprecatedAlias *>(m_alg.get());
+
     if (depr)
       deprecMessage = depr->deprecationMsg(m_alg.get());
+    else if (deprecatedAliasAlg)
+      deprecMessage = deprecatedAliasAlg->deprecationMessage(m_alg.get());
+
     return deprecMessage;
   }
 
@@ -58,10 +65,9 @@ private:
 
 void export_DeprecatedAlgorithmChecker() {
   class_<DeprecatedAlgorithmChecker>("DeprecatedAlgorithmChecker", no_init)
-      .def(init<const std::string &, int>(
-          (arg("algName"), arg("version")),
-          "Constructs a DeprecatedAlgorithmChecker for the given algorithm & "
-          "version. (-1 indicates latest version)"))
+      .def(init<const std::string &, int>((arg("algName"), arg("version")),
+                                          "Constructs a DeprecatedAlgorithmChecker for the given algorithm & "
+                                          "version. (-1 indicates latest version)"))
       .def("isDeprecated", &DeprecatedAlgorithmChecker::isDeprecated,
            "A string containing a deprecation message if the algorithm is "
            "deprecated, empty string otherwise");

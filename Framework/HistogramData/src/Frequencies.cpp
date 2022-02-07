@@ -8,20 +8,17 @@
 #include "MantidHistogramData/BinEdges.h"
 #include "MantidHistogramData/Counts.h"
 
-namespace Mantid {
-namespace HistogramData {
+namespace Mantid::HistogramData {
 
 /// Constructs Frequencies from Counts and bin width based on BinEdges.
-Frequencies::Frequencies(const Counts &counts, const BinEdges &edges)
-    : Frequencies(Counts(counts), edges) {}
+Frequencies::Frequencies(const Counts &counts, const BinEdges &edges) : Frequencies(Counts(counts), edges) {}
 
 /// Move-constructs Frequencies from Counts and bin width based on BinEdges.
 Frequencies::Frequencies(Counts &&counts, const BinEdges &edges) {
   if (!counts)
     return;
   if (!edges)
-    throw std::logic_error(
-        "Frequencies: Cannot construct from Counts -- BinEdges are NULL.");
+    throw std::logic_error("Frequencies: Cannot construct from Counts -- BinEdges are NULL.");
   if ((counts.size() + 1) != edges.size())
     if (!counts.empty() || !edges.empty())
       throw std::logic_error("Frequencies: Cannot construct from Counts -- "
@@ -35,5 +32,4 @@ Frequencies::Frequencies(Counts &&counts, const BinEdges &edges) {
   }
 }
 
-} // namespace HistogramData
-} // namespace Mantid
+} // namespace Mantid::HistogramData

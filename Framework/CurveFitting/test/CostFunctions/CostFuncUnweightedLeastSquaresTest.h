@@ -21,12 +21,8 @@ class CostFuncUnweightedLeastSquaresTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static CostFuncUnweightedLeastSquaresTest *createSuite() {
-    return new CostFuncUnweightedLeastSquaresTest();
-  }
-  static void destroySuite(CostFuncUnweightedLeastSquaresTest *suite) {
-    delete suite;
-  }
+  static CostFuncUnweightedLeastSquaresTest *createSuite() { return new CostFuncUnweightedLeastSquaresTest(); }
+  static void destroySuite(CostFuncUnweightedLeastSquaresTest *suite) { delete suite; }
 
   void testGetFitWeights() {
     /* The test makes sure that the returned weights are always 1.0,
@@ -58,10 +54,8 @@ public:
     FunctionValues_sptr values = std::make_shared<FunctionValues>(d1d);
 
     // Data generated with numpy.random.normal(loc=2.0, scale=0.25, size=10)
-    double obsValues[10] = {1.9651563160778176, 1.9618188576389295,
-                            1.9565961107376706, 2.0049055113975252,
-                            2.0747505383068865, 2.0666404554638578,
-                            1.7854026688169637, 2.266075963037971,
+    double obsValues[10] = {1.9651563160778176, 1.9618188576389295, 1.9565961107376706, 2.0049055113975252,
+                            2.0747505383068865, 2.0666404554638578, 1.7854026688169637, 2.266075963037971,
                             1.8656602424955859, 1.8132221813342393};
 
     for (size_t i = 0; i < 10; ++i) {
@@ -70,8 +64,7 @@ public:
     }
 
     // Function has 1 parameter, so degrees of freedom = 9
-    IFunction_sptr fn =
-        FunctionFactory::Instance().createFunction("FlatBackground");
+    IFunction_sptr fn = FunctionFactory::Instance().createFunction("FlatBackground");
     FunctionDomain_sptr domain = std::make_shared<FunctionDomain1DVector>(d1d);
 
     TestableCostFuncUnweightedLeastSquares uwls;
@@ -82,8 +75,7 @@ public:
   }
 
 private:
-  class TestableCostFuncUnweightedLeastSquares
-      : public CostFuncUnweightedLeastSquares {
+  class TestableCostFuncUnweightedLeastSquares : public CostFuncUnweightedLeastSquares {
     friend class CostFuncUnweightedLeastSquaresTest;
   };
 };

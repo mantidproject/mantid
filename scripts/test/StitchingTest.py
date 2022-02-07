@@ -9,13 +9,14 @@ from mantid.simpleapi import *
 from LargeScaleStructures import data_stitching
 import numpy as np
 
+
 class StitchingTest(unittest.TestCase):
     def setUp(self):
         # Create two workspaces to stitch
         r1 = 9.8 + 0.4 * np.random.rand(250)
         r2 = 59.8 + 0.4 * np.random.rand(250)
         x1 = np.arange(250)
-        x2 = x1+50.0
+        x2 = x1 + 50.0
 
         self.ws1 = CreateWorkspace(DataX=x1, DataY=r1, OutputWorkspace='ws1')
         self.ws2 = CreateWorkspace(DataX=x2, DataY=r2, OutputWorkspace='ws2')
@@ -28,13 +29,14 @@ class StitchingTest(unittest.TestCase):
         """
             Test the stitching call
         """
-        data_stitching.stitch(['ws1', 'ws2'], [70,], [100], output_workspace='scaled_ws')
+        data_stitching.stitch(['ws1', 'ws2'], [70, ], [100], output_workspace='scaled_ws')
         x_out = mtd['scaled_ws'].dataY(0)
         # Stitching will scale ws2 to ws1, so the output workspace should line up
         # with ws1, which should have an average value of about 10.
         # Since both workspaces have very different ranges of values, we use a wide
         # acceptance range to allow for random fluctuations.
         self.assertTrue(np.average(x_out) < 13 and np.average(x_out) > 7)
+
 
 if __name__ == '__main__':
     unittest.main()

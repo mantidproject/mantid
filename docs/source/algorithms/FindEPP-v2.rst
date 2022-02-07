@@ -54,5 +54,5 @@ Output:
 .. categories::
 
 .. sourcelink::
-   :filename: FindEPP 
+   :filename: FindEPP
    :py: None

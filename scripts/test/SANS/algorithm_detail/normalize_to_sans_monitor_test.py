@@ -9,7 +9,6 @@ import unittest
 from mantid.api import AnalysisDataService
 from mantid.simpleapi import CreateSampleWorkspace, Rebin
 from sans.algorithm_detail.normalize_to_sans_monitor import normalize_to_monitor
-from sans.common.enums import (RebinType, RangeStepType)
 from sans.state.StateObjects.StateNormalizeToMonitor import get_normalize_to_monitor_builder
 from sans.test_helper.test_director import TestDirector
 
@@ -66,11 +65,10 @@ class SANSNormalizeToMonitorTest(unittest.TestCase):
 
         data_state = state.data
         normalize_to_monitor_builder = get_normalize_to_monitor_builder(data_state)
-        normalize_to_monitor_builder.set_rebin_type(RebinType.REBIN)
-        normalize_to_monitor_builder.set_wavelength_low([2.])
-        normalize_to_monitor_builder.set_wavelength_high([8.])
-        normalize_to_monitor_builder.set_wavelength_step(2.)
-        normalize_to_monitor_builder.set_wavelength_step_type(RangeStepType.LIN)
+        wav_range = (2., 8.)  # Override from test director
+        state.wavelength.wavelength_interval.wavelength_full_range = wav_range
+        state.wavelength.wavelength_interval.selected_ranges = [wav_range]
+        state.wavelength.wavelength_interval.wavelength_step = 2.
         if background_TOF_general_start:
             normalize_to_monitor_builder.set_background_TOF_general_start(background_TOF_general_start)
         if background_TOF_general_stop:
@@ -111,8 +109,10 @@ class SANSNormalizeToMonitorTest(unittest.TestCase):
 
     @staticmethod
     def _run_test(workspace, state, scale=1.0):
-        output_ws = normalize_to_monitor(workspace=workspace, scale_factor=scale,
-                                         state_adjustment_normalize_to_monitor=state.adjustment.normalize_to_monitor)
+        wav_range = state.wavelength.wavelength_interval.wavelength_full_range
+        output_ws = normalize_to_monitor(workspace=workspace, scale_factor=scale, wav_range=wav_range,
+                                         normalize_to_monitor=state.adjustment.normalize_to_monitor,
+                                         wavelengths=state.wavelength)
         return output_ws
 
     def _do_assert(self, workspace, expected_monitor_spectrum, expected_lambda, expected_signal):

@@ -33,8 +33,7 @@ class BinDialog;
 /**
  * Implements the Render tab in InstrumentWidget.
  */
-class EXPORT_OPT_MANTIDQT_INSTRUMENTVIEW InstrumentWidgetRenderTab
-    : public InstrumentWidgetTab {
+class EXPORT_OPT_MANTIDQT_INSTRUMENTVIEW InstrumentWidgetRenderTab : public InstrumentWidgetTab {
   Q_OBJECT
 
 public:
@@ -48,8 +47,7 @@ public:
   void setScaleType(ColorMap::ScaleType type);
   void setAxis(const QString &axisName);
   bool areAxesOn() const;
-  void setupColorBar(const ColorMap & /*cmap*/, double /*minValue*/,
-                     double /*maxValue*/, double /*minPositive*/,
+  void setupColorBar(const ColorMap & /*cmap*/, double /*minValue*/, double /*maxValue*/, double /*minPositive*/,
                      bool /*autoscaling*/);
   /// Load the render window tab settings from file.
   virtual void loadFromProject(const std::string &lines) override;
@@ -68,15 +66,15 @@ public slots:
   void displayDetectorsOnly(bool yes);
   void enableGL(bool on);
   void setColorMapAutoscaling(bool /*on*/);
+  void setLegendScaleType(int /*index*/);
   void changeColorMap(const QString &filename = "");
   void setSurfaceType(int /*index*/);
   void flipUnwrappedView(bool /*on*/);
+  void resetView();
   void saveImage(const QString &filename = "");
 
 private slots:
-
-  void showResetView(int /*iv*/);
-  void showFlipControl(int /*iv*/);
+  void showOrHideBoxes(int /*iv*/);
   /// Called before the display setting menu opens. Filters out menu options.
   void displaySettingsAboutToshow();
   /// Change the type of the surfac
@@ -107,6 +105,7 @@ private: // methods
 
 private: // members
   QPushButton *m_surfaceTypeButton;
+  QPushButton *m_resetView;
   QPushButton *mSaveImage;
   ColorBar *m_colorBarWidget;
   QFrame *m_resetViewFrame;
@@ -114,6 +113,7 @@ private: // members
   QCheckBox *m_flipCheckBox;
   QPushButton *m_peakOverlaysButton;
   QCheckBox *m_autoscaling;
+  QCheckBox *m_freezeRotation;
 
   QActionGroup *m_surfaceTypeActionGroup;
   QAction *m_full3D;

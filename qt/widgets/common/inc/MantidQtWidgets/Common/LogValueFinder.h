@@ -19,16 +19,13 @@ namespace MantidWidgets {
 class EXPORT_OPT_MANTIDQT_COMMON LogValueFinder {
 public:
   /// Constructor
-  explicit LogValueFinder(const QStringList &wsNames);
+  explicit LogValueFinder(QStringList wsNames);
   /// Get log names from workspaces
   std::vector<std::string> getLogNames() const;
   /// Get log value from workspace position in list
-  double getLogValue(const QString &logName,
-                     const Mantid::Kernel::Math::StatisticType &function,
-                     int index) const;
+  double getLogValue(const QString &logName, const Mantid::Kernel::Math::StatisticType &function, int index) const;
   /// Get log value from workspace name
-  double getLogValue(const QString &logName,
-                     const Mantid::Kernel::Math::StatisticType &function,
+  double getLogValue(const QString &logName, const Mantid::Kernel::Math::StatisticType &function,
                      const QString &wsName) const;
 
 private:

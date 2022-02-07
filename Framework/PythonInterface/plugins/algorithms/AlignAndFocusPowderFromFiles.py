@@ -8,7 +8,7 @@ from mantid.api import mtd, AlgorithmFactory, DistributedDataProcessorAlgorithm,
     MatrixWorkspaceProperty, MultipleFileProperty, PropertyMode
 from mantid.kernel import Direction, PropertyManagerDataService
 from mantid.simpleapi import AlignAndFocusPowder, CompressEvents, ConvertDiffCal, ConvertUnits, CopyLogs, \
-    CreateCacheFilename, DeleteWorkspace, DetermineChunking, Divide, EditInstrumentGeometry, FilterBadPulses, \
+    CopySample, CreateCacheFilename, DeleteWorkspace, DetermineChunking, Divide, EditInstrumentGeometry, FilterBadPulses, \
     LoadDiffCal, Load, LoadIDFFromNexus, LoadNexusProcessed, PDDetermineCharacterizations, Plus, \
     RebinToWorkspace, RemoveLogs, RenameWorkspace, SaveNexusProcessed
 import os
@@ -19,13 +19,15 @@ PROPS_FOR_INSTR = ["PrimaryFlightPath", "SpectrumIDs", "L2", "Polar", "Azimuthal
 CAL_FILE, GROUP_FILE = "CalFileName", "GroupFilename"
 CAL_WKSP, GRP_WKSP, MASK_WKSP = "CalibrationWorkspace", "GroupingWorkspace", "MaskWorkspace"
 # AlignAndFocusPowder only uses the ranges
-PROPS_IN_PD_CHARACTER = ["DMin", "DMax", "TMin", "TMax", "CropWavelengthMin", "CropWavelengthMax"]
+PROPS_IN_PD_CHARACTER = ["DMin", "DMax", "DeltaRagged", "TMin", "TMax", "CropWavelengthMin", "CropWavelengthMax"]
 PROPS_FOR_ALIGN = [CAL_FILE, GROUP_FILE,
                    GRP_WKSP, CAL_WKSP, "OffsetsWorkspace",
                    MASK_WKSP, "MaskBinTable",
                    "Params", "ResampleX", "Dspacing",
                    "PreserveEvents",
-                   "RemovePromptPulseWidth", "CompressTolerance", "CompressWallClockTolerance",
+                   "RemovePromptPulseWidth",
+                   "ResonanceFilterUnits", "ResonanceFilterLowerLimits", "ResonanceFilterUpperLimits",
+                   "CompressTolerance", "CompressWallClockTolerance",
                    "CompressStartTime", "LorentzCorrection", "UnwrapRef", "LowResRef",
                    "LowResSpectrumOffset", "ReductionProperties"]
 PROPS_FOR_ALIGN.extend(PROPS_IN_PD_CHARACTER)
@@ -66,7 +68,7 @@ def uniqueDescription(name, wksp):
         sample = mtd[wksp].sample()
         materialname = sample.getMaterial().name()
         shapeXML = sample.getShape().getShapeXML()
-        density = str(sample.getMaterial().numberDensity)
+        density = str(sample.getMaterial().numberDensityEffective)
         wavelength = mtd[wksp].readX(0)
         wavelength = '{} to {} with {} bins'.format(wavelength[0], wavelength[-1], mtd[wksp].readY(0).size)
         value = ';'.join((materialname, density, shapeXML, wavelength))
@@ -293,7 +295,7 @@ class AlignAndFocusPowderFromFiles(DistributedDataProcessorAlgorithm):
 
         alignandfocusargs += additional_props or []
         reductionPropertiesName = self.getProperty('ReductionProperties').valueAsStr
-        if not PropertyManagerDataService.doesExist(reductionPropertiesName):
+        if reductionPropertiesName not in PropertyManagerDataService:
             reductionPropertiesName = ''  # do not specify non-existant manager
 
         return CreateCacheFilename(Prefix=prefix,
@@ -435,6 +437,11 @@ class AlignAndFocusPowderFromFiles(DistributedDataProcessorAlgorithm):
         # end of inner loop
         if not mtd.doesExist(wkspname):
             raise RuntimeError('Failed to process any data from file "{}"'.format(filename))
+
+        # copy the sample object from the absorption workspace
+        if self.absorption is not None and len(str(self.absorption)) > 0:
+            CopySample(InputWorkspace=self.absorption, OutputWorkspace=wkspname,
+                       CopyEnvironment=False)
 
         # write out the cachefile for the main reduced data independent of whether
         # the unfocussed workspace was requested

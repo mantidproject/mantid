@@ -23,19 +23,19 @@ Algorithm is event aware. TOF events will be changed to weighted events.
 Usage
 -----
 
-**Example**  
+**Example**
 
 .. testcode:: CorrectKiKf
 
     ws = CreateSampleWorkspace()
     ws = ConvertUnits(ws,"DeltaE",EMode="Direct", EFixed=7.5)
-    
+
     wsOut = CorrectKiKf(ws, EMode="Direct", EFixed=7.5)
 
     print("First five bins:")
     print("index  orig  corrected")
     for i in range(5):
-        print("  %i    %.2f  %.2f" % 
+        print("  %i    %.2f  %.2f" %
             (i,ws.readY(0)[i],wsOut.readY(0)[i]))
 
 

@@ -14,7 +14,10 @@ set(TEST_PY_FILES
     CalculateFluxTest.py
     CalculateSampleTransmissionTest.py
     CheckForSampleLogsTest.py
+    CleanFileCacheTest.py
+    ClipPeaksTest.py
     ConjoinSpectraTest.py
+    ConvertQtoHKLMDHistoTest.py
     ConvertWANDSCDtoQTest.py
     CompareSampleLogsTest.py
     ComputeCalibrationCoefVanTest.py
@@ -22,9 +25,9 @@ set(TEST_PY_FILES
     CorrectLogTimesTest.py
     CreateLeBailFitInputTest.py
     CorrectTOFTest.py
+    CreateCacheFilenameTest.py
     CreateWorkspaceTest.py
     CropWorkspaceForMDNormTest.py
-    CropWorkspaceRaggedTest.py
     CylinderPaalmanPingsCorrection2Test.py
     DakotaChiSquaredTest.py
     DeltaPDF3DTest.py
@@ -34,6 +37,7 @@ set(TEST_PY_FILES
     DSFinterpTest.py
     EnggCalibrateFullTest.py
     EnggCalibrateTest.py
+    EnggEstimateFocussedBackgroundTest.py
     EnggFitTOFFromPeaksTest.py
     EnggFitPeaksTest.py
     EnggFocusTest.py
@@ -44,15 +48,27 @@ set(TEST_PY_FILES
     ExportSpectraMaskTest.py
     FilterLogByTimeTest.py
     FitGaussianTest.py
+    FindGoniometerFromUBTest.py
+    FindGlobalBMatrixTest.py
     FitIncidentSpectrumTest.py
     FractionalIndexingTest.py
+    GenerateLogbookTest.py
     GetEiT0atSNSTest.py
     HB2AReduceTest.py
+    HB3AAdjustSampleNormTest.py
+    HB3AFindPeaksTest.py
+    HB3AIntegrateDetectorPeaksTest.py
+    HB3AIntegratePeaksTest.py
+    HB3APredictPeaksTest.py
+    HFIRCalculateGoniometerTest.py
     HFIRSANS2WavelengthTest.py
+    IndexPeaksTest.py
     IndirectTransmissionTest.py
     IndexSatellitePeaksTest.py
+    LeadPressureCalcTest.py
     LoadAndMergeTest.py
     LoadDNSLegacyTest.py
+    LoadElementalAnalysisRunTest.py
     LoadEmptyVesuvioTest.py
     LoadFullprofFileTest.py
     LoadGudrunOutputTest.py
@@ -64,6 +80,7 @@ set(TEST_PY_FILES
     LoadNMoldyn4Ascii1DTest.py
     LoadNMoldyn4AsciiTest.py
     LoadWANDSCDTest.py
+    LRDirectBeamSortTest.py
     LRPeakSelectionTest.py
     MatchSpectraTest.py
     MaskAngleTest.py
@@ -76,26 +93,32 @@ set(TEST_PY_FILES
     MuscatSofQWTest.py
     MuonMaxEntTest.py
     NMoldyn4InterpolationTest.py
+    NOMADMedianDetectorTestTest.py
     NormaliseSpectraTest.py
     OptimizeCrystalPlacementByRunTest.py
     PDConvertRealSpaceTest.py
     PDConvertReciprocalSpaceTest.py
+    PeakMatchingTest.py
+    RebinRaggedTest.py
     ReflectometryReductionOneLiveDataTest.py
     ReflectometrySliceEventWorkspaceTest.py
     RetrieveRunInfoTest.py
     SANSWideAngleCorrectionTest.py
     SaveGEMMAUDParamFileTest.py
     SaveNexusPDTest.py
+    SaveGSSCWTest.py
+    SaveHKLCWTest.py
     SavePlot1DAsJsonTest.py
     SaveReflectionsTest.py
     ExtractMonitorsTest.py
     SetDetScaleTest.py
+    SetSampleFromLogsTest.py
     SortByQVectorsTest.py
     SortDetectorsTest.py
     StatisticsOfTableWorkspaceTest.py
     StringToPngTest.py
-    SuggestTibCNCSTest.py
-    SuggestTibHYSPECTest.py
+    CNCSSuggestTIBTest.py
+    HYSPECSuggestTIBTest.py
     SymmetriseTest.py
     UpdatePeakParameterTableValueTest.py
     SANSSubtractTest.py
@@ -107,18 +130,21 @@ set(TEST_PY_FILES
     VelocityCrossCorrelationsTest.py
     VelocityAutoCorrelationsTest.py
     SelectNexusFilesByMetadataTest.py
+    VesuvioAnalysisTest.py
     VesuvioPeakPredictionTest.py
     VesuvioPreFitTest.py
     VesuvioResolutionTest.py
     VesuvioThicknessTest.py
     VesuvioTOFFitTest.py
+    PEARLTransfitTest.py
     PoldiCreatePeaksFromFileTest.py
     LoadCIFTest.py
-    SaveYDATest.py)
+    SaveYDATest.py
+    SaveP2DTest.py
+)
 
 check_tests_valid(${CMAKE_CURRENT_SOURCE_DIR} ${TEST_PY_FILES})
 
 # Prefix for test name=PythonAlgorithms
 set(PYUNITTEST_PYTHONPATH_EXTRA ${PYTHONINTERFACE_PLUGINS_DIR}/algorithms)
-pyunittest_add_test(${CMAKE_CURRENT_SOURCE_DIR} python.algorithms
-                    ${TEST_PY_FILES})
+pyunittest_add_test(${CMAKE_CURRENT_SOURCE_DIR} python.algorithms ${TEST_PY_FILES})

@@ -6,9 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "RangeInLambda.h"
 #include "MantidKernel/Tolerance.h"
-namespace MantidQt {
-namespace CustomInterfaces {
-namespace ISISReflectometry {
+namespace MantidQt::CustomInterfaces::ISISReflectometry {
 
 RangeInLambda::RangeInLambda(double min, double max) : m_min(min), m_max(max) {}
 
@@ -37,9 +35,5 @@ bool operator==(RangeInLambda const &lhs, RangeInLambda const &rhs) {
   return lhs.min() == rhs.min() && lhs.max() == rhs.max();
 }
 
-bool operator!=(RangeInLambda const &lhs, RangeInLambda const &rhs) {
-  return !(lhs == rhs);
-}
-} // namespace ISISReflectometry
-} // namespace CustomInterfaces
-} // namespace MantidQt
+bool operator!=(RangeInLambda const &lhs, RangeInLambda const &rhs) { return !(lhs == rhs); }
+} // namespace MantidQt::CustomInterfaces::ISISReflectometry

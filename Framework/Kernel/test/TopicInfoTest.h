@@ -44,25 +44,24 @@ public:
 
 private:
   FacilityInfo *createFakeFacilityWithTopics() {
-    const std::string xml =
-        "<?xml version=\"1.0\" encoding=\"UTF-8\"?>"
-        "<facilities>"
-        "  <facility name=\"MyFacility\" FileExtensions=\".xyz\">"
-        "    <instrument name=\"MyInstrument\">"
-        "      <zeropadding size=\"8\" />"
-        "      <technique>Novel Technique</technique>"
-        "      <livedata default=\"event\">"
-        "        <connection name=\"event\" address=\"localhost\" "
-        "listener=\"KafkaEventListener\" />"
-        "        <topic name=\"choppers\" type=\"chopper\" />"
-        "        <topic name=\"sample\" type=\"sample\" />"
-        "        <topic name=\"run\" type=\"run\" />"
-        "        <topic name=\"detector_events\" type=\"event\" />"
-        "        <topic name=\"monitor\" type=\"monitor\" />"
-        "      </livedata>"
-        "    </instrument>"
-        "  </facility>"
-        "</facilities>";
+    const std::string xml = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>"
+                            "<facilities>"
+                            "  <facility name=\"MyFacility\" FileExtensions=\".xyz\">"
+                            "    <instrument name=\"MyInstrument\">"
+                            "      <zeropadding size=\"8\" />"
+                            "      <technique>Novel Technique</technique>"
+                            "      <livedata default=\"event\">"
+                            "        <connection name=\"event\" address=\"localhost\" "
+                            "listener=\"KafkaEventListener\" />"
+                            "        <topic name=\"choppers\" type=\"chopper\" />"
+                            "        <topic name=\"sample\" type=\"sample\" />"
+                            "        <topic name=\"run\" type=\"run\" />"
+                            "        <topic name=\"detector_events\" type=\"event\" />"
+                            "        <topic name=\"monitor\" type=\"monitor\" />"
+                            "      </livedata>"
+                            "    </instrument>"
+                            "  </facility>"
+                            "</facilities>";
 
     Poco::XML::DOMParser parser;
 

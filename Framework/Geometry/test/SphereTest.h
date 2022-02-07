@@ -106,37 +106,38 @@ public:
     A.setSurface("so 2");
     TS_ASSERT_EQUALS(extractString(A), "-1 so 2\n");
 
-    // Origin should be inonSurface
-    TS_ASSERT_EQUALS(A.onSurface(V3D(0, 0, 0)), 0);
-    TS_ASSERT_EQUALS(A.onSurface(V3D(1.9, 0, 0)), 0);
-    TS_ASSERT_EQUALS(A.onSurface(V3D(0, 1.9, 0)), 0);
-    TS_ASSERT_EQUALS(A.onSurface(V3D(0, 0, 1.9)), 0);
-    TS_ASSERT_EQUALS(A.onSurface(V3D(0, 0, -1.9)), 0);
-    TS_ASSERT_EQUALS(A.onSurface(V3D(-1.9, 0, 0)), 0);
-    TS_ASSERT_EQUALS(A.onSurface(V3D(0, -1.9, 0)), 0);
+    // Origin should not be on the surface
+    TS_ASSERT(!A.onSurface(V3D(0, 0, 0)));
+    TS_ASSERT(!A.onSurface(V3D(0, 0, 0)));
+    TS_ASSERT(!A.onSurface(V3D(1.9, 0, 0)));
+    TS_ASSERT(!A.onSurface(V3D(0, 1.9, 0)));
+    TS_ASSERT(!A.onSurface(V3D(0, 0, 1.9)));
+    TS_ASSERT(!A.onSurface(V3D(0, 0, -1.9)));
+    TS_ASSERT(!A.onSurface(V3D(-1.9, 0, 0)));
+    TS_ASSERT(!A.onSurface(V3D(0, -1.9, 0)));
 
-    // should be on the onSurface
-    TS_ASSERT_EQUALS(A.onSurface(V3D(2, 0, 0)), 1);
-    TS_ASSERT_EQUALS(A.onSurface(V3D(0, 2, 0)), 1);
-    TS_ASSERT_EQUALS(A.onSurface(V3D(0, 0, 2)), 1);
-    TS_ASSERT_EQUALS(A.onSurface(V3D(0, 0, -2)), 1);
-    TS_ASSERT_EQUALS(A.onSurface(V3D(-2, 0, 0)), 1);
-    TS_ASSERT_EQUALS(A.onSurface(V3D(0, -2, 0)), 1);
+    // should be on the surface
+    TS_ASSERT(A.onSurface(V3D(2, 0, 0)));
+    TS_ASSERT(A.onSurface(V3D(0, 2, 0)));
+    TS_ASSERT(A.onSurface(V3D(0, 0, 2)));
+    TS_ASSERT(A.onSurface(V3D(0, 0, -2)));
+    TS_ASSERT(A.onSurface(V3D(-2, 0, 0)));
+    TS_ASSERT(A.onSurface(V3D(0, -2, 0)));
     // test tolerance at default 1e-6
-    TS_ASSERT_EQUALS(A.onSurface(V3D(0, -2 + 1e-7, 0)), 1);
-    TS_ASSERT_EQUALS(A.onSurface(V3D(0, -2 - 1e-7, 0)), 1);
-    TS_ASSERT_EQUALS(A.onSurface(V3D(0, -2 - 2e-6, 0)), 0);
-    TS_ASSERT_EQUALS(A.onSurface(V3D(0, -2 + 2e-6, 0)), 0);
-    // should be outonSurface
-    TS_ASSERT_EQUALS(A.onSurface(V3D(2.1, 0, 0)), 0);
-    TS_ASSERT_EQUALS(A.onSurface(V3D(0, 2.1, 0)), 0);
-    TS_ASSERT_EQUALS(A.onSurface(V3D(0, 0, 2.1)), 0);
-    TS_ASSERT_EQUALS(A.onSurface(V3D(-2.1, 0, 0)), 0);
-    TS_ASSERT_EQUALS(A.onSurface(V3D(0, -2.1, 0)), 0);
-    TS_ASSERT_EQUALS(A.onSurface(V3D(0, 0, -2.1)), 0);
-    TS_ASSERT_EQUALS(A.onSurface(V3D(2, 0.1, 0)), 0);
-    TS_ASSERT_EQUALS(A.onSurface(V3D(0.1, 2, 0)), 0);
-    TS_ASSERT_EQUALS(A.onSurface(V3D(0, 0.1, 2)), 0);
+    TS_ASSERT(A.onSurface(V3D(0, -2 + 1e-7, 0)));
+    TS_ASSERT(A.onSurface(V3D(0, -2 - 1e-7, 0)));
+    TS_ASSERT(!A.onSurface(V3D(0, -2 - 2e-6, 0)));
+    TS_ASSERT(!A.onSurface(V3D(0, -2 + 2e-6, 0)));
+    // should not be on the surface
+    TS_ASSERT(!A.onSurface(V3D(2.1, 0, 0)));
+    TS_ASSERT(!A.onSurface(V3D(0, 2.1, 0)));
+    TS_ASSERT(!A.onSurface(V3D(0, 0, 2.1)));
+    TS_ASSERT(!A.onSurface(V3D(-2.1, 0, 0)));
+    TS_ASSERT(!A.onSurface(V3D(0, -2.1, 0)));
+    TS_ASSERT(!A.onSurface(V3D(0, 0, -2.1)));
+    TS_ASSERT(!A.onSurface(V3D(2, 0.1, 0)));
+    TS_ASSERT(!A.onSurface(V3D(0.1, 2, 0)));
+    TS_ASSERT(!A.onSurface(V3D(0, 0.1, 2)));
   }
 
   void testSphereDistance() {
@@ -205,8 +206,7 @@ public:
   @retval 0 :: All passed
   */
   {
-    std::vector<std::string> SphStr{
-        "so 1", "s 1.5 -2.5 1.8 1"}; // sphere origin, sphere
+    std::vector<std::string> SphStr{"so 1", "s 1.5 -2.5 1.8 1"}; // sphere origin, sphere
     Kernel::V3D P(3, 7, 4);
     Kernel::V3D Q(0, 0, 4);
     std::vector<std::string>::const_iterator vc;
@@ -221,11 +221,9 @@ public:
         std::cout << "Sphere == ";
         A.Surface::write(std::cout);
         std::cout << "TestPoint == " << P << '\n';
-        std::cout << "Distance == " << A.distance(P) << " === " << A.distance(P)
-                  << '\n';
+        std::cout << "Distance == " << A.distance(P) << " === " << A.distance(P) << '\n';
         std::cout << "--------------\n";
-        std::cout << "Distance == " << A.distance(Q) << " === " << A.distance(Q)
-                  << '\n';
+        std::cout << "Distance == " << A.distance(Q) << " === " << A.distance(Q) << '\n';
       }
     }
   }

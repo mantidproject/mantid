@@ -77,6 +77,8 @@ class LRAutoReduction(PythonAlgorithm):
                              "Force the sequence number value if it's not available")
         self.declareProperty("OrderDirectBeamsByRunNumber", False,
                              "Force the sequence of direct beam files to be ordered by run number")
+        self.declareProperty("ComputeResolution", True,
+                             "If True, the Q resolution will be computed")
         self.declareProperty(FileProperty('OutputFilename', '', action=FileAction.OptionalSave, extensions=["txt"]),
                              doc='Name of the reflectivity file output')
         self.declareProperty(FileProperty("OutputDirectory", "", FileAction.Directory))
@@ -84,6 +86,10 @@ class LRAutoReduction(PythonAlgorithm):
         self.declareProperty(IntArrayProperty("SequenceInfo", [0, 0, 0], direction=Direction.Output),
                              "Run sequence information (run number, sequence ID, sequence number).")
         self.declareProperty("SlitTolerance", 0.02, doc="Tolerance for matching slit positions")
+        self.declareProperty("NormalizationType", "DirectBeam",
+                             doc="Normalization type for reduction. Allowed values: ['DirectBeam', 'WithReference']")
+        self.declareProperty("Refl1DModelParameters", "",
+                             doc="JSON string for Refl1D theoretical model parameters for 'NormalizationType'=='WithReference' ")
 
     def load_data(self):
         """
@@ -574,10 +580,11 @@ class LRAutoReduction(PythonAlgorithm):
         output_binning = [data_set.q_min, -abs(data_set.q_step), 2.0]
         dQ_constant = data_set.fourth_column_dq0
         dQ_slope = data_set.fourth_column_dq_over_q
-
+        compute_resolution = self.getProperty("ComputeResolution").value
         LRReflectivityOutput(ReducedWorkspaces=input_ws_list, ScaleToUnity=scale_to_unity,
                              ScalingWavelengthCutoff=wl_cutoff, OutputBinning=output_binning,
-                             DQConstant=dQ_constant, DQSlope=dQ_slope, OutputFilename=file_path)
+                             DQConstant=dQ_constant, DQSlope=dQ_slope,
+                             ComputeDQ=compute_resolution, OutputFilename=file_path)
         for ws in input_ws_list:
             AnalysisDataService.remove(str(ws))
 
@@ -650,34 +657,51 @@ class LRAutoReduction(PythonAlgorithm):
         # Write template before we start the computation
         self._write_template(data_set, run_number, first_run_of_set, sequence_number)
 
-        # Execute the reduction
-        LiquidsReflectometryReduction(#RunNumbers=[int(run_number)],
-                                      InputWorkspace=self.event_data,
-                                      NormalizationRunNumber=str(data_set.norm_file),
-                                      SignalPeakPixelRange=data_set.DataPeakPixels,
-                                      SubtractSignalBackground=data_set.DataBackgroundFlag,
-                                      SignalBackgroundPixelRange=data_set.DataBackgroundRoi[:2],
-                                      NormFlag=data_set.NormFlag,
-                                      NormPeakPixelRange=data_set.NormPeakPixels,
-                                      NormBackgroundPixelRange=data_set.NormBackgroundRoi,
-                                      SubtractNormBackground=data_set.NormBackgroundFlag,
-                                      LowResDataAxisPixelRangeFlag=data_set.data_x_range_flag,
-                                      LowResDataAxisPixelRange=data_set.data_x_range,
-                                      LowResNormAxisPixelRangeFlag=data_set.norm_x_range_flag,
-                                      LowResNormAxisPixelRange=data_set.norm_x_range,
-                                      TOFRange=data_set.DataTofRange,
-                                      IncidentMediumSelected=incident_medium,
-                                      GeometryCorrectionFlag=False,
-                                      QMin=data_set.q_min,
-                                      QStep=data_set.q_step,
-                                      AngleOffset=data_set.angle_offset,
-                                      AngleOffsetError=data_set.angle_offset_error,
-                                      ScalingFactorFile=str(data_set.scaling_factor_file),
-                                      SlitsWidthFlag=data_set.slits_width_flag,
-                                      ApplyPrimaryFraction=True,
-                                      SlitTolerance=slit_tolerance,
-                                      PrimaryFractionRange=[data_set.clocking_from, data_set.clocking_to],
-                                      OutputWorkspace='reflectivity_%s_%s_%s' % (first_run_of_set, sequence_number, run_number))
+        # input args for both reduction
+        kwargs = {
+            "InputWorkspace": self.event_data,
+            "NormalizationRunNumber": str(data_set.norm_file),
+            "SignalPeakPixelRange": data_set.DataPeakPixels,
+            "SubtractSignalBackground": data_set.DataBackgroundFlag,
+            "SignalBackgroundPixelRange": data_set.DataBackgroundRoi[:2],
+            "NormFlag": data_set.NormFlag,
+            "NormPeakPixelRange": data_set.NormPeakPixels,
+            "NormBackgroundPixelRange": data_set.NormBackgroundRoi,
+            "SubtractNormBackground": data_set.NormBackgroundFlag,
+            "LowResDataAxisPixelRangeFlag": data_set.data_x_range_flag,
+            "LowResDataAxisPixelRange": data_set.data_x_range,
+            "LowResNormAxisPixelRangeFlag": data_set.norm_x_range_flag,
+            "LowResNormAxisPixelRange": data_set.norm_x_range,
+            "TOFRange": data_set.DataTofRange,
+            "IncidentMediumSelected": incident_medium,
+            "GeometryCorrectionFlag": False,
+            "QMin": data_set.q_min,
+            "QStep": data_set.q_step,
+            "AngleOffset": data_set.angle_offset,
+            "AngleOffsetError": data_set.angle_offset_error,
+            "ScalingFactorFile": str(data_set.scaling_factor_file),
+            "SlitsWidthFlag": data_set.slits_width_flag,
+            "ApplyPrimaryFraction": True,
+            "SlitTolerance": slit_tolerance,
+            "PrimaryFractionRange": [data_set.clocking_from, data_set.clocking_to],
+            "OutputWorkspace": 'reflectivity_%s_%s_%s' % (first_run_of_set, sequence_number, run_number)
+        }
+
+        # Execute the reduction for the selected normalization type
+        norm_type = self.getProperty("NormalizationType").value
+        if norm_type == "DirectBeam":
+            LiquidsReflectometryReduction(**kwargs)
+
+        elif "WithReference":
+            # Get Refl1D parameters for theoretical model
+            refl1d_parameters = self.getProperty("Refl1DModelParameters").value
+            kwargs['Refl1DModelParameters'] = refl1d_parameters
+
+            # Modify output wksp name to match backwards compatibility for UI
+            _time = int(time.time())
+            kwargs["OutputWorkspace"] = kwargs["OutputWorkspace"] + '_#' + str(_time) + 'ts'
+
+            LRReductionWithReference(**kwargs)
 
         # Put the reflectivity curve together
         self._save_partial_output(data_set, first_run_of_set, sequence_number, run_number)

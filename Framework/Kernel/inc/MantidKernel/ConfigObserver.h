@@ -21,18 +21,14 @@ public:
   ConfigObserver &operator=(const ConfigObserver &other);
   virtual ~ConfigObserver() noexcept;
 
-  void notifyValueChanged(const std::string &name, const std::string &newValue,
-                          const std::string &prevValue);
+  void notifyValueChanged(const std::string &name, const std::string &newValue, const std::string &prevValue);
   void notifyValueChanged(ConfigValChangeNotification_ptr notification);
 
 protected:
-  virtual void onValueChanged(const std::string &name,
-                              const std::string &newValue,
-                              const std::string &prevValue) = 0;
+  virtual void onValueChanged(const std::string &name, const std::string &newValue, const std::string &prevValue) = 0;
 
 private:
-  Poco::NObserver<ConfigObserver, Mantid::Kernel::ConfigValChangeNotification>
-      m_valueChangeListener;
+  Poco::NObserver<ConfigObserver, Mantid::Kernel::ConfigValChangeNotification> m_valueChangeListener;
 };
 } // namespace Kernel
 } // namespace Mantid

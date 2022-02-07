@@ -29,11 +29,11 @@ Improved
    - The Grouping Policy in :ref:`algm-ISISIndirectDiffractionReduction`, now allows for grouping with a Workspace.
 - :ref:`FlatPlatePaalmanPingsCorrection <algm-FlatPlatePaalmanPingsCorrection>` now supports `Direct` and `Indirect` modes.
 - :ref:`BASISReduction <algm-BASISReduction>` can save to NXSPE format.
-   
+
 Bugfixes
 ########
 - :ref:`algm-ElasticWindowMultiple` now correctly normalizes by the lowest temperature - rather than the first one.
-- An issue has been fixed in :ref:`algm-IndirectILLEnergyTransfer` when handling the data with mirror sense, that have shifted 0 monitor counts in the left and right wings. This was causing the left and right workspaces to have different x-axis binning and to fail to sum during the unmirroring step. 
+- An issue has been fixed in :ref:`algm-IndirectILLEnergyTransfer` when handling the data with mirror sense, that have shifted 0 monitor counts in the left and right wings. This was causing the left and right workspaces to have different x-axis binning and to fail to sum during the unmirroring step.
 - An issue has been fixed in :ref:`algm-IndirectILLReductionFWS` when the scaling of the data after vanadium calibration was not applied.
 - :ref:`algm-CalculateSampleTransmission` now divides by the tabulated wavelength when calculating the absorption cross section.
 
@@ -43,7 +43,7 @@ Indirect Interfaces
 - In the Indirect ConvFit interface, EISF is now extracted as a parameter when performing a single fit using 'Fit Single Spectrum'.
 - The Indirect *S(Q, W)* interface now automatically replaces NaN values with 0.
 - The Save Result option in the Indirect Elwin interface now writes to file the temperature-dependent elastic intensity normalized to the lowest temperature.
-- Model selection is available in the Indirect MSDFit interface, providing the option to choose one of the three models available in the :ref:`algm-MSDFit` algorithm. 
+- Model selection is available in the Indirect MSDFit interface, providing the option to choose one of the three models available in the :ref:`algm-MSDFit` algorithm.
 - Removed fit option from plot options drop-down menu, in the Indirect Bayes interface.
 - Use Manual Grouping in the Indirect Diffraction interface now functions in the same way as the equivalent option in the Indirect ISISEnergyTransfer interface; providing and option to choose the number of groups and subsequently grouping by detector.
 - Plot Current Preview is now an available option across all Indirect interfaces, where a mini-plot is shown within the interface.

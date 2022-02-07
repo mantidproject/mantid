@@ -20,8 +20,7 @@ using namespace Mantid::DataObjects;
 using Mantid::Geometry::IDetector_const_sptr;
 using Mantid::Geometry::InstrumentRayTracer;
 
-namespace Mantid {
-namespace Algorithms {
+namespace Mantid::Algorithms {
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(RayTracerTester)
@@ -30,14 +29,12 @@ DECLARE_ALGORITHM(RayTracerTester)
 /** Initialize the algorithm's properties.
  */
 void RayTracerTester::init() {
-  declareProperty(std::make_unique<FileProperty>("Filename", "",
-                                                 FileProperty::Load, ".xml"),
+  declareProperty(std::make_unique<FileProperty>("Filename", "", FileProperty::Load, ".xml"),
                   "The filename (including its full or relative path) of an "
                   "instrument definition file");
   declareProperty("NumAzimuth", 100, "Steps in azimuthal angles");
   declareProperty("NumZenith", 50, "Steps in zenith angles");
-  declareProperty(std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
-                                                        Direction::Output),
+  declareProperty(std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "", Direction::Output),
                   "An output workspace.");
 }
 
@@ -45,8 +42,7 @@ void RayTracerTester::init() {
 /** Execute the algorithm.
  */
 void RayTracerTester::exec() {
-  IAlgorithm_sptr alg =
-      this->createChildAlgorithm("LoadEmptyInstrument", 0.0, 0.3, true);
+  auto alg = createChildAlgorithm("LoadEmptyInstrument", 0.0, 0.3, true);
   alg->setPropertyValue("Filename", getPropertyValue("Filename"));
   alg->executeAsChildAlg();
 
@@ -85,5 +81,4 @@ void RayTracerTester::exec() {
   }
 }
 
-} // namespace Algorithms
-} // namespace Mantid
+} // namespace Mantid::Algorithms

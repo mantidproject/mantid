@@ -12,7 +12,6 @@ namespace HistogramData {
 class Histogram;
 class BinEdges;
 
-MANTID_HISTOGRAMDATA_DLL Histogram rebin(const Histogram &input,
-                                         const BinEdges &binEdges);
+MANTID_HISTOGRAMDATA_DLL Histogram rebin(const Histogram &input, const BinEdges &binEdges);
 } // namespace HistogramData
 } // namespace Mantid

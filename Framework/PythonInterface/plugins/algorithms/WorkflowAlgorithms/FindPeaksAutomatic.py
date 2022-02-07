@@ -45,6 +45,8 @@ class FindPeaksAutomatic(DataProcessorAlgorithm):
             'Workspace with peaks to be identified')
 
         # Input parameters
+        self.declareProperty('SpectrumNumber',1, doc = 'Spectrum number to use',
+                             validator=IntBoundedValidator(lower=0))
         self.declareProperty('StartXValue', 0.0, doc='Value of X to start the search from')
         self.declareProperty('EndXValue', np.Inf, doc='Value of X to stop the search to')
         self.declareProperty(
@@ -112,7 +114,6 @@ class FindPeaksAutomatic(DataProcessorAlgorithm):
 
     def validateInputs(self):
         issues = {}
-
         self._acceptance = self.getProperty('AcceptanceThreshold').value
         self._smooth_window = self.getProperty('SmoothWindow').value
         self._bad_peak_to_consider = self.getProperty('BadPeaksToConsider').value
@@ -123,6 +124,7 @@ class FindPeaksAutomatic(DataProcessorAlgorithm):
         self._estimate_peak_sigma = self.getProperty('EstimatePeakSigma').value
         self._min_sigma = self.getProperty('MinPeakSigma').value
         self._max_sigma = self.getProperty('MaxPeakSigma').value
+        self._spectrum_number = self.getProperty('SpectrumNumber').value
 
         if self._max_sigma < self._min_sigma:
             issues['MinPeakSigma'] = 'Sigma bounds must be: MinPeakSigma <= MaxPeakSigma'
@@ -133,6 +135,9 @@ class FindPeaksAutomatic(DataProcessorAlgorithm):
 
         if self._estimate_peak_sigma > self._max_sigma:
             issues['EstimatePeakSigma'] = 'EstimatePeakSigma must be greater than MaxPeakSigma'
+
+        if self._spectrum_number < 0:
+            issues['SpectrumNumber'] = 'Spectrum number must be greater than 0'
 
         return issues
 
@@ -170,12 +175,18 @@ class FindPeaksAutomatic(DataProcessorAlgorithm):
 
     def load_data(self, prog_reporter):
         # Load the data and clean from Nans
-        raw_xvals = self.getProperty('InputWorkspace').value.readX(0).copy()
-        raw_yvals = self.getProperty('InputWorkspace').value.readY(0).copy()
+        spectrumNo = self.getProperty('SpectrumNumber').value
+        try:
+            index = self.getProperty('InputWorkspace').value.getSpectrumNumbers().index(spectrumNo)
+        except ValueError:
+            raise ValueError("Spectrum number is not valid")
+
+        raw_xvals = self.getProperty('InputWorkspace').value.readX(index).copy()
+        raw_yvals = self.getProperty('InputWorkspace').value.readY(index).copy()
         prog_reporter.report('Loaded data')
 
         # If the data does not have errors use poisson statistics create an workspace with added errors
-        raw_error = self.getProperty('InputWorkspace').value.readE(0).copy()
+        raw_error = self.getProperty('InputWorkspace').value.readE(index).copy()
         if len(np.argwhere(raw_error > 0)) == 0:
             raw_error = np.sqrt(raw_yvals)
             error_ws = CreateWorkspace(DataX=raw_xvals,
@@ -186,8 +197,13 @@ class FindPeaksAutomatic(DataProcessorAlgorithm):
                                   '{}_with_errors'.format(self.getPropertyValue('InputWorkspace')))
             self.setProperty('OutputWorkspace', error_ws)
         else:
-            error_ws = self.getProperty('InputWorkspace').value
-            self.setPropertyValue('OutputWorkspace', error_ws.getName())
+            error_ws = CreateWorkspace(DataX=raw_xvals,
+                                       DataY=raw_yvals,
+                                       DataE=raw_error,
+                                       StoreInADS=False)
+            self.setPropertyValue('OutputWorkspace',
+                                  '{}_with_errors'.format(self.getPropertyValue('InputWorkspace')))
+            self.setProperty('OutputWorkspace', error_ws)
 
         return raw_xvals, raw_yvals, raw_error, error_ws
 

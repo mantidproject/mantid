@@ -31,14 +31,10 @@ public:
 
   /// Return an appropriate object to determine the tick locations
   /// The default returns None indicating that matplotlib should autoselect it
-  virtual Common::Python::Object tickLocator() const {
-    return Common::Python::Object();
-  }
+  virtual Common::Python::Object tickLocator() const { return Common::Python::Object(); }
   /// Return an appropriate object to determine the text format type
   /// The default returns None indicating that matplotlib should autoselect it
-  virtual Common::Python::Object labelFormatter() const {
-    return Common::Python::Object();
-  }
+  virtual Common::Python::Object labelFormatter() const { return Common::Python::Object(); }
 
 protected:
   // Only to be called by derived classes. They should ensure
@@ -89,8 +85,7 @@ class MANTID_MPLCPP_DLL PowerNorm : public NormalizeBase {
 public:
   PowerNorm(double gamma);
   PowerNorm(double gamma, double vmin, double vmax);
-  virtual std::tuple<double, double>
-  autoscale(std::tuple<double, double> clim) override;
+  virtual std::tuple<double, double> autoscale(std::tuple<double, double> clim) override;
 };
 
 } // namespace MplCpp

@@ -25,7 +25,7 @@ Including this at the start of your view script will import a class
 
 .. code-block:: python
 
-    from mantid.utils.qt import load_ui
+    from mantidqt.utils.qt import load_ui
 
     Ui_MyWidget, _ = load_ui(__file__, "my_widget.ui")
 
@@ -47,7 +47,7 @@ which inherits from the imported one.
     from qtpy import QtCore, QtGui, QtWidgets
     import matplotlib.pyplot as plt
     from mantidqt.utils.qt import load_ui
-    from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg as FigureCanvas
+    from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 
     Ui_MyWidget, _ = load_ui(__file__, "my_widget.ui")
 
@@ -71,7 +71,6 @@ from above and use the following as your main:
 
 .. code-block:: python
 
-    from __future__ import (absolute_import,division,print_function)
     from qtpy import QtWidgets
     import sys
     import my_widget.view as view
@@ -93,7 +92,6 @@ the form of a package that will be called by another script.
 
 .. code-block:: python
 
-    from __future__ import (absolute_import, division, print_function)
     from my_widget.main import demo
 
     widget = demo()

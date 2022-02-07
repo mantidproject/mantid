@@ -6,23 +6,19 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "IndirectDataAnalysis.h"
 
-#include "ConvFit.h"
-#include "Elwin.h"
-#include "Iqt.h"
-#include "IqtFit.h"
-#include "JumpFit.h"
-#include "MSDFit.h"
+#include "IndirectDataAnalysisConvFitTab.h"
+#include "IndirectDataAnalysisElwinTab.h"
+#include "IndirectDataAnalysisFqFitTab.h"
+#include "IndirectDataAnalysisIqtFitTab.h"
+#include "IndirectDataAnalysisIqtTab.h"
+#include "IndirectDataAnalysisMSDFitTab.h"
 
-namespace MantidQt {
-namespace CustomInterfaces {
-namespace IDA {
+namespace MantidQt::CustomInterfaces::IDA {
 DECLARE_SUBWINDOW(IndirectDataAnalysis)
 
 IndirectDataAnalysis::IndirectDataAnalysis(QWidget *parent)
-    : IndirectInterface(parent),
-      m_settingsGroup("CustomInterfaces/IndirectAnalysis/"), m_valInt(nullptr),
-      m_valDbl(nullptr),
-      m_changeObserver(*this, &IndirectDataAnalysis::handleDirectoryChange) {
+    : IndirectInterface(parent), m_settingsGroup("CustomInterfaces/IndirectAnalysis/"), m_valInt(nullptr),
+      m_valDbl(nullptr), m_changeObserver(*this, &IndirectDataAnalysis::handleDirectoryChange) {
   m_uiForm.setupUi(this);
   m_uiForm.pbSettings->setIcon(IndirectSettings::icon());
 
@@ -31,16 +27,15 @@ IndirectDataAnalysis::IndirectDataAnalysis(QWidget *parent)
   // All tabs MUST appear here to be shown in interface.
   // We make the assumption that each map key corresponds to the order in which
   // the tabs appear.
-  m_tabs.emplace(ELWIN, new Elwin(m_uiForm.twIDATabs->widget(ELWIN)));
-  m_tabs.emplace(MSD_FIT, new MSDFit(m_uiForm.twIDATabs->widget(MSD_FIT)));
-  m_tabs.emplace(IQT, new Iqt(m_uiForm.twIDATabs->widget(IQT)));
-  m_tabs.emplace(IQT_FIT, new IqtFit(m_uiForm.twIDATabs->widget(IQT_FIT)));
-  m_tabs.emplace(CONV_FIT, new ConvFit(m_uiForm.twIDATabs->widget(CONV_FIT)));
-  m_tabs.emplace(JUMP_FIT, new JumpFit(m_uiForm.twIDATabs->widget(JUMP_FIT)));
+  m_tabs.emplace(ELWIN, new IndirectDataAnalysisElwinTab(m_uiForm.twIDATabs->widget(ELWIN)));
+  m_tabs.emplace(MSD_FIT, new IndirectDataAnalysisMSDFitTab(m_uiForm.twIDATabs->widget(MSD_FIT)));
+  m_tabs.emplace(IQT, new IndirectDataAnalysisIqtTab(m_uiForm.twIDATabs->widget(IQT)));
+  m_tabs.emplace(IQT_FIT, new IndirectDataAnalysisIqtFitTab(m_uiForm.twIDATabs->widget(IQT_FIT)));
+  m_tabs.emplace(CONV_FIT, new IndirectDataAnalysisConvFitTab(m_uiForm.twIDATabs->widget(CONV_FIT)));
+  m_tabs.emplace(FQ_FIT, new IndirectDataAnalysisFqFitTab(m_uiForm.twIDATabs->widget(FQ_FIT)));
 }
 
-void IndirectDataAnalysis::applySettings(
-    std::map<std::string, QVariant> const &settings) {
+void IndirectDataAnalysis::applySettings(std::map<std::string, QVariant> const &settings) {
   for (auto tab = m_tabs.begin(); tab != m_tabs.end(); ++tab) {
     tab->second->filterInputData(settings.at("RestrictInput").toBool());
   }
@@ -58,8 +53,7 @@ void IndirectDataAnalysis::closeEvent(QCloseEvent * /*unused*/) {
  *
  * @param pNf :: notification
  */
-void IndirectDataAnalysis::handleDirectoryChange(
-    Mantid::Kernel::ConfigValChangeNotification_ptr pNf) {
+void IndirectDataAnalysis::handleDirectoryChange(Mantid::Kernel::ConfigValChangeNotification_ptr pNf) {
   std::string key = pNf->key();
 
   if (key == "defaultsave.directory")
@@ -76,20 +70,14 @@ void IndirectDataAnalysis::initLayout() {
   // Set up all tabs
   for (auto &tab : m_tabs) {
     tab.second->setupTab();
-    connect(tab.second, SIGNAL(runAsPythonScript(const QString &, bool)), this,
-            SIGNAL(runAsPythonScript(const QString &, bool)));
-    connect(tab.second, SIGNAL(showMessageBox(const QString &)), this,
-            SLOT(showMessageBox(const QString &)));
+    connect(tab.second, SIGNAL(showMessageBox(const QString &)), this, SLOT(showMessageBox(const QString &)));
   }
 
-  connect(m_uiForm.twIDATabs, SIGNAL(currentChanged(int)), this,
-          SLOT(tabChanged(int)));
-  connect(m_uiForm.pbPythonExport, SIGNAL(clicked()), this,
-          SLOT(exportTabPython()));
+  connect(m_uiForm.twIDATabs, SIGNAL(currentChanged(int)), this, SLOT(tabChanged(int)));
+  connect(m_uiForm.pbPythonExport, SIGNAL(clicked()), this, SLOT(exportTabPython()));
   connect(m_uiForm.pbSettings, SIGNAL(clicked()), this, SLOT(settings()));
   connect(m_uiForm.pbHelp, SIGNAL(clicked()), this, SLOT(help()));
-  connect(m_uiForm.pbManageDirs, SIGNAL(clicked()), this,
-          SLOT(manageUserDirectories()));
+  connect(m_uiForm.pbManageDirs, SIGNAL(clicked()), this, SLOT(manageUserDirectories()));
 
   // Needed to initially apply the settings loaded on the settings GUI
   applySettings(getInterfaceSettings());
@@ -108,17 +96,16 @@ void IndirectDataAnalysis::initLocalPython() {
  * Load the settings saved for this interface.
  */
 void IndirectDataAnalysis::loadSettings() {
-  auto const saveDir = Mantid::Kernel::ConfigService::Instance().getString(
-      "defaultsave.directory");
+  auto const saveDir = Mantid::Kernel::ConfigService::Instance().getString("defaultsave.directory");
 
   QSettings settings;
   settings.beginGroup(m_settingsGroup + "ProcessedFiles");
 
   settings.setValue("last_directory", QString::fromStdString(saveDir));
 
-  for (auto tab = m_tabs.begin(); tab != m_tabs.end(); ++tab)
+  for (auto tab = m_tabs.begin(); tab != m_tabs.end(); ++tab) {
     tab->second->loadTabSettings(settings);
-
+  }
   settings.endGroup();
 }
 
@@ -127,9 +114,7 @@ void IndirectDataAnalysis::loadSettings() {
  */
 void IndirectDataAnalysis::tabChanged(int) {}
 
-std::string IndirectDataAnalysis::documentationPage() const {
-  return "Indirect Data Analysis";
-}
+std::string IndirectDataAnalysis::documentationPage() const { return "Inelastic Data Analysis"; }
 
 /**
  * Handles exporting a Python script for the current tab.
@@ -139,6 +124,4 @@ void IndirectDataAnalysis::exportTabPython() {
   m_tabs[currentTab]->exportPythonScript();
 }
 
-} // namespace IDA
-} // namespace CustomInterfaces
-} // namespace MantidQt
+} // namespace MantidQt::CustomInterfaces::IDA

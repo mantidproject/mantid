@@ -17,8 +17,7 @@
 #include <stdexcept>
 
 
-namespace MantidQt{
-namespace API{
+namespace MantidQt::API{
 
 //==================================================================================
 // xpms from other spots in the files
@@ -12222,7 +12221,7 @@ static const char * magnifier_xpm[] = {
 "                                      o+p+q+    "};
 
 
-/* "Manage User Directories" Icon */ 
+/* "Manage User Directories" Icon */
 static const char * managefolders_xpm[] = {
 "32 32 534 2",
 "  	c None",
@@ -13008,5 +13007,4 @@ QPixmap getQPixmap(const std::string &name)
 
 }
 
-}
 }

@@ -6,12 +6,15 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
+#include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
 #include <cxxtest/TestSuite.h>
 
 #include "MantidAPI/Axis.h"
+#include "MantidAPI/FrameworkManager.h"
+#include "MantidAPI/TableRow.h"
 #include "MantidAlgorithms/AddSampleLog.h"
 #include "MantidAlgorithms/AddTimeSeriesLog.h"
+#include "MantidAlgorithms/ChangeBinOffset.h"
 #include "MantidAlgorithms/ConvertUnits.h"
 #include "MantidAlgorithms/CreateGroupingWorkspace.h"
 #include "MantidAlgorithms/CreateSampleWorkspace.h"
@@ -37,6 +40,7 @@ public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
   static AlignAndFocusPowderTest *createSuite() {
+    FrameworkManager::Instance();
     return new AlignAndFocusPowderTest();
   }
   static void destroySuite(AlignAndFocusPowderTest *suite) { delete suite; }
@@ -63,26 +67,18 @@ public:
   /* Test AlignAndFocusPowder for HRP38692 raw data */
   void testHRP38692_useCalfile() { doTestHRP38692(true, false, false, false); }
 
-  void testHRP38692_useCalfile_useGroupfile() {
-    doTestHRP38692(true, false, true, false);
-  }
+  void testHRP38692_useCalfile_useGroupfile() { doTestHRP38692(true, false, true, false); }
 
-  void testHRP38692_useCalfile_useGroupWorkspace() {
-    doTestHRP38692(true, false, false, true);
-  }
+  void testHRP38692_useCalfile_useGroupWorkspace() { doTestHRP38692(true, false, false, true); }
 
-  void testHRP38692_useCalWorkspace_useGroupfile() {
-    doTestHRP38692(false, true, true, false);
-  }
+  void testHRP38692_useCalWorkspace_useGroupfile() { doTestHRP38692(false, true, true, false); }
 
-  void testHRP38692_useCalWorkspace_useGroupWorkspace() {
-    doTestHRP38692(false, true, false, true);
-  }
+  void testHRP38692_useCalWorkspace_useGroupWorkspace() { doTestHRP38692(false, true, false, true); }
 
   /* Test AlignAndFocusPowder for Event Workspace*/
   void testEventWksp_preserveEvents() {
     // Setup the event workspace
-    setUp_EventWorkspace();
+    setUp_EventWorkspace("EventWksp_preserveEvents");
 
     // Set the inputs for doTestEventWksp
     m_preserveEvents = true;
@@ -94,17 +90,21 @@ public:
 
     // Test the input
     docheckEventInputWksp();
+    AnalysisDataService::Instance().remove(m_inputWS);
 
     // Test the output
-    TS_ASSERT_DELTA(m_outWS->x(0)[80], 1609.2800, 0.0001);
-    TS_ASSERT_EQUALS(m_outWS->y(0)[80], 20);
-    TS_ASSERT_DELTA(m_outWS->x(0)[880], 14702.0800, 0.0001);
-    TS_ASSERT_EQUALS(m_outWS->y(0)[880], 587);
+    // [99] 1920.2339999999983, 41
+    TS_ASSERT_DELTA(m_outWS->x(0)[99], 1920.23400, 0.0001);
+    TS_ASSERT_EQUALS(m_outWS->y(0)[99], 41.);
+    // [899] 673.0, 15013.033999999987
+    TS_ASSERT_DELTA(m_outWS->x(0)[899], 15013.03400, 0.0001);
+    TS_ASSERT_EQUALS(m_outWS->y(0)[899], 673.0);
+    AnalysisDataService::Instance().remove(m_outputWS);
   }
 
   void testEventWksp_preserveEvents_useGroupAll() {
     // Setup the event workspace
-    setUp_EventWorkspace();
+    setUp_EventWorkspace("EventWksp_preserveEvents_useGroupAll");
 
     // Set the inputs for doTestEventWksp
     m_preserveEvents = true;
@@ -116,17 +116,21 @@ public:
 
     // Test the input
     docheckEventInputWksp();
+    AnalysisDataService::Instance().remove(m_inputWS);
 
     // Test the output
-    TS_ASSERT_DELTA(m_outWS->x(0)[423], 1634.3791, 0.0001);
-    TS_ASSERT_EQUALS(m_outWS->y(0)[423], 2702);
-    TS_ASSERT_DELTA(m_outWS->x(0)[970], 14719.8272, 0.0001);
-    TS_ASSERT_EQUALS(m_outWS->y(0)[970], 149165);
+    // [465] 1942.1284, 2498.0
+    TS_ASSERT_DELTA(m_outWS->x(0)[465], 1942.1284, 0.0001);
+    TS_ASSERT_EQUALS(m_outWS->y(0)[465], 2498.0);
+    // [974] 15076.563461: 59802.0
+    TS_ASSERT_DELTA(m_outWS->x(0)[974], 15076.563461, 0.0001);
+    TS_ASSERT_EQUALS(m_outWS->y(0)[974], 59802.0);
+    AnalysisDataService::Instance().remove(m_outputWS);
   }
 
   void testEventWksp_doNotPreserveEvents() {
     // Setup the event workspace
-    setUp_EventWorkspace();
+    setUp_EventWorkspace("EventWksp_doNotPreserveEvents");
 
     // Set the inputs for doTestEventWksp
     m_preserveEvents = false;
@@ -138,17 +142,21 @@ public:
 
     // Test the input
     docheckEventInputWksp();
+    AnalysisDataService::Instance().remove(m_inputWS);
 
     // Test the output
-    TS_ASSERT_DELTA(m_outWS->x(0)[80], 1609.2800, 0.0001);
-    TS_ASSERT_EQUALS(m_outWS->y(0)[80], 20);
-    TS_ASSERT_DELTA(m_outWS->x(0)[880], 14702.0800, 0.0001);
-    TS_ASSERT_EQUALS(m_outWS->y(0)[880], 587);
+    // [99] 1920.2339999999983, 41
+    TS_ASSERT_DELTA(m_outWS->x(0)[99], 1920.23400, 0.0001);
+    TS_ASSERT_EQUALS(m_outWS->y(0)[99], 41.);
+    // [899] 673.0, 15013.033999999987
+    TS_ASSERT_DELTA(m_outWS->x(0)[899], 15013.03400, 0.0001);
+    TS_ASSERT_EQUALS(m_outWS->y(0)[899], 673.0);
+    AnalysisDataService::Instance().remove(m_outputWS);
   }
 
   void testEventWksp_doNotPreserveEvents_useGroupAll() {
     // Setup the event workspace
-    setUp_EventWorkspace();
+    setUp_EventWorkspace("EventWksp_doNotPreserveEvents_useGroupAll");
 
     // Set the inputs for doTestEventWksp
     m_preserveEvents = false;
@@ -157,20 +165,24 @@ public:
 
     // Run the main test function
     doTestEventWksp();
+    AnalysisDataService::Instance().remove(m_inputWS);
 
     // Test the input
     docheckEventInputWksp();
 
     // Test the output
-    TS_ASSERT_DELTA(m_outWS->x(0)[423], 1634.3791, 0.0001);
-    TS_ASSERT_DELTA(m_outWS->y(0)[423], 2419.5680, 0.0001);
-    TS_ASSERT_DELTA(m_outWS->x(0)[970], 14719.8272, 0.0001);
-    TS_ASSERT_DELTA(m_outWS->y(0)[970], 148503.3853, 0.0001);
+    // [465] 1942.1284, 2415.9
+    TS_ASSERT_DELTA(m_outWS->x(0)[465], 1942.1284, 0.0001);
+    TS_ASSERT_DELTA(m_outWS->y(0)[465], 2415.9, 0.1);
+    // [974] 15076.563463: 60043.5
+    TS_ASSERT_DELTA(m_outWS->x(0)[974], 15076.563463, 0.0001);
+    TS_ASSERT_DELTA(m_outWS->y(0)[974], 60043.5, 0.1);
+    AnalysisDataService::Instance().remove(m_outputWS);
   }
 
   void testEventWksp_rebin_preserveEvents() {
     // Setup the event workspace
-    setUp_EventWorkspace();
+    setUp_EventWorkspace("EventWksp_rebin_preserveEvents");
 
     // Set the inputs for doTestEventWksp
     m_preserveEvents = true;
@@ -181,21 +193,23 @@ public:
     doTestEventWksp();
 
     // Test the input
-    TS_ASSERT_DELTA(m_inWS->x(0)[170], 1628.3764, 0.0001);
-    TS_ASSERT_EQUALS(m_inWS->y(0)[170], 48);
-    TS_ASSERT_DELTA(m_inWS->x(0)[391], 14681.7696, 0.0001);
-    TS_ASSERT_EQUALS(m_inWS->y(0)[391], 2540);
+    TS_ASSERT_DELTA(m_inWS->x(0)[187], 1928.4933786037175, 0.0001);
+    TS_ASSERT_EQUALS(m_inWS->y(0)[187], 53);
+    TS_ASSERT_DELTA(m_inWS->x(0)[393], 14976.873144731135, 0.0001);
+    TS_ASSERT_EQUALS(m_inWS->y(0)[393], 2580);
+    AnalysisDataService::Instance().remove(m_inputWS);
 
     // Test the output
-    TS_ASSERT_DELTA(m_outWS->x(0)[1693], 1629.3502, 0.0001);
-    TS_ASSERT_EQUALS(m_outWS->y(0)[1693], 6);
-    TS_ASSERT_DELTA(m_outWS->x(0)[3895], 14718.1436, 0.0001);
-    TS_ASSERT_EQUALS(m_outWS->y(0)[3895], 612);
+    TS_ASSERT_DELTA(m_outWS->x(0)[1872], 1948.5623011850066, 0.0001);
+    TS_ASSERT_EQUALS(m_outWS->y(0)[1872], 4);
+    TS_ASSERT_DELTA(m_outWS->x(0)[3915], 15015.319796791482, 0.0001);
+    TS_ASSERT_EQUALS(m_outWS->y(0)[3915], 620);
+    AnalysisDataService::Instance().remove(m_outputWS);
   }
 
   void testEventWksp_preserveEvents_dmin_dmax() {
     // Setup the event workspace
-    setUp_EventWorkspace();
+    setUp_EventWorkspace("EventWksp_preserveEvents_dmin_dmax");
 
     // Set the inputs for doTestEventWksp
     m_preserveEvents = true;
@@ -213,24 +227,26 @@ public:
 
     // Test the input
     docheckEventInputWksp();
+    AnalysisDataService::Instance().remove(m_inputWS);
 
     // Test the output
-    TS_ASSERT_DELTA(m_outWS->x(0)[116], 3270.3908, 0.0001);
-    TS_ASSERT_EQUALS(m_outWS->y(0)[116], 37);
-    TS_ASSERT_DELTA(m_outWS->x(0)[732], 6540.7817, 0.0001);
-    TS_ASSERT_EQUALS(m_outWS->y(0)[732], 25);
+    TS_ASSERT_DELTA(m_outWS->x(0)[172], 3567.6990819051966, 0.0001);
+    TS_ASSERT_EQUALS(m_outWS->y(0)[172], 37);
+    TS_ASSERT_DELTA(m_outWS->x(0)[789], 6843.398982999533, 0.0001);
+    TS_ASSERT_EQUALS(m_outWS->y(0)[789], 27);
+    AnalysisDataService::Instance().remove(m_outputWS);
   }
 
   void testEventWksp_preserveEvents_tmin_tmax() {
     // Setup the event workspace
-    setUp_EventWorkspace();
+    setUp_EventWorkspace("EventWksp_preserveEvents_tmin_tmax");
 
     // Set the inputs for doTestEventWksp
     m_preserveEvents = true;
     m_useGroupAll = false;
     m_useResamplex = true;
     m_tmin = "2000.0";
-    m_tmax = "10000.0";
+    m_tmax = "12000.0";
 
     // Run the main test function
     doTestEventWksp();
@@ -241,17 +257,19 @@ public:
 
     // Test the input
     docheckEventInputWksp();
+    AnalysisDataService::Instance().remove(m_inputWS);
 
     // Test the output
-    TS_ASSERT_DELTA(m_outWS->x(0)[149], 3270.7563, 0.0001);
-    TS_ASSERT_EQUALS(m_outWS->y(0)[149], 51);
-    TS_ASSERT_DELTA(m_outWS->x(0)[982], 9814.5378, 0.0001);
-    TS_ASSERT_EQUALS(m_outWS->y(0)[982], 138);
+    TS_ASSERT_DELTA(m_outWS->x(0)[149], 3563.380399999972, 0.0001);
+    TS_ASSERT_EQUALS(m_outWS->y(0)[149], 63);
+    TS_ASSERT_DELTA(m_outWS->x(0)[816], 10113.053600000023, 0.0001);
+    TS_ASSERT_EQUALS(m_outWS->y(0)[816], 175);
+    AnalysisDataService::Instance().remove(m_outputWS);
   }
 
   void testEventWksp_preserveEvents_lambdamin_lambdamax() {
     // Setup the event workspace
-    setUp_EventWorkspace();
+    setUp_EventWorkspace("EventWksp_preserveEvents_lambdamin_lambdamax");
 
     // Set the inputs for doTestEventWksp
     m_preserveEvents = true;
@@ -269,19 +287,21 @@ public:
 
     // Test the input
     docheckEventInputWksp();
+    AnalysisDataService::Instance().remove(m_inputWS);
 
     // Test the output
-    TS_ASSERT_DELTA(m_outWS->x(0)[181], 3262.2460, 0.0001);
-    TS_ASSERT_EQUALS(m_outWS->y(0)[181], 105);
-    TS_ASSERT_DELTA(m_outWS->x(0)[581], 9808.6460, 0.0001);
-    TS_ASSERT_EQUALS(m_outWS->y(0)[581], 290);
-    TS_ASSERT_DELTA(m_outWS->x(0)[880], 14702.0800, 0.0001);
-    TS_ASSERT_EQUALS(m_outWS->y(0)[880], 0);
+    TS_ASSERT_DELTA(m_outWS->x(0)[199], 3556.833999999997, 0.0001);
+    TS_ASSERT_EQUALS(m_outWS->y(0)[199], 92.);
+    TS_ASSERT_DELTA(m_outWS->x(0)[599], 10103.233999999991, 0.0001);
+    TS_ASSERT_EQUALS(m_outWS->y(0)[599], 277.);
+    TS_ASSERT_DELTA(m_outWS->x(0)[899], 15013.033999999987, 0.0001);
+    TS_ASSERT_EQUALS(m_outWS->y(0)[899], 0);
+    AnalysisDataService::Instance().remove(m_outputWS);
   }
 
   void testEventWksp_preserveEvents_maskbins() {
     // Setup the event workspace
-    setUp_EventWorkspace();
+    setUp_EventWorkspace("EventWksp_preserveEvents_maskbins");
 
     // Set the inputs for doTestEventWksp
     m_preserveEvents = true;
@@ -297,19 +317,21 @@ public:
 
     // Test the input
     docheckEventInputWksp();
+    AnalysisDataService::Instance().remove(m_inputWS);
 
     // Test the output
-    TS_ASSERT_DELTA(m_outWS->x(0)[181], 3262.2460, 0.0001);
-    TS_ASSERT_EQUALS(m_outWS->y(0)[181], 105);
-    TS_ASSERT_DELTA(m_outWS->x(0)[581], 9808.6460, 0.0001);
-    TS_ASSERT_EQUALS(m_outWS->y(0)[581], 290);
-    TS_ASSERT_DELTA(m_outWS->x(0)[880], 14702.0800, 0.0001);
-    TS_ASSERT_EQUALS(m_outWS->y(0)[880], 0);
+    TS_ASSERT_DELTA(m_outWS->x(0)[199], 3556.833999999997, 0.0001);
+    TS_ASSERT_EQUALS(m_outWS->y(0)[199], 92.);
+    TS_ASSERT_DELTA(m_outWS->x(0)[599], 10103.233999999991, 0.0001);
+    TS_ASSERT_EQUALS(m_outWS->y(0)[599], 277.);
+    TS_ASSERT_DELTA(m_outWS->x(0)[899], 15013.033999999987, 0.0001);
+    TS_ASSERT_EQUALS(m_outWS->y(0)[899], 0);
+    AnalysisDataService::Instance().remove(m_outputWS);
   }
 
   void testEventWksp_preserveEvents_noCompressTolerance() {
     // Setup the event workspace
-    setUp_EventWorkspace();
+    setUp_EventWorkspace("EventWksp_preserveEvents_noCompressTolerance");
 
     // Set the inputs for doTestEventWksp
     m_preserveEvents = true;
@@ -325,19 +347,21 @@ public:
 
     // Test the input
     docheckEventInputWksp();
+    AnalysisDataService::Instance().remove(m_inputWS);
 
     // Test the output
-    TS_ASSERT_DELTA(m_outWS->x(0)[181], 3262.2460, 0.0001);
-    TS_ASSERT_EQUALS(m_outWS->y(0)[181], 105);
-    TS_ASSERT_DELTA(m_outWS->x(0)[581], 9808.6460, 0.0001);
-    TS_ASSERT_EQUALS(m_outWS->y(0)[581], 290);
-    TS_ASSERT_DELTA(m_outWS->x(0)[880], 14702.0800, 0.0001);
-    TS_ASSERT_EQUALS(m_outWS->y(0)[880], 587);
+    TS_ASSERT_DELTA(m_outWS->x(0)[199], 3556.833999999997, 0.0001);
+    TS_ASSERT_EQUALS(m_outWS->y(0)[199], 92.);
+    TS_ASSERT_DELTA(m_outWS->x(0)[599], 10103.233999999991, 0.0001);
+    TS_ASSERT_EQUALS(m_outWS->y(0)[599], 277.);
+    TS_ASSERT_DELTA(m_outWS->x(0)[899], 15013.033999999987, 0.0001);
+    TS_ASSERT_EQUALS(m_outWS->y(0)[899], 673.);
+    AnalysisDataService::Instance().remove(m_outputWS);
   }
 
   void testEventWksp_preserveEvents_highCompressTolerance() {
     // Setup the event workspace
-    setUp_EventWorkspace();
+    setUp_EventWorkspace("EventWksp_preserveEvents_highCompressTolerance");
 
     // Set the inputs for doTestEventWksp
     m_preserveEvents = true;
@@ -353,19 +377,21 @@ public:
 
     // Test the input
     docheckEventInputWksp();
+    AnalysisDataService::Instance().remove(m_inputWS);
 
     // Test the output
-    TS_ASSERT_DELTA(m_outWS->x(0)[181], 3262.2460, 0.0001);
-    TS_ASSERT_EQUALS(m_outWS->y(0)[181], 96);
-    TS_ASSERT_DELTA(m_outWS->x(0)[581], 9808.6460, 0.0001);
-    TS_ASSERT_EQUALS(m_outWS->y(0)[581], 427);
-    TS_ASSERT_DELTA(m_outWS->x(0)[880], 14702.0800, 0.0001);
-    TS_ASSERT_EQUALS(m_outWS->y(0)[880], 672);
+    TS_ASSERT_DELTA(m_outWS->x(0)[199], 3556.833999999997, 0.0001);
+    TS_ASSERT_EQUALS(m_outWS->y(0)[199], 119.);
+    TS_ASSERT_DELTA(m_outWS->x(0)[599], 10103.233999999991, 0.0001);
+    TS_ASSERT_EQUALS(m_outWS->y(0)[599], 263.);
+    TS_ASSERT_DELTA(m_outWS->x(0)[899], 15013.033999999987, 0.0001);
+    TS_ASSERT_EQUALS(m_outWS->y(0)[899], 827.);
+    AnalysisDataService::Instance().remove(m_outputWS);
   }
 
   void testEventWksp_preserveEvents_compressWallClockTolerance() {
     // Setup the event workspace
-    setUp_EventWorkspace();
+    setUp_EventWorkspace("EventWksp_preserveEvents_compressWallClockTolerance");
 
     // Set the inputs for doTestEventWksp
     m_preserveEvents = true;
@@ -382,19 +408,22 @@ public:
 
     // Test the input
     docheckEventInputWksp();
+    AnalysisDataService::Instance().remove(m_inputWS);
 
-    // Test the output
-    TS_ASSERT_DELTA(m_outWS->x(0)[181], 3262.2460, 0.0001);
-    TS_ASSERT_EQUALS(m_outWS->y(0)[181], 105);
-    TS_ASSERT_DELTA(m_outWS->x(0)[581], 9808.6460, 0.0001);
-    TS_ASSERT_EQUALS(m_outWS->y(0)[581], 290);
-    TS_ASSERT_DELTA(m_outWS->x(0)[880], 14702.0800, 0.0001);
-    TS_ASSERT_EQUALS(m_outWS->y(0)[880], 587);
+    // Test the output: expected result shall be same as testEventWksp_preserveEvents_noCompressTolerance
+    // because comparess time clock won't change the result
+    TS_ASSERT_DELTA(m_outWS->x(0)[199], 3556.833999999997, 0.0001);
+    TS_ASSERT_EQUALS(m_outWS->y(0)[199], 92.);
+    TS_ASSERT_DELTA(m_outWS->x(0)[599], 10103.233999999991, 0.0001);
+    TS_ASSERT_EQUALS(m_outWS->y(0)[599], 277.);
+    TS_ASSERT_DELTA(m_outWS->x(0)[899], 15013.033999999987, 0.0001);
+    TS_ASSERT_EQUALS(m_outWS->y(0)[899], 673.);
+    AnalysisDataService::Instance().remove(m_outputWS);
   }
 
   void testEventWksp_preserveEvents_removePromptPulse() {
     // Setup the event workspace
-    setUp_EventWorkspace();
+    setUp_EventWorkspace("EventWksp_preserveEvents_removePromptPulse");
 
     // Set the inputs for doTestEventWksp
     m_preserveEvents = true;
@@ -411,27 +440,121 @@ public:
 
     // Test the input
     docheckEventInputWksp();
+    AnalysisDataService::Instance().remove(m_inputWS);
 
     // Test the output
-    TS_ASSERT_DELTA(m_outWS->x(0)[181], 3262.2460, 0.0001);
-    TS_ASSERT_EQUALS(m_outWS->y(0)[181], 105);
-    TS_ASSERT_DELTA(m_outWS->x(0)[581], 9808.6460, 0.0001);
-    TS_ASSERT_EQUALS(m_outWS->y(0)[581], 0);
+    TS_ASSERT_DELTA(m_outWS->x(0)[199], 3556.833999999997, 0.0001);
+    TS_ASSERT_EQUALS(m_outWS->y(0)[199], 92.);
+    TS_ASSERT_DELTA(m_outWS->x(0)[599], 10103.233999999991, 0.0001);
+    TS_ASSERT_EQUALS(m_outWS->y(0)[599], 0.);
+    AnalysisDataService::Instance().remove(m_outputWS);
+  }
+
+  void testEventWksp_filterResonance() {
+
+    /* Create fake event data in an event workspace */
+    /* fake data is the "Powder Diffraction" composite function from
+     * CreateSampleWorkspace.cpp: a series of 9 peaks */
+    setUp_EventWorkspace("EventWksp_filterResonance");
+
+    // Set the inputs for doTestEventWksp
+    m_preserveEvents = true;
+    m_useGroupAll = false;
+    m_useResamplex = true;
+    addFrequencyForLogs();
+
+    /* Run 0: produces the aligned and focused output workspace with no wavelength ranges
+     * filtered out: */
+    m_filterResonanceLower = "";
+    m_filterResonanceUpper = "";
+
+    /* Run AlignAndFocus */
+    doTestEventWksp();
+
+    TS_ASSERT_EQUALS(m_outWS->getNumberHistograms(), 144);
+
+    /* Convert the units of the workspace to wavelength, the same units as the resonance
+     * filtering limits */
+    ConvertUnits convert_units;
+    convert_units.initialize();
+    convert_units.setPropertyValue("InputWorkspace", m_outputWS);
+    convert_units.setPropertyValue("OutputWorkspace", m_outputWS);
+    convert_units.setPropertyValue("Target", "Wavelength");
+    convert_units.execute();
+
+    /* get the raw output data */
+    const auto &y0 = m_outWS->y(0);
+    const auto &x0 = m_outWS->x(0).rawData();
+
+    /* Obtain data values from peaks 2 and 5 (zero-indexed): */
+    /* 1.3 - 1.5 for peak 2 */
+    int peak_2_index = 299;
+    double peak_2_x = 1.36951;
+    double peak_2_y = 126;
+    /* 2.6 - 2.8 */
+    int peak_5_index = 599;
+    double peak_5_x = 2.66423;
+    double peak_5_y = 277;
+    double tol = 1e-5;
+
+    TS_ASSERT_DELTA(x0[peak_2_index], peak_2_x, tol);
+    TS_ASSERT_DELTA(y0[peak_2_index], peak_2_y, tol);
+    TS_ASSERT_DELTA(x0[peak_5_index], peak_5_x, tol);
+    TS_ASSERT_DELTA(y0[peak_5_index], peak_5_y, tol);
+
+    /* cleanup */
+    AnalysisDataService::Instance().remove(m_outputWS);
+
+    /* Run 2: produces the aligned and focused output workspace with two peaks
+     * filtered out: the indices they occupied should now contain zero. */
+
+    /* filter out peak 2 and peak 5 from above */
+    m_filterResonanceLower = "1.3, 2.6";
+    m_filterResonanceUpper = "1.5, 2.8";
+
+    /* Run AlignAndFocus */
+    doTestEventWksp();
+
+    /* Convert the units of the workspace to get wavelength ranges */
+    ConvertUnits convert_units_0;
+    convert_units_0.initialize();
+    convert_units_0.setPropertyValue("InputWorkspace", m_outputWS);
+    convert_units_0.setPropertyValue("OutputWorkspace", m_outputWS);
+    convert_units_0.setPropertyValue("Target", "Wavelength");
+    convert_units_0.execute();
+
+    const auto &y2 = m_outWS->y(0).rawData();
+    const auto &x2 = m_outWS->x(0).rawData();
+
+    /* y values of filtered peaks should be zero */
+    TS_ASSERT_DELTA(x2[peak_2_index], peak_2_x, tol);
+    TS_ASSERT_EQUALS(y2[peak_2_index], 0);
+    TS_ASSERT_DELTA(x2[peak_5_index], peak_5_x, tol);
+    TS_ASSERT_EQUALS(y2[peak_5_index], 0);
+
+    /* Check the input workspace here for some reason otherwise segfault */
+    docheckEventInputWksp();
+
+    /* remove trashed workspaces */
+    AnalysisDataService::Instance().remove(m_inputWS);
+    AnalysisDataService::Instance().remove(m_outputWS);
+
+    /* reset state variables for future tests... */
+    m_filterResonanceLower = "";
+    m_filterResonanceUpper = "";
   }
 
   void testEventWksp_preserveEvents_compressStartTime() {
     // Setup the event workspace
-    setUp_EventWorkspace();
+    setUp_EventWorkspace("EventWksp_preserveEvents_compressStartTime");
 
     // Set the inputs for doTestEventWksp
     m_preserveEvents = true;
     m_useGroupAll = false;
     m_useResamplex = true;
     // require both inside AlignAndFocusPowder
-    m_compressStartTime =
-        "2010-01-01T00:20:00"; // start time is "2010-01-01T00:00:00"
-    m_compressWallClockTolerance =
-        "50.0"; // require both inside AlignAndFocusPowder
+    m_compressStartTime = "2010-01-01T00:20:00"; // start time is "2010-01-01T00:00:00"
+    m_compressWallClockTolerance = "50.0";       // require both inside AlignAndFocusPowder
 
     // Run the main test function
     doTestEventWksp();
@@ -442,12 +565,14 @@ public:
 
     // Test the input
     docheckEventInputWksp();
+    AnalysisDataService::Instance().remove(m_inputWS);
 
     // Test the output
-    TS_ASSERT_DELTA(m_outWS->x(0)[181], 3262.2460, 0.0001);
-    TS_ASSERT_EQUALS(m_outWS->y(0)[181], 72);
-    TS_ASSERT_DELTA(m_outWS->x(0)[581], 9808.6460, 0.0001);
-    TS_ASSERT_EQUALS(m_outWS->y(0)[581], 197);
+    TS_ASSERT_DELTA(m_outWS->x(0)[199], 3556.833999999997, 0.0001);
+    TS_ASSERT_EQUALS(m_outWS->y(0)[199], 68.);
+    TS_ASSERT_DELTA(m_outWS->x(0)[599], 10103.233999999991, 0.0001);
+    TS_ASSERT_EQUALS(m_outWS->y(0)[599], 190.);
+    AnalysisDataService::Instance().remove(m_outputWS);
   }
 
   /** Setup for testing HRPD NeXus data */
@@ -462,9 +587,7 @@ public:
     TS_ASSERT(loader.isExecuted());
   }
 
-  void doTestHRP38692(bool useCalfile, bool useCalWksp, bool useGroupfile,
-                      bool useGroupWksp) {
-
+  void doTestHRP38692(bool useCalfile, bool useCalWksp, bool useGroupfile, bool useGroupWksp) {
     setUp_HRP38692();
 
     AlignAndFocusPowder align_and_focus;
@@ -475,42 +598,38 @@ public:
     align_and_focus.setProperty("ResampleX", 1000);
     align_and_focus.setProperty("Dspacing", false);
 
-    TS_ASSERT_THROWS_NOTHING(align_and_focus.execute());
-    TS_ASSERT(align_and_focus.isExecuted());
-
-    std::string calfilename("hrpd_new_072_01.cal");
+    const std::string INSTR("HRPD");
+    const std::string calfilename("hrpd_new_072_01.cal");
+    const std::string grpfilename("hrpd_new_072_01_grp.xml"); // TODO add to external data repo
     if (useCalfile)
       align_and_focus.setPropertyValue("CalFilename", calfilename);
     else if (useCalWksp) {
-      loadDiffCal(calfilename, false, true, true);
-      align_and_focus.setPropertyValue("GroupingWorkspace",
-                                       m_loadDiffWSName + "_group");
-      align_and_focus.setPropertyValue("CalibrationWorkspace",
-                                       m_loadDiffWSName + "_cal");
-      align_and_focus.setPropertyValue("MaskWorkspace",
-                                       m_loadDiffWSName + "_mask");
+      loadDiffCal(INSTR, calfilename, false, true, true);
+      // didn't load group
+      align_and_focus.setPropertyValue("CalibrationWorkspace", m_loadDiffWSName + "_cal");
+      align_and_focus.setPropertyValue("MaskWorkspace", m_loadDiffWSName + "_mask");
     }
 
     if (useGroupfile)
-      align_and_focus.setPropertyValue("GroupFilename", calfilename);
+      align_and_focus.setPropertyValue("GroupFilename", grpfilename);
     else if (useGroupWksp) {
-      loadDiffCal(calfilename, true, false, true);
-      align_and_focus.setPropertyValue("MaskWorkspace",
-                                       m_loadDiffWSName + "_mask");
-      align_and_focus.setPropertyValue("GroupingWorkspace",
-                                       m_loadDiffWSName + "_group");
+      loadDiffCal(INSTR, calfilename, true, false, true);
+      align_and_focus.setPropertyValue("GroupingWorkspace", m_loadDiffWSName + "_group");
+      // didn't load calibration
+      align_and_focus.setPropertyValue("MaskWorkspace", m_loadDiffWSName + "_mask");
     }
 
     TS_ASSERT_THROWS_NOTHING(align_and_focus.execute());
     TS_ASSERT(align_and_focus.isExecuted());
 
-    m_inWS =
-        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(m_inputWS);
-    m_outWS =
-        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(m_outputWS);
+    m_inWS = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(m_inputWS);
 
     TS_ASSERT_EQUALS(m_inWS->size(), 263857);
     TS_ASSERT_EQUALS(m_inWS->blocksize(), 23987);
+
+    AnalysisDataService::Instance().remove(m_inputWS);
+
+    m_outWS = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(m_outputWS);
 
     TS_ASSERT_EQUALS(m_outWS->getAxis(0)->unit()->unitID(), "TOF");
     TS_ASSERT_EQUALS(m_outWS->size(), 1000);
@@ -518,23 +637,24 @@ public:
     TS_ASSERT_EQUALS(m_outWS->getNumberHistograms(), 1);
 
     // Maximum of peak near TOF approx. equal to 22,000 (micro-seconds)
-    TS_ASSERT_DELTA(m_outWS->x(0)[333], 21990.0502, 0.0001);
-    TS_ASSERT_DELTA(m_outWS->y(0)[333], 770.2515, 0.0001);
+    TS_ASSERT_DELTA(m_outWS->x(0)[333], 22011.6726, 0.0001);
+    TS_ASSERT_DELTA(m_outWS->y(0)[333], 743.4881, 0.0001);
 
     // Maximum of peak near TOF approx. equal to 25,800 (micro-seconds)
-    TS_ASSERT_DELTA(m_outWS->x(0)[398], 25750.3113, 0.0001);
-    TS_ASSERT_DELTA(m_outWS->y(0)[398], 1522.3778, 0.0001);
+    TS_ASSERT_DELTA(m_outWS->x(0)[398], 25780.5763, 0.0001);
+    TS_ASSERT_DELTA(m_outWS->y(0)[398], 1584.2907, 0.0001);
 
     // Maximum of peak near TOF approx. equal to 42,000 (micro-seconds)
-    TS_ASSERT_DELTA(m_outWS->x(0)[600], 42056.6091, 0.0001);
-    TS_ASSERT_DELTA(m_outWS->y(0)[600], 7283.29652, 0.0001);
+    TS_ASSERT_DELTA(m_outWS->x(0)[600], 42131.1493, 0.0001);
+    TS_ASSERT_DELTA(m_outWS->y(0)[600], 7343.1294, 0.0001);
+
+    AnalysisDataService::Instance().remove(m_outputWS);
   }
 
-  /* Setup for event data */
+  /* Setup for event data. The caller supplies the workspace name */
 
-  void setUp_EventWorkspace() {
-    m_inputWS = "eventWS";
-
+  void setUp_EventWorkspace(const std::string &wkspname) {
+    m_inputWS = wkspname;
     CreateSampleWorkspace createSampleAlg;
     createSampleAlg.initialize();
     createSampleAlg.setPropertyValue("WorkspaceType", "Event");
@@ -571,16 +691,21 @@ public:
   }
 
   void docheckEventInputWksp() {
-    TS_ASSERT_DELTA(m_inWS->x(0)[8], 1609.2800, 0.0001);
-    TS_ASSERT_EQUALS(m_inWS->y(0)[8], 97);
-    TS_ASSERT_DELTA(m_inWS->x(0)[18], 3245.8800, 0.0001);
-    TS_ASSERT_EQUALS(m_inWS->y(0)[18], 237);
-    TS_ASSERT_DELTA(m_inWS->x(0)[38], 6519.0800, 0.0001);
-    TS_ASSERT_EQUALS(m_inWS->y(0)[38], 199);
-    TS_ASSERT_DELTA(m_inWS->x(0)[58], 9792.2800, 0.0001);
-    TS_ASSERT_EQUALS(m_inWS->y(0)[58], 772);
-    TS_ASSERT_DELTA(m_inWS->x(0)[88], 14702.0800, 0.0001);
-    TS_ASSERT_EQUALS(m_inWS->y(0)[88], 2162);
+    // peak 0
+    TS_ASSERT_DELTA(m_inWS->x(0)[9], 1772.94, 0.01);
+    TS_ASSERT_EQUALS(m_inWS->y(0)[9], 50);
+    // peak 1
+    TS_ASSERT_DELTA(m_inWS->x(0)[19], 3409.54, 0.01);
+    TS_ASSERT_EQUALS(m_inWS->y(0)[19], 125);
+    // peak 3: index = 39  6682.74  118
+    TS_ASSERT_DELTA(m_inWS->x(0)[39], 6682.74, 0.01);
+    TS_ASSERT_EQUALS(m_inWS->y(0)[39], 118);
+    // peak 5: index = 59  9955.94  483
+    TS_ASSERT_DELTA(m_inWS->x(0)[59], 9955.94, 0.01);
+    TS_ASSERT_EQUALS(m_inWS->y(0)[59], 483);
+    // peak 7: index = 89  14865.7  1524
+    TS_ASSERT_DELTA(m_inWS->x(0)[89], 14865.7, 0.1);
+    TS_ASSERT_EQUALS(m_inWS->y(0)[89], 1524);
   }
 
   void doTestEventWksp() {
@@ -593,13 +718,11 @@ public:
       resamplex(inputHistoBins);
     } else {
       rebin(params);
-      m_inWS = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-          m_inputWS);
+      m_inWS = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(m_inputWS);
       numHistoBins = int(m_inWS->blocksize());
 
       rebin(input_params);
-      m_inWS = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-          m_inputWS);
+      m_inWS = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(m_inputWS);
       inputHistoBins = int(m_inWS->blocksize());
     }
 
@@ -622,8 +745,7 @@ public:
     // Compression for the wall clock time; controls whether all pulses are
     // compressed together
     if (m_compressWallClockTolerance != "0")
-      align_and_focus.setProperty("CompressWallClockTolerance",
-                                  m_compressWallClockTolerance);
+      align_and_focus.setProperty("CompressWallClockTolerance", m_compressWallClockTolerance);
 
     // Filtering for the start wall clock time; cuts off events before start
     // time
@@ -633,6 +755,10 @@ public:
     // Remove prompt pulse; will cutoff last 6 long-TOF peaks (freq is 200 Hz)
     if (m_removePromptPulse)
       align_and_focus.setProperty("RemovePromptPulseWidth", 1e4);
+
+    // Filter absorption resonances - default unit is wavelength
+    align_and_focus.setPropertyValue("ResonanceFilterLowerLimits", m_filterResonanceLower);
+    align_and_focus.setPropertyValue("ResonanceFilterUpperLimits", m_filterResonanceUpper);
 
     // Setup the binning type
     if (m_useResamplex) {
@@ -666,9 +792,7 @@ public:
     int numGroups{m_numBanks * m_numPixels * m_numPixels};
     if (m_useGroupAll) {
       groupAllBanks(m_inputWS);
-      auto group_wksp =
-          AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-              m_groupWS);
+      auto group_wksp = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(m_groupWS);
       align_and_focus.setProperty("GroupingWorkspace", group_wksp->getName());
       numGroups = (int)group_wksp->blocksize();
     }
@@ -676,13 +800,10 @@ public:
     TS_ASSERT_THROWS_NOTHING(align_and_focus.execute());
     TS_ASSERT(align_and_focus.isExecuted());
 
-    m_inWS =
-        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(m_inputWS);
-    m_outWS =
-        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(m_outputWS);
+    m_inWS = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(m_inputWS);
+    m_outWS = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(m_outputWS);
 
-    TS_ASSERT_EQUALS(m_inWS->size(),
-                     m_numBanks * m_numPixels * m_numPixels * inputHistoBins);
+    TS_ASSERT_EQUALS(m_inWS->size(), m_numBanks * m_numPixels * m_numPixels * inputHistoBins);
     TS_ASSERT_EQUALS(m_inWS->blocksize(), inputHistoBins);
 
     TS_ASSERT_EQUALS(m_outWS->getAxis(0)->unit()->unitID(), "TOF");
@@ -692,12 +813,11 @@ public:
   }
 
   /* Utility functions */
-  void loadDiffCal(const std::string &calfilename, bool group, bool cal,
-                   bool mask) {
+  void loadDiffCal(const std::string &instrname, const std::string &calfilename, bool group, bool cal, bool mask) {
     LoadDiffCal loadDiffAlg;
     loadDiffAlg.initialize();
     loadDiffAlg.setPropertyValue("Filename", calfilename);
-    loadDiffAlg.setPropertyValue("InstrumentName", "HRPD");
+    loadDiffAlg.setPropertyValue("InstrumentName", instrname);
     loadDiffAlg.setProperty("MakeGroupingWorkspace", group);
     loadDiffAlg.setProperty("MakeCalWorkspace", cal);
     loadDiffAlg.setProperty("MakeMaskWorkspace", mask);
@@ -722,7 +842,7 @@ public:
     rebin.setPropertyValue("Params", params);
     rebin.setProperty("PreserveEvents", preserveEvents);
     rebin.execute();
-    rebin.isExecuted();
+    TS_ASSERT(rebin.isExecuted());
   }
 
   void resamplex(int numHistoBins, bool preserveEvents = true) {
@@ -735,8 +855,7 @@ public:
     resamplexAlg.execute();
   }
 
-  std::string createArgForNumberHistograms(double val,
-                                           const MatrixWorkspace_sptr &ws,
+  std::string createArgForNumberHistograms(double val, const MatrixWorkspace_sptr &ws,
                                            const std::string &delimiter = ",") {
     std::vector<std::string> vec;
     for (size_t i = 0; i < ws->getNumberHistograms(); i++)
@@ -753,7 +872,7 @@ public:
     TableRow row1 = m_maskBinTableWS->appendRow();
     row1 << "" << 0.0 << 2000.0;
     TableRow row2 = m_maskBinTableWS->appendRow();
-    row2 << "" << 10000.0 << m_xmax + 1000.0;
+    row2 << "" << 12000.0 << m_xmax + 1000.0;
     return m_maskBinTableWS;
   }
 
@@ -762,8 +881,7 @@ public:
     std::string time, minute;
     std::string prefix{"2010-01-01T00:"};
     for (int i = 0; i < 60; i++) {
-      minute =
-          std::string(2 - std::to_string(i).length(), '0') + std::to_string(i);
+      minute = std::string(2 - std::to_string(i).length(), '0') + std::to_string(i);
       time = prefix + minute + "00";
       logAlg.initialize();
       logAlg.setPropertyValue("Workspace", m_inputWS);
@@ -813,6 +931,8 @@ private:
   std::string m_compressWallClockTolerance{"0"};
   std::string m_compressStartTime{"0"};
   bool m_removePromptPulse{false};
+  std::string m_filterResonanceLower;
+  std::string m_filterResonanceUpper;
   bool m_preserveEvents{true};
   bool m_useGroupAll{true};
   bool m_useResamplex{true};

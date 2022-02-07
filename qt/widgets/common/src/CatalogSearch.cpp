@@ -32,8 +32,8 @@ namespace MantidWidgets {
  * Constructor
  */
 CatalogSearch::CatalogSearch(QWidget *parent)
-    : QWidget(parent), m_icatHelper(new CatalogHelper()),
-      m_catalogSelector(new CatalogSelector()), m_currentPageNumber(1) {
+    : QWidget(parent), m_icatHelper(new CatalogHelper()), m_catalogSelector(new CatalogSelector()),
+      m_currentPageNumber(1) {
   initLayout();
   // Load saved settings from store.
   loadSettings();
@@ -53,8 +53,7 @@ void CatalogSearch::initLayout() {
 
   // What facilities is the user logged in to?
   m_icatUiForm.facilityName->setText(QString::fromStdString(
-      "Currently logged into " +
-      Mantid::Kernel::ConfigService::Instance().getFacility().name()));
+      "Currently logged into " + Mantid::Kernel::ConfigService::Instance().getFacility().name()));
 
   // Only want to show labels when an error occurs.
   hideErrorLabels();
@@ -85,68 +84,51 @@ void CatalogSearch::initLayout() {
   // Show related help page when a user clicks on the "Help" button.
   connect(m_icatUiForm.helpBtn, SIGNAL(clicked()), this, SLOT(helpClicked()));
   // Show "Search" frame when user clicks "Catalog search" check box.
-  connect(m_icatUiForm.searchCbox, SIGNAL(clicked()), this,
-          SLOT(showCatalogSearch()));
+  connect(m_icatUiForm.searchCbox, SIGNAL(clicked()), this, SLOT(showCatalogSearch()));
   // Show advanced search options if "Advanced search" is checked.
-  connect(m_icatUiForm.advSearchCbox, SIGNAL(clicked()), this,
-          SLOT(advancedSearchChecked()));
+  connect(m_icatUiForm.advSearchCbox, SIGNAL(clicked()), this, SLOT(advancedSearchChecked()));
   // Open calendar when start or end date is selected
-  connect(m_icatUiForm.startDatePicker, SIGNAL(clicked()), this,
-          SLOT(openCalendar()));
-  connect(m_icatUiForm.endDatePicker, SIGNAL(clicked()), this,
-          SLOT(openCalendar()));
+  connect(m_icatUiForm.startDatePicker, SIGNAL(clicked()), this, SLOT(openCalendar()));
+  connect(m_icatUiForm.endDatePicker, SIGNAL(clicked()), this, SLOT(openCalendar()));
   // Clear all fields when reset button is pressed.
   connect(m_icatUiForm.resetBtn, SIGNAL(clicked()), this, SLOT(onReset()));
   // Show "Search results" frame when user tries to "Search".
-  connect(m_icatUiForm.searchBtn, SIGNAL(clicked()), this,
-          SLOT(searchClicked()));
+  connect(m_icatUiForm.searchBtn, SIGNAL(clicked()), this, SLOT(searchClicked()));
   // Show "Search results" frame when user clicks related check box.
-  connect(m_icatUiForm.searchResultsCbox, SIGNAL(clicked()), this,
-          SLOT(showSearchResults()));
+  connect(m_icatUiForm.searchResultsCbox, SIGNAL(clicked()), this, SLOT(showSearchResults()));
   // When the user has double clicked on an investigation they wish to view
   // datafiles for then load the relevant datafiles.
-  connect(m_icatUiForm.searchResultsTbl,
-          SIGNAL(itemDoubleClicked(QTableWidgetItem *)), this,
+  connect(m_icatUiForm.searchResultsTbl, SIGNAL(itemDoubleClicked(QTableWidgetItem *)), this,
           SLOT(investigationSelected(QTableWidgetItem *)));
   // Show "DataFile frame" when the user selects an investigation.
-  connect(m_icatUiForm.dataFileCbox, SIGNAL(clicked()), this,
-          SLOT(showDataFileInfo()));
+  connect(m_icatUiForm.dataFileCbox, SIGNAL(clicked()), this, SLOT(showDataFileInfo()));
   // When the user has selected a filter type then perform the filter for the
   // specified type.
-  connect(m_icatUiForm.dataFileFilterCombo, SIGNAL(currentIndexChanged(int)),
-          this, SLOT(doFilter(int)));
+  connect(m_icatUiForm.dataFileFilterCombo, SIGNAL(currentIndexChanged(int)), this, SLOT(doFilter(int)));
   // When the user clicks "download to..." then open a dialog and download the
   // file(s) to that location.
-  connect(m_icatUiForm.dataFileDownloadBtn, SIGNAL(clicked()), this,
-          SLOT(downloadDataFiles()));
+  connect(m_icatUiForm.dataFileDownloadBtn, SIGNAL(clicked()), this, SLOT(downloadDataFiles()));
   // When the user clicks the "load" button then load their selected datafiles
   // into a workspace.
-  connect(m_icatUiForm.dataFileLoadBtn, SIGNAL(clicked()), this,
-          SLOT(loadDataFiles()));
+  connect(m_icatUiForm.dataFileLoadBtn, SIGNAL(clicked()), this, SLOT(loadDataFiles()));
   // When a checkbox is selected in a row we want to select (highlight) the
   // entire row.
-  connect(m_icatUiForm.dataFileResultsTbl,
-          SIGNAL(itemClicked(QTableWidgetItem *)), this,
+  connect(m_icatUiForm.dataFileResultsTbl, SIGNAL(itemClicked(QTableWidgetItem *)), this,
           SLOT(dataFileCheckboxSelected(QTableWidgetItem *)));
   // When several rows are selected we want to check the related checkboxes.
-  connect(m_icatUiForm.dataFileResultsTbl, SIGNAL(itemSelectionChanged()), this,
-          SLOT(dataFileRowSelected()));
+  connect(m_icatUiForm.dataFileResultsTbl, SIGNAL(itemSelectionChanged()), this, SLOT(dataFileRowSelected()));
   // When the user clicks "< Prev" populate the results table with the previous
   // 100 results.
-  connect(m_icatUiForm.resPrevious, SIGNAL(clicked()), this,
-          SLOT(prevPageClicked()));
+  connect(m_icatUiForm.resPrevious, SIGNAL(clicked()), this, SLOT(prevPageClicked()));
   // When the user clicks "Next >" populate the results table with the next 100
   // results.
-  connect(m_icatUiForm.resNext, SIGNAL(clicked()), this,
-          SLOT(nextPageClicked()));
+  connect(m_icatUiForm.resNext, SIGNAL(clicked()), this, SLOT(nextPageClicked()));
   // When the user is done editing & presses enter we retrieve the results for
   // that specific page in paging.
-  connect(m_icatUiForm.pageStartNum, SIGNAL(editingFinished()),
-          SLOT(goToInputPage()));
+  connect(m_icatUiForm.pageStartNum, SIGNAL(editingFinished()), SLOT(goToInputPage()));
   // Open the catalog/facility selection widget when 'Select a catalog' is
   // clicked.
-  connect(m_icatUiForm.catalogSelection, SIGNAL(clicked()),
-          SLOT(openFacilitySelection()));
+  connect(m_icatUiForm.catalogSelection, SIGNAL(clicked()), SLOT(openFacilitySelection()));
 
   // No need for error handling as that's dealt with in the algorithm being
   // used.
@@ -172,8 +154,7 @@ void CatalogSearch::initLayout() {
   // Resize to minimum width/height to improve UX.
   this->resize(minimumSizeHint());
   // Centre the GUI on screen.
-  this->setGeometry(QStyle::alignedRect(Qt::LeftToRight, Qt::AlignCenter,
-                                        this->window()->size(),
+  this->setGeometry(QStyle::alignedRect(Qt::LeftToRight, Qt::AlignCenter, this->window()->size(),
                                         QDesktopWidget().availableGeometry()));
 }
 
@@ -187,8 +168,7 @@ void CatalogSearch::onFacilityLogin() {}
  */
 void CatalogSearch::helpClicked() {
   using MantidQt::API::MantidDesktopServices;
-  MantidDesktopServices::openUrl(
-      QUrl("http://www.mantidproject.org/Catalog_Search"));
+  MantidDesktopServices::openUrl(QUrl("http://www.mantidproject.org/Catalog_Search"));
 }
 
 /**
@@ -242,8 +222,7 @@ void CatalogSearch::emboldenTableHeaders(QTableWidget *table) {
  * @param numOfRows    :: The number of rows in the workspace.
  * @param numOfColumns :: The number of columns in the workspace.
  */
-void CatalogSearch::setupTable(QTableWidget *table, const size_t &numOfRows,
-                               const size_t &numOfColumns) {
+void CatalogSearch::setupTable(QTableWidget *table, const size_t &numOfRows, const size_t &numOfColumns) {
   table->setRowCount(static_cast<int>(numOfRows));
   table->setColumnCount(static_cast<int>(numOfColumns));
 
@@ -264,8 +243,7 @@ void CatalogSearch::setupTable(QTableWidget *table, const size_t &numOfRows,
  * @param table :: The table we want to setup.
  * @param workspace :: The workspace to obtain data information from.
  */
-void CatalogSearch::populateTable(
-    QTableWidget *table, const Mantid::API::ITableWorkspace_sptr &workspace) {
+void CatalogSearch::populateTable(QTableWidget *table, const Mantid::API::ITableWorkspace_sptr &workspace) {
   // NOTE: This method freezes up the ICAT search GUI. We will need to do this
   // adding in another thread.
 
@@ -285,8 +263,7 @@ void CatalogSearch::populateTable(
       column->print(row, ostr);
 
       // Add a result to the table.
-      QTableWidgetItem *newItem =
-          new QTableWidgetItem(QString::fromStdString(ostr.str()));
+      QTableWidgetItem *newItem = new QTableWidgetItem(QString::fromStdString(ostr.str()));
       table->setItem(static_cast<int>(row), static_cast<int>(col), newItem);
 
       // Allow the row to be selected, and enabled.
@@ -305,8 +282,7 @@ void CatalogSearch::populateTable(
  * @param table     :: The table to modify and remove previous results from.
  * @param workspace :: The workspace to remove.
  */
-void CatalogSearch::clearSearch(QTableWidget *table,
-                                const std::string &workspace) {
+void CatalogSearch::clearSearch(QTableWidget *table, const std::string &workspace) {
   // Remove workspace if it exists.
   if (Mantid::API::AnalysisDataService::Instance().doesExist(workspace)) {
     Mantid::API::AnalysisDataService::Instance().remove(workspace);
@@ -351,17 +327,13 @@ void CatalogSearch::clearDataFileFrame() {
  * @param searchFor :: The header name to search against.
  * @return The index of the column with the specified name.
  */
-int CatalogSearch::headerIndexByName(QTableWidget *table,
-                                     const std::string &searchFor) {
+int CatalogSearch::headerIndexByName(QTableWidget *table, const std::string &searchFor) {
   QAbstractItemModel *model = table->model();
 
   // For every column in the table
   for (int col = 0; col < table->columnCount(); col++) {
     // Is the column name the same as the searchFor string?
-    if (searchFor.compare(
-            model->headerData(col, Qt::Horizontal, Qt::DisplayRole)
-                .toString()
-                .toStdString()) == 0) {
+    if (searchFor.compare(model->headerData(col, Qt::Horizontal, Qt::DisplayRole).toString().toStdString()) == 0) {
       // Yes? Return the index of the column.
       return (col);
     }
@@ -391,9 +363,7 @@ void CatalogSearch::loadSettings() {
 
   // The user has not previously selected a directory to save ICAT downloads to.
   if (lastdir.isEmpty()) {
-    lastdir = QString::fromStdString(
-        Mantid::Kernel::ConfigService::Instance().getString(
-            "defaultsave.directory"));
+    lastdir = QString::fromStdString(Mantid::Kernel::ConfigService::Instance().getString("defaultsave.directory"));
   }
   // Initalise the member variable to the last saved directory.
   m_downloadSaveDir = lastdir;
@@ -410,16 +380,15 @@ void CatalogSearch::dateSelected(const std::string &buttonName)
  */
 void CatalogSearch::populateInstrumentBox() {
   // Obtain the list of instruments to display in the drop-box.
-  std::vector<std::string> instrumentList = m_icatHelper->getInstrumentList(
-      m_catalogSelector->getSelectedCatalogSessions());
+  std::vector<std::string> instrumentList =
+      m_icatHelper->getInstrumentList(m_catalogSelector->getSelectedCatalogSessions());
 
   // This option allows the user to select no instruments (thus searching over
   // them all).
   m_icatUiForm.Instrument->insertItem(-1, "");
   m_icatUiForm.Instrument->setCurrentIndex(0);
 
-  QString userInstrument = QString::fromStdString(
-      Mantid::Kernel::ConfigService::Instance().getInstrument().name());
+  QString userInstrument = QString::fromStdString(Mantid::Kernel::ConfigService::Instance().getInstrument().name());
 
   for (unsigned i = 0; i < instrumentList.size(); i++) {
     QString instrument = QString::fromStdString(instrumentList.at(i));
@@ -437,8 +406,7 @@ void CatalogSearch::populateInstrumentBox() {
 void CatalogSearch::populateInvestigationTypeBox() {
   // Obtain the list of investigation types to display in the list-box.
   std::vector<std::string> invesTypeList =
-      m_icatHelper->getInvestigationTypeList(
-          m_catalogSelector->getSelectedCatalogSessions());
+      m_icatHelper->getInvestigationTypeList(m_catalogSelector->getSelectedCatalogSessions());
 
   std::vector<std::string>::const_iterator citr;
   for (citr = invesTypeList.begin(); citr != invesTypeList.end(); ++citr) {
@@ -462,46 +430,31 @@ const std::map<std::string, std::string> CatalogSearch::getSearchFields() {
   std::map<std::string, std::string> searchFieldInput;
 
   // Left side of form.
-  searchFieldInput.emplace(
-      "InvestigationName",
-      m_icatUiForm.InvestigationName->text().toStdString());
-  searchFieldInput.emplace(
-      "Instrument", m_icatUiForm.Instrument->currentText().toStdString());
+  searchFieldInput.emplace("InvestigationName", m_icatUiForm.InvestigationName->text().toStdString());
+  searchFieldInput.emplace("Instrument", m_icatUiForm.Instrument->currentText().toStdString());
   if (m_icatUiForm.RunRange->text().size() > 2) {
-    searchFieldInput.emplace("RunRange",
-                             m_icatUiForm.RunRange->text().toStdString());
+    searchFieldInput.emplace("RunRange", m_icatUiForm.RunRange->text().toStdString());
   }
-  searchFieldInput.emplace(
-      "InvestigatorSurname",
-      m_icatUiForm.InvestigatorSurname->text().toStdString());
-  searchFieldInput.emplace("DataFileName",
-                           m_icatUiForm.DataFileName->text().toStdString());
-  searchFieldInput.emplace("InvestigationId",
-                           m_icatUiForm.InvestigationId->text().toStdString());
+  searchFieldInput.emplace("InvestigatorSurname", m_icatUiForm.InvestigatorSurname->text().toStdString());
+  searchFieldInput.emplace("DataFileName", m_icatUiForm.DataFileName->text().toStdString());
+  searchFieldInput.emplace("InvestigationId", m_icatUiForm.InvestigationId->text().toStdString());
 
   // Right side of form.
   if (m_icatUiForm.StartDate->text().size() > 2) {
-    searchFieldInput.emplace("StartDate",
-                             m_icatUiForm.StartDate->text().toStdString());
+    searchFieldInput.emplace("StartDate", m_icatUiForm.StartDate->text().toStdString());
   }
   if (m_icatUiForm.EndDate->text().size() > 2) {
-    searchFieldInput.emplace("EndDate",
-                             m_icatUiForm.EndDate->text().toStdString());
+    searchFieldInput.emplace("EndDate", m_icatUiForm.EndDate->text().toStdString());
   }
-  searchFieldInput.emplace("Keywords",
-                           m_icatUiForm.Keywords->text().toStdString());
-  searchFieldInput.emplace("SampleName",
-                           m_icatUiForm.SampleName->text().toStdString());
-  searchFieldInput.emplace(
-      "InvestigationType",
-      m_icatUiForm.InvestigationType->currentText().toStdString());
+  searchFieldInput.emplace("Keywords", m_icatUiForm.Keywords->text().toStdString());
+  searchFieldInput.emplace("SampleName", m_icatUiForm.SampleName->text().toStdString());
+  searchFieldInput.emplace("InvestigationType", m_icatUiForm.InvestigationType->currentText().toStdString());
 
   // Since we check if the field is empty in the algorithm, there's no need to
   // check if advanced was clicked.
   // If the "My data only" field is checked. We return the state of the checkbox
   // (1 is true, 0 is false).
-  searchFieldInput.emplace("MyData", boost::lexical_cast<std::string>(
-                                         m_icatUiForm.myDataCbox->isChecked()));
+  searchFieldInput.emplace("MyData", boost::lexical_cast<std::string>(m_icatUiForm.myDataCbox->isChecked()));
 
   return (searchFieldInput);
 }
@@ -520,8 +473,7 @@ void CatalogSearch::openCalendar() {
 
   // Centre the calendar on screen.
   m_calendar->setGeometry(
-      QStyle::alignedRect(Qt::LeftToRight, Qt::AlignCenter, QSize(445, 205),
-                          QDesktopWidget().availableGeometry()));
+      QStyle::alignedRect(Qt::LeftToRight, Qt::AlignCenter, QSize(445, 205), QDesktopWidget().availableGeometry()));
 
   // Improve UX, then display the m_calendar.
   m_calendar->setGridVisible(true);
@@ -561,13 +513,11 @@ bool CatalogSearch::validateDates() {
   if (startDateInput.size() <= 2 || endDateInput.size() <= 2)
     return false;
 
-  bool ret = m_icatHelper->getTimevalue(startDateInput) >
-             m_icatHelper->getTimevalue(endDateInput);
+  bool ret = m_icatHelper->getTimevalue(startDateInput) > m_icatHelper->getTimevalue(endDateInput);
   // If startDate > endDate we want to throw an error and inform the user (red
   // star(*)).
   if (ret) {
-    correctedToolTip("Start date cannot be greater than end date.",
-                     m_icatUiForm.StartDate_err);
+    correctedToolTip("Start date cannot be greater than end date.", m_icatUiForm.StartDate_err);
     m_icatUiForm.StartDate_err->show();
   } else {
     m_icatUiForm.StartDate_err->hide();
@@ -578,11 +528,9 @@ bool CatalogSearch::validateDates() {
 
 void CatalogSearch::correctedToolTip(const std::string &text, QLabel *label) {
 #ifdef Q_OS_WIN
-  label->setToolTip(QString::fromStdString("<span style=\"color: black;\">" +
-                                           text + "</span>"));
+  label->setToolTip(QString::fromStdString("<span style=\"color: black;\">" + text + "</span>"));
 #else
-  label->setToolTip(QString::fromStdString("<span style=\"color: white;\">" +
-                                           text + "</span>"));
+  label->setToolTip(QString::fromStdString("<span style=\"color: white;\">" + text + "</span>"));
 #endif
 }
 
@@ -627,16 +575,14 @@ void CatalogSearch::searchClicked() {
 
   std::map<std::string, std::string> inputFields = getSearchFields();
   // Contains the error label names, and the related error message.
-  std::map<std::string, std::string> errors =
-      m_icatHelper->validateProperties(inputFields);
+  std::map<std::string, std::string> errors = m_icatHelper->validateProperties(inputFields);
 
   // Has any errors occurred?
   if (!errors.empty() || validateDates()) {
     // Clear form to prevent previous search results showing if an error occurs.
     clearSearchResultFrame();
     showErrorLabels(errors);
-    m_icatUiForm.searchResultsLbl->setText(
-        "An error has occurred in the search form.");
+    m_icatUiForm.searchResultsLbl->setText("An error has occurred in the search form.");
     // Stop here to prevent the search being carried out below.
     return;
   }
@@ -660,8 +606,7 @@ void CatalogSearch::searchClicked() {
   // Get previous sorting parameters
   QTableWidget *resultsTable = m_icatUiForm.searchResultsTbl;
   int sort_section = resultsTable->horizontalHeader()->sortIndicatorSection();
-  Qt::SortOrder sort_order =
-      resultsTable->horizontalHeader()->sortIndicatorOrder();
+  Qt::SortOrder sort_order = resultsTable->horizontalHeader()->sortIndicatorOrder();
 
   // Remove previous search results.
   std::string searchResults = "searchResults";
@@ -670,8 +615,7 @@ void CatalogSearch::searchClicked() {
 
   auto sessionIDs = m_catalogSelector->getSelectedCatalogSessions();
   // Obtain the number of results for paging.
-  int64_t numrows =
-      m_icatHelper->getNumberOfSearchResults(inputFields, sessionIDs);
+  int64_t numrows = m_icatHelper->getNumberOfSearchResults(inputFields, sessionIDs);
 
   // Setup values used for paging.
   int limit = 100;
@@ -688,8 +632,7 @@ void CatalogSearch::searchClicked() {
 
   // Update the label to inform the user of how many investigations have been
   // returned from the search.
-  m_icatUiForm.searchResultsLbl->setText(QString::number(numrows) +
-                                         " investigations found.");
+  m_icatUiForm.searchResultsLbl->setText(QString::number(numrows) + " investigations found.");
 
   // Populate the result table from the searchResult workspace.
   populateResultTable(sort_section, sort_order);
@@ -700,11 +643,9 @@ void CatalogSearch::searchClicked() {
  * @param errors :: A map containing the error label names, and the related
  * error message.
  */
-void CatalogSearch::showErrorLabels(
-    std::map<std::string, std::string> &errors) {
+void CatalogSearch::showErrorLabels(std::map<std::string, std::string> &errors) {
   for (auto &error : errors) {
-    QLabel *label = m_icatUiForm.searchFrame->findChild<QLabel *>(
-        QString::fromStdString(error.first));
+    QLabel *label = m_icatUiForm.searchFrame->findChild<QLabel *>(QString::fromStdString(error.first));
 
     if (label) {
       // Update the tooltip of the element and then show it.
@@ -738,9 +679,7 @@ void CatalogSearch::hideErrorLabels() {
  */
 void CatalogSearch::onReset() {
   // Clear the QLineEdit boxes.
-  foreach (QLineEdit *widget, this->findChildren<QLineEdit *>()) {
-    widget->clear();
-  }
+  foreach (QLineEdit *widget, this->findChildren<QLineEdit *>()) { widget->clear(); }
   // Clear all other elements.
   m_icatUiForm.Instrument->setCurrentIndex(0);
   m_icatUiForm.InvestigationType->setCurrentIndex(0);
@@ -768,23 +707,19 @@ void CatalogSearch::openFacilitySelection() {
  * data (0 will sort by StartDate)
  * @param sort_order :: A Qt::SortOrder giving the order of sorting
  */
-void CatalogSearch::populateResultTable(int sort_section,
-                                        Qt::SortOrder sort_order) {
+void CatalogSearch::populateResultTable(int sort_section, Qt::SortOrder sort_order) {
   // Obtain a pointer to the "searchResults" workspace where the search results
   // are saved if it exists.
   Mantid::API::ITableWorkspace_sptr workspace;
 
   // Check to see if the workspace exists...
-  if (Mantid::API::AnalysisDataService::Instance().doesExist(
-          "__searchResults")) {
+  if (Mantid::API::AnalysisDataService::Instance().doesExist("__searchResults")) {
     workspace = std::dynamic_pointer_cast<Mantid::API::ITableWorkspace>(
-        Mantid::API::AnalysisDataService::Instance().retrieve(
-            "__searchResults"));
+        Mantid::API::AnalysisDataService::Instance().retrieve("__searchResults"));
   } else {
     // Otherwise an error will be thrown (in ICat4Catalog). We will reproduce
     // that error on the ICAT form for the user.
-    m_icatUiForm.searchResultsLbl->setText(
-        "You have not input any terms to search for.");
+    m_icatUiForm.searchResultsLbl->setText("You have not input any terms to search for.");
     return;
   }
 
@@ -815,20 +750,16 @@ void CatalogSearch::populateResultTable(int sort_section,
 
   // Show only a portion of the title as they can be quite long.
   resultsTable->setColumnWidth(headerIndexByName(resultsTable, "Title"), 210);
-  resultsTable->setColumnHidden(headerIndexByName(resultsTable, "DatabaseID"),
-                                true);
-  resultsTable->setColumnHidden(headerIndexByName(resultsTable, "SessionID"),
-                                true);
+  resultsTable->setColumnHidden(headerIndexByName(resultsTable, "DatabaseID"), true);
+  resultsTable->setColumnHidden(headerIndexByName(resultsTable, "SessionID"), true);
 
   // Resize InvestigationID column to fit contents
-  resultsTable->resizeColumnToContents(
-      headerIndexByName(resultsTable, "InvestigationID"));
+  resultsTable->resizeColumnToContents(headerIndexByName(resultsTable, "InvestigationID"));
 
   // Sort by specified column or by descending StartDate if none specified
   resultsTable->setSortingEnabled(true);
   if (sort_section == 0) {
-    resultsTable->sortByColumn(headerIndexByName(resultsTable, "Start date"),
-                               Qt::DescendingOrder);
+    resultsTable->sortByColumn(headerIndexByName(resultsTable, "Start date"), Qt::DescendingOrder);
   } else {
     resultsTable->sortByColumn(sort_section, sort_order);
   }
@@ -919,8 +850,8 @@ void CatalogSearch::investigationSelected(QTableWidgetItem *item) {
   QTableWidget *searchResultsTable = m_icatUiForm.searchResultsTbl;
 
   // Obtain the investigationID from the selected
-  QTableWidgetItem *investigationId = searchResultsTable->item(
-      item->row(), headerIndexByName(searchResultsTable, "InvestigationID"));
+  QTableWidgetItem *investigationId =
+      searchResultsTable->item(item->row(), headerIndexByName(searchResultsTable, "InvestigationID"));
 
   // Remove previous dataFile search results.
   std::string dataFileResults = "dataFileResults";
@@ -934,11 +865,7 @@ void CatalogSearch::investigationSelected(QTableWidgetItem *item) {
   // investigation.
   m_icatHelper->executeGetDataFiles(
       investigationId->text().toStdString(),
-      searchResultsTable
-          ->item(item->row(),
-                 headerIndexByName(searchResultsTable, "SessionID"))
-          ->text()
-          .toStdString());
+      searchResultsTable->item(item->row(), headerIndexByName(searchResultsTable, "SessionID"))->text().toStdString());
 
   // Populate the dataFile table from the "dataFileResults" workspace.
   populateDataFileTable();
@@ -958,11 +885,9 @@ void CatalogSearch::populateDataFileTable() {
   Mantid::API::ITableWorkspace_sptr workspace;
 
   // Check to see if the workspace exists...
-  if (Mantid::API::AnalysisDataService::Instance().doesExist(
-          "__dataFileResults")) {
+  if (Mantid::API::AnalysisDataService::Instance().doesExist("__dataFileResults")) {
     workspace = std::dynamic_pointer_cast<Mantid::API::ITableWorkspace>(
-        Mantid::API::AnalysisDataService::Instance().retrieve(
-            "__dataFileResults"));
+        Mantid::API::AnalysisDataService::Instance().retrieve("__dataFileResults"));
   } else {
     return;
   }
@@ -970,8 +895,7 @@ void CatalogSearch::populateDataFileTable() {
   // If there are no results then don't try to setup table.
   if (workspace->rowCount() == 0) {
     clearDataFileFrame();
-    m_icatUiForm.dataFileLbl->setText(QString::number(workspace->rowCount()) +
-                                      " datafiles found.");
+    m_icatUiForm.dataFileLbl->setText(QString::number(workspace->rowCount()) + " datafiles found.");
     return;
   }
 
@@ -983,16 +907,14 @@ void CatalogSearch::populateDataFileTable() {
 
   // Update the label to inform the user of how many dataFiles relating to the
   // selected investigation have been found.
-  m_icatUiForm.dataFileLbl->setText(QString::number(workspace->rowCount()) +
-                                    " datafiles found.");
+  m_icatUiForm.dataFileLbl->setText(QString::number(workspace->rowCount()) + " datafiles found.");
 
   // Create the custom header with checkbox ability.
   m_customHeader = new CheckboxHeader(Qt::Horizontal, dataFileTable);
 
   // There is no simple way to override default QTableWidget sort.
   // Instead, connecting header to obtain column clicked, and sorting by
-  connect(m_customHeader, SIGNAL(sectionClicked(int)), this,
-          SLOT(sortByFileSize(int)));
+  connect(m_customHeader, SIGNAL(sectionClicked(int)), this, SLOT(sortByFileSize(int)));
 
   // Set it prior to adding labels in populateTable.
   dataFileTable->setHorizontalHeader(m_customHeader);
@@ -1012,24 +934,20 @@ void CatalogSearch::populateDataFileTable() {
   // Hide these columns as they're not useful for the user, but are used by the
   // algorithms.
   dataFileTable->setColumnHidden(headerIndexByName(dataFileTable, "Id"), true);
-  dataFileTable->setColumnHidden(headerIndexByName(dataFileTable, "Location"),
-                                 true);
-  dataFileTable->setColumnHidden(
-      headerIndexByName(dataFileTable, "File size(bytes)"), true);
+  dataFileTable->setColumnHidden(headerIndexByName(dataFileTable, "Location"), true);
+  dataFileTable->setColumnHidden(headerIndexByName(dataFileTable, "File size(bytes)"), true);
 
   // Obtain the list of extensions of all dataFiles for the chosen
   // investigation.
   // "File name" is the first column of "dataFileResults" so we make use of it.
-  auto extensions = getDataFileExtensions(
-      workspace.get()->getColumn(headerIndexByName(dataFileTable, "Name")));
+  auto extensions = getDataFileExtensions(workspace.get()->getColumn(headerIndexByName(dataFileTable, "Name")));
 
   // Populate the "Filter type..." combo-box with all possible file extensions.
   populateDataFileType(extensions);
 
   // Sort by create time with the most recent being first.
   dataFileTable->setSortingEnabled(true);
-  dataFileTable->sortByColumn(headerIndexByName(dataFileTable, "Name"),
-                              Qt::DescendingOrder);
+  dataFileTable->sortByColumn(headerIndexByName(dataFileTable, "Name"), Qt::DescendingOrder);
 }
 
 /**
@@ -1044,8 +962,7 @@ void CatalogSearch::addCheckBoxColumn(QTableWidget *table) {
   table->setHorizontalHeaderItem(0, new QTableWidgetItem());
   // Set this here (rather than on initialisation) as the customer header would
   // be null otherwise.
-  connect(m_customHeader, SIGNAL(toggled(bool)), this,
-          SLOT(selectAllDataFiles(bool)));
+  connect(m_customHeader, SIGNAL(toggled(bool)), this, SLOT(selectAllDataFiles(bool)));
 
   // Add a checkbox to all rows in the first column.
   for (int row = 0; row < table->rowCount(); row++) {
@@ -1053,8 +970,7 @@ void CatalogSearch::addCheckBoxColumn(QTableWidget *table) {
     // Allow the widget to take on checkbox functionality.
     newItem->setCheckState(Qt::Unchecked);
     // Allow the user to select and check the box.
-    newItem->setFlags(Qt::ItemIsSelectable | Qt::ItemIsUserCheckable |
-                      Qt::ItemIsEnabled);
+    newItem->setFlags(Qt::ItemIsSelectable | Qt::ItemIsUserCheckable | Qt::ItemIsEnabled);
     // Add a result to the table.
     table->setItem(row, 0, newItem);
   }
@@ -1065,8 +981,7 @@ void CatalogSearch::addCheckBoxColumn(QTableWidget *table) {
  * @return A vector containing the fileID and fileName of the datafile(s) to
  * download.
  */
-const std::vector<std::pair<int64_t, std::string>>
-CatalogSearch::selectedDataFileNames() {
+const std::vector<std::pair<int64_t, std::string>> CatalogSearch::selectedDataFileNames() {
   QTableWidget *table = m_icatUiForm.dataFileResultsTbl;
 
   // Holds the FileID, and fileName in order to perform search to download
@@ -1075,11 +990,8 @@ CatalogSearch::selectedDataFileNames() {
 
   for (int row = 0; row < table->rowCount(); row++) {
     if (table->item(row, 0)->checkState()) {
-      fileInfo.emplace_back(
-          table->item(row, headerIndexByName(table, "Id"))->text().toLongLong(),
-          table->item(row, headerIndexByName(table, "Name"))
-              ->text()
-              .toStdString());
+      fileInfo.emplace_back(table->item(row, headerIndexByName(table, "Id"))->text().toLongLong(),
+                            table->item(row, headerIndexByName(table, "Name"))->text().toStdString());
     }
   }
   return (fileInfo);
@@ -1095,24 +1007,16 @@ void CatalogSearch::updateDataFileLabels(QTableWidgetItem *item) {
   // Set the "title" label using the data from the investigation results
   // workspace.
   m_icatUiForm.dataFileTitleRes->setText(
-      searchResultsTable
-          ->item(item->row(), headerIndexByName(searchResultsTable, "Title"))
-          ->text());
+      searchResultsTable->item(item->row(), headerIndexByName(searchResultsTable, "Title"))->text());
 
   // Set the instrument label using data from the investigation results
   // workspace.
   m_icatUiForm.dataFileInstrumentRes->setText(
-      searchResultsTable
-          ->item(item->row(),
-                 headerIndexByName(searchResultsTable, "Instrument"))
-          ->text());
+      searchResultsTable->item(item->row(), headerIndexByName(searchResultsTable, "Instrument"))->text());
 
   // Show the related "run-range" for the specific dataFiles.
   m_icatUiForm.dataFileRunRangeRes->setText(
-      searchResultsTable
-          ->item(item->row(),
-                 headerIndexByName(searchResultsTable, "Run range"))
-          ->text());
+      searchResultsTable->item(item->row(), headerIndexByName(searchResultsTable, "Run range"))->text());
 }
 
 /**
@@ -1120,15 +1024,13 @@ void CatalogSearch::updateDataFileLabels(QTableWidgetItem *item) {
  * @param column :: The fileName column in the dataFile workspace.
  * @return A set containing all file extensions.
  */
-std::unordered_set<std::string>
-CatalogSearch::getDataFileExtensions(const Mantid::API::Column_sptr &column) {
+std::unordered_set<std::string> CatalogSearch::getDataFileExtensions(const Mantid::API::Column_sptr &column) {
   std::unordered_set<std::string> extensions;
 
   // For every filename in the column...
   for (unsigned row = 0; row < column->size(); row++) {
     // Add the file extension to the set if it does not exist.
-    QString extension = QString::fromStdString(
-        Poco::Path(column->cell<std::string>(row)).getExtension());
+    QString extension = QString::fromStdString(Poco::Path(column->cell<std::string>(row)).getExtension());
     extensions.insert(extension.toLower().toStdString());
   }
 
@@ -1138,11 +1040,9 @@ CatalogSearch::getDataFileExtensions(const Mantid::API::Column_sptr &column) {
 /**
  * Add the list of file extensions to the "Filter type..." drop-down.
  */
-void CatalogSearch::populateDataFileType(
-    const std::unordered_set<std::string> &extensions) {
+void CatalogSearch::populateDataFileType(const std::unordered_set<std::string> &extensions) {
   for (const auto &extension : extensions) {
-    m_icatUiForm.dataFileFilterCombo->addItem(
-        QString::fromStdString("." + extension));
+    m_icatUiForm.dataFileFilterCombo->addItem(QString::fromStdString("." + extension));
   }
 }
 
@@ -1156,15 +1056,11 @@ void CatalogSearch::disableDownloadButtonIfArchives(int row) {
 
   QTableWidget *table = m_icatUiForm.dataFileResultsTbl;
   // The location of the file selected in the archives.
-  std::string location = table->item(row, headerIndexByName(table, "Location"))
-                             ->text()
-                             .toStdString();
+  std::string location = table->item(row, headerIndexByName(table, "Location"))->text().toStdString();
 
   // Create and use the user-set ConfigInformation.
-  std::unique_ptr<CatalogConfigService> catConfigService(
-      makeCatalogConfigServiceAdapter(ConfigService::Instance()));
-  UserCatalogInfo catalogInfo(
-      ConfigService::Instance().getFacility().catalogInfo(), *catConfigService);
+  std::unique_ptr<CatalogConfigService> catConfigService(makeCatalogConfigServiceAdapter(ConfigService::Instance()));
+  UserCatalogInfo catalogInfo(ConfigService::Instance().getFacility().catalogInfo(), *catConfigService);
 
   std::string fileLocation = catalogInfo.transformArchivePath(location);
 
@@ -1187,10 +1083,7 @@ void CatalogSearch::disableDownloadButtonIfArchives(int row) {
  * nothing.
  */
 void CatalogSearch::disableDatafileButtons() {
-  if (m_icatUiForm.dataFileResultsTbl->selectionModel()
-          ->selection()
-          .indexes()
-          .empty()) {
+  if (m_icatUiForm.dataFileResultsTbl->selectionModel()->selection().indexes().empty()) {
     m_icatUiForm.dataFileDownloadBtn->setEnabled(false);
     m_icatUiForm.dataFileLoadBtn->setEnabled(false);
   }
@@ -1217,9 +1110,7 @@ void CatalogSearch::doFilter(const int &index) {
     // type..." so all will be shown.
     // Have to convert to lowercase as ".TXT", and ".txt" should be filtered as
     // the same.
-    if (index == 0 ||
-        (item->text().toLower().contains(
-            m_icatUiForm.dataFileFilterCombo->itemText(index).toLower()))) {
+    if (index == 0 || (item->text().toLower().contains(m_icatUiForm.dataFileFilterCombo->itemText(index).toLower()))) {
       table->setRowHidden(row, false);
     }
   }
@@ -1229,9 +1120,8 @@ void CatalogSearch::doFilter(const int &index) {
  * Downloads selected datFiles to a specified location.
  */
 void CatalogSearch::downloadDataFiles() {
-  QString downloadSavePath = QFileDialog::getExistingDirectory(
-      this, tr("Select a directory to save data files."), m_downloadSaveDir,
-      QFileDialog::ShowDirsOnly);
+  QString downloadSavePath = QFileDialog::getExistingDirectory(this, tr("Select a directory to save data files."),
+                                                               m_downloadSaveDir, QFileDialog::ShowDirsOnly);
 
   // The user has clicked "Open" and changed the path (and not clicked cancel).
   if (!downloadSavePath.isEmpty()) {
@@ -1240,8 +1130,7 @@ void CatalogSearch::downloadDataFiles() {
     // Save settings to store for use next time.
     saveSettings();
     // Download the selected dataFiles to the chosen directory.
-    m_icatHelper->downloadDataFiles(selectedDataFileNames(),
-                                    m_downloadSaveDir.toStdString(),
+    m_icatHelper->downloadDataFiles(selectedDataFileNames(), m_downloadSaveDir.toStdString(),
                                     selectedInvestigationSession());
   }
 }
@@ -1253,8 +1142,7 @@ void CatalogSearch::loadDataFiles() {
   // Get the path(s) to the file that was downloaded (via HTTP) or is stored in
   // the archive.
   std::vector<std::string> filePaths = m_icatHelper->downloadDataFiles(
-      selectedDataFileNames(), m_downloadSaveDir.toStdString(),
-      selectedInvestigationSession());
+      selectedDataFileNames(), m_downloadSaveDir.toStdString(), selectedInvestigationSession());
 
   // Create & initialize the load algorithm we will use to load the file by path
   // to a workspace.
@@ -1268,9 +1156,7 @@ void CatalogSearch::loadDataFiles() {
     // Set the filename (path) of the algorithm to load from.
     loadAlgorithm->setPropertyValue("Filename", filePath);
     // Sets the output workspace to be the name of the file.
-    loadAlgorithm->setPropertyValue(
-        "OutputWorkspace",
-        Poco::Path(Poco::Path(filePath).getFileName()).getBaseName());
+    loadAlgorithm->setPropertyValue("OutputWorkspace", Poco::Path(Poco::Path(filePath).getFileName()).getBaseName());
 
     Poco::ActiveResult<bool> result(loadAlgorithm->executeAsync());
     while (!result.available()) {
@@ -1295,8 +1181,7 @@ void CatalogSearch::selectAllDataFiles(const bool &toggled) {
   if (toggled)
     table->selectAll();
   else
-    selectionModel->select(selectionModel->selection(),
-                           QItemSelectionModel::Deselect);
+    selectionModel->select(selectionModel->selection(), QItemSelectionModel::Deselect);
 
   // Check/un-check the checkboxes of each row.
   for (int row = 0; row < table->rowCount(); ++row) {

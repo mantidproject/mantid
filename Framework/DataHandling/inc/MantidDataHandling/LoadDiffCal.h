@@ -24,16 +24,13 @@ class DLLExport LoadDiffCal : public API::Algorithm {
 public:
   const std::string name() const override;
   int version() const override;
-  const std::vector<std::string> seeAlso() const override {
-    return {"SaveDiffCal"};
-  }
+  const std::vector<std::string> seeAlso() const override { return {"SaveDiffCal"}; }
   const std::string category() const override;
   const std::string summary() const override;
 
 protected:
-  Parallel::ExecutionMode getParallelExecutionMode(
-      const std::map<std::string, Parallel::StorageMode> &storageModes)
-      const override;
+  Parallel::ExecutionMode
+  getParallelExecutionMode(const std::map<std::string, Parallel::StorageMode> &storageModes) const override;
 
 private:
   void init() override;
@@ -41,16 +38,11 @@ private:
   void getInstrument(H5::H5File &file);
   void loadGroupingFromAlternateFile();
   void runLoadCalFile();
-  void makeGroupingWorkspace(const std::vector<int32_t> &detids,
-                             const std::vector<int32_t> &groups);
-  void makeMaskWorkspace(const std::vector<int32_t> &detids,
-                         const std::vector<int32_t> &use);
-  void makeCalWorkspace(const std::vector<int32_t> &detids,
-                        const std::vector<double> &difc,
-                        const std::vector<double> &difa,
-                        const std::vector<double> &tzero,
-                        const std::vector<int32_t> &dasids,
-                        const std::vector<double> &offsets,
+  void makeGroupingWorkspace(const std::vector<int32_t> &detids, const std::vector<int32_t> &groups);
+  void makeMaskWorkspace(const std::vector<int32_t> &detids, const std::vector<int32_t> &use);
+  void makeCalWorkspace(const std::vector<int32_t> &detids, const std::vector<double> &difc,
+                        const std::vector<double> &difa, const std::vector<double> &tzero,
+                        const std::vector<int32_t> &dasids, const std::vector<double> &offsets,
                         const std::vector<int32_t> &use);
 
   std::string m_filename;

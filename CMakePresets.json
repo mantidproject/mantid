@@ -1,0 +1,172 @@
+{
+    "version": 1,
+    "cmakeMinimumRequired": {
+        "major": 3,
+        "minor": 19,
+        "patch": 0
+    },
+    "configurePresets": [
+        {
+            "name": "osx",
+            "displayName": "osx",
+            "description": "Default build options for an OSX conda build",
+            "generator": "Ninja",
+            "binaryDir": "${sourceDir}/build",
+            "cacheVariables": {
+                "CMAKE_FIND_FRAMEWORK": "LAST",
+                "CMAKE_PREFIX_PATH": "$env{CONDA_PREFIX}",
+                "USE_PYTHON_DYNAMIC_LIB": "OFF",
+                "Qt5_DIR": "$env{CONDA_PREFIX}/lib/cmake/qt5",
+                "HDF5_ROOT": "$env{CONDA_PREFIX}",
+                "OpenSSL_ROOT": "$env{CONDA_PREFIX}",
+                "CMAKE_CXX_FLAGS_DEBUG": "-g -O0",
+                "CONDA_ENV": true,
+                "CMAKE_BUILD_TYPE": "Debug"
+            }
+        },
+        {
+            "name": "osx-ci",
+            "displayName": "osx-ci",
+            "description": "To be used in the CI environment only",
+            "generator": "Ninja",
+            "binaryDir": "${sourceDir}/build",
+            "cacheVariables": {
+                "CMAKE_FIND_FRAMEWORK": "LAST",
+                "CMAKE_PREFIX_PATH": "$env{CONDA_PREFIX}",
+                "USE_PYTHON_DYNAMIC_LIB": "OFF",
+                "Qt5_DIR": "$env{CONDA_PREFIX}/lib/cmake/qt5",
+                "HDF5_ROOT": "$env{CONDA_PREFIX}",
+                "OpenSSL_ROOT": "$env{CONDA_PREFIX}",
+                "CONDA_ENV": true,
+                "CMAKE_BUILD_TYPE": "Release"
+            }
+        },
+        {
+            "name": "win",
+            "displayName": "win",
+            "description": "Default build options for a windows conda build",
+            "binaryDir": "${sourceDir}/build",
+            "generator": "Visual Studio 16 2019",
+            "cacheVariables": {
+                "CMAKE_PREFIX_PATH": "$env{CONDA_PREFIX}",
+                "CONDA_ENV": true
+            }
+        },
+        {
+            "name": "linux",
+            "displayName": "linux",
+            "description": "Default build options for a linux conda build",
+            "binaryDir": "${sourceDir}/build",
+            "generator": "Ninja",
+            "cacheVariables": {
+                "CMAKE_PREFIX_PATH": "$env{CONDA_PREFIX}",
+                "CONDA_ENV": true,
+                "CMAKE_FIND_USE_SYSTEM_ENVIRONMENT_PATH": "FALSE",
+                "CMAKE_FIND_USE_CMAKE_ENVIRONMENT_PATH": "FALSE",
+                "CMAKE_BUILD_TYPE": "Debug",
+                "CMAKE_CXX_FLAGS_DEBUG": "-g -O0"
+            }
+        },
+        {
+            "name": "linux-ci",
+            "displayName": "linux-ci",
+            "description": "To be used in the CI environment only",
+            "binaryDir": "${sourceDir}/build",
+            "generator": "Ninja",
+            "cacheVariables": {
+                "CMAKE_PREFIX_PATH": "$env{CONDA_PREFIX}",
+                "CONDA_ENV": true,
+                "CMAKE_FIND_USE_SYSTEM_ENVIRONMENT_PATH": "FALSE",
+                "CMAKE_FIND_USE_CMAKE_ENVIRONMENT_PATH": "FALSE",
+                "CMAKE_BUILD_TYPE": "Release",
+                "ENABLE_PRECOMMIT": "OFF",
+                "ENABLE_CPACK": "ON",
+                "DOCS_HTML": "ON",
+                "ENABLE_CONDA": "ON",
+                "COLORED_COMPILER_OUTPUT": "OFF"
+            }
+        },
+        {
+            "name": "linux-ci-address-sanitiser",
+            "displayName": "linux-ci-address-sanitiser",
+            "description": "To be used for the CI environment",
+            "binaryDir": "${sourceDir}/build",
+            "generator": "Ninja",
+            "cacheVariables": {
+                "CMAKE_PREFIX_PATH": "$env{CONDA_PREFIX}",
+                "CONDA_ENV": true,
+                "CMAKE_FIND_USE_SYSTEM_ENVIRONMENT_PATH": "FALSE",
+                "CMAKE_FIND_USE_CMAKE_ENVIRONMENT_PATH": "FALSE",
+                "CMAKE_BUILD_TYPE": "RelWithDebInfo",
+                "ENABLE_PRECOMMIT": "OFF",
+                "ENABLE_CPACK": "ON",
+                "DOCS_HTML": "ON",
+                "ENABLE_CONDA": "ON",
+                "COLORED_COMPILER_OUTPUT": "OFF",
+                "USE_SANITIZER": "Address"
+            }
+        },
+        {
+            "name": "linux-ci-memory-sanitiser",
+            "displayName": "linux-ci-memory-sanitiser",
+            "description": "To be used for the CI environment",
+            "binaryDir": "${sourceDir}/build",
+            "generator": "Ninja",
+            "cacheVariables": {
+                "CMAKE_PREFIX_PATH": "$env{CONDA_PREFIX}",
+                "CONDA_ENV": true,
+                "CMAKE_FIND_USE_SYSTEM_ENVIRONMENT_PATH": "FALSE",
+                "CMAKE_FIND_USE_CMAKE_ENVIRONMENT_PATH": "FALSE",
+                "CMAKE_BUILD_TYPE": "RelWithDebInfo",
+                "ENABLE_PRECOMMIT": "OFF",
+                "ENABLE_CPACK": "ON",
+                "DOCS_HTML": "ON",
+                "ENABLE_CONDA": "ON",
+                "COLORED_COMPILER_OUTPUT": "OFF",
+                "USE_SANITIZER": "memory"
+            }
+        },
+        {
+            "name": "linux-ci-thread-sanitiser",
+            "displayName": "linux-ci-thread-sanitiser",
+            "description": "To be used for the CI environment",
+            "binaryDir": "${sourceDir}/build",
+            "generator": "Ninja",
+            "cacheVariables": {
+                "CMAKE_PREFIX_PATH": "$env{CONDA_PREFIX}",
+                "CONDA_ENV": true,
+                "CMAKE_FIND_USE_SYSTEM_ENVIRONMENT_PATH": "FALSE",
+                "CMAKE_FIND_USE_CMAKE_ENVIRONMENT_PATH": "FALSE",
+                "CMAKE_BUILD_TYPE": "RelWithDebInfo",
+                "ENABLE_PRECOMMIT": "OFF",
+                "ENABLE_CPACK": "ON",
+                "DOCS_HTML": "ON",
+                "ENABLE_CONDA": "ON",
+                "COLORED_COMPILER_OUTPUT": "OFF",
+                "USE_SANITIZER": "thread"
+            }
+        },
+        {
+            "name": "linux-ci-coverage",
+            "displayName": "linux-ci-coverage",
+            "description": "To be used in the CI environment only",
+            "binaryDir": "${sourceDir}/build",
+            "generator": "Ninja",
+            "cacheVariables": {
+                "CMAKE_PREFIX_PATH": "$env{CONDA_PREFIX}",
+                "CONDA_ENV": true,
+                "CMAKE_FIND_USE_SYSTEM_ENVIRONMENT_PATH": "FALSE",
+                "CMAKE_FIND_USE_CMAKE_ENVIRONMENT_PATH": "FALSE",
+                "CMAKE_BUILD_TYPE": "Debug",
+                "ENABLE_PRECOMMIT": "OFF",
+                "ENABLE_CPACK": "ON",
+                "DOCS_HTML": "ON",
+                "ENABLE_CONDA": "ON",
+                "COLORED_COMPILER_OUTPUT": "OFF",
+                "COVERAGE": "OFF",
+                "TESTING_TIMEOUT": "1200",
+                "CMAKE_CXX_FLAGS_DEBUG": "-g -O0"
+            }
+        }
+    ]
+}

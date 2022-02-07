@@ -36,6 +36,15 @@ General properties
 | ``algorithms.categories.hidden`` | A comma separated list of any categories of      | ``Muons,Testing``      |
 |                                  | algorithms that should be hidden in Mantid.      |                        |
 +----------------------------------+--------------------------------------------------+------------------------+
+| ``algorithms.deprecated``        | Action upon invoking a deprecated algorithm.     | ``Log`` or ``Raise``   |
+|                                  | ``Log`` causes a log message at error level.     |                        |
+|                                  |``Raise`` causes a ``RuntimError``.               |                        |
++----------------------------------+--------------------------------------------------+------------------------+
+| ``algorithms.alias.deprecated``  | Action upon invoking the algorithm via one of    | ``Log`` or ``Raise``   |
+|                                  | its deprecated aliases.                          |                        |
+|                                  | ``Log`` causes a log message at error level.     |                        |
+|                                  |``Raise`` causes a ``RuntimError``.               |                        |
++----------------------------------+--------------------------------------------------+------------------------+
 | ``curvefitting.guiExclude``      | A semicolon separated list of function names     | ``ExpDecay;Gaussian;`` |
 |                                  | that should be hidden in Mantid.                 |                        |
 +----------------------------------+--------------------------------------------------+------------------------+
@@ -112,7 +121,15 @@ Directory Properties
 |                                      | that Mantid requires to function correctly.       |                                     |
 |                                      | **WARNING:** Do not alter the default value.      |                                     |
 +--------------------------------------+---------------------------------------------------+-------------------------------------+
-
+| ``python.plugins.manifest``          | A path to the location of the manifest file       | N/A                                 |
+|                                      | containing paths to each of the python algorithm  |                                     |
+|                                      | files.                                            |                                     |
+|                                      | **WARNING:** Do not alter the default value.      |                                     |
++--------------------------------------+---------------------------------------------------+-------------------------------------+
+| ``python.templates.directory``       | The directory of python .in files used as         | N/A                                 |
+|                                      | templates when generating python scripts from     |                                     |
+|                                      | within an algorithm.                              |                                     |
++--------------------------------------+---------------------------------------------------+-------------------------------------+
 
 
 Logging Properties
@@ -132,7 +149,16 @@ you may want to alter and those properties are detailed below.
 |                                                 |The default is information, but                    | ``error``, ``critical``     |
 |                                                 |this can be lowered to debug for more detailed     | or ``fatal``                |
 |                                                 |feedback.                                          |                             |
-|                                                 |                                                   |                             |
++-------------------------------------------------+---------------------------------------------------+-----------------------------+
+| ``logging.channels.consoleChannel.class``       | Select where log messages appear.                 | ``ConsoleChannel``,         |
+|                                                 | ``ConsoleChannel`` writes to stdlog.              | ``StdoutChannel``,          |
+|                                                 | ``StdoutChannel`` writes to stdout and can be     | ``PythonStdoutChannel``, or |
+|                                                 | redirected using pipes.                           | ``PythonLoggingChannel``    |
+|                                                 | ``PythonStdoutChannel`` writes to stdout through  |                             |
+|                                                 | python and is visible in jupyter notebooks.       |                             |
+|                                                 | ``PythonLoggingChannel`` sends messages to a      |                             |
+|                                                 | logger called ``'Mantid'`` from the ``logging``   |                             |
+|                                                 | framework of Python's standard library.           |                             |
 +-------------------------------------------------+---------------------------------------------------+-----------------------------+
 
 The logging priority levels for the file logging and console logging can also be adjusted in python using the command:
@@ -185,6 +211,10 @@ Network Properties
 +-------------------------------------------+---------------------------------------------------+---------------------------------+
 | ``network.scriptrepo.timeout``            |The timeout for network operations in the script   | ``5``                           |
 |                                           |repository, this overrides the default timeout.    |                                 |
++-------------------------------------------+---------------------------------------------------+---------------------------------+
+| ``network.github.api_token``              |The api token for github calls used by             | (not shown)                     |
+|                                           |``DownloadInstrument``. Setting this to ``unset``  |                                 |
+|                                           |or an empty string will turn off authentication.   |                                 |
 +-------------------------------------------+---------------------------------------------------+---------------------------------+
 | ``proxy.host``                            | Allows the system proxy to be overridden, if not  | ``http://www.proxy.org``        |
 |                                           | set mantid will use the system proxy              |                                 |
@@ -254,11 +284,55 @@ Plotting Settings
 +=================================+==================================================================+=====================+
 |``plots.ShowTitle``              |Whether to show titles on plots                                   | ``On``, ``Off``     |
 +---------------------------------+------------------------------------------------------------------+---------------------+
+|``plots.ShowLegend``             |Whether to show legend on plots                                   | ``On``, ``Off``     |
++---------------------------------+------------------------------------------------------------------+---------------------+
+|``plots.font``                   |The default font for labels and titles on plots.                  |``Helvetica``        |
++---------------------------------+------------------------------------------------------------------+---------------------+
 |``plots.xAxesScale``             |The default x scale on 1d plots                                   |``Linear``, ``Log``  |
 +---------------------------------+------------------------------------------------------------------+---------------------+
 |``plots.yAxesScale``             |The default y scale on 1d plots                                   |``Linear``, ``Log``  |
 +---------------------------------+------------------------------------------------------------------+---------------------+
+|``plots.axesLineWidth``          |The default width of the lines that make the axes                 |``1``                |
++---------------------------------+------------------------------------------------------------------+---------------------+
+|``plots.enableGrid``             |The default y scale on 1d plots                                   |``Linear``, ``Log``  |
++---------------------------------+------------------------------------------------------------------+---------------------+
+|``plots.ShowMinorTicks``         |Whether to show minor ticks on plots                              | ``On``, ``Off``     |
++---------------------------------+------------------------------------------------------------------+---------------------+
+|``plots.ShowMinorGridlines``     |Whether to show minor gridlines on plots                          | ``On``, ``Off``     |
++---------------------------------+------------------------------------------------------------------+---------------------+
+|``plots.showTicksLeft``          |Whether to show ticks on the left side of the plot                | ``On``, ``Off``     |
++---------------------------------+------------------------------------------------------------------+---------------------+
+|``plots.showTicksBottom``        |Whether to show ticks on the bottom of the plot                   | ``On``, ``Off``     |
++---------------------------------+------------------------------------------------------------------+---------------------+
+|``plots.showTicksRight``         |Whether to show ticks on the right side of the plot               | ``On``, ``Off``     |
++---------------------------------+------------------------------------------------------------------+---------------------+
+|``plots.showTicksTop``           |Whether to show ticks on the top side of the plot                 | ``On``, ``Off``     |
++---------------------------------+------------------------------------------------------------------+---------------------+
+|``plots.showLabelsLeft``         |Whether to show labels on the left side of the plot               | ``On``, ``Off``     |
++---------------------------------+------------------------------------------------------------------+---------------------+
+|``plots.showLabelsBottom``       |Whether to show labels on the bottom of the plot                  | ``On``, ``Off``     |
++---------------------------------+------------------------------------------------------------------+---------------------+
+|``plots.showLabelsRight``        |Whether to show labels on the right side of the plot              | ``On``, ``Off``     |
++---------------------------------+------------------------------------------------------------------+---------------------+
+|``plots.showLabelsTop``          |Whether to show labels on the top side of the plot                | ``On``, ``Off``     |
++---------------------------------+------------------------------------------------------------------+---------------------+
+|``plots.ticks.major.length``     |The default length of the major ticks                             |``6``                |
++---------------------------------+------------------------------------------------------------------+---------------------+
+|``plots.ticks.major.width``      |The default width of the major ticks                              |``1``                |
++---------------------------------+------------------------------------------------------------------+---------------------+
+|``plots.ticks.major.direction``  |The default direction of the major ticks                          |``In``, ``Out``,     |
+|                                 |                                                                  |``InOut``            |
++---------------------------------+------------------------------------------------------------------+---------------------+
+|``plots.ticks.minor.length``     |The default length of the minor ticks                             |``3``                |
++---------------------------------+------------------------------------------------------------------+---------------------+
+|``plots.ticks.minor.width``      |The default width of the minor ticks                              |``1``                |
++---------------------------------+------------------------------------------------------------------+---------------------+
+|``plots.ticks.minor.direction``  |The default direction of the minor ticks                          |``In``, ``Out``,     |
+|                                 |                                                                  |``InOut``            |
++---------------------------------+------------------------------------------------------------------+---------------------+
 |``plots.line.Style``             |Default Line style on 1d plots                                    |``solid``, ``dashed``|
++---------------------------------+------------------------------------------------------------------+---------------------+
+|``plots.line.DrawStyle``         |Default Draw style on 1d plots                                    |``default``,``steps``|
 +---------------------------------+------------------------------------------------------------------+---------------------+
 |``plots.line.Width``             |Default Line width on 1d plots                                    |``1.5``              |
 +---------------------------------+------------------------------------------------------------------+---------------------+
@@ -274,6 +348,14 @@ Plotting Settings
 |                                 |in 1d plots. Must be an integer                                   |                     |
 +---------------------------------+------------------------------------------------------------------+---------------------+
 |``plots.errorbar.Width``         |Default width of error bars in 1d plots                           |``1.0``              |
++---------------------------------+------------------------------------------------------------------+---------------------+
+|``plots.legend.FontSize``        |Default legend font size                                          |``8.0``              |
++---------------------------------+------------------------------------------------------------------+---------------------+
+|``plots.legend.Location``        |Default legend location                                           |``best``             |
++---------------------------------+------------------------------------------------------------------+---------------------+
+|``plots.images.Colormap``        |Default colormap for image plots                                  |``viridis``          |
++---------------------------------+------------------------------------------------------------------+---------------------+
+|``plots.images.ColorBarScale``   |Default colorbar scale for image plots                            |``Linear``           |
 +---------------------------------+------------------------------------------------------------------+---------------------+
 
 Getting access to Mantid properties

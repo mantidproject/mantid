@@ -37,14 +37,12 @@ class MANTID_API_DLL TextAxis : public Axis {
 public:
   TextAxis(const std::size_t &length);
   Axis *clone(const MatrixWorkspace *const parentWorkspace) override;
-  Axis *clone(const std::size_t length,
-              const MatrixWorkspace *const parentWorkspace) override;
+  Axis *clone(const std::size_t length, const MatrixWorkspace *const parentWorkspace) override;
   std::size_t length() const override { return m_values.size(); }
   /// If this is a TextAxis, always return true for this class
   bool isText() const override { return true; }
   /// Get a value at the specified index
-  double operator()(const std::size_t &index,
-                    const std::size_t &verticalIndex = 0) const override;
+  double operator()(const std::size_t &index, const std::size_t &verticalIndex = 0) const override;
   /// Set the value at the specified index
   void setValue(const std::size_t &index, const double &value) override;
   size_t indexOfValue(const double value) const override;
@@ -60,8 +58,6 @@ public:
   double getMax() const override;
 
 private:
-  /// Private, undefined copy assignment operator
-  const TextAxis &operator=(const TextAxis &);
   /// A vector holding the axis values for the axis.
   std::vector<std::string> m_values;
 };

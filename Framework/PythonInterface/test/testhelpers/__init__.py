@@ -9,6 +9,7 @@ are for use in unit tests only!
 """
 
 
+from contextlib import contextmanager
 from distutils.version import LooseVersion
 
 # Import mantid to set MANTIDPATH for any ConfigService call that may be done
@@ -86,6 +87,53 @@ def assertRaisesNothing(testobj, callable, *args, **kwargs):
     except Exception as exc:
         testobj.fail("Assertion error. An exception was caught where none was expected in %s. Message: %s"
                      % (callable.__name__, str(exc)))
+
+
+def assert_called_with_partial(_mock_self, *args, **kwargs):
+    """This is similar to assert_called_with but passes if the function is called with provided arguments and keywords,
+    which can be a subset of the full list of arguments passed.
+    Credit: https://stackoverflow.com/questions/52647476/python-unit-test-assert-called-with-partial
+    """
+    self = _mock_self
+    if self.call_args is None:
+        expected = self._format_mock_call_signature(args, kwargs)
+        raise AssertionError('Expected call: %s\nNot called' % (expected,))
+
+    def _error_message():
+        msg = self._format_mock_failure_message(args, kwargs)
+        return msg
+
+    expected = self._call_matcher((args, kwargs))
+    expected_args, expected_kwargs = expected
+    actual_args, actual_kwargs = self._call_matcher(self.call_args)
+    if actual_args[:len(expected_args)] != expected_args or not (expected_kwargs.items() <= actual_kwargs.items()):
+        cause = expected if isinstance(expected, Exception) else None
+        raise AssertionError(_error_message()) from cause
+
+
+def assert_any_call_partial(_mock_self, *args, **kwargs):
+    """This is similar to assert_any_call but passes if the function is called with provided arguments and keywords,
+    which can be a subset of the full list of arguments passed.
+    Adapted from: https://stackoverflow.com/questions/52647476/python-unit-test-assert-called-with-partial and the
+    unittest assert_any_call function
+    """
+    self = _mock_self
+    if self.call_args is None:
+        expected = self._format_mock_call_signature(args, kwargs)
+        raise AssertionError('Expected call: %s\nNot called' % (expected,))
+
+    def _error_message():
+        msg = self._format_mock_failure_message(args, kwargs)
+        return msg
+
+    expected = self._call_matcher((args, kwargs))
+    actual = [self._call_matcher(c) for c in self.call_args_list]
+    expected_args, expected_kwargs = expected
+    for actual_args, actual_kwargs in actual:
+        if actual_args[:len(expected_args)] == expected_args and (expected_kwargs.items() <= actual_kwargs.items()):
+            return
+    cause = expected if isinstance(expected, Exception) else None
+    raise AssertionError(_error_message()) from cause
 
 
 def can_be_instantiated(cls):
@@ -220,3 +268,18 @@ else:
             pass
         if round(abs(desired - actual), decimal) != 0:
             raise AssertionError(_build_err_msg())
+
+
+@contextmanager
+def temporary_config():
+    """
+    Creates a backup of the current system configuration and restores
+    is when the context is existed.
+    """
+    try:
+        config = mantid.kernel.ConfigService.Instance()
+        backup = {key: config[key] for key in config.keys()}
+        yield
+    finally:
+        for key, val in backup.items():
+            config[key] = val

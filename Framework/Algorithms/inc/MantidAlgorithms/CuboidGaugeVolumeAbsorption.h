@@ -25,13 +25,10 @@ namespace Algorithms {
     @author Russell Taylor, Tessella
     @date 1/11/2010
 */
-class MANTID_ALGORITHMS_DLL CuboidGaugeVolumeAbsorption
-    : public FlatPlateAbsorption {
+class MANTID_ALGORITHMS_DLL CuboidGaugeVolumeAbsorption : public FlatPlateAbsorption {
 public:
   /// Algorithm's name
-  const std::string name() const override {
-    return "CuboidGaugeVolumeAbsorption";
-  }
+  const std::string name() const override { return "CuboidGaugeVolumeAbsorption"; }
   /// Summary of algorithms purpose
   const std::string summary() const override {
     return "Calculates bin-by-bin correction factors for attenuation due to "
@@ -42,9 +39,7 @@ public:
 
   /// Algorithm's version
   int version() const override { return (1); }
-  const std::vector<std::string> seeAlso() const override {
-    return {"AbsorptionCorrection"};
-  }
+  const std::vector<std::string> seeAlso() const override { return {"AbsorptionCorrection"}; }
 
 private:
   std::string sampleXML() override;

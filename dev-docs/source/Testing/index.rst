@@ -4,7 +4,7 @@
 Testing
 =======
 
-This is a series of tests for the different functionalities of Mantid. The tests are designed to 
+This is a series of tests for the different functionalities of Mantid. The tests are designed to
 try to capture real-life use scenarios as closely as possible, whilst minimising the data and
 time required for each test. Hopefully if Mantid can pass these tests then it will be usable in
 *at least* a basic sense.
@@ -20,8 +20,11 @@ creation is outlined in :ref:`issue_tracking`.
 .. toctree::
    :maxdepth: 1
 
+   Core/Core
+   SliceViewer/SliceViewer
    MuonAnalysis_test_guides/index
    MuonInterface/MuonTesting
+   ElementalAnalysis/ElementalAnalysisTests
    IndirectInelastic/IndirectInelasticAcceptanceTests
    EngineeringDiffraction/EngineeringDiffractionTestGuide
    ErrorReporter-ProjectRecovery/ErrorReporterTesting
@@ -29,5 +32,4 @@ creation is outlined in :ref:`issue_tracking`.
    LiveData/LiveDataTests
    ReflectometryGUI/ReflectometryGUITests
    SANSGUI/SANSGUITests
-   VSI/VSITesting
-
+   MSlice/MSliceTestGuide

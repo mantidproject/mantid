@@ -13,7 +13,7 @@ The following information will be useful to you if you want to write an
 Individual Neutron Event Data (TofEvent)
 ########################################
 
-The `TofEvent <https://github.com/mantidproject/mantid/blob/master/Framework/Types/inc/MantidTypes/Event/TofEvent.h>`_ class holds information for each neutron detection event
+The `TofEvent <https://github.com/mantidproject/mantid/blob/main/Framework/Types/inc/MantidTypes/Event/TofEvent.h>`_ class holds information for each neutron detection event
 data:
 
 -  PulseTime: An absolute time of the pulse that generated this neutron.

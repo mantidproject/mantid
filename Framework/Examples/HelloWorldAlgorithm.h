@@ -27,9 +27,7 @@ public:
   int version() const override { return (1); }
   /// Algorithm's category for identification overriding a virtual method
   const std::string category() const override { return "Examples"; }
-  const std::string summary() const override {
-    return "Summary of this algorithm - Outputs Hello World!.";
-  }
+  const std::string summary() const override { return "Summary of this algorithm - Outputs Hello World!."; }
 
 private:
   /// Initialisation code

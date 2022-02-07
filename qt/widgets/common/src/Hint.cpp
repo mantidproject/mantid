@@ -5,8 +5,7 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidQtWidgets/Common/Hint.h"
-namespace MantidQt {
-namespace MantidWidgets {
+namespace MantidQt::MantidWidgets {
 
 Hint::Hint(std::string word, std::string description)
     : m_word(std::move(word)), m_description(std::move(description)) {}
@@ -20,5 +19,4 @@ bool operator==(Hint const &lhs, Hint const &rhs) {
 }
 
 bool operator!=(Hint const &lhs, Hint const &rhs) { return !(lhs == rhs); }
-} // namespace MantidWidgets
-} // namespace MantidQt
+} // namespace MantidQt::MantidWidgets

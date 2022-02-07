@@ -32,17 +32,13 @@ public:
   const std::string name() const override { return "LoadDNSSCD"; }
 
   /// Summary of algorithms purpose
-  const std::string summary() const override {
-    return "Load a list of DNS .d_dat files into a MDEventWorkspace.";
-  }
+  const std::string summary() const override { return "Load a list of DNS .d_dat files into a MDEventWorkspace."; }
 
   /// Algorithm's version for identification
   int version() const override { return 1; }
 
   /// Algorithm's category for identification
-  const std::string category() const override {
-    return "MDAlgorithms\\DataHandling";
-  }
+  const std::string category() const override { return "MDAlgorithms\\DataHandling"; }
 
   const std::vector<std::string> seeAlso() const override {
     return {"LoadDNSLegacy", "LoadWANDSCD", "ConvertWANDSCDtoQ"};
@@ -89,16 +85,13 @@ private:
   Mantid::API::IMDEventWorkspace_sptr m_OutWS;
 
   int splitIntoColumns(std::list<std::string> &columns, std::string &str);
-  void read_data(const std::string &fname,
-                 std::map<std::string, std::string> &str_metadata,
+  void read_data(const std::string &fname, std::map<std::string, std::string> &str_metadata,
                  std::map<std::string, double> &num_metadata);
   void fillOutputWorkspace(double wavelength);
   void fillOutputWorkspaceRaw(double wavelength);
   API::ITableWorkspace_sptr saveHuber();
   void loadHuber(const API::ITableWorkspace_sptr &tws);
-  template <class T>
-  void updateProperties(API::Run &run, std::map<std::string, T> &metadata,
-                        std::string time);
+  template <class T> void updateProperties(API::Run &run, std::map<std::string, T> &metadata, std::string time);
 };
 
 } // namespace MDAlgorithms

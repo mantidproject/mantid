@@ -3,6 +3,10 @@
 
 <facility name="TEST" FileExtensions=".nxs,.dat,.xml">
 
+  <catalog name="FakeCatalog">
+    <soapendpoint url="https://fake.endpoint"></soapendpoint>
+  </catalog>
+
   <livedata listener="MockLiveListener"/>
 
   <instrument name="MINITOPAZ">

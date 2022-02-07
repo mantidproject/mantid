@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>943</width>
-    <height>466</height>
+    <height>668</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -23,76 +23,194 @@
       <layout class="QVBoxLayout" name="verticalLayout">
        <item>
         <widget class="QGroupBox" name="dataGroup">
+         <property name="minimumSize">
+          <size>
+           <width>0</width>
+           <height>0</height>
+          </size>
+         </property>
          <property name="title">
           <string>Data</string>
          </property>
          <layout class="QVBoxLayout" name="verticalLayout_5">
-          <property name="leftMargin">
-           <number>0</number>
-          </property>
           <item>
-           <layout class="QGridLayout" name="firstLastLayout">
+           <layout class="QGridLayout" name="instrumentLayout" columnstretch="0,0,0,0">
             <property name="leftMargin">
              <number>9</number>
             </property>
-            <item row="0" column="0">
-             <widget class="QLabel" name="label">
-              <property name="text">
-               <string>First</string>
-              </property>
-             </widget>
-            </item>
-            <item row="1" column="0">
-             <widget class="QLabel" name="label_2">
-              <property name="text">
-               <string>Last</string>
-              </property>
-             </widget>
-            </item>
-            <item row="1" column="1">
-             <widget class="MantidQt::API::MWRunFiles" name="lastRun" native="true">
-              <property name="sizePolicy">
-               <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
-                <horstretch>0</horstretch>
-                <verstretch>0</verstretch>
-               </sizepolicy>
-              </property>
-              <property name="label" stdset="0">
-               <string/>
-              </property>
-              <property name="multipleFiles" stdset="0">
-               <bool>false</bool>
-              </property>
-             </widget>
-            </item>
-            <item row="1" column="2">
-             <widget class="QCheckBox" name="lastRunAuto">
-              <property name="toolTip">
-               <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;When checked, loads all files in directory&lt;/p&gt;&lt;p&gt;and automatically updates as files are added&lt;/p&gt;&lt;p&gt;and removed.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-              </property>
-              <property name="text">
-               <string>Auto</string>
-              </property>
-             </widget>
-            </item>
+            <property name="topMargin">
+             <number>0</number>
+            </property>
+            <property name="rightMargin">
+             <number>9</number>
+            </property>
+            <property name="bottomMargin">
+             <number>0</number>
+            </property>
             <item row="0" column="1">
-             <widget class="MantidQt::API::MWRunFiles" name="firstRun" native="true">
-              <property name="sizePolicy">
-               <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
-                <horstretch>0</horstretch>
-                <verstretch>0</verstretch>
-               </sizepolicy>
+             <widget class="QComboBox" name="instrument">
+              <property name="toolTip">
+               <string>Set the instrument of the data to be loaded.</string>
               </property>
-              <property name="label" stdset="0">
-               <string/>
+             </widget>
+            </item>
+            <item row="0" column="0">
+             <widget class="QLabel" name="instrumentLabel">
+              <property name="text">
+               <string>Instrument:  </string>
               </property>
-              <property name="multipleFiles" stdset="0">
-               <bool>false</bool>
+             </widget>
+            </item>
+            <item row="0" column="2">
+             <spacer name="instrumentSpacer">
+              <property name="orientation">
+               <enum>Qt::Horizontal</enum>
+              </property>
+              <property name="sizeHint" stdset="0">
+               <size>
+                <width>40</width>
+                <height>20</height>
+               </size>
+              </property>
+             </spacer>
+            </item>
+            <item row="0" column="3">
+             <widget class="QPushButton" name="manageDirectoriesButton">
+              <property name="text">
+               <string>Manage User Directories </string>
               </property>
              </widget>
             </item>
            </layout>
           </item>
+          <item>
+           <layout class="QGridLayout" name="pathLayout" columnstretch="1,10">
+            <property name="leftMargin">
+             <number>9</number>
+            </property>
+            <property name="topMargin">
+             <number>0</number>
+            </property>
+            <property name="rightMargin">
+             <number>9</number>
+            </property>
+            <property name="bottomMargin">
+             <number>0</number>
+            </property>
+            <item row="0" column="0">
+             <widget class="QLabel" name="pathLabel">
+              <property name="text">
+               <string>Loaded From:</string>
+              </property>
+             </widget>
+            </item>
+            <item row="0" column="1">
+             <widget class="QLineEdit" name="path">
+              <property name="enabled">
+               <bool>false</bool>
+              </property>
+              <property name="toolTip">
+               <string>The path the data is loaded from. This is set once you have loaded the data. Use manage user directories to specify where to load from</string>
+              </property>
+              <property name="text">
+               <string/>
+              </property>
+              <property name="readOnly">
+               <bool>true</bool>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </item>
+          <item>
+           <layout class="QHBoxLayout" name="runsLayout">
+            <property name="leftMargin">
+             <number>9</number>
+            </property>
+            <property name="rightMargin">
+             <number>9</number>
+            </property>
+            <item>
+             <widget class="MantidQt::API::FileFinderWidget" name="runs" native="true">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Expanding" vsizetype="Minimum">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+              <property name="toolTip">
+               <string>Specify runs by comma separated lists and ranges using '-'.</string>
+              </property>
+              <property name="findRunFiles" stdset="0">
+               <bool>true</bool>
+              </property>
+              <property name="label" stdset="0">
+               <string>Runs:</string>
+              </property>
+              <property name="multipleFiles" stdset="0">
+               <bool>true</bool>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QRadioButton" name="runsAutoAdd">
+              <property name="toolTip">
+               <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;When checked, automatically watches the loaded path for runs being added and loads them.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+              </property>
+              <property name="text">
+               <string>Auto add</string>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </item>
+          <item>
+           <layout class="QHBoxLayout" name="loadLayout">
+            <property name="leftMargin">
+             <number>9</number>
+            </property>
+            <property name="topMargin">
+             <number>0</number>
+            </property>
+            <property name="rightMargin">
+             <number>9</number>
+            </property>
+            <item>
+             <widget class="QLabel" name="loadStatusLabel">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Preferred" vsizetype="Expanding">
+                <horstretch>0</horstretch>
+                <verstretch>2</verstretch>
+               </sizepolicy>
+              </property>
+              <property name="toolTip">
+               <string>Status of the interface. Green: Success; Yellow: Processing; Red: Error</string>
+              </property>
+              <property name="styleSheet">
+               <string notr="true"/>
+              </property>
+              <property name="text">
+               <string>Default Text</string>
+              </property>
+              <property name="wordWrap">
+               <bool>true</bool>
+              </property>
+              <property name="margin">
+               <number>1</number>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </item>
+         </layout>
+        </widget>
+       </item>
+       <item>
+        <widget class="QGroupBox" name="plotByLogGroup">
+         <property name="title">
+          <string>Plot By Log</string>
+         </property>
+         <layout class="QVBoxLayout" name="verticalLayout_6">
           <item>
            <widget class="MantidQt::MantidWidgets::LogValueSelector" name="logValueSelector" native="true"/>
           </item>
@@ -158,7 +276,7 @@
           <item>
            <layout class="QHBoxLayout" name="horizontalLayoutDeadTime_2">
             <item>
-             <widget class="MantidQt::API::MWRunFiles" name="deadTimeFile" native="true">
+             <widget class="MantidQt::API::FileFinderWidget" name="deadTimeFile" native="true">
               <property name="enabled">
                <bool>false</bool>
               </property>
@@ -228,14 +346,14 @@
            </layout>
           </item>
           <item>
-           <layout class="QHBoxLayout" name="horizontalLayoutGrouping_2">
+           <layout class="QHBoxLayout" name="horizontalLayoutGrouping_2" stretch="0,7,7">
             <item>
              <widget class="QLabel" name="labelForward">
               <property name="enabled">
                <bool>false</bool>
               </property>
               <property name="text">
-               <string>Forward</string>
+               <string>Forward:  </string>
               </property>
              </widget>
             </item>
@@ -247,12 +365,29 @@
              </widget>
             </item>
             <item>
+             <spacer name="horizontalSpacer_6">
+              <property name="orientation">
+               <enum>Qt::Horizontal</enum>
+              </property>
+              <property name="sizeHint" stdset="0">
+               <size>
+                <width>40</width>
+                <height>20</height>
+               </size>
+              </property>
+             </spacer>
+            </item>
+           </layout>
+          </item>
+          <item>
+           <layout class="QHBoxLayout" name="horizontalLayout_7" stretch="0,6,1,0,2">
+            <item>
              <widget class="QLabel" name="labelBackward">
               <property name="enabled">
                <bool>false</bool>
               </property>
               <property name="text">
-               <string>Backward</string>
+               <string>Backward:</string>
               </property>
              </widget>
             </item>
@@ -263,7 +398,59 @@
               </property>
              </widget>
             </item>
+            <item>
+             <spacer name="horizontalSpacer_5">
+              <property name="orientation">
+               <enum>Qt::Horizontal</enum>
+              </property>
+              <property name="sizeHint" stdset="0">
+               <size>
+                <width>40</width>
+                <height>20</height>
+               </size>
+              </property>
+             </spacer>
+            </item>
+            <item>
+             <widget class="QLabel" name="alphaLabel">
+              <property name="toolTip">
+               <string>The balance parameter for the back spectra</string>
+              </property>
+              <property name="text">
+               <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Alpha:&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QLineEdit" name="alpha">
+              <property name="enabled">
+               <bool>false</bool>
+              </property>
+              <property name="minimumSize">
+               <size>
+                <width>0</width>
+                <height>0</height>
+               </size>
+              </property>
+              <property name="text">
+               <string/>
+              </property>
+             </widget>
+            </item>
            </layout>
+          </item>
+          <item>
+           <widget class="QLabel" name="alphaMessage">
+            <property name="enabled">
+             <bool>true</bool>
+            </property>
+            <property name="text">
+             <string>Alpha is only avaiable with single period data</string>
+            </property>
+            <property name="alignment">
+             <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+            </property>
+           </widget>
           </item>
          </layout>
         </widget>
@@ -290,6 +477,13 @@
              <widget class="QComboBox" name="greenPeriod">
               <property name="enabled">
                <bool>false</bool>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QPushButton" name="periodInfo">
+              <property name="text">
+               <string>Period Info</string>
               </property>
              </widget>
             </item>
@@ -393,7 +587,7 @@
                <item>
                 <widget class="QLabel" name="label_4">
                  <property name="text">
-                  <string>From [µ]</string>
+                  <string>From [µ]:</string>
                  </property>
                 </widget>
                </item>
@@ -413,7 +607,7 @@
                <item>
                 <widget class="QLabel" name="label_5">
                  <property name="text">
-                  <string>Max [µ]</string>
+                  <string>Max [µ]:</string>
                  </property>
                 </widget>
                </item>
@@ -465,7 +659,17 @@
         </spacer>
        </item>
        <item>
-        <layout class="QHBoxLayout" name="horizontalLayout_3">
+        <layout class="QHBoxLayout" name="horizontalLayout_6" stretch="0,0,4,2">
+         <property name="topMargin">
+          <number>0</number>
+         </property>
+         <item>
+          <widget class="QLabel" name="label">
+           <property name="text">
+            <string>Help: </string>
+           </property>
+          </widget>
+         </item>
          <item>
           <widget class="QPushButton" name="help">
            <property name="maximumSize">
@@ -480,7 +684,7 @@
           </widget>
          </item>
          <item>
-          <spacer name="horizontalSpacer">
+          <spacer name="horizontalSpacer_4">
            <property name="orientation">
             <enum>Qt::Horizontal</enum>
            </property>
@@ -501,7 +705,16 @@
          </item>
         </layout>
        </item>
+       <item>
+        <layout class="QHBoxLayout" name="horizontalLayout_3"/>
+       </item>
       </layout>
+      <zorder>deadTimeGroup</zorder>
+      <zorder>detectorGroupingGroup</zorder>
+      <zorder>periodsGroup</zorder>
+      <zorder>calculationGroup</zorder>
+      <zorder>dataGroup</zorder>
+      <zorder>plotByLogGroup</zorder>
      </widget>
      <widget class="QGroupBox" name="groupBox">
       <property name="styleSheet">
@@ -519,6 +732,12 @@
            <height>0</height>
           </size>
          </property>
+         <property name="toolTip">
+          <string>Use right-click for plot options</string>
+         </property>
+         <property name="toolTipDuration">
+          <number>2000</number>
+         </property>
         </widget>
        </item>
       </layout>
@@ -535,9 +754,9 @@
    <container>1</container>
   </customwidget>
   <customwidget>
-   <class>MantidQt::API::MWRunFiles</class>
+   <class>MantidQt::API::FileFinderWidget</class>
    <extends>QWidget</extends>
-   <header>MantidQtWidgets/Common/MWRunFiles.h</header>
+   <header>MantidQtWidgets/Common/FileFinderWidget.h</header>
   </customwidget>
   <customwidget>
    <class>MantidQt::MantidWidgets::LogValueSelector</class>
@@ -551,8 +770,6 @@
   <tabstop>differential</tabstop>
   <tabstop>minTime</tabstop>
   <tabstop>maxTime</tabstop>
-  <tabstop>help</tabstop>
-  <tabstop>load</tabstop>
  </tabstops>
  <resources/>
  <connections>
@@ -655,7 +872,7 @@
  </connections>
  <buttongroups>
   <buttongroup name="deadTimeCorrType"/>
-  <buttongroup name="calculationType"/>
   <buttongroup name="detectorGroupingType"/>
+  <buttongroup name="calculationType"/>
  </buttongroups>
 </ui>

@@ -63,7 +63,7 @@ neutrons, of an appropriate wavelength (on the same scale of interatomic distanc
     2d\sin\theta = \lambda
 
 In this equation :math: `d` is the spacing between the lattice planes, :math:`\theta` is the angle of the incoming beam
-and the lattice plane normal and lambda is the wavelength of the radiation. In an experiment theta and lambda are
+and the lattice plane, and lambda is the wavelength of the radiation. In an experiment theta and lambda are
 usually limited, thus they are limiting the range of interplanar spacings that can be probed. In Bragg's law the lattice
 plane families are only described by one parameter, the interplanar distance. But each lattice plane family also has an
 orientation in space which can be described by the plane's normal vector. Usually the vector is given in terms of the

@@ -388,9 +388,9 @@ def create_category_pages(app):
             # index in document directory
             document_dir = posixpath.dirname(category_html_dir)
             category_html_path_noext = posixpath.join(document_dir, 'index')
-            context['outpath'] = category_html_path_noext + '.html'        
+            context['outpath'] = category_html_path_noext + '.html'
             yield (category_html_path_noext, context, template)
-      
+
     #create the top level algorithm category
     yield create_top_algorithm_category(categories)
 # enddef
@@ -428,20 +428,17 @@ def create_top_algorithm_category(categories):
             else:
                 top_category.additional_text = ''
             all_top_categories.append(top_category)
-    
+
     #split the full list into subsections
     general_categories = all_top_categories
     technique_categories = extract_matching_categories(general_categories,posixpath.join(category_src_dir, 'techniquecategories') + '.txt')
     facility_categories = extract_matching_categories(general_categories,posixpath.join(category_src_dir, 'facilitycategories') + '.txt')
-    hidden_categories = extract_matching_categories(general_categories,posixpath.join(category_src_dir, 'hiddencategories') + '.txt')
-    
+
     # create the page
     top_context = {}
-    top_html_path_noext = ""
     top_category_html_path_noext = posixpath.join('algorithms', 'index')
     top_context['outpath'] = top_category_html_path_noext + '.html'
     #set the content
-    top_context["text_page"] = "algorithm_categories.html"
     top_context["pages"] = []
     top_context["generalcategories"] = sorted(general_categories, key = lambda x: x.name)
     top_context["techniquecategories"] = sorted(technique_categories, key = lambda x: x.name)
@@ -462,24 +459,23 @@ def extract_matching_categories(input_categories,filepath):
       filepath : The path to the file of names to be extracted
     """
     extracted_list = []
-    name_list = []
     if os.path.isfile(filepath):
         with open(filepath) as f:
             name_list = [line.strip() for line in f]
-      
+
         extracted_list = [category for category in input_categories if category.name in name_list]
         #overwrite input_categories
-        input_categories[:] = [category for category in input_categories if category.name not in name_list] 
-    
+        input_categories[:] = [category for category in input_categories if category.name not in name_list]
+
     return extracted_list
 
 
-def purge_categories(app, env, docname):
+def purge_categories(_, env, docname):
     """
     Purge information about the given document name from the tracked algorithms
 
     Arguments:
-      app (Sphinx.application): Application object
+      _ (Sphinx.application): Application object
       env (Sphinx.BuildEnvironment):
       docname (str): Name of the document
     """
@@ -497,8 +493,6 @@ def purge_categories(app, env, docname):
         pages = category.pages
         if deadref in pages:
             pages.remove(deadref)
-
-#------------------------------------------------------------------------------
 
 
 def setup(app):

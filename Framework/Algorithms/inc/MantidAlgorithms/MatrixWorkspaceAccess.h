@@ -12,9 +12,8 @@ namespace Mantid {
 namespace Algorithms {
 
 struct MatrixWorkspaceAccess {
-  static decltype(std::mem_fn(
-      (std::vector<double> & (API::MatrixWorkspace::*)(const std::size_t)) &
-      API::MatrixWorkspace::dataX)) x;
+  static decltype(std::mem_fn((std::vector<double> & (API::MatrixWorkspace::*)(const std::size_t)) &
+                              API::MatrixWorkspace::dataX)) x;
 };
 } // namespace Algorithms
 } // namespace Mantid

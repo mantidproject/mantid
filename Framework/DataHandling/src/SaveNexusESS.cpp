@@ -8,8 +8,7 @@
 #include "MantidNexusGeometry/NexusGeometrySave.h"
 #include <H5Cpp.h>
 
-namespace Mantid {
-namespace DataHandling {
+namespace Mantid::DataHandling {
 using Mantid::API::WorkspaceProperty;
 using Mantid::Kernel::Direction;
 
@@ -25,9 +24,7 @@ const std::string SaveNexusESS::name() const { return "SaveNexusESS"; }
 int SaveNexusESS::version() const { return 1; }
 
 /// Algorithm's category for identification. @see Algorithm::category
-const std::string SaveNexusESS::category() const {
-  return "DataHandling\\Nexus";
-}
+const std::string SaveNexusESS::category() const { return "DataHandling\\Nexus"; }
 
 /// Algorithm's summary for use in the GUI and help. @see Algorithm::summary
 const std::string SaveNexusESS::summary() const {
@@ -40,25 +37,20 @@ const std::string SaveNexusESS::summary() const {
  * @return
  */
 bool SaveNexusESS::processGroups() {
-  throw std::invalid_argument(
-      "SaveNexusESS does not currently support operations on groups");
+  throw std::invalid_argument("SaveNexusESS does not currently support operations on groups");
 }
 
-void SaveNexusESS::saveNexusGeometry(const Mantid::API::MatrixWorkspace &ws,
-                                     const std::string &filename) {
+void SaveNexusESS::saveNexusGeometry(const Mantid::API::MatrixWorkspace &ws, const std::string &filename) {
 
   try {
     NexusGeometry::LogAdapter<Kernel::Logger> adapter(&g_log);
-    NexusGeometry::NexusGeometrySave::saveInstrument(
-        ws, filename, "mantid_workspace_1", adapter, true);
+    NexusGeometry::NexusGeometrySave::saveInstrument(ws, filename, "mantid_workspace_1", adapter, true);
   } catch (std::exception &e) {
-    g_log.error(std::string(e.what()) +
-                " Nexus Geometry may be absent or incomplete "
-                "from processed Nexus file");
+    g_log.error(std::string(e.what()) + " Nexus Geometry may be absent or incomplete "
+                                        "from processed Nexus file");
   } catch (H5::Exception &ex) {
-    g_log.error(ex.getDetailMsg() +
-                " Nexus Geometry may be absent or incomplete "
-                "from processed Nexus file");
+    g_log.error(ex.getDetailMsg() + " Nexus Geometry may be absent or incomplete "
+                                    "from processed Nexus file");
   }
 }
 
@@ -96,5 +88,4 @@ void SaveNexusESS::exec() {
   // Now write spectrum to detector maps;
   return;
 }
-} // namespace DataHandling
-} // namespace Mantid
+} // namespace Mantid::DataHandling

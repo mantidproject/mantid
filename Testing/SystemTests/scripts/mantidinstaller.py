@@ -13,7 +13,11 @@ import sys
 import subprocess
 import time
 
+# global script path
 scriptLog = None
+# distributions
+RPMBASED = ['redhat', 'centos', 'fedora']
+DEBBASED = ['ubuntu', 'debian']
 
 
 def createScriptLog(path):
@@ -48,7 +52,6 @@ def failure(installer):
         installer.uninstall()
     except Exception as exc:
         log("Could not uninstall package %s: %s" % (installer.mantidInstaller, str(exc)))
-        pass
 
     log('Tests failed')
     print('Tests failed')
@@ -83,10 +86,10 @@ def get_installer(package_dir, do_install=True):
     if system == 'Windows':
         return NSISInstaller(package_dir, do_install)
     elif system == 'Linux':
-        dist = platform.dist()
-        if dist[0] == 'Ubuntu':
+        dist = linux_distro_distributor().lower()
+        if any(map(lambda name: name in dist, DEBBASED)):
             return DebInstaller(package_dir, do_install)
-        elif dist[0].lower() == 'redhat' or dist[0].lower() == 'fedora' or dist[0].lower() == 'centos':
+        elif any(map(lambda name: name in dist, RPMBASED)):
             return RPMInstaller(package_dir, do_install)
         else:
             scriptfailure('Unknown Linux flavour: %s' % str(dist))
@@ -96,15 +99,24 @@ def get_installer(package_dir, do_install=True):
         raise scriptfailure("Unsupported platform")
 
 
+def linux_distro_distributor():
+    """Extract the distributor for the current Linux distribution
+    """
+    try:
+        lsb_descr = subprocess.check_output('lsb_release --id', shell=True,
+                                            stderr=subprocess.STDOUT).decode('utf-8')
+        return lsb_descr.strip()[len('Distributor ID:')+1:].strip()
+    except subprocess.CalledProcessError as exc:
+        return f'Unknown distribution: lsb_release --id failed {exc}'
+
+
 def run(cmd):
     """Run a command in a subprocess"""
     try:
-        p = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, shell=True)
-        stdout, stderr = p.communicate()
-        if p.returncode != 0:
-            raise Exception('Returned with code '+str(p.returncode)+'\n'+ stdout)
-    except Exception as err:
-        log('Error in subprocess %s:\n' % str(err))
+        stdout = subprocess.check_output(cmd, shell=True,
+                                         stderr=subprocess.STDOUT).decode('utf-8')
+    except subprocess.CalledProcessError as exc:
+        log(f'Error in subprocess {exc}')
         raise
     log(stdout)
     return stdout
@@ -115,7 +127,6 @@ class MantidInstaller(object):
     Base-class for installer objects
     """
     mantidInstaller = None
-    mantidPlotPath = None
     no_uninstall = False
     python_cmd = None
     python_args = "--classic"
@@ -131,14 +142,10 @@ class MantidInstaller(object):
             # This will put the release mantid packages at the start and the nightly ones at the end
             # with increasing version numbers
             matches.sort()
-            # Make sure we don't get Vates
-            for match in matches:
-                if 'vates'in match:
-                    matches.remove(match)
         # Take the last one as it will have the highest version number
         if len(matches) > 0:
             self.mantidInstaller = os.path.join(os.getcwd(), matches[-1])
-            log("Found package" + self.mantidInstaller)
+            log("Found package " + self.mantidInstaller)
         else:
             raise RuntimeError('Unable to find installer package in "%s"' % os.getcwd())
         self.no_uninstall = not do_install
@@ -176,7 +183,6 @@ class NSISInstaller(MantidInstaller):
             install_prefix += 'MantidInstall'
 
         self.uninstallPath = install_prefix + '/Uninstall.exe'
-        self.mantidPlotPath = install_prefix + '/bin/launch_mantidplot.bat'
         self.python_cmd = install_prefix + '/bin/mantidpython.bat'
 
     def do_install(self):
@@ -219,7 +225,6 @@ class LinuxInstaller(MantidInstaller):
         if 'python3' in package:
             install_prefix += '-python3'
 
-        self.mantidPlotPath = install_prefix + '/bin/MantidPlot'
         self.python_cmd = install_prefix + '/bin/mantidpython'
 
 
@@ -277,27 +282,35 @@ class DMGInstaller(MantidInstaller):
     """Uses an OS X dmg file to install mantid
     """
     def __init__(self, package_dir, do_install):
-        MantidInstaller.__init__(self, package_dir, 'mantid-*.dmg', do_install)
-        bin_dir = '/Applications/MantidPlot.app/Contents/MacOS'
-        self.mantidPlotPath = bin_dir + '/MantidPlot'
-        self.python_cmd = bin_dir + '/mantidpython'
-        # only necessary on 10.8 build
-        if int(platform.release().split('.')[0]) < 13:
-            os.environ['DYLD_LIBRARY_PATH'] = '/Applications/MantidPlot.app/Contents/MacOS'
+        MantidInstaller.__init__(self, package_dir, 'mantid*.dmg', do_install)
+        package = os.path.basename(self.mantidInstaller)
+        if 'mantidnightly' in package:
+            self.bundle_name = 'MantidWorkbenchNightly.app'
+        elif 'mantidunstable' in package:
+            self.bundle_name = 'MantidWorkbenchUnstable.app'
+        else:
+            self.bundle_name = 'MantidWorkbench.app'
+
+        self.python_cmd = f'/Applications/{self.bundle_name}/Contents/MacOS/mantidpython'
 
     def do_install(self):
         """Mounts the dmg and copies the application into the right place.
         """
-        p = subprocess.Popen(['hdiutil','attach',self.mantidInstaller],stdin=subprocess.PIPE,stdout=subprocess.PIPE)
-        p.stdin.write('yes') # This accepts the GPL
+        p = subprocess.Popen(['hdiutil','attach',self.mantidInstaller],
+                             stdin=subprocess.PIPE,stdout=subprocess.PIPE)
+        p.stdin.write(b'yes') # This accepts the GPL
         p.communicate()[0] # This captures (and discards) the GPL text
         mantidInstallerName = os.path.basename(self.mantidInstaller)
         mantidInstallerName = mantidInstallerName.replace('.dmg','')
-        run('sudo cp -r /Volumes/'+ mantidInstallerName+'/MantidPlot.app /Applications/' )
-        run('hdiutil detach /Volumes/'+ mantidInstallerName+'/')
+        try:
+            run(f'sudo cp -a /Volumes/{mantidInstallerName}/{self.bundle_name} /Applications/')
+        finally:
+            run(f'hdiutil detach /Volumes/{mantidInstallerName}/')
 
     def do_uninstall(self):
-        run('sudo rm -fr /Applications/MantidPlot.app/')
+        # protect against empty bundle name removing /Applications
+        if self.bundle_name:
+            run(f'sudo rm -fr /Applications/{self.bundle_name}')
 
 
 class CondaInstaller(MantidInstaller):
@@ -311,7 +324,6 @@ class CondaInstaller(MantidInstaller):
         bindir = os.path.dirname(sys.executable)
         prefix = os.path.dirname(bindir)
         self.conda_mantid_env_prefix = prefix
-        self.mantidPlotPath = None # conda mantid-framework does not include mantidplot
         self.python_cmd = sys.executable
 
     def do_install(self):
@@ -337,8 +349,6 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Commands available: install, uninstall")
     parser.add_argument('command', choices=['install', 'uninstall'], help='command to run')
     parser.add_argument('directory', help='package directory')
-    parser.add_argument('-d', '--dump-exe-path', dest='dump_exe_path',
-                        help='Filepath to write the full path of the MantidPlot executable')
 
     options = parser.parse_args()
 
@@ -348,9 +358,6 @@ if __name__ == "__main__":
     if options.command == "install":
         print("Installing package '%s'" % installer.mantidInstaller)
         installer.install()
-        if options.dump_exe_path is not None:
-            with open(options.dump_exe_path, 'w') as f:
-                f.write(installer.mantidPlotPath)
     elif options.command == "uninstall":
         print("Removing package '%s'" % installer.mantidInstaller)
         installer.uninstall()

@@ -9,17 +9,13 @@
 @author: Janik Zikovsky
 """
 
-#This line has to be first for some reason.
-#from enthought.mayavi import mlab
+# This line has to be first for some reason.
+# from enthought.mayavi import mlab
 
 from pylab import *
-import os
-import sys
-import time
-import numpy as np
 import pickle
-import argparse
 from scipy import stats
+
 
 class Params:
     def __init__(self):
@@ -31,10 +27,10 @@ class Params:
         self.FineBinTime = 0
         self.MemoryUsed = 0
 
+
 results = []
 
 
-#========================================================================================================
 def plot_results_vs_other(results, x_field, y_field, other_field, extra_title=""):
     """ Function to plot Y vs X of anything. It accesses the members of "results" to plot them.
     other_field is used to separate by another field, and make separate line plots for each"""
@@ -48,7 +44,7 @@ def plot_results_vs_other(results, x_field, y_field, other_field, extra_title=""
 
     for other in others:
         data = []
-        for par in results:
+        for _ in results:
             this_other = eval('par.%s' % other_field)
             if this_other == other:
                 x = eval('par.%s' % x_field)
@@ -57,20 +53,18 @@ def plot_results_vs_other(results, x_field, y_field, other_field, extra_title=""
         data.sort()
         xs = [x for (x,y) in data]
         ys = [y for (x,y) in data]
-        p = plot(xs,ys, marker='.', label="%s = %f" % (other_field, other))
+        plot(xs,ys, marker='.', label="%s = %f" % (other_field, other))
 
-    if extra_title != "": extra_title = "\n" + extra_title
-    title("%s vs %s%s" % (y_field, x_field, extra_title) );
+    if extra_title != "":
+        extra_title = "\n" + extra_title
+    title("%s vs %s%s" % (y_field, x_field, extra_title) )
     xlabel(x_field)
     ylabel(y_field)
     legend(loc='best')
-    savefig("%s_vs_%s.png" % (y_field, x_field));
+    savefig("%s_vs_%s.png" % (y_field, x_field))
 
 
-
-
-#========================================================================================================
-def plot_results_with_slope(results, x_field, y_field, x_scale=1):
+def plot_results_with_slope(results, x_field, y_field, x_scale=1.):
     """ Function to plot Y vs X of anything. It accesses the members of "results" to plot them.
     other_field is used to separate by another field, and make separate line plots for each
 
@@ -79,7 +73,7 @@ def plot_results_with_slope(results, x_field, y_field, x_scale=1):
     figure()
 
     data = []
-    for par in results:
+    for _ in results:
         x = eval('par.%s' % x_field)
         y = eval('par.%s' % y_field)
         data.append( (x,y) )
@@ -90,21 +84,17 @@ def plot_results_with_slope(results, x_field, y_field, x_scale=1):
     # Now get the slope
     gradient, intercept, r_value, p_value, std_err = stats.linregress(xs,ys)
 
-    p = plot(xs,ys, marker='.', label="y = %.3gx + %.3g" % (gradient, intercept))
+    plot(xs,ys, marker='.', label="y = %.3gx + %.3g" % (gradient, intercept))
 
-    title("%s vs %s" % (y_field, x_field));
+    title("%s vs %s" % (y_field, x_field))
     xlabel("%s x %s" % (x_field, x_scale) )
     ylabel(y_field)
     legend(loc='best')
-    savefig("%s_vs_%s.png" % (y_field, x_field));
+    savefig("%s_vs_%s.png" % (y_field, x_field))
 
 
-
-
-#========================================================================================================
 def do_analysis(file_list, type):
-     # Load back the results
-
+    # Load back the results
     results = []
     for filename in file_list:
         f = open(filename, 'r')
@@ -136,18 +126,6 @@ def do_analysis(file_list, type):
     show()
 
 
-
-#========================================================================================================
 if __name__=="__main__":
-#    parser = argparse.ArgumentParser(description='Analyze results from MDEvents optimization')
-#    parser.add_argument('files', metavar='FILES', type=str,
-#                        help='The .dat results file')
-#    parser.add_argument('--force', dest='force', action='store_const',
-#                        const=True, default=False,
-#                        help='Force overwriting existing files. Use with caution!')
-#    args = parser.parse_args()
-
     file_list = ["optimize_results1.dat"]
     do_analysis(file_list, 1)
-
-

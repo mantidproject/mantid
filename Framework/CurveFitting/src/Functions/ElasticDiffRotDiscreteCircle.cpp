@@ -24,9 +24,7 @@ namespace {
 Mantid::Kernel::Logger g_log("ElasticDiffRotDiscreteCircle");
 }
 
-namespace Mantid {
-namespace CurveFitting {
-namespace Functions {
+namespace Mantid::CurveFitting::Functions {
 
 DECLARE_FUNCTION(ElasticDiffRotDiscreteCircle)
 
@@ -46,12 +44,10 @@ ElasticDiffRotDiscreteCircle::ElasticDiffRotDiscreteCircle() {
  */
 void ElasticDiffRotDiscreteCircle::init() {
   // Ensure positive values for Height and Radius
-  auto HeightConstraint = std::make_unique<BConstraint>(
-      this, "Height", std::numeric_limits<double>::epsilon(), true);
+  auto HeightConstraint = std::make_unique<BConstraint>(this, "Height", std::numeric_limits<double>::epsilon(), true);
   this->addConstraint(std::move(HeightConstraint));
 
-  auto RadiusConstraint = std::make_unique<BConstraint>(
-      this, "Radius", std::numeric_limits<double>::epsilon(), true);
+  auto RadiusConstraint = std::make_unique<BConstraint>(this, "Radius", std::numeric_limits<double>::epsilon(), true);
   this->addConstraint(std::move(RadiusConstraint));
 }
 
@@ -71,6 +67,4 @@ double ElasticDiffRotDiscreteCircle::HeightPrefactor() const {
   return aN / N;
 }
 
-} // namespace Functions
-} // namespace CurveFitting
-} // namespace Mantid
+} // namespace Mantid::CurveFitting::Functions

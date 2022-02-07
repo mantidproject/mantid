@@ -15,9 +15,7 @@
 #include <memory>
 #include <sstream>
 
-namespace Mantid {
-
-namespace Kernel {
+namespace Mantid::Kernel {
 //
 #define fabs(x) std::fabs((x)*1.0)
 
@@ -39,9 +37,7 @@ public:
   /// Constructor
   PIndex() : count(0) {}
   /// functional
-  std::pair<T, int> operator()(const T &A) {
-    return std::pair<T, int>(A, count++);
-  }
+  std::pair<T, int> operator()(const T &A) { return std::pair<T, int>(A, count++); }
 };
 
 /**
@@ -62,8 +58,7 @@ template <typename T> struct PSep {
  * @param pVec :: Input vector
  * @param Index :: Output vector
  */
-template <typename T>
-void indexSort(const std::vector<T> &pVec, std::vector<int> &Index) {
+template <typename T> void indexSort(const std::vector<T> &pVec, std::vector<int> &Index) {
   Index.resize(pVec.size());
   std::vector<typename std::pair<T, int>> PartList;
   PartList.resize(pVec.size());
@@ -126,14 +121,12 @@ vector.
   }
 }
 //
-template <typename T>
-Matrix<T>::Matrix(const std::vector<T> &data) : m_numRows(0), m_numColumns(0) {
+template <typename T> Matrix<T>::Matrix(const std::vector<T> &data) : m_numRows(0), m_numColumns(0) {
   size_t numElements = data.size();
   auto numRows = static_cast<size_t>(sqrt(double(numElements)));
   size_t numRowsSquare = numRows * numRows;
   if (numElements != numRowsSquare) {
-    throw(std::invalid_argument(
-        "number of elements in input vector have to be square of some value"));
+    throw(std::invalid_argument("number of elements in input vector have to be square of some value"));
   }
 
   setMem(numRows, numRows);
@@ -148,9 +141,7 @@ Matrix<T>::Matrix(const std::vector<T> &data) : m_numRows(0), m_numColumns(0) {
 }
 
 template <typename T>
-Matrix<T>::Matrix(const std::vector<T> &data, const size_t nrow,
-                  const size_t ncol)
-    : m_numRows(0), m_numColumns(0) {
+Matrix<T>::Matrix(const std::vector<T> &data, const size_t nrow, const size_t ncol) : m_numRows(0), m_numColumns(0) {
   size_t numel = data.size();
   size_t test = nrow * ncol;
   if (test != numel) {
@@ -181,11 +172,9 @@ Constructor with for a missing row/column.
 */
 {
   if (nrow > m_numRows)
-    throw Kernel::Exception::IndexError(nrow, A.m_numRows,
-                                        "Matrix::Constructor without row");
+    throw Kernel::Exception::IndexError(nrow, A.m_numRows, "Matrix::Constructor without row");
   if (ncol > m_numColumns)
-    throw Kernel::Exception::IndexError(ncol, A.m_numColumns,
-                                        "Matrix::Constructor without col");
+    throw Kernel::Exception::IndexError(ncol, A.m_numColumns, "Matrix::Constructor without col");
   setMem(m_numRows, m_numColumns);
   size_t iR(0);
   for (size_t i = 0; i <= m_numRows; i++) {
@@ -244,15 +233,13 @@ Simple assignment operator
 
 template <typename T>
 Matrix<T>::Matrix(Matrix<T> &&other) noexcept
-    : m_numRows(other.m_numRows), m_numColumns(other.m_numColumns),
-      m_rawDataAlloc(std::move(other.m_rawDataAlloc)),
+    : m_numRows(other.m_numRows), m_numColumns(other.m_numColumns), m_rawDataAlloc(std::move(other.m_rawDataAlloc)),
       m_rawData(std::move(other.m_rawData)) {
   other.m_numRows = 0;
   other.m_numColumns = 0;
 }
 
-template <typename T>
-Matrix<T> &Matrix<T>::operator=(Matrix<T> &&other) noexcept {
+template <typename T> Matrix<T> &Matrix<T>::operator=(Matrix<T> &&other) noexcept {
   m_numRows = other.m_numRows;
   m_numColumns = other.m_numColumns;
   m_rawData = std::move(other.m_rawData);
@@ -275,8 +262,7 @@ Matrix A is not expanded.
 */
 {
   const size_t Xpt((m_numRows > A.m_numRows) ? A.m_numRows : m_numRows);
-  const size_t Ypt((m_numColumns > A.m_numColumns) ? A.m_numColumns
-                                                   : m_numColumns);
+  const size_t Ypt((m_numColumns > A.m_numColumns) ? A.m_numColumns : m_numColumns);
   for (size_t i = 0; i < Xpt; i++) {
     for (size_t j = 0; j < Ypt; j++) {
       m_rawData[i][j] += A.m_rawData[i][j];
@@ -297,8 +283,7 @@ Matrix A is not expanded.
 */
 {
   const size_t Xpt((m_numRows > A.m_numRows) ? A.m_numRows : m_numRows);
-  const size_t Ypt((m_numColumns > A.m_numColumns) ? A.m_numColumns
-                                                   : m_numColumns);
+  const size_t Ypt((m_numColumns > A.m_numColumns) ? A.m_numColumns : m_numColumns);
   for (size_t i = 0; i < Xpt; i++) {
     for (size_t j = 0; j < Ypt; j++) {
       m_rawData[i][j] -= A.m_rawData[i][j];
@@ -346,8 +331,7 @@ Matrix multiplication THIS * A
 */
 {
   if (m_numColumns != A.m_numRows)
-    throw Kernel::Exception::MisMatch<size_t>(m_numColumns, A.m_numRows,
-                                              "Matrix::operator*(Matrix)");
+    throw Kernel::Exception::MisMatch<size_t>(m_numColumns, A.m_numRows, "Matrix::operator*(Matrix)");
   Matrix<T> X(m_numRows, A.m_numColumns);
   for (size_t i = 0; i < m_numRows; i++) {
     for (size_t j = 0; j < A.m_numColumns; j++) {
@@ -369,8 +353,7 @@ Matrix multiplication THIS * Vec to produce a vec
 */
 {
   if (m_numColumns > Vec.size())
-    throw Kernel::Exception::MisMatch<size_t>(m_numColumns, Vec.size(),
-                                              "Matrix::operator*(m_rawDataec)");
+    throw Kernel::Exception::MisMatch<size_t>(m_numColumns, Vec.size(), "Matrix::operator*(m_rawDataec)");
 
   std::vector<T> Out(m_numRows);
   for (size_t i = 0; i < m_numRows; i++) {
@@ -387,14 +370,11 @@ Matrix multiplication THIS * Vec to produce a vec
 @param out :: result of Matrix(This * Vec)
 @throw MisMatch<size_t> if there is a size mismatch.
 */
-template <typename T>
-void Matrix<T>::multiplyPoint(const std::vector<T> &in,
-                              std::vector<T> &out) const {
+template <typename T> void Matrix<T>::multiplyPoint(const std::vector<T> &in, std::vector<T> &out) const {
   out.resize(m_numRows);
   std::fill(std::begin(out), std::end(out), static_cast<T>(0.0));
   if (m_numColumns > in.size())
-    throw Kernel::Exception::MisMatch<size_t>(m_numColumns, in.size(),
-                                              "Matrix::multiplyPoint(in,out)");
+    throw Kernel::Exception::MisMatch<size_t>(m_numColumns, in.size(), "Matrix::multiplyPoint(in,out)");
   for (size_t i = 0; i < m_numRows; i++) {
     for (size_t j = 0; j < m_numColumns; j++) {
       out[i] += m_rawData[i][j] * in[j];
@@ -412,13 +392,11 @@ Matrix multiplication THIS * V
 */
 {
   if (m_numColumns != 3 || m_numRows > 3)
-    throw Kernel::Exception::MisMatch<size_t>(m_numColumns, 3,
-                                              "Matrix::operator*(m_rawData3D)");
+    throw Kernel::Exception::MisMatch<size_t>(m_numColumns, 3, "Matrix::operator*(m_rawData3D)");
 
   V3D v;
   for (size_t i = 0; i < m_numRows; ++i) {
-    v[i] = m_rawData[i][0] * Vx.X() + m_rawData[i][1] * Vx.Y() +
-           m_rawData[i][2] * Vx.Z();
+    v[i] = m_rawData[i][0] * Vx.X() + m_rawData[i][1] * Vx.Y() + m_rawData[i][2] * Vx.Z();
   }
 
   return v;
@@ -450,8 +428,7 @@ of changing matrix size.
 */
 template <typename T> Matrix<T> &Matrix<T>::operator*=(const Matrix<T> &A) {
   if (m_numColumns != A.m_numRows)
-    throw Kernel::Exception::MisMatch<size_t>(m_numColumns, A.m_numRows,
-                                              "Matrix*=(Matrix<T>)");
+    throw Kernel::Exception::MisMatch<size_t>(m_numColumns, A.m_numRows, "Matrix*=(Matrix<T>)");
   // This construct to avoid the problem of changing size
   *this = this->operator*(A);
   return *this;
@@ -538,8 +515,12 @@ Always returns 0 if the Matrix have different sizes
     for (size_t i = 0; i < m_numRows; i++)
       for (size_t j = 0; j < m_numColumns; j++) {
         const T diff = (m_rawData[i][j] - A.m_rawData[i][j]);
-        if (fabs(diff) > maxDiff)
-          maxDiff = fabs(diff);
+        if (std::isnan(static_cast<double>(diff))) {
+          maxDiff = std::numeric_limits<T>::max();
+        } else {
+          if (fabs(diff) > maxDiff)
+            maxDiff = fabs(diff);
+        }
         if (fabs(m_rawData[i][j]) > maxS)
           maxS = fabs(m_rawData[i][j]);
       }
@@ -634,10 +615,8 @@ Swap rows I and J
 @param RowI :: row I to swap
 @param RowJ :: row J to swap
 */
-template <typename T>
-void Matrix<T>::swapRows(const size_t RowI, const size_t RowJ) {
-  if ((m_numRows * m_numColumns > 0) && RowI < m_numRows && RowJ < m_numRows &&
-      RowI != RowJ) {
+template <typename T> void Matrix<T>::swapRows(const size_t RowI, const size_t RowJ) {
+  if ((m_numRows * m_numColumns > 0) && RowI < m_numRows && RowJ < m_numRows && RowI != RowJ) {
     for (size_t k = 0; k < m_numColumns; k++) {
       T tmp = m_rawData[RowI][k];
       m_rawData[RowI][k] = m_rawData[RowJ][k];
@@ -651,10 +630,8 @@ Swap columns I and J
 @param colI :: col I to swap
 @param colJ :: col J to swap
 */
-template <typename T>
-void Matrix<T>::swapCols(const size_t colI, const size_t colJ) {
-  if ((m_numRows * m_numColumns) > 0 && colI < m_numColumns &&
-      colJ < m_numColumns && colI != colJ) {
+template <typename T> void Matrix<T>::swapCols(const size_t colI, const size_t colJ) {
+  if ((m_numRows * m_numColumns) > 0 && colI < m_numColumns && colJ < m_numColumns && colI != colJ) {
     for (size_t k = 0; k < m_numRows; k++) {
       T tmp = m_rawData[k][colI];
       m_rawData[k][colI] = m_rawData[k][colJ];
@@ -693,8 +670,7 @@ Zeros all the terms outside of the square
     }
   }
 }
-template <typename T>
-void Matrix<T>::setColumn(const size_t nCol, const std::vector<T> &newCol) {
+template <typename T> void Matrix<T>::setColumn(const size_t nCol, const std::vector<T> &newCol) {
   if (nCol >= this->m_numColumns) {
     throw(std::invalid_argument("nCol requested> nCol availible"));
   }
@@ -705,8 +681,7 @@ void Matrix<T>::setColumn(const size_t nCol, const std::vector<T> &newCol) {
     m_rawData[i][nCol] = newCol[i];
   }
 }
-template <typename T>
-void Matrix<T>::setRow(const size_t nRow, const std::vector<T> &newRow) {
+template <typename T> void Matrix<T>::setRow(const size_t nRow, const std::vector<T> &newRow) {
   if (nRow >= this->m_numRows) {
     throw(std::invalid_argument("nRow requested> nRow availible"));
   }
@@ -719,8 +694,7 @@ void Matrix<T>::setRow(const size_t nRow, const std::vector<T> &newRow) {
 }
 
 template <typename T>
-void Matrix<T>::rotate(const double tau, const double s, const int i,
-                       const int j, const int k, const int m)
+void Matrix<T>::rotate(const double tau, const double s, const int i, const int j, const int k, const int m)
 /**
 Applies a rotation to a particular point of tan(theta)=tau.
 Note that you need both sin(theta) and tan(theta) because of
@@ -750,8 +724,7 @@ PRE-multiplies the matrix by it (i.e. D * M).
 {
   if (Dvec.size() != m_numRows) {
     std::ostringstream cx;
-    cx << "Matrix::preMultiplyByDiagonal Size: " << Dvec.size() << " "
-       << m_numRows << " " << m_numColumns;
+    cx << "Matrix::preMultiplyByDiagonal Size: " << Dvec.size() << " " << m_numRows << " " << m_numColumns;
     throw std::runtime_error(cx.str());
   }
   Matrix<T> X(Dvec.size(), m_numColumns);
@@ -774,8 +747,7 @@ POST-multiplies the matrix by it (i.e. M * D).
 {
   if (Dvec.size() != m_numColumns) {
     std::ostringstream cx;
-    cx << "Error Matrix::bDiaognal size:: " << Dvec.size() << " " << m_numRows
-       << " " << m_numColumns;
+    cx << "Error Matrix::bDiaognal size:: " << Dvec.size() << " " << m_numRows << " " << m_numColumns;
     throw std::runtime_error(cx.str());
   }
 
@@ -988,6 +960,77 @@ using LU decomposition
 }
 
 template <typename T>
+void Matrix<T>::invertTridiagonal()
+/**
+Check it's a square tridiagonal matrix with all diagonal elements equal and if
+yes invert the matrix using analytic formula. If not then use standard Invert
+*/
+{
+  bool regular = true;
+  if ((numRows() > 1) && (numCols() > 1)) {
+    if (numRows() == numCols()) {
+      std::vector<T> diagonal = {m_rawData[0][0], m_rawData[1][0]};
+      for (size_t i = 1; i < numRows() && regular; i++) {
+        for (size_t j = 1; i < numCols() && regular; i++) {
+          size_t diff = std::abs(static_cast<int>(i - j));
+          if (diff < 2) {
+            if (std::abs(diagonal[diff] - m_rawData[i][j]) > std::numeric_limits<double>::epsilon()) {
+              regular = false;
+            }
+          } else if (m_rawData[i][j] != 0) {
+            throw std::runtime_error("Matrix is not tridiagonal");
+          }
+        }
+      }
+    } else {
+      regular = false;
+    }
+  }
+  if (regular) {
+    // use analytic expression as described in G Y Hu and R F O'Connell (1996)
+    T scalefactor = numRows() > 1 ? m_rawData[1][0] : 1;
+    *this /= scalefactor;
+    T D = m_rawData[0][0];
+    auto k = static_cast<T>(numRows());
+    for (size_t i = 0; i < numRows(); i++) {
+      for (size_t j = 0; j < numCols(); j++) {
+        T lambda;
+        auto iMinusj = static_cast<T>(i) - static_cast<T>(j);
+        auto iPlusj = static_cast<T>(i) + static_cast<T>(j);
+        if (D >= 2) {
+          m_rawData[i][j] = static_cast<T>(pow(-1.0, i + j));
+          lambda = static_cast<T>(acosh(D / 2));
+        } else if ((D > -2) && (D < 2)) {
+          m_rawData[i][j] = 1;                   // use +1 here instead of the -1 in the paper
+          lambda = static_cast<T>(acos(-D / 2)); // extra minus sign here compared to paper
+        } else {
+          m_rawData[i][j] = -1;
+          lambda = static_cast<T>(acosh(-D / 2));
+        }
+        if (std::abs(D) > 2) {
+          m_rawData[i][j] *= static_cast<T>(cosh((k + 1 - std::abs(iMinusj)) * lambda) -
+                                            cosh((k + 1 - iPlusj - 2) * lambda)); // extra -2 because i and j
+                                                                                  // are 1-based in the paper
+          m_rawData[i][j] /= static_cast<T>(2 * sinh(lambda) * sinh((k + 1) * lambda));
+        } else if (std::abs(D) == 2) {
+          m_rawData[i][j] *=
+              static_cast<T>((2 * k + 2 - std::abs(iMinusj) - iPlusj - 2) * (iPlusj + 2 - std::abs(iMinusj)));
+          m_rawData[i][j] /= static_cast<T>((4 * (k + 1)));
+        } else {
+          m_rawData[i][j] *= static_cast<T>(cos((k + 1 - std::abs(iMinusj)) * lambda) -
+                                            cos((k + 1 - iPlusj - 2) * lambda)); // extra -2 because i and j
+                                                                                 // are 1-based in the paper
+          m_rawData[i][j] /= static_cast<T>(2 * sin(lambda) * sin((k + 1) * lambda));
+        }
+      }
+    }
+    *this /= scalefactor;
+  } else {
+    Invert();
+  }
+}
+
+template <typename T>
 T Matrix<T>::determinant() const
 /**
 Calculate the derminant of the matrix
@@ -995,8 +1038,7 @@ Calculate the derminant of the matrix
 */
 {
   if (m_numRows != m_numColumns)
-    throw Kernel::Exception::MisMatch<size_t>(
-        m_numRows, m_numColumns, "Determinant error :: Matrix is not square");
+    throw Kernel::Exception::MisMatch<size_t>(m_numRows, m_numColumns, "Determinant error :: Matrix is not square");
 
   Matrix<T> Mt(*this); // temp copy
   T D = Mt.factor();
@@ -1016,13 +1058,11 @@ the lower part is zero.
     throw std::runtime_error("Matrix::factor Matrix is not square");
 
   double deter = 1.0;
-  for (int i = 0; i < static_cast<int>(m_numRows) - 1;
-       i++) // loop over each row
+  for (int i = 0; i < static_cast<int>(m_numRows) - 1; i++) // loop over each row
   {
     int jmax = i;
     double Pmax = fabs(m_rawData[i][i]);
-    for (int j = i + 1; j < static_cast<int>(m_numRows);
-         j++) // find max in Row i
+    for (int j = i + 1; j < static_cast<int>(m_numRows); j++) // find max in Row i
     {
       if (fabs(m_rawData[i][j]) > Pmax) {
         Pmax = fabs(m_rawData[i][j]);
@@ -1142,8 +1182,7 @@ divide by pivot.
     }
 
     if (j != imax) {
-      for (int k = 0; k < static_cast<int>(m_numRows);
-           k++) { // Interchange rows
+      for (int k = 0; k < static_cast<int>(m_numRows); k++) { // Interchange rows
         dum = m_rawData[imax][k];
         m_rawData[imax][k] = m_rawData[j][k];
         m_rawData[j][k] = static_cast<T>(dum);
@@ -1246,8 +1285,7 @@ size. Moves the EigenVectors correspondingly
 @param DiagMatrix :: matrix of the EigenValues
 */
 {
-  if (m_numColumns != m_numRows || m_numRows != DiagMatrix.m_numRows ||
-      m_numRows != DiagMatrix.m_numColumns) {
+  if (m_numColumns != m_numRows || m_numRows != DiagMatrix.m_numRows || m_numRows != DiagMatrix.m_numColumns) {
     std::cerr << "Matrix not Eigen Form\n";
     throw(std::invalid_argument(" Matrix is not in an eigenvalue format"));
   }
@@ -1318,31 +1356,24 @@ Attempt to diagonalise the matrix IF symmetric
     }
 
     // Threshold large for first 5 sweeps
-    double tresh =
-        (i < 6) ? 0.2 * sm / static_cast<int>(m_numRows * m_numRows) : 0.0;
+    double tresh = (i < 6) ? 0.2 * sm / static_cast<int>(m_numRows * m_numRows) : 0.0;
 
     for (int ip = 0; ip < static_cast<int>(m_numRows) - 1; ip++) {
       for (int iq = ip + 1; iq < static_cast<int>(m_numRows); iq++) {
         double g = 100.0 * fabs(A.m_rawData[ip][iq]);
         // After 4 sweeps skip if off diagonal small
-        if (i > 6 &&
-            static_cast<float>(fabs(Diag[ip] + g)) ==
-                static_cast<float>(fabs(Diag[ip])) &&
-            static_cast<float>(fabs(Diag[iq] + g)) ==
-                static_cast<float>(fabs(Diag[iq])))
+        if (i > 6 && static_cast<float>(fabs(Diag[ip] + g)) == static_cast<float>(fabs(Diag[ip])) &&
+            static_cast<float>(fabs(Diag[iq] + g)) == static_cast<float>(fabs(Diag[iq])))
           A.m_rawData[ip][iq] = 0;
 
         else if (fabs(A.m_rawData[ip][iq]) > tresh) {
           double tanAngle, cosAngle, sinAngle;
           double h = Diag[iq] - Diag[ip];
-          if (static_cast<float>((fabs(h) + g)) == static_cast<float>(fabs(h)))
-            tanAngle = A.m_rawData[ip][iq] / h; // tanAngle=1/(2theta)
-          else {
-            double theta = 0.5 * h / A.m_rawData[ip][iq];
-            tanAngle = 1.0 / (fabs(theta) + sqrt(1.0 + theta * theta));
-            if (theta < 0.0)
-              tanAngle = -tanAngle;
-          }
+          double cot2Theta = 0.5 * h / A.m_rawData[ip][iq];
+          // tanAngle formula well behaved even if cot2Theta is inf
+          tanAngle = 1.0 / (fabs(cot2Theta) + sqrt(1.0 + pow(cot2Theta, 2)));
+          if (cot2Theta < 0.0)
+            tanAngle = -tanAngle;
           cosAngle = 1.0 / sqrt(1 + tanAngle * tanAngle);
           sinAngle = tanAngle * cosAngle;
           double tau = sinAngle / (1.0 + cosAngle);
@@ -1388,8 +1419,7 @@ bool Matrix<T>::isRotation() const
   if (fabs(this->determinant() - 1) > 1e-5) {
     return false;
   } else {
-    Matrix<T> prod(m_numRows, m_numColumns),
-        ident(m_numRows, m_numColumns, true);
+    Matrix<T> prod(m_numRows, m_numColumns), ident(m_numRows, m_numColumns, true);
     prod = this->operator*(this->Tprime());
     //    std::cout << "Matrix * Matrix' = " << std::endl << prod << '\n';
     return prod.equals(ident, 1e-5);
@@ -1408,8 +1438,7 @@ to be -1
   if (fabs(fabs(this->determinant()) - 1.) > 1e-5) {
     return false;
   } else {
-    Matrix<T> prod(m_numRows, m_numColumns),
-        ident(m_numRows, m_numColumns, true);
+    Matrix<T> prod(m_numRows, m_numColumns), ident(m_numRows, m_numColumns, true);
     prod = this->operator*(this->Tprime());
     return prod.equals(ident, 1e-7);
   }
@@ -1452,8 +1481,7 @@ less then 1e-10 or not square matrix
       throw(std::invalid_argument("Scale is too small"));
     scale[i] = currentScale;
   }
-  Matrix<T> scalingMatrix(m_numRows, m_numColumns),
-      change(m_numRows, m_numColumns, true);
+  Matrix<T> scalingMatrix(m_numRows, m_numColumns), change(m_numRows, m_numColumns, true);
   for (size_t i = 0; i < this->m_numColumns; ++i)
     scalingMatrix[i][i] = static_cast<T>(1.0 / scale[i]);
   *this = this->operator*(scalingMatrix);
@@ -1475,8 +1503,7 @@ Simple print out routine
 }
 
 /** set matrix elements ito random values  in the range from  rMin to rMax*/
-template <typename T>
-void Matrix<T>::setRandom(size_t seed, double rMin, double rMax) {
+template <typename T> void Matrix<T>::setRandom(size_t seed, double rMin, double rMax) {
   MersenneTwister rng(seed, rMin, rMax);
 
   for (size_t i = 0; i < m_numRows; i++) {
@@ -1542,8 +1569,7 @@ Convert the matrix into a simple linear string expression
  * @param matrix :: Matrix to write out
  * @return The output stream (of)
  */
-template <typename T>
-std::ostream &operator<<(std::ostream &os, const Matrix<T> &matrix) {
+template <typename T> std::ostream &operator<<(std::ostream &os, const Matrix<T> &matrix) {
   dumpToStream(os, matrix, ',');
   return os;
 }
@@ -1555,9 +1581,7 @@ std::ostream &operator<<(std::ostream &os, const Matrix<T> &matrix) {
  * @param matrix :: Matrix to write out
  * @param delimiter :: A character to use as delimiter for the string
  */
-template <typename T>
-void dumpToStream(std::ostream &os, const Kernel::Matrix<T> &matrix,
-                  const char delimiter) {
+template <typename T> void dumpToStream(std::ostream &os, const Kernel::Matrix<T> &matrix, const char delimiter) {
   size_t nrows(matrix.numRows()), ncols(matrix.numCols());
   os << "Matrix(" << nrows << delimiter << ncols << ")";
   for (size_t i = 0; i < nrows; ++i) {
@@ -1576,8 +1600,7 @@ void dumpToStream(std::ostream &os, const Kernel::Matrix<T> &matrix,
  * @param in :: An object to fill
  * @returns A reference to the stream
  */
-template <typename T>
-std::istream &operator>>(std::istream &is, Kernel::Matrix<T> &in) {
+template <typename T> std::istream &operator>>(std::istream &is, Kernel::Matrix<T> &in) {
   fillFromStream(is, in, ',');
   return is;
 }
@@ -1590,9 +1613,7 @@ std::istream &operator>>(std::istream &is, Kernel::Matrix<T> &in) {
  * @param in :: An Matrix object to fill
  * @param delimiter :: A single character separator that delimits the entries
  */
-template <typename T>
-void fillFromStream(std::istream &is, Kernel::Matrix<T> &in,
-                    const char delimiter) {
+template <typename T> void fillFromStream(std::istream &is, Kernel::Matrix<T> &in, const char delimiter) {
   // Stream should start with Matrix(
   char dump;
   std::string start(7, ' ');
@@ -1600,8 +1621,7 @@ void fillFromStream(std::istream &is, Kernel::Matrix<T> &in,
     is >> dump;
     start[i] = dump;
     if (!is)
-      throw std::invalid_argument(
-          "Unexpected character when reading Matrix from stream.");
+      throw std::invalid_argument("Unexpected character when reading Matrix from stream.");
   }
   if (start != "Matrix(")
     throw std::invalid_argument("Incorrect input format for Matrix stream.");
@@ -1633,9 +1653,7 @@ void fillFromStream(std::istream &is, Kernel::Matrix<T> &in,
       auto value = boost::lexical_cast<T>(value_str);
       in.m_rawData[row][col] = value;
     } catch (boost::bad_lexical_cast &) {
-      throw std::invalid_argument(
-          "Unexpected type found while reading Matrix from stream: \"" +
-          value_str + "\"");
+      throw std::invalid_argument("Unexpected type found while reading Matrix from stream: \"" + value_str + "\"");
     }
     ++col;
     if (col == ncols) // New row
@@ -1661,33 +1679,20 @@ template class KERNEL_MATRIX_SYMBOL_DLL Matrix<double>;
 template class KERNEL_MATRIX_SYMBOL_DLL Matrix<int>;
 template class KERNEL_MATRIX_SYMBOL_DLL Matrix<float>;
 
-template MANTID_KERNEL_DLL std::ostream &operator<<(std::ostream &,
-                                                    const DblMatrix &);
-template MANTID_KERNEL_DLL void dumpToStream(std::ostream &, const DblMatrix &,
-                                             const char);
-template MANTID_KERNEL_DLL std::istream &operator>>(std::istream &,
-                                                    DblMatrix &);
-template MANTID_KERNEL_DLL void fillFromStream(std::istream &, DblMatrix &,
-                                               const char);
+template MANTID_KERNEL_DLL std::ostream &operator<<(std::ostream &, const DblMatrix &);
+template MANTID_KERNEL_DLL void dumpToStream(std::ostream &, const DblMatrix &, const char);
+template MANTID_KERNEL_DLL std::istream &operator>>(std::istream &, DblMatrix &);
+template MANTID_KERNEL_DLL void fillFromStream(std::istream &, DblMatrix &, const char);
 
-template MANTID_KERNEL_DLL std::ostream &operator<<(std::ostream &,
-                                                    const Matrix<float> &);
-template MANTID_KERNEL_DLL void dumpToStream(std::ostream &,
-                                             const Matrix<float> &, const char);
-template MANTID_KERNEL_DLL std::istream &operator>>(std::istream &,
-                                                    Matrix<float> &);
-template MANTID_KERNEL_DLL void fillFromStream(std::istream &, Matrix<float> &,
-                                               const char);
+template MANTID_KERNEL_DLL std::ostream &operator<<(std::ostream &, const Matrix<float> &);
+template MANTID_KERNEL_DLL void dumpToStream(std::ostream &, const Matrix<float> &, const char);
+template MANTID_KERNEL_DLL std::istream &operator>>(std::istream &, Matrix<float> &);
+template MANTID_KERNEL_DLL void fillFromStream(std::istream &, Matrix<float> &, const char);
 
-template MANTID_KERNEL_DLL std::ostream &operator<<(std::ostream &,
-                                                    const IntMatrix &);
-template MANTID_KERNEL_DLL void dumpToStream(std::ostream &, const IntMatrix &,
-                                             const char);
-template MANTID_KERNEL_DLL std::istream &operator>>(std::istream &,
-                                                    IntMatrix &);
-template MANTID_KERNEL_DLL void fillFromStream(std::istream &, IntMatrix &,
-                                               const char);
+template MANTID_KERNEL_DLL std::ostream &operator<<(std::ostream &, const IntMatrix &);
+template MANTID_KERNEL_DLL void dumpToStream(std::ostream &, const IntMatrix &, const char);
+template MANTID_KERNEL_DLL std::istream &operator>>(std::istream &, IntMatrix &);
+template MANTID_KERNEL_DLL void fillFromStream(std::istream &, IntMatrix &, const char);
 ///\endcond TEMPLATE
 
-} // namespace Kernel
-} // namespace Mantid
+} // namespace Mantid::Kernel

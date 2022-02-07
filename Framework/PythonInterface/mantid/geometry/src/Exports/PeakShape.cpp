@@ -18,12 +18,9 @@ void export_PeakShape() {
   register_ptr_to_python<Mantid::Geometry::PeakShape_sptr>();
 
   class_<PeakShape, boost::noncopyable>("PeakShape", no_init)
-      .def("toJSON", &PeakShape::toJSON, arg("self"),
-           "Serialize object to JSON")
-      .def("shapeName", &PeakShape::shapeName, arg("self"),
-           "Shape name for type of shape")
+      .def("toJSON", &PeakShape::toJSON, arg("self"), "Serialize object to JSON")
+      .def("shapeName", &PeakShape::shapeName, arg("self"), "Shape name for type of shape")
       .def("algorithmVersion", &PeakShape::algorithmVersion, arg("self"),
            "Number of source integration algorithm version")
-      .def("algorithmName", &PeakShape::algorithmName, arg("self"),
-           "Name of source integration algorithm");
+      .def("algorithmName", &PeakShape::algorithmName, arg("self"), "Name of source integration algorithm");
 }

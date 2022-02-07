@@ -5,8 +5,10 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 from contextlib import contextmanager
+import os
 
 import mantid.simpleapi as mantid
+from mantid.kernel import logger
 
 from isis_powder.routines import common, instrument_settings
 from isis_powder.abstract_inst import AbstractInst
@@ -33,6 +35,9 @@ class Pearl(AbstractInst):
 
     def focus(self, **kwargs):
         with self._apply_temporary_inst_settings(kwargs, kwargs.get("run_number")):
+            if self._inst_settings.perform_atten:
+                if not hasattr(self._inst_settings, 'attenuation_file'):
+                    raise RuntimeError("Attenuation cannot be applied because attenuation_file not specified")
             return self._focus(run_number_string=self._inst_settings.run_number,
                                do_absorb_corrections=self._inst_settings.absorb_corrections,
                                do_van_normalisation=self._inst_settings.van_norm)
@@ -40,6 +45,7 @@ class Pearl(AbstractInst):
     def create_vanadium(self, **kwargs):
         kwargs[
             "perform_attenuation"] = None  # Hard code this off as we do not need an attenuation file
+
         with self._apply_temporary_inst_settings(kwargs, kwargs.get("run_in_cycle")):
             if str(self._inst_settings.tt_mode).lower() == "all":
                 for new_tt_mode in ["tt35", "tt70", "tt88"]:
@@ -84,35 +90,12 @@ class Pearl(AbstractInst):
     @contextmanager
     def _apply_temporary_inst_settings(self, kwargs, run):
 
-        # set temporary settings, Check has to occur before updating attributes,
-        # otherwise it would assumed the longmode vars are cached.
-        if not self._inst_settings.long_mode == bool(kwargs.get("long_mode")):
-            self._inst_settings.update_attributes(kwargs=kwargs)
-            self._switch_long_mode_inst_settings(kwargs.get("long_mode"))
-        else:
-            self._inst_settings.update_attributes(kwargs=kwargs)
+        self._inst_settings.update_attributes(kwargs=kwargs)
+        self._switch_long_mode_inst_settings(self._inst_settings.long_mode)
 
-        # check that cache exists
-        run_number_string_key = self._generate_run_details_fingerprint(
-            run, self._inst_settings.file_extension, self._inst_settings.tt_mode)
-        if run_number_string_key in self._cached_run_details:
-            # update spline path of cache
-
-            add_spline = [self._inst_settings.tt_mode, "long"] if self._inst_settings.long_mode else \
-                [self._inst_settings.tt_mode]
-
-            self._cached_run_details[run_number_string_key].update_spline(
-                self._inst_settings, add_spline)
         yield
         # reset instrument settings
         self._inst_settings = copy.deepcopy(self._default_inst_settings)
-
-        # reset spline path
-        add_spline = [self._inst_settings.tt_mode, "long"] if self._inst_settings.long_mode else \
-            [self._inst_settings.tt_mode]
-
-        self._cached_run_details[run_number_string_key].update_spline(self._inst_settings,
-                                                                      add_spline)
 
     def _run_create_vanadium(self):
         # Provides a minimal wrapper so if we have tt_mode 'all' we can loop round
@@ -120,8 +103,12 @@ class Pearl(AbstractInst):
                                      do_absorb_corrections=self._inst_settings.absorb_corrections)
 
     def _get_run_details(self, run_number_string):
+        tt_mode_string = self._inst_settings.tt_mode
+        if self._inst_settings.tt_mode == "custom":
+            grouping_file_name = pearl_algs._pearl_get_tt_grouping_file_name(self._inst_settings)
+            tt_mode_string += os.path.splitext(os.path.basename(grouping_file_name))[0]
         run_number_string_key = self._generate_run_details_fingerprint(
-            run_number_string, self._inst_settings.file_extension, self._inst_settings.tt_mode)
+            run_number_string, self._inst_settings.file_extension, tt_mode_string, self._inst_settings.long_mode)
         if run_number_string_key in self._cached_run_details:
             return self._cached_run_details[run_number_string_key]
 
@@ -175,16 +162,35 @@ class Pearl(AbstractInst):
         return new_workspace_names
 
     def _get_instrument_bin_widths(self):
-        return self._inst_settings.focused_bin_widths
+        if self._inst_settings.tt_mode=="custom":
+            return self._inst_settings.custom_focused_bin_widths
+        else:
+            return self._inst_settings.focused_bin_widths
 
     def _output_focused_ws(self, processed_spectra, run_details, output_mode=None):
         if not output_mode:
             output_mode = self._inst_settings.focus_mode
 
+        attenuation_path = None
         if self._inst_settings.perform_atten:
-            attenuation_path = self._inst_settings.attenuation_file_path
-        else:
-            attenuation_path = None
+            name_key='name'
+            path_key='path'
+            if isinstance(self._inst_settings.attenuation_files, str):
+                self._inst_settings.attenuation_files = eval(self._inst_settings.attenuation_files)
+            atten_file_found = False
+            for atten_file in self._inst_settings.attenuation_files:
+                if any (required_key not in atten_file for required_key in [name_key,path_key]):
+                    logger.warning("A dictionary in attenuation_files has been ignored because "
+                                   f"it doesn't contain both {name_key} and {path_key} entries")
+                elif atten_file[name_key] == self._inst_settings.attenuation_file:
+                    if atten_file_found:
+                        raise RuntimeError(
+                            f"Duplicate name {self._inst_settings.attenuation_file} found in attenuation_files")
+                    attenuation_path = atten_file[path_key]
+                    atten_file_found = True
+            if attenuation_path is None:
+                raise RuntimeError(
+                    f"Unknown attenuation_file {self._inst_settings.attenuation_file} specified for attenuation")
 
         output_spectra = \
             pearl_output.generate_and_save_focus_output(self, processed_spectra=processed_spectra,
@@ -200,8 +206,12 @@ class Pearl(AbstractInst):
         return grouped_d_spacing, None
 
     def _crop_banks_to_user_tof(self, focused_banks):
-        return common.crop_banks_using_crop_list(focused_banks,
-                                                 self._inst_settings.tof_cropping_values)
+        if self._inst_settings.tt_mode=="custom":
+            return common.crop_banks_using_crop_list(focused_banks,
+                                                     self._inst_settings.custom_tof_cropping_values)
+        else:
+            return common.crop_banks_using_crop_list(focused_banks,
+                                                     self._inst_settings.tof_cropping_values)
 
     def _crop_raw_to_expected_tof_range(self, ws_to_crop):
         out_ws = common.crop_in_tof(ws_to_crop=ws_to_crop,
@@ -235,4 +245,4 @@ class Pearl(AbstractInst):
         self._inst_settings.update_attributes(
             advanced_config=pearl_advanced_config.get_long_mode_dict(long_mode_on))
         if long_mode_on:
-            setattr(self._inst_settings, "perform_atten", False)
+            self._inst_settings.update_attributes(kwargs={'perform_attenuation': False})

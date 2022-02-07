@@ -21,7 +21,7 @@ Structure
 :code:`GUI`
 ###########
 
-This directory contains all of the GUI code for the interface. Each separate component e.g. the Experiment tab, has its own subdirectory. Each of these components has its own view and presenter. There is also a :code:`Common` subdirectory for GUI components/interfaces common to more than one widget (e.g. the :code:`IMessageHandler` interface).
+This directory contains all of the GUI code for the interface. Each separate component e.g. the Experiment tab, has its own subdirectory. Each of these components has its own view and presenter. There is also a :code:`Common` subdirectory for GUI components/interfaces common to more than one widget (e.g. the :code:`IReflMessageHandler` interface).
 
 Briefly the structure is as follows:
 
@@ -37,7 +37,7 @@ Briefly the structure is as follows:
 .. figure:: images/ISISReflectometryInterface_structure.png
    :figwidth: 70%
    :align: center
-    
+
 :code:`Reduction`
 #################
 
@@ -60,7 +60,7 @@ Reduction back-end
 
 The back-end is primarily a set of algorithms, with the entry points from the GUI being :ref:`algm-ReflectometryISISLoadAndProcess` (for reducing a row) and :ref:`algm-Stitch1DMany` (for post-processing a group). Any additional processing should be added to these algorithms, or a new wrapper algorithm could be added if appropriate (this might be necessary in future if post-processing will involve more than just stitching).
 
-The :code:`BatchPresenter` is the main coordinator for executing a reduction. It uses the :code:`BatchJobRunner`, which converts the reduction configuration to a format appropriate for the algorithms. The conversion functions are in files called :code:`RowProcessingAlgorithm` and :code:`GroupProcessingAlgorithm`, and any algorithm-specific code should be kept to these files.
+The :code:`BatchPresenter` is the main coordinator for executing a reduction. It uses the :code:`BatchJobManager`, which converts the reduction configuration to a format appropriate for the algorithms. The conversion functions are in files called :code:`RowProcessingAlgorithm` and :code:`GroupProcessingAlgorithm`, and any algorithm-specific code should be kept to these files.
 
 Unfortunately the whole batch cannot be farmed off to a single algorithm because we need to update the GUI after each row completes, and we must be able to interrupt processing so that we can cancel a large batch operation. We also need to know whether rows completed successfully before we can set up the group post-processing algorithms. Some queue management is therefore done by the :code:`BatchPresenter`, with the help of the :code:`BatchAlgorithmRunner`.
 
@@ -103,7 +103,7 @@ Avoid use of Qt types outside of Qt classes
 
 Qt-specific types such as :code:`QString`, :code:`QColor` and subclasses of :code:`QWidget` should be kept out of the presenters and models. This avoids confusion over which types should be used and a potentially messy situation where we are always having to convert back and forth between Qt types and :code:`std` types. It also avoids an over-reliance on Qt, so that the view could be swapped out in future to one using a different framework, with little or no changes to the presenters and models.
 
-To help make it clear where Qt is used, all classes that use Qt (namely the views, along with a few supporting classes which wrap or subclass :code:`QObject`) are named with a :code:`Qt` prefix in their file and class names. Conversion from types like :code:`QString` to :code:`std::string` is performed within the views, and no Qt types are present in their interfaces. 
+To help make it clear where Qt is used, all classes that use Qt (namely the views, along with a few supporting classes which wrap or subclass :code:`QObject`) are named with a :code:`Qt` prefix in their file and class names. Conversion from types like :code:`QString` to :code:`std::string` is performed within the views, and no Qt types are present in their interfaces.
 
 Keep the reduction configuration up to date
 ###########################################
@@ -186,13 +186,13 @@ Let's take the :code:`Event` component as an example.
 Dependency injection
 ####################
 
-A simple example of `Dependency inversion`_ is in the use of an :code:`IMessageHandler` interface to provide a service to display messages to the user. These messages must be displayed by a Qt view. Rather than each view having to implement this, we use one object (in this case the :code:`QtMainWindowView`) to implement this functionality and inject it as an :code:`IMessageHandler` to all of the presenters that need it.
+A simple example of `Dependency inversion`_ is in the use of an :code:`IReflMessageHandler` interface to provide a service to display messages to the user. These messages must be displayed by a Qt view. Rather than each view having to implement this, we use one object (in this case the :code:`QtMainWindowView`) to implement this functionality and inject it as an :code:`IReflMessageHandler` to all of the presenters that need it.
 
-- The :code:`IMessageHandler` interface defines the functions for displaying messages:
+- The :code:`IReflMessageHandler` interface defines the functions for displaying messages:
 
   .. code-block:: c++
 
-    class IMessageHandler {
+    class IReflMessageHandler {
     public:
       virtual void giveUserCritical(const std::string &prompt,
                                     const std::string &title) = 0;
@@ -258,7 +258,7 @@ The :code:`MainWindowPresenter` constructs the child Batch presenters on demand.
     - it returns the result as an :code:`IBatchPresenter`.
 
   - The :code:`IBatchPresenter` is then added to the :code:`MainWindowPresenter`'s list of child presenters.
-    
+
 The :code:`MainWindowPresenter` therefore creates, and owns, the :code:`BatchPresenter`, but does not need to know its concrete type. In turn, the :code:`BatchPresenterFactory` creates the child :code:`EventPresenter` and injects this into the :code:`BatchPresenter`, also without knowing the child's concrete type. As mentioned in the `Dependency inversion`_ section, this helps testability by allowing us to replace the real dependencies with mock objects.
 
 Testing
@@ -284,7 +284,7 @@ Let's look at the presenter-view interactions in the :code:`Event` component as 
     class MockEventView : public IEventView {
     public:
       MOCK_METHOD1(subscribe, void(EventViewSubscriber *));
-  
+
 - The presenter then uses :code:`EXPECT_CALL` to check that the method was called. Note that for :code:`subscribe` it is difficult to check that the correct presenter pointer is passed because of the two-way dependency in the construction, so we just check that it is called with any argument; for other methods we typically want to check the exact arguments.
 
   .. code-block:: c++
@@ -310,7 +310,7 @@ Let's look at the presenter-view interactions in the :code:`Event` component as 
                 UniformSlicingByNumberOfSlices(expectedSliceCount));
       verifyAndClear();
     }
-  
+
   .. code-block:: c++
 
     void testChangingSliceCountNotifiesMainPresenter() {

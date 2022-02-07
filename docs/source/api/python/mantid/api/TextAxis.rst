@@ -8,7 +8,7 @@ This is a Python binding to the C++ class Mantid::API::TextAxis.
 
 .. module:`mantid.api`
 
-.. autoclass:: mantid.api.TextAxis 
+.. autoclass:: mantid.api.TextAxis
     :members:
     :undoc-members:
     :inherited-members:

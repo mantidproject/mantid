@@ -18,7 +18,7 @@ Instructions
 The processing instructions consist of a list of numbers that refer to spectra 0 to n-1 and various operators ',',':','+' and '-'.
 
 To remove spectra, list those you want to keep. The ':' symbol indicates a continuous range of spectra, sparing you the need to list every spectrum.
-For example if you have 100 spectra (0 to 99) and want to remove the first and last 10 spectra along with spectrum 12, 
+For example if you have 100 spectra (0 to 99) and want to remove the first and last 10 spectra along with spectrum 12,
 you would use processing instructions '10,13:89'. This says keep spectrum 10 along with spectra 13 to 89 inclusive.
 
 To add spectra, use '+' to add two spectra or '-' to add a range. For example you may with to add spectrum 10 to 12 and ignore the rest, you would use '10+12'.
@@ -43,7 +43,7 @@ Usage
    print(ws2.readY(0))
    print(ws2.readY(1))
    print(ws2.readY(2))
-   
+
 Output:
 
 .. testoutput:: ExPerformIndexOperationsSimple

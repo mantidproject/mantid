@@ -11,15 +11,15 @@ Description
 
 This algorithm calculates and subtracts the background from a given workspace using the spectrum ranges in :literal:`ProcessingInstructions`. If no spectrum ranges are given the whole input workspace is used.
 
-The background can be calculated using three methods. **PerDetectorAverage** which groups the background spectrum together and divides it by the total number of spectra. 
-This is done using :ref:`algm-GroupDetectors`. This is then subtracted from the input workspace. **Polynomial** uses :ref:`algm-Transpose` so the spectrum numbers 
-are in the X (horizontal) axis and TOF channels are the vertical axis. Then the background is calculated by fitting a polynomial of the given degree to each TOF using the background spectra given 
-in :literal:`InputWorkspaceIndexSet`. This is done using :ref:`algm-CalculatePolynomialBackground`. The minimizer used is ‘Levenberg-Marquardt’ and the value of CostFunction is passed to :ref:`algm-CalculatePolynomialBackground` as-is. 
-The default option for the CostFunction is ‘Least squares’ which uses the histogram errors as weights. This might not be desirable, e.g. when there are bins with zero counts and zero errors. 
-An ‘Unweighted least squares’ option is available to deal with such cases. Once this has been done the workspace is then transposed again and subtracted from the input workspace. 
-**AveragePixelFit** uses :ref:`algm-RefRoi` to sum the background region on either side of the peak and finding average of these regions. Then the average is subtracted from 
+The background can be calculated using three methods. **PerDetectorAverage** which groups the background spectrum together and divides it by the total number of spectra.
+This is done using :ref:`algm-GroupDetectors`. This is then subtracted from the input workspace. **Polynomial** uses :ref:`algm-Transpose` so the spectrum numbers
+are in the X (horizontal) axis and TOF channels are the vertical axis. Then the background is calculated by fitting a polynomial of the given degree to each TOF using the background spectra given
+in :literal:`InputWorkspaceIndexSet`. This is done using :ref:`algm-CalculatePolynomialBackground`. The minimizer used is ‘Levenberg-Marquardt’ and the value of CostFunction is passed to :ref:`algm-CalculatePolynomialBackground` as-is.
+The default option for the CostFunction is ‘Least squares’ which uses the histogram errors as weights. This might not be desirable, e.g. when there are bins with zero counts and zero errors.
+An ‘Unweighted least squares’ option is available to deal with such cases. Once this has been done the workspace is then transposed again and subtracted from the input workspace.
+**AveragePixelFit** uses :ref:`algm-RefRoi` to sum the background region on either side of the peak and finding average of these regions. Then the average is subtracted from
 the sum of the whole region of interest of the detector. It takes the background range from the :literal:`ProcessingInstructions` and the :literal:`PeakRange` which is the range of pixels containing the peak.
-Note when using the average pixel fit method the background must only be one region either side of the peak. If any more regions are given the background will be taken as all the spectra between the highest and lowest spectra entered excluding the peak. 
+Note when using the average pixel fit method the background must only be one region either side of the peak. If any more regions are given the background will be taken as all the spectra between the highest and lowest spectra entered excluding the peak.
 This is done using :ref:`algm-LRSubtractAverageBackground`.
 
 Usage
@@ -34,7 +34,7 @@ Usage
    dataX = [1, 2, 3, 4, 5]
    background = [2, 2, 2, 2, 2, 2, 2, 2, 2, 2]
    peak = [5, 5, 5, 5, 5]
-   dataY = background + peak + background 
+   dataY = background + peak + background
    #workspace has a background of 2 and a peak of 5 in the 2nd index
    ws = CreateWorkspace(dataX, dataY, NSpec = 5)
 
@@ -50,7 +50,7 @@ Output:
 .. testoutput:: ExPerDetAve
 
    Peak height with background: 5.0
-   Background subtracted peak height: 3.0 
+   Background subtracted peak height: 3.0
 
 **Example - Subtracting background using Polynomial:**
 

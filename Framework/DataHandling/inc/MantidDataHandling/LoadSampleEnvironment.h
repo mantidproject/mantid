@@ -42,9 +42,7 @@ public:
     return {"CopySample", "SetSampleMaterial", "LoadSampleShape"};
   }
   /// Algorithm's category for identification overriding a virtual method
-  const std::string category() const override {
-    return "DataHandling\\Instrument";
-  }
+  const std::string category() const override { return "DataHandling\\Instrument"; }
   std::map<std::string, std::string> validateInputs() override;
 
 private:
@@ -52,12 +50,12 @@ private:
   void init() override;
   void exec() override;
 
-  void loadEnvironmentFromSTL(const std::string filename, API::Sample &sample,
-                              const bool add, std::string debugString);
+  void loadEnvironmentFromSTL(const std::string &filename, API::Sample &sample, const bool add,
+                              std::string debugString);
 
-  void loadEnvironmentFrom3MF(API::MatrixWorkspace_const_sptr inputWS,
-                              const std::string filename, API::Sample &sample,
-                              const bool add, std::string debugString);
+  void loadEnvironmentFrom3MF([[maybe_unused]] const API::MatrixWorkspace_const_sptr &inputWS,
+                              [[maybe_unused]] const std::string &filename, [[maybe_unused]] API::Sample &sample,
+                              [[maybe_unused]] const bool add, std::string &debugString);
 };
 
 } // end namespace DataHandling

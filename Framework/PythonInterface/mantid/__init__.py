@@ -52,6 +52,9 @@ def _bin_dirs():
     # conda layout
     yield os.path.dirname(sys.executable)
 
+    # conda windows layout
+    yield os.path.join(os.path.dirname(sys.executable), 'Library', 'bin')
+
     # iterate over the PYTHONPATH, to scan all possible bin dirs
     for path in sys.path:
         yield path
@@ -81,14 +84,14 @@ site.addsitedir(_bindir)
 
 try:
     # Flag indicating whether mantidplot layer is loaded.
-    import _qti
+    import _qti  # noqa: F401
 
     __gui__ = True
 except ImportError:
     __gui__ = False
 
 # Set deprecation warnings back to default (they are ignored in 2.7)
-import warnings as _warnings
+import warnings as _warnings  # noqa: E402
 
 # Default we see everything
 _warnings.filterwarnings("default", category=DeprecationWarning,
@@ -102,16 +105,17 @@ _warnings.filterwarnings("ignore", category=DeprecationWarning,
 # Load all non-plugin subpackages that contain a C-extension. The boost.python
 # registry will be missing entries if all are not loaded.
 ###############################################################################
-from mantid import kernel as _kernel
-from mantid import api as _api
-from mantid import geometry as _geometry
-from mantid import dataobjects as _dataobjects
+from mantid import kernel as _kernel  # noqa: F401, E402
+from mantid import api as _api  # noqa: F401, E402
+from mantid import geometry as _geometry  # noqa: F401, E402
+from mantid import dataobjects as _dataobjects  # noqa: F401, E402
 
 # Make the aliases from each module accessible in the mantid namespace
-from mantid.kernel._aliases import *
-from mantid.api._aliases import *
+from mantid.kernel._aliases import *  # noqa: F401, E402
+from mantid.api._aliases import *  # noqa: F401, E402
 
-# Make the version string accessible in the standard way
-from mantid.kernel import version_str as _version_str
+# Make the version string and info accessible in the standard way
+from mantid.kernel import version_str as _version_str  # noqa: E402
+from mantid.kernel import version    # noqa: F401, E402
 
 __version__ = _version_str()

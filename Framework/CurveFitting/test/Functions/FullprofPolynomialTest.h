@@ -19,9 +19,7 @@ class FullprofPolynomialTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static FullprofPolynomialTest *createSuite() {
-    return new FullprofPolynomialTest();
-  }
+  static FullprofPolynomialTest *createSuite() { return new FullprofPolynomialTest(); }
   static void destroySuite(FullprofPolynomialTest *suite) { delete suite; }
 
   void test_category() {
@@ -39,15 +37,13 @@ public:
   void test_negative() {
     FullprofPolynomial tofbkgd;
     tofbkgd.initialize();
-    TS_ASSERT_THROWS(tofbkgd.setAttributeValue("n", -3),
-                     const std::invalid_argument &);
+    TS_ASSERT_THROWS(tofbkgd.setAttributeValue("n", -3), const std::invalid_argument &);
   }
 
   void test_zero() {
     FullprofPolynomial tofbkgd;
     tofbkgd.initialize();
-    TS_ASSERT_THROWS(tofbkgd.setAttributeValue("n", 0),
-                     const std::runtime_error &);
+    TS_ASSERT_THROWS(tofbkgd.setAttributeValue("n", 0), const std::runtime_error &);
   }
 
   void test_calculate() {

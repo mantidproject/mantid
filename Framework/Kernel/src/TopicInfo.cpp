@@ -9,8 +9,9 @@
 #include "MantidKernel/Logger.h"
 #include <Poco/DOM/Element.h>
 
-namespace Mantid {
-namespace Kernel {
+#include <utility>
+
+namespace Mantid::Kernel {
 
 namespace {
 // static logger object
@@ -38,10 +39,8 @@ TopicInfo::TopicInfo(InstrumentInfo *inst, const Poco::XML::Element *elem) {
   m_name = elem->getAttribute("name");
 
   if (m_name.empty())
-    g_log.warning()
-        << "Kafka topic provided without a suitable name for instrument "
-        << inst->name()
-        << ". No attempts will be made to connect to this topic." << std::endl;
+    g_log.warning() << "Kafka topic provided without a suitable name for instrument " << inst->name()
+                    << ". No attempts will be made to connect to this topic." << std::endl;
 
   std::string type = elem->getAttribute("type");
 
@@ -56,14 +55,11 @@ TopicInfo::TopicInfo(InstrumentInfo *inst, const Poco::XML::Element *elem) {
   else if (type == "monitor")
     m_type = TopicType::Monitor;
   else
-    g_log.warning()
-        << "Kafka topic provided without a suitable type for instrument "
-        << inst->name()
-        << ". No attempts will be made to connect to this topic." << std::endl;
+    g_log.warning() << "Kafka topic provided without a suitable type for instrument " << inst->name()
+                    << ". No attempts will be made to connect to this topic." << std::endl;
 }
 
-TopicInfo::TopicInfo(const std::string &name, TopicType type)
-    : m_name(name), m_type(type) {}
+TopicInfo::TopicInfo(std::string name, TopicType type) : m_name(std::move(name)), m_type(type) {}
 
 /**
  * Prints the listener to the stream.
@@ -77,5 +73,4 @@ std::ostream &operator<<(std::ostream &buffer, const TopicInfo &topic) {
          << ")";
   return buffer;
 }
-} // namespace Kernel
-} // namespace Mantid
+} // namespace Mantid::Kernel

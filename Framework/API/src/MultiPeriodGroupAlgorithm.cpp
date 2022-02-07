@@ -10,13 +10,11 @@
 
 using namespace Mantid::Kernel;
 
-namespace Mantid {
-namespace API {
+namespace Mantid::API {
 //----------------------------------------------------------------------------------------------
 /** Constructor
  */
-MultiPeriodGroupAlgorithm::MultiPeriodGroupAlgorithm()
-    : m_worker(new MultiPeriodGroupWorker) {}
+MultiPeriodGroupAlgorithm::MultiPeriodGroupAlgorithm() : m_worker(new MultiPeriodGroupWorker) {}
 
 /** Check the input workspace properties for groups.
  *
@@ -76,5 +74,4 @@ bool MultiPeriodGroupAlgorithm::processGroups() {
   return result;
 }
 
-} // namespace API
-} // namespace Mantid
+} // namespace Mantid::API

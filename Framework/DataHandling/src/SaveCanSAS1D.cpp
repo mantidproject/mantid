@@ -59,8 +59,7 @@ using namespace Mantid::Kernel;
 using namespace Mantid::Geometry;
 using namespace Mantid::API;
 
-namespace Mantid {
-namespace DataHandling {
+namespace Mantid::DataHandling {
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(SaveCanSAS1D)
@@ -68,12 +67,10 @@ DECLARE_ALGORITHM(SaveCanSAS1D)
 /// Overwrites Algorithm method.
 void SaveCanSAS1D::init() {
   declareProperty(
-      std::make_unique<API::WorkspaceProperty<>>(
-          "InputWorkspace", "", Kernel::Direction::Input,
-          std::make_shared<API::WorkspaceUnitValidator>("MomentumTransfer")),
+      std::make_unique<API::WorkspaceProperty<>>("InputWorkspace", "", Kernel::Direction::Input,
+                                                 std::make_shared<API::WorkspaceUnitValidator>("MomentumTransfer")),
       "The input workspace, which must be in units of Q");
-  declareProperty(std::make_unique<API::FileProperty>(
-                      "Filename", "", API::FileProperty::Save, ".xml"),
+  declareProperty(std::make_unique<API::FileProperty>("Filename", "", API::FileProperty::Save, ".xml"),
                   "The name of the xml file to save");
 
   std::vector<std::string> radiation_source{"Spallation Neutron Source",
@@ -87,10 +84,8 @@ void SaveCanSAS1D::init() {
                                             "x-ray",
                                             "muon",
                                             "electron"};
-  declareProperty(
-      "RadiationSource", "Spallation Neutron Source",
-      std::make_shared<Kernel::StringListValidator>(radiation_source),
-      "The type of radiation used.");
+  declareProperty("RadiationSource", "Spallation Neutron Source",
+                  std::make_shared<Kernel::StringListValidator>(radiation_source), "The type of radiation used.");
   declareProperty("Append", false,
                   "Selecting append allows the workspace to "
                   "be added to an existing canSAS 1-D file as "
@@ -109,12 +104,9 @@ void SaveCanSAS1D::init() {
       "Flat plate",
       "Disc",
   };
-  declareProperty(
-      "Geometry", "Disc",
-      std::make_shared<Kernel::StringListValidator>(collimationGeometry),
-      "The geometry type of the collimation.");
-  auto mustBePositiveOrZero =
-      std::make_shared<Kernel::BoundedValidator<double>>();
+  declareProperty("Geometry", "Disc", std::make_shared<Kernel::StringListValidator>(collimationGeometry),
+                  "The geometry type of the collimation.");
+  auto mustBePositiveOrZero = std::make_shared<Kernel::BoundedValidator<double>>();
   mustBePositiveOrZero->setLower(0);
   declareProperty("SampleHeight", 0.0, mustBePositiveOrZero,
                   "The height of the collimation element in mm. If specified "
@@ -135,10 +127,8 @@ void SaveCanSAS1D::init() {
  *  @param propertyValue :: value  of the property
  *  @param perioidNum :: period number
  */
-void SaveCanSAS1D::setOtherProperties(API::IAlgorithm *alg,
-                                      const std::string &propertyName,
-                                      const std::string &propertyValue,
-                                      int perioidNum) {
+void SaveCanSAS1D::setOtherProperties(API::IAlgorithm *alg, const std::string &propertyName,
+                                      const std::string &propertyValue, int perioidNum) {
   // call the base class method
   Algorithm::setOtherProperties(alg, propertyName, propertyValue, perioidNum);
 
@@ -150,19 +140,17 @@ void SaveCanSAS1D::setOtherProperties(API::IAlgorithm *alg,
 void SaveCanSAS1D::exec() {
   m_workspace = getProperty("InputWorkspace");
   if (!m_workspace) {
-    throw std::invalid_argument(
-        "Invalid inputworkspace ,Error in  SaveCanSAS1D");
+    throw std::invalid_argument("Invalid inputworkspace ,Error in  SaveCanSAS1D");
   }
 
   if (m_workspace->getNumberHistograms() > 1) {
-    throw std::invalid_argument(
-        "Error in SaveCanSAS1D - more than one histogram.");
+    throw std::invalid_argument("Error in SaveCanSAS1D - more than one histogram.");
   }
 
   // write xml manually as the user requires a specific format were the
   // placement of new line characters is controled
   // and this can't be done in using the stylesheet part in Poco or libXML
-  prepareFileToWriteEntry();
+  prepareFileToWriteEntry(getPropertyValue("FileName"));
 
   m_outFile << "\n\t<SASentry name=\"" << m_workspace->getName() << "\">";
 
@@ -179,7 +167,7 @@ void SaveCanSAS1D::exec() {
   searchandreplaceSpecialChars(dataUnit);
 
   std::string sasData;
-  createSASDataElement(sasData);
+  createSASDataElement(sasData, 0);
   m_outFile << sasData;
 
   std::string sasSample;
@@ -212,15 +200,15 @@ void SaveCanSAS1D::exec() {
 }
 /** Opens the output file and either moves the file pointer to beyond the last
  *  entry or blanks the file and writes a header
+ *  @param fileName :: name of the output file
  *  @throw logic_error if append was selected but end of an entry tag couldn't
  * be found
  *  @throw FileError if there was a problem writing to the file
  */
-void SaveCanSAS1D::prepareFileToWriteEntry() {
+void SaveCanSAS1D::prepareFileToWriteEntry(const std::string &fileName) {
   // reduce error handling code by making file access errors throw
   m_outFile.exceptions(std::ios::eofbit | std::ios::failbit | std::ios::badbit);
 
-  const std::string fileName = getPropertyValue("FileName");
   bool append(getProperty("Append"));
 
   // write xml manually as the user requires a specific format were the
@@ -251,9 +239,7 @@ bool SaveCanSAS1D::openForAppending(const std::string &filename) {
       return true;
     }
   } catch (std::fstream::failure &) {
-    g_log.information()
-        << "File " << filename
-        << " couldn't be opened for a appending, will try to create the file\n";
+    g_log.information() << "File " << filename << " couldn't be opened for a appending, will try to create the file\n";
   }
   m_outFile.clear();
   if (m_outFile.is_open()) {
@@ -279,8 +265,7 @@ void SaveCanSAS1D::findEndofLastEntry() {
     m_outFile.read(test_tag, LAST_TAG_LEN);
     // check we're in the correct place in the file
     static const char LAST_TAG[LAST_TAG_LEN + 1] = "</SASentry>";
-    if (std::string(test_tag, LAST_TAG_LEN) !=
-        std::string(LAST_TAG, LAST_TAG_LEN)) {
+    if (std::string(test_tag, LAST_TAG_LEN) != std::string(LAST_TAG, LAST_TAG_LEN)) {
       // we'll allow some extra charaters so there is some variablity in where
       // the tag might be found
       bool tagFound(false);
@@ -326,8 +311,7 @@ void SaveCanSAS1D::writeHeader(const std::string &fileName) {
     createSASRootElement(sasroot);
     m_outFile << sasroot;
   } catch (std::fstream::failure &) {
-    throw Exception::FileError("Error opening the output file for writing",
-                               fileName);
+    throw Exception::FileError("Error opening the output file for writing", fileName);
   }
 }
 /** This method search for xml special characters in the input string
@@ -359,8 +343,7 @@ void SaveCanSAS1D::searchandreplaceSpecialChars(std::string &input) {
  *  @param input :: -input string
  *  @param index ::  position of the special character in the input string
  */
-void SaveCanSAS1D::replacewithEntityReference(
-    std::string &input, const std::string::size_type &index) {
+void SaveCanSAS1D::replacewithEntityReference(std::string &input, const std::string::size_type &index) {
   std::basic_string<char>::reference str = input.at(index);
   switch (str) {
   case '&':
@@ -429,8 +412,9 @@ void SaveCanSAS1D::createSASRunElement(std::string &sasRun) {
 
 /** This method creates an XML element named "SASdata"
  *  @param sasData :: string for sasdata element in the xml
+ *  @param workspaceIndex :: workspace index to be exported in SASdata entry
  */
-void SaveCanSAS1D::createSASDataElement(std::string &sasData) {
+void SaveCanSAS1D::createSASDataElement(std::string &sasData, size_t workspaceIndex) {
   std::string dataUnit = m_workspace->YUnitLabel();
   // look for xml special characters and replace with entity refrence
   searchandreplaceSpecialChars(dataUnit);
@@ -445,62 +429,50 @@ void SaveCanSAS1D::createSASDataElement(std::string &sasData) {
   if (dataUnit == "I(q) (cm-1)")
     dataUnit = "1/cm";
 
-  sasData = "\n\t\t<SASdata>";
-  // outFile<<sasData;
-  std::string sasIData;
-  std::string sasIBlockData;
-  std::string sasIHistData;
-  for (size_t i = 0; i < m_workspace->getNumberHistograms(); ++i) {
-    const auto intensities = m_workspace->points(i);
-    auto intensityDeltas = m_workspace->pointStandardDeviations(i);
-    if (!intensityDeltas)
-      intensityDeltas =
-          HistogramData::PointStandardDeviations(intensities.size(), 0.0);
-    const auto &ydata = m_workspace->y(i);
-    const auto &edata = m_workspace->e(i);
-    for (size_t j = 0; j < ydata.size(); ++j) {
-      // x data is the QData in xml.If histogramdata take the mean
-      std::stringstream x;
-      x << intensities[j];
-      std::stringstream dx_str;
-      dx_str << intensityDeltas[j];
-      sasIData = "\n\t\t\t<Idata><Q unit=\"1/A\">";
-      sasIData += x.str();
-      sasIData += "</Q>";
-      sasIData += "<I unit=";
-      sasIData += "\"";
-      sasIData += dataUnit;
-      sasIData += "\">";
-      //// workspace Y data is the I data in the xml file
-      std::stringstream y;
-      y << (ydata[j]);
-      sasIData += y.str();
-      sasIData += "</I>";
+  const auto intensities = m_workspace->points(workspaceIndex);
+  auto intensityDeltas = m_workspace->pointStandardDeviations(workspaceIndex);
+  if (!intensityDeltas)
+    intensityDeltas = HistogramData::PointStandardDeviations(intensities.size(), 0.0);
+  const auto &ydata = m_workspace->y(workspaceIndex);
+  const auto &edata = m_workspace->e(workspaceIndex);
+  sasData += "\n\t\t<SASdata>";
+  for (size_t j = 0; j < ydata.size(); ++j) {
+    // x data is the QData in xml.If histogramdata take the mean
+    std::stringstream x;
+    x << intensities[j];
+    std::stringstream dx_str;
+    dx_str << intensityDeltas[j];
+    sasData += "\n\t\t\t<Idata><Q unit=\"1/A\">";
+    sasData += x.str();
+    sasData += "</Q>";
+    sasData += "<I unit=";
+    sasData += "\"";
+    sasData += dataUnit;
+    sasData += "\">";
+    //// workspace Y data is the I data in the xml file
+    std::stringstream y;
+    y << (ydata[j]);
+    sasData += y.str();
+    sasData += "</I>";
 
-      // workspace error data is the Idev data in the xml file
-      std::stringstream e;
-      e << edata[j];
+    // workspace error data is the Idev data in the xml file
+    std::stringstream e;
+    e << edata[j];
 
-      sasIData += "<Idev unit=";
-      sasIData += "\"";
-      sasIData += dataUnit;
-      sasIData += "\">";
+    sasData += "<Idev unit=";
+    sasData += "\"";
+    sasData += dataUnit;
+    sasData += "\">";
 
-      sasIData += e.str();
-      sasIData += "</Idev>";
+    sasData += e.str();
+    sasData += "</Idev>";
 
-      sasIData += "<Qdev unit=\"1/A\">";
-      sasIData += dx_str.str();
-      sasIData += "</Qdev>";
+    sasData += "<Qdev unit=\"1/A\">";
+    sasData += dx_str.str();
+    sasData += "</Qdev>";
 
-      sasIData += "</Idata>";
-      // outFile<<sasIData;
-      sasIBlockData += sasIData;
-    }
-    sasIHistData += sasIBlockData;
+    sasData += "</Idata>";
   }
-  sasData += sasIHistData;
-
   sasData += "\n\t\t</SASdata>";
 }
 
@@ -561,14 +533,12 @@ void SaveCanSAS1D::createSASDetectorElement(std::string &sasDet) {
 
   std::list<std::string> detList;
   using std::placeholders::_1;
-  boost::algorithm::split(detList, detectorNames,
-                          std::bind(std::equal_to<char>(), _1, ','));
+  boost::algorithm::split(detList, detectorNames, std::bind(std::equal_to<char>(), _1, ','));
   for (auto detectorName : detList) {
     boost::algorithm::trim(detectorName);
 
     // get first component with name detectorName in IDF
-    std::shared_ptr<const IComponent> comp =
-        m_workspace->getInstrument()->getComponentByName(detectorName);
+    std::shared_ptr<const IComponent> comp = m_workspace->getInstrument()->getComponentByName(detectorName);
     if (comp != std::shared_ptr<const IComponent>()) {
       sasDet += "\n\t\t\t<SASdetector>";
 
@@ -580,8 +550,7 @@ void SaveCanSAS1D::createSASDetectorElement(std::string &sasDet) {
       std::string sasDetUnit = "\n\t\t\t\t<SDD unit=\"m\">";
 
       std::stringstream sdd;
-      double distance =
-          comp->getDistance(*m_workspace->getInstrument()->getSample());
+      double distance = comp->getDistance(*m_workspace->getInstrument()->getSample());
       sdd << distance;
 
       sasDetUnit += sdd.str();
@@ -591,8 +560,7 @@ void SaveCanSAS1D::createSASDetectorElement(std::string &sasDet) {
       sasDet += "\n\t\t\t</SASdetector>";
     } else {
       g_log.notice() << "Detector with name " << detectorName
-                     << " does not exist in the instrument of the workspace: "
-                     << m_workspace->getName() << '\n';
+                     << " does not exist in the instrument of the workspace: " << m_workspace->getName() << '\n';
     }
   }
 }
@@ -700,18 +668,15 @@ void SaveCanSAS1D::createSASInstrument(std::string &sasInstrument) {
 
     // aperture with name
     std::string collimationGeometry = getProperty("Geometry");
-    sasCollimation +=
-        "\n\t\t\t\t<aperture name=\"" + collimationGeometry + "\">";
+    sasCollimation += "\n\t\t\t\t<aperture name=\"" + collimationGeometry + "\">";
 
     // size
     sasCollimation += "\n\t\t\t\t\t<size>";
 
     // Width
-    sasCollimation += "\n\t\t\t\t\t\t<x unit=\"mm\">" +
-                      std::to_string(collimationWidth) + "</x>";
+    sasCollimation += "\n\t\t\t\t\t\t<x unit=\"mm\">" + std::to_string(collimationWidth) + "</x>";
     // Height
-    sasCollimation += "\n\t\t\t\t\t\t<y unit=\"mm\">" +
-                      std::to_string(collimationHeight) + "</y>";
+    sasCollimation += "\n\t\t\t\t\t\t<y unit=\"mm\">" + std::to_string(collimationHeight) + "</y>";
 
     sasCollimation += "\n\t\t\t\t\t</size>";
     sasCollimation += "\n\t\t\t\t</aperture>";
@@ -725,5 +690,4 @@ void SaveCanSAS1D::createSASInstrument(std::string &sasInstrument) {
   sasInstrument += sasDet;
   sasInstrument += "\n\t\t</SASinstrument>";
 }
-} // namespace DataHandling
-} // namespace Mantid
+} // namespace Mantid::DataHandling

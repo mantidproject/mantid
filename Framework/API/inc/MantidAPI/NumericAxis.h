@@ -29,23 +29,20 @@ class MatrixWorkspace;
 class MANTID_API_DLL NumericAxis : public Axis {
 public:
   NumericAxis(const std::size_t &length);
-  NumericAxis(const std::vector<double> &centres);
+  NumericAxis(std::vector<double> centres);
 
   Axis *clone(const MatrixWorkspace *const parentWorkspace) override;
-  Axis *clone(const std::size_t length,
-              const MatrixWorkspace *const parentWorkspace) override;
+  Axis *clone(const std::size_t length, const MatrixWorkspace *const parentWorkspace) override;
   /// Is the axis numeric - always true for this class
   bool isNumeric() const override { return true; }
   std::size_t length() const override { return m_values.size(); }
   /// Get a value at the specified index
-  double operator()(const std::size_t &index,
-                    const std::size_t &verticalIndex = 0) const override;
+  double operator()(const std::size_t &index, const std::size_t &verticalIndex = 0) const override;
   /// Set the value at a specific index
   void setValue(const std::size_t &index, const double &value) override;
   size_t indexOfValue(const double value) const override;
   bool operator==(const Axis &) const override;
-  virtual bool equalWithinTolerance(const Axis &axis2,
-                                    const double tolerance) const;
+  virtual bool equalWithinTolerance(const Axis &axis2, const double tolerance) const;
   std::string label(const std::size_t &index) const override;
   /// Create bin boundaries from the point values
   virtual std::vector<double> createBinBoundaries() const;
@@ -63,9 +60,8 @@ protected:
   /// A vector holding the centre values.
   std::vector<double> m_values;
 
-private:
-  /// Private, undefined copy assignment operator
-  const NumericAxis &operator=(const NumericAxis &);
+  /// Get number label
+  std::string formatLabel(const double value) const;
 };
 
 } // namespace API

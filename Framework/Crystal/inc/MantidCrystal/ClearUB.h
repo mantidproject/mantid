@@ -29,18 +29,14 @@ public:
   }
 
   int version() const override;
-  const std::vector<std::string> seeAlso() const override {
-    return {"SetUB", "HasUB"};
-  }
+  const std::vector<std::string> seeAlso() const override { return {"SetUB", "HasUB"}; }
   const std::string category() const override;
 
 protected:
   bool doExecute(Mantid::API::Workspace *const ws, bool dryRun);
 
 private:
-  bool
-  clearSingleExperimentInfo(Mantid::API::ExperimentInfo *const experimentInfo,
-                            const bool dryRun) const;
+  bool clearSingleExperimentInfo(Mantid::API::ExperimentInfo *const experimentInfo, const bool dryRun) const;
   void init() override;
   void exec() override;
 };

@@ -10,9 +10,7 @@
 #include "MantidAlgorithms/ApodizationFunctions.h"
 #include <cmath>
 
-namespace Mantid {
-namespace Algorithms {
-namespace ApodizationFunctions {
+namespace Mantid::Algorithms::ApodizationFunctions {
 
 /**
  * Returns the evaluation of the Lorentz
@@ -24,9 +22,7 @@ namespace ApodizationFunctions {
  * @param decayConstant :: [input] the decay constant (tau)
  * @returns :: Function evaluation
  */
-double lorentz(const double time, const double decayConstant) {
-  return exp(-time / decayConstant);
-}
+double lorentz(const double time, const double decayConstant) { return exp(-time / decayConstant); }
 /**
  * Returns the evaluation of the Gaussian
  * apodization function at a time (t) and
@@ -48,6 +44,4 @@ double gaussian(const double time, const double decayConstant) {
  * @returns :: Function evaluation
  */
 double none(const double /*unused*/, const double /*unused*/) { return 1.; }
-} // namespace ApodizationFunctions
-} // namespace Algorithms
-} // namespace Mantid
+} // namespace Mantid::Algorithms::ApodizationFunctions

@@ -44,25 +44,20 @@ private:
   /// Collection of component ids
   std::shared_ptr<const std::vector<Geometry::IComponent *>> m_componentIds;
   /// Map of component ids to indexes
-  std::shared_ptr<const std::unordered_map<Geometry::IComponent *, size_t>>
-      m_compIDToIndex;
+  std::shared_ptr<const std::unordered_map<Geometry::IComponent *, size_t>> m_compIDToIndex;
 
   /// Shapes for each component
-  std::shared_ptr<std::vector<std::shared_ptr<const Geometry::IObject>>>
-      m_shapes;
+  std::shared_ptr<std::vector<std::shared_ptr<const Geometry::IObject>>> m_shapes;
 
-  BoundingBox componentBoundingBox(const size_t index,
-                                   const BoundingBox *reference) const;
+  BoundingBox componentBoundingBox(const size_t index, const BoundingBox *reference,
+                                   const bool excludeMonitors = false) const;
 
   /// Private copy constructor. Do not make public.
   ComponentInfo(const ComponentInfo &other);
-  void
-  growBoundingBoxAsRectuangularBank(size_t index,
-                                    const Geometry::BoundingBox *reference,
-                                    Geometry::BoundingBox &mutableBB) const;
-  void growBoundingBoxAsOutline(size_t index,
-                                const Geometry::BoundingBox *reference,
-                                Geometry::BoundingBox &mutableBB) const;
+  void growBoundingBoxAsRectuangularBank(size_t index, const Geometry::BoundingBox *reference,
+                                         Geometry::BoundingBox &mutableBB, const bool excludeMonitors = false) const;
+  void growBoundingBoxAsOutline(size_t index, const Geometry::BoundingBox *reference, Geometry::BoundingBox &mutableBB,
+                                const bool excludeMonitors = false) const;
 
 public:
   struct QuadrilateralComponent {
@@ -74,14 +69,10 @@ public:
     size_t nY;
   };
 
-  ComponentInfo(
-      std::unique_ptr<Beamline::ComponentInfo> componentInfo,
-      std::shared_ptr<const std::vector<Mantid::Geometry::IComponent *>>
-          componentIds,
-      std::shared_ptr<const std::unordered_map<Geometry::IComponent *, size_t>>
-          componentIdToIndexMap,
-      std::shared_ptr<std::vector<std::shared_ptr<const Geometry::IObject>>>
-          shapes);
+  ComponentInfo(std::unique_ptr<Beamline::ComponentInfo> componentInfo,
+                std::shared_ptr<const std::vector<Mantid::Geometry::IComponent *>> componentIds,
+                std::shared_ptr<const std::unordered_map<Geometry::IComponent *, size_t>> componentIdToIndexMap,
+                std::shared_ptr<std::vector<std::shared_ptr<const Geometry::IObject>>> shapes);
   ~ComponentInfo();
   /// Copy assignment is not possible for ComponentInfo
   ComponentInfo &operator=(const ComponentInfo &) = delete;
@@ -90,38 +81,37 @@ public:
   std::vector<size_t> componentsInSubtree(size_t componentIndex) const;
   const std::vector<size_t> &children(size_t componentIndex) const;
   size_t size() const;
-  QuadrilateralComponent
-  quadrilateralComponent(const size_t componentIndex) const;
+  QuadrilateralComponent quadrilateralComponent(const size_t componentIndex) const;
   size_t indexOf(Geometry::IComponent *id) const;
   size_t indexOfAny(const std::string &name) const;
+  bool uniqueName(const std::string &name) const;
   bool isDetector(const size_t componentIndex) const;
   Kernel::V3D position(const size_t componentIndex) const;
-  Kernel::V3D position(const std::pair<size_t, size_t> index) const;
+  Kernel::V3D position(const std::pair<size_t, size_t> &index) const;
   Kernel::Quat rotation(const size_t componentIndex) const;
-  Kernel::Quat rotation(const std::pair<size_t, size_t> index) const;
+  Kernel::Quat rotation(const std::pair<size_t, size_t> &index) const;
   Kernel::V3D relativePosition(const size_t componentIndex) const;
   Kernel::Quat relativeRotation(const size_t componentIndex) const;
   void setPosition(size_t componentIndex, const Kernel::V3D &newPosition);
   void setRotation(size_t componentIndex, const Kernel::Quat &newRotation);
-  void setPosition(const std::pair<size_t, size_t> index,
-                   const Kernel::V3D &newPosition);
-  void setRotation(const std::pair<size_t, size_t> index,
-                   const Kernel::Quat &newRotation);
+  void setPosition(const std::pair<size_t, size_t> &index, const Kernel::V3D &newPosition);
+  void setRotation(const std::pair<size_t, size_t> &index, const Kernel::Quat &newRotation);
   size_t parent(const size_t componentIndex) const;
   bool hasParent(const size_t componentIndex) const;
   bool hasDetectorInfo() const;
   Kernel::V3D sourcePosition() const;
   Kernel::V3D samplePosition() const;
   bool hasSource() const;
+  bool hasEquivalentSource(const ComponentInfo &other) const;
   bool hasSample() const;
+  bool hasEquivalentSample(const ComponentInfo &other) const;
   bool hasDetectors(const size_t componentIndex) const;
   size_t source() const;
   size_t sample() const;
   double l1() const;
   Kernel::V3D scaleFactor(const size_t componentIndex) const;
   const std::string &name(const size_t componentIndex) const;
-  void setScaleFactor(const size_t componentIndex,
-                      const Kernel::V3D &scaleFactor);
+  void setScaleFactor(const size_t componentIndex, const Kernel::V3D &scaleFactor);
   size_t root() const;
 
   const IComponent *componentID(const size_t componentIndex) const {
@@ -131,13 +121,11 @@ public:
 
   const Geometry::IObject &shape(const size_t componentIndex) const;
 
-  double solidAngle(const size_t componentIndex,
-                    const Kernel::V3D &observer) const;
-  BoundingBox boundingBox(const size_t componentIndex,
-                          const BoundingBox *reference = nullptr) const;
+  double solidAngle(const size_t componentIndex, const Kernel::V3D &observer) const;
+  BoundingBox boundingBox(const size_t componentIndex, const BoundingBox *reference = nullptr,
+                          const bool excludeMonitors = false) const;
   Beamline::ComponentType componentType(const size_t componentIndex) const;
-  void setScanInterval(const std::pair<Types::Core::DateAndTime,
-                                       Types::Core::DateAndTime> &interval);
+  void setScanInterval(const std::pair<Types::Core::DateAndTime, Types::Core::DateAndTime> &interval);
   size_t scanCount() const;
   void merge(const ComponentInfo &other);
 

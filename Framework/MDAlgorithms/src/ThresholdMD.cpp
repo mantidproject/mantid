@@ -17,8 +17,7 @@ using namespace Mantid::Kernel;
 using namespace Mantid::API;
 using namespace Mantid::DataObjects;
 
-namespace Mantid {
-namespace MDAlgorithms {
+namespace Mantid::MDAlgorithms {
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(ThresholdMD)
@@ -35,9 +34,7 @@ const std::string ThresholdMD::name() const { return "ThresholdMD"; }
 int ThresholdMD::version() const { return 1; }
 
 /// Algorithm's category for identification. @see Algorithm::category
-const std::string ThresholdMD::category() const {
-  return "MDAlgorithms\\Transforms";
-}
+const std::string ThresholdMD::category() const { return "MDAlgorithms\\Transforms"; }
 
 //----------------------------------------------------------------------------------------------
 
@@ -45,36 +42,30 @@ const std::string ThresholdMD::category() const {
 /** Initialize the algorithm's properties.
  */
 void ThresholdMD::init() {
-  declareProperty(std::make_unique<WorkspaceProperty<IMDHistoWorkspace>>(
-                      "InputWorkspace", "", Direction::Input),
+  declareProperty(std::make_unique<WorkspaceProperty<IMDHistoWorkspace>>("InputWorkspace", "", Direction::Input),
                   "An input workspace.");
 
   std::vector<std::string> propOptions;
   propOptions.emplace_back(LessThan());
   propOptions.emplace_back(GreaterThan());
 
-  declareProperty("Condition", LessThan(),
-                  std::make_shared<StringListValidator>(propOptions),
+  declareProperty("Condition", LessThan(), std::make_shared<StringListValidator>(propOptions),
                   "Selected threshold condition. Any value which does meet "
                   "this condition with respect to the ReferenceValue will be "
                   "overwritten.");
 
-  declareProperty("ReferenceValue", 0.0,
-                  "Comparator value used by the Condition.");
+  declareProperty("ReferenceValue", 0.0, "Comparator value used by the Condition.");
 
   declareProperty("OverwriteWithZero", true,
                   "Flag for enabling overwriting "
                   "with a custom value. Defaults to "
                   "overwrite signals with zeros.");
 
-  declareProperty("CustomOverwriteValue", 0.0,
-                  "Custom overwrite value for the signal. Defaults to zero.");
+  declareProperty("CustomOverwriteValue", 0.0, "Custom overwrite value for the signal. Defaults to zero.");
   setPropertySettings("CustomOverwriteValue",
-                      std::make_unique<EnabledWhenProperty>("OverwriteWithZero",
-                                                            IS_NOT_DEFAULT));
+                      std::make_unique<EnabledWhenProperty>("OverwriteWithZero", IS_NOT_DEFAULT));
 
-  declareProperty(std::make_unique<WorkspaceProperty<IMDHistoWorkspace>>(
-                      "OutputWorkspace", "", Direction::Output),
+  declareProperty(std::make_unique<WorkspaceProperty<IMDHistoWorkspace>>("OutputWorkspace", "", Direction::Output),
                   "Output thresholded workspace.");
 }
 
@@ -94,7 +85,7 @@ void ThresholdMD::exec() {
   IMDHistoWorkspace_sptr outWS = getProperty("OutputWorkspace");
   if (outWS != inputWS) {
     g_log.debug("Deep copy input workspace as output workspace.");
-    IAlgorithm_sptr alg = createChildAlgorithm("CloneMDWorkspace");
+    auto alg = createChildAlgorithm("CloneMDWorkspace");
     alg->setProperty("InputWorkspace", inputWS);
     alg->executeAsChildAlg();
     IMDWorkspace_sptr temp = alg->getProperty("OutputWorkspace");
@@ -104,10 +95,9 @@ void ThresholdMD::exec() {
   const int64_t nPoints = inputWS->getNPoints();
 
   using namespace std::placeholders;
-  boost::function<bool(double)> comparitor =
-      std::bind(std::less<double>(), _1, referenceValue);
+  boost::function<bool(double)> comparitor = std::bind(std::less<double>(), std::placeholders::_1, referenceValue);
   if (condition == GreaterThan()) {
-    comparitor = std::bind(std::greater<double>(), _1, referenceValue);
+    comparitor = std::bind(std::greater<double>(), std::placeholders::_1, referenceValue);
   }
 
   Progress prog(this, 0.0, 1.0, 100);
@@ -133,5 +123,4 @@ void ThresholdMD::exec() {
   setProperty("OutputWorkspace", outWS);
 }
 
-} // namespace MDAlgorithms
-} // namespace Mantid
+} // namespace Mantid::MDAlgorithms

@@ -36,21 +36,16 @@ public:
 private:
   void init() override;
 
-  Mantid::API::Workspace_sptr runProcessing(Mantid::API::Workspace_sptr inputWS,
-                                            bool PostProcess);
+  Mantid::API::Workspace_sptr runProcessing(Mantid::API::Workspace_sptr inputWS, bool PostProcess);
   Mantid::API::Workspace_sptr processChunk(Mantid::API::Workspace_sptr chunkWS);
   void runPostProcessing();
 
   void replaceChunk(Mantid::API::Workspace_sptr chunkWS);
   void addChunk(const Mantid::API::Workspace_sptr &chunkWS);
-  void addMatrixWSChunk(const API::Workspace_sptr &accumWS,
-                        const API::Workspace_sptr &chunkWS);
-  void addMDWSChunk(API::Workspace_sptr &accumWS,
-                    const API::Workspace_sptr &chunkWS);
+  void addMatrixWSChunk(const API::Workspace_sptr &accumWS, const API::Workspace_sptr &chunkWS);
+  void addMDWSChunk(API::Workspace_sptr &accumWS, const API::Workspace_sptr &chunkWS);
   void appendChunk(const Mantid::API::Workspace_sptr &chunkWS);
-  API::Workspace_sptr
-  appendMatrixWSChunk(API::Workspace_sptr accumWS,
-                      const Mantid::API::Workspace_sptr &chunkWS);
+  API::Workspace_sptr appendMatrixWSChunk(API::Workspace_sptr accumWS, const Mantid::API::Workspace_sptr &chunkWS);
   void updateDefaultBinBoundaries(API::Workspace *workspace);
 
   /// The "accumulation" workspace = after adding, but before post-processing

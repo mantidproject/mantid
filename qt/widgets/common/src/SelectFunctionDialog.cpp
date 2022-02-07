@@ -25,10 +25,10 @@
 #include <QIcon>
 #include <QLabel>
 #include <QPushButton>
+#include <QTreeWidget>
 #include <QVBoxLayout>
 
-namespace MantidQt {
-namespace MantidWidgets {
+namespace MantidQt::MantidWidgets {
 
 /**
  * Constructor.
@@ -42,8 +42,7 @@ SelectFunctionDialog::SelectFunctionDialog(QWidget *parent)
  * @param parent :: A parent widget
  * @param restrictions :: List of categories to restrict to
  */
-SelectFunctionDialog::SelectFunctionDialog(
-    QWidget *parent, const std::vector<std::string> &restrictions)
+SelectFunctionDialog::SelectFunctionDialog(QWidget *parent, const std::vector<std::string> &restrictions)
     : MantidDialog(parent), m_form(new Ui::SelectFunctionDialog) {
   setWindowModality(Qt::WindowModal);
   setWindowIcon(QIcon(":/images/MantidIcon.ico"));
@@ -61,26 +60,24 @@ SelectFunctionDialog::SelectFunctionDialog(
     auto f = factory.createFunction(registeredFunction);
     std::vector<std::string> tempCategories = f->categories();
     for (size_t j = 0; j < tempCategories.size(); ++j) {
-      categories[tempCategories[boost::lexical_cast<int>(j)]].emplace_back(
-          registeredFunction);
+      categories[tempCategories[boost::lexical_cast<int>(j)]].emplace_back(registeredFunction);
     }
   }
 
   // Set up the search box
-  m_form->searchBox->completer()->setCompletionMode(
-      QCompleter::PopupCompletion);
+  m_form->searchBox->completer()->setCompletionMode(QCompleter::PopupCompletion);
 #if (QT_VERSION >= QT_VERSION_CHECK(5, 0, 0))
   m_form->searchBox->completer()->setFilterMode(Qt::MatchContains);
 #endif
-  connect(m_form->searchBox, SIGNAL(editTextChanged(const QString &)), this,
-          SLOT(searchBoxChanged(const QString &)));
+  connect(m_form->searchBox, SIGNAL(editTextChanged(const QString &)), this, SLOT(searchBoxChanged(const QString &)));
 
   // Construct the QTreeWidget based on the map information of categories and
   // their respective fit functions.
   constructFunctionTree(categories, restrictions);
+  setMinimumHeightOfFunctionTree();
 
-  connect(m_form->fitTree, SIGNAL(itemDoubleClicked(QTreeWidgetItem *, int)),
-          this, SLOT(functionDoubleClicked(QTreeWidgetItem *)));
+  connect(m_form->fitTree, SIGNAL(itemDoubleClicked(QTreeWidgetItem *, int)), this,
+          SLOT(functionDoubleClicked(QTreeWidgetItem *)));
   m_form->fitTree->setToolTip("Select a function type and press OK.");
 
   connect(m_form->buttonBox, SIGNAL(accepted()), this, SLOT(acceptFunction()));
@@ -106,8 +103,7 @@ void SelectFunctionDialog::constructFunctionTree(
     if (restrictions.empty()) {
       return true;
     } else {
-      return (std::find(restrictions.begin(), restrictions.end(), name) !=
-              restrictions.end());
+      return (std::find(restrictions.begin(), restrictions.end(), name) != restrictions.end());
     }
   };
 
@@ -121,8 +117,7 @@ void SelectFunctionDialog::constructFunctionTree(
     if (!categories.contains(categoryName)) {
       if (subCategories.size() == 1) {
         if (showCategory(entry.first)) {
-          QTreeWidgetItem *catItem =
-              new QTreeWidgetItem(QStringList(categoryName));
+          QTreeWidgetItem *catItem = new QTreeWidgetItem(QStringList(categoryName));
           categories.insert(categoryName, catItem);
           m_form->fitTree->addTopLevelItem(catItem);
           for (const auto &function : entry.second) {
@@ -147,8 +142,7 @@ void SelectFunctionDialog::constructFunctionTree(
             if (categories.contains(currentPath)) {
               catItem = categories[currentPath];
             } else {
-              QTreeWidgetItem *newCatItem =
-                  new QTreeWidgetItem(QStringList(subCategories[j]));
+              QTreeWidgetItem *newCatItem = new QTreeWidgetItem(QStringList(subCategories[j]));
               categories.insert(currentPath, newCatItem);
               if (!catItem) {
                 m_form->fitTree->addTopLevelItem(newCatItem);
@@ -177,6 +171,19 @@ void SelectFunctionDialog::constructFunctionTree(
 SelectFunctionDialog::~SelectFunctionDialog() { delete m_form; }
 
 /**
+ * Sets the minimum height of the function tree to ensure that all catagories are visible when the dialog is opened.
+ * This method ensures the correct minimum size is used for any screen resolution.
+ */
+void SelectFunctionDialog::setMinimumHeightOfFunctionTree() {
+  auto const numberOfTopLevelItems = m_form->fitTree->topLevelItemCount();
+  if (numberOfTopLevelItems > 0) {
+    auto const firstItem = m_form->fitTree->topLevelItem(0);
+    auto const itemHeight = m_form->fitTree->visualItemRect(firstItem).height();
+    m_form->fitTree->setMinimumHeight(itemHeight * numberOfTopLevelItems);
+  }
+}
+
+/**
  * Return selected function
  */
 QString SelectFunctionDialog::getFunction() const {
@@ -190,9 +197,7 @@ QString SelectFunctionDialog::getFunction() const {
   return "";
 }
 
-void SelectFunctionDialog::clearSearchBoxText() const {
-  m_form->searchBox->clearEditText();
-}
+void SelectFunctionDialog::clearSearchBoxText() const { m_form->searchBox->clearEditText(); }
 
 /**
  * Called when the text in the search box changes
@@ -216,8 +221,7 @@ void SelectFunctionDialog::functionDoubleClicked(QTreeWidgetItem *item) {
 void SelectFunctionDialog::acceptFunction() {
   const auto func = getFunction();
   if (func.isEmpty()) {
-    m_form->errorMessage->setText(
-        QString("<span style='color:red'> Function  not found</span> "));
+    m_form->errorMessage->setText(QString("<span style='color:red'> Function  not found</span> "));
     m_form->errorMessage->show();
   } else {
     m_form->errorMessage->hide();
@@ -239,5 +243,4 @@ void SelectFunctionDialog::helpClicked() const {
   }
 }
 
-} // namespace MantidWidgets
-} // namespace MantidQt
+} // namespace MantidQt::MantidWidgets

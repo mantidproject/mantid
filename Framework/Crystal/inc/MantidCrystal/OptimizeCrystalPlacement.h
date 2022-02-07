@@ -32,9 +32,7 @@ orientation .
 */
 class MANTID_CRYSTAL_DLL OptimizeCrystalPlacement : public API::Algorithm {
 public:
-  const std::string name() const override {
-    return "OptimizeCrystalPlacement";
-  };
+  const std::string name() const override { return "OptimizeCrystalPlacement"; };
   /// Summary of algorithms purpose
   const std::string summary() const override {
     return "This algorithm  optimizes goniometer settings  and sample "
@@ -43,9 +41,7 @@ public:
 
   int version() const override { return 1; };
 
-  const std::string category() const override {
-    return "Crystal\\Corrections";
-  };
+  const std::string category() const override { return "Crystal\\Corrections"; };
 
 private:
   void init() override;

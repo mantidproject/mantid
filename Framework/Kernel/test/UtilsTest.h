@@ -53,13 +53,9 @@ public:
     Utils::NestedForLoop::SetUpIndexMaker(4, index_maker, index_max);
 
     size_t index[4] = {1, 1, 1, 1};
-    TS_ASSERT_EQUALS(
-        Utils::NestedForLoop::GetLinearIndex(4, index, index_maker),
-        1 + 10 + 50 + 100);
+    TS_ASSERT_EQUALS(Utils::NestedForLoop::GetLinearIndex(4, index, index_maker), 1 + 10 + 50 + 100);
     size_t index2[4] = {3, 2, 1, 0};
-    TS_ASSERT_EQUALS(
-        Utils::NestedForLoop::GetLinearIndex(4, index2, index_maker),
-        3 + 20 + 50);
+    TS_ASSERT_EQUALS(Utils::NestedForLoop::GetLinearIndex(4, index2, index_maker), 3 + 20 + 50);
   }
 
   /** Back-conversion from linear index */
@@ -78,12 +74,10 @@ public:
     bool allDone = false;
     while (!allDone) {
       // Convert to linear index
-      size_t linear_index =
-          Utils::NestedForLoop::GetLinearIndex(4, indices, index_maker);
+      size_t linear_index = Utils::NestedForLoop::GetLinearIndex(4, indices, index_maker);
 
       // Back-convert
-      Utils::NestedForLoop::GetIndicesFromLinearIndex(
-          4, linear_index, index_maker, index_max, out_indices);
+      Utils::NestedForLoop::GetIndicesFromLinearIndex(4, linear_index, index_maker, index_max, out_indices);
       for (size_t d = 0; d < 4; d++) {
         TS_ASSERT_EQUALS(out_indices[d], indices[d]);
       }
@@ -106,8 +100,7 @@ public:
 
     bool allDone = false;
     while (!allDone) {
-      data[counters[0]][counters[1]][counters[2]] =
-          counters[0] * 10000 + counters[1] * 100 + counters[2];
+      data[counters[0]][counters[1]][counters[2]] = counters[0] * 10000 + counters[1] * 100 + counters[2];
       allDone = Utils::NestedForLoop::Increment(3, counters, counters_max);
     }
 
@@ -133,10 +126,8 @@ public:
 
     bool allDone = false;
     while (!allDone) {
-      data[counters[0]][counters[1]][counters[2]] =
-          counters[0] * 10000 + counters[1] * 100 + counters[2];
-      allDone = Utils::NestedForLoop::Increment(3, counters, counters_max,
-                                                counters_min);
+      data[counters[0]][counters[1]][counters[2]] = counters[0] * 10000 + counters[1] * 100 + counters[2];
+      allDone = Utils::NestedForLoop::Increment(3, counters, counters_max, counters_min);
     }
 
     for (size_t x = 0; x < 10; x++)

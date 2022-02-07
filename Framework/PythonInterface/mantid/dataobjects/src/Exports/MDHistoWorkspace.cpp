@@ -5,8 +5,8 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidDataObjects/MDHistoWorkspace.h"
+#include "MantidPythonInterface/api/RegisterWorkspacePtrToPython.h"
 #include "MantidPythonInterface/core/GetPointer.h"
-#include "MantidPythonInterface/kernel/Registry/RegisterWorkspacePtrToPython.h"
 
 #include <boost/python/class.hpp>
 
@@ -18,8 +18,7 @@ using namespace boost::python;
 GET_POINTER_SPECIALIZATION(MDHistoWorkspace)
 
 void export_MDHistoWorkspace() {
-  class_<MDHistoWorkspace, bases<IMDHistoWorkspace>, boost::noncopyable>(
-      "MDHistoWorkspace", no_init);
+  class_<MDHistoWorkspace, bases<IMDHistoWorkspace>, boost::noncopyable>("MDHistoWorkspace", no_init);
 
   // register pointers
   RegisterWorkspacePtrToPython<MDHistoWorkspace>();

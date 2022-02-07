@@ -27,10 +27,8 @@ namespace MantidWidgets {
  * @param parent A parent widget
  * @param minPositiveValue A minimum positive value for the Log10 scale
  */
-DraggableColorBarWidget::DraggableColorBarWidget(QWidget *parent,
-                                                 const double &minPositiveValue)
-    : QFrame(parent), m_minPositiveValue(minPositiveValue), m_dragging(false),
-      m_y(0), m_dtype(), m_nth_power(2.0) {
+DraggableColorBarWidget::DraggableColorBarWidget(QWidget *parent, const double &minPositiveValue)
+    : QFrame(parent), m_minPositiveValue(minPositiveValue), m_dragging(false), m_y(0), m_dtype(), m_nth_power(2.0) {
   m_scaleWidget = new QwtScaleWidget(QwtScaleDraw::RightScale);
   m_scaleWidget->setColorBarEnabled(true);
   m_scaleWidget->setColorBarWidth(20);
@@ -50,10 +48,8 @@ DraggableColorBarWidget::DraggableColorBarWidget(QWidget *parent,
   // been set from the scripting side
   m_minValueBox->setText("");
   m_maxValueBox->setText("");
-  connect(m_minValueBox, SIGNAL(editingFinished()), this,
-          SLOT(minValueChanged()));
-  connect(m_maxValueBox, SIGNAL(editingFinished()), this,
-          SLOT(maxValueChanged()));
+  connect(m_minValueBox, SIGNAL(editingFinished()), this, SLOT(minValueChanged()));
+  connect(m_maxValueBox, SIGNAL(editingFinished()), this, SLOT(maxValueChanged()));
 
   auto *lColormapLayout = new QVBoxLayout;
   lColormapLayout->addWidget(m_maxValueBox);
@@ -65,16 +61,14 @@ DraggableColorBarWidget::DraggableColorBarWidget(QWidget *parent,
   m_scaleOptions->addItem("Linear", QVariant(GraphOptions::Linear));
   m_scaleOptions->addItem("Power", QVariant(GraphOptions::Power));
   m_scaleOptions->setCurrentIndex(1); // linear default
-  connect(m_scaleOptions, SIGNAL(currentIndexChanged(int)), this,
-          SLOT(scaleOptionsChanged(int)));
+  connect(m_scaleOptions, SIGNAL(currentIndexChanged(int)), this, SLOT(scaleOptionsChanged(int)));
 
   // Controls for exponent for power scale type
   m_lblN = new QLabel(tr("n ="));
   m_lblN->setAlignment(Qt::AlignVCenter | Qt::AlignRight);
   m_dspnN = new DoubleSpinBox();
   m_dspnN->setValue(m_nth_power);
-  connect(m_dspnN, SIGNAL(valueChanged(double)), this,
-          SLOT(nPowerChanged(double)));
+  connect(m_dspnN, SIGNAL(valueChanged(double)), this, SLOT(nPowerChanged(double)));
 
   auto *options_layout = new QGridLayout;
   options_layout->addWidget(m_scaleOptions, 1, 0, 1, 2);
@@ -99,31 +93,24 @@ void DraggableColorBarWidget::scaleOptionsChanged(int i) {
   emit scaleTypeChanged(m_scaleOptions->itemData(i).toUInt());
 }
 
-void DraggableColorBarWidget::nPowerChanged(double nth_power) {
-  emit nthPowerChanged(nth_power);
-}
+void DraggableColorBarWidget::nPowerChanged(double nth_power) { emit nthPowerChanged(nth_power); }
 
 /**
  * Set up a new colour map.
  * @param colorMap :: Reference to the new colour map.
  */
-void DraggableColorBarWidget::setupColorBarScaling(
-    const MantidColorMap &colorMap) {
+void DraggableColorBarWidget::setupColorBarScaling(const MantidColorMap &colorMap) {
   double minValue = m_minValueBox->displayText().toDouble();
   double maxValue = m_maxValueBox->displayText().toDouble();
 
   auto type = colorMap.getScaleType();
   if (type == MantidColorMap::ScaleType::Linear) {
     QwtLinearScaleEngine linScaler;
-    m_scaleWidget->setScaleDiv(
-        linScaler.transformation(),
-        linScaler.divideScale(minValue, maxValue, 20, 5));
+    m_scaleWidget->setScaleDiv(linScaler.transformation(), linScaler.divideScale(minValue, maxValue, 20, 5));
     m_scaleWidget->setColorMap(QwtDoubleInterval(minValue, maxValue), colorMap);
   } else if (type == MantidColorMap::ScaleType::Power) {
     PowerScaleEngine powerScaler;
-    m_scaleWidget->setScaleDiv(
-        powerScaler.transformation(),
-        powerScaler.divideScale(minValue, maxValue, 20, 5));
+    m_scaleWidget->setScaleDiv(powerScaler.transformation(), powerScaler.divideScale(minValue, maxValue, 20, 5));
     m_scaleWidget->setColorMap(QwtDoubleInterval(minValue, maxValue), colorMap);
   } else {
     QwtLog10ScaleEngine logScaler;
@@ -140,13 +127,11 @@ void DraggableColorBarWidget::setupColorBarScaling(
       setMaxValue(maxValue);
       m_maxValueBox->blockSignals(false);
     }
-    m_scaleWidget->setScaleDiv(logScaler.transformation(),
-                               logScaler.divideScale(logmin, maxValue, 20, 5));
+    m_scaleWidget->setScaleDiv(logScaler.transformation(), logScaler.divideScale(logmin, maxValue, 20, 5));
     m_scaleWidget->setColorMap(QwtDoubleInterval(logmin, maxValue), colorMap);
   }
   m_scaleOptions->blockSignals(true);
-  m_scaleOptions->setCurrentIndex(
-      m_scaleOptions->findData(static_cast<int>(type)));
+  m_scaleOptions->setCurrentIndex(m_scaleOptions->findData(static_cast<int>(type)));
   if (m_scaleOptions->findData(static_cast<int>(type)) == 2) {
     m_dspnN->setEnabled(true);
   } else {
@@ -207,16 +192,12 @@ void DraggableColorBarWidget::setMaxValue(double value) {
 /**
  * returns the min value as QString
  */
-QString DraggableColorBarWidget::getMinValue() const {
-  return m_minValueBox->text();
-}
+QString DraggableColorBarWidget::getMinValue() const { return m_minValueBox->text(); }
 
 /**
  * returns the min value as QString
  */
-QString DraggableColorBarWidget::getMaxValue() const {
-  return m_maxValueBox->text();
-}
+QString DraggableColorBarWidget::getMaxValue() const { return m_maxValueBox->text(); }
 
 /**
  * returns the mnth powder as QString
@@ -227,25 +208,19 @@ QString DraggableColorBarWidget::getNthPower() const { return m_dspnN->text(); }
  * Update the min value text box.
  * @param value :: Value to be displayed in the text box.
  */
-void DraggableColorBarWidget::setMinValueText(double value) {
-  m_minValueBox->setText(QString::number(value));
-}
+void DraggableColorBarWidget::setMinValueText(double value) { m_minValueBox->setText(QString::number(value)); }
 
 /**
  * Update the max value text box.
  * @param value :: Value to be displayed in the text box.
  */
-void DraggableColorBarWidget::setMaxValueText(double value) {
-  m_maxValueBox->setText(QString::number(value));
-}
+void DraggableColorBarWidget::setMaxValueText(double value) { m_maxValueBox->setText(QString::number(value)); }
 
 /**
  * Set the minimum positive value for use with the Log10 scale. Values below
  * this will not be displayed on a Log10 scale.
  */
-void DraggableColorBarWidget::setMinPositiveValue(double value) {
-  m_minPositiveValue = value;
-}
+void DraggableColorBarWidget::setMinPositiveValue(double value) { m_minPositiveValue = value; }
 
 /**
  * Return the scale type: Log10 or Linear.
@@ -261,9 +236,7 @@ void DraggableColorBarWidget::setScaleType(int type) {
   m_scaleOptions->setCurrentIndex(m_scaleOptions->findData(type));
 }
 
-void DraggableColorBarWidget::setNthPower(double nth_power) {
-  m_dspnN->setValue(nth_power);
-}
+void DraggableColorBarWidget::setNthPower(double nth_power) { m_dspnN->setValue(nth_power); }
 
 /**
  * Update the colour scale after the range changes.
@@ -271,27 +244,21 @@ void DraggableColorBarWidget::setNthPower(double nth_power) {
 void DraggableColorBarWidget::updateScale() {
   double minValue = m_minValueBox->displayText().toDouble();
   double maxValue = m_maxValueBox->displayText().toDouble();
-  GraphOptions::ScaleType type = (GraphOptions::ScaleType)m_scaleOptions
-                                     ->itemData(m_scaleOptions->currentIndex())
-                                     .toUInt();
+  GraphOptions::ScaleType type =
+      (GraphOptions::ScaleType)m_scaleOptions->itemData(m_scaleOptions->currentIndex()).toUInt();
   if (type == GraphOptions::Linear) {
     QwtLinearScaleEngine linScaler;
-    m_scaleWidget->setScaleDiv(
-        linScaler.transformation(),
-        linScaler.divideScale(minValue, maxValue, 20, 5));
+    m_scaleWidget->setScaleDiv(linScaler.transformation(), linScaler.divideScale(minValue, maxValue, 20, 5));
   } else if (type == GraphOptions::Power) {
     PowerScaleEngine powerScaler;
-    m_scaleWidget->setScaleDiv(
-        powerScaler.transformation(),
-        powerScaler.divideScale(minValue, maxValue, 20, 5));
+    m_scaleWidget->setScaleDiv(powerScaler.transformation(), powerScaler.divideScale(minValue, maxValue, 20, 5));
   } else {
     QwtLog10ScaleEngine logScaler;
     double logmin(minValue);
     if (logmin <= 0.0) {
       logmin = m_minPositiveValue;
     }
-    m_scaleWidget->setScaleDiv(logScaler.transformation(),
-                               logScaler.divideScale(logmin, maxValue, 20, 5));
+    m_scaleWidget->setScaleDiv(logScaler.transformation(), logScaler.divideScale(logmin, maxValue, 20, 5));
   }
 }
 

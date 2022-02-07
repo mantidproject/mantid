@@ -16,11 +16,11 @@
 #include "MantidDataHandling/LoadNexusProcessed.h"
 #include "MantidDataHandling/LoadNexusProcessed2.h"
 #include "MantidDataHandling/SaveNexusESS.h"
+#include "MantidFrameworkTestHelpers/ComponentCreationHelper.h"
+#include "MantidFrameworkTestHelpers/FileResource.h"
+#include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidIndexing/IndexInfo.h"
-#include "MantidTestHelpers/ComponentCreationHelper.h"
-#include "MantidTestHelpers/FileResource.h"
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidTypes/SpectrumDefinition.h"
 
 using namespace Mantid::DataHandling;
@@ -28,8 +28,7 @@ using namespace Mantid::API;
 
 namespace {
 
-template <typename Alg>
-Mantid::API::MatrixWorkspace_sptr do_load(const std::string &filename) {
+template <typename Alg> Mantid::API::MatrixWorkspace_sptr do_load(const std::string &filename) {
   Alg loader;
   loader.setChild(true);
   loader.setRethrows(true);
@@ -38,8 +37,7 @@ Mantid::API::MatrixWorkspace_sptr do_load(const std::string &filename) {
   loader.setPropertyValue("OutputWorkspace", "dummy");
   loader.execute();
   Workspace_sptr out = loader.getProperty("OutputWorkspace");
-  auto matrixWSOut =
-      std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(out);
+  auto matrixWSOut = std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(out);
   return matrixWSOut;
 }
 
@@ -81,9 +79,7 @@ class LoadNexusProcessed2Test : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static LoadNexusProcessed2Test *createSuite() {
-    return new LoadNexusProcessed2Test();
-  }
+  static LoadNexusProcessed2Test *createSuite() { return new LoadNexusProcessed2Test(); }
   static void destroySuite(LoadNexusProcessed2Test *suite) { delete suite; }
 
   void test_checkVersion() {
@@ -92,8 +88,7 @@ public:
   }
 
   void test_defaultVersion() {
-    auto alg =
-        Mantid::API::AlgorithmManager::Instance().create("LoadNexusProcessed");
+    auto alg = Mantid::API::AlgorithmManager::Instance().create("LoadNexusProcessed");
     TS_ASSERT_EQUALS(alg->version(), 2);
   }
   void test_with_ess_instrument() {
@@ -102,8 +97,7 @@ public:
 
     FileResource fileInfo("test_ess_instrument.nxs");
 
-    auto wsIn =
-        test_utility::make_workspace("V20_4-tubes_90deg_Definition_v01.xml");
+    auto wsIn = test_utility::make_workspace("V20_4-tubes_90deg_Definition_v01.xml");
     for (size_t i = 0; i < wsIn->getNumberHistograms(); ++i) {
       wsIn->setCounts(i, Counts{double(i)});
     }
@@ -124,16 +118,15 @@ public:
     using Mantid::SpectrumDefinition;
     using namespace Mantid::Indexing;
     FileResource fileInfo("test_no_spectra_mapping.nxs");
-    auto wsIn =
-        WorkspaceCreationHelper::create2DWorkspaceWithRectangularInstrument(
-            2 /*numBanks*/, 10 /*numPixels*/, 12 /*numBins*/);
+    auto wsIn = WorkspaceCreationHelper::create2DWorkspaceWithRectangularInstrument(2 /*numBanks*/, 10 /*numPixels*/,
+                                                                                    12 /*numBins*/);
 
     std::vector<SpectrumDefinition> specDefinitions;
     std::vector<SpectrumNumber> spectrumNumbers;
     size_t i = wsIn->getNumberHistograms() - 1;
     for (size_t j = 0; j < wsIn->getNumberHistograms(); --i, ++j) {
-      specDefinitions.emplace_back(SpectrumDefinition(i));
-      spectrumNumbers.emplace_back(SpectrumNumber(static_cast<int>(j)));
+      specDefinitions.emplace_back(i);
+      spectrumNumbers.emplace_back(static_cast<int>(j));
     }
     IndexInfo info(spectrumNumbers);
     info.setSpectrumDefinitions(specDefinitions);
@@ -181,16 +174,15 @@ public:
     auto instr = ComponentCreationHelper::createTestInstrumentRectangular(
         2 /*numBanks*/, 10 /*numPixels*/); // 200 detectors in instrument
 
-    auto wsIn = WorkspaceCreationHelper::create2DWorkspaceBinned(
-        1 /*number of spectra*/, 1 /*number of bins*/);
+    auto wsIn = WorkspaceCreationHelper::create2DWorkspaceBinned(1 /*number of spectra*/, 1 /*number of bins*/);
     wsIn->setInstrument(instr); // Just 1 spectra in the workspace
 
     std::vector<SpectrumDefinition> specDefinitions;
     std::vector<SpectrumNumber> spectrumNumbers;
     // We add a single detector index 0 to a single spectrum with number (1). No
     // other mappings provided!
-    specDefinitions.emplace_back(SpectrumDefinition(0));
-    spectrumNumbers.emplace_back(SpectrumNumber(1));
+    specDefinitions.emplace_back(0);
+    spectrumNumbers.emplace_back(1);
     IndexInfo info(spectrumNumbers);
     info.setSpectrumDefinitions(specDefinitions);
     wsIn->setIndexInfo(info);
@@ -238,12 +230,10 @@ public:
     const int nBanks = 2;
     const int pixPerDim = 10;
     const size_t nDetectors = pixPerDim * pixPerDim * nBanks;
-    auto instrument = ComponentCreationHelper::createTestInstrumentRectangular2(
-        nBanks, pixPerDim);
+    auto instrument = ComponentCreationHelper::createTestInstrumentRectangular2(nBanks, pixPerDim);
 
     // Make mappings
-    const size_t nSpectra =
-        nDetectors / 2; // We are going to have 2 detectors per spectra
+    const size_t nSpectra = nDetectors / 2; // We are going to have 2 detectors per spectra
     std::vector<SpectrumDefinition> specDefinitions;
     std::vector<SpectrumNumber> spectrumNumbers;
     size_t i = nDetectors - 1;
@@ -252,7 +242,7 @@ public:
       def.add(i);
       def.add(i - 1);
       specDefinitions.emplace_back(def);
-      spectrumNumbers.emplace_back(SpectrumNumber(static_cast<int>(j)));
+      spectrumNumbers.emplace_back(static_cast<int>(j));
     }
     IndexInfo info(spectrumNumbers);
     info.setSpectrumDefinitions(specDefinitions);
@@ -299,8 +289,7 @@ public:
 
     FileResource fileInfo("test_demo_file_for_incompatible.nxs");
 
-    auto wsIn =
-        test_utility::make_workspace("V20_4-tubes_90deg_Definition_v01.xml");
+    auto wsIn = test_utility::make_workspace("V20_4-tubes_90deg_Definition_v01.xml");
 
     test_utility::save(fileInfo.fullPath(), wsIn);
     auto wsOut = do_load_v1(fileInfo.fullPath());

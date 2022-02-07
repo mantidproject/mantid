@@ -9,7 +9,6 @@
 #include <string>
 
 #include "GUI/Runs/IRunsPresenter.h"
-#include "MantidAPI/ITableWorkspace_fwd.h"
 
 namespace MantidQt {
 namespace CustomInterfaces {

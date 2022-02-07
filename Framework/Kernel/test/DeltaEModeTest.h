@@ -18,9 +18,7 @@ public:
   static DeltaEModeTest *createSuite() { return new DeltaEModeTest(); }
   static void destroySuite(DeltaEModeTest *suite) { delete suite; }
 
-  DeltaEModeTest()
-      : m_elasticString("Elastic"), m_directString("Direct"),
-        m_indirectString("Indirect") {}
+  DeltaEModeTest() : m_elasticString("Elastic"), m_directString("Direct"), m_indirectString("Indirect") {}
 
   void test_availableTypes_Are_The_3_Expected_In_The_Correct_Order() {
     const std::vector<std::string> modes = DeltaEMode::availableTypes();
@@ -31,23 +29,18 @@ public:
   }
 
   void test_elastic_mode_is_correctly_transformed_to_and_from_string() {
-    TS_ASSERT_EQUALS(DeltaEMode::asString(DeltaEMode::Elastic),
-                     m_elasticString);
-    TS_ASSERT_EQUALS(DeltaEMode::fromString(m_elasticString),
-                     DeltaEMode::Elastic);
+    TS_ASSERT_EQUALS(DeltaEMode::asString(DeltaEMode::Elastic), m_elasticString);
+    TS_ASSERT_EQUALS(DeltaEMode::fromString(m_elasticString), DeltaEMode::Elastic);
   }
 
   void test_direct_mode_is_correctly_transformed_to_and_from_string() {
     TS_ASSERT_EQUALS(DeltaEMode::asString(DeltaEMode::Direct), m_directString);
-    TS_ASSERT_EQUALS(DeltaEMode::fromString(m_elasticString),
-                     DeltaEMode::Elastic);
+    TS_ASSERT_EQUALS(DeltaEMode::fromString(m_elasticString), DeltaEMode::Elastic);
   }
 
   void test_indirect_mode_is_correctly_transformed_to_and_from_string() {
-    TS_ASSERT_EQUALS(DeltaEMode::asString(DeltaEMode::Indirect),
-                     m_indirectString);
-    TS_ASSERT_EQUALS(DeltaEMode::fromString(m_elasticString),
-                     DeltaEMode::Elastic);
+    TS_ASSERT_EQUALS(DeltaEMode::asString(DeltaEMode::Indirect), m_indirectString);
+    TS_ASSERT_EQUALS(DeltaEMode::fromString(m_elasticString), DeltaEMode::Elastic);
   }
 
 private:

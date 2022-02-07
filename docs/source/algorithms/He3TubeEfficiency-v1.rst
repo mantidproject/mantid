@@ -13,13 +13,13 @@ This algorithm corrects the detection efficiency of He3 tubes using an
 exponential function and certain detector properties. The correction
 scheme is given by the following:
 
-:math:`\epsilon = \frac{A}{1-e^{\frac{-\alpha P (L - 2W) \lambda}{T sin(\theta)}}}`
+:math:`\epsilon = \frac{A}{1-e^{\frac{-\alpha P (L - 2W) \lambda}{T \sin(\theta)}}}`
 
 where *A* is a dimensionless scaling factor, :math:`\alpha` is a
-constant with units :math:`(Kelvin / (metres\: \AA\: atm))`, *P* is
+constant with units :math:`(\text{Kelvin} / (\text{metres} \: \AA\: \text{atm}))`, *P* is
 pressure in units of *atm*, *L* is the tube diameter in units of
-*metres*, *W* is the tube thickness in units of *metres*, *T* is the
-temperature in units of *Kelvin*, :math:`sin(\theta)` is the angle
+metres, *W* is the tube thickness in units of metres, *T* is the
+temperature in units of Kelvin, :math:`\sin(\theta)` is the angle
 of the neutron trajectory with respect to the long axis of the He3 tube
 and :math:`\lambda` is in units of :math:`\AA`.
 

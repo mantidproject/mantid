@@ -12,10 +12,8 @@
 
 const QString ParameterPropertyManager::ERROR_TOOLTIP(" (Error)");
 
-ParameterPropertyManager::ParameterPropertyManager(QObject *parent,
-                                                   bool hasGlobalOption)
-    : QtDoublePropertyManager(parent), m_errors(), m_errorsEnabled(false),
-      m_hasGlobalOption(hasGlobalOption) {}
+ParameterPropertyManager::ParameterPropertyManager(QObject *parent, bool hasGlobalOption)
+    : QtDoublePropertyManager(parent), m_errors(), m_errorsEnabled(false), m_hasGlobalOption(hasGlobalOption) {}
 
 /**
  * Throws if property error is not set
@@ -36,8 +34,7 @@ double ParameterPropertyManager::error(const QtProperty *property) const {
  * @param property :: Parameter property
  * @return Parameter description
  */
-std::string
-ParameterPropertyManager::description(const QtProperty *property) const {
+std::string ParameterPropertyManager::description(const QtProperty *property) const {
   // Cast for searching purposes
   auto prop = const_cast<QtProperty *>(property);
 
@@ -71,8 +68,7 @@ bool ParameterPropertyManager::isGlobal(const QtProperty *property) const {
  * @param property :: Property to set error for
  * @param error :: Error value to set
  */
-void ParameterPropertyManager::setError(QtProperty *property,
-                                        const double &error) {
+void ParameterPropertyManager::setError(QtProperty *property, const double &error) {
   m_errors[property] = error;
   emit propertyChanged(property);
   updateTooltip(property);
@@ -82,8 +78,7 @@ void ParameterPropertyManager::setError(QtProperty *property,
  * @param property :: Parameter property to set error for
  * @param description :: Description of the parameter
  */
-void ParameterPropertyManager::setDescription(QtProperty *property,
-                                              const std::string &description) {
+void ParameterPropertyManager::setDescription(QtProperty *property, const std::string &description) {
   m_descriptions[property] = description;
   updateTooltip(property);
 }

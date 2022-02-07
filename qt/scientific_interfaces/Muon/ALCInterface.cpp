@@ -23,12 +23,46 @@
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceGroup.h"
-namespace MantidQt {
-namespace CustomInterfaces {
+#include "MantidKernel/Logger.h"
+
+using namespace Mantid::API;
+
+namespace {
+Mantid::Kernel::Logger logger("ALC Interface");
+
+MatrixWorkspace_sptr getWorkspace(const std::string &workspaceName) {
+  auto &ads = AnalysisDataService::Instance();
+  if (ads.doesExist(workspaceName)) {
+    return ads.retrieveWS<MatrixWorkspace>(workspaceName);
+  } else {
+    logger.warning("Workspace " + workspaceName + " was not found");
+    return nullptr;
+  }
+}
+
+QHash<QString, QVariant> createPointKwargs() {
+  QHash<QString, QVariant> kwargs{{"marker", "."}, {"linestyle", "None"}};
+  return kwargs;
+}
+
+QHash<QString, QVariant> createLineKwargs() {
+  QHash<QString, QVariant> kwargs{{"marker", "None"}};
+  return kwargs;
+}
+
+std::vector<boost::optional<QHash<QString, QVariant>>> createPointAndLineKwargs() {
+  std::vector<boost::optional<QHash<QString, QVariant>>> kwargs;
+  kwargs.emplace_back(createPointKwargs());
+  kwargs.emplace_back(createLineKwargs());
+  return kwargs;
+}
+
+} // namespace
+
+namespace MantidQt::CustomInterfaces {
 DECLARE_SUBWINDOW(ALCInterface)
 
-const QStringList ALCInterface::STEP_NAMES = {
-    "Data loading", "Baseline modelling", "Peak fitting"};
+const QStringList ALCInterface::STEP_NAMES = {"Data loading", "Baseline modelling", "Peak fitting"};
 
 // %1 - current step no., %2 - total no. of steps, %3 - current step label
 const QString ALCInterface::LABEL_FORMAT = "Step %1/%2 - %3";
@@ -50,11 +84,10 @@ void ALCInterface::closeEvent(QCloseEvent *event) {
 }
 // namespace CustomInterfaces
 ALCInterface::ALCInterface(QWidget *parent)
-    : UserSubWindow(parent), m_ui(), m_baselineModellingView(nullptr),
-      m_peakFittingView(nullptr), m_dataLoading(nullptr),
-      m_baselineModelling(nullptr), m_peakFitting(nullptr),
-      m_baselineModellingModel(new ALCBaselineModellingModel()),
-      m_peakFittingModel(new ALCPeakFittingModel()) {}
+    : UserSubWindow(parent), m_ui(), m_baselineModellingView(nullptr), m_peakFittingView(nullptr),
+      m_dataLoading(nullptr), m_baselineModelling(nullptr), m_peakFitting(nullptr),
+      m_baselineModellingModel(new ALCBaselineModellingModel()), m_peakFittingModel(new ALCPeakFittingModel()),
+      m_externalPlotter(std::make_unique<Widgets::MplCpp::ExternalPlotter>()) {}
 
 void ALCInterface::initLayout() {
   m_ui.setupUi(this);
@@ -63,29 +96,25 @@ void ALCInterface::initLayout() {
   connect(m_ui.previousStep, SIGNAL(clicked()), SLOT(previousStep()));
   connect(m_ui.exportResults, SIGNAL(clicked()), SLOT(exportResults()));
   connect(m_ui.importResults, SIGNAL(clicked()), SLOT(importResults()));
+  connect(m_ui.externalPlotButton, SIGNAL(clicked()), SLOT(externalPlotRequested()));
 
   auto dataLoadingView = new ALCDataLoadingView(m_ui.dataLoadingView);
   m_dataLoading = new ALCDataLoadingPresenter(dataLoadingView);
   m_dataLoading->initialize();
   m_dataLoading->setParent(this);
 
-  m_baselineModellingView =
-      new ALCBaselineModellingView(m_ui.baselineModellingView);
-  m_baselineModelling = new ALCBaselineModellingPresenter(
-      m_baselineModellingView, m_baselineModellingModel);
+  m_baselineModellingView = new ALCBaselineModellingView(m_ui.baselineModellingView);
+  m_baselineModelling = new ALCBaselineModellingPresenter(m_baselineModellingView, m_baselineModellingModel);
   m_baselineModelling->initialize();
 
   m_peakFittingView = new ALCPeakFittingView(m_ui.peakFittingView);
-  m_peakFitting =
-      new ALCPeakFittingPresenter(m_peakFittingView, m_peakFittingModel);
+  m_peakFitting = new ALCPeakFittingPresenter(m_peakFittingView, m_peakFittingModel);
   m_peakFitting->initialize();
 
   connect(m_dataLoading, SIGNAL(dataChanged()), SLOT(updateBaselineData()));
-  connect(m_baselineModellingModel, SIGNAL(correctedDataChanged()),
-          SLOT(updatePeakData()));
+  connect(m_baselineModellingModel, SIGNAL(correctedDataChanged()), SLOT(updatePeakData()));
 
-  assert(m_ui.stepView->count() ==
-         STEP_NAMES.count()); // Should have names for all steps
+  assert(m_ui.stepView->count() == STEP_NAMES.count()); // Should have names for all steps
 
   switchStep(0); // We always start from the first step
 }
@@ -100,8 +129,7 @@ void ALCInterface::updateBaselineData() {
 
     // If we have a fitting function and a fitting range
     // we can update the baseline model
-    if ((!m_baselineModellingView->function().isEmpty()) &&
-        (m_baselineModellingView->noOfSectionRows() > 0)) {
+    if ((!m_baselineModellingView->function().isEmpty()) && (m_baselineModellingView->noOfSectionRows() > 0)) {
 
       // Fit the data
       m_baselineModellingView->emitFitRequested();
@@ -143,9 +171,7 @@ void ALCInterface::switchStep(int newStepIndex) {
   assert(newStepIndex >= 0);
   assert(newStepIndex < m_ui.stepView->count());
 
-  m_ui.label->setText(LABEL_FORMAT.arg(newStepIndex + 1)
-                          .arg(STEP_NAMES.count())
-                          .arg(STEP_NAMES[newStepIndex]));
+  m_ui.label->setText(LABEL_FORMAT.arg(newStepIndex + 1).arg(STEP_NAMES.count()).arg(STEP_NAMES[newStepIndex]));
 
   int nextStepIndex = newStepIndex + 1;
   int prevStepIndex = newStepIndex - 1;
@@ -172,9 +198,8 @@ void ALCInterface::switchStep(int newStepIndex) {
 void ALCInterface::exportResults() {
 
   bool ok;
-  QString label = QInputDialog::getText(
-      this, "Results label",
-      "Label to assign to the results: ", QLineEdit::Normal, "ALCResults", &ok);
+  QString label = QInputDialog::getText(this, "Results label", "Label to assign to the results: ", QLineEdit::Normal,
+                                        "ALCResults", &ok);
 
   if (!ok) // Cancelled
   {
@@ -187,14 +212,18 @@ void ALCInterface::exportResults() {
 
   std::map<std::string, Workspace_sptr> results;
 
-  results["Loaded_Data"] = m_dataLoading->exportWorkspace();
-
-  results["Baseline_Workspace"] = m_baselineModellingModel->exportWorkspace();
-  results["Baseline_Sections"] = m_baselineModellingModel->exportSections();
-  results["Baseline_Model"] = m_baselineModellingModel->exportModel();
-
-  results["Peaks_Workspace"] = m_peakFittingModel->exportWorkspace();
-  results["Peaks_FitResults"] = m_peakFittingModel->exportFittedPeaks();
+  if (const auto loadedData = m_dataLoading->exportWorkspace())
+    results["Loaded_Data"] = loadedData->clone();
+  if (const auto baseline = m_baselineModellingModel->exportWorkspace())
+    results["Baseline_Workspace"] = baseline->clone();
+  if (const auto baselineSections = m_baselineModellingModel->exportSections())
+    results["Baseline_Sections"] = baselineSections->clone();
+  if (const auto baselineModel = m_baselineModellingModel->exportModel())
+    results["Baseline_Model"] = baselineModel->clone();
+  if (const auto peaksWorkspace = m_peakFittingModel->exportWorkspace())
+    results["Peaks_Workspace"] = peaksWorkspace->clone();
+  if (const auto peaksResults = m_peakFittingModel->exportFittedPeaks())
+    results["Peaks_FitResults"] = peaksResults->clone();
 
   // Check if any of the above is not empty
   bool nothingToExport = true;
@@ -210,8 +239,7 @@ void ALCInterface::exportResults() {
   if (!nothingToExport) {
 
     // Add output group to the ADS
-    AnalysisDataService::Instance().addOrReplace(
-        groupName, std::make_shared<WorkspaceGroup>());
+    AnalysisDataService::Instance().addOrReplace(groupName, std::make_shared<WorkspaceGroup>());
 
     for (auto &result : results) {
       if (result.second) {
@@ -227,113 +255,145 @@ void ALCInterface::exportResults() {
 }
 
 void ALCInterface::importResults() {
+  bool okClicked;
+  const auto groupName =
+      QInputDialog::getText(this, "Results label", "Label to assign to the results: ", QLineEdit::Normal, "ALCResults",
+                            &okClicked)
+          .toStdString();
 
-  bool ok;
-  QString label = QInputDialog::getText(
-      this, "Results label",
-      "Label to assign to the results: ", QLineEdit::Normal, "ALCResults", &ok);
-
-  if (!ok) // Cancelled
-  {
+  if (!okClicked) {
     return;
+  } else if (!AnalysisDataService::Instance().doesExist(groupName)) {
+    QMessageBox::critical(this, "Error", "Workspace " + QString::fromStdString(groupName) + " could not be found.");
   }
 
-  std::string groupName = label.toStdString();
+  importLoadedData(groupName + "_Loaded_Data");
+  importBaselineData(groupName + "_Baseline_Workspace");
+  importPeakData(groupName + "_Peaks_Workspace");
+}
 
-  using namespace Mantid::API;
-
-  int currentStep = m_ui.stepView->currentIndex();
-
-  if (currentStep == 0) {
-    // DataLoading step
-
-    std::string wsData = groupName + "_Loaded_Data";
-
-    if (AnalysisDataService::Instance().doesExist(wsData)) {
-
-      MatrixWorkspace_sptr ws =
-          AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(wsData);
-
-      // Check that ws contains one spectrum only
-      if (ws->getNumberHistograms() != 1) {
-        QMessageBox::critical(this, "Error",
-                              "Workspace " + QString::fromStdString(wsData) +
-                                  " must contain one spectrum only");
-        return;
-      }
-
-      // Set the retrieved data
-      m_dataLoading->setData(ws);
-
+void ALCInterface::importLoadedData(const std::string &workspaceName) {
+  if (const auto dataWS = getWorkspace(workspaceName)) {
+    if (dataWS->getNumberHistograms() != 1) {
+      logger.warning("Workspace " + workspaceName + " must contain one spectrum only.");
     } else {
-      // Error message
-      QMessageBox::critical(this, "Error",
-                            "Workspace " + QString::fromStdString(wsData) +
-                                " was not found");
+      m_dataLoading->setData(dataWS);
     }
-
-  } else if (currentStep == 1) {
-    // BaselineModelling step
-
-    std::string wsData = groupName + "_Baseline_Workspace";
-
-    if (AnalysisDataService::Instance().doesExist(wsData)) {
-
-      MatrixWorkspace_sptr dataWs =
-          AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(wsData);
-
-      // Check that ws contains three spectra
-      if (dataWs->getNumberHistograms() != 3) {
-        QMessageBox::critical(this, "Error",
-                              "Workspace " + QString::fromStdString(wsData) +
-                                  " must contain three spectra");
-        return;
-      }
-
-      // Set the retrieved workspace
-      m_baselineModellingModel->setData(dataWs);
-      m_baselineModellingModel->setCorrectedData(dataWs);
-
-    } else {
-      // Error message
-      QMessageBox::critical(this, "Error",
-                            "Workspace " + QString::fromStdString(wsData) +
-                                " was not found");
-    }
-
-  } else if (currentStep == 2) {
-    // PeakFitting step
-
-    std::string wsData = groupName + "_Peaks_Workspace";
-
-    if (AnalysisDataService::Instance().doesExist(wsData)) {
-
-      MatrixWorkspace_sptr dataWs =
-          AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(wsData);
-
-      // Check that ws contains one spectrum only
-      if (dataWs->getNumberHistograms() < 3) {
-        QMessageBox::critical(this, "Error",
-                              "Workspace " + QString::fromStdString(wsData) +
-                                  " must contain at least three spectra");
-        return;
-      }
-
-      // Set the retrieved data
-      m_peakFittingModel->setData(dataWs);
-
-    } else {
-      // Error message
-      QMessageBox::critical(this, "Error",
-                            "Workspace " + QString::fromStdString(wsData) +
-                                " was not found");
-    }
-
-  } else {
-    // Exception: we can never get here
-    throw std::runtime_error("Fatal error in ALC interface");
   }
 }
 
-} // namespace CustomInterfaces
-} // namespace MantidQt
+void ALCInterface::importBaselineData(const std::string &workspaceName) {
+  if (const auto baselineWS = getWorkspace(workspaceName)) {
+    if (baselineWS->getNumberHistograms() != 3) {
+      logger.warning("Workspace " + workspaceName + " must contain three spectra.");
+    } else {
+      m_baselineModellingModel->setData(baselineWS);
+      m_baselineModellingModel->setCorrectedData(baselineWS);
+    }
+  }
+}
+
+void ALCInterface::importPeakData(const std::string &workspaceName) {
+  if (const auto peaksWS = getWorkspace(workspaceName)) {
+    if (peaksWS->getNumberHistograms() < 3) {
+      logger.warning("Workspace " + workspaceName + " must contain at least three spectra.");
+    } else {
+      m_peakFittingModel->setData(peaksWS);
+    }
+  }
+}
+
+/**
+ * Handles when External Plot is pressed on the ALC interface
+ */
+void ALCInterface::externalPlotRequested() {
+  // Get current step to determine what data to externally plot
+  switch (m_ui.stepView->currentIndex()) {
+  case DataLoading:
+    externalPlotDataLoading();
+    break;
+  case BaselineModel:
+    externalPlotBaselineModel();
+    break;
+  case PeakFitting:
+    externalPlotPeakFitting();
+    break;
+  }
+}
+
+/**
+ * Plots in workbench the single workspace from the data given
+ * @param data The workspace to add to the ADS before plotting
+ * @param workspaceName The name of workspace to plot
+ * @param workspaceIndices String list of indices to plot (e.g.
+ * '0-2,5,7-10')
+ * @param errorBars Boolean to add/remove error bars to plot
+ * @param kwargs The kwargs used when plotting the workspace
+ */
+void ALCInterface::externallyPlotWorkspace(MatrixWorkspace_sptr &data, std::string const &workspaceName,
+                                           std::string const &workspaceIndices, bool errorBars,
+                                           boost::optional<QHash<QString, QVariant>> const &kwargs) {
+  AnalysisDataService::Instance().addOrReplace(workspaceName, data);
+  m_externalPlotter->plotSpectra(workspaceName, workspaceIndices, errorBars, kwargs);
+}
+
+/**
+ * Plots in workbench all the provided workspaces from the data given
+ * @param data The workspace to add to the ADS before plotting
+ * @param workspaceNames List of names of workspaces to plot
+ * @param workspaceIndices List of indices to plot
+ * @param errorBars List of booleans to add/remove error bars to each line individually
+ * @param kwargs The kwargs used when plotting each of the workspaces
+ */
+void ALCInterface::externallyPlotWorkspaces(MatrixWorkspace_sptr &data, std::vector<std::string> const &workspaceNames,
+                                            std::vector<int> const &workspaceIndices,
+                                            std::vector<bool> const &errorBars,
+                                            std::vector<boost::optional<QHash<QString, QVariant>>> const &kwargs) {
+  AnalysisDataService::Instance().addOrReplace(workspaceNames[0], data);
+  m_externalPlotter->plotCorrespondingSpectra(workspaceNames, workspaceIndices, errorBars, kwargs);
+}
+
+/**
+ * Handle Data Loading external plot requested. Will plot the loaded data if available
+ */
+void ALCInterface::externalPlotDataLoading() {
+  if (auto data = m_dataLoading->exportWorkspace()) {
+    externallyPlotWorkspace(data, "ALC_External_Plot_Loaded_Data", "0", true, createPointKwargs());
+  } else
+    logger.warning("Load some data before externally plotting");
+}
+
+/**
+ * Handle Baseline Model external plot requested. Will plot the baseline model data if available otherwise will plot the
+ * loaded data if available
+ */
+void ALCInterface::externalPlotBaselineModel() {
+  if (auto data = m_baselineModellingModel->exportWorkspace()) {
+    externallyPlotWorkspaces(data, std::vector<std::string>{2, "ALC_External_Plot_Baseline_Workspace"},
+                             std::vector<int>{0, 1}, std::vector<bool>{true, false}, createPointAndLineKwargs());
+  } else {
+    // If we don't have a baseline model workspace, try to plot the raw data from the data loading tab
+    externalPlotDataLoading();
+  }
+}
+
+/**
+ * Handle Baseline Model external plot requested. Will plot the peak fitting data if available otherwise will plot the
+ * corrected data from the baseline model if available
+ */
+void ALCInterface::externalPlotPeakFitting() {
+  if (auto data = m_peakFittingModel->exportWorkspace()) {
+    externallyPlotWorkspaces(data, std::vector<std::string>{2, "ALC_External_Plot_Peaks_Workspace"},
+                             std::vector<int>{0, 1}, std::vector<bool>{true, false}, createPointAndLineKwargs());
+  } else {
+    // If we don't have a peaks fit workspace, try to plot the raw peak data from the baseline model workspace (diff
+    // spec (2))
+    if (auto data = m_baselineModellingModel->exportWorkspace()) {
+      // Plot the diff spec from the baseline model workspace
+      externallyPlotWorkspace(data, "ALC_External_Plot_Baseline_Workspace", "2", true, createPointKwargs());
+    } else
+      logger.warning("Perform a baseline fit before externally plotting");
+  }
+}
+
+} // namespace MantidQt::CustomInterfaces

@@ -20,16 +20,13 @@ namespace {
 Mantid::Kernel::Logger g_log("DensityOfStates");
 } // namespace
 
-namespace MantidQt {
-namespace CustomInterfaces {
-DensityOfStates::DensityOfStates(QWidget *parent)
-    : IndirectSimulationTab(parent) {
+namespace MantidQt::CustomInterfaces {
+DensityOfStates::DensityOfStates(QWidget *parent) : IndirectSimulationTab(parent) {
   m_uiForm.setupUi(parent);
-  setOutputPlotOptionsPresenter(std::make_unique<IndirectPlotOptionsPresenter>(
-      m_uiForm.ipoPlotOptions, this, PlotWidget::Spectra));
+  setOutputPlotOptionsPresenter(
+      std::make_unique<IndirectPlotOptionsPresenter>(m_uiForm.ipoPlotOptions, PlotWidget::Spectra));
 
-  connect(m_uiForm.mwInputFile, SIGNAL(filesFound()), this,
-          SLOT(handleFileChange()));
+  connect(m_uiForm.mwInputFile, SIGNAL(filesFound()), this, SLOT(handleFileChange()));
 
   connect(m_uiForm.pbRun, SIGNAL(clicked()), this, SLOT(runClicked()));
   connect(m_uiForm.pbSave, SIGNAL(clicked()), this, SLOT(saveClicked()));
@@ -47,16 +44,12 @@ void DensityOfStates::setup() {}
 bool DensityOfStates::validate() {
   UserInputValidator uiv;
 
-  // Ensure there are ions selected when using DensityOfStates sectrum with
-  // .phonon file
-  QString filename = m_uiForm.mwInputFile->getFirstFilename();
-  QFileInfo fileInfo(filename);
-  bool isPhononFile = fileInfo.suffix() == "phonon";
-
+  const auto filename = m_uiForm.mwInputFile->getFirstFilename();
+  InputFormat format = filenameToFormat(filename);
   QString specType = m_uiForm.cbSpectrumType->currentText();
   auto items = m_uiForm.lwIons->selectedItems();
 
-  if (specType == "DensityOfStates" && isPhononFile && items.size() < 1)
+  if (specType == "DensityOfStates" && isPdosFile(format) && items.size() < 1)
     uiv.addErrorMessage("Must select at least one ion for DensityOfStates.");
 
   // Give error message when there are errors
@@ -73,19 +66,15 @@ void DensityOfStates::run() {
   setRunIsRunning(true);
 
   // Get the SimulatedDensityOfStates algorithm
-  auto dosAlgo =
-      AlgorithmManager::Instance().create("SimulatedDensityOfStates");
+  auto dosAlgo = AlgorithmManager::Instance().create("SimulatedDensityOfStates");
 
   const auto filename = m_uiForm.mwInputFile->getFirstFilename();
-  QFileInfo inputFileInfo(filename);
   const auto specType = m_uiForm.cbSpectrumType->currentText();
-  const auto isPhononFile = inputFileInfo.suffix() == "phonon";
+  const auto filePropName = formatToFilePropName(filenameToFormat(filename));
 
-  std::string filePropName("CASTEPFile");
-  if (isPhononFile)
-    filePropName = "PHONONFile";
+  // QFileInfo inputFileInfo(filename);
 
-  m_outputWsName = inputFileInfo.baseName() + "_" + specType;
+  m_outputWsName = QFileInfo(filename).baseName() + "_" + specType;
 
   // Set common properties
   dosAlgo->setProperty(filePropName, filename.toStdString());
@@ -114,8 +103,7 @@ void DensityOfStates::run() {
     dosAlgo->setProperty("SpectrumType", "DOS");
 
     const auto crossSectionScale = m_uiForm.ckCrossSectionScale->isChecked();
-    const auto crossSectionScaleType =
-        m_uiForm.cbCrossSectionScale->currentText().toStdString();
+    const auto crossSectionScaleType = m_uiForm.cbCrossSectionScale->currentText().toStdString();
     if (crossSectionScale)
       dosAlgo->setProperty("ScaleByCrossSection", crossSectionScaleType);
 
@@ -143,8 +131,7 @@ void DensityOfStates::run() {
 
   m_batchAlgoRunner->addAlgorithm(dosAlgo);
 
-  connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this,
-          SLOT(dosAlgoComplete(bool)));
+  connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this, SLOT(dosAlgoComplete(bool)));
   m_batchAlgoRunner->executeBatchAsync();
 }
 
@@ -154,8 +141,7 @@ void DensityOfStates::run() {
  * @param error If the algorithm failed
  */
 void DensityOfStates::dosAlgoComplete(bool error) {
-  disconnect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this,
-             SLOT(dosAlgoComplete(bool)));
+  disconnect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this, SLOT(dosAlgoComplete(bool)));
 
   setRunIsRunning(false);
   if (error)
@@ -169,26 +155,20 @@ void DensityOfStates::dosAlgoComplete(bool error) {
  */
 void DensityOfStates::handleFileChange() {
   QString filename = m_uiForm.mwInputFile->getFirstFilename();
+  InputFormat fileFormat = filenameToFormat(filename);
+  bool pdosAvailable = isPdosFile(fileFormat);
 
-  // Check if we have a .phonon file
-  QFileInfo fileInfo(filename);
-  bool isPhononFile = fileInfo.suffix() == "phonon";
-
-  std::string filePropName("CASTEPFile");
-  if (isPhononFile) {
-    filePropName = "PHONONFile";
+  if (pdosAvailable) {
     // Load the ion table to populate the list of ions
-    IAlgorithm_sptr ionTableAlgo =
-        AlgorithmManager::Instance().create("SimulatedDensityOfStates");
+    IAlgorithm_sptr ionTableAlgo = AlgorithmManager::Instance().create("SimulatedDensityOfStates");
     ionTableAlgo->initialize();
-    ionTableAlgo->setProperty(filePropName, filename.toStdString());
+    ionTableAlgo->setProperty(formatToFilePropName(fileFormat), filename.toStdString());
     ionTableAlgo->setProperty("SpectrumType", "IonTable");
     ionTableAlgo->setProperty("OutputWorkspace", "__dos_ions");
 
     m_batchAlgoRunner->addAlgorithm(ionTableAlgo);
 
-    connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this,
-            SLOT(ionLoadComplete(bool)));
+    connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this, SLOT(ionLoadComplete(bool)));
     m_batchAlgoRunner->executeBatchAsync();
   } else {
     m_uiForm.lwIons->clear();
@@ -196,10 +176,10 @@ void DensityOfStates::handleFileChange() {
   }
 
   // Enable partial DOS related optons when they can be used
-  m_uiForm.lwIons->setEnabled(isPhononFile);
-  m_uiForm.pbSelectAllIons->setEnabled(isPhononFile);
-  m_uiForm.pbDeselectAllIons->setEnabled(isPhononFile);
-  m_uiForm.ckCrossSectionScale->setEnabled(isPhononFile);
+  m_uiForm.lwIons->setEnabled(pdosAvailable);
+  m_uiForm.pbSelectAllIons->setEnabled(pdosAvailable);
+  m_uiForm.pbDeselectAllIons->setEnabled(pdosAvailable);
+  m_uiForm.ckCrossSectionScale->setEnabled(pdosAvailable);
 }
 
 /**
@@ -209,33 +189,32 @@ void DensityOfStates::handleFileChange() {
  * @param error If the algorithm failed
  */
 void DensityOfStates::ionLoadComplete(bool error) {
-  disconnect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this,
-             SLOT(ionLoadComplete(bool)));
+  disconnect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this, SLOT(ionLoadComplete(bool)));
 
-  if (error)
-    g_log.error("Could not get a list of ions from .phonon file");
+  if (error) {
+    g_log.error("Could not get a list of ions from input file");
+  } else {
 
-  // Get the list of ions from algorithm
-  auto ionTable =
-      AnalysisDataService::Instance().retrieveWS<ITableWorkspace>("__dos_ions");
-  Column_sptr ionColumn = ionTable->getColumn("Species");
-  size_t numIons = ionColumn->size();
+    // Get the list of ions from algorithm
+    auto ionTable = AnalysisDataService::Instance().retrieveWS<ITableWorkspace>("__dos_ions");
+    Column_sptr ionColumn = ionTable->getColumn("Species");
+    size_t numIons = ionColumn->size();
 
-  // Remove old ions
-  m_uiForm.lwIons->clear();
+    // Remove old ions
+    m_uiForm.lwIons->clear();
 
-  // Add ions to list
-  QStringList ionSpecies;
-  for (size_t ion = 0; ion < numIons; ion++) {
-    const QString species =
-        QString::fromStdString(ionColumn->cell<std::string>(ion));
-    if (!ionSpecies.contains(species))
-      ionSpecies << species;
+    // Add ions to list
+    QStringList ionSpecies;
+    for (size_t ion = 0; ion < numIons; ion++) {
+      const QString species = QString::fromStdString(ionColumn->cell<std::string>(ion));
+      if (!ionSpecies.contains(species))
+        ionSpecies << species;
+    }
+    m_uiForm.lwIons->addItems(ionSpecies);
+
+    // Select all ions by default
+    m_uiForm.lwIons->selectAll();
   }
-  m_uiForm.lwIons->addItems(ionSpecies);
-
-  // Select all ions by default
-  m_uiForm.lwIons->selectAll();
 }
 
 /**
@@ -244,9 +223,7 @@ void DensityOfStates::ionLoadComplete(bool error) {
  *
  * @param settings :: The settings to loading into the interface
  */
-void DensityOfStates::loadSettings(const QSettings &settings) {
-  m_uiForm.mwInputFile->readSettings(settings.group());
-}
+void DensityOfStates::loadSettings(const QSettings &settings) { m_uiForm.mwInputFile->readSettings(settings.group()); }
 
 void DensityOfStates::runClicked() {
   clearOutputPlotOptionsWorkspaces();
@@ -272,13 +249,59 @@ void DensityOfStates::setButtonsEnabled(bool enabled) {
   setSaveEnabled(enabled);
 }
 
-void DensityOfStates::setRunEnabled(bool enabled) {
-  m_uiForm.pbRun->setEnabled(enabled);
+void DensityOfStates::setRunEnabled(bool enabled) { m_uiForm.pbRun->setEnabled(enabled); }
+
+void DensityOfStates::setSaveEnabled(bool enabled) { m_uiForm.pbSave->setEnabled(enabled); }
+
+/**
+ * Handle file formats
+ */
+
+enum class DensityOfStates::InputFormat : int { Unsupported = 0, Phonon, Castep, ForceConstants };
+
+DensityOfStates::InputFormat DensityOfStates::filenameToFormat(QString filename) {
+  QFileInfo inputFileInfo(filename);
+  const auto suffix = inputFileInfo.suffix().toStdString();
+
+  InputFormat format;
+
+  if (suffix == "phonon") {
+    format = InputFormat::Phonon;
+  } else if (suffix == "castep") {
+    format = InputFormat::Castep;
+  } else if (suffix == "castep_bin") {
+    format = InputFormat::ForceConstants;
+  } else if (suffix == "yaml") {
+    format = InputFormat::ForceConstants;
+  } else {
+    format = InputFormat::Unsupported;
+  }
+
+  return format;
 }
 
-void DensityOfStates::setSaveEnabled(bool enabled) {
-  m_uiForm.pbSave->setEnabled(enabled);
+std::string DensityOfStates::formatToFilePropName(InputFormat format) {
+  std::string filePropName;
+
+  switch (format) {
+  case InputFormat::Phonon:
+    filePropName = "PHONONFile";
+    break;
+  case InputFormat::Castep:
+    filePropName = "CASTEPFile";
+    break;
+  case InputFormat::ForceConstants:
+    filePropName = "ForceConstantsFile";
+    break;
+  default:
+    g_log.error("Could not determine appropriate input field for this file type. ");
+  }
+
+  return filePropName;
 }
 
-} // namespace CustomInterfaces
-} // namespace MantidQt
+bool DensityOfStates::isPdosFile(InputFormat dosFileFormat) {
+  return (dosFileFormat == InputFormat::Phonon) || (dosFileFormat == InputFormat::ForceConstants);
+}
+
+} // namespace MantidQt::CustomInterfaces

@@ -6,17 +6,16 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidMDAlgorithms/CentroidPeaksMD2.h"
 #include "MantidAPI/IMDEventWorkspace.h"
+#include "MantidAPI/IPeaksWorkspace.h"
 #include "MantidDataObjects/CoordTransformDistance.h"
+#include "MantidDataObjects/LeanElasticPeaksWorkspace.h"
 #include "MantidDataObjects/MDEventFactory.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/System.h"
 #include "MantidMDAlgorithms/IntegratePeaksMD.h"
 
-using Mantid::DataObjects::PeaksWorkspace;
-
-namespace Mantid {
-namespace MDAlgorithms {
+namespace Mantid::MDAlgorithms {
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(CentroidPeaksMD2)
@@ -31,25 +30,19 @@ using namespace Mantid::DataObjects;
 /** Initialize the algorithm's properties.
  */
 void CentroidPeaksMD2::init() {
-  declareProperty(std::make_unique<WorkspaceProperty<IMDEventWorkspace>>(
-                      "InputWorkspace", "", Direction::Input),
+  declareProperty(std::make_unique<WorkspaceProperty<IMDEventWorkspace>>("InputWorkspace", "", Direction::Input),
                   "An input MDEventWorkspace.");
 
-  declareProperty(
-      std::make_unique<PropertyWithValue<double>>("PeakRadius", 1.0,
-                                                  Direction::Input),
-      "Fixed radius around each peak position in which to calculate the "
-      "centroid.");
+  declareProperty(std::make_unique<PropertyWithValue<double>>("PeakRadius", 1.0, Direction::Input),
+                  "Fixed radius around each peak position in which to calculate the "
+                  "centroid.");
 
-  declareProperty(std::make_unique<WorkspaceProperty<PeaksWorkspace>>(
-                      "PeaksWorkspace", "", Direction::Input),
+  declareProperty(std::make_unique<WorkspaceProperty<IPeaksWorkspace>>("PeaksWorkspace", "", Direction::Input),
                   "A PeaksWorkspace containing the peaks to centroid.");
 
-  declareProperty(
-      std::make_unique<WorkspaceProperty<PeaksWorkspace>>("OutputWorkspace", "",
-                                                          Direction::Output),
-      "The output PeaksWorkspace will be a copy of the input PeaksWorkspace "
-      "with the peaks' positions modified by the new found centroids.");
+  declareProperty(std::make_unique<WorkspaceProperty<IPeaksWorkspace>>("OutputWorkspace", "", Direction::Output),
+                  "The output PeaksWorkspace will be a copy of the input PeaksWorkspace "
+                  "with the peaks' positions modified by the new found centroids.");
 }
 
 //----------------------------------------------------------------------------------------------
@@ -57,19 +50,16 @@ void CentroidPeaksMD2::init() {
  * class
  * @param ws ::  MDEventWorkspace to integrate
  */
-template <typename MDE, size_t nd>
-void CentroidPeaksMD2::integrate(typename MDEventWorkspace<MDE, nd>::sptr ws) {
+template <typename MDE, size_t nd> void CentroidPeaksMD2::integrate(typename MDEventWorkspace<MDE, nd>::sptr ws) {
   if (nd != 3)
     throw std::invalid_argument("For now, we expect the input MDEventWorkspace "
                                 "to have 3 dimensions only.");
 
   /// Peak workspace to centroid
-  Mantid::DataObjects::PeaksWorkspace_sptr inPeakWS =
-      getProperty("PeaksWorkspace");
+  IPeaksWorkspace_sptr inPeakWS = getProperty("PeaksWorkspace");
 
   /// Output peaks workspace, create if needed
-  Mantid::DataObjects::PeaksWorkspace_sptr peakWS =
-      getProperty("OutputWorkspace");
+  IPeaksWorkspace_sptr peakWS = getProperty("OutputWorkspace");
 
   if (peakWS != inPeakWS)
     peakWS = inPeakWS->clone();
@@ -79,12 +69,14 @@ void CentroidPeaksMD2::integrate(typename MDEventWorkspace<MDE, nd>::sptr ws) {
   /// Radius to use around peaks
   double PeakRadius = getProperty("PeakRadius");
 
-  // cppcheck-suppress syntaxError
     PRAGMA_OMP(parallel for schedule(dynamic, 10) )
     for (int i = 0; i < int(peakWS->getNumberPeaks()); ++i) {
       // Get a direct ref to that peak.
       IPeak &p = peakWS->getPeak(i);
-      double detectorDistance = p.getL2();
+      Peak *peak = dynamic_cast<Peak *>(&p);
+      double detectorDistance = 0.;
+      if (peak)
+        detectorDistance = p.getL2();
 
       // Get the peak center as a position in the dimensions of the workspace
       V3D pos;
@@ -111,9 +103,7 @@ void CentroidPeaksMD2::integrate(typename MDEventWorkspace<MDE, nd>::sptr ws) {
         centroid[d] = 0.0;
 
       // Perform centroid
-      ws->getBox()->centroidSphere(
-          sphere, static_cast<coord_t>(PeakRadius * PeakRadius), centroid,
-          signal);
+      ws->getBox()->centroidSphere(sphere, static_cast<coord_t>(PeakRadius * PeakRadius), centroid, signal);
 
       // Normalize by signal
       if (signal != 0.0) {
@@ -128,11 +118,13 @@ void CentroidPeaksMD2::integrate(typename MDEventWorkspace<MDE, nd>::sptr ws) {
           if (CoordinatesToUse == 1) //"Q (lab frame)"
           {
             p.setQLabFrame(vecCentroid, detectorDistance);
-            p.findDetector();
+            if (peak)
+              peak->findDetector();
           } else if (CoordinatesToUse == 2) //"Q (sample frame)"
           {
             p.setQSampleFrame(vecCentroid, detectorDistance);
-            p.findDetector();
+            if (peak)
+              peak->findDetector();
           } else if (CoordinatesToUse == 3) //"HKL"
           {
             p.setHKL(vecCentroid);
@@ -142,12 +134,10 @@ void CentroidPeaksMD2::integrate(typename MDEventWorkspace<MDE, nd>::sptr ws) {
           g_log.warning() << e.what() << '\n';
         }
 
-        g_log.information() << "Peak " << i << " at " << pos << ": signal "
-                            << signal << ", centroid " << vecCentroid << " in "
-                            << CoordinatesToUse << '\n';
+        g_log.information() << "Peak " << i << " at " << pos << ": signal " << signal << ", centroid " << vecCentroid
+                            << " in " << CoordinatesToUse << '\n';
       } else {
-        g_log.information() << "Peak " << i << " at " << pos
-                            << " had no signal, and could not be centroided.\n";
+        g_log.information() << "Peak " << i << " at " << pos << " had no signal, and could not be centroided.\n";
       }
     }
 
@@ -164,5 +154,4 @@ void CentroidPeaksMD2::exec() {
   CALL_MDEVENT_FUNCTION3(this->integrate, inWS);
 }
 
-} // namespace MDAlgorithms
-} // namespace Mantid
+} // namespace Mantid::MDAlgorithms

@@ -26,8 +26,7 @@ namespace {
 /// the total number of tests that results are reported for here
 const int NUMTESTS = 5;
 /// the list of tests that we display results for
-const QString TESTS[NUMTESTS] = {"Hard mask", "First detector vanadium test",
-                                 "Second detector vanadium test",
+const QString TESTS[NUMTESTS] = {"Hard mask", "First detector vanadium test", "Second detector vanadium test",
                                  "Background test", "PSD Bleed test"};
 
 int find_test(const std::string &test_name) {
@@ -46,8 +45,7 @@ int find_test(const std::string &test_name) {
 // Public member functions
 //----------------------
 /// Constructor
-DiagResults::DiagResults(QWidget *parent)
-    : MantidDialog(parent), m_Grid(new QGridLayout) {
+DiagResults::DiagResults(QWidget *parent) : MantidDialog(parent), m_Grid(new QGridLayout) {
   setWindowTitle("Failed detectors list");
 
   addRow("Test", "Number of failed spectra");
@@ -73,8 +71,7 @@ DiagResults::DiagResults(QWidget *parent)
  */
 void DiagResults::updateResults(const QString &testSummary) {
   if (!testSummary.contains("Diagnostic Test Summary")) {
-    throw std::runtime_error(
-        "Diagnostic results string does not have expected format.");
+    throw std::runtime_error("Diagnostic results string does not have expected format.");
   }
 
   QStringList results = testSummary.split("\n");
@@ -93,8 +90,7 @@ void DiagResults::updateResults(const QString &testSummary) {
     }
     QStringList NameValPair = results[i].split(":");
     tn = NameValPair[0].toStdString();
-    QStringList columns =
-        NameValPair[1].split(QRegExp("\\s+"), QString::SkipEmptyParts);
+    QStringList columns = NameValPair[1].split(QRegExp("\\s+"), QString::SkipEmptyParts);
     Q_ASSERT(columns.size() == 2);
     QString status;
     if (columns[0] == "None")
@@ -112,8 +108,7 @@ void DiagResults::updateResults(const QString &testSummary) {
 // Private member functions
 //----------------------
 /// insert a row at the bottom of the grid
-int DiagResults::addRow(const QString &firstColumn,
-                        const QString &secondColumn) {
+int DiagResults::addRow(const QString &firstColumn, const QString &secondColumn) {
   // set row to one past the end of the number of rows that currently exist
   int row = m_Grid->rowCount();
   m_Grid->addWidget(new QLabel(firstColumn), row, 0);

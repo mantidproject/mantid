@@ -19,8 +19,9 @@ import sys
 import mantid.api
 import mantid.kernel
 import mantid.plots.modest_image
-from mantid.plots.datafunctions import get_axes_labels, get_bins, get_data_uneven_flag, get_distribution, \
-    get_matrix_2d_ragged, get_matrix_2d_data, get_md_data1d, get_md_data2d_bin_bounds, \
+from mantid.plots.resampling_image import samplingimage
+from mantid.plots.datafunctions import get_axes_labels, get_bins, get_distribution, \
+    get_matrix_2d_data, get_md_data1d, get_md_data2d_bin_bounds, \
     get_md_data2d_bin_centers, get_normalization, get_sample_log, get_spectrum, get_uneven_data, \
     get_wksp_index_dist_and_label, check_resample_to_regular_grid, get_indices, get_normalize_by_bin_width
 from mantid.plots.utility import MantidAxType
@@ -28,24 +29,60 @@ from mantid.plots.utility import MantidAxType
 # Used for initializing searches of max, min values
 _LARGEST, _SMALLEST = float(sys.maxsize), -sys.maxsize
 
-
 # ================================================
 # Private 2D Helper functions
 # ================================================
 
-def _setLabels1D(axes, workspace, indices=None, normalize_by_bin_width=True,
+
+def _pcolormesh_nonortho(axes, workspace, nonortho_tr, *args, **kwargs):
+    '''
+    Essentially the same as :meth:`matplotlib.axes.Axes.pcolormesh` and adds arguments related to
+    plotting slices on nonorthogonal axes. It requires a non-standard Axes type. See
+    https://matplotlib.org/examples/axes_grid/demo_curvelinear_grid.html.
+
+    NOTE: Do NOT make this part of the public API until a discussion has been had about whether this
+    api is sensible. It is placed here for testing purposes and is used in the sliceviewer.
+
+    :param axes:      :class:`matplotlib.axes.Axes` object that will do the plotting
+    :param workspace: :class:`mantid.api.MatrixWorkspace` or :class:`mantid.api.IMDHistoWorkspace`
+                      to extract the data from
+    :param nonortho_tr: Callable accepting two numpy arrays to transfrom from nonorthogonal
+                        coordinates to rectilinear image coordinates
+    :param transpose: ``bool`` to transpose the x and y axes of the plotted dimensions of an MDHistoWorkspace
+    '''
+    transpose = kwargs.pop('transpose', False)
+    (normalization, kwargs) = get_normalization(workspace, **kwargs)
+    indices, kwargs = get_indices(workspace, **kwargs)
+    x, y, z = get_md_data2d_bin_bounds(workspace,
+                                       indices=indices,
+                                       normalization=normalization,
+                                       transpose=transpose)
+    X, Y = numpy.meshgrid(x, y)
+    xx, yy = nonortho_tr(X, Y)
+    _setLabels2D(axes, workspace, indices, transpose)
+    return axes.pcolormesh(xx, yy, z, *args, **kwargs)
+
+
+def _setLabels1D(axes,
+                 workspace,
+                 indices=None,
+                 normalize_by_bin_width=True,
                  axis=MantidAxType.SPECTRUM):
     '''
     helper function to automatically set axes labels for 1D plots
     '''
     labels = get_axes_labels(workspace, indices, normalize_by_bin_width)
     # We assume that previous checking has ensured axis can only be 1 of 2 types
-    axes.set_xlabel(labels[1 if axis == MantidAxType.SPECTRUM else 2])
+    axes.set_xlabel(labels[2 if axis == MantidAxType.BIN else 1])
     axes.set_ylabel(labels[0])
 
 
-def _setLabels2D(axes, workspace, indices=None, transpose=False,
-                 xscale=None, normalize_by_bin_width=True):
+def _setLabels2D(axes,
+                 workspace,
+                 indices=None,
+                 transpose=False,
+                 xscale=None,
+                 normalize_by_bin_width=True):
     '''
     helper function to automatically set axes labels for 2D plots
     '''
@@ -56,7 +93,7 @@ def _setLabels2D(axes, workspace, indices=None, transpose=False,
     else:
         axes.set_xlabel(labels[1])
         axes.set_ylabel(labels[2])
-    axes.set_title(labels[0])
+    axes.colorbar_label = labels[0]
     if xscale is None and hasattr(workspace, 'isCommonLogBins') and workspace.isCommonLogBins():
         axes.set_xscale('log')
     elif xscale is not None:
@@ -72,16 +109,28 @@ def _get_data_for_plot(axes, workspace, kwargs, with_dy=False, with_dx=False):
         axis = None
     else:
         axis = MantidAxType(kwargs.pop("axis", MantidAxType.SPECTRUM))
-        normalize_by_bin_width, kwargs = get_normalize_by_bin_width(
-            workspace, axes, **kwargs)
-        workspace_index, distribution, kwargs = get_wksp_index_dist_and_label(workspace, axis, **kwargs)
+        normalize_by_bin_width, kwargs = get_normalize_by_bin_width(workspace, axes, **kwargs)
+        workspace_index, distribution, kwargs = get_wksp_index_dist_and_label(
+            workspace, axis, **kwargs)
         if axis == MantidAxType.BIN:
-            # Overwrite any user specified xlabel
-            axes.set_xlabel("Spectrum")
+            # get_bin returns the bin *without the monitor data*
             x, y, dy, dx = get_bins(workspace, workspace_index, with_dy)
+            vertical_axis = workspace.getAxis(1)
+            if isinstance(vertical_axis, mantid.api.NumericAxis):
+                axes.set_xlabel(vertical_axis.getUnit().unitID())
+                values = vertical_axis.extractValues()
+                if isinstance(vertical_axis, mantid.api.BinEdgeAxis):
+                    # for bin edge axis we have one more edge than content
+                    values = (values[0:-1] + values[1:])/2.
+                # only take spectra not associated with a monitor
+                x = [values[i] for i in x]
+            if isinstance(vertical_axis, mantid.api.SpectraAxis):
+                spectrum_numbers = workspace.getSpectrumNumbers()
+                x = [spectrum_numbers[i] for i in x]
+
         elif axis == MantidAxType.SPECTRUM:
-            x, y, dy, dx = get_spectrum(workspace, workspace_index,
-                                        normalize_by_bin_width, with_dy, with_dx)
+            x, y, dy, dx = get_spectrum(workspace, workspace_index, normalize_by_bin_width, with_dy,
+                                        with_dx)
         else:
             raise ValueError("Axis {} is not a valid axis number.".format(axis))
         indices = None
@@ -91,6 +140,7 @@ def _get_data_for_plot(axes, workspace, kwargs, with_dy=False, with_dx=False):
 # ========================================================
 # Plot functions
 # ========================================================
+
 
 def _plot_impl(axes, workspace, args, kwargs):
     """
@@ -108,12 +158,18 @@ def _plot_impl(axes, workspace, args, kwargs):
             axes.set_xlabel('Time')
         kwargs['drawstyle'] = 'steps-post'
     else:
-        normalize_by_bin_width, kwargs = get_normalize_by_bin_width(
-            workspace, axes, **kwargs)
+        normalize_by_bin_width, kwargs = get_normalize_by_bin_width(workspace, axes, **kwargs)
+        # the get... function returns kwargs without 'normalize_by_bin_width', but it is needed in _get_data_for_plot to
+        # avoid reverting to the default norm setting, in the event that this function is being called as part of a plot
+        # restoration
+        kwargs['normalize_by_bin_width'] = normalize_by_bin_width
         x, y, _, _, indices, axis, kwargs = _get_data_for_plot(axes, workspace, kwargs)
         if kwargs.pop('update_axes_labels', True):
-            _setLabels1D(axes, workspace, indices,
-                         normalize_by_bin_width=normalize_by_bin_width, axis=axis)
+            _setLabels1D(axes,
+                         workspace,
+                         indices,
+                         normalize_by_bin_width=normalize_by_bin_width,
+                         axis=axis)
     kwargs.pop('normalize_by_bin_width', None)
     return x, y, args, kwargs
 
@@ -209,13 +265,18 @@ def errorbar(axes, workspace, *args, **kwargs):
     keyword for MDHistoWorkspaces. These type of workspaces have to have exactly one non integrated
     dimension
     """
-    normalize_by_bin_width, kwargs = get_normalize_by_bin_width(
-        workspace, axes, **kwargs)
-    x, y, dy, dx, indices, axis, kwargs = _get_data_for_plot(
-        axes, workspace, kwargs, with_dy=True, with_dx=False)
+    normalize_by_bin_width, kwargs = get_normalize_by_bin_width(workspace, axes, **kwargs)
+    x, y, dy, dx, indices, axis, kwargs = _get_data_for_plot(axes,
+                                                             workspace,
+                                                             kwargs,
+                                                             with_dy=True,
+                                                             with_dx=False)
     if kwargs.pop('update_axes_labels', True):
-        _setLabels1D(axes, workspace, indices,
-                     normalize_by_bin_width=normalize_by_bin_width, axis=axis)
+        _setLabels1D(axes,
+                     workspace,
+                     indices,
+                     normalize_by_bin_width=normalize_by_bin_width,
+                     axis=axis)
     kwargs.pop('normalize_by_bin_width', None)
 
     return axes.errorbar(x, y, dy, dx, *args, **kwargs)
@@ -300,7 +361,10 @@ def contour(axes, workspace, *args, **kwargs):
         _setLabels2D(axes, workspace, indices, transpose)
     else:
         (distribution, kwargs) = get_distribution(workspace, **kwargs)
-        (x, y, z) = get_matrix_2d_data(workspace, distribution, histogram2D=False, transpose=transpose)
+        (x, y, z) = get_matrix_2d_data(workspace,
+                                       distribution,
+                                       histogram2D=False,
+                                       transpose=transpose)
         _setLabels2D(axes, workspace, transpose=transpose)
     return axes.contour(x, y, z, *args, **kwargs)
 
@@ -339,7 +403,10 @@ def contourf(axes, workspace, *args, **kwargs):
         _setLabels2D(axes, workspace, indices, transpose)
     else:
         (distribution, kwargs) = get_distribution(workspace, **kwargs)
-        (x, y, z) = get_matrix_2d_data(workspace, distribution, histogram2D=False, transpose=transpose)
+        (x, y, z) = get_matrix_2d_data(workspace,
+                                       distribution,
+                                       histogram2D=False,
+                                       transpose=transpose)
         _setLabels2D(axes, workspace, transpose=transpose)
     return axes.contourf(x, y, z, *args, **kwargs)
 
@@ -431,8 +498,14 @@ def pcolor(axes, workspace, *args, **kwargs):
             kwargs['pcolortype'] = ''
             return _pcolorpieces(axes, workspace, distribution, *args, **kwargs)
         else:
-            (x, y, z) = get_matrix_2d_data(workspace, distribution, histogram2D=True, transpose=transpose)
-            _setLabels2D(axes, workspace, transpose=transpose, normalize_by_bin_width=normalize_by_bin_width)
+            (x, y, z) = get_matrix_2d_data(workspace,
+                                           distribution,
+                                           histogram2D=True,
+                                           transpose=transpose)
+            _setLabels2D(axes,
+                         workspace,
+                         transpose=transpose,
+                         normalize_by_bin_width=normalize_by_bin_width)
     return axes.pcolor(x, y, z, *args, **kwargs)
 
 
@@ -476,8 +549,14 @@ def pcolorfast(axes, workspace, *args, **kwargs):
             kwargs['pcolortype'] = 'fast'
             return _pcolorpieces(axes, workspace, distribution, *args, **kwargs)
         else:
-            (x, y, z) = get_matrix_2d_data(workspace, distribution, histogram2D=True, transpose=transpose)
-        _setLabels2D(axes, workspace, transpose=transpose, normalize_by_bin_width=normalize_by_bin_width)
+            (x, y, z) = get_matrix_2d_data(workspace,
+                                           distribution,
+                                           histogram2D=True,
+                                           transpose=transpose)
+        _setLabels2D(axes,
+                     workspace,
+                     transpose=transpose,
+                     normalize_by_bin_width=normalize_by_bin_width)
     return axes.pcolorfast(x, y, z, *args, **kwargs)
 
 
@@ -521,8 +600,14 @@ def pcolormesh(axes, workspace, *args, **kwargs):
             kwargs['pcolortype'] = 'mesh'
             return _pcolorpieces(axes, workspace, distribution, *args, **kwargs)
         else:
-            (x, y, z) = get_matrix_2d_data(workspace, distribution, histogram2D=True, transpose=transpose)
-        _setLabels2D(axes, workspace, transpose=transpose, normalize_by_bin_width=normalize_by_bin_width)
+            (x, y, z) = get_matrix_2d_data(workspace,
+                                           distribution,
+                                           histogram2D=True,
+                                           transpose=transpose)
+        _setLabels2D(axes,
+                     workspace,
+                     transpose=transpose,
+                     normalize_by_bin_width=normalize_by_bin_width)
     return axes.pcolormesh(x, y, z, *args, **kwargs)
 
 
@@ -552,27 +637,27 @@ def imshow(axes, workspace, *args, **kwargs):
                         number of bins, the polygons will be aligned with the axes
     :param transpose: ``bool`` to transpose the x and y axes of the plotted dimensions of an MDHistoWorkspace
     '''
-    transpose = kwargs.pop('transpose', False)
+    transpose = kwargs.get('transpose', False)
     if isinstance(workspace, mantid.dataobjects.MDHistoWorkspace):
         (normalization, kwargs) = get_normalization(workspace, **kwargs)
         indices, kwargs = get_indices(workspace, **kwargs)
         x, y, z = get_md_data2d_bin_bounds(workspace, normalization, indices, transpose)
         _setLabels2D(axes, workspace, indices, transpose)
+        if 'extent' not in kwargs:
+            if x.ndim == 2 and y.ndim == 2:
+                kwargs['extent'] = [x[0, 0], x[0, -1], y[0, 0], y[-1, 0]]
+            else:
+                kwargs['extent'] = [x[0], x[-1], y[0], y[-1]]
+        return mantid.plots.modest_image.imshow(axes, z, *args, **kwargs)
     else:
         (aligned, kwargs) = check_resample_to_regular_grid(workspace, **kwargs)
         (normalize_by_bin_width, kwargs) = get_normalize_by_bin_width(workspace, axes, **kwargs)
-        (distribution, kwargs) = get_distribution(workspace, **kwargs)
-        if aligned:
-            (x, y, z) = get_matrix_2d_ragged(workspace, normalize_by_bin_width, histogram2D=True, transpose=transpose)
-        else:
-            (x, y, z) = get_matrix_2d_data(workspace, distribution=distribution, histogram2D=True, transpose=transpose)
-        _setLabels2D(axes, workspace, transpose=transpose, normalize_by_bin_width=normalize_by_bin_width)
-    if 'extent' not in kwargs:
-        if x.ndim == 2 and y.ndim == 2:
-            kwargs['extent'] = [x[0, 0], x[0, -1], y[0, 0], y[-1, 0]]
-        else:
-            kwargs['extent'] = [x[0], x[-1], y[0], y[-1]]
-    return mantid.plots.modest_image.imshow(axes, z, *args, **kwargs)
+        kwargs['normalize_by_bin_width'] = normalize_by_bin_width
+        _setLabels2D(axes,
+                     workspace,
+                     transpose=transpose,
+                     normalize_by_bin_width=normalize_by_bin_width)
+        return samplingimage.imshow_sampling(axes, workspace=workspace, *args, **kwargs)
 
 
 def tripcolor(axes, workspace, *args, **kwargs):
@@ -612,7 +697,10 @@ def tripcolor(axes, workspace, *args, **kwargs):
         _setLabels2D(axes, workspace, indices, transpose)
     else:
         (distribution, kwargs) = get_distribution(workspace, **kwargs)
-        (x, y, z) = get_matrix_2d_data(workspace, distribution, histogram2D=False, transpose=transpose)
+        (x, y, z) = get_matrix_2d_data(workspace,
+                                       distribution,
+                                       histogram2D=False,
+                                       transpose=transpose)
         _setLabels2D(axes, workspace, transpose=transpose)
     return axes.tripcolor(x.ravel(), y.ravel(), z.ravel(), *args, **kwargs)
 
@@ -655,7 +743,10 @@ def tricontour(axes, workspace, *args, **kwargs):
         _setLabels2D(axes, workspace, indices, transpose)
     else:
         (distribution, kwargs) = get_distribution(workspace, **kwargs)
-        (x, y, z) = get_matrix_2d_data(workspace, distribution, histogram2D=False, transpose=transpose)
+        (x, y, z) = get_matrix_2d_data(workspace,
+                                       distribution,
+                                       histogram2D=False,
+                                       transpose=transpose)
         _setLabels2D(axes, workspace, transpose=transpose)
     # tricontour segfaults if many z values are not finite
     # https://github.com/matplotlib/matplotlib/issues/10167
@@ -707,7 +798,10 @@ def tricontourf(axes, workspace, *args, **kwargs):
         _setLabels2D(axes, workspace, indices, transpose)
     else:
         (distribution, kwargs) = get_distribution(workspace, **kwargs)
-        (x, y, z) = get_matrix_2d_data(workspace, distribution, histogram2D=False, transpose=transpose)
+        (x, y, z) = get_matrix_2d_data(workspace,
+                                       distribution,
+                                       histogram2D=False,
+                                       transpose=transpose)
         _setLabels2D(axes, workspace, transpose=transpose)
     # tricontourf segfaults if many z values are not finite
     # https://github.com/matplotlib/matplotlib/issues/10167
@@ -721,11 +815,12 @@ def tricontourf(axes, workspace, *args, **kwargs):
     return axes.tricontourf(x, y, z, *args, **kwargs)
 
 
-def update_colorplot_datalimits(axes, mappables):
+def update_colorplot_datalimits(axes, mappables, axis='both'):
     """
-    For an colorplot (imshow, pcolor*) plots update the data limits on the axes
+    For a colorplot (imshow, pcolor*) plots update the data limits on the axes
     to circumvent bugs in matplotlib
     :param mappables: An iterable of mappable for this axes
+    :param axis: {'both', 'x', 'y'} which axis to operate on.
     """
     # ax.relim in matplotlib < 2.2 doesn't take into account of images
     # and it doesn't support collections at all as of verison 3 so we'll take
@@ -737,8 +832,15 @@ def update_colorplot_datalimits(axes, mappables):
         xmin, xmax, ymin, ymax = get_colorplot_extents(mappable)
         xmin_all, xmax_all = min(xmin_all, xmin), max(xmax_all, xmax)
         ymin_all, ymax_all = min(ymin_all, ymin), max(ymax_all, ymax)
-    axes.update_datalim(((xmin_all, ymin_all), (xmax_all, ymax_all)))
-    axes.autoscale()
+
+    update_x = axis in ['x', 'both']
+    update_y = axis in ['y', 'both']
+    axes.update_datalim(((xmin_all, ymin_all), (xmax_all, ymax_all)), update_x, update_y)
+    axes.autoscale(axis=axis)
+    if axes.get_autoscalex_on():
+        axes.set_xlim((xmin_all, xmax_all), auto=None)
+    if axes.get_autoscaley_on():
+        axes.set_ylim((ymin_all, ymax_all), auto=None)
 
 
 def get_colorplot_extents(mappable):
@@ -748,7 +850,10 @@ def get_colorplot_extents(mappable):
     :return: (left, right, bottom, top)
     """
     if isinstance(mappable, mimage.AxesImage):
-        xmin, xmax, ymin, ymax = mappable.get_extent()
+        if hasattr(mappable, 'get_full_extent'):
+            xmin, xmax, ymin, ymax = mappable.get_full_extent()
+        else:
+            xmin, xmax, ymin, ymax = mappable.get_extent()
     elif isinstance(mappable, mcoll.QuadMesh):
         # coordinates are vertices of the grid
         coords = mappable._coordinates

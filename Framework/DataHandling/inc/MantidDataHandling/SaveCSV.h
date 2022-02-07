@@ -72,15 +72,11 @@ public:
   /// Algorithm's name for identification overriding a virtual method
   const std::string name() const override { return "SaveCSV"; };
   /// Summary of algorithms purpose
-  const std::string summary() const override {
-    return "Saves a 1D or 2D workspace to a CSV file.";
-  }
+  const std::string summary() const override { return "Saves a 1D or 2D workspace to a CSV file."; }
 
   /// Algorithm's version for identification overriding a virtual method
   int version() const override { return 1; };
-  const std::vector<std::string> seeAlso() const override {
-    return {"SaveAscii"};
-  }
+  const std::vector<std::string> seeAlso() const override { return {"SaveAscii"}; }
   /// Algorithm's category for identification overriding a virtual method
   const std::string category() const override { return "DataHandling\\Text"; }
 
@@ -92,8 +88,7 @@ private:
   void exec() override;
 
   /// Saves out x errors
-  void saveXerrors(std::ofstream &stream,
-                   const Mantid::DataObjects::Workspace2D_sptr &workspace,
+  void saveXerrors(std::ofstream &stream, const Mantid::DataObjects::Workspace2D_sptr &workspace,
                    const size_t numberOfHist);
 
   /// The name of the file used for storing the workspace

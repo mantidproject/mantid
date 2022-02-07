@@ -36,15 +36,11 @@ public:
 
   bool openFile(const std::string &fileName, const std::string &mode) override;
 
-  void saveBlock(const std::vector<float> & /* DataBlock */,
-                 const uint64_t /*blockPosition*/) const override;
-  void loadBlock(std::vector<float> & /* Block */,
-                 const uint64_t /*blockPosition*/,
+  void saveBlock(const std::vector<float> & /* DataBlock */, const uint64_t /*blockPosition*/) const override;
+  void loadBlock(std::vector<float> & /* Block */, const uint64_t /*blockPosition*/,
                  const size_t /*BlockSize*/) const override;
-  void saveBlock(const std::vector<double> & /* DataBlock */,
-                 const uint64_t /*blockPosition*/) const override;
-  void loadBlock(std::vector<double> & /* Block */,
-                 const uint64_t /*blockPosition*/,
+  void saveBlock(const std::vector<double> & /* DataBlock */, const uint64_t /*blockPosition*/) const override;
+  void loadBlock(std::vector<double> & /* Block */, const uint64_t /*blockPosition*/,
                  const size_t /*BlockSize*/) const override;
 
   void flushData() const override;
@@ -53,14 +49,59 @@ public:
   ~BoxControllerNeXusIO() override;
   // Auxiliary functions. Used to change default state of this object which is
   // not fully supported. Should be replaced by some IBoxControllerIO factory
-  void setDataType(const size_t blockSize,
-                   const std::string &typeName) override;
+  void setDataType(const size_t blockSize, const std::string &typeName) override;
   void getDataType(size_t &CoordSize, std::string &typeName) const override;
   //------------------------------------------------------------------------------------------------------------------------
   // Auxiliary functions (non-virtual, used for testing)
   int64_t getNDataColums() const { return m_BlockSize[1]; }
   // get pointer to the Nexus file --> compatribility testing only.
   ::NeXus::File *getFile() { return m_File.get(); }
+
+  /**@brief The version of the "event_data" Nexus dataset
+   *
+   * @details The "event_data" Nexus dataset may contain all or only a subset
+   * of the attributes of the current event object.
+   *
+   * | class      | attributes stored (besides coordinates)
+   * -------------------------------------------------------
+   *  MDLeanEvent | signal, error
+   *  MDEvent     | signal, error, run-index, detector-index
+   *  MDEvent     | signal, error, run-index, goniometer-index, detector-index
+   *
+   * The number of attributes stored (neglecting coordinates) define the version
+   */
+  enum class EventDataVersion : size_t { EDVLean = 2, EDVOriginal = 4, EDVGoniometer = 5 };
+
+  EventDataVersion getEventDataVersion() const { return m_EventDataVersion; }
+
+  void setEventDataVersion(const EventDataVersion &version);
+
+  /**
+   * @brief set the data version based on the number of attributes of the event,
+   * not counting its coordinates.
+   */
+  void setEventDataVersion(const size_t &traitsCount);
+
+  /**
+   * @brief Number of data items in Nexus dataset "data_event" associated
+   * with the particular event data version.
+   */
+  int64_t dataEventCount(void) const;
+
+  /**
+   * @brief Insert goniometer info in a block of event data, if necessary
+   *
+   * @details The dataset "event_data" in old Nexus files lack goniometer info,
+   * thus it's necessary to insert the default goniometerIndex value into
+   * a data-block that has been read from the file before it's consumed
+   * by MDEvent::dataToEvents()
+   *
+   * @param Block : the storage vector containing the event data
+   * @param accessMode : string specifying if we're reading from or writing to
+   * file. Valid values are "READ" and "WRITE"
+   */
+  template <typename FloatOrDouble>
+  void adjustEventDataBlock(std::vector<FloatOrDouble> &Block, const std::string &accessMode) const;
 
 private:
   /// Default size of the events block which can be written in the NeXus array
@@ -76,7 +117,7 @@ private:
   /// identifier if the file open only for reading or is  in read/write
   bool m_ReadOnly;
   /// The size of the events block which can be written in the neXus array at
-  /// once (continious part of the data block)
+  /// once (continuous part of the data block)
   size_t m_dataChunk;
   /// shared pointer to the box controller, which is repsoponsible for this IO
   API::BoxController *const m_bc;
@@ -92,7 +133,7 @@ private:
 
   // Mainly static information which may be split into different IO classes
   // selected through chein of responsibility.
-  /// number of bytes in the event coorinates (coord_t length). Set by
+  /// number of bytes in the event coordinates (coord_t length). Set by
   /// setDataType but can be defined statically with coord_t
   unsigned int m_CoordSize;
   /// possible event types this class understands. The enum numbers have to
@@ -100,15 +141,18 @@ private:
   /// defined in EVENT_TYPES_SUPPORTED vector
   enum EventType {
     LeanEvent = 0, //< the event consisting of signal error and event coordinate
-    FatEvent =
-        1 //< the event having the same as lean event plus RunID and detID
+    FatEvent = 1   //< the event having the same as lean event plus RunID and detID
     /// the type of event (currently MD event or MDLean event this class deals
     /// with. )
   } m_EventType;
 
   /// The version of the md events data block
   std::string m_EventsVersion;
-  /// the symblolic description of the event types currently supported by the
+
+  /// "data_event" dataset version in the current Nexus file
+  EventDataVersion m_EventDataVersion;
+
+  /// the symbolic description of the event types currently supported by the
   /// class
   std::vector<std::string> m_EventsTypesSupported;
   /// data headers used for different events types
@@ -127,9 +171,7 @@ private:
   void prepareNxSToWrite_CurVersion();
   void prepareNxSdata_CurVersion();
   // get the event type from event name
-  static EventType
-  TypeFromString(const std::vector<std::string> &typesSupported,
-                 const std::string &typeName);
+  static EventType TypeFromString(const std::vector<std::string> &typesSupported, const std::string &typeName);
   /// the enum, which suggests the way (currently)two possible data types are
   /// converted to each other
   enum CoordConversion {
@@ -140,11 +182,18 @@ private:
   } m_ReadConversion;
 
   template <typename Type>
-  void saveGenericBlock(const std::vector<Type> &DataBlock,
-                        const uint64_t blockPosition) const;
+  void saveGenericBlock(const std::vector<Type> &DataBlock, const uint64_t blockPosition) const;
+
+  /** Load generic data block from the opened NeXus file.
+    *@param Block         -- the storage vector to place data into
+    *@param blockPosition -- The starting place to read data from
+    *@param nPoints       -- number of data points (events) to read
+
+    *@returns Block -- resized block of data containing serialized events
+    representation.
+  */
   template <typename Type>
-  void loadGenericBlock(std::vector<Type> &Block, const uint64_t blockPosition,
-                        const size_t nPoints) const;
+  void loadGenericBlock(std::vector<Type> &Block, const uint64_t blockPosition, const size_t nPoints) const;
 };
 } // namespace DataObjects
 } // namespace Mantid

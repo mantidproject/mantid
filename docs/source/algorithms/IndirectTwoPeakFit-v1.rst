@@ -25,7 +25,7 @@ Usage
                      TotalRange='-0.5,0.5', ReducedWorkspace='__reduced_group', ScanWorkspace='__scan_workspace')
 
     # Perform a two peak fit
-    IndirectTwoPeakFit(SampleWorkspace='osiris92762_graphite002_red', EnergyMin=-0.5, 
+    IndirectTwoPeakFit(SampleWorkspace='osiris92762_graphite002_red', EnergyMin=-0.5,
                        EnergyMax=0.5, OutputName='osiris92762_graphite002_two_peak_fit')
 
 .. categories::

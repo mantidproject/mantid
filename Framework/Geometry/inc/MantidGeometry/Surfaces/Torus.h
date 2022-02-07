@@ -56,7 +56,7 @@ public:
 
   int setSurface(const std::string &Pstr) override;
   int side(const Kernel::V3D &R) const override;
-  int onSurface(const Kernel::V3D &R) const override;
+  bool onSurface(const Kernel::V3D &R) const override;
   double distance(const Kernel::V3D &Pt) const override;
 
   /// Return centre point
@@ -78,8 +78,7 @@ public:
   void setTubeRadius(double dist);
 
   void write(std::ostream &OX) const override;
-  void getBoundingBox(double &xmax, double &ymax, double &zmax, double &xmin,
-                      double &ymin, double &zmin) override;
+  void getBoundingBox(double &xmax, double &ymax, double &zmax, double &xmin, double &ymin, double &zmin) override;
 #ifdef ENABLE_OPENCASCADE
   TopoDS_Shape createShape() override;
 #endif

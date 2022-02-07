@@ -91,8 +91,8 @@ Example Algorithms
 -  :ref:`Rebin <algm-Rebin>`
    - An algorithm for altering the binning of the data in a
    :ref:`workspace <Workspace>`.
--  :ref:`LoadRaw <algm-LoadRaw>`
-   - An algorithm for loading the data from a RAW file into a
+-  :ref:`Load <algm-Load>`
+   - An algorithm for loading the data from a file into a
    :ref:`workspace <Workspace>`.
 -  :ref:`GroupDetectors <algm-GroupDetectors>`
    - An algorithm for grouping two or more detectors into a larger
@@ -102,7 +102,7 @@ Example Algorithms
 Writing your own algorithm
 --------------------------
 
-A primer for this is `here <http://www.mantidproject.org/Writing_an_Algorithm>`__.
+A primer for this is :ref:`here <01_basic_algorithm_structure>`.
 
 
 

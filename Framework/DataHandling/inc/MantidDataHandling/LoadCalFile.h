@@ -37,32 +37,24 @@ public:
   /// Algorithm's version for identification
   int version() const override { return 1; };
   const std::vector<std::string> seeAlso() const override {
-    return {"LoadDiffCal",        "ReadGroupsFromFile",
-            "CreateDummyCalFile", "CreateCalFileByNames",
-            "AlignDetectors",     "DiffractionFocussing",
-            "SaveCalFile",        "MergeCalFiles"};
+    return {"LoadDiffCal",    "ReadGroupsFromFile",   "CreateDummyCalFile", "CreateCalFileByNames",
+            "AlignDetectors", "DiffractionFocussing", "SaveCalFile",        "MergeCalFiles"};
   }
   /// Algorithm's category for identification
-  const std::string category() const override {
-    return R"(DataHandling\Text;Diffraction\DataHandling\CalFiles)";
-  }
+  const std::string category() const override { return R"(DataHandling\Text;Diffraction\DataHandling\CalFiles)"; }
 
   static void getInstrument3WaysInit(Mantid::API::Algorithm *alg);
 
-  static Geometry::Instrument_const_sptr
-  getInstrument3Ways(API::Algorithm *alg);
+  static Geometry::Instrument_const_sptr getInstrument3Ways(API::Algorithm *alg);
   static bool instrumentIsSpecified(API::Algorithm *alg);
 
-  static void
-  readCalFile(const std::string &calFileName,
-              const Mantid::DataObjects::GroupingWorkspace_sptr &groupWS,
-              const Mantid::DataObjects::OffsetsWorkspace_sptr &offsetsWS,
-              const Mantid::DataObjects::MaskWorkspace_sptr &maskWS);
+  static void readCalFile(const std::string &calFileName, const Mantid::DataObjects::GroupingWorkspace_sptr &groupWS,
+                          const Mantid::DataObjects::OffsetsWorkspace_sptr &offsetsWS,
+                          const Mantid::DataObjects::MaskWorkspace_sptr &maskWS);
 
 protected:
-  Parallel::ExecutionMode getParallelExecutionMode(
-      const std::map<std::string, Parallel::StorageMode> &storageModes)
-      const override;
+  Parallel::ExecutionMode
+  getParallelExecutionMode(const std::map<std::string, Parallel::StorageMode> &storageModes) const override;
 
 private:
   /// Initialise the properties
@@ -71,8 +63,7 @@ private:
   void exec() override;
 
   /// Checks if a detector ID is for a monitor on a given instrument
-  static bool idIsMonitor(const Mantid::Geometry::Instrument_const_sptr &inst,
-                          int detID);
+  static bool idIsMonitor(const Mantid::Geometry::Instrument_const_sptr &inst, int detID);
 };
 
 } // namespace DataHandling

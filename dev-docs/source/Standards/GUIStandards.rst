@@ -531,7 +531,7 @@ are only really used for patching tests.
 Python allows you to reach into a class's internals and replace them. Consider
 replacing the attribute with a mock. For example:
 
-.. code-block:: Python
+.. code-block:: python
 
     # View needs to be mocked but no DI available
     presenter = MyPresenter()

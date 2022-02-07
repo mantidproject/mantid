@@ -13,7 +13,7 @@ This function calculates multiple spectra of a crystal electric field acting upo
 in Mantid and under active development. More documentation will follow as the development progresses.
 
 Here is an example of how to fit function's parameters to a spectrum. All parameters disallowed by symmetry are fixed automatically.
-Any other parameters that need fixing has to be tied explicitly. Peak centres (in meV) and intensities (in mb/sr) are also fixed and computed 
+Any other parameters that need fixing has to be tied explicitly. Peak centres (in meV) and intensities (in mb/sr) are also fixed and computed
 from the field parameters with the :ref:`CrystalFieldPeaks <func-CrystalFieldPeaks>` function. Any other peak parameter can be set using
 the "f-index-dot-name" syntax (see :ref:`CompositeFunction <func-CompositeFunction>` for more details).
 
@@ -33,7 +33,7 @@ the "f-index-dot-name" syntax (see :ref:`CompositeFunction <func-CompositeFuncti
 
 	# The calculated data will be in 'data', WorkspaceIndex=1
 	EvaluateFunction(fun, InputWorkspace=ws, InputWorkspace_1=ws, OutputWorkspace='data')
-	 
+
 	# Change parameters slightly and fit to the reference data
 	fun = 'name=CrystalFieldMultiSpectrum,Ion=Ce,Temperatures=(44, 150),ToleranceIntensity=0.1,Symmetry=C2v,B20=0.37,B22=3.9,B40=-0.03,B42=-0.11,B44=-0.12'
 	fun += ',f0.f1.FWHM=2,f0.f2.FWHM=2,f0.f3.FWHM=2,f1.f1.FWHM=2,f1.f2.FWHM=2,f1.f3.FWHM=2,f1.f4.FWHM=2'
@@ -44,7 +44,7 @@ the "f-index-dot-name" syntax (see :ref:`CompositeFunction <func-CompositeFuncti
 			   InputWorkspace_1='Workspace_1', WorkspaceIndex_1=1,
 			   Output='fit',MaxIterations=100, CostFunction='Unweighted least squares')
 	# Using Unweighted least squares fit because the data has no errors.
-     
+
 .. attributes::
 
    Ion;String;Mandatory;An element name for a rare earth ion. Possible values are: Ce, Pr, Nd, Pm, Sm, Eu, Gd, Tb, Dy, Ho, Er, Tm, Yb.
@@ -56,7 +56,7 @@ the "f-index-dot-name" syntax (see :ref:`CompositeFunction <func-CompositeFuncti
    Temperatures;List of doubles;[1.0];Temperatures of each spectrum in Kelvin.
    FWHMs;List of double;[0.0];The default full peak widths at half maximum for each spectrum. If not set explicitly via function parameters the peaks will have this width (not fixed).
    FixAllPeakParameters;Bool;False;If True fix all parameters of the peak functions. The only parameters that will vary will be the field parameters.
-   
+
 If the peak functions have any own attributes they can be accessed using the "f-index-dot-name" syntax (see :ref:`CompositeFunction <func-CompositeFunction>` for more details).
 
 

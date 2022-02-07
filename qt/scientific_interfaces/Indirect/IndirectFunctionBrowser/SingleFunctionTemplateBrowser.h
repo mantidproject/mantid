@@ -7,7 +7,6 @@
 #pragma once
 
 #include "DllConfig.h"
-#include "FQFitConstants.h"
 #include "FunctionTemplateBrowser.h"
 #include "IFQFitObserver.h"
 #include "SingleFunctionTemplatePresenter.h"
@@ -21,28 +20,26 @@ namespace MantidQt {
 namespace CustomInterfaces {
 namespace IDA {
 
+class IDAFunctionParameterEstimation;
 /**
  * Class FunctionTemplateBrowser implements QtPropertyBrowser to display
  * and set properties that can be used to generate a fit function.
  *
  */
-class MANTIDQT_INDIRECT_DLL SingleFunctionTemplateBrowser
-    : public FunctionTemplateBrowser,
-      public IFQFitObserver {
+class MANTIDQT_INDIRECT_DLL SingleFunctionTemplateBrowser : public FunctionTemplateBrowser, public IFQFitObserver {
   Q_OBJECT
 public:
-  explicit SingleFunctionTemplateBrowser(
-      const std::map<std::string, std::string> &functionInitialisationStrings,
-      QWidget *parent = nullptr);
+  explicit SingleFunctionTemplateBrowser(const std::map<std::string, std::string> &functionInitialisationStrings,
+                                         std::unique_ptr<IDAFunctionParameterEstimation> parameterEstimation,
+                                         QWidget *parent = nullptr);
   virtual ~SingleFunctionTemplateBrowser() = default;
-  void updateAvailableFunctions(const std::map<std::string, std::string>
-                                    &functionInitialisationStrings) override;
+  void updateAvailableFunctions(const std::map<std::string, std::string> &functionInitialisationStrings) override;
   void setFunction(const QString &funStr) override;
   IFunction_sptr getGlobalFunction() const override;
   IFunction_sptr getFunction() const override;
   void setNumberOfDatasets(int) override;
   int getNumberOfDatasets() const override;
-  void setDatasetNames(const QStringList &names) override;
+  void setDatasets(const QList<MantidWidgets::FunctionModelDataset> &datasets) override;
   QStringList getGlobalParameters() const override;
   QStringList getLocalParameters() const override;
   void setGlobalParameters(const QStringList &globals) override;
@@ -51,26 +48,20 @@ public:
   void updateParameters(const IFunction &fun) override;
   void setCurrentDataset(int i) override;
   void updateParameterNames(const QMap<int, QString> &parameterNames) override;
-  void
-  updateParameterDescriptions(const QMap<int, std::string> &parameterNames);
+  void updateParameterDescriptions(const QMap<int, std::string> &parameterNames);
   void setErrorsEnabled(bool enabled) override;
   void clear() override;
-  void updateParameterEstimationData(
-      DataForParameterEstimationCollection &&data) override;
+  void updateParameterEstimationData(DataForParameterEstimationCollection &&data) override;
+  void estimateFunctionParameters() override;
   void setBackgroundA0(double) override;
-  void setResolution(std::string const &, TableDatasetIndex const &) override;
-  void setResolution(const std::vector<std::pair<std::string, int>> &) override;
+  void setResolution(const std::vector<std::pair<std::string, size_t>> &) override;
   void setQValues(const std::vector<double> &) override;
   int getCurrentDataset() override;
-  void addParameter(const QString &parameterName,
-                    const QString &parameterDescription);
-  void setParameterValue(const QString &parameterName, double parameterValue,
-                         double parameterError);
+  void addParameter(const QString &parameterName, const QString &parameterDescription);
+  void setParameterValue(const QString &parameterName, double parameterValue, double parameterError);
+  void setParameterValueQuietly(const QString &parameterName, double parameterValue, double parameterError);
   void setDataType(const QStringList &allowedFunctionsList);
   void setEnumValue(int enumIndex);
-
-signals:
-  void dataTypeChanged(DataType dataType);
 
 protected slots:
   void enumChanged(QtProperty *) override;

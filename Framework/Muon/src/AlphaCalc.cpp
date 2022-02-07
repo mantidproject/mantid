@@ -14,8 +14,7 @@
 #include <cmath>
 #include <vector>
 
-namespace Mantid {
-namespace Algorithms {
+namespace Mantid::Algorithms {
 
 using namespace Kernel;
 
@@ -27,29 +26,21 @@ DECLARE_ALGORITHM(AlphaCalc)
  */
 void AlphaCalc::init() {
 
-  declareProperty(std::make_unique<API::WorkspaceProperty<>>(
-                      "InputWorkspace", "", Direction::Input),
+  declareProperty(std::make_unique<API::WorkspaceProperty<>>("InputWorkspace", "", Direction::Input),
                   "Name of the input workspace");
 
   std::vector<int> forwardDefault{1};
-  declareProperty(std::make_unique<ArrayProperty<int>>(
-                      "ForwardSpectra", std::move(forwardDefault)),
+  declareProperty(std::make_unique<ArrayProperty<int>>("ForwardSpectra", std::move(forwardDefault)),
                   "The spectra numbers of the forward group (default to 1)");
 
   std::vector<int> backwardDefault{2};
-  declareProperty(std::make_unique<ArrayProperty<int>>(
-                      "BackwardSpectra", std::move(backwardDefault)),
+  declareProperty(std::make_unique<ArrayProperty<int>>("BackwardSpectra", std::move(backwardDefault)),
                   "The spectra numbers of the backward group (default to 2)");
 
-  declareProperty("FirstGoodValue", EMPTY_DBL(),
-                  "First good value (default lowest value of x)",
-                  Direction::Input);
-  declareProperty("LastGoodValue", EMPTY_DBL(),
-                  "Last good value (default highest value of x)",
-                  Direction::Input);
+  declareProperty("FirstGoodValue", EMPTY_DBL(), "First good value (default lowest value of x)", Direction::Input);
+  declareProperty("LastGoodValue", EMPTY_DBL(), "Last good value (default highest value of x)", Direction::Input);
 
-  declareProperty("Alpha", 1.0, "The alpha efficiency (default to 1.0)",
-                  Direction::Output);
+  declareProperty("Alpha", 1.0, "The alpha efficiency (default to 1.0)", Direction::Output);
 }
 
 /** Executes the algorithm
@@ -65,9 +56,8 @@ void AlphaCalc::exec() {
   // one spectra
   API::MatrixWorkspace_sptr inputWS = getProperty("InputWorkspace");
   if (inputWS->getNumberHistograms() < 2) {
-    g_log.error()
-        << "Can't calculate alpha value for workspace which"
-        << " contains one spectrum. A default value of alpha = 1.0 is returned";
+    g_log.error() << "Can't calculate alpha value for workspace which"
+                  << " contains one spectrum. A default value of alpha = 1.0 is returned";
     setProperty("Alpha", alpha);
     return;
   }
@@ -82,30 +72,28 @@ void AlphaCalc::exec() {
   // first step is to create two workspaces which groups all forward and
   // backward spectra
 
-  API::IAlgorithm_sptr groupForward = createChildAlgorithm("GroupDetectors");
+  auto groupForward = createChildAlgorithm("GroupDetectors");
   groupForward->setProperty("InputWorkspace", inputWS);
   groupForward->setProperty("OutputWorkspace", "tmp");
   groupForward->setProperty("SpectraList", forwardSpectraList);
   groupForward->setProperty("KeepUngroupedSpectra", false);
   groupForward->execute();
-  API::MatrixWorkspace_sptr forwardWS =
-      groupForward->getProperty("OutputWorkspace");
+  API::MatrixWorkspace_sptr forwardWS = groupForward->getProperty("OutputWorkspace");
 
-  API::IAlgorithm_sptr groupBackward = createChildAlgorithm("GroupDetectors");
+  auto groupBackward = createChildAlgorithm("GroupDetectors");
   groupBackward->setProperty("InputWorkspace", inputWS);
   groupBackward->setProperty("OutputWorkspace", "tmp");
   groupBackward->setProperty("SpectraList", backwardSpectraList);
   groupBackward->setProperty("KeepUngroupedSpectra", false);
   groupBackward->execute();
-  API::MatrixWorkspace_sptr backwardWS =
-      groupBackward->getProperty("OutputWorkspace");
+  API::MatrixWorkspace_sptr backwardWS = groupBackward->getProperty("OutputWorkspace");
 
   // calculate sum of forward counts
 
   double firstGoodvalue = getProperty("FirstGoodValue");
   double lastGoodvalue = getProperty("LastGoodValue");
 
-  API::IAlgorithm_sptr integr = createChildAlgorithm("Integration");
+  auto integr = createChildAlgorithm("Integration");
   integr->setProperty("InputWorkspace", forwardWS);
   integr->setPropertyValue("OutputWorkspace", "tmp");
   if (firstGoodvalue != EMPTY_DBL())
@@ -126,7 +114,7 @@ void AlphaCalc::exec() {
 
   // calculate sum of backward counts
 
-  API::IAlgorithm_sptr integrB = createChildAlgorithm("Integration");
+  auto integrB = createChildAlgorithm("Integration");
   integrB->setProperty("InputWorkspace", backwardWS);
   integrB->setPropertyValue("OutputWorkspace", "tmp");
   if (firstGoodvalue != EMPTY_DBL())
@@ -150,5 +138,4 @@ void AlphaCalc::exec() {
   setProperty("Alpha", sumForward / sumBackward);
 }
 
-} // namespace Algorithms
-} // namespace Mantid
+} // namespace Mantid::Algorithms

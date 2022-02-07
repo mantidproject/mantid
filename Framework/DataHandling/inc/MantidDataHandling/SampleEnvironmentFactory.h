@@ -19,13 +19,12 @@ namespace DataHandling {
 class MANTID_DATAHANDLING_DLL ISampleEnvironmentSpecFinder {
 public:
   virtual ~ISampleEnvironmentSpecFinder() = default;
-  virtual SampleEnvironmentSpec_uptr find(const std::string &facility,
-                                          const std::string &instrument,
+  virtual SampleEnvironmentSpec_uptr find(const std::string &facility, const std::string &instrument,
                                           const std::string &name) const = 0;
+  virtual SampleEnvironmentSpec_uptr parseSpec(const std::string &name, const std::string &filename) const = 0;
 };
 // Typedef for a unique_ptr
-using ISampleEnvironmentSpecFinder_uptr =
-    std::unique_ptr<ISampleEnvironmentSpecFinder>;
+using ISampleEnvironmentSpecFinder_uptr = std::unique_ptr<ISampleEnvironmentSpecFinder>;
 
 /**
   Create a single instance of a SampleEnvironment. It requires the name
@@ -39,13 +38,12 @@ public:
   SampleEnvironmentFactory() = default;
   SampleEnvironmentFactory(ISampleEnvironmentSpecFinder_uptr specFinder);
 
-  Geometry::SampleEnvironment_uptr create(const std::string &facility,
-                                          const std::string &instrument,
-                                          const std::string &specName,
-                                          const std::string &canName);
+  Geometry::SampleEnvironment_uptr create(const std::string &facility, const std::string &instrument,
+                                          const std::string &specName, const std::string &canName);
 
   size_t cacheSize() const;
   void clearCache();
+  SampleEnvironmentSpec_uptr parseSpec(const std::string &filename, const std::string &filepath) const;
 
 private:
   ISampleEnvironmentSpecFinder_uptr m_finder;
@@ -57,19 +55,15 @@ private:
 /**
  * Class responsible for finding a specifications on disk.
  */
-class MANTID_DATAHANDLING_DLL SampleEnvironmentSpecFileFinder final
-    : public ISampleEnvironmentSpecFinder {
+class MANTID_DATAHANDLING_DLL SampleEnvironmentSpecFileFinder final : public ISampleEnvironmentSpecFinder {
 public:
-  SampleEnvironmentSpecFileFinder(const std::vector<std::string> &directories);
+  SampleEnvironmentSpecFileFinder(std::vector<std::string> directories);
 
-  SampleEnvironmentSpec_uptr find(const std::string &facility,
-                                  const std::string &instrument,
+  SampleEnvironmentSpec_uptr find(const std::string &facility, const std::string &instrument,
                                   const std::string &name) const override;
+  SampleEnvironmentSpec_uptr parseSpec(const std::string &name, const std::string &filename) const override;
 
 private:
-  SampleEnvironmentSpec_uptr parseSpec(const std::string &name,
-                                       const std::string &filename) const;
-
   const std::string m_fileext = ".xml";
   const std::vector<std::string> m_rootDirs;
 };

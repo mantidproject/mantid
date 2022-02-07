@@ -9,8 +9,7 @@
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidKernel/ListValidator.h"
 
-namespace Mantid {
-namespace Algorithms {
+namespace Mantid::Algorithms {
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(Scale)
@@ -32,16 +31,12 @@ const std::string ADD("Add");
 } // anonymous namespace
 
 void Scale::init() {
-  declareProperty(std::make_unique<WorkspaceProperty<>>(
-      PropertyNames::INPUT_WORKSPACE, "", Direction::Input));
-  declareProperty(std::make_unique<WorkspaceProperty<>>(
-      PropertyNames::OUTPUT_WORKSPACE, "", Direction::Output));
+  declareProperty(std::make_unique<WorkspaceProperty<>>(PropertyNames::INPUT_WORKSPACE, "", Direction::Input));
+  declareProperty(std::make_unique<WorkspaceProperty<>>(PropertyNames::OUTPUT_WORKSPACE, "", Direction::Output));
 
-  declareProperty(PropertyNames::FACTOR, 1.0,
-                  "The value by which to scale the input workspace");
+  declareProperty(PropertyNames::FACTOR, 1.0, "The value by which to scale the input workspace");
   std::vector<std::string> operations{Operation::MULT, Operation::ADD};
-  declareProperty(PropertyNames::OPERATION, Operation::MULT,
-                  std::make_shared<StringListValidator>(operations),
+  declareProperty(PropertyNames::OPERATION, Operation::MULT, std::make_shared<StringListValidator>(operations),
                   "Whether to multiply by, or add factor");
 }
 
@@ -50,10 +45,8 @@ std::map<std::string, std::string> Scale::validateInputs() {
 
   // don't allow adding with EventWorkspace
   if (getPropertyValue(PropertyNames::OPERATION) == Operation::ADD) {
-    MatrixWorkspace_const_sptr inputWS =
-        getProperty(PropertyNames::INPUT_WORKSPACE);
-    const auto eventWS =
-        std::dynamic_pointer_cast<const DataObjects::EventWorkspace>(inputWS);
+    MatrixWorkspace_const_sptr inputWS = getProperty(PropertyNames::INPUT_WORKSPACE);
+    const auto eventWS = std::dynamic_pointer_cast<const DataObjects::EventWorkspace>(inputWS);
     if (bool(eventWS)) {
       result[PropertyNames::INPUT_WORKSPACE] = "Cannot Add to EventWorkspace";
     }
@@ -112,5 +105,4 @@ void Scale::exec() {
   setProperty(PropertyNames::OUTPUT_WORKSPACE, outputWS);
 }
 
-} // namespace Algorithms
-} // namespace Mantid
+} // namespace Mantid::Algorithms

@@ -16,14 +16,11 @@
 #include "MantidAlgorithms/Rebin.h"
 #include "MantidAlgorithms/RemoveBackground.h"
 
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
+#include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
 using namespace Mantid;
 
-void init_workspaces(int nHist, int nBins, API::MatrixWorkspace_sptr &BgWS,
-                     API::MatrixWorkspace_sptr &SourceWS) {
-  DataObjects::Workspace2D_sptr theWS =
-      WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(nHist,
-                                                                   nBins);
+void init_workspaces(int nHist, int nBins, API::MatrixWorkspace_sptr &BgWS, API::MatrixWorkspace_sptr &SourceWS) {
+  DataObjects::Workspace2D_sptr theWS = WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(nHist, nBins);
   // Add incident energy necessary for unit conversion
   theWS->mutableRun().addProperty("Ei", 13., "meV", true);
 
@@ -37,8 +34,7 @@ void init_workspaces(int nHist, int nBins, API::MatrixWorkspace_sptr &BgWS,
 
   rebinner.execute();
 
-  BgWS = API::AnalysisDataService::Instance().retrieveWS<API::MatrixWorkspace>(
-      "Background");
+  BgWS = API::AnalysisDataService::Instance().retrieveWS<API::MatrixWorkspace>("Background");
 
   Algorithms::ConvertUnits unitsConv;
   unitsConv.initialize();
@@ -67,18 +63,14 @@ void init_workspaces(int nHist, int nBins, API::MatrixWorkspace_sptr &BgWS,
 
   unitsConv.execute();
 
-  SourceWS =
-      API::AnalysisDataService::Instance().retrieveWS<API::MatrixWorkspace>(
-          "sourceWSdE");
+  SourceWS = API::AnalysisDataService::Instance().retrieveWS<API::MatrixWorkspace>("sourceWSdE");
 }
 
 class RemoveBackgroundTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static RemoveBackgroundTest *createSuite() {
-    return new RemoveBackgroundTest();
-  }
+  static RemoveBackgroundTest *createSuite() { return new RemoveBackgroundTest(); }
   static void destroySuite(RemoveBackgroundTest *suite) { delete suite; }
 
   RemoveBackgroundTest() { init_workspaces(1, 15000, BgWS, SourceWS); }
@@ -91,16 +83,14 @@ public:
     Algorithms::BackgroundHelper bgRemoval;
     // create workspace with units of energy transfer
     auto bkgWS = WorkspaceCreationHelper::createProcessedInelasticWS(
-        std::vector<double>(1, 1.), std::vector<double>(1, 20.),
-        std::vector<double>(1, 10.));
-    TSM_ASSERT_THROWS(
-        "Should throw if background workspace is not in TOF units",
-        bgRemoval.initialize(bkgWS, SourceWS, 0),
-        const std::invalid_argument &);
+        std::vector<double>(1, 1.), std::vector<double>(1, 20.), std::vector<double>(1, 10.));
+    TSM_ASSERT_THROWS("Should throw if background workspace is not in TOF units",
+                      bgRemoval.initialize(bkgWS, SourceWS, Kernel::DeltaEMode::Elastic),
+                      const std::invalid_argument &);
 
     bkgWS = WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(2, 15);
     TSM_ASSERT_THROWS("Should throw if background is not 1 or equal to source",
-                      bgRemoval.initialize(bkgWS, SourceWS, 0),
+                      bgRemoval.initialize(bkgWS, SourceWS, Kernel::DeltaEMode::Elastic),
                       const std::invalid_argument &);
   }
 
@@ -110,7 +100,7 @@ public:
 
     API::AnalysisDataService::Instance().addOrReplace("TestWS", clone);
 
-    int emode = static_cast<int>(Kernel::DeltaEMode().fromString("Direct"));
+    auto emode = Kernel::DeltaEMode().fromString("Direct");
     bgRemoval.initialize(BgWS, SourceWS, emode);
 
     auto &dataX = clone->mutableX(0);
@@ -119,9 +109,7 @@ public:
 
     bgRemoval.removeBackground(0, dataX, dataY, dataE);
 
-    auto SampleWS =
-        API::AnalysisDataService::Instance().retrieveWS<API::MatrixWorkspace>(
-            "sampleWSdE");
+    auto SampleWS = API::AnalysisDataService::Instance().retrieveWS<API::MatrixWorkspace>("sampleWSdE");
 
     auto &sampleX = SampleWS->x(0);
     auto &sampleY = SampleWS->y(0);
@@ -145,9 +133,7 @@ public:
 
     TS_ASSERT_THROWS_NOTHING(bkgRem.execute());
 
-    auto SampleWS =
-        API::AnalysisDataService::Instance().retrieveWS<API::MatrixWorkspace>(
-            "sampleWSdE");
+    auto SampleWS = API::AnalysisDataService::Instance().retrieveWS<API::MatrixWorkspace>("sampleWSdE");
     auto result = clone;
 
     auto &sampleX = SampleWS->x(0);
@@ -176,12 +162,8 @@ public:
 
     TS_ASSERT_THROWS_NOTHING(bkgRem.execute());
 
-    auto SampleWS =
-        API::AnalysisDataService::Instance().retrieveWS<API::MatrixWorkspace>(
-            "sampleWSdE");
-    auto result =
-        API::AnalysisDataService::Instance().retrieveWS<API::MatrixWorkspace>(
-            "TestWS2");
+    auto SampleWS = API::AnalysisDataService::Instance().retrieveWS<API::MatrixWorkspace>("sampleWSdE");
+    auto result = API::AnalysisDataService::Instance().retrieveWS<API::MatrixWorkspace>("TestWS2");
 
     auto &sampleX = SampleWS->x(0);
     auto &sampleY = SampleWS->y(0);
@@ -228,9 +210,7 @@ public:
 
     TS_ASSERT_THROWS_NOTHING(bkgRem.execute());
 
-    auto result =
-        API::AnalysisDataService::Instance().retrieveWS<API::MatrixWorkspace>(
-            "RemovedBgWS");
+    auto result = API::AnalysisDataService::Instance().retrieveWS<API::MatrixWorkspace>("RemovedBgWS");
 
     auto &resY = result->y(0);
     auto &resE = result->e(0);
@@ -259,16 +239,10 @@ class RemoveBackgroundTestPerformance : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other xests
-  static RemoveBackgroundTestPerformance *createSuite() {
-    return new RemoveBackgroundTestPerformance();
-  }
-  static void destroySuite(RemoveBackgroundTestPerformance *suite) {
-    delete suite;
-  }
+  static RemoveBackgroundTestPerformance *createSuite() { return new RemoveBackgroundTestPerformance(); }
+  static void destroySuite(RemoveBackgroundTestPerformance *suite) { delete suite; }
 
-  RemoveBackgroundTestPerformance() {
-    init_workspaces(1000, 15000, BgWS, SourceWS);
-  }
+  RemoveBackgroundTestPerformance() { init_workspaces(1000, 15000, BgWS, SourceWS); }
 
   void testRemoveBkgInPlace() {
 

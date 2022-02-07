@@ -41,6 +41,11 @@ private:
 public:
   vtkGeometryCacheWriter(std::string); ///< Constructor
   ~vtkGeometryCacheWriter();           ///< Destructor
+
+  // Disable copies as we have a file handle
+  vtkGeometryCacheWriter(const vtkGeometryCacheWriter &) = delete;
+  vtkGeometryCacheWriter &operator=(const vtkGeometryCacheWriter) = delete;
+
   void addObject(CSGObject *obj);
   void write(); ///< Write the XML to a file
 };

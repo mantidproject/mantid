@@ -29,9 +29,7 @@ class CalculateZscoreTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static CalculateZscoreTest *createSuite() {
-    return new CalculateZscoreTest();
-  }
+  static CalculateZscoreTest *createSuite() { return new CalculateZscoreTest(); }
   static void destroySuite(CalculateZscoreTest *suite) { delete suite; }
 
   void test_Calculation() {
@@ -52,8 +50,8 @@ public:
     alg.execute();
     TS_ASSERT(alg.isExecuted());
 
-    Workspace2D_sptr outWS = std::dynamic_pointer_cast<Workspace2D>(
-        AnalysisDataService::Instance().retrieve("Zscores"));
+    Workspace2D_sptr outWS =
+        std::dynamic_pointer_cast<Workspace2D>(AnalysisDataService::Instance().retrieve("Zscores"));
 
     auto &Zscore = outWS->y(0);
     TS_ASSERT_DELTA(Zscore[4], 1.6397, 0.0001);
@@ -70,12 +68,10 @@ public:
   /** Generate a workspace for test
    */
   MatrixWorkspace_sptr generateTestWorkspace() {
-    vector<double> data{12, 13, 9,  18, 7,  9,  14, 16, 10, 12,
-                        7,  13, 14, 19, 10, 16, 12, 16, 19, 11};
+    vector<double> data{12, 13, 9, 18, 7, 9, 14, 16, 10, 12, 7, 13, 14, 19, 10, 16, 12, 16, 19, 11};
 
     MatrixWorkspace_sptr ws = std::dynamic_pointer_cast<MatrixWorkspace>(
-        WorkspaceFactory::Instance().create("Workspace2D", 1, data.size(),
-                                            data.size()));
+        WorkspaceFactory::Instance().create("Workspace2D", 1, data.size(), data.size()));
 
     auto &histX = ws->mutableX(0);
     auto &histY = ws->mutableY(0);

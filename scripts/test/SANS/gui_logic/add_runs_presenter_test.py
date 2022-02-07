@@ -7,16 +7,14 @@
 import os
 import unittest
 
-from assert_called import assert_called
-from fake_signal import FakeSignal
 from mantid.kernel import ConfigService
 from unittest import mock
 from sans.common.enums import SANSInstrument
-from sans.gui_logic.models import SumRunsModel
-from sans.gui_logic.models.SumRunsModel import SumRunsModel
+from sans.gui_logic.models.sum_runs_model import SumRunsModel
 from sans.gui_logic.models.SummationSettingsModel import SummationSettingsModel
 from sans.gui_logic.models.run_file import SummableRunFile
 from sans.gui_logic.presenter.add_runs_presenter import AddRunsPagePresenter, AddRunsFilenameManager
+from test.SANS.gui_logic.fake_signal import FakeSignal
 from ui.sans_isis.add_runs_page import AddRunsPage
 from ui.sans_isis.sans_data_processor_gui import SANSDataProcessorGui
 
@@ -29,7 +27,7 @@ class MockedOutAddRunsFilenameManager(AddRunsFilenameManager):
     def _get_leading_zeroes(self, run_number):
         # Return four 0s as all examples we are using in testing
         # Would normally require 4
-        return 4*"0"
+        return 4 * "0"
 
     def make_filename(self, run_numbers):
         return "LOQ0000" + str(max(run_numbers)) + "-add"
@@ -81,7 +79,7 @@ class InitializationTest(AddRunsPagePresenterTestCase):
 
     @mock.patch('sans.gui_logic.presenter.add_runs_presenter.SummationSettingsModel', autospec=True)
     @mock.patch('sans.gui_logic.presenter.add_runs_presenter.SummationSettingsPresenter', autospec=True)
-    def test_creates_run_selector_with_child_view(self, patched_presenter, patched_model):
+    def test_creates_run_selector_summation_model_with_child_view(self, patched_presenter, patched_model):
         view = self._make_mock_view()
         parent_view = self._make_mock_parent_view()
 
@@ -120,7 +118,7 @@ class SummationSettingsViewEnablednessTest(AddRunsPagePresenterTestCase):
 
         presenter = self._make_presenter()
         presenter._handle_selection_changed(run_selection=runs)
-        assert_called(self.view.enable_summation_settings)
+        self.view.enable_summation_settings.assert_called_once()
 
     @mock.patch("sans.gui_logic.presenter.add_runs_presenter.RunSelectionModel", autospec=True)
     def test_enables_summation_settings_when_event_and_histogram_data(self, _):
@@ -133,7 +131,7 @@ class SummationSettingsViewEnablednessTest(AddRunsPagePresenterTestCase):
 
         presenter = self._make_presenter()
         presenter._handle_selection_changed(run_selection=runs)
-        assert_called(self.view.enable_summation_settings)
+        self.view.enable_summation_settings.assert_called_once()
 
 
 class SummationConfigurationTest(AddRunsPagePresenterTestCase):
@@ -296,14 +294,15 @@ class SumButtonTest(AddRunsPagePresenterTestCase):
         fake_run_selection.__iter__.return_value = fake_run_list
 
         self.presenter._handle_selection_changed(run_selection=fake_run_selection)
-        assert_called(self.view.enable_sum)
+        self.view.enable_sum.assert_called_once()
 
     def test_disables_sum_button_when_no_rows(self):
         fake_run_selection = mock.Mock()
         fake_run_selection.has_any_runs.return_value = False
 
+        self.view.disable_sum.reset_mock()
         self.presenter._handle_selection_changed(run_selection=fake_run_selection)
-        assert_called(self.view.disable_sum)
+        self.view.disable_sum.assert_called_once()
 
 
 class AddRunsFilenameManagerTest(unittest.TestCase):
@@ -319,13 +318,13 @@ class AddRunsFilenameManagerTest(unittest.TestCase):
     def test_that_filename_manager_gets_correct_zeros(self):
         filename_manager = self._get_filename_manager("LOQ")
 
-        expected_zeroes = 2*"0"
+        expected_zeroes = 2 * "0"
         actual_zeroes = filename_manager._get_leading_zeroes("105476")
         self.assertEqual(actual_zeroes, expected_zeroes)
 
     def test_that_filename_manager_gets_facility_zeros_for_run_before_definition(self):
         filename_manager = self._get_filename_manager("LOQ")
-        expected_zeroes = 1*"0"
+        expected_zeroes = 1 * "0"
         actual_zeroes = filename_manager._get_leading_zeroes("7777")
         self.assertEqual(actual_zeroes, expected_zeroes)
 
@@ -354,7 +353,8 @@ class AddRunsDefaultSettingsTest(unittest.TestCase):
     def setUp(self):
         mock_parent_view = mock.Mock()
         mock_parent_view.instrument = SANSInstrument.LOQ
-        self.presenter = AddRunsPagePresenter(parent_view=mock_parent_view, sum_runs_model=mock.Mock(), view=mock.Mock())
+        self.presenter = AddRunsPagePresenter(parent_view=mock_parent_view, sum_runs_model=mock.Mock(),
+                                              view=mock.Mock())
 
     def test_that_presenter_calls_properties_handler_to_update_directory_on_directory_changed(self):
         new_dir_name = os.path.join("some", "dir", "path")
@@ -370,6 +370,8 @@ class AddRunsDefaultSettingsTest(unittest.TestCase):
     def test_that_if_output_directory_is_empty_default_save_directory_is_used_instead(self):
         default_dir = os.path.join("default", "save", "directory")
         ConfigService["defaultsave.directory"] = default_dir
+        # ConfigService may do some conversion in the background.
+        default_dir = ConfigService["defaultsave.directory"]
 
         output_dir = self.presenter.set_output_directory("")
         ConfigService["defaultsave.directory"] = ""

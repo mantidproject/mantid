@@ -24,11 +24,7 @@ Implements a presenter for the project saving dialog.
 */
 class EXPORT_OPT_MANTIDQT_COMMON ProjectSavePresenter {
 public:
-  enum class Notification {
-    UncheckWorkspace,
-    CheckWorkspace,
-    PrepareProjectFolder
-  };
+  enum class Notification { UncheckWorkspace, CheckWorkspace, PrepareProjectFolder };
 
   /// Construct a new presenter with a view
   ProjectSavePresenter(IProjectSaveView *view);

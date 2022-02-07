@@ -14,8 +14,7 @@
 #include "MantidGeometry/Instrument.h"
 #include "MantidKernel/Unit.h"
 
-namespace Mantid {
-namespace Algorithms {
+namespace Mantid::Algorithms {
 
 using namespace Kernel;
 using namespace API;
@@ -26,20 +25,16 @@ using namespace DataObjects;
 WorkspaceJoiners::WorkspaceJoiners() : Algorithm(), m_progress(nullptr) {}
 
 /// Algorithm's category for identification. @see Algorithm::category
-const std::string WorkspaceJoiners::category() const {
-  return "Transforms\\Merging";
-}
+const std::string WorkspaceJoiners::category() const { return "Transforms\\Merging"; }
 
 /** Executes the algorithm for histogram workspace inputs
  *  @returns The result workspace
  */
-MatrixWorkspace_sptr WorkspaceJoiners::execWS2D(const MatrixWorkspace &ws1,
-                                                const MatrixWorkspace &ws2) {
+MatrixWorkspace_sptr WorkspaceJoiners::execWS2D(const MatrixWorkspace &ws1, const MatrixWorkspace &ws2) {
   // Create the output workspace
-  const size_t totalHists =
-      ws1.getNumberHistograms() + ws2.getNumberHistograms();
-  MatrixWorkspace_sptr output = WorkspaceFactory::Instance().create(
-      "Workspace2D", totalHists, ws1.x(0).size(), ws1.y(0).size());
+  const size_t totalHists = ws1.getNumberHistograms() + ws2.getNumberHistograms();
+  MatrixWorkspace_sptr output =
+      WorkspaceFactory::Instance().create("Workspace2D", totalHists, ws1.x(0).size(), ws1.y(0).size());
   // Copy over stuff from first input workspace. This will include the spectrum
   // masking
   WorkspaceFactory::Instance().initializeFromParent(ws1, *output, true);
@@ -96,9 +91,7 @@ MatrixWorkspace_sptr WorkspaceJoiners::execWS2D(const MatrixWorkspace &ws1,
     // Propagate spectrum masking
     if (spectrumInfo.hasDetectors(j) && spectrumInfo.isMasked(j)) {
       output->getSpectrum(nhist1 + j).clearData();
-      PARALLEL_CRITICAL(setMasked) {
-        outSpectrumInfo.setMasked(nhist1 + j, true);
-      }
+      PARALLEL_CRITICAL(setMasked) { outSpectrumInfo.setMasked(nhist1 + j, true); }
     }
 
     m_progress->report();
@@ -116,14 +109,11 @@ MatrixWorkspace_sptr WorkspaceJoiners::execWS2D(const MatrixWorkspace &ws1,
  *  @throw std::invalid_argument If the input workspaces do not meet the
  * requirements of this algorithm
  */
-DataObjects::EventWorkspace_sptr
-WorkspaceJoiners::execEvent(const DataObjects::EventWorkspace &eventWs1,
-                            const DataObjects::EventWorkspace &eventWs2) {
+DataObjects::EventWorkspace_sptr WorkspaceJoiners::execEvent(const DataObjects::EventWorkspace &eventWs1,
+                                                             const DataObjects::EventWorkspace &eventWs2) {
   // Create the output workspace
-  const size_t totalHists =
-      eventWs1.getNumberHistograms() + eventWs2.getNumberHistograms();
-  auto output =
-      create<EventWorkspace>(eventWs1, totalHists, eventWs1.binEdges(0));
+  const size_t totalHists = eventWs1.getNumberHistograms() + eventWs2.getNumberHistograms();
+  auto output = create<EventWorkspace>(eventWs1, totalHists, eventWs1.binEdges(0));
 
   // Initialize the progress reporting object
   m_progress = std::make_unique<API::Progress>(this, 0.0, 1.0, totalHists);
@@ -147,9 +137,7 @@ WorkspaceJoiners::execEvent(const DataObjects::EventWorkspace &eventWs1,
     // factory
     if (spectrumInfo.hasDetectors(j) && spectrumInfo.isMasked(j)) {
       output->getSpectrum(outputWi).clearData();
-      PARALLEL_CRITICAL(setMaskedEvent) {
-        outSpectrumInfo.setMasked(outputWi, true);
-      }
+      PARALLEL_CRITICAL(setMaskedEvent) { outSpectrumInfo.setMasked(outputWi, true); }
     }
 
     m_progress->report();
@@ -157,7 +145,7 @@ WorkspaceJoiners::execEvent(const DataObjects::EventWorkspace &eventWs1,
 
   fixSpectrumNumbers(eventWs1, eventWs2, *output);
 
-  return std::move(output);
+  return output;
 }
 
 /** Checks that the two input workspace have common size and the same
@@ -166,8 +154,7 @@ WorkspaceJoiners::execEvent(const DataObjects::EventWorkspace &eventWs1,
  *  @param ws2 :: The second input workspace
  *  @throw std::invalid_argument If the workspaces are not compatible
  */
-void WorkspaceJoiners::checkCompatibility(const API::MatrixWorkspace &ws1,
-                                          const API::MatrixWorkspace &ws2) {
+void WorkspaceJoiners::checkCompatibility(const API::MatrixWorkspace &ws1, const API::MatrixWorkspace &ws2) {
   if (ws1.getInstrument()->getName() != ws2.getInstrument()->getName()) {
     const std::string message("The input workspaces are not compatible because "
                               "they come from different instruments");
@@ -186,8 +173,7 @@ void WorkspaceJoiners::checkCompatibility(const API::MatrixWorkspace &ws1,
   }
 
   if (ws1.isDistribution() != ws2.isDistribution()) {
-    const std::string message(
-        "The input workspaces have inconsistent distribution flags");
+    const std::string message("The input workspaces have inconsistent distribution flags");
     throw std::invalid_argument(message);
   }
 }
@@ -199,14 +185,12 @@ void WorkspaceJoiners::checkCompatibility(const API::MatrixWorkspace &ws1,
  * @param min The minimum id (output).
  * @param max The maximum id (output).
  */
-void WorkspaceJoiners::getMinMax(const MatrixWorkspace &ws, specnum_t &min,
-                                 specnum_t &max) {
-  specnum_t temp;
+void WorkspaceJoiners::getMinMax(const MatrixWorkspace &ws, specnum_t &min, specnum_t &max) {
   size_t length = ws.getNumberHistograms();
   // initial values
   min = max = ws.getSpectrum(0).getSpectrumNo();
   for (size_t i = 0; i < length; i++) {
-    temp = ws.getSpectrum(i).getSpectrumNo();
+    const auto temp = ws.getSpectrum(i).getSpectrumNo();
     // Adjust min/max
     if (temp < min)
       min = temp;
@@ -215,5 +199,4 @@ void WorkspaceJoiners::getMinMax(const MatrixWorkspace &ws, specnum_t &min,
   }
 }
 
-} // namespace Algorithms
-} // namespace Mantid
+} // namespace Mantid::Algorithms

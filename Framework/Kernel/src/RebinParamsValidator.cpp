@@ -7,21 +7,17 @@
 #include "MantidKernel/RebinParamsValidator.h"
 #include <memory>
 
-namespace Mantid {
-namespace Kernel {
+namespace Mantid::Kernel {
 RebinParamsValidator::RebinParamsValidator(bool allowEmpty, bool allowRange)
     : m_allowEmpty(allowEmpty), m_allowRange(allowRange) {}
 
-IValidator_sptr RebinParamsValidator::clone() const {
-  return std::make_shared<RebinParamsValidator>(*this);
-}
+IValidator_sptr RebinParamsValidator::clone() const { return std::make_shared<RebinParamsValidator>(*this); }
 
 /** Check on the inputed bin boundaries and widths.
  *  @param value :: The parameter array to check
  *  @return A user level description of any problem or "" if there is no problem
  */
-std::string
-RebinParamsValidator::checkValidity(const std::vector<double> &value) const {
+std::string RebinParamsValidator::checkValidity(const std::vector<double> &value) const {
   // array must not be empty
   if (value.empty()) {
     if (m_allowEmpty) // unless allowed in the constructor
@@ -66,5 +62,4 @@ RebinParamsValidator::checkValidity(const std::vector<double> &value) const {
   return "";
 }
 
-} // namespace Kernel
-} // namespace Mantid
+} // namespace Mantid::Kernel

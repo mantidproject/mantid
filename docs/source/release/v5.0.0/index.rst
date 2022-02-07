@@ -24,7 +24,7 @@ For this release we have fully migrated all scripts in the Mantid Script Reposit
 Other highlights include:
 
 - *Waterfall Plots* in Workbench
-- *Settings menu* in Workbench, with options to set your plot preferences, such as Marker Style and Errorbar Capsize 
+- *Settings menu* in Workbench, with options to set your plot preferences, such as Marker Style and Errorbar Capsize
 - *Brand new Engineering Diffraction interface*
 - Several performance improvements, in particular relating to scripts.
 - Redesign of the Muon Analysis and Frequency Domain Interfaces.

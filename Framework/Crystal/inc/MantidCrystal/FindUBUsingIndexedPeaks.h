@@ -8,7 +8,7 @@
 
 #include "MantidAPI/Algorithm.h"
 #include "MantidCrystal/DllConfig.h"
-#include "MantidDataObjects/Peak.h"
+#include "MantidGeometry/Crystal/IPeak.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
 
 namespace Mantid {
@@ -27,8 +27,7 @@ public:
   /// Algorithm's version for identification
   int version() const override { return 1; };
   const std::vector<std::string> seeAlso() const override {
-    return {"SetUB", "FindUBUsingFFT", "FindUBUsingLatticeParameters",
-            "FindUBUsingMinMaxD"};
+    return {"SetUB", "FindUBUsingFFT", "FindUBUsingLatticeParameters", "FindUBUsingMinMaxD"};
   }
 
   /// Algorithm's category for identification
@@ -46,9 +45,9 @@ private:
 
   /// Run the algorithm
   void exec() override;
-  void logLattice(Geometry::OrientedLattice &o_lattice, int &ModDim);
+  void logLattice(const Geometry::OrientedLattice &o_lattice, const int &ModDim);
   int getModulationDimension(Kernel::V3D &mnp);
-  bool isPeakIndexed(const DataObjects::Peak &peak);
+  bool isPeakIndexed(const Geometry::IPeak &peak);
 };
 
 } // namespace Crystal

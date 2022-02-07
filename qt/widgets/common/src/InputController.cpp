@@ -14,8 +14,7 @@
 
 #include <cmath>
 
-namespace MantidQt {
-namespace MantidWidgets {
+namespace MantidQt::MantidWidgets {
 
 //--------------------------------------------------------------------------------
 
@@ -39,10 +38,10 @@ void InputController3DMove::mousePressEvent(QMouseEvent *event) {
   if (event->buttons() & Qt::MidButton) {
     emit initZoom(event->x(), event->y());
     m_isButtonPressed = true;
-  } else if (event->buttons() & Qt::LeftButton) {
+  } else if ((event->buttons() & Qt::LeftButton) && !m_isRotationFrozen) {
     emit initRotation(event->x(), event->y());
     m_isButtonPressed = true;
-  } else if (event->buttons() & Qt::RightButton) {
+  } else if ((event->buttons() & Qt::RightButton) || ((event->buttons() & Qt::LeftButton) && m_isRotationFrozen)) {
     emit initTranslation(event->x(), event->y());
     m_isButtonPressed = true;
   }
@@ -53,9 +52,9 @@ void InputController3DMove::mousePressEvent(QMouseEvent *event) {
  * Send out surface movement signals.
  */
 void InputController3DMove::mouseMoveEvent(QMouseEvent *event) {
-  if (event->buttons() & Qt::LeftButton) {
+  if ((event->buttons() & Qt::LeftButton) && !m_isRotationFrozen) {
     emit rotate(event->x(), event->y());
-  } else if (event->buttons() & Qt::RightButton) {
+  } else if ((event->buttons() & Qt::RightButton) || ((event->buttons() & Qt::LeftButton) && m_isRotationFrozen)) {
     emit translate(event->x(), event->y());
   } else if (event->buttons() & Qt::MidButton) {
     emit zoom(event->x(), event->y());
@@ -75,9 +74,9 @@ void InputController3DMove::mouseReleaseEvent(QMouseEvent * /*unused*/) {
  * Process the mouse wheel event.
  * Send the wheel zoom signal.
  */
-void InputController3DMove::wheelEvent(QWheelEvent *event) {
-  emit wheelZoom(event->x(), event->y(), event->delta());
-}
+void InputController3DMove::wheelEvent(QWheelEvent *event) { emit wheelZoom(event->x(), event->y(), event->delta()); }
+
+void InputController3DMove::freezeRotation(bool freeze) { m_isRotationFrozen = freeze; }
 
 //--------------------------------------------------------------------------------
 
@@ -85,8 +84,7 @@ void InputController3DMove::wheelEvent(QWheelEvent *event) {
  * Constructor.
  * @param parent :: The parent object.
  */
-InputControllerPick::InputControllerPick(QObject *parent)
-    : InputController(parent), m_isButtonPressed(false) {}
+InputControllerPick::InputControllerPick(QObject *parent) : InputController(parent), m_isButtonPressed(false) {}
 
 /**
  * Process the mouse press event.
@@ -125,8 +123,7 @@ void InputControllerPick::mouseReleaseEvent(QMouseEvent * /*unused*/) {
  * Constructor.
  */
 InputControllerDrawShape::InputControllerDrawShape(QObject *parent)
-    : InputController(parent), m_creating(false), m_x(0), m_y(0), m_shapeType(),
-      m_isButtonPressed(false) {}
+    : InputController(parent), m_creating(false), m_x(0), m_y(0), m_shapeType(), m_isButtonPressed(false) {}
 
 /**
  * Process the mouse press event. Sends addShape or selectAt signal.
@@ -135,8 +132,7 @@ void InputControllerDrawShape::mousePressEvent(QMouseEvent *event) {
   if (event->button() == Qt::LeftButton) {
     m_isButtonPressed = true;
     if (m_creating && !m_shapeType.isEmpty()) {
-      emit addShape(m_shapeType, event->x(), event->y(), m_borderColor,
-                    m_fillColor);
+      emit addShape(m_shapeType, event->x(), event->y(), m_borderColor, m_fillColor);
     } else if (event->modifiers() & Qt::ControlModifier) {
       emit selectCtrlAt(event->x(), event->y());
     } else {
@@ -187,21 +183,28 @@ void InputControllerDrawShape::keyPressEvent(QKeyEvent *event) {
   case Qt::Key_Backspace:
     emit removeSelectedShapes();
     break;
+  case Qt::Key_C:
+    if (event->modifiers() == Qt::CTRL) {
+      emit copySelectedShapes();
+    }
+    break;
+  case Qt::Key_V:
+    if (event->modifiers() == Qt::CTRL) {
+      emit pasteCopiedShapes();
+    }
+    break;
   }
 }
 
 /**
  * Process event of the mouse leaving the widget.
  */
-void InputControllerDrawShape::leaveEvent(QEvent * /*unused*/) {
-  emit restoreOverrideCursor();
-}
+void InputControllerDrawShape::leaveEvent(QEvent * /*unused*/) { emit restoreOverrideCursor(); }
 
 /**
  * Slot for defining the shape to draw and initializing drawing.
  */
-void InputControllerDrawShape::startCreatingShape2D(const QString &type,
-                                                    const QColor &borderColor,
+void InputControllerDrawShape::startCreatingShape2D(const QString &type, const QColor &borderColor,
                                                     const QColor &fillColor) {
   m_creating = true;
   m_shapeType = type;
@@ -267,8 +270,7 @@ void InputControllerMoveUnwrapped::mouseReleaseEvent(QMouseEvent *event) {
  * Constructor.
  */
 InputControllerDraw::InputControllerDraw(QObject *parent)
-    : InputController(parent), m_max_size(32), m_size(30),
-      m_isLeftButtonPressed(false), m_isRightButtonPressed(false),
+    : InputController(parent), m_max_size(32), m_size(30), m_isLeftButtonPressed(false), m_isRightButtonPressed(false),
       m_isActive(false), m_cursor(nullptr) {}
 
 InputControllerDraw::~InputControllerDraw() { delete m_cursor; }
@@ -345,8 +347,7 @@ void InputControllerDraw::signalRightClick() {}
 
 //--------------------------------------------------------------------------------
 
-InputControllerSelection::InputControllerSelection(QObject *parent,
-                                                   QPixmap *icon)
+InputControllerSelection::InputControllerSelection(QObject *parent, QPixmap *icon)
     : InputControllerDraw(parent), m_rect(0, 0, cursorSize(), cursorSize()) {
   m_image = icon;
 }
@@ -378,9 +379,7 @@ void InputControllerSelection::drawCursor(QPixmap *cursor) {
   painter.drawRect(QRect(0, 0, size, size));
 }
 
-void InputControllerSelection::setPosition(const QPoint &pos) {
-  m_rect.moveTopLeft(pos);
-}
+void InputControllerSelection::setPosition(const QPoint &pos) { m_rect.moveTopLeft(pos); }
 
 void InputControllerSelection::resize() {
   auto size = cursorSize();
@@ -444,17 +443,13 @@ void InputControllerDrawAndErase::drawCursor(QPixmap *cursor) {
   painter.drawPolygon(poly);
 }
 
-void InputControllerDrawAndErase::setPosition(const QPoint &pos) {
-  m_pos = pos;
-}
+void InputControllerDrawAndErase::setPosition(const QPoint &pos) { m_pos = pos; }
 
 void InputControllerDrawAndErase::resize() { makePolygon(); }
 
-void InputControllerDrawAndErase::startCreatingShape2D(
-    const QColor &borderColor, const QColor &fillColor) {
+void InputControllerDrawAndErase::startCreatingShape2D(const QColor &borderColor, const QColor &fillColor) {
   m_borderColor = borderColor;
   m_fillColor = fillColor;
   m_creating = true;
 }
-} // namespace MantidWidgets
-} // namespace MantidQt
+} // namespace MantidQt::MantidWidgets

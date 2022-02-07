@@ -24,8 +24,7 @@ public:
   AtomPositionsEqual(double precision = 1.e-4) : m_precision(precision) {}
 
   bool operator()(const Kernel::V3D &lhs, const Kernel::V3D &rhs) const {
-    return !(fabs(lhs.X() - rhs.X()) > m_precision ||
-             fabs(lhs.Y() - rhs.Y()) > m_precision ||
+    return !(fabs(lhs.X() - rhs.X()) > m_precision || fabs(lhs.Y() - rhs.Y()) > m_precision ||
              fabs(lhs.Z() - rhs.Z()) > m_precision);
   }
 
@@ -153,8 +152,7 @@ public:
 
   std::vector<Kernel::V3D> operator*(const Kernel::V3D &vector) const;
 
-  bool isInvariant(const Kernel::DblMatrix &tensor,
-                   double tolerance = 1e-8) const;
+  bool isInvariant(const Kernel::DblMatrix &tensor, double tolerance = 1e-8) const;
 
   bool operator==(const Group &other) const;
   bool operator!=(const Group &other) const;
@@ -163,11 +161,9 @@ public:
   bool isGroup() const;
 
 protected:
-  void setSymmetryOperations(
-      const std::vector<SymmetryOperation> &symmetryOperations);
+  void setSymmetryOperations(const std::vector<SymmetryOperation> &symmetryOperations);
 
-  CoordinateSystem getCoordinateSystemFromOperations(
-      const std::vector<SymmetryOperation> &symmetryOperations) const;
+  CoordinateSystem getCoordinateSystemFromOperations(const std::vector<SymmetryOperation> &symmetryOperations) const;
 
   bool isClosed() const;
   bool hasIdentity() const;
@@ -185,28 +181,21 @@ using Group_const_sptr = std::shared_ptr<const Group>;
 namespace GroupFactory {
 /// Creates a Group sub-class of type T if T has a constructor that takes a
 /// string.
-template <typename T>
-Group_const_sptr create(const std::string &initializationString) {
+template <typename T> Group_const_sptr create(const std::string &initializationString) {
   return std::make_shared<const T>(initializationString);
 }
 
 /// Creates a Group sub-class of type T if T has a constructor that takes a
 /// vector of SymmetryOperations.
-template <typename T>
-Group_const_sptr
-create(const std::vector<SymmetryOperation> &symmetryOperations) {
+template <typename T> Group_const_sptr create(const std::vector<SymmetryOperation> &symmetryOperations) {
   return std::make_shared<const T>(symmetryOperations);
 }
 } // namespace GroupFactory
 
-MANTID_GEOMETRY_DLL Group_const_sptr operator*(const Group_const_sptr &lhs,
-                                               const Group_const_sptr &rhs);
-MANTID_GEOMETRY_DLL std::vector<Kernel::V3D>
-operator*(const Group_const_sptr &lhs, const Kernel::V3D &rhs);
-MANTID_GEOMETRY_DLL bool operator==(const Group_const_sptr &lhs,
-                                    const Group_const_sptr &rhs);
-MANTID_GEOMETRY_DLL bool operator!=(const Group_const_sptr &lhs,
-                                    const Group_const_sptr &rhs);
+MANTID_GEOMETRY_DLL Group_const_sptr operator*(const Group_const_sptr &lhs, const Group_const_sptr &rhs);
+MANTID_GEOMETRY_DLL std::vector<Kernel::V3D> operator*(const Group_const_sptr &lhs, const Kernel::V3D &rhs);
+MANTID_GEOMETRY_DLL bool operator==(const Group_const_sptr &lhs, const Group_const_sptr &rhs);
+MANTID_GEOMETRY_DLL bool operator!=(const Group_const_sptr &lhs, const Group_const_sptr &rhs);
 
 } // namespace Geometry
 } // namespace Mantid

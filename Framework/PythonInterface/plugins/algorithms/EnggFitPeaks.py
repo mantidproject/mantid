@@ -8,8 +8,7 @@ import math
 
 from mantid.kernel import *
 from mantid.api import *
-
-import mantid.simpleapi as mantid
+from mantid.simpleapi import *
 
 
 class EnggFitPeaks(PythonAlgorithm):
@@ -25,7 +24,7 @@ class EnggFitPeaks(PythonAlgorithm):
         return "Diffraction\\Engineering;Diffraction\\Fitting"
 
     def seeAlso(self):
-        return [ "EnggFitTOFFromPeaks","GSASIIRefineFitPeaks","Fit" ]
+        return ["EnggFitTOFFromPeaks", "GSASIIRefineFitPeaks", "Fit"]
 
     def name(self):
         return "EnggFitPeaks"
@@ -57,13 +56,13 @@ class EnggFitPeaks(PythonAlgorithm):
 
         self.declareProperty('OutFittedPeaksTable', '', direction=Direction.Input,
                              doc='Name for a table workspace with the parameters of the peaks found and '
-                             'fitted. If not given, the table workspace is not created.')
+                                 'fitted. If not given, the table workspace is not created.')
 
         self.declareProperty(ITableWorkspaceProperty("FittedPeaks", "", Direction.Output),
                              doc="Information on fitted peaks. The table contains, for every peak fitted "
-                             "the expected peak value (in d-spacing), and the parameters fitted. The expected "
-                             "values are given in the column labelled 'dSpacing'. When fitting "
-                             "back-to-back exponential functions, the 'X0' column has the fitted peak center.")
+                                 "the expected peak value (in d-spacing), and the parameters fitted. The expected "
+                                 "values are given in the column labelled 'dSpacing'. When fitting "
+                                 "back-to-back exponential functions, the 'X0' column has the fitted peak center.")
 
     def PyExec(self):
 
@@ -147,11 +146,11 @@ class EnggFitPeaks(PythonAlgorithm):
 
         startx = center - (width * COEF_LEFT)
         endx = center + (width * COEF_RIGHT)
-        x_diff = endx-startx
+        x_diff = endx - startx
         if x_diff < MIN_RANGE_WIDTH:
-            inc = (min_width-x_diff)/5
-            endx = endx + 3*inc
-            startx = startx - 2*inc
+            inc = (min_width - x_diff) / 5
+            endx = endx + 3 * inc
+            startx = startx - 2 * inc
 
         return startx, endx
 
@@ -184,7 +183,7 @@ class EnggFitPeaks(PythonAlgorithm):
         prog = Progress(self, start=0, end=1, nreports=found_peaks.rowCount())
 
         for i in range(found_peaks.rowCount()):
-            prog.report('Fitting peak number ' + str(i+1))
+            prog.report('Fitting peak number ' + str(i + 1))
 
             row = found_peaks.row(i)
             # Peak parameters estimated by FindPeaks
@@ -195,10 +194,9 @@ class EnggFitPeaks(PythonAlgorithm):
             if width <= 0.:
                 failure_msg = ("Cannot fit a peak with these initial parameters from FindPeaks, center: %s "
                                ", width: %s, height: %s" % (initial_params[0], width, initial_params[1]))
-                self.log().notice('For workspace index ' + str(wks_index) + ', a peak that is in the list of '
-                                  'expected peaks and was found by FindPeaks has not been fitted correctly. '
-                                  'It will be ignored. ' + "Expected, dSpacing: {0}. Details: {1}".
-                                  format(peaks[1][i], failure_msg))
+                self.log().notice(f'For workspace index {wks_index} a peak that is in the list of expected peaks and '
+                                  f'was found by FindPeaks has not been fitted correctly. It will be ignored. '
+                                  f'Expected dSpacing: {peaks[1][i]}. Details: {failure_msg}.')
                 continue
 
             try:
@@ -265,24 +263,23 @@ class EnggFitPeaks(PythonAlgorithm):
         peak.setParameter('I', intensity)
 
         # Fit using predicted window and a proper function with approximated initial values
-        fit_alg = self.createChildAlgorithm('Fit')
         fit_function = 'name=LinearBackground;{0}'.format(peak)
-        fit_alg.setProperty('Function', fit_function)
-        fit_alg.setProperty('InputWorkspace', wks)
-        fit_alg.setProperty('WorkspaceIndex', wks_index)
-        fit_alg.setProperty('CreateOutput', True)
-
         (startx, endx) = self._estimate_start_end_fitting_range(center, width)
-        fit_alg.setProperty('StartX', startx)
-        fit_alg.setProperty('EndX', endx)
         self.log().debug("Fitting for peak expected in (d-spacing): {0}, Fitting peak function: "
                          "{1}, with startx: {2}, endx: {3}".
                          format(expected_center, fit_function, startx, endx))
-        fit_alg.execute()
-        param_table = fit_alg.getProperty('OutputParameters').value
-        chi_over_dof = fit_alg.getProperty('OutputChi2overDoF').value
 
-        return param_table, chi_over_dof
+        fit_output = Fit(
+            Function=fit_function,
+            InputWorkspace=wks,
+            WorkspaceIndex=wks_index,
+            CreateOutput=True,
+            StartX=startx,
+            EndX=endx,
+            StoreInADS=False
+        )
+
+        return fit_output.OutputParameters, fit_output.OutputChi2overDoF
 
     def _peaks_from_find_peaks(self, in_wks, expected_peaks_tof, wks_index):
         """
@@ -296,14 +293,14 @@ class EnggFitPeaks(PythonAlgorithm):
         of this list should be the same as the number of expected peaks received.
         """
 
-        # Find approximate peak positions, asumming Gaussian shapes
-        find_peaks_alg = self.createChildAlgorithm('FindPeaks')
-        find_peaks_alg.setProperty('InputWorkspace', in_wks)
-        find_peaks_alg.setProperty('PeakPositions', expected_peaks_tof)
-        find_peaks_alg.setProperty('PeakFunction', 'Gaussian')
-        find_peaks_alg.setProperty('WorkspaceIndex', wks_index)
-        find_peaks_alg.execute()
-        found_peaks = find_peaks_alg.getProperty('PeaksList').value
+        # Find approximate peak positions, assuming Gaussian shapes
+        found_peaks = FindPeaks(
+            InputWorkspace=in_wks,
+            PeakPositions=expected_peaks_tof,
+            PeakFunction='Gaussian',
+            WorkspaceIndex=wks_index,
+            StoreInADS=False
+        )
         return found_peaks
 
     def _expected_peaks_in_d(self, expected_peaks, input_ws):
@@ -329,8 +326,8 @@ class EnggFitPeaks(PythonAlgorithm):
 
     def _convert_peaks_to_d_using_convert_units(self, expected_peaks, input_ws):
         y_values = [1] * (len(expected_peaks) - 1)
-        ws_tof = mantid.CreateWorkspace(UnitX="TOF", DataX=expected_peaks, DataY=y_values, ParentWorkspace=input_ws)
-        ws_d = mantid.ConvertUnits(InputWorkspace=ws_tof, Target="dSpacing")
+        ws_tof = CreateWorkspace(UnitX="TOF", DataX=expected_peaks, DataY=y_values, ParentWorkspace=input_ws)
+        ws_d = ConvertUnits(InputWorkspace=ws_tof, Target="dSpacing")
         return ws_d.readX(0)
 
     def _expected_peaks_in_tof(self, expected_peaks, in_wks, wks_index):
@@ -390,28 +387,25 @@ class EnggFitPeaks(PythonAlgorithm):
         y_vals = [1] * (len(expected_peaks) - 1)
         # Do like: ws_from = sapi.CreateWorkspace(UnitX='dSpacing', DataX=expected_peaks, DataY=yVals,
         #                                         ParentWorkspace=self.getProperty("InputWorkspace").value)
-        create_alg = self.createChildAlgorithm("CreateWorkspace")
-        create_alg.setProperty("UnitX", 'dSpacing')
-        create_alg.setProperty("DataX", expected_peaks)
-        create_alg.setProperty("DataY", y_vals)
-        create_alg.setProperty("ParentWorkspace", in_wks)
-        create_alg.execute()
-
-        ws_from = create_alg.getProperty("OutputWorkspace").value
+        ws_from = CreateWorkspace(
+            UnitX='dSpacing',
+            DataX=expected_peaks,
+            DataY=y_vals,
+            ParentWorkspace=in_wks
+        )
 
         # finally convert units, like: sapi.ConvertUnits(InputWorkspace=ws_from, Target=target_units)
-        conv_alg = self.createChildAlgorithm("ConvertUnits")
-        conv_alg.setProperty("InputWorkspace", ws_from)
-        target_units = 'TOF'
-        conv_alg.setProperty("Target", target_units)
-        # note: this implicitly uses default property "EMode" value 'Elastic'
-        good_exec = conv_alg.execute()
-
-        if not good_exec:
+        try:
+            # note: this implicitly uses default property "EMode" value 'Elastic'
+            target_units = 'TOF'
+            output_ws = ConvertUnits(
+                InputWorkspace=ws_from,
+                Target=target_units
+            )
+        except:
             raise RuntimeError("Conversion of units went wrong. Failed to run ConvertUnits for {0} "
                                "peaks. Details: {1}".format(len(expected_peaks), expected_peaks))
 
-        output_ws = conv_alg.getProperty('OutputWorkspace').value
         peaks_tof = output_ws.readX(0)
         if len(peaks_tof) != len(expected_peaks):
             raise RuntimeError("Conversion of units went wrong. Converted {0} peaks from the "
@@ -463,8 +457,7 @@ class EnggFitPeaks(PythonAlgorithm):
             alg.execute()
             table = alg.getProperty('OutputWorkspace').value
         else:
-            import mantid.simpleapi as sapi
-            table = sapi.CreateEmptyTableWorkspace(OutputWorkspace=tbl_name)
+            table = CreateEmptyTableWorkspace(OutputWorkspace=tbl_name)
 
         table.addColumn('double', 'dSpacing')
 
@@ -498,7 +491,7 @@ class EnggFitPeaks(PythonAlgorithm):
         center = self._find_peak_center_in_params(fitted_params)
         intensity = self._find_peak_intensity_in_params(fitted_params)
         return (spec_x_axis.min() <= center <= spec_x_axis.max()
-                and intensity > 0 and fitted_params['Chi'] < 10
+                and intensity > 0 and fitted_params['Chi'] < 17
                 and self._b2bexp_is_acceptable(fitted_params))
 
     def _find_peak_center_in_params(self, fitted_params):
@@ -547,9 +540,8 @@ class EnggFitPeaks(PythonAlgorithm):
                 and not math.isnan(fitted_params['X0_Err'])
                 and not math.isnan(fitted_params['A_Err'])
                 and not math.isnan(fitted_params['B_Err'])
-                and fitted_params['X0_Err'] < (fitted_params['X0'] * 100.0 / self.CENTER_ERROR_LIMIT)
-                and (0 != fitted_params['X0_Err'] and 0 != fitted_params['A_Err']
-                     and 0 != fitted_params['B_Err'] and 0 != fitted_params['S_Err']
+                and fitted_params['X0_Err'] < (fitted_params['X0'] * self.CENTER_ERROR_LIMIT / 100)
+                and (0 != fitted_params['X0_Err'] and 0 != fitted_params['S_Err']
                      and 0 != fitted_params['I_Err']))
 
     def _add_parameters_to_map(self, param_map, param_table):

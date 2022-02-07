@@ -26,13 +26,11 @@ using namespace Mantid::Kernel;
 
 namespace {
 
-EventWorkspaceCollection_uptr
-makeEventWorkspaceCollection(unsigned int decoratorSize) {
+EventWorkspaceCollection_uptr makeEventWorkspaceCollection(unsigned int decoratorSize) {
 
   auto decorator = std::make_unique<EventWorkspaceCollection>();
 
-  auto periodLog =
-      std::make_unique<const TimeSeriesProperty<int>>("period_log");
+  auto periodLog = std::make_unique<const TimeSeriesProperty<int>>("period_log");
 
   decorator->setNPeriods(decoratorSize, periodLog);
 
@@ -44,12 +42,8 @@ class EventWorkspaceCollectionTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static EventWorkspaceCollectionTest *createSuite() {
-    return new EventWorkspaceCollectionTest();
-  }
-  static void destroySuite(EventWorkspaceCollectionTest *suite) {
-    delete suite;
-  }
+  static EventWorkspaceCollectionTest *createSuite() { return new EventWorkspaceCollectionTest(); }
+  static void destroySuite(EventWorkspaceCollectionTest *suite) { delete suite; }
 
   void test_constructor() {
     EventWorkspaceCollection decorator;
@@ -59,19 +53,16 @@ public:
   void test_output_single_workspace() {
     EventWorkspaceCollection decorator;
     TSM_ASSERT_EQUALS("Always one period by default", 1, decorator.nPeriods());
-    TS_ASSERT_EQUALS(decorator.combinedWorkspace(),
-                     decorator.getSingleHeldWorkspace());
+    TS_ASSERT_EQUALS(decorator.combinedWorkspace(), decorator.getSingleHeldWorkspace());
   }
 
   void test_output_multiple_workspaces() {
     EventWorkspaceCollection decorator;
 
-    auto periodLog =
-        std::make_unique<const TimeSeriesProperty<int>>("period_log");
+    auto periodLog = std::make_unique<const TimeSeriesProperty<int>>("period_log");
     decorator.setNPeriods(3, periodLog);
 
-    WorkspaceGroup_sptr outWS = std::dynamic_pointer_cast<WorkspaceGroup>(
-        decorator.combinedWorkspace());
+    WorkspaceGroup_sptr outWS = std::dynamic_pointer_cast<WorkspaceGroup>(decorator.combinedWorkspace());
     TSM_ASSERT("Should be a WorkspaceGroup", outWS);
     TS_ASSERT_EQUALS(3, outWS->size());
   }
@@ -84,15 +75,12 @@ public:
 
     decorator->setGeometryFlag(geometryFlag);
 
-    WorkspaceGroup_sptr outWS = std::dynamic_pointer_cast<WorkspaceGroup>(
-        decorator->combinedWorkspace());
+    WorkspaceGroup_sptr outWS = std::dynamic_pointer_cast<WorkspaceGroup>(decorator->combinedWorkspace());
 
     for (size_t i = 0; i < outWS->size(); ++i) {
-      auto memberWS =
-          std::dynamic_pointer_cast<EventWorkspace>(outWS->getItem(i));
-      TSM_ASSERT_EQUALS(
-          "Child workspaces should all have the geometry flag set",
-          geometryFlag, memberWS->sample().getGeometryFlag());
+      auto memberWS = std::dynamic_pointer_cast<EventWorkspace>(outWS->getItem(i));
+      TSM_ASSERT_EQUALS("Child workspaces should all have the geometry flag set", geometryFlag,
+                        memberWS->sample().getGeometryFlag());
     }
   }
 
@@ -104,14 +92,12 @@ public:
 
     decorator->setThickness(thickness);
 
-    WorkspaceGroup_sptr outWS = std::dynamic_pointer_cast<WorkspaceGroup>(
-        decorator->combinedWorkspace());
+    WorkspaceGroup_sptr outWS = std::dynamic_pointer_cast<WorkspaceGroup>(decorator->combinedWorkspace());
 
     for (size_t i = 0; i < outWS->size(); ++i) {
-      auto memberWS =
-          std::dynamic_pointer_cast<EventWorkspace>(outWS->getItem(i));
-      TSM_ASSERT_EQUALS("Child workspaces should all have the thickness set",
-                        thickness, memberWS->sample().getThickness());
+      auto memberWS = std::dynamic_pointer_cast<EventWorkspace>(outWS->getItem(i));
+      TSM_ASSERT_EQUALS("Child workspaces should all have the thickness set", thickness,
+                        memberWS->sample().getThickness());
     }
   }
 
@@ -122,14 +108,11 @@ public:
 
     decorator->setHeight(height);
 
-    WorkspaceGroup_sptr outWS = std::dynamic_pointer_cast<WorkspaceGroup>(
-        decorator->combinedWorkspace());
+    WorkspaceGroup_sptr outWS = std::dynamic_pointer_cast<WorkspaceGroup>(decorator->combinedWorkspace());
 
     for (size_t i = 0; i < outWS->size(); ++i) {
-      auto memberWS =
-          std::dynamic_pointer_cast<EventWorkspace>(outWS->getItem(i));
-      TSM_ASSERT_EQUALS("Child workspaces should all have the height set",
-                        height, memberWS->sample().getHeight());
+      auto memberWS = std::dynamic_pointer_cast<EventWorkspace>(outWS->getItem(i));
+      TSM_ASSERT_EQUALS("Child workspaces should all have the height set", height, memberWS->sample().getHeight());
     }
   }
 
@@ -141,21 +124,17 @@ public:
 
     decorator->setWidth(width);
 
-    WorkspaceGroup_sptr outWS = std::dynamic_pointer_cast<WorkspaceGroup>(
-        decorator->combinedWorkspace());
+    WorkspaceGroup_sptr outWS = std::dynamic_pointer_cast<WorkspaceGroup>(decorator->combinedWorkspace());
 
     for (size_t i = 0; i < outWS->size(); ++i) {
-      auto memberWS =
-          std::dynamic_pointer_cast<EventWorkspace>(outWS->getItem(i));
-      TSM_ASSERT_EQUALS("Child workspaces should all have the width set", width,
-                        memberWS->sample().getWidth());
+      auto memberWS = std::dynamic_pointer_cast<EventWorkspace>(outWS->getItem(i));
+      TSM_ASSERT_EQUALS("Child workspaces should all have the width set", width, memberWS->sample().getWidth());
     }
   }
 
   void test_setIndexInfo() {
     EventWorkspaceCollection collection;
-    auto periodLog =
-        std::make_unique<const TimeSeriesProperty<int>>("period_log");
+    auto periodLog = std::make_unique<const TimeSeriesProperty<int>>("period_log");
     const size_t periods = 2;
     collection.setNPeriods(periods, periodLog);
     // Set some arbitrary data to ensure that it is preserved.
@@ -163,8 +142,7 @@ public:
     collection.setThickness(thickness);
 
     collection.setIndexInfo(Indexing::IndexInfo({3, 1, 2}));
-    const auto ws = std::dynamic_pointer_cast<WorkspaceGroup>(
-        collection.combinedWorkspace());
+    const auto ws = std::dynamic_pointer_cast<WorkspaceGroup>(collection.combinedWorkspace());
     for (size_t i = 0; i < periods; ++i) {
       auto eventWS = std::dynamic_pointer_cast<EventWorkspace>(ws->getItem(i));
       TS_ASSERT_EQUALS(eventWS->getSpectrum(0).getSpectrumNo(), 3);

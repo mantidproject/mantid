@@ -1,0 +1,139 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!-- For help on the notation used to specify an Instrument Definition File
+     see http://www.mantidproject.org/IDF -->
+<instrument xmlns="http://www.mantidproject.org/IDF/1.0"
+            xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+            xsi:schemaLocation="http://www.mantidproject.org/IDF/1.0 http://schema.mantidproject.org/IDF/1.0/IDFSchema.xsd"
+            name="VULCAN" valid-from   ="2006-01-31 23:59:59"
+                          valid-to     ="2017-05-19 00:00:01"
+		          last-modified="2021-02-19 11:00:00">
+  <!--Data taken from VULCAN_geom_2010_06_03.xml-->
+  <!--Created by Vickie Lynch-->
+  <!--DEFAULTS-->
+  <defaults>
+    <length unit="metre"/>
+    <angle unit="degree"/>
+    <reference-frame>
+      <along-beam axis="z"/>
+      <pointing-up axis="y"/>
+      <handedness val="right"/>
+      <theta-sign axis="x"/>
+    </reference-frame>
+  </defaults>
+  <!--SOURCE-->
+  <component type="moderator">
+    <location z="-43.754"/>
+  </component>
+  <type name="moderator" is="Source"/>
+  <!--SAMPLE-->
+  <component type="sample-position">
+    <location y="0.0" x="0.0" z="0.0"/>
+  </component>
+  <type name="sample-position" is="SamplePos"/>
+  <!--MONITORS-->
+  <component type="monitors" idlist="monitors">
+    <location/>
+  </component>
+  <type name="monitors">
+    <component type="monitor">
+      <location z="4.83" name="monitor2"/>
+      <location z="1.50" name="monitor3"/>
+    </component>
+  </type>
+  <component type="Group1">
+    <location/>
+  </component>
+  <component type="Group2">
+    <location/>
+  </component>
+
+  <type name="Group1">
+  <component type="flip-panel" idstart="26250" idfillbyfirst="y" idstepbyrow="8">
+    <location y="0.4021558" x="-1.9591505" z="0.0" name="bank21" rot="-180.0" axis-x="0" axis-y="1" axis-z="0">
+      <rot val="11.6000073013">
+        <rot val="90.0" axis-x="0" axis-y="1" axis-z="0" />
+      </rot>
+    </location>
+  </component>
+  <component type="flip-panel" idstart="27500" idfillbyfirst="y" idstepbyrow="8">
+    <location y="0.0" x="-2.0" z="0.0" name="bank22" rot="0.0" axis-x="0" axis-y="1" axis-z="0">
+      <rot val="0.0">
+        <rot val="-90.0" axis-x="0" axis-y="1" axis-z="0" />
+      </rot>
+    </location>
+  </component>
+  <component type="flip-panel" idstart="28750" idfillbyfirst="y" idstepbyrow="8">
+    <location y="-0.4021558" x="-1.9591505" z="0.0" name="bank23" rot="0.0" axis-x="0" axis-y="1" axis-z="0">
+      <rot val="11.6000073013">
+        <rot val="-90.0" axis-x="0" axis-y="1" axis-z="0" />
+      </rot>
+    </location>
+  </component>
+  </type>
+
+  <type name="Group2">
+  <component type="panel" idstart="32500" idfillbyfirst="y" idstepbyrow="8">
+    <location y="-0.4021558" x="1.9591505" z="0.0" name="bank26" rot="-180.0" axis-x="0" axis-y="1" axis-z="0">
+      <rot val="11.6000073013">
+        <rot val="90.0" axis-x="0" axis-y="1" axis-z="0" />
+      </rot>
+    </location>
+  </component>
+  <component type="panel" idstart="33750" idfillbyfirst="y" idstepbyrow="8">
+    <location y="0.0" x="2.0" z="0.0" name="bank27" rot="0.0" axis-x="0" axis-y="1" axis-z="0">
+      <rot val="0.0">
+        <rot val="-90.0" axis-x="0" axis-y="1" axis-z="0" />
+      </rot>
+    </location>
+  </component>
+  <component type="panel" idstart="35000" idfillbyfirst="y" idstepbyrow="8">
+    <location y="0.4021558" x="1.9591505" z="0.0" name="bank28" rot="0.0" axis-x="0" axis-y="1" axis-z="0">
+      <rot val="11.6000073013">
+        <rot val="-90.0" axis-x="0" axis-y="1" axis-z="0" />
+      </rot>
+    </location>
+  </component>
+  </type>
+
+  <!-- NOTE: This detector is the same as the SNAP detector -->
+  <!-- Rectangular Detector Panel -->
+  <type name="panel" is="rectangular_detector" type="pixel"
+      xpixels="154" xstart="-0.3825" xstep="+0.005"
+      ypixels="8" ystart="-0.16625" ystep="+0.0475" >
+    <properties/>
+  </type>
+  <!-- NOTE: This detector is the same as the SNAP detector -->
+  <!-- Rectangular Detector Panel -->
+  <type name="flip-panel" is="rectangular_detector" type="pixel"
+      xpixels="154" xstart="+0.3825" xstep="-0.005"
+      ypixels="8" ystart="-0.16625" ystep="+0.0475" >
+    <properties/>
+  </type>
+
+  <!-- Shape for Monitors-->
+  <!-- TODO: Update to real shape -->
+  <type is="monitor" name="monitor">
+    <cylinder id="some-shape">
+      <centre-of-bottom-base p="0.0" r="0.0" t="0.0"/>
+      <axis y="0.0" x="0.0" z="1.0"/>
+      <radius val="0.01"/>
+      <height val="0.03"/>
+    </cylinder>
+    <algebra val="some-shape"/>
+  </type>
+  <!-- Pixel for Detectors (8x154)-->
+  <type is="detector" name="pixel">
+    <cuboid id="pixel-shape">
+      <left-front-bottom-point y="-0.02375" x="-0.0025" z="0.0"/>
+      <left-front-top-point y="0.02375" x="-0.0025" z="0.0"/>
+      <left-back-bottom-point y="-0.02375" x="-0.0025" z="0.0001"/>
+      <right-front-bottom-point y="-0.02375" x="0.0025" z="0.0"/>
+    </cuboid>
+    <algebra val="pixel-shape"/>
+  </type>
+  <!--MONITOR IDs-->
+  <idlist idname="monitors">
+    <id val="-1"/>
+    <id val="-2"/>
+  </idlist>
+</instrument>

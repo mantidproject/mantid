@@ -37,43 +37,34 @@ public:
   PropertyManagerOwner &operator=(const PropertyManagerOwner &);
 
   // Function to declare properties (i.e. store them)
-  void declareProperty(std::unique_ptr<Property> p,
-                       const std::string &doc = "") override;
+  void declareProperty(std::unique_ptr<Property> p, const std::string &doc = "") override;
 
   // Function to declare properties (i.e. store them)
-  void declareOrReplaceProperty(std::unique_ptr<Property> p,
-                                const std::string &doc = "") override;
-
+  void declareOrReplaceProperty(std::unique_ptr<Property> p, const std::string &doc = "") override;
+  void resetProperties() override;
   using IPropertyManager::declareProperty;
 
   // Sets all the declared properties from
   void setProperties(const std::string &propertiesJson,
-                     const std::unordered_set<std::string> &ignoreProperties =
-                         std::unordered_set<std::string>(),
+                     const std::unordered_set<std::string> &ignoreProperties = std::unordered_set<std::string>(),
                      bool createMissing = false) override;
 
   // Sets all the declared properties from a json object
   void setProperties(const ::Json::Value &jsonValue,
-                     const std::unordered_set<std::string> &ignoreProperties =
-                         std::unordered_set<std::string>(),
+                     const std::unordered_set<std::string> &ignoreProperties = std::unordered_set<std::string>(),
                      bool createMissing = false) override;
 
   // sets all the declared properties using a simple string format
   void setPropertiesWithString(
       const std::string &propertiesString,
-      const std::unordered_set<std::string> &ignoreProperties =
-          std::unordered_set<std::string>()) override;
+      const std::unordered_set<std::string> &ignoreProperties = std::unordered_set<std::string>()) override;
 
-  void setPropertyValue(const std::string &name,
-                        const std::string &value) override;
-  void setPropertyValueFromJson(const std::string &name,
-                                const Json::Value &value) override;
+  void setPropertyValue(const std::string &name, const std::string &value) override;
+  void setPropertyValueFromJson(const std::string &name, const Json::Value &value) override;
   void setPropertyOrdinal(const int &index, const std::string &value) override;
 
   /// Make m_properties point to the same PropertyManager as po.
-  virtual void copyPropertiesFrom(const PropertyManagerOwner &po) {
-    *this = po;
-  }
+  virtual void copyPropertiesFrom(const PropertyManagerOwner &po) { *this = po; }
 
   bool existsProperty(const std::string &name) const override;
   bool validateProperties() const override;
@@ -81,6 +72,7 @@ public:
 
   std::string getPropertyValue(const std::string &name) const override;
   const std::vector<Property *> &getProperties() const override;
+  std::vector<std::string> getDeclaredPropertyNames() const noexcept override;
 
   /// Get the value of a property
   TypedValue getProperty(const std::string &name) const override;
@@ -94,8 +86,9 @@ public:
   bool isDefault(const std::string &name) const;
 
   /// Removes the property from management
-  void removeProperty(const std::string &name,
-                      const bool delproperty = true) override;
+  void removeProperty(const std::string &name, const bool delproperty = true) override;
+  /// Removes the property from management returning a pointer to it
+  std::unique_ptr<Property> takeProperty(const size_t index) override;
   /// Clears all properties under management
   void clear() override;
   /// Override this method to perform a custom action right after a property was
@@ -103,15 +96,16 @@ public:
   /// The argument is the property name. Default - do nothing.
   void afterPropertySet(const std::string &) override;
 
-  void filterByTime(const Types::Core::DateAndTime & /*start*/,
-                    const Types::Core::DateAndTime & /*stop*/) override {
+  void filterByTime(const Types::Core::DateAndTime & /*start*/, const Types::Core::DateAndTime & /*stop*/) override {
     throw(std::runtime_error("Not yet implmented"));
   }
   void splitByTime(std::vector<SplittingInterval> & /*splitter*/,
                    std::vector<PropertyManager *> /* outputs*/) const override {
     throw(std::runtime_error("Not yet implmented"));
   }
-  void filterByProperty(const TimeSeriesProperty<bool> & /*filte*/) override {
+
+  void filterByProperty(const TimeSeriesProperty<bool> & /*filter*/, const std::vector<std::string> &
+                        /* excludedFromFiltering */) override {
     throw(std::runtime_error("Not yet implmented"));
   }
 

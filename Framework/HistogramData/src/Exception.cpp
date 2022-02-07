@@ -6,11 +6,6 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidHistogramData/Exception.h"
 
-namespace Mantid {
-namespace HistogramData {
-namespace Exception {
-InvalidBinEdgesError::InvalidBinEdgesError(const char *what)
-    : runtime_error(what) {}
-} // namespace Exception
-} // namespace HistogramData
-} // namespace Mantid
+namespace Mantid::HistogramData::Exception {
+InvalidBinEdgesError::InvalidBinEdgesError(const char *what) : runtime_error(what) {}
+} // namespace Mantid::HistogramData::Exception

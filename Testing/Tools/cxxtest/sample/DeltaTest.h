@@ -12,7 +12,7 @@
 class DeltaTest : public CxxTest::TestSuite
 {
     double _delta;
-    
+
 public:
     void setUp()
     {

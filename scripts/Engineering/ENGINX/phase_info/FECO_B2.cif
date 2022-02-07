@@ -235,54 +235,54 @@ _cell_volume                           23.32012
 _symmetry_cell_setting                 cubic
 _symmetry_space_group_name_H-M         "P m -3 m"
 loop_ _symmetry_equiv_pos_site_id _symmetry_equiv_pos_as_xyz
-       1 +x,+y,+z 
-       2 +z,+x,+y 
-       3 +y,+z,+x 
-       4 +x,+y,-z 
-       5 -z,+x,+y 
-       6 +y,-z,+x 
-       7 -z,+x,-y 
-       8 -y,-z,+x 
-       9 +y,-z,-x 
-      10 -x,+y,-z 
-      11 -z,-x,+y 
-      12 +x,-y,-z 
-      13 +y,+x,+z 
-      14 +z,+y,+x 
-      15 +x,+z,+y 
-      16 +y,+x,-z 
-      17 -z,+y,+x 
-      18 +x,-z,+y 
-      19 -z,+y,-x 
-      20 -x,-z,+y 
-      21 +x,-z,-y 
-      22 -y,+x,-z 
-      23 -z,-y,+x 
-      24 +y,-x,-z 
-      -1 -x,-y,-z 
-      -2 -z,-x,-y 
-      -3 -y,-z,-x 
-      -4 -x,-y,+z 
-      -5 +z,-x,-y 
-      -6 -y,+z,-x 
-      -7 +z,-x,+y 
-      -8 +y,+z,-x 
-      -9 -y,+z,+x 
-     -10 +x,-y,+z 
-     -11 +z,+x,-y 
-     -12 -x,+y,+z 
-     -13 -y,-x,-z 
-     -14 -z,-y,-x 
-     -15 -x,-z,-y 
-     -16 -y,-x,+z 
-     -17 +z,-y,-x 
-     -18 -x,+z,-y 
-     -19 +z,-y,+x 
-     -20 +x,+z,-y 
-     -21 -x,+z,+y 
-     -22 +y,-x,+z 
-     -23 +z,+y,-x 
-     -24 -y,+x,+z 
+       1 +x,+y,+z
+       2 +z,+x,+y
+       3 +y,+z,+x
+       4 +x,+y,-z
+       5 -z,+x,+y
+       6 +y,-z,+x
+       7 -z,+x,-y
+       8 -y,-z,+x
+       9 +y,-z,-x
+      10 -x,+y,-z
+      11 -z,-x,+y
+      12 +x,-y,-z
+      13 +y,+x,+z
+      14 +z,+y,+x
+      15 +x,+z,+y
+      16 +y,+x,-z
+      17 -z,+y,+x
+      18 +x,-z,+y
+      19 -z,+y,-x
+      20 -x,-z,+y
+      21 +x,-z,-y
+      22 -y,+x,-z
+      23 -z,-y,+x
+      24 +y,-x,-z
+      -1 -x,-y,-z
+      -2 -z,-x,-y
+      -3 -y,-z,-x
+      -4 -x,-y,+z
+      -5 +z,-x,-y
+      -6 -y,+z,-x
+      -7 +z,-x,+y
+      -8 +y,+z,-x
+      -9 -y,+z,+x
+     -10 +x,-y,+z
+     -11 +z,+x,-y
+     -12 -x,+y,+z
+     -13 -y,-x,-z
+     -14 -z,-y,-x
+     -15 -x,-z,-y
+     -16 -y,-x,+z
+     -17 +z,-y,-x
+     -18 -x,+z,-y
+     -19 +z,-y,+x
+     -20 +x,+z,-y
+     -21 -x,+z,+y
+     -22 +y,-x,+z
+     -23 +z,+y,-x
+     -24 -y,+x,+z
 
 # ATOMIC COORDINATES AND DISPLACEMENT PARAMETERS
 
@@ -304,9 +304,9 @@ Fe      0.5          0.5          0.5          1.0        Uiso   0.025         1
 
 loop_ _atom_type_symbol
       _atom_type_number_in_cell
-                   Co  1.0        
-                   Fe  1.0        
- 
+                   Co  1.0
+                   Fe  1.0
+
 # If you change Z, be sure to change all 3 of the following
 _chemical_formula_sum                  "Co Fe"
 _chemical_formula_weight               114.78

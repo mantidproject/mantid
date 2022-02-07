@@ -11,12 +11,12 @@ Matrix Workspace
 A Matrix Workspace is a generic name for a family which contains measured (or derived) data (Y) with associated errors (E) and an axis (X) giving information about where the the measurement was made. The Matrix Workspace forms a 2D structure, more details on this will be provided below. This is the most common structure for storing data in  Mantid. This covers several more detailed workspace types including:
 
 -  :ref:`Workspace2D <Workspace2D>` - A workspace for holding 2D, acuumulated data in memory, this is the most commonly used to store histograms.
--  :ref:`EventWorkspace <EventWorkspace>` - A workspace that retains the individual neutron event data.            
+-  :ref:`EventWorkspace <EventWorkspace>` - A workspace that retains the individual neutron event data.
 
 What information is in a Matrix Workspace
 ------------------------------------------
 
-All Matrix Workspaces contain one or more rows of data. A single row is formed of a set of arrays (Y, E, X). For example, the output of a single detector in a white-beam measuring wavelength would form a single row. In this scenario The x-axis (or "horizontal axis") has units of length for wavelength, and Y would be the counts at each wavelength. The rows may have no correlation to each other. However, they are usually marked and sorted by some other attribute, such as detector number, or scattering angle. We call this row axis the "vertical axis". Axis have :ref:`Units <Unit Factory>`.  
+All Matrix Workspaces contain one or more rows of data. A single row is formed of a set of arrays (Y, E, X). For example, the output of a single detector in a white-beam measuring wavelength would form a single row. In this scenario The x-axis (or "horizontal axis") has units of length for wavelength, and Y would be the counts at each wavelength. The rows may have no correlation to each other. However, they are usually marked and sorted by some other attribute, such as detector number, or scattering angle. We call this row axis the "vertical axis". Axis have :ref:`Units <Unit Factory>`.
 
 Also they may contain:
 
@@ -85,6 +85,7 @@ Output:
     False       MDEventWorkspace<MDLeanEvent,3>
     False       MDHistoWorkspace
 
+
 Matrix Workspace Properties
 ###########################
 
@@ -95,7 +96,7 @@ Matrix Workspace Properties
 
 .. testcode:: MatrixWorkspaceProperties
 
-  # find out the number of histograms on a workspace use getNumberHistograms()
+  # To find out the number of histograms in a workspace use getNumberHistograms()
   print("number of histograms = {0}".format(ws.getNumberHistograms()))
 
   # To find out the number of bins along the x-axis use blocksize()
@@ -236,7 +237,7 @@ Output:
   for idx in range(0, ws.getNumberHistograms()):
       tempValue = idx*3+25 # some made up value
       newAxis.setValue(idx, tempValue)
-      
+
   # Replace axis 1 with the new axis
   ws.replaceAxis(1, newAxis)
 
@@ -314,7 +315,7 @@ Matrix Workspace Operations
 
   # To rebin the workspace
   ws = ws.rebin(Params = 200)
-  # or 
+  # or
   ws = Rebin(ws, Params = 200)
 
   # Mask detectors or spectra (or use the MaskDetectors algorithm
@@ -328,7 +329,7 @@ Matrix Workspace Operations
   DeleteWorkspace(wsClone)
   # Do not access the python variable again as you will get a RuntimeError
   # e.g. RuntimeError: Variable invalidated, data has been deleted.
-  
+
 .. testoutput:: MatrixWorkspaceOperations
   :hide:
 
@@ -369,7 +370,7 @@ The data is accessed using the ``readX()``, ``readY()`` and ``readE()`` commands
     62.0
     95.0
 
-There are more examples how to `Extract and manipulate workspace data here <http://www.mantidproject.org/Extracting_And_Manipulating_Data>`_.
+There are more examples how to :ref:`Extract and manipulate workspace data here <07_extract_manipulate_data>`.
 
 .. _MatrixWorkspace Algebra:
 
@@ -416,6 +417,6 @@ It is also possible to replace one of the input workspaces using one of +=,-=,*=
 
 
 .. include:: WorkspaceNavigation.txt
-   
+
 
 .. categories:: Concepts

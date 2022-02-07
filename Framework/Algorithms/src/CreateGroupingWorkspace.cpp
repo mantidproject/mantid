@@ -21,12 +21,222 @@
 #include <queue>
 #include <utility>
 
+using namespace Mantid;
+using namespace Mantid::API;
+using namespace Mantid::Geometry;
+
 namespace {
 Mantid::Kernel::Logger g_log("CreateGroupingWorkspace");
+
+void removeSpacesFromString(std::string &str) { str.erase(std::remove_if(str.begin(), str.end(), isspace), str.end()); }
+
+/** Adds the elements of the second vector onto the end of the first vector.
+ *
+ * @param vec The vector to be extended.
+ * @param extension The vector to emplace onto the end of vec.
+ */
+void extendVectorBy(std::vector<std::string> &vec, const std::vector<std::string> &extension) {
+  vec.reserve(vec.size() + std::distance(extension.cbegin(), extension.cend()));
+  vec.insert(vec.end(), extension.cbegin(), extension.cend());
 }
 
-namespace Mantid {
-namespace Algorithms {
+/** Splits a string by the provided delimiter characters. Erases any empty
+ * sub-strings.
+ *
+ * @param str The string to be split.
+ * @param delimiter The characters to split the string by.
+ * @returns :: A vector of sub-strings resulting from the split.
+ */
+std::vector<std::string> splitStringBy(const std::string &str, const std::string &delimiter) {
+  std::vector<std::string> subStrings;
+  boost::split(subStrings, str, boost::is_any_of(delimiter));
+  subStrings.erase(std::remove_if(subStrings.begin(), subStrings.end(),
+                                  [](const std::string &subString) { return subString.empty(); }),
+                   subStrings.cend());
+  return subStrings;
+}
+
+/** Returns true if a string contains a specific separator.
+ *
+ * @param str The string to search for the separator.
+ * @param separator The separator to search for.
+ * @returns :: True if the string contains the specified separator.
+ */
+bool hasSeparator(const std::string &str, const std::string &separator) {
+  return str.find(separator) != std::string::npos;
+}
+
+/** Returns a vector of detector IDs (in string format) contained within the
+ * lower and upper limits of a range.
+ *
+ * @param lower The lowest detector ID.
+ * @param upper The highest detector ID.
+ * @returns :: A vector of detector IDs (in string format).
+ */
+std::vector<std::string> getDetectorRangeFromLimits(int lower, int upper) {
+  std::vector<std::string> detectorIds;
+  detectorIds.reserve(static_cast<std::size_t>(upper - lower + 1));
+  for (auto i = lower; i <= upper; ++i)
+    detectorIds.emplace_back(std::to_string(i));
+  return detectorIds;
+}
+
+/** Splits a grouping string by the colon separator, and then fully expands the
+ * group.
+ *
+ * @param groupString The grouping string containing a ':' separator.
+ * @returns :: The expanded vector of groups.
+ */
+std::vector<std::string> groupsFromColonRange(const std::string &groupString) {
+  const auto splitByColon = splitStringBy(groupString, ":");
+  if (splitByColon.size() > 2)
+    throw std::runtime_error("Expected a single colon separator.");
+
+  if (splitByColon.size() == 2)
+    return getDetectorRangeFromLimits(std::stoi(splitByColon[0]), std::stoi(splitByColon[1]));
+  return splitByColon;
+}
+
+/** Expands the grouping strings that contain a ':' separator. For example the
+ * string '2:5' means the detector IDs 2, 3, 4 and 5 should be in their own
+ * individual groups. This means we must expand this string.
+ *
+ * @param groupsToExpand The grouping strings to check and expand.
+ * @returns :: A vector of expanded grouping strings.
+ */
+std::vector<std::string> expandGroupsWithColonSeparator(const std::vector<std::string> &groupsToExpand) {
+  std::vector<std::string> expandedGroupStrings;
+  for (const auto &groupString : groupsToExpand)
+    extendVectorBy(expandedGroupStrings, groupsFromColonRange(groupString));
+  return expandedGroupStrings;
+}
+
+/** Maps a single detector ID to a group ID if the detector ID is found in the
+ * vector of allowed ID's.
+ *
+ * @param allowedDetectorIDs The detector IDs which are allowed for the given
+ * instrument.
+ * @param detectorIDToGroup The mapping of detector IDs to group IDs.
+ * @param detectorID The ID of the detector to map to the group ID.
+ * @param groupID The ID of the group to map to the detector ID.
+ */
+void addDetectorToGroup(const std::vector<detid_t> &allowedDetectorIDs, std::map<detid_t, int> &detectorIDToGroup,
+                        int detectorID, int groupID) {
+  const auto iter = std::find(allowedDetectorIDs.cbegin(), allowedDetectorIDs.cend(), detectorID);
+  if (iter == allowedDetectorIDs.cend())
+    throw std::runtime_error("The Detector ID '" + std::to_string(detectorID) +
+                             "' is not valid for this instrument component.");
+
+  detectorIDToGroup[detectorID] = groupID;
+}
+
+/** Adds the detector IDs from a grouping string containing a dash to the Group
+ * ID map. For example the string '2-5' means detector IDs 2, 3, 4 and 5
+ * should be mapped to the same group ID.
+ *
+ * @param allowedDetectorIDs The detector IDs which are allowed for the given
+ * instrument.
+ * @param detectorIDToGroup The mapping of detector IDs to group IDs.
+ * @param groupString The string which contains the '-' separator.
+ * @param groupID The ID of the group to map to the detector IDs.
+ */
+void addDashSeparatedDetectorIDsToSameGroup(const std::vector<detid_t> &allowedDetectorIDs,
+                                            std::map<detid_t, int> &detectorIDToGroup, const std::string &groupString,
+                                            int groupID) {
+  const auto splitByDash = splitStringBy(groupString, "-");
+
+  if (splitByDash.size() < 2)
+    throw std::runtime_error("Expected at least one dash separator.");
+  else if (splitByDash.size() > 2)
+    throw std::runtime_error("Expected a single dash separator.");
+
+  for (auto i = std::stoi(splitByDash[0]); i <= std::stoi(splitByDash[1]); ++i)
+    addDetectorToGroup(allowedDetectorIDs, detectorIDToGroup, i, groupID);
+}
+
+/** Adds the detector IDs from a grouping string containing a plus to the Group
+ * ID map. For example the string '2+3+4+5' means detector IDs 2, 3, 4 and 5
+ * should be mapped to the same group ID.
+ *
+ * @param allowedDetectorIDs The detector IDs which are allowed for the given
+ * instrument.
+ * @param detectorIDToGroup The mapping of detector IDs to group IDs.
+ * @param groupString The string which contains the '+' separator.
+ * @param groupID The ID of the group to map to the detector IDs.
+ */
+void addPlusSeparatedDetectorIDsToSameGroup(const std::vector<detid_t> &allowedDetectorIDs,
+                                            std::map<detid_t, int> &detectorIDToGroup, const std::string &groupString,
+                                            int groupID) {
+  const auto splitByPlus = splitStringBy(groupString, "+");
+  if (splitByPlus.size() < 2)
+    throw std::runtime_error("Expected at least one plus separator.");
+
+  for (const auto &id : splitByPlus)
+    addDetectorToGroup(allowedDetectorIDs, detectorIDToGroup, std::stoi(id), groupID);
+}
+
+/** Gets the detector IDs within the component of a given instrument.
+ *
+ * @param instrument A pointer to instrument.
+ * @param componentName Name of component in instrument.
+ * @returns :: A vector of Detector IDs.
+ */
+std::vector<detid_t> getAllowedDetectorIDs(const Instrument_const_sptr &instrument, const std::string &componentName) {
+  std::vector<IDetector_const_sptr> detectors;
+  detectors.reserve(instrument->getNumberDetectors());
+  instrument->getDetectorsInBank(detectors, componentName);
+
+  std::vector<detid_t> detectorIDs;
+  detectorIDs.reserve(detectors.size());
+  std::transform(detectors.cbegin(), detectors.cend(), std::back_inserter(detectorIDs),
+                 [](const IDetector_const_sptr &detector) { return detector->getID(); });
+  return detectorIDs;
+}
+
+/** Creates a mapping between Detector IDs and Group IDs from several grouping
+ * strings already split by the comma ',' separator. At this stage the ':'
+ * separated strings have also already been expanded.
+ *
+ * @param allowedDetectorIDs The detector IDs which are allowed for the given
+ * instrument.
+ * @param groupingStrings The grouping strings to split and map.
+ * @returns :: Map of detector IDs to group IDs.
+ */
+std::map<detid_t, int> mapGroupingStringsToGroupIDs(const std::vector<detid_t> &allowedDetectorIDs,
+                                                    const std::vector<std::string> &groupingStrings) {
+  std::map<detid_t, int> detectorIDToGroup;
+  for (auto j = 0; j < static_cast<int>(groupingStrings.size()); ++j) {
+    if (hasSeparator(groupingStrings[j], "+"))
+      addPlusSeparatedDetectorIDsToSameGroup(allowedDetectorIDs, detectorIDToGroup, groupingStrings[j], j + 1);
+    else if (hasSeparator(groupingStrings[j], "-"))
+      addDashSeparatedDetectorIDsToSameGroup(allowedDetectorIDs, detectorIDToGroup, groupingStrings[j], j + 1);
+    else
+      addDetectorToGroup(allowedDetectorIDs, detectorIDToGroup, std::stoi(groupingStrings[j]), j + 1);
+  }
+  return detectorIDToGroup;
+}
+
+/** Creates a mapping between Detector IDs and Group IDs using a custom grouping
+ * string
+ *
+ * @param instrument A pointer to instrument.
+ * @param componentName Name of component in instrument.
+ * @param customGroupingString The string used to specify the grouping.
+ * @returns :: Map of detector IDs to group IDs.
+ */
+std::map<detid_t, int> makeGroupingByCustomString(const Instrument_const_sptr &instrument,
+                                                  const std::string &componentName, std::string &customGroupingString) {
+  removeSpacesFromString(customGroupingString);
+
+  const auto detectorIDs = getAllowedDetectorIDs(instrument, componentName);
+  const auto groupStrings = expandGroupsWithColonSeparator(splitStringBy(customGroupingString, ","));
+
+  return mapGroupingStringsToGroupIDs(detectorIDs, groupStrings);
+}
+
+} // namespace
+
+namespace Mantid::Algorithms {
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(CreateGroupingWorkspace)
@@ -36,15 +246,11 @@ using namespace Mantid::API;
 using namespace Mantid::Geometry;
 using namespace Mantid::DataObjects;
 
-const std::string CreateGroupingWorkspace::name() const {
-  return "CreateGroupingWorkspace";
-}
+const std::string CreateGroupingWorkspace::name() const { return "CreateGroupingWorkspace"; }
 
 int CreateGroupingWorkspace::version() const { return 1; }
 
-const std::string CreateGroupingWorkspace::category() const {
-  return "Utility\\Workspaces;Transforms\\Grouping";
-}
+const std::string CreateGroupingWorkspace::category() const { return "Utility\\Workspaces;Transforms\\Grouping"; }
 
 //----------------------------------------------------------------------------------------------
 
@@ -52,24 +258,18 @@ const std::string CreateGroupingWorkspace::category() const {
 /** Initialize the algorithm's properties.
  */
 void CreateGroupingWorkspace::init() {
-  declareProperty(
-      std::make_unique<WorkspaceProperty<>>(
-          "InputWorkspace", "", Direction::Input, PropertyMode::Optional),
-      "Optional: An input workspace with the instrument we want to use.");
+  declareProperty(std::make_unique<WorkspaceProperty<>>("InputWorkspace", "", Direction::Input, PropertyMode::Optional),
+                  "Optional: An input workspace with the instrument we want to use.");
 
-  declareProperty(std::make_unique<PropertyWithValue<std::string>>(
-                      "InstrumentName", "", Direction::Input),
+  declareProperty(std::make_unique<PropertyWithValue<std::string>>("InstrumentName", "", Direction::Input),
                   "Optional: Name of the instrument to base the "
                   "GroupingWorkspace on which to base the GroupingWorkspace.");
 
-  declareProperty(std::make_unique<FileProperty>("InstrumentFilename", "",
-                                                 FileProperty::OptionalLoad,
-                                                 ".xml"),
+  declareProperty(std::make_unique<FileProperty>("InstrumentFilename", "", FileProperty::OptionalLoad, ".xml"),
                   "Optional: Path to the instrument definition file on which "
                   "to base the GroupingWorkspace.");
 
-  declareProperty(std::make_unique<FileProperty>(
-                      "OldCalFilename", "", FileProperty::OptionalLoad, ".cal"),
+  declareProperty(std::make_unique<FileProperty>("OldCalFilename", "", FileProperty::OptionalLoad, ".cal"),
                   "Optional: Path to the old-style .cal grouping/calibration "
                   "file (multi-column ASCII). You must also specify the "
                   "instrument.");
@@ -80,24 +280,23 @@ void CreateGroupingWorkspace::init() {
                   "Use / or , to separate multiple groups. "
                   "If empty, then an empty GroupingWorkspace will be created.");
 
-  std::vector<std::string> grouping{"",       "All", "Group", "2_4Grouping",
-                                    "Column", "bank"};
-  declareProperty("GroupDetectorsBy", "",
-                  std::make_shared<StringListValidator>(grouping),
+  std::vector<std::string> grouping{"", "All", "Group", "2_4Grouping", "Column", "bank"};
+  declareProperty("GroupDetectorsBy", "", std::make_shared<StringListValidator>(grouping),
                   "Only used if GroupNames is empty");
-  declareProperty("MaxRecursionDepth", 5,
-                  "Number of levels to search into the instrument (default=5)");
+  declareProperty("MaxRecursionDepth", 5, "Number of levels to search into the instrument (default=5)");
 
-  declareProperty("FixedGroupCount", 0,
-                  std::make_shared<BoundedValidator<int>>(0, INT_MAX),
+  declareProperty("FixedGroupCount", 0, std::make_shared<BoundedValidator<int>>(0, INT_MAX),
                   "Used to distribute the detectors of a given component into "
                   "a fixed number of groups");
+  declareProperty("CustomGroupingString", "",
+                  "This takes a comma separated list of grouped detector IDs. An example "
+                  "of the syntax is 1,2+3,4-6,7:10. The documentation page for this "
+                  "algorithm gives a full explanation of this syntax.");
   declareProperty("ComponentName", "",
                   "Specify the instrument component to "
                   "group into a fixed number of groups");
 
-  declareProperty(std::make_unique<WorkspaceProperty<GroupingWorkspace>>(
-                      "OutputWorkspace", "", Direction::Output),
+  declareProperty(std::make_unique<WorkspaceProperty<GroupingWorkspace>>("OutputWorkspace", "", Direction::Output),
                   "An output GroupingWorkspace.");
 
   std::string inputs("Specify Instrument");
@@ -111,12 +310,11 @@ void CreateGroupingWorkspace::init() {
   setPropertyGroup("MaxRecursionDepth", groupby);
   setPropertyGroup("FixedGroupCount", groupby);
   setPropertyGroup("ComponentName", groupby);
+  setPropertyGroup("CustomGroupingString", groupby);
 
   // output properties
-  declareProperty("NumberGroupedSpectraResult", EMPTY_INT(),
-                  "The number of spectra in groups", Direction::Output);
-  declareProperty("NumberGroupsResult", EMPTY_INT(), "The number of groups",
-                  Direction::Output);
+  declareProperty("NumberGroupedSpectraResult", EMPTY_INT(), "The number of spectra in groups", Direction::Output);
+  declareProperty("NumberGroupsResult", EMPTY_INT(), "The number of groups", Direction::Output);
 }
 
 std::map<std::string, std::string> CreateGroupingWorkspace::validateInputs() {
@@ -164,6 +362,17 @@ std::map<std::string, std::string> CreateGroupingWorkspace::validateInputs() {
       result["ComponentName"] = msg;
   }
 
+  std::string customGroupingString = getPropertyValue("CustomGroupingString");
+  std::string componentName = getPropertyValue("ComponentName");
+
+  if (!componentName.empty() && !customGroupingString.empty()) {
+    try {
+      (void)makeGroupingByCustomString(getInstrument(), componentName, customGroupingString);
+    } catch (const std::runtime_error &ex) {
+      result["CustomGroupingString"] = ex.what();
+    }
+  }
+
   return result;
 }
 
@@ -174,8 +383,7 @@ std::map<std::string, std::string> CreateGroupingWorkspace::validateInputs() {
  * @param prog :: progress reporter
  * @returns :: map of key=detectorID, value=group number.
  */
-std::map<detid_t, int> readGroupingFile(const std::string &groupingFileName,
-                                        Progress &prog) {
+std::map<detid_t, int> readGroupingFile(const std::string &groupingFileName, Progress &prog) {
   std::ifstream grFile(groupingFileName.c_str());
   if (!grFile.is_open()) {
     throw Exception::FileError("Error reading .cal file", groupingFileName);
@@ -208,9 +416,8 @@ std::map<detid_t, int> readGroupingFile(const std::string &groupingFileName,
  * @param prog Progress reporter
  * @returns :: Map of detector IDs to group number
  */
-std::map<detid_t, int>
-makeGroupingByNumGroups(const std::string &compName, int numGroups,
-                        const Instrument_const_sptr &inst, Progress &prog) {
+std::map<detid_t, int> makeGroupingByNumGroups(const std::string &compName, int numGroups,
+                                               const Instrument_const_sptr &inst, Progress &prog) {
   std::map<detid_t, int> detIDtoGroup;
 
   // Get detectors for given instument component
@@ -252,16 +459,12 @@ bool groupnumber(std::string groupi, std::string groupj) {
   int i = 0;
   std::string groupName = std::move(groupi);
   // Take out the "group" part of the group name and convert to an int
-  groupName.erase(
-      remove_if(groupName.begin(), groupName.end(), std::not_fn(::isdigit)),
-      groupName.end());
+  groupName.erase(remove_if(groupName.begin(), groupName.end(), std::not_fn(::isdigit)), groupName.end());
   Strings::convert(groupName, i);
   int j = 0;
   groupName = std::move(groupj);
   // Take out the "group" part of the group name and convert to an int
-  groupName.erase(
-      remove_if(groupName.begin(), groupName.end(), std::not_fn(::isdigit)),
-      groupName.end());
+  groupName.erase(remove_if(groupName.begin(), groupName.end(), std::not_fn(::isdigit)), groupName.end());
   Strings::convert(groupName, j);
   return (i < j);
 }
@@ -275,16 +478,14 @@ bool groupnumber(std::string groupi, std::string groupj) {
  * @param sortnames :: sort names - a boolean
  * @returns:: map of detID to group number
  */
-std::map<detid_t, int> makeGroupingByNames(std::string GroupNames,
-                                           const Instrument_const_sptr &inst,
-                                           Progress &prog, bool sortnames) {
+std::map<detid_t, int> makeGroupingByNames(std::string GroupNames, const Instrument_const_sptr &inst, Progress &prog,
+                                           bool sortnames) {
   // This will contain the grouping
   std::map<detid_t, int> detIDtoGroup;
 
   // Split the names of the group and insert in a vector
   std::vector<std::string> vgroups;
-  boost::split(vgroups, GroupNames,
-               boost::algorithm::detail::is_any_ofF<char>(",/*"));
+  boost::split(vgroups, GroupNames, boost::algorithm::detail::is_any_ofF<char>(",/*"));
   while (vgroups.back().empty()) {
     vgroups.pop_back();
   }
@@ -307,8 +508,7 @@ std::map<detid_t, int> makeGroupingByNames(std::string GroupNames,
     using sptr_IComp = std::shared_ptr<const Geometry::IComponent>;
     using sptr_IDet = std::shared_ptr<const Geometry::IDetector>;
     std::queue<std::pair<sptr_ICompAss, int>> assemblies;
-    sptr_ICompAss current =
-        std::dynamic_pointer_cast<const Geometry::ICompAssembly>(inst);
+    sptr_ICompAss current = std::dynamic_pointer_cast<const Geometry::ICompAssembly>(inst);
     sptr_IDet currentDet;
     sptr_IComp currentIComp;
     sptr_ICompAss currentchild;
@@ -331,8 +531,7 @@ std::map<detid_t, int> makeGroupingByNames(std::string GroupNames,
       if (nchilds != 0) {
         for (int i = 0; i < nchilds; ++i) {
           currentIComp = (*(current.get()))[i]; // Get child
-          currentDet = std::dynamic_pointer_cast<const Geometry::IDetector>(
-              currentIComp);
+          currentDet = std::dynamic_pointer_cast<const Geometry::IDetector>(currentIComp);
           if (currentDet.get()) // Is detector
           {
             if (top_group > 0) {
@@ -340,9 +539,7 @@ std::map<detid_t, int> makeGroupingByNames(std::string GroupNames,
             }
           } else // Is an assembly, push in the queue
           {
-            currentchild =
-                std::dynamic_pointer_cast<const Geometry::ICompAssembly>(
-                    currentIComp);
+            currentchild = std::dynamic_pointer_cast<const Geometry::ICompAssembly>(currentIComp);
             if (currentchild.get()) {
               child_group = group_map[currentchild->getName()];
               if (child_group == 0)
@@ -369,6 +566,7 @@ void CreateGroupingWorkspace::exec() {
   std::string GroupNames = getPropertyValue("GroupNames");
   std::string grouping = getPropertyValue("GroupDetectorsBy");
   int numGroups = getProperty("FixedGroupCount");
+  std::string customGroupingString = getPropertyValue("CustomGroupingString");
   std::string componentName = getPropertyValue("ComponentName");
 
   // Some validation
@@ -396,21 +594,7 @@ void CreateGroupingWorkspace::exec() {
 
   bool sortnames = false;
 
-  // ---------- Get the instrument one of 3 ways ---------------------------
-  Instrument_const_sptr inst;
-  if (inWS) {
-    inst = inWS->getInstrument();
-  } else {
-    Algorithm_sptr childAlg = createChildAlgorithm("LoadInstrument", 0.0, 0.2);
-    MatrixWorkspace_sptr tempWS = std::make_shared<Workspace2D>();
-    childAlg->setProperty<MatrixWorkspace_sptr>("Workspace", tempWS);
-    childAlg->setPropertyValue("Filename", InstrumentFilename);
-    childAlg->setProperty("RewriteSpectraMap",
-                          Mantid::Kernel::OptionalBool(true));
-    childAlg->setPropertyValue("InstrumentName", InstrumentName);
-    childAlg->executeAsChildAlg();
-    inst = tempWS->getInstrument();
-  }
+  const auto inst = getInstrument();
 
   // Validation for 2_4Grouping input used only for SNAP
   if (inst->getName() != "SNAP" && grouping == "2_4Grouping") {
@@ -432,14 +616,13 @@ void CreateGroupingWorkspace::exec() {
       sortnames = true;
       GroupNames = "";
       int maxRecurseDepth = this->getProperty("MaxRecursionDepth");
-      // cppcheck-suppress syntaxError
+
           PRAGMA_OMP(parallel for schedule(dynamic, 1) )
           for (int num = 0; num < 300; ++num) {
             PARALLEL_START_INTERUPT_REGION
             std::ostringstream mess;
             mess << grouping << num;
-            IComponent_const_sptr comp =
-                inst->getComponentByName(mess.str(), maxRecurseDepth);
+            IComponent_const_sptr comp = inst->getComponentByName(mess.str(), maxRecurseDepth);
             PARALLEL_CRITICAL(GroupNames)
             if (comp)
               GroupNames += mess.str() + ",";
@@ -474,13 +657,18 @@ void CreateGroupingWorkspace::exec() {
   } else if (!OldCalFilename.empty())
     detIDtoGroup = readGroupingFile(OldCalFilename, prog);
   else if ((numGroups > 0) && !componentName.empty())
-    detIDtoGroup =
-        makeGroupingByNumGroups(componentName, numGroups, inst, prog);
+    detIDtoGroup = makeGroupingByNumGroups(componentName, numGroups, inst, prog);
+  else if (!customGroupingString.empty() && !componentName.empty()) {
+    try {
+      detIDtoGroup = makeGroupingByCustomString(inst, componentName, customGroupingString);
+    } catch (const std::runtime_error &ex) {
+      g_log.error(ex.what());
+      return;
+    }
+  }
 
-  g_log.information() << detIDtoGroup.size()
-                      << " entries in the detectorID-to-group map.\n";
-  setProperty("NumberGroupedSpectraResult",
-              static_cast<int>(detIDtoGroup.size()));
+  g_log.information() << detIDtoGroup.size() << " entries in the detectorID-to-group map.\n";
+  setProperty("NumberGroupedSpectraResult", static_cast<int>(detIDtoGroup.size()));
 
   if (detIDtoGroup.empty()) {
     g_log.warning() << "Creating empty group workspace\n";
@@ -505,11 +693,30 @@ void CreateGroupingWorkspace::exec() {
     setProperty("NumberGroupsResult", static_cast<int>(groupCount.size()));
 
     if (numNotFound > 0)
-      g_log.warning() << numNotFound << " detector IDs (out of "
-                      << detIDtoGroup.size()
+      g_log.warning() << numNotFound << " detector IDs (out of " << detIDtoGroup.size()
                       << ") were not found in the instrument\n.";
   }
 }
 
-} // namespace Algorithms
-} // namespace Mantid
+Instrument_const_sptr CreateGroupingWorkspace::getInstrument() {
+  MatrixWorkspace_sptr inputWorkspace = getProperty("InputWorkspace");
+  std::string instrumentName = getPropertyValue("InstrumentName");
+  std::string instrumentFilename = getPropertyValue("InstrumentFilename");
+
+  Instrument_const_sptr instrument;
+  if (inputWorkspace) {
+    instrument = inputWorkspace->getInstrument();
+  } else {
+    Algorithm_sptr childAlg = createChildAlgorithm("LoadInstrument", 0.0, 0.2);
+    MatrixWorkspace_sptr tempWS = std::make_shared<Workspace2D>();
+    childAlg->setProperty<MatrixWorkspace_sptr>("Workspace", tempWS);
+    childAlg->setPropertyValue("Filename", instrumentFilename);
+    childAlg->setProperty("RewriteSpectraMap", Mantid::Kernel::OptionalBool(true));
+    childAlg->setPropertyValue("InstrumentName", instrumentName);
+    childAlg->executeAsChildAlg();
+    instrument = tempWS->getInstrument();
+  }
+  return instrument;
+}
+
+} // namespace Mantid::Algorithms

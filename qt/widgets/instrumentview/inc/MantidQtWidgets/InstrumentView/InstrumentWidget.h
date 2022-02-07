@@ -7,8 +7,12 @@
 #pragma once
 
 #include "DllOption.h"
+#include "IGLDisplay.h"
+#include "IQtDisplay.h"
+#include "InstrumentDisplay.h"
 #include "InstrumentWidgetTypes.h"
-#include "MantidGLWidget.h"
+#include "QtConnect.h"
+#include "QtMetaObject.h"
 #include "UnwrappedSurface.h"
 
 #include "MantidAPI/AlgorithmObserver.h"
@@ -18,9 +22,12 @@
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/Workspace.h"
 #include "MantidQtWidgets/Common/GraphOptions.h"
+#include "MantidQtWidgets/Common/IMessageHandler.h"
 #include "MantidQtWidgets/Common/WorkspaceObserver.h"
 
 #include <memory>
+
+#include <QThread>
 
 namespace Mantid {
 namespace API {
@@ -43,6 +50,8 @@ class QDragEnterEvent;
 class QDropEvent;
 class QStackedLayout;
 class QSettings;
+class QSplitter;
+class QVBoxLayout;
 
 namespace MantidQt {
 namespace MantidWidgets {
@@ -54,8 +63,20 @@ class InstrumentWidgetPickTab;
 class InstrumentWidgetTreeTab;
 class CollapsiblePanel;
 class XIntegrationControl;
-class SimpleWidget;
+class QtDisplay;
 class ProjectionSurface;
+
+namespace Detail {
+struct Dependencies {
+  std::unique_ptr<IInstrumentDisplay> instrumentDisplay = nullptr;
+  std::unique_ptr<IQtDisplay> qtDisplay = nullptr;
+  std::unique_ptr<IGLDisplay> glDisplay = nullptr;
+  std::unique_ptr<QtConnect> qtConnect = std::make_unique<QtConnect>();
+  std::unique_ptr<QtMetaObject> qtMetaObject = std::make_unique<QtMetaObject>();
+  std::unique_ptr<IMessageHandler> messageHandler = nullptr;
+};
+
+} // namespace Detail
 
 /**
 \class  InstrumentWidget
@@ -70,17 +91,17 @@ http://www.mantidproject.org/MantidPlot:_Instrument_View
 and needs to be updated whenever the instrument view functionality changes.
 
 */
-class EXPORT_OPT_MANTIDQT_INSTRUMENTVIEW InstrumentWidget
-    : public QWidget,
-      public MantidQt::API::WorkspaceObserver,
-      public Mantid::API::AlgorithmObserver,
-      public InstrumentWidgetTypes {
+class EXPORT_OPT_MANTIDQT_INSTRUMENTVIEW InstrumentWidget : public QWidget,
+                                                            public MantidQt::API::WorkspaceObserver,
+                                                            public Mantid::API::AlgorithmObserver,
+                                                            public InstrumentWidgetTypes {
   Q_OBJECT
 
   friend class InstrumentWidgetEncoder;
   friend class InstrumentWidgetDecoder;
 
 public:
+  using Dependencies = Detail::Dependencies;
   enum SurfaceType {
     FULL3D = 0,
     CYLINDRICAL_X,
@@ -94,10 +115,9 @@ public:
   };
   enum Tab { RENDER = 0, PICK, MASK, TREE };
 
-  explicit InstrumentWidget(const QString &wsName, QWidget *parent = nullptr,
-                            bool resetGeometry = true, bool autoscaling = true,
-                            double scaleMin = 0.0, double scaleMax = 0.0,
-                            bool setDefaultView = true);
+  explicit InstrumentWidget(QString wsName, QWidget *parent = nullptr, bool resetGeometry = true,
+                            bool autoscaling = true, double scaleMin = 0.0, double scaleMax = 0.0,
+                            bool setDefaultView = true, Dependencies deps = Dependencies(), bool useThread = true);
   ~InstrumentWidget() override;
   QString getWorkspaceName() const;
   std::string getWorkspaceNameStdString() const;
@@ -127,31 +147,36 @@ public:
   void setScaleType(ColorMap::ScaleType type);
   void setExponent(double nth_power);
   void setViewType(const QString &type);
-  const InstrumentActor &getInstrumentActor() const {
-    return *m_instrumentActor;
-  }
+  const InstrumentActor &getInstrumentActor() const { return *m_instrumentActor; }
   InstrumentActor &getInstrumentActor() { return *m_instrumentActor; }
   void resetInstrument(bool resetGeometry);
   void resetSurface();
+  void resetInstrumentActor(bool resetGeometry, bool autoscaling, double scaleMin, double scaleMax,
+                            bool setDefaultView);
   void selectTab(int tab);
   void selectTab(Tab tab) { selectTab(int(tab)); }
   InstrumentWidgetTab *getTab(const QString &title = "") const;
   InstrumentWidgetTab *getTab(const Tab tab) const;
+  /// Get a specific tab
+  InstrumentWidgetRenderTab *getRenderTab(const Tab tab) const;
+  /// Get a Pick tab
+  InstrumentWidgetPickTab *getPickTab(const Tab tab) const;
+
   /// Get a filename for saving
-  QString getSaveFileName(const QString &title, const QString &filters,
-                          QString *selectedFilter = nullptr);
+  QString getSaveFileName(const QString &title, const QString &filters, QString *selectedFilter = nullptr);
   /// Get a name for settings group
   QString getSettingsGroupName() const;
   /// Get a name for a instrument-specific settings group
   QString getInstrumentSettingsGroupName() const;
 
   bool hasWorkspace(const std::string &wsName) const;
-  void handleWorkspaceReplacement(
-      const std::string &wsName,
-      const std::shared_ptr<Mantid::API::Workspace> &workspace);
+  void handleWorkspaceReplacement(const std::string &wsName, const std::shared_ptr<Mantid::API::Workspace> &workspace);
+  void replaceWorkspace(const std::string &newWs, const std::string &newInstrumentWindowName);
 
   /// Get the currently selected tab index
   int getCurrentTab() const;
+  /// Decides whether the given tab is the tab currently open
+  bool isCurrentTab(InstrumentWidgetTab *tab) const;
   /// Load the widget from a Mantid project file.
   void loadFromProject(const std::string &lines);
   /// Save the widget to a Mantid projecy file.
@@ -159,14 +184,23 @@ public:
   void removeTab(const std::string &tabName);
   void addTab(const std::string &tabName);
   void hideHelp();
-  InstrumentWidgetPickTab *getPickTab() { return m_pickTab; };
+  InstrumentWidgetPickTab *getPickTab() { return m_pickTab; }
+  /// Determine if the workspace requires an integration bar
+  bool isIntegrable();
+  /// Whether the background instrument actor loading thead is running
+  bool isThreadRunning() const;
+  /// Block until thread is finished
+  void waitForThread() const;
+  /// Whether the window has been fully initialized
+  bool isFinished() const;
+
+  /// Whether the side tab is currently visible or is folded
+  bool isTabFolded() const;
 
 signals:
   void enableLighting(bool /*_t1*/);
-  void plot1D(const QString & /*_t1*/, const std::set<int> & /*_t2*/,
-              bool /*_t3*/);
-  void createDetectorTable(const QString & /*_t1*/,
-                           const std::vector<int> & /*_t2*/, bool /*_t3*/);
+  void plot1D(const QString & /*_t1*/, const std::set<int> & /*_t2*/, bool /*_t3*/);
+  void createDetectorTable(const QString & /*_t1*/, const std::vector<int> & /*_t2*/, bool /*_t3*/);
   void needSetIntegrationRange(double /*_t1*/, double /*_t2*/);
   void surfaceTypeChanged(int /*_t1*/);
   void colorMapChanged();
@@ -188,6 +222,7 @@ protected:
   void dragEnterEvent(QDragEnterEvent *e) override;
   void dropEvent(QDropEvent *e) override;
   bool eventFilter(QObject *obj, QEvent *ev) override;
+  void closeEvent(QCloseEvent *e) override;
 
 public slots:
   void tabChanged(int /*unused*/);
@@ -210,6 +245,7 @@ public slots:
 
   void setViewDirection(const QString & /*input*/);
   void pickBackgroundColor();
+  void freezeRotation(bool);
   void saveImage(QString filename);
   void setInfoText(const QString & /*text*/);
   void set3DAxesState(bool /*on*/);
@@ -228,31 +264,30 @@ public slots:
   /// Enable OpenGL. Slot called from render tab only - doesn't update the
   /// checkbox.
   void enableGL(bool on);
-  void updateInfoText();
+  void updateInfoText(const QString &text = QString());
+
+  void initWidget(bool resetGeometry, bool setDefaultView);
+  void threadFinished();
 
 private slots:
   void helpClicked();
 
 protected:
-  void init(bool resetGeometry, bool autoscaling, double scaleMin,
-            double scaleMax, bool setDefaultView, bool resetActor = true);
+  void init(bool resetGeometry, bool setDefaultView);
   /// Set newly created projection surface
   void setSurface(ProjectionSurface *surface);
   QWidget *createInstrumentTreeTab(QTabWidget *ControlsTab);
-  void createTabs(QSettings &settings);
+  void createTabs(const QSettings &settings);
   void saveSettings();
 
   QString asString(const std::vector<int> &numbers) const;
-  QString confirmDetectorOperation(const QString &opName,
-                                   const QString &inputWS, int ndets);
+  QString confirmDetectorOperation(const QString &opName, const QString &inputWS, int ndets);
   /// Set background color of the instrument display
   void setBackgroundColor(const QColor &color);
   /// Get the surface info string
   QString getSurfaceInfoText() const;
-  /// Return the width of the instrunemt display
-  int getInstrumentDisplayWidth() const;
-  /// Return the height of the instrunemt display
-  int getInstrumentDisplayHeight() const;
+  /// Return the size of the OpenGL display widget in device pixels
+  QSize glWidgetDimensions();
   /// Select the OpenGL or simple widget for instrument display
   void selectOpenGLDisplay(bool yes);
   /// Set the surface type.
@@ -261,8 +296,12 @@ protected:
   QString getSaveGroupingFilename();
   /// add the selected tabs
   void addSelectedTabs();
+  /// update integration widget visibility and range
+  void updateIntegrationWidget(bool init = false);
+
   // GUI elements
   QLabel *mInteractionInfo;
+
   QTabWidget *mControlsTab;
   /// Control tabs
   QList<InstrumentWidgetTab *> m_tabs;
@@ -271,10 +310,8 @@ protected:
   InstrumentWidgetTreeTab *m_treeTab;
   InstrumentWidgetPickTab *m_pickTab;
   XIntegrationControl *m_xIntegration;
-  /// The OpenGL widget to display the instrument
-  MantidGLWidget *m_InstrumentDisplay;
-  /// The simple widget to display the instrument
-  SimpleWidget *m_simpleDisplay;
+
+  std::unique_ptr<IInstrumentDisplay> m_instrumentDisplay;
 
   // Context menu actions
   QAction *m_clearPeakOverlays, *m_clearAlignment;
@@ -289,8 +326,7 @@ protected:
   bool m_useOpenGL;
   /// 3D view or unwrapped
   SurfaceType m_surfaceType;
-  /// Stacked layout managing m_InstrumentDisplay and m_simpleDisplay
-  QStackedLayout *m_instrumentDisplayLayout;
+
   /// spectra index id
   int mSpectraIDSelected;
   /// detector id
@@ -315,14 +351,11 @@ protected:
 
 private:
   /// ADS notification handlers
-  void preDeleteHandle(
-      const std::string &ws_name,
-      const std::shared_ptr<Mantid::API::Workspace> &workspace_ptr) override;
-  void afterReplaceHandle(
-      const std::string &wsName,
-      const std::shared_ptr<Mantid::API::Workspace> &workspace_ptr) override;
-  void renameHandle(const std::string &oldName,
-                    const std::string &newName) override;
+  void preDeleteHandle(const std::string &ws_name,
+                       const std::shared_ptr<Mantid::API::Workspace> &workspace_ptr) override;
+  void afterReplaceHandle(const std::string &wsName,
+                          const std::shared_ptr<Mantid::API::Workspace> &workspace_ptr) override;
+  void renameHandle(const std::string &oldName, const std::string &newName) override;
   void clearADSHandle() override;
   /// overlay a peaks workspace on the projection surface
   void overlayPeaksWorkspace(const Mantid::API::IPeaksWorkspace_sptr &ws);
@@ -339,8 +372,29 @@ private:
   /// Save tabs on the widget to a string
   std::string saveTabs() const;
 
+  void cancelThread();
+
   bool m_wsReplace;
   QPushButton *m_help;
+  QVBoxLayout *m_mainLayout;
+
+  /// Wrapper around Qt connect function so we can mock it
+  std::unique_ptr<QtConnect> m_qtConnect;
+  /// Wrapper around Qt meta object for mocking
+  std::unique_ptr<QtMetaObject> m_qtMetaObject;
+
+  std::unique_ptr<IMessageHandler> m_messageHandler;
+
+  mutable QThread m_thread;
+  bool m_finished;
+  bool m_autoscaling;
+  double m_scaleMin;
+  double m_scaleMax;
+  bool m_setDefaultView;
+  bool m_resetGeometry;
+  bool m_useThread;
+
+  QSplitter *m_controlPanelLayout;
 };
 
 } // namespace MantidWidgets

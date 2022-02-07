@@ -81,27 +81,22 @@ Required properties:
 class DLLExport SaveCanSAS1D : public API::Algorithm {
 public:
   const std::string name() const override { return "SaveCanSAS1D"; }
-  const std::string summary() const override {
-    return "Save a MatrixWorkspace to a file in the canSAS 1-D format";
-  }
+  const std::string summary() const override { return "Save a MatrixWorkspace to a file in the canSAS 1-D format"; }
   int version() const override { return 1; }
-  const std::string category() const override {
-    return "DataHandling\\XML;SANS\\DataHandling";
-  }
+  const std::string category() const override { return "DataHandling\\XML;SANS\\DataHandling"; }
 
 protected:
   /// Overwrites Algorithm method.
   void init() override;
   /// overriden method sets appending for workspace groups
-  void setOtherProperties(API::IAlgorithm *alg, const std::string &propertyName,
-                          const std::string &propertyValue,
+  void setOtherProperties(API::IAlgorithm *alg, const std::string &propertyName, const std::string &propertyValue,
                           int perioidNum) override;
   /// Overwrites Algorithm method
   void exec() override;
 
   /// Opens the output file and, as necessary blanks it, writes the file header
   /// and moves the file pointer
-  void prepareFileToWriteEntry();
+  void prepareFileToWriteEntry(const std::string &fileName);
   /// opens the named file if possible or returns false
   bool openForAppending(const std::string &filename);
   /// Moves to the end of the last entry in the file
@@ -113,8 +108,7 @@ protected:
   void searchandreplaceSpecialChars(std::string &input);
   /// replaces the charcter at index in the input string with xml entity
   /// reference(eg.replace '&' with "&amp;")
-  void replacewithEntityReference(std::string &input,
-                                  const std::string::size_type &index);
+  void replacewithEntityReference(std::string &input, const std::string::size_type &index);
   /// sasroot element
   virtual void createSASRootElement(std::string &rootElem);
 
@@ -128,7 +122,7 @@ protected:
   void createSASRunElement(std::string &sasRun);
 
   /// this method creates a sasData element
-  void createSASDataElement(std::string &sasData);
+  void createSASDataElement(std::string &sasData, size_t workspaceIndex);
 
   /// this method creates a sasSource element
   void createSASSourceElement(std::string &sasSource);

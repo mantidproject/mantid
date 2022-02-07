@@ -19,14 +19,14 @@ where,
 
 :math:`A_0` is the amplitude,
 
-:math:`\beta` is the stretching exponential and it ranges from 1 (neglible nuclear field) and 2 (strong nuclear field). 
+:math:`\beta` is the stretching exponential and it ranges from 1 (neglible nuclear field) and 2 (strong nuclear field).
 
 .. attributes::
 
 .. properties::
 
 .. plot::
-	
+
    from mantid.simpleapi import FunctionWrapper
    import matplotlib.pyplot as plt
    import numpy as np

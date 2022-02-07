@@ -6,16 +6,13 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "RegexRowFilter.h"
 
-namespace MantidQt {
-namespace CustomInterfaces {
-namespace ISISReflectometry {
+namespace MantidQt::CustomInterfaces::ISISReflectometry {
 
 using MantidQt::MantidWidgets::Batch::IJobTreeView;
 using MantidQt::MantidWidgets::Batch::RowLocation;
 
-RegexFilter::RegexFilter(const boost::regex &regex, IJobTreeView const &view,
-                         ReductionJobs const &jobs)
-    : m_filter(std::move(regex)), m_view(view), m_jobs(jobs) {}
+RegexFilter::RegexFilter(const boost::regex &regex, IJobTreeView const &view, ReductionJobs const &jobs)
+    : m_filter(regex), m_view(view), m_jobs(jobs) {}
 
 bool RegexFilter::rowMeetsCriteria(RowLocation const &location) const {
   if (location.isRoot()) {
@@ -27,16 +24,12 @@ bool RegexFilter::rowMeetsCriteria(RowLocation const &location) const {
     assert(isRowLocation(location));
     auto cellText = m_view.cellAt(location, RUNS_COLUMN_INDEX).contentText();
     auto groupText = groupName(m_jobs, groupOf(location));
-    return boost::regex_search(cellText, m_filter) ||
-           boost::regex_search(groupText, m_filter);
+    return boost::regex_search(cellText, m_filter) || boost::regex_search(groupText, m_filter);
   }
 }
 
-std::unique_ptr<RegexFilter> filterFromRegexString(std::string const &regex,
-                                                   IJobTreeView const &view,
+std::unique_ptr<RegexFilter> filterFromRegexString(std::string const &regex, IJobTreeView const &view,
                                                    ReductionJobs const &jobs) {
   return std::make_unique<RegexFilter>(boost::regex(regex), view, jobs);
 }
-} // namespace ISISReflectometry
-} // namespace CustomInterfaces
-} // namespace MantidQt
+} // namespace MantidQt::CustomInterfaces::ISISReflectometry

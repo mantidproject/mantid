@@ -5,20 +5,21 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 
-/********** PLEASE NOTE! THIS FILE WAS AUTO-GENERATED FROM CMAKE.
- * ***********************/
-/********** Source = kernel.cpp.in
- * *******************************************************/
+@AUTO_GENERATE_WARNING@
+/********** Source = kernel.cpp.in **********************************************************/
 
 #include <boost/python/def.hpp>
 #include <boost/python/docstring_options.hpp>
 #include <boost/python/module.hpp>
 #include <boost/python/type_id.hpp>
+#include <Poco/Instantiator.h>
+#include <Poco/LoggingFactory.h>
 
-#include "MantidKernel/MantidVersion.h"
 #include "MantidPythonInterface/core/NDArray.h"
 #include "MantidPythonInterface/kernel/Registry/TypeRegistry.h"
 #include "MantidPythonInterface/kernel/kernel.h"
+#include "MantidPythonInterface/core/PythonLoggingChannel.h"
+#include "MantidPythonInterface/core/PythonStdoutChannel.h"
 
 // See
 // http://docs.scipy.org/doc/numpy/reference/c-api.array.html#PY_ARRAY_UNIQUE_SYMBOL
@@ -37,37 +38,6 @@ namespace converter = boost::python::converter;
 // Forward declare
 @EXPORT_DECLARE@
 
-#if PY_VERSION_HEX < 0x03000000
-    /**
-     * Adds a from_python converter to converter unicode strings to std::string
-     * by encoding them in utf-8 if possible. Adapted from
-     * https://www.boost.org/doc/libs/1_68_0/libs/python/doc/html/faq/how_can_i_automatically_convert_.html
-     */
-struct from_unicode_py2 {
-  from_unicode_py2() {
-    converter::registry::push_back(&convertible, &construct,
-                                   type_id<std::string>());
-  }
-  static void *convertible(PyObject *obj_ptr) {
-    return (PyUnicode_Check(obj_ptr)) ? obj_ptr : 0;
-  }
-  static void construct(PyObject *obj_ptr,
-                        converter::rvalue_from_python_stage1_data *data) {
-    PyObject *pyutf8 = PyUnicode_AsUTF8String(obj_ptr);
-    if (pyutf8 == 0)
-      boost::python::throw_error_already_set();
-    const char *value = PyString_AsString(pyutf8);
-    if (value == 0)
-      boost::python::throw_error_already_set();
-    using rvalue_from_python_std_string = converter::rvalue_from_python_storage<std::string>;
-    void *storage = reinterpret_cast<rvalue_from_python_std_string*>(data)->storage.bytes;
-    new (storage) std::string(value);
-    data->convertible = storage;
-    Py_DECREF(pyutf8); // Must be deleted after the std::string has taken a copy
-  }
-};
-#endif
-
 BOOST_PYTHON_MODULE(_kernel) {
   // Doc string options - User defined, python arguments, C++ call signatures
   boost::python::docstring_options docstrings(true, true, false);
@@ -75,27 +45,20 @@ BOOST_PYTHON_MODULE(_kernel) {
   Mantid::PythonInterface::importNumpy();
   // Import numpy for this DLL
   _import_array();
+  // register the python logger with poco
+  Poco::LoggingFactory::defaultFactory().registerChannelClass(
+    "PythonLoggingChannel",
+    new Poco::Instantiator<Poco::PythonLoggingChannel, Poco::Channel>);
+  Poco::LoggingFactory::defaultFactory().registerChannelClass(
+    "PythonStdoutChannel",
+    new Poco::Instantiator<Poco::PythonStdoutChannel, Poco::Channel>);
+  /*
+  // TODO: this channel should replace PythonStdoutChannel when we adopt pybind11 because of robust GIL  management
+  Poco::LoggingFactory::defaultFactory().registerChannelClass(
+      "PyBindStdoutChannel", new Poco::Instantiator<Poco::PyBindStdoutChannel, Poco::Channel>);
+  */
 
-  def("version_str", &Mantid::Kernel::MantidVersion::version,
-      "Returns the Mantid version string in the form \"major.minor.patch\"");
-  def("release_notes_url", &Mantid::Kernel::MantidVersion::releaseNotes,
-      "Returns the url to the most applicable release notes");
-  def("revision", &Mantid::Kernel::MantidVersion::revision,
-      "Returns the abbreviated SHA-1 of the last commit");
-  def("revision_full", &Mantid::Kernel::MantidVersion::revisionFull,
-      "Returns the full SHA-1 of the last commit");
-  def("release_date", &Mantid::Kernel::MantidVersion::releaseDate,
-      "Returns the date of the last commit");
-  def("doi", &Mantid::Kernel::MantidVersion::doi,
-      "Returns the DOI for this release of Mantid");
-  def("paper_citation", &Mantid::Kernel::MantidVersion::paperCitation,
-      "Returns The citation for the Mantid paper");
 
-#if PY_VERSION_HEX < 0x03000000
-  // accept unicode strings wherever we see std::string (as long as they can be
-  // encoded in utf8)
-  from_unicode_py2();
-#endif
   Mantid::PythonInterface::Registry::TypeRegistry::registerBuiltins();
 
   @EXPORT_FUNCTIONS@

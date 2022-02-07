@@ -57,52 +57,44 @@ class MantidTreeWidget;
 \date   24-08-2016
 \version 1.1
 */
-class EXPORT_OPT_MANTIDQT_COMMON WorkspaceTreeWidget
-    : public QWidget,
-      public IWorkspaceDockView {
+class EXPORT_OPT_MANTIDQT_COMMON WorkspaceTreeWidget : public QWidget, public IWorkspaceDockView {
   Q_OBJECT
 public:
-  WorkspaceTreeWidget(MantidQt::MantidWidgets::MantidDisplayBase *mdb,
-                      bool viewOnly = false, QWidget *parent = nullptr);
+  WorkspaceTreeWidget(MantidQt::MantidWidgets::MantidDisplayBase *mdb, bool viewOnly = false,
+                      QWidget *parent = nullptr);
   ~WorkspaceTreeWidget();
   void dropEvent(QDropEvent *de) override;
 
-  MantidQt::MantidWidgets::WorkspacePresenterWN_wptr
-  getPresenterWeakPtr() override;
+  MantidQt::MantidWidgets::WorkspacePresenterWN_wptr getPresenterWeakPtr() override;
 
   SortDirection getSortDirection() const override;
   SortCriteria getSortCriteria() const override;
   void sortWorkspaces(SortCriteria criteria, SortDirection direction) override;
 
-  MantidQt::MantidWidgets::StringList
-  getSelectedWorkspaceNames() const override;
+  MantidQt::MantidWidgets::StringList getSelectedWorkspaceNames() const override;
   // Horrible second function to get a return value as QStringList directly
   QStringList getSelectedWorkspaceNamesAsQList() const;
   Mantid::API::Workspace_sptr getSelectedWorkspace() const override;
 
-  bool askUserYesNo(const std::string &caption,
-                    const std::string &message) const override;
-  void showCriticalUserMessage(const std::string &caption,
-                               const std::string &message) const override;
+  bool askUserYesNo(const std::string &caption, const std::string &message) const override;
+  void showCriticalUserMessage(const std::string &caption, const std::string &message) const override;
 
   void showLoadDialog() override;
   void showLiveDataDialog() override;
-  void
-  showRenameDialog(const MantidQt::MantidWidgets::StringList &wsNames) override;
+  void showRenameDialog(const MantidQt::MantidWidgets::StringList &wsNames) override;
   void enableDeletePrompt(bool enable) override;
   bool isPromptDelete() const override;
   bool deleteConfirmation() const override;
-  void
-  deleteWorkspaces(const MantidQt::MantidWidgets::StringList &wsNames) override;
+  void deleteWorkspaces(const MantidQt::MantidWidgets::StringList &wsNames) override;
+  bool clearWorkspacesConfirmation() const override;
+  void enableClearButton(bool enable) override;
   void clearView() override;
   std::string getFilterText() const override;
   SaveFileType getSaveFileType() const override;
   void saveWorkspace(const std::string &wsName, SaveFileType type) override;
-  void
-  saveWorkspaces(const MantidQt::MantidWidgets::StringList &wsNames) override;
+  void saveWorkspaces(const MantidQt::MantidWidgets::StringList &wsNames) override;
   void filterWorkspaces(const std::string &filterText) override;
-  void recordWorkspaceRename(const std::string &oldName,
-                             const std::string &newName) override;
+  void recordWorkspaceRename(const std::string &oldName, const std::string &newName) override;
   void refreshWorkspaces() override;
 
   // Context Menu Handlers
@@ -110,11 +102,10 @@ public:
   void showWorkspaceData() override;
   void saveToProgram() override;
   void showInstrumentView() override;
-  void plotSpectrum(std::string type) override;
+  void plotSpectrum(const std::string &type) override;
   void showColourFillPlot() override;
   void showDetectorsTable() override;
   void showBoxDataTable() override;
-  void showVatesGUI() override;
   void showMDPlot() override;
   void showListData() override;
   void showSpectrumViewer() override;
@@ -126,36 +117,26 @@ public:
   void convertToMatrixWorkspace() override;
   void convertMDHistoToMatrixWorkspace() override;
 
-  bool executeAlgorithmAsync(Mantid::API::IAlgorithm_sptr alg,
-                             const bool wait = true) override;
+  bool executeAlgorithmAsync(Mantid::API::IAlgorithm_sptr alg, const bool wait = true) override;
 
 private:
   bool hasUBMatrix(const std::string &wsName);
-  void addSaveMenuOption(const QString &algorithmString,
-                         QString menuEntryName = "");
+  void addSaveMenuOption(const QString &algorithmString, QString menuEntryName = "");
   void setTreeUpdating(const bool state);
   inline bool isTreeUpdating() const { return m_treeUpdating; }
   void updateTree(const TopLevelItems &items) override;
-  void populateTopLevel(const TopLevelItems &topLevelItems,
-                        const QStringList &expanded);
-  MantidTreeWidgetItem *
-  addTreeEntry(const std::pair<std::string, Mantid::API::Workspace_sptr> &item,
-               QTreeWidgetItem *parent = nullptr);
+  void populateTopLevel(const TopLevelItems &topLevelItems, const QStringList &expanded);
+  MantidTreeWidgetItem *addTreeEntry(const std::pair<std::string, Mantid::API::Workspace_sptr> &item,
+                                     QTreeWidgetItem *parent = nullptr);
   bool shouldBeSelected(const QString &name) const;
   void createWorkspaceMenuActions();
   void createSortMenuActions();
   void setItemIcon(QTreeWidgetItem *item, const std::string &wsID);
 
-  void addMatrixWorkspaceMenuItems(
-      QMenu *menu,
-      const Mantid::API::MatrixWorkspace_const_sptr &matrixWS) const;
-  void addMDEventWorkspaceMenuItems(
-      QMenu *menu,
-      const Mantid::API::IMDEventWorkspace_const_sptr &mdeventWS) const;
-  void addMDHistoWorkspaceMenuItems(
-      QMenu *menu, const Mantid::API::IMDWorkspace_const_sptr &WS) const;
-  void addPeaksWorkspaceMenuItems(
-      QMenu *menu, const Mantid::API::IPeaksWorkspace_const_sptr &WS) const;
+  void addMatrixWorkspaceMenuItems(QMenu *menu, const Mantid::API::MatrixWorkspace_const_sptr &matrixWS) const;
+  void addMDEventWorkspaceMenuItems(QMenu *menu, const Mantid::API::IMDEventWorkspace_const_sptr &mdeventWS) const;
+  void addMDHistoWorkspaceMenuItems(QMenu *menu, const Mantid::API::IMDWorkspace_const_sptr &WS) const;
+  void addPeaksWorkspaceMenuItems(QMenu *menu, const Mantid::API::IPeaksWorkspace_const_sptr &WS) const;
   void addWorkspaceGroupMenuItems(QMenu *menu) const;
   void addTableWorkspaceMenuItems(QMenu *menu) const;
   void addClearMenuItems(QMenu *menu, const QString &wsName);
@@ -167,13 +148,13 @@ private:
   void setupConnections();
   void hideButtonToolbar();
 
-  MantidQt::MantidWidgets::MantidItemSortScheme
-  whichCriteria(SortCriteria criteria);
+  MantidQt::MantidWidgets::MantidItemSortScheme whichCriteria(SortCriteria criteria);
 
 public slots:
   void clickedWorkspace(QTreeWidgetItem * /*item*/, int /*unused*/);
   void saveWorkspaceCollection();
   void onClickDeleteWorkspaces();
+  void onClickClearWorkspaces();
   void renameWorkspace();
   void populateChildData(QTreeWidgetItem *item);
   void onClickSaveToProgram(const QString &name);
@@ -198,7 +179,6 @@ private slots:
   void onClickShowData();
   void onClickShowInstrument();
   void onClickShowBoxData();
-  void onClickShowVates();
   void onClickShowMDPlot();
   void onClickShowListData();
   void onClickShowSpectrumViewer();
@@ -238,6 +218,7 @@ private:
   QPushButton *m_loadButton;
   QPushButton *m_saveButton;
   QPushButton *m_deleteButton;
+  QPushButton *m_clearButton;
   QPushButton *m_groupButton;
   QPushButton *m_sortButton;
   QLineEdit *m_workspaceFilter;
@@ -247,13 +228,11 @@ private:
 
   QMenu *m_sortMenu, *m_saveMenu;
   // Context-menu actions
-  QAction *m_showData, *m_showInst, *m_plotSpec, *m_plotSpecErr,
-      *m_plotAdvanced, *m_showDetectors, *m_showBoxData, *m_showVatesGui,
-      *m_showSpectrumViewer, *m_showSliceViewer, *m_colorFill, *m_showLogs,
-      *m_showSampleMaterial, *m_showHist, *m_showMDPlot, *m_showListData,
-      *m_ascendingSortAction, *m_descendingSortAction, *m_byNameChoice,
-      *m_byLastModifiedChoice, *m_showTransposed, *m_convertToMatrixWorkspace,
-      *m_convertMDHistoToMatrixWorkspace, *m_clearUB;
+  QAction *m_showData, *m_showInst, *m_plotSpec, *m_plotSpecErr, *m_plotAdvanced, *m_showDetectors, *m_showBoxData,
+      *m_showSpectrumViewer, *m_showSliceViewer, *m_colorFill, *m_showLogs, *m_showSampleMaterial, *m_showHist,
+      *m_showMDPlot, *m_showListData, *m_ascendingSortAction, *m_descendingSortAction, *m_byNameChoice,
+      *m_byLastModifiedChoice, *m_showTransposed, *m_convertToMatrixWorkspace, *m_convertMDHistoToMatrixWorkspace,
+      *m_clearUB;
 
   QAtomicInt m_updateCount;
   bool m_treeUpdating;

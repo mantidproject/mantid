@@ -19,8 +19,7 @@ namespace Functions {
   convoluted with an instrument resolution function that is approximated by a
   Voigt function.
 */
-class MANTID_CURVEFITTING_DLL GramCharlierComptonProfile
-    : public ComptonProfile {
+class MANTID_CURVEFITTING_DLL GramCharlierComptonProfile : public ComptonProfile {
 public:
   /// Default constructor required by factory
   GramCharlierComptonProfile();
@@ -42,9 +41,8 @@ private:
   /// Returns the indices of the intensity parameters
   std::vector<size_t> intensityParameterIndices() const override;
   /// Fill in the columns of the matrix for this mass
-  size_t
-  fillConstraintMatrix(Kernel::DblMatrix &cmatrix, const size_t start,
-                       const HistogramData::HistogramE &errors) const override;
+  size_t fillConstraintMatrix(Kernel::DblMatrix &cmatrix, const size_t start,
+                              const HistogramData::HistogramE &errors) const override;
   /// Compute the sum for all Hermite polynomial coefficents
   void massProfile(double *result, const size_t nData) const override;
   /// Compute the contribution to mass profile nth Hermite polynomial
@@ -54,14 +52,12 @@ private:
   /// Add FSE term based on current parameter setting
   void addFSETerm(std::vector<double> &lhs) const;
   /// Convolute with resolution
-  void convoluteVoigt(double *result, const size_t nData,
-                      const std::vector<double> &profile) const;
+  void convoluteVoigt(double *result, const size_t nData, const std::vector<double> &profile) const;
   /// Called by the framework when a workspace is set
-  void setMatrixWorkspace(std::shared_ptr<const API::MatrixWorkspace> workspace,
-                          size_t wi, double startX, double endX) override;
+  void setMatrixWorkspace(std::shared_ptr<const API::MatrixWorkspace> workspace, size_t wi, double startX,
+                          double endX) override;
   /// Pre-calculate the Y-space values
-  void cacheYSpaceValues(const HistogramData::Points &tseconds,
-                         const Algorithms::DetectorParams &detpar) override;
+  void cacheYSpaceValues(const HistogramData::Points &tseconds, const Algorithms::DetectorParams &detpar) override;
 
   /// The active hermite coefficents
   std::vector<short> m_hermite;

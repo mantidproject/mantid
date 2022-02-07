@@ -42,15 +42,12 @@ GNU_DIAG_ON("conversion")
 GNU_DIAG_ON("cast-qual")
 #endif
 
-namespace Mantid {
-
-namespace Geometry {
+namespace Mantid::Geometry {
 using Kernel::Tolerance;
 using Kernel::V3D;
 
 Torus::Torus()
-    : Surface(), Centre(), Normal(1, 0, 0), Iradius(0), Dradius(0),
-      Displacement(0)
+    : Surface(), Centre(), Normal(1, 0, 0), Iradius(0), Dradius(0), Displacement(0)
 /**
   Constructor with centre line along X axis
   and centre on origin
@@ -88,8 +85,7 @@ int Torus::operator==(const Torus &A) const
   if (this == &A)
     return 1;
 
-  if ((fabs(Displacement - A.Displacement) > Tolerance) ||
-      (fabs(Iradius - A.Iradius) > Tolerance) ||
+  if ((fabs(Displacement - A.Displacement) > Tolerance) || (fabs(Iradius - A.Iradius) > Tolerance) ||
       (fabs(Dradius - A.Dradius) > Tolerance))
     return 0;
 
@@ -143,8 +139,7 @@ int Torus::setSurface(const std::string &Pstr)
   std::string Line = Pstr;
 
   std::string item;
-  if (!Mantid::Kernel::Strings::section(Line, item) ||
-      tolower(item[0]) != 't' || item.length() != 3)
+  if (!Mantid::Kernel::Strings::section(Line, item) || tolower(item[0]) != 't' || item.length() != 3)
     return errDesc;
 
   // Torus on X/Y/Z axis
@@ -255,17 +250,21 @@ int Torus::side(const Kernel::V3D &R) const
   return -1;
 }
 
-int Torus::onSurface(const Kernel::V3D &R) const {
+bool Torus::onSurface(const Kernel::V3D &R) const {
   /**
      Calculate if the point R is on
      the cone (Note: have to be careful here
      since angle calcuation calcuates an angle.
      We need a distance for tolerance!)
      @param R :: Point to check
-     @return 1 if on surface and -1 if not no surface
   */
   UNUSED_ARG(R);
-  return -1;
+  // was formerly alwasy returning -1 which bool(-1) == true
+  // which appears to be an accidental bug
+
+  // the previous doxygen comment was
+  // return 1 if on surface and -1 if not no surface
+  return false;
 }
 
 void Torus::write(std::ostream &OX) const
@@ -300,8 +299,7 @@ void Torus::write(std::ostream &OX) const
  *  @param ymin :: the Y min value
  *  @param zmin :: the Z min value
  */
-void Torus::getBoundingBox(double &xmax, double &ymax, double &zmax,
-                           double &xmin, double &ymin, double &zmin) {
+void Torus::getBoundingBox(double &xmax, double &ymax, double &zmax, double &xmin, double &ymin, double &zmin) {
   UNUSED_ARG(xmax);
   UNUSED_ARG(ymax);
   UNUSED_ARG(zmax);
@@ -331,6 +329,4 @@ TopoDS_Shape Torus::createShape() {
 }
 #endif
 
-} // namespace Geometry
-
-} // NAMESPACE Mantid
+} // namespace Mantid::Geometry

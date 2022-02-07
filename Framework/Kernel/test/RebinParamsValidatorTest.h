@@ -28,8 +28,7 @@ public:
   }
 
   void testFailEmpty() {
-    TS_ASSERT_EQUALS(standardValidator.isValid(std::vector<double>()),
-                     "Enter values for this property");
+    TS_ASSERT_EQUALS(standardValidator.isValid(std::vector<double>()), "Enter values for this property");
   }
 
   void testSucceedEmpty() {
@@ -49,9 +48,7 @@ public:
     vec[2] = 2.0;
     vec[3] = 0.2;
     vec[4] = 1.5;
-    TS_ASSERT_EQUALS(
-        standardValidator.isValid(vec),
-        "Bin boundary values must be given in order of increasing value");
+    TS_ASSERT_EQUALS(standardValidator.isValid(vec), "Bin boundary values must be given in order of increasing value");
   }
 
   void testFailZeroBin_or_bad_log() {
@@ -96,9 +93,8 @@ public:
     std::vector<double> vec(2);
     vec[0] = 1.0;
     vec[1] = 0.0;
-    TS_ASSERT_EQUALS(
-        allowRangeValidator.isValid(vec),
-        "When giving a range the second value must be larger than the first");
+    TS_ASSERT_EQUALS(allowRangeValidator.isValid(vec),
+                     "When giving a range the second value must be larger than the first");
   }
 
 private:

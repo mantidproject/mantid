@@ -17,8 +17,7 @@ namespace ISISReflectometry {
 
 class MANTIDQT_ISISREFLECTOMETRY_DLL IPlotter {
 public:
-  virtual void
-  reflectometryPlot(const std::vector<std::string> &workspaces) const = 0;
+  virtual void reflectometryPlot(const std::vector<std::string> &workspaces) const = 0;
 };
 
 } // namespace ISISReflectometry

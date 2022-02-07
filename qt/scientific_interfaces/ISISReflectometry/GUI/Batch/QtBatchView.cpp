@@ -6,6 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "QtBatchView.h"
 #include "GUI/Event/QtEventView.h"
+#include "GUI/Preview/QtPreviewView.h"
 #include "GUI/Runs/QtRunsView.h"
 #include "GUI/Save/QtSaveView.h"
 #include "MantidAPI/AlgorithmManager.h"
@@ -16,25 +17,19 @@
 #include <QMetaType>
 #include <utility>
 
-namespace MantidQt {
-namespace CustomInterfaces {
-namespace ISISReflectometry {
+namespace MantidQt::CustomInterfaces::ISISReflectometry {
 
 using API::BatchAlgorithmRunner;
 using Mantid::API::IAlgorithm_sptr;
 
-QtBatchView::QtBatchView(QWidget *parent)
-    : QWidget(parent), m_batchAlgoRunner(this) {
-  qRegisterMetaType<API::IConfiguredAlgorithm_sptr>(
-      "MantidQt::API::IConfiguredAlgorithm_sptr");
+QtBatchView::QtBatchView(QWidget *parent) : QWidget(parent), m_batchAlgoRunner(this) {
+  qRegisterMetaType<API::IConfiguredAlgorithm_sptr>("MantidQt::API::IConfiguredAlgorithm_sptr");
   initLayout();
   m_batchAlgoRunner.stopOnFailure(false);
   connectBatchAlgoRunnerSlots();
 }
 
-void QtBatchView::subscribe(BatchViewSubscriber *notifyee) {
-  m_notifyee = notifyee;
-}
+void QtBatchView::subscribe(JobRunnerSubscriber *notifyee) { m_notifyees.push_back(notifyee); }
 
 void QtBatchView::initLayout() {
   m_ui.setupUi(this);
@@ -51,6 +46,13 @@ void QtBatchView::initLayout() {
   m_instrument = std::make_unique<QtInstrumentView>(createReductionAlg(), this);
   m_ui.batchTabs->addTab(m_instrument.get(), "Instrument Settings");
 
+  m_preview = std::make_unique<QtPreviewView>(this);
+  m_ui.batchTabs->addTab(m_preview.get(), "Reduction Preview");
+#ifdef NDEBUG
+  // Preview disabled in Release mode to prevent users "finding" it in the nightly
+  m_ui.batchTabs->removeTab(m_ui.batchTabs->indexOf(m_preview.get()));
+#endif // NDEBUG
+
   m_save = createSaveTab();
   m_ui.batchTabs->addTab(m_save.get(), "Save ASCII");
 }
@@ -58,6 +60,8 @@ void QtBatchView::initLayout() {
 IExperimentView *QtBatchView::experiment() const { return m_experiment.get(); }
 
 IInstrumentView *QtBatchView::instrument() const { return m_instrument.get(); }
+
+IPreviewView *QtBatchView::preview() const { return m_preview.get(); }
 
 IRunsView *QtBatchView::runs() const { return m_runs.get(); }
 
@@ -67,76 +71,65 @@ ISaveView *QtBatchView::save() const { return m_save.get(); }
 
 void QtBatchView::clearAlgorithmQueue() { m_batchAlgoRunner.clearQueue(); }
 
-void QtBatchView::setAlgorithmQueue(
-    std::deque<API::IConfiguredAlgorithm_sptr> algorithms) {
+void QtBatchView::setAlgorithmQueue(std::deque<API::IConfiguredAlgorithm_sptr> algorithms) {
   m_batchAlgoRunner.setQueue(algorithms);
 }
 
 void QtBatchView::connectBatchAlgoRunnerSlots() {
-  connect(&m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this,
-          SLOT(onBatchComplete(bool)));
-  connect(&m_batchAlgoRunner, SIGNAL(batchCancelled()), this,
-          SLOT(onBatchCancelled()));
-  connect(&m_batchAlgoRunner,
-          SIGNAL(algorithmStarted(MantidQt::API::IConfiguredAlgorithm_sptr)),
-          this,
+  connect(&m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this, SLOT(onBatchComplete(bool)));
+  connect(&m_batchAlgoRunner, SIGNAL(batchCancelled()), this, SLOT(onBatchCancelled()));
+  connect(&m_batchAlgoRunner, SIGNAL(algorithmStarted(MantidQt::API::IConfiguredAlgorithm_sptr)), this,
           SLOT(onAlgorithmStarted(MantidQt::API::IConfiguredAlgorithm_sptr)));
-  connect(&m_batchAlgoRunner,
-          SIGNAL(algorithmComplete(MantidQt::API::IConfiguredAlgorithm_sptr)),
-          this,
+  connect(&m_batchAlgoRunner, SIGNAL(algorithmComplete(MantidQt::API::IConfiguredAlgorithm_sptr)), this,
           SLOT(onAlgorithmComplete(MantidQt::API::IConfiguredAlgorithm_sptr)));
-  connect(&m_batchAlgoRunner,
-          SIGNAL(algorithmError(MantidQt::API::IConfiguredAlgorithm_sptr,
-                                std::string)),
-          this,
-          SLOT(onAlgorithmError(MantidQt::API::IConfiguredAlgorithm_sptr,
-                                std::string)));
+  connect(&m_batchAlgoRunner, SIGNAL(algorithmError(MantidQt::API::IConfiguredAlgorithm_sptr, std::string)), this,
+          SLOT(onAlgorithmError(MantidQt::API::IConfiguredAlgorithm_sptr, std::string)));
 }
 
-void QtBatchView::executeAlgorithmQueue() {
-  m_batchAlgoRunner.executeBatchAsync();
-}
+void QtBatchView::executeAlgorithmQueue() { m_batchAlgoRunner.executeBatchAsync(); }
 
 void QtBatchView::cancelAlgorithmQueue() { m_batchAlgoRunner.cancelBatch(); }
 
 void QtBatchView::onBatchComplete(bool error) {
-  m_notifyee->notifyBatchComplete(error);
+  for (auto notifyee : m_notifyees) {
+    notifyee->notifyBatchComplete(error);
+  }
 }
 
-void QtBatchView::onBatchCancelled() { m_notifyee->notifyBatchCancelled(); }
+void QtBatchView::onBatchCancelled() {
+  for (auto notifyee : m_notifyees) {
+    notifyee->notifyBatchCancelled();
+  }
+}
 
 void QtBatchView::onAlgorithmStarted(API::IConfiguredAlgorithm_sptr algorithm) {
-  m_notifyee->notifyAlgorithmStarted(std::move(algorithm));
+  for (auto notifyee : m_notifyees) {
+    notifyee->notifyAlgorithmStarted(algorithm);
+  }
 }
 
-void QtBatchView::onAlgorithmComplete(
-    API::IConfiguredAlgorithm_sptr algorithm) {
-  m_notifyee->notifyAlgorithmComplete(std::move(algorithm));
+void QtBatchView::onAlgorithmComplete(API::IConfiguredAlgorithm_sptr algorithm) {
+  for (auto notifyee : m_notifyees) {
+    notifyee->notifyAlgorithmComplete(algorithm);
+  }
 }
 
-void QtBatchView::onAlgorithmError(API::IConfiguredAlgorithm_sptr algorithm,
-                                   const std::string &message) {
-  m_notifyee->notifyAlgorithmError(std::move(algorithm), message);
+void QtBatchView::onAlgorithmError(API::IConfiguredAlgorithm_sptr algorithm, const std::string &message) {
+  for (auto notifyee : m_notifyees) {
+    notifyee->notifyAlgorithmError(algorithm, message);
+  }
 }
 
 std::unique_ptr<QtRunsView> QtBatchView::createRunsTab() {
-  auto instruments = std::vector<std::string>(
-      {{"INTER", "SURF", "CRISP", "POLREF", "OFFSPEC"}});
+  auto instruments = std::vector<std::string>({{"INTER", "SURF", "CRISP", "POLREF", "OFFSPEC"}});
   return std::make_unique<QtRunsView>(this, RunsTableViewFactory(instruments));
 }
 
-std::unique_ptr<QtEventView> QtBatchView::createEventTab() {
-  return std::make_unique<QtEventView>(this);
-}
+std::unique_ptr<QtEventView> QtBatchView::createEventTab() { return std::make_unique<QtEventView>(this); }
 
 IAlgorithm_sptr QtBatchView::createReductionAlg() {
-  return Mantid::API::AlgorithmManager::Instance().create(
-      "ReflectometryISISLoadAndProcess");
+  return Mantid::API::AlgorithmManager::Instance().create("ReflectometryISISLoadAndProcess");
 }
 
-std::unique_ptr<QtSaveView> QtBatchView::createSaveTab() {
-  return std::make_unique<QtSaveView>(this);
-}
-} // namespace ISISReflectometry
-} // namespace CustomInterfaces
-} // namespace MantidQt
+std::unique_ptr<QtSaveView> QtBatchView::createSaveTab() { return std::make_unique<QtSaveView>(this); }
+} // namespace MantidQt::CustomInterfaces::ISISReflectometry

@@ -15,25 +15,20 @@ using namespace Mantid::Kernel;
 using namespace Mantid::API;
 using namespace Mantid::DataObjects;
 
-namespace Mantid {
-namespace Algorithms {
+namespace Mantid::Algorithms {
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(RebinByPulseTimes)
 
 //----------------------------------------------------------------------------------------------
 /// Algorithm's name for identification. @see Algorithm::name
-const std::string RebinByPulseTimes::name() const {
-  return "RebinByPulseTimes";
-}
+const std::string RebinByPulseTimes::name() const { return "RebinByPulseTimes"; }
 
 /// Algorithm's version for identification. @see Algorithm::version
 int RebinByPulseTimes::version() const { return 1; }
 
 /// Algorithm's category for identification. @see Algorithm::category
-const std::string RebinByPulseTimes::category() const {
-  return "Transforms\\Rebin";
-}
+const std::string RebinByPulseTimes::category() const { return "Transforms\\Rebin"; }
 
 //----------------------------------------------------------------------------------------------
 
@@ -45,11 +40,8 @@ const std::string RebinByPulseTimes::category() const {
  * @param OutXValues_scaled : Vector of new x values
  * @param prog : Progress object
  */
-void RebinByPulseTimes::doHistogramming(IEventWorkspace_sptr inWS,
-                                        MatrixWorkspace_sptr outputWS,
-                                        MantidVecPtr &XValues_new,
-                                        MantidVec &OutXValues_scaled,
-                                        Progress &prog) {
+void RebinByPulseTimes::doHistogramming(IEventWorkspace_sptr inWS, MatrixWorkspace_sptr outputWS,
+                                        MantidVecPtr &XValues_new, MantidVec &OutXValues_scaled, Progress &prog) {
 
   // workspace independent determination of length
   const auto histnumber = static_cast<int>(inWS->getNumberHistograms());
@@ -69,8 +61,8 @@ void RebinByPulseTimes::doHistogramming(IEventWorkspace_sptr inWS,
     outputWS->setSharedX(i, x);
 
     // Copy the data over.
-    outputWS->mutableY(i) = std::move(y_data);
-    outputWS->mutableE(i) = std::move(e_data);
+    outputWS->mutableY(i) = y_data;
+    outputWS->mutableE(i) = e_data;
 
     // Report progress
     prog.report(name());
@@ -84,9 +76,13 @@ void RebinByPulseTimes::doHistogramming(IEventWorkspace_sptr inWS,
  * @param ws : workspace to inspect
  * @return max time since epoch in nanoseconds.
  */
-uint64_t
-RebinByPulseTimes::getMaxX(Mantid::API::IEventWorkspace_sptr ws) const {
-  return ws->getPulseTimeMax().totalNanoseconds();
+uint64_t RebinByPulseTimes::getMaxX(Mantid::API::IEventWorkspace_sptr ws) const {
+  uint64_t timeMax = static_cast<uint64_t>(ws->getPulseTimeMax().totalNanoseconds());
+
+  if (timeMax == getMinX(ws)) {
+    timeMax += static_cast<uint64_t>(ws->getTofMax() * 1e3);
+  }
+  return timeMax;
 }
 
 /**
@@ -94,10 +90,8 @@ RebinByPulseTimes::getMaxX(Mantid::API::IEventWorkspace_sptr ws) const {
  * @param ws : workspace to inspect
  * @return min time since epoch in nanoseconds.
  */
-uint64_t
-RebinByPulseTimes::getMinX(Mantid::API::IEventWorkspace_sptr ws) const {
+uint64_t RebinByPulseTimes::getMinX(Mantid::API::IEventWorkspace_sptr ws) const {
   return ws->getPulseTimeMin().totalNanoseconds();
 }
 
-} // namespace Algorithms
-} // namespace Mantid
+} // namespace Mantid::Algorithms

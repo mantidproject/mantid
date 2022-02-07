@@ -9,22 +9,17 @@
 #include "qtpropertymanager.h"
 #include <QLineEdit>
 
-class StringEditorFactory
-    : public QtAbstractEditorFactory<QtStringPropertyManager> {
+class StringEditorFactory : public QtAbstractEditorFactory<QtStringPropertyManager> {
   Q_OBJECT
 public:
-  StringEditorFactory(QObject *parent = nullptr)
-      : QtAbstractEditorFactory<QtStringPropertyManager>(parent) {}
+  StringEditorFactory(QObject *parent = nullptr) : QtAbstractEditorFactory<QtStringPropertyManager>(parent) {}
 
 protected:
   using QtAbstractEditorFactoryBase::createEditor; // Avoid Intel compiler
                                                    // warning
   void connectPropertyManager(QtStringPropertyManager * /*manager*/) override {}
-  QWidget *createEditorForManager(QtStringPropertyManager *manager,
-                                  QtProperty *property,
-                                  QWidget *parent) override;
-  void
-  disconnectPropertyManager(QtStringPropertyManager * /*manager*/) override {}
+  QWidget *createEditorForManager(QtStringPropertyManager *manager, QtProperty *property, QWidget *parent) override;
+  void disconnectPropertyManager(QtStringPropertyManager * /*manager*/) override {}
 };
 
 class StringEditor : public QLineEdit {

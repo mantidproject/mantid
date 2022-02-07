@@ -13,9 +13,7 @@ using namespace Mantid::API;
 
 using namespace std;
 
-namespace Mantid {
-namespace CurveFitting {
-namespace Functions {
+namespace Mantid::CurveFitting::Functions {
 
 using namespace CurveFitting;
 
@@ -24,13 +22,15 @@ DECLARE_FUNCTION(Polynomial)
 //----------------------------------------------------------------------------------------------
 /** Constructor
  */
-Polynomial::Polynomial() : m_n(0) { declareParameter("A0"); }
+Polynomial::Polynomial() : m_n(0) {
+  declareParameter("A0");
+  declareAttribute("n", Attribute(0));
+}
 
 //----------------------------------------------------------------------------------------------
 /** Function to calcualte polynomial
  */
-void Polynomial::function1D(double *out, const double *xValues,
-                            const size_t nData) const {
+void Polynomial::function1D(double *out, const double *xValues, const size_t nData) const {
   // 1. Use a vector for all coefficient
   vector<double> coeff(m_n + 1, 0.0);
   for (int i = 0; i < m_n + 1; ++i)
@@ -52,8 +52,7 @@ void Polynomial::function1D(double *out, const double *xValues,
 //----------------------------------------------------------------------------------------------
 /** Function to calculate derivative analytically
  */
-void Polynomial::functionDeriv1D(API::Jacobian *out, const double *xValues,
-                                 const size_t nData) {
+void Polynomial::functionDeriv1D(API::Jacobian *out, const double *xValues, const size_t nData) {
   for (size_t i = 0; i < nData; i++) {
     double x = xValues[i];
     double nx = 1;
@@ -76,8 +75,7 @@ std::vector<std::string> Polynomial::getAttributeNames() const { return {"n"}; }
  * @return a value of attribute attName
  * (identical to Polynomial)
  */
-API::IFunction::Attribute
-Polynomial::getAttribute(const std::string &attName) const {
+API::IFunction::Attribute Polynomial::getAttribute(const std::string &attName) const {
   if (attName == "n") {
     return Attribute(m_n);
   }
@@ -92,15 +90,13 @@ Polynomial::getAttribute(const std::string &attName) const {
  * negative.
  * (identical to Polynomial)
  */
-void Polynomial::setAttribute(const std::string &attName,
-                              const API::IFunction::Attribute &att) {
+void Polynomial::setAttribute(const std::string &attName, const API::IFunction::Attribute &att) {
   if (attName == "n") {
     // set the polynomial order
 
     auto newN = att.asInt();
     if (newN < 0) {
-      throw std::invalid_argument(
-          "Polynomial: polynomial order cannot be negative.");
+      throw std::invalid_argument("Polynomial: polynomial order cannot be negative.");
     }
 
     // Save old values
@@ -128,10 +124,6 @@ void Polynomial::setAttribute(const std::string &attName,
 //----------------------------------------------------------------------------------------------
 /** Check if attribute attName exists
  */
-bool Polynomial::hasAttribute(const std::string &attName) const {
-  return attName == "n";
-}
+bool Polynomial::hasAttribute(const std::string &attName) const { return attName == "n"; }
 
-} // namespace Functions
-} // namespace CurveFitting
-} // namespace Mantid
+} // namespace Mantid::CurveFitting::Functions

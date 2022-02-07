@@ -4,10 +4,11 @@
 //   NScD Oak Ridge National Laboratory, European Spallation Source,
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
+#include <utility>
+
 #include "MantidKernel/MDAxisValidator.h"
 
-namespace Mantid {
-namespace Kernel {
+namespace Mantid::Kernel {
 
 //----------------------------------------------------------------------------------------------
 /** Constructor
@@ -15,10 +16,8 @@ namespace Kernel {
  *  @param nDimensions Number of dimensions of input workspace for algorithm
  *  @param checkIfEmpty Whether validator will check if the axes vector is empty
  */
-MDAxisValidator::MDAxisValidator(const std::vector<int> &axes,
-                                 const size_t nDimensions,
-                                 const bool checkIfEmpty)
-    : m_axes(axes), m_wsDimensions(nDimensions), m_emptyCheck(checkIfEmpty) {}
+MDAxisValidator::MDAxisValidator(std::vector<int> axes, const size_t nDimensions, const bool checkIfEmpty)
+    : m_axes(std::move(axes)), m_wsDimensions(nDimensions), m_emptyCheck(checkIfEmpty) {}
 
 /**
  * @brief Checks the MD axes given against the given number of dimensions of the
@@ -35,15 +34,13 @@ std::map<std::string, std::string> MDAxisValidator::validate() const {
   // TransposeMD, so don't need an error here).
   if (m_emptyCheck) {
     if (m_axes.empty()) {
-      invalidProperties.insert(
-          std::make_pair("Axes", "No index was specified."));
+      invalidProperties.insert(std::make_pair("Axes", "No index was specified."));
     }
   }
 
   // Make sure that there are fewer axes specified than exist on the workspace
   if (m_axes.size() > m_wsDimensions) {
-    invalidProperties.emplace(
-        "Axes", "More axes specified than dimensions available in the input");
+    invalidProperties.emplace("Axes", "More axes specified than dimensions available in the input");
   }
 
   // Ensure that the axes selection is within the number of dimensions of the
@@ -52,14 +49,12 @@ std::map<std::string, std::string> MDAxisValidator::validate() const {
     auto it = std::max_element(m_axes.begin(), m_axes.end());
     auto largest = static_cast<size_t>(*it);
     if (largest >= m_wsDimensions) {
-      invalidProperties.insert(
-          std::make_pair("Axes", "One of the axis indexes specified indexes a "
-                                 "dimension outside the real dimension range"));
+      invalidProperties.insert(std::make_pair("Axes", "One of the axis indexes specified indexes a "
+                                                      "dimension outside the real dimension range"));
     }
   }
 
   return invalidProperties;
 }
 
-} // namespace Kernel
-} // namespace Mantid
+} // namespace Mantid::Kernel
