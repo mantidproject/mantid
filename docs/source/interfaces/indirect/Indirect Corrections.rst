@@ -55,10 +55,10 @@ Options
 ~~~~~~~
 
 Sample
-  Either a reduced file (_red.nxs) or workspace (_red), an S(Q,\omega) file (_sqw.nxs) or workspace (_sqw) or an ELF file (_elf.nxs) or workspace (_elf) that represents the sample.
+  Either a reduced file (_red.nxs) or workspace (_red), an :math:`S(Q,\omega)` file (_sqw.nxs) or workspace (_sqw), or an ELF file (_elf.nxs) or workspace (_elf) that represents the sample.
 
 Container
-  Either a reduced file (_red.nxs) or workspace (_red), an S(Q,\omega) file (_sqw.nxs) or workspace (_sqw) or an ELF file (_elf.nxs) or workspace (_elf) that represents the container.
+  Either a reduced file (_red.nxs) or workspace (_red), an :math:`S(Q,\omega)` file (_sqw.nxs) or workspace (_sqw), or an ELF file (_elf.nxs) or workspace (_elf) that represents the container.
 
 Scale Container by Factor
   Allows the container's intensity to be scaled by a given scale factor before being used in the corrections calculation.
