@@ -42,9 +42,7 @@ public:
   /// Algorithm's version. @see Algorithm::version
   int version() const override { return (1); }
   /// Algorithm's category for identification. @see Algorithm::category
-  const std::string category() const override {
-    return "ILL\\Reflectometry;Reflectometry";
-  }
+  const std::string category() const override { return "ILL\\Reflectometry;Reflectometry"; }
   /// Algorithm's summary. @see Algorith::summary
   const std::string summary() const override {
     return "Correction of time-of-flight values and final angles, i.e. angles "
@@ -71,13 +69,11 @@ private:
   double m_beam1;
   double m_beam2;
   std::map<double, size_t> m_finalAngles;
-  std::map<double, size_t>::key_compare m_smallerThan =
-      Mantid::Algorithms::GravityCorrection::m_finalAngles.key_comp();
+  std::map<double, size_t>::key_compare m_smallerThan = Mantid::Algorithms::GravityCorrection::m_finalAngles.key_comp();
   /// Initialisation code
   void init() override;
   /// Name of a string component wich may be defined in parameters file
-  std::string componentName(const std::string &inputName,
-                            Mantid::Geometry::Instrument_const_sptr &instr);
+  std::string componentName(const std::string &inputName, Mantid::Geometry::Instrument_const_sptr &instr);
   /// Final angle definition between source and sample
   double finalAngle(const double k, const double theta);
   /// Generalise instrument setup (origin, handedness, coordinate system)

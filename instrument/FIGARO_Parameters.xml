@@ -53,19 +53,19 @@
 		</parameter>
 		<parameter name="Workflow.slit2" type="string">
 			<value val="slit3" />
-		</parameter>     
+		</parameter>
 
 		<parameter name="chopper_window_opening">
 		<!-- Chopper opening window [degrees]-->
 			<value val="45.0"/>
 		</parameter>
 		<parameter name="DH1Z">
-		 <!-- The sample to first height motor position along Z [m]-->
- 		 	<value val="1.135" />
-	 	  </parameter>
-			<parameter name="DH2Z">
-			 <!-- The sample to second height motor position along Z [m]-->
-	 		 	<value val="2.077" />
-	 	  </parameter>
+		<!-- The sample to first height motor position along Z [m]-->
+ 			<value val="1.135" />
+	 	</parameter>
+		<parameter name="DH2Z">
+		<!-- The sample to second height motor position along Z [m]-->
+	 	 	<value val="2.077" />
+	 	</parameter>
 	</component-link>
 </parameter-file>
