@@ -52,14 +52,14 @@ private:
   void testInvalidDeclaration() {
     TS_ASSERT_THROWS(
         declareAttribute("DAttr_invalid", Attribute(-1), Mantid::Kernel::BoundedValidator<double>(0.0, 100.0)),
-        const std::runtime_error &);
+        const IFunction::validationException &);
 
     TS_ASSERT_THROWS(declareAttribute("IAttr_invalid", Attribute(11), Mantid::Kernel::BoundedValidator<int>(0, 10)),
-                     const std::runtime_error &);
+                     const IFunction::validationException &);
 
     TS_ASSERT_THROWS(declareAttribute("SAttr_invalid", Attribute("Invalid"),
                                       Mantid::Kernel::StringListValidator(std::vector<std::string>{"K", "meV"})),
-                     const std::runtime_error &);
+                     const IFunction::validationException &);
 
     std::vector<std::string> sV(3);
     sV[0] = "a";
@@ -67,7 +67,7 @@ private:
     sV[2] = "c";
     TS_ASSERT_THROWS(
         declareAttribute("SQAttr_invalid", Attribute("ab", true), Mantid::Kernel::StringContainsValidator(sV)),
-        const std::runtime_error &);
+        const IFunction::validationException &);
 
     std::vector<double> v(3);
     v[0] = 1.0;
@@ -75,7 +75,7 @@ private:
     v[2] = 50.0;
     TS_ASSERT_THROWS(
         declareAttribute("VAttr_invalid", Attribute(v), Mantid::Kernel::ArrayBoundedValidator<double>(1, 5)),
-        const std::runtime_error &);
+        const IFunction::validationException &);
   }
 };
 
@@ -110,7 +110,7 @@ public:
     detail::FAVT_Funct f;
     IFunction::Attribute att = f.getAttribute("DAttr");
 
-    TS_ASSERT_THROWS(att.setDouble(-1), const std::runtime_error &);
+    TS_ASSERT_THROWS(att.setDouble(-1), const IFunction::validationException &);
 
     att.setDouble(50.0);
     TS_ASSERT(att.asDouble() == 50.0);
@@ -120,7 +120,7 @@ public:
     detail::FAVT_Funct f;
     IFunction::Attribute att = f.getAttribute("IAttr");
 
-    TS_ASSERT_THROWS(att.setInt(11), const std::runtime_error &);
+    TS_ASSERT_THROWS(att.setInt(11), const IFunction::validationException &);
 
     att.setInt(3);
     TS_ASSERT(att.asInt() == 3);
@@ -130,7 +130,7 @@ public:
     detail::FAVT_Funct f;
     IFunction::Attribute att = f.getAttribute("SAttr");
 
-    TS_ASSERT_THROWS(att.setString("Invalid"), const std::runtime_error &);
+    TS_ASSERT_THROWS(att.setString("Invalid"), IFunction::validationException &);
 
     att.setString("meV");
     TS_ASSERT(att.asString() == "meV");
@@ -140,7 +140,7 @@ public:
     detail::FAVT_Funct f;
     IFunction::Attribute att = f.getAttribute("SQAttr");
 
-    TS_ASSERT_THROWS(att.setString("ab"), const std::runtime_error &);
+    TS_ASSERT_THROWS(att.setString("ab"), IFunction::validationException &);
 
     att.setString("abcd");
     TS_ASSERT(att.asString() == "\"abcd\"");
@@ -159,7 +159,7 @@ public:
     TS_ASSERT(att.asVector() == v);
 
     v[2] = 50;
-    TS_ASSERT_THROWS(att.setVector(v), const std::runtime_error &);
+    TS_ASSERT_THROWS(att.setVector(v), const IFunction::validationException &);
   }
 
   void test_double_attribute_visitor() {
@@ -179,7 +179,7 @@ public:
     dbl = 150;
     att_visitor.m_dbl = dbl;
 
-    TS_ASSERT_THROWS(att.apply(att_visitor), const std::runtime_error &);
+    TS_ASSERT_THROWS(att.apply(att_visitor), IFunction::validationException &);
   }
 
   void test_double_attribute_from_string() {
@@ -191,7 +191,7 @@ public:
     TS_ASSERT(att.asDouble() == 65.0);
 
     // Test visitor change outside of validator restrictions
-    TS_ASSERT_THROWS(att.fromString("150.0"), const std::runtime_error &);
+    TS_ASSERT_THROWS(att.fromString("150.0"), IFunction::validationException &);
   }
 
   // void test_factory_creation() {

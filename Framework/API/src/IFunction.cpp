@@ -951,7 +951,7 @@ protected:
     }
 
     if (error != "") {
-      throw std::runtime_error("Attribute Set Error: " + error);
+      throw IFunction::validationException("Attribute Set Error: " + error);
     }
   }
 
@@ -1004,7 +1004,7 @@ void IFunction::Attribute::evaluateValidator() const {
   }
 
   if (error != "") {
-    throw std::runtime_error("Attribute " + m_name + ": " + error);
+    throw IFunction::validationException("Attribute " + m_name + ": " + error);
   }
 }
 
