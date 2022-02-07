@@ -77,7 +77,7 @@ class IqtFitSequentialTest(unittest.TestCase):
         sub_ws = groupWS.getItem(0)
         nbins = sub_ws.blocksize()
         nhists = sub_ws.getNumberHistograms()
-        self.assertEqual(nbins, 58)
+        self.assertEqual(nbins, 59)
         self.assertEqual(nhists, 3)
 
         # Check histogram names

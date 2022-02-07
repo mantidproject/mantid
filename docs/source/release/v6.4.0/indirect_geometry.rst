@@ -20,4 +20,4 @@ Changes
 Bugfixes
 ########
 
-- A bug has been fixed in IqtFit where the first value would be ignored when a fit was performed.
+- A bug has been fixed in Indirect Data Analysis where the first value would be ignored when a fit was performed.

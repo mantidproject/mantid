@@ -22,9 +22,6 @@ public:
   const std::vector<std::string> seeAlso() const override;
 
 private:
-  double getStartX(std::size_t index) const;
-  double getEndX(std::size_t index) const;
-
   std::map<std::string, std::string> validateInputs() override;
   bool isFitParameter(const std::string &name) const override;
   bool throwIfElasticQConversionFails() const override;
