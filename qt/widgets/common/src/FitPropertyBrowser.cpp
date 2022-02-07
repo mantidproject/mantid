@@ -1641,10 +1641,7 @@ void FitPropertyBrowser::finishHandle(const Mantid::API::IAlgorithm *alg) {
 
   IFunction_sptr function = alg->getProperty("Function");
   updateBrowserFromFitResults(function);
-  if (!isWorkspaceAGroup() && alg->existsProperty("OutputWorkspace")) {
-    std::string out = alg->getProperty("OutputWorkspace");
-    emit algorithmFinished(QString::fromStdString(out));
-  }
+
   // Update Status string in member variable (so can be retrieved)
   m_fitAlgOutputStatus = alg->getPropertyValue("OutputStatus");
   auto status = QString::fromStdString(m_fitAlgOutputStatus);
@@ -1778,9 +1775,9 @@ void FitPropertyBrowser::postDeleteHandle(const std::string &wsName) { removeWor
 
 void FitPropertyBrowser::removeWorkspace(const std::string &wsName) {
   QString oldName = QString::fromStdString(workspaceName());
-  int i = m_workspaceNames.indexOf(QString(wsName.c_str()));
-  if (i >= 0) {
-    m_workspaceNames.removeAt(i);
+  int iName = m_workspaceNames.indexOf(QString(wsName.c_str()));
+  if (iName >= 0) {
+    m_workspaceNames.removeAt(iName);
   }
 
   bool initialSignalsBlocked = m_enumManager->signalsBlocked();
@@ -1791,9 +1788,9 @@ void FitPropertyBrowser::removeWorkspace(const std::string &wsName) {
 
   m_enumManager->setEnumNames(m_workspace, m_workspaceNames);
 
-  i = m_workspaceNames.indexOf(oldName);
-  if (i >= 0) {
-    m_enumManager->setValue(m_workspace, i);
+  iName = m_workspaceNames.indexOf(oldName);
+  if (iName >= 0) {
+    m_enumManager->setValue(m_workspace, iName);
   }
 
   m_enumManager->blockSignals(initialSignalsBlocked);
@@ -1843,12 +1840,6 @@ void FitPropertyBrowser::renameHandle(const std::string &oldName, const std::str
 bool FitPropertyBrowser::isWorkspaceValid(Mantid::API::Workspace_sptr ws) const {
   return (dynamic_cast<Mantid::API::MatrixWorkspace *>(ws.get()) != nullptr ||
           dynamic_cast<Mantid::API::ITableWorkspace *>(ws.get()) != nullptr);
-}
-
-bool FitPropertyBrowser::isWorkspaceAGroup() const {
-  // MG: Disabled as there is an issue with replacing workspace groups and the
-  // browser
-  return false;
 }
 
 /// Is the current function a peak?
@@ -2671,53 +2662,8 @@ void FitPropertyBrowser::setAutoBackgroundName(const QString &aName) {
   }
 }
 
-/// Set LogValue for PlotPeakByLogValue
-void FitPropertyBrowser::setLogValue(const QString &lv) {
-  if (isWorkspaceAGroup()) {
-    // validateGroupMember();
-    if (!m_logValue) {
-      m_logValue = m_enumManager->addProperty("LogValue");
-      m_settingsGroup->property()->addSubProperty(m_logValue);
-    }
-    m_logs.clear();
-    m_logs << "";
-    /* if (!m_groupMember.empty())
-     {
-       Mantid::API::MatrixWorkspace_sptr ws =
-         std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
-         Mantid::API::AnalysisDataService::Instance().retrieve(m_groupMember)
-         );
-       if (ws)
-       {
-         const std::vector<Mantid::Kernel::Property*> logs =
-     ws->run().getLogData();
-         for(int i=0;i<static_cast<int>(logs.size()); ++i)
-         {
-           m_logs << QString::fromStdString(logs[i]->name());
-         }
-       }
-     }*/
-    m_enumManager->setEnumNames(m_logValue, m_logs);
-    int i = m_logs.indexOf(lv);
-    if (i < 0)
-      i = 0;
-    m_enumManager->setValue(m_logValue, i);
-  }
-}
-
-std::string FitPropertyBrowser::getLogValue() const {
-  if (isWorkspaceAGroup() && m_logValue) {
-    int i = m_enumManager->value(m_logValue);
-    if (i < m_logs.size())
-      return m_logs[i].toStdString();
-  }
-  return "";
-}
-
 /// Remove LogValue from the browser
 void FitPropertyBrowser::removeLogValue() {
-  if (isWorkspaceAGroup())
-    return;
   m_settingsGroup->property()->removeSubProperty(m_logValue);
   m_logValue = nullptr;
 }
@@ -2831,15 +2777,7 @@ void FitPropertyBrowser::setTextPlotGuess(const QString &text) { m_displayAction
  */
 void FitPropertyBrowser::workspaceChange(const QString &wsName) {
   if (m_guessOutputName) {
-    if (isWorkspaceAGroup()) {
-      m_stringManager->setValue(m_output, QString::fromStdString(workspaceName() + "_params"));
-    } else {
-      m_stringManager->setValue(m_output, QString::fromStdString(workspaceName()));
-    }
-  }
-  if (isWorkspaceAGroup()) {
-    setLogValue();
-  } else {
+    m_stringManager->setValue(m_output, QString::fromStdString(workspaceName()));
     removeLogValue();
   }
 

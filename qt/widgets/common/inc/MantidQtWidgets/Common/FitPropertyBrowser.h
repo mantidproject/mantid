@@ -198,10 +198,6 @@ public:
   QString getYColumnName() const;
   /// Get the name of the Error column
   QString getErrColumnName() const;
-  /// Set LogValue for PlotPeakByLogValue
-  void setLogValue(const QString &lv = "");
-  /// Get LogValue
-  std::string getLogValue() const;
   /// Remove LogValue from the browser
   void removeLogValue();
 
@@ -548,8 +544,6 @@ protected:
   /// if true the output name will be guessed every time workspace name is
   /// changeed
   bool m_guessOutputName;
-  /// Check if the input workspace is a group
-  bool isWorkspaceAGroup() const;
 
   /// A list of registered functions
   mutable QStringList m_registeredFunctions;
