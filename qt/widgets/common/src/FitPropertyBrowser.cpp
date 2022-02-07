@@ -2419,6 +2419,27 @@ QtProperty *FitPropertyBrowser::addStringProperty(const QString &name) const {
   return prop;
 }
 
+/** Create a string list property and selects a property manager for it
+ * based on the property name
+ * @param name :: The name of the new property
+ * @param allowed_values :: A list of the values allowed by the validator
+ * @return Pointer to the created property
+ */
+QtProperty *FitPropertyBrowser::addStringListProperty(const QString &name,
+                                                      const std::vector<std::string> &allowed_values) const {
+  QtProperty *prop;
+  QStringList qAllowedValues;
+
+  prop = m_enumManager->addProperty(name);
+
+  for (const auto &values : allowed_values) {
+    qAllowedValues << QString::fromStdString(values);
+  }
+  m_enumManager->setEnumNames(prop, qAllowedValues);
+
+  return prop;
+}
+
 /**
  * Set a value to a string property.
  * @param prop :: A pointer to the property

@@ -21,6 +21,8 @@
 #include "MantidAPI/ParameterReference.h"
 #include "MantidAPI/ParameterTie.h"
 
+#include "MantidKernel/ListValidator.h"
+
 #include "MantidQtWidgets/Common/QtPropertyBrowser/ParameterPropertyManager.h"
 #include "MantidQtWidgets/Common/QtPropertyBrowser/qtpropertymanager.h"
 #include "MantidQtWidgets/Common/QtPropertyBrowser/qttreepropertybrowser.h"
@@ -130,13 +132,24 @@ void PropertyHandler::init() {
  */
 class CreateAttributeProperty : public Mantid::API::IFunction::ConstAttributeVisitor<QtProperty *> {
 public:
-  CreateAttributeProperty(FitPropertyBrowser *browser, PropertyHandler *handler, QString name)
-      : m_browser(browser), m_handler(handler), m_name(std::move(name)) {}
+  CreateAttributeProperty(FitPropertyBrowser *browser, PropertyHandler *handler, QString name,
+                          Mantid::Kernel::IValidator_sptr validator = Mantid::Kernel::IValidator_sptr())
+      : m_browser(browser), m_handler(handler), m_name(std::move(name)) {
+    m_validator = validator;
+  }
 
 protected:
   /// Create string property
   QtProperty *apply(const std::string &str) const override {
-    QtProperty *prop = m_browser->addStringProperty(m_name);
+    QtProperty *prop;
+
+    // if validator is string list validator, create string list property
+    if (dynamic_cast<Mantid::Kernel::StringListValidator *>(m_validator.get()) != nullptr) {
+      prop = m_browser->addStringListProperty(m_name, m_validator->allowedValues());
+    } else {
+      prop = m_browser->addStringProperty(m_name);
+    }
+
     m_browser->setStringPropertyValue(prop, QString::fromStdString(str));
     return prop;
   }
@@ -219,7 +232,7 @@ void PropertyHandler::initAttributes() {
       continue;
     QString aName = QString::fromStdString(attName);
     Mantid::API::IFunction::Attribute att = function()->getAttribute(attName);
-    CreateAttributeProperty tmp(m_browser, this, aName);
+    CreateAttributeProperty tmp(m_browser, this, aName, att.getValidator());
     QtProperty *prop = att.apply(tmp);
     m_item->property()->addSubProperty(prop);
     m_attributes << prop;
@@ -792,6 +805,9 @@ bool PropertyHandler::setAttribute(QtProperty *prop, bool resetProperties) {
         fit();
       }
     } catch (Mantid::API::IFunction::validationException &ve) { // catch attribute validation error
+      initAttributes();
+      initParameters();
+
       throw Mantid::API::IFunction::validationException(
           ve.what()); // rethrow validation exception so it can be recaught by Fit Property Browser.
     } catch (std::exception &e) {
