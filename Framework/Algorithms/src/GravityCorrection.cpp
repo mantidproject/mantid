@@ -488,8 +488,7 @@ void GravityCorrection::exec() {
   m_beam2 = general::coordinate(this->m_slit2Name, this->m_beamDirection, this->m_virtualInstrument);
   const auto &spectrumInfo = this->m_ws->spectrumInfo();
   this->m_progress->report("Setup OutputWorkspace ...");
-  MatrixWorkspace_sptr outWS = this->getProperty("OutputWorkspace");
-  outWS = DataObjects::create<MatrixWorkspace>(*this->m_ws);
+  MatrixWorkspace_sptr outWS = DataObjects::create<MatrixWorkspace>(*this->m_ws);
   outWS->setTitle(this->m_ws->getTitle() + " cancelled gravitation ");
   for (size_t i = 0; i < spectrumInfo.size(); ++i) {
     if (spectrumInfo.isMonitor(i)) {
