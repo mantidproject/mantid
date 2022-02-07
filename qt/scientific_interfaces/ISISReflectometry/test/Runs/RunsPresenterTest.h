@@ -925,7 +925,7 @@ private:
     auto group = Group(groupName);
     group.appendRow(Row({run}, theta, TransmissionRunPair(), RangeInQ(), boost::none, ReductionOptionsMap(),
                         ReductionWorkspaces({run}, TransmissionRunPair())));
-    jobs.appendGroup(group);
+    jobs.appendGroup(std::move(group));
     return jobs;
   }
 

@@ -196,12 +196,11 @@ std::vector<MantidQt::MantidWidgets::Batch::Cell> cellsFromRow(Row const &row, c
 void Decoder::updateRunsTableViewFromModel(QtRunsTableView *view, const ReductionJobs *model,
                                            const boost::optional<int> &precision) {
   auto jobTreeView = view->m_jobs.get();
-  auto groups = model->groups();
+  auto const &groups = model->groups();
   for (auto groupIndex = 0u; groupIndex < groups.size(); ++groupIndex) {
     // Update view for groups
-    auto group = groups[groupIndex];
 
-    auto modelName = group.name();
+    auto const &modelName = groups[groupIndex].name();
     // If name doesn't contain "HiddenGroupName" update groupname as it
     // represents a none user defined name
     if (modelName.find("HiddenGroupName") == std::string::npos) {
@@ -211,9 +210,9 @@ void Decoder::updateRunsTableViewFromModel(QtRunsTableView *view, const Reductio
     }
 
     // Update view for rows
-    auto rows = groups[groupIndex].rows();
+    auto const &rows = groups[groupIndex].rows();
     for (auto rowIndex = 0u; rowIndex < rows.size(); ++rowIndex) {
-      auto row = rows[rowIndex];
+      auto const &row = rows[rowIndex];
       // If row has content in the model.
       if (row) {
         MantidQt::MantidWidgets::Batch::RowLocation location(
@@ -263,8 +262,7 @@ void Decoder::decodeRunsTable(QtRunsTableView *gui, ReductionJobs *redJobs, Runs
 
 void Decoder::decodeRunsTableModel(ReductionJobs *jobs, const QList<QVariant> &list) {
   for (auto groupIndex = 0; groupIndex < list.size(); ++groupIndex) {
-    auto group = decodeGroup(list[groupIndex].toMap());
-    jobs->mutableGroups()[groupIndex] = group;
+    jobs->mutableGroups()[groupIndex] = decodeGroup(list[groupIndex].toMap());
   }
 }
 
