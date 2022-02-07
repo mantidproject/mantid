@@ -36,7 +36,6 @@
 #include <memory>
 #include <utility>
 
-using boost::make_shared;
 using Mantid::API::AlgorithmHistories;
 using Mantid::API::AlgorithmHistory_const_sptr;
 using Mantid::API::HistogramValidator;
@@ -66,6 +65,7 @@ using Mantid::Kernel::V3D;
 using Mantid::PhysicalConstants::g;
 using std::abs;
 using std::find_if;
+using std::make_shared;
 using std::make_unique;
 using std::map;
 using std::pair;
