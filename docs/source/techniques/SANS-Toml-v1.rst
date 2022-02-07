@@ -1384,8 +1384,10 @@ and extended to the edge of the pattern at the specified angle b with the
 specified width a in mm. Only pixels wholly within the line were excluded. The
 angle was defined in the same way as for L/PHI.
 
-An effectively infinite cylinder (length 100m) with the angle and width set
-by the user is created at x=0, y=0, and z equal to the detector depth.
+An infinite cylinder (length 100m) with the angle and width set
+by the user is created at the centre of the detectors
+ (x=0, y=0, which represents the Neutron source. z=detector depth, where Z is in the direction of the beam).
+
 :ref:`algm-MaskDetectorsInShape` is subsequently used the apply the generated shape.
 The central point of each detector must lie within the shape to be masked, partially
 overlapping detectors (whose centre does not sit in the masked region) will not be masked.
