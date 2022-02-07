@@ -16,7 +16,7 @@ General Notes
 Format Changes
 ==============
 
-V0 (Mantid 6.1.x) to V1 (Mantid 6.2.x)
+V0 (Mantid 6.1.x) to V1 (Mantid 6.3.x)
 --------------------------------------
 
 - *normalisation* and *normalization* are both accepted and equivalent
