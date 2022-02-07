@@ -43,16 +43,10 @@ Conda
 We are excited to announce the release of brand-new packages built for the `Conda package manager <https://docs.conda.io/en/latest/>`__.
 Up until this release only a single ``mantid-framework`` package has been available for Linux but
 this release sees full support for our standard platforms (Linux, Windows, macOS).
-Furthermore, the traditional monolithic package has been split into 3 packages in the Conda world:
+We have also renamed the package from ``mantid-framework`` to ``mantid`` to align with the package name used in scripts.
 
-- ``mantid``: Access to the algorithms and workspace from Python (no GUI components).
-
-- ``mantidqt``: Access to custom-made Qt widgets built on top of Mantid functionality,
-  e.g. InstrumentViewer, SliceViewer.
-
-- ``mantidworkbench``: A package shippping the traditional Workbench application.
-
-For instructions on how to access these packages please see the `Conda installation instructions <https://download.mantidproject.org/conda.html>`__.
+For instructions on how to access the packages please see
+the `Conda installation instructions <https://download.mantidproject.org/conda.html>`__.
 
 Future Packaging Changes
 ------------------------
