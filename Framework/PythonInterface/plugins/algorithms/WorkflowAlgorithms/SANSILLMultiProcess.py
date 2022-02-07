@@ -189,15 +189,16 @@ class SANSILLMultiProcess(DataProcessorAlgorithm):
                              doc='Defines which distance indices (starting from 0) match to the 2nd wavelength')
         self.setPropertyGroup('DistancesAtWavelength2', 'Parameters')
 
-        self.declareProperty(name='SubAlgorithmOffset', defaultValue=True,
-                             doc='Whether to offset logging from child algorithms one level down.')
-        self.setPropertyGroup('SubAlgorithmOffset', 'Parameters')
-
         #===================================I(Q) OPTIONS==================================#
 
         self.declareProperty(name='OutputBinning', defaultValue='',
                              doc='Output binning for each distance( : separated list of binning params).')
         self.setPropertyGroup('OutputBinning', 'I(Q) Options')
+
+        self.declareProperty(name='OutputType', defaultValue='I(Q)',
+                             validator=StringListValidator(['I(Q)']),
+                             doc='Final integration type; at the moment only I(Q) is supported.')
+        self.setPropertyGroup('OutputType', 'I(Q) Options')
 
         iq_options = ['CalculateResolution', 'DefaultQBinning', 'BinningFactor', 'NumberOfWedges', 'WedgeAngle',
                       'WedgeOffset', 'AsymmetricWedges', 'WavelengthRange', 'ShapeTable']
