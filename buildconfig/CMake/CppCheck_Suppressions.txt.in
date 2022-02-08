@@ -268,8 +268,6 @@ constParameter:${CMAKE_SOURCE_DIR}/Framework/CurveFitting/src/Functions/CrystalE
 constParameter:${CMAKE_SOURCE_DIR}/Framework/CurveFitting/src/Functions/CrystalElectricField.cpp:454
 constParameter:${CMAKE_SOURCE_DIR}/Framework/CurveFitting/src/Functions/CrystalElectricField.cpp:484
 identicalInnerCondition:${CMAKE_SOURCE_DIR}/Framework/CurveFitting/src/Functions/CrystalFieldMultiSpectrum.cpp:128
-oppositeInnerCondition:${CMAKE_SOURCE_DIR}/Framework/CurveFitting/src/Functions/CrystalFieldMultiSpectrum.cpp:242
-useStlAlgorithm:${CMAKE_SOURCE_DIR}/Framework/CurveFitting/src/Functions/CrystalFieldMultiSpectrum.cpp:270
 useInitializationList:${CMAKE_SOURCE_DIR}/Framework/CurveFitting/src/Functions/SimpleChebfun.cpp:31
 useInitializationList:${CMAKE_SOURCE_DIR}/Framework/CurveFitting/src/Functions/SimpleChebfun.cpp:71
 useInitializationList:${CMAKE_SOURCE_DIR}/Framework/CurveFitting/src/GSLVector.cpp:61
