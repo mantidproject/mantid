@@ -36,6 +36,7 @@ Bugfixes
 ########
 - Fixed a bug with :ref:`CalculatePlaczek <algm-CalculatePlaczek>` algorithm for computing Placzek correction factors that fixed the previously implemented formula for transforming k to e, and the summation for second order Placezek corrections.
 - :ref:`ConvertAxesToRealSpace <algm-ConvertAxesToRealSpace>` no longer crashes Mantid if using an invalid file.
+- Calculation of log binning factor in :ref:`DiffractionFocussing <algm-DiffractionFocussing>` adjusted to remove a small discrepancy between total x range before/after rebinning.
 - Fixed a bug in :ref:`DiscusMultipleScatteringCorrection <algm-DiscusMultipleScatteringCorrection>` where the calculation aborts with an exception due to a floating point rounding error when the track segment is close to vertical. Also fixed bug in calculation of track direction after scatter if pre-scatter track was pointing exactly down - sign of z component of new direction was incorrect.
 - Fixed a bug in :ref:`Integration <algm-Integration>` when using ``UsePartialBinsOption`` with integration limits that are either equal or close together.
 - The :ref:`Load <algm-Load>` algorithm now reports the correct history.
@@ -43,13 +44,30 @@ Bugfixes
 - Fixed a bug in :ref:`LoadEventNexus <algm-LoadEventNexus>` in checking valid event ID's and to make sure to always exclude data in ``error`` and ``unmapped`` banks.
 - Fixed a bug in :ref:`MonteCarloAbsorption <algm-MonteCarloAbsorption>`. If the algorithm was run with the Sparse Workspace feature enabled on a workspace containing spectra
   that didn't have any detectors, it failed with an error.
+- Fixed a bug in :ref:`Integration <algm-Integration>` when using it with a ``RebinnedOutput`` workspace (e.g from :ref:`SofQWNormalisedPolygon <algm-SofQWNormalisedPolygon>`) where the output was not correctly normalised.
 - Fixed a bug in :ref:`SaveNexus <algm-SaveNexus>` - ragged workspace x-values are now saved correctly when workspace indices are supplied.
+
+
+Documentation
+-------------
+Improvements
+############
+- The source links at the bottom of each algorithm page no longer include the last-modified date. The dates were misleading in most cases as no meaningful
+  changes to the algorithm had actually occurred and could be something as simple as formatting changes. Moving forward, each algorithm will now document any significant changes of behaviour across versions in a dedicated
+  section within its own page.
+
 
 Fit Functions
 -------------
 New Features
 ############
 - Fixed a bug in :ref:`UserFunction<func-UserFunction>` where the view would not be updated with the parameters in the formula entered.
+
+Fitting
+-------
+Bugfixes
+########
+- The errors/confidence-bounds on a fitted curve are determined using the covariance matrix without scaling (since v6.0 the matrix was scaled by the reduced chi-squared). This change makes them consistent with the errors on the best fit parameters.
 
 Geometry
 ---------

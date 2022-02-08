@@ -112,16 +112,17 @@ class PythonFileInterpreter(QWidget):
     sig_exec_success = Signal(object)
 
     def __init__(self, font=None, content=None, filename=None,
-                 parent=None):
+                 parent=None, completion_enabled=True):
         """
         :param font: A reference to the font to be used by the editor. If not supplied use the system default
         :param content: An optional string of content to pass to the editor
         :param filename: The file path where the content was read.
         :param parent: An optional parent QWidget
+        :param completion_enabled: Optional parameter to control code auto-completion suggestions
         """
         super(PythonFileInterpreter, self).__init__(parent)
         self.parent = parent
-
+        self.completion_enabled = completion_enabled
         # layout
         font = font if font is not None else QFont()
         self.editor = CodeEditor("AlternateCSPython", font, self)
@@ -136,7 +137,8 @@ class PythonFileInterpreter(QWidget):
 
         self._presenter = PythonFileInterpreterPresenter(self, PythonCodeExecution(self.editor))
         self.code_commenter = CodeCommenter(self.editor)
-        self.code_completer = CodeCompleter(self.editor, self._presenter.model.globals_ns)
+        if self.completion_enabled:
+            self.code_completer = CodeCompleter(self.editor, self._presenter.model.globals_ns)
 
         self.editor.modificationChanged.connect(self.sig_editor_modified)
         self.editor.fileNameChanged.connect(self.sig_filename_modified)
@@ -147,11 +149,21 @@ class PythonFileInterpreter(QWidget):
         self._presenter.model.sig_exec_error.connect(self.sig_exec_error)
         self._presenter.model.sig_exec_success.connect(self.sig_exec_success)
 
-        # Re-populate the completion API after execution success
-        self._presenter.model.sig_exec_success.connect(self.code_completer.update_completion_api)
+        if self.completion_enabled:
+            # Re-populate the completion API after execution success
+            self._presenter.model.sig_exec_success.connect(self.code_completer.update_completion_api)
+            # Only load the simpleapi completions if the code editor starts being modified.
+            self.sig_editor_modified.connect(self.code_completer.add_simpleapi_to_completions_if_required)
 
-        # Only load the simpleapi completions if the code editor starts being modified.
-        self.sig_editor_modified.connect(self.code_completer.add_simpleapi_to_completions_if_required)
+    def setCompletion(self, completion_enabled):
+        self.completion_enabled = completion_enabled
+        if self.completion_enabled:
+            self.code_completer = CodeCompleter(self.editor, self._presenter.model.globals_ns)
+            self._presenter.model.sig_exec_success.connect(self.code_completer.update_completion_api)
+            # Only load the simpleapi completions if the code editor starts being modified.
+            self.sig_editor_modified.connect(self.code_completer.add_simpleapi_to_completions_if_required)
+        else:
+            self.editor.disableAutoCompletion()
 
     def connect_to_progress_reports(self, this):
         self.editor.progressMade.connect(self.sig_progress)

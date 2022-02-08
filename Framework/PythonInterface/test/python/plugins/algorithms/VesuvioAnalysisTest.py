@@ -208,7 +208,16 @@ class VesuvioAnalysisTest(unittest.TestCase):
             self.assertEquals(len(errors),1)
             self.assertTrue("Runs" in errors)
 
-    def test_masked_sapectra_correct(self):
+    def test_spectra_incorrect(self):
+        table = self.generate_table()
+        alg = self.set_up_alg()
+        alg.setProperty('ComptonProfile', table)
+        alg.setProperty('Spectra', [3, 134])
+        errors = alg.validateInputs()
+        self.assertEquals(len(errors),1)
+        self.assertTrue("Spectra" in errors)
+
+    def test_masked_spectra_correct(self):
         table = self.generate_table()
         alg = self.set_up_alg()
         alg.setProperty('ComptonProfile', table)

@@ -700,8 +700,8 @@ useStlAlgorithm:${CMAKE_SOURCE_DIR}/qt/widgets/instrumentview/src/BankRenderingH
 useInitializationList:${CMAKE_SOURCE_DIR}/qt/widgets/instrumentview/src/DetXMLFile.cpp:24
 constParameter:${CMAKE_SOURCE_DIR}/qt/widgets/common/inc/MantidQtWidgets/Common/ObserverPattern.h:65
 useStlAlgorithm:${CMAKE_SOURCE_DIR}/qt/widgets/instrumentview/src/InstrumentWidgetDecoder.cpp:186
-knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/qt/widgets/instrumentview/src/InstrumentWidgetPickTab.cpp:1622
-knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/qt/widgets/instrumentview/src/InstrumentWidgetPickTab.cpp:1655
+knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/qt/widgets/instrumentview/src/InstrumentWidgetPickTab.cpp:1638
+knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/qt/widgets/instrumentview/src/InstrumentWidgetPickTab.cpp:1671
 useStlAlgorithm:${CMAKE_SOURCE_DIR}/qt/widgets/instrumentview/src/PanelsSurface.cpp:178
 knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/qt/widgets/instrumentview/src/Projection3D.cpp:248
 useInitializationList:${CMAKE_SOURCE_DIR}/qt/widgets/instrumentview/src/UnwrappedDetector.cpp:16
@@ -735,7 +735,6 @@ useStlAlgorithm:${CMAKE_SOURCE_DIR}/qt/scientific_interfaces/ISISReflectometry/G
 useStlAlgorithm:${CMAKE_SOURCE_DIR}/qt/scientific_interfaces/ISISReflectometry/GUI/Experiment/QtExperimentView.cpp:542
 constParameter:${CMAKE_SOURCE_DIR}/qt/scientific_interfaces/ISISReflectometry/GUI/Instrument/InstrumentPresenter.cpp:18
 useStlAlgorithm:${CMAKE_SOURCE_DIR}/qt/scientific_interfaces/ISISReflectometry/GUI/MainWindow/MainWindowPresenter.cpp:153
-useStlAlgorithm:${CMAKE_SOURCE_DIR}/qt/scientific_interfaces/ISISReflectometry/GUI/MainWindow/MainWindowPresenter.cpp:161
 shadowFunction:${CMAKE_SOURCE_DIR}/qt/scientific_interfaces/ISISReflectometry/GUI/Common/Encoder.cpp:40
 shadowFunction:${CMAKE_SOURCE_DIR}/qt/scientific_interfaces/ISISReflectometry/GUI/Common/Encoder.cpp:63
 shadowFunction:${CMAKE_SOURCE_DIR}/qt/scientific_interfaces/ISISReflectometry/GUI/Common/Encoder.cpp:74
@@ -752,8 +751,6 @@ shadowFunction:${CMAKE_SOURCE_DIR}/qt/scientific_interfaces/ISISReflectometry/GU
 shadowFunction:${CMAKE_SOURCE_DIR}/qt/scientific_interfaces/ISISReflectometry/GUI/Common/Encoder.cpp:261
 shadowFunction:${CMAKE_SOURCE_DIR}/qt/scientific_interfaces/ISISReflectometry/GUI/Common/Encoder.cpp:284
 shadowFunction:${CMAKE_SOURCE_DIR}/qt/scientific_interfaces/ISISReflectometry/GUI/Common/Encoder.cpp:311
-constParameter:${CMAKE_SOURCE_DIR}/qt/scientific_interfaces/ISISReflectometry/Reduction/Group.cpp:185
-constParameter:${CMAKE_SOURCE_DIR}/qt/scientific_interfaces/ISISReflectometry/Reduction/Group.cpp:197
 useStlAlgorithm:${CMAKE_SOURCE_DIR}/qt/scientific_interfaces/ISISReflectometry/Reduction/Experiment.cpp:61
 useStlAlgorithm:${CMAKE_SOURCE_DIR}/qt/scientific_interfaces/Indirect/DensityOfStates.cpp:121
 unreadVariable:${CMAKE_SOURCE_DIR}/qt/scientific_interfaces/Indirect/IndirectCorrections.cpp:80

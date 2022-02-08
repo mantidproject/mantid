@@ -9,6 +9,7 @@ New features
 ------------
 - Table workspaces can now have read-only columns added to them (``ws.addReadOnlyColumn(<TYPE>, <NAME>)``). Existing columns can also be set to be read-only (``ws.setColumnReadOnly(<INDEX>, <TRUE/FALSE>)``).
 - **The Error Reporter can now remember and prefill the user's name and email.**
+
 .. image::  ../../images/ErrorReporter_RememberMe.png
     :align: center
 
@@ -41,38 +42,42 @@ Bugfixes
 * The instrument and facility combo-boxes are now always appropriately sized on the ``About Mantid`` page on macOS.
 * Fixed a bug where copying data from a table displaying a matrix workspace was not working.
 * Workbench will no longer hang if an algorithm was running when Workbench was closed.
-* Fixed a bug in the editor where uncommenting using 'ctrl+/' wasn't working correctly for lines of the form ``<optional whitespace>#code_here # inline comment``.
-* Commenting code in the editor using ``ctrl+/`` will preserve indenting (i.e. ``# `` will be inserted at the position of the first non-whitespace character in the line).
+* Fixed a bug in the editor where uncommenting using ``ctrl+/`` wasn't working correctly for lines of the form ``<optional whitespace>#code_here # inline comment``.
+* Commenting code in the editor using ``ctrl+/`` will preserve indenting (i.e. ``#`` will be inserted at the position of the first non-whitespace character in the line).
 * Empty group workspaces can now be deleted rather than needing to be ungrouped.
 * Fixed a bug in :ref:`Project Recovery<Project Recovery>` when attempting to remove non-empty directories and raising the error reporter.
 * Users are no longer able to add a peak to the Fit Property Browser by clicking with the interactive tool outside of the axes (which would cause an error).
+* An unhandled exeception no longer occurs when attempting to open the Fit Property Browser on a bin plot.
 
 InstrumentViewer
 ----------------
 New features
 ############
-- **In the pick tab, a new panel allowing for direct rebinning of the workspace now exists.**
+- **In the** :ref:`Pick Tab<instrumentviewer_pick_tab>` **, a new panel allowing users to directly rebin their workspace now exists.**
+
 .. figure:: ../../images/iview_insitu_rebin.png
      :width: 500px
      :align: center
+
 - The ability to rotate Ellipse and Rectangle shapes has been added.
 - The integration slider now supports discrete steps when the axis has discrete values.
+- A new button has been added to the :ref:`Pick Tab<instrumentviewer_pick_tab>` to allow all of the detectors in the instrument to be summed in the miniplot without having to draw a shape.
 
 Improvements
 ############
 - In the :ref:`Pick Tab<instrumentviewer_pick_tab>` integration is now by default over the entire detector unless some other curve is requested (such as by drawing a shape or picking a detector).
-- The instrument is now loaded in a background thread when opening the :ref:`InstrumentViewer` which prevents running scripts from hanging.
 - The Y-position of the HKL labels on the miniplot is now fixed in Axes coordinates so that the label remains visible as the zoom level changes.
 
 Bugfixes
 ########
+- Fixed a memory leak when closing the :ref:`InstrumentViewer` window.
 - Fixed a bug where folding the :ref:`Pick Tab<instrumentviewer_pick_tab>` crashed Mantid.
 - Fixed a crash on the :ref:`Draw Tab <instrumentviewer_draw_tab>` when trying to sum detectors on a workspace which doesn't have common bin edges across all spectra.
 - Getter for the :ref:`InstrumentViewer` will return a fully constructed instance to avoid a segmentation fault.
+- Opening the :ref:`InstrumentViewer` while a workspace is being reloaded will no longer cause a crash.
 
 SliceViewer
 -----------
-
 Bugfixes
 ########
 - Fixed the ``out-of-range`` error when trying to access the projection matrix for a workspace with a non-Q axis before other Q axes.
@@ -89,5 +94,6 @@ Bugfixes
 - Transposing data (i.e. swapping x and y axes) of ``2D MD`` workspace, now works without error.
 - Fixed issues with the colorbar autoscale not updating correctly on zoom.
 - Stopped the ROI rectangle selection extents jumping discontinuously when the user tries to resize beyond the extent of the colorfill axes towards the line plot axes.
+- :ref:`SliceViewer` will no longer dynamically rebin when viewing an ``MDHisto`` workspace that has been modified by a binary operation (e.g. :ref:`MinusMD<algm-MinusMD>`).
 
 :ref:`Release 6.3.0 <v6.3.0>`

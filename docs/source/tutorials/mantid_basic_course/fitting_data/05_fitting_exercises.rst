@@ -87,8 +87,9 @@ Optionally using a similar approach try to fit the spectrum in for example *GEM6
 Exercise 3
 ==========
 
-#. Load the MUSR00015189 data set
-#. Plot spectrum number 64 of the second workspace in the group
+#. Load the MUSR00015189 data set, this is a group workspace
+#. Click the triangle beside this workspace
+#. From the second workspace (MUSR00015189_2), plot spectrum number 64
 #. Open the Fit property browser
 #. As described earlier, add a UserFunction with the with Formula = `h*exp(-a*x)`
 #. Set `h = 5000` and **Fix** it to this value

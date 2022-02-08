@@ -11,9 +11,9 @@ Installing Mantid
 Mantid is available to download for Windows, Linux or Mac. Our releases are available to download from the
 `Downloads section <https://download.mantidproject.org/>`_ of the website.
 
-On the downloads page you will be able to get the latest stable release of Mantid, which we recommend. There is also an option
-to download the latest nightly build, this is a more experimental version of the code. Whilst the nightly build may have more
-features, it is less tested and comes with much less guarantee.
+On the downloads page you will be able to get the current stable release of Mantid, which is recommended.
+There is also an option to download the latest nightly build, this is a more experimental version of the software.
+Whilst the nightly build may have more features, it is less tested and is likely to be less stable than the release.
 
 You will also find detailed instructions for installing Mantid on different operating systems.
 

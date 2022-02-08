@@ -149,7 +149,7 @@ class InstrumentViewManager:
                 # find the corresponding object if they have the same workspace name
                 loc = InstrumentViewManager.view_dict[ws_name].index(view_obj)
                 del InstrumentViewManager.view_dict[ws_name][loc]
-                # clear the dictonary entry if it was the last item
+                # clear the dictionary entry if it was the last item
                 if len(InstrumentViewManager.view_dict[ws_name]) == 0:
                     del InstrumentViewManager.view_dict[ws_name]
         except KeyError as ke:

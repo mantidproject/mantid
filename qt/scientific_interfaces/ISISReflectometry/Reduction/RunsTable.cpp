@@ -41,12 +41,12 @@ boost::optional<Item &> RunsTable::getItemWithOutputWorkspaceOrNone(std::string 
   return m_reductionJobs.getItemWithOutputWorkspaceOrNone(wsName);
 }
 
-std::vector<Group> RunsTable::selectedGroups() const {
-  std::vector<Group> groups;
+std::vector<const Group *> RunsTable::selectedGroups() const {
+  std::vector<const Group *> groups;
   for (const auto &rowLocation : m_selectedRowLocations) {
     if (!isGroupLocation(rowLocation))
       continue;
-    const auto group = m_reductionJobs.getGroupFromPath(rowLocation);
+    const auto group = &m_reductionJobs.getGroupFromPath(rowLocation);
     groups.emplace_back(group);
   }
   return groups;

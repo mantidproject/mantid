@@ -1,22 +1,68 @@
 .. _v6.3.0:
 
+.. include:: <isonum.txt>
+
 ===========================
 Mantid 6.3.0 Release Notes
 ===========================
 
-.. figure:: ../../images/ImageNotFound.png
+.. figure:: ../../images/engggui_texture.png
    :class: screenshot
-   :width: 385px
+   :width: 350px
    :align: right
 
 .. contents:: Table of Contents
    :local:
 
-.. warning:: This release is still under construction. The changes can be found in the nightly builds on the `download page`_.
+Summary
+-------
 
 We are proud to announce version 6.3.0 of Mantid.
 
-**TODO: Add paragraph summarizing big changes**
+Much of this version provides improvements for users, building on exisiting algorithms and GUIs.
+Plotting has also seen a number of updates and users will benefit from improved documentation too.
+
+In addition to many improvements we are delighted to announce some new features including:
+
+- Full cross-platform support for Conda packages. See Conda_ for further details.
+- The :ref:`Engineering Diffraction interface<Engineering_Diffraction-ref>` now supports two texture groupings, ``Texture20`` and ``Texture30`` (see image above).
+- The Error Reporter can now remember and prefill the user's name and e-mail address.
+- The :ref:`InstrumentViewer` :ref:`Pick Tab<instrumentviewer_pick_tab>` has a new panel for allowing the rebinning of workspaces.
+- In the :ref:`Frequency Domain Analysis <Frequency_Domain_Analysis-ref>` and the :ref:`Muon Analysis <Muon_Analysis-ref>` GUIs the confidence interval of a fit, previously shown as an error bar, is now represented by a shaded region.
+- Several new fitting functions for Muons have been provided.
+
+Conda
+-----
+
+.. figure:: ../../images/conda_logo.svg
+   :align: center
+   :width: 400px
+
+   |copy| 2017 Continuum Analytics, Inc. (dba Anaconda, Inc.). https://www.anaconda.com. All Rights Reserved
+
+We are excited to announce the release of brand-new packages built for the `Conda package manager <https://docs.conda.io/en/latest/>`__.
+Up until this release only a single ``mantid-framework`` package has been available for Linux but
+this release sees full support for our standard platforms (Linux, Windows, macOS).
+We have also renamed the package from ``mantid-framework`` to ``mantid`` to align with the package name used in scripts.
+
+For instructions on how to access the packages please see
+the `Conda installation instructions <https://download.mantidproject.org/conda.html>`__.
+
+Future Packaging Changes
+------------------------
+
+In future releases we will be reworking how our installer packages are constructed so that we can replace an
+aging system that is hard to maintain and keep up to date.
+
+Windows & macOS users should see no change in how these packages function and are used. However, the version of Python bundled
+internally will start to change more regularly, at a frequency yet undefined, to keep up with external developments.
+
+We plan to push Linux users towards the Conda distribution packages and dropping package (.deb and .rpm) builds in the future.
+This would Mantid easier to install on different distros (though support would be unofficial).
+We're open to feedback and suggestions on this direction.
+
+Further Information
+-------------------
 
 These are just some of the many improvements in this release, so please take a
 look at the release notes, which are filled with details of the

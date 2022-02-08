@@ -43,6 +43,10 @@ void applyWarningStateStyling(MantidWidgets::Batch::Cell &cell, std::string cons
   cell.setToolTip(errorMessage);
 }
 
+void applyChildSuccessStateStyling(MantidWidgets::Batch::Cell &cell) {
+  cell.setBackgroundColor(Colour::CHILDREN_SUCCESS);
+}
+
 /** Check if a group name exists in the given model.
  * @param groupName : the name to check
  * @param jobs : the model to compare against
@@ -479,7 +483,10 @@ void RunsTablePresenter::notifyCellTextChanged(MantidWidgets::Batch::RowLocation
   notifyRowStateChanged();
 }
 
-void RunsTablePresenter::notifyBatchLoaded() { notifySelectionChanged(); }
+void RunsTablePresenter::notifyBatchLoaded() {
+  notifySelectionChanged();
+  m_model.mutableReductionJobs().setAllRowParents();
+}
 
 void RunsTablePresenter::notifySelectionChanged() {
   m_model.setSelectedRowLocations(m_view->jobs().selectedRowLocations());
@@ -490,6 +497,14 @@ void RunsTablePresenter::applyGroupStylingToRow(MantidWidgets::Batch::RowLocatio
   if (cells.size() > 0) {
     boost::fill(boost::make_iterator_range(cells.begin() + 1, cells.end()), m_view->jobs().deadCell());
     m_view->jobs().setCellsAt(location, cells);
+  }
+}
+
+void RunsTablePresenter::applyStylingToParent(Row const &row) {
+  auto *parent = row.getParent();
+  if (parent) {
+    auto const parentLocation = m_model.reductionJobs().getLocation(*parent);
+    setRowStylingForItem(parentLocation, *parent);
   }
 }
 
@@ -702,7 +717,7 @@ void RunsTablePresenter::setRowStylingForItem(MantidWidgets::Batch::RowLocation 
   case State::ITEM_RUNNING:
     forAllCellsAt(rowLocation, applyRunningStateStyling);
     break;
-  case State::ITEM_COMPLETE:
+  case State::ITEM_SUCCESS:
     forAllCellsAt(rowLocation, applyCompletedStateStyling);
     break;
   case State::ITEM_ERROR:
@@ -710,6 +725,9 @@ void RunsTablePresenter::setRowStylingForItem(MantidWidgets::Batch::RowLocation 
     break;
   case State::ITEM_WARNING:
     forAllCellsAt(rowLocation, applyWarningStateStyling, item.message());
+    break;
+  case State::ITEM_CHILDREN_SUCCESS:
+    forAllCellsAt(rowLocation, applyChildSuccessStateStyling);
     break;
   };
 }
@@ -722,7 +740,7 @@ void RunsTablePresenter::notifyRowStateChanged() {
   updateProgressBar();
 
   int groupIndex = 0;
-  for (auto &group : m_model.reductionJobs().groups()) {
+  for (auto &group : m_model.mutableReductionJobs().mutableGroups()) {
     auto groupLocation = MantidWidgets::Batch::RowLocation({groupIndex});
     setRowStylingForItem(groupLocation, group);
 
@@ -749,6 +767,11 @@ void RunsTablePresenter::notifyRowStateChanged(boost::optional<Item const &> ite
   updateProgressBar();
   auto const location = m_model.reductionJobs().getLocation(item.get());
   setRowStylingForItem(location, item.get());
+  if (item->isGroup()) {
+    return;
+  }
+  auto const &row = dynamic_cast<const Row &>(item.get());
+  applyStylingToParent(row);
 }
 
 void RunsTablePresenter::notifyRowOutputsChanged() {
@@ -789,7 +812,7 @@ void RunsTablePresenter::notifyPlotSelectedPressed() {
   const auto rows = m_model.selectedRows();
 
   for (const auto &row : rows) {
-    if (row.state() == State::ITEM_COMPLETE)
+    if (row.state() == State::ITEM_SUCCESS)
       workspaces.emplace_back(row.reducedWorkspaceNames().iVsQBinned());
   }
 
@@ -803,9 +826,9 @@ void RunsTablePresenter::notifyPlotSelectedStitchedOutputPressed() {
   std::vector<std::string> workspaces;
   const auto groups = m_model.selectedGroups();
 
-  for (const auto &group : groups) {
-    if (group.state() == State::ITEM_COMPLETE)
-      workspaces.emplace_back(group.postprocessedWorkspaceName());
+  for (const auto *group : groups) {
+    if (group->state() == State::ITEM_SUCCESS)
+      workspaces.emplace_back(group->postprocessedWorkspaceName());
   }
 
   if (workspaces.empty())
