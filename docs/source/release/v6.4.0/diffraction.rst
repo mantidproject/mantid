@@ -12,6 +12,8 @@ Diffraction Changes
 Powder Diffraction
 ------------------
 
+- The NOMAD instrument IDF was updated
+
 Engineering Diffraction
 -----------------------
 
