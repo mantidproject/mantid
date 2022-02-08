@@ -6,6 +6,11 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 
 #include "LookupRowFinder.h"
+#include <cmath>
+
+namespace {
+constexpr double EPSILON = std::numeric_limits<double>::epsilon();
+}
 
 namespace MantidQt::CustomInterfaces::ISISReflectometry {
 
@@ -14,10 +19,11 @@ LookupRowFinder::LookupRowFinder(const LookupTable &table) : m_lookupTable(table
 LookupRow const *LookupRowFinder::operator()(const boost::optional<double> &thetaAngle, double tolerance) const {
   LookupTable::const_iterator match;
   if (thetaAngle) {
-    match = std::find_if(
-        m_lookupTable.cbegin(), m_lookupTable.cend(), [thetaAngle, tolerance](LookupRow const &candiate) -> bool {
-          return !candiate.isWildcard() && std::abs(*thetaAngle - candiate.thetaOrWildcard().get()) <= tolerance;
-        });
+    match = std::find_if(m_lookupTable.cbegin(), m_lookupTable.cend(),
+                         [thetaAngle, tolerance](LookupRow const &candiate) -> bool {
+                           return !candiate.isWildcard() &&
+                                  std::abs(*thetaAngle - candiate.thetaOrWildcard().get()) <= (tolerance + EPSILON);
+                         });
   } else {
     match = std::find_if(m_lookupTable.cbegin(), m_lookupTable.cend(),
                          [](LookupRow const &candidate) -> bool { return candidate.isWildcard(); });

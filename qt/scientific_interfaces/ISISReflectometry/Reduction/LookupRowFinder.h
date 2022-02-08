@@ -7,11 +7,12 @@
 
 #pragma once
 
+#include "Common/DllConfig.h"
 #include "LookupRow.h"
 
 namespace MantidQt::CustomInterfaces::ISISReflectometry {
 
-class LookupRowFinder {
+class MANTIDQT_ISISREFLECTOMETRY_DLL LookupRowFinder {
 public:
   LookupRowFinder(LookupTable const &);
 
