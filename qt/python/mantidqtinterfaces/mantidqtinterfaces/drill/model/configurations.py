@@ -10,10 +10,8 @@ class RundexSettings(object):
 
     # instruments
     D11 =    "D11"
-    D11B =   "D11B"
     D16 =    "D16"
     D22 =    "D22"
-    D22B =   "D22B"
     D33 =    "D33"
     D17 =    "D17"
     FIGARO = "FIGARO"
@@ -38,10 +36,8 @@ class RundexSettings(object):
     # correspondance between instrument and technique
     TECHNIQUE = {
             D11:    SANS,
-            D11B:    SANS,
             D16:    SANS,
             D22:    SANS,
-            D22B:    SANS,
             D33:    SANS,
             D17:    REFL,
             FIGARO: REFL,
@@ -53,10 +49,8 @@ class RundexSettings(object):
     # correspondance between instrument and acquisition mode
     ACQUISITION_MODES = {
             D11:    [SANS_ACQ, SANS_MULTI],
-            D11B:    [SANS_ACQ],
             D16:    [SANS_ACQ, SANS_PSCAN],
             D22:    [SANS_ACQ, SANS_MULTI],
-            D22B:    [SANS_ACQ],
             D33:    [SANS_ACQ, SANS_MULTI],
             D17:    [REFL_POL, REFL_NPOL],
             FIGARO: [REFL_NPOL],
