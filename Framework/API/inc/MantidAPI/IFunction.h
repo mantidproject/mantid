@@ -205,7 +205,7 @@ public:
     virtual T apply(std::vector<double> &) const = 0;
 
     /// Evaluates the validator associated with attribute this visitor is to visit.
-    template <typename T> void evaluateValidator(T &inputData) const {
+    template <typename T1> void evaluateValidator(T1 &inputData) const {
       std::string error;
 
       if (m_validator != Mantid::Kernel::IValidator_sptr()) {
@@ -252,7 +252,7 @@ public:
     virtual T apply(const std::vector<double> &) const = 0;
 
     /// Evaluates the validator associated with attribute this visitor is to visit.
-    template <typename T> void evaluateValidator(T &inputData) const {
+    template <typename T1> void evaluateValidator(T1 &inputData) const {
       std::string error;
 
       if (m_validator != Mantid::Kernel::IValidator_sptr()) {

@@ -2410,7 +2410,8 @@ QtProperty *FitPropertyBrowser::addStringProperty(const QString &name) const {
   return prop;
 }
 
-/** Create a string list property and selects a property manager for it
+/**
+ * Create a string list property and selects a property manager for it
  * based on the property name
  * @param name :: The name of the new property
  * @param allowed_values :: A list of the values allowed by the validator

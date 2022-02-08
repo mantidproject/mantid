@@ -580,8 +580,7 @@ private:
   void setStringPropertyValue(QtProperty *prop, const QString &value) const;
   QString getStringPropertyValue(QtProperty *prop) const;
   /// Create a string list property
-  QtProperty *FitPropertyBrowser::addStringListProperty(const QString &name,
-                                                        const std::vector<std::string> &allowed_values) const;
+  QtProperty *addStringListProperty(const QString &name, const std::vector<std::string> &allowed_values) const;
 
   /// Check that the properties match the function
   void checkFunction();
