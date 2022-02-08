@@ -23,7 +23,7 @@
 #
 # Possible parameters:
 #   --clobber-yml: clobber the meta yaml files of each package build with conda-build, provide an absolute path to the uteyml file
-#   --recipes-tag: a branch, sha, or tag that should be used for cloning the recipes from conda-build-recipes
+#   --recipes-tag: a branch or tag that should be used for cloning the recipes from conda-build-recipes
 #
 
 # Setup expected variables
