@@ -16,8 +16,6 @@ using namespace Mantid::API;
 
 namespace {
 Mantid::Kernel::Logger g_log("IqtFit");
-
-std::string getPropertySuffix(std::size_t index) { return index == 0 ? "" : "_" + std::to_string(index); }
 } // namespace
 
 namespace Mantid::CurveFitting::Algorithms {
