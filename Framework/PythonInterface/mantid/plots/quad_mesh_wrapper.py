@@ -32,9 +32,11 @@ class QuadMeshWrapper:
         ydata = self._mesh._coordinates[:-1, 0, 1]  # bin edges - excl. last edge as pcolor puts bin center bottom left
         dy = ydata[1] - ydata[0]  # ybin width
         iy_rows = np.logical_and(ydata >= ylim[0] - dy, ydata < ylim[1])  # include bins to bottom left of axes limits
-        # unlike ydata need whole 2D array for xdata as x-extent of data (in orthogonal basis) depends on y value
-        xdata = self._mesh._coordinates[:-1, :-1, 0][iy_rows, :]
-        dx = xdata[0][1] - xdata[0][0]  # xbin width
-        xmask = np.logical_and(xdata >= xlim[0] - dx, xdata < xlim[1])
-
-        return safe_masked_invalid(arr[iy_rows, :][xmask])
+        if any(iy_rows):
+            # unlike ydata need whole 2D array for xdata as x-extent of data (in orthogonal basis) depends on y value
+            xdata = self._mesh._coordinates[:-1, :-1, 0][iy_rows, :]
+            dx = xdata[0][1] - xdata[0][0]  # xbin width
+            xmask = np.logical_and(xdata >= xlim[0] - dx, xdata < xlim[1])
+            return safe_masked_invalid(arr[iy_rows, :][xmask])
+        else:
+            return np.array([], dtype=float)
