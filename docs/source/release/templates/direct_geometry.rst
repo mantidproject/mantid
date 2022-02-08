@@ -14,7 +14,7 @@ New features
 
 Improvements
 ############
-.. include:: Direct_Geometry/General/Improvements.rst
+.. include:: Direct_Geometry/General/Improvements/Improvements.rst
 
 Bugfixes
 ############
