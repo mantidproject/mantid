@@ -44,8 +44,8 @@ boost::optional<ProcessingInstructions> LookupRow::backgroundProcessingInstructi
 }
 
 bool operator==(LookupRow const &lhs, LookupRow const &rhs) {
-  return lhs.thetaOrWildcard() == rhs.thetaOrWildcard() && lhs.qRange() == rhs.qRange() &&
-         lhs.scaleFactor() == rhs.scaleFactor() &&
+  return lhs.thetaOrWildcard() == rhs.thetaOrWildcard() && lhs.titleMatcher() == rhs.titleMatcher() &&
+         lhs.qRange() == rhs.qRange() && lhs.scaleFactor() == rhs.scaleFactor() &&
          lhs.transmissionProcessingInstructions() == rhs.transmissionProcessingInstructions() &&
          lhs.processingInstructions() == rhs.processingInstructions() &&
          lhs.backgroundProcessingInstructions() == rhs.backgroundProcessingInstructions();

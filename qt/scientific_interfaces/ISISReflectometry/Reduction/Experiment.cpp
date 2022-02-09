@@ -7,6 +7,7 @@
 #include "Experiment.h"
 #include "LookupRowFinder.h"
 #include "MantidQtWidgets/Common/ParseKeyValueString.h"
+#include <boost/optional.hpp>
 #include <cmath>
 
 namespace MantidQt::CustomInterfaces::ISISReflectometry {
@@ -63,7 +64,8 @@ std::vector<LookupRow::ValueArray> Experiment::lookupTableToArray() const {
   return result;
 }
 
-LookupRow const *Experiment::findLookupRow(const boost::optional<double> &thetaAngle, double tolerance) const {
+boost::optional<LookupRow> Experiment::findLookupRow(const boost::optional<double> &thetaAngle,
+                                                     double tolerance) const {
   LookupRowFinder findLookupRow(m_lookupTable);
   return findLookupRow(thetaAngle, tolerance);
 }

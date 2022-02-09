@@ -341,6 +341,14 @@ ReductionJobs oneGroupWithTwoRowsWithOutputNamesModel() {
 
 /* Experiment */
 
+LookupRow makeLookupRow(boost::optional<double> angle, boost::optional<boost::regex> titleMatcher) {
+  return LookupRow(
+      std::move(angle), std::move(titleMatcher),
+      TransmissionRunPair(std::vector<std::string>{"22348", "22349"}, std::vector<std::string>{"22358", "22359"}),
+      ProcessingInstructions("4"), RangeInQ(0.009, 0.03, 1.3), 0.9, ProcessingInstructions("4-6"),
+      ProcessingInstructions("2-3,7-8"));
+}
+
 LookupTable makeEmptyLookupTable() { return LookupTable{}; }
 
 LookupTable makeLookupTable() {
@@ -350,14 +358,9 @@ LookupTable makeLookupTable() {
 }
 
 LookupTable makeLookupTableWithTwoAngles() {
-  return LookupTable{// two angle rows
-                     LookupRow(0.5, boost::none, TransmissionRunPair("22347", ""), boost::none,
+  return LookupTable{LookupRow(0.5, boost::none, TransmissionRunPair("22347", ""), boost::none,
                                RangeInQ(0.008, 0.02, 1.2), 0.8, ProcessingInstructions("2-3"), boost::none),
-                     LookupRow(2.3, boost::none,
-                               TransmissionRunPair(std::vector<std::string>{"22348", "22349"},
-                                                   std::vector<std::string>{"22358", "22359"}),
-                               ProcessingInstructions("4"), RangeInQ(0.009, 0.03, 1.3), 0.9,
-                               ProcessingInstructions("4-6"), ProcessingInstructions("2-3,7-8"))};
+                     makeLookupRow(2.3)};
 }
 
 LookupTable makeLookupTableWithTwoAnglesAndWildcard() {
@@ -368,11 +371,7 @@ LookupTable makeLookupTableWithTwoAnglesAndWildcard() {
       // two angle rows
       LookupRow(0.5, boost::none, TransmissionRunPair("22347", ""), boost::none, RangeInQ(0.008, 0.02, 1.2), 0.8,
                 ProcessingInstructions("2-3"), boost::none),
-      LookupRow(
-          2.3, boost::none,
-          TransmissionRunPair(std::vector<std::string>{"22348", "22349"}, std::vector<std::string>{"22358", "22359"}),
-          ProcessingInstructions("4"), RangeInQ(0.009, 0.03, 1.3), 0.9, ProcessingInstructions("4-6"),
-          ProcessingInstructions("2-3,7-8"))};
+      LookupRow(makeLookupRow(2.3))};
 }
 
 std::map<std::string, std::string> makeStitchOptions() {
