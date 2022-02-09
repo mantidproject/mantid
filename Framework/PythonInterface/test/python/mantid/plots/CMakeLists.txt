@@ -13,6 +13,7 @@ set(TEST_PY_FILES
     compatabilityTest.py
     surfacecontourplotsTest.py
     legendTest.py
+    test_quad_mesh_wrapper.py
 )
 
 check_tests_valid(${CMAKE_CURRENT_SOURCE_DIR} ${TEST_PY_FILES})
