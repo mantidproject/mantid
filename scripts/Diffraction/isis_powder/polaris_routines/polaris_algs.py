@@ -35,7 +35,7 @@ def _get_run_numbers_for_key(current_mode_run_numbers, key):
 def _get_current_mode_dictionary(run_number_string, inst_settings):
     mapping_dict = get_cal_mapping_dict(run_number_string, inst_settings.cal_mapping_path)
     if inst_settings.mode is None:
-        ws = mantid.Load('POLARIS'+run_number_string+'.nxs')
+        ws = mantid.Load('POLARIS'+run_number_string)
         mode, cropping_vals = _determine_chopper_mode(ws)
         inst_settings.mode = mode
         inst_settings.focused_cropping_values = cropping_vals
@@ -85,7 +85,7 @@ def generate_ts_pdf(run_number, focus_file_path, merge_banks=False, q_lims=None,
     focused_ws = _obtain_focused_run(run_number, focus_file_path)
     focused_ws = mantid.ConvertUnits(InputWorkspace=focused_ws, Target="MomentumTransfer", EMode='Elastic')
 
-    raw_ws = mantid.Load(Filename='POLARIS'+str(run_number)+'.nxs')
+    raw_ws = mantid.Load(Filename='POLARIS'+str(run_number))
     sample_geometry = common.generate_sample_geometry(sample_details)
     sample_material = common.generate_sample_material(sample_details)
     self_scattering_correction = mantid.TotScatCalculateSelfScattering(

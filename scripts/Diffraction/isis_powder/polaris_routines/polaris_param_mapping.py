@@ -19,6 +19,8 @@ attr_mapping = [
     ParamMapEntry(ext_name="delta_q", int_name="delta_q", optional=True),
     ParamMapEntry(ext_name="do_absorb_corrections", int_name="do_absorb_corrections"),
     ParamMapEntry(ext_name="do_van_normalisation", int_name="do_van_normalisation"),
+    ParamMapEntry(ext_name="do_paalman_pings", int_name="do_paalman_pings", optional=True),
+    ParamMapEntry(ext_name="paalman_pings_events_per_point", int_name="paalman_pings_events_per_point", optional=True),
     ParamMapEntry(ext_name="file_ext", int_name="file_extension", optional=True),
     ParamMapEntry(ext_name="first_cycle_run_no", int_name="run_in_range"),
     ParamMapEntry(ext_name="focused_cropping_values", int_name="focused_cropping_values"),

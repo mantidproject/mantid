@@ -5,7 +5,8 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 # pylint: disable=no-init,too-many-instance-attributes
-from mantid.simpleapi import *
+from mantid.simpleapi import AddSampleLog, ScaleX, Divide, Minus, RenameWorkspace, \
+    ConvertUnits, CloneWorkspace, RebinToWorkspace
 from mantid.api import PythonAlgorithm, AlgorithmFactory, MatrixWorkspaceProperty, WorkspaceGroupProperty, \
     PropertyMode, MatrixWorkspace, Progress, WorkspaceGroup
 from mantid.kernel import Direction, logger
@@ -377,12 +378,17 @@ class ApplyPaalmanPingsCorrection(PythonAlgorithm):
         acc = factor_workspaces['acc']
         acsc = factor_workspaces['acsc']
         assc = factor_workspaces['assc']
-        return (sample_workspace - container_workspace * (acsc / acc)) / assc
+        subtrahend = container_workspace * (acsc / acc)
+        difference = Minus(sample_workspace, subtrahend)
+        return difference / assc
 
     def _two_factor_corrections_approximation(self, sample_workspace, container_workspace, factor_workspaces):
         acc = factor_workspaces['acc']
         ass = factor_workspaces['ass']
-        return (sample_workspace / ass) - (container_workspace / acc)
+        minuend = (sample_workspace / ass)
+        subtrahend = (container_workspace / acc)
+        difference = Minus(minuend, subtrahend)
+        return difference
 
 
 # Register algorithm with Mantid

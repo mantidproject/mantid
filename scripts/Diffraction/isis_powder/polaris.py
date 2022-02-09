@@ -26,6 +26,7 @@ class Polaris(AbstractInst):
         # Hold the last dictionary later to avoid us having to keep parsing the YAML
         self._run_details_cached_obj = {}
         self._sample_details = None
+        self._container_details = None
 
     # Public API
 
@@ -35,7 +36,9 @@ class Polaris(AbstractInst):
         return self._focus(run_number_string=self._inst_settings.run_number,
                            do_van_normalisation=self._inst_settings.do_van_normalisation,
                            do_absorb_corrections=self._inst_settings.do_absorb_corrections,
-                           sample_details=self._sample_details)
+                           do_paalman_pings=self._inst_settings.do_paalman_pings,
+                           sample_details=self._sample_details,
+                           container_details=self._container_details)
 
     def create_vanadium(self, **kwargs):
         self._switch_mode_specific_inst_settings(kwargs.get("mode"))
@@ -72,13 +75,21 @@ class Polaris(AbstractInst):
         return pdf_output
 
     def set_sample_details(self, **kwargs):
+        self._set_environment_details("sample", **kwargs)
+
+    def set_container_details(self, **kwargs):
+        self._set_environment_details("container", **kwargs)
+
+    def _set_environment_details(self, environment_type: str = "sample", **kwargs):
         self._switch_mode_specific_inst_settings(kwargs.get("mode"))
-        kwarg_name = "sample"
-        sample_details_obj = common.dictionary_key_helper(
-            dictionary=kwargs, key=kwarg_name,
+        environment_details_obj = common.dictionary_key_helper(
+            dictionary=kwargs, key=environment_type,
             exception_msg="The argument containing sample details was not found. Please"
-                          " set the following argument: " + kwarg_name)
-        self._sample_details = sample_details_obj
+                          " set the following argument: " + environment_type)
+        if environment_type == "sample":
+            self._sample_details = environment_details_obj
+        elif environment_type == "container":
+            self._container_details = environment_details_obj
 
     # Overrides
     def _apply_absorb_corrections(self, run_details, ws_to_correct):
