@@ -471,10 +471,6 @@
       <archiveSearch plugin="SNSDataSearch" />
    </archive>
 
-   <computeResource name="Fermi">
-     <baseURL>https://fermi.ornl.gov/MantidRemote</baseURL>
-   </computeResource>
-
    <timezone>US/Eastern</timezone>
 
    <instrument name="DAS">
@@ -759,6 +755,10 @@
 
   <instrument name="D19">
     <technique>Single Crystal Diffraction</technique>
+  </instrument>
+
+  <instrument name="SALSA">
+    <technique>Strain analyzer</technique>
   </instrument>
 
 </facility>

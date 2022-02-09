@@ -37,6 +37,7 @@ from mantidqt.utils.observer_pattern import GenericObserver, GenericObservable
 from mantidqtinterfaces.Muon.GUI.Common.features.model_analysis import AddModelAnalysis
 from mantidqtinterfaces.Muon.GUI.Common.features.raw_plots import AddRawPlots
 from mantidqtinterfaces.Muon.GUI.Common.features.add_grouping_workspaces import AddGroupingWorkspaces
+from mantidqtinterfaces.Muon.GUI.Common.features.add_fitting import AddFitting
 from mantidqtinterfaces.Muon.GUI.Common.features.load_features import load_features
 
 
@@ -131,6 +132,7 @@ class MuonAnalysisGui(QtWidgets.QMainWindow):
 
         self.add_model_analysis = AddModelAnalysis(self, feature_dict)
         self.add_raw_plots = AddRawPlots(self, feature_dict)
+        self.add_fitting = AddFitting(self, feature_dict)
         setup_group_ws = AddGroupingWorkspaces(self, feature_dict)
 
         self.setup_tabs()

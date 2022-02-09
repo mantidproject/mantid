@@ -88,17 +88,17 @@ std::string sphereXML(double radius, const Mantid::Kernel::V3D &centre, const st
 std::shared_ptr<Mantid::Geometry::CSGObject>
 createSphere(double radius, const Mantid::Kernel::V3D &centre = Mantid::Kernel::V3D(), const std::string &id = "sp-1");
 std::string cuboidXML(double xHalfLength, double yHalfLength = -1.0, double zHalfLength = -1.0,
-                      Mantid::Kernel::V3D centre = {0.0, 0.0, 0.0}, const std::string &id = "detector-shape");
+                      const Mantid::Kernel::V3D &centre = {0.0, 0.0, 0.0}, const std::string &id = "detector-shape");
 /** Create a cuboid shape*/
 std::shared_ptr<Mantid::Geometry::CSGObject> createCuboid(double xHalfLength, double yHalfLength = -1.0,
                                                           double zHalfLength = -1.0,
-                                                          Mantid::Kernel::V3D centre = {0.0, 0.0, 0.0},
+                                                          const Mantid::Kernel::V3D &centre = {0.0, 0.0, 0.0},
                                                           const std::string &id = "detector-shape");
 /**
  * Create a rotated cuboid shape
  */
 std::shared_ptr<Mantid::Geometry::CSGObject> createCuboid(double xHalfLength, double yHalfLength, double zHalfLength,
-                                                          double angle, Mantid::Kernel::V3D axis);
+                                                          double angle, const Mantid::Kernel::V3D &axis);
 /**
  * Create a component assembly at the origin made up of 4 cylindrical detectors
  */

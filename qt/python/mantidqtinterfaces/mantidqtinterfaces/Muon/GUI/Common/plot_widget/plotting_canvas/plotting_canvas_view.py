@@ -23,7 +23,7 @@ from matplotlib.figure import Figure
 import matplotlib.pyplot as plt
 import numpy as np
 from textwrap import wrap
-
+from matplotlib.ticker import StrMethodFormatter, NullFormatter
 from mantidqt.MPLwidgets import FigureCanvas
 
 # Default color cycle using Matplotlib color codes C0, C1...ect
@@ -214,8 +214,7 @@ class PlottingCanvasView(QtWidgets.QWidget, PlottingCanvasViewInterface):
                 self.hide_axis(axis_number, nrows, ncols)
 
     def add_shaded_region(self, workspace_name, axis_number, x_values, y1_values, y2_values):
-        # -1 to count from 0 instead of 1
-        axis = self.fig.axes[axis_number-1]
+        axis = self.fig.axes[axis_number]
         if workspace_name in self._shaded_regions.keys():
             self._shaded_regions[workspace_name].update(axis = axis,
                                                         x_values = x_values,
@@ -235,7 +234,10 @@ class PlottingCanvasView(QtWidgets.QWidget, PlottingCanvasViewInterface):
     def _set_text_tick_labels(self, axis_number):
         ax = self.fig.axes[axis_number]
         # set the axes to not "simplify" the values
-        ax.ticklabel_format(useOffset=self._settings.sci_notation)
+        ax.xaxis.set_major_formatter(StrMethodFormatter('{x:g}'))
+        ax.xaxis.set_minor_formatter(NullFormatter())
+        ax.yaxis.set_major_formatter(StrMethodFormatter('{x:g}'))
+        ax.yaxis.set_minor_formatter(NullFormatter())
         if self._x_tick_labels:
             ax.set_xticks(range(len(self._x_tick_labels)))
             labels = self._wrap_labels(self._x_tick_labels)
@@ -438,6 +440,16 @@ class PlottingCanvasView(QtWidgets.QWidget, PlottingCanvasViewInterface):
         plot_kwargs = {'distribution': True, 'autoscale_on_update': False, 'label': label}
         plot_kwargs["marker"] = self._settings.get_marker(workspace_info.workspace_name)
         plot_kwargs["linestyle"] = self._settings.get_linestyle(workspace_info.workspace_name)
+        if isinstance(workspace_info.index, int):
+            """
+            Attempts at replotting the fit line do not work,
+            this is because replot_artist currently only does anything
+            if the data has changed (it has not in our case).
+            So lets manually set the fit lines to be on top
+            (they will always have an index of either 1 or 3 and data
+            will always have an index of 0).
+            """
+            plot_kwargs["zorder"] = workspace_info.index
         return plot_kwargs
 
     def _get_y_axis_autoscale_limits(self, axis):

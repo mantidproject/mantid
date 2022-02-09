@@ -8,7 +8,7 @@ dependencies:
   - cmake>=3.20.*
   - conda-wrappers
   - doxygen>=1.9.*
-  - eigen=3.3.*
+  - eigen=3.4.*
   - euphonic=0.6.*
   - graphviz>=2.47.0
   - gsl=2.6 # Keep gsl a specific version to reduce changes in our fitting
@@ -26,7 +26,7 @@ dependencies:
   - pip>=21.0.1
   - poco=1.10.*
   - psutil>=5.8.0
-  - pycifrw>=4.4.1
+  - pycifrw==4.4.1 # Force to 4.4.1 as later versions cause issues with loading CIF files
   - pyqt>=5.12.3,<6
   - python-dateutil>=2.8.1
   - python=3.8.*
@@ -44,7 +44,7 @@ dependencies:
   - toml>=0.10.2
   - zlib>=1.2.11
   # Needed only for development
-  - cppcheck>=2.4.1
+  - cppcheck==2.5
   - pre-commit>=2.12.0
   - pip:
       - matplotlib==3.1.3 # Pip used for package compatibility (Conda seems to have a broken dependancy list), otherwise a high version number is needed (for use on conda) which doesn't work right now for workbench. Pinned at 3.1.3 as is highest/currently used and compatible with Workbench.

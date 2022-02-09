@@ -140,7 +140,7 @@ ReductionJobs oneGroupWithAnInvalidRowModel() {
   auto reductionJobs = ReductionJobs();
   auto group1 = Group("Test group 1");
   group1.appendRow(boost::none);
-  reductionJobs.appendGroup(group1);
+  reductionJobs.appendGroup(std::move(group1));
   return reductionJobs;
 }
 
@@ -148,7 +148,7 @@ ReductionJobs oneGroupWithARowModel() {
   auto reductionJobs = ReductionJobs();
   auto group1 = Group("Test group 1");
   group1.appendRow(makeRow("12345", 0.5));
-  reductionJobs.appendGroup(group1);
+  reductionJobs.appendGroup(std::move(group1));
   return reductionJobs;
 }
 
@@ -158,7 +158,7 @@ ReductionJobs oneGroupWithARowWithInputQRangeModel() {
   auto row = Row({"12345"}, 0.5, TransmissionRunPair({"Trans A", "Trans B"}), RangeInQ(0.5, 0.01, 0.9), boost::none,
                  ReductionOptionsMap(), ReductionWorkspaces({"12345"}, TransmissionRunPair({"Trans A", "Trans B"})));
   group1.appendRow(row);
-  reductionJobs.appendGroup(group1);
+  reductionJobs.appendGroup(std::move(group1));
   return reductionJobs;
 }
 
@@ -168,7 +168,7 @@ ReductionJobs oneGroupWithARowWithOutputQRangeModel() {
   auto row = makeRow("12345", 0.5);
   row.setOutputQRange(RangeInQ(0.5, 0.01, 0.9));
   group1.appendRow(row);
-  reductionJobs.appendGroup(group1);
+  reductionJobs.appendGroup(std::move(group1));
   return reductionJobs;
 }
 
@@ -179,7 +179,7 @@ ReductionJobs oneGroupWithARowWithInputQRangeModelMixedPrecision() {
       Row({"12345"}, 0.555555, TransmissionRunPair({"Trans A", "Trans B"}), RangeInQ(0.55567, 0.012, 0.9), boost::none,
           ReductionOptionsMap(), ReductionWorkspaces({"12345"}, TransmissionRunPair({"Trans A", "Trans B"})));
   group1.appendRow(row);
-  reductionJobs.appendGroup(group1);
+  reductionJobs.appendGroup(std::move(group1));
   return reductionJobs;
 }
 
@@ -187,7 +187,7 @@ ReductionJobs oneGroupWithAnotherRowModel() {
   auto reductionJobs = ReductionJobs();
   auto group1 = Group("Test group 1");
   group1.appendRow(makeRow("12346", 0.8));
-  reductionJobs.appendGroup(group1);
+  reductionJobs.appendGroup(std::move(group1));
   return reductionJobs;
 }
 
@@ -195,7 +195,7 @@ ReductionJobs oneGroupWithAnotherRunWithSameAngleModel() {
   auto reductionJobs = ReductionJobs();
   auto group1 = Group("Test group 1");
   group1.appendRow(makeRow("12346", 0.5));
-  reductionJobs.appendGroup(group1);
+  reductionJobs.appendGroup(std::move(group1));
   return reductionJobs;
 }
 
@@ -203,7 +203,7 @@ ReductionJobs oneGroupWithTwoRunsInARowModel() {
   auto reductionJobs = ReductionJobs();
   auto group1 = Group("Test group 1");
   group1.appendRow(makeRow(std::vector<std::string>{"12345", "12346"}, 0.5));
-  reductionJobs.appendGroup(group1);
+  reductionJobs.appendGroup(std::move(group1));
   return reductionJobs;
 }
 
@@ -229,7 +229,7 @@ ReductionJobs anotherGroupWithARowModel() {
   auto reductionJobs = ReductionJobs();
   auto group1 = Group("Test group 2");
   group1.appendRow(makeRow("12346", 0.8));
-  reductionJobs.appendGroup(group1);
+  reductionJobs.appendGroup(std::move(group1));
   return reductionJobs;
 }
 
@@ -341,10 +341,23 @@ ReductionJobs oneGroupWithTwoRowsWithOutputNamesModel() {
 
 /* Experiment */
 
+LookupTable makeEmptyLookupTable() { return LookupTable{}; }
+
 LookupTable makeLookupTable() {
   auto lookupRow = LookupRow(boost::none, TransmissionRunPair(), boost::none,
                              RangeInQ(boost::none, boost::none, boost::none), boost::none, boost::none, boost::none);
   return LookupTable{std::move(lookupRow)};
+}
+
+LookupTable makeLookupTableWithTwoAngles() {
+  return LookupTable{// two angle rows
+                     LookupRow(0.5, TransmissionRunPair("22347", ""), boost::none, RangeInQ(0.008, 0.02, 1.2), 0.8,
+                               ProcessingInstructions("2-3"), boost::none),
+                     LookupRow(2.3,
+                               TransmissionRunPair(std::vector<std::string>{"22348", "22349"},
+                                                   std::vector<std::string>{"22358", "22359"}),
+                               ProcessingInstructions("4"), RangeInQ(0.009, 0.03, 1.3), 0.9,
+                               ProcessingInstructions("4-6"), ProcessingInstructions("2-3,7-8"))};
 }
 
 LookupTable makeLookupTableWithTwoAnglesAndWildcard() {

@@ -28,23 +28,30 @@ Error Reporter test
 
 1. Open MantidWorkbench
 
-- Cause a crash by running the `Segfault` algorithm
-- The error report dialog should pop up
+- Cause a crash by running the `Segfault` algorithm, Workbench should close
+- This should cause an error reporter dialog saying Mantid has thrown an unexpected exception
 - Make sure the hyperlink to the privacy policy works
+- Click the `Show More Details` button to open the Show More Details dialog. This should show user details such as OS.
+  The python stacktrace should be empty as the Workbench unhandled exception occurred in C++. Close this dialog.
 - Enter some text in the `Name` box; make sure the `Share non-identifiable information` button gets greyed out
 - In the `Name` box enter `Private` and in the `Email` box enter `private`
-- Click the `Don't share any information` box
-- Check with the database admin
+- Input some additional information into the main textbox. Try to include characters that need to be escaped such as ``"``
+- Tick the `Remember Me` checkbox
+- Click the `Don't share any information` button
+- Check with the database admin that an error report was sent **without** a name, email or stacktrace.
 
 ---------------
 
 2. Open MantidWorkbench
 
-- Cause a crash by running the `Segfault` algorithm
-- The error report dialog should pop up
+- Cause a crash by running the `Segfault` algorithm, Workbench should close
+- This should cause an error reporter dialog saying Mantid has thrown an unexpected exception
+- The `Private` contact details from Test 1 should **NOT** be displayed and the `Remember Me` checkbox should **NOT** be ticked
 - In the `Name` box enter `Public` and in the `Email` box enter `public`
-- Click the `Yes, share information` box
-- Check with the database admin
+- Input some additional information into the main textbox. Try to include characters that need to be escaped such as ``"``
+- Tick the `Remember Me` checkbox
+- Click the `Yes, share information` button
+- Check with the database admin that an error report was sent **WITH** the correct name, email and textbox.
 
 ---------------
 
@@ -52,54 +59,79 @@ Error Reporter test
 
 - Load the file `Training_Exercise3a_SNS.nxs`
 - Run the `NormaliseToMonitor` algorithm
-- This should cause an error box saying Mantid has thrown an unexpected exception
+- This should cause an error reporter dialog saying Mantid has thrown an unexpected exception
+- The `Public` contact details from Test 2 should be displayed and the `Remember Me` checkbox ticked
 - Make sure the hyperlink to the privacy policy works
 - Enter some text in the `Name` box; make sure the `Share non-identifiable information` button gets greyed out
 - In the `Name` box enter `Private2` and in the `Email` box enter `private2`
+- Input some additional information into the main textbox. Try to include characters that need to be escaped such as ``"``
 - Make sure the `Continue` radio button is checked
-- Click the `Don't share any information` box
+- Click the `Don't share any information` button
 - You should be returned to the main Mantid window
-- Check with the database admin
+- Check with the database admin that an error report was sent **without** a name, email, stacktrace or textbox.
 
 ---------------
 
-4. Open MantidWorkbench
+4. MantidWorkbench is still open
 
 - Load the file `Training_Exercise3a_SNS.nxs`
 - Run the `NormaliseToMonitor` algorithm
-- This should cause an error box saying Mantid has thrown an unexpected exception
+- This should cause an error reporter dialog saying Mantid has thrown an unexpected exception
+- The `Public` contact details from Test 2 should be displayed and the `Remember Me` checkbox ticked
+- Click the `Show More Details` button to open the Show More Details dialog. This should show user details such as OS.
+  There should be a python stacktrace as this unhandled exception occurred in Python. Close this dialog.
+- Input some additional information into the main textbox. Try to include characters that need to be escaped such as ``"``
+- This time, UNTick the `Remember Me` checkbox
 - Make sure the `Continue` radio button is checked
-- Click the `Share non-identifiable information` box
+- Click the `Share non-identifiable information` button
 - You should be returned to the main Mantid window
-- Check with the database admin
+- Check with the database admin that an error report was sent **without** a name, email or stacktrace, BUT **WITH** a textbox.
 
 ---------------
 
-5. Open MantidWorkbench
+5. MantidWorkbench is still open
 
 - Load the file `Training_Exercise3a_SNS.nxs`
 - Run the `NormaliseToMonitor` algorithm
-- This should cause an error box saying Mantid has thrown an unexpected exception
-- Make sure the hyperlink to the privacy policy works
+- This should cause an error reporter dialog saying Mantid has thrown an unexpected exception
+- Contact details from before should **NOT** be displayed and the `Remember Me` checkbox should **NOT** be ticked
 - Enter some text in the `Name` box; make sure the `Share non-identifiable information` button gets greyed out
-- In the `Name` box enter `Public2` and in the `Email` box enter `public2`
+- Input some additional information into the main textbox. Try to include characters that need to be escaped such as ``"``
+- Leave the `Name` box EMPTY and in the `Email` box enter `public2`
+- Tick the `Remember Me` checkbox
 - Make sure the `Continue` radio button is checked
-- Click the `Yes, share information` box
+- Click the `Yes, share information` button
 - You should be returned to the main Mantid window
-- Check with the database admin
+- Check with the database admin that an error report was sent **WITH** a name, email, stacktrace and a textbox.
 
 ---------------
 
-6. Open MantidWorkbench
+6. MantidWorkbench is still open
 
 - Load the file `Training_Exercise3a_SNS.nxs`
 - Run the `NormaliseToMonitor` algorithm
-- This should cause an error box saying Mantid has thrown an unexpected exception
-- Make sure the hyperlink to the privacy policy works
+- This should cause an error reporter dialog saying Mantid has thrown an unexpected exception
+- Only the `public2` email from Test 5 should be displayed in the email box and the `Remember Me` checkbox ticked.
+  Make sure the `Share non-identifiable information` button is currently enabled (not greyed out)
 - Enter some text in the `Name` box; make sure the `Share non-identifiable information` button gets greyed out
 - In the `Name` box enter `Public3` and in the `Email` box enter `public3`
+- Input some additional information into the main textbox. Try to include characters that need to be escaped such as ``"``
+- Tick the `Remember Me` checkbox
 - Make sure the `Terminate` radio button is checked
-- Click the `Yes, share information` box
+- Click the `Yes, share information` button
 - Mantid should shut down
-- Check with the database admin
+- Check with the database admin that an error report was sent **WITH** a name, email, stacktrace and a textbox.
 
+--------------
+
+7. Open MantidWorkbench
+
+- Load the file `Training_Exercise3a_SNS.nxs`
+- Run the `NormaliseToMonitor` algorithm
+- This should cause an error reporter dialog saying Mantid has thrown an unexpected exception
+- The `Public3` contact details from Test 6 should be displayed and the `Remember Me` checkbox ticked
+
+Test the error reporter with any weird and wonderful ideas.
+Note any problems with Workbench or these testing instructions.
+
+**Thanks for testing!!!**

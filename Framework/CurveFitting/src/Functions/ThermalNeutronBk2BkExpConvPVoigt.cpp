@@ -169,7 +169,7 @@ void ThermalNeutronBk2BkExpConvPVoigt::getMillerIndex(int& h, int &k, int &l)
  * Exception: if the peak profile parameter is not in this peak, then
  *            return an Empty_DBL
  */
-double ThermalNeutronBk2BkExpConvPVoigt::getPeakParameter(std::string paramname) {
+double ThermalNeutronBk2BkExpConvPVoigt::getPeakParameter(const std::string &paramname) {
   // 1. Calculate peak parameters if required
   if (m_hasNewParameterValue) {
     calculateParameters(false);

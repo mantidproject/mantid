@@ -9,7 +9,6 @@ Powder Diffraction
 ------------------
 New features
 ############
-- Add new input concerning sample height information from :ref:`SNSPowderReduction <algm-SNSPowderReduction>` to Powder Diffraction Reduction GUI.
 - New algorithm :ref:`CalculatePlaczek <algm-CalculatePlaczek>` to compute both first and second Placzek correction factors.
 - New algorithm :ref:`CalculatePlaczekSelfScattering2 <algm-CalculatePlaczekSelfScattering-v2>` utilizes :ref:`CalculatePlaczek <algm-CalculatePlaczek>` to compute first order correction.
 - New algorithm :ref:`CombineDiffCal <algm-CombineDiffCal>` to calibrate groups of pixels after cross correlation so that diffraction peaks can be adjusted to the correct positions.

@@ -58,7 +58,7 @@ class FrequencyDomainAnalysisContext(MuonContext):
         for group_pair in group_and_pair:
             group, pair = self.get_group_and_pair(group_pair)
             names += self._frequency_context.get_frequency_workspace_names(
-                run_list, group, pair, frequency_type)
+                run_list, group, pair, frequency_type, self._frequency_context.x_label)
 
         # Remove duplicates from the list
         return list(dict.fromkeys(names))

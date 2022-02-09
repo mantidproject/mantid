@@ -102,8 +102,9 @@ private:
 
   void updateSumProperty(double addeeWSNumber, double outWSNumber, API::MatrixWorkspace &outWS,
                          const std::string &name);
-  void updateTimeSeriesProperty(API::MatrixWorkspace &addeeWS, API::MatrixWorkspace &outWS, const std::string &name);
-  void updateListProperty(API::MatrixWorkspace &addeeWS, API::MatrixWorkspace &outWS, const std::string &name);
+  void updateTimeSeriesProperty(const API::MatrixWorkspace &addeeWS, const API::MatrixWorkspace &outWS,
+                                const std::string &name);
+  void updateListProperty(const API::MatrixWorkspace &addeeWS, API::MatrixWorkspace &outWS, const std::string &name);
   void checkWarnProperty(const API::MatrixWorkspace &addeeWS, Kernel::Property *addeeWSProperty,
                          const SampleLogBehaviour &behaviour, const double addeeWSNumber, const double outWSNumber,
                          const std::string &name);

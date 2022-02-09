@@ -36,6 +36,8 @@ class SliceViewerModel:
     def __init__(self, ws):
         # reference to the workspace requested to be viewed
         self._ws = ws
+        self.set_ws_name(ws.name())
+
         if isinstance(ws, MatrixWorkspace):
             if ws.getNumberHistograms() < 2:
                 raise ValueError("workspace must contain at least 2 spectrum")
@@ -119,17 +121,35 @@ class SliceViewerModel:
 
         return False
 
+    def can_rebin_original_workspace(self):
+        ws = self._get_ws()
+        if self.get_ws_type() == WS_TYPE.MDH and self._get_ws().hasOriginalWorkspace(0):
+            has_same_dims = ws.getOriginalWorkspace(0).getNumDims() == ws.getNumDims()
+            # check if mdhisto altered since original ws BinMD - then not valid to rebin original
+            mdhisto_has_been_altered = False
+            if ws.getNumExperimentInfo() > 0 and ws.getExperimentInfo(0).run().hasProperty("mdhisto_was_modified"):
+                mdhisto_has_been_altered = bool(int(ws.getExperimentInfo(0).run().get("mdhisto_was_modified").value))
+            return has_same_dims and not mdhisto_has_been_altered
+        else:
+            return False
+
     def can_support_dynamic_rebinning(self) -> bool:
         """
         Check if the given workspace can multiple BinMD calls.
         """
         ws_type = self.get_ws_type()
-        return ws_type == WS_TYPE.MDE or (ws_type == WS_TYPE.MDH and self._get_ws().hasOriginalWorkspace(
-            0) and self._get_ws().getOriginalWorkspace(0).getNumDims() == self._get_ws().getNumDims())
+        return ws_type == WS_TYPE.MDE or (ws_type == WS_TYPE.MDH and self.can_rebin_original_workspace())
+
+    def set_ws_name(self, new_name):
+        self._ws_name = new_name
 
     def get_ws_name(self) -> str:
         """Return the name of the workspace being viewed"""
-        return self._ws.name()
+        return self._ws_name
+
+    def get_number_dimensions(self):
+        """Return number of dimensions in workspace"""
+        return self._get_ws().getNumDims()
 
     def get_frame(self) -> SpecialCoordinateSystem:
         """Return the coordinate system of the workspace"""
@@ -339,14 +359,11 @@ class SliceViewerModel:
         :param transpose: If true then the limits are transposed w.r.t to the data
         """
         workspace = self._get_ws()
-        if transpose:
-            # swap back to model order
-            limits = limits[1], limits[0]
-        xindex, yindex = _display_indices(slicepoint)
-        dim_limits = _dimension_limits(workspace, slicepoint, limits)
+        dim_limits = _dimension_limits(workspace, slicepoint, bin_params, dimension_indices, limits)
         # Construct parameters to integrate everything first and override per cut
         params = {f'P{n + 1}Bin': [*dim_limits[n]] for n in range(workspace.getNumDims())}
 
+        xindex, yindex = _display_indices(slicepoint)
         xdim_min, xdim_max = dim_limits[xindex]
         ydim_min, ydim_max = dim_limits[yindex]
         params['OutputWorkspace'] = self._roi_name
@@ -372,10 +389,8 @@ class SliceViewerModel:
         :param cut: A string denoting which type to export. Options=c,x,y.
         """
         workspace = self._get_ws()
-        if transpose:
-            # swap back to model order
-            limits = limits[1], limits[0]
-        dim_limits = _dimension_limits(workspace, slicepoint, limits)
+        dim_limits = _dimension_limits(workspace, slicepoint, bin_params, dimension_indices, limits)
+
         # Construct paramters to integrate everything first and overrid per cut
         params = {f'P{n + 1}Bin': [*dim_limits[n]] for n in range(workspace.getNumDims())}
         xindex, yindex = _display_indices(slicepoint, transpose)
@@ -485,7 +500,7 @@ class SliceViewerModel:
         return help_msg
 
     def workspace_equals(self, ws_name):
-        return str(self._get_ws()) == ws_name
+        return self._ws_name == ws_name
 
     # private api
     def _get_ws(self):
@@ -558,13 +573,13 @@ def _roi_binmd_parameters(workspace, slicepoint: Sequence[Optional[float]],
     :param workspace: MDEventWorkspace that is to be binned
     :param slicepoint: ND sequence of either None or float. A float defines the point
                     in that dimension for the slice.
-    :param bin_params: A list of binning paramaters for each dimension or thickness for slicing dimensions
+    :param bin_params: A list ndims long each element is nbins if a non-integrated dim or thickness if an integrated dim
     :param limits: An optional Sequence of length 2 containing limits for plotting dimensions. If
                     not provided the full extent of each dimension is used.
     :return: 3-tuple (binmd parameters, index of X dimension, index of Y dimension)
     """
     xindex, yindex = _display_indices(slicepoint)
-    dim_limits = _dimension_limits(workspace, dimension_indices, limits)
+    dim_limits = _dimension_limits(workspace, slicepoint, bin_params, dimension_indices, limits)
     ndims = workspace.getNumDims()
     ws_basis = np.eye(ndims)
     output_extents, output_bins = [], []
@@ -574,15 +589,11 @@ def _roi_binmd_parameters(workspace, slicepoint: Sequence[Optional[float]],
     for n in range(ndims):
         dimension = workspace.getDimension(n)
         basis_vec_n = _to_str(ws_basis[:, n])
-        slice_pt = slicepoint[n]
+        dim_min, dim_max = dim_limits[n]
         nbins = bin_params[n] if bin_params is not None else dimension.getNBins()
-        if slice_pt is None:
-            dim_min, dim_max = dim_limits[n]
-        else:
-            dim_min, dim_max = slice_pt - nbins / 2, slice_pt + nbins / 2
+        slice_pt = slicepoint[n]
+        if slice_pt is not None:
             nbins = 1
-        if dim_max - dim_min < MIN_WIDTH:
-            dim_max = dim_min + MIN_WIDTH
         params[f'BasisVector{n}'] = f'{dimension.name},{dimension.getUnits()},{basis_vec_n}'
         output_extents.append(dim_min)
         output_extents.append(dim_max)
@@ -594,24 +605,36 @@ def _roi_binmd_parameters(workspace, slicepoint: Sequence[Optional[float]],
 
 
 def _dimension_limits(workspace,
+                      slicepoint: Sequence[Optional[float]],
+                      bin_params: Optional[Sequence[float]],
                       dimension_indices: Optional[tuple],
                       limits: Optional[Sequence[tuple]] = None) -> Sequence[tuple]:
     """
     Return a sequence of 2-tuples defining the limits for MDEventWorkspace binning
-    :param workspace: MDEventWorkspace that is to be binned
+    :param workspace: MDEvent of MDHisto workspace that is to be binned
     :param slicepoint: ND sequence of either None or float. A float defines the point
                     in that dimension for the slice.
+    :param bin_params: list of ndim elements: nbins if a non-integrated dim or thickness if an integrated dim
+    :param dimension_indices: list of ndim elements: 0/1 corresponding to x/y axis on plot or None for integrated dim
     :param limits: An optional Sequence of length 2 containing limits for plotting dimensions. If
                     not provided the full extent of each dimension is used.
     """
     dim_limits = [(dim.getMinimum(), dim.getMaximum())
                   for dim in [workspace.getDimension(i) for i in range(workspace.getNumDims())]]
-    if limits is not None:
-        # Match the view limits to the dimension they're for.
-        for dim, axis in enumerate(dimension_indices):
-            if axis is not None:
-                dim_limits[dim] = limits[axis]
-
+    for idim, (dim_min, dim_max) in enumerate(dim_limits):
+        slice_pt = slicepoint[idim]
+        if slice_pt is not None:
+            # replace extents with integration limits (calc from bin width in bin_params)
+            half_bin_width = bin_params[idim]/2
+            dim_min, dim_max = (slice_pt - half_bin_width, slice_pt + half_bin_width)
+        elif limits is not None and dimension_indices[idim] is not None:
+            # replace min/max of non-integrated dims with limits from ROI if specified
+            # swap ROI limits from plot back to dim order of ws in model (necessary for transposed data)
+            dim_min, dim_max = limits[dimension_indices[idim]]
+        # check all limits are over minimum width
+        if dim_max - dim_min < MIN_WIDTH:
+            dim_max = dim_min + MIN_WIDTH
+        dim_limits[idim] = (dim_min, dim_max)
     return dim_limits
 
 

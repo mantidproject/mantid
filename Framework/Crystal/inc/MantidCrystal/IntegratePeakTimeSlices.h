@@ -75,7 +75,7 @@ public:
   void setHeightHalfWidthInfo(const MantidVec &xvals, const MantidVec &yvals, const MantidVec &counts);
 
   void setCurrentRadius(double radius) { currentRadius = radius; }
-  void setCurrentCenter(const Kernel::V3D newCenter) {
+  void setCurrentCenter(const Kernel::V3D &newCenter) {
     Kernel::V3D XX(newCenter);
     currentPosition = XX;
   }
@@ -103,7 +103,7 @@ public:
   }
 
   void CalcVariancesFromData(double background, double meanx, double meany, double &Varxx, double &Varxy, double &Varyy,
-                             std::vector<double> &StatBase);
+                             const std::vector<double> &StatBase);
 
   bool IsEnoughData(const double *ParameterValues, Kernel::Logger &);
 
@@ -263,7 +263,7 @@ private:
                  double &neighborRadius, // from CentDet
                  double Radius, std::string &spec_idList);
 
-  bool getNeighborPixIDs(const std::shared_ptr<Geometry::IComponent> &comp, Kernel::V3D &Center, double &Radius,
+  bool getNeighborPixIDs(const std::shared_ptr<Geometry::IComponent> &comp, const Kernel::V3D &Center, double &Radius,
                          int *&ArryofID);
 
   int CalculateTimeChannelSpan(Geometry::IPeak const &peak, const double dQ, const Mantid::HistogramData::HistogramX &X,
@@ -276,7 +276,7 @@ private:
   /// Prepares the data for futher analysis adding meta data and marking data on
   /// the edges of detectors
   void SetUpData1(API::MatrixWorkspace_sptr &Data, API::MatrixWorkspace_const_sptr const &inpWkSpace, const int chanMin,
-                  const int chanMax, double Radius, Kernel::V3D CentPos, std::string &spec_idList
+                  const int chanMax, double Radius, const Kernel::V3D &CentPos, std::string &spec_idList
 
   );
 
@@ -320,8 +320,8 @@ private:
   int findTimeChannel(const Mantid::HistogramData::HistogramX &X, const double time);
 
   // returns true if Neighborhood list is changed
-  bool updateNeighbors(std::shared_ptr<Geometry::IComponent> &comp, Kernel::V3D CentPos, Kernel::V3D oldCenter,
-                       double NewRadius, double &neighborRadius);
+  bool updateNeighbors(const std::shared_ptr<Geometry::IComponent> &comp, const Kernel::V3D &CentPos,
+                       const Kernel::V3D &oldCenter, double NewRadius, double &neighborRadius);
   bool m_debug;
 };
 } // namespace Crystal

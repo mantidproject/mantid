@@ -95,7 +95,7 @@ private:
      * @param other the wedge to compare to
      * @return
      */
-    bool isSymmetric(Wedge &other) {
+    bool isSymmetric(const Wedge &other) {
       double diffAngle = std::fabs(std::fmod(this->angleMiddle - other.angleMiddle, M_PI));
 
       double epsilon = 1e-3;
@@ -113,7 +113,7 @@ private:
 
   void getTableShapes();
   void getViewportParams(const std::string &, std::map<std::string, std::vector<double>> &);
-  void getWedgeParams(std::vector<std::string> &, std::map<std::string, std::vector<double>> &);
+  void getWedgeParams(const std::vector<std::string> &, const std::map<std::string, std::vector<double>> &);
   bool checkIfSymetricalWedge(Wedge &Wedge);
   void checkIfSuperposedWedges();
 

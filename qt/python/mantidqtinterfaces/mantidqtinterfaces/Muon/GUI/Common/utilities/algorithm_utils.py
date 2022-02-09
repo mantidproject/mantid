@@ -248,7 +248,8 @@ def run_Plus(parameter_dict):
     return alg.getProperty("OutputWorkspace").value
 
 
-def convert_to_field(workspace_name):
+#cannot import the strings from the context as it causes a circular import
+def convert_to_field(workspace_name, output_name):
     """
     Apply the ConvertAxisByFormula algorithm to convert from MHz to Field.
     """
@@ -256,10 +257,26 @@ def convert_to_field(workspace_name):
     alg.initialize()
     alg.setAlwaysStoreInADS(True)
     alg.setProperty("InputWorkspace", workspace_name)
-    alg.setProperty("OutputWorkspace", workspace_name)
+    alg.setProperty("OutputWorkspace", output_name)
     alg.setProperty("Formula", 'x * 1. / '+str(const.MuonGyromagneticRatio))
     alg.setProperty("AxisTitle", 'Field')
     alg.setProperty('AxisUnits', 'Gauss')
+    alg.execute()
+    return alg.getProperty("OutputWorkspace").valueAsStr
+
+
+def convert_to_freq(workspace_name, output_name):
+    """
+    Apply the ConvertAxisByFormula algorithm to convert from Field to MHz.
+    """
+    alg = mantid.AlgorithmManager.create("ConvertAxisByFormula")
+    alg.initialize()
+    alg.setAlwaysStoreInADS(True)
+    alg.setProperty("InputWorkspace", workspace_name)
+    alg.setProperty("OutputWorkspace", output_name)
+    alg.setProperty("Formula", 'x * '+str(const.MuonGyromagneticRatio))
+    alg.setProperty("AxisTitle", 'Frequency')
+    alg.setProperty('AxisUnits', 'MHz')
     alg.execute()
     return alg.getProperty("OutputWorkspace").valueAsStr
 
@@ -382,3 +399,14 @@ def run_create_workspace(x_data, y_data, name):
     alg.setProperty("OutputWorkspace", name)
     alg.execute()
     return alg.getProperty("OutputWorkspace").valueAsStr
+
+
+def run_create_workspace_without_storing(x_data, y_data, name):
+    alg = mantid.AlgorithmManager.create("CreateWorkspace")
+    alg.initialize()
+    alg.setAlwaysStoreInADS(False)
+    alg.setProperty("DataX", x_data)
+    alg.setProperty("DataY", y_data)
+    alg.setProperty("OutputWorkspace", name)
+    alg.execute()
+    return alg.getProperty("OutputWorkspace").value

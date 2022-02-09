@@ -10,6 +10,9 @@ from unittest import mock
 from mantid.api import FrameworkManager, FunctionFactory
 from mantid.simpleapi import CreateEmptyTableWorkspace
 from mantidqt.widgets.fitscriptgenerator import FittingMode
+from mantidqtinterfaces.Muon.GUI.Common.contexts.fitting_contexts.basic_fitting_context import (X_FROM_FIT_RANGE,
+                                                                                                X_FROM_DATA_RANGE,
+                                                                                                X_FROM_CUSTOM)
 from mantidqtinterfaces.Muon.GUI.Common.test_helpers.fitting_mock_setup import MockBasicFitting
 from mantidqtinterfaces.Muon.GUI.Common.utilities.workspace_utils import StaticWorkspaceWrapper
 
@@ -273,15 +276,50 @@ class BasicFittingPresenterTest(unittest.TestCase, MockBasicFitting):
         self.presenter.update_fit_functions_in_model_from_view = mock.Mock()
         self.presenter.automatically_update_function_name = mock.Mock()
         self.presenter.reset_fit_status_and_chi_squared_information = mock.Mock()
+        self.presenter.clear_undo_data = mock.Mock()
 
         self.presenter.handle_function_structure_changed()
 
         self.presenter.update_fit_functions_in_model_from_view.assert_called_once_with()
         self.presenter.automatically_update_function_name.assert_called_once_with()
+        self.presenter.clear_undo_data.assert_called_once_with()
         self.model.get_active_fit_function.assert_called_once_with()
         self.presenter.reset_fit_status_and_chi_squared_information.assert_called_once_with()
         self.model.update_plot_guess.assert_called_once_with()
         self.presenter.fit_function_changed_notifier.notify_subscribers.assert_called_once_with()
+
+    def test_that_handle_plot_guess_type_changed_will_set_guess_parameters_for_plot_range(self):
+        self.presenter.view.plot_guess_type = X_FROM_FIT_RANGE
+        self.presenter.handle_plot_guess_type_changed()
+        self.view.show_plot_guess_points.assert_called_with(False)
+        self.view.show_plot_guess_start_x.assert_called_with(False)
+        self.view.show_plot_guess_end_x.assert_called_with(False)
+
+    def test_that_handle_plot_guess_type_changed_will_set_guess_parameters_for_data_points(self):
+        self.presenter.view.plot_guess_type = X_FROM_DATA_RANGE
+        self.presenter.handle_plot_guess_type_changed()
+        self.view.show_plot_guess_points.assert_called_with(True)
+        self.view.show_plot_guess_start_x.assert_called_with(False)
+        self.view.show_plot_guess_end_x.assert_called_with(False)
+
+    def test_that_handle_plot_guess_type_changed_will_set_guess_parameters_for_custom_range(self):
+        self.presenter.view.plot_guess_type = X_FROM_CUSTOM
+        self.presenter.handle_plot_guess_type_changed()
+        self.view.show_plot_guess_points.assert_called_with(True)
+        self.view.show_plot_guess_start_x.assert_called_with(True)
+        self.view.show_plot_guess_end_x.assert_called_with(True)
+
+    def test_that_handle_plot_guess_points_changed_will_update_the_guess(self):
+        self.presenter.handle_plot_guess_points_changed()
+        self.model.update_plot_guess.assert_called_once_with()
+
+    def test_that_handle_plot_guess_start_x_changed_will_update_the_guess(self):
+        self.presenter.handle_plot_guess_start_x_changed()
+        self.model.update_plot_guess.assert_called_once_with()
+
+    def test_that_handle_plot_guess_end_x_changed_will_update_the_guess(self):
+        self.presenter.handle_plot_guess_end_x_changed()
+        self.model.update_plot_guess.assert_called_once_with()
 
     def test_that_handle_function_parameter_changed_will_update_the_fit_functions_and_notify_they_are_updated(self):
         function_index = ""
@@ -474,9 +512,9 @@ class BasicFittingPresenterTest(unittest.TestCase, MockBasicFitting):
     def test_that_update_start_and_end_x_in_view_from_model_will_update_the_start_and_end_x_in_the_view(self):
         self.presenter.update_start_and_end_x_in_view_from_model()
 
-        self.mock_model_current_start_x.assert_called_once_with()
+        self.mock_model_current_start_x.assert_called()
         self.mock_view_start_x.assert_called_once_with(self.start_x)
-        self.mock_model_current_end_x.assert_called_once_with()
+        self.mock_model_current_end_x.assert_called()
         self.mock_view_end_x.assert_called_once_with(self.end_x)
 
 

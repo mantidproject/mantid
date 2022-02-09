@@ -273,11 +273,12 @@ selection it will show the percentage of that selection that is complete.
   *The processing table*
 
 Rows or groups that are currently processing will be highlighted in yellow, and
-those that are successfully complete will be highlighted in green. Note that
-groups that only have a single row do not have any stitching to do so will not
-be processed and therefore will not turn green. If processing fails for any
-reason, the row/group will be highlighted in blue and you can over over it to
-see a tooltip displaying the error message.
+those that are successfully complete will be highlighted in green. Groups where
+all of the rows within it are complete, but post-processing has not yet completed,
+will be highlighted in a paler green. Groups with a single row do not need to be
+stitched, so will not be post-processed. If processing fails for any reason, the
+row/group will be highlighted in blue and you can hover over it to see a tooltip
+displaying the error message.
 
 Editing any settings that may change the outputs will reset the state for all
 rows and groups. If any rows are added to or removed from a group, the group's
@@ -763,6 +764,8 @@ The four slicing options are described in more detail below:
 
 Workspaces will be named with a suffix providing information about the slice, e.g
 ``IvsQ_13460_slice_50_75``, ``IvsQ_13460_slice_75_100``, etc.
+
+.. _refl_exp_instrument_settings:
 
 Experiment and Instrument Settings Tabs
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

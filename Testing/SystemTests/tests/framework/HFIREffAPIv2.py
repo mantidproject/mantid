@@ -6,31 +6,15 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 #pylint: disable=no-init,attribute-defined-outside-init
 import systemtesting
-from mantid.api import FileFinder
 from mantid.simpleapi import *
 from reduction_workflow.instruments.sans.hfir_command_interface import *
 from reduction_workflow.command_interface import AppendDataFile, Reduce1D
 
-import os
-
-
-def do_cleanup():
-    Files = ["BioSANS_test_data_reduction.log",
-             "BioSANS_test_data_Iq.xml",
-             "BioSANS_test_data_Iq.txt",
-             "BioSANS_test_data_Iqxy.dat"]
-    for filename in Files:
-        absfile = FileFinder.getFullPath(filename)
-        if os.path.exists(absfile):
-            os.remove(absfile)
-    return True
-
 
 class HFIREffAPIv2(systemtesting.MantidSystemTest):
 
-    def cleanup(self):
-        do_cleanup()
-        return True
+    def setUp(self):
+        self._work_dir = self.temporary_directory()
 
     def runTest(self):
         """
@@ -39,6 +23,7 @@ class HFIREffAPIv2(systemtesting.MantidSystemTest):
         configI = ConfigService.Instance()
         configI["facilityName"]='HFIR'
         GPSANS()
+        DataPath(self._work_dir)
         SetSampleDetectorDistance(6000)
         DirectBeamCenter("BioSANS_empty_cell.xml")
         AppendDataFile("BioSANS_test_data.xml")
@@ -58,9 +43,8 @@ class HFIREffAPIv2(systemtesting.MantidSystemTest):
 
 class HFIRSensitivityDirectBeamCenter(systemtesting.MantidSystemTest):
 
-    def cleanup(self):
-        do_cleanup()
-        return True
+    def setUp(self):
+        self._work_dir = self.temporary_directory()
 
     def runTest(self):
         """
@@ -69,6 +53,7 @@ class HFIRSensitivityDirectBeamCenter(systemtesting.MantidSystemTest):
         configI = ConfigService.Instance()
         configI["facilityName"]='HFIR'
         GPSANS()
+        DataPath(self._work_dir)
         SetSampleDetectorDistance(6000)
         DirectBeamCenter("BioSANS_empty_cell.xml")
         AppendDataFile("BioSANS_test_data.xml")
@@ -90,9 +75,8 @@ class HFIRSensitivityDirectBeamCenter(systemtesting.MantidSystemTest):
 
 class HFIRSensitivityScatteringBeamCenter(systemtesting.MantidSystemTest):
 
-    def cleanup(self):
-        do_cleanup()
-        return True
+    def setUp(self):
+        self._work_dir = self.temporary_directory()
 
     def runTest(self):
         """
@@ -101,6 +85,7 @@ class HFIRSensitivityScatteringBeamCenter(systemtesting.MantidSystemTest):
         configI = ConfigService.Instance()
         configI["facilityName"]='HFIR'
         GPSANS()
+        DataPath(self._work_dir)
         SetSampleDetectorDistance(6000)
         DirectBeamCenter("BioSANS_empty_cell.xml")
         AppendDataFile("BioSANS_test_data.xml")

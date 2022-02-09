@@ -321,6 +321,7 @@ class PlotsLoader(object):
         else:
             ax.set_ylim(properties["yLim"])
         ax.show_minor_gridlines = properties["showMinorGrid"]
+        ax.set_facecolor(properties["facecolor"])
 
         # Update X Axis
         if "xAxisProperties" in properties:

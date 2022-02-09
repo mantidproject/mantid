@@ -147,12 +147,14 @@ void MiniPlotMpl::addPeakLabel(const PeakMarker2D *peakMarker) {
   } else {
     peakX = peak.getTOF();
   }
-  double ymax(1.0), _;
-  std::tie(_, ymax) = m_canvas->gca().getYLim();
-  // arbitrarily place the label at 85% of the y-axis height
-  const double peakY = 0.85 * ymax;
+  // Place the label in axes coordinates on the Y axis but data coordinates on the X axis.
+  // Uses the transform to accomplish this.
+  // This keeps the label visible as you zoom. Arbitrarily picked value.
+  const double axesY(0.95);
   const QString label(peakMarker->getLabel());
-  m_peakLabels.emplace_back(m_canvas->gca().text(peakX, peakY, label, "center"));
+  auto axes = m_canvas->gca();
+  m_peakLabels.emplace_back(axes.text(peakX, axesY, label, "center", axes.getXAxisTransform()));
+  m_peakLabels.back().set("clip_on", true);
 }
 
 /**

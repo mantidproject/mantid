@@ -4,13 +4,22 @@
 Introduction
 ============
 
+.. raw:: html
+
+    <style> .purple {color:#a349a4; font-weight:bold} </style>
+    <style> .green {color:#22b14c; font-weight:bold} </style>
+    <style> .orange {color:#FF7F27; font-weight:bold} </style>
+
+.. role:: purple
+.. role:: green
+.. role:: orange
 
 Instrument View is a widget for displaying data on the instrument geometry. It
 consists of three elements:
 
--  Controls panel
--  Graphical display
--  Data integration slider
+-  :purple:`Controls panel`
+-  :orange:`Graphical display`
+-  :green:`Data integration slider`
 
 .. figure:: /images/InstrumentViewGeneralView.png
    :alt: InstrumentViewGeneralView.png

@@ -39,10 +39,12 @@ SAMPLE_SCRIPT = ("import matplotlib.pyplot as plt\n"
                  "axes[0].plot(...)\n"
                  "axes[0].set_xlim(...)\n"
                  "axes[0].set_ylim(...)\n"
+                 "axes[0].set_facecolor('#8a9aff')\n"
                  "\n"
                  "axes[1].plot(...)\n"
                  "axes[1].set_xlim(...)\n"
                  "axes[1].set_ylim(...)\n"
+                 "axes[1].set_facecolor('#8a9aff')\n"
                  "\n"
                  "plt.show()"
                  "\n"
@@ -68,10 +70,14 @@ SAMPLE_SCRIPT_WITH_FIT = ("from mantid.simpleapi import Fit\n"
                           "axes[0].plot(...)\n"
                           "axes[0].set_xlim(...)\n"
                           "axes[0].set_ylim(...)\n"
+                          "axes[0].set_facecolor('#8a9aff')\n"
+
                           "\n"
                           "axes[1].plot(...)\n"
                           "axes[1].set_xlim(...)\n"
                           "axes[1].set_ylim(...)\n"
+                          "axes[1].set_facecolor('#8a9aff')\n"
+
                           "\n"
                           "plt.show()"
                           "\n"
@@ -104,6 +110,7 @@ class PlotScriptGeneratorTest(unittest.TestCase):
         mock_kwargs = {
             'get_tracked_artists': lambda: [],
             'get_lines': lambda: [Mock()],
+            'get_facecolor': lambda: "#8a9aff",
             'legend_': False,
             'lines': [],
             'collections': [],

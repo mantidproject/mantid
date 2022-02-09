@@ -17,7 +17,7 @@
     </parameter>
 
     <parameter name="sample_logs_sum" type="string">
-      <value val="duration" />
+      <value val="duration,monitor1.monsum" />
     </parameter>
 
     <!-- Distance from the sample of odd and even detectors, and the Fermi chopper in metres -->
