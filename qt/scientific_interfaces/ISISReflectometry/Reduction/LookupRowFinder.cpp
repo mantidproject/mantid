@@ -10,7 +10,11 @@
 
 namespace {
 constexpr double EPSILON = std::numeric_limits<double>::epsilon();
+
+bool equalWithinTolerance(double val1, double val2, double tolerance) {
+  return std::abs(val1 - val2) <= (tolerance + EPSILON);
 }
+} // namespace
 
 namespace MantidQt::CustomInterfaces::ISISReflectometry {
 
@@ -27,11 +31,10 @@ LookupRow const *LookupRowFinder::operator()(const boost::optional<double> &thet
 }
 
 LookupRow const *LookupRowFinder::searchByTheta(const boost::optional<double> &thetaAngle, double tolerance) const {
-  auto match = std::find_if(m_lookupTable.cbegin(), m_lookupTable.cend(),
-                            [thetaAngle, tolerance](LookupRow const &candiate) -> bool {
-                              return !candiate.isWildcard() &&
-                                     std::abs(*thetaAngle - candiate.thetaOrWildcard().get()) <= (tolerance + EPSILON);
-                            });
+  auto match = std::find_if(
+      m_lookupTable.cbegin(), m_lookupTable.cend(), [thetaAngle, tolerance](LookupRow const &candiate) -> bool {
+        return !candiate.isWildcard() && equalWithinTolerance(*thetaAngle, candiate.thetaOrWildcard().get(), tolerance);
+      });
   return match == m_lookupTable.cend() ? nullptr : &(*match);
 }
 
