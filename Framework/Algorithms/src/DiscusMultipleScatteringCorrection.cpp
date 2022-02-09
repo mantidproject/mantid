@@ -175,7 +175,7 @@ std::map<std::string, std::string> DiscusMultipleScatteringCorrection::validateI
   return issues;
 }
 
-void DiscusMultipleScatteringCorrection::getXMinMax(Mantid::API::MatrixWorkspace &ws, double &xmin,
+void DiscusMultipleScatteringCorrection::getXMinMax(const Mantid::API::MatrixWorkspace &ws, double &xmin,
                                                     double &xmax) const {
   // set to crazy values to start
   xmin = std::numeric_limits<double>::max();
@@ -459,11 +459,11 @@ std::unique_ptr<Mantid::HistogramData::Histogram> DiscusMultipleScatteringCorrec
 /**
  * Calculate a cumulative probability distribution for use in importance sampling. The distribution
  * is the inverse function P^-1(t4) where P(Q) = I(Q)/I(2k) and I(x) = integral of Q.S(Q)dQ between 0 and x
- * @param SQ Workspace containing S(Q)
+ * @param QSQ Workspace containing Q*S(Q)
  * @param kinc The incident wavenumber
  * @param PInvOfQ The inverted cumulative probability distribution
  */
-void DiscusMultipleScatteringCorrection::prepareCumulativeProbForQ(HistogramData::Histogram &QSQ, double kinc,
+void DiscusMultipleScatteringCorrection::prepareCumulativeProbForQ(const HistogramData::Histogram &QSQ, double kinc,
                                                                    HistogramData::Histogram &PInvOfQ) {
   auto &PInvOfQX = PInvOfQ.dataX();
   auto &PInvOfQY = PInvOfQ.dataY();
