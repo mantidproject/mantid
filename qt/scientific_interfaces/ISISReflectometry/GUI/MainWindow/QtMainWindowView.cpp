@@ -59,6 +59,8 @@ Initialise the Interface
 void QtMainWindowView::initLayout() {
   m_ui.setupUi(this);
 
+  m_ui.mainTabs->setUsesScrollButtons(true);
+
   connect(m_ui.helpButton, SIGNAL(clicked()), this, SLOT(helpPressed()));
   connect(m_ui.mainTabs, SIGNAL(tabCloseRequested(int)), this, SLOT(onTabCloseRequested(int)));
   connect(m_ui.newBatch, SIGNAL(triggered(bool)), this, SLOT(onNewBatchRequested(bool)));

@@ -24,7 +24,7 @@ from workbench.widgets.settings.presenter import SettingsPresenter
 # -----------------------------------------------------------------------------
 # Qt
 # -----------------------------------------------------------------------------
-from qtpy.QtCore import (QEventLoop, Qt, QPoint, QSize)  # noqa
+from qtpy.QtCore import (QEventLoop, Qt, QPoint, QSize, QCoreApplication)  # noqa
 from qtpy.QtGui import (QColor, QFontDatabase, QGuiApplication, QIcon, QPixmap)  # noqa
 from qtpy.QtWidgets import (QApplication, QDesktopWidget, QFileDialog, QMainWindow,
                             QSplashScreen, QMessageBox)  # noqa
@@ -223,6 +223,9 @@ class MainWindow(QMainWindow):
         self.config_updated()
 
         self.override_python_input()
+
+        # Ensure windows created after the main window have their own menu bars (on mac)
+        QCoreApplication.setAttribute(Qt.AA_DontUseNativeMenuBar, True)
 
     def post_mantid_init(self):
         """Run any setup that requires mantid

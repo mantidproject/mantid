@@ -682,8 +682,6 @@ unsafeClassCanLeak:${CMAKE_SOURCE_DIR}/qt/widgets/common/inc/MantidQtWidgets/Com
 unsafeClassCanLeak:${CMAKE_SOURCE_DIR}/qt/widgets/common/inc/MantidQtWidgets/Common/WidgetScrollbarDecorator.h:105
 unsafeClassCanLeak:${CMAKE_SOURCE_DIR}/qt/widgets/common/inc/MantidQtWidgets/Common/WidgetScrollbarDecorator.h:106
 useStlAlgorithm:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/UserInputValidator.cpp:40
-useStlAlgorithm:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/WorkspacePresenter/WorkspaceTreeWidget.cpp:200
-unreadVariable:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/WorkspacePresenter/WorkspaceTreeWidget.cpp:487
 unreadVariable:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/WorkspacePresenter/WorkspaceTreeWidgetSimple.cpp:222
 unreadVariable:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/WorkspacePresenter/WorkspaceTreeWidgetSimple.cpp:225
 unreadVariable:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/WorkspacePresenter/WorkspaceTreeWidgetSimple.cpp:261
