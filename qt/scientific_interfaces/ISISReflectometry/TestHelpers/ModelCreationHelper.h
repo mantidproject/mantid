@@ -71,6 +71,7 @@ MANTIDQT_ISISREFLECTOMETRY_DLL
 ReductionJobs oneGroupWithTwoRowsWithOutputNamesModel();
 
 /* Experiment */
+MANTIDQT_ISISREFLECTOMETRY_DLL LookupRow makeWildcardLookupRow();
 MANTIDQT_ISISREFLECTOMETRY_DLL LookupRow makeLookupRow(boost::optional<double> angle,
                                                        boost::optional<boost::regex> titleMatcher = boost::none);
 MANTIDQT_ISISREFLECTOMETRY_DLL LookupTable makeEmptyLookupTable();

@@ -27,7 +27,10 @@ LookupRowFinder::LookupRowFinder(LookupTable const &table) : m_lookupTable(table
 boost::optional<LookupRow> LookupRowFinder::operator()(boost::optional<double> const &thetaAngle, double tolerance,
                                                        std::string const &title) const {
   if (thetaAngle) {
-    if (auto found = searchByTheta(thetaAngle, tolerance)) {
+    // First filter lookup rows by title, if the run has one
+    auto lookupRows = title.empty() ? m_lookupTable : searchByTitle(title);
+    // Now filter by angle; it should be unique
+    if (auto found = searchByTheta(lookupRows, thetaAngle, tolerance)) {
       return found;
     }
   }
@@ -35,23 +38,26 @@ boost::optional<LookupRow> LookupRowFinder::operator()(boost::optional<double> c
   return searchForWildcard();
 }
 
-boost::optional<LookupRow> LookupRowFinder::searchByTheta(boost::optional<double> const &thetaAngle,
+boost::optional<LookupRow> LookupRowFinder::searchByTheta(std::vector<LookupRow> lookupRows,
+                                                          boost::optional<double> const &thetaAngle,
                                                           double tolerance) const {
-  auto match = std::find_if(
-      m_lookupTable.cbegin(), m_lookupTable.cend(), [thetaAngle, tolerance](LookupRow const &candiate) -> bool {
+  // TODO We may get multiple matches if the title matches multiple regexes. If one regex is empty then we
+  // can discard it. If we get multiple non-empty regex matches it is an error.
+  auto match =
+      std::find_if(lookupRows.cbegin(), lookupRows.cend(), [thetaAngle, tolerance](LookupRow const &candiate) -> bool {
         return !candiate.isWildcard() && equalWithinTolerance(*thetaAngle, candiate.thetaOrWildcard().get(), tolerance);
       });
-  if (match == m_lookupTable.cend())
+  if (match == lookupRows.cend())
     return boost::none;
   else
     return *match;
 }
 
-std::vector<LookupRow> LookupRowFinder::searchByTitle(std::string_view title) const {
+std::vector<LookupRow> LookupRowFinder::searchByTitle(std::string const &title) const {
   auto results = std::vector<LookupRow>();
   std::copy_if(
       m_lookupTable.cbegin(), m_lookupTable.cend(), std::back_inserter(results), [&title](auto const &candidate) {
-        return candidate.titleMatcher().has_value() && boost::regex_search("test", candidate.titleMatcher().get());
+        return candidate.titleMatcher().has_value() && boost::regex_search(title, candidate.titleMatcher().get());
       });
   return results;
 }

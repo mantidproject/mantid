@@ -349,6 +349,8 @@ LookupRow makeLookupRow(boost::optional<double> angle, boost::optional<boost::re
       ProcessingInstructions("2-3,7-8"));
 }
 
+LookupRow makeWildcardLookupRow() { return makeLookupRow(boost::none, boost::none); }
+
 LookupTable makeEmptyLookupTable() { return LookupTable{}; }
 
 LookupTable makeLookupTable() {

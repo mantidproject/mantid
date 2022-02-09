@@ -25,8 +25,9 @@ public:
 private:
   LookupTable const &m_lookupTable;
 
-  boost::optional<LookupRow> searchByTheta(boost::optional<double> const &, double) const;
-  std::vector<LookupRow> searchByTitle(std::string_view title) const;
+  boost::optional<LookupRow> searchByTheta(std::vector<LookupRow> lookupRows, boost::optional<double> const &,
+                                           double) const;
+  std::vector<LookupRow> searchByTitle(std::string const &title) const;
   boost::optional<LookupRow> searchForWildcard() const;
 };
 
