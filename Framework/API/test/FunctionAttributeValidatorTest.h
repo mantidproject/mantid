@@ -84,21 +84,37 @@ class SetAttribute : public Mantid::API::IFunction::AttributeVisitor<> {
 public:
   SetAttribute(Mantid::Kernel::IValidator_sptr validator) : m_dbl(0) { m_validator = validator; }
   double m_dbl;
+  std::string m_str;
+  int m_i;
+  bool m_b;
+  std::vector<double> m_v;
 
 protected:
   /// Create string property
-  void apply(std::string &str) const override { return; }
+  void apply(std::string &str) const override {
+    evaluateValidator(m_str);
+    str = m_str;
+  }
   /// Create double property
   void apply(double &d) const override {
     evaluateValidator(m_dbl);
     d = m_dbl;
   }
   /// Create int property
-  void apply(int &i) const override { return; }
+  void apply(int &i) const override {
+    evaluateValidator(m_i);
+    i = m_i;
+  }
   /// Create bool property
-  void apply(bool &b) const override { return; }
+  void apply(bool &b) const override {
+    evaluateValidator(m_b);
+    b = m_b;
+  }
   /// Create vector property
-  void apply(std::vector<double> &v) const override { return; }
+  void apply(std::vector<double> &v) const override {
+    evaluateValidator(m_v);
+    v = m_v;
+  }
 };
 
 DECLARE_FUNCTION(FAVT_Funct)
