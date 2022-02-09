@@ -240,6 +240,10 @@ After the Technical Release Manager has finished their release day tasks:
 
    ``neutron<at>neutronsources.org``
 
+   ``announcements<at>mantidproject.org``
+
+   ``ISIS Instrument Scientists + Other``
+
 *  Also post the contents of the message to the *\#announcements* channel on
    Slack.
 *  Create a new item on the forum news.
@@ -307,8 +311,8 @@ have been fixed. Then:
 
 *  Email ``mantid-builder@mantidproject.org`` and ask that a new token be generated for
    the instrument updates and placed in the appropriate place in Jenkins.
-*  Check the release notes and remove the "Under Construction" paragraph on the main
-   index page.
+*  Check the release notes and verify that the "Under Construction" paragraph on the main
+   index page has been removed. Remove the paragraph if it still exists.
 *  Disable release deploy jobs by building the
    `close-release-testing <https://builds.mantidproject.org/view/All/job/close-release-testing>`__
    job.
@@ -317,11 +321,11 @@ have been fixed. Then:
 
 We are now ready to create the release candidates ready for Smoke testing.
 
-*  On the ``release-next`` branch, create a PR to update the `git SHA
+*  On the ``release-next`` branch, check whether the `git SHA
    <https://github.com/mantidproject/mantid/blob/343037c685c0aca9151523d6a3e105504f8cf218/scripts/ExternalInterfaces/CMakeLists.txt#L11>`__
-   for MSlice.
+   for MSlice is up to date. If not, create a PR to update it.
 *  On the ``release-next`` branch, create a PR to update the `major & minor
-   <https://github.com/mantidproject/mantid/blob/main/buildconfig/CMake/VersionNumber.cmake>`__
+   <https://github.com/mantidproject/mantid/blob/release-next/buildconfig/CMake/VersionNumber.cmake>`__
    versions accordingly. Also, uncomment ``VERSION_PATCH`` and set it to ``0``.
 *  Ask a gatekeeper to: merge the ``release-next`` branch back to ``main`` locally, and then comment
    out the ``VERSION_PATCH`` on the ``main`` branch. They should then commit and push these changes
@@ -338,7 +342,7 @@ Check with the Quality Assurance Manager that the Smoke testing has been complet
 have been fixed.
 
 *  Run the `release_deploy <https://builds.mantidproject.org/view/Release%20Pipeline/job/release_deploy/>`__
-   job to put the packages, with the exception of Windows, on Sourceforge.
+   job to put the packages, with the exception of Windows, on Sourceforge. Set ``SOURCEFORGE_DIR`` to <major version>.<minor version> (e.g. 6.3)
 
   *  Have someone at ISIS sign the Windows binary and upload this manually to Sourceforge
 
@@ -357,8 +361,6 @@ have been fixed.
 *  Kick off the build for ``mantidXY`` on RHEL7 for the SNS with ``PACKAGE_SUFFIX`` set to
    ``XY`` where ``X`` and ``Y`` correspond to the Major and Minor release version numbers:
    https://builds.mantidproject.org/job/release_clean-rhel7/
-* **ISIS**: If in cycle add a calendar reminder for when the current cycle ends for
-  mantid to be updated on IDAaaS and cabin PCs. If out of cycle do this immediately.
 
 **Generate DOI**
 
@@ -374,6 +376,11 @@ publish a new `release <https://github.com/mantidproject/mantid/releases>`__ on 
 .. code-block:: bash
 
     python tools/DOI/doi.py --username=[username] [X.Y.Z]
+
+for example
+
+.. code-block:: bash
+
     python tools/DOI/doi.py --username="doi.username" 6.1.0
 
 *  The script will prompt you for the password. Ask a senior developer to share the username and
