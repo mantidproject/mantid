@@ -284,7 +284,8 @@ def pcolormesh(workspaces, fig=None, color_norm=None, normalize_by_bin_width=Non
     colorbar = fig.colorbar(pcm, ax=axes.tolist(), pad=0.06)
     add_colorbar_label(colorbar, axes)
 
-    fig.canvas.set_window_title(figure_title(workspaces, fig.number))
+    if fig.canvas.manager is not None:
+        fig.canvas.manager.set_window_title(figure_title(workspaces, fig.number))
     # assert a minimum size, otherwise we can lose axis labels
     size = fig.get_size_inches()
     if (size[0] <= COLORPLOT_MIN_WIDTH) or (size[1] <= COLORPLOT_MIN_HEIGHT):
