@@ -924,7 +924,7 @@ protected:
     }
     Kernel::StringTokenizer tokenizer(m_value, ",", Kernel::StringTokenizer::TOK_TRIM);
 
-    int newSize = tokenizer.count();
+    size_t newSize = tokenizer.count();
 
     // if visitor has an associated validator, first populate temp vec and evaluate against validator.
     if (m_validator != Mantid::Kernel::IValidator_sptr()) {
