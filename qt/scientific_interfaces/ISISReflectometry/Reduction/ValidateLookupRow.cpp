@@ -103,6 +103,8 @@ LookupRowValidator::parseBackgroundProcessingInstructions(CellText const &cellTe
 
 ValidationResult<LookupRow, std::vector<int>> LookupRowValidator::operator()(CellText const &cellText) {
   auto maybeTheta = parseThetaOrWhitespace(cellText);
+  // TODO implement parsing function for the title matcher when it is added to the view
+  auto maybeTitleMatcher = boost::optional<boost::regex>("");
   auto maybeTransmissionRuns = parseTransmissionRuns(cellText);
   auto maybeTransmissionProcessingInstructions = parseTransmissionProcessingInstructions(cellText);
   auto maybeQRange = parseQRange(cellText);
@@ -110,8 +112,8 @@ ValidationResult<LookupRow, std::vector<int>> LookupRowValidator::operator()(Cel
   auto maybeProcessingInstructions = parseProcessingInstructions(cellText);
   auto maybeBackgroundProcessingInstructions = parseBackgroundProcessingInstructions(cellText);
   auto maybeDefaults = makeIfAllInitialized<LookupRow>(
-      maybeTheta, maybeTransmissionRuns, maybeTransmissionProcessingInstructions, maybeQRange, maybeScaleFactor,
-      maybeProcessingInstructions, maybeBackgroundProcessingInstructions);
+      maybeTheta, maybeTitleMatcher, maybeTransmissionRuns, maybeTransmissionProcessingInstructions, maybeQRange,
+      maybeScaleFactor, maybeProcessingInstructions, maybeBackgroundProcessingInstructions);
 
   if (maybeDefaults.is_initialized())
     return ValidationResult<LookupRow, std::vector<int>>(maybeDefaults.get());
