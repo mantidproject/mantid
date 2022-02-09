@@ -20,6 +20,8 @@ public:
 
 private:
   LookupTable const &m_lookupTable;
+
+  LookupRow const *searchByTheta(const boost::optional<double> &thetaAngle, double tolerance) const;
 };
 
 } // namespace MantidQt::CustomInterfaces::ISISReflectometry

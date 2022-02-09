@@ -17,13 +17,11 @@ namespace MantidQt::CustomInterfaces::ISISReflectometry {
 LookupRowFinder::LookupRowFinder(const LookupTable &table) : m_lookupTable(table) {}
 
 LookupRow const *LookupRowFinder::operator()(const boost::optional<double> &thetaAngle, double tolerance) const {
-  LookupTable::const_iterator match;
+  auto match = m_lookupTable.cend();
   if (thetaAngle) {
-    match = std::find_if(m_lookupTable.cbegin(), m_lookupTable.cend(),
-                         [thetaAngle, tolerance](LookupRow const &candiate) -> bool {
-                           return !candiate.isWildcard() &&
-                                  std::abs(*thetaAngle - candiate.thetaOrWildcard().get()) <= (tolerance + EPSILON);
-                         });
+    if (const auto *found = searchByTheta(thetaAngle, tolerance)) {
+      return found;
+    }
   } else {
     match = std::find_if(m_lookupTable.cbegin(), m_lookupTable.cend(),
                          [](LookupRow const &candidate) -> bool { return candidate.isWildcard(); });
@@ -33,10 +31,20 @@ LookupRow const *LookupRowFinder::operator()(const boost::optional<double> &thet
     return &(*match);
   } else if (thetaAngle) {
     // Try again without a specific angle i.e. look for a wildcard row
+    // Wildcard branch
     return this->operator()(boost::none, tolerance);
   } else {
     return nullptr;
   }
+}
+
+LookupRow const *LookupRowFinder::searchByTheta(const boost::optional<double> &thetaAngle, double tolerance) const {
+  auto match = std::find_if(m_lookupTable.cbegin(), m_lookupTable.cend(),
+                            [thetaAngle, tolerance](LookupRow const &candiate) -> bool {
+                              return !candiate.isWildcard() &&
+                                     std::abs(*thetaAngle - candiate.thetaOrWildcard().get()) <= (tolerance + EPSILON);
+                            });
+  return match == m_lookupTable.cend() ? nullptr : &(*match);
 }
 
 } // namespace MantidQt::CustomInterfaces::ISISReflectometry
