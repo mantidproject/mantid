@@ -5,6 +5,7 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "Experiment.h"
+#include "LookupRowFinder.h"
 #include "MantidQtWidgets/Common/ParseKeyValueString.h"
 #include <cmath>
 
@@ -63,25 +64,8 @@ std::vector<LookupRow::ValueArray> Experiment::lookupTableToArray() const {
 }
 
 LookupRow const *Experiment::findLookupRow(const boost::optional<double> &thetaAngle, double tolerance) const {
-  LookupTable::const_iterator match;
-  if (thetaAngle) {
-    match = std::find_if(
-        m_lookupTable.cbegin(), m_lookupTable.cend(), [thetaAngle, tolerance](LookupRow const &candiate) -> bool {
-          return !candiate.isWildcard() && std::abs(*thetaAngle - candiate.thetaOrWildcard().get()) <= tolerance;
-        });
-  } else {
-    match = std::find_if(m_lookupTable.cbegin(), m_lookupTable.cend(),
-                         [](LookupRow const &candidate) -> bool { return candidate.isWildcard(); });
-  }
-
-  if (match != m_lookupTable.cend()) {
-    return &(*match);
-  } else if (thetaAngle) {
-    // Try again without a specific angle i.e. look for a wildcard row
-    return findLookupRow(boost::none, tolerance);
-  } else {
-    return nullptr;
-  }
+  LookupRowFinder findLookupRow(m_lookupTable);
+  return findLookupRow(thetaAngle, tolerance);
 }
 
 bool operator!=(Experiment const &lhs, Experiment const &rhs) { return !(lhs == rhs); }

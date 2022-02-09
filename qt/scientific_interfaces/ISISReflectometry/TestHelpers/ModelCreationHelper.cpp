@@ -341,10 +341,23 @@ ReductionJobs oneGroupWithTwoRowsWithOutputNamesModel() {
 
 /* Experiment */
 
+LookupTable makeEmptyLookupTable() { return LookupTable{}; }
+
 LookupTable makeLookupTable() {
   auto lookupRow = LookupRow(boost::none, TransmissionRunPair(), boost::none,
                              RangeInQ(boost::none, boost::none, boost::none), boost::none, boost::none, boost::none);
   return LookupTable{std::move(lookupRow)};
+}
+
+LookupTable makeLookupTableWithTwoAngles() {
+  return LookupTable{// two angle rows
+                     LookupRow(0.5, TransmissionRunPair("22347", ""), boost::none, RangeInQ(0.008, 0.02, 1.2), 0.8,
+                               ProcessingInstructions("2-3"), boost::none),
+                     LookupRow(2.3,
+                               TransmissionRunPair(std::vector<std::string>{"22348", "22349"},
+                                                   std::vector<std::string>{"22358", "22359"}),
+                               ProcessingInstructions("4"), RangeInQ(0.009, 0.03, 1.3), 0.9,
+                               ProcessingInstructions("4-6"), ProcessingInstructions("2-3,7-8"))};
 }
 
 LookupTable makeLookupTableWithTwoAnglesAndWildcard() {
