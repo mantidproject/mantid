@@ -131,8 +131,8 @@ class PlotScriptGeneratorTest(unittest.TestCase):
         mock_kwargs.update(kwargs)
         mock_ax = Mock(spec=MantidAxes, **mock_kwargs)
         mock_ax.xaxis.minor.locator = Mock(spec=NullLocator)
-        mock_ax.xaxis._gridOnMajor = False
-        mock_ax.yaxis._gridOnMajor = False
+        mock_ax.xaxis._major_tick_kw['gridOn'] = False
+        mock_ax.yaxis._major_tick_kw['gridOn'] = False
         return mock_ax
 
     def test_generate_script_returns_None_if_no_MantidAxes_in_figure(self):
