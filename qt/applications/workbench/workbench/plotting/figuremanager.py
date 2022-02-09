@@ -508,7 +508,8 @@ class FigureManagerWorkbench(FigureManagerBase, QObject):
         errorbar_cap_lines = datafunctions.remove_and_return_errorbar_cap_lines(ax)
 
         ax.lines.reverse()
-        ax.lines += errorbar_cap_lines
+        for cap in errorbar_cap_lines:
+            ax.add_line(cap)
         ax.collections += fills
         ax.collections.reverse()
         ax.update_waterfall(x, y)

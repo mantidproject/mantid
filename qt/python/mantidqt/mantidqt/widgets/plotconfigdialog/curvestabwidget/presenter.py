@@ -174,7 +174,8 @@ class CurvesTabWidgetPresenter:
 
             datafunctions.set_waterfall_fill_visible(ax, curve_index)
 
-        ax.lines += errorbar_cap_lines
+        for cap in errorbar_cap_lines:
+            ax.add_line(cap)
 
     def populate_select_axes_combo_box(self):
         """

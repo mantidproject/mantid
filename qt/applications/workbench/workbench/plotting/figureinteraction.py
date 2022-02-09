@@ -56,7 +56,8 @@ def errorbar_caps_removed(ax):
     error_bar_caps = datafunctions.remove_and_return_errorbar_cap_lines(ax)
     yield
     # Re-add error bar caps
-    ax.lines += error_bar_caps
+    for cap in error_bar_caps:
+        ax.add_line(cap)
 
 
 class FigureInteraction(object):

@@ -237,7 +237,8 @@ def _overplot_waterfall(ax, no_of_lines):
         if ax.waterfall_has_fill():
             datafunctions.waterfall_update_fill(ax)
 
-        ax.lines += errorbar_cap_lines
+        for cap in errorbar_cap_lines:
+            ax.add_line(cap)
 
 
 def _update_show_figure(fig):
