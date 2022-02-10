@@ -1301,16 +1301,16 @@ class MantidAxes3D(Axes3D):
         # instead.
         return Axes.set_title(self, *args, **kwargs)
 
-    def set_xlim3d(self, *args):
-        super().set_xlim3d(*args)
+    def set_xlim3d(self, *args, **kwargs):
+        super().set_xlim3d(*args, **kwargs)
         self._set_overflowing_data_to_nan(0)
 
-    def set_ylim3d(self, *args):
-        super().set_ylim3d(*args)
+    def set_ylim3d(self, *args, **kwargs):
+        super().set_ylim3d(*args, **kwargs)
         self._set_overflowing_data_to_nan(1)
 
-    def set_zlim3d(self, *args):
-        super().set_zlim3d(*args)
+    def set_zlim3d(self, *args, **kwargs):
+        super().set_zlim3d(*args, **kwargs)
         self._set_overflowing_data_to_nan(2)
 
     def autoscale(self, *args, **kwargs):
