@@ -104,7 +104,9 @@ LookupRowValidator::parseBackgroundProcessingInstructions(CellText const &cellTe
 ValidationResult<LookupRow, std::vector<int>> LookupRowValidator::operator()(CellText const &cellText) {
   auto maybeTheta = parseThetaOrWhitespace(cellText);
   // TODO implement parsing function for the title matcher when it is added to the view
-  auto maybeTitleMatcher = boost::optional<boost::regex>("");
+  // Note that the contained value is already an optional so we wrap it in another optional to indicate whether
+  // parsing succeeded or not.
+  auto maybeTitleMatcher = boost::optional<boost::optional<boost::regex>>(boost::optional<boost::regex>(boost::none));
   auto maybeTransmissionRuns = parseTransmissionRuns(cellText);
   auto maybeTransmissionProcessingInstructions = parseTransmissionProcessingInstructions(cellText);
   auto maybeQRange = parseQRange(cellText);
