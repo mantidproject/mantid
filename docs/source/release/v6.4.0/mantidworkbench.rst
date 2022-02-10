@@ -13,5 +13,11 @@ Bugfixes
 --------
 - In DrILL interface, scrolling down in the settings dialog no longer affects the comboxes
 - Cleaned up the appearance of the main window and the Indirect, Reflectometry, and Engineering GUIs on macOS.
+- Fixed where matplotlib 3.5 caused 3D plots to throw a warning in multiple places.
+- Fixed where matplotlib 3.5 caused a plot to raise an exception when right clicked, or showing the context menu.
+- Fixed where matplotlib 3.5 caused a warning when opening plots.
+- Fixed where matplotlib 3.5 caused any 3D plot to raise an exception when opened.
+- Fixed where matplotlib 3.5 caused a crash when closing workbench with a plot open.
+- Fixed where matplotlib 3.5 caused a project to be unable to save and load plots.
 
 :ref:`Release 6.4.0 <v6.4.0>`
