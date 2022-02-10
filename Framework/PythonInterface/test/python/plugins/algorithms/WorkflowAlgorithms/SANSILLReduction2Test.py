@@ -18,6 +18,7 @@ class SANSILLReduction2Test(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         config.appendDataSearchSubDir('ILL/D11/')
+        config.appendDataSearchSubDir('ILL/D11B/')
         config.appendDataSearchSubDir('ILL/D33/')
 
     def setUp(self):
@@ -35,12 +36,12 @@ class SANSILLReduction2Test(unittest.TestCase):
         mtd.clear()
 
     def test_dark_current(self):
-        SANSILLReduction(Runs='010462', ProcessAs='DarkCurrent', OutputWorkspace='dc')
+        SANSILLReduction(Runs='010462', ProcessAs='DarkCurrent', OutputWorkspace='dc', NormaliseBy='Monitor')
         self._check_output(mtd['dc'], 1, 128*128+2)
         self._check_process_flag(mtd['dc'], 'DarkCurrent')
 
     def test_empty_beam(self):
-        SANSILLReduction(Runs='010414', ProcessAs='EmptyBeam', OutputWorkspace='eb', OutputFluxWorkspace='fl')
+        SANSILLReduction(Runs='010414', ProcessAs='EmptyBeam', OutputWorkspace='eb', OutputFluxWorkspace='fl', NormaliseBy='Monitor')
         self._check_output(mtd['eb'], 1, 128*128+2)
         self._check_process_flag(mtd['eb'], 'EmptyBeam')
         run = mtd['eb'].getRun()
@@ -52,20 +53,20 @@ class SANSILLReduction2Test(unittest.TestCase):
         self.assertAlmostEqual(mtd['fl'].readE(0)[0], 0.957, delta=1e-3)
 
     def test_transmission(self):
-        SANSILLReduction(Runs='010414', ProcessAs='EmptyBeam', OutputWorkspace='eb', OutputFluxWorkspace='fl')
-        SANSILLReduction(Runs='010585', ProcessAs='Transmission', FluxWorkspace='fl', OutputWorkspace='tr')
+        SANSILLReduction(Runs='010414', ProcessAs='EmptyBeam', OutputWorkspace='eb', OutputFluxWorkspace='fl', NormaliseBy='Monitor')
+        SANSILLReduction(Runs='010585', ProcessAs='Transmission', FluxWorkspace='fl', OutputWorkspace='tr', NormaliseBy='Monitor')
         self.assertAlmostEqual(mtd['tr'].readY(0)[0], 0.642, delta=1e-3)
         self.assertAlmostEqual(mtd['tr'].readE(0)[0], 0.0019, delta=1e-4)
         self._check_process_flag(mtd['tr'], 'Transmission')
         self._check_output(mtd['tr'], 1, 1)
 
     def test_container(self):
-        SANSILLReduction(Runs='010460', ProcessAs='EmptyContainer', OutputWorkspace='can')
+        SANSILLReduction(Runs='010460', ProcessAs='EmptyContainer', OutputWorkspace='can', NormaliseBy='Monitor')
         self._check_output(mtd['can'], 1, 128*128+2)
         self._check_process_flag(mtd['can'], 'EmptyContainer')
 
     def test_water(self):
-        SANSILLReduction(Runs='010453', ProcessAs='Water', OutputSensitivityWorkspace='sens', OutputWorkspace='water')
+        SANSILLReduction(Runs='010453', ProcessAs='Water', OutputSensitivityWorkspace='sens', OutputWorkspace='water', NormaliseBy='Monitor')
         self._check_output(mtd['water'], 1, 128*128+2)
         self._check_output(mtd['sens'], 1, 128*128+2)
         self._check_process_flag(mtd['water'], 'Water')
@@ -77,8 +78,18 @@ class SANSILLReduction2Test(unittest.TestCase):
         self._check_process_flag(mtd['solvent'], 'Solvent')
 
     def test_sample(self):
-        SANSILLReduction(Runs='010569', ProcessAs='Sample', OutputWorkspace='sample',)
+        SANSILLReduction(Runs='010569', ProcessAs='Sample', OutputWorkspace='sample', NormaliseBy='Monitor')
         self._check_output(mtd['sample'], 1, 128*128+2)
+        self._check_process_flag(mtd['sample'], 'Sample')
+
+    def test_sample_kinetic(self):
+        SANSILLReduction(Runs='017251', ProcessAs='Sample', OutputWorkspace='sample', NormaliseBy='Monitor')
+        self._check_output(mtd['sample'], 85, 256*256+2)
+        self._check_process_flag(mtd['sample'], 'Sample')
+
+    def test_sample_tof(self):
+        SANSILLReduction(Runs='042610', ProcessAs='Sample', OutputWorkspace='sample', NormaliseBy='Time')
+        self._check_output_tof(mtd['sample'], 200, 256*256+2)
         self._check_process_flag(mtd['sample'], 'Sample')
 
     def _check_process_flag(self, ws, value):
