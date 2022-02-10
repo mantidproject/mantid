@@ -14,8 +14,9 @@ This high level algorithm steers the reduction for **multiple** samples measured
 The sample measurements will be corrected for all the instrumental effects and converted to Q-space, producing by default the azimuthal average curve :math:`I(Q)`.
 Optionally, it can also perform anisotropic integration with azimuthal wedges or hand-drawn sectors in the instrument viewer.
 If requested, it can also produce separate :math:`I(Q)` curves per detector panel.
-It supports standard monochromatic, kinetic and rebinned event modes.
-Makes use of :ref:`SANSILLReduction <algm-SANSILLReduction-v2>` and :ref:`SANSILLIntegration <algm-SANSILLIntegration>`.
+Note, that panels and azimuthal wedges cannot be requested simultaneously.
+The algorithm supports monochromatic (standard, kinetic, and event) as well as TOF modes (linear or variable binning, D33 only).
+Makes use of :ref:`SANSILLReduction <algm-SANSILLReduction-v2>` and :ref:`SANSILLIntegration <algm-SANSILLIntegration>` and the algorithm suite used therein.
 
 Output
 ------
@@ -25,10 +26,18 @@ The group will contain many workspaces as follows:
 
 * The corrected real-space workspaces (2D), one per detector distance
 * The integrated I(Q) workspace, one per detector distance
-* Optionally, the I(Q) workspaces per wedge or per detector workspace, if requested
+* Optionally, the I(Q) workspaces per azimuthal sector or per detector panel, if requested
 * The stitched I(Q) workspace (also for wedges, if requested)
 * The calculated scale factors for stitching
 * The transmission workspaces, one per wavelength
+
+Notes
+-----
+
+* The algorithm will cache the reduced calibration measurements (empty beams, dark currents, empty containers, etc.) in the ADS. This is to ensure that subsequent runs with the same calibrants run faster. However, if a critical parameter is changed, such as the normalisation option, those workspaces must be manually cleared before processing again.
+* The sample runs for different distances must be filled in order; that is, if there is only one distance is present, they must be filled in D1, if only 2, then D1 and D2, and so on.
+* The transmission runs for different wavelengths must be filled in order; that is, if there is only one wavelength, they must be filled in W1, if 2, then W1 and W2.
+* See the section in :ref:`SANSILLReduction <algm-SANSILLReduction-v2>` regarding the blank samples and transmission replicae.
 
 Workflow
 --------
