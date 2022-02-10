@@ -504,7 +504,7 @@ class SANSILLMultiProcess(DataProcessorAlgorithm):
         all_outputs = []
         for l in range(self.lambda_rank):
             transmissions = self.process_all_transmissions_at_lambda(l)
-            self.progress.report((l+1)*self.n_samples, 'Calculated transmissions for wavelength index {l+1}')
+            self.progress.report((l+1)*self.n_samples, f'Calculated transmissions for wavelength index {l+1}')
             all_outputs.append(transmissions)
         return all_outputs
 
@@ -514,7 +514,7 @@ class SANSILLMultiProcess(DataProcessorAlgorithm):
         for d in range(self.rank):
             outputs = dict()
             sample_ws = self.process_all_samples_at_distance(d, transmissions)
-            self.progress.report((d+1)*self.n_samples, 'Reduced sample data at distance index {d+1}')
+            self.progress.report((d+1)*self.n_samples, f'Reduced sample data at distance index {d+1}')
             outputs['RealSpace'] = sample_ws[0]
             if len(sample_ws) > 1:
                 # if there is a 2nd output, it must be sensitivity
