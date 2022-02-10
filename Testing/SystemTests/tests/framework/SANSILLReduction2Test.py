@@ -514,6 +514,7 @@ class ILL_SANS_D22B_MONO_TEST(systemtesting.MantidSystemTest):
 
         SANSILLReduction(Runs='51727+51724+51693',
                          ProcessAs='EmptyContainer',
+                         NormaliseBy='Monitor',
                          DarkCurrentWorkspace='cad',
                          EmptyBeamWorkspace='mt',
                          TransmissionWorkspace='ctr',
