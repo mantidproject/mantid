@@ -55,17 +55,17 @@ boost::optional<LookupRow> LookupRowFinder::searchByTheta(std::vector<LookupRow>
 
 std::vector<LookupRow> LookupRowFinder::findMatchingRegexes(std::string const &title) const {
   auto results = std::vector<LookupRow>();
-  std::copy_if(
-      m_lookupTable.cbegin(), m_lookupTable.cend(), std::back_inserter(results), [&title](auto const &candidate) {
-        return candidate.titleMatcher().has_value() && boost::regex_search(title, candidate.titleMatcher().get());
-      });
+  std::copy_if(m_lookupTable.cbegin(), m_lookupTable.cend(), std::back_inserter(results),
+               [&title](auto const &candidate) {
+                 return candidate.titleMatcher() && boost::regex_search(title, candidate.titleMatcher().get());
+               });
   return results;
 }
 
 std::vector<LookupRow> LookupRowFinder::findEmptyRegexes() const {
   auto results = std::vector<LookupRow>();
   std::copy_if(m_lookupTable.cbegin(), m_lookupTable.cend(), std::back_inserter(results),
-               [](auto const &candidate) { return !candidate.titleMatcher().has_value(); });
+               [](auto const &candidate) { return !candidate.titleMatcher(); });
   return results;
 }
 

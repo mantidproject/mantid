@@ -112,7 +112,7 @@ public:
 
     LookupRowFinder findLookupRow(table);
     const auto foundLookupRow = findLookupRow(angle, m_exactMatchTolerance, "En Oh");
-    TS_ASSERT(!foundLookupRow.has_value())
+    TS_ASSERT(!foundLookupRow)
   }
 
   void test_searching_by_title_found_but_theta_not_found_returns_none() {
@@ -122,7 +122,7 @@ public:
 
     LookupRowFinder findLookupRow(table);
     const auto foundLookupRow = findLookupRow(0.5, m_exactMatchTolerance, "En Oh");
-    TS_ASSERT(!foundLookupRow.has_value())
+    TS_ASSERT(!foundLookupRow)
   }
 
   void test_searching_by_theta_found_but_title_not_found_returns_wildcard() {
@@ -133,7 +133,7 @@ public:
 
     LookupRowFinder findLookupRow(table);
     const auto foundLookupRow = findLookupRow(angle, m_exactMatchTolerance, "En Oh");
-    TS_ASSERT(foundLookupRow.has_value())
+    TS_ASSERT(foundLookupRow)
     TS_ASSERT_EQUALS(wildcardRow, foundLookupRow)
   }
 
@@ -145,7 +145,7 @@ public:
 
     LookupRowFinder findLookupRow(table);
     const auto foundLookupRow = findLookupRow(0.5, m_exactMatchTolerance, "En Oh");
-    TS_ASSERT(foundLookupRow.has_value())
+    TS_ASSERT(foundLookupRow)
     TS_ASSERT_EQUALS(wildcardRow, foundLookupRow)
   }
 
@@ -157,7 +157,7 @@ public:
 
     LookupRowFinder findLookupRow(table);
     const auto foundLookupRow = findLookupRow(angle, m_exactMatchTolerance, "En Oh");
-    TS_ASSERT(foundLookupRow.has_value())
+    TS_ASSERT(foundLookupRow)
     TS_ASSERT_EQUALS(regexRow, foundLookupRow)
   }
 
@@ -168,7 +168,7 @@ public:
 
     LookupRowFinder findLookupRow(table);
     const auto foundLookupRow = findLookupRow(angle, m_exactMatchTolerance, "En Oh");
-    TS_ASSERT(foundLookupRow.has_value())
+    TS_ASSERT(foundLookupRow)
     TS_ASSERT_EQUALS(emptyRegexRow, foundLookupRow)
   }
 
