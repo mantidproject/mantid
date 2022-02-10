@@ -161,7 +161,16 @@ public:
     TS_ASSERT_EQUALS(regexRow, foundLookupRow)
   }
 
-  // void test_searching_by_title_when_no_regex
+  void test_searching_by_title_matches_empty_regex() {
+    auto constexpr angle = 2.3;
+    auto emptyRegexRow = ModelCreationHelper::makeLookupRow(angle, boost::none);
+    auto table = LookupTable{emptyRegexRow};
+
+    LookupRowFinder findLookupRow(table);
+    const auto foundLookupRow = findLookupRow(angle, m_exactMatchTolerance, "En Oh");
+    TS_ASSERT(foundLookupRow.has_value())
+    TS_ASSERT_EQUALS(emptyRegexRow, foundLookupRow)
+  }
 
   // error cases:
   // lookup title specified but theta is not

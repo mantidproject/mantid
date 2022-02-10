@@ -53,12 +53,29 @@ boost::optional<LookupRow> LookupRowFinder::searchByTheta(std::vector<LookupRow>
     return *match;
 }
 
-std::vector<LookupRow> LookupRowFinder::searchByTitle(std::string const &title) const {
+std::vector<LookupRow> LookupRowFinder::findMatchingRegexes(std::string const &title) const {
   auto results = std::vector<LookupRow>();
   std::copy_if(
       m_lookupTable.cbegin(), m_lookupTable.cend(), std::back_inserter(results), [&title](auto const &candidate) {
         return candidate.titleMatcher().has_value() && boost::regex_search(title, candidate.titleMatcher().get());
       });
+  return results;
+}
+
+std::vector<LookupRow> LookupRowFinder::findEmptyRegexes() const {
+  auto results = std::vector<LookupRow>();
+  std::copy_if(m_lookupTable.cbegin(), m_lookupTable.cend(), std::back_inserter(results),
+               [](auto const &candidate) { return !candidate.titleMatcher().has_value(); });
+  return results;
+}
+
+std::vector<LookupRow> LookupRowFinder::searchByTitle(std::string const &title) const {
+  auto results = findMatchingRegexes(title);
+  // If we didn't find an explicit regex that matches, then we allow the user to specify a lookup row with an empty
+  // regex as a default, which falls back to matching all titles
+  if (results.empty()) {
+    results = findEmptyRegexes();
+  }
   return results;
 }
 

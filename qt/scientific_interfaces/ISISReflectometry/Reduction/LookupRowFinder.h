@@ -29,6 +29,8 @@ private:
                                            double) const;
   std::vector<LookupRow> searchByTitle(std::string const &title) const;
   boost::optional<LookupRow> searchForWildcard() const;
+  std::vector<LookupRow> findMatchingRegexes(std::string const &title) const;
+  std::vector<LookupRow> findEmptyRegexes() const;
 };
 
 } // namespace MantidQt::CustomInterfaces::ISISReflectometry
