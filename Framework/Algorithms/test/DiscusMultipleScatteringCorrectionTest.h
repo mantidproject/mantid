@@ -63,10 +63,10 @@ public:
     auto inputWorkspace = SetupFlatPlateWorkspace(1, NTHETA, 0.2, 1, THICKNESS);
 
     auto SofQWorkspace = WorkspaceCreationHelper::create2DWorkspace(1, 3);
-    SofQWorkspace->mutableX(0)[0] = 4.985;
-    SofQWorkspace->mutableX(0)[1] = 4.995;
-    SofQWorkspace->mutableX(0)[2] = 5.005;
-    SofQWorkspace->mutableX(0)[3] = 5.015;
+    SofQWorkspace->mutableX(0)[0] = 5.985;
+    SofQWorkspace->mutableX(0)[1] = 5.995;
+    SofQWorkspace->mutableX(0)[2] = 6.005;
+    SofQWorkspace->mutableX(0)[3] = 6.015;
     // S(Q) zero everywhere apart from spike at Q=5
     SofQWorkspace->mutableY(0)[0] = 0.;
     SofQWorkspace->mutableY(0)[1] = 100.;
@@ -81,8 +81,8 @@ public:
     alg->setPropertyValue("OutputWorkspace", "MuscatResults");
     // input workspace has single bin - centred at 1 Angstrom, so kinc=2*pi=6.28 inverse Angstroms
     // DiscusMultipleScatteringCorrection will sample q between 0 and 2k (12.56)
-    // so q=5 requires sin(theta) = 5 /(4*pi) = 0.39789, theta=23.44 degrees, 2theta=46.88 degrees
-    // So two scatters at max S(Q) will take the track to ~93.76 degrees
+    // so q=6 requires sin(theta) = 6 /(4*pi) = 0.477465, theta=28.52 degrees, 2theta=57.04 degrees
+    // So two scatters at max S(Q) will take the track to ~114.08 degrees
     alg->setProperty("InputWorkspace", inputWorkspace);
     const int NSCATTERINGS = 2;
     alg->setProperty("NumberScatterings", NSCATTERINGS);
@@ -95,12 +95,12 @@ public:
     Mantid::API::Workspace_sptr wsPtr = output->getItem("Scatter_2");
     auto doubleScatterResult = std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(wsPtr);
 
-    // validate that the max scatter angle is ~94 degrees
+    // validate that the max scatter angle is ~115 degrees (peak is at 114 but slight tail)
     for (size_t i = 0; i < NTHETA; i++)
-      if (doubleScatterResult->spectrumInfo().twoTheta(i) > M_PI * 94.0 / 180.0)
+      if (doubleScatterResult->spectrumInfo().twoTheta(i) > M_PI * 115.0 / 180.0)
         TS_ASSERT_EQUALS(doubleScatterResult->y(i)[0], 0.);
 
-    // crude check on peak positions at theta=0 and ~94 degrees
+    // crude check on peak positions at theta=0 and ~114 degrees
     double sum = 0.;
     for (size_t i = 0; i < NTHETA; i++)
       sum += doubleScatterResult->y(i)[0];
@@ -108,15 +108,22 @@ public:
     std::vector<size_t> peakPos;
     int PEAKSPACING = NTHETA / 10;
     int lastPeakFound = -PEAKSPACING;
-    for (size_t i = 0; i < NTHETA; i++)
-      if ((doubleScatterResult->y(i)[0] > 3 * avgY) && (static_cast<int>(i - lastPeakFound) >= PEAKSPACING)) {
-        peakPos.push_back(i);
-        lastPeakFound = static_cast<int>(i);
+    for (int i = 0; i < NTHETA; i++) {
+      bool maxInWindow = true;
+      for (size_t j = std::max(0, i - PEAKSPACING); j <= std::min(NTHETA - 1, i + PEAKSPACING); j++) {
+        if (doubleScatterResult->y(j)[0] > doubleScatterResult->y(i)[0])
+          maxInWindow = false;
       }
+      if ((doubleScatterResult->y(i)[0] > 3 * avgY) && maxInWindow) {
+        peakPos.push_back(i);
+        lastPeakFound = i;
+      }
+    }
     TS_ASSERT_EQUALS(peakPos.size(), 2);
     if (peakPos.size() > 0) {
       TS_ASSERT_EQUALS(peakPos.front(), 0);
-      TS_ASSERT((static_cast<double>(peakPos.back()) * 0.2 > 93) && (static_cast<double>(peakPos.back()) * 0.2 < 94));
+      TS_ASSERT((static_cast<double>(peakPos.back()) * 0.2 >= 114) &&
+                (static_cast<double>(peakPos.back()) * 0.2 < 115));
     }
 
     Mantid::API::AnalysisDataService::Instance().deepRemoveGroup("MuscatResults");
