@@ -64,10 +64,14 @@ std::vector<LookupRow::ValueArray> Experiment::lookupTableToArray() const {
   return result;
 }
 
-boost::optional<LookupRow> Experiment::findLookupRow(const boost::optional<double> &thetaAngle,
-                                                     double tolerance) const {
+boost::optional<LookupRow> Experiment::findLookupRow(Row const &row, double tolerance) const {
   LookupRowFinder findLookupRow(m_lookupTable);
-  return findLookupRow(thetaAngle, tolerance);
+  return findLookupRow(row, tolerance);
+}
+
+boost::optional<LookupRow> Experiment::findWildcardLookupRow() const {
+  LookupRowFinder finder(m_lookupTable);
+  return finder.findWildcardLookupRow();
 }
 
 bool operator!=(Experiment const &lhs, Experiment const &rhs) { return !(lhs == rhs); }

@@ -237,7 +237,7 @@ std::unique_ptr<MantidQt::API::IAlgorithmRuntimeProps> createAlgorithmRuntimePro
   auto properties = createAlgorithmRuntimeProps(model);
   // Update properties specific to this row - the per-angle options based on
   // the known angle, and the values in the table cells in the row
-  updateLookupRowProperties(*properties, model.findLookupRow(row.theta()));
+  updateLookupRowProperties(*properties, model.findLookupRow(row));
   updateRowProperties(*properties, row);
   return properties;
 }
@@ -250,7 +250,7 @@ std::unique_ptr<MantidQt::API::IAlgorithmRuntimeProps> createAlgorithmRuntimePro
   updateExperimentProperties(*properties, model.experiment());
   updateInstrumentProperties(*properties, model.instrument());
   // Update properties from the wildcard row in the lookup table
-  updateLookupRowProperties(*properties, model.findLookupRow());
+  updateLookupRowProperties(*properties, model.findWildcardLookupRow());
   return properties;
 }
 } // namespace MantidQt::CustomInterfaces::ISISReflectometry

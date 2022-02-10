@@ -6,6 +6,8 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 
 #include "LookupRowFinder.h"
+#include "IGroup.h"
+#include "Row.h"
 #include <boost/optional.hpp>
 #include <boost/regex.hpp>
 #include <cmath>
@@ -23,19 +25,24 @@ namespace MantidQt::CustomInterfaces::ISISReflectometry {
 
 LookupRowFinder::LookupRowFinder(LookupTable const &table) : m_lookupTable(table) {}
 
-// TODO pass in row rather than unpacking at call-site
-boost::optional<LookupRow> LookupRowFinder::operator()(boost::optional<double> const &thetaAngle, double tolerance,
-                                                       std::string const &title) const {
-  if (thetaAngle) {
+boost::optional<LookupRow> LookupRowFinder::operator()(Row const &row, double tolerance) const {
+  if (row.theta()) {
     // First filter lookup rows by title, if the run has one
-    auto lookupRows = title.empty() ? m_lookupTable : searchByTitle(title);
+    auto lookupRows = searchByTitle(row);
+
+    if (lookupRows.empty()) {
+      // If we didn't find an explicit regex that matches, then we allow the user to specify a lookup row with an empty
+      // regex as a default, which falls back to matching all titles
+      lookupRows = findEmptyRegexes();
+    }
+
     // Now filter by angle; it should be unique
-    if (auto found = searchByTheta(lookupRows, thetaAngle, tolerance)) {
+    if (auto found = searchByTheta(lookupRows, row.theta(), tolerance)) {
       return found;
     }
   }
   // No theta found/provided, look for wildcards
-  return searchForWildcard();
+  return findWildcardLookupRow();
 }
 
 boost::optional<LookupRow> LookupRowFinder::searchByTheta(std::vector<LookupRow> lookupRows,
@@ -69,17 +76,18 @@ std::vector<LookupRow> LookupRowFinder::findEmptyRegexes() const {
   return results;
 }
 
-std::vector<LookupRow> LookupRowFinder::searchByTitle(std::string const &title) const {
-  auto results = findMatchingRegexes(title);
-  // If we didn't find an explicit regex that matches, then we allow the user to specify a lookup row with an empty
-  // regex as a default, which falls back to matching all titles
-  if (results.empty()) {
-    results = findEmptyRegexes();
+std::vector<LookupRow> LookupRowFinder::searchByTitle(Row const &row) const {
+  if (!row.getParent() || row.getParent()->name().empty()) {
+    // No titles for us to check against, so skip filtering
+    return m_lookupTable;
   }
+
+  auto const &title = row.getParent()->name();
+  auto results = findMatchingRegexes(title);
   return results;
 }
 
-boost::optional<LookupRow> LookupRowFinder::searchForWildcard() const {
+boost::optional<LookupRow> LookupRowFinder::findWildcardLookupRow() const {
   auto match = std::find_if(m_lookupTable.cbegin(), m_lookupTable.cend(),
                             [](LookupRow const &candidate) -> bool { return candidate.isWildcard(); });
   if (match == m_lookupTable.cend())
