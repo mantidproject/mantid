@@ -49,6 +49,7 @@
 		</parameter>
 		<parameter name="Workflow.slit2" type="string">
 			<value val="slit3" />
+		</parameter>
 		<parameter name="chopper_window_opening" visible="false">
 		<!-- Chopper opening window [degrees]-->
 			<value val="45.0" valid-to="2020-07-31T23:59:59"/>
