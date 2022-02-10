@@ -188,7 +188,7 @@ void addMonitor(Mantid::Geometry::Instrument_sptr &instrument, const Mantid::Ker
  * @param compAss :: optional component assembly (to help with saving geometry with SaveNexusESS)
  */
 void addDetector(Mantid::Geometry::Instrument_sptr &instrument, const Mantid::Kernel::V3D &position, const int ID,
-                 const std::string &name, ObjCompAssembly *compAss) {
+                 const std::string &name, Mantid::Geometry::ObjCompAssembly *compAss) {
   // Where 0.01 is half detector width etc.
   Detector *detector = new Detector(name, ID, ComponentCreationHelper::createCuboid(0.01, 0.02, 0.03), nullptr);
   detector->setPos(position);
