@@ -44,16 +44,19 @@ class ILL_SANS_D11_MONO_TEST(systemtesting.MantidSystemTest):
         # First reduce the water measured at 8m
         SANSILLReduction(Runs='010455',
                          ProcessAs='DarkCurrent',
+                         NormaliseBy='Monitor',
                          OutputWorkspace='cad')
         # Process the empty beam for water
         SANSILLReduction(Runs='010414',
                          ProcessAs='EmptyBeam',
+                         NormaliseBy='Monitor',
                          DarkCurrentWorkspace='cad',
                          OutputWorkspace='mt',
                          OutputFluxWorkspace='flux')
         # Water container transmission
         SANSILLReduction(Runs='010446',
                          ProcessAs='Transmission',
+                         NormaliseBy='Monitor',
                          DarkCurrentWorkspace='cad',
                          EmptyBeamWorkspace='mt',
                          FluxWorkspace='flux',
@@ -61,6 +64,7 @@ class ILL_SANS_D11_MONO_TEST(systemtesting.MantidSystemTest):
         # Water container
         SANSILLReduction(Runs='010454',
                          ProcessAs='EmptyContainer',
+                         NormaliseBy='Monitor',
                          DarkCurrentWorkspace='cad',
                          EmptyBeamWorkspace='mt',
                          TransmissionWorkspace='wc_tr',
@@ -68,6 +72,7 @@ class ILL_SANS_D11_MONO_TEST(systemtesting.MantidSystemTest):
         # Water transmission
         SANSILLReduction(Runs='010445',
                          ProcessAs='Transmission',
+                         NormaliseBy='Monitor',
                          DarkCurrentWorkspace='cad',
                          EmptyBeamWorkspace='mt',
                          FluxWorkspace='flux',
@@ -75,6 +80,7 @@ class ILL_SANS_D11_MONO_TEST(systemtesting.MantidSystemTest):
         # Water
         SANSILLReduction(Runs='010453',
                          ProcessAs='Water',
+                         NormaliseBy='Monitor',
                          DarkCurrentWorkspace='cad',
                          MaskWorkspace='mask',
                          EmptyBeamWorkspace='mt',
@@ -88,6 +94,7 @@ class ILL_SANS_D11_MONO_TEST(systemtesting.MantidSystemTest):
         # Sample container transmission
         SANSILLReduction(Runs='010444',
                          ProcessAs='Transmission',
+                         NormaliseBy='Monitor',
                          DarkCurrentWorkspace='cad',
                          EmptyBeamWorkspace='mt',
                          FluxWorkspace='flux',
@@ -95,6 +102,7 @@ class ILL_SANS_D11_MONO_TEST(systemtesting.MantidSystemTest):
         # Sample transmission
         SANSILLReduction(Runs='010585',
                          ProcessAs='Transmission',
+                         NormaliseBy='Monitor',
                          DarkCurrentWorkspace='cad',
                          EmptyBeamWorkspace='mt',
                          OutputWorkspace='s_tr',
@@ -103,16 +111,19 @@ class ILL_SANS_D11_MONO_TEST(systemtesting.MantidSystemTest):
         # Process the dark current Cd/B4C for sample
         SANSILLReduction(Runs='010462',
                          ProcessAs='DarkCurrent',
+                         NormaliseBy='Monitor',
                          OutputWorkspace='scad')
         # Process the empty beam for sample
         SANSILLReduction(Runs='010413',
                          ProcessAs='EmptyBeam',
+                         NormaliseBy='Monitor',
                          DarkCurrentWorkspace='scad',
                          OutputWorkspace='smt',
                          OutputFluxWorkspace='sflux')
         # Sample container
         SANSILLReduction(Runs='010460',
                          ProcessAs='EmptyContainer',
+                         NormaliseBy='Monitor',
                          DarkCurrentWorkspace='scad',
                          EmptyBeamWorkspace='smt',
                          TransmissionWorkspace='sc_tr',
@@ -120,6 +131,7 @@ class ILL_SANS_D11_MONO_TEST(systemtesting.MantidSystemTest):
         # Sample with flux and sensitivity
         SANSILLReduction(Runs='010569',
                          ProcessAs='Sample',
+                         NormaliseBy='Monitor',
                          DarkCurrentWorkspace='scad',
                          EmptyContainerWorkspace='sc',
                          EmptyBeamWorkspace='smt',
@@ -131,6 +143,7 @@ class ILL_SANS_D11_MONO_TEST(systemtesting.MantidSystemTest):
         # Sample with flux and water normalisation
         SANSILLReduction(Runs='010569',
                          ProcessAs='Sample',
+                         NormaliseBy='Monitor',
                          DarkCurrentWorkspace='scad',
                          EmptyContainerWorkspace='sc',
                          EmptyBeamWorkspace='smt',
@@ -180,11 +193,13 @@ class ILL_SANS_D22_MONO_TEST(systemtesting.MantidSystemTest):
         # Absorber
         SANSILLReduction(Runs='241238',
                          ProcessAs='DarkCurrent',
+                         NormaliseBy='Monitor',
                          OutputWorkspace='cad')
 
         # Beam
         SANSILLReduction(Runs='241226',
                          ProcessAs='EmptyBeam',
+                         NormaliseBy='Monitor',
                          DarkCurrentWorkspace='cad',
                          OutputWorkspace='mt',
                          OutputFluxWorkspace='fl')
@@ -197,6 +212,7 @@ class ILL_SANS_D22_MONO_TEST(systemtesting.MantidSystemTest):
         # Container
         SANSILLReduction(Runs='241239',
                          ProcessAs='EmptyContainer',
+                         NormaliseBy='Monitor',
                          DarkCurrentWorkspace='cad',
                          EmptyBeamWorkspace='mt',
                          TransmissionWorkspace='ctr',
@@ -210,6 +226,7 @@ class ILL_SANS_D22_MONO_TEST(systemtesting.MantidSystemTest):
         # Sample
         SANSILLReduction(Runs='241240',
                          ProcessAs='Sample',
+                         NormaliseBy='Monitor',
                          DarkCurrentWorkspace='cad',
                          EmptyBeamWorkspace='mt',
                          TransmissionWorkspace='str',
@@ -265,11 +282,13 @@ class ILL_SANS_D22_MULTISENS(systemtesting.MantidSystemTest):
         # Absorber
         SANSILLReduction(Runs='241238',
                          ProcessAs='DarkCurrent',
+                         NormaliseBy='Monitor',
                          OutputWorkspace='cad')
 
         # Beam
         SANSILLReduction(Runs='241226',
                          ProcessAs='EmptyBeam',
+                         NormaliseBy='Monitor',
                          DarkCurrentWorkspace='cad',
                          OutputWorkspace='mt',
                          OutputFluxWorkspace='fl')
@@ -282,6 +301,7 @@ class ILL_SANS_D22_MULTISENS(systemtesting.MantidSystemTest):
         # Container
         SANSILLReduction(Runs='241239',
                          ProcessAs='EmptyContainer',
+                         NormaliseBy='Monitor',
                          DarkCurrentWorkspace='cad',
                          EmptyBeamWorkspace='mt',
                          TransmissionWorkspace='ctr',
@@ -290,12 +310,14 @@ class ILL_SANS_D22_MULTISENS(systemtesting.MantidSystemTest):
         # Water Reference
         SANSILLReduction(Runs='344411',
                          ProcessAs='Water',
+                         NormaliseBy='Monitor',
                          MaskWorkspace='mask_central',
                          OutputWorkspace='ref1',
                          OutputSensitivityWorkspace='sens1')
 
         SANSILLReduction(Runs='344407',
                          ProcessAs='Water',
+                         NormaliseBy='Monitor',
                          MaskWorkspace='mask_offset',
                          OutputWorkspace='ref2',
                          OutputSensitivityWorkspace='sens2')
@@ -311,6 +333,7 @@ class ILL_SANS_D22_MULTISENS(systemtesting.MantidSystemTest):
         # Sample
         SANSILLReduction(Runs='241240',
                          ProcessAs='Sample',
+                         NormaliseBy='Monitor',
                          DarkCurrentWorkspace='cad',
                          EmptyBeamWorkspace='mt',
                          TransmissionWorkspace='str',
@@ -373,20 +396,24 @@ class ILL_SANS_D11B_MONO_TEST(systemtesting.MantidSystemTest):
         for i, cad in enumerate(cadmiums):
             SANSILLReduction(Runs=cad,
                              ProcessAs='DarkCurrent',
+                             NormaliseBy='Monitor',
                              OutputWorkspace=f'cad_{i}')
 
         SANSILLReduction(Runs=tr_beam,
                          ProcessAs='EmptyBeam',
+                         NormaliseBy='Monitor',
                          OutputWorkspace='trb',
                          OutputFluxWorkspace='trfl')
 
         SANSILLReduction(Runs=can_tr,
                          ProcessAs='Transmission',
+                         NormaliseBy='Monitor',
                          FluxWorkspace='trfl',
                          OutputWorkspace='ctr')
 
         SANSILLReduction(Runs=str,
                          ProcessAs='Transmission',
+                         NormaliseBy='Monitor',
                          EmptyBeamWorkspace='trb',
                          FluxWorkspace='trfl',
                          OutputWorkspace='str')
@@ -394,6 +421,7 @@ class ILL_SANS_D11B_MONO_TEST(systemtesting.MantidSystemTest):
         for i, mt in enumerate(empty_beams):
             SANSILLReduction(Runs=mt,
                              ProcessAs='EmptyBeam',
+                             NormaliseBy='Monitor',
                              DarkCurrentWorkspace=f'cad_{i}',
                              OutputWorkspace=f'mt_{i}',
                              OutputFluxWorkspace=f'fl_{i}')
@@ -401,6 +429,7 @@ class ILL_SANS_D11B_MONO_TEST(systemtesting.MantidSystemTest):
         for i, can in enumerate(cans):
             SANSILLReduction(Runs=can,
                              ProcessAs='EmptyContainer',
+                             NormaliseBy='Monitor',
                              TransmissionWorkspace='ctr',
                              DarkCurrentWorkspace=f'cad_{i}',
                              EmptyBeamWorkspace=f'mt_{i}',
@@ -409,6 +438,7 @@ class ILL_SANS_D11B_MONO_TEST(systemtesting.MantidSystemTest):
         for i, wat in enumerate(water):
             SANSILLReduction(Runs=wat,
                              ProcessAs='Water',
+                             NormaliseBy='Monitor',
                              DefaultMaskWorkspace=edge_mask,
                              MaskWorkspace=masks[i],
                              DarkCurrentWorkspace=f'cad_{i}',
@@ -465,16 +495,19 @@ class ILL_SANS_D22B_MONO_TEST(systemtesting.MantidSystemTest):
 
         SANSILLReduction(Runs='51690+51704',
                          ProcessAs='DarkCurrent',
+                         NormaliseBy='Monitor',
                          OutputWorkspace='cad')
 
         SANSILLReduction(Runs='51701',
                          ProcessAs='EmptyBeam',
+                         NormaliseBy='Monitor',
                          DarkCurrentWorkspace='cad',
                          OutputFluxWorkspace='fl',
                          OutputWorkspace='mt')
 
         SANSILLReduction(Runs='51703',
                          ProcessAs='Transmission',
+                         NormaliseBy='Monitor',
                          DarkCurrentWorkspace='cad',
                          FluxWorkspace='fl',
                          OutputWorkspace='ctr')
@@ -488,6 +521,7 @@ class ILL_SANS_D22B_MONO_TEST(systemtesting.MantidSystemTest):
 
         SANSILLReduction(Runs='51702',
                          ProcessAs='Transmission',
+                         NormaliseBy='Monitor',
                          DarkCurrentWorkspace='cad',
                          FluxWorkspace='fl',
                          OutputWorkspace='wtr')
@@ -495,6 +529,7 @@ class ILL_SANS_D22B_MONO_TEST(systemtesting.MantidSystemTest):
         #Empty beam for flux calculation
         SANSILLReduction(Runs='51644',
                          ProcessAs='EmptyBeam',
+                         NormaliseBy='Monitor',
                          DarkCurrentWorkspace='cad',
                          OutputFluxWorkspace='chfl',
                          OutputWorkspace='mtfl')
@@ -504,6 +539,7 @@ class ILL_SANS_D22B_MONO_TEST(systemtesting.MantidSystemTest):
         # adding that obviously brings the scale down to a wrong level
         SANSILLReduction(Runs='51726+51692+51723',
                          ProcessAs='Water',
+                         NormaliseBy='Monitor',
                          MaskWorkspace='bs_mask',
                          DefaultMaskWorkspace='edge_mask',
                          DarkCurrentWorkspace='cad',

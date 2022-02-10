@@ -58,6 +58,7 @@ class ILL_SANS_D11B_MONO_MULTI_TEST(systemtesting.MantidSystemTest):
                             SampleRunsD2=samplesD2,
                             SampleRunsD3=samplesD3,
                             SampleTrRunsW1=sampleTrs,
+                            NormaliseBy='Monitor',
                             EmptyBeamRuns=','.join(empty_beams),
                             DarkCurrentRuns=','.join(cadmiums),
                             TrEmptyBeamRuns=tr_beam,

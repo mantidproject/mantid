@@ -94,8 +94,9 @@ class SANSILLReduction(PythonAlgorithm):
         water_solvent_sample = EnabledWhenProperty(solvent_sample, water, LogicOperator.Or)
         can_water_solvent_sample = EnabledWhenProperty(water_solvent_sample, container, LogicOperator.Or)
 
+        # most of D33 data has 0 monitor counts, so normalise by time is a better universal default
         self.declareProperty(name='NormaliseBy',
-                             defaultValue='Monitor',
+                             defaultValue='Time',
                              validator=StringListValidator(['None', 'Time', 'Monitor']),
                              doc='Choose the normalisation type.')
 
@@ -262,6 +263,18 @@ class SANSILLReduction(PythonAlgorithm):
             if self.process != 'Sample' and self.process != 'Transmission':
                 raise RuntimeError('Only the sample and transmission can be kinetic measurements, the calibration measurements cannot.')
 
+    def check_zero_monitor(self, mon_ws):
+        '''
+        Throws an error, if the sum of monitor spectra is not strictly positive.
+        Logs an error, if there is a bin in monitor spectra that is not strictly positive.
+        '''
+        if np.sum(mtd[mon_ws].readY(0)) <= 0:
+            raise RuntimeError('Normalise by monitor requested, \
+                                but the monitor spectrum has no positive counts, please switch to time normalization.')
+        if np.any(mtd[mon_ws].readY(0) <= 0):
+            self.log().error('Some bins in the monitor spectra have no positive counts, \
+                              please check the monitor data, or switch to time normalization.')
+
     #==============================METHODS TO APPLY CORRECTIONS==============================#
 
     def apply_normalisation(self, ws):
@@ -272,10 +285,11 @@ class SANSILLReduction(PythonAlgorithm):
                 mon = ws + '_mon'
                 mon_ws_index = mtd[ws].getNumberHistograms() + real_monitor_ws_neg_index(self.instrument)
                 ExtractSpectra(InputWorkspace=ws, WorkspaceIndexList=mon_ws_index, OutputWorkspace=mon)
+                self.check_zero_monitor(mon)
                 Divide(LHSWorkspace=ws, RHSWorkspace=mon, OutputWorkspace=ws, WarnOnZeroDivide=False)
                 DeleteWorkspace(mon)
             elif normalise_by == 'Time':
-                # the durations are stored in the second monitor
+                # the durations are stored in the second monitor, after preprocessing step
                 mon = ws + '_duration'
                 mon_ws_index = mtd[ws].getNumberHistograms() + blank_monitor_ws_neg_index(self.instrument)
                 ExtractSpectra(InputWorkspace=ws, WorkspaceIndexList=mon_ws_index, OutputWorkspace=mon)
@@ -289,6 +303,7 @@ class SANSILLReduction(PythonAlgorithm):
                 ExtractSpectra(InputWorkspace=ws, WorkspaceIndexList=mon_ws_index, OutputWorkspace=mon)
                 self.broadcast_tof(ws, mon)
                 RebinToWorkspace(WorkspaceToMatch=ws, WorkspaceToRebin=mon, OutputWorkspace=mon)
+                self.check_zero_monitor(mon)
                 Divide(LHSWorkspace=ws, RHSWorkspace=mon, OutputWorkspace=ws, WarnOnZeroDivide=False)
                 DeleteWorkspace(mon)
             elif normalise_by == 'Time':
