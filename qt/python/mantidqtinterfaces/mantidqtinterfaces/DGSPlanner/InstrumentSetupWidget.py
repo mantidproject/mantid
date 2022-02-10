@@ -261,7 +261,8 @@ class InstrumentSetupWidget(QtWidgets.QWidget):
         #plot directions
         if self.gonfig is not None:
             self.gonfig.clear()
-        self.gonfig = Axes3D(self.figure)
+        self.gonfig = Axes3D(self.figure, auto_add_to_figure=False)
+        self.figure.add_axes(self.gonfig)
         if LooseVersion('2.1.0') > LooseVersion(matplotlib.__version__):
             self.gonfig.hold(True) # hold is deprecated since 2.1.0, true by default
         self.gonfig.set_frame_on(False)
