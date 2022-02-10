@@ -71,6 +71,7 @@ Projection3D::Projection3D(const InstrumentActor *rootActor, QSize viewportSize)
   connect(moveController, SIGNAL(zoom(int, int)), this, SLOT(zoom(int, int)));
   connect(moveController, SIGNAL(wheelZoom(int, int, int)), this, SLOT(wheelZoom(int, int, int)));
   connect(moveController, SIGNAL(finish()), this, SLOT(finishMove()));
+  connect(moveController, SIGNAL(touchPointAt(int, int)), this, SLOT(touchComponentAt(int, int)));
 }
 
 /**

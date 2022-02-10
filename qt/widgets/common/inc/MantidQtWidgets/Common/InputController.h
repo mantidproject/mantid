@@ -8,6 +8,7 @@
 
 #include "DllOption.h"
 #include <QColor>
+#include <QMouseEvent>
 #include <QObject>
 #include <QPolygonF>
 #include <QRect>
@@ -40,7 +41,7 @@ public:
   ~InputController() override {}
 
   virtual void mousePressEvent(QMouseEvent * /*unused*/) {}
-  virtual void mouseMoveEvent(QMouseEvent * /*unused*/) {}
+  virtual void mouseMoveEvent(QMouseEvent *event) { emit touchPointAt(event->x(), event->y()); }
   virtual void mouseReleaseEvent(QMouseEvent * /*unused*/) {}
   virtual void wheelEvent(QWheelEvent * /*unused*/) {}
   virtual void keyPressEvent(QKeyEvent * /*unused*/) {}
@@ -64,6 +65,7 @@ public:
 signals:
   void enabled();
   void disabled();
+  void touchPointAt(int /*_t1*/, int /*_t2*/);
 
 private:
   bool m_canShowContextMenu;

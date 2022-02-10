@@ -86,6 +86,7 @@ ProjectionSurface::ProjectionSurface(const InstrumentActor *rootActor)
   connect(drawController, SIGNAL(finishSelection(QRect)), this, SIGNAL(shapeChangeFinished()));
   connect(drawController, SIGNAL(copySelectedShapes()), &m_maskShapes, SLOT(copySelectedShapes()));
   connect(drawController, SIGNAL(pasteCopiedShapes()), &m_maskShapes, SLOT(pasteCopiedShapes()));
+  connect(drawController, SIGNAL(touchPointAt(int, int)), this, SLOT(touchComponentAt(int, int)));
 
   InputControllerDrawAndErase *freeDrawController = new InputControllerDrawAndErase(this);
   setInputController(DrawFreeMode, freeDrawController);
@@ -95,24 +96,28 @@ ProjectionSurface::ProjectionSurface(const InstrumentActor *rootActor)
           SLOT(addFreeShape(const QPolygonF &, QColor, QColor)));
   connect(freeDrawController, SIGNAL(draw(const QPolygonF &)), &m_maskShapes, SLOT(drawFree(const QPolygonF &)));
   connect(freeDrawController, SIGNAL(erase(const QPolygonF &)), &m_maskShapes, SLOT(eraseFree(const QPolygonF &)));
+  connect(freeDrawController, SIGNAL(touchPointAt(int, int)), this, SLOT(touchComponentAt(int, int)));
 
   // create and connect the peak eraser controller
   auto eraseIcon = new QPixmap(":/PickTools/eraser.png");
   InputControllerSelection *eraseController = new InputControllerSelection(this, eraseIcon);
   setInputController(ErasePeakMode, eraseController);
   connect(eraseController, SIGNAL(selection(QRect)), this, SLOT(erasePeaks(QRect)));
+  connect(eraseController, SIGNAL(touchPointAt(int, int)), this, SLOT(touchComponentAt(int, int)));
 
   // create and connect the peak compare controller
   auto selectIcon = new QPixmap(":/PickTools/selection-pointer.png");
   InputControllerSelection *compareController = new InputControllerSelection(this, selectIcon);
   setInputController(ComparePeakMode, compareController);
   connect(compareController, SIGNAL(selection(QRect)), this, SLOT(comparePeaks(QRect)));
+  connect(compareController, SIGNAL(touchPointAt(int, int)), this, SLOT(touchComponentAt(int, int)));
 
   // create and connect the peak alignment controller
   auto alignIcon = new QPixmap(":/PickTools/selection-pointer.png");
   InputControllerSelection *alignController = new InputControllerSelection(this, alignIcon);
   setInputController(AlignPeakMode, alignController);
   connect(alignController, SIGNAL(selection(QRect)), this, SLOT(alignPeaks(QRect)));
+  connect(alignController, SIGNAL(touchPointAt(int, int)), this, SLOT(touchComponentAt(int, int)));
 }
 
 ProjectionSurface::~ProjectionSurface() {
