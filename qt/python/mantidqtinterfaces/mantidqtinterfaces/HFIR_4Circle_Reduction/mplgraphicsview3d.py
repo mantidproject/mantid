@@ -36,7 +36,8 @@ class MplPlot3dCanvas(FigureCanvas):
         FigureCanvas.updateGeometry(self)
 
         # Axes
-        self._myAxes = Axes3D(self._myFigure)  # Canvas figure must be created for mouse rotation
+        self._myAxes = Axes3D(self._myFigure, auto_add_to_figure=False)  # Canvas figure must be created for mouse rotation
+        self._myFigure.add_axes(self._myAxes)
         self.format_coord_org = self._myAxes.format_coord
         self._myAxes.format_coord = self.report_pixel
 
