@@ -18,9 +18,11 @@
 #include "MantidAPI/IPeaksWorkspace.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidGeometry/IDetector.h"
+#include "MantidGeometry/Instrument/ComponentInfo.h"
 #include "MantidGeometry/Objects/CSGObject.h"
 #include "MantidKernel/Unit.h"
 
+#include <QCursor>
 #include <QMenu>
 #include <QMessageBox>
 #include <QMouseEvent>
@@ -29,6 +31,7 @@
 #include <QSet>
 
 #include "MantidKernel/V3D.h"
+#include <QToolTip>
 #include <algorithm>
 #include <cfloat>
 #include <cmath>
@@ -804,6 +807,18 @@ void ProjectionSurface::pickComponentAt(int x, int y) {
 
 void ProjectionSurface::touchComponentAt(int x, int y) {
   size_t pickID = getPickID(x, y);
+  const auto &componentInfo = m_instrActor->componentInfo();
+
+  if (componentInfo.isDetector(pickID)) {
+    QString text;
+
+    text += "Detector: " + QString::fromStdString(componentInfo.name(pickID)) + '\n';
+
+    const double integrated = m_instrActor->getIntegratedCounts(pickID);
+    const QString counts = integrated == InstrumentActor::INVALID_VALUE ? "N/A" : QString::number(integrated);
+    text += "Counts: " + counts;
+    QToolTip::showText(QCursor::pos(), text);
+  }
   emit singleComponentTouched(pickID);
 }
 
