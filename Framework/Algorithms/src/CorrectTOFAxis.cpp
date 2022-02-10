@@ -311,11 +311,11 @@ void CorrectTOFAxis::useReferenceWorkspace(const API::MatrixWorkspace_sptr &outp
   const auto histogramCount = static_cast<int64_t>(m_referenceWs->getNumberHistograms());
   PARALLEL_FOR_IF(threadSafe(*m_referenceWs, *outputWs))
   for (int64_t i = 0; i < histogramCount; ++i) {
-    PARALLEL_START_INTERUPT_REGION
+    PARALLEL_START_INTERRUPT_REGION
     std::copy(m_referenceWs->x(i).cbegin(), m_referenceWs->x(i).cend(), outputWs->mutableX(i).begin());
-    PARALLEL_END_INTERUPT_REGION
+    PARALLEL_END_INTERRUPT_REGION
   }
-  PARALLEL_CHECK_INTERUPT_REGION
+  PARALLEL_CHECK_INTERRUPT_REGION
   if (outputWs->run().hasProperty(SampleLog::INCIDENT_ENERGY)) {
     outputWs->mutableRun()
         .getProperty(SampleLog::INCIDENT_ENERGY)
@@ -366,11 +366,11 @@ void CorrectTOFAxis::correctManually(const API::MatrixWorkspace_sptr &outputWs) 
   const auto histogramCount = static_cast<int64_t>(m_inputWs->getNumberHistograms());
   PARALLEL_FOR_IF(threadSafe(*m_inputWs, *outputWs))
   for (int64_t i = 0; i < histogramCount; ++i) {
-    PARALLEL_START_INTERUPT_REGION
+    PARALLEL_START_INTERRUPT_REGION
     outputWs->mutableX(i) += shift;
-    PARALLEL_END_INTERUPT_REGION
+    PARALLEL_END_INTERRUPT_REGION
   }
-  PARALLEL_CHECK_INTERUPT_REGION
+  PARALLEL_CHECK_INTERRUPT_REGION
 }
 
 /** Calculates the average L2 distance between the sample and given
@@ -391,7 +391,7 @@ void CorrectTOFAxis::averageL2AndEPP(const API::SpectrumInfo &spectrumInfo, doub
   PRAGMA_OMP(parallel for if (m_eppTable->threadSafe())
              reduction(+: n, l2Sum, eppSum))
   for (int64_t i = 0; i < indexCount; ++i) {
-    PARALLEL_START_INTERUPT_REGION
+    PARALLEL_START_INTERRUPT_REGION
     const size_t index = m_workspaceIndices[i];
     interruption_point();
     if (fitStatusColumn->cell<std::string>(index) == EPPTableLiterals::FIT_STATUS_SUCCESS) {
@@ -408,9 +408,9 @@ void CorrectTOFAxis::averageL2AndEPP(const API::SpectrumInfo &spectrumInfo, doub
     } else {
       g_log.debug() << "Excluding detector with unsuccessful fit at workspace index " << index << ".\n";
     }
-    PARALLEL_END_INTERUPT_REGION
+    PARALLEL_END_INTERRUPT_REGION
   }
-  PARALLEL_CHECK_INTERUPT_REGION
+  PARALLEL_CHECK_INTERRUPT_REGION
   if (n == 0) {
     throw std::runtime_error("No successful detector fits found in " + PropertyNames::EPP_TABLE);
   }
@@ -426,7 +426,7 @@ double CorrectTOFAxis::averageL2(const API::SpectrumInfo &spectrumInfo) {
   const auto indexCount = static_cast<int64_t>(m_workspaceIndices.size());
   PRAGMA_OMP(parallel for reduction(+: n, l2Sum))
   for (int64_t i = 0; i < indexCount; ++i) {
-    PARALLEL_START_INTERUPT_REGION
+    PARALLEL_START_INTERRUPT_REGION
     const size_t index = m_workspaceIndices[i];
     interruption_point();
     if (!spectrumInfo.isMasked(index)) {
@@ -436,9 +436,9 @@ double CorrectTOFAxis::averageL2(const API::SpectrumInfo &spectrumInfo) {
     } else {
       g_log.debug() << "Excluding masked workspace index " << index << ".\n";
     }
-    PARALLEL_END_INTERUPT_REGION
+    PARALLEL_END_INTERRUPT_REGION
   }
-  PARALLEL_CHECK_INTERUPT_REGION
+  PARALLEL_CHECK_INTERRUPT_REGION
   if (n == 0) {
     throw std::runtime_error("No unmasked detectors found in " + PropertyNames::REFERENCE_SPECTRA);
   }

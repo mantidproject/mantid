@@ -23,13 +23,13 @@ one over the spectra in a workspace) is as follows:
      PARALLEL_FOR_IF(Kernel::threadSafe(*inputWS, *outputWS))
      for (int i = 0; i < numSpec; ++i)
      {
-       PARALLEL_START_INTERUPT_REGION
+       PARALLEL_START_INTERRUPT_REGION
 
        // .... algorithm code ....
 
-       PARALLEL_END_INTERUPT_REGION
+       PARALLEL_END_INTERRUPT_REGION
      }
-     PARALLEL_CHECK_INTERUPT_REGION
+     PARALLEL_CHECK_INTERRUPT_REGION
 
 
 The main work is in the first statement, which contains the

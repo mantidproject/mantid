@@ -64,7 +64,7 @@ void XDataConverter::exec() {
   Progress prog(this, 0.0, 1.0, numSpectra);
   PARALLEL_FOR_IF(Kernel::threadSafe(*inputWS, *outputWS))
   for (int i = 0; i < int(numSpectra); ++i) {
-    PARALLEL_START_INTERUPT_REGION
+    PARALLEL_START_INTERRUPT_REGION
 
     // Copy over the Y and E data
     outputWS->setSharedY(i, inputWS->sharedY(i));
@@ -75,9 +75,9 @@ void XDataConverter::exec() {
     }
     prog.report();
 
-    PARALLEL_END_INTERUPT_REGION
+    PARALLEL_END_INTERRUPT_REGION
   }
-  PARALLEL_CHECK_INTERUPT_REGION
+  PARALLEL_CHECK_INTERRUPT_REGION
 
   // Store the output
   setProperty("OutputWorkspace", outputWS);

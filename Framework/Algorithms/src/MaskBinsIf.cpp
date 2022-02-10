@@ -96,7 +96,7 @@ void MaskBinsIf::exec() {
   auto progress = std::make_unique<Progress>(this, 0., 1., numberHistograms);
   PARALLEL_FOR_IF(Mantid::Kernel::threadSafe(*outputWorkspace))
   for (int64_t index = 0; index < numberHistograms; ++index) {
-    PARALLEL_START_INTERUPT_REGION
+    PARALLEL_START_INTERRUPT_REGION
     double y, e, x, dx;
     double s = spectrumOrNumeric ? verticalAxis->getValue(index) : 0.;
     mu::Parser parser = makeParser(y, e, x, dx, s, criterion);
@@ -113,9 +113,9 @@ void MaskBinsIf::exec() {
       }
     }
     progress->report();
-    PARALLEL_END_INTERUPT_REGION
+    PARALLEL_END_INTERRUPT_REGION
   }
-  PARALLEL_CHECK_INTERUPT_REGION
+  PARALLEL_CHECK_INTERRUPT_REGION
   setProperty("OutputWorkspace", outputWorkspace);
 }
 
