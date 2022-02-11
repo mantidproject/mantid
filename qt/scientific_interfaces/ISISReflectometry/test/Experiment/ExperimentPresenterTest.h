@@ -360,7 +360,7 @@ public:
     presenter.notifyLookupRowChanged(row, column);
 
     // Check the model contains the per-theta defaults returned by the view
-    auto const lookupTable = presenter.experiment().lookupTable();
+    auto const lookupTable = presenter.experiment().lookupTableRows();
     TS_ASSERT_EQUALS(lookupTable.size(), 2);
     TS_ASSERT_EQUALS(lookupTable[0], defaultsWithFirstAngle());
     TS_ASSERT_EQUALS(lookupTable[1], defaultsWithSecondAngle());
@@ -578,8 +578,8 @@ public:
     presenter.notifyInstrumentChanged("POLREF");
     auto expected = LookupRow(boost::none, boost::none, TransmissionRunPair(), boost::none, RangeInQ(0.01, 0.03, 0.2),
                               0.7, std::string("390-415"), std::string("370-389,416-430"));
-    TS_ASSERT_EQUALS(presenter.experiment().lookupTable().size(), 1);
-    TS_ASSERT_EQUALS(presenter.experiment().lookupTable().front(), expected);
+    TS_ASSERT_EQUALS(presenter.experiment().lookupTableRows().size(), 1);
+    TS_ASSERT_EQUALS(presenter.experiment().lookupTableRows().front(), expected);
     verifyAndClear();
   }
 
@@ -687,7 +687,7 @@ private:
 
   Experiment makeModelWithLookupRow(LookupRow lookupRow) {
     auto lookupTable = LookupTable();
-    lookupTable.emplace_back(std::move(lookupRow));
+    lookupTable.rows.emplace_back(std::move(lookupRow));
     return Experiment(AnalysisMode::PointDetector, ReductionType::Normal, SummationType::SumInLambda, false, false,
                       BackgroundSubtraction(), makeEmptyPolarizationCorrections(), makeFloodCorrections(),
                       makeEmptyTransmissionStitchOptions(), makeEmptyStitchOptions(), std::move(lookupTable));

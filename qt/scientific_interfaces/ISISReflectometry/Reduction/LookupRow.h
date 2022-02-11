@@ -87,7 +87,27 @@ MANTIDQT_ISISREFLECTOMETRY_DLL bool operator==(LookupRow const &lhs, LookupRow c
 MANTIDQT_ISISREFLECTOMETRY_DLL bool operator!=(LookupRow const &lhs, LookupRow const &rhs);
 LookupRow::ValueArray lookupRowToArray(LookupRow const &lookupRow);
 
-using LookupTable = std::vector<LookupRow>;
+// TODO merge this class with LookupRowFinder
+class MANTIDQT_ISISREFLECTOMETRY_DLL LookupTable {
+public:
+  LookupTable() = default;
+  LookupTable(std::vector<LookupRow> rowsIn) : rows(std::move(rowsIn)) {}
+  LookupTable(std::initializer_list<LookupRow> rowsIn) : rows(rowsIn) {}
+
+  std::vector<LookupRow::ValueArray> toValueArray() const {
+    auto result = std::vector<LookupRow::ValueArray>();
+    std::transform(rows.cbegin(), rows.cend(), std::back_inserter(result),
+                   [](auto const &lookupRow) { return lookupRowToArray(lookupRow); });
+    return result;
+  };
+
+  bool operator==(LookupTable const &rhs) const noexcept { return this->rows == rhs.rows; }
+
+  bool operator!=(LookupTable const &rhs) const noexcept { return !((*this) == rhs); }
+
+  std::vector<LookupRow> rows;
+};
+
 } // namespace ISISReflectometry
 } // namespace CustomInterfaces
 } // namespace MantidQt

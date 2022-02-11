@@ -51,7 +51,7 @@ public:
   TransmissionStitchOptions transmissionStitchOptions() const;
   std::map<std::string, std::string> stitchParameters() const;
   std::string stitchParametersString() const;
-  LookupTable const &lookupTable() const;
+  std::vector<LookupRow> const &lookupTableRows() const;
   std::vector<LookupRow::ValueArray> lookupTableToArray() const;
 
   boost::optional<LookupRow> findLookupRow(Row const &row, double tolerance) const;
@@ -71,10 +71,10 @@ private:
 
   std::map<std::string, std::string> m_stitchParameters;
   LookupTable m_lookupTable;
-};
 
-MANTIDQT_ISISREFLECTOMETRY_DLL bool operator==(Experiment const &lhs, Experiment const &rhs);
-MANTIDQT_ISISREFLECTOMETRY_DLL bool operator!=(Experiment const &lhs, Experiment const &rhs);
+  friend bool operator==(Experiment const &lhs, Experiment const &rhs);
+  friend bool operator!=(Experiment const &lhs, Experiment const &rhs);
+};
 } // namespace ISISReflectometry
 } // namespace CustomInterfaces
 } // namespace MantidQt

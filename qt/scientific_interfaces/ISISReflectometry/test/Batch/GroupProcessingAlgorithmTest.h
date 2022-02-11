@@ -79,11 +79,12 @@ public:
   }
 
   void testLookupRowQResolutionUsedForParamsIfStitchingOptionsEmpty() {
+    auto lookupTable = makeLookupTableWithTwoAnglesAndWildcard();
     auto experiment =
         Experiment(AnalysisMode::PointDetector, ReductionType::Normal, SummationType::SumInLambda, false, false,
                    BackgroundSubtraction(), PolarizationCorrections(PolarizationCorrectionType::None),
                    FloodCorrections(FloodCorrectionType::Workspace), TransmissionStitchOptions(),
-                   std::map<std::string, std::string>(), makeLookupTableWithTwoAnglesAndWildcard());
+                   std::map<std::string, std::string>(), std::move(lookupTable));
     auto model = Batch(experiment, m_instrument, m_runsTable, m_slicing);
     auto group = makeGroupWithTwoRows();
     auto result = createAlgorithmRuntimeProps(model, group);

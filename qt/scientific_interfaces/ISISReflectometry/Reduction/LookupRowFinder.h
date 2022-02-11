@@ -18,7 +18,7 @@ class Row;
 
 class MANTIDQT_ISISREFLECTOMETRY_DLL LookupRowFinder {
 public:
-  LookupRowFinder(LookupTable const &);
+  explicit LookupRowFinder(LookupTable const &);
 
   boost::optional<LookupRow> operator()(Row const &row, double tolerance) const;
   boost::optional<LookupRow> findWildcardLookupRow() const;

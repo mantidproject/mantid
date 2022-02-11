@@ -82,21 +82,21 @@ public:
 
   void test_searching_by_theta_and_title_found() {
     auto constexpr angle = 2.3;
-    auto table = LookupTable{ModelCreationHelper::makeLookupRow(angle, boost::regex("Ay")),
-                             ModelCreationHelper::makeLookupRow(angle, boost::regex("El"))};
+    auto expectedLookupRow = ModelCreationHelper::makeLookupRow(angle, boost::regex("El"));
+    auto table = LookupTable{ModelCreationHelper::makeLookupRow(angle, boost::regex("Ay")), expectedLookupRow};
 
     LookupRowFinder findLookupRow(table);
     auto group = Group("El Em En Oh", {ModelCreationHelper::makeRow(angle)});
     const auto foundLookupRow = findLookupRow(*group[0], m_exactMatchTolerance);
     TS_ASSERT(foundLookupRow)
     if (foundLookupRow)
-      TS_ASSERT_EQUALS(*foundLookupRow, table[1])
+      TS_ASSERT_EQUALS(*foundLookupRow, expectedLookupRow)
   }
 
   void test_searching_by_theta_and_title_found_with_wildcard_present() {
     auto constexpr angle = 2.3;
-    auto table = LookupTable{ModelCreationHelper::makeLookupRow(angle, boost::regex("Ay")),
-                             ModelCreationHelper::makeLookupRow(angle, boost::regex("El")),
+    auto expectedLookupRow = ModelCreationHelper::makeLookupRow(angle, boost::regex("El"));
+    auto table = LookupTable{ModelCreationHelper::makeLookupRow(angle, boost::regex("Ay")), expectedLookupRow,
                              ModelCreationHelper::makeWildcardLookupRow()};
 
     LookupRowFinder findLookupRow(table);
@@ -104,7 +104,7 @@ public:
     const auto foundLookupRow = findLookupRow(*group[0], m_exactMatchTolerance);
     TS_ASSERT(foundLookupRow)
     if (foundLookupRow)
-      TS_ASSERT_EQUALS(*foundLookupRow, table[1])
+      TS_ASSERT_EQUALS(*foundLookupRow, expectedLookupRow)
   }
 
   void test_searching_by_theta_found_but_title_not_found_returns_none() {

@@ -62,7 +62,7 @@ boost::optional<LookupRow> LookupRowFinder::searchByTheta(std::vector<LookupRow>
 
 std::vector<LookupRow> LookupRowFinder::findMatchingRegexes(std::string const &title) const {
   auto results = std::vector<LookupRow>();
-  std::copy_if(m_lookupTable.cbegin(), m_lookupTable.cend(), std::back_inserter(results),
+  std::copy_if(m_lookupTable.rows.cbegin(), m_lookupTable.rows.cend(), std::back_inserter(results),
                [&title](auto const &candidate) {
                  return candidate.titleMatcher() && boost::regex_search(title, candidate.titleMatcher().get());
                });
@@ -71,7 +71,7 @@ std::vector<LookupRow> LookupRowFinder::findMatchingRegexes(std::string const &t
 
 std::vector<LookupRow> LookupRowFinder::findEmptyRegexes() const {
   auto results = std::vector<LookupRow>();
-  std::copy_if(m_lookupTable.cbegin(), m_lookupTable.cend(), std::back_inserter(results),
+  std::copy_if(m_lookupTable.rows.cbegin(), m_lookupTable.rows.cend(), std::back_inserter(results),
                [](auto const &candidate) { return !candidate.titleMatcher(); });
   return results;
 }
@@ -79,7 +79,7 @@ std::vector<LookupRow> LookupRowFinder::findEmptyRegexes() const {
 std::vector<LookupRow> LookupRowFinder::searchByTitle(Row const &row) const {
   if (!row.getParent() || row.getParent()->name().empty()) {
     // No titles for us to check against, so skip filtering
-    return m_lookupTable;
+    return m_lookupTable.rows;
   }
 
   auto const &title = row.getParent()->name();
@@ -88,9 +88,9 @@ std::vector<LookupRow> LookupRowFinder::searchByTitle(Row const &row) const {
 }
 
 boost::optional<LookupRow> LookupRowFinder::findWildcardLookupRow() const {
-  auto match = std::find_if(m_lookupTable.cbegin(), m_lookupTable.cend(),
+  auto match = std::find_if(m_lookupTable.rows.cbegin(), m_lookupTable.rows.cend(),
                             [](LookupRow const &candidate) -> bool { return candidate.isWildcard(); });
-  if (match == m_lookupTable.cend())
+  if (match == m_lookupTable.rows.cend())
     return boost::none;
   else
     return *match;

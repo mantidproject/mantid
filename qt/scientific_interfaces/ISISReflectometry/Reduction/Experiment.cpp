@@ -55,14 +55,9 @@ std::string Experiment::stitchParametersString() const {
   return MantidQt::MantidWidgets::optionsToString(m_stitchParameters);
 }
 
-LookupTable const &Experiment::lookupTable() const { return m_lookupTable; }
+std::vector<LookupRow> const &Experiment::lookupTableRows() const { return m_lookupTable.rows; }
 
-std::vector<LookupRow::ValueArray> Experiment::lookupTableToArray() const {
-  auto result = std::vector<LookupRow::ValueArray>();
-  for (auto const &lookupRow : m_lookupTable)
-    result.emplace_back(lookupRowToArray(lookupRow));
-  return result;
-}
+std::vector<LookupRow::ValueArray> Experiment::lookupTableToArray() const { return m_lookupTable.toValueArray(); }
 
 boost::optional<LookupRow> Experiment::findLookupRow(Row const &row, double tolerance) const {
   LookupRowFinder findLookupRow(m_lookupTable);
@@ -83,6 +78,6 @@ bool operator==(Experiment const &lhs, Experiment const &rhs) {
          lhs.polarizationCorrections() == rhs.polarizationCorrections() &&
          lhs.floodCorrections() == rhs.floodCorrections() &&
          lhs.transmissionStitchOptions() == rhs.transmissionStitchOptions() &&
-         lhs.stitchParameters() == rhs.stitchParameters() && lhs.lookupTable() == rhs.lookupTable();
+         lhs.stitchParameters() == rhs.stitchParameters() && lhs.m_lookupTable == rhs.m_lookupTable;
 }
 } // namespace MantidQt::CustomInterfaces::ISISReflectometry

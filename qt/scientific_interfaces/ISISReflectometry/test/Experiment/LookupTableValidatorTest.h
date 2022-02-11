@@ -187,7 +187,7 @@ private:
     return errors;
   }
 
-  LookupTable runTestValid(const Table &table) {
+  std::vector<LookupRow> runTestValid(const Table &table) {
     LookupTableValidator validator;
     auto result = validator(table, TOLERANCE);
     TS_ASSERT(result.isValid());
