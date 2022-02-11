@@ -6,7 +6,10 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 
 #include "LookupRowFinder.h"
+#include <boost/optional.hpp>
+#include <boost/regex.hpp>
 #include <cmath>
+#include <vector>
 
 namespace {
 constexpr double EPSILON = std::numeric_limits<double>::epsilon();
@@ -18,11 +21,16 @@ bool equalWithinTolerance(double val1, double val2, double tolerance) {
 
 namespace MantidQt::CustomInterfaces::ISISReflectometry {
 
-LookupRowFinder::LookupRowFinder(const LookupTable &table) : m_lookupTable(table) {}
+LookupRowFinder::LookupRowFinder(LookupTable const &table) : m_lookupTable(table) {}
 
-LookupRow const *LookupRowFinder::operator()(const boost::optional<double> &thetaAngle, double tolerance) const {
+// TODO pass in row rather than unpacking at call-site
+boost::optional<LookupRow> LookupRowFinder::operator()(boost::optional<double> const &thetaAngle, double tolerance,
+                                                       std::string const &title) const {
   if (thetaAngle) {
-    if (const auto *found = searchByTheta(thetaAngle, tolerance)) {
+    // First filter lookup rows by title, if the run has one
+    auto lookupRows = title.empty() ? m_lookupTable : searchByTitle(title);
+    // Now filter by angle; it should be unique
+    if (auto found = searchByTheta(lookupRows, thetaAngle, tolerance)) {
       return found;
     }
   }
@@ -30,18 +38,54 @@ LookupRow const *LookupRowFinder::operator()(const boost::optional<double> &thet
   return searchForWildcard();
 }
 
-LookupRow const *LookupRowFinder::searchByTheta(const boost::optional<double> &thetaAngle, double tolerance) const {
-  auto match = std::find_if(
-      m_lookupTable.cbegin(), m_lookupTable.cend(), [thetaAngle, tolerance](LookupRow const &candiate) -> bool {
+boost::optional<LookupRow> LookupRowFinder::searchByTheta(std::vector<LookupRow> lookupRows,
+                                                          boost::optional<double> const &thetaAngle,
+                                                          double tolerance) const {
+  // TODO We may get multiple matches if the title matches multiple regexes. If one regex is empty then we
+  // can discard it. If we get multiple non-empty regex matches it is an error.
+  auto match =
+      std::find_if(lookupRows.cbegin(), lookupRows.cend(), [thetaAngle, tolerance](LookupRow const &candiate) -> bool {
         return !candiate.isWildcard() && equalWithinTolerance(*thetaAngle, candiate.thetaOrWildcard().get(), tolerance);
       });
-  return match == m_lookupTable.cend() ? nullptr : &(*match);
+  if (match == lookupRows.cend())
+    return boost::none;
+  else
+    return *match;
 }
 
-LookupRow const *LookupRowFinder::searchForWildcard() const {
+std::vector<LookupRow> LookupRowFinder::findMatchingRegexes(std::string const &title) const {
+  auto results = std::vector<LookupRow>();
+  std::copy_if(m_lookupTable.cbegin(), m_lookupTable.cend(), std::back_inserter(results),
+               [&title](auto const &candidate) {
+                 return candidate.titleMatcher() && boost::regex_search(title, candidate.titleMatcher().get());
+               });
+  return results;
+}
+
+std::vector<LookupRow> LookupRowFinder::findEmptyRegexes() const {
+  auto results = std::vector<LookupRow>();
+  std::copy_if(m_lookupTable.cbegin(), m_lookupTable.cend(), std::back_inserter(results),
+               [](auto const &candidate) { return !candidate.titleMatcher(); });
+  return results;
+}
+
+std::vector<LookupRow> LookupRowFinder::searchByTitle(std::string const &title) const {
+  auto results = findMatchingRegexes(title);
+  // If we didn't find an explicit regex that matches, then we allow the user to specify a lookup row with an empty
+  // regex as a default, which falls back to matching all titles
+  if (results.empty()) {
+    results = findEmptyRegexes();
+  }
+  return results;
+}
+
+boost::optional<LookupRow> LookupRowFinder::searchForWildcard() const {
   auto match = std::find_if(m_lookupTable.cbegin(), m_lookupTable.cend(),
                             [](LookupRow const &candidate) -> bool { return candidate.isWildcard(); });
-  return match == m_lookupTable.cend() ? nullptr : &(*match);
+  if (match == m_lookupTable.cend())
+    return boost::none;
+  else
+    return *match;
 }
 
 } // namespace MantidQt::CustomInterfaces::ISISReflectometry

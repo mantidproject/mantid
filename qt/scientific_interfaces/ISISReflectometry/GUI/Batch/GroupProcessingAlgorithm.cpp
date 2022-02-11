@@ -70,7 +70,7 @@ void updateParamsFromResolution(AlgorithmRuntimeProps &properties, boost::option
   AlgorithmProperties::update("Params", -(resolution.get()), properties);
 }
 
-void updateLookupRowProperties(AlgorithmRuntimeProps &properties, LookupRow const *lookupRow) {
+void updateLookupRowProperties(AlgorithmRuntimeProps &properties, boost::optional<LookupRow> lookupRow) {
   if (!lookupRow)
     return;
 

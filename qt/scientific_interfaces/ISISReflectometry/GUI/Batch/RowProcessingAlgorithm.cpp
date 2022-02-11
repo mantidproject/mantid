@@ -102,7 +102,7 @@ void updateExperimentProperties(AlgorithmRuntimeProps &properties, Experiment co
   updateFloodCorrectionProperties(properties, experiment.floodCorrections());
 }
 
-void updateLookupRowProperties(AlgorithmRuntimeProps &properties, LookupRow const *lookupRow) {
+void updateLookupRowProperties(AlgorithmRuntimeProps &properties, boost::optional<LookupRow> lookupRow) {
   if (!lookupRow)
     return;
 

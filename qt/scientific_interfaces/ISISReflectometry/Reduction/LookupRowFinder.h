@@ -9,6 +9,9 @@
 
 #include "Common/DllConfig.h"
 #include "LookupRow.h"
+#include <boost/optional.hpp>
+#include <boost/regex.hpp>
+#include <vector>
 
 namespace MantidQt::CustomInterfaces::ISISReflectometry {
 
@@ -16,13 +19,18 @@ class MANTIDQT_ISISREFLECTOMETRY_DLL LookupRowFinder {
 public:
   LookupRowFinder(LookupTable const &);
 
-  LookupRow const *operator()(const boost::optional<double> &thetaAngle, double tolerance) const;
+  boost::optional<LookupRow> operator()(boost::optional<double> const &thetaAngle, double tolerance,
+                                        std::string const & = "") const;
 
 private:
   LookupTable const &m_lookupTable;
 
-  LookupRow const *searchByTheta(const boost::optional<double> &thetaAngle, double tolerance) const;
-  LookupRow const *searchForWildcard() const;
+  boost::optional<LookupRow> searchByTheta(std::vector<LookupRow> lookupRows, boost::optional<double> const &,
+                                           double) const;
+  std::vector<LookupRow> searchByTitle(std::string const &title) const;
+  boost::optional<LookupRow> searchForWildcard() const;
+  std::vector<LookupRow> findMatchingRegexes(std::string const &title) const;
+  std::vector<LookupRow> findEmptyRegexes() const;
 };
 
 } // namespace MantidQt::CustomInterfaces::ISISReflectometry

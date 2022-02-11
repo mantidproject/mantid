@@ -7,6 +7,7 @@
 #include "Experiment.h"
 #include "LookupRowFinder.h"
 #include "MantidQtWidgets/Common/ParseKeyValueString.h"
+#include <boost/optional.hpp>
 #include <cmath>
 
 namespace MantidQt::CustomInterfaces::ISISReflectometry {
@@ -18,8 +19,8 @@ Experiment::Experiment()
       m_polarizationCorrections(PolarizationCorrections(PolarizationCorrectionType::None)),
       m_floodCorrections(FloodCorrections(FloodCorrectionType::Workspace)), m_transmissionStitchOptions(),
       m_stitchParameters(std::map<std::string, std::string>()),
-      m_lookupTable(LookupTable({LookupRow(boost::none, TransmissionRunPair(), boost::none, RangeInQ(), boost::none,
-                                           ProcessingInstructions(), boost::none)})) {}
+      m_lookupTable(LookupTable({LookupRow(boost::none, boost::none, TransmissionRunPair(), boost::none, RangeInQ(),
+                                           boost::none, ProcessingInstructions(), boost::none)})) {}
 
 Experiment::Experiment(AnalysisMode analysisMode, ReductionType reductionType, SummationType summationType,
                        bool includePartialBins, bool debug, BackgroundSubtraction backgroundSubtraction,
@@ -63,7 +64,8 @@ std::vector<LookupRow::ValueArray> Experiment::lookupTableToArray() const {
   return result;
 }
 
-LookupRow const *Experiment::findLookupRow(const boost::optional<double> &thetaAngle, double tolerance) const {
+boost::optional<LookupRow> Experiment::findLookupRow(const boost::optional<double> &thetaAngle,
+                                                     double tolerance) const {
   LookupRowFinder findLookupRow(m_lookupTable);
   return findLookupRow(thetaAngle, tolerance);
 }
