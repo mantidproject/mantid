@@ -24,6 +24,8 @@ namespace MantidQt {
 namespace CustomInterfaces {
 namespace ISISReflectometry {
 
+class Row;
+
 /** @class Experiment
 
     The Experiment model holds all settings relating to the Experiment Settings
@@ -52,7 +54,8 @@ public:
   LookupTable const &lookupTable() const;
   std::vector<LookupRow::ValueArray> lookupTableToArray() const;
 
-  boost::optional<LookupRow> findLookupRow(const boost::optional<double> &thetaAngle, double tolerance) const;
+  boost::optional<LookupRow> findLookupRow(Row const &row, double tolerance) const;
+  boost::optional<LookupRow> findWildcardLookupRow() const;
 
 private:
   AnalysisMode m_analysisMode;

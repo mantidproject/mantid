@@ -38,7 +38,8 @@ public:
   std::vector<MantidWidgets::Batch::RowLocation> selectedRowLocations() const;
   template <typename T>
   bool isInSelection(T const &item, std::vector<MantidWidgets::Batch::RowLocation> const &selectedRowLocations) const;
-  boost::optional<LookupRow> findLookupRow(boost::optional<double> thetaAngle = boost::none) const;
+  boost::optional<LookupRow> findLookupRow(Row const &row) const;
+  boost::optional<LookupRow> findWildcardLookupRow() const;
   void resetState();
   void resetSkippedItems();
   boost::optional<Item &> getItemWithOutputWorkspaceOrNone(std::string const &wsName);

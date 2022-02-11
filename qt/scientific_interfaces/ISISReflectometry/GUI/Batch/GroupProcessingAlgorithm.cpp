@@ -130,7 +130,7 @@ std::unique_ptr<MantidQt::API::IAlgorithmRuntimeProps> createAlgorithmRuntimePro
   auto properties = std::make_unique<MantidQt::API::AlgorithmRuntimeProps>();
   updateWorkspaceProperties(*properties, group);
   // Set the rebin Params from the lookup row resolution, if given
-  updateLookupRowProperties(*properties, model.findLookupRow());
+  updateLookupRowProperties(*properties, model.findWildcardLookupRow());
   // Override the lookup row with the group's rows' resolution,
   // if given
   updateGroupProperties(*properties, group);
