@@ -207,9 +207,9 @@ def get_axes_object_variable(ax):
     # plotted otherwise it returns a list
     ax_object_var = AXES_VARIABLE
     try:
-        if ax.numRows > 1:
+        if ax.get_gridspec().nrows > 1:
             ax_object_var += "[{row_num}]".format(row_num=row_num(ax))
-        if ax.numCols > 1:
+        if ax.get_gridspec().ncols > 1:
             ax_object_var += "[{col_num}]".format(col_num=col_num(ax))
     except AttributeError:
         # No numRows or NumCols members, so no list use the default

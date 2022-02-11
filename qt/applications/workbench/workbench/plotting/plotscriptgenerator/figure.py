@@ -34,8 +34,8 @@ def get_subplots_command_kwargs(fig):
         'facecolor': convert_color_to_hex(fig.get_facecolor()),
         'figsize': [fig.get_figwidth(), fig.get_figheight()],
         'frameon': fig.frameon,
-        'ncols': ax.numCols,
-        'nrows': ax.numRows,
+        'ncols': ax.get_gridspec().ncols,
+        'nrows': ax.get_gridspec().nrows,
         'num': fig.get_label(),
         'subplot_kw': {
             'projection': 'mantid'
