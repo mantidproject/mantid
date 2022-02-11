@@ -10,7 +10,6 @@ from qtpy.QtTest import QTest
 from qtpy.QtCore import Qt, QPoint
 
 from mantidqt.utils.qt.testing import start_qapplication
-from mantidqt.utils.qt.testing.qt_widget_finder import QtWidgetFinder
 
 from mantidqtinterfaces.Muon.GUI.Common.corrections_tab_widget.background_corrections_view import (BackgroundCorrectionsView,
                                                                                                    RUN_COLUMN_INDEX,
@@ -25,12 +24,11 @@ from mantidqtinterfaces.Muon.GUI.Common.corrections_tab_widget.background_correc
 
 
 @start_qapplication
-class BackgroundCorrectionsViewTest(unittest.TestCase, QtWidgetFinder):
+class BackgroundCorrectionsViewTest(unittest.TestCase):
 
     def setUp(self):
         self.view = BackgroundCorrectionsView()
         self.view.show()
-        self.assert_widget_created()
 
         self.runs = ["84447", "84447", "84447", "84447"]
         self.groups = ["fwd", "bwd", "top", "bottom"]

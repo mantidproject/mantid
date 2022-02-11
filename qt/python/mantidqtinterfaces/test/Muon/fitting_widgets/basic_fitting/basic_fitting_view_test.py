@@ -8,7 +8,6 @@ import unittest
 
 from mantid.api import FrameworkManager
 from mantidqt.utils.qt.testing import start_qapplication
-from mantidqt.utils.qt.testing.qt_widget_finder import QtWidgetFinder
 
 from mantidqtinterfaces.Muon.GUI.Common.fitting_widgets.basic_fitting.basic_fitting_view import BasicFittingView
 from mantidqtinterfaces.Muon.GUI.Common.fitting_widgets.basic_fitting.fit_function_options_view import (EVALUATE_AS_TABLE_ROW,
@@ -22,7 +21,7 @@ from mantidqtinterfaces.Muon.GUI.Common.fitting_widgets.basic_fitting.fit_functi
 
 
 @start_qapplication
-class BasicFittingViewTest(unittest.TestCase, QtWidgetFinder):
+class BasicFittingViewTest(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
@@ -32,7 +31,6 @@ class BasicFittingViewTest(unittest.TestCase, QtWidgetFinder):
         self.dataset_names = ["MUSR62260; Group; fwd; Asymmetry; MA", "MUSR62260; Group; bwd; Asymmetry; MA"]
         self.view = BasicFittingView()
         self.view.show()
-        self.assert_widget_created()
 
     def tearDown(self):
         self.assertTrue(self.view.close())

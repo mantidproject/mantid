@@ -8,7 +8,6 @@ import unittest
 
 from unittest import mock
 from mantidqt.utils.qt.testing import start_qapplication
-from mantidqt.utils.qt.testing.qt_widget_finder import QtWidgetFinder
 from mantidqtinterfaces.Muon.GUI.Common.contexts.plotting_context import PlottingContext
 from mantidqtinterfaces.Muon.GUI.Common.plot_widget.plotting_canvas.plotting_canvas_view import PlottingCanvasView
 from mantidqtinterfaces.Muon.GUI.Common.plot_widget.quick_edit.quick_edit_widget import QuickEditWidget
@@ -17,7 +16,7 @@ import numpy as np
 
 
 @start_qapplication
-class PlottingCanvasViewTest(unittest.TestCase, QtWidgetFinder):
+class PlottingCanvasViewTest(unittest.TestCase):
 
     def setUp(self):
         self.context = PlottingContext()
@@ -28,7 +27,6 @@ class PlottingCanvasViewTest(unittest.TestCase, QtWidgetFinder):
         self.view.fig.tight_layout = mock.Mock()
         self.view.show()
         self._count = -1
-        self.assert_widget_created()
 
     def tearDown(self):
         self.assertTrue(self.view.close())

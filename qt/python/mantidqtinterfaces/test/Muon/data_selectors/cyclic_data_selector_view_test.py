@@ -7,18 +7,16 @@
 import unittest
 
 from mantidqt.utils.qt.testing import start_qapplication
-from mantidqt.utils.qt.testing.qt_widget_finder import QtWidgetFinder
 
 from mantidqtinterfaces.Muon.GUI.Common.data_selectors.cyclic_data_selector_view import CyclicDataSelectorView
 
 
 @start_qapplication
-class CyclicDataSelectorViewTest(unittest.TestCase, QtWidgetFinder):
+class CyclicDataSelectorViewTest(unittest.TestCase):
 
     def setUp(self):
         self.view = CyclicDataSelectorView()
         self.view.show()
-        self.assert_widget_created()
 
     def tearDown(self):
         self.assertTrue(self.view.close())

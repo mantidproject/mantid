@@ -7,18 +7,16 @@
 import unittest
 
 from mantidqt.utils.qt.testing import start_qapplication
-from mantidqt.utils.qt.testing.qt_widget_finder import QtWidgetFinder
 
 from mantidqtinterfaces.Muon.GUI.Common.corrections_tab_widget.dead_time_corrections_view import DeadTimeCorrectionsView
 
 
 @start_qapplication
-class DeadTimeCorrectionsViewTest(unittest.TestCase, QtWidgetFinder):
+class DeadTimeCorrectionsViewTest(unittest.TestCase):
 
     def setUp(self):
         self.view = DeadTimeCorrectionsView()
         self.view.show()
-        self.assert_widget_created()
 
     def tearDown(self):
         self.assertTrue(self.view.close())

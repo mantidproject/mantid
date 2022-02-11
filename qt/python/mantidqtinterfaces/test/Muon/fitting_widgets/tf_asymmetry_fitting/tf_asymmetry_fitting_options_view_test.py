@@ -8,19 +8,17 @@ import unittest
 
 from mantidqt.utils.qt.line_edit_double_validator import LineEditDoubleValidator
 from mantidqt.utils.qt.testing import start_qapplication
-from mantidqt.utils.qt.testing.qt_widget_finder import QtWidgetFinder
 
 from mantidqtinterfaces.Muon.GUI.Common.fitting_widgets.tf_asymmetry_fitting.tf_asymmetry_fitting_options_view import \
     TFAsymmetryFittingOptionsView
 
 
 @start_qapplication
-class TFAsymmetryFittingOptionsViewTest(unittest.TestCase, QtWidgetFinder):
+class TFAsymmetryFittingOptionsViewTest(unittest.TestCase):
 
     def setUp(self):
         self.view = TFAsymmetryFittingOptionsView()
         self.view.show()
-        self.assert_widget_created()
 
     def tearDown(self):
         self.assertTrue(self.view.close())

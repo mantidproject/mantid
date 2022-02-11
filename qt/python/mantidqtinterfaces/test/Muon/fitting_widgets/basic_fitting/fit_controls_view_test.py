@@ -7,18 +7,16 @@
 import unittest
 
 from mantidqt.utils.qt.testing import start_qapplication
-from mantidqt.utils.qt.testing.qt_widget_finder import QtWidgetFinder
 
 from mantidqtinterfaces.Muon.GUI.Common.fitting_widgets.basic_fitting.fit_controls_view import FitControlsView
 
 
 @start_qapplication
-class FitControlsViewTest(unittest.TestCase, QtWidgetFinder):
+class FitControlsViewTest(unittest.TestCase):
 
     def setUp(self):
         self.view = FitControlsView()
         self.view.show()
-        self.assert_widget_created()
 
     def tearDown(self):
         self.assertTrue(self.view.close())

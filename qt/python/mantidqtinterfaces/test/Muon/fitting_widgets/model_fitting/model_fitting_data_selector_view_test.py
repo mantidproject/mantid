@@ -7,19 +7,17 @@
 import unittest
 
 from mantidqt.utils.qt.testing import start_qapplication
-from mantidqt.utils.qt.testing.qt_widget_finder import QtWidgetFinder
 
 from mantidqtinterfaces.Muon.GUI.Common.fitting_widgets.model_fitting.model_fitting_data_selector_view import ModelFittingDataSelectorView
 from mantidqtinterfaces.Muon.GUI.Common.results_tab_widget.results_tab_model import TableColumnType
 
 
 @start_qapplication
-class ModelFittingDataSelectorViewTest(unittest.TestCase, QtWidgetFinder):
+class ModelFittingDataSelectorViewTest(unittest.TestCase):
 
     def setUp(self):
         self.view = ModelFittingDataSelectorView()
         self.view.show()
-        self.assert_widget_created()
 
     def tearDown(self):
         self.assertTrue(self.view.close())
