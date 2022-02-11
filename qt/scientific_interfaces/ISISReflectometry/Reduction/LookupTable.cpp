@@ -5,7 +5,7 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 
-#include "LookupRowFinder.h"
+#include "LookupTable.h"
 #include "IGroup.h"
 #include "Row.h"
 #include <boost/optional.hpp>
@@ -23,9 +23,13 @@ bool equalWithinTolerance(double val1, double val2, double tolerance) {
 
 namespace MantidQt::CustomInterfaces::ISISReflectometry {
 
-LookupRowFinder::LookupRowFinder(LookupTable const &table) : m_lookupTable(table) {}
+LookupTable::LookupTable(std::vector<LookupRow> rowsIn) : m_lookupRows(std::move(rowsIn)) {}
 
-boost::optional<LookupRow> LookupRowFinder::operator()(Row const &row, double tolerance) const {
+LookupTable::LookupTable(std::initializer_list<LookupRow> rowsIn) : m_lookupRows(rowsIn) {}
+
+std::vector<LookupRow> const &LookupTable::rows() const { return m_lookupRows; }
+
+boost::optional<LookupRow> LookupTable::findLookupRow(Row const &row, double tolerance) const {
   // First filter lookup rows by title, if the run has one
   auto lookupRows = searchByTitle(row);
   if (lookupRows.empty()) {
@@ -42,9 +46,9 @@ boost::optional<LookupRow> LookupRowFinder::operator()(Row const &row, double to
   return findWildcardLookupRow();
 }
 
-boost::optional<LookupRow> LookupRowFinder::searchByTheta(std::vector<LookupRow> lookupRows,
-                                                          boost::optional<double> const &thetaAngle,
-                                                          double tolerance) const {
+boost::optional<LookupRow> LookupTable::searchByTheta(std::vector<LookupRow> lookupRows,
+                                                      boost::optional<double> const &thetaAngle,
+                                                      double tolerance) const {
   // TODO We may get multiple matches if the title matches multiple regexes. If one regex is empty then we
   // can discard it. If we get multiple non-empty regex matches it is an error.
   auto match =
@@ -57,26 +61,26 @@ boost::optional<LookupRow> LookupRowFinder::searchByTheta(std::vector<LookupRow>
     return *match;
 }
 
-std::vector<LookupRow> LookupRowFinder::findMatchingRegexes(std::string const &title) const {
+std::vector<LookupRow> LookupTable::findMatchingRegexes(std::string const &title) const {
   auto results = std::vector<LookupRow>();
-  std::copy_if(m_lookupTable.rows.cbegin(), m_lookupTable.rows.cend(), std::back_inserter(results),
+  std::copy_if(m_lookupRows.cbegin(), m_lookupRows.cend(), std::back_inserter(results),
                [&title](auto const &candidate) {
                  return candidate.titleMatcher() && boost::regex_search(title, candidate.titleMatcher().get());
                });
   return results;
 }
 
-std::vector<LookupRow> LookupRowFinder::findEmptyRegexes() const {
+std::vector<LookupRow> LookupTable::findEmptyRegexes() const {
   auto results = std::vector<LookupRow>();
-  std::copy_if(m_lookupTable.rows.cbegin(), m_lookupTable.rows.cend(), std::back_inserter(results),
+  std::copy_if(m_lookupRows.cbegin(), m_lookupRows.cend(), std::back_inserter(results),
                [](auto const &candidate) { return !candidate.titleMatcher(); });
   return results;
 }
 
-std::vector<LookupRow> LookupRowFinder::searchByTitle(Row const &row) const {
+std::vector<LookupRow> LookupTable::searchByTitle(Row const &row) const {
   if (!row.getParent() || row.getParent()->name().empty()) {
     // No titles for us to check against, so skip filtering
-    return m_lookupTable.rows;
+    return m_lookupRows;
   }
 
   auto const &title = row.getParent()->name();
@@ -84,13 +88,22 @@ std::vector<LookupRow> LookupRowFinder::searchByTitle(Row const &row) const {
   return results;
 }
 
-boost::optional<LookupRow> LookupRowFinder::findWildcardLookupRow() const {
-  auto match = std::find_if(m_lookupTable.rows.cbegin(), m_lookupTable.rows.cend(),
+boost::optional<LookupRow> LookupTable::findWildcardLookupRow() const {
+  auto match = std::find_if(m_lookupRows.cbegin(), m_lookupRows.cend(),
                             [](LookupRow const &candidate) -> bool { return candidate.isWildcard(); });
-  if (match == m_lookupTable.rows.cend())
+  if (match == m_lookupRows.cend())
     return boost::none;
   else
     return *match;
 }
 
+std::vector<LookupRow::ValueArray> LookupTable::toValueArray() const {
+  auto result = std::vector<LookupRow::ValueArray>();
+  std::transform(m_lookupRows.cbegin(), m_lookupRows.cend(), std::back_inserter(result),
+                 [](auto const &lookupRow) { return lookupRowToArray(lookupRow); });
+  return result;
+};
+
+bool LookupTable::operator==(LookupTable const &rhs) const noexcept { return this->m_lookupRows == rhs.m_lookupRows; }
+bool LookupTable::operator!=(LookupTable const &rhs) const noexcept { return !((*this) == rhs); }
 } // namespace MantidQt::CustomInterfaces::ISISReflectometry

@@ -7,21 +7,20 @@
 
 #pragma once
 
-#include "../../../ISISReflectometry/Reduction/LookupRowFinder.h"
+#include "../../../ISISReflectometry/Reduction/LookupTable.h"
 #include "TestHelpers/ModelCreationHelper.h"
 #include <cxxtest/TestSuite.h>
 
 using namespace MantidQt::CustomInterfaces::ISISReflectometry;
 
-class LookupRowFinderTest : public CxxTest::TestSuite {
+class LookupTableTest : public CxxTest::TestSuite {
 public:
   void test_searching_by_theta_found() {
     LookupTable table = ModelCreationHelper::makeLookupTableWithTwoAnglesAndWildcard();
 
-    LookupRowFinder findLookupRow(table);
     for (const auto angle : {0.5, 2.3}) {
       auto row = ModelCreationHelper::makeRow(angle);
-      const auto lookupRow = findLookupRow(row, m_exactMatchTolerance);
+      const auto lookupRow = table.findLookupRow(row, m_exactMatchTolerance);
       TS_ASSERT(lookupRow)
       const auto foundAngle = lookupRow->thetaOrWildcard();
       TS_ASSERT(foundAngle)
@@ -32,11 +31,10 @@ public:
   void test_searching_by_theta_tolerance_found() {
     LookupTable table = ModelCreationHelper::makeLookupTableWithTwoAnglesAndWildcard();
 
-    LookupRowFinder findLookupRow(table);
     const double matchTolerance = 0.01;
     for (const auto angle : {(0.5 - matchTolerance), (2.3 + matchTolerance)}) {
       auto row = ModelCreationHelper::makeRow(angle);
-      const auto lookupRow = findLookupRow(row, matchTolerance);
+      const auto lookupRow = table.findLookupRow(row, matchTolerance);
       TS_ASSERT(lookupRow)
       const auto foundAngle = lookupRow->thetaOrWildcard();
       TS_ASSERT(foundAngle)
@@ -49,10 +47,9 @@ public:
   void test_searching_by_theta_not_found_returns_wildcard() {
     LookupTable table = ModelCreationHelper::makeLookupTableWithTwoAnglesAndWildcard();
 
-    LookupRowFinder findLookupRow(table);
     for (const auto angle : {1.2, 3.4}) {
       auto row = ModelCreationHelper::makeRow(angle);
-      const auto lookupRow = findLookupRow(row, m_exactMatchTolerance);
+      const auto lookupRow = table.findLookupRow(row, m_exactMatchTolerance);
       TS_ASSERT(lookupRow)
       const auto foundAngle = lookupRow->thetaOrWildcard();
       TS_ASSERT(!foundAngle)
@@ -63,20 +60,18 @@ public:
   void test_searching_by_theta_not_found_returns_none() {
     LookupTable table = ModelCreationHelper::makeLookupTableWithTwoAngles();
 
-    LookupRowFinder findLookupRow(table);
     constexpr double notThere = 999;
     auto row = ModelCreationHelper::makeRow(notThere);
-    const auto lookupRow = findLookupRow(row, m_exactMatchTolerance);
+    const auto lookupRow = table.findLookupRow(row, m_exactMatchTolerance);
     TS_ASSERT(!lookupRow)
   }
 
   void test_searching_empty_table_returns_none() {
     LookupTable table = ModelCreationHelper::makeEmptyLookupTable();
 
-    LookupRowFinder findLookupRow(table);
     constexpr double notThere = 0.5;
     auto row = ModelCreationHelper::makeRow(notThere);
-    const auto lookupRow = findLookupRow(row, m_exactMatchTolerance);
+    const auto lookupRow = table.findLookupRow(row, m_exactMatchTolerance);
     TS_ASSERT(!lookupRow)
   }
 
@@ -85,9 +80,8 @@ public:
     auto expectedLookupRow = ModelCreationHelper::makeLookupRow(angle, boost::regex("El"));
     auto table = LookupTable{ModelCreationHelper::makeLookupRow(angle, boost::regex("Ay")), expectedLookupRow};
 
-    LookupRowFinder findLookupRow(table);
     auto group = Group("El Em En Oh", {ModelCreationHelper::makeRow(angle)});
-    const auto foundLookupRow = findLookupRow(*group[0], m_exactMatchTolerance);
+    const auto foundLookupRow = table.findLookupRow(*group[0], m_exactMatchTolerance);
     TS_ASSERT(foundLookupRow)
     if (foundLookupRow)
       TS_ASSERT_EQUALS(*foundLookupRow, expectedLookupRow)
@@ -99,9 +93,8 @@ public:
     auto table = LookupTable{ModelCreationHelper::makeLookupRow(angle, boost::regex("Ay")), expectedLookupRow,
                              ModelCreationHelper::makeWildcardLookupRow()};
 
-    LookupRowFinder findLookupRow(table);
     auto group = Group("El Em En Oh", {ModelCreationHelper::makeRow(angle)});
-    const auto foundLookupRow = findLookupRow(*group[0], m_exactMatchTolerance);
+    const auto foundLookupRow = table.findLookupRow(*group[0], m_exactMatchTolerance);
     TS_ASSERT(foundLookupRow)
     if (foundLookupRow)
       TS_ASSERT_EQUALS(*foundLookupRow, expectedLookupRow)
@@ -112,9 +105,8 @@ public:
     auto table = LookupTable{ModelCreationHelper::makeLookupRow(angle, boost::regex("Ay")),
                              ModelCreationHelper::makeLookupRow(angle, boost::regex("El"))};
 
-    LookupRowFinder findLookupRow(table);
     auto group = Group("En Oh", {ModelCreationHelper::makeRow(angle)});
-    const auto foundLookupRow = findLookupRow(*group[0], m_exactMatchTolerance);
+    const auto foundLookupRow = table.findLookupRow(*group[0], m_exactMatchTolerance);
     TS_ASSERT(!foundLookupRow)
   }
 
@@ -123,9 +115,8 @@ public:
     auto table = LookupTable{ModelCreationHelper::makeLookupRow(angle, boost::regex("Ay")),
                              ModelCreationHelper::makeLookupRow(angle, boost::regex("El"))};
 
-    LookupRowFinder findLookupRow(table);
     auto group = Group("En Oh", {ModelCreationHelper::makeRow(angle)});
-    const auto foundLookupRow = findLookupRow(*group[0], m_exactMatchTolerance);
+    const auto foundLookupRow = table.findLookupRow(*group[0], m_exactMatchTolerance);
     TS_ASSERT(!foundLookupRow)
   }
 
@@ -135,9 +126,8 @@ public:
     auto table = LookupTable{ModelCreationHelper::makeLookupRow(angle, boost::regex("Ay")),
                              ModelCreationHelper::makeLookupRow(angle, boost::regex("El")), wildcardRow};
 
-    LookupRowFinder findLookupRow(table);
     auto group = Group("En Oh", {ModelCreationHelper::makeRow(angle)});
-    const auto foundLookupRow = findLookupRow(*group[0], m_exactMatchTolerance);
+    const auto foundLookupRow = table.findLookupRow(*group[0], m_exactMatchTolerance);
     TS_ASSERT(foundLookupRow)
     TS_ASSERT_EQUALS(wildcardRow, foundLookupRow)
   }
@@ -148,9 +138,8 @@ public:
     auto table = LookupTable{ModelCreationHelper::makeLookupRow(angle, boost::regex("Ay")),
                              ModelCreationHelper::makeLookupRow(angle, boost::regex("El")), wildcardRow};
 
-    LookupRowFinder findLookupRow(table);
     auto group = Group("En Oh", {ModelCreationHelper::makeRow(angle)});
-    const auto foundLookupRow = findLookupRow(*group[0], m_exactMatchTolerance);
+    const auto foundLookupRow = table.findLookupRow(*group[0], m_exactMatchTolerance);
     TS_ASSERT(foundLookupRow)
     TS_ASSERT_EQUALS(wildcardRow, foundLookupRow)
   }
@@ -161,9 +150,8 @@ public:
     auto regexRow = ModelCreationHelper::makeLookupRow(angle, boost::regex(".*"));
     auto table = LookupTable{wildcardRow, regexRow};
 
-    LookupRowFinder findLookupRow(table);
     auto group = Group("En Oh", {ModelCreationHelper::makeRow(angle)});
-    const auto foundLookupRow = findLookupRow(*group[0], m_exactMatchTolerance);
+    const auto foundLookupRow = table.findLookupRow(*group[0], m_exactMatchTolerance);
     TS_ASSERT(foundLookupRow)
     TS_ASSERT_EQUALS(regexRow, foundLookupRow)
   }
@@ -173,9 +161,8 @@ public:
     auto emptyRegexRow = ModelCreationHelper::makeLookupRow(angle, boost::none);
     auto table = LookupTable{emptyRegexRow};
 
-    LookupRowFinder findLookupRow(table);
     auto group = Group("En Oh", {ModelCreationHelper::makeRow(angle)});
-    const auto foundLookupRow = findLookupRow(*group[0], m_exactMatchTolerance);
+    const auto foundLookupRow = table.findLookupRow(*group[0], m_exactMatchTolerance);
     TS_ASSERT(foundLookupRow)
     TS_ASSERT_EQUALS(emptyRegexRow, foundLookupRow)
   }
@@ -186,8 +173,7 @@ public:
     auto table = LookupTable{ModelCreationHelper::makeLookupRow(angle, boost::regex("Ay")),
                              ModelCreationHelper::makeLookupRow(angle, boost::regex("El")), wildcardRow};
 
-    LookupRowFinder finder(table);
-    const auto foundLookupRow = finder.findWildcardLookupRow();
+    const auto foundLookupRow = table.findWildcardLookupRow();
     TS_ASSERT(foundLookupRow)
     TS_ASSERT_EQUALS(wildcardRow, foundLookupRow)
   }
@@ -197,8 +183,7 @@ public:
     auto table = LookupTable{ModelCreationHelper::makeLookupRow(angle, boost::regex("Ay")),
                              ModelCreationHelper::makeLookupRow(angle, boost::regex("El"))};
 
-    LookupRowFinder finder(table);
-    const auto foundLookupRow = finder.findWildcardLookupRow();
+    const auto foundLookupRow = table.findWildcardLookupRow();
     TS_ASSERT(!foundLookupRow)
   }
 

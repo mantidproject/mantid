@@ -11,6 +11,7 @@
 #include "Common/DllConfig.h"
 #include "FloodCorrections.h"
 #include "LookupRow.h"
+#include "LookupTable.h"
 #include "PolarizationCorrections.h"
 #include "ReductionType.h"
 #include "SummationType.h"
