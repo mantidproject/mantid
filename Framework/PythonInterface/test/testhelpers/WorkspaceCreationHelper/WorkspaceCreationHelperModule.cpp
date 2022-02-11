@@ -41,7 +41,7 @@ BOOST_PYTHON_FUNCTION_OVERLOADS(create2DWorkspaceWithRectangularInstrument_overl
                                 create2DWorkspaceWithRectangularInstrument, 3, 3)
 
 BOOST_PYTHON_FUNCTION_OVERLOADS(create2DWorkspaceWithGeographicalDetectors_overloads,
-                                create2DWorkspaceWithGeographicalDetectors, 4, 5)
+                                create2DWorkspaceWithGeographicalDetectors, 4, 7)
 
 GNU_DIAG_ON("conversion")
 GNU_DIAG_ON("unused-local-typedef")
@@ -67,7 +67,7 @@ BOOST_PYTHON_MODULE(_WorkspaceCreationHelper) {
 
   def("create2DWorkspace123WithMaskedBin", reinterpret_cast<Signature3_2D>(&create2DWorkspace123WithMaskedBin));
   def("create2DWorkspaceWithGeographicalDetectors",
-      (Workspace2D_sptr(*)(const int, const int, const double, const int,
+      (Workspace2D_sptr(*)(const int, const int, const double, const int, const double, const double,
                            const std::string &))create2DWorkspaceWithGeographicalDetectors,
       create2DWorkspaceWithGeographicalDetectors_overloads()[return_value_policy<AsType<Workspace_sptr>>()]);
 
