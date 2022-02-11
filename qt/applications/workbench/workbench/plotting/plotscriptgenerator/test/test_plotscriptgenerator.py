@@ -35,16 +35,12 @@ SAMPLE_SCRIPT = ("import matplotlib.pyplot as plt\n"
                  "ADS.retrieve(...)\n"
                  "\n"
                  "fig, axes = plt.subplots(...)\n"
-                 "axes[0].plot(...)\n"
-                 "axes[0].plot(...)\n"
-                 "axes[0].set_xlim(...)\n"
-                 "axes[0].set_ylim(...)\n"
-                 "axes[0].set_facecolor('#8a9aff')\n"
-                 "\n"
-                 "axes[1].plot(...)\n"
-                 "axes[1].set_xlim(...)\n"
-                 "axes[1].set_ylim(...)\n"
-                 "axes[1].set_facecolor('#8a9aff')\n"
+                 "axes.plot(...)\n"
+                 "axes.plot(...)\n"
+                 "axes.set_xlim(...)\n"
+                 "axes.set_ylim(...)\n"
+                 "axes.set_facecolor('#8a9aff')\n"
+
                  "\n"
                  "plt.show()"
                  "\n"
@@ -66,17 +62,11 @@ SAMPLE_SCRIPT_WITH_FIT = ("from mantid.simpleapi import Fit\n"
                           "ADS.retrieve(...)\n"
                           "\n"
                           "fig, axes = plt.subplots(...)\n"
-                          "axes[0].plot(...)\n"
-                          "axes[0].plot(...)\n"
-                          "axes[0].set_xlim(...)\n"
-                          "axes[0].set_ylim(...)\n"
-                          "axes[0].set_facecolor('#8a9aff')\n"
-
-                          "\n"
-                          "axes[1].plot(...)\n"
-                          "axes[1].set_xlim(...)\n"
-                          "axes[1].set_ylim(...)\n"
-                          "axes[1].set_facecolor('#8a9aff')\n"
+                          "axes.plot(...)\n"
+                          "axes.plot(...)\n"
+                          "axes.set_xlim(...)\n"
+                          "axes.set_ylim(...)\n"
+                          "axes.set_facecolor('#8a9aff')\n"
 
                           "\n"
                           "plt.show()"
@@ -84,6 +74,35 @@ SAMPLE_SCRIPT_WITH_FIT = ("from mantid.simpleapi import Fit\n"
                           "# Scripting Plots in Mantid:"
                           "\n"
                           "# https://docs.mantidproject.org/tutorials/python_in_mantid/plotting/02_scripting_plots.html")
+
+SAMPLE_SCRIPT_TILED_PLOT = "# import mantid algorithms, numpy and matplotlib\n" \
+                           "from mantid.simpleapi import *\n" \
+                           "import matplotlib.pyplot as plt\n" \
+                           "import numpy as np\n\n\n" \
+                           "import matplotlib.pyplot as plt\n" \
+                           "from mantid.plots.utility import MantidAxType\n" \
+                           "from mantid.api import AnalysisDataService as ADS\n\n" \
+                           "ws = ADS.retrieve('ws')\n\n" \
+                           "fig, axes = plt.subplots(edgecolor='#ffffff', facecolor='#ffffff', ncols=2, num='ws-1', " \
+                           "subplot_kw={'projection': 'mantid'})\n" \
+                           "axes[0].plot(ws, color='#1f77b4', label='ws: spec 1', wkspIndex=0)\n" \
+                           "axes[0].tick_params(axis='x', which='major', **{'gridOn': False, 'tick1On': True, " \
+                           "'tick2On': False, 'label1On': True, 'label2On': False})\n"\
+                           "axes[0].tick_params(axis='y', which='major', **{'gridOn': False, 'tick1On': True, " \
+                           "'tick2On': False, 'label1On': True, 'label2On': False})\n"\
+                           "axes[0].set_xlabel('Time-of-flight ($\\\\mu s$)')\n" \
+                           "axes[0].set_ylabel('Counts ($\\\\mu s$)$^{-1}$')\n\n" \
+                           "axes[1].plot(ws, color='#1f77b4', label='ws: spec 2', wkspIndex=1)\n" \
+                           "axes[1].tick_params(axis='x', which='major', **{'gridOn': False, 'tick1On': True, " \
+                           "'tick2On': False, 'label1On': True, 'label2On': False})\n"\
+                           "axes[1].tick_params(axis='y', which='major', **{'gridOn': False, 'tick1On': True, " \
+                           "'tick2On': False, 'label1On': True, 'label2On': False})\n"\
+                           "axes[1].set_xlabel('Time-of-flight ($\\\\mu s$)')\n" \
+                           "axes[1].set_ylabel('Counts ($\\\\mu s$)$^{-1}$')\n\n" \
+                           "plt.show()\n" \
+                           "# Scripting Plots in Mantid:\n" \
+                           "# https://docs.mantidproject.org/tutorials/python_in_mantid/plotting/" \
+                           "02_scripting_plots.html"
 
 
 class PlotScriptGeneratorTest(unittest.TestCase):
@@ -131,8 +150,8 @@ class PlotScriptGeneratorTest(unittest.TestCase):
         mock_kwargs.update(kwargs)
         mock_ax = Mock(spec=MantidAxes, **mock_kwargs)
         mock_ax.xaxis.minor.locator = Mock(spec=NullLocator)
-        mock_ax.xaxis._major_tick_kw['gridOn'] = False
-        mock_ax.yaxis._major_tick_kw['gridOn'] = False
+        mock_ax.xaxis._major_tick_kw = {'gridOn': False}
+        mock_ax.yaxis._major_tick_kw = {'gridOn': False}
         return mock_ax
 
     def test_generate_script_returns_None_if_no_MantidAxes_in_figure(self):
@@ -157,11 +176,7 @@ class PlotScriptGeneratorTest(unittest.TestCase):
         mock_axes1 = self._gen_mock_axes(get_tracked_artists=lambda: [None, None],
                                          get_lines=lambda: [None, None],
                                          numRows=1, numCols=2, colNum=0)
-        mock_axes2 = self._gen_mock_axes(get_tracked_artists=lambda: [None],
-                                         get_lines=lambda: [None],
-                                         numRows=1, numCols=2, colNum=1)
-        mock_fig = Mock(get_axes=lambda: [mock_axes1, mock_axes2],
-                        axes=[mock_axes1, mock_axes2])
+        mock_fig = Mock(get_axes=lambda: [mock_axes1], axes=[mock_axes1])
         mock_fig.canvas.manager.fit_browser.fit_result_ws_name = ""
 
         output_script = generate_script(mock_fig, exclude_headers=True)
@@ -237,11 +252,8 @@ class PlotScriptGeneratorTest(unittest.TestCase):
         mock_axes1 = self._gen_mock_axes(get_tracked_artists=lambda: [None, None],
                                          get_lines=lambda: [None, None],
                                          numRows=1, numCols=2, colNum=0)
-        mock_axes2 = self._gen_mock_axes(get_tracked_artists=lambda: [None],
-                                         get_lines=lambda: [None],
-                                         numRows=1, numCols=2, colNum=1)
-        mock_fig = Mock(get_axes=lambda: [mock_axes1, mock_axes2],
-                        axes=[mock_axes1, mock_axes2])
+        mock_fig = Mock(get_axes=lambda: [mock_axes1],
+                        axes=[mock_axes1])
         mock_fig.canvas.manager.fit_browser.fit_result_ws_name = "OutputWorkspace"
 
         output_script = generate_script(mock_fig, exclude_headers=True)
@@ -283,6 +295,17 @@ class PlotScriptGeneratorTest(unittest.TestCase):
         commands = generate_script(mock_fig)
         self.assertIn(mock_major_kw, commands)
         self.assertIn(mock_minor_kw, commands)
+
+    def test_generate_script_handles_tiled_plots_correctly(self):
+        from mantid.simpleapi import CreateSampleWorkspace
+
+        ws = CreateSampleWorkspace()
+        fig, axes = plt.subplots(ncols=2, num='ws-1', subplot_kw={'projection': 'mantid'})
+        axes[0].plot(ws, wkspIndex=0)
+        axes[1].plot(ws, wkspIndex=1)
+
+        commands = generate_script(fig)
+        self.assertEqual(SAMPLE_SCRIPT_TILED_PLOT, commands)
 
 
 if __name__ == '__main__':
