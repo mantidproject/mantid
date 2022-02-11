@@ -111,11 +111,17 @@ BUILD_THREADS=${BUILD_THREADS:-1}
 SYSTEST_NPROCS=${SYSTEST_NPROCS:-$BUILD_THREADS}
 echo "The list of system tests will be split and executed over ${SYSTEST_NPROCS} processes."
 
+# Running installer tests script only works if we have a package
 if [[ ${RUN_INSTALLER_TESTS} == true ]]; then
-  TEST_SCRIPT=$WORKSPACE/Testing/SystemTests/scripts/InstallerTests.py
+  PKGDIR=${WORKSPACE}/build
+  ${X11_RUNNER} "${X11_RUNNER_ARGS}" python3 $WORKSPACE/Testing/SystemTests/scripts/InstallerTests.py -o -d $PKGDIR -j ${SYSTEST_NPROCS} $EXTRA_ARGS
+# Run systems tests without a package
 else
-  TEST_SCRIPT=$WORKSPACE/Testing/SystemTests/scripts/runSystemTests.py
+  # For multi-config generators mantidpython is in a config-dependent subdirectory, otherwise it's just in bin
+  if [ -f ${WORKSPACE}/build/bin/$BUILD_CONFIG/mantidpython ]; then
+    MANTIDPYTHON=${WORKSPACE}/build/bin/$BUILD_CONFIG/mantidpython
+  else
+    MANTIDPYTHON=${WORKSPACE}/build/bin/mantidpython
+  fi
+  ${X11_RUNNER} "${X11_RUNNER_ARGS}" $MANTIDPYTHON $WORKSPACE/Testing/SystemTests/scripts/runSystemTests.py --loglevel=information --executable=$MANTIDPYTHON --exec-args="--classic" -j ${SYSTEST_NPROCS} --quiet --output-on-failure $EXTRA_ARGS
 fi
-
-PKGDIR=${WORKSPACE}/build
-${X11_RUNNER} "${X11_RUNNER_ARGS}" python3 $TEST_SCRIPT -o -d $PKGDIR -j ${SYSTEST_NPROCS} $EXTRA_ARGS
