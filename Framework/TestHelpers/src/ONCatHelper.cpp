@@ -23,7 +23,7 @@ MockONCatAPI::MockONCatAPI(const MockResponseMap &responseMap)
   }
 }
 
-MockONCatAPI::~MockONCatAPI() {}
+MockONCatAPI::~MockONCatAPI() = default;
 
 bool MockONCatAPI::allResponsesCalledOnce() const {
   return std::all_of(m_responseCallCounts.cbegin(), m_responseCallCounts.cend(),

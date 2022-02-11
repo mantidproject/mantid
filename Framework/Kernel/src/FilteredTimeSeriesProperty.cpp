@@ -43,7 +43,7 @@ FilteredTimeSeriesProperty<HeldType>::FilteredTimeSeriesProperty(
 /**
  * Destructor
  */
-template <typename HeldType> FilteredTimeSeriesProperty<HeldType>::~FilteredTimeSeriesProperty() {}
+template <typename HeldType> FilteredTimeSeriesProperty<HeldType>::~FilteredTimeSeriesProperty() = default;
 
 /**
  * Access the unfiltered log

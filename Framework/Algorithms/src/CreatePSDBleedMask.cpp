@@ -30,7 +30,7 @@ using API::MatrixWorkspace_sptr;
 using DataObjects::MaskWorkspace_sptr;
 
 /// Default constructor
-CreatePSDBleedMask::CreatePSDBleedMask() {}
+CreatePSDBleedMask::CreatePSDBleedMask() = default;
 
 /// Initialize the algorithm properties
 void CreatePSDBleedMask::init() {

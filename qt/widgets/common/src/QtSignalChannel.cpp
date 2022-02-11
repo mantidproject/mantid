@@ -23,7 +23,7 @@ namespace MantidQt::MantidWidgets {
  */
 QtSignalChannel::QtSignalChannel(QString source) : QObject(), Poco::Channel(), m_source(std::move(source)) {}
 
-QtSignalChannel::~QtSignalChannel() {}
+QtSignalChannel::~QtSignalChannel() = default;
 
 /**
  * @param source A string specifying the required source for messages

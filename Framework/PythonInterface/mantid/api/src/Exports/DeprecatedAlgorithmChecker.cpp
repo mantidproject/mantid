@@ -57,7 +57,7 @@ public:
 
 private:
   /// Private default constructor
-  DeprecatedAlgorithmChecker();
+  DeprecatedAlgorithmChecker() = delete;
   /// Pointer to unmanaged algorithm
   IAlgorithm_sptr m_alg;
 };

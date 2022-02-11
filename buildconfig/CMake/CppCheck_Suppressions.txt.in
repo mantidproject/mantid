@@ -431,7 +431,7 @@ redundantPointerOp:${CMAKE_SOURCE_DIR}/Framework/DataObjects/inc/MantidDataObjec
 shadowVariable:${CMAKE_SOURCE_DIR}/Framework/DataObjects/inc/MantidDataObjects/MDGridBox.tcc:1192
 useStlAlgorithm:${CMAKE_SOURCE_DIR}/Framework/DataObjects/inc/MantidDataObjects/MDEventWorkspace.tcc:463
 useStlAlgorithm:${CMAKE_SOURCE_DIR}/Framework/DataObjects/src/MaskWorkspace.cpp:191
-knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/DataObjects/src/Peak.cpp:673
+knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/DataObjects/src/Peak.cpp:670
 knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/Load.cpp:43
 knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/DataObjects/src/PeaksWorkspace.cpp:345
 constParameter:${CMAKE_SOURCE_DIR}/Framework/DataObjects/src/SpecialWorkspace2D.cpp:203
@@ -557,8 +557,8 @@ knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/WorkflowAlgorithms/src/SAN
 unreadVariable:${CMAKE_SOURCE_DIR}/Framework/WorkflowAlgorithms/src/SofTwoThetaTOF.cpp:191
 nullPointerRedundantCheck:${CMAKE_SOURCE_DIR}/Framework/MDAlgorithms/src/ApplyDetailedBalanceMD.cpp:267
 nullPointerRedundantCheck:${CMAKE_SOURCE_DIR}/Framework/MDAlgorithms/src/ApplyDetailedBalanceMD.cpp:223
-constParameter:${CMAKE_SOURCE_DIR}/Framework/MDAlgorithms/src/CompareMDWorkspaces.cpp:70
-constParameter:${CMAKE_SOURCE_DIR}/Framework/MDAlgorithms/src/CompareMDWorkspaces.cpp:147
+constParameter:${CMAKE_SOURCE_DIR}/Framework/MDAlgorithms/src/CompareMDWorkspaces.cpp:69
+constParameter:${CMAKE_SOURCE_DIR}/Framework/MDAlgorithms/src/CompareMDWorkspaces.cpp:146
 useStlAlgorithm:${CMAKE_SOURCE_DIR}/Framework/MDAlgorithms/inc/MantidMDAlgorithms/MDEventTreeBuilder.h:301
 useStlAlgorithm:${CMAKE_SOURCE_DIR}/Framework/MDAlgorithms/src/ConvToMDEventsWSIndexing.cpp:21
 negativeContainerIndex:${CMAKE_SOURCE_DIR}/Framework/MDAlgorithms/src/ConvertCWPDMDToSpectra.cpp:489

@@ -21,7 +21,7 @@ QtDisplay::QtDisplay(QWidget *parent) : IQtDisplay(parent) {
   setFocusPolicy(Qt::StrongFocus);
 }
 
-QtDisplay::~QtDisplay() {}
+QtDisplay::~QtDisplay() = default;
 
 /// Assign a surface to draw on
 void QtDisplay::setSurface(std::shared_ptr<ProjectionSurface> surface) {

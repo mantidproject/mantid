@@ -49,7 +49,7 @@ ILLEnergyTransfer::ILLEnergyTransfer(IndirectDataReduction *idrUI, QWidget *pare
 //----------------------------------------------------------------------------------------------
 /** Destructor
  */
-ILLEnergyTransfer::~ILLEnergyTransfer() {}
+ILLEnergyTransfer::~ILLEnergyTransfer() = default;
 
 void ILLEnergyTransfer::setup() {}
 

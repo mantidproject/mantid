@@ -104,4 +104,4 @@ void IndirectTools::runClicked() {
 
 std::string IndirectTools::documentationPage() const { return "Indirect Tools"; }
 
-IndirectTools::~IndirectTools() {}
+IndirectTools::~IndirectTools() = default;

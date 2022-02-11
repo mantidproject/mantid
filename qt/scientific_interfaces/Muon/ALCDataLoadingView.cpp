@@ -27,7 +27,7 @@ namespace MantidQt::CustomInterfaces {
 ALCDataLoadingView::ALCDataLoadingView(QWidget *widget)
     : m_widget(widget), m_selectedLog(DEFAULT_LOG), m_numPeriods(0) {}
 
-ALCDataLoadingView::~ALCDataLoadingView() {}
+ALCDataLoadingView::~ALCDataLoadingView() = default;
 
 void ALCDataLoadingView::initialize() {
   m_ui.setupUi(m_widget);
