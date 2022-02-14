@@ -195,6 +195,7 @@ class LRautoreductionTest(systemtesting.MantidSystemTest):
         Test algorithm LiquidsReflectometryReduction with simple binning
     """
     def runTest(self):
+        scaling_factor_file = FileFinder.getFullPath("sf_185602_Si2InDisk_auto.cfg")
         with open('template.xml', 'w') as fd:
             content = """<Reduction>
 <DataSeries>
@@ -235,7 +236,7 @@ class LRautoreductionTest(systemtesting.MantidSystemTest):
 <angle_offset>0.01</angle_offset>
 <angle_offset_error>0.001</angle_offset_error>
 <scaling_factor_flag>False</scaling_factor_flag>
-<scaling_factor_file>''</scaling_factor_file>
+<scaling_factor_file>%s</scaling_factor_file>
 <slits_width_flag>True</slits_width_flag>
 <geometry_correction_switch>False</geometry_correction_switch>
 <incident_medium_list>Air</incident_medium_list>
@@ -245,7 +246,7 @@ class LRautoreductionTest(systemtesting.MantidSystemTest):
 <fourth_column_dq_over_q>0.028</fourth_column_dq_over_q>
 </RefLData>
 </DataSeries>
-</Reduction>"""
+</Reduction>""" % scaling_factor_file
             fd.write(content)
 
         ws = Load("REF_L_%d" % 190367, OutputWorkspace="REFL_%d" % 190367)
