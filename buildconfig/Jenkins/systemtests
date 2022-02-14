@@ -123,5 +123,6 @@ else
   else
     MANTIDPYTHON=${WORKSPACE}/build/bin/mantidpython
   fi
-  ${X11_RUNNER} "${X11_RUNNER_ARGS}" $MANTIDPYTHON --classic $WORKSPACE/Testing/SystemTests/scripts/runSystemTests.py --loglevel="information" --executable="${MANTIDPYTHON}" --exec-args="--classic" -j${SYSTEST_NPROCS} --quiet --output-on-failure $EXTRA_ARGS
+  SYSTEMTEST_ARGS="--loglevel=information --executable=${MANTIDPYTHON} --exec-args=--classic -j ${SYSTEST_NPROCS} --quiet --output-on-failure"
+  ${X11_RUNNER} "${X11_RUNNER_ARGS}" $MANTIDPYTHON --classic $WORKSPACE/Testing/SystemTests/scripts/runSystemTests.py $SYSTEMTEST_ARGS $EXTRA_ARGS
 fi
