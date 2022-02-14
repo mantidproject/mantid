@@ -510,26 +510,27 @@ class SliceViewerModel:
         """
         Calculate angles between all combination of display axes
         """
+
+        proj_matrix = np.eye(3)  # needs to be 3x3 even if 2D ws as columns passed to recAngle
         if self.can_support_nonorthogonal_axes():
             expt_info = self._get_ws().getExperimentInfo(0)
             lattice = expt_info.sample().getOrientedLattice()
             if self.get_ws_type() == WS_TYPE.MDH:
                 ws = self._get_ws()
-                proj_matrix = np.zeros((3, 3))
-                icol = 0
-                for ivec in range(ws.getNumDims()):
-                    Qvec = list(ws.getBasisVector(ivec))[0:3] # first 3 components of basis vector always Q
-                    if any(Qvec):
-                        proj_matrix[:, icol] = Qvec
-                        icol += 1
+                ndims = ws.getNumDims()
+                i_qdims = [idim for idim in range(ndims) if ws.getDimension(idim).getMDFrame().isQ()]
+                irow_end = min(3, len(i_qdims))  # note for 2D the last col/row of proj_matrix is 0,0,1 - i.e. L
+                for icol, idim in enumerate(i_qdims):
+                    # copy first irow_end components of basis vec are always Q
+                    proj_matrix[0:irow_end, icol] = list(ws.getBasisVector(idim))[0:irow_end]
             else:
                 # for event try to find axes from log
                 try:
                     proj_matrix = np.array(expt_info.run().get(PROJ_MATRIX_LOG_NAME).value, dtype=float)
                     proj_matrix = proj_matrix.reshape(3, 3)
                 except (AttributeError, KeyError):  # run can be None so no .get()
-                    # assume orthogonal projection if no log exists
-                    proj_matrix = np.eye(3)
+                    # assume orthogonal projection if no log exists (i.e. proj_matrix is identity)
+                    pass
 
             # calculate angles for all combinations of axes
             angles_matrix = np.zeros((3, 3))
