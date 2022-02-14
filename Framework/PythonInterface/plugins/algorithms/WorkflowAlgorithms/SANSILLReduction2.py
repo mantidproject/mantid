@@ -803,6 +803,9 @@ class SANSILLReduction(PythonAlgorithm):
             RenameWorkspace(InputWorkspace=tmp, OutputWorkspace=tmp+'_0')
             GroupWorkspaces(InputWorkspaces=[tmp+'_0'], OutputWorkspace=tmp)
         if isinstance(mtd[tmp], WorkspaceGroup):
+            # the setup is performed based on the first workspace
+            # this assumes that in one call of this algorithm, all the input runs are homogeneous; that is,
+            # they correspond to the same instrument, same acquisition mode, and same number of frames for kinetic
             self.setup(mtd[tmp][0])
             self.preprocess_group(tmp)
             if self.mode != AcqMode.TOF:

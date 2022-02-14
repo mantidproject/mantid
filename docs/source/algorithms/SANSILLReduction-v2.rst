@@ -20,9 +20,11 @@ Input Runs
 The main input is the **Runs**, which is a multiple file property.
 It supports summing which will be performed at the raw level; that is, right after loading.
 The acquisition times and the monitor counts will also be summed, so that the summed data can be correctly normalised.
+The acquisition times (in seconds) will be stored in the second, empty monitor spectrum.
 The listing dimension is supported only for monochromatic and kinetic modes, which signifies the concatenation of different samples into the same workspace.
 Note that, it is up to the user to make sure that samples that are being concatenated are measured with strictly **identical** beamline/detector configuration (i.e. distance, wavelength).
-There is no check regarding this, again for the purposes of performance.
+When providing multiple runs, it is assumed that they are homogeneous; that is, they correspond to the same instrument, same acquisition mode and the same dimensionality (i.e. number of frames in case of kinetic, number of channels in case of TOF).
+There are no checks regarding this for the purposes of performance.
 
 Input Workspaces
 ----------------
