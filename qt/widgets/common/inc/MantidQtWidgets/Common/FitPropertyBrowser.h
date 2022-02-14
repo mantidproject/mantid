@@ -198,10 +198,6 @@ public:
   QString getYColumnName() const;
   /// Get the name of the Error column
   QString getErrColumnName() const;
-  /// Set LogValue for PlotPeakByLogValue
-  void setLogValue(const QString &lv = "");
-  /// Get LogValue
-  std::string getLogValue() const;
   /// Remove LogValue from the browser
   void removeLogValue();
 
