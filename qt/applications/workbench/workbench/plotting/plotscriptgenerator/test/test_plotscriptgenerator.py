@@ -7,6 +7,7 @@
 #  This file is part of the mantid workbench.
 
 import unittest
+from distutils.version import LooseVersion
 
 import matplotlib
 
@@ -28,52 +29,101 @@ GEN_AXIS_LIMIT_CMDS = 'workbench.plotting.plotscriptgenerator.generate_axis_limi
 GET_AUTOSCALE_LIMITS = 'workbench.plotting.plotscriptgenerator.axes.get_autoscale_limits'
 GET_FIT_COMMANDS = 'workbench.plotting.plotscriptgenerator.get_fit_cmds'
 
-SAMPLE_SCRIPT = ("import matplotlib.pyplot as plt\n"
-                 "from mantid.plots.utility import MantidAxType\n"
-                 "from mantid.api import AnalysisDataService\n"
-                 "\n"
-                 "ADS.retrieve(...)\n"
-                 "\n"
-                 "fig, axes = plt.subplots(...)\n"
-                 "axes.plot(...)\n"
-                 "axes.plot(...)\n"
-                 "axes.set_xlim(...)\n"
-                 "axes.set_ylim(...)\n"
-                 "axes.set_facecolor('#8a9aff')\n"
+if LooseVersion('3.1.3') <= LooseVersion(matplotlib.__version__):
+    SAMPLE_SCRIPT = ("import matplotlib.pyplot as plt\n"
+                     "from mantid.plots.utility import MantidAxType\n"
+                     "from mantid.api import AnalysisDataService\n"
+                     "\n"
+                     "ADS.retrieve(...)\n"
+                     "\n"
+                     "fig, axes = plt.subplots(...)\n"
+                     "axes[0].plot(...)\n"
+                     "axes[0].plot(...)\n"
+                     "axes[0].set_xlim(...)\n"
+                     "axes[0].set_ylim(...)\n"
+                     "axes[0].set_facecolor('#8a9aff')\n"
 
-                 "\n"
-                 "plt.show()"
-                 "\n"
-                 "# Scripting Plots in Mantid:"
-                 "\n"
-                 "# https://docs.mantidproject.org/tutorials/python_in_mantid/plotting/02_scripting_plots.html")
+                     "\n"
+                     "plt.show()"
+                     "\n"
+                     "# Scripting Plots in Mantid:"
+                     "\n"
+                     "# https://docs.mantidproject.org/tutorials/python_in_mantid/plotting/02_scripting_plots.html")
 
-SAMPLE_SCRIPT_WITH_FIT = ("from mantid.simpleapi import Fit\n"
-                          "import matplotlib.pyplot as plt\n"
-                          "from mantid.plots.utility import MantidAxType\n"
-                          "# Fit definition, see https://docs.mantidproject.org/algorithms/Fit-v1.html for more details\n"
-                          "Function=\"GaussOsc\"\n"
-                          "InputWorkspace=\"TestWorkspace\"\n"
-                          "Output=\"TestOutput\"\n"
-                          "Fit(Function=Function, InputWorkspace=InputWorkspace, Output=Output)\n"
-                          "\n"
-                          "from mantid.api import AnalysisDataService\n"
-                          "\n"
-                          "ADS.retrieve(...)\n"
-                          "\n"
-                          "fig, axes = plt.subplots(...)\n"
-                          "axes.plot(...)\n"
-                          "axes.plot(...)\n"
-                          "axes.set_xlim(...)\n"
-                          "axes.set_ylim(...)\n"
-                          "axes.set_facecolor('#8a9aff')\n"
+    SAMPLE_SCRIPT_WITH_FIT = ("from mantid.simpleapi import Fit\n"
+                              "import matplotlib.pyplot as plt\n"
+                              "from mantid.plots.utility import MantidAxType\n"
+                              "# Fit definition, see https://docs.mantidproject.org/algorithms/Fit-v1.html for more details\n"
+                              "Function=\"GaussOsc\"\n"
+                              "InputWorkspace=\"TestWorkspace\"\n"
+                              "Output=\"TestOutput\"\n"
+                              "Fit(Function=Function, InputWorkspace=InputWorkspace, Output=Output)\n"
+                              "\n"
+                              "from mantid.api import AnalysisDataService\n"
+                              "\n"
+                              "ADS.retrieve(...)\n"
+                              "\n"
+                              "fig, axes = plt.subplots(...)\n"
+                              "axes[0].plot(...)\n"
+                              "axes[0].plot(...)\n"
+                              "axes[0].set_xlim(...)\n"
+                              "axes[0].set_ylim(...)\n"
+                              "axes[0].set_facecolor('#8a9aff')\n"
 
-                          "\n"
-                          "plt.show()"
-                          "\n"
-                          "# Scripting Plots in Mantid:"
-                          "\n"
-                          "# https://docs.mantidproject.org/tutorials/python_in_mantid/plotting/02_scripting_plots.html")
+                              "\n"
+                              "plt.show()"
+                              "\n"
+                              "# Scripting Plots in Mantid:"
+                              "\n"
+                              "# https://docs.mantidproject.org/tutorials/python_in_mantid/plotting/02_scripting_plots.html")
+else:
+    SAMPLE_SCRIPT = ("import matplotlib.pyplot as plt\n"
+                     "from mantid.plots.utility import MantidAxType\n"
+                     "from mantid.api import AnalysisDataService\n"
+                     "\n"
+                     "ADS.retrieve(...)\n"
+                     "\n"
+                     "fig, axes = plt.subplots(...)\n"
+                     "axes.plot(...)\n"
+                     "axes.plot(...)\n"
+                     "axes.set_xlim(...)\n"
+                     "axes.set_ylim(...)\n"
+                     "axes.set_facecolor('#8a9aff')\n"
+
+                     "\n"
+                     "plt.show()"
+                     "\n"
+                     "# Scripting Plots in Mantid:"
+                     "\n"
+                     "# https://docs.mantidproject.org/tutorials/python_in_mantid/plotting/02_scripting_plots.html")
+
+    SAMPLE_SCRIPT_WITH_FIT = ("from mantid.simpleapi import Fit\n"
+                              "import matplotlib.pyplot as plt\n"
+                              "from mantid.plots.utility import MantidAxType\n"
+                              "# Fit definition, see https://docs.mantidproject.org/algorithms/Fit-v1.html for more details\n"
+                              "Function=\"GaussOsc\"\n"
+                              "InputWorkspace=\"TestWorkspace\"\n"
+                              "Output=\"TestOutput\"\n"
+                              "Fit(Function=Function, InputWorkspace=InputWorkspace, Output=Output)\n"
+                              "\n"
+                              "from mantid.api import AnalysisDataService\n"
+                              "\n"
+                              "ADS.retrieve(...)\n"
+                              "\n"
+                              "fig, axes = plt.subplots(...)\n"
+                              "axes.plot(...)\n"
+                              "axes.plot(...)\n"
+                              "axes.set_xlim(...)\n"
+                              "axes.set_ylim(...)\n"
+                              "axes.set_facecolor('#8a9aff')\n"
+
+                              "\n"
+                              "plt.show()"
+                              "\n"
+                              "# Scripting Plots in Mantid:"
+                              "\n"
+                              "# https://docs.mantidproject.org/tutorials/python_in_mantid/plotting/02_scripting_plots.html")
+
 
 SAMPLE_SCRIPT_TILED_PLOT = "# import mantid algorithms, numpy and matplotlib\n" \
                            "from mantid.simpleapi import *\n" \
