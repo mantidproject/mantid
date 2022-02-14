@@ -61,6 +61,14 @@ class SANSILLMultiProcessTest(unittest.TestCase):
         self.assertTrue(iq.getRun())
         self.assertTrue(iq.getHistory())
 
+    def test_fail_d2_before_d1_samples(self):
+        self.assertRaises(RuntimeError, SANSILLMultiProcess, OutputWorkspace="out",
+                          SampleRunsD2="010569")
+
+    def test_fail_d2_skipped_samples(self):
+        self.assertRaises(RuntimeError, SANSILLMultiProcess, OutputWorkspace="out",
+                          SampleRunsD1="010569", SampleRunsD3="010455")
+
     def test_fail_different_number_of_samples(self):
         self.assertRaises(RuntimeError, SANSILLMultiProcess, OutputWorkspace="out",
                           SampleRunsD1="010569", SampleRunsD2="010455,010460")
@@ -72,6 +80,11 @@ class SANSILLMultiProcessTest(unittest.TestCase):
     def test_fail_different_number_of_tr_runs(self):
         self.assertRaises(RuntimeError, SANSILLMultiProcess, OutputWorkspace="out",
                           SampleRunsD1="010569,010460", SampleTrRunsW1="010585",
+                          TrEmptyBeamRuns="010414")
+
+    def test_fail_w2_before_w1_tr_runs(self):
+        self.assertRaises(RuntimeError, SANSILLMultiProcess, OutputWorkspace="out",
+                          SampleRunsD1="010569", SampleTrRunsW2="010585",
                           TrEmptyBeamRuns="010414")
 
     def test_fail_output_name_not_alphanumeric(self):
