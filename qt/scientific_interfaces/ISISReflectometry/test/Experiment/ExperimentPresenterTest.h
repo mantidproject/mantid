@@ -891,6 +891,7 @@ private:
     for (auto row : rows)
       EXPECT_CALL(m_view, showLookupRowAsInvalid(row, column)).Times(1);
     presenter.notifyLookupRowChanged(1, 1);
+    TS_ASSERT(!presenter.hasValidSettings());
     verifyAndClear();
   }
 
@@ -899,6 +900,7 @@ private:
     EXPECT_CALL(m_view, getLookupTable()).WillOnce(Return(optionsTable));
     EXPECT_CALL(m_view, showLookupRowAsInvalid(row, column)).Times(1);
     presenter.notifyLookupRowChanged(1, 1);
+    TS_ASSERT(!presenter.hasValidSettings());
     verifyAndClear();
   }
 
