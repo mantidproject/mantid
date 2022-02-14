@@ -789,7 +789,7 @@ class DirectILLAutoProcess(DataProcessorAlgorithm):
         if self.masking:
             ws = self._apply_mask(ws)
 
-        vanadium_diagnostics = '{}_diag'.format(numor)
+        vanadium_diagnostics = 'diag_{}'.format(numor)
         kwargs = {'BeamStopDiagnostics': 'Beam Stop Diagnostics OFF'}
         if self.vanadium_epp:
             kwargs[common.PROP_EPP_WS] = self.vanadium_epp
@@ -802,7 +802,7 @@ class DirectILLAutoProcess(DataProcessorAlgorithm):
         if self.empty:
             self._subtract_empty_container(ws)
 
-        vanadium_integral = '{}_integral'.format(numor)
+        vanadium_integral = 'integral_{}'.format(numor)
         DirectILLIntegrateVanadium(
             InputWorkspace=ws,
             OutputWorkspace=vanadium_integral,
@@ -811,8 +811,8 @@ class DirectILLAutoProcess(DataProcessorAlgorithm):
         if self.getPropertyValue('AbsorptionCorrection') != 'None':
             self._correct_self_attenuation(ws, 0)
 
-        sofq_output = '{}_SofQ'.format(numor)
-        softw_output = '{}_SofTW'.format(numor)
+        sofqw_output = 'SofQW_{}'.format(numor)
+        softw_output = 'SofTW_{}'.format(numor)
         optional_parameters = dict()
         if not self.getProperty(common.PROP_GROUPING_ANGLE_STEP).isDefault:
             optional_parameters['GroupingAngleStep'] = self.getProperty(common.PROP_GROUPING_ANGLE_STEP).value
@@ -827,7 +827,7 @@ class DirectILLAutoProcess(DataProcessorAlgorithm):
             optional_parameters['QBinningParams'] = self.getProperty('MomentumTransferBinning').value
         DirectILLReduction(
             InputWorkspace=ws,
-            OutputWorkspace=sofq_output,
+            OutputWorkspace=sofqw_output,
             OutputSofThetaEnergyWorkspace=softw_output,
             DiagnosticsWorkspace=vanadium_diagnostics,
             **optional_parameters
@@ -835,7 +835,7 @@ class DirectILLAutoProcess(DataProcessorAlgorithm):
 
         if len(to_remove) > 0 and self.clear_cache:
             self._clean_up(to_remove)
-        return sofq_output, softw_output, vanadium_diagnostics, vanadium_integral
+        return sofqw_output, softw_output, vanadium_diagnostics, vanadium_integral
 
     def _rename_workspaces(self, ws_list):
         """Renames workspaces in the provided list by appending a custom suffix containing the user-defined output
