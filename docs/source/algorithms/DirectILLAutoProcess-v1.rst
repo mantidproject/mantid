@@ -11,7 +11,7 @@ Description
 
 This algorithms performs full treatment of :ref:`ILL's time-of-flight <DirectILL>` data recorded with the ILL instruments IN4, IN5, IN6, PANTHER, and SHARP.
 This high level algorithm steers the reduction for each sample type and performs the full set of corrections for a given sample run, or set thereof;
-measured at one initial energy and one or more temperatures.
+measured at one initial energy and one or more temperatures (for powder) and one or more sample angles (for single crystal).
 
 The sample measurement will be corrected for all the effects the user selects and the input is provided for, such as flat background, empty container subtraction, and vanadium normalisation.
 The output is transformated to :math:`S(q,\omega)` space, and :math:`S(2\theta,\omega)`, and can be stored as .nxs and .nxspe files, if requested.
