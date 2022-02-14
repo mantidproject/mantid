@@ -220,7 +220,6 @@ class RundexSettings(object):
             DIRECT_TOF: {
                 "SaveNexusProcessed": True,
                 "SaveAscii": False,
-                "SaveFocussedXYE": False,
                 "SaveNXSPE": False
                 }
             }
