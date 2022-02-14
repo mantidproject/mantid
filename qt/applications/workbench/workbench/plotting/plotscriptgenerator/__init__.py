@@ -5,7 +5,9 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 #  This file is part of the mantid workbench.
+from distutils.version import LooseVersion
 
+import matplotlib
 from matplotlib.legend import Legend
 
 from mantid.plots.mantidaxes import MantidAxes
@@ -207,9 +209,11 @@ def get_axes_object_variable(ax):
     # plotted otherwise it returns a list
     ax_object_var = AXES_VARIABLE
     try:
-        if ax.get_gridspec().nrows > 1:
+        if (LooseVersion('3.1.3') > LooseVersion(matplotlib.__version__) and ax.get_gridspec().nrows > 1) or \
+                ax.numRows > 1:
             ax_object_var += "[{row_num}]".format(row_num=row_num(ax))
-        if ax.get_gridspec().ncols > 1:
+        if (LooseVersion('3.1.3') > LooseVersion(matplotlib.__version__) and ax.get_gridspec().ncols > 1) or \
+                ax.numCols > 1:
             ax_object_var += "[{col_num}]".format(col_num=col_num(ax))
     except AttributeError:
         # No numRows or NumCols members, so no list use the default
