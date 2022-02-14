@@ -277,6 +277,7 @@ class LRautoreductionTest(systemtesting.MantidSystemTest):
         if os.path.isfile('template.xml'):
             os.remove('template.xml')
 
+
 class LiquidsReflectometryReductionSimpleErrorTest(systemtesting.MantidSystemTest):
     """
         Test automated reduction
