@@ -12,6 +12,8 @@ our custom window.
 """
 
 # std imports
+from distutils.version import LooseVersion
+
 import matplotlib
 import numpy as np
 
@@ -343,8 +345,11 @@ def plot_surface(workspaces, fig=None):
             fig.clf()
             ax = fig.add_subplot(111, projection='mantid3d')
         else:
-            fig, ax = plt.subplots(subplot_kw={'projection': 'mantid3d', "auto_add_to_figure": False})
-            fig.add_axes(ax)
+            if LooseVersion('3.4.0') >= LooseVersion(matplotlib.__version__):
+                fig, ax = plt.subplots(subplot_kw={'projection': 'mantid3d', "auto_add_to_figure": False})
+                fig.add_axes(ax)
+            else:
+                fig, ax = plt.subplots(subplot_kw={'projection': 'mantid3d'})
 
         surface = ax.plot_surface(ws, cmap=ConfigService.getString("plots.images.Colormap"))
         ax.set_title(ws.name())
