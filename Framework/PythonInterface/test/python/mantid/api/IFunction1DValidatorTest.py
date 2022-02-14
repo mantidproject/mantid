@@ -37,6 +37,8 @@ class SimpleFuncWValidator(IFunction1D):
     def function1D(self, xvals):
         pass
 
+class IFunction1DValidatorTest(unittest.TestCase):
+
     def test_float_bounded_validator(self):
         func = SimpleFuncWValidator()
 
