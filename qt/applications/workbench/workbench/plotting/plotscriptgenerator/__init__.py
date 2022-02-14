@@ -78,7 +78,7 @@ def generate_script(fig, exclude_headers=False):
             continue
         ax_object_var = get_axes_object_variable(ax)
         if axes_type(ax) in [FigureType.Image]:
-            colormap_lines, colormap_headers = get_plot_2d_cmd(ax, ax_object_var) # ax.imshow or pcolormesh
+            colormap_lines, colormap_headers = get_plot_2d_cmd(ax, ax_object_var)  # ax.imshow or pcolormesh
             plot_commands.extend(colormap_lines)
             plot_headers.extend(colormap_headers)
         else:
@@ -209,10 +209,10 @@ def get_axes_object_variable(ax):
     # plotted otherwise it returns a list
     ax_object_var = AXES_VARIABLE
     try:
-        if (LooseVersion('3.1.3') > LooseVersion(matplotlib.__version__) and ax.get_gridspec().nrows > 1) or \
+        if (LooseVersion('3.1.3') < LooseVersion(matplotlib.__version__) and ax.get_gridspec().nrows > 1) or \
                 ax.numRows > 1:
             ax_object_var += "[{row_num}]".format(row_num=row_num(ax))
-        if (LooseVersion('3.1.3') > LooseVersion(matplotlib.__version__) and ax.get_gridspec().ncols > 1) or \
+        if (LooseVersion('3.1.3') < LooseVersion(matplotlib.__version__) and ax.get_gridspec().ncols > 1) or \
                 ax.numCols > 1:
             ax_object_var += "[{col_num}]".format(col_num=col_num(ax))
     except AttributeError:
