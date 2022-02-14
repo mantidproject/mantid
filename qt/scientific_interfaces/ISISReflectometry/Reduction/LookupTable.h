@@ -27,8 +27,8 @@ public:
   boost::optional<LookupRow> findWildcardLookupRow() const;
   std::vector<LookupRow::ValueArray> toValueArray() const;
 
-  bool operator==(LookupTable const &rhs) const noexcept;
-  bool operator!=(LookupTable const &rhs) const noexcept;
+  friend bool operator==(LookupTable const &lhs, LookupTable const &rhs);
+  friend bool operator!=(LookupTable const &lhs, LookupTable const &rhs);
 
 private:
   std::vector<LookupRow> m_lookupRows;

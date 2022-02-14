@@ -104,6 +104,6 @@ std::vector<LookupRow::ValueArray> LookupTable::toValueArray() const {
   return result;
 };
 
-bool LookupTable::operator==(LookupTable const &rhs) const noexcept { return this->m_lookupRows == rhs.m_lookupRows; }
-bool LookupTable::operator!=(LookupTable const &rhs) const noexcept { return !((*this) == rhs); }
+bool operator==(LookupTable const &lhs, LookupTable const &rhs) { return lhs.m_lookupRows == rhs.m_lookupRows; }
+bool operator!=(LookupTable const &lhs, LookupTable const &rhs) { return !operator==(lhs, rhs); }
 } // namespace MantidQt::CustomInterfaces::ISISReflectometry

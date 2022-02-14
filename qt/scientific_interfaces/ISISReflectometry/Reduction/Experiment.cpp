@@ -65,7 +65,7 @@ boost::optional<LookupRow> Experiment::findLookupRow(Row const &row, double tole
 
 boost::optional<LookupRow> Experiment::findWildcardLookupRow() const { return m_lookupTable.findWildcardLookupRow(); }
 
-bool operator!=(Experiment const &lhs, Experiment const &rhs) { return !(lhs == rhs); }
+bool operator!=(Experiment const &lhs, Experiment const &rhs) { return !operator==(lhs, rhs); }
 
 bool operator==(Experiment const &lhs, Experiment const &rhs) {
   return lhs.analysisMode() == rhs.analysisMode() && lhs.reductionType() == rhs.reductionType() &&
