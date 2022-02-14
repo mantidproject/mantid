@@ -140,7 +140,7 @@ class DirectILLAuto_PANTHER_SingleCrystal_Test(systemtesting.MantidSystemTest):
         self.tolerance = 1e-3
         self.tolerance_is_rel_err = True
         self.disableChecking = ['Instrument', 'Sample']
-        return ['panther_236_013806_reb_Ei_19', 'ILL_PANTHER_SingleCrystal_Auto.nxs']
+        return ['panther_236', 'ILL_PANTHER_SingleCrystal_Auto.nxs']
 
     def runTest(self):
 

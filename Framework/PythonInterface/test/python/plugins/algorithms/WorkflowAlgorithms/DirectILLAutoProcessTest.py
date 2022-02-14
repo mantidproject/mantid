@@ -61,7 +61,7 @@ class DirectILLAutoProcessTest(unittest.TestCase):
             ClearCache=True
         )
         self.assertTrue(isinstance(mtd[vanadium_name], WorkspaceGroup))
-        self._check_output(mtd[vanadium_name][0], 665, 226, True, "q", "MomentumTransfer", "Energy transfer",
+        self._check_output(mtd[vanadium_name][0], 664, 226, True, "q", "MomentumTransfer", "Energy transfer",
                            "DeltaE")  # S(Q, w)
         self._check_output(mtd[vanadium_name][1], 226, 669, True, "Energy transfer", "DeltaE", "Scattering angle",
                            "Degrees")  # S(2theta, w)
