@@ -208,14 +208,12 @@ def get_axes_object_variable(ax):
     # plt.subplots returns an Axes object if there's only one axes being
     # plotted otherwise it returns a list
     ax_object_var = AXES_VARIABLE
-    try:
-        if (LooseVersion('3.1.3') < LooseVersion(matplotlib.__version__) and ax.get_gridspec().nrows > 1) or \
-                ax.numRows > 1:
-            ax_object_var += "[{row_num}]".format(row_num=row_num(ax))
-        if (LooseVersion('3.1.3') < LooseVersion(matplotlib.__version__) and ax.get_gridspec().ncols > 1) or \
-                ax.numCols > 1:
-            ax_object_var += "[{col_num}]".format(col_num=col_num(ax))
-    except AttributeError:
-        # No numRows or NumCols members, so no list use the default
-        pass
+
+    if (LooseVersion('3.1.3') < LooseVersion(matplotlib.__version__) and ax.get_gridspec().nrows > 1) or \
+            hasattr(ax, "numRows") and ax.numRows > 1:
+        ax_object_var += "[{row_num}]".format(row_num=row_num(ax))
+    if (LooseVersion('3.1.3') < LooseVersion(matplotlib.__version__) and ax.get_gridspec().ncols > 1) or \
+            hasattr(ax, "numCols") and ax.numCols > 1:
+        ax_object_var += "[{col_num}]".format(col_num=col_num(ax))
+
     return ax_object_var
