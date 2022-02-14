@@ -70,9 +70,11 @@ class PyChopInstrument(DirectInstrument):
         frequencies_mev = frequencies_invcm / MILLI_EV_TO_WAVENUMBER
         ei_mev = self._e_init / MILLI_EV_TO_WAVENUMBER
 
-        resolution = self._pychop_instrument.getResolution(Ei_in=ei_mev,
-                                                           Etrans=frequencies_mev.tolist())
+        resolution_fwhm = self._pychop_instrument.getResolution(Ei_in=ei_mev,
+                                                                Etrans=frequencies_mev.tolist())
 
-        fit = np.polyfit(frequencies_invcm, resolution * MILLI_EV_TO_WAVENUMBER, order)
+        resolution_sigma = resolution_fwhm / (2 * np.sqrt(2 * np.log(2)))
+
+        fit = np.polyfit(frequencies_invcm, resolution_sigma * MILLI_EV_TO_WAVENUMBER, order)
 
         self._polyfits[self._e_init] = fit
