@@ -647,7 +647,6 @@ class DirectILLAutoProcess(DataProcessorAlgorithm):
             if not self.getProperty('ContainerMaterial').isDefault else ""
 
         self.absorption_corr = "{}_abs_corr".format(ws)
-        self.to_clean.append(self.absorption_corr)
         SetSample(
             InputWorkspace=ws,
             Geometry=sample_geometry,
