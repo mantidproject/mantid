@@ -39,7 +39,7 @@ class MplPlot3dCanvas(FigureCanvas):
         FigureCanvas.updateGeometry(self)
 
         # Axes
-        if LooseVersion('3.4.0') >= LooseVersion(matplotlib.__version__):
+        if LooseVersion('3.4.0') <= LooseVersion(matplotlib.__version__):
             self._myAxes = Axes3D(self._myFigure, auto_add_to_figure=False)  # Canvas figure must be created for mouse rotation
             self._myFigure.add_axes(self._myAxes)
         else:

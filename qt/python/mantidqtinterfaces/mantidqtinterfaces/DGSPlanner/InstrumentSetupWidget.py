@@ -261,7 +261,7 @@ class InstrumentSetupWidget(QtWidgets.QWidget):
         #plot directions
         if self.gonfig is not None:
             self.gonfig.clear()
-        if LooseVersion('3.4.0') >= LooseVersion(matplotlib.__version__):
+        if LooseVersion('3.4.0') <= LooseVersion(matplotlib.__version__):
             self.gonfig = Axes3D(self.figure, auto_add_to_figure=False)
             self.figure.add_axes(self.gonfig)
         else:
