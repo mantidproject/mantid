@@ -13,13 +13,11 @@ import math
 import re
 import platform
 import time
-import numpy as np
 import mantid
 from mantid.api import *
 from mantid.simpleapi import *
 from mantid.kernel import *
 from reduction_gui.reduction.reflectometer.refl_data_series import DataSeries
-from reduction_gui.reduction.reflectometer.refl_data_script import DataSets
 
 
 class LRAutoReduction(PythonAlgorithm):
@@ -226,8 +224,6 @@ class LRAutoReduction(PythonAlgorithm):
         """
         # Check whether we need to read a template file
         filename = self.getProperty("TemplateFile").value
-        # Keep track of the origin of the template so we know whether to force peak finding
-        create_template = False
 
         # Look for the template file
         if len(filename.strip()) > 0:
