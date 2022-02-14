@@ -87,6 +87,12 @@ class SANSILLReduction2Test(unittest.TestCase):
         self._check_output(mtd['sample'], 85, 256*256+2)
         self._check_process_flag(mtd['sample'], 'Sample')
 
+    def test_kinetic_calibrants_not_allowed(self):
+        calibrants = ["EmptyBeam", "DarkCurrent", "Water", "EmptyContainer", "Solvent"]
+        for process in calibrants:
+            self.assertRaises(RuntimeError, SANSILLReduction, OutputWorkspace="out",
+                              SampleRunsD1="017251", ProcessAs=process)
+
     def test_sample_tof(self):
         SANSILLReduction(Runs='042610', ProcessAs='Sample', OutputWorkspace='sample', NormaliseBy='Time')
         self._check_output_tof(mtd['sample'], 200, 256*256+2)
