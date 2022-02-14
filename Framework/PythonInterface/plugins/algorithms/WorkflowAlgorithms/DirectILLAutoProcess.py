@@ -508,7 +508,10 @@ class DirectILLAutoProcess(DataProcessorAlgorithm):
                 OutputWorkspace=ws,
                 CorrectionsWorkspace=tmp_corr
             )
-            DeleteWorkspace(Workspace=tmp_corr)
+            to_remove = [tmp_corr]
+            if 'corrected' in mtd:
+                to_remove.append('corrected')
+            DeleteWorkspaces(WorkspaceList=to_remove)
 
     @staticmethod
     def _clean_up(to_clean):
