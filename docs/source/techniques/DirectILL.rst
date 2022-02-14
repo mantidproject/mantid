@@ -34,13 +34,14 @@ The algorithms can be used as flexible building blocks in Python scripts. Not al
 
 Together with the other algorithms and services provided by the Mantid framework, the reduction algorithms can handle a great number of reduction scenarios. If this proves insufficient, however, the algorithms can be accessed using Python. Before making modifications it is recommended to copy the source files and rename the algorithms as not to break the original behavior.
 
-Additionally, there is an algorithm that streamlines the reduction process:
+Additionally, there is an algorithm that streamlines the reduction process, which is the recommended way of performing the reduction:
 
 :ref:`algm-DirectILLAutoProcess`
      Performs full data treatment of a defined reduction technique and process.
 
 The :ref:`algm-DirectILLAutoProcess` algorithm calls and properly connects inputs for the algorithms specified above to provide a simplified interface for standard reductions. The number of possible
-workflows is necessarily more limited than when calls to intermediate algorithms are made individually and from a user-defined script.
+workflows is necessarily more limited than when calls to intermediate algorithms are made individually and from a user-defined script. The individual algorithms should be used only in case when
+the order of corrections needs changing or any other custom modifications to the standard workflow in the :ref:`algm-DirectILLAutoProcess` are necessary.
 
 This document tries to give an overview on how the algorithms work together via Python examples. Please refer to the algorithm documentation for details of each individual algorithm.
 
