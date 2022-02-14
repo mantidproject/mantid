@@ -89,6 +89,29 @@ class DirectILLAutoProcessTest(unittest.TestCase):
         )
         self._check_output(mtd[sample_name][0], 95, 36863, False, "Energy transfer", "DeltaE", "Spectrum", "Label")
 
+    def test_sample_powder(self):
+        sample_runs = '9738'
+        sample_name = 'panther_powder'
+        ei = 19
+        elp = 104
+        DirectILLAutoProcess(
+            Runs=sample_runs,
+            OutputWorkspace=sample_name,
+            ProcessAs='Sample',
+            ReductionType='Powder',
+            IncidentEnergyCalibration="Energy Calibration ON",
+            IncidentEnergy=ei,
+            ElasticChannelIndex=elp,
+            MaskThresholdMin=0,
+            MaskThresholdMax=20,
+            ClearCache=True,
+            SaveOutput=False
+        )
+        self._check_output(mtd[sample_name][0], 665, 226, True, "q", "MomentumTransfer", "Energy transfer",
+                           "DeltaE")  # S(Q, w)
+        self._check_output(mtd[sample_name][1], 226, 669, True, "Energy transfer", "DeltaE", "Scattering angle",
+                           "Degrees")  # S(2theta, w)
+
     def _check_output(self, ws, blocksize, spectra, isDistribution, x_unit, x_unit_id, y_unit, y_unit_id):
         self.assertTrue(ws)
         self.assertTrue(isinstance(ws, MatrixWorkspace))
