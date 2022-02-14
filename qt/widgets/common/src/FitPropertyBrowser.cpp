@@ -1284,7 +1284,7 @@ void FitPropertyBrowser::boolChanged(QtProperty *prop) {
     PropertyHandler *h = getHandler()->findHandler(prop);
     if (!h)
       return;
-    h->setAttribute(prop);
+    enactAttributeChange(prop, h);
   }
 }
 
@@ -1330,7 +1330,7 @@ void FitPropertyBrowser::intChanged(QtProperty *prop) {
     PropertyHandler *h = getHandler()->findHandler(prop);
     if (!h)
       return;
-    h->setAttribute(prop);
+    enactAttributeChange(prop, h);
   }
 }
 
@@ -1373,8 +1373,18 @@ void FitPropertyBrowser::doubleChanged(QtProperty *prop) {
         h->addConstraint(parProp, false, true, 0, upBound);
       }
     } else { // it could be an attribute
-      h->setAttribute(prop);
+      enactAttributeChange(prop, h);
     }
+  }
+}
+
+void FitPropertyBrowser::enactAttributeChange(QtProperty *prop, PropertyHandler *h) {
+  try {
+    h->setAttribute(prop);
+  } catch (IFunction::validationException &ve) {
+    std::stringstream err_str;
+    err_str << prop->propertyName().toStdString() << " - " << ve.what();
+    g_log.warning(err_str.str());
   }
 }
 
@@ -2406,6 +2416,28 @@ QtProperty *FitPropertyBrowser::addStringProperty(const QString &name) const {
   } else {
     prop = m_stringManager->addProperty(name);
   }
+  return prop;
+}
+
+/**
+ * Create a string list property and selects a property manager for it
+ * based on the property name
+ * @param name :: The name of the new property
+ * @param allowed_values :: A list of the values allowed by the validator
+ * @return Pointer to the created property
+ */
+QtProperty *FitPropertyBrowser::addStringListProperty(const QString &name,
+                                                      const std::vector<std::string> &allowed_values) const {
+  QtProperty *prop;
+  QStringList qAllowedValues;
+
+  prop = m_enumManager->addProperty(name);
+
+  for (const auto &values : allowed_values) {
+    qAllowedValues << QString::fromStdString(values);
+  }
+  m_enumManager->setEnumNames(prop, qAllowedValues);
+
   return prop;
 }
 
