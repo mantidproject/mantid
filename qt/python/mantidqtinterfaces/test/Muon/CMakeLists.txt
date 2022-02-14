@@ -24,12 +24,15 @@ set(TEST_PY_FILES
     elemental_analysis/detectors_presenter_test.py
     elemental_analysis/periodic_table_test.py
     elemental_analysis/peak_selector_view_test.py
+    elemental_analysis/peak_data_file_test.py
     elemental_analysis/element_button_test.py
     elemental_analysis/periodic_combo_test.py
     elemental_analysis/periodic_list_test.py
     elemental_analysis/periodic_table_item_test.py
     elemental_analysis/lmodel_test.py
     elemental_analysis/load_model_test.py
+    elemental_analysis/PeriodicTableModel_test.py
+    elemental_analysis/PeriodicTablePresenter_test.py
     elemental_analysis_2/elemental_analysis_context_test.py
     elemental_analysis_2/elemental_analysis_main_GUI_test.py
     elemental_analysis_2/EA_loading_tab/elemental_analysis_loadutils_test.py
@@ -46,6 +49,7 @@ set(TEST_PY_FILES
     elemental_analysis_2/EA_auto_tab/ea_auto_tab_presenter_test.py
     elemental_analysis_2/EA_auto_tab/ea_match_table_presenter_test.py
     external_plotting_model_test.py
+    feature_flags/add_fitting_test.py
     feature_flags/add_grouping_workspaces_test.py
     feature_flags/add_model_analysis_test.py
     feature_flags/add_raw_plots_test.py
@@ -104,6 +108,8 @@ set(TEST_PY_FILES
     loading_tab/loadwidget_presenter_failure_test.py
     loading_tab/loadwidget_presenter_multiple_file_test.py
     loading_tab/loadwidget_presenter_test.py
+    LoadWidgetPresenter_test.py
+    LoadWidgetView_test.py
     max_ent_presenter_load_interaction_test.py
     MaxEntPresenter_test.py
     model_fitting_context_test.py
@@ -122,6 +128,7 @@ set(TEST_PY_FILES
     plot_fit_panes/plot_time_fit_pane_model_test.py
     plot_fit_panes/plot_fit_pane_presenter_test.py
     plot_fit_panes/plot_freq_fit_pane_model_test.py
+    plot_fit_panes/plot_freq_fit_pane_presenter_test.py
     plot_fit_panes/plot_model_fit_pane_model_test.py
     plot_fit_panes/plot_model_fit_pane_presenter_test.py
     plot_fit_panes/plot_widget_test.py

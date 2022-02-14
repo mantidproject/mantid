@@ -115,8 +115,8 @@ std::vector<std::string> splitPath(const std::string &path) {
 
 /// Private constructor for singleton class
 ConfigServiceImpl::ConfigServiceImpl()
-    : m_pConf(nullptr), m_pSysConfig(nullptr), m_changed_keys(), m_strBaseDir(""), m_propertyString(""),
-      m_properties_file_name("Mantid.properties"),
+    : m_pConf(nullptr), m_pSysConfig(new Poco::Util::SystemConfiguration()), m_changed_keys(), m_strBaseDir(""),
+      m_propertyString(""), m_properties_file_name("Mantid.properties"),
 #ifdef MPI_BUILD
       // Use a different user properties file for an mpi-enabled build to avoid
       // confusion if both are used on the same file system
@@ -125,10 +125,6 @@ ConfigServiceImpl::ConfigServiceImpl()
       m_user_properties_file_name("Mantid.user.properties"),
 #endif
       m_dataSearchDirs(), m_instrumentDirs(), m_proxyInfo(), m_isProxySet(false) {
-  // getting at system details
-  m_pSysConfig = new Poco::Util::SystemConfiguration();
-  m_pConf = nullptr;
-
   // Register StdChannel with Poco
   Poco::LoggingFactory::defaultFactory().registerChannelClass(
       "StdoutChannel", new Poco::Instantiator<Poco::StdoutChannel, Poco::Channel>);

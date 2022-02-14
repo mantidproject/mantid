@@ -103,7 +103,7 @@ void EQSANSCorrectFrame::exec() {
   // Loop through the spectra and apply correction
   PARALLEL_FOR_IF(Kernel::threadSafe(*inputWS))
   for (int64_t ispec = 0; ispec < int64_t(numHists); ++ispec) {
-    PARALLEL_START_INTERUPT_REGION
+    PARALLEL_START_INTERRUPT_REGION
     if (!spectrumInfo.hasDetectors(ispec)) {
       g_log.warning() << "Workspace index " << ispec << " has no detector assigned to it - discarding\n";
       continue;
@@ -122,9 +122,9 @@ void EQSANSCorrectFrame::exec() {
 
     evlist.convertTof(tofCorrector);
     progress.report("Correct TOF frame");
-    PARALLEL_END_INTERUPT_REGION
+    PARALLEL_END_INTERRUPT_REGION
   }
-  PARALLEL_CHECK_INTERUPT_REGION
+  PARALLEL_CHECK_INTERRUPT_REGION
   // Set bin boundaries to absolute minimum and maximum
   inputWS->resetAllXToSingleBin();
 }

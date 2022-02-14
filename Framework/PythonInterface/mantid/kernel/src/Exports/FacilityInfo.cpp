@@ -46,7 +46,5 @@ void export_FacilityInfo() {
            (std::vector<InstrumentInfo>(FacilityInfo::*)(const std::string &) const) & FacilityInfo::instruments,
            (arg("self"), arg("technique")), "Returns a list of instruments of given technique")
       .def("instrument", &FacilityInfo::instrument, (arg("self"), arg("instrumentName")),
-           return_value_policy<copy_const_reference>(), "Returns the instrument with the given name")
-      .def("computeResources", &FacilityInfo::computeResources, arg("self"),
-           "Returns a vector of the available compute resources");
+           return_value_policy<copy_const_reference>(), "Returns the instrument with the given name");
 }

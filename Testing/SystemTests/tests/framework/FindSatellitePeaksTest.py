@@ -5,7 +5,6 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 from mantid.simpleapi import FindSatellitePeaks, Load
-import unittest
 import systemtesting
 
 
@@ -64,7 +63,3 @@ class FindSatellitePeaksTestAutoFindQ(systemtesting.MantidSystemTest):
 
     def validate(self):
         return self._satellites_refined.name(), 'refine_satellites_auto_q_test_04012021.nxs'
-
-
-if __name__ == "__main__":
-    unittest.main()

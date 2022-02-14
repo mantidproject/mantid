@@ -136,7 +136,6 @@ void WorkspaceTreeWidget::setupWidgetLayout() {
   m_workspaceFilter->setToolTip("Type here to filter the workspaces");
 
   auto *layout = new QVBoxLayout();
-  layout->setSpacing(0);
   layout->setMargin(0);
   layout->addLayout(buttonLayout);
   layout->addWidget(m_workspaceFilter);
@@ -196,8 +195,8 @@ StringList WorkspaceTreeWidget::getSelectedWorkspaceNames() const {
   auto items = m_tree->selectedItems();
   StringList names;
   names.reserve(static_cast<size_t>(items.size()));
-  for (auto &item : items)
-    names.emplace_back(item->text(0).toStdString());
+  std::transform(items.cbegin(), items.cend(), std::back_inserter(names),
+                 [](auto const &item) { return item->text(0).toStdString(); });
 
   return names;
 }
@@ -484,7 +483,7 @@ void WorkspaceTreeWidget::filterWorkspaces(const std::string &filterText) {
           // I am a workspace
           if (item->text(0).contains(filterRegEx)) {
             // my name does match the filter
-            if (auto group = std::dynamic_pointer_cast<WorkspaceGroup>(workspace)) {
+            if (workspace->isGroup()) {
               // I am a group, I will want my children to be visible
               // but I cannot do that until this iterator has finished
               // store this pointer in a list for processing later
@@ -1405,7 +1404,7 @@ void WorkspaceTreeWidget::onClickPlotAdvanced() {
 /** Plots one or more spectra from each selected workspace
  * @param type "Simple", "Errors" show error bars, "Advanced" advanced plotting.
  */
-void WorkspaceTreeWidget::plotSpectrum(std::string type) {
+void WorkspaceTreeWidget::plotSpectrum(const std::string &type) {
   const bool isAdvanced = type == "Advanced";
   const auto userInput = m_tree->chooseSpectrumFromSelected(true, true, true, isAdvanced);
   // An empty map will be returned if the user clicks cancel in the spectrum

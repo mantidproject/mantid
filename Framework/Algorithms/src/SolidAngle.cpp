@@ -246,7 +246,7 @@ void SolidAngle::exec() {
   // Loop over the histograms (detector spectra)
   PARALLEL_FOR_IF(Kernel::threadSafe(*outputWS, *inputWS))
   for (int j = m_MinSpec; j <= m_MaxSpec; ++j) {
-    PARALLEL_START_INTERUPT_REGION
+    PARALLEL_START_INTERRUPT_REGION
     initSpectrum(*inputWS, *outputWS, j);
     if (spectrumInfo.hasDetectors(j)) {
       double solidAngle = 0.0;
@@ -261,9 +261,9 @@ void SolidAngle::exec() {
       ++failCount;
     }
     prog.report();
-    PARALLEL_END_INTERUPT_REGION
+    PARALLEL_END_INTERRUPT_REGION
   } // loop over spectra
-  PARALLEL_CHECK_INTERUPT_REGION
+  PARALLEL_CHECK_INTERRUPT_REGION
   g_log.warning() << "min max total" << m_MinSpec << " " << m_MaxSpec << " " << numberOfSpectra;
 
   auto &outputSpectrumInfo = outputWS->mutableSpectrumInfo();

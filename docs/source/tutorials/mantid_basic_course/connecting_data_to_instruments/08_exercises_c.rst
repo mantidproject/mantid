@@ -1,7 +1,7 @@
 .. _08_exercises_c:
 
 =========
-Exercises 
+Exercises
 =========
 
 Exercise 1
@@ -11,7 +11,7 @@ Exercise 1
 -  Open the Instrument View
 -  Make sure the colour map is set to "jet" and the display type to "Spherical Z".
 -  Change the colour scale to *SymmetricLog10* set the scale range to be between
-   100 and 5e4
+   100 and 5e4 (5e4 is equivalent to 50000)
 -  Go to the *Pick* tab, choose *Add single crystal peak*
    |PickTabAddPeakButton.png| go to a Bragg peak and left-click. The
    mini-plot should now be showing a plot of counts vs TOF for that
@@ -59,14 +59,14 @@ detector for a small angle dataset.
 #. Select the ellipse drawing button |PickTabEllipseButton.png|.
 #. Draw an ellipse in the middle of the panel to cover completely the
    blue disk there. [Tip: Set the Instrument View window to full screen to make this easier!]
-   
+
    |LOQEllipseMasking.png|
 
 #. Select the button for drawing a rectangular ring
    |PickTabRectRingButton.png|
 #. Draw a ring masking the edge detectors of the panel. Use its control
    points to adjust it to the right size and thickness.
-   
+
    |LOQRectRingMasking.png|
 
 #. Click |ApplyToViewButton.png| button.

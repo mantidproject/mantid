@@ -36,6 +36,8 @@ class LRReflectivityOutput(PythonAlgorithm):
         self.declareProperty(FloatArrayProperty("OutputBinning", [0.005, -0.01, 1.0], direction=Direction.Input))
         self.declareProperty("DQConstant", 0.0004, "Constant factor for the resolution dQ = dQ0 + Q dQ/Q")
         self.declareProperty("DQSlope", 0.025, "Slope for the resolution dQ = dQ0 + Q dQ/Q")
+        self.declareProperty("ComputeDQ", True, "If true, the Q resolution will be computed")
+        self.declareProperty("FrontSlitName", "S1", doc="Name of the front slit")
         self.declareProperty(FileProperty('OutputFilename', '', action=FileAction.Save, extensions=["txt"]),
                              doc='Name of the reflectivity file output')
         self.declareProperty("MetaData", "", "Additional meta-data to add to the top of the output file")
@@ -48,6 +50,36 @@ class LRReflectivityOutput(PythonAlgorithm):
 
         # Put the workspaces together
         self.average_points_for_single_q(workspace_list)
+
+    def compute_resolution(self, ws):
+        """
+            Compute the Q resolution from the meta data.
+        """
+        # We can't compute the resolution if the value of xi is not in the logs.
+        # Since it was not always logged, check for it here.
+        if not ws.getRun().hasProperty("BL4B:Mot:xi.RBV"):
+            logger.notice("Could not find BL4B:Mot:xi.RBV: using supplied dQ/Q")
+            return None
+
+        # Xi reference would be the position of xi if the si slit were to be positioned
+        # at the sample. The distance from the sample to si is then xi_reference - xi.
+        xi_reference = 445
+        if ws.getInstrument().hasParameter("xi-reference"):
+            ws.getInstrument().getNumberParameter("xi-reference")[0]
+
+        # Distance between the s1 and the sample
+        s1_sample_distance = 1485
+        if ws.getInstrument().hasParameter("s1-sample-distance"):
+            ws.getInstrument().getNumberParameter("s1-sample-distance")[0]
+
+        front_slit = self.getProperty("FrontSlitName").value
+        s1h = abs(ws.getRun().getProperty("%sVHeight" % front_slit).value[0])
+        ths = abs(ws.getRun().getProperty("ths").value[0])
+        xi = abs(ws.getRun().getProperty("BL4B:Mot:xi.RBV").value[0])
+        sample_si_distance = xi_reference - xi
+        slit_distance = s1_sample_distance - sample_si_distance
+        dq_over_q = s1h / slit_distance * 180 / 3.1416 / ths
+        return dq_over_q
 
     def check_scaling(self, workspace_list):
         """
@@ -192,6 +224,18 @@ class LRReflectivityOutput(PythonAlgorithm):
         file_path = self.getProperty("OutputFilename").value
         dq0 = self.getProperty("DQConstant").value
         dq_over_q = self.getProperty("DQSlope").value
+
+        # Check whether we want to compute the Q resolution
+        compute_dq = self.getProperty("ComputeDQ").value
+        if compute_dq:
+            # Calibrated constant term for the resolution
+            if mtd[scaled_ws_list[0]].getInstrument().hasParameter("dq-constant"):
+                dq0 = mtd[scaled_ws_list[0]].getInstrument().getNumberParameter("dq-constant")[0]
+
+            _dq_over_q = self.compute_resolution(mtd[scaled_ws_list[0]])
+            if _dq_over_q:
+                dq_over_q = _dq_over_q
+
         meta_data = self.getProperty("MetaData").value
 
         data_x = mtd[scaled_ws_list[0] + '_scaled'].dataX(0)

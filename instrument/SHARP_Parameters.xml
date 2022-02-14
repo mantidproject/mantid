@@ -86,6 +86,10 @@
 		<parameter name="detector_for_height_axis" type="string" visible="false">
 			<value val="tube_1" />
 		</parameter>
-	</component-link>
+		<parameter name="elastic_channel_precision" type="int">
+		        <value val="3" />
+		</parameter>
+
+        </component-link>
 
 </parameter-file>

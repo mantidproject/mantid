@@ -276,9 +276,9 @@ void Q1DWeighted::getViewportParams(const std::string &viewport,
  * @param params the vector of strings containing the data defining the sector
  * @param viewport the previously created map of the viewport's parameters
  */
-void Q1DWeighted::getWedgeParams(std::vector<std::string> &params,
-                                 std::map<std::string, std::vector<double>> &viewport) {
-  double zoom = viewport["Zoom"][0];
+void Q1DWeighted::getWedgeParams(const std::vector<std::string> &params,
+                                 const std::map<std::string, std::vector<double>> &viewport) {
+  double zoom = viewport.at("Zoom")[0];
 
   double innerRadius = std::stod(params[1]) / zoom;
   double outerRadius = std::stod(params[2]) / zoom;
@@ -296,8 +296,8 @@ void Q1DWeighted::getWedgeParams(std::vector<std::string> &params,
   // since the viewport was in Z-, the axis are inverted so we have to take the symmetry of the angle
   centerAngle = std::fmod(3 * M_PI - centerAngle, 2 * M_PI);
 
-  double xOffset = viewport["Translation"][0];
-  double yOffset = viewport["Translation"][1];
+  double xOffset = viewport.at("Translation")[0];
+  double yOffset = viewport.at("Translation")[1];
 
   double centerX = -(std::stod(params[5]) - xOffset) / zoom;
   double centerY = (std::stod(params[6]) - yOffset) / zoom;
@@ -368,7 +368,7 @@ void Q1DWeighted::calculate(const MatrixWorkspace_const_sptr &inputWS) {
   PARALLEL_FOR_IF(Kernel::threadSafe(*inputWS))
   // first we loop over spectra
   for (int index = 0; index < static_cast<int>(m_nSpec); ++index) {
-    PARALLEL_START_INTERUPT_REGION
+    PARALLEL_START_INTERRUPT_REGION
     const auto i = static_cast<size_t>(index);
     // skip spectra with no detectors, monitors or masked spectra
     if (!spectrumInfo.hasDetectors(i) || spectrumInfo.isMonitor(i) || spectrumInfo.isMasked(i)) {
@@ -483,9 +483,9 @@ void Q1DWeighted::calculate(const MatrixWorkspace_const_sptr &inputWS) {
       }
       progress.report("Computing I(Q)");
     }
-    PARALLEL_END_INTERUPT_REGION
+    PARALLEL_END_INTERRUPT_REGION
   }
-  PARALLEL_CHECK_INTERUPT_REGION
+  PARALLEL_CHECK_INTERRUPT_REGION
 }
 
 /**
@@ -544,15 +544,15 @@ void Q1DWeighted::fillMonochromaticOutput(MatrixWorkspace_sptr &outputWS, const 
 
     PARALLEL_FOR_IF(Kernel::threadSafe(*outputWS))
     for (int iq = 0; iq < static_cast<int>(m_nQ); ++iq) {
-      PARALLEL_START_INTERUPT_REGION
+      PARALLEL_START_INTERRUPT_REGION
       const double norm = m_normalisation[iout][iSample][iq];
       if (norm != 0.) {
         YOut[iq] = m_intensities[iout][iSample][iq] / norm;
         EOut[iq] = m_errors[iout][iSample][iq] / (norm * norm);
       }
-      PARALLEL_END_INTERUPT_REGION
+      PARALLEL_END_INTERRUPT_REGION
     }
-    PARALLEL_CHECK_INTERUPT_REGION
+    PARALLEL_CHECK_INTERRUPT_REGION
   }
 }
 
@@ -571,16 +571,16 @@ void Q1DWeighted::fillTOFOutput(MatrixWorkspace_sptr &outputWS, const size_t iou
   for (size_t il = 0; il < m_nBins; ++il) {
     PARALLEL_FOR_IF(Kernel::threadSafe(*outputWS))
     for (int iq = 0; iq < static_cast<int>(m_nQ); ++iq) {
-      PARALLEL_START_INTERUPT_REGION
+      PARALLEL_START_INTERRUPT_REGION
       const double norm = m_normalisation[iout][il][iq];
       if (norm != 0.) {
         YOut[iq] += m_intensities[iout][il][iq] / norm;
         EOut[iq] += m_errors[iout][il][iq] / (norm * norm);
         normLambda[iq] += 1.;
       }
-      PARALLEL_END_INTERUPT_REGION
+      PARALLEL_END_INTERRUPT_REGION
     }
-    PARALLEL_CHECK_INTERUPT_REGION
+    PARALLEL_CHECK_INTERRUPT_REGION
   }
 
   for (size_t i = 0; i < m_nQ; ++i) {

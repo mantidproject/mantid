@@ -27,11 +27,11 @@ std::vector<MantidWidgets::Batch::RowLocation> Batch::selectedRowLocations() con
   return m_runsTable.selectedRowLocations();
 }
 
-std::vector<Group> Batch::selectedGroups() const { return m_runsTable.selectedGroups(); }
-
-LookupRow const *Batch::findLookupRow(boost::optional<double> thetaAngle) const {
-  return experiment().findLookupRow(thetaAngle, runsTable().thetaTolerance());
+boost::optional<LookupRow> Batch::findLookupRow(Row const &row) const {
+  return experiment().findLookupRow(row, runsTable().thetaTolerance());
 }
+
+boost::optional<LookupRow> Batch::findWildcardLookupRow() const { return experiment().findWildcardLookupRow(); }
 
 void Batch::resetState() { m_runsTable.resetState(); }
 

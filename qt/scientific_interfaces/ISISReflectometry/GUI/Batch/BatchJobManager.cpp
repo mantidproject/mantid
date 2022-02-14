@@ -245,10 +245,11 @@ void BatchJobManager::algorithmError(IConfiguredAlgorithm_sptr algorithm, std::s
 
 boost::optional<Item &> BatchJobManager::getRunsTableItem(IConfiguredAlgorithm_sptr const &algorithm) {
   auto jobAlgorithm = std::dynamic_pointer_cast<IBatchJobAlgorithm>(algorithm);
-  if (!jobAlgorithm->item() || jobAlgorithm->item()->isPreview()) {
+  auto *item = jobAlgorithm->item();
+  if (!item || item->isPreview()) {
     return boost::none;
   }
-  return *jobAlgorithm->item();
+  return *item;
 }
 
 std::vector<std::string> BatchJobManager::algorithmOutputWorkspacesToSave(IConfiguredAlgorithm_sptr algorithm) const {
@@ -272,8 +273,8 @@ std::vector<std::string> BatchJobManager::getWorkspacesToSave(Row const &row) co
   // workspaces for the row if the group does not have postprocessing, because
   // in that case users just want to see the postprocessed output instead.
   auto workspaces = std::vector<std::string>();
-  auto const group = m_batch.runsTable().reductionJobs().getParentGroup(row);
-  if (group.hasPostprocessing())
+  auto *const group = row.getParent();
+  if (group && group->hasPostprocessing())
     return workspaces;
 
   // We currently only save the binned workspace in Q
@@ -282,7 +283,7 @@ std::vector<std::string> BatchJobManager::getWorkspacesToSave(Row const &row) co
 }
 
 size_t BatchJobManager::getNumberOfInitialisedRowsInGroup(const int groupIndex) const {
-  auto group = m_batch.runsTable().reductionJobs().groups()[groupIndex];
+  auto const &group = m_batch.runsTable().reductionJobs().groups()[groupIndex];
   return static_cast<int>(std::count_if(group.rows().cbegin(), group.rows().cend(),
                                         [](const boost::optional<Row> &row) { return row.is_initialized(); }));
 }

@@ -1,5 +1,5 @@
 name: MAPS
-# Input file for PyChop2 for the MAPS spectrometer at ISIS.
+# Input file for PyChop for the MAPS spectrometer at ISIS.
 
 chopper_system:
   name: MAPS chopper system

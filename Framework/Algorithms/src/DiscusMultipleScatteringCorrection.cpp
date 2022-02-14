@@ -197,10 +197,12 @@ void DiscusMultipleScatteringCorrection::exec() {
   }
 
   MatrixWorkspace_sptr sigmaSSWS = getProperty("ScatteringCrossSection");
+  if (sigmaSSWS)
+    m_sigmaSS = std::make_shared<HistogramData::Histogram>(sigmaSSWS->histogram(0));
 
   double kincmin, kincmax;
   inputWS->getXMinMax(kincmin, kincmax);
-  auto SQHist = SQWS->histogram(0);
+  m_SQHist = std::make_shared<HistogramData::Histogram>(SQWS->histogram(0));
 
   const auto inputNbins = static_cast<int>(inputWS->blocksize());
   int nlambda = getProperty("NumberOfWavelengthPoints");
@@ -235,13 +237,13 @@ void DiscusMultipleScatteringCorrection::exec() {
   }
   const MatrixWorkspace &instrumentWS = useSparseInstrument ? *sparseWS : *inputWS;
 
-  auto instrument = inputWS->getInstrument();
+  m_instrument = inputWS->getInstrument();
   const auto nhists = useSparseInstrument ? static_cast<int64_t>(sparseWS->getNumberHistograms())
                                           : static_cast<int64_t>(inputWS->getNumberHistograms());
 
-  const auto &sample = inputWS->sample();
+  m_sampleShape = inputWS->sample().getShapePtr();
   // generate the bounding box before the multithreaded section
-  sample.getShape().getBoundingBox();
+  m_sampleShape->getBoundingBox();
 
   const int nSingleScatterEvents = getProperty("NeutronPathsSingle");
   const int nMultiScatterEvents = getProperty("NeutronPathsMultiple");
@@ -251,7 +253,7 @@ void DiscusMultipleScatteringCorrection::exec() {
   InterpolationOption interpolateOpt;
   interpolateOpt.set(getPropertyValue("Interpolation"), false, true);
 
-  const bool importanceSampling = getProperty("ImportanceSampling");
+  m_importanceSampling = getProperty("ImportanceSampling");
 
   Progress prog(this, 0.0, 1.0, nhists * nlambda);
   prog.setNotifyStep(0.01);
@@ -267,7 +269,7 @@ void DiscusMultipleScatteringCorrection::exec() {
 
   PARALLEL_FOR_IF(enableParallelFor)
   for (int64_t i = 0; i < nhists; ++i) {
-    PARALLEL_START_INTERUPT_REGION
+    PARALLEL_START_INTERRUPT_REGION
     auto &spectrum = instrumentWS.getSpectrum(i);
     Mantid::specnum_t specNo = spectrum.getSpectrumNo();
     MersenneTwister rng(seed + specNo);
@@ -288,17 +290,15 @@ void DiscusMultipleScatteringCorrection::exec() {
 
         const double kinc = 2 * M_PI / lambdas[bin];
 
-        auto invPOfQ = prepareCumulativeProbForQ(SQHist, kinc);
+        auto invPOfQ = prepareCumulativeProbForQ(kinc);
 
-        double total = simulatePaths(nSingleScatterEvents, 1, sample, *instrument, rng, sigmaSSWS, SQHist, *invPOfQ,
-                                     kinc, detPos, true, importanceSampling);
+        double total = simulatePaths(nSingleScatterEvents, 1, rng, *invPOfQ, kinc, detPos, true);
         noAbsSimulationWS->getSpectrum(i).dataY()[bin] = total;
 
         for (int ne = 0; ne < nScatters; ne++) {
           int nEvents = ne == 0 ? nSingleScatterEvents : nMultiScatterEvents;
 
-          total = simulatePaths(nEvents, ne + 1, sample, *instrument, rng, sigmaSSWS, SQHist, *invPOfQ, kinc, detPos,
-                                false, importanceSampling);
+          total = simulatePaths(nEvents, ne + 1, rng, *invPOfQ, kinc, detPos, false);
           simulationWSs[ne]->getSpectrum(i).dataY()[bin] = total;
         }
 
@@ -334,9 +334,9 @@ void DiscusMultipleScatteringCorrection::exec() {
       }
     }
 
-    PARALLEL_END_INTERUPT_REGION
+    PARALLEL_END_INTERRUPT_REGION
   }
-  PARALLEL_CHECK_INTERUPT_REGION
+  PARALLEL_CHECK_INTERRUPT_REGION
 
   if (useSparseInstrument) {
     Poco::Thread::sleep(200); // to ensure prog message changes
@@ -391,15 +391,14 @@ void DiscusMultipleScatteringCorrection::exec() {
 /**
  * Calculate a cumulative probability distribution for use in importance sampling. The distribution
  * is the inverse function P^-1(t4) where P(Q) = I(Q)/I(2k) and I(x) = integral of Q.S(Q)dQ between 0 and x
- * @param SQ Workspace containing S(Q)
  * @param kinc The incident wavenumber
  * @return the inverted cumulative probability distribution
  */
 std::shared_ptr<Mantid::HistogramData::Histogram>
-DiscusMultipleScatteringCorrection::prepareCumulativeProbForQ(HistogramData::Histogram &SQ, double kinc) {
+DiscusMultipleScatteringCorrection::prepareCumulativeProbForQ(double kinc) {
 
-  std::vector<double> qValues = SQ.readX();
-  std::vector<double> SQValues = SQ.readY();
+  std::vector<double> qValues = m_SQHist->readX();
+  std::vector<double> SQValues = m_SQHist->readY();
   // add terminating points at 0 and 2k before multiplying by Q so no extrapolation problems
   if (qValues.front() > 0.) {
     qValues.insert(qValues.begin(), 0.);
@@ -455,17 +454,20 @@ DiscusMultipleScatteringCorrection::integrateCumulative(const Mantid::HistogramD
     throw std::runtime_error("Distribution doesn't extend as far as upper integration limit, x=" +
                              std::to_string(xmax));
 
-  size_t i;
-  for (i = 0; i < xValues.size() - 1 && xValues[i + 1] <= xmax; i++) {
-    sum += 0.5 * (yValues[i + 1] + yValues[i]) * (xValues[i + 1] - xValues[i]);
-    resultX.push_back(xValues[i + 1]);
+  size_t iRight;
+  // integrate the intervals between each pair of points. Do this until right point is at end of vector or > xmax
+  for (iRight = 1; iRight < xValues.size() && xValues[iRight] <= xmax; iRight++) {
+    sum += 0.5 * (yValues[iRight] + yValues[iRight - 1]) * (xValues[iRight] - xValues[iRight - 1]);
+    resultX.push_back(xValues[iRight]);
     resultY.push_back(sum);
   }
 
-  if (xmax > xValues[i]) {
-    double interpY =
-        (yValues[i] * (xValues[i + 1] - xmax) + yValues[i + 1] * (xmax - xValues[i])) / (xValues[i + 1] - xValues[i]);
-    sum += 0.5 * (yValues[i] + interpY) * (xmax - xValues[i]);
+  // integrate a partial final interval if xmax is between points
+  if (xmax > xValues[iRight - 1]) {
+    // use linear interpolation to calculate the y value at xmax
+    double interpY = (yValues[iRight - 1] * (xValues[iRight] - xmax) + yValues[iRight] * (xmax - xValues[iRight - 1])) /
+                     (xValues[iRight] - xValues[iRight - 1]);
+    sum += 0.5 * (yValues[iRight - 1] + interpY) * (xmax - xValues[iRight - 1]);
     resultX.push_back(xmax);
     resultY.push_back(sum);
   }
@@ -477,15 +479,13 @@ DiscusMultipleScatteringCorrection::integrateCumulative(const Mantid::HistogramD
  * Calculate a total cross section using a k-specific scattering cross section
  * Note - a separate tabulated scattering cross section is used elsewhere in the
  * calculation
- * @param sigmaSSWS Workspace containing scattering cross section as a function of k
  * @param material The sample material
  * @param kinc The incident wavenumber
  * @param specialSingleScatterCalc Boolean indicating whether special single
  * scatter calculation should be performed
  * @return A tuple containing the total cross section and the scattering cross section
  */
-std::tuple<double, double> DiscusMultipleScatteringCorrection::new_vector(const MatrixWorkspace_sptr &sigmaSSWS,
-                                                                          const Material &material, double kinc,
+std::tuple<double, double> DiscusMultipleScatteringCorrection::new_vector(const Material &material, double kinc,
                                                                           bool specialSingleScatterCalc) {
   double scatteringXSection, absorbXsection;
   if (specialSingleScatterCalc) {
@@ -494,8 +494,8 @@ std::tuple<double, double> DiscusMultipleScatteringCorrection::new_vector(const 
     const double wavelength = 2 * M_PI / kinc;
     absorbXsection = material.absorbXSection(wavelength);
   }
-  if (sigmaSSWS) {
-    scatteringXSection = interpolateFlat(sigmaSSWS->histogram(0), kinc);
+  if (m_sigmaSS) {
+    scatteringXSection = interpolateFlat(m_sigmaSS, kinc);
   } else {
     scatteringXSection = material.totalScatterXSection();
   }
@@ -534,17 +534,19 @@ double DiscusMultipleScatteringCorrection::interpolateSquareRoot(const Histogram
 /**
  * Interpolate function using flat interpolation from previous point
  */
-double DiscusMultipleScatteringCorrection::interpolateFlat(const Mantid::HistogramData::Histogram &histToInterpolate,
-                                                           double x) {
-  if (x > histToInterpolate.x().back()) {
-    return histToInterpolate.y().back();
+double DiscusMultipleScatteringCorrection::interpolateFlat(
+    std::shared_ptr<const Mantid::HistogramData::Histogram> histToInterpolate, double x) {
+  auto &xHisto = histToInterpolate->x();
+  auto &yHisto = histToInterpolate->y();
+  if (x > xHisto.back()) {
+    return yHisto.back();
   }
-  if (x < histToInterpolate.x().front()) {
-    return histToInterpolate.y().front();
+  if (x < xHisto.front()) {
+    return yHisto.front();
   }
-  auto iter = std::upper_bound(histToInterpolate.x().cbegin(), histToInterpolate.x().cend(), x);
-  auto idx = static_cast<size_t>(std::distance(histToInterpolate.x().cbegin(), iter) - 1);
-  return histToInterpolate.dataY()[idx];
+  auto iter = std::upper_bound(xHisto.cbegin(), xHisto.cend(), x);
+  auto idx = static_cast<size_t>(std::distance(xHisto.cbegin(), iter) - 1);
+  return yHisto[idx];
 }
 
 /**
@@ -556,31 +558,22 @@ double DiscusMultipleScatteringCorrection::interpolateFlat(const Mantid::Histogr
  * material. The average weight across all the simulated paths is returned
  * @param nPaths The number of paths to simulate
  * @param nScatters The number of scattering events to simulate along each path
- * @param sample A sample object
- * @param instrument An instrument object used to obtain the source position
  * @param rng Random number generator
- * @param sigmaSSWS Workspace containing scattering cross section as a function of k
- * @param SOfQ  Pointer to workspace containing S(Q)
  * @param invPOfQ Inverse of the cumulative prob distribution of Q (used in importance sampling)
  * @param kinc The incident wavevector
  * @param detPos The position of the detector we're currently calculating a correction for
  * @param specialSingleScatterCalc Boolean indicating whether special single
- * @param importanceSampling Boolean indicating whether to use importance sampling on Q values
- * scatter calculation should be performed
  * @return An average weight across all of the paths
  */
-double DiscusMultipleScatteringCorrection::simulatePaths(
-    const int nPaths, const int nScatters, const Sample &sample, const Geometry::Instrument &instrument,
-    Kernel::PseudoRandomNumberGenerator &rng, const MatrixWorkspace_sptr &sigmaSSWS,
-    const HistogramData::Histogram &SOfQ, const HistogramData::Histogram &invPOfQ, const double kinc,
-    const Kernel::V3D &detPos, bool specialSingleScatterCalc, bool importanceSampling) {
+double DiscusMultipleScatteringCorrection::simulatePaths(const int nPaths, const int nScatters,
+                                                         Kernel::PseudoRandomNumberGenerator &rng,
+                                                         const HistogramData::Histogram &invPOfQ, const double kinc,
+                                                         const Kernel::V3D &detPos, bool specialSingleScatterCalc) {
   double sumOfWeights = 0, sumOfQSS = 0.;
   int countZeroWeights = 0; // for debugging and analysis of where importance sampling may help
-  auto sourcePos = instrument.getSource()->getPos();
 
   for (int ie = 0; ie < nPaths; ie++) {
-    auto [success, weight, QSS] = scatter(nScatters, sample, instrument, sourcePos, rng, sigmaSSWS, SOfQ, invPOfQ, kinc,
-                                          detPos, specialSingleScatterCalc, importanceSampling);
+    auto [success, weight, QSS] = scatter(nScatters, rng, invPOfQ, kinc, detPos, specialSingleScatterCalc);
     if (success) {
       sumOfWeights += weight;
       sumOfQSS += QSS;
@@ -592,7 +585,7 @@ double DiscusMultipleScatteringCorrection::simulatePaths(
 
   // divide by the mean of Q*S(Q) for each of the n-1 terms representing a
   // multiple scatter
-  if (!importanceSampling)
+  if (!m_importanceSampling)
     sumOfWeights = sumOfWeights / pow(sumOfQSS / static_cast<double>(nPaths * (nScatters - 1)), nScatters - 1);
 
   return sumOfWeights / nPaths;
@@ -606,42 +599,34 @@ double DiscusMultipleScatteringCorrection::simulatePaths(
  * calculated as a weight using the cross section information from the sample
  * material
  * @param nScatters The number of scattering events to simulate along each path
- * @param sample A sample object
- * @param instrument An instrument object used to obtain the reference frame
- * @param sourcePos The source xyz coordinates
  * @param rng Random number generator
- * @param sigmaSSWS  Workspace containing scattering cross section as a function of k
- * @param SOfQ Pointer to workspace containing S(Q)
  * @param invPOfQ Inverse of the cumulative prob distribution of Q (used in importance sampling)
  * @param kinc The incident wavevector
  * @param detPos The detector position xyz coordinates
  * @param specialSingleScatterCalc Boolean indicating whether special single
  * scatter calculation should be performed
- * @param importanceSampling Boolean indicating whether to use importance sampling on Q values
  * @return A tuple containing a success/fail boolean, the calculated weight and
  * a sum of the QSS values across the n-1 multiple scatters
  */
-std::tuple<bool, double, double> DiscusMultipleScatteringCorrection::scatter(
-    const int nScatters, const Sample &sample, const Geometry::Instrument &instrument, const V3D sourcePos,
-    Kernel::PseudoRandomNumberGenerator &rng, const MatrixWorkspace_sptr &sigmaSSWS,
-    const HistogramData::Histogram &SOfQ, const HistogramData::Histogram &invPOfQ, const double kinc,
-    Kernel::V3D detPos, bool specialSingleScatterCalc, bool importanceSampling) {
+std::tuple<bool, double, double>
+DiscusMultipleScatteringCorrection::scatter(const int nScatters, Kernel::PseudoRandomNumberGenerator &rng,
+                                            const HistogramData::Histogram &invPOfQ, const double kinc,
+                                            const Kernel::V3D &detPos, bool specialSingleScatterCalc) {
   double weight = 1;
-  double numberDensity = sample.getMaterial().numberDensityEffective();
+  double numberDensity = m_sampleShape->material().numberDensityEffective();
   // if scale up scatteringXSection by 100*numberDensity then may not need
   // sigma_total any more but leave it alone now to align with original code
 
-  const auto [sigma_total, scatteringXSection] =
-      new_vector(sigmaSSWS, sample.getMaterial(), kinc, specialSingleScatterCalc);
+  const auto [sigma_total, scatteringXSection] = new_vector(m_sampleShape->material(), kinc, specialSingleScatterCalc);
 
   double vmu = 100 * numberDensity * sigma_total;
-  auto track = start_point(sample.getShape(), instrument.getReferenceFrame(), sourcePos, rng);
+  auto track = start_point(rng);
   updateWeightAndPosition(track, weight, vmu, sigma_total, rng);
 
   double QSS = 0;
   for (int iScat = 0; iScat < nScatters - 1; iScat++) {
-    q_dir(track, SOfQ, invPOfQ, kinc, scatteringXSection, rng, QSS, weight, importanceSampling);
-    const int nlinks = sample.getShape().interceptSurface(track);
+    q_dir(track, invPOfQ, kinc, scatteringXSection, rng, QSS, weight);
+    const int nlinks = m_sampleShape->interceptSurface(track);
     m_callsToInterceptSurface++;
     if (nlinks == 0) {
       return {false, 0, 0};
@@ -653,7 +638,7 @@ std::tuple<bool, double, double> DiscusMultipleScatteringCorrection::scatter(
   Kernel::V3D prevDirection = track.direction();
   directionToDetector.normalize();
   track.reset(track.startPoint(), directionToDetector);
-  const int nlinks = sample.getShape().interceptSurface(track);
+  const int nlinks = m_sampleShape->interceptSurface(track);
   m_callsToInterceptSurface++;
   // due to VALID_INTERCEPT_POINT_SHIFT some tracks that skim the surface
   // of a CSGObject sample may not generate valid tracks. Start over again
@@ -663,33 +648,31 @@ std::tuple<bool, double, double> DiscusMultipleScatteringCorrection::scatter(
   }
   const double dl = track.front().distInsideObject;
   const auto q = (directionToDetector - prevDirection) * kinc;
-  const auto SQ = interpolateFlat(SOfQ, q.norm());
+  const auto SQ = interpolateFlat(m_SQHist, q.norm());
   if (specialSingleScatterCalc)
     vmu = 0;
   const auto AT2 = exp(-dl * vmu);
-  auto scatteringXSectionFull = sample.getMaterial().totalScatterXSection();
+  auto scatteringXSectionFull = m_sampleShape->material().totalScatterXSection();
   weight = weight * AT2 * SQ * scatteringXSectionFull / (4 * M_PI);
   return {true, weight, QSS};
 }
 
 // update track direction, QSS and weight
-void DiscusMultipleScatteringCorrection::q_dir(Geometry::Track &track, const HistogramData::Histogram &SOfQ,
-                                               const HistogramData::Histogram &invPOfQ, const double kinc,
-                                               const double scatteringXSection,
-                                               Kernel::PseudoRandomNumberGenerator &rng, double &QSS, double &weight,
-                                               bool importanceSampling) {
+void DiscusMultipleScatteringCorrection::q_dir(Geometry::Track &track, const HistogramData::Histogram &invPOfQ,
+                                               const double kinc, const double scatteringXSection,
+                                               Kernel::PseudoRandomNumberGenerator &rng, double &QSS, double &weight) {
   const double kf = kinc; // elastic only so far
   double QQ, SQ;
-  if (importanceSampling) {
+  if (m_importanceSampling) {
     QQ = interpolateSquareRoot(invPOfQ, rng.nextValue());
     // S(Q) not strictly needed here but useful to see if the higher values are indeed being returned
-    SQ = interpolateFlat(SOfQ, QQ);
+    SQ = interpolateFlat(m_SQHist, QQ);
     weight = weight * scatteringXSection;
   } else {
     const double qmin = abs(kf - kinc);
     const double qrange = 2 * kinc;
     QQ = qmin + qrange * rng.nextValue();
-    SQ = interpolateFlat(SOfQ, QQ);
+    SQ = interpolateFlat(m_SQHist, QQ);
     weight = weight * scatteringXSection * SQ * QQ;
   }
   // T = 2theta
@@ -719,17 +702,19 @@ void DiscusMultipleScatteringCorrection::updateTrackDirection(Geometry::Track &t
   // v_rot = cosT * v + sinT(k x v)
   // with rotation axis k orthogonal to v
   // Define k by first creating two vectors orthogonal to v:
-  // (-vy, vx, 0) by inspection
+  // (vy, -vx, 0) by inspection
   // and then (-vz * vx, -vy * vz, vx * vx + vy * vy) as cross product
   // Then define k as combination of these:
   // sin(phi) * (vy, -vx, 0) + cos(phi) * (-vx * vz, -vy * vz, 1 - vz * vz)
+  // ...with division by normalisation factor of sqrt(vx * vx + vy * vy)
   // Note: xyz convention here isn't the standard Mantid one. x=beam, z=up
   const auto vy = track.direction()[0];
   const auto vz = track.direction()[1];
   const auto vx = track.direction()[2];
   double UKX, UKY, UKZ;
-  if (vz < 1) {
-    auto A2 = sqrt(1 - vz * vz);
+  if (vz * vz < 1.0) {
+    // calculate A2 from vx^2 + vy^2 rather than 1-vz^2 to reduce floating point rounding error when vz close to 1
+    auto A2 = sqrt(vx * vx + vy * vy);
     auto UQTZ = cos(phi) * A2;
     auto UQTX = -cos(phi) * vz * vx / A2 + sin(phi) * vy / A2;
     auto UQTY = -cos(phi) * vz * vy / A2 - sin(phi) * vx / A2;
@@ -737,9 +722,11 @@ void DiscusMultipleScatteringCorrection::updateTrackDirection(Geometry::Track &t
     UKY = B2 * vy + B3 * UQTY;
     UKZ = B2 * vz + B3 * UQTZ;
   } else {
+    // definition of phi in general formula is dependent on v. So may see phi "redefinition" as vx and vy tend to zero
+    // and you move from general formula to this special case
     UKX = B3 * cos(phi);
     UKY = B3 * sin(phi);
-    UKZ = B2;
+    UKZ = B2 * vz;
   }
   track.reset(track.startPoint(), Kernel::V3D(UKY, UKZ, UKX));
 }
@@ -748,19 +735,13 @@ void DiscusMultipleScatteringCorrection::updateTrackDirection(Geometry::Track &t
  * Repeatedly attempt to generate an initial track starting at the source and entering the sample at a random point on
  * its front surface. After each attempt check the track has at least one intercept with sample shape (sometimes for
  * tracks very close to the surface this can sometimes be zero due to numerical precision)
- * @param shape The sample shape
- * @param frame The instrument's reference frame
- * @param sourcePos The source position
  * @param rng Random number generator
  * @return a track intercepting the sample
  */
-Geometry::Track
-DiscusMultipleScatteringCorrection::start_point(const Geometry::IObject &shape,
-                                                const std::shared_ptr<const Geometry::ReferenceFrame> &frame,
-                                                const V3D &sourcePos, Kernel::PseudoRandomNumberGenerator &rng) {
+Geometry::Track DiscusMultipleScatteringCorrection::start_point(Kernel::PseudoRandomNumberGenerator &rng) {
   for (int i = 0; i < m_maxScatterPtAttempts; i++) {
-    auto t = generateInitialTrack(shape, frame, sourcePos, rng);
-    const int nlinks = shape.interceptSurface(t);
+    auto t = generateInitialTrack(rng);
+    const int nlinks = m_sampleShape->interceptSurface(t);
     m_callsToInterceptSurface++;
     if (nlinks > 0) {
       if (i > 0) {
@@ -802,19 +783,16 @@ void DiscusMultipleScatteringCorrection::updateWeightAndPosition(Geometry::Track
 /**
  * Generate an initial track starting at the source and entering
  * the sample at a random point on its front surface
- * @param shape The sample shape
- * @param frame The instrument's reference frame
- * @param sourcePos The source position
  * @param rng Random number generator
  * @return a track
  */
-Geometry::Track DiscusMultipleScatteringCorrection::generateInitialTrack(
-    const Geometry::IObject &shape, const std::shared_ptr<const Geometry::ReferenceFrame> &frame, const V3D &sourcePos,
-    Kernel::PseudoRandomNumberGenerator &rng) {
-  auto sampleBox = shape.getBoundingBox();
+Geometry::Track DiscusMultipleScatteringCorrection::generateInitialTrack(Kernel::PseudoRandomNumberGenerator &rng) {
+  auto sampleBox = m_sampleShape->getBoundingBox();
   // generate random point on front surface of sample bounding box
   // The change of variables from length to t1 means this still samples the points fairly in the integration volume even
   // in shapes like cylinders where the depth varies across xy
+  auto frame = m_instrument->getReferenceFrame();
+  auto sourcePos = m_instrument->getSource()->getPos();
   auto ptx = sampleBox.minPoint()[frame->pointingHorizontal()] +
              rng.nextValue() * sampleBox.width()[frame->pointingHorizontal()];
   auto pty = sampleBox.minPoint()[frame->pointingUp()] + rng.nextValue() * sampleBox.width()[frame->pointingUp()];
@@ -889,8 +867,8 @@ void DiscusMultipleScatteringCorrection::interpolateFromSparse(
   const auto refFrame = targetWS.getInstrument()->getReferenceFrame();
   PARALLEL_FOR_IF(Kernel::threadSafe(targetWS, sparseWS))
   for (int64_t i = 0; i < static_cast<decltype(i)>(spectrumInfo.size()); ++i) {
-    PARALLEL_START_INTERUPT_REGION
-    if (!spectrumInfo.isMonitor(i)) {
+    PARALLEL_START_INTERRUPT_REGION
+    if (spectrumInfo.hasDetectors(i) && !spectrumInfo.isMonitor(i)) {
       double lat, lon;
       std::tie(lat, lon) = spectrumInfo.geographicalAngles(i);
       const auto spatiallyInterpHisto = sparseWS.bilinearInterpolateFromDetectorGrid(lat, lon);
@@ -902,9 +880,9 @@ void DiscusMultipleScatteringCorrection::interpolateFromSparse(
         targetWS.mutableY(i) = spatiallyInterpHisto.y().front();
       }
     }
-    PARALLEL_END_INTERUPT_REGION
+    PARALLEL_END_INTERRUPT_REGION
   }
-  PARALLEL_CHECK_INTERUPT_REGION
+  PARALLEL_CHECK_INTERRUPT_REGION
 }
 
 void DiscusMultipleScatteringCorrection::correctForWorkspaceNameClash(std::string &wsName) {

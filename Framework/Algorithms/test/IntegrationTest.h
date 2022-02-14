@@ -266,22 +266,22 @@ public:
   }
 
   void testRebinnedOutput_NoLimits() {
-    const double truth[] = {1.1, 0.331662479};
+    const double truth[] = {5.5, 1.6583123953};
     doTestRebinned("-3.0", "3.0", 0, 3, false, 4, truth);
   }
 
   void testRebinnedOutput_RangeLimits() {
-    const double truth[] = {1.125, 0.375};
+    const double truth[] = {4.5, 1.5};
     doTestRebinned("-2.0", "2.0", 0, 3, false, 4, truth);
   }
 
   void testRebinnedOutput_WorkspaceIndexLimits() {
-    const double truth[] = {1.1666666667, 0.4409585512};
+    const double truth[] = {4.6666666667, 1.7638342079};
     doTestRebinned("-3.0", "3.0", 1, 2, false, 2, truth);
   }
 
   void testRebinnedOutput_RangeLimitsWithPartialBins() {
-    const double truth[] = {1.1034482756, 0.3745786376};
+    const double truth[] = {3.5862068967, 1.2173805720};
     doTestRebinned("-1.5", "1.75", 0, 3, true, 4, truth);
   }
 

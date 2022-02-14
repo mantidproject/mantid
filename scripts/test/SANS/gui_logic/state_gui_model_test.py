@@ -339,11 +339,6 @@ class StateGuiModelTest(unittest.TestCase):
         self.assertEqual(trans_state.wavelength_interval.wavelength_full_range, (low, high))
         self.assertEqual(trans_state.wavelength_interval.wavelength_step, step)
         self.assertEqual(trans_state.wavelength_step_type, step_type)
-        # Monitor
-        norm_state = model.all_states.adjustment.normalize_to_monitor
-        self.assertEqual(norm_state.wavelength_interval.wavelength_full_range, (low, high))
-        self.assertEqual(norm_state.wavelength_interval.wavelength_step, step)
-        self.assertEqual(norm_state.wavelength_step_type, step_type)
 
         # Wavelength and pixel adjustment
         adj_state = model.all_states.adjustment.wavelength_and_pixel_adjustment

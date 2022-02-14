@@ -9,6 +9,7 @@
 #include "BatchJobAlgorithm.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/IAlgorithm.h"
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidQtWidgets/Common/AlgorithmRuntimeProps.h"
 #include "MantidQtWidgets/Common/BatchAlgorithmRunner.h"
 #include "Reduction/Item.h"
@@ -32,11 +33,11 @@ void updateInputWorkspacesProperties(MantidQt::API::IAlgorithmRuntimeProps &prop
 
 namespace MantidQt::CustomInterfaces::ISISReflectometry::PreprocessRow {
 
-/** Create a configured algorithm for processing a row. The algorithm
+/** Create a configured algorithm for preprocessing a row. The algorithm
  * properties are set from the reduction configuration model and the
- * cell values in the given row.
+ * given row.
  * @param model : the reduction configuration model
- * @param row : the row from the runs table
+ * @param row : the row from the preview tab
  */
 IConfiguredAlgorithm_sptr createConfiguredAlgorithm(IBatch const & /*model*/, PreviewRow &row, IAlgorithm_sptr alg) {
   // Create the algorithm
@@ -59,8 +60,11 @@ IConfiguredAlgorithm_sptr createConfiguredAlgorithm(IBatch const & /*model*/, Pr
 
 void updateRowOnAlgorithmComplete(const IAlgorithm_sptr &algorithm, Item &item) {
   auto &row = dynamic_cast<PreviewRow &>(item);
-  MatrixWorkspace_sptr outputWs = algorithm->getProperty("OutputWorkspace");
-  row.setLoadedWs(outputWs);
+  Workspace_sptr outputWs = algorithm->getProperty("OutputWorkspace");
+  auto matrixWs = std::dynamic_pointer_cast<MatrixWorkspace>(outputWs);
+  if (!matrixWs)
+    throw std::runtime_error("Unsupported workspace type; expected MatrixWorkspace");
+  row.setLoadedWs(matrixWs);
   // TODO reset the rest of the workspaces associated with the workflow
 }
 } // namespace MantidQt::CustomInterfaces::ISISReflectometry::PreprocessRow

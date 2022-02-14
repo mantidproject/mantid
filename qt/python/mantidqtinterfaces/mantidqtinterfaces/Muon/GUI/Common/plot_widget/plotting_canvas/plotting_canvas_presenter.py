@@ -10,7 +10,7 @@ from mantidqtinterfaces.Muon.GUI.Common.plot_widget.plotting_canvas.plotting_can
     PlottingCanvasPresenterInterface
 from mantidqtinterfaces.Muon.GUI.Common.plot_widget.quick_edit.quick_edit_widget import QuickEditWidget
 from mantidqtinterfaces.Muon.GUI.Common.plot_widget.plotting_canvas.plotting_canvas_view_interface import PlottingCanvasViewInterface
-from mantid import AnalysisDataService
+from mantidqtinterfaces.Muon.GUI.Common.ADSHandler.ADS_calls import retrieve_ws
 from mantidqt.utils.observer_pattern import GenericObserver
 import numpy as np
 
@@ -29,13 +29,14 @@ class PlottingCanvasPresenter(PlottingCanvasPresenterInterface):
         self._setup_autoscale_observer()
         self._options_presenter.add_subplot("one")
         self._context.update_axis("one", 0)
+        self._shaded_region_info = {}
 
     # general plotting
     def remove_workspace_names_from_plot(self, workspace_names: List[str]):
         """Removes the input workspace names from the plot"""
         for workspace_name in workspace_names:
             try:
-                workspace = AnalysisDataService.Instance().retrieve(workspace_name)
+                workspace = retrieve_ws(workspace_name)
             except RuntimeError:
                 continue
             self._view.remove_workspace_from_plot(workspace)
@@ -117,6 +118,7 @@ class PlottingCanvasPresenter(PlottingCanvasPresenterInterface):
         """Plots the input workspace names and indices in the figure window
         If hold_on is True the existing workspaces plotted in the figure are kept"""
         # Create workspace information named tuple from input list
+
         workspace_plot_info = self._model.create_workspace_plot_information(workspace_names, workspace_indices,
                                                                             self._options_presenter.get_errors())
         if not hold_on:
@@ -133,6 +135,20 @@ class PlottingCanvasPresenter(PlottingCanvasPresenterInterface):
         if self._options_presenter.autoscale:
             autoscale = True
         self._set_axes_limits_and_titles(autoscale)
+
+    def add_shaded_region(self, workspaces, indices):
+        workspace_plot_info = self._model.create_workspace_plot_information(workspaces, indices,
+                                                                            self._options_presenter.get_errors())
+        for plot_info in workspace_plot_info:
+            name = plot_info.workspace_name
+            index = plot_info.index
+            x_data, y1_data, y2_data = self._model.get_shade_lines(name, index)
+
+            self._view.add_shaded_region(workspace_name = name,
+                                         axis_number = plot_info.axis,
+                                         x_values = x_data,
+                                         y1_values = y1_data,
+                                         y2_values = y2_data)
 
     def should_update_all(self, selected_subplots):
         all = len(selected_subplots)==1 and self._options_presenter.get_selection_index()==0
@@ -238,6 +254,9 @@ class PlottingCanvasPresenter(PlottingCanvasPresenterInterface):
             return None, None
         else:
             return xlims, ylims
+
+    def set_quickedit_by_index(self, index):
+        self._options_presenter.set_selection_by_index(index)
 
     """x or y range changed"""
 

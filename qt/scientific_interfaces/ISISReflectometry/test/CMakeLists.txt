@@ -9,6 +9,7 @@ set(TEST_FILES
     Batch/BatchJobManagerProcessingTest.h
     Batch/RowProcessingAlgorithmTest.h
     Batch/RowPreprocessingAlgorithmTest.h
+    Batch/SumBanksAlgorithmTest.h
     Event/EventPresenterTest.h
     MainWindow/MainWindowPresenterTest.h
     RunsTable/RunsTablePresenterRowDeletionTest.h
@@ -31,7 +32,9 @@ set(TEST_FILES
     Experiment/ExperimentPresenterTest.h
     Experiment/LookupTableValidatorTest.h
     Experiment/ExperimentOptionDefaultsTest.h
+    Reduction/LookupRowFinderTest.h
     Reduction/ReductionJobsMergeTest.h
+    Reduction/RowTest.h
     Reduction/ParseReflectometryStringsTest.h
     Reduction/ValidateLookupRowTest.h
     Reduction/GroupTest.h

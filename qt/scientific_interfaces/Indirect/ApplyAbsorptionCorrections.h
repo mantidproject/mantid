@@ -61,9 +61,11 @@ private:
 
   std::string m_sampleWorkspaceName;
   std::string m_containerWorkspaceName;
+  std::string m_correctionsGroupName;
   /// Loaded workspaces
   Mantid::API::MatrixWorkspace_sptr m_ppSampleWS;
   Mantid::API::MatrixWorkspace_sptr m_ppContainerWS;
+  Mantid::API::WorkspaceGroup_sptr m_ppCorrectionsGp;
 
   size_t m_spectra;
 };

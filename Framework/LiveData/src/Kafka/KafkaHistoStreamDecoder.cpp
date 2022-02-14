@@ -252,9 +252,6 @@ void KafkaHistoStreamDecoder::initLocalCaches(const RunStartStruct &runStartData
   // Create the proton charge property
   mutableRun.addProperty(new Kernel::TimeSeriesProperty<double>(PROTON_CHARGE_PROPERTY));
 
-  // Cache spec->index mapping. We assume it is the same across all periods
-  m_specToIdx = histoBuffer->getSpectrumToWorkspaceIndexVector(m_specToIdxOffset);
-
   // Buffers for each period
   const size_t nperiods = runStartData.nPeriods;
   if (nperiods > 1) {

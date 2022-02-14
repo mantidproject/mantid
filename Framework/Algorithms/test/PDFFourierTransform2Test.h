@@ -26,6 +26,17 @@ using namespace Mantid::Algorithms;
 using namespace Mantid::Kernel;
 using namespace Mantid;
 
+// allow testing of protected methods
+class PDFFourierTransform2Wrapper : public PDFFourierTransform2 {
+public:
+  size_t determineMinIndex(double min, const std::vector<double> &X, const std::vector<double> &Y) {
+    return PDFFourierTransform2::determineMinIndex(min, X, Y);
+  };
+  size_t determineMaxIndex(double max, const std::vector<double> &X, const std::vector<double> &Y) {
+    return PDFFourierTransform2::determineMaxIndex(max, X, Y);
+  };
+};
+
 namespace {
 /**
  * Create Workspace from 0 to N*dx
@@ -211,6 +222,43 @@ public:
     TS_ASSERT_DELTA(SofQ[0], 5.1875, 0.0001);
     TS_ASSERT_DELTA(SofQ[249], 1.1068, 0.0001);
     TS_ASSERT_EQUALS(SofQUnit->caption(), "q");
+  }
+
+  void test_integration_range() {
+    std::vector<double> X;
+    std::vector<double> Y;
+
+    for (size_t i = 0; i < 100; i++) {
+      X.push_back(double(i) * 0.1);
+      Y.push_back(X[i] + 1.0);
+    }
+    X.push_back(double(100) * 0.1);
+    // For a distribution workspace, X.size() = Y.size() + 1
+    // This data has 100 bins and 101 bin edges
+
+    std::vector<double> badValuesY = Y;
+    badValuesY[0] = std::numeric_limits<double>::quiet_NaN();
+    badValuesY[badValuesY.size() - 1] = std::numeric_limits<double>::quiet_NaN();
+    PDFFourierTransform2Wrapper alg;
+    TS_ASSERT_EQUALS(alg.determineMinIndex(0.0, X, Y), 0);
+    TS_ASSERT_EQUALS(alg.determineMinIndex(1.0, X, Y), 10);
+    TS_ASSERT_EQUALS(alg.determineMinIndex(0.0, X, badValuesY), 1);
+    TS_ASSERT_EQUALS(alg.determineMinIndex(1.0, X, badValuesY), 10);
+
+    TS_ASSERT_EQUALS(alg.determineMaxIndex(5.0, X, Y), 50);
+    TS_ASSERT_EQUALS(alg.determineMaxIndex(20.0, X, Y), 100);
+    TS_ASSERT_EQUALS(alg.determineMaxIndex(5.0, X, badValuesY), 50);
+    TS_ASSERT_EQUALS(alg.determineMaxIndex(20.0, X, badValuesY), 99);
+
+    std::vector<double> endZeroValuesY = Y;
+    endZeroValuesY[0] = 0.0;
+    endZeroValuesY[1] = 0.0;
+    endZeroValuesY[2] = 0.0;
+    endZeroValuesY[97] = 0.0;
+    endZeroValuesY[98] = 0.0;
+    endZeroValuesY[99] = 0.0;
+    TS_ASSERT_EQUALS(alg.determineMinIndex(0.0, X, endZeroValuesY), 3);
+    TS_ASSERT_EQUALS(alg.determineMaxIndex(20.0, X, endZeroValuesY), 97);
   }
 };
 

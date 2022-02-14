@@ -7,7 +7,6 @@
 #include "MantidDataObjects/LeanElasticPeak.h"
 #include "MantidDataObjects/NoShape.h"
 #include "MantidGeometry/Objects/InstrumentRayTracer.h"
-#include "MantidGeometry/Surfaces/LineIntersectVisit.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/Strings.h"
@@ -133,7 +132,7 @@ double LeanElasticPeak::getScattering() const { return asin(getWavelength() / (2
 double LeanElasticPeak::getAzimuthal() const {
   const V3D qLab = getQLabFrame();
   std::shared_ptr<const ReferenceFrame> refFrame = getReferenceFrame();
-  const double qSign = (convention != "Crystallography") ? 1.0 : -1.0;
+  const double qSign = (m_convention != "Crystallography") ? 1.0 : -1.0;
   const V3D detectorDir = -qLab * qSign;
   if (refFrame)
     return atan2(detectorDir[refFrame->pointingUp()], detectorDir[refFrame->pointingHorizontal()]);

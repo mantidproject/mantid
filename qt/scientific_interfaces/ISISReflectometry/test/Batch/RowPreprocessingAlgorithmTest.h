@@ -30,11 +30,12 @@ class RowPreprocessingAlgorithmTest : public CxxTest::TestSuite {
   public:
     StubbedPreProcess() {
       this->setChild(true);
-      auto prop = std::make_unique<Mantid::API::WorkspaceProperty<>>(m_propName, "", Mantid::Kernel::Direction::Output);
+      auto prop = std::make_unique<Mantid::API::WorkspaceProperty<Mantid::API::Workspace>>(
+          m_propName, "", Mantid::Kernel::Direction::Output);
       declareProperty(std::move(prop));
     }
 
-    void addOutputWorkspace(Mantid::API::MatrixWorkspace_sptr &ws) {
+    void addOutputWorkspace(Mantid::API::Workspace_sptr &ws) {
       this->getPointerToProperty("OutputWorkspace")->createTemporaryValue();
       setProperty(m_propName, ws);
     }
@@ -69,7 +70,7 @@ public:
   void test_row_is_updated_on_algorithm_complete() {
     auto mockAlg = std::make_shared<StubbedPreProcess>();
     const bool isHistogram = true;
-    Mantid::API::MatrixWorkspace_sptr mockWs = WorkspaceCreationHelper::create1DWorkspaceRand(1, isHistogram);
+    Mantid::API::Workspace_sptr mockWs = WorkspaceCreationHelper::create1DWorkspaceRand(1, isHistogram);
     mockAlg->addOutputWorkspace(mockWs);
 
     auto runNumbers = std::vector<std::string>{};

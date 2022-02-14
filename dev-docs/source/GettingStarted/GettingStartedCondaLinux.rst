@@ -22,6 +22,17 @@ Install `Mambaforge <https://github.com/conda-forge/miniforge/releases>`_
 * Run your downloaded script from the terminal using ``bash Mambaforge-Linux-x86_64.sh``. If it asks whether or not you want to initialise conda with conda init, choose to do so.
 * Restart your terminal.
 
+(ILL) Setup proxy
+-----------------
+* Open ~/.condarc.
+* Add the following lines :
+
+.. code-block:: text
+
+  proxy_servers:
+    http: http://proxy.ill.fr:8888
+    https: http://proxy.ill.fr:8888
+
 Setup the mantid conda environment
 ----------------------------------
 * With your restarted terminal.

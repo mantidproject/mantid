@@ -77,7 +77,7 @@ class FrequencyAnalysisPlotWidgetTest(unittest.TestCase):
         self.mock_muon_base_view.return_value = mock.MagicMock(autospec=BasePaneView)
         self.mock_muon_canvas.side_effect = self.canvas_mocks
 
-        self.context = setup_context(False)
+        self.context = setup_context(freq=True)
         self.widget = FrequencyAnalysisPlotWidget(self.context)
 
     def test_setup(self):
@@ -119,9 +119,7 @@ class FrequencyAnalysisPlotWidgetTest(unittest.TestCase):
 
         self.context.update_plots_notifier.add_subscriber = mock.Mock()
         self.context.deleted_plots_notifier.add_subscriber = mock.Mock()
-
         self.widget.insert_plot_panes()
-
         self.context.update_plots_notifier.add_subscriber.assert_any_call("data 1")
         self.context.update_plots_notifier.add_subscriber.assert_any_call("fit 2")
         self.context.update_plots_notifier.add_subscriber.assert_any_call("maxent 3")

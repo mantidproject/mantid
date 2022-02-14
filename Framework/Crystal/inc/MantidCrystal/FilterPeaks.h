@@ -82,7 +82,7 @@ private:
    */
   template <typename Comparator>
   void filterPeaksStr(const Mantid::API::IPeaksWorkspace &inputWS, Mantid::API::IPeaksWorkspace &filteredWS,
-                      const FilterFunctionStr &filterFunction, const std::string filterValue) {
+                      const FilterFunctionStr &filterFunction, const std::string &filterValue) {
     Comparator operatorFunc;
     for (int i = 0; i < inputWS.getNumberPeaks(); ++i) {
       const Geometry::IPeak &currentPeak = inputWS.getPeak(i);

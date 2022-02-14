@@ -54,6 +54,8 @@ set(SRC_FILES
     src/FuncMinimizers/TrustRegionMinimizer.cpp
     src/FunctionDomain1DSpectrumCreator.cpp
     src/Functions/Abragam.cpp
+    src/Functions/ActivationK.cpp
+    src/Functions/ActivationmeV.cpp
     src/Functions/BSpline.cpp
     src/Functions/BackToBackExponential.cpp
     src/Functions/BackgroundFunction.cpp
@@ -65,6 +67,7 @@ set(SRC_FILES
     src/Functions/ComptonProfile.cpp
     src/Functions/ComptonScatteringCountRate.cpp
     src/Functions/Convolution.cpp
+    src/Functions/CriticalPeakRelaxationRate.cpp
     src/Functions/CrystalElectricField.cpp
     src/Functions/CrystalFieldControl.cpp
     src/Functions/CrystalFieldFunction.cpp
@@ -83,6 +86,8 @@ set(SRC_FILES
     src/Functions/CrystalFieldSpectrum.cpp
     src/Functions/CrystalFieldSusceptibility.cpp
     src/Functions/CubicSpline.cpp
+    src/Functions/DecoupAsymPowderMagLong.cpp
+    src/Functions/DecoupAsymPowderMagRot.cpp
     src/Functions/DeltaFunction.cpp
     src/Functions/DiffRotDiscreteCircle.cpp
     src/Functions/DiffSphere.cpp
@@ -112,6 +117,7 @@ set(SRC_FILES
     src/Functions/LinearBackground.cpp
     src/Functions/LogNormal.cpp
     src/Functions/Lorentzian.cpp
+    src/Functions/MagneticOrderParameter.cpp
     src/Functions/MultivariateGaussianComptonProfile.cpp
     src/Functions/MuonFInteraction.cpp
     src/Functions/MuoniumDecouplingCurve.cpp
@@ -129,6 +135,7 @@ set(SRC_FILES
     src/Functions/ReflectivityMulf.cpp
     src/Functions/Resolution.cpp
     src/Functions/SimpleChebfun.cpp
+    src/Functions/SmoothTransition.cpp
     src/Functions/StaticKuboToyabe.cpp
     src/Functions/StaticKuboToyabeTimesExpDecay.cpp
     src/Functions/StaticKuboToyabeTimesGausDecay.cpp
@@ -158,6 +165,7 @@ set(SRC_FILES
     src/LatticeFunction.cpp
     src/MSVesuvioHelpers.cpp
     src/MultiDomainCreator.cpp
+    src/MuonHelpers.cpp
     src/ParDomain.cpp
     src/ParameterEstimator.cpp
     src/RalNlls/TrustRegion.cpp
@@ -229,6 +237,8 @@ set(INC_FILES
     inc/MantidCurveFitting/FuncMinimizers/TrustRegionMinimizer.h
     inc/MantidCurveFitting/FunctionDomain1DSpectrumCreator.h
     inc/MantidCurveFitting/Functions/Abragam.h
+    inc/MantidCurveFitting/Functions/ActivationK.h
+    inc/MantidCurveFitting/Functions/ActivationmeV.h
     inc/MantidCurveFitting/Functions/BSpline.h
     inc/MantidCurveFitting/Functions/BackToBackExponential.h
     inc/MantidCurveFitting/Functions/BackgroundFunction.h
@@ -240,6 +250,7 @@ set(INC_FILES
     inc/MantidCurveFitting/Functions/ComptonProfile.h
     inc/MantidCurveFitting/Functions/ComptonScatteringCountRate.h
     inc/MantidCurveFitting/Functions/Convolution.h
+    inc/MantidCurveFitting/Functions/CriticalPeakRelaxationRate.h
     inc/MantidCurveFitting/Functions/CrystalElectricField.h
     inc/MantidCurveFitting/Functions/CrystalFieldControl.h
     inc/MantidCurveFitting/Functions/CrystalFieldFunction.h
@@ -253,6 +264,8 @@ set(INC_FILES
     inc/MantidCurveFitting/Functions/CrystalFieldSpectrum.h
     inc/MantidCurveFitting/Functions/CrystalFieldSusceptibility.h
     inc/MantidCurveFitting/Functions/CubicSpline.h
+    inc/MantidCurveFitting/Functions/DecoupAsymPowderMagLong.h
+    inc/MantidCurveFitting/Functions/DecoupAsymPowderMagRot.h
     inc/MantidCurveFitting/Functions/DeltaFunction.h
     inc/MantidCurveFitting/Functions/DiffRotDiscreteCircle.h
     inc/MantidCurveFitting/Functions/DiffSphere.h
@@ -282,6 +295,7 @@ set(INC_FILES
     inc/MantidCurveFitting/Functions/LinearBackground.h
     inc/MantidCurveFitting/Functions/LogNormal.h
     inc/MantidCurveFitting/Functions/Lorentzian.h
+    inc/MantidCurveFitting/Functions/MagneticOrderParameter.h
     inc/MantidCurveFitting/Functions/MultivariateGaussianComptonProfile.h
     inc/MantidCurveFitting/Functions/MuonFInteraction.h
     inc/MantidCurveFitting/Functions/MuoniumDecouplingCurve.h
@@ -289,6 +303,7 @@ set(INC_FILES
     inc/MantidCurveFitting/Functions/PawleyFunction.h
     inc/MantidCurveFitting/Functions/PeakParameterFunction.h
     inc/MantidCurveFitting/Functions/Polynomial.h
+    inc/MantidCurveFitting/Functions/PowerLaw.h
     inc/MantidCurveFitting/Functions/ProcessBackground.h
     inc/MantidCurveFitting/Functions/ProductFunction.h
     inc/MantidCurveFitting/Functions/ProductLinearExp.h
@@ -298,6 +313,7 @@ set(INC_FILES
     inc/MantidCurveFitting/Functions/ReflectivityMulf.h
     inc/MantidCurveFitting/Functions/Resolution.h
     inc/MantidCurveFitting/Functions/SimpleChebfun.h
+    inc/MantidCurveFitting/Functions/SmoothTransition.h
     inc/MantidCurveFitting/Functions/StaticKuboToyabe.h
     inc/MantidCurveFitting/Functions/StaticKuboToyabeTimesExpDecay.h
     inc/MantidCurveFitting/Functions/StaticKuboToyabeTimesGausDecay.h
@@ -330,6 +346,7 @@ set(INC_FILES
     inc/MantidCurveFitting/LatticeFunction.h
     inc/MantidCurveFitting/MSVesuvioHelpers.h
     inc/MantidCurveFitting/MultiDomainCreator.h
+    inc/MantidCurveFitting/MuonHelpers.h
     inc/MantidCurveFitting/ParDomain.h
     inc/MantidCurveFitting/ParameterEstimator.h
     inc/MantidCurveFitting/RalNlls/TrustRegion.h
@@ -395,6 +412,8 @@ set(TEST_FILES
     FunctionFactoryConstraintTest.h
     FunctionParameterDecoratorFitTest.h
     Functions/AbragamTest.h
+    Functions/ActivationKTest.h
+    Functions/ActivationmeVTest.h
     Functions/BSplineTest.h
     Functions/BackToBackExponentialTest.h
     Functions/BivariateNormalTest.h
@@ -405,6 +424,7 @@ set(TEST_FILES
     Functions/ComptonProfileTest.h
     Functions/ComptonScatteringCountRateTest.h
     Functions/ConvolutionTest.h
+    Functions/CriticalPeakRelaxationRateTest.h
     Functions/CrystalFieldControlTest.h
     Functions/CrystalFieldEnergiesTest.h
     Functions/CrystalFieldFunctionTest.h
@@ -417,6 +437,8 @@ set(TEST_FILES
     Functions/CrystalFieldSusceptibilityTest.h
     Functions/CrystalFieldTest.h
     Functions/CubicSplineTest.h
+    Functions/DecoupAsymPowderMagLongTest.h
+    Functions/DecoupAsymPowderMagRotTest.h
     Functions/DeltaFunctionTest.h
     Functions/DiffRotDiscreteCircleTest.h
     Functions/DiffSphereTest.h
@@ -441,6 +463,7 @@ set(TEST_FILES
     Functions/LinearBackgroundTest.h
     Functions/LogNormalTest.h
     Functions/LorentzianTest.h
+    Functions/MagneticOrderParameterTest.h
     Functions/MultivariateGaussianComptonProfileTest.h
     Functions/MuonFInteractionTest.h
     Functions/MuoniumDecouplingCurveTest.h
@@ -458,6 +481,7 @@ set(TEST_FILES
     Functions/ReflectivityMulfTest.h
     Functions/ResolutionTest.h
     Functions/SimpleChebfunTest.h
+    Functions/SmoothTransitionTest.h
     Functions/StaticKuboToyabeTest.h
     Functions/StaticKuboToyabeTimesExpDecayTest.h
     Functions/StaticKuboToyabeTimesGausDecayTest.h
@@ -487,6 +511,7 @@ set(TEST_FILES
     LatticeFunctionTest.h
     MultiDomainCreatorTest.h
     MultiDomainFunctionTest.h
+    MuonHelperTest.h
     ParameterEstimatorTest.h
     RalNlls/NLLSTest.h
     SpecialFunctionSupportTest.h

@@ -1,0 +1,21 @@
+cff-version: 1.2.0
+message: "If you use Mantid in your research, please cite it using this metadata."
+abstract: "The Mantid project provides a framework that supports high-performance computing and visualisation of scientific data. Mantid has been created to manipulate and analyse Neutron and Muon scattering data, but could be applied to many other techniques. The framework is open source and is supported on multiple target platforms (Windows, Linux, macOS)."
+authors:
+  - name: "The Mantid Project team"
+    email: mantid-help@mantidproject.org
+    website: https://www.mantidproject.org/
+title: Manipulation and Analysis Toolkit for Instrument Data
+version: 6.3.0
+doi: 10.5286/Software/Mantid6.3
+date-released: 2022-02-08
+keywords:
+  - mantid
+  - neutron
+  - muon
+  - particle physics
+  - instrument
+  - reduction
+  - analysis
+license:
+  - GPL-3.0

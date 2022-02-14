@@ -16,6 +16,7 @@ from workbench.plotting.plotscriptgenerator.axes import (generate_axis_limit_com
                                                          generate_axis_label_commands,
                                                          generate_set_title_command,
                                                          generate_axis_scale_commands,
+                                                         generate_axis_facecolor_commands,
                                                          generate_tick_commands,
                                                          generate_tick_formatter_commands)
 from workbench.plotting.plotscriptgenerator.figure import generate_subplots_command
@@ -56,6 +57,7 @@ def generate_script(fig, exclude_headers=False):
         axes.set_xlabel and axes.set_ylabel()
         axes.set_xlim() and axes.set_ylim()
         axes.set_xscale() and axes.set_yscale()
+        axes.set_facecolor()
         <Set axes major tick formatters if non-default>
         axes.legend().set_draggable(True)     (if legend present, or just draggable() for earlier matplotlib versions)
         <Legend title and label commands if non-default>
@@ -87,6 +89,7 @@ def generate_script(fig, exclude_headers=False):
         plot_commands.extend(get_axis_label_cmds(ax, ax_object_var))  # ax.set_label
         plot_commands.extend(get_axis_limit_cmds(ax, ax_object_var))  # ax.set_lim
         plot_commands.extend(get_axis_scale_cmds(ax, ax_object_var))  # ax.set_scale
+        plot_commands.extend(get_axis_facecolor_cmds(ax, ax_object_var))  # ax.set_facecolor
 
         # Only add the ticker import to headers if it's needed.
         formatter_commands = get_tick_formatter_commands(ax, ax_object_var)
@@ -154,6 +157,14 @@ def get_axis_scale_cmds(ax, ax_object_var):
     """Get commands such as axes.set_xscale and axes.set_yscale"""
     axis_scale_cmds = generate_axis_scale_commands(ax)
     return ["{ax_obj}.{cmd}".format(ax_obj=ax_object_var, cmd=cmd) for cmd in axis_scale_cmds]
+
+
+def get_axis_facecolor_cmds(ax, ax_object_var):
+    """Get command ax.set_facecolor. Returns an empty list if the facecolor is default."""
+    command = generate_axis_facecolor_commands(ax)
+    if command is not None:
+        return ["{ax_obj}.{cmd}".format(ax_obj=ax_object_var, cmd=command)]
+    return []
 
 
 def get_title_cmds(ax, ax_object_var):

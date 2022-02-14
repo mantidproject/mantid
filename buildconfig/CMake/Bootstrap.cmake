@@ -1,9 +1,14 @@
 # ######################################################################################################################
 # Configure required dependencies if necessary
 # ######################################################################################################################
+# Find git for everything
+if(WIN32)
+  set(_git_requires 1.9.5)
+endif()
+find_package(Git ${_git_requires})
+
 if(MSVC AND NOT CONDA_ENV)
   # Git LFS does not work properly with <= 1.9
-  find_package(Git 1.9.5 REQUIRED)
   find_package(GitLFS REQUIRED)
 
   # Use ExternalProject functionality as it already knows how to do clone/update
@@ -13,7 +18,7 @@ if(MSVC AND NOT CONDA_ENV)
       CACHE PATH "Location to clone third party dependencies to"
   )
   set(THIRD_PARTY_GIT_URL "https://github.com/mantidproject/thirdparty-msvc2015.git")
-  set(THIRD_PARTY_GIT_SHA1 1f44d901442239ae12c11e33187b3d877bb9f2b2)
+  set(THIRD_PARTY_GIT_SHA1 02d17753f5232c2e8ba0faf94e1d189e4241ca9d)
   set(THIRD_PARTY_DIR ${EXTERNAL_ROOT}/src/ThirdParty)
   # Generates a script to do the clone/update in tmp
   set(_project_name ThirdParty)
@@ -116,7 +121,6 @@ else()
     # Homebrew adds qt4 here and we require it to be unlinked from /usr/local to avoid qt4/qt5 cross talk
     list(APPEND CMAKE_PREFIX_PATH /usr/local/opt/qt@4)
   endif()
-  find_package(Git)
 endif()
 
 # Clean out python variables set from a previous build so they can be rediscovered again

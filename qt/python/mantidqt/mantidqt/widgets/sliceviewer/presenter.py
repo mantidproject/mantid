@@ -10,7 +10,6 @@
 from qtpy.QtCore import Qt
 
 from mantid.kernel import Logger, SpecialCoordinateSystem
-import sip
 
 # local imports
 from .lineplots import PixelLinePlot, RectangleSelectionLinePlot
@@ -205,7 +204,8 @@ class SliceViewer(ObservingPresenter):
 
         ws_type = self.model.get_ws_type()
         if ws_type == WS_TYPE.MDH or ws_type == WS_TYPE.MDE:
-            if sliceinfo.slicepoint[data_view.dimensions.get_previous_states().index(None)] is None:
+            if self.model.get_number_dimensions() > 2 and \
+                    sliceinfo.slicepoint[data_view.dimensions.get_previous_states().index(None)] is None:
                 # The dimension of the slicepoint has changed
                 self.new_plot(dimensions_changing=True)
             else:
@@ -402,6 +402,8 @@ class SliceViewer(ObservingPresenter):
         @param workspace: the workspace that has changed
         """
         if not self.model.workspace_equals(workspace_name):
+            # TODO this is a dead branch, since the ADS observer will call this if the
+            # names are the same, but the model "workspace_equals" simply checks for the same name
             return
         try:
             candidate_model = SliceViewerModel(workspace)
@@ -423,10 +425,7 @@ class SliceViewer(ObservingPresenter):
         """
         Updates the view to enable/disable certain options depending on the model.
         """
-        # The view currently introduces a delay before calling this function, which
-        # causes a race condition where it's possible the view could be closed in
-        # the meantime, so check it still exists. See github issue #30406 for detail.
-        if sip.isdeleted(self.view):
+        if not self.view:
             return
 
         # we don't want to use model.get_ws for the image info widget as this needs
@@ -440,11 +439,12 @@ class SliceViewer(ObservingPresenter):
             ws.unlock()
 
     def rename_workspace(self, old_name, new_name):
-        if str(self.model._get_ws()) == old_name:
+        if self.model.workspace_equals(old_name):
+            self.model.set_ws_name(new_name)
             self.view.emit_rename(self.model.get_title(new_name))
 
     def delete_workspace(self, ws_name):
-        if ws_name == str(self.model._ws):
+        if self.model.workspace_equals(ws_name):
             self.view.emit_close()
 
     def ADS_cleared(self):
@@ -521,6 +521,9 @@ class SliceViewer(ObservingPresenter):
     def _close_view_with_message(self, message: str):
         self.view.emit_close()  # inherited from ObservingView
         self._logger.warning(message)
+
+    def notify_close(self):
+        self.view = None
 
     def action_open_help_window(self):
         InterfaceManager().showHelpPage('qthelp://org.mantidproject/doc/workbench/sliceviewer.html')

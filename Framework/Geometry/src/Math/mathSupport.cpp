@@ -29,10 +29,9 @@ int solveQuadratic(const InputIter Coef, std::pair<std::complex<double>, std::co
   @return number of unique solutions
 */
 {
-  double a, b, c, cf;
-  a = (*Coef);
-  b = *(Coef + 1);
-  c = *(Coef + 2);
+  const double a = (*Coef);
+  const double b = *(Coef + 1);
+  const double c = *(Coef + 2);
 
   if (a == 0.0) {
     if (b == 0.0) {
@@ -45,19 +44,24 @@ int solveQuadratic(const InputIter Coef, std::pair<std::complex<double>, std::co
       return 1;
     }
   }
-  cf = b * b - 4 * a * c;
-  if (cf >= 0) /* Real Roots */
-  {
-    const double q = (b >= 0) ? -0.5 * (b + sqrt(cf)) : -0.5 * (b - sqrt(cf));
+  const double complex_part_sq = b * b - 4 * a * c;
+  if (complex_part_sq == 0.) { // degenerate case
+    OutAns.first = std::complex<double>(-0.5 * b / a, 0.0);
+    OutAns.second = OutAns.first;
+    return 1;
+  } else if (complex_part_sq > 0.) { /* Real Roots */
+    const double complex_part = sqrt(complex_part_sq);
+    const double q = (b >= 0) ? -0.5 * (b + complex_part) : -0.5 * (b - complex_part);
     OutAns.first = std::complex<double>(q / a, 0.0);
     OutAns.second = std::complex<double>(c / q, 0.0);
-    return (cf == 0) ? 1 : 2;
+    return 2;
+  } else {
+    const double complex_part = sqrt(-complex_part_sq);
+    std::complex<double> CQ(-0.5 * b, (b >= 0 ? -0.5 * complex_part : 0.5 * complex_part));
+    OutAns.first = CQ / a;
+    OutAns.second = c / CQ;
+    return 2;
   }
-
-  std::complex<double> CQ(-0.5 * b, (b >= 0 ? -0.5 * sqrt(-cf) : 0.5 * sqrt(-cf)));
-  OutAns.first = CQ / a;
-  OutAns.second = c / CQ;
-  return 2;
 }
 
 template <typename CInputIter>

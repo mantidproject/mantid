@@ -122,27 +122,3 @@ class _RunDetails(object):
         self.vanadium_absorption_path = vanadium_abs_path
         self.output_suffix = output_suffix
         self.van_paths = van_paths
-
-    def update_file_paths(self, inst_settings, new_splined_name_list):
-        """Updates the file path for splined, unsplined and summed_empty files using a new splined name list,
-        this is necessary on instruments where the path may change e.g. Pearl due to long-mode
-        :param inst_settings The current Instrument settings
-        :param new_splined_name_list  List of unique properties to generate a splined vanadium name from
-        """
-
-        cal_map_dict = get_cal_mapping_dict(run_number_string=self.output_run_string,
-                                            cal_mapping_path=inst_settings.cal_mapping_path)
-        offset_file_name = common.cal_map_dictionary_key_helper(dictionary=cal_map_dict, key="offset_file_name")
-
-        # Prepend the properties used for creating a van spline so we can fingerprint the output files
-        splined_list = new_splined_name_list if new_splined_name_list else []
-        splined_list.append(os.path.basename(offset_file_name))
-
-        splined_van_name = common.generate_splined_name(self.vanadium_run_numbers, splined_list)
-        self.splined_vanadium_file_path = os.path.join(self.van_paths, splined_van_name)
-
-        unsplined_van_name = common.generate_unsplined_name(self.vanadium_run_numbers, splined_list)
-        self.unsplined_vanadium_file_path = os.path.join(self.van_paths, unsplined_van_name)
-
-        summed_empty_name = common.generate_summed_empty_name(self.empty_runs, splined_list)
-        self.summed_empty_file_path = os.path.join(self.van_paths, summed_empty_name)

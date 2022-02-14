@@ -49,7 +49,7 @@ Output:
 .. testoutput:: CalculateDIFCExample
 
   The output workspace has 101376 spectra
-  DIFC of pixel 100 is 1228
+  DIFC of pixel 100 is 1274
 
 **Determining traditional offsets**
 

@@ -270,7 +270,3 @@ class SANSLOQCan2DReloadWorkspace(systemtesting.MantidSystemTest):
         self.disableChecking.append('Axes')
         # the change in number is because the run number reported from 99630 is 53615
         return '53615main_2D_2.2_10.0','SANSLOQCan2D.nxs'
-
-
-if __name__ == "__main__":
-    unittest.main()

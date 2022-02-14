@@ -216,7 +216,7 @@ public:
    * @param  row  row number of the value  searched
    * @param  col  column number of the value searched
    */
-  void find(std::string value, size_t &row, const size_t &col) override { findValue(value, row, col); }
+  void find(const std::string &value, size_t &row, const size_t &col) override { findValue(value, row, col); }
   /** This method finds the row and column index of an float value in a table
    * workspace
    * @param value :: -value to search
@@ -244,7 +244,7 @@ public:
    * @param  row  row number of the value  searched
    * @param  col  column number of the value searched
    */
-  void find(Mantid::Kernel::V3D value, size_t &row, const size_t &col) override { findValue(value, row, col); }
+  void find(const Mantid::Kernel::V3D &value, size_t &row, const size_t &col) override { findValue(value, row, col); }
   /** Casts cells through converting their values to/from double without type
    * checking;
    * Can produce stuped results in case if the type is in any way not related to
@@ -311,7 +311,7 @@ private:
    * @param  row  row number of the value  searched
    * @param  col  column number of the value searched
    */
-  virtual void find(std::string value, size_t &row, size_t &col) {
+  virtual void find(const std::string &value, size_t &row, size_t &col) {
     findValue(std::move(std::move(std::move(std::move(std::move(std::move(std::move(std::move(value)))))))), row, col);
   }
   /** This method finds the row and column index of an float value in a table
@@ -341,7 +341,7 @@ private:
    * @param  row  row number of the value  searched
    * @param  col  column number of the value searched
    */
-  void find(Mantid::Kernel::V3D value, size_t &row, size_t &col) { findValue(value, row, col); }
+  void find(const Mantid::Kernel::V3D &value, size_t &row, size_t &col) { findValue(value, row, col); }
 
 private:
   /// Used in std::find_if algorithm to find a Column with name \a name.

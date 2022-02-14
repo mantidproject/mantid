@@ -8,6 +8,7 @@
 
 #include "Common/DllConfig.h"
 #include "IInstViewModel.h"
+#include "MantidGeometry/IDTypes.h"
 #include "MantidQtWidgets/Common/IMessageHandler.h"
 #include "MantidQtWidgets/InstrumentView/InstrumentActor.h"
 
@@ -22,7 +23,7 @@ public:
   MantidWidgets::InstrumentActor *getInstrumentViewActor() const override;
   Mantid::Kernel::V3D getSamplePos() const override;
   Mantid::Kernel::V3D getAxis() const override;
-  std::vector<size_t> detIndicesToWsIndices(std::vector<size_t> const &detIndices) const override;
+  std::vector<Mantid::detid_t> detIndicesToDetIDs(std::vector<size_t> const &detIndices) const override;
 
 private:
   std::unique_ptr<MantidWidgets::InstrumentActor> m_actor;

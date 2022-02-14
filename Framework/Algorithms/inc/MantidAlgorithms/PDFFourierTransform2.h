@@ -33,22 +33,24 @@ public:
   /// @copydoc Algorithm::validateInputs()
   std::map<std::string, std::string> validateInputs() override;
 
+protected:
+  size_t determineMinIndex(double min, const std::vector<double> &X, const std::vector<double> &Y);
+  size_t determineMaxIndex(double max, const std::vector<double> &X, const std::vector<double> &Y);
+
 private:
   /// Initialize the properties
   void init() override;
   /// Run the algorithm
   void exec() override;
 
-  size_t determineMinIndex(double min, const std::vector<double> &X, const std::vector<double> &Y);
-  size_t determineMaxIndex(double max, const std::vector<double> &X, const std::vector<double> &Y);
   double determineRho0();
   void convertToSQMinus1(std::vector<double> &FOfQ, std::vector<double> &Q, std::vector<double> &DFOfQ,
-                         std::vector<double> &DQ);
-  void convertToLittleGRMinus1(std::vector<double> &FOfR, std::vector<double> &R, std::vector<double> &DFOfR,
-                               std::vector<double> &DR);
-  void convertFromSQMinus1(HistogramData::HistogramY &FOfQ, HistogramData::HistogramX &Q,
+                         const std::vector<double> &DQ);
+  void convertToLittleGRMinus1(std::vector<double> &FOfR, const std::vector<double> &R, std::vector<double> &DFOfR,
+                               const std::vector<double> &DR);
+  void convertFromSQMinus1(HistogramData::HistogramY &FOfQ, const HistogramData::HistogramX &Q,
                            HistogramData::HistogramE &DFOfQ);
-  void convertFromLittleGRMinus1(HistogramData::HistogramY &FOfR, HistogramData::HistogramX &R,
+  void convertFromLittleGRMinus1(HistogramData::HistogramY &FOfR, const HistogramData::HistogramX &R,
                                  HistogramData::HistogramE &DFOfR);
 };
 

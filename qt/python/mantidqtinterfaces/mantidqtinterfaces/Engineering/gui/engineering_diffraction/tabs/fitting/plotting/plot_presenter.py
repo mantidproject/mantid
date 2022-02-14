@@ -48,15 +48,15 @@ class FittingPlotPresenter(object):
         self.view.clear_figure()
         self.view.update_fitbrowser()
 
-    def do_fit_all(self, ws_list, do_sequential=True):
+    def do_fit_all(self, ws_name_list, do_sequential=True):
         fitprop_list = []
         prev_fitprop = self.view.read_fitprop_from_browser()
-        for ws in ws_list:
-            logger.notice(f'Starting to fit workspace {ws}')
+        for ws_name in ws_name_list:
+            logger.notice(f'Starting to fit workspace {ws_name}')
             fitprop = deepcopy(prev_fitprop)
             # update I/O workspace name
-            fitprop['properties']['Output'] = ws
-            fitprop['properties']['InputWorkspace'] = ws
+            fitprop['properties']['Output'] = ws_name
+            fitprop['properties']['InputWorkspace'] = ws_name
             # do fit
             fit_output = Fit(**fitprop['properties'])
             # update results
@@ -67,7 +67,7 @@ class FittingPlotPresenter(object):
                 # update function in prev fitprop to use for next workspace
                 prev_fitprop['properties']['Function'] = funcstr
             # update last fit in fit browser and save setup
-            self.view.update_browser(fit_output.OutputStatus, funcstr, ws)
+            self.view.update_browser(fit_output.OutputStatus, funcstr, ws_name)
             # append a deep copy to output list (will be initial parameters if not successful)
             fitprop_list.append(fitprop)
 

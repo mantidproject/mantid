@@ -10,7 +10,6 @@ from mantid.py36compat import dataclass
 from sans.common.enums import RangeStepType
 from sans.common.general_functions import get_ranges_from_event_slice_setting
 from sans.state.StateObjects.StateCalculateTransmission import StateCalculateTransmission
-from sans.state.StateObjects.StateNormalizeToMonitor import StateNormalizeToMonitor
 from sans.state.StateObjects.StateWavelength import StateWavelength
 from sans.state.StateObjects.StateWavelengthAndPixelAdjustment import StateWavelengthAndPixelAdjustment
 from sans.state.StateObjects.wavelength_interval import WavRangePairs, WavRange
@@ -20,16 +19,15 @@ from sans.user_file.parser_helpers.toml_parser_impl_base import TomlParserImplBa
 @dataclass(init=True)
 class DuplicateWavelengthStates:
     """
-    These four classes contain duplicated attributes, so this POD
+    These classes contain duplicated attributes, so this POD
     class ties them together for subsequent setters
     """
     transmission: StateCalculateTransmission
-    normalize: StateNormalizeToMonitor
     wavelength: StateWavelength
     pixel: StateWavelengthAndPixelAdjustment
 
     def iterate_fields(self):
-        return [self.transmission, self.normalize,
+        return [self.transmission,
                 self.wavelength, self.pixel]
 
 

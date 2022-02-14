@@ -23,6 +23,7 @@ set(REDUCTION_SRC_FILES
     RangeInLambda.cpp
     RunsTable.cpp
     LookupRow.cpp
+    LookupRowFinder.cpp
     ValidateLookupRow.cpp
     PreviewRow.cpp
 )
@@ -58,6 +59,7 @@ set(REDUCTION_INC_FILES
     ReductionType.h
     RunsTable.h
     LookupRow.h
+    LookupRowFinder.h
     SummationType.h
     IBatch.h
     PreviewRow.h

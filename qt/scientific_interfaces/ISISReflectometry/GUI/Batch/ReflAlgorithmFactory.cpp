@@ -9,6 +9,7 @@
 #include "Reduction/Batch.h"
 #include "Reduction/PreviewRow.h"
 #include "RowPreprocessingAlgorithm.h"
+#include "SumBanksAlgorithm.h"
 
 namespace MantidQt::CustomInterfaces::ISISReflectometry {
 
@@ -17,4 +18,9 @@ ReflAlgorithmFactory::ReflAlgorithmFactory(IBatch const &batch) : m_batch(batch)
 MantidQt::API::IConfiguredAlgorithm_sptr ReflAlgorithmFactory::makePreprocessingAlgorithm(PreviewRow &row) const {
   return PreprocessRow::createConfiguredAlgorithm(m_batch, row, nullptr);
 }
+
+MantidQt::API::IConfiguredAlgorithm_sptr ReflAlgorithmFactory::makeSumBanksAlgorithm(PreviewRow &row) const {
+  return SumBanks::createConfiguredAlgorithm(m_batch, row, nullptr);
+}
+
 } // namespace MantidQt::CustomInterfaces::ISISReflectometry

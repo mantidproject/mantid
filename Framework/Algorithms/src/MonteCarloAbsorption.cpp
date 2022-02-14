@@ -323,7 +323,7 @@ MatrixWorkspace_uptr MonteCarloAbsorption::doSimulation(const MatrixWorkspace &i
 
   PARALLEL_FOR_IF(Kernel::threadSafe(simulationWS))
   for (int64_t i = 0; i < nhists; ++i) {
-    PARALLEL_START_INTERUPT_REGION
+    PARALLEL_START_INTERRUPT_REGION
 
     auto &outE = simulationWS.mutableE(i);
     // The input was cloned so clear the errors out
@@ -386,9 +386,9 @@ MatrixWorkspace_uptr MonteCarloAbsorption::doSimulation(const MatrixWorkspace &i
 
     prog.report(reportMsg);
 
-    PARALLEL_END_INTERUPT_REGION
+    PARALLEL_END_INTERRUPT_REGION
   }
-  PARALLEL_CHECK_INTERUPT_REGION
+  PARALLEL_CHECK_INTERRUPT_REGION
 
   if (useSparseInstrument) {
     interpolateFromSparse(*outputWS, *sparseWS, interpolateOpt);
@@ -448,19 +448,21 @@ void MonteCarloAbsorption::interpolateFromSparse(MatrixWorkspace &targetWS, cons
   const auto refFrame = targetWS.getInstrument()->getReferenceFrame();
   PARALLEL_FOR_IF(Kernel::threadSafe(targetWS, sparseWS))
   for (int64_t i = 0; i < static_cast<decltype(i)>(spectrumInfo.size()); ++i) {
-    PARALLEL_START_INTERUPT_REGION
-    double lat, lon;
-    std::tie(lat, lon) = spectrumInfo.geographicalAngles(i);
-    const auto spatiallyInterpHisto = sparseWS.bilinearInterpolateFromDetectorGrid(lat, lon);
-    if (spatiallyInterpHisto.size() > 1) {
-      auto targetHisto = targetWS.histogram(i);
-      interpOpt.applyInPlace(spatiallyInterpHisto, targetHisto);
-      targetWS.setHistogram(i, targetHisto);
-    } else {
-      targetWS.mutableY(i) = spatiallyInterpHisto.y().front();
+    PARALLEL_START_INTERRUPT_REGION
+    if (spectrumInfo.hasDetectors(i)) {
+      double lat, lon;
+      std::tie(lat, lon) = spectrumInfo.geographicalAngles(i);
+      const auto spatiallyInterpHisto = sparseWS.bilinearInterpolateFromDetectorGrid(lat, lon);
+      if (spatiallyInterpHisto.size() > 1) {
+        auto targetHisto = targetWS.histogram(i);
+        interpOpt.applyInPlace(spatiallyInterpHisto, targetHisto);
+        targetWS.setHistogram(i, targetHisto);
+      } else {
+        targetWS.mutableY(i) = spatiallyInterpHisto.y().front();
+      }
     }
-    PARALLEL_END_INTERUPT_REGION
+    PARALLEL_END_INTERRUPT_REGION
   }
-  PARALLEL_CHECK_INTERUPT_REGION
+  PARALLEL_CHECK_INTERRUPT_REGION
 }
 } // namespace Mantid::Algorithms

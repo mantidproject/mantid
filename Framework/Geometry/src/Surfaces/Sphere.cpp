@@ -42,7 +42,9 @@ Sphere::Sphere() : Sphere({0, 0, 0}, 0.0) {}
  * @param centre
  * @param radius
  */
-Sphere::Sphere(Kernel::V3D centre, double radius) : Quadratic(), m_centre{centre}, m_radius{radius} { setBaseEqn(); }
+Sphere::Sphere(const Kernel::V3D &centre, double radius) : Quadratic(), m_centre{centre}, m_radius{radius} {
+  setBaseEqn();
+}
 
 /**
  * Makes a clone (implicit virtual copy constructor)
@@ -125,14 +127,8 @@ int Sphere::side(const Kernel::V3D &Pt) const
  * Calculate if the point Pt on the surface of the sphere
  * (within tolerance CTolerance)
  * @param Pt :: Point to check
- * @return 1 :: on the surfacae or 0 if not.
  */
-int Sphere::onSurface(const Kernel::V3D &Pt) const {
-  if (distance(Pt) > Tolerance) {
-    return 0;
-  }
-  return 1;
-}
+bool Sphere::onSurface(const Kernel::V3D &Pt) const { return (distance(Pt) <= Tolerance); }
 
 /**
  * Determine the shortest distance from the Surface

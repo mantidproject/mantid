@@ -20,6 +20,8 @@ namespace MantidQt {
 namespace CustomInterfaces {
 namespace ISISReflectometry {
 
+class IGroup;
+
 /** @class Row
 
   The Row model represents a single row in the runs table
@@ -48,10 +50,19 @@ public:
   bool hasOutputWorkspace(std::string const &wsName) const;
   void renameOutputWorkspace(std::string const &oldName, std::string const &newName) override;
 
+  void setParent(IGroup *parent) const;
+  IGroup *getParent() const;
   Row withExtraRunNumbers(std::vector<std::string> const &runNumbers) const;
 
   int totalItems() const override;
+
   int completedItems() const override;
+  void resetState(bool resetChildren = true) override;
+
+  void setStarting() override;
+  void setRunning() override;
+  void setSuccess() override;
+  void setError(const std::string &msg) override;
 
 private:
   std::vector<std::string> m_runNumbers;
@@ -62,8 +73,10 @@ private:
   TransmissionRunPair m_transmissionRuns;
   ReductionWorkspaces m_reducedWorkspaceNames;
   ReductionOptionsMap m_reductionOptions;
-
+  mutable IGroup *m_parent;
   friend class Encoder;
+
+  void updateParent();
 };
 
 MANTIDQT_ISISREFLECTOMETRY_DLL bool operator!=(Row const &lhs, Row const &rhs);
