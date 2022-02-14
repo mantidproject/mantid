@@ -25,7 +25,7 @@ class InstrumentViewManagerTest(unittest.TestCase):
         the manager can remove it correctly.
         """
         ws = CreateSampleWorkspace(OutputWorkspace="my_workspace")
-        mock_presenter = mock.MagicMock()
+        mock_presenter = mock.MagicMock(ws_name=ws.name())
         instrument_view = InstrumentView(parent=None, presenter=mock_presenter, name=ws.name())
         instrument_view.close()
         mock_presenter.close.assert_called_once_with(ws.name())
