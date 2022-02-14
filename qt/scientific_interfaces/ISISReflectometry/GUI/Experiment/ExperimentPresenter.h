@@ -63,7 +63,7 @@ public:
   void notifyInstrumentChanged(std::string const &instrumentName) override;
   void restoreDefaults() override;
 
-  bool hasValidSettings() const noexcept;
+  bool hasValidSettings() const noexcept override;
 
 protected:
   std::unique_ptr<IExperimentOptionDefaults> m_experimentDefaults;
