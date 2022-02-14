@@ -223,7 +223,7 @@ void Rebin::exec() {
       // Go through all the histograms and set the data
       PARALLEL_FOR_IF(Kernel::threadSafe(*inputWS, *outputWS))
       for (int i = 0; i < histnumber; ++i) {
-        PARALLEL_START_INTERUPT_REGION
+        PARALLEL_START_INTERRUPT_REGION
         // Get a const event list reference. eventInputWS->dataY() doesn't work.
         const EventList &el = eventInputWS->getSpectrum(i);
         MantidVec y_data, e_data;
@@ -236,9 +236,9 @@ void Rebin::exec() {
 
         // Report progress
         prog.report(name());
-        PARALLEL_END_INTERUPT_REGION
+        PARALLEL_END_INTERRUPT_REGION
       }
-      PARALLEL_CHECK_INTERUPT_REGION
+      PARALLEL_CHECK_INTERRUPT_REGION
 
       // Copy all the axes
       for (int i = 1; i < inputWS->axes(); i++) {
@@ -283,7 +283,7 @@ void Rebin::exec() {
     Progress prog(this, 0.0, 1.0, histnumber);
     PARALLEL_FOR_IF(Kernel::threadSafe(*inputWS, *outputWS))
     for (int hist = 0; hist < histnumber; ++hist) {
-      PARALLEL_START_INTERUPT_REGION
+      PARALLEL_START_INTERRUPT_REGION
 
       try {
         outputWS->setHistogram(hist, HistogramData::rebin(inputWS->histogram(hist), XValues_new));
@@ -294,9 +294,9 @@ void Rebin::exec() {
           throw;
       }
       prog.report(name());
-      PARALLEL_END_INTERUPT_REGION
+      PARALLEL_END_INTERRUPT_REGION
     }
-    PARALLEL_CHECK_INTERUPT_REGION
+    PARALLEL_CHECK_INTERRUPT_REGION
     outputWS->setDistribution(dist);
 
     // Now propagate any masking correctly to the output workspace

@@ -20,6 +20,8 @@ ENABLE_DOC_TESTS=$5
 BUILD_THREADS=$6
 USE_CORE_DUMPS=$7
 
+# Run only 3 tests at a time because of memory constraints in the system tests
+BUILD_THREADS_SYSTEM_TESTS=3
 XVFB_SERVER_NUM=101
 ULIMIT_CORE_ORIG=$(ulimit -c)
 
@@ -54,15 +56,25 @@ function onexit {
 
 # Clean up prior to testing
 # Prevent race conditions when creating the user config directory
-userconfig_dir=$HOME/.mantid
+if [[ $OSTYPE == "msys"* ]]; then
+    userconfig_dir=$APPDATA/mantidproject/mantid
+    userprops=$WORKSPACE/build/bin/Release/Mantid.user.properties
+    workbench_ini=$APPDATA/mantidproject/mantidworkbench.ini
+else
+    userconfig_dir=$HOME/.mantid
+    userprops=$userconfig_dir/Mantid.user.properties
+    workbench_ini=~/.config/mantidproject/mantidworkbench.ini
+fi
+
 rm -fr $userconfig_dir
+rm -fr $userprops
+mkdir -p $userconfig_dir
 
 # Remove GUI qsettings files
-rm -f ~/.config/mantidproject/mantidworkbench.ini
+rm -f $workbench_ini
 
-mkdir -p $userconfig_dir
 # use a fixed number of openmp threads to avoid overloading the system
-echo MultiThreaded.MaxCores=2 > $userconfig_dir/Mantid.user.properties
+echo MultiThreaded.MaxCores=2 > $userprops
 
 # Setup core dumping
 trap onexit INT TERM EXIT
@@ -70,29 +82,38 @@ if [[ ${USE_CORE_DUMPS} == true ]]; then
     ulimit -c unlimited
 fi
 
+if [[ $OSTYPE == "msys"* ]]; then
+    WINDOWS_BUILD_OPTIONS="--config Release"
+    WINDOWS_TEST_OPTIONS="-C Release"
+    WINDOWS_UNITTEST_TIMEOUT_OPTIONS="--timeout 500"
+    export PYTHONHOME=$CONDA_PREFIX
+    SYSTEM_TEST_EXECUTABLE=$WORKSPACE/build/systemtest.bat
+else
+    SYSTEM_TEST_EXECUTABLE=$WORKSPACE/build/systemtest
+fi
+
 # Run unit tests
 cd $WORKSPACE/build
 if [[ $ENABLE_UNIT_TESTS == true ]]; then
-    run_with_xvfb ctest -j$BUILD_THREADS --no-compress-output -T Test --schedule-random --output-on-failure
+    run_with_xvfb ctest -j$BUILD_THREADS --no-compress-output -T Test --schedule-random --output-on-failure --repeat until-pass:3 $WINDOWS_TEST_OPTIONS $WINDOWS_UNITTEST_TIMEOUT_OPTIONS
     terminate_xvfb_sessions
 fi
 
 if [[ $ENABLE_DOCS == true && $ENABLE_DOC_TESTS == true ]]; then
-    run_with_xvfb cmake --build . --target docs-doctest -j$BUILD_THREADS
+    run_with_xvfb cmake --build . --target docs-doctest -j$BUILD_THREADS $WINDOWS_BUILD_OPTIONS
     terminate_xvfb_sessions
 fi
 
 if [[ $ENABLE_SYSTEM_TESTS == true ]]; then
     rm -fr $userconfig_dir
-    rm -f ~/.config/mantidproject/mantidworkbench.ini
+    rm -f $workbench_ini
 
     # Turn off any auto updating on startup
     mkdir -p $userconfig_dir
-    userprops=$userconfig_dir/Mantid.user.properties
     echo "UpdateInstrumentDefinitions.OnStartup = 0" > $userprops
     echo "usagereports.enabled = 0" >> $userprops
     echo "CheckMantidVersion.OnStartup = 0" >> $userprops
 
-    run_with_xvfb $WORKSPACE/build/systemtest -j$BUILD_THREADS
+    run_with_xvfb $SYSTEM_TEST_EXECUTABLE $WINDOWS_TEST_OPTIONS -j$BUILD_THREADS_SYSTEM_TESTS -l error
     terminate_xvfb_sessions
 fi

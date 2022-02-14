@@ -16,7 +16,7 @@ from mantid.simpleapi import (AddSampleLog, CalculateFlatBackground, CorrectTOFA
                               CreateSingleValuedWorkspace, CreateWorkspace, CropWorkspace, DeleteWorkspace, ExtractMonitors,
                               FindEPP, GetEiMonDet, GroupDetectors, LoadAndMerge, LoadEmptyInstrument, Minus, mtd,
                               NormaliseToMonitor, Scale, SetInstrumentParameter)
-import numpy
+import numpy as np
 
 _MONSUM_LIMIT = 100
 
@@ -132,7 +132,7 @@ def _createFlatBkg(ws, wsType, windowWidth, wsNames, algorithmLogging):
 
 def _fitElasticChannel(ys, wsNames, wsCleanup, algorithmLogging):
     """Return index to the peak position of ys."""
-    xs = numpy.array([i for i in range(len(ys))])
+    xs = np.array([i for i in range(len(ys))])
     l2SumWSName = wsNames.withSuffix('summed_detectors_at_l2')
     l2SumWS = CreateWorkspace(OutputWorkspace=l2SumWSName,
                               DataX=xs,
@@ -145,7 +145,7 @@ def _fitElasticChannel(ys, wsNames, wsCleanup, algorithmLogging):
     peakCentre = float(fitWS.cell('PeakCentre', 0))
     wsCleanup.cleanup(l2SumWS)
     wsCleanup.cleanup(fitWS)
-    return int(round(peakCentre))
+    return peakCentre
 
 
 def _fitEPP(ws, wsType, wsNames, algorithmLogging):
@@ -274,7 +274,7 @@ def _subtractFlatBkg(ws, wsType, bkgWorkspace, bkgScaling, wsNames, wsCleanup, a
 def _sumDetectorsAtDistance(ws, distance, tolerance):
     """Return a sum of the Y values of detectors at distance away from the sample."""
     histogramCount = ws.getNumberHistograms()
-    ySums = numpy.zeros(ws.blocksize())
+    ySums = np.zeros(ws.blocksize())
     detectorInfo = ws.detectorInfo()
     sample = ws.getInstrument().getSample()
     for i in range(histogramCount):
@@ -442,8 +442,8 @@ class DirectILLCollectData(DataProcessorAlgorithm):
                              defaultValue='',
                              direction=Direction.Input,
                              optional=PropertyMode.Optional),
-                             doc='A single value workspace containing the nominal elastic channel index. Overrides '
-                                 + common.PROP_ELASTIC_CHANNEL_MODE + '.')
+                             doc='A single value workspace containing the nominal elastic channel index'
+                                 '(can be floating point). Overrides {}.'.format(common.PROP_ELASTIC_CHANNEL_MODE))
         self.declareProperty(name=common.PROP_MON_INDEX,
                              defaultValue=Property.EMPTY_INT,
                              validator=positiveInt,
@@ -653,7 +653,7 @@ class DirectILLCollectData(DataProcessorAlgorithm):
             return mainWS
         if not self.getProperty(common.PROP_ELASTIC_CHANNEL_WS).isDefault:
             indexWS = self.getProperty(common.PROP_ELASTIC_CHANNEL_WS).value
-            index = int(indexWS.readY(0)[0])
+            index = indexWS.readY(0)[0]
         else:
             mode = self._chooseElasticChannelMode(mainWS)
             if mode == common.ELASTIC_CHANNEL_SAMPLE_LOG:
@@ -664,6 +664,8 @@ class DirectILLCollectData(DataProcessorAlgorithm):
             else:
                 ys = _sumDetectorsAtDistance(mainWS, l2, 1e-5)
                 index = _fitElasticChannel(ys, self._names, self._cleanup, self._subalgLogging)
+                precision = int(mainWS.getInstrument().getIntParameter("elastic_channel_precision")[0])
+                index = np.trunc(index * 10 ** precision) / 10 ** precision
         correctedWSName = self._names.withSuffix('tof_axis_corrected')
         correctedWS = CorrectTOFAxis(InputWorkspace=mainWS,
                                      OutputWorkspace=correctedWSName,
@@ -674,9 +676,10 @@ class DirectILLCollectData(DataProcessorAlgorithm):
         self._report.notice('Elastic channel index {0} was used for TOF axis adjustment.'.format(index))
         if not self.getProperty(common.PROP_OUTPUT_ELASTIC_CHANNEL_WS).isDefault:
             indexOutputWSName = self._names.withSuffix('elastic_channel_output')
-            indexOutputWS = CreateSingleValuedWorkspace(OutputWorkspace=indexOutputWSName,
-                                                        DataValue=index,
-                                                        EnableLogging=self._subalgLogging)
+            indexOutputWS = CreateSingleValuedWorkspace(
+                OutputWorkspace=indexOutputWSName,
+                DataValue=index,
+                EnableLogging=self._subalgLogging)
             self.setProperty(common.PROP_OUTPUT_ELASTIC_CHANNEL_WS, indexOutputWS)
             self._cleanup.cleanup(indexOutputWS)
         self._cleanup.cleanup(mainWS)
@@ -824,7 +827,7 @@ class DirectILLCollectData(DataProcessorAlgorithm):
         output_ws = f'{input_ws}ungrouped'
         CreateWorkspace(
             DataX=ws_to_match.readX(0)[0]*ws_to_match.getNumberHistograms(),
-            DataY=numpy.full(shape=(ws_to_match.getNumberHistograms()), fill_value=0.0, dtype='float64'),
+            DataY=np.full(shape=(ws_to_match.getNumberHistograms()), fill_value=0.0, dtype='float64'),
             Nspec=ws_to_match.getNumberHistograms(),
             ParentWorkspace=ws_to_match,
             UnitX=ws_to_match.getAxis(0).getUnit().unitID(),

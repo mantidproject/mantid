@@ -25,9 +25,8 @@ class DLLExport EQSANSLoad : public API::Algorithm {
 public:
   /// Constructor
   EQSANSLoad()
-      : API::Algorithm(), m_low_TOF_cut(0), m_high_TOF_cut(0), m_center_x(0), m_center_y(0), m_moderator_position(0) {
-    m_mask_as_string = "";
-    m_output_message = "";
+      : API::Algorithm(), m_low_TOF_cut(0), m_high_TOF_cut(0), m_center_x(0), m_center_y(0), m_mask_as_string(""),
+        m_output_message(""), m_moderator_position(0) {
     for (int i = 0; i < 3; i++)
       for (int j = 0; j < 8; j++)
         m_slit_positions[i][j] = EQSANSInstrument::default_slit_positions[i][j];

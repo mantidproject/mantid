@@ -11,13 +11,12 @@ Frequency Domain Analysis
 
 New Features
 ############
-
 - Users can now select the unit for the frequency spectra (MHz or Gauss) in plotting, by picking either ``Frequency`` or ``Field`` respectively after a transform has been calculated.
 
 Bugfixes
 ########
-
 - Fixed a bug that prevented the frequency spectra from being plotted when data was binned.
+- When plotting transformations, FFTs now have y-units of ``intensity`` and Maxents now have y-units of ``probability``.
 
 
 Muon Analysis and Frequency Domain Analysis
@@ -25,7 +24,6 @@ Muon Analysis and Frequency Domain Analysis
 
 New Features
 ############
-
 - **Instead of plotting the confidence interval of a fit as an error bar, it is now represented by a shaded region.**
 
 .. image::  ../../images/Muon_error_shading.png
@@ -35,9 +33,8 @@ New Features
 
 Improvements
 ############
-
 - Changes have been made to improve the speed of Muon Analysis and Frequency Domain Analysis.
-- The :ref:`Results Tab <muon_results_tab-ref>` will now dispay a warning (red text and a tooltip) if the results table already exists.
+- The :ref:`Results Tab <muon_results_tab-ref>` will now display a warning (red text and a tooltip) if the results table already exists.
 - The results table now produces errors for log values (when they are available).
 - The plots no longer use scientific notation for the axis values.
 - On resizing the GUI, priority is given to plotting.
@@ -45,12 +42,12 @@ Improvements
 - The ``alpha`` values on :ref:`Grouping Tab <muon_grouping_tab-ref>` are now to six decimal places.
 - The numerical values in the ``run info`` box on the :ref:`Home Tab <muon_home_tab-ref>` are now rounded to either 4 significant figures or a whole number, whichever is more precise.
 - The Sequentially Fit all button is now visible for 4K displays.
+- The :ref:`Results Tab <muon_results_tab-ref>` will now preserve the workspace selection after a fit. However, it will reselect a fit that has been recalculated.
+- When using ``Browse`` to load data from a different instrument, a warning is now shown saying that the data has not been loaded.
 
 
 Bugfixes
 ########
-
-
 - Detaching tabs in Muon Analysis or Frequency Domain Analysis GUIs and then closing Mantid no longer causes a crash.
 - Dragging tabs in Muon Analysis or Frequency Domain Analysis GUIs no longer shows a translucent preview that does nothing.
 - Mantid no longer crashes when changing tabs in either Muon Analysis or Frequency Domain Analysis on MacOS.
@@ -63,16 +60,17 @@ ALC
 
 New Features
 ############
-
 - Can now read ``nxs_v2`` files.
 
+Bugfixes
+########
+- Fixed a bug that allowed decimal values for custom groupings.
 
 Algorithms
 ----------
 
 Improvements
 ############
-
 - :ref:`LoadPSIMuonBin <algm-LoadPSIMuonBin>` can now load a subset of the spectra.
 
 
@@ -103,20 +101,3 @@ Improvements
 - :ref:`Gaussian <func-Gaussian>`, :ref:`Lorentzian <func-Lorentzian>` and :ref:`Polynomial fitting <func-Polynomial>` functions can now also be found under ``MuonModelling`` in the Fitting Functions Tree.
 
 :ref:`Release 6.3.0 <v6.3.0>`
-
-..
-  Model Fitting
-  -------------
-
-  BugFixes
-  ########
-  - A bug has been fixed that caused Model fitting to not update it's results table list.
-  - Plotting in Model Fitting now features a greater number of units for parameters and sample logs.
-  - The dates and times for relevant parameters in Model Fitting have been formatted so that they can be plotted with relative spacing.
-  - On the Model Fitting Tab, the fit range will now update when the x axis is changed.
-  - The Model Fitting tab no longer resets when the instrument is changed.
-  - When a new results table is created the Model Fitting tab selects the default parameters to plot based on log values or parameters in the results table.
-  - Fixed a bug that prevented the Model Fitting plot showing when data was binned.
-
-
-

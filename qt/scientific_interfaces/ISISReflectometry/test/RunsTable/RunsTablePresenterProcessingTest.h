@@ -175,6 +175,15 @@ public:
     verifyAndClearExpectations();
   }
 
+  void testRowParentStateChangedForAllRowsInGroupComplete() {
+    auto presenter = makePresenter(m_view, oneGroupWithARowModel());
+    getRow(presenter, 0, 0)->setSuccess();
+    expectRowState(Colour::SUCCESS);
+    expectGroupState(Colour::CHILDREN_SUCCESS);
+    presenter.notifyRowStateChanged();
+    verifyAndClearExpectations();
+  }
+
   void testRowStateChangedForErrorRow() {
     auto presenter = makePresenter(m_view, oneGroupWithARowModel());
     getRow(presenter, 0, 0)->setError("error message");

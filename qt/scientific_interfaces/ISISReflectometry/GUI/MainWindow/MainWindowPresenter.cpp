@@ -157,11 +157,8 @@ bool MainWindowPresenter::isAnyBatchProcessing() const {
 }
 
 bool MainWindowPresenter::isAnyBatchAutoreducing() const {
-  for (const auto &batchPresenter : m_batchPresenters) {
-    if (batchPresenter->isAutoreducing())
-      return true;
-  }
-  return false;
+  return std::any_of(m_batchPresenters.cbegin(), m_batchPresenters.cend(),
+                     [](auto const &batchPresenter) { return batchPresenter->isAutoreducing(); });
 }
 
 bool MainWindowPresenter::isWarnProcessAllChecked() const {

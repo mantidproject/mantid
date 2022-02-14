@@ -118,7 +118,7 @@ Output:
 
 .. testoutput:: BasicIN4Reduction
 
-    S(Q,W): Q range: 0.0...9.18A; W range -96.3...7.62meV
+    S(Q,W): Q range: 0.0...9.21A; W range -97.0...7.62meV
 
 The basic reduction for IN5 and PANTHER differs slightly with regards to the diagnostics step. In this case, the "raw" workspace is not needed, and it is not necessary to pass the EPP workspace to :ref:`algm-DirectILLDiagnostics`:
 
@@ -372,7 +372,7 @@ Output:
 
 .. testoutput:: SelfShieldingReduction
 
-    S(Q,W): Q range: 0.0...9.18A; W range -96.3...7.62meV
+    S(Q,W): Q range: 0.0...9.21A; W range -97.0...7.62meV
 
 
 In the case of :ref:`algm-DirectILLAutoProcess`, the self-attenuation correction is handled internally when the `AbsorptionCorrection` property is set to either `Fast` or `Full`, which denote the granularity of the geometry to be used for calculations. Another property, `SelfAbsorptionCorrection` allows to choose whether to use Monte Carlo or numerical integration methods. Similarly to the case presented above, at least the geometry and material of the sample need of the provided as input, via `SampleMaterial` and `SampleGeometry` properties.
@@ -412,7 +412,7 @@ Output:
 
 .. testoutput:: SampleContainerCompatibility
 
-    Sample's TOF axis starts at 966.8mus, container's at 966.8mus
+    Sample's TOF axis starts at 965.4mus, container's at 965.7mus
 
 Container subtraction
 =====================
@@ -522,7 +522,7 @@ Output:
 
 .. testoutput:: ContainerSubtraction
 
-    S(Q,W): Q range: 0.0...9.18A; W range -96.3...7.62meV
+    S(Q,W): Q range: 0.0...9.21A; W range -97.0...7.62meV
 
 Container subtraction is handled internally by the :ref:`algm-DirectILLAutoProcess` algorithm, provided the X-axis binning is compatible between the current sample and the empty container workspace.
 For the correction to be taken into account, the `EmptyContainerWorkspace` needs to be pointed to the empty container workspace.
@@ -563,7 +563,12 @@ Sometimes the empty container is not measured at all the experiment's temperatur
     # Target sample temperature.
     Ts = 50.0
     # Linear interpolation.
-    container_50K = (T1 - Ts) / DT * mtd['container_1.5K'] + (Ts - T0) / DT * mtd['container_100K']
+    RebinToWorkspace(
+        WorkspaceToRebin='container_100K',
+	WorkspaceToMatch='container_1.5K',
+        OutputWorkspace='container_100K_rebinned1p5K'
+    )
+    container_50K = (T1 - Ts) / DT * mtd['container_1.5K'] + (Ts - T0) / DT * mtd['container_100K_rebinned1p5K']
     T_sample_logs = container_50K.run().getProperty('sample.temperature').value
     mean_T = numpy.mean(T_sample_logs)
     print('Note, that the mean temperature from the sample logs is {:.4}K, a bit off.'.format(mean_T))
@@ -698,7 +703,12 @@ Lets put it all together into a complex Python script. The script below reduces 
     T1 = 100.0
     DT = T1 - T0
     Ts = 50.0 # Target T
-    container_50K = (T1 - Ts) / DT * mtd['container_1.5K'] + (Ts - T0) / DT * mtd['container_100K']
+    RebinToWorkspace(
+        WorkspaceToRebin='container_100K',
+        WorkspaceToMatch='container_1.5K',
+        OutputWorkspace='container_100K_rebinned1p5K'
+    )
+    container_50K = (T1 - Ts) / DT * mtd['container_1.5K'] + (Ts - T0) / DT * mtd['container_100K_rebinned1p5K']
     DirectILLApplySelfShielding(
         InputWorkspace='sample_50K',
         OutputWorkspace='corrected_50K',
@@ -729,8 +739,8 @@ Output:
 
 .. testoutput:: FullExample
 
-    SofQW_1.5K: Q range: 0.0...9.18A; W range -96.3...7.62meV
-    SofQW_50K: Q range: 0.0...9.18A; W range -96.3...7.62meV
+    SofQW_1.5K: Q range: 0.0...9.21A; W range -97.0...7.62meV
+    SofQW_50K: Q range: 0.0...9.19A; W range -96.6...7.62meV
 
 And the same reduction, but with the use of the :ref:`algm-DirectILLAutoProcess`:
 

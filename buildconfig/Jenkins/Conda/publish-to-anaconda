@@ -1,0 +1,55 @@
+#!/bin/bash -ex
+
+# This script expects an environment to exist in the workspace directory, and
+# activated that contains conda-build.
+#
+# Expected args:
+#   1. WORKSPACE: path to the workspace/source code that this should run inside
+#                 (mantid repo). Windows Caveat: Only use / for this arguement do
+#                 not use \\ or \ in the path.
+#   2. TOKEN: Token for uploading to anaconda.org
+#   3. CHANNEL: Channel to upload to
+#   4. LABEL: The label used when uploading to anaconda
+#   5. PACKAGES: A list of args that will be uploaded to anaconda cloud.
+#
+
+WORKSPACE=$1
+shift
+TOKEN=$1
+shift
+CHANNEL=$1
+shift
+LABEL=$1
+shift
+EXPECTED_MAMBAFORGE_PATH=$WORKSPACE/mambaforge # Install into the WORKSPACE_DIR
+if [[ $OSTYPE == "msys" ]]; then
+    EXPECTED_CONDA_PATH=$EXPECTED_MAMBAFORGE_PATH/condabin/mamba.bat
+else
+    EXPECTED_CONDA_PATH=$EXPECTED_MAMBAFORGE_PATH/bin/mamba
+fi
+CONDA_ENV_NAME=mantid-anaconda-upload
+RECIPES_DIR=$WORKSPACE/conda-recipes
+SCRIPT_DIR=$WORKSPACE/buildconfig/Jenkins/Conda/
+
+# Setup Mambaforge
+$SCRIPT_DIR/download-and-install-mambaforge $EXPECTED_MAMBAFORGE_PATH $EXPECTED_CONDA_PATH true
+
+# Remove conda env if it exists
+$EXPECTED_CONDA_PATH env remove -n $CONDA_ENV_NAME
+
+# Create env with anaconda-client installed
+$EXPECTED_CONDA_PATH create -n $CONDA_ENV_NAME anaconda-client -y
+
+# Activate Conda environment
+. $WORKSPACE/mambaforge/etc/profile.d/conda.sh
+conda activate $CONDA_ENV_NAME
+
+for package in "$@"
+do
+    # Skip the Workspace, Token, and Channel args, then upload every other package to the given User
+    if [[ $package == *"mantid"* ]]
+    then
+        echo "Uploading $package"
+        anaconda -t $TOKEN upload -u $CHANNEL $package --label $LABEL
+    fi
+done

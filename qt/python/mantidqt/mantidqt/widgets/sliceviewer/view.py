@@ -346,6 +346,7 @@ class SliceViewerDataView(QWidget):
 
     def draw_plot(self):
         self.ax.set_title('')
+        self.canvas.draw()
         if self.image:
             self.colorbar.set_mappable(self.image)
             self.colorbar.update_clim()
@@ -353,8 +354,6 @@ class SliceViewerDataView(QWidget):
         if self.line_plots_active:
             self._line_plots.plotter.delete_line_plot_lines()
             self._line_plots.plotter.update_line_plot_labels()
-
-        self.canvas.draw()
 
     def export_region(self, limits, cut):
         """

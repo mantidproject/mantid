@@ -1075,7 +1075,7 @@ class SNSPowderReduction(DistributedDataProcessorAlgorithm):
         assert self.does_workspace_exist(wksp_name)
 
         # Reset characterization run numbers in the property manager
-        if PropertyManagerDataService.doesExist('__snspowderreduction'):
+        if '__snspowderreduction' in PropertyManagerDataService:
             PropertyManagerDataService.remove('__snspowderreduction')
 
         # Determine characterization
@@ -1089,7 +1089,7 @@ class SNSPowderReduction(DistributedDataProcessorAlgorithm):
                                          WaveLengthLogNames=self.getProperty("WaveLengthLogNames").value)
 
         # convert the result into a dict
-        return PropertyManagerDataService.retrieve("__snspowderreduction")
+        return PropertyManagerDataService["__snspowderreduction"]
 
     def _save(self, wksp, info, normalized, pdfgetn):
         prefix = str(wksp)

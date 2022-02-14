@@ -14,6 +14,14 @@ RESULTS_TAB_MODEL_CLS = 'mantidqtinterfaces.Muon.GUI.Common.results_tab_widget.r
 RESULTS_TAB_VIEW_CLS = 'mantidqtinterfaces.Muon.GUI.Common.results_tab_widget.results_tab_widget.ResultsTabView'
 
 
+class mock_fit_info(object):
+    def __init__(self, name):
+        self.name = name
+
+    def output_workspace_names(self):
+        return [self.name]
+
+
 class ResultsTabPresenterTest(unittest.TestCase):
     def setUp(self):
         self.model_patcher = mock.patch(RESULTS_TAB_MODEL_CLS, autospec=True)
@@ -88,21 +96,64 @@ class ResultsTabPresenterTest(unittest.TestCase):
 
     def test_adding_new_fit_to_existing_fits_preserves_current_selections(
             self):
-        orig_ws_list_state = {'ws1': [0, True, True], 'ws3': [1, False, True]}
-        final_ws_list_state = ['ws1', 'ws3']
+        ws1 = "ws1; parameters"
+        ws2 = "ws2; parameters"
+        fit_ws = "ws3; workspaces"
+        ws3 = "ws3; parameters"
+
+        # list is [row number, ticked, enabled] -> first selected, second is not
+        orig_ws_list_state = {ws1: [0, True, True], ws2: [1, False, True]}
+        final_ws_list_state = [ws1, ws2, ws3]
         test_functions = ['func1', 'func2']
         self.mock_model.fit_functions.return_value = test_functions
         self.mock_model.fit_selection.return_value = final_ws_list_state
         self.mock_view.fit_result_workspaces.return_value = orig_ws_list_state
 
         presenter = ResultsTabPresenter(self.mock_view, self.mock_model)
-        presenter._get_workspace_list = mock.MagicMock(return_value=(['ws1', 'ws3'], "func1"))
+        presenter._get_workspace_list = mock.MagicMock(return_value=([ws1, ws2, ws3], "func1"))
         # previous test verifies this is correct on construction
         self.mock_view.set_output_results_button_enabled.reset_mock()
-        presenter.on_new_fit_performed()
+        # add a new fit_ws
+        fit_info = mock_fit_info(fit_ws)
+
+        presenter.on_new_fit_performed(fit_info)
 
         self.mock_model.fit_functions.assert_called_once_with()
-        self.mock_model.fit_selection.assert_called_once_with(['ws1'])
+        # only the first ws and the new one are selected
+        self.mock_model.fit_selection.assert_called_once_with([ws1, ws3])
+        self.mock_view.set_fit_function_names.assert_called_once_with(
+            test_functions)
+        self.mock_view.set_fit_result_workspaces.assert_called_once_with(
+            final_ws_list_state)
+        self.mock_view.set_output_results_button_enabled.assert_called_once_with(
+            True)
+
+    def test_redoing_fit_to_updates_selections(
+            self):
+        ws1 = "ws1; parameters"
+        ws2 = "ws2; parameters"
+        fit_ws = "ws1; workspaces"
+
+        # list is [row number, ticked, enabled] -> nothing selected
+        orig_ws_list_state = {ws1: [0, False, True], ws2: [1, False, True]}
+        final_ws_list_state = [ws1, ws2]
+        test_functions = ['func1', 'func2']
+        self.mock_model.fit_functions.return_value = test_functions
+        self.mock_model.fit_selection.return_value = final_ws_list_state
+        self.mock_view.fit_result_workspaces.return_value = orig_ws_list_state
+
+        presenter = ResultsTabPresenter(self.mock_view, self.mock_model)
+        presenter._get_workspace_list = mock.MagicMock(return_value=([ws1, ws2], "func1"))
+        # previous test verifies this is correct on construction
+        self.mock_view.set_output_results_button_enabled.reset_mock()
+        # add a new fit_ws
+        fit_info = mock_fit_info(fit_ws)
+
+        presenter.on_new_fit_performed(fit_info)
+
+        self.mock_model.fit_functions.assert_called_once_with()
+        # ince ws1 has updated it is reselected
+        self.mock_model.fit_selection.assert_called_once_with([ws1])
         self.mock_view.set_fit_function_names.assert_called_once_with(
             test_functions)
         self.mock_view.set_fit_result_workspaces.assert_called_once_with(
@@ -113,7 +164,8 @@ class ResultsTabPresenterTest(unittest.TestCase):
     def test_if_no_fits_in_context_then_output_results_is_disabled(self):
         self.mock_model._fit_context.clear()
         presenter = ResultsTabPresenter(self.mock_view, self.mock_model)
-        presenter.on_new_fit_performed()
+        fit_info = mock_fit_info("ws1")
+        presenter.on_new_fit_performed(fit_info)
         expected_calls = [mock.call(False), mock.call(True)]  # Called once in init of view and once on new fit
 
         self.mock_view.set_output_results_button_enabled.assert_has_calls(expected_calls)
@@ -132,10 +184,7 @@ class ResultsTabPresenterTest(unittest.TestCase):
         self.mock_model.log_selection.return_value = final_selection
 
         presenter = ResultsTabPresenter(self.mock_view, self.mock_model)
-        presenter._get_workspace_list = mock.MagicMock(return_value=(['ws1', 'ws3'], "func1"))
-        # previous test verifies this is correct on construction
-        self.mock_view.set_output_results_button_enabled.reset_mock()
-        presenter.on_new_fit_performed()
+        presenter._update_logs_view()
 
         self.mock_view.log_values.assert_called_once_with()
         self.mock_model.log_selection.assert_called_once_with(

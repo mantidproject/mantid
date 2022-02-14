@@ -5,7 +5,9 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "Experiment.h"
+#include "LookupRowFinder.h"
 #include "MantidQtWidgets/Common/ParseKeyValueString.h"
+#include <boost/optional.hpp>
 #include <cmath>
 
 namespace MantidQt::CustomInterfaces::ISISReflectometry {
@@ -17,8 +19,8 @@ Experiment::Experiment()
       m_polarizationCorrections(PolarizationCorrections(PolarizationCorrectionType::None)),
       m_floodCorrections(FloodCorrections(FloodCorrectionType::Workspace)), m_transmissionStitchOptions(),
       m_stitchParameters(std::map<std::string, std::string>()),
-      m_lookupTable(LookupTable({LookupRow(boost::none, TransmissionRunPair(), boost::none, RangeInQ(), boost::none,
-                                           ProcessingInstructions(), boost::none)})) {}
+      m_lookupTable(LookupTable({LookupRow(boost::none, boost::none, TransmissionRunPair(), boost::none, RangeInQ(),
+                                           boost::none, ProcessingInstructions(), boost::none)})) {}
 
 Experiment::Experiment(AnalysisMode analysisMode, ReductionType reductionType, SummationType summationType,
                        bool includePartialBins, bool debug, BackgroundSubtraction backgroundSubtraction,
@@ -62,26 +64,14 @@ std::vector<LookupRow::ValueArray> Experiment::lookupTableToArray() const {
   return result;
 }
 
-LookupRow const *Experiment::findLookupRow(const boost::optional<double> &thetaAngle, double tolerance) const {
-  LookupTable::const_iterator match;
-  if (thetaAngle) {
-    match = std::find_if(
-        m_lookupTable.cbegin(), m_lookupTable.cend(), [thetaAngle, tolerance](LookupRow const &candiate) -> bool {
-          return !candiate.isWildcard() && std::abs(*thetaAngle - candiate.thetaOrWildcard().get()) <= tolerance;
-        });
-  } else {
-    match = std::find_if(m_lookupTable.cbegin(), m_lookupTable.cend(),
-                         [](LookupRow const &candidate) -> bool { return candidate.isWildcard(); });
-  }
+boost::optional<LookupRow> Experiment::findLookupRow(Row const &row, double tolerance) const {
+  LookupRowFinder findLookupRow(m_lookupTable);
+  return findLookupRow(row, tolerance);
+}
 
-  if (match != m_lookupTable.cend()) {
-    return &(*match);
-  } else if (thetaAngle) {
-    // Try again without a specific angle i.e. look for a wildcard row
-    return findLookupRow(boost::none, tolerance);
-  } else {
-    return nullptr;
-  }
+boost::optional<LookupRow> Experiment::findWildcardLookupRow() const {
+  LookupRowFinder finder(m_lookupTable);
+  return finder.findWildcardLookupRow();
 }
 
 bool operator!=(Experiment const &lhs, Experiment const &rhs) { return !(lhs == rhs); }

@@ -1183,12 +1183,12 @@ void LoadEventNexus::loadEvents(API::Progress *const prog, const bool monitors) 
         auto numHistograms = static_cast<int64_t>(m_ws->getNumberHistograms());
         PARALLEL_FOR_IF(Kernel::threadSafe(*m_ws))
         for (int64_t i = 0; i < numHistograms; ++i) {
-          PARALLEL_START_INTERUPT_REGION
+          PARALLEL_START_INTERRUPT_REGION
           // Do the offsetting
           m_ws->getSpectrum(i).addTof(mT0);
-          PARALLEL_END_INTERUPT_REGION
+          PARALLEL_END_INTERRUPT_REGION
         }
-        PARALLEL_CHECK_INTERUPT_REGION
+        PARALLEL_CHECK_INTERRUPT_REGION
         // set T0 in the run parameters
         API::Run &run = m_ws->mutableRun();
         run.addProperty<double>("T0", mT0, true);

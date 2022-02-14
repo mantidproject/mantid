@@ -396,12 +396,12 @@ void ConjoinXRuns::exec() {
   // Now loop in parallel over all the spectra and join the data
   PARALLEL_FOR_IF(threadSafe(*m_outWS))
   for (int64_t index = 0; index < static_cast<int64_t>(numSpec); ++index) {
-    PARALLEL_START_INTERUPT_REGION
+    PARALLEL_START_INTERRUPT_REGION
     joinSpectrum(index);
     m_progress->report();
-    PARALLEL_END_INTERUPT_REGION
+    PARALLEL_END_INTERRUPT_REGION
   }
-  PARALLEL_CHECK_INTERUPT_REGION
+  PARALLEL_CHECK_INTERRUPT_REGION
 
   if (!m_logEntry.empty()) {
     std::string unit = first->run().getLogData(m_logEntry)->units();

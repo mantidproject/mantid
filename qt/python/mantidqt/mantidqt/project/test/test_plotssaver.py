@@ -92,7 +92,7 @@ class PlotsSaverTest(unittest.TestCase):
                                                      u'minorTickLocatorValues': None,
                                                      u'visible': True},
                                 u'yAxisScale': u'linear',
-                                u'yLim': (0.0, 1.0),u"yAutoScale":False,
+                                u'yLim': (0.0, 1.0),u"yAutoScale":False,u"facecolor":(0.0,0.0,0.0,0.0),
                                 u'showMinorGrid': False,
                                 u'tickParams': {
                                     'xaxis': {
@@ -263,6 +263,7 @@ class PlotsSaverTest(unittest.TestCase):
 
         self.loader_plot_dict[u'creationArguments'] = expected_creation_args
 
+        self.maxDiff = None
         self.assertDictEqual(return_value, self.loader_plot_dict)
 
     def test_get_dict_from_fig_with_LogNorm(self):
@@ -274,6 +275,7 @@ class PlotsSaverTest(unittest.TestCase):
 
         self.loader_plot_dict[u'creationArguments'] = expected_creation_args
 
+        self.maxDiff = None
         self.assertDictEqual(return_value, self.loader_plot_dict)
 
 

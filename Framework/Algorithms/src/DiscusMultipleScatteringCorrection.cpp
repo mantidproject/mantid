@@ -269,7 +269,7 @@ void DiscusMultipleScatteringCorrection::exec() {
 
   PARALLEL_FOR_IF(enableParallelFor)
   for (int64_t i = 0; i < nhists; ++i) {
-    PARALLEL_START_INTERUPT_REGION
+    PARALLEL_START_INTERRUPT_REGION
     auto &spectrum = instrumentWS.getSpectrum(i);
     Mantid::specnum_t specNo = spectrum.getSpectrumNo();
     MersenneTwister rng(seed + specNo);
@@ -334,9 +334,9 @@ void DiscusMultipleScatteringCorrection::exec() {
       }
     }
 
-    PARALLEL_END_INTERUPT_REGION
+    PARALLEL_END_INTERRUPT_REGION
   }
-  PARALLEL_CHECK_INTERUPT_REGION
+  PARALLEL_CHECK_INTERRUPT_REGION
 
   if (useSparseInstrument) {
     Poco::Thread::sleep(200); // to ensure prog message changes
@@ -867,7 +867,7 @@ void DiscusMultipleScatteringCorrection::interpolateFromSparse(
   const auto refFrame = targetWS.getInstrument()->getReferenceFrame();
   PARALLEL_FOR_IF(Kernel::threadSafe(targetWS, sparseWS))
   for (int64_t i = 0; i < static_cast<decltype(i)>(spectrumInfo.size()); ++i) {
-    PARALLEL_START_INTERUPT_REGION
+    PARALLEL_START_INTERRUPT_REGION
     if (spectrumInfo.hasDetectors(i) && !spectrumInfo.isMonitor(i)) {
       double lat, lon;
       std::tie(lat, lon) = spectrumInfo.geographicalAngles(i);
@@ -880,9 +880,9 @@ void DiscusMultipleScatteringCorrection::interpolateFromSparse(
         targetWS.mutableY(i) = spatiallyInterpHisto.y().front();
       }
     }
-    PARALLEL_END_INTERUPT_REGION
+    PARALLEL_END_INTERRUPT_REGION
   }
-  PARALLEL_CHECK_INTERUPT_REGION
+  PARALLEL_CHECK_INTERRUPT_REGION
 }
 
 void DiscusMultipleScatteringCorrection::correctForWorkspaceNameClash(std::string &wsName) {

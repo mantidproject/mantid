@@ -29,22 +29,26 @@ if [[ -n "${MANTID_DATA_STORE}" ]]; then
     MANTID_DATA_STORE_CMAKE="-DMANTID_DATA_STORE=${MANTID_DATA_STORE}"
 fi
 
+if [[ $OSTYPE == "msys"* ]]; then
+    WINDOWS_BUILD_OPTIONS="--config Release"
+fi
+
 # Run CMake using preset and variables
 cmake --preset=${CMAKE_PRESET} ${MANTID_DATA_STORE_CMAKE} ${EXTRA_CMAKE_FLAGS} $WORKSPACE
 
 # Run the actual builds for the code, unit tests, and system tests.
 cd $WORKSPACE/build
 if [[ $ENABLE_BUILD_CODE == true ]]; then
-    cmake --build . -j$BUILD_THREADS
+    cmake --build . -j$BUILD_THREADS $WINDOWS_BUILD_OPTIONS
 fi
 
 if [[ $ENABLE_UNIT_TESTS == true ]]; then
-    cmake --build . --target AllTests -j$BUILD_THREADS
+    cmake --build . --target AllTests -j$BUILD_THREADS $WINDOWS_BUILD_OPTIONS
 fi
 
 if [[ $ENABLE_SYSTEM_TESTS == true ]]; then
-    cmake --build . --target StandardTestData -j$BUILD_THREADS
-    cmake --build . --target SystemTestData -j$BUILD_THREADS
+    cmake --build . --target StandardTestData -j$BUILD_THREADS $WINDOWS_BUILD_OPTIONS
+    cmake --build . --target SystemTestData -j$BUILD_THREADS $WINDOWS_BUILD_OPTIONS
 fi
 
 # Build docs
@@ -54,12 +58,12 @@ if [[ $ENABLE_DOCS == true ]]; then
     if [ -d $BUILD_DIR/docs/doctrees ]; then
         rm -fr $BUILD_DIR/docs/doctrees/*
     fi
-    cmake --build . --target docs-html -j$BUILD_THREADS
+    cmake --build . --target docs-html -j$BUILD_THREADS $WINDOWS_BUILD_OPTIONS
 fi
 
 # Build dev-docs turned off until dev docs run without error
 if [[ $ENABLE_DEV_DOCS == true ]]; then
     rm -fr $BUILD_DIR/dev-docs/doctree/*
     rm -f $BUILD_DIR/dev-docs/dev_docs_warnings.txt
-    cmake --build . --target dev-docs-html
+    cmake --build . --target dev-docs-html $WINDOWS_BUILD_OPTIONS
 fi

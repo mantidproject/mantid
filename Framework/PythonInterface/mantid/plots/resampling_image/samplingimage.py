@@ -143,6 +143,9 @@ class SamplingImage(MantidImage):
     def get_full_extent(self):
         return self._full_extent
 
+    def get_array_clipped_to_bounds(self):
+        return self.get_array()
+
     def _update_maxpooling_option(self):
         """
         Updates the maxpooling option, used when the image is downsampled
