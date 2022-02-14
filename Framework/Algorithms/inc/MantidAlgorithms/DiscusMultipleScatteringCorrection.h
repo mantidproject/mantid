@@ -71,17 +71,18 @@ private:
   API::MatrixWorkspace_sptr createOutputWorkspace(const API::MatrixWorkspace &inputWS) const;
   std::tuple<double, double> new_vector(const Kernel::Material &material, double kinc, bool specialSingleScatterCalc);
   double simulatePaths(const int nEvents, const int nScatters, Kernel::PseudoRandomNumberGenerator &rng,
-                       const MatrixWorkspace_sptr &invPOfQ, const double kinc, const Kernel::V3D &detPos,
+                       const MatrixWorkspace_sptr &invPOfQ, const double kinc, const double kout,
+                       const Kernel::V3D &detPos,
                        bool specialSingleScatterCalc);
   std::tuple<bool, double, double> scatter(const int nScatters, Kernel::PseudoRandomNumberGenerator &rng,
-                                           const MatrixWorkspace_sptr &invPOfQ, const double kinc,
+                                           const MatrixWorkspace_sptr &invPOfQ, const double kinc, const double kout,
                                            const Kernel::V3D &detPos, bool specialSingleScatterCalc);
   Geometry::Track start_point(Kernel::PseudoRandomNumberGenerator &rng);
   Geometry::Track generateInitialTrack(Kernel::PseudoRandomNumberGenerator &rng);
   void inc_xyz(Geometry::Track &track, double vl);
   void updateWeightAndPosition(Geometry::Track &track, double &weight, const double vmfp, const double sigma_total,
                                Kernel::PseudoRandomNumberGenerator &rng);
-  void q_dir(Geometry::Track &track, const MatrixWorkspace_sptr &invPOfQ, const double kinc,
+  void q_dir(Geometry::Track &track, const MatrixWorkspace_sptr &invPOfQ, double &k,
              const double scatteringXSection, Kernel::PseudoRandomNumberGenerator &rng, double &QSS, double &weight);
   void interpolateFromSparse(API::MatrixWorkspace &targetWS, const SparseWorkspace &sparseWS,
                              const Mantid::Algorithms::InterpolationOption &interpOpt);
@@ -103,6 +104,7 @@ private:
   Geometry::IObject_const_sptr m_sampleShape;
   Geometry::Instrument_const_sptr m_instrument;
   bool m_importanceSampling;
+  Kernel::DeltaEMode::Type m_EMode;
 };
 } // namespace Algorithms
 } // namespace Mantid

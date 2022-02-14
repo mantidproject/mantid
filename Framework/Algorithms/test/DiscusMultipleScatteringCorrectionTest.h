@@ -15,6 +15,7 @@
 #include "MantidFrameworkTestHelpers/InstrumentCreationHelper.h"
 #include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidGeometry/Instrument/ReferenceFrame.h"
+#include "MantidKernel/DeltaEMode.h"
 #include "MantidKernel/Material.h"
 #include "MantidKernel/PhysicalConstants.h"
 #include "MantidKernel/UnitFactory.h"
@@ -61,7 +62,7 @@ public:
 
     const int NTHETA = 900;
     const double ang_inc = 180.0 / NTHETA;
-    auto inputWorkspace = SetupFlatPlateWorkspace(1, NTHETA, ang_inc, 1, THICKNESS);
+    auto inputWorkspace = SetupFlatPlateWorkspace(1, NTHETA, ang_inc, 1, THICKNESS, DeltaEMode::Elastic);
 
     auto SofQWorkspace = WorkspaceCreationHelper::create2DWorkspace(1, 3);
     SofQWorkspace->mutableX(0)[0] = 5.985;
@@ -129,7 +130,7 @@ public:
 
   void test_output_workspaces() {
     const double THICKNESS = 0.001; // metres
-    auto inputWorkspace = SetupFlatPlateWorkspace(46, 1, 1.0, 1, THICKNESS);
+    auto inputWorkspace = SetupFlatPlateWorkspace(46, 1, 1.0, 1, THICKNESS, DeltaEMode::Elastic);
 
     auto alg = createAlgorithm();
     TS_ASSERT_THROWS_NOTHING(alg->setProperty("InputWorkspace", inputWorkspace));
@@ -157,7 +158,7 @@ public:
     // generate a result corresponding to Figure 4 in the Mancinelli paper (flat
     // plate sample for once scattered neutrons) where there's an analytical solution
     const double THICKNESS = 0.001; // metres
-    auto inputWorkspace = SetupFlatPlateWorkspace(46, 1, 1.0, 1, THICKNESS);
+    auto inputWorkspace = SetupFlatPlateWorkspace(46, 1, 1.0, 1, THICKNESS, DeltaEMode::Elastic);
 
     auto alg = createAlgorithm();
     TS_ASSERT_THROWS_NOTHING(alg->setProperty("InputWorkspace", inputWorkspace));
@@ -186,7 +187,7 @@ public:
   void run_flat_plate_sample_multiple_scatter(int nPaths, bool importanceSampling) {
     // same set up as previous test but increase nscatter to 2
     const double THICKNESS = 0.001; // metres
-    auto inputWorkspace = SetupFlatPlateWorkspace(2, 1, 1.0, 1, THICKNESS);
+    auto inputWorkspace = SetupFlatPlateWorkspace(2, 1, 1.0, 1, THICKNESS, DeltaEMode::Elastic);
 
     auto alg = createAlgorithm();
     TS_ASSERT_THROWS_NOTHING(alg->setProperty("InputWorkspace", inputWorkspace));
@@ -231,7 +232,7 @@ public:
   void test_flat_plate_sample_multiple_scatter_with_wavelength_interp() {
     // same set up as previous test but increase nscatter to 2
     const double THICKNESS = 0.001; // metres
-    auto inputWorkspace = SetupFlatPlateWorkspace(2, 1, 1.0, 3, THICKNESS);
+    auto inputWorkspace = SetupFlatPlateWorkspace(2, 1, 1.0, 3, THICKNESS, DeltaEMode::Elastic);
 
     auto alg = createAlgorithm();
     TS_ASSERT_THROWS_NOTHING(alg->setProperty("InputWorkspace", inputWorkspace));
@@ -280,7 +281,7 @@ public:
     // set up instrument with five detectors at different latitudes (=5 different rows)
     // run simulation for detectors at latitude=0 and 2 degrees and interpolate at lat=1 degree
     const double THICKNESS = 0.001; // metres
-    auto inputWorkspace = SetupFlatPlateWorkspace(5, 2, 1.0, 1, THICKNESS);
+    auto inputWorkspace = SetupFlatPlateWorkspace(5, 2, 1.0, 1, THICKNESS, DeltaEMode::Elastic);
 
     auto alg = createAlgorithm();
     TS_ASSERT_THROWS_NOTHING(alg->setProperty("InputWorkspace", inputWorkspace));
@@ -376,7 +377,7 @@ public:
   void test_invalidSOfQ() {
     DiscusMultipleScatteringCorrectionHelper alg;
     const double THICKNESS = 0.001; // metres
-    auto inputWorkspace = SetupFlatPlateWorkspace(1, 1, 1.0, 1, THICKNESS);
+    auto inputWorkspace = SetupFlatPlateWorkspace(1, 1, 1.0, 1, THICKNESS, DeltaEMode::Elastic);
     auto SofQWorkspaceTwoSp = WorkspaceCreationHelper::create2DWorkspace(2, 1);
     SofQWorkspaceTwoSp->mutableY(0)[0] = 1.;
     SofQWorkspaceTwoSp->getAxis(0)->unit() = UnitFactory::Instance().create("MomentumTransfer");
@@ -406,7 +407,7 @@ public:
   void test_invalidZeroSOfQ() {
     DiscusMultipleScatteringCorrectionHelper alg;
     const double THICKNESS = 0.001; // metres
-    auto inputWorkspace = SetupFlatPlateWorkspace(1, 1, 1.0, 1, THICKNESS);
+    auto inputWorkspace = SetupFlatPlateWorkspace(1, 1, 1.0, 1, THICKNESS, DeltaEMode::Elastic);
     auto SofQWorkspaceZero = WorkspaceCreationHelper::create2DWorkspace(1, 1);
     SofQWorkspaceZero->mutableY(0)[0] = 0.;
     SofQWorkspaceZero->getAxis(0)->unit() = UnitFactory::Instance().create("MomentumTransfer");
@@ -423,13 +424,50 @@ public:
     TS_ASSERT(!alg.isExecuted());
   }
 
+  void test_elastic_SQW_supplied_for_inelastic() {
+    DiscusMultipleScatteringCorrectionHelper alg;
+    const double THICKNESS = 0.001; // metres
+    auto inputWorkspace = SetupFlatPlateWorkspace(1, 1, 1.0, 1, THICKNESS, DeltaEMode::Direct);
+    auto SofQWorkspaceZero = WorkspaceCreationHelper::create2DWorkspace(1, 1);
+    SofQWorkspaceZero->mutableY(0)[0] = 0.;
+    SofQWorkspaceZero->getAxis(0)->unit() = UnitFactory::Instance().create("MomentumTransfer");
+    alg.initialize();
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", inputWorkspace));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("StructureFactorWorkspace", SofQWorkspaceZero));
+    const int NSCATTERINGS = 2;
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("NumberScatterings", NSCATTERINGS));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("NeutronPathsSingle", 1));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("NeutronPathsMultiple", 1));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("OutputWorkspace", "MuscatResults"));
+    TS_ASSERT_THROWS(alg.execute(), const std::runtime_error &);
+  }
+
+  void test_invalid_SQW_supplied_for_inelastic() {
+    DiscusMultipleScatteringCorrectionHelper alg;
+    const double THICKNESS = 0.001; // metres
+    auto inputWorkspace = SetupFlatPlateWorkspace(1, 1, 1.0, 1, THICKNESS, DeltaEMode::Direct);
+    auto SofQWorkspaceZero = WorkspaceCreationHelper::create2DWorkspace(2, 1);
+    SofQWorkspaceZero->mutableY(0)[0] = 0.;
+    SofQWorkspaceZero->getAxis(0)->unit() = UnitFactory::Instance().create("dSpacing");
+    SofQWorkspaceZero->getAxis(1)->unit() = UnitFactory::Instance().create("MomentumTransfer");
+    alg.initialize();
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", inputWorkspace));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("StructureFactorWorkspace", SofQWorkspaceZero));
+    const int NSCATTERINGS = 2;
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("NumberScatterings", NSCATTERINGS));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("NeutronPathsSingle", 1));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("NeutronPathsMultiple", 1));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("OutputWorkspace", "MuscatResults"));
+    TS_ASSERT_THROWS(alg.execute(), const std::runtime_error &);
+  }
+
   void test_cant_run_withAlwaysStoreInADS_false() {
     const double THICKNESS = 0.001; // metres
     DiscusMultipleScatteringCorrectionHelper alg;
     alg.setAlwaysStoreInADS(false);
     alg.setRethrows(true);
     alg.initialize();
-    auto inputWorkspace = SetupFlatPlateWorkspace(1, 1, 1.0, 1, THICKNESS);
+    auto inputWorkspace = SetupFlatPlateWorkspace(1, 1, 1.0, 1, THICKNESS, DeltaEMode::Elastic);
     alg.setProperty("InputWorkspace", inputWorkspace);
     alg.setProperty("StructureFactorWorkspace", SofQWorkspace);
     alg.setPropertyValue("OutputWorkspace", "MuscatResults");
@@ -450,7 +488,8 @@ private:
   }
 
   Mantid::API::MatrixWorkspace_sptr SetupFlatPlateWorkspace(const int nlat, const int nlong, const double anginc,
-                                                            const int nbins, const double thickness) {
+                                                            const int nbins, const double thickness,
+                                                            const DeltaEMode::Type EMode) {
 
     auto inputWorkspace =
         WorkspaceCreationHelper::create2DWorkspaceWithGeographicalDetectors(nlat, nlong, anginc, nbins);
@@ -461,6 +500,18 @@ private:
     auto mat = Mantid::Kernel::Material("Ni", Mantid::PhysicalConstants::getNeutronAtom(28, 0), 0.091337537);
     flatPlateShape->setMaterial(mat);
     inputWorkspace->mutableSample().setShape(flatPlateShape);
+
+    auto inst = inputWorkspace->getInstrument();
+    auto &pmap = inputWorkspace->instrumentParameters();
+    if (EMode == DeltaEMode::Direct) {
+      pmap.addString(inst.get(), "deltaE-mode", "Direct");
+      const double efixed(5.0);
+      inputWorkspace->mutableRun().addProperty<double>("Ei", efixed);
+    } else if (EMode == DeltaEMode::Indirect) {
+      const double efixed(5.0);
+      pmap.addString(inst.get(), "deltaE-mode", "Indirect");
+      pmap.addDouble(inst.get(), "Efixed", efixed);
+    }
 
     return inputWorkspace;
   }
