@@ -153,7 +153,7 @@ class DirectILLAuto_PANTHER_SingleCrystal_Test(systemtesting.MantidSystemTest):
 
         output_name = 'panther_236'
         DirectILLAutoProcess(
-            Runs='13806',
+            Runs='13806, 13807',
             OutputWorkspace=output_name,
             ProcessAs='Sample',
             ReductionType='SingleCrystal',
