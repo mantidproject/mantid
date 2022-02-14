@@ -238,11 +238,7 @@ constParameter:${CMAKE_SOURCE_DIR}/Framework/CurveFitting/src/Functions/CrystalE
 constParameter:${CMAKE_SOURCE_DIR}/Framework/CurveFitting/src/Functions/CrystalElectricField.cpp:484
 identicalInnerCondition:${CMAKE_SOURCE_DIR}/Framework/CurveFitting/src/Functions/CrystalFieldMultiSpectrum.cpp:128
 oppositeInnerCondition:${CMAKE_SOURCE_DIR}/Framework/CurveFitting/src/Functions/CrystalFieldMultiSpectrum.cpp:252
-useStlAlgorithm:${CMAKE_SOURCE_DIR}/Framework/CurveFitting/src/Functions/CrystalFieldMultiSpectrum.cpp:279
-useInitializationList:${CMAKE_SOURCE_DIR}/Framework/CurveFitting/src/Functions/SimpleChebfun.cpp:31
-useInitializationList:${CMAKE_SOURCE_DIR}/Framework/CurveFitting/src/Functions/SimpleChebfun.cpp:71
-useInitializationList:${CMAKE_SOURCE_DIR}/Framework/CurveFitting/src/GSLVector.cpp:61
-useInitializationList:${CMAKE_SOURCE_DIR}/Framework/CurveFitting/src/LatticeDomainCreator.cpp:31
+useStlAlgorithm:${CMAKE_SOURCE_DIR}/Framework/CurveFitting/src/Functions/CrystalFieldMultiSpectrum.cpp:280
 constParameter:${CMAKE_SOURCE_DIR}/Framework/CurveFitting/src/RalNlls/TrustRegion.cpp:288
 constParameter:${CMAKE_SOURCE_DIR}/Framework/CurveFitting/src/RalNlls/TrustRegion.cpp:288
 unsignedLessThanZero:${CMAKE_SOURCE_DIR}/Framework/CurveFitting/src/ParDomain.cpp:72
