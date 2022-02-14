@@ -102,7 +102,7 @@ std::vector<LookupRow::ValueArray> LookupTable::toValueArray() const {
   std::transform(m_lookupRows.cbegin(), m_lookupRows.cend(), std::back_inserter(result),
                  [](auto const &lookupRow) { return lookupRowToArray(lookupRow); });
   return result;
-};
+}
 
 bool operator==(LookupTable const &lhs, LookupTable const &rhs) { return lhs.m_lookupRows == rhs.m_lookupRows; }
 bool operator!=(LookupTable const &lhs, LookupTable const &rhs) { return !operator==(lhs, rhs); }
