@@ -849,7 +849,7 @@ class DirectILLAutoProcess(DataProcessorAlgorithm):
             ws_name = name
             if 'raw' in name:  # remove 'raw' from the output name
                 ws_name = '{}{}'.format(name[:name.find('raw')-1], name[name.find('raw')+4:])
-            new_name = '{}_{}_Ei_{:.0f}'.format(output_group_name, ws_name, ei)
+            new_name = '{}_{}_Ei{:.0f}meV'.format(output_group_name, ws_name, ei)
             temp = run.getLogData(temp_log_name).value
             if isinstance(temp, np.ndarray):
                 for t in temp:
@@ -858,7 +858,7 @@ class DirectILLAutoProcess(DataProcessorAlgorithm):
             else:
                 self.temperatures.add(temp)
             if self.reduction_type == 'Powder':
-                new_name = '{}_T_{:.1f}'.format(new_name, temp)
+                new_name = '{}_T{:.1f}K'.format(new_name, temp)
             RenameWorkspace(InputWorkspace=name, OutputWorkspace=new_name)
             new_ws_list.append(new_name)
 
