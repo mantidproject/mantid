@@ -21,4 +21,9 @@ Bugfixes
 ########
 - Color limit autoscaling now works for MDHisto workspaces in non-orthogonal view in sliceviewer.
 
+Instrument Viewer
+-----------------
+
+- It is now possible to replace the workspace and save the image of the instrument viewer using its python API.
+
 :ref:`Release 6.4.0 <v6.4.0>`
