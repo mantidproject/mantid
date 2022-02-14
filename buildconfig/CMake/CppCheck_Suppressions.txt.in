@@ -585,11 +585,44 @@ templateRecursion:${CMAKE_SOURCE_DIR}/Framework/MDAlgorithms/src/SliceMD.cpp:300
 useStlAlgorithm:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/FitDomain.cpp:97
 unreadVariable:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/FitDomain.cpp:125
 knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/FitPropertyBrowser.cpp:862
+<<<<<<< HEAD
 knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/FitPropertyBrowser.cpp:1644
+||||||| parent of 33e26fc75cb (Fix cpp issues)
+knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/FitPropertyBrowser.cpp:1634
+=======
+<<<<<<< HEAD
+knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/FitPropertyBrowser.cpp:1634
+||||||| parent of 7fee3e2ed95 (Fix cpp issues)
+knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/FitPropertyBrowser.cpp:1644
+=======
+>>>>>>> 7fee3e2ed95 (Fix cpp issues)
+>>>>>>> 33e26fc75cb (Fix cpp issues)
 shadowVariable:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/FitPropertyBrowser.cpp:512
+<<<<<<< HEAD
 shadowVariable:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/FitPropertyBrowser.cpp:1801
+||||||| parent of 33e26fc75cb (Fix cpp issues)
+shadowVariable:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/FitPropertyBrowser.cpp:1791
+=======
+<<<<<<< HEAD
+shadowVariable:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/FitPropertyBrowser.cpp:1791
+||||||| parent of 7fee3e2ed95 (Fix cpp issues)
+shadowVariable:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/FitPropertyBrowser.cpp:1801
+=======
+>>>>>>> 7fee3e2ed95 (Fix cpp issues)
+>>>>>>> 33e26fc75cb (Fix cpp issues)
 constParameter:${CMAKE_SOURCE_DIR}/qt/widgets/common/inc/MantidQtWidgets/Common/PropertyHandler.h:194
+<<<<<<< HEAD
 useStlAlgorithm:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/FitPropertyBrowser.cpp:3281
+||||||| parent of 33e26fc75cb (Fix cpp issues)
+useStlAlgorithm:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/FitPropertyBrowser.cpp:3251
+=======
+<<<<<<< HEAD
+useStlAlgorithm:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/FitPropertyBrowser.cpp:3251
+||||||| parent of 7fee3e2ed95 (Fix cpp issues)
+useStlAlgorithm:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/FitPropertyBrowser.cpp:3282
+=======
+>>>>>>> 7fee3e2ed95 (Fix cpp issues)
+>>>>>>> 33e26fc75cb (Fix cpp issues)
 useStlAlgorithm:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/FitScriptGeneratorDataTable.cpp:200
 unsignedLessThanZero:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/FitScriptGeneratorModel.cpp:611
 knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/FlowLayout.cpp:131
