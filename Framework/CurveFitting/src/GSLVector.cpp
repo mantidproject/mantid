@@ -56,10 +56,7 @@ GSLVector::GSLVector(const gsl_vector *v)
   }
 }
 
-GSLVector::GSLVector(GSLVector &&v) noexcept : m_data(std::move(v.m_data)), m_view() {
-  // m_view is trivially copyable, but does not provide an operator()
-  m_view = v.m_view;
-}
+GSLVector::GSLVector(GSLVector &&v) noexcept : m_data(std::move(v.m_data)), m_view(v.m_view) {}
 
 /// Copy assignment operator
 /// @param v :: The other vector

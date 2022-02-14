@@ -33,20 +33,14 @@ Logger g_log("InstrumentInfo");
  * @param elem :: The Poco::XML::Element to read the data from
  * @throw std::runtime_error if name or at least one technique are not defined
  */
-InstrumentInfo::InstrumentInfo(const FacilityInfo *f, const Poco::XML::Element *elem) : m_facility(f) {
+InstrumentInfo::InstrumentInfo(const FacilityInfo *f, const Poco::XML::Element *elem)
+    : m_facility(f), m_name(elem->getAttribute("name")), m_shortName(elem->getAttribute("shortname")),
+      m_delimiter(elem->getAttribute("delimiter")) {
 
-  m_name = elem->getAttribute("name");
-
-  // The string to separate the instrument name and the run number.
-  m_delimiter = elem->getAttribute("delimiter");
-  if (m_delimiter.empty()) {
+  if (m_delimiter.empty())
     m_delimiter = f->delimiter();
-  }
-
-  m_shortName = elem->getAttribute("shortname");
-  if (m_shortName.empty()) {
+  if (m_shortName.empty())
     m_shortName = m_name;
-  }
 
   fillTechniques(elem);
   fillLiveData(elem);

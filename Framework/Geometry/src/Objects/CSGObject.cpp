@@ -393,12 +393,10 @@ CSGObject::CSGObject() : CSGObject("") {}
  */
 CSGObject::CSGObject(std::string shapeXML)
     : m_topRule(nullptr), m_boundingBox(), AABBxMax(0), AABByMax(0), AABBzMax(0), AABBxMin(0), AABByMin(0), AABBzMin(0),
-      boolBounded(false), m_objNum(0), m_handler(), bGeometryCaching(false),
+      boolBounded(false), m_objNum(0), m_handler(std::make_shared<GeometryHandler>(this)), bGeometryCaching(false),
       vtkCacheReader(std::shared_ptr<vtkGeometryCacheReader>()),
-      vtkCacheWriter(std::shared_ptr<vtkGeometryCacheWriter>()), m_shapeXML(std::move(shapeXML)), m_id() {
-  m_handler = std::make_shared<GeometryHandler>(this);
-  m_material = std::make_unique<Material>();
-}
+      vtkCacheWriter(std::shared_ptr<vtkGeometryCacheWriter>()), m_shapeXML(std::move(shapeXML)), m_id(),
+      m_material(std::make_unique<Material>()) {}
 
 /**
  * Copy constructor

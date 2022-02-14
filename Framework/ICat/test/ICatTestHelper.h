@@ -19,8 +19,8 @@ public:
   std::string getSessionId() const;
 
 private:
-  Mantid::API::CatalogSession_sptr m_session;
   FacilityHelper::ScopedFacilities m_loadTESTFacility;
+  Mantid::API::CatalogSession_sptr m_session;
 };
 
 } // namespace ICatTestHelper
