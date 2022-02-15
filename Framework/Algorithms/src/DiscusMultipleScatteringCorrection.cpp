@@ -174,29 +174,38 @@ std::map<std::string, std::string> DiscusMultipleScatteringCorrection::validateI
 
   return issues;
 }
-
+/**
+ * This is a variation on the function MatrixWorkspace::getXMinMax with some additional logic
+ * eg if x values are all NaN values it raises an error
+ * @param ws Workspace to scan for min and max x values
+ * @param xmin In/out parameter for min x value found
+ * @param xmax In/out parameter for max x value found
+ */
 void DiscusMultipleScatteringCorrection::getXMinMax(const Mantid::API::MatrixWorkspace &ws, double &xmin,
                                                     double &xmax) const {
   // set to crazy values to start
   xmin = std::numeric_limits<double>::max();
   xmax = -1.0 * xmin;
   size_t numberOfSpectra = ws.getNumberHistograms();
+  const auto &spectrumInfo = ws.spectrumInfo();
 
   // determine the data range - only return min > 0. Bins with x=0 will be skipped later on
-  for (size_t workspaceIndex = 0; workspaceIndex < numberOfSpectra; workspaceIndex++) {
-    const auto &dataX = ws.points(workspaceIndex);
-    const double xfront = dataX.front();
-    const double xback = dataX.back();
-    if (std::isnormal(xfront) && std::isnormal(xback)) {
-      if (xfront < xmin)
-        xmin = xfront;
-      if (xback > xmax)
-        xmax = xback;
+  for (size_t wsIndex = 0; wsIndex < numberOfSpectra; wsIndex++) {
+    if (spectrumInfo.hasDetectors(wsIndex) && !spectrumInfo.isMonitor(wsIndex) && !spectrumInfo.isMasked(wsIndex)) {
+      const auto &dataX = ws.points(wsIndex);
+      const double xfront = dataX.front();
+      const double xback = dataX.back();
+      if (std::isnormal(xfront) && std::isnormal(xback)) {
+        if (xfront < xmin)
+          xmin = xfront;
+        if (xback > xmax)
+          xmax = xback;
+      }
     }
+    // workspace not partitioned at this point so don't replicate code using m_indexInfo->communicator
+    if (xmin > xmax)
+      throw std::runtime_error("Unable to determine min and max x values for workspace");
   }
-  // workspace not partitioned at this point so don't replicate code using m_indexInfo->communicator
-  if (xmin > xmax)
-    throw std::runtime_error("Unable to determine min and max x values for workspace");
 }
 
 /**
@@ -427,6 +436,13 @@ void DiscusMultipleScatteringCorrection::exec() {
   }
 }
 
+/**
+ * Prepare a profile of Q*S(Q) that will later be used to calculate a cumulative probability distribution
+ * for use in importance sampling
+ * @param kmax The maxmimum incident wavenumber from the InputWorkspace. This may be different to the maximum
+ * q value in the input S(Q) profile
+ * @return A pointer to a histogram containing the Q*S(Q) profile
+ */
 std::unique_ptr<Mantid::HistogramData::Histogram> DiscusMultipleScatteringCorrection::prepareQSQ(double kmax) {
   std::vector<double> qValues = m_SQHist->readX();
   std::vector<double> SQValues = m_SQHist->readY();

@@ -60,7 +60,8 @@ public:
     const double THICKNESS = 0.001; // metres
 
     const int NTHETA = 900;
-    auto inputWorkspace = SetupFlatPlateWorkspace(1, NTHETA, 0.2, 1, THICKNESS);
+    const double ang_inc = 180.0 / NTHETA;
+    auto inputWorkspace = SetupFlatPlateWorkspace(1, NTHETA, ang_inc, 1, THICKNESS);
 
     auto SofQWorkspace = WorkspaceCreationHelper::create2DWorkspace(1, 3);
     SofQWorkspace->mutableX(0)[0] = 5.985;
@@ -119,8 +120,8 @@ public:
     TS_ASSERT_EQUALS(peakPos.size(), 2);
     if (peakPos.size() > 0) {
       TS_ASSERT_EQUALS(peakPos.front(), 0);
-      TS_ASSERT((static_cast<double>(peakPos.back()) * 0.2 >= 114) &&
-                (static_cast<double>(peakPos.back()) * 0.2 < 115));
+      TS_ASSERT((static_cast<double>(peakPos.back()) * ang_inc >= 114) &&
+                (static_cast<double>(peakPos.back()) * ang_inc < 115));
     }
 
     Mantid::API::AnalysisDataService::Instance().deepRemoveGroup("MuscatResults");
