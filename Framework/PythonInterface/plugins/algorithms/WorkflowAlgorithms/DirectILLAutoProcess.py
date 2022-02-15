@@ -420,8 +420,8 @@ class DirectILLAutoProcess(DataProcessorAlgorithm):
                 progress.report("Renaming output")
                 current_output = [ws]
                 current_output = self._rename_workspaces(current_output)
+                self._group_detectors(current_output)
                 output_samples.extend(current_output)
-            self._group_detectors(current_output)
             if self.save_output:
                 self._save_output(current_output)
 
@@ -568,6 +568,7 @@ class DirectILLAutoProcess(DataProcessorAlgorithm):
                 GroupDetectors(InputWorkspace=ws, OutputWorkspace=ws,
                                GroupingPattern=grouping_pattern,
                                Behaviour=self.getPropertyValue('GroupingBehaviour'))
+        return grouping_pattern is not None
 
     def _normalise_sample(self, sample_ws, sample_no, numor):
         """Normalises sample using vanadium integral, if it has been provided. Returns either a normalised sample
@@ -753,7 +754,9 @@ class DirectILLAutoProcess(DataProcessorAlgorithm):
             else:
                 RenameWorkspace(InputWorkspace=corrected_ws, OutputWorkspace=processed_sample)
                 to_remove.pop()
+            self._group_detectors([processed_sample])
         else:
+            self._group_detectors([ws])
             processed_sample = 'SofQW_{}'.format(numor)  # name should contain only SofQW and numor
             processed_sample_tw = 'SofTW_{}'.format(numor)  # name should contain only SofTW and numor
             if self.getPropertyValue('AbsorptionCorrection') != 'None':
@@ -810,6 +813,7 @@ class DirectILLAutoProcess(DataProcessorAlgorithm):
             OutputWorkspace=vanadium_integral,
             EPPWorkspace=self.vanadium_epp
         )
+
         if self.getPropertyValue('AbsorptionCorrection') != 'None':
             self._correct_self_attenuation(ws, 0)
 

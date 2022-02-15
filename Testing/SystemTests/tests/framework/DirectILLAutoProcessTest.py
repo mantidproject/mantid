@@ -106,7 +106,6 @@ class DirectILLAuto_PANTHER_Powder_Test(systemtesting.MantidSystemTest):
             MaskedAngles=[0, 20],
             IncidentEnergy=Ei,
             IncidentEnergyCalibration="Energy Calibration ON",
-            GroupDetBy=4,
             AbsorptionCorrection='Fast',
             SelfAttenuationMethod='MonteCarlo',
             SampleMaterial=material,
