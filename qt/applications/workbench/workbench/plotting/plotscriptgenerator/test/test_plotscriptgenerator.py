@@ -18,7 +18,7 @@ from matplotlib.legend import Legend
 from matplotlib.ticker import NullLocator
 
 from mantid.plots import MantidAxes
-from unittest.mock import Mock, patch
+from unittest.mock import Mock, patch, MagicMock
 from mantid.simpleapi import CreateWorkspace
 from workbench.plotting.plotscriptgenerator import generate_script, get_legend_cmds
 
@@ -122,7 +122,7 @@ class PlotScriptGeneratorTest(unittest.TestCase):
                         "Fit(Function=Function, InputWorkspace=InputWorkspace, Output=Output)"]
         cls.fit_header = ["from mantid.simpleapi import Fit"]
 
-    def _gen_mock_axes(self, **kwargs):
+    def _gen_mock_axes(self, colNum=0, **kwargs):
         mock_kwargs = {
             'get_tracked_artists': lambda: [],
             'get_lines': lambda: [Mock()],
@@ -143,16 +143,20 @@ class PlotScriptGeneratorTest(unittest.TestCase):
             'yaxis': Mock()
         }
         mock_kwargs.update(kwargs)
-        mock_ax = Mock(spec=MantidAxes, **mock_kwargs)
-        mock_ax.xaxis.minor.locator = Mock(spec=NullLocator)
-        mock_ax.xaxis._major_tick_kw = {'gridOn': False}
-        mock_ax.yaxis._major_tick_kw = {'gridOn': False}
+        mock_ax = MagicMock(spec=MantidAxes, **mock_kwargs)
         if LooseVersion('3.1.3') < LooseVersion(matplotlib.__version__):
+            setattr(mock_ax, "get_gridspec", MagicMock())
             mock_ax.get_gridspec.return_value.nrows = 1
             mock_ax.get_gridspec.return_value.ncols = 1
+            setattr(mock_ax, "get_subplotspec", MagicMock())
+            mock_ax.get_subplotspec.return_value.colspan.start = colNum
         else:
             mock_kwargs['numRows'] = 1
             mock_kwargs['numCols'] = 1
+
+        mock_ax.xaxis.minor.locator = Mock(spec=NullLocator)
+        mock_ax.xaxis._major_tick_kw = {'gridOn': False}
+        mock_ax.yaxis._major_tick_kw = {'gridOn': False}
         return mock_ax
 
     def test_generate_script_returns_None_if_no_MantidAxes_in_figure(self):
