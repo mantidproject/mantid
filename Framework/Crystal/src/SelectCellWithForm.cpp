@@ -155,14 +155,15 @@ Kernel::Matrix<double> SelectCellWithForm::CalculateUBWithErrors(std::vector<dou
   // re-calculate mode vectors [mnp]
   // NOTE: if modUB in singular (non-invertable), set all mnp to 0;
   //       otherwise, calculate mnp from UB, hkl, and qs_indexed
+  const int npeaks_indexed = static_cast<int>(q_vectors_indexed.size());
   auto modUB_inv = UBmatrix(modUB);
   auto det_modUB = modUB_inv.Invert();
   if (det_modUB == 0) {
-    for (int i = 0; i < q_vectors_indexed.size(); ++i) {
+    for (int i = 0; i < npeaks_indexed; ++i) {
       mnp_vectors.emplace_back(V3D(0, 0, 0));
     }
   } else {
-    for (int i = 0; i < q_vectors_indexed.size(); ++i) {
+    for (int i = 0; i < npeaks_indexed; ++i) {
       auto q_ideal = UB * q_vectors_indexed[i];
       auto dq = q_vectors[i] - q_ideal;
       auto mnp = modUB_inv * dq;
