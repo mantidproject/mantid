@@ -6,7 +6,6 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "QtExperimentView.h"
 #include "MantidKernel/UsageService.h"
-#include "MantidKernel/WarningSuppressions.h"
 #include "MantidQtWidgets/Common/AlgorithmHintStrategy.h"
 #include "Reduction/LookupRow.h"
 #include <QMessageBox>
@@ -606,9 +605,6 @@ std::string QtExperimentView::textFromCell(QTableWidgetItem const *maybeNullItem
   }
 }
 
-// The missing braces warning is a false positive -
-// https://llvm.org/bugs/show_bug.cgi?id=21629
-GNU_DIAG_OFF("missing-braces")
 std::vector<LookupRow::ValueArray> QtExperimentView::getLookupTable() const {
   auto const &table = *m_ui.optionsTable;
   auto rows = std::vector<LookupRow::ValueArray>();
@@ -624,7 +620,6 @@ std::vector<LookupRow::ValueArray> QtExperimentView::getLookupTable() const {
   }
   return rows;
 }
-GNU_DIAG_ON("missing-braces")
 
 void QtExperimentView::setLookupTable(std::vector<LookupRow::ValueArray> rows) {
   auto &table = *m_ui.optionsTable;
