@@ -153,6 +153,7 @@ class PlotScriptGeneratorTest(unittest.TestCase):
         else:
             mock_kwargs['numRows'] = 1
             mock_kwargs['numCols'] = 1
+            mock_ax.colNum = colNum
 
         mock_ax.xaxis.minor.locator = Mock(spec=NullLocator)
         mock_ax.xaxis._major_tick_kw = {'gridOn': False}
