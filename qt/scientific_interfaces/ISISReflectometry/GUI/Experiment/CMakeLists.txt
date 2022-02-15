@@ -10,7 +10,7 @@ set(EXPERIMENT_SRC_FILES
 
 # Include files aren't required, but this makes them appear in Visual Studio IMPORTANT: Include files are required in
 # the MOC_FILES set. Scroll down to find it.
-set(EXPERIMENT_INC_FILES QtExperimentView.h ExperimentPresenter.h IExperimentView.h)
+set(EXPERIMENT_INC_FILES QtExperimentView.h ExperimentPresenter.h IExperimentView.h LookupCriteriaError.h)
 
 set(EXPERIMENT_MOC_FILES QtExperimentView.h)
 

@@ -40,7 +40,7 @@ public:
 
   void testTwoWildcardRowsIsInvalid() {
     auto table = Table({emptyRow(), emptyRow()});
-    runTestInvalidThetas(table, ThetaValuesValidationError::MultipleWildcards,
+    runTestInvalidThetas(table, LookupCriteriaError::MultipleWildcards,
                          expectedErrors({0, 1}, {LookupRow::Column::THETA}));
   }
 
@@ -64,7 +64,7 @@ public:
 
   void testTwoNonUniqueAngleRowsIsInvalid() {
     auto table = Table({Cells({"0.5"}), Cells({"0.5"})});
-    runTestInvalidThetas(table, ThetaValuesValidationError::NonUniqueTheta,
+    runTestInvalidThetas(table, LookupCriteriaError::NonUniqueTheta,
                          expectedErrors({0, 1}, {LookupRow::Column::THETA}));
   }
 
@@ -164,7 +164,7 @@ public:
 
   void testAnglesThatDifferByLessThanTolerance() {
     auto table = Table({Cells({"0.5"}), Cells({"0.5009"})});
-    runTestInvalidThetas(table, ThetaValuesValidationError::NonUniqueTheta,
+    runTestInvalidThetas(table, LookupCriteriaError::NonUniqueTheta,
                          expectedErrors({0, 1}, {LookupRow::Column::THETA}));
   }
 
@@ -194,7 +194,7 @@ private:
     return result.assertValid();
   }
 
-  void runTestInvalidThetas(const Table &table, ThetaValuesValidationError thetaValuesError,
+  void runTestInvalidThetas(const Table &table, LookupCriteriaError thetaValuesError,
                             std::vector<InvalidLookupRowCells> expectedErrors) {
     LookupTableValidator validator;
     auto result = validator(table, TOLERANCE);

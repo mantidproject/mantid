@@ -9,7 +9,7 @@ namespace MantidQt {
 namespace CustomInterfaces {
 namespace ISISReflectometry {
 
-enum class ThetaValuesValidationError { MultipleWildcards, NonUniqueTheta };
+enum class LookupCriteriaError { MultipleWildcards, NonUniqueTheta };
 } // namespace ISISReflectometry
 } // namespace CustomInterfaces
 } // namespace MantidQt

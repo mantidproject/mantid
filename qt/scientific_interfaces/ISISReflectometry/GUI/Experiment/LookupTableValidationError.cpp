@@ -8,17 +8,15 @@
 
 #include <utility>
 
-#include "ThetaValuesValidationError.h"
+#include "LookupCriteriaError.h"
 namespace MantidQt::CustomInterfaces::ISISReflectometry {
 
 LookupTableValidationError::LookupTableValidationError(
 
-    std::vector<InvalidLookupRowCells> validationErrors, boost::optional<ThetaValuesValidationError> fullTableError)
+    std::vector<InvalidLookupRowCells> validationErrors, boost::optional<LookupCriteriaError> fullTableError)
     : m_validationErrors(std::move(validationErrors)), m_fullTableError(std::move(fullTableError)) {}
 
 std::vector<InvalidLookupRowCells> const &LookupTableValidationError::errors() const { return m_validationErrors; }
 
-boost::optional<ThetaValuesValidationError> LookupTableValidationError::fullTableError() const {
-  return m_fullTableError;
-}
+boost::optional<LookupCriteriaError> LookupTableValidationError::fullTableError() const { return m_fullTableError; }
 } // namespace MantidQt::CustomInterfaces::ISISReflectometry

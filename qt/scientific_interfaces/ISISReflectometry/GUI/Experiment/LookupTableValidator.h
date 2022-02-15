@@ -22,8 +22,8 @@ public:
 
   ResultType operator()(ContentType const &lookupTableContent, double thetaTolerance) const;
 
-  ValidationResult<boost::blank, ThetaValuesValidationError> validateThetaValues(LookupTableRows lookupTable,
-                                                                                 double tolerance) const;
+  ValidationResult<boost::blank, LookupCriteriaError> validateThetaValues(LookupTableRows lookupTable,
+                                                                          double tolerance) const;
 
   void validateAllLookupRows(ContentType const &lookupTableContent, LookupTableRows &lookupTable,
                              std::vector<InvalidLookupRowCells> &validationErrors) const;
