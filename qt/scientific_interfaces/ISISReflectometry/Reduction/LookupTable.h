@@ -16,15 +16,22 @@
 namespace MantidQt::CustomInterfaces::ISISReflectometry {
 class Row;
 
-class MANTIDQT_ISISREFLECTOMETRY_DLL LookupRowFinder {
+class MANTIDQT_ISISREFLECTOMETRY_DLL LookupTable {
 public:
-  LookupRowFinder(LookupTable const &);
+  LookupTable() = default;
+  LookupTable(std::vector<LookupRow> rowsIn);
+  LookupTable(std::initializer_list<LookupRow> rowsIn);
 
-  boost::optional<LookupRow> operator()(Row const &row, double tolerance) const;
+  std::vector<LookupRow> const &rows() const;
+  boost::optional<LookupRow> findLookupRow(Row const &row, double tolerance) const;
   boost::optional<LookupRow> findWildcardLookupRow() const;
+  std::vector<LookupRow::ValueArray> toValueArray() const;
+
+  friend bool operator==(LookupTable const &lhs, LookupTable const &rhs);
+  friend bool operator!=(LookupTable const &lhs, LookupTable const &rhs);
 
 private:
-  LookupTable const &m_lookupTable;
+  std::vector<LookupRow> m_lookupRows;
 
   boost::optional<LookupRow> searchByTheta(std::vector<LookupRow> lookupRows, boost::optional<double> const &,
                                            double) const;

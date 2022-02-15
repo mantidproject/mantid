@@ -5,7 +5,7 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "Experiment.h"
-#include "LookupRowFinder.h"
+#include "LookupTable.h"
 #include "MantidQtWidgets/Common/ParseKeyValueString.h"
 #include <boost/optional.hpp>
 #include <cmath>
@@ -55,26 +55,17 @@ std::string Experiment::stitchParametersString() const {
   return MantidQt::MantidWidgets::optionsToString(m_stitchParameters);
 }
 
-LookupTable const &Experiment::lookupTable() const { return m_lookupTable; }
+std::vector<LookupRow> const &Experiment::lookupTableRows() const { return m_lookupTable.rows(); }
 
-std::vector<LookupRow::ValueArray> Experiment::lookupTableToArray() const {
-  auto result = std::vector<LookupRow::ValueArray>();
-  for (auto const &lookupRow : m_lookupTable)
-    result.emplace_back(lookupRowToArray(lookupRow));
-  return result;
-}
+std::vector<LookupRow::ValueArray> Experiment::lookupTableToArray() const { return m_lookupTable.toValueArray(); }
 
 boost::optional<LookupRow> Experiment::findLookupRow(Row const &row, double tolerance) const {
-  LookupRowFinder findLookupRow(m_lookupTable);
-  return findLookupRow(row, tolerance);
+  return m_lookupTable.findLookupRow(row, tolerance);
 }
 
-boost::optional<LookupRow> Experiment::findWildcardLookupRow() const {
-  LookupRowFinder finder(m_lookupTable);
-  return finder.findWildcardLookupRow();
-}
+boost::optional<LookupRow> Experiment::findWildcardLookupRow() const { return m_lookupTable.findWildcardLookupRow(); }
 
-bool operator!=(Experiment const &lhs, Experiment const &rhs) { return !(lhs == rhs); }
+bool operator!=(Experiment const &lhs, Experiment const &rhs) { return !operator==(lhs, rhs); }
 
 bool operator==(Experiment const &lhs, Experiment const &rhs) {
   return lhs.analysisMode() == rhs.analysisMode() && lhs.reductionType() == rhs.reductionType() &&
@@ -83,6 +74,6 @@ bool operator==(Experiment const &lhs, Experiment const &rhs) {
          lhs.polarizationCorrections() == rhs.polarizationCorrections() &&
          lhs.floodCorrections() == rhs.floodCorrections() &&
          lhs.transmissionStitchOptions() == rhs.transmissionStitchOptions() &&
-         lhs.stitchParameters() == rhs.stitchParameters() && lhs.lookupTable() == rhs.lookupTable();
+         lhs.stitchParameters() == rhs.stitchParameters() && lhs.m_lookupTable == rhs.m_lookupTable;
 }
 } // namespace MantidQt::CustomInterfaces::ISISReflectometry

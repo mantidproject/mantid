@@ -86,8 +86,6 @@ private:
 MANTIDQT_ISISREFLECTOMETRY_DLL bool operator==(LookupRow const &lhs, LookupRow const &rhs);
 MANTIDQT_ISISREFLECTOMETRY_DLL bool operator!=(LookupRow const &lhs, LookupRow const &rhs);
 LookupRow::ValueArray lookupRowToArray(LookupRow const &lookupRow);
-
-using LookupTable = std::vector<LookupRow>;
 } // namespace ISISReflectometry
 } // namespace CustomInterfaces
 } // namespace MantidQt
