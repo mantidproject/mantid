@@ -14,4 +14,6 @@ Improvements
 
 - Groups are now highlighted to show that all subtasks are completed.
 
+- Processing is disabled if there are errors on the Experiment Setting table.
+
 :ref:`Release 6.4.0 <v6.4.0>`
