@@ -22,6 +22,7 @@ namespace Crystal {
   */
 class MANTID_CRYSTAL_DLL SelectCellWithForm : public API::Algorithm {
 public:
+  typedef Kernel::Matrix<double> UBmatrix;
   /// Algorithm's name for identification
   const std::string name() const override { return "SelectCellWithForm"; };
 
@@ -43,6 +44,10 @@ public:
 
   static Kernel::Matrix<double> DetermineErrors(std::vector<double> &sigabc, const Kernel::Matrix<double> &UB,
                                                 const API::IPeaksWorkspace_sptr &ws, double tolerance);
+
+  static Kernel::Matrix<double> CalculateUBWithErrors(std::vector<double> &sigabc, const Kernel::Matrix<double> &UB,
+                                                      const Kernel::Matrix<double> &modUB,
+                                                      const API::IPeaksWorkspace_sptr &ws, double tolerance);
 
 private:
   /// Initialise the properties

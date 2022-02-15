@@ -53,19 +53,19 @@ void SelectCellOfType::init() {
   declareProperty("Centering", centering_list[3], std::make_shared<Kernel::StringListValidator>(centering_list),
                   "The centering for the conventional cell");
 
-  this->declareProperty("Apply", false, "Update UB and re-index the peaks");
-  this->declareProperty("Tolerance", 0.12, "Indexing Tolerance");
+  declareProperty("Apply", false, "Update UB and re-index the peaks");
+  declareProperty("Tolerance", 0.12, "Indexing Tolerance");
 
-  this->declareProperty(std::make_unique<PropertyWithValue<int>>("NumIndexed", 0, Direction::Output),
-                        "The number of indexed peaks if apply==true.");
+  declareProperty(std::make_unique<PropertyWithValue<int>>("NumIndexed", 0, Direction::Output),
+                  "The number of indexed peaks if apply==true.");
 
-  this->declareProperty(std::make_unique<PropertyWithValue<double>>("AverageError", 0.0, Direction::Output),
-                        "The average HKL indexing error if apply==true.");
+  declareProperty(std::make_unique<PropertyWithValue<double>>("AverageError", 0.0, Direction::Output),
+                  "The average HKL indexing error if apply==true.");
 
-  this->declareProperty("AllowPermutations", true, "Allow permutations of conventional cells");
+  declareProperty("AllowPermutations", true, "Allow permutations of conventional cells");
 
-  this->declareProperty(std::make_unique<ArrayProperty<double>>("TransformationMatrix", Direction::Output),
-                        "The transformation matrix");
+  declareProperty(std::make_unique<ArrayProperty<double>>("TransformationMatrix", Direction::Output),
+                  "The transformation matrix");
 }
 
 /**
@@ -77,7 +77,7 @@ std::map<std::string, std::string> SelectCellOfType::validateInputs() {
   std::map<std::string, std::string> result;
 
   // Case 0: PeaksWorkspace is not valid
-  IPeaksWorkspace_sptr ws = this->getProperty("PeaksWorkspace");
+  IPeaksWorkspace_sptr ws = getProperty("PeaksWorkspace");
   if (!ws) {
     result["PeaksWorkspace"] = "Could not read the peaks workspace";
   }
@@ -96,12 +96,12 @@ std::map<std::string, std::string> SelectCellOfType::validateInputs() {
  */
 void SelectCellOfType::exec() {
   // -- Parse input
-  IPeaksWorkspace_sptr ws = this->getProperty("PeaksWorkspace");
-  std::string cell_type = this->getProperty("CellType");
-  std::string centering = this->getProperty("Centering");
-  bool apply = this->getProperty("Apply");
-  double tolerance = this->getProperty("Tolerance");
-  bool allowPermutations = this->getProperty("AllowPermutations");
+  IPeaksWorkspace_sptr ws = getProperty("PeaksWorkspace");
+  std::string cell_type = getProperty("CellType");
+  std::string centering = getProperty("Centering");
+  bool apply = getProperty("Apply");
+  double tolerance = getProperty("Tolerance");
+  bool allowPermutations = getProperty("AllowPermutations");
 
   // copy current lattice
   auto o_lattice = std::make_unique<OrientedLattice>(ws->mutableSample().getOrientedLattice());
@@ -126,7 +126,7 @@ void SelectCellOfType::exec() {
     modHKL[i][2] = modvector_2[i];
   }
   DblMatrix newModUB = newUB * modHKL;
-  this->setProperty("TransformationMatrix", HKLTransformMatrix.getVector());
+  setProperty("TransformationMatrix", HKLTransformMatrix.getVector());
 
   // logging
   std::ostringstream msg;
@@ -136,12 +136,13 @@ void SelectCellOfType::exec() {
 
   if (apply) {
     std::vector<double> lattice_constant_errors(6);
+    auto UBs_optimized =
+        SelectCellWithForm::CalculateUBWithErrors(lattice_constant_errors, newUB, newModUB, ws, tolerance);
     // NOTE: the returned UB is the augmented UB, i.e.
     // UB = [ UB  | modUB ]
     // 3x6   3x3     3x3
-    auto UBs_optimized = SelectCellWithForm::DetermineErrors(lattice_constant_errors, newUB, newModUB, ws, tolerance);
-    for (size_t i = 0; i < 3; ++i) {
-      for (size_t j = 0; j < 3; ++j) {
+    for (int i = 0; i < 3; ++i) {
+      for (int j = 0; j < 3; ++j) {
         newUB[i][j] = UBs_optimized[i][j];
         newModUB[i][j] = UBs_optimized[i][j + 3];
       }
@@ -175,8 +176,8 @@ void SelectCellOfType::exec() {
       for (int i = 0; i < n_peaks; i++) {
         IPeak &peak = ws->getPeak(i);
         average_error += (peak.getHKL()).hklError();
-        peak.setIntHKL(T * peak.getIntHKL());
-        peak.setHKL(T * peak.getHKL());
+        peak.setIntHKL(HKLTransformMatrix * peak.getIntHKL());
+        peak.setHKL(HKLTransformMatrix * peak.getHKL());
       }
     }
     ws->mutableSample().setOrientedLattice(std::move(o_lattice));
@@ -188,8 +189,8 @@ void SelectCellOfType::exec() {
     g_log.notice(apply_msg.str());
 
     // Save output properties
-    this->setProperty("NumIndexed", num_indexed);
-    this->setProperty("AverageError", average_error);
+    setProperty("NumIndexed", num_indexed);
+    setProperty("AverageError", average_error);
   }
 }
 

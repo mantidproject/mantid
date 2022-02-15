@@ -66,6 +66,7 @@ std::map<std::string, std::string> SelectCellWithForm::validateInputs() {
 
   return result;
 }
+
 Kernel::Matrix<double> SelectCellWithForm::DetermineErrors(std::vector<double> &sigabc,
                                                            const Kernel::Matrix<double> &UB,
                                                            const IPeaksWorkspace_sptr &ws, double tolerance) {
@@ -115,23 +116,101 @@ Kernel::Matrix<double> SelectCellWithForm::DetermineErrors(std::vector<double> &
     return newUB1;
 }
 
+/**
+ * @brief This function takes in UB and modUB along with the corresponding peaksworkspace
+ *
+ * @param lattice_constant_errors lattice constant errors calculated during UB optimization
+ * @param UB starting UB matrix
+ * @param modUB start modUB matrix
+ * @param ws input peaks workspace
+ * @param tolerance tolerance used during peak indexation
+ * @return Kernel::Matrix<double>
+ */
+Kernel::Matrix<double> SelectCellWithForm::CalculateUBWithErrors(std::vector<double> &lattice_constant_errors,
+                                                                 const Kernel::Matrix<double> &UB,
+                                                                 const Kernel::Matrix<double> &modUB,
+                                                                 const IPeaksWorkspace_sptr &ws, double tolerance) {
+  const int npeaks = ws->getNumberPeaks();
+  std::vector<V3D> q_vectors;
+  std::vector<V3D> q_vectors_indexed;
+  std::vector<V3D> hkl_vectors;
+  std::vector<V3D> mnp_vectors;
+  q_vectors.reserve(npeaks);
+  q_vectors_indexed.reserve(npeaks);
+  hkl_vectors.reserve(npeaks);
+  mnp_vectors.reserve(npeaks);
+
+  UBmatrix UB_new(3, 3);
+  UBmatrix modUB_new(3, 3);
+  std::vector<double> mod_vectors_errors(3);
+
+  for (int i = 0; i < npeaks; ++i) {
+    q_vectors.emplace_back(ws->getPeak(i).getQSampleFrame());
+  }
+
+  // re-index with new UB
+  double fit_error;
+  IndexingUtils::GetIndexedPeaks(UB, q_vectors, tolerance, hkl_vectors, q_vectors_indexed, fit_error);
+
+  // re-calculate mode vectors [mnp]
+  // NOTE: if modUB in singular (non-invertable), set all mnp to 0;
+  //       otherwise, calculate mnp from UB, hkl, and qs_indexed
+  auto modUB_inv = UBmatrix(modUB);
+  auto det_modUB = modUB_inv.Invert();
+  if (det_modUB == 0) {
+    for (int i = 0; i < q_vectors_indexed.size(); ++i) {
+      mnp_vectors.emplace_back(V3D(0, 0, 0));
+    }
+  } else {
+    for (int i = 0; i < q_vectors_indexed.size(); ++i) {
+      auto q_ideal = UB * q_vectors_indexed[i];
+      auto dq = q_vectors[i] - q_ideal;
+      auto mnp = modUB_inv * dq;
+      mnp_vectors.emplace_back(mnp);
+    }
+  }
+
+  // get the modulation vectors dimension [1-3]
+  int ModDim;
+  auto const o_lattice = ws->mutableSample().getOrientedLattice();
+  auto const modvec0 = o_lattice.getModVec(0);
+  auto const modvec1 = o_lattice.getModVec(1);
+  auto const modvec2 = o_lattice.getModVec(2);
+  if (modvec2.norm2() > 0.0)
+    ModDim = 3;
+  else if (modvec1.norm2() > 0.0)
+    ModDim = 2;
+  else if (modvec0.norm2() > 0.0)
+    ModDim = 1;
+  else
+    ModDim = 0;
+
+  IndexingUtils::Optimize_6dUB(UB_new, modUB_new, hkl_vectors, mnp_vectors, ModDim, q_vectors_indexed,
+                               lattice_constant_errors, mod_vectors_errors);
+
+  //
+  Kernel::Matrix<double> UB_optimized(3, 6);
+  for (int i = 0; i < 3; ++i) {
+    for (int j = 0; j < 3; ++j) {
+      UB_optimized[i][j] = UB_new[i][j];
+      UB_optimized[i][j + 3] = modUB_new[i][j];
+    }
+  }
+
+  //
+  return UB_optimized;
+}
+
 /** Execute the algorithm.
  */
 void SelectCellWithForm::exec() {
   IPeaksWorkspace_sptr ws = this->getProperty("PeaksWorkspace");
-  if (!ws) {
-    throw std::runtime_error("Could not read the peaks workspace");
-  }
 
   // copy current lattice
   auto o_lattice = std::make_unique<OrientedLattice>(ws->mutableSample().getOrientedLattice());
   Matrix<double> UB = o_lattice->getUB();
 
   bool allowPermutations = this->getProperty("AllowPermutations");
-
-  if (!IndexingUtils::CheckUB(UB)) {
-    throw std::runtime_error("ERROR: The stored UB is not a valid orientation matrix");
-  }
 
   int form_num = this->getProperty("FormNumber");
   bool apply = this->getProperty("Apply");
