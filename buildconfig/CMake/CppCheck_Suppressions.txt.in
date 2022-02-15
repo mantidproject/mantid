@@ -282,9 +282,6 @@ constParameter:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadILLIndirect2.c
 constParameter:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadILLReflectometry.cpp:238
 constParameter:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadILLReflectometry.cpp:365
 constParameter:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadILLReflectometry.cpp:652
-unreadVariable:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadILLSANS.cpp:270
-unreadVariable:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadILLSANS.cpp:369
-unreadVariable:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadILLSANS.cpp:476
 constParameter:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadILLTOF2.cpp:115
 constParameter:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadILLTOF2.cpp:143
 constParameter:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadILLTOF2.cpp:230

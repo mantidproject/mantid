@@ -89,7 +89,6 @@ private:
   bool m_isTOF;                                    ///< TOF or monochromatic flag
   double m_sourcePos;                              ///< Source Z (for D33 TOF)
   bool m_isD16Omega;                               ///< Data come from a D16 omega scan flag
-
   void setFinalProperties(const std::string &filename);
   std::vector<double> getVariableTimeBinning(const NeXus::NXEntry &, const std::string &, const NeXus::NXInt &,
                                              const NeXus::NXFloat &) const;

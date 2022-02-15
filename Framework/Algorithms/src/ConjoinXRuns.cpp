@@ -10,6 +10,7 @@
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/NumericAxis.h"
 #include "MantidAPI/Run.h"
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidAPI/WorkspaceHistory.h"
@@ -22,6 +23,7 @@
 #include "MantidHistogramData/HistogramE.h"
 #include "MantidHistogramData/HistogramX.h"
 #include "MantidHistogramData/HistogramY.h"
+#include "MantidHistogramData/LinearGenerator.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/ListValidator.h"
@@ -105,6 +107,9 @@ void ConjoinXRuns::init() {
   declareProperty("FailBehaviour", SKIP_BEHAVIOUR, std::make_shared<StringListValidator>(failBehaviourOptions),
                   "Choose whether to skip the workspace and continue, or stop and "
                   "throw and error, when encountering a failure on merging.");
+  declareProperty(
+      "LinearizeAxis", false,
+      "Choose to set a linear x-axis starting from 1, can be used only if the workspaces have common bins.");
 }
 
 std::map<std::string, std::string> ConjoinXRuns::validateInputs() {
@@ -157,6 +162,13 @@ std::map<std::string, std::string> ConjoinXRuns::validateInputs() {
       if (!logValid.empty()) {
         issues[INPUT_WORKSPACE_PROPERTY] += "Invalid sample log entry for " + ws->getName() + ": " + logValid + "\n";
       }
+    }
+  }
+  if (getProperty("LinearizeAxis")) {
+    auto notCommon = std::find_if(m_inputWS.cbegin(), m_inputWS.cend(), [](auto ws) { return !ws->isCommonBins(); });
+    if (notCommon != m_inputWS.cend()) {
+      issues[INPUT_WORKSPACE_PROPERTY] +=
+          "Workspace " + (*notCommon)->getName() + " is ragged, which is not allowed if linearize axis is requested.\n";
     }
   }
   m_inputWS.clear();
@@ -216,29 +228,37 @@ std::string ConjoinXRuns::checkLogEntry(const MatrixWorkspace_sptr &ws) const {
 //----------------------------------------------------------------------------------------------
 /** Return the to-be axis of the workspace dependent on the log entry
  * @param ws : the input workspace
+ * @param xstart : the starting x in case linearized axis is requested; this is an in/out parameter, passed by reference
  * @return : the x-axis to use for the output workspace
  */
-std::vector<double> ConjoinXRuns::getXAxis(const MatrixWorkspace_sptr &ws) const {
-
+std::vector<double> ConjoinXRuns::getXAxis(const MatrixWorkspace_sptr &ws, double &xstart) const {
   std::vector<double> axis;
-  axis.reserve(ws->y(0).size());
+  const size_t s = ws->y(0).size();
+  axis.reserve(s);
   auto &run = ws->run();
-  // try time series first
-  TimeSeriesProperty<double> *timeSeriesDouble(nullptr);
-  timeSeriesDouble = dynamic_cast<TimeSeriesProperty<double> *>(run.getLogData(m_logEntry));
-  if (timeSeriesDouble) {
-    // try double series
-    axis = timeSeriesDouble->filteredValuesAsVector();
+  if (getProperty("LinearizeAxis")) {
+    for (double ix = xstart; ix < xstart + double(s); ++ix) {
+      axis.push_back(ix);
+    }
+    xstart += double(s);
   } else {
-    // try int series next
-    TimeSeriesProperty<int> *timeSeriesInt(nullptr);
-    timeSeriesInt = dynamic_cast<TimeSeriesProperty<int> *>(run.getLogData(m_logEntry));
-    if (timeSeriesInt) {
-      std::vector<int> intAxis = timeSeriesInt->filteredValuesAsVector();
-      axis = std::vector<double>(intAxis.begin(), intAxis.end());
+    // try time series first
+    TimeSeriesProperty<double> *timeSeriesDouble(nullptr);
+    timeSeriesDouble = dynamic_cast<TimeSeriesProperty<double> *>(run.getLogData(m_logEntry));
+    if (timeSeriesDouble) {
+      // try double series
+      axis = timeSeriesDouble->filteredValuesAsVector();
     } else {
-      // then scalar
-      axis.emplace_back(run.getPropertyAsSingleValue(m_logEntry));
+      // try int series next
+      TimeSeriesProperty<int> *timeSeriesInt(nullptr);
+      timeSeriesInt = dynamic_cast<TimeSeriesProperty<int> *>(run.getLogData(m_logEntry));
+      if (timeSeriesInt) {
+        std::vector<int> intAxis = timeSeriesInt->filteredValuesAsVector();
+        axis = std::vector<double>(intAxis.begin(), intAxis.end());
+      } else {
+        // then scalar
+        axis.emplace_back(run.getPropertyAsSingleValue(m_logEntry));
+      }
     }
   }
 
@@ -278,17 +298,18 @@ void ConjoinXRuns::joinSpectrum(int64_t wsIndex) {
   const auto ySize = m_outWS->y(index).size();
   spectrum.reserve(ySize);
   errors.reserve(ySize);
-  axis.reserve(m_outWS->x(index).size());
+  axis.reserve(ySize);
+  xerrors.reserve(ySize);
   for (const auto &input : m_inputWS) {
     const auto &y = input->y(index);
     spectrum.insert(spectrum.end(), y.begin(), y.end());
     const auto &e = input->e(index);
     errors.insert(errors.end(), e.begin(), e.end());
-    if (m_logEntry.empty()) {
-      const auto &x = input->x(index);
+    if (!m_logEntry.empty() || getProperty("LinearizeAxis")) {
+      const auto &x = m_axisCache[input->getName()];
       axis.insert(axis.end(), x.begin(), x.end());
     } else {
-      const auto &x = m_axisCache[input->getName()];
+      const auto &x = input->x(index);
       axis.insert(axis.end(), x.begin(), x.end());
     }
     if (input->hasDx(index)) {
@@ -296,11 +317,11 @@ void ConjoinXRuns::joinSpectrum(int64_t wsIndex) {
       xerrors.insert(xerrors.end(), dx.begin(), dx.end());
     }
   }
+  m_outWS->setPoints(index, std::move(axis));
+  m_outWS->setCounts(index, std::move(spectrum));
+  m_outWS->setCountStandardDeviations(index, std::move(errors));
   if (!xerrors.empty())
     m_outWS->setPointStandardDeviations(index, std::move(xerrors));
-  m_outWS->mutableY(index) = spectrum;
-  m_outWS->mutableE(index) = errors;
-  m_outWS->mutableX(index) = axis;
 }
 
 //----------------------------------------------------------------------------------------------
@@ -377,9 +398,10 @@ void ConjoinXRuns::exec() {
     // the x-axis might need to be changed
   }
 
-  if (!m_logEntry.empty()) {
+  if (!m_logEntry.empty() || getProperty("LinearizeAxis")) {
+    double xstart = 0;
     for (const auto &ws : m_inputWS) {
-      m_axisCache[ws->getName()] = getXAxis(ws);
+      m_axisCache[ws->getName()] = getXAxis(ws, xstart);
     }
   }
 

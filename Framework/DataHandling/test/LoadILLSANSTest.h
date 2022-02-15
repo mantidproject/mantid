@@ -97,6 +97,8 @@ public:
     const auto unit = outputWS->getAxis(0)->unit()->unitID();
     TS_ASSERT_EQUALS(unit, "Wavelength");
     checkTimeFormat(outputWS);
+    checkDuration(outputWS, 1200.);
+    checkWavelength(outputWS, 6.);
   }
 
   void test_D11B() {
@@ -140,6 +142,8 @@ public:
     const auto unit = outputWS->getAxis(0)->unit()->unitID();
     TS_ASSERT_EQUALS(unit, "Wavelength");
     checkTimeFormat(outputWS);
+    checkDuration(outputWS, 600.);
+    checkWavelength(outputWS, 6.);
   }
 
   void test_D11B_Kinetic() {
@@ -199,6 +203,8 @@ public:
     const auto unit = outputWS->getAxis(0)->unit()->unitID();
     TS_ASSERT_EQUALS(unit, "Empty");
     checkTimeFormat(outputWS);
+    checkDuration(outputWS, 0.);
+    checkWavelength(outputWS, 6.);
   }
 
   void test_D22() {
@@ -233,6 +239,8 @@ public:
     const auto unit = outputWS->getAxis(0)->unit()->unitID();
     TS_ASSERT_EQUALS(unit, "Wavelength");
     checkTimeFormat(outputWS);
+    checkDuration(outputWS, 120.);
+    checkWavelength(outputWS, 5.);
   }
 
   void test_D22B_Cycle211() {
@@ -284,6 +292,8 @@ public:
     TS_ASSERT_DELTA(std::fabs(qy), 1., 1E-6)
     TS_ASSERT_EQUALS(qz, 0.)
     checkTimeFormat(outputWS);
+    checkDuration(outputWS, 60.);
+    checkWavelength(outputWS, 6.);
   }
 
   void test_D22B() {
@@ -333,6 +343,60 @@ public:
     TS_ASSERT_DELTA(std::fabs(qy), 1., 1E-6)
     TS_ASSERT_EQUALS(qz, 0.)
     checkTimeFormat(outputWS);
+    checkDuration(outputWS, 60.);
+    checkWavelength(outputWS, 11.01);
+  }
+
+  void test_D22B_Kinetic() {
+    LoadILLSANS alg;
+    alg.setChild(true);
+    alg.initialize();
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("Filename", "089120.nxs"))
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", "__unused_for_child"))
+    TS_ASSERT_THROWS_NOTHING(alg.execute())
+    TS_ASSERT(alg.isExecuted())
+    MatrixWorkspace_const_sptr outputWS = alg.getProperty("OutputWorkspace");
+    TS_ASSERT(outputWS)
+    TS_ASSERT_EQUALS(outputWS->getNumberHistograms(), 128 * 256 + 96 * 256 + 2)
+    TS_ASSERT(outputWS->detectorInfo().isMonitor(128 * 256 + 96 * 256 + 1))
+    TS_ASSERT(outputWS->detectorInfo().isMonitor(128 * 256 + 96 * 256))
+    TS_ASSERT(!outputWS->isHistogramData())
+    TS_ASSERT(!outputWS->isDistribution())
+    TS_ASSERT(outputWS->isCommonBins())
+    const auto &instrument = outputWS->getInstrument();
+    const auto &run = outputWS->run();
+    TS_ASSERT(run.hasProperty("Detector 1.det1_calc"));
+    TS_ASSERT(run.hasProperty("L2"));
+    const double detCalc = run.getPropertyAsSingleValue("Detector 1.det1_calc");
+    const double l2 = run.getPropertyAsSingleValue("L2");
+    TS_ASSERT_EQUALS(detCalc, l2);
+    IComponent_const_sptr comp = instrument->getComponentByName("detector_back");
+    V3D pos = comp->getPos();
+    TS_ASSERT(run.hasProperty("Detector 1.det1_calc"))
+    double det2_calc = run.getLogAsSingleValue("Detector 1.det1_calc");
+    TS_ASSERT(run.hasProperty("Detector 1.dtr1_actual"))
+    double dtr2_act = run.getLogAsSingleValue("Detector 1.dtr1_actual");
+    TS_ASSERT_DELTA(pos.Z(), det2_calc, 1E-6)
+    TS_ASSERT_DELTA(pos.X(), -dtr2_act / 1000., 1E-6)
+    comp = instrument->getComponentByName("detector_front");
+    pos = comp->getPos();
+    TS_ASSERT(run.hasProperty("Detector 2.det2_calc"))
+    double det1_calc = run.getLogAsSingleValue("Detector 2.det2_calc");
+    TS_ASSERT(run.hasProperty("Detector 2.dtr2_actual"))
+    double dtr1_act = run.getLogAsSingleValue("Detector 2.dtr2_actual");
+    TS_ASSERT_DELTA(pos.Z(), det1_calc, 1E-6)
+    TS_ASSERT_DELTA(pos.X(), -dtr1_act / 1000., 1E-6)
+    TS_ASSERT(run.hasProperty("Detector 2.dan2_actual"))
+    double dan1_act = run.getLogAsSingleValue("Detector 2.dan2_actual");
+    double angle, qx, qy, qz;
+    comp->getRotation().getAngleAxis(angle, qx, qy, qz);
+    TS_ASSERT_DELTA(angle, dan1_act, 1E-6)
+    TS_ASSERT_EQUALS(qx, 0.)
+    TS_ASSERT_DELTA(std::fabs(qy), 1., 1E-6)
+    TS_ASSERT_EQUALS(qz, 0.)
+    checkTimeFormat(outputWS);
+    checkDuration(outputWS, 20.);
+    checkWavelength(outputWS, 6.);
   }
 
   void test_D16_GAMMA() {
@@ -379,6 +443,8 @@ public:
     TS_ASSERT_EQUALS(spec[0], 17)
     TS_ASSERT_DELTA(err[0], sqrt(17), 1E-5)
     checkTimeFormat(outputWS);
+    checkDuration(outputWS, 30.);
+    checkWavelength(outputWS, 7.);
   }
 
   void test_D16_OMEGA() {
@@ -397,6 +463,8 @@ public:
     TS_ASSERT_EQUALS(outputWS->blocksize(), 1)
     TS_ASSERT_EQUALS(outputWS->getNumberHistograms(), 320 * 320 + 2);
     checkTimeFormat(outputWS);
+    checkDuration(outputWS, 5.);
+    checkWavelength(outputWS, 4.8);
   }
 
   void test_D33_MONO() {
@@ -437,6 +505,8 @@ public:
     const auto unit = outputWS->getAxis(0)->unit()->unitID();
     TS_ASSERT_EQUALS(unit, "Wavelength");
     checkTimeFormat(outputWS);
+    checkDuration(outputWS, 41.5);
+    checkWavelength(outputWS, 10.);
   }
 
   void test_D33_LTOF() {
@@ -467,6 +537,7 @@ public:
     const auto unit = outputWS->getAxis(0)->unit()->unitID();
     TS_ASSERT_EQUALS(unit, "Wavelength");
     checkTimeFormat(outputWS);
+    checkDuration(outputWS, 30.);
   }
 
   void test_D33_VTOF() {
@@ -497,12 +568,21 @@ public:
     const auto unit = outputWS->getAxis(0)->unit()->unitID();
     TS_ASSERT_EQUALS(unit, "Wavelength");
     checkTimeFormat(outputWS);
+    checkDuration(outputWS, 120.);
   }
 
   void checkTimeFormat(MatrixWorkspace_const_sptr outputWS) {
     TS_ASSERT(outputWS->run().hasProperty("start_time"));
     TS_ASSERT(
         Mantid::Types::Core::DateAndTimeHelpers::stringIsISO8601(outputWS->run().getProperty("start_time")->value()));
+  }
+  void checkDuration(MatrixWorkspace_const_sptr outputWS, const double val) {
+    TS_ASSERT(outputWS->run().hasProperty("duration"));
+    TS_ASSERT_DELTA(outputWS->run().getPropertyAsSingleValue("duration"), val, 0.1);
+  }
+  void checkWavelength(MatrixWorkspace_const_sptr outputWS, const double val) {
+    TS_ASSERT(outputWS->run().hasProperty("wavelength"));
+    TS_ASSERT_DELTA(outputWS->run().getPropertyAsSingleValue("wavelength"), val, 0.1);
   }
 };
 
