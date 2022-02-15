@@ -46,6 +46,9 @@ private:
 
   /// Run the algorithm
   void exec() override;
+
+  /// Default input validation
+  std::map<std::string, std::string> validateInputs() override;
 };
 
 } // namespace Crystal

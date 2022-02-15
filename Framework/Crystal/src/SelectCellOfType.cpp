@@ -68,49 +68,89 @@ void SelectCellOfType::init() {
                         "The transformation matrix");
 }
 
+/**
+ * @brief Validate input arguments and workspaces
+ *
+ * @return std::map<std::string, std::string>
+ */
+std::map<std::string, std::string> SelectCellOfType::validateInputs() {
+  std::map<std::string, std::string> result;
+
+  // Case 0: PeaksWorkspace is not valid
+  IPeaksWorkspace_sptr ws = this->getProperty("PeaksWorkspace");
+  if (!ws) {
+    result["PeaksWorkspace"] = "Could not read the peaks workspace";
+  }
+
+  // Case 1: Attached UB is invalid
+  auto const o_lattice = ws->mutableSample().getOrientedLattice();
+  auto const UB = o_lattice.getUB();
+  if (!IndexingUtils::CheckUB(UB)) {
+    result["PeaksWorkspace"] = "ERROR: The stored UB is not a valid orientation matrix";
+  }
+
+  return result;
+}
+
 /** Execute the algorithm.
  */
 void SelectCellOfType::exec() {
+  // -- Parse input
   IPeaksWorkspace_sptr ws = this->getProperty("PeaksWorkspace");
-  if (!ws) {
-    throw std::runtime_error("Could not read the peaks workspace");
-  }
-
-  // copy current lattice
-  auto o_lattice = std::make_unique<OrientedLattice>(ws->mutableSample().getOrientedLattice());
-  Matrix<double> UB = o_lattice->getUB();
-
-  if (!IndexingUtils::CheckUB(UB)) {
-    throw std::runtime_error("ERROR: The stored UB is not a valid orientation matrix");
-  }
-
   std::string cell_type = this->getProperty("CellType");
   std::string centering = this->getProperty("Centering");
   bool apply = this->getProperty("Apply");
   double tolerance = this->getProperty("Tolerance");
   bool allowPermutations = this->getProperty("AllowPermutations");
 
+  // copy current lattice
+  auto o_lattice = std::make_unique<OrientedLattice>(ws->mutableSample().getOrientedLattice());
+  Matrix<double> UB = o_lattice->getUB();
+  // NOTE: we need the previous mod vectors to find the new mod vectors after cell change
+  auto modvector_0 = o_lattice->getModVec(0);
+  auto modvector_1 = o_lattice->getModVec(1);
+  auto modvector_2 = o_lattice->getModVec(2);
+
   std::vector<ConventionalCell> list = ScalarUtils::GetCells(UB, cell_type, centering, allowPermutations);
-
   ConventionalCell info = ScalarUtils::GetCellBestError(list, true);
-
+  //
   DblMatrix newUB = info.GetNewUB();
+  DblMatrix HKLTransformMatrix = info.GetHKL_Tran();
+  modvector_0 = HKLTransformMatrix * modvector_0;
+  modvector_1 = HKLTransformMatrix * modvector_1;
+  modvector_2 = HKLTransformMatrix * modvector_2;
+  DblMatrix modHKL(3, 3);
+  for (size_t i = 0; i < 3; i++) {
+    modHKL[i][0] = modvector_0[i];
+    modHKL[i][1] = modvector_1[i];
+    modHKL[i][2] = modvector_2[i];
+  }
+  DblMatrix newModUB = newUB * modHKL;
+  this->setProperty("TransformationMatrix", HKLTransformMatrix.getVector());
 
-  std::string message = info.GetDescription() + " Lat Par:" + IndexingUtils::GetLatticeParameterString(newUB);
-
-  g_log.notice(std::string(message));
-
-  DblMatrix T = info.GetHKL_Tran();
-  g_log.notice() << "Transformation Matrix =  " << T.str() << '\n';
-  this->setProperty("TransformationMatrix", T.getVector());
+  // logging
+  std::ostringstream msg;
+  msg << info.GetDescription() << " Lattice Parameters: " << IndexingUtils::GetLatticeParameterString(newUB) << '\n'
+      << "Transformation Matrix =  " << HKLTransformMatrix.str() << '\n';
+  g_log.notice(msg.str());
 
   if (apply) {
-    std::vector<double> sigabc(6);
-    SelectCellWithForm::DetermineErrors(sigabc, newUB, ws, tolerance);
+    std::vector<double> lattice_constant_errors(6);
+    // NOTE: the returned UB is the augmented UB, i.e.
+    // UB = [ UB  | modUB ]
+    // 3x6   3x3     3x3
+    auto UBs_optimized = SelectCellWithForm::DetermineErrors(lattice_constant_errors, newUB, newModUB, ws, tolerance);
+    for (size_t i = 0; i < 3; ++i) {
+      for (size_t j = 0; j < 3; ++j) {
+        newUB[i][j] = UBs_optimized[i][j];
+        newModUB[i][j] = UBs_optimized[i][j + 3];
+      }
+    }
     //----------------------------------------------
     o_lattice->setUB(newUB);
-
-    o_lattice->setError(sigabc[0], sigabc[1], sigabc[2], sigabc[3], sigabc[4], sigabc[5]);
+    o_lattice->setModUB(newModUB);
+    o_lattice->setError(lattice_constant_errors[0], lattice_constant_errors[1], lattice_constant_errors[2],
+                        lattice_constant_errors[3], lattice_constant_errors[4], lattice_constant_errors[5]);
 
     int n_peaks = ws->getNumberPeaks();
 
@@ -142,8 +182,10 @@ void SelectCellOfType::exec() {
     ws->mutableSample().setOrientedLattice(std::move(o_lattice));
 
     // Tell the user what happened.
-    g_log.notice() << "Re-indexed the peaks with the new UB. \n";
-    g_log.notice() << "Now, " << num_indexed << " are indexed with average error " << average_error << '\n';
+    std::ostringstream apply_msg;
+    apply_msg << "Re-indexed the peaks with the new UB. \n"
+              << "Now, " << num_indexed << " are indexed with average error " << average_error << '\n';
+    g_log.notice(apply_msg.str());
 
     // Save output properties
     this->setProperty("NumIndexed", num_indexed);
