@@ -16,6 +16,22 @@
 namespace MantidQt::CustomInterfaces::ISISReflectometry {
 
 namespace {
+// Map of column number to hard-coded tooltips (used for lookup criteria columns)
+std::map<int, std::string> ColumnTooltips{
+    {LookupRow::THETA,
+     "Theta lookup: runs with theta within 0.01 of this value will use the settings specified in this row"}};
+
+// Map of column number to algorithm property name for columns where we want to get the tooltip from the algorithm
+std::map<int, std::string> ColumnPropertyNames{{LookupRow::FIRST_TRANS, "FirstTransmissionRunList"},
+                                               {LookupRow::SECOND_TRANS, "SecondTransmissionRunList"},
+                                               {LookupRow::TRANS_SPECTRA, "TransmissionProcessingInstructions"},
+                                               {LookupRow::QMIN, "MomentumTransferMin"},
+                                               {LookupRow::QMAX, "MomentumTransferMax"},
+                                               {LookupRow::QSTEP, "MomentumTransferStep"},
+                                               {LookupRow::SCALE, "ScaleFactor"},
+                                               {LookupRow::RUN_SPECTRA, "ProcessingInstructions"},
+                                               {LookupRow::BACKGROUND_SPECTRA, "BackgroundProcessingInstructions"}};
+
 // Changing the palette for spin boxes doesn't work but we can
 // change the background colour with a style sheet. This also changes
 // the font slightly on Ubuntu so there may be a better way to do this,
@@ -95,19 +111,51 @@ void QtExperimentView::initLayout(const Mantid::API::IAlgorithm_sptr &algorithmF
   connect(m_ui.addPerAngleOptionsButton, SIGNAL(clicked()), this, SLOT(onNewLookupRowRequested()));
 }
 
+/** Set a column tooltip from a map, if it exists
+ *
+ * @param column : the column index
+ * @param tooltips : a map of column index to tooltip
+ * @return : true if the tooltip was set, false if not found
+ */
+bool QtExperimentView::setTooltipFromMap(int column, std::map<int, std::string> tooltips) {
+  auto tooltipIt = tooltips.find(column);
+  if (tooltipIt == tooltips.end()) {
+    return false;
+  }
+  m_columnToolTips[column] = QString::fromStdString(tooltipIt->second);
+  return true;
+}
+
+/** Set a column tooltip from an algorithm property. Does nothing if the property is not found
+ *
+ * @param column : the column index
+ * @param properties : a map of column index to algorithm property name
+ */
+void QtExperimentView::setTooltipFromAlgorithm(int column, std::map<int, std::string> properties,
+                                               const Mantid::API::IAlgorithm_sptr &algorithmForTooltips) {
+  auto propertyIt = properties.find(column);
+  if (propertyIt == properties.end()) {
+    return;
+  }
+  // Get the tooltip for this column based on the algorithm property of the same name
+  auto const toolTip =
+      QString::fromStdString(algorithmForTooltips->getPointerToProperty(propertyIt->second)->documentation());
+  // We could set the tooltip for the column header here using
+  // horizontalHeaderItem(column)->setToolTip(). However, then we lose the
+  // tooltip about the purpose of the table as a whole. So we set the tooltip
+  // on the table cells instead. They are created dynamically, so for now
+  // just cache the tooltip.
+  m_columnToolTips[column] = toolTip;
+}
+
 void QtExperimentView::initializeTableColumns(QTableWidget &table,
                                               const Mantid::API::IAlgorithm_sptr &algorithmForTooltips) {
   for (auto column = 0; column < table.columnCount(); ++column) {
-    // Get the tooltip for this column based on the algorithm property
-    auto const propertyName = LookupRow::ColumnPropertyName[column];
-    auto const toolTip =
-        QString::fromStdString(algorithmForTooltips->getPointerToProperty(propertyName)->documentation());
-    // We could set the tooltip for the column header here using
-    // horizontalHeaderItem(column)->setToolTip(). However, then we lose the
-    // tooltip about the purpose of the table as a whole. So we set the tooltip
-    // on the table cells instead. They are created dynamically, so for now
-    // just cache the tooltip.
-    m_columnToolTips[column] = toolTip;
+    // First check if there's a tooltip for the column
+    if (!setTooltipFromMap(column, ColumnTooltips)) {
+      // Otherwise, get the tooltip from the algorithm property
+      setTooltipFromAlgorithm(column, ColumnPropertyNames, algorithmForTooltips);
+    }
   }
 }
 
