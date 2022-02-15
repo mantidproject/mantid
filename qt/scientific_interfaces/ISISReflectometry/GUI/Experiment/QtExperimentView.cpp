@@ -8,6 +8,7 @@
 #include "MantidKernel/UsageService.h"
 #include "MantidKernel/WarningSuppressions.h"
 #include "MantidQtWidgets/Common/AlgorithmHintStrategy.h"
+#include "Reduction/LookupRow.h"
 #include <QMessageBox>
 #include <QScrollBar>
 #include <boost/algorithm/string/join.hpp>
@@ -612,12 +613,14 @@ std::vector<LookupRow::ValueArray> QtExperimentView::getLookupTable() const {
   auto const &table = *m_ui.optionsTable;
   auto rows = std::vector<LookupRow::ValueArray>();
   rows.reserve(table.rowCount());
+  using Col = LookupRow::Column;
   for (auto row = 0; row < table.rowCount(); ++row) {
-    rows.emplace_back(LookupRow::ValueArray{textFromCell(table.item(row, 0)), textFromCell(table.item(row, 1)),
-                                            textFromCell(table.item(row, 2)), textFromCell(table.item(row, 3)),
-                                            textFromCell(table.item(row, 4)), textFromCell(table.item(row, 5)),
-                                            textFromCell(table.item(row, 6)), textFromCell(table.item(row, 7)),
-                                            textFromCell(table.item(row, 8)), textFromCell(table.item(row, 9))});
+    rows.emplace_back(LookupRow::ValueArray{
+        textFromCell(table.item(row, Col::THETA)), textFromCell(table.item(row, Col::FIRST_TRANS)),
+        textFromCell(table.item(row, Col::SECOND_TRANS)), textFromCell(table.item(row, Col::TRANS_SPECTRA)),
+        textFromCell(table.item(row, Col::QMIN)), textFromCell(table.item(row, Col::QMAX)),
+        textFromCell(table.item(row, Col::QSTEP)), textFromCell(table.item(row, Col::SCALE)),
+        textFromCell(table.item(row, Col::RUN_SPECTRA)), textFromCell(table.item(row, Col::BACKGROUND_SPECTRA))});
   }
   return rows;
 }
