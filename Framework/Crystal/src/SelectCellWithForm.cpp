@@ -48,6 +48,24 @@ void SelectCellWithForm::init() {
                         "The transformation matrix");
 }
 
+std::map<std::string, std::string> SelectCellWithForm::validateInputs() {
+  std::map<std::string, std::string> result;
+
+  // Case 0: invalid peaksworkspace
+  IPeaksWorkspace_sptr ws = this->getProperty("PeaksWorkspace");
+  if (!ws) {
+    result["PeaksWorkspace"] = "Must be a valid PeaksWorkspace";
+  }
+
+  // Case 1:
+  auto const o_lattice = ws->sample().getOrientedLattice();
+  auto const UB = o_lattice.getUB();
+  if (!IndexingUtils::CheckUB(UB)) {
+    result["PeaksWorkspace"] = "The stored UB is not a valid orientation matrix";
+  }
+
+  return result;
+}
 Kernel::Matrix<double> SelectCellWithForm::DetermineErrors(std::vector<double> &sigabc,
                                                            const Kernel::Matrix<double> &UB,
                                                            const IPeaksWorkspace_sptr &ws, double tolerance) {
