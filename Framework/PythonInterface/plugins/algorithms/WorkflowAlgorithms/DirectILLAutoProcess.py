@@ -717,7 +717,7 @@ class DirectILLAutoProcess(DataProcessorAlgorithm):
         """Does the sample data reduction for single crystal."""
         to_remove = [ws]
         if self.empty:
-            self._subtract_empty_container(ws)
+            self._subtract_empty_container(ws, sample_no)
         if self.masking:
             ws = self._apply_mask(ws)
         numor = ws[:ws.rfind('_')]
@@ -908,7 +908,7 @@ class DirectILLAutoProcess(DataProcessorAlgorithm):
             OutputWorkspace=ws
         )
 
-    def _subtract_empty_container(self, ws):
+    def _subtract_empty_container(self, ws, sample_no=0):
         """Subtracts empty container counts from the input workspace."""
         empty_ws = self.getPropertyValue('EmptyContainerWorkspace')
         empty_correction_ws = "{}_correction".format(empty_ws)
@@ -921,11 +921,34 @@ class DirectILLAutoProcess(DataProcessorAlgorithm):
             )
         else:
             empty_correction_ws = empty_ws
-        Minus(
-            LHSWorkspace=ws,
-            RHSWorkspace=mtd[empty_correction_ws][0],
-            OutputWorkspace=ws
-        )
+        # match correct empty container workspace to the sample
+        empty_no = sample_no
+        empty_entries = len(mtd[empty_correction_ws])
+        if empty_entries == 1:
+            empty_no = 0
+        elif sample_no > empty_entries:
+            empty_no = sample_no % empty_entries
+        try:
+            Minus(
+                LHSWorkspace=ws,
+                RHSWorkspace=mtd[empty_correction_ws][empty_no],
+                OutputWorkspace=ws,
+                EnableLogging=False  # suppressed to avoid logging error cases treated below
+            )
+        except ValueError:
+            # case when workspaces X-axes don't match
+            tmp_empty = '{}_tmp'.format(mtd[empty_correction_ws][empty_no])
+            RebinToWorkspace(
+                WorkspaceToRebin=mtd[empty_correction_ws][empty_no],
+                WorkspaceToMatch=ws,
+                OutputWorkspace=tmp_empty
+            )
+            Minus(
+                LHSWorkspace=ws,
+                RHSWorkspace=tmp_empty,
+                OutputWorkspace=ws
+            )
+            DeleteWorkspace(Workspace=tmp_empty)
         if self.clear_cache and empty_scaling != 1:
             DeleteWorkspace(Workspace=empty_correction_ws)
 

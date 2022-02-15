@@ -141,12 +141,12 @@ Sample, single crystal
 .. testcode:: ExDirectILLAutoProcessPowder
 
     vanadium_runs = 'ILL/IN4/085801-085802'
-    sample_runs = {'1p5K': 'ILL/IN4/087294+087295.nxs', '50K': 'ILL/IN4/087283-087290.nxs'}
-    container_runs = {'1p5K': 'ILL/IN4/087306-087309.nxs', '100K': 'ILL/IN4/087311-087314.nxs'}
+    sample_runs = 'ILL/IN4/087294+087295.nxs,ILL/IN4/087283-087290.nxs'
+    container_runs = 'ILL/IN4/087306-087309.nxs,ILL/IN4/087311-087314.nxs'
 
     vanadium_ws = 'vanadium_auto'
-    container_ws = {'1p5K': 'container_1.5K', '100K': 'container_100K'}
-    sample_ws = {'1p5K': 'sample_1.5K', '50K': 'sample_50K'}
+    container_ws = 'container'
+    sample_ws = 'sample'
 
     # Sample self-shielding and container subtraction.
     geometry = {
@@ -172,41 +172,44 @@ Sample, single crystal
         EPPCreationMethod='Fit EPP'
     )
 
-    for key in container_runs:
-        DirectILLAutoProcess(
-            Runs=container_runs[key],
-	    OutputWorkspace=container_ws[key],
-            ProcessAs='Empty',
-            ReductionType='Powder',
-            IncidentEnergyCalibration="Energy Calibration ON",
-            IncidentEnergy=Ei
-        )
+    DirectILLAutoProcess(
+        Runs=container_runs,
+	OutputWorkspace=container_ws,
+        ProcessAs='Empty',
+        ReductionType='Powder',
+        IncidentEnergyCalibration="Energy Calibration ON",
+        IncidentEnergy=Ei
+    )
 
     # Need to interpolate container to 50K
     T0 = 1.5
     T1 = 100.0
     DT = T1 - T0
     Ts = 50.0 # Target T
-    container_50K = (T1 - Ts) / DT * mtd['container_1.5K'] + (Ts - T0) / DT * mtd['container_100K']
-    container_ws['50K'] = 'container_50K'
+    RebinToWorkspace(
+        WorkspaceToRebin='container_087311_Ei9meV_T100.0K',
+        WorkspaceToMatch='container_087306_Ei9meV_T1.5K',
+        OutputWorkspace='container_087311_Ei9meV_T100.0K'
+    )
+    container_Ei9meV_50K = (T1 - Ts) / DT * mtd['container_087306_Ei9meV_T1.5K'] + (Ts - T0) / DT * mtd['container_087311_Ei9meV_T100.0K']
+    mtd[container_ws].add('container_Ei9meV_50K')
 
-    for key in sample_runs:
-        DirectILLAutoProcess(
-            Runs=sample_runs[key],
-            OutputWorkspace=sample_ws[key],
-            ProcessAs='Sample',
-            ReductionType='Powder',
-            VanadiumWorkspace=vanadium_ws,
-            EmptyContainerWorkspace=container_ws[key],
-            IncidentEnergyCalibration="Energy Calibration ON",
-            IncidentEnergy=Ei,
-            SampleMaterial=material,
-            SampleGeometry=geometry,
-            SaveOutput=False,
-            ClearCache=True,
-        )
+    DirectILLAutoProcess(
+        Runs=sample_runs,
+        OutputWorkspace=sample_ws,
+        ProcessAs='Sample',
+        ReductionType='Powder',
+        VanadiumWorkspace=vanadium_ws,
+        EmptyContainerWorkspace=container_ws,
+        IncidentEnergyCalibration="Energy Calibration ON",
+        IncidentEnergy=Ei,
+        SampleMaterial=material,
+        SampleGeometry=geometry,
+        SaveOutput=False,
+        ClearCache=True,
+    )
 
-    outputs = ['sample_1.5K_SofQW_087294_Ei_9_T_1.5', 'sample_50K_SofQW_087283_Ei_9_T_50.0']
+    outputs = ['sample_SofQW_087294_Ei9meV_T1.5K', 'sample_SofQW_087283_Ei9meV_T50.0K']
     for output in outputs:
         SofQW = mtd[output]
         qAxis = SofQW.readX(0)  # Vertical axis
@@ -218,8 +221,8 @@ Output:
 
 .. testoutput:: ExDirectILLAutoProcessPowder
 
-    sample_1.5K_SofQW_087294_Ei_9_T_1.5: Q range: 0.0...9.18A; W range -96.3...7.62meV
-    sample_50K_SofQW_087283_Ei_9_T_50.0: Q range: 0.0...9.18A; W range -96.3...7.62meV
+    sample_SofQW_087294_Ei9meV_T1.5K: Q range: 0.0...9.21A; W range -97.0...7.62meV
+    sample_SofQW_087283_Ei9meV_T50.0K: Q range: 0.0...9.19A; W range -96.6...7.62meV
 
 .. testcleanup:: ExDirectILLAutoProcessPowder
 
