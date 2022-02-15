@@ -26,14 +26,14 @@ public:
                                                                                  double tolerance) const;
 
   void validateAllLookupRows(ContentType const &lookupTableContent, LookupTableRows &lookupTable,
-                             std::vector<InvalidDefaultsError> &validationErrors) const;
+                             std::vector<InvalidLookupRowCells> &validationErrors) const;
 
   int countWildcards(LookupTableRows const &lookupTable) const;
 
   void sortInPlaceWildcardsFirstThenByTheta(LookupTableRows &lookupTable) const;
 
   bool hasUniqueThetas(LookupTableRows lookupTable, int wildcardCount, double tolerance) const;
-  void appendThetaErrorForAllRows(std::vector<InvalidDefaultsError> &validationErrors, std::size_t rowCount) const;
+  void appendThetaErrorForAllRows(std::vector<InvalidLookupRowCells> &validationErrors, std::size_t rowCount) const;
 };
 } // namespace ISISReflectometry
 } // namespace CustomInterfaces

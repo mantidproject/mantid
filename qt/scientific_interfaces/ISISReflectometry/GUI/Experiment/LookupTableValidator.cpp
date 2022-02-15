@@ -15,7 +15,7 @@ auto LookupTableValidator::operator()(ContentType const &lookupTableContent, dou
     -> ResultType {
 
   auto lookupTable = LookupTableRows();
-  auto validationErrors = std::vector<InvalidDefaultsError>();
+  auto validationErrors = std::vector<InvalidLookupRowCells>();
   validateAllLookupRows(lookupTableContent, lookupTable, validationErrors);
   auto thetaValidationResult = validateThetaValues(lookupTable, thetaTolerance);
   if (thetaValidationResult.isValid()) {
@@ -49,7 +49,7 @@ LookupTableValidator::validateThetaValues(LookupTableRows lookupTable, double to
 }
 
 void LookupTableValidator::validateAllLookupRows(ContentType const &lookupTableContent, LookupTableRows &lookupTable,
-                                                 std::vector<InvalidDefaultsError> &validationErrors) const {
+                                                 std::vector<InvalidLookupRowCells> &validationErrors) const {
   auto row = 0;
   for (auto const &lookupRowContent : lookupTableContent) {
     auto rowValidationResult = validateLookupRow(lookupRowContent);
@@ -96,7 +96,7 @@ void LookupTableValidator::sortInPlaceWildcardsFirstThenByTheta(LookupTableRows 
   std::sort(lookupTable.begin(), lookupTable.end(), thetaLessThan);
 }
 
-void LookupTableValidator::appendThetaErrorForAllRows(std::vector<InvalidDefaultsError> &validationErrors,
+void LookupTableValidator::appendThetaErrorForAllRows(std::vector<InvalidLookupRowCells> &validationErrors,
                                                       std::size_t rowCount) const {
   for (auto row = 0u; row < rowCount; ++row)
     validationErrors.emplace_back(row, std::vector<int>({0}));

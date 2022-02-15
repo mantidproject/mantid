@@ -2,7 +2,7 @@ set(EXPERIMENT_SRC_FILES
     QtExperimentView.cpp
     ExperimentPresenter.cpp
     ExperimentOptionDefaults.cpp
-    InvalidDefaultsError.cpp
+    InvalidLookupRowCells.cpp
     LookupTableValidationError.cpp
     LookupTableValidator.cpp
     ExperimentOptionDefaults.h

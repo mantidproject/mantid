@@ -180,10 +180,10 @@ private:
   Table emptyTable() { return Table(); }
   Cells emptyRow() { return Cells(); }
 
-  std::vector<InvalidDefaultsError> expectedErrors(const std::vector<int> &rows, const std::vector<int> &columns) {
-    std::vector<InvalidDefaultsError> errors;
+  std::vector<InvalidLookupRowCells> expectedErrors(const std::vector<int> &rows, const std::vector<int> &columns) {
+    std::vector<InvalidLookupRowCells> errors;
     for (auto row : rows)
-      errors.emplace_back(InvalidDefaultsError(row, columns));
+      errors.emplace_back(InvalidLookupRowCells(row, columns));
     return errors;
   }
 
@@ -195,7 +195,7 @@ private:
   }
 
   void runTestInvalidThetas(const Table &table, ThetaValuesValidationError thetaValuesError,
-                            std::vector<InvalidDefaultsError> expectedErrors) {
+                            std::vector<InvalidLookupRowCells> expectedErrors) {
     LookupTableValidator validator;
     auto result = validator(table, TOLERANCE);
     TS_ASSERT(result.isError());
@@ -205,7 +205,7 @@ private:
     TS_ASSERT_EQUALS(validationError.errors(), expectedErrors);
   }
 
-  void runTestInvalidCells(const Table &table, std::vector<InvalidDefaultsError> expectedErrors) {
+  void runTestInvalidCells(const Table &table, std::vector<InvalidLookupRowCells> expectedErrors) {
     LookupTableValidator validator;
     auto result = validator(table, TOLERANCE);
     TS_ASSERT(result.isError());
