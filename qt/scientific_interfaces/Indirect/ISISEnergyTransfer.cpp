@@ -442,6 +442,7 @@ void ISISEnergyTransfer::run() {
 
   reductionAlg->setProperty("SumFiles", m_uiForm.ckSumFiles->isChecked());
   reductionAlg->setProperty("LoadLogFiles", m_uiForm.ckLoadLogFiles->isChecked());
+  reductionAlg->setProperty("GroupBySampleChanger", m_uiForm.cbGroupOutput->currentText() == "Group by Sample");
 
   if (m_uiForm.ckUseCalib->isChecked()) {
     QString calibWorkspaceName = m_uiForm.dsCalibrationFile->getCurrentDataName();
@@ -516,8 +517,9 @@ void ISISEnergyTransfer::algorithmComplete(bool error) {
       m_outputWorkspaces = outputGroup->getNames();
       m_pythonExportWsName = m_outputWorkspaces[0];
 
-      if (!m_uiForm.ckGroupOutput->isChecked())
+      if (m_uiForm.cbGroupOutput->currentText() == "Ungrouped") {
         ungroupWorkspace(outputGroup->getName());
+      }
 
       setOutputPlotOptionsWorkspaces(m_outputWorkspaces);
 
