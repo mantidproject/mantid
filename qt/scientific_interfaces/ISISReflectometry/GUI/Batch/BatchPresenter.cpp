@@ -163,7 +163,9 @@ bool BatchPresenter::startBatch(std::deque<IConfiguredAlgorithm_sptr> algorithms
 
 void BatchPresenter::resumeReduction() {
   if (!m_experimentPresenter->hasValidSettings()) {
-    m_messageHandler->giveUserCritical("One or more of the experiment settings is incorrect", "Processing Error");
+    m_messageHandler->giveUserCritical(
+        "One or more of the experiment settings is invalid. Please check the Experiment Settings tab.",
+        "Processing Error");
     return;
   }
   // Update the model
@@ -209,7 +211,9 @@ void BatchPresenter::notifyReductionPaused() {
 
 void BatchPresenter::resumeAutoreduction() {
   if (!m_experimentPresenter->hasValidSettings()) {
-    m_messageHandler->giveUserCritical("One or more of the experiment settings is incorrect", "Processing Error");
+    m_messageHandler->giveUserCritical(
+        "One or more of the experiment settings is invalid. Please check the Experiment Settings tab.",
+        "Processing Error");
     return;
   }
   // Update the model first to ensure the autoprocessing flag is set
