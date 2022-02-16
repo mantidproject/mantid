@@ -53,6 +53,22 @@ boost::optional<boost::optional<double>> LookupRowValidator::parseThetaOrWhitesp
   return boost::none;
 }
 
+boost::optional<boost::optional<boost::regex>>
+LookupRowValidator::parseTitleMatcherOrWhitespace(CellText const &cellText) {
+  auto const &text = cellText[LookupRow::Column::TITLE];
+  if (isEntirelyWhitespace(text)) {
+    // Mark validator as passed, but the enclosed value empty
+    return boost::optional<boost::regex>(boost::none);
+  }
+
+  // This check relies on us checking for whitespace chars before calling parseTitleMatcher
+  if (auto result = parseTitleMatcher(text)) {
+    return result;
+  } else {
+    return boost::none;
+  }
+}
+
 boost::optional<TransmissionRunPair> LookupRowValidator::parseTransmissionRuns(CellText const &cellText) {
   auto transmissionRunsOrError = ISISReflectometry::parseTransmissionRuns(cellText[LookupRow::Column::FIRST_TRANS],
                                                                           cellText[LookupRow::Column::SECOND_TRANS]);
@@ -103,10 +119,7 @@ LookupRowValidator::parseBackgroundProcessingInstructions(CellText const &cellTe
 
 ValidationResult<LookupRow, std::vector<int>> LookupRowValidator::operator()(CellText const &cellText) {
   auto maybeTheta = parseThetaOrWhitespace(cellText);
-  // TODO implement parsing function for the title matcher when it is added to the view
-  // Note that the contained value is already an optional so we wrap it in another optional to indicate whether
-  // parsing succeeded or not.
-  auto maybeTitleMatcher = boost::optional<boost::optional<boost::regex>>(boost::optional<boost::regex>(boost::none));
+  auto maybeTitleMatcher = parseTitleMatcherOrWhitespace(cellText);
   auto maybeTransmissionRuns = parseTransmissionRuns(cellText);
   auto maybeTransmissionProcessingInstructions = parseTransmissionProcessingInstructions(cellText);
   auto maybeQRange = parseQRange(cellText);

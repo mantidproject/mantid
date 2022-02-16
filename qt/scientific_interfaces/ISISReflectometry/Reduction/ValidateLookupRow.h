@@ -27,6 +27,7 @@ public:
 
 private:
   boost::optional<boost::optional<double>> parseThetaOrWhitespace(LookupRow::ValueArray const &cellText);
+  boost::optional<boost::optional<boost::regex>> parseTitleMatcherOrWhitespace(LookupRow::ValueArray const &cellText);
   boost::optional<TransmissionRunPair> parseTransmissionRuns(LookupRow::ValueArray const &cellText);
   boost::optional<boost::optional<std::string>>
   parseTransmissionProcessingInstructions(LookupRow::ValueArray const &cellText);

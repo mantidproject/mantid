@@ -45,9 +45,52 @@ public:
     TS_ASSERT_EQUALS(result.assertError(), errorCells);
   }
 
+  void testParseTitleMatcherEmpty() {
+    LookupRowValidator validator;
+    auto result = validator({"0.5", ""});
+    TS_ASSERT(result.isValid());                                     // Outer initialized (not invalid)
+    TS_ASSERT(!result.assertValid().titleMatcher().is_initialized()) // Inner not initialized (empty)
+  }
+
+  void testParseTitleMatcherWhitespace() {
+    LookupRowValidator validator;
+    auto result = validator({"0.5", "    \t"});
+    TS_ASSERT(result.isValid());
+    // All whitespace is the equivalent of an empty string
+    TS_ASSERT(!result.assertValid().titleMatcher().is_initialized())
+  }
+
+  void testParseTitleMatcherSimpleValid() {
+    LookupRowValidator validator;
+    std::string const expected = "test";
+    auto result = validator({"0.5", expected});
+    TS_ASSERT(result.isValid());
+
+    auto const &titleMatcher = result.assertValid().titleMatcher();
+    TS_ASSERT(titleMatcher.is_initialized())
+    TS_ASSERT_EQUALS(expected, titleMatcher.get().expression())
+  }
+
+  void testParseTitleMatcherRegexCharsValid() {
+    LookupRowValidator validator;
+    std::string const expected = "test.*";
+    auto result = validator({"0.5", expected});
+    TS_ASSERT(result.isValid());
+
+    auto const &titleMatcher = result.assertValid().titleMatcher();
+    TS_ASSERT(titleMatcher.is_initialized())
+    TS_ASSERT_EQUALS(expected, titleMatcher.get().expression())
+  }
+
+  void testParseTitleMatcherInvalid() {
+    LookupRowValidator validator;
+    auto result = validator({"0.5", "["});
+    TS_ASSERT(!result.isValid()); // Outer not initialized (invalid)
+  }
+
   void testParseTransmissionRuns() {
     LookupRowValidator validator;
-    auto result = validator({"", "13463", "13464"});
+    auto result = validator({"", "", "13463", "13464"});
     auto expected = TransmissionRunPair("13463", "13464");
     TS_ASSERT(result.isValid());
     TS_ASSERT_EQUALS(result.assertValid().transmissionWorkspaceNames(), expected);
@@ -55,7 +98,7 @@ public:
 
   void testParseTransmissionRunsWithWorkspaceNames() {
     LookupRowValidator validator;
-    auto result = validator({"", "some workspace", "another_workspace"});
+    auto result = validator({"", "", "some workspace", "another_workspace"});
     auto expected = TransmissionRunPair("some workspace", "another_workspace");
     TS_ASSERT(result.isValid());
     TS_ASSERT_EQUALS(result.assertValid().transmissionWorkspaceNames(), expected);
@@ -63,7 +106,7 @@ public:
 
   void testParseTransmissionProcessingInstructions() {
     LookupRowValidator validator;
-    auto result = validator({"", "", "", "4-7"});
+    auto result = validator({"", "", "", "", "4-7"});
     TS_ASSERT(result.isValid());
     TS_ASSERT(result.assertValid().transmissionProcessingInstructions().is_initialized());
     TS_ASSERT_EQUALS(result.assertValid().transmissionProcessingInstructions().get(), "4-7");
@@ -71,7 +114,7 @@ public:
 
   void testParseTransmissionProcessingInstructionsError() {
     LookupRowValidator validator;
-    auto result = validator({"", "", "", "bad"});
+    auto result = validator({"", "", "", "", "bad"});
     std::vector<int> errorCells = {LookupRow::Column::TRANS_SPECTRA};
     TS_ASSERT(result.isError());
     TS_ASSERT_EQUALS(result.assertError(), errorCells);
@@ -79,14 +122,14 @@ public:
 
   void testParseQRange() {
     LookupRowValidator validator;
-    auto result = validator({"", "", "", "", "0.05", "1.3", "0.02"});
+    auto result = validator({"", "", "", "", "", "0.05", "1.3", "0.02"});
     TS_ASSERT(result.isValid());
     TS_ASSERT_EQUALS(result.assertValid().qRange(), RangeInQ(0.05, 0.02, 1.3));
   }
 
   void testParseQRangeError() {
     LookupRowValidator validator;
-    auto result = validator({"", "", "", "", "bad", "bad", "bad"});
+    auto result = validator({"", "", "", "", "", "bad", "bad", "bad"});
     std::vector<int> errorCells = {LookupRow::Column::QMIN, LookupRow::Column::QMAX, LookupRow::Column::QSTEP};
     TS_ASSERT(result.isError());
     TS_ASSERT_EQUALS(result.assertError(), errorCells);
@@ -94,14 +137,14 @@ public:
 
   void testParseScaleFactor() {
     LookupRowValidator validator;
-    auto result = validator({"", "", "", "", "", "", "", "1.4"});
+    auto result = validator({"", "", "", "", "", "", "", "", "1.4"});
     TS_ASSERT(result.isValid());
     TS_ASSERT_EQUALS(result.assertValid().scaleFactor(), 1.4);
   }
 
   void testParseScaleFactorError() {
     LookupRowValidator validator;
-    auto result = validator({"", "", "", "", "", "", "", "bad"});
+    auto result = validator({"", "", "", "", "", "", "", "", "bad"});
     std::vector<int> errorCells = {LookupRow::Column::SCALE};
     TS_ASSERT(result.isError());
     TS_ASSERT_EQUALS(result.assertError(), errorCells);
@@ -109,7 +152,7 @@ public:
 
   void testParseProcessingInstructions() {
     LookupRowValidator validator;
-    auto result = validator({"", "", "", "", "", "", "", "", "1-3"});
+    auto result = validator({"", "", "", "", "", "", "", "", "", "1-3"});
     TS_ASSERT(result.isValid());
     TS_ASSERT(result.assertValid().processingInstructions().is_initialized());
     TS_ASSERT_EQUALS(result.assertValid().processingInstructions().get(), "1-3");
@@ -117,7 +160,7 @@ public:
 
   void testParseProcessingInstructionsError() {
     LookupRowValidator validator;
-    auto result = validator({"", "", "", "", "", "", "", "", "bad"});
+    auto result = validator({"", "", "", "", "", "", "", "", "", "bad"});
     std::vector<int> errorCells = {LookupRow::Column::RUN_SPECTRA};
     TS_ASSERT(result.isError());
     TS_ASSERT_EQUALS(result.assertError(), errorCells);
@@ -125,7 +168,7 @@ public:
 
   void testParseBackgroundProcessingInstructions() {
     LookupRowValidator validator;
-    auto result = validator({"", "", "", "", "", "", "", "", "", "4-7"});
+    auto result = validator({"", "", "", "", "", "", "", "", "", "", "4-7"});
     TS_ASSERT(result.isValid());
     TS_ASSERT(result.assertValid().backgroundProcessingInstructions().is_initialized());
     TS_ASSERT_EQUALS(result.assertValid().backgroundProcessingInstructions().get(), "4-7");
@@ -133,7 +176,7 @@ public:
 
   void testParseBackgroundProcessingInstructionsError() {
     LookupRowValidator validator;
-    auto result = validator({"", "", "", "", "", "", "", "", "", "bad"});
+    auto result = validator({"", "", "", "", "", "", "", "", "", "", "bad"});
     std::vector<int> errorCells = {LookupRow::Column::BACKGROUND_SPECTRA};
     TS_ASSERT(result.isError());
     TS_ASSERT_EQUALS(result.assertError(), errorCells);

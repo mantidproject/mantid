@@ -19,7 +19,9 @@ namespace {
 // Map of column number to hard-coded tooltips (used for lookup criteria columns)
 std::unordered_map<int, std::string> ColumnTooltips{
     {LookupRow::THETA,
-     "Theta lookup: runs with theta within 0.01 of this value will use the settings specified in this row"}};
+     "Theta lookup: runs with theta within 0.01 of this value will use the settings specified in this row"},
+    {LookupRow::TITLE,
+     "Title lookup: runs with a title matching this regex will use the settings specified in this row"}};
 
 // Map of column number to algorithm property name for columns where we want to get the tooltip from the algorithm
 std::unordered_map<int, std::string> ColumnPropertyNames{
@@ -158,6 +160,9 @@ void QtExperimentView::initializeTableColumns(QTableWidget &table,
       setTooltipFromAlgorithm(column, ColumnPropertyNames, algorithmForTooltips);
     }
   }
+
+  // TODO - Temporarily hide the new title-matcher column. Remove this once the implementation is complete.
+  // table.setColumnHidden(LookupRow::TITLE, true);
 }
 
 void QtExperimentView::initializeTableItems(QTableWidget &table) {
