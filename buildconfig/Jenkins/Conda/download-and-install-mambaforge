@@ -10,12 +10,13 @@
 EXPECTED_MAMBAFORGE_PATH=$1
 EXPECTED_CONDA_PATH=$2
 CLEAN_BUILD=$3
+MAMBAFORGE_VERSION=4.11.0-0
 
 # Only supporting x86_64 at this time for the build process
 if [[ $OSTYPE == 'msys'* ]]; then
-    MAMBAFORGE_SCRIPT_NAME=Mambaforge-Windows-x86_64.exe
+    MAMBAFORGE_SCRIPT_NAME=Mambaforge-$MAMBAFORGE_VERSION-Windows-x86_64.exe
 else
-    MAMBAFORGE_SCRIPT_NAME=Mambaforge-$(uname)-x86_64.sh
+    MAMBAFORGE_SCRIPT_NAME=Mambaforge-$MAMBAFORGE_VERSION-$(uname)-x86_64.sh
 fi
 URL=https://github.com/conda-forge/miniforge/releases/latest/download/$MAMBAFORGE_SCRIPT_NAME
 
