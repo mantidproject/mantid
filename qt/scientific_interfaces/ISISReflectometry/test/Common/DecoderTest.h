@@ -42,10 +42,11 @@ const static QString BATCH_JSON_STRING{"{"
                                        "        \"floodWorkspaceWsSelector\": 0,"
                                        "        \"includePartialBinsCheckBox\": true,"
                                        "        \"perAngleDefaults\": {"
-                                       "            \"columnsNum\": 10,"
+                                       "            \"columnsNum\": 11,"
                                        "            \"rows\": ["
                                        "                ["
                                        "                    \"0.5\","
+                                       "                    \".*\","
                                        "                    \"13463\","
                                        "                    \"13464\","
                                        "                    \"4\","
@@ -363,9 +364,10 @@ const static QString EMPTY_EXPERIMENT_JSON_STRING{"    \"experimentView\": {"
                                                   "        \"floodWorkspaceWsSelector\": 0,"
                                                   "        \"includePartialBinsCheckBox\": false,"
                                                   "        \"perAngleDefaults\": {"
-                                                  "            \"columnsNum\": 10,"
+                                                  "            \"columnsNum\": 11,"
                                                   "            \"rows\": ["
                                                   "                ["
+                                                  "                    \"\","
                                                   "                    \"\","
                                                   "                    \"\","
                                                   "                    \"\","
@@ -446,7 +448,7 @@ const static QString EMPTY_BATCH_JSON_STRING{EMPTY_EVENT_JSON_STRING + EMPTY_EXP
                                              EMPTY_INSTRUMENT_JSON_STRING + EMPTY_RUNS_JSON_STRING +
                                              EMPTY_SAVE_JSON_STRING};
 
-// This batch file has an incorrect number of columns (9 instead of 10) for the
+// This batch file has an incorrect number of columns (9 instead) for the
 // experiment tab's table - this needs to be supported for backwards
 // compatibility
 const static QString EXPERIMENT_JSON_STRING_9_COLUMNS{"    \"experimentView\": {"
@@ -513,7 +515,6 @@ public:
     Decoder decoder;
     auto map = MantidQt::API::loadJSONFromString(MAINWINDOW_JSON_STRING);
     auto widget = decoder.decode(map, "");
-
     tester.testMainWindowView(dynamic_cast<QtMainWindowView *>(widget), map);
   }
 
@@ -566,7 +567,7 @@ public:
     // Decode from the old 9-column format
     auto oldMap = MantidQt::API::loadJSONFromString(BATCH_JSON_STRING_9_COLUMNS);
     decoder.decodeBatch(&mwv, 0, oldMap);
-    // Check that the result matches the new 10-column format
+    // Check that the result matches the new format
     auto newMap = MantidQt::API::loadJSONFromString(EMPTY_BATCH_JSON_STRING);
     tester.testBatch(gui, &mwv, newMap);
   }
