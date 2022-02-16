@@ -9,7 +9,6 @@
 #
 import __future__
 import ast
-import warnings
 
 try:
     import builtins
@@ -141,15 +140,7 @@ class PythonCodeExecution(QObject):
         flags = get_future_import_compiler_flags(code_str)
         with AddedToSysPath([os.path.dirname(filename)]):
             executor = CodeExecution(self._editor)
-            with warnings.catch_warnings() as warnings_list:
-                # Hide matplotlib warning about threading as we handle this manually on the backend, but this happens
-                # before our code is executed.
-                warnings.filterwarnings("ignore", message="Starting a Matplotlib GUI outside of the main thread will "
-                                                          "likely fail.")
-                executor.execute(code_str, filename, flags, self.globals_ns, line_offset)
-                if warnings_list is list:
-                    for warning in warnings_list:
-                        print(warning)
+            executor.execute(code_str, filename, flags, self.globals_ns, line_offset)
 
     def reset_context(self):
         # create new context for execution
