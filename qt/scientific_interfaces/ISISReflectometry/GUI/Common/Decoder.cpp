@@ -116,13 +116,28 @@ void Decoder::decodePerAngleDefaults(QTableWidget *tab, const QMap<QString, QVar
 void Decoder::decodePerAngleDefaultsRows(QTableWidget *tab, int rowsNum, int columnsNum, const QList<QVariant> &list) {
   for (auto rowIndex = 0; rowIndex < rowsNum; ++rowIndex) {
     tab->insertRow(rowIndex);
-    decodePerAngleDefaultsRow(tab, rowIndex, columnsNum, list[rowIndex].toList());
+    decodeLegacyPerAngleDefaultsRow(tab, rowIndex, columnsNum, list[rowIndex].toList());
   }
+}
+
+void Decoder::decodeLegacyPerAngleDefaultsRow(QTableWidget *tab, int rowIndex, int columnsNum, QList<QVariant> list) {
+  // WORKAROUND: This method can only handle 9/10 column legacy files. All future files (e.g. 11+ cols) should
+  // be versioned and should never hit the below path:
+  assert((columnsNum == 9 || columnsNum == 10));
+  // Column 2 was created to hold a title matcher
+  list.insert(1, QString(""));
+
+  if (columnsNum == 9) {
+    // Column 11 was created to hold the background ROI
+    list.append(QString(""));
+  }
+
+  // We've now fixed this up to an 11 column file, so hardcode this:
+  decodePerAngleDefaultsRow(tab, rowIndex, 11, list);
 }
 
 void Decoder::decodePerAngleDefaultsRow(QTableWidget *tab, int rowIndex, int columnsNum, const QList<QVariant> &list) {
   MantidQt::API::SignalBlocker blocker(tab);
-  // Loop all columns in the table
   for (auto columnIndex = 0; columnIndex < tab->columnCount(); ++columnIndex) {
     // Old files may not include all of the columns so add an empty cell if it
     // doesn't exist in the file

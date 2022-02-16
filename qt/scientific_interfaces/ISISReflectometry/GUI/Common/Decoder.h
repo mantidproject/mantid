@@ -55,6 +55,7 @@ private:
   BatchPresenter *findBatchPresenter(const QtBatchView *gui, const IMainWindowView *mww);
   void decodeExperiment(QtExperimentView *gui, const QMap<QString, QVariant> &map);
   void decodePerAngleDefaults(QTableWidget *tab, const QMap<QString, QVariant> &map);
+  void decodeLegacyPerAngleDefaultsRow(QTableWidget *tab, int rowIndex, int columnsNum, QList<QVariant> list);
   void decodePerAngleDefaultsRow(QTableWidget *tab, int rowIndex, int columnsNum, const QList<QVariant> &list);
   void decodePerAngleDefaultsRows(QTableWidget *tab, int rowsNum, int columnsNum, const QList<QVariant> &list);
   void decodeInstrument(const QtInstrumentView *gui, const QMap<QString, QVariant> &map);
@@ -76,6 +77,7 @@ private:
   void decodeEvent(const QtEventView *gui, const QMap<QString, QVariant> &map);
   void updateRunsTableViewFromModel(QtRunsTableView *view, const ReductionJobs *model,
                                     const boost::optional<int> &precision);
+
   bool m_projectSave = false;
   friend class CoderCommonTester;
 };
