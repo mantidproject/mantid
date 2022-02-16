@@ -73,14 +73,14 @@ private:
 
     PARALLEL_FOR_IF(Kernel::threadSafe(workspace))
     for (int64_t i = 0; i < size; ++i) {
-      PARALLEL_START_INTERUPT_REGION
+      PARALLEL_START_INTERRUPT_REGION
       // Note the small but for now negligible overhead from the IndexSet access
       // in the case where it is not used.
       operation(std::get<S>(getters)(workspace, indexSet[i])...);
       progress.report(name());
-      PARALLEL_END_INTERUPT_REGION
+      PARALLEL_END_INTERRUPT_REGION
     }
-    PARALLEL_CHECK_INTERUPT_REGION
+    PARALLEL_CHECK_INTERRUPT_REGION
 
     ifEventWorkspaceClearMRU(workspace);
   }

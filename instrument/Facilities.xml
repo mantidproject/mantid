@@ -757,6 +757,10 @@
     <technique>Single Crystal Diffraction</technique>
   </instrument>
 
+  <instrument name="SALSA">
+    <technique>Strain analyzer</technique>
+  </instrument>
+
 </facility>
 
 <facility name="SINQ" FileExtensions=".hdf">

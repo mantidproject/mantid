@@ -151,7 +151,7 @@ void LoadDNSEvent::populate_EventWorkspace(EventWorkspace_sptr &eventWS, EventAc
     auto chopperIt = finalEventAccumulator.triggerEvents.cbegin();
 
     auto &spectrum = eventWS->getSpectrum(wsIndex);
-    PARALLEL_START_INTERUPT_REGION
+    PARALLEL_START_INTERRUPT_REGION
 
     uint64_t numProcessed = 0;
     for (const auto &event : eventList) {
@@ -176,11 +176,11 @@ void LoadDNSEvent::populate_EventWorkspace(EventWorkspace_sptr &eventWS, EventAc
       spectrum.addEventQuickly(Types::Event::TofEvent(double(event.timestamp - chopperTimestamp) / 10.0));
     }
 
-    PARALLEL_END_INTERUPT_REGION
+    PARALLEL_END_INTERRUPT_REGION
     oversizedChanelIndexCounterA += oversizedChanelIndexCounter;
     oversizedPosCounterA += oversizedPosCounter;
   }
-  PARALLEL_CHECK_INTERUPT_REGION
+  PARALLEL_CHECK_INTERRUPT_REGION
 
   if (oversizedChanelIndexCounterA > 0) {
     g_log.warning() << "Bad chanel indices: " << oversizedChanelIndexCounterA << std::endl;

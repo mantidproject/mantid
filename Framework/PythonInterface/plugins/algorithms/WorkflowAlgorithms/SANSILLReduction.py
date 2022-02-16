@@ -294,8 +294,8 @@ class SANSILLReduction(PythonAlgorithm):
                 Divide(LHSWorkspace=ws, RHSWorkspace=mon, OutputWorkspace=ws)
                 DeleteWorkspace(mon)
         elif normalise_by == 'Timer':
-            if mtd[ws].getRun().hasProperty('timer'):
-                duration = mtd[ws].getRun().getLogData('timer').value
+            if mtd[ws].getRun().hasProperty('duration'):
+                duration = mtd[ws].getRun().getLogData('duration').value
                 if duration != 0.:
                     Scale(InputWorkspace=ws, Factor=1./duration, OutputWorkspace=ws)
                     self._apply_dead_time(ws)

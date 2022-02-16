@@ -29,12 +29,10 @@ namespace Mantid::DataObjects {
 //----------------------------------------------------------------------------------------------
 /** Default constructor */
 BasePeak::BasePeak()
-    : m_samplePos(V3D(0, 0, 0)), m_H(0), m_K(0), m_L(0), m_intensity(0), m_sigmaIntensity(0), m_binCount(0),
-      m_absorptionWeightedPathLength(0), m_GoniometerMatrix(3, 3, true), m_InverseGoniometerMatrix(3, 3, true),
-      m_runNumber(0), m_monitorCount(0), m_peakNumber(0), m_intHKL(V3D(0, 0, 0)), m_intMNP(V3D(0, 0, 0)),
-      m_peakShape(std::make_shared<NoShape>()) {
-  convention = Kernel::ConfigService::Instance().getString("Q.convention");
-}
+    : m_convention(Kernel::ConfigService::Instance().getString("Q.convention")), m_samplePos(V3D(0, 0, 0)), m_H(0),
+      m_K(0), m_L(0), m_intensity(0), m_sigmaIntensity(0), m_binCount(0), m_absorptionWeightedPathLength(0),
+      m_GoniometerMatrix(3, 3, true), m_InverseGoniometerMatrix(3, 3, true), m_runNumber(0), m_monitorCount(0),
+      m_peakNumber(0), m_intHKL(V3D(0, 0, 0)), m_intMNP(V3D(0, 0, 0)), m_peakShape(std::make_shared<NoShape>()) {}
 
 //----------------------------------------------------------------------------------------------
 /** Constructor including goniometer
@@ -42,17 +40,16 @@ BasePeak::BasePeak()
  * @param goniometer :: a 3x3 rotation matrix
  */
 BasePeak::BasePeak(const Mantid::Kernel::Matrix<double> &goniometer)
-    : m_H(0), m_K(0), m_L(0), m_intensity(0), m_sigmaIntensity(0), m_binCount(0), m_absorptionWeightedPathLength(0),
-      m_GoniometerMatrix(goniometer), m_InverseGoniometerMatrix(goniometer), m_runNumber(0), m_monitorCount(0),
-      m_peakNumber(0), m_intHKL(V3D(0, 0, 0)), m_intMNP(V3D(0, 0, 0)), m_peakShape(std::make_shared<NoShape>()) {
-  convention = Kernel::ConfigService::Instance().getString("Q.convention");
-
+    : m_convention(Kernel::ConfigService::Instance().getString("Q.convention")), m_H(0), m_K(0), m_L(0), m_intensity(0),
+      m_sigmaIntensity(0), m_binCount(0), m_absorptionWeightedPathLength(0), m_GoniometerMatrix(goniometer),
+      m_InverseGoniometerMatrix(goniometer), m_runNumber(0), m_monitorCount(0), m_peakNumber(0), m_intHKL(V3D(0, 0, 0)),
+      m_intMNP(V3D(0, 0, 0)), m_peakShape(std::make_shared<NoShape>()) {
   if (fabs(m_InverseGoniometerMatrix.Invert()) < 1e-8)
     throw std::invalid_argument("BasePeak::ctor(): Goniometer matrix must non-singular.");
 }
 
 BasePeak::BasePeak(const BasePeak &other)
-    : convention(other.convention), m_samplePos(other.m_samplePos), m_H(other.m_H), m_K(other.m_K), m_L(other.m_L),
+    : m_convention(other.m_convention), m_samplePos(other.m_samplePos), m_H(other.m_H), m_K(other.m_K), m_L(other.m_L),
       m_intensity(other.m_intensity), m_sigmaIntensity(other.m_sigmaIntensity), m_binCount(other.m_binCount),
       m_absorptionWeightedPathLength(other.m_absorptionWeightedPathLength),
       m_GoniometerMatrix(other.m_GoniometerMatrix), m_InverseGoniometerMatrix(other.m_InverseGoniometerMatrix),
@@ -65,14 +62,13 @@ BasePeak::BasePeak(const BasePeak &other)
  * @param ipeak :: const reference to an IPeak object
  */
 BasePeak::BasePeak(const Geometry::IPeak &ipeak)
-    : IPeak(ipeak), m_H(ipeak.getH()), m_K(ipeak.getK()), m_L(ipeak.getL()), m_intensity(ipeak.getIntensity()),
+    : IPeak(ipeak), m_convention(Kernel::ConfigService::Instance().getString("Q.convention")), m_H(ipeak.getH()),
+      m_K(ipeak.getK()), m_L(ipeak.getL()), m_intensity(ipeak.getIntensity()),
       m_sigmaIntensity(ipeak.getSigmaIntensity()), m_binCount(ipeak.getBinCount()),
       m_absorptionWeightedPathLength(ipeak.getAbsorptionWeightedPathLength()),
       m_GoniometerMatrix(ipeak.getGoniometerMatrix()), m_InverseGoniometerMatrix(ipeak.getGoniometerMatrix()),
       m_runNumber(ipeak.getRunNumber()), m_monitorCount(ipeak.getMonitorCount()), m_peakNumber(ipeak.getPeakNumber()),
       m_intHKL(ipeak.getIntHKL()), m_intMNP(ipeak.getIntMNP()), m_peakShape(std::make_shared<NoShape>()) {
-  convention = Kernel::ConfigService::Instance().getString("Q.convention");
-
   if (fabs(m_InverseGoniometerMatrix.Invert()) < 1e-8)
     throw std::invalid_argument("Peak::ctor(): Goniometer matrix must non-singular.");
 }
@@ -327,7 +323,7 @@ BasePeak &BasePeak::operator=(const BasePeak &other) {
     m_intMNP = other.m_intMNP;
     m_peakShape.reset(other.m_peakShape->clone());
     m_absorptionWeightedPathLength = other.m_absorptionWeightedPathLength;
-    convention = other.convention;
+    m_convention = other.m_convention;
   }
   return *this;
 }
@@ -363,7 +359,7 @@ double BasePeak::calculateWavelengthFromQLab(const V3D &qLab) {
     refBeamDir = refFrame->vecPointingAlongBeam();
 
   // Default for ki-kf has -q
-  const double qSign = (convention != "Crystallography") ? 1.0 : -1.0;
+  const double qSign = (m_convention != "Crystallography") ? 1.0 : -1.0;
   const double qBeam = qLab.scalar_prod(refBeamDir) * qSign;
 
   if (qBeam == 0.0)

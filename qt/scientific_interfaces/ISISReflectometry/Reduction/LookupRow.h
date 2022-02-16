@@ -11,6 +11,7 @@
 #include "TransmissionRunPair.h"
 #include <array>
 #include <boost/optional.hpp>
+#include <boost/regex.hpp>
 #include <string>
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -55,7 +56,8 @@ public:
                                                            "ProcessingInstructions",
                                                            "BackgroundProcessingInstructions"};
 
-  LookupRow(boost::optional<double> theta, TransmissionRunPair tranmissionRuns,
+  LookupRow(boost::optional<double> theta, boost::optional<boost::regex> titleMatcher,
+            TransmissionRunPair tranmissionRuns,
             boost::optional<ProcessingInstructions> transmissionProcessingInstructions, RangeInQ qRange,
             boost::optional<double> scaleFactor, boost::optional<ProcessingInstructions> processingInstructions,
             boost::optional<ProcessingInstructions> backgroundProcessingInstructions);
@@ -63,6 +65,7 @@ public:
   TransmissionRunPair const &transmissionWorkspaceNames() const;
   bool isWildcard() const;
   boost::optional<double> thetaOrWildcard() const;
+  boost::optional<boost::regex> titleMatcher() const;
   RangeInQ const &qRange() const;
   boost::optional<double> scaleFactor() const;
   boost::optional<ProcessingInstructions> transmissionProcessingInstructions() const;
@@ -71,6 +74,7 @@ public:
 
 private:
   boost::optional<double> m_theta;
+  boost::optional<boost::regex> m_titleMatcher;
   TransmissionRunPair m_transmissionRuns;
   RangeInQ m_qRange;
   boost::optional<double> m_scaleFactor;
@@ -82,8 +86,6 @@ private:
 MANTIDQT_ISISREFLECTOMETRY_DLL bool operator==(LookupRow const &lhs, LookupRow const &rhs);
 MANTIDQT_ISISREFLECTOMETRY_DLL bool operator!=(LookupRow const &lhs, LookupRow const &rhs);
 LookupRow::ValueArray lookupRowToArray(LookupRow const &lookupRow);
-
-using LookupTable = std::vector<LookupRow>;
 } // namespace ISISReflectometry
 } // namespace CustomInterfaces
 } // namespace MantidQt

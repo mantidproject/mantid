@@ -13,16 +13,17 @@
 
 #include "MockGLDisplay.h"
 #include "MockInstrumentDisplay.h"
+#include "MockInstrumentWidgetMaskTab.h"
 #include "MockMessageHandler.h"
 #include "MockProjectionSurface.h"
 #include "MockQtConnect.h"
 #include "MockQtDisplay.h"
 #include "MockQtMetaObject.h"
 
+#include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
-#include "MantidKernel/WarningSuppressions.h"
 
 #include <QObject>
 
@@ -279,8 +280,12 @@ public:
     // create a second workspace that doesn't have common bins
     auto ws_d = WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(2, 2);
     AnalysisDataService::Instance().addOrReplace("test_ws_d", ws_d);
-    FrameworkManager::Instance().exec("ConvertUnits", 6, "InputWorkspace", "test_ws_d", "OutputWorkspace", "test_ws_d",
-                                      "Target", "dSpacing");
+    auto alg = Mantid::API::AlgorithmManager::Instance().create("ConvertUnits");
+    alg->setRethrows(true);
+    alg->setProperty("InputWorkspace", "test_ws_d");
+    alg->setProperty("OutputWorkspace", "test_ws_d");
+    alg->setProperty("Target", "dSpacing");
+    alg->execute();
     draw_tab_save_actions("test_ws_d", 2);
   }
 
@@ -347,15 +352,6 @@ private:
     }
     return mock;
   }
-
-  class MockInstrumentWidgetMaskTab final : public InstrumentWidgetMaskTab {
-  public:
-    explicit MockInstrumentWidgetMaskTab(InstrumentWidget *instrWidget) : InstrumentWidgetMaskTab(instrWidget){};
-
-    GNU_DIAG_OFF_SUGGEST_OVERRIDE
-    MOCK_METHOD1(showMessageBox, void(const QString &));
-    GNU_DIAG_ON_SUGGEST_OVERRIDE
-  };
 
   InstrumentWidget construct(QString wsname, std::unique_ptr<DisplayMock> displayMock, QtMock *qtMock, GLMock *glMock,
                              const int getSurfaceCalls, const bool useLoadingThread) const {

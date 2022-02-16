@@ -14,6 +14,7 @@
 #include "GUI/Save/ISavePresenter.h"
 #include "IBatchView.h"
 #include "MantidQtWidgets/Common/HelpWindow.h"
+#include "MantidQtWidgets/Common/IMessageHandler.h"
 #include <memory>
 
 namespace MantidQt::CustomInterfaces::ISISReflectometry {
@@ -38,12 +39,13 @@ BatchPresenter::BatchPresenter(IBatchView *view, std::unique_ptr<Batch> model, I
                                std::unique_ptr<IExperimentPresenter> experimentPresenter,
                                std::unique_ptr<IInstrumentPresenter> instrumentPresenter,
                                std::unique_ptr<ISavePresenter> savePresenter,
-                               std::unique_ptr<IPreviewPresenter> previewPresenter)
+                               std::unique_ptr<IPreviewPresenter> previewPresenter,
+                               MantidQt::MantidWidgets::IMessageHandler *messageHandler)
     : m_view(view), m_model(std::move(model)), m_mainPresenter(), m_runsPresenter(std::move(runsPresenter)),
       m_eventPresenter(std::move(eventPresenter)), m_experimentPresenter(std::move(experimentPresenter)),
       m_instrumentPresenter(std::move(instrumentPresenter)), m_savePresenter(std::move(savePresenter)),
       m_previewPresenter(std::move(previewPresenter)), m_unsavedBatchFlag(false), m_jobRunner(jobRunner),
-      m_jobManager(new BatchJobManager(*m_model)) {
+      m_messageHandler(messageHandler), m_jobManager(new BatchJobManager(*m_model)) {
 
   m_jobRunner->subscribe(this);
 
@@ -160,6 +162,12 @@ bool BatchPresenter::startBatch(std::deque<IConfiguredAlgorithm_sptr> algorithms
 }
 
 void BatchPresenter::resumeReduction() {
+  if (!m_experimentPresenter->hasValidSettings()) {
+    m_messageHandler->giveUserCritical(
+        "One or more of the experiment settings is invalid. Please check the Experiment Settings tab.",
+        "Processing Error");
+    return;
+  }
   // Update the model
   m_jobManager->notifyReductionResumed();
   // Get the algorithms to process
@@ -202,6 +210,12 @@ void BatchPresenter::notifyReductionPaused() {
 }
 
 void BatchPresenter::resumeAutoreduction() {
+  if (!m_experimentPresenter->hasValidSettings()) {
+    m_messageHandler->giveUserCritical(
+        "One or more of the experiment settings is invalid. Please check the Experiment Settings tab.",
+        "Processing Error");
+    return;
+  }
   // Update the model first to ensure the autoprocessing flag is set
   m_jobManager->notifyAutoreductionResumed();
   // The runs presenter starts autoreduction. This sets off a search to find

@@ -1078,7 +1078,7 @@ void GenerateEventsFilter::makeMultipleFiltersByValuesParallel(const map<size_t,
 
     PRAGMA_OMP(parallel for schedule(dynamic, 1) )
     for (int i = 0; i < numThreads; ++i) {
-      PARALLEL_START_INTERUPT_REGION
+      PARALLEL_START_INTERRUPT_REGION
 
       int istart = vecStart[i];
       int iend = vecEnd[i];
@@ -1086,9 +1086,9 @@ void GenerateEventsFilter::makeMultipleFiltersByValuesParallel(const map<size_t,
       makeMultipleFiltersByValuesPartialLog(istart, iend, m_vecSplitterTimeSet[i], m_vecGroupIndexSet[i],
                                             indexwsindexmap, logvalueranges, tol, filterIncrease, filterDecrease,
                                             startTime, stopTime);
-      PARALLEL_END_INTERUPT_REGION
+      PARALLEL_END_INTERRUPT_REGION
     }
-    PARALLEL_CHECK_INTERUPT_REGION
+    PARALLEL_CHECK_INTERRUPT_REGION
 
     // Concatenate splitters on different threads together
     for (int i = 1; i < numThreads; ++i) {

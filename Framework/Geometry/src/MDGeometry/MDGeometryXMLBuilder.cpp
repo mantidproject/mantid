@@ -56,15 +56,10 @@ void MDGeometryBuilderXML<CheckDimensionPolicy>::addManyOrdinaryDimensions(const
 
 template <typename CheckDimensionPolicy>
 MDGeometryBuilderXML<CheckDimensionPolicy>::MDGeometryBuilderXML(
-    const MDGeometryBuilderXML<CheckDimensionPolicy> &other) {
-  m_vecDimensions = other.m_vecDimensions;
-  m_spXDimension = other.m_spXDimension;
-  m_spYDimension = other.m_spYDimension;
-  m_spZDimension = other.m_spZDimension;
-  m_spTDimension = other.m_spTDimension;
-  m_changed = other.m_changed;
-  m_lastResult = other.m_lastResult;
-}
+    const MDGeometryBuilderXML<CheckDimensionPolicy> &other)
+    : m_vecDimensions(other.m_vecDimensions), m_spXDimension(other.m_spXDimension),
+      m_spYDimension(other.m_spYDimension), m_spZDimension(other.m_spZDimension), m_spTDimension(other.m_spTDimension),
+      m_changed(other.m_changed), m_lastResult(other.m_lastResult) {}
 
 template <typename CheckDimensionPolicy>
 MDGeometryBuilderXML<CheckDimensionPolicy> &

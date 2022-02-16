@@ -233,7 +233,7 @@ public:
     EXPECT_CALL(*m_jobAlgorithm, updateItem()).Times(1);
 
     jobManager.algorithmComplete(m_jobAlgorithm);
-    TS_ASSERT_EQUALS(row.state(), State::ITEM_COMPLETE);
+    TS_ASSERT_EQUALS(row.state(), State::ITEM_SUCCESS);
     verifyAndClear();
   }
 
@@ -250,6 +250,70 @@ public:
     TS_ASSERT_EQUALS(row.reducedWorkspaceNames().iVsLambda(), "");
     TS_ASSERT_EQUALS(row.reducedWorkspaceNames().iVsQ(), "");
     TS_ASSERT_EQUALS(row.reducedWorkspaceNames().iVsQBinned(), "");
+    verifyAndClear();
+  }
+
+  void testAlgorithmCompleteSetsParentsSingleRow() {
+    auto group = makeGroupWithOneRow();
+    Row *row = &group.mutableRows()[0].get();
+    auto jobManager = makeJobManager();
+
+    EXPECT_CALL(*m_jobAlgorithm, item()).Times(AtLeast(1)).WillRepeatedly(Return(row));
+    EXPECT_CALL(*m_jobAlgorithm, updateItem()).Times(1);
+
+    jobManager.algorithmComplete(m_jobAlgorithm);
+
+    TS_ASSERT_EQUALS(row->state(), State::ITEM_SUCCESS);
+    TS_ASSERT_EQUALS(group.state(), State::ITEM_CHILDREN_SUCCESS);
+
+    verifyAndClear();
+  }
+
+  void testAlgorithmCompleteSetsParentsMultipleRows() {
+    auto group = makeGroupWithTwoRows();
+    Row *row1 = &group.mutableRows()[0].get();
+    Row *row2 = &group.mutableRows()[1].get();
+    auto jobManager = makeJobManager();
+
+    EXPECT_CALL(*m_jobAlgorithm, item()).Times(2).WillOnce(Return(row1)).WillOnce(Return(row2));
+    EXPECT_CALL(*m_jobAlgorithm, updateItem()).Times(2);
+
+    jobManager.algorithmComplete(m_jobAlgorithm);
+
+    TS_ASSERT_EQUALS(row1->state(), State::ITEM_SUCCESS);
+    TS_ASSERT_EQUALS(row2->state(), State::ITEM_NOT_STARTED);
+    TS_ASSERT_EQUALS(group.state(), State::ITEM_NOT_STARTED);
+
+    jobManager.algorithmComplete(m_jobAlgorithm);
+
+    TS_ASSERT_EQUALS(row1->state(), State::ITEM_SUCCESS);
+    TS_ASSERT_EQUALS(row2->state(), State::ITEM_SUCCESS);
+    TS_ASSERT_EQUALS(group.state(), State::ITEM_CHILDREN_SUCCESS);
+
+    verifyAndClear();
+  }
+
+  void testAlgorithmErrorSetsParentIncomplete() {
+    auto group = makeGroupWithTwoRows();
+    Row *row1 = &group.mutableRows()[0].get();
+    Row *row2 = &group.mutableRows()[1].get();
+    auto jobManager = makeJobManager();
+
+    EXPECT_CALL(*m_jobAlgorithm, item()).Times(2).WillOnce(Return(row1)).WillOnce(Return(row2));
+    EXPECT_CALL(*m_jobAlgorithm, updateItem()).Times(1);
+
+    jobManager.algorithmError(m_jobAlgorithm, "row1 invalid");
+
+    TS_ASSERT_EQUALS(row1->state(), State::ITEM_ERROR);
+    TS_ASSERT_EQUALS(row2->state(), State::ITEM_NOT_STARTED);
+    TS_ASSERT_EQUALS(group.state(), State::ITEM_NOT_STARTED);
+
+    jobManager.algorithmComplete(m_jobAlgorithm);
+
+    TS_ASSERT_EQUALS(row1->state(), State::ITEM_ERROR);
+    TS_ASSERT_EQUALS(row2->state(), State::ITEM_SUCCESS);
+    TS_ASSERT_EQUALS(group.state(), State::ITEM_NOT_STARTED);
+
     verifyAndClear();
   }
 };

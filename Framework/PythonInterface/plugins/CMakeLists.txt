@@ -293,9 +293,12 @@ set(PYTHON_PLUGINS
     algorithms/WorkflowAlgorithms/SANSDirectBeamTransmission.py
     algorithms/WorkflowAlgorithms/SANSFitShiftScale.py
     algorithms/WorkflowAlgorithms/SANSILLAutoProcess.py
+    algorithms/WorkflowAlgorithms/SANSILLCommon.py
     algorithms/WorkflowAlgorithms/SANSILLIntegration.py
+    algorithms/WorkflowAlgorithms/SANSILLMultiProcess.py
     algorithms/WorkflowAlgorithms/SANSILLParameterScan.py
     algorithms/WorkflowAlgorithms/SANSILLReduction.py
+    algorithms/WorkflowAlgorithms/SANSILLReduction2.py
     algorithms/WorkflowAlgorithms/SANSMask.py
     algorithms/WorkflowAlgorithms/SANSPatchSensitivity.py
     algorithms/WorkflowAlgorithms/SANSReduction.py

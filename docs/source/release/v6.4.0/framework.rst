@@ -15,6 +15,10 @@ Concepts
 Algorithms
 ----------
 
+- :ref:`LoadAndMerge <algm-LoadAndMerge>` will now offer a possibility to have a joined workspace as output instead of a workspace group.
+- :ref:`ConjoinXRuns <algm-ConjoinXRuns>` will now have a possibility to set a linear integer range as the axis of the output joined workspace.
+- :ref:`CalculateFlux <algm-CalculateFlux>` will now work also on workspaces with dimensionless x-axis.
+
 Data Objects
 ------------
 

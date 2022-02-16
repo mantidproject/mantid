@@ -591,7 +591,7 @@ void NormaliseToMonitor::performHistogramDivision(const MatrixWorkspace_sptr &in
 
     PARALLEL_FOR_IF(Kernel::threadSafe(*outputWorkspace))
     for (int64_t i = 0; i < int64_t(outputWorkspace->getNumberHistograms()); ++i) {
-      PARALLEL_START_INTERUPT_REGION
+      PARALLEL_START_INTERRUPT_REGION
       const auto &specDef = specInfo.spectrumDefinition(i);
 
       if (!spectrumDefinitionsMatchTimeIndex(specDef, timeIndex))
@@ -607,9 +607,9 @@ void NormaliseToMonitor::performHistogramDivision(const MatrixWorkspace_sptr &in
       }
 
       outputWorkspace->setHistogram(i, hist);
-      PARALLEL_END_INTERUPT_REGION
+      PARALLEL_END_INTERRUPT_REGION
     }
-    PARALLEL_CHECK_INTERUPT_REGION
+    PARALLEL_CHECK_INTERRUPT_REGION
   }
 }
 
@@ -654,7 +654,7 @@ void NormaliseToMonitor::normaliseBinByBin(const MatrixWorkspace_sptr &inputWork
     // Loop over spectra
     PARALLEL_FOR_IF(Kernel::threadSafe(*inputWorkspace, *outputWorkspace, *m_monitor))
     for (int64_t i = 0; i < int64_t(numHists); ++i) {
-      PARALLEL_START_INTERUPT_REGION
+      PARALLEL_START_INTERRUPT_REGION
       prog.report();
 
       const auto &specDef = inputSpecInfo.spectrumDefinition(i);
@@ -720,9 +720,9 @@ void NormaliseToMonitor::normaliseBinByBin(const MatrixWorkspace_sptr &inputWork
         } // end Workspace2D case
       }   // end loop over current spectrum
 
-      PARALLEL_END_INTERUPT_REGION
+      PARALLEL_END_INTERRUPT_REGION
     } // end loop over spectra
-    PARALLEL_CHECK_INTERUPT_REGION
+    PARALLEL_CHECK_INTERRUPT_REGION
 
     if (hasZeroDivision) {
       g_log.warning() << "Division by zero in some of the bins.\n";

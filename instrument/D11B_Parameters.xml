@@ -12,8 +12,12 @@
       </parameter>
       <!-- Logs to sum when merging the runs -->
       <parameter name="sample_logs_sum" type="string" visible="false">
-        <value val="time, timer, duration" />
+        <value val="duration" />
       </parameter>
+      <!-- Logs to list when conjoining the runs -->
+      <parameter name="conjoin_sample_logs_list" type="string" visible="false">
+  			<value val="sample.thickness, sample_description, run_number" />
+  		</parameter>
       <!-- The pixel sizes [mm] used by SolidAngle, resolution and default Q binning calculations.
       Note that for the panels, often pixels have transposed shape, but the surface is the same.
       Q binning is based on the maximum of the 2 dimensions, so it is also invariant. -->
@@ -25,87 +29,87 @@
       </parameter>
       <!-- These parameters are used to define headers and entries for GenerateLogbook algorithm -->
       <parameter name="logbook_default_parameters" type="string" visible="false">
-	<value val="SampleDescription:/entry0/sample_description:s,
-		    TotalTime:/entry0/duration:d,
-		    RateMonitor1:/entry0/monitor1/monrate:f,
-		    TotalCountsDetMain:/entry0/D11/Detector 1/detsum:d,
-		    RateCountsDetMain:/entry0/D11/Detector 1/detrate:d,
-		    StartTime:/entry0/start_time:s,
-		    Wavelength:/entry0/D11/selector/wavelength:f,
-		    Attenuator:/entry0/D11/attenuator/attenuation_value:f,
-		    Collimation:/entry0/D11/collimation/actual_position:f,
-		    SD:/entry0/D11/Detector 1/det_actual:f,
-		    BeamStopY:/entry0/D11/beamstop/by_actual:f" />
+      	<value val="SampleDescription:/entry0/sample_description:s,
+      		    TotalTime:/entry0/duration:d,
+      		    RateMonitor1:/entry0/monitor1/monrate:f,
+      		    TotalCountsDetMain:/entry0/D11/Detector 1/detsum:d,
+      		    RateCountsDetMain:/entry0/D11/Detector 1/detrate:d,
+      		    StartTime:/entry0/start_time:s,
+      		    Wavelength:/entry0/D11/selector/wavelength:f,
+      		    Attenuator:/entry0/D11/attenuator/attenuation_value:f,
+      		    Collimation:/entry0/D11/collimation/actual_position:f,
+      		    SD:/entry0/D11/Detector 1/det_actual:f,
+      		    BeamStopY:/entry0/D11/beamstop/by_actual:f" />
       </parameter>
       <parameter name="logbook_optional_parameters" type="string" visible="false">
-	<value val="AcquisitionMode:/entry0/acquisition_mode:d,
-		    TotalCountsDetAll:/entry0/D11/Detector 1/detsum+/entry0/D11/Detector 2/detsum+/entry0/D11/Detector 3/detsum:d,
-		    Beamstop:/entry0/D11/beamstop/actual_beamstop_number:f,
-		    VelocitySelectorSpeed:/entry0/D11/selector/rotation_speed:f,
-		    VelocitySelectorTilt:/entry0/D11/selector/selrot_actual:f,
-		    AttenuationFactor:/entry0/D11/attenuator/attenuation_coefficient:f,
-		    Diaphragm1:/entry0/D11/collimation/diaphragm1_position:f,
-		    Diaphragm2:/entry0/D11/collimation/diaphragm2_position:f,
-		    Diaphragm3:/entry0/D11/collimation/diaphragm3_position:f,
-		    Diaphragm4:/entry0/D11/collimation/diaphragm4_position:f,
-		    Diaphragm5:/entry0/D11/collimation/diaphragm5_position:f,
-		    Diaphragm6:/entry0/D11/collimation/diaphragm6_position:f,
-		    Guide1:/entry0/D11/collimation/col1_actual_state:f,
-		    Guide2:/entry0/D11/collimation/col2_actual_state:f,
-		    Guide3:/entry0/D11/collimation/col3_actual_state:f,
-		    Guide4:/entry0/D11/collimation/col4_actual_state:f,
-		    Guide5:/entry0/D11/collimation/col5_actual_state:f,
-		    Guide6:/entry0/D11/collimation/col6_actual_state:f,
-		    Guide7:/entry0/D11/collimation/col7_actual_state:f,
-		    Guide8:/entry0/D11/collimation/col8_actual_state:f,
-		    Guide9:/entry0/D11/collimation/col9_actual_state:f,
-		    Guide10:/entry0/D11/collimation/col10_actual_state:f,
-		    Guide11:/entry0/D11/collimation/col11_actual_state:f,
-		    Guide12:/entry0/D11/collimation/col12_actual_state:f,
-		    Guide13:/entry0/D11/collimation/col13_actual_state:f,
-		    TotalCountsMonitor1:/entry0/monitor1/monsum:d,
-		    ReactorPower:/entry0/reactor_power:f,
-		    BeamstopX:/entry0/D11/beamstop/bx_actual:f,
-		    BeamstopX2:/entry0/D11/beamstop/bx2_actual:f,
-		    TotalCountsDetLeft:/entry0/D11/Detector 2/detsum:d,
-		    TotalCountsDetRight:/entry0/D11/Detector 3/detsum:d,
-		    RateCountsDetLeft:/entry0/D11/Detector 2/detrate:f,
-		    RateCountsDetRight:/entry0/D11/Detector 3/detrate:f,
-		    san:/entry0/sample/san_actual:f,
-		    omega:/entry0/sample/omega_actual:f,
-		    phi:/entry0/sample/phi_actual:f,
-		    sdi:/entry0/sample/sdi_actual:f,
-		    sht:/entry0/sample/sht_actual:f,
-		    str:/entry0/sample/str_actual:f,
-		    trs:/entry0/sample/trs_actual:f,
-		    SampleTemperature:/entry0/sample/temperature:f,
-		    AirTemperature:/entry0/sample/air_temperature:f,
-		    RackTemperature:/entry0/sample/rack_temperature:f,
-		    Bath1Temperature:/entry0/sample/bath1_regulation_temperature:f,
-		    Bath2Temperature:/entry0/sample/bath2_regulation_temperature:f,
-		    BathSelector:/entry0/sample/Actual bath:s,
-		    Thermocouple1:/entry0/sample/thermo_temperature1:f,
-		    Thermocouple2:/entry0/sample/thermo_temperature2:f,
-		    SampleChanger:/entry0/sample/sample_changer_nickname:s,
-		    Position:/entry0/sample/sample_changer_slot_value:s,
-		    SampleThickness:/entry0/sample/thickness:f,
-		    MeasurementType:/entry0/D11/MeasurementType/typeOfMeasure:s,
-		    SampleType:/entry0/D11/MeasurementType/typeOfSample:s,
-		    SampleSubType:/entry0/D11/MeasurementType/subType:s,
-		    SampleApertureWidth:/entry0/D11/Beam/sample_ap_x_or_diam:f,
-		    SampleApertureHeight:/entry0/D11/Beam/sample_ap_y:f" />
+      	<value val="AcquisitionMode:/entry0/acquisition_mode:d,
+      		    TotalCountsDetAll:/entry0/D11/Detector 1/detsum+/entry0/D11/Detector 2/detsum+/entry0/D11/Detector 3/detsum:d,
+      		    Beamstop:/entry0/D11/beamstop/actual_beamstop_number:f,
+      		    VelocitySelectorSpeed:/entry0/D11/selector/rotation_speed:f,
+      		    VelocitySelectorTilt:/entry0/D11/selector/selrot_actual:f,
+      		    AttenuationFactor:/entry0/D11/attenuator/attenuation_coefficient:f,
+      		    Diaphragm1:/entry0/D11/collimation/diaphragm1_position:f,
+      		    Diaphragm2:/entry0/D11/collimation/diaphragm2_position:f,
+      		    Diaphragm3:/entry0/D11/collimation/diaphragm3_position:f,
+      		    Diaphragm4:/entry0/D11/collimation/diaphragm4_position:f,
+      		    Diaphragm5:/entry0/D11/collimation/diaphragm5_position:f,
+      		    Diaphragm6:/entry0/D11/collimation/diaphragm6_position:f,
+      		    Guide1:/entry0/D11/collimation/col1_actual_state:f,
+      		    Guide2:/entry0/D11/collimation/col2_actual_state:f,
+      		    Guide3:/entry0/D11/collimation/col3_actual_state:f,
+      		    Guide4:/entry0/D11/collimation/col4_actual_state:f,
+      		    Guide5:/entry0/D11/collimation/col5_actual_state:f,
+      		    Guide6:/entry0/D11/collimation/col6_actual_state:f,
+      		    Guide7:/entry0/D11/collimation/col7_actual_state:f,
+      		    Guide8:/entry0/D11/collimation/col8_actual_state:f,
+      		    Guide9:/entry0/D11/collimation/col9_actual_state:f,
+      		    Guide10:/entry0/D11/collimation/col10_actual_state:f,
+      		    Guide11:/entry0/D11/collimation/col11_actual_state:f,
+      		    Guide12:/entry0/D11/collimation/col12_actual_state:f,
+      		    Guide13:/entry0/D11/collimation/col13_actual_state:f,
+      		    TotalCountsMonitor1:/entry0/monitor1/monsum:d,
+      		    ReactorPower:/entry0/reactor_power:f,
+      		    BeamstopX:/entry0/D11/beamstop/bx_actual:f,
+      		    BeamstopX2:/entry0/D11/beamstop/bx2_actual:f,
+      		    TotalCountsDetLeft:/entry0/D11/Detector 2/detsum:d,
+      		    TotalCountsDetRight:/entry0/D11/Detector 3/detsum:d,
+      		    RateCountsDetLeft:/entry0/D11/Detector 2/detrate:f,
+      		    RateCountsDetRight:/entry0/D11/Detector 3/detrate:f,
+      		    san:/entry0/sample/san_actual:f,
+      		    omega:/entry0/sample/omega_actual:f,
+      		    phi:/entry0/sample/phi_actual:f,
+      		    sdi:/entry0/sample/sdi_actual:f,
+      		    sht:/entry0/sample/sht_actual:f,
+      		    str:/entry0/sample/str_actual:f,
+      		    trs:/entry0/sample/trs_actual:f,
+      		    SampleTemperature:/entry0/sample/temperature:f,
+      		    AirTemperature:/entry0/sample/air_temperature:f,
+      		    RackTemperature:/entry0/sample/rack_temperature:f,
+      		    Bath1Temperature:/entry0/sample/bath1_regulation_temperature:f,
+      		    Bath2Temperature:/entry0/sample/bath2_regulation_temperature:f,
+      		    BathSelector:/entry0/sample/Actual bath:s,
+      		    Thermocouple1:/entry0/sample/thermo_temperature1:f,
+      		    Thermocouple2:/entry0/sample/thermo_temperature2:f,
+      		    SampleChanger:/entry0/sample/sample_changer_nickname:s,
+      		    Position:/entry0/sample/sample_changer_slot_value:s,
+      		    SampleThickness:/entry0/sample/thickness:f,
+      		    MeasurementType:/entry0/D11/MeasurementType/typeOfMeasure:s,
+      		    SampleType:/entry0/D11/MeasurementType/typeOfSample:s,
+      		    SampleSubType:/entry0/D11/MeasurementType/subType:s,
+      		    SampleApertureWidth:/entry0/D11/Beam/sample_ap_x_or_diam:f,
+      		    SampleApertureHeight:/entry0/D11/Beam/sample_ap_y:f" />
       </parameter>
       <parameter name="log_list_to_save" type="string" visible="false">
-	<value val="facility,instrument_name,experiment_identifier,
-		    experiment_title,start_time,end_time,numor_list,
-		    processedAs,wavelength,sample_transmission_numors,
-                    collimation.actual_position,L2"/>
+      	<value val="facility,instrument_name,experiment_identifier,
+      		    experiment_title,start_time,end_time,numor_list,
+      		    processedAs,wavelength,sample_transmission_numors,
+                          collimation.actual_position,L2"/>
       </parameter>
     </component-link>
     <!-- These parameters are used in ParallaxCorrection algorithm -->
     <component-link name="detector_center">
         <parameter name="parallax" type="string">
-            <value val="1+0.14*exp(-4*ln(2.)*((t-0.588)/0.414)^2)"/>
+            <value val="(t &lt; 26*3.14/180) ? 1/cos(t) : 1.113+0.007726 * (t-26*3.14/180)"/>
         </parameter>
         <parameter name="direction" type="string">
             <value val="x"/>
@@ -113,7 +117,7 @@
     </component-link>
     <component-link name="detector_left">
         <parameter name="parallax" type="string">
-            <value val="1+0.14*exp(-4*ln(2.)*((t-0.588)/0.414)^2)"/>
+            <value val="(t &lt; 26*3.14/180) ? 1/cos(t) : 1.113+0.007726 * (t-26*3.14/180)"/>
         </parameter>
         <parameter name="direction" type="string">
             <value val="y"/>
@@ -121,7 +125,7 @@
     </component-link>
     <component-link name="detector_right">
         <parameter name="parallax" type="string">
-            <value val="1+0.14*exp(-4*ln(2.)*((t-0.588)/0.414)^2)"/>
+            <value val="(t &lt; 26*3.14/180) ? 1/cos(t) : 1.113+0.007726 * (t-26*3.14/180)"/>
         </parameter>
         <parameter name="direction" type="string">
             <value val="y"/>

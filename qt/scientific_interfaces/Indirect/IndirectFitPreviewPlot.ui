@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>445</width>
+    <width>550</width>
     <height>663</height>
    </rect>
   </property>
@@ -85,12 +85,12 @@
       <widget class="QPushButton" name="pbFitSingle">
        <property name="minimumSize">
         <size>
-         <width>99</width>
+         <width>0</width>
          <height>0</height>
         </size>
        </property>
        <property name="text">
-        <string>Fit Single Spectrum</string>
+        <string>Fit Current Preview</string>
        </property>
       </widget>
      </item>

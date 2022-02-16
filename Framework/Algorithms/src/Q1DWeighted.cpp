@@ -368,7 +368,7 @@ void Q1DWeighted::calculate(const MatrixWorkspace_const_sptr &inputWS) {
   PARALLEL_FOR_IF(Kernel::threadSafe(*inputWS))
   // first we loop over spectra
   for (int index = 0; index < static_cast<int>(m_nSpec); ++index) {
-    PARALLEL_START_INTERUPT_REGION
+    PARALLEL_START_INTERRUPT_REGION
     const auto i = static_cast<size_t>(index);
     // skip spectra with no detectors, monitors or masked spectra
     if (!spectrumInfo.hasDetectors(i) || spectrumInfo.isMonitor(i) || spectrumInfo.isMasked(i)) {
@@ -483,9 +483,9 @@ void Q1DWeighted::calculate(const MatrixWorkspace_const_sptr &inputWS) {
       }
       progress.report("Computing I(Q)");
     }
-    PARALLEL_END_INTERUPT_REGION
+    PARALLEL_END_INTERRUPT_REGION
   }
-  PARALLEL_CHECK_INTERUPT_REGION
+  PARALLEL_CHECK_INTERRUPT_REGION
 }
 
 /**
@@ -544,15 +544,15 @@ void Q1DWeighted::fillMonochromaticOutput(MatrixWorkspace_sptr &outputWS, const 
 
     PARALLEL_FOR_IF(Kernel::threadSafe(*outputWS))
     for (int iq = 0; iq < static_cast<int>(m_nQ); ++iq) {
-      PARALLEL_START_INTERUPT_REGION
+      PARALLEL_START_INTERRUPT_REGION
       const double norm = m_normalisation[iout][iSample][iq];
       if (norm != 0.) {
         YOut[iq] = m_intensities[iout][iSample][iq] / norm;
         EOut[iq] = m_errors[iout][iSample][iq] / (norm * norm);
       }
-      PARALLEL_END_INTERUPT_REGION
+      PARALLEL_END_INTERRUPT_REGION
     }
-    PARALLEL_CHECK_INTERUPT_REGION
+    PARALLEL_CHECK_INTERRUPT_REGION
   }
 }
 
@@ -571,16 +571,16 @@ void Q1DWeighted::fillTOFOutput(MatrixWorkspace_sptr &outputWS, const size_t iou
   for (size_t il = 0; il < m_nBins; ++il) {
     PARALLEL_FOR_IF(Kernel::threadSafe(*outputWS))
     for (int iq = 0; iq < static_cast<int>(m_nQ); ++iq) {
-      PARALLEL_START_INTERUPT_REGION
+      PARALLEL_START_INTERRUPT_REGION
       const double norm = m_normalisation[iout][il][iq];
       if (norm != 0.) {
         YOut[iq] += m_intensities[iout][il][iq] / norm;
         EOut[iq] += m_errors[iout][il][iq] / (norm * norm);
         normLambda[iq] += 1.;
       }
-      PARALLEL_END_INTERUPT_REGION
+      PARALLEL_END_INTERRUPT_REGION
     }
-    PARALLEL_CHECK_INTERUPT_REGION
+    PARALLEL_CHECK_INTERRUPT_REGION
   }
 
   for (size_t i = 0; i < m_nQ; ++i) {

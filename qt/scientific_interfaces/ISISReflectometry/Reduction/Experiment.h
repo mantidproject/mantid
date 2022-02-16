@@ -11,10 +11,12 @@
 #include "Common/DllConfig.h"
 #include "FloodCorrections.h"
 #include "LookupRow.h"
+#include "LookupTable.h"
 #include "PolarizationCorrections.h"
 #include "ReductionType.h"
 #include "SummationType.h"
 #include "TransmissionStitchOptions.h"
+#include <boost/optional.hpp>
 #include <map>
 #include <string>
 #include <vector>
@@ -22,6 +24,8 @@
 namespace MantidQt {
 namespace CustomInterfaces {
 namespace ISISReflectometry {
+
+class Row;
 
 /** @class Experiment
 
@@ -48,10 +52,11 @@ public:
   TransmissionStitchOptions transmissionStitchOptions() const;
   std::map<std::string, std::string> stitchParameters() const;
   std::string stitchParametersString() const;
-  LookupTable const &lookupTable() const;
+  std::vector<LookupRow> const &lookupTableRows() const;
   std::vector<LookupRow::ValueArray> lookupTableToArray() const;
 
-  LookupRow const *findLookupRow(const boost::optional<double> &thetaAngle, double tolerance) const;
+  boost::optional<LookupRow> findLookupRow(Row const &row, double tolerance) const;
+  boost::optional<LookupRow> findWildcardLookupRow() const;
 
 private:
   AnalysisMode m_analysisMode;
@@ -67,10 +72,10 @@ private:
 
   std::map<std::string, std::string> m_stitchParameters;
   LookupTable m_lookupTable;
-};
 
-MANTIDQT_ISISREFLECTOMETRY_DLL bool operator==(Experiment const &lhs, Experiment const &rhs);
-MANTIDQT_ISISREFLECTOMETRY_DLL bool operator!=(Experiment const &lhs, Experiment const &rhs);
+  friend bool operator==(Experiment const &lhs, Experiment const &rhs);
+  friend bool operator!=(Experiment const &lhs, Experiment const &rhs);
+};
 } // namespace ISISReflectometry
 } // namespace CustomInterfaces
 } // namespace MantidQt

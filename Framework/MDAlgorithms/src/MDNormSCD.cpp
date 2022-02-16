@@ -414,7 +414,7 @@ void MDNormSCD::calculateNormalization(const std::vector<coord_t> &otherValues,
 
 PRAGMA_OMP(parallel for private(intersections, xValues, yValues, pos, posNew) if (Kernel::threadSafe(*integrFlux)))
 for (int64_t i = 0; i < ndets; i++) {
-  PARALLEL_START_INTERUPT_REGION
+  PARALLEL_START_INTERRUPT_REGION
 
   if (!spectrumInfo.hasDetectors(i) || spectrumInfo.isMonitor(i) || spectrumInfo.isMasked(i)) {
     continue;
@@ -480,9 +480,9 @@ for (int64_t i = 0; i < ndets; i++) {
   }
   prog->report();
 
-  PARALLEL_END_INTERUPT_REGION
+  PARALLEL_END_INTERRUPT_REGION
 }
-PARALLEL_CHECK_INTERUPT_REGION
+PARALLEL_CHECK_INTERRUPT_REGION
 if (m_accumulate) {
   std::transform(signalArray.cbegin(), signalArray.cend(), m_normWS->getSignalArray(), m_normWS->mutableSignalArray(),
                  [](const std::atomic<signal_t> &a, const signal_t &b) { return a + b; });

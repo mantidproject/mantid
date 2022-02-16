@@ -36,10 +36,10 @@ public:
   Slicing const &slicing() const;
 
   std::vector<MantidWidgets::Batch::RowLocation> selectedRowLocations() const;
-  std::vector<Group> selectedGroups() const;
   template <typename T>
   bool isInSelection(T const &item, std::vector<MantidWidgets::Batch::RowLocation> const &selectedRowLocations) const;
-  LookupRow const *findLookupRow(boost::optional<double> thetaAngle = boost::none) const;
+  boost::optional<LookupRow> findLookupRow(Row const &row) const;
+  boost::optional<LookupRow> findWildcardLookupRow() const;
   void resetState();
   void resetSkippedItems();
   boost::optional<Item &> getItemWithOutputWorkspaceOrNone(std::string const &wsName);

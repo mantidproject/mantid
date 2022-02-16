@@ -38,11 +38,7 @@ Kernel::Logger g_log("PeakHKLErrors");
 
 DECLARE_FUNCTION(PeakHKLErrors)
 
-PeakHKLErrors::PeakHKLErrors() : ParamFunction(), IFunction1D() {
-  OptRuns = "";
-  PeakWorkspaceName = "";
-  initMode = 0;
-}
+PeakHKLErrors::PeakHKLErrors() : ParamFunction(), IFunction1D(), OptRuns(""), PeakWorkspaceName("") { initMode = 0; }
 
 void PeakHKLErrors::init() {
   declareParameter("SampleXOffset", 0.0, "Sample x offset");
