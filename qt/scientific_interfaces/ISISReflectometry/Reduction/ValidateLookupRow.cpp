@@ -15,19 +15,19 @@ using namespace MantidQt::CustomInterfaces::ISISReflectometry;
 
 namespace MantidQt::CustomInterfaces::ISISReflectometry {
 
-template <typename T> class AppendErrorIfNotType : public boost::static_visitor<boost::optional<T>> {
+template <typename T> class AppendErrorIfNotType : public boost::static_visitor<ValidatorT<T>> {
 public:
   AppendErrorIfNotType(std::vector<int> &invalidParams, int baseColumn)
       : m_invalidParams(invalidParams), m_baseColumn(baseColumn) {}
 
-  boost::optional<T> operator()(T const &result) const { return result; }
+  ValidatorT<T> operator()(T const &result) const { return result; }
 
-  boost::optional<T> operator()(int errorColumn) const {
+  ValidatorT<T> operator()(int errorColumn) const {
     m_invalidParams.emplace_back(m_baseColumn + errorColumn);
     return boost::none;
   }
 
-  boost::optional<T> operator()(const std::vector<int> &errorColumns) const {
+  ValidatorT<T> operator()(const std::vector<int> &errorColumns) const {
     std::transform(errorColumns.cbegin(), errorColumns.cend(), std::back_inserter(m_invalidParams),
                    [this](int column) -> int { return m_baseColumn + column; });
     return boost::none;
@@ -40,7 +40,7 @@ private:
 
 using CellText = LookupRow::ValueArray;
 
-boost::optional<boost::optional<double>> LookupRowValidator::parseThetaOrWhitespace(CellText const &cellText) {
+ValidatorT<boost::optional<double>> LookupRowValidator::parseThetaOrWhitespace(CellText const &cellText) {
   if (isEntirelyWhitespace(cellText[LookupRow::Column::THETA])) {
     return boost::optional<double>();
   } else {
@@ -53,8 +53,7 @@ boost::optional<boost::optional<double>> LookupRowValidator::parseThetaOrWhitesp
   return boost::none;
 }
 
-boost::optional<boost::optional<boost::regex>>
-LookupRowValidator::parseTitleMatcherOrWhitespace(CellText const &cellText) {
+ValidatorT<boost::optional<boost::regex>> LookupRowValidator::parseTitleMatcherOrWhitespace(CellText const &cellText) {
   auto const &text = cellText[LookupRow::Column::TITLE];
   if (isEntirelyWhitespace(text)) {
     // Mark validator as passed, but the enclosed value empty
@@ -69,7 +68,7 @@ LookupRowValidator::parseTitleMatcherOrWhitespace(CellText const &cellText) {
   }
 }
 
-boost::optional<TransmissionRunPair> LookupRowValidator::parseTransmissionRuns(CellText const &cellText) {
+ValidatorT<TransmissionRunPair> LookupRowValidator::parseTransmissionRuns(CellText const &cellText) {
   auto transmissionRunsOrError = ISISReflectometry::parseTransmissionRuns(cellText[LookupRow::Column::FIRST_TRANS],
                                                                           cellText[LookupRow::Column::SECOND_TRANS]);
   return boost::apply_visitor(
@@ -77,7 +76,7 @@ boost::optional<TransmissionRunPair> LookupRowValidator::parseTransmissionRuns(C
       transmissionRunsOrError);
 }
 
-boost::optional<boost::optional<std::string>>
+ValidatorT<boost::optional<std::string>>
 LookupRowValidator::parseTransmissionProcessingInstructions(CellText const &cellText) {
   auto optionalInstructionsOrNoneIfError =
       ISISReflectometry::parseProcessingInstructions(cellText[LookupRow::Column::TRANS_SPECTRA]);
@@ -86,21 +85,20 @@ LookupRowValidator::parseTransmissionProcessingInstructions(CellText const &cell
   return optionalInstructionsOrNoneIfError;
 }
 
-boost::optional<RangeInQ> LookupRowValidator::parseQRange(CellText const &cellText) {
+ValidatorT<RangeInQ> LookupRowValidator::parseQRange(CellText const &cellText) {
   auto qRangeOrError = ISISReflectometry::parseQRange(
       cellText[LookupRow::Column::QMIN], cellText[LookupRow::Column::QMAX], cellText[LookupRow::Column::QSTEP]);
   return boost::apply_visitor(AppendErrorIfNotType<RangeInQ>(m_invalidColumns, LookupRow::Column::QMIN), qRangeOrError);
 }
 
-boost::optional<boost::optional<double>> LookupRowValidator::parseScaleFactor(CellText const &cellText) {
+ValidatorT<boost::optional<double>> LookupRowValidator::parseScaleFactor(CellText const &cellText) {
   auto optionalScaleFactorOrNoneIfError = ISISReflectometry::parseScaleFactor(cellText[LookupRow::Column::SCALE]);
   if (!optionalScaleFactorOrNoneIfError.is_initialized())
     m_invalidColumns.emplace_back(LookupRow::Column::SCALE);
   return optionalScaleFactorOrNoneIfError;
 }
 
-boost::optional<boost::optional<std::string>>
-LookupRowValidator::parseProcessingInstructions(CellText const &cellText) {
+ValidatorT<boost::optional<std::string>> LookupRowValidator::parseProcessingInstructions(CellText const &cellText) {
   auto optionalInstructionsOrNoneIfError =
       ISISReflectometry::parseProcessingInstructions(cellText[LookupRow::Column::RUN_SPECTRA]);
   if (!optionalInstructionsOrNoneIfError.is_initialized())
@@ -108,7 +106,7 @@ LookupRowValidator::parseProcessingInstructions(CellText const &cellText) {
   return optionalInstructionsOrNoneIfError;
 }
 
-boost::optional<boost::optional<std::string>>
+ValidatorT<boost::optional<std::string>>
 LookupRowValidator::parseBackgroundProcessingInstructions(CellText const &cellText) {
   auto optionalInstructionsOrNoneIfError =
       ISISReflectometry::parseProcessingInstructions(cellText[LookupRow::Column::BACKGROUND_SPECTRA]);
