@@ -117,7 +117,18 @@ void SelectCellOfType::exec() {
   ConventionalCell info = ScalarUtils::GetCellBestError(list, true);
   //
   DblMatrix newUB = info.GetNewUB();
-  DblMatrix HKLTransformMatrix = info.GetHKL_Tran();
+
+  // Find the transformation matrix that can transform old unit reference frame
+  // to new unit cell reference frame, i.e.
+  // UB_old * hkl_old = UB_new * hkl_new
+  // hkl_new = inv(UB_new) * UB_old * hkl_old = HKLTransformMatrix * hkl_old
+  // -> HKLTransformMatrix = inv(UB_new) * UB_old
+  auto newUB_inv = DblMatrix(newUB);
+  newUB_inv.Invert();
+  auto HKLTransformMatrix = newUB_inv * UB;
+  // NOTE: the original one below is incorrect?!
+  // DblMatrix HKLTransformMatrix = info.GetHKL_Tran();
+
   modvector_0 = HKLTransformMatrix * modvector_0;
   modvector_1 = HKLTransformMatrix * modvector_1;
   modvector_2 = HKLTransformMatrix * modvector_2;
@@ -129,6 +140,8 @@ void SelectCellOfType::exec() {
   }
   DblMatrix newModUB = newUB * modHKL;
   setProperty("TransformationMatrix", HKLTransformMatrix.getVector());
+
+  //
 
   // logging
   std::ostringstream msg;
