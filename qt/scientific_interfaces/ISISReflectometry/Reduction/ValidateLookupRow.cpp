@@ -10,31 +10,32 @@
 #include <boost/algorithm/string/trim.hpp>
 #include <boost/tokenizer.hpp>
 #include <boost/variant.hpp>
+#include <unordered_set>
 
 using namespace MantidQt::CustomInterfaces::ISISReflectometry;
 
 namespace MantidQt::CustomInterfaces::ISISReflectometry {
 
-template <typename T> class AppendErrorIfNotType : public boost::static_visitor<ValidatorT<T>> {
+template <typename T> class InsertErrorIfNotType : public boost::static_visitor<ValidatorT<T>> {
 public:
-  AppendErrorIfNotType(std::vector<int> &invalidParams, int baseColumn)
+  InsertErrorIfNotType(std::unordered_set<int> &invalidParams, int baseColumn)
       : m_invalidParams(invalidParams), m_baseColumn(baseColumn) {}
 
   ValidatorT<T> operator()(T const &result) const { return result; }
 
   ValidatorT<T> operator()(int errorColumn) const {
-    m_invalidParams.emplace_back(m_baseColumn + errorColumn);
+    m_invalidParams.insert(m_baseColumn + errorColumn);
     return boost::none;
   }
 
   ValidatorT<T> operator()(const std::vector<int> &errorColumns) const {
-    std::transform(errorColumns.cbegin(), errorColumns.cend(), std::back_inserter(m_invalidParams),
+    std::transform(errorColumns.cbegin(), errorColumns.cend(), std::inserter(m_invalidParams, m_invalidParams.end()),
                    [this](int column) -> int { return m_baseColumn + column; });
     return boost::none;
   }
 
 private:
-  std::vector<int> &m_invalidParams;
+  std::unordered_set<int> &m_invalidParams;
   int m_baseColumn;
 };
 
@@ -49,7 +50,7 @@ ValidatorT<boost::optional<double>> LookupRowValidator::parseThetaOrWhitespace(C
       return theta;
     }
   }
-  m_invalidColumns.emplace_back(LookupRow::Column::THETA);
+  m_invalidColumns.insert(LookupRow::Column::THETA);
   return boost::none;
 }
 
@@ -73,7 +74,7 @@ ValidatorT<TransmissionRunPair> LookupRowValidator::parseTransmissionRuns(CellTe
   auto transmissionRunsOrError = ISISReflectometry::parseTransmissionRuns(cellText[LookupRow::Column::FIRST_TRANS],
                                                                           cellText[LookupRow::Column::SECOND_TRANS]);
   return boost::apply_visitor(
-      AppendErrorIfNotType<TransmissionRunPair>(m_invalidColumns, LookupRow::Column::FIRST_TRANS),
+      InsertErrorIfNotType<TransmissionRunPair>(m_invalidColumns, LookupRow::Column::FIRST_TRANS),
       transmissionRunsOrError);
 }
 
@@ -82,20 +83,20 @@ LookupRowValidator::parseTransmissionProcessingInstructions(CellText const &cell
   auto optionalInstructionsOrNoneIfError =
       ISISReflectometry::parseProcessingInstructions(cellText[LookupRow::Column::TRANS_SPECTRA]);
   if (!optionalInstructionsOrNoneIfError.is_initialized())
-    m_invalidColumns.emplace_back(LookupRow::Column::TRANS_SPECTRA);
+    m_invalidColumns.insert(LookupRow::Column::TRANS_SPECTRA);
   return optionalInstructionsOrNoneIfError;
 }
 
 ValidatorT<RangeInQ> LookupRowValidator::parseQRange(CellText const &cellText) {
   auto qRangeOrError = ISISReflectometry::parseQRange(
       cellText[LookupRow::Column::QMIN], cellText[LookupRow::Column::QMAX], cellText[LookupRow::Column::QSTEP]);
-  return boost::apply_visitor(AppendErrorIfNotType<RangeInQ>(m_invalidColumns, LookupRow::Column::QMIN), qRangeOrError);
+  return boost::apply_visitor(InsertErrorIfNotType<RangeInQ>(m_invalidColumns, LookupRow::Column::QMIN), qRangeOrError);
 }
 
 ValidatorT<boost::optional<double>> LookupRowValidator::parseScaleFactor(CellText const &cellText) {
   auto optionalScaleFactorOrNoneIfError = ISISReflectometry::parseScaleFactor(cellText[LookupRow::Column::SCALE]);
   if (!optionalScaleFactorOrNoneIfError.is_initialized())
-    m_invalidColumns.emplace_back(LookupRow::Column::SCALE);
+    m_invalidColumns.insert(LookupRow::Column::SCALE);
   return optionalScaleFactorOrNoneIfError;
 }
 
@@ -103,7 +104,7 @@ ValidatorT<boost::optional<std::string>> LookupRowValidator::parseProcessingInst
   auto optionalInstructionsOrNoneIfError =
       ISISReflectometry::parseProcessingInstructions(cellText[LookupRow::Column::RUN_SPECTRA]);
   if (!optionalInstructionsOrNoneIfError.is_initialized())
-    m_invalidColumns.emplace_back(LookupRow::Column::RUN_SPECTRA);
+    m_invalidColumns.insert(LookupRow::Column::RUN_SPECTRA);
   return optionalInstructionsOrNoneIfError;
 }
 
@@ -112,7 +113,7 @@ LookupRowValidator::parseBackgroundProcessingInstructions(CellText const &cellTe
   auto optionalInstructionsOrNoneIfError =
       ISISReflectometry::parseProcessingInstructions(cellText[LookupRow::Column::BACKGROUND_SPECTRA]);
   if (!optionalInstructionsOrNoneIfError.is_initialized())
-    m_invalidColumns.emplace_back(LookupRow::Column::BACKGROUND_SPECTRA);
+    m_invalidColumns.insert(LookupRow::Column::BACKGROUND_SPECTRA);
   return optionalInstructionsOrNoneIfError;
 }
 
@@ -129,7 +130,7 @@ void LookupRowValidator::validateThetaAndRegex() {
   }
 }
 
-ValidationResult<LookupRow, std::vector<int>> LookupRowValidator::operator()(CellText const &cellText) {
+ValidationResult<LookupRow, std::unordered_set<int>> LookupRowValidator::operator()(CellText const &cellText) {
   m_thetaOrInvalid = parseThetaOrWhitespace(cellText);
   m_titleMatcherOrInvalid = parseTitleMatcherOrWhitespace(cellText);
   validateThetaAndRegex();
@@ -146,12 +147,12 @@ ValidationResult<LookupRow, std::vector<int>> LookupRowValidator::operator()(Cel
       maybeQRange, maybeScaleFactor, maybeProcessingInstructions, maybeBackgroundProcessingInstructions);
 
   if (maybeDefaults.is_initialized())
-    return ValidationResult<LookupRow, std::vector<int>>(maybeDefaults.get());
+    return ValidationResult<LookupRow, std::unordered_set<int>>(maybeDefaults.get());
   else
-    return ValidationResult<LookupRow, std::vector<int>>(m_invalidColumns);
+    return ValidationResult<LookupRow, std::unordered_set<int>>(m_invalidColumns);
 }
 
-ValidationResult<LookupRow, std::vector<int>> validateLookupRow(CellText const &cells) {
+ValidationResult<LookupRow, std::unordered_set<int>> validateLookupRow(CellText const &cells) {
   auto validate = LookupRowValidator();
   return validate(cells);
 }

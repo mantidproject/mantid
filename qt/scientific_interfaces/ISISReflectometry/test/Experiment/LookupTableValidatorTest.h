@@ -74,14 +74,14 @@ public:
   }
 
   void testValidTransmissionRuns() {
-    auto table = Table({Cells({"", "13463", "13464"})});
+    auto table = Table({Cells({"", "", "13463", "13464"})});
     auto results = runTestValid(table);
     TS_ASSERT_EQUALS(results.size(), 1);
     TS_ASSERT_EQUALS(results[0].transmissionWorkspaceNames(), TransmissionRunPair("13463", "13464"));
   }
 
   void testTransmissionRunsAreWorkspaceNames() {
-    auto table = Table({Cells({"", "some workspace", "another_workspace"})});
+    auto table = Table({Cells({"", "", "some workspace", "another_workspace"})});
     auto results = runTestValid(table);
     TS_ASSERT_EQUALS(results.size(), 1);
     TS_ASSERT_EQUALS(results[0].transmissionWorkspaceNames(),
@@ -89,7 +89,7 @@ public:
   }
 
   void testValidTransmissionProcessingInstructions() {
-    auto table = Table({Cells({"", "", "", "1-3"})});
+    auto table = Table({Cells({"", "", "", "", "1-3"})});
     auto results = runTestValid(table);
     TS_ASSERT_EQUALS(results.size(), 1);
     TS_ASSERT(results[0].transmissionProcessingInstructions().is_initialized());
@@ -97,37 +97,37 @@ public:
   }
 
   void testInvalidTransmissionProcessingInstructions() {
-    auto table = Table({Cells({"", "", "", "bad"})});
+    auto table = Table({Cells({"", "", "", "", "bad"})});
     runTestInvalidCells(table, expectedErrors({0}, {LookupRow::Column::TRANS_SPECTRA}));
   }
 
   void testValidQRange() {
-    auto table = Table({Cells({"", "", "", "", "0.05", "1.3", "0.021"})});
+    auto table = Table({Cells({"", "", "", "", "", "0.05", "1.3", "0.021"})});
     auto results = runTestValid(table);
     TS_ASSERT_EQUALS(results.size(), 1);
     TS_ASSERT_EQUALS(results[0].qRange(), RangeInQ(0.05, 0.021, 1.3));
   }
 
   void testInvalidQRange() {
-    auto table = Table({Cells({"", "", "", "", "bad", "bad", "bad"})});
+    auto table = Table({Cells({"", "", "", "", "", "bad", "bad", "bad"})});
     runTestInvalidCells(
         table, expectedErrors({0}, {LookupRow::Column::QMIN, LookupRow::Column::QMAX, LookupRow::Column::QSTEP}));
   }
 
   void testValidScaleFactor() {
-    auto table = Table({Cells({"", "", "", "", "", "", "", "1.4"})});
+    auto table = Table({Cells({"", "", "", "", "", "", "", "", "1.4"})});
     auto results = runTestValid(table);
     TS_ASSERT_EQUALS(results.size(), 1);
     TS_ASSERT_EQUALS(results[0].scaleFactor(), 1.4);
   }
 
   void testInvalidScaleFactor() {
-    auto table = Table({Cells({"", "", "", "", "", "", "", "bad"})});
+    auto table = Table({Cells({"", "", "", "", "", "", "", "", "bad"})});
     runTestInvalidCells(table, expectedErrors({0}, {LookupRow::Column::SCALE}));
   }
 
   void testValidProcessingInstructions() {
-    auto table = Table({Cells({"", "", "", "", "", "", "", "", "1-3"})});
+    auto table = Table({Cells({"", "", "", "", "", "", "", "", "", "1-3"})});
     auto results = runTestValid(table);
     TS_ASSERT_EQUALS(results.size(), 1);
     TS_ASSERT(results[0].processingInstructions().is_initialized());
@@ -135,12 +135,12 @@ public:
   }
 
   void testInvalidProcessingInstructions() {
-    auto table = Table({Cells({"", "", "", "", "", "", "", "", "bad"})});
+    auto table = Table({Cells({"", "", "", "", "", "", "", "", "", "bad"})});
     runTestInvalidCells(table, expectedErrors({0}, {LookupRow::Column::RUN_SPECTRA}));
   }
 
   void testValidBackgroundProcessingInstructions() {
-    auto table = Table({Cells({"", "", "", "", "", "", "", "", "", "1-3"})});
+    auto table = Table({Cells({"", "", "", "", "", "", "", "", "", "", "1-3"})});
     auto results = runTestValid(table);
     TS_ASSERT_EQUALS(results.size(), 1);
     TS_ASSERT(results[0].backgroundProcessingInstructions().is_initialized());
@@ -148,7 +148,7 @@ public:
   }
 
   void testInvalidBackgroundProcessingInstructions() {
-    auto table = Table({Cells({"", "", "", "", "", "", "", "", "", "bad"})});
+    auto table = Table({Cells({"", "", "", "", "", "", "", "", "", "", "bad"})});
     runTestInvalidCells(table, expectedErrors({0}, {LookupRow::Column::BACKGROUND_SPECTRA}));
   }
 
@@ -169,18 +169,19 @@ public:
   }
 
   void testCorrectRowMarkedAsInvalidInMultiRowTable() {
-    auto row1 = Cells({"0.5"});
-    auto row2 = Cells({"1.2", "", "", "bad"});
-    auto row3 = Cells({"2.3"});
-    auto table = Table({row1, row2, row3});
-    runTestInvalidCells(table, expectedErrors({1}, {3}));
+    auto row0 = Cells({"0.5"});
+    auto row1 = Cells({"1.2", "", "", "", "bad"});
+    auto row2 = Cells({"2.3"});
+    auto table = Table({row0, row1, row2});
+    runTestInvalidCells(table, expectedErrors({1}, {LookupRow::Column::TRANS_SPECTRA}));
   }
 
 private:
   Table emptyTable() { return Table(); }
   Cells emptyRow() { return Cells(); }
 
-  std::vector<InvalidLookupRowCells> expectedErrors(const std::vector<int> &rows, const std::vector<int> &columns) {
+  std::vector<InvalidLookupRowCells> expectedErrors(const std::vector<int> &rows,
+                                                    const std::unordered_set<int> &columns) {
     std::vector<InvalidLookupRowCells> errors;
     for (auto row : rows)
       errors.emplace_back(InvalidLookupRowCells(row, columns));

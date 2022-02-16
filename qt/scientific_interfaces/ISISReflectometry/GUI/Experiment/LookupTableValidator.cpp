@@ -99,6 +99,6 @@ void LookupTableValidator::sortInPlaceWildcardsFirstThenByTheta(LookupTableRows 
 void LookupTableValidator::appendThetaErrorForAllRows(std::vector<InvalidLookupRowCells> &validationErrors,
                                                       std::size_t rowCount) const {
   for (auto row = 0u; row < rowCount; ++row)
-    validationErrors.emplace_back(row, std::vector<int>({0}));
+    validationErrors.emplace_back(row, std::unordered_set<int>({LookupRow::Column::THETA}));
 }
 } // namespace MantidQt::CustomInterfaces::ISISReflectometry

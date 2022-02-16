@@ -8,6 +8,7 @@
 #include "../../../ISISReflectometry/Reduction/ValidateLookupRow.h"
 #include "MantidKernel/WarningSuppressions.h"
 #include <cxxtest/TestSuite.h>
+#include <unordered_set>
 
 using namespace MantidQt::CustomInterfaces::ISISReflectometry;
 
@@ -40,7 +41,7 @@ public:
   void testParseThetaError() {
     LookupRowValidator validator;
     auto result = validator({"bad"});
-    std::vector<int> errorCells = {LookupRow::Column::THETA};
+    std::unordered_set<int> errorCells = {LookupRow::Column::THETA};
     TS_ASSERT(result.isError());
     TS_ASSERT_EQUALS(result.assertError(), errorCells);
   }
@@ -121,7 +122,7 @@ public:
   void testParseTransmissionProcessingInstructionsError() {
     LookupRowValidator validator;
     auto result = validator({"", "", "", "", "bad"});
-    std::vector<int> errorCells = {LookupRow::Column::TRANS_SPECTRA};
+    std::unordered_set<int> errorCells = {LookupRow::Column::TRANS_SPECTRA};
     TS_ASSERT(result.isError());
     TS_ASSERT_EQUALS(result.assertError(), errorCells);
   }
@@ -136,7 +137,7 @@ public:
   void testParseQRangeError() {
     LookupRowValidator validator;
     auto result = validator({"", "", "", "", "", "bad", "bad", "bad"});
-    std::vector<int> errorCells = {LookupRow::Column::QMIN, LookupRow::Column::QMAX, LookupRow::Column::QSTEP};
+    std::unordered_set<int> errorCells = {LookupRow::Column::QMIN, LookupRow::Column::QMAX, LookupRow::Column::QSTEP};
     TS_ASSERT(result.isError());
     TS_ASSERT_EQUALS(result.assertError(), errorCells);
   }
@@ -151,7 +152,7 @@ public:
   void testParseScaleFactorError() {
     LookupRowValidator validator;
     auto result = validator({"", "", "", "", "", "", "", "", "bad"});
-    std::vector<int> errorCells = {LookupRow::Column::SCALE};
+    std::unordered_set<int> errorCells = {LookupRow::Column::SCALE};
     TS_ASSERT(result.isError());
     TS_ASSERT_EQUALS(result.assertError(), errorCells);
   }
@@ -167,7 +168,7 @@ public:
   void testParseProcessingInstructionsError() {
     LookupRowValidator validator;
     auto result = validator({"", "", "", "", "", "", "", "", "", "bad"});
-    std::vector<int> errorCells = {LookupRow::Column::RUN_SPECTRA};
+    std::unordered_set<int> errorCells = {LookupRow::Column::RUN_SPECTRA};
     TS_ASSERT(result.isError());
     TS_ASSERT_EQUALS(result.assertError(), errorCells);
   }
@@ -183,7 +184,7 @@ public:
   void testParseBackgroundProcessingInstructionsError() {
     LookupRowValidator validator;
     auto result = validator({"", "", "", "", "", "", "", "", "", "", "bad"});
-    std::vector<int> errorCells = {LookupRow::Column::BACKGROUND_SPECTRA};
+    std::unordered_set<int> errorCells = {LookupRow::Column::BACKGROUND_SPECTRA};
     TS_ASSERT(result.isError());
     TS_ASSERT_EQUALS(result.assertError(), errorCells);
   }

@@ -12,6 +12,7 @@
 #include "TransmissionRunPair.h"
 #include <array>
 #include <boost/optional.hpp>
+#include <unordered_set>
 namespace MantidQt {
 namespace CustomInterfaces {
 namespace ISISReflectometry {
@@ -26,7 +27,7 @@ template <typename T> using ValidatorT = boost::optional<T>;
 
 class MANTIDQT_ISISREFLECTOMETRY_DLL LookupRowValidator {
 public:
-  ValidationResult<LookupRow, std::vector<int>> operator()(LookupRow::ValueArray const &cellText);
+  ValidationResult<LookupRow, std::unordered_set<int>> operator()(LookupRow::ValueArray const &cellText);
 
 private:
   ValidatorT<boost::optional<double>> parseThetaOrWhitespace(LookupRow::ValueArray const &cellText);
@@ -42,12 +43,12 @@ private:
 
   void validateThetaAndRegex();
 
-  std::vector<int> m_invalidColumns;
+  std::unordered_set<int> m_invalidColumns;
   ValidatorT<boost::optional<double>> m_thetaOrInvalid;
   ValidatorT<boost::optional<boost::regex>> m_titleMatcherOrInvalid;
 };
 
-ValidationResult<LookupRow, std::vector<int>> validateLookupRow(LookupRow::ValueArray const &cellText);
+ValidationResult<LookupRow, std::unordered_set<int>> validateLookupRow(LookupRow::ValueArray const &cellText);
 
 } // namespace ISISReflectometry
 } // namespace CustomInterfaces
