@@ -12,6 +12,10 @@ EXPECTED_CONDA_PATH=$2
 CLEAN_BUILD=$3
 MAMBAFORGE_VERSION=4.11.0-0
 
+LINUX_SHA256="49268ee30d4418be4de852dda3aa4387f8c95b55a76f43fb1af68dcbf8b205c3  ./Mambaforge-4.11.0-0-Linux-x86_64.sh"
+MAC_SHA256="2039f744e272d47878f0bc2ae372f03c7f07881f39a93d693d5445744f36f19d  ./Mambaforge-4.11.0-0-MacOSX-x86_64.sh"
+WINDOWS_SHA256="70e8cb24f329f867155a81bb90b48d9f6d105ca1414e8382cac4f4fd7a1c6529  *./Mambaforge-4.11.0-0-Windows-x86_64.exe"
+
 # Only supporting x86_64 at this time for the build process
 if [[ $OSTYPE == 'msys'* ]]; then
     MAMBAFORGE_SCRIPT_NAME=Mambaforge-$MAMBAFORGE_VERSION-Windows-x86_64.exe
@@ -40,6 +44,14 @@ if [[ ! -f $EXPECTED_CONDA_PATH ]]; then
             exit 1
         fi
     fi
+
+    # Compare the sha256 of the downloaded file to the expected sha256
+    SHA256_DOWNLOADED=$(sha256sum $MAMBAFORGE_SCRIPT_NAME)
+    if [[ $SHA256_DOWNLOADED != $LINUX_SHA256 && $SHA256_DOWNLOADED != $MAC_SHA256 && $SHA256_DOWNLOADED != $WINDOWS_SHA256 ]]; then
+        echo "sha256 of downloaded file does not match expected sha256, failing..."
+        exit 1
+    fi
+
     if [[ $OSTYPE == 'msys'* ]]; then
         # Replace all / with \ for windows batch support before passing in $EXPECTED_MAMBAFORGE_PATH
         cmd.exe /C "START /wait "" $MAMBAFORGE_SCRIPT_NAME /InstallationType=JustMe /RegisterPython=0 /S /D=${EXPECTED_MAMBAFORGE_PATH////\\}"
