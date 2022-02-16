@@ -189,12 +189,38 @@ Kernel::Matrix<double> SelectCellWithForm::CalculateUBWithErrors(std::vector<dou
   IndexingUtils::Optimize_6dUB(UB_new, modUB_new, hkl_vectors, mnp_vectors, ModDim, q_vectors_indexed,
                                lattice_constant_errors, mod_vectors_errors);
 
+  // Make sure that the newly optimized UB (UB_new) is close to the original UB,
+  // otherwise something is wrong and we should cowardly reject the results by
+  // - returning the original UB and modUB
+  // - set the lattice constants errors to 0 since the calculated ones are most
+  //   likely wrong
+  // -- make sure both UB are valid orientation matrix
+  bool accept_new_UB = true;
+  if (IndexingUtils::CheckUB(UB) && IndexingUtils::CheckUB(UB_new)) {
+    auto UB_inv = UBmatrix(UB);
+    UB_inv.Invert();
+    auto UB_new_dot_UB_inv = UB_new * UB_inv;
+    if (1 - UB_new_dot_UB_inv.determinant() > 1e-3) {
+      accept_new_UB = false;
+    }
+  } else {
+    accept_new_UB = false;
+    lattice_constant_errors.assign(6, 0.);
+  }
+
   //
   Kernel::Matrix<double> UB_optimized(3, 6);
   for (int i = 0; i < 3; ++i) {
     for (int j = 0; j < 3; ++j) {
-      UB_optimized[i][j] = UB_new[i][j];
-      UB_optimized[i][j + 3] = modUB_new[i][j];
+      if (accept_new_UB) {
+        // accept the optimized UB
+        UB_optimized[i][j] = UB_new[i][j];
+        UB_optimized[i][j + 3] = modUB_new[i][j];
+      } else {
+        // reject the optimized UB and restore the original ones
+        UB_optimized[i][j] = UB[i][j];
+        UB_optimized[i][j + 3] = modUB[i][j];
+      }
     }
   }
 
