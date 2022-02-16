@@ -756,7 +756,6 @@ class DirectILLAutoProcess(DataProcessorAlgorithm):
                 to_remove.pop()
             self._group_detectors([processed_sample])
         else:
-            self._group_detectors([ws])
             processed_sample = 'SofQW_{}'.format(numor)  # name should contain only SofQW and numor
             processed_sample_tw = 'SofTW_{}'.format(numor)  # name should contain only SofTW and numor
             if self.getPropertyValue('AbsorptionCorrection') != 'None':
