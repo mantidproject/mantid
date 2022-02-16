@@ -821,8 +821,6 @@ class DirectILLAutoProcess(DataProcessorAlgorithm):
         optional_parameters = dict()
         if not self.getProperty(common.PROP_GROUPING_ANGLE_STEP).isDefault:
             optional_parameters['GroupingAngleStep'] = self.getProperty(common.PROP_GROUPING_ANGLE_STEP).value
-        if not self.getProperty(common.PROP_GROUPING_ANGLE_STEP).isDefault:
-            optional_parameters['GroupingAngleStep'] = self.getProperty(common.PROP_GROUPING_ANGLE_STEP).value
         if not self.getProperty(common.PROP_REBINNING_W).isDefault:
             optional_parameters[common.PROP_REBINNING_W] = self.getProperty(common.PROP_REBINNING_W).value
         if not self.getProperty(common.PROP_REBINNING_PARAMS_W).isDefault:
