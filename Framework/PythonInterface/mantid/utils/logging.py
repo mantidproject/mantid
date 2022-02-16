@@ -58,3 +58,26 @@ def capture_logs(level=None) -> io.StringIO:
         if level:
             config['logging.loggers.root.level'] = backup['level']
         sys.stdout = backup['stdout']
+
+
+def log_to_python(level='debug'):
+    r"""
+    Modify Mantid's logger to forward messages to Python's logging framework instead
+    of outputting them itself. This allows users to configure the logger from Python
+    and merge logs from different sources.
+
+    Note that this function does not configure Python's logging system.
+
+    @param str level: Logging level for the *Mantid* logger. Should be set to a low value
+        to forward all potentially relevant messages to Python and let *Python's* logger
+        filter out undesired messages. Possible values: 'trace', 'debug' (default),
+        'information', 'notice', 'warning', 'error', 'critical', 'fatal'.
+    """
+    config = ConfigService.Instance()
+    config['logging.loggers.root.level'] = level
+    config['logging.channels.consoleChannel.formatter'] = 'f1'
+    # Output only the message text and let Python take care of formatting.
+    config['logging.formatters.f1.class'] = 'PatternFormatter'
+    config['logging.formatters.f1.pattern'] = '%t'
+    # Important: Do this one last because it triggers re-init of logging system!
+    config['logging.channels.consoleChannel.class'] = 'PythonLoggingChannel'

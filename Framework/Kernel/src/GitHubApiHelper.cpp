@@ -96,20 +96,12 @@ std::string getApiToken() {
 //----------------------------------------------------------------------------------------------
 /** Constructor
  */
-GitHubApiHelper::GitHubApiHelper() : InternetHelper() {
-  // set up the api token so it can be quickly added to the authentication
-  m_api_token = getApiToken();
-
-  addAuthenticationToken();
-}
+GitHubApiHelper::GitHubApiHelper() : InternetHelper(), m_api_token(getApiToken()) { addAuthenticationToken(); }
 
 //----------------------------------------------------------------------------------------------
 /** Constructor
  */
-GitHubApiHelper::GitHubApiHelper(const Kernel::ProxyInfo &proxy) : InternetHelper(proxy) {
-  // set up the api token so it can be quickly added to the authentication
-  m_api_token = getApiToken();
-
+GitHubApiHelper::GitHubApiHelper(const Kernel::ProxyInfo &proxy) : InternetHelper(proxy), m_api_token(getApiToken()) {
   addAuthenticationToken();
 }
 

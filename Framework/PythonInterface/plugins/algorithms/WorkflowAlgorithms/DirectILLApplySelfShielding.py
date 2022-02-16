@@ -10,7 +10,7 @@ import ILL_utilities as utils
 from mantid.api import (AlgorithmFactory, DataProcessorAlgorithm, InstrumentValidator, MatrixWorkspaceProperty,
                         Progress, PropertyMode,  WorkspaceProperty, WorkspaceUnitValidator)
 from mantid.kernel import (CompositeValidator, Direction, FloatBoundedValidator, StringListValidator)
-from mantid.simpleapi import (CloneWorkspace, Divide, Minus, Scale)
+from mantid.simpleapi import (CloneWorkspace, Divide, Minus, RebinToWorkspace, Scale)
 
 
 def _subtractEC(ws, ecWS, ecScaling, wsNames, wsCleanup, algorithmLogging):
@@ -21,9 +21,13 @@ def _subtractEC(ws, ecWS, ecScaling, wsNames, wsCleanup, algorithmLogging):
                        Factor=ecScaling,
                        OutputWorkspace=scaledECWSName,
                        EnableLogging=algorithmLogging)
+    rebinnedECWSName = wsNames.withSuffix('rebinned_EC')
+    rebinnedECWS = RebinToWorkspace(WorkspaceToRebin=scaledECWS,
+                                    WorkspaceToMatch=ws,
+                                    OutputWorkspace=rebinnedECWSName)
     ecSubtractedWSName = wsNames.withSuffix('EC_subtracted')
     ecSubtractedWS = Minus(LHSWorkspace=ws,
-                           RHSWorkspace=scaledECWS,
+                           RHSWorkspace=rebinnedECWS,
                            OutputWorkspace=ecSubtractedWSName,
                            EnableLogging=algorithmLogging)
     wsCleanup.cleanup(scaledECWS)
@@ -144,11 +148,16 @@ class DirectILLApplySelfShielding(DataProcessorAlgorithm):
         if self.getProperty(common.PROP_SELF_SHIELDING_CORRECTION_WS).isDefault:
             return mainWS, False
         correctionWS = self.getProperty(common.PROP_SELF_SHIELDING_CORRECTION_WS).value
+        matchedCorrectionWS = '{}_matched'.format(correctionWS)
+        RebinToWorkspace(WorkspaceToRebin=correctionWS,
+                         WorkspaceToMatch=mainWS,
+                         OutputWorkspace=matchedCorrectionWS)
         correctedWSName = self._names.withSuffix('self_shielding_corrected')
         correctedWS = Divide(LHSWorkspace=mainWS,
-                             RHSWorkspace=correctionWS,
+                             RHSWorkspace=matchedCorrectionWS,
                              OutputWorkspace=correctedWSName,
                              EnableLogging=self._subalgLogging)
+        self._cleanup.cleanup(matchedCorrectionWS)
         self._cleanup.cleanup(mainWS)
         return correctedWS, True
 

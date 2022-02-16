@@ -6,6 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 #include "Common/DllConfig.h"
+#include "IGroup.h"
 #include "Item.h"
 #include "Row.h"
 #include <boost/optional.hpp>
@@ -16,56 +17,83 @@ namespace MantidQt {
 namespace CustomInterfaces {
 namespace ISISReflectometry {
 
+class Row;
+
 /** @class Group
 
     The Group model holds information about a group of rows in the runs table.
  */
-class MANTIDQT_ISISREFLECTOMETRY_DLL Group : public Item {
+class MANTIDQT_ISISREFLECTOMETRY_DLL Group final : public IGroup {
 public:
   explicit Group(std::string name);
   Group(std::string name, std::vector<boost::optional<Row>> rows);
 
+  ~Group() = default;
+
+  Group(Group &&group) noexcept;
+  Group(const Group &old_group);
+  Group &operator=(Group &&) noexcept;
+  Group &operator=(Group const &);
+
+  // copy-and-swap idiom.
+  friend void swap(Group &first, Group &second) {
+    std::swap(first.m_name, second.m_name);
+    std::swap(first.m_rows, second.m_rows);
+    std::swap(first.m_postprocessedWorkspaceName, second.m_postprocessedWorkspaceName);
+    std::swap(first.m_itemState, second.m_itemState);
+    std::swap(first.m_skipped, second.m_skipped);
+  }
+
+  // Overrides from Item
   bool isGroup() const override;
   bool isPreview() const override;
-  std::string const &name() const;
-  void setName(std::string const &name);
-  bool hasPostprocessing() const;
   bool requiresProcessing(bool reprocessFailed) const override;
-  bool requiresPostprocessing(bool reprocessFailed) const;
-  std::string postprocessedWorkspaceName() const;
   void setOutputNames(std::vector<std::string> const &outputNames) override;
   void resetOutputs() override;
-
-  void appendEmptyRow();
-  void appendRow(boost::optional<Row> const &row);
-  void insertRow(boost::optional<Row> const &row, int beforeRowAtIndex);
-  int insertRowSortedByAngle(boost::optional<Row> const &row);
-  void removeRow(int rowIndex);
-  void updateRow(int rowIndex, boost::optional<Row> const &row);
-
   int totalItems() const override;
   int completedItems() const override;
-
   void resetState(bool resetChildren = true) override;
-  void resetSkipped();
   void renameOutputWorkspace(std::string const &oldName, std::string const &newName) override;
+  void notifyChildStateChanged() override;
 
-  boost::optional<int> indexOfRowWithTheta(double angle, double tolerance) const;
+  // Overrides from IGroup
+  std::string const &name() const override;
+  void setName(std::string const &name) override;
+  bool hasPostprocessing() const override;
+  bool requiresPostprocessing(bool reprocessFailed) const override;
+  std::string postprocessedWorkspaceName() const override;
 
-  boost::optional<Row> const &operator[](int rowIndex) const;
-  std::vector<boost::optional<Row>> const &rows() const;
-  std::vector<boost::optional<Row>> &mutableRows();
+  void appendEmptyRow() override;
+  void appendRow(boost::optional<Row> const &row) override;
+  void insertRow(boost::optional<Row> const &row, int beforeRowAtIndex) override;
+  int insertRowSortedByAngle(boost::optional<Row> const &row) override;
+  void removeRow(int rowIndex) override;
+  void updateRow(int rowIndex, boost::optional<Row> const &row) override;
 
-  boost::optional<Item &> getItemWithOutputWorkspaceOrNone(std::string const &wsName);
+  void resetSkipped() override;
+
+  boost::optional<int> indexOfRowWithTheta(double angle, double tolerance) const override;
+
+  boost::optional<Row> const &operator[](int rowIndex) const override;
+  std::vector<boost::optional<Row>> const &rows() const override;
+  std::vector<boost::optional<Row>> &mutableRows() override;
+
+  boost::optional<Item &> getItemWithOutputWorkspaceOrNone(std::string const &wsName) override;
+
+  void setAllRowParents() override;
+
+  void setChildrenSuccess();
 
 private:
   std::string m_name;
   std::string m_postprocessedWorkspaceName;
   std::vector<boost::optional<Row>> m_rows;
-
   friend class Encoder;
+
   friend class Decoder;
   friend class CoderCommonTester;
+
+  bool allChildRowsSucceeded() const;
 };
 
 template <typename ModificationListener>

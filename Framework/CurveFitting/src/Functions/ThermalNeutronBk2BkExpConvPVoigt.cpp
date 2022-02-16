@@ -334,7 +334,7 @@ void ThermalNeutronBk2BkExpConvPVoigt::functionLocal(double *out, const double *
   // PARALLEL_SET_NUM_THREADS(8);
   // PARALLEL_FOR_NO_WSP_CHECK()
   for (size_t id = 0; id < nData; ++id) {
-    // PARALLEL_START_INTERUPT_REGION
+    // PARALLEL_START_INTERRUPT_REGION
 
     // a) Caclualte peak intensity
     double dT = xValues[id] - m_centre;
@@ -369,9 +369,9 @@ void ThermalNeutronBk2BkExpConvPVoigt::functionLocal(double *out, const double *
     }
     */
 
-    // PARALLEL_END_INTERUPT_REGION
+    // PARALLEL_END_INTERRUPT_REGION
   } // ENDFOR data points
-  // PARALLEL_CHECK_INTERUPT_REGION
+  // PARALLEL_CHECK_INTERRUPT_REGION
 }
 
 //----------------------------------------------------------------------------------------------

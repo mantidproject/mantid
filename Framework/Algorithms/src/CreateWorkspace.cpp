@@ -186,7 +186,7 @@ void CreateWorkspace::exec() {
 
   PARALLEL_FOR_IF(Kernel::threadSafe(*outputWS))
   for (int i = 0; i < nSpec; i++) {
-    PARALLEL_START_INTERUPT_REGION
+    PARALLEL_START_INTERRUPT_REGION
 
     // In an MPI run the global index i is not necessarily on this rank, i.e.,
     // there might not be a corrsponding workspace index.
@@ -214,9 +214,9 @@ void CreateWorkspace::exec() {
       outputWS->mutableDx(local_i).assign(dX.begin() + yStart, dX.begin() + yEnd);
 
     progress.report();
-    PARALLEL_END_INTERUPT_REGION
+    PARALLEL_END_INTERRUPT_REGION
   }
-  PARALLEL_CHECK_INTERUPT_REGION
+  PARALLEL_CHECK_INTERRUPT_REGION
 
   // Set the Unit of the X Axis
   try {

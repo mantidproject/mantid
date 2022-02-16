@@ -360,10 +360,12 @@ public:
     presenter.notifyLookupRowChanged(row, column);
 
     // Check the model contains the per-theta defaults returned by the view
-    auto const lookupTable = presenter.experiment().lookupTable();
-    TS_ASSERT_EQUALS(lookupTable.size(), 2);
-    TS_ASSERT_EQUALS(lookupTable[0], defaultsWithFirstAngle());
-    TS_ASSERT_EQUALS(lookupTable[1], defaultsWithSecondAngle());
+    auto const lookupRows = presenter.experiment().lookupTableRows();
+    TS_ASSERT_EQUALS(lookupRows.size(), 2);
+    if (lookupRows.size() == 2) {
+      TS_ASSERT_EQUALS(lookupRows[0], defaultsWithFirstAngle());
+      TS_ASSERT_EQUALS(lookupRows[1], defaultsWithSecondAngle());
+    }
     verifyAndClear();
   }
 
@@ -557,8 +559,8 @@ public:
   }
 
   void testInstrumentChangedUpdatesLookupRowInView() {
-    auto lookupRow = LookupRow(boost::none, TransmissionRunPair(), boost::none, RangeInQ(0.01, 0.03, 0.2), 0.7,
-                               std::string("390-415"), std::string("370-389,416-430"));
+    auto lookupRow = LookupRow(boost::none, boost::none, TransmissionRunPair(), boost::none, RangeInQ(0.01, 0.03, 0.2),
+                               0.7, std::string("390-415"), std::string("370-389,416-430"));
     auto model = makeModelWithLookupRow(std::move(lookupRow));
     auto defaultOptions = expectDefaults(model);
     auto presenter = makePresenter(std::move(defaultOptions));
@@ -570,16 +572,19 @@ public:
   }
 
   void testInstrumentChangedUpdatesLookupRowInModel() {
-    auto model =
-        makeModelWithLookupRow(LookupRow(boost::none, TransmissionRunPair(), boost::none, RangeInQ(0.01, 0.03, 0.2),
-                                         0.7, std::string("390-415"), std::string("370-389,416-430")));
+    auto model = makeModelWithLookupRow(LookupRow(boost::none, boost::none, TransmissionRunPair(), boost::none,
+                                                  RangeInQ(0.01, 0.03, 0.2), 0.7, std::string("390-415"),
+                                                  std::string("370-389,416-430")));
     auto defaultOptions = expectDefaults(model);
     auto presenter = makePresenter(std::move(defaultOptions));
     presenter.notifyInstrumentChanged("POLREF");
-    auto expected = LookupRow(boost::none, TransmissionRunPair(), boost::none, RangeInQ(0.01, 0.03, 0.2), 0.7,
-                              std::string("390-415"), std::string("370-389,416-430"));
-    TS_ASSERT_EQUALS(presenter.experiment().lookupTable().size(), 1);
-    TS_ASSERT_EQUALS(presenter.experiment().lookupTable().front(), expected);
+    auto expected = LookupRow(boost::none, boost::none, TransmissionRunPair(), boost::none, RangeInQ(0.01, 0.03, 0.2),
+                              0.7, std::string("390-415"), std::string("370-389,416-430"));
+    auto lookupRows = presenter.experiment().lookupTableRows();
+    TS_ASSERT_EQUALS(lookupRows.size(), 1);
+    if (lookupRows.size() == 1) {
+      TS_ASSERT_EQUALS(lookupRows.front(), expected);
+    }
     verifyAndClear();
   }
 
@@ -686,8 +691,7 @@ private:
   }
 
   Experiment makeModelWithLookupRow(LookupRow lookupRow) {
-    auto lookupTable = LookupTable();
-    lookupTable.emplace_back(std::move(lookupRow));
+    auto lookupTable = LookupTable({std::move(lookupRow)});
     return Experiment(AnalysisMode::PointDetector, ReductionType::Normal, SummationType::SumInLambda, false, false,
                       BackgroundSubtraction(), makeEmptyPolarizationCorrections(), makeFloodCorrections(),
                       makeEmptyTransmissionStitchOptions(), makeEmptyStitchOptions(), std::move(lookupTable));
@@ -843,14 +847,14 @@ private:
   // either as an input array of strings or an output model
   OptionsRow optionsRowWithFirstAngle() { return {"0.5", "13463", ""}; }
   LookupRow defaultsWithFirstAngle() {
-    return LookupRow(0.5, TransmissionRunPair("13463", ""), boost::none, RangeInQ(), boost::none, boost::none,
-                     boost::none);
+    return LookupRow(0.5, boost::none, TransmissionRunPair("13463", ""), boost::none, RangeInQ(), boost::none,
+                     boost::none, boost::none);
   }
 
   OptionsRow optionsRowWithSecondAngle() { return {"2.3", "13463", "13464"}; }
   LookupRow defaultsWithSecondAngle() {
-    return LookupRow(2.3, TransmissionRunPair("13463", "13464"), boost::none, RangeInQ(), boost::none, boost::none,
-                     boost::none);
+    return LookupRow(2.3, boost::none, TransmissionRunPair("13463", "13464"), boost::none, RangeInQ(), boost::none,
+                     boost::none, boost::none);
   }
   OptionsRow optionsRowWithWildcard() { return {"", "13463", "13464"}; }
   OptionsRow optionsRowWithFirstTransmissionRun() { return {"", "13463"}; }
@@ -887,6 +891,7 @@ private:
     for (auto row : rows)
       EXPECT_CALL(m_view, showLookupRowAsInvalid(row, column)).Times(1);
     presenter.notifyLookupRowChanged(1, 1);
+    TS_ASSERT(!presenter.hasValidSettings());
     verifyAndClear();
   }
 
@@ -895,6 +900,7 @@ private:
     EXPECT_CALL(m_view, getLookupTable()).WillOnce(Return(optionsTable));
     EXPECT_CALL(m_view, showLookupRowAsInvalid(row, column)).Times(1);
     presenter.notifyLookupRowChanged(1, 1);
+    TS_ASSERT(!presenter.hasValidSettings());
     verifyAndClear();
   }
 

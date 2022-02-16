@@ -119,12 +119,32 @@ Inside the algorithms:
 
   self.log().information('Number of scan steps is something')
 
-In general:
+In general (see :class:`mantid.kernel.Logger`):
 
 .. code-block:: python
 
   from mantid.kernel import logger
   logger.warning('this is a custom warning')
+
+Using :code:`logging` in Python
+-------------------------------
+
+It is possible to forward Mantid's log messages to Python's :code:`logging` framework.
+The simplest way to configure the logger is:
+
+.. code-block:: python
+
+    import logging
+    from mantid.utils.logging import log_to_python
+    from mantid.kernel import logger
+    # Configure Mantid to send messages to Python
+    log_to_python()
+
+    log = logging.getLogger('Mantid')
+    logger.information('This message is send to `log` defined above.')
+
+Note that :code:`log_to_python` overwrites the existing setup.
+If you need more control, you can use :code:`'PythonLoggingChannel'` as a channel class in the config as described above.
 
 Tips
 ----

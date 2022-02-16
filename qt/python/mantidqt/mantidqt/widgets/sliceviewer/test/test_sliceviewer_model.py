@@ -122,6 +122,8 @@ def _create_mock_workspace(ws_type,
             ws.isMDHistoWorkspace.return_value = True
             ws.getNonIntegratedDimensions.return_value = [MagicMock(), MagicMock()]
             ws.hasOriginalWorkspace.return_value = False
+            basis_mat = np.eye(ndims)
+            ws.getBasisVector.side_effect = lambda idim: basis_mat[:, idim]
         else:
             ws.isMDHistoWorkspace.return_value = False
 
