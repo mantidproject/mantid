@@ -188,6 +188,11 @@ QPushButton *InstrumentWidgetRenderTab::setupDisplaySettings() {
   m_UCorrection = new QAction("U Correction", this);
   m_UCorrection->setToolTip("Manually set the limits on the horizontal axis.");
   connect(m_UCorrection, SIGNAL(triggered()), this, SLOT(setUCorrection()));
+  m_tooltipInfo = new QAction("Tooltip", this);
+  m_tooltipInfo->setToolTip("Show detector info in a tooltip when hovering.");
+  m_tooltipInfo->setCheckable(true);
+  m_tooltipInfo->setChecked(false);
+  connect(m_tooltipInfo, SIGNAL(toggled(bool)), this, SLOT(toggleTooltip(bool)));
 
   // Create "Use OpenGL" action
   m_GLView = new QAction("Use OpenGL", this);
@@ -210,6 +215,7 @@ QPushButton *InstrumentWidgetRenderTab::setupDisplaySettings() {
   displaySettingsMenu->addAction(m_lighting);
   displaySettingsMenu->addAction(m_GLView);
   displaySettingsMenu->addAction(m_UCorrection);
+  displaySettingsMenu->addAction(m_tooltipInfo);
 
   displaySettings->setMenu(displaySettingsMenu);
   connect(displaySettingsMenu, SIGNAL(hovered(QAction *)), this, SLOT(showMenuToolTip(QAction *)));
@@ -811,6 +817,13 @@ void InstrumentWidgetRenderTab::setUCorrection() {
     }
   }
 }
+
+/**
+ * @brief InstrumentWidgetRenderTab::toggleToolTip
+ * Change whether or not to display a tooltip with basic info when hovering over the instrument
+ * @param activate : the new status
+ */
+void InstrumentWidgetRenderTab::toggleTooltip(bool activate) { getSurface()->toggleToolTip(activate); }
 
 /**
  * Get current value for the u-correction for a RotationSurface.

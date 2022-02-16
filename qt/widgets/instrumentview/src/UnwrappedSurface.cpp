@@ -59,7 +59,6 @@ UnwrappedSurface::UnwrappedSurface(const InstrumentActor *rootActor)
   connect(moveController, SIGNAL(zoom()), this, SLOT(zoom()));
   connect(moveController, SIGNAL(resetZoom()), this, SLOT(resetZoom()));
   connect(moveController, SIGNAL(unzoom()), this, SLOT(unzoom()));
-  connect(moveController, SIGNAL(touchPointAt(int, int)), this, SLOT(touchComponentAt(int, int)));
 }
 
 /**
