@@ -17,20 +17,21 @@ namespace MantidQt::CustomInterfaces::ISISReflectometry {
 
 namespace {
 // Map of column number to hard-coded tooltips (used for lookup criteria columns)
-std::map<int, std::string> ColumnTooltips{
+std::unordered_map<int, std::string> ColumnTooltips{
     {LookupRow::THETA,
      "Theta lookup: runs with theta within 0.01 of this value will use the settings specified in this row"}};
 
 // Map of column number to algorithm property name for columns where we want to get the tooltip from the algorithm
-std::map<int, std::string> ColumnPropertyNames{{LookupRow::FIRST_TRANS, "FirstTransmissionRunList"},
-                                               {LookupRow::SECOND_TRANS, "SecondTransmissionRunList"},
-                                               {LookupRow::TRANS_SPECTRA, "TransmissionProcessingInstructions"},
-                                               {LookupRow::QMIN, "MomentumTransferMin"},
-                                               {LookupRow::QMAX, "MomentumTransferMax"},
-                                               {LookupRow::QSTEP, "MomentumTransferStep"},
-                                               {LookupRow::SCALE, "ScaleFactor"},
-                                               {LookupRow::RUN_SPECTRA, "ProcessingInstructions"},
-                                               {LookupRow::BACKGROUND_SPECTRA, "BackgroundProcessingInstructions"}};
+std::unordered_map<int, std::string> ColumnPropertyNames{
+    {LookupRow::FIRST_TRANS, "FirstTransmissionRunList"},
+    {LookupRow::SECOND_TRANS, "SecondTransmissionRunList"},
+    {LookupRow::TRANS_SPECTRA, "TransmissionProcessingInstructions"},
+    {LookupRow::QMIN, "MomentumTransferMin"},
+    {LookupRow::QMAX, "MomentumTransferMax"},
+    {LookupRow::QSTEP, "MomentumTransferStep"},
+    {LookupRow::SCALE, "ScaleFactor"},
+    {LookupRow::RUN_SPECTRA, "ProcessingInstructions"},
+    {LookupRow::BACKGROUND_SPECTRA, "BackgroundProcessingInstructions"}};
 
 // Changing the palette for spin boxes doesn't work but we can
 // change the background colour with a style sheet. This also changes
@@ -117,7 +118,7 @@ void QtExperimentView::initLayout(const Mantid::API::IAlgorithm_sptr &algorithmF
  * @param tooltips : a map of column index to tooltip
  * @return : true if the tooltip was set, false if not found
  */
-bool QtExperimentView::setTooltipFromMap(int column, std::map<int, std::string> tooltips) {
+bool QtExperimentView::setTooltipFromMap(int column, std::unordered_map<int, std::string> const &tooltips) {
   auto tooltipIt = tooltips.find(column);
   if (tooltipIt == tooltips.end()) {
     return false;
@@ -131,7 +132,7 @@ bool QtExperimentView::setTooltipFromMap(int column, std::map<int, std::string> 
  * @param column : the column index
  * @param properties : a map of column index to algorithm property name
  */
-void QtExperimentView::setTooltipFromAlgorithm(int column, std::map<int, std::string> properties,
+void QtExperimentView::setTooltipFromAlgorithm(int column, std::unordered_map<int, std::string> const &properties,
                                                const Mantid::API::IAlgorithm_sptr &algorithmForTooltips) {
   auto propertyIt = properties.find(column);
   if (propertyIt == properties.end()) {
