@@ -133,9 +133,9 @@ pipeline {
             }
             agent { label 'conda-build-linux' } // Use linux for simplicity with shell scripts
             steps {
-                sh '$WORKSPACE/buildconfig/Jenkins/Conda/delete-old-nightlies.sh $ANACONDA_TOKEN --channel mantid --package mantid --label nightly'
-                sh '$WORKSPACE/buildconfig/Jenkins/Conda/delete-old-nightlies.sh $ANACONDA_TOKEN --channel mantid --package mantidqt --label nightly'
-                sh '$WORKSPACE/buildconfig/Jenkins/Conda/delete-old-nightlies.sh $ANACONDA_TOKEN --channel mantid --package mantidworkbench --label nightly'
+                sh '$WORKSPACE/buildconfig/Jenkins/Conda/delete-old-nightlies.sh $WORKSPACE $ANACONDA_TOKEN --channel mantid --package mantid --label nightly'
+                sh '$WORKSPACE/buildconfig/Jenkins/Conda/delete-old-nightlies.sh $WORKSPACE $ANACONDA_TOKEN --channel mantid --package mantidqt --label nightly'
+                sh '$WORKSPACE/buildconfig/Jenkins/Conda/delete-old-nightlies.sh $WORKSPACE $ANACONDA_TOKEN --channel mantid --package mantidworkbench --label nightly'
             }
         }
     }

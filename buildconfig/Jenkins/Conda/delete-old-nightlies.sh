@@ -3,13 +3,15 @@
 # Delete all but the latest nightly build
 #
 # Expected args:
-#   1. ANACONDA_TOKEN: The token required to interact with the mantid channel on anaconda.org
+#   1. WORKSPACE: path to the workspace/source code that this should run inside
+#   2. ANACONDA_TOKEN: The token required to interact with the mantid channel on anaconda.org
 #
 # Optional args:
 #   --channel: The channel to remove from (defaults to mantid)
 #   --package: The package to remove from the channel (defaults to mantid)
 #   --label: The label to remove from the channel (defaults to nightly)
-
+WORKSPACE=$1
+shift
 ANACONDA_TOKEN=$1
 shift
 
