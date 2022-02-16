@@ -69,7 +69,7 @@ noCopyConstructor:${CMAKE_SOURCE_DIR}/Framework/Geometry/inc/MantidGeometry/Rend
 
 useStlAlgorithm:${CMAKE_SOURCE_DIR}/Framework/Kernel/inc/MantidKernel/CompositeValidator.h:57
 operatorEqShouldBeLeftUnimplemented:${CMAKE_SOURCE_DIR}/Framework/Kernel/src/Exception.cpp:229
-unreadVariable:${CMAKE_SOURCE_DIR}/Framework/Kernel/src/InternetHelper.cpp:444
+unreadVariable:${CMAKE_SOURCE_DIR}/Framework/Kernel/src/InternetHelper.cpp:445
 useStlAlgorithm:${CMAKE_SOURCE_DIR}/Framework/Kernel/src/InstrumentInfo.cpp:160
 mismatchingContainerExpression:${CMAKE_SOURCE_DIR}/Framework/Kernel/src/LogFilter.cpp:55
 mismatchingContainerExpression:${CMAKE_SOURCE_DIR}/Framework/Kernel/src/LogFilter.cpp:59
