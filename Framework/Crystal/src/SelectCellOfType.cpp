@@ -154,6 +154,9 @@ void SelectCellOfType::exec() {
     o_lattice->setModUB(newModUB);
     o_lattice->setError(lattice_constant_errors[0], lattice_constant_errors[1], lattice_constant_errors[2],
                         lattice_constant_errors[3], lattice_constant_errors[4], lattice_constant_errors[5]);
+    o_lattice->setModVec1(modvector_0);
+    o_lattice->setModVec2(modvector_1);
+    o_lattice->setModVec3(modvector_2);
 
     int n_peaks = ws->getNumberPeaks();
 
