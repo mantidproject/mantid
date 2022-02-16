@@ -15,12 +15,6 @@ Concepts
 Algorithms
 ----------
 
-Crystal
--------
-
-Improvements
-############
-
 - :ref:`SelectCellOfType <algm-SelectCellOfType>` will optimize both UB and modUB when calculating the lattice constants errors.
 
 Data Objects
