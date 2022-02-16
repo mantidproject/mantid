@@ -41,6 +41,29 @@ do
   shift
 done
 
+EXPECTED_MAMBAFORGE_PATH=$WORKSPACE/mambaforge # Install into the WORKSPACE_DIR
+if [[ $OSTYPE == "msys" ]]; then
+    EXPECTED_CONDA_PATH=$EXPECTED_MAMBAFORGE_PATH/condabin/mamba.bat
+else
+    EXPECTED_CONDA_PATH=$EXPECTED_MAMBAFORGE_PATH/bin/mamba
+fi
+CONDA_ENV_NAME=mantid-anaconda-delete
+RECIPES_DIR=$WORKSPACE/conda-recipes
+SCRIPT_DIR=$WORKSPACE/buildconfig/Jenkins/Conda/
+
+# Setup Mambaforge
+$SCRIPT_DIR/download-and-install-mambaforge $EXPECTED_MAMBAFORGE_PATH $EXPECTED_CONDA_PATH true
+
+# Remove conda env if it exists
+$EXPECTED_CONDA_PATH env remove -n $CONDA_ENV_NAME
+
+# Create env with anaconda-client installed
+$EXPECTED_CONDA_PATH create -n $CONDA_ENV_NAME curl jq -y
+
+# Activate Conda environment
+. $WORKSPACE/mambaforge/etc/profile.d/conda.sh
+conda activate $CONDA_ENV_NAME
+
 FILE_URL="https://api.anaconda.org/package/$CHANNEL/$PACKAGE/files"
 echo Get from url: $FILE_URL
 ALL_PACKAGES=$(curl -s -X GET $FILE_URL)
