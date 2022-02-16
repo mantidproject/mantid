@@ -1,0 +1,22 @@
+#!/usr/bin/env bash
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2020 ISIS Rutherford Appleton Laboratory UKRI,
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
+# SPDX - License - Identifier: GPL - 3.0 +
+#  This file is part of the mantid workbench.
+
+# DMG bundle application launcher. Just redirects to the Conda-executable
+CONTENTS=$(dirname "$(dirname "$0")")
+PREFIX="$CONTENTS"/Resources
+export PATH="$PREFIX"/bin:${PATH}
+
+# Debugging
+# Run on command-line using 'open --stdout=workbench_bundle.log --stderr=workbench_bundle.log MantidWorkbench.app'
+# to capture this output
+echo "Using bundled conda-environment in '$PREFIX'"
+echo "Using Python: '$(which python)'"
+
+# Start
+"$PREFIX/bin/MantidWorkbench" "$@"
