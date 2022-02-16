@@ -744,8 +744,11 @@ class DirectILLCollectData(DataProcessorAlgorithm):
         else:
             windowWidth = self.getProperty(common.PROP_FLAT_BKG_WINDOW).value
             if not self.getProperty(common.PROP_DET_HOR_GROUPING).isDefault \
-                    or not self.getProperty(common.PROP_DET_HOR_GROUPING).isDefault:
-                grouping_pattern = self._get_grouping_pattern(mainWS)
+                    or not self.getProperty(common.PROP_DET_VER_GROUPING).isDefault:
+                grouping_pattern = common.get_grouping_pattern(
+                    mainWS,
+                    self.getProperty(common.PROP_DET_VER_GROUPING).value,
+                    self.getProperty(common.PROP_DET_HOR_GROUPING).value)
                 flatInputWS = self._group_detectors(mainWS, grouping_pattern)
                 flatOutputWS = _createFlatBkg(flatInputWS, common.WS_CONTENT_DETS, windowWidth,
                                               self._names, self._subalgLogging)
@@ -788,29 +791,6 @@ class DirectILLCollectData(DataProcessorAlgorithm):
         self._cleanup.cleanup(monBkgWS)
         self._cleanup.cleanup(monWS)
         return bkgSubtractedMonWS
-
-    def _get_grouping_pattern(self, ws):
-        """Returns a grouping pattern taking into account requested grouping horizontally (between tubes) and vertically
-        (inside a tube). This method can be applied to PANTHER, SHARP, and IN5 instrument structure."""
-
-        group_by_x = self.getProperty(common.PROP_DET_HOR_GROUPING).value
-        group_by_y = self.getProperty(common.PROP_DET_VER_GROUPING).value
-        n_pixels, n_pixels_per_tube = _get_instrument_structure(ws)
-        grouping_pattern = []
-        pixel_id = 0
-        while pixel_id < n_pixels - (group_by_x - 1) * n_pixels_per_tube:
-            pattern = []
-            for tube_shift in range(0, group_by_x):
-                numeric_pattern = list(range(pixel_id + tube_shift * n_pixels_per_tube,
-                                             pixel_id + tube_shift * n_pixels_per_tube + group_by_y))
-                pattern.append('+'.join(map(str, numeric_pattern)))
-            pattern = "+".join(pattern)
-            grouping_pattern.append(pattern)
-            pixel_id += group_by_y
-            if pixel_id % n_pixels_per_tube == 0:
-                pixel_id += n_pixels_per_tube * (group_by_x - 1)
-
-        return ",".join(grouping_pattern)
 
     @staticmethod
     def _group_detectors(input_ws, grouping_pattern):

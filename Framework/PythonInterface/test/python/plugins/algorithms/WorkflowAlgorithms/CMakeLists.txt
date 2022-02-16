@@ -8,6 +8,7 @@ set(TEST_PY_FILES
     CalculateMonteCarloAbsorptionTest.py
     CorelliPowderCalibrationCreateTest.py
     DetectorFloodWeightingTest.py
+    DirectILL_commonTest.py
     DirectILLApplySelfShieldingTest.py
     DirectILLAutoProcessTest.py
     DirectILLCollectDataTest.py

@@ -153,3 +153,48 @@ def convertToWorkspaceIndex(i, ws, indexType=INDEX_TYPE_DET_ID):
 def convertListToWorkspaceIndices(indices, ws, indexType=INDEX_TYPE_DET_ID):
     """Convert a list of spectrum nubmers/detector IDs to workspace indices."""
     return [convertToWorkspaceIndex(i, ws, indexType) for i in indices]
+
+
+def get_grouping_pattern(ws, vertical_step, horizontal_step=1):
+    """Returns a grouping pattern taking into account the requested grouping, either inside the tube, as defined
+    by grouping-by property, or horizontally (between tubes) and vertically (inside a tube).
+    The latter method can be applied only to PANTHER, SHARP, and IN5 instruments' structure.
+
+    Keyword parameters:
+    ws -- workspace for which the grouping pattern is to be provided
+    vertical_step -- grouping step inside a tube
+    horizontal_step -- grouping step between tubes
+    """
+    instrument = ws.getInstrument().getName()
+    n_pixels = ws.getNumberHistograms()
+    if horizontal_step == 1:
+        group_by = vertical_step
+        grouping_pattern = \
+            ["{}-{}".format(pixel_id, pixel_id + group_by - 1) for pixel_id in range(0, n_pixels-group_by, group_by)]
+    else:
+        group_by_x = horizontal_step
+        group_by_y = vertical_step
+        n_tubes = 0
+        n_monitors = {'IN5': 1, 'PANTHER': 1, 'SHARP': 1}
+        for comp in ws.componentInfo():
+            if len(comp.detectorsInSubtree) > 1 and comp.hasParent:
+                n_tubes += 1
+        n_tubes -= n_monitors[instrument]
+        if instrument == 'IN5':  # there is an extra bank that contains all of the tubes
+            n_tubes -= 1
+        n_pixels_per_tube = int(n_pixels / n_tubes)
+        grouping_pattern = []
+        pixel_id = 0
+        while pixel_id < n_pixels - (group_by_x - 1) * n_pixels_per_tube:
+            pattern = []
+            for tube_shift in range(0, group_by_x):
+                numeric_pattern = list(range(pixel_id + tube_shift * n_pixels_per_tube,
+                                             pixel_id + tube_shift * n_pixels_per_tube + group_by_y))
+                pattern.append('+'.join(map(str, numeric_pattern)))
+            pattern = "+".join(pattern)
+            grouping_pattern.append(pattern)
+            pixel_id += group_by_y
+            if pixel_id % n_pixels_per_tube == 0:
+                pixel_id += n_pixels_per_tube * (group_by_x - 1)
+
+    return ",".join(grouping_pattern)
