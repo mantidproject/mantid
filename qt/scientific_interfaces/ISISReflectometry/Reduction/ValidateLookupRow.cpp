@@ -65,7 +65,7 @@ ValidatorT<boost::optional<boost::regex>> LookupRowValidator::parseTitleMatcherO
   if (auto result = parseTitleMatcher(text)) {
     return result;
   } else {
-    // TODO add to m_invalidColumns and test it
+    m_invalidColumns.insert(LookupRow::Column::TITLE);
     return boost::none;
   }
 }
@@ -124,7 +124,8 @@ void LookupRowValidator::validateThetaAndRegex() {
 
   // Check we have a theta value, when we have a titleMatcher
   if (m_titleMatcherOrInvalid.get().is_initialized() && !m_thetaOrInvalid.get().is_initialized()) {
-    // TODO column
+    m_invalidColumns.insert(LookupRow::Column::THETA);
+    m_invalidColumns.insert(LookupRow::Column::TITLE);
     m_thetaOrInvalid = boost::none;
     m_titleMatcherOrInvalid = boost::none;
   }

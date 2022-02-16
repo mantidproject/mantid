@@ -81,13 +81,17 @@ public:
   void testParseTitleMatcherInvalid() {
     LookupRowValidator validator;
     auto result = validator({"0.5", "["});
-    TS_ASSERT(!result.isValid()); // Outer not initialized (invalid)
+    auto expectedErrorSet = std::unordered_set<int>{LookupRow::Column::TITLE};
+    TS_ASSERT(result.isError()); // Outer not initialized (invalid)
+    TS_ASSERT_EQUALS(expectedErrorSet, result.assertError())
   }
 
   void testParseTitleMatcherWithNoThetaIsInvalid() {
     LookupRowValidator validator;
     auto result = validator({"", "test.*"});
-    TS_ASSERT(!result.isValid()); // Outer not initialized (invalid)
+    auto expectedErrorSet = std::unordered_set<int>{LookupRow::Column::THETA, LookupRow::Column::TITLE};
+    TS_ASSERT(result.isError()); // Outer not initialized (invalid)
+    TS_ASSERT_EQUALS(expectedErrorSet, result.assertError())
   }
 
   void testParseTransmissionRuns() {
