@@ -83,10 +83,12 @@ std::map<std::string, std::string> SelectCellOfType::validateInputs() {
   }
 
   // Case 1: Attached UB is invalid
-  auto const o_lattice = ws->mutableSample().getOrientedLattice();
-  auto const UB = o_lattice.getUB();
-  if (!IndexingUtils::CheckUB(UB)) {
-    result["PeaksWorkspace"] = "ERROR: The stored UB is not a valid orientation matrix";
+  if (ws) {
+    auto const o_lattice = ws->mutableSample().getOrientedLattice();
+    auto const UB = o_lattice.getUB();
+    if (!IndexingUtils::CheckUB(UB)) {
+      result["PeaksWorkspace"] = "ERROR: The stored UB is not a valid orientation matrix";
+    }
   }
 
   return result;

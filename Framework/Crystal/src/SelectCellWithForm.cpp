@@ -57,11 +57,13 @@ std::map<std::string, std::string> SelectCellWithForm::validateInputs() {
     result["PeaksWorkspace"] = "Must be a valid PeaksWorkspace";
   }
 
-  // Case 1:
-  auto const o_lattice = ws->sample().getOrientedLattice();
-  auto const UB = o_lattice.getUB();
-  if (!IndexingUtils::CheckUB(UB)) {
-    result["PeaksWorkspace"] = "The stored UB is not a valid orientation matrix";
+  // Case 1: invalid UB
+  if (ws) {
+    auto const o_lattice = ws->sample().getOrientedLattice();
+    auto const UB = o_lattice.getUB();
+    if (!IndexingUtils::CheckUB(UB)) {
+      result["PeaksWorkspace"] = "The stored UB is not a valid orientation matrix";
+    }
   }
 
   return result;
