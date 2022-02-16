@@ -21,7 +21,7 @@ Mantid::Kernel::Logger g_log("Reflectometry GUI");
 ExperimentPresenter::ExperimentPresenter(IExperimentView *view, Experiment experiment, double defaultsThetaTolerance,
                                          std::unique_ptr<IExperimentOptionDefaults> experimentDefaults)
     : m_experimentDefaults(std::move(experimentDefaults)), m_view(view), m_model(std::move(experiment)),
-      m_thetaTolerance(defaultsThetaTolerance) {
+      m_thetaTolerance(defaultsThetaTolerance), m_validationResult(m_model) {
   m_view->subscribe(this);
 }
 
@@ -30,8 +30,8 @@ void ExperimentPresenter::acceptMainPresenter(IBatchPresenter *mainPresenter) { 
 Experiment const &ExperimentPresenter::experiment() const { return m_model; }
 
 void ExperimentPresenter::notifySettingsChanged() {
-  auto validationResult = updateModelFromView();
-  showValidationResult(validationResult);
+  updateModelFromView();
+  showValidationResult();
   m_mainPresenter->notifySettingsChanged();
 }
 
@@ -64,10 +64,10 @@ void ExperimentPresenter::notifyRemoveLookupRowRequested(int index) {
 }
 
 void ExperimentPresenter::notifyLookupRowChanged(int, int column) {
-  auto validationResult = updateModelFromView();
-  showValidationResult(validationResult);
-  if (column == 0 && !validationResult.isValid() &&
-      validationResult.assertError().lookupTableValidationErrors().fullTableError() ==
+  updateModelFromView();
+  showValidationResult();
+  if (column == 0 && !m_validationResult.isValid() &&
+      m_validationResult.assertError().lookupTableValidationErrors().fullTableError() ==
           ThetaValuesValidationError::NonUniqueTheta)
     m_view->showLookupRowsNotUnique(m_thetaTolerance);
   m_mainPresenter->notifySettingsChanged();
@@ -234,6 +234,8 @@ std::map<std::string, std::string> ExperimentPresenter::stitchParametersFromView
   return std::map<std::string, std::string>();
 }
 
+bool ExperimentPresenter::hasValidSettings() const noexcept { return m_validationResult.isValid(); }
+
 ExperimentValidationResult ExperimentPresenter::validateExperimentFromView() {
   auto validate = LookupTableValidator();
   auto lookupTableValidationResult = validate(m_view->getLookupTable(), m_thetaTolerance);
@@ -257,13 +259,12 @@ ExperimentValidationResult ExperimentPresenter::validateExperimentFromView() {
   }
 }
 
-ExperimentValidationResult ExperimentPresenter::updateModelFromView() {
-  auto validationResult = validateExperimentFromView();
-  if (validationResult.isValid()) {
-    m_model = validationResult.assertValid();
+void ExperimentPresenter::updateModelFromView() {
+  m_validationResult = validateExperimentFromView();
+  if (m_validationResult.isValid()) {
+    m_model = m_validationResult.assertValid();
     updateWidgetEnabledState();
   }
-  return validationResult;
 }
 
 void ExperimentPresenter::showLookupTableErrors(LookupTableValidationError const &errors) {
@@ -274,11 +275,11 @@ void ExperimentPresenter::showLookupTableErrors(LookupTableValidationError const
   }
 }
 
-void ExperimentPresenter::showValidationResult(ExperimentValidationResult const &result) {
-  if (result.isValid()) {
+void ExperimentPresenter::showValidationResult() {
+  if (m_validationResult.isValid()) {
     m_view->showAllLookupRowsAsValid();
   } else {
-    auto errors = result.assertError();
+    auto errors = m_validationResult.assertError();
     showLookupTableErrors(errors.lookupTableValidationErrors());
   }
 }

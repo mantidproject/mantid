@@ -63,6 +63,8 @@ public:
   void notifyInstrumentChanged(std::string const &instrumentName) override;
   void restoreDefaults() override;
 
+  bool hasValidSettings() const noexcept override;
+
 protected:
   std::unique_ptr<IExperimentOptionDefaults> m_experimentDefaults;
 
@@ -79,10 +81,10 @@ private:
 
   std::map<std::string, std::string> stitchParametersFromView();
 
-  ExperimentValidationResult updateModelFromView();
+  void updateModelFromView();
   void updateViewFromModel();
 
-  void showValidationResult(ExperimentValidationResult const &result);
+  void showValidationResult();
   void showLookupTableErrors(LookupTableValidationError const &errors);
 
   void updateWidgetEnabledState();
@@ -94,9 +96,10 @@ private:
   bool isProcessing() const;
   bool isAutoreducing() const;
 
-  IExperimentView *m_view;
+  IExperimentView *m_view = nullptr;
   Experiment m_model;
-  double m_thetaTolerance;
+  double m_thetaTolerance = 0;
+  ExperimentValidationResult m_validationResult;
 };
 } // namespace ISISReflectometry
 } // namespace CustomInterfaces
