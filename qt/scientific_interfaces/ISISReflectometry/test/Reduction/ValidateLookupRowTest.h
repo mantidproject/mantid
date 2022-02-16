@@ -6,15 +6,10 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 #include "../../../ISISReflectometry/Reduction/ValidateLookupRow.h"
-#include "MantidKernel/WarningSuppressions.h"
 #include <cxxtest/TestSuite.h>
 #include <unordered_set>
 
 using namespace MantidQt::CustomInterfaces::ISISReflectometry;
-
-// The missing braces warning is a false positive -
-// https://llvm.org/bugs/show_bug.cgi?id=21629
-GNU_DIAG_OFF("missing-braces")
 
 class ValidateLookupRowTest : public CxxTest::TestSuite {
 public:
@@ -189,5 +184,3 @@ public:
     TS_ASSERT_EQUALS(result.assertError(), errorCells);
   }
 };
-
-GNU_DIAG_ON("missing-braces")
