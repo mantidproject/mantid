@@ -40,7 +40,11 @@ private:
   ValidatorT<boost::optional<std::string>> parseProcessingInstructions(LookupRow::ValueArray const &cellText);
   ValidatorT<boost::optional<std::string>> parseBackgroundProcessingInstructions(LookupRow::ValueArray const &cellText);
 
+  void validateThetaAndRegex();
+
   std::vector<int> m_invalidColumns;
+  ValidatorT<boost::optional<double>> m_thetaOrInvalid;
+  ValidatorT<boost::optional<boost::regex>> m_titleMatcherOrInvalid;
 };
 
 ValidationResult<LookupRow, std::vector<int>> validateLookupRow(LookupRow::ValueArray const &cellText);

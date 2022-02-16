@@ -64,6 +64,7 @@ ValidatorT<boost::optional<boost::regex>> LookupRowValidator::parseTitleMatcherO
   if (auto result = parseTitleMatcher(text)) {
     return result;
   } else {
+    // TODO add to m_invalidColumns and test it
     return boost::none;
   }
 }
@@ -115,18 +116,34 @@ LookupRowValidator::parseBackgroundProcessingInstructions(CellText const &cellTe
   return optionalInstructionsOrNoneIfError;
 }
 
+void LookupRowValidator::validateThetaAndRegex() {
+  // If either value didn't even parse, there's nothing further to check, so return
+  if (!m_thetaOrInvalid.is_initialized() || !m_titleMatcherOrInvalid.is_initialized())
+    return;
+
+  // Check we have a theta value, when we have a titleMatcher
+  if (m_titleMatcherOrInvalid.get().is_initialized() && !m_thetaOrInvalid.get().is_initialized()) {
+    // TODO column
+    m_thetaOrInvalid = boost::none;
+    m_titleMatcherOrInvalid = boost::none;
+  }
+}
+
 ValidationResult<LookupRow, std::vector<int>> LookupRowValidator::operator()(CellText const &cellText) {
-  auto maybeTheta = parseThetaOrWhitespace(cellText);
-  auto maybeTitleMatcher = parseTitleMatcherOrWhitespace(cellText);
+  m_thetaOrInvalid = parseThetaOrWhitespace(cellText);
+  m_titleMatcherOrInvalid = parseTitleMatcherOrWhitespace(cellText);
+  validateThetaAndRegex();
+
   auto maybeTransmissionRuns = parseTransmissionRuns(cellText);
   auto maybeTransmissionProcessingInstructions = parseTransmissionProcessingInstructions(cellText);
   auto maybeQRange = parseQRange(cellText);
   auto maybeScaleFactor = parseScaleFactor(cellText);
   auto maybeProcessingInstructions = parseProcessingInstructions(cellText);
   auto maybeBackgroundProcessingInstructions = parseBackgroundProcessingInstructions(cellText);
+
   auto maybeDefaults = makeIfAllInitialized<LookupRow>(
-      maybeTheta, maybeTitleMatcher, maybeTransmissionRuns, maybeTransmissionProcessingInstructions, maybeQRange,
-      maybeScaleFactor, maybeProcessingInstructions, maybeBackgroundProcessingInstructions);
+      m_thetaOrInvalid, m_titleMatcherOrInvalid, maybeTransmissionRuns, maybeTransmissionProcessingInstructions,
+      maybeQRange, maybeScaleFactor, maybeProcessingInstructions, maybeBackgroundProcessingInstructions);
 
   if (maybeDefaults.is_initialized())
     return ValidationResult<LookupRow, std::vector<int>>(maybeDefaults.get());

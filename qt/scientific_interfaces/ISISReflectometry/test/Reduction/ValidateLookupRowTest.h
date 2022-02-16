@@ -88,6 +88,12 @@ public:
     TS_ASSERT(!result.isValid()); // Outer not initialized (invalid)
   }
 
+  void testParseTitleMatcherWithNoThetaIsInvalid() {
+    LookupRowValidator validator;
+    auto result = validator({"", "test.*"});
+    TS_ASSERT(!result.isValid()); // Outer not initialized (invalid)
+  }
+
   void testParseTransmissionRuns() {
     LookupRowValidator validator;
     auto result = validator({"", "", "13463", "13464"});
