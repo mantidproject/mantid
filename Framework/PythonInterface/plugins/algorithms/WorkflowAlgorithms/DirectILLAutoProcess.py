@@ -497,12 +497,17 @@ class DirectILLAutoProcess(DataProcessorAlgorithm):
         if sample_no == 0:
             self._prepare_self_attenuation_ws(ws)
         if self.absorption_corr:
-            tmp_corr = '{}_tmp'.format(self.absorption_corr)
-            RebinToWorkspace(
-                WorkspaceToRebin=self.absorption_corr,
-                WorkspaceToMatch=ws,
-                OutputWorkspace=tmp_corr
-            )
+            corr_list = []
+            for ws_name in mtd[self.absorption_corr].getNames():
+                tmp_corr = 'tmp_{}'.format(ws_name)
+                corr_list.append(tmp_corr)
+                RebinToWorkspace(
+                    WorkspaceToRebin=ws_name,
+                    WorkspaceToMatch=ws,
+                    OutputWorkspace=tmp_corr
+                )
+            tmp_corr = 'tmp_{}'.format(self.absorption_corr)
+            GroupWorkspaces(InputWorkspaces=corr_list, OutputWorkspace=tmp_corr)
             ApplyPaalmanPingsCorrection(
                 SampleWorkspace=ws,
                 OutputWorkspace=ws,
