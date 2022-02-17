@@ -25,6 +25,7 @@ CrystalField
 ------------
 Improvements
 ############
+
 - The :ref:`Crystal Field Python interface <Crystal Field Python Interface>` has been extended to include functions to calculate the x y and z components of
   the dipole transition maxtrix, ``getXDipoleMatrixComponent()``, ``getYDipoleMatrixComponent()`` and ``getZDipoleMatrixComponent()``.
 

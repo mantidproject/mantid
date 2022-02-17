@@ -796,17 +796,19 @@ Calculating Physical Properties
 -------------------------------
 
 In addition to the inelastic neutron spectrum, various physical properties arising from the crystal field interaction
-can be calculated. These include (but are not necessarily limited to)::
--the crystal field contribution to the magnetic heat capacity;
--the magnetic susceptibility;
--magnetic moment (and subsequently magnetisation)
--the dipole transition matrix (and individual components).
+can be calculated. These include (but are not necessarily limited to):
 
-The calculated values can be invoked using the respective functions::
--`getHeatCapacity()`;
--`getSusceptibility()`;
--`getMagneticMoment()`;
--`getDipoleMatrix()` (`getXDipoleMatrixComponent()`, `getYDipoleMatrixComponent()`, `getZDipoleMatrixComponent()`).
+- the crystal field contribution to the magnetic heat capacity;
+- magnetic susceptibility;
+- magnetic moment (and subsequently magnetisation)
+- the dipole transition matrix (and individual components).
+
+The calculated values can be invoked using the respective functions:
+
+- `getHeatCapacity()`;
+- `getSusceptibility()`;
+- `getMagneticMoment()`;
+- `getDipoleMatrix()` (`getXDipoleMatrixComponent()`, `getYDipoleMatrixComponent()`, `getZDipoleMatrixComponent()`).
 
 To calculate the heat capacity use::
 
@@ -877,6 +879,7 @@ SI or cgs molar magnetic moments can be calculated::
 Please note that if cgs units are used, then the magnetic field must be specified in *Gauss* rather than *Tesla*
 (1T == 10000G). Note also that the cgs unit "emu/mol" in this case is "erg/Gauss/mol" quantifying a molar magnetic
 moment.
+
 Please note that the calculation result is the molar magnetic moment. Thus to get the magnetisation, you
 should divide this by the molar volume of the material.
 By default, the calculation temperature is 1K, and the applied magnetic field is 1T along [001]. For further details
