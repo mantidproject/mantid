@@ -904,13 +904,7 @@ class CrystalField(object):
 
         return self._getPhysProp(PhysicalProperties(pptype, *args, **kwargs), workspace, ws_index)
 
-    def getDipoleMatrix(self):
-        """Returns the dipole transition matrix as a numpy array"""
-        gJuB = _calcGJuB()
-        trans = getXDipoleMatrixComponent(gJuB) + getYDipoleMatrixComponent(gJuB) + getZDipoleMatrixComponent(gJuB)
-        return trans
-
-    def _calcGJuB(self):
+    def _calc_gJuB(self):
         gj = 2. if (self._nre < 1) else self.lande_g[self._nre - 1]
         gJuB = gj * physical_constants['Bohr magneton in eV/T'][0] * 1000.
         return gJuB
@@ -918,7 +912,7 @@ class CrystalField(object):
     def getXDipoleMatrixComponent(self, gJuB = None):
         self._calcEigensystem() #will not recalculate if already called (unless _dirty_eigensystem)
         if gJuB is None:
-            gJuB = _calcGJuB
+            gJuB = self._calc_gJuB()
         _, _, hx = energies(self._nre, BextX=1.0)
         ix = np.dot(np.conj(np.transpose(self._eigenvectors)), np.dot(hx, self._eigenvectors))
         return np.multiply(ix, np.conj(ix))/(gJuB ** 2)
@@ -926,7 +920,7 @@ class CrystalField(object):
     def getYDipoleMatrixComponent(self, gJuB = None):
         self._calcEigensystem() #will not recalculate if already called (unless _dirty_eigensystem)
         if gJuB is None:
-            gJuB = _calcGJuB
+            gJuB = self._calc_gJuB()
         _, _, hy = energies(self._nre, BextY=1.0)
         iy = np.dot(np.conj(np.transpose(self._eigenvectors)), np.dot(hy, self._eigenvectors))
         return np.multiply(iy, np.conj(iy))/(gJuB ** 2)
@@ -934,10 +928,16 @@ class CrystalField(object):
     def getZDipoleMatrixComponent(self, gJuB = None):
         self._calcEigensystem() #will not recalculate if already called (unless _dirty_eigensystem)
         if gJuB is None:
-            gJuB = _calcGJuB
+            gJuB = self._calc_gJuB()
         _, _, hz = energies(self._nre, BextZ=1.0)
         iz = np.dot(np.conj(np.transpose(self._eigenvectors)), np.dot(hz, self._eigenvectors))
         return np.multiply(iz, np.conj(iz))/(gJuB ** 2)
+
+    def getDipoleMatrix(self):
+        """Returns the dipole transition matrix as a numpy array"""
+        gJuB = self._calc_gJuB()
+        trans = self.getXDipoleMatrixComponent(gJuB) + self.getYDipoleMatrixComponent(gJuB) + self.getZDipoleMatrixComponent(gJuB)
+        return trans
 
     def plot(self, i=0, workspace=None, ws_index=0, name=None):
         """Plot a spectrum. Parameters are the same as in getSpectrum(...)"""
