@@ -240,7 +240,7 @@ if "%BUILDPKG%" == "yes" (
     if not "%JOB_NAME%" == "%JOB_NAME:pull_requests=%" (
       set EXTRA_ARGS=--exclude-in-pull-requests
     )
-    call systemtests.bat
+    call %WORKSPACE%\buildconfig\Jenkins\systemtests.bat
   )
 ) else (
   :: If no package is built, run the system tests without installing the package.
@@ -248,6 +248,6 @@ if "%BUILDPKG%" == "yes" (
     if not "%JOB_NAME%" == "%JOB_NAME:pull_requests=%" (
       set EXTRA_ARGS=--exclude-in-pull-requests
     )
-    call systemtests.bat
+    call %WORKSPACE%\buildconfig\Jenkins\systemtests.bat
   )
 )
