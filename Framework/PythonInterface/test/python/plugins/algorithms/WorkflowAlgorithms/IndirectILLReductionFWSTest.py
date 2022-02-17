@@ -57,6 +57,14 @@ class IndirectILLReductionFWS(unittest.TestCase):
 
         self.assertEqual(runs_log2,'170300,170302,170304',"Reduced runs list mismatch.")
 
+    def test_no_grouping(self):
+        args = {'Run': self._run_one_wing_mixed,
+                'GroupDetectors': False,
+                'OutputWorkspace': 'out'}
+        alg_test = run_algorithm('IndirectILLReductionFWS', **args)
+        self.assertTrue(alg_test.isExecuted(), "IndirectILLReductionFWS not executed")
+        self._check_workspace_group(mtd['out_red'], 3, 128*16+2+1, 2)
+
     def test_one_wing(self):
 
         args = {'Run': self._run_one_wing_mixed,
