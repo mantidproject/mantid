@@ -7,6 +7,8 @@
 # pylint: disable=no-init,invalid-name,attribute-defined-outside-init,too-many-instance-attributes
 from mantid.simpleapi import *
 from mantid.api import *
+# the mantid.kernel import is required for Direction.Input and Direction.Output calls
+from mantid.kernel import *
 
 
 class PoldiDataAnalysis(PythonAlgorithm):
