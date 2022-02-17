@@ -175,12 +175,6 @@ if [[ ${PRBUILD} == true ]]; then
     fi
 fi
 
-# Temporarily disable stuff to speed up feedback time.
-DO_UNITTESTS=false
-DO_DOCTESTS_USER=false
-DO_BUILD_DEVDOCS=false
-
-
 ###############################################################################
 # Setup the build directory
 # For a clean build the entire thing is removed to guarantee it is clean. All
