@@ -1776,6 +1776,17 @@ class CrystalFieldFitTest(unittest.TestCase):
 
         self.assertLess(cf.chi2, chi2)
 
+    def test_matrix_components_equal_to_summed_matrix(self):
+        cf = CrystalField.CrystalField('Ce', 'C2v', B20=0.035, B40=-0.012, B43=-0.027, B60=-0.00012, B63=0.0025,
+                                       B66=0.0068)
+        x = cf.getXDipoleMatrixComponent()
+        y = cf.getYDipoleMatrixComponent()
+        z = cf.getZDipoleMatrixComponent()
+        sum = x + y + z
+        func_res = cf.getDipoleMatrix()
+        comparison = sum == func_res
+        self.assertTrue(comparison.all())
+
 
 if __name__ == "__main__":
     unittest.main()
