@@ -7,7 +7,7 @@
 from mantidqt.gui_helper import show_interface_help
 import numpy as np
 import mantid
-from qtpy import QtWidgets
+from qtpy import QtWidgets, QtCore
 from mantidqt.MPLwidgets import *
 import matplotlib
 from matplotlib.figure import Figure
