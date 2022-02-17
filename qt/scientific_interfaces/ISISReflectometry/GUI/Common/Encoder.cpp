@@ -21,6 +21,10 @@
 #include "../RunsTable/RunsTablePresenter.h"
 #include "../Save/QtSaveView.h"
 
+namespace {
+auto constexpr BATCH_VERSION = 1;
+}
+
 namespace MantidQt::CustomInterfaces::ISISReflectometry {
 
 BatchPresenter *Encoder::findBatchPresenter(const QtBatchView *gui, const IMainWindowView *view) {
@@ -61,6 +65,7 @@ QMap<QString, QVariant> Encoder::encodeBatch(const IMainWindowView *mwv, int bat
   auto searcher = dynamic_cast<QtCatalogSearcher *>(runsPresenter->m_searcher.get());
 
   QMap<QString, QVariant> map;
+  map.insert(QString("version"), QVariant(BATCH_VERSION));
   map.insert(QString("runsView"), QVariant(encodeRuns(gui->m_runs.get(), projectSave, reductionJobs, searcher)));
   map.insert(QString("eventView"), QVariant(encodeEvent(gui->m_eventHandling.get())));
   map.insert(QString("experimentView"), QVariant(encodeExperiment(gui->m_experiment.get())));

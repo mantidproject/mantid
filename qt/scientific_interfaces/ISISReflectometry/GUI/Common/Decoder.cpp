@@ -58,7 +58,8 @@ QWidget *Decoder::decode(const QMap<QString, QVariant> &map, const std::string &
 
 QList<QString> Decoder::tags() { return QList<QString>({QString("ISIS Reflectometry")}); }
 
-void Decoder::decodeBatch(const IMainWindowView *mwv, int batchIndex, const QMap<QString, QVariant> &map) {
+void Decoder::decodeBatch(const IMainWindowView *mwv, int batchIndex, const QMap<QString, QVariant> &batchMap) {
+  m_currentBatchVersion = decodeVersion(batchMap);
   auto gui = dynamic_cast<const QtBatchView *>(mwv->batches()[batchIndex]);
   auto batchPresenter = findBatchPresenter(gui, mwv);
   if (!batchPresenter) {
@@ -73,12 +74,16 @@ void Decoder::decodeBatch(const IMainWindowView *mwv, int batchIndex, const QMap
   // other settings may need to be correct. There is also a notification to set
   // defaults for this instrument so we need to do that before other settings
   // or it will override them.
-  decodeRuns(gui->m_runs.get(), reductionJobs, runsTablePresenter, map[QString("runsView")].toMap(),
+  decodeRuns(gui->m_runs.get(), reductionJobs, runsTablePresenter, batchMap[QString("runsView")].toMap(),
              destinationPrecision, searcher);
-  decodeEvent(gui->m_eventHandling.get(), map[QString("eventView")].toMap());
-  decodeExperiment(gui->m_experiment.get(), map[QString("experimentView")].toMap());
-  decodeInstrument(gui->m_instrument.get(), map[QString("instrumentView")].toMap());
-  decodeSave(gui->m_save.get(), map[QString("saveView")].toMap());
+  decodeEvent(gui->m_eventHandling.get(), batchMap[QString("eventView")].toMap());
+  decodeExperiment(gui->m_experiment.get(), batchMap[QString("experimentView")].toMap());
+  decodeInstrument(gui->m_instrument.get(), batchMap[QString("instrumentView")].toMap());
+  decodeSave(gui->m_save.get(), batchMap[QString("saveView")].toMap());
+}
+
+size_t Decoder::decodeVersion(const QMap<QString, QVariant> &batchMap) const {
+  return batchMap[QString("version")].toUInt();
 }
 
 void Decoder::decodeExperiment(QtExperimentView *gui, const QMap<QString, QVariant> &map) {
@@ -110,20 +115,36 @@ void Decoder::decodePerAngleDefaults(QTableWidget *tab, const QMap<QString, QVar
   }
   const int rowsNum = map[QString("rowsNum")].toInt();
   const int columnsNum = map[QString("columnsNum")].toInt();
-  decodePerAngleDefaultsRows(tab, rowsNum, columnsNum, map[QString("rows")].toList());
+
+  if (m_currentBatchVersion >= 1) {
+    decodePerAngleDefaultsRows(tab, rowsNum, columnsNum, map[QString("rows")].toList());
+  } else {
+    decodeLegacyPerAngleDefaultsRows(tab, rowsNum, columnsNum, map[QString("rows")].toList());
+  }
 }
 
-void Decoder::decodePerAngleDefaultsRows(QTableWidget *tab, int rowsNum, int columnsNum, const QList<QVariant> &list) {
+void Decoder::decodeLegacyPerAngleDefaultsRows(QTableWidget *tab, int rowsNum, int columnsNum,
+                                               const QList<QVariant> &list) {
   for (auto rowIndex = 0; rowIndex < rowsNum; ++rowIndex) {
     tab->insertRow(rowIndex);
     decodeLegacyPerAngleDefaultsRow(tab, rowIndex, columnsNum, list[rowIndex].toList());
   }
 }
 
+void Decoder::decodePerAngleDefaultsRows(QTableWidget *tab, int rowsNum, int columnsNum, const QList<QVariant> &list) {
+  for (auto rowIndex = 0; rowIndex < rowsNum; ++rowIndex) {
+    tab->insertRow(rowIndex);
+    decodePerAngleDefaultsRow(tab, rowIndex, columnsNum, list[rowIndex].toList());
+  }
+}
+
 void Decoder::decodeLegacyPerAngleDefaultsRow(QTableWidget *tab, int rowIndex, int columnsNum, QList<QVariant> list) {
   // WORKAROUND: This method can only handle 9/10 column legacy files. All future files (e.g. 11+ cols) should
   // be versioned and should never hit the below path:
-  assert((columnsNum == 9 || columnsNum == 10));
+  if (!(columnsNum == 9 || columnsNum == 10)) {
+    throw std::out_of_range(
+        "Cannot decode malformed row. Unexpected number of columns for legacy row. Should have 9 or 10.");
+  }
   // Column 2 was created to hold a title matcher
   list.insert(1, QString(""));
 
@@ -139,8 +160,6 @@ void Decoder::decodeLegacyPerAngleDefaultsRow(QTableWidget *tab, int rowIndex, i
 void Decoder::decodePerAngleDefaultsRow(QTableWidget *tab, int rowIndex, int columnsNum, const QList<QVariant> &list) {
   MantidQt::API::SignalBlocker blocker(tab);
   for (auto columnIndex = 0; columnIndex < tab->columnCount(); ++columnIndex) {
-    // Old files may not include all of the columns so add an empty cell if it
-    // doesn't exist in the file
     auto const columnValue = columnIndex < columnsNum ? list[columnIndex].toString() : QString();
     auto tableWidgetItem = new QTableWidgetItem(columnValue);
     tab->setItem(rowIndex, columnIndex, tableWidgetItem);

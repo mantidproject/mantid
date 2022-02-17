@@ -49,7 +49,9 @@ class MANTIDQT_ISISREFLECTOMETRY_DLL Decoder : public MantidQt::API::BaseDecoder
 public:
   QWidget *decode(const QMap<QString, QVariant> &map, const std::string &directory) override;
   QList<QString> tags() override;
-  void decodeBatch(const IMainWindowView *mwv, int batchIndex, const QMap<QString, QVariant> &map) override;
+  void decodeBatch(const IMainWindowView *mwv, int batchIndex, const QMap<QString, QVariant> &batchMap) override;
+
+  size_t decodeVersion(const QMap<QString, QVariant> &batchMap) const override;
 
 private:
   BatchPresenter *findBatchPresenter(const QtBatchView *gui, const IMainWindowView *mww);
@@ -57,6 +59,7 @@ private:
   void decodePerAngleDefaults(QTableWidget *tab, const QMap<QString, QVariant> &map);
   void decodeLegacyPerAngleDefaultsRow(QTableWidget *tab, int rowIndex, int columnsNum, QList<QVariant> list);
   void decodePerAngleDefaultsRow(QTableWidget *tab, int rowIndex, int columnsNum, const QList<QVariant> &list);
+  void decodeLegacyPerAngleDefaultsRows(QTableWidget *tab, int rowsNum, int columnsNum, const QList<QVariant> &list);
   void decodePerAngleDefaultsRows(QTableWidget *tab, int rowsNum, int columnsNum, const QList<QVariant> &list);
   void decodeInstrument(const QtInstrumentView *gui, const QMap<QString, QVariant> &map);
   void decodeRuns(QtRunsView *gui, ReductionJobs *redJobs, RunsTablePresenter *presenter,
@@ -79,6 +82,7 @@ private:
                                     const boost::optional<int> &precision);
 
   bool m_projectSave = false;
+  size_t m_currentBatchVersion = 0;
   friend class CoderCommonTester;
 };
 
