@@ -906,17 +906,38 @@ class CrystalField(object):
 
     def getDipoleMatrix(self):
         """Returns the dipole transition matrix as a numpy array"""
-        self._calcEigensystem()
-        _, _, hx = energies(self._nre, BextX=1.0)
-        _, _, hy = energies(self._nre, BextY=1.0)
-        _, _, hz = energies(self._nre, BextZ=1.0)
-        ix = np.dot(np.conj(np.transpose(self._eigenvectors)), np.dot(hx, self._eigenvectors))
-        iy = np.dot(np.conj(np.transpose(self._eigenvectors)), np.dot(hy, self._eigenvectors))
-        iz = np.dot(np.conj(np.transpose(self._eigenvectors)), np.dot(hz, self._eigenvectors))
+        gJuB = _calcGJuB()
+        trans = getXDipoleMatrixComponent(gJuB) + getYDipoleMatrixComponent(gJuB) + getZDipoleMatrixComponent(gJuB)
+        return trans
+
+    def _calcGJuB(self):
         gj = 2. if (self._nre < 1) else self.lande_g[self._nre - 1]
         gJuB = gj * physical_constants['Bohr magneton in eV/T'][0] * 1000.
-        trans = np.multiply(ix, np.conj(ix)) + np.multiply(iy, np.conj(iy)) + np.multiply(iz, np.conj(iz))
-        return trans / (gJuB ** 2)
+        return gJuB
+
+    def getXDipoleMatrixComponent(self, gJuB = None):
+        self._calcEigensystem() #will not recalculate if already called (unless _dirty_eigensystem)
+        if gJuB is None:
+            gJuB = _calcGJuB
+        _, _, hx = energies(self._nre, BextX=1.0)
+        ix = np.dot(np.conj(np.transpose(self._eigenvectors)), np.dot(hx, self._eigenvectors))
+        return np.multiply(ix, np.conj(ix))/(gJuB ** 2)
+
+    def getYDipoleMatrixComponent(self, gJuB = None):
+        self._calcEigensystem() #will not recalculate if already called (unless _dirty_eigensystem)
+        if gJuB is None:
+            gJuB = _calcGJuB
+        _, _, hy = energies(self._nre, BextY=1.0)
+        iy = np.dot(np.conj(np.transpose(self._eigenvectors)), np.dot(hy, self._eigenvectors))
+        return np.multiply(iy, np.conj(iy))/(gJuB ** 2)
+
+    def getZDipoleMatrixComponent(self, gJuB = None):
+        self._calcEigensystem() #will not recalculate if already called (unless _dirty_eigensystem)
+        if gJuB is None:
+            gJuB = _calcGJuB
+        _, _, hz = energies(self._nre, BextZ=1.0)
+        iz = np.dot(np.conj(np.transpose(self._eigenvectors)), np.dot(hz, self._eigenvectors))
+        return np.multiply(iz, np.conj(iz))/(gJuB ** 2)
 
     def plot(self, i=0, workspace=None, ws_index=0, name=None):
         """Plot a spectrum. Parameters are the same as in getSpectrum(...)"""
