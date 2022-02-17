@@ -752,9 +752,9 @@ And the same reduction, but with the use of the :ref:`algm-DirectILLAutoProcess`
 
 .. testcode:: FullExampleAutoProcess
 
-    vanadium_runs = 'ILL/IN4/085801-085802'
-    sample_runs = 'ILL/IN4/087294+087295.nxs,ILL/IN4/087283-087290.nxs'
-    container_runs = 'ILL/IN4/087306-087309.nxs,ILL/IN4/087311-087314.nxs'
+    vanadium_runs = '085801-085802'
+    sample_runs = '087294+087295,087283-087290'
+    container_runs = '087306-087309,087311-087314'
 
     vanadium_ws = 'vanadium_auto'
     container_ws = 'container'
