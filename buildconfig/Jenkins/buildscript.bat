@@ -70,19 +70,24 @@ if NOT DEFINED MANTID_DATA_STORE (
 ::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 set CLEANBUILD=
 set BUILDPKG=
+set SYSTEMTESTS=
 
 if not "%JOB_NAME%" == "%JOB_NAME:clean=%" (
   set CLEANBUILD=yes
   set BUILDPKG=yes
 )
 
-:: BUILD_PACKAGE can be provided as a job parameter on the pull requests
+:: BUILD_PACKAGE and RUN_SYSTEMTESTS can be provided as job parameters on pull requests
 if not "%JOB_NAME%" == "%JOB_NAME:pull_requests=%" (
   if not "%BUILD_PACKAGE%" == "%BUILD_PACKAGE:true=%" (
     set BUILDPKG=yes
   ) else (
     set BUILDPKG=no
   )
+  if not "%RUN_SYSTEMTESTS%" == "%RUN_SYSTEMTESTS:true=%" (
+    set SYSTEMTESTS=yes
+  ) else (
+    set SYSTEMTESTS=no
 )
 :: Never want package for debug builds
 if not "%JOB_NAME%" == "%JOB_NAME:debug=%" (
@@ -229,4 +234,20 @@ if "%BUILDPKG%" == "yes" (
   :: It always marks the build as a failure even though MantidPlot exits correctly
   echo Building package
   cpack.exe -C %BUILD_CONFIG% --config CPackConfig.cmake
+  :: If a package is built and system tests are to be run,
+  :: use InstallerTests to run them from the package.
+  if "%SYSTEMTESTS%" == "yes" (
+    if not "%JOB_NAME%" == "%JOB_NAME:pull_requests=%" (
+      set EXTRA_ARGS=--exclude-in-pull-requests
+    )
+    call systemtests.bat
+  )
+) else (
+  :: If no package is built, run the system tests without installing the package.
+  if "%SYSTEMTESTS%" == "yes" (
+    if not "%JOB_NAME%" == "%JOB_NAME:pull_requests=%" (
+      set EXTRA_ARGS=--exclude-in-pull-requests
+    )
+    call systemtests.bat
+  )
 )
