@@ -7,14 +7,9 @@
 #pragma once
 #include "../../../ISISReflectometry/GUI/Experiment/LookupTableValidator.h"
 #include "../../../ISISReflectometry/Reduction/TransmissionRunPair.h"
-#include "MantidKernel/WarningSuppressions.h"
 #include <cxxtest/TestSuite.h>
 
 using namespace MantidQt::CustomInterfaces::ISISReflectometry;
-
-// The missing braces warning is a false positive -
-// https://llvm.org/bugs/show_bug.cgi?id=21629
-GNU_DIAG_OFF("missing-braces")
 
 class LookupTableValidatorTest : public CxxTest::TestSuite {
 public:
@@ -214,5 +209,3 @@ private:
     TS_ASSERT_EQUALS(validationError.errors(), expectedErrors);
   }
 };
-
-GNU_DIAG_ON("missing-braces")
