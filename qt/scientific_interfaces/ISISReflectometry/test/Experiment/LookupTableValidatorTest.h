@@ -84,6 +84,27 @@ public:
                          expectedErrors({0, 1}, {LookupRow::Column::THETA}));
   }
 
+  void testMatchingAngleRowsWithDifferentTitleMatchersAreUnique() {
+    auto const title1 = std::string("title1");
+    auto const title2 = std::string("title2");
+    auto table = Table({Cells({"0.5", title1}), Cells({"0.5", title2})});
+
+    auto results = runTestValid(table);
+
+    TS_ASSERT_EQUALS(results.size(), 2);
+    TS_ASSERT(results[0].thetaOrWildcard().is_initialized());
+    TS_ASSERT(results[1].thetaOrWildcard().is_initialized());
+    TS_ASSERT_EQUALS(results[0].thetaOrWildcard().get(), results[1].thetaOrWildcard().get());
+    TS_ASSERT_EQUALS(results[0].titleMatcher().get().expression(), title1);
+    TS_ASSERT_EQUALS(results[1].titleMatcher().get().expression(), title2);
+  }
+
+  void testDuplicateAnglesAndTitleMatchersAreInvalid() {
+    auto table = Table({Cells({"0.5", "title"}), Cells({"0.5", "title"})});
+    runTestInvalidThetas(table, LookupCriteriaError::NonUniqueTheta,
+                         expectedErrors({0, 1}, {LookupRow::Column::THETA}));
+  }
+
   void testInvalidAngle() {
     auto table = Table({Cells({"bad"})});
     runTestInvalidCells(table, expectedErrors({0}, {LookupRow::Column::THETA}));
