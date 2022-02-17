@@ -59,7 +59,28 @@ public:
 
   void testTwoNonUniqueAngleRowsIsInvalid() {
     auto table = Table({Cells({"0.5"}), Cells({"0.5"})});
-    runTestInvalidThetas(table, LookupCriteriaError::NonUniqueTheta,
+    runTestInvalidThetas(table, LookupCriteriaError::NonUniqueSearchCriteria,
+                         expectedErrors({0, 1}, {LookupRow::Column::THETA}));
+  }
+
+  void testMatchingAngleRowsWithDifferentTitleMatchersAreUnique() {
+    auto const title1 = std::string("title1");
+    auto const title2 = std::string("title2");
+    auto table = Table({Cells({"0.5", title1}), Cells({"0.5", title2})});
+
+    auto results = runTestValid(table);
+
+    TS_ASSERT_EQUALS(results.size(), 2);
+    TS_ASSERT(results[0].thetaOrWildcard().is_initialized());
+    TS_ASSERT(results[1].thetaOrWildcard().is_initialized());
+    TS_ASSERT_EQUALS(results[0].thetaOrWildcard().get(), results[1].thetaOrWildcard().get());
+    TS_ASSERT_EQUALS(results[0].titleMatcher().get().expression(), title1);
+    TS_ASSERT_EQUALS(results[1].titleMatcher().get().expression(), title2);
+  }
+
+  void testDuplicateAnglesAndTitleMatchersAreInvalid() {
+    auto table = Table({Cells({"0.5", "title"}), Cells({"0.5", "title"})});
+    runTestInvalidThetas(table, LookupCriteriaError::NonUniqueSearchCriteria,
                          expectedErrors({0, 1}, {LookupRow::Column::THETA}));
   }
 
@@ -148,18 +169,18 @@ public:
   }
 
   void testAnglesThatDifferByTolerance() {
-    auto table = Table({Cells({"0.5"}), Cells({"0.501"})});
+    auto table = Table({Cells({"0.5"}), Cells({"0.5011"})});
     auto results = runTestValid(table);
     TS_ASSERT_EQUALS(results.size(), 2);
     TS_ASSERT(results[0].thetaOrWildcard().is_initialized());
     TS_ASSERT_EQUALS(results[0].thetaOrWildcard().get(), 0.5);
     TS_ASSERT(results[1].thetaOrWildcard().is_initialized());
-    TS_ASSERT_EQUALS(results[1].thetaOrWildcard().get(), 0.501);
+    TS_ASSERT_EQUALS(results[1].thetaOrWildcard().get(), 0.5011);
   }
 
   void testAnglesThatDifferByLessThanTolerance() {
     auto table = Table({Cells({"0.5"}), Cells({"0.5009"})});
-    runTestInvalidThetas(table, LookupCriteriaError::NonUniqueTheta,
+    runTestInvalidThetas(table, LookupCriteriaError::NonUniqueSearchCriteria,
                          expectedErrors({0, 1}, {LookupRow::Column::THETA}));
   }
 
@@ -187,7 +208,10 @@ private:
     LookupTableValidator validator;
     auto result = validator(table, TOLERANCE);
     TS_ASSERT(result.isValid());
-    return result.assertValid();
+    if (result.isValid()) {
+      return result.assertValid();
+    }
+    return {};
   }
 
   void runTestInvalidThetas(const Table &table, LookupCriteriaError thetaValuesError,

@@ -30,9 +30,9 @@ public:
 
   int countWildcards(LookupTableRows const &lookupTable) const;
 
-  void sortInPlaceWildcardsFirstThenByTheta(LookupTableRows &lookupTable) const;
+  void sortInPlaceByThetaThenTitleMatcher(LookupTableRows &lookupTable) const;
 
-  bool hasUniqueThetas(LookupTableRows lookupTable, int wildcardCount, double tolerance) const;
+  bool hasUniqueSearchCriteria(LookupTableRows lookupTable, int wildcardCount, double tolerance) const;
   void appendThetaErrorForAllRows(std::vector<InvalidLookupRowCells> &validationErrors, std::size_t rowCount) const;
 };
 } // namespace ISISReflectometry
