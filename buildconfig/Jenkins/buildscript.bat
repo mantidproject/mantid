@@ -88,6 +88,7 @@ if not "%JOB_NAME%" == "%JOB_NAME:pull_requests=%" (
     set SYSTEMTESTS=yes
   ) else (
     set SYSTEMTESTS=no
+  )
 )
 :: Never want package for debug builds
 if not "%JOB_NAME%" == "%JOB_NAME:debug=%" (
