@@ -267,7 +267,7 @@ void LoadILLSANS::initWorkSpace(NeXus::NXEntry &firstEntry, const std::string &i
 
   size_t nextIndex;
   nextIndex = loadDataFromTubes(data, m_defaultBinning, 0);
-  nextIndex = loadDataFromMonitors(firstEntry, nextIndex);
+  loadDataFromMonitors(firstEntry, nextIndex);
   if (data.dim1() == 128) {
     m_resMode = "low";
   }
@@ -343,30 +343,56 @@ void LoadILLSANS::initWorkSpaceD11B(NeXus::NXEntry &firstEntry, const std::strin
 void LoadILLSANS::initWorkSpaceD22B(NeXus::NXEntry &firstEntry, const std::string &instrumentPath) {
   g_log.debug("Fetching data...");
 
-  NXData data2 = firstEntry.openNXData("data2");
-  NXInt data2_data = data2.openIntData();
-  data2_data.load();
   NXData data1 = firstEntry.openNXData("data1");
   NXInt data1_data = data1.openIntData();
   data1_data.load();
+  NXData data2 = firstEntry.openNXData("data2");
+  NXInt data2_data = data2.openIntData();
+  data2_data.load();
 
   size_t numberOfHistograms =
       static_cast<size_t>(data2_data.dim0() * data2_data.dim1() + data1_data.dim0() * data1_data.dim1()) + N_MONITORS;
 
-  createEmptyWorkspace(numberOfHistograms, 1);
+  if (data1_data.dim2() != 1) {
+    createEmptyWorkspace(numberOfHistograms, data1_data.dim2(), MultichannelType::KINETIC);
+  } else {
+    createEmptyWorkspace(numberOfHistograms, 1);
+  }
   loadMetaData(firstEntry, instrumentPath);
+
+  // we need to adjust the default binning after loadmetadata
+  if (data1_data.dim2() != 1) {
+    std::vector<double> frames(data1_data.dim2(), 0);
+    for (int i = 0; i < data1_data.dim2(); ++i) {
+      frames[i] = i;
+    }
+    m_defaultBinning.resize(data1_data.dim2());
+    std::copy(frames.cbegin(), frames.cend(), m_defaultBinning.begin());
+  }
+
   runLoadInstrument();
 
   const std::string backIndex = m_localWorkspace->getInstrument()->getStringParameter("back_detector_index")[0];
+  MultichannelType type = (data1_data.dim2() != 1) ? MultichannelType::KINETIC : MultichannelType::TOF;
   size_t nextIndex;
   if (backIndex == "2") {
-    nextIndex = loadDataFromTubes(data2_data, m_defaultBinning, 0);
-    nextIndex = loadDataFromTubes(data1_data, m_defaultBinning, nextIndex);
+    nextIndex = loadDataFromTubes(data2_data, m_defaultBinning, 0, type);
+    nextIndex = loadDataFromTubes(data1_data, m_defaultBinning, nextIndex, type);
   } else {
-    nextIndex = loadDataFromTubes(data1_data, m_defaultBinning, 0);
-    nextIndex = loadDataFromTubes(data2_data, m_defaultBinning, nextIndex);
+    nextIndex = loadDataFromTubes(data1_data, m_defaultBinning, 0, type);
+    nextIndex = loadDataFromTubes(data2_data, m_defaultBinning, nextIndex, type);
   }
-  nextIndex = loadDataFromMonitors(firstEntry, nextIndex);
+  nextIndex = loadDataFromMonitors(firstEntry, nextIndex, type);
+
+  // hijack the second monitor spectrum to store per-frame durations to enable time normalisation
+  if (data1_data.dim2() != 1) {
+    NXFloat durations = firstEntry.openNXFloat("slices");
+    durations.load();
+    const HistogramData::Counts histoCounts(durations(), durations() + data1_data.dim2());
+    m_localWorkspace->setCounts(nextIndex - 1, std::move(histoCounts));
+    m_localWorkspace->setCountVariances(nextIndex - 1,
+                                        HistogramData::CountVariances(std::vector<double>(data1_data.dim2(), 0)));
+  }
 }
 
 /**
@@ -473,7 +499,7 @@ void LoadILLSANS::initWorkSpaceD33(NeXus::NXEntry &firstEntry, const std::string
   nextIndex = loadDataFromTubes(dataLeft, binningLeft, nextIndex);
   nextIndex = loadDataFromTubes(dataDown, binningDown, nextIndex);
   nextIndex = loadDataFromTubes(dataUp, binningUp, nextIndex);
-  nextIndex = loadDataFromMonitors(firstEntry, nextIndex);
+  loadDataFromMonitors(firstEntry, nextIndex);
 }
 
 /**
@@ -819,9 +845,6 @@ void LoadILLSANS::loadMetaData(const NeXus::NXEntry &entry, const std::string &i
     m_defaultBinning[0] = wavelength - wavelengthRes * wavelength * 0.01 / 2;
     m_defaultBinning[1] = wavelength + wavelengthRes * wavelength * 0.01 / 2;
   }
-  // Add a log called timer with the value of duration
-  const double duration = entry.getFloat("duration");
-  runDetails.addProperty<double>("timer", duration);
 
   // the start time is needed in the workspace when loading the parameter file
   std::string startDate = entry.getString("start_time");
@@ -836,10 +859,8 @@ void LoadILLSANS::loadMetaData(const NeXus::NXEntry &entry, const std::string &i
  */
 void LoadILLSANS::setFinalProperties(const std::string &filename) {
   API::Run &runDetails = m_localWorkspace->mutableRun();
-  runDetails.addProperty("is_frame_skipping", 0);
   NXhandle nxHandle;
   NXstatus nxStat = NXopen(filename.c_str(), NXACC_READ, &nxHandle);
-
   if (nxStat != NX_ERROR) {
     m_loadHelper.addNexusFieldsToWsRun(nxHandle, runDetails);
     NXclose(&nxHandle);

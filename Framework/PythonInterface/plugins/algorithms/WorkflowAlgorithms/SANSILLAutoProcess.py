@@ -322,7 +322,7 @@ class SANSILLAutoProcess(DataProcessorAlgorithm):
         self.setPropertyGroup('TransmissionBeamRuns', 'Transmissions')
         self.setPropertyGroup('TransmissionAbsorberRuns', 'Transmissions')
         self.copyProperties('SANSILLReduction',
-                            ['ThetaDependent'])
+                            ['ThetaDependent'], version=1)
         self.setPropertyGroup('ThetaDependent', 'Transmissions')
 
         self.declareProperty('SensitivityMaps', '',
@@ -346,7 +346,7 @@ class SANSILLAutoProcess(DataProcessorAlgorithm):
                                                      optional=PropertyMode.Optional),
                              doc='The output sensitivity map workspace.')
 
-        self.copyProperties('SANSILLReduction', ['NormaliseBy'])
+        self.copyProperties('SANSILLReduction', ['NormaliseBy'], version=1)
 
         self.declareProperty('SampleThickness', 0.1,
                              validator=FloatBoundedValidator(lower=-1),
@@ -408,7 +408,7 @@ class SANSILLAutoProcess(DataProcessorAlgorithm):
 
         self.copyProperties('SANSILLIntegration', ['ShapeTable'])
 
-        self.copyProperties('SANSILLReduction', 'Wavelength')
+        self.copyProperties('SANSILLReduction', 'Wavelength', 1)
 
     def PyExec(self):
         self.setUp()
@@ -473,6 +473,7 @@ class SANSILLAutoProcess(DataProcessorAlgorithm):
 
         GroupWorkspaces(InputWorkspaces=outputSamples,
                         OutputWorkspace=self.output)
+        self.set_distribution(outputSamples)
         self.setProperty('OutputWorkspace', mtd[self.output])
 
         if outputWedges:
@@ -482,7 +483,16 @@ class SANSILLAutoProcess(DataProcessorAlgorithm):
             self.outputSensitivity(outputSens)
 
         if outputPanels:
+            self.set_distribution(outputPanels)
             self.outputPanels(outputPanels)
+
+    def set_distribution(self, wslist):
+        for ws in wslist:
+            if isinstance(mtd[ws], WorkspaceGroup):
+                for wsi in mtd[ws]:
+                    wsi.setDistribution(True)
+            else:
+                mtd[ws].setDistribution(True)
 
     def outputWedges(self, outputWedges):
         # ungroup and regroup wedge outputs per wedge
@@ -528,6 +538,8 @@ class SANSILLAutoProcess(DataProcessorAlgorithm):
                 except RuntimeError as re:
                     self.log().warning("Unable to stitch automatically, consider "
                                        "stitching manually: " + str(re))
+
+        self.set_distribution([group_name])
 
     def outputSensitivity(self, sensitivity_outputs):
         if len(sensitivity_outputs) > 1:
@@ -575,7 +587,9 @@ class SANSILLAutoProcess(DataProcessorAlgorithm):
                 SANSILLReduction(Run=absorber,
                                  ProcessAs='Absorber',
                                  NormaliseBy=self.normalise,
-                                 OutputWorkspace=transmission_absorber_name)
+                                 OutputWorkspace=transmission_absorber_name,
+                                 Wavelength=self.getProperty("Wavelength").value,
+                                 Version=1)
         for beam_no, beam in enumerate(self.btransmission.split(',')):
             [process_transmission_beam, transmission_beam_name] = \
                 needs_processing(beam, 'Beam')
@@ -594,7 +608,9 @@ class SANSILLAutoProcess(DataProcessorAlgorithm):
                                  BeamRadius=self.tr_radius,
                                  FluxOutputWorkspace=flux_name,
                                  AbsorberInputWorkspace=
-                                 transmission_absorber_name)
+                                 transmission_absorber_name,
+                                 Wavelength=self.getProperty("Wavelength").value,
+                                 Version=1)
         for transmission_no, transmission in enumerate(self.ctransmission.split(',')):
             [process_container_transmission, container_transmission_name] = \
                 needs_processing(transmission, 'Transmission')
@@ -616,7 +632,9 @@ class SANSILLAutoProcess(DataProcessorAlgorithm):
                                  transmission_absorber_name,
                                  BeamInputWorkspace=transmission_beam_name,
                                  NormaliseBy=self.normalise,
-                                 BeamRadius=self.tr_radius)
+                                 BeamRadius=self.tr_radius,
+                                 Wavelength=self.getProperty("Wavelength").value,
+                                 Version=1)
         for transmission_no, transmission in enumerate(self.stransmission.split(',')):
             [process_sample_transmission, sample_transmission_name] = \
                 needs_processing(transmission, 'Transmission')
@@ -638,7 +656,9 @@ class SANSILLAutoProcess(DataProcessorAlgorithm):
                                  transmission_absorber_name,
                                  BeamInputWorkspace=transmission_beam_name,
                                  NormaliseBy=self.normalise,
-                                 BeamRadius=self.tr_radius)
+                                 BeamRadius=self.tr_radius,
+                                 Wavelength=self.getProperty("Wavelength").value,
+                                 Version=1)
         return container_transmission_names, sample_transmission_names
 
     def processAbsorber(self, i):
@@ -652,7 +672,9 @@ class SANSILLAutoProcess(DataProcessorAlgorithm):
             SANSILLReduction(Run=absorber,
                              ProcessAs='Absorber',
                              NormaliseBy=self.normalise,
-                             OutputWorkspace=absorber_name)
+                             OutputWorkspace=absorber_name,
+                             Wavelength=self.getProperty("Wavelength").value,
+                             Version=1)
         return absorber_name
 
     def processBeam(self, i, absorber_name):
@@ -672,7 +694,9 @@ class SANSILLAutoProcess(DataProcessorAlgorithm):
                              NormaliseBy=self.normalise,
                              BeamRadius=radius,
                              AbsorberInputWorkspace=absorber_name,
-                             FluxOutputWorkspace=flux_name)
+                             FluxOutputWorkspace=flux_name,
+                             Wavelength=self.getProperty("Wavelength").value,
+                             Version=1)
         return beam_name, flux_name
 
     def processFlux(self, i, absorber_name):
@@ -693,7 +717,9 @@ class SANSILLAutoProcess(DataProcessorAlgorithm):
                                  NormaliseBy=self.normalise,
                                  BeamRadius=radius,
                                  AbsorberInputWorkspace=absorber_name,
-                                 FluxOutputWorkspace=flux_name)
+                                 FluxOutputWorkspace=flux_name,
+                                 Wavelength=self.getProperty("Wavelength").value,
+                                 Version=1)
             return flux_name
         else:
             return None
@@ -720,7 +746,9 @@ class SANSILLAutoProcess(DataProcessorAlgorithm):
                              TransmissionInputWorkspace=
                              container_transmission_name,
                              ThetaDependent=self.theta_dependent,
-                             NormaliseBy=self.normalise)
+                             NormaliseBy=self.normalise,
+                             Wavelength=self.getProperty("Wavelength").value,
+                             Version=1)
         return container_name
 
     def getWavelength(self, logs):
@@ -892,8 +920,8 @@ class SANSILLAutoProcess(DataProcessorAlgorithm):
                 self.getProperty('SampleThickness').value,
                 WaterCrossSection=
                 self.getProperty('WaterCrossSection').value,
-                Wavelength=self.getProperty('Wavelength').value
-                )
+                Wavelength=self.getProperty('Wavelength').value,
+                Version=1)
 
         output_sample = self.output + '_#' + str(i + 1)
 
@@ -947,6 +975,8 @@ class SANSILLAutoProcess(DataProcessorAlgorithm):
             self.n_wedges = mtd[output_wedges].getNumberOfEntries()
 
         ConvertToPointData(InputWorkspace=output_sample, OutputWorkspace=output_sample)
+        # Set to histogram to enable stitching
+        mtd[output_sample].setDistribution(False)
 
         if self.cleanup:
             DeleteWorkspace(sample_name)

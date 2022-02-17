@@ -21,7 +21,6 @@ from mantid.simpleapi import CreateSampleWorkspace, DeleteWorkspace
 def wait_for_thread(thread_model):
     if thread_model and thread_model.worker:
         while thread_model.worker.is_alive():
-            QApplication.sendPostedEvents()
             time.sleep(0.1)
         QApplication.sendPostedEvents()
 

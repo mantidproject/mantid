@@ -190,12 +190,100 @@ class LRReflectivityOutputResolutionTest(systemtesting.MantidSystemTest):
             mtd.remove(ws_name)
 
 
-class LiquidsReflectometryReductionSimpleErrorTest(systemtesting.MantidSystemTest):
+class LRautoreductionTest(systemtesting.MantidSystemTest):
     """
         Test algorithm LiquidsReflectometryReduction with simple binning
     """
     def runTest(self):
-        # '/SNS/users/wzz/Mantid_Project/builds/testing/sf_185602_Si2InDisk_auto.cfg'
+        scaling_factor_file = FileFinder.getFullPath("sf_185602_Si2InDisk_auto.cfg")
+        with open('template.xml', 'w') as fd:
+            content = """<Reduction>
+<DataSeries>
+<RefLData>
+<peak_selection_type>narrow</peak_selection_type>
+<from_peak_pixels>142</from_peak_pixels>
+<to_peak_pixels>152</to_peak_pixels>
+<peak_discrete_selection>N/A</peak_discrete_selection>
+<background_flag>True</background_flag>
+<back_roi1_from>139</back_roi1_from>
+<back_roi1_to>155</back_roi1_to>
+<back_roi2_from>0</back_roi2_from>
+<back_roi2_to>0</back_roi2_to>
+<tof_range_flag>True</tof_range_flag>
+<from_tof_range>51978.9</from_tof_range>
+<to_tof_range>65266.7</to_tof_range>
+<data_sets>190367</data_sets>
+<x_min_pixel>70</x_min_pixel>
+<x_max_pixel>178</x_max_pixel>
+<x_range_flag>True</x_range_flag>
+<tthd_value>N/A</tthd_value>
+<ths_value>N/A</ths_value>
+<norm_flag>False</norm_flag>
+<norm_x_range_flag>True</norm_x_range_flag>
+<norm_x_max>142</norm_x_max>
+<norm_x_min>115</norm_x_min>
+<norm_from_peak_pixels>135</norm_from_peak_pixels>
+<norm_to_peak_pixels>143</norm_to_peak_pixels>
+<norm_background_flag>True</norm_background_flag>
+<norm_from_back_pixels>132</norm_from_back_pixels>
+<norm_to_back_pixels>146</norm_to_back_pixels>
+<norm_dataset>0</norm_dataset>
+<q_min>0.005</q_min>
+<q_step>0.02</q_step>
+<auto_q_binning>False</auto_q_binning>
+<overlap_lowest_error>True</overlap_lowest_error>
+<overlap_mean_value>False</overlap_mean_value>
+<angle_offset>0.01</angle_offset>
+<angle_offset_error>0.001</angle_offset_error>
+<scaling_factor_flag>False</scaling_factor_flag>
+<scaling_factor_file>%s</scaling_factor_file>
+<slits_width_flag>True</slits_width_flag>
+<geometry_correction_switch>False</geometry_correction_switch>
+<incident_medium_list>Air</incident_medium_list>
+<incident_medium_index_selected>0</incident_medium_index_selected>
+<fourth_column_flag>True</fourth_column_flag>
+<fourth_column_dq0>0.0</fourth_column_dq0>
+<fourth_column_dq_over_q>0.028</fourth_column_dq_over_q>
+</RefLData>
+</DataSeries>
+</Reduction>""" % scaling_factor_file
+            fd.write(content)
+
+        ws = Load("REF_L_%d" % 190367, OutputWorkspace="REFL_%d" % 190367)
+        LRAutoReduction(InputWorkspace=ws,
+                        ScaleToUnity=False,
+                        OutputDirectory='/tmp',
+                        ReadSequenceFromFile=False,
+                        ForceSequenceNumber=1,
+                        TemplateFile='template.xml')
+
+        # Find the dQ/Q value in the output file to determine success
+        self._success = False
+        output_path = '/tmp/REFL_190367_combined_data_auto.txt'
+        if os.path.isfile(output_path):
+            with open(output_path, 'r') as fd:
+                for line in fd:
+                    if line.startswith("# dQ/Q"):
+                        toks = line.split('=')
+                        dq_over_q = float(toks[1])
+                        if abs(dq_over_q - 0.0273679) < 0.00001:
+                            self._success = True
+        else:
+            print("Error: expected output file '{}' not found.".format(output_path))
+
+    def validate(self):
+        return self._success
+
+    def cleanup(self):
+        if os.path.isfile('template.xml'):
+            os.remove('template.xml')
+
+
+class LiquidsReflectometryReductionSimpleErrorTest(systemtesting.MantidSystemTest):
+    """
+        Test automated reduction
+    """
+    def runTest(self):
         scaling_factor_file = FileFinder.getFullPath("sf_185602_Si2InDisk_auto.cfg")
 
         error_weighting = False
