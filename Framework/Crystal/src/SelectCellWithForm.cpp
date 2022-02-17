@@ -256,7 +256,7 @@ void SelectCellWithForm::exec() {
   // DblMatrix T = info.GetHKL_Tran();
   auto newUB_inv = DblMatrix(newUB);
   newUB_inv.Invert();
-  DblMatrix T_inv = newUB_inv * UB;
+  DblMatrix T = newUB_inv * UB;
 
   g_log.notice() << "Transformation Matrix =  " << T.str() << '\n';
   this->setProperty("TransformationMatrix", T.getVector());
