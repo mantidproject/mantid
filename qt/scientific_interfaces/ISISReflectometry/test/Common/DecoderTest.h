@@ -577,6 +577,15 @@ const static QString BATCH_JSON_STRING_8_COLUMNS{"{" + EMPTY_EVENT_JSON_STRING +
 const static QString MAINWINDOW_JSON_STRING{QString("{\"batches\": [") + BATCH_JSON_STRING + QString(", ") +
                                             EMPTY_BATCH_JSON_STRING + QString("], ") +
                                             QString("\"tag\": \"ISIS Reflectometry\"}")};
+
+const static QString DIR_PATH = "../ExternalData/Testing/Data/UnitTest/ISISReflectometry/";
+const static QString MAINWINDOW_FILE = "mainwindow.json";
+const static QString BATCH_FILE = "batch.json";
+const static QString EMPTY_BATCH_FILE = "empty_batch.json";
+const static QString EIGHT_COL_BATCH_FILE = "8_col_batch.json";
+const static QString NINE_COL_BATCH_FILE = "9_col_batch.json";
+const static QString TEN_COL_BATCH_FILE = "10_col_batch.json";
+
 } // namespace
 
 namespace MantidQt {
@@ -595,14 +604,14 @@ public:
   void test_decodeMainWindow() {
     CoderCommonTester tester;
     Decoder decoder;
-    auto map = MantidQt::API::loadJSONFromString(MAINWINDOW_JSON_STRING);
+    auto map = MantidQt::API::loadJSONFromFile(DIR_PATH + MAINWINDOW_FILE);
     auto widget = decoder.decode(map, "");
     tester.testMainWindowView(dynamic_cast<QtMainWindowView *>(widget), map);
   }
 
   void test_decodeEmptyBatch() {
     CoderCommonTester tester;
-    auto map = MantidQt::API::loadJSONFromString(EMPTY_BATCH_JSON_STRING);
+    auto map = MantidQt::API::loadJSONFromFile(DIR_PATH + EMPTY_BATCH_FILE);
     QtMainWindowView mwv;
     mwv.initLayout();
     auto gui = dynamic_cast<QtBatchView *>(mwv.batches()[0]);
@@ -614,7 +623,7 @@ public:
 
   void test_decodePopulatedBatch() {
     CoderCommonTester tester;
-    auto map = MantidQt::API::loadJSONFromString(BATCH_JSON_STRING);
+    auto map = MantidQt::API::loadJSONFromFile(DIR_PATH + BATCH_FILE);
     QtMainWindowView mwv;
     mwv.initLayout();
     auto gui = dynamic_cast<QtBatchView *>(mwv.batches()[0]);
@@ -626,7 +635,7 @@ public:
 
   void test_decodeBatchWhenInstrumentChanged() {
     CoderCommonTester tester;
-    auto map = MantidQt::API::loadJSONFromString(BATCH_JSON_STRING);
+    auto map = MantidQt::API::loadJSONFromFile(DIR_PATH + BATCH_FILE);
     QtMainWindowView mwv;
     mwv.initLayout();
     auto gui = dynamic_cast<QtBatchView *>(mwv.batches()[0]);
@@ -646,7 +655,7 @@ public:
     auto gui = dynamic_cast<QtBatchView *>(mwv.batches()[0]);
     Decoder decoder;
     // Decode from the old 9-column format
-    auto oldMap = MantidQt::API::loadJSONFromString(BATCH_JSON_STRING_10_COLUMNS);
+    auto oldMap = MantidQt::API::loadJSONFromFile(DIR_PATH + TEN_COL_BATCH_FILE);
     decoder.decodeBatch(&mwv, 0, oldMap);
 
     // Check that the result matches the new format
@@ -662,7 +671,7 @@ public:
     auto gui = dynamic_cast<QtBatchView *>(mwv.batches()[0]);
     Decoder decoder;
     // Decode from the old 9-column format
-    auto oldMap = MantidQt::API::loadJSONFromString(BATCH_JSON_STRING_9_COLUMNS);
+    auto oldMap = MantidQt::API::loadJSONFromFile(DIR_PATH + NINE_COL_BATCH_FILE);
     decoder.decodeBatch(&mwv, 0, oldMap);
 
     // Check that the result matches the new format
@@ -677,19 +686,19 @@ public:
     mwv.initLayout();
     Decoder decoder;
     // Decode from the old 9-column format
-    auto oldMap = MantidQt::API::loadJSONFromString(BATCH_JSON_STRING_8_COLUMNS);
+    auto oldMap = MantidQt::API::loadJSONFromFile(DIR_PATH + EIGHT_COL_BATCH_FILE);
     TS_ASSERT_THROWS(decoder.decodeBatch(&mwv, 0, oldMap), std::out_of_range const &);
   }
 
   void test_decodeVersionOneFiles() {
-    auto map = MantidQt::API::loadJSONFromString(BATCH_JSON_STRING);
+    auto map = MantidQt::API::loadJSONFromFile(DIR_PATH + BATCH_FILE);
     Decoder decoder;
     auto constexpr expectedVersion = 1;
     TS_ASSERT_EQUALS(expectedVersion, decoder.decodeVersion(map));
   }
 
   void test_decodeVersionLegacy() {
-    auto map = MantidQt::API::loadJSONFromString(BATCH_JSON_STRING_10_COLUMNS);
+    auto map = MantidQt::API::loadJSONFromFile(DIR_PATH + TEN_COL_BATCH_FILE);
     Decoder decoder;
     auto constexpr expectedVersion = 0;
     TS_ASSERT_EQUALS(expectedVersion, decoder.decodeVersion(map));
