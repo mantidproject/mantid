@@ -207,7 +207,8 @@ class RawDataExplorerView(QWidget):
         Args:
             preview (PreviewView): preview to be removed
         """
-        self._previews.remove(preview)
+        if preview in self._previews:
+            self._previews.remove(preview)
 
     def clear_selection(self):
         """
