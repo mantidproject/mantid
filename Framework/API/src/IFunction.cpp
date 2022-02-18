@@ -63,7 +63,7 @@ struct TieNode {
 const std::vector<std::string> EXCLUDEUSAGE = {"CompositeFunction"};
 } // namespace
 
-void IFunction::attributeValidator::evaluateValidator(
+void IFunction::validatorEvaluator::evaluateValidator(
     const boost::variant<std::string, int, double, bool, std::vector<double>> &inputdata, std::string dataTypeName,
     Mantid::Kernel::IValidator_sptr validator) const {
   std::string error;
@@ -968,7 +968,7 @@ protected:
   /// Evaluates the validator associated with this attribute with regards to input value. Returns error as a string.
   template <typename T> void evaluateValidator(T &inputData) const {
     if (m_validator != Kernel::IValidator_sptr()) {
-      m_attributeValidator.evaluateValidator(inputData, m_validator);
+      m_validatorEvaluator.evaluateValidator(inputData, m_validator);
     }
   }
 
@@ -1003,7 +1003,7 @@ void IFunction::Attribute::evaluateValidator() const {
   std::string dataTypeName;
   dataTypeName = type();
 
-  m_attributeValidator.evaluateValidator(m_data, dataTypeName, m_validator);
+  m_validatorEvaluator.evaluateValidator(m_data, dataTypeName, m_validator);
 }
 
 /// Value of i-th active parameter. Override this method to make fitted
