@@ -171,6 +171,29 @@ public:
   };
 
   /**
+   * Simple Class to constain function to evaluate attribute validators that is required in both attributes and
+   * visitors.
+   */
+  class attributeValidator {
+  public:
+    attributeValidator(){}; // default constructor
+    template <typename T1> void evaluateValidator(T1 &inputData, Mantid::Kernel::IValidator_sptr validator) const {
+      std::string error;
+
+      if (validator != Mantid::Kernel::IValidator_sptr()) {
+        error = validator->isValid(inputData);
+      }
+
+      if (error != "") {
+        throw IFunction::validationException("Set Attribute Error: " + error);
+      }
+    }
+
+    void evaluateValidator(const boost::variant<std::string, int, double, bool, std::vector<double>> &inputdata,
+                           std::string dataTypeName, Mantid::Kernel::IValidator_sptr validator) const;
+  };
+
+  /**
    * Atribute visitor class. It provides a separate access method
    * for each attribute type. When applied to a particular attribue
    * the appropriate method will be used. The child classes must
@@ -206,19 +229,15 @@ public:
 
     /// Evaluates the validator associated with attribute this visitor is to visit.
     template <typename T1> void evaluateValidator(T1 &inputData) const {
-      std::string error;
-
       if (m_validator != Mantid::Kernel::IValidator_sptr()) {
-        error = m_validator->isValid(inputData);
-      }
-
-      if (error != "") {
-        throw IFunction::validationException("Set Attribute Error: " + error);
+        m_attributeValidator.evaluateValidator(inputData, m_validator);
       }
     }
 
     /// Validator against which to evaluate attribute value to set.
     Mantid::Kernel::IValidator_sptr m_validator = Mantid::Kernel::IValidator_sptr();
+    /// Attribute validator object to hold validation functions.
+    attributeValidator m_attributeValidator;
   };
 
   /**
@@ -253,19 +272,15 @@ public:
 
     /// Evaluates the validator associated with attribute this visitor is to visit.
     template <typename T1> void evaluateValidator(T1 &inputData) const {
-      std::string error;
-
       if (m_validator != Mantid::Kernel::IValidator_sptr()) {
-        error = m_validator->isValid(inputData);
-      }
-
-      if (error != "") {
-        throw IFunction::validationException("Set Attribute Error: " + error);
+        m_attributeValidator.evaluateValidator(T1, m_validator);
       }
     }
 
     /// Validator against which to evaluate attribute value to set.
     Mantid::Kernel::IValidator_sptr m_validator = Mantid::Kernel::IValidator_sptr();
+    /// Attribute validator object to hold validation functions.
+    attributeValidator m_attributeValidator;
   };
 
   /// Attribute is a non-fitting parameter.
@@ -304,14 +319,8 @@ public:
     void evaluateValidator() const;
     /// Evaluates the validator associated with this attribute with regards to input value. Returns error as a string.
     template <typename T> void evaluateValidator(T &inputData) const {
-      std::string error;
-
       if (m_validator != Kernel::IValidator_sptr()) {
-        error = m_validator->isValid(inputData);
-      }
-
-      if (error != "") {
-        throw IFunction::validationException("Attribute " + m_name + ": " + error);
+        m_attributeValidator.evaluateValidator(inputData, m_validator);
       }
     }
     /// Return a clone of the attribute validator;
@@ -369,6 +378,8 @@ public:
     mutable Kernel::IValidator_sptr m_validator;
     /// Attribute Name
     mutable std::string m_name;
+    /// Attribute validator object to hold validation functions.
+    attributeValidator m_attributeValidator;
   };
 
   //---------------------------------------------------------//
