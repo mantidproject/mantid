@@ -41,14 +41,14 @@ BatchPresenter *Encoder::findBatchPresenter(const QtBatchView *gui, const IMainW
 QMap<QString, QVariant> Encoder::encode(const QWidget *gui, const std::string &directory) {
   UNUSED_ARG(directory)
   auto mwv = dynamic_cast<const QtMainWindowView *>(gui);
-  QMap<QString, QVariant> map;
-  map.insert(QString("tag"), QVariant(QString("ISIS Reflectometry")));
+  QMap<QString, QVariant> topLevelMap;
+  topLevelMap.insert(QString("tag"), QVariant(QString("ISIS Reflectometry")));
   QList<QVariant> batches;
   for (size_t batchIndex = 0; batchIndex < mwv->batches().size(); ++batchIndex) {
     batches.append(QVariant(encodeBatch(mwv, static_cast<int>(batchIndex), true)));
   }
-  map.insert(QString("batches"), QVariant(batches));
-  return map;
+  topLevelMap.insert(QString("batches"), QVariant(batches));
+  return topLevelMap;
 }
 
 QList<QString> Encoder::tags() { return QList<QString>({QString("ISIS Reflectometry")}); }
@@ -64,40 +64,40 @@ QMap<QString, QVariant> Encoder::encodeBatch(const IMainWindowView *mwv, int bat
   auto reductionJobs = &runsTablePresenter->m_model.m_reductionJobs;
   auto searcher = dynamic_cast<QtCatalogSearcher *>(runsPresenter->m_searcher.get());
 
-  QMap<QString, QVariant> map;
-  map.insert(QString("version"), QVariant(BATCH_VERSION));
-  map.insert(QString("runsView"), QVariant(encodeRuns(gui->m_runs.get(), projectSave, reductionJobs, searcher)));
-  map.insert(QString("eventView"), QVariant(encodeEvent(gui->m_eventHandling.get())));
-  map.insert(QString("experimentView"), QVariant(encodeExperiment(gui->m_experiment.get())));
-  map.insert(QString("instrumentView"), QVariant(encodeInstrument(gui->m_instrument.get())));
-  map.insert(QString("saveView"), QVariant(encodeSave(gui->m_save.get())));
-  return map;
+  QMap<QString, QVariant> batchMap;
+  batchMap.insert(QString("version"), QVariant(BATCH_VERSION));
+  batchMap.insert(QString("runsView"), QVariant(encodeRuns(gui->m_runs.get(), projectSave, reductionJobs, searcher)));
+  batchMap.insert(QString("eventView"), QVariant(encodeEvent(gui->m_eventHandling.get())));
+  batchMap.insert(QString("experimentView"), QVariant(encodeExperiment(gui->m_experiment.get())));
+  batchMap.insert(QString("instrumentView"), QVariant(encodeInstrument(gui->m_instrument.get())));
+  batchMap.insert(QString("saveView"), QVariant(encodeSave(gui->m_save.get())));
+  return batchMap;
 }
 
 QMap<QString, QVariant> Encoder::encodeRuns(const QtRunsView *gui, bool projectSave, const ReductionJobs *redJobs,
                                             QtCatalogSearcher *searcher) {
-  QMap<QString, QVariant> map;
-  map.insert(QString("runsTable"), QVariant(encodeRunsTable(gui->m_tableView, projectSave, redJobs)));
-  map.insert(QString("comboSearchInstrument"), QVariant(gui->m_ui.comboSearchInstrument->currentIndex()));
+  QMap<QString, QVariant> runsMap;
+  runsMap.insert(QString("runsTable"), QVariant(encodeRunsTable(gui->m_tableView, projectSave, redJobs)));
+  runsMap.insert(QString("comboSearchInstrument"), QVariant(gui->m_ui.comboSearchInstrument->currentIndex()));
   // This is not ideal but the search criteria may be changed on the view and
   // no longer be relevant for the search results. The latter are more
   // important so use the cached search criteria, i.e. only save the search
   // criteria if they have been used to perform a search
-  map.insert(QString("textSearch"), QVariant(QString::fromStdString(searcher->searchCriteria().investigation)));
-  map.insert(QString("textCycle"), QVariant(QString::fromStdString(searcher->searchCriteria().cycle)));
-  map.insert(QString("textInstrument"), QVariant(QString::fromStdString(searcher->searchCriteria().instrument)));
-  map.insert(QString("searchResults"), QVariant(encodeSearchModel(gui->searchResults())));
-  return map;
+  runsMap.insert(QString("textSearch"), QVariant(QString::fromStdString(searcher->searchCriteria().investigation)));
+  runsMap.insert(QString("textCycle"), QVariant(QString::fromStdString(searcher->searchCriteria().cycle)));
+  runsMap.insert(QString("textInstrument"), QVariant(QString::fromStdString(searcher->searchCriteria().instrument)));
+  runsMap.insert(QString("searchResults"), QVariant(encodeSearchModel(gui->searchResults())));
+  return runsMap;
 }
 
 QMap<QString, QVariant> Encoder::encodeRunsTable(const QtRunsTableView *gui, bool projectSave,
                                                  const ReductionJobs *redJobs) {
-  QMap<QString, QVariant> map;
-  map.insert(QString("filterBox"), QVariant(gui->m_ui.filterBox->text()));
+  QMap<QString, QVariant> runTableMap;
+  runTableMap.insert(QString("filterBox"), QVariant(gui->m_ui.filterBox->text()));
 
-  map.insert(QString("projectSave"), QVariant(projectSave));
-  map.insert(QString("runsTableModel"), QVariant(encodeRunsTableModel(redJobs)));
-  return map;
+  runTableMap.insert(QString("projectSave"), QVariant(projectSave));
+  runTableMap.insert(QString("runsTableModel"), QVariant(encodeRunsTableModel(redJobs)));
+  return runTableMap;
 }
 
 QList<QVariant> Encoder::encodeRunsTableModel(const ReductionJobs *redJobs) {
@@ -109,13 +109,13 @@ QList<QVariant> Encoder::encodeRunsTableModel(const ReductionJobs *redJobs) {
 }
 
 QMap<QString, QVariant> Encoder::encodeGroup(const MantidQt::CustomInterfaces::ISISReflectometry::Group &group) {
-  QMap<QString, QVariant> map;
-  map.insert(QString("name"), QVariant(QString::fromStdString(group.m_name)));
-  map.insert(QString("itemState"), QVariant(static_cast<int>(group.state())));
-  map.insert(QString("postprocessedWorkspaceName"),
-             QVariant(QString::fromStdString(group.m_postprocessedWorkspaceName)));
-  map.insert(QString("rows"), QVariant(encodeRows(group)));
-  return map;
+  QMap<QString, QVariant> groupMap;
+  groupMap.insert(QString("name"), QVariant(QString::fromStdString(group.m_name)));
+  groupMap.insert(QString("itemState"), QVariant(static_cast<int>(group.state())));
+  groupMap.insert(QString("postprocessedWorkspaceName"),
+                  QVariant(QString::fromStdString(group.m_postprocessedWorkspaceName)));
+  groupMap.insert(QString("rows"), QVariant(encodeRows(group)));
+  return groupMap;
 }
 
 QList<QVariant> Encoder::encodeRows(const MantidQt::CustomInterfaces::ISISReflectometry::Group &group) {
@@ -131,20 +131,20 @@ QList<QVariant> Encoder::encodeRows(const MantidQt::CustomInterfaces::ISISReflec
 }
 
 QMap<QString, QVariant> Encoder::encodeRangeInQ(const RangeInQ &rangeInQ) {
-  QMap<QString, QVariant> map;
+  QMap<QString, QVariant> qRangeMap;
   auto min = rangeInQ.min();
   auto max = rangeInQ.max();
   auto step = rangeInQ.step();
-  map.insert(QString("minPresent"), QVariant(static_cast<bool>(min)));
+  qRangeMap.insert(QString("minPresent"), QVariant(static_cast<bool>(min)));
   if (min)
-    map.insert(QString("min"), QVariant(min.get()));
-  map.insert(QString("maxPresent"), QVariant(static_cast<bool>(max)));
+    qRangeMap.insert(QString("min"), QVariant(min.get()));
+  qRangeMap.insert(QString("maxPresent"), QVariant(static_cast<bool>(max)));
   if (max)
-    map.insert(QString("max"), QVariant(max.get()));
-  map.insert(QString("stepPresent"), QVariant(static_cast<bool>(step)));
+    qRangeMap.insert(QString("max"), QVariant(max.get()));
+  qRangeMap.insert(QString("stepPresent"), QVariant(static_cast<bool>(step)));
   if (step)
-    map.insert(QString("step"), QVariant(step.get()));
-  return map;
+    qRangeMap.insert(QString("step"), QVariant(step.get()));
+  return qRangeMap;
 }
 
 QMap<QString, QVariant> Encoder::encodeTransmissionRunPair(const TransmissionRunPair &transRunPair) {
@@ -156,10 +156,10 @@ QMap<QString, QVariant> Encoder::encodeTransmissionRunPair(const TransmissionRun
   for (const auto &secondTransRunNum : transRunPair.secondTransmissionRunNumbers()) {
     secondTransRunNums.append(QVariant(QString::fromStdString(secondTransRunNum)));
   }
-  QMap<QString, QVariant> map;
-  map.insert(QString("firstTransRuns"), QVariant(firstTransRunNums));
-  map.insert(QString("secondTransRuns"), QVariant(secondTransRunNums));
-  return map;
+  QMap<QString, QVariant> transmissionMap;
+  transmissionMap.insert(QString("firstTransRuns"), QVariant(firstTransRunNums));
+  transmissionMap.insert(QString("secondTransRuns"), QVariant(secondTransRunNums));
+  return transmissionMap;
 }
 
 QMap<QString, QVariant> Encoder::encodeReductionWorkspace(const ReductionWorkspaces &redWs) {
@@ -167,42 +167,42 @@ QMap<QString, QVariant> Encoder::encodeReductionWorkspace(const ReductionWorkspa
   for (const auto &inputRunNum : redWs.m_inputRunNumbers) {
     inputRunNumbers.append(QVariant(QString::fromStdString(inputRunNum)));
   }
-  QMap<QString, QVariant> map;
-  map.insert(QString("inputRunNumbers"), QVariant(inputRunNumbers));
-  map.insert(QString("transPair"), QVariant(encodeTransmissionRunPair(redWs.m_transmissionRuns)));
-  map.insert(QString("iVsLambda"), QVariant(QString::fromStdString(redWs.m_iVsLambda)));
-  map.insert(QString("iVsQ"), QVariant(QString::fromStdString(redWs.m_iVsQ)));
-  map.insert(QString("iVsQBinned"), QVariant(QString::fromStdString(redWs.m_iVsQBinned)));
-  return map;
+  QMap<QString, QVariant> reductionMap;
+  reductionMap.insert(QString("inputRunNumbers"), QVariant(inputRunNumbers));
+  reductionMap.insert(QString("transPair"), QVariant(encodeTransmissionRunPair(redWs.m_transmissionRuns)));
+  reductionMap.insert(QString("iVsLambda"), QVariant(QString::fromStdString(redWs.m_iVsLambda)));
+  reductionMap.insert(QString("iVsQ"), QVariant(QString::fromStdString(redWs.m_iVsQ)));
+  reductionMap.insert(QString("iVsQBinned"), QVariant(QString::fromStdString(redWs.m_iVsQBinned)));
+  return reductionMap;
 }
 
 QMap<QString, QVariant> Encoder::encodeReductionOptions(const ReductionOptionsMap &rom) {
-  QMap<QString, QVariant> map;
+  QMap<QString, QVariant> reductionOptionsMap;
   for (const auto &elem : rom) {
-    map.insert(QString::fromStdString(elem.first), QVariant(QString::fromStdString(elem.second)));
+    reductionOptionsMap.insert(QString::fromStdString(elem.first), QVariant(QString::fromStdString(elem.second)));
   }
-  return map;
+  return reductionOptionsMap;
 }
 
 QMap<QString, QVariant> Encoder::encodeRow(const MantidQt::CustomInterfaces::ISISReflectometry::Row &row) {
-  QMap<QString, QVariant> map;
-  map.insert(QString("itemState"), QVariant(static_cast<int>(row.state())));
+  QMap<QString, QVariant> rowMap;
+  rowMap.insert(QString("itemState"), QVariant(static_cast<int>(row.state())));
   QList<QVariant> runNumbers;
   for (const auto &runNumber : row.m_runNumbers) {
     runNumbers.append(QVariant(QString::fromStdString(runNumber)));
   }
-  map.insert(QString("runNumbers"), QVariant(runNumbers));
-  map.insert(QString("theta"), QVariant(row.m_theta));
-  map.insert(QString("qRange"), QVariant(encodeRangeInQ(row.m_qRange)));
-  map.insert(QString("qRangeOutput"), QVariant(encodeRangeInQ(row.m_qRangeOutput)));
-  map.insert(QString("scaleFactorPresent"), QVariant(static_cast<bool>(row.m_scaleFactor)));
+  rowMap.insert(QString("runNumbers"), QVariant(runNumbers));
+  rowMap.insert(QString("theta"), QVariant(row.m_theta));
+  rowMap.insert(QString("qRange"), QVariant(encodeRangeInQ(row.m_qRange)));
+  rowMap.insert(QString("qRangeOutput"), QVariant(encodeRangeInQ(row.m_qRangeOutput)));
+  rowMap.insert(QString("scaleFactorPresent"), QVariant(static_cast<bool>(row.m_scaleFactor)));
   if (row.m_scaleFactor) {
-    map.insert(QString("scaleFactor"), QVariant(row.m_scaleFactor.get()));
+    rowMap.insert(QString("scaleFactor"), QVariant(row.m_scaleFactor.get()));
   }
-  map.insert(QString("transRunNums"), QVariant(encodeTransmissionRunPair(row.m_transmissionRuns)));
-  map.insert(QString("reductionWorkspaces"), QVariant(encodeReductionWorkspace(row.m_reducedWorkspaceNames)));
-  map.insert(QString("reductionOptions"), QVariant(encodeReductionOptions(row.m_reductionOptions)));
-  return map;
+  rowMap.insert(QString("transRunNums"), QVariant(encodeTransmissionRunPair(row.m_transmissionRuns)));
+  rowMap.insert(QString("reductionWorkspaces"), QVariant(encodeReductionWorkspace(row.m_reducedWorkspaceNames)));
+  rowMap.insert(QString("reductionOptions"), QVariant(encodeReductionOptions(row.m_reductionOptions)));
+  return rowMap;
 }
 
 QList<QVariant> Encoder::encodeSearchModel(const ISearchModel &searchModel) {
@@ -214,85 +214,89 @@ QList<QVariant> Encoder::encodeSearchModel(const ISearchModel &searchModel) {
 }
 
 QMap<QString, QVariant> Encoder::encodeSearchResult(const SearchResult &row) {
-  QMap<QString, QVariant> map;
-  map.insert(QString("runNumber"), QVariant(QString::fromStdString(row.runNumber())));
-  map.insert(QString("title"), QVariant(QString::fromStdString(row.title())));
-  map.insert(QString("groupName"), QVariant(QString::fromStdString(row.groupName())));
-  map.insert(QString("theta"), QVariant(QString::fromStdString(row.theta())));
-  map.insert(QString("error"), QVariant(QString::fromStdString(row.error())));
-  map.insert(QString("excludeReason"), QVariant(QString::fromStdString(row.excludeReason())));
-  map.insert(QString("comment"), QVariant(QString::fromStdString(row.comment())));
-  return map;
+  QMap<QString, QVariant> searchResultMap;
+  searchResultMap.insert(QString("runNumber"), QVariant(QString::fromStdString(row.runNumber())));
+  searchResultMap.insert(QString("title"), QVariant(QString::fromStdString(row.title())));
+  searchResultMap.insert(QString("groupName"), QVariant(QString::fromStdString(row.groupName())));
+  searchResultMap.insert(QString("theta"), QVariant(QString::fromStdString(row.theta())));
+  searchResultMap.insert(QString("error"), QVariant(QString::fromStdString(row.error())));
+  searchResultMap.insert(QString("excludeReason"), QVariant(QString::fromStdString(row.excludeReason())));
+  searchResultMap.insert(QString("comment"), QVariant(QString::fromStdString(row.comment())));
+  return searchResultMap;
 }
 
 QMap<QString, QVariant> Encoder::encodeEvent(const QtEventView *gui) {
-  QMap<QString, QVariant> map;
-  map.insert(QString("disabledSlicingButton"), QVariant(gui->m_ui.disabledSlicingButton->isChecked()));
+  QMap<QString, QVariant> eventMap;
+  eventMap.insert(QString("disabledSlicingButton"), QVariant(gui->m_ui.disabledSlicingButton->isChecked()));
 
   // Uniform Slicing
-  map.insert(QString("uniformEvenButton"), QVariant(gui->m_ui.uniformEvenButton->isChecked()));
-  map.insert(QString("uniformEvenEdit"), QVariant(gui->m_ui.uniformEvenEdit->value()));
-  map.insert(QString("uniformButton"), QVariant(gui->m_ui.uniformButton->isChecked()));
-  map.insert(QString("uniformEdit"), QVariant(gui->m_ui.uniformEdit->value()));
+  eventMap.insert(QString("uniformEvenButton"), QVariant(gui->m_ui.uniformEvenButton->isChecked()));
+  eventMap.insert(QString("uniformEvenEdit"), QVariant(gui->m_ui.uniformEvenEdit->value()));
+  eventMap.insert(QString("uniformButton"), QVariant(gui->m_ui.uniformButton->isChecked()));
+  eventMap.insert(QString("uniformEdit"), QVariant(gui->m_ui.uniformEdit->value()));
 
   // Custom Slicing
-  map.insert(QString("customButton"), QVariant(gui->m_ui.customButton->isChecked()));
-  map.insert(QString("customEdit"), QVariant(gui->m_ui.customEdit->text()));
+  eventMap.insert(QString("customButton"), QVariant(gui->m_ui.customButton->isChecked()));
+  eventMap.insert(QString("customEdit"), QVariant(gui->m_ui.customEdit->text()));
 
   // Slicing by log value
-  map.insert(QString("logValueButton"), QVariant(gui->m_ui.logValueButton->isChecked()));
-  map.insert(QString("logValueEdit"), QVariant(gui->m_ui.logValueEdit->text()));
-  map.insert(QString("logValueTypeEdit"), QVariant(gui->m_ui.logValueTypeEdit->text()));
-  return map;
+  eventMap.insert(QString("logValueButton"), QVariant(gui->m_ui.logValueButton->isChecked()));
+  eventMap.insert(QString("logValueEdit"), QVariant(gui->m_ui.logValueEdit->text()));
+  eventMap.insert(QString("logValueTypeEdit"), QVariant(gui->m_ui.logValueTypeEdit->text()));
+  return eventMap;
 }
 
 QMap<QString, QVariant> Encoder::encodeInstrument(const QtInstrumentView *gui) {
-  QMap<QString, QVariant> map;
-  map.insert(QString("intMonCheckBox"), QVariant(gui->m_ui.intMonCheckBox->isChecked()));
-  map.insert(QString("monIntMinEdit"), QVariant(gui->m_ui.monIntMinEdit->value()));
-  map.insert(QString("monIntMaxEdit"), QVariant(gui->m_ui.monIntMaxEdit->value()));
-  map.insert(QString("monBgMinEdit"), QVariant(gui->m_ui.monBgMinEdit->value()));
-  map.insert(QString("monBgMaxEdit"), QVariant(gui->m_ui.monBgMaxEdit->value()));
-  map.insert(QString("lamMinEdit"), QVariant(gui->m_ui.lamMinEdit->value()));
-  map.insert(QString("lamMaxEdit"), QVariant(gui->m_ui.lamMaxEdit->value()));
-  map.insert(QString("I0MonitorIndex"), QVariant(gui->m_ui.I0MonitorIndex->value()));
-  map.insert(QString("correctDetectorsCheckBox"), QVariant(gui->m_ui.correctDetectorsCheckBox->isChecked()));
-  map.insert(QString("detectorCorrectionTypeComboBox"),
-             QVariant(gui->m_ui.detectorCorrectionTypeComboBox->currentIndex()));
-  return map;
+  QMap<QString, QVariant> instrumentMap;
+  instrumentMap.insert(QString("intMonCheckBox"), QVariant(gui->m_ui.intMonCheckBox->isChecked()));
+  instrumentMap.insert(QString("monIntMinEdit"), QVariant(gui->m_ui.monIntMinEdit->value()));
+  instrumentMap.insert(QString("monIntMaxEdit"), QVariant(gui->m_ui.monIntMaxEdit->value()));
+  instrumentMap.insert(QString("monBgMinEdit"), QVariant(gui->m_ui.monBgMinEdit->value()));
+  instrumentMap.insert(QString("monBgMaxEdit"), QVariant(gui->m_ui.monBgMaxEdit->value()));
+  instrumentMap.insert(QString("lamMinEdit"), QVariant(gui->m_ui.lamMinEdit->value()));
+  instrumentMap.insert(QString("lamMaxEdit"), QVariant(gui->m_ui.lamMaxEdit->value()));
+  instrumentMap.insert(QString("I0MonitorIndex"), QVariant(gui->m_ui.I0MonitorIndex->value()));
+  instrumentMap.insert(QString("correctDetectorsCheckBox"), QVariant(gui->m_ui.correctDetectorsCheckBox->isChecked()));
+  instrumentMap.insert(QString("detectorCorrectionTypeComboBox"),
+                       QVariant(gui->m_ui.detectorCorrectionTypeComboBox->currentIndex()));
+  return instrumentMap;
 }
 
 QMap<QString, QVariant> Encoder::encodeExperiment(const QtExperimentView *gui) {
-  QMap<QString, QVariant> map;
-  map.insert(QString("analysisModeComboBox"), QVariant(gui->m_ui.analysisModeComboBox->currentIndex()));
-  map.insert(QString("debugCheckbox"), QVariant(gui->m_ui.debugCheckBox->isChecked()));
-  map.insert(QString("summationTypeComboBox"), QVariant(gui->m_ui.summationTypeComboBox->currentIndex()));
-  map.insert(QString("reductionTypeComboBox"), QVariant(gui->m_ui.reductionTypeComboBox->currentIndex()));
-  map.insert(QString("includePartialBinsCheckBox"), QVariant(gui->m_ui.includePartialBinsCheckBox->isChecked()));
-  map.insert(QString("perAngleDefaults"), QVariant(encodePerAngleDefaults(gui->m_ui.optionsTable)));
-  map.insert(QString("startOverlapEdit"), QVariant(gui->m_ui.startOverlapEdit->value()));
-  map.insert(QString("endOverlapEdit"), QVariant(gui->m_ui.endOverlapEdit->value()));
-  map.insert(QString("transStitchParamsEdit"), QVariant(gui->m_ui.transStitchParamsEdit->text()));
-  map.insert(QString("transScaleRHSCheckBox"), QVariant(gui->m_ui.transScaleRHSCheckBox->isChecked()));
-  map.insert(QString("subtractBackgroundCheckBox"), QVariant(gui->m_ui.subtractBackgroundCheckBox->isChecked()));
-  map.insert(QString("backgroundMethodComboBox"), QVariant(gui->m_ui.backgroundMethodComboBox->currentIndex()));
-  map.insert(QString("polynomialDegreeSpinBox"), QVariant(gui->m_ui.polynomialDegreeSpinBox->value()));
-  map.insert(QString("costFunctionComboBox"), QVariant(gui->m_ui.costFunctionComboBox->currentIndex()));
-  map.insert(QString("polCorrCheckBox"), QVariant(gui->m_ui.polCorrCheckBox->isChecked()));
-  map.insert(QString("floodCorComboBox"), QVariant(gui->m_ui.floodCorComboBox->currentIndex()));
-  map.insert(QString("floodWorkspaceWsSelector"), QVariant(gui->m_ui.floodWorkspaceWsSelector->currentIndex()));
-  map.insert(QString("stitchEdit"), QVariant(gui->m_stitchEdit->text()));
-  return map;
+  QMap<QString, QVariant> experimentMap;
+  experimentMap.insert(QString("analysisModeComboBox"), QVariant(gui->m_ui.analysisModeComboBox->currentIndex()));
+  experimentMap.insert(QString("debugCheckbox"), QVariant(gui->m_ui.debugCheckBox->isChecked()));
+  experimentMap.insert(QString("summationTypeComboBox"), QVariant(gui->m_ui.summationTypeComboBox->currentIndex()));
+  experimentMap.insert(QString("reductionTypeComboBox"), QVariant(gui->m_ui.reductionTypeComboBox->currentIndex()));
+  experimentMap.insert(QString("includePartialBinsCheckBox"),
+                       QVariant(gui->m_ui.includePartialBinsCheckBox->isChecked()));
+  experimentMap.insert(QString("perAngleDefaults"), QVariant(encodePerAngleDefaults(gui->m_ui.optionsTable)));
+  experimentMap.insert(QString("startOverlapEdit"), QVariant(gui->m_ui.startOverlapEdit->value()));
+  experimentMap.insert(QString("endOverlapEdit"), QVariant(gui->m_ui.endOverlapEdit->value()));
+  experimentMap.insert(QString("transStitchParamsEdit"), QVariant(gui->m_ui.transStitchParamsEdit->text()));
+  experimentMap.insert(QString("transScaleRHSCheckBox"), QVariant(gui->m_ui.transScaleRHSCheckBox->isChecked()));
+  experimentMap.insert(QString("subtractBackgroundCheckBox"),
+                       QVariant(gui->m_ui.subtractBackgroundCheckBox->isChecked()));
+  experimentMap.insert(QString("backgroundMethodComboBox"),
+                       QVariant(gui->m_ui.backgroundMethodComboBox->currentIndex()));
+  experimentMap.insert(QString("polynomialDegreeSpinBox"), QVariant(gui->m_ui.polynomialDegreeSpinBox->value()));
+  experimentMap.insert(QString("costFunctionComboBox"), QVariant(gui->m_ui.costFunctionComboBox->currentIndex()));
+  experimentMap.insert(QString("polCorrCheckBox"), QVariant(gui->m_ui.polCorrCheckBox->isChecked()));
+  experimentMap.insert(QString("floodCorComboBox"), QVariant(gui->m_ui.floodCorComboBox->currentIndex()));
+  experimentMap.insert(QString("floodWorkspaceWsSelector"),
+                       QVariant(gui->m_ui.floodWorkspaceWsSelector->currentIndex()));
+  experimentMap.insert(QString("stitchEdit"), QVariant(gui->m_stitchEdit->text()));
+  return experimentMap;
 }
 
 QMap<QString, QVariant> Encoder::encodePerAngleDefaults(const QTableWidget *tab) {
-  QMap<QString, QVariant> map;
+  QMap<QString, QVariant> defaultsMap;
   const int rowsNum = tab->rowCount();
   const int columnNum = tab->columnCount();
-  map.insert(QString("rowsNum"), QVariant(rowsNum));
-  map.insert(QString("columnsNum"), QVariant(columnNum));
-  map.insert(QString("rows"), QVariant(encodePerAngleDefaultsRows(tab, rowsNum, columnNum)));
-  return map;
+  defaultsMap.insert(QString("rowsNum"), QVariant(rowsNum));
+  defaultsMap.insert(QString("columnsNum"), QVariant(columnNum));
+  defaultsMap.insert(QString("rows"), QVariant(encodePerAngleDefaultsRows(tab, rowsNum, columnNum)));
+  return defaultsMap;
 }
 
 QList<QVariant> Encoder::encodePerAngleDefaultsRows(const QTableWidget *tab, int rowsNum, int columnsNum) {
@@ -313,18 +317,19 @@ QList<QVariant> Encoder::encodePerAngleDefaultsRow(const QTableWidget *tab, int 
 }
 
 QMap<QString, QVariant> Encoder::encodeSave(const QtSaveView *gui) {
-  QMap<QString, QVariant> map;
-  map.insert(QString("savePathEdit"), QVariant(gui->m_ui.savePathEdit->text()));
-  map.insert(QString("prefixEdit"), QVariant(gui->m_ui.prefixEdit->text()));
-  map.insert(QString("headerCheckBox"), QVariant(gui->m_ui.headerCheckBox->isChecked()));
-  map.insert(QString("qResolutionCheckBox"), QVariant(gui->m_ui.qResolutionCheckBox->isChecked()));
-  map.insert(QString("commaRadioButton"), QVariant(gui->m_ui.commaRadioButton->isChecked()));
-  map.insert(QString("spaceRadioButton"), QVariant(gui->m_ui.spaceRadioButton->isChecked()));
-  map.insert(QString("tabRadioButton"), QVariant(gui->m_ui.tabRadioButton->isChecked()));
-  map.insert(QString("fileFormatComboBox"), QVariant(gui->m_ui.fileFormatComboBox->currentIndex()));
-  map.insert(QString("filterEdit"), QVariant(gui->m_ui.filterEdit->text()));
-  map.insert(QString("regexCheckBox"), QVariant(gui->m_ui.regexCheckBox->isChecked()));
-  map.insert(QString("saveReductionResultsCheckBox"), QVariant(gui->m_ui.saveReductionResultsCheckBox->isChecked()));
-  return map;
+  QMap<QString, QVariant> saveMap;
+  saveMap.insert(QString("savePathEdit"), QVariant(gui->m_ui.savePathEdit->text()));
+  saveMap.insert(QString("prefixEdit"), QVariant(gui->m_ui.prefixEdit->text()));
+  saveMap.insert(QString("headerCheckBox"), QVariant(gui->m_ui.headerCheckBox->isChecked()));
+  saveMap.insert(QString("qResolutionCheckBox"), QVariant(gui->m_ui.qResolutionCheckBox->isChecked()));
+  saveMap.insert(QString("commaRadioButton"), QVariant(gui->m_ui.commaRadioButton->isChecked()));
+  saveMap.insert(QString("spaceRadioButton"), QVariant(gui->m_ui.spaceRadioButton->isChecked()));
+  saveMap.insert(QString("tabRadioButton"), QVariant(gui->m_ui.tabRadioButton->isChecked()));
+  saveMap.insert(QString("fileFormatComboBox"), QVariant(gui->m_ui.fileFormatComboBox->currentIndex()));
+  saveMap.insert(QString("filterEdit"), QVariant(gui->m_ui.filterEdit->text()));
+  saveMap.insert(QString("regexCheckBox"), QVariant(gui->m_ui.regexCheckBox->isChecked()));
+  saveMap.insert(QString("saveReductionResultsCheckBox"),
+                 QVariant(gui->m_ui.saveReductionResultsCheckBox->isChecked()));
+  return saveMap;
 }
 } // namespace MantidQt::CustomInterfaces::ISISReflectometry
