@@ -409,10 +409,14 @@ std::vector<double> LoadILLReflectometry::getXValues() {
     std::string chopper{"Chopper"};
     double chop1Speed{0.0}, chop1Phase{0.0}, chop2Speed{0.0}, chop2Phase{0.0};
     if (m_instrument == Supported::D17) {
-      chop1Speed = doubleFromRun("VirtualChopper.chopper1_speed_average");
-      chop1Phase = doubleFromRun("VirtualChopper.chopper1_phase_average");
-      chop2Speed = doubleFromRun("VirtualChopper.chopper2_speed_average");
-      chop2Phase = doubleFromRun("VirtualChopper.chopper2_phase_average");
+      const auto chop1SpeedName = instrument->getStringParameter("chopper1_speed")[0];
+      const auto chop1PhaseName = instrument->getStringParameter("chopper1_phase")[0];
+      const auto chop2SpeedName = instrument->getStringParameter("chopper2_speed")[0];
+      const auto chop2PhaseName = instrument->getStringParameter("chopper2_phase")[0];
+      chop1Speed = doubleFromRun(chop1SpeedName);
+      chop1Phase = doubleFromRun(chop1PhaseName);
+      chop2Speed = doubleFromRun(chop2SpeedName);
+      chop2Phase = doubleFromRun(chop2PhaseName);
       if (chop1Phase > 360.) {
         // Pre-2018 D17 files which have chopper 1 phase and chopper 2 speed
         // swapped.
