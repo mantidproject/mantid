@@ -23,7 +23,7 @@ LookupRow::LookupRow(boost::optional<double> theta, boost::optional<boost::regex
 
 TransmissionRunPair const &LookupRow::transmissionWorkspaceNames() const { return m_transmissionRuns; }
 
-bool LookupRow::isWildcard() const { return !m_theta.is_initialized(); }
+bool LookupRow::isWildcard() const { return !m_theta.is_initialized() && !m_titleMatcher.is_initialized(); }
 
 boost::optional<double> LookupRow::thetaOrWildcard() const { return m_theta; }
 

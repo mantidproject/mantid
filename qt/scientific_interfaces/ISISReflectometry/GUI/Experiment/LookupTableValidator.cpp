@@ -24,39 +24,46 @@ namespace MantidQt::CustomInterfaces::ISISReflectometry {
 
 auto LookupTableValidator::operator()(ContentType const &lookupTableContent, double thetaTolerance) const
     -> ResultType {
-
   auto lookupTable = LookupTableRows();
+  // First check the individual rows for errors
   auto validationErrors = std::vector<InvalidLookupRowCells>();
   validateAllLookupRows(lookupTableContent, lookupTable, validationErrors);
-  auto thetaValidationResult = validateThetaValues(lookupTable, thetaTolerance);
+  // Now cross-check search criteria across all rows against each other (in case of duplicates etc.)
+  auto thetaValidationResult = validateSearchCriteria(lookupTable, thetaTolerance);
+
   if (thetaValidationResult.isValid()) {
-    if (validationErrors.empty())
+    if (validationErrors.empty()) {
+      // No errors - return the valid table
       return ResultType(std::move(lookupTable));
-    else
+    } else {
+      // Return the row errors (but no table errors)
       return ResultType(LookupTableValidationError(std::move(validationErrors), boost::none));
+    }
   } else {
-    appendThetaErrorForAllRows(validationErrors, lookupTableContent.size());
+    // Mark all rows with the search criteria errors, then return both row and table errors
+    appendSearchCriteriaErrorForAllRows(validationErrors, lookupTableContent.size());
     return ResultType(LookupTableValidationError(std::move(validationErrors), thetaValidationResult.assertError()));
   }
 }
 
 ValidationResult<boost::blank, LookupCriteriaError>
-LookupTableValidator::validateThetaValues(LookupTableRows lookupTable, double tolerance) const {
+LookupTableValidator::validateSearchCriteria(LookupTableRows lookupTable, double tolerance) const {
   using Result = ValidationResult<boost::blank, LookupCriteriaError>;
   auto ok = Result(boost::blank());
-  if (!lookupTable.empty()) {
-    auto const wildcardCount = countWildcards(lookupTable);
-    if (wildcardCount <= 1) {
-      if (hasUniqueSearchCriteria(std::move(lookupTable), wildcardCount, tolerance))
-        return ok;
-      else
-        return Result(LookupCriteriaError::NonUniqueSearchCriteria);
-    } else {
-      return Result(LookupCriteriaError::MultipleWildcards);
-    }
-  } else {
+  // If the table is empty there's nothing to check
+  if (lookupTable.empty()) {
     return ok;
   }
+  // Ensure there is at most one wildcard
+  auto const wildcardCount = countWildcards(lookupTable);
+  if (wildcardCount > 1) {
+    return Result(LookupCriteriaError::MultipleWildcards);
+  }
+  // Ensure search criteria are unique
+  if (!hasUniqueSearchCriteria(std::move(lookupTable), tolerance)) {
+    return Result(LookupCriteriaError::NonUniqueSearchCriteria);
+  }
+  return ok;
 }
 
 void LookupTableValidator::validateAllLookupRows(ContentType const &lookupTableContent, LookupTableRows &lookupTable,
@@ -72,8 +79,7 @@ void LookupTableValidator::validateAllLookupRows(ContentType const &lookupTableC
   }
 }
 
-bool LookupTableValidator::hasUniqueSearchCriteria(LookupTableRows lookupTable, int wildcardCount,
-                                                   double tolerance) const {
+bool LookupTableValidator::hasUniqueSearchCriteria(LookupTableRows lookupTable, double tolerance) const {
   if (lookupTable.size() < 2)
     return true;
 
@@ -87,7 +93,7 @@ bool LookupTableValidator::hasUniqueSearchCriteria(LookupTableRows lookupTable, 
   };
 
   bool foundDuplicate = false;
-  for (auto iter = lookupTable.cbegin() + wildcardCount + 1; !foundDuplicate && iter != lookupTable.cend(); ++iter) {
+  for (auto iter = lookupTable.cbegin() + 1; !foundDuplicate && iter != lookupTable.cend(); ++iter) {
     foundDuplicate = lookupRowsMatch(*iter, *prev(iter));
   }
 
@@ -119,8 +125,8 @@ void LookupTableValidator::sortInPlaceByThetaThenTitleMatcher(LookupTableRows &l
   std::sort(lookupTable.begin(), lookupTable.end(), lookupRowLessThan);
 }
 
-void LookupTableValidator::appendThetaErrorForAllRows(std::vector<InvalidLookupRowCells> &validationErrors,
-                                                      std::size_t rowCount) const {
+void LookupTableValidator::appendSearchCriteriaErrorForAllRows(std::vector<InvalidLookupRowCells> &validationErrors,
+                                                               std::size_t rowCount) const {
   for (auto row = 0u; row < rowCount; ++row)
     validationErrors.emplace_back(row, std::unordered_set<int>({LookupRow::Column::THETA}));
 }
