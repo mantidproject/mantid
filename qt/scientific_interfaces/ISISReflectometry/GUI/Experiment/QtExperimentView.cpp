@@ -666,11 +666,12 @@ std::vector<LookupRow::ValueArray> QtExperimentView::getLookupTable() const {
   using Col = LookupRow::Column;
   for (auto row = 0; row < table.rowCount(); ++row) {
     rows.emplace_back(LookupRow::ValueArray{
-        textFromCell(table.item(row, Col::THETA)), textFromCell(table.item(row, Col::FIRST_TRANS)),
-        textFromCell(table.item(row, Col::SECOND_TRANS)), textFromCell(table.item(row, Col::TRANS_SPECTRA)),
-        textFromCell(table.item(row, Col::QMIN)), textFromCell(table.item(row, Col::QMAX)),
-        textFromCell(table.item(row, Col::QSTEP)), textFromCell(table.item(row, Col::SCALE)),
-        textFromCell(table.item(row, Col::RUN_SPECTRA)), textFromCell(table.item(row, Col::BACKGROUND_SPECTRA))});
+        textFromCell(table.item(row, Col::THETA)), textFromCell(table.item(row, Col::TITLE)),
+        textFromCell(table.item(row, Col::FIRST_TRANS)), textFromCell(table.item(row, Col::SECOND_TRANS)),
+        textFromCell(table.item(row, Col::TRANS_SPECTRA)), textFromCell(table.item(row, Col::QMIN)),
+        textFromCell(table.item(row, Col::QMAX)), textFromCell(table.item(row, Col::QSTEP)),
+        textFromCell(table.item(row, Col::SCALE)), textFromCell(table.item(row, Col::RUN_SPECTRA)),
+        textFromCell(table.item(row, Col::BACKGROUND_SPECTRA))});
   }
   return rows;
 }
