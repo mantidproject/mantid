@@ -38,10 +38,10 @@ public:
 
 protected:
   virtual void processResponseHeaders(const Poco::Net::HTTPResponse &res) override;
-  virtual int sendRequestAndProcess(Poco::Net::HTTPClientSession &session,
+  virtual InternetHelper::HTTPStatus sendRequestAndProcess(Poco::Net::HTTPClientSession &session,
     Poco::URI &uri, std::ostream &responseStream) override;
 private:
-  int processAnonymousRequest(Poco::URI &uri, std::ostream &responseStream);
+  InternetHelper::HTTPStatus processAnonymousRequest(Poco::URI &uri, std::ostream &responseStream);
   void addAuthenticationToken();
   /**
    * API token for github access. This is only created during construction.

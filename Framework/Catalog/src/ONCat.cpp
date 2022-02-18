@@ -215,9 +215,9 @@ void ONCat::login(const std::string &username, const std::string &password) {
   try {
     std::stringstream ss;
 
-    const int statusCode = m_internetHelper->sendRequest(m_url + "/oauth/token", ss);
+    const auto statusCode = m_internetHelper->sendRequest(m_url + "/oauth/token", ss);
 
-    if (statusCode == HTTPResponse::HTTP_OK) {
+    if (statusCode == Kernel::InternetHelper::HTTPStatus::OK) {
       m_tokenStore->setToken(OAuthToken::fromJSONStream(ss));
     }
 
@@ -323,9 +323,9 @@ void ONCat::refreshTokenIfNeeded(const DateAndTime &currentTime) {
     try {
       std::stringstream ss;
 
-      const int statusCode = m_internetHelper->sendRequest(m_url + "/oauth/token", ss);
+      const auto statusCode = m_internetHelper->sendRequest(m_url + "/oauth/token", ss);
 
-      if (statusCode == HTTPResponse::HTTP_OK) {
+      if (statusCode == Kernel::InternetHelper::HTTPStatus::OK) {
         m_tokenStore->setToken(OAuthToken::fromJSONStream(ss));
       }
       g_log.debug() << "Token successfully refreshed." << std::endl;
@@ -358,9 +358,9 @@ void ONCat::refreshTokenIfNeeded(const DateAndTime &currentTime) {
     try {
       std::stringstream ss;
 
-      const int statusCode = m_internetHelper->sendRequest(m_url + "/oauth/token", ss);
+      const auto statusCode = m_internetHelper->sendRequest(m_url + "/oauth/token", ss);
 
-      if (statusCode == HTTPResponse::HTTP_OK) {
+      if (statusCode == Kernel::InternetHelper::HTTPStatus::OK) {
         m_tokenStore->setToken(OAuthToken::fromJSONStream(ss));
       }
       g_log.debug() << "Token successfully refreshed." << std::endl;
