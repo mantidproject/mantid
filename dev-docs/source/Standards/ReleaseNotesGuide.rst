@@ -28,9 +28,8 @@ File naming conventions
 -----------------------
 Release note files need to be named in one of the following ways:-
 
-- Using the Issue number
-- Using the Pull Request (PR) number
-- For MSlice release notes use the date backwards (e.g. 20220217 if pushing on 17th February 2022)
+- Using the Pull Request (PR) number (preferred method)
+- Using the Issue number (to be used if multiple PRs stem from the same issue)
 
 Files need to have unique names. By using either the Issue number or PR number this makes them easier to find if they need to be updated at a later date.
 
