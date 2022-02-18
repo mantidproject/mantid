@@ -19,6 +19,8 @@ Algorithms
 - :ref:`ConjoinXRuns <algm-ConjoinXRuns>` will now have a possibility to set a linear integer range as the axis of the output joined workspace.
 - :ref:`CalculateFlux <algm-CalculateFlux>` will now work also on workspaces with dimensionless x-axis.
 - Performance of :ref:`DiscusMultipleScatteringCorrection <algm-DiscusMultipleScatteringCorrection>` improved when running with ImportanceSampling=True
+- :ref:`MonteCarloAbsorption <algm-MonteCarloAbsorption>` will now get the beam profile from the sample environment in case the sample shape is not defined,
+  e.g. in container-only absorption correction calculation with sparse instrument geometry.
 
 Data Objects
 ------------
