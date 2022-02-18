@@ -9,6 +9,7 @@
 #include "../../../ISISReflectometry/GUI/Common/Decoder.h"
 #include "../ReflMockObjects.h"
 #include "CoderCommonTester.h"
+#include "MantidAPI/FileFinder.h"
 #include "MantidPythonInterface/core/WrapPython.h"
 #include "MantidQtWidgets/Common/QtJSONUtils.h"
 
@@ -20,7 +21,7 @@
 
 namespace {
 
-const static QString DIR_PATH = "../ExternalData/Testing/Data/UnitTest/ISISReflectometry/";
+const static QString DIR_PATH = QString::fromStdString(FileFinder::Instance().getFullPath("ISISReflectometry"));
 const static QString MAINWINDOW_FILE = "mainwindow.json";
 const static QString BATCH_FILE = "batch.json";
 const static QString EMPTY_BATCH_FILE = "empty_batch.json";
