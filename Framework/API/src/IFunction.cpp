@@ -65,7 +65,7 @@ const std::vector<std::string> EXCLUDEUSAGE = {"CompositeFunction"};
 
 void IFunction::validatorEvaluator::evaluateValidator(
     const boost::variant<std::string, int, double, bool, std::vector<double>> &inputdata, std::string dataTypeName,
-    Mantid::Kernel::IValidator_sptr validator) const {
+    Mantid::Kernel::IValidator_sptr validator) {
   std::string error;
 
   if (dataTypeName == "int") {
@@ -968,7 +968,7 @@ protected:
   /// Evaluates the validator associated with this attribute with regards to input value. Returns error as a string.
   template <typename T> void evaluateValidator(T &inputData) const {
     if (m_validator != Kernel::IValidator_sptr()) {
-      m_validatorEvaluator.evaluateValidator(inputData, m_validator);
+      IFunction::validatorEvaluator::evaluateValidator(inputData, m_validator);
     }
   }
 
@@ -1003,7 +1003,7 @@ void IFunction::Attribute::evaluateValidator() const {
   std::string dataTypeName;
   dataTypeName = type();
 
-  m_validatorEvaluator.evaluateValidator(m_data, dataTypeName, m_validator);
+  validatorEvaluator::evaluateValidator(m_data, dataTypeName, m_validator);
 }
 
 /// Value of i-th active parameter. Override this method to make fitted
