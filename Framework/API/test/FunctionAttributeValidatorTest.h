@@ -41,6 +41,10 @@ public:
     v[2] = 3;
     declareAttribute("VAttr", Attribute(v), Mantid::Kernel::ArrayBoundedValidator<double>(1, 5));
 
+    declareAttribute("BAttr", Attribute(false), Mantid::Kernel::ListValidator<bool>(std::vector<bool>{true, false}));
+
+    declareAttribute("BIAttr", Attribute(0), Mantid::Kernel::ListValidator<int>(std::vector<int>{0, 1}));
+
     testInvalidDeclaration();
   }
 
@@ -208,6 +212,20 @@ public:
 
     // Test visitor change outside of validator restrictions
     TS_ASSERT_THROWS(att.fromString("150.0"), IFunction::validationException &);
+  }
+
+  void test_bool_attribute() {
+    detail::FAVT_Funct f;
+    IFunction::Attribute att = f.getAttribute("BAttr");
+    IFunction::Attribute att_bi = f.getAttribute("BIAttr");
+
+    TS_ASSERT_THROWS(att_bi.setInt(3), IFunction::validationException &);
+
+    att.setBool(true);
+    att_bi.setInt(true);
+
+    TS_ASSERT(att.asBool() == true);
+    TS_ASSERT(att_bi.asInt() == true);
   }
 
   // void test_factory_creation() {
