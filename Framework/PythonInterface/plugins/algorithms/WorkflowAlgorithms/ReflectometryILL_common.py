@@ -38,15 +38,18 @@ def detector_angle(run):
             raise RuntimeError('Cannot retrieve detector angle from Nexus file {}.'.format(run))
 
 
-def chopperOpeningAngle(sampleLogs, instrumentName):
+def chopperOpeningAngle(sampleLogs, instrument):
     """Return the chopper opening angle in degrees."""
+    instrumentName = instrument.getName()
     if instrumentName == 'D17':
-        chopper1Phase = sampleLogs.getProperty('VirtualChopper.chopper1_phase_average').value
+        chopper1PhaseName = instrument.getStringParameter('chopper1_phase')[0]
+        chopper1Phase = sampleLogs.getProperty(chopper1PhaseName).value
         chopperWindow = sampleLogs.getProperty('ChopperWindow').value
         if chopper1Phase > 360.:
             # Workaround for broken old D17 NeXus files.
             chopper1Phase = sampleLogs.getProperty('VirtualChopper.chopper2_speed_average').value
-        chopper2Phase = sampleLogs.getProperty('VirtualChopper.chopper2_phase_average').value
+        chopper2PhaseName = instrument.getStringParameter('chopper2_phase')[0]
+        chopper2Phase = sampleLogs.getProperty(chopper2PhaseName).value
         openoffset = sampleLogs.getProperty('VirtualChopper.open_offset').value
         return chopperWindow - (chopper2Phase - chopper1Phase) - openoffset
     else:
@@ -66,18 +69,21 @@ def chopperOpeningAngle(sampleLogs, instrumentName):
         return 45. - (chopper2Phase - chopper1Phase) - openoffset
 
 
-def chopperPairDistance(sampleLogs, instrumentName):
+def chopperPairDistance(sampleLogs, instrument):
     """Return the gap between the two choppers."""
+    instrumentName = instrument.getName()
     if instrumentName == 'D17':
-        return sampleLogs.getProperty('Distance.ChopperGap').value # in [m]
+        return sampleLogs.getProperty('Distance.ChopperGap').value  # in [m]
     else:
         return sampleLogs.getProperty('ChopperSetting.distSeparationChopperPair').value * 1e-3
 
 
-def chopperSpeed(sampleLogs, instrumentName):
+def chopperSpeed(sampleLogs, instrument):
     """Return the chopper speed."""
+    instrumentName = instrument.getName()
     if instrumentName == 'D17':
-        return sampleLogs.getProperty('VirtualChopper.chopper1_speed_average').value
+        chopper1SpeedName = instrument.getStringParameter('chopper1_speed')[0]
+        return sampleLogs.getProperty(chopper1SpeedName).value
     else:
         firstChopper = int(sampleLogs.getProperty('ChopperSetting.firstChopper').value)
         speedEntry = 'CH{}.rotation_speed'.format(firstChopper)
@@ -86,22 +92,22 @@ def chopperSpeed(sampleLogs, instrumentName):
 
 def correctForChopperOpenings(ws, directWS, names, cleanup, logging):
     """Correct reflectivity values if chopper openings between RB and DB differ."""
-    def opening(instrumentName, logs, Xs):
-        chopperGap = chopperPairDistance(logs, instrumentName)
-        chopperPeriod = 60. / chopperSpeed(logs, instrumentName)
-        openingAngle = chopperOpeningAngle(logs, instrumentName)
+    def opening(instrument, logs, Xs):
+        chopperGap = chopperPairDistance(logs, instrument)
+        chopperPeriod = 60. / chopperSpeed(logs, instrument)
+        openingAngle = chopperOpeningAngle(logs, instrument)
         return chopperGap * constants.m_n / constants.h / chopperPeriod * Xs * 1e-10 + openingAngle / 360.
-    instrumentName = ws.getInstrument().getName()
+    instrument = ws.getInstrument()
     Xs = ws.readX(0)
     if ws.isHistogramData():
         Xs = (Xs[:-1] + Xs[1:]) / 2.
-    reflectedOpening = opening(instrumentName, ws.run(), Xs)
-    directOpening = opening(instrumentName, directWS.run(), Xs)
+    reflectedOpening = opening(instrument, ws.run(), Xs)
+    directOpening = opening(instrument, directWS.run(), Xs)
     corFactorWSName = names.withSuffix('chopper_opening_correction_factors')
     corFactorWS = CreateWorkspace(
         OutputWorkspace=corFactorWSName,
         DataX=ws.readX(0),
-        DataY= directOpening / reflectedOpening,
+        DataY=directOpening / reflectedOpening,
         UnitX=ws.getAxis(0).getUnit().unitID(),
         ParentWorkspace=ws,
         EnableLogging=logging)

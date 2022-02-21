@@ -146,14 +146,15 @@ class ReflectometryILLConvertToQ(DataProcessorAlgorithm):
         """Convert the X units of ws to momentum transfer."""
         logs = ws.run()
         reflectedForeground = self._foreground(logs)
+        instrument = ws.getInstrument()
         instrumentName = common.instrumentName(ws)
         sumType = logs.getProperty(common.SampleLogs.SUM_TYPE).value
         pixelSize = common.pixelSize(instrumentName)
         detResolution = common.detectorResolution()
-        chopperSpeed = common.chopperSpeed(logs, instrumentName)
-        chopperOpening = common.chopperOpeningAngle(logs, instrumentName)
+        chopperSpeed = common.chopperSpeed(logs, instrument)
+        chopperOpening = common.chopperOpeningAngle(logs, instrument)
         chopperRadius = 0.36 if instrumentName == 'D17' else 0.305
-        chopperPairDist = common.chopperPairDistance(logs, instrumentName)
+        chopperPairDist = common.chopperPairDistance(logs, instrument)
         tofBinWidth = self._TOFChannelWidth(logs)
         qWSName = self._names.withSuffix('in_momentum_transfer')
         qWS = ReflectometryMomentumTransfer(
@@ -179,17 +180,17 @@ class ReflectometryILLConvertToQ(DataProcessorAlgorithm):
     def _correctForChopperOpenings(self, ws, directWS):
         """Correct reflectivity values if chopper openings between RB and DB differ."""
 
-        def opening(instrumentName, logs, Xs):
-            chopperGap = common.chopperPairDistance(logs, instrumentName)
-            chopperPeriod = 60. / common.chopperSpeed(logs, instrumentName)
-            openingAngle = common.chopperOpeningAngle(logs, instrumentName)
+        def opening(instrument, logs, Xs):
+            chopperGap = common.chopperPairDistance(logs, instrument)
+            chopperPeriod = 60. / common.chopperSpeed(logs, instrument)
+            openingAngle = common.chopperOpeningAngle(logs, instrument)
             return chopperGap * constants.m_n / constants.h / chopperPeriod * Xs * 1e-10 + openingAngle / 360.
 
-        instrumentName = common.instrumentName(ws)
+        instrument = ws.getInstrument()
         Xbins = ws.readX(0)
         Xs = (Xbins[:-1] + Xbins[1:]) / 2.
-        reflectedOpening = opening(instrumentName, ws.run(), Xs)
-        directOpening = opening(instrumentName, directWS.run(), Xs)
+        reflectedOpening = opening(instrument, ws.run(), Xs)
+        directOpening = opening(instrument, directWS.run(), Xs)
         corFactorWSName = self._names.withSuffix('chopper_opening_correction_factors')
         corFactorWS = CreateWorkspace(
             OutputWorkspace=corFactorWSName,
