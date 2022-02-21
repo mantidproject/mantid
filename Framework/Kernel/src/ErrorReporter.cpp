@@ -58,17 +58,20 @@ ErrorReporter::ErrorReporter(std::string application, Types::Core::time_duration
 
 /** Generates an error message and then calls an internet helper to send it
  */
-int ErrorReporter::sendErrorReport() {
+Mantid::Kernel::InternetHelper::HTTPStatus ErrorReporter::sendErrorReport() {
   try {
     std::string message = this->generateErrorMessage();
 
     // send the report
     // Poco::ActiveResult<int> result = m_errorActiveMethod(message);
-    auto status = this->sendReport(message, m_url + "/api/error");
+    const auto status = this->sendReport(message, m_url + "/api/error");
     return status;
+  } catch (Kernel::Exception::InternetError &ex) {
+    g_log.debug() << "Send error report failure. " << ex.what() << '\n';
+    return static_cast<InternetHelper::HTTPStatus>(ex.errorCode());
   } catch (std::exception &ex) {
     g_log.debug() << "Send error report failure. " << ex.what() << '\n';
-    return -1;
+    return Kernel::InternetHelper::HTTPStatus::BAD_REQUEST;
   }
 }
 
@@ -124,8 +127,8 @@ std::string ErrorReporter::generateErrorMessage() const {
  @param message : String containg json formatted error message
  @param url : The url to send the post request to
 */
-int ErrorReporter::sendReport(const std::string &message, const std::string &url) {
-  int status = -1;
+Kernel::InternetHelper::HTTPStatus ErrorReporter::sendReport(const std::string &message, const std::string &url) {
+  InternetHelper::HTTPStatus status;
   try {
     Kernel::InternetHelper helper;
     std::stringstream responseStream;
@@ -133,8 +136,9 @@ int ErrorReporter::sendReport(const std::string &message, const std::string &url
     helper.setBody(message);
     status = helper.sendRequest(url, responseStream);
   } catch (Mantid::Kernel::Exception::InternetError &e) {
-    status = e.errorCode();
-    g_log.information() << "Call to \"" << url << "\" responded with " << status << "\n" << e.what() << "\n";
+    status = static_cast<InternetHelper::HTTPStatus>(e.errorCode());
+    g_log.information() << "Call to \"" << url << "\" responded with " << static_cast<int>(status) << "\n"
+                        << e.what() << "\n";
   }
 
   return status;
