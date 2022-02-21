@@ -32,11 +32,12 @@ std::vector<LookupRow> const &LookupTable::rows() const { return m_lookupRows; }
 boost::optional<LookupRow> LookupTable::findLookupRow(Row const &row, double tolerance) const {
   // First filter lookup rows by title, if the run has one
   auto lookupRows = searchByTitle(row);
-  if (lookupRows.empty()) {
-    // If we didn't find an explicit regex that matches, then we allow the user to specify a lookup row with an empty
-    // regex as a default, which falls back to matching all titles
-    lookupRows = findEmptyRegexes();
+  if (auto found = searchByTheta(lookupRows, row.theta(), tolerance)) {
+    return found;
   }
+  // If we didn't find an explicit regex that matches, then we allow the user to specify a lookup row with an empty
+  // regex as a default, which falls back to matching all titles
+  lookupRows = findEmptyRegexes();
   // Now filter by angle; it should be unique
   if (auto found = searchByTheta(lookupRows, row.theta(), tolerance)) {
     return found;
