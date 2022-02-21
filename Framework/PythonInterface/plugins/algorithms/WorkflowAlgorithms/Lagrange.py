@@ -19,7 +19,7 @@ class ILLLagrange(DataProcessorAlgorithm):
     water_correction = None
     intermediate_workspaces = None
 
-    INCIDENT_ENERGY = 4.5
+    INCIDENT_ENERGY_OFFSET = 4.5
 
     use_incident_energy = False
     convert_to_wavenumber = False
@@ -52,7 +52,7 @@ class ILLLagrange(DataProcessorAlgorithm):
         return 'ILLLagrange'
 
     def setup(self):
-        self.use_incident_energy = self.getProperty('IncidentEnergy').value
+        self.use_incident_energy = self.getProperty('UseIncidentEnergy').value
         self.convert_to_wavenumber = self.getProperty('ConvertToWaveNumber').value
 
     def PyInit(self):
@@ -64,7 +64,7 @@ class ILLLagrange(DataProcessorAlgorithm):
                              doc='Correction reference file.')
         self.declareProperty(MatrixWorkspaceProperty('OutputWorkspace', '', direction=Direction.Output),
                              doc='The output workspace containing reduced data.')
-        self.declareProperty(name='IncidentEnergy', defaultValue=False,
+        self.declareProperty(name='UseIncidentEnergy', defaultValue=False,
                              doc='Show the energies as incident energies, not transfer ones.')
         self.declareProperty(name='ConvertToWaveNumber', defaultValue=False,
                              doc='Convert axis unit to energy in wave number (cm-1)')
@@ -218,8 +218,8 @@ class ILLLagrange(DataProcessorAlgorithm):
         detector_counts = [0]*len(data)
         errors = [0]*len(data)
 
-        # if the user wants to see transfer energy, we offset by 4.5
-        offset = 0 if self.use_incident_energy else self.INCIDENT_ENERGY
+        # if the user wants to see transfer energy, we subtract by the constant offset
+        offset = 0 if self.use_incident_energy else self.INCIDENT_ENERGY_OFFSET
 
         for index, line in enumerate(data):
             energy[index] = line[0] - offset

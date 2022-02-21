@@ -67,7 +67,7 @@ class ILLLagrangeTest(unittest.TestCase):
         self.assertAlmostEqual(result.readY(0)[80], -0.013009, 4)
 
     def test_incident_energy(self):
-        result = ILLLagrange(SampleRuns='012869:012871', IncidentEnergy=True)
+        result = ILLLagrange(SampleRuns='012869:012871', UseIncidentEnergy=True)
 
         self.check_result(result, "Energy", 276, 25.9992, 451.0527)
 
