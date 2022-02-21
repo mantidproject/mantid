@@ -36,6 +36,7 @@ class RawDataExplorerFileTree(QTreeView):
         super(RawDataExplorerFileTree, self).__init__(parent)
 
         self.is_ctrl_being_pressed = False
+        self._ignore_next_focus_out = False
 
         file_model = QFileSystemModel()
         file_model.setNameFilters(self._FILE_SYSTEM_FILTERS)
@@ -86,3 +87,25 @@ class RawDataExplorerFileTree(QTreeView):
             self.is_ctrl_being_pressed = False
         else:
             super(RawDataExplorerFileTree, self).keyReleaseEvent(event)
+
+    def focusOutEvent(self, event):
+        """
+        Slot triggered by focusing out of the explorer. Overrode to take care of the case when the widget is updated
+        and steals the focus.
+        @param event: the event that caused the focusing out
+        """
+        # if the event is caused by creating a new window, that means the focus is being taken away by our new widget,
+        # and since we don't want that as it makes it impossible to navigate with the keyboard, we actually reverse it
+        # and give the focus back to the main window and the raw data explorer
+        if event.reason() == Qt.ActiveWindowFocusReason and self.ignore_next_focus_out:
+            self.set_ignore_next_focus_out(False)
+            self.activateWindow()
+            self.setFocus()
+            return
+        super(RawDataExplorerFileTree, self).focusOutEvent(event)
+
+    def set_ignore_next_focus_out(self, new_status):
+        """
+        Setter for the bool ignore_next_focus_out
+        """
+        self._ignore_next_focus_out = new_status

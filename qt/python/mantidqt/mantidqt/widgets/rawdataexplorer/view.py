@@ -117,6 +117,8 @@ class PreviewView(QObject):
             self._widget.canvas.mpl_connect("close_event", self.on_close)
             self.sig_request_close.connect(lambda: plt.close(self._widget))
 
+        self._presenter.get_main_view().fileTree.set_ignore_next_focus_out(True)
+
     def change_workspace(self, workspace_name):
         """
         Change the workspace displayed by the current widget.
@@ -124,15 +126,18 @@ class PreviewView(QObject):
         """
         if self._type == self.IVIEW:
             self._widget.replace_workspace(workspace_name)
-        if self._type == self.SVIEW:
+        elif self._type == self.SVIEW:
             return
-        if self._type == self.PLOT2D:
+        elif self._type == self.PLOT2D:
             pcolormesh([workspace_name], self._widget)
-        if self._type == self.PLOT1D:
+            self._presenter.get_main_view().fileTree.set_ignore_next_focus_out(True)
+        elif self._type == self.PLOT1D:
             plotBin(workspace_name, 0, error_bars=True, window=self._widget,
                     clearWindow=True)
-        if self._type == self.PLOTSPECTRUM:
+            self._presenter.get_main_view().fileTree.set_ignore_next_focus_out(True)
+        elif self._type == self.PLOTSPECTRUM:
             plotSpectrum(workspace_name, 0, error_bars=True, window=self._widget, clearWindow=True)
+            self._presenter.get_main_view().fileTree.set_ignore_next_focus_out(True)
 
     def on_close(self, event=None):
         """

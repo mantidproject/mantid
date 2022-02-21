@@ -80,6 +80,12 @@ class PreviewPresenter:
         ws_name = self._model.get_workspace_name()
         self._view.change_workspace(ws_name)
 
+    def get_main_view(self):
+        """
+        Getter for the main view
+        """
+        return self._main_view
+
 
 class RawDataExplorerPresenter(QObject):
     """
