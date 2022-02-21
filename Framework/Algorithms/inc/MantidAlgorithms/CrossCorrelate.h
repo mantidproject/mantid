@@ -46,7 +46,7 @@ public:
   /// (Empty) Constructor
   CrossCorrelate() : API::Algorithm() {}
   /// Virtual destructor
-  ~CrossCorrelate() override {}
+  ~CrossCorrelate() override = default;
   /// Algorithm's name
   const std::string name() const override { return "CrossCorrelate"; }
   /// Summary of algorithms purpose

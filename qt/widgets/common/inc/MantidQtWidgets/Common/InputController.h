@@ -37,7 +37,7 @@ class EXPORT_OPT_MANTIDQT_COMMON InputController : public QObject {
   Q_OBJECT
 public:
   explicit InputController(QObject *parent, bool contextAllowed = true);
-  ~InputController() override {}
+  ~InputController() override = default;
 
   virtual void mousePressEvent(QMouseEvent * /*unused*/) {}
   virtual void mouseMoveEvent(QMouseEvent * /*unused*/) {}

@@ -124,7 +124,7 @@ public:
   /// Constructor
   ShapeDetails(QWidget *parent = nullptr) : QWidget(parent), m_idvalue(""), m_isComplement(false) {}
   /// Constructor
-  ~ShapeDetails() override {}
+  ~ShapeDetails() override = default;
 
   /// Write out the XML definition for this shape
   virtual QString writeXML() const = 0;

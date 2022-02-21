@@ -24,7 +24,7 @@ public:
   /// constructor
   CatalogListInvestigationTypes() : API::Algorithm() {}
   /// destructor
-  ~CatalogListInvestigationTypes() override {}
+  ~CatalogListInvestigationTypes() override = default;
   /// Algorithm's name for identification overriding a virtual method
   const std::string name() const override { return "CatalogListInvestigationTypes"; }
   /// Summary of algorithms purpose.

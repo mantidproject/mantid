@@ -36,7 +36,7 @@ GNU_DIAG_OFF_SUGGEST_OVERRIDE
 class MockPeakTransform : public PeakTransform {
 public:
   MockPeakTransform() : PeakTransform("H (Lattice)", "K (Lattice)", regex("^H.*$"), regex("^K.*$"), regex("^L.*$")) {}
-  ~MockPeakTransform() override {}
+  ~MockPeakTransform() override = default;
   MOCK_CONST_METHOD0(clone, PeakTransform_sptr());
   MOCK_CONST_METHOD1(transform, Mantid::Kernel::V3D(const Mantid::Kernel::V3D &));
   MOCK_CONST_METHOD1(transformPeak, Mantid::Kernel::V3D(const Mantid::Geometry::IPeak &));

@@ -194,7 +194,7 @@ public:
 class MockProgressBase : public Mantid::Kernel::ProgressBase {
 public:
   MOCK_METHOD1(doReport, void(const std::string &));
-  ~MockProgressBase() override {}
+  ~MockProgressBase() override = default;
 };
 
 /**** Catalog ****/
@@ -210,7 +210,7 @@ public:
   MOCK_CONST_METHOD0(linuxPrefix, const std::string());
   MOCK_CONST_METHOD0(clone, ICatalogInfo *());
   MOCK_CONST_METHOD1(transformArchivePath, std::string(const std::string &));
-  ~MockICatalogInfo() override {}
+  ~MockICatalogInfo() override = default;
 };
 
 class MockSearcher : public ISearcher {

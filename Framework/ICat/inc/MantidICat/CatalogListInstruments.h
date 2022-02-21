@@ -23,7 +23,7 @@ public:
   /// constructor
   CatalogListInstruments() : API::Algorithm() {}
   /// destructor
-  ~CatalogListInstruments() override {}
+  ~CatalogListInstruments() override = default;
   /// Algorithm's name for identification overriding a virtual method
   const std::string name() const override { return "CatalogListInstruments"; }
   /// Summary of algorithms purpose.

@@ -109,7 +109,7 @@ class PeakOverlay : public Shape2DCollection, public MantidQt::API::WorkspaceObs
   Q_OBJECT
 public:
   PeakOverlay(UnwrappedSurface *surface, const std::shared_ptr<Mantid::API::IPeaksWorkspace> &pws);
-  ~PeakOverlay() override {}
+  ~PeakOverlay() override = default;
   /// Override the drawing method
   void draw(QPainter &painter) const override;
   void removeShapes(const QList<Shape2D *> & /*unused*/) override;
