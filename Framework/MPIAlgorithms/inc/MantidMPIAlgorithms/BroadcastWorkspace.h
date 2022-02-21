@@ -31,7 +31,7 @@ public:
   /// (Empty) Constructor
   BroadcastWorkspace() : API::Algorithm() {}
   /// Virtual destructor
-  virtual ~BroadcastWorkspace() {}
+  virtual ~BroadcastWorkspace() = default;
   /// Algorithm's name
   virtual const std::string name() const { return "BroadcastWorkspace"; }
   /// Algorithm's version

@@ -58,7 +58,7 @@ class AbstractIntensityScale {
 public:
   explicit AbstractIntensityScale(const std::shared_ptr<Mantid::API::IPeaksWorkspace> &pws) { setPeaksWorkspace(pws); }
 
-  virtual ~AbstractIntensityScale() {}
+  virtual ~AbstractIntensityScale() = default;
 
   void setPeaksWorkspace(const std::shared_ptr<Mantid::API::IPeaksWorkspace> &pws);
 

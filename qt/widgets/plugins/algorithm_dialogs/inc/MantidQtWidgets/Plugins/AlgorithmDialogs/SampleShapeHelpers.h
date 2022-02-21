@@ -87,7 +87,7 @@ struct BaseInstantiator {
   /// Default constructor
   BaseInstantiator() {}
   /// Virtual destructor
-  virtual ~BaseInstantiator() {}
+  virtual ~BaseInstantiator() = default;
   /// Create an instance
   virtual ShapeDetails *createInstance() const = 0;
 
