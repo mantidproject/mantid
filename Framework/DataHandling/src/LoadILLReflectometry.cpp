@@ -858,6 +858,12 @@ double LoadILLReflectometry::sourceSampleDistance() const {
       pairSeparation = doubleFromRun("Distance.ChopperGap") * scale;                      // in [m]
       m_localWorkspace->mutableRun().addProperty("VirtualChopper.MidChopper_Sample_distance", pairCentre, "meter",
                                                  true);
+    } else if (run.hasProperty("Distance.Chopper1_Sample")) {
+      // Valid from cycle 212 onwards
+      pairCentre = mmToMeter(doubleFromRun("Distance.Chopper1_Sample")); // [mm] to [m]
+      pairSeparation = doubleFromRun("Distance.ChopperGap") * scale;     // in [m]
+      m_localWorkspace->mutableRun().addProperty("VirtualChopper.MidChopper_Sample_distance", pairCentre, "meter",
+                                                 true);
     } else {
       throw std::runtime_error("Unable to extract chopper to sample distance");
     }
