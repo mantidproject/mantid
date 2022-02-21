@@ -105,7 +105,6 @@ MantidColorMap::MantidColorMap(const QString &filename, MantidColorMap::ScaleTyp
 /**
  * Destructor
  */
-MantidColorMap::~MantidColorMap() {}
 
 //-------------------------------------------------------------------------------------------------
 /**

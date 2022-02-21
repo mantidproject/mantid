@@ -24,8 +24,6 @@ using namespace Mantid::API;
 AbstractTreeModel::AbstractTreeModel(ITableWorkspace_sptr tableWorkspace, const WhiteList &whitelist)
     : m_tWS(std::move(tableWorkspace)), m_whitelist(whitelist) {}
 
-AbstractTreeModel::~AbstractTreeModel() {}
-
 /** Returns the number of columns, i.e. elements in the whitelist
  * @return : The number of columns
  */

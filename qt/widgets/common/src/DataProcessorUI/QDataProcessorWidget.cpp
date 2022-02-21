@@ -106,7 +106,6 @@ QDataProcessorWidget::QDataProcessorWidget(const WhiteList &whitelist, const Pre
 
 /** Destructor
  */
-QDataProcessorWidget::~QDataProcessorWidget() {}
 
 /**
 Initialise the Interface
