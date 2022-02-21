@@ -160,9 +160,6 @@ void QtExperimentView::initializeTableColumns(QTableWidget &table,
       setTooltipFromAlgorithm(column, ColumnPropertyNames, algorithmForTooltips);
     }
   }
-
-  // TODO - Temporarily hide the new title-matcher column. Remove this once the implementation is complete.
-  // table.setColumnHidden(LookupRow::TITLE, true);
 }
 
 void QtExperimentView::initializeTableItems(QTableWidget &table) {
