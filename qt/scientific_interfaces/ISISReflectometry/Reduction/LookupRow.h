@@ -44,18 +44,6 @@ public:
     BACKGROUND_SPECTRA = 9
   };
 
-  static auto constexpr ColumnPropertyName =
-      std::array<const char *, OPTIONS_TABLE_COLUMN_COUNT>{"ThetaIn",
-                                                           "FirstTransmissionRunList",
-                                                           "SecondTransmissionRunList",
-                                                           "TransmissionProcessingInstructions",
-                                                           "MomentumTransferMin",
-                                                           "MomentumTransferMax",
-                                                           "MomentumTransferStep",
-                                                           "ScaleFactor",
-                                                           "ProcessingInstructions",
-                                                           "BackgroundProcessingInstructions"};
-
   LookupRow(boost::optional<double> theta, boost::optional<boost::regex> titleMatcher,
             TransmissionRunPair tranmissionRuns,
             boost::optional<ProcessingInstructions> transmissionProcessingInstructions, RangeInQ qRange,

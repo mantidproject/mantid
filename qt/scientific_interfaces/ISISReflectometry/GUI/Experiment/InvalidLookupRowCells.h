@@ -12,9 +12,9 @@ namespace MantidQt {
 namespace CustomInterfaces {
 namespace ISISReflectometry {
 
-class MANTIDQT_ISISREFLECTOMETRY_DLL InvalidDefaultsError {
+class MANTIDQT_ISISREFLECTOMETRY_DLL InvalidLookupRowCells {
 public:
-  InvalidDefaultsError(int row, std::vector<int> invalidColumns);
+  InvalidLookupRowCells(int row, std::vector<int> invalidColumns);
   std::vector<int> const &invalidColumns() const;
   int row() const;
 
@@ -23,8 +23,8 @@ private:
   int m_row;
 };
 
-MANTIDQT_ISISREFLECTOMETRY_DLL bool operator==(InvalidDefaultsError const &lhs, InvalidDefaultsError const &rhs);
-MANTIDQT_ISISREFLECTOMETRY_DLL bool operator!=(InvalidDefaultsError const &lhs, InvalidDefaultsError const &rhs);
+MANTIDQT_ISISREFLECTOMETRY_DLL bool operator==(InvalidLookupRowCells const &lhs, InvalidLookupRowCells const &rhs);
+MANTIDQT_ISISREFLECTOMETRY_DLL bool operator!=(InvalidLookupRowCells const &lhs, InvalidLookupRowCells const &rhs);
 } // namespace ISISReflectometry
 } // namespace CustomInterfaces
 } // namespace MantidQt
