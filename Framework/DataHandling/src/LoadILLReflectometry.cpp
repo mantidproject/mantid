@@ -1,4 +1,4 @@
-﻿// Mantid Repository : https://github.com/mantidproject/mantid
+// Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
 //   NScD Oak Ridge National Laboratory, European Spallation Source,
@@ -235,7 +235,7 @@ void LoadILLReflectometry::loadInstrument() {
  *
  * @param entry :: the NeXus file entry
  */
-void LoadILLReflectometry::initNames(NeXus::NXEntry &entry) {
+void LoadILLReflectometry::initNames(const NeXus::NXEntry &entry) {
   std::string instrumentNamePath = m_loader.findInstrumentNexusPath(entry);
   std::string instrumentName = entry.getString(instrumentNamePath.append("/name"));
   if (instrumentName.empty())
@@ -321,7 +321,7 @@ void LoadILLReflectometry::initWorkspace(const std::vector<std::vector<int>> &mo
  *
  * @param entry First entry of nexus file
  */
-void LoadILLReflectometry::loadDataDetails(NeXus::NXEntry &entry) {
+void LoadILLReflectometry::loadDataDetails(const NeXus::NXEntry &entry) {
   // PSD data D17 256 x 1 x 1000
   // PSD data FIGARO 1 x 256 x 1000
   m_startTime = DateAndTime(m_loader.dateTimeInIsoFormat(entry.getString("start_time")));
@@ -362,7 +362,7 @@ double LoadILLReflectometry::doubleFromRun(const std::string &entryName) const {
  *data
  * @return monitor :: A std::vector containing monitor values
  */
-std::vector<int> LoadILLReflectometry::loadSingleMonitor(NeXus::NXEntry &entry, const std::string &monitor_data) {
+std::vector<int> LoadILLReflectometry::loadSingleMonitor(const NeXus::NXEntry &entry, const std::string &monitor_data) {
   NXData dataGroup = entry.openNXData(monitor_data);
   NXInt data = dataGroup.openIntData();
   data.load();
@@ -375,7 +375,7 @@ std::vector<int> LoadILLReflectometry::loadSingleMonitor(NeXus::NXEntry &entry, 
  * @param entry :: The Nexus entry
  * @return :: A std::vector of vectors of monitors containing monitor values
  */
-std::vector<std::vector<int>> LoadILLReflectometry::loadMonitors(NeXus::NXEntry &entry) {
+std::vector<std::vector<int>> LoadILLReflectometry::loadMonitors(const NeXus::NXEntry &entry) {
   g_log.debug("Read monitor data...");
   // vector of monitors with one entry
   const std::vector<std::vector<int>> monitors{loadSingleMonitor(entry, "monitor1/data"),
@@ -493,7 +493,7 @@ std::vector<double> LoadILLReflectometry::getXValues() {
  * @param monitorsData :: Monitors data already loaded
  * @param xVals :: X values
  */
-void LoadILLReflectometry::loadData(NeXus::NXEntry &entry, const std::vector<std::vector<int>> &monitorsData,
+void LoadILLReflectometry::loadData(const NeXus::NXEntry &entry, const std::vector<std::vector<int>> &monitorsData,
                                     const std::vector<double> &xVals) {
   NXData dataGroup = entry.openNXData("data");
   NXInt data = dataGroup.openIntData();
@@ -653,7 +653,7 @@ double LoadILLReflectometry::detectorRotation() {
  * reflected beams standalone, hence sample angle is the only option if
  * BraggAngle is not manually specified.
  */
-void LoadILLReflectometry::sampleAngle(NeXus::NXEntry &entry) {
+void LoadILLReflectometry::sampleAngle(const NeXus::NXEntry &entry) {
   std::string entryName;
   if (m_instrument == Supported::D17) {
     if (entry.isValid("instrument/SAN/value")) {
