@@ -171,7 +171,7 @@ knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/SmoothNeigh
 nullPointerRedundantCheck:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/SmoothNeighbours.cpp:256
 unreadVariable:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/VesuvioL1ThetaResolution.cpp:241
 useStlAlgorithm:${CMAKE_SOURCE_DIR}/Framework/API/src/Algorithm.cpp:369
-useStlAlgorithm:${CMAKE_SOURCE_DIR}/Framework/API/src/AlgorithmHistory.cpp:93
+useStlAlgorithm:${CMAKE_SOURCE_DIR}/Framework/API/src/AlgorithmHistory.cpp:90
 duplicateCondition:${CMAKE_SOURCE_DIR}/Framework/API/src/BoxController.cpp:282
 unsignedLessThanZero:${CMAKE_SOURCE_DIR}/Framework/API/src/BoxController.cpp:220
 useStlAlgorithm:${CMAKE_SOURCE_DIR}/Framework/API/src/BoxControllerSettingsAlgorithm.cpp:40
@@ -429,7 +429,7 @@ unreadVariable:${CMAKE_SOURCE_DIR}/Framework/DataObjects/src/MDHistoWorkspace.cp
 unreadVariable:${CMAKE_SOURCE_DIR}/Framework/DataObjects/src/MDHistoWorkspace.cpp:520
 redundantPointerOp:${CMAKE_SOURCE_DIR}/Framework/DataObjects/inc/MantidDataObjects/MDGridBox.tcc:755
 shadowVariable:${CMAKE_SOURCE_DIR}/Framework/DataObjects/inc/MantidDataObjects/MDGridBox.tcc:1192
-useStlAlgorithm:${CMAKE_SOURCE_DIR}/Framework/DataObjects/inc/MantidDataObjects/MDEventWorkspace.tcc:463
+useStlAlgorithm:${CMAKE_SOURCE_DIR}/Framework/DataObjects/inc/MantidDataObjects/MDEventWorkspace.tcc:459
 useStlAlgorithm:${CMAKE_SOURCE_DIR}/Framework/DataObjects/src/MaskWorkspace.cpp:191
 knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/DataObjects/src/Peak.cpp:670
 knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/Load.cpp:43
