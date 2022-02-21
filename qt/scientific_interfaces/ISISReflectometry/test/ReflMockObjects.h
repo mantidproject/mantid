@@ -303,6 +303,7 @@ public:
 class MockDecoder : public IDecoder {
 public:
   MOCK_METHOD3(decodeBatch, void(const IMainWindowView *, int, const QMap<QString, QVariant> &));
+  MOCK_CONST_METHOD1(decodeVersion, size_t(const QMap<QString, QVariant> &));
 };
 
 class MockPythonRunner : public IPythonRunner {

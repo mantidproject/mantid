@@ -7,45 +7,63 @@
 #include "LookupTableValidator.h"
 #include "../../Reduction/ValidateLookupRow.h"
 
+#include <algorithm>
 #include <cmath>
+#include <vector>
+
+namespace {
+constexpr double EPSILON = std::numeric_limits<double>::epsilon();
+
+bool equalWithinTolerance(double val1, double val2, double tolerance) {
+  bool result = std::abs(val1 - val2) <= (tolerance + EPSILON);
+  return result;
+}
+} // namespace
 
 namespace MantidQt::CustomInterfaces::ISISReflectometry {
 
 auto LookupTableValidator::operator()(ContentType const &lookupTableContent, double thetaTolerance) const
     -> ResultType {
-
   auto lookupTable = LookupTableRows();
+  // First check the individual rows for errors
   auto validationErrors = std::vector<InvalidLookupRowCells>();
   validateAllLookupRows(lookupTableContent, lookupTable, validationErrors);
-  auto thetaValidationResult = validateThetaValues(lookupTable, thetaTolerance);
+  // Now cross-check search criteria across all rows against each other (in case of duplicates etc.)
+  auto thetaValidationResult = validateSearchCriteria(lookupTable, thetaTolerance);
+
   if (thetaValidationResult.isValid()) {
-    if (validationErrors.empty())
+    if (validationErrors.empty()) {
+      // No errors - return the valid table
       return ResultType(std::move(lookupTable));
-    else
+    } else {
+      // Return the row errors (but no table errors)
       return ResultType(LookupTableValidationError(std::move(validationErrors), boost::none));
+    }
   } else {
-    appendThetaErrorForAllRows(validationErrors, lookupTableContent.size());
+    // Mark all rows with the search criteria errors, then return both row and table errors
+    appendSearchCriteriaErrorForAllRows(validationErrors, lookupTableContent.size());
     return ResultType(LookupTableValidationError(std::move(validationErrors), thetaValidationResult.assertError()));
   }
 }
 
 ValidationResult<boost::blank, LookupCriteriaError>
-LookupTableValidator::validateThetaValues(LookupTableRows lookupTable, double tolerance) const {
+LookupTableValidator::validateSearchCriteria(LookupTableRows lookupTable, double tolerance) const {
   using Result = ValidationResult<boost::blank, LookupCriteriaError>;
   auto ok = Result(boost::blank());
-  if (!lookupTable.empty()) {
-    auto const wildcardCount = countWildcards(lookupTable);
-    if (wildcardCount <= 1) {
-      if (hasUniqueThetas(std::move(lookupTable), wildcardCount, tolerance))
-        return ok;
-      else
-        return Result(LookupCriteriaError::NonUniqueTheta);
-    } else {
-      return Result(LookupCriteriaError::MultipleWildcards);
-    }
-  } else {
+  // If the table is empty there's nothing to check
+  if (lookupTable.empty()) {
     return ok;
   }
+  // Ensure there is at most one wildcard
+  auto const wildcardCount = countWildcards(lookupTable);
+  if (wildcardCount > 1) {
+    return Result(LookupCriteriaError::MultipleWildcards);
+  }
+  // Ensure search criteria are unique
+  if (!hasUniqueSearchCriteria(std::move(lookupTable), tolerance)) {
+    return Result(LookupCriteriaError::NonUniqueSearchCriteria);
+  }
+  return ok;
 }
 
 void LookupTableValidator::validateAllLookupRows(ContentType const &lookupTableContent, LookupTableRows &lookupTable,
@@ -61,19 +79,22 @@ void LookupTableValidator::validateAllLookupRows(ContentType const &lookupTableC
   }
 }
 
-bool LookupTableValidator::hasUniqueThetas(LookupTableRows lookupTable, int wildcardCount, double tolerance) const {
+bool LookupTableValidator::hasUniqueSearchCriteria(LookupTableRows lookupTable, double tolerance) const {
   if (lookupTable.size() < 2)
     return true;
 
-  sortInPlaceWildcardsFirstThenByTheta(lookupTable);
-  auto thetasWithinTolerance = [tolerance](LookupRow const &lhs, LookupRow const &rhs) -> bool {
-    double const difference = lhs.thetaOrWildcard().get() - rhs.thetaOrWildcard().get();
-    return std::abs(difference) < tolerance;
+  sortInPlaceByThetaThenTitleMatcher(lookupTable);
+
+  auto lookupRowsMatch = [tolerance](LookupRow const &lhs, LookupRow const &rhs) -> bool {
+    if (lhs.titleMatcher() != rhs.titleMatcher()) {
+      return false;
+    }
+    return equalWithinTolerance(*lhs.thetaOrWildcard(), *rhs.thetaOrWildcard(), tolerance);
   };
 
   bool foundDuplicate = false;
-  for (auto iter = lookupTable.cbegin() + wildcardCount + 1; !foundDuplicate && iter != lookupTable.cend(); ++iter) {
-    foundDuplicate = thetasWithinTolerance(*iter, *prev(iter));
+  for (auto iter = lookupTable.cbegin() + 1; !foundDuplicate && iter != lookupTable.cend(); ++iter) {
+    foundDuplicate = lookupRowsMatch(*iter, *prev(iter));
   }
 
   return !foundDuplicate;
@@ -84,21 +105,29 @@ int LookupTableValidator::countWildcards(LookupTableRows const &lookupTable) con
                                         [](LookupRow const &lookupRow) -> bool { return lookupRow.isWildcard(); }));
 }
 
-void LookupTableValidator::sortInPlaceWildcardsFirstThenByTheta(LookupTableRows &lookupTable) const {
-  auto thetaLessThan = [](LookupRow const &lhs, LookupRow const &rhs) -> bool {
-    if (lhs.isWildcard())
-      return true;
-    else if (rhs.isWildcard())
-      return false;
-    else
-      return lhs.thetaOrWildcard().get() < rhs.thetaOrWildcard().get();
+void LookupTableValidator::sortInPlaceByThetaThenTitleMatcher(LookupTableRows &lookupTable) const {
+  lookupTable.erase(
+      std::remove_if(lookupTable.begin(), lookupTable.end(), [](auto const &row) { return row.isWildcard(); }),
+      lookupTable.end());
+
+  auto lookupRowLessThan = [](LookupRow const &lhs, LookupRow const &rhs) -> bool {
+    // This method should never be called with wildcard rows
+    assert(lhs.thetaOrWildcard().is_initialized());
+    assert(rhs.thetaOrWildcard().is_initialized());
+    if (*lhs.thetaOrWildcard() != *rhs.thetaOrWildcard()) {
+      return *lhs.thetaOrWildcard() < *rhs.thetaOrWildcard();
+    }
+    auto const lhsTitle = lhs.titleMatcher().get_value_or(boost::regex());
+    auto const rhsTitle = rhs.titleMatcher().get_value_or(boost::regex());
+    return lhsTitle < rhsTitle;
   };
-  std::sort(lookupTable.begin(), lookupTable.end(), thetaLessThan);
+
+  std::sort(lookupTable.begin(), lookupTable.end(), lookupRowLessThan);
 }
 
-void LookupTableValidator::appendThetaErrorForAllRows(std::vector<InvalidLookupRowCells> &validationErrors,
-                                                      std::size_t rowCount) const {
+void LookupTableValidator::appendSearchCriteriaErrorForAllRows(std::vector<InvalidLookupRowCells> &validationErrors,
+                                                               std::size_t rowCount) const {
   for (auto row = 0u; row < rowCount; ++row)
-    validationErrors.emplace_back(row, std::vector<int>({0}));
+    validationErrors.emplace_back(row, std::unordered_set<int>({LookupRow::Column::THETA}));
 }
 } // namespace MantidQt::CustomInterfaces::ISISReflectometry

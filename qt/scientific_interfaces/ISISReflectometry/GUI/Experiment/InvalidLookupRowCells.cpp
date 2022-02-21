@@ -8,10 +8,10 @@
 
 namespace MantidQt::CustomInterfaces::ISISReflectometry {
 
-InvalidLookupRowCells::InvalidLookupRowCells(int row, std::vector<int> invalidColumns)
+InvalidLookupRowCells::InvalidLookupRowCells(int row, std::unordered_set<int> invalidColumns)
     : m_invalidColumns(std::move(invalidColumns)), m_row(row) {}
 
-std::vector<int> const &InvalidLookupRowCells::invalidColumns() const { return m_invalidColumns; }
+std::unordered_set<int> const &InvalidLookupRowCells::invalidColumns() const { return m_invalidColumns; }
 
 int InvalidLookupRowCells::row() const { return m_row; }
 

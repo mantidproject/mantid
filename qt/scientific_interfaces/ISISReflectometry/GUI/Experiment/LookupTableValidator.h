@@ -22,18 +22,19 @@ public:
 
   ResultType operator()(ContentType const &lookupTableContent, double thetaTolerance) const;
 
-  ValidationResult<boost::blank, LookupCriteriaError> validateThetaValues(LookupTableRows lookupTable,
-                                                                          double tolerance) const;
+  ValidationResult<boost::blank, LookupCriteriaError> validateSearchCriteria(LookupTableRows lookupTable,
+                                                                             double tolerance) const;
 
   void validateAllLookupRows(ContentType const &lookupTableContent, LookupTableRows &lookupTable,
                              std::vector<InvalidLookupRowCells> &validationErrors) const;
 
   int countWildcards(LookupTableRows const &lookupTable) const;
 
-  void sortInPlaceWildcardsFirstThenByTheta(LookupTableRows &lookupTable) const;
+  void sortInPlaceByThetaThenTitleMatcher(LookupTableRows &lookupTable) const;
 
-  bool hasUniqueThetas(LookupTableRows lookupTable, int wildcardCount, double tolerance) const;
-  void appendThetaErrorForAllRows(std::vector<InvalidLookupRowCells> &validationErrors, std::size_t rowCount) const;
+  bool hasUniqueSearchCriteria(LookupTableRows lookupTable, double tolerance) const;
+  void appendSearchCriteriaErrorForAllRows(std::vector<InvalidLookupRowCells> &validationErrors,
+                                           std::size_t rowCount) const;
 };
 } // namespace ISISReflectometry
 } // namespace CustomInterfaces

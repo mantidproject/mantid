@@ -19,7 +19,9 @@ namespace {
 // Map of column number to hard-coded tooltips (used for lookup criteria columns)
 std::unordered_map<int, std::string> ColumnTooltips{
     {LookupRow::THETA,
-     "Theta lookup: runs with theta within 0.01 of this value will use the settings specified in this row"}};
+     "Theta lookup: runs with theta within 0.01 of this value will use the settings specified in this row"},
+    {LookupRow::TITLE,
+     "Title lookup: runs with a title matching this regex will use the settings specified in this row"}};
 
 // Map of column number to algorithm property name for columns where we want to get the tooltip from the algorithm
 std::unordered_map<int, std::string> ColumnPropertyNames{
@@ -661,11 +663,12 @@ std::vector<LookupRow::ValueArray> QtExperimentView::getLookupTable() const {
   using Col = LookupRow::Column;
   for (auto row = 0; row < table.rowCount(); ++row) {
     rows.emplace_back(LookupRow::ValueArray{
-        textFromCell(table.item(row, Col::THETA)), textFromCell(table.item(row, Col::FIRST_TRANS)),
-        textFromCell(table.item(row, Col::SECOND_TRANS)), textFromCell(table.item(row, Col::TRANS_SPECTRA)),
-        textFromCell(table.item(row, Col::QMIN)), textFromCell(table.item(row, Col::QMAX)),
-        textFromCell(table.item(row, Col::QSTEP)), textFromCell(table.item(row, Col::SCALE)),
-        textFromCell(table.item(row, Col::RUN_SPECTRA)), textFromCell(table.item(row, Col::BACKGROUND_SPECTRA))});
+        textFromCell(table.item(row, Col::THETA)), textFromCell(table.item(row, Col::TITLE)),
+        textFromCell(table.item(row, Col::FIRST_TRANS)), textFromCell(table.item(row, Col::SECOND_TRANS)),
+        textFromCell(table.item(row, Col::TRANS_SPECTRA)), textFromCell(table.item(row, Col::QMIN)),
+        textFromCell(table.item(row, Col::QMAX)), textFromCell(table.item(row, Col::QSTEP)),
+        textFromCell(table.item(row, Col::SCALE)), textFromCell(table.item(row, Col::RUN_SPECTRA)),
+        textFromCell(table.item(row, Col::BACKGROUND_SPECTRA))});
   }
   return rows;
 }

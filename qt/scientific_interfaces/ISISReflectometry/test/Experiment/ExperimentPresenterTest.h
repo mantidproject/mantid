@@ -565,7 +565,7 @@ public:
     auto defaultOptions = expectDefaults(model);
     auto presenter = makePresenter(std::move(defaultOptions));
     auto const expected = std::vector<LookupRow::ValueArray>{
-        {"", "", "", "", "0.010000", "0.200000", "0.030000", "0.700000", "390-415", "370-389,416-430"}};
+        {"", "", "", "", "", "0.010000", "0.200000", "0.030000", "0.700000", "390-415", "370-389,416-430"}};
     EXPECT_CALL(m_view, setLookupTable(expected)).Times(1);
     presenter.notifyInstrumentChanged("POLREF");
     verifyAndClear();
@@ -845,36 +845,38 @@ private:
 
   // These functions create various rows in the per-theta defaults tables,
   // either as an input array of strings or an output model
-  OptionsRow optionsRowWithFirstAngle() { return {"0.5", "13463", ""}; }
+  OptionsRow optionsRowWithFirstAngle() { return {"0.5", "", "13463", ""}; }
   LookupRow defaultsWithFirstAngle() {
     return LookupRow(0.5, boost::none, TransmissionRunPair("13463", ""), boost::none, RangeInQ(), boost::none,
                      boost::none, boost::none);
   }
 
-  OptionsRow optionsRowWithSecondAngle() { return {"2.3", "13463", "13464"}; }
+  OptionsRow optionsRowWithSecondAngle() { return {"2.3", "", "13463", "13464"}; }
   LookupRow defaultsWithSecondAngle() {
     return LookupRow(2.3, boost::none, TransmissionRunPair("13463", "13464"), boost::none, RangeInQ(), boost::none,
                      boost::none, boost::none);
   }
-  OptionsRow optionsRowWithWildcard() { return {"", "13463", "13464"}; }
-  OptionsRow optionsRowWithFirstTransmissionRun() { return {"", "13463"}; }
-  OptionsRow optionsRowWithSecondTransmissionRun() { return {"", "", "13464"}; }
-  OptionsRow optionsRowWithBothTransmissionRuns() { return {"", "13463", "13464"}; }
-  OptionsRow optionsRowWithTransProcessingInstructions() { return {"", "", "", "1-4"}; }
-  OptionsRow optionsRowWithTransProcessingInstructionsInvalid() { return {"", "", "", "bad"}; }
-  OptionsRow optionsRowWithQMin() { return {"", "", "", "", "0.008"}; }
-  OptionsRow optionsRowWithQMinInvalid() { return {"", "", "", "", "bad"}; }
-  OptionsRow optionsRowWithQMax() { return {"", "", "", "", "", "0.1"}; }
-  OptionsRow optionsRowWithQMaxInvalid() { return {"", "", "", "", "", "bad"}; }
-  OptionsRow optionsRowWithQStep() { return {"", "", "", "", "", "", "0.02"}; }
-  OptionsRow optionsRowWithQStepInvalid() { return {"", "", "", "", "", "", "bad"}; }
-  OptionsRow optionsRowWithScale() { return {"", "", "", "", "", "", "", "1.4"}; }
-  OptionsRow optionsRowWithScaleInvalid() { return {"", "", "", "", "", "", "", "bad"}; }
-  OptionsRow optionsRowWithProcessingInstructions() { return {"", "", "", "", "", "", "", "", "1-4"}; }
-  OptionsRow optionsRowWithProcessingInstructionsInvalid() { return {"", "", "", "", "", "", "", "", "bad"}; }
-  OptionsRow optionsRowWithBackgroundProcessingInstructions() { return {"", "", "", "", "", "", "", "", "", "1-4"}; }
+  OptionsRow optionsRowWithWildcard() { return {"", "", "13463", "13464"}; }
+  OptionsRow optionsRowWithFirstTransmissionRun() { return {"", "", "13463"}; }
+  OptionsRow optionsRowWithSecondTransmissionRun() { return {"", "", "", "13464"}; }
+  OptionsRow optionsRowWithBothTransmissionRuns() { return {"", "", "13463", "13464"}; }
+  OptionsRow optionsRowWithTransProcessingInstructions() { return {"", "", "", "", "1-4"}; }
+  OptionsRow optionsRowWithTransProcessingInstructionsInvalid() { return {"", "", "", "", "bad"}; }
+  OptionsRow optionsRowWithQMin() { return {"", "", "", "", "", "0.008"}; }
+  OptionsRow optionsRowWithQMinInvalid() { return {"", "", "", "", "", "bad"}; }
+  OptionsRow optionsRowWithQMax() { return {"", "", "", "", "", "", "0.1"}; }
+  OptionsRow optionsRowWithQMaxInvalid() { return {"", "", "", "", "", "", "bad"}; }
+  OptionsRow optionsRowWithQStep() { return {"", "", "", "", "", "", "", "0.02"}; }
+  OptionsRow optionsRowWithQStepInvalid() { return {"", "", "", "", "", "", "", "bad"}; }
+  OptionsRow optionsRowWithScale() { return {"", "", "", "", "", "", "", "", "1.4"}; }
+  OptionsRow optionsRowWithScaleInvalid() { return {"", "", "", "", "", "", "", "", "bad"}; }
+  OptionsRow optionsRowWithProcessingInstructions() { return {"", "", "", "", "", "", "", "", "", "1-4"}; }
+  OptionsRow optionsRowWithProcessingInstructionsInvalid() { return {"", "", "", "", "", "", "", "", "", "bad"}; }
+  OptionsRow optionsRowWithBackgroundProcessingInstructions() {
+    return {"", "", "", "", "", "", "", "", "", "", "1-4"};
+  }
   OptionsRow optionsRowWithBackgroundProcessingInstructionsInvalid() {
-    return {"", "", "", "", "", "", "", "", "", "bad"};
+    return {"", "", "", "", "", "", "", "", "", "", "bad"};
   }
 
   void runTestForValidOptionsTable(OptionsTable const &optionsTable) {
