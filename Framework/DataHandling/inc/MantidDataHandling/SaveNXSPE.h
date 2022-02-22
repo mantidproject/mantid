@@ -39,7 +39,7 @@ namespace DataHandling {
  *
  */
 
-class DLLExport SaveNXSPE : public API::Algorithm {
+class DLLExport SaveNXSPE final : public API::Algorithm {
 public:
   /// Constructor
   SaveNXSPE();

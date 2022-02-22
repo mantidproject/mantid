@@ -16,7 +16,7 @@ namespace Algorithms {
 
   @date 2012-06-01
 */
-class MANTID_ALGORITHMS_DLL InvertMask : public API::Algorithm {
+class MANTID_ALGORITHMS_DLL InvertMask final : public API::Algorithm {
 public:
   /// Algorithm's name for identification overriding a virtual method
   const std::string name() const override { return "InvertMask"; };

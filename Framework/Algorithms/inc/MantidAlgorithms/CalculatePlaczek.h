@@ -14,7 +14,7 @@ namespace Algorithms {
 
 /** CalculatePlaczek : Placzek 1st&2nd order correction for inelastic scattering
  */
-class MANTID_ALGORITHMS_DLL CalculatePlaczek : public API::Algorithm {
+class MANTID_ALGORITHMS_DLL CalculatePlaczek final : public API::Algorithm {
 public:
   const std::string name() const override;
   int version() const override;

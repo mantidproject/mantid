@@ -27,7 +27,7 @@ size_t getIndex(const HistogramData::HistogramX &vecx, double x);
 
 /** FitOneSinglePeak: a class to perform peak fitting on a single peak
  */
-class MANTID_ALGORITHMS_DLL FitOneSinglePeak : public API::Algorithm {
+class MANTID_ALGORITHMS_DLL FitOneSinglePeak final : public API::Algorithm {
 public:
   /// Constructor
   FitOneSinglePeak();
@@ -215,7 +215,7 @@ private:
 
 /** FitPeak : Fit a single peak
  */
-class MANTID_ALGORITHMS_DLL FitPeak : public API::Algorithm {
+class MANTID_ALGORITHMS_DLL FitPeak final : public API::Algorithm {
 public:
   FitPeak();
 

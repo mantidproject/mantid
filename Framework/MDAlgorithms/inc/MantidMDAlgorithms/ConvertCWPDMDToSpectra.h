@@ -78,7 +78,7 @@ inline double calculate2Theta(const Kernel::V3D &detpos, const Kernel::V3D &samp
   powder diffractometer's data to single spectrum matrix workspace
   by merging and binning the detectors' counts by their 2theta value.
 */
-class DLLExport ConvertCWPDMDToSpectra : public API::Algorithm {
+class DLLExport ConvertCWPDMDToSpectra final : public API::Algorithm {
 public:
   /// Algorithm's name
   const std::string name() const override { return "ConvertCWPDMDToSpectra"; }

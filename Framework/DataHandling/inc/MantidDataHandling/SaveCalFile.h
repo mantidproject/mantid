@@ -22,7 +22,7 @@ namespace DataHandling {
  * @author
  * @date 2011-05-10 09:48:31.796980
  */
-class DLLExport SaveCalFile : public API::Algorithm {
+class DLLExport SaveCalFile final : public API::Algorithm {
 public:
   /// Algorithm's name for identification
   const std::string name() const override { return "SaveCalFile"; };

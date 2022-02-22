@@ -20,7 +20,7 @@ namespace Mantid::Crystal {
  * Using a set of offset vectors, either provided as separate lists or as a set
  * of vectors, predict whether
  */
-class MANTID_CRYSTAL_DLL PredictFractionalPeaks : public API::Algorithm {
+class MANTID_CRYSTAL_DLL PredictFractionalPeaks final : public API::Algorithm {
 public:
   const std::string name() const override { return "PredictFractionalPeaks"; }
   const std::string summary() const override {

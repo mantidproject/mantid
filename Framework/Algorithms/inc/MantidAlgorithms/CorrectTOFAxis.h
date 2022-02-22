@@ -23,7 +23,7 @@ namespace Algorithms {
 /** CorrectTOFAxis : Corrects the time-of-flight axis with regards to
   the incident energy and the L1+L2 distance or a reference workspace.
 */
-class MANTID_ALGORITHMS_DLL CorrectTOFAxis : public API::Algorithm {
+class MANTID_ALGORITHMS_DLL CorrectTOFAxis final : public API::Algorithm {
 public:
   const std::string name() const override;
   int version() const override;

@@ -94,6 +94,8 @@ private:
   std::string m_indexRangePropertyName;
 
 protected:
+  ~SpectrumAlgorithm() = default;
+
   /// Dummy struct holding compile-time flags to for_each().
   // A strongly typed enum used in non-type variadic template arguments would
   // have been the other candidate. However, combining flags from multiple enums

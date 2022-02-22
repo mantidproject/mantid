@@ -17,7 +17,7 @@ namespace DataHandling {
 
   @date 2012-06-01
 */
-class DLLExport SNSAppendGeometryToNexus : public API::Algorithm, public API::DeprecatedAlias {
+class DLLExport SNSAppendGeometryToNexus final : public API::Algorithm, public API::DeprecatedAlias {
 public:
   SNSAppendGeometryToNexus();
   ~SNSAppendGeometryToNexus() override;

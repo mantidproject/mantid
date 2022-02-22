@@ -41,7 +41,7 @@ namespace Algorithms {
     @author Laurent C Chapon, ISIS Facility Rutherford Appleton Laboratory
     @date 15/12/2008
 */
-class MANTID_ALGORITHMS_DLL CrossCorrelate : public API::Algorithm {
+class MANTID_ALGORITHMS_DLL CrossCorrelate final : public API::Algorithm {
 public:
   /// (Empty) Constructor
   CrossCorrelate() : API::Algorithm() {}

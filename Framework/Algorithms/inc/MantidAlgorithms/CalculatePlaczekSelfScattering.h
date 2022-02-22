@@ -16,7 +16,7 @@ namespace Algorithms {
 /** CalculatePlaczekSelfScattering : This algorithm calculates a correction for
   an incident spectrum defracted by a sample.
 */
-class MANTID_ALGORITHMS_DLL CalculatePlaczekSelfScattering : public API::Algorithm {
+class MANTID_ALGORITHMS_DLL CalculatePlaczekSelfScattering final : public API::Algorithm {
 public:
   CalculatePlaczekSelfScattering() : API::Algorithm() {}
   virtual ~CalculatePlaczekSelfScattering() {}

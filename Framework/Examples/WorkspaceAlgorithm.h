@@ -15,7 +15,7 @@ namespace Algorithms {
     @author Roman Tolchenov, ISIS, RAL
     @date 02/05/2008
  */
-class WorkspaceAlgorithm : public API::Algorithm {
+class WorkspaceAlgorithm final : public API::Algorithm {
 public:
   /// no arg constructor
   WorkspaceAlgorithm() : API::Algorithm() {}

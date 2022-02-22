@@ -30,7 +30,7 @@ namespace Algorithms {
    paalman-pings absorption terms
 
 */
-class MANTID_ALGORITHMS_DLL PaalmanPingsAbsorptionCorrection : public API::Algorithm {
+class MANTID_ALGORITHMS_DLL PaalmanPingsAbsorptionCorrection final : public API::Algorithm {
 public:
   /// (Empty) Constructor
   PaalmanPingsAbsorptionCorrection();

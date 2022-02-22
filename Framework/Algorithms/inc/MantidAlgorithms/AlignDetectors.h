@@ -40,7 +40,7 @@ class ConversionFactors;
     @author Russell Taylor, Tessella Support Services plc
     @date 18/08/2008
 */
-class MANTID_ALGORITHMS_DLL AlignDetectors : public API::Algorithm, public API::DeprecatedAlgorithm {
+class MANTID_ALGORITHMS_DLL AlignDetectors final : public API::Algorithm, public API::DeprecatedAlgorithm {
 public:
   AlignDetectors();
 

@@ -31,7 +31,7 @@ namespace Algorithms {
     @author Russell Taylor, Tessella Support Services plc
     @date 25/07/2008
 */
-class MANTID_ALGORITHMS_DLL UnwrapSNS : public API::Algorithm {
+class MANTID_ALGORITHMS_DLL UnwrapSNS final : public API::Algorithm {
 public:
   UnwrapSNS();
   ~UnwrapSNS() override {}

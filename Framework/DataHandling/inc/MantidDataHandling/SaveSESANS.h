@@ -33,7 +33,7 @@ namespace DataHandling {
   @author Joseph Ramsay, ISIS
   @date 19/07/2017
 */
-class MANTID_DATAHANDLING_DLL SaveSESANS : public API::Algorithm {
+class MANTID_DATAHANDLING_DLL SaveSESANS final : public API::Algorithm {
 public:
   const std::string name() const override;
   const std::string summary() const override;

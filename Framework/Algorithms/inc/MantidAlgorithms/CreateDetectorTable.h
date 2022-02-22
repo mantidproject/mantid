@@ -27,7 +27,7 @@
 namespace Mantid {
 namespace Algorithms {
 
-class MANTID_ALGORITHMS_DLL CreateDetectorTable : public API::Algorithm {
+class MANTID_ALGORITHMS_DLL CreateDetectorTable final : public API::Algorithm {
 public:
   /// (Empty) Constructor
   CreateDetectorTable() : API::Algorithm() {}

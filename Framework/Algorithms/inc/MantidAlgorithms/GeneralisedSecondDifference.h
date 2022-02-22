@@ -38,7 +38,7 @@ namespace Algorithms {
     @author Laurent C Chapon, ISIS Facility Rutherford Appleton Laboratory
     @date 26/12/2008
 */
-class MANTID_ALGORITHMS_DLL GeneralisedSecondDifference : public API::Algorithm {
+class MANTID_ALGORITHMS_DLL GeneralisedSecondDifference final : public API::Algorithm {
 public:
   /// Algorithm's name
   const std::string name() const override { return "GeneralisedSecondDifference"; }

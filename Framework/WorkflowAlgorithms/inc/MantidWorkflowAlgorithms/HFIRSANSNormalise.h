@@ -14,7 +14,7 @@
 namespace Mantid {
 namespace WorkflowAlgorithms {
 
-class DLLExport HFIRSANSNormalise : public API::Algorithm {
+class DLLExport HFIRSANSNormalise final : public API::Algorithm {
 public:
   /// Algorithm's name
   const std::string name() const override { return "HFIRSANSNormalise"; }

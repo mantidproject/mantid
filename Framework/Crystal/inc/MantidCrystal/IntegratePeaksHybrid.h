@@ -14,7 +14,7 @@ namespace Crystal {
 
 /** IntegratePeaksHybrid : Integrate single crystal peaks algorithm
  */
-class MANTID_CRYSTAL_DLL IntegratePeaksHybrid : public API::Algorithm {
+class MANTID_CRYSTAL_DLL IntegratePeaksHybrid final : public API::Algorithm {
 public:
   const std::string name() const override;
   int version() const override;

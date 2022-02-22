@@ -27,7 +27,7 @@ namespace DataHandling {
     @author Martyn Gigg, Tessella Support Services plc
     @date 26/01/2009
  */
-class DLLExport SaveRKH : public API::Algorithm {
+class DLLExport SaveRKH final : public API::Algorithm {
 public:
   /// Algorithm's name
   const std::string name() const override { return "SaveRKH"; }

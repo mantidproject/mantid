@@ -51,7 +51,7 @@ namespace DataHandling {
  *
  */
 
-class DLLExport SaveNXTomo : public API::Algorithm {
+class DLLExport SaveNXTomo final : public API::Algorithm {
 public:
   SaveNXTomo();
   /// Algorithm's name for identification overriding a virtual method

@@ -99,7 +99,7 @@ private:
 
 /** CorelliCalibrationDatabase: blablabla TODO
  */
-class MANTID_ALGORITHMS_DLL CorelliCalibrationDatabase : public API::Algorithm {
+class MANTID_ALGORITHMS_DLL CorelliCalibrationDatabase final : public API::Algorithm {
 public:
   const std::string name() const override { return "CorelliCalibrationDatabase"; };
   int version() const override { return 1; };

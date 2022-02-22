@@ -80,6 +80,7 @@ Required properties:
 */
 class DLLExport SaveCanSAS1D : public API::Algorithm {
 public:
+  virtual ~SaveCanSAS1D() = default;
   const std::string name() const override { return "SaveCanSAS1D"; }
   const std::string summary() const override { return "Save a MatrixWorkspace to a file in the canSAS 1-D format"; }
   int version() const override { return 1; }
