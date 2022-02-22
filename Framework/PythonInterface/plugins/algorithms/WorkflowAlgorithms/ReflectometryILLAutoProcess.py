@@ -649,6 +649,8 @@ class ReflectometryILLAutoProcess(DataProcessorAlgorithm):
             return run.getLogData('DAN.value').value
         elif run.hasProperty('dan.value'):
             return run.getLogData('dan.value').value
+        elif run.hasProperty('VirtualAxis.DAN_actual_angle'):
+            return run.getLogData('VirtualAxis.DAN_actual_angle').value
         else:
             raise RuntimeError('Unable to retrieve the detector angle from ' + ws)
 

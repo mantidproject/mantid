@@ -57,8 +57,16 @@ def chopperOpeningAngle(sampleLogs, instrument):
         secondChopper = int(sampleLogs.getProperty('ChopperSetting.secondChopper').value)
         phase1Entry = 'CH{}.phase'.format(firstChopper)
         phase2Entry = 'CH{}.phase'.format(secondChopper)
-        chopper1Phase = sampleLogs.getProperty(phase1Entry).value
-        chopper2Phase = sampleLogs.getProperty(phase2Entry).value
+        if sampleLogs.hasProperty(phase1Entry):
+            chopper1Phase = sampleLogs.getProperty(phase1Entry).value
+        else:
+            speedEntry = 'chopper{}.phase'.format(firstChopper)
+            chopper1Phase = sampleLogs.getProperty(speedEntry).value
+        if sampleLogs.hasProperty(phase2Entry):
+            chopper2Phase = sampleLogs.getProperty(phase2Entry).value
+        else:
+            speedEntry = 'chopper{}.phase'.format(secondChopper)
+            chopper2Phase = sampleLogs.getProperty(speedEntry).value
         if chopper1Phase > 360.:
             # CH1.phase on FIGARO is set to an arbitrary value (999.9)
             chopper1Phase = 0.
@@ -73,7 +81,8 @@ def chopperPairDistance(sampleLogs, instrument):
     """Return the gap between the two choppers."""
     instrumentName = instrument.getName()
     if instrumentName == 'D17':
-        return sampleLogs.getProperty('Distance.ChopperGap').value  # in [m]
+        # in [mm] after 08.2020, [m] 20.08.2019-31.07.2020, before: [cm]
+        return sampleLogs.getProperty('Distance.ChopperGap').value
     else:
         return sampleLogs.getProperty('ChopperSetting.distSeparationChopperPair').value * 1e-3
 
@@ -87,7 +96,11 @@ def chopperSpeed(sampleLogs, instrument):
     else:
         firstChopper = int(sampleLogs.getProperty('ChopperSetting.firstChopper').value)
         speedEntry = 'CH{}.rotation_speed'.format(firstChopper)
-        return sampleLogs.getProperty(speedEntry).value
+        if sampleLogs.hasProperty(speedEntry):
+            return sampleLogs.getProperty(speedEntry).value
+        speedEntry = 'chopper{}.rotation_speed'.format(firstChopper)
+        if sampleLogs.hasProperty(speedEntry):
+            return sampleLogs.getProperty(speedEntry).value
 
 
 def correctForChopperOpenings(ws, directWS, names, cleanup, logging):
