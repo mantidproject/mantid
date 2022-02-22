@@ -25,7 +25,7 @@ namespace Algorithms {
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 
-class MANTID_ALGORITHMS_DLL EQSANSCorrectFrame : public API::Algorithm {
+class MANTID_ALGORITHMS_DLL EQSANSCorrectFrame final : public API::Algorithm {
 public:
   /// Default constructor
   EQSANSCorrectFrame();

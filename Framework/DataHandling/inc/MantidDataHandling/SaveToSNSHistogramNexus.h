@@ -31,7 +31,7 @@ time_of_flight fields.
 @date Dec 2, 2010
 */
 
-class DLLExport SaveToSNSHistogramNexus : public API::Algorithm {
+class DLLExport SaveToSNSHistogramNexus final : public API::Algorithm {
 public:
   /// Default constructor
   SaveToSNSHistogramNexus();

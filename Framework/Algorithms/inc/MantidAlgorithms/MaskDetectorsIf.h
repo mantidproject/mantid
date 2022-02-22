@@ -29,7 +29,7 @@ This algorithm is used to select/deselect detectors in a *.cal file.
 Laboratory
  @date 06/07/2009
  */
-class MANTID_ALGORITHMS_DLL MaskDetectorsIf : public API::Algorithm {
+class MANTID_ALGORITHMS_DLL MaskDetectorsIf final : public API::Algorithm {
 public:
   /// Algorithm's name for identification overriding a virtual method
   const std::string name() const override { return "MaskDetectorsIf"; }

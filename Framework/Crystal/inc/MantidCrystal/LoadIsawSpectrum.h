@@ -17,7 +17,7 @@ namespace Crystal {
 Load incident spectrum and detector efficiency correction file.
  */
 
-class MANTID_CRYSTAL_DLL LoadIsawSpectrum : public API::Algorithm {
+class MANTID_CRYSTAL_DLL LoadIsawSpectrum final : public API::Algorithm {
 public:
   /// Algorithm's name for identification
   const std::string name() const override { return "LoadIsawSpectrum"; };

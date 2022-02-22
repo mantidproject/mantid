@@ -21,7 +21,7 @@ namespace ICat {
   @author Sofia Antony, STFC Rutherford Appleton Laboratory
   @date 23/07/2010
   */
-class MANTID_ICAT_DLL CatalogLogout : public API::Algorithm {
+class MANTID_ICAT_DLL CatalogLogout final : public API::Algorithm {
 public:
   /// Constructor
   CatalogLogout() : API::Algorithm() {}

@@ -19,7 +19,7 @@ namespace MDAlgorithms {
   @author Janik Zikovsky
   @date 2011-07-11
 */
-class DLLExport SaveMD : public API::Algorithm {
+class DLLExport SaveMD final : public API::Algorithm {
 public:
   /// Algorithm's name for identification
   const std::string name() const override { return "SaveMD"; };

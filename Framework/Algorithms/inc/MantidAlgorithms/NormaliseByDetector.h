@@ -28,7 +28,7 @@ namespace Algorithms {
 
   @date 2012-07-17
 */
-class MANTID_ALGORITHMS_DLL NormaliseByDetector : public API::Algorithm {
+class MANTID_ALGORITHMS_DLL NormaliseByDetector final : public API::Algorithm {
 public:
   NormaliseByDetector(bool parallelExecution = true);
 

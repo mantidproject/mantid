@@ -20,7 +20,7 @@ Saves a table workspace to a reflectometry tbl format ascii file.
 Rows are 17 cells long and this save algorithm will throw if the workspace has
 stitch groups of longer than 3 runs.
 */
-class DLLExport SaveTBL : public API::Algorithm {
+class DLLExport SaveTBL final : public API::Algorithm {
 public:
   /// Default constructor
   SaveTBL();

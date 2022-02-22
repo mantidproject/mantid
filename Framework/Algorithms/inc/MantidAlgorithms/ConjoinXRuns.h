@@ -18,7 +18,7 @@ namespace Algorithms {
 /** ConjoinXRuns : This algorithms joins the input workspaces horizontally,
  * i.e. by appending (concatenating) their columns.
  */
-class MANTID_ALGORITHMS_DLL ConjoinXRuns : public API::Algorithm {
+class MANTID_ALGORITHMS_DLL ConjoinXRuns final : public API::Algorithm {
 public:
   const std::string name() const override;
   int version() const override;

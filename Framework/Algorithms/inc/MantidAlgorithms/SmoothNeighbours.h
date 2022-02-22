@@ -59,7 +59,7 @@ private:
   @authors Janik Zikovsky, Vickie Lynch, SNS
   @date Oct 2010
 */
-class MANTID_ALGORITHMS_DLL SmoothNeighbours : public API::Algorithm {
+class MANTID_ALGORITHMS_DLL SmoothNeighbours final : public API::Algorithm {
 public:
   /// Default constructor
   SmoothNeighbours();

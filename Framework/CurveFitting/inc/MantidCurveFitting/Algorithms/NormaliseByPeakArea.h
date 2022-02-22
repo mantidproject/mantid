@@ -21,7 +21,7 @@ class HistogramE;
 namespace CurveFitting {
 namespace Algorithms {
 
-class MANTID_CURVEFITTING_DLL NormaliseByPeakArea : public API::Algorithm {
+class MANTID_CURVEFITTING_DLL NormaliseByPeakArea final : public API::Algorithm {
 public:
   NormaliseByPeakArea();
 

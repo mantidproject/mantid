@@ -20,7 +20,7 @@ Deletes a row from a TableWorkspace.
 @author Roman Tolchenov, Tessella plc
 @date 12/05/2011
 */
-class DLLExport DeleteTableRows : public API::Algorithm {
+class DLLExport DeleteTableRows final : public API::Algorithm {
 public:
   /// Default constructor
   DeleteTableRows() {}
