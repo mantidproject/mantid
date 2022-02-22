@@ -391,7 +391,7 @@ public:
 
   void testMultipleWildcardRowsAreInvalid() {
     OptionsTable const optionsTable = {optionsRowWithWildcard(), optionsRowWithWildcard()};
-    runTestForInvalidOptionsTable(optionsTable, {0, 1}, LookupRow::Column::THETA);
+    runTestForInvalidOptionsTable(optionsTable, {0, 1}, {LookupRow::Column::THETA, LookupRow::Column::TITLE});
   }
 
   void testSetFirstTransmissionRun() {
@@ -401,7 +401,7 @@ public:
 
   void testSetSecondTransmissionRun() {
     OptionsTable const optionsTable = {optionsRowWithSecondTransmissionRun()};
-    runTestForInvalidOptionsTable(optionsTable, 0, LookupRow::Column::FIRST_TRANS);
+    runTestForInvalidOptionsTable(optionsTable, 0, {LookupRow::Column::FIRST_TRANS});
   }
 
   void testSetBothTransmissionRuns() {
@@ -416,7 +416,7 @@ public:
 
   void testSetTransmissionProcessingInstructionsInvalid() {
     OptionsTable const optionsTable = {optionsRowWithTransProcessingInstructionsInvalid()};
-    runTestForInvalidOptionsTable(optionsTable, 0, LookupRow::Column::TRANS_SPECTRA);
+    runTestForInvalidOptionsTable(optionsTable, 0, {LookupRow::Column::TRANS_SPECTRA});
   }
 
   void testSetQMin() {
@@ -426,7 +426,7 @@ public:
 
   void testSetQMinInvalid() {
     OptionsTable const optionsTable = {optionsRowWithQMinInvalid()};
-    runTestForInvalidOptionsTable(optionsTable, 0, LookupRow::Column::QMIN);
+    runTestForInvalidOptionsTable(optionsTable, 0, {LookupRow::Column::QMIN});
   }
 
   void testSetQMax() {
@@ -436,7 +436,7 @@ public:
 
   void testSetQMaxInvalid() {
     OptionsTable const optionsTable = {optionsRowWithQMaxInvalid()};
-    runTestForInvalidOptionsTable(optionsTable, 0, LookupRow::Column::QMAX);
+    runTestForInvalidOptionsTable(optionsTable, 0, {LookupRow::Column::QMAX});
   }
 
   void testSetQStep() {
@@ -446,7 +446,7 @@ public:
 
   void testSetQStepInvalid() {
     OptionsTable const optionsTable = {optionsRowWithQStepInvalid()};
-    runTestForInvalidOptionsTable(optionsTable, 0, LookupRow::Column::QSTEP);
+    runTestForInvalidOptionsTable(optionsTable, 0, {LookupRow::Column::QSTEP});
   }
 
   void testSetScale() {
@@ -456,7 +456,7 @@ public:
 
   void testSetScaleInvalid() {
     OptionsTable const optionsTable = {optionsRowWithScaleInvalid()};
-    runTestForInvalidOptionsTable(optionsTable, 0, LookupRow::Column::SCALE);
+    runTestForInvalidOptionsTable(optionsTable, 0, {LookupRow::Column::SCALE});
   }
 
   void testSetProcessingInstructions() {
@@ -466,7 +466,7 @@ public:
 
   void testSetProcessingInstructionsInvalid() {
     OptionsTable const optionsTable = {optionsRowWithProcessingInstructionsInvalid()};
-    runTestForInvalidOptionsTable(optionsTable, 0, LookupRow::Column::RUN_SPECTRA);
+    runTestForInvalidOptionsTable(optionsTable, 0, {LookupRow::Column::RUN_SPECTRA});
   }
 
   void testSetBackgroundProcessingInstructionsValid() {
@@ -476,7 +476,7 @@ public:
 
   void testSetBackgroundProcessingInstructionsInvalid() {
     OptionsTable const optionsTable = {optionsRowWithBackgroundProcessingInstructionsInvalid()};
-    runTestForInvalidOptionsTable(optionsTable, 0, LookupRow::Column::BACKGROUND_SPECTRA);
+    runTestForInvalidOptionsTable(optionsTable, 0, {LookupRow::Column::BACKGROUND_SPECTRA});
   }
 
   void testChangingSettingsNotifiesMainPresenter() {
@@ -887,23 +887,22 @@ private:
     verifyAndClear();
   }
 
-  void runTestForInvalidOptionsTable(OptionsTable const &optionsTable, const std::vector<int> &rows, int column) {
+  void runTestForInvalidOptionsTable(OptionsTable const &optionsTable, const std::vector<int> &rows,
+                                     std::vector<int> columns) {
     auto presenter = makePresenter();
     EXPECT_CALL(m_view, getLookupTable()).WillOnce(Return(optionsTable));
-    for (auto row : rows)
-      EXPECT_CALL(m_view, showLookupRowAsInvalid(row, column)).Times(1);
+    for (auto row : rows) {
+      for (auto col : columns) {
+        EXPECT_CALL(m_view, showLookupRowAsInvalid(row, col)).Times(1);
+      }
+    }
     presenter.notifyLookupRowChanged(1, 1);
     TS_ASSERT(!presenter.hasValidSettings());
     verifyAndClear();
   }
 
-  void runTestForInvalidOptionsTable(OptionsTable const &optionsTable, int row, int column) {
-    auto presenter = makePresenter();
-    EXPECT_CALL(m_view, getLookupTable()).WillOnce(Return(optionsTable));
-    EXPECT_CALL(m_view, showLookupRowAsInvalid(row, column)).Times(1);
-    presenter.notifyLookupRowChanged(1, 1);
-    TS_ASSERT(!presenter.hasValidSettings());
-    verifyAndClear();
+  void runTestForInvalidOptionsTable(OptionsTable const &optionsTable, int row, std::vector<int> columns) {
+    runTestForInvalidOptionsTable(optionsTable, std::vector<int>{row}, columns);
   }
 
   void runTestForNonUniqueAngles(OptionsTable const &optionsTable) {

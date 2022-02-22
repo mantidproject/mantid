@@ -128,6 +128,6 @@ void LookupTableValidator::sortInPlaceByThetaThenTitleMatcher(LookupTableRows &l
 void LookupTableValidator::appendSearchCriteriaErrorForAllRows(std::vector<InvalidLookupRowCells> &validationErrors,
                                                                std::size_t rowCount) const {
   for (auto row = 0u; row < rowCount; ++row)
-    validationErrors.emplace_back(row, std::unordered_set<int>({LookupRow::Column::THETA}));
+    validationErrors.emplace_back(row, std::unordered_set<int>({LookupRow::Column::THETA, LookupRow::Column::TITLE}));
 }
 } // namespace MantidQt::CustomInterfaces::ISISReflectometry
