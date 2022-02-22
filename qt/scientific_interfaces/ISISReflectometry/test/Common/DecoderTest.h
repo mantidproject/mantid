@@ -21,13 +21,14 @@
 
 namespace {
 
-const static QString DIR_PATH = QString::fromStdString(FileFinder::Instance().getFullPath("ISISReflectometry"));
-const static QString MAINWINDOW_FILE = "mainwindow.json";
-const static QString BATCH_FILE = "batch.json";
-const static QString EMPTY_BATCH_FILE = "empty_batch.json";
-const static QString EIGHT_COL_BATCH_FILE = "8_col_batch.json";
-const static QString NINE_COL_BATCH_FILE = "9_col_batch.json";
-const static QString TEN_COL_BATCH_FILE = "10_col_batch.json";
+const std::string DIR_PATH = "ISISReflectometry/";
+auto &fileFinder = FileFinder::Instance();
+const auto MAINWINDOW_FILE = fileFinder.getFullPath(DIR_PATH + "mainwindow.json");
+const auto BATCH_FILE = fileFinder.getFullPath(DIR_PATH + "batch.json");
+const auto EMPTY_BATCH_FILE = fileFinder.getFullPath(DIR_PATH + "empty_batch.json");
+const auto EIGHT_COL_BATCH_FILE = fileFinder.getFullPath(DIR_PATH + "8_col_batch.json");
+const auto NINE_COL_BATCH_FILE = fileFinder.getFullPath(DIR_PATH + "9_col_batch.json");
+const auto TEN_COL_BATCH_FILE = fileFinder.getFullPath(DIR_PATH + "10_col_batch.json");
 
 } // namespace
 
@@ -47,14 +48,14 @@ public:
   void test_decodeMainWindow() {
     CoderCommonTester tester;
     Decoder decoder;
-    auto map = MantidQt::API::loadJSONFromFile(DIR_PATH + MAINWINDOW_FILE);
+    auto map = MantidQt::API::loadJSONFromFile(QString::fromStdString(MAINWINDOW_FILE));
     auto widget = decoder.decode(map, "");
     tester.testMainWindowView(dynamic_cast<QtMainWindowView *>(widget), map);
   }
 
   void test_decodeEmptyBatch() {
     CoderCommonTester tester;
-    auto map = MantidQt::API::loadJSONFromFile(DIR_PATH + EMPTY_BATCH_FILE);
+    auto map = MantidQt::API::loadJSONFromFile(QString::fromStdString(EMPTY_BATCH_FILE));
     QtMainWindowView mwv;
     mwv.initLayout();
     auto gui = dynamic_cast<QtBatchView *>(mwv.batches()[0]);
@@ -66,7 +67,7 @@ public:
 
   void test_decodePopulatedBatch() {
     CoderCommonTester tester;
-    auto map = MantidQt::API::loadJSONFromFile(DIR_PATH + BATCH_FILE);
+    auto map = MantidQt::API::loadJSONFromFile(QString::fromStdString(BATCH_FILE));
     QtMainWindowView mwv;
     mwv.initLayout();
     auto gui = dynamic_cast<QtBatchView *>(mwv.batches()[0]);
@@ -78,7 +79,7 @@ public:
 
   void test_decodeBatchWhenInstrumentChanged() {
     CoderCommonTester tester;
-    auto map = MantidQt::API::loadJSONFromFile(DIR_PATH + BATCH_FILE);
+    auto map = MantidQt::API::loadJSONFromFile(QString::fromStdString(BATCH_FILE));
     QtMainWindowView mwv;
     mwv.initLayout();
     auto gui = dynamic_cast<QtBatchView *>(mwv.batches()[0]);
@@ -98,7 +99,7 @@ public:
     auto gui = dynamic_cast<QtBatchView *>(mwv.batches()[0]);
     Decoder decoder;
     // Decode from the old 9-column format
-    auto oldMap = MantidQt::API::loadJSONFromFile(DIR_PATH + TEN_COL_BATCH_FILE);
+    auto oldMap = MantidQt::API::loadJSONFromFile(QString::fromStdString(TEN_COL_BATCH_FILE));
     decoder.decodeBatch(&mwv, 0, oldMap);
 
     // Check that the result matches the new format
@@ -114,7 +115,7 @@ public:
     auto gui = dynamic_cast<QtBatchView *>(mwv.batches()[0]);
     Decoder decoder;
     // Decode from the old 9-column format
-    auto oldMap = MantidQt::API::loadJSONFromFile(DIR_PATH + NINE_COL_BATCH_FILE);
+    auto oldMap = MantidQt::API::loadJSONFromFile(QString::fromStdString(NINE_COL_BATCH_FILE));
     decoder.decodeBatch(&mwv, 0, oldMap);
 
     // Check that the result matches the new format
@@ -129,19 +130,19 @@ public:
     mwv.initLayout();
     Decoder decoder;
     // Decode from the old 9-column format
-    auto oldMap = MantidQt::API::loadJSONFromFile(DIR_PATH + EIGHT_COL_BATCH_FILE);
+    auto oldMap = MantidQt::API::loadJSONFromFile(QString::fromStdString(EIGHT_COL_BATCH_FILE));
     TS_ASSERT_THROWS(decoder.decodeBatch(&mwv, 0, oldMap), std::out_of_range const &);
   }
 
   void test_decodeVersionOneFiles() {
-    auto map = MantidQt::API::loadJSONFromFile(DIR_PATH + BATCH_FILE);
+    auto map = MantidQt::API::loadJSONFromFile(QString::fromStdString(BATCH_FILE));
     Decoder decoder;
     auto constexpr expectedVersion = 1;
     TS_ASSERT_EQUALS(expectedVersion, decoder.decodeVersion(map));
   }
 
   void test_decodeVersionLegacy() {
-    auto map = MantidQt::API::loadJSONFromFile(DIR_PATH + TEN_COL_BATCH_FILE);
+    auto map = MantidQt::API::loadJSONFromFile(QString::fromStdString(TEN_COL_BATCH_FILE));
     Decoder decoder;
     auto constexpr expectedVersion = 0;
     TS_ASSERT_EQUALS(expectedVersion, decoder.decodeVersion(map));
