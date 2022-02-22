@@ -825,6 +825,8 @@ void LoadILLReflectometry::sampleHorizontalOffset() {
       offsetEntry = "Distance.sampleHorizontalOffset";
     } else if (run.hasProperty("Distance.sample_changer_horizontal_offset")) {
       offsetEntry = "Distance.sample_changer_horizontal_offset";
+    } else if (run.hasProperty("Theta.sample_horizontal_offset")) {
+      offsetEntry = "Theta.sample_horizontal_offset";
     } else {
       throw std::runtime_error("Unable to find sample horizontal offset in the file");
     }
