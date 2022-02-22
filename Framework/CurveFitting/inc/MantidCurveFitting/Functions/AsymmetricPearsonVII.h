@@ -39,7 +39,7 @@ namespace Functions {
 
 class MANTID_CURVEFITTING_DLL AsymmetricPearsonVII : public API::IPeakFunction {
 public:
-  /// Constructor and destructor
+  /// Constructor
   AsymmetricPearsonVII();
 
   /// Override IPeakFunction base class methods
