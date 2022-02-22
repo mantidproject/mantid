@@ -99,7 +99,6 @@ class PropertyNames(object):
     INCOHERENT = 'Incoherent'
     COHERENT = 'Coherent'
 
-    USE_MANUAL_SCALE_FACTORS = 'UseManualScaleFactors'
     MANUAL_SCALE_FACTORS = 'ManualScaleFactors'
     CACHE_DIRECT_BEAM = 'CacheDirectBeam'
 
@@ -272,21 +271,12 @@ class ReflectometryILLAutoProcess(DataProcessorAlgorithm):
         )
 
         self.declareProperty(
-            PropertyNames.USE_MANUAL_SCALE_FACTORS,
-            defaultValue=False,
-            doc='Choose to apply manual scale factors for stitching.'
-        )
-
-        self.declareProperty(
             FloatArrayProperty(
                 PropertyNames.MANUAL_SCALE_FACTORS,
                 values=[]
             ),
-            doc='A list of manual scale factors for stitching (number of anlge configurations minus 1)'
+            doc='An optional list of manual scale factors for stitching (number of angle configurations minus 1)'
         )
-
-        self.setPropertySettings(PropertyNames.MANUAL_SCALE_FACTORS,
-                                 EnabledWhenProperty(PropertyNames.USE_MANUAL_SCALE_FACTORS, PropertyCriterion.IsNotDefault))
 
         self.declareProperty(
             PropertyNames.CACHE_DIRECT_BEAM,
@@ -556,7 +546,7 @@ class ReflectometryILLAutoProcess(DataProcessorAlgorithm):
                 if len(value) != dimensionality and len(value) != 1:
                     issues[property_name] = 'Parameter size mismatch: must have a single value or as many as there are reflected beams:' \
                                             ' given {0}, but there are {1} reflected beam runs'.format(len(value), dimensionality)
-        if self.getProperty(PropertyNames.USE_MANUAL_SCALE_FACTORS).value:
+        if not self.getProperty(PropertyNames.MANUAL_SCALE_FACTORS).isDefault:
             manual_scale_factors = self.getProperty(PropertyNames.MANUAL_SCALE_FACTORS).value
             if len(manual_scale_factors) != dimensionality-1:
                 issues[PropertyNames.MANUAL_SCALE_FACTORS] = \
@@ -864,10 +854,10 @@ class ReflectometryILLAutoProcess(DataProcessorAlgorithm):
         if len(to_group) > 1:
             try:
                 stitched = self._outWS + '_stitched'
-                use_manual = self.getProperty(PropertyNames.USE_MANUAL_SCALE_FACTORS).value
                 scale_factors = self.getProperty(PropertyNames.MANUAL_SCALE_FACTORS).value
-                Stitch1DMany(InputWorkspaces=to_group, OutputWorkspace=stitched, UseManualScaleFactors=use_manual,
-                             ManualScaleFactors=scale_factors)
+                Stitch(InputWorkspaces=to_group,
+                       OutputWorkspace=stitched,
+                       ManualScaleFactors=scale_factors)
                 to_group.append(stitched)
             except RuntimeError as re:
                 self.log().warning('Unable to stitch automatically, consider stitching manually: ' + str(re))
