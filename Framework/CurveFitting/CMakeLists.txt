@@ -56,6 +56,7 @@ set(SRC_FILES
     src/Functions/Abragam.cpp
     src/Functions/ActivationK.cpp
     src/Functions/ActivationmeV.cpp
+    src/Functions/AsymmetricPearsonVII.cpp
     src/Functions/BSpline.cpp
     src/Functions/BackToBackExponential.cpp
     src/Functions/BackgroundFunction.cpp
@@ -239,6 +240,7 @@ set(INC_FILES
     inc/MantidCurveFitting/Functions/Abragam.h
     inc/MantidCurveFitting/Functions/ActivationK.h
     inc/MantidCurveFitting/Functions/ActivationmeV.h
+    inc/MantidCurveFitting/Functions/AsymmetricPearsonVII.h
     inc/MantidCurveFitting/Functions/BSpline.h
     inc/MantidCurveFitting/Functions/BackToBackExponential.h
     inc/MantidCurveFitting/Functions/BackgroundFunction.h
