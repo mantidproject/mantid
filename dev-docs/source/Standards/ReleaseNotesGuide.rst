@@ -37,10 +37,10 @@ Files should always be in .rst format.
 
 File location
 -------------
-Release note files need to be saved in the directory that best represents their position within the release notes. First identify which release version your note relates to e.g. ``v6.3.0`` . Navigate to this directory and then navigate through the sub-directories until you reach a suitable sub heading. All notes need to be placed within a ``New_features``, ``Improvements``
+Release note files need to be saved in the directory that best represents their position within the release notes. First identify which release version your note relates to e.g. ``v6.3.0`` . Navigate to this directory and then navigate through the sub-directories until you reach a suitable sub heading. All notes need to be placed within a ``New_features``
 or ``Bugfixes`` directory. For example a Bugfix release note for Engineering Diffraction should sit within ``/Diffraction/Engineering/Bugfixes`` .
 
-Release notes should not be placed in any directory outside of ``New_features``, ``Improvements`` or ``Bugfixes`` e.g. do not place release notes in ``/Diffraction/Engineering``. You should also not save release notes in any directory titled ``Used`` as this is for notes that have already been collated into the release notes.
+Release notes should not be placed in any directory outside of ``New_features`` or ``Bugfixes`` e.g. do not place release notes in ``/Diffraction/Engineering``. You should also not save release notes in any directory titled ``Used`` as this is for notes that have already been collated into the release notes.
 
 If you are uncertain where your release note should be see the :ref:`Standard File Structure <ReleaseNoteFileStructure>`.
 
@@ -49,9 +49,9 @@ Adding sub-headings
 There will be occasions when the range of standard headings is not suitable for your needs. If you want to add a heading you need to do the following:-
 
 - Add a new directory into the correct part of the filing system. E.g. to add Algorithms to Workbench create the directory ``/Workbench/Algorithm``. The directory name should not contain any spaces.
-- Add ``New_features``, ``Improvements`` and ``Bugfixes`` directories within your new directory. The automated script only works with these directories.
-- Add a blank .rst file to each of the ``New_features``, ``Improvements`` and ``Bugfixes`` directories that has the same name as the directory - this is where the automated script amalgamates the separate release notes.
-- Update the top level release note file with your new heading and sub-headings. For each subheading you need to add an include statement with a link to each new black .rst file to ensure the notes will be visible for users. For this example it may look something like this
+- Add ``New_features`` and ``Bugfixes`` directories within your new directory. The automated script only works with these directories.
+- Add a blank .rst file to each of the ``New_features`` and ``Bugfixes`` directories that has the same name as the directory - this is where the automated script amalgamates the separate release notes.
+- Update the top level release note file with your new heading and sub-headings. For each subheading you need to add an include statement with a link to each new blank .rst file to ensure the notes will be visible for users. For this example it may look something like this
 
 .. code-block:: python
 
@@ -62,16 +62,22 @@ There will be occasions when the range of standard headings is not suitable for 
 	############
 	.. include:: Workbench/Algorithm/New_features/New_features.rst
 
-	Improvements
-	############
-	.. include:: Workbench/Algorithm/Improvements/Improvements.rst
-
 	Bugfixes
 	############
 	.. include:: Workbench/Algorithm/Bugfixes/Bugfixes.rst
 
 
 Once all the directories and files are in place you can add your release note as a separate file as outlined above.
+
+Previewing release notes
+------------------------
+
+There are two ways you can preview release notes prior to them being merged in.
+
+1. Build the documents and view the release note from the build folder as a HTML file. You will need to find it in the directory structure and it may take some time if you have not recently built documentation.
+2. Via the Pull Request (PR). You can view the release note on Github and it will show it using basic .rst rendering. You cannot check all the features you might expect to see when the release note is merged in (e.g. you cannot
+verify links work) but it gives you an idea of how it might look.
+
 
 During release
 --------------
@@ -90,19 +96,16 @@ This is the basic directory structure that is available to you for release notes
   - Powder Diffraction
 
 	  + New features
-	  + Improvements
 	  + Bugfixes
 
   - Engineering Diffraction
 
 	  + New features
-	  + Improvements
 	  + Bugfixes
 
   - Powder Diffraction
 
 	  + New features
-	  + Improvements
 	  + Bugfixes
 
 * Direct Geometry
@@ -110,19 +113,16 @@ This is the basic directory structure that is available to you for release notes
   - General
 
 	  + New features
-	  + Improvements
 	  + Bugfixes
 
   - CrystalField
 
 	  + New features
-	  + Improvements
 	  + Bugfixes
 
   - MSlice
 
 	  + New features
-	  + Improvements
 	  + Bugfixes
 
 * Framework
@@ -130,55 +130,46 @@ This is the basic directory structure that is available to you for release notes
   - Algorithms
 
 	  + New features
-	  + Improvements
 	  + Bugfixes
 
   - Fit Functions
 
 	  + New features
-	  + Improvements
 	  + Bugfixes
 
   - Data Objects
 
 	  + New features
-	  + Improvements
 	  + Bugfixes
 
   - Python
 
 	  + New features
-	  + Improvements
 	  + Bugfixes
 
 * Indirect Geometry
 
   - New features
-  - Improvements
   - Bugfixes
 
   - Algorithms
 
 	  + New features
-	  + Improvements
 	  + Bugfixes
 
 * Mantid Workbench
 
   - New features
-  - Improvements
   - Bugfixes
 
   - InstrumentViewer
 
 	  + New features
-	  + Improvements
 	  + Bugfixes
 
   - SliceViewer
 
 	  + New features
-	  + Improvements
 	  + Bugfixes
 
 * Muon
@@ -186,47 +177,39 @@ This is the basic directory structure that is available to you for release notes
   - Frequency Domain Analysis
 
 	  + New features
-	  + Improvements
 	  + Bugfixes
 
   - Muon Analysis
 
 	  + New features
-	  + Improvements
 	  + Bugfixes
 
   - Muon and Frequency Domain Analysis
 
 	  + New features
-	  + Improvements
 	  + Bugfixes
 
   - ALC
 
 	  + New features
-	  + Improvements
 	  + Bugfixes
 
   - Elemental Analysis
 
 	  + New features
-	  + Improvements
 	  + Bugfixes
 
   - Algorithms
 
 	  + New features
-	  + Improvements
 	  + Bugfixes
 
 * Reflectometry
 
   - New features
-  - Improvements
   - Bugfixes
 
 * SANS
 
   - New features
-  - Improvements
   - Bugfixes
