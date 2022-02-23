@@ -37,6 +37,7 @@ class RawDataExplorerFileTree(QTreeView):
 
         self.is_ctrl_being_pressed = False
         self._ignore_next_focus_out = False
+        self._clearing_selection = False
 
         file_model = QFileSystemModel()
         file_model.setNameFilters(self._FILE_SYSTEM_FILTERS)
@@ -62,6 +63,10 @@ class RawDataExplorerFileTree(QTreeView):
 
     def selectionChanged(self, selected, deselected):
         super(RawDataExplorerFileTree, self).selectionChanged(selected, deselected)
+        if self._clearing_selection:
+            self._clearing_selection = False
+            return
+
         if len(selected.indexes()) == 0 and len(deselected.indexes()) != 0:
             # checking if something was deselected
 
@@ -74,6 +79,12 @@ class RawDataExplorerFileTree(QTreeView):
             # but it is not allowed for the user to deselect a line, so we select it back
             for index in deselected.indexes():
                 self.selectionModel().select(index, QItemSelectionModel.Select | QItemSelectionModel.Rows)
+
+    def clear_selection(self):
+        self._clearing_selection = True
+        selection_model = self.selectionModel()
+        selection_model.clearSelection()
+        selection_model.clearCurrentIndex()
 
     def keyPressEvent(self, event):
         if event.key() == Qt.Key_Control:
