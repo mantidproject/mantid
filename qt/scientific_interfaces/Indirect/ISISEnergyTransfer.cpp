@@ -96,6 +96,17 @@ void ungroupWorkspace(std::string const &workspaceName) {
   ungroup->execute();
 }
 
+void groupWorkspaceBySampleChanger(std::string const &workspaceName) {
+  auto group = AlgorithmManager::Instance().create("GroupBySampleChangerPosition");
+  group->initialize();
+  group->setProperty("InputWorkspace", workspaceName);
+  std::string prefix = workspaceName;
+  prefix.erase(workspaceName.find("_Reduced"), 8);
+  group->setProperty("OutputGroupPrefix", prefix);
+  group->setProperty("OutputGroupSuffix", "Reduced");
+  group->execute();
+}
+
 IAlgorithm_sptr loadAlgorithm(std::string const &filename, std::string const &outputName) {
   auto loader = AlgorithmManager::Instance().create("Load");
   loader->initialize();
@@ -442,7 +453,6 @@ void ISISEnergyTransfer::run() {
 
   reductionAlg->setProperty("SumFiles", m_uiForm.ckSumFiles->isChecked());
   reductionAlg->setProperty("LoadLogFiles", m_uiForm.ckLoadLogFiles->isChecked());
-  reductionAlg->setProperty("GroupBySampleChanger", m_uiForm.cbGroupOutput->currentText() == "Group by Sample");
 
   if (m_uiForm.ckUseCalib->isChecked()) {
     QString calibWorkspaceName = m_uiForm.dsCalibrationFile->getCurrentDataName();
@@ -518,6 +528,10 @@ void ISISEnergyTransfer::algorithmComplete(bool error) {
       m_pythonExportWsName = m_outputWorkspaces[0];
 
       if (m_uiForm.cbGroupOutput->currentText() == "Ungrouped") {
+        ungroupWorkspace(outputGroup->getName());
+      } else if (m_uiForm.cbGroupOutput->currentText() == "Group by Sample") {
+        groupWorkspaceBySampleChanger(outputGroup->getName());
+        // If we are grouping by sample we want to ungroup the reduced group leaving only the sample grouped
         ungroupWorkspace(outputGroup->getName());
       }
 

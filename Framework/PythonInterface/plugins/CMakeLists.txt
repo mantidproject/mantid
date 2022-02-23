@@ -76,6 +76,7 @@ set(PYTHON_PLUGINS
     algorithms/GetEiT0atSNS.py
     algorithms/GetIPTS.py
     algorithms/GetLiveInstrumentValue.py
+    algorithms/GroupBySampleChangerPosition.py
     algorithms/HB2AReduce.py
     algorithms/HB3AAdjustSampleNorm.py
     algorithms/HB3AFindPeaks.py
@@ -227,7 +228,6 @@ set(PYTHON_PLUGINS
     algorithms/WorkflowAlgorithms/ILL_utilities.py
     algorithms/WorkflowAlgorithms/ISISIndirectDiffractionReduction.py
     algorithms/WorkflowAlgorithms/ISISIndirectEnergyTransfer.py
-    algorithms/WorkflowAlgorithms/ISISIndirectEnergyTransferSampleChanger.py
     algorithms/WorkflowAlgorithms/ISISIndirectEnergyTransferWrapper.py
     algorithms/WorkflowAlgorithms/IndirectAnnulusAbsorption.py
     algorithms/WorkflowAlgorithms/IndirectAnnulusAbsorption2.py
