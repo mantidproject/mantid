@@ -70,8 +70,7 @@ class PreviewPresenter:
         self._main_view.del_preview(self._view)
         self._main_model.del_preview(self._model)
 
-        if self._main_view.is_accumulating():
-            self._main_view.clear_selection()
+        self._main_view.clear_selection()
 
     def on_workspace_changed(self):
         """
@@ -187,10 +186,6 @@ class RawDataExplorerPresenter(QObject):
         if not os.path.isfile(last_clicked):
             # if the user clicked on a directory, do nothing preview-wise
             return
-
-        for selected_path in self.view.get_selection():
-            if not os.path.isfile(selected_path):
-                continue
 
         QGuiApplication.setOverrideCursor(Qt.WaitCursor)
         self.set_selection_mode(False)
