@@ -50,16 +50,20 @@ boost::optional<LookupRow> LookupTable::findLookupRow(Row const &row, double tol
 boost::optional<LookupRow> LookupTable::searchByTheta(std::vector<LookupRow> lookupRows,
                                                       boost::optional<double> const &thetaAngle,
                                                       double tolerance) const {
-  // TODO We may get multiple matches if the title matches multiple regexes. If one regex is empty then we
-  // can discard it. If we get multiple non-empty regex matches it is an error.
-  auto match =
-      std::find_if(lookupRows.cbegin(), lookupRows.cend(), [thetaAngle, tolerance](LookupRow const &candiate) -> bool {
-        return !candiate.isWildcard() && equalWithinTolerance(*thetaAngle, candiate.thetaOrWildcard().get(), tolerance);
-      });
-  if (match == lookupRows.cend())
+  std::vector<LookupRow> matchingRows;
+  auto predicate = [thetaAngle, tolerance](LookupRow const &candiate) -> bool {
+    return !candiate.isWildcard() && equalWithinTolerance(*thetaAngle, candiate.thetaOrWildcard().get(), tolerance);
+  };
+
+  std::copy_if(lookupRows.cbegin(), lookupRows.cend(), std::back_inserter(matchingRows), predicate);
+
+  if (matchingRows.empty())
     return boost::none;
-  else
-    return *match;
+  else if (matchingRows.size() == 1) {
+    return matchingRows[0];
+  } else {
+    throw MultipleRowsFoundException("Multiple matching Experiment Setting rows");
+  }
 }
 
 std::vector<LookupRow> LookupTable::findMatchingRegexes(std::string const &title) const {

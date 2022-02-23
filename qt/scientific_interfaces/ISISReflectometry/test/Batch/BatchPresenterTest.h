@@ -21,13 +21,7 @@
 using namespace MantidQt::CustomInterfaces::ISISReflectometry;
 using namespace MantidQt::CustomInterfaces::ISISReflectometry::ModelCreationHelper;
 using MantidQt::API::IConfiguredAlgorithm_sptr;
-using testing::_;
-using testing::AtLeast;
-using testing::Mock;
-using testing::NiceMock;
-using testing::Return;
-using testing::ReturnRef;
-using testing::StrictMock;
+using namespace ::testing;
 
 class BatchPresenterTest : public CxxTest::TestSuite {
 public:
@@ -518,6 +512,21 @@ public:
     EXPECT_CALL(*m_experimentPresenter, hasValidSettings()).Times(1).WillOnce(Return(false));
     EXPECT_CALL(m_messageHandler, giveUserCritical(_, _)).Times(1);
     presenter->notifyResumeAutoreductionRequested();
+  }
+
+  void testWarningShownOnResumeMatchingMultipleRows() {
+    auto presenter = makePresenter();
+    ON_CALL(*m_jobManager, getAlgorithms()).WillByDefault(Throw(MultipleRowsFoundException("")));
+    EXPECT_CALL(m_messageHandler, giveUserCritical(_, _)).Times(1);
+    presenter->notifyResumeReductionRequested();
+  }
+
+  void testWarningShownOnBatchCompleteMatchingMultipleRows() {
+    auto presenter = makePresenter();
+    ON_CALL(*m_jobManager, getAlgorithms()).WillByDefault(Throw(MultipleRowsFoundException("")));
+    EXPECT_CALL(m_messageHandler, giveUserCritical(_, _)).Times(1);
+    // When we process one row correctly, but additional rows need processing this will fire
+    presenter->notifyBatchComplete(false);
   }
 
 private:
