@@ -986,11 +986,6 @@ void IFunction::Attribute::fromString(const std::string &str) {
   apply(tmp);
 }
 
-/** Set Attribute Name
- * @param name :: string of attribute name (set via declareAttribute)
- */
-void IFunction::Attribute::setName(const std::string &name) const { m_name = name; }
-
 /** Set validator to enforce limits on attribute value
  * @param validator :: shared ptr to validator object
  */
@@ -1426,7 +1421,6 @@ void IFunction::setAttribute(const std::string &name, const API::IFunction::Attr
  */
 void IFunction::declareAttribute(const std::string &name, const API::IFunction::Attribute &defaultValue) {
   checkAttributeName(name);
-  defaultValue.setName(name);
 
   m_attrs.emplace(name, defaultValue);
 }
@@ -1440,9 +1434,7 @@ void IFunction::declareAttribute(const std::string &name, const API::IFunction::
 void IFunction::declareAttribute(const std::string &name, const API::IFunction::Attribute &defaultValue,
                                  const Kernel::IValidator &validator) {
   const Kernel::IValidator_sptr validatorClone = validator.clone();
-
   checkAttributeName(name);
-  defaultValue.setName(name);
 
   defaultValue.setValidator(validatorClone);
   defaultValue.evaluateValidator();

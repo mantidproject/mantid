@@ -306,9 +306,6 @@ public:
     /// Apply a lambda visitor
     template <typename... Ts> void apply(AttributeLambdaVisitor<Ts...> &v) { boost::apply_visitor(v, m_data); }
 
-    /// Set Attribute Name
-    void setName(const std::string &name) const;
-
     /// Set validator to enforce limits on attribute value
     void setValidator(const Kernel::IValidator_sptr &validator) const;
     /// Evaluates the validator associated with this attribute. Returns error as a string.
@@ -372,8 +369,6 @@ public:
     bool m_quoteValue = false;
     /// Associated Validator
     mutable Kernel::IValidator_sptr m_validator;
-    /// Attribute Name
-    mutable std::string m_name;
   };
 
   //---------------------------------------------------------//
