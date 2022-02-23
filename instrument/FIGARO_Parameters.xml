@@ -55,5 +55,18 @@
 		 <!-- The sample to second height motor position along Z [m]-->
  		 	<value val="2.077" />
  	  </parameter>
+	  <parameter name="logbook_default_parameters" type="string" visible="false">
+	    <value val="proposal:/entry0/user/proposal:s,
+			experiment identifier:/entry0/experiment_identifier:s,
+			start time:/entry0/start_time:s,
+			duration:/entry0/duration:d,
+			title:/entry0/title:s,
+			angle:/entry0/instrument/MainParameters/Incident_angle:f,
+			slit2 size:/entry0/instrument/MainParameters/Slit2_size:f,
+			slit3 size:/entry0/instrument/MainParameters/Slit3_size:f" />
+	  </parameter>
+	  <parameter name="logbook_optional_parameters" type="string" visible="false">
+	    <value val="sample changer:/entry0/instrument/VirtualSampleChanger/wanted_changer:f" />
+	  </parameter>
 	</component-link>
 </parameter-file>

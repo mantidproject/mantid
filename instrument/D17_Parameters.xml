@@ -79,5 +79,21 @@
 		  <value val="VirtualChopper.chopper2_phase_average" valid-to="2021-04-01T23:59:59"/>
 		  <value val="Chopper2.phase_average" valid-from="2021-04-02T00:00:00"/>
 		</parameter>
+		<parameter name="logbook_default_parameters" type="string" visible="false">
+		  <value val="proposal:/entry0/user/proposal:s,
+			      experiment identifier:/entry0/experiment_identifier:s,
+			      start time:/entry0/start_time:s,
+			      duration:/entry0/duration:d,
+			      title:/entry0/title:s,
+			      angle:/entry0/instrument/AngleSetting/actual_angle:f,
+			      slit2 size:/entry0/instrument/MainParameters/Slit2_size:f,
+			      dan:/entry0/instrument/dan/value:f,
+			      san:/entry0/instrument/san/value:f,
+			      slit3 size:/entry0/instrument/MainParameters/Slit3_size:f" />
+		</parameter>
+		<parameter name="logbook_optional_parameters" type="string" visible="false">
+		  <value val="sample changer:/entry0/instrument/VirtualSampleChanger/wanted_changer:f,
+			      analyser pos:/entry0/instrument/tra/value:f" />
+		</parameter>
 	</component-link>
 </parameter-file>
