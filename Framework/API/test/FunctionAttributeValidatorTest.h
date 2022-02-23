@@ -48,9 +48,8 @@ public:
     testInvalidDeclaration();
   }
 
-  std::string name() const override { return "IFT_Funct"; }
+  std::string name() const override { return "FAVT_Funct"; }
   void function1D(double *, const double *, const size_t) const override {}
-  void functionDeriv1D(Jacobian *, const double *, const size_t) override {}
 
 private:
   void testInvalidDeclaration() {
@@ -86,11 +85,11 @@ private:
 // Simple Attribute Visitor for Test
 class SetAttribute : public Mantid::API::IFunction::AttributeVisitor<> {
 public:
-  SetAttribute(Mantid::Kernel::IValidator_sptr validator) : m_dbl(0) { m_validator = validator; }
-  double m_dbl;
+  SetAttribute(Mantid::Kernel::IValidator_sptr validator) { m_validator = validator; }
+  double m_dbl = 0;
   std::string m_str;
-  int m_i;
-  bool m_b;
+  int m_i = 0;
+  bool m_b = false;
   std::vector<double> m_v;
 
 protected:
