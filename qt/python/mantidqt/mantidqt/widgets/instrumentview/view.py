@@ -108,6 +108,18 @@ class InstrumentView(QWidget, ObservingView):
     def save_image(self, filename):
         return self.widget.saveImage(filename)
 
+    def closeEvent(self, event):
+        # ordering of close events is different depending on
+        # whether workspace is deleted or window is closed
+        if self.presenter is not None:
+            # pass close event through to the underlying C++ widget
+            children = self.findChildren(InstrumentWidget)
+            for child in children:
+                child.close()
+            self.presenter.close(self.name)
+        self.closing.emit()
+        super(QWidget, self).closeEvent(event)
+
     @Slot()
     def _run_close(self):
         self.close()

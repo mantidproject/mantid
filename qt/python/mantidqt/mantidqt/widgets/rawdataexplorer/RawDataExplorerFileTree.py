@@ -97,7 +97,7 @@ class RawDataExplorerFileTree(QTreeView):
         # if the event is caused by creating a new window, that means the focus is being taken away by our new widget,
         # and since we don't want that as it makes it impossible to navigate with the keyboard, we actually reverse it
         # and give the focus back to the main window and the raw data explorer
-        if event.reason() == Qt.ActiveWindowFocusReason and self.ignore_next_focus_out:
+        if event.reason() == Qt.ActiveWindowFocusReason and self._ignore_next_focus_out:
             self.set_ignore_next_focus_out(False)
             self.activateWindow()
             self.setFocus()
