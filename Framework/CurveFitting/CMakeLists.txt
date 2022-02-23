@@ -416,6 +416,7 @@ set(TEST_FILES
     Functions/AbragamTest.h
     Functions/ActivationKTest.h
     Functions/ActivationmeVTest.h
+    Functions/AsymmetricPearsonVIITest.h
     Functions/BSplineTest.h
     Functions/BackToBackExponentialTest.h
     Functions/BivariateNormalTest.h
