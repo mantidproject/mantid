@@ -166,11 +166,6 @@ class RawDataExplorerView(QWidget):
     """
     _previews = None
 
-    """
-    Full path of the last model item clicked. It can be a directory or a file.
-    """
-    _last_clicked = None
-
     file_tree_path_changed = Signal(str)
 
     def __init__(self, presenter, parent=None):
@@ -187,8 +182,7 @@ class RawDataExplorerView(QWidget):
         self.setAttribute(Qt.WA_DeleteOnClose, True)
         self.setup_connections()
 
-        self.fileTree.sig_new_current.connect(self.on_file_clicked, Qt.QueuedConnection)
-        self.is_busy = False
+        self._last_clicked = None  # full path of the last model item clicked. It can be a directory or a file.
 
     def closeEvent(self, event):
         self.deleteLater()
@@ -238,10 +232,11 @@ class RawDataExplorerView(QWidget):
         """
         return self._current_selection
 
-    def on_file_clicked(self, last_clicked_index):
+    def on_item_selected(self, last_selected_index):
         """
-        Triggered when a file is clicked in the tree widget. This method checks
-        the selected items and sends a signal if they changed.
+        Triggered when an item is selected in the tree widget.
+        This method checks the selected items and sends a signal if they changed.
+        @param last_selected_index: the index of the last selected item
         """
         selection_model = self.fileTree.selectionModel()
         file_model = self.fileTree.model()
@@ -257,8 +252,8 @@ class RawDataExplorerView(QWidget):
                 selection_model.select(index, QItemSelectionModel.Deselect | QItemSelectionModel.Rows)
                 continue
 
-            if index == last_clicked_index:
-                self._last_clicked = file_model.filePath(last_clicked_index)
+            if index == last_selected_index:
+                self._last_clicked = file_model.filePath(last_selected_index)
             selection.add(file_path)
 
         if selection != self._current_selection:
@@ -270,6 +265,7 @@ class RawDataExplorerView(QWidget):
         Set up connections between signals and slots in the view.
         """
         self.browse.clicked.connect(self.show_directory_manager)
+        self.fileTree.sig_new_current.connect(self.on_item_selected, Qt.QueuedConnection)
 
     def is_accumulating(self):
         return self._presenter.is_accumulating()
@@ -278,9 +274,13 @@ class RawDataExplorerView(QWidget):
         """
         Open a new directory manager window so the user can select a directory.
         """
+        base_directory = self.fileTree.model().rootPath()
+
         # we have to use the DontUseNativeDialog flag because without it, the ShowDirsOnly flag is ignored on Linux
-        file_tree_path = QFileDialog().getExistingDirectory(parent=self,
-                                                            caption="Select a directory",
-                                                            directory="/home",
-                                                            options=QFileDialog.DontUseNativeDialog | QFileDialog.ShowDirsOnly)
+        dialog = QFileDialog()
+        file_tree_path = dialog.getExistingDirectory(parent=self,
+                                                     caption="Select a directory",
+                                                     directory=base_directory,
+                                                     options=QFileDialog.DontUseNativeDialog | QFileDialog.ShowDirsOnly)
+
         self.file_tree_path_changed.emit(file_tree_path)
