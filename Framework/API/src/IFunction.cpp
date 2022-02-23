@@ -898,7 +898,7 @@ protected:
   }
   /// Apply if int
   void apply(int &i) const override {
-    int tempi;
+    int tempi = 0;
 
     std::istringstream istr(m_value + " ");
     istr >> tempi;
@@ -912,7 +912,7 @@ protected:
   }
   /// Apply if double
   void apply(double &d) const override {
-    double tempd;
+    double tempd = 0;
 
     std::istringstream istr(m_value + " ");
     istr >> tempd;
@@ -926,7 +926,7 @@ protected:
   }
   /// Apply if bool
   void apply(bool &b) const override {
-    bool tempb;
+    bool tempb = false;
 
     tempb = (m_value == "true" || m_value == "TRUE" || m_value == "1");
     evaluateValidator(tempb);
