@@ -63,30 +63,6 @@ struct TieNode {
 const std::vector<std::string> EXCLUDEUSAGE = {"CompositeFunction"};
 } // namespace
 
-void IFunction::validatorEvaluator::evaluateValidator(
-    const boost::variant<std::string, int, double, bool, std::vector<double>> &inputdata, std::string dataTypeName,
-    Mantid::Kernel::IValidator_sptr validator) {
-  std::string error;
-
-  if (dataTypeName == "int") {
-    error = validator->isValid(boost::get<int>(inputdata));
-  } else if (dataTypeName == "double") {
-    error = validator->isValid(boost::get<double>(inputdata));
-  } else if (dataTypeName == "std::string") {
-    error = validator->isValid(boost::get<std::string>(inputdata));
-  } else if (dataTypeName == "bool") {
-    error = validator->isValid(boost::get<bool>(inputdata));
-  } else if (dataTypeName == "std::vector<double>") {
-    error = validator->isValid(boost::get<std::vector<double>>(inputdata));
-  } else {
-    throw std::runtime_error("Invalid Type, must be int, dbl, str, bool, vector<double>");
-  }
-
-  if (error != "") {
-    throw IFunction::validationException("Set Attribute Error: " + error);
-  }
-}
-
 /**
  * Constructor
  */
@@ -994,12 +970,7 @@ void IFunction::Attribute::setValidator(const Kernel::IValidator_sptr &validator
 /**
  *  Evaluates the validator associated with this attribute.
  */
-void IFunction::Attribute::evaluateValidator() const {
-  std::string dataTypeName;
-  dataTypeName = type();
-
-  validatorEvaluator::evaluateValidator(m_data, dataTypeName, m_validator);
-}
+void IFunction::Attribute::evaluateValidator() const { boost::apply_visitor(AttributeValidatorVisitor(this), m_data); }
 
 /// Value of i-th active parameter. Override this method to make fitted
 /// parameters different from the declared

@@ -171,10 +171,10 @@ public:
   };
 
   /**
-   * Simple Class to constain function to evaluate attribute validators that is required in both attributes and
+   * Simple struct to constain function to evaluate attribute validators that is required in both attributes and
    * visitors.
    */
-  class validatorEvaluator {
+  struct validatorEvaluator {
   public:
     validatorEvaluator(){}; // default constructor
     template <typename T1> static void evaluateValidator(T1 &inputData, Mantid::Kernel::IValidator_sptr validator) {
@@ -188,9 +188,6 @@ public:
         throw IFunction::validationException("Set Attribute Error: " + error);
       }
     }
-
-    static void evaluateValidator(const boost::variant<std::string, int, double, bool, std::vector<double>> &inputdata,
-                                  std::string dataTypeName, Mantid::Kernel::IValidator_sptr validator);
   };
 
   /**
@@ -369,6 +366,31 @@ public:
     bool m_quoteValue = false;
     /// Associated Validator
     mutable Kernel::IValidator_sptr m_validator;
+  };
+
+  /**
+   * Atribute visitor class. It provides a separate access method
+   * for each attribute type. When applied to a particular attribue
+   * the appropriate method will be used. Each method calls the attributes
+   * evaluateValidator class to validate the attribute value
+   */
+  template <typename T = void> class DLLExport AttributeValidatorVisitor : public boost::static_visitor<T> {
+  public:
+    AttributeValidatorVisitor(const IFunction::Attribute *attrToValidate) : m_attrToValidate{attrToValidate} {}
+
+    /// implements static_visitor's operator() for std::string
+    T operator()(std::string &str) const { m_attrToValidate->evaluateValidator(str); }
+    /// implements static_visitor's operator() for double
+    T operator()(double &d) const { m_attrToValidate->evaluateValidator(d); }
+    /// implements static_visitor's operator() for int
+    T operator()(int &i) const { m_attrToValidate->evaluateValidator(i); }
+    /// implements static_visitor's operator() for bool
+    T operator()(bool &b) const { m_attrToValidate->evaluateValidator(b); }
+    /// implements static_visitor's operator() for vector
+    T operator()(std::vector<double> &v) const { m_attrToValidate->evaluateValidator(v); }
+
+  protected:
+    const IFunction::Attribute *m_attrToValidate;
   };
 
   //---------------------------------------------------------//
