@@ -17,7 +17,6 @@ import mantid.simpleapi as s_api
 from mantid import config, logger
 from IndirectCommon import *
 
-MTD_PLOT = import_mantidplot()
 
 if is_supported_f2py_platform():
     QLr = import_f2py("QLres")
