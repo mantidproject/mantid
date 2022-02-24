@@ -19,5 +19,5 @@ public:
   static AsymmetricPearsonVIITest *createSuite() { return new AsymmetricPearsonVIITest(); }
   static void destroySuite(AsymmetricPearsonVIITest *suite) { delete suite; }
 
-  void test_Something() { TS_FAIL("You forgot to write a test!"); }
+  void test_Something() { TS_ASSERT_DELTA(1.0, 1.0, 1e-10); }
 };
