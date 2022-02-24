@@ -217,8 +217,8 @@ mkdir %CONFIGDIR%\mantid
 :: use a fixed number of openmp threads to avoid overloading the system
 echo MultiThreaded.MaxCores=2 > %USERPROPS%
 
-:: call ctest.exe -C %BUILD_CONFIG%  --no-compress-output -T Test -j%BUILD_THREADS% --schedule-random --output-on-failure
-:: if ERRORLEVEL 1 exit /B %ERRORLEVEL%
+call ctest.exe -C %BUILD_CONFIG%  --no-compress-output -T Test -j%BUILD_THREADS% --schedule-random --output-on-failure
+if ERRORLEVEL 1 exit /B %ERRORLEVEL%
 
 echo Note: not running doc-test target as it currently takes too long
 
