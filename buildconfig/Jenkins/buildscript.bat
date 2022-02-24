@@ -227,7 +227,6 @@ echo Note: not running doc-test target as it currently takes too long
 :: Disabled while it takes 10 minutes to create & 5-10 mins to archive!
 :: If the install kit needs to be built,  create the docs to check they work
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
-
 if "%BUILDPKG%" == "yes" (
   :: Build offline documentation
   cmake --build . --target docs-qthelp -- /p:Configuration=%BUILD_CONFIG%  /verbosity:minimal
@@ -235,20 +234,14 @@ if "%BUILDPKG%" == "yes" (
   :: It always marks the build as a failure even though MantidPlot exits correctly
   echo Building package
   cpack.exe -C %BUILD_CONFIG% --config CPackConfig.cmake
-  :: If a package is built and system tests are to be run,
-  :: use InstallerTests to run them from the package.
-  if "%SYSTEMTESTS%" == "yes" (
-    if not "%JOB_NAME%" == "%JOB_NAME:pull_requests=%" (
-      set EXTRA_ARGS=--exclude-in-pull-requests
-    )
-    call %WORKSPACE%\buildconfig\Jenkins\systemtests.bat
+)
+
+:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+:: Run system tests if it's a PR build and the RUN_SYSTEMTESTS option is true
+:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+if "%SYSTEMTESTS%" == "yes" (
+  if not "%JOB_NAME%" == "%JOB_NAME:pull_requests=%" (
+    set EXTRA_ARGS=--exclude-in-pull-requests
   )
-) else (
-  :: If no package is built, run the system tests without installing the package.
-  if "%SYSTEMTESTS%" == "yes" (
-    if not "%JOB_NAME%" == "%JOB_NAME:pull_requests=%" (
-      set EXTRA_ARGS=--exclude-in-pull-requests
-    )
-    call %WORKSPACE%\buildconfig\Jenkins\systemtests.bat
-  )
+  call %WORKSPACE%\buildconfig\Jenkins\systemtests.bat
 )
