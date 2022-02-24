@@ -7,7 +7,6 @@
 from mantid.simpleapi import AppendSpectra, DeleteWorkspace, Load, plotSpectrum
 from mantid.api import AnalysisDataService, WorkspaceGroup, AlgorithmManager
 from mantid import mtd, logger, config
-from mantidqt.plotting.functions import pcolormesh
 
 import os
 import numpy as np
@@ -934,6 +933,7 @@ def plot_reduction(workspace_name, plot_type):
 
     can_plot_contour = mtd[workspace_name].getNumberHistograms() > 1
     if (plot_type == 'Contour' or plot_type == 'Both') and can_plot_contour:
+        from mantidqt.plotting.functions import pcolormesh
         pcolormesh(workspace_name)
 
 
