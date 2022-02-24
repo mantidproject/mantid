@@ -275,8 +275,7 @@ class SData(collections.abc.Sequence):
 
         return order_index - 1
 
-    def add_autoconvolution_spectra(self, max_order: Optional[int] = None,
-                                    normalise: bool = True) -> None:
+    def add_autoconvolution_spectra(self, max_order: Optional[int] = None) -> None:
         """
         Atom-by-atom, add higher order spectra by convolution with fundamentals
 
@@ -294,14 +293,9 @@ class SData(collections.abc.Sequence):
 
         for atom_key, atom_data in self._data.items():
             fundamental_spectrum = atom_data['s']['order_1']
-            if normalise:
-                normalisation = np.sum(fundamental_spectrum)
-            else:
-                normalisation = 1.
-            kernel = fundamental_spectrum * abins.parameters.autoconvolution['scale'] / normalisation
 
             for order_index in range(self._get_highest_existing_order(atom_data), max_order):
-                spectrum = convolve(atom_data['s'][f'order_{order_index}'], kernel, mode='full')[:fundamental_spectrum.size]
+                spectrum = convolve(atom_data['s'][f'order_{order_index}'], fundamental_spectrum, mode='full')[:fundamental_spectrum.size]
                 self._data[atom_key]['s'][f'order_{order_index + 1}'] = spectrum
 
     def check_thresholds(self, return_cases: bool = False,

@@ -350,7 +350,7 @@ class SPowderSemiEmpiricalCalculator:
                                   f"Adding autoconvolution data up to order {max_dw_order}.",
                                   reporter=self.progress_reporter)
 
-            sdata.add_autoconvolution_spectra(normalise=False)
+            sdata.add_autoconvolution_spectra()
             sdata = sdata.rebin(self._bins)  # Don't need fine bins any more, so reduce cost of remaining steps
 
             # Apply appropriate q-dependence to each order, along with 1/(n!) term
