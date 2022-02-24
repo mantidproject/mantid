@@ -110,21 +110,46 @@ with the Release Manager.
 Monday, 3 weeks
 ---------------
 
+Manual Testing
+^^^^^^^^^^^^^^
+
 *  Ensure that Manual testing begins. An overview of the Manual testing to be done is
    found :ref:`here <Testing>`. Generate the Manual testing issues by following the instructions
    `here <https://github.com/mantidproject/documents/tree/main/Project-Management/Tools/RoadmapUpdate>`__.
 *  Over the next week or so, read through the Manual testing issues and ensure that any
    serious problems are raised as an issue and marked against the relevant milestone.
+*  Manual testing at ISIS as of release 6.3, has taken the form of Ensemble Manual Testing, outlined
+   `here <https://github.com/mantidproject/documents/blob/main/Project-Management/Tools/RoadmapUpdate/Ensemble%20Manual%20Testing.pptx>`__.
+   In short, testing teams of around 3-5 developers, spread across sub-teams
+   are assigned tasks with the code expert in that testing team.
+
+Thursday, 2 days
+----------------
+
+Prepare for Smoke Testing
+^^^^^^^^^^^^^^^^^^^^^^^^^
+
+* Liaise with the technical release manager and project manager to decide on an appropriate time for Smoke Testing.
+* Send an invite to developers for 1.5 hours maximum Smoke Testing. Include an introduction message to assign all testers to a certain operating system.
+  Link to the release pipeline builds where the release packages *WILL* be. Encourage testers to download
+  in the 30 mins before smoke testing. Inform that ticking on an testing issue means that someone has assigned themselves and will tackle that task.
+* The QA manager should pre-setup 3 ISIS IDAaaS mantid dev instances and manually install the release package before testing
+  so the 1.5 hours is clear for testing time. Then share the instances with the relevant testers by providing their email in the workspace settings.
 
 Friday, 1 day
 -------------
 
+Smoke Testing
+^^^^^^^^^^^^^
+
+*  Make sure to follow the preparing steps listed above for yesterday.
 *  It is likely that many changes have been made over the beta test period, therefore
    we must do some more Manual testing to ensure everything still works. This stage is
    called Smoke testing. Generate the Smoke testing issues by following the instructions
    `here <https://github.com/mantidproject/documents/tree/main/Project-Management/Tools/RoadmapUpdate/SmokeTesting>`__.
-*  Liase with the Technical Release Manager to announce the creation of the Smoke testing
-   issues and Release Candidates in the *\#general* slack channel.
+*  Liaise with the Technical Release Manager and together announce the creation of the
+   Smoke testing issues and Release Candidates in the *\#general* slack channel.
+
 
 
 .. _release-editor-checklist:
@@ -348,8 +373,8 @@ We are now ready to create the release candidates ready for Smoke testing.
    directly to the remote ``main`` without making a PR.
 *  Build the `release kit builds <https://builds.mantidproject.org/view/Release%20Pipeline/>`__
    and set the ``PACKAGE_SUFFIX`` parameter to an empty string
-*  Liase with the Quality Assurance Manager to announce the creation of the Smoke testing
-   issues and Release Candidates in the *\#general* slack channel.
+*  Liaise with the Quality Assurance Manager and together announce the creation of the
+   Smoke testing issues and Release Candidates in the *\#general* slack channel.
 
 Monday, Release Day
 -------------------
