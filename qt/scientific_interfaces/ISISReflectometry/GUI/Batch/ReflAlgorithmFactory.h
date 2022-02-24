@@ -17,6 +17,8 @@ class PreviewRow;
 class ReflAlgorithmFactory : public IReflAlgorithmFactory {
 public:
   explicit ReflAlgorithmFactory(IBatch const &batch);
+  MantidQt::API::IConfiguredAlgorithm_sptr createGroupConfiguredAlgorithm(Group &group) const override;
+  MantidQt::API::IConfiguredAlgorithm_sptr createRowConfiguredAlgorithm(Row &row) const override;
   MantidQt::API::IConfiguredAlgorithm_sptr makePreprocessingAlgorithm(PreviewRow &row) const override;
   MantidQt::API::IConfiguredAlgorithm_sptr makeSumBanksAlgorithm(PreviewRow &row) const override;
 

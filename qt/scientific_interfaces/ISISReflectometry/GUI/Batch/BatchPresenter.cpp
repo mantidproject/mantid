@@ -17,10 +17,6 @@
 #include "MantidQtWidgets/Common/IMessageHandler.h"
 #include <memory>
 
-namespace {
-std::string const PROCESSING_ERROR = "Processing Error";
-}
-
 namespace MantidQt::CustomInterfaces::ISISReflectometry {
 
 using API::IConfiguredAlgorithm_sptr;
@@ -104,13 +100,7 @@ void BatchPresenter::notifyBatchComplete(bool error) {
   UNUSED_ARG(error);
 
   // Continue processing the next batch of algorithms, if there is more to do
-  std::deque<MantidQt::API::IConfiguredAlgorithm_sptr> algorithms;
-  try {
-    algorithms = m_jobManager->getAlgorithms();
-  } catch (MultipleRowsFoundException const &) {
-    return m_messageHandler->giveUserCritical(
-        "The title and angle specified matches multiple rows in the Experiment Settings tab", PROCESSING_ERROR);
-  }
+  auto algorithms = m_jobManager->getAlgorithms();
   if (algorithms.size() > 0) {
     startBatch(std::move(algorithms));
     return;
@@ -173,22 +163,15 @@ bool BatchPresenter::startBatch(std::deque<IConfiguredAlgorithm_sptr> algorithms
 
 void BatchPresenter::resumeReduction() {
   if (!m_experimentPresenter->hasValidSettings()) {
-    return m_messageHandler->giveUserCritical(
+    m_messageHandler->giveUserCritical(
         "One or more of the experiment settings is invalid. Please check the Experiment Settings tab.",
-        PROCESSING_ERROR);
+        "Processing Error");
+    return;
   }
   // Update the model
   m_jobManager->notifyReductionResumed();
   // Get the algorithms to process
-  std::deque<MantidQt::API::IConfiguredAlgorithm_sptr> algorithms;
-
-  try {
-    algorithms = m_jobManager->getAlgorithms();
-  } catch (MultipleRowsFoundException const &) {
-    return m_messageHandler->giveUserCritical(
-        "The title and angle specified matches multiple rows in the Experiment Settings tab", PROCESSING_ERROR);
-  }
-
+  auto algorithms = m_jobManager->getAlgorithms();
   if (algorithms.size() < 1 || (m_jobManager->getProcessAll() && m_mainPresenter->isProcessAllPrevented()) ||
       (m_jobManager->getProcessPartial() && m_mainPresenter->isProcessPartialGroupPrevented())) {
     notifyReductionPaused();
@@ -230,7 +213,7 @@ void BatchPresenter::resumeAutoreduction() {
   if (!m_experimentPresenter->hasValidSettings()) {
     m_messageHandler->giveUserCritical(
         "One or more of the experiment settings is invalid. Please check the Experiment Settings tab.",
-        PROCESSING_ERROR);
+        "Processing Error");
     return;
   }
   // Update the model first to ensure the autoprocessing flag is set

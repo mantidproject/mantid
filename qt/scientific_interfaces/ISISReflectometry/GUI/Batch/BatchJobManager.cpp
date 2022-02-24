@@ -180,7 +180,7 @@ std::deque<IConfiguredAlgorithm_sptr> BatchJobManager::getAlgorithms() {
  * @returns : the list of configured algorithms
  */
 std::deque<IConfiguredAlgorithm_sptr> BatchJobManager::algorithmForPostprocessingGroup(Group &group) {
-  auto algorithm = createConfiguredAlgorithm(m_batch, group);
+  auto algorithm = GroupProcessing::createConfiguredAlgorithm(m_batch, group);
   auto algorithms = std::deque<IConfiguredAlgorithm_sptr>();
   algorithms.emplace_back(std::move(algorithm));
   return algorithms;
@@ -210,12 +210,18 @@ std::deque<IConfiguredAlgorithm_sptr> BatchJobManager::algorithmsForProcessingRo
  * @returns : true if algorithms were added, false if there was nothing to do
  */
 void BatchJobManager::addAlgorithmForProcessingRow(Row &row, std::deque<IConfiguredAlgorithm_sptr> &algorithms) {
-  auto algorithm = createConfiguredAlgorithm(m_batch, row);
+  IConfiguredAlgorithm_sptr algorithm;
+  try {
+    algorithm = m_algFactory->createRowConfiguredAlgorithm(row);
+  } catch (MultipleRowsFoundException const &) {
+    row.setError("The title and angle specified matches multiple rows in the Experiment Settings tab");
+    return;
+  }
   algorithms.emplace_back(std::move(algorithm));
 }
 
 std::unique_ptr<MantidQt::API::IAlgorithmRuntimeProps> BatchJobManager::rowProcessingProperties() const {
-  return createAlgorithmRuntimeProps(m_batch);
+  return RowProcessing::createAlgorithmRuntimeProps(m_batch);
 }
 
 void BatchJobManager::algorithmStarted(IConfiguredAlgorithm_sptr algorithm) {

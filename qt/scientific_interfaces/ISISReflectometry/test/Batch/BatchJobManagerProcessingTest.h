@@ -7,6 +7,13 @@
 #pragma once
 
 #include "BatchJobManagerTest.h"
+#include "test/Batch/MockReflAlgorithmFactory.h"
+
+#include <memory>
+
+using ::testing::_;
+using ::testing::Return;
+using ::testing::Throw;
 
 class BatchJobManagerProcessingTest : public CxxTest::TestSuite, public BatchJobManagerTest {
 public:
@@ -192,6 +199,32 @@ public:
     TS_ASSERT_EQUALS(jobManager.m_processAll, false);
     TS_ASSERT_EQUALS(jobManager.m_processPartial, false);
     verifyAndClear();
+  }
+
+  void testGetAlgorithmsWithMultipleMatchingRows() {
+    auto mockAlgFactory = std::make_unique<MockReflAlgorithmFactory>();
+    EXPECT_CALL(*mockAlgFactory, createRowConfiguredAlgorithm(_))
+        .Times(1)
+        .WillOnce(Throw(MultipleRowsFoundException("")));
+
+    // Create the job manager and ensure the group/row is selected for processing
+    auto jobManager = makeJobManager(twoGroupsWithARowModel(), std::move(mockAlgFactory));
+    selectGroup(jobManager, 0);
+    selectRow(jobManager, 0, 0);
+
+    // Execute the test
+    auto const algorithms = jobManager.getAlgorithms();
+
+    // Check the row was marked with an error
+    auto const &row = m_runsTable.reductionJobs().groups()[0].rows()[0].get();
+    TS_ASSERT_EQUALS(row.state(), State::ITEM_ERROR);
+    TS_ASSERT_EQUALS(row.message(),
+                     "The title and angle specified matches multiple rows in the Experiment Settings tab");
+    // Check the row was not included in the results
+    TS_ASSERT(algorithms.empty());
+
+    auto const &unprocessedRow = m_runsTable.reductionJobs().groups()[1].rows()[0].get();
+    TS_ASSERT_EQUALS(unprocessedRow.state(), State::ITEM_NOT_STARTED);
   }
 
   void testGetAlgorithmsWithEmptyModel() {

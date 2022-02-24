@@ -10,12 +10,16 @@
 
 namespace MantidQt::CustomInterfaces::ISISReflectometry {
 
+class Group;
 class PreviewRow;
+class Row;
 
 class IReflAlgorithmFactory {
 public:
   virtual ~IReflAlgorithmFactory() = default;
 
+  virtual MantidQt::API::IConfiguredAlgorithm_sptr createGroupConfiguredAlgorithm(Group &group) const = 0;
+  virtual MantidQt::API::IConfiguredAlgorithm_sptr createRowConfiguredAlgorithm(Row &row) const = 0;
   virtual MantidQt::API::IConfiguredAlgorithm_sptr makePreprocessingAlgorithm(PreviewRow &row) const = 0;
   virtual MantidQt::API::IConfiguredAlgorithm_sptr makeSumBanksAlgorithm(PreviewRow &row) const = 0;
 };
