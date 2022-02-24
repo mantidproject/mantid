@@ -46,7 +46,8 @@ If you are uncertain where your release note should be see the :ref:`Standard Fi
 
 Adding sub-headings
 -------------------
-There will be occasions when the range of standard headings is not suitable for your needs. If you want to add a heading you need to do the following:-
+There will be occasions when the range of standard headings is not suitable for your needs. If you want to add a sub-heading to the main headings (e.g. Diffraction, Workbench etc.) or
+another sub-heading (e.g. Powder Diffraction, Algorithms, MSlice), you need to do the following:-
 
 - Add a new directory into the correct part of the filing system. E.g. to add Algorithms to Workbench create the directory ``/Workbench/Algorithm``. The directory name should not contain any spaces.
 - Add ``New_features`` and ``Bugfixes`` directories within your new directory. The automated script only works with these directories.
@@ -69,6 +70,8 @@ There will be occasions when the range of standard headings is not suitable for 
 
 Once all the directories and files are in place you can add your release note as a separate file as outlined above.
 
+You can add sub-headings to a sub-heading if you would like (e.g. ``/Workbench/Algorithm/Fitting``) that is fine to do, so long as your new branch ends with the ``New_features`` and ``Bugfixes`` folders and blank files.
+
 Previewing release notes
 ------------------------
 
@@ -76,7 +79,7 @@ There are two ways you can preview release notes prior to them being merged in.
 
 1. Build the documents and view the release note from the build folder as a HTML file. You will need to find it in the directory structure and it may take some time if you have not recently built documentation.
 2. Via the Pull Request (PR). You can view the release note on Github and it will show it using basic .rst rendering. You cannot check all the features you might expect to see when the release note is merged in (e.g. you cannot
-verify links work) but it gives you an idea of how it might look.
+   verify links work) but it gives you an idea of how it might look.
 
 
 During release
@@ -91,125 +94,125 @@ Standard Release file structure
 
 This is the basic directory structure that is available to you for release notes.
 
-* Diffraction
+* Diffraction (Main Heading)
 
-  - Powder Diffraction
-
-	  + New features
-	  + Bugfixes
-
-  - Engineering Diffraction
+  - Powder Diffraction (Sub-heading)
 
 	  + New features
 	  + Bugfixes
 
-  - Powder Diffraction
+  - Engineering Diffraction (Sub-heading)
 
 	  + New features
 	  + Bugfixes
 
-* Direct Geometry
-
-  - General
+  - Powder Diffraction (Sub-heading)
 
 	  + New features
 	  + Bugfixes
 
-  - CrystalField
+* Direct Geometry (Main Heading)
+
+  - General (Sub-heading)
 
 	  + New features
 	  + Bugfixes
 
-  - MSlice
+  - CrystalField (Sub-heading)
 
 	  + New features
 	  + Bugfixes
 
-* Framework
-
-  - Algorithms
+  - MSlice (Sub-heading)
 
 	  + New features
 	  + Bugfixes
 
-  - Fit Functions
+* Framework (Main Heading)
+
+  - Algorithms (Sub-heading)
 
 	  + New features
 	  + Bugfixes
 
-  - Data Objects
+  - Fit Functions (Sub-heading)
 
 	  + New features
 	  + Bugfixes
 
-  - Python
+  - Data Objects (Sub-heading)
 
 	  + New features
 	  + Bugfixes
 
-* Indirect Geometry
+  - Python (Sub-heading)
+
+	  + New features
+	  + Bugfixes
+
+* Indirect Geometry (Main Heading)
 
   - New features
   - Bugfixes
 
-  - Algorithms
+  - Algorithms (Sub-heading)
 
 	  + New features
 	  + Bugfixes
 
-* Mantid Workbench
+* Mantid Workbench (Main Heading)
 
   - New features
   - Bugfixes
 
-  - InstrumentViewer
+  - InstrumentViewer (Sub-heading)
 
 	  + New features
 	  + Bugfixes
 
-  - SliceViewer
+  - SliceViewer (Sub-heading)
 
 	  + New features
 	  + Bugfixes
 
-* Muon
+* Muon (Main Heading)
 
-  - Frequency Domain Analysis
-
-	  + New features
-	  + Bugfixes
-
-  - Muon Analysis
+  - Frequency Domain Analysis (Sub-heading)
 
 	  + New features
 	  + Bugfixes
 
-  - Muon and Frequency Domain Analysis
+  - Muon Analysis (Sub-heading)
 
 	  + New features
 	  + Bugfixes
 
-  - ALC
+  - Muon and Frequency Domain Analysis (Sub-heading)
 
 	  + New features
 	  + Bugfixes
 
-  - Elemental Analysis
+  - ALC (Sub-heading)
 
 	  + New features
 	  + Bugfixes
 
-  - Algorithms
+  - Elemental Analysis (Sub-heading)
 
 	  + New features
 	  + Bugfixes
 
-* Reflectometry
+  - Algorithms (Sub-heading)
+
+	  + New features
+	  + Bugfixes
+
+* Reflectometry (Main Heading)
 
   - New features
   - Bugfixes
 
-* SANS
+* SANS (Main Heading)
 
   - New features
   - Bugfixes
