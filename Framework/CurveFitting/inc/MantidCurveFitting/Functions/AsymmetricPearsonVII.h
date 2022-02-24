@@ -53,7 +53,7 @@ public:
 
   /// Override IFunction base class methods
   std::string name() const override { return "AsymmetricPearsonVII"; }
-  const std::string category() const override { return "Peak; X-ray\\diffraction"; }
+  const std::string category() const override { return "XrayDiffraction"; }
 
   double activeParameter(size_t i) const override;
   void setActiveParameter(size_t i, double value) override;
