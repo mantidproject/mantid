@@ -63,6 +63,29 @@ struct TieNode {
 const std::vector<std::string> EXCLUDEUSAGE = {"CompositeFunction"};
 } // namespace
 
+template <typename T>
+static void IFunction::validatorEvaluator::evaluate(const T &inputData, Mantid::Kernel::IValidator_sptr validator) {
+  std::string error;
+
+  if (validator != Mantid::Kernel::IValidator_sptr()) {
+    error = validator->isValid(inputData);
+  }
+
+  if (error != "") {
+    throw IFunction::validationException("Set Attribute Error: " + error);
+  }
+}
+
+template void IFunction::validatorEvaluator::evaluate<int>(const int &inputData,
+                                                           Mantid::Kernel::IValidator_sptr validator);
+template void IFunction::validatorEvaluator::evaluate<double>(const double &inputData,
+                                                              Mantid::Kernel::IValidator_sptr validator);
+template void IFunction::validatorEvaluator::evaluate<std::string>(const std::string &inputData,
+                                                                   Mantid::Kernel::IValidator_sptr validator);
+template void IFunction::validatorEvaluator::evaluate<bool>(const bool &inputData,
+                                                            Mantid::Kernel::IValidator_sptr validator);
+template void IFunction::validatorEvaluator::evaluate<std::vector<double>>(const std::vector<double> &inputData,
+                                                                           Mantid::Kernel::IValidator_sptr validator);
 /**
  * Constructor
  */
@@ -938,13 +961,6 @@ protected:
     v.resize(newSize);
     for (size_t i = 0; i < v.size(); ++i) {
       v[i] = boost::lexical_cast<double>(tokenizer[i]);
-    }
-  }
-
-  /// Evaluates the validator associated with this attribute with regards to input value. Returns error as a string.
-  template <typename T> void evaluateValidator(T &inputData) const {
-    if (m_validator != Kernel::IValidator_sptr()) {
-      IFunction::validatorEvaluator::evaluateValidator(inputData, m_validator);
     }
   }
 

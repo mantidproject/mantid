@@ -175,19 +175,7 @@ public:
    * visitors.
    */
   struct validatorEvaluator {
-  public:
-    validatorEvaluator(){}; // default constructor
-    template <typename T1> static void evaluateValidator(T1 &inputData, Mantid::Kernel::IValidator_sptr validator) {
-      std::string error;
-
-      if (validator != Mantid::Kernel::IValidator_sptr()) {
-        error = validator->isValid(inputData);
-      }
-
-      if (error != "") {
-        throw IFunction::validationException("Set Attribute Error: " + error);
-      }
-    }
+    template <typename T> static void evaluate(const T &inputData, Mantid::Kernel::IValidator_sptr validator);
   };
 
   /**
@@ -227,7 +215,7 @@ public:
     /// Evaluates the validator associated with attribute this visitor is to visit.
     template <typename T1> void evaluateValidator(T1 &inputData) const {
       if (m_validator != Mantid::Kernel::IValidator_sptr()) {
-        validatorEvaluator::evaluateValidator(inputData, m_validator);
+        validatorEvaluator::evaluate(inputData, m_validator);
       }
     }
 
@@ -268,7 +256,7 @@ public:
     /// Evaluates the validator associated with attribute this visitor is to visit.
     template <typename T1> void evaluateValidator(T1 &inputData) const {
       if (m_validator != Mantid::Kernel::IValidator_sptr()) {
-        validatorEvaluator::evaluateValidator(T1, m_validator);
+        validatorEvaluator::evaluate(T1, m_validator);
       }
     }
 
@@ -310,7 +298,7 @@ public:
     /// Evaluates the validator associated with this attribute with regards to input value. Returns error as a string.
     template <typename T> void evaluateValidator(T &inputData) const {
       if (m_validator != Kernel::IValidator_sptr()) {
-        validatorEvaluator::evaluateValidator(inputData, m_validator);
+        validatorEvaluator::evaluate(inputData, m_validator);
       }
     }
     /// Return a clone of the attribute validator;
@@ -353,7 +341,6 @@ public:
     // Set value
     template <typename T> void setValue(const T &v) {
       evaluateValidator(v);
-
       m_data = v;
     }
     /// Set value from a string.
