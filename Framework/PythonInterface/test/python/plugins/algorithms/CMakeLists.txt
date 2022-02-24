@@ -54,6 +54,7 @@ set(TEST_PY_FILES
     FractionalIndexingTest.py
     GenerateLogbookTest.py
     GetEiT0atSNSTest.py
+    GroupBySampleChangerPositionTest.py
     HB2AReduceTest.py
     HB3AAdjustSampleNormTest.py
     HB3AFindPeaksTest.py
