@@ -154,9 +154,13 @@ class RawDataExplorerModel(QObject):
         """
         load_alg = AlgorithmManager.create("Load")
         load_alg.setLogging(True)
-        load_alg.setProperty("Filename", filename)
         load_alg.setProperty("OutputWorkspace", workspace_name)
-        load_alg.execute()
+        try:
+            load_alg.setProperty("Filename", filename)
+            load_alg.execute()
+        except RuntimeError as e:
+            logger.error("Error, could not load file: {0}".format(e))
+
         if not load_alg.isExecuted():
             logger.error("Failed to load " + filename)
         return load_alg.isExecuted()
