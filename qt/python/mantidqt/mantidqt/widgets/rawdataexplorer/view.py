@@ -9,9 +9,10 @@ from matplotlib import pyplot as plt
 from qtpy.QtWidgets import QFileDialog, QWidget
 from qtpy.QtCore import *
 
+from mantid.simpleapi import *
+from mantid.kernel import logger
 from mantidqt.utils.qt import load_ui
 from mantidqt.widgets.instrumentview.api import *
-from mantid.simpleapi import *
 from mantidqt.widgets.sliceviewer.presenter import SliceViewer
 from mantidqt.plotting.functions import pcolormesh
 from workbench.config import get_window_config
@@ -91,33 +92,50 @@ class PreviewView(QObject):
         Show the workspace on the adapted widget.
         @param workspace_name (str): name of the workspace
         """
+        try:
+            self.get_widget(workspace_name)
+        except ValueError as e:
+            logger.error("Could not open view:\n{0}".format(e))
+            return
+
         if self._type == self.IVIEW:
-            parent, flags = get_window_config()
-            self._widget = get_instrumentview(workspace_name, parent, flags, use_thread=False)
             self._widget.show_view()
             self._widget.container.closing.connect(self.on_close)
             self.sig_request_close.connect(self._widget.container.emit_close)
         if self._type == self.SVIEW:
-            self._widget = SliceViewer(ws=mtd[workspace_name])
             self._widget.view.show()
             self._widget.view.close_signal.connect(self.on_close)
             self.sig_request_close.connect(self._widget.view.emit_close)
         if self._type == self.PLOT2D:
-            self._widget = pcolormesh([workspace_name])
             self._widget.canvas.mpl_connect("close_event", self.on_close)
             self.sig_request_close.connect(lambda: plt.close(self._widget))
 
         if self._type == self.PLOT1D:
-            self._widget = plotBin(workspace_name, 0, error_bars=True)
             self._widget.canvas.mpl_connect("close_event", self.on_close)
             self.sig_request_close.connect(lambda: plt.close(self._widget))
 
         if self._type == self.PLOTSPECTRUM:
-            self._widget = plotSpectrum(workspace_name, 0, error_bars=True)
             self._widget.canvas.mpl_connect("close_event", self.on_close)
             self.sig_request_close.connect(lambda: plt.close(self._widget))
 
         self._presenter.get_main_view().fileTree.set_ignore_next_focus_out(True)
+
+    def get_widget(self, workspace_name):
+        """
+        Create the appropriate widget to show.
+        @param workspace_name: name of the workspace
+        """
+        if self._type == self.IVIEW:
+            parent, flags = get_window_config()
+            self._widget = get_instrumentview(workspace_name, True, parent, flags, use_thread=False)
+        elif self._type == self.SVIEW:
+            self._widget = SliceViewer(ws=mtd[workspace_name])
+        elif self._type == self.PLOT1D:
+            self._widget = plotBin(workspace_name, 0, error_bars=True)
+        elif self._type == self.PLOT2D:
+            self._widget = pcolormesh([workspace_name])
+        elif self._widget == self.PLOTSPECTRUM:
+            self._widget = plotSpectrum(workspace_name, 0, error_bars=True)
 
     def change_workspace(self, workspace_name):
         """

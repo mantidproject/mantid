@@ -11,6 +11,7 @@ from qtpy.QtCore import *
 from mantid.simpleapi import mtd, Plus, RenameWorkspace
 from mantid.api import AlgorithmManager
 from mantid.kernel import logger
+from _dataobjects import PeaksWorkspace, TableWorkspace
 
 from .PreviewFinder import PreviewFinder, AcquisitionType
 from .memoryManager import MemoryManager
@@ -189,7 +190,11 @@ class RawDataExplorerModel(QObject):
 
         preview_finder = PreviewFinder()
 
-        if workspace.isGroup():
+        if isinstance(workspace, PeaksWorkspace) or isinstance(workspace, TableWorkspace):
+            return
+
+        is_group = workspace.isGroup()
+        if is_group:
             # that's probably D7 or some processed data
             if workspace.size() == 0:
                 return
@@ -201,9 +206,9 @@ class RawDataExplorerModel(QObject):
 
         if is_acquisition_type_needed:
             acquisition_mode = self.determine_acquisition_mode(workspace)
-            return preview_finder.get_preview(instrument_name, acquisition_mode)
+            return preview_finder.get_preview(instrument_name, acquisition_mode, is_group=is_group)
         else:
-            return preview_finder.get_preview(instrument_name)
+            return preview_finder.get_preview(instrument_name, is_group=is_group)
 
     @staticmethod
     def determine_acquisition_mode(workspace):
