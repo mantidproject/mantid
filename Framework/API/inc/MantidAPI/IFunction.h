@@ -177,10 +177,10 @@ public:
   struct validatorEvaluator {
   public:
     validatorEvaluator(){}; // default constructor
-    template <typename T1> static void evaluateValidator(T1 &inputData, Mantid::Kernel::IValidator_sptr validator) {
+    template <typename T1> static void evaluate(T1 &inputData, Mantid::Kernel::IValidator_sptr validator) {
       std::string error;
 
-      if (validator != Mantid::Kernel::IValidator_sptr()) {
+      if (validator != nullptr) {
         error = validator->isValid(inputData);
       }
 
@@ -310,7 +310,7 @@ public:
     /// Evaluates the validator associated with this attribute with regards to input value. Returns error as a string.
     template <typename T> void evaluateValidator(T &inputData) const {
       if (m_validator != nullptr) {
-        validatorEvaluator().evaluate(inputData, m_validator);
+        validatorEvaluator::evaluate(inputData, m_validator);
       }
     }
     /// Return a clone of the attribute validator;

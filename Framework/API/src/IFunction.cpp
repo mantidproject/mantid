@@ -943,8 +943,8 @@ protected:
 
   /// Evaluates the validator associated with this attribute with regards to input value. Returns error as a string.
   template <typename T> void evaluateValidator(T &inputData) const {
-    if (m_validator != Kernel::IValidator_sptr()) {
-      IFunction::validatorEvaluator::evaluateValidator(inputData, m_validator);
+    if (m_validator != nullptr) {
+      IFunction::validatorEvaluator::evaluate(inputData, m_validator);
     }
   }
 

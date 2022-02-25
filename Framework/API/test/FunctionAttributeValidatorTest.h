@@ -21,64 +21,23 @@ using namespace Mantid::API;
 namespace detail {
 class FAVT_Funct : public ParamFunction, public IFunction1D {
 public:
-  FAVT_Funct() {
-    declareAttribute("DAttr", Attribute(0.0), Mantid::Kernel::BoundedValidator<double>(0.0, 100.0));
-
-    declareAttribute("IAttr", Attribute(5), Mantid::Kernel::BoundedValidator<int>(0, 10));
-
-    declareAttribute("SAttr", Attribute("K"),
-                     Mantid::Kernel::StringListValidator(std::vector<std::string>{"K", "meV"}));
-
-    std::vector<std::string> sV(3);
-    sV[0] = "a";
-    sV[1] = "b";
-    sV[2] = "c";
-    declareAttribute("SQAttr", Attribute("abc", true), Mantid::Kernel::StringContainsValidator(sV));
-
-    std::vector<double> v(3);
-    v[0] = 1;
-    v[1] = 2;
-    v[2] = 3;
-    declareAttribute("VAttr", Attribute(v), Mantid::Kernel::ArrayBoundedValidator<double>(1, 5));
-
-    declareAttribute("BAttr", Attribute(false), Mantid::Kernel::ListValidator<bool>(std::vector<bool>{true, false}));
-
-    declareAttribute("BIAttr", Attribute(0), Mantid::Kernel::ListValidator<int>(std::vector<int>{0, 1}));
-
-    testInvalidDeclaration();
-  }
-
   std::string name() const override { return "FAVT_Funct"; }
   void function1D(double *, const double *, const size_t) const override {}
 
-private:
-  void testInvalidDeclaration() {
-    TS_ASSERT_THROWS(
-        declareAttribute("DAttr_invalid", Attribute(-1), Mantid::Kernel::BoundedValidator<double>(0.0, 100.0)),
-        const IFunction::validationException &);
-
-    TS_ASSERT_THROWS(declareAttribute("IAttr_invalid", Attribute(11), Mantid::Kernel::BoundedValidator<int>(0, 10)),
-                     const IFunction::validationException &);
-
-    TS_ASSERT_THROWS(declareAttribute("SAttr_invalid", Attribute("Invalid"),
-                                      Mantid::Kernel::StringListValidator(std::vector<std::string>{"K", "meV"})),
-                     const IFunction::validationException &);
-
-    std::vector<std::string> sV(3);
-    sV[0] = "a";
-    sV[1] = "b";
-    sV[2] = "c";
-    TS_ASSERT_THROWS(
-        declareAttribute("SQAttr_invalid", Attribute("ab", true), Mantid::Kernel::StringContainsValidator(sV)),
-        const IFunction::validationException &);
-
-    std::vector<double> v(3);
-    v[0] = 1.0;
-    v[1] = 2.0;
-    v[2] = 50.0;
-    TS_ASSERT_THROWS(
-        declareAttribute("VAttr_invalid", Attribute(v), Mantid::Kernel::ArrayBoundedValidator<double>(1, 5)),
-        const IFunction::validationException &);
+  void declareDblBoundedAttr(std::string attrName, double inputVal, double minVal, double maxVal) {
+    declareAttribute(attrName, Attribute(inputVal), Mantid::Kernel::BoundedValidator<double>(minVal, maxVal));
+  }
+  void declareIntBoundedAttr(std::string attrName, int inputVal, int minVal, int maxVal) {
+    declareAttribute(attrName, Attribute(inputVal), Mantid::Kernel::BoundedValidator<int>(minVal, maxVal));
+  }
+  void declareStrListAttr(std::string attrName, std::string inputVal, std::vector<std::string> allowedVals) {
+    declareAttribute(attrName, Attribute(inputVal), Mantid::Kernel::StringListValidator(allowedVals));
+  }
+  void declareStrContainsAttr(std::string attrName, std::string inputVal, std::vector<std::string> allowedVals) {
+    declareAttribute(attrName, Attribute(inputVal, true), Mantid::Kernel::StringContainsValidator(allowedVals));
+  }
+  void declareVecArrayBoundedAttr(std::string attrName, std::vector<double> inputVec, double minVal, double maxVal) {
+    declareAttribute(attrName, Attribute(inputVec), Mantid::Kernel::ArrayBoundedValidator<double>(minVal, maxVal));
   }
 };
 
@@ -127,6 +86,7 @@ class FunctionAttributeValidatorTest : public CxxTest::TestSuite {
 public:
   void test_double_attribute_validator() {
     detail::FAVT_Funct f;
+    f.declareDblBoundedAttr("DAttr", 0.0, 0.0, 100.0);
     IFunction::Attribute att = f.getAttribute("DAttr");
 
     TS_ASSERT_THROWS(att.setDouble(-1), const IFunction::validationException &);
@@ -137,6 +97,7 @@ public:
 
   void test_int_attribute_validator() {
     detail::FAVT_Funct f;
+    f.declareIntBoundedAttr("IAttr", 5, 0, 10);
     IFunction::Attribute att = f.getAttribute("IAttr");
 
     TS_ASSERT_THROWS(att.setInt(11), const IFunction::validationException &);
@@ -147,6 +108,7 @@ public:
 
   void test_string_attribute_validator() {
     detail::FAVT_Funct f;
+    f.declareStrListAttr("SAttr", "K", std::vector<std::string>{"K", "meV"});
     IFunction::Attribute att = f.getAttribute("SAttr");
 
     TS_ASSERT_THROWS(att.setString("Invalid"), IFunction::validationException &);
@@ -157,7 +119,13 @@ public:
 
   void test_quoted_string_attribute_validator() {
     detail::FAVT_Funct f;
-    IFunction::Attribute att = f.getAttribute("SQAttr");
+
+    std::vector<std::string> sV(3);
+    sV[0] = "a";
+    sV[1] = "b";
+    sV[2] = "c";
+    f.declareStrContainsAttr("SCAttr", "abc", sV);
+    IFunction::Attribute att = f.getAttribute("SCAttr");
 
     TS_ASSERT_THROWS(att.setString("ab"), IFunction::validationException &);
 
@@ -167,22 +135,28 @@ public:
 
   void test_vector_attribute_validator() {
     detail::FAVT_Funct f;
+    std::vector<double> v(3);
+    v[0] = 1;
+    v[1] = 2;
+    v[2] = 3;
+    f.declareVecArrayBoundedAttr("VAttr", v, 1, 5);
     IFunction::Attribute att = f.getAttribute("VAttr");
 
-    std::vector<double> v(3);
-    v[0] = 1.0;
-    v[1] = 2.0;
-    v[2] = 5.0;
+    std::vector<double> v2(3);
+    v2[0] = 1.0;
+    v2[1] = 2.0;
+    v2[2] = 5.0;
 
-    att.setVector(v);
-    TS_ASSERT(att.asVector() == v);
+    att.setVector(v2);
+    TS_ASSERT(att.asVector() == v2);
 
-    v[2] = 50;
-    TS_ASSERT_THROWS(att.setVector(v), const IFunction::validationException &);
+    v2[2] = 50;
+    TS_ASSERT_THROWS(att.setVector(v2), const IFunction::validationException &);
   }
 
   void test_double_attribute_visitor() {
     detail::FAVT_Funct f;
+    f.declareDblBoundedAttr("DAttr", 0.0, 0.0, 100.0);
     IFunction::Attribute att = f.getAttribute("DAttr");
     detail::SetAttribute att_visitor(att.getValidator());
 
@@ -203,6 +177,7 @@ public:
 
   void test_double_attribute_from_string() {
     detail::FAVT_Funct f;
+    f.declareDblBoundedAttr("DAttr", 0.0, 0.0, 100.0);
     IFunction::Attribute att = f.getAttribute("DAttr");
 
     // Test visitor change within validator restrictions
@@ -213,21 +188,25 @@ public:
     TS_ASSERT_THROWS(att.fromString("150.0"), IFunction::validationException &);
   }
 
-  void test_bool_attribute() {
+  void test_invalid_declarations() {
+    // Test invalid declarations
+
     detail::FAVT_Funct f;
-    IFunction::Attribute att = f.getAttribute("BAttr");
-    IFunction::Attribute att_bi = f.getAttribute("BIAttr");
+    TS_ASSERT_THROWS(f.declareDblBoundedAttr("DAttr_invalid", -1.0, 0.0, 100.0), IFunction::validationException &);
+    TS_ASSERT_THROWS(f.declareDblBoundedAttr("IAttr_invalid", -1, 0, 100), IFunction::validationException &);
+    TS_ASSERT_THROWS(f.declareStrListAttr("SAttr_invalid", "Invalid", std::vector<std::string>{"K", "meV"}),
+                     IFunction::validationException &);
 
-    TS_ASSERT_THROWS(att_bi.setInt(3), IFunction::validationException &);
+    std::vector<std::string> sV(3);
+    sV[0] = "a";
+    sV[1] = "b";
+    sV[2] = "c";
+    TS_ASSERT_THROWS(f.declareStrContainsAttr("SCAttr_invalid", "Invalid", sV), IFunction::validationException &);
 
-    att.setBool(true);
-    att_bi.setInt(true);
-
-    TS_ASSERT(att.asBool() == true);
-    TS_ASSERT(att_bi.asInt() == true);
+    std::vector<double> v(3);
+    v[0] = 1;
+    v[1] = 2;
+    v[2] = 10;
+    TS_ASSERT_THROWS(f.declareVecArrayBoundedAttr("VAttr_invalid", v, 1.0, 5.0), IFunction::validationException &);
   }
-
-  // void test_factory_creation() {
-  // Need to test factory creation?
-  //}
 };
