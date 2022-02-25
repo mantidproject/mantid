@@ -12,13 +12,13 @@
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/StringContainsValidator.h"
-
 #include <cxxtest/TestSuite.h>
 
 using namespace Mantid;
 using namespace Mantid::API;
 
 namespace detail {
+
 class FAVT_Funct : public ParamFunction, public IFunction1D {
 public:
   FAVT_Funct() {
