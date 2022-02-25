@@ -808,7 +808,7 @@ The calculated values can be invoked using the respective functions:
 - `getHeatCapacity()`;
 - `getSusceptibility()`;
 - `getMagneticMoment()`;
-- `getDipoleMatrix()` (`getXDipoleMatrixComponent()`, `getYDipoleMatrixComponent()`, `getZDipoleMatrixComponent()`).
+- `getDipoleMatrix()` (+ `getDipoleMatrixComponent(<'X', 'Y' or 'Z'>)`).
 
 To calculate the heat capacity use::
 
@@ -891,9 +891,9 @@ To calculate the dipole transition matrix (and components)::
     import matplotlib.pyplot as plt
     cf = CrystalField('Ce', 'C2v', B20=0.37737, B22=3.9770, Temperature=44.0)
     A = cf.getDipoleMatrix()       # Calculates the dipole transition matrix, which is equal to the sum of its components::
-    Ax = cf.getXDipoleMatrixComponent() # Calculates the component of the dipole transition matrix in the x direction
-    Ay = cf.getYDipoleMatrixComponent() # Calculates the component of the dipole transition matrix in the Y direction
-    Az = cf.getZDipoleMatrixComponent() # Calculates the component of the dipole transition matrix in the Z direction
+    Ax = cf.getDipoleMatrixComponent('X') # Calculates the component of the dipole transition matrix in the x direction
+    Ay = cf.getDipoleMatrixComponent('Y') # Calculates the component of the dipole transition matrix in the Y direction
+    Az = cf.getDipoleMatrixComponent('Z') # Calculates the component of the dipole transition matrix in the Z direction
 
 
 Fitting Physical Properties
