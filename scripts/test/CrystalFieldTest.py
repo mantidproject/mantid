@@ -1779,9 +1779,12 @@ class CrystalFieldFitTest(unittest.TestCase):
     def test_matrix_components_equal_to_summed_matrix(self):
         cf = CrystalField.CrystalField('Ce', 'C2v', B20=0.035, B40=-0.012, B43=-0.027, B60=-0.00012, B63=0.0025,
                                        B66=0.0068)
-        x = cf.getXDipoleMatrixComponent()
-        y = cf.getYDipoleMatrixComponent()
-        z = cf.getZDipoleMatrixComponent()
+        with self.assertRaises(Exception):
+            cf.getDipoleMatrixComponent('FAIL')
+
+        x = cf.getDipoleMatrixComponent('X')
+        y = cf.getDipoleMatrixComponent('Y')
+        z = cf.getDipoleMatrixComponent('Z')
         sum = x + y + z
         func_res = cf.getDipoleMatrix()
         comparison = sum == func_res
