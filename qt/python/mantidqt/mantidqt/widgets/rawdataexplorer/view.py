@@ -157,7 +157,7 @@ class PreviewView(QObject):
             plotSpectrum(workspace_name, 0, error_bars=True, window=self._widget, clearWindow=True)
             self._presenter.get_main_view().fileTree.set_ignore_next_focus_out(True)
 
-    def on_close(self, event=None):
+    def on_close(self, name=None):
         """
         Triggered when the widget is closed.
         """

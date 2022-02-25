@@ -36,7 +36,7 @@ class InstrumentView(QWidget, ObservingView):
 
     close_signal = Signal()
 
-    closing = Signal()
+    closing = Signal(str)
 
     def __init__(self, parent, presenter, name, window_flags=Qt.Window, use_thread=True):
         super(InstrumentView, self).__init__(parent)
@@ -63,7 +63,7 @@ class InstrumentView(QWidget, ObservingView):
         self.setLayout(layout)
 
         self.close_signal.connect(self._run_close)
-        self.closing.connect(lambda: self.presenter.close(self.presenter.ws_name))
+        self.closing.connect(lambda ws_name: self.presenter.close(ws_name))
 
     def get_tab(self, tab_index):
         tab_name = [InstrumentWidget.RENDER,
@@ -116,8 +116,7 @@ class InstrumentView(QWidget, ObservingView):
             children = self.findChildren(InstrumentWidget)
             for child in children:
                 child.close()
-            self.presenter.close(self.name)
-        self.closing.emit()
+            self.closing.emit(self.name)
         super(QWidget, self).closeEvent(event)
 
     @Slot()
