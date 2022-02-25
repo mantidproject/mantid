@@ -162,15 +162,21 @@ bool BatchJobManager::hasSelectedRowsRequiringProcessing(Group const &group) {
 std::deque<IConfiguredAlgorithm_sptr> BatchJobManager::getAlgorithms() {
   auto &groups = m_batch.mutableRunsTable().mutableReductionJobs().mutableGroups();
   for (auto &group : groups) {
-    // If the group is selected, process all of its rows
-    if (isSelected(group) && group.requiresProcessing(m_reprocessFailed))
-      return algorithmsForProcessingRowsInGroup(group, true);
-    // If the group has rows that are selected, process the selected rows
-    if (hasSelectedRowsRequiringProcessing(group))
-      return algorithmsForProcessingRowsInGroup(group, false);
-    // If the group's requires postprocessing, do it
-    if (isSelected(group) && group.requiresPostprocessing(m_reprocessFailed))
-      return algorithmForPostprocessingGroup(group);
+    auto algorithms = std::deque<IConfiguredAlgorithm_sptr>{};
+    if (isSelected(group) && group.requiresProcessing(m_reprocessFailed)) {
+      // If the group is selected, process all of its rows
+      algorithms = algorithmsForProcessingRowsInGroup(group, true);
+    } else if (hasSelectedRowsRequiringProcessing(group)) {
+      // If the group has rows that are selected, process the selected rows
+      algorithms = algorithmsForProcessingRowsInGroup(group, false);
+    } else if (isSelected(group) && group.requiresPostprocessing(m_reprocessFailed)) {
+      // If the group's requires postprocessing, do it
+      algorithms = algorithmForPostprocessingGroup(group);
+    }
+    // If we have valid algorithms, return now; otherwise continue to the next group
+    if (algorithms.size() > 0) {
+      return algorithms;
+    }
   }
   return std::deque<IConfiguredAlgorithm_sptr>();
 }
@@ -215,6 +221,9 @@ void BatchJobManager::addAlgorithmForProcessingRow(Row &row, std::deque<IConfigu
     algorithm = m_algFactory->createRowConfiguredAlgorithm(row);
   } catch (MultipleRowsFoundException const &) {
     row.setError("The title and angle specified matches multiple rows in the Experiment Settings tab");
+    // Mark the item as skipped so we don't reprocess it in the current round of
+    // reductions.
+    row.setSkipped(true);
     return;
   }
   algorithms.emplace_back(std::move(algorithm));
