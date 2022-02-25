@@ -102,6 +102,7 @@ void BatchPresenter::notifyBatchComplete(bool error) {
   // Continue processing the next batch of algorithms, if there is more to do
   auto algorithms = m_jobManager->getAlgorithms();
   if (algorithms.size() > 0) {
+    notifyReductionResumed();
     startBatch(std::move(algorithms));
     return;
   }
