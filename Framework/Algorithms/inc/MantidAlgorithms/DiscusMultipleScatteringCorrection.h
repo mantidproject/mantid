@@ -69,9 +69,9 @@ private:
   std::map<std::string, std::string> validateInputs() override;
   API::MatrixWorkspace_sptr createOutputWorkspace(const API::MatrixWorkspace &inputWS) const;
   std::tuple<double, double> new_vector(const Kernel::Material &material, double kinc, bool specialSingleScatterCalc);
-  void simulatePaths(const int nEvents, const int nScatters, Kernel::PseudoRandomNumberGenerator &rng,
-                     MatrixWorkspace_sptr &invPOfQ, const double kinc, const std::vector<double> &kout,
-                     const Kernel::V3D &detPos, bool specialSingleScatterCalc, ISpectrum &results);
+  std::vector<double> simulatePaths(const int nEvents, const int nScatters, Kernel::PseudoRandomNumberGenerator &rng,
+                                    MatrixWorkspace_sptr &invPOfQ, const double kinc, const std::vector<double> &kout,
+                                    const Kernel::V3D &detPos, bool specialSingleScatterCalc);
   std::tuple<bool, std::vector<double>, double> scatter(const int nScatters, Kernel::PseudoRandomNumberGenerator &rng,
                                                         MatrixWorkspace_sptr &invPOfQ, const double kinc,
                                                         const std::vector<double> &kout, const Kernel::V3D &detPos,
