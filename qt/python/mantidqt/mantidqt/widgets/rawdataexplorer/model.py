@@ -7,6 +7,7 @@
 
 import os.path
 from qtpy.QtCore import *
+from qtpy.QtWidgets import QMessageBox
 
 from mantid.simpleapi import mtd, Plus, RenameWorkspace
 from mantid.api import AlgorithmManager
@@ -159,7 +160,11 @@ class RawDataExplorerModel(QObject):
             load_alg.setProperty("Filename", filename)
             load_alg.execute()
         except RuntimeError as e:
-            logger.error("Error, could not load file: {0}".format(e))
+            message = "Error, could not load file:\n {0}".format(e)
+            logger.error(message)
+            message = QMessageBox()
+            message.setText(message)
+            message.exec()
 
         if not load_alg.isExecuted():
             logger.error("Failed to load " + filename)
@@ -247,7 +252,11 @@ class RawDataExplorerModel(QObject):
         try:
             Plus(LHSWorkspace=target_ws, RHSWorkspace=ws_to_add, OutputWorkspace=target_ws)
         except ValueError as e:
-            logger.error("Unable to accumulate: {0}".format(e))
+            message = "Unable to accumulate: {0}".format(e)
+            logger.error(message)
+            message_box = QMessageBox()
+            message_box.setText(message)
+            message_box.exec()
             return None
 
         RenameWorkspace(InputWorkspace=target_ws, OutputWorkspace=final_ws)

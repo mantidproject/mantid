@@ -6,7 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 
 from matplotlib import pyplot as plt
-from qtpy.QtWidgets import QFileDialog, QWidget
+from qtpy.QtWidgets import QFileDialog, QWidget, QMessageBox
 from qtpy.QtCore import *
 
 from mantid.simpleapi import *
@@ -95,7 +95,12 @@ class PreviewView(QObject):
         try:
             self.get_widget(workspace_name)
         except ValueError as e:
-            logger.error("Could not open view:\n{0}".format(e))
+            message = "Could not open view:\n{0}".format(e)
+            logger.error(message)
+            message_box = QMessageBox()
+            message_box.setText(message)
+            message_box.exec()
+            self.on_close()
             return
 
         if self._type == self.IVIEW:
