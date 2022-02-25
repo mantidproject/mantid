@@ -926,7 +926,7 @@ protected:
     size_t newSize = tokenizer.count();
 
     // if visitor has an associated validator, first populate temp vec and evaluate against validator.
-    if (m_validator != Mantid::Kernel::IValidator_sptr()) {
+    if (m_validator != nullptr) {
       std::vector<double> tempVec(newSize);
 
       for (size_t i = 0; i < tempVec.size(); ++i) {

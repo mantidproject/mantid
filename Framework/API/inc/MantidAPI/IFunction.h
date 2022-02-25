@@ -226,8 +226,8 @@ public:
 
     /// Evaluates the validator associated with attribute this visitor is to visit.
     template <typename T1> void evaluateValidator(T1 &inputData) const {
-      if (m_validator != Mantid::Kernel::IValidator_sptr()) {
-        validatorEvaluator::evaluateValidator(inputData, m_validator);
+      if (m_validator != nullptr) {
+        validatorEvaluator().evaluate(inputData, m_validator);
       }
     }
 
@@ -267,8 +267,8 @@ public:
 
     /// Evaluates the validator associated with attribute this visitor is to visit.
     template <typename T1> void evaluateValidator(T1 &inputData) const {
-      if (m_validator != Mantid::Kernel::IValidator_sptr()) {
-        validatorEvaluator::evaluateValidator(T1, m_validator);
+      if (m_validator != nullptr) {
+        validatorEvaluator().evaluate(T1, m_validator);
       }
     }
 
@@ -309,8 +309,8 @@ public:
     void evaluateValidator() const;
     /// Evaluates the validator associated with this attribute with regards to input value. Returns error as a string.
     template <typename T> void evaluateValidator(T &inputData) const {
-      if (m_validator != Kernel::IValidator_sptr()) {
-        validatorEvaluator::evaluateValidator(inputData, m_validator);
+      if (m_validator != nullptr) {
+        validatorEvaluator().evaluate(inputData, m_validator);
       }
     }
     /// Return a clone of the attribute validator;
