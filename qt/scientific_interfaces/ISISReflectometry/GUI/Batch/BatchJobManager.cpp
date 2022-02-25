@@ -218,7 +218,7 @@ std::deque<IConfiguredAlgorithm_sptr> BatchJobManager::algorithmsForProcessingRo
 void BatchJobManager::addAlgorithmForProcessingRow(Row &row, std::deque<IConfiguredAlgorithm_sptr> &algorithms) {
   IConfiguredAlgorithm_sptr algorithm;
   try {
-    algorithm = m_algFactory->createRowConfiguredAlgorithm(row);
+    algorithm = m_algFactory->makeReductionAlgorithm(row);
   } catch (MultipleRowsFoundException const &) {
     row.setError("The title and angle specified matches multiple rows in the Experiment Settings tab");
     // Mark the item as skipped so we don't reprocess it in the current round of

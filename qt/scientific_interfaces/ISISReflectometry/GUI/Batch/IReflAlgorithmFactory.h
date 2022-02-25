@@ -18,8 +18,8 @@ class IReflAlgorithmFactory {
 public:
   virtual ~IReflAlgorithmFactory() = default;
 
-  virtual MantidQt::API::IConfiguredAlgorithm_sptr createGroupConfiguredAlgorithm(Group &group) const = 0;
-  virtual MantidQt::API::IConfiguredAlgorithm_sptr createRowConfiguredAlgorithm(Row &row) const = 0;
+  virtual MantidQt::API::IConfiguredAlgorithm_sptr makePostprocessingAlgorithm(Group &group) const = 0;
+  virtual MantidQt::API::IConfiguredAlgorithm_sptr makeReductionAlgorithm(Row &row) const = 0;
   virtual MantidQt::API::IConfiguredAlgorithm_sptr makePreprocessingAlgorithm(PreviewRow &row) const = 0;
   virtual MantidQt::API::IConfiguredAlgorithm_sptr makeSumBanksAlgorithm(PreviewRow &row) const = 0;
 };

@@ -18,11 +18,11 @@ namespace MantidQt::CustomInterfaces::ISISReflectometry {
 
 ReflAlgorithmFactory::ReflAlgorithmFactory(IBatch const &batch) : m_batch(batch) {}
 
-MantidQt::API::IConfiguredAlgorithm_sptr ReflAlgorithmFactory::createGroupConfiguredAlgorithm(Group &group) const {
+MantidQt::API::IConfiguredAlgorithm_sptr ReflAlgorithmFactory::makePostprocessingAlgorithm(Group &group) const {
   return GroupProcessing::createConfiguredAlgorithm(m_batch, group);
 }
 
-MantidQt::API::IConfiguredAlgorithm_sptr ReflAlgorithmFactory::createRowConfiguredAlgorithm(Row &row) const {
+MantidQt::API::IConfiguredAlgorithm_sptr ReflAlgorithmFactory::makeReductionAlgorithm(Row &row) const {
   return RowProcessing::createConfiguredAlgorithm(m_batch, row);
 }
 

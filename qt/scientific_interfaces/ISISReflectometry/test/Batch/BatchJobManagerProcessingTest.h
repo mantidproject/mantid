@@ -203,9 +203,7 @@ public:
 
   void testGetAlgorithmsWithMultipleMatchingRows() {
     auto mockAlgFactory = std::make_unique<MockReflAlgorithmFactory>();
-    EXPECT_CALL(*mockAlgFactory, createRowConfiguredAlgorithm(_))
-        .Times(1)
-        .WillOnce(Throw(MultipleRowsFoundException("")));
+    EXPECT_CALL(*mockAlgFactory, makeReductionAlgorithm(_)).Times(1).WillOnce(Throw(MultipleRowsFoundException("")));
 
     // Create the job manager and ensure the group/row is selected for processing
     auto jobManager = makeJobManager(twoGroupsWithARowModel(), std::move(mockAlgFactory));
