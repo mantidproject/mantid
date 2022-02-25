@@ -67,7 +67,7 @@ class PreviewFinder:
             D19:     {AcquisitionType.DEFAULT: PreviewType.SVIEW}
             }
 
-    def get_preview(self, instrument_name, acquisition_mode=AcquisitionType.DEFAULT):
+    def get_preview(self, instrument_name, acquisition_mode=AcquisitionType.DEFAULT, is_group=False):
         """
         Get the preview associated with an instrument with a given acquisition mode.
         @param instrument_name: the name of instrument to look for
@@ -83,8 +83,12 @@ class PreviewFinder:
                 return None
         else:
             # the instrument is currently not supported
-            # default to instrument view and hope for the best
-            return PreviewType.IVIEW
+            if is_group:
+                # default to 1D tiled plot
+                return PreviewType.PLOT1D
+            else:
+                # default to instrument view and hope for the best
+                return PreviewType.IVIEW
 
     def need_acquisition_mode(self, instrument_name):
         """
