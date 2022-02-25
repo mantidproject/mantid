@@ -51,6 +51,10 @@ public:
     auto map = encoder.encodeBatch(&mwv, 0);
 
     tester.testBatch(gui, &mwv, map);
+
+    TS_ASSERT(map.contains(QString("version")))
+    auto constexpr expectedVersion = "1";
+    TS_ASSERT_EQUALS(expectedVersion, map[QString("version")].toString().toStdString())
   }
 };
 } // namespace ISISReflectometry

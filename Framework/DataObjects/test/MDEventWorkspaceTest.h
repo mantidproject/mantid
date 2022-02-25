@@ -202,9 +202,9 @@ public:
     //    bc->setSplitThreshold(100);
     //    ew->splitBox();
     //
-    //    typedef MDGridBox<MDLeanEvent<1>,1> gbox_t;
-    //    typedef MDBox<MDLeanEvent<1>,1> box_t;
-    //    typedef MDBoxBase<MDLeanEvent<1>,1> ibox_t;
+    //    using gbox_t = MDGridBox<MDLeanEvent<1>,1>;
+    //    using box_t = MDBox<MDLeanEvent<1>,1>;
+    //    using ibox_t = MDBoxBase<MDLeanEvent<1>,1>;
     //
     //    // Make 99 events
     //    coord_t centers[1] = {0};

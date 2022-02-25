@@ -7,6 +7,7 @@
 #pragma once
 
 #include "MantidAPI/Algorithm.h"
+#include "MantidKernel/InternetHelper.h"
 #include "MantidKernel/ProxyInfo.h"
 
 #include <map>
@@ -35,8 +36,9 @@ protected:
 private:
   void init() override;
   void exec() override;
-  virtual int doDownloadFile(const std::string &urlFile, const std::string &localFilePath = "",
-                             const StringToStringMap &headers = StringToStringMap());
+  virtual Kernel::InternetHelper::HTTPStatus doDownloadFile(const std::string &urlFile,
+                                                            const std::string &localFilePath = "",
+                                                            const StringToStringMap &headers = StringToStringMap());
   StringToStringMap getFileShas(const std::string &directoryPath);
   const std::string getDownloadableRepoUrl(const std::string &filename) const;
   StringToStringMap processRepository();

@@ -721,7 +721,7 @@ void SetSample::setSampleShape(API::ExperimentInfo &experiment, const Kernel::Pr
     auto xml = tryCreateXMLFromArgsOnly(*args, *refFrame);
     if (!xml.empty()) {
       Kernel::Matrix<double> rotationMatrix = experiment.run().getGoniometer().getR();
-      if (rotationMatrix != Kernel::Matrix<double>(3, 3, 1) && !sampleEnv) {
+      if (rotationMatrix != Kernel::Matrix<double>(3, 3, true) && !sampleEnv) {
         // Only add goniometer tag if rotationMatrix is not the Identity,
         // and this shape is not defined within a sample environment
         xml = Geometry::ShapeFactory().addGoniometerTag(rotationMatrix, xml);

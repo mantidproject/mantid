@@ -68,7 +68,7 @@ void ExperimentPresenter::notifyLookupRowChanged(int, int column) {
   showValidationResult();
   if (column == 0 && !m_validationResult.isValid() &&
       m_validationResult.assertError().lookupTableValidationErrors().fullTableError() ==
-          ThetaValuesValidationError::NonUniqueTheta)
+          LookupCriteriaError::NonUniqueSearchCriteria)
     m_view->showLookupRowsNotUnique(m_thetaTolerance);
   m_mainPresenter->notifySettingsChanged();
 }

@@ -70,6 +70,7 @@ Experiment getExperimentDefaults(Mantid::Geometry::Instrument_const_sptr instrum
   // i.e.  where theta is empty. It probably doesn't make sense to specify
   // tranmsission runs so leave that empty.
   auto const theta = std::string("");
+  auto const title = std::string("");
   auto const firstTransmissionRun = std::string("");
   auto const secondTransmissionRun = std::string("");
   auto const transmissionProcessingInstructions =
@@ -82,9 +83,9 @@ Experiment getExperimentDefaults(Mantid::Geometry::Instrument_const_sptr instrum
   auto const processingInstructions = defaults.getStringOrEmpty("ProcessingInstructions", "ProcessingInstructions");
   auto const backgroundProcessingInstructions =
       defaults.getStringOrEmpty("BackgroundProcessingInstructions", "BackgroundProcessingInstructions");
-  auto lookupRow =
-      LookupRow::ValueArray{{theta, firstTransmissionRun, secondTransmissionRun, transmissionProcessingInstructions,
-                             qMin, qMax, qStep, scaleFactor, processingInstructions, backgroundProcessingInstructions}};
+  auto lookupRow = LookupRow::ValueArray{{theta, title, firstTransmissionRun, secondTransmissionRun,
+                                          transmissionProcessingInstructions, qMin, qMax, qStep, scaleFactor,
+                                          processingInstructions, backgroundProcessingInstructions}};
   auto lookupTable = std::vector<LookupRow::ValueArray>{lookupRow};
   auto validate = LookupTableValidator();
   auto const tolerance = 0.0; // irrelevant because theta is empty

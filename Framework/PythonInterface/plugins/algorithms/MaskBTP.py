@@ -18,16 +18,17 @@ class MaskBTP(mantid.api.PythonAlgorithm):
 
     # list of supported instruments
     INSTRUMENT_LIST = ['ARCS', 'BIOSANS', 'CG2', 'CG3', 'CHESS', 'CNCS', 'CORELLI', 'D11', 'D11B', 'D11lr', 'D16',
-                       'D22', 'D22B', 'D22lr', 'D33', 'EQ-SANS', 'GPSANS', 'HYSPEC', 'MANDI', 'NOMAD', 'POWGEN',
-                       'REF_M', 'SEQUOIA', 'SNAP', 'SXD', 'TOPAZ', 'WAND', 'WISH']
+                       'D22', 'D22B', 'D22lr', 'D33', 'EQ-SANS', 'GPSANS', 'HYSPEC', 'IN4', 'IN5', 'IN6', 'MANDI',
+                       'NOMAD', 'PANTHER', 'POWGEN', 'REF_M', 'SEQUOIA', 'SHARP', 'SNAP', 'SXD', 'TOPAZ', 'WAND',
+                       'WISH']
 
     instname = None
     instrument = None
     bankmin = defaultdict(lambda: 1, {'D33': 0, 'SEQUOIA': 23, 'TOPAZ': 10})  # default is one
     bankmax = {'ARCS': 115, 'BIOSANS': 88, 'CG2': 48, 'CG3': 88, 'CHESS': 163, 'CNCS': 50, 'CORELLI': 91, 'D11': 1,
                'D11B': 3, 'D11lr': 1, 'D16': 1, 'D22': 1, 'D22B': 2, 'D22lr': 1, 'D33': 4, 'EQ-SANS': 48, 'GPSANS': 48,
-               'HYSPEC': 20, 'MANDI': 59, 'NOMAD': 99, 'POWGEN': 300, 'REF_M': 1, 'SEQUOIA': 150, 'SNAP': 64, 'SXD': 11,
-               'TOPAZ': 59, 'WAND': 8, 'WISH': 10}
+               'HYSPEC': 20, 'IN4': 11, 'IN5': 1, 'IN6': 3, 'MANDI': 59, 'NOMAD': 99, 'PANTHER': 1, 'POWGEN': 300,
+               'REF_M': 1, 'SEQUOIA': 150, 'SHARP': 1, 'SNAP': 64, 'SXD': 11, 'TOPAZ': 59, 'WAND': 8, 'WISH': 10}
 
     def category(self):
         """ Mantid required
@@ -81,7 +82,7 @@ class MaskBTP(mantid.api.PythonAlgorithm):
         if not ws:
             IDF = mantid.api.ExperimentInfo.getInstrumentFilename(self.instname)
             ws = mantid.simpleapi.LoadEmptyInstrument(Filename=IDF, OutputWorkspace=self.instname + "MaskBTP")
-            deleteWS = True  # if there is going to be an issue with the instrument provdied
+            deleteWS = True  # if there is going to be an issue with the instrument provided
         self.instname = ws.getInstrument().getName()  # update the instrument name
 
         # only check against valid instrument if components isn't set
@@ -268,8 +269,15 @@ class MaskBTP(mantid.api.PythonAlgorithm):
             return ["detector_center", "detector_left", "detector_right"][banknum - 1]
         elif self.instname == "D22B":
             return ["detector_back", "detector_front"][banknum - 1]
-        elif self.instname in ["D11", "D11lr", "D22", "D22lr", "D16"]:
+        elif self.instname in ["D11", "D11lr", "D22", "D22lr", "D16", "PANTHER", "SHARP"]:
             return "detector"
+        elif self.instname in ["IN4", "IN6"]:
+            banks = ["top_bank", "middle_bank", "bottom_bank"]
+            if self.instname == "IN4":
+                banks.extend(["sector_{}".format(index) for index in range(8)])
+            return banks[banknum-1]
+        elif self.instname == "IN5":
+            return "bank_uniq"
         else:
             return "bank" + str(banknum)
 

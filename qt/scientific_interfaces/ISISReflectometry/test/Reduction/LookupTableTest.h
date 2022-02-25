@@ -187,6 +187,18 @@ public:
     TS_ASSERT(!foundLookupRow)
   }
 
+  void test_searching_with_no_matching_title_but_matching_theta_with_matching_title_present() {
+    auto angle = 0.7;
+    auto regexRow = ModelCreationHelper::makeLookupRow(2.3, boost::regex("Ay"));
+    auto nonRegexRow = ModelCreationHelper::makeLookupRow(angle, boost::none);
+    auto table = LookupTable{regexRow, nonRegexRow};
+
+    auto group = Group("Ay Bee", {ModelCreationHelper::makeRow(angle)});
+    const auto foundLookupRow = table.findLookupRow(*group[0], m_exactMatchTolerance);
+    TS_ASSERT(foundLookupRow)
+    TS_ASSERT_EQUALS(nonRegexRow, foundLookupRow)
+  }
+
   // error cases:
   // lookup title specified but theta is not
   // multiple wildcard rows

@@ -26,35 +26,24 @@ namespace ISISReflectometry {
  */
 class MANTIDQT_ISISREFLECTOMETRY_DLL LookupRow {
 public:
-  static auto constexpr OPTIONS_TABLE_COLUMN_COUNT = 10;
+  static auto constexpr OPTIONS_TABLE_COLUMN_COUNT = 11;
   using ValueArray = std::array<std::string, OPTIONS_TABLE_COLUMN_COUNT>;
 
   enum Column {
     // 0-based column indices for cells in a row. The Actual values are
     // important here so set them explicitly
     THETA = 0,
-    FIRST_TRANS = 1,
-    SECOND_TRANS = 2,
-    TRANS_SPECTRA = 3,
-    QMIN = 4,
-    QMAX = 5,
-    QSTEP = 6,
-    SCALE = 7,
-    RUN_SPECTRA = 8,
-    BACKGROUND_SPECTRA = 9
+    TITLE = 1,
+    FIRST_TRANS = 2,
+    SECOND_TRANS = 3,
+    TRANS_SPECTRA = 4,
+    QMIN = 5,
+    QMAX = 6,
+    QSTEP = 7,
+    SCALE = 8,
+    RUN_SPECTRA = 9,
+    BACKGROUND_SPECTRA = 10
   };
-
-  static auto constexpr ColumnPropertyName =
-      std::array<const char *, OPTIONS_TABLE_COLUMN_COUNT>{"ThetaIn",
-                                                           "FirstTransmissionRunList",
-                                                           "SecondTransmissionRunList",
-                                                           "TransmissionProcessingInstructions",
-                                                           "MomentumTransferMin",
-                                                           "MomentumTransferMax",
-                                                           "MomentumTransferStep",
-                                                           "ScaleFactor",
-                                                           "ProcessingInstructions",
-                                                           "BackgroundProcessingInstructions"};
 
   LookupRow(boost::optional<double> theta, boost::optional<boost::regex> titleMatcher,
             TransmissionRunPair tranmissionRuns,
