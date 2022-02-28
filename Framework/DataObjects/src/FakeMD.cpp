@@ -75,7 +75,9 @@ void FakeMD::setupDetectorCache(const API::IMDEventWorkspace &workspace) {
   }
 }
 
-/** Function makes up a fake single-crystal peak and adds it to the workspace.
+/**
+ * Function generates random uniformly distributed events within an nD-sphere
+ * to simulate a single-crystal peak and adds it to the workspace.
  *
  * @param ws A pointer to the workspace that receives the events
  */
@@ -90,38 +92,36 @@ template <typename MDE, size_t nd> void FakeMD::addFakePeak(typename MDEventWork
   auto num = size_t(m_peakParams[0]);
 
   // Width of the peak
-  double desiredRadius = m_peakParams.back();
+  auto desiredRadius = m_peakParams.back();
 
   std::mt19937 rng(static_cast<unsigned int>(m_randomSeed));
   std::uniform_real_distribution<coord_t> flat(0, 1.0);
+  std::normal_distribution<coord_t> normal(0.0, 1.0); // mean = 0, std = 1
 
   // Inserter to help choose the correct event type
   auto eventHelper = MDEventInserter<typename MDEventWorkspace<MDE, nd>::sptr>(ws);
 
   for (size_t i = 0; i < num; ++i) {
-    // Algorithm to generate points along a random n-sphere (sphere with not
-    // necessarily 3 dimensions)
-    // from http://en.wikipedia.org/wiki/N-sphere as of May 6, 2011.
 
-    // First, points in a hyper-cube of size 1.0, centered at 0.
+    // generate point along radius with ^1/n scaling for uniformity (i.e. Prob(point < r) ~ r^nd)
+    auto radius_frac = flat(rng);
+    auto radius = static_cast<coord_t>(desiredRadius * pow(radius_frac, 1.0f / nd));
+    // to get direction generate uniformly distributed points on surface of a unit N sphere using
+    // uniformly dist. rand numbers as per http://corysimon.github.io/articles/uniformdistn-on-sphere/
     coord_t centers[nd];
-    coord_t radiusSquared = 0;
-    for (size_t d = 0; d < nd; d++) {
-      centers[d] = flat(rng) - 0.5f; // Distribute around +- the center
-      radiusSquared += centers[d] * centers[d];
+    coord_t modulusSq = 0;
+    while (modulusSq < 1E-6) {
+      // small modulus may cause issues with floating point precision when dividing later
+      for (size_t d = 0; d < nd; d++) {
+        centers[d] = normal(rng);
+        modulusSq += centers[d] * centers[d];
+      }
     }
-
-    // Make a unit vector pointing in this direction
-    auto radius = static_cast<coord_t>(sqrt(radiusSquared));
-    for (size_t d = 0; d < nd; d++)
-      centers[d] /= radius;
-
-    // Now place the point along this radius, scaled with ^1/n for uniformity.
-    coord_t radPos = flat(rng);
-    radPos = static_cast<coord_t>(pow(radPos, static_cast<coord_t>(1.0 / static_cast<coord_t>(nd))));
+    // now normalise by modulus, scale by radius and translate to peak centre
+    auto inverseModulus = static_cast<coord_t>(1.0f / sqrt(modulusSq));
     for (size_t d = 0; d < nd; d++) {
       // Multiply by the scaling and the desired peak radius
-      centers[d] *= (radPos * static_cast<coord_t>(desiredRadius));
+      centers[d] *= radius * inverseModulus;
       // Also offset by the center of the peak, as taken in Params
       centers[d] += static_cast<coord_t>(m_peakParams[d + 1]);
     }
