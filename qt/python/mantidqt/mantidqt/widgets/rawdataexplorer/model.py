@@ -10,7 +10,7 @@ from qtpy.QtCore import *
 from qtpy.QtWidgets import QMessageBox
 
 from mantid.simpleapi import mtd, Plus, RenameWorkspace
-from mantid.api import AlgorithmManager
+from mantid.api import AlgorithmManager, PreviewType
 from mantid.kernel import logger
 from _dataobjects import PeaksWorkspace, TableWorkspace
 
@@ -160,14 +160,10 @@ class RawDataExplorerModel(QObject):
             load_alg.setProperty("Filename", filename)
             load_alg.execute()
         except RuntimeError as e:
-            message = "Error, could not load file:\n {0}".format(e)
-            logger.error(message)
-            message = QMessageBox()
-            message.setText(message)
-            message.exec()
+            error_reporting("Error, could not load file:\n {0}".format(e))
 
         if not load_alg.isExecuted():
-            logger.error("Failed to load " + filename)
+            error_reporting("Failed to load " + filename)
         return load_alg.isExecuted()
 
     def del_preview(self, previewModel):
@@ -200,14 +196,16 @@ class RawDataExplorerModel(QObject):
         preview_finder = PreviewFinder()
 
         if isinstance(workspace, PeaksWorkspace) or isinstance(workspace, TableWorkspace):
-            return
+            error_reporting("Cannot open this data: invalid workspace type {0}".format(type(workspace)))
+            return None
 
         is_group = workspace.isGroup()
         if is_group:
-            # that's probably D7 or some processed data
             if workspace.size() == 0:
-                return
+                error_reporting("No data found in group workspace.")
+                return None
 
+            # we are judging from the first workspace and hoping it is representative
             workspace = workspace.getItem(0)
 
         instrument_name = workspace.getInstrument().getName()
@@ -215,9 +213,19 @@ class RawDataExplorerModel(QObject):
 
         if is_acquisition_type_needed:
             acquisition_mode = self.determine_acquisition_mode(workspace)
-            return preview_finder.get_preview(instrument_name, acquisition_mode, is_group=is_group)
+            preview = preview_finder.get_preview(instrument_name, acquisition_mode, is_group=is_group)
         else:
-            return preview_finder.get_preview(instrument_name, is_group=is_group)
+            preview = preview_finder.get_preview(instrument_name, is_group=is_group)
+
+        # basically the conditions for "Show instrument" to be clickable
+        # Should root out most of the cases when the data cannot be displayed, since it is not handled gracefully later
+        if preview == PreviewType.IVIEW and not(workspace.getInstrument()
+                                                and workspace.getInstrument().getName()
+                                                and workspace.getAxis(1).isSpectra()):
+            message = "Cannot open the instrument viewer for the provided data."
+            error_reporting(message)
+            return None
+        return preview
 
     @staticmethod
     def determine_acquisition_mode(workspace):
@@ -253,10 +261,7 @@ class RawDataExplorerModel(QObject):
             Plus(LHSWorkspace=target_ws, RHSWorkspace=ws_to_add, OutputWorkspace=target_ws)
         except ValueError as e:
             message = "Unable to accumulate: {0}".format(e)
-            logger.error(message)
-            message_box = QMessageBox()
-            message_box.setText(message)
-            message_box.exec()
+            error_reporting(message)
             return None
 
         RenameWorkspace(InputWorkspace=target_ws, OutputWorkspace=final_ws)
@@ -279,3 +284,14 @@ class RawDataExplorerModel(QObject):
             # shouldn't reach this case with the naming convention, but if it happens, default to the new name
             ws_name = ws_to_add
         return ws_name
+
+
+def error_reporting(error_message):
+    """
+    Log an error and displays a popup for the attention of the user
+    @param error_message: the error message to show
+    """
+    logger.error(error_message)
+    message_box = QMessageBox()
+    message_box.setText(error_message)
+    message_box.exec()
