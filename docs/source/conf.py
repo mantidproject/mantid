@@ -261,3 +261,11 @@ intersphinx_mapping = {
     'pystog': ('https://pystog.readthedocs.io/en/latest/', None),
     'mantid-dev': ('https://developer.mantidproject.org/', None)
 }
+
+# Temporarily suppress build warnings of the type:
+# "WARNING: document isn't included in any toctree"
+# while new release notes system is under development.
+exclude_patterns = [
+    'release/v6.4.0/**/Bugfixes/Bugfixes.rst',
+    'release/v6.4.0/**/New_features/New_features.rst'
+]
