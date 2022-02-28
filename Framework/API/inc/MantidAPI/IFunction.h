@@ -268,7 +268,7 @@ public:
     /// Evaluates the validator associated with attribute this visitor is to visit.
     template <typename T1> void evaluateValidator(T1 &inputData) const {
       if (m_validator != nullptr) {
-        validatorEvaluator::evaluate(T1, m_validator);
+        validatorEvaluator::evaluate(inputData, m_validator);
       }
     }
 
@@ -369,10 +369,10 @@ public:
   };
 
   /**
-   * Atribute visitor class. It provides a separate access method
-   * for each attribute type. When applied to a particular attribue
-   * the appropriate method will be used. Each method calls the attributes
-   * evaluateValidator class to validate the attribute value
+   * Atribute validator visitor class. It is used to access
+   * m_data of a specificed attribute in order to
+   * evaluate the current value of the attribute against
+   * the associated validator, for all allowed types.
    */
   template <typename T = void> class DLLExport AttributeValidatorVisitor : public boost::static_visitor<T> {
   public:
