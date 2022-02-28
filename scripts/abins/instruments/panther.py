@@ -29,7 +29,11 @@ class PantherInstrument(DirectInstrument):
         ei_meV = self._e_init / MILLI_EV_TO_WAVENUMBER
         frequencies_meV = frequencies / MILLI_EV_TO_WAVENUMBER
 
-        return (np.polyval(resolution['abs_meV'], frequencies_meV)
-                + np.polyval(resolution['ei_dependence'], ei_meV)
-                + np.polyval(resolution['ei_energy_product'], ei_meV * frequencies_meV)
-                ) * MILLI_EV_TO_WAVENUMBER
+        resolution_fwhm = (np.polyval(resolution['abs_meV'], frequencies_meV)
+                           + np.polyval(resolution['ei_dependence'], ei_meV)
+                           + np.polyval(resolution['ei_energy_product'],
+                                        ei_meV * frequencies_meV)
+                           ) * MILLI_EV_TO_WAVENUMBER
+
+        resolution_sigma = resolution_fwhm / (2 * np.sqrt(2 * np.log(2)))
+        return resolution_sigma
