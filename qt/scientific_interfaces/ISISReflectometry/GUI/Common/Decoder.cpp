@@ -110,9 +110,7 @@ void Decoder::decodeExperiment(QtExperimentView *gui, const QMap<QString, QVaria
 
 void Decoder::decodePerAngleDefaults(QTableWidget *tab, const QMap<QString, QVariant> &map) {
   // Clear the rows
-  for (auto rowIndex = 0; rowIndex < tab->rowCount(); ++rowIndex) {
-    tab->removeRow(rowIndex);
-  }
+  tab->setRowCount(0);
   const int rowsNum = map[QString("rowsNum")].toInt();
   const int columnsNum = map[QString("columnsNum")].toInt();
 
