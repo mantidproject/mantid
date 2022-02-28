@@ -227,7 +227,7 @@ public:
     /// Evaluates the validator associated with attribute this visitor is to visit.
     template <typename T1> void evaluateValidator(T1 &inputData) const {
       if (m_validator != nullptr) {
-        validatorEvaluator().evaluate(inputData, m_validator);
+        validatorEvaluator::evaluate(inputData, m_validator);
       }
     }
 
@@ -268,7 +268,7 @@ public:
     /// Evaluates the validator associated with attribute this visitor is to visit.
     template <typename T1> void evaluateValidator(T1 &inputData) const {
       if (m_validator != nullptr) {
-        validatorEvaluator().evaluate(T1, m_validator);
+        validatorEvaluator::evaluate(T1, m_validator);
       }
     }
 
