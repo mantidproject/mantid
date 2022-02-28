@@ -6,6 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAlgorithms/DiscusMultipleScatteringCorrection.h"
 #include "MantidAPI/Axis.h"
+#include "MantidAPI/BinEdgeAxis.h"
 #include "MantidAPI/ISpectrum.h"
 #include "MantidAPI/InstrumentValidator.h"
 #include "MantidAPI/NumericAxis.h"
@@ -265,6 +266,16 @@ void DiscusMultipleScatteringCorrection::convertWsToPoints(MatrixWorkspace_sptr 
       SQWSPoints->setSharedX(0, HistogramData::Points(newX).cowData());
       ws = SQWSPoints;
     }
+  }
+  if (dynamic_cast<BinEdgeAxis *>(ws->getAxis(1)) != nullptr) {
+    auto edges = dynamic_cast<NumericAxis *>(ws->getAxis(1))->getValues();
+    std::vector<double> centres(edges.size() - 1);
+    for (size_t i = 0; i < centres.size(); ++i) {
+      centres[i] = (0.5 * (edges[i] + edges[i + 1]));
+    }
+    auto newAxis = std::make_unique<NumericAxis>(centres);
+    newAxis->setUnit("DeltaE");
+    ws->replaceAxis(1, std::move(newAxis));
   }
 }
 
@@ -854,9 +865,15 @@ std::tuple<bool, std::vector<double>, double> DiscusMultipleScatteringCorrection
   updateWeightAndPosition(track, weight, vmu, sigma_total, rng);
 
   double QSS = 0;
+  auto currentInvPOfQ = invPOfQ;
   double k = kinc;
   for (int iScat = 0; iScat < nScatters - 1; iScat++) {
-    q_dir(track, invPOfQ, k, scatteringXSection, rng, QSS, weight);
+    if ((k != kinc) && m_importanceSampling) {
+      MatrixWorkspace_sptr newInvPOfQ = currentInvPOfQ->clone();
+      prepareCumulativeProbForQ(k, newInvPOfQ);
+      currentInvPOfQ = newInvPOfQ;
+    }
+    q_dir(track, currentInvPOfQ, k, scatteringXSection, rng, QSS, weight);
     const int nlinks = m_sampleShape->interceptSurface(track);
     m_callsToInterceptSurface++;
     if (nlinks == 0) {
@@ -968,8 +985,6 @@ void DiscusMultipleScatteringCorrection::q_dir(Geometry::Track &track, MatrixWor
     // S(Q) not strictly needed here but useful to see if the higher values are indeed being returned
     SQ = interpolateFlat(m_SQWS->histogram(iW), QQ);
     weight = weight * scatteringXSection;
-    if (k != kinc)
-      prepareCumulativeProbForQ(k, invPOfQ);
   } else {
     std::tie(k, iW) = sampleKW(m_SQWS, rng, kinc);
     auto [qmin, qrange] = getKinematicRange(k, kinc);
