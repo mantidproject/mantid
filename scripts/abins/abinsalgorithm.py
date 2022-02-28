@@ -17,7 +17,7 @@ from mantid.kernel import Atom, Direction, StringListValidator, StringArrayPrope
 from mantid.simpleapi import CloneWorkspace, SaveAscii, Scale
 
 import abins
-from abins.constants import AB_INITIO_FILE_EXTENSIONS, ALL_INSTRUMENTS, ALL_SAMPLE_FORMS, ATOM_PREFIX
+from abins.constants import AB_INITIO_FILE_EXTENSIONS, ALL_INSTRUMENTS, ATOM_PREFIX
 from abins.instruments import get_instrument, Instrument
 
 
@@ -33,8 +33,6 @@ class AbinsAlgorithm:
         self._ab_initio_program = None
         self._out_ws_name = None
         self._temperature = None
-        self._bin_width = None
-        self._sample_form = None
         self._atoms = None
         self._sum_contributions = None
         self._save_ascii = None
@@ -54,8 +52,6 @@ class AbinsAlgorithm:
         self._out_ws_name = self.getPropertyValue('OutputWorkspace')
 
         self._temperature = self.getProperty("TemperatureInKelvin").value
-        self._bin_width = self.getProperty("BinWidthInWavenumber").value
-        self._sample_form = self.getProperty("SampleForm").value
 
         self._atoms = self.getProperty("Atoms").value
         self._sum_contributions = self.getProperty("SumContributions").value
@@ -103,14 +99,6 @@ class AbinsAlgorithm:
                              direction=Direction.Input,
                              defaultValue=10.0,
                              doc="Temperature in K for which dynamical structure factor S should be calculated.")
-
-        self.declareProperty(name="BinWidthInWavenumber", defaultValue=1.0, doc="Width of bins used during rebining.")
-
-        self.declareProperty(name="SampleForm",
-                             direction=Direction.Input,
-                             defaultValue="Powder",
-                             validator=StringListValidator(ALL_SAMPLE_FORMS),
-                             doc="Form of the sample: Powder.")
 
         self.declareProperty(StringArrayProperty("Atoms", Direction.Input),
                              doc="List of atoms to use to calculate partial S."
@@ -239,10 +227,6 @@ class AbinsAlgorithm:
         temperature = self.getProperty("TemperatureInKelvin").value
         if temperature < 0:
             issues["TemperatureInKelvin"] = "Temperature must be positive."
-
-        bin_width = self.getProperty("BinWidthInWavenumber").value
-        if not (isinstance(bin_width, float) and 1.0 <= bin_width <= 10.0):
-            issues["BinWidthInWavenumber"] = "Invalid bin width. Valid range is [1.0, 10.0] cm^-1"
 
         return issues
 

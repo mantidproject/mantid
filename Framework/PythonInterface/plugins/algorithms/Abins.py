@@ -13,7 +13,7 @@ from mantid.api import WorkspaceFactory, AnalysisDataService
 
 # noinspection PyProtectedMember
 from mantid.simpleapi import ConvertUnits, GroupWorkspaces, Load
-from mantid.kernel import Direction
+from mantid.kernel import Direction, StringListValidator
 import abins
 from abins.abinsalgorithm import AbinsAlgorithm
 
@@ -22,6 +22,9 @@ from abins.abinsalgorithm import AbinsAlgorithm
 class Abins(AbinsAlgorithm, PythonAlgorithm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+
+        self._bin_width = None
+        self._sample_form = None
 
         self._experimental_file = None
         self._scale = None
@@ -34,9 +37,19 @@ class Abins(AbinsAlgorithm, PythonAlgorithm):
         return "Calculates inelastic neutron scattering against 1-D ω axis."
 
     def PyInit(self) -> None:
-        from abins.constants import ONE_DIMENSIONAL_INSTRUMENTS
+        from abins.constants import ALL_SAMPLE_FORMS, ONE_DIMENSIONAL_INSTRUMENTS
         # Declare properties for all Abins Algorithms
         self.declare_common_properties()
+
+        # Soon-to-be-deprecated properties (i.e. already removed from 2D)
+        self.declareProperty(name="BinWidthInWavenumber", defaultValue=1.0,
+                             doc="Width of bins used during rebinning.")
+
+        self.declareProperty(name="SampleForm",
+                             direction=Direction.Input,
+                             defaultValue="Powder",
+                             validator=StringListValidator(ALL_SAMPLE_FORMS),
+                             doc="Form of the sample: Powder.")
 
         # Declare properties specific to 1D
         self.declareProperty(FileProperty("ExperimentalFile", "",
@@ -63,6 +76,10 @@ class Abins(AbinsAlgorithm, PythonAlgorithm):
         scale = self.getProperty("Scale").value
         if scale < 0:
             issues["Scale"] = "Scale must be positive."
+
+        bin_width = self.getProperty("BinWidthInWavenumber").value
+        if not (isinstance(bin_width, float) and 1.0 <= bin_width <= 10.0):
+            issues["BinWidthInWavenumber"] = "Invalid bin width. Valid range is [1.0, 10.0] cm^-1"
 
         self._check_advanced_parameter()
 
@@ -271,6 +288,10 @@ class Abins(AbinsAlgorithm, PythonAlgorithm):
         from abins.constants import FLOAT_TYPE
 
         self.get_common_properties()
+
+        self._bin_width = self.getProperty("BinWidthInWavenumber").value
+        self._sample_form = self.getProperty("SampleForm").value
+
         self._instrument_kwargs = {"setting": self.getProperty("Setting").value}
         self.set_instrument()
 
