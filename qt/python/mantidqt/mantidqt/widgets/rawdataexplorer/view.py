@@ -273,7 +273,6 @@ class RawDataExplorerView(QWidget):
             if file_model.isDir(index):
                 # we don't select directories
                 selection_model.select(index, QItemSelectionModel.Deselect | QItemSelectionModel.Rows)
-                continue
 
             if index == last_selected_index:
                 self._last_clicked = file_model.filePath(last_selected_index)
