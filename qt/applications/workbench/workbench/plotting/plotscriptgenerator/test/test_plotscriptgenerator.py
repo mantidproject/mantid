@@ -144,15 +144,17 @@ class PlotScriptGeneratorTest(unittest.TestCase):
         }
         mock_kwargs.update(kwargs)
         mock_ax = MagicMock(spec=MantidAxes, **mock_kwargs)
+        num_rows = kwargs.get("numRows", 1)
+        num_cols = kwargs.get("numCols", 1)
         if LooseVersion('3.1.3') < LooseVersion(matplotlib.__version__):
             setattr(mock_ax, "get_gridspec", MagicMock())
-            mock_ax.get_gridspec.return_value.nrows = 1
-            mock_ax.get_gridspec.return_value.ncols = 1
+            mock_ax.get_gridspec.return_value.nrows = num_rows
+            mock_ax.get_gridspec.return_value.ncols = num_cols
             setattr(mock_ax, "get_subplotspec", MagicMock())
             mock_ax.get_subplotspec.return_value.colspan.start = colNum
         else:
-            mock_kwargs['numRows'] = 1
-            mock_kwargs['numCols'] = 1
+            mock_kwargs['numRows'] = num_rows
+            mock_kwargs['numCols'] = num_cols
             mock_ax.colNum = colNum
 
         mock_ax.xaxis.minor.locator = Mock(spec=NullLocator)
@@ -231,6 +233,8 @@ class PlotScriptGeneratorTest(unittest.TestCase):
 
         mock_ax = self._gen_mock_axes()
         mock_ax.xaxis.minor.locator = Mock()
+        mock_ax.numRows = 1
+        mock_ax.numCols = 1
         mock_fig = Mock(get_axes=lambda: [mock_ax])
         mock_fig.canvas.manager.fit_browser.fit_result_ws_name = ""
 
@@ -294,6 +298,8 @@ class PlotScriptGeneratorTest(unittest.TestCase):
         mock_major_kw = "{gridOn: True, show: True, width: 20, length: 15}"
         mock_ax.xaxis._major_tick_kw = mock_major_kw
         mock_ax.xaxis._minor_tick_kw = mock_minor_kw
+        mock_ax.numRows = 1
+        mock_ax.numCols = 1
 
         mock_fig = Mock(get_axes=lambda: [mock_ax])
         mock_fig.canvas.manager.fit_browser.fit_result_ws_name = ""

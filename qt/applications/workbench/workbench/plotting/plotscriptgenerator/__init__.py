@@ -207,7 +207,7 @@ def get_axes_object_variable(ax):
     # plotted otherwise it returns a list
     ax_object_var = AXES_VARIABLE
 
-    if hasattr(ax.get_gridspec(), "nrows") and hasattr(ax.get_gridspec(), "ncols"):
+    if hasattr(ax, "get_gridspec") and hasattr(ax.get_gridspec(), "nrows") and hasattr(ax.get_gridspec(), "ncols"):
         num_rows = ax.get_gridspec().nrows
         num_cols = ax.get_gridspec().ncols
     else:
