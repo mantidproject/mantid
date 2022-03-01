@@ -47,9 +47,15 @@ boost::optional<LookupRow> LookupTable::findLookupRow(Row const &row, double tol
   }
   // If we didn't find a lookup row where theta matches, then we allow the user to specify a "wildcard" row
   // which will be used for everything where a specific match is not found
-  g_log.warning("Used wildcard row for " + boost::algorithm::join(row.runNumbers(), ", ") +
+  auto result = findWildcardLookupRow();
+  if (result) {
+    g_log.warning("Used wildcard row for " + boost::algorithm::join(row.runNumbers(), ", ") +
+                  ". You may wish to check that all lookup criteria are correct.");
+    return result;
+  }
+  g_log.warning("Used algorithm defaults for " + boost::algorithm::join(row.runNumbers(), ", ") +
                 ". You may wish to check that all lookup criteria are correct.");
-  return findWildcardLookupRow();
+  return result;
 }
 
 boost::optional<LookupRow> LookupTable::searchByTheta(std::vector<LookupRow> lookupRows,
