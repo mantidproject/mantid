@@ -81,7 +81,7 @@ def chopperPairDistance(sampleLogs, instrument):
     """Return the gap between the two choppers."""
     instrumentName = instrument.getName()
     if instrumentName == 'D17':
-        # in [mm] after 08.2020, [m] 20.08.2019-31.07.2020, before: [cm]
+        # in [m], enforced by the loader
         return sampleLogs.getProperty('Distance.ChopperGap').value
     else:
         return sampleLogs.getProperty('ChopperSetting.distSeparationChopperPair').value * 1e-3

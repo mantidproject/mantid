@@ -576,7 +576,7 @@ public:
     prop.emplace_back("Xunit", "TimeOfFlight");
     getWorkspaceFor(output, m_d17FileCycle213, m_outWSName, prop);
     const auto &run = output->run();
-    const auto chopperCentre = run.getPropertyValueAsType<double>("Distance.Chopper1_Sample");
+    const auto chopperCentre = run.getPropertyValueAsType<double>("Distance.MidChopper_Sample");
     const auto chopperSeparation = run.getPropertyValueAsType<double>("Distance.ChopperGap");
     const auto sourceSample = 1e-3 * chopperCentre;
     const auto &spectrumInfo = output->spectrumInfo();

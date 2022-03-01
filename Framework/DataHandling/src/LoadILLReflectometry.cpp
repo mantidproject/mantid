@@ -862,8 +862,8 @@ double LoadILLReflectometry::sourceSampleDistance() const {
                                                  true);
     } else if (run.hasProperty("Distance.Chopper1_Sample")) {
       // Valid from cycle 212 onwards
-      pairCentre = mmToMeter(doubleFromRun("Distance.Chopper1_Sample")); // [mm] to [m]
-      pairSeparation = doubleFromRun("Distance.ChopperGap") * scale;     // in [m]
+      pairCentre = mmToMeter(doubleFromRun("Distance.MidChopper_Sample")); // [mm] to [m]
+      pairSeparation = doubleFromRun("Distance.ChopperGap") * scale;       // in [m]
       m_localWorkspace->mutableRun().addProperty("VirtualChopper.MidChopper_Sample_distance", pairCentre, "meter",
                                                  true);
     } else {
