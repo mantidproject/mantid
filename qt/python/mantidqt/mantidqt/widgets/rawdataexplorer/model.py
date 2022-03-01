@@ -12,7 +12,7 @@ from qtpy.QtWidgets import QMessageBox
 from mantid.simpleapi import mtd, Plus, RenameWorkspace
 from mantid.api import AlgorithmManager, PreviewType
 from mantid.kernel import logger
-from _dataobjects import PeaksWorkspace, TableWorkspace
+from _dataobjects import Workspace2D, EventWorkspace
 
 from .PreviewFinder import PreviewFinder, AcquisitionType
 from .memoryManager import MemoryManager
@@ -161,9 +161,10 @@ class RawDataExplorerModel(QObject):
             load_alg.execute()
         except RuntimeError as e:
             error_reporting("Error, could not load file:\n {0}".format(e))
+            return False
 
         if not load_alg.isExecuted():
-            error_reporting("Failed to load " + filename)
+            error_reporting("Error, could not load file.")
         return load_alg.isExecuted()
 
     def del_preview(self, previewModel):
@@ -195,10 +196,6 @@ class RawDataExplorerModel(QObject):
 
         preview_finder = PreviewFinder()
 
-        if isinstance(workspace, PeaksWorkspace) or isinstance(workspace, TableWorkspace):
-            error_reporting("Cannot open this data: invalid workspace type {0}".format(type(workspace)))
-            return None
-
         is_group = workspace.isGroup()
         if is_group:
             if workspace.size() == 0:
@@ -207,6 +204,13 @@ class RawDataExplorerModel(QObject):
 
             # we are judging from the first workspace and hoping it is representative
             workspace = workspace.getItem(0)
+
+        if not isinstance(workspace, Workspace2D) and not isinstance(workspace, EventWorkspace):
+            ws_type = str(type(workspace))
+            if "dataobject" in ws_type:
+                ws_type = ws_type[21:-2]
+            error_reporting("Cannot open this data: invalid workspace type {0}.".format(ws_type))
+            return None
 
         instrument_name = workspace.getInstrument().getName()
         is_acquisition_type_needed = preview_finder.need_acquisition_mode(instrument_name)
