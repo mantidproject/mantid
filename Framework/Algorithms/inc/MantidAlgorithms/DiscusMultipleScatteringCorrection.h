@@ -59,6 +59,9 @@ protected:
   double interpolateFlat(const HistogramData::Histogram &histToInterpolate, double x);
   std::tuple<double, int> sampleQW(const MatrixWorkspace_sptr &CumulativeProb, double x);
   double interpolateSquareRoot(const HistogramData::Histogram &histToInterpolate, double x);
+  double DiscusMultipleScatteringCorrection::interpolateGaussian(const HistogramData::Histogram &histToInterpolate,
+                                                                 double x);
+  double Interpolate2D(MatrixWorkspace_sptr SOfQ, double w, double q);
   void updateTrackDirection(Geometry::Track &track, const double cosT, const double phi);
   void integrateCumulative(const Mantid::HistogramData::Histogram &h, double xmin, double xmax,
                            std::vector<double> &resultX, std::vector<double> &resultY);
@@ -70,11 +73,12 @@ private:
   API::MatrixWorkspace_sptr createOutputWorkspace(const API::MatrixWorkspace &inputWS) const;
   std::tuple<double, double> new_vector(const Kernel::Material &material, double kinc, bool specialSingleScatterCalc);
   std::vector<double> simulatePaths(const int nEvents, const int nScatters, Kernel::PseudoRandomNumberGenerator &rng,
-                                    MatrixWorkspace_sptr &invPOfQ, const double kinc, const std::vector<double> &kout,
+                                    MatrixWorkspace_sptr &invPOfQ, const double kinc,
+                                    const std::vector<double> &wValues,
                                     const Kernel::V3D &detPos, bool specialSingleScatterCalc);
   std::tuple<bool, std::vector<double>, double> scatter(const int nScatters, Kernel::PseudoRandomNumberGenerator &rng,
                                                         MatrixWorkspace_sptr &invPOfQ, const double kinc,
-                                                        const std::vector<double> &kout, const Kernel::V3D &detPos,
+                                                        const std::vector<double> &wValues, const Kernel::V3D &detPos,
                                                         bool specialSingleScatterCalc);
   Geometry::Track start_point(Kernel::PseudoRandomNumberGenerator &rng);
   Geometry::Track generateInitialTrack(Kernel::PseudoRandomNumberGenerator &rng);

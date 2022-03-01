@@ -27,6 +27,7 @@
 #include "MantidKernel/Material.h"
 #include "MantidKernel/MersenneTwister.h"
 #include "MantidKernel/PhysicalConstants.h"
+#include "MantidKernel/VectorHelper.h"
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
@@ -77,12 +78,10 @@ DECLARE_ALGORITHM(DiscusMultipleScatteringCorrection)
  * Initialize the algorithm
  */
 void DiscusMultipleScatteringCorrection::init() {
-  // The input workspace must have an instrument and units of wavelength
-  auto wsValidator = std::make_shared<CompositeValidator>();
-  wsValidator->add<WorkspaceUnitValidator>("Wavelength");
-  wsValidator->add<InstrumentValidator>();
+  // The input workspace must have an instrument
+  auto wsValidator = std::make_shared<InstrumentValidator>();
 
-  declareProperty(std::make_unique<WorkspaceProperty<>>("InputWorkspace", "", Direction::Input, wsValidator),
+  declareProperty(std::make_unique<WorkspaceProperty<>>("InputWorkspace", "", Direction::Input),
                   "The name of the input workspace.  The input workspace must "
                   "have X units of wavelength. This is used to supply the detector "
                   "positions and the x axis range to calculate corrections for");
@@ -178,6 +177,9 @@ std::map<std::string, std::string> DiscusMultipleScatteringCorrection::validateI
 
   MatrixWorkspace_sptr SQWS = getProperty("StructureFactorWorkspace");
   if (inputWS->getEMode() == Kernel::DeltaEMode::Elastic) {
+    if (inputWS->getAxis(0)->unit()->unitID() != "Wavelength") {
+      issues["InputWorkspace"] = "Input workspace must have units of wavelength for elastic instrument\n";
+    }
     if (SQWS->getNumberHistograms() != 1) {
       issues["StructureFactorWorkspace"] = "S(Q) workspace must contain a single spectrum for elastic mode\n";
     }
@@ -186,6 +188,9 @@ std::map<std::string, std::string> DiscusMultipleScatteringCorrection::validateI
       issues["StructureFactorWorkspace"] += "S(Q) workspace must have units of MomentumTransfer\n";
     }
   } else {
+    if (inputWS->getAxis(0)->unit()->unitID() != "DeltaE") {
+      issues["InputWorkspace"] = "Input workspace must have units of DeltaE for inelastic instrument\n";
+    }
     std::set<std::string> axisUnits;
     axisUnits.insert(SQWS->getAxis(0)->unit()->unitID());
     axisUnits.insert(SQWS->getAxis(1)->unit()->unitID());
@@ -311,6 +316,19 @@ void DiscusMultipleScatteringCorrection::exec() {
   // avoid repeated conversion of bin edges to points inside loop by converting to point data
   convertWsToPoints(m_SQWS);
 
+  m_logSQ = m_SQWS->clone();
+
+  for (auto i = 0; i < m_logSQ->getNumberHistograms(); i++) {
+    auto &ySQ = m_logSQ->mutableY(i);
+
+    std::transform(ySQ.begin(), ySQ.end(), ySQ.begin(), [](double d) -> double {
+      if (d == 0.)
+        return -20.0;
+      else
+        return std::log(d);
+    });
+  }
+
   MatrixWorkspace_sptr sigmaSSWS = getProperty("ScatteringCrossSection");
   if (sigmaSSWS)
     m_sigmaSS = std::make_shared<HistogramData::Histogram>(sigmaSSWS->histogram(0));
@@ -403,29 +421,35 @@ void DiscusMultipleScatteringCorrection::exec() {
 
     if (spectrumInfo.hasDetectors(i) && !spectrumInfo.isMonitor(i) && !spectrumInfo.isMasked(i)) {
 
-      auto lambdas = instrumentWS.points(i).rawData();
-      std::vector<double> kvalues;
-      std::transform(lambdas.begin(), lambdas.end(), std::back_inserter(kvalues),
-                     [](double d) -> double { return 2 * M_PI / d; });
+      std::vector<std::pair<double, double>> kInW;
+      const double eFixed = efixed.value(spectrumInfo.detector(i).getID());
+      const double kFixed = toWaveVector(eFixed);
+      auto xPoints = instrumentWS.points(i).rawData();
 
-      std::vector<std::pair<double, double>> kInOut;
-      const double kFixed = toWaveVector(efixed.value(spectrumInfo.detector(i).getID()));
-
-      if ((!m_simulateEnergiesIndependently) && (efixed.emode() == DeltaEMode::Direct)) {
-        kInOut.emplace_back(std::make_pair(kFixed, -1.0));
+      if (efixed.emode() == DeltaEMode::Elastic) {
+        std::vector<double> kvalues;
+        std::transform(xPoints.begin(), xPoints.end(), std::back_inserter(kvalues),
+                       [](double d) -> double { return 2 * M_PI / d; });
+        for (auto k : kvalues) {
+          kInW.emplace_back(k, 0.);
+        }
       } else {
-        for (auto x : kvalues) { // NB range based for loop doesn't work on temporaries (eg point(i).rawData())??
-          if (efixed.emode() == DeltaEMode::Direct) {
-            kInOut.emplace_back(std::make_pair(kFixed, x));
-          } else if (efixed.emode() == DeltaEMode::Indirect) {
-            kInOut.emplace_back(std::make_pair(x, kFixed));
-          } else {
-            kInOut.emplace_back(x, x);
+        if ((!m_simulateEnergiesIndependently) && (efixed.emode() == DeltaEMode::Direct)) {
+          kInW.emplace_back(std::make_pair(kFixed, -1.0));
+        } else {
+          for (auto w : xPoints) { // NB range based for loop doesn't work on temporaries (eg point(i).rawData())??
+            if (efixed.emode() == DeltaEMode::Direct) {
+              kInW.emplace_back(std::make_pair(kFixed, w));
+            } else if (efixed.emode() == DeltaEMode::Indirect) {
+              const double initialE = eFixed - w;
+              const double kin = toWaveVector(initialE);
+              kInW.emplace_back(std::make_pair(kin, w));
+            }
           }
         }
       }
 
-      const auto nbins = kInOut.size();
+      const auto nbins = kInW.size();
       // step size = index range / number of steps requested
       const size_t nsteps = std::max(1, nlambda - 1);
       const size_t lambdaStepSize = nbins == 1 ? 1 : (nbins - 1) / nsteps;
@@ -439,22 +463,22 @@ void DiscusMultipleScatteringCorrection::exec() {
       }
 
       for (size_t bin = 0; bin < nbins; bin += lambdaStepSize) {
-        double lambdaIn = kInOut[bin].first;
+        double lambdaIn = kInW[bin].first;
         if (lambdaIn <= 0) {
           g_log.warning("Skipping calculation for bin with lambda<=0, workspace index=" + std::to_string(i) +
                         " bin index=" + std::to_string(bin));
           continue;
         }
 
-        const double kinc = 2 * M_PI / lambdaIn;
+        const double kinc = kInW[bin].first;
 
-        std::vector<double> kouts = kInOut[bin].second == -1.0 ? kvalues : std::vector{kInOut[bin].second};
+        std::vector<double> wValues = kInW[bin].second == -1.0 ? xPoints : std::vector{kInW[bin].second};
 
         if (m_importanceSampling)
           prepareCumulativeProbForQ(kinc, invPOfQ);
 
-        auto weights = simulatePaths(nSingleScatterEvents, 1, rng, invPOfQ, kinc, kouts, detPos, true);
-        if (kInOut[bin].second == -1.0) {
+        auto weights = simulatePaths(nSingleScatterEvents, 1, rng, invPOfQ, kinc, wValues, detPos, true);
+        if (kInW[bin].second == -1.0) {
           noAbsSimulationWS->getSpectrum(i).mutableY() += weights;
         } else {
           noAbsSimulationWS->getSpectrum(i).dataY()[bin] = weights[0];
@@ -463,8 +487,8 @@ void DiscusMultipleScatteringCorrection::exec() {
         for (int ne = 0; ne < nScatters; ne++) {
           int nEvents = ne == 0 ? nSingleScatterEvents : nMultiScatterEvents;
 
-          auto weights = simulatePaths(nEvents, ne + 1, rng, invPOfQ, kinc, kouts, detPos, false);
-          if (kInOut[bin].second == -1.0) {
+          auto weights = simulatePaths(nEvents, ne + 1, rng, invPOfQ, kinc, wValues, detPos, false);
+          if (kInW[bin].second == -1.0) {
             simulationWSs[ne]->getSpectrum(i).mutableY() += weights;
           } else {
             simulationWSs[ne]->getSpectrum(i).dataY()[bin] = weights[0];
@@ -790,6 +814,81 @@ double DiscusMultipleScatteringCorrection::interpolateFlat(const HistogramData::
 }
 
 /**
+ * Interpolate a value from a spectrum containing Gaussian peaks. The log of the spectrum has previously
+  been taken so this method does a quadratic interpolation and returns e^y
+ * @param histToInterpolate The histogram containing the data to interpolate
+ * @param x The x value to interpolate at
+ * @return The exponential of the interpolated value
+ */
+double DiscusMultipleScatteringCorrection::interpolateGaussian(const HistogramData::Histogram &histToInterpolate,
+                                                               double x) {
+  // could have written using points() method so it also worked on histogram data but found that the points
+  // method was bottleneck on multithreaded code due to cow_ptr atomic_load
+  assert(histToInterpolate.xMode() == HistogramData::Histogram::XMode::Points);
+  if (x > histToInterpolate.x().back()) {
+    return exp(histToInterpolate.y().back());
+  }
+  if (x < histToInterpolate.x().front()) {
+    return exp(histToInterpolate.y().front());
+  }
+  // assume log(cross section) is quadratic in k
+  auto deltax = histToInterpolate.x()[1] - histToInterpolate.x()[0];
+
+  auto iter = std::upper_bound(histToInterpolate.x().cbegin(), histToInterpolate.x().cend(), x);
+  auto idx = static_cast<size_t>(std::distance(histToInterpolate.x().cbegin(), iter) - 1);
+
+  // need at least two points to the right of the x value for the quadratic
+  // interpolation to work
+  auto ny = histToInterpolate.y().size();
+  if (ny < 3) {
+    throw std::runtime_error("Need at least 3 y values to perform quadratic interpolation");
+  }
+  if (idx > ny - 3) {
+    idx = ny - 3;
+  }
+  // this interpolation assumes the set of 3 bins\point have the same width
+  // U=0 on point or bin edge to the left of where x lies
+  const auto U = (x - histToInterpolate.x()[idx]) / deltax;
+  const auto &y = histToInterpolate.y();
+  const auto A = (y[idx] - 2 * y[idx + 1] + y[idx + 2]) / 2;
+  const auto B = (-3 * y[idx] + 4 * y[idx + 1] - y[idx + 2]) / 2;
+  const auto C = y[idx];
+  return exp(A * U * U + B * U + C);
+}
+
+/**
+ * Interpolate value on S(Q,w) surface given a Q and w. For now there is no interpolation between
+ * w values so the nearest one is taken. Also S(Q,w) is assumed to be zero for w beyond the w limits
+ * of the supplied surface. S(Q,w) is assumed to equal the extreme value for q beyond the q limits
+ * @param SOfQ A workspace containing the structure factor to interpolate
+ * @param w The energy transfer (w) value to interpolate at
+ * @param q The momentum transfer (q) value to interpolate at
+ * @return The interpolated S(Q,w) value
+ */
+double DiscusMultipleScatteringCorrection::Interpolate2D(MatrixWorkspace_sptr SOfQ, double w, double q) {
+  double SQ;
+  int iW;
+  auto wValues = dynamic_cast<NumericAxis *>(SOfQ->getAxis(1))->getValues();
+  try {
+    // required w values will often equal the points in the S(Q,w) distribution so pick nearest value
+    iW = Kernel::VectorHelper::indexOfValueFromCenters(wValues, w);
+  } catch (std::out_of_range) {
+    iW = -1;
+  }
+  if (iW >= 0) {
+    if (m_importanceSampling)
+      // the square root interpolation used to look up Q, w in InvPOfQ is based on flat interpolation of S(Q) so use
+      // same interpolation here for consistency
+      SQ = interpolateFlat(SOfQ->histogram(iW), q);
+    else
+      SQ = interpolateGaussian(m_logSQ->histogram(iW), q);
+  } else
+    SQ = 0.;
+
+  return SQ;
+}
+
+/**
  * Simulates a set of neutron paths through the sample to a specific detector
  * position with each path containing the specified number of scattering events.
  * Each path represents a group of neutrons and the proportion of neutrons
@@ -801,19 +900,20 @@ double DiscusMultipleScatteringCorrection::interpolateFlat(const HistogramData::
  * @param rng Random number generator
  * @param invPOfQ Inverse of the cumulative prob distribution of Q (used in importance sampling)
  * @param kinc The incident wavevector
+ * @param wValues A vector of overall energy transfers
  * @param detPos The position of the detector we're currently calculating a correction for
  * @param specialSingleScatterCalc Boolean indicating whether special single
  * @return An average weight across all of the paths
  */
 std::vector<double> DiscusMultipleScatteringCorrection::simulatePaths(
     const int nPaths, const int nScatters, Kernel::PseudoRandomNumberGenerator &rng, MatrixWorkspace_sptr &invPOfQ,
-    const double kinc, const std::vector<double> &kout, const Kernel::V3D &detPos, bool specialSingleScatterCalc) {
+    const double kinc, const std::vector<double> &wValues, const Kernel::V3D &detPos, bool specialSingleScatterCalc) {
   double sumOfQSS = 0.;
-  std::vector<double> sumOfWeights(kout.size(), 0.);
+  std::vector<double> sumOfWeights(wValues.size(), 0.);
   int countZeroWeights = 0; // for debugging and analysis of where importance sampling may help
 
   for (int ie = 0; ie < nPaths; ie++) {
-    auto [success, weights, QSS] = scatter(nScatters, rng, invPOfQ, kinc, kout, detPos, specialSingleScatterCalc);
+    auto [success, weights, QSS] = scatter(nScatters, rng, invPOfQ, kinc, wValues, detPos, specialSingleScatterCalc);
     if (success) {
       std::transform(weights.begin(), weights.end(), sumOfWeights.begin(), sumOfWeights.begin(), std::plus<double>());
       sumOfQSS += QSS;
@@ -822,7 +922,7 @@ std::vector<double> DiscusMultipleScatteringCorrection::simulatePaths(
     } else
       ie--;
   }
-  for (int i = 0; i < kout.size(); i++) {
+  for (int i = 0; i < wValues.size(); i++) {
     if (!m_importanceSampling)
       // divide by the mean of Q*S(Q) for each of the n-1 terms representing a multiple scatter
       sumOfWeights[i] = sumOfWeights[i] / pow(sumOfQSS / static_cast<double>(nPaths * (nScatters - 1)), nScatters - 1);
@@ -843,6 +943,7 @@ std::vector<double> DiscusMultipleScatteringCorrection::simulatePaths(
  * @param rng Random number generator
  * @param invPOfQ Inverse of the cumulative prob distribution of Q (used in importance sampling)
  * @param kinc The incident wavevector
+ * @param wValues A vector of overall energy transfers
  * @param detPos The detector position xyz coordinates
  * @param specialSingleScatterCalc Boolean indicating whether special single
  * scatter calculation should be performed
@@ -852,7 +953,7 @@ std::vector<double> DiscusMultipleScatteringCorrection::simulatePaths(
  */
 std::tuple<bool, std::vector<double>, double> DiscusMultipleScatteringCorrection::scatter(
     const int nScatters, Kernel::PseudoRandomNumberGenerator &rng, MatrixWorkspace_sptr &invPOfQ, const double kinc,
-    const std::vector<double> &kouts, const Kernel::V3D &detPos, bool specialSingleScatterCalc) {
+    const std::vector<double> &wValues, const Kernel::V3D &detPos, bool specialSingleScatterCalc) {
   double weight = 1;
   double numberDensity = m_sampleShape->material().numberDensityEffective();
   // if scale up scatteringXSection by 100*numberDensity then may not need
@@ -896,26 +997,29 @@ std::tuple<bool, std::vector<double>, double> DiscusMultipleScatteringCorrection
   }
   std::vector<double> weights;
   const double dl = track.front().distInsideObject;
-  for (auto kout : kouts) {
-    const auto q = directionToDetector * kout - prevDirection * k;
-    size_t iW;
-    const double w = (kout * kout - k * k) * PhysicalConstants::E_mev_toNeutronWavenumberSq;
-    auto wValues = dynamic_cast<NumericAxis *>(m_SQWS->getAxis(1))->getValues();
-    if (w > wValues.back()) {
-      iW = wValues.size() - 1;
-    }
-    if (w < wValues.front()) {
-      iW = 0;
+  if (specialSingleScatterCalc)
+    vmu = 0;
+  const auto AT2 = exp(-dl * vmu);
+  auto scatteringXSectionFull = m_sampleShape->material().totalScatterXSection();
+  // Step through required overall energy transfer (w) values and work out what
+  // w that means for the final scatter. There will be a single w value for elastic
+  // Slightly different approach to original DISCUS code. It stepped through the w values
+  // in the supplied S(Q,w) distribution and applied each one to the final scatter. If
+  // this resulted in an overall w that equalled one of the required w values it was output.
+  // That approach implicitly assumed S(Q,w)=0 where not specified and that no interpolation
+  // on w would be needed - this may be what's required but seems possible it might not always be
+  for (auto w : wValues) {
+    const double finalE = PhysicalConstants::E_mev_toNeutronWavenumberSq * kinc * kinc + w;
+    if (finalE > 0) {
+      const double kout = toWaveVector(finalE);
+      const auto qVector = directionToDetector * kout - prevDirection * k;
+      const double q = qVector.norm();
+      const double finalW = finalE - PhysicalConstants::E_mev_toNeutronWavenumberSq * k * k;
+      double SQ = Interpolate2D(m_SQWS, finalW, q);
+      weights.emplace_back(weight * AT2 * SQ * scatteringXSectionFull / (4 * M_PI));
     } else {
-      auto iter = std::upper_bound(wValues.cbegin(), wValues.cend(), w);
-      iW = static_cast<size_t>(std::distance(wValues.cbegin(), iter) - 1);
+      weights.emplace_back(0.);
     }
-    const auto SQ = interpolateFlat(m_SQWS->histogram(iW), q.norm());
-    if (specialSingleScatterCalc)
-      vmu = 0;
-    const auto AT2 = exp(-dl * vmu);
-    auto scatteringXSectionFull = m_sampleShape->material().totalScatterXSection();
-    weights.emplace_back(weight * AT2 * SQ * scatteringXSectionFull / (4 * M_PI));
   }
   return {true, weights, QSS};
 }
@@ -989,7 +1093,7 @@ void DiscusMultipleScatteringCorrection::q_dir(Geometry::Track &track, MatrixWor
     std::tie(k, iW) = sampleKW(m_SQWS, rng, kinc);
     auto [qmin, qrange] = getKinematicRange(k, kinc);
     QQ = qmin + qrange * rng.nextValue();
-    SQ = interpolateFlat(m_SQWS->histogram(iW), QQ);
+    SQ = interpolateGaussian(m_logSQ->histogram(iW), QQ);
     weight = weight * scatteringXSection * SQ * QQ;
   }
   // T = 2theta
