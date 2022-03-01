@@ -6,6 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
+#include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidDataObjects/LeanElasticPeaksWorkspace.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
@@ -177,7 +178,7 @@ public:
     const auto &peaks = peaksWS->getPeaks();
     const Mantid::DataObjects::Peak &peak1 = peaks[0];
     const auto &detIDs1 = peak1.getContributingDetIDs();
-    TS_ASSERT_EQUALS(7, detIDs1.size());
+    TS_ASSERT_EQUALS(8, detIDs1.size());
 
     // const Mantid::DataObjects::Peak & peak2 = peaks[1];
     // const auto & detIDs2 = peak2.getContributingDetIDs();
@@ -262,7 +263,14 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.execute(););
     TS_ASSERT(alg.isExecuted());
 
-    // Retrieve the workspace from data service.
+    // Sort because the order of the peaks found is depends on the way the boxes were sorted
+    auto sortPeaksAlg = AlgorithmManager::Instance().createUnmanaged("SortPeaksWorkspace");
+    sortPeaksAlg->initialize();
+    sortPeaksAlg->setProperty("InputWorkspace", outWSName);
+    sortPeaksAlg->setProperty("OutputWorkspace", outWSName);
+    sortPeaksAlg->setProperty("ColumnNameToSortBy", "DSpacing");
+    sortPeaksAlg->execute();
+
     LeanElasticPeaksWorkspace_sptr ws;
     TS_ASSERT_THROWS_NOTHING(ws = AnalysisDataService::Instance().retrieveWS<LeanElasticPeaksWorkspace>(outWSName));
     TS_ASSERT(ws);
@@ -272,25 +280,25 @@ public:
     // Should find all 3 peaks.
     TS_ASSERT_EQUALS(ws->getNumberPeaks(), 3);
 
-    TS_ASSERT_DELTA(ws->getPeak(0).getQSampleFrame()[0], -5.0, 0.11);
-    TS_ASSERT_DELTA(ws->getPeak(0).getQSampleFrame()[1], -5.0, 0.11);
-    TS_ASSERT_DELTA(ws->getPeak(0).getQSampleFrame()[2], 5.0, 0.11);
+    TS_ASSERT_DELTA(ws->getPeak(0).getQSampleFrame()[0], 4.0, 0.11);
+    TS_ASSERT_DELTA(ws->getPeak(0).getQSampleFrame()[1], 5.0, 0.11);
+    TS_ASSERT_DELTA(ws->getPeak(0).getQSampleFrame()[2], 6.0, 0.11);
+
+    TS_ASSERT_DELTA(ws->getPeak(1).getQSampleFrame()[0], -5.0, 0.11);
+    TS_ASSERT_DELTA(ws->getPeak(1).getQSampleFrame()[1], -5.0, 0.11);
+    TS_ASSERT_DELTA(ws->getPeak(1).getQSampleFrame()[2], 5.0, 0.11);
     if (expInfo) {
-      TS_ASSERT_EQUALS(ws->getPeak(0).getRunNumber(), 12345);
+      TS_ASSERT_EQUALS(ws->getPeak(1).getRunNumber(), 12345);
     } else {
-      TS_ASSERT_EQUALS(ws->getPeak(0).getRunNumber(), -1);
+      TS_ASSERT_EQUALS(ws->getPeak(1).getRunNumber(), -1);
     }
     // Bin count = density of the box / 1e6
     double BinCount = ws->getPeak(0).getBinCount();
     if (histo) {
-      TS_ASSERT_DELTA(BinCount, 0.08375, 0.001);
+      TS_ASSERT_DELTA(BinCount, 0.05375, 0.001);
     } else {
       TS_ASSERT_DELTA(BinCount, 7., 001000.);
     }
-
-    TS_ASSERT_DELTA(ws->getPeak(1).getQSampleFrame()[0], 4.0, 0.11);
-    TS_ASSERT_DELTA(ws->getPeak(1).getQSampleFrame()[1], 5.0, 0.11);
-    TS_ASSERT_DELTA(ws->getPeak(1).getQSampleFrame()[2], 6.0, 0.11);
 
     TS_ASSERT_DELTA(ws->getPeak(2).getQSampleFrame()[0], 1.0, 0.11);
     TS_ASSERT_DELTA(ws->getPeak(2).getQSampleFrame()[1], 2.0, 0.11);

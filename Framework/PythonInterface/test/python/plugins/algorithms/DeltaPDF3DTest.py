@@ -60,9 +60,9 @@ class DeltaPDF3DTest(unittest.TestCase):
         DeltaPDF3D(InputWorkspace='DeltaPDF3DTest_MDH',OutputWorkspace='fft',
                    Method='None',CropSphere=False,Convolution=False,WindowFunction='None')
         fft=mtd['fft']
-        self.assertAlmostEqual(fft.signalAt(113490), 33958.0) # [0,0,0]
-        self.assertAlmostEqual(fft.signalAt(113496), 23671.27596343) # [1,0,0]
-        self.assertAlmostEqual(fft.signalAt(113862), 28947.50521336) # [1,1,0]
+        self.assertAlmostEqual(fft.signalAt(113490), 34209.0) # [0,0,0] 34209.0
+        self.assertAlmostEqual(fft.signalAt(113496), 23202.32114192) # [1,0,0]
+        self.assertAlmostEqual(fft.signalAt(113862), 29097.728403971) # [1,1,0]
         dimX=fft.getXDimension()
         self.assertAlmostEqual(dimX.getMinimum(), -4.9180326)
         self.assertAlmostEqual(dimX.getMaximum(), 4.9180326)
@@ -72,24 +72,24 @@ class DeltaPDF3DTest(unittest.TestCase):
                    Method='Punch and fill',Size=0.4,CropSphere=False,Convolution=False,WindowFunction='None')
         fft=mtd['fft']
         self.assertAlmostEqual(fft.signalAt(113490), 4320.0) # [0,0,0]
-        self.assertAlmostEqual(fft.signalAt(113496), -3899.411112565) # [1,0,0]
-        self.assertAlmostEqual(fft.signalAt(113862), 3994.2768284083) # [1,1,0]
+        self.assertAlmostEqual(fft.signalAt(113496), -4056.764921871) # [1,0,0]
+        self.assertAlmostEqual(fft.signalAt(113862), 3839.3468074482) # [1,1,0]
 
     def test_3D_CropSphere(self):
         DeltaPDF3D(InputWorkspace='DeltaPDF3DTest_MDH',OutputWorkspace='fft',IntermediateWorkspace='int',
                    Method='Punch and fill',Size=0.4,CropSphere=True,SphereMax=3,Convolution=False,WindowFunction='None')
         fft=mtd['fft']
-        self.assertAlmostEqual(fft.signalAt(113490), 2510.0) # [0,0,0]
-        self.assertAlmostEqual(fft.signalAt(113496), -2274.141590160) # [1,0,0]
-        self.assertAlmostEqual(fft.signalAt(113862), 2341.378453873) # [1,1,0]
+        self.assertAlmostEqual(fft.signalAt(113490), 2464.0) # [0,0,0]
+        self.assertAlmostEqual(fft.signalAt(113496), -2320.115474514) # [1,0,0]
+        self.assertAlmostEqual(fft.signalAt(113862), 2202.6748248247) # [1,1,0]
 
     def test_2D(self):
         DeltaPDF3D(InputWorkspace='DeltaPDF3DTest_MDH_2',OutputWorkspace='fft',
                    Method='None',CropSphere=False,Convolution=False,WindowFunction='None')
         fft=mtd['fft']
         self.assertAlmostEqual(fft.signalAt(1860), 5620.0) # [0,0,0]
-        self.assertAlmostEqual(fft.signalAt(1866), 4146.7654660) # [1,0,0]
-        self.assertAlmostEqual(fft.signalAt(2232), 5361.2265518) # [1,1,0]
+        self.assertAlmostEqual(fft.signalAt(1866), 4120.5398311) # [1,0,0]
+        self.assertAlmostEqual(fft.signalAt(2232), 5335.4048817) # [1,1,0]
         dimX=fft.getXDimension()
         self.assertAlmostEqual(dimX.getMinimum(), -4.9180326)
         self.assertAlmostEqual(dimX.getMaximum(), 4.9180326)
@@ -102,73 +102,73 @@ class DeltaPDF3DTest(unittest.TestCase):
                    Method='Punch and fill',Size=0.4,CropSphere=False,Convolution=False,WindowFunction='None')
         fft=mtd['fft']
         self.assertAlmostEqual(fft.signalAt(1860), 720.0) # [0,0,0]
-        self.assertAlmostEqual(fft.signalAt(1866), -649.90185209) # [1,0,0]
-        self.assertAlmostEqual(fft.signalAt(2232), 665.71280473) # [1,1,0]
+        self.assertAlmostEqual(fft.signalAt(1866), -676.12748697) # [1,0,0]
+        self.assertAlmostEqual(fft.signalAt(2232), 639.89113457) # [1,1,0]
 
     def test_2D_CropSphere(self):
         DeltaPDF3D(InputWorkspace='DeltaPDF3DTest_MDH_2',OutputWorkspace='fft',IntermediateWorkspace='int',
                    Method='Punch and fill',Size=0.4,CropSphere=True,SphereMax=3,Convolution=False,WindowFunction='None')
         fft=mtd['fft']
-        self.assertAlmostEqual(fft.signalAt(1860), 622.0) # [0,0,0]
-        self.assertAlmostEqual(fft.signalAt(1866), -562.30106845) # [1,0,0]
-        self.assertAlmostEqual(fft.signalAt(2232), 577.15758916) # [1,1,0]
+        self.assertAlmostEqual(fft.signalAt(1860), 620.0) # [0,0,0]
+        self.assertAlmostEqual(fft.signalAt(1866), -583.145906100) # [1,0,0]
+        self.assertAlmostEqual(fft.signalAt(2232), 552.675152713) # [1,1,0]
 
     def test_2D_RemoveReflections_sphere(self):
         DeltaPDF3D(InputWorkspace='DeltaPDF3DTest_MDH_2',OutputWorkspace='fft',IntermediateWorkspace='int',
                    Method='Punch and fill',Shape='sphere',Size=0.3,CropSphere=False,Convolution=False,WindowFunction='None')
         fft=mtd['fft']
         self.assertAlmostEqual(fft.signalAt(1860), 720.0) # [0,0,0]
-        self.assertAlmostEqual(fft.signalAt(1866), -649.90185209) # [1,0,0]
-        self.assertAlmostEqual(fft.signalAt(2232), 665.71280473) # [1,1,0]
+        self.assertAlmostEqual(fft.signalAt(1866), -676.12748697) # [1,0,0]
+        self.assertAlmostEqual(fft.signalAt(2232), 639.89113457) # [1,1,0]
 
     def test_2D_RemoveReflections_sphere_CropSphere(self):
         DeltaPDF3D(InputWorkspace='DeltaPDF3DTest_MDH_2',OutputWorkspace='fft',IntermediateWorkspace='int',
                    Method='Punch and fill',Shape='sphere',Size=0.3,CropSphere=True,SphereMax=3,Convolution=False,WindowFunction='None')
         fft=mtd['fft']
-        self.assertAlmostEqual(fft.signalAt(1860), 622.0) # [0,0,0]
-        self.assertAlmostEqual(fft.signalAt(1866), -562.30106845) # [1,0,0]
-        self.assertAlmostEqual(fft.signalAt(2232), 577.15758916) # [1,1,0]
+        self.assertAlmostEqual(fft.signalAt(1860), 620.0) # [0,0,0]
+        self.assertAlmostEqual(fft.signalAt(1866), -583.14590610) # [1,0,0]
+        self.assertAlmostEqual(fft.signalAt(2232), 552.67515271) # [1,1,0]
 
     def test_2D_KAREN(self):
         DeltaPDF3D(InputWorkspace='DeltaPDF3DTest_MDH_2',OutputWorkspace='fft',
                    Method='KAREN',WindowFunction='None',KARENWidth=3)
         fft=mtd['fft']
-        self.assertAlmostEqual(fft.signalAt(1860), 115.2) # [0,0,0]
-        self.assertAlmostEqual(fft.signalAt(1866), -113.42552489) # [1,0,0]
-        self.assertAlmostEqual(fft.signalAt(2232), 111.67838279) # [1,1,0]
+        self.assertAlmostEqual(fft.signalAt(1860), 187.2) # [0,0,0]
+        self.assertAlmostEqual(fft.signalAt(1866), -177.76006923) # [1,0,0]
+        self.assertAlmostEqual(fft.signalAt(2232), 168.56653695) # [1,1,0]
 
     def test_2D_KAREN_blackman(self):
         DeltaPDF3D(InputWorkspace='DeltaPDF3DTest_MDH_2',OutputWorkspace='fft',
                    Method='KAREN',KARENWidth=3)
         fft=mtd['fft']
-        self.assertAlmostEqual(fft.signalAt(1860), 18.4552085327) # [0,0,0]
-        self.assertAlmostEqual(fft.signalAt(1866), -18.3728358886) # [1,0,0]
-        self.assertAlmostEqual(fft.signalAt(2232), 18.2797248611) # [1,1,0]
+        self.assertAlmostEqual(fft.signalAt(1860), 32.7120784121) # [0,0,0]
+        self.assertAlmostEqual(fft.signalAt(1866), -31.3504178404) # [1,0,0]
+        self.assertAlmostEqual(fft.signalAt(2232), 30.0367428916) # [1,1,0]
 
     def test_2D_KAREN_gaussian(self):
         DeltaPDF3D(InputWorkspace='DeltaPDF3DTest_MDH_2',OutputWorkspace='fft',
                    Method='KAREN',WindowFunction='Gaussian',KARENWidth=3)
         fft=mtd['fft']
-        self.assertAlmostEqual(fft.signalAt(1860), 84.255827882) # [0,0,0]
-        self.assertAlmostEqual(fft.signalAt(1866), -83.109989976) # [1,0,0]
-        self.assertAlmostEqual(fft.signalAt(2232), 81.957445912) # [1,1,0]
+        self.assertAlmostEqual(fft.signalAt(1860), 138.93657974) # [0,0,0]
+        self.assertAlmostEqual(fft.signalAt(1866), -132.11218854) # [1,0,0]
+        self.assertAlmostEqual(fft.signalAt(2232), 125.51404909) # [1,1,0]
 
     @unittest.skipIf(not hasattr(signal,'tukey'), 'Window function not available with this version of scipy')
     def test_2D_KAREN_tukey(self):
         DeltaPDF3D(InputWorkspace='DeltaPDF3DTest_MDH_2',OutputWorkspace='fft',
                    Method='KAREN',WindowFunction='Tukey',KARENWidth=3)
         fft=mtd['fft']
-        self.assertAlmostEqual(fft.signalAt(1860), 60.8833379907) # [0,0,0]
-        self.assertAlmostEqual(fft.signalAt(1866), -60.3561604256) # [1,0,0]
-        self.assertAlmostEqual(fft.signalAt(2232), 59.7969775224) # [1,1,0]
+        self.assertAlmostEqual(fft.signalAt(1860), 104.338861695) # [0,0,0]
+        self.assertAlmostEqual(fft.signalAt(1866), -99.5461877381) # [1,0,0]
+        self.assertAlmostEqual(fft.signalAt(2232), 95.0065971292) # [1,1,0]
 
     def test_2D_KAREN_kaiser(self):
         DeltaPDF3D(InputWorkspace='DeltaPDF3DTest_MDH_2',OutputWorkspace='fft',
                    Method='KAREN',WindowFunction='Kaiser',WindowParameter=2,KARENWidth=3)
         fft=mtd['fft']
-        self.assertAlmostEqual(fft.signalAt(1860), 71.67514587555) # [0,0,0]
-        self.assertAlmostEqual(fft.signalAt(1866), -70.77683306878) # [1,0,0]
-        self.assertAlmostEqual(fft.signalAt(2232), 69.86001401877) # [1,1,0]
+        self.assertAlmostEqual(fft.signalAt(1860), 119.2556169174) # [0,0,0]
+        self.assertAlmostEqual(fft.signalAt(1866), -113.4886083267) # [1,0,0]
+        self.assertAlmostEqual(fft.signalAt(2232), 107.9361501707) # [1,1,0]
 
 
 if __name__ == '__main__':

@@ -312,14 +312,14 @@ public:
     // First, a check with no background
     doRun(1.0, 0.0, "IntegratePeaksMDTest_peaks", 0.0);
     // approx. + 500 + 333 counts due to 2 backgrounds
-    TS_ASSERT_DELTA(peakWS->getPeak(0).getIntensity(), 1000 + 500 + 333, 30.0);
+    TS_ASSERT_DELTA(peakWS->getPeak(0).getIntensity(), 1000 + 500 + 333, 100.0);
     TSM_ASSERT_DELTA("Simple sqrt() error", peakWS->getPeak(0).getSigmaIntensity(), sqrt(1833.0), 2);
 
     // Set background from 2.0 to 3.0.
     // So the 1/2 density background remains, we subtract the 1/3 density =
     // about 1500 counts
     doRun(1.0, 3.0, "IntegratePeaksMDTest_peaks", 2.0);
-    TS_ASSERT_DELTA(peakWS->getPeak(0).getIntensity(), 1000 + 500, 80.0);
+    TS_ASSERT_DELTA(peakWS->getPeak(0).getIntensity(), 1000 + 500, 100.0);
     // Error is larger, since it is error of peak + error of background
     TSM_ASSERT_DELTA("Error has increased", peakWS->getPeak(0).getSigmaIntensity(), sqrt(1830.0), 2);
 
