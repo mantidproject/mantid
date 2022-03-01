@@ -118,7 +118,7 @@ public:
     auto &frame = mdews->getDimension(0)->getMDFrame();
     TSM_ASSERT_EQUALS("Should be HKL", Mantid::Geometry::HKL::HKLName, frame.name());
     TS_ASSERT_EQUALS(mdews->getNPoints(), 3000);
-    TS_ASSERT_DELTA(mdews->getBox()->getSignal(), 3021.7071, 1e-2);
+    TS_ASSERT_DELTA(mdews->getBox()->getSignal(), 3000, 1); // randomised signal but approx nevents
 
     // Make a fake instrument - doesn't matter, we won't use it really
     Instrument_sptr inst = ComponentCreationHelper::createTestInstrumentRectangular(1, 100, 0.05);
@@ -136,10 +136,10 @@ public:
     // ------------- Integrating with cylinder ------------------------
     doRun("IntegratePeaksMDHKLTest_peaks");
 
-    TS_ASSERT_DELTA(peakWS0->getPeak(0).getIntensity(), 29.4284, 1e-2);
+    TS_ASSERT_DELTA(peakWS0->getPeak(0).getIntensity(), 8.7019, 1e-2);
 
     // Error is also calculated
-    TS_ASSERT_DELTA(peakWS0->getPeak(0).getSigmaIntensity(), 5.2813, 1e-2);
+    TS_ASSERT_DELTA(peakWS0->getPeak(0).getSigmaIntensity(), 3.2692, 1e-2);
   }
 
   //-------------------------------------------------------------------------------
@@ -177,8 +177,8 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("BackgroundInnerRadius", 0.16));
     TS_ASSERT_THROWS_NOTHING(alg.execute());
     TS_ASSERT(alg.isExecuted());
-    TS_ASSERT_DELTA(peakWS->getPeak(0).getIntensity(), 29.4275, 0.1);
+    TS_ASSERT_DELTA(peakWS->getPeak(0).getIntensity(), 8.7027, 0.1);
     // Error is larger, since it is error of peak + error of background
-    TSM_ASSERT_DELTA("Error has increased", peakWS->getPeak(0).getSigmaIntensity(), 5.2814, 0.1);
+    TSM_ASSERT_DELTA("Error has increased", peakWS->getPeak(0).getSigmaIntensity(), 3.2692, 0.1);
   }
 };
