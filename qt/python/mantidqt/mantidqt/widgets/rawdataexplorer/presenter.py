@@ -177,6 +177,8 @@ class RawDataExplorerPresenter(QObject):
         if not is_now_accumulating:
             self.view.fileTree.selectionModel().clearSelection()
 
+        self.set_selection_mode()
+
     def on_selection_changed(self):
         """
         Triggered when the selection changed in the file system widget.
@@ -200,7 +202,6 @@ class RawDataExplorerPresenter(QObject):
         """
         view = self.view.add_preview()
         PreviewPresenter(self.view, view, self.model, previewModel)
-        # self.view.fileTree.grabKeyboard()
 
     def is_accumulating(self):
         """
