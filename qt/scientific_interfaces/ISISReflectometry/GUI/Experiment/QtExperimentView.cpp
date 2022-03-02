@@ -81,12 +81,6 @@ void QtExperimentView::showAllLookupRowsAsValid() {
     showLookupRowAsValid(row);
 }
 
-void QtExperimentView::showLookupRowsNotUnique(double tolerance) {
-  QMessageBox::critical(this, "Invalid lookup criteria combination!",
-                        "Cannot have multiple defaults with theta values less than " + QString::number(tolerance) +
-                            " apart.");
-}
-
 void QtExperimentView::showStitchParametersValid() { showAsValid(stitchOptionsLineEdit()); }
 
 void QtExperimentView::showStitchParametersInvalid() { showAsInvalid(stitchOptionsLineEdit()); }

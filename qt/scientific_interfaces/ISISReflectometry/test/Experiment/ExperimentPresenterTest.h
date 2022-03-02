@@ -908,7 +908,10 @@ private:
   void runTestForNonUniqueAngles(OptionsTable const &optionsTable) {
     auto presenter = makePresenter();
     EXPECT_CALL(m_view, getLookupTable()).WillOnce(Return(optionsTable));
-    EXPECT_CALL(m_view, showLookupRowsNotUnique(m_thetaTolerance)).Times(1);
+    EXPECT_CALL(m_view, showLookupRowAsInvalid(0, 1)).Times(1);
+    EXPECT_CALL(m_view, showLookupRowAsInvalid(0, 0)).Times(1);
+    EXPECT_CALL(m_view, showLookupRowAsInvalid(1, 1)).Times(1);
+    EXPECT_CALL(m_view, showLookupRowAsInvalid(1, 0)).Times(1);
     presenter.notifyLookupRowChanged(0, 0);
     verifyAndClear();
   }

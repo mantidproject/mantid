@@ -123,8 +123,6 @@ public:
   virtual void addLookupRow() = 0;
   virtual void removeLookupRow(int rowIndex) = 0;
 
-  virtual void showLookupRowsNotUnique(double tolerance) = 0;
-
   virtual ~IExperimentView() = default;
 };
 } // namespace ISISReflectometry

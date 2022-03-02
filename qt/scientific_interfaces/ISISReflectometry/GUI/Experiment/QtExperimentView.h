@@ -54,7 +54,6 @@ public:
   void setLookupTable(std::vector<LookupRow::ValueArray> rows) override;
   void showLookupRowAsInvalid(int row, int column) override;
   void showLookupRowAsValid(int row) override;
-  void showLookupRowsNotUnique(double thetaTolerance) override;
   void showStitchParametersValid() override;
   void showStitchParametersInvalid() override;
 
