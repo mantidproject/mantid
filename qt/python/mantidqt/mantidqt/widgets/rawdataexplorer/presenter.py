@@ -63,14 +63,17 @@ class PreviewPresenter:
         self._model.sig_workspace_changed.connect(self.on_workspace_changed)
         self._model.sig_request_close.connect(lambda: self._view.sig_request_close.emit())
 
-    def close_preview(self):
+    def close_preview(self, requested_by_user=True):
         """
         Slot triggered when the view is closed.
         """
         self._main_view.del_preview(self._view)
         self._main_model.del_preview(self._model)
 
-        self._main_view.clear_selection()
+        if requested_by_user:
+            self._main_view.clear_selection()
+        else:
+            self._main_view.select_last_clicked()
 
     def on_workspace_changed(self):
         """

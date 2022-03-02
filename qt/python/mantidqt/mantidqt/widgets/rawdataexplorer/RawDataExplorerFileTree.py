@@ -35,9 +35,9 @@ class RawDataExplorerFileTree(QTreeView):
     def __init__(self, parent=None):
         super(RawDataExplorerFileTree, self).__init__(parent)
 
-        self.is_ctrl_being_pressed = False
-        self._ignore_next_focus_out = False
-        self._clearing_selection = False
+        self.is_ctrl_being_pressed = False  # indicates if the control key is being held
+        self._ignore_next_focus_out = False  # used for focus management when opening a preview
+        self._clearing_selection = False  # used when the selection is being cleared, to ignore changes
 
         file_model = QFileSystemModel()
         file_model.setNameFilters(self._FILE_SYSTEM_FILTERS)
@@ -45,11 +45,13 @@ class RawDataExplorerFileTree(QTreeView):
         file_model.setRootPath("/")
         self.setModel(file_model)
         self.header().hideSection(2)
-        self.setSelectionMode(QAbstractItemView.SingleSelection)
         self.header().setSectionResizeMode(0, QHeaderView.Stretch)
         self.header().setSectionResizeMode(1, QHeaderView.ResizeToContents)
         self.header().setSectionResizeMode(3, QHeaderView.ResizeToContents)
         self.header().setStretchLastSection(False)
+
+        self.setSelectionMode(QAbstractItemView.SingleSelection)
+        self.setSelectionBehavior(QAbstractItemView.SelectRows)
 
     def currentChanged(self, current_index, previous_index):
         if current_index.column() != self._FILES_COLUMN:
@@ -78,10 +80,15 @@ class RawDataExplorerFileTree(QTreeView):
 
             # but it is not allowed for the user to deselect a line, so we select it back
             for index in deselected.indexes():
-                self.selectionModel().select(index, QItemSelectionModel.Select | QItemSelectionModel.Rows)
+                self.selectionModel().select(index, QItemSelectionModel.Select)
 
     def clear_selection(self):
+        """
+        Clear all selected indices and reset the index
+        """
+        # set this flag so selectionChanged ignores the changes
         self._clearing_selection = True
+
         selection_model = self.selectionModel()
         selection_model.clearSelection()
         selection_model.clearCurrentIndex()

@@ -46,6 +46,7 @@ class InstrumentViewPresenter(ObservingPresenter):
         else:
             self.ads_observer = WorkspaceDisplayADSObserver(self, observe_replace=False)
 
+        # TODO FIXME - this may not be a good design.  It violates the OO principles
         # Update the instrument view manager
         InstrumentViewManager.register(self, self.ws_name)
 

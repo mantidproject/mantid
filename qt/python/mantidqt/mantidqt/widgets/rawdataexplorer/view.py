@@ -107,21 +107,28 @@ class PreviewView(QObject):
             self._widget.show_view()
             self._widget.container.closing.connect(self.on_close)
             self.sig_request_close.connect(self._widget.container.emit_close)
+            self.sig_request_close.connect(lambda: self.on_close(None, False))
+
         if self._type == self.SVIEW:
             self._widget.view.show()
             self._widget.view.close_signal.connect(self.on_close)
             self.sig_request_close.connect(self._widget.view.emit_close)
+            self.sig_request_close.connect(lambda: self.on_close(None, False))
+
         if self._type == self.PLOT2D:
             self._widget.canvas.mpl_connect("close_event", self.on_close)
             self.sig_request_close.connect(lambda: plt.close(self._widget))
+            self.sig_request_close.connect(lambda: self.on_close(None, False))
 
         if self._type == self.PLOT1D:
             self._widget.canvas.mpl_connect("close_event", self.on_close)
             self.sig_request_close.connect(lambda: plt.close(self._widget))
+            self.sig_request_close.connect(lambda: self.on_close(None, False))
 
         if self._type == self.PLOTSPECTRUM:
             self._widget.canvas.mpl_connect("close_event", self.on_close)
             self.sig_request_close.connect(lambda: plt.close(self._widget))
+            self.sig_request_close.connect(lambda: self.on_close(None, False))
 
         self._presenter.get_main_view().fileTree.set_ignore_next_focus_out(True)
 
@@ -162,11 +169,11 @@ class PreviewView(QObject):
             plotSpectrum(workspace_name, 0, error_bars=True, window=self._widget, clearWindow=True)
             self._presenter.get_main_view().fileTree.set_ignore_next_focus_out(True)
 
-    def on_close(self, name=None):
+    def on_close(self, name=None, requested_by_user=True):
         """
         Triggered when the widget is closed.
         """
-        self._presenter.close_preview()
+        self._presenter.close_preview(requested_by_user)
 
 
 class RawDataExplorerView(QWidget):
@@ -205,7 +212,7 @@ class RawDataExplorerView(QWidget):
         self.setAttribute(Qt.WA_DeleteOnClose, True)
         self.setup_connections()
 
-        self._last_clicked = None  # full path of the last model item clicked. It can be a directory or a file.
+        self._last_clicked_index = None  # full path of the last model item clicked. It can be a directory or a file.
 
     def closeEvent(self, event):
         self.deleteLater()
@@ -239,13 +246,22 @@ class RawDataExplorerView(QWidget):
         self._current_selection = set()
         self.fileTree.clear_selection()
 
+    def select_last_clicked(self):
+        """
+        Select only the last clicked valid item
+        """
+        self.fileTree.clear_selection()
+        self.fileTree.selectionModel().setCurrentIndex(self._last_clicked_index,
+                                                       QItemSelectionModel.Select | QItemSelectionModel.Rows)
+        self._current_selection = set(self.get_path(self._last_clicked_index))
+
     def get_last_clicked(self):
         """
         Get last file clicked
 
         @return the full path to the last file clicked by the user
         """
-        return self._last_clicked
+        return self.get_path(self._last_clicked_index)
 
     def get_selection(self):
         """
@@ -269,18 +285,26 @@ class RawDataExplorerView(QWidget):
 
         for index in selected_indexes:
 
-            file_path = file_model.filePath(index)
+            file_path = self.get_path(index)
             if file_model.isDir(index):
                 # we don't select directories
-                selection_model.select(index, QItemSelectionModel.Deselect | QItemSelectionModel.Rows)
+                selection_model.select(index, QItemSelectionModel.Deselect)
 
-            if index == last_selected_index:
-                self._last_clicked = file_model.filePath(last_selected_index)
             selection.add(file_path)
+
+        self._last_clicked_index = last_selected_index
 
         if selection != self._current_selection:
             self._current_selection = selection
             self._presenter.on_selection_changed()
+
+    def get_path(self, index):
+        """
+        Get the path of the file at a given index
+        @param index: the desired index
+        @return the full path to the file
+        """
+        return self.fileTree.model().filePath(index)
 
     def setup_connections(self):
         """
