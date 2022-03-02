@@ -212,7 +212,7 @@ class RawDataExplorerView(QWidget):
         self.setAttribute(Qt.WA_DeleteOnClose, True)
         self.setup_connections()
 
-        self._last_clicked_index = None  # full path of the last model item clicked. It can be a directory or a file.
+        self._last_clicked_index = None  # index of the last item clicked
 
     def closeEvent(self, event):
         self.deleteLater()
@@ -280,10 +280,10 @@ class RawDataExplorerView(QWidget):
         selection_model = self.fileTree.selectionModel()
         file_model = self.fileTree.model()
 
-        selected_indexes = selection_model.selectedRows()
+        selected_indices = selection_model.selectedRows()
         selection = set()
 
-        for index in selected_indexes:
+        for index in selected_indices:
 
             file_path = self.get_path(index)
             if file_model.isDir(index):

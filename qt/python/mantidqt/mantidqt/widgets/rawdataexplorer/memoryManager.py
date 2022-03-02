@@ -18,7 +18,8 @@ from ..memorywidget.memoryinfo import get_memory_info
 class MemoryManager(QObject):
     """
     Gets system memory usage information and manages the caching of the workspaces loaded by the raw data explorer.
-    It keeps track of the loaded workspaces and delete the oldest ones if the memory goes above MEMORY_THRESHOLD percent
+    It keeps track of the loaded workspaces and deletes the oldest ones if the memory goes above MEMORY_WORRY_THRESHOLD.
+    If this is not enough and the memory rises above MEMORY_PANIC_THRESHOLD, it deletes them faster.
     Update is made every TIME_INTERVAL_MEMORY_USAGE_UPDATE (s) using threading.Timer;
     """
 
