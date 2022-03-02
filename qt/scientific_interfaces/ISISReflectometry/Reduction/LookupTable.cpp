@@ -7,6 +7,7 @@
 
 #include "LookupTable.h"
 #include "IGroup.h"
+#include "MantidKernel/Logger.h"
 #include "Row.h"
 #include <boost/optional.hpp>
 #include <boost/regex.hpp>
@@ -19,6 +20,8 @@ constexpr double EPSILON = std::numeric_limits<double>::epsilon();
 bool equalWithinTolerance(double val1, double val2, double tolerance) {
   return std::abs(val1 - val2) <= (tolerance + EPSILON);
 }
+
+Mantid::Kernel::Logger g_log("Reflectometry Lookup Table");
 } // namespace
 
 namespace MantidQt::CustomInterfaces::ISISReflectometry {
@@ -44,7 +47,19 @@ boost::optional<LookupRow> LookupTable::findLookupRow(Row const &row, double tol
   }
   // If we didn't find a lookup row where theta matches, then we allow the user to specify a "wildcard" row
   // which will be used for everything where a specific match is not found
-  return findWildcardLookupRow();
+  auto result = findWildcardLookupRow();
+  if (result) {
+    g_log.warning(
+        "No matching experiment settings found for " + boost::algorithm::join(row.runNumbers(), ", ") +
+        ". Using wildcard row settings instead. You may wish to check that all lookup criteria on the Experiment "
+        "Settings table are correct.");
+    return result;
+  }
+  g_log.warning(
+      "No matching experiment settings found for " + boost::algorithm::join(row.runNumbers(), ", ") +
+      ". Using algorithm default settings instead. You may wish to check that all lookup criteria on the Experiment "
+      "Settings table are correct.");
+  return result;
 }
 
 boost::optional<LookupRow> LookupTable::searchByTheta(std::vector<LookupRow> lookupRows,
