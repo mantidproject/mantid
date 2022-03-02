@@ -49,6 +49,8 @@ class Abins2D(AbinsAlgorithm, PythonAlgorithm):
         """
         Performs input validation. Use to ensure the user has defined a consistent set of parameters.
         """
+        from abins.constants import MILLI_EV_TO_WAVENUMBER
+
         issues = dict()
         issues = self.validate_common_inputs(issues)
         issues.update(self._validate_instrument_settings(name='Chopper', parameter='settings'))
@@ -73,8 +75,16 @@ class Abins2D(AbinsAlgorithm, PythonAlgorithm):
             max_energy = abins.parameters.instruments[instrument_name]['max_wavenumber']
         else:
             max_energy = abins.parameters.sampling['max_wavenumber']
+
+        energy_units = self.getProperty("EnergyUnits").value
+
+        if energy_units == 'meV':
+            max_energy = max_energy / MILLI_EV_TO_WAVENUMBER
+        else:
+            max_energy = max_energy
+
         if float(self.getProperty("IncidentEnergy").value) > max_energy:
-            issues["IncidentEnergy"] = f"Incident energy cannot be greater than {max_energy} for this instrument."
+            issues["IncidentEnergy"] = f"Incident energy cannot be greater than {max_energy:.3f} {energy_units} for this instrument."
 
         return issues
 
