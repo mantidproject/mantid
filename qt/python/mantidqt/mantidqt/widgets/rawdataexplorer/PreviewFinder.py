@@ -9,6 +9,7 @@
 from enum import Enum
 
 from mantid.api import PreviewType
+from mantid.kernel import logger
 
 
 class AcquisitionType(Enum):
@@ -72,23 +73,20 @@ class PreviewFinder:
         Get the preview associated with an instrument with a given acquisition mode.
         @param instrument_name: the name of instrument to look for
         @param acquisition_mode: the acquisition mode used
+        @param is_group: whether the data comes from a group. Used for determining default.
         @return the preview to use
         """
-        if instrument_name in self.prev.keys():
-            if acquisition_mode in self.prev[instrument_name].keys():
+        if instrument_name in self.prev:
+            if acquisition_mode in self.prev[instrument_name]:
                 return self.prev[instrument_name][acquisition_mode]
-            else:
-                # the acquisition type is currently not supported
-                # TODO some kind of default ?
-                return None
+
+        logger.warning("Could not find appropriate preview for data. Resorting to default.")
+        if is_group:
+            # default to 1D plot
+            return PreviewType.PLOT1D
         else:
-            # the instrument is currently not supported
-            if is_group:
-                # default to 1D tiled plot
-                return PreviewType.PLOT1D
-            else:
-                # default to instrument view and hope for the best
-                return PreviewType.IVIEW
+            # default to instrument view and hope for the best
+            return PreviewType.IVIEW
 
     def need_acquisition_mode(self, instrument_name):
         """
