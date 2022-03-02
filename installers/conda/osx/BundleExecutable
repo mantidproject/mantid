@@ -10,7 +10,9 @@
 # DMG bundle application launcher. Just redirects to the Conda-executable
 CONTENTS=$(dirname "$(dirname "$0")")
 PREFIX="$CONTENTS"/Resources
-export PATH="$PREFIX"/bin:${PATH}
+QTWEBENGINE_CHROMIUM_FLAGS="--disable-gpu"
+PATH="$PREFIX"/bin:${PATH}
+export PATH QTWEBENGINE_CHROMIUM_FLAGS
 
 # Debugging
 # Run on command-line using 'open --stdout=workbench_bundle.log --stderr=workbench_bundle.log MantidWorkbench.app'
