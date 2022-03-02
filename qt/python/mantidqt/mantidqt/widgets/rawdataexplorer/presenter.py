@@ -12,6 +12,7 @@ from qtpy.QtGui import QGuiApplication
 
 from mantid.simpleapi import config
 from mantid.api import PreviewType
+from mantid.kernel import logger
 
 from .model import RawDataExplorerModel
 from .view import RawDataExplorerView, PreviewView
@@ -169,6 +170,8 @@ class RawDataExplorerPresenter(QObject):
         new_dir = self.view.repositoryPath.text()
         if os.path.isdir(new_dir):
             self.set_working_directory(self.view.repositoryPath.text())
+        else:
+            logger.warning("Not a valid path for a directory to set as root for the explorer.")
 
     def on_accumulate_changed(self, is_now_accumulating):
         """
