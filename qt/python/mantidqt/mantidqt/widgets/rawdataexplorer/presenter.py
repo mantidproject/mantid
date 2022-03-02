@@ -40,6 +40,15 @@ class PreviewPresenter:
     """
     _model = None
 
+    """
+    Conversion dictionary between PreviewType and PreviewView
+    """
+    _conversion_dict = {PreviewType.IVIEW: PreviewView.IVIEW,
+                        PreviewType.SVIEW: PreviewView.SVIEW,
+                        PreviewType.PLOT1D: PreviewView.PLOT1D,
+                        PreviewType.PLOT2D: PreviewView.PLOT2D,
+                        PreviewType.PLOTSPECTRUM: PreviewView.PLOTSPECTRUM}
+
     def __init__(self, main_view, view, main_model, model):
         self._main_view = main_view
         self._view = view
@@ -48,16 +57,8 @@ class PreviewPresenter:
         self._model = model
 
         preview_type = self._model.get_preview_type()
-        if preview_type == PreviewType.IVIEW:
-            self._view.set_type(PreviewView.IVIEW)
-        if preview_type == PreviewType.SVIEW:
-            self._view.set_type(PreviewView.SVIEW)
-        if preview_type == PreviewType.PLOT2D:
-            self._view.set_type(PreviewView.PLOT2D)
-        if preview_type == PreviewType.PLOT1D:
-            self._view.set_type(PreviewView.PLOT1D)
-        if preview_type == PreviewType.PLOTSPECTRUM:
-            self._view.set_type(PreviewView.PLOTSPECTRUM)
+        if preview_type in self._conversion_dict:
+            self._view.set_type(self._conversion_dict[preview_type])
 
         workspace_name = self._model.get_workspace_name()
         self._view.show_workspace(workspace_name)
