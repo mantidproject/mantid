@@ -8,6 +8,7 @@
 from qtpy.QtCore import *
 
 from mantid.simpleapi import mtd, DeleteWorkspace
+from mantid.api import AnalysisDataServiceObserver
 from mantid.kernel import logger
 
 from ...utils.asynchronous import set_interval
@@ -29,7 +30,12 @@ class MemoryManager(QObject):
     """
     Limit at which the memory manager starts to free memory.
     """
-    MEMORY_THRESHOLD = 80  # in percentage of the total
+    MEMORY_WORRY_THRESHOLD = 80  # in percentage of the total
+
+    """
+    Limit at which the memory manager tries to free memory as fast as possible
+    """
+    MEMORY_PANIC_THRESHOLD = 90  # in percentage of total
 
     """
     Signal sent when freeing memory is needed.
@@ -46,6 +52,10 @@ class MemoryManager(QObject):
 
         self.rdexp_model = rdexp_model
         self._current_workspaces = []
+
+        self.observer = RDExpADSObserver()
+        self.observer.signals.sig_ws_deleted.connect(self.on_ws_update)
+        self.observer.signals.sig_ws_added.connect(self.on_ws_update)
 
         self.update_allowed = True
         self.update_memory_usage()
@@ -65,7 +75,7 @@ class MemoryManager(QObject):
         if mem_used_percent is None:
             return
 
-        if mem_used_percent > self.MEMORY_THRESHOLD:
+        if mem_used_percent > self.MEMORY_WORRY_THRESHOLD:
             self.sig_free_memory.emit()
 
     def update_memory_usage(self):
@@ -111,3 +121,58 @@ class MemoryManager(QObject):
                     DeleteWorkspace(Workspace=ws_name)
                     break
             index += 1
+
+    def on_ws_update(self):
+        """
+        Slot called whenever a workspace is deleted or added. If the memory is above the panic threshold,
+        it will be calling itself in a loop as it calls for deleting workspaces and is in turn trigger by the deletion,
+        until the memory is back under control
+        """
+        mem_used_percent = self.update_memory_usage()
+        if mem_used_percent and mem_used_percent > self.MEMORY_PANIC_THRESHOLD:
+            self.sig_free_memory.emit()
+
+
+class RDExpADSObserverSignals(QObject):
+    """
+    Utility class to store the signals for the observer.
+    """
+
+    """
+    Signal triggered when a workspace is deleted.
+    """
+    sig_ws_deleted = Signal()
+
+    """
+    Signal triggered when a workspace is added
+    """
+    sig_ws_added = Signal()
+
+    def __init__(self):
+        super().__init__()
+
+
+class RDExpADSObserver(AnalysisDataServiceObserver):
+    """
+    ADS observer for the memory manager of the raw data explorer, that monitors workspace creation and deletion.
+    """
+    def __init__(self):
+        super().__init__()
+        self.observeDelete(True)
+        self.observeAdd(True)
+        self.signals = RDExpADSObserverSignals()
+
+    def __del__(self):
+        self.observeAll(False)
+
+    def deleteHandle(self, _, __):
+        """
+        Triggered when a workspace is deleted.
+        """
+        self.signals.sig_ws_deleted.emit()
+
+    def addHandle(self, _, __):
+        """
+        Triggered when a workspace is added.
+        """
+        self.signals.sig_ws_added.emit()
