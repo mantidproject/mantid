@@ -49,12 +49,16 @@ boost::optional<LookupRow> LookupTable::findLookupRow(Row const &row, double tol
   // which will be used for everything where a specific match is not found
   auto result = findWildcardLookupRow();
   if (result) {
-    g_log.warning("Used wildcard row for " + boost::algorithm::join(row.runNumbers(), ", ") +
-                  ". You may wish to check that all lookup criteria are correct.");
+    g_log.warning(
+        "No matching experiment settings found for " + boost::algorithm::join(row.runNumbers(), ", ") +
+        ". Using wildcard row settings instead. You may wish to check that all lookup criteria on the Experiment "
+        "Settings table are correct.");
     return result;
   }
-  g_log.warning("Used algorithm defaults for " + boost::algorithm::join(row.runNumbers(), ", ") +
-                ". You may wish to check that all lookup criteria are correct.");
+  g_log.warning(
+      "No matching experiment settings found for " + boost::algorithm::join(row.runNumbers(), ", ") +
+      ". Using algorithm default settings instead. You may wish to check that all lookup criteria on the Experiment "
+      "Settings table are correct.");
   return result;
 }
 
