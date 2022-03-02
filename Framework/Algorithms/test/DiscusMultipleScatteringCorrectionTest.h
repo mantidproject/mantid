@@ -357,15 +357,27 @@ public:
     std::vector<double> testResultX, testResultY;
     alg.integrateCumulative(test, 0., 2.2, testResultX, testResultY);
     TS_ASSERT_EQUALS(testResultY[3], 2.2);
+    testResultX.clear();
+    testResultY.clear();
     TS_ASSERT_THROWS(alg.integrateCumulative(test, 0., 3.2, testResultX, testResultY), std::runtime_error &);
+    testResultX.clear();
+    testResultY.clear();
     alg.integrateCumulative(test, 0., 2.0, testResultX, testResultY);
     TS_ASSERT_EQUALS(testResultY[2], 2.0);
+    testResultX.clear();
+    testResultY.clear();
     alg.integrateCumulative(test, 0., 0., testResultX, testResultY);
     TS_ASSERT_EQUALS(testResultY[0], 0.);
+    testResultX.clear();
+    testResultY.clear();
     alg.integrateCumulative(test, 1., 0., testResultX, testResultY);
     TS_ASSERT_EQUALS(testResultY[0], 0.);
+    testResultX.clear();
+    testResultY.clear();
     alg.integrateCumulative(test, 0.5, 1.5, testResultX, testResultY);
     TS_ASSERT_EQUALS(testResultY[2], 1.0);
+    testResultX.clear();
+    testResultY.clear();
     alg.integrateCumulative(test, 0.5, 0.9, testResultX, testResultY);
     TS_ASSERT_EQUALS(testResultY[1], 0.4);
   }

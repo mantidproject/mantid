@@ -296,7 +296,7 @@ void DiscusMultipleScatteringCorrection::exec() {
                              "AlwaysStoreInADS set to true");
   const MatrixWorkspace_sptr inputWS = getProperty("InputWorkspace");
 
-  MatrixWorkspace_sptr m_SQWS = getProperty("StructureFactorWorkspace");
+  m_SQWS = getProperty("StructureFactorWorkspace");
   // avoid repeated conversion of bin edges to points inside loop by converting to point data
   convertWsToPoints(m_SQWS);
   // if S(Q,w) has been supplied ensure Q is along the x axis of each spectrum (so same as S(Q))
@@ -618,8 +618,10 @@ MatrixWorkspace_uptr DiscusMultipleScatteringCorrection::prepareQSQ(double qmax)
     std::transform(SQValues.begin(), SQValues.end(), qValues.begin(), std::back_inserter(QSQValues),
                    std::multiplies<double>());
 
-    outputWS->mutableX(iW).assign(qValues.cbegin(), qValues.cend());
-    outputWS->mutableY(iW).assign(QSQValues.cbegin(), QSQValues.cend());
+    outputWS->dataX(iW).resize(qValues.size());
+    outputWS->dataX(iW) = qValues;
+    outputWS->dataY(iW).resize(QSQValues.size());
+    outputWS->dataY(iW) = QSQValues;
   }
 
   return outputWS;
@@ -656,9 +658,12 @@ void DiscusMultipleScatteringCorrection::prepareCumulativeProbForQ(double kinc, 
                  [IOfQYAt2K](double d) -> double { return d / IOfQYAt2K; });
   // Store the normalized integral (= cumulative probability) on the x axis
   // The y values in the two spectra store Q, w (or w index to be precise)
-  PInvOfQ->mutableX(0).assign(IOfQYFull.cbegin(), IOfQYFull.cend());
-  PInvOfQ->mutableY(0).assign(qValuesFull.cbegin(), qValuesFull.cend());
-  PInvOfQ->mutableY(1).assign(wIndices.cbegin(), wIndices.cend());
+  PInvOfQ->dataX(0).resize(IOfQYFull.size());
+  PInvOfQ->dataX(0) = IOfQYFull;
+  PInvOfQ->dataY(0).resize(qValuesFull.size());
+  PInvOfQ->dataY(0) = qValuesFull;
+  PInvOfQ->dataY(1).resize(wIndices.size());
+  PInvOfQ->dataY(1) = wIndices;
 }
 
 /**
@@ -717,7 +722,7 @@ void DiscusMultipleScatteringCorrection::integrateCumulative(const Mantid::Histo
   }
 
   // integrate the intervals between each pair of points. Do this until right point is at end of vector or > xmax
-  for (iRight = 1; iRight < xValues.size() && xValues[iRight] <= xmax; iRight++) {
+  for (; iRight < xValues.size() && xValues[iRight] <= xmax; iRight++) {
     sum += 0.5 * (yValues[iRight] + yValues[iRight - 1]) * (xValues[iRight] - xValues[iRight - 1]);
     resultX.emplace_back(xValues[iRight]);
     resultY.emplace_back(sum);
@@ -1263,13 +1268,10 @@ std::shared_ptr<SparseWorkspace> DiscusMultipleScatteringCorrection::createSpars
 }
 
 MatrixWorkspace_sptr DiscusMultipleScatteringCorrection::createInvPOfQ(size_t expectedMaxSize) {
-  // use this constructor so e vector not created - faster
-  auto invPOfQHist = std::make_unique<Mantid::HistogramData::Histogram>(HistogramData::Histogram::XMode::Points,
-                                                                        HistogramData::Histogram::YMode::Counts);
-  invPOfQHist->setY(Mantid::Kernel::make_cow<HistogramData::HistogramY>(0));
-  invPOfQHist->dataX().reserve(expectedMaxSize);
-  invPOfQHist->dataY().reserve(expectedMaxSize);
-  auto retVal = DataObjects::create<Workspace2D>(2, *invPOfQHist);
+  auto retVal = DataObjects::create<Workspace2D>(2, HistogramData::Points{0.});
+  retVal->dataX(0).reserve(expectedMaxSize);
+  retVal->dataY(0).reserve(expectedMaxSize);
+  retVal->dataY(1).reserve(expectedMaxSize);
   return retVal;
 }
 
