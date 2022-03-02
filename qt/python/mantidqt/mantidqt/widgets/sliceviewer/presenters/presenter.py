@@ -541,7 +541,7 @@ class SliceViewerManager:
     @staticmethod
     def register(slice_viewer, ws_name):
         """
-        Register a slice viewer instance in the mamanger.
+        Register a slice viewer instance in the manager.
         :param slice_viewer: (SliceViewerDataView) the slice viewer instance
         :param ws_name: (str) name of the workspace
         """
