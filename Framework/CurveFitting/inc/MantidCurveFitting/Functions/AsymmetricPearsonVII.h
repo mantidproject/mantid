@@ -27,11 +27,10 @@ namespace Functions {
     PearsonVII(x, ph, pc, w, ml)*θ(pc-x) + PearsonVII(x, ph, pc, w, mr)*θ(x-pc),
 
   which is a superposition of left and right K-alpha peaks. θ denotes the Heavyside
-  step function. The AsymmetricPearsonVII profile function is often used for peaks
-  which are not strictly Gaussian or Lorentzian shaped. The parameters ml and mr
-  determine (for the left and right side of the function, respectively) whether
-  the function is more close to a Lorentzian or a Gaussian. When ml/mr=1 it's a
-  Lorentzian, whereas when ml/mr->infinity it's a Gaussian.
+  step function. The parameters ml and mr determine (for the left and right side of
+  the function, respectively) whether the function is more close to a Lorentzian or
+  a Gaussian. When ml/mr=1 it's a Lorentzian, whereas when ml/mr->infinity it's a
+  Gaussian.
 
   @author Oleksandr Koshchii, Forshungsztentrum Jülich at MLZ, Garching
   @date 18/02/2022
