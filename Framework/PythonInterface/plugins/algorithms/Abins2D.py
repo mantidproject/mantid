@@ -6,7 +6,6 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 
 import numbers
-import numpy as np
 from typing import Dict
 
 from mantid.api import AlgorithmFactory, PythonAlgorithm, Progress
@@ -101,12 +100,12 @@ class Abins2D(AbinsAlgorithm, PythonAlgorithm):
 
         s_calculator = abins.SCalculatorFactory.init(filename=self._vibrational_or_phonon_data_file,
                                                      temperature=self._temperature,
-                                                     sample_form=self._sample_form,
+                                                     sample_form="Powder",
                                                      abins_data=ab_initio_data,
                                                      autoconvolution=self._autoconvolution,
                                                      instrument=self._instrument,
                                                      quantum_order_num=self._num_quantum_order_events,
-                                                     bin_width=self._bin_width)
+                                                     bin_width=self._instrument.get_energy_bin_width())
         s_calculator.progress_reporter = prog_reporter
         s_data = s_calculator.get_formatted_data()
         self._q_bins = s_data.get_q_bins()
@@ -142,7 +141,8 @@ class Abins2D(AbinsAlgorithm, PythonAlgorithm):
 
         # 8) save workspaces to ascii_file
         if self._save_ascii:
-            self.write_workspaces_to_ascii(ws_name=self._out_ws_name, scale=(1.0 / self._bin_width))
+            self.write_workspaces_to_ascii(ws_name=self._out_ws_name,
+                                           scale=(1.0 / self._instrument.get_energy_bin_width()))
             prog_reporter.report("All workspaces have been saved to ASCII files.")
 
         # 9) set  OutputWorkspace
@@ -253,7 +253,7 @@ class Abins2D(AbinsAlgorithm, PythonAlgorithm):
         """
         Loads all properties to object's attributes.
         """
-        from abins.constants import TWO_DIMENSIONAL_CHOPPER_INSTRUMENTS, FLOAT_TYPE
+        from abins.constants import TWO_DIMENSIONAL_CHOPPER_INSTRUMENTS
         self.get_common_properties()
         self._autoconvolution = self.getProperty("Autoconvolution").value
 
@@ -275,11 +275,7 @@ class Abins2D(AbinsAlgorithm, PythonAlgorithm):
         self._instrument.set_incident_energy(float(self.getProperty("IncidentEnergy").value),
                                              units=self._energy_units)
 
-        # Establish energy sampling mesh
-        step = abins.parameters.sampling['bin_width'] = self._bin_width
-        start = self.get_instrument().get_min_wavenumber()
-        stop = self.get_instrument().get_max_wavenumber() + step
-        self._bins = np.arange(start=start, stop=stop, step=step, dtype=FLOAT_TYPE)
+        self._bins = self.get_instrument().get_energy_bins()
 
         # Increase max event order if using autoconvolution
         if self._autoconvolution:

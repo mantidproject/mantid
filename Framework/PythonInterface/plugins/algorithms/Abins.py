@@ -5,7 +5,6 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 
-import numpy as np
 from typing import Dict
 
 from mantid.api import AlgorithmFactory, FileAction, FileProperty, PythonAlgorithm, Progress
@@ -23,7 +22,6 @@ class Abins(AbinsAlgorithm, PythonAlgorithm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
-        self._bin_width = None
         self._sample_form = None
 
         self._experimental_file = None
@@ -285,8 +283,6 @@ class Abins(AbinsAlgorithm, PythonAlgorithm):
         """
         Loads all properties to object's attributes.
         """
-        from abins.constants import FLOAT_TYPE
-
         self.get_common_properties()
 
         self._bin_width = self.getProperty("BinWidthInWavenumber").value
@@ -299,11 +295,8 @@ class Abins(AbinsAlgorithm, PythonAlgorithm):
         self._experimental_file = self.getProperty("ExperimentalFile").value
         self._scale = self.getProperty("Scale").value
 
-        # Establish energy sampling mesh
-        step = abins.parameters.sampling['bin_width'] = self._bin_width
-        start = self.get_instrument().get_min_wavenumber()
-        stop = self.get_instrument().get_max_wavenumber() + step
-        self._bins = np.arange(start=start, stop=stop, step=step, dtype=FLOAT_TYPE)
+        abins.parameters.sampling['bin_width'] = self._bin_width
+        self._bins = self.get_instrument().get_energy_bins()
 
         # Increase max event order if using autoconvolution
         if self._autoconvolution:

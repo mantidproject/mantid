@@ -9,7 +9,9 @@ import logging
 from typing import Any, Dict, Union
 
 import mantid.kernel
+import numpy as np
 
+from abins.constants import FLOAT_TYPE
 import abins.parameters
 
 Logger = Union[logging.Logger, mantid.kernel.Logger]
@@ -76,6 +78,41 @@ class Instrument:
 
     def get_max_wavenumber(self):
         return self.get_parameter('max_wavenumber', default=abins.parameters.sampling['max_wavenumber'])
+
+    def get_energy_bin_width(self):
+        """Check abins.parameters and select appropriate energy bin in cm-1
+
+        (Decreasing) priority order is:
+
+        - abins.parameters.sampling['bin_width']: use this to override
+          instrument settings (e.g. for convergence test or rough-quality calculation)
+
+        - abins.parameters.instruments[INSTRUMENT]['bin_width']
+
+        - abins.parameters.instruments[INSTRUMENT]['n_energy_bins']
+
+        - abins.parameters.sampling['default_n_energy_bins']
+
+        If using an n_energy_bins value, this is used to subdivide from zero to
+        max_wavenumber.
+
+        """
+        bin_width = abins.parameters.sampling['bin_width']
+        if not bin_width:
+            bin_width = self.get_parameter('bin_width', default=None)
+        if not bin_width:
+            n_energy_bins = self.get_parameter(
+                'n_energy_bins',
+                default=abins.parameters.sampling['default_n_energy_bins'])
+            bin_width = self.get_max_wavenumber() / n_energy_bins
+        return bin_width
+
+    def get_energy_bins(self):
+        """Get appropriate energy bins for current instrument/settings"""
+        step = self.get_energy_bin_width()
+        start = self.get_min_wavenumber()
+        stop = self.get_max_wavenumber() + step
+        return np.arange(start=start, stop=stop, step=step, dtype=FLOAT_TYPE)
 
     def calculate_q_powder(self, *, input_data=None, angle=None):
         """

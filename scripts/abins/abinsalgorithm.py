@@ -44,6 +44,7 @@ class AbinsAlgorithm:
 
         # Interally-used private properties
         self._max_event_order = None
+        self._bin_width = None
 
     def get_common_properties(self) -> None:
         """From user input, set properties common to Abins 1D and 2D versions"""
