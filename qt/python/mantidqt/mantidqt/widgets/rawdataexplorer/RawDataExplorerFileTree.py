@@ -125,5 +125,6 @@ class RawDataExplorerFileTree(QTreeView):
     def set_ignore_next_focus_out(self, new_status):
         """
         Setter for the bool ignore_next_focus_out
+        @param new_status: a boolean, the new value of the flag
         """
         self._ignore_next_focus_out = new_status

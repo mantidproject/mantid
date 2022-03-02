@@ -13,6 +13,9 @@ from mantid.kernel import logger
 
 
 class AcquisitionType(Enum):
+    """
+    Different acquisition types that can be found.
+    """
     DEFAULT = 0
     MONO = 1
     TOF = 2
@@ -20,7 +23,13 @@ class AcquisitionType(Enum):
 
 
 class PreviewFinder:
+    """
+    Utility class to determine which preview should be used in which case.
+    """
 
+    """
+    Officially supported instruments
+    """
     D11 = "D11"
     D11lr = "D11lr"
     D11B = "D11B"
@@ -44,6 +53,9 @@ class PreviewFinder:
     D10 = "D10"
     D19 = "D19"
 
+    """
+    Dictionary linking each instrument to its preview(s), depending on the acquisition mode
+    """
     prev = {D11:     {AcquisitionType.DEFAULT: PreviewType.IVIEW},
             D11lr:   {AcquisitionType.DEFAULT: PreviewType.IVIEW},
             D11B:    {AcquisitionType.DEFAULT: PreviewType.IVIEW},
