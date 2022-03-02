@@ -45,7 +45,7 @@ BatchPresenter::BatchPresenter(IBatchView *view, std::unique_ptr<Batch> model, I
       m_eventPresenter(std::move(eventPresenter)), m_experimentPresenter(std::move(experimentPresenter)),
       m_instrumentPresenter(std::move(instrumentPresenter)), m_savePresenter(std::move(savePresenter)),
       m_previewPresenter(std::move(previewPresenter)), m_unsavedBatchFlag(false), m_jobRunner(jobRunner),
-      m_messageHandler(messageHandler), m_jobManager(new BatchJobManager(*m_model)) {
+      m_messageHandler(messageHandler), m_jobManager(std::make_unique<BatchJobManager>(*m_model)) {
 
   m_jobRunner->subscribe(this);
 
@@ -102,6 +102,7 @@ void BatchPresenter::notifyBatchComplete(bool error) {
   // Continue processing the next batch of algorithms, if there is more to do
   auto algorithms = m_jobManager->getAlgorithms();
   if (algorithms.size() > 0) {
+    notifyReductionResumed();
     startBatch(std::move(algorithms));
     return;
   }

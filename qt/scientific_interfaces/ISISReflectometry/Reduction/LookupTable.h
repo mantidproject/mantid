@@ -11,10 +11,16 @@
 #include "LookupRow.h"
 #include <boost/optional.hpp>
 #include <boost/regex.hpp>
+#include <exception>
 #include <vector>
 
 namespace MantidQt::CustomInterfaces::ISISReflectometry {
 class Row;
+
+struct MultipleRowsFoundException : public std::length_error {
+public:
+  MultipleRowsFoundException(std::string s) : std::length_error(std::move(s)){};
+};
 
 class MANTIDQT_ISISREFLECTOMETRY_DLL LookupTable {
 public:

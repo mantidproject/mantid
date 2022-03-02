@@ -6,15 +6,15 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "RowProcessingAlgorithm.h"
 #include "../../Reduction/Batch.h"
+#include "../../Reduction/IBatch.h"
 #include "../../Reduction/Row.h"
 #include "AlgorithmProperties.h"
 #include "BatchJobAlgorithm.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/IAlgorithm.h"
 #include "MantidQtWidgets/Common/AlgorithmRuntimeProps.h"
-#include "MantidQtWidgets/Common/BatchAlgorithmRunner.h"
 
-namespace MantidQt::CustomInterfaces::ISISReflectometry {
+namespace MantidQt::CustomInterfaces::ISISReflectometry::RowProcessing {
 
 using API::IConfiguredAlgorithm_sptr;
 using Mantid::API::IAlgorithm_sptr;
@@ -218,7 +218,7 @@ void updateRowFromOutputProperties(const IAlgorithm_sptr &algorithm, Item &item)
  * @param model : the reduction configuration model
  * @param row : the row from the runs table
  */
-IConfiguredAlgorithm_sptr createConfiguredAlgorithm(Batch const &model, Row &row) {
+IConfiguredAlgorithm_sptr createConfiguredAlgorithm(IBatch const &model, Row &row) {
   // Create the algorithm
   auto alg = Mantid::API::AlgorithmManager::Instance().create("ReflectometryISISLoadAndProcess");
   alg->setRethrows(true);
@@ -232,7 +232,8 @@ IConfiguredAlgorithm_sptr createConfiguredAlgorithm(Batch const &model, Row &row
   return jobAlgorithm;
 }
 
-std::unique_ptr<MantidQt::API::IAlgorithmRuntimeProps> createAlgorithmRuntimeProps(Batch const &model, Row const &row) {
+std::unique_ptr<MantidQt::API::IAlgorithmRuntimeProps> createAlgorithmRuntimeProps(IBatch const &model,
+                                                                                   Row const &row) {
   // Create properties for the model
   auto properties = createAlgorithmRuntimeProps(model);
   // Update properties specific to this row - the per-angle options based on
@@ -242,7 +243,7 @@ std::unique_ptr<MantidQt::API::IAlgorithmRuntimeProps> createAlgorithmRuntimePro
   return properties;
 }
 
-std::unique_ptr<MantidQt::API::IAlgorithmRuntimeProps> createAlgorithmRuntimeProps(Batch const &model) {
+std::unique_ptr<MantidQt::API::IAlgorithmRuntimeProps> createAlgorithmRuntimeProps(IBatch const &model) {
   auto properties = std::make_unique<MantidQt::API::AlgorithmRuntimeProps>();
   // Update properties from settings in the event, experiment and instrument
   // tabs
@@ -253,4 +254,4 @@ std::unique_ptr<MantidQt::API::IAlgorithmRuntimeProps> createAlgorithmRuntimePro
   updateLookupRowProperties(*properties, model.findWildcardLookupRow());
   return properties;
 }
-} // namespace MantidQt::CustomInterfaces::ISISReflectometry
+} // namespace MantidQt::CustomInterfaces::ISISReflectometry::RowProcessing

@@ -199,12 +199,15 @@ public:
     TS_ASSERT_EQUALS(nonRegexRow, foundLookupRow)
   }
 
-  // error cases:
-  // lookup title specified but theta is not
-  // multiple wildcard rows
-  // duplicate criteria
-  // matches multiple non-empty titles with same theta
-  // whitespace
+  void test_multiple_row_title_matches_are_invalid() {
+    auto constexpr angle = 2.3;
+    auto table = LookupTable{ModelCreationHelper::makeLookupRow(angle, boost::regex("A.*")),
+                             ModelCreationHelper::makeLookupRow(angle, boost::regex("AA.*"))};
+
+    auto group = Group("AAA", {ModelCreationHelper::makeRow(angle)});
+    TS_ASSERT_THROWS(table.findLookupRow(*group[0], m_exactMatchTolerance), MultipleRowsFoundException const &)
+  }
+
 private:
   const double m_exactMatchTolerance = 1e-6;
 };
