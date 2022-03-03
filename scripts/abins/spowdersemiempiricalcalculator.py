@@ -609,13 +609,11 @@ class SPowderSemiEmpiricalCalculator:
     def _calculate_order_one_dw(self, *, q2: np.ndarray,
                                 frequencies: np.ndarray,
                                 a_tensor=None, a_trace=None,
-                                b_tensor=None, b_trace=None,
-                                indices=None):
+                                b_tensor=None, b_trace=None):
         """
         Calculate mode-dependent Debye-Waller factor for the first order quantum event for one atom.
         :param q2: squared values of momentum transfer vectors
         :param frequencies: frequencies for which transitions occur
-        :param indices: (unused) array which stores information how transitions can be decomposed in terms of fundamentals
         :param a_tensor: total MSD tensor for the given atom
         :param a_trace: total MSD trace for the given atom
         :param b_tensor: frequency dependent MSD tensor for the given atom
@@ -648,8 +646,7 @@ class SPowderSemiEmpiricalCalculator:
         :param include_dw: Include (mode-dependent) Debye-Waller temperature effect
         :returns: s for the first quantum order event for the given atom
         """
-        s = q2 * b_trace / 3.0
-        return s
+        return q2 * b_trace / 3.0
 
     def _calculate_order_two(self, q2=None, frequencies=None, indices=None, a_tensor=None, a_trace=None,
                              b_tensor=None, b_trace=None):
