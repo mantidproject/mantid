@@ -77,8 +77,12 @@ void QtExperimentView::onRemoveLookupRowRequested() {
 }
 
 void QtExperimentView::showAllLookupRowsAsValid() {
-  for (auto row = 0; row < m_ui.optionsTable->rowCount(); ++row)
+  for (auto row = 0; row < m_ui.optionsTable->rowCount(); ++row) {
     showLookupRowAsValid(row);
+    for (auto column = 0; column < m_ui.optionsTable->columnCount(); ++column) {
+      resetTooltip(row, column);
+    }
+  }
 }
 
 void QtExperimentView::showStitchParametersValid() { showAsValid(stitchOptionsLineEdit()); }
@@ -143,6 +147,18 @@ void QtExperimentView::setTooltipFromAlgorithm(int column, std::unordered_map<in
   // on the table cells instead. They are created dynamically, so for now
   // just cache the tooltip.
   m_columnToolTips[column] = toolTip;
+}
+
+void QtExperimentView::setTooltip(int row, int column, std::string text) {
+  m_ui.optionsTable->blockSignals(true);
+  m_ui.optionsTable->item(row, column)->setToolTip(QString::fromStdString(text));
+  m_ui.optionsTable->blockSignals(false);
+}
+
+void QtExperimentView::resetTooltip(int row, int column) {
+  m_ui.optionsTable->blockSignals(true);
+  m_ui.optionsTable->item(row, column)->setToolTip(m_columnToolTips[column]);
+  m_ui.optionsTable->blockSignals(false);
 }
 
 void QtExperimentView::initializeTableColumns(QTableWidget &table,

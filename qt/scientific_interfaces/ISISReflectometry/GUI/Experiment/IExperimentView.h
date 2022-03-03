@@ -123,6 +123,9 @@ public:
   virtual void addLookupRow() = 0;
   virtual void removeLookupRow(int rowIndex) = 0;
 
+  virtual void setTooltip(int row, int column, std::string text) = 0;
+  virtual void resetTooltip(int row, int column) = 0;
+
   virtual ~IExperimentView() = default;
 };
 } // namespace ISISReflectometry
