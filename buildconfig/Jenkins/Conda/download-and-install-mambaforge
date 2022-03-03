@@ -46,7 +46,12 @@ if [[ ! -f $EXPECTED_CONDA_PATH ]]; then
     fi
 
     # Compare the sha256 of the downloaded file to the expected sha256
-    SHA256_DOWNLOADED=$(sha256sum $MAMBAFORGE_SCRIPT_NAME)
+    if [[ $OSTYPE == 'darwin'* ]]; then
+        SHA256_DOWNLOADED=$(shasum -a 256 $MAMBAFORGE_SCRIPT_NAME)
+    else
+        SHA256_DOWNLOADED=$(sha256sum $MAMBAFORGE_SCRIPT_NAME)
+    fi
+
     if [[ $SHA256_DOWNLOADED != $LINUX_SHA256 && $SHA256_DOWNLOADED != $MAC_SHA256 && $SHA256_DOWNLOADED != $WINDOWS_SHA256 ]]; then
         echo "sha256 of downloaded file does not match expected sha256, failing..."
         exit 1
