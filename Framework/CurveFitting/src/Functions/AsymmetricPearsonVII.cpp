@@ -27,11 +27,11 @@ DECLARE_FUNCTION(AsymmetricPearsonVII)
 AsymmetricPearsonVII::AsymmetricPearsonVII() : IPeakFunction() {}
 
 void AsymmetricPearsonVII::init() {
-  declareParameter("PeakHeight", 0.0);
-  declareParameter("PeakCentre", 0.0);
-  declareParameter("Width", 0.0);
-  declareParameter("LeftShape", 1.0);
-  declareParameter("RightShape", 1.0);
+  declareParameter("PeakHeight", 0.0, "Hight of the peak");
+  declareParameter("PeakCentre", 0.0, "Location of the peak");
+  declareParameter("Width", 0.0, "Full width at half maximum");
+  declareParameter("LeftShape", 1.0, "Left shape parameter");
+  declareParameter("RightShape", 1.0, "Right shape parameter");
 
   // constrain shape parameters to the suggested range of values
   auto leftShapeConstraint = std::make_unique<BoundaryConstraint>(this, "LeftShape", 1.0, 20.0, true);
