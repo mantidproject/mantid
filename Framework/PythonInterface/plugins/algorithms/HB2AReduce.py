@@ -9,7 +9,8 @@ from mantid.api import (PythonAlgorithm, AlgorithmFactory, PropertyMode, Workspa
 from mantid.kernel import (Direction, IntArrayProperty, FloatTimeSeriesProperty,
                            StringListValidator, FloatBoundedValidator, EnabledWhenProperty,
                            PropertyCriterion, Property)
-from mantid.simpleapi import (SaveGSSCW, SaveFocusedXYE, AnalysisDataService)
+from mantid.simpleapi import (SaveGSSCW, SaveFocusedXYE, AnalysisDataService,
+                              RenameWorkspace, mtd)
 from mantid import logger
 import numpy as np
 import datetime
@@ -218,6 +219,7 @@ class HB2AReduce(PythonAlgorithm):
         counts = np.array([data['anode{}'.format(n)] for n in range(1, 45)])[detector_mask]
         twotheta = data['2theta']
         monitor = data['monitor']
+        col_time = data['time']
 
         # Remove points with zero monitor count
         monitor_mask = np.nonzero(monitor)[0]
@@ -226,6 +228,7 @@ class HB2AReduce(PythonAlgorithm):
         monitor = monitor[monitor_mask]
         counts = counts[:, monitor_mask]
         twotheta = twotheta[monitor_mask]
+        col_time = col_time[monitor_mask]
 
         # Get either vcorr file or vanadium data
         vanadium_count, vanadium_monitor, vcorr = self.get_vanadium(detector_mask, data['m1'][0],
@@ -250,56 +253,26 @@ class HB2AReduce(PythonAlgorithm):
 
         if self.getProperty("IndividualDetectors").value:
             # Separate spectrum per anode
-            y, e = self.process(counts, scale, monitor, vanadium_count, vanadium_monitor, vcorr)
+            y, e, y_t, e_t = self.process(counts, scale, monitor, col_time,
+                                          vanadium_count, vanadium_monitor, vcorr)
             NSpec = len(x)
         else:
             if self.getProperty("BinData").value:
                 # Data binned with bin
-                x, y, e = self.process_binned(counts, x.ravel(), scale, monitor, vanadium_count,
-                                              vanadium_monitor, vcorr)
+                x, y, e, y_t, e_t = self.process_binned(counts, x.ravel(), scale, monitor,
+                                                        col_time, vanadium_count,
+                                                        vanadium_monitor, vcorr)
             else:
-                y, e = self.process(counts, scale, monitor, vanadium_count, vanadium_monitor, vcorr)
+                y, e, y_t, e_t = self.process(counts, scale, monitor, col_time,
+                                              vanadium_count, vanadium_monitor, vcorr)
             NSpec = 1
 
-        createWS_alg = self.createChildAlgorithm("CreateWorkspace", enableLogging=False)
-        createWS_alg.setProperty("DataX", x)
-        createWS_alg.setProperty("DataY", y)
-        createWS_alg.setProperty("DataE", e)
-        createWS_alg.setProperty("NSpec", NSpec)
-        createWS_alg.setProperty("UnitX", UnitX)
-        createWS_alg.setProperty("YUnitLabel", "Counts")
-        createWS_alg.setProperty("WorkspaceTitle", str(metadata['scan_title']))
-        createWS_alg.execute()
-        outWS = createWS_alg.getProperty("OutputWorkspace").value
-        AnalysisDataService.addOrReplace(outputfn, outWS)
-        self.setProperty("OutputWorkspace", outWS)
-        self.add_metadata(outWS, metadata, data)
+        self.output_data(x, y, e, data, NSpec, UnitX, "mon", outputfn, metadata)
+        self.output_data(x, y_t, e_t, data, NSpec, UnitX, "time", outputfn, metadata)
 
-        # save reduced workspace to requested format
-        save_data = self.getProperty("SaveData").value
-        if save_data:
-            outputdir = self.getProperty("OutputDirectory").value
-            outputdir = outputdir if outputdir != "" else f"/HFIR/HB2A/IPTS-{metadata['proposal']}/shared"
-            _outputfunc = {
-                'XYE': SaveFocusedXYE,
-                'GSAS': SaveGSSCW
-            }[self.getProperty('OutputFormat').value]
-            _outputext = {
-                "XYE": 'dat',
-                "GSAS": 'gss',
-            }[self.getProperty('OutputFormat').value]
-            outputbase = os.path.join(outputdir, outputfn)
-            if self.getProperty('OutputFormat').value == "GSAS":
-                _outputfunc(
-                    InputWorkspace=outWS,
-                    OutputFilename=f"{outputbase}.{_outputext}",
-                )
-            else:
-                _outputfunc(
-                    InputWorkspace=outWS,
-                    Filename=f"{outputbase}.{_outputext}",
-                    SplitFiles=False,
-                )
+        RenameWorkspace(InputWorkspace=outputfn + "_norm_mon",
+                        OutputWorkspace=outputfn)
+        self.setProperty("OutputWorkspace", mtd[outputfn])
 
     def get_detector_mask(self, exp, indir):
         """Returns an anode mask"""
@@ -389,6 +362,7 @@ class HB2AReduce(PythonAlgorithm):
                 counts,
                 scale,
                 monitor,
+                col_time,
                 vanadium_count=None,
                 vanadium_monitor=None,
                 vcorr=None):
@@ -397,6 +371,8 @@ class HB2AReduce(PythonAlgorithm):
         if vcorr is not None:
             y = counts / vcorr[:, np.newaxis] / monitor
             e = np.sqrt(counts) / vcorr[:, np.newaxis] / monitor
+            y_t = counts / vcorr[:, np.newaxis] / col_time
+            e_t = np.sqrt(counts) / vcorr[:, np.newaxis] / col_time
         else:
             y = counts / vanadium_count[:, np.newaxis] * vanadium_monitor / monitor
             e = (
@@ -408,14 +384,26 @@ class HB2AReduce(PythonAlgorithm):
                 )
                 * y
             )
+            y_t = counts / vanadium_count[:, np.newaxis] * vanadium_monitor / col_time
+            e_t = (
+                  np.sqrt(
+                      1 / counts
+                      + 1 / vanadium_count[:, np.newaxis]
+                      + 1 / vanadium_monitor
+                      + 1 / col_time
+                  )
+                  * y_t
+            )
         np.seterr(**old_settings)
-        return np.nan_to_num(y * scale), np.nan_to_num(e * scale)
+        return np.nan_to_num(y * scale), np.nan_to_num(e * scale), \
+               np.nan_to_num(y_t * scale), np.nan_to_num(e_t * scale)
 
     def process_binned(self,
                        counts,
                        x,
                        scale,
                        monitor,
+                       col_time,
                        vanadium_count=None,
                        vanadium_monitor=None,
                        vcorr=None):
@@ -433,15 +421,19 @@ class HB2AReduce(PythonAlgorithm):
             vanadium_monitor_binned = np.bincount(inds, minlength=len(bins)) * vanadium_monitor
 
         monitor = np.tile(monitor, (counts.shape[0], 1))
+        col_time = np.tile(col_time, (counts.shape[0], 1))
 
         counts_binned = np.bincount(inds, weights=counts.ravel(), minlength=len(bins))
         monitor_binned = np.bincount(inds, weights=monitor.ravel(), minlength=len(bins))
+        col_time_binned = np.bincount(inds, weights=col_time.ravel(), minlength=len(bins))
         number_binned = np.bincount(inds, minlength=len(bins))
 
         old_settings = np.seterr(all='ignore')  # otherwise it will complain about divide by zero
         if vcorr is not None:
             y = (counts_binned / vcorr_binned * number_binned / monitor_binned)[1:]
             e = (np.sqrt(1 / counts_binned)[1:]) * y
+            y_t = (counts_binned / vcorr_binned * number_binned / col_time_binned)[1:]
+            e_t = (np.sqrt(1 / counts_binned)[1:]) * y_t
         else:
             y = (
                 counts_binned
@@ -457,10 +449,25 @@ class HB2AReduce(PythonAlgorithm):
                     + 1 / monitor_binned
                 )[1:]
             ) * y
+            y_t = (
+                  counts_binned
+                  / vanadium_binned
+                  * vanadium_monitor_binned
+                  / col_time_binned
+            )[1:]
+            e_t = (
+                  np.sqrt(
+                      1 / counts_binned
+                      + 1 / vanadium_binned
+                      + 1 / vanadium_monitor
+                      + 1 / col_time_binned
+                  )[1:]
+            ) * y_t
         np.seterr(**old_settings)
         x = bins
 
-        return x, np.nan_to_num(y * scale), np.nan_to_num(e * scale)
+        return x, np.nan_to_num(y * scale), np.nan_to_num(e * scale), \
+               np.nan_to_num(y_t * scale), np.nan_to_num(e_t * scale)
 
     def add_metadata(self, ws, metadata, data):
         """Adds metadata to the workspace"""
@@ -489,6 +496,52 @@ class HB2AReduce(PythonAlgorithm):
                 for t, v in zip(time_array, data[name]):
                     log.addValue(t, v)
                 run[name] = log
+
+    def output_data(self, x, y, e, data, NSpec, UnitX, norm, outputfn, metadata):
+        """Save reduced data to file"""
+
+        createWS_alg = self.createChildAlgorithm("CreateWorkspace", enableLogging=False)
+        createWS_alg.setProperty("DataX", x)
+        createWS_alg.setProperty("DataY", y)
+        createWS_alg.setProperty("DataE", e)
+        createWS_alg.setProperty("NSpec", NSpec)
+        createWS_alg.setProperty("UnitX", UnitX)
+        createWS_alg.setProperty("YUnitLabel", "Counts")
+        createWS_alg.setProperty("WorkspaceTitle", str(metadata['scan_title']) + "_norm_" + norm)
+        createWS_alg.execute()
+        outWS = createWS_alg.getProperty("OutputWorkspace").value
+        AnalysisDataService.addOrReplace(outputfn + "_norm_" + norm, outWS)
+        self.add_metadata(outWS, metadata, data)
+
+        # save reduced workspace to requested format
+        save_data = self.getProperty("SaveData").value
+        if save_data:
+            outputdir = self.getProperty("OutputDirectory").value
+            outputdir = outputdir if outputdir != "" else f"/HFIR/HB2A/IPTS-{metadata['proposal']}/shared"
+            _outputfunc = {
+                'XYE': SaveFocusedXYE,
+                'GSAS': SaveGSSCW
+            }[self.getProperty('OutputFormat').value]
+            _outputext = {
+                "XYE": 'dat',
+                "GSAS": 'gss',
+            }[self.getProperty('OutputFormat').value]
+            outputbase = os.path.join(outputdir, outputfn)
+            if norm == "mon":
+                out_f_name = outputbase
+            else:
+                out_f_name = outputbase + "_norm_" + norm
+            if self.getProperty('OutputFormat').value == "GSAS":
+                _outputfunc(
+                    InputWorkspace=outWS,
+                    OutputFilename=f"{out_f_name}.{_outputext}",
+                )
+            else:
+                _outputfunc(
+                    InputWorkspace=outWS,
+                    Filename=f"{out_f_name}.{_outputext}",
+                    SplitFiles=False,
+                )
 
 
 AlgorithmFactory.subscribe(HB2AReduce)
