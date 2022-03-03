@@ -266,8 +266,15 @@ void ExperimentPresenter::updateModelFromView() {
 void ExperimentPresenter::showLookupTableErrors(LookupTableValidationError const &errors) {
   m_view->showAllLookupRowsAsValid();
   for (auto const &validationError : errors.errors()) {
-    for (auto const &column : validationError.invalidColumns())
+    for (auto const &column : validationError.invalidColumns()) {
+      if (errors.fullTableError()) {
+        if (errors.fullTableError() == LookupCriteriaError::NonUniqueSearchCriteria)
+          m_view->setTooltip(validationError.row(), column, "Error: Duplicated search criteria.");
+        if (errors.fullTableError() == LookupCriteriaError::MultipleWildcards)
+          m_view->setTooltip(validationError.row(), column, "Error: Multiple wildcards.");
+      }
       m_view->showLookupRowAsInvalid(validationError.row(), column);
+    }
   }
 }
 
