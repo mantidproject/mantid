@@ -30,6 +30,8 @@ namespace {
 const int RUNS_WARNING_LIMIT = 200;
 // must include the "."
 const std::vector<std::string> ADDITIONAL_EXTENSIONS{".nxs", ".nxs_v2", ".bin"};
+
+bool is_decimal(const char character) { return character == '.'; }
 } // namespace
 
 using namespace Mantid::Kernel;
@@ -419,7 +421,8 @@ bool ALCDataLoadingPresenter::checkCustomGrouping() {
  * @returns :: True if grouping OK, false if bad
  */
 std::string ALCDataLoadingPresenter::isCustomGroupingValid(const std::string &group, bool &isValid) {
-  if (!std::isdigit(group[0]) || std::any_of(std::begin(group), std::end(group), ::isalpha)) {
+  if (!std::isdigit(group[0]) || std::any_of(std::begin(group), std::end(group), ::isalpha) ||
+      std::any_of(std::begin(group), std::end(group), is_decimal)) {
     isValid = false;
     return "";
   }

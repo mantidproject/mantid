@@ -11,7 +11,7 @@ from matplotlib.collections import LineCollection
 from qtpy import QtCore, QtGui, QtPrintSupport, QtWidgets
 
 from mantid.plots import MantidAxes
-from mantid.plots.legend import convert_color_to_hex
+from mantid.plots.utility import convert_color_to_hex
 from mantidqt.icons import get_icon
 from mantidqt.plotting.figuretype import FigureType, figure_type
 from mantidqt.plotting.mantid_navigation_toolbar import MantidNavigationToolbar, MantidStandardNavigationTools, MantidNavigationTool

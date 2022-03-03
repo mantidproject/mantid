@@ -20,9 +20,8 @@ namespace MantidQt::MantidWidgets {
  * excluded from grouping.
  * @param fname :: Name of the file to save the grouping to.
  */
-DetXMLFile::DetXMLFile(const std::vector<int> &detector_list, const std::vector<int> &exclude, const QString &fname) {
-  m_fileName = fname;
-  m_delete = false;
+DetXMLFile::DetXMLFile(const std::vector<int> &detector_list, const std::vector<int> &exclude, const QString &fname)
+    : m_fileName(fname), m_delete(false) {
   std::ofstream out(m_fileName.toStdString().c_str());
   out << "<?xml version=\"1.0\" encoding=\"UTF-8\" ?> \n<detector-grouping> \n";
   out << R"(<group name="sum"> <detids val=")";

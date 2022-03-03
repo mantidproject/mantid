@@ -113,7 +113,7 @@ int LeanElasticPeaksWorkspace::getNumberPeaks() const { return int(m_peaks.size(
 //---------------------------------------------------------------------------------------------
 /** @return the convention
  */
-std::string LeanElasticPeaksWorkspace::getConvention() const { return convention; }
+std::string LeanElasticPeaksWorkspace::getConvention() const { return m_convention; }
 
 //---------------------------------------------------------------------------------------------
 /** Removes the indicated peak

@@ -15,6 +15,7 @@ set(TEST_PY_FILES
     EnabledWhenPropertyTest.py
     FacilityInfoTest.py
     FilteredTimeSeriesPropertyTest.py
+    HTTPStatusTest.py
     InstrumentInfoTest.py
     IPropertySettingsTest.py
     ListValidatorTest.py

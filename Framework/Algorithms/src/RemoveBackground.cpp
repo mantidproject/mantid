@@ -120,7 +120,7 @@ void RemoveBackground::exec() {
   Progress prog(this, 0.0, 1.0, histnumber);
   PARALLEL_FOR_IF(Kernel::threadSafe(*inputWS, *outputWS))
   for (int hist = 0; hist < histnumber; ++hist) {
-    PARALLEL_START_INTERUPT_REGION
+    PARALLEL_START_INTERRUPT_REGION
     // get references to output Workspace X-arrays.
     auto &XValues = outputWS->mutableX(hist);
     // get references to output workspace data and error. If it is new
@@ -133,9 +133,9 @@ void RemoveBackground::exec() {
     m_BackgroundHelper.removeBackground(hist, XValues, YValues, YErrors, id);
 
     prog.report(name());
-    PARALLEL_END_INTERUPT_REGION
+    PARALLEL_END_INTERRUPT_REGION
   }
-  PARALLEL_CHECK_INTERUPT_REGION
+  PARALLEL_CHECK_INTERRUPT_REGION
   // Assign it to the output workspace property
   setProperty("OutputWorkspace", outputWS);
 }

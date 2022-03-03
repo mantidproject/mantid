@@ -791,6 +791,10 @@ void InstrumentWidgetMaskTab::saveInvertedMaskToCalFile() { saveMaskingToCalFile
 
 void InstrumentWidgetMaskTab::saveMaskToTable() { saveMaskingToTableWorkspace(false); }
 
+void InstrumentWidgetMaskTab::showMessageBox(const QString &message) {
+  QMessageBox::information(this, "GroupDetectors Error", message, "OK");
+}
+
 /**
  * Extract selected detectors to a new workspace
  */
@@ -807,10 +811,14 @@ void InstrumentWidgetMaskTab::extractDetsToWorkspace() {
   if (!fname.empty()) {
     std::string workspaceName = m_instrWidget->getWorkspaceName().toStdString();
     auto alg = AlgorithmManager::Instance().create("GroupDetectors");
-    alg->setPropertyValue("InputWorkspace", workspaceName);
-    alg->setPropertyValue("MapFile", fname);
-    alg->setPropertyValue("OutputWorkspace", workspaceName + "_selection");
-    alg->execute();
+    try {
+      alg->setPropertyValue("InputWorkspace", workspaceName);
+      alg->setPropertyValue("MapFile", fname);
+      alg->setPropertyValue("OutputWorkspace", workspaceName + "_selection");
+      alg->execute();
+    } catch (std::exception &e) {
+      showMessageBox(e.what());
+    }
   }
   QApplication::restoreOverrideCursor();
 }
@@ -831,10 +839,14 @@ void InstrumentWidgetMaskTab::sumDetsToWorkspace() {
   if (!fname.empty()) {
     std::string workspaceName = m_instrWidget->getWorkspaceName().toStdString();
     auto alg = AlgorithmManager::Instance().create("GroupDetectors");
-    alg->setPropertyValue("InputWorkspace", workspaceName);
-    alg->setPropertyValue("MapFile", fname);
-    alg->setPropertyValue("OutputWorkspace", workspaceName + "_sum");
-    alg->execute();
+    try {
+      alg->setPropertyValue("InputWorkspace", workspaceName);
+      alg->setPropertyValue("MapFile", fname);
+      alg->setPropertyValue("OutputWorkspace", workspaceName + "_sum");
+      alg->execute();
+    } catch (std::exception &e) {
+      showMessageBox(e.what());
+    }
   }
   QApplication::restoreOverrideCursor();
 }

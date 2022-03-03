@@ -44,7 +44,8 @@ class GROUP(Enum):
     SOUTH = "2", [2]
     CROPPED = "Cropped", []  # pdcal results will be saved with grouping file with same suffix
     CUSTOM = "Custom", []  # pdcal results will be saved with grouping file with same suffix
-    TEXTURE = "Texture", [1, 2]
+    TEXTURE20 = "Texture20", [1, 2]
+    TEXTURE30 = "Texture30", [1, 2]
 
 
 def plot_tof_vs_d_from_calibration(diag_ws, ws_foc, dspacing, calibration):
@@ -171,7 +172,7 @@ def create_new_calibration(calibration, rb_num, plot_output, save_dir, full_cali
     calib_dirs = [path.join(save_dir, "Calibration", "")]
     if rb_num:
         calib_dirs.append(path.join(save_dir, "User", rb_num, "Calibration", ""))
-        if calibration.group == GROUP.TEXTURE:
+        if calibration.group == GROUP.TEXTURE20 or calibration.group == GROUP.TEXTURE30:
             calib_dirs.pop(0)  # only save to RB directory to limit number files saved
 
     for calib_dir in calib_dirs:
@@ -423,7 +424,7 @@ def focus_run(sample_paths, vanadium_path, plot_output, rb_num, calibration, sav
     focus_dirs = [path.join(save_dir, "Focus")]
     if rb_num:
         focus_dirs.append(path.join(save_dir, "User", rb_num, "Focus"))
-        if calibration.group == GROUP.TEXTURE:
+        if calibration.group == GROUP.TEXTURE20 or calibration.group == GROUP.TEXTURE30:
             focus_dirs.pop(0)  # only save to RB directory to limit number files saved
 
     # Loop over runs and focus

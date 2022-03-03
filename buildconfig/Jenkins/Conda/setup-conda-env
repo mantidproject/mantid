@@ -16,4 +16,12 @@ CONDA_ENV_NAME=$3
 $EXPECTED_CONDA_PATH env remove -n $CONDA_ENV_NAME
 
 # Always create the new environment:
-$EXPECTED_CONDA_PATH env create -f $WORKSPACE/mantid-developer-linux.yml
+if [[ $OSTYPE == 'darwin'* ]]; then
+    MANTID_DEVELOPER_YML_FILE=$WORKSPACE/mantid-developer-osx.yml
+elif [[ $OSTYPE == 'linux'* ]]; then
+    MANTID_DEVELOPER_YML_FILE=$WORKSPACE/mantid-developer-linux.yml
+else
+    MANTID_DEVELOPER_YML_FILE=$WORKSPACE/mantid-developer-win.yml
+fi
+
+$EXPECTED_CONDA_PATH env create -f $MANTID_DEVELOPER_YML_FILE

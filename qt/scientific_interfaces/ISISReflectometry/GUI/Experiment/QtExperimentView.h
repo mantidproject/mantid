@@ -127,6 +127,9 @@ public slots:
   void onLookupRowChanged(int row, int column);
 
 private:
+  bool setTooltipFromMap(int column, std::unordered_map<int, std::string> const &tooltips);
+  void setTooltipFromAlgorithm(int column, std::unordered_map<int, std::string> const &properties,
+                               const Mantid::API::IAlgorithm_sptr &algorithmForTooltips);
   void initializeTableColumns(QTableWidget &table, const Mantid::API::IAlgorithm_sptr &algorithmForTooltips);
   void initializeTableItems(QTableWidget &table);
   void initializeTableRow(QTableWidget &table, int row);

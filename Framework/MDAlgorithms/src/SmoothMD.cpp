@@ -177,7 +177,7 @@ IMDHistoWorkspace_sptr SmoothMD::hatSmooth(const IMDHistoWorkspace_const_sptr &t
   PARALLEL_FOR_NO_WSP_CHECK()
   for (int it = 0; it < int(iterators.size()); ++it) { // NOLINT
 
-    PARALLEL_START_INTERUPT_REGION
+    PARALLEL_START_INTERRUPT_REGION
     auto iterator = dynamic_cast<MDHistoWorkspaceIterator *>(iterators[it].get());
 
     if (!iterator) {
@@ -234,9 +234,9 @@ IMDHistoWorkspace_sptr SmoothMD::hatSmooth(const IMDHistoWorkspace_const_sptr &t
       progress.report();
 
     } while (iterator->next());
-    PARALLEL_END_INTERUPT_REGION
+    PARALLEL_END_INTERRUPT_REGION
   }
-  PARALLEL_CHECK_INTERUPT_REGION
+  PARALLEL_CHECK_INTERRUPT_REGION
 
   return outWS;
 }
@@ -292,7 +292,7 @@ IMDHistoWorkspace_sptr SmoothMD::gaussianSmooth(const IMDHistoWorkspace_const_sp
     PARALLEL_FOR_NO_WSP_CHECK()
     for (int it = 0; it < int(iterators.size()); ++it) { // NOLINT
 
-      PARALLEL_START_INTERUPT_REGION
+      PARALLEL_START_INTERRUPT_REGION
       auto iterator = dynamic_cast<MDHistoWorkspaceIterator *>(iterators[it].get());
       if (!iterator) {
         throw std::logic_error("Failed to cast IMDIterator to MDHistoWorkspaceIterator");
@@ -338,9 +338,9 @@ IMDHistoWorkspace_sptr SmoothMD::gaussianSmooth(const IMDHistoWorkspace_const_sp
         progress.report();
 
       } while (iterator->next());
-      PARALLEL_END_INTERUPT_REGION
+      PARALLEL_END_INTERRUPT_REGION
     }
-    PARALLEL_CHECK_INTERUPT_REGION
+    PARALLEL_CHECK_INTERRUPT_REGION
   }
 
   return write_ws;

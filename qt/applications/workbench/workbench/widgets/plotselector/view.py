@@ -75,7 +75,6 @@ class PlotSelectorView(QWidget):
         self.table_widget.customContextMenuRequested.connect(self.context_menu_opened)
 
         buttons_layout = FlowLayout()
-        buttons_layout.setSpacing(1)
         buttons_layout.addWidget(self.show_button)
         buttons_layout.addWidget(self.hide_button)
         buttons_layout.addWidget(self.close_button)
@@ -87,6 +86,7 @@ class PlotSelectorView(QWidget):
         filter_layout.addWidget(self.filter_box)
 
         layout = QVBoxLayout()
+        layout.setContentsMargins(0,0,0,0)
         layout.addLayout(buttons_layout)
         layout.addLayout(filter_layout)
         layout.addWidget(self.table_widget)

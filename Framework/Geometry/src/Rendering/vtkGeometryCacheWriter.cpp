@@ -40,10 +40,8 @@ Kernel::Logger g_log("vtkGeometryCacheWriter");
 /**
  * Constructor
  */
-vtkGeometryCacheWriter::vtkGeometryCacheWriter(std::string filename) {
-  mFileName = std::move(filename);
-
-  mDoc = new Document();
+vtkGeometryCacheWriter::vtkGeometryCacheWriter(std::string filename)
+    : m_doc(new Document()), m_filename(std::move(filename)) {
   Init();
 }
 
@@ -51,15 +49,15 @@ vtkGeometryCacheWriter::vtkGeometryCacheWriter(std::string filename) {
  * Destructor
  */
 vtkGeometryCacheWriter::~vtkGeometryCacheWriter() {
-  mRoot->release();
-  mDoc->release();
+  m_root->release();
+  m_doc->release();
 }
 
 /**
  * Initialises the XML Document with the required vtk XML Headings
  */
 void vtkGeometryCacheWriter::Init() {
-  mRoot = mDoc->createElement("PolyData");
+  m_root = m_doc->createElement("PolyData");
   createVTKFileHeader();
 }
 /**
@@ -70,12 +68,12 @@ void vtkGeometryCacheWriter::Init() {
  * \</VTKFile\>
  */
 void vtkGeometryCacheWriter::createVTKFileHeader() {
-  AutoPtr<Element> pRoot = mDoc->createElement("VTKFile");
+  AutoPtr<Element> pRoot = m_doc->createElement("VTKFile");
   pRoot->setAttribute("type", "PolyData");
   pRoot->setAttribute("version", "1.0");
   pRoot->setAttribute("byte_order", "LittleEndian");
-  mDoc->appendChild(pRoot);
-  pRoot->appendChild(mRoot);
+  m_doc->appendChild(pRoot);
+  pRoot->appendChild(m_root);
 }
 
 /**
@@ -95,7 +93,7 @@ void vtkGeometryCacheWriter::addObject(CSGObject *obj) {
   // get number of triangles
   auto noTris = handle->numberOfTriangles();
   // Add Piece
-  AutoPtr<Element> pPiece = mDoc->createElement("Piece");
+  AutoPtr<Element> pPiece = m_doc->createElement("Piece");
   // Add attribute name
   buf << name;
   pPiece->setAttribute("name", buf.str());
@@ -108,8 +106,8 @@ void vtkGeometryCacheWriter::addObject(CSGObject *obj) {
   buf << noTris;
   pPiece->setAttribute("NumberOfPolys", buf.str());
   // write the points
-  AutoPtr<Element> pPoints = mDoc->createElement("Points");
-  AutoPtr<Element> pPtsDataArray = mDoc->createElement("DataArray");
+  AutoPtr<Element> pPoints = m_doc->createElement("Points");
+  AutoPtr<Element> pPtsDataArray = m_doc->createElement("DataArray");
   // Add attributes to data array
   pPtsDataArray->setAttribute("type", "Float32");
   pPtsDataArray->setAttribute("NumberOfComponents", "3");
@@ -121,12 +119,12 @@ void vtkGeometryCacheWriter::addObject(CSGObject *obj) {
   for (i = 0; i < points.size(); i++) {
     buf << points[i] << " ";
   }
-  AutoPtr<Text> pPointText = mDoc->createTextNode(buf.str());
+  AutoPtr<Text> pPointText = m_doc->createTextNode(buf.str());
   pPtsDataArray->appendChild(pPointText);
   pPoints->appendChild(pPtsDataArray);
   // get triangles faces info
-  AutoPtr<Element> pFaces = mDoc->createElement("Polys");
-  AutoPtr<Element> pTrisDataArray = mDoc->createElement("DataArray");
+  AutoPtr<Element> pFaces = m_doc->createElement("Polys");
+  AutoPtr<Element> pTrisDataArray = m_doc->createElement("DataArray");
   // add attribute
   pTrisDataArray->setAttribute("type", "UInt32");
   pTrisDataArray->setAttribute("Name", "connectivity");
@@ -137,11 +135,11 @@ void vtkGeometryCacheWriter::addObject(CSGObject *obj) {
   for (i = 0; i < faces.size(); i++) {
     buf << faces[i] << " ";
   }
-  AutoPtr<Text> pTrisDataText = mDoc->createTextNode(buf.str());
+  AutoPtr<Text> pTrisDataText = m_doc->createTextNode(buf.str());
   pTrisDataArray->appendChild(pTrisDataText);
   pFaces->appendChild(pTrisDataArray);
   // set the offsets
-  AutoPtr<Element> pTrisOffsetDataArray = mDoc->createElement("DataArray");
+  AutoPtr<Element> pTrisOffsetDataArray = m_doc->createElement("DataArray");
   // add attribute
   pTrisOffsetDataArray->setAttribute("type", "UInt32");
   pTrisOffsetDataArray->setAttribute("Name", "offsets");
@@ -150,7 +148,7 @@ void vtkGeometryCacheWriter::addObject(CSGObject *obj) {
   for (i = 1; i < noTris + 1; i++) {
     buf << i * 3 << " ";
   }
-  AutoPtr<Text> pTrisOffsetDataText = mDoc->createTextNode(buf.str());
+  AutoPtr<Text> pTrisOffsetDataText = m_doc->createTextNode(buf.str());
   pTrisOffsetDataArray->appendChild(pTrisOffsetDataText);
   pFaces->appendChild(pTrisOffsetDataArray);
 
@@ -159,7 +157,7 @@ void vtkGeometryCacheWriter::addObject(CSGObject *obj) {
   pPiece->appendChild(pFaces);
 
   // add this piece to root
-  mRoot->appendChild(pPiece);
+  m_root->appendChild(pPiece);
 }
 /**
  * Write the XML to the file
@@ -170,9 +168,9 @@ void vtkGeometryCacheWriter::write() {
   writer.setOptions(XMLWriter::PRETTY_PRINT);
   std::ofstream file;
   try {
-    g_log.information("Writing Geometry Cache file to " + mFileName);
-    file.open(mFileName.c_str(), std::ios::trunc);
-    writer.writeNode(file, mDoc);
+    g_log.information("Writing Geometry Cache file to " + m_filename);
+    file.open(m_filename.c_str(), std::ios::trunc);
+    writer.writeNode(file, m_doc);
     file.close();
   } catch (...) {
     g_log.error("Geometry Cache file writing exception");

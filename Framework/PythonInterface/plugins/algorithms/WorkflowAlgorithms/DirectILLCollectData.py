@@ -14,8 +14,9 @@ from mantid.kernel import (CompositeValidator, Direct, Direction, FloatBoundedVa
                            IntMandatoryValidator, Property, StringListValidator, UnitConversion)
 from mantid.simpleapi import (AddSampleLog, CalculateFlatBackground, CorrectTOFAxis, CreateEPP,
                               CreateSingleValuedWorkspace, CreateWorkspace, CropWorkspace, DeleteWorkspace, ExtractMonitors,
-                              FindEPP, GetEiMonDet, LoadAndMerge, Minus, NormaliseToMonitor, Scale, SetInstrumentParameter)
-import numpy
+                              FindEPP, GetEiMonDet, GroupDetectors, LoadAndMerge, LoadEmptyInstrument, Minus, mtd,
+                              NormaliseToMonitor, Scale, SetInstrumentParameter)
+import numpy as np
 
 _MONSUM_LIMIT = 100
 
@@ -131,7 +132,7 @@ def _createFlatBkg(ws, wsType, windowWidth, wsNames, algorithmLogging):
 
 def _fitElasticChannel(ys, wsNames, wsCleanup, algorithmLogging):
     """Return index to the peak position of ys."""
-    xs = numpy.array([i for i in range(len(ys))])
+    xs = np.array([i for i in range(len(ys))])
     l2SumWSName = wsNames.withSuffix('summed_detectors_at_l2')
     l2SumWS = CreateWorkspace(OutputWorkspace=l2SumWSName,
                               DataX=xs,
@@ -144,7 +145,7 @@ def _fitElasticChannel(ys, wsNames, wsCleanup, algorithmLogging):
     peakCentre = float(fitWS.cell('PeakCentre', 0))
     wsCleanup.cleanup(l2SumWS)
     wsCleanup.cleanup(fitWS)
-    return int(round(peakCentre))
+    return peakCentre
 
 
 def _fitEPP(ws, wsType, wsNames, algorithmLogging):
@@ -167,6 +168,32 @@ def _monitorCounts(ws):
         return logs.getProperty('monitor1.monsum').value
     else:
         return logs.getProperty('monitor.monsum').value
+
+
+def _get_instrument_structure(ws):
+    """Returns the number of detectors and the number of detectors per tube in the currently processed
+    instrument."""
+    instrument = ws.getInstrument().getName()
+    if instrument in ['IN4', 'IN6']:
+        self.log.warning("Grouping pattern cannot be provided for IN4 and IN6.")
+        return ""
+    tmp_inst = '{}_tmp'.format(instrument)
+    LoadEmptyInstrument(InstrumentName=instrument, OutputWorkspace=tmp_inst)
+    tmp_mon_inst = 'mon_{}'.format(tmp_inst)
+    ExtractMonitors(InputWorkspace=tmp_inst, DetectorWorkspace=tmp_inst, MonitorWorkspace=tmp_mon_inst)
+    n_monitors = mtd[tmp_mon_inst].getNumberHistograms()
+    n_tubes = 0
+    for comp in mtd[tmp_inst].componentInfo():
+        if len(comp.detectorsInSubtree) > 1 and comp.hasParent:
+            n_tubes += 1
+    n_tubes -= n_monitors
+    if instrument == 'IN5':  # there is an extra bank that contains all of the tubes
+        n_tubes -= 1
+    n_pixels = mtd[tmp_inst].getNumberHistograms()
+    n_pixels_per_tube = int(n_pixels / n_tubes)
+    DeleteWorkspace(Workspace=tmp_inst)
+    DeleteWorkspace(Workspace=tmp_mon_inst)
+    return n_pixels, n_pixels_per_tube
 
 
 def _normalizeToMonitor(ws, monWS, monIndex, integrationBegin, integrationEnd,
@@ -247,7 +274,7 @@ def _subtractFlatBkg(ws, wsType, bkgWorkspace, bkgScaling, wsNames, wsCleanup, a
 def _sumDetectorsAtDistance(ws, distance, tolerance):
     """Return a sum of the Y values of detectors at distance away from the sample."""
     histogramCount = ws.getNumberHistograms()
-    ySums = numpy.zeros(ws.blocksize())
+    ySums = np.zeros(ws.blocksize())
     detectorInfo = ws.detectorInfo()
     sample = ws.getInstrument().getSample()
     for i in range(histogramCount):
@@ -415,8 +442,8 @@ class DirectILLCollectData(DataProcessorAlgorithm):
                              defaultValue='',
                              direction=Direction.Input,
                              optional=PropertyMode.Optional),
-                             doc='A single value workspace containing the nominal elastic channel index. Overrides '
-                                 + common.PROP_ELASTIC_CHANNEL_MODE + '.')
+                             doc='A single value workspace containing the nominal elastic channel index'
+                                 '(can be floating point). Overrides {}.'.format(common.PROP_ELASTIC_CHANNEL_MODE))
         self.declareProperty(name=common.PROP_MON_INDEX,
                              defaultValue=Property.EMPTY_INT,
                              validator=positiveInt,
@@ -466,6 +493,16 @@ class DirectILLCollectData(DataProcessorAlgorithm):
             optional=PropertyMode.Optional),
             doc='Workspace with previously determined flat background data.')
         self.setPropertyGroup(common.PROP_FLAT_BKG_WS, PROPGROUP_FLAT_BKG)
+        self.declareProperty(name=common.PROP_DET_HOR_GROUPING,
+                             defaultValue=1,
+                             doc='Step to use when grouping detectors horizontally (between tubes) to increase'
+                                 ' the statistics for flat background calculation.')
+        self.setPropertyGroup(common.PROP_DET_HOR_GROUPING, PROPGROUP_FLAT_BKG)
+        self.declareProperty(name=common.PROP_DET_VER_GROUPING,
+                             defaultValue=1,
+                             doc='Step to use when grouping detectors vertically (inside the same tube)'
+                                 ' to increase the statistics for flat background calculation.')
+        self.setPropertyGroup(common.PROP_DET_VER_GROUPING, PROPGROUP_FLAT_BKG)
         self.declareProperty(name=common.PROP_NORMALISATION,
                              defaultValue=common.NORM_METHOD_MON,
                              validator=StringListValidator([
@@ -616,7 +653,7 @@ class DirectILLCollectData(DataProcessorAlgorithm):
             return mainWS
         if not self.getProperty(common.PROP_ELASTIC_CHANNEL_WS).isDefault:
             indexWS = self.getProperty(common.PROP_ELASTIC_CHANNEL_WS).value
-            index = int(indexWS.readY(0)[0])
+            index = indexWS.readY(0)[0]
         else:
             mode = self._chooseElasticChannelMode(mainWS)
             if mode == common.ELASTIC_CHANNEL_SAMPLE_LOG:
@@ -627,6 +664,8 @@ class DirectILLCollectData(DataProcessorAlgorithm):
             else:
                 ys = _sumDetectorsAtDistance(mainWS, l2, 1e-5)
                 index = _fitElasticChannel(ys, self._names, self._cleanup, self._subalgLogging)
+                precision = int(mainWS.getInstrument().getIntParameter("elastic_channel_precision")[0])
+                index = np.trunc(index * 10 ** precision) / 10 ** precision
         correctedWSName = self._names.withSuffix('tof_axis_corrected')
         correctedWS = CorrectTOFAxis(InputWorkspace=mainWS,
                                      OutputWorkspace=correctedWSName,
@@ -637,9 +676,10 @@ class DirectILLCollectData(DataProcessorAlgorithm):
         self._report.notice('Elastic channel index {0} was used for TOF axis adjustment.'.format(index))
         if not self.getProperty(common.PROP_OUTPUT_ELASTIC_CHANNEL_WS).isDefault:
             indexOutputWSName = self._names.withSuffix('elastic_channel_output')
-            indexOutputWS = CreateSingleValuedWorkspace(OutputWorkspace=indexOutputWSName,
-                                                        DataValue=index,
-                                                        EnableLogging=self._subalgLogging)
+            indexOutputWS = CreateSingleValuedWorkspace(
+                OutputWorkspace=indexOutputWSName,
+                DataValue=index,
+                EnableLogging=self._subalgLogging)
             self.setProperty(common.PROP_OUTPUT_ELASTIC_CHANNEL_WS, indexOutputWS)
             self._cleanup.cleanup(indexOutputWS)
         self._cleanup.cleanup(mainWS)
@@ -703,7 +743,21 @@ class DirectILLCollectData(DataProcessorAlgorithm):
             self._cleanup.protect(bkgWS)
         else:
             windowWidth = self.getProperty(common.PROP_FLAT_BKG_WINDOW).value
-            bkgWS = _createFlatBkg(mainWS, common.WS_CONTENT_DETS, windowWidth, self._names, self._subalgLogging)
+            if not self.getProperty(common.PROP_DET_HOR_GROUPING).isDefault \
+                    or not self.getProperty(common.PROP_DET_VER_GROUPING).isDefault:
+                grouping_pattern = common.get_grouping_pattern(
+                    mainWS,
+                    self.getProperty(common.PROP_DET_VER_GROUPING).value,
+                    self.getProperty(common.PROP_DET_HOR_GROUPING).value)
+                flatInputWS = self._group_detectors(mainWS, grouping_pattern)
+                flatOutputWS = _createFlatBkg(flatInputWS, common.WS_CONTENT_DETS, windowWidth,
+                                              self._names, self._subalgLogging)
+                bkgWS = self._ungroup_detectors(input_ws=flatOutputWS, ws_to_match=mainWS,
+                                                grouping_pattern=grouping_pattern)
+                self._cleanup.cleanup(flatInputWS)
+                self._cleanup.cleanup(flatOutputWS)
+            else:
+                bkgWS = _createFlatBkg(mainWS, common.WS_CONTENT_DETS, windowWidth, self._names, self._subalgLogging)
         if not self.getProperty(common.PROP_OUTPUT_FLAT_BKG_WS).isDefault:
             self.setProperty(common.PROP_OUTPUT_FLAT_BKG_WS, bkgWS)
         bkgScaling = self.getProperty(common.PROP_FLAT_BKG_SCALING).value
@@ -737,6 +791,35 @@ class DirectILLCollectData(DataProcessorAlgorithm):
         self._cleanup.cleanup(monBkgWS)
         self._cleanup.cleanup(monWS)
         return bkgSubtractedMonWS
+
+    @staticmethod
+    def _group_detectors(input_ws, grouping_pattern):
+        """Groups detectors of the input workspace according to the provided pattern and returns
+        the name of the grouped workspace."""
+        output_ws = f'{input_ws}_grouped'
+        GroupDetectors(InputWorkspace=input_ws, OutputWorkspace=output_ws,
+                       GroupingPattern=grouping_pattern, Behaviour='Average')
+        return output_ws
+
+    @staticmethod
+    def _ungroup_detectors(input_ws, ws_to_match, grouping_pattern):
+        """Assigns Y-axis values of grouped detectors back to the original (ungrouped) detectors."""
+        output_ws = f'{input_ws}ungrouped'
+        CreateWorkspace(
+            DataX=ws_to_match.readX(0)[0]*ws_to_match.getNumberHistograms(),
+            DataY=np.full(shape=(ws_to_match.getNumberHistograms()), fill_value=0.0, dtype='float64'),
+            Nspec=ws_to_match.getNumberHistograms(),
+            ParentWorkspace=ws_to_match,
+            UnitX=ws_to_match.getAxis(0).getUnit().unitID(),
+            OutputWorkspace=output_ws
+        )
+        for group_no, grouped_detectors in enumerate(grouping_pattern.split(',')):
+            det_list = list(map(int, grouped_detectors.split('+')))
+            det_grouped_val = input_ws.readY(group_no)
+            for det_no in det_list:
+                mtd[output_ws].setY(det_no, det_grouped_val)
+
+        return mtd[output_ws]
 
     def _inputWS(self):
         """Return the raw input workspace."""

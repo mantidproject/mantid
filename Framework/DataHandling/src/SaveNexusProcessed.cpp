@@ -464,7 +464,7 @@ void SaveNexusProcessed::execEvent(Mantid::NeXus::NexusFileIO *nexusFile, const 
   // --- Fill in the combined event arrays ----
   PARALLEL_FOR_NO_WSP_CHECK()
   for (int wi = 0; wi < static_cast<int>(m_eventWorkspace->getNumberHistograms()); wi++) {
-    PARALLEL_START_INTERUPT_REGION
+    PARALLEL_START_INTERRUPT_REGION
     const DataObjects::EventList &el = m_eventWorkspace->getSpectrum(wi);
 
     // This is where it will land in the output array.
@@ -484,9 +484,9 @@ void SaveNexusProcessed::execEvent(Mantid::NeXus::NexusFileIO *nexusFile, const 
     }
     m_progress->reportIncrement(el.getNumberEvents(), "Copying EventList");
 
-    PARALLEL_END_INTERUPT_REGION
+    PARALLEL_END_INTERRUPT_REGION
   }
-  PARALLEL_CHECK_INTERUPT_REGION
+  PARALLEL_CHECK_INTERRUPT_REGION
 
   /*Default = DONT compress - much faster*/
   bool CompressNexus = getProperty("CompressNexus");

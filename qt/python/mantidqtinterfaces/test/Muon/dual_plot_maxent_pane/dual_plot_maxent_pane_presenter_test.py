@@ -8,7 +8,8 @@ from mantid import AnalysisDataService
 from mantidqtinterfaces.Muon.GUI.Common.plot_widget.plotting_canvas.plotting_canvas_presenter_interface import \
     PlottingCanvasPresenterInterface
 from mantidqtinterfaces.Muon.GUI.FrequencyDomainAnalysis.\
-    plot_widget.dual_plot_maxent_pane.dual_plot_maxent_pane_presenter import DualPlotMaxentPanePresenter
+    plot_widget.dual_plot_maxent_pane.dual_plot_maxent_pane_presenter import DualPlotMaxentPanePresenter, \
+    FREQ_X_LABEL, FIELD_X_LABEL
 from mantidqtinterfaces.Muon.GUI.FrequencyDomainAnalysis. \
     plot_widget.dual_plot_maxent_pane.dual_plot_maxent_pane_model import DualPlotMaxentPaneModel
 from mantidqtinterfaces.Muon.GUI.FrequencyDomainAnalysis. \
@@ -147,11 +148,11 @@ class DualPlotMaxentPanePresenterTest(unittest.TestCase):
         self.presenter.clear_subplots.assert_called_once_with()
 
     def test_get_plot_type_MHz(self):
-        self.view.get_plot_type.return_value = "Maxent (MHz) and counts"
+        self.view.get_plot_type.return_value = FREQ_X_LABEL
         self.assertEqual("Frequency", self.presenter.get_plot_type())
 
     def test_get_plot_type_Gauss(self):
-        self.view.get_plot_type.return_value = "Maxent (Gauss) and counts"
+        self.view.get_plot_type.return_value = FIELD_X_LABEL
         self.assertEqual("Field", self.presenter.get_plot_type())
 
     def test_handle_data_changed(self):
@@ -165,6 +166,34 @@ class DualPlotMaxentPanePresenterTest(unittest.TestCase):
         self.presenter.handle_data_type_changed()
         self.presenter.handle_maxent_data_updated.assert_called_once_with("unit test")
         self.presenter.update_freq_units.notify_subscribers.assert_called_once_with()
+
+    def test_update_pane_freq(self):
+        self.context.frequency_context.unit = mock.Mock(return_value="MHz")
+        self.context.frequency_context.range = mock.MagicMock(return_value=[1,3])
+        self.context._frequency_context.switch_units_in_name = mock.Mock(return_value="unit test")
+        self.presenter._maxent_ws_name = "maxent"
+        self.presenter.handle_maxent_data_updated = mock.Mock()
+
+        self.presenter._update_pane()
+
+        self.context._frequency_context.switch_units_in_name.assert_called_once_with("maxent")
+        self.figure_presenter.set_plot_range.assert_called_once_with([1, 3])
+        self.view.set_plot_type.assert_called_once_with(FREQ_X_LABEL)
+        self.presenter.handle_maxent_data_updated.assert_called_once_with("unit test")
+
+    def test_update_pane_field(self):
+        self.context.frequency_context.unit = mock.Mock(return_value="Gauss")
+        self.context.frequency_context.range = mock.MagicMock(return_value=[1,3])
+        self.context._frequency_context.switch_units_in_name = mock.Mock(return_value="unit test")
+        self.presenter._maxent_ws_name = "maxent"
+        self.presenter.handle_maxent_data_updated = mock.Mock()
+
+        self.presenter._update_pane()
+
+        self.context._frequency_context.switch_units_in_name.assert_called_once_with("maxent")
+        self.figure_presenter.set_plot_range.assert_called_once_with([1, 3])
+        self.view.set_plot_type.assert_called_once_with(FIELD_X_LABEL)
+        self.presenter.handle_maxent_data_updated.assert_called_once_with("unit test")
 
 
 if __name__ == '__main__':

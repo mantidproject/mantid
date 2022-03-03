@@ -9,7 +9,7 @@
 from matplotlib import rcParams
 from numpy import isclose
 
-from mantidqt.widgets.plotconfigdialog.colorselector import convert_color_to_hex
+from mantid.plots.utility import convert_color_to_hex
 from workbench.plotting.plotscriptgenerator.utils import convert_args_to_string
 
 BASE_SUBPLOTS_COMMAND = "plt.subplots({})"

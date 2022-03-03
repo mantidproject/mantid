@@ -10,7 +10,8 @@ from unittest import mock
 from unittest.mock import patch
 from numpy import isnan, nan
 from mantid.kernel import UnitParams, UnitParametersMap
-from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.fitting.data_handling.data_model import FittingDataModel
+from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.fitting.data_handling.data_model import \
+    FittingDataModel
 from testhelpers import assertRaisesNothing
 
 data_model_path = "mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.fitting.data_handling.data_model"
@@ -241,16 +242,20 @@ class TestFittingDataModel(unittest.TestCase):
 
     @patch(data_model_path + ".FittingDataModel.update_log_workspace_group")
     def test_update_workspace_name(self, mock_update_log_ws_group):
-        self.model._data_workspaces.add("name1", loaded_ws=self.mock_ws, bgsub_ws=self.mock_ws, bg_params=[True, 80, 1000, False])
+        self.model._data_workspaces.add("name1", loaded_ws=self.mock_ws, bgsub_ws=self.mock_ws,
+                                        bg_params=[True, 80, 1000, False])
         self.model._data_workspaces.add("name2", loaded_ws=self.mock_ws, bgsub_ws=self.mock_ws)
-        self.model._log_values = {"name1": {"log_name1" : 1}, "name2": {"log_name1": 2}}
+        self.model._log_values = {"name1": {"log_name1": 1}, "name2": {"log_name1": 2}}
 
         self.model.update_workspace_name("name1", "new_name")
 
-        self.assertEqual({"new_name": self.mock_ws, "name2": self.mock_ws}, self.model._data_workspaces.get_loaded_ws_dict())
-        self.assertEqual({"new_name": self.mock_ws, "name2": self.mock_ws}, self.model._data_workspaces.get_bgsub_ws_dict())
-        self.assertEqual({"name2":[], "new_name": [True, 80, 1000, False]}, self.model._data_workspaces.get_bg_params_dict())
-        self.assertEqual({"new_name": {"log_name1" : 1}, "name2": {"log_name1": 2}}, self.model._log_values)
+        self.assertEqual({"new_name": self.mock_ws, "name2": self.mock_ws},
+                         self.model._data_workspaces.get_loaded_ws_dict())
+        self.assertEqual({"new_name": self.mock_ws, "name2": self.mock_ws},
+                         self.model._data_workspaces.get_bgsub_ws_dict())
+        self.assertEqual({"name2": [], "new_name": [True, 80, 1000, False]},
+                         self.model._data_workspaces.get_bg_params_dict())
+        self.assertEqual({"new_name": {"log_name1": 1}, "name2": {"log_name1": 2}}, self.model._log_values)
 
     @patch(data_model_path + ".FittingDataModel.remove_all_log_rows")
     @patch(data_model_path + ".FittingDataModel.create_log_workspace_group")
@@ -407,7 +412,8 @@ class TestFittingDataModel(unittest.TestCase):
         mock_groupws.side_effect = lambda wslist, OutputWorkspace: wslist
         # setup fit results
         self.model._data_workspaces.add("name1", loaded_ws=self.mock_ws)
-        self.model._data_workspaces.add("name2", loaded_ws=self.mock_ws)
+        self.model._data_workspaces.add("name2", loaded_ws=self.mock_ws, bgsub_ws=self.mock_ws,
+                                        bgsub_ws_name="name2_bgsub", bg_params=[True])
         self.model._log_workspaces = mock.MagicMock()
         self.model._log_workspaces.name.return_value = 'some_log'
         func_str = 'name=Gaussian,Height=11,PeakCentre=40000,Sigma=54;name=Gaussian,Height=10,PeakCentre=30000,Sigma=51'
@@ -470,10 +476,10 @@ class TestFittingDataModel(unittest.TestCase):
                                                                                             mock_groupws)
         mock_ws_list.append(mock.MagicMock())  # adding an additional parameter into model for name2
         func_str2 = self.model._fit_results['name1']['model'] + ';name=FlatBackground,A0=1'
-        self.model._fit_results['name2'] = {'model': func_str2, 'status': 'success',
-                                            'results': dict(self.model._fit_results['name1']['results'],
-                                                            FlatBackground_A0=[[1.0, 0.1]]),
-                                            'costFunction': 2.0}
+        self.model._fit_results['name2_bgsub'] = {'model': func_str2, 'status': 'success',
+                                                  'results': dict(self.model._fit_results['name1']['results'],
+                                                                  FlatBackground_A0=[[1.0, 0.1]]),
+                                                  'costFunction': 2.0}
         self.model.create_fit_tables()
 
         # test the workspaces were created and added to fit_workspaces
@@ -484,15 +490,15 @@ class TestFittingDataModel(unittest.TestCase):
                                        self.model._fit_results['name1']['status'],
                                        self.model._fit_results['name1']['model']], 0)
         mock_writerow.assert_any_call(mock_create_table.return_value,
-                                      ['name2', self.model._fit_results['name2']['costFunction'],
+                                      ['name2_bgsub', self.model._fit_results['name2_bgsub']['costFunction'],
                                        self.model._fit_results['name1']['status'],
-                                       self.model._fit_results['name2']['model']], 1)
+                                       self.model._fit_results['name2_bgsub']['model']], 1)
         # check the matrix workspaces corresponding to the fit parameters
         # 4 unique params plus the peak centre converted to dSpacing
         ws_names = [mock_create_ws.mock_calls[iws][2]['OutputWorkspace'] for iws in range(0, 5)]
         # get list of all unique params across both models
         param_names = list(set(list(self.model._fit_results['name1']['results'].keys()) + list(
-            self.model._fit_results['name2']['results'].keys())))
+            self.model._fit_results['name2_bgsub']['results'].keys())))
         # test only table for unique parameter
         self.assertEqual(sorted(ws_names), sorted(param_names))
 

@@ -233,7 +233,7 @@ class AxisEditor(PropertiesEditorBase):
             fmt = ScalarFormatter(useOffset=True)
         elif formatter == SCIENTIFIC_FORMAT:
             fmt = LogFormatterSciNotation()
-        getattr(self.axes, 'get_{}axis'.format(self.axis_id))().set_major_formatter(fmt)
+        getattr(self.axes, '{}axis'.format(self.axis_id)).set_major_formatter(fmt)
         return
 
 

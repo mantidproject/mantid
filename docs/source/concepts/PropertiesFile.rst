@@ -151,12 +151,15 @@ you may want to alter and those properties are detailed below.
 |                                                 |feedback.                                          |                             |
 +-------------------------------------------------+---------------------------------------------------+-----------------------------+
 | ``logging.channels.consoleChannel.class``       | Select where log messages appear.                 | ``ConsoleChannel``,         |
-|                                                 | ``ConsoleChannel`` writes to stdlog.              | ``StdoutChannel``, or       |
-|                                                 | ``StdoutChannel`` writes to stdout and can be     | ``PythonStdoutChannel``     |
-|                                                 | redirected using pipes.                           |                             |
+|                                                 | ``ConsoleChannel`` writes to stdlog.              | ``StdoutChannel``,          |
+|                                                 | ``StdoutChannel`` writes to stdout and can be     | ``PythonStdoutChannel``, or |
+|                                                 | redirected using pipes.                           | ``PythonLoggingChannel``    |
 |                                                 | ``PythonStdoutChannel`` writes to stdout through  |                             |
 |                                                 | python and is visible in jupyter notebooks.       |                             |
-+-- -----------------------------------------------+---------------------------------------------------+-----------------------------+
+|                                                 | ``PythonLoggingChannel`` sends messages to a      |                             |
+|                                                 | logger called ``'Mantid'`` from the ``logging``   |                             |
+|                                                 | framework of Python's standard library.           |                             |
++-------------------------------------------------+---------------------------------------------------+-----------------------------+
 
 The logging priority levels for the file logging and console logging can also be adjusted in python using the command:
 

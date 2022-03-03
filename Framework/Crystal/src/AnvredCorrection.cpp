@@ -188,7 +188,7 @@ void AnvredCorrection::exec() {
   // Loop over the spectra
   PARALLEL_FOR_IF(Kernel::threadSafe(*m_inputWS, *correctionFactors))
   for (int64_t i = 0; i < int64_t(numHists); ++i) {
-    PARALLEL_START_INTERUPT_REGION
+    PARALLEL_START_INTERRUPT_REGION
 
     // If no detector is found, skip onto the next spectrum
     if (!spectrumInfo.hasDetectors(i) || spectrumInfo.isMonitor(i))
@@ -252,9 +252,9 @@ void AnvredCorrection::exec() {
 
     prog.report();
 
-    PARALLEL_END_INTERUPT_REGION
+    PARALLEL_END_INTERRUPT_REGION
   }
-  PARALLEL_CHECK_INTERUPT_REGION
+  PARALLEL_CHECK_INTERRUPT_REGION
 
   // set the absorption correction values in the run parameters
   API::Run &run = correctionFactors->mutableRun();
@@ -289,7 +289,7 @@ void AnvredCorrection::execEvent() {
   // Loop over the spectra
   PARALLEL_FOR_IF(Kernel::threadSafe(*eventW, *correctionFactors))
   for (int64_t i = 0; i < int64_t(numHists); ++i) {
-    PARALLEL_START_INTERUPT_REGION
+    PARALLEL_START_INTERRUPT_REGION
 
     // share bin boundaries, and leave Y and E nullptr
     correctionFactors->setHistogram(i, eventW->binEdges(i));
@@ -350,9 +350,9 @@ void AnvredCorrection::execEvent() {
 
     prog.report();
 
-    PARALLEL_END_INTERUPT_REGION
+    PARALLEL_END_INTERRUPT_REGION
   }
-  PARALLEL_CHECK_INTERUPT_REGION
+  PARALLEL_CHECK_INTERRUPT_REGION
 
   // set the absorption correction values in the run parameters
   API::Run &run = correctionFactors->mutableRun();

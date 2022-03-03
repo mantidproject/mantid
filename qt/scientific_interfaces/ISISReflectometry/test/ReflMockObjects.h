@@ -164,6 +164,7 @@ public:
   MOCK_METHOD0(notifyAutoreductionResumed, void());
   MOCK_METHOD1(notifyInstrumentChanged, void(std::string const &));
   MOCK_METHOD0(restoreDefaults, void());
+  MOCK_METHOD(bool, hasValidSettings, (), (const, noexcept, override));
 };
 
 class MockInstrumentPresenter : public IInstrumentPresenter {
@@ -302,6 +303,7 @@ public:
 class MockDecoder : public IDecoder {
 public:
   MOCK_METHOD3(decodeBatch, void(const IMainWindowView *, int, const QMap<QString, QVariant> &));
+  MOCK_CONST_METHOD1(decodeVersion, size_t(const QMap<QString, QVariant> &));
 };
 
 class MockPythonRunner : public IPythonRunner {

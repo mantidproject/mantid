@@ -146,6 +146,7 @@ _translations = {
     'Louise McCann': 'McCann, Louise',
     'louisemccann': 'McCann, Louise',
     'Gagik Vardanyan': 'Vardanyan, Gagik',
+    'gvardany': 'Vardanyan, Gagik',
     'Verena Reimund': 'Reimund, Verena',
     'reimundILL': 'Reimund, Verena',
     'Krzysztof Dymkowski': 'Dymkowski, Krzysztof',
@@ -257,6 +258,7 @@ _translations = {
     'Guillaume Communie': 'Communie, Guillaume',
     'Dominik Arominski': 'Arominski, Dominik',
     'Sarah Foxley': 'Foxley, Sarah',
+    'sf1919': 'Foxley, Sarah',
     'Sam Tygier': 'Tygier, Sam',
     'Silke Schomann': 'Schomann, Silke',
     'Jenna Delozier': 'Delozier, Jenna',
@@ -275,7 +277,8 @@ _translations = {
     'stonecoldhughes': 'Hughes, Harry',
     'Jesse McGaha': 'McGaha, Jesse',
     'jrmcgaha-dev': 'McGaha, Jesse',
-    'Zachary Morgan': 'Morgan, Zachary'
+    'Zachary Morgan': 'Morgan, Zachary',
+    'MialLewis': 'Lewis, Mial'
 }
 
 # Used to ensure a Git author does not appear in any of the DOIs.  This is NOT

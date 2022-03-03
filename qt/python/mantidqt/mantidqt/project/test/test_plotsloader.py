@@ -34,7 +34,7 @@ class PlotsLoaderTest(unittest.TestCase):
         mantid.plots.axesfunctions.plot = mock.MagicMock()
         self.dictionary = {u'legend': {u'exists': False}, u'lines': [],
                            u'properties': {u'axisOn': True, u'bounds': (0.0, 0.0, 0.0, 0.0), u'dynamic': True,
-                                           u'frameOn': True, u'visible': True,
+                                           u'frameOn': True, u'visible': True, u'facecolor': None,
                                            u'xAxisProperties': {u'fontSize': 10.0,
                                                                 u'gridStyle': {u'gridOn': False},
                                                                 u'majorTickFormat': None,

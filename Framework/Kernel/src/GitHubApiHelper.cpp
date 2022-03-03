@@ -96,20 +96,12 @@ std::string getApiToken() {
 //----------------------------------------------------------------------------------------------
 /** Constructor
  */
-GitHubApiHelper::GitHubApiHelper() : InternetHelper() {
-  // set up the api token so it can be quickly added to the authentication
-  m_api_token = getApiToken();
-
-  addAuthenticationToken();
-}
+GitHubApiHelper::GitHubApiHelper() : InternetHelper(), m_api_token(getApiToken()) { addAuthenticationToken(); }
 
 //----------------------------------------------------------------------------------------------
 /** Constructor
  */
-GitHubApiHelper::GitHubApiHelper(const Kernel::ProxyInfo &proxy) : InternetHelper(proxy) {
-  // set up the api token so it can be quickly added to the authentication
-  m_api_token = getApiToken();
-
+GitHubApiHelper::GitHubApiHelper(const Kernel::ProxyInfo &proxy) : InternetHelper(proxy), m_api_token(getApiToken()) {
   addAuthenticationToken();
 }
 
@@ -127,7 +119,7 @@ void GitHubApiHelper::addAuthenticationToken() {
 
 bool GitHubApiHelper::isAuthenticated() { return (m_headers.find("Authorization") != m_headers.end()); }
 
-void GitHubApiHelper::processResponseHeaders(const Poco::Net::HTTPResponse &res) {
+void GitHubApiHelper::processResponseHeaders(const HTTPResponse &res) {
   // get github api rate limit information if available;
   int rateLimitRemaining = 0;
   int rateLimitLimit;
@@ -165,36 +157,38 @@ std::string GitHubApiHelper::getRateLimitDescription() {
   return formatRateLimit(limit, remaining, expires);
 }
 
-int GitHubApiHelper::processAnonymousRequest(Poco::URI &uri, std::ostream &responseStream) {
+Kernel::InternetHelper::HTTPStatus GitHubApiHelper::processAnonymousRequest(Poco::URI &uri,
+                                                                            std::ostream &responseStream) {
   g_log.debug("Repeating API call anonymously\n");
   removeHeader("Authorization");
   m_api_token = ""; // all future calls are anonymous
   return this->sendRequest(uri.toString(), responseStream);
 }
 
-int GitHubApiHelper::sendRequestAndProcess(HTTPClientSession &session, Poco::URI &uri, std::ostream &responseStream) {
+InternetHelper::HTTPStatus GitHubApiHelper::sendRequestAndProcess(HTTPClientSession &session, Poco::URI &uri,
+                                                                  std::ostream &responseStream) {
   // create a request
   this->createRequest(uri);
   session.sendRequest(*m_request) << m_body;
 
   std::istream &rs = session.receiveResponse(*m_response);
-  int retStatus = m_response->getStatus();
-  g_log.debug() << "Answer from web: " << retStatus << " " << m_response->getReason() << "\n";
+  const auto retStatus = static_cast<HTTPStatus>(m_response->getStatus());
+  g_log.debug() << "Answer from web: " << static_cast<int>(retStatus) << " " << m_response->getReason() << "\n";
 
-  if (retStatus == HTTP_OK || (retStatus == HTTP_CREATED && m_method == HTTPRequest::HTTP_POST)) {
+  if (retStatus == HTTPStatus::OK || (retStatus == HTTPStatus::CREATED && m_method == HTTPRequest::HTTP_POST)) {
     Poco::StreamCopier::copyStream(rs, responseStream);
     if (m_response)
       processResponseHeaders(*m_response);
     else
       g_log.warning("Response is null pointer");
     return retStatus;
-  } else if ((retStatus == HTTP_FORBIDDEN && isAuthenticated()) || (retStatus == HTTP_UNAUTHORIZED) ||
-             (retStatus == HTTP_NOT_FOUND)) {
+  } else if ((retStatus == HTTPStatus::FORBIDDEN && isAuthenticated()) || (retStatus == HTTPStatus::UNAUTHORIZED) ||
+             (retStatus == HTTPStatus::NOT_FOUND)) {
     // If authentication fails you can get HTTP_UNAUTHORIZED or HTTP_NOT_FOUND
     // If the limit runs out you can get HTTP_FORBIDDEN
     return this->processAnonymousRequest(uri, responseStream);
   } else if (isRelocated(retStatus)) {
-    return this->processRelocation(*m_response, responseStream);
+    return static_cast<InternetHelper::HTTPStatus>(this->processRelocation(*m_response, responseStream));
   } else {
     Poco::StreamCopier::copyStream(rs, responseStream);
     return processErrorStates(*m_response, rs, uri.toString());

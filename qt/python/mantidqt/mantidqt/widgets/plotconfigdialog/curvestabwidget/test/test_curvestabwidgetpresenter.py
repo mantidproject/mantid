@@ -16,9 +16,8 @@ from numpy import array_equal
 
 from mantid.simpleapi import CreateWorkspace
 from mantid.plots import datafunctions
-from mantid.plots.utility import MantidAxType
+from mantid.plots.utility import convert_color_to_hex, MantidAxType
 from unittest.mock import Mock, patch, call
-from mantidqt.widgets.plotconfigdialog.colorselector import convert_color_to_hex
 from mantidqt.widgets.plotconfigdialog.curvestabwidget import CurveProperties
 from mantidqt.widgets.plotconfigdialog.curvestabwidget.presenter import (
     CurvesTabWidgetPresenter, remove_curve_from_ax, curve_has_errors)

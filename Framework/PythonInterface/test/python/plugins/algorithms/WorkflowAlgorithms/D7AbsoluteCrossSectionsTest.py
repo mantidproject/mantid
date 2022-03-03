@@ -29,6 +29,7 @@ class D7AbsoluteCrossSectionsTest(unittest.TestCase):
         Load('396993_reduced.nxs', OutputWorkspace='396993_reduced.nxs')
         GroupWorkspaces('396993_reduced.nxs', OutputWorkspace='vanadium_data') # workaround for a single-entry workspace group
         Load('397004_reduced.nxs', OutputWorkspace='sample_data')
+        Load('395639_reduced.nxs', OutputWorkspace='sample_tof_data')
 
     def setUp(self):
         self._sampleProperties = {'SampleMass': 2.93, 'FormulaUnitMass': 182.56, 'SampleSpin':0.5,
@@ -47,7 +48,7 @@ class D7AbsoluteCrossSectionsTest(unittest.TestCase):
 
     def test_uniaxial_separation(self):
         D7AbsoluteCrossSections(InputWorkspace='vanadium_uniaxial', OutputWorkspace='uniaxial',
-                                CrossSectionSeparationMethod='Uniaxial')
+                                CrossSectionSeparationMethod='Z')
         self._check_output('uniaxial', 132, 1, 2, onlySeparation=True)
 
     def test_xyz_separation(self):
@@ -88,19 +89,27 @@ class D7AbsoluteCrossSectionsTest(unittest.TestCase):
                                 SampleAndEnvironmentProperties=self._sampleProperties, AbsoluteUnitsNormalisation=False)
         self._check_output('normalised_sample_incoherent', 132, 1, 3, onlySeparation=False)
 
-    def _check_output(self, ws, blocksize, spectra, nEntries, onlySeparation):
+    def test_tof_data_normalisation(self):
+        D7AbsoluteCrossSections(InputWorkspace='sample_tof_data', OutputWorkspace='normalised_tof',
+                                CrossSectionSeparationMethod='Z', NormalisationMethod='Vanadium',
+                                SampleAndEnvironmentProperties=self._sampleProperties, AbsoluteUnitsNormalisation=False,
+                                VanadiumInputWorkspace='vanadium_data', MeasurementTechnique='TOF',
+                                OutputUnits='Qw')
+        self._check_output('normalised_tof', 225, 339, 3, onlySeparation=False, isHistogram=True)
+
+    def _check_output(self, ws, blocksize, spectra, nEntries, onlySeparation, isHistogram=False):
         self.assertTrue(mtd[ws])
         self.assertTrue(isinstance(mtd[ws], WorkspaceGroup))
         self.assertTrue(mtd[ws].getNumberOfEntries(), nEntries)
         for entry in mtd[ws]:
             self.assertTrue(isinstance(entry, MatrixWorkspace))
-            self.assertTrue(entry.isDistribution())
             if onlySeparation:
                 name = entry.name()
                 name = name[name.rfind("_")+1:]
-                self.assertTrue(name in ['Total', 'Coherent', 'Incoherent', 'AverageMagnetic', 'NSFMagnetic', 'SFMagnetic'])
-            self.assertTrue(not entry.isHistogramData())
-            self.assertTrue(entry.isDistribution())
+                self.assertTrue(name in ['Total', 'Coherent', 'Incoherent', 'AverageMagnetic', 'NSFMagnetic',
+                                         'SFMagnetic'])
+            self.assertEquals(entry.isHistogramData(), isHistogram)
+            self.assertTrue(not entry.isDistribution())
             self.assertEqual(entry.blocksize(), blocksize)
             self.assertEqual(entry.getNumberHistograms(), spectra)
             self.assertTrue(entry.getHistory())

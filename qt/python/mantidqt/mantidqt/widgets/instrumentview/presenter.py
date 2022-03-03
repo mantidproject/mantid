@@ -12,6 +12,7 @@ Contains the presenter for displaying the InstrumentWidget
 """
 from qtpy.QtCore import Qt
 
+from mantid.api import AnalysisDataService
 from mantidqt.widgets.observers.ads_observer import WorkspaceDisplayADSObserver
 from mantidqt.widgets.observers.observing_presenter import ObservingPresenter
 from .view import InstrumentView
@@ -23,14 +24,22 @@ class InstrumentViewPresenter(ObservingPresenter):
     It has no model as its an old widget written in C++ with out MVP
     """
 
+    """
+    @param ws : The workspace object OR workspace name.
+    """
     def __init__(self, ws, parent=None, window_flags=Qt.Window, ads_observer=None, view: InstrumentView=None):
         super(InstrumentViewPresenter, self).__init__()
         self.ws_name = str(ws)
 
         self.container = view
         if not self.container:
-            self.container = InstrumentView(parent=parent, presenter=self,
-                                            name=self.ws_name, window_flags=window_flags)
+            workspace = AnalysisDataService.retrieve(self.ws_name)
+            workspace.readLock()
+            try:
+                self.container = InstrumentView(parent=parent, presenter=self,
+                                                name=self.ws_name, window_flags=window_flags)
+            finally:
+                workspace.unlock()
 
         if ads_observer:
             self.ads_observer = ads_observer
@@ -58,6 +67,9 @@ class InstrumentViewPresenter(ObservingPresenter):
 
     def show_view(self):
         self.container.show()
+
+    def save_image(self, filename):
+        self.container.save_image(filename)
 
     def get_current_tab(self):
         return self.container.get_current_tab()
@@ -140,7 +152,7 @@ class InstrumentViewManager:
                 # find the corresponding object if they have the same workspace name
                 loc = InstrumentViewManager.view_dict[ws_name].index(view_obj)
                 del InstrumentViewManager.view_dict[ws_name][loc]
-                # clear the dictonary entry if it was the last item
+                # clear the dictionary entry if it was the last item
                 if len(InstrumentViewManager.view_dict[ws_name]) == 0:
                     del InstrumentViewManager.view_dict[ws_name]
         except KeyError as ke:

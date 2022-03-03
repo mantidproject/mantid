@@ -123,7 +123,7 @@ int PeaksWorkspace::getNumberPeaks() const { return int(m_peaks.size()); }
 //---------------------------------------------------------------------------------------------
 /** @return the convention
  */
-std::string PeaksWorkspace::getConvention() const { return convention; }
+std::string PeaksWorkspace::getConvention() const { return m_convention; }
 
 //---------------------------------------------------------------------------------------------
 /** Removes the indicated peak

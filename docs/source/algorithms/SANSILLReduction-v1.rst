@@ -132,59 +132,59 @@ This example below performs a complete reduction for D11 data.
     LoadNexusProcessed(Filename='D11_mask.nxs', OutputWorkspace='mask')
 
     # Process the dark current Cd/B4C for water
-    SANSILLReduction(Run='010455.nxs', ProcessAs='Absorber', OutputWorkspace='Cdw')
+    SANSILLReduction(Run='010455.nxs', ProcessAs='Absorber', OutputWorkspace='Cdw', Version=1)
 
     # Process the empty beam for water
-    SANSILLReduction(Run='010414.nxs', ProcessAs='Beam', AbsorberInputWorkspace='Cdw', OutputWorkspace='Dbw')
+    SANSILLReduction(Run='010414.nxs', ProcessAs='Beam', AbsorberInputWorkspace='Cdw', OutputWorkspace='Dbw', Version=1)
 
     # Water container transmission
     SANSILLReduction(Run='010446.nxs', ProcessAs='Transmission',
                      AbsorberInputWorkspace='Cdw', BeamInputWorkspace='Dbw',
-                     OutputWorkspace='wc_tr')
+                     OutputWorkspace='wc_tr', Version=1)
     print('Water container transmission is {0:.3f}'.format(mtd['wc_tr'].readY(0)[0]))
 
     # Water container
     SANSILLReduction(Run='010454.nxs', ProcessAs='Container',
                      AbsorberInputWorkspace='Cdw', BeamInputWorkspace='Dbw',
-                     TransmissionInputWorkspace='wc_tr', OutputWorkspace='wc')
+                     TransmissionInputWorkspace='wc_tr', OutputWorkspace='wc', Version=1)
 
     # Water transmission
     SANSILLReduction(Run='010445.nxs', ProcessAs='Transmission',
-                     AbsorberInputWorkspace='Cdw', BeamInputWorkspace='Dbw', OutputWorkspace='w_tr')
+                     AbsorberInputWorkspace='Cdw', BeamInputWorkspace='Dbw', OutputWorkspace='w_tr', Version=1)
     print('Water transmission is {0:.3f}'.format(mtd['w_tr'].readY(0)[0]))
 
     # Water
     SANSILLReduction(Run='010453.nxs', ProcessAs='Sample', MaskedInputWorkspace='mask',
                      AbsorberInputWorkspace='Cdw', ContainerInputWorkspace='wc',
                      BeamInputWorkspace='Dbw', TransmissionInputWorkspace='wc_tr',
-                     SensitivityOutputWorkspace='sens', OutputWorkspace='water')
+                     SensitivityOutputWorkspace='sens', OutputWorkspace='water', Version=1)
 
     # Process the dark current Cd/B4C for sample
-    SANSILLReduction(Run='010462.nxs', ProcessAs='Absorber', OutputWorkspace='Cd')
+    SANSILLReduction(Run='010462.nxs', ProcessAs='Absorber', OutputWorkspace='Cd', Version=1)
 
     # Process the empty beam for sample
-    SANSILLReduction(Run='010413.nxs', ProcessAs='Beam', AbsorberInputWorkspace='Cd', OutputWorkspace='Db')
+    SANSILLReduction(Run='010413.nxs', ProcessAs='Beam', AbsorberInputWorkspace='Cd', OutputWorkspace='Db', Version=1)
 
     # Sample container transmission
     SANSILLReduction(Run='010444.nxs', ProcessAs='Transmission',
-                     AbsorberInputWorkspace='Cd', BeamInputWorkspace='Dbw', OutputWorkspace='sc_tr')
+                     AbsorberInputWorkspace='Cd', BeamInputWorkspace='Dbw', OutputWorkspace='sc_tr', Version=1)
     print('Sample container transmission is {0:.3f}'.format(mtd['sc_tr'].readY(0)[0]))
 
     # Sample container
     SANSILLReduction(Run='010460.nxs', ProcessAs='Container',
                      AbsorberInputWorkspace='Cd', BeamInputWorkspace='Db',
-                     TransmissionInputWorkspace='sc_tr', OutputWorkspace='sc')
+                     TransmissionInputWorkspace='sc_tr', OutputWorkspace='sc', Version=1)
 
     # Sample transmission
     SANSILLReduction(Run='010585.nxs', ProcessAs='Transmission',
-                     AbsorberInputWorkspace='Cd', BeamInputWorkspace='Dbw', OutputWorkspace='s_tr')
+                     AbsorberInputWorkspace='Cd', BeamInputWorkspace='Dbw', OutputWorkspace='s_tr', Version=1)
     print('Sample transmission is {0:.3f}'.format(mtd['s_tr'].readY(0)[0]))
 
     # Sample
     SANSILLReduction(Run='010569.nxs', ProcessAs='Sample', MaskedInputWorkspace='mask',
                      AbsorberInputWorkspace='Cd', ContainerInputWorkspace='sc',
                      BeamInputWorkspace='Db', SensitivityInputWorkspace='sens',
-                     TransmissionInputWorkspace='s_tr', OutputWorkspace='sample_flux')
+                     TransmissionInputWorkspace='s_tr', OutputWorkspace='sample_flux', Version=1)
 
     # Convert to I(Q)
     SANSILLIntegration(InputWorkspace='sample_flux', OutputWorkspace='iq')

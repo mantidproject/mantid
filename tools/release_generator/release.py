@@ -286,7 +286,9 @@ if __name__ == '__main__':
     print('milestone:', args.milestone)
     release_root = getReleaseRoot()
     print('     root:', release_root)
-    milestone_link='https://github.com/mantidproject/mantid/pulls?utf8=%E2%9C%93&q=is%3Apr+' \
+    # Encode the milestone to remove spaces for the GitHub filter URL
+    sanitized_milestone = args.milestone.replace(' ', '+')
+    milestone_link ='https://github.com/mantidproject/mantid/pulls?utf8=%E2%9C%93&q=is%3Apr+' \
         + f'milestone%3A%22{sanitized_milestone}%22+is%3Amerged'
     # add the new sub-site to the index
     addToReleaseList(release_root, args.release)
@@ -296,14 +298,11 @@ if __name__ == '__main__':
     if not os.path.exists(release_root):
         print('creating directory', release_root)
         os.makedirs(release_root)
-
     release_link = '\n:ref:`Release {0} <{1}>`'.format(args.release[1:], args.release)
-    # Encode the milestone to remove spaces for the GitHub filter URL
-    sanitized_milestone = args.milestone.replace(' ', '+')
 
     for filename in DOCS.keys():
         version_maj_min=args.release[1:-2]
-        contents = DOCS[filename].format(sanitized_milestone=sanitized_milestone, version=args.release[1:],
+        contents = DOCS[filename].format(milestone_link=milestone_link, version=args.release[1:],
                                          version_maj_min=version_maj_min,
                                          mantid_doi=MANTID_DOI.format(version_maj_min=version_maj_min))
         filename = os.path.join(release_root, filename)

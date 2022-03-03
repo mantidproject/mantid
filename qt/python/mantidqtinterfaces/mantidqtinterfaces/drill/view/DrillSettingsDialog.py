@@ -6,7 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 
 import os
-from qtpy.QtCore import QObject, Signal
+from qtpy.QtCore import QObject, Signal, QEvent
 
 from qtpy.QtWidgets import QDialog, QComboBox, QCheckBox, QLineEdit, QLabel
 
@@ -14,6 +14,26 @@ from qtpy import uic
 
 from mantidqt.widgets.filefinderwidget import FileFinderWidget
 from mantidqt.widgets.workspaceselector import WorkspaceSelector
+
+
+class MouseScrollEventFilter(QObject):
+    """
+    Event filter to eat the scroll event. This is used on comboboxes that appear
+    in potential scroll area to avoid scrolling the combobox while scrolling in
+    the dialog.
+    """
+    def __init__(self):
+        super(MouseScrollEventFilter, self).__init__()
+
+    def eventFilter(self, obj, event):
+        """
+        Override QObject::eventFilter
+
+        Args:
+            obj (QObject): object on which the event is called
+            event (QEvent): event received
+        """
+        return event.type() == QEvent.Wheel
 
 
 class DrillSetting(QObject):
@@ -64,6 +84,8 @@ class DrillSetting(QObject):
 
         elif (settingType == "combobox"):
             self._widget = QComboBox()
+            self._widgetEventFilter = MouseScrollEventFilter()
+            self._widget.installEventFilter(self._widgetEventFilter)
             self._widget.addItems(values)
             self._widget.currentTextChanged.connect(
                     lambda t : self.valueChanged.emit(name)
@@ -157,6 +179,11 @@ class DrillSettingsDialog(QDialog):
 
     valueChanged = Signal(str)  # setting name
 
+    """
+    Sent when the apply button is clicked.
+    """
+    applied = Signal()
+
     def __init__(self, presenter, parent=None):
         """
         Initialize ths dialog. Connect the static buttons.
@@ -169,7 +196,7 @@ class DrillSettingsDialog(QDialog):
         self.okButton.clicked.connect(self.accept)
         self.cancelButton.clicked.connect(self.reject)
         self.applyButton.clicked.connect(
-                lambda : self.accepted.emit()
+                lambda : self.applied.emit()
                 )
 
         # widgets
