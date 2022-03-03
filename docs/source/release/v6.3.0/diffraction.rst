@@ -11,6 +11,7 @@ Diffraction Changes
 
 Powder Diffraction
 ------------------
+- Add in the capability to normalize data with collection time in :ref:`HB2AReduce <algm-HB2AReduce>`.
 * :ref:`StripVanadiumPeaks <algm-StripVanadiumPeaks-v2>` has 3 additional peak positions of 0.41192, 0.4279, 0.4907 angstroms.
 - `GetDetOffsetsMultiPeaks`, which is deprecate since v6.2.0, is removed.
 - `CalibrateRectangularDetectors`, which is deprecate since v6.2.0, is removed. And system test CalibrateRectangularDetectors_Test is removed.
