@@ -12,7 +12,7 @@ from qtpy.QtWidgets import QMessageBox
 from mantid.simpleapi import mtd, Plus, RenameWorkspace
 from mantid.api import AlgorithmManager, PreviewType
 from mantid.kernel import logger
-from _dataobjects import Workspace2D, EventWorkspace
+from mantid.dataobjects import Workspace2D, EventWorkspace
 
 from .PreviewFinder import PreviewFinder, AcquisitionType
 from .memoryManager import MemoryManager
