@@ -29,9 +29,9 @@ auto LookupTableValidator::operator()(ContentType const &lookupTableContent, dou
   auto validationErrors = std::vector<InvalidLookupRowCells>();
   validateAllLookupRows(lookupTableContent, lookupTable, validationErrors);
   // Now cross-check search criteria across all rows against each other (in case of duplicates etc.)
-  auto thetaValidationResult = validateSearchCriteria(lookupTable, thetaTolerance);
+  auto searchCriteriaValidationResult = validateSearchCriteria(lookupTable, thetaTolerance);
 
-  if (thetaValidationResult.isValid()) {
+  if (searchCriteriaValidationResult.isValid()) {
     if (validationErrors.empty()) {
       // No errors - return the valid table
       return ResultType(std::move(lookupTable));
@@ -42,7 +42,8 @@ auto LookupTableValidator::operator()(ContentType const &lookupTableContent, dou
   } else {
     // Mark all rows with the search criteria errors, then return both row and table errors
     appendSearchCriteriaErrorForAllRows(validationErrors, lookupTableContent.size());
-    return ResultType(LookupTableValidationError(std::move(validationErrors), thetaValidationResult.assertError()));
+    return ResultType(
+        LookupTableValidationError(std::move(validationErrors), searchCriteriaValidationResult.assertError()));
   }
 }
 
