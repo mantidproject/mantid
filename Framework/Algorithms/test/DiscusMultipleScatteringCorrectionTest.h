@@ -29,7 +29,7 @@ using namespace Mantid::Kernel;
 
 class DiscusMultipleScatteringCorrectionHelper : public Mantid::Algorithms::DiscusMultipleScatteringCorrection {
 public:
-  double interpolateSquareRoot(const Mantid::HistogramData::Histogram &histToInterpolate, double x) {
+  double interpolateSquareRoot(const Mantid::API::ISpectrum &histToInterpolate, double x) {
     return DiscusMultipleScatteringCorrection::interpolateSquareRoot(histToInterpolate, x);
   }
   void updateTrackDirection(Mantid::Geometry::Track &track, const double cosT, const double phi) {
@@ -327,7 +327,7 @@ public:
     auto ws = Mantid::DataObjects::create<Workspace2D>(
         1, Mantid::HistogramData::Histogram(Mantid::HistogramData::Points({0., 4., 16.}),
                                             Mantid::HistogramData::Counts({0., 2., 4.})));
-    auto interpY = alg.interpolateSquareRoot(ws->histogram(0), 9.0);
+    auto interpY = alg.interpolateSquareRoot(ws->getSpectrum(0), 9.0);
     TS_ASSERT_EQUALS(interpY, 3.0);
   }
 

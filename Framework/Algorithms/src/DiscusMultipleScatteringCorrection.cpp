@@ -331,7 +331,7 @@ void DiscusMultipleScatteringCorrection::exec() {
 
   MatrixWorkspace_sptr sigmaSSWS = getProperty("ScatteringCrossSection");
   if (sigmaSSWS)
-    m_sigmaSS = std::make_shared<HistogramData::Histogram>(sigmaSSWS->histogram(0));
+    m_sigmaSS = std::make_shared<DataObjects::Histogram1D>(sigmaSSWS->getSpectrum(0));
 
   const auto inputNbins = static_cast<int>(inputWS->blocksize());
   int nlambda = getProperty("NumberOfWavelengthPoints");
@@ -366,7 +366,8 @@ void DiscusMultipleScatteringCorrection::exec() {
   }
   const MatrixWorkspace &instrumentWS = useSparseInstrument ? *sparseWS : *inputWS;
 
-  m_instrument = inputWS->getInstrument();
+  m_refframe = inputWS->getInstrument()->getReferenceFrame();
+  m_sourcePos = inputWS->getInstrument()->getSource()->getPos();
   const auto nhists = useSparseInstrument ? static_cast<int64_t>(sparseWS->getNumberHistograms())
                                           : static_cast<int64_t>(inputWS->getNumberHistograms());
 
@@ -770,7 +771,7 @@ std::tuple<double, double> DiscusMultipleScatteringCorrection::new_vector(const 
 
 std::tuple<double, int> DiscusMultipleScatteringCorrection::sampleQW(const MatrixWorkspace_sptr &CumulativeProb,
                                                                      double x) {
-  return {interpolateSquareRoot(CumulativeProb->histogram(0), x), interpolateFlat(CumulativeProb->histogram(1), x)};
+  return {interpolateSquareRoot(CumulativeProb->getSpectrum(0), x), interpolateFlat(CumulativeProb->getSpectrum(1), x)};
 }
 
 /**
@@ -778,9 +779,8 @@ std::tuple<double, int> DiscusMultipleScatteringCorrection::sampleQW(const Matri
  * Used to lookup value in the cumulative probability distribution of Q S(Q) which
  * for flat S(Q) will be a quadratic
  */
-double DiscusMultipleScatteringCorrection::interpolateSquareRoot(const HistogramData::Histogram &histToInterpolate,
-                                                                 double x) {
-  assert(histToInterpolate.xMode() == HistogramData::Histogram::XMode::Points);
+double DiscusMultipleScatteringCorrection::interpolateSquareRoot(const ISpectrum &histToInterpolate, double x) {
+  assert(histToInterpolate.histogram().xMode() == HistogramData::Histogram::XMode::Points);
   if (x > histToInterpolate.x().back()) {
     return histToInterpolate.y().back();
   }
@@ -803,8 +803,7 @@ double DiscusMultipleScatteringCorrection::interpolateSquareRoot(const Histogram
 /**
  * Interpolate function using flat interpolation from previous point
  */
-double DiscusMultipleScatteringCorrection::interpolateFlat(const HistogramData::Histogram &histToInterpolate,
-                                                           double x) {
+double DiscusMultipleScatteringCorrection::interpolateFlat(const ISpectrum &histToInterpolate, double x) {
   auto &xHisto = histToInterpolate.x();
   auto &yHisto = histToInterpolate.y();
   if (x > xHisto.back()) {
@@ -825,11 +824,10 @@ double DiscusMultipleScatteringCorrection::interpolateFlat(const HistogramData::
  * @param x The x value to interpolate at
  * @return The exponential of the interpolated value
  */
-double DiscusMultipleScatteringCorrection::interpolateGaussian(const HistogramData::Histogram &histToInterpolate,
-                                                               double x) {
+double DiscusMultipleScatteringCorrection::interpolateGaussian(const ISpectrum &histToInterpolate, double x) {
   // could have written using points() method so it also worked on histogram data but found that the points
   // method was bottleneck on multithreaded code due to cow_ptr atomic_load
-  assert(histToInterpolate.xMode() == HistogramData::Histogram::XMode::Points);
+  assert(histToInterpolate.histogram().xMode() == HistogramData::Histogram::XMode::Points);
   if (x > histToInterpolate.x().back()) {
     return exp(histToInterpolate.y().back());
   }
@@ -873,7 +871,7 @@ double DiscusMultipleScatteringCorrection::interpolateGaussian(const HistogramDa
 double DiscusMultipleScatteringCorrection::Interpolate2D(MatrixWorkspace_sptr SOfQ, double w, double q) {
   double SQ;
   int iW;
-  auto wValues = dynamic_cast<NumericAxis *>(SOfQ->getAxis(1))->getValues();
+  auto &wValues = dynamic_cast<NumericAxis *>(SOfQ->getAxis(1))->getValues();
   try {
     // required w values will often equal the points in the S(Q,w) distribution so pick nearest value
     iW = Kernel::VectorHelper::indexOfValueFromCenters(wValues, w);
@@ -884,9 +882,9 @@ double DiscusMultipleScatteringCorrection::Interpolate2D(MatrixWorkspace_sptr SO
     if (m_importanceSampling)
       // the square root interpolation used to look up Q, w in InvPOfQ is based on flat interpolation of S(Q) so use
       // same interpolation here for consistency
-      SQ = interpolateFlat(SOfQ->histogram(iW), q);
+      SQ = interpolateFlat(SOfQ->getSpectrum(iW), q);
     else
-      SQ = interpolateGaussian(m_logSQ->histogram(iW), q);
+      SQ = interpolateGaussian(m_logSQ->getSpectrum(iW), q);
   } else
     SQ = 0.;
 
@@ -1092,13 +1090,13 @@ void DiscusMultipleScatteringCorrection::q_dir(Geometry::Track &track, MatrixWor
     std::tie(QQ, iW) = sampleQW(invPOfQ, rng.nextValue());
     k = getKf(m_SQWS, iW, kinc);
     // S(Q) not strictly needed here but useful to see if the higher values are indeed being returned
-    SQ = interpolateFlat(m_SQWS->histogram(iW), QQ);
+    SQ = interpolateFlat(m_SQWS->getSpectrum(iW), QQ);
     weight = weight * scatteringXSection;
   } else {
     std::tie(k, iW) = sampleKW(m_SQWS, rng, kinc);
     auto [qmin, qrange] = getKinematicRange(k, kinc);
     QQ = qmin + qrange * rng.nextValue();
-    SQ = interpolateGaussian(m_logSQ->histogram(iW), QQ);
+    SQ = interpolateGaussian(m_logSQ->getSpectrum(iW), QQ);
     weight = weight * scatteringXSection * SQ * QQ;
   }
   // T = 2theta
@@ -1218,19 +1216,19 @@ Geometry::Track DiscusMultipleScatteringCorrection::generateInitialTrack(Kernel:
   // generate random point on front surface of sample bounding box
   // The change of variables from length to t1 means this still samples the points fairly in the integration
   // volume even in shapes like cylinders where the depth varies across xy
-  auto frame = m_instrument->getReferenceFrame();
-  auto sourcePos = m_instrument->getSource()->getPos();
-  auto ptx = sampleBox.minPoint()[frame->pointingHorizontal()] +
-             rng.nextValue() * sampleBox.width()[frame->pointingHorizontal()];
-  auto pty = sampleBox.minPoint()[frame->pointingUp()] + rng.nextValue() * sampleBox.width()[frame->pointingUp()];
+  auto sampleBoxWidth = sampleBox.width();
+  auto ptx = sampleBox.minPoint()[m_refframe->pointingHorizontal()] +
+             rng.nextValue() * sampleBoxWidth[m_refframe->pointingHorizontal()];
+  auto pty =
+      sampleBox.minPoint()[m_refframe->pointingUp()] + rng.nextValue() * sampleBoxWidth[m_refframe->pointingUp()];
 
   // perhaps eventually also generate random point on the beam profile?
   auto ptOnBeamProfile = Kernel::V3D();
-  ptOnBeamProfile[frame->pointingHorizontal()] = ptx;
-  ptOnBeamProfile[frame->pointingUp()] = pty;
-  ptOnBeamProfile[frame->pointingAlongBeam()] = sourcePos[frame->pointingAlongBeam()];
+  ptOnBeamProfile[m_refframe->pointingHorizontal()] = ptx;
+  ptOnBeamProfile[m_refframe->pointingUp()] = pty;
+  ptOnBeamProfile[m_refframe->pointingAlongBeam()] = m_sourcePos[m_refframe->pointingAlongBeam()];
   auto toSample = Kernel::V3D();
-  toSample[frame->pointingAlongBeam()] = 1.;
+  toSample[m_refframe->pointingAlongBeam()] = 1.;
   return Geometry::Track(ptOnBeamProfile, toSample);
 }
 

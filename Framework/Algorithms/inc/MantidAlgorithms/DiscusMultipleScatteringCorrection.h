@@ -56,11 +56,10 @@ protected:
                                                                  const size_t wavelengthPoints, const size_t rows,
                                                                  const size_t columns);
   virtual std::unique_ptr<InterpolationOption> createInterpolateOption();
-  double interpolateFlat(const HistogramData::Histogram &histToInterpolate, double x);
+  double interpolateFlat(const ISpectrum &histToInterpolate, double x);
   std::tuple<double, int> sampleQW(const MatrixWorkspace_sptr &CumulativeProb, double x);
-  double interpolateSquareRoot(const HistogramData::Histogram &histToInterpolate, double x);
-  double DiscusMultipleScatteringCorrection::interpolateGaussian(const HistogramData::Histogram &histToInterpolate,
-                                                                 double x);
+  double interpolateSquareRoot(const ISpectrum &histToInterpolate, double x);
+  double DiscusMultipleScatteringCorrection::interpolateGaussian(const ISpectrum &histToInterpolate, double x);
   double Interpolate2D(MatrixWorkspace_sptr SOfQ, double w, double q);
   void updateTrackDirection(Geometry::Track &track, const double cosT, const double phi);
   void integrateCumulative(const Mantid::HistogramData::Histogram &h, double xmin, double xmax,
@@ -74,8 +73,8 @@ private:
   std::tuple<double, double> new_vector(const Kernel::Material &material, double kinc, bool specialSingleScatterCalc);
   std::vector<double> simulatePaths(const int nEvents, const int nScatters, Kernel::PseudoRandomNumberGenerator &rng,
                                     MatrixWorkspace_sptr &invPOfQ, const double kinc,
-                                    const std::vector<double> &wValues,
-                                    const Kernel::V3D &detPos, bool specialSingleScatterCalc);
+                                    const std::vector<double> &wValues, const Kernel::V3D &detPos,
+                                    bool specialSingleScatterCalc);
   std::tuple<bool, std::vector<double>, double> scatter(const int nScatters, Kernel::PseudoRandomNumberGenerator &rng,
                                                         MatrixWorkspace_sptr &invPOfQ, const double kinc,
                                                         const std::vector<double> &wValues, const Kernel::V3D &detPos,
@@ -103,15 +102,16 @@ private:
   long long m_callsToInterceptSurface{0};
   std::map<int, int> m_attemptsToGenerateInitialTrack;
   int m_maxScatterPtAttempts;
-  std::shared_ptr<const Mantid::HistogramData::Histogram> m_sigmaSS; // scattering cross section as a function of k
+  std::shared_ptr<const DataObjects::Histogram1D> m_sigmaSS; // scattering cross section as a function of k
   MatrixWorkspace_sptr m_SQWS;
   MatrixWorkspace_sptr m_QSQWS;
   MatrixWorkspace_sptr m_logSQ;
   Geometry::IObject_const_sptr m_sampleShape;
-  Geometry::Instrument_const_sptr m_instrument;
   bool m_importanceSampling;
   Kernel::DeltaEMode::Type m_EMode;
   bool m_simulateEnergiesIndependently;
+  Kernel::V3D m_sourcePos;
+  std::shared_ptr<const Geometry::ReferenceFrame> m_refframe;
 };
 } // namespace Algorithms
 } // namespace Mantid
