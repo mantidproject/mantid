@@ -10,7 +10,6 @@ Powder Diffraction
 ------------------
 New features
 ############
-- Add in the capability to normalize data with collection time in :ref:`HB2AReduce <algm-HB2AReduce>`.
 - ``absorptioncorrutils`` now have the capability to calculate effective absorption correction (considering both absorption and multiple scattering).
 - Extended :ref:`MultipleScatteringCorrection <algm-MultipleScatteringCorrection>` to both the sample and container case.
 - Both :ref:`MultipleScatteringCorrection <algm-MultipleScatteringCorrection>` and :ref:`PaalmanPingsAbsorptionCorrection <algm-PaalmanPingsAbsorptionCorrection>` can use a different element size for container now.
