@@ -614,6 +614,8 @@ void InstrumentWidgetRenderTab::resetView() {
   m_instrWidget->setSurfaceType(int(m_instrWidget->getSurfaceType()));
   m_instrWidget->getSurface()->setInteractionMode(ProjectionSurface::MoveMode);
   m_instrWidget->getSurface()->freezeRotation(m_freezeRotation->isChecked());
+  toggleTooltip(m_tooltipInfo->isChecked());
+  m_instrWidget->setWireframe(m_wireframe->isChecked());
 }
 
 /**
@@ -727,6 +729,8 @@ void InstrumentWidgetRenderTab::displaySettingsAboutToshow() {
 void InstrumentWidgetRenderTab::setSurfaceType(int index) {
   if ((int)m_instrWidget->getSurfaceType() != index) {
     m_instrWidget->setSurfaceType(index);
+    toggleTooltip(m_tooltipInfo->isChecked());
+    m_instrWidget->setWireframe(m_wireframe->isChecked());
   }
 }
 
