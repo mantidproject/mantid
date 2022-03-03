@@ -41,11 +41,7 @@ BOOST_PYTHON_FUNCTION_OVERLOADS(create2DWorkspaceWithRectangularInstrument_overl
                                 create2DWorkspaceWithRectangularInstrument, 3, 3)
 
 BOOST_PYTHON_FUNCTION_OVERLOADS(create2DWorkspaceWithGeographicalDetectors_overloads,
-<<<<<<< HEAD
-                                create2DWorkspaceWithGeographicalDetectors, 4, 7)
-=======
                                 create2DWorkspaceWithGeographicalDetectors, 6, 8)
->>>>>>> Further work on inelastic support
 
 GNU_DIAG_ON("conversion")
 GNU_DIAG_ON("unused-local-typedef")
