@@ -277,9 +277,12 @@ void ExperimentPresenter::showLookupTableErrors(LookupTableValidationError const
 
 void ExperimentPresenter::showFullTableError(LookupCriteriaError const &tableError, int row, int column) {
   if (tableError == LookupCriteriaError::NonUniqueSearchCriteria)
-    m_view->setTooltip(row, column, "Error: Duplicated search criteria.");
+    m_view->setTooltip(row, column,
+                       "Error: Duplicated search criteria. No more than one row may have the same angle and title.");
   if (tableError == LookupCriteriaError::MultipleWildcards)
-    m_view->setTooltip(row, column, "Error: Multiple wildcards.");
+    m_view->setTooltip(
+        row, column,
+        "Error: Multiple wildcard rows. Only a single row in the table may have a blank angle and title cell.");
 }
 
 void ExperimentPresenter::showValidationResult() {
