@@ -11,13 +11,7 @@ Powder Diffraction
 New features
 ############
 - ``absorptioncorrutils`` now have the capability to calculate effective absorption correction (considering both absorption and multiple scattering).
-- Add in the capability to normalize data with collection time in :ref:`HB2AReduce <algm-HB2AReduce>`.
-* :ref:`StripVanadiumPeaks <algm-StripVanadiumPeaks-v2>` has 3 additional peak positions of 0.41192, 0.4279, 0.4907 angstroms.
-- `GetDetOffsetsMultiPeaks`, which is deprecate since v6.2.0, is removed.
-- `CalibrateRectangularDetectors`, which is deprecate since v6.2.0, is removed. And system test CalibrateRectangularDetectors_Test is removed.
-- Extending :ref:`MultipleScatteringCorrection <algm-MultipleScatteringCorrection>` to the sample and container case.
 - Extended :ref:`MultipleScatteringCorrection <algm-MultipleScatteringCorrection>` to both the sample and container case.
-- :ref:`SNSPowderReduction <algm-SNSPowderReduction>` now has an option to manually specify sample geometry for absorption correction.
 - Both :ref:`MultipleScatteringCorrection <algm-MultipleScatteringCorrection>` and :ref:`PaalmanPingsAbsorptionCorrection <algm-PaalmanPingsAbsorptionCorrection>` can use a different element size for container now.
 - Added a new input for sample height information from :ref:`SNSPowderReduction <algm-SNSPowderReduction>` to Powder Diffraction Reduction GUI.
 - :ref:`StripVanadiumPeaks <algm-StripVanadiumPeaks-v2>` has 3 additional peak positions of 0.41192, 0.4279, 0.4907 angstroms.
