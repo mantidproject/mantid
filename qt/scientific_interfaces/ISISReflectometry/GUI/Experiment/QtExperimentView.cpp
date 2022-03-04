@@ -590,8 +590,8 @@ void QtExperimentView::showOptionLoadErrors(std::vector<InstrumentParameterTypeM
   if (!missingValues.empty())
     message += messageFor(missingValues);
 
-  for (auto &typeError : typeErrors)
-    message += messageFor(typeError);
+  std::accumulate(typeErrors.cbegin(), typeErrors.cend(), message,
+                  [this](auto &msg, auto const &section) { return msg += messageFor(section); });
 
   QMessageBox::warning(this, "Failed to load one or more defaults from parameter file", message);
 }
