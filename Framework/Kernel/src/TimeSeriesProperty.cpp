@@ -48,7 +48,7 @@ TimeSeriesProperty<TYPE>::TimeSeriesProperty(const std::string &name,
 }
 
 /// Virtual destructor
-template <typename TYPE> TimeSeriesProperty<TYPE>::~TimeSeriesProperty() {}
+template <typename TYPE> TimeSeriesProperty<TYPE>::~TimeSeriesProperty() = default;
 
 /**
  * "Virtual" copy constructor

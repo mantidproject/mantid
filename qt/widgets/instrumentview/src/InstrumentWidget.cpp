@@ -86,7 +86,7 @@ struct WorkspaceReplacementFlagHolder {
   ~WorkspaceReplacementFlagHolder() { m_worskpaceReplacementFlag = false; }
 
 private:
-  WorkspaceReplacementFlagHolder();
+  WorkspaceReplacementFlagHolder() = delete;
   bool &m_worskpaceReplacementFlag;
 };
 

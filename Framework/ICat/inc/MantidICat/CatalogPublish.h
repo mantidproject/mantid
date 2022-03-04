@@ -34,7 +34,7 @@ public:
   /// constructor
   CatalogPublish() : API::Algorithm() {}
   /// Destructor
-  ~CatalogPublish() override {}
+  ~CatalogPublish() override = default;
   /// Algorithm's name for identification.
   const std::string name() const override { return "CatalogPublish"; }
   /// Summary of algorithms purpose.

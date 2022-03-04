@@ -22,12 +22,12 @@ namespace MantidQt::API {
 //----------------------------------------------------------------------------------------------
 /** Constructor
  */
-PropertyWidgetFactory::PropertyWidgetFactory() {}
+PropertyWidgetFactory::PropertyWidgetFactory() = default;
 
 //----------------------------------------------------------------------------------------------
 /** Destructor
  */
-PropertyWidgetFactory::~PropertyWidgetFactory() {}
+PropertyWidgetFactory::~PropertyWidgetFactory() = default;
 
 //----------------------------------------------------------------------------------------------
 /** Create the appropriate PropertyWidget for the given Property

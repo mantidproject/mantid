@@ -20,7 +20,7 @@ public:
   /// Constructor
   SaveNXcanSAS();
   /// Virtual dtor
-  ~SaveNXcanSAS() override {}
+  ~SaveNXcanSAS() override = default;
   const std::string name() const override { return "SaveNXcanSAS"; }
   /// Summary of algorithms purpose
   const std::string summary() const override { return "Writes a MatrixWorkspace to a file in the NXcanSAS format."; }

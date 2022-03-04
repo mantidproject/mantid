@@ -22,7 +22,7 @@ void QtSaveView::subscribe(SaveViewSubscriber *notifyee) { m_notifyee = notifyee
 
 /** Destructor
  */
-QtSaveView::~QtSaveView() {}
+QtSaveView::~QtSaveView() = default;
 
 /**
 Initialize the Interface

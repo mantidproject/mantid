@@ -87,7 +87,7 @@ InstrumentWidgetRenderTab::InstrumentWidgetRenderTab(InstrumentWidget *instrWind
   setupGridBankMenu(renderControlsLayout);
 }
 
-InstrumentWidgetRenderTab::~InstrumentWidgetRenderTab() {}
+InstrumentWidgetRenderTab::~InstrumentWidgetRenderTab() = default;
 
 void InstrumentWidgetRenderTab::connectInstrumentWidgetSignals() const {
   // Connect to InstrumentWindow signals

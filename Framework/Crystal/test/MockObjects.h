@@ -30,7 +30,7 @@ public:
   MOCK_CONST_METHOD1(configureIterator, void(Mantid::API::IMDIterator *const));
   MOCK_CONST_METHOD1(isBackground, bool(Mantid::API::IMDIterator *const));
   MockBackgroundStrategy *clone() const override { throw std::runtime_error("Cannot clone the mock object"); }
-  ~MockBackgroundStrategy() override {}
+  ~MockBackgroundStrategy() override = default;
 };
 
 class MockICluster : public ICluster {

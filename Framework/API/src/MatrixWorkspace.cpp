@@ -128,7 +128,7 @@ MatrixWorkspace::MatrixWorkspace(const MatrixWorkspace &other)
 /// Destructor
 // RJT, 3/10/07: The Analysis Data Service needs to be able to delete
 // workspaces, so I moved this from protected to public.
-MatrixWorkspace::~MatrixWorkspace() {}
+MatrixWorkspace::~MatrixWorkspace() = default;
 
 /** Returns a const reference to the IndexInfo object of the workspace.
  *

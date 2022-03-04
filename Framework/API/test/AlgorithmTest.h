@@ -36,7 +36,7 @@ using Mantid::Indexing::SpectrumIndexSet;
 class StubbedWorkspaceAlgorithm : public Algorithm {
 public:
   StubbedWorkspaceAlgorithm() : Algorithm() {}
-  ~StubbedWorkspaceAlgorithm() override {}
+  ~StubbedWorkspaceAlgorithm() override = default;
 
   const std::string name() const override { return "StubbedWorkspaceAlgorithm"; }
   int version() const override { return 1; }
@@ -76,7 +76,7 @@ DECLARE_ALGORITHM(StubbedWorkspaceAlgorithm)
 class StubbedWorkspaceAlgorithm2 : public Algorithm {
 public:
   StubbedWorkspaceAlgorithm2() : Algorithm() {}
-  ~StubbedWorkspaceAlgorithm2() override {}
+  ~StubbedWorkspaceAlgorithm2() override = default;
 
   const std::string name() const override { return "StubbedWorkspaceAlgorithm2"; }
   int version() const override { return 2; }
@@ -95,7 +95,7 @@ DECLARE_ALGORITHM(StubbedWorkspaceAlgorithm2)
 class AlgorithmWithValidateInputs : public Algorithm {
 public:
   AlgorithmWithValidateInputs() : Algorithm() {}
-  ~AlgorithmWithValidateInputs() override {}
+  ~AlgorithmWithValidateInputs() override = default;
   const std::string name() const override { return "StubbedWorkspaceAlgorithm2"; }
   int version() const override { return 1; }
   const std::string category() const override { return "Cat;Leopard;Mink"; }
@@ -126,7 +126,7 @@ DECLARE_ALGORITHM(AlgorithmWithValidateInputs)
 class FailingAlgorithm : public Algorithm {
 public:
   FailingAlgorithm() : Algorithm() {}
-  ~FailingAlgorithm() override {}
+  ~FailingAlgorithm() override = default;
   const std::string name() const override { return "FailingAlgorithm"; }
   int version() const override { return 1; }
   const std::string summary() const override { return "Test summary"; }

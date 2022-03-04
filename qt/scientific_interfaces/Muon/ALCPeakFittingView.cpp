@@ -16,7 +16,7 @@ namespace MantidQt::CustomInterfaces {
 
 ALCPeakFittingView::ALCPeakFittingView(QWidget *widget) : m_widget(widget), m_ui(), m_peakPicker(nullptr) {}
 
-ALCPeakFittingView::~ALCPeakFittingView() {}
+ALCPeakFittingView::~ALCPeakFittingView() = default;
 
 IFunction_const_sptr ALCPeakFittingView::function(QString index) const { return m_ui.peaks->getFunctionByIndex(index); }
 

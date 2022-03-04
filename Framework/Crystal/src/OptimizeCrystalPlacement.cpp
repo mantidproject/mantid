@@ -53,7 +53,7 @@ public:
   }
   ~OrEnabledWhenProperties() override // responsible for deleting all supplied
                                       // EnabledWhenProperites
-  {}
+      = default;
 
   IPropertySettings *clone() const override {
     return new OrEnabledWhenProperties(propName1, Criteria1, value1, propName2, Criteria2, value2);

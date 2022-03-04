@@ -97,6 +97,6 @@ void IndirectBayes::applySettings(std::map<std::string, QVariant> const &setting
 
 std::string IndirectBayes::documentationPage() const { return "Indirect Bayes"; }
 
-IndirectBayes::~IndirectBayes() {}
+IndirectBayes::~IndirectBayes() = default;
 
 } // namespace MantidQt::CustomInterfaces

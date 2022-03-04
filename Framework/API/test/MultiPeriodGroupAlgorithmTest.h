@@ -42,7 +42,7 @@ public:
   void exec() override { setProperty("OutputWorkspace", Workspace_sptr(new WorkspaceTester)); }
   std::string fetchInputPropertyName() const override { return "MyInputWorkspaces"; }
   bool useCustomInputPropertyName() const override { return true; }
-  ~TestAlgorithmA() override {}
+  ~TestAlgorithmA() override = default;
 };
 DECLARE_ALGORITHM(TestAlgorithmA)
 // ------------------------------------------------------------------
@@ -86,7 +86,7 @@ public:
   }
   std::string fetchInputPropertyName() const override { return ""; }
   bool useCustomInputPropertyName() const override { return false; }
-  ~TestAlgorithmB() override {}
+  ~TestAlgorithmB() override = default;
 };
 DECLARE_ALGORITHM(TestAlgorithmB)
 // ------------------------------------------------------------------
@@ -118,7 +118,7 @@ public:
       void exec() override { setProperty("OutputWorkspace", Workspace_sptr(new WorkspaceTester)); }
       std::string fetchInputPropertyName() const override { return "InputWorkspaces"; }
       bool useCustomInputPropertyName() const override { return true; }
-      ~BrokenAlgorithm() override {}
+      ~BrokenAlgorithm() override = default;
     };
     // ------------------------------------------------------------------
     // End class dec
@@ -151,7 +151,7 @@ public:
       void exec() override { setProperty("OutputWorkspace", Workspace_sptr(new WorkspaceTester)); }
       std::string fetchInputPropertyName() const override { return "made_up_property_name"; }
       bool useCustomInputPropertyName() const override { return true; }
-      ~BrokenAlgorithm() override {}
+      ~BrokenAlgorithm() override = default;
     };
     // ------------------------------------------------------------------
     // End class dec

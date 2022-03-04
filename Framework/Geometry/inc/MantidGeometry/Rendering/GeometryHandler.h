@@ -40,7 +40,7 @@ template <typename Adaptee> std::unique_ptr<Geometry::RenderingMesh> makeRenderi
     size_t numberOfTriangles() const override { return m_adaptee.numberOfTriangles(); }
     std::vector<double> getVertices() const override { return m_adaptee.getVertices(); }
     std::vector<uint32_t> getTriangles() const override { return m_adaptee.getTriangles(); }
-    virtual ~Adapter() {}
+    virtual ~Adapter() = default;
   };
   return std::make_unique<Adapter>(adaptee);
 }

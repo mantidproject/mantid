@@ -19,7 +19,7 @@ namespace MantidQt::CustomInterfaces {
 ALCBaselineModellingView::ALCBaselineModellingView(QWidget *widget)
     : m_widget(widget), m_ui(), m_rangeSelectors(), m_selectorModifiedMapper(new QSignalMapper(this)) {}
 
-ALCBaselineModellingView::~ALCBaselineModellingView() {}
+ALCBaselineModellingView::~ALCBaselineModellingView() = default;
 
 void ALCBaselineModellingView::initialize() {
   m_ui.setupUi(m_widget);
