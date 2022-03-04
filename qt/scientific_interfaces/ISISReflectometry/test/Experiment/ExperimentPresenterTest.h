@@ -391,6 +391,11 @@ public:
 
   void testMultipleWildcardRowsAreInvalid() {
     OptionsTable const optionsTable = {optionsRowWithWildcard(), optionsRowWithWildcard()};
+    for (auto row = 0; row < 2; ++row) {
+      for (auto col = 0; col < 2; ++col) {
+        EXPECT_CALL(m_view, setTooltip(row, col, "Error: Multiple wildcards.")).Times(1);
+      }
+    }
     runTestForInvalidOptionsTable(optionsTable, {0, 1}, {LookupRow::Column::THETA, LookupRow::Column::TITLE});
   }
 
@@ -908,10 +913,12 @@ private:
   void runTestForNonUniqueAngles(OptionsTable const &optionsTable) {
     auto presenter = makePresenter();
     EXPECT_CALL(m_view, getLookupTable()).WillOnce(Return(optionsTable));
-    EXPECT_CALL(m_view, showLookupRowAsInvalid(0, 1)).Times(1);
-    EXPECT_CALL(m_view, showLookupRowAsInvalid(0, 0)).Times(1);
-    EXPECT_CALL(m_view, showLookupRowAsInvalid(1, 1)).Times(1);
-    EXPECT_CALL(m_view, showLookupRowAsInvalid(1, 0)).Times(1);
+    for (auto row = 0; row < 2; ++row) {
+      for (auto col = 0; col < 2; ++col) {
+        EXPECT_CALL(m_view, showLookupRowAsInvalid(row, col)).Times(1);
+        EXPECT_CALL(m_view, setTooltip(row, col, "Error: Duplicated search criteria.")).Times(1);
+      }
+    }
     presenter.notifyLookupRowChanged(0, 0);
     verifyAndClear();
   }
