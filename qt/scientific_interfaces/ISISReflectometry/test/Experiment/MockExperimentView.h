@@ -99,6 +99,7 @@ public:
   MOCK_METHOD0(addLookupRow, void());
   MOCK_METHOD1(removeLookupRow, void(int));
   MOCK_METHOD1(showLookupRowsNotUnique, void(double));
+  MOCK_METHOD3(setTooltip, void(int, int, std::string const &));
 };
 } // namespace ISISReflectometry
 } // namespace CustomInterfaces

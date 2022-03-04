@@ -116,7 +116,7 @@ public:
   void addLookupRow() override;
   void removeLookupRow(int rowIndex) override;
 
-  void setTooltip(int row, int column, std::string text) override;
+  void setTooltip(int row, int column, std::string const &text) override;
 
 public slots:
   /// Adds another row to the per-angle options table

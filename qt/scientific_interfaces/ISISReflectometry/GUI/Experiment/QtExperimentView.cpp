@@ -146,7 +146,7 @@ void QtExperimentView::setTooltipFromAlgorithm(int column, std::unordered_map<in
   m_columnToolTips[column] = toolTip;
 }
 
-void QtExperimentView::setTooltip(int row, int column, std::string text) {
+void QtExperimentView::setTooltip(int row, int column, std::string const &text) {
   m_ui.optionsTable->blockSignals(true);
   m_ui.optionsTable->item(row, column)->setToolTip(QString::fromStdString(text));
   m_ui.optionsTable->blockSignals(false);
