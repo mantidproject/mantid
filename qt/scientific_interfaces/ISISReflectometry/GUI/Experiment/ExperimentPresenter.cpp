@@ -268,14 +268,18 @@ void ExperimentPresenter::showLookupTableErrors(LookupTableValidationError const
   for (auto const &validationError : errors.errors()) {
     for (auto const &column : validationError.invalidColumns()) {
       if (errors.fullTableError()) {
-        if (errors.fullTableError() == LookupCriteriaError::NonUniqueSearchCriteria)
-          m_view->setTooltip(validationError.row(), column, "Error: Duplicated search criteria.");
-        if (errors.fullTableError() == LookupCriteriaError::MultipleWildcards)
-          m_view->setTooltip(validationError.row(), column, "Error: Multiple wildcards.");
+        showFullTableError(errors.fullTableError().get(), validationError.row(), column);
       }
       m_view->showLookupRowAsInvalid(validationError.row(), column);
     }
   }
+}
+
+void ExperimentPresenter::showFullTableError(LookupCriteriaError const &tableError, int row, int column) {
+  if (tableError == LookupCriteriaError::NonUniqueSearchCriteria)
+    m_view->setTooltip(row, column, "Error: Duplicated search criteria.");
+  if (tableError == LookupCriteriaError::MultipleWildcards)
+    m_view->setTooltip(row, column, "Error: Multiple wildcards.");
 }
 
 void ExperimentPresenter::showValidationResult() {
