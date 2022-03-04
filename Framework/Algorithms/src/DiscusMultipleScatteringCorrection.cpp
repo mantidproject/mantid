@@ -83,7 +83,7 @@ void DiscusMultipleScatteringCorrection::init() {
   auto wsValidator = std::make_shared<InstrumentValidator>();
 
   declareProperty(
-      std::make_unique<WorkspaceProperty<>>("InputWorkspace", "", Direction::Input),
+      std::make_unique<WorkspaceProperty<>>("InputWorkspace", "", Direction::Input, wsValidator),
       "The name of the input workspace.  The input workspace must have X units of wavelength for elastic "
       "calculations and units of energy transfer (DeltaE) for inelastic calculations. This is used to "
       "supply the sample details, the detector positions and the x axis range to calculate corrections for");
@@ -431,12 +431,8 @@ void DiscusMultipleScatteringCorrection::exec() {
       auto xPoints = instrumentWS.points(i).rawData();
 
       if (efixed.emode() == DeltaEMode::Elastic) {
-        std::vector<double> kvalues;
-        std::transform(xPoints.begin(), xPoints.end(), std::back_inserter(kvalues),
-                       [](double d) -> double { return 2 * M_PI / d; });
-        for (auto k : kvalues) {
-          kInW.emplace_back(k, 0.);
-        }
+        std::transform(xPoints.begin(), xPoints.end(), std::back_inserter(kInW),
+                       [](double d) { return std::make_pair(2 * M_PI / d, 0.); });
       } else {
         if ((!m_simulateEnergiesIndependently) && (efixed.emode() == DeltaEMode::Direct)) {
           kInW.emplace_back(std::make_pair(kFixed, -1.0));
@@ -491,7 +487,7 @@ void DiscusMultipleScatteringCorrection::exec() {
         for (int ne = 0; ne < nScatters; ne++) {
           int nEvents = ne == 0 ? nSingleScatterEvents : nMultiScatterEvents;
 
-          auto weights = simulatePaths(nEvents, ne + 1, rng, invPOfQ, kinc, wValues, detPos, false);
+          weights = simulatePaths(nEvents, ne + 1, rng, invPOfQ, kinc, wValues, detPos, false);
           if (kInW[bin].second == -1.0) {
             simulationWSs[ne]->getSpectrum(i).mutableY() += weights;
           } else {
@@ -583,13 +579,12 @@ void DiscusMultipleScatteringCorrection::exec() {
                              std::to_string(kv.second) + " occasions.\n";
     g_log.warning() << "Calls to interceptSurface= " + std::to_string(m_callsToInterceptSurface) + "\n";
   }
-} // namespace Mantid::Algorithms
+}
 
 /**
  * Prepare a profile of Q*S(Q) that will later be used to calculate a cumulative probability distribution
  * for use in importance sampling
- * @param kmax The maxmimum incident wavenumber from the InputWorkspace. This may be different to the maximum
- * q value in the input S(Q) profile
+ * @param qmax The maxmimum q value required based on the data in the InputWorkspace
  * @return A pointer to a histogram containing the Q*S(Q) profile
  */
 MatrixWorkspace_uptr DiscusMultipleScatteringCorrection::prepareQSQ(double qmax) {
@@ -634,7 +629,6 @@ MatrixWorkspace_uptr DiscusMultipleScatteringCorrection::prepareQSQ(double qmax)
 /**
  * Calculate a cumulative probability distribution for use in importance sampling. The distribution
  * is the inverse function P^-1(t4) where P(Q) = I(Q)/I(2k) and I(x) = integral of Q.S(Q)dQ between 0 and x
- * @param QSQ Workspace containing Q*S(Q)
  * @param kinc The incident wavenumber
  * @param PInvOfQ The inverted cumulative probability distribution
  */
@@ -654,7 +648,7 @@ void DiscusMultipleScatteringCorrection::prepareCumulativeProbForQ(double kinc, 
     IOfQMaxPreviousRow = IOfQY.back();
     IOfQYFull.insert(IOfQYFull.end(), IOfQY.begin(), IOfQY.end());
   }
-  auto IOfQYAt2K = IOfQYFull.back();
+  auto IOfQYAt2K = IOfQYFull.empty() ? 0. : IOfQYFull.back();
   if (IOfQYAt2K == 0.)
     throw std::runtime_error("Integral of Q * S(Q) is zero so can't generate probability distribution");
   // normalise probability range to 0-1
@@ -953,13 +947,12 @@ std::vector<double> DiscusMultipleScatteringCorrection::simulatePaths(
  * @param detPos The detector position xyz coordinates
  * @param specialSingleScatterCalc Boolean indicating whether special single
  * scatter calculation should be performed
- * @param importanceSampling Boolean indicating whether to use importance sampling on Q values
- * @return A tuple containing a success/fail boolean, the calculated weight and
+ * @return A tuple containing a success/fail boolean, the calculated weights and
  * a sum of the QSS values across the n-1 multiple scatters
  */
 std::tuple<bool, std::vector<double>, double> DiscusMultipleScatteringCorrection::scatter(
-    const int nScatters, Kernel::PseudoRandomNumberGenerator &rng, MatrixWorkspace_sptr &invPOfQ, const double kinc,
-    const std::vector<double> &wValues, const Kernel::V3D &detPos, bool specialSingleScatterCalc) {
+    const int nScatters, Kernel::PseudoRandomNumberGenerator &rng, const MatrixWorkspace_sptr &invPOfQ,
+    const double kinc, const std::vector<double> &wValues, const Kernel::V3D &detPos, bool specialSingleScatterCalc) {
   double weight = 1;
   double numberDensity = m_sampleShape->material().numberDensityEffective();
   // if scale up scatteringXSection by 100*numberDensity then may not need
@@ -1082,7 +1075,7 @@ std::tuple<double, int> DiscusMultipleScatteringCorrection::sampleKW(const Matri
 }
 
 // update track direction, QSS and weight
-void DiscusMultipleScatteringCorrection::q_dir(Geometry::Track &track, MatrixWorkspace_sptr &invPOfQ, double &k,
+void DiscusMultipleScatteringCorrection::q_dir(Geometry::Track &track, const MatrixWorkspace_sptr &invPOfQ, double &k,
                                                const double scatteringXSection,
                                                Kernel::PseudoRandomNumberGenerator &rng, double &QSS, double &weight) {
   const double kinc = k;

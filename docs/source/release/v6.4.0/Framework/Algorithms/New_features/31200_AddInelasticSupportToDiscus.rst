@@ -1,0 +1,2 @@
+- :ref:`DiscusMultipleScatteringCorrection <algm-DiscusMultipleScatteringCorrection>` now supports inelastic instruments (direct and indirect).
+  Note that this improvement has involved two breaking changes: the parameter SofqWorkspace has been renamed to StructureFactorWorkspace and the EMode parameter has been dropped (with the mode being determined from the workspace instead)
