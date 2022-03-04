@@ -1292,25 +1292,21 @@ class MantidAxes3D(Axes3D):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
-        # Remove the connection for when you click on the plot as this is dealt with in figureinteraction.py to stop
-        # it interfering with double-clicking on the axes.
-        self.figure.canvas.mpl_disconnect(self._cids[1])
-
     def set_title(self, *args, **kwargs):
         # The set_title function in Axes3D also moves the title downwards for some reason so the Axes function is called
         # instead.
         return Axes.set_title(self, *args, **kwargs)
 
-    def set_xlim3d(self, *args):
-        super().set_xlim3d(*args)
+    def set_xlim3d(self, *args, **kwargs):
+        super().set_xlim3d(*args, **kwargs)
         self._set_overflowing_data_to_nan(0)
 
-    def set_ylim3d(self, *args):
-        super().set_ylim3d(*args)
+    def set_ylim3d(self, *args, **kwargs):
+        super().set_ylim3d(*args, **kwargs)
         self._set_overflowing_data_to_nan(1)
 
-    def set_zlim3d(self, *args):
-        super().set_zlim3d(*args)
+    def set_zlim3d(self, *args, **kwargs):
+        super().set_zlim3d(*args, **kwargs)
         self._set_overflowing_data_to_nan(2)
 
     def autoscale(self, *args, **kwargs):
