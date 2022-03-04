@@ -42,10 +42,11 @@ constexpr int DEFAULT_LATITUDINAL_DETS = 5;
 constexpr int DEFAULT_LONGITUDINAL_DETS = 10;
 
 /// Energy (meV) to wavevector (angstroms-1)
-inline double toWaveVector(double energy) {
-  static const double factor =
-      1e10 * PhysicalConstants::h / sqrt(2.0 * PhysicalConstants::NeutronMass * PhysicalConstants::meV);
-  return 2 * M_PI * sqrt(energy) / factor;
+inline double toWaveVector(double energy) { return sqrt(energy / PhysicalConstants::E_mev_toNeutronWavenumberSq); }
+
+/// wavevector (angstroms-1) to Energy (meV)
+inline double fromWaveVector(double wavevector) {
+  return PhysicalConstants::E_mev_toNeutronWavenumberSq * wavevector * wavevector;
 }
 
 struct EFixedProvider {
@@ -444,7 +445,7 @@ void DiscusMultipleScatteringCorrection::exec() {
             if (efixed.emode() == DeltaEMode::Direct) {
               kInW.emplace_back(std::make_pair(kFixed, w));
             } else if (efixed.emode() == DeltaEMode::Indirect) {
-              const double initialE = eFixed - w;
+              const double initialE = eFixed + w;
               const double kin = toWaveVector(initialE);
               kInW.emplace_back(std::make_pair(kin, w));
             }
@@ -1014,12 +1015,12 @@ std::tuple<bool, std::vector<double>, double> DiscusMultipleScatteringCorrection
   // That approach implicitly assumed S(Q,w)=0 where not specified and that no interpolation
   // on w would be needed - this may be what's required but seems possible it might not always be
   for (auto w : wValues) {
-    const double finalE = PhysicalConstants::E_mev_toNeutronWavenumberSq * kinc * kinc + w;
+    const double finalE = fromWaveVector(kinc) + w;
     if (finalE > 0) {
       const double kout = toWaveVector(finalE);
       const auto qVector = directionToDetector * kout - prevDirection * k;
       const double q = qVector.norm();
-      const double finalW = finalE - PhysicalConstants::E_mev_toNeutronWavenumberSq * k * k;
+      const double finalW = finalE - fromWaveVector(k);
       double SQ = Interpolate2D(m_SQWS, finalW, q);
       weights.emplace_back(weight * AT2 * SQ * scatteringXSectionFull / (4 * M_PI));
     } else {
@@ -1040,7 +1041,10 @@ double DiscusMultipleScatteringCorrection::getKf(const MatrixWorkspace_sptr &SOf
   if (deltaE == 0.) {
     kf = kinc; // avoid costly sqrt
   } else {
-    kf = sqrt(kinc * kinc + deltaE / PhysicalConstants::E_mev_toNeutronWavenumberSq);
+    // slightly concerned that rounding errors moving between k and E may mean we take the sqrt of
+    // a negative number in here. deltaE was capped using a threshold calculated using fromWaveVector so
+    // hopefully any rounding will affect fromWaveVector(kinc) in same direction
+    kf = toWaveVector(fromWaveVector(kinc) - deltaE);
   }
   return kf;
 }
@@ -1066,17 +1070,13 @@ std::tuple<double, double> DiscusMultipleScatteringCorrection::getKinematicRange
 std::tuple<double, int> DiscusMultipleScatteringCorrection::sampleKW(const MatrixWorkspace_sptr &SOfQ,
                                                                      Kernel::PseudoRandomNumberGenerator &rng,
                                                                      const double kinc) {
-  // the energy transfer is always capped at a negative value corresponding to energy going from ki to 0
+  // the energy transfer must always be less than the positive value corresponding to energy going from ki to 0
   // Note - this is still the case for indirect because on a multiple scatter the kf isn't kfixed
-  double wMin = -kinc * kinc * PhysicalConstants::E_mev_toNeutronWavenumberSq;
-  size_t iWMin = 0.;
-  for (auto i = 0; i < SOfQ->getAxis(1)->length(); i++) {
-    if (wMin < SOfQ->getAxis(1)->getValue(i)) {
-      iWMin = i;
-      break;
-    }
-  }
-  auto iW = rng.nextInt(iWMin, static_cast<int>(SOfQ->getNumberHistograms() - 1));
+  double wMax = fromWaveVector(kinc);
+  auto &wValues = dynamic_cast<NumericAxis *>(SOfQ->getAxis(1))->getValues();
+  auto it = std::lower_bound(wValues.begin(), wValues.end(), wMax);
+  size_t iWMax = std::distance(wValues.begin(), it) - 1;
+  auto iW = rng.nextInt(0, iWMax);
   double k = getKf(SOfQ, iW, kinc);
   return {k, iW};
 }

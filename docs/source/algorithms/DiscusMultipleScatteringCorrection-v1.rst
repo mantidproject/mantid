@@ -138,6 +138,67 @@ Both of these interpolation features are described further in the documentation 
 Usage
 -----
 
+**Example - elastic calculation on single spike S(Q)**
+
+.. plot::
+   :include-source:
+
+   # import mantid algorithms, numpy and matplotlib
+   from mantid.simpleapi import *
+   import matplotlib.pyplot as plt
+   import numpy as np
+
+   # S(Q) consisting of single spike
+   X=[4.9,5.0,5.1]
+   Y=[0.,1000,0.]
+   Sofq=CreateWorkspace(DataX=X,DataY=Y,UnitX="MomentumTransfer")
+
+   two_thetas=[]
+   for i in range(180):
+       two_thetas.append(i)
+
+   # workspace with single bin centred at wavelength=1 Angstrom
+   ws = CreateSampleWorkspace(WorkspaceType="Histogram",
+                              XUnit="Wavelength",
+                              Xmin=0.5,
+                              Xmax=1.5,
+                              BinWidth=1.0,
+                              NumBanks=len(two_thetas)//4,
+                              BankPixelWidth=2,
+                              InstrumentName="testinst")
+
+   ids = list(range(1,len(two_thetas)+1))
+   EditInstrumentGeometry(ws,
+       PrimaryFlightPath=14.0,
+       SpectrumIDs=ids,
+       L2=[2.0] * len(two_thetas),
+       Polar=two_thetas,
+       Azimuthal=[90.0] * len(two_thetas),
+       DetectorIDs=ids,
+       InstrumentName="testinst")
+
+   sphere_xml = " \
+   <sphere id='some-sphere'> \
+       <centre x='0.0'  y='0.0' z='0.0' /> \
+       <radius val='0.01' /> \
+   </sphere> \
+   <algebra val='some-sphere' /> \
+   "
+   SetSample(InputWorkspace=ws,
+             Geometry={'Shape': 'CSG', 'Value': sphere_xml},
+             Material={'ChemicalFormula': 'Ni', 'NumberDensity': 0.02, 'AttenuationXSection': 0.0, 'ScatteringXSection': 80.0})
+
+   DiscusMultipleScatteringCorrection(InputWorkspace=ws, StructureFactorWorkspace=Sofq,
+                                      OutputWorkspace="MuscatResults", NeutronPathsSingle=1000,
+                                      NeutronPathsMultiple=10000, ImportanceSampling=True)
+
+   # q=2ksin(theta), so q spike corresonds to single scatter spike at ~46 degrees, double scatter spikes at 0 and 92 degrees
+   msplot = plotBin('Scatter_2',0)
+   msplot = plotBin('Scatter_1',0, window=msplot)
+   axes = plt.gca()
+   axes.set_xlabel('Spectrum (~scattering angle in degrees)')
+   plt.title("Single and Double Scatter Intensities")
+
 **Example - inelastic calculation on direct geometry (matches calculation in DISCUS paper** [#JOH]_ **figure 1)**
 
 .. plot::
@@ -172,8 +233,9 @@ Usage
         else:
            Sqw = D*q*q/(math.pi*(w*w + (D*q*q)**2))
            # Apply detailed balance, neutrons more likely to lose energy in each scatter
-           if (w < 0.):
-              Sqw = Sqw * math.exp(-HOVERT * w)
+           # Mantid has w = Ei-Ef
+           if (w > 0.):
+              Sqw = Sqw * math.exp(HOVERT * w)
            # S(Q,w) is capped at exactly 4.0 for some reason in Discus example
            Y.append(min(Sqw,4.0))
 
@@ -197,7 +259,7 @@ Usage
    EditInstrumentGeometry(ws,
        PrimaryFlightPath=14.0,
        SpectrumIDs=ids,
-       L2=[90.0] * len(two_thetas),
+       L2=[2.0] * len(two_thetas),
        Polar=two_thetas,
        Azimuthal=[90.0] * len(two_thetas),
        DetectorIDs=ids,
@@ -226,6 +288,14 @@ Usage
                                       OutputWorkspace="MuscatResults", NeutronPathsSingle=200,
                                       NeutronPathsMultiple=1000)
 
+   # reverse w axis because Discus w = Ef-Ei (opposite to Mantid)
+   for i in range(mtd['Scatter_1'].getNumberHistograms()):
+       y = np.flip(mtd['Scatter_1'].dataY(i))
+       mtd['Scatter_1'].setY(i,y.tolist())
+   for i in range(mtd['Scatter_2'].getNumberHistograms()):
+       y = np.flip(mtd['Scatter_2'].dataY(i))
+       mtd['Scatter_2'].setY(i,y.tolist())
+
    plt.rcParams['figure.figsize'] = (5, 6)
    fig, ax = plt.subplots(subplot_kw={'projection':'mantid'})
    for i, tt in enumerate(two_thetas):
@@ -250,6 +320,7 @@ References
 .. [#JOH] M W Johnson, 1974 AERE Report R7682, Discus: A computer program for the calculating of multiple scattering effects in inelastic neutron scattering experiments
 .. [#HOW] WS Howells, V Garcia Sakai, F Demmel, MTF Telling, F Fernandez-Alonso, Feb 2010, MODES manual RAL-TR-2010-006, `doi: 10.5286/raltr.2010006 <https://doi.org/10.5286/raltr.2010006>`_
 .. [#MAN] R Mancinelli 2012 *J. Phys.: Conf. Ser.* **340** 012033, Multiple neutron scattering corrections. Some general equations to do fast evaluations `doi: 10.1088/1742-6596/340/1/012033 <https://doi.org/10.1088/1742-6596/340/1/012033>`_
+.. [#MAY] J Mayers, R Cywinski, 1985 *Nuclear Instruments and Methods in Physics Research* A241, A Monte Carlo Evaluation Of Analytical Multiple Scattering Corrections For Unpolarised Neutron Scattering And Polarisation Analysis Data `doi: 10.1016/0168-9002(85)90607-2 <https://doi.org/10.1016/0168-9002(85)90607-2>`_
 
 
 Usage
