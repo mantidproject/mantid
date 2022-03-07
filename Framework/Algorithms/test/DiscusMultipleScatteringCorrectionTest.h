@@ -99,7 +99,6 @@ public:
 
     // validate that the max scatter angle is ~120 degrees (peak is at 120.0 but slight tail)
     for (size_t i = 0; i < NTHETA; i++) {
-      double test = doubleScatterResult->spectrumInfo().twoTheta(i);
       if (doubleScatterResult->spectrumInfo().twoTheta(i) > M_PI * (120.2 + 0.5 * ang_inc) / 180.0)
         TS_ASSERT_EQUALS(doubleScatterResult->y(i)[0], 0.);
     }

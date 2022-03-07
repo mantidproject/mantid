@@ -388,7 +388,7 @@ void DiscusMultipleScatteringCorrection::exec() {
     qmax = 2 * kmax;
   }
   m_QSQWS = prepareQSQ(qmax);
-  int totalPoints = 0;
+  size_t totalPoints = 0;
   for (size_t i = 0; i < m_QSQWS->getNumberHistograms(); i++) {
     totalPoints += m_QSQWS->histogram(i).size();
   }
@@ -653,7 +653,7 @@ void DiscusMultipleScatteringCorrection::prepareCumulativeProbForQ(double kinc, 
     std::vector<double> IOfQX, IOfQY;
     integrateCumulative(m_QSQWS->histogram(iW), qmin, qmin + qrange, IOfQX, IOfQY);
     qValuesFull.insert(qValuesFull.end(), IOfQX.begin(), IOfQX.end());
-    wIndices.insert(wIndices.end(), IOfQX.size(), iW);
+    wIndices.insert(wIndices.end(), IOfQX.size(), static_cast<double>(iW));
     std::transform(IOfQY.begin(), IOfQY.end(), IOfQY.begin(),
                    [IOfQMaxPreviousRow](double d) -> double { return d + IOfQMaxPreviousRow; });
     IOfQMaxPreviousRow = IOfQY.back();
@@ -779,7 +779,8 @@ std::tuple<double, double> DiscusMultipleScatteringCorrection::new_vector(const 
 
 std::tuple<double, int> DiscusMultipleScatteringCorrection::sampleQW(const MatrixWorkspace_sptr &CumulativeProb,
                                                                      double x) {
-  return {interpolateSquareRoot(CumulativeProb->getSpectrum(0), x), interpolateFlat(CumulativeProb->getSpectrum(1), x)};
+  return {interpolateSquareRoot(CumulativeProb->getSpectrum(0), x),
+          static_cast<int>(interpolateFlat(CumulativeProb->getSpectrum(1), x))};
 }
 
 /**
@@ -1034,7 +1035,7 @@ std::tuple<bool, std::vector<double>, double> DiscusMultipleScatteringCorrection
   return {true, weights, QSS};
 }
 
-double DiscusMultipleScatteringCorrection::getKf(const MatrixWorkspace_sptr &SOfQ, const int iW, const double kinc) {
+double DiscusMultipleScatteringCorrection::getKf(const MatrixWorkspace_sptr &SOfQ, const size_t iW, const double kinc) {
   double deltaE, kf;
   if (m_EMode == Kernel::DeltaEMode::Elastic) {
     deltaE = 0.;
@@ -1079,7 +1080,7 @@ std::tuple<double, int> DiscusMultipleScatteringCorrection::sampleKW(const Matri
   double wMax = fromWaveVector(kinc);
   auto &wValues = dynamic_cast<NumericAxis *>(SOfQ->getAxis(1))->getValues();
   auto it = std::lower_bound(wValues.begin(), wValues.end(), wMax);
-  int iWMax = std::distance(wValues.begin(), it) - 1;
+  int iWMax = static_cast<int>(std::distance(wValues.begin(), it) - 1);
   auto iW = rng.nextInt(0, iWMax);
   double k = getKf(SOfQ, iW, kinc);
   return {k, iW};

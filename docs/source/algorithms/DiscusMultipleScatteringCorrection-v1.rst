@@ -144,12 +144,13 @@ Usage
    :include-source:
 
    # import mantid algorithms, numpy and matplotlib
+   from mantid import mtd
    from mantid.simpleapi import *
    import matplotlib.pyplot as plt
    import numpy as np
 
-   # S(Q) consisting of single spike
-   X=[4.9,5.0,5.1]
+   # S(Q) consisting of single spike at q=1
+   X=[0.99,1.0,1.01]
    Y=[0.,1000,0.]
    Sofq=CreateWorkspace(DataX=X,DataY=Y,UnitX="MomentumTransfer")
 
@@ -157,9 +158,9 @@ Usage
    for i in range(180):
        two_thetas.append(i)
 
-   # workspace with single bin centred at wavelength=1 Angstrom
+   # workspace with single bin centred at k=1 Angstrom-1
    ws = CreateSampleWorkspace(WorkspaceType="Histogram",
-                              XUnit="Wavelength",
+                              XUnit="Momentum",
                               Xmin=0.5,
                               Xmax=1.5,
                               BinWidth=1.0,
@@ -186,18 +187,20 @@ Usage
    "
    SetSample(InputWorkspace=ws,
              Geometry={'Shape': 'CSG', 'Value': sphere_xml},
-             Material={'ChemicalFormula': 'Ni', 'NumberDensity': 0.02, 'AttenuationXSection': 0.0, 'ScatteringXSection': 80.0})
+             Material={'NumberDensity': 0.02, 'AttenuationXSection': 0.0,
+                       'CoherentXSection': 0.0, 'IncoherentXSection': 0.0, 'ScatteringXSection': 80.0})
 
    DiscusMultipleScatteringCorrection(InputWorkspace=ws, StructureFactorWorkspace=Sofq,
                                       OutputWorkspace="MuscatResults", NeutronPathsSingle=1000,
                                       NeutronPathsMultiple=10000, ImportanceSampling=True)
 
-   # q=2ksin(theta), so q spike corresonds to single scatter spike at ~46 degrees, double scatter spikes at 0 and 92 degrees
+   # q=2ksin(theta), so q spike corresonds to single scatter spike at ~60 degrees, double scatter spikes at 0 and 120 degrees
    msplot = plotBin('Scatter_2',0)
    msplot = plotBin('Scatter_1',0, window=msplot)
    axes = plt.gca()
    axes.set_xlabel('Spectrum (~scattering angle in degrees)')
    plt.title("Single and Double Scatter Intensities")
+   mtd.clear()
 
 **Example - inelastic calculation on direct geometry (matches calculation in DISCUS paper** [#JOH]_ **figure 1)**
 
@@ -277,8 +280,8 @@ Usage
    "
    SetSample(InputWorkspace=ws,
              Geometry={'Shape': 'CSG', 'Value': cuboid_xml},
-             Material={'ChemicalFormula': 'Ni', 'NumberDensity': 0.02,
-                       'AttenuationXSection': 0.0, 'ScatteringXSection': 80.0})
+             Material={'NumberDensity': 0.02, 'AttenuationXSection': 0.0,
+                       'CoherentXSection': 0.0, 'IncoherentXSection': 0.0, 'ScatteringXSection': 80.0})
 
    #match Ei value from DISCUS pdf Figure 1
    ws.run().addProperty("deltaE-mode", "Direct", True);
@@ -290,10 +293,10 @@ Usage
 
    # reverse w axis because Discus w = Ef-Ei (opposite to Mantid)
    for i in range(mtd['Scatter_1'].getNumberHistograms()):
-       y = np.flip(mtd['Scatter_1'].dataY(i))
+       y = np.flip(mtd['Scatter_1'].dataY(i),0)
        mtd['Scatter_1'].setY(i,y.tolist())
    for i in range(mtd['Scatter_2'].getNumberHistograms()):
-       y = np.flip(mtd['Scatter_2'].dataY(i))
+       y = np.flip(mtd['Scatter_2'].dataY(i),0)
        mtd['Scatter_2'].setY(i,y.tolist())
 
    plt.rcParams['figure.figsize'] = (5, 6)
@@ -301,13 +304,14 @@ Usage
    for i, tt in enumerate(two_thetas):
        ax.plot(mtd['Scatter_1'], wkspIndex=i, label='Single: ' + str(tt) + ' degrees')
    for i, tt in enumerate(two_thetas):
-       ax.plot(mtd['Scatter_2'], wkspIndex=i, label='Double: ' + str(tt) + ' degrees')
+       ax.plot(mtd['Scatter_2'], wkspIndex=i, label='Double: ' + str(tt) + ' degrees', linestyle='--')
    plt.yscale('log')
    ax.set_xlim(-1,1)
    ax.set_ylim(1e-4,1e-1)
    ax.legend(fontsize=7.0)
-   plt.title("Inelastic Double\Single Scattering Weights")
+   plt.title("Inelastic Double\\Single Scattering Weights")
    fig.show()
+   mtd.clear()
 
 This is the equivalent plot from the original Discus Fortran program:
 
