@@ -266,6 +266,6 @@ intersphinx_mapping = {
 # "WARNING: document isn't included in any toctree"
 # while new release notes system is under development.
 exclude_patterns = [
-    'release/v6.4.0/**/Bugfixes/Bugfixes.rst',
-    'release/v6.4.0/**/New_features/New_features.rst'
+    'release/v6.4.0/**/Bugfixes/**/*.rst',
+    'release/v6.4.0/**/New_features/**/*.rst'
 ]
