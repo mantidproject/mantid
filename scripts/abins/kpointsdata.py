@@ -39,12 +39,16 @@ class KpointsData(collections.abc.Sequence):
         unit_cell: lattice vectors (use zeros for open boundary conditions);
         unit_cell.shape == (3, 3)
 
-        logger: Logging instance. Defaults to Mantid logger.
+        logger: Logging instance. Defaults to Mantid logger. Alternate loggers
+            may be useful for testing.
     """
     def __init__(self, *, frequencies: np.ndarray, atomic_displacements: np.ndarray,
                  weights: np.ndarray, k_vectors: np.ndarray, unit_cell: np.ndarray,
                  logger = None) -> None:
         super().__init__()
+
+        if logger is None:
+            logger = mantid_logger
 
         self._data = {}
         dim = 3
@@ -66,9 +70,6 @@ class KpointsData(collections.abc.Sequence):
             raise ValueError("Invalid value of weights.")
 
         if not isclose(np.sum(weights), 1.0):
-            if logger is None:
-                logger = mantid_logger
-
             logger.warning("k-point weights do not sum to 1. Re-normalising...")
             weights /= np.sum(weights)
 
