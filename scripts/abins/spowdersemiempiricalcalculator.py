@@ -384,7 +384,8 @@ class SPowderSemiEmpiricalCalculator:
 
         else:
             # (order, q, energy)
-            q2_order_corrections = q2**np.arange(self._quantum_order_num)[:, np.newaxis, np.newaxis]
+            max_dw_order = self._quantum_order_num
+            q2_order_corrections = q2**np.arange(max_dw_order)[:, np.newaxis, np.newaxis]
 
         self._report_progress("Applying instrumental broadening to all orders with simple q-dependence")
         broadening_scheme = abins.parameters.sampling['broadening_scheme']
