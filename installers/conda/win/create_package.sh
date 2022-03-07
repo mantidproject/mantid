@@ -1,139 +1,143 @@
-#!/bin/bash
+#!/bin/bash -ex
 
+# REQUIRES NSIS to be installed and on the path.
 # Construct a standalone windows MantidWorkbench NSIS package.
 # The package is created from a pre-packaged conda version
 # and removes any excess that is not necessary in a standalone
 # packaged
-set -e
-
-# Constants
-HERE="$(dirname "$0")"
-BUILDDIR=_package_build
-# Prefer mamba over conda for speed
-CONDA_EXE=mamba
-CONDA_PACKAGE=mantidworkbench
 
 # Print usage and exit
 function usage() {
   local exitcode=$1
   echo "Usage: $0 [options] package_name icon_file"
   echo
-  echo "Create a DragNDrop packae out of a Conda package. The package is built in $BUILDDIR."
-  echo "This directory will be created if it does not exist or purged if it already exists."
-  echo "The final installer will be created in the current working directory."
+  echo "Create a standalone installable package out of a mantidworkbench Conda package. The"
+  echo " package is built in $BUILDDIR. This directory will be created if it does not exist"
+  echo " or purged if it already exists. The final installer will be created in the current"
+  echo " working directory. Requires mamba and NSIS to be installed in the running "
+  echo "environment, and on the path."
   echo "Options:"
   echo "  -c Optional Conda channel overriding the default mantid"
   echo
   echo "Positional Arguments"
-  echo "  package_name: The name of the package app directory, i.e. the final name will be '${package_name}.exe'"
-  echo "  icon_file: An icon file, in icns format, for the final package"
+  echo "  package_name: The name of the package exe, i.e. the final name will be '${package_name}.exe'"
   exit $exitcode
 }
 
 # Optional arguments
-conda_channel=mantid
+CONDA_CHANNEL=mantid
 while getopts ":c:h" o; do
   case "$o" in
-  c) conda_channel="$OPTARG";;
+  c) CONDA_CHANNEL="$OPTARG";;
   h) usage 0;;
   *) usage 1;;
 esac
 done
 shift $((OPTIND-1))
 
-# Positional arguments
-# 2) - the name of the package
-# 3) - path to .icns image used as icon for package
-package_name=$1
-package_icon=$2
+# Define variables
+HERE="$(pwd)"
+CONDA_ENV=_conda_env
+CONDA_ENV_PATH=$HERE/$CONDA_ENV
+COPY_DIR=$HERE/_package_build
+CONDA_EXE=mamba
+PACKAGE_NAME=$1
 
 # Sanity check arguments. Especially ensure that paths are not empty as we are removing
 # items and we don't want to accidentally clean out system paths
-test -n "$package_name" || usage 1
-test -n "$package_icon" || usage 1
+test -n "$PACKAGE_NAME" || usage 1
 
-package_dirname="$package_name"
-package_contents="$BUILDDIR"/"$package_dirname"
-echo "Building '$package_dirname' in '$BUILDDIR' from '$conda_channel' Conda channel"
+echo "Cleaning up left over old directories"
+rm -rf $COPY_DIR
+rm -rf $CONDA_ENV_PATH
 
-# Build directory needs to be empty before we start
-if [ -d "$BUILDDIR" ]; then
-  echo "$BUILDDIR exists. Removing before commencing build."
-  rm -fr "$BUILDDIR"
-elif [ -e "$BUILDDIR" ]; then
-  echo "$BUILDDIR exists but is not a directory. $BUILDDIR is expected to be created by this script as a place to build the package"
-  echo "Either move/rename $BUILDDIR or use a different working directory"
-  exit 1
-fi
+mkdir $COPY_DIR
 
-# Make directory because it needs to exist
-echo "Making $BUILDDIR directory"
-mkdir $BUILDDIR
-
-# Create conda environment internally. --copy ensures no symlinks are used
-package_conda_prefix="$package_contents"
-
-echo "Creating Conda environment in '$package_conda_prefix' from '$CONDA_PACKAGE'"
-"$CONDA_EXE" create --prefix "$package_conda_prefix" --copy --channel "$conda_channel" --yes \
-  "$CONDA_PACKAGE" \
-  jq  # used for processing the version string
+echo "Creating conda env from mantidworkbench and jq"
+"$CONDA_EXE" create --prefix $CONDA_ENV mantidworkbench m2w64-jq --copy -c $CONDA_CHANNEL -c conda-forge -y
+echo "Conda env created"
 
 # Determine version information
-version=$("$CONDA_EXE" list --prefix "$package_conda_prefix" '^mantid$' --json | jq --raw-output '.[0].version')
+version=$("$CONDA_EXE" list --prefix "$CONDA_ENV_PATH" '^mantid$' --json | $CONDA_ENV_PATH/Library/mingw-w64/bin/jq.exe --raw-output '.[0].version')
+echo "Version number: $version"
 
 # Remove jq
-"$CONDA_EXE" remove --prefix "$package_conda_prefix" --yes jq
+echo "Removing jq from conda env"
+"$CONDA_EXE" remove --prefix $CONDA_ENV --yes m2w64-jq
+echo "jq removed from conda env"
 
-# Conda packages pretty much everything with each of its packages and much of this is
-# unnecessary in this type of package - trim the fat.
-echo "Purging '$package_conda_prefix' of unnecessary items"
-# Heavily cut down everything in bin
-mv "$package_conda_prefix"/bin "$package_conda_prefix"/bin_tmp
-mkdir "$package_conda_prefix"/bin
-cp "$package_conda_prefix"/bin_tmp/Mantid.properties "$package_conda_prefix"/bin/
-cp "$package_conda_prefix"/bin_tmp/mantid-scripts.pth "$package_conda_prefix"/bin/
-cp "$package_conda_prefix"/bin_tmp/MantidWorkbench "$package_conda_prefix"/bin/
-cp "$package_conda_prefix"/bin_tmp/python "$package_conda_prefix"/bin/
-cp "$package_conda_prefix"/bin_tmp/pip "$package_conda_prefix"/bin/
-sed -i "" '1s|.*|#!/usr/bin/env python|' "$package_conda_prefix"/bin/pip
-# Heavily cut down share
-mv "$package_conda_prefix"/share "$package_conda_prefix"/share_tmp
-# Removals
-rm -rf "$package_conda_prefix"/bin_tmp \
-  "$package_conda_prefix"/include \
-  "$package_conda_prefix"/man \
-  "$package_conda_prefix"/mkspecs \
-  "$package_conda_prefix"/phrasebooks \
-  "$package_conda_prefix"/qml \
-  "$package_conda_prefix"/qsci \
-  "$package_conda_prefix"/share_tmp \
-  "$package_conda_prefix"/translations
-find "$package_conda_prefix" -name 'qt.conf' -delete
-find "$package_conda_prefix" -name '*.a' -delete
-find "$package_conda_prefix" -name "*.pyc" -type f -delete
-find "$package_conda_prefix" -path "*/__pycache__/*" -delete
-find "$package_contents" -name '*.plist' -delete
+# Pip install quasielasticbayes so it can be packaged alongside workbench on windows
+$CONDA_ENV_PATH/python.exe -m pip install quasielasticbayes
 
-# Add required resources
-cp "$HERE"/BundleExecutable "$package_contents"/MacOS/"$package_name"
-chmod +x "$package_contents"/MacOS/"$package_name"
-cp "$HERE"/qt.conf "$package_conda_prefix"/bin/qt.conf
-cp "$package_icon" "$package_conda_prefix"
+echo "Copying root packages of env files (Python, DLLs, Lib, Scripts, ucrt, and msvc files) to package/bin"
+cp $CONDA_ENV_PATH/DLLs $COPY_DIR/bin/ -r
+cp $CONDA_ENV_PATH/Lib $COPY_DIR/bin/ -r
+cp $CONDA_ENV_PATH/Scripts $COPY_DIR/bin/ -r
+cp $CONDA_ENV_PATH/tcl $COPY_DIR/bin/ -r
+cp $CONDA_ENV_PATH/python*.* $COPY_DIR/bin/
+cp $CONDA_ENV_PATH/msvc*.* $COPY_DIR/bin/
+cp $CONDA_ENV_PATH/ucrt*.* $COPY_DIR/bin/
 
-# Create a plist from base version
-package_plist="$package_contents"/Info.plist
-cp "$HERE"/Info.plist.base "$package_plist"
-add_string_to_plist "$package_plist" CFBundleIdentifier org.mantidproject."$package_name"
-add_string_to_plist "$package_plist" CFBundleExecutable "$package_name"
-add_string_to_plist "$package_plist" CFBundleName "$package_name"
-add_string_to_plist "$package_plist" CFBundleIconFile "$(package_icon)"
-add_string_to_plist "$package_plist" CFBundleVersion "$version"
-add_string_to_plist "$package_plist" CFBundleLongVersionString "$version"
+echo "Copying mantid python files into bin"
+cp $CONDA_ENV_PATH/Lib/site-packages/mantid* $COPY_DIR/bin/ -r
+cp $CONDA_ENV_PATH/Lib/site-packages/ $COPY_DIR/bin/ -r
+cp $CONDA_ENV_PATH/Lib/site-packages/workbench $COPY_DIR/bin/workbench -r
 
-# Wrap up into dmg
-version_name="$package_name"-"$version"
-echo "Creating DragNDrop package '$version_name.dmg'"
-hdiutil create -volname "$version_name" -srcfolder "$BUILDDIR" -ov -format UDZO "$version_name".dmg
+echo "Copy all DLLs from env/Library/bin to package/bin"
+cp $CONDA_ENV_PATH/Library/bin/*.dll $COPY_DIR/bin/
 
-echo
-echo "Bundle '$package_name.dmg' successfully created."
+echo "Copy Mantid specific files from env/Library/bin to package/bin"
+cp $CONDA_ENV_PATH/Library/bin/Mantid.properties $COPY_DIR/bin/
+cp $CONDA_ENV_PATH/Library/bin/Mantid.user.properties $COPY_DIR/bin/
+cp $CONDA_ENV_PATH/Library/bin/MantidNexusParallelLoader.exe $COPY_DIR/bin/
+cp $CONDA_ENV_PATH/Library/bin/mantid-scripts.pth $COPY_DIR/bin/
+cp $CONDA_ENV_PATH/Library/bin/MantidWorkbench.exe $COPY_DIR/bin/
+
+echo "Copy env/includes to the package/includes"
+cp $CONDA_ENV_PATH/Library/include/eigen3 $COPY_DIR/include/ -r
+
+echo "Copy Instrument details to the package"
+cp $CONDA_ENV_PATH/Library/instrument $COPY_DIR/ -r
+
+echo "Constructing package/lib/qt5"
+mkdir $COPY_DIR/lib
+mkdir $COPY_DIR/lib/qt5
+mkdir $COPY_DIR/lib/qt5/bin
+cp $CONDA_ENV_PATH/Library/bin/QtWebEngineProcess.exe $COPY_DIR/lib/qt5/bin
+cp $CONDA_ENV_PATH/Library/bin/qt.conf $COPY_DIR/lib/qt5/bin
+cp $CONDA_ENV_PATH/Library/resources $COPY_DIR/lib/qt5/ -r
+
+echo "Copy plugins to the package"
+mkdir $COPY_DIR/plugins
+mkdir $COPY_DIR/plugins/qt5
+cp $CONDA_ENV_PATH/Library/plugins/platforms $COPY_DIR/plugins/qt5/ -r
+cp $CONDA_ENV_PATH/Library/plugins/imageformats $COPY_DIR/plugins/qt5/ -r
+cp $CONDA_ENV_PATH/Library/plugins/printsupport $COPY_DIR/plugins/qt5/ -r
+cp $CONDA_ENV_PATH/Library/plugins/sqldrivers $COPY_DIR/plugins/qt5/ -r
+cp $CONDA_ENV_PATH/Library/plugins/styles $COPY_DIR/plugins/qt5/ -r
+cp $CONDA_ENV_PATH/Library/plugins/*.dll $COPY_DIR/plugins/
+cp $CONDA_ENV_PATH/Library/plugins/python $COPY_DIR/plugins/ -r
+
+echo "Copy scripts into the package"
+cp $CONDA_ENV_PATH/Library/scripts $COPY_DIR/ -r
+
+echo "Copy share files (includes mantid docs) to the package"
+cp $CONDA_ENV_PATH/Library/share/doc $COPY_DIR/share/ -r
+cp $CONDA_ENV_PATH/Library/share/eigen3 $COPY_DIR/share/ -r
+
+# Cleanup pdb files and remove them from bin
+echo "Performing some cleanup.... deleting files"
+rm -rf $COPY_DIR/bin/*.pdb
+find $COPY_DIR -name *.pyc -delete
+# Delete extra DLLs
+rm -rf $COPY_DIR/bin/api-ms-win*.dll
+rm -rf $COPY_DIR/bin/libclang.dll
+
+echo "Cleanup directory containing build that is no longer needed"
+rm -rf $CONDA_ENV_PATH
+
+# Now package using NSIS
+echo "Packaging package via NSIS"
+
+echo "Package packaged, find it here. "
+
