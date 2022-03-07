@@ -23,6 +23,7 @@ class Instrument:
     def __init__(self, setting: str = ''):
         setting = self._check_setting(setting)
         self._setting = setting
+        self._setting_parameters = None
 
     def get_angles(self):
         """Get a list of detector angles to sample"""
@@ -59,19 +60,25 @@ class Instrument:
         """Get parameters for this instrument from abins.parameters"""
         return abins.parameters.instruments.get(self.get_name())
 
-    def get_setting(self):
+    def get_setting(self) -> str:
         return self._setting
 
     def get_setting_parameters(self) -> Dict[str, Any]:
-        """Get instrument parameters associated with the current setting"""
-        all_settings_data = self.get_parameters().get('settings')
+        """Get instrument parameters associated with the current setting
 
-        if all_settings_data:
-            return all_settings_data.get(
-                self._check_setting(self.get_setting()))
+        (These will be cached the first time this method is called. Instrument
+        settings are not mutable.)
+        """
+        if self._setting_parameters is None:
+            all_settings_data = self.get_parameters().get('settings')
 
-        else:
-            return {}
+            if all_settings_data:
+                self._setting_parameters =  all_settings_data.get(
+                    self._check_setting(self.get_setting()))
+            else:
+                self._setting_parameters = {}
+
+        return self._setting_parameters
 
     def get_min_wavenumber(self):
         return self.get_parameter('min_wavenumber', default=abins.parameters.sampling['min_wavenumber'])
