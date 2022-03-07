@@ -108,9 +108,9 @@ void AsymmetricPearsonVII::functionDerivLocal(Jacobian *out, const double *xValu
       right_ph_der = 1.0 / pow(right_denom, mr);
 
     if (xValues[i] <= peak_centre)
-      out->set(i, 0, 1.0 / pow(left_ph_der, ml));
+      out->set(i, 0, left_ph_der);
     else
-      out->set(i, 0, 1.0 / pow(right_ph_der, mr));
+      out->set(i, 0, right_ph_der);
 
     // derivative with respect to the peak_centre
     double left_pc_der, right_pc_der;
