@@ -1,0 +1,1 @@
+- It is now possible to replace the workspace and save the image of the instrument viewer using its python API.
