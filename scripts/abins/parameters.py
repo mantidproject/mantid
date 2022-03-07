@@ -77,7 +77,6 @@ sampling = {
 # Parameters related to estimated of spectra of high quantum orders by repeated convolution with fundamentals
 autoconvolution = {
     'max_order': 10, # Highest quantum order accessed by autoconvolution
-    'scale': 1.0,    # Scale factor applied to normalised convolution kernel
     'fine_bin_factor': 10
     }
 
