@@ -11,24 +11,38 @@ HERE="$(dirname "$0")"
 BUILD_DIR=_bundle_build
 TEMP_IMAGE=/tmp/temp.dmg
 TEMP_OSA_SCPT=/tmp/dmg_setup.scpt
-# Prefer mamba over conda for speed
+DETACH_MAX_TRIES=5
+DETACH_WAIT_SECS=60
 CONDA_EXE=mamba
 CONDA_PACKAGE=mantidworkbench
 
 # Cleanup on script exit
-# Remove temporary work files
+# Remove temporary work files and ensure volumes are detached
 #   $1 - The name of the mounted volume that, if it still exists, should be detached
-function onexit() {
-  # All volumes should have detached but if an error occurred they will not have done
-  ensure_detached "$1"
+function cleanup() {
+  ensure_volume_detached "$1"
   rm -f "$TEMP_OSA_SCPT"
   rm -f "$TEMP_IMAGE"
 }
 
 # Attempt to detach the named volume. This will wait for a maximum of 5 minutes
 #   $1 - The name of the mounted volume that, if it still exists, should be detached
-function ensure_detached() {
+function ensure_volume_detached() {
   local volume_name="$1"
+  if [ ! -d /Volumes/"$volume_name" ]; then
+    return
+  fi
+
+  # It can quite often happen that the resource is busy on first try.
+  # We keep trying for several times
+  local counter=0
+  while [ $counter -lt $DETACH_MAX_TRIES ]; do
+    if hdiutil detach /Volumes/"$volume_name"; then
+      break
+    fi
+    (( counter+=1 ))
+    sleep $DETACH_WAIT_SECS
+  done
 }
 
 # Use otool/install_name_tool to change a dependent path
