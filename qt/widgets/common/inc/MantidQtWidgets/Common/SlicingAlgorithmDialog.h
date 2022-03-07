@@ -124,7 +124,7 @@ class EXPORT_OPT_MANTIDQT_COMMON SliceMDDialog : public SlicingAlgorithmDialog {
 public:
   SliceMDDialog(QWidget *parent = nullptr) : SlicingAlgorithmDialog(parent) {}
 
-  ~SliceMDDialog() override {}
+  ~SliceMDDialog() override = default;
 
   void customiseInitLayout() override;
 };
@@ -137,7 +137,7 @@ class EXPORT_OPT_MANTIDQT_COMMON BinMDDialog : public SlicingAlgorithmDialog {
   Q_OBJECT
 public:
   BinMDDialog(QWidget *parent = nullptr) : SlicingAlgorithmDialog(parent) {}
-  ~BinMDDialog() override {}
+  ~BinMDDialog() override = default;
   void customiseInitLayout() override;
 };
 } // namespace MantidWidgets

@@ -5,25 +5,28 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 # pylint: disable=invalid-name,relative-import
-from . import InstrumentSetupWidget
-from . import ClassicUBInputWidget
-from . import MatrixUBInputWidget
-from . import DimensionSelectorWidget
-from qtpy import QtCore, QtWidgets
-import sys
-import mantid
-from .ValidateOL import ValidateOL
-import matplotlib
-from mantidqt.gui_helper import show_interface_help
-from mantidqt.MPLwidgets import *
-from mantidqt.plotting.mantid_navigation_toolbar import MantidNavigationToolbar
-from matplotlib.figure import Figure
-from mpl_toolkits.axisartist.grid_helper_curvelinear import GridHelperCurveLinear
-from mpl_toolkits.axisartist import Subplot
-from mantid.kernel import UnitConversion, Elastic
-import numpy
 import copy
 import os
+import sys
+from distutils.version import LooseVersion
+
+import matplotlib
+import numpy
+from mantidqt.MPLwidgets import *
+from mantidqt.gui_helper import show_interface_help
+from mantidqt.plotting.mantid_navigation_toolbar import MantidNavigationToolbar
+from matplotlib.figure import Figure
+from mpl_toolkits.axisartist import Subplot
+from mpl_toolkits.axisartist.grid_helper_curvelinear import GridHelperCurveLinear
+from qtpy import QtCore, QtWidgets
+
+import mantid
+from mantid.kernel import UnitConversion, Elastic
+from . import ClassicUBInputWidget
+from . import DimensionSelectorWidget
+from . import InstrumentSetupWidget
+from . import MatrixUBInputWidget
+from .ValidateOL import ValidateOL
 
 
 def float2Input(x):
@@ -102,7 +105,7 @@ class DGSPlannerGUI(QtWidgets.QWidget):
         self.canvas = FigureCanvas(self.figure)
         self.grid_helper = GridHelperCurveLinear((self.tr, self.inv_tr))
         self.trajfig = Subplot(self.figure, 1, 1, 1, grid_helper=self.grid_helper)
-        if matplotlib.compare_versions('2.1.0', matplotlib.__version__):
+        if LooseVersion('2.1.0') > LooseVersion(matplotlib.__version__):
             self.trajfig.hold(True)  # hold is deprecated since 2.1.0, true by default
         self.figure.add_subplot(self.trajfig)
         self.toolbar = MantidNavigationToolbar(self.canvas, self)

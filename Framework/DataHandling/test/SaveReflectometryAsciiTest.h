@@ -33,7 +33,7 @@ public:
   static void destroySuite(SaveReflectometryAsciiTest *suite) { delete suite; }
 
   SaveReflectometryAsciiTest() {}
-  ~SaveReflectometryAsciiTest() override {}
+  ~SaveReflectometryAsciiTest() override = default;
 
   void testInit() {
     SaveReflectometryAscii alg;

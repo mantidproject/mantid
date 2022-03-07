@@ -32,7 +32,7 @@ namespace Algorithms {
 class MANTID_ALGORITHMS_DLL UnwrapMonitor : public API::Algorithm {
 public:
   UnwrapMonitor();
-  ~UnwrapMonitor() override {}
+  ~UnwrapMonitor() override = default;
   /// Algorithm's name for identification overriding a virtual method
   const std::string name() const override { return "UnwrapMonitor"; }
   /// Summary of algorithms purpose

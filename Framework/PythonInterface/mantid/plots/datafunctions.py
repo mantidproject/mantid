@@ -1133,7 +1133,8 @@ def waterfall_create_fill(ax):
         fill.set_zorder((len(ax.get_lines()) - i) + 1)
         set_waterfall_fill_visible(ax, i)
 
-    ax.lines += errorbar_cap_lines
+    for cap in errorbar_cap_lines:
+        ax.add_line(cap)
 
 
 def waterfall_remove_fill(ax):

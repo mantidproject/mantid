@@ -54,7 +54,7 @@ IndirectTransmission::IndirectTransmission(IndirectDataReduction *idrUI, QWidget
 //----------------------------------------------------------------------------------------------
 /** Destructor
  */
-IndirectTransmission::~IndirectTransmission() {}
+IndirectTransmission::~IndirectTransmission() = default;
 
 void IndirectTransmission::setup() {}
 

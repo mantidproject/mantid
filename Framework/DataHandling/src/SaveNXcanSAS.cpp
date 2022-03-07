@@ -713,7 +713,7 @@ namespace Mantid::DataHandling {
 DECLARE_ALGORITHM(SaveNXcanSAS)
 
 /// constructor
-SaveNXcanSAS::SaveNXcanSAS() {}
+SaveNXcanSAS::SaveNXcanSAS() = default;
 
 void SaveNXcanSAS::init() {
   auto inputWSValidator = std::make_shared<Kernel::CompositeValidator>();

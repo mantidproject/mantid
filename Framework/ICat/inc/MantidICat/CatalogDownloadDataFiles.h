@@ -35,7 +35,7 @@ public:
   /// Constructor
   CatalogDownloadDataFiles() : API::Algorithm(), m_prog(0.0) {}
   /// Destructor
-  ~CatalogDownloadDataFiles() override {}
+  ~CatalogDownloadDataFiles() override = default;
   /// Algorithm's name for identification overriding a virtual method
   const std::string name() const override { return "CatalogDownloadDataFiles"; }
   /// Summary of algorithms purpose.

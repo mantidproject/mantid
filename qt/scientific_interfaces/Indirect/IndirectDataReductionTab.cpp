@@ -29,7 +29,7 @@ IndirectDataReductionTab::IndirectDataReductionTab(IndirectDataReduction *idrUI,
   connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this, SLOT(tabExecutionComplete(bool)));
 }
 
-IndirectDataReductionTab::~IndirectDataReductionTab() {}
+IndirectDataReductionTab::~IndirectDataReductionTab() = default;
 
 void IndirectDataReductionTab::setOutputPlotOptionsPresenter(std::unique_ptr<IndirectPlotOptionsPresenter> presenter) {
   m_plotOptionsPresenter = std::move(presenter);

@@ -1,0 +1,1 @@
+- Loading a batch now completely clears the Experiment Settings tab's lookup table before re-populating it.

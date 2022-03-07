@@ -269,7 +269,7 @@ MDGeometryBuilderXML<CheckDimensionPolicy>::MDGeometryBuilderXML() : m_changed(t
 /**
  Destructor
  */
-template <typename CheckDimensionPolicy> MDGeometryBuilderXML<CheckDimensionPolicy>::~MDGeometryBuilderXML() {}
+template <typename CheckDimensionPolicy> MDGeometryBuilderXML<CheckDimensionPolicy>::~MDGeometryBuilderXML() = default;
 
 // Create a builder that blocks the creation when a integrated dimension is used
 // in x, y, z, t mappings.

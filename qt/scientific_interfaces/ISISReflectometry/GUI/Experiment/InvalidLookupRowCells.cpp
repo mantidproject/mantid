@@ -4,20 +4,20 @@
 //   NScD Oak Ridge National Laboratory, European Spallation Source,
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#include "InvalidDefaultsError.h"
+#include "InvalidLookupRowCells.h"
 
 namespace MantidQt::CustomInterfaces::ISISReflectometry {
 
-InvalidDefaultsError::InvalidDefaultsError(int row, std::vector<int> invalidColumns)
+InvalidLookupRowCells::InvalidLookupRowCells(int row, std::unordered_set<int> invalidColumns)
     : m_invalidColumns(std::move(invalidColumns)), m_row(row) {}
 
-std::vector<int> const &InvalidDefaultsError::invalidColumns() const { return m_invalidColumns; }
+std::unordered_set<int> const &InvalidLookupRowCells::invalidColumns() const { return m_invalidColumns; }
 
-int InvalidDefaultsError::row() const { return m_row; }
+int InvalidLookupRowCells::row() const { return m_row; }
 
-bool operator==(InvalidDefaultsError const &lhs, InvalidDefaultsError const &rhs) {
+bool operator==(InvalidLookupRowCells const &lhs, InvalidLookupRowCells const &rhs) {
   return lhs.row() == rhs.row() && lhs.invalidColumns() == rhs.invalidColumns();
 }
 
-bool operator!=(InvalidDefaultsError const &lhs, InvalidDefaultsError const &rhs) { return !(lhs == rhs); }
+bool operator!=(InvalidLookupRowCells const &lhs, InvalidLookupRowCells const &rhs) { return !(lhs == rhs); }
 } // namespace MantidQt::CustomInterfaces::ISISReflectometry

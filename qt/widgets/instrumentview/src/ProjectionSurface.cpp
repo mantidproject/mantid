@@ -18,9 +18,11 @@
 #include "MantidAPI/IPeaksWorkspace.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidGeometry/IDetector.h"
+#include "MantidGeometry/Instrument/ComponentInfo.h"
 #include "MantidGeometry/Objects/CSGObject.h"
 #include "MantidKernel/Unit.h"
 
+#include <QCursor>
 #include <QMenu>
 #include <QMessageBox>
 #include <QMouseEvent>
@@ -29,6 +31,7 @@
 #include <QSet>
 
 #include "MantidKernel/V3D.h"
+#include <QToolTip>
 #include <algorithm>
 #include <cfloat>
 #include <cmath>
@@ -64,7 +67,6 @@ ProjectionSurface::ProjectionSurface(const InstrumentActor *rootActor)
   setInputController(PickTubeMode, pickController);
   setInputController(AddPeakMode, pickController);
   connect(pickController, SIGNAL(pickPointAt(int, int)), this, SLOT(pickComponentAt(int, int)));
-  connect(pickController, SIGNAL(touchPointAt(int, int)), this, SLOT(touchComponentAt(int, int)));
 
   // create and connect the mask drawing input controller
   InputControllerDrawShape *drawController = new InputControllerDrawShape(this);
@@ -129,6 +131,19 @@ ProjectionSurface::~ProjectionSurface() {
   m_peakShapes.clear();
 }
 
+/**
+ * @brief ProjectionSurface::toggleToolTip
+ * Connect or disconnect all controllers reporting for tooltip when a component is touched
+ * @param activateToolTip the new status
+ */
+void ProjectionSurface::toggleToolTip(bool activateToolTip) {
+  for (auto controller : m_inputControllers) {
+    if (activateToolTip) {
+      connect(controller, SIGNAL(touchPointAt(int, int)), this, SLOT(touchComponentAt(int, int)));
+    } else
+      disconnect(controller, SIGNAL(touchPointAt(int, int)), this, SLOT(touchComponentAt(int, int)));
+  }
+}
 /**
  * Resets the instrument actor. The caller must ensure that the instrument
  * stays the same and workspace dimensions also don't change.
@@ -799,6 +814,18 @@ void ProjectionSurface::pickComponentAt(int x, int y) {
 
 void ProjectionSurface::touchComponentAt(int x, int y) {
   size_t pickID = getPickID(x, y);
+  const auto &componentInfo = m_instrActor->componentInfo();
+
+  if (componentInfo.isDetector(pickID)) {
+    QString text;
+
+    text += "Detector: " + QString::fromStdString(componentInfo.name(pickID)) + '\n';
+
+    const double integrated = m_instrActor->getIntegratedCounts(pickID);
+    const QString counts = integrated == InstrumentActor::INVALID_VALUE ? "N/A" : QString::number(integrated);
+    text += "Counts: " + counts;
+    QToolTip::showText(QCursor::pos(), text);
+  }
   emit singleComponentTouched(pickID);
 }
 

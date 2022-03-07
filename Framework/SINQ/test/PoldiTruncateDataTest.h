@@ -285,6 +285,6 @@ private:
 
   public:
     TestablePoldiTruncateData() : PoldiTruncateData() {}
-    ~TestablePoldiTruncateData() override {}
+    ~TestablePoldiTruncateData() override = default;
   };
 };

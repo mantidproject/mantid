@@ -87,7 +87,7 @@ public:
     m_TOF = WorkspaceCreationHelper::create2DWorkspaceWithReflectometryInstrumentMultiDetector();
   }
 
-  ~ReflectometryReductionOneAuto2Test() override {}
+  ~ReflectometryReductionOneAuto2Test() override = default;
 
   void test_init() {
     ReflectometryReductionOneAuto2 alg;

@@ -28,28 +28,6 @@ Please try installing the extra package: python -m pip install --user quasielast
 """
 
 
-def import_mantidplot():
-    """
-    Currently, all scripts in the PythonAlgorithms directory are imported
-    during system tests.  Unfortunately, these tests are run outside of
-    MantidPlot and so are incompatible with scripts that import the
-    "mantidplot" module.  As a result, an error message is dumped to the
-    results log for each PythonAlgorithm in the directory that imports
-    mantidplot, for each and every test.
-
-    Here, we silently catch all ImportErrors so that this does not occur.
-
-    @returns the mantidplot module.
-    """
-    try:
-        import mantidplot
-        return mantidplot
-    except ImportError:
-        # Not a problem since we are only in a system test anyway, and these
-        # scripts are not needed there.
-        return None
-
-
 def _os_env():
     return platform.system() + platform.architecture()[0]
 

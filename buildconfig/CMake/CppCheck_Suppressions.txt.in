@@ -69,7 +69,7 @@ noCopyConstructor:${CMAKE_SOURCE_DIR}/Framework/Geometry/inc/MantidGeometry/Rend
 
 useStlAlgorithm:${CMAKE_SOURCE_DIR}/Framework/Kernel/inc/MantidKernel/CompositeValidator.h:57
 operatorEqShouldBeLeftUnimplemented:${CMAKE_SOURCE_DIR}/Framework/Kernel/src/Exception.cpp:229
-unreadVariable:${CMAKE_SOURCE_DIR}/Framework/Kernel/src/InternetHelper.cpp:444
+unreadVariable:${CMAKE_SOURCE_DIR}/Framework/Kernel/src/InternetHelper.cpp:445
 useStlAlgorithm:${CMAKE_SOURCE_DIR}/Framework/Kernel/src/InstrumentInfo.cpp:160
 mismatchingContainerExpression:${CMAKE_SOURCE_DIR}/Framework/Kernel/src/LogFilter.cpp:55
 mismatchingContainerExpression:${CMAKE_SOURCE_DIR}/Framework/Kernel/src/LogFilter.cpp:59
@@ -171,7 +171,7 @@ knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/SmoothNeigh
 nullPointerRedundantCheck:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/SmoothNeighbours.cpp:256
 unreadVariable:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/VesuvioL1ThetaResolution.cpp:241
 useStlAlgorithm:${CMAKE_SOURCE_DIR}/Framework/API/src/Algorithm.cpp:369
-useStlAlgorithm:${CMAKE_SOURCE_DIR}/Framework/API/src/AlgorithmHistory.cpp:93
+useStlAlgorithm:${CMAKE_SOURCE_DIR}/Framework/API/src/AlgorithmHistory.cpp:90
 duplicateCondition:${CMAKE_SOURCE_DIR}/Framework/API/src/BoxController.cpp:282
 unsignedLessThanZero:${CMAKE_SOURCE_DIR}/Framework/API/src/BoxController.cpp:220
 useStlAlgorithm:${CMAKE_SOURCE_DIR}/Framework/API/src/BoxControllerSettingsAlgorithm.cpp:40
@@ -426,9 +426,9 @@ unreadVariable:${CMAKE_SOURCE_DIR}/Framework/DataObjects/src/MDHistoWorkspace.cp
 unreadVariable:${CMAKE_SOURCE_DIR}/Framework/DataObjects/src/MDHistoWorkspace.cpp:520
 redundantPointerOp:${CMAKE_SOURCE_DIR}/Framework/DataObjects/inc/MantidDataObjects/MDGridBox.tcc:755
 shadowVariable:${CMAKE_SOURCE_DIR}/Framework/DataObjects/inc/MantidDataObjects/MDGridBox.tcc:1192
-useStlAlgorithm:${CMAKE_SOURCE_DIR}/Framework/DataObjects/inc/MantidDataObjects/MDEventWorkspace.tcc:463
+useStlAlgorithm:${CMAKE_SOURCE_DIR}/Framework/DataObjects/inc/MantidDataObjects/MDEventWorkspace.tcc:459
 useStlAlgorithm:${CMAKE_SOURCE_DIR}/Framework/DataObjects/src/MaskWorkspace.cpp:191
-knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/DataObjects/src/Peak.cpp:673
+knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/DataObjects/src/Peak.cpp:670
 knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/Load.cpp:43
 knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/DataObjects/src/PeaksWorkspace.cpp:345
 constParameter:${CMAKE_SOURCE_DIR}/Framework/DataObjects/src/SpecialWorkspace2D.cpp:203
@@ -554,8 +554,8 @@ knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/WorkflowAlgorithms/src/SAN
 unreadVariable:${CMAKE_SOURCE_DIR}/Framework/WorkflowAlgorithms/src/SofTwoThetaTOF.cpp:191
 nullPointerRedundantCheck:${CMAKE_SOURCE_DIR}/Framework/MDAlgorithms/src/ApplyDetailedBalanceMD.cpp:267
 nullPointerRedundantCheck:${CMAKE_SOURCE_DIR}/Framework/MDAlgorithms/src/ApplyDetailedBalanceMD.cpp:223
-constParameter:${CMAKE_SOURCE_DIR}/Framework/MDAlgorithms/src/CompareMDWorkspaces.cpp:70
-constParameter:${CMAKE_SOURCE_DIR}/Framework/MDAlgorithms/src/CompareMDWorkspaces.cpp:147
+constParameter:${CMAKE_SOURCE_DIR}/Framework/MDAlgorithms/src/CompareMDWorkspaces.cpp:69
+constParameter:${CMAKE_SOURCE_DIR}/Framework/MDAlgorithms/src/CompareMDWorkspaces.cpp:146
 useStlAlgorithm:${CMAKE_SOURCE_DIR}/Framework/MDAlgorithms/inc/MantidMDAlgorithms/MDEventTreeBuilder.h:301
 useStlAlgorithm:${CMAKE_SOURCE_DIR}/Framework/MDAlgorithms/src/ConvToMDEventsWSIndexing.cpp:21
 negativeContainerIndex:${CMAKE_SOURCE_DIR}/Framework/MDAlgorithms/src/ConvertCWPDMDToSpectra.cpp:489
@@ -665,25 +665,8 @@ useStlAlgorithm:${CMAKE_SOURCE_DIR}/qt/scientific_interfaces/Muon/ALCInterface.c
 useStlAlgorithm:${CMAKE_SOURCE_DIR}/qt/scientific_interfaces/ISISReflectometry/Common/Clipboard.cpp:91
 constParameter:${CMAKE_SOURCE_DIR}/qt/scientific_interfaces/ISISReflectometry/GUI/Batch/BatchJobManager.cpp:58
 useStlAlgorithm:${CMAKE_SOURCE_DIR}/qt/scientific_interfaces/ISISReflectometry/GUI/Batch/BatchJobManager.cpp:152
-useStlAlgorithm:${CMAKE_SOURCE_DIR}/qt/scientific_interfaces/ISISReflectometry/GUI/Experiment/QtExperimentView.cpp:542
 constParameter:${CMAKE_SOURCE_DIR}/qt/scientific_interfaces/ISISReflectometry/GUI/Instrument/InstrumentPresenter.cpp:18
 useStlAlgorithm:${CMAKE_SOURCE_DIR}/qt/scientific_interfaces/ISISReflectometry/GUI/MainWindow/MainWindowPresenter.cpp:153
-shadowFunction:${CMAKE_SOURCE_DIR}/qt/scientific_interfaces/ISISReflectometry/GUI/Common/Encoder.cpp:40
-shadowFunction:${CMAKE_SOURCE_DIR}/qt/scientific_interfaces/ISISReflectometry/GUI/Common/Encoder.cpp:63
-shadowFunction:${CMAKE_SOURCE_DIR}/qt/scientific_interfaces/ISISReflectometry/GUI/Common/Encoder.cpp:74
-shadowFunction:${CMAKE_SOURCE_DIR}/qt/scientific_interfaces/ISISReflectometry/GUI/Common/Encoder.cpp:90
-shadowFunction:${CMAKE_SOURCE_DIR}/qt/scientific_interfaces/ISISReflectometry/GUI/Common/Encoder.cpp:107
-shadowFunction:${CMAKE_SOURCE_DIR}/qt/scientific_interfaces/ISISReflectometry/GUI/Common/Encoder.cpp:129
-shadowFunction:${CMAKE_SOURCE_DIR}/qt/scientific_interfaces/ISISReflectometry/GUI/Common/Encoder.cpp:154
-shadowFunction:${CMAKE_SOURCE_DIR}/qt/scientific_interfaces/ISISReflectometry/GUI/Common/Encoder.cpp:165
-shadowFunction:${CMAKE_SOURCE_DIR}/qt/scientific_interfaces/ISISReflectometry/GUI/Common/Encoder.cpp:175
-shadowFunction:${CMAKE_SOURCE_DIR}/qt/scientific_interfaces/ISISReflectometry/GUI/Common/Encoder.cpp:183
-shadowFunction:${CMAKE_SOURCE_DIR}/qt/scientific_interfaces/ISISReflectometry/GUI/Common/Encoder.cpp:212
-shadowFunction:${CMAKE_SOURCE_DIR}/qt/scientific_interfaces/ISISReflectometry/GUI/Common/Encoder.cpp:224
-shadowFunction:${CMAKE_SOURCE_DIR}/qt/scientific_interfaces/ISISReflectometry/GUI/Common/Encoder.cpp:245
-shadowFunction:${CMAKE_SOURCE_DIR}/qt/scientific_interfaces/ISISReflectometry/GUI/Common/Encoder.cpp:261
-shadowFunction:${CMAKE_SOURCE_DIR}/qt/scientific_interfaces/ISISReflectometry/GUI/Common/Encoder.cpp:284
-shadowFunction:${CMAKE_SOURCE_DIR}/qt/scientific_interfaces/ISISReflectometry/GUI/Common/Encoder.cpp:311
 useStlAlgorithm:${CMAKE_SOURCE_DIR}/qt/scientific_interfaces/Indirect/DensityOfStates.cpp:121
 unreadVariable:${CMAKE_SOURCE_DIR}/qt/scientific_interfaces/Indirect/IndirectCorrections.cpp:80
 unreadVariable:${CMAKE_SOURCE_DIR}/qt/scientific_interfaces/Indirect/IndirectDataAnalysis.cpp:91

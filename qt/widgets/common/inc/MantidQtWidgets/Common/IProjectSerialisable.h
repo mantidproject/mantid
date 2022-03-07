@@ -27,7 +27,7 @@ class IProjectSerialisable {
 public:
   /// Virtual destructor (required by linker on some versions of OS X/Intel
   /// compiler)
-  virtual ~IProjectSerialisable() {}
+  virtual ~IProjectSerialisable() = default;
 
   static IProjectSerialisable *loadFromProject(const std::string &lines, ApplicationWindow *app,
                                                const int fileVersion) {

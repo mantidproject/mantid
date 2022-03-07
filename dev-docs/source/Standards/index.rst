@@ -37,6 +37,7 @@ Documentation Standards
    AlgorithmDocumentation
    AlgorithmUsageExamples
    InterfaceDocumentation
+   ReleaseNotesGuide
 
 
 Guidelines

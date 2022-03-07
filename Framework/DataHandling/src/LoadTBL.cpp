@@ -27,7 +27,7 @@ using namespace Kernel;
 using namespace API;
 
 /// Empty constructor
-LoadTBL::LoadTBL() {}
+LoadTBL::LoadTBL() = default;
 
 /**
  * Return the confidence with with this algorithm can load the file

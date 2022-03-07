@@ -38,7 +38,7 @@ using Mantid::Kernel::V3D;
 class IntegratePeaksMDTest : public CxxTest::TestSuite {
 public:
   IntegratePeaksMDTest() { Mantid::API::FrameworkManager::Instance(); }
-  ~IntegratePeaksMDTest() override {}
+  ~IntegratePeaksMDTest() override = default;
 
   void test_Init() {
     IntegratePeaksMD alg;

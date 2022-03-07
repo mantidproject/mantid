@@ -5,6 +5,7 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 import collections.abc
+from copy import deepcopy
 from typing import Dict, List, Optional, overload, Sequence, TypeVar, Union
 import numpy as np
 from numbers import Real
@@ -292,10 +293,9 @@ class SData(collections.abc.Sequence):
 
         for atom_key, atom_data in self._data.items():
             fundamental_spectrum = atom_data['s']['order_1']
-            kernel = fundamental_spectrum * abins.parameters.autoconvolution['scale'] / np.sum(fundamental_spectrum)
 
             for order_index in range(self._get_highest_existing_order(atom_data), max_order):
-                spectrum = convolve(atom_data['s'][f'order_{order_index}'], kernel, mode='full')[:fundamental_spectrum.size]
+                spectrum = convolve(atom_data['s'][f'order_{order_index}'], fundamental_spectrum, mode='full')[:fundamental_spectrum.size]
                 self._data[atom_key]['s'][f'order_{order_index + 1}'] = spectrum
 
     def check_thresholds(self, return_cases: bool = False,
@@ -352,6 +352,50 @@ class SData(collections.abc.Sequence):
             return warning_cases
         else:
             return None
+
+    def __mul__(self, other: np.ndarray) -> 'SData':
+        """Multiply S data by an array over energies and orders
+
+        Columns correspond to energies, rows correspond to quantum orders.
+        All atoms will be included; for data over atoms and energies use the
+        .apply_dw() method.
+
+        """
+        new_sdata = SData(data=deepcopy(self._data),
+                          frequencies=self.get_frequencies(),
+                          temperature=self.get_temperature(),
+                          sample_form=self.get_sample_form())
+        new_sdata *= other
+
+        return new_sdata
+
+    def __imul__(self, other: Union[float, np.ndarray]) -> None:
+        """Multiply S data in-place by an array over energies and orders
+
+        Columns correspond to energies, rows correspond to quantum orders.
+        All atoms will be included; for data over atoms and energies use the
+        .apply_dw() method.
+
+        """
+        if isinstance(other, float):
+            for atom_data in self:
+                for order, weights in atom_data.items():
+                    weights *= other
+            return self
+
+        if isinstance(other, np.ndarray) and len(other.shape) == 1:
+            other = other[np.newaxis, :]
+        elif isinstance(other, np.ndarray) and len(other.shape) == 2:
+            pass
+        else:
+            raise IndexError(
+                "Can only multiply SData by a scalar float, 1- or 2-D array. ")
+
+        for order_index, order_multiplier in enumerate(other):
+            for atom_data in self:
+                atom_data[f'order_{order_index + 1}'] *= order_multiplier
+
+        return self
 
     def __str__(self):
         return "Dynamical structure factors data"

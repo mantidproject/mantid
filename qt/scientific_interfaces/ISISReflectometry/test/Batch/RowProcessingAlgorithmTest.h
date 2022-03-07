@@ -12,6 +12,7 @@
 #include <cxxtest/TestSuite.h>
 
 using namespace MantidQt::CustomInterfaces::ISISReflectometry;
+using namespace MantidQt::CustomInterfaces::ISISReflectometry::RowProcessing;
 using namespace MantidQt::CustomInterfaces::ISISReflectometry::ModelCreationHelper;
 
 class RowProcessingAlgorithmTest : public CxxTest::TestSuite {

@@ -123,7 +123,7 @@ IndirectPlotOptionsModel::IndirectPlotOptionsModel(
     : m_actions(constructActions(availableActions)), m_fixedIndices(false), m_workspaceIndices(boost::none),
       m_workspaceName(boost::none), m_plotter(plotter) {}
 
-IndirectPlotOptionsModel::~IndirectPlotOptionsModel() {}
+IndirectPlotOptionsModel::~IndirectPlotOptionsModel() = default;
 
 bool IndirectPlotOptionsModel::setWorkspace(std::string const &workspaceName) {
   auto &ads = AnalysisDataService::Instance();

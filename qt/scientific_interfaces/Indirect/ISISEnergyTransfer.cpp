@@ -264,7 +264,7 @@ ISISEnergyTransfer::ISISEnergyTransfer(IndirectDataReduction *idrUI, QWidget *pa
 //----------------------------------------------------------------------------------------------
 /** Destructor
  */
-ISISEnergyTransfer::~ISISEnergyTransfer() {}
+ISISEnergyTransfer::~ISISEnergyTransfer() = default;
 
 void ISISEnergyTransfer::setup() {}
 

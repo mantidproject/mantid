@@ -11,7 +11,7 @@
 
 namespace Mantid::DataObjects {
 /// Constructor
-CoordTransformDistanceParser::CoordTransformDistanceParser() {}
+CoordTransformDistanceParser::CoordTransformDistanceParser() = default;
 
 //-----------------------------------------------------------------------------------------------
 /*

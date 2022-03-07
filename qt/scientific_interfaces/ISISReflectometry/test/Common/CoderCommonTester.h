@@ -55,6 +55,10 @@ public:
     testSave(gui->m_save.get(), map[QString("saveView")].toMap());
   }
 
+  void checkPerAngleDefaultsRowEquals(const QtBatchView *gui, const QList<QVariant> &list, int rowIndex) {
+    testPerAngleDefaultsRow(gui->m_experiment->m_ui.optionsTable, list, rowIndex);
+  }
+
 private:
   void testExperiment(const QtExperimentView *gui, const QMap<QString, QVariant> &map) {
     TS_ASSERT_EQUALS(gui->m_ui.analysisModeComboBox->currentIndex(), map[QString("analysisModeComboBox")].toInt())
@@ -96,7 +100,7 @@ private:
   void testPerAngleDefaultsRow(const QTableWidget *tab, const QList<QVariant> &list, int rowIndex) {
     for (auto columnIndex = 0; columnIndex < tab->columnCount(); ++columnIndex) {
       auto guiText = tab->item(rowIndex, columnIndex)->text();
-      TS_ASSERT_EQUALS(guiText, list[columnIndex].toString())
+      TS_ASSERT_EQUALS(guiText.toStdString(), list[columnIndex].toString().toStdString())
     }
   }
 
