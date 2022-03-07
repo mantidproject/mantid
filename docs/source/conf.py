@@ -262,10 +262,10 @@ intersphinx_mapping = {
     'mantid-dev': ('https://developer.mantidproject.org/', None)
 }
 
-# Temporarily suppress build warnings of the type:
+# Suppress build warnings of the type:
 # "WARNING: document isn't included in any toctree"
-# while new release notes system is under development.
+# for individual release notes files.
 exclude_patterns = [
-    'release/v6.4.0/**/Bugfixes/**/*.rst',
-    'release/v6.4.0/**/New_features/**/*.rst'
+    'release/v6.4.0/**/Bugfixes/*.rst',
+    'release/v6.4.0/**/New_features/*.rst'
 ]
