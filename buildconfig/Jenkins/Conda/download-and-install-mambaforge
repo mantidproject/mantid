@@ -22,7 +22,7 @@ if [[ $OSTYPE == 'msys'* ]]; then
 else
     MAMBAFORGE_SCRIPT_NAME=Mambaforge-$MAMBAFORGE_VERSION-$(uname)-x86_64.sh
 fi
-URL=https://github.com/conda-forge/miniforge/releases/latest/download/$MAMBAFORGE_SCRIPT_NAME
+URL=https://github.com/conda-forge/miniforge/releases/download/$MAMBAFORGE_VERSION/$MAMBAFORGE_SCRIPT_NAME
 
 if [[ $CLEAN_BUILD  == true ]]; then
     rm -rf $EXPECTED_MAMBAFORGE_PATH
