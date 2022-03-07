@@ -295,8 +295,9 @@ def _runnumber(logs):
 def _sampletemperature(logs):
     """Return the instrument specific sample temperature from the logs or None."""
     instrument = _instrumentname(logs)
-    if instrument in ['IN4', 'IN5', 'IN6']:
-        return logs.getProperty('sample.temperature').value
+    sample_log_name = 'sample.temperature'
+    if instrument in ['IN4', 'IN5', 'IN6', 'PANTHER', 'SHARP'] and logs.hasProperty(sample_log_name):
+        return logs.getProperty(sample_log_name).value
     else:
         return None
 
