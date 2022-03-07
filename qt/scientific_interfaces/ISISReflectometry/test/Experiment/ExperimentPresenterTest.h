@@ -391,6 +391,16 @@ public:
 
   void testMultipleWildcardRowsAreInvalid() {
     OptionsTable const optionsTable = {optionsRowWithWildcard(), optionsRowWithWildcard()};
+    for (auto row = 0; row < 2; ++row) {
+      for (auto col = 0; col < 2; ++col) {
+        EXPECT_CALL(
+            m_view,
+            setTooltip(
+                row, col,
+                "Error: Multiple wildcard rows. Only a single row in the table may have a blank angle and title cell."))
+            .Times(1);
+      }
+    }
     runTestForInvalidOptionsTable(optionsTable, {0, 1}, {LookupRow::Column::THETA, LookupRow::Column::TITLE});
   }
 
@@ -908,7 +918,16 @@ private:
   void runTestForNonUniqueAngles(OptionsTable const &optionsTable) {
     auto presenter = makePresenter();
     EXPECT_CALL(m_view, getLookupTable()).WillOnce(Return(optionsTable));
-    EXPECT_CALL(m_view, showLookupRowsNotUnique(m_thetaTolerance)).Times(1);
+    for (auto row = 0; row < 2; ++row) {
+      for (auto col = 0; col < 2; ++col) {
+        EXPECT_CALL(m_view, showLookupRowAsInvalid(row, col)).Times(1);
+        EXPECT_CALL(
+            m_view,
+            setTooltip(row, col,
+                       "Error: Duplicated search criteria. No more than one row may have the same angle and title."))
+            .Times(1);
+      }
+    }
     presenter.notifyLookupRowChanged(0, 0);
     verifyAndClear();
   }

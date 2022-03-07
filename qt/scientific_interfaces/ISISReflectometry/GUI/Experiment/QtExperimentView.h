@@ -54,7 +54,6 @@ public:
   void setLookupTable(std::vector<LookupRow::ValueArray> rows) override;
   void showLookupRowAsInvalid(int row, int column) override;
   void showLookupRowAsValid(int row) override;
-  void showLookupRowsNotUnique(double thetaTolerance) override;
   void showStitchParametersValid() override;
   void showStitchParametersInvalid() override;
 
@@ -116,6 +115,8 @@ public:
 
   void addLookupRow() override;
   void removeLookupRow(int rowIndex) override;
+
+  void setTooltip(int row, int column, std::string const &text) override;
 
 public slots:
   /// Adds another row to the per-angle options table

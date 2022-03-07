@@ -86,6 +86,7 @@ private:
 
   void showValidationResult();
   void showLookupTableErrors(LookupTableValidationError const &errors);
+  void showFullTableError(LookupCriteriaError const &tableError, int row, int column);
 
   void updateWidgetEnabledState();
   void updateSummationTypeEnabledState();
