@@ -61,6 +61,7 @@ extensions = [
     'mantiddoc.directives.algorithm',
     'mantiddoc.directives.attributes',
     'mantiddoc.directives.categories',
+    'mantiddoc.directives.amalgamate',
     'mantiddoc.directives.diagram',
     'mantiddoc.directives.interface',
     'mantiddoc.directives.plot_directive',
