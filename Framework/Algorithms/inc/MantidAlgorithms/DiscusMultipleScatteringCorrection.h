@@ -95,8 +95,11 @@ private:
   double getKf(const API::MatrixWorkspace_sptr &SOfQ, const int iW, const double kinc);
   std::tuple<double, int> sampleKW(const API::MatrixWorkspace_sptr &SOfQ, Kernel::PseudoRandomNumberGenerator &rng,
                                    const double kinc);
+  void prepareStructureFactor();
   void convertWsToPoints(API::MatrixWorkspace_sptr &ws);
   std::tuple<double, double> getKinematicRange(double kf, double ki);
+  std::vector<std::pair<double, double>> generateInputKOutputWList(const double efixed,
+                                                                   const std::vector<double> &xPoints);
   long long m_callsToInterceptSurface{0};
   std::map<int, int> m_attemptsToGenerateInitialTrack;
   int m_maxScatterPtAttempts;

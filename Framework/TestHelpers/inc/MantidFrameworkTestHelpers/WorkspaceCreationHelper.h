@@ -240,7 +240,7 @@ create2DDetectorScanWorkspaceWithFullInstrument(int nhist, int nbins, size_t nTi
 
 Mantid::DataObjects::Workspace2D_sptr create2DWorkspaceWithGeographicalDetectors(
     const int nlat, const int nlong, const double anginc, int nbins, const double x0 = 0.5, const double deltax = 1.0,
-    const std::string &instrumentName = std::string("testInst"), const std::string &xunit = std::string("Wavelength"));
+    const std::string &instrumentName = std::string("testInst"), const std::string &xunit = std::string("Momentum"));
 
 /**
  * Create a test workspace with a Theta numeric axis instead of a spectrum axis

@@ -84,7 +84,7 @@ void DiscusMultipleScatteringCorrection::init() {
 
   declareProperty(
       std::make_unique<WorkspaceProperty<>>("InputWorkspace", "", Direction::Input, wsValidator),
-      "The name of the input workspace.  The input workspace must have X units of wavelength for elastic "
+      "The name of the input workspace.  The input workspace must have X units of Momentum (k) for elastic "
       "calculations and units of energy transfer (DeltaE) for inelastic calculations. This is used to "
       "supply the sample details, the detector positions and the x axis range to calculate corrections for");
 
@@ -180,8 +180,8 @@ std::map<std::string, std::string> DiscusMultipleScatteringCorrection::validateI
 
   MatrixWorkspace_sptr SQWS = getProperty("StructureFactorWorkspace");
   if (inputWS->getEMode() == Kernel::DeltaEMode::Elastic) {
-    if (inputWS->getAxis(0)->unit()->unitID() != "Wavelength") {
-      issues["InputWorkspace"] = "Input workspace must have units of wavelength for elastic instrument\n";
+    if (inputWS->getAxis(0)->unit()->unitID() != "Momentum") {
+      issues["InputWorkspace"] = "Input workspace must have units of Momentum (k) for elastic instrument\n";
     }
     if (SQWS->getNumberHistograms() != 1) {
       issues["StructureFactorWorkspace"] = "S(Q) workspace must contain a single spectrum for elastic mode\n";
@@ -254,6 +254,41 @@ void DiscusMultipleScatteringCorrection::getXMinMax(const Mantid::API::MatrixWor
   }
 }
 
+void DiscusMultipleScatteringCorrection::prepareStructureFactor() {
+  // avoid repeated conversion of bin edges to points inside loop by converting to point data
+  convertWsToPoints(m_SQWS);
+  // if S(Q,w) has been supplied ensure Q is along the x axis of each spectrum (so same as S(Q))
+  if (m_SQWS->getAxis(1)->unit()->unitID() == "MomentumTransfer") {
+    auto transposeAlgorithm = this->createChildAlgorithm("Transpose");
+    transposeAlgorithm->initialize();
+    transposeAlgorithm->setProperty("InputWorkspace", m_SQWS);
+    transposeAlgorithm->setProperty("OutputWorkspace", "_");
+    transposeAlgorithm->execute();
+    m_SQWS = transposeAlgorithm->getProperty("OutputWorkspace");
+  } else if (m_SQWS->getAxis(1)->isSpectra()) {
+    // for elastic set w=0 on the spectrum axis to align code with inelastic
+    auto newAxis = std::make_unique<NumericAxis>(std::vector<double>{0.});
+    newAxis->setUnit("DeltaE");
+    m_SQWS->replaceAxis(1, std::move(newAxis));
+  }
+  // avoid repeated conversion of bin edges to points inside loop by converting to point data
+  convertWsToPoints(m_SQWS);
+
+  // generate log of the structure factor to support gaussian interpolation
+  m_logSQ = m_SQWS->clone();
+
+  for (auto i = 0; i < m_logSQ->getNumberHistograms(); i++) {
+    auto &ySQ = m_logSQ->mutableY(i);
+
+    std::transform(ySQ.begin(), ySQ.end(), ySQ.begin(), [](double d) -> double {
+      if (d == 0.)
+        return -20.0;
+      else
+        return std::log(d);
+    });
+  }
+}
+
 void DiscusMultipleScatteringCorrection::convertWsToPoints(MatrixWorkspace_sptr &ws) {
   if (ws->isHistogramData()) {
     if (!m_importanceSampling) {
@@ -300,37 +335,7 @@ void DiscusMultipleScatteringCorrection::exec() {
   const MatrixWorkspace_sptr inputWS = getProperty("InputWorkspace");
 
   m_SQWS = getProperty("StructureFactorWorkspace");
-  // avoid repeated conversion of bin edges to points inside loop by converting to point data
-  convertWsToPoints(m_SQWS);
-  // if S(Q,w) has been supplied ensure Q is along the x axis of each spectrum (so same as S(Q))
-  if (m_SQWS->getAxis(1)->unit()->unitID() == "MomentumTransfer") {
-    auto transposeAlgorithm = this->createChildAlgorithm("Transpose");
-    transposeAlgorithm->initialize();
-    transposeAlgorithm->setProperty("InputWorkspace", m_SQWS);
-    transposeAlgorithm->setProperty("OutputWorkspace", "_");
-    transposeAlgorithm->execute();
-    m_SQWS = transposeAlgorithm->getProperty("OutputWorkspace");
-  } else if (m_SQWS->getAxis(1)->isSpectra()) {
-    // for elastic set w=0 on the spectrum axis to align code with inelastic
-    auto newAxis = std::make_unique<NumericAxis>(std::vector<double>{0.});
-    newAxis->setUnit("DeltaE");
-    m_SQWS->replaceAxis(1, std::move(newAxis));
-  }
-  // avoid repeated conversion of bin edges to points inside loop by converting to point data
-  convertWsToPoints(m_SQWS);
-
-  m_logSQ = m_SQWS->clone();
-
-  for (auto i = 0; i < m_logSQ->getNumberHistograms(); i++) {
-    auto &ySQ = m_logSQ->mutableY(i);
-
-    std::transform(ySQ.begin(), ySQ.end(), ySQ.begin(), [](double d) -> double {
-      if (d == 0.)
-        return -20.0;
-      else
-        return std::log(d);
-    });
-  }
+  prepareStructureFactor();
 
   MatrixWorkspace_sptr sigmaSSWS = getProperty("ScatteringCrossSection");
   if (sigmaSSWS)
@@ -378,9 +383,9 @@ void DiscusMultipleScatteringCorrection::exec() {
   EFixedProvider efixed(instrumentWS);
   m_EMode = efixed.emode();
   if (m_EMode == Kernel::DeltaEMode::Elastic) {
-    double lambdamin, lambdamax;
-    getXMinMax(*inputWS, lambdamin, lambdamax);
-    qmax = 2 * 2 * M_PI / lambdamin; // 2k
+    double kmin, kmax;
+    getXMinMax(*inputWS, kmin, kmax);
+    qmax = 2 * kmax;
   }
   m_QSQWS = prepareQSQ(qmax);
   int totalPoints = 0;
@@ -425,29 +430,10 @@ void DiscusMultipleScatteringCorrection::exec() {
 
     if (spectrumInfo.hasDetectors(i) && !spectrumInfo.isMonitor(i) && !spectrumInfo.isMasked(i)) {
 
-      std::vector<std::pair<double, double>> kInW;
-      const double eFixed = efixed.value(spectrumInfo.detector(i).getID());
-      const double kFixed = toWaveVector(eFixed);
+      const double eFixedValue = efixed.value(spectrumInfo.detector(i).getID());
       auto xPoints = instrumentWS.points(i).rawData();
 
-      if (efixed.emode() == DeltaEMode::Elastic) {
-        std::transform(xPoints.begin(), xPoints.end(), std::back_inserter(kInW),
-                       [](double d) { return std::make_pair(2 * M_PI / d, 0.); });
-      } else {
-        if ((!m_simulateEnergiesIndependently) && (efixed.emode() == DeltaEMode::Direct)) {
-          kInW.emplace_back(std::make_pair(kFixed, -1.0));
-        } else {
-          for (auto w : xPoints) { // NB range based for loop doesn't work on temporaries (eg point(i).rawData())??
-            if (efixed.emode() == DeltaEMode::Direct) {
-              kInW.emplace_back(std::make_pair(kFixed, w));
-            } else if (efixed.emode() == DeltaEMode::Indirect) {
-              const double initialE = eFixed + w;
-              const double kin = toWaveVector(initialE);
-              kInW.emplace_back(std::make_pair(kin, w));
-            }
-          }
-        }
-      }
+      auto kInW = generateInputKOutputWList(eFixedValue, xPoints);
 
       const auto nbins = kInW.size();
       // step size = index range / number of steps requested
@@ -579,6 +565,31 @@ void DiscusMultipleScatteringCorrection::exec() {
                              std::to_string(kv.second) + " occasions.\n";
     g_log.warning() << "Calls to interceptSurface= " + std::to_string(m_callsToInterceptSurface) + "\n";
   }
+}
+
+std::vector<std::pair<double, double>>
+DiscusMultipleScatteringCorrection::generateInputKOutputWList(const double efixed, const std::vector<double> &xPoints) {
+  std::vector<std::pair<double, double>> kInW;
+  const double kFixed = toWaveVector(efixed);
+  if (m_EMode == DeltaEMode::Elastic) {
+    std::transform(xPoints.begin(), xPoints.end(), std::back_inserter(kInW),
+                   [](double d) { return std::make_pair(d, 0.); });
+  } else {
+    if ((!m_simulateEnergiesIndependently) && (m_EMode == DeltaEMode::Direct)) {
+      kInW.emplace_back(std::make_pair(kFixed, -1.0));
+    } else {
+      for (auto w : xPoints) { // NB range based for loop doesn't work on temporaries (eg point(i).rawData())??
+        if (m_EMode == DeltaEMode::Direct) {
+          kInW.emplace_back(std::make_pair(kFixed, w));
+        } else if (m_EMode == DeltaEMode::Indirect) {
+          const double initialE = efixed + w;
+          const double kin = toWaveVector(initialE);
+          kInW.emplace_back(std::make_pair(kin, w));
+        }
+      }
+    }
+  }
+  return kInW;
 }
 
 /**

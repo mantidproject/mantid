@@ -65,11 +65,11 @@ public:
     auto inputWorkspace = SetupFlatPlateWorkspace(1, NTHETA, ang_inc, 1, THICKNESS, DeltaEMode::Elastic);
 
     auto SofQWorkspace = WorkspaceCreationHelper::create2DWorkspace(1, 3);
-    SofQWorkspace->mutableX(0)[0] = 5.985;
-    SofQWorkspace->mutableX(0)[1] = 5.995;
-    SofQWorkspace->mutableX(0)[2] = 6.005;
-    SofQWorkspace->mutableX(0)[3] = 6.015;
-    // S(Q) zero everywhere apart from spike at Q=5
+    SofQWorkspace->mutableX(0)[0] = 0.9985;
+    SofQWorkspace->mutableX(0)[1] = 0.9995;
+    SofQWorkspace->mutableX(0)[2] = 1.0005;
+    SofQWorkspace->mutableX(0)[3] = 1.0015;
+    // S(Q) zero everywhere apart from spike at Q=1
     SofQWorkspace->mutableY(0)[0] = 0.;
     SofQWorkspace->mutableY(0)[1] = 100.;
     SofQWorkspace->mutableY(0)[2] = 0.;
@@ -81,10 +81,10 @@ public:
     TS_ASSERT(alg->isInitialized());
     TS_ASSERT_THROWS_NOTHING(alg->setProperty("StructureFactorWorkspace", SofQWorkspace));
     alg->setPropertyValue("OutputWorkspace", "MuscatResults");
-    // input workspace has single bin - centred at 1 Angstrom, so kinc=2*pi=6.28 inverse Angstroms
-    // DiscusMultipleScatteringCorrection will sample q between 0 and 2k (12.56)
-    // so q=6 requires sin(theta) = 6 /(4*pi) = 0.477465, theta=28.52 degrees, 2theta=57.04 degrees
-    // So two scatters at max S(Q) will take the track to ~114.08 degrees
+    // input workspace has single bin - centred at 1.0 Angstrom-1
+    // DiscusMultipleScatteringCorrection will sample q between 0 and 2k (2.0)
+    // so q=1 requires sin(theta) = 0.5, theta=30 degrees, 2theta=60 degrees
+    // So two scatters at max S(Q) will take the track to ~120 degrees
     alg->setProperty("InputWorkspace", inputWorkspace);
     const int NSCATTERINGS = 2;
     alg->setProperty("NumberScatterings", NSCATTERINGS);
@@ -97,12 +97,14 @@ public:
     Mantid::API::Workspace_sptr wsPtr = output->getItem("Scatter_2");
     auto doubleScatterResult = std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(wsPtr);
 
-    // validate that the max scatter angle is ~115 degrees (peak is at 114 but slight tail)
-    for (size_t i = 0; i < NTHETA; i++)
-      if (doubleScatterResult->spectrumInfo().twoTheta(i) > M_PI * 115.0 / 180.0)
+    // validate that the max scatter angle is ~120 degrees (peak is at 120.0 but slight tail)
+    for (size_t i = 0; i < NTHETA; i++) {
+      double test = doubleScatterResult->spectrumInfo().twoTheta(i);
+      if (doubleScatterResult->spectrumInfo().twoTheta(i) > M_PI * (120.2 + 0.5 * ang_inc) / 180.0)
         TS_ASSERT_EQUALS(doubleScatterResult->y(i)[0], 0.);
+    }
 
-    // crude check on peak positions at theta=0 and ~114 degrees
+    // crude check on peak positions at theta=0 and ~120 degrees
     double sum = 0.;
     for (size_t i = 0; i < NTHETA; i++)
       sum += doubleScatterResult->y(i)[0];
@@ -121,8 +123,8 @@ public:
     TS_ASSERT_EQUALS(peakPos.size(), 2);
     if (peakPos.size() > 0) {
       TS_ASSERT_EQUALS(peakPos.front(), 0);
-      TS_ASSERT((static_cast<double>(peakPos.back()) * ang_inc >= 114) &&
-                (static_cast<double>(peakPos.back()) * ang_inc < 115));
+      TS_ASSERT((static_cast<double>(peakPos.back()) * ang_inc >= 120) &&
+                (static_cast<double>(peakPos.back()) * ang_inc < 121));
     }
 
     Mantid::API::AnalysisDataService::Instance().deepRemoveGroup("MuscatResults");
@@ -188,6 +190,11 @@ public:
     // same set up as previous test but increase nscatter to 2
     const double THICKNESS = 0.001; // metres
     auto inputWorkspace = SetupFlatPlateWorkspace(2, 1, 1.0, 1, THICKNESS, DeltaEMode::Elastic);
+    // overwrite x with single point centered at wavelength=1 Angstrom. Algorithm used to take x units of wavelength
+    // so this allows test values to be preserved
+    Mantid::HistogramData::Points xv = {2 * M_PI};
+    inputWorkspace->setPoints(0, xv.cowData());
+    inputWorkspace->setPoints(1, xv.cowData());
 
     auto alg = createAlgorithm();
     TS_ASSERT_THROWS_NOTHING(alg->setProperty("InputWorkspace", inputWorkspace));
@@ -233,6 +240,11 @@ public:
     // same set up as previous test but increase nscatter to 2
     const double THICKNESS = 0.001; // metres
     auto inputWorkspace = SetupFlatPlateWorkspace(2, 1, 1.0, 3, THICKNESS, DeltaEMode::Elastic);
+    // overwrite x with points at wavelength=1,2,3 Angstroms. Algorithm used to take x units of wavelength
+    // so this allows test values to be preserved
+    Mantid::HistogramData::Points xv = {2 * M_PI / 3, M_PI, 2 * M_PI};
+    inputWorkspace->setPoints(0, xv.cowData());
+    inputWorkspace->setPoints(1, xv.cowData());
 
     auto alg = createAlgorithm();
     TS_ASSERT_THROWS_NOTHING(alg->setProperty("InputWorkspace", inputWorkspace));
@@ -267,8 +279,8 @@ public:
       TS_ASSERT(singleScatterY[1] > analyticResult1 || singleScatterY[1] > analyticResult2);
       // no analytical result for double scatter so just check against current result that we assume is correct
       auto doubleScatterY = doubleScatterResult->y(SPECTRUMINDEXTOTEST);
-      constexpr double expResult0 = 0.001997;
-      constexpr double expResult2 = 0.001819;
+      constexpr double expResult2 = 0.001997;
+      constexpr double expResult0 = 0.001819;
       TS_ASSERT_DELTA(doubleScatterY[0], expResult0, delta);
       TS_ASSERT_DELTA(doubleScatterY[2], expResult2, delta);
       TS_ASSERT(doubleScatterY[1] < expResult0 || doubleScatterY[1] < expResult2);
@@ -528,8 +540,9 @@ private:
     return inputWorkspace;
   }
 
-  double calculateFlatPlateAnalyticalResult(const double wavelength, const Mantid::Kernel::Material &mat,
+  double calculateFlatPlateAnalyticalResult(const double wavevector, const Mantid::Kernel::Material &mat,
                                             const double twoTheta, const double thickness) {
+    const double wavelength = 2 * M_PI / wavevector;
     const double totalXSection = mat.totalScatterXSection() + mat.absorbXSection(wavelength);
     const double alpha = mat.absorbXSection(wavelength) / totalXSection;
     const double mfp = 0.01 / (mat.numberDensity() * totalXSection);
