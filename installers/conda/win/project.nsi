@@ -31,10 +31,10 @@ Section "-Core installation"
     WriteUninstaller $INSTDIR\Uninstall.exe
 
     # Create shortucts for startmenu
-    CreateDirectory "$SMPROGRAMS\$START_MENU_FOLDER"
-    CreateShortCut "$SMPROGRAMS\$START_MENU_FOLDER\Mantid Workbench.lnk" "$INSTDIR\bin\MantidWorkbench.exe"
-    CreateShortCut "$SMPROGRAMS\$START_MENU_FOLDER\Mantid Workbench (Python).lnk" "$INSTDIR\bin\python.exe" "-m workbenc.app.main"
-    CreateShortCut "$SMPROGRAMS\$START_MENU_FOLDER\Mantid Notebook.lnk" "$INSTDIR\bin\mantidpython.bat" "notebook --notebook-dir=%userprofile%"
+    CreateDirectory "$SMPROGRAMS\${START_MENU_FOLDER}"
+    CreateShortCut "$SMPROGRAMS\${START_MENU_FOLDER}\Mantid Workbench.lnk" "$INSTDIR\bin\MantidWorkbench.exe"
+    CreateShortCut "$SMPROGRAMS\${START_MENU_FOLDER}\Mantid Workbench (Python).lnk" "$INSTDIR\bin\python.exe" "-m workbenc.app.main"
+    CreateShortCut "$SMPROGRAMS\${START_MENU_FOLDER}\Mantid Notebook.lnk" "$INSTDIR\bin\mantidpython.bat" "notebook --notebook-dir=%userprofile%"
 
 
 SectionEnd ; end the section
@@ -55,9 +55,9 @@ Section "Uninstall"
     RMDir $INSTDIR
 
     # Remove shortcuts
-    Delete "$SMPROGRAMS\$START_MENU_FOLDER\Mantid Workbench.lnk"
-    Delete "$SMPROGRAMS\$START_MENU_FOLDER\Mantid Workbench (Python).lnk"
-    Delete "$SMPROGRAMS\$START_MENU_FOLDER\Mantid Notebook.lnk"
-    RMDir "$SMPROGRAMS\$START_MENU_FOLDER"
+    Delete "$SMPROGRAMS\${START_MENU_FOLDER}\Mantid Workbench.lnk"
+    Delete "$SMPROGRAMS\${START_MENU_FOLDER}\Mantid Workbench (Python).lnk"
+    Delete "$SMPROGRAMS\${START_MENU_FOLDER}\Mantid Notebook.lnk"
+    RMDir "$SMPROGRAMS\${START_MENU_FOLDER}"
 SectionEnd
 
