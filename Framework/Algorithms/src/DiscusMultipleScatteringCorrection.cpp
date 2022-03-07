@@ -277,7 +277,7 @@ void DiscusMultipleScatteringCorrection::prepareStructureFactor() {
   // generate log of the structure factor to support gaussian interpolation
   m_logSQ = m_SQWS->clone();
 
-  for (auto i = 0; i < m_logSQ->getNumberHistograms(); i++) {
+  for (size_t i = 0; i < m_logSQ->getNumberHistograms(); i++) {
     auto &ySQ = m_logSQ->mutableY(i);
 
     std::transform(ySQ.begin(), ySQ.end(), ySQ.begin(), [](double d) -> double {
@@ -389,7 +389,7 @@ void DiscusMultipleScatteringCorrection::exec() {
   }
   m_QSQWS = prepareQSQ(qmax);
   int totalPoints = 0;
-  for (int i = 0; i < m_QSQWS->getNumberHistograms(); i++) {
+  for (size_t i = 0; i < m_QSQWS->getNumberHistograms(); i++) {
     totalPoints += m_QSQWS->histogram(i).size();
   }
 
@@ -603,7 +603,7 @@ MatrixWorkspace_uptr DiscusMultipleScatteringCorrection::prepareQSQ(double qmax)
   MatrixWorkspace_uptr outputWS = DataObjects::create<Workspace2D>(*m_SQWS);
   std::vector<double> IOfQYFull, qValuesFull, wIndices;
   // loop through the S(Q) spectra for the different energy transfer values
-  for (int iW = 0; iW < m_SQWS->getNumberHistograms(); iW++) {
+  for (size_t iW = 0; iW < m_SQWS->getNumberHistograms(); iW++) {
     std::vector<double> qValues = m_SQWS->histogram(iW).readX();
     std::vector<double> SQValues = m_SQWS->histogram(iW).readY();
     // add terminating points at 0 and 2k before multiplying by Q so no extrapolation problems
@@ -647,7 +647,7 @@ void DiscusMultipleScatteringCorrection::prepareCumulativeProbForQ(double kinc, 
   std::vector<double> IOfQYFull, qValuesFull, wIndices;
   double IOfQMaxPreviousRow = 0.;
   // loop through the S(Q) spectra for the different energy transfer values
-  for (int iW = 0; iW < m_SQWS->getNumberHistograms(); iW++) {
+  for (size_t iW = 0; iW < m_SQWS->getNumberHistograms(); iW++) {
     auto kf = getKf(m_SQWS, iW, kinc);
     auto [qmin, qrange] = getKinematicRange(kf, kinc);
     std::vector<double> IOfQX, IOfQY;
@@ -882,7 +882,7 @@ double DiscusMultipleScatteringCorrection::Interpolate2D(MatrixWorkspace_sptr SO
   auto &wValues = dynamic_cast<NumericAxis *>(SOfQ->getAxis(1))->getValues();
   try {
     // required w values will often equal the points in the S(Q,w) distribution so pick nearest value
-    iW = Kernel::VectorHelper::indexOfValueFromCenters(wValues, w);
+    iW = static_cast<int>(Kernel::VectorHelper::indexOfValueFromCenters(wValues, w));
   } catch (std::out_of_range) {
     iW = -1;
   }
@@ -933,7 +933,7 @@ std::vector<double> DiscusMultipleScatteringCorrection::simulatePaths(
     } else
       ie--;
   }
-  for (int i = 0; i < wValues.size(); i++) {
+  for (size_t i = 0; i < wValues.size(); i++) {
     if (!m_importanceSampling)
       // divide by the mean of Q*S(Q) for each of the n-1 terms representing a multiple scatter
       sumOfWeights[i] = sumOfWeights[i] / pow(sumOfQSS / static_cast<double>(nPaths * (nScatters - 1)), nScatters - 1);
@@ -1079,7 +1079,7 @@ std::tuple<double, int> DiscusMultipleScatteringCorrection::sampleKW(const Matri
   double wMax = fromWaveVector(kinc);
   auto &wValues = dynamic_cast<NumericAxis *>(SOfQ->getAxis(1))->getValues();
   auto it = std::lower_bound(wValues.begin(), wValues.end(), wMax);
-  size_t iWMax = std::distance(wValues.begin(), it) - 1;
+  int iWMax = std::distance(wValues.begin(), it) - 1;
   auto iW = rng.nextInt(0, iWMax);
   double k = getKf(SOfQ, iW, kinc);
   return {k, iW};
