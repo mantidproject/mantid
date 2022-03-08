@@ -94,6 +94,9 @@ class SPowderSemiEmpiricalCalculator:
         self._progress_reporter = None
         self._powder_data = None
 
+        self._isotropic_fundamentals = abins.parameters.development.get(
+            'isotropic_fundamentals', False)
+
         # Set up caching
         self._clerk = abins.IO(
             input_filename=filename,
@@ -256,7 +259,11 @@ class SPowderSemiEmpiricalCalculator:
             logger.information(msg)
 
     def _calculate_s(self) -> SData:
-        """Calculate structure factor by dispatching to appropriate 1d or 2d workflow"""
+        """Calculate structure factor by dispatching to appropriate 1d or 2d workflow
+
+        If self._isotropic_fundamentals is True, order-1 will use the same Debye-Waller approximation
+        as higher orders.
+        """
         from abins.constants import ONE_DIMENSIONAL_INSTRUMENTS, TWO_DIMENSIONAL_INSTRUMENTS
 
         # Compute tensors and traces, write to cache for access during atomic s calculations
@@ -264,34 +271,24 @@ class SPowderSemiEmpiricalCalculator:
         self._powder_data = powder_calculator.get_formatted_data()
 
         # Dispatch to appropriate routine
-        isotropic_fundamentals = abins.parameters.development.get('isotropic_fundamentals', False)
-
         if self._instrument.get_name() in ONE_DIMENSIONAL_INSTRUMENTS:
-            return self._calculate_s_powder_1d(
-                isotropic_fundamentals=isotropic_fundamentals)
+            return self._calculate_s_powder_1d()
         elif self._instrument.get_name() in TWO_DIMENSIONAL_INSTRUMENTS:
-            return self._calculate_s_powder_2d(
-                isotropic_fundamentals=isotropic_fundamentals)
+            return self._calculate_s_powder_2d()
         else:
             raise ValueError('Instrument "{}" is not recognised, cannot perform semi-empirical '
                              'powder averaging.'.format(self._instrument.get_name()))
 
-    def _calculate_s_powder_2d(self, isotropic_fundamentals: bool = False) -> SData:
-        s_data = self._calculate_s_powder_over_k_and_q(
-            isotropic_fundamentals=isotropic_fundamentals)
+    def _calculate_s_powder_2d(self) -> SData:
+        s_data = self._calculate_s_powder_over_k_and_q()
 
         s_data.apply_kinematic_constraints(self._instrument)
 
         return s_data
 
-    def _calculate_s_powder_1d(self, isotropic_fundamentals=False) -> SData:
+    def _calculate_s_powder_1d(self) -> SData:
         """
-        Calculates 1D S for the powder case.
-
-        Args:
-            isotropic_fundamentals
-                If True, use isotropic approximation for Debye-Waller factor of
-                fundamental modes. (Otherwise a slower mode-by-mode method is used.)
+        Calculate 1-D S(q,w) using geometry-constrained energy-q relationships
 
         :returns: object of type SData with 1D dynamical structure factors for the powder case
         """
@@ -301,7 +298,7 @@ class SPowderSemiEmpiricalCalculator:
                                                # Autoconvolution message if appropriate
                                                + (1 if self._autoconvolution else 0)
                                                # Isotropic DW message if appropriate
-                                               + (1 if (isotropic_fundamentals
+                                               + (1 if (self._isotropic_fundamentals
                                                         or (self._quantum_order_num > 1)
                                                         or self._autoconvolution)
                                                   else 0))
@@ -311,7 +308,6 @@ class SPowderSemiEmpiricalCalculator:
             self._report_progress(msg=f'Calculating S for angle: {angle:} degrees',
                                   reporter=self.progress_reporter)
             sdata_by_angle.append(self._calculate_s_powder_over_k(angle=angle,
-                                                                  isotropic_fundamentals=isotropic_fundamentals,
                                                                   autoconvolution=self._autoconvolution))
 
         # Complete set of scattering intensity data including Debye-Waller factors and autocorrelation orders
@@ -324,7 +320,7 @@ class SPowderSemiEmpiricalCalculator:
                                      broadening_scheme=broadening_scheme)
         return s_data
 
-    def _calculate_s_powder_over_k_and_q(self, isotropic_fundamentals: bool = False):
+    def _calculate_s_powder_over_k_and_q(self):
         """Calculate S along a set of q-points in semi-analytic powder-averaging approximation
 
         This data is averaged over the phonon k-points and Debye-Waller factors
@@ -356,7 +352,7 @@ class SPowderSemiEmpiricalCalculator:
                                          max_order=self._quantum_order_num,
                                          shape='1d')
 
-        if isotropic_fundamentals or self._quantum_order_num > 1 or self._autoconvolution:
+        if self._isotropic_fundamentals or self._quantum_order_num > 1 or self._autoconvolution:
             for k_index in range(self._num_k):
                 _ = self._calculate_s_powder_over_atoms(k_index=k_index, q2=1.,
                                                         bins=(self._fine_bins if self._autoconvolution else self._bins),
@@ -391,7 +387,7 @@ class SPowderSemiEmpiricalCalculator:
         sdata = sdata_1d * q2_order_corrections
         sdata.set_q_bins(self._q_bins)
 
-        if isotropic_fundamentals or (self._quantum_order_num > 1) or self._autoconvolution:
+        if self._isotropic_fundamentals or (self._quantum_order_num > 1) or self._autoconvolution:
             self._report_progress(f"Applying isotropic Debye-Waller factor to orders {min_order} and above.",
                                   reporter=self.progress_reporter)
             iso_dw = self.calculate_isotropic_dw(q2=q2[:,np.newaxis])
@@ -408,8 +404,8 @@ class SPowderSemiEmpiricalCalculator:
         sdata.update(fundamentals_sdata_with_dw)
         return sdata
 
-    def _calculate_s_powder_over_k(self, *, angle: float,
-                                   isotropic_fundamentals: bool = False,
+    def _calculate_s_powder_over_k(self, *,
+                                   angle: float,
                                    autoconvolution: bool = False) -> SData:
         """Calculate S for a given angle in semi-analytic powder-averaging approximation
 
@@ -418,10 +414,6 @@ class SPowderSemiEmpiricalCalculator:
 
         Args:
             angle: Scattering angle used to determine energy-q relationship
-            isotropic_fundamentals:
-                Replace the mode-by-mode Debye Waller factor for fundamental
-                modes with faster isotropic approximation. This method will
-                always be used for quantum orders above fundamentals.
             autoconvolution:
                 Estimate spectra for higher quantum orders by convolving the
                 highest computed spectrum with the fundamentals before applying
@@ -443,7 +435,7 @@ class SPowderSemiEmpiricalCalculator:
             min_order = 2  # Skip fundamentals to be calculated separately
 
         # Collect SData at q = 1/Å without DW factors
-        if isotropic_fundamentals or self._quantum_order_num > 1 or self._autoconvolution:
+        if self._isotropic_fundamentals or self._quantum_order_num > 1 or self._autoconvolution:
             for k_index in range(self._num_k):
                 _ = self._calculate_s_powder_over_atoms(k_index=k_index, q2=1.,
                                                         bins=(self._fine_bins if self._autoconvolution else self._bins),
@@ -474,14 +466,14 @@ class SPowderSemiEmpiricalCalculator:
                                   reporter=self.progress_reporter)
             max_dw_order = self._quantum_order_num
 
-        if isotropic_fundamentals or (self._quantum_order_num > 1) or autoconvolution:
+        if self._isotropic_fundamentals or (self._quantum_order_num > 1) or autoconvolution:
             self._report_progress(f"Applying isotropic Debye-Waller factor to orders {min_order} and above.",
                                   reporter=self.progress_reporter)
             iso_dw = self.calculate_isotropic_dw(q2=q2)
             sdata.apply_dw(iso_dw, min_order=min_order, max_order=max_dw_order)
 
         # Finally we (re)calculate the first-order spectrum with more accurate DW method
-        if not isotropic_fundamentals:
+        if not self._isotropic_fundamentals:
             self._report_progress(
                 "Calculating fundamentals with mode-dependent Debye-Waller factor.",
                 reporter=self.progress_reporter)
