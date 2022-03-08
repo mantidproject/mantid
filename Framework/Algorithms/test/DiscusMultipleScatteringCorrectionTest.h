@@ -251,7 +251,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg->setProperty("NumberScatterings", NSCATTERINGS));
     TS_ASSERT_THROWS_NOTHING(alg->setProperty("NeutronPathsSingle", 100000));
     TS_ASSERT_THROWS_NOTHING(alg->setProperty("NeutronPathsMultiple", 100000));
-    TS_ASSERT_THROWS_NOTHING(alg->setProperty("NumberOfWavelengthPoints", 2));
+    TS_ASSERT_THROWS_NOTHING(alg->setProperty("NumberOfSimulationPoints", 2));
     TS_ASSERT_THROWS_NOTHING(alg->execute(););
     TS_ASSERT(alg->isExecuted());
 

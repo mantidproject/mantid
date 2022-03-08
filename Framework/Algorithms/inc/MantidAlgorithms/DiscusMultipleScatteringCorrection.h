@@ -51,7 +51,7 @@ public:
 
 protected:
   virtual std::shared_ptr<SparseWorkspace> createSparseWorkspace(const API::MatrixWorkspace &modelWS,
-                                                                 const size_t wavelengthPoints, const size_t rows,
+                                                                 const size_t nXPoints, const size_t rows,
                                                                  const size_t columns);
   virtual std::unique_ptr<InterpolationOption> createInterpolateOption();
   double interpolateFlat(const API::ISpectrum &histToInterpolate, double x);

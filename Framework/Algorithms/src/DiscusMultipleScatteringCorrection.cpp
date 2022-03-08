@@ -109,9 +109,8 @@ void DiscusMultipleScatteringCorrection::init() {
 
   auto positiveInt = std::make_shared<Kernel::BoundedValidator<int>>();
   positiveInt->setLower(1);
-  declareProperty("NumberOfWavelengthPoints", EMPTY_INT(), positiveInt,
-                  "The number of wavelength points for which a simulation is attempted if "
-                  "ResimulateTracksForDifferentWavelengths=true");
+  declareProperty("NumberOfSimulationPoints", EMPTY_INT(), positiveInt,
+                  "The number of points on the input workspace x axis for which a simulation is attempted");
 
   declareProperty("NeutronPathsSingle", DEFAULT_NPATHS, positiveInt,
                   "The number of \"neutron\" paths to generate for single scattering");
@@ -207,14 +206,14 @@ std::map<std::string, std::string> DiscusMultipleScatteringCorrection::validateI
     issues["StructureFactorWorkspace"] += "S(Q) workspace must have all y >= 0";
   }
 
-  const int nlambda = getProperty("NumberOfWavelengthPoints");
-  if (!isEmpty(nlambda)) {
+  const int nSimulationPoints = getProperty("NumberOfSimulationPoints");
+  if (!isEmpty(nSimulationPoints)) {
     InterpolationOption interpOpt;
     const std::string interpValue = getPropertyValue("Interpolation");
     interpOpt.set(interpValue, false, false);
-    const auto nlambdaIssue = interpOpt.validateInputSize(nlambda);
-    if (!nlambdaIssue.empty()) {
-      issues["NumberOfWavelengthPoints"] = nlambdaIssue;
+    const auto nSimPointsIssue = interpOpt.validateInputSize(nSimulationPoints);
+    if (!nSimPointsIssue.empty()) {
+      issues["NumberOfSimulationPoints"] = nSimPointsIssue;
     }
   }
 
@@ -341,15 +340,33 @@ void DiscusMultipleScatteringCorrection::exec() {
   if (sigmaSSWS)
     m_sigmaSS = std::make_shared<DataObjects::Histogram1D>(sigmaSSWS->getSpectrum(0));
 
-  const auto inputNbins = static_cast<int>(inputWS->blocksize());
-  int nlambda = getProperty("NumberOfWavelengthPoints");
-  if (isEmpty(nlambda) || nlambda > inputNbins) {
-    if (!isEmpty(nlambda)) {
-      g_log.warning() << "The requested number of wavelength points is larger "
+  double qmax = std::numeric_limits<double>::max();
+  EFixedProvider efixed(*inputWS);
+  m_EMode = efixed.emode();
+  g_log.information("EMode=" + DeltaEMode::asString(m_EMode) + " detected");
+  if (m_EMode == Kernel::DeltaEMode::Elastic) {
+    double kmin, kmax;
+    getXMinMax(*inputWS, kmin, kmax);
+    qmax = 2 * kmax;
+  }
+  m_QSQWS = prepareQSQ(qmax);
+  size_t totalPoints = 0;
+  for (size_t i = 0; i < m_QSQWS->getNumberHistograms(); i++) {
+    totalPoints += m_QSQWS->histogram(i).size();
+  }
+
+  // call this function with dummy efixed to determine total possible simulation points
+  const auto inputNbins = generateInputKOutputWList(-1.0, inputWS->points(0).rawData()).size();
+
+  int nSimulationPointsInt = getProperty("NumberOfSimulationPoints");
+  size_t nSimulationPoints = static_cast<size_t>(nSimulationPointsInt);
+  if (isEmpty(nSimulationPoints) || nSimulationPoints > inputNbins) {
+    if (!isEmpty(nSimulationPoints)) {
+      g_log.warning() << "The requested number of simulation points is larger "
                          "than the spectra size. "
                          "Defaulting to spectra size.\n";
     }
-    nlambda = inputNbins;
+    nSimulationPoints = inputNbins;
   }
 
   const bool useSparseInstrument = getProperty("SparseInstrument");
@@ -357,7 +374,7 @@ void DiscusMultipleScatteringCorrection::exec() {
   if (useSparseInstrument) {
     const int latitudinalDets = getProperty("NumberOfDetectorRows");
     const int longitudinalDets = getProperty("NumberOfDetectorColumns");
-    sparseWS = createSparseWorkspace(*inputWS, nlambda, latitudinalDets, longitudinalDets);
+    sparseWS = createSparseWorkspace(*inputWS, nSimulationPoints, latitudinalDets, longitudinalDets);
   }
   const int nScatters = getProperty("NumberScatterings");
   m_maxScatterPtAttempts = getProperty("MaxScatterPtAttempts");
@@ -376,22 +393,7 @@ void DiscusMultipleScatteringCorrection::exec() {
 
   m_refframe = inputWS->getInstrument()->getReferenceFrame();
   m_sourcePos = inputWS->getInstrument()->getSource()->getPos();
-  const auto nhists = useSparseInstrument ? static_cast<int64_t>(sparseWS->getNumberHistograms())
-                                          : static_cast<int64_t>(inputWS->getNumberHistograms());
-
-  double qmax = std::numeric_limits<double>::max();
-  EFixedProvider efixed(instrumentWS);
-  m_EMode = efixed.emode();
-  if (m_EMode == Kernel::DeltaEMode::Elastic) {
-    double kmin, kmax;
-    getXMinMax(*inputWS, kmin, kmax);
-    qmax = 2 * kmax;
-  }
-  m_QSQWS = prepareQSQ(qmax);
-  size_t totalPoints = 0;
-  for (size_t i = 0; i < m_QSQWS->getNumberHistograms(); i++) {
-    totalPoints += m_QSQWS->histogram(i).size();
-  }
+  const auto nhists = useSparseInstrument ? sparseWS->getNumberHistograms() : inputWS->getNumberHistograms();
 
   m_sampleShape = inputWS->sample().getShapePtr();
   // generate the bounding box before the multithreaded section
@@ -408,7 +410,7 @@ void DiscusMultipleScatteringCorrection::exec() {
   m_importanceSampling = getProperty("ImportanceSampling");
   m_simulateEnergiesIndependently = getProperty("SimulateEnergiesIndependently");
 
-  Progress prog(this, 0.0, 1.0, nhists * nlambda);
+  Progress prog(this, 0.0, 1.0, nhists * nSimulationPoints);
   prog.setNotifyStep(0.01);
   const std::string reportMsg = "Computing corrections";
 
@@ -421,7 +423,7 @@ void DiscusMultipleScatteringCorrection::exec() {
   const auto &spectrumInfo = instrumentWS.spectrumInfo();
 
   PARALLEL_FOR_IF(enableParallelFor)
-  for (int64_t i = 0; i < nhists; ++i) {
+  for (int64_t i = 0; i < static_cast<int64_t>(nhists); ++i) { // signed int for openMP loop
     PARALLEL_START_INTERRUPT_REGION
     auto &spectrum = instrumentWS.getSpectrum(i);
     Mantid::specnum_t specNo = spectrum.getSpectrumNo();
@@ -437,8 +439,8 @@ void DiscusMultipleScatteringCorrection::exec() {
 
       const auto nbins = kInW.size();
       // step size = index range / number of steps requested
-      const size_t nsteps = std::max(1, nlambda - 1);
-      const size_t lambdaStepSize = nbins == 1 ? 1 : (nbins - 1) / nsteps;
+      const size_t nsteps = std::max(static_cast<size_t>(1), nSimulationPoints - 1);
+      const size_t xStepSize = nbins == 1 ? 1 : (nbins - 1) / nsteps;
 
       const auto detPos = spectrumInfo.position(i);
 
@@ -448,10 +450,10 @@ void DiscusMultipleScatteringCorrection::exec() {
         invPOfQ = createInvPOfQ(totalPoints);
       }
 
-      for (size_t bin = 0; bin < nbins; bin += lambdaStepSize) {
-        double lambdaIn = kInW[bin].first;
-        if (lambdaIn <= 0) {
-          g_log.warning("Skipping calculation for bin with lambda<=0, workspace index=" + std::to_string(i) +
+      for (size_t bin = 0; bin < nbins; bin += xStepSize) {
+        double kIn = kInW[bin].first;
+        if (kIn <= 0) {
+          g_log.warning("Skipping calculation for bin with x<=0, workspace index=" + std::to_string(i) +
                         " bin index=" + std::to_string(bin));
           continue;
         }
@@ -484,18 +486,18 @@ void DiscusMultipleScatteringCorrection::exec() {
         prog.report(reportMsg);
 
         // Ensure we have the last point for the interpolation
-        if (lambdaStepSize > 1 && bin + lambdaStepSize >= nbins && bin + 1 != nbins) {
-          bin = nbins - lambdaStepSize - 1;
+        if (xStepSize > 1 && bin + xStepSize >= nbins && bin + 1 != nbins) {
+          bin = nbins - xStepSize - 1;
         }
       } // bins
 
       // interpolate through points not simulated. Simulation WS only has
       // reduced X values if using sparse instrument so no interpolation
       // required
-      if (!useSparseInstrument && lambdaStepSize > 1) {
+      if (!useSparseInstrument && xStepSize > 1) {
         auto histNoAbs = noAbsSimulationWS->histogram(i);
-        if (lambdaStepSize < nbins) {
-          interpolateOpt.applyInplace(histNoAbs, lambdaStepSize);
+        if (xStepSize < nbins) {
+          interpolateOpt.applyInplace(histNoAbs, xStepSize);
         } else {
           std::fill(histNoAbs.mutableY().begin() + 1, histNoAbs.mutableY().end(), histNoAbs.y()[0]);
         }
@@ -503,8 +505,8 @@ void DiscusMultipleScatteringCorrection::exec() {
 
         for (size_t ne = 0; ne < static_cast<size_t>(nScatters); ne++) {
           auto histnew = simulationWSs[ne]->histogram(i);
-          if (lambdaStepSize < nbins) {
-            interpolateOpt.applyInplace(histnew, lambdaStepSize);
+          if (xStepSize < nbins) {
+            interpolateOpt.applyInplace(histnew, xStepSize);
           } else {
             std::fill(histnew.mutableY().begin() + 1, histnew.mutableY().end(), histnew.y()[0]);
           }
@@ -883,7 +885,7 @@ double DiscusMultipleScatteringCorrection::Interpolate2D(MatrixWorkspace_sptr SO
   auto &wValues = dynamic_cast<NumericAxis *>(SOfQ->getAxis(1))->getValues();
   try {
     // required w values will often equal the points in the S(Q,w) distribution so pick nearest value
-    iW = static_cast<int>(Kernel::VectorHelper::indexOfValueFromCenters(wValues, w));
+    iW = static_cast<int>(Kernel::VectorHelper::indexOfValueFromCentersNoThrow(wValues, w));
   } catch (std::out_of_range) {
     iW = -1;
   }
@@ -1260,15 +1262,16 @@ void DiscusMultipleScatteringCorrection::inc_xyz(Geometry::Track &track, double 
 /**
  * Factory method to return an instance of the required SparseInstrument class
  * @param modelWS The full workspace that the sparse one will be based on
- * @param wavelengthPoints The number of wavelength points to include in the
+ * @param nXPoints The number of x points (k or w) to include in the
  * histograms in the sparse workspace
  * @param rows The number of rows of detectors to create
  * @param columns The number of columns of detectors to create
  * @return a pointer to an SparseInstrument object
  */
-std::shared_ptr<SparseWorkspace> DiscusMultipleScatteringCorrection::createSparseWorkspace(
-    const API::MatrixWorkspace &modelWS, const size_t wavelengthPoints, const size_t rows, const size_t columns) {
-  auto sparseWS = std::make_shared<SparseWorkspace>(modelWS, wavelengthPoints, rows, columns);
+std::shared_ptr<SparseWorkspace>
+DiscusMultipleScatteringCorrection::createSparseWorkspace(const API::MatrixWorkspace &modelWS, const size_t nXPoints,
+                                                          const size_t rows, const size_t columns) {
+  auto sparseWS = std::make_shared<SparseWorkspace>(modelWS, nXPoints, rows, columns);
   return sparseWS;
 }
 
