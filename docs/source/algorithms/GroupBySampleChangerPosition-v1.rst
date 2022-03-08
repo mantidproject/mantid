@@ -9,7 +9,7 @@
 Description
 -----------
 
-Reorders workspaces into groups based on their sample changer position
+Sorts workspaces into groups based on their sample changer position
 
 Usage
 -----

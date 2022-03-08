@@ -24,7 +24,7 @@ class GroupBySampleChangerPosition(Algorithm):
         return 'Workflow\\Inelastic;Inelastic\\Indirect'
 
     def summary(self):
-        return 'Separates a Group workspace into separate groups based on sample changer position.'
+        return 'Separates a Group workspace into groups based on sample changer position.'
 
     def PyInit(self):
         # Input properties
@@ -38,7 +38,7 @@ class GroupBySampleChangerPosition(Algorithm):
                              doc='String to suffix the output groups.')
 
         self.declareProperty(StringArrayProperty('OutputWorkspaceList', [], direction=Direction.Output),
-                             doc='List of Workspace group for the resulting workspaces.')
+                             doc='List of Workspace groups for the resulting workspaces.')
 
     #pylint: disable=too-many-locals
     def PyExec(self):
