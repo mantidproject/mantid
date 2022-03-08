@@ -114,9 +114,6 @@ public:
   virtual std::string getStitchOptions() const = 0;
   virtual void setStitchOptions(std::string const &stitchOptions) = 0;
 
-  virtual void showOptionLoadErrors(std::vector<InstrumentParameterTypeMissmatch> const &typeErrors,
-                                    std::vector<MissingInstrumentParameterValue> const &missingValues) = 0;
-
   virtual void disableAll() = 0;
   virtual void enableAll() = 0;
 
