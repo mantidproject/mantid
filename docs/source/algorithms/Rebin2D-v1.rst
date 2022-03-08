@@ -31,8 +31,8 @@ workspace has not been previously rebinned, but will give incorrect
 error (standard deviation) estimates if it has been rebinned.
 
 .. note:: Rebin2D looks at the histogram representation of the input
-workspace, so while it will accept EventWorkspaces, number of bins
-will affect the numerical results.
+          workspace, so while it will accept EventWorkspaces, number of bins
+          will affect the numerical results.
 
 Requirements
 ------------
