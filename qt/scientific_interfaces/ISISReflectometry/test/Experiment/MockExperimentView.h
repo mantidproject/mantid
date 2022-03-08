@@ -92,8 +92,6 @@ public:
   MOCK_METHOD1(setFloodWorkspace, void(std::string const &));
   MOCK_CONST_METHOD0(getStitchOptions, std::string());
   MOCK_METHOD1(setStitchOptions, void(std::string const &));
-  MOCK_METHOD2(showOptionLoadErrors, void(std::vector<InstrumentParameterTypeMissmatch> const &,
-                                          std::vector<MissingInstrumentParameterValue> const &));
   MOCK_METHOD0(disableAll, void());
   MOCK_METHOD0(enableAll, void());
   MOCK_METHOD0(addLookupRow, void());

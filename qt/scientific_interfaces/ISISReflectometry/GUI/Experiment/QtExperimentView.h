@@ -81,9 +81,6 @@ public:
   std::string getStitchOptions() const override;
   void setStitchOptions(std::string const &stitchOptions) override;
 
-  void showOptionLoadErrors(std::vector<InstrumentParameterTypeMissmatch> const &typeErrors,
-                            std::vector<MissingInstrumentParameterValue> const &missingValues) override;
-
   void showAllLookupRowsAsValid() override;
 
   void disableAll() override;

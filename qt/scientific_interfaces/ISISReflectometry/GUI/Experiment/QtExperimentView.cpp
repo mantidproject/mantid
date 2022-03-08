@@ -583,19 +583,6 @@ QString QtExperimentView::messageFor(std::vector<MissingInstrumentParameterValue
          " not set in the instrument parameter file but should be.\n";
 }
 
-void QtExperimentView::showOptionLoadErrors(std::vector<InstrumentParameterTypeMissmatch> const &typeErrors,
-                                            std::vector<MissingInstrumentParameterValue> const &missingValues) {
-  auto message = QString("Unable to retrieve default values for the following parameters:\n");
-
-  if (!missingValues.empty())
-    message += messageFor(missingValues);
-
-  std::accumulate(typeErrors.cbegin(), typeErrors.cend(), message,
-                  [this](auto &msg, auto const &section) { return msg += messageFor(section); });
-
-  QMessageBox::warning(this, "Failed to load one or more defaults from parameter file", message);
-}
-
 QLineEdit &QtExperimentView::stitchOptionsLineEdit() const { return *static_cast<QLineEdit *>(m_stitchEdit); }
 
 /** Creates hints for 'Stitch1DMany'
@@ -744,8 +731,5 @@ std::string QtExperimentView::getStitchOptions() const { return getText(stitchOp
 void QtExperimentView::setStitchOptions(std::string const &stitchOptions) {
   setText(stitchOptionsLineEdit(), stitchOptions);
 }
-
-void showOptionLoadErrors(std::vector<InstrumentParameterTypeMissmatch> const &typeErrors,
-                          std::vector<MissingInstrumentParameterValue> const &missingValues);
 
 } // namespace MantidQt::CustomInterfaces::ISISReflectometry
