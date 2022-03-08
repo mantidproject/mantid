@@ -161,7 +161,7 @@ function create_disk_image() {
 
   # Create final compressed dmg
   test -f "$version_name".dmg && rm -f "$version_name".dmg
-  hdiutil convert "$TEMP_IMAGE" -format UDZO -imagekey zlib-level=9 -o "$version_name".dmg
+  hdiutil convert "$TEMP_IMAGE" -format UDBZ -imagekey zlib-level=9 -o "$version_name".dmg
 }
 
 # Print usage and exit
