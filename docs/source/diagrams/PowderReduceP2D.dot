@@ -16,7 +16,7 @@ digraph PowderReduceP2D {
     Minus               [label="Substract Container Run\nfrom Sample Run\nusing Minus v1."]
     processVanRun       [label="Process Vanadium Run\n(see workflow diagram)"]
     Divide              [label="Divide Sample Run\nby Vanadium Run\nusing Divide v1."]
-    resetNegatives2D    [label="ResetNegatives2D v1"]
+    resetNegatives2D    [label="ResetNegatives2D"]
     SaveP2D             [label="Create p2d File"]
   }
 
