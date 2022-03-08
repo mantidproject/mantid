@@ -19,10 +19,12 @@ WINDOWS_SHA256="70e8cb24f329f867155a81bb90b48d9f6d105ca1414e8382cac4f4fd7a1c6529
 # Only supporting x86_64 at this time for the build process
 if [[ $OSTYPE == 'msys'* ]]; then
     MAMBAFORGE_SCRIPT_NAME=Mambaforge-$MAMBAFORGE_VERSION-Windows-x86_64.exe
+elif [[ $OSTYPE == 'darwin'* ]]; then
+    MAMBAFORGE_SCRIPT_NAME=Mambaforge-$MAMBAFORGE_VERSION-MacOSX-x86_64.sh
 else
     MAMBAFORGE_SCRIPT_NAME=Mambaforge-$MAMBAFORGE_VERSION-$(uname)-x86_64.sh
 fi
-URL=https://github.com/conda-forge/miniforge/releases/latest/download/$MAMBAFORGE_SCRIPT_NAME
+URL=https://github.com/conda-forge/miniforge/releases/download/$MAMBAFORGE_VERSION/$MAMBAFORGE_SCRIPT_NAME
 
 if [[ $CLEAN_BUILD  == true ]]; then
     rm -rf $EXPECTED_MAMBAFORGE_PATH
