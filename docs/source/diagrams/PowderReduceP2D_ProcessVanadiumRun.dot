@@ -15,8 +15,10 @@ digraph PowderReduceP2D_ProcessVanRun {
     RemovePromptPulse           [label="RemovePromptPulse v1"]
     LoadDiffCal                 [label="LoadDiffCal v1"]
     MaskDetectors               [label="MaskDetectors v1"]
-    AlignDetectors              [label="AlignDetectors v1"]
-    ConvertUnits                [label="ConvertUnits v1\nwith target 'Wavelength'"]
+    ApplyDiffCal                [label="ApplyDiffCal v1"]
+    ConvertUnits                [label="ConvertUnits v1\nwith target 'dSpacing'"]
+    ApplyDiffCal2               [label="ApplyDiffCal v1\nwith ClearCalibration"]
+    ConvertUnits2               [label="ConvertUnits v1\nwith target 'Wavelength'"]
     CylinderAbsorption          [label="CylinderAbsorption v1"]
     Divide                      [label="Divide v1"]
     Bin2DPowderDiffraction1     [label="Bin2DPowderDiffraction v1\nusing a specified edgebinning file."]
@@ -41,9 +43,11 @@ digraph PowderReduceP2D_ProcessVanRun {
   FilterBadPulses           -> RemovePromptPulse
   RemovePromptPulse         -> LoadDiffCal
   LoadDiffCal               -> MaskDetectors
-  MaskDetectors             -> AlignDetectors
-  AlignDetectors            -> ConvertUnits
-  ConvertUnits              -> CylinderAbsorption
+  MaskDetectors             -> ApplyDiffCal
+  ApplyDiffCal              -> ConvertUnits
+  ConvertUnits              -> ApplyDiffCal2
+  ApplyDiffCal2             -> ConvertUnits2
+  ConvertUnits2             -> CylinderAbsorption
   CylinderAbsorption        -> Divide
   Divide                    -> edgebinning
   edgebinning               -> Bin2DPowderDiffraction1  [label="Yes"]
