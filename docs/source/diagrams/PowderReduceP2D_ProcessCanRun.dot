@@ -15,8 +15,10 @@ digraph PowderReduceP2D_ProcessCanRun {
     RemovePromptPulse           [label="RemovePromptPulse v1"]
     LoadDiffCal                 [label="LoadDiffCal v1"]
     MaskDetectors               [label="MaskDetectors v1"]
-    AlignDetectors              [label="AlignDetectors v1"]
-    ConvertUnits                [label="ConvertUnits v1\nwith target 'Wavelength'"]
+    ApplyDiffCal                [label="ApplyDiffCal v1"]
+    ConvertUnits                [label="ConvertUnits v1\nwith target 'dSpacing'"]
+    ApplyDiffCal2               [label="ApplyDiffCal v1\nwith ClearCalibration"]
+    ConvertUnits2               [label="ConvertUnits v1\nwith target 'Wavelength'"]
     Bin2DPowderDiffraction1     [label="Bin2DPowderDiffraction v1\nusing a specified edgebinning file."]
     Bin2DPowderDiffraction2     [label="Bin2DPowderDiffraction v1\nusing logbinning."]
   }
@@ -37,13 +39,14 @@ digraph PowderReduceP2D_ProcessCanRun {
   FilterBadPulses           -> RemovePromptPulse
   RemovePromptPulse         -> LoadDiffCal
   LoadDiffCal               -> MaskDetectors
-  MaskDetectors             -> AlignDetectors
-  AlignDetectors            -> ConvertUnits
-  ConvertUnits              -> edgebinning
+  MaskDetectors             -> ApplyDiffCal
+  ApplyDiffCal              -> ConvertUnits
+  ConvertUnits              -> ApplyDiffCal2
+  ApplyDiffCal2             -> ConvertUnits2
+  ConvertUnits2             -> edgebinning
   edgebinning               -> Bin2DPowderDiffraction1  [label="Yes"]
   edgebinning               -> Bin2DPowderDiffraction2  [label="No"]
   Bin2DPowderDiffraction1   -> OutputWorkspace
   Bin2DPowderDiffraction2   -> OutputWorkspace
-
 
 }
