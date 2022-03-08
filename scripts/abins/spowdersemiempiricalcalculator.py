@@ -320,6 +320,97 @@ class SPowderSemiEmpiricalCalculator:
                                      broadening_scheme=broadening_scheme)
         return s_data
 
+    def _calculate_s_isotropic(self, q2: np.ndarray,
+                               broaden: bool = False) -> SData:
+        """Calculate S(q,ω) components that use isotropic Debye-Waller term
+
+        This is:
+        - fundamentals (only if self._isotropic_fundamentals; otherwise left empty)
+        - order 2 (if self._quantum_order_num > 1)
+        - orders 3-10 (if self._autoconvolution)
+
+        Args:
+            q2: q^2 values for intensity and Debye-Waller calculation. This
+                should have dimensions (N_ENERGY_BINS,) for a 1-D S(ω) calculation
+                with fixed q-energy relationship (i.e. a fixed angle) or
+                (N_Q_BINS, 1) for a calculation over independent q, energy
+                (i.e. when constructing a 2D S(|q|, ω) map.)
+
+            broaden: perform instrumental broadening. (For 2-D maps it is more
+                efficient to broaden inside this method, as energy broadening
+                can be applied before q-dependence is added. For 1-D
+                calculations over multiple angles, it is more efficient to
+                broaden outside this method, after angle contributions have
+                been summed.)
+
+        Returns:
+            Debye-Waller corrected scattering intensities at the calculated
+            orders, for all atoms.
+        """
+
+        # Calculate fundamentals and order-2 in isotropic powder-averaging approximation
+        if self._quantum_order_num == 1 or self._autoconvolution:
+            min_order = 1  # Need fundamentals without DW
+        else:
+            min_order = 2  # Skip fundamentals to be calculated separately
+
+        # Collect SData at q = 1/Å without DW factors
+        sdata = self._get_empty_sdata(use_fine_bins=self._autoconvolution,
+                                      max_order=self._quantum_order_num,
+                                      shape='1d')
+
+        if self._isotropic_fundamentals or self._quantum_order_num > 1 or self._autoconvolution:
+            for k_index in range(self._num_k):
+                _ = self._calculate_s_powder_over_atoms(k_index=k_index, q2=1.,
+                                                        bins=(self._fine_bins if self._autoconvolution else self._bins),
+                                                        sdata=sdata, min_order=min_order)
+
+        # Get numpy broadcasting right: we need to convert an array from (order,)
+        # to (order, energy) or (order, q, energy) format.
+        if len(q2.shape) == 1:
+            order_expansion_slice = np.s_[:, np.newaxis]
+        elif len(q2.shape) == 2:
+            order_expansion_slice = np.s_[:, np.newaxis, np.newaxis]
+        else:
+            raise IndexError("q2 should be 1-D or 2-D array")
+
+        if self._autoconvolution:
+            max_dw_order = abins.parameters.autoconvolution['max_order']
+            self._report_progress(f"Finished calculating SData to order {self._quantum_order_num} by "
+                                  f"analytic powder-averaging. "
+                                  f"Adding autoconvolution data up to order {max_dw_order}.",
+                                  reporter=self.progress_reporter)
+
+            sdata.add_autoconvolution_spectra()
+            sdata = sdata.rebin(self._bins)  # Don't need fine bins any more, so reduce cost of remaining steps
+
+            # Compute appropriate q-dependence for each order, along with 1/(n!) term
+            factorials = factorial(range(1, max_dw_order + 1))[order_expansion_slice]
+            factorials[:min_order + 1] = 1.  # Remove 1/n! for orders that were explicitly calculated
+
+            q2_order_corrections = q2 ** np.arange(1, max_dw_order + 1)[order_expansion_slice] / factorials
+        else:
+            # (order, q, energy)
+            max_dw_order = self._quantum_order_num
+            q2_order_corrections = q2**np.arange(max_dw_order)[order_expansion_slice]
+
+        if broaden:
+            self._report_progress("Applying instrumental broadening to all orders with simple q-dependence")
+            broadening_scheme = abins.parameters.sampling['broadening_scheme']
+            sdata = self._broaden_sdata(sdata, broadening_scheme=broadening_scheme)
+
+        self._report_progress("Applying q^2n / n! q-dependence")
+        sdata *= q2_order_corrections
+        sdata.set_q_bins(self._q_bins)
+
+        if self._isotropic_fundamentals or (self._quantum_order_num > 1) or self._autoconvolution:
+            self._report_progress(f"Applying isotropic Debye-Waller factor to orders {min_order} and above.",
+                                  reporter=self.progress_reporter)
+            iso_dw = self.calculate_isotropic_dw(q2=q2[order_expansion_slice[:-1]])
+            sdata.apply_dw(np.swapaxes(iso_dw, 0, 1), min_order=min_order, max_order=max_dw_order)
+
+        return sdata
+
     def _calculate_s_powder_over_k_and_q(self):
         """Calculate S along a set of q-points in semi-analytic powder-averaging approximation
 
@@ -341,63 +432,15 @@ class SPowderSemiEmpiricalCalculator:
 
         q2 = (self._q_bin_centres**2)[:, np.newaxis]
 
-        # Calculate fundamentals and order-2 in isotropic powder-averaging approximation
-        if self._quantum_order_num == 1 or self._autoconvolution:
-            min_order = 1  # Need fundamentals without DW
-        else:
-            min_order = 2  # Skip fundamentals to be calculated separately
-
-        # Collect SData at q = 1/Å without DW factors
-        sdata_1d = self._get_empty_sdata(use_fine_bins=self._autoconvolution,
-                                         max_order=self._quantum_order_num,
-                                         shape='1d')
-
-        if self._isotropic_fundamentals or self._quantum_order_num > 1 or self._autoconvolution:
-            for k_index in range(self._num_k):
-                _ = self._calculate_s_powder_over_atoms(k_index=k_index, q2=1.,
-                                                        bins=(self._fine_bins if self._autoconvolution else self._bins),
-                                                        sdata=sdata_1d, min_order=min_order)
-
-        if self._autoconvolution:
-            max_dw_order = abins.parameters.autoconvolution['max_order']
-            self._report_progress(f"Finished calculating SData to order {self._quantum_order_num} by "
-                                  f"analytic powder-averaging. "
-                                  f"Adding autoconvolution data up to order {max_dw_order}.",
-                                  reporter=self.progress_reporter)
-
-            sdata_1d.add_autoconvolution_spectra(normalise=False)
-            sdata_1d = sdata_1d.rebin(self._bins)  # Don't need fine bins any more, so reduce cost of remaining steps
-
-            # Compute appropriate q-dependence for each order, along with 1/(n!) term
-            factorials = factorial(range(1, max_dw_order + 1))[:, np.newaxis, np.newaxis]
-            factorials[:min_order + 1] = 1.  # Remove 1/n! for orders that were explicitly calculated
-
-            q2_order_corrections = q2 ** np.arange(1, max_dw_order + 1)[:, np.newaxis, np.newaxis] / factorials
-
-        else:
-            # (order, q, energy)
-            max_dw_order = self._quantum_order_num
-            q2_order_corrections = q2**np.arange(max_dw_order)[:, np.newaxis, np.newaxis]
-
-        self._report_progress("Applying instrumental broadening to all orders with simple q-dependence")
-        broadening_scheme = abins.parameters.sampling['broadening_scheme']
-        sdata_1d = self._broaden_sdata(sdata_1d, broadening_scheme=broadening_scheme)
-
-        self._report_progress("Applying q^2n / n! q-dependence")
-        sdata = sdata_1d * q2_order_corrections
-        sdata.set_q_bins(self._q_bins)
-
-        if self._isotropic_fundamentals or (self._quantum_order_num > 1) or self._autoconvolution:
-            self._report_progress(f"Applying isotropic Debye-Waller factor to orders {min_order} and above.",
-                                  reporter=self.progress_reporter)
-            iso_dw = self.calculate_isotropic_dw(q2=q2[:,np.newaxis])
-            sdata.apply_dw(np.swapaxes(iso_dw, 0, 1), min_order=min_order, max_order=max_dw_order)
+        sdata = self._calculate_s_isotropic(q2, broaden=True)
 
         self._report_progress("Calculating fundamentals with mode-dependent Debye-Waller factor",
                               reporter=self.progress_reporter)
+
         fundamentals_sdata_with_dw = self._calculate_fundamentals_over_k(q2=q2)
         self._report_progress("Broadening fundamentals",
                               reporter=self.progress_reporter)
+        broadening_scheme = abins.parameters.sampling['broadening_scheme']
         fundamentals_sdata_with_dw = self._broaden_sdata(fundamentals_sdata_with_dw,
                                                          broadening_scheme=broadening_scheme)
 
@@ -429,55 +472,10 @@ class SPowderSemiEmpiricalCalculator:
         # Get q^2 series corresponding to energy bins
         q2 = self._instrument.calculate_q_powder(input_data=self._bin_centres, angle=angle)
 
-        if self._quantum_order_num == 1 or self._autoconvolution:
-            min_order = 1  # Need fundamentals without DW
-        else:
-            min_order = 2  # Skip fundamentals to be calculated separately
-
-        # Collect SData at q = 1/Å without DW factors
-        if self._isotropic_fundamentals or self._quantum_order_num > 1 or self._autoconvolution:
-            for k_index in range(self._num_k):
-                _ = self._calculate_s_powder_over_atoms(k_index=k_index, q2=1.,
-                                                        bins=(self._fine_bins if self._autoconvolution else self._bins),
-                                                        sdata=sdata, min_order=min_order)
-
-        if autoconvolution:
-            max_dw_order = abins.parameters.autoconvolution['max_order']
-            self._report_progress(f"Finished calculating SData to order {self._quantum_order_num} by "
-                                  f"analytic powder-averaging. "
-                                  f"Adding autoconvolution data up to order {max_dw_order}.",
-                                  reporter=self.progress_reporter)
-
-            sdata.add_autoconvolution_spectra()
-            sdata = sdata.rebin(self._bins)  # Don't need fine bins any more, so reduce cost of remaining steps
-
-            # Apply appropriate q-dependence to each order, along with 1/(n!) term
-            factorials = factorial(range(1, max_dw_order + 1))[:, np.newaxis]
-            factorials[:min_order + 1] = 1.  # Remove 1/n! for orders that were explicitly calculated
-
-            q2n_over_n_factorial = q2 ** np.arange(1, max_dw_order + 1)[:, np.newaxis] / factorials
-            sdata *= q2n_over_n_factorial
-
-        else:
-            q2n = q2 ** np.arange(1, self._quantum_order_num + 1)[:, np.newaxis]
-            sdata *= q2n
-
-            self._report_progress(f"Finished calculating SData to order {self._quantum_order_num} by analytic powder-averaging.",
-                                  reporter=self.progress_reporter)
-            max_dw_order = self._quantum_order_num
-
-        if self._isotropic_fundamentals or (self._quantum_order_num > 1) or autoconvolution:
-            self._report_progress(f"Applying isotropic Debye-Waller factor to orders {min_order} and above.",
-                                  reporter=self.progress_reporter)
-            iso_dw = self.calculate_isotropic_dw(q2=q2)
-            sdata.apply_dw(iso_dw, min_order=min_order, max_order=max_dw_order)
+        sdata = self._calculate_s_isotropic(q2, broaden=False)
 
         # Finally we (re)calculate the first-order spectrum with more accurate DW method
         if not self._isotropic_fundamentals:
-            self._report_progress(
-                "Calculating fundamentals with mode-dependent Debye-Waller factor.",
-                reporter=self.progress_reporter)
-
             fundamentals_sdata_with_dw = self._calculate_fundamentals_over_k(angle=angle)
             sdata.update(fundamentals_sdata_with_dw)
 
@@ -597,6 +595,10 @@ class SPowderSemiEmpiricalCalculator:
             SData for fundamentals including mode-dependent Debye-Waller factor
 
         """
+        self._report_progress(
+            "Calculating fundamentals with mode-dependent Debye-Waller factor.",
+            reporter=self.progress_reporter)
+
         if (angle is None) == (q2 is None):  # XNOR
             raise ValueError("Exactly one should be set: angle or q2")
 
