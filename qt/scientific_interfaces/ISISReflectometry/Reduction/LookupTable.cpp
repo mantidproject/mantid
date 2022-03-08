@@ -117,12 +117,11 @@ boost::optional<LookupRow> LookupTable::findWildcardLookupRow() const {
     return *match;
 }
 
-ptrdiff_t LookupTable::getIndex(const LookupRow &lookupRow) const noexcept {
+ptrdiff_t LookupTable::getIndex(const LookupRow &lookupRow) const {
   if (auto found = std::find(m_lookupRows.cbegin(), m_lookupRows.cend(), lookupRow); found != m_lookupRows.cend()) {
     return std::distance(m_lookupRows.cbegin(), found);
   }
-  // TODO: Think of a proper return when we find nothing
-  return -1;
+  throw std::out_of_range("Lookup row not found.");
 }
 
 std::vector<LookupRow::ValueArray> LookupTable::toValueArray() const {
