@@ -109,8 +109,7 @@ class Abins(AbinsAlgorithm, PythonAlgorithm):
                                                      abins_data=ab_initio_data,
                                                      instrument=self._instrument,
                                                      quantum_order_num=self._num_quantum_order_events,
-                                                     autoconvolution=self._autoconvolution,
-                                                     bin_width=self._bin_width)
+                                                     autoconvolution=self._autoconvolution)
         s_calculator.progress_reporter = prog_reporter
         s_data = s_calculator.get_formatted_data()
 

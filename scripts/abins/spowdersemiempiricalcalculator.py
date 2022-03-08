@@ -61,8 +61,7 @@ class SPowderSemiEmpiricalCalculator:
                  abins_data: abins.AbinsData,
                  instrument: Instrument,
                  quantum_order_num: int,
-                 autoconvolution: bool = False,
-                 bin_width: float = 1.0) -> None:
+                 autoconvolution: bool = False) -> None:
         """
         :param filename: name of input DFT file (CASTEP: foo.phonon). This is only used for caching, the file will not be read.
         :param temperature: temperature in K for which calculation of S should be done
@@ -71,7 +70,6 @@ class SPowderSemiEmpiricalCalculator:
         :param quantum_order_num: number of quantum order events to simulate in semi-analytic approximation
         :param autoconvolution:
             approximate spectra up to abins.parameters.autoconvolution['max_order'] using auto-convolution
-        :param bin_width: bin width in wavenumber for re-binned spectrum
         """
         from abins.constants import TWO_DIMENSIONAL_INSTRUMENTS
 
@@ -110,11 +108,9 @@ class SPowderSemiEmpiricalCalculator:
         # Set up two sampling grids: _bins for broadening/output
         # and _fine_bins which subdivides _bins to prevent accumulation of binning errors
         # during autoconvolution
-        self._bins = np.arange(start=self._instrument.get_min_wavenumber(),
-                               stop=(self._instrument.get_max_wavenumber() + bin_width),
-                               step=bin_width,
-                               dtype=FLOAT_TYPE)
-        self._bin_centres = self._bins[:-1] + (bin_width / 2)
+        self._bins = self._instrument.get_energy_bins()
+        self._bin_centres = (self._bins[:-1] + self._bins[1:]) / 2
+        bin_width = instrument.get_energy_bin_width()
 
         if self._autoconvolution:
             self._fine_bin_factor = abins.parameters.autoconvolution['fine_bin_factor']

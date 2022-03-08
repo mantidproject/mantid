@@ -114,8 +114,7 @@ class Abins2D(AbinsAlgorithm, PythonAlgorithm):
                                                      abins_data=ab_initio_data,
                                                      autoconvolution=self._autoconvolution,
                                                      instrument=self._instrument,
-                                                     quantum_order_num=self._num_quantum_order_events,
-                                                     bin_width=self._instrument.get_energy_bin_width())
+                                                     quantum_order_num=self._num_quantum_order_events)
         s_calculator.progress_reporter = prog_reporter
         s_data = s_calculator.get_formatted_data()
         self._q_bins = s_data.get_q_bins()

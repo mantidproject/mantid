@@ -94,7 +94,7 @@ class Instrument:
         - abins.parameters.sampling['bin_width']: use this to override
           instrument settings (e.g. for convergence test or rough-quality calculation)
 
-        - abins.parameters.instruments[INSTRUMENT]['bin_width']
+        - abins.parameters.instruments[INSTRUMENT]['energy_bin_width']
 
         - abins.parameters.instruments[INSTRUMENT]['n_energy_bins']
 
@@ -106,7 +106,7 @@ class Instrument:
         """
         bin_width = abins.parameters.sampling['bin_width']
         if not bin_width:
-            bin_width = self.get_parameter('bin_width', default=None)
+            bin_width = self.get_parameter('energy_bin_width', default=None)
         if not bin_width:
             n_energy_bins = self.get_parameter(
                 'n_energy_bins',
