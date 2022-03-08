@@ -30,7 +30,7 @@ public:
 
   boost::optional<LookupRow> findLookupRow(Row const &row, double tolerance) const;
   boost::optional<LookupRow> findWildcardLookupRow() const;
-  ptrdiff_t getIndex(LookupRow const &) const;
+  size_t getIndex(LookupRow const &) const;
   std::vector<LookupRow> const &rows() const;
   std::vector<LookupRow::ValueArray> toValueArray() const;
 
