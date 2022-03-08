@@ -1,17 +1,17 @@
 # Mantid NSIS script
+# Assumes you have passed /DVERSION, /DOUTFILE_NAME, and /DPACKAGE_DIR as arguments
 
 #This must be set for long paths to work properly.
 #  Unicode only defaults to true in NSIS 3.07 onwards.
 Unicode True
 
-!define PACKAGE_DIR "C:\Users\sam\mantid\installers\conda\win\_package_build"
 !define START_MENU_FOLDER "Mantid"
 
 # The name of the installer
-Name "MantidWorkbench"
+Name "Mantid Workbench"
 
 # The file to write
-OutFile "MantidWorkbench.exe"
+OutFile "${OUTFILE_NAME}"
 
 # The default installation directory
 InstallDir "C:\MantidInstall"

@@ -58,7 +58,7 @@ echo "Creating conda env from mantidworkbench and jq"
 echo "Conda env created"
 
 # Determine version information
-version=$("$CONDA_EXE" list --prefix "$CONDA_ENV_PATH" '^mantid$' --json | $CONDA_ENV_PATH/Library/mingw-w64/bin/jq.exe --raw-output '.[0].version')
+VERSION=$("$CONDA_EXE" list --prefix "$CONDA_ENV_PATH" '^mantid$' --json | $CONDA_ENV_PATH/Library/mingw-w64/bin/jq.exe --raw-output '.[0].version')
 echo "Version number: $version"
 
 # Remove jq
@@ -137,7 +137,16 @@ echo "Cleanup directory containing build that is no longer needed"
 rm -rf $CONDA_ENV_PATH
 
 # Now package using NSIS
+echo "Edit the NSIS script"
+THIS_SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+NSIS_SCRIPT=$THIS_SCRIPT_DIR/project.nsi
+
 echo "Packaging package via NSIS"
+makensis $NSIS_SCRIPT /DVERSION=$VERSION /DPACKAGE_DIR=$COPY_DIR /DOUTFILE_NAME=$PACKAGE_NAME
+echo "Package packaged, find it here: $THIS_SCRIPT_DIR/$PACKAGE_NAME.exe"
 
-echo "Package packaged, find it here. "
+echo "Cleaning up left over files"
+rm $NSIS_SCRIPT
+rm -rf $COPY_DIR
 
+echo "Done"
