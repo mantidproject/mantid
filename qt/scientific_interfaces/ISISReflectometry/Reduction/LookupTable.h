@@ -28,9 +28,10 @@ public:
   LookupTable(std::vector<LookupRow> rowsIn);
   LookupTable(std::initializer_list<LookupRow> rowsIn);
 
-  std::vector<LookupRow> const &rows() const;
   boost::optional<LookupRow> findLookupRow(Row const &row, double tolerance) const;
   boost::optional<LookupRow> findWildcardLookupRow() const;
+  size_t getIndex(LookupRow const &) const;
+  std::vector<LookupRow> const &rows() const;
   std::vector<LookupRow::ValueArray> toValueArray() const;
 
   friend bool operator==(LookupTable const &lhs, LookupTable const &rhs);

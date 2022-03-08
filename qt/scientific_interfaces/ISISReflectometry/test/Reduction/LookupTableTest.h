@@ -208,6 +208,22 @@ public:
     TS_ASSERT_THROWS(table.findLookupRow(*group[0], m_exactMatchTolerance), MultipleRowsFoundException const &)
   }
 
+  void test_get_index_for_lookup_row() {
+    auto constexpr angle = 2.3;
+    auto const lookupRow = ModelCreationHelper::makeLookupRow(angle, boost::regex("A.*"));
+    auto table = LookupTable{ModelCreationHelper::makeLookupRow(angle, boost::regex(".*")), lookupRow,
+                             ModelCreationHelper::makeLookupRow(angle, boost::regex("AA.*"))};
+    TS_ASSERT_EQUALS(table.getIndex(lookupRow), 1);
+  }
+
+  void test_get_index_for_missing_lookup_row() {
+    auto constexpr angle = 2.3;
+    auto const lookupRow = ModelCreationHelper::makeLookupRow(angle, boost::regex("A.*"));
+    auto table = LookupTable{ModelCreationHelper::makeLookupRow(angle, boost::regex(".*")),
+                             ModelCreationHelper::makeLookupRow(angle, boost::regex("AA.*"))};
+    TS_ASSERT_THROWS(table.getIndex(lookupRow), std::out_of_range const &);
+  }
+
 private:
   const double m_exactMatchTolerance = 1e-6;
 };
