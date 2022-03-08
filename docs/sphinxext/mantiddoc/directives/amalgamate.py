@@ -7,7 +7,6 @@
 from mantiddoc.directives.base import BaseDirective
 
 import os
-import sys
 
 
 class CompilationDirective(BaseDirective):
@@ -34,10 +33,7 @@ class CompilationDirective(BaseDirective):
         """
         Called by Sphinx when the ..compiler:: directive is encountered.
         """
-        args = self.arguments[0]
-        current_dir = os.path.split(sys.argv[0])[0]
-        path_to_notes = '../../../../../../../../docs/source/' + self.source().rsplit('/', 1)[0] + args
-        script_dir = os.path.abspath(os.path.join(current_dir, path_to_notes))
+        script_dir = self.getPath()
         for file in os.listdir(script_dir):
             if file.endswith(".rst"):
                 with open(script_dir + '/' + file) as f:
@@ -45,6 +41,20 @@ class CompilationDirective(BaseDirective):
                     self.add_rst(contents)
 
         return []
+
+    def getPath(self):
+        # gets the current directory
+        current_dir = os.getcwd()
+        # the location of documentation
+        source_dir = '../../mantid/docs/source/'
+        # the location of the release notes for this version
+        release_dir = self.source().rsplit('/', 1)[0]
+        # argument provided to amalgamate directive
+        args = self.arguments[0]
+        if args[0] != '/':
+            args = '/' + args
+        path_to_notes = source_dir + release_dir + args
+        return os.path.abspath(os.path.join(current_dir, path_to_notes))
 
 
 def setup(app):

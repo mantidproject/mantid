@@ -51,7 +51,7 @@ another sub-heading (e.g. Powder Diffraction, Algorithms, MSlice), you need to d
 
 - Add a new directory into the correct part of the filing system. E.g. to add Algorithms to Workbench create the directory ``/Workbench/Algorithm``. The directory name should not contain any spaces.
 - Add ``New_features`` and ``Bugfixes`` directories within your new directory. The automated script only works with these directories.
-- Update the top level release note file with your new heading and sub-headings. For each subheading you need to add an ``amalgamate`` statement with a link to each new directory to ensure the notes will be visible for users. The link to the new directory must start with `/` to enable the script to work. For this example it may look something like this
+- Update the top level release note file with your new heading and sub-headings. For each subheading you need to add an ``amalgamate`` statement with a link to each new directory to ensure the notes will be visible for users. For this example it may look something like this
 
 .. code-block:: python
 
@@ -60,11 +60,11 @@ another sub-heading (e.g. Powder Diffraction, Algorithms, MSlice), you need to d
 
 	New features
 	############
-	.. amalgamate:: /Workbench/Algorithm/New_features
+	.. amalgamate:: Workbench/Algorithm/New_features
 
 	Bugfixes
 	############
-	.. amalgamate:: /Workbench/Algorithm/Bugfixes
+	.. amalgamate:: Workbench/Algorithm/Bugfixes
 
 
 Once all the directories are in place you can add your release note as a separate file as outlined above.
@@ -74,10 +74,10 @@ You can add sub-headings to a sub-heading if you would like (e.g. ``/Workbench/A
 Previewing release notes
 ------------------------
 
-Currently the only are way you can preview release notes prior to them being merged in is as follows:-
+Currently the only  way you can preview release notes prior to them being merged in is as follows:-
 
-1. Via the Pull Request (PR). You can view the release note on Github and it will show it using basic .rst rendering. You cannot check all the features you might expect to see when the release note is merged in (e.g. you cannot
-   verify links work) but it gives you an idea of how it might look.
+Via a Pull Request (PR): You can view the release note on Github and it will show it using basic .rst rendering. You cannot check all the features you might expect to see when the release note is merged in (e.g. you cannot
+verify links work) but it gives you an idea of how it might look.
 
 
 During release
