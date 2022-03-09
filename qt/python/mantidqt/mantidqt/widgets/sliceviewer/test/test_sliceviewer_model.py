@@ -256,21 +256,17 @@ class SliceViewerModelTest(unittest.TestCase):
     def test_init_with_valid_MDHistoWorkspace(self):
         mock_ws = MagicMock(spec=MultipleExperimentInfos)
         mock_ws.name = Mock(return_value="")
-        mock_ws.isMDHistoWorkspace = Mock()
-        mock_ws.getNumNonIntegratedDims = Mock()
-        mock_ws.isMDHistoWorkspace.return_value = True
-        mock_ws.getNumNonIntegratedDims.return_value = 700
+        mock_ws.isMDHistoWorkspace = Mock(return_value=True)
+        mock_ws.getNumNonIntegratedDims = Mock(return_value=700)
 
         with patch.object(SliceViewerModel, "_calculate_axes_angles"):
             self.assertIsNotNone(SliceViewerModel(mock_ws))
 
     def test_init_with_valid_MDEventWorkspace(self):
         mock_ws = MagicMock(spec=MultipleExperimentInfos)
-        mock_ws.name = Mock(return_value="")
-        mock_ws.isMDHistoWorkspace = Mock()
-        mock_ws.getNumDims = Mock()
-        mock_ws.isMDHistoWorkspace.return_value = False
-        mock_ws.getNumDims.return_value = 4
+        mock_ws.name = Mock(return_value='')
+        mock_ws.isMDHistoWorkspace = Mock(return_value=False)
+        mock_ws.getNumDims = Mock(return_value=4)
 
         with patch.object(SliceViewerModel, "_calculate_axes_angles"):
             self.assertIsNotNone(SliceViewerModel(mock_ws))
@@ -295,19 +291,17 @@ class SliceViewerModelTest(unittest.TestCase):
 
     def test_init_raises_if_fewer_than_two_integrated_dimensions(self):
         mock_ws = MagicMock(spec=MultipleExperimentInfos)
-        mock_ws.isMDHistoWorkspace = Mock()
-        mock_ws.getNumNonIntegratedDims = Mock()
-        mock_ws.isMDHistoWorkspace.return_value = True
-        mock_ws.getNumNonIntegratedDims.return_value = 1
+        mock_ws.isMDHistoWorkspace = Mock(return_value=True)
+        mock_ws.getNumNonIntegratedDims = Mock(return_value=1)
+        mock_ws.name = Mock(return_value='')
 
         self.assertRaisesRegex(ValueError, "at least 2 non-integrated dimensions", SliceViewerModel, mock_ws)
 
     def test_init_raises_if_fewer_than_two_dimensions(self):
         mock_ws = MagicMock(spec=MultipleExperimentInfos)
-        mock_ws.isMDHistoWorkspace = Mock()
-        mock_ws.getNumDims = Mock()
-        mock_ws.isMDHistoWorkspace.return_value = False
-        mock_ws.getNumDims.return_value = 1
+        mock_ws.isMDHistoWorkspace = Mock(return_value=False)
+        mock_ws.getNumDims = Mock(return_value=1)
+        mock_ws.name = Mock(return_value='')
 
         self.assertRaisesRegex(ValueError, "at least 2 dimensions", SliceViewerModel, mock_ws)
 
@@ -336,7 +330,7 @@ class SliceViewerModelTest(unittest.TestCase):
                                            OutputWorkspace=ws.name() + '_svrebinned')
         mock_binmd.reset_mock()
 
-    @patch('mantidqt.widgets.sliceviewer.model.BinMD')
+    @patch('mantidqt.widgets.sliceviewer.models.model.BinMD')
     def test_get_ws_MDE_with_limits_uses_limits_over_dimension_extents(self, mock_binmd):
         model = SliceViewerModel(self.ws_MDE_3D)
         mock_binmd.return_value = self.ws_MD_3D
@@ -359,7 +353,7 @@ class SliceViewerModelTest(unittest.TestCase):
         model.get_data((None, None, 0), (1, 2, 4), [0, 1, None], ((-2, 2), (-1, 1)))
         mock_binmd.assert_called_once_with(**call_params)
 
-    @patch('mantidqt.widgets.sliceviewer.model.BinMD')
+    @patch('mantidqt.widgets.sliceviewer.models.model.BinMD')
     def test_get_ws_mde_sets_minimum_width_on_data_limits(self, mock_binmd):
         model = SliceViewerModel(self.ws_MDE_3D)
         mock_binmd.return_value = self.ws_MD_3D
@@ -558,10 +552,10 @@ class SliceViewerModelTest(unittest.TestCase):
         assert_call_as_expected(xmin, xmax, 1, 3, transpose=False, is_spectra=False)
         assert_call_as_expected(ymin, ymax, 0, 2, transpose=True, is_spectra=False)
 
-    @patch('mantidqt.widgets.sliceviewer.roi.ExtractSpectra')
-    @patch('mantidqt.widgets.sliceviewer.roi.Rebin')
-    @patch('mantidqt.widgets.sliceviewer.roi.SumSpectra')
-    @patch('mantidqt.widgets.sliceviewer.roi.Transpose')
+    @patch('mantidqt.widgets.sliceviewer.models.roi.ExtractSpectra')
+    @patch('mantidqt.widgets.sliceviewer.models.roi.Rebin')
+    @patch('mantidqt.widgets.sliceviewer.models.roi.SumSpectra')
+    @patch('mantidqt.widgets.sliceviewer.models.roi.Transpose')
     def test_export_cuts_for_matrixworkspace(self, mock_transpose, mock_sum_spectra, mock_rebin,
                                              mock_extract_spectra):
         xmin, xmax, ymin, ymax = -4., 5., 6., 9.
@@ -640,8 +634,8 @@ class SliceViewerModelTest(unittest.TestCase):
                                     is_spectra=is_spectra,
                                     is_ragged=is_ragged)
 
-    @patch('mantidqt.widgets.sliceviewer.model.TransposeMD')
-    @patch('mantidqt.widgets.sliceviewer.model.IntegrateMDHistoWorkspace')
+    @patch('mantidqt.widgets.sliceviewer.models.model.TransposeMD')
+    @patch('mantidqt.widgets.sliceviewer.models.model.IntegrateMDHistoWorkspace')
     def test_export_region_for_mdhisto_workspace(self, mock_intMD, mock_transposemd):
         xmin, xmax, ymin, ymax = -1., 3., 2., 4.
         slicepoint, bin_params = (None, None, 0.5), (100, 100, 0.1)
@@ -704,8 +698,8 @@ class SliceViewerModelTest(unittest.TestCase):
             assert_call_as_expected(transpose=True, dimension_indices=transposed_dimension_indices,
                                     export_type=export_type)
 
-    @patch('mantidqt.widgets.sliceviewer.model.TransposeMD')
-    @patch('mantidqt.widgets.sliceviewer.model.BinMD')
+    @patch('mantidqt.widgets.sliceviewer.models.model.TransposeMD')
+    @patch('mantidqt.widgets.sliceviewer.models.model.BinMD')
     def test_export_region_for_mdevent_workspace(self, mock_binmd, mock_transposemd):
         xmin, xmax, ymin, ymax = -1., 3., 2., 4.
         slicepoint, bin_params = (None, None, 0.5), (100, 100, 0.1)
@@ -798,8 +792,8 @@ class SliceViewerModelTest(unittest.TestCase):
             assert_call_as_expected(transpose=True, dimension_indices=transposed_dimension_indices,
                                     export_type=export_type)
 
-    @patch('mantidqt.widgets.sliceviewer.model.BinMD')
-    @patch('mantidqt.widgets.sliceviewer.roi.ExtractSpectra')
+    @patch('mantidqt.widgets.sliceviewer.models.model.BinMD')
+    @patch('mantidqt.widgets.sliceviewer.models.roi.ExtractSpectra')
     def test_export_region_raises_exception_if_operation_failed(self, mock_extract_spectra,
                                                                 mock_binmd):
         def assert_error_returned_in_help(workspace, export_type, mock_alg, err_msg):

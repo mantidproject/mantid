@@ -20,8 +20,7 @@ matplotlib.use('Agg')
 sys.modules['mantid.simpleapi'] = mock.MagicMock()
 
 from mantidqt.widgets.sliceviewer.models.model import SliceViewerModel, WS_TYPE  # noqa: E402
-from mantidqt.widgets.sliceviewer.presenters.presenter import (  # noqa: E402
-    PeaksViewerCollectionPresenter, SliceViewer)
+from mantidqt.widgets.sliceviewer.presenters.presenter import (PeaksViewerCollectionPresenter, SliceViewer)  # noqa: E402
 from mantidqt.widgets.sliceviewer.models.transform import NonOrthogonalTransform  # noqa: E402
 from mantidqt.widgets.sliceviewer.views.toolbar import ToolItemText  # noqa: E402
 from mantidqt.widgets.sliceviewer.views.view import SliceViewerView  # noqa: E402
@@ -265,6 +264,7 @@ class SliceViewerTest(unittest.TestCase):
         data_view_mock.enable_tool_button.assert_has_calls(
             (mock.call(ToolItemText.LINEPLOTS), mock.call(ToolItemText.REGIONSELECTION)))
 
+    @mock.patch("mantidqt.widgets.sliceviewer.presenters.presenter.SliceViewer.new_plot_MDH")
     @mock.patch("mantidqt.widgets.sliceviewer.presenters.presenter.SliceInfo")
     def test_dimensions_changed_when_transpose_2D_MD_workspace(self, mock_sliceinfo_cls, mock_new_plot):
         presenter, data_view_mock = _create_presenter(self.model,
@@ -289,6 +289,7 @@ class SliceViewerTest(unittest.TestCase):
                                                       mock_sliceinfo_cls,
                                                       enable_nonortho_axes=True,
                                                       supports_nonortho=False)
+        self.model.get_number_dimensions.return_value = 2
 
         presenter.dimensions_changed()
 
@@ -306,6 +307,7 @@ class SliceViewerTest(unittest.TestCase):
                                                       supports_nonortho=True)
 
         self.patched_deps["WorkspaceInfo"].is_ragged_matrix_workspace.return_value = False
+        self.model.get_number_dimensions.return_value = 2
 
         presenter.dimensions_changed()
 
@@ -321,6 +323,7 @@ class SliceViewerTest(unittest.TestCase):
                                                       mock_sliceinfo_cls,
                                                       enable_nonortho_axes=False,
                                                       supports_nonortho=False)
+        self.model.get_number_dimensions.return_value = 2
 
         presenter.dimensions_changed()
 
@@ -334,6 +337,7 @@ class SliceViewerTest(unittest.TestCase):
                                                       mock_sliceinfo_cls,
                                                       enable_nonortho_axes=False,
                                                       supports_nonortho=True)
+        self.model.get_number_dimensions.return_value = 2
 
         presenter.dimensions_changed()
 
@@ -434,7 +438,7 @@ class SliceViewerTest(unittest.TestCase):
         presenter.refresh_view()
 
         # There is a call to setWorkspace from the constructor, so expect two
-        calls = [mock.call(self.model._get_ws()), mock.call(self.model._get_ws())]
+        calls = [mock.call(self.model.ws), mock.call(self.model.ws)]
         self.view.data_view.image_info_widget.setWorkspace.assert_has_calls(calls)
         self.view.setWindowTitle.assert_called_with(self.model.get_title())
         presenter.new_plot.assert_called_once()
