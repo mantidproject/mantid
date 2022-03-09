@@ -407,7 +407,12 @@ class SPowderSemiEmpiricalCalculator:
             self._report_progress(f"Applying isotropic Debye-Waller factor to orders {min_order} and above.",
                                   reporter=self.progress_reporter)
             iso_dw = self.calculate_isotropic_dw(q2=q2[order_expansion_slice[:-1]])
-            sdata.apply_dw(np.swapaxes(iso_dw, 0, 1), min_order=min_order, max_order=max_dw_order)
+
+            if len(iso_dw.shape) == 3:
+                # From q, atom, freq -> atom, q, freq
+                iso_dw = np.swapaxes(iso_dw, 0, 1)
+
+            sdata.apply_dw(iso_dw, min_order=min_order, max_order=max_dw_order)
 
         return sdata
 
