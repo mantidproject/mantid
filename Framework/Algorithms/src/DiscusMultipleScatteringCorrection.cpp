@@ -561,11 +561,11 @@ void DiscusMultipleScatteringCorrection::exec() {
   // set the output property
   setProperty("OutputWorkspace", wsgroup);
 
-  if (g_log.is(Kernel::Logger::Priority::PRIO_WARNING)) {
+  if (g_log.is(Kernel::Logger::Priority::PRIO_INFORMATION)) {
     for (auto &kv : m_attemptsToGenerateInitialTrack)
-      g_log.warning() << "Generating initial track required " + std::to_string(kv.first) + " attempts on " +
-                             std::to_string(kv.second) + " occasions.\n";
-    g_log.warning() << "Calls to interceptSurface= " + std::to_string(m_callsToInterceptSurface) + "\n";
+      g_log.information() << "Generating initial track required " + std::to_string(kv.first) + " attempts on " +
+                                 std::to_string(kv.second) + " occasions.\n";
+    g_log.information() << "Calls to interceptSurface= " + std::to_string(m_callsToInterceptSurface) + "\n";
   }
 }
 
@@ -972,7 +972,7 @@ std::tuple<bool, std::vector<double>, double> DiscusMultipleScatteringCorrection
   // if scale up scatteringXSection by 100*numberDensity then may not need
   // sigma_total any more but leave it alone now to align with original code
 
-  const auto [sigma_total, scatteringXSection] = new_vector(m_sampleShape->material(), kinc, specialSingleScatterCalc);
+  auto [sigma_total, scatteringXSection] = new_vector(m_sampleShape->material(), kinc, specialSingleScatterCalc);
 
   double vmu = 100 * numberDensity * sigma_total;
   auto track = start_point(rng);
@@ -993,6 +993,7 @@ std::tuple<bool, std::vector<double>, double> DiscusMultipleScatteringCorrection
     if (nlinks == 0) {
       return {false, {0.}, 0};
     }
+    std::tie(sigma_total, scatteringXSection) = new_vector(m_sampleShape->material(), k, specialSingleScatterCalc);
     updateWeightAndPosition(track, weight, vmu, sigma_total, rng);
   }
 
