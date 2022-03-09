@@ -4,8 +4,10 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-import unittest
+import functools
 import json
+import unittest
+
 import numpy as np
 from numpy.testing import assert_almost_equal
 
@@ -25,6 +27,12 @@ class SCalculatorFactoryPowderTest(unittest.TestCase):
     _instrument = abins.instruments.get_instrument("TOSCA")
     _order_event = FUNDAMENTALS
     _si2 = "Si2-sc_CalculateSPowder"
+
+    default_calculator_kwargs = dict(temperature=_temperature,
+                                     instrument=_instrument,
+                                     sample_form=_sample_form,
+                                     quantum_order_num=_order_event,
+                                     autoconvolution=False)
 
     def setUp(self):
         self.default_threads = abins.parameters.performance['threads']
@@ -72,38 +80,67 @@ class SCalculatorFactoryPowderTest(unittest.TestCase):
                                           sample_form=self._sample_form, abins_data=good_data.extract(),
                                           instrument=self._instrument, quantum_order_num=self._order_event)
 
-    #  main test
-    def test_good_case(self):
-        self._good_case(name=self._si2)
+    def test_1d_order1(self):
+        self._good_case()
+
+    def test_1d_order2(self):
+        self._good_case(name=self._si2 + '_1d_o2',
+                        castep_name=self._si2,
+                        quantum_order_num=2)
+
+    def test_1d_order10(self):
+        self._good_case(name=self._si2 + '_1d_o10',
+                        castep_name=self._si2,
+                        quantum_order_num=2,
+                        autoconvolution=True)
 
     # helper functions
-    def _good_case(self, name=None):
+    def _good_case(self, name=_si2, castep_name=None, **calculator_kwargs):
+        if castep_name is None:
+            castep_name = name
+
+        calc_kwargs = self.default_calculator_kwargs.copy()
+        calc_kwargs.update(calculator_kwargs)
+
         # calculation of powder data
-        good_data = self._get_good_data(filename=name)
         good_tester = abins.SCalculatorFactory.init(
-            filename=abins.test_helpers.find_file(filename=name + ".phonon"), temperature=self._temperature,
-            sample_form=self._sample_form, abins_data=good_data["DFT"], instrument=self._instrument,
-            quantum_order_num=self._order_event)
+            filename=abins.test_helpers.find_file(filename=castep_name + ".phonon"),
+            abins_data = self._get_abins_data(castep_name),
+            **calc_kwargs)
         calculated_data = good_tester.get_formatted_data()
 
+        ### Uncomment to generate new data ###
+        from pathlib import Path
+        data_path = Path(abins.test_helpers.find_file(filename=castep_name + ".phonon")).parent
+        self._write_data(data=calculated_data.extract(),
+                         filename=(data_path / f"{name}_S.txt"))
+
+        good_data = self._get_good_data(filename=name, castep_filename=castep_name)
         self._check_data(good_data=good_data["S"], data=calculated_data.extract())
 
         # check if loading powder data is correct
         new_tester = abins.SCalculatorFactory.init(
-            filename=abins.test_helpers.find_file(filename=name + ".phonon"), temperature=self._temperature,
-            sample_form=self._sample_form, abins_data=good_data["DFT"], instrument=self._instrument,
-            quantum_order_num=self._order_event)
+            filename=abins.test_helpers.find_file(filename=castep_name + ".phonon"),
+            abins_data=good_data["DFT"],
+            **calc_kwargs)
         loaded_data = new_tester.load_formatted_data()
 
         self._check_data(good_data=good_data["S"], data=loaded_data.extract())
 
-    def _get_good_data(self, filename=None):
-
+    @staticmethod
+    @functools.lru_cache(maxsize=4)
+    def _get_abins_data(castep_filename):
         castep_reader = abins.input.CASTEPLoader(
-            input_ab_initio_filename=abins.test_helpers.find_file(filename=filename + ".phonon"))
-        s_data = self._prepare_data(filename=abins.test_helpers.find_file(filename=filename + "_S.txt"))
+            input_ab_initio_filename=abins.test_helpers.find_file(filename=castep_filename + ".phonon"))
+        return castep_reader.read_vibrational_or_phonon_data()
 
-        return {"DFT": castep_reader.read_vibrational_or_phonon_data(), "S": s_data}
+    def _get_good_data(self, filename=None, castep_filename=None):
+        if castep_filename is None:
+            castep_filename = filename
+
+        s_data = self._prepare_data(filename=abins.test_helpers.find_file(filename=(filename + "_S.txt")))
+
+        return {"DFT": self._get_abins_data(castep_filename), "S": s_data}
 
     @staticmethod
     def _write_data(*, data, filename):
