@@ -703,7 +703,6 @@ class PowderReduceP2D(DistributedDataProcessorAlgorithm):
             else:
                 self.binDataLog(self._vanaWS, self._dSpaceBinning[0], self._dPerpendicularBinning[0])
             self.postProcessVana(self._vanaWS)
-            
             if self._doVanaEmpty:
                 self.processData(self._vanaEmpty, self._vanaEmptyWS)
                 self.processVana(self._vanaEmptyWS)
