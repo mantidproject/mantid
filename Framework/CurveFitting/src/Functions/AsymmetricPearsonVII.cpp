@@ -54,12 +54,12 @@ void AsymmetricPearsonVII::functionLocal(double *out, const double *xValues, con
     double left_part, right_part;
 
     if (ml == 0.0)
-      left_part = peak_height / 2.0;
+      left_part = peak_centre / 2.0;
     else
       left_part = peak_height / pow(1.0 + 4.0 * offset_sq * (pow(2, 1.0 / ml) - 1.0) * weight_sq, ml);
 
     if (mr == 0.0)
-      right_part = peak_height / 2.0;
+      right_part = peak_centre / 2.0;
     else
       right_part = peak_height / pow(1.0 + 4.0 * offset_sq * (pow(2, 1.0 / mr) - 1.0) * weight_sq, mr);
 
@@ -108,9 +108,9 @@ void AsymmetricPearsonVII::functionDerivLocal(Jacobian *out, const double *xValu
       right_ph_der = 1.0 / pow(right_denom, mr);
 
     if (xValues[i] <= peak_centre)
-      out->set(i, 0, left_ph_der);
+      out->set(i, 0, 1.0 / pow(left_ph_der, ml));
     else
-      out->set(i, 0, right_ph_der);
+      out->set(i, 0, 1.0 / pow(right_ph_der, mr));
 
     // derivative with respect to the peak_centre
     double left_pc_der, right_pc_der;
@@ -202,13 +202,8 @@ double AsymmetricPearsonVII::activeParameter(size_t i) const {
 double AsymmetricPearsonVII::height() const { return getParameter("PeakHeight"); }
 double AsymmetricPearsonVII::centre() const { return getParameter("PeakCentre"); }
 double AsymmetricPearsonVII::fwhm() const { return getParameter("Width"); }
-double AsymmetricPearsonVII::leftShape() const { return getParameter("LeftShape"); }
-double AsymmetricPearsonVII::rightShape() const { return getParameter("RightShape"); }
 
 void AsymmetricPearsonVII::setCentre(const double c) { setParameter("PeakCentre", c); }
 void AsymmetricPearsonVII::setHeight(const double h) { setParameter("PeakHeight", h); }
 void AsymmetricPearsonVII::setFwhm(const double w) { setParameter("Width", w); }
-void AsymmetricPearsonVII::setLeftShape(const double ml) { setParameter("LeftShape", ml); }
-void AsymmetricPearsonVII::setRightShape(const double mr) { setParameter("RightShape", mr); }
-
 } // namespace Mantid::CurveFitting::Functions

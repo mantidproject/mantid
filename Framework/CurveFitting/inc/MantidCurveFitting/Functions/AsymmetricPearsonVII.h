@@ -45,14 +45,10 @@ public:
   double height() const override;
   double centre() const override;
   double fwhm() const override;
-  double leftShape() const;
-  double rightShape() const;
 
   void setCentre(const double newCentre) override;
   void setHeight(const double newHight) override;
   void setFwhm(const double newFwhm) override;
-  void setLeftShape(const double newLeftShape);
-  void setRightShape(const double newRightShape);
 
   /// Override IFunction base class methods
   std::string name() const override { return "AsymmetricPearsonVII"; }
