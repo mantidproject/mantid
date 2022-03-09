@@ -8,7 +8,6 @@ from mantid.kernel import Direction, IntBoundedValidator, FloatBoundedValidator,
 from mantid.api import mtd, AlgorithmFactory, DistributedDataProcessorAlgorithm, FileProperty, FileAction
 from mantid.simpleapi import Load, FindDetectorsPar, FilterBadPulses, RemovePromptPulse, LoadDiffCal, MaskDetectors, ApplyDiffCal,\
     ConvertUnits, CylinderAbsorption, Divide, Bin2DPowderDiffraction, StripVanadiumPeaks, FFTSmooth, Minus, SaveP2D, Scale, CreateWorkspace
-from mantid import mtd
 
 import numpy as np
 
