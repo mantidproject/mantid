@@ -673,6 +673,8 @@ void DiscusMultipleScatteringCorrection::prepareCumulativeProbForQ(double kinc, 
   PInvOfQ->dataX(0) = IOfQYFull;
   PInvOfQ->dataY(0).resize(qValuesFull.size());
   PInvOfQ->dataY(0) = qValuesFull;
+  PInvOfQ->dataX(1).resize(IOfQYFull.size());
+  PInvOfQ->dataX(1) = IOfQYFull;
   PInvOfQ->dataY(1).resize(wIndices.size());
   PInvOfQ->dataY(1) = wIndices;
 }
@@ -1023,12 +1025,12 @@ std::tuple<bool, std::vector<double>, double> DiscusMultipleScatteringCorrection
   // That approach implicitly assumed S(Q,w)=0 where not specified and that no interpolation
   // on w would be needed - this may be what's required but seems possible it might not always be
   for (auto w : wValues) {
-    const double finalE = fromWaveVector(kinc) + w;
+    const double finalE = fromWaveVector(kinc) - w;
     if (finalE > 0) {
       const double kout = toWaveVector(finalE);
       const auto qVector = directionToDetector * kout - prevDirection * k;
       const double q = qVector.norm();
-      const double finalW = finalE - fromWaveVector(k);
+      const double finalW = fromWaveVector(k) - finalE;
       double SQ = Interpolate2D(m_SQWS, finalW, q);
       weights.emplace_back(weight * AT2 * SQ * scatteringXSectionFull / (4 * M_PI));
     } else {
