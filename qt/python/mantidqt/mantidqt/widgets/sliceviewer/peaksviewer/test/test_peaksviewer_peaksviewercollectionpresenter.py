@@ -210,7 +210,7 @@ class PeaksViewerCollectionPresenterTest(unittest.TestCase):
 
         # test deactivating peak adding mode from sliceviewer
         presenter.deactivate_peak_add_delete()
-        view.peak_actions_view.zoom_pan_clicked.assert_called_once()
+        view.peak_actions_view.deactivate_peak_adding.assert_called_once()
 
         # test adding peak to peaksworkspace
         presenter.child_presenter = MagicMock()
