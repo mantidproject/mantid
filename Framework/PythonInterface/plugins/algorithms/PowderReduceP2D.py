@@ -6,12 +6,10 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 from mantid.kernel import Direction, IntBoundedValidator, FloatBoundedValidator, EnabledWhenProperty, PropertyCriterion
 from mantid.api import (AlgorithmFactory, DistributedDataProcessorAlgorithm, FileProperty, FileAction)
-from mantid.simpleapi import Load, FindDetectorsPar, FilterBadPulses, RemovePromptPulse, LoadDiffCal, MaskDetectors, ApplyDiffCal, \
-    ConvertUnits, CylinderAbsorption, Divide, Bin2DPowderDiffraction, StripVanadiumPeaks, FFTSmooth, Minus, SaveP2D, Scale, CreateWorkspace, \
-    ConvertFromDistribution
+from mantid.simpleapi import Load, FindDetectorsPar, FilterBadPulses, RemovePromptPulse, LoadDiffCal, MaskDetectors, ApplyDiffCal,\
+    ConvertUnits, CylinderAbsorption, Divide, Bin2DPowderDiffraction, StripVanadiumPeaks, FFTSmooth, Minus, SaveP2D, Scale, CreateWorkspace
 from mantid import mtd
 
-import math
 import numpy as np
 
 
@@ -229,7 +227,7 @@ class PowderReduceP2D(DistributedDataProcessorAlgorithm):
             self.setPropertyGroup('StartWorkspaceIndex', grp7)
             self.setPropertyGroup('EndWorkspaceIndex', grp7)
             self.setPropertyGroup('ComponentList', grp7)
-        
+
         def loadApplyDiffCal():
             # Input for ApplyDiffCal
             self.copyProperties('ApplyDiffCal', ['CalibrationWorkspace', 'OffsetsWorkspace'])
@@ -353,7 +351,7 @@ class PowderReduceP2D(DistributedDataProcessorAlgorithm):
                 'IgnoreXBins',
                 True,
                 direction=Direction.Input,
-                doc='Ignores the requirement that X bins be linear and of the same size. Set this to true if you are using log binning. '
+                doc='Ignores the requirement that X bins be linear and of the same size. Set this to true if you are using log binning.'
                 'The output X axis will be the same as the input either way.')
             self.declareProperty('AllSpectra', True, direction=Direction.Input, doc='Smooth all spectra.')
             self.declareProperty('WorkspaceIndexSmooth', 0, direction=Direction.Input, doc='Workspace index for smoothing')
@@ -667,7 +665,8 @@ class PowderReduceP2D(DistributedDataProcessorAlgorithm):
                             ParentWorkspace=mtd[wsName])
             mtd[wsName].setDistribution(True)
 
-    def checkForNegatives(self, wsName, useVana, vanaWsName, useEmpty, emptyWsName, useVanaEmpty, vanaEmptyWsName, addMinimum, resetValue, addMinimumVana, resetValueVana):
+    def checkForNegatives(self, wsName, useVana, vanaWsName, useEmpty, emptyWsName, useVanaEmpty, vanaEmptyWsName, addMinimum,
+                          resetValue, addMinimumVana, resetValueVana):
         self.ResetNegatives2D(wsName, addMinimum, resetValue)
         if useVana:
             self.ResetNegatives2D(vanaWsName, addMinimumVana, resetValueVana)
@@ -714,8 +713,8 @@ class PowderReduceP2D(DistributedDataProcessorAlgorithm):
                     self.binDataLog(self._vanaEmptyWS, self._dSpaceBinning[0], self._dPerpendicularBinning[0])
 
         # Check all datafiles for negative Values and correct those
-        self.checkForNegatives(self._sampleWS, self._doVana, self._vanaWS, self._doEmpty, self._emptyWS, self._doVanaEmpty, self._vanaEmptyWS, 
-                               self._addMinimum, self._resetValue, self._addMinimumVana, self._addMinimumVana)
+        self.checkForNegatives(self._sampleWS, self._doVana, self._vanaWS, self._doEmpty, self._emptyWS, self._doVanaEmpty,
+                               self._vanaEmptyWS, self._addMinimum, self._resetValue, self._addMinimumVana, self._addMinimumVana)
 
         # Correct vanadium data with empty vanadium measurement
         if self._doVanaEmpty:
@@ -726,8 +725,8 @@ class PowderReduceP2D(DistributedDataProcessorAlgorithm):
             self.correctSampleData(self._sampleWS, self._doVana, self._vanaWS, self._doEmpty, self._emptyWS)
 
         # Check final results again for negative Values and correct those
-        self.checkForNegatives(self._sampleWS, self._doVana, self._vanaWS, self._doEmpty, self._emptyWS, self._doVanaEmpty, self._vanaEmptyWS, 
-                               self._addMinimum, self._resetValue, self._addMinimumVana, self._addMinimumVana)
+        self.checkForNegatives(self._sampleWS, self._doVana, self._vanaWS, self._doEmpty, self._emptyWS, self._doVanaEmpty,
+                               self._vanaEmptyWS, self._addMinimum, self._resetValue, self._addMinimumVana, self._addMinimumVana)
 
         # Print sample data to p2d file
         SaveP2D(Workspace=self._sampleWS,
