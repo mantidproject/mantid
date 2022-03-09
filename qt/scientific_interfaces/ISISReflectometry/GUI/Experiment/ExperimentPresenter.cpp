@@ -63,13 +63,9 @@ void ExperimentPresenter::notifyRemoveLookupRowRequested(int index) {
   notifySettingsChanged();
 }
 
-void ExperimentPresenter::notifyLookupRowChanged(int, int column) {
+void ExperimentPresenter::notifyLookupRowChanged(int /*row*/, int /*column*/) {
   updateModelFromView();
   showValidationResult();
-  if (column == 0 && !m_validationResult.isValid() &&
-      m_validationResult.assertError().lookupTableValidationErrors().fullTableError() ==
-          LookupCriteriaError::NonUniqueSearchCriteria)
-    m_view->showLookupRowsNotUnique(m_thetaTolerance);
   m_mainPresenter->notifySettingsChanged();
 }
 
@@ -270,9 +266,23 @@ void ExperimentPresenter::updateModelFromView() {
 void ExperimentPresenter::showLookupTableErrors(LookupTableValidationError const &errors) {
   m_view->showAllLookupRowsAsValid();
   for (auto const &validationError : errors.errors()) {
-    for (auto const &column : validationError.invalidColumns())
+    for (auto const &column : validationError.invalidColumns()) {
+      if (errors.fullTableError()) {
+        showFullTableError(errors.fullTableError().get(), validationError.row(), column);
+      }
       m_view->showLookupRowAsInvalid(validationError.row(), column);
+    }
   }
+}
+
+void ExperimentPresenter::showFullTableError(LookupCriteriaError const &tableError, int row, int column) {
+  if (tableError == LookupCriteriaError::NonUniqueSearchCriteria)
+    m_view->setTooltip(row, column,
+                       "Error: Duplicated search criteria. No more than one row may have the same angle and title.");
+  if (tableError == LookupCriteriaError::MultipleWildcards)
+    m_view->setTooltip(
+        row, column,
+        "Error: Multiple wildcard rows. Only a single row in the table may have a blank angle and title cell.");
 }
 
 void ExperimentPresenter::showValidationResult() {

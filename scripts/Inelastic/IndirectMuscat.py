@@ -4,7 +4,7 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-#pylint: disable=invalid-name,too-many-arguments,too-many-locals
+# pylint: disable=invalid-name,too-many-arguments,too-many-locals
 
 """
 MUSIC : Version of Minus for MIDAS
@@ -17,21 +17,21 @@ else:
     unsupported_message()
 
 from mantid.simpleapi import *
-from mantid import config, logger, mtd
+from mantid import mtd
+from mantidqt.plotting.functions import pcolormesh
 from IndirectCommon import *
 import sys
 import math
 import os.path
 import numpy as np
-mp = import_mantidplot()
 
 
-def CalcW0(nq,dq,disp,coeff):
+def CalcW0(nq, dq, disp, coeff):
     Q = []
     Q2 = []
     w0 = []
     e0 = []
-    for n in range(0,nq):
+    for n in range(0, nq):
         q0 = (n+1)*dq
         Q.append(q0)
         q02 = q0*q0
@@ -43,24 +43,24 @@ def CalcW0(nq,dq,disp,coeff):
             w = coeff[0]*(1.0-math.sin(qk)/qk)
         if disp == 'SS':
             w0 = coeff[0]*(1.0-math.exp(coeff[1]*q02))
-        w0.append(w*0.001)           #convert from mmeV to meV
+        w0.append(w*0.001)           # convert from mmeV to meV
         e0.append(0.0)
-    return Q,w0,e0
+    return Q, w0, e0
 
 
-def CalcSqw(q0,nw2,nel,dw,w0):
-    PKHT=1.0/math.pi
+def CalcSqw(q0, nw2, nel, dw, w0):
+    PKHT = 1.0/math.pi
     xSqw = []
     ySqw = []
     eSqw = []
     nq = len(q0)
     Qaxis = ''
-    for i in range(0,nq):
+    for i in range(0, nq):
         ww0 = w0[i]
-        for j in range(0,nw2):
-#        S(I,J)=S(I,J)+PKHT*W0(I)/(W0(I)**2+W**2)  !Lorentzian S(Q,w)
+        for j in range(0, nw2):
+            # S(I,J)=S(I,J)+PKHT*W0(I)/(W0(I)**2+W**2)  !Lorentzian S(Q,w)
             ww = (j-nel)*dw
-            xSqw.append(ww)                  #convert to microeV
+            xSqw.append(ww)                  # convert to microeV
             ss = PKHT*ww0/(ww0**2+ww**2)
             ySqw.append(ss)
             eSqw.append(0.0)
@@ -72,7 +72,7 @@ def CalcSqw(q0,nw2,nel,dw,w0):
                     Nspec=nq, UnitX='DeltaE', VerticalAxisUnit='MomentumTransfer', VerticalAxisValues=Qaxis)
 
 
-def CheckCoeff(disp,coeff):
+def CheckCoeff(disp, coeff):
     if (disp == 'CE') or (disp == 'SS'):
         if coeff[0] < 1e-8:
             error = disp + ' coeff 1 is zero'
@@ -111,44 +111,44 @@ def CheckQw(grid):
         error = 'Grid : w increment is zero'
         logger.notice('ERROR *** '+error)
         sys.exit(error)
-    return nq,dq,nw,dw
+    return nq, dq, nw, dw
 
 
-def CreateSqw(disp,coeff,grid,Verbose):
-    CheckCoeff(disp,coeff)
+def CreateSqw(disp, coeff, grid, Verbose):
+    CheckCoeff(disp, coeff)
     if Verbose:
         logger.notice('Dispersion is '+disp)
         logger.notice('Coefficients : '+str(coeff))
-    nq,dq,nw,dw = CheckQw(grid)
-    q0,w0,e0 = CalcW0(nq,dq,disp,coeff)
+    nq, dq, nw, dw = CheckQw(grid)
+    q0, w0, e0 = CalcW0(nq, dq, disp, coeff)
     CreateWorkspace(OutputWorkspace=disp, DataX=q0, DataY=w0, DataE=e0,
                     Nspec=1, UnitX='MomentumTransfer')
     nw2 = 2*nw+1
-    nel= nw+1
-    CalcSqw(q0,nw2,nel,dw,w0)
+    nel = nw+1
+    CalcSqw(q0, nw2, nel, dw, w0)
 
 
-def ReadSqw(sqw,Verbose):
+def ReadSqw(sqw, Verbose):
     logger.notice('Reading S(q,w) from workspace : '+sqw)
-    nq,nw = CheckHistZero(sqw)
+    nq, nw = CheckHistZero(sqw)
     axis = mtd[sqw].getAxis(1)
     Q = []
-    for i in range(0,nq):
+    for i in range(0, nq):
         Q.append(float(axis.label(i)))
-    Q_in = PadArray(Q,500)
+    Q_in = PadArray(Q, 500)
     Sqw_in = []
-    for n in range(0,nq):
+    for n in range(0, nq):
         Xw = mtd[sqw].readX(n)             # energy array
         Ys = mtd[sqw].readY(n)             # S(q,w) values
-        Ys = PadArray(Ys,1000)          # pad to Fortran energy size 1000
+        Ys = PadArray(Ys, 1000)          # pad to Fortran energy size 1000
         Sqw_in.append(Ys)
     dw = Xw[2]-Xw[1]
     if dw < 1e-8:
         error = 'Sqw : w increment is zero'
         logger.notice('ERROR *** '+error)
         sys.exit(error)
-    nel= nw+1
-    for n in range(0,nw):
+    nel = nw+1
+    for n in range(0, nw):
         if Xw[n] < dw:
             nel = n
     dq = Q[1]-Q[0]
@@ -159,16 +159,16 @@ def ReadSqw(sqw,Verbose):
     if Verbose:
         logger.notice('Q : '+str(nq)+' points from '+str(Q[0])+' to '+str(Q[nq-1])+' at '+str(dq))
         logger.notice('w : '+str(nw)+' points from '+str(Xw[0])+' to '+str(Xw[nw])+' at '+str(dw)
-                      +' ; Elastic energy at : '+str(nel))
+                      + ' ; Elastic energy at : '+str(nel))
     X0 = []
-    X0 = PadArray(X0,1000)              # zeroes
-    for n in range(nq,500):                 # pad to Fortran Q size 500
+    X0 = PadArray(X0, 1000)              # zeroes
+    for n in range(nq, 500):                 # pad to Fortran Q size 500
         Sqw_in.append(X0)
-    return nq,dq,Q_in,nw,dw,nel,Xw,Sqw_in
+    return nq, dq, Q_in, nw, dw, nel, Xw, Sqw_in
 
 
 def CheckNeut(neut):
-#    neut = [NRUN1, NRUN2, JRAND, MRAND, NMST]
+    # neut = [NRUN1, NRUN2, JRAND, MRAND, NMST]
     if neut[0] == 0:
         error = 'NRUN1 is Zero'
         logger.notice('ERROR *** ' + error)
@@ -184,44 +184,44 @@ def CheckNeut(neut):
 
 
 def CheckBeam(beam):
-#    beam = [THICK, WIDTH, HEIGHT, alfa]
-    if beam[0] <1e-5:
+    # beam = [THICK, WIDTH, HEIGHT, alfa]
+    if beam[0] < 1e-5:
         error = 'Beam thickness is Zero'
         logger.notice('ERROR *** ' + error)
         sys.exit(error)
-    if beam[1] <1e-5:
+    if beam[1] < 1e-5:
         error = 'Beam width is Zero'
         logger.notice('ERROR *** ' + error)
         sys.exit(error)
-    if beam[2] <1e-5:
+    if beam[2] < 1e-5:
         error = 'Beam height is Zero'
         logger.notice('ERROR *** ' + error)
         sys.exit(error)
 
 
 def CheckSam(sam):
-    if sam[1] <1e-8:
+    if sam[1] < 1e-8:
         error = 'Sample density is Zero'
         logger.notice('ERROR *** ' + error)
         sys.exit(error)
-    if (sam[2]+sam[3]) <1e-8:
+    if (sam[2]+sam[3]) < 1e-8:
         error = 'Sample total scattering cross-section (scat+abs) is Zero'
         logger.notice('ERROR *** ' + error)
         sys.exit(error)
 
 
-def MuscatRun(sname,geom,neut,beam,sam,sqw,kr1,Verbose,Plot,Save):
-#    neut = [NRUN1, NRUN2, JRAND, MRAND, NMST]
-#    beam = [THICK, WIDTH, HEIGHT, alfa]
-#   sam = [temp, dens, siga, sigb]
+def MuscatRun(sname, geom, neut, beam, sam, sqw, kr1, Verbose, Plot, Save):
+    # neut = [NRUN1, NRUN2, JRAND, MRAND, NMST]
+    # beam = [THICK, WIDTH, HEIGHT, alfa]
+    # sam = [temp, dens, siga, sigb]
     workdir = config['defaultsave.directory']
-    hist,npt = CheckHistZero(sname)
+    hist, npt = CheckHistZero(sname)
     CheckNeut(neut)
     CheckBeam(beam)
     CheckSam(sam)
     samWS = sname
     efixed = getEfixed(samWS)
-    angle,QQ = GetThetaQ(samWS)
+    angle, QQ = GetThetaQ(samWS)
     mang = len(angle)
 #   ijeom = [jeom, Jann]
     Jann = 1
@@ -244,9 +244,9 @@ def MuscatRun(sname,geom,neut,beam,sam,sqw,kr1,Verbose,Plot,Save):
             logger.notice('  thickness = '+str(beam[0]))
         logger.notice('Output lptfile : ' + lpt)
     llpt = len(lpt)
-    lpt.ljust(140,' ')
+    lpt.ljust(140, ' ')
     lsqw = len(sqw)
-    nq,dq,Q_in,nw,dw,nel,Xw,Sqw_in = ReadSqw(sqw,Verbose)
+    nq, dq, Q_in, nw, dw, nel, Xw, Sqw_in = ReadSqw(sqw, Verbose)
 #   ims = [NMST, NQ, NW, Nel, KR1]
     nmst = neut[4]
     ims = [neut[4], nq, nw, nel, 1]
@@ -254,23 +254,23 @@ def MuscatRun(sname,geom,neut,beam,sam,sqw,kr1,Verbose,Plot,Save):
     dqw = [dq, dw]
     sname = sname[:-4]
     Qaxis = ''
-    for m in range(0,mang):
-#     rinstr = [efixed, theta, alfa]
+    for m in range(0, mang):
+        # rinstr = [efixed, theta, alfa]
         rinstr = [efixed, angle[m], beam[3]]
-        logger.notice('Detector ' +str(m+1)+ ' at angle ' +str(angle[m])+ ' and Q = ' +str(QQ[m]))
+        logger.notice('Detector ' + str(m+1) + ' at angle ' + str(angle[m]) + ' and Q = ' + str(QQ[m]))
 #      SUBROUTINE MUSCAT_data(IDET,sfile,l_sf,rfile,l_rf,rinstr,nran,
 #     1 ijeom,rgeom,sam,ims,dqw,Q_in,S_in,
 #     2 totals,iw,energy,scat1,scatm,RR,S_out)
         idet = m+1
-        kill,totals,iw,energy,scat1,scatm,RR,Sqw=muscat.muscat_data(idet,lpt,llpt,sqw,lsqw,rinstr,nran,
-                                                                    ijeom,rgeom,sam,ims,dqw,Q_in,Sqw_in)
+        kill, totals, iw, energy, scat1, scatm, RR, Sqw = muscat.muscat_data(idet, lpt, llpt, sqw, lsqw, rinstr, nran,
+                                                                             ijeom, rgeom, sam, ims, dqw, Q_in, Sqw_in)
         if kill != 0:
             error = 'Muscat error code : '+str(kill)
             logger.notice(error)
             sys.exit(error)
         else:
             xEn = energy[:iw]
-            xEn = np.append(xEn,2*energy[iw-1]-energy[iw-2])
+            xEn = np.append(xEn, 2*energy[iw-1]-energy[iw-2])
             ySc1 = scat1[:iw]              # single scattering energy distribution
             yScM = scatm[:iw]               # total scattering energy distribution
             yRr = RR[:iw]                   # R-factor energy distribution
@@ -284,21 +284,21 @@ def MuscatRun(sname,geom,neut,beam,sam,sqw,kr1,Verbose,Plot,Save):
                 yMscM = yScM
                 yMr = yRr
             else:
-                tot1 = np.append(tot1,totals[1])
-                tot2 = np.append(tot2,totals[2])
-                tot3 = np.append(tot3,totals[3])
-                total = np.append(total,totals[4])
-                xMs = np.append(xMs,xEn)
-                yMsc1 = np.append(yMsc1,ySc1)
-                yMscM = np.append(yMscM,yScM)
-                yMr = np.append(yMr,yRr)
+                tot1 = np.append(tot1, totals[1])
+                tot2 = np.append(tot2, totals[2])
+                tot3 = np.append(tot3, totals[3])
+                total = np.append(total, totals[4])
+                xMs = np.append(xMs, xEn)
+                yMsc1 = np.append(yMsc1, ySc1)
+                yMscM = np.append(yMscM, yScM)
+                yMr = np.append(yMr, yRr)
                 Qaxis += ','
             Qaxis += str(QQ[m])
 # start output of Totals
     totx = [angle[0]]
     tote = np.zeros(mang)
-    for m in range(1,mang):
-        totx = np.append(totx,angle[m])
+    for m in range(1, mang):
+        totx = np.append(totx, angle[m])
     nt = 1
     Taxis = 'Scat1'
     xTot = totx
@@ -309,19 +309,19 @@ def MuscatRun(sname,geom,neut,beam,sam,sqw,kr1,Verbose,Plot,Save):
         nt += 1
         spec_list.append(nt-1)
         Taxis += ',Scat2'
-        xTot = np.append(xTot,totx)
-        yTot = np.append(yTot,tot2)
-        eTot = np.append(eTot,tote)
+        xTot = np.append(xTot, totx)
+        yTot = np.append(yTot, tot2)
+        eTot = np.append(eTot, tote)
         if nmst > 2:
             nt += 1
             spec_list.append(nt-1)
             Taxis += ',Scat3'
-            xTot = np.append(xTot,totx)
-            yTot = np.append(yTot,tot3)
-            eTot = np.append(eTot,tote)
-    xTot = np.append(xTot,totx)
-    yTot = np.append(yTot,total)
-    eTot = np.append(eTot,tote)
+            xTot = np.append(xTot, totx)
+            yTot = np.append(yTot, tot3)
+            eTot = np.append(eTot, tote)
+    xTot = np.append(xTot, totx)
+    yTot = np.append(yTot, total)
+    eTot = np.append(eTot, tote)
     nt += 1
     spec_list.append(nt-1)
     Taxis += ',Total'
@@ -342,37 +342,37 @@ def MuscatRun(sname,geom,neut,beam,sam,sqw,kr1,Verbose,Plot,Save):
                     Nspec=mang, UnitX='DeltaE', VerticalAxisUnit='MomentumTransfer', VerticalAxisValues=Qaxis)
     CreateWorkspace(OutputWorkspace=msname+'_R', DataX=xMs, DataY=yMr, DataE=eMs,
                     Nspec=mang, UnitX='DeltaE', VerticalAxisUnit='MomentumTransfer', VerticalAxisValues=Qaxis)
-    group = msname+'_1,'+ msname+'_M,'+ msname+'_R'
-    GroupWorkspaces(InputWorkspaces=group,OutputWorkspace=msname+'_Scat')
+    group = msname+'_1,' + msname+'_M,' + msname+'_R'
+    GroupWorkspaces(InputWorkspaces=group, OutputWorkspace=msname+'_Scat')
 # start output
     if Save:
-        tot_path = os.path.join(workdir,msname+'_Totals.nxs')
+        tot_path = os.path.join(workdir, msname+'_Totals.nxs')
         SaveNexusProcessed(InputWorkspace=msname+'_Totals', Filename=tot_path)
-        scat_path = os.path.join(workdir,msname+'_Scat.nxs')
+        scat_path = os.path.join(workdir, msname+'_Scat.nxs')
         SaveNexusProcessed(InputWorkspace=msname+'_Scat', Filename=scat_path)
         if Verbose:
             logger.notice('Output total scattering file : ' + tot_path)
             logger.notice('Output MS scattering file : ' + scat_path)
     if Plot:
-        plotMuscat(msname,spec_list,Plot)
+        plotMuscat(msname, spec_list, Plot)
 
 
-def MuscatFuncStart(sname,geom,neut,beam,sam,grid,disp,coeff,kr1,Verbose,Plot,Save):
+def MuscatFuncStart(sname, geom, neut, beam, sam, grid, disp, coeff, kr1, Verbose, Plot, Save):
     StartTime('Muscat Function')
     workdir = config['defaultsave.directory']
     sname = sname+'_red'
     spath = os.path.join(workdir, sname+'.nxs')		# path name for sample nxs file
     LoadNexusProcessed(FileName=spath, OutputWorkspace=sname)
     sqw = 'S(Q,w)'
-    CreateSqw(disp,coeff,grid,Verbose)
+    CreateSqw(disp, coeff, grid, Verbose)
     if Verbose:
         logger.notice('Sample run : '+spath)
         logger.notice('S(Q,w) from : '+disp)
-    MuscatRun(sname,geom,neut,beam,sam,sqw,kr1,Verbose,Plot,Save)
+    MuscatRun(sname, geom, neut, beam, sam, sqw, kr1, Verbose, Plot, Save)
     EndTime('Muscat Function')
 
 
-def MuscatDataStart(sname,geom,neut,beam,sam,sqw,kr1,Verbose,Plot,Save):
+def MuscatDataStart(sname, geom, neut, beam, sam, sqw, kr1, Verbose, Plot, Save):
     StartTime('Muscat Data')
     workdir = config['defaultsave.directory']
     sname = sname+'_red'
@@ -384,12 +384,12 @@ def MuscatDataStart(sname,geom,neut,beam,sam,sqw,kr1,Verbose,Plot,Save):
     if Verbose:
         logger.notice('Sample run : '+spath)
         logger.notice('S(Q,w) file : '+qpath)
-    MuscatRun(sname,geom,neut,beam,sam,sqw,kr1,Verbose,Plot,Save)
+    MuscatRun(sname, geom, neut, beam, sam, sqw, kr1, Verbose, Plot, Save)
     EndTime('Muscat Data')
 
 
-def plotMuscat(inWS,spec_list,Plot):
+def plotMuscat(inWS, spec_list, Plot):
     if Plot == 'Totals' or Plot == 'All':
-        mp.plotSpectrum(inWS+'_Totals',spec_list)
+        plotSpectrum(inWS+'_Totals', spec_list)
     if Plot == 'Scat1' or Plot == 'All':
-        mp.importMatrixWorkspace(inWS+'_1').plotGraph2D()
+        pcolormesh(inWS+'_1')

@@ -32,7 +32,7 @@ public:
   /// constructor for CatalogGetDataSets
   CatalogGetDataSets() : API::Algorithm() {}
   /// destructor for CatalogGetDataSets
-  ~CatalogGetDataSets() override {}
+  ~CatalogGetDataSets() override = default;
   /// Algorithm's name for identification overriding a virtual method
   const std::string name() const override { return "CatalogGetDataSets"; }
   /// Summary of algorithms purpose

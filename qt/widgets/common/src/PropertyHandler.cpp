@@ -47,7 +47,7 @@ PropertyHandler::PropertyHandler(const Mantid::API::IFunction_sptr &fun, Mantid:
       m_hasPlot(false) {}
 
 /// Destructor
-PropertyHandler::~PropertyHandler() {}
+PropertyHandler::~PropertyHandler() = default;
 
 /// overrides virtual init() which is called from IFunction::setHandler(...)
 void PropertyHandler::init() {

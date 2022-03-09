@@ -25,7 +25,7 @@ public:
   /// (Empty) Constructor
   ApplyMuonDetectorGrouping() : API::Algorithm() {}
   /// Virtual destructor
-  ~ApplyMuonDetectorGrouping() {}
+  virtual ~ApplyMuonDetectorGrouping() = default;
   /// Algorithm's name
   const std::string name() const override { return "ApplyMuonDetectorGrouping"; }
   /// Algorithm's version

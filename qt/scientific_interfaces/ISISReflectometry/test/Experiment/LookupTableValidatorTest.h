@@ -36,7 +36,7 @@ public:
   void testTwoWildcardRowsIsInvalid() {
     auto table = Table({emptyRow(), emptyRow()});
     runTestInvalidThetas(table, LookupCriteriaError::MultipleWildcards,
-                         expectedErrors({0, 1}, {LookupRow::Column::THETA}));
+                         expectedErrors({0, 1}, {LookupRow::Column::THETA, LookupRow::Column::TITLE}));
   }
 
   void testOneAngleRow() {
@@ -60,7 +60,7 @@ public:
   void testTwoNonUniqueAngleRowsIsInvalid() {
     auto table = Table({Cells({"0.5"}), Cells({"0.5"})});
     runTestInvalidThetas(table, LookupCriteriaError::NonUniqueSearchCriteria,
-                         expectedErrors({0, 1}, {LookupRow::Column::THETA}));
+                         expectedErrors({0, 1}, {LookupRow::Column::THETA, LookupRow::Column::TITLE}));
   }
 
   void testMatchingAngleRowsWithDifferentTitleMatchersAreUnique() {
@@ -81,7 +81,7 @@ public:
   void testDuplicateAnglesAndTitleMatchersAreInvalid() {
     auto table = Table({Cells({"0.5", "title"}), Cells({"0.5", "title"})});
     runTestInvalidThetas(table, LookupCriteriaError::NonUniqueSearchCriteria,
-                         expectedErrors({0, 1}, {LookupRow::Column::THETA}));
+                         expectedErrors({0, 1}, {LookupRow::Column::THETA, LookupRow::Column::TITLE}));
   }
 
   void testInvalidAngle() {
@@ -181,7 +181,7 @@ public:
   void testAnglesThatDifferByLessThanTolerance() {
     auto table = Table({Cells({"0.5"}), Cells({"0.5009"})});
     runTestInvalidThetas(table, LookupCriteriaError::NonUniqueSearchCriteria,
-                         expectedErrors({0, 1}, {LookupRow::Column::THETA}));
+                         expectedErrors({0, 1}, {LookupRow::Column::THETA, LookupRow::Column::TITLE}));
   }
 
   void testCorrectRowMarkedAsInvalidInMultiRowTable() {

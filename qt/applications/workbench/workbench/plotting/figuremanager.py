@@ -154,8 +154,9 @@ class FigureManagerADSObserver(AnalysisDataServiceObserver):
                     ax.wsName = newName
                 ax.make_legend()
             ax.set_title(_replace_workspace_name_in_string(oldName, newName, ax.get_title()))
-        self.canvas.set_window_title(
-            _replace_workspace_name_in_string(oldName, newName, self.canvas.get_window_title()))
+        if self.canvas.manager is not None:
+            self.canvas.manager.set_window_title(
+                _replace_workspace_name_in_string(oldName, newName, self.canvas.get_window_title()))
         self.canvas.draw()
 
 
@@ -507,7 +508,8 @@ class FigureManagerWorkbench(FigureManagerBase, QObject):
         errorbar_cap_lines = datafunctions.remove_and_return_errorbar_cap_lines(ax)
 
         ax.lines.reverse()
-        ax.lines += errorbar_cap_lines
+        for cap in errorbar_cap_lines:
+            ax.add_line(cap)
         ax.collections += fills
         ax.collections.reverse()
         ax.update_waterfall(x, y)

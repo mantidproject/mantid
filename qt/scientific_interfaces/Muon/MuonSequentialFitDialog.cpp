@@ -112,7 +112,6 @@ MuonSequentialFitDialog::MuonSequentialFitDialog(MuonFitPropertyBrowser *fitProp
 /**
  * Destructor
  */
-MuonSequentialFitDialog::~MuonSequentialFitDialog() {}
 
 /**
  * Checks if specified name is valid as a name for the label.

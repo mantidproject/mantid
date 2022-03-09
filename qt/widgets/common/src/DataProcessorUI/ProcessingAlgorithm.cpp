@@ -71,7 +71,6 @@ ProcessingAlgorithm::ProcessingAlgorithm(const QString &name, QString const &pre
 ProcessingAlgorithm::ProcessingAlgorithm() : m_prefix(), m_inputProperties(), m_outputProperties() {}
 
 // Destructor
-ProcessingAlgorithm::~ProcessingAlgorithm() {}
 
 // Returns the number of output properties
 size_t ProcessingAlgorithm::numberOfOutputProperties() const { return m_outputProperties.size(); }

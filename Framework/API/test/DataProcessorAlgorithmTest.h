@@ -25,7 +25,7 @@ class DataProcessorAlgorithmTest : public CxxTest::TestSuite {
   class SubAlgorithm : public Algorithm {
   public:
     SubAlgorithm() : Algorithm() {}
-    ~SubAlgorithm() override {}
+    ~SubAlgorithm() override = default;
     const std::string name() const override { return "SubAlgorithm"; }
     int version() const override { return 1; }
     const std::string category() const override { return "Cat;Leopard;Mink"; }
@@ -48,7 +48,7 @@ class DataProcessorAlgorithmTest : public CxxTest::TestSuite {
   class BasicAlgorithm : public Algorithm {
   public:
     BasicAlgorithm() : Algorithm() {}
-    ~BasicAlgorithm() override {}
+    ~BasicAlgorithm() override = default;
     const std::string name() const override { return "BasicAlgorithm"; }
     int version() const override { return 1; }
     const std::string category() const override { return "Cat;Leopard;Mink"; }
@@ -74,7 +74,7 @@ class DataProcessorAlgorithmTest : public CxxTest::TestSuite {
   class NestedAlgorithm : public DataProcessorAlgorithm {
   public:
     NestedAlgorithm() : DataProcessorAlgorithm() {}
-    ~NestedAlgorithm() override {}
+    ~NestedAlgorithm() override = default;
     const std::string name() const override { return "NestedAlgorithm"; }
     int version() const override { return 1; }
     const std::string category() const override { return "Cat;Leopard;Mink"; }
@@ -99,7 +99,7 @@ class DataProcessorAlgorithmTest : public CxxTest::TestSuite {
   class TopLevelAlgorithm : public DataProcessorAlgorithm {
   public:
     TopLevelAlgorithm() : DataProcessorAlgorithm() {}
-    ~TopLevelAlgorithm() override {}
+    ~TopLevelAlgorithm() override = default;
     const std::string name() const override { return "TopLevelAlgorithm"; }
     int version() const override { return 1; }
     const std::string category() const override { return "Cat;Leopard;Mink"; }

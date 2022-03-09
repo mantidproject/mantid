@@ -12,7 +12,7 @@ namespace MantidQt::CustomInterfaces {
 
 IndirectSimulationTab::IndirectSimulationTab(QWidget *parent) : IndirectTab(parent) {}
 
-IndirectSimulationTab::~IndirectSimulationTab() {}
+IndirectSimulationTab::~IndirectSimulationTab() = default;
 
 void IndirectSimulationTab::setOutputPlotOptionsPresenter(std::unique_ptr<IndirectPlotOptionsPresenter> presenter) {
   m_plotOptionsPresenter = std::move(presenter);

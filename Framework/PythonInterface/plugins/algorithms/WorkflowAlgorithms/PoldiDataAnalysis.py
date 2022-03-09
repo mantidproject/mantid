@@ -7,6 +7,7 @@
 # pylint: disable=no-init,invalid-name,attribute-defined-outside-init,too-many-instance-attributes
 from mantid.simpleapi import *
 from mantid.api import *
+# the mantid.kernel import is required for Direction.Input and Direction.Output calls
 from mantid.kernel import *
 
 
@@ -55,7 +56,7 @@ class PoldiDataAnalysis(PythonAlgorithm):
                                   'from background noise.'))
 
         self.declareProperty("MaximumRelativeFwhm", 0.02, direction=Direction.Input,
-                             doc=('Peaks with a relative FWHM larger than this are removed during the 1D fit.'))
+                             doc='Peaks with a relative FWHM larger than this are removed during the 1D fit.')
 
         self.declareProperty("ScatteringContributions", "1", direction=Direction.Input,
                              doc=('If there is more than one compound, you may supply estimates of their scattering '
@@ -295,13 +296,10 @@ class PoldiDataAnalysis(PythonAlgorithm):
         plotResults = self.getProperty('PlotResult').value
 
         if plotResults:
-            from IndirectImport import import_mantidplot
 
-            plot = import_mantidplot()
-
-            plotWindow = plot.plotSpectrum(total, 0, type=1)
-            plotWindow = plot.plotSpectrum(spectrum1D, 0, type=0, window=plotWindow)
-            plotWindow = plot.plotSpectrum(residuals, 0, type=0, window=plotWindow)
+            plotWindow = plotSpectrum(total, 0, type=1)
+            plotWindow = plotSpectrum(spectrum1D, 0, type=0, window=plotWindow)
+            plotWindow = plotSpectrum(residuals, 0, type=0, window=plotWindow)
             plotWindow.activeLayer().setTitle('Fit result for ' + self.baseName)
             plotWindow.activeLayer().removeLegend()
 

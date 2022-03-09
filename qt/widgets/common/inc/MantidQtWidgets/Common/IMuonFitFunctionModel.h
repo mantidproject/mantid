@@ -19,7 +19,7 @@ namespace MantidWidgets {
 */
 class EXPORT_OPT_MANTIDQT_COMMON IMuonFitFunctionModel {
 public:
-  virtual ~IMuonFitFunctionModel() {}
+  virtual ~IMuonFitFunctionModel() = default;
   virtual void setFunction(const Mantid::API::IFunction_sptr func) = 0;
   virtual void runFit() = 0;
   virtual void runSequentialFit() = 0;

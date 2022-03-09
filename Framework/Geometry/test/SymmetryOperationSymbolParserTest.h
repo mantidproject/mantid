@@ -53,6 +53,5 @@ private:
 
   public:
     TestableSymmetryOperationSymbolParser() : SymmetryOperationSymbolParser() {}
-    ~TestableSymmetryOperationSymbolParser() {}
   };
 };

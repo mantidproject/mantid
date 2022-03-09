@@ -19,7 +19,7 @@ using namespace MantidQt::CustomInterfaces;
 IndirectSimulation::IndirectSimulation(QWidget *parent)
     : IndirectInterface(parent), m_changeObserver(*this, &IndirectSimulation::handleDirectoryChange) {}
 
-IndirectSimulation::~IndirectSimulation() {}
+IndirectSimulation::~IndirectSimulation() = default;
 
 void IndirectSimulation::initLayout() {
   m_uiForm.setupUi(this);

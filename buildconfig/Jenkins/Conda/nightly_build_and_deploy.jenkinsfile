@@ -127,5 +127,16 @@ pipeline {
                 sh '$WORKSPACE/buildconfig/Jenkins/Conda/publish-to-anaconda $WORKSPACE $ANACONDA_TOKEN $ANACONDA_CHANNEL $ANACONDA_CHANNEL_LABEL $WORKSPACE/conda-bld/linux-64/mantid-*.tar.bz2 $WORKSPACE/conda-bld/linux-64/mantidqt-*.tar.bz2 $WORKSPACE/conda-bld/linux-64/mantidworkbench-*.tar.bz2 $WORKSPACE/conda-bld/osx-64/mantid-*.tar.bz2 $WORKSPACE/conda-bld/osx-64/mantidqt-*.tar.bz2 $WORKSPACE/conda-bld/osx-64/mantidworkbench-*.tar.bz2 $WORKSPACE/conda-bld/win-64/mantid-*.tar.bz2 $WORKSPACE/conda-bld/win-64/mantidqt-*.tar.bz2 $WORKSPACE/conda-bld/win-64/mantidworkbench-*.tar.bz2'
             }
         }
+        stage ('Delete old packages'){
+            environment {
+                ANACONDA_TOKEN = credentials("${ANACONDA_TOKEN_CREDENTIAL_ID}")
+            }
+            agent { label 'conda-build-linux' } // Use linux for simplicity with shell scripts
+            steps {
+                sh '$WORKSPACE/buildconfig/Jenkins/Conda/delete-old-nightlies.sh $WORKSPACE $ANACONDA_TOKEN --channel mantid --package mantid --label nightly'
+                sh '$WORKSPACE/buildconfig/Jenkins/Conda/delete-old-nightlies.sh $WORKSPACE $ANACONDA_TOKEN --channel mantid --package mantidqt --label nightly'
+                sh '$WORKSPACE/buildconfig/Jenkins/Conda/delete-old-nightlies.sh $WORKSPACE $ANACONDA_TOKEN --channel mantid --package mantidworkbench --label nightly'
+            }
+        }
     }
 }

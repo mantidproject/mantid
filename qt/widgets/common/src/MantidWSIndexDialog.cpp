@@ -999,7 +999,7 @@ void Interval::init(int start, int end) {
 //----------------------------------
 // IntervalList public methods
 //----------------------------------
-IntervalList::IntervalList(void) {}
+IntervalList::IntervalList(void) = default;
 
 IntervalList::IntervalList(const QString &intervals) { addIntervals(intervals); }
 

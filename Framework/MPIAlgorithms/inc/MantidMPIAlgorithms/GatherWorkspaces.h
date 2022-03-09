@@ -46,7 +46,7 @@ public:
   /// (Empty) Constructor
   GatherWorkspaces() : API::Algorithm() {}
   /// Virtual destructor
-  virtual ~GatherWorkspaces() {}
+  virtual ~GatherWorkspaces() = default;
   /// Algorithm's name
   virtual const std::string name() const { return "GatherWorkspaces"; }
   /// Algorithm's version

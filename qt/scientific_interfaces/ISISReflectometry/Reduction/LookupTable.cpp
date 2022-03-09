@@ -7,6 +7,7 @@
 
 #include "LookupTable.h"
 #include "IGroup.h"
+#include "MantidKernel/Logger.h"
 #include "Row.h"
 #include <boost/optional.hpp>
 #include <boost/regex.hpp>
@@ -19,6 +20,8 @@ constexpr double EPSILON = std::numeric_limits<double>::epsilon();
 bool equalWithinTolerance(double val1, double val2, double tolerance) {
   return std::abs(val1 - val2) <= (tolerance + EPSILON);
 }
+
+Mantid::Kernel::Logger g_log("Reflectometry Lookup Table");
 } // namespace
 
 namespace MantidQt::CustomInterfaces::ISISReflectometry {
@@ -44,22 +47,38 @@ boost::optional<LookupRow> LookupTable::findLookupRow(Row const &row, double tol
   }
   // If we didn't find a lookup row where theta matches, then we allow the user to specify a "wildcard" row
   // which will be used for everything where a specific match is not found
-  return findWildcardLookupRow();
+  auto result = findWildcardLookupRow();
+  if (result) {
+    g_log.warning(
+        "No matching experiment settings found for " + boost::algorithm::join(row.runNumbers(), ", ") +
+        ". Using wildcard row settings instead. You may wish to check that all lookup criteria on the Experiment "
+        "Settings table are correct.");
+    return result;
+  }
+  g_log.warning(
+      "No matching experiment settings found for " + boost::algorithm::join(row.runNumbers(), ", ") +
+      ". Using algorithm default settings instead. You may wish to check that all lookup criteria on the Experiment "
+      "Settings table are correct.");
+  return result;
 }
 
 boost::optional<LookupRow> LookupTable::searchByTheta(std::vector<LookupRow> lookupRows,
                                                       boost::optional<double> const &thetaAngle,
                                                       double tolerance) const {
-  // TODO We may get multiple matches if the title matches multiple regexes. If one regex is empty then we
-  // can discard it. If we get multiple non-empty regex matches it is an error.
-  auto match =
-      std::find_if(lookupRows.cbegin(), lookupRows.cend(), [thetaAngle, tolerance](LookupRow const &candiate) -> bool {
-        return !candiate.isWildcard() && equalWithinTolerance(*thetaAngle, candiate.thetaOrWildcard().get(), tolerance);
-      });
-  if (match == lookupRows.cend())
+  std::vector<LookupRow> matchingRows;
+  auto predicate = [thetaAngle, tolerance](LookupRow const &candiate) -> bool {
+    return !candiate.isWildcard() && equalWithinTolerance(*thetaAngle, candiate.thetaOrWildcard().get(), tolerance);
+  };
+
+  std::copy_if(lookupRows.cbegin(), lookupRows.cend(), std::back_inserter(matchingRows), predicate);
+
+  if (matchingRows.empty())
     return boost::none;
-  else
-    return *match;
+  else if (matchingRows.size() == 1) {
+    return matchingRows[0];
+  } else {
+    throw MultipleRowsFoundException("Multiple matching Experiment Setting rows");
+  }
 }
 
 std::vector<LookupRow> LookupTable::findMatchingRegexes(std::string const &title) const {
@@ -96,6 +115,15 @@ boost::optional<LookupRow> LookupTable::findWildcardLookupRow() const {
     return boost::none;
   else
     return *match;
+}
+
+size_t LookupTable::getIndex(const LookupRow &lookupRow) const {
+  if (auto found = std::find(m_lookupRows.cbegin(), m_lookupRows.cend(), lookupRow); found != m_lookupRows.cend()) {
+    auto index = std::distance(m_lookupRows.cbegin(), found);
+    assert(index >= 0);
+    return static_cast<size_t>(index);
+  }
+  throw std::out_of_range("Lookup row not found.");
 }
 
 std::vector<LookupRow::ValueArray> LookupTable::toValueArray() const {

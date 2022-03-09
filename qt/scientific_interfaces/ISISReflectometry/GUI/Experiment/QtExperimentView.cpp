@@ -77,14 +77,9 @@ void QtExperimentView::onRemoveLookupRowRequested() {
 }
 
 void QtExperimentView::showAllLookupRowsAsValid() {
-  for (auto row = 0; row < m_ui.optionsTable->rowCount(); ++row)
+  for (auto row = 0; row < m_ui.optionsTable->rowCount(); ++row) {
     showLookupRowAsValid(row);
-}
-
-void QtExperimentView::showLookupRowsNotUnique(double tolerance) {
-  QMessageBox::critical(this, "Invalid lookup criteria combination!",
-                        "Cannot have multiple defaults with theta values less than " + QString::number(tolerance) +
-                            " apart.");
+  }
 }
 
 void QtExperimentView::showStitchParametersValid() { showAsValid(stitchOptionsLineEdit()); }
@@ -149,6 +144,12 @@ void QtExperimentView::setTooltipFromAlgorithm(int column, std::unordered_map<in
   // on the table cells instead. They are created dynamically, so for now
   // just cache the tooltip.
   m_columnToolTips[column] = toolTip;
+}
+
+void QtExperimentView::setTooltip(int row, int column, std::string const &text) {
+  m_ui.optionsTable->blockSignals(true);
+  m_ui.optionsTable->item(row, column)->setToolTip(QString::fromStdString(text));
+  m_ui.optionsTable->blockSignals(false);
 }
 
 void QtExperimentView::initializeTableColumns(QTableWidget &table,
@@ -582,19 +583,6 @@ QString QtExperimentView::messageFor(std::vector<MissingInstrumentParameterValue
          " not set in the instrument parameter file but should be.\n";
 }
 
-void QtExperimentView::showOptionLoadErrors(std::vector<InstrumentParameterTypeMissmatch> const &typeErrors,
-                                            std::vector<MissingInstrumentParameterValue> const &missingValues) {
-  auto message = QString("Unable to retrieve default values for the following parameters:\n");
-
-  if (!missingValues.empty())
-    message += messageFor(missingValues);
-
-  for (auto &typeError : typeErrors)
-    message += messageFor(typeError);
-
-  QMessageBox::warning(this, "Failed to load one or more defaults from parameter file", message);
-}
-
 QLineEdit &QtExperimentView::stitchOptionsLineEdit() const { return *static_cast<QLineEdit *>(m_stitchEdit); }
 
 /** Creates hints for 'Stitch1DMany'
@@ -693,8 +681,10 @@ void QtExperimentView::showLookupRowAsInvalid(int row, int column) {
 
 void QtExperimentView::showLookupRowAsValid(int row) {
   m_ui.optionsTable->blockSignals(true);
-  for (auto column = 0; column < m_ui.optionsTable->columnCount(); ++column)
+  for (auto column = 0; column < m_ui.optionsTable->columnCount(); ++column) {
     m_ui.optionsTable->item(row, column)->setBackground(QBrush(Qt::transparent));
+    m_ui.optionsTable->item(row, column)->setToolTip(m_columnToolTips[column]);
+  }
   m_ui.optionsTable->blockSignals(false);
 }
 
@@ -741,8 +731,5 @@ std::string QtExperimentView::getStitchOptions() const { return getText(stitchOp
 void QtExperimentView::setStitchOptions(std::string const &stitchOptions) {
   setText(stitchOptionsLineEdit(), stitchOptions);
 }
-
-void showOptionLoadErrors(std::vector<InstrumentParameterTypeMissmatch> const &typeErrors,
-                          std::vector<MissingInstrumentParameterValue> const &missingValues);
 
 } // namespace MantidQt::CustomInterfaces::ISISReflectometry

@@ -12,7 +12,7 @@ namespace MantidQt::CustomInterfaces::ISISReflectometry {
 
 using namespace MantidQt::MantidWidgets::QSettingsHelper;
 
-OptionsDialogModel::OptionsDialogModel() {}
+OptionsDialogModel::OptionsDialogModel() = default;
 
 /** Applies default options to specified settings
  *

@@ -24,17 +24,7 @@ UnwrappedDetector::UnwrappedDetector(const GLColor &color, size_t detIndex)
 UnwrappedDetector::UnwrappedDetector(const UnwrappedDetector &other) { this->operator=(other); }
 
 /** Assignment operator */
-UnwrappedDetector &UnwrappedDetector::operator=(const UnwrappedDetector &other) {
-  color = other.color;
-  u = other.u;
-  v = other.v;
-  width = other.width;
-  height = other.height;
-  uscale = other.uscale;
-  vscale = other.vscale;
-  detIndex = other.detIndex;
-  return *this;
-}
+UnwrappedDetector &UnwrappedDetector::operator=(const UnwrappedDetector &other) = default;
 
 bool UnwrappedDetector::empty() const { return detIndex == std::numeric_limits<size_t>::max(); }
 
