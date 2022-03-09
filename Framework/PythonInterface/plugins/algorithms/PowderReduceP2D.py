@@ -256,7 +256,7 @@ class PowderReduceP2D(DistributedDataProcessorAlgorithm):
             self.declareProperty('CylinderSampleHeight',
                                  4,
                                  direction=Direction.Input,
-                                 doc='The height of the cylindrical sample in centimetres.')
+                                 doc='The height of the cylindrical sample in centimetres. ')
             self.declareProperty('CylinderSampleRadius',
                                  0.4,
                                  direction=Direction.Input,
