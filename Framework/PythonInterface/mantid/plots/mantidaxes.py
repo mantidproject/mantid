@@ -7,6 +7,9 @@
 #  This file is part of the mantid package
 from collections.abc import Iterable
 import copy
+from distutils.version import LooseVersion
+
+import matplotlib
 import numpy as np
 import re
 
@@ -1118,7 +1121,8 @@ class MantidAxes(Axes):
         self.waterfall_x_offset = x_offset
         self.waterfall_y_offset = y_offset
 
-        self.lines += errorbar_cap_lines
+        for cap in errorbar_cap_lines:
+            self.lines.add_line(cap)
 
         datafunctions.set_waterfall_toolbar_options_enabled(self)
         self.get_figure().canvas.draw()
@@ -1290,6 +1294,8 @@ class MantidAxes3D(Axes3D):
     name = 'mantid3d'
 
     def __init__(self, *args, **kwargs):
+        if LooseVersion('3.4.0') <= LooseVersion(matplotlib.__version__):
+            kwargs["auto_add_to_figure"] = False
         super().__init__(*args, **kwargs)
 
     def set_title(self, *args, **kwargs):
