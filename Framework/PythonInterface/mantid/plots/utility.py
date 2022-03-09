@@ -71,30 +71,21 @@ def autoscale_on_update(ax, state, axis='both'):
     :param bool state: True turns auto-scaling on, False off
     :param str axis: {'both', 'x', 'y'} The axis to set the scaling on
     """
-    original_state = ax.get_autoscale_on()
+    if axis == 'both':
+        auto_scale_suffix = ''
+    else:
+        auto_scale_suffix = axis
+    original_state = getattr(ax, f'get_autoscale_on{auto_scale_suffix}')()
     try:
         # If we are making the first plot on an axes object
         # i.e. ax.lines is empty, axes has default ylim values.
         # Therefore we need to autoscale regardless of state parameter.
         if ax.lines:
-            if axis == 'both':
-                original_state = ax.get_autoscale_on()
-                ax.set_autoscale_on(state)
-            elif axis == 'x':
-                original_state = ax.get_autoscalex_on()
-                ax.set_autoscalex_on(state)
-            elif axis == 'y':
-                original_state = ax.get_autoscaley_on()
-                ax.set_autoscaley_on(state)
+            ax.autoscale(enable=state, axis=axis)
         yield
     finally:
         if ax.lines:
-            if axis == 'both':
-                ax.set_autoscale_on(original_state)
-            elif axis == 'x':
-                ax.set_autoscalex_on(original_state)
-            elif axis == 'y':
-                ax.set_autoscaley_on(original_state)
+            ax.autoscale(enable=original_state, axis=axis)
 
 
 def find_errorbar_container(line, containers):
