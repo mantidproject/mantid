@@ -64,6 +64,9 @@ Monday then the names of the days will have to be changed.
 | | **Tuesday**,                  | Beta Testing Ends         | Blocker bug fixes, Testing, Release Notes,    | | :ref:`Release Editor <release-editor-checklist>`                       |
 | | 4 days                        |                           | Maintenance Tasks & Next release development  | | :ref:`Release Manager <release-manager-checklist>`                     |
 +---------------------------------+---------------------------+-----------------------------------------------+--------------------------------------------------------------------------+
+| | **Thursday**,                 |                           |                                               | | :ref:`Quality Assurance Manager <quality-assurance-manager-checklist>` |
+| | 2 days                        |                           |                                               | |                                                                        |
++---------------------------------+---------------------------+-----------------------------------------------+--------------------------------------------------------------------------+
 | | **Friday**,                   | | Release Eve             | Blocker bug fixes, Testing & Packaging        | | :ref:`Quality Assurance Manager <quality-assurance-manager-checklist>` |
 | | 1 day                         | | Smoke Testing           |                                               | | :ref:`Release Manager <release-manager-checklist>`                     |
 |                                 |                           |                                               | | :ref:`Technical Release Manager <technical-release-manager-checklist>` |
@@ -142,7 +145,7 @@ Friday, 1 day
 Smoke Testing
 ^^^^^^^^^^^^^
 
-*  Make sure to follow the preparing steps listed above for yesterday.
+*  Make sure to follow the preparation steps listed above for yesterday.
 *  It is likely that many changes have been made over the beta test period, therefore
    we must do some more Manual testing to ensure everything still works. This stage is
    called Smoke testing. Generate the Smoke testing issues by following the instructions
