@@ -654,7 +654,6 @@ class PowderReduceP2D(DistributedDataProcessorAlgorithm):
             if intMin < 0:
                 Scale(InputWorkspace=mtd[wsName], OutputWorkspace=mtd[wsName], Factor=-intMin, Operation="Add")
         else:
-            print('Creating new workspace!')
             yDataNew = np.where(yData < 0, resetValue, yData)
             CreateWorkspace(OutputWorkspace=mtd[wsName],
                             DataX=xData,
