@@ -328,6 +328,7 @@ class SliceViewerDataView(QWidget):
         """Removes everything from the figure"""
         if self.line_plots_active:
             self._line_plots.plotter.close()
+            self.line_plots_active = False
         self.image = None
         self.canvas.disable_zoom_on_scroll()
         self.fig.clf()
@@ -335,6 +336,7 @@ class SliceViewerDataView(QWidget):
 
     def draw_plot(self):
         self.ax.set_title('')
+        self.canvas.draw()
         if self.image:
             self.colorbar.set_mappable(self.image)
             self.colorbar.update_clim()
@@ -342,8 +344,6 @@ class SliceViewerDataView(QWidget):
         if self.line_plots_active:
             self._line_plots.plotter.delete_line_plot_lines()
             self._line_plots.plotter.update_line_plot_labels()
-
-        self.canvas.draw()
 
     def export_region(self, limits, cut):
         """

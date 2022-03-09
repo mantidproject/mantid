@@ -15,7 +15,7 @@ from mantidqt.widgets.sliceviewer.views.cursor import (MoveMouseCursorUp, MoveMo
 from qtpy.QtCore import QPoint
 
 
-@patch("mantidqt.widgets.sliceviewer.cursor.QCursor")
+@patch("mantidqt.widgets.sliceviewer.views.cursor.QCursor")
 class MoveMouseCursorTest(unittest.TestCase):
     def setUp(self):
         mock_canvas = MagicMock(_dpi_ratio=1.0)

@@ -38,7 +38,7 @@ class LinePlotsTest(unittest.TestCase):
         for mock_axis in [self.image_axes.get_xaxis(), self.image_axes.get_yaxis()]:
             mock_axis.set_visible.assert_called_with(True)
 
-    @patch('mantidqt.widgets.sliceviewer.lineplots.GridSpec')
+    @patch('mantidqt.widgets.sliceviewer.presenters.lineplots.GridSpec')
     def test_construction_adds_line_plots_to_axes(self, mock_gridspec):
         gs = mock_gridspec()
         mock_gridspec.reset_mock()

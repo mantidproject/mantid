@@ -24,8 +24,6 @@ from mantidqt.widgets.sliceviewer.peaksviewer.representation.painter import MplP
 # Constants
 from mantidqt.widgets.observers.observing_view import ObservingView
 
-            self.line_plots_active = False
-        self.canvas.draw()
 
 class SliceViewerView(QWidget, ObservingView):
     """Combines the data view for the slice viewer with the optional peaks viewer."""

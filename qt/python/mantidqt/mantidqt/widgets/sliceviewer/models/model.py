@@ -133,6 +133,7 @@ class SliceViewerModel(SliceViewerBaseModel):
 
     def set_ws_name(self, new_name):
         self._ws_name = new_name
+
     def get_ws_name(self) -> str:
         """Return the name of the workspace being viewed"""
         return self._ws_name
@@ -300,7 +301,7 @@ class SliceViewerModel(SliceViewerBaseModel):
         # Construct parameters to integrate everything first and override per cut
         params = {f'P{n + 1}Bin': [*dim_limits[n]] for n in range(workspace.getNumDims())}
 
-        xindex, yindex = _display_indices(slicepoint)
+        xindex, yindex = WorkspaceInfo.display_indices(slicepoint)
         xdim_min, xdim_max = dim_limits[xindex]
         ydim_min, ydim_max = dim_limits[yindex]
         params['OutputWorkspace'] = self._roi_name
