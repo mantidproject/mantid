@@ -6,6 +6,10 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
+#include <cxxtest/TestSuite.h>
+#include <math.h>
+#include <memory>
+
 #include "MantidAPI/PeakFunctionIntegrator.h"
 #include "MantidCurveFitting/CostFunctions/CostFuncLeastSquares.h"
 #include "MantidCurveFitting/FuncMinimizers/LevenbergMarquardtMDMinimizer.h"
@@ -13,11 +17,9 @@
 #include "MantidCurveFitting/Functions/Gaussian.h"
 #include "MantidCurveFitting/Functions/Lorentzian.h"
 #include "MantidCurveFitting/Jacobian.h"
-#include <cxxtest/TestSuite.h>
-#include <math.h>
 
 using namespace Mantid;
-using namespace Mantid::Kernel;
+// using namespace Mantid::Kernel;
 using namespace Mantid::API;
 using namespace Mantid::CurveFitting;
 using namespace Mantid::CurveFitting::Functions;
