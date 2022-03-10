@@ -27,10 +27,11 @@
   </parameter>
 
   <parameter name="MultiDetectorStart">
-    <!--
-  This channel number is marks the start of all other linear and/or area detectors.
-   -->
-    <value val="6"/>
+    <value val="69"/>
+  </parameter>
+
+  <parameter name="MultiDetectorStop">
+    <value val="89"/>
   </parameter>
 
   <parameter name="I0MonitorIndex">
