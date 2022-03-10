@@ -585,9 +585,9 @@ class PowderReduceP2D(DistributedDataProcessorAlgorithm):
                       StartWorkspaceIndex=self._startWorkspaceIndex,
                       EndWorkspaceIndex=self._endWorkspaceIndex,
                       ComponentList=self._componentList)
-        ApplyDiffCal(InstrumentWorkspace=wsName, CalibrationFile=self._calibrationFile)
-        ConvertUnits(InputWorkspace=wsName, OutputWorkspace=wsName, Target='dSpacing')
-        ApplyDiffCal (InstrumentWorkspace=wsName, ClearCalibration=True)
+        # ApplyDiffCal(InstrumentWorkspace=wsName, CalibrationFile=self._calibrationFile)
+        # ConvertUnits(InputWorkspace=wsName, OutputWorkspace=wsName, Target='dSpacing')
+        # ApplyDiffCal (InstrumentWorkspace=wsName, ClearCalibration=True)
         ConvertUnits(InputWorkspace=wsName, OutputWorkspace=wsName, Target='Wavelength')
 
     def processVana(self, wsName):
@@ -661,7 +661,7 @@ class PowderReduceP2D(DistributedDataProcessorAlgorithm):
                             NSpec=mtd[wsName].getNumberHistograms(),
                             UnitX='dSpacing',
                             ParentWorkspace=mtd[wsName])
-            # mtd[wsName].setDistribution(True)
+            mtd[wsName].setDistribution(True)
 
     def checkForNegatives(self, wsName, useVana, vanaWsName, useEmpty, emptyWsName, useVanaEmpty, vanaEmptyWsName, addMinimum,
                           resetValue, addMinimumVana, resetValueVana):
