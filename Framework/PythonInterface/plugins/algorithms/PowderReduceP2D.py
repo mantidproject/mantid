@@ -661,7 +661,7 @@ class PowderReduceP2D(DistributedDataProcessorAlgorithm):
                             NSpec=mtd[wsName].getNumberHistograms(),
                             UnitX='dSpacing',
                             ParentWorkspace=mtd[wsName])
-            mtd[wsName].setDistribution(True)
+            # mtd[wsName].setDistribution(True)
 
     def checkForNegatives(self, wsName, useVana, vanaWsName, useEmpty, emptyWsName, useVanaEmpty, vanaEmptyWsName, addMinimum,
                           resetValue, addMinimumVana, resetValueVana):
