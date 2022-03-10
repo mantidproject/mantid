@@ -696,31 +696,33 @@ std::string ReflectometryWorkflowBase2::findProcessingInstructions(const Instrum
     const std::vector<double> pointStart = instrument->getNumberParameter("PointDetectorStart");
     const std::vector<double> pointStop = instrument->getNumberParameter("PointDetectorStop");
 
-    if (pointStart.empty() || pointStop.empty())
+    if (pointStart.empty() || pointStop.empty()) {
       throw std::runtime_error("Could not find 'PointDetectorStart' and/or "
                                "'PointDetectorStop' in parameter file. Please "
                                "provide processing instructions manually or "
                                "set analysis mode to 'MultiDetectorAnalysis'.");
-
+    }
     const auto detStart = static_cast<int>(pointStart[0]);
     const auto detStop = static_cast<int>(pointStop[0]);
 
     auto instructions = std::to_string(detStart);
     if (detStart != detStop)
-      instructions += ":" + std::to_string(detStop);
+      instructions += "-" + std::to_string(detStop);
     return instructions;
   }
 
   else {
     const std::vector<double> multiStart = instrument->getNumberParameter("MultiDetectorStart");
-    if (multiStart.empty())
+    const std::vector<double> multiStop = instrument->getNumberParameter("MultiDetectorStop");
+    if (multiStart.empty()) {
       throw std::runtime_error("Could not find 'MultiDetectorStart in "
                                "parameter file. Please provide processing "
                                "instructions manually or set analysis mode to "
                                "'PointDetectorAnalysis'.");
-
-    auto instructions =
-        std::to_string(static_cast<int>(multiStart[0])) + ":" + std::to_string(inputWS->getNumberHistograms() - 1);
+    }
+    // Use last workspace index if stop is empty
+    auto const stop = multiStop.empty() ? inputWS->getNumberHistograms() - 1 : static_cast<int>(multiStop[0]);
+    auto instructions = std::to_string(static_cast<int>(multiStart[0])) + "-" + std::to_string(stop);
     return instructions;
   }
 }

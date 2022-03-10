@@ -55,7 +55,19 @@ public:
 
     auto instructions = alg.findProcessingInstructions(workspace->getInstrument(), workspace);
 
-    TS_ASSERT_EQUALS(instructions, "2:3");
+    TS_ASSERT_EQUALS(instructions, "2-3");
+  }
+
+  void xtest_find_processing_instructions_from_IPF_for_point_detector_invalid() {
+    // Due to a quirk of Mantid where it will load params from a previous parameters file for the same instrument,
+    // and keep those params even if we re-load a different params file without them, we need to to use the REFLEMPTY
+    // instrument in order to test that the params are missing
+    auto workspace = createREFL_WS(5, 100.0, 500.0, {1.0, 2.0, 3.0, 4.0, 5.0}, "", "EMPTY");
+    ReflectometryWorkflowBase2Stub alg;
+    alg.initAnalysisProperties();
+    alg.setProperty("AnalysisMode", "PointDetectorAnalysis");
+
+    TS_ASSERT_THROWS(alg.findProcessingInstructions(workspace->getInstrument(), workspace), std::runtime_error const &);
   }
 
   void test_find_processing_instructions_from_IPF_for_multi_detector() {
@@ -66,7 +78,33 @@ public:
 
     auto instructions = alg.findProcessingInstructions(workspace->getInstrument(), workspace);
 
-    auto const expected = std::string("3:") + std::to_string(workspace->getNumberHistograms() - 1);
+    TS_ASSERT_EQUALS(instructions, "2-3");
+  }
+
+  void test_find_processing_instructions_from_IPF_for_multi_detector_no_stop() {
+    // Due to a quirk of Mantid where it will load params from a previous parameters file for the same instrument,
+    // and keep those params even if we re-load a different params file without them, we need to name the test
+    // instrument unique here
+    auto workspace = createREFL_WS(5, 100.0, 500.0, {1.0, 2.0, 3.0, 4.0, 5.0}, "MultiDetector_NoStop", "MULTI");
+    ReflectometryWorkflowBase2Stub alg;
+    alg.initAnalysisProperties();
+    alg.setProperty("AnalysisMode", "MultiDetectorAnalysis");
+
+    auto instructions = alg.findProcessingInstructions(workspace->getInstrument(), workspace);
+
+    auto const expected = std::string("2-") + std::to_string(workspace->getNumberHistograms() - 1);
     TS_ASSERT_EQUALS(instructions, expected);
+  }
+
+  void test_find_processing_instructions_from_IPF_for_multi_detector_invalid() {
+    // Due to a quirk of Mantid where it will load params from a previous parameters file for the same instrument,
+    // and keep those params even if we re-load a different params file without them, we need to to use the REFLEMPTY
+    // instrument in order to test that the params are missing
+    auto workspace = createREFL_WS(5, 100.0, 500.0, {1.0, 2.0, 3.0, 4.0, 5.0}, "", "EMPTY");
+    ReflectometryWorkflowBase2Stub alg;
+    alg.initAnalysisProperties();
+    alg.setProperty("AnalysisMode", "MultiDetectorAnalysis");
+
+    TS_ASSERT_THROWS(alg.findProcessingInstructions(workspace->getInstrument(), workspace), std::runtime_error const &);
   }
 };
