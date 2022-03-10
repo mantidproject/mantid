@@ -6,7 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 from mantid.kernel import Direction, IntBoundedValidator, FloatBoundedValidator, EnabledWhenProperty, PropertyCriterion
 from mantid.api import mtd, AlgorithmFactory, DistributedDataProcessorAlgorithm, FileProperty, FileAction
-from mantid.simpleapi import Load, FindDetectorsPar, FilterBadPulses, RemovePromptPulse, LoadDiffCal, MaskDetectors,\
+from mantid.simpleapi import Load, FindDetectorsPar, FilterBadPulses, RemovePromptPulse, LoadDiffCal, MaskDetectors, ApplyDiffCal,\
     ConvertUnits, CylinderAbsorption, Divide, Bin2DPowderDiffraction, StripVanadiumPeaks, FFTSmooth, Minus, SaveP2D, Scale, CreateWorkspace
 
 import numpy as np
@@ -482,9 +482,9 @@ class PowderReduceP2D(DistributedDataProcessorAlgorithm):
             self._endWorkspaceIndex = self.getProperty('EndWorkspaceIndex').value
             self._componentList = self.getProperty('ComponentList').value
 
-        #def getApplyDiffCalParameters():
-        #    # ApplyDiffCal
-        #    self._calibrationFile = self._filename
+        def getApplyDiffCalParameters():
+            # ApplyDiffCal
+            self._calibrationFile = self._filename
 
         def getCylinderAbsorptionParameters():
             # CylinderAbsorption
@@ -545,7 +545,7 @@ class PowderReduceP2D(DistributedDataProcessorAlgorithm):
         getRemovePromptPulseParameters()
         getLoadDiffCalParameters()
         getMaskDetectorsParameters()
-        #getApplyDiffCalParameters()
+        getApplyDiffCalParameters()
         getCylinderAbsorptionParameters()
         getBind2DPowderDiffractionParameters()
         getStripVanadiumPeaksParameters()
@@ -585,9 +585,9 @@ class PowderReduceP2D(DistributedDataProcessorAlgorithm):
                       StartWorkspaceIndex=self._startWorkspaceIndex,
                       EndWorkspaceIndex=self._endWorkspaceIndex,
                       ComponentList=self._componentList)
-        # ApplyDiffCal(InstrumentWorkspace=wsName, CalibrationFile=self._calibrationFile)
-        # ConvertUnits(InputWorkspace=wsName, OutputWorkspace=wsName, Target='dSpacing')
-        # ApplyDiffCal (InstrumentWorkspace=wsName, ClearCalibration=True)
+        ApplyDiffCal(InstrumentWorkspace=wsName, CalibrationFile=self._calibrationFile)
+        ConvertUnits(InputWorkspace=wsName, OutputWorkspace=wsName, Target='dSpacing')
+        ApplyDiffCal (InstrumentWorkspace=wsName, ClearCalibration=True)
         ConvertUnits(InputWorkspace=wsName, OutputWorkspace=wsName, Target='Wavelength')
 
     def processVana(self, wsName):
