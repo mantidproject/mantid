@@ -165,18 +165,18 @@ public:
   /**
    * Simple Exception Struct to differentiate validation error from other exceptions.
    */
-  struct validationException : public std::runtime_error {
+  struct ValidationException : public std::runtime_error {
   public:
-    validationException(const std::string &ErrorMsg) : std::runtime_error(ErrorMsg) {}
+    ValidationException(const std::string &ErrorMsg) : std::runtime_error(ErrorMsg) {}
   };
 
   /**
    * Simple struct to constain function to evaluate attribute validators that is required in both attributes and
    * visitors.
    */
-  struct validatorEvaluator {
+  struct ValidatorEvaluator {
   public:
-    validatorEvaluator(){}; // default constructor
+    ValidatorEvaluator(){}; // default constructor
     template <typename T1> static void evaluate(T1 &inputData, Mantid::Kernel::IValidator_sptr validator) {
       std::string error;
 
@@ -185,7 +185,7 @@ public:
       }
 
       if (error != "") {
-        throw IFunction::validationException("Set Attribute Error: " + error);
+        throw IFunction::ValidationException("Set Attribute Error: " + error);
       }
     }
   };
@@ -227,7 +227,7 @@ public:
     /// Evaluates the validator associated with attribute this visitor is to visit.
     template <typename T1> void evaluateValidator(T1 &inputData) const {
       if (m_validator != nullptr) {
-        validatorEvaluator::evaluate(inputData, m_validator);
+        ValidatorEvaluator::evaluate(inputData, m_validator);
       }
     }
 
@@ -268,7 +268,7 @@ public:
     /// Evaluates the validator associated with attribute this visitor is to visit.
     template <typename T1> void evaluateValidator(T1 &inputData) const {
       if (m_validator != nullptr) {
-        validatorEvaluator::evaluate(inputData, m_validator);
+        ValidatorEvaluator::evaluate(inputData, m_validator);
       }
     }
 
@@ -310,7 +310,7 @@ public:
     /// Evaluates the validator associated with this attribute with regards to input value. Returns error as a string.
     template <typename T> void evaluateValidator(T &inputData) const {
       if (m_validator != nullptr) {
-        validatorEvaluator::evaluate(inputData, m_validator);
+        ValidatorEvaluator::evaluate(inputData, m_validator);
       }
     }
     /// Return a clone of the attribute validator;

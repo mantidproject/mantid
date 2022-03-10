@@ -89,7 +89,7 @@ public:
     f.declareDblBoundedAttr("DAttr", 0.0, 0.0, 100.0);
     IFunction::Attribute att = f.getAttribute("DAttr");
 
-    TS_ASSERT_THROWS(att.setDouble(-1), const IFunction::validationException &);
+    TS_ASSERT_THROWS(att.setDouble(-1), const IFunction::ValidationException &);
 
     att.setDouble(50.0);
     TS_ASSERT(att.asDouble() == 50.0);
@@ -100,7 +100,7 @@ public:
     f.declareIntBoundedAttr("IAttr", 5, 0, 10);
     IFunction::Attribute att = f.getAttribute("IAttr");
 
-    TS_ASSERT_THROWS(att.setInt(11), const IFunction::validationException &);
+    TS_ASSERT_THROWS(att.setInt(11), const IFunction::ValidationException &);
 
     att.setInt(3);
     TS_ASSERT(att.asInt() == 3);
@@ -111,7 +111,7 @@ public:
     f.declareStrListAttr("SAttr", "K", std::vector<std::string>{"K", "meV"});
     IFunction::Attribute att = f.getAttribute("SAttr");
 
-    TS_ASSERT_THROWS(att.setString("Invalid"), IFunction::validationException &);
+    TS_ASSERT_THROWS(att.setString("Invalid"), IFunction::ValidationException &);
 
     att.setString("meV");
     TS_ASSERT(att.asString() == "meV");
@@ -127,7 +127,7 @@ public:
     f.declareStrContainsAttr("SCAttr", "abc", sV);
     IFunction::Attribute att = f.getAttribute("SCAttr");
 
-    TS_ASSERT_THROWS(att.setString("ab"), IFunction::validationException &);
+    TS_ASSERT_THROWS(att.setString("ab"), IFunction::ValidationException &);
 
     att.setString("abcd");
     TS_ASSERT(att.asString() == "\"abcd\"");
@@ -151,7 +151,7 @@ public:
     TS_ASSERT(att.asVector() == v2);
 
     v2[2] = 50;
-    TS_ASSERT_THROWS(att.setVector(v2), const IFunction::validationException &);
+    TS_ASSERT_THROWS(att.setVector(v2), const IFunction::ValidationException &);
   }
 
   void test_double_attribute_visitor() {
@@ -172,7 +172,7 @@ public:
     dbl = 150;
     att_visitor.m_dbl = dbl;
 
-    TS_ASSERT_THROWS(att.apply(att_visitor), IFunction::validationException &);
+    TS_ASSERT_THROWS(att.apply(att_visitor), IFunction::ValidationException &);
   }
 
   void test_double_attribute_from_string() {
@@ -185,28 +185,28 @@ public:
     TS_ASSERT(att.asDouble() == 65.0);
 
     // Test visitor change outside of validator restrictions
-    TS_ASSERT_THROWS(att.fromString("150.0"), IFunction::validationException &);
+    TS_ASSERT_THROWS(att.fromString("150.0"), IFunction::ValidationException &);
   }
 
   void test_invalid_declarations() {
     // Test invalid declarations
 
     detail::FAVT_Funct f;
-    TS_ASSERT_THROWS(f.declareDblBoundedAttr("DAttr_invalid", -1.0, 0.0, 100.0), IFunction::validationException &);
-    TS_ASSERT_THROWS(f.declareDblBoundedAttr("IAttr_invalid", -1, 0, 100), IFunction::validationException &);
+    TS_ASSERT_THROWS(f.declareDblBoundedAttr("DAttr_invalid", -1.0, 0.0, 100.0), IFunction::ValidationException &);
+    TS_ASSERT_THROWS(f.declareDblBoundedAttr("IAttr_invalid", -1, 0, 100), IFunction::ValidationException &);
     TS_ASSERT_THROWS(f.declareStrListAttr("SAttr_invalid", "Invalid", std::vector<std::string>{"K", "meV"}),
-                     IFunction::validationException &);
+                     IFunction::ValidationException &);
 
     std::vector<std::string> sV(3);
     sV[0] = "a";
     sV[1] = "b";
     sV[2] = "c";
-    TS_ASSERT_THROWS(f.declareStrContainsAttr("SCAttr_invalid", "Invalid", sV), IFunction::validationException &);
+    TS_ASSERT_THROWS(f.declareStrContainsAttr("SCAttr_invalid", "Invalid", sV), IFunction::ValidationException &);
 
     std::vector<double> v(3);
     v[0] = 1;
     v[1] = 2;
     v[2] = 10;
-    TS_ASSERT_THROWS(f.declareVecArrayBoundedAttr("VAttr_invalid", v, 1.0, 5.0), IFunction::validationException &);
+    TS_ASSERT_THROWS(f.declareVecArrayBoundedAttr("VAttr_invalid", v, 1.0, 5.0), IFunction::ValidationException &);
   }
 };
