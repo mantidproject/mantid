@@ -43,18 +43,16 @@ class CompilationDirective(BaseDirective):
         return []
 
     def getPath(self):
-        # gets the current directory
-        current_dir = os.getcwd()
         # the location of documentation
-        source_dir = '../../mantid/docs/source/'
+        source_dir = self.state.document.settings.env.srcdir
         # the location of the release notes for this version
         release_dir = self.source().rsplit('/', 1)[0]
         # argument provided to amalgamate directive
         args = self.arguments[0]
         if args[0] != '/':
             args = '/' + args
-        path_to_notes = source_dir + release_dir + args
-        return os.path.abspath(os.path.join(current_dir, path_to_notes))
+        path_to_notes = release_dir + args
+        return os.path.abspath(os.path.join(source_dir, path_to_notes))
 
 
 def setup(app):
