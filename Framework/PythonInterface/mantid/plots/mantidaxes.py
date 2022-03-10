@@ -30,8 +30,7 @@ from mantid.api import AnalysisDataService as ads
 from mantid.plots import datafunctions, axesfunctions, axesfunctions3D
 from mantid.plots.legend import LegendProperties
 from mantid.plots.datafunctions import get_normalize_by_bin_width
-from mantid.plots.utility import (artists_hidden, autoscale_on_update,
-                                  legend_set_draggable, MantidAxType)
+from mantid.plots.utility import (artists_hidden, legend_set_draggable, MantidAxType)
 
 
 WATERFALL_XOFFSET_DEFAULT, WATERFALL_YOFFSET_DEFAULT = 10, 20
@@ -631,8 +630,6 @@ class MantidAxes(Axes):
         if datafunctions.validate_args(*args,**kwargs):
             logger.debug('using plotfunctions')
 
-            autoscale_on = kwargs.pop("autoscale_on_update", self.get_autoscale_on())
-
             def _data_update(artists, workspace, new_kwargs=None):
                 # It's only possible to plot 1 line at a time from a workspace
                 try:
@@ -656,14 +653,6 @@ class MantidAxes(Axes):
                     if (not self.is_empty(self)) and self.legend_ is not None:
                         legend_set_draggable(self.legend(), True)
 
-                if new_kwargs:
-                    _autoscale_on = new_kwargs.pop("autoscale_on_update", self.get_autoscale_on())
-                else:
-                    _autoscale_on = self.get_autoscale_on()
-
-                if _autoscale_on:
-                    self.relim()
-                    self.autoscale()
                 return artists
 
             workspace = args[0]
@@ -671,16 +660,14 @@ class MantidAxes(Axes):
             normalize_by_bin_width, kwargs = get_normalize_by_bin_width(workspace, self, **kwargs)
             is_normalized = normalize_by_bin_width or \
                             (hasattr(workspace, 'isDistribution') and workspace.isDistribution())
-
-            with autoscale_on_update(self, autoscale_on):
-                artist = self.track_workspace_artist(workspace,
-                                                     axesfunctions.plot(self, normalize_by_bin_width=is_normalized,
-                                                                        *args, **kwargs),
-                                                     _data_update, spec_num, is_normalized,
-                                                     MantidAxes.is_axis_of_type(MantidAxType.SPECTRUM, kwargs),
-                                                     kwargs.get('LogName', None),
-                                                     kwargs.get('Filtered', None),
-                                                     kwargs.get('ExperimentInfo', None))
+            artist = self.track_workspace_artist(workspace,
+                                                 axesfunctions.plot(self, normalize_by_bin_width=is_normalized,
+                                                                    *args, **kwargs),
+                                                 _data_update, spec_num, is_normalized,
+                                                 MantidAxes.is_axis_of_type(MantidAxType.SPECTRUM, kwargs),
+                                                 kwargs.get('LogName', None),
+                                                 kwargs.get('Filtered', None),
+                                                 kwargs.get('ExperimentInfo', None))
             return artist
         else:
             return Axes.plot(self, *args, **kwargs)
@@ -733,13 +720,7 @@ class MantidAxes(Axes):
         if datafunctions.validate_args(*args):
             logger.debug('using plotfunctions')
 
-            autoscale_on = kwargs.pop("autoscale_on_update", self.get_autoscale_on())
-
-            def _data_update(artists, workspace, new_kwargs=None):
-                if new_kwargs:
-                    _autoscale_on = new_kwargs.pop("autoscale_on_update", self.get_autoscale_on())
-                else:
-                    _autoscale_on = self.get_autoscale_on()
+            def _data_update(artists, workspace):
                 # errorbar with workspaces can only return a single container
                 container_orig = artists[0]
                 # It is not possible to simply reset the error bars so
@@ -754,12 +735,7 @@ class MantidAxes(Axes):
                     pass
                 # this gets pushed back onto the containers list
                 try:
-                    with autoscale_on_update(self, _autoscale_on):
-                        # this gets pushed back onto the containers list
-                        if new_kwargs:
-                            container_new = axesfunctions.errorbar(self, workspace, **new_kwargs)
-                        else:
-                            container_new = axesfunctions.errorbar(self, workspace, **kwargs)
+                    container_new = axesfunctions.errorbar(self, workspace, **kwargs)
 
                     self.containers.insert(orig_idx, container_new)
                     self.containers.pop()
@@ -786,19 +762,16 @@ class MantidAxes(Axes):
                         legend_set_draggable(self.legend(), True)
 
                 return container_new
-
             workspace = args[0]
             spec_num = self.get_spec_number_or_bin(workspace, kwargs)
             normalize_by_bin_width, kwargs = get_normalize_by_bin_width(workspace, self, **kwargs)
-            is_normalized = normalize_by_bin_width or \
-                            (hasattr(workspace, 'isDistribution') and workspace.isDistribution())
-
-            with autoscale_on_update(self, autoscale_on):
-                artist = self.track_workspace_artist(workspace,
-                                                     axesfunctions.errorbar(self, normalize_by_bin_width = is_normalized,
-                                                                            *args, **kwargs),
-                                                     _data_update, spec_num, is_normalized,
-                                                     MantidAxes.is_axis_of_type(MantidAxType.SPECTRUM, kwargs))
+            is_normalized = normalize_by_bin_width or (hasattr(workspace, 'isDistribution')
+                                                       and workspace.isDistribution())
+            artist = self.track_workspace_artist(workspace,
+                                                 axesfunctions.errorbar(self, normalize_by_bin_width=is_normalized,
+                                                                        *args, **kwargs),
+                                                 _data_update, spec_num, is_normalized,
+                                                 MantidAxes.is_axis_of_type(MantidAxType.SPECTRUM, kwargs))
             return artist
         else:
             return Axes.errorbar(self, *args, **kwargs)

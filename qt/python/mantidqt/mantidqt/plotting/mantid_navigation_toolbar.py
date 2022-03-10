@@ -24,10 +24,9 @@ class MantidNavigationTool:
     """
     Mantid navigation tool
     """
-
     def __init__(self, text, tooltip, icon=None, callback=None, checked=None, initialiser=None):
         """
-        Context manager to temporarily change value of autoscale_on_update
+        Context manager
         :param text: Name of the action
         :param tooltip: Tooltip information describing the action
         :param icon: Icon for the action (optional)

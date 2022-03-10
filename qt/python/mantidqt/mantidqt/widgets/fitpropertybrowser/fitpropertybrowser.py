@@ -381,9 +381,11 @@ class FitPropertyBrowser(FitPropertyBrowserBase):
         # Keep local copy of the original lines
         original_lines = self.get_lines()
 
-        ax.plot(ws, wkspIndex=1, autoscale_on_update=False, **plot_kwargs)
+        ax.autoscale(enable=False, axis='both')
+        ax.plot(ws, wkspIndex=1, **plot_kwargs)
         if plot_diff:
-            ax.plot(ws, wkspIndex=2, autoscale_on_update=False, **plot_kwargs)
+            ax.plot(ws, wkspIndex=2, **plot_kwargs)
+        ax.autoscale(enable=True, axis='both')
 
         self.addFitResultWorkspacesToTableWidget()
         # Add properties back to the lines

@@ -508,7 +508,8 @@ class MantidAxesTest(unittest.TestCase):
         autoscale if the workspace changes
         """
         ws = CreateWorkspace(DataX=[10, 20], DataY=[10, 20], OutputWorkspace="ws")
-        self.ax.plot(ws, autoscale_on_update=False)
+        self.ax.autoscale(enable=False, axis='both')
+        self.ax.plot(ws)
         CreateWorkspace(DataX=[10, 20], DataY=[10, 5000], OutputWorkspace="ws")
         self.assertLess(self.ax.get_ylim()[1], 5000)
 
@@ -517,7 +518,8 @@ class MantidAxesTest(unittest.TestCase):
         ws = CreateWorkspace(DataX=[10, 20], DataY=[10, 20])
         self.ax.plot(ws)
         ws2 = CreateWorkspace(DataX=[10, 20], DataY=[10, 5000])
-        self.ax.plot(ws2, autoscale_on_update=False)
+        self.ax.autoscale(enable=False, axis='both')
+        self.ax.plot(ws2)
         self.assertLess(self.ax.get_ylim()[1], 5000)
 
     def test_that_plot_autoscales_by_default(self):
@@ -538,14 +540,16 @@ class MantidAxesTest(unittest.TestCase):
         ws = CreateWorkspace(DataX=[10, 20], DataY=[10, 20])
         self.ax.errorbar(ws)
         ws2 = CreateWorkspace(DataX=[10, 20], DataY=[10, 5000])
-        self.ax.errorbar(ws2, autoscale_on_update=False)
+        self.ax.autoscale(enable=False, axis='both')
+        self.ax.errorbar(ws2)
         self.assertLess(self.ax.get_ylim()[1], 5000)
 
     def test_that_errorbar_autoscaling_can_be_turned_off(self):
         ws = CreateWorkspace(DataX=[10, 20], DataY=[10, 20], DataE=[1, 2], OutputWorkspace="ws")
         self.ax.errorbar(ws)
         ws2 = CreateWorkspace(DataX=[10, 20], DataY=[10, 5000], DataE=[1, 1], OutputWorkspace="ws2")
-        self.ax.errorbar(ws2, autoscale_on_update=False)
+        self.ax.autoscale(enable=False, axis='both')
+        self.ax.errorbar(ws2)
         self.assertLess(self.ax.get_ylim()[1], 5000)
 
     def test_that_plotting_ws_without_giving_spec_num_sets_spec_num_if_ws_has_1_histogram(self):
