@@ -130,7 +130,7 @@ void IFunctionAdapter::declareAttribute(const std::string &name, const boost::py
 void IFunctionAdapter::declareAttribute(const std::string &name, const boost::python::object &defaultValue,
                                         const boost::python::object &validator) {
   auto attr = IFunction::hasAttribute(name) ? IFunction::getAttribute(name) : Attribute();
-  auto c_validator = Mantid::Kernel::IValidator_sptr();
+  Mantid::Kernel::IValidator_sptr c_validator = nullptr;
 
   try {
     c_validator = boost::python::extract<Mantid::Kernel::IValidator_sptr>(validator);
