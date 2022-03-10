@@ -227,12 +227,12 @@ class PowderReduceP2D(DistributedDataProcessorAlgorithm):
             self.setPropertyGroup('EndWorkspaceIndex', grp7)
             self.setPropertyGroup('ComponentList', grp7)
 
-        def loadApplyDiffCal():
+        #def loadApplyDiffCal():
             # Input for ApplyDiffCal
-            self.copyProperties('ApplyDiffCal', ['CalibrationWorkspace', 'OffsetsWorkspace'])
-            grp8 = 'ApplyDiffCal'
-            self.setPropertyGroup('CalibrationWorkspace', grp8)
-            self.setPropertyGroup('OffsetsWorkspace', grp8)
+        #    self.copyProperties('ApplyDiffCal', ['CalibrationWorkspace', 'OffsetsWorkspace'])
+        #    grp8 = 'ApplyDiffCal'
+        #    self.setPropertyGroup('CalibrationWorkspace', grp8)
+        #    self.setPropertyGroup('OffsetsWorkspace', grp8)
 
         def loadCylinderAbsorption():
             # Input for CylinderAbsorption
@@ -397,7 +397,7 @@ class PowderReduceP2D(DistributedDataProcessorAlgorithm):
         loadRemovePromptPulse()
         loadLoadDiffCal()
         loadMaskDetectors()
-        loadApplyDiffCal ()
+        #loadApplyDiffCal ()
         loadCylinderAbsorption()
         loadBin2DPowderDiffraction()
         loadStripVanadiumPeaks()
@@ -482,9 +482,9 @@ class PowderReduceP2D(DistributedDataProcessorAlgorithm):
             self._endWorkspaceIndex = self.getProperty('EndWorkspaceIndex').value
             self._componentList = self.getProperty('ComponentList').value
 
-        def getApplyDiffCalParameters():
-            # ApplyDiffCal
-            self._calibrationFile = self._filename
+        #def getApplyDiffCalParameters():
+        #    # ApplyDiffCal
+        #    self._calibrationFile = self._filename
 
         def getCylinderAbsorptionParameters():
             # CylinderAbsorption
@@ -545,7 +545,7 @@ class PowderReduceP2D(DistributedDataProcessorAlgorithm):
         getRemovePromptPulseParameters()
         getLoadDiffCalParameters()
         getMaskDetectorsParameters()
-        getApplyDiffCalParameters()
+        #getApplyDiffCalParameters()
         getCylinderAbsorptionParameters()
         getBind2DPowderDiffractionParameters()
         getStripVanadiumPeaksParameters()
