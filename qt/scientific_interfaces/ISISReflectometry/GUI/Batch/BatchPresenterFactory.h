@@ -19,9 +19,11 @@
 #include "ReflAlgorithmFactory.h"
 #include <memory>
 
-namespace MantidQt {
-namespace CustomInterfaces {
-namespace ISISReflectometry {
+namespace MantidQt::MantidWidgets {
+class IMessageHandler;
+}
+
+namespace MantidQt::CustomInterfaces::ISISReflectometry {
 
 class BatchPresenterFactory : public IBatchPresenterFactory {
 public:
@@ -29,13 +31,14 @@ public:
 
       RunsPresenterFactory runsPresenterFactory, EventPresenterFactory eventPresenterFactory,
       ExperimentPresenterFactory experimentPresenterFactory, InstrumentPresenterFactory instrumentPresenterFactory,
-      PreviewPresenterFactory previewPresenterFactory, SavePresenterFactory savePresenterFactory)
+      PreviewPresenterFactory previewPresenterFactory, SavePresenterFactory savePresenterFactory,
+      MantidQt::MantidWidgets::IMessageHandler *messageHandler)
       : m_runsPresenterFactory(std::move(runsPresenterFactory)),
         m_eventPresenterFactory(std::move(eventPresenterFactory)),
         m_experimentPresenterFactory(std::move(experimentPresenterFactory)),
         m_instrumentPresenterFactory(std::move(instrumentPresenterFactory)),
         m_previewPresenterFactory(std::move(previewPresenterFactory)),
-        m_savePresenterFactory(std::move(savePresenterFactory)) {}
+        m_savePresenterFactory(std::move(savePresenterFactory)), m_messageHandler(messageHandler) {}
 
   std::unique_ptr<IBatchPresenter> make(IBatchView *view) override {
     auto runsPresenter = m_runsPresenterFactory.make(view->runs());
@@ -52,7 +55,7 @@ public:
     return std::make_unique<BatchPresenter>(view, std::move(batchModel), view, std::move(runsPresenter),
                                             std::move(eventPresenter), std::move(experimentPresenter),
                                             std::move(instrumentPresenter), std::move(savePresenter),
-                                            std::move(previewPresenter));
+                                            std::move(previewPresenter), m_messageHandler);
   }
 
 private:
@@ -62,7 +65,6 @@ private:
   InstrumentPresenterFactory m_instrumentPresenterFactory;
   PreviewPresenterFactory m_previewPresenterFactory;
   SavePresenterFactory m_savePresenterFactory;
+  MantidQt::MantidWidgets::IMessageHandler *m_messageHandler;
 };
-} // namespace ISISReflectometry
-} // namespace CustomInterfaces
-} // namespace MantidQt
+} // namespace MantidQt::CustomInterfaces::ISISReflectometry

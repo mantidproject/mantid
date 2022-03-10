@@ -180,6 +180,7 @@ void RunsPresenter::notifyReductionResumed() {
 void RunsPresenter::notifyReductionPaused() {
   updateWidgetEnabledState();
   tablePresenter()->notifyReductionPaused();
+  notifyRowStateChanged();
 }
 
 /** Returns true if performing a new autoreduction search i.e. with different
@@ -234,6 +235,7 @@ void RunsPresenter::notifyAutoreductionResumed() {
   updateWidgetEnabledState();
   tablePresenter()->notifyAutoreductionResumed();
   m_progressView->setAsEndlessIndicator();
+  notifyRowStateChanged();
 }
 
 void RunsPresenter::notifyAutoreductionPaused() {
@@ -241,6 +243,7 @@ void RunsPresenter::notifyAutoreductionPaused() {
   m_progressView->setAsPercentageIndicator();
   updateWidgetEnabledState();
   tablePresenter()->notifyAutoreductionPaused();
+  notifyRowStateChanged();
 }
 
 void RunsPresenter::notifyAnyBatchReductionResumed() {

@@ -7,25 +7,20 @@
 import unittest
 
 from mantidqt.utils.qt.testing import start_qapplication
-from mantidqt.utils.qt.testing.qt_widget_finder import QtWidgetFinder
 
 from mantidqtinterfaces.Muon.GUI.Common.fitting_widgets.tf_asymmetry_fitting.tf_asymmetry_mode_switcher_view import \
     TFAsymmetryModeSwitcherView
 
-from qtpy.QtWidgets import QApplication
-
 
 @start_qapplication
-class TFAsymmetryModeSwitcherViewTest(unittest.TestCase, QtWidgetFinder):
+class TFAsymmetryModeSwitcherViewTest(unittest.TestCase):
 
     def setUp(self):
         self.view = TFAsymmetryModeSwitcherView()
         self.view.show()
-        self.assert_widget_created()
 
     def tearDown(self):
         self.assertTrue(self.view.close())
-        QApplication.sendPostedEvents()
 
     def test_that_the_tf_asymmetry_mode_can_be_set_to_be_on(self):
         self.view.tf_asymmetry_mode = False

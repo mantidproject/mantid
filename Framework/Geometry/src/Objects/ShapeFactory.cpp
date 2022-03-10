@@ -331,11 +331,11 @@ std::string ShapeFactory::parseSphere(Poco::XML::Element *pElem, std::map<int, s
 
   // Only rotate the normal vector by the rotate-all and goniometer tags
   // Special case: do not obey rotate tag as rotation around the centre of sphere is unneccessary
-  if (m_rotateAllMatrix != Kernel::Matrix<double>(3, 3, 1)) {
+  if (m_rotateAllMatrix != Kernel::Matrix<double>(3, 3, true)) {
     // Apply automatic rotation due to the rotate-all tag
     centre.rotate(m_rotateAllMatrix);
   }
-  if (m_gonioRotateMatrix != Kernel::Matrix<double>(3, 3, 1)) {
+  if (m_gonioRotateMatrix != Kernel::Matrix<double>(3, 3, true)) {
     // Apply automatic rotation due to the goniometer that should NOT be manually defined by the user
     centre.rotate(m_gonioRotateMatrix);
   }
@@ -381,12 +381,12 @@ std::string ShapeFactory::parseInfinitePlane(Poco::XML::Element *pElem, std::map
     const std::vector<double> rotateMatrix = generateMatrix(rotateAngles[0], rotateAngles[1], rotateAngles[2]);
     normVec.rotate(rotateMatrix);
   }
-  if (m_rotateAllMatrix != Kernel::Matrix<double>(3, 3, 1)) {
+  if (m_rotateAllMatrix != Kernel::Matrix<double>(3, 3, true)) {
     // Apply automatic rotation due to the rotate-all tag
     centre.rotate(m_rotateAllMatrix);
     normVec.rotate(m_rotateAllMatrix);
   }
-  if (m_gonioRotateMatrix != Kernel::Matrix<double>(3, 3, 1)) {
+  if (m_gonioRotateMatrix != Kernel::Matrix<double>(3, 3, true)) {
     // Apply automatic rotation due to the goniometer that should NOT be manually defined by the user
     centre.rotate(m_gonioRotateMatrix);
     normVec.rotate(m_gonioRotateMatrix);
@@ -434,12 +434,12 @@ std::string ShapeFactory::parseInfiniteCylinder(Poco::XML::Element *pElem,
     const std::vector<double> rotateMatrix = generateMatrix(rotateAngles[0], rotateAngles[1], rotateAngles[2]);
     normVec.rotate(rotateMatrix);
   }
-  if (m_rotateAllMatrix != Kernel::Matrix<double>(3, 3, 1)) {
+  if (m_rotateAllMatrix != Kernel::Matrix<double>(3, 3, true)) {
     // Apply automatic rotation due to the rotate-all tag
     centre.rotate(m_rotateAllMatrix);
     normVec.rotate(m_rotateAllMatrix);
   }
-  if (m_gonioRotateMatrix != Kernel::Matrix<double>(3, 3, 1)) {
+  if (m_gonioRotateMatrix != Kernel::Matrix<double>(3, 3, true)) {
     // Apply automatic rotation due to the goniometer that should NOT be manually defined by the user
     centre.rotate(m_gonioRotateMatrix);
     normVec.rotate(m_gonioRotateMatrix);
@@ -498,12 +498,12 @@ std::string ShapeFactory::parseCylinder(Poco::XML::Element *pElem, std::map<int,
     const std::vector<double> rotateMatrix = generateMatrix(rotateAngles[0], rotateAngles[1], rotateAngles[2]);
     normVec.rotate(rotateMatrix);
   }
-  if (m_rotateAllMatrix != Kernel::Matrix<double>(3, 3, 1)) {
+  if (m_rotateAllMatrix != Kernel::Matrix<double>(3, 3, true)) {
     // Apply automatic rotation due to the rotate-all tag
     centre.rotate(m_rotateAllMatrix);
     normVec.rotate(m_rotateAllMatrix);
   }
-  if (m_gonioRotateMatrix != Kernel::Matrix<double>(3, 3, 1)) {
+  if (m_gonioRotateMatrix != Kernel::Matrix<double>(3, 3, true)) {
     // Apply automatic rotation due to the goniometer that should NOT be manually defined by the user
     centre.rotate(m_gonioRotateMatrix);
     normVec.rotate(m_gonioRotateMatrix);
@@ -585,12 +585,12 @@ std::string ShapeFactory::parseHollowCylinder(Poco::XML::Element *pElem, std::ma
     const std::vector<double> rotateMatrix = generateMatrix(rotateAngles[0], rotateAngles[1], rotateAngles[2]);
     normVec.rotate(rotateMatrix);
   }
-  if (m_rotateAllMatrix != Kernel::Matrix<double>(3, 3, 1)) {
+  if (m_rotateAllMatrix != Kernel::Matrix<double>(3, 3, true)) {
     // Apply automatic rotation due to the rotate-all tag
     centre.rotate(m_rotateAllMatrix);
     normVec.rotate(m_rotateAllMatrix);
   }
-  if (m_gonioRotateMatrix != Kernel::Matrix<double>(3, 3, 1)) {
+  if (m_gonioRotateMatrix != Kernel::Matrix<double>(3, 3, true)) {
     // Apply automatic rotation due to the goniometer that should NOT be manually defined by the user
     centre.rotate(m_gonioRotateMatrix);
     normVec.rotate(m_gonioRotateMatrix);
@@ -719,12 +719,12 @@ CuboidCorners ShapeFactory::parseCuboid(Poco::XML::Element *pElem) {
       const std::vector<double> rotateMatrix = generateMatrix(rotateAngles[0], rotateAngles[1], rotateAngles[2]);
       result.rotatePoints(rotateMatrix);
     }
-    if (m_rotateAllMatrix != Kernel::Matrix<double>(3, 3, 1)) {
+    if (m_rotateAllMatrix != Kernel::Matrix<double>(3, 3, true)) {
       // Apply automatic rotation due to the rotate-all tag
       result.rotatePoints(m_rotateAllMatrix);
       centre.rotate(m_rotateAllMatrix);
     }
-    if (m_gonioRotateMatrix != Kernel::Matrix<double>(3, 3, 1)) {
+    if (m_gonioRotateMatrix != Kernel::Matrix<double>(3, 3, true)) {
       // Apply automatic rotation due to the goniometer that should NOT be manually defined by the user
       result.rotatePoints(m_gonioRotateMatrix);
       centre.rotate(m_gonioRotateMatrix);
@@ -1068,11 +1068,11 @@ Hexahedron ShapeFactory::parseHexahedron(Poco::XML::Element *pElem) {
     const std::vector<double> rotateMatrix = generateMatrix(rotateAngles[0], rotateAngles[1], rotateAngles[2]);
     hex.rotatePoints(rotateMatrix);
   }
-  if (m_rotateAllMatrix != Kernel::Matrix<double>(3, 3, 1)) {
+  if (m_rotateAllMatrix != Kernel::Matrix<double>(3, 3, true)) {
     // Apply automatic rotation due to the rotate-all tag
     hex.rotatePoints(m_rotateAllMatrix);
   }
-  if (m_gonioRotateMatrix != Kernel::Matrix<double>(3, 3, 1)) {
+  if (m_gonioRotateMatrix != Kernel::Matrix<double>(3, 3, true)) {
     // Apply automatic rotation due to the goniometer that should NOT be manually defined by the user
     hex.rotatePoints(m_gonioRotateMatrix);
   }
@@ -1167,12 +1167,12 @@ std::string ShapeFactory::parseTaperedGuide(Poco::XML::Element *pElem, std::map<
     const std::vector<double> rotateMatrix = generateMatrix(rotateAngles[0], rotateAngles[1], rotateAngles[2]);
     hex.rotatePoints(rotateMatrix);
   }
-  if (m_rotateAllMatrix != Kernel::Matrix<double>(3, 3, 1)) {
+  if (m_rotateAllMatrix != Kernel::Matrix<double>(3, 3, true)) {
     // Apply automatic rotation due to the rotate-all tag
     hex.rotatePoints(m_rotateAllMatrix);
     centre.rotate(m_rotateAllMatrix);
   }
-  if (m_gonioRotateMatrix != Kernel::Matrix<double>(3, 3, 1)) {
+  if (m_gonioRotateMatrix != Kernel::Matrix<double>(3, 3, true)) {
     // Apply automatic rotation due to the goniometer that should NOT be manually defined by the user
     hex.rotatePoints(m_gonioRotateMatrix);
     centre.rotate(m_gonioRotateMatrix);
@@ -1276,14 +1276,14 @@ std::string ShapeFactory::parseSliceOfCylinderRing(Poco::XML::Element *pElem,
     planeSlice1.rotate(rotateMatrix);
     planeSlice2.rotate(rotateMatrix);
   }
-  if (m_rotateAllMatrix != Kernel::Matrix<double>(3, 3, 1)) {
+  if (m_rotateAllMatrix != Kernel::Matrix<double>(3, 3, true)) {
     // Apply automatic rotation due to the rotate-all tag
     normVec.rotate(m_rotateAllMatrix);
     planeSlice1.rotate(m_rotateAllMatrix);
     planeSlice2.rotate(m_rotateAllMatrix);
     centrePoint.rotate(m_rotateAllMatrix);
   }
-  if (m_gonioRotateMatrix != Kernel::Matrix<double>(3, 3, 1)) {
+  if (m_gonioRotateMatrix != Kernel::Matrix<double>(3, 3, true)) {
     // Apply automatic rotation due to the goniometer that should NOT be manually defined by the user
     normVec.rotate(m_gonioRotateMatrix);
     planeSlice1.rotate(m_gonioRotateMatrix);

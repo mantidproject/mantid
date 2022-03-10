@@ -22,7 +22,7 @@ IndirectFitOutputOptionsView::IndirectFitOutputOptionsView(QWidget *parent)
   connect(m_outputOptions->pbEditResult, SIGNAL(clicked()), this, SLOT(emitEditResultClicked()));
 }
 
-IndirectFitOutputOptionsView::~IndirectFitOutputOptionsView() {}
+IndirectFitOutputOptionsView::~IndirectFitOutputOptionsView() = default;
 
 void IndirectFitOutputOptionsView::emitGroupWorkspaceChanged(QString const &group) {
   emit groupWorkspaceChanged(group.toStdString());

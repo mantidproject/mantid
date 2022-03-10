@@ -805,16 +805,17 @@ global options that will be applied to all the rows in the table, whereas the
 row values will only be applicable to the specific row for which those options
 are defined.
 
-Per-Angle Defaults
-^^^^^^^^^^^^^^^^^^
+Sample and angle lookup table
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-The **Experiment Settings** tab allows some options to be specified on a
-per-angle basis, that is, to specify defaults that will apply only to runs with
-a specific angle. Note that matching angles are searched for within a tolerance
-of ``0.01``. In the per-angle defaults table, you can also specify a "wildcard"
-row, which will apply to all runs that don't also have a matching angle - just
-leave the angle blank to create a wildcard row. Only one wildcard row may
-exist.
+The **Experiment Settings** tab allows some options to be specified in a lookup
+table that will be applied to runs that match certain search criteria, namely the
+angle, and optionally also the run title. Matching angles are searched for within
+a tolerance of ``0.01``. The title field on the lookup table is a regular expression.
+
+In the lookup table, you can also specify a "wildcard" row, which will apply to all
+runs that don't also have a matching angle/title - just leave the angle and title
+blank to create a wildcard row. Only one wildcard row may exist.
 
 .. figure:: /images/ISISReflectometryInterface/workflow_settings.png
   :class: screenshot
@@ -822,9 +823,9 @@ exist.
   :align: center
   :alt: The per-angle defaults table
 
-  *The per-angle defaults table*
+  *The lookup table on the Experiment Settings tab*
 
-Entries in the per-angle defaults table are similar to the table on the Runs
+Entries in the lookup table are similar to the table on the Runs
 tab. Hover over a table cell to see a tooltip describing what the value is for.
 
 Default transmission runs can be specified and each input can take a

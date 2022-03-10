@@ -10,7 +10,7 @@ from mantid.api import MatrixWorkspace, WorkspaceGroup
 from mantid.simpleapi import SANSILLParameterScan, config, mtd
 
 
-class SANSILLIntegrationTest(unittest.TestCase):
+class SANSILLParameterScanTest(unittest.TestCase):
 
     _facility = None
 

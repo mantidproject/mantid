@@ -10,14 +10,15 @@
 Description
 -----------
 
-Calculates the wavelength profile of incident flux using an empty beam measurement for a SANS instrument in reactor sources.
+Calculates the incident flux using an empty beam measurement for a SANS instrument in reactor sources.
 
 Input
 -----
 
-Input must be a workspace in units of Wavelength, corresponding to an empty beam measurement.
-It needs to have the same number of bins for all the spectra, but it does not have to have exact same wavelength axes.
-The algorithm will take the global minimum and the global maximum of the wavelengths in the input workspace, and make equidistant bins such that it has the same number of bins as the input.
+Input must be a workspace corresponding to an empty beam measurement.
+It needs to have the same number of bins for all the spectra, but it does not have to have exact same axes.
+The X-axis unit can be either wavelength (for TOF) or dimensionless.
+In case of TOF, the algorithm will take the global minimum and the global maximum of the wavelengths in the input workspace, and make equidistant bins such that it has the same number of bins as the input.
 The input has to be already normalised in the same fashion, as the sample workspaces that are going to be normalised with the flux calculated with this algorithm.
 For example, if the input is normalised by time, the flux will mean number of neutrons per second.
 

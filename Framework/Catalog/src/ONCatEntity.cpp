@@ -22,7 +22,7 @@ ONCatEntity::ONCatEntity(std::string id, std::string type, Content_uptr content)
 ONCatEntity::ONCatEntity(const ONCatEntity &other)
     : m_id(other.m_id), m_type(other.m_type), m_content(std::make_unique<Content>(*other.m_content)) {}
 
-ONCatEntity::~ONCatEntity() {}
+ONCatEntity::~ONCatEntity() = default;
 
 std::string ONCatEntity::id() const { return m_id; }
 

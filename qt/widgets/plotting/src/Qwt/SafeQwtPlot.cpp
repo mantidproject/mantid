@@ -29,7 +29,6 @@ SafeQwtPlot::SafeQwtPlot(const QwtText &title, QWidget *parent) : QwtPlot(title,
 //----------------------------------------------------------------------------------------------
 /** Destructor
  */
-SafeQwtPlot::~SafeQwtPlot() {}
 
 //----------------------------------------------------------------------------------------------
 /** Set the workspace that we read-lock when drawing.

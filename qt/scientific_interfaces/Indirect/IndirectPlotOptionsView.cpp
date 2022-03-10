@@ -81,7 +81,7 @@ IndirectPlotOptionsView::IndirectPlotOptionsView(QWidget *parent)
   setupView();
 }
 
-IndirectPlotOptionsView::~IndirectPlotOptionsView() {}
+IndirectPlotOptionsView::~IndirectPlotOptionsView() = default;
 
 void IndirectPlotOptionsView::setupView() {
   connect(m_plotOptions->cbWorkspace, SIGNAL(currentIndexChanged(QString const &)), this,

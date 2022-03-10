@@ -830,8 +830,20 @@ void CompositeFunction::declareParameter(const std::string &name, double initVal
  * @param defaultValue :: A default value
  */
 void CompositeFunction::declareAttribute(const std::string &name, const API::IFunction::Attribute &defaultValue) {
-  m_globalAttributeNames.emplace_back(name);
   IFunction::declareAttribute(name, defaultValue);
+  m_globalAttributeNames.emplace_back(name);
+}
+
+/**
+ * Declares a single (global) attribute on the composite function, with a validator
+ * @param name :: The name of the attribute
+ * @param defaultValue :: A default value
+ * @param validator :: validator to restrict attribute values
+ */
+void CompositeFunction::declareAttribute(const std::string &name, const API::IFunction::Attribute &defaultValue,
+                                         const Kernel::IValidator &validator) {
+  IFunction::declareAttribute(name, defaultValue, validator);
+  m_globalAttributeNames.emplace_back(name);
 }
 
 /**

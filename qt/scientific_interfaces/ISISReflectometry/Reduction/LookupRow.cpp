@@ -23,7 +23,7 @@ LookupRow::LookupRow(boost::optional<double> theta, boost::optional<boost::regex
 
 TransmissionRunPair const &LookupRow::transmissionWorkspaceNames() const { return m_transmissionRuns; }
 
-bool LookupRow::isWildcard() const { return !m_theta.is_initialized(); }
+bool LookupRow::isWildcard() const { return !m_theta.is_initialized() && !m_titleMatcher.is_initialized(); }
 
 boost::optional<double> LookupRow::thetaOrWildcard() const { return m_theta; }
 
@@ -57,6 +57,8 @@ LookupRow::ValueArray lookupRowToArray(LookupRow const &lookupRow) {
   auto result = LookupRow::ValueArray();
   if (lookupRow.thetaOrWildcard())
     result[LookupRow::Column::THETA] = std::to_string(*lookupRow.thetaOrWildcard());
+  if (lookupRow.titleMatcher())
+    result[LookupRow::Column::TITLE] = lookupRow.titleMatcher()->expression();
   result[LookupRow::Column::FIRST_TRANS] = lookupRow.transmissionWorkspaceNames().firstRunList();
   result[LookupRow::Column::SECOND_TRANS] = lookupRow.transmissionWorkspaceNames().secondRunList();
   if (lookupRow.transmissionProcessingInstructions())

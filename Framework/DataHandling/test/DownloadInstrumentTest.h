@@ -13,7 +13,6 @@
 
 #include <Poco/File.h>
 #include <Poco/Glob.h>
-#include <Poco/Net/HTTPResponse.h>
 #include <Poco/Path.h>
 
 #include <cstdio>
@@ -21,6 +20,7 @@
 #include <string>
 
 using Mantid::DataHandling::DownloadInstrument;
+using Mantid::Kernel::InternetHelper;
 using namespace Mantid::DataHandling;
 using namespace Mantid::API;
 
@@ -33,8 +33,8 @@ public:
   MockedDownloadInstrument() : DownloadInstrument() {}
 
 private:
-  int doDownloadFile(const std::string &urlFile, const std::string &localFilePath = "",
-                     const StringToStringMap &headers = StringToStringMap()) override {
+  InternetHelper::HTTPStatus doDownloadFile(const std::string &urlFile, const std::string &localFilePath = "",
+                                            const StringToStringMap &headers = StringToStringMap()) override {
     std::string dateTime;
     auto it = headers.find("if-modified-since");
     if (it != headers.end())
@@ -86,7 +86,7 @@ private:
     file << outputString;
     file.close();
 
-    return Poco::Net::HTTPResponse::HTTP_FOUND;
+    return InternetHelper::HTTPStatus::FOUND;
   }
 };
 } // namespace

@@ -411,6 +411,7 @@ set(TEST_FILES
     FrameworkManagerTest.h
     FuncMinimizerFactoryTest.h
     FunctionAttributeTest.h
+    FunctionAttributeValidatorTest.h
     FunctionDomainGeneralTest.h
     FunctionDomainTest.h
     FunctionFactoryTest.h

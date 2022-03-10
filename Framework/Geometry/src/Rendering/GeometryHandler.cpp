@@ -43,7 +43,7 @@ GeometryHandler::GeometryHandler(const GeometryHandler &handler) {
 }
 
 /// Destructor
-GeometryHandler::~GeometryHandler() {}
+GeometryHandler::~GeometryHandler() = default;
 
 std::shared_ptr<GeometryHandler> GeometryHandler::clone() const { return std::make_shared<GeometryHandler>(*this); }
 

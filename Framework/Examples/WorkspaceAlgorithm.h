@@ -20,7 +20,7 @@ public:
   /// no arg constructor
   WorkspaceAlgorithm() : API::Algorithm() {}
   /// virtual destructor
-  ~WorkspaceAlgorithm() override {}
+  ~WorkspaceAlgorithm() override = default;
   /// Algorithm's name for identification overriding a virtual method
   const std::string name() const override { return "WorkspaceAlgorithm"; }
   /// Algorithm's version for identification overriding a virtual method

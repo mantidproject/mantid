@@ -116,7 +116,7 @@ Algorithm::Algorithm()
       m_communicator(std::make_unique<Parallel::Communicator>()), m_properties() {}
 
 /// Virtual destructor
-Algorithm::~Algorithm() {}
+Algorithm::~Algorithm() = default;
 
 //=============================================================================================
 //================================== Simple Getters/Setters
@@ -1582,7 +1582,7 @@ struct AsyncFlagHolder {
 
 private:
   /// Default constructor
-  AsyncFlagHolder();
+  AsyncFlagHolder() = delete;
   /// Running flag
   bool &m_running_flag;
 };

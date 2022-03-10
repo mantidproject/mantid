@@ -34,8 +34,6 @@
 
 QwtScaleTransformation *ScaleEngine::transformation() const { return new ScaleTransformation(this); }
 
-ScaleTransformation::~ScaleTransformation() {}
-
 double ScaleTransformation::invXForm(double p, double p1, double p2, double s1, double s2) const {
   if (!d_engine->hasBreak()) {
     QwtScaleTransformation *tr = newScaleTransformation();
@@ -199,8 +197,6 @@ ScaleEngine::ScaleEngine(ScaleTransformation::Type type, double left_break, doub
     : QwtScaleEngine(), d_type(type), d_break_left(left_break), d_break_right(right_break), d_break_pos(50),
       d_step_before(0.0), d_step_after(0.0), d_minor_ticks_before(1), d_minor_ticks_after(1),
       d_log10_scale_after(false), d_break_width(4), d_break_decoration(true), d_nth_power(2.0) {}
-
-ScaleEngine::~ScaleEngine() {}
 
 bool ScaleEngine::hasBreak() const {
   return !(d_break_left == d_break_right || (d_break_left == -DBL_MAX && d_break_right == DBL_MAX));

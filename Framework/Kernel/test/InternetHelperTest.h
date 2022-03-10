@@ -30,16 +30,16 @@ namespace {
  */
 class MockedInternetHelper : public InternetHelper {
 protected:
-  int sendHTTPSRequest(const std::string &url, std::ostream &responseStream) override {
+  InternetHelper::HTTPStatus sendHTTPSRequest(const std::string &url, std::ostream &responseStream) override {
     UNUSED_ARG(url);
 
     responseStream << "HTTPS request succeeded";
-    return 200;
+    return InternetHelper::HTTPStatus::OK;
   }
-  int sendHTTPRequest(const std::string &url, std::ostream &responseStream) override {
+  InternetHelper::HTTPStatus sendHTTPRequest(const std::string &url, std::ostream &responseStream) override {
     UNUSED_ARG(url);
     responseStream << "HTTP request succeeded";
-    return 200;
+    return InternetHelper::HTTPStatus::OK;
   }
 };
 } // namespace
@@ -56,9 +56,9 @@ public:
     std::string url = "http://www.google.com";
 
     std::stringstream ss;
-    int response = 0;
+    InternetHelper::HTTPStatus response{InternetHelper::HTTPStatus::BAD_REQUEST};
     TS_ASSERT_THROWS_NOTHING(response = internetHelper.sendRequest(url, ss);)
-    TS_ASSERT_EQUALS(200, response);
+    TS_ASSERT_EQUALS(InternetHelper::HTTPStatus::OK, response);
     TS_ASSERT_EQUALS("HTTP request succeeded", ss.str());
   }
 
@@ -67,9 +67,9 @@ public:
     std::string httpsUrl = "https://api.github.com/repos/mantidproject/mantid/contents";
 
     std::stringstream ss;
-    int response = 0;
+    InternetHelper::HTTPStatus response{InternetHelper::HTTPStatus::BAD_REQUEST};
     TS_ASSERT_THROWS_NOTHING(response = internetHelper.sendRequest(httpsUrl, ss);)
-    TS_ASSERT_EQUALS(200, response);
+    TS_ASSERT_EQUALS(InternetHelper::HTTPStatus::OK, response);
     TS_ASSERT_EQUALS("HTTPS request succeeded", ss.str());
   }
 
@@ -77,8 +77,8 @@ public:
     MockedInternetHelper internetHelper;
     std::string url = "http://www.google.com";
     Poco::TemporaryFile tmpFile;
-    int response = internetHelper.downloadFile(url, tmpFile.path());
-    TS_ASSERT_EQUALS(200, response);
+    const auto response = internetHelper.downloadFile(url, tmpFile.path());
+    TS_ASSERT_EQUALS(InternetHelper::HTTPStatus::OK, response);
     TSM_ASSERT("File has not been created.", tmpFile.exists());
     TSM_ASSERT("File is not a file.", tmpFile.isFile());
     std::fstream fs;
@@ -97,8 +97,8 @@ public:
     MockedInternetHelper internetHelper;
     std::string httpsUrl = "https://api.github.com/repos/mantidproject/mantid/contents";
     Poco::TemporaryFile tmpFile;
-    int response = internetHelper.downloadFile(httpsUrl, tmpFile.path());
-    TS_ASSERT_EQUALS(200, response);
+    const auto response = internetHelper.downloadFile(httpsUrl, tmpFile.path());
+    TS_ASSERT_EQUALS(InternetHelper::HTTPStatus::OK, response);
     TSM_ASSERT("File has not been created.", tmpFile.exists());
     TSM_ASSERT("File is not a file.", tmpFile.isFile());
     std::fstream fs;

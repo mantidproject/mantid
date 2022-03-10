@@ -56,7 +56,8 @@ def errorbar_caps_removed(ax):
     error_bar_caps = datafunctions.remove_and_return_errorbar_cap_lines(ax)
     yield
     # Re-add error bar caps
-    ax.lines += error_bar_caps
+    for cap in error_bar_caps:
+        ax.add_line(cap)
 
 
 class FigureInteraction(object):
@@ -157,7 +158,9 @@ class FigureInteraction(object):
         elif event.dblclick and event.button == canvas.buttond.get(Qt.LeftButton):
             if not marker_selected:
                 if not self._show_axis_editor(event):
-                    self._show_plot_options(event)
+                    # Don't run inside 3D+ plots, as there is already matplotlib behaviour here.
+                    if not hasattr(event.inaxes, 'zaxis'):
+                        self._show_plot_options(event)
             elif len(marker_selected) == 1:
                 self._edit_marker(marker_selected[0])
         elif event.button == canvas.buttond.get(Qt.MiddleButton):

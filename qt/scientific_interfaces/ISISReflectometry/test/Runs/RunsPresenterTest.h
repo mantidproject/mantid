@@ -636,6 +636,34 @@ public:
     verifyAndClear();
   }
 
+  void testRowStateChangedOnReductionResumed() {
+    auto presenter = makePresenter();
+    EXPECT_CALL(*m_runsTablePresenter, notifyRowStateChanged()).Times(1);
+    presenter.notifyReductionResumed();
+    verifyAndClear();
+  }
+
+  void testRowStateChangedOnReductionPaused() {
+    auto presenter = makePresenter();
+    EXPECT_CALL(*m_runsTablePresenter, notifyRowStateChanged()).Times(1);
+    presenter.notifyReductionPaused();
+    verifyAndClear();
+  }
+
+  void testRowStateChangedOnAutoreductionResumed() {
+    auto presenter = makePresenter();
+    EXPECT_CALL(*m_runsTablePresenter, notifyRowStateChanged()).Times(1);
+    presenter.notifyAutoreductionResumed();
+    verifyAndClear();
+  }
+
+  void testRowStateChangedOnAutoreductionPaused() {
+    auto presenter = makePresenter();
+    EXPECT_CALL(*m_runsTablePresenter, notifyRowStateChanged()).Times(1);
+    presenter.notifyAutoreductionPaused();
+    verifyAndClear();
+  }
+
   void testNotifyRowOutputsChanged() {
     auto presenter = makePresenter();
     EXPECT_CALL(*m_runsTablePresenter, notifyRowOutputsChanged()).Times(1);

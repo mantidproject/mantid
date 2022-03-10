@@ -8,7 +8,6 @@ import unittest
 
 from mantid.api import FrameworkManager
 from mantidqt.utils.qt.testing import start_qapplication
-from mantidqt.utils.qt.testing.qt_widget_finder import QtWidgetFinder
 
 from mantidqtinterfaces.Muon.GUI.Common.fitting_widgets.basic_fitting.basic_fitting_view import BasicFittingView
 from mantidqtinterfaces.Muon.GUI.Common.fitting_widgets.basic_fitting.fit_function_options_view import (EVALUATE_AS_TABLE_ROW,
@@ -20,11 +19,9 @@ from mantidqtinterfaces.Muon.GUI.Common.fitting_widgets.basic_fitting.fit_functi
                                                                                                         PLOT_GUESS_START_X,
                                                                                                         PLOT_GUESS_END_X)
 
-from qtpy.QtWidgets import QApplication
-
 
 @start_qapplication
-class BasicFittingViewTest(unittest.TestCase, QtWidgetFinder):
+class BasicFittingViewTest(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
@@ -34,11 +31,9 @@ class BasicFittingViewTest(unittest.TestCase, QtWidgetFinder):
         self.dataset_names = ["MUSR62260; Group; fwd; Asymmetry; MA", "MUSR62260; Group; bwd; Asymmetry; MA"]
         self.view = BasicFittingView()
         self.view.show()
-        self.assert_widget_created()
 
     def tearDown(self):
         self.assertTrue(self.view.close())
-        QApplication.sendPostedEvents()
 
     def test_that_the_plot_guess_checkbox_can_be_ticked_as_expected(self):
         self.view.plot_guess = True

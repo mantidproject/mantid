@@ -32,7 +32,7 @@ set(TEST_FILES
     Experiment/ExperimentPresenterTest.h
     Experiment/LookupTableValidatorTest.h
     Experiment/ExperimentOptionDefaultsTest.h
-    Reduction/LookupRowFinderTest.h
+    Reduction/LookupTableTest.h
     Reduction/ReductionJobsMergeTest.h
     Reduction/RowTest.h
     Reduction/ParseReflectometryStringsTest.h

@@ -15,13 +15,17 @@ Concepts
 Algorithms
 ----------
 
+New Features
+############
+
 Data Objects
 ------------
 
 Python
 ------
 
-- Added possibility to forward log messages to Python, see :ref:`mantid.utils.logging.log_to_python`.
+New Features
+############
 
 Installation
 ------------
@@ -31,13 +35,5 @@ MantidWorkbench
 
 See :doc:`mantidworkbench`.
 
-SliceViewer
------------
-
-Improvements
-############
-
-Bugfixes
-########
 
 :ref:`Release 6.4.0 <v6.4.0>`

@@ -7,24 +7,19 @@
 import unittest
 
 from mantidqt.utils.qt.testing import start_qapplication
-from mantidqt.utils.qt.testing.qt_widget_finder import QtWidgetFinder
 
 from mantidqtinterfaces.Muon.GUI.Common.corrections_tab_widget.dead_time_corrections_view import DeadTimeCorrectionsView
 
-from qtpy.QtWidgets import QApplication
-
 
 @start_qapplication
-class DeadTimeCorrectionsViewTest(unittest.TestCase, QtWidgetFinder):
+class DeadTimeCorrectionsViewTest(unittest.TestCase):
 
     def setUp(self):
         self.view = DeadTimeCorrectionsView()
         self.view.show()
-        self.assert_widget_created()
 
     def tearDown(self):
         self.assertTrue(self.view.close())
-        QApplication.sendPostedEvents()
 
     def test_that_the_view_has_been_initialized_with_the_workspace_selector_and_other_file_options_invisible(self):
         self.assertTrue(self.view.dead_time_workspace_label.isHidden())

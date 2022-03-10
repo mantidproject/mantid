@@ -1010,7 +1010,7 @@ RepoModel::UploadForm::UploadForm(const QString &file2upload, QWidget *parent) :
   connect(buttonBox, SIGNAL(accepted()), this, SLOT(accept()));
   connect(buttonBox, SIGNAL(rejected()), this, SLOT(reject()));
 }
-RepoModel::UploadForm::~UploadForm() {}
+RepoModel::UploadForm::~UploadForm() = default;
 QString RepoModel::UploadForm::email() { return email_le->text(); }
 QString RepoModel::UploadForm::author() { return author_le->text(); }
 QString RepoModel::UploadForm::comment() { return comment_te->toPlainText(); }
@@ -1049,7 +1049,7 @@ RepoModel::DeleteQueryBox::DeleteQueryBox(const QString &path, QWidget *parent)
   }
 }
 
-RepoModel::DeleteQueryBox::~DeleteQueryBox() {}
+RepoModel::DeleteQueryBox::~DeleteQueryBox() = default;
 QString RepoModel::DeleteQueryBox::comment() {
   if (comment_te)
     return comment_te->toPlainText();

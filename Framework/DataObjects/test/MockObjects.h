@@ -21,7 +21,7 @@ class MockPeakShapeFactory : public PeakShapeFactory {
 public:
   MOCK_CONST_METHOD1(create, Mantid::Geometry::PeakShape *(const std::string &source));
   MOCK_METHOD1(setSuccessor, void(std::shared_ptr<const PeakShapeFactory> successorFactory));
-  ~MockPeakShapeFactory() override {}
+  ~MockPeakShapeFactory() override = default;
 };
 
 class MockPeakShape : public Mantid::Geometry::PeakShape {
@@ -33,7 +33,7 @@ public:
   MOCK_CONST_METHOD0(algorithmVersion, int());
   MOCK_CONST_METHOD0(shapeName, std::string());
   MOCK_CONST_METHOD1(radius, boost::optional<double>(Mantid::Geometry::PeakShape::RadiusType));
-  ~MockPeakShape() override {}
+  ~MockPeakShape() override = default;
 };
 } // namespace DataObjects
 } // namespace Mantid
