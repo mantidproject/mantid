@@ -6,13 +6,16 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "RowProcessingAlgorithm.h"
 #include "../../Reduction/Batch.h"
-#include "../../Reduction/IBatch.h"
-#include "../../Reduction/Row.h"
 #include "AlgorithmProperties.h"
 #include "BatchJobAlgorithm.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/IAlgorithm.h"
+#include "MantidKernel/Logger.h"
 #include "MantidQtWidgets/Common/AlgorithmRuntimeProps.h"
+
+namespace {
+Mantid::Kernel::Logger g_log("Reflectometry RowProcessingAlgorithm");
+} // namespace
 
 namespace MantidQt::CustomInterfaces::ISISReflectometry::RowProcessing {
 
@@ -102,17 +105,14 @@ void updateExperimentProperties(AlgorithmRuntimeProps &properties, Experiment co
   updateFloodCorrectionProperties(properties, experiment.floodCorrections());
 }
 
-void updateLookupRowProperties(AlgorithmRuntimeProps &properties, boost::optional<LookupRow> lookupRow) {
-  if (!lookupRow)
-    return;
-
-  updateTransmissionWorkspaceProperties(properties, lookupRow->transmissionWorkspaceNames());
-  AlgorithmProperties::update("TransmissionProcessingInstructions", lookupRow->transmissionProcessingInstructions(),
+void updateLookupRowProperties(AlgorithmRuntimeProps &properties, LookupRow const &lookupRow) {
+  updateTransmissionWorkspaceProperties(properties, lookupRow.transmissionWorkspaceNames());
+  AlgorithmProperties::update("TransmissionProcessingInstructions", lookupRow.transmissionProcessingInstructions(),
                               properties);
-  updateMomentumTransferProperties(properties, lookupRow->qRange());
-  AlgorithmProperties::update("ScaleFactor", lookupRow->scaleFactor(), properties);
-  AlgorithmProperties::update("ProcessingInstructions", lookupRow->processingInstructions(), properties);
-  AlgorithmProperties::update("BackgroundProcessingInstructions", lookupRow->backgroundProcessingInstructions(),
+  updateMomentumTransferProperties(properties, lookupRow.qRange());
+  AlgorithmProperties::update("ScaleFactor", lookupRow.scaleFactor(), properties);
+  AlgorithmProperties::update("ProcessingInstructions", lookupRow.processingInstructions(), properties);
+  AlgorithmProperties::update("BackgroundProcessingInstructions", lookupRow.backgroundProcessingInstructions(),
                               properties);
 }
 
@@ -238,7 +238,9 @@ std::unique_ptr<MantidQt::API::IAlgorithmRuntimeProps> createAlgorithmRuntimePro
   auto properties = createAlgorithmRuntimeProps(model);
   // Update properties specific to this row - the per-angle options based on
   // the known angle, and the values in the table cells in the row
-  updateLookupRowProperties(*properties, model.findLookupRow(row));
+  if (auto lookupRow = model.findLookupRow(row)) {
+    updateLookupRowProperties(*properties, *lookupRow);
+  }
   updateRowProperties(*properties, row);
   return properties;
 }
@@ -251,7 +253,13 @@ std::unique_ptr<MantidQt::API::IAlgorithmRuntimeProps> createAlgorithmRuntimePro
   updateExperimentProperties(*properties, model.experiment());
   updateInstrumentProperties(*properties, model.instrument());
   // Update properties from the wildcard row in the lookup table
-  updateLookupRowProperties(*properties, model.findWildcardLookupRow());
+  if (auto lookupRow = model.findWildcardLookupRow()) {
+    g_log.warning("Using experiment settings from the wildcard row.");
+    updateLookupRowProperties(*properties, *lookupRow);
+  } else {
+    g_log.warning("No experiment settings found; using algorithm defaults. You may wish to specify a wildcard"
+                  " row in the Experiment Settings table to override them.");
+  }
   return properties;
 }
 } // namespace MantidQt::CustomInterfaces::ISISReflectometry::RowProcessing
