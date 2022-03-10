@@ -87,6 +87,17 @@ std::vector<size_t> getProcessingInstructionsAsIndices(std::string const &instru
 
 namespace Mantid::Reflectometry {
 
+/** Initialize the analysis properties
+ */
+void ReflectometryWorkflowBase2::initAnalysisProperties() {
+  const std::vector<std::string> analysisMode{"PointDetectorAnalysis", "MultiDetectorAnalysis"};
+  auto analysisModeValidator = std::make_shared<StringListValidator>(analysisMode);
+  declareProperty("AnalysisMode", analysisMode[0], analysisModeValidator,
+                  "Analysis mode. This property is only used when "
+                  "ProcessingInstructions is not set.",
+                  Direction::Input);
+}
+
 /** Initialize properties related to the type of reduction
  */
 void ReflectometryWorkflowBase2::initReductionProperties() {
