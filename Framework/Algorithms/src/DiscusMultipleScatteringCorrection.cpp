@@ -451,35 +451,33 @@ void DiscusMultipleScatteringCorrection::exec() {
       }
 
       for (size_t bin = 0; bin < nbins; bin += xStepSize) {
-        double kIn = kInW[bin].first;
-        if (kIn <= 0) {
+        const double kinc = std::get<0>(kInW[bin]);
+        if (kinc <= 0) {
           g_log.warning("Skipping calculation for bin with x<=0, workspace index=" + std::to_string(i) +
                         " bin index=" + std::to_string(bin));
           continue;
         }
 
-        const double kinc = kInW[bin].first;
-
-        std::vector<double> wValues = kInW[bin].second == -1.0 ? xPoints : std::vector{kInW[bin].second};
+        std::vector<double> wValues = std::get<1>(kInW[bin]) == -1 ? xPoints : std::vector{std::get<2>(kInW[bin])};
 
         if (m_importanceSampling)
           prepareCumulativeProbForQ(kinc, invPOfQ);
 
         auto weights = simulatePaths(nSingleScatterEvents, 1, rng, invPOfQ, kinc, wValues, detPos, true);
-        if (kInW[bin].second == -1.0) {
+        if (std::get<1>(kInW[bin]) == -1) {
           noAbsSimulationWS->getSpectrum(i).mutableY() += weights;
         } else {
-          noAbsSimulationWS->getSpectrum(i).dataY()[bin] = weights[0];
+          noAbsSimulationWS->getSpectrum(i).dataY()[std::get<1>(kInW[bin])] = weights[0];
         }
 
         for (int ne = 0; ne < nScatters; ne++) {
           int nEvents = ne == 0 ? nSingleScatterEvents : nMultiScatterEvents;
 
           weights = simulatePaths(nEvents, ne + 1, rng, invPOfQ, kinc, wValues, detPos, false);
-          if (kInW[bin].second == -1.0) {
+          if (std::get<1>(kInW[bin]) == -1.0) {
             simulationWSs[ne]->getSpectrum(i).mutableY() += weights;
           } else {
-            simulationWSs[ne]->getSpectrum(i).dataY()[bin] = weights[0];
+            simulationWSs[ne]->getSpectrum(i).dataY()[std::get<1>(kInW[bin])] = weights[0];
           }
         }
 
@@ -569,24 +567,36 @@ void DiscusMultipleScatteringCorrection::exec() {
   }
 }
 
-std::vector<std::pair<double, double>>
+/**
+ * Generate a list of the k and w points where calculation results are required. The w points are expressed
+ * as bin indices and values.
+ * The special bin index value -1 means calculate results for all w bins in the innermost calculation loop using a
+ * single set of simulated tracks
+ * @param efixed The fixed energy (or zero if an elastic calculation)
+ * @param xPoints The x points either in momentum (elastic) or energy transfer (inelastic)
+ */
+std::vector<std::tuple<double, int, double>>
 DiscusMultipleScatteringCorrection::generateInputKOutputWList(const double efixed, const std::vector<double> &xPoints) {
-  std::vector<std::pair<double, double>> kInW;
+  std::vector<std::tuple<double, int, double>> kInW;
   const double kFixed = toWaveVector(efixed);
   if (m_EMode == DeltaEMode::Elastic) {
-    std::transform(xPoints.begin(), xPoints.end(), std::back_inserter(kInW),
-                   [](double d) { return std::make_pair(d, 0.); });
+    int index = 0;
+    std::transform(xPoints.begin(), xPoints.end(), std::back_inserter(kInW), [&index](double d) {
+      auto t = std::make_tuple(d, index, 0.);
+      index++;
+      return t;
+    });
   } else {
     if ((!m_simulateEnergiesIndependently) && (m_EMode == DeltaEMode::Direct)) {
-      kInW.emplace_back(std::make_pair(kFixed, -1.0));
+      kInW.emplace_back(std::make_tuple(kFixed, -1, 0.));
     } else {
-      for (auto w : xPoints) { // NB range based for loop doesn't work on temporaries (eg point(i).rawData())??
+      for (size_t i = 0; i < xPoints.size(); i++) {
         if (m_EMode == DeltaEMode::Direct) {
-          kInW.emplace_back(std::make_pair(kFixed, w));
+          kInW.emplace_back(std::make_tuple(kFixed, i, xPoints[i]));
         } else if (m_EMode == DeltaEMode::Indirect) {
-          const double initialE = efixed + w;
+          const double initialE = efixed + xPoints[i];
           const double kin = toWaveVector(initialE);
-          kInW.emplace_back(std::make_pair(kin, w));
+          kInW.emplace_back(std::make_tuple(kin, i, xPoints[i]));
         }
       }
     }

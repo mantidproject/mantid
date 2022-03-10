@@ -98,8 +98,8 @@ private:
   void prepareStructureFactor();
   void convertWsToPoints(API::MatrixWorkspace_sptr &ws);
   std::tuple<double, double> getKinematicRange(double kf, double ki);
-  std::vector<std::pair<double, double>> generateInputKOutputWList(const double efixed,
-                                                                   const std::vector<double> &xPoints);
+  std::vector<std::tuple<double, int, double>> generateInputKOutputWList(const double efixed,
+                                                                         const std::vector<double> &xPoints);
   long long m_callsToInterceptSurface{0};
   std::map<int, int> m_attemptsToGenerateInitialTrack;
   int m_maxScatterPtAttempts;
