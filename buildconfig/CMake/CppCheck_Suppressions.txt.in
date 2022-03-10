@@ -592,11 +592,11 @@ templateRecursion:${CMAKE_SOURCE_DIR}/Framework/MDAlgorithms/src/SliceMD.cpp:300
 useStlAlgorithm:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/FitDomain.cpp:97
 unreadVariable:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/FitDomain.cpp:125
 knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/FitPropertyBrowser.cpp:862
-knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/FitPropertyBrowser.cpp:1644
+knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/FitPropertyBrowser.cpp:1634
 shadowVariable:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/FitPropertyBrowser.cpp:512
-shadowVariable:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/FitPropertyBrowser.cpp:1801
+shadowVariable:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/FitPropertyBrowser.cpp:1791
 constParameter:${CMAKE_SOURCE_DIR}/qt/widgets/common/inc/MantidQtWidgets/Common/PropertyHandler.h:194
-useStlAlgorithm:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/FitPropertyBrowser.cpp:3282
+useStlAlgorithm:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/FitPropertyBrowser.cpp:3251
 useStlAlgorithm:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/FitScriptGeneratorDataTable.cpp:200
 unsignedLessThanZero:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/FitScriptGeneratorModel.cpp:611
 knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/FlowLayout.cpp:131
