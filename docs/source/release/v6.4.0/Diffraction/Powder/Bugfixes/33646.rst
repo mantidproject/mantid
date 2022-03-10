@@ -1,0 +1,1 @@
+- Fixed an issue in :ref:`SNSPowderReduction <algm-SNSPowderReduction>` causing a failure if a reduction was repeated twice.
