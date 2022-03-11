@@ -217,6 +217,17 @@ std::map<std::string, std::string> DiscusMultipleScatteringCorrection::validateI
     }
   }
 
+  const bool simulateEnergiesIndependently = getProperty("SimulateEnergiesIndependently");
+  if (simulateEnergiesIndependently) {
+    if (inputWS->getEMode() == Kernel::DeltaEMode::Elastic)
+      issues["SimulateEnergiesIndependently"] =
+          "SimulateEnergiesIndependently is only applicable to inelastic direct geometry calculations";
+    if (inputWS->getEMode() == Kernel::DeltaEMode::Indirect)
+      issues["SimulateEnergiesIndependently"] =
+          "SimulateEnergiesIndependently is only applicable to inelastic direct geometry calculations. Different "
+          "energy transfer bins are always simulated separately for indirect geometry";
+  }
+
   return issues;
 }
 /**
@@ -340,7 +351,9 @@ void DiscusMultipleScatteringCorrection::exec() {
   if (sigmaSSWS)
     m_sigmaSS = std::make_shared<DataObjects::Histogram1D>(sigmaSSWS->getSpectrum(0));
 
-  double qmax = std::numeric_limits<double>::max();
+  // for inelastic we could calculate the qmax based on the min\max w in the S(Q,w) but that
+  // would bake as assumption that S(Q,w)=0 beyond the limits of the supplied data
+  double qmax = std::numeric_limits<float>::max();
   EFixedProvider efixed(*inputWS);
   m_EMode = efixed.emode();
   g_log.information("EMode=" + DeltaEMode::asString(m_EMode) + " detected");
@@ -355,6 +368,7 @@ void DiscusMultipleScatteringCorrection::exec() {
     totalPoints += m_QSQWS->histogram(i).size();
   }
 
+  m_simulateEnergiesIndependently = getProperty("SimulateEnergiesIndependently");
   // call this function with dummy efixed to determine total possible simulation points
   const auto inputNbins = generateInputKOutputWList(-1.0, inputWS->points(0).rawData()).size();
 
@@ -408,7 +422,6 @@ void DiscusMultipleScatteringCorrection::exec() {
   interpolateOpt.set(getPropertyValue("Interpolation"), false, true);
 
   m_importanceSampling = getProperty("ImportanceSampling");
-  m_simulateEnergiesIndependently = getProperty("SimulateEnergiesIndependently");
 
   Progress prog(this, 0.0, 1.0, nhists * nSimulationPoints);
   prog.setNotifyStep(0.01);
@@ -454,7 +467,7 @@ void DiscusMultipleScatteringCorrection::exec() {
         const double kinc = std::get<0>(kInW[bin]);
         if (kinc <= 0) {
           g_log.warning("Skipping calculation for bin with x<=0, workspace index=" + std::to_string(i) +
-                        " bin index=" + std::to_string(bin));
+                        " bin index=" + std::to_string(std::get<1>(kInW[bin])));
           continue;
         }
 
@@ -590,13 +603,18 @@ DiscusMultipleScatteringCorrection::generateInputKOutputWList(const double efixe
     if ((!m_simulateEnergiesIndependently) && (m_EMode == DeltaEMode::Direct)) {
       kInW.emplace_back(std::make_tuple(kFixed, -1, 0.));
     } else {
-      for (size_t i = 0; i < xPoints.size(); i++) {
+      for (int i = 0; i < static_cast<int>(xPoints.size()); i++) {
         if (m_EMode == DeltaEMode::Direct) {
           kInW.emplace_back(std::make_tuple(kFixed, i, xPoints[i]));
         } else if (m_EMode == DeltaEMode::Indirect) {
           const double initialE = efixed + xPoints[i];
-          const double kin = toWaveVector(initialE);
-          kInW.emplace_back(std::make_tuple(kin, i, xPoints[i]));
+          if (initialE > 0) {
+            const double kin = toWaveVector(initialE);
+            kInW.emplace_back(std::make_tuple(kin, i, xPoints[i]));
+          } else {
+            g_log.warning() << "Calculation for bin with energy transfer " << xPoints[i]
+                            << " will be skipped because initial energy not positive" << std::endl;
+          }
         }
       }
     }
