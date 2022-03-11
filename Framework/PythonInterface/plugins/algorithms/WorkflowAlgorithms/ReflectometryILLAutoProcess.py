@@ -105,6 +105,13 @@ class PropertyNames(object):
 
 class ReflectometryILLAutoProcess(DataProcessorAlgorithm):
 
+    @staticmethod
+    def _get_numor_string(runs):
+        """Returns numor string based on the provided runs list."""
+        if not isinstance(runs, list):
+            runs = [runs]
+        return '+'.join([numor[numor.rfind('/') + 1:-4] for numor in runs])
+
     def category(self):
         """Return the categories of the algorithm."""
         return 'ILL\\Reflectometry;ILL\\Auto;Workflow\\Reflectometry'
@@ -815,10 +822,12 @@ class ReflectometryILLAutoProcess(DataProcessorAlgorithm):
         for angle_index in range(self._dimensionality):
             if len(self._db) == 1:
                 runDB = self.make_name(self._db[0])
+                direct_beam_names = self._get_numor_string(self._db)
             else:
                 runDB = self.make_name(self._db[angle_index])
+                direct_beam_names = self._get_numor_string(self._db[angle_index])
             self.log().accumulate('Angle {0}:\n'.format(angle_index+1))
-            self.log().accumulate('Direct Beam: {0}\n'.format(runDB))
+            self.log().accumulate('Direct Beam(s): {0}\n'.format(direct_beam_names))
             directBeamName = runDB + '_direct'
             directForegroundName = directBeamName + '_frg'
             # always process direct beam; even if it can be the same for different angles,
@@ -826,7 +835,8 @@ class ReflectometryILLAutoProcess(DataProcessorAlgorithm):
             self.process_direct_beam(directBeamName, directForegroundName, angle_index)
             if not self.is_polarized():
                 runRB = self.make_name(self._rb[angle_index])
-                self.log().accumulate('Reflected Beam: {0}\n'.format(runRB))
+                refl_beam_names = self._get_numor_string(self._rb[angle_index])
+                self.log().accumulate('Reflected Beam(s): {0}\n'.format(refl_beam_names))
                 reflectedBeamName = runRB + '_reflected'
                 reflectedBeamInput = self.compose_run_string(self._rb[angle_index])
                 to_convert_to_q = self.process_reflected_beam(reflectedBeamInput, reflectedBeamName, directBeamName, angle_index)
