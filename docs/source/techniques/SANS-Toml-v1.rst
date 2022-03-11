@@ -16,9 +16,11 @@ General Notes
 Format Changes
 ==============
 
-V0 (Mantid 6.1.x) to V1 (Mantid 6.3.x)
+V0 (Mantid 6.1.x) to V1 (Mantid 6.4+)
 --------------------------------------
 
+- *norm_monitor* and *trans_monitor* in *instrument.configuration* now take a monitor name (e.g. "M1") instead of a spectra number
+- *selected_monitor* in *normalisation* and *transmission* has been removed in favour of *instrument.configuration*
 - *normalisation* and *normalization* are both accepted and equivalent
 - *detector.calibration* was renamed to *detector.correction*
 - *mask.beamstop_shadow* and *mask.mask_pixels* were moved to
@@ -1203,14 +1205,14 @@ regions of pixels from the calculation.
     [mask]
     mask_files = ["a.xml", "b.xml", "c.xml"]
 
-:ref:`mask_h-ref`
+.. _mask_h-ref:
 
 MASK[/FRONT][/REAR] Hn
 ----------------------
 
 This command was used to specify a **horizontal row** of detector pixels
 to be omitted from the calculation during data reduction. See also
-:ref:`mask_h_h-ref`.
+:ref:`mask_h-ref`.
 
 The TOML replacement command actually permits several rows to be
 specified at once.
@@ -1239,7 +1241,7 @@ specified at once.
         # Masks horizontal 100 and 200
         detector_rows = [100, 200]
 
-:ref:`mask_h_h-ref`
+:ref:`mask_h-ref`
 
 MASK[/FRONT][/REAR] Hn>Hm
 -------------------------
@@ -1275,14 +1277,14 @@ specified at once.
         # Also includes 130-135 to show multiple can be masked
         detector_row_ranges = [[126, 127], [130, 135]]
 
-:ref:`mask_v-ref`
+.. _mask_v-ref:
 
 MASK[/FRONT][/REAR] Vn
 ----------------------
 
 This command was used to specify a **vertical column** of detector pixels
 to be omitted from the calculation during data reduction. See also
-:ref:`mask_v_v-ref`.
+:ref:`mask_v-ref`.
 
 The TOML replacement command actually permits several columns to be
 specified at once.
@@ -1311,7 +1313,7 @@ specified at once.
         # Masks vertical 100 and 200
         detector_columns = [100, 200]
 
-:ref:`mask_v_v-ref`
+:ref:`mask_v-ref`
 
 MASK[/FRONT][/REAR] Vn>Vm
 -------------------------
@@ -1669,17 +1671,22 @@ rebin of the specified monitor spectrum. This could be useful as a means of
 'smoothing' noisy monitor spectra where the normal rebin command generated
 'stepped' histograms.
 
+Note: The current implementation will always use the same monitor to normalisation
+transmission and sample data i.e. the value set in *instrument.configuration.norm_monitor*.
+
 ..  code-block:: none
+
+  [instrument.configuration]
+    norm_monitor = "Mn"
 
   [normalisation]
     #Normalisation monitor
 
-    # This name is used below so if there was a monitor called FOO1
-    # this would work with it
-    selected_monitor = "M1"
-
     [normalisation.monitor.M1]
-      spectrum_number = n
+      spectrum_number = n1
+
+    [normalisation.monitor.M2]
+      spectrum_number = n2
 
 **Existing Example:**
 
@@ -1694,19 +1701,15 @@ rebin of the specified monitor spectrum. This could be useful as a means of
 
 ..  code-block:: none
 
+  [instrument.configuration]
+    norm_monitor = "M1"
+    trans_monitor = "M2"
+
   [normalisation]
-    #Normalisation monitor
-
-    # This name is used below so if there was a monitor called FOO1
-    # this would work with it
-    selected_monitor = "M1"
-
     [normalisation.monitor.M1]
       spectrum_number = 1
 
   [transmission]
-    selected_monitor = "M2"
-
     [transmission.monitor.M2]
       spectrum_number = 2
 
@@ -2283,7 +2286,7 @@ Unsupported
 .. _trans_mask-ref:
 
 TRANS/MASK=filename
-------------------
+--------------------
 
 This command was used in conjunction with TRANS/RADIUS=r or, more likely,
 TRANS/ROI=filename to *exclude* regions of the detector specified by those
@@ -2375,10 +2378,11 @@ number may, or may not, be the same depending on the instrument!
 
 ..  code-block:: none
 
-    [transmission]
+    [instrument.configuration]
       # Where Mn is arbitrary but must match the section label
-      selected_monitor = "Mn"
+      trans_monitor = "Mn"
 
+    [transmission]
       [transmission.monitor.Mn]
         spectrum_number = s
 
@@ -2392,9 +2396,10 @@ number may, or may not, be the same depending on the instrument!
 
 ..  code-block:: none
 
-    [transmission]
-      selected_monitor = "M3"
+    [instrument.configuration]
+      trans_monitor = "M3"
 
+    [transmission]
       [transmission.monitor.M3]
         spectrum_number = 3
 
@@ -2414,13 +2419,14 @@ transmission monitors.
 
 ..  code-block:: none
 
-    [transmission]
+    [instrument.configuration]
       # Where Mn is arbitrary but must match the section label
-      selected_monitor = "Mn"
+      trans_monitor = "Mn"
 
+    [transmission]
       [transmission.monitor.Mn]
         spectrum_number = s
-		shift = dz
+		    shift = dz
 
 **Existing Example:**
 
@@ -2432,9 +2438,10 @@ transmission monitors.
 
 ..  code-block:: none
 
-    [transmission]
-      selected_monitor = "M4"
+    [instrument.configuration]
+      trans_monitor = "M4"
 
+    [transmission]
       [transmission.monitor.M4]
         spectrum_number = 17788
         shift = -0.012

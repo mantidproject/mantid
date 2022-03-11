@@ -82,8 +82,6 @@ class TomlV1ParserTest(unittest.TestCase):
         supported_keys = [
             ("collimation_length", lambda x: x.get_state_convert_to_q().q_resolution_collimation_length),
             ("gravity_extra_length", lambda x: x.get_state_convert_to_q().gravity_extra_length),
-            ("norm_monitor", lambda x: x.get_state_calculate_transmission().incident_monitor),
-            ("trans_monitor", lambda x: x.get_state_calculate_transmission().transmission_monitor),
             ("sample_aperture_diameter", lambda x: x.get_state_convert_to_q().q_resolution_a2),
             ("sample_offset", lambda x: x.get_state_move(None).sample_offset),
             ("gravity_enabled", lambda x: x.get_state_convert_to_q().use_gravity)
@@ -300,7 +298,13 @@ class TomlV1ParserTest(unittest.TestCase):
         self.assertEqual(q_resolution_dict["moderator_file"], q_resolution.moderator_file)
 
     def test_transmission(self):
-        top_level_dict = {"transmission": {"monitor": {"M3": {}, "M5": {}}}}
+        top_level_dict = {
+            "instrument": {"configuration": {"norm_monitor": "", "trans_monitor": ""}},
+            # A transmission run can be normalised by a different norm monitor. This is useful for cryostats
+            # where a different transmission monitor is used due to physical space limitations on the instrument
+            "normalisation": {"monitor": {"M3": {}, "M5": {}}},
+            "transmission": {"monitor": {"M3": {}, "M5": {}}}
+        }
         monitor_dict = top_level_dict["transmission"]["monitor"]
 
         m3_dict = monitor_dict["M3"]
@@ -309,28 +313,37 @@ class TomlV1ParserTest(unittest.TestCase):
         m3_dict["shift"] = 10
         m3_dict["use_own_background"] = True
 
+        top_level_dict["normalisation"]["monitor"]["M3"]["spectrum_number"] = 100
+
         m5_dict = monitor_dict["M5"]
         m5_dict["spectrum_number"] = 5
         m5_dict["use_own_background"] = False
         m5_dict["shift"] = -10
+        top_level_dict["normalisation"]["monitor"]["M5"]["spectrum_number"] = 200
 
-        top_level_dict["transmission"]["selected_monitor"] = "M3"
+        top_level_dict["instrument"]["configuration"]["norm_monitor"] = "M3"
+        top_level_dict["instrument"]["configuration"]["trans_monitor"] = "M3"
         parser = self._setup_parser(top_level_dict)
         calc_transmission = parser.get_state_calculate_transmission()
+        self.assertEqual(100, calc_transmission.incident_monitor)
+        self.assertEqual(3, calc_transmission.transmission_monitor)
         self.assertEqual(10, parser.get_state_move(None).monitor_4_offset)
         self.assertEqual({'3': 100}, calc_transmission.background_TOF_monitor_start)
         self.assertEqual({'3': 200}, calc_transmission.background_TOF_monitor_stop)
 
         # Check switching the selected monitor picks up correctly
-        top_level_dict["transmission"]["selected_monitor"] = "M5"
+        top_level_dict["instrument"]["configuration"]["norm_monitor"] = "M5"
+        top_level_dict["instrument"]["configuration"]["trans_monitor"] = "M5"
         parser = self._setup_parser(top_level_dict)
         calc_transmission = parser.get_state_calculate_transmission()
+        self.assertEqual(200, calc_transmission.incident_monitor)
+        self.assertEqual(5, calc_transmission.transmission_monitor)
         self.assertEqual(-10, parser.get_state_move(None).monitor_5_offset)
         self.assertFalse(calc_transmission.background_TOF_monitor_start)
         self.assertFalse(calc_transmission.background_TOF_monitor_stop)
 
         with self.assertRaises(KeyError):
-            top_level_dict["transmission"]["selected_monitor"] = "M999"
+            top_level_dict["instrument"]["configuration"]["trans_monitor"] = "M999"
             self._setup_parser(top_level_dict)
 
     def test_transmission_fitting(self):
@@ -369,9 +382,13 @@ class TomlV1ParserTest(unittest.TestCase):
         self.assertIsNotNone(self._setup_parser(top_level_dict))
 
     def test_normalisation_normalization_both_accepted(self):
-        for norm_variant in "normalisation", "normalization":
-            norm_dict = {norm_variant: {"monitor": {"M1": {}, "A2": {}}, "selected_monitor": "M1"}}
-            monitor_dict = norm_dict[norm_variant]["monitor"]
+        for norm_key in "normalisation", "normalization":
+            norm_dict = {
+                "instrument": {"configuration": {"norm_monitor": "M1"}},
+                norm_key: {"monitor": {"M1": {}, "A2": {}}}
+            }
+
+            monitor_dict = norm_dict[norm_key]["monitor"]
 
             m1_dict = monitor_dict["M1"]
             m1_dict["background"] = [100, 200]
@@ -404,9 +421,12 @@ class TomlV1ParserTest(unittest.TestCase):
         self.assertIsNone(parsed_norm_monitors.background_TOF_general_stop)
 
     def test_parse_normalisation(self):
-        # A2 is intentional to check were not hardcoded to Mx
-        top_level_dict = {"normalisation": {"monitor": {"M1": {}, "A2": {}},
-                                            "selected_monitor": ""}}
+        # A2 is intentional to check were not hardcoded to Monitor x (Mx), such that a user could have FooY
+        top_level_dict = {
+            "instrument": {"configuration": {"norm_monitor": ""}},
+            "normalisation": {"monitor": {"M1": {}, "A2": {}}}
+        }
+
         monitor_dict = top_level_dict["normalisation"]["monitor"]
 
         m1_dict = monitor_dict["M1"]
@@ -417,19 +437,21 @@ class TomlV1ParserTest(unittest.TestCase):
         a2_dict["background"] = [400, 800]
         a2_dict["spectrum_number"] = 2
 
-        top_level_dict["normalisation"]["selected_monitor"] = "M1"
+        top_level_dict["instrument"]["configuration"]["norm_monitor"] = "M1"
         parser = self._setup_parser(top_level_dict)
         calc_transmission = parser.get_state_calculate_transmission()
         self.assertEqual({'1': 100}, calc_transmission.background_TOF_monitor_start)
         self.assertEqual({'1': 200}, calc_transmission.background_TOF_monitor_stop)
+        self.assertEqual(1, calc_transmission.incident_monitor)
 
-        top_level_dict["normalisation"]["selected_monitor"] = "A2"
+        top_level_dict["instrument"]["configuration"]["norm_monitor"] = "A2"
         parser = self._setup_parser(top_level_dict)
         calc_transmission = parser.get_state_calculate_transmission()
         self.assertEqual({'2': 400}, calc_transmission.background_TOF_monitor_start)
         self.assertEqual({'2': 800}, calc_transmission.background_TOF_monitor_stop)
+        self.assertEqual(2, calc_transmission.incident_monitor)
 
-        top_level_dict["normalisation"]["selected_monitor"] = "NotThere"
+        top_level_dict["instrument"]["configuration"]["norm_monitor"] = "NotThere"
         with self.assertRaises(KeyError):
             self._setup_parser(top_level_dict)
 

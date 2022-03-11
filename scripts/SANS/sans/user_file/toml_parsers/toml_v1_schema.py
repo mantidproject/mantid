@@ -87,12 +87,10 @@ class TomlSchemaV1Validator(object):
 
         transmission_keys = {"monitor": {"*": {"spectrum_number", "background", "shift", "use_own_background"}},
                              "fitting": {"enabled": None, "function": None, "polynomial_order": None,
-                                         "parameters": {"lambda_min", "lambda_max"}},
-                             "selected_monitor": None}
+                                         "parameters": {"lambda_min", "lambda_max"}}}
 
         normalisation_keys = {"monitor": {"*": {"spectrum_number", "background"}},
-                              "all_monitors": {"background", "enabled"},
-                              "selected_monitor": None}
+                              "all_monitors": {"background", "enabled"}}
 
         mask_keys = {
                      "prompt_peak" : {"start", "stop"},
