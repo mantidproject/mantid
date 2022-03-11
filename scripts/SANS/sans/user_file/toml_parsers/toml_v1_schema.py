@@ -86,6 +86,7 @@ class TomlSchemaV1Validator(object):
                              "h1", "h2", "w1", "w2"}
 
         transmission_keys = {"monitor": {"*": {"spectrum_number", "background", "shift", "use_own_background"}},
+                             "ROI": {"file"},
                              "fitting": {"enabled": None, "function": None, "polynomial_order": None,
                                          "parameters": {"lambda_min", "lambda_max"}}}
 

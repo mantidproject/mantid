@@ -29,7 +29,7 @@ class TomlV1ParserTest(unittest.TestCase):
         data_builder.set_sample_scatter_period(3)
         return data_builder.build()
 
-    def _setup_parser(self, dict_vals):
+    def _setup_parser(self, dict_vals) -> TomlV1Parser:
         def _add_missing_mandatory_key(dict_to_check: Dict, key_path: List[str], replacement_val):
             _dict = dict_to_check
             for key in key_path[0:-1]:
@@ -344,6 +344,48 @@ class TomlV1ParserTest(unittest.TestCase):
 
         with self.assertRaises(KeyError):
             top_level_dict["instrument"]["configuration"]["trans_monitor"] = "M999"
+            self._setup_parser(top_level_dict)
+
+    def test_transmission_monitor_parser_ignores_roi(self):
+        top_level_dict = {
+            "instrument": {"configuration": {"trans_monitor": "ROI"}},
+            "transmission": {"monitor": {"M3": {}},
+                             "ROI": {"file": "foo"}}
+        }
+        monitor_dict = top_level_dict["transmission"]["monitor"]
+
+        m3_dict = monitor_dict["M3"]
+        m3_dict["spectrum_number"] = 3
+        parser = self._setup_parser(top_level_dict)
+        calc_transmission = parser.get_state_calculate_transmission()
+        self.assertEqual(3, calc_transmission.transmission_monitor)
+
+    def test_transmission_monitor_parses_roi(self):
+        expected_file_name = "test.xml"
+        top_level_dict = {
+            "instrument": {"configuration": {"trans_monitor": "ROI"}},
+            "transmission": {"ROI": {"file": expected_file_name}}
+        }
+
+        result = self._setup_parser(top_level_dict)
+        self.assertEqual([expected_file_name], result.get_state_calculate_transmission().transmission_roi_files)
+
+    def test_transmission_monitor_errors_for_multiple_values(self):
+        top_level_dict = {
+            "instrument": {"configuration": {"trans_monitor": "ROI"}},
+            "transmission": {"ROI": {"file": ["test1.xml", "test2.xml"]}}
+        }
+
+        with self.assertRaisesRegex(ValueError, "single file"):
+            self._setup_parser(top_level_dict)
+
+    def test_transmission_monitor_errors_for_empty_value(self):
+        top_level_dict = {
+            "instrument": {"configuration": {"trans_monitor": "ROI"}},
+            "transmission": {"ROI": {"file": ""}}
+        }
+
+        with self.assertRaisesRegex(ValueError, "empty"):
             self._setup_parser(top_level_dict)
 
     def test_transmission_fitting(self):

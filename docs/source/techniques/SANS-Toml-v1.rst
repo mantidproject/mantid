@@ -2306,7 +2306,7 @@ TRANS/MASK=filename command.** See also :ref:`trans_transpec-ref`.
 
 **Replacement Example**
 
-Unsupported, pending future discussion.
+Unsupported, see :ref:`trans_roi-ref`.
 
 .. _trans_radius-ref:
 
@@ -2355,6 +2355,22 @@ filename was expected to be a Mantid mask file in XML format.
 **Note that if also present a TRANS/TRANSPEC=s command would always supersede a
 TRANS/ROI=filename command.** See also :ref:`trans_transpec-ref`.
 
+**Replacement**
+
+..  code-block:: none
+
+    [instrument.configuration]
+      trans_monitor = "ROI"
+
+    [transmission]
+      # This will be ignored:
+      [transmission.monitor.Mn]
+        spectrum_number = s
+
+      [transmission.ROI]
+        file = "roi_file.xml"
+
+
 **Existing Example:**
 
 ..  code-block:: none
@@ -2363,7 +2379,13 @@ TRANS/ROI=filename command.** See also :ref:`trans_transpec-ref`.
 
 **Replacement Example**
 
-Unsupported, pending future discussion.
+    [instrument.configuration]
+      trans_monitor = "ROI"
+
+    [transmission]
+
+      [transmission.ROI]
+        file = "filename.xml"
 
 .. _trans_transpec-ref:
 

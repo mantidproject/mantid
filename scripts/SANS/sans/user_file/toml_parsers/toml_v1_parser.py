@@ -111,6 +111,7 @@ class _TomlV1ParserImpl(TomlParserImplBase):
         self._parse_reduction()
         self._parse_spatial_masks()
         self._parse_transmission()
+        self._parse_transmission_roi()
         self._parse_transmission_fitting()
 
     @property
@@ -142,19 +143,6 @@ class _TomlV1ParserImpl(TomlParserImplBase):
 
     def _parse_instrument_configuration(self):
         inst_config_dict = self.get_val(["instrument", "configuration"])
-
-        # The legacy user file would accept missing spec nums, we want to lock this down in the
-        # TOML parser without affecting backwards compatibility by doing this check upstream
-        selected_norm_monitor = self.get_val("norm_monitor", inst_config_dict)
-        selected_trans_monitor = self.get_val("trans_monitor", inst_config_dict)
-
-        if selected_norm_monitor:
-            self.calculate_transmission.incident_monitor = self.get_mandatory_val(
-                [self._get_normalisation_spelling(), "monitor", selected_norm_monitor, "spectrum_number"])
-
-        if selected_trans_monitor:
-            self.calculate_transmission.transmission_monitor = self.get_mandatory_val(
-                ["transmission", "monitor", selected_trans_monitor, "spectrum_number"])
 
         self.convert_to_q.q_resolution_collimation_length = self.get_val("collimation_length", inst_config_dict)
         self.convert_to_q.gravity_extra_length = self.get_val("gravity_extra_length", inst_config_dict, 0.0)
@@ -316,15 +304,26 @@ class _TomlV1ParserImpl(TomlParserImplBase):
         self.convert_to_q.q_resolution_w2 = self.get_val("w2", q_dict)
 
     def _parse_transmission(self):
-        monitor_name = self.get_val(["instrument", "configuration", "trans_monitor"])
-        if not monitor_name:
+        # The legacy user file would accept missing spec nums, we want to lock this down in the
+        # TOML parser without affecting backwards compatibility by doing this check upstream
+        selected_norm_monitor = self.get_val(["instrument", "configuration", "norm_monitor"])
+        selected_trans_monitor = self.get_val(["instrument", "configuration", "trans_monitor"])
+
+        if selected_norm_monitor:
+            self.calculate_transmission.incident_monitor = self.get_mandatory_val(
+                [self._get_normalisation_spelling(), "monitor", selected_norm_monitor, "spectrum_number"])
+
+        if not selected_trans_monitor or str(selected_trans_monitor).casefold() == "ROI".casefold():
+            # ROI is handled in _parse_transmission_roi()
             return
 
-        # This is mandatory so we don't use get_toml_val
-        transmission_dict = self.get_mandatory_val(["transmission", "monitor", monitor_name])
+        self.calculate_transmission.transmission_monitor = self.get_mandatory_val(
+            ["transmission", "monitor", selected_trans_monitor, "spectrum_number"])
+
+        transmission_dict = self.get_mandatory_val(["transmission", "monitor", selected_trans_monitor])
         monitor_dict = transmission_dict
 
-        if "M5" in monitor_name:
+        if "M5" in selected_trans_monitor:
             self.move.monitor_5_offset = self.get_val("shift", monitor_dict, default=0.0)
         else:
             # Instruments will use monitor 3/4/17788 (not making the last one up) here instead of 4
@@ -341,6 +340,19 @@ class _TomlV1ParserImpl(TomlParserImplBase):
             self.calculate_transmission.background_TOF_monitor_stop.update({str(monitor_spec_num): background[1]})
             self.normalize_to_monitor.background_TOF_monitor_start.update({str(monitor_spec_num): background[0]})
             self.normalize_to_monitor.background_TOF_monitor_stop.update({str(monitor_spec_num): background[1]})
+
+    def _parse_transmission_roi(self):
+        monitor_name = self.get_val(["instrument", "configuration", "trans_monitor"])
+        if not str(monitor_name).casefold() == "ROI".casefold():
+            return
+
+        file = self.get_mandatory_val(["transmission", "ROI", "file"])
+        if not isinstance(file, str):
+            raise ValueError("A single file is currently only accepted for ROI")
+        elif not file:
+            raise ValueError("The ROI filename selected was empty")
+
+        self.calculate_transmission.transmission_roi_files = [file]
 
     def _parse_transmission_fitting(self):
         fit_dict = self.get_val(["transmission", "fitting"])
