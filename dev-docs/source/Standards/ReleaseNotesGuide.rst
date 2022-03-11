@@ -51,8 +51,7 @@ another sub-heading (e.g. Powder Diffraction, Algorithms, MSlice), you need to d
 
 - Add a new directory into the correct part of the filing system. E.g. to add Algorithms to Workbench create the directory ``/Workbench/Algorithm``. The directory name should not contain any spaces.
 - Add ``New_features`` and ``Bugfixes`` directories within your new directory. The automated script only works with these directories.
-- Add a blank .rst file to each of the ``New_features`` and ``Bugfixes`` directories that has the same name as the directory - this is where the automated script amalgamates the separate release notes.
-- Update the top level release note file with your new heading and sub-headings. For each subheading you need to add an include statement with a link to each new blank .rst file to ensure the notes will be visible for users. For this example it may look something like this
+- Update the top level release note file with your new heading and sub-headings. For each subheading you need to add an ``amalgamate`` statement with a link to each new directory to ensure the notes will be visible for users. For this example it may look something like this
 
 .. code-block:: python
 
@@ -61,25 +60,24 @@ another sub-heading (e.g. Powder Diffraction, Algorithms, MSlice), you need to d
 
 	New features
 	############
-	.. include:: Workbench/Algorithm/New_features/New_features.rst
+	.. amalgamate:: Workbench/Algorithm/New_features
 
 	Bugfixes
 	############
-	.. include:: Workbench/Algorithm/Bugfixes/Bugfixes.rst
+	.. amalgamate:: Workbench/Algorithm/Bugfixes
 
 
-Once all the directories and files are in place you can add your release note as a separate file as outlined above.
+Once all the directories are in place you can add your release note as a separate file as outlined above.
 
-You can add sub-headings to a sub-heading if you would like (e.g. ``/Workbench/Algorithm/Fitting``) that is fine to do, so long as your new branch ends with the ``New_features`` and ``Bugfixes`` folders and blank files.
+You can add sub-headings to a sub-heading if you would like (e.g. ``/Workbench/Algorithm/Fitting``) that is fine to do, so long as your new branch ends with the ``New_features`` and ``Bugfixes`` folders.
 
 Previewing release notes
 ------------------------
 
-There are two ways you can preview release notes prior to them being merged in.
+Currently the only  way you can preview release notes prior to them being merged in is as follows:-
 
-1. Build the documents and view the release note from the build folder as a HTML file. You will need to find it in the directory structure and it may take some time if you have not recently built documentation.
-2. Via the Pull Request (PR). You can view the release note on Github and it will show it using basic .rst rendering. You cannot check all the features you might expect to see when the release note is merged in (e.g. you cannot
-   verify links work) but it gives you an idea of how it might look.
+Via a Pull Request (PR): You can view the release note on Github and it will show it using basic .rst rendering. You cannot check all the features you might expect to see when the release note is merged in (e.g. you cannot
+verify links work) but it gives you an idea of how it might look.
 
 
 During release
