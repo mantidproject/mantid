@@ -105,12 +105,8 @@ class PropertyNames(object):
 
 class ReflectometryILLAutoProcess(DataProcessorAlgorithm):
 
-    def __init__(self):
-        """Initialize an instance of the algorithm."""
-        DataProcessorAlgorithm.__init__(self)
-
     def category(self):
-        """Return the categories of the algrithm."""
+        """Return the categories of the algorithm."""
         return 'ILL\\Reflectometry;ILL\\Auto;Workflow\\Reflectometry'
 
     def name(self):
