@@ -10,30 +10,22 @@ Algorithms
 
 New features
 ############
-.. include:: Framework/Algorithms/New_features/New_features.rst
-
-Improvements
-############
-.. include:: Framework/Algorithms/Improvements/Improvements.rst
+.. amalgamate:: Framework/Algorithms/New_features
 
 Bugfixes
 ############
-.. include:: Framework/Algorithms/Bugfixes/Bugfixes.rst
+.. amalgamate:: Framework/Algorithms/Bugfixes
 
 Fit Functions
 -------------
 
 New features
 ############
-.. include:: Framework/Fit_Functions/New_features/New_features.rst
-
-Improvements
-############
-.. include:: Framework/Fit_Functions/Improvements/Improvements.rst
+.. amalgamate:: Framework/Fit_Functions/New_features
 
 Bugfixes
 ############
-.. include:: Framework/Fit_Functions/Bugfixes/Bugfixes.rst
+.. amalgamate:: Framework/Fit_Functions/Bugfixes
 
 
 Data Objects
@@ -41,15 +33,11 @@ Data Objects
 
 New features
 ############
-.. include:: Framework/Data_Objects/New_features/New_features.rst
-
-Improvements
-############
-.. include:: Framework/Data_Objects/Improvements/Improvements.rst
+.. amalgamate:: Framework/Data_Objects/New_features
 
 Bugfixes
 ############
-.. include:: Framework/Data_Objects/Bugfixes/Bugfixes.rst
+.. amalgamate:: Framework/Data_Objects/Bugfixes
 
 
 Python
@@ -57,12 +45,17 @@ Python
 
 New features
 ############
-.. include:: Framework/Python/New_features/New_features.rst
-
-Improvements
-############
-.. include:: Framework/Python/Improvements/Improvements.rst
+.. amalgamate:: Framework/Python/New_features
 
 Bugfixes
 ############
-.. include:: Framework/Python/Bugfixes/Bugfixes.rst
+.. amalgamate:: Framework/Python/Bugfixes
+
+
+Installation
+------------
+
+MantidWorkbench
+---------------
+
+See :doc:`mantidworkbench`.

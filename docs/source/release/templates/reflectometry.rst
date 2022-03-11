@@ -7,14 +7,8 @@ Reflectometry Changes
 
 New Features
 ------------
-.. include:: Reflectometry/New_features/New_features.rst
-
-
-Improvements
-------------
-.. include:: Reflectometry/Improvements/Improvements.rst
-
+.. amalgamate:: Reflectometry/New_features
 
 Bugfixes
 --------
-.. include:: Reflectometry/Bugfixes/Bugfixes.rst
+.. amalgamate:: Reflectometry/Bugfixes

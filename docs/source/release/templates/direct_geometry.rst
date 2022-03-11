@@ -10,15 +10,11 @@ General
 
 New features
 ############
-.. include:: Direct_Geometry/General/New_features/New_features.rst
-
-Improvements
-############
-.. include:: Direct_Geometry/General/Improvements/Improvements.rst
+.. amalgamate:: Direct_Geometry/General/New_features
 
 Bugfixes
 ############
-.. include:: Direct_Geometry/General/Bugfixes/Bugfixes.rst
+.. amalgamate:: Direct_Geometry/General/Bugfixes
 
 
 CrystalField
@@ -26,15 +22,11 @@ CrystalField
 
 New features
 ############
-.. include:: Direct_Geometry/CrystalField/New_features/New_features.rst
-
-Improvements
-############
-.. include:: Direct_Geometry/CrystalField/Improvements/Improvements.rst
+.. amalgamate:: Direct_Geometry/CrystalField/New_features
 
 Bugfixes
 ############
-.. include:: Direct_Geometry/CrystalField/Bugfixes/Bugfixes.rst
+.. amalgamate:: Direct_Geometry/CrystalField/Bugfixes
 
 
 MSlice
@@ -42,13 +34,9 @@ MSlice
 
 New features
 ############
-.. include:: Direct_Geometry/MSlice/New_features/New_features.rst
-
-Improvements
-############
-.. include:: Direct_Geometry/MSlice/Improvements/Improvements.rst
+.. amalgamate:: Direct_Geometry/MSlice/New_features
 
 Bugfixes
 ############
-.. include:: Direct_Geometry/MSlice/Bugfixes/Bugfixes.rst
+.. amalgamate:: Direct_Geometry/MSlice/Bugfixes
 

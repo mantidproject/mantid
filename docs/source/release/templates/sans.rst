@@ -7,14 +7,8 @@ SANS Changes
 
 New Features
 ------------
-.. include:: SANS/New_features/New_features.rst
-
-
-Improvements
-------------
-.. include:: SANS/Improvements/Improvements.rst
-
+.. amalgamate:: SANS/New_features
 
 Bugfixes
 --------
-.. include:: SANS/Bugfixes/Bugfixes.rst
+.. amalgamate:: SANS/Bugfixes

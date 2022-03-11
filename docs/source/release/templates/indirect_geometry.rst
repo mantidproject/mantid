@@ -7,17 +7,12 @@ Indirect Geometry Changes
 
 New Features
 ------------
-.. include:: Indirect/New_features/New_features.rst
-
-
-Improvements
-------------
-.. include:: Indirect/Improvements/Improvements.rst
+.. amalgamate:: Indirect/New_features
 
 
 Bugfixes
 --------
-.. include:: Indirect/Bugfixes/Bugfixes.rst
+.. amalgamate:: Indirect/Bugfixes
 
 
 Algorithms
@@ -25,12 +20,8 @@ Algorithms
 
 New features
 ############
-.. include:: Indirect/Algorithms/New_features/New_features.rst
-
-Improvements
-############
-.. include:: Indirect/Algorithms/Improvements/Improvements.rst
+.. amalgamate:: Indirect/Algorithms/New_features
 
 Bugfixes
 ############
-.. include:: Indirect/Algorithms/Bugfixes/Bugfixes.rst
+.. amalgamate:: Indirect/Algorithms/Bugfixes

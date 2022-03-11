@@ -7,17 +7,12 @@ Mantid Workbench Changes
 
 New Features
 ------------
-.. include:: Workbench/New_features/New_features.rst
-
-
-Improvements
-------------
-.. include:: Workbench/Improvements/Improvements.rst
+.. amalgamate:: Workbench/New_features
 
 
 Bugfixes
 --------
-.. include:: Workbench/Bugfixes/Bugfixes.rst
+.. amalgamate:: Workbench/Bugfixes
 
 
 InstrumentViewer
@@ -25,15 +20,11 @@ InstrumentViewer
 
 New features
 ############
-.. include:: Workbench/InstrumentViewer/New_features/New_features.rst
-
-Improvements
-############
-.. include:: Workbench/InstrumentViewer/Improvements/Improvements.rst
+.. amalgamate:: Workbench/InstrumentViewer/New_features
 
 Bugfixes
 ############
-.. include:: Workbench/InstrumentViewer/Bugfixes/Bugfixes.rst
+.. amalgamate:: Workbench/InstrumentViewer/Bugfixes
 
 
 SliceViewer
@@ -41,13 +32,9 @@ SliceViewer
 
 New features
 ############
-.. include:: Workbench/SliceViewer/New_features/New_features.rst
-
-Improvements
-############
-.. include:: Workbench/SliceViewer/Improvements/Improvements.rst
+.. amalgamate:: Workbench/SliceViewer/New_features
 
 Bugfixes
 ############
-.. include:: Workbench/SliceViewer/Bugfixes/Bugfixes.rst
+.. amalgamate:: Workbench/SliceViewer/Bugfixes
 

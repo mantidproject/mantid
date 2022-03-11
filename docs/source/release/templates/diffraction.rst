@@ -10,15 +10,11 @@ Powder Diffraction
 
 New features
 ############
-.. include:: Diffraction/Powder/New_features/New_features.rst
-
-Improvements
-############
-.. include:: Diffraction/Powder/Improvements/Improvements.rst
+.. amalgamate:: Diffraction/Powder/New_features
 
 Bugfixes
 ############
-.. include:: Diffraction/Powder/Bugfixes/Bugfixes.rst
+.. amalgamate:: Diffraction/Powder/Bugfixes
 
 
 Engineering Diffraction
@@ -26,15 +22,11 @@ Engineering Diffraction
 
 New features
 ############
-.. include:: Diffraction/Engineering/New_features/New_features.rst
-
-Improvements
-############
-.. include:: Diffraction/Engineering/Improvements/Improvements.rst
+.. amalgamate:: Diffraction/Engineering/New_features
 
 Bugfixes
 ############
-.. include:: Diffraction/Engineering/Bugfixes/Bugfixes.rst
+.. amalgamate:: Diffraction/Engineering/Bugfixes
 
 
 Single Crystal Diffraction
@@ -42,12 +34,8 @@ Single Crystal Diffraction
 
 New features
 ############
-.. include:: Diffraction/Single_Crystal/New_features/New_features.rst
-
-Improvements
-############
-.. include:: Diffraction/Single_Crystal/Improvements/Improvements.rst
+.. amalgamate:: Diffraction/Single_Crystal/New_features
 
 Bugfixes
 ############
-.. include:: Diffraction/Single_Crystal/Bugfixes/Bugfixes.rst
+.. amalgamate:: Diffraction/Single_Crystal/Bugfixes

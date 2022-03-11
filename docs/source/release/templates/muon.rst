@@ -9,95 +9,46 @@ Muon Changes
 Frequency Domain Analysis
 -------------------------
 
-New features
-############
-.. include:: Muon/FDA/New_features/New_features.rst
-
-Improvements
-############
-.. include:: Muon/FDA/Improvements/Improvements.rst
-
 Bugfixes
 ############
-.. include:: Muon/FDA/Bugfixes/Bugfixes.rst
+.. amalgamate:: Muon/FDA/Bugfixes
 
 
 Muon Analysis
 -------------
 
-New features
-############
-.. include:: Muon/Muon_Analysis/New_features/New_features.rst
-
-Improvements
-############
-.. include:: Muon/Muon_Analysis/Improvements/Improvements.rst
-
 Bugfixes
 ############
-.. include:: Muon/Muon_Analysis/Bugfixes/Bugfixes.rst
-
+.. amalgamate:: Muon/Muon_Analysis/Bugfixes
 
 
 Muon Analysis and Frequency Domain Analysis
 -------------------------------------------
 
-New features
-############
-.. include:: Muon/MA_FDA/New_features/New_features.rst
-
-Improvements
-############
-.. include:: Muon/MA_FDA/Improvements/Improvements.rst
-
 Bugfixes
 ############
-.. include:: Muon/MA_FDA/Bugfixes/Bugfixes.rst
+.. amalgamate:: Muon/MA_FDA/Bugfixes
 
 
 ALC
 ---
 
-New features
-############
-.. include:: Muon/ALC/New_features/New_features.rst
-
-Improvements
-############
-.. include:: Muon/ALC/Improvements/Improvements.rst
-
 Bugfixes
 ############
-.. include:: Muon/ALC/Bugfixes/Bugfixes.rst
+.. amalgamate:: Muon/ALC/Bugfixes
 
 
 Elemental Analysis
 ------------------
 
-New features
-############
-.. include:: Muon/Elemental_Analysis/New_features/New_features.rst
-
-Improvements
-############
-.. include:: Muon/Elemental_Analysis/Improvements/Improvements.rst
-
 Bugfixes
 ############
-.. include:: Muon/Elemental_Analysis/Bugfixes/Bugfixes.rst
+.. amalgamate:: Muon/Elemental_Analysis/Bugfixes
 
 
 Algorithms
 ----------
 
-New features
-############
-.. include:: Muon/Algorithms/New_features/New_features.rst
-
-Improvements
-############
-.. include:: Muon/Algorithms/Improvements/Improvements.rst
-
 Bugfixes
 ############
-.. include:: Muon/Algorithms/Bugfixes/Bugfixes.rst
+.. amalgamate:: Muon/Algorithms/Bugfixes
