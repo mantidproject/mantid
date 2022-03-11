@@ -377,6 +377,7 @@ public:
     auto testWS = createTestWorkspace();
 
     std::vector<std::string> blocked = {"proton_charge", "S2HGap", "S2VGap"};
+    std::vector<std::string> blocked_pattern = {"proton_charge", "S2?Gap"};
 
     LoadNexusLogs loader;
     loader.setChild(true);
@@ -384,7 +385,7 @@ public:
     loader.setProperty("Workspace", testWS);
     loader.setPropertyValue("Filename", "LARMOR00003368.nxs");
     loader.setPropertyValue("AllowList", "");
-    loader.setProperty<std::vector<std::string>>("BlockList", blocked);
+    loader.setProperty<std::vector<std::string>>("BlockList", blocked_pattern);
     loader.execute();
     TS_ASSERT_THROWS_NOTHING(loader.execute());
 
