@@ -32,7 +32,6 @@ from mantid.kernel import (
 import ILL_utilities as utils
 from ReflectometryILL_common import SampleLogs
 from ReflectometryILLPreprocess import BkgMethod, Prop, SubalgLogging
-from ReflectometryILLSumForeground import SumType
 from mantid.simpleapi import *
 import math
 
@@ -709,6 +708,11 @@ class ReflectometryILLAutoProcess(DataProcessorAlgorithm):
         """Run the ReflectometryILLSumForeground, empty directForegroundName decides, if reflected beam is present."""
         wavelengthRange = [float(self.get_value(PropertyNames.WAVELENGTH_LOWER, angle_index)),
                            float(self.get_value(PropertyNames.WAVELENGTH_UPPER, angle_index))]
+        if directForegroundName == '' and sumType == 'SumInQ':
+            wavelengthRange = [float(self.getProperty(PropertyNames.WAVELENGTH_LOWER).getDefault),
+                               float(self.getProperty(PropertyNames.WAVELENGTH_UPPER).getDefault)]
+            sumType = 'SumInLambda'
+
         directBeamName = directForegroundName[:-4] if directForegroundName else ''
         ReflectometryILLSumForeground(
             InputWorkspace=inputWorkspaceName,
@@ -752,7 +756,9 @@ class ReflectometryILLAutoProcess(DataProcessorAlgorithm):
         dbrun = self._db[0]  if len(self._db) == 1 else self._db[angle_index]
         directBeamInput = self.compose_run_string(dbrun)
         self.preprocess_direct_beam(directBeamInput, directBeamName, angle_index)
-        self.sum_foreground(directBeamName, directForegroundName, SumType.IN_LAMBDA, angle_index)
+        sum_type = self.get_value(PropertyNames.SUM_TYPE, angle_index)
+        sum_type = 'SumInLambda' if sum_type == PropertyNames.INCOHERENT else 'SumInQ'
+        self.sum_foreground(directBeamName, directForegroundName, sum_type, angle_index)
         if self.getProperty(PropertyNames.CACHE_DIRECT_BEAM).value:
             self._autoCleanup.protect(directBeamName)
             self._autoCleanup.protect(directForegroundName)
