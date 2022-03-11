@@ -72,6 +72,15 @@ for blocking a series of logs with similar names), while loading all other sampl
 For both of these options, log entry names should be separated by a space.
 Warning: ``AllowList`` and ``BlockList`` cannot be set at the same time.
 
+NOTE: The pattern matching (globing) in ``BlockList`` supports the following:
+
+- ``*`` matches any sequence of zero or more characters
+- ``?`` matches any single character
+- ``[SET]`` matches any single character in the specified set (``[0-9a-zA-Z_]`` is the set of characters allowed in C identifiers)
+- ``[!SET]`` matches any character not in the specified set
+- To suppress the special syntactic significance of any of ``[]*?!-\``, and match the character exactly, precede it with a backslash.
+- All strings must be UTF-8 encoded
+
 Usage
 -----
 
