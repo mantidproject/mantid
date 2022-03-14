@@ -34,6 +34,8 @@ def detector_angle(run):
             return float(numpy.array(nexus.get('entry0/instrument/DAN/value'), dtype='float'))
         elif nexus.get('entry0/instrument/dan') is not None:
             return float(numpy.array(nexus.get('entry0/instrument/dan/value'), dtype='float'))
+        elif nexus.get('entry0/instrument/VirtualAxis/DAN_actual_angle') is not None:
+            return float(numpy.array(nexus.get('entry0/instrument/VirtualAxis/DAN_actual_angle'), dtype='float'))
         else:
             raise RuntimeError('Cannot retrieve detector angle from Nexus file {}.'.format(run))
 
