@@ -1658,21 +1658,16 @@ the moderator-monitor distance.
 
 Unsupported
 
-MON[/TRANS]/SPECTRUM=n[/INTERPOLATE]
+MON/SPECTRUM=n[/INTERPOLATE]
 ------------------------------------
 
 This command was used to specify which monitor *spectrum* (not number) was to
-be used for normalisation during data reduction. If the /TRANS qualifier was
-present then the command only applied to the normalisation of *transmission*
-spectra.
+be used for normalisation during data reduction.
 
 The optional /INTERPOLATE qualifier could be used to apply an interpolating
 rebin of the specified monitor spectrum. This could be useful as a means of
 'smoothing' noisy monitor spectra where the normal rebin command generated
 'stepped' histograms.
-
-Note: The current implementation will always use the same monitor to normalisation
-transmission and sample data i.e. the value set in *instrument.configuration.norm_monitor*.
 
 ..  code-block:: none
 
@@ -1682,20 +1677,72 @@ transmission and sample data i.e. the value set in *instrument.configuration.nor
   [normalisation]
     #Normalisation monitor
 
-    [normalisation.monitor.M1]
+    [normalisation.monitor.Ma]
       spectrum_number = n1
 
-    [normalisation.monitor.M2]
+    [normalisation.monitor.Mb]
       spectrum_number = n2
 
 **Existing Example:**
 
 ..  code-block:: none
 
-    MON/SPECTRUM=1
-    MON/TRANS/SPECTRUM=2
-
     MON/SPECTRUM=1/INTERPOLATE
+
+**Replacement Example**
+
+..  code-block:: none
+
+  [instrument.configuration]
+    norm_monitor = "M1"
+
+  [normalisation]
+    [normalisation.monitor.M1]
+      spectrum_number = 1
+
+  # If interpolation is also required:
+  [binning]
+    [binning.2d_reduction]
+      interpolate = true
+
+MON/TRANS/SPECTRUM=n[/INTERPOLATE]
+------------------------------------
+
+This command could also be used to specify which monitor *spectrum* (not number) was to
+be used for normalisation during data reduction. As the /TRANS qualifier was
+present the command only applied to the normalisation of *transmission*
+spectra.
+
+..  code-block:: none
+
+  [instrument.configuration]
+    norm_monitor = "Ma"
+    trans_monitor = "Mb"
+
+  [normalisation]
+    #Normalisation monitor
+
+    [normalisation.monitor.Ma]
+      spectrum_number = n1
+
+    [normalisation.monitor.Mb]
+      spectrum_number = n2
+
+    [normalisation.monitor.Mc]
+      spectrum_number = n3
+
+  [transmission]
+    [transmission.monitor.Mb]
+      use_different_norm_monitor = true
+      trans_norm_monitor = "Mc"
+
+**Existing Example:**
+
+..  code-block:: none
+
+    MON/SPECTRUM=1
+    TRANS/TRANSPEC=2
+    MON/TRANS/SPECTRUM=4
 
 **Replacement Example**
 
@@ -1709,9 +1756,14 @@ transmission and sample data i.e. the value set in *instrument.configuration.nor
     [normalisation.monitor.M1]
       spectrum_number = 1
 
+    [normalisation.monitor.M4]
+      spectrum_number = 4
+
   [transmission]
     [transmission.monitor.M2]
       spectrum_number = 2
+      use_different_norm_monitor = true
+      trans_norm_monitor = "M4"
 
   # If interpolation is also required:
   [binning]

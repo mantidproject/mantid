@@ -300,8 +300,6 @@ class TomlV1ParserTest(unittest.TestCase):
     def test_transmission(self):
         top_level_dict = {
             "instrument": {"configuration": {"norm_monitor": "", "trans_monitor": ""}},
-            # A transmission run can be normalised by a different norm monitor. This is useful for cryostats
-            # where a different transmission monitor is used due to physical space limitations on the instrument
             "normalisation": {"monitor": {"M3": {}, "M5": {}}},
             "transmission": {"monitor": {"M3": {}, "M5": {}}}
         }
@@ -345,6 +343,32 @@ class TomlV1ParserTest(unittest.TestCase):
         with self.assertRaises(KeyError):
             top_level_dict["instrument"]["configuration"]["trans_monitor"] = "M999"
             self._setup_parser(top_level_dict)
+
+    def test_transmission_with_different_norm_monitor(self):
+        # A transmission run can be normalised by a different norm monitor. This is useful for cryostats
+        # where a different transmission monitor is used due to physical space limitations on the instrument
+        top_level_dict = {
+            "instrument": {"configuration": {"norm_monitor": "M3", "trans_monitor": "M3"}},
+            "normalisation": {"monitor": {"M3": {}, "M5": {}}},
+            "transmission": {"monitor": {"M3": {}}}
+        }
+
+        monitor_dict = top_level_dict["transmission"]["monitor"]
+        top_level_dict["normalisation"]["monitor"]["M3"]["spectrum_number"] = 3
+        top_level_dict["normalisation"]["monitor"]["M5"]["spectrum_number"] = 5
+
+        m3_dict = monitor_dict["M3"]
+        m3_dict["spectrum_number"] = 3
+        m3_dict["use_different_norm_monitor"] = True
+
+        with self.assertRaises(KeyError):
+            self._setup_parser(top_level_dict)
+
+        m3_dict["trans_norm_monitor"] = "M5"
+        parser = self._setup_parser(top_level_dict)
+        calc_transmission = parser.get_state_calculate_transmission()
+        self.assertEqual(5, calc_transmission.incident_monitor)
+        self.assertEqual(3, calc_transmission.transmission_monitor)
 
     def test_transmission_monitor_parser_ignores_roi(self):
         top_level_dict = {

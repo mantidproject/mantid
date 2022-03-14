@@ -306,21 +306,24 @@ class _TomlV1ParserImpl(TomlParserImplBase):
     def _parse_transmission(self):
         # The legacy user file would accept missing spec nums, we want to lock this down in the
         # TOML parser without affecting backwards compatibility by doing this check upstream
-        selected_norm_monitor = self.get_val(["instrument", "configuration", "norm_monitor"])
         selected_trans_monitor = self.get_val(["instrument", "configuration", "trans_monitor"])
-
-        if selected_norm_monitor:
-            self.calculate_transmission.incident_monitor = self.get_mandatory_val(
-                [self._get_normalisation_spelling(), "monitor", selected_norm_monitor, "spectrum_number"])
-
         if not selected_trans_monitor or str(selected_trans_monitor).casefold() == "ROI".casefold():
             # ROI is handled in _parse_transmission_roi()
             return
+        transmission_dict = self.get_mandatory_val(["transmission", "monitor", selected_trans_monitor])
+
+        if self.get_val("use_different_norm_monitor", transmission_dict):
+            selected_norm_monitor = self.get_mandatory_val(
+                ["transmission", "monitor", selected_trans_monitor, "trans_norm_monitor"])
+        else:
+            selected_norm_monitor = self.get_mandatory_val(["instrument", "configuration", "norm_monitor"])
+
+        self.calculate_transmission.incident_monitor = self.get_mandatory_val(
+            [self._get_normalisation_spelling(), "monitor", selected_norm_monitor, "spectrum_number"])
 
         self.calculate_transmission.transmission_monitor = self.get_mandatory_val(
             ["transmission", "monitor", selected_trans_monitor, "spectrum_number"])
 
-        transmission_dict = self.get_mandatory_val(["transmission", "monitor", selected_trans_monitor])
         monitor_dict = transmission_dict
 
         if "M5" in selected_trans_monitor:

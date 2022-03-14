@@ -85,7 +85,8 @@ class TomlSchemaV1Validator(object):
         q_resolution_keys = {"enabled", "moderator_file", "source_aperture", "delta_r",
                              "h1", "h2", "w1", "w2"}
 
-        transmission_keys = {"monitor": {"*": {"spectrum_number", "background", "shift", "use_own_background"}},
+        transmission_keys = {"monitor": {"*": {"spectrum_number", "background", "shift", "use_own_background",
+                                               "use_different_norm_monitor", "trans_norm_monitor"}},
                              "ROI": {"file"},
                              "fitting": {"enabled": None, "function": None, "polynomial_order": None,
                                          "parameters": {"lambda_min", "lambda_max"}}}
