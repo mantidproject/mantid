@@ -1,0 +1,4 @@
+Replaced the deprecated algorithm AlignDetectors inside the workflow algorithm with the recommended algorithm ApplyDiffCal. The workflow diagrams 
+were updated to show these changes as well.
+
+Fixed a problem with resetting negative values to a given value. This option now works properly. 
