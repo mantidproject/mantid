@@ -505,17 +505,17 @@ class TomlV1ParserTest(unittest.TestCase):
 
         top_level_dict["instrument"]["configuration"]["norm_monitor"] = "M1"
         parser = self._setup_parser(top_level_dict)
-        calc_transmission = parser.get_state_calculate_transmission()
-        self.assertEqual({'1': 100}, calc_transmission.background_TOF_monitor_start)
-        self.assertEqual({'1': 200}, calc_transmission.background_TOF_monitor_stop)
-        self.assertEqual(1, calc_transmission.incident_monitor)
+        norm_to_monitor = parser.get_state_normalize_to_monitor(None)
+        self.assertEqual({'1': 100}, norm_to_monitor.background_TOF_monitor_start)
+        self.assertEqual({'1': 200}, norm_to_monitor.background_TOF_monitor_stop)
+        self.assertEqual(1, norm_to_monitor.incident_monitor)
 
         top_level_dict["instrument"]["configuration"]["norm_monitor"] = "A2"
         parser = self._setup_parser(top_level_dict)
-        calc_transmission = parser.get_state_calculate_transmission()
-        self.assertEqual({'2': 400}, calc_transmission.background_TOF_monitor_start)
-        self.assertEqual({'2': 800}, calc_transmission.background_TOF_monitor_stop)
-        self.assertEqual(2, calc_transmission.incident_monitor)
+        norm_to_monitor = parser.get_state_calculate_transmission()
+        self.assertEqual({'2': 400}, norm_to_monitor.background_TOF_monitor_start)
+        self.assertEqual({'2': 800}, norm_to_monitor.background_TOF_monitor_stop)
+        self.assertEqual(2, norm_to_monitor.incident_monitor)
 
         top_level_dict["instrument"]["configuration"]["norm_monitor"] = "NotThere"
         with self.assertRaises(KeyError):
