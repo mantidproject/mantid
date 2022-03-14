@@ -11,7 +11,7 @@ from typing import Tuple, Sequence, Optional
 # 3rd party
 import numpy as np
 
-from mantidqt.widgets.sliceviewer.transform import NonOrthogonalTransform, OrthogonalTransform
+from mantidqt.widgets.sliceviewer.models.transform import NonOrthogonalTransform, OrthogonalTransform
 
 # Types
 SlicePointType = Optional[float]

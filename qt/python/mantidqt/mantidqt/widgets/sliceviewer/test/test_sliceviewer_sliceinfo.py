@@ -12,7 +12,7 @@ import unittest
 from numpy import full, radians
 
 # local imports
-from mantidqt.widgets.sliceviewer.sliceinfo import SliceInfo
+from mantidqt.widgets.sliceviewer.models.sliceinfo import SliceInfo
 
 
 class SliceInfoTest(unittest.TestCase):

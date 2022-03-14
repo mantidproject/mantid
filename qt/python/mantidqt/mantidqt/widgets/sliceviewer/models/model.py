@@ -6,43 +6,41 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 #  This file is part of the mantid workbench.
 #
-from enum import Enum
-from typing import Dict, List, Sequence, Tuple, Optional
+from typing import Sequence, Tuple, Optional
 
 from mantid.api import MatrixWorkspace, MultipleExperimentInfos
 from mantid.kernel import SpecialCoordinateSystem
 from mantid.plots.datafunctions import get_indices
 from mantid.simpleapi import BinMD, IntegrateMDHistoWorkspace, TransposeMD
+
+from .base_model import SliceViewerBaseModel
+from .workspaceinfo import WorkspaceInfo, WS_TYPE
+
 import numpy as np
 
 from .roi import extract_cuts_matrix, extract_roi_matrix
 
 # Constants
+
 PROJ_MATRIX_LOG_NAME = "W_MATRIX"
 LOG_GET_WS_MDE_ALGORITHM_CALLS = False
 # min width between data limits (data_min, data_max)
 MIN_WIDTH = 1e-5
 
 
-class WS_TYPE(Enum):
-    MDE = 0
-    MDH = 1
-    MATRIX = 2
-
-
-class SliceViewerModel:
+class SliceViewerModel(SliceViewerBaseModel):
     """Store the workspace to be plotted. Can be MatrixWorkspace, MDEventWorkspace or MDHistoWorkspace"""
 
     def __init__(self, ws):
         # reference to the workspace requested to be viewed
-        self._ws = ws
+        super().__init__(ws)
         self.set_ws_name(ws.name())
 
         if isinstance(ws, MatrixWorkspace):
             if ws.getNumberHistograms() < 2:
-                raise ValueError("workspace must contain at least 2 spectrum")
+                raise ValueError("workspace must contain at least 2 spectra")
             if ws.getDimension(0).getNBins() < 2:  # Check number of x bins
-                raise ValueError("workspace must contain at least 2 bin")
+                raise ValueError("workspace must contain at least 2 bins")
         elif isinstance(ws, MultipleExperimentInfos):
             if ws.isMDHistoWorkspace():
                 if ws.getNumNonIntegratedDims() < 2:
@@ -58,7 +56,7 @@ class SliceViewerModel:
         self._xcut_name, self._ycut_name = wsname + '_cut_x', wsname + '_cut_y'
         self._roi_name = wsname + '_roi'
 
-        ws_type = self.get_ws_type()
+        ws_type = WorkspaceInfo.get_ws_type(self._get_ws())
         if ws_type == WS_TYPE.MDE:
             self.get_ws = self.get_ws_MDE
             self.get_data = self.get_data_MDE
@@ -66,7 +64,7 @@ class SliceViewerModel:
             self.get_ws = self._get_ws
             self.get_data = self.get_data_MDH
 
-        if self.get_ws_type() == WS_TYPE.MDE:
+        if WorkspaceInfo.get_ws_type(self._get_ws()) == WS_TYPE.MDE:
             self.export_roi_to_workspace = self.export_roi_to_workspace_mdevent
             self.export_cuts_to_workspace = self.export_cuts_to_workspace_mdevent
             self.export_pixel_cut_to_workspace = self.export_pixel_cut_to_workspace_md
@@ -83,7 +81,7 @@ class SliceViewerModel:
         self._axes_angles = self._calculate_axes_angles()
 
     def can_normalize_workspace(self) -> bool:
-        if self.get_ws_type() == WS_TYPE.MATRIX and not self._get_ws().isDistribution():
+        if WorkspaceInfo.get_ws_type(self._get_ws()) == WS_TYPE.MATRIX and not self._get_ws().isDistribution():
             return True
         return False
 
@@ -93,7 +91,7 @@ class SliceViewerModel:
         Workspace must be an MD workspace, in HKL coordinate system
         and have a defined oriented lattice on the first experiment info.
         """
-        ws_type = self.get_ws_type()
+        ws_type = WorkspaceInfo.get_ws_type(self._get_ws())
         if ws_type == WS_TYPE.MDE or ws_type == WS_TYPE.MDH:
             if self.get_frame() != SpecialCoordinateSystem.HKL:
                 return False
@@ -132,13 +130,6 @@ class SliceViewerModel:
             return has_same_dims and not mdhisto_has_been_altered
         else:
             return False
-
-    def can_support_dynamic_rebinning(self) -> bool:
-        """
-        Check if the given workspace can multiple BinMD calls.
-        """
-        ws_type = self.get_ws_type()
-        return ws_type == WS_TYPE.MDE or (ws_type == WS_TYPE.MDH and self.can_rebin_original_workspace())
 
     def set_ws_name(self, new_name):
         self._ws_name = new_name
@@ -207,69 +198,16 @@ class SliceViewerModel:
             return np.ma.masked_invalid(
                 self.get_ws_MDE(slicepoint, bin_params, limits, dimension_indices).getSignalArray().squeeze())
 
-    def get_dim_limits(self, slicepoint, transpose):
-        """
-        Return a xlim, ylim) for the display dimensions where xlim, ylim are tuples
-        :param slicepoint: Sequence containing either a float or None where None indicates a display dimension
-        :param transpose: A boolean flag indicating if the display dimensions are transposed
-        """
-        xindex, yindex = _display_indices(slicepoint, transpose)
-        workspace = self._get_ws()
-        xdim, ydim = workspace.getDimension(xindex), workspace.getDimension(yindex)
-        return (xdim.getMinimum(), xdim.getMaximum()), (ydim.getMinimum(), ydim.getMaximum())
-
-    def is_ragged_matrix_plotted(self):
-        """
-        :return: bool for if workspace is matrix workspace with non common bins
-        """
-        return self.get_ws_type() == WS_TYPE.MATRIX and not self._get_ws().isCommonBins()
-
-    def get_dim_info(self, n: int) -> dict:
-        """
-        returns dict of (minimum :float, maximum :float, number_of_bins :int,
-                         width :float, name :str, units :str, type :str, can_rebin: bool, qdim: bool) for dimension n
-        """
-        workspace = self._get_ws()
-        dim = workspace.getDimension(n)
-        return {
-            'minimum': dim.getMinimum(),
-            'maximum': dim.getMaximum(),
-            'number_of_bins': dim.getNBins(),
-            'width': dim.getBinWidth(),
-            'name': dim.name,
-            'units': dim.getUnits(),
-            'type': self.get_ws_type().name,
-            'can_rebin': self.can_support_dynamic_rebinning(),
-            'qdim': dim.getMDFrame().isQ()
-        }
-
-    def get_dimensions_info(self) -> List[Dict]:
-        """
-        returns a list of dict for each dimension containing dim_info
-        """
-        return [self.get_dim_info(n) for n in range(self._get_ws().getNumDims())]
-
-    def get_ws_type(self) -> WS_TYPE:
-        if isinstance(self._get_ws(), MatrixWorkspace):
-            return WS_TYPE.MATRIX
-        elif isinstance(self._get_ws(), MultipleExperimentInfos):
-            if self._get_ws().isMDHistoWorkspace():
-                return WS_TYPE.MDH
-            else:
-                return WS_TYPE.MDE
-        else:
-            raise ValueError("Unsupported workspace type")
-
     def get_properties(self):
         """
         @return: a dictionary of properties about this model to compare new models against,
         for example when the model workspace changes outside of the slice viewer.
         """
         return {
-            "workspace_type": self.get_ws_type(),
+            "workspace_type": WorkspaceInfo.get_ws_type(self._get_ws()),
             "supports_normalise": self.can_normalize_workspace(),
             "supports_nonorthogonal_axes": self.can_support_nonorthogonal_axes(),
-            "supports_dynamic_rebinning": self.can_support_dynamic_rebinning(),
+            "supports_dynamic_rebinning": WorkspaceInfo.can_support_dynamic_rebinning(self._get_ws()),
             "supports_peaks_overlays": self.can_support_peaks_overlays()
         }
 
@@ -363,7 +301,7 @@ class SliceViewerModel:
         # Construct parameters to integrate everything first and override per cut
         params = {f'P{n + 1}Bin': [*dim_limits[n]] for n in range(workspace.getNumDims())}
 
-        xindex, yindex = _display_indices(slicepoint)
+        xindex, yindex = WorkspaceInfo.display_indices(slicepoint)
         xdim_min, xdim_max = dim_limits[xindex]
         ydim_min, ydim_max = dim_limits[yindex]
         params['OutputWorkspace'] = self._roi_name
@@ -393,7 +331,7 @@ class SliceViewerModel:
 
         # Construct paramters to integrate everything first and overrid per cut
         params = {f'P{n + 1}Bin': [*dim_limits[n]] for n in range(workspace.getNumDims())}
-        xindex, yindex = _display_indices(slicepoint, transpose)
+        xindex, yindex = WorkspaceInfo.display_indices(slicepoint, transpose)
 
         xcut_name, ycut_name, help_msg = self._cut_names(cut)
         xdim_min, xdim_max = dim_limits[xindex]
@@ -464,7 +402,7 @@ class SliceViewerModel:
         :param axis: A string 'x' or 'y' identifying the axis to cut along
         """
         # Form single pixel limits for a cut
-        xindex, yindex = _display_indices(slicepoint, transpose)
+        xindex, yindex = WorkspaceInfo.display_indices(slicepoint, transpose)
         workspace = self._get_ws()
         deltax, deltay = workspace.getDimension(xindex).getBinWidth(), \
             workspace.getDimension(yindex).getBinWidth()
@@ -515,7 +453,7 @@ class SliceViewerModel:
         if self.can_support_nonorthogonal_axes():
             expt_info = self._get_ws().getExperimentInfo(0)
             lattice = expt_info.sample().getOrientedLattice()
-            if self.get_ws_type() == WS_TYPE.MDH:
+            if WorkspaceInfo.get_ws_type(self._get_ws()) == WS_TYPE.MDH:
                 ws = self._get_ws()
                 ndims = ws.getNumDims()
                 i_qdims = [idim for idim in range(ndims) if ws.getDimension(idim).getMDFrame().isQ()]
@@ -579,7 +517,7 @@ def _roi_binmd_parameters(workspace, slicepoint: Sequence[Optional[float]],
                     not provided the full extent of each dimension is used.
     :return: 3-tuple (binmd parameters, index of X dimension, index of Y dimension)
     """
-    xindex, yindex = _display_indices(slicepoint)
+    xindex, yindex = WorkspaceInfo.display_indices(slicepoint)
     dim_limits = _dimension_limits(workspace, slicepoint, bin_params, dimension_indices, limits)
     ndims = workspace.getNumDims()
     ws_basis = np.eye(ndims)
@@ -647,22 +585,6 @@ def _dimension_bins(workspace) -> Sequence[float]:
     :return: A sequence of floats
     """
     return [workspace.getDimension(i).getNBins() for i in range(workspace.getNumDims())]
-
-
-def _display_indices(slicepoint: Sequence[Optional[float]], transpose: bool = False):
-    """
-    Given a slicepoint sequence return the indices of the display
-    dimensions.
-    :param slicepoint: ND sequence of either None or float. A float defines the point
-                    in that dimension for the slice.
-    :param transpose: If True then swap the indices before return
-    """
-    xindex = slicepoint.index(None)
-    yindex = slicepoint.index(None, xindex + 1)
-    if transpose:
-        return yindex, xindex
-    else:
-        return xindex, yindex
 
 
 def _keep_dimensions(workspace, index):

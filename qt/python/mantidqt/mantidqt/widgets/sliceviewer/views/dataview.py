@@ -1,45 +1,31 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
-# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+# Copyright &copy; 2021 ISIS Rutherford Appleton Laboratory UKRI,
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-#  This file is part of the mantid workbench.
-# std imports
+#  This file is part of the mantidqt
 import sys
 
-# 3rd party imports
-
-import mantid.api
-from mantid.plots.resampling_image import samplingimage
-from mantid.plots.axesfunctions import _pcolormesh_nonortho as pcolormesh_nonorthogonal
-from mantid.plots.datafunctions import get_normalize_by_bin_width
+from qtpy.QtCore import Qt
+from qtpy.QtWidgets import QWidget, QGridLayout, QVBoxLayout, QCheckBox, QLabel, QComboBox, QHBoxLayout, QStatusBar, \
+    QToolButton
 from matplotlib.figure import Figure
-from mpl_toolkits.axisartist import Subplot as CurveLinearSubPlot
-from mpl_toolkits.axisartist.grid_helper_curvelinear import GridHelperCurveLinear
-from qtpy.QtCore import Qt, Signal
-from qtpy.QtWidgets import (QCheckBox, QComboBox, QGridLayout, QLabel, QHBoxLayout, QSplitter, QStatusBar, QToolButton, QVBoxLayout,
-                            QWidget)
+from mpl_toolkits.axisartist import Subplot as CurveLinearSubPlot, GridHelperCurveLinear
 
-# local imports
-from workbench.plotting.mantidfigurecanvas import MantidFigureCanvas
+from mantid.plots import get_normalize_by_bin_width
+from mantid.plots.axesfunctions import _pcolormesh_nonortho as pcolormesh_nonorthogonal
+from mantid.plots.resampling_image import samplingimage
 from mantidqt.widgets.colorbar.colorbar import ColorbarWidget
-from mantidqt.widgets.sliceviewer.dimensionwidget import DimensionWidget
-from .imageinfowidget import ImageInfoWidget, ImageInfoTracker
-from .lineplots import LinePlots
-from .toolbar import SliceViewerNavigationToolbar, ToolItemText
-from .peaksviewer.workspaceselection import \
-    (PeaksWorkspaceSelectorModel, PeaksWorkspaceSelectorPresenter,
-     PeaksWorkspaceSelectorView)
-from .peaksviewer.view import PeaksViewerCollectionView
-from .peaksviewer.representation.painter import MplPainter
-from .zoom import ScrollZoomMixin
-
-# Constants
-from ..observers.observing_view import ObservingView
+from mantidqt.widgets.sliceviewer.presenters.imageinfowidget import ImageInfoWidget, ImageInfoTracker
+from mantidqt.widgets.sliceviewer.presenters.lineplots import LinePlots
+from mantidqt.widgets.sliceviewer.views.dataviewsubscriber import IDataViewSubscriber
+from mantidqt.widgets.sliceviewer.views.dimensionwidget import DimensionWidget
+from mantidqt.widgets.sliceviewer.views.toolbar import SliceViewerNavigationToolbar, ToolItemText
+from mantidqt.widgets.sliceviewer.presenters.zoom import ScrollZoomMixin
+from workbench.plotting.mantidfigurecanvas import MantidFigureCanvas
 
 DBLMAX = sys.float_info.max
-
 SCALENORM = "SliceViewer/scale_norm"
 POWERSCALE = "SliceViewer/scale_norm_power"
 
@@ -51,7 +37,7 @@ class SliceViewerCanvas(ScrollZoomMixin, MantidFigureCanvas):
 class SliceViewerDataView(QWidget):
     """The view for the data portion of the sliceviewer"""
 
-    def __init__(self, presenter, dims_info, can_normalise, parent=None, conf=None):
+    def __init__(self, presenter: IDataViewSubscriber, dims_info, can_normalise, parent=None, conf=None):
         super().__init__(parent)
 
         self.presenter = presenter
@@ -107,7 +93,7 @@ class SliceViewerDataView(QWidget):
         self.fig.set_facecolor(self.palette().window().color().getRgbF())
         self.canvas = SliceViewerCanvas(self.fig)
         self.canvas.mpl_connect('button_release_event', self.mouse_release)
-        self.canvas.mpl_connect('button_press_event', self.presenter.add_delete_peak)
+        self.canvas.mpl_connect('button_press_event', self.presenter.canvas_clicked)
 
         self.colorbar_label = QLabel("Colormap")
         self.colorbar_layout.addWidget(self.colorbar_label)
@@ -134,7 +120,7 @@ class SliceViewerDataView(QWidget):
         self.mpl_toolbar.regionSelectionClicked.connect(self.on_region_selection_toggle)
         self.mpl_toolbar.homeClicked.connect(self.on_home_clicked)
         self.mpl_toolbar.nonOrthogonalClicked.connect(self.on_non_orthogonal_axes_toggle)
-        self.mpl_toolbar.zoomPanClicked.connect(self.presenter.deactivate_peak_adding)
+        self.mpl_toolbar.zoomPanClicked.connect(self.presenter.zoom_pan_clicked)
         self.mpl_toolbar.zoomPanFinished.connect(self.on_data_limits_changed)
         self.toolbar_layout.addWidget(self.mpl_toolbar)
 
@@ -177,7 +163,11 @@ class SliceViewerDataView(QWidget):
         self.nonortho_transform = None
         self.ax = self.fig.add_subplot(111, projection='mantid')
         self.enable_zoom_on_mouse_scroll(redraw_on_zoom)
-        self.ax.grid(self.grid_on)
+        if self.grid_on:
+            self.ax.grid(self.grid_on)
+        if self.line_plots_active:
+            self.add_line_plots()
+
         self.plot_MDH = self.plot_MDH_orthogonal
 
         self.canvas.draw_idle()
@@ -403,7 +393,7 @@ class SliceViewerDataView(QWidget):
 
     def on_home_clicked(self):
         """Reset the view to encompass all of the data"""
-        self.presenter.show_all_data_requested()
+        self.presenter.show_all_data_clicked()
 
     def on_line_plots_toggle(self, state):
         """Switch state of the line plots"""
@@ -491,8 +481,9 @@ class SliceViewerDataView(QWidget):
         """
         If not visible sets the grid visibility
         """
-        self._grid_on = True
-        self.mpl_toolbar.set_action_checked(ToolItemText.GRID, state=self._grid_on)
+        if not self._grid_on:
+            self._grid_on = True
+            self.mpl_toolbar.set_action_checked(ToolItemText.GRID, state=self._grid_on)
 
     def set_nonorthogonal_transform(self, transform):
         """
@@ -573,94 +564,3 @@ class SliceViewerDataView(QWidget):
         if scale == 'Power':
             exponent = self.colorbar.powerscale_value
             self.conf.set(POWERSCALE, exponent)
-
-
-class SliceViewerView(QWidget, ObservingView):
-    """Combines the data view for the slice viewer with the optional peaks viewer."""
-    close_signal = Signal()
-    rename_signal = Signal(str)
-
-    def __init__(self, presenter, dims_info, can_normalise, parent=None, window_flags=Qt.Window, conf=None):
-        super().__init__(parent)
-
-        self.presenter = presenter
-
-        self.setWindowFlags(window_flags)
-        self.setAttribute(Qt.WA_DeleteOnClose, True)
-
-        self._splitter = QSplitter(self)
-        self._data_view = SliceViewerDataView(presenter, dims_info, can_normalise, self, conf)
-        self._splitter.addWidget(self._data_view)
-        #  peaks viewer off by default
-        self._peaks_view = None
-
-        # config the splitter appearance
-        splitterStyleStr = """QSplitter::handle{
-            border: 1px dotted gray;
-            min-height: 10px;
-            max-height: 20px;
-            }"""
-        self._splitter.setStyleSheet(splitterStyleStr)
-        self._splitter.setHandleWidth(1)
-
-        layout = QHBoxLayout(self)
-        layout.setContentsMargins(0, 0, 0, 0)
-        layout.addWidget(self._splitter)
-        self.setLayout(layout)
-
-        # connect up additional peaks signals
-        self.data_view.mpl_toolbar.peaksOverlayClicked.connect(self.peaks_overlay_clicked)
-        self.close_signal.connect(self._run_close)
-        self.rename_signal.connect(self._on_rename)
-
-    @property
-    def data_view(self):
-        return self._data_view
-
-    @property
-    def dimensions(self):
-        return self._data_view.dimensions
-
-    @property
-    def peaks_view(self) -> PeaksViewerCollectionView:
-        """Lazily instantiates PeaksViewer and returns it"""
-        if self._peaks_view is None:
-            self._peaks_view = PeaksViewerCollectionView(MplPainter(self.data_view), self.presenter)
-            self._splitter.addWidget(self._peaks_view)
-
-        return self._peaks_view
-
-    def peaks_overlay_clicked(self):
-        """Peaks overlay button has been toggled
-        """
-        self.presenter.overlay_peaks_workspaces()
-
-    def query_peaks_to_overlay(self, current_overlayed_names):
-        """Display a dialog to the user to ask which peaks to overlay
-        :param current_overlayed_names: A list of names that are currently overlayed
-        :returns: A list of workspace names to overlay on the display
-        """
-        model = PeaksWorkspaceSelectorModel(mantid.api.AnalysisDataService.Instance(),
-                                            checked_names=current_overlayed_names)
-        view = PeaksWorkspaceSelectorView(self)
-        presenter = PeaksWorkspaceSelectorPresenter(view, model)
-        return presenter.select_peaks_workspaces()
-
-    def set_peaks_viewer_visible(self, on):
-        """
-        Set the visibility of the PeaksViewer.
-        :param on: If True make the view visible, else make it invisible
-        :return: The PeaksViewerCollectionView
-        """
-        self.peaks_view.set_visible(on)
-
-    def close(self):
-        self.presenter.notify_close()
-        super().close()
-
-    def _run_close(self):
-        # handles the signal emitted from ObservingView.emit_close
-        self.close()
-
-    def _on_rename(self, new_title):
-        self.setWindowTitle(new_title)
