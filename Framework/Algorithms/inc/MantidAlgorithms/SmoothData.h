@@ -37,7 +37,7 @@ namespace Algorithms {
     @author Russell Taylor, Tessella Support Services plc
     @date 23/10/2008
 */
-class MANTID_ALGORITHMS_DLL SmoothData : public API::Algorithm {
+class MANTID_ALGORITHMS_DLL SmoothData final : public API::Algorithm {
 public:
   /// Algorithm's name
   const std::string name() const override { return "SmoothData"; }

@@ -16,7 +16,7 @@ using namespace Mantid::API;
 namespace Mantid {
 namespace Muon {
 
-class MANTID_MUON_DLL MuonGroupingAsymmetry : public API::Algorithm {
+class MANTID_MUON_DLL MuonGroupingAsymmetry final : public API::Algorithm {
 public:
   MuonGroupingAsymmetry() : API::Algorithm() {}
   virtual ~MuonGroupingAsymmetry() = default;

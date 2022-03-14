@@ -86,7 +86,7 @@ private:
   bool m_previouslyRemovedBkgMode;
 };
 
-class MANTID_ALGORITHMS_DLL RemoveBackground : public API::Algorithm {
+class MANTID_ALGORITHMS_DLL RemoveBackground final : public API::Algorithm {
 public:
   RemoveBackground() {}
   RemoveBackground(const RemoveBackground &) = delete;

@@ -27,7 +27,7 @@ namespace ICat {
   @author Sofia Antony, ISIS Rutherford Appleton Laboratory
   @date 07/07/2010
 */
-class MANTID_ICAT_DLL CatalogGetDataSets : public API::Algorithm {
+class MANTID_ICAT_DLL CatalogGetDataSets final : public API::Algorithm {
 public:
   /// constructor for CatalogGetDataSets
   CatalogGetDataSets() : API::Algorithm() {}

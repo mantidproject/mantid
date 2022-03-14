@@ -48,7 +48,7 @@ namespace Algorithms {
     @author Russell Taylor, Tessella
     @date 03/02/2011
 */
-class MANTID_ALGORITHMS_DLL IQTransform : public API::Algorithm {
+class MANTID_ALGORITHMS_DLL IQTransform final : public API::Algorithm {
 public:
   IQTransform();
   const std::string name() const override { return "IQTransform"; }

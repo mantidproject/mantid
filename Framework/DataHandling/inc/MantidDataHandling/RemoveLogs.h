@@ -55,7 +55,7 @@ namespace DataHandling {
     @author Vickie Lynch, SNS
     @date 26/04/2012
 */
-class DLLExport RemoveLogs : public API::Algorithm {
+class DLLExport RemoveLogs final : public API::Algorithm {
 public:
   /// Default constructor
   RemoveLogs();

@@ -40,7 +40,7 @@ Required Properties:
 
 @author Martyn Gigg, Tessella plc
 */
-class DLLExport UpdateInstrumentFromFile : public API::Algorithm {
+class DLLExport UpdateInstrumentFromFile final : public API::Algorithm {
 public:
   /// Default constructor
   UpdateInstrumentFromFile();

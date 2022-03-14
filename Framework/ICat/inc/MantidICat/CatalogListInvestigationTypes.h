@@ -19,7 +19,7 @@ namespace ICat {
  @author Sofia Antony, STFC Rutherford Appleton Laboratory
  @date 12/08/2010
  */
-class MANTID_ICAT_DLL CatalogListInvestigationTypes : public API::Algorithm {
+class MANTID_ICAT_DLL CatalogListInvestigationTypes final : public API::Algorithm {
 public:
   /// constructor
   CatalogListInvestigationTypes() : API::Algorithm() {}

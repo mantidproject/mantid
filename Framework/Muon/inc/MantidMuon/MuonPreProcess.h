@@ -17,7 +17,7 @@ using namespace Mantid::DataObjects;
 namespace Mantid {
 namespace Muon {
 
-class MANTID_MUON_DLL MuonPreProcess : public API::Algorithm {
+class MANTID_MUON_DLL MuonPreProcess final : public API::Algorithm {
 public:
   MuonPreProcess() : API::Algorithm() {}
   virtual ~MuonPreProcess() = default;

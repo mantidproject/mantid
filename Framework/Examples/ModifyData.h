@@ -15,7 +15,7 @@ namespace Algorithms {
     @author Roman Tolchenov, ISIS, RAL
     @date 02/05/2008
  */
-class ModifyData : public API::Algorithm {
+class ModifyData final : public API::Algorithm {
 public:
   /// no arg constructor
   ModifyData() : API::Algorithm() {}

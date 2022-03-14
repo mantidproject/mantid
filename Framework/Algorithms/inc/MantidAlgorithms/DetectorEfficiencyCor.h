@@ -67,7 +67,7 @@ namespace Algorithms {
     @author Steve Williams based on code by T.G.Perring
     @date 6/10/2009
 */
-class MANTID_ALGORITHMS_DLL DetectorEfficiencyCor : public API::Algorithm {
+class MANTID_ALGORITHMS_DLL DetectorEfficiencyCor final : public API::Algorithm {
 public:
   DetectorEfficiencyCor();
   /// Algorithm's name for identification overriding a virtual method

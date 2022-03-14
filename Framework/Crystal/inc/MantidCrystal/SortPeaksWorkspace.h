@@ -16,7 +16,7 @@ namespace Crystal {
 /** SortPeaksWorkspace : Sort a PeaksWorkspace by a range of properties. Only
   allow sorting of one property at a time.
 */
-class MANTID_CRYSTAL_DLL SortPeaksWorkspace : public API::Algorithm {
+class MANTID_CRYSTAL_DLL SortPeaksWorkspace final : public API::Algorithm {
 public:
   const std::string name() const override;
   /// Summary of algorithms purpose

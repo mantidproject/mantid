@@ -41,7 +41,7 @@ namespace MPIAlgorithms {
    created by the root process.</LI>
     </UL>
 */
-class GatherWorkspaces : public API::Algorithm {
+class GatherWorkspaces final : public API::Algorithm {
 public:
   /// (Empty) Constructor
   GatherWorkspaces() : API::Algorithm() {}

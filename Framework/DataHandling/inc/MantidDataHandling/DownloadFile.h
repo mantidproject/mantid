@@ -23,7 +23,7 @@ namespace DataHandling {
 class DLLExport DownloadFile : public API::Algorithm {
 public:
   DownloadFile();
-  ~DownloadFile() override;
+  virtual ~DownloadFile() override;
 
   const std::string name() const override;
   int version() const override;

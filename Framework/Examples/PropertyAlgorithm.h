@@ -15,7 +15,7 @@ namespace Algorithms {
     @author Roman Tolchenov, ISIS, RAL
     @date 01/05/2008
  */
-class PropertyAlgorithm : public API::Algorithm {
+class PropertyAlgorithm final : public API::Algorithm {
 public:
   /// no arg constructor
   PropertyAlgorithm() : API::Algorithm() {}

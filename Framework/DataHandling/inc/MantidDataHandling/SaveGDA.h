@@ -17,7 +17,7 @@
 namespace Mantid {
 namespace DataHandling {
 
-class MANTID_DATAHANDLING_DLL SaveGDA : public API::Algorithm {
+class MANTID_DATAHANDLING_DLL SaveGDA final : public API::Algorithm {
 public:
   const std::string name() const override;
 

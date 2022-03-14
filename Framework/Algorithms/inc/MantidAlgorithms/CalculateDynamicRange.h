@@ -15,7 +15,7 @@ namespace Algorithms {
 /** CalculateDynamicRange
  * Calculates the Qmin and Qmax of SANS workspace, sets to sample logs.
  */
-class MANTID_ALGORITHMS_DLL CalculateDynamicRange : public API::Algorithm {
+class MANTID_ALGORITHMS_DLL CalculateDynamicRange final : public API::Algorithm {
 public:
   const std::string name() const override;
   int version() const override;

@@ -28,7 +28,7 @@ Required Properties:
 @author Roman Tolchenov, Tessella plc
 @date 03/03/2011
 */
-class DLLExport SaveISISNexus : public API::Algorithm {
+class DLLExport SaveISISNexus final : public API::Algorithm {
 public:
   /// Default constructor
   SaveISISNexus();

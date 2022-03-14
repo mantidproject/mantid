@@ -26,7 +26,7 @@ namespace MPIAlgorithms {
    broadcast (default: 0).</LI>
     </UL>
 */
-class BroadcastWorkspace : public API::Algorithm {
+class BroadcastWorkspace final : public API::Algorithm {
 public:
   /// (Empty) Constructor
   BroadcastWorkspace() : API::Algorithm() {}

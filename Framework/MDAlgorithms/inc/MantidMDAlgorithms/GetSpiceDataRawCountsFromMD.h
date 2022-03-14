@@ -18,7 +18,7 @@ namespace MDAlgorithms {
   values from
     IMDEventWorkspaces from the output of algorithm ConvertSpiceDataToRealSpace.
 */
-class DLLExport GetSpiceDataRawCountsFromMD : public API::Algorithm {
+class DLLExport GetSpiceDataRawCountsFromMD final : public API::Algorithm {
 public:
   /// Algorithm's name
   const std::string name() const override { return "GetSpiceDataRawCountsFromMD"; }

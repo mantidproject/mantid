@@ -15,7 +15,7 @@ namespace DataHandling {
 
 /** SaveFullprofResolution : TODO: DESCRIPTION
  */
-class DLLExport SaveFullprofResolution : public API::Algorithm {
+class DLLExport SaveFullprofResolution final : public API::Algorithm {
 public:
   SaveFullprofResolution();
   /// Algorithm's name

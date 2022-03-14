@@ -30,7 +30,7 @@ namespace ICat {
  @author Sofia Antony, ISIS Rutherford Appleton Laboratory
  @date 07/07/2010
 */
-class MANTID_ICAT_DLL CatalogDownloadDataFiles : public API::Algorithm {
+class MANTID_ICAT_DLL CatalogDownloadDataFiles final : public API::Algorithm {
 public:
   /// Constructor
   CatalogDownloadDataFiles() : API::Algorithm(), m_prog(0.0) {}

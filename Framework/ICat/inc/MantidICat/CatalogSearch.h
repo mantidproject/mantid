@@ -39,7 +39,7 @@ namespace ICat {
   @author Sofia Antony, ISIS Rutherford Appleton Laboratory
   @date 04/11/2013
  */
-class MANTID_ICAT_DLL CatalogSearch : public API::Algorithm {
+class MANTID_ICAT_DLL CatalogSearch final : public API::Algorithm {
 public:
   /// constructor
   CatalogSearch() : API::Algorithm() {}

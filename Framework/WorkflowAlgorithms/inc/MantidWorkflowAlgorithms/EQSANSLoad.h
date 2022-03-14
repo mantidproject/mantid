@@ -21,7 +21,7 @@ namespace WorkflowAlgorithms {
     Subtract dark current for EQSANS.
 */
 
-class DLLExport EQSANSLoad : public API::Algorithm {
+class DLLExport EQSANSLoad final : public API::Algorithm {
 public:
   /// Constructor
   EQSANSLoad()

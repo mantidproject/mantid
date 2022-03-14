@@ -22,7 +22,7 @@ namespace MDAlgorithms {
  * @author Janik Zikovsky
  * @date 2011-04-13 18:11:53.496539
  */
-class DLLExport IntegratePeaksCWSD : public API::Algorithm {
+class DLLExport IntegratePeaksCWSD final : public API::Algorithm {
 public:
   IntegratePeaksCWSD();
 

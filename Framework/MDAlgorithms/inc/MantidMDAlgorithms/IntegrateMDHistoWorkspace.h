@@ -17,7 +17,7 @@ namespace MDAlgorithms {
 /** IntegrateMDHistoWorkspace : Algorithm to perform axis aligned integration of
   an MDHistoWorkspace.
 */
-class DLLExport IntegrateMDHistoWorkspace : public API::Algorithm {
+class DLLExport IntegrateMDHistoWorkspace final : public API::Algorithm {
 public:
   const std::string name() const override;
   int version() const override;

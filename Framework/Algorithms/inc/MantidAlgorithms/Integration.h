@@ -40,7 +40,7 @@ namespace Algorithms {
    false)</LI>
     </UL>
  */
-class MANTID_ALGORITHMS_DLL Integration : public API::Algorithm {
+class MANTID_ALGORITHMS_DLL Integration final : public API::Algorithm {
 public:
   /// Algorithm's name for identification overriding a virtual method
   const std::string name() const override { return "Integration"; }
