@@ -109,6 +109,8 @@ class ReflectometryILLAutoProcess(DataProcessorAlgorithm):
         """Returns numor string based on the provided runs list."""
         if not isinstance(runs, list):
             runs = [runs]
+        if isinstance(runs[0], list):
+            runs = runs[0]
         return '+'.join([numor[numor.rfind('/') + 1:-4] for numor in runs])
 
     def category(self):
