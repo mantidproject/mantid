@@ -42,12 +42,14 @@ toml_file_version
 This is always the first line of the file and represents the TOML
 file version. Long-term this allows us to make changes in a backwards compatible way.
 
-Available TOML Versions: 0
+Available TOML Versions:
+
+- 1
 
 ..  code-block:: none
 
   # First line of file
-  toml_file_version = 0
+  toml_file_version = 1
 
   # Everything else
 

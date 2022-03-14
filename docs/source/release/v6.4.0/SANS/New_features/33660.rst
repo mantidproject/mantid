@@ -1,0 +1,4 @@
+- The SANS TOML format has been bumped from V0 to V1. This formally
+represents forwards compatibility of the .TOML format. All V1 files will continue
+to be supported in future versions of Mantid without requiring changes.
+See :ref:`sans_toml_v1-ref` for details.
