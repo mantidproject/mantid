@@ -36,6 +36,10 @@ def get_mantid_memory_info() -> Tuple[int, float]:
     Returns following process memory usage information obtained using psutil
     mantid_mem_used_percent : Used  memory by the current process in percentage
     mantid_mem_used_GB : Used memory by the current process in Gigabytes(GB)
+
+    Returns following system memory usage information
+    obtained using psutil.virtual_memory
+    mem_total_GB : Total available system memory in GB
     """
     current_process = psutil.Process(os.getpid())
     mantid_mem_used = current_process.memory_info().rss
@@ -44,4 +48,5 @@ def get_mantid_memory_info() -> Tuple[int, float]:
     if mantid_mem_used_percent < 0.1:
         mantid_mem_used_percent = 0.1
     mantid_mem_used_GB = mantid_mem_used * CONVERSION_FACTOR_BYTES_TO_GB
-    return mantid_mem_used_percent, mantid_mem_used_GB
+    mem_total_GB = mem_total * CONVERSION_FACTOR_BYTES_TO_GB
+    return mantid_mem_used_percent, mantid_mem_used_GB, mem_total_GB

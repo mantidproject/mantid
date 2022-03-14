@@ -7,7 +7,7 @@
 #  This file is part of the mantidqt package
 #
 #
-from ..memorywidget.memoryinfo import get_memory_info
+from ..memorywidget.memoryinfo import get_memory_info, get_mantid_memory_info
 from ...utils.asynchronous import set_interval
 
 TIME_INTERVAL_MEMORY_USAGE_UPDATE = 2.000  # in s
@@ -24,6 +24,7 @@ class MemoryPresenter(object):
         self.update_allowed = True
         self.set_bar_color_at_start()
         self.update_memory_usage()
+        self.update_mantid_memory_usage()
         self.thread_stopper = self.update_memory_usage_threaded()
 
     def __del__(self):
@@ -47,6 +48,7 @@ class MemoryPresenter(object):
         Calls update_memory_usage once every TIME_INTERVAL_MEMORY_USAGE_UPDATE
         """
         self.update_memory_usage()
+        self.update_mantid_memory_usage()
 
     def update_memory_usage(self):
         """
@@ -55,6 +57,14 @@ class MemoryPresenter(object):
         if self.update_allowed:
             mem_used_percent, mem_used, mem_avail = get_memory_info()
             self.view.invoke_set_value(mem_used_percent, mem_used, mem_avail)
+
+    def update_mantid_memory_usage(self):
+        """
+        Gets memory usage information and passes it to the view
+        """
+        if self.update_allowed:
+            mantid_mem_used_percent, mantid_mem_used, mem_avail = get_mantid_memory_info()
+            self.view.invoke_mantid_set_value(mantid_mem_used_percent, mantid_mem_used, mem_avail)
 
     def cancel_memory_update(self):
         """
