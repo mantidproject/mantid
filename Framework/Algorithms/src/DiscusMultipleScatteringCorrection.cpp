@@ -377,8 +377,9 @@ void DiscusMultipleScatteringCorrection::exec() {
   if (isEmpty(nSimulationPoints) || nSimulationPoints > inputNbins) {
     if (!isEmpty(nSimulationPoints)) {
       g_log.warning() << "The requested number of simulation points is larger "
-                         "than the spectra size. "
-                         "Defaulting to spectra size.\n";
+                         "than the maximum number of simulations per spectra. "
+                         "Defaulting to "
+                      << inputNbins << ".\n ";
     }
     nSimulationPoints = inputNbins;
   }
@@ -611,10 +612,9 @@ DiscusMultipleScatteringCorrection::generateInputKOutputWList(const double efixe
           if (initialE > 0) {
             const double kin = toWaveVector(initialE);
             kInW.emplace_back(std::make_tuple(kin, i, xPoints[i]));
-          } else {
-            g_log.warning() << "Calculation for bin with energy transfer " << xPoints[i]
-                            << " will be skipped because initial energy not positive" << std::endl;
-          }
+          } else
+            // negative kinc is filtered out later
+            kInW.emplace_back(std::make_tuple(-1.0, i, xPoints[i]));
         }
       }
     }

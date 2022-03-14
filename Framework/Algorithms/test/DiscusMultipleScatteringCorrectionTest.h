@@ -523,7 +523,8 @@ public:
 
   void run_test_inelastic_on_realistic_structure_factor(const DeltaEMode::Type emode, int nPaths,
                                                         bool importanceSampling, bool simulateWSeparately,
-                                                        double expWeightMinusOne, double expWeightPlusOne) {
+                                                        int numberSimulationPoints, double expWeightMinusOne,
+                                                        double expWeightPlusOne) {
     // run test on a realistic structure factor. Validate against results in original Discus paper
 
     // calculate the S(Q,w) values based on a Lorentzian
@@ -594,6 +595,8 @@ public:
     alg->setProperty("NumberScatterings", NSCATTERINGS);
     alg->setProperty("NeutronPathsSingle", 200);
     alg->setProperty("NeutronPathsMultiple", nPaths);
+    if (numberSimulationPoints > 0)
+      alg->setProperty("NumberOfSimulationPoints", numberSimulationPoints);
     alg->setProperty("ImportanceSampling", importanceSampling);
     alg->setProperty("SimulateEnergiesIndependently", simulateWSeparately);
     alg->execute();
@@ -620,20 +623,25 @@ public:
   }
 
   void test_direct_on_realistic_structure_factor_with_importance_sampling() {
-    run_test_inelastic_on_realistic_structure_factor(DeltaEMode::Direct, 1000, true, false, 0.00022, 0.00017);
+    run_test_inelastic_on_realistic_structure_factor(DeltaEMode::Direct, 1000, true, false, -1, 0.00022, 0.00017);
   }
 
   void test_direct_on_realistic_structure_factor_without_importance_sampling() {
-    run_test_inelastic_on_realistic_structure_factor(DeltaEMode::Direct, 1000, false, false, 0.00022, 0.00017);
+    run_test_inelastic_on_realistic_structure_factor(DeltaEMode::Direct, 1000, false, false, -1, 0.00022, 0.00017);
   }
 
   void test_direct_on_realistic_structure_factor_without_importance_sampling_simulate_w_separately() {
-    run_test_inelastic_on_realistic_structure_factor(DeltaEMode::Direct, 1000, false, true, 0.00022, 0.00017);
+    run_test_inelastic_on_realistic_structure_factor(DeltaEMode::Direct, 1000, false, true, -1, 0.00022, 0.00017);
   }
 
   void test_indirect_on_realistic_structure_factor_without_importance_sampling() {
     // results are not vastly different to the direct geometry
-    run_test_inelastic_on_realistic_structure_factor(DeltaEMode::Indirect, 1000, false, false, 0.00024, 0.00021);
+    run_test_inelastic_on_realistic_structure_factor(DeltaEMode::Indirect, 1000, false, false, -1, 0.00022, 0.00021);
+  }
+
+  void test_indirect_on_realistic_structure_factor_with_deltaE_interpolation() {
+    // only run simulation on half of the deltaE bins (even indices) and interpolate the rest (odd indices)
+    run_test_inelastic_on_realistic_structure_factor(DeltaEMode::Indirect, 1000, false, false, 40, 0.00023, 0.00021);
   }
 
   //---------------------------------------------------------------------------
