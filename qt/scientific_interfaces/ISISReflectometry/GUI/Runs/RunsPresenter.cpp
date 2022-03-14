@@ -12,14 +12,12 @@
 #include "GUI/RunsTable/RunsTablePresenter.h"
 #include "IRunsView.h"
 #include "MantidAPI/AlgorithmManager.h"
+#include "MantidKernel/Logger.h"
 #include "MantidQtWidgets/Common/AlgorithmRunner.h"
 #include "MantidQtWidgets/Common/ProgressPresenter.h"
 #include "QtCatalogSearcher.h"
 
 #include <algorithm>
-#include <fstream>
-#include <iterator>
-#include <sstream>
 #include <utility>
 #include <vector>
 
@@ -28,6 +26,10 @@
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
 using namespace MantidQt::MantidWidgets;
+
+namespace {
+Mantid::Kernel::Logger g_log("Reflectometry RunsPresenter");
+} // namespace
 
 namespace MantidQt::CustomInterfaces::ISISReflectometry {
 
@@ -474,6 +476,7 @@ std::string RunsPresenter::liveDataReductionAlgorithm() { return "ReflectometryR
 
 std::string RunsPresenter::liveDataReductionOptions(const std::string &inputWorkspace, const std::string &instrument) {
   // Get the properties for the reduction algorithm from the settings tabs
+  g_log.warning("Note that lookup of experiment settings by angle/title is not supported for live data.");
   auto options = m_mainPresenter->rowProcessingProperties();
   // Add other required input properties to the live data reduction algorithnm
   options->setPropertyValue("InputWorkspace", inputWorkspace);
