@@ -151,6 +151,11 @@ class RawDataExplorerPresenter(QObject):
         Change the current working directory and update the tree view
         @param new_working_directory : the path to the new working directory, which exists
         """
+        # discover the directory's content first, so that it is already cached when Qt creates the new root
+        # on linux, it noticeably improves reactivity when opening a big directory
+        os.listdir(new_working_directory)
+
+        # set the new root
         self.view.repositoryPath.setText(new_working_directory)
         self.view.fileTree.model().setRootPath(new_working_directory)
         self.view.fileTree.setRootIndex(self.view.fileTree.model().index(new_working_directory))
