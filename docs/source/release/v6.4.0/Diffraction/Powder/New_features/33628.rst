@@ -1,0 +1,1 @@
+Added possibility to correct vanadium measurement with seperate empty measurement. This was necessary to reduce up to date measurements from POWGEN.
