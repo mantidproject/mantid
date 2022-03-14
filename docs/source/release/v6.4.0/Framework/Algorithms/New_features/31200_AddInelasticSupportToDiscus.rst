@@ -1,2 +1,3 @@
 - :ref:`DiscusMultipleScatteringCorrection <algm-DiscusMultipleScatteringCorrection>` now supports inelastic instruments (direct and indirect).
-  Note that this improvement has involved two breaking changes: the parameter SofqWorkspace has been renamed to StructureFactorWorkspace and the EMode parameter has been dropped (with the mode being determined from the workspace instead)
+  Note that this improvement has involved several breaking changes: the parameter SofqWorkspace has been renamed to StructureFactorWorkspace, the parameter NumberOfWavelengthPoints has been renamed NumberOfSimulationPoints and the EMode parameter has been dropped (with the mode being determined from the workspace instead)
+  The algorithm also now requires the input workspace for elastic calculations to have units of Momentum (k) instead of wavelength
