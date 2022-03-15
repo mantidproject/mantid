@@ -16,11 +16,15 @@ General Notes
 Format Changes
 ==============
 
-V0 (Mantid 6.1.x) to V1 (Mantid 6.4+)
+V1 (Mantid 6.3+) to V1 (Mantid 6.4+)
 --------------------------------------
 
-- *norm_monitor* and *trans_monitor* in *instrument.configuration* now take a monitor name (e.g. "M1") instead of a spectra number
-- *selected_monitor* in *normalisation* and *transmission* has been removed in favour of *instrument.configuration*
+- *norm_monitor* and *trans_monitor* in *instrument.configuration* now take a monitor name (e.g. "M1") instead of a spectrum number
+- *selected_monitor* in *normalisation* and *transmission* has been removed in favour of this change in *instrument.configuration*
+
+V0 (Mantid 6.1.x) to V1 (Mantid 6.3+)
+--------------------------------------
+
 - *normalisation* and *normalization* are both accepted and equivalent
 - *detector.calibration* was renamed to *detector.correction*
 - *mask.beamstop_shadow* and *mask.mask_pixels* were moved to
