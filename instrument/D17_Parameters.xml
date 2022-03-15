@@ -26,10 +26,11 @@
 		</parameter>
 		<!-- MergeRuns behavior when merging sample logs. -->
 		<parameter name="sample_logs_sum" type="string" visible="false">
-			<value val="duration, monitor1.monsum, monitor2.monsum, PSD.detsum, time" />
+			<value val="duration, monitor1.monsum, monitor2.monsum, PSD.detsum" />
 		</parameter>
 		<parameter name="sample_logs_time_series" type="string" visible="false">
-			<value val="sample.temperature" />
+		        <value val="sample.temperature, time, Chopper1.speed_average, Chopper1.phase_average,
+			            Chopper2.speed_average, Chopper2.phase_average" />
 		</parameter>
 		<parameter name="sample_logs_warn" type="string" visible="false">
 			<value val="sample.temperature" />

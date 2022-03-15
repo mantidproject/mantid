@@ -132,6 +132,7 @@ class ReflectometryILLPreprocess(DataProcessorAlgorithm):
 
         ws, monWS = self._extractMonitors(ws)
 
+        self._recalculate_average_chopper_params(ws)
         self._addSampleLogInfo(ws)
 
         if self.getPropertyValue('AngleOption')=='DetectorAngle' and self.getPropertyValue('Measurement')=='ReflectedBeam':
@@ -418,6 +419,20 @@ class ReflectometryILLPreprocess(DataProcessorAlgorithm):
         )
         return ws
 
+    def _recalculate_average_chopper_params(self, ws):
+
+        run = ws.run()
+        time = run.getProperty('time').value
+        logs_to_average = ['chopper1.speed_average', 'chopper1.phase_average',
+                           'chopper2.speed_average', 'chopper2.phase_average']
+        for log in logs_to_average:
+            if run.hasProperty(log):
+                param = run.getProperty(log).value
+                if not isinstance(param, np.ndarray):
+                    continue
+                param = np.sum(param * time) / np.sum(time)
+                run.addProperty(log, float(param), True)
+
     def _addSampleLogInfo(self, ws):
         """Add foreground indices (start, center, end), names start with reduction."""
         run = ws.run()
@@ -456,7 +471,7 @@ class ReflectometryILLPreprocess(DataProcessorAlgorithm):
             self._cleanup.cleanup(detWS)
             return normalisedWS
         elif method == FluxNormMethod.TIME:
-            t = detWS.run().getProperty('time').value
+            t = detWS.run().getProperty('duration').value
             normalisedWSName = self._names.withSuffix('normalised_to_time')
             scaledWS = Scale(
                 InputWorkspace=detWS,
