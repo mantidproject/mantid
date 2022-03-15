@@ -75,7 +75,7 @@ class TomlSchemaV1Validator(object):
 
         binning_keys = {"wavelength": {"start", "step", "stop", "type", "binning"},
                         "1d_reduction": {"binning", "radius_cut", "wavelength_cut"},
-                        "2d_reduction": {"step", "stop", "type", "interpolate"}}
+                        "2d_reduction": {"step", "stop", "type"}}
 
         reduction_keys = {"merged": {"rescale": {"min", "max", "use_fit"},
                                      "shift": {"min", "max", "use_fit", "factor"},

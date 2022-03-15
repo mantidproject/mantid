@@ -1664,16 +1664,11 @@ the moderator-monitor distance.
 
 Unsupported
 
-MON/SPECTRUM=n[/INTERPOLATE]
+MON/SPECTRUM=n
 ------------------------------------
 
 This command was used to specify which monitor *spectrum* (not number) was to
 be used for normalisation during data reduction.
-
-The optional /INTERPOLATE qualifier could be used to apply an interpolating
-rebin of the specified monitor spectrum. This could be useful as a means of
-'smoothing' noisy monitor spectra where the normal rebin command generated
-'stepped' histograms.
 
 ..  code-block:: none
 
@@ -1693,7 +1688,7 @@ rebin of the specified monitor spectrum. This could be useful as a means of
 
 ..  code-block:: none
 
-    MON/SPECTRUM=1/INTERPOLATE
+    MON/SPECTRUM=1
 
 **Replacement Example**
 
@@ -1706,14 +1701,30 @@ rebin of the specified monitor spectrum. This could be useful as a means of
     [normalisation.monitor.M1]
       spectrum_number = 1
 
-  # If interpolation is also required:
-  [binning]
-    [binning.2d_reduction]
-      interpolate = true
+.. _mon_interpolate-ref:
 
-MON/TRANS/SPECTRUM=n[/INTERPOLATE]
+MON [/INTERPOLATE]
+------------------
+The optional /INTERPOLATE qualifier could be used to apply an interpolating
+rebin of the specified monitor spectrum. This could be useful as a means of
+'smoothing' noisy monitor spectra where the normal rebin command generated
+'stepped' histograms.
+
+This command has been been made obsolete by the switch to monitors running
+in Event mode.
+
+**Existing Example:**
+
+..  code-block:: none
+
+    MON/SPECTRUM=1/INTERPOLATE
+
+**Replacement Example**
+
+Unsupported - Obsolete
+
+MON/TRANS/SPECTRUM=n
 ------------------------------------
-
 This command could also be used to specify which monitor *spectrum* (not number) was to
 be used for normalisation during data reduction. As the /TRANS qualifier was
 present the command only applied to the normalisation of *transmission*
@@ -1775,6 +1786,11 @@ spectra.
   [binning]
     [binning.2d_reduction]
       interpolate = true
+
+MON/TRANS[/INTERPOLATE]
+-----------------------
+
+See :ref:`mon_interpolate-ref`.
 
 PRINT string
 ------------

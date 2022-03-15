@@ -172,14 +172,13 @@ class TomlV1ParserTest(unittest.TestCase):
         self.assertEqual(12.3, one_d_convert_to_q.radius_cutoff)
         self.assertEqual(23.4, one_d_convert_to_q.wavelength_cutoff)
 
-        two_d_reduction_q_dict = {"binning": {"2d_reduction": {"step": 1.0, "stop": 5.0,
-                                                               "type": "Lin", "interpolate": True}}}
+        two_d_reduction_q_dict = {"binning": {"2d_reduction": {"step": 1.0, "stop": 5.0, "type": "Lin"}}}
         results = self._setup_parser(two_d_reduction_q_dict)
         two_d_convert_to_q = results.get_state_convert_to_q()
         self.assertEqual(5.0, two_d_convert_to_q.q_xy_max)
         self.assertEqual(1.0, two_d_convert_to_q.q_xy_step)
         self.assertTrue(two_d_convert_to_q.q_xy_step_type is RangeStepType.LIN)
-        self.assertTrue(results.get_state_calculate_transmission().rebin_type is RebinType.INTERPOLATING_REBIN)
+        self.assertTrue(results.get_state_calculate_transmission().rebin_type is RebinType.REBIN)
 
     def test_reduction_commands_parsed(self):
         top_level_dict = {"reduction": {"merged": {},

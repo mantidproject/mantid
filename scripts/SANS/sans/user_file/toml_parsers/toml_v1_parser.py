@@ -241,10 +241,9 @@ class _TomlV1ParserImpl(TomlParserImplBase):
         if two_d_step_type:
             self.convert_to_q.q_xy_step_type = RangeStepType(two_d_step_type)
 
-        rebin_type = self.get_val(["2d_reduction", "interpolate"], binning_dict, default=False)
-        rebin_type = RebinType.INTERPOLATING_REBIN if rebin_type else RebinType.REBIN
-        self.calculate_transmission.rebin_type = rebin_type
-        self.normalize_to_monitor.rebin_type = rebin_type
+        # We could previous interpolate. This is now obsolete, see the docs for details
+        self.calculate_transmission.rebin_type = RebinType.REBIN
+        self.normalize_to_monitor.rebin_type = RebinType.REBIN
 
     def _parse_reduction(self):
         reduction_dict = self.get_val(["reduction"])
