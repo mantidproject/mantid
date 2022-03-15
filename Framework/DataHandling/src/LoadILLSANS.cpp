@@ -127,7 +127,12 @@ void LoadILLSANS::exec() {
     progress.report("Loading the instrument " + m_instrumentName);
     runLoadInstrument();
 
-    double distance = firstEntry.getFloat(instrumentPath + "/Det/value") / 1000; // mm to metre
+    double distance;
+    try {
+      distance = firstEntry.getFloat(instrumentPath + "/Det/value") / 1000; // mm to metre
+    } catch (...) {
+      distance = 1;
+    }
     const double angle = firstEntry.getFloat(instrumentPath + "/Gamma/value");
     placeD16(-angle, distance, "detector");
 
@@ -257,17 +262,23 @@ void LoadILLSANS::initWorkSpace(NeXus::NXEntry &firstEntry, const std::string &i
 
   m_isD16Omega = (data.dim0() == 1 && data.dim2() > 1 && m_instrumentName == "D16");
 
+  if (m_instrumentName == "D16" && data.dim1() == 1152 && data.dim2() == 192) {
+    m_instrumentName = "D16B";
+    m_isD16Omega = true;
+  }
+
   if (m_isD16Omega) {
     numberOfHistograms = static_cast<size_t>(data.dim1() * data.dim2()) + N_MONITORS;
   } else {
     numberOfHistograms = static_cast<size_t>(data.dim0() * data.dim1()) + N_MONITORS;
   }
-  createEmptyWorkspace(numberOfHistograms, 1);
+  createEmptyWorkspace(numberOfHistograms, data.dim0());
   loadMetaData(firstEntry, instrumentPath);
 
   size_t nextIndex;
   nextIndex = loadDataFromTubes(data, m_defaultBinning, 0);
-  loadDataFromMonitors(firstEntry, nextIndex);
+  if (m_instrumentName != "D16B")
+    loadDataFromMonitors(firstEntry, nextIndex);
   if (data.dim1() == 128) {
     m_resMode = "low";
   }
@@ -562,38 +573,63 @@ size_t LoadILLSANS::loadDataFromTubes(NeXus::NXInt &data, const std::vector<doub
                                       const MultichannelType type) {
   int numberOfTubes;
   int numberOfChannels;
-  const int numberOfPixelsPerTube = data.dim1();
+  int numberOfPixelsPerTube = data.dim1();
 
-  if (m_isD16Omega) {
-    // D16 with omega scan case
-    numberOfTubes = data.dim2();
+  if (m_instrumentName == "D16B") {
     numberOfChannels = data.dim0();
-  } else {
-    numberOfTubes = data.dim0();
-    numberOfChannels = data.dim2();
-  }
+    numberOfTubes = data.dim1();
+    numberOfPixelsPerTube = data.dim2();
 
-  PARALLEL_FOR_IF(Kernel::threadSafe(*m_localWorkspace))
-  for (int i = 0; i < numberOfTubes; ++i) {
-    for (int j = 0; j < numberOfPixelsPerTube; ++j) {
-      int *data_p;
-      if (m_isD16Omega) {
-        data_p = &data(0, i, j);
-      } else {
-        data_p = &data(i, j, 0);
+    PARALLEL_FOR_IF(Kernel::threadSafe(*m_localWorkspace))
+    for (int i = 0; i < numberOfTubes; i++) {
+      for (int j = 0; j < numberOfPixelsPerTube; j++) {
+        std::vector<int> spectrum;
+        spectrum.reserve(numberOfChannels);
+        for (int k = 0; k < numberOfChannels; k++) {
+          spectrum.push_back(data(k, i, j));
+        }
+        const size_t index = firstIndex + i * numberOfPixelsPerTube + j;
+        //      const HistogramData::BinEdges binEdges(timeBinning);
+        //      m_localWorkspace->setBinEdges(index, binEdges);
+        const HistogramData::Counts histoCounts(spectrum.begin(), spectrum.end());
+        const HistogramData::CountVariances histoVariances(spectrum.begin(), spectrum.end());
+
+        m_localWorkspace->setCounts(index, histoCounts);
+        m_localWorkspace->setCountVariances(index, histoVariances);
       }
-      const size_t index = firstIndex + i * numberOfPixelsPerTube + j;
-      const HistogramData::Counts histoCounts(data_p, data_p + numberOfChannels);
-      const HistogramData::CountVariances histoVariances(data_p, data_p + numberOfChannels);
-      m_localWorkspace->setCounts(index, histoCounts);
-      m_localWorkspace->setCountVariances(index, histoVariances);
+    }
+  } else {
+    if (m_isD16Omega) {
+      // D16 with omega scan case
+      numberOfTubes = data.dim2();
+      numberOfChannels = data.dim0();
+    } else {
+      numberOfTubes = data.dim0();
+      numberOfChannels = data.dim2();
+    }
 
-      if (type == MultichannelType::KINETIC) {
-        const HistogramData::Points histoPoints(timeBinning);
-        m_localWorkspace->setPoints(index, histoPoints);
-      } else {
-        const HistogramData::BinEdges binEdges(timeBinning);
-        m_localWorkspace->setBinEdges(index, binEdges);
+    PARALLEL_FOR_IF(Kernel::threadSafe(*m_localWorkspace))
+    for (int i = 0; i < numberOfTubes; ++i) {
+      for (int j = 0; j < numberOfPixelsPerTube; ++j) {
+        int *data_p;
+        if (m_isD16Omega) {
+          data_p = &data(0, i, j);
+        } else {
+          data_p = &data(i, j, 0);
+        }
+        const size_t index = firstIndex + i * numberOfPixelsPerTube + j;
+        const HistogramData::Counts histoCounts(data_p, data_p + numberOfChannels);
+        const HistogramData::CountVariances histoVariances(data_p, data_p + numberOfChannels);
+        m_localWorkspace->setCounts(index, histoCounts);
+        m_localWorkspace->setCountVariances(index, histoVariances);
+
+        if (type == MultichannelType::KINETIC) {
+          const HistogramData::Points histoPoints(timeBinning);
+          m_localWorkspace->setPoints(index, histoPoints);
+        } else {
+          const HistogramData::BinEdges binEdges(timeBinning);
+          m_localWorkspace->setBinEdges(index, binEdges);
+        }
       }
     }
   }
@@ -610,6 +646,7 @@ size_t LoadILLSANS::loadDataFromTubes(NeXus::NXInt &data, const std::vector<doub
 void LoadILLSANS::createEmptyWorkspace(const size_t numberOfHistograms, const size_t numberOfChannels,
                                        const MultichannelType type) {
   const size_t numberOfElementsInX = numberOfChannels + ((type == MultichannelType::TOF && !m_isD16Omega) ? 1 : 0);
+  std::cout << numberOfElementsInX << "  " << numberOfChannels << std::endl;
   m_localWorkspace =
       WorkspaceFactory::Instance().create("Workspace2D", numberOfHistograms, numberOfElementsInX, numberOfChannels);
   if (type == MultichannelType::TOF) {
@@ -800,7 +837,7 @@ void LoadILLSANS::loadMetaData(const NeXus::NXEntry &entry, const std::string &i
 
   double wavelength;
   if (getPointerToProperty("Wavelength")->isDefault()) {
-    if (m_instrumentName == "D16") {
+    if (m_instrumentName == "D16" || m_instrumentName == "D16B") {
       wavelength = entry.getFloat(instrumentNamePath + "/Beam/wavelength");
     } else {
       wavelength = entry.getFloat(instrumentNamePath + "/selector/wavelength");
