@@ -65,19 +65,35 @@
 		  <value val="Chopper1.speed_average" valid-from="2021-04-02T00:00:00"/>
 		</parameter>
 		<parameter name="chopper1_phase" type="string" visible="false">
-		  <!-- The sample log name for the chopper1 speed -->
+		  <!-- The sample log name for the chopper1 phase -->
 		  <value val="VirtualChopper.chopper1_phase_average" valid-to="2021-04-01T23:59:59"/>
 		  <value val="Chopper1.phase_average" valid-from="2021-04-02T00:00:00"/>
 		</parameter>
 		<parameter name="chopper2_speed" type="string" visible="false">
-		  <!-- The sample log name for the chopper1 speed -->
+		  <!-- The sample log name for the chopper2 speed -->
 		  <value val="VirtualChopper.chopper2_speed_average" valid-to="2021-04-01T23:59:59"/>
 		  <value val="Chopper2.speed_average" valid-from="2021-04-02T00:00:00"/>
 		</parameter>
 		<parameter name="chopper2_phase" type="string" visible="false">
-		  <!-- The sample log name for the chopper1 speed -->
+		  <!-- The sample log name for the chopper2 phase -->
 		  <value val="VirtualChopper.chopper2_phase_average" valid-to="2021-04-01T23:59:59"/>
 		  <value val="Chopper2.phase_average" valid-from="2021-04-02T00:00:00"/>
+		</parameter>
+		<parameter name="chopper1_speed_alt" type="string" visible="false">
+		  <!-- The sample log name for the alternative chopper1 speed, for short runs -->
+		  <value val="Chopper1.rotation_speed"/>
+		</parameter>
+		<parameter name="chopper1_phase_alt" type="string" visible="false">
+		  <!-- The sample log name for the alternative chopper1 phase, for short runs -->
+		  <value val="Chopper1.phase"/>
+		</parameter>
+		<parameter name="chopper2_speed_alt" type="string" visible="false">
+		  <!-- The sample log name for the alternative chopper2 speed, for short runs -->
+		  <value val="Chopper2.rotation_speed"/>
+		</parameter>
+		<parameter name="chopper2_phase_alt" type="string" visible="false">
+		  <!-- The sample log name for the alternative chopper2 phase, for short runs -->
+		  <value val="Chopper2.phase"/>
 		</parameter>
 		<parameter name="logbook_default_parameters" type="string" visible="false">
 		  <value val="proposal:/entry0/user/proposal:s,

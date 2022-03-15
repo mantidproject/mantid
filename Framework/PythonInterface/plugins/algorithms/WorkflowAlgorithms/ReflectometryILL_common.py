@@ -44,13 +44,18 @@ def chopperOpeningAngle(sampleLogs, instrument):
     """Return the chopper opening angle in degrees."""
     instrumentName = instrument.getName()
     if instrumentName == 'D17':
-        chopper1PhaseName = instrument.getStringParameter('chopper1_phase')[0]
+        duration = sampleLogs.getProperty('duration').value
+        if duration > 30.0:
+            chopper1PhaseName = instrument.getStringParameter('chopper1_phase')[0]
+            chopper2PhaseName = instrument.getStringParameter('chopper2_phase')[0]
+        else:
+            chopper1PhaseName = instrument.getStringParameter('chopper1_phase_alt')[0]
+            chopper2PhaseName = instrument.getStringParameter('chopper2_phase_alt')[0]
         chopper1Phase = sampleLogs.getProperty(chopper1PhaseName).value
         chopperWindow = sampleLogs.getProperty('ChopperWindow').value
         if chopper1Phase > 360.:
             # Workaround for broken old D17 NeXus files.
             chopper1Phase = sampleLogs.getProperty('VirtualChopper.chopper2_speed_average').value
-        chopper2PhaseName = instrument.getStringParameter('chopper2_phase')[0]
         chopper2Phase = sampleLogs.getProperty(chopper2PhaseName).value
         openoffset = sampleLogs.getProperty('VirtualChopper.open_offset').value
         return chopperWindow - (chopper2Phase - chopper1Phase) - openoffset
@@ -62,13 +67,13 @@ def chopperOpeningAngle(sampleLogs, instrument):
         if sampleLogs.hasProperty(phase1Entry):
             chopper1Phase = sampleLogs.getProperty(phase1Entry).value
         else:
-            speedEntry = 'chopper{}.phase'.format(firstChopper)
-            chopper1Phase = sampleLogs.getProperty(speedEntry).value
+            phaseEntry = 'chopper{}.phase'.format(firstChopper)
+            chopper1Phase = sampleLogs.getProperty(phaseEntry).value
         if sampleLogs.hasProperty(phase2Entry):
             chopper2Phase = sampleLogs.getProperty(phase2Entry).value
         else:
-            speedEntry = 'chopper{}.phase'.format(secondChopper)
-            chopper2Phase = sampleLogs.getProperty(speedEntry).value
+            phaseEntry = 'chopper{}.phase'.format(secondChopper)
+            chopper2Phase = sampleLogs.getProperty(phaseEntry).value
         if chopper1Phase > 360.:
             # CH1.phase on FIGARO is set to an arbitrary value (999.9)
             chopper1Phase = 0.
@@ -93,7 +98,11 @@ def chopperSpeed(sampleLogs, instrument):
     """Return the chopper speed."""
     instrumentName = instrument.getName()
     if instrumentName == 'D17':
-        chopper1SpeedName = instrument.getStringParameter('chopper1_speed')[0]
+        duration = sampleLogs.getProperty('duration').value
+        if duration > 30.0:
+            chopper1SpeedName = instrument.getStringParameter('chopper1_speed')[0]
+        else:
+            chopper1SpeedName = instrument.getStringParameter('chopper1_speed_alt')[0]
         return sampleLogs.getProperty(chopper1SpeedName).value
     else:
         firstChopper = int(sampleLogs.getProperty('ChopperSetting.firstChopper').value)

@@ -409,10 +409,19 @@ std::vector<double> LoadILLReflectometry::getXValues() {
     std::string chopper{"Chopper"};
     double chop1Speed{0.0}, chop1Phase{0.0}, chop2Speed{0.0}, chop2Phase{0.0};
     if (m_instrument == Supported::D17) {
-      const auto chop1SpeedName = instrument->getStringParameter("chopper1_speed")[0];
-      const auto chop1PhaseName = instrument->getStringParameter("chopper1_phase")[0];
-      const auto chop2SpeedName = instrument->getStringParameter("chopper2_speed")[0];
-      const auto chop2PhaseName = instrument->getStringParameter("chopper2_phase")[0];
+      const auto duration = doubleFromRun("duration");
+      std::string chop1SpeedName, chop1PhaseName, chop2SpeedName, chop2PhaseName;
+      if (duration > 30.0) {
+        chop1SpeedName = instrument->getStringParameter("chopper1_speed")[0];
+        chop1PhaseName = instrument->getStringParameter("chopper1_phase")[0];
+        chop2SpeedName = instrument->getStringParameter("chopper2_speed")[0];
+        chop2PhaseName = instrument->getStringParameter("chopper2_phase")[0];
+      } else {
+        chop1SpeedName = instrument->getStringParameter("chopper1_speed_alt")[0];
+        chop1PhaseName = instrument->getStringParameter("chopper1_phase_alt")[0];
+        chop2SpeedName = instrument->getStringParameter("chopper2_speed_alt")[0];
+        chop2PhaseName = instrument->getStringParameter("chopper2_phase_alt")[0];
+      }
       chop1Speed = doubleFromRun(chop1SpeedName);
       chop1Phase = doubleFromRun(chop1PhaseName);
       chop2Speed = doubleFromRun(chop2SpeedName);
