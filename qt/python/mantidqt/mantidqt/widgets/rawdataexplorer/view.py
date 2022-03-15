@@ -13,7 +13,7 @@ from mantid.simpleapi import *
 from mantid.kernel import logger
 from mantidqt.utils.qt import load_ui
 from mantidqt.widgets.instrumentview.api import *
-from mantidqt.widgets.sliceviewer.presenter import SliceViewer
+from mantidqt.widgets.sliceviewer.presenters.presenter import SliceViewer
 from mantidqt.plotting.functions import pcolormesh
 from workbench.config import get_window_config
 
