@@ -12,6 +12,7 @@ from mantid.simpleapi import *
 import ReflectometryILL_common as common
 import ILL_utilities as utils
 import numpy as np
+from math import fabs
 
 
 class Prop:
@@ -93,6 +94,29 @@ class ReflectometryILLPreprocess(DataProcessorAlgorithm):
     def version(self):
         """Return the version of the algorithm."""
         return 1
+
+    @staticmethod
+    def _check_angles_match(input_files):
+        """
+            Checks if the sample and detector angles difference between the loaded data is close enough
+            @param  input_files: string containing paths to NeXus files to be checked
+        """
+        tolerance = 0.1  # degree
+        file_list = input_files.split('+')
+        san = common.sample_angle(file_list[0])
+        dan = common.detector_angle(file_list[0])
+        r = file_list[0][file_list[0].rfind('/')+1:-4]
+        for file_no in range(1, len(file_list)):
+            file_name = file_list[file_no]
+            san_test = common.sample_angle(file_name)
+            dan_test = common.detector_angle(file_name)
+            r_test = file_name[file_list[0].rfind('/')+1:-4]
+            if fabs(san - san_test) > tolerance:
+                logger.warning('Different sample angles detected! {0}: {1}, {2}: {3}'.format(r, san,
+                                                                                             r_test, san_test))
+            if fabs(dan - dan_test) > tolerance:
+                logger.warning('Different detector angles detected! {0}: {1}, {2}: {3}'.format(r, dan,
+                                                                                               r_test, dan_test))
 
     def PyExec(self):
         """Execute the algorithm."""
@@ -379,6 +403,10 @@ class ReflectometryILLPreprocess(DataProcessorAlgorithm):
             elif angle_option == 'UserAngle':
                 bragg_angle = self.getProperty('BraggAngle').value
             load_options['BraggAngle'] = bragg_angle
+
+        # perform data consistency check
+        if len(inputFiles.split('+')) > 1:
+            self._check_angles_match(inputFiles)
 
         # MergeRunsOptions are defined by the parameter files and will not be modified here!
         ws = LoadAndMerge(
