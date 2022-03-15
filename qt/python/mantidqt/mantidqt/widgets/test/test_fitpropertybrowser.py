@@ -182,6 +182,7 @@ class FitPropertyBrowserTest(unittest.TestCase):
     def test_plot_limits_are_not_changed_when_plotting_fit_lines(self):
         fig, canvas, _ = self._create_and_plot_matrix_workspace()
         ax_limits = fig.get_axes()[0].axis()
+        canvas.draw()
         widget = self._create_widget(canvas=canvas)
         fit_ws_name = "fit_ws"
         CreateSampleWorkspace(OutputWorkspace=fit_ws_name)

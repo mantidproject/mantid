@@ -720,7 +720,7 @@ class MantidAxes(Axes):
         if datafunctions.validate_args(*args):
             logger.debug('using plotfunctions')
 
-            def _data_update(artists, workspace):
+            def _data_update(artists, workspace, new_kwargs=None):
                 # errorbar with workspaces can only return a single container
                 container_orig = artists[0]
                 # It is not possible to simply reset the error bars so
@@ -735,7 +735,10 @@ class MantidAxes(Axes):
                     pass
                 # this gets pushed back onto the containers list
                 try:
-                    container_new = axesfunctions.errorbar(self, workspace, **kwargs)
+                    if new_kwargs:
+                        container_new = axesfunctions.errorbar(self, workspace, **new_kwargs)
+                    else:
+                        container_new = axesfunctions.errorbar(self, workspace, **kwargs)
 
                     self.containers.insert(orig_idx, container_new)
                     self.containers.pop()
