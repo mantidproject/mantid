@@ -212,89 +212,92 @@ const std::string IntegrateEllipsoidsV1::category() const { return "Crystal\\Int
 //---------------------------------------------------------------------
 /** Initialize the algorithm's properties.
  */
-void IntegrateEllipsoidsV1::init() {
+
+void IntegrateEllipsoidsV1::init() { initInstance(*this); }
+void IntegrateEllipsoidsV1::initInstance(API::Algorithm &alg) {
   auto ws_valid = std::make_shared<CompositeValidator>();
   ws_valid->add<WorkspaceUnitValidator>("TOF");
   ws_valid->add<InstrumentValidator>();
   // the validator which checks if the workspace has axis
 
-  declareProperty(
+  alg.declareProperty(
       std::make_unique<WorkspaceProperty<MatrixWorkspace>>("InputWorkspace", "", Direction::Input, ws_valid),
       "An input MatrixWorkspace with time-of-flight units along "
       "X-axis and defined instrument with defined sample");
 
-  declareProperty(std::make_unique<WorkspaceProperty<PeaksWorkspace>>("PeaksWorkspace", "", Direction::InOut),
-                  "Workspace with Peaks to be integrated. NOTE: The peaks MUST "
-                  "be indexed with integer HKL values.");
+  alg.declareProperty(std::make_unique<WorkspaceProperty<PeaksWorkspace>>("PeaksWorkspace", "", Direction::InOut),
+                      "Workspace with Peaks to be integrated. NOTE: The peaks MUST "
+                      "be indexed with integer HKL values.");
 
   std::shared_ptr<BoundedValidator<double>> mustBePositive(new BoundedValidator<double>());
   mustBePositive->setLower(0.0);
 
-  declareProperty("RegionRadius", .35, mustBePositive,
-                  "Only events at most this distance from a peak will be "
-                  "considered when integrating");
+  alg.declareProperty("RegionRadius", .35, mustBePositive,
+                      "Only events at most this distance from a peak will be "
+                      "considered when integrating");
 
-  declareProperty("SpecifySize", false, "If true, use the following for the major axis sizes, else use 3-sigma");
+  alg.declareProperty("SpecifySize", false, "If true, use the following for the major axis sizes, else use 3-sigma");
 
-  declareProperty("PeakSize", .18, mustBePositive, "Half-length of major axis for peak ellipsoid");
+  alg.declareProperty("PeakSize", .18, mustBePositive, "Half-length of major axis for peak ellipsoid");
 
-  declareProperty("BackgroundInnerSize", .18, mustBePositive,
-                  "Half-length of major axis for inner ellipsoidal surface of "
-                  "background region");
+  alg.declareProperty("BackgroundInnerSize", .18, mustBePositive,
+                      "Half-length of major axis for inner ellipsoidal surface of "
+                      "background region");
 
-  declareProperty("BackgroundOuterSize", .23, mustBePositive,
-                  "Half-length of major axis for outer ellipsoidal surface of "
-                  "background region");
+  alg.declareProperty("BackgroundOuterSize", .23, mustBePositive,
+                      "Half-length of major axis for outer ellipsoidal surface of "
+                      "background region");
 
-  declareProperty(std::make_unique<WorkspaceProperty<PeaksWorkspace>>("OutputWorkspace", "", Direction::Output),
-                  "The output PeaksWorkspace will be a copy of the input PeaksWorkspace "
-                  "with the peaks' integrated intensities.");
+  alg.declareProperty(std::make_unique<WorkspaceProperty<PeaksWorkspace>>("OutputWorkspace", "", Direction::Output),
+                      "The output PeaksWorkspace will be a copy of the input PeaksWorkspace "
+                      "with the peaks' integrated intensities.");
 
-  declareProperty("CutoffIsigI", EMPTY_DBL(), mustBePositive,
-                  "Cuttoff for I/sig(i) when finding mean of half-length of "
-                  "major radius in first pass when SpecifySize is false."
-                  "Default is no second pass.");
+  alg.declareProperty("CutoffIsigI", EMPTY_DBL(), mustBePositive,
+                      "Cuttoff for I/sig(i) when finding mean of half-length of "
+                      "major radius in first pass when SpecifySize is false."
+                      "Default is no second pass.");
 
-  declareProperty("NumSigmas", 3,
-                  "Number of sigmas to add to mean of half-length of "
-                  "major radius for second pass when SpecifySize is false.");
+  alg.declareProperty("NumSigmas", 3,
+                      "Number of sigmas to add to mean of half-length of "
+                      "major radius for second pass when SpecifySize is false.");
 
-  declareProperty("IntegrateInHKL", false, "If true, integrate in HKL space not Q space.");
+  alg.declareProperty("IntegrateInHKL", false, "If true, integrate in HKL space not Q space.");
 
-  declareProperty("IntegrateIfOnEdge", true,
-                  "Set to false to not integrate if peak radius is off edge of detector."
-                  "Background will be scaled if background radius is off edge.");
+  alg.declareProperty("IntegrateIfOnEdge", true,
+                      "Set to false to not integrate if peak radius is off edge of detector."
+                      "Background will be scaled if background radius is off edge.");
 
-  declareProperty("AdaptiveQBackground", false,
-                  "Default is false.   If true, "
-                  "BackgroundOuterRadius + AdaptiveQMultiplier * **|Q|** and "
-                  "BackgroundInnerRadius + AdaptiveQMultiplier * **|Q|**");
+  alg.declareProperty("AdaptiveQBackground", false,
+                      "Default is false.   If true, "
+                      "BackgroundOuterRadius + AdaptiveQMultiplier * **|Q|** and "
+                      "BackgroundInnerRadius + AdaptiveQMultiplier * **|Q|**");
 
-  declareProperty("AdaptiveQMultiplier", 0.0,
-                  "PeakRadius + AdaptiveQMultiplier * **|Q|** "
-                  "so each peak has a "
-                  "different integration radius.  Q includes the 2*pi factor.");
+  alg.declareProperty("AdaptiveQMultiplier", 0.0,
+                      "PeakRadius + AdaptiveQMultiplier * **|Q|** "
+                      "so each peak has a "
+                      "different integration radius.  Q includes the 2*pi factor.");
 
-  declareProperty("UseOnePercentBackgroundCorrection", true,
-                  "If this options is enabled, then the the top 1% of the "
-                  "background will be removed"
-                  "before the background subtraction.");
+  alg.declareProperty("UseOnePercentBackgroundCorrection", true,
+                      "If this options is enabled, then the the top 1% of the "
+                      "background will be removed"
+                      "before the background subtraction.");
 
-  declareProperty("SatelliteRegionRadius", .1, mustBePositive,
-                  "Only events at most this distance from a peak will be "
-                  "considered when integrating");
+  alg.declareProperty("SatelliteRegionRadius", .1, mustBePositive,
+                      "Only events at most this distance from a peak will be "
+                      "considered when integrating");
 
-  declareProperty("SatellitePeakSize", .08, mustBePositive, "Half-length of major axis for satellite peak ellipsoid");
+  alg.declareProperty("SatellitePeakSize", .08, mustBePositive,
+                      "Half-length of major axis for satellite peak ellipsoid");
 
-  declareProperty("SatelliteBackgroundInnerSize", .08, mustBePositive,
-                  "Half-length of major axis for inner ellipsoidal surface of "
-                  "satellite background region");
+  alg.declareProperty("SatelliteBackgroundInnerSize", .08, mustBePositive,
+                      "Half-length of major axis for inner ellipsoidal surface of "
+                      "satellite background region");
 
-  declareProperty("SatelliteBackgroundOuterSize", .09, mustBePositive,
-                  "Half-length of major axis for outer ellipsoidal surface of "
-                  "satellite background region");
+  alg.declareProperty("SatelliteBackgroundOuterSize", .09, mustBePositive,
+                      "Half-length of major axis for outer ellipsoidal surface of "
+                      "satellite background region");
 
-  declareProperty("GetUBFromPeaksWorkspace", false, "If true, UB is taken from peak workspace.");
+  alg.declareProperty("GetUBFromPeaksWorkspace", false, "If true, UB is taken from peak workspace.");
 }
 
 //---------------------------------------------------------------------

@@ -24,6 +24,7 @@
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/CompositeValidator.h"
 #include "MantidKernel/Statistics.h"
+#include "MantidMDAlgorithms/IntegrateEllipsoidsV1.h"
 #include "MantidMDAlgorithms/IntegrateQLabEvents.h"
 #include "MantidMDAlgorithms/MDTransfFactory.h"
 #include "MantidMDAlgorithms/MDTransfQ3D.h"
@@ -163,6 +164,39 @@ void IntegrateEllipsoidsV2::qListFromHistoWS(IntegrateQLabEvents &integrator, Pr
   } // end of loop over spectra
   PARALLEL_CHECK_INTERUPT_REGION
   integrator.populateCellsWithPeaks();
+}
+
+void IntegrateEllipsoidsV2::init() {
+  IntegrateEllipsoidsV1::initInstance(*this);
+  // not used in this version
+  removeProperty("IntegrateInHKL", false);
+  removeProperty("GetUBFromPeaksWorkspace", false);
+
+  initInstance(*this);
+}
+void IntegrateEllipsoidsV2::initInstance(API::Algorithm &alg) {
+
+  std::shared_ptr<BoundedValidator<double>> mustBePositive(new BoundedValidator<double>());
+  mustBePositive->setLower(0.0);
+
+  // Different defaults
+  alg.removeProperty("SatelliteRegionRadius", false);
+  alg.removeProperty("SatellitePeakSize", false);
+  alg.removeProperty("SatelliteBackgroundInnerSize", false);
+  alg.removeProperty("SatelliteBackgroundOuterSize", false);
+
+  // satellite realted properties
+  alg.declareProperty("SatelliteRegionRadius", EMPTY_DBL(), mustBePositive,
+                      "Only events at most this distance from a satellite peak will be considered when integration");
+  alg.declareProperty("SatellitePeakSize", EMPTY_DBL(), mustBePositive,
+                      "Half-length of major axis for satellite peak ellipsoid");
+  alg.declareProperty("ShareBackground", false, "Whether to use the same peak background region for satellite peaks.");
+  alg.declareProperty(
+      "SatelliteBackgroundInnerSize", EMPTY_DBL(), mustBePositive,
+      "Half-length of major axis for the inner ellipsoidal surface of background region of the satellite peak");
+  alg.declareProperty(
+      "SatelliteBackgroundOuterSize", EMPTY_DBL(), mustBePositive,
+      "Half-length of major axis for the outer ellipsoidal surface of background region of the satellite peak");
 }
 
 /**

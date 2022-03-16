@@ -154,84 +154,8 @@ const std::string IntegrateEllipsoids::category() const { return "Crystal\\Integ
 >>>>>>> added wrapper algo, wip test
 
 void IntegrateEllipsoids::init() {
-  auto ws_valid = std::make_shared<CompositeValidator>();
-  ws_valid->add<WorkspaceUnitValidator>("TOF");
-  ws_valid->add<InstrumentValidator>();
-  // the validator which checks if the workspace has axis
-
-  declareProperty(
-      std::make_unique<WorkspaceProperty<MatrixWorkspace>>("InputWorkspace", "", Direction::Input, ws_valid),
-      "An input MatrixWorkspace with time-of-flight units along "
-      "X-axis and defined instrument with defined sample");
-
-  declareProperty(std::make_unique<WorkspaceProperty<PeaksWorkspace>>("PeaksWorkspace", "", Direction::InOut),
-                  "Workspace with Peaks to be integrated. NOTE: The peaks MUST "
-                  "be indexed with integer HKL values.");
-
-  std::shared_ptr<BoundedValidator<double>> mustBePositive(new BoundedValidator<double>());
-  mustBePositive->setLower(0.0);
-
-  declareProperty("RegionRadius", .35, mustBePositive,
-                  "Only events at most this distance from a peak will be "
-                  "considered when integrating");
-
-  declareProperty("SpecifySize", false, "If true, use the following for the major axis sizes, else use 3-sigma");
-
-  declareProperty("PeakSize", .18, mustBePositive, "Half-length of major axis for peak ellipsoid");
-
-  declareProperty("BackgroundInnerSize", .18, mustBePositive,
-                  "Half-length of major axis for inner ellipsoidal surface of "
-                  "background region");
-
-  declareProperty("BackgroundOuterSize", .23, mustBePositive,
-                  "Half-length of major axis for outer ellipsoidal surface of "
-                  "background region");
-
-  declareProperty(std::make_unique<WorkspaceProperty<PeaksWorkspace>>("OutputWorkspace", "", Direction::Output),
-                  "The output PeaksWorkspace will be a copy of the input PeaksWorkspace "
-                  "with the peaks' integrated intensities.");
-
-  declareProperty("CutoffIsigI", EMPTY_DBL(), mustBePositive,
-                  "Cuttoff for I/sig(i) when finding mean of half-length of "
-                  "major radius in first pass when SpecifySize is false."
-                  "Default is no second pass.");
-
-  declareProperty("NumSigmas", 3,
-                  "Number of sigmas to add to mean of half-length of "
-                  "major radius for second pass when SpecifySize is false.");
-  declareProperty("IntegrateInHKL", false, "If true, integrate in HKL space not Q space.");
-  declareProperty("IntegrateIfOnEdge", true,
-                  "Set to false to not integrate if peak radius is off edge of detector."
-                  "Background will be scaled if background radius is off edge.");
-
-  declareProperty("AdaptiveQBackground", false,
-                  "Default is false.   If true, "
-                  "BackgroundOuterRadius + AdaptiveQMultiplier * **|Q|** and "
-                  "BackgroundInnerRadius + AdaptiveQMultiplier * **|Q|**");
-
-  declareProperty("AdaptiveQMultiplier", 0.0,
-                  "PeakRadius + AdaptiveQMultiplier * **|Q|** "
-                  "so each peak has a "
-                  "different integration radius.  Q includes the 2*pi factor.");
-
-  declareProperty("UseOnePercentBackgroundCorrection", true,
-                  "If this options is enabled, then the the top 1% of the "
-                  "background will be removed"
-                  "before the background subtraction.");
-
-  // satellite realted properties
-  declareProperty("SatelliteRegionRadius", EMPTY_DBL(), mustBePositive,
-                  "Only events at most this distance from a satellite peak will be considered when integration");
-  declareProperty("SatellitePeakSize", EMPTY_DBL(), mustBePositive,
-                  "Half-length of major axis for satellite peak ellipsoid");
-  declareProperty("ShareBackground", false, "Whether to use the same peak background region for satellite peaks.");
-  declareProperty(
-      "SatelliteBackgroundInnerSize", EMPTY_DBL(), mustBePositive,
-      "Half-length of major axis for the inner ellipsoidal surface of background region of the satellite peak");
-  declareProperty(
-      "SatelliteBackgroundOuterSize", EMPTY_DBL(), mustBePositive,
-      "Half-length of major axis for the outer ellipsoidal surface of background region of the satellite peak");
-  declareProperty("GetUBFromPeaksWorkspace", false, "If true, UB is taken from peak workspace.");
+  IntegrateEllipsoidsV1::initInstance(*this);
+  IntegrateEllipsoidsV2::initInstance(*this);
 }
 
 int getIndexCount(PeaksWorkspace_sptr peakWorkspace) {
@@ -254,36 +178,23 @@ void IntegrateEllipsoids::exec() {
 
   const int indexCount = getIndexCount(peakWorkspace);
 
-  IAlgorithm_sptr alg;
+  Algorithm_sptr alg;
 
   // detect which algo to run
   if ((isIntegrateInHKL || isGetUBFromPeaksWorkspace) && indexCount > 0 && !shareBackground) {
     // v1
-    alg = createChildAlgorithm("IntegrateEllipsoidsV1", 0.0, 1.0);
+    alg = std::dynamic_pointer_cast<Algorithm>(createChildAlgorithm("IntegrateEllipsoidsV1"));
   } else {
     // v2
-    alg = createChildAlgorithm("IntegrateEllipsoidsV2", 0.0, 1.0);
+    alg = std::dynamic_pointer_cast<Algorithm>(createChildAlgorithm("IntegrateEllipsoidsV2"));
   }
-  alg->initialize();
-
   // forward properties to algo
-  const std::vector<Property *> &props = alg->getProperties();
-  for (auto prop : props) {
-    if (prop) {
-      if (boost::starts_with(prop->type(), "MatrixWorkspace")) {
-        MatrixWorkspace_sptr workspace = getProperty(prop->name());
-        alg->setProperty(prop->name(), workspace);
-      } else if (boost::starts_with(prop->type(), "PeaksWorkspace")) {
-        PeaksWorkspace_sptr workspace = getProperty(prop->name());
-        alg->setProperty(prop->name(), workspace);
-      } else {
-        alg->setPropertyValue(prop->name(), getPropertyValue(prop->name()));
-      }
-    }
-  }
-  // childAlg->copyPropertiesFrom(*this); TODO look into this
+  alg->copyPropertiesFrom(*this);
   // run correct algo and return results
-  alg->executeAsChildAlg();
+  alg->execute();
+  if (!alg->isExecuted())
+    throw std::runtime_error("IntegrateEllipsoids Algorithm has not executed successfully");
+
   PeaksWorkspace_sptr outputWorkspace = alg->getProperty("OutputWorkspace");
   setProperty("OutputWorkspace", outputWorkspace);
 }
