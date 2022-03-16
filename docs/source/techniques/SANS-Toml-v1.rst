@@ -16,7 +16,7 @@ General Notes
 Format Changes
 ==============
 
-V0 (Mantid 6.3+) to V0 (Mantid 6.4+)
+V0 (Mantid 6.3+) to V1 (Mantid 6.4+)
 --------------------------------------
 
 - *norm_monitor* and *trans_monitor* in *instrument.configuration* now take a monitor name (e.g. "M1") instead of a spectrum number
