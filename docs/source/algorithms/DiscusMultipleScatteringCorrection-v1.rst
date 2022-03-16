@@ -35,7 +35,7 @@ The quantity :math:`J_n` is calculated by performing the following integration:
 .. math::
 
    J_n &= (\frac{\mu_s}{4 \pi})^n \frac{1}{A} \int dS \int_{0}^{l_1^{max}} dl_1 e^{-\mu_T l_1} \prod\limits_{i=1}^{n-1} [\int_{0}^{l_{i+1}^{max}} dl_{i+1} \int_{0}^{\pi} \sin\theta_i d\theta_i \int_{0}^{2 \pi} d\phi_i \int_{\omega^{min}}^{\omega_i^{max}} d\omega (e^{-\mu_T l_{i+1}}) \frac{k_{i+1}}{k_i} S(Q_i, \omega_i)] e^{-\mu_T l_{out}} S(Q_n, \omega_n) \\
-       &=(\frac{\mu_s}{4 \pi})^n \frac{1}{A} \int dS \int_{0}^{l_1^{max}} dl_1 e^{-\mu_T l_1} \prod\limits_{i=1}^{n-1} [\int_{0}^{l_{i+1}^{max}} dl_{i+1} \int_{q_i^min}^{q_i^max} dQ_i \int_{0}^{2 \pi} d\phi_i \int_{\omega^{min}}^{\omega_i^{max}} d\omega (e^{-\mu_T l_{i+1}}) \frac{Q_i}{k_i^2} S(Q_i, \omega_i)] e^{-\mu_T l_{out}} S(Q_n, \omega_n)
+       &=(\frac{\mu_s}{4 \pi})^n \frac{1}{A} \int dS \int_{0}^{l_1^{max}} dl_1 e^{-\mu_T l_1} \prod\limits_{i=1}^{n-1} [\int_{0}^{l_{i+1}^{max}} dl_{i+1} \int_{q_i^{min}}^{q_i^{max}} dQ_i \int_{0}^{2 \pi} d\phi_i \int_{\omega^{min}}^{\omega_i^{max}} d\omega (e^{-\mu_T l_{i+1}}) \frac{Q_i}{k_i^2} S(Q_i, \omega_i)] e^{-\mu_T l_{out}} S(Q_n, \omega_n)
 
 
 The variables :math:`l_i^{max}` represent the maximum path length before the next scatter given a particular phi and theta value (Q). Each :math:`l_i` is actually a function of all of the earlier values for the :math:`l_i`, :math:`\phi` and :math:`Q` variables ie :math:`l_i = l_i(l_1, l_2, ..., l_{i-1}, \phi_1, \phi_2, ..., \phi_i, Q_1, Q_2, ..., Q_i)`.
