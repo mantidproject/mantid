@@ -16,13 +16,14 @@ General Notes
 Format Changes
 ==============
 
-V1 (Mantid 6.3+) to V1 (Mantid 6.4+)
+V0 (Mantid 6.3+) to V0 (Mantid 6.4+)
 --------------------------------------
 
 - *norm_monitor* and *trans_monitor* in *instrument.configuration* now take a monitor name (e.g. "M1") instead of a spectrum number
 - *selected_monitor* in *normalisation* and *transmission* has been removed in favour of this change in *instrument.configuration*
+- *trans_monitor* can now have the value *"ROI"*
 
-V0 (Mantid 6.1.x) to V1 (Mantid 6.3+)
+V0 (Mantid 6.1.x) to V0 (Mantid 6.3+)
 --------------------------------------
 
 - *normalisation* and *normalization* are both accepted and equivalent
