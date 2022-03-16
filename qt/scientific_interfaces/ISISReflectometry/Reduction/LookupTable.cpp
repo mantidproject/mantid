@@ -98,9 +98,8 @@ std::vector<LookupRow> LookupTable::findEmptyRegexes() const {
 }
 
 std::vector<LookupRow> LookupTable::searchByTitle(Row const &row) const {
-  if (!row.getParent() || row.getParent()->name().empty()) {
-    // No titles for us to check against, so skip filtering
-    return m_lookupRows;
+  if (!row.getParent()) {
+    return findMatchingRegexes("");
   }
 
   auto const &title = row.getParent()->name();
