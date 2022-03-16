@@ -24,6 +24,7 @@ namespace MDAlgorithms {
 
 class DLLExport IntegrateEllipsoidsV1 : public API::Algorithm {
 public:
+  static void initInstance(API::Algorithm &alg);
   const std::string name() const override;
   /// Summary of algorithms purpose
   const std::string summary() const override {

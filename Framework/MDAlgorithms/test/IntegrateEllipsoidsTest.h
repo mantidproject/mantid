@@ -623,17 +623,12 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", m_satelliteEventWS));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("PeaksWorkspace", peaksWS));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("OutputWorkspace", "peaks_integrated_shared"));
-    TS_ASSERT_THROWS_NOTHING(alg.setProperty("RegionRadius", 0.11));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("SpecifySize", true));
-    TS_ASSERT_THROWS_NOTHING(alg.setProperty("PeakSize", 0.085));
-    TS_ASSERT_THROWS_NOTHING(alg.setProperty("BackgroundInnerSize", 0.086));
-    TS_ASSERT_THROWS_NOTHING(alg.setProperty("BackgroundOuterSize", 0.11));
-    TS_ASSERT_THROWS_NOTHING(alg.setProperty("UseOnePercentBackgroundCorrection", false));
-    TS_ASSERT_THROWS_NOTHING(alg.setProperty("SatelliteRegionRadius", 0.11));
-    TS_ASSERT_THROWS_NOTHING(alg.setProperty("SatellitePeakSize", 0.10));
-    TS_ASSERT_THROWS_NOTHING(alg.setProperty("ShareBackground", true));
-    TS_ASSERT_THROWS_NOTHING(alg.setProperty("SatelliteBackgroundInnerSize", 0.101));
-    TS_ASSERT_THROWS_NOTHING(alg.setProperty("SatelliteBackgroundOuterSize", 0.11));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("PeakSize", 0.20));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("BackgroundInnerSize", 0.23));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("BackgroundOuterSize", 0.26));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("AdaptiveQMultiplier", 0.01));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("AdaptiveQBackground", true));
     TS_ASSERT_THROWS_NOTHING(alg.execute());
     TS_ASSERT_THROWS_NOTHING(alg.isExecuted());
 
@@ -650,7 +645,6 @@ public:
     auto childHist = algHist->getChildAlgorithmHistory(0);
 
     TS_ASSERT_EQUALS(childHist->name(), "IntegrateEllipsoidsV2");
-    TS_ASSERT_EQUALS(childHist->childHistorySize(), 1);
 
     AnalysisDataService::Instance().remove("peaks_integrated_shared");
     AnalysisDataService::Instance().remove(peaksWS->getName());
