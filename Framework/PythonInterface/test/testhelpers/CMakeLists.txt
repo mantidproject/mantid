@@ -19,7 +19,7 @@ add_library(PythonWorkspaceCreationHelper ${SRC_FILES} ${INC_FILES})
 set_python_properties(PythonWorkspaceCreationHelper _WorkspaceCreationHelper)
 
 # Override folder
-set_property(TARGET PythonWorkspaceCreationHelper PROPERTY FOLDER "UnitTests/Python")
+set_target_properties(PythonWorkspaceCreationHelper PROPERTIES EXCLUDE_FROM_ALL TRUE FOLDER "UnitTests/Python")
 target_link_libraries(
   PythonWorkspaceCreationHelper
   PRIVATE PythonInterfaceCore
@@ -51,4 +51,4 @@ add_custom_target(testhelpers DEPENDS PythonWorkspaceCreationHelper ${_testhelpe
 add_dependencies(PythonInterface ScriptsDotPth)
 
 add_dependencies(FrameworkTests testhelpers)
-set_property(TARGET testhelpers PROPERTY FOLDER "UnitTests/Python")
+set_target_properties(testhelpers PROPERTIES EXCLUDE_FROM_ALL TRUE FOLDER "UnitTests/Python")
