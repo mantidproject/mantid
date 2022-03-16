@@ -6,12 +6,12 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
-#include "MantidAPI/Algorithm.h"
+#include "MantidAPI/DataProcessorAlgorithm.h"
 
 namespace Mantid::MDAlgorithms {
 
 // Detect and pass to the correct version
-class DLLExport IntegrateEllipsoids : public API::Algorithm {
+class DLLExport IntegrateEllipsoids : public API::DataProcessorAlgorithm {
 public:
   const std::string name() const override;
   /// Summary of algorithms purpose

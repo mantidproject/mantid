@@ -11,7 +11,6 @@
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidDataObjects/Workspace2D.h"
-#include "MantidMDAlgorithms/IntegrateEllipsoids.h"
 #include "MantidMDAlgorithms/IntegrateQLabEvents.h"
 #include "MantidMDAlgorithms/MDTransfInterface.h"
 #include "MantidMDAlgorithms/MDWSDescription.h"
@@ -25,8 +24,9 @@ namespace MDAlgorithms {
 // Note: this relies on several MD specific interfaces, so it needs to be defined
 // in MDAlgorithms despite it not actually operating on MDWorkspaces
 
-class DLLExport IntegrateEllipsoidsV2 : public IntegrateEllipsoids {
+class DLLExport IntegrateEllipsoidsV2 : public API::Algorithm {
 public:
+  static void initInstance(API::Algorithm &alg);
   const std::string name() const override { return "IntegrateEllipsoidsV2"; }
 
   const std::string summary() const override {
@@ -40,6 +40,8 @@ public:
   const std::string category() const override { return "Crystal\\Integration"; }
 
 private:
+  /// Initialize the algorithm's properties
+  void init() override;
   /// Execute the algorithm
   void exec() override;
   /// Private validator for inputs
