@@ -1199,7 +1199,7 @@ def update_colorbar_scale(figure, image, scale, vmin, vmax):
     image.set_norm(scale(vmin=vmin, vmax=vmax))
 
     if image.colorbar:
-        label = image.colorbar.ax.get_xlabel()
+        label = image.colorbar.ax.get_ylabel()
         image.colorbar.remove()
         locator = None
         if scale == LogNorm:

@@ -77,7 +77,11 @@ class ImagesTabWidgetPresenterTest(unittest.TestCase):
         fig.colorbar(img)
         mock_view = Mock(get_selected_image_name=lambda: '(0, 0) - {}'.format(label))
         presenter = self._generate_presenter(fig=fig, view=mock_view)
-        expected = {'(0, 0) - {}'.format(label): axes.collections}
+        #need to unpack axes.collection from ArtistList
+        axes_collection = []
+        for i in axes.collections:
+            axes_collection.append(i)
+        expected = {'(0, 0) - {}'.format(label): axes_collection}
         self.assertEqual(presenter.image_names_dict, expected)
 
     def test_generate_image_name(self):
@@ -104,11 +108,12 @@ class ImagesTabWidgetPresenterTest(unittest.TestCase):
                  'vmax': 2,
                  'scale': 'Linear',
                  'interpolation': 'None'}
-        mock_view = Mock(get_selected_image_name=lambda: '(0, 0) - img label',
+        img_name = '(0, 0) - img label'
+        mock_view = Mock(get_selected_image_name=lambda: img_name,
                          get_properties=lambda: ImageProperties(props))
         presenter = self._generate_presenter(fig=fig, view=mock_view)
         presenter.apply_properties()
-        self.assertEqual("New Label", img.colorbar._label)
+        self.assertEqual("New Label", img.colorbar.ax.get_ylabel())
         self.assertEqual('jet', img.cmap.name)
         self.assertEqual(0, img.norm.vmin)
         self.assertEqual(2, img.norm.vmax)
@@ -130,7 +135,7 @@ class ImagesTabWidgetPresenterTest(unittest.TestCase):
                          get_properties=lambda: ImageProperties(props))
         presenter = self._generate_presenter(fig=fig, view=mock_view)
         presenter.apply_properties()
-        self.assertEqual("New Label", img.colorbar._label)
+        self.assertEqual("New Label", img.colorbar.ax.get_ylabel())
         self.assertEqual('jet', img.cmap.name)
         self.assertEqual(0.0001, img.norm.vmin)
         self.assertEqual(4, img.norm.vmax)
@@ -152,7 +157,7 @@ class ImagesTabWidgetPresenterTest(unittest.TestCase):
                          get_properties=lambda: ImageProperties(props))
         presenter = self._generate_presenter(fig=fig, view=mock_view)
         presenter.apply_properties()
-        self.assertEqual("New Label", img.colorbar._label)
+        self.assertEqual("New Label", img.colorbar.ax.get_ylabel())
         self.assertEqual('jet', img.cmap.name)
         self.assertEqual(0.0001, img.norm.vmin)
         self.assertEqual(1, img.norm.vmax)
@@ -161,9 +166,9 @@ class ImagesTabWidgetPresenterTest(unittest.TestCase):
     def test_interpolation_disabled_for_pcolormesh_image(self):
         fig = figure()
         ax = fig.add_subplot(111)
-        ax.pcolormesh([[0, 2], [2, 0]])
+        ax.pcolormesh([[0, 2], [2, 0]], label='collection0')
         view = Mock(get_selected_image_name=lambda: '(0, 0) - collection0')
-        presenter = self._generate_presenter(view, fig)
+        presenter = self._generate_presenter(view=view, fig=fig)
         presenter.view.enable_interpolation.assert_called_once_with(False)
 
     def test_colorbars_not_included(self):
@@ -186,7 +191,7 @@ class ImagesTabWidgetPresenterTest(unittest.TestCase):
                  'vmax': 2,
                  'scale': 'Linear',
                  'interpolation': 'None'}
-        mock_view = Mock(get_selected_image_name=lambda: 'ws: (0, 0) - image0',
+        mock_view = Mock(get_selected_image_name=lambda: 'ws: (0, 0) - child0',
                          get_properties=lambda: ImageProperties(props))
         presenter = self._generate_presenter(fig=fig, view=mock_view)
         presenter.apply_properties()
@@ -195,7 +200,7 @@ class ImagesTabWidgetPresenterTest(unittest.TestCase):
             image = fig.axes[ax].images[0]
 
             if image.colorbar:
-                self.assertEqual('New Label', image.colorbar._label)
+                self.assertEqual('New Label', image.colorbar.ax.get_ylabel())
 
             self.assertEqual('jet', image.cmap.name)
             self.assertEqual(0, image.norm.vmin)
