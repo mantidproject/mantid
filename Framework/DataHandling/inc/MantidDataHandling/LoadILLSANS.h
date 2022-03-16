@@ -92,6 +92,7 @@ private:
   void setFinalProperties(const std::string &filename);
   std::vector<double> getVariableTimeBinning(const NeXus::NXEntry &, const std::string &, const NeXus::NXInt &,
                                              const NeXus::NXFloat &) const;
+  std::vector<double> getOmegaBinning(const NeXus::NXEntry &entry, const std::string &path) const;
 };
 
 } // namespace DataHandling

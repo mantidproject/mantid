@@ -298,8 +298,13 @@ void LoadILLSANS::initWorkSpace(NeXus::NXEntry &firstEntry, const std::string &i
   createEmptyWorkspace(numberOfHistograms, numberOfChannels);
   loadMetaData(firstEntry, instrumentPath);
 
+  std::vector<double> binning;
+
+  binning =
+      m_instrumentName == "D16B" ? getOmegaBinning(firstEntry, "data_scan/scanned_variables/data") : m_defaultBinning;
+
   size_t nextIndex;
-  nextIndex = loadDataFromTubes(data, m_defaultBinning, 0);
+  nextIndex = loadDataFromTubes(data, binning, 0);
   if (m_instrumentName != "D16B")
     loadDataFromMonitors(firstEntry, nextIndex);
   if (data.dim1() == 128) {
@@ -608,13 +613,13 @@ size_t LoadILLSANS::loadDataFromTubes(NeXus::NXInt &data, const std::vector<doub
           spectrum.push_back(data(k, i, j));
         }
         const size_t index = firstIndex + i * numberOfPixelsPerTube + j;
-        //      const HistogramData::BinEdges binEdges(timeBinning);
-        //      m_localWorkspace->setBinEdges(index, binEdges);
         const HistogramData::Counts histoCounts(spectrum.begin(), spectrum.end());
         const HistogramData::CountVariances histoVariances(spectrum.begin(), spectrum.end());
 
         m_localWorkspace->setCounts(index, histoCounts);
         m_localWorkspace->setCountVariances(index, histoVariances);
+        const HistogramData::Points histoPoints(timeBinning);
+        m_localWorkspace->setPoints(index, histoPoints);
       }
     }
   } else {
@@ -962,6 +967,28 @@ void LoadILLSANS::moveSource() {
   mover->setProperty("Z", -m_sourcePos);
   mover->setProperty("RelativePosition", false);
   mover->executeAsChildAlg();
+}
+
+/**
+ * @brief LoadILLSANS::getOmegaBinning
+ * Get the binnign for an omega scan for D16B files
+ * @param entry opened root nexus entry
+ * @param path path of the scanned variables entry
+ * @return the omega binning vector
+ */
+std::vector<double> LoadILLSANS::getOmegaBinning(const NXEntry &entry, const std::string &path) const {
+  NXData scanning_data = entry.openNXData(path);
+  NXDouble scanning_values = scanning_data.openDoubleData();
+  scanning_values.load();
+
+  const int nBins = scanning_values.dim1();
+  std::vector<double> binning(nBins, 0);
+
+  for (int i = 0; i < nBins; ++i) {
+    // for D16, we are only interested in the first line, which contains the omega values
+    binning[i] = scanning_values(0, i);
+  }
+  return binning;
 }
 
 /**
