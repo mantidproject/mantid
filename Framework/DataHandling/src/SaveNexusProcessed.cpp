@@ -76,7 +76,6 @@ bool makeMappings(const MatrixWorkspace &ws, const std::vector<int> &ws_indices,
   out_detector_list.resize(numberDetectors, 0);
   int id = 0;
 
-  int ndet = 0;
   // get data from map into Nexus Muon format
   for (int i = 0; i < numberSpec; i++) {
     // Workspace index
@@ -91,7 +90,6 @@ bool makeMappings(const MatrixWorkspace &ws, const std::vector<int> &ws_indices,
     // points to start of detector list for the next spectrum
     out_detector_index[i + 1] = int32_t(out_detector_index[i] + ndet1);
     out_detector_count[i] = int32_t(ndet1);
-    ndet += ndet1;
 
     std::set<detid_t>::const_iterator it;
     for (it = detectorgroup.begin(); it != detectorgroup.end(); ++it) {
