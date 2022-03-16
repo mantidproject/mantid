@@ -23,6 +23,7 @@ class MemoryPresenter(object):
         self.view = view
         self.update_allowed = True
         self.set_bar_color_at_start()
+        self.set_mantid_bar_color_at_start()
         self.update_memory_usage()
         self.update_mantid_memory_usage()
         self.thread_stopper = self.update_memory_usage_threaded()
@@ -39,6 +40,18 @@ class MemoryPresenter(object):
             self.view.set_bar_color(0, current_value)
         elif current_value < self.view.critical:
             self.view.set_bar_color(100, current_value)
+        else:
+            pass
+
+    def set_mantid_bar_color_at_start(self):
+        """
+        Sets style of the memory(progress) bar at the start
+        """
+        current_value = self.view.mantid_memory_bar.value()
+        if current_value >= self.view.critical:
+            self.view.set_mantid_bar_color(0, current_value)
+        elif current_value < self.view.critical:
+            self.view.set_mantid_bar_color(100, current_value)
         else:
             pass
 

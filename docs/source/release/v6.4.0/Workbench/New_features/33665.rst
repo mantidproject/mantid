@@ -1,0 +1,1 @@
+- An additional memory bar has been added to the memory widget to enable users to see how much memory Mantid is using.

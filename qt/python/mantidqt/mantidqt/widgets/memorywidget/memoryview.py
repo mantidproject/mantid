@@ -111,7 +111,7 @@ class MemoryView(QWidget):
             return
         self.set_bar_color(current_value, new_value)
         self.memory_bar.setValue(new_value)
-        display_str = f"{mem_used:3.1f}/{mem_avail:3.1f} GB ({new_value:d}%) - System"
+        display_str = f"{mem_used:3.1f}/{mem_avail:3.1f} GB ({new_value:d}%) - System Total"
         self.memory_bar.setFormat(display_str)
 
     @Slot(int, float, float)
