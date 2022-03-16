@@ -2,7 +2,7 @@
 
 # Make gtest_version available everywhere
 set(gtest_version
-    "1.10.0"
+    "b007c54f2944e193ac44fba1bc997cb65826a0b9"
     CACHE INTERNAL ""
 )
 
@@ -17,8 +17,7 @@ set(gtest_force_shared_crt
 fetchcontent_declare(
   googletest
   GIT_REPOSITORY https://github.com/google/googletest.git
-  GIT_TAG release-1.10.0
-  GIT_SHALLOW TRUE
+  GIT_TAG b007c54f2944e193ac44fba1bc997cb65826a0b9
 )
 
 fetchcontent_getproperties(googletest)
