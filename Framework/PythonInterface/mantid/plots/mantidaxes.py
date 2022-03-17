@@ -1218,7 +1218,7 @@ class MantidAxes(Axes):
         cb = colorbar
         cb.mappable = mappable
         mappable.colorbar = cb
-        mappable.colorbar_cid = mappable.callbacksSM.connect('changed', cb.on_mappable_changed)
+        mappable.colorbar_cid = mappable.callbacksSM.connect('changed', cb.update_normal)
         cb.update_normal(mappable)
 
     def _remove_matching_curve_from_creation_args(self, workspace_name, workspace_index, spec_num):
