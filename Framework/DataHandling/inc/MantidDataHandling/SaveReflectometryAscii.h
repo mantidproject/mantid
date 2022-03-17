@@ -74,6 +74,8 @@ private:
   std::vector<std::string> m_wsName;
   /// The output file stream
   std::ofstream m_file;
+  /// The angle used to calculate wavelength from momentum exchange
+  double m_theta;
 };
 } // namespace DataHandling
 } // namespace Mantid

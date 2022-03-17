@@ -40,7 +40,7 @@ void SaveReflectometryAscii::init() {
   declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>("InputWorkspace", "", Direction::Input),
                   "The name of the workspace containing the data you want to save.");
   declareProperty(std::make_unique<FileProperty>("Filename", "", FileProperty::Save), "The output filename");
-  std::vector<std::string> extension = {".mft", ".txt", ".dat", "custom"};
+  std::vector<std::string> extension = {".mft", ".txt", ".dat", ".lam", "custom"};
   declareProperty("FileExtension", ".mft", std::make_shared<StringListValidator>(extension),
                   "Choose the file extension according to the file format.");
   auto mft = std::make_unique<VisibleWhenProperty>("FileExtension", IS_EQUAL_TO, "mft");
@@ -57,6 +57,8 @@ void SaveReflectometryAscii::init() {
   declareProperty("Separator", "tab", std::make_shared<StringListValidator>(separator),
                   "The separator used for splitting data columns.");
   setPropertySettings("Separator", std::make_unique<VisibleWhenProperty>("FileExtension", IS_EQUAL_TO, "custom"));
+  declareProperty("Theta", 0.0, "The angle (in deg) used to calculate wavelength from momentum exchange.");
+  setPropertySettings("Theta", std::make_unique<VisibleWhenProperty>("FileExtension", IS_EQUAL_TO, ".lam"));
 }
 
 /// Input validation for single MatrixWorkspace
@@ -81,6 +83,12 @@ std::map<std::string, std::string> SaveReflectometryAscii::validateInputs() {
       issues["InputWorkspace"] = "Workspace does not contain data";
     }
   }
+  if (m_ext == ".lam") {
+    m_theta = M_PI * static_cast<double>(getProperty("Theta")) / 180.0;
+    if (m_theta == 0.0) {
+      issues["Theta"] = "The theta angle necessary to calculate wavelength is not defined.";
+    }
+  }
   return issues;
 }
 
@@ -100,6 +108,10 @@ void SaveReflectometryAscii::data() {
         outputval(m_ws->dx(0)[i]);
       else
         outputval(points[i] * ((points[1] + points[0]) / points[1]));
+    }
+    if (m_ext == ".lam") {
+      // the final column contains wavelength calculated using momentum exchange (first column)
+      outputval(4 * M_PI * sin(m_theta) / points[i]);
     }
     m_file << '\n';
   }
@@ -125,7 +137,7 @@ bool SaveReflectometryAscii::includeQResolution() const {
   if (m_ext == "custom" && getProperty("WriteResolution"))
     return true;
   // Only include the resolution for MFT if the workspace contains it
-  if (m_ext == ".mft" && m_ws->hasDx(0))
+  if ((m_ext == ".mft" || m_ext == ".lam") && m_ws->hasDx(0))
     return true;
 
   return false;
@@ -193,7 +205,10 @@ void SaveReflectometryAscii::writeInfo(const std::string &logName, const std::st
 /// Write header lines
 void SaveReflectometryAscii::header() {
   m_file << std::setfill(' ');
-  m_file << "MFT\n";
+  auto fileType = "MFT\n";
+  if (m_ext == ".lam")
+    fileType = "LAM\n";
+  m_file << fileType;
   std::vector<std::string> logs{"instrument.name", "user.namelocalcontact", "title", "start_time", "end_time"};
   writeInfo("instrument.name", "Instrument");
   writeInfo("user.namelocalcontact", "User-local contact");
@@ -224,6 +239,8 @@ void SaveReflectometryAscii::header() {
   outputval("refl_err");
   if (includeQResolution())
     outputval("q_res (FWHM)");
+  if (m_ext == ".lam")
+    outputval("wavelength");
   m_file << "\n";
 }
 
@@ -248,7 +265,7 @@ void SaveReflectometryAscii::checkFile(const std::string &filename) {
 void SaveReflectometryAscii::exec() {
   checkFile(m_filename);
   separator();
-  if ((getProperty("WriteHeader") && m_ext == "custom") || m_ext == ".mft")
+  if ((getProperty("WriteHeader") && m_ext == "custom") || m_ext == ".mft" || m_ext == ".lam")
     header();
   else if (m_ext == ".dat")
     m_file << m_ws->y(0).size() << "\n";
