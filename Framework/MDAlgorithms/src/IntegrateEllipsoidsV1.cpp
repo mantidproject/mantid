@@ -199,7 +199,7 @@ DECLARE_ALGORITHM(IntegrateEllipsoidsV1)
 
 //---------------------------------------------------------------------
 /// Algorithm's name for identification. @see Algorithm::name
-const std::string IntegrateEllipsoidsV1::name() const { return "IntegrateEllipsoidsV1"; }
+const std::string IntegrateEllipsoidsV1::name() const { return "IntegrateEllipsoids"; }
 
 /// Algorithm's version for identification. @see Algorithm::version
 int IntegrateEllipsoidsV1::version() const { return 1; }

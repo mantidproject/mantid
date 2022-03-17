@@ -27,7 +27,7 @@ namespace MDAlgorithms {
 class DLLExport IntegrateEllipsoidsV2 : public API::Algorithm {
 public:
   static void initInstance(API::Algorithm &alg);
-  const std::string name() const override { return "IntegrateEllipsoidsV2"; }
+  const std::string name() const override { return "IntegrateEllipsoids"; }
 
   const std::string summary() const override {
     return "Integrate Single Crystal Diffraction Bragg peaks using 3D "
