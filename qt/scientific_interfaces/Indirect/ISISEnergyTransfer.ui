@@ -1061,23 +1061,8 @@
            <bool>false</bool>
           </property>
           <property name="currentText">
-           <string>Ungrouped</string>
+           <string/>
           </property>
-          <item>
-           <property name="text">
-            <string>Ungrouped</string>
-           </property>
-          </item>
-          <item>
-           <property name="text">
-            <string>Group</string>
-           </property>
-          </item>
-          <item>
-           <property name="text">
-            <string>Group by Sample</string>
-           </property>
-          </item>
          </widget>
         </item>
         <item>

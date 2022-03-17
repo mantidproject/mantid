@@ -223,10 +223,15 @@ void saveAclimax(std::string const &workspaceName, std::string const &outputName
 
 } // namespace
 
+std::string UNGROUPED = "Ungrouped";
+std::string GROUP = "Group";
+std::string GROUPBYSAMPLE = "Group by sample";
+
 namespace MantidQt::CustomInterfaces {
 //----------------------------------------------------------------------------------------------
 /** Constructor
  */
+
 ISISEnergyTransfer::ISISEnergyTransfer(IndirectDataReduction *idrUI, QWidget *parent)
     : IndirectDataReductionTab(idrUI, parent) {
   m_uiForm.setupUi(parent);
@@ -260,6 +265,11 @@ ISISEnergyTransfer::ISISEnergyTransfer(IndirectDataReduction *idrUI, QWidget *pa
 
   // Allows empty workspace selector when initially selected
   m_uiForm.dsCalibrationFile->isOptional(true);
+
+  // Add grouping options
+  m_uiForm.cbGroupOutput->addItem(QString::fromStdString(UNGROUPED));
+  m_uiForm.cbGroupOutput->addItem(QString::fromStdString(GROUP));
+  m_uiForm.cbGroupOutput->addItem(QString::fromStdString(GROUPBYSAMPLE));
 
   // Update UI widgets to show default values
   mappingOptionSelected(m_uiForm.cbGroupingOptions->currentText());
@@ -527,9 +537,9 @@ void ISISEnergyTransfer::algorithmComplete(bool error) {
       m_outputWorkspaces = outputGroup->getNames();
       m_pythonExportWsName = m_outputWorkspaces[0];
 
-      if (m_uiForm.cbGroupOutput->currentText() == "Ungrouped") {
+      if (m_uiForm.cbGroupOutput->currentText().toStdString() == UNGROUPED) {
         ungroupWorkspace(outputGroup->getName());
-      } else if (m_uiForm.cbGroupOutput->currentText() == "Group by Sample") {
+      } else if (m_uiForm.cbGroupOutput->currentText().toStdString() == GROUPBYSAMPLE) {
         groupWorkspaceBySampleChanger(outputGroup->getName());
         // If we are grouping by sample we want to ungroup the reduced group leaving only the sample grouped
         ungroupWorkspace(outputGroup->getName());
