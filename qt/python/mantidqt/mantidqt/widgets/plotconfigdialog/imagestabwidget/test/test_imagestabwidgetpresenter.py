@@ -78,9 +78,7 @@ class ImagesTabWidgetPresenterTest(unittest.TestCase):
         mock_view = Mock(get_selected_image_name=lambda: '(0, 0) - {}'.format(label))
         presenter = self._generate_presenter(fig=fig, view=mock_view)
         #need to unpack axes.collection from ArtistList
-        axes_collection = []
-        for i in axes.collections:
-            axes_collection.append(i)
+        axes_collection = list(axes.collections)
         expected = {'(0, 0) - {}'.format(label): axes_collection}
         self.assertEqual(presenter.image_names_dict, expected)
 
