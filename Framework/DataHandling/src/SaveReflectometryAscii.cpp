@@ -63,8 +63,6 @@ void SaveReflectometryAscii::init() {
 std::map<std::string, std::string> SaveReflectometryAscii::validateInputs() {
   std::map<std::string, std::string> issues;
   m_filename = getPropertyValue("Filename");
-  if (m_filename.empty())
-    issues["InputWorkspace"] = "Provide a file name";
   m_ext = getPropertyValue("FileExtension");
   if (m_ext != "custom")
     m_filename.append(m_ext);
