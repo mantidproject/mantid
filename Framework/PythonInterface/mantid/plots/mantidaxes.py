@@ -1312,11 +1312,16 @@ class MantidAxes3D(Axes3D):
             else:
                 axis_index_list = [axis_index]
 
-            for axis_index in axis_index_list:
-                axis_data = self.original_data_surface[axis_index].copy()
-                axis_data[np.less(axis_data, min_vals[axis_index], where=~np.isnan(axis_data))] = np.nan
-                axis_data[np.greater(axis_data, max_vals[axis_index], where=~np.isnan(axis_data))] = np.nan
-                self.collections[0]._vec[axis_index] = axis_data
+            # if original_data_surface does not match current collections then we shouldn't add it back,
+            # delete attribute and skip adding back.
+            if self.collections[0]._vec[axis_index_list[0]].size != self.original_data_surface[axis_index_list[0]].size:
+                delattr(self, 'original_data_surface')
+            else:
+                for axis_index in axis_index_list:
+                    axis_data = self.original_data_surface[axis_index].copy()
+                    axis_data[np.less(axis_data, min_vals[axis_index], where=~np.isnan(axis_data))] = np.nan
+                    axis_data[np.greater(axis_data, max_vals[axis_index], where=~np.isnan(axis_data))] = np.nan
+                    self.collections[0]._vec[axis_index] = axis_data
 
         if hasattr(self, 'original_data_wireframe'):
 
