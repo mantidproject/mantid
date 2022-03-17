@@ -26,7 +26,7 @@ DECLARE_ALGORITHM(IntegrateEllipsoids)
 const std::string IntegrateEllipsoids::name() const { return "IntegrateEllipsoids"; }
 
 /// Algorithm's version for identification. @see Algorithm::version
-int IntegrateEllipsoids::version() const { return 1; }
+int IntegrateEllipsoids::version() const { return 3; }
 
 <<<<<<< HEAD
 /// Only convert to Q-vector.
