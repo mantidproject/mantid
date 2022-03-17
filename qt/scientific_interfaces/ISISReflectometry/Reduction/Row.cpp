@@ -45,6 +45,8 @@ ReductionOptionsMap const &Row::reductionOptions() const { return m_reductionOpt
 
 ReductionWorkspaces const &Row::reducedWorkspaceNames() const { return m_reducedWorkspaceNames; }
 
+boost::optional<size_t> const &Row::lookupIndex() const { return m_lookupIndex; }
+
 void Row::setOutputNames(std::vector<std::string> const &outputNames) {
   if (outputNames.size() != 3)
     throw std::runtime_error("Invalid number of output workspaces for row");
@@ -53,6 +55,8 @@ void Row::setOutputNames(std::vector<std::string> const &outputNames) {
 }
 
 void Row::setOutputQRange(RangeInQ qRange) { m_qRangeOutput = std::move(qRange); }
+
+void Row::setLookupIndex(boost::optional<size_t> lookupIndex) { m_lookupIndex = std::move(lookupIndex); }
 
 void Row::resetOutputs() {
   m_reducedWorkspaceNames.resetOutputNames();
