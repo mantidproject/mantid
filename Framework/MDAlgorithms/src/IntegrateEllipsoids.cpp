@@ -62,10 +62,10 @@ void IntegrateEllipsoids::exec() {
   // detect which algo to run
   if ((isIntegrateInHKL || isGetUBFromPeaksWorkspace) && indexCount > 0 && !shareBackground) {
     // v1
-    alg = std::dynamic_pointer_cast<Algorithm>(createChildAlgorithm("IntegrateEllipsoidsV1"));
+    alg = std::dynamic_pointer_cast<Algorithm>(createChildAlgorithm("IntegrateEllipsoids", -1., -1., true, 1));
   } else {
     // v2
-    alg = std::dynamic_pointer_cast<Algorithm>(createChildAlgorithm("IntegrateEllipsoidsV2"));
+    alg = std::dynamic_pointer_cast<Algorithm>(createChildAlgorithm("IntegrateEllipsoids", -1., -1., true, 2));
   }
   // forward properties to algo
   alg->copyPropertiesFrom(*this);
