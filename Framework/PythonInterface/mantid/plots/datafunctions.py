@@ -1138,7 +1138,10 @@ def waterfall_create_fill(ax):
 
 
 def waterfall_remove_fill(ax):
-    ax.collections[:] = filter(lambda x: not isinstance(x, PolyCollection), ax.collections)
+    # Use a temporary list to hold a reference to the collections whilst removing them.
+    for poly_collection in list(ax.collections):
+        if isinstance(poly_collection, PolyCollection):
+            poly_collection.remove()
     ax.get_figure().canvas.draw()
 
 
