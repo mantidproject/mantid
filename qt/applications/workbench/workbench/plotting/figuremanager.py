@@ -510,7 +510,15 @@ class FigureManagerWorkbench(FigureManagerBase, QObject):
         ax.lines.reverse()
         for cap in errorbar_cap_lines:
             ax.add_line(cap)
-        ax.collections += fills
+        if LooseVersion("3.7") > LooseVersion(matplotlib.__version__) >= LooseVersion("3.2"):
+            for line_fill in fills:
+                if line_fill not in ax.collections:
+                    ax.add_collection(line_fill)
+        elif LooseVersion(matplotlib.__version__) < LooseVersion("3.2"):
+            ax.collections += fills
+        else:
+            raise NotImplementedError("ArtistList will become an immutable tuple in matplotlib 3.7 and thus, "
+                                      "this code doesn't work anymore.")
         ax.collections.reverse()
         ax.update_waterfall(x, y)
 
