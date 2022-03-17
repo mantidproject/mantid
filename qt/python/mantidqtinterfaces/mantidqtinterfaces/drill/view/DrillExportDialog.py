@@ -68,7 +68,10 @@ class DrillExportDialog(QDialog):
         for i in range(len(algorithms)):
             algo = algorithms[i]
             if algo in extensions:
-                text = algo + " (" + extensions[algo] + ")"
+                ext = extensions[algo]
+                if isinstance(extensions[algo], list):
+                    ext = ', '.join(extensions[algo])
+                text = algo + " (" + ext + ")"
             else:
                 text = algo
             widget = QCheckBox(text, self)

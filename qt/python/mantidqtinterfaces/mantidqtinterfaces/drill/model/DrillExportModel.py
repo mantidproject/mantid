@@ -214,6 +214,36 @@ class DrillExportModel:
                       .format(wsName, filenames))
         del self._successExports[wsName]
 
+    def _create_tasks(self, wsName, algo, exportPath, extension):
+        tasks = list()
+        extensions = extension
+        if not isinstance(extension, list):
+            extensions = [extension]
+        for ext in extensions:
+            filename = os.path.join(exportPath,
+                                    wsName + ext)
+            name = wsName + ":" + filename
+            if wsName not in self._exports:
+                self._exports[wsName] = set()
+
+            self._exports[wsName].add(filename)
+            kwargs = {}
+            if 'Ascii' in algo:
+                log_list = mtd[wsName].getInstrument().getStringParameter('log_list_to_save')
+                if log_list:
+                    log_list = log_list[0].split(',')
+                    kwargs['LogList'] = [log.strip() for log in log_list]  # removes white spaces
+                if 'Reflectometry' in algo:
+                    kwargs['WriteHeader'] = True
+                    kwargs['FileExtension'] = ext
+                    kwargs['Theta'] = mtd[wsName].getRun().getProperty('san.value').value
+                else:
+                    kwargs['WriteXError'] = True
+            task = DrillTask(name, algo, InputWorkspace=wsName,
+                             FileName=filename, **kwargs)
+            tasks.append(task)
+        return tasks
+
     def run(self, sample):
         """
         Run the export algorithms on a sample. For each export algorithm, the
@@ -244,7 +274,7 @@ class DrillExportModel:
             return
 
         tasks = list()
-        for algo,active in self._exportAlgorithms.items():
+        for algo, active in self._exportAlgorithms.items():
             if not active:
                 continue
             if not self._validCriteria(outputWs, algo):
@@ -256,27 +286,7 @@ class DrillExportModel:
             for wsName in mtd.getObjectNames(contain=workspaceName):
                 if isinstance(mtd[wsName], WorkspaceGroup):
                     continue
-
-                filename = os.path.join(
-                        exportPath,
-                        wsName + RundexSettings.EXPORT_ALGO_EXTENSION[algo])
-                name = wsName + ":" + filename
-                if wsName not in self._exports:
-                    self._exports[wsName] = set()
-                self._exports[wsName].add(filename)
-                kwargs = {}
-                if 'Ascii' in algo:
-                    log_list = mtd[wsName].getInstrument().getStringParameter('log_list_to_save')
-                    if log_list:
-                        log_list = log_list[0].split(',')
-                        kwargs['LogList'] = [log.strip() for log in log_list] # removes white spaces
-                    if 'Reflectometry' in algo:
-                        kwargs['WriteHeader'] = True
-                        kwargs['FileExtension'] = 'custom'
-                    else:
-                        kwargs['WriteXError'] = True
-                task = DrillTask(name, algo, InputWorkspace=wsName,
-                                 FileName=filename, **kwargs)
-                tasks.append(task)
+                extension = RundexSettings.EXPORT_ALGO_EXTENSION[algo]
+                tasks.extend(self._create_tasks(wsName, algo, exportPath, extension))
 
         self._pool.addProcesses(tasks)

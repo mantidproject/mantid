@@ -190,7 +190,7 @@ class RundexSettings(object):
             "SaveAscii": ".txt",
             "SaveCanSAS1D": ".xml",
             "SaveNISTDAT": ".dat",
-            "SaveReflectometryAscii": ".mft",
+            "SaveReflectometryAscii": [".mft", ".lam"],
             "SaveFocussedXYE": ".dat"
             }
 
