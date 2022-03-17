@@ -30,7 +30,7 @@ public:
   int confidence(Kernel::NexusDescriptor &descriptor) const override;
 
 private:
-  enum MultichannelType { TOF, KINETIC };
+  enum MultichannelType { TOF, KINETIC, SCAN };
   struct DetectorPosition {
     double distanceSampleRear;
     double distanceSampleBottomTop;

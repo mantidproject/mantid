@@ -294,8 +294,10 @@ void LoadILLSANS::initWorkSpace(NeXus::NXEntry &firstEntry, const std::string &i
   int numberOfTubes, numberOfPixelsPerTubes, numberOfChannels;
   getDataDimensions(data, numberOfChannels, numberOfTubes, numberOfPixelsPerTubes);
 
+  MultichannelType type = (numberOfChannels != 1) ? MultichannelType::SCAN : MultichannelType::TOF;
+
   numberOfHistograms = numberOfPixelsPerTubes * numberOfTubes + N_MONITORS;
-  createEmptyWorkspace(numberOfHistograms, numberOfChannels);
+  createEmptyWorkspace(numberOfHistograms, numberOfChannels, type);
   loadMetaData(firstEntry, instrumentPath);
 
   std::vector<double> binning;
@@ -664,9 +666,21 @@ void LoadILLSANS::createEmptyWorkspace(const size_t numberOfHistograms, const si
   const size_t numberOfElementsInX = numberOfChannels + ((type == MultichannelType::TOF && !m_isD16Omega) ? 1 : 0);
   m_localWorkspace =
       WorkspaceFactory::Instance().create("Workspace2D", numberOfHistograms, numberOfElementsInX, numberOfChannels);
-  if (type == MultichannelType::TOF) {
+
+  switch (type) {
+  case MultichannelType::TOF:
     m_localWorkspace->getAxis(0)->unit() = UnitFactory::Instance().create("Wavelength");
+    break;
+  case MultichannelType::SCAN: {
+    auto labelX = std::dynamic_pointer_cast<Kernel::Units::Label>(Kernel::UnitFactory::Instance().create("Label"));
+    labelX->setLabel("Omega angle");
+    m_localWorkspace->getAxis(0)->unit() = labelX;
+    break;
   }
+  case MultichannelType::KINETIC:
+    break;
+  }
+
   m_localWorkspace->setYUnitLabel("Counts");
 }
 
