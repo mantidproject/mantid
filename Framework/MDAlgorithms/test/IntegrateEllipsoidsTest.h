@@ -617,6 +617,13 @@ public:
     // creates the peak workspace, sets UB, and indexes them
     PeaksWorkspace_sptr peaksWS = createPeaksForSatelliteTests(peaksHKL);
 
+    // Tolerance of 0 to force 0 peaks and take v2 route
+    auto indexalg = Mantid::API::AlgorithmManager::Instance().createUnmanaged("IndexPeaks");
+    indexalg->initialize();
+    indexalg->setProperty("PeaksWorkspace", peaksWS);
+    indexalg->setProperty("Tolerance", 0.0);
+    indexalg->execute();
+
     // integrate with sharing background region to satellite peaks
     IntegrateEllipsoids alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize());
@@ -645,6 +652,47 @@ public:
     auto childHist = algHist->getChildAlgorithmHistory(0);
 
     TS_ASSERT_EQUALS(childHist->name(), "IntegrateEllipsoidsV2");
+
+    AnalysisDataService::Instance().remove("peaks_integrated_shared");
+    AnalysisDataService::Instance().remove(peaksWS->getName());
+  }
+
+  void test_execution_V1_Path() {
+
+    const std::vector<V3D> peaksHKL = {V3D(0.15, 1.85, -1.0), V3D(1.0, 4.0, -3.0), V3D(1.0, 5.0, -3.0)};
+
+    // creates the peak workspace, sets UB, and indexes them
+    PeaksWorkspace_sptr peaksWS = createPeaksForSatelliteTests(peaksHKL);
+    // integrate with sharing background region to satellite peaks
+    IntegrateEllipsoids alg;
+    TS_ASSERT_THROWS_NOTHING(alg.initialize());
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", m_satelliteEventWS));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("PeaksWorkspace", peaksWS));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("OutputWorkspace", "peaks_integrated_shared"));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("SpecifySize", true));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("PeakSize", 0.20));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("BackgroundInnerSize", 0.23));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("BackgroundOuterSize", 0.26));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("AdaptiveQMultiplier", 0.01));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("AdaptiveQBackground", true));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("GetUBFromPeaksWorkspace", true));
+
+    TS_ASSERT_THROWS_NOTHING(alg.execute());
+    TS_ASSERT_THROWS_NOTHING(alg.isExecuted());
+
+    PeaksWorkspace_sptr peaksShared = alg.getProperty("OutputWorkspace");
+
+    auto wsHist = peaksShared->getHistory();
+    TS_ASSERT(!wsHist.empty())
+
+    auto algHist = wsHist.getAlgorithmHistory(wsHist.size() - 1);
+    TS_ASSERT_EQUALS(algHist->name(), "IntegrateEllipsoids")
+
+    TS_ASSERT_EQUALS(algHist->childHistorySize(), 1);
+
+    auto childHist = algHist->getChildAlgorithmHistory(0);
+
+    TS_ASSERT_EQUALS(childHist->name(), "IntegrateEllipsoidsV1");
 
     AnalysisDataService::Instance().remove("peaks_integrated_shared");
     AnalysisDataService::Instance().remove(peaksWS->getName());
