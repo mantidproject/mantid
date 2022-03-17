@@ -64,8 +64,10 @@ std::map<std::string, std::string> SaveReflectometryAscii::validateInputs() {
   std::map<std::string, std::string> issues;
   m_filename = getPropertyValue("Filename");
   m_ext = getPropertyValue("FileExtension");
-  if (m_ext != "custom")
+  if (m_ext != "custom" && m_filename.find(m_ext) > m_filename.size()) {
+    // second check avoids appending redundant extension in case it is already specified
     m_filename.append(m_ext);
+  }
   m_ws = getProperty("InputWorkspace");
   if (!m_ws) {
     WorkspaceGroup_const_sptr group =
