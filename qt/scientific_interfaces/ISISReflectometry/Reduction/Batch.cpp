@@ -40,4 +40,9 @@ void Batch::resetSkippedItems() { m_runsTable.resetSkippedItems(); }
 boost::optional<Item &> Batch::getItemWithOutputWorkspaceOrNone(std::string const &wsName) {
   return m_runsTable.getItemWithOutputWorkspaceOrNone(wsName);
 }
+
+void Batch::updateLookupIndex(Row &row) {
+  row.setLookupIndex(experiment().getLookupRowIndexFromRow(row, runsTable().thetaTolerance()));
+}
+
 } // namespace MantidQt::CustomInterfaces::ISISReflectometry

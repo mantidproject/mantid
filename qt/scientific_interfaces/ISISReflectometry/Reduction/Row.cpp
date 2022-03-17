@@ -21,7 +21,7 @@ Row::Row(std::vector<std::string> runNumbers, double theta,
     : Item(), m_runNumbers(std::move(runNumbers)), m_theta(theta), m_qRange(std::move(qRange)), m_qRangeOutput(),
       m_scaleFactor(std::move(scaleFactor)), m_transmissionRuns(std::move(transmissionRuns)),
       m_reducedWorkspaceNames(std::move(reducedWorkspaceNames)), m_reductionOptions(std::move(reductionOptions)),
-      m_parent(nullptr) {
+      m_lookupIndex(boost::none), m_parent(nullptr) {
   std::sort(m_runNumbers.begin(), m_runNumbers.end());
 }
 
