@@ -37,7 +37,6 @@ LINE2D_KWARGS = {
     'markeredgecolor': 'g',
     'markeredgewidth': 1.2,
     'markerfacecolor': 'y',
-    'markerfacecoloralt': 'k',
     'markersize': 1.3,
     'markevery': 2,
     'visible': False,
