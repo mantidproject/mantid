@@ -1,0 +1,1 @@
+- reintroduced :ref:`algm-IntegrateEllipsoids` from release v6.0.0 as v1, marked the latest as v2, and created a wrapper that automatically switches between them as a v3
