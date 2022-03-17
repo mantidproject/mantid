@@ -651,7 +651,7 @@ public:
 
     auto childHist = algHist->getChildAlgorithmHistory(0);
 
-    TS_ASSERT_EQUALS(childHist->name(), "IntegrateEllipsoidsV2");
+    TS_ASSERT_EQUALS(childHist->version(), 2);
 
     AnalysisDataService::Instance().remove("peaks_integrated_shared");
     AnalysisDataService::Instance().remove(peaksWS->getName());
@@ -692,7 +692,7 @@ public:
 
     auto childHist = algHist->getChildAlgorithmHistory(0);
 
-    TS_ASSERT_EQUALS(childHist->name(), "IntegrateEllipsoidsV1");
+    TS_ASSERT_EQUALS(childHist->version(), 1);
 
     AnalysisDataService::Instance().remove("peaks_integrated_shared");
     AnalysisDataService::Instance().remove(peaksWS->getName());
