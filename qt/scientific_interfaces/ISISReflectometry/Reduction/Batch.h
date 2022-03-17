@@ -46,6 +46,7 @@ public:
   boost::optional<Item &> getItemWithOutputWorkspaceOrNone(std::string const &wsName);
 
   void updateLookupIndex(Row &row);
+  void updateLookupIndexesOfGroup(Group &group);
 
 private:
   Experiment const &m_experiment;

@@ -53,6 +53,29 @@ public:
     TS_ASSERT_EQUALS(row.lookupIndex(), boost::none);
   }
 
+  void test_update_lookup_index_group_updates_all_rows() {
+    auto rowA = ModelCreationHelper::makeRow(0.5);
+    auto rowB = ModelCreationHelper::makeRow(2.3);
+    auto rowW = ModelCreationHelper::makeRow(1.8);
+    auto group = Group("groupName");
+    group.appendRow(std::move(rowA));
+    group.appendRow(std::move(rowB));
+    group.appendRow(std::move(rowW));
+    auto model = Batch(m_experiment, m_instrument, m_runsTable, m_slicing);
+    TS_ASSERT_EQUALS(group.mutableRows()[0].get().lookupIndex(), boost::none);
+    TS_ASSERT_EQUALS(group.mutableRows()[1].get().lookupIndex(), boost::none);
+    TS_ASSERT_EQUALS(group.mutableRows()[2].get().lookupIndex(), boost::none);
+
+    model.updateLookupIndexesOfGroup(group);
+
+    TS_ASSERT(group.mutableRows()[0].get().lookupIndex().is_initialized());
+    TS_ASSERT_EQUALS(group.mutableRows()[0].get().lookupIndex().get(), size_t(1));
+    TS_ASSERT(group.mutableRows()[1].get().lookupIndex().is_initialized());
+    TS_ASSERT_EQUALS(group.mutableRows()[1].get().lookupIndex().get(), size_t(2));
+    TS_ASSERT(group.mutableRows()[2].get().lookupIndex().is_initialized());
+    TS_ASSERT_EQUALS(group.mutableRows()[2].get().lookupIndex().get(), size_t(0));
+  }
+
 private:
   std::vector<std::string> m_instruments;
   double m_thetaTolerance;

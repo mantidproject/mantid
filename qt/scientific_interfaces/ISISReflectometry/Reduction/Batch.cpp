@@ -45,4 +45,12 @@ void Batch::updateLookupIndex(Row &row) {
   row.setLookupIndex(experiment().getLookupRowIndexFromRow(row, runsTable().thetaTolerance()));
 }
 
+void Batch::updateLookupIndexesOfGroup(Group &group) {
+  for (auto &row : group.mutableRows()) {
+    if (row.is_initialized()) {
+      updateLookupIndex(row.get());
+    }
+  }
+}
+
 } // namespace MantidQt::CustomInterfaces::ISISReflectometry
