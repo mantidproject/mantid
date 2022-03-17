@@ -64,7 +64,6 @@ class FitPropertyBrowserTest(unittest.TestCase):
         property_browser = self._create_widget(canvas=canvas)
         property_browser.setWorkspaceName('ws_name')
         plot([ws], spectrum_nums=[3], overplot=True, fig=fig)
-        property_browser.show()
         property_browser.setWorkspaceIndex(2)
         self.assertEqual(property_browser.workspaceIndex(), 2)
         property_browser.hide()

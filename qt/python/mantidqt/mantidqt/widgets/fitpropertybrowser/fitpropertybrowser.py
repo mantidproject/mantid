@@ -220,6 +220,9 @@ class FitPropertyBrowser(FitPropertyBrowserBase):
         self.setPeakToolOn(True)
         self.canvas.draw()
         self.set_output_window_names()
+        # Turn off autoscaling in the future
+        for axes in self.canvas.figure.get_axes():
+            axes.autoscale(enable=False)
 
     def set_output_window_names(self):
         import matplotlib.pyplot as plt  # unfortunately need to import again
@@ -385,7 +388,6 @@ class FitPropertyBrowser(FitPropertyBrowserBase):
         ax.plot(ws, wkspIndex=1, **plot_kwargs)
         if plot_diff:
             ax.plot(ws, wkspIndex=2, **plot_kwargs)
-        ax.autoscale(enable=True, axis='both')
 
         self.addFitResultWorkspacesToTableWidget()
         # Add properties back to the lines
