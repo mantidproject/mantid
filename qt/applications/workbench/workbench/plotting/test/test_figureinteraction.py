@@ -616,7 +616,7 @@ class FigureInteractionTest(unittest.TestCase):
         fig_interactor = FigureInteraction(fig_manager_mock)
         fig_interactor._toggle_normalization(fig.axes[0])
 
-        self.assertTrue(all(convert_color_to_hex(col.get_color()[0]) == "#ff9900"
+        self.assertTrue(all(convert_color_to_hex(col.get_edgecolor()[0]) == "#ff9900"
                             for col in fig.get_axes()[0].collections))
 
     def test_toggle_normalisation_applies_to_all_images_if_one_colorbar(self):
