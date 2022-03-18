@@ -8,7 +8,7 @@
 #
 #
 import unittest
-from mantidqt.widgets.memorywidget.memoryinfo import get_memory_info
+from mantidqt.widgets.memorywidget.memoryinfo import get_memory_info, get_mantid_memory_info
 
 
 class MemoryInfoTest(unittest.TestCase):
@@ -17,6 +17,11 @@ class MemoryInfoTest(unittest.TestCase):
         mem_used_percent, mem_used, mem_total = get_memory_info()
         self.assertTrue(isinstance(mem_used_percent, int))
         self.assertTrue(0 <= mem_used_percent <= 100)
+
+    def test_mantid_memoryinfo(self):
+        mantid_mem_used_percent, mantid_mem_used, mem_total = get_mantid_memory_info()
+        self.assertTrue(isinstance(mantid_mem_used_percent, int))
+        self.assertTrue(0 <= mantid_mem_used_percent <= 100)
 
 
 if __name__ == "__main__":
