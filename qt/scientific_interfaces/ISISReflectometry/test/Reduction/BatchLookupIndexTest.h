@@ -21,7 +21,8 @@ public:
   BatchLookupIndexTest()
       : m_instruments{"INTER", "OFFSPEC", "POLREF", "SURF", "CRISP"}, m_thetaTolerance(0.01),
         m_experiment(ModelCreationHelper::makeExperiment()), m_instrument(ModelCreationHelper::makeInstrument()),
-        m_runsTable(m_instruments, m_thetaTolerance, ReductionJobs()), m_slicing() {}
+        m_runsTable(m_instruments, m_thetaTolerance, ModelCreationHelper::twoGroupsWithTwoRowsAndOneEmptyGroupModel()),
+        m_slicing() {}
 
   void test_update_lookup_index_single_row_match() {
     constexpr auto angle = 0.5;
@@ -74,6 +75,29 @@ public:
     TS_ASSERT_EQUALS(group.mutableRows()[1].get().lookupIndex().get(), size_t(2));
     TS_ASSERT(group.mutableRows()[2].get().lookupIndex().is_initialized());
     TS_ASSERT_EQUALS(group.mutableRows()[2].get().lookupIndex().get(), size_t(0));
+  }
+
+  void test_update_lookup_index_table_updates_all_groups() {
+    auto model = Batch(m_experiment, m_instrument, m_runsTable, m_slicing);
+
+    for (auto const &group : m_runsTable.reductionJobs().groups()) {
+      for (auto const &row : group.rows()) {
+        TS_ASSERT_EQUALS(row.get().lookupIndex(), boost::none);
+      }
+    }
+
+    model.updateLookupIndexesOfTable();
+
+    for (auto const &group : m_runsTable.reductionJobs().groups()) {
+      for (auto const &row : group.rows()) {
+        TS_ASSERT(row.is_initialized());
+        if (row.get().theta() == 0.5) {
+          TS_ASSERT_EQUALS(row.get().lookupIndex(), size_t(1));
+        } else {
+          TS_ASSERT_EQUALS(row.get().lookupIndex(), size_t(0));
+        }
+      }
+    }
   }
 
 private:

@@ -47,6 +47,7 @@ public:
 
   void updateLookupIndex(Row &row);
   void updateLookupIndexesOfGroup(Group &group);
+  void updateLookupIndexesOfTable();
 
 private:
   Experiment const &m_experiment;

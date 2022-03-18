@@ -53,4 +53,10 @@ void Batch::updateLookupIndexesOfGroup(Group &group) {
   }
 }
 
+void Batch::updateLookupIndexesOfTable() {
+  for (auto &group : m_runsTable.mutableReductionJobs().mutableGroups()) {
+    updateLookupIndexesOfGroup(group);
+  }
+}
+
 } // namespace MantidQt::CustomInterfaces::ISISReflectometry
