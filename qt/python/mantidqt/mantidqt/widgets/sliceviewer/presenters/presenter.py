@@ -310,6 +310,12 @@ class SliceViewer(ObservingPresenter, SliceViewerBasePresenter):
         else:
             self.view.peaks_view.hide()
 
+    def non_axis_aligned_cut(self):
+        if self.view.non_axis_aligned_cut_view.isVisible():
+            self.view.non_axis_aligned_cut_view.hide()
+        else:
+            self.view.non_axis_aligned_cut_view.show()
+
     def replace_workspace(self, workspace_name, workspace):
         """
         Called when the SliceViewerADSObserver has detected that a workspace has changed

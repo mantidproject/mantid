@@ -20,6 +20,7 @@ from mantidqt.widgets.sliceviewer.peaksviewer.workspaceselection import \
      PeaksWorkspaceSelectorView)
 from mantidqt.widgets.sliceviewer.peaksviewer.view import PeaksViewerCollectionView
 from mantidqt.widgets.sliceviewer.peaksviewer.representation.painter import MplPainter
+from mantidqt.widgets.sliceviewer.cutviewer.view import CutViewerView
 
 # Constants
 from mantidqt.widgets.observers.observing_view import ObservingView
@@ -43,6 +44,7 @@ class SliceViewerView(QWidget, ObservingView):
         self._splitter.addWidget(self._data_view)
         #  peaks viewer off by default
         self._peaks_view = None
+        self._non_axis_aligned_cut_view = None
 
         # config the splitter appearance
         splitterStyleStr = """QSplitter::handle{
@@ -60,6 +62,7 @@ class SliceViewerView(QWidget, ObservingView):
 
         # connect up additional peaks signals
         self.data_view.mpl_toolbar.peaksOverlayClicked.connect(self.peaks_overlay_clicked)
+        self.data_view.mpl_toolbar.nonAlignedCutsClicked.connect(self.non_axis_aligned_cuts_clicked)
         self.close_signal.connect(self._run_close)
         self.rename_signal.connect(self._on_rename)
 
@@ -80,10 +83,20 @@ class SliceViewerView(QWidget, ObservingView):
 
         return self._peaks_view
 
+    @property
+    def non_axis_aligned_cut_view(self):
+        if self._non_axis_aligned_cut_view is None:
+            self._non_axis_aligned_cut_view = CutViewerView(MplPainter(self.data_view), self.presenter)
+            self._splitter.addWidget(self._non_axis_aligned_cut_view)
+        return self._non_axis_aligned_cut_view
+
     def peaks_overlay_clicked(self):
         """Peaks overlay button has been toggled
         """
         self.presenter.overlay_peaks_workspaces()
+
+    def non_axis_aligned_cuts_clicked(self):
+        self.presenter.non_axis_aligned_cut()
 
     def query_peaks_to_overlay(self, current_overlayed_names):
         """Display a dialog to the user to ask which peaks to overlay

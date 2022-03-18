@@ -21,6 +21,7 @@ class ToolItemText:
     OVERLAY_PEAKS = 'OverlayPeaks'
     NONORTHOGONAL_AXES = 'NonOrthogonalAxes'
     SAVE = 'Save'
+    NONAXISALIGNEDCUTS = 'NonAxisAlignedCuts'
 
 
 class SliceViewerNavigationToolbar(MantidNavigationToolbar):
@@ -31,6 +32,7 @@ class SliceViewerNavigationToolbar(MantidNavigationToolbar):
     regionSelectionClicked = Signal(bool)
     nonOrthogonalClicked = Signal(bool)
     peaksOverlayClicked = Signal(bool)
+    nonAlignedCutsClicked = Signal(bool)
     zoomPanClicked = Signal(bool)
     zoomPanFinished = Signal()
 
@@ -45,6 +47,8 @@ class SliceViewerNavigationToolbar(MantidNavigationToolbar):
                              'linePlotsClicked', False),
         MantidNavigationTool(ToolItemText.REGIONSELECTION, 'Toggle region selection on/off', 'mdi.vector-rectangle',
                              'regionSelectionClicked', False),
+        MantidNavigationTool(ToolItemText.NONAXISALIGNEDCUTS, 'Toggle cutting tool', 'mdi.angle-acute',
+                             'nonAlignedCutsClicked', False),
         MantidStandardNavigationTools.SEPARATOR,
         MantidNavigationTool(ToolItemText.OVERLAY_PEAKS, 'Add peaks overlays on/off', 'mdi.chart-bubble',
                              'peaksOverlayClicked', None),
