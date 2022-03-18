@@ -7,7 +7,9 @@
 #  This file is part of the mantid workbench.
 
 import unittest
+from distutils.version import LooseVersion
 
+import matplotlib
 from matplotlib import use as mpl_use
 mpl_use('Agg')  # noqa
 from matplotlib.colors import LogNorm, Normalize
@@ -189,8 +191,12 @@ class ImagesTabWidgetPresenterTest(unittest.TestCase):
                  'vmax': 2,
                  'scale': 'Linear',
                  'interpolation': 'None'}
-        mock_view = Mock(get_selected_image_name=lambda: 'ws: (0, 0) - child0',
-                         get_properties=lambda: ImageProperties(props))
+        if LooseVersion(matplotlib.__version__) > LooseVersion("3.1.3"):
+            mock_view = Mock(get_selected_image_name=lambda: 'ws: (0, 0) - child0',
+                             get_properties=lambda: ImageProperties(props))
+        else:
+            mock_view = Mock(get_selected_image_name=lambda: 'ws: (0, 0) - image0',
+                             get_properties=lambda: ImageProperties(props))
         presenter = self._generate_presenter(fig=fig, view=mock_view)
         presenter.apply_properties()
 
