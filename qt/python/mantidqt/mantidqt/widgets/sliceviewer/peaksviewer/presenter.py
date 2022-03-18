@@ -9,7 +9,7 @@
 # local imports
 from .model import create_peaksviewermodel, PeaksViewerModel
 from .view import PeaksViewerView, PeaksViewerCollectionView
-from ..adsobsever import SliceViewerADSObserver
+from mantidqt.widgets.sliceviewer.models.adsobsever import SliceViewerADSObserver
 
 # 3rd party
 from mantid.kernel import logger

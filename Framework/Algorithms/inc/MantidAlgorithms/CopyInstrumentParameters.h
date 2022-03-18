@@ -40,7 +40,7 @@ namespace Algorithms {
     @author Karl Palmen STFC
     @date 16/08/2012
 */
-class MANTID_ALGORITHMS_DLL CopyInstrumentParameters : public API::Algorithm {
+class MANTID_ALGORITHMS_DLL CopyInstrumentParameters final : public API::Algorithm {
 public:
   /// Algorithm's name
   const std::string name() const override { return "CopyInstrumentParameters"; }

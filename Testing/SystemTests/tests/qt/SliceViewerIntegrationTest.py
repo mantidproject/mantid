@@ -16,7 +16,7 @@ from matplotlib.colors import Normalize
 from numpy import hstack
 
 from mantidqt.widgets.colorbar.colorbar import MIN_LOG_VALUE
-from mantidqt.widgets.sliceviewer.view import SCALENORM
+from mantidqt.widgets.sliceviewer.views.dataview import SCALENORM
 from mantid.simpleapi import (
     CreateMDHistoWorkspace, CreateMDWorkspace, CreateSampleWorkspace, DeleteWorkspace, FakeMDEventData,
     ConvertToDistribution, Scale,
@@ -24,8 +24,8 @@ from mantid.simpleapi import (
 from mantid.api import AnalysisDataService
 from mantidqt.utils.qt.testing import get_application
 from mantidqt.utils.qt.testing.qt_widget_finder import QtWidgetFinder
-from mantidqt.widgets.sliceviewer.presenter import SliceViewer
-from mantidqt.widgets.sliceviewer.toolbar import ToolItemText
+from mantidqt.widgets.sliceviewer.presenters.presenter import SliceViewer
+from mantidqt.widgets.sliceviewer.views.toolbar import ToolItemText
 from math import inf
 from numpy.testing import assert_allclose
 
@@ -431,7 +431,7 @@ class SliceViewerTestPlotMatrixXlimitsIgnoresMonitors(systemtesting.MantidSystem
 
 class SliceViewerTestPlotMatrixXlimitsIgnoresNans(systemtesting.MantidSystemTest, HelperTestingClass):
     # need to mock update slider as doesn't handle inf when initialising SliceViewer in this manner
-    @patch("mantidqt.widgets.sliceviewer.dimensionwidget.Dimension.update_slider")
+    @patch("mantidqt.widgets.sliceviewer.views.dimensionwidget.Dimension.update_slider")
     def runTest(self, mock_update_slider):
         HelperTestingClass.__init__(self)
         xmin = 5000

@@ -17,7 +17,7 @@ namespace LiveData {
     Simulates ISIS histogram DAE. It runs continuously until canceled and
     listens to port 6789 for ISIS DAE commands.
 */
-class FakeISISEventDAE : public API::Algorithm {
+class FakeISISEventDAE final : public API::Algorithm {
 public:
   /// Algorithm's name for identification overriding a virtual method
   const std::string name() const override { return "FakeISISEventDAE"; }

@@ -19,7 +19,7 @@ namespace MDAlgorithms {
 
   @date 2012-07-11
 */
-class DLLExport ImportMDEventWorkspace : public API::Algorithm {
+class DLLExport ImportMDEventWorkspace final : public API::Algorithm {
 public:
   const std::string name() const override;
   /// Summary of algorithms purpose

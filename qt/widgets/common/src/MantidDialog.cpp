@@ -29,7 +29,7 @@ MantidDialog::MantidDialog(QWidget *parent, const Qt::WindowFlags &flags) : QDia
 /**
  * Destructor
  */
-MantidDialog::~MantidDialog() {}
+MantidDialog::~MantidDialog() = default;
 
 /**
  *   Checks if receiver derives from MantidDialog. If it does calls the virtual

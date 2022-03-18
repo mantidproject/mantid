@@ -27,7 +27,7 @@ std::map<IqtFunctionModel::ParamID, QString> g_paramName{{IqtFunctionModel::Para
                                                          {IqtFunctionModel::ParamID::BG_A0, "A0"}};
 }
 
-IqtFunctionModel::IqtFunctionModel() {}
+IqtFunctionModel::IqtFunctionModel() = default;
 
 void IqtFunctionModel::clearData() {
   m_numberOfExponentials = 0;

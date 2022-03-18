@@ -99,7 +99,7 @@ class AlgorithmTreeWidget : public QTreeWidget {
   Q_OBJECT
 public:
   AlgorithmTreeWidget(QWidget *w) : QTreeWidget(w) {}
-  ~AlgorithmTreeWidget() override {}
+  ~AlgorithmTreeWidget() override = default;
   void mousePressEvent(QMouseEvent *e) override;
   void mouseMoveEvent(QMouseEvent *e) override;
   void mouseDoubleClickEvent(QMouseEvent *e) override;
@@ -123,7 +123,7 @@ private:
 class FindAlgComboBox : public QComboBox {
   Q_OBJECT
 public:
-  ~FindAlgComboBox() override {}
+  ~FindAlgComboBox() override = default;
   SelectedAlgorithm getSelectedAlgorithm();
 
 signals:

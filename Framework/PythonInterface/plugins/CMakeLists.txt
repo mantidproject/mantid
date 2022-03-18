@@ -208,6 +208,7 @@ set(PYTHON_PLUGINS
     algorithms/WorkflowAlgorithms/D7YIGPositionCalibration.py
     algorithms/WorkflowAlgorithms/DetectorFloodWeighting.py
     algorithms/WorkflowAlgorithms/DirectILLApplySelfShielding.py
+    algorithms/WorkflowAlgorithms/DirectILLAutoProcess.py
     algorithms/WorkflowAlgorithms/DirectILLCollectData.py
     algorithms/WorkflowAlgorithms/DirectILLDiagnostics.py
     algorithms/WorkflowAlgorithms/DirectILLIntegrateVanadium.py

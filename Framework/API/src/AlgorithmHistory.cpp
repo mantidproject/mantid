@@ -58,9 +58,6 @@ AlgorithmHistory::AlgorithmHistory(const Algorithm *const alg, const Types::Core
 /// Default constructor
 AlgorithmHistory::AlgorithmHistory() : m_uuid(boost::uuids::to_string(uuidGen())) {}
 
-/// Destructor
-AlgorithmHistory::~AlgorithmHistory() = default;
-
 /**
     Construct AlgorithmHistory by name. Can be used for rstoring the history
    from saved records.
@@ -112,15 +109,6 @@ void AlgorithmHistory::fillAlgorithmHistory(const Algorithm *const alg, const Ty
   m_execCount = uexeccount;
   setProperties(alg);
 }
-
-/**
-    Standard Copy Constructor
-    @param A :: AlgorithmHistory Item to copy
- */
-AlgorithmHistory::AlgorithmHistory(const AlgorithmHistory &A)
-    : m_name(A.m_name), m_version(A.m_version), m_executionDate(A.m_executionDate),
-      m_executionDuration(A.m_executionDuration), m_properties(A.m_properties), m_execCount(A.m_execCount),
-      m_childHistories(A.m_childHistories), m_uuid(A.m_uuid) {}
 
 /** Add details of an algorithm's execution to an existing history object
  *  @param start ::    The start time of the algorithm execution

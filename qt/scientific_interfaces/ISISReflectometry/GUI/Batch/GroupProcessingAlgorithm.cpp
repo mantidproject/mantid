@@ -10,6 +10,7 @@
 
 #include "../../Reduction/Batch.h"
 #include "../../Reduction/Group.h"
+#include "../../Reduction/IBatch.h"
 #include "AlgorithmProperties.h"
 #include "BatchJobAlgorithm.h"
 #include "MantidAPI/AlgorithmManager.h"
@@ -18,7 +19,7 @@
 #include "MantidQtWidgets/Common/BatchAlgorithmRunner.h"
 #include "MantidQtWidgets/Common/IAlgorithmRuntimeProps.h"
 
-namespace MantidQt::CustomInterfaces::ISISReflectometry {
+namespace MantidQt::CustomInterfaces::ISISReflectometry::GroupProcessing {
 
 using API::IConfiguredAlgorithm_sptr;
 using Mantid::API::IAlgorithm_sptr;
@@ -111,7 +112,7 @@ void updateStitchProperties(AlgorithmRuntimeProps &properties,
  * @param model : the reduction configuration model
  * @param group : the row from the runs table
  */
-IConfiguredAlgorithm_sptr createConfiguredAlgorithm(Batch const &model, Group &group) {
+IConfiguredAlgorithm_sptr createConfiguredAlgorithm(IBatch const &model, Group &group) {
   // Create the algorithm
   auto alg = Mantid::API::AlgorithmManager::Instance().create("Stitch1DMany");
   alg->setRethrows(true);
@@ -125,7 +126,7 @@ IConfiguredAlgorithm_sptr createConfiguredAlgorithm(Batch const &model, Group &g
   return jobAlgorithm;
 }
 
-std::unique_ptr<MantidQt::API::IAlgorithmRuntimeProps> createAlgorithmRuntimeProps(Batch const &model,
+std::unique_ptr<MantidQt::API::IAlgorithmRuntimeProps> createAlgorithmRuntimeProps(IBatch const &model,
                                                                                    Group const &group) {
   auto properties = std::make_unique<MantidQt::API::AlgorithmRuntimeProps>();
   updateWorkspaceProperties(*properties, group);
@@ -138,4 +139,4 @@ std::unique_ptr<MantidQt::API::IAlgorithmRuntimeProps> createAlgorithmRuntimePro
   updateStitchProperties(*properties, model.experiment().stitchParameters());
   return properties;
 }
-} // namespace MantidQt::CustomInterfaces::ISISReflectometry
+} // namespace MantidQt::CustomInterfaces::ISISReflectometry::GroupProcessing

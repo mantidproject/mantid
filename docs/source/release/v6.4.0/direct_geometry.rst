@@ -5,20 +5,58 @@ Direct Geometry Changes
 .. contents:: Table of Contents
    :local:
 
-Direct Geometry
----------------
+General
+-------
 
-Improvements
+New Features
 ############
 
-- :ref:`CorrectTOFAxis <algm-CorrectTOFAxis>` can now accept fractional bin indices for more precise calculation of the elastic peak position calibration
-- :ref:`DirectILLCollectData <algm-DirectILLCollectData>` will now accept fractional elastic peak reference bin as well as forward fractional elastic
-  peak index to the :ref:`CorrectTOFAxis <algm-CorrectTOFAxis>`
-- :ref:`DirectILLApplySelfShielding <algm-DirectILLApplySelfShielding>` now ensures that the subtracted container and self-attenuation correction workspaces
-  have consistent binning with the provided sample to be corrected by rebinning to the sample
+.. amalgamate:: Direct_Geometry/General/New_features
 
-.. warning:: **Developers:** Sort changes under appropriate heading
-    putting new features at the top of the section, followed by
-    improvements, followed by bug fixes.
+Bugfixes
+########
+
+.. amalgamate:: Direct_Geometry/General/Bugfixes
+
+Algorithms
+----------
+
+New Features
+############
+
+.. amalgamate:: Direct_Geometry/Algorithms/New_features
+
+Bugfixes
+########
+
+.. amalgamate:: Direct_Geometry/Algorithms/Bugfixes
+
+CrystalField
+------------
+
+New Features
+############
+
+.. amalgamate:: Direct_Geometry/CrystalField/New_features
+
+Bugfixes
+########
+
+.. amalgamate:: Direct_Geometry/CrystalField/Bugfixes
+
+MSlice
+------
+
+New Features
+############
+
+.. amalgamate:: Direct_Geometry/MSlice/New_features
+
+Bugfixes
+########
+
+.. amalgamate:: Direct_Geometry/MSlice/Bugfixes
+
+
 
 :ref:`Release 6.4.0 <v6.4.0>`

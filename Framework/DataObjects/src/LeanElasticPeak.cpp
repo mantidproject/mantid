@@ -72,8 +72,7 @@ LeanElasticPeak::LeanElasticPeak(const Mantid::Kernel::V3D &QSampleFrame, double
  * @brief Copy constructor
  * @param other : Source
  */
-LeanElasticPeak::LeanElasticPeak(const LeanElasticPeak &other)
-    : BasePeak(other), m_Qsample(other.m_Qsample), m_wavelength(other.m_wavelength), m_refFrame(other.m_refFrame) {}
+LeanElasticPeak::LeanElasticPeak(const LeanElasticPeak &other) = default;
 
 //----------------------------------------------------------------------------------------------
 /** Constructor making a LeanElasticPeak from IPeak interface

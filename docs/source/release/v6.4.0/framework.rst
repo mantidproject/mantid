@@ -15,17 +15,55 @@ Concepts
 Algorithms
 ----------
 
-- :ref:`LoadAndMerge <algm-LoadAndMerge>` will now offer a possibility to have a joined workspace as output instead of a workspace group.
-- :ref:`ConjoinXRuns <algm-ConjoinXRuns>` will now have a possibility to set a linear integer range as the axis of the output joined workspace.
-- :ref:`CalculateFlux <algm-CalculateFlux>` will now work also on workspaces with dimensionless x-axis.
+New Features
+############
+
+.. amalgamate:: Framework/Algorithms/New_features
+
+Bugfixes
+########
+
+.. amalgamate:: Framework/Algorithms/Bugfixes
 
 Data Objects
 ------------
 
+New Features
+############
+
+.. amalgamate:: Framework/Data_Objects/New_features
+
+Bugfixes
+########
+
+.. amalgamate:: Framework/Data_Objects/Bugfixes
+
+Fit Functions
+-------------
+
+New Features
+############
+
+.. amalgamate:: Framework/Fit_Functions/New_features
+
+Bugfixes
+########
+
+.. amalgamate:: Framework/Fit_Functions/Bugfixes
+
+
 Python
 ------
 
-- Added possibility to forward log messages to Python, see :ref:`mantid.utils.logging.log_to_python`.
+New Features
+############
+
+.. amalgamate:: Framework/Python/New_features
+
+Bugfixes
+########
+
+.. amalgamate:: Framework/Python/Bugfixes
 
 Installation
 ------------
@@ -35,13 +73,5 @@ MantidWorkbench
 
 See :doc:`mantidworkbench`.
 
-SliceViewer
------------
-
-Improvements
-############
-
-Bugfixes
-########
 
 :ref:`Release 6.4.0 <v6.4.0>`

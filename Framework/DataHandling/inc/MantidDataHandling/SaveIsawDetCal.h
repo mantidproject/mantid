@@ -20,7 +20,7 @@ namespace DataHandling {
   @author Janik Zikovsky
   @date 2011-10-03
 */
-class DLLExport SaveIsawDetCal : public API::Algorithm {
+class DLLExport SaveIsawDetCal final : public API::Algorithm {
 public:
   /// Algorithm's name for identification
   const std::string name() const override { return "SaveIsawDetCal"; }

@@ -9,6 +9,7 @@
 #include "MantidAPI/InstrumentValidator.h"
 #include "MantidAPI/Sample.h"
 #include "MantidAPI/SpectrumInfo.h"
+#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
 #include "MantidDataObjects/Workspace2D.h"
@@ -150,7 +151,7 @@ std::map<std::string, std::string> DiscusMultipleScatteringCorrection::validateI
     issues["SofqWorkspace"] = "S(Q) workspace must contain a single spectrum";
   }
   auto y = SQWS->y(0);
-  if (std::any_of(y.cbegin(), y.cend(), [](const auto yval) { return (yval < 0); })) {
+  if (std::any_of(y.cbegin(), y.cend(), [](const auto yval) { return yval < 0 || std::isnan(yval); })) {
     issues["SofqWorkspace"] = "S(Q) workspace must have all y >= 0";
   }
 
@@ -173,6 +174,39 @@ std::map<std::string, std::string> DiscusMultipleScatteringCorrection::validateI
 
   return issues;
 }
+/**
+ * This is a variation on the function MatrixWorkspace::getXMinMax with some additional logic
+ * eg if x values are all NaN values it raises an error
+ * @param ws Workspace to scan for min and max x values
+ * @param xmin In/out parameter for min x value found
+ * @param xmax In/out parameter for max x value found
+ */
+void DiscusMultipleScatteringCorrection::getXMinMax(const Mantid::API::MatrixWorkspace &ws, double &xmin,
+                                                    double &xmax) const {
+  // set to crazy values to start
+  xmin = std::numeric_limits<double>::max();
+  xmax = -1.0 * xmin;
+  size_t numberOfSpectra = ws.getNumberHistograms();
+  const auto &spectrumInfo = ws.spectrumInfo();
+
+  // determine the data range - only return min > 0. Bins with x=0 will be skipped later on
+  for (size_t wsIndex = 0; wsIndex < numberOfSpectra; wsIndex++) {
+    if (spectrumInfo.hasDetectors(wsIndex) && !spectrumInfo.isMonitor(wsIndex) && !spectrumInfo.isMasked(wsIndex)) {
+      const auto &dataX = ws.points(wsIndex);
+      const double xfront = dataX.front();
+      const double xback = dataX.back();
+      if (std::isnormal(xfront) && std::isnormal(xback)) {
+        if (xfront < xmin)
+          xmin = xfront;
+        if (xback > xmax)
+          xmax = xback;
+      }
+    }
+    // workspace not partitioned at this point so don't replicate code using m_indexInfo->communicator
+    if (xmin > xmax)
+      throw std::runtime_error("Unable to determine min and max x values for workspace");
+  }
+}
 
 /**
  * Execution code
@@ -188,21 +222,25 @@ void DiscusMultipleScatteringCorrection::exec() {
   MatrixWorkspace_sptr SQWS = getProperty("SofqWorkspace");
   // avoid repeated conversion of bin edges to points inside loop by converting to point data
   if (SQWS->isHistogramData()) {
-    auto pointDataAlgorithm = this->createChildAlgorithm("ConvertToPointData");
-    pointDataAlgorithm->initialize();
-    pointDataAlgorithm->setProperty("InputWorkspace", SQWS);
-    pointDataAlgorithm->setProperty("OutputWorkspace", "_");
-    pointDataAlgorithm->execute();
-    SQWS = pointDataAlgorithm->getProperty("OutputWorkspace");
+    // flat interpolation is later used on S(Q) so convert to points by assigning Y value to LH bin edge
+    MatrixWorkspace_sptr SQWSPoints = API::WorkspaceFactory::Instance().create(SQWS, SQWS->getNumberHistograms(),
+                                                                               SQWS->blocksize(), SQWS->blocksize());
+    SQWSPoints->setSharedY(0, SQWS->sharedY(0));
+    SQWSPoints->setSharedE(0, SQWS->sharedE(0));
+    std::vector<double> newX = SQWS->histogram(0).dataX();
+    newX.pop_back();
+    SQWSPoints->setSharedX(0, HistogramData::Points(newX).cowData());
+    SQWS = SQWSPoints;
   }
 
   MatrixWorkspace_sptr sigmaSSWS = getProperty("ScatteringCrossSection");
   if (sigmaSSWS)
     m_sigmaSS = std::make_shared<HistogramData::Histogram>(sigmaSSWS->histogram(0));
 
-  double kincmin, kincmax;
-  inputWS->getXMinMax(kincmin, kincmax);
+  double lambdamin, lambdamax;
+  getXMinMax(*inputWS, lambdamin, lambdamax);
   m_SQHist = std::make_shared<HistogramData::Histogram>(SQWS->histogram(0));
+  auto QSQHist = prepareQSQ(2 * M_PI / lambdamin);
 
   const auto inputNbins = static_cast<int>(inputWS->blocksize());
   int nlambda = getProperty("NumberOfWavelengthPoints");
@@ -232,8 +270,8 @@ void DiscusMultipleScatteringCorrection::exec() {
   for (int i = 0; i < nScatters; i++) {
     auto outputWS = createOutputWorkspace(*inputWS);
     MatrixWorkspace_sptr simulationWS = useSparseInstrument ? sparseWS->clone() : outputWS;
-    simulationWSs.push_back(simulationWS);
-    outputWSs.push_back(outputWS);
+    simulationWSs.emplace_back(simulationWS);
+    outputWSs.emplace_back(outputWS);
   }
   const MatrixWorkspace &instrumentWS = useSparseInstrument ? *sparseWS : *inputWS;
 
@@ -286,11 +324,21 @@ void DiscusMultipleScatteringCorrection::exec() {
 
       const auto detPos = spectrumInfo.position(i);
 
-      for (size_t bin = 0; bin < nbins; bin += lambdaStepSize) {
+      std::unique_ptr<Mantid::HistogramData::Histogram> invPOfQ;
+      if (m_importanceSampling)
+        // prep invPOfQ outside the bin loop to avoid costly construction\destruction
+        invPOfQ = createInvPOfQHistogram(QSQHist->size());
 
+      for (size_t bin = 0; bin < nbins; bin += lambdaStepSize) {
+        if (lambdas[bin] <= 0) {
+          g_log.warning("Skipping calculation for bin with lambda<=0, workspace index=" + std::to_string(i) +
+                        " bin index=" + std::to_string(bin));
+          continue;
+        }
         const double kinc = 2 * M_PI / lambdas[bin];
 
-        auto invPOfQ = prepareCumulativeProbForQ(kinc);
+        if (m_importanceSampling)
+          prepareCumulativeProbForQ(*QSQHist, kinc, *invPOfQ);
 
         double total = simulatePaths(nSingleScatterEvents, 1, rng, *invPOfQ, kinc, detPos, true);
         noAbsSimulationWS->getSpectrum(i).dataY()[bin] = total;
@@ -389,14 +437,13 @@ void DiscusMultipleScatteringCorrection::exec() {
 }
 
 /**
- * Calculate a cumulative probability distribution for use in importance sampling. The distribution
- * is the inverse function P^-1(t4) where P(Q) = I(Q)/I(2k) and I(x) = integral of Q.S(Q)dQ between 0 and x
- * @param kinc The incident wavenumber
- * @return the inverted cumulative probability distribution
+ * Prepare a profile of Q*S(Q) that will later be used to calculate a cumulative probability distribution
+ * for use in importance sampling
+ * @param kmax The maxmimum incident wavenumber from the InputWorkspace. This may be different to the maximum
+ * q value in the input S(Q) profile
+ * @return A pointer to a histogram containing the Q*S(Q) profile
  */
-std::shared_ptr<Mantid::HistogramData::Histogram>
-DiscusMultipleScatteringCorrection::prepareCumulativeProbForQ(double kinc) {
-
+std::unique_ptr<Mantid::HistogramData::Histogram> DiscusMultipleScatteringCorrection::prepareQSQ(double kmax) {
   std::vector<double> qValues = m_SQHist->readX();
   std::vector<double> SQValues = m_SQHist->readY();
   // add terminating points at 0 and 2k before multiplying by Q so no extrapolation problems
@@ -404,11 +451,13 @@ DiscusMultipleScatteringCorrection::prepareCumulativeProbForQ(double kinc) {
     qValues.insert(qValues.begin(), 0.);
     SQValues.insert(SQValues.begin(), SQValues.front());
   }
-  if (qValues.back() < 2 * kinc) {
-    qValues.push_back(2 * kinc);
-    SQValues.push_back(SQValues.back());
+  if (qValues.back() < 2 * kmax) {
+    qValues.emplace_back(2 * kmax);
+    SQValues.emplace_back(SQValues.back());
   }
   // add some extra points to help the Q.S(Q) integral get the right answer
+  qValues.reserve(qValues.size() * 2);
+  SQValues.reserve(SQValues.size() * 2);
   for (size_t i = 1; i < qValues.size(); i++) {
     if (std::abs(SQValues[i] - SQValues[i - 1]) > std::numeric_limits<double>::epsilon()) {
       qValues.insert(qValues.begin() + i, qValues[i] - std::numeric_limits<double>::epsilon());
@@ -419,31 +468,50 @@ DiscusMultipleScatteringCorrection::prepareCumulativeProbForQ(double kinc) {
   std::vector<double> QSQValues;
   std::transform(SQValues.begin(), SQValues.end(), qValues.begin(), std::back_inserter(QSQValues),
                  std::multiplies<double>());
-  auto QSQ = Mantid::HistogramData::Histogram(Mantid::HistogramData::Points(qValues),
-                                              Mantid::HistogramData::Frequencies(QSQValues));
-  auto IOfQ = integrateCumulative(QSQ, 2 * kinc);
-  auto IOfQX = IOfQ->dataX();
-  auto IOfQY = IOfQ->dataY();
-  auto IOfQYAt2K = IOfQY.back();
-  if (IOfQYAt2K == 0.)
+  return std::make_unique<Mantid::HistogramData::Histogram>(Mantid::HistogramData::Points{qValues},
+                                                            Mantid::HistogramData::Counts{QSQValues});
+}
+
+/**
+ * Calculate a cumulative probability distribution for use in importance sampling. The distribution
+ * is the inverse function P^-1(t4) where P(Q) = I(Q)/I(2k) and I(x) = integral of Q.S(Q)dQ between 0 and x
+ * @param QSQ Workspace containing Q*S(Q)
+ * @param kinc The incident wavenumber
+ * @param PInvOfQ The inverted cumulative probability distribution
+ */
+void DiscusMultipleScatteringCorrection::prepareCumulativeProbForQ(const HistogramData::Histogram &QSQ, double kinc,
+                                                                   HistogramData::Histogram &PInvOfQ) {
+  auto &PInvOfQX = PInvOfQ.dataX();
+  auto &PInvOfQY = PInvOfQ.dataY();
+  PInvOfQX.clear();
+  PInvOfQY.clear();
+  integrateCumulative(QSQ, 2 * kinc, PInvOfQY, PInvOfQX);
+  auto POfQYAt2K = PInvOfQX.back();
+  if (POfQYAt2K == 0.)
     throw std::runtime_error("Integral of Q * S(Q) is zero so can't generate probability distribution");
-  std::transform(IOfQY.begin(), IOfQY.end(), IOfQY.begin(), [IOfQYAt2K](double d) -> double { return d / IOfQYAt2K; });
-  return std::make_shared<Mantid::HistogramData::Histogram>(Mantid::HistogramData::Points{IOfQY},
-                                                            Mantid::HistogramData::Counts{IOfQX});
+  // normalise probability range to 0-1
+  std::transform(PInvOfQX.begin(), PInvOfQX.end(), PInvOfQX.begin(),
+                 [POfQYAt2K](double d) -> double { return d / POfQYAt2K; });
 }
 
 /**
  * Integrate a distribution between x=0 and the supplied xmax value using trapezoid rule
  * without any extrapolation on either end of the distribution
+ * Return two vectors rather than a histogram for performance reasons and to make transposing it easier
  * @param h Histogram object containing the distribution to integrate
  * @param xmax The upper integration limit
- * @return A histogram containing the integral values for each point in the supplied histogram
+ * @param resultX The x values at which the integral has been calculated
+ * @param resultY the values of the integral at various x values up to xmax
  */
-std::shared_ptr<Mantid::HistogramData::Histogram>
-DiscusMultipleScatteringCorrection::integrateCumulative(const Mantid::HistogramData::Histogram &h, double xmax) {
-  std::vector<double> xValues = h.readX();
-  std::vector<double> yValues = h.readY();
-  std::vector<double> resultX{0.}, resultY{0.};
+void DiscusMultipleScatteringCorrection::integrateCumulative(const Mantid::HistogramData::Histogram &h, double xmax,
+                                                             std::vector<double> &resultX,
+                                                             std::vector<double> &resultY) {
+  const std::vector<double> &xValues = h.readX();
+  const std::vector<double> &yValues = h.readY();
+
+  // set the integral to zero at x=0
+  resultX.emplace_back(0.);
+  resultY.emplace_back(0.);
   double sum = 0;
 
   // ensure there's a point at x=0 so xmax is never to the left of all the points
@@ -458,8 +526,8 @@ DiscusMultipleScatteringCorrection::integrateCumulative(const Mantid::HistogramD
   // integrate the intervals between each pair of points. Do this until right point is at end of vector or > xmax
   for (iRight = 1; iRight < xValues.size() && xValues[iRight] <= xmax; iRight++) {
     sum += 0.5 * (yValues[iRight] + yValues[iRight - 1]) * (xValues[iRight] - xValues[iRight - 1]);
-    resultX.push_back(xValues[iRight]);
-    resultY.push_back(sum);
+    resultX.emplace_back(xValues[iRight]);
+    resultY.emplace_back(sum);
   }
 
   // integrate a partial final interval if xmax is between points
@@ -468,11 +536,9 @@ DiscusMultipleScatteringCorrection::integrateCumulative(const Mantid::HistogramD
     double interpY = (yValues[iRight - 1] * (xValues[iRight] - xmax) + yValues[iRight] * (xmax - xValues[iRight - 1])) /
                      (xValues[iRight] - xValues[iRight - 1]);
     sum += 0.5 * (yValues[iRight - 1] + interpY) * (xmax - xValues[iRight - 1]);
-    resultX.push_back(xmax);
-    resultY.push_back(sum);
+    resultX.emplace_back(xmax);
+    resultY.emplace_back(sum);
   }
-  return std::make_shared<Mantid::HistogramData::Histogram>(Mantid::HistogramData::Points{resultX},
-                                                            Mantid::HistogramData::Counts{resultY});
 }
 
 /**
@@ -770,8 +836,8 @@ void DiscusMultipleScatteringCorrection::updateWeightAndPosition(Geometry::Track
                                                                  const double vmu, const double sigma_total,
                                                                  Kernel::PseudoRandomNumberGenerator &rng) {
   // work out maximum distance to next scatter point dl
-  // At the moment this doesn't cope if sample shape is concave eg if track has more than one segment inside the sample
-  // with segment outside sample in between
+  // At the moment this doesn't cope if sample shape is concave eg if track has more than one segment inside the
+  // sample with segment outside sample in between
   const double dl = track.front().distInsideObject;
   const double b4 = (1.0 - exp(-dl * vmu));
   const double vmfp = 1.0 / vmu;
@@ -789,8 +855,8 @@ void DiscusMultipleScatteringCorrection::updateWeightAndPosition(Geometry::Track
 Geometry::Track DiscusMultipleScatteringCorrection::generateInitialTrack(Kernel::PseudoRandomNumberGenerator &rng) {
   auto sampleBox = m_sampleShape->getBoundingBox();
   // generate random point on front surface of sample bounding box
-  // The change of variables from length to t1 means this still samples the points fairly in the integration volume even
-  // in shapes like cylinders where the depth varies across xy
+  // The change of variables from length to t1 means this still samples the points fairly in the integration volume
+  // even in shapes like cylinders where the depth varies across xy
   auto frame = m_instrument->getReferenceFrame();
   auto sourcePos = m_instrument->getSource()->getPos();
   auto ptx = sampleBox.minPoint()[frame->pointingHorizontal()] +
@@ -838,6 +904,17 @@ std::shared_ptr<SparseWorkspace> DiscusMultipleScatteringCorrection::createSpars
     const API::MatrixWorkspace &modelWS, const size_t wavelengthPoints, const size_t rows, const size_t columns) {
   auto sparseWS = std::make_shared<SparseWorkspace>(modelWS, wavelengthPoints, rows, columns);
   return sparseWS;
+}
+
+std::unique_ptr<Mantid::HistogramData::Histogram>
+DiscusMultipleScatteringCorrection::createInvPOfQHistogram(size_t expectedMaxSize) {
+  // use this constructor so e vector not created - faster
+  auto invPOfQ = std::make_unique<Mantid::HistogramData::Histogram>(HistogramData::Histogram::XMode::Points,
+                                                                    HistogramData::Histogram::YMode::Counts);
+  invPOfQ->setY(Mantid::Kernel::make_cow<HistogramData::HistogramY>(0));
+  invPOfQ->dataX().reserve(expectedMaxSize);
+  invPOfQ->dataY().reserve(expectedMaxSize);
+  return invPOfQ;
 }
 
 MatrixWorkspace_sptr DiscusMultipleScatteringCorrection::createOutputWorkspace(const MatrixWorkspace &inputWS) const {

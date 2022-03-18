@@ -41,7 +41,7 @@ public:
   static void destroySuite(IntegratePeaksMDHKLTest *suite) { delete suite; }
 
   IntegratePeaksMDHKLTest() { Mantid::API::FrameworkManager::Instance(); }
-  ~IntegratePeaksMDHKLTest() override {}
+  ~IntegratePeaksMDHKLTest() override = default;
 
   void test_Init() {
     IntegratePeaksMDHKL alg;

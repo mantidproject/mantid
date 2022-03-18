@@ -1,0 +1,1 @@
+- A bug has been fixed in Indirect Data Analysis where the first value would be ignored when a fit was performed.

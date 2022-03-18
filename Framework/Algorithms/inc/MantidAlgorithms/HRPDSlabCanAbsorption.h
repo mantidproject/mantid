@@ -52,7 +52,7 @@ namespace Algorithms {
   @author Russell Taylor, Tessella plc
   @date 05/02/2010
 */
-class MANTID_ALGORITHMS_DLL HRPDSlabCanAbsorption : public API::Algorithm {
+class MANTID_ALGORITHMS_DLL HRPDSlabCanAbsorption final : public API::Algorithm {
 public:
   /// Algorithm's name
   const std::string name() const override { return "HRPDSlabCanAbsorption"; }

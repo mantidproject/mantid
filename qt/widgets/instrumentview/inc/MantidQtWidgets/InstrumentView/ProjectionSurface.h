@@ -152,6 +152,7 @@ public:
 
   void setCurrentTab(QString currentTab) { m_currentTab = currentTab; }
   void freezeRotation(bool freeze);
+  void toggleToolTip(bool);
 
   //-----------------------------------
   //    Mask methods

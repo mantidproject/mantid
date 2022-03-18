@@ -15,6 +15,7 @@ Fixes #xxxx. <!-- and fix #xxxx or close #xxxx xor resolves #xxxx -->
 
 <!-- delete this if you added release notes
 *This does not require release notes* because **fill in an explanation of why**
+If you add release notes please save them as a separate file using the Issue or PR number as the file name. Check the file is located in the correct directory for your note(s).
 -->
 
 <!-- Ensure the base of this PR is correct (e.g. release-next or master)
@@ -33,6 +34,7 @@ Please comment on the following ([full description](http://developer.mantidproje
 - Are the unit tests small and test the class in isolation?
 - If there is GUI work does it follow the [GUI standards](http://developer.mantidproject.org/Standards/GUIStandards.html)?
 - If there are changes in the release notes then do they describe the changes appropriately?
+- Are the release notes saved in a separate file, using Issue or PR number for file name and in the correct location?
 
 ##### Functional Tests #####
 

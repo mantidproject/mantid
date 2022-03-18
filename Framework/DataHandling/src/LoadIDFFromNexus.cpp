@@ -34,7 +34,7 @@ using namespace API;
 using Types::Core::DateAndTime;
 
 /// Empty default constructor
-LoadIDFFromNexus::LoadIDFFromNexus() {}
+LoadIDFFromNexus::LoadIDFFromNexus() = default;
 
 /// Initialisation method.
 void LoadIDFFromNexus::init() {

@@ -17,7 +17,7 @@ namespace Algorithms {
   @author Janik Zikovsky
   @date 2011-09-23
 */
-class MANTID_ALGORITHMS_DLL RayTracerTester : public API::Algorithm {
+class MANTID_ALGORITHMS_DLL RayTracerTester final : public API::Algorithm {
 public:
   /// Algorithm's name for identification
   const std::string name() const override { return "RayTracerTester"; };

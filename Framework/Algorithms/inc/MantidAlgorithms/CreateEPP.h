@@ -16,7 +16,7 @@ namespace Algorithms {
   each spectrum and creates an elastic peak position table (EPP)
   like the one returned by the FindEPP algorithm.
 */
-class MANTID_ALGORITHMS_DLL CreateEPP : public API::Algorithm {
+class MANTID_ALGORITHMS_DLL CreateEPP final : public API::Algorithm {
 public:
   const std::string name() const override;
   int version() const override;

@@ -13,7 +13,7 @@ namespace Algorithms {
 
 /** ApplyInstrumentToPeaks : TODO: DESCRIPTION
  */
-class MANTID_ALGORITHMS_DLL ApplyInstrumentToPeaks : public API::Algorithm {
+class MANTID_ALGORITHMS_DLL ApplyInstrumentToPeaks final : public API::Algorithm {
 public:
   const std::string name() const override { return "ApplyInstrumentToPeaks"; }
   int version() const override { return 1; }

@@ -162,7 +162,7 @@ void CopySample::copyParameters(Sample &from, Sample &to, bool nameFlag, bool ma
       // Rotate CSGObject by goniometer by editing XML, if possible for that shape
       std::string xml = csgObj->getShapeXML();
       xml = Geometry::ShapeFactory().addGoniometerTag(rotationMatrix, xml);
-      rhsObject = Geometry::ShapeFactory().createShape(xml, 0);
+      rhsObject = Geometry::ShapeFactory().createShape(xml, false);
       rhsObject->setMaterial(rhsMaterial); // add back in Material
     }
     if (auto meshObj = std::dynamic_pointer_cast<Geometry::MeshObject>(rhsObject)) {

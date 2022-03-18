@@ -28,7 +28,7 @@ public:
 
 class Corners {
 public:
-  Corners() {}
+  Corners() = default;
   Corners(const V3D &bottomLeft, const V3D &bottomRight, const V3D &topRight, const V3D &topLeft)
       : m_bottomLeft(bottomLeft), m_bottomRight(bottomRight), m_topRight(topRight), m_topLeft(topLeft) {}
 

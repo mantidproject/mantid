@@ -104,15 +104,7 @@ Expression::Expression(const Expression &expr)
 Expression::Expression(const Expression *pexpr) : m_operators(pexpr->m_operators) {}
 
 /// Assignment operator
-Expression &Expression::operator=(const Expression &expr) {
-  m_operators = expr.m_operators;
-  m_funct = expr.m_funct;
-  m_op = expr.m_op;
-  m_terms = expr.m_terms;
-  m_expr = expr.m_expr;
-  m_tokens = expr.m_tokens;
-  return *this;
-}
+Expression &Expression::operator=(const Expression &expr) = default;
 
 void Expression::add_operators(const std::vector<std::string> &ops) {
   m_operators->binary = ops;

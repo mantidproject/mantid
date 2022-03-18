@@ -1,0 +1,1 @@
+- The ISIS Reflectometry interface now log a warning if starting live data will use potentially unexpected settings

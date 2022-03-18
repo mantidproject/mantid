@@ -41,7 +41,7 @@ namespace Algorithms {
     @author Vickie Lynch, SNS, ORNL
     @date 12/01/2010
 */
-class MANTID_ALGORITHMS_DLL CreateDummyCalFile : public API::Algorithm {
+class MANTID_ALGORITHMS_DLL CreateDummyCalFile final : public API::Algorithm {
 public:
   /// Algorithm's name
   const std::string name() const override { return "CreateDummyCalFile"; }

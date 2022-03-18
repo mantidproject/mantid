@@ -27,12 +27,12 @@ investigations search
 @date 04/08/2010
 
  */
-class MANTID_ICAT_DLL CatalogMyDataSearch : public API::Algorithm {
+class MANTID_ICAT_DLL CatalogMyDataSearch final : public API::Algorithm {
 public:
   /// constructor
   CatalogMyDataSearch() : API::Algorithm() {}
   /// destructor
-  ~CatalogMyDataSearch() override {}
+  ~CatalogMyDataSearch() override = default;
   /// Algorithm's name for identification overriding a virtual method
   const std::string name() const override { return "CatalogMyDataSearch"; }
   /// Summary of algorithms purpose.

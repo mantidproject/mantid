@@ -19,7 +19,7 @@ class HistogramE;
 } // namespace HistogramData
 namespace Algorithms {
 
-class MANTID_ALGORITHMS_DLL MonitorEfficiencyCorUser : public API::Algorithm {
+class MANTID_ALGORITHMS_DLL MonitorEfficiencyCorUser final : public API::Algorithm {
 public:
   /// Algorithm's name
   const std::string name() const override { return "MonitorEfficiencyCorUser"; }

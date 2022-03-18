@@ -239,7 +239,8 @@ create2DDetectorScanWorkspaceWithFullInstrument(int nhist, int nbins, size_t nTi
                                                 const std::string &instrumentName = std::string("testInst"));
 
 Mantid::DataObjects::Workspace2D_sptr
-create2DWorkspaceWithGeographicalDetectors(const int nlat, const int nlong, const double anginc, int nbins,
+create2DWorkspaceWithGeographicalDetectors(const int nlat, const int nlong, const double anginc, const int nbins,
+                                           const double x0 = 0.5, const double deltax = 1.0,
                                            const std::string &instrumentName = std::string("testInst"));
 
 /**

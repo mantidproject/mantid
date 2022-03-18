@@ -126,7 +126,7 @@ GNU_DIAG_ON_SUGGEST_OVERRIDE
 template <class AlgorithmType> class RebinByTimeBaseTest {
 
 public:
-  virtual ~RebinByTimeBaseTest() {}
+  virtual ~RebinByTimeBaseTest() = default;
 
 private:
   /**

@@ -12,14 +12,42 @@ Diffraction Changes
 Powder Diffraction
 ------------------
 
-- The NOMAD instrument IDF was updated
+New Features
+############
+
+.. amalgamate:: Diffraction/Powder/New_features
+
+Bugfixes
+########
+
+.. amalgamate:: Diffraction/Powder/Bugfixes
+
 
 Engineering Diffraction
 -----------------------
 
-Add a parent to an instance of the engineering diffraction interface created by loading a project so that it's a child of the main window. This also resolves an occasional crash when loading a project containing a workspace that was plotted on the Fitting tab
+New Features
+############
+
+.. amalgamate:: Diffraction/Engineering/New_features
+
+Bugfixes
+########
+
+.. amalgamate:: Diffraction/Engineering/Bugfixes
+
 
 Single Crystal Diffraction
 --------------------------
+
+New Features
+############
+
+.. amalgamate:: Diffraction/Single_Crystal/New_features
+
+Bugfixes
+########
+
+.. amalgamate:: Diffraction/Single_Crystal/Bugfixes
 
 :ref:`Release 6.4.0 <v6.4.0>`

@@ -26,7 +26,7 @@ namespace Algorithms {
     @author Roman Tolchenov
     @date 09/10/2009
  */
-class MANTID_CURVEFITTING_DLL SplineBackground : public API::Algorithm {
+class MANTID_CURVEFITTING_DLL SplineBackground final : public API::Algorithm {
 public:
   /// Algorithm's name for identification overriding a virtual method
   const std::string name() const override { return "SplineBackground"; }

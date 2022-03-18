@@ -73,7 +73,7 @@ const double radtodeg = 180.0 / M_PI;
     @author Vickie Lynch, Dennis Mikkelson SNS
     @date 06/14/2011
 */
-class MANTID_CRYSTAL_DLL AnvredCorrection : public API::Algorithm {
+class MANTID_CRYSTAL_DLL AnvredCorrection final : public API::Algorithm {
 public:
   /// (Empty) Constructor
   AnvredCorrection();

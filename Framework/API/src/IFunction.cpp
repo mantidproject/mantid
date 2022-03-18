@@ -62,6 +62,7 @@ struct TieNode {
 };
 const std::vector<std::string> EXCLUDEUSAGE = {"CompositeFunction"};
 } // namespace
+
 /**
  * Constructor
  */
@@ -765,6 +766,8 @@ std::vector<double> IFunction::Attribute::asVector() const {
  * @param str :: The new value
  */
 void IFunction::Attribute::setString(const std::string &str) {
+  evaluateValidator(str);
+
   try {
     boost::get<std::string>(m_data) = str;
   } catch (...) {
@@ -779,6 +782,8 @@ void IFunction::Attribute::setString(const std::string &str) {
  * @param d :: The new value
  */
 void IFunction::Attribute::setDouble(const double &d) {
+  evaluateValidator(d);
+
   try {
     boost::get<double>(m_data) = d;
   } catch (...) {
@@ -793,6 +798,8 @@ void IFunction::Attribute::setDouble(const double &d) {
  * @param i :: The new value
  */
 void IFunction::Attribute::setInt(const int &i) {
+  evaluateValidator(i);
+
   try {
     boost::get<int>(m_data) = i;
   } catch (...) {
@@ -807,6 +814,8 @@ void IFunction::Attribute::setInt(const int &i) {
  * @param b :: The new value
  */
 void IFunction::Attribute::setBool(const bool &b) {
+  evaluateValidator(b);
+
   try {
     boost::get<bool>(m_data) = b;
   } catch (...) {
@@ -822,6 +831,8 @@ void IFunction::Attribute::setBool(const bool &b) {
  * @param v :: The new value
  */
 void IFunction::Attribute::setVector(const std::vector<double> &v) {
+  evaluateValidator(v);
+
   try {
     auto &value = boost::get<std::vector<double>>(m_data);
     value.assign(v.begin(), v.end());
@@ -850,32 +861,54 @@ public:
   /**
    * Constructor
    * @param value :: The value to set
+   * @param validator :: Associated validator
    */
-  explicit SetValue(std::string value) : m_value(std::move(value)) {}
+  explicit SetValue(std::string value, Mantid::Kernel::IValidator_sptr validator = Mantid::Kernel::IValidator_sptr())
+      : m_value(std::move(value)), m_validator(validator) {}
 
 protected:
   /// Apply if string
-  void apply(std::string &str) const override { str = m_value; }
+  void apply(std::string &str) const override {
+    evaluateValidator(m_value);
+    str = m_value;
+  }
   /// Apply if int
   void apply(int &i) const override {
+    int tempi = 0;
+
     std::istringstream istr(m_value + " ");
-    istr >> i;
+    istr >> tempi;
     if (!istr.good())
       throw std::invalid_argument("Failed to set int attribute "
                                   "from string " +
                                   m_value);
+
+    evaluateValidator(tempi);
+    i = tempi;
   }
   /// Apply if double
   void apply(double &d) const override {
+    double tempd = 0;
+
     std::istringstream istr(m_value + " ");
-    istr >> d;
+    istr >> tempd;
     if (!istr.good())
       throw std::invalid_argument("Failed to set double attribute "
                                   "from string " +
                                   m_value);
+
+    evaluateValidator(tempd);
+    d = tempd;
   }
   /// Apply if bool
-  void apply(bool &b) const override { b = (m_value == "true" || m_value == "TRUE" || m_value == "1"); }
+  void apply(bool &b) const override {
+    bool tempb = false;
+
+    tempb = (m_value == "true" || m_value == "TRUE" || m_value == "1");
+    evaluateValidator(tempb);
+
+    b = (m_value == "true" || m_value == "TRUE" || m_value == "1");
+  }
   /// Apply if vector
   void apply(std::vector<double> &v) const override {
     if (m_value.empty() || m_value == "EMPTY") {
@@ -883,21 +916,41 @@ protected:
       return;
     }
     if (m_value.size() > 2) {
-      // check if the value is in barckets (...)
+      // check if the value is in brackets (...)
       if (m_value.front() == '(' && m_value.back() == ')') {
         m_value.erase(0, 1);
         m_value.erase(m_value.size() - 1);
       }
     }
-    Mantid::Kernel::StringTokenizer tokenizer(m_value, ",", Mantid::Kernel::StringTokenizer::TOK_TRIM);
-    v.resize(tokenizer.count());
+    Kernel::StringTokenizer tokenizer(m_value, ",", Kernel::StringTokenizer::TOK_TRIM);
+    size_t newSize = tokenizer.count();
+
+    // if visitor has an associated validator, first populate temp vec and evaluate against validator.
+    if (m_validator != nullptr) {
+      std::vector<double> tempVec(newSize);
+
+      for (size_t i = 0; i < tempVec.size(); ++i) {
+        tempVec[i] = boost::lexical_cast<double>(tokenizer[i]);
+      }
+      evaluateValidator(tempVec);
+    }
+
+    v.resize(newSize);
     for (size_t i = 0; i < v.size(); ++i) {
       v[i] = boost::lexical_cast<double>(tokenizer[i]);
     }
   }
 
+  /// Evaluates the validator associated with this attribute with regards to input value. Returns error as a string.
+  template <typename T> void evaluateValidator(T &inputData) const {
+    if (m_validator != nullptr) {
+      IFunction::ValidatorEvaluator::evaluate(inputData, m_validator);
+    }
+  }
+
 private:
   mutable std::string m_value; ///< the value as a string
+  mutable Kernel::IValidator_sptr m_validator;
 };
 } // namespace
 
@@ -905,9 +958,19 @@ private:
  * @param str :: String representation of the new value
  */
 void IFunction::Attribute::fromString(const std::string &str) {
-  SetValue tmp(str);
+  SetValue tmp(str, m_validator);
   apply(tmp);
 }
+
+/** Set validator to enforce limits on attribute value
+ * @param validator :: shared ptr to validator object
+ */
+void IFunction::Attribute::setValidator(const Kernel::IValidator_sptr &validator) const { m_validator = validator; }
+
+/**
+ *  Evaluates the validator associated with this attribute.
+ */
+void IFunction::Attribute::evaluateValidator() const { boost::apply_visitor(AttributeValidatorVisitor(this), m_data); }
 
 /// Value of i-th active parameter. Override this method to make fitted
 /// parameters different from the declared
@@ -1328,7 +1391,38 @@ void IFunction::setAttribute(const std::string &name, const API::IFunction::Attr
  * @param defaultValue :: A default value
  */
 void IFunction::declareAttribute(const std::string &name, const API::IFunction::Attribute &defaultValue) {
+  checkAttributeName(name);
+
   m_attrs.emplace(name, defaultValue);
+}
+
+/**
+ * Declares a single attribute with a validator
+ * @param name :: The name of the attribute
+ * @param defaultValue :: A default value
+ * @param validator :: validator to restrict allows input value of defaultValue param
+ */
+void IFunction::declareAttribute(const std::string &name, const API::IFunction::Attribute &defaultValue,
+                                 const Kernel::IValidator &validator) {
+  const Kernel::IValidator_sptr validatorClone = validator.clone();
+  checkAttributeName(name);
+
+  defaultValue.setValidator(validatorClone);
+  defaultValue.evaluateValidator();
+
+  m_attrs.emplace(name, defaultValue);
+}
+
+/**
+ * Checks Attribute of "name" does not exist
+ * @param name :: The name of the attribute
+ */
+void IFunction::checkAttributeName(const std::string &name) {
+  if (m_attrs.find(name) != m_attrs.end()) {
+    std::ostringstream msg;
+    msg << "Attribute (" << name << ") already exists.";
+    throw std::invalid_argument(msg.str());
+  }
 }
 
 /// Initialize the function. Calls declareAttributes & declareParameters

@@ -15,12 +15,12 @@ namespace DataHandling {
 /** SaveNXcanSAS : Saves a reduced workspace in the NXcanSAS format. Currently
  * only MatrixWorkspaces resulting from 1D and 2D reductions are supported.
  */
-class MANTID_DATAHANDLING_DLL SaveNXcanSAS : public API::Algorithm {
+class MANTID_DATAHANDLING_DLL SaveNXcanSAS final : public API::Algorithm {
 public:
   /// Constructor
   SaveNXcanSAS();
   /// Virtual dtor
-  ~SaveNXcanSAS() override {}
+  ~SaveNXcanSAS() override = default;
   const std::string name() const override { return "SaveNXcanSAS"; }
   /// Summary of algorithms purpose
   const std::string summary() const override { return "Writes a MatrixWorkspace to a file in the NXcanSAS format."; }
