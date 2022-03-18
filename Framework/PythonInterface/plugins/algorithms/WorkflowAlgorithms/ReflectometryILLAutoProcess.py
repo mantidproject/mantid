@@ -537,6 +537,12 @@ class ReflectometryILLAutoProcess(DataProcessorAlgorithm):
         )
         self.setPropertyGroup(PropertyNames.XMAX, preProcessReflected)
 
+        self.declareProperty(
+            name="SaveReductionParams",
+            defaultValue=True,
+            doc="Whether to save reduction parameters in an ASCII file."
+        )
+
     def validateInputs(self):
         """Return a dictionary containing issues found in properties."""
         issues = dict()
@@ -818,6 +824,29 @@ class ReflectometryILLAutoProcess(DataProcessorAlgorithm):
             run_inputs.append(run11_input)
         return run_inputs, run_names
 
+    def _save_parameters(self, ws):
+        """Saves workspace parameters used in the reduction to an ASCII file.
+
+        Keyword parameters:
+        ws - workspace used to obtain reduction parameters
+        """
+        save_path = config['defaultsave.directory']
+        parameter_output = os.path.join(save_path, "{}.txt".format(mtd[ws].getName()))
+        run = mtd[ws].run() if not isinstance(mtd[ws], WorkspaceGroup) else mtd[ws][0].run()
+        try:
+            log_list = mtd[ws].getInstrument().getStringParameter('reduction_logs_to_save')[0]
+        except IndexError:
+            self.log().warning('A list of reduction logs to save not specified, cannot save them.')
+            return
+        property_list = [log.strip() for log in log_list.split(',')]  # removes empty spaces from log names
+        with open(parameter_output, "w") as outfile:
+            for prop in property_list:
+                if run.hasProperty(prop):
+                    property_val = run.getLogData(prop).value
+                    if isinstance(property_val, int) or isinstance(property_val, float):
+                        property_val = round(property_val, 4)
+                    outfile.write("{}\t{}\n".format(prop, str(property_val)))
+
     def PyExec(self):
         """Execute the algorithm."""
         self.log().purge()
@@ -864,6 +893,8 @@ class ReflectometryILLAutoProcess(DataProcessorAlgorithm):
             if scaleFactor != 1:
                 Scale(InputWorkspace=convertedToQName, OutputWorkspace=convertedToQName, Factor=scaleFactor)
             to_group.append(convertedToQName)
+            if self.getProperty('SaveReductionParams').value:
+                self._save_parameters(convertedToQName)
             self._autoCleanup.protect(convertedToQName)
             progress.report()
 

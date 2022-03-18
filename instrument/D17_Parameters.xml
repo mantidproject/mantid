@@ -112,5 +112,12 @@
 		  <value val="sample changer:/entry0/instrument/VirtualSampleChanger/wanted_changer:f,
 			      analyser pos:/entry0/instrument/tra/value:f" />
 		</parameter>
+		<parameter name="reduction_logs_to_save" type="string" visible="false">
+		  <value val="poff,d0,chopper1.speed_average,chopper1.phase_average,chopper2.speed_average,
+			      chopper2.phase_average,MainParameters.Pixel_width,MainParameters.open_offset,
+			      MainParameters.pickup_offset,ChopperWindow,
+			      san.value,dan.value"/>
+		</parameter>
+
 	</component-link>
 </parameter-file>
