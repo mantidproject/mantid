@@ -10,7 +10,6 @@
 from __future__  import absolute_import
 
 # std imports
-import unittest
 from distutils.version import LooseVersion
 from unittest import TestCase, main
 
@@ -61,21 +60,14 @@ class FigureTypeTest(TestCase):
         ax.plot_wireframe(a, a, a)
         self.assertEqual(FigureType.Wireframe, figure_type(ax.figure))
 
-    @unittest.skipIf(LooseVersion("3.1.3") > LooseVersion(matplotlib.__version__),
-                     "contour returns an image in later versions of matplotlib")
-    def test_contour_plot_returns_contour_after_3_1(self):
+    def test_contour_plot_returns_contour(self):
         ax = plt.subplot(111)
         ax.imshow([[1], [1]])
         ax.contour([[1, 1], [1, 1]])
-        self.assertEqual(FigureType.Image, figure_type(ax.figure))
-
-    @unittest.skipIf(LooseVersion("3.1.3") < LooseVersion(matplotlib.__version__),
-                     "contour returns an image in later versions of matplotlib")
-    def test_contour_plot_returns_contour_3_1_and_below(self):
-        ax = plt.subplot(111)
-        ax.imshow([[1], [1]])
-        ax.contour([[1, 1], [1, 1]])
-        self.assertEqual(FigureType.Contour, figure_type(ax.figure))
+        if LooseVersion("3.5") <= LooseVersion(matplotlib.__version__):
+            self.assertEqual(FigureType.Image, figure_type(ax.figure))
+        else:
+            self.assertEqual(FigureType.Contour, figure_type(ax.figure))
 
     def test_mesh_plot_returns_mesh(self):
         a = np.array([[[1, 1, 1], [2, 2, 2], [3, 3, 3]]])
