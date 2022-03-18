@@ -92,8 +92,8 @@ private:
   void prepareCumulativeProbForQ(double kinc, const API::MatrixWorkspace_sptr &PInvOfQ);
   void getXMinMax(const Mantid::API::MatrixWorkspace &ws, double &xmin, double &xmax) const;
   API::MatrixWorkspace_uptr prepareQSQ(double kinc);
-  double getKf(const API::MatrixWorkspace_sptr &SOfQ, const size_t iW, const double kinc);
-  std::tuple<double, int> sampleKW(const API::MatrixWorkspace_sptr &SOfQ, Kernel::PseudoRandomNumberGenerator &rng,
+  double getKf(const double deltaE, const double kinc);
+  std::tuple<double, int> sampleKW(const std::vector<double> &wValues, Kernel::PseudoRandomNumberGenerator &rng,
                                    const double kinc);
   void prepareStructureFactor();
   void convertWsToPoints(API::MatrixWorkspace_sptr &ws);

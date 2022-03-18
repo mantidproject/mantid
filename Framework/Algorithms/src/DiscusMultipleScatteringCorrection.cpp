@@ -678,7 +678,7 @@ void DiscusMultipleScatteringCorrection::prepareCumulativeProbForQ(double kinc, 
   double IOfQMaxPreviousRow = 0.;
   // loop through the S(Q) spectra for the different energy transfer values
   for (size_t iW = 0; iW < m_SQWS->getNumberHistograms(); iW++) {
-    auto kf = getKf(m_SQWS, iW, kinc);
+    auto kf = getKf(m_SQWS->getAxis(1)->getValue(iW), kinc);
     auto [qmin, qrange] = getKinematicRange(kf, kinc);
     std::vector<double> IOfQX, IOfQY;
     integrateCumulative(m_QSQWS->histogram(iW), qmin, qmin + qrange, IOfQX, IOfQY);
@@ -1068,14 +1068,8 @@ std::tuple<bool, std::vector<double>, double> DiscusMultipleScatteringCorrection
   return {true, weights, QSS};
 }
 
-double DiscusMultipleScatteringCorrection::getKf(const MatrixWorkspace_sptr &SOfQ, const size_t iW, const double kinc) {
-  double deltaE, kf;
-  if (m_EMode == Kernel::DeltaEMode::Elastic) {
-    deltaE = 0.;
-  } else {
-    assert(!SOfQ->getAxis(1)->isSpectra());
-    deltaE = SOfQ->getAxis(1)->getValue(iW);
-  }
+double DiscusMultipleScatteringCorrection::getKf(const double deltaE, const double kinc) {
+  double kf;
   if (deltaE == 0.) {
     kf = kinc; // avoid costly sqrt
   } else {
@@ -1105,17 +1099,16 @@ std::tuple<double, double> DiscusMultipleScatteringCorrection::getKinematicRange
   return {qmin, qrange};
 }
 
-std::tuple<double, int> DiscusMultipleScatteringCorrection::sampleKW(const MatrixWorkspace_sptr &SOfQ,
+std::tuple<double, int> DiscusMultipleScatteringCorrection::sampleKW(const std::vector<double> &wValues,
                                                                      Kernel::PseudoRandomNumberGenerator &rng,
                                                                      const double kinc) {
   // the energy transfer must always be less than the positive value corresponding to energy going from ki to 0
   // Note - this is still the case for indirect because on a multiple scatter the kf isn't kfixed
   double wMax = fromWaveVector(kinc);
-  auto &wValues = dynamic_cast<NumericAxis *>(SOfQ->getAxis(1))->getValues();
   auto it = std::lower_bound(wValues.begin(), wValues.end(), wMax);
   int iWMax = static_cast<int>(std::distance(wValues.begin(), it) - 1);
   auto iW = rng.nextInt(0, iWMax);
-  double k = getKf(SOfQ, iW, kinc);
+  double k = getKf(wValues[iW], kinc);
   return {k, iW};
 }
 
@@ -1128,12 +1121,12 @@ void DiscusMultipleScatteringCorrection::q_dir(Geometry::Track &track, const Mat
   int iW;
   if (m_importanceSampling) {
     std::tie(QQ, iW) = sampleQW(invPOfQ, rng.nextValue());
-    k = getKf(m_SQWS, iW, kinc);
+    k = getKf(m_SQWS->getAxis(1)->getValue(iW), kinc);
     // S(Q) not strictly needed here but useful to see if the higher values are indeed being returned
     SQ = interpolateFlat(m_SQWS->getSpectrum(iW), QQ);
     weight = weight * scatteringXSection;
   } else {
-    std::tie(k, iW) = sampleKW(m_SQWS, rng, kinc);
+    std::tie(k, iW) = sampleKW(dynamic_cast<NumericAxis *>(m_logSQ->getAxis(1))->getValues(), rng, kinc);
     auto [qmin, qrange] = getKinematicRange(k, kinc);
     QQ = qmin + qrange * rng.nextValue();
     SQ = interpolateGaussian(m_logSQ->getSpectrum(iW), QQ);
