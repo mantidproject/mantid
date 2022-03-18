@@ -421,15 +421,15 @@ std::unique_ptr<IBeamProfile> MonteCarloAbsorption::createBeamProfile(const Inst
   const auto frame = instrument.getReferenceFrame();
   const auto source = instrument.getSource();
 
-  std::string beamShapeParam = source->getParameterAsString("beam-shape");
+  const std::string beamShapeParam = source->getParameterAsString("beam-shape");
   if (beamShapeParam == "Slit") {
-    auto beamWidthParam = source->getNumberParameter("beam-width");
-    auto beamHeightParam = source->getNumberParameter("beam-height");
+    const auto beamWidthParam = source->getNumberParameter("beam-width");
+    const auto beamHeightParam = source->getNumberParameter("beam-height");
     if (beamWidthParam.size() == 1 && beamHeightParam.size() == 1) {
       return std::make_unique<RectangularBeamProfile>(*frame, source->getPos(), beamWidthParam[0], beamHeightParam[0]);
     }
   } else if (beamShapeParam == "Circle") {
-    auto beamRadiusParam = source->getNumberParameter("beam-radius");
+    const auto beamRadiusParam = source->getNumberParameter("beam-radius");
     if (beamRadiusParam.size() == 1) {
       return std::make_unique<CircularBeamProfile>(*frame, source->getPos(), beamRadiusParam[0]);
     }
