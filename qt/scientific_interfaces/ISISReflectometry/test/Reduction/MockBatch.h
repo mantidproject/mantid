@@ -10,6 +10,7 @@
 #include "../../Reduction/IBatch.h"
 #include "../../Reduction/Instrument.h"
 #include "../../Reduction/LookupRow.h"
+#include "MantidFrameworkTestHelpers/FallbackBoostOptionalIO.h"
 
 #include <gmock/gmock.h>
 

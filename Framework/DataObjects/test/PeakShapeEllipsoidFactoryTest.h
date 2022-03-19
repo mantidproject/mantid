@@ -20,6 +20,7 @@
 #include <json/json.h>
 
 #include "MantidDataObjects/PeakShapeEllipsoid.h"
+#include "MantidFrameworkTestHelpers/FallbackBoostOptionalIO.h"
 #include "MantidJson/Json.h"
 #include "MantidKernel/SpecialCoordinateSystem.h"
 #include "MantidKernel/VMD.h"
