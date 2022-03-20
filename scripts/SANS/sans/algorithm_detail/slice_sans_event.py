@@ -30,7 +30,7 @@ def slice_sans_event(state_slice, input_ws, input_ws_monitor, data_type_str="Sam
 
     # This should be removed in the future when cycle 19/1 data is unlikely to be processed by users
     # This prevents time slicing falling over, since we wrap around and get -0
-    _clean_logs(ws=input_ws, estimate_logs=True)
+    _clean_logs(ws=input_ws, estimate_logs=False)
 
     if isinstance(input_ws, Workspace2D):
         sliced_workspace = input_ws
