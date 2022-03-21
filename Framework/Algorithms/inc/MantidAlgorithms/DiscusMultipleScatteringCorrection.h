@@ -68,7 +68,7 @@ private:
   void exec() override;
   std::map<std::string, std::string> validateInputs() override;
   API::MatrixWorkspace_sptr createOutputWorkspace(const API::MatrixWorkspace &inputWS) const;
-  std::tuple<double, double> new_vector(const Kernel::Material &material, double kinc, bool specialSingleScatterCalc);
+  std::tuple<double, double> new_vector(const Kernel::Material &material, double k, bool specialSingleScatterCalc);
   std::vector<double> simulatePaths(const int nEvents, const int nScatters, Kernel::PseudoRandomNumberGenerator &rng,
                                     API::MatrixWorkspace_sptr &invPOfQ, const double kinc,
                                     const std::vector<double> &wValues, const Kernel::V3D &detPos,
@@ -96,7 +96,7 @@ private:
   std::tuple<double, int> sampleKW(const std::vector<double> &wValues, Kernel::PseudoRandomNumberGenerator &rng,
                                    const double kinc);
   void prepareStructureFactor();
-  void convertWsToPoints(API::MatrixWorkspace_sptr &ws);
+  void convertWsBothAxesToPoints(API::MatrixWorkspace_sptr &ws);
   std::tuple<double, double> getKinematicRange(double kf, double ki);
   std::vector<std::tuple<double, int, double>> generateInputKOutputWList(const double efixed,
                                                                          const std::vector<double> &xPoints);
