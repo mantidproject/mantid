@@ -68,7 +68,7 @@ endif()
 # We use an object lib to avoid the problems with static libs and dynamic factories. As the linker will only pull in the
 # static init if the symbol is used in the executable. A DLL could be used but it requires each helper to be labelled
 # with DLL export and complexity one CMake file < DLL exports in every test helper header
-add_library(FrameworkTestHelpers OBJECT ${SRC_FILES} ${INC_FILES})
+add_library(FrameworkTestHelpers OBJECT EXCLUDE_FROM_ALL ${SRC_FILES} ${INC_FILES})
 add_library(FrameWorkTestHelpersHeaders INTERFACE)
 
 add_library(Mantid::FrameworkTestHelpers ALIAS FrameworkTestHelpers)
