@@ -814,7 +814,7 @@ class FigureInteraction(object):
                 arg_set_copy = copy(arg_set)
                 [
                     arg_set_copy.pop(key)
-                    for key in ['function', 'workspaces', 'autoscale_on_update', 'norm']
+                    for key in ['function', 'workspaces', 'norm']
                     if key in arg_set_copy.keys()
                 ]
                 if 'specNum' not in arg_set:
@@ -833,7 +833,7 @@ class FigureInteraction(object):
 
                         # This check is to prevent the contour lines being re-plotted using the colorfill plot args.
                         if isinstance(ws_artist._artists[0], QuadContourSet):
-                            contour_line_colour = ws_artist._artists[0].collections[0].get_color()
+                            contour_line_colour = ws_artist._artists[0].collections[0].get_edgecolor()
 
                             ws_artist.replace_data(workspace, None)
 

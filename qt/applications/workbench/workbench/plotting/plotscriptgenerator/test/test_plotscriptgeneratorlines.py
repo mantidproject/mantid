@@ -37,7 +37,6 @@ LINE2D_KWARGS = {
     'markeredgecolor': 'g',
     'markeredgewidth': 1.2,
     'markerfacecolor': 'y',
-    'markerfacecoloralt': 'k',
     'markersize': 1.3,
     'markevery': 2,
     'visible': False,
@@ -132,6 +131,7 @@ class PlotScriptGeneratorLinesTest(unittest.TestCase):
         kwargs.pop('markeredgewidth')
         kwargs.update(MANTID_ONLY_KWARGS)
         err_cont = self.ax.errorbar(self.test_ws, **kwargs)
+        err_cont[2][0].set_visible(True)  # Set the errorbars to visible
         output = generate_plot_command(err_cont)
         expected_command = ("errorbar({}, {})".format(self.test_ws.name(),
                                                       convert_args_to_string(None, kwargs)))

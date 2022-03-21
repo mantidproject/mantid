@@ -433,8 +433,12 @@ def _pcolorpieces(axes, workspace, distribution, *args, **kwargs):
     maxi = numpy.max([numpy.max(i) for i in z])
     if 'vmin' in kwargs:
         mini = kwargs['vmin']
+        # Passing normalized and vmin or vmax is not supported in matplotlib
+        del kwargs['vmin']
     if 'vmax' in kwargs:
         maxi = kwargs['vmax']
+        # Passing normalized and vmin or vmax is not supported in matplotlib
+        del kwargs['vmax']
     if 'norm' not in kwargs:
         kwargs['norm'] = matplotlib.colors.Normalize(vmin=mini, vmax=maxi)
     else:

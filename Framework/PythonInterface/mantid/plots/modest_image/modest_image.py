@@ -9,7 +9,10 @@
 Modification of Chris Beaumont's mpl-modest-image package to allow the use of
 set_extent.
 """
+from distutils.version import LooseVersion
+
 import matplotlib
+
 rcParams = matplotlib.rcParams
 
 import matplotlib.image as mi  # noqa: E402
@@ -267,8 +270,11 @@ def imshow(axes, X, cmap=None, norm=None, aspect=None,
     # to tightly fit the image, regardless of dataLim.
     im.set_extent(im.get_extent())
 
-    axes.images.append(im)
-    im._remove_method = lambda h: axes.images.remove(h)
+    if LooseVersion(matplotlib.__version__) <= LooseVersion("3.1.3"):
+        axes.images.append(im)
+        im._remove_method = lambda h: axes.images.remove(h)
+    else:
+        axes.add_image(im)
 
     return im
 

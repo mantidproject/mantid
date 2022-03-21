@@ -4,7 +4,7 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-import collections
+import collections.abc
 from directtools import _validate
 from mantid import logger, mtd
 from mantid.simpleapi import DeleteWorkspace, LineProfile, OneMinusExponentialCor, Transpose
@@ -18,7 +18,7 @@ import time
 
 def _applyiftimeseries(logValue, function):
     """Apply function to logValue, if it is time series log, otherwise return logValue as is."""
-    if isinstance(logValue, collections.Iterable):
+    if isinstance(logValue, collections.abc.Iterable):
         return function(logValue)
     return logValue
 
@@ -104,7 +104,7 @@ def _energylimits(workspaces):
     workspaces = _normwslist(workspaces)
     eMax = 0.
     for ws in workspaces:
-        axisIndex = 0 if ws.getAxis(0).getUnit().name() == 'Energy transfer' else 1
+        axisIndex = 0 if ws.getAxis(0).getUnit().caption() == 'Energy transfer' else 1
         Xs = ws.getAxis(axisIndex).extractValues()
         eMax = max(eMax, Xs[-1])
     eMin = -eMax
@@ -179,9 +179,9 @@ def _instrumentname(logs):
 def _singlecutinfo(cuts, widths):
     """Return False if there are more than one cut and width."""
     isSingleCutInfo = True
-    if isinstance(cuts, collections.Iterable):
+    if isinstance(cuts, collections.abc.Iterable):
         isSingleCutInfo = len(cuts) == 1
-    if isinstance(widths, collections.Iterable):
+    if isinstance(widths, collections.abc.Iterable):
         isSingleCutInfo = len(widths) == 1
     return isSingleCutInfo
 
@@ -208,7 +208,7 @@ def _normws(workspace):
 
 def _normwslist(workspaces):
     """Retrieve workspaces from mtd if they are string, otherwise return as-is."""
-    if not isinstance(workspaces, collections.Iterable) or isinstance(workspaces, str):
+    if not isinstance(workspaces, collections.abc.Iterable) or isinstance(workspaces, str):
         workspaces = [workspaces]
     unnormWss = workspaces
     return [_normws(ws) for ws in unnormWss]
@@ -217,7 +217,7 @@ def _normwslist(workspaces):
 def _plotsinglehistogram(workspaces, labels, style, xscale, yscale):
     """Plot single histogram workspaces."""
     workspaces = _normwslist(workspaces)
-    if not isinstance(labels, collections.Iterable) or isinstance(labels, str):
+    if not isinstance(labels, collections.abc.Iterable) or isinstance(labels, str):
         if labels is None:
             labels = len(workspaces) * ['']
         else:
@@ -596,9 +596,9 @@ def plotcuts(direction, workspaces, cuts, widths, quantity, unit, style='l', kee
     """
     _validate._styleordie(style)
     workspaces = _normwslist(workspaces)
-    if not isinstance(cuts, collections.Iterable):
+    if not isinstance(cuts, collections.abc.Iterable):
         cuts = [cuts]
-    if not isinstance(widths, collections.Iterable):
+    if not isinstance(widths, collections.abc.Iterable):
         widths = [widths]
     lineStyle = 'solid' if 'l' in style else 'None'
     figure, axes = subplots()
@@ -725,7 +725,7 @@ def plotSofQW(workspace, QMin=0., QMax=None, EMin=None, EMax=None, VMin=0., VMax
     workspace = _normws(workspace)
     if not _validate._isSofQW(workspace):
         logger.warning("The workspace '{}' does not look like proper S(Q,W) data. Trying to plot nonetheless.".format(str(workspace)))
-    qHorizontal = workspace.getAxis(0).getUnit().name() == 'q'
+    qHorizontal = workspace.getAxis(0).getUnit().caption() == 'q'
     isSusceptibility = workspace.YUnitLabel() == 'Dynamic susceptibility'
     figure, axes = subplots()
     if QMin is None:
@@ -749,17 +749,17 @@ def plotSofQW(workspace, QMin=0., QMax=None, EMin=None, EMax=None, VMin=0., VMax
         VMin = 0.
     colorNormalization = None
     if colorscale == 'linear':
-        colorNormalization = matplotlib.colors.Normalize()
+        colorNormalization = matplotlib.colors.Normalize(vmin=VMin, vmax=VMax)
     elif colorscale == 'log':
         if VMin <= 0.:
             if VMax > 0.:
                 VMin = VMax / 1000.
             else:
                 raise RuntimeError('Cannot plot nonpositive range in log scale.')
-        colorNormalization = matplotlib.colors.LogNorm()
+        colorNormalization = matplotlib.colors.LogNorm(vmin=VMin, vmax=VMax)
     else:
         raise RuntimeError('Unknown colorscale: ' + colorscale)
-    contours = axes.pcolor(workspace, vmin=VMin, vmax=VMax, distribution=True, cmap=colormap, norm=colorNormalization)
+    contours = axes.pcolor(workspace, distribution=True, cmap=colormap, norm=colorNormalization)
     colorbar = figure.colorbar(contours)
     if isSusceptibility:
         colorbar.set_label(r"$\chi''(Q,E)$ (arb. units)")
@@ -814,7 +814,7 @@ def validQ(workspace, E=0.0):
     :returns: a tuple of (:math:`Q_{min}`, :math:`Q_{max}`)
     """
     workspace = _normws(workspace)
-    if workspace.getAxis(0).getUnit().name() == 'q':
+    if workspace.getAxis(0).getUnit().caption() == 'q':
         vertPoints = workspace.getAxis(1).extractValues()
         if len(vertPoints) > workspace.getNumberHistograms():
             vertPoints = _bincentres(vertPoints)
@@ -875,7 +875,7 @@ def wsreport(workspace):
         print('Ei = {:0.2f} meV    lambda = {:0.2f} A'.format(ei, wavelength))
     T = _sampletemperature(logs)
     if T is not None:
-        if isinstance(T, collections.Iterable):
+        if isinstance(T, collections.abc.Iterable):
             meanT = _applyiftimeseries(T, numpy.mean)
             stdT = _applyiftimeseries(T, numpy.std)
             print('T = {:0.2f} +- {:4.2f} K'.format(meanT, stdT))
