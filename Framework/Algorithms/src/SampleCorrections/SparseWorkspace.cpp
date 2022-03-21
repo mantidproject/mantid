@@ -114,7 +114,7 @@ SparseWorkspace::SparseWorkspace(const API::MatrixWorkspace &modelWS, const size
   const auto modelSource = modelWS.getInstrument()->getSource();
   const auto parametrizedSource = parametrizedInstrument->getSource();
   const auto beamShapeParam = modelSource->getParameterAsString("beam-shape");
-  if (beamShapeParam.size() > 0)
+  if (!beamShapeParam.empty())
     paramMap.add("string", parametrizedSource.get(), "beam-shape", beamShapeParam);
   const auto beamWidthParam = modelSource->getNumberParameter("beam-width");
   const auto beamHeightParam = modelSource->getNumberParameter("beam-height");
