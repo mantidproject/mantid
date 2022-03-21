@@ -19,7 +19,6 @@ Bugfixes
 - Fixed where matplotlib 3.5 caused any 3D plot to raise an exception when opened.
 - Fixed where matplotlib 3.5 caused a crash when closing workbench with a plot open.
 - Fixed where matplotlib 3.5 caused a project to be unable to save and load plots.
-- Suppressed a spurious warning where matplotlib warns about creating a figure outside of the main thread when using the script window.
 
 Sliceviewer
 -----------
