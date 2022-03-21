@@ -214,7 +214,16 @@ class DrillExportModel:
                       .format(wsName, filenames))
         del self._successExports[wsName]
 
-    def _create_tasks(self, wsName, algo, exportPath, extension):
+    def _createTasks(self, wsName, algo, exportPath, extension):
+        """
+        Create a list of drill tasks for exporting data.
+
+        Args:
+            wsName: string with name of the workspace to be saved
+            algo: string with algorithm name to be used
+            exportPath: string path for the output file
+            extension: list of strings or string with desired extension(s)
+        """
         tasks = list()
         extensions = extension
         if not isinstance(extension, list):
@@ -287,6 +296,6 @@ class DrillExportModel:
                 if isinstance(mtd[wsName], WorkspaceGroup):
                     continue
                 extension = RundexSettings.EXPORT_ALGO_EXTENSION[algo]
-                tasks.extend(self._create_tasks(wsName, algo, exportPath, extension))
+                tasks.extend(self._createTasks(wsName, algo, exportPath, extension))
 
         self._pool.addProcesses(tasks)
