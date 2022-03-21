@@ -433,23 +433,23 @@ std::unique_ptr<IBeamProfile> MonteCarloAbsorption::createBeamProfile(const Inst
     if (beamRadiusParam.size() == 1) {
       return std::make_unique<CircularBeamProfile>(*frame, source->getPos(), beamRadiusParam[0]);
     }
-  } // revert to sample dimensions if no return by this point
+  }
+  // revert to sample dimensions if no return by this point
   if (!sample.getShape().hasValidShape() && !sample.hasEnvironment()) {
     throw std::invalid_argument("Cannot determine beam profile without a sample shape and environment");
-  } else {
-    V3D bbox;
-    V3D bboxCentre;
-    if (sample.getShape().hasValidShape()) {
-      bbox = sample.getShape().getBoundingBox().width();
-      bboxCentre = sample.getShape().getBoundingBox().centrePoint();
-    } else {
-      bbox = sample.getEnvironment().boundingBox().width();
-      bboxCentre = sample.getEnvironment().boundingBox().centrePoint();
-    }
-    const double beamWidth = 2 * bboxCentre[frame->pointingHorizontal()] + bbox[frame->pointingHorizontal()];
-    const double beamHeight = 2 * bboxCentre[frame->pointingUp()] + bbox[frame->pointingUp()];
-    return std::make_unique<RectangularBeamProfile>(*frame, source->getPos(), beamWidth, beamHeight);
   }
+  V3D bbox;
+  V3D bboxCentre;
+  if (sample.getShape().hasValidShape()) {
+    bbox = sample.getShape().getBoundingBox().width();
+    bboxCentre = sample.getShape().getBoundingBox().centrePoint();
+  } else {
+    bbox = sample.getEnvironment().boundingBox().width();
+    bboxCentre = sample.getEnvironment().boundingBox().centrePoint();
+  }
+  const double beamWidth = 2 * bboxCentre[frame->pointingHorizontal()] + bbox[frame->pointingHorizontal()];
+  const double beamHeight = 2 * bboxCentre[frame->pointingUp()] + bbox[frame->pointingUp()];
+  return std::make_unique<RectangularBeamProfile>(*frame, source->getPos(), beamWidth, beamHeight);
 }
 
 void MonteCarloAbsorption::interpolateFromSparse(MatrixWorkspace &targetWS, const SparseWorkspace &sparseWS,
