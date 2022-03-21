@@ -177,32 +177,26 @@ This is the basic directory structure that is available to you for release notes
 
   - Frequency Domain Analysis (Sub-heading)
 
-	  + New features
 	  + Bugfixes
 
   - Muon Analysis (Sub-heading)
 
-	  + New features
 	  + Bugfixes
 
   - Muon and Frequency Domain Analysis (Sub-heading)
 
-	  + New features
 	  + Bugfixes
 
   - ALC (Sub-heading)
 
-	  + New features
 	  + Bugfixes
 
   - Elemental Analysis (Sub-heading)
 
-	  + New features
 	  + Bugfixes
 
   - Algorithms (Sub-heading)
 
-	  + New features
 	  + Bugfixes
 
 * Reflectometry (Main Heading)
