@@ -63,7 +63,7 @@ protected:
                                                                  const size_t columns);
   virtual std::unique_ptr<InterpolationOption> createInterpolateOption();
   std::unique_ptr<IBeamProfile> createBeamProfile(const Geometry::Instrument &instrument,
-                                                  const Geometry::IObject &sample) const;
+                                                  const API::Sample &sample) const;
 
 private:
   void init() override;

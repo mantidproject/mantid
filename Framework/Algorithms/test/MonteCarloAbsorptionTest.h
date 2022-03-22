@@ -578,8 +578,10 @@ public:
     source->setPos(V3D(0.0, 0.0, -20.0));
     instrument->add(source);
     instrument->markAsSource(source);
+    Mantid::DataObjects::Workspace2D_sptr ws = WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(5, 5);
+    ws->mutableSample().setShape(sampleShape);
     std::shared_ptr<IBeamProfile> beam;
-    TS_ASSERT_THROWS_NOTHING(beam = mcAbsorb->createBeamProfile(*instrument, *sampleShape));
+    TS_ASSERT_THROWS_NOTHING(beam = mcAbsorb->createBeamProfile(*instrument, ws->sample()));
     TS_ASSERT(std::dynamic_pointer_cast<RectangularBeamProfile>(beam)->maxPoint()[1] == 0.06);
   }
 
