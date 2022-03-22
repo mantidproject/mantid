@@ -711,7 +711,7 @@ void DiscusMultipleScatteringCorrection::prepareCumulativeProbForQ(double kinc, 
 
   double wMax = fromWaveVector(kinc);
   auto it = std::lower_bound(wValues.begin(), wValues.end(), wMax);
-  auto iFirstInaccessibleW = std::distance(wValues.begin(), it);
+  size_t iFirstInaccessibleW = std::distance(wValues.begin(), it);
   auto nAccessibleWPoints = iFirstInaccessibleW;
   wBinEdges.resize(nAccessibleWPoints + 1);
 
