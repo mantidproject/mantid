@@ -418,7 +418,7 @@ public:
   }
 
   void test_inelastic_with_importance_sampling() {
-    // perform test on an S(Q,w) consisting of single spike at Q=1, w=1
+    // perform test on an S(Q,w) consisting of single spike at Q=1, w=-1
     // Not a realistic S(Q,w) for inelastic but useful for test to check sign conventions on w are correct and
     // also produces features at predictable w and two theta
     const double THICKNESS = 0.001; // metres
@@ -427,7 +427,7 @@ public:
     const double ang_inc = 180.0 / NTHETA;
     // set up k_inc=2.0 and work out where the peaks in the single and double scatter profiles should be
     const double kinitial = 2.0;
-    const double deltaE = 1.0;
+    const double deltaE = -1.0;
     const double deltaESpikeWidth = 0.01;
     const double qSpike = 1.0;
     const double qSpikeWidth = 0.01;
@@ -445,7 +445,7 @@ public:
     const double expectedPeak2InDeg = TwoThetaScatter1InDeg + TwoThetaScatter2InDeg;
 
     // set up workspace in direct mode with kinitial=2, w points at 1.0, 2.0, 3.0 meV
-    auto inputWorkspace = SetupFlatPlateWorkspace(1, NTHETA, ang_inc, 3, 0.5, 1.0, 10 * THICKNESS, 10 * THICKNESS,
+    auto inputWorkspace = SetupFlatPlateWorkspace(1, NTHETA, ang_inc, 3, -3.5, 1.0, 10 * THICKNESS, 10 * THICKNESS,
                                                   THICKNESS, 0., {0., 0., 1.}, DeltaEMode::Direct, Einitial);
 
     auto SofQWorkspace =
@@ -512,9 +512,9 @@ public:
       TS_ASSERT_EQUALS(peakPos.size(), 2);
       if (peakPos.size() > 0) {
         TS_ASSERT((static_cast<double>(peakPos.front()) * ang_inc >= std::floor(expectedPeak1InDeg)) &&
-                  (static_cast<double>(peakPos.front()) * ang_inc < std::ceil(expectedPeak1InDeg)));
+                  (static_cast<double>(peakPos.front()) * ang_inc <= std::ceil(expectedPeak1InDeg)));
         TS_ASSERT((static_cast<double>(peakPos.back()) * ang_inc >= std::floor(expectedPeak2InDeg)) &&
-                  (static_cast<double>(peakPos.back()) * ang_inc < std::ceil(expectedPeak2InDeg)));
+                  (static_cast<double>(peakPos.back()) * ang_inc <= std::ceil(expectedPeak2InDeg)));
       }
 
       Mantid::API::AnalysisDataService::Instance().deepRemoveGroup("MuscatResults");
@@ -705,7 +705,6 @@ public:
     auto inputWorkspace = SetupFlatPlateWorkspace(1, 1, 1.0, 1, 0.5, 1.0, 100 * THICKNESS, 100 * THICKNESS, THICKNESS,
                                                   0., {0., 0., 1.}, DeltaEMode::Direct);
     auto SofQWorkspaceZero = WorkspaceCreationHelper::create2DWorkspace(1, 1);
-    SofQWorkspaceZero->mutableY(0)[0] = 0.;
     SofQWorkspaceZero->getAxis(0)->unit() = UnitFactory::Instance().create("MomentumTransfer");
     alg.initialize();
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", inputWorkspace));
@@ -718,18 +717,48 @@ public:
     TS_ASSERT_THROWS(alg.execute(), const std::runtime_error &);
   }
 
-  void test_invalid_SQW_supplied_for_inelastic() {
+  void test_invalid_SQW_wrong_units_supplied_for_inelastic() {
     DiscusMultipleScatteringCorrectionHelper alg;
     const double THICKNESS = 0.001; // metres
     auto inputWorkspace = SetupFlatPlateWorkspace(1, 1, 1.0, 1, 0.5, 1.0, 100 * THICKNESS, 100 * THICKNESS, THICKNESS,
-                                                  DeltaEMode::Direct);
+                                                  0., {0., 0., 1.}, DeltaEMode::Direct);
     auto SofQWorkspaceZero = WorkspaceCreationHelper::create2DWorkspace(2, 1);
-    SofQWorkspaceZero->mutableY(0)[0] = 0.;
+    auto verticalAxis = std::make_unique<Mantid::API::NumericAxis>(2);
+    // Now set the axis q values
+    for (int i = 0; i < 2; ++i) {
+      verticalAxis->setValue(0, i * 1.0);
+    }
+    SofQWorkspaceZero->replaceAxis(1, std::move(verticalAxis));
     SofQWorkspaceZero->getAxis(0)->unit() = UnitFactory::Instance().create("dSpacing");
     SofQWorkspaceZero->getAxis(1)->unit() = UnitFactory::Instance().create("MomentumTransfer");
     alg.initialize();
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", inputWorkspace));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("StructureFactorWorkspace", SofQWorkspaceZero));
+    const int NSCATTERINGS = 2;
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("NumberScatterings", NSCATTERINGS));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("NeutronPathsSingle", 1));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("NeutronPathsMultiple", 1));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("OutputWorkspace", "MuscatResults"));
+    TS_ASSERT_THROWS(alg.execute(), const std::runtime_error &);
+  }
+
+  void test_invalid_SQW_no_negative_w_supplied_for_inelastic() {
+    DiscusMultipleScatteringCorrectionHelper alg;
+    const double THICKNESS = 0.001; // metres
+    auto inputWorkspace = SetupFlatPlateWorkspace(1, 1, 1.0, 1, 0.5, 1.0, 100 * THICKNESS, 100 * THICKNESS, THICKNESS,
+                                                  0., {0., 0., 1.}, DeltaEMode::Direct);
+    auto SofQWorkspaceWithOnlyPositiveW = WorkspaceCreationHelper::create2DWorkspaceBinned(2, 1, 1000);
+    auto verticalAxis = std::make_unique<Mantid::API::NumericAxis>(2);
+    // Now set the axis q values
+    for (int i = 0; i < 2; ++i) {
+      verticalAxis->setValue(0, i * 1.0);
+    }
+    SofQWorkspaceWithOnlyPositiveW->replaceAxis(1, std::move(verticalAxis));
+    SofQWorkspaceWithOnlyPositiveW->getAxis(0)->unit() = UnitFactory::Instance().create("DeltaE");
+    SofQWorkspaceWithOnlyPositiveW->getAxis(1)->unit() = UnitFactory::Instance().create("MomentumTransfer");
+    alg.initialize();
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", inputWorkspace));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("StructureFactorWorkspace", SofQWorkspaceWithOnlyPositiveW));
     const int NSCATTERINGS = 2;
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("NumberScatterings", NSCATTERINGS));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("NeutronPathsSingle", 1));

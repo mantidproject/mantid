@@ -170,42 +170,64 @@ std::map<std::string, std::string> DiscusMultipleScatteringCorrection::validateI
   if (!sample) {
     issues["InputWorkspace"] = "Input workspace does not have a Sample";
   } else {
-    if (inputWS->sample().hasEnvironment()) {
+    if (inputWS->sample().hasEnvironment())
       issues["InputWorkspace"] = "Sample must not have a sample environment";
-    }
 
-    if (inputWS->sample().getMaterial().numberDensity() == 0) {
+    if (inputWS->sample().getMaterial().numberDensity() == 0)
       issues["InputWorkspace"] = "Sample must have a material set up with a non-zero number density";
-    }
   }
 
   MatrixWorkspace_sptr SQWS = getProperty("StructureFactorWorkspace");
   if (inputWS->getEMode() == Kernel::DeltaEMode::Elastic) {
-    if (inputWS->getAxis(0)->unit()->unitID() != "Momentum") {
+    if (inputWS->getAxis(0)->unit()->unitID() != "Momentum")
       issues["InputWorkspace"] = "Input workspace must have units of Momentum (k) for elastic instrument\n";
-    }
-    if (SQWS->getNumberHistograms() != 1) {
+    if (SQWS->getNumberHistograms() != 1)
       issues["StructureFactorWorkspace"] = "S(Q) workspace must contain a single spectrum for elastic mode\n";
-    }
 
-    if (SQWS->getAxis(0)->unit()->unitID() != "MomentumTransfer") {
+    if (SQWS->getAxis(0)->unit()->unitID() != "MomentumTransfer")
       issues["StructureFactorWorkspace"] += "S(Q) workspace must have units of MomentumTransfer\n";
-    }
   } else {
-    if (inputWS->getAxis(0)->unit()->unitID() != "DeltaE") {
+    if (inputWS->getAxis(0)->unit()->unitID() != "DeltaE")
       issues["InputWorkspace"] = "Input workspace must have units of DeltaE for inelastic instrument\n";
-    }
     std::set<std::string> axisUnits;
     axisUnits.insert(SQWS->getAxis(0)->unit()->unitID());
     axisUnits.insert(SQWS->getAxis(1)->unit()->unitID());
-    if (axisUnits != std::set<std::string>{"DeltaE", "MomentumTransfer"}) {
-      issues["StructureFactorWorkspace"] = "S(Q, w) workspace must have units of Energy Transfer and MomentumTransfer";
+    if (axisUnits != std::set<std::string>{"DeltaE", "MomentumTransfer"})
+      issues["StructureFactorWorkspace"] +=
+          "S(Q, w) workspace must have units of Energy Transfer and MomentumTransfer\n";
+
+    if (SQWS->getAxis(1)->isSpectra())
+      issues["StructureFactorWorkspace"] += "S(Q, w) must have a numeric spectrum axis\n";
+
+    /* ensure S(Q,w) has some negative values - for a few reasons:
+    1) It's not physical to have a one-sided S(Q,w)
+    2) if S(Q,w) only includes positive w (energy loss) this opens up the possibility of not being able to complete
+       a neutron path through to the detector if the neutron ends up with energy below the min w
+    3) DISCUS took a one sided S(Q,w) and generated values for opposite w using detailed balance so make it clear
+       this algorithm doesn't do that*/
+    if ((axisUnits.find("DeltaE") != axisUnits.end()) && !SQWS->getAxis(1)->isSpectra()) {
+      bool atLeastOnePositive = false;
+      for (size_t iHist = 0; iHist < SQWS->getNumberHistograms(); iHist++) {
+        for (size_t iBin = 0; iBin < SQWS->y(iHist).size(); iBin++) {
+          double wValue;
+          if (SQWS->getAxis(0)->unit()->unitID() == "DeltaE")
+            wValue = SQWS->dataX(0)[iBin];
+          else {
+            wValue = SQWS->getAxis(1)->getValue(iBin);
+          }
+          if ((SQWS->y(iHist)[iBin] > 0.) && (wValue < 0.))
+            atLeastOnePositive = true;
+        }
+      }
+      if (!atLeastOnePositive)
+        issues["StructureFactorWorkspace"] += "S(Q, w) must have some positive values for negative w\n";
     }
   }
 
-  auto y = SQWS->y(0);
-  if (std::any_of(y.cbegin(), y.cend(), [](const auto yval) { return yval < 0 || std::isnan(yval); })) {
-    issues["StructureFactorWorkspace"] += "S(Q) workspace must have all y >= 0";
+  for (size_t i = 0; i < SQWS->getNumberHistograms(); i++) {
+    auto y = SQWS->y(i);
+    if (std::any_of(y.cbegin(), y.cend(), [](const auto yval) { return yval < 0 || std::isnan(yval); }))
+      issues["StructureFactorWorkspace"] += "S(Q) workspace must have all y >= 0";
   }
 
   const int nSimulationPoints = getProperty("NumberOfSimulationPoints");
@@ -214,9 +236,8 @@ std::map<std::string, std::string> DiscusMultipleScatteringCorrection::validateI
     const std::string interpValue = getPropertyValue("Interpolation");
     interpOpt.set(interpValue, false, false);
     const auto nSimPointsIssue = interpOpt.validateInputSize(nSimulationPoints);
-    if (!nSimPointsIssue.empty()) {
+    if (!nSimPointsIssue.empty())
       issues["NumberOfSimulationPoints"] = nSimPointsIssue;
-    }
   }
 
   const bool simulateEnergiesIndependently = getProperty("SimulateEnergiesIndependently");
@@ -675,22 +696,37 @@ MatrixWorkspace_uptr DiscusMultipleScatteringCorrection::prepareQSQ(double qmax)
 /**
  * Calculate a cumulative probability distribution for use in importance sampling. The distribution
  * is the inverse function P^-1(t4) where P(Q) = I(Q)/I(2k) and I(x) = integral of Q.S(Q)dQ between 0 and x
+ * For S(Q,w) this effectively appends the 1D S(Q) profiles for each w value onto each other to create one long S(Q)
+ * distribution.
  * @param kinc The wavenumber prior to the next scattering event
  * @param PInvOfQ The inverted cumulative probability distribution
  */
 void DiscusMultipleScatteringCorrection::prepareCumulativeProbForQ(double kinc, const MatrixWorkspace_sptr &PInvOfQ) {
   std::vector<double> IOfQYFull, qValuesFull, wIndices;
   double IOfQMaxPreviousRow = 0.;
+
+  auto &wValues = dynamic_cast<NumericAxis *>(m_SQWS->getAxis(1))->getValues();
+  std::vector<double> wBinEdges;
+  VectorHelper::convertToBinBoundary(wValues, wBinEdges);
+
+  double wMax = fromWaveVector(kinc);
+  auto it = std::lower_bound(wValues.begin(), wValues.end(), wMax);
+  auto iFirstInaccessibleW = std::distance(wValues.begin(), it);
+  auto nAccessibleWPoints = iFirstInaccessibleW;
+  wBinEdges.resize(nAccessibleWPoints + 1);
+
   // loop through the S(Q) spectra for the different energy transfer values
-  for (size_t iW = 0; iW < m_SQWS->getNumberHistograms(); iW++) {
+  for (size_t iW = 0; iW < nAccessibleWPoints; iW++) {
     auto kf = getKf(m_SQWS->getAxis(1)->getValue(iW), kinc);
     auto [qmin, qrange] = getKinematicRange(kf, kinc);
     std::vector<double> IOfQX, IOfQY;
     integrateCumulative(m_QSQWS->histogram(iW), qmin, qmin + qrange, IOfQX, IOfQY);
     qValuesFull.insert(qValuesFull.end(), IOfQX.begin(), IOfQX.end());
     wIndices.insert(wIndices.end(), IOfQX.size(), static_cast<double>(iW));
+    // w bin width for elastic will equal 1
+    double wBinWidth = wBinEdges[iW + 1] - wBinEdges[iW];
     std::transform(IOfQY.begin(), IOfQY.end(), IOfQY.begin(),
-                   [IOfQMaxPreviousRow](double d) -> double { return d + IOfQMaxPreviousRow; });
+                   [IOfQMaxPreviousRow, wBinWidth](double d) -> double { return d * wBinWidth + IOfQMaxPreviousRow; });
     IOfQMaxPreviousRow = IOfQY.back();
     IOfQYFull.insert(IOfQYFull.end(), IOfQY.begin(), IOfQY.end());
   }
@@ -1114,6 +1150,7 @@ std::tuple<double, int> DiscusMultipleScatteringCorrection::sampleKW(const std::
   double wMax = fromWaveVector(kinc);
   auto it = std::lower_bound(wValues.begin(), wValues.end(), wMax);
   int iWMax = static_cast<int>(std::distance(wValues.begin(), it) - 1);
+  assert(iWMax >= 0);
   auto iW = rng.nextInt(0, iWMax);
   double kf = getKf(wValues[iW], kinc);
   return {kf, iW};
