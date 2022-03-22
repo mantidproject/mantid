@@ -9,14 +9,14 @@ from typing import Dict
 from unittest import mock
 
 from mantidqt.utils.qt.testing import start_qapplication
-from mantidqt.widgets.sliceviewer.toolbar import ToolItemText
-from mantidqt.widgets.sliceviewer.view import SliceViewerDataView
+from mantidqt.widgets.sliceviewer.views.toolbar import ToolItemText
+from mantidqt.widgets.sliceviewer.views.view import SliceViewerDataView
 
 
 @start_qapplication
 class SliceviewerDataViewTest(unittest.TestCase):
     def setUp(self) -> None:
-        self.patcher = mock.patch.multiple("mantidqt.widgets.sliceviewer.view",
+        self.patcher = mock.patch.multiple("mantidqt.widgets.sliceviewer.views.dataview",
                                            DimensionWidget=mock.DEFAULT,
                                            QGridLayout=mock.DEFAULT,
                                            QHBoxLayout=mock.DEFAULT,
@@ -40,7 +40,7 @@ class SliceviewerDataViewTest(unittest.TestCase):
         self.view.mpl_toolbar.regionSelectionClicked.connect.assert_called_once_with(self.view.on_region_selection_toggle)
         self.view.mpl_toolbar.homeClicked.connect.assert_called_once_with(self.view.on_home_clicked)
         self.view.mpl_toolbar.nonOrthogonalClicked.connect.assert_called_once_with(self.view.on_non_orthogonal_axes_toggle)
-        self.view.mpl_toolbar.zoomPanClicked.connect.assert_called_once_with(self.view.presenter.deactivate_peak_adding)
+        self.view.mpl_toolbar.zoomPanClicked.connect.assert_called_once_with(self.view.presenter.zoom_pan_clicked)
         self.view.mpl_toolbar.zoomPanFinished.connect.assert_called_once_with(self.view.on_data_limits_changed)
 
     def test_color_bar_signals_connected(self):

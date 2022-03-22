@@ -18,7 +18,7 @@ namespace Crystal {
   @author Andrei Savici, ORNL
   @date 2011-08-05
 */
-class MANTID_CRYSTAL_DLL CalculateUMatrix : public API::Algorithm {
+class MANTID_CRYSTAL_DLL CalculateUMatrix final : public API::Algorithm {
 public:
   /// Algorithm's name for identification
   const std::string name() const override { return "CalculateUMatrix"; };

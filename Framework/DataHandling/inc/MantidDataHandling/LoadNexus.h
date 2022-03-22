@@ -39,7 +39,7 @@ data </LI>
 @author Ronald Fowler, based on version by Freddie Akeroyd
 @date 29/08/2008
 */
-class DLLExport LoadNexus : public API::Algorithm {
+class DLLExport LoadNexus final : public API::Algorithm {
 public:
   /// Default constructor
   LoadNexus();

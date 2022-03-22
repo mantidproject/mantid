@@ -1,0 +1,1 @@
+- :ref:`LoadILLTOF <algm-LoadILLTOF>` the sign of the half-channel width has been changed from negative to positive to ensure TOF axis is always positive.

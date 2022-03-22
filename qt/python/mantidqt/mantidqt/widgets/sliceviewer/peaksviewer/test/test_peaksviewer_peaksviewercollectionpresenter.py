@@ -14,7 +14,7 @@ from unittest.mock import MagicMock, create_autospec, patch
 from mantid.api import AnalysisDataService as ADS
 from mantid.simpleapi import CreateSampleWorkspace, RenameWorkspace
 from mantid.dataobjects import PeaksWorkspace
-from mantidqt.widgets.sliceviewer.adsobsever import SliceViewerADSObserver
+from mantidqt.widgets.sliceviewer.models.adsobsever import SliceViewerADSObserver
 from mantidqt.widgets.sliceviewer.peaksviewer \
     import PeaksViewerPresenter, PeaksViewerCollectionPresenter, PeaksViewerModel
 

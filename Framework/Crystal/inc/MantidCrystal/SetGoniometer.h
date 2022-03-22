@@ -18,7 +18,7 @@ namespace Crystal {
  * @author Janik Zikovsky
  * @date 2011-05-27
  */
-class MANTID_CRYSTAL_DLL SetGoniometer : public API::Algorithm {
+class MANTID_CRYSTAL_DLL SetGoniometer final : public API::Algorithm {
 public:
   /// Algorithm's name for identification
   const std::string name() const override { return "SetGoniometer"; };

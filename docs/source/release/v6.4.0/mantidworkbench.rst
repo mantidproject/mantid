@@ -8,9 +8,12 @@ Mantid Workbench Changes
 New Features
 ------------
 
+.. amalgamate:: Workbench/New_features
 
 Bugfixes
 --------
+
+.. amalgamate:: Workbench/Bugfixes
 
 Instrument Viewer
 -----------------
@@ -18,12 +21,26 @@ Instrument Viewer
 New Features
 ############
 
+.. amalgamate:: Workbench/InstrumentViewer/New_features
+
+Bugfixes
+########
+
+.. amalgamate:: Workbench/InstrumentViewer/Bugfixes
+
 
 Sliceviewer
 -----------
 
+New Features
+############
+
+.. amalgamate:: Workbench/SliceViewer/New_features
+
 Bugfixes
 ########
+
+.. amalgamate:: Workbench/SliceViewer/Bugfixes
 
 
 

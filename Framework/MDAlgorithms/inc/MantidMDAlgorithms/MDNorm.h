@@ -18,7 +18,7 @@ namespace MDAlgorithms {
 /** MDNormalization : Bin single crystal diffraction or direct geometry
  * inelastic data and calculate the corresponding statistical weight
  */
-class MANTID_MDALGORITHMS_DLL MDNorm : public API::Algorithm {
+class MANTID_MDALGORITHMS_DLL MDNorm final : public API::Algorithm {
 public:
   MDNorm();
   const std::string name() const override;

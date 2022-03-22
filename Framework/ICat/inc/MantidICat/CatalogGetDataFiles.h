@@ -27,7 +27,7 @@ Required Properties:
 @date 07/07/2010
 
  */
-class MANTID_ICAT_DLL CatalogGetDataFiles : public API::Algorithm {
+class MANTID_ICAT_DLL CatalogGetDataFiles final : public API::Algorithm {
 public:
   /// Constructor
   CatalogGetDataFiles() : API::Algorithm() {}

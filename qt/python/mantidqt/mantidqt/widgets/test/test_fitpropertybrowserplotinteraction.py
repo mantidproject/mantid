@@ -101,7 +101,7 @@ class FitPropertyBrowserPlotInteractionTest(unittest.TestCase):
         self.figure.get_axes.assert_called_once()
         self.axes.plot.assert_called_once_with(ANY, wkspIndex=1, label=workspace_name + '_guess',
                                                distribution=True,
-                                               update_axes_labels=False, autoscale_on_update=False)
+                                               update_axes_labels=False)
 
     def test_plot_current_guess_evaluates_correct_function(self):
         workspace_name = "test_workspace"
@@ -124,7 +124,7 @@ class FitPropertyBrowserPlotInteractionTest(unittest.TestCase):
         self.figure.get_axes.assert_called_once()
         self.axes.plot.assert_called_once_with(ANY, wkspIndex=1, label=prefix + '.' + FUNCTION_2.name(),
                                                distribution=True,
-                                               update_axes_labels=False, autoscale_on_update=False)
+                                               update_axes_labels=False)
 
     def test_plot_guess_all_plots_for_table_workspaces(self):
         table_name = "table_name"
@@ -136,7 +136,7 @@ class FitPropertyBrowserPlotInteractionTest(unittest.TestCase):
         self.figure.get_axes.assert_called_once()
         self.axes.plot.assert_called_once_with(ANY, wkspIndex=1, label=table_name + '_guess',
                                                distribution=True,
-                                               update_axes_labels=False, autoscale_on_update=False)
+                                               update_axes_labels=False)
 
     def test_remove_function_correctly_updates_stored_prefixed_functions(self):
         workspace_name = "test_workspace"
@@ -183,7 +183,7 @@ class FitPropertyBrowserPlotInteractionTest(unittest.TestCase):
         old_line.remove.assert_called_once()
         self.axes.plot.assert_called_once_with(ANY, wkspIndex=1, label=workspace_name + '_guess',
                                                distribution=True,
-                                               update_axes_labels=False, autoscale_on_update=False,
+                                               update_axes_labels=False,
                                                color=old_line.get_color())
 
     def test_changing_parameters_refreshes_guess_all(self):
@@ -198,7 +198,7 @@ class FitPropertyBrowserPlotInteractionTest(unittest.TestCase):
         old_line.remove.assert_called_once()
         self.axes.plot.assert_called_once_with(ANY, wkspIndex=1, label=workspace_name + '_guess',
                                                distribution=True,
-                                               update_axes_labels=False, autoscale_on_update=False,
+                                               update_axes_labels=False,
                                                color=old_line.get_color())
 
     def test_changing_parameters_refreshes_current_guess(self):
@@ -212,7 +212,7 @@ class FitPropertyBrowserPlotInteractionTest(unittest.TestCase):
         line_2.remove.assert_called_once()
         self.axes.plot.assert_called_once_with(ANY, wkspIndex=1, label=prefix + '.' + FUNCTION_2.name(),
                                                distribution=True,
-                                               update_axes_labels=False, autoscale_on_update=False,
+                                               update_axes_labels=False,
                                                color=line_2.get_color())
 
 

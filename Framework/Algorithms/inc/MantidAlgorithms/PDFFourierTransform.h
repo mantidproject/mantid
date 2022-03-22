@@ -15,7 +15,7 @@ namespace Algorithms {
 
 /** PDFFourierTransform : TODO: DESCRIPTION
  */
-class MANTID_ALGORITHMS_DLL PDFFourierTransform : public API::Algorithm {
+class MANTID_ALGORITHMS_DLL PDFFourierTransform final : public API::Algorithm {
 public:
   /// Algorithm's name for identification
   const std::string name() const override;

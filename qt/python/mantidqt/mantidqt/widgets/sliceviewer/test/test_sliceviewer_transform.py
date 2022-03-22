@@ -7,7 +7,7 @@
 #  This file is part of the mantid workbench.
 import unittest
 
-from mantidqt.widgets.sliceviewer.transform import NonOrthogonalTransform
+from mantidqt.widgets.sliceviewer.models.transform import NonOrthogonalTransform
 from numpy.testing import assert_allclose
 import numpy as np
 

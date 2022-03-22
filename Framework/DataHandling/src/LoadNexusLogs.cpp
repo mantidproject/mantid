@@ -16,6 +16,7 @@
 #include <Poco/DateTimeFormat.h>
 #include <Poco/DateTimeFormatter.h>
 #include <Poco/DateTimeParser.h>
+#include <Poco/Glob.h>
 #include <Poco/Path.h>
 
 #include "MantidDataHandling/LoadTOFRawNexus.h"
@@ -415,7 +416,7 @@ void LoadNexusLogs::init() {
                   "separated by a comma).");
   declareProperty(std::make_unique<PropertyWithValue<std::vector<std::string>>>("BlockList", std::vector<std::string>(),
                                                                                 Direction::Input),
-                  "If specified, these logs will NOT be loaded from the file (each "
+                  "If specified, logs matching one of the patterns will NOT be loaded from the file (each "
                   "separated by a comma).");
 }
 
@@ -747,7 +748,7 @@ void LoadNexusLogs::loadNPeriods(::NeXus::File &file, const std::shared_ptr<API:
  * @param entry_class :: The class type of the log entry
  * @param workspace :: A pointer to the workspace to store the logs
  * @param allow_list :: Names of specific log entries to load
- * @param block_list :: Names of specific log entries to skip when loading
+ * @param block_list :: Names of specific log entries or patterns skip when loading
  */
 void LoadNexusLogs::loadLogs(::NeXus::File &file, const std::string &absolute_entry_name,
                              const std::string &entry_class, const std::shared_ptr<API::MatrixWorkspace> &workspace,
@@ -772,7 +773,8 @@ void LoadNexusLogs::loadLogs(::NeXus::File &file, const std::string &absolute_en
           if (!block_list.empty()) {
             bool skip = false;
             for (const auto &block : block_list) {
-              if ((*it).substr((*it).find_last_of("/") + 1) == block) {
+              Poco::Glob glob(block);
+              if (glob.match((*it).substr((*it).find_last_of("/") + 1))) {
                 skip = true;
                 break;
               }

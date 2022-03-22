@@ -306,7 +306,6 @@ knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/Crystal/src/SaveIsawPeaks.
 useStlAlgorithm:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadMuonNexusV2NexusHelper.cpp:105
 useStlAlgorithm:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadMuonNexusV2NexusHelper.cpp:145
 shadowFunction:${CMAKE_SOURCE_DIR}/Framework/DataObjects/inc/MantidDataObjects/VectorColumn.h:88
-useStlAlgorithm:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadNexusLogs.cpp:775
 constParameter:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadNexusProcessed2.cpp:95
 useStlAlgorithm:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadNexusProcessed2.cpp:33
 useStlAlgorithm:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadNexusProcessed2.cpp:43

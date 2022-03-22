@@ -23,7 +23,7 @@ namespace CustomDialogs {
 
   @date 1/12/2014
 */
-class SortTableWorkspaceDialog : public API::AlgorithmDialog {
+class SortTableWorkspaceDialog final : public API::AlgorithmDialog {
   Q_OBJECT
 
 public:

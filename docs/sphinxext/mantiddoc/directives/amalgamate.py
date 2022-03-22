@@ -34,11 +34,12 @@ class CompilationDirective(BaseDirective):
         Called by Sphinx when the ..compiler:: directive is encountered.
         """
         script_dir = self.getPath()
-        for file in os.listdir(script_dir):
-            if file.endswith(".rst"):
-                with open(script_dir + '/' + file) as f:
-                    contents = f.read()
-                    self.add_rst(contents)
+        if os.path.exists(script_dir):
+            for file in os.listdir(script_dir):
+                if file.endswith(".rst"):
+                    with open(script_dir + '/' + file) as f:
+                        contents = f.read()
+                        self.add_rst(contents)
 
         return []
 

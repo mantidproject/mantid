@@ -34,6 +34,7 @@ namespace Algorithms {
 */
 class MANTID_ALGORITHMS_DLL DiscusMultipleScatteringCorrection : public API::Algorithm {
 public:
+  virtual ~DiscusMultipleScatteringCorrection() = default;
   /// Algorithm's name
   const std::string name() const override { return "DiscusMultipleScatteringCorrection"; }
   /// Algorithm's version

@@ -27,7 +27,5 @@ namespace MantidQt::CustomInterfaces::ISISReflectometry::RowProcessing {
 MANTIDQT_ISISREFLECTOMETRY_DLL MantidQt::API::IConfiguredAlgorithm_sptr createConfiguredAlgorithm(IBatch const &model,
                                                                                                   Row &row);
 MANTIDQT_ISISREFLECTOMETRY_DLL std::unique_ptr<MantidQt::API::IAlgorithmRuntimeProps>
-createAlgorithmRuntimeProps(IBatch const &model, Row const &row);
-MANTIDQT_ISISREFLECTOMETRY_DLL std::unique_ptr<MantidQt::API::IAlgorithmRuntimeProps>
-createAlgorithmRuntimeProps(IBatch const &model);
+createAlgorithmRuntimeProps(IBatch const &model, boost::optional<Row const &> row = boost::none);
 } // namespace MantidQt::CustomInterfaces::ISISReflectometry::RowProcessing

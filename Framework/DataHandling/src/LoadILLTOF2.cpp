@@ -351,8 +351,8 @@ void LoadILLTOF2::loadDataIntoTheWorkSpace(NeXus::NXEntry &entry, const std::vec
   if (moni.containsDataSet("time_of_flight")) {
     if (convertToTOF) {
       for (size_t i = 0; i < m_numberOfChannels + 1; ++i) {
-        X0[i] = m_timeOfFlightDelay + m_channelWidth * static_cast<double>(i) -
-                m_channelWidth / 2; // to make sure the bin centre is correct
+        X0[i] = m_timeOfFlightDelay + m_channelWidth * static_cast<double>(i) +
+                m_channelWidth / 2; // to make sure the bin centre is positive
       }
     } else {
       for (size_t i = 0; i < m_numberOfChannels + 1; ++i) {

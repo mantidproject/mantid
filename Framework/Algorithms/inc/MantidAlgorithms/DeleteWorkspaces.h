@@ -20,7 +20,7 @@ namespace Algorithms {
   @author Nick Draper, Tessella plc
   @date 2017-02-17
 */
-class MANTID_ALGORITHMS_DLL DeleteWorkspaces : public API::Algorithm {
+class MANTID_ALGORITHMS_DLL DeleteWorkspaces final : public API::Algorithm {
 public:
   /// Algorithm's name
   const std::string name() const override { return "DeleteWorkspaces"; }

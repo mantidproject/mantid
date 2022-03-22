@@ -47,4 +47,4 @@ dependencies:
   - zlib>=1.2.11
   # Needed only for development
   - cppcheck==2.5
-  - pre-commit>=2.12.0
+  - pre-commit==2.15 # Had to pin back to 2.15 as we can't handle changes made here (https://github.com/pre-commit/pre-commit/pull/2065 added in 2.16) on windows yet.

@@ -21,7 +21,7 @@ namespace Algorithms {
   creates a new workspace containing background data that can be subtracted
   from the original data.
 */
-class MANTID_ALGORITHMS_DLL CreateUserDefinedBackground : public API::Algorithm {
+class MANTID_ALGORITHMS_DLL CreateUserDefinedBackground final : public API::Algorithm {
 public:
   /// Return name of algorithm
   const std::string name() const override;

@@ -48,7 +48,7 @@ namespace WorkflowAlgorithms {
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 
-class DLLExport HFIRLoad : public API::Algorithm {
+class DLLExport HFIRLoad final : public API::Algorithm {
 public:
   /// Algorithm's name
   const std::string name() const override { return "HFIRLoad"; }

@@ -16,7 +16,7 @@ namespace Crystal {
 /** FilterPeaks : Filter a peaks workspace based on a set number of queries to
   provide a new, filtered peaks workspace.
 */
-class MANTID_CRYSTAL_DLL FilterPeaks : public API::Algorithm {
+class MANTID_CRYSTAL_DLL FilterPeaks final : public API::Algorithm {
 public:
   const std::string name() const override;
   /// Summary of algorithms purpose

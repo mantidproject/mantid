@@ -6,13 +6,16 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "RowProcessingAlgorithm.h"
 #include "../../Reduction/Batch.h"
-#include "../../Reduction/IBatch.h"
-#include "../../Reduction/Row.h"
 #include "AlgorithmProperties.h"
 #include "BatchJobAlgorithm.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/IAlgorithm.h"
+#include "MantidKernel/Logger.h"
 #include "MantidQtWidgets/Common/AlgorithmRuntimeProps.h"
+
+namespace {
+Mantid::Kernel::Logger g_log("Reflectometry RowProcessingAlgorithm");
+} // namespace
 
 namespace MantidQt::CustomInterfaces::ISISReflectometry::RowProcessing {
 
@@ -102,17 +105,14 @@ void updateExperimentProperties(AlgorithmRuntimeProps &properties, Experiment co
   updateFloodCorrectionProperties(properties, experiment.floodCorrections());
 }
 
-void updateLookupRowProperties(AlgorithmRuntimeProps &properties, boost::optional<LookupRow> lookupRow) {
-  if (!lookupRow)
-    return;
-
-  updateTransmissionWorkspaceProperties(properties, lookupRow->transmissionWorkspaceNames());
-  AlgorithmProperties::update("TransmissionProcessingInstructions", lookupRow->transmissionProcessingInstructions(),
+void updateLookupRowProperties(AlgorithmRuntimeProps &properties, LookupRow const &lookupRow) {
+  updateTransmissionWorkspaceProperties(properties, lookupRow.transmissionWorkspaceNames());
+  AlgorithmProperties::update("TransmissionProcessingInstructions", lookupRow.transmissionProcessingInstructions(),
                               properties);
-  updateMomentumTransferProperties(properties, lookupRow->qRange());
-  AlgorithmProperties::update("ScaleFactor", lookupRow->scaleFactor(), properties);
-  AlgorithmProperties::update("ProcessingInstructions", lookupRow->processingInstructions(), properties);
-  AlgorithmProperties::update("BackgroundProcessingInstructions", lookupRow->backgroundProcessingInstructions(),
+  updateMomentumTransferProperties(properties, lookupRow.qRange());
+  AlgorithmProperties::update("ScaleFactor", lookupRow.scaleFactor(), properties);
+  AlgorithmProperties::update("ProcessingInstructions", lookupRow.processingInstructions(), properties);
+  AlgorithmProperties::update("BackgroundProcessingInstructions", lookupRow.backgroundProcessingInstructions(),
                               properties);
 }
 
@@ -210,6 +210,37 @@ void updateRowFromOutputProperties(const IAlgorithm_sptr &algorithm, Item &item)
                          getDouble(algorithm, "MomentumTransferMax"));
   row.setOutputQRange(qRange);
 }
+
+// Get the lookup row from the model. Because using a wildcard row or algorithm defaults
+// can be confusing this function also logs warnings about what is happening.
+boost::optional<LookupRow> findLookupRow(Row const &row, IBatch const &model) {
+  auto lookupRow = model.findLookupRow(row);
+  if (!lookupRow) {
+    g_log.warning(
+        "No matching experiment settings found for " + boost::algorithm::join(row.runNumbers(), ", ") +
+        ". Using algorithm default settings instead. You may wish to check that all lookup criteria on the Experiment "
+        "Settings table are correct.");
+  } else if (lookupRow->isWildcard()) {
+    g_log.warning(
+        "No matching experiment settings found for " + boost::algorithm::join(row.runNumbers(), ", ") +
+        ". Using wildcard row settings instead. You may wish to check that all lookup criteria on the Experiment "
+        "Settings table are correct.");
+  }
+  return lookupRow;
+}
+
+// Get the wildcard lookup row from the model. Because using a wildcard row or algorithm defaults
+// can be confusing this function also logs warnings about what is happening.
+boost::optional<LookupRow> findWildcardLookupRow(IBatch const &model) {
+  auto lookupRow = model.findWildcardLookupRow();
+  if (lookupRow) {
+    g_log.warning("Using experiment settings from the wildcard row.");
+  } else {
+    g_log.warning("No experiment settings found; using algorithm defaults. You may wish to specify a wildcard"
+                  " row in the Experiment Settings table to override them.");
+  }
+  return lookupRow;
+}
 } // unnamed namespace
 
 /** Create a configured algorithm for processing a row. The algorithm
@@ -232,26 +263,31 @@ IConfiguredAlgorithm_sptr createConfiguredAlgorithm(IBatch const &model, Row &ro
   return jobAlgorithm;
 }
 
+/** This function gets the canonical set of properties for performing the reduction, either using defaults for all runs
+ * or for a specific run if that run's Row is passed. It starts with the most generic set of defaults, overrides them
+ * from the lookup table if a match is found there, and then finally overrides them with the specific run's settings if
+ * the user has specified them on the Runs table.
+ *
+ * @param model : the Batch model containing all of the default settings and the lookup table
+ * @param row : optional run details from the Runs table
+ * @returns : a custom PropertyManager class with all of the algorithm properties set
+ */
 std::unique_ptr<MantidQt::API::IAlgorithmRuntimeProps> createAlgorithmRuntimeProps(IBatch const &model,
-                                                                                   Row const &row) {
-  // Create properties for the model
-  auto properties = createAlgorithmRuntimeProps(model);
-  // Update properties specific to this row - the per-angle options based on
-  // the known angle, and the values in the table cells in the row
-  updateLookupRowProperties(*properties, model.findLookupRow(row));
-  updateRowProperties(*properties, row);
-  return properties;
-}
-
-std::unique_ptr<MantidQt::API::IAlgorithmRuntimeProps> createAlgorithmRuntimeProps(IBatch const &model) {
+                                                                                   boost::optional<Row const &> row) {
   auto properties = std::make_unique<MantidQt::API::AlgorithmRuntimeProps>();
-  // Update properties from settings in the event, experiment and instrument
-  // tabs
+  // Update properties from settings in the event, experiment and instrument tabs
   updateEventProperties(*properties, model.slicing());
   updateExperimentProperties(*properties, model.experiment());
   updateInstrumentProperties(*properties, model.instrument());
-  // Update properties from the wildcard row in the lookup table
-  updateLookupRowProperties(*properties, model.findWildcardLookupRow());
+  // Look up properties for this run on the lookup table (or use wildcard defaults if no run is given)
+  auto lookupRow = row ? findLookupRow(*row, model) : findWildcardLookupRow(model);
+  if (lookupRow) {
+    updateLookupRowProperties(*properties, *lookupRow);
+  }
+  // Update properties the user has specifically set for this run
+  if (row) {
+    updateRowProperties(*properties, *row);
+  }
   return properties;
 }
 } // namespace MantidQt::CustomInterfaces::ISISReflectometry::RowProcessing

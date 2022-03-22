@@ -15,7 +15,7 @@ namespace Algorithms {
     @author Matt Clarke, ISIS, RAL
     @date 09/11/2007
  */
-class HelloWorldAlgorithm : public API::Algorithm {
+class HelloWorldAlgorithm final : public API::Algorithm {
 public:
   /// no arg constructor
   HelloWorldAlgorithm() : API::Algorithm() {}

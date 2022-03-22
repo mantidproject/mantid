@@ -1,0 +1,1 @@
+- Fixed where matplotlib 3.5 didn't allow for waterfall plots to functions

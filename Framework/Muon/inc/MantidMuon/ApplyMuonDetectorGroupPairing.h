@@ -20,7 +20,7 @@ namespace Muon {
 @date 2018-06-01
 */
 
-class MANTID_MUON_DLL ApplyMuonDetectorGroupPairing : public API::Algorithm {
+class MANTID_MUON_DLL ApplyMuonDetectorGroupPairing final : public API::Algorithm {
 public:
   /// (Empty) Constructor
   ApplyMuonDetectorGroupPairing() : API::Algorithm() {}
