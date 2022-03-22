@@ -19,6 +19,8 @@ InstallDir "C:\MantidInstall"
 # The text to prompt the user to enter a directory
 DirText "This will install mantid and it's components"
 
+RequestExecutionLevel user
+
 # The stuff to install
 Section "-Core installation"
     # Set output path to the installation directory.
