@@ -42,7 +42,11 @@ boost::optional<Item &> Batch::getItemWithOutputWorkspaceOrNone(std::string cons
 }
 
 void Batch::updateLookupIndex(Row &row) {
-  row.setLookupIndex(experiment().getLookupRowIndexFromRow(row, runsTable().thetaTolerance()));
+  try {
+    row.setLookupIndex(experiment().getLookupRowIndexFromRow(row, runsTable().thetaTolerance()));
+  } catch (MultipleRowsFoundException &e) {
+    row.setError(e.what());
+  }
 }
 
 void Batch::updateLookupIndexesOfGroup(Group &group) {

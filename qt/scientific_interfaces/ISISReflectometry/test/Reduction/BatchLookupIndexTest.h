@@ -100,6 +100,23 @@ public:
     }
   }
 
+  void test_error_message_set_if_lookup_throws() {
+    constexpr auto angle = 0.5;
+    auto row = ModelCreationHelper::makeRow(angle);
+    auto group = Group("groupName");
+    group.appendRow(std::move(row));
+
+    auto exp = ModelCreationHelper::makeExperimentWithValidDuplicateCriteria();
+
+    auto model = Batch(exp, m_instrument, m_runsTable, m_slicing);
+
+    TS_ASSERT_EQUALS(group.rows()[0].get().lookupIndex(), boost::none);
+    model.updateLookupIndex(group.mutableRows()[0].get());
+    TS_ASSERT(!group.rows()[0].get().lookupIndex().is_initialized());
+    TS_ASSERT_EQUALS(group.rows()[0].get().state(), State::ITEM_ERROR);
+    TS_ASSERT_EQUALS(group.rows()[0].get().message(), "Multiple matching Experiment Setting rows")
+  }
+
 private:
   std::vector<std::string> m_instruments;
   double m_thetaTolerance;
