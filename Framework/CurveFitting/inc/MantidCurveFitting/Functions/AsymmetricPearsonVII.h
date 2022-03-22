@@ -61,12 +61,28 @@ public:
   double activeParameter(size_t i) const override;
   void setActiveParameter(size_t i, double value) override;
 
+  double getPearsonVII(double peak_height, double offset, double weight, double m) const;
+  double getPearsonVIIDerivWRTh(double offset, double weight, double m) const;
+  double getPearsonVIIDerivWRTc(double peak_height, double offset, double weight, double m) const;
+  double getPearsonVIIDerivWRTw(double peak_height, double offset, double weight, double m) const;
+  double getPearsonVIIDerivWRTm(double peak_height, double offset, double weight, double m) const;
+
+  double getPearsonVIILimitmEq0(double peak_height) const;
+  double getPearsonVIIDerivWRThLimitmEq0() const;
+  double getPearsonVIIDerivWRTcLimitmEq0() const;
+  double getPearsonVIIDerivWRTwLimitmEq0() const;
+  double getPearsonVIIDerivWRTmLimitmEq0(double peak_height, double offset, double weight) const;
+
 protected:
   void functionLocal(double *out, const double *xValues, const size_t nData) const override;
   void functionDerivLocal(API::Jacobian *out, const double *xValues, const size_t nData) override;
   /// Override IFunction base class method, which declares function parameters
   void init() override;
 };
+
+double denominator_function(double offset_sq, double weight_sq, double m);
+double derivative_function(double peak_height, double offset, double weight, double m);
+double m_derivative_function(double peak_height, double offset_sq, double weight_sq, double m);
 
 } // namespace Functions
 } // namespace CurveFitting
