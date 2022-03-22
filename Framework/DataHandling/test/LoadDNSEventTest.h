@@ -53,7 +53,7 @@ public:
     alg.initialize();
     std::string outWSName("LoadDNSEventTest_OutputWS");
     TS_ASSERT_EQUALS(alg.name(), "LoadDNSEvent");
-    TS_ASSERT_THROWS(alg.setProperty("ChopperChannel", 5), std::invalid_argument);
+    TS_ASSERT_THROWS(alg.setProperty("ChopperChannel", 5), const std::invalid_argument &);
     TS_ASSERT_EQUALS(alg.getPropertyValue("ChopperChannel"), "2");
     TS_ASSERT_EQUALS(alg.getPropertyValue("NumberOfTubes"), "128");
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("NumberOfTubes", "1"));
