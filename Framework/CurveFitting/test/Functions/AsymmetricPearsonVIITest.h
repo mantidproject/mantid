@@ -48,6 +48,17 @@ public:
     TS_ASSERT_EQUALS(ap7.category(), "XrayDiffraction");
   }
 
+  void testParametersInitialization() {
+    AsymmetricPearsonVII ap7;
+    ap7.initialize();
+    // test initialized values
+    TS_ASSERT_DELTA(ap7.height(), 1.0, 1.0e-6);
+    TS_ASSERT_DELTA(ap7.centre(), 0.0, 1.0e-6);
+    TS_ASSERT_DELTA(ap7.fwhm(), 0.1, 1.0e-6);
+    TS_ASSERT_DELTA(ap7.leftShape(), 1.0, 1.0e-6);
+    TS_ASSERT_DELTA(ap7.rightShape(), 1.0, 1.0e-6);
+  }
+
   void testSetParameters() {
     AsymmetricPearsonVII ap7;
     const double ph = 0.9;
@@ -56,12 +67,13 @@ public:
     const double ml = 2.0;
     const double mr = 0.0;
     ap7.initialize();
+
     ap7.setHeight(ph);
     ap7.setCentre(pc);
     ap7.setFwhm(width);
     ap7.setLeftShape(ml);
     ap7.setRightShape(mr);
-
+    // test change of the values
     TS_ASSERT_DELTA(ap7.height(), ph, 1.0e-6);
     TS_ASSERT_DELTA(ap7.centre(), pc, 1.0e-6);
     TS_ASSERT_DELTA(ap7.fwhm(), width, 1.0e-6);
@@ -78,7 +90,7 @@ public:
     const double ph = 10.0;
     const double pc = 0.0;
     const double width = 0.1;
-    const double ml = 10.0;
+    const double ml = 1.75;
     const double mr = 1.0;
 
     IPeakFunction_sptr ap7 = getInitializedAPVII(ph, pc, width, ml, mr);
@@ -86,8 +98,8 @@ public:
     FunctionValues values_ap7(domain);
     ap7->function(domain, values_ap7);
 
-    double expected_output[10] = {1.86665e-14, 1.34216e-12, 2.85522e-10, 3.33551e-7, 0.00477417,
-                                  10.,         0.588235,    0.153846,    0.0689655,  0.0389105};
+    double expected_output[10] = {0.000979244, 0.00212761, 0.00576074, 0.0230956, 0.22348,
+                                  10.,         0.588235,   0.153846,   0.0689655, 0.0389105};
 
     for (size_t i = 0; i < values_ap7.size(); ++i) {
       TS_ASSERT_DELTA(expected_output[i], values_ap7[i], 1e-6);
@@ -113,10 +125,10 @@ public:
   }
 
   /** Test asymptotic behavior
-   * @brief testAsymptoticBehavior: test if the asymmetric Pearson VII
-   * behaves as Lorentzian at m = 1 and as Gaussian at m -> \infty
+   * @brief testAsymptoticBehaviorLimitmEq1: test if the
+   * asymmetric Pearson VII behaves as Lorentzian at m = 1
    */
-  void testAsymptoticBehavior() {
+  void testAsymptoticBehaviorLimitmEq1() {
     const double ph = 10.0;
     const double pc = 0.0;
     const double width = 0.7;
@@ -139,9 +151,21 @@ public:
     // compare AsymmetricPearsonVII with Lorentzian
     for (size_t i = 0; i < values_lorentzian.size(); ++i)
       TS_ASSERT_DELTA(values_lorentzian[i], values_ap7[i], 1.0e-6);
+  }
 
-    // change ml=mr=10^8
-    ap7 = getInitializedAPVII(ph, pc, width, 1.0e8, 1.0e8);
+  /** Test asymptotic behavior
+   * @brief testAsymptoticBehaviorLimitmEqInfty: test if the
+   * asymmetric Pearson VII behaves as Gaussian at m -> \infty
+   */
+  void testAsymptoticBehaviorLimitmEqInfty() {
+    const double ph = 210.0;
+    const double pc = 3.0;
+    const double width = 12.7;
+
+    // initialize AsymmetricPearsonVII with ml=mr=10^8
+    IPeakFunction_sptr ap7 = getInitializedAPVII(ph, pc, width, 1.0e8, 1.0e8);
+    FunctionDomain1DVector domain(m_xValues);
+    FunctionValues values_ap7(domain);
     ap7->function(domain, values_ap7);
 
     // initialize Gaussian
