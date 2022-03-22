@@ -371,8 +371,6 @@ useStlAlgorithm:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/RemoveLogs.cpp:67
 rethrowNoCurrentException:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/SaveDetectorsGrouping.cpp:90
 knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/SaveNXcanSAS.cpp:678
 unreadVariable:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/SaveNXcanSAS.cpp:356
-unreadVariable:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/SaveNexusProcessed.cpp:79
-unreadVariable:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/SaveNexusProcessed.cpp:94
 knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/SaveRKH.cpp:175
 knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/SaveRKH.cpp:183
 nullPointerRedundantCheck:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/SaveRMCProfile.cpp:63
@@ -543,9 +541,7 @@ unreadVariable:${CMAKE_SOURCE_DIR}/Framework/SINQ/src/SINQTranspose3D.cpp:117
 unreadVariable:${CMAKE_SOURCE_DIR}/Framework/SINQ/src/SINQTranspose3D.cpp:118
 unreadVariable:${CMAKE_SOURCE_DIR}/Framework/SINQ/src/SINQTranspose3D.cpp:156
 unreadVariable:${CMAKE_SOURCE_DIR}/Framework/SINQ/src/SINQTranspose3D.cpp:157
-constParameter:${CMAKE_SOURCE_DIR}/Framework/TestHelpers/src/JSONGeometryParserTestHelper.cpp:176
-unreadVariable:${CMAKE_SOURCE_DIR}/Framework/TestHelpers/src/JSONGeometryParserTestHelper.cpp:120
-unreadVariable:${CMAKE_SOURCE_DIR}/Framework/TestHelpers/src/JSONGeometryParserTestHelper.cpp:124
+constParameter:${CMAKE_SOURCE_DIR}/Framework/TestHelpers/src/JSONGeometryParserTestHelper.cpp:174
 constParameter:${CMAKE_SOURCE_DIR}/Framework/TestHelpers/src/MuonWorkspaceCreationHelper.cpp:193
 useStlAlgorithm:${CMAKE_SOURCE_DIR}/Framework/WorkflowAlgorithms/src/ExtractQENSMembers.cpp:107
 useStlAlgorithm:${CMAKE_SOURCE_DIR}/Framework/WorkflowAlgorithms/src/ProcessIndirectFitParameters.cpp:45
