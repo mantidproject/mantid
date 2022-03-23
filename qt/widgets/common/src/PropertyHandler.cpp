@@ -133,7 +133,7 @@ void PropertyHandler::init() {
 class CreateAttributeProperty : public Mantid::API::IFunction::ConstAttributeVisitor<QtProperty *> {
 public:
   CreateAttributeProperty(FitPropertyBrowser *browser, PropertyHandler *handler, QString name,
-                          Mantid::Kernel::IValidator_sptr validator = Mantid::Kernel::IValidator_sptr())
+                          Mantid::Kernel::IValidator_sptr validator = nullptr)
       : m_browser(browser), m_handler(handler), m_name(std::move(name)) {
     m_validator = validator;
   }

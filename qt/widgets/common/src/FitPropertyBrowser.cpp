@@ -2428,10 +2428,8 @@ QtProperty *FitPropertyBrowser::addStringProperty(const QString &name) const {
  */
 QtProperty *FitPropertyBrowser::addStringListProperty(const QString &name,
                                                       const std::vector<std::string> &allowed_values) const {
-  QtProperty *prop;
   QStringList qAllowedValues;
-
-  prop = m_enumManager->addProperty(name);
+  QtProperty *prop = m_enumManager->addProperty(name);
 
   for (const auto &values : allowed_values) {
     qAllowedValues << QString::fromStdString(values);
