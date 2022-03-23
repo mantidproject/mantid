@@ -17,6 +17,7 @@ from mantidqt.widgets.sliceviewer.models.dimensions import Dimensions
 from mantidqt.widgets.sliceviewer.models.model import SliceViewerModel, WS_TYPE
 from mantidqt.widgets.sliceviewer.models.sliceinfo import SliceInfo
 from mantidqt.widgets.sliceviewer.models.workspaceinfo import WorkspaceInfo
+from mantidqt.widgets.sliceviewer.cutviewer.presenter import CutViewerPresenter
 from mantidqt.widgets.sliceviewer.peaksviewer import PeaksViewerPresenter, PeaksViewerCollectionPresenter
 from mantidqt.widgets.sliceviewer.presenters.base_presenter import SliceViewerBasePresenter
 from mantidqt.widgets.sliceviewer.views.toolbar import ToolItemText
@@ -44,6 +45,7 @@ class SliceViewer(ObservingPresenter, SliceViewerBasePresenter):
 
         self._logger = Logger("SliceViewer")
         self._peaks_presenter: PeaksViewerCollectionPresenter = None
+        self._cutviewer_presenter = None
         self.conf = conf
 
         # Acts as a 'time capsule' to the properties of the model at this
@@ -204,11 +206,13 @@ class SliceViewer(ObservingPresenter, SliceViewerBasePresenter):
                 self.new_plot(dimensions_transposing=True)
         else:
             self.new_plot()
+        self._call_cutviewer_presenter_if_created("on_dimension_changed")
 
     def slicepoint_changed(self):
         """Indicates the slicepoint has been updated"""
         self._call_peaks_presenter_if_created("notify",
                                               PeaksViewerPresenter.Event.SlicePointChanged)
+        self._call_cutviewer_presenter_if_created("on_slicepoint_changed")
         self.update_plot_data()
 
     def export_roi(self, limits):
@@ -317,6 +321,7 @@ class SliceViewer(ObservingPresenter, SliceViewerBasePresenter):
         if self.view.non_axis_aligned_cut_view.isVisible():
             self.view.non_axis_aligned_cut_view.hide()
         else:
+            self._create_cutviewer_presenter_if_necessary()
             self.view.non_axis_aligned_cut_view.show()
 
     def replace_workspace(self, workspace_name, workspace):
@@ -413,6 +418,21 @@ class SliceViewer(ObservingPresenter, SliceViewerBasePresenter):
         """
         if self._peaks_presenter is not None:
             getattr(self._peaks_presenter, attr)(*args, **kwargs)
+
+    def _create_cutviewer_presenter_if_necessary(self):
+        if self._cutviewer_presenter is None:
+            self._cutviewer_presenter = CutViewerPresenter(self.view.non_axis_aligned_cut_view)
+        return self._cutviewer_presenter
+
+    def _call_cutviewer_presenter_if_created(self, attr, *args, **kwargs):
+        """
+        Call a method on the peaks presenter if it has been created
+        :param attr: The attribute to call
+        :param *args: Positional-arguments to pass to call
+        :param **kwargs Keyword-arguments to pass to call
+        """
+        if self._cutviewer_presenter is not None:
+            getattr(self._cutviewer_presenter, attr)(*args, **kwargs)
 
     def _show_status_message(self, message: str):
         """

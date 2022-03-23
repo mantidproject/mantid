@@ -26,9 +26,9 @@ class CutViewerView(QWidget):
         self._sliceinfo_provider = sliceinfo_provider
         self._setup_ui()
         self._init_slice_table()
-        self.hide()
+        self.hide()  # hide initially as visibility is toggled
 
-    def fill_new_table(self):
+    def reset_table_data(self):
         # write proj matrix to table
         proj_matrix = self._sliceinfo_provider.get_proj_matrix().T  # .T so now each basis vector is a row as in table
         dims = self._sliceinfo_provider.get_dimensions()
@@ -53,8 +53,19 @@ class CutViewerView(QWidget):
             self.table.item(irow, 3).setData(Qt.EditRole, float(start))  # start
             self.table.item(irow, 4).setData(Qt.EditRole, float(stop))  # stop
             self.table.item(irow, 6).setData(Qt.EditRole, float((stop - start) / nbins))  # step/width
+        self.update_slicepoint()
         # update slicepoint and width
         slicept = dims.get_slicepoint()[states[-1]]
+        self.table.item(2, 3).setData(Qt.EditRole, float(slicept - bin_params[-1]/2))  # start
+        self.table.item(2, 4).setData(Qt.EditRole, float(slicept + bin_params[-1]/2))  # stop
+        self.table.item(2, 6).setData(Qt.EditRole, float(bin_params[-1]))  # step (i.e. width)
+
+    def update_slicepoint(self):
+        dims = self._sliceinfo_provider.get_dimensions()
+        states = dims.get_states()
+        states[states.index(None)] = 2  # set last index as out of plane dimension
+        bin_params = np.array(dims.get_bin_params())[states]
+        slicept = self._sliceinfo_provider.get_sliceinfo().z_value
         self.table.item(2, 3).setData(Qt.EditRole, float(slicept - bin_params[-1]/2))  # start
         self.table.item(2, 4).setData(Qt.EditRole, float(slicept + bin_params[-1]/2))  # stop
         self.table.item(2, 6).setData(Qt.EditRole, float(bin_params[-1]))  # step (i.e. width)
@@ -114,4 +125,4 @@ class CutViewerView(QWidget):
                 else:
                     item.setFlags(item.flags() | Qt.ItemIsEditable)
                 self.table.setItem(irow, icol, item)
-        self.fill_new_table()
+        self.reset_table_data()
