@@ -53,6 +53,9 @@ IndirectMoments::IndirectMoments(IndirectDataReduction *idrUI, QWidget *parent)
   connect(xRangeSelector, SIGNAL(selectionChanged(double, double)), this, SLOT(rangeChanged(double, double)));
   connect(m_dblManager, SIGNAL(valueChanged(QtProperty *, double)), this, SLOT(updateProperties(QtProperty *, double)));
 
+  connect(m_uiForm.ckScale, SIGNAL(stateChanged(bool)), this, SLOT(handleScaleChanged(bool)));
+  connect(m_uiForm.spScale, SIGNAL(valueChanged(double)), this, SLOT(handleScaleValueChanged(double)));
+
   // Update the preview plot when the algorithm completes
   connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this, SLOT(momentsAlgComplete(bool)));
 
@@ -82,9 +85,21 @@ void IndirectMoments::setup() {}
  *
  */
 void IndirectMoments::handleDataReady(QString const &dataName) {
-  if (validate())
+  if (validate()) {
+    m_model.setInputWorkspace(m_uiForm.dsInput->getCurrentDataName().toStdString());
     plotNewData(dataName);
+  }
 }
+
+/**
+ * Handles the scale checkbox being changed.
+ */
+void IndirectMoments::handleScaleChanged(bool scale) { m_model.setScale(scale); }
+
+/**
+ * Handles the scale value being changed.
+ */
+void IndirectMoments::handleScaleValueChanged(double value) { m_model.setScaleValue(value); }
 
 bool IndirectMoments::validate() {
   UserInputValidator uiv;
@@ -96,31 +111,7 @@ bool IndirectMoments::validate() {
   return errorMessage.isEmpty();
 }
 
-void IndirectMoments::run() {
-  QString workspaceName = m_uiForm.dsInput->getCurrentDataName();
-  QString outputName = workspaceName.left(workspaceName.length() - 4);
-  double scale = m_uiForm.spScale->value();
-  double eMin = m_dblManager->value(m_properties["EMin"]);
-  double eMax = m_dblManager->value(m_properties["EMax"]);
-
-  std::string const outputWorkspaceName = outputName.toStdString() + "_Moments";
-
-  IAlgorithm_sptr momentsAlg = AlgorithmManager::Instance().create("SofQWMoments", -1);
-  momentsAlg->initialize();
-  momentsAlg->setProperty("InputWorkspace", workspaceName.toStdString());
-  momentsAlg->setProperty("EnergyMin", eMin);
-  momentsAlg->setProperty("EnergyMax", eMax);
-  momentsAlg->setProperty("OutputWorkspace", outputWorkspaceName);
-
-  if (m_uiForm.ckScale->isChecked())
-    momentsAlg->setProperty("Scale", scale);
-
-  // Set the workspace name for Python script export
-  m_pythonExportWsName = outputWorkspaceName;
-
-  // Execute algorithm on separate thread
-  runAlgorithm(momentsAlg);
-}
+void IndirectMoments::run() { runAlgorithm(m_model.setupAlgorithm()); }
 
 /**
  * Clears previous plot data (in both preview and raw plot) and sets the new
@@ -141,6 +132,8 @@ void IndirectMoments::plotNewData(QString const &filename) {
   auto xRangeSelector = m_uiForm.ppRawPlot->getRangeSelector("XRange");
   setPlotPropertyRange(xRangeSelector, m_properties["EMin"], m_properties["EMax"], range);
   setRangeSelector(xRangeSelector, m_properties["EMin"], m_properties["EMax"], range);
+  m_model.setEMin(range.first);
+  m_model.setEMax(range.second);
   m_uiForm.ppRawPlot->replot();
 
   connect(m_dblManager, SIGNAL(valueChanged(QtProperty *, double)), this, SLOT(updateProperties(QtProperty *, double)));
@@ -157,6 +150,8 @@ void IndirectMoments::rangeChanged(double min, double max) {
              SLOT(updateProperties(QtProperty *, double)));
   m_dblManager->setValue(m_properties["EMin"], min);
   m_dblManager->setValue(m_properties["EMax"], max);
+  m_model.setEMin(min);
+  m_model.setEMax(max);
   connect(m_dblManager, SIGNAL(valueChanged(QtProperty *, double)), this, SLOT(updateProperties(QtProperty *, double)));
 }
 
@@ -176,8 +171,10 @@ void IndirectMoments::updateProperties(QtProperty *prop, double val) {
 
   if (prop == m_properties["EMin"]) {
     setRangeSelectorMin(m_properties["EMin"], m_properties["EMax"], eRangeSelector, val);
+    m_model.setEMin(val);
   } else if (prop == m_properties["EMax"]) {
     setRangeSelectorMax(m_properties["EMin"], m_properties["EMax"], eRangeSelector, val);
+    m_model.setEMax(val);
   }
 
   connect(m_dblManager, SIGNAL(valueChanged(QtProperty *, double)), this, SLOT(updateProperties(QtProperty *, double)));
@@ -193,18 +190,18 @@ void IndirectMoments::momentsAlgComplete(bool error) {
     return;
 
   MatrixWorkspace_sptr outputWorkspace =
-      AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(m_pythonExportWsName);
+      AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(m_model.getOutputWorkspace());
 
   if (outputWorkspace->getNumberHistograms() < 5)
     return;
 
-  setOutputPlotOptionsWorkspaces({m_pythonExportWsName});
+  setOutputPlotOptionsWorkspaces({m_model.getOutputWorkspace()});
 
   // Plot each spectrum
   m_uiForm.ppMomentsPreview->clear();
-  m_uiForm.ppMomentsPreview->addSpectrum("M0", QString::fromStdString(m_pythonExportWsName), 0, Qt::green);
-  m_uiForm.ppMomentsPreview->addSpectrum("M1", QString::fromStdString(m_pythonExportWsName), 1, Qt::black);
-  m_uiForm.ppMomentsPreview->addSpectrum("M2", QString::fromStdString(m_pythonExportWsName), 2, Qt::red);
+  m_uiForm.ppMomentsPreview->addSpectrum("M0", QString::fromStdString(m_model.getOutputWorkspace()), 0, Qt::green);
+  m_uiForm.ppMomentsPreview->addSpectrum("M1", QString::fromStdString(m_model.getOutputWorkspace()), 1, Qt::black);
+  m_uiForm.ppMomentsPreview->addSpectrum("M2", QString::fromStdString(m_model.getOutputWorkspace()), 2, Qt::red);
   m_uiForm.ppMomentsPreview->resizeX();
 
   // Enable plot and save buttons
@@ -227,8 +224,8 @@ void IndirectMoments::runClicked() { runTab(); }
  * Handles saving of workspaces
  */
 void IndirectMoments::saveClicked() {
-  if (checkADSForPlotSaveWorkspace(m_pythonExportWsName, false))
-    addSaveWorkspaceToQueue(m_pythonExportWsName);
+  if (checkADSForPlotSaveWorkspace(m_model.getOutputWorkspace(), false))
+    addSaveWorkspaceToQueue(m_model.getOutputWorkspace());
   m_batchAlgoRunner->executeBatchAsync();
 }
 

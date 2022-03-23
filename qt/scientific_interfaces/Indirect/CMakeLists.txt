@@ -67,6 +67,7 @@ set(SRC_FILES
     IndirectLoadILL.cpp
     IndirectMolDyn.cpp
     IndirectMoments.cpp
+    IndirectMomentsModel.cpp
     IndirectPlotOptionsModel.cpp
     IndirectPlotOptionsPresenter.cpp
     IndirectPlotOptionsView.cpp
@@ -147,6 +148,7 @@ set(MOC_FILES
     IndirectLoadILL.h
     IndirectMolDyn.h
     IndirectMoments.h
+    IndirectMomentsModel.h
     IndirectPlotOptionsPresenter.h
     IndirectPlotOptionsView.h
     IndirectSassena.h

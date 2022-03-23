@@ -7,6 +7,7 @@
 #pragma once
 
 #include "IndirectDataReductionTab.h"
+#include "IndirectMomentsModel.h"
 
 #include "MantidKernel/System.h"
 #include "ui_IndirectMoments.h"
@@ -51,12 +52,15 @@ protected slots:
 
 private slots:
   void handleDataReady(QString const &dataName) override;
+  void handleScaleChanged(bool scale);
+  void handleScaleValueChanged(double value);
 
 private:
   void plotNewData(QString const &filename);
   void setFileExtensionsByName(bool filter) override;
 
   Ui::IndirectMoments m_uiForm;
+  IndirectMomentsModel m_model;
 };
 } // namespace CustomInterfaces
 } // namespace MantidQt
