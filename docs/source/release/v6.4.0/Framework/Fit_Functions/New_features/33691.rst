@@ -1,0 +1,5 @@
+- New feature: Functions have been extended to allow for Function Attribute Validators. This feature further extends to the FitPropertyBrowser.
+  This allows the value of attributes to be restricted in numerous ways, using validators already available in the Mantid Kernel. Examples of validation include (but are not limited to):
+    - A numeric value being bound by a numeric min/max.
+    - A string value having to be be selected from a list of possible values.
+    - A string value being required to contain specific sub-strings.
