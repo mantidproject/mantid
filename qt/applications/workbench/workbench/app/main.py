@@ -34,6 +34,9 @@ def main():
     parser.add_argument('--error-on-warning',
                         action='store_true',
                         help='Convert python warnings to exceptions')
+    parser.add_argument('--no-error-reporter',
+                        action='store_true',
+                        help='Stop the error reporter from opening if you suffer an exception or crash.')
 
     try:
         # set up bash completion as a soft dependency
