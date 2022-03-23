@@ -1381,7 +1381,7 @@ void FitPropertyBrowser::doubleChanged(QtProperty *prop) {
 void FitPropertyBrowser::enactAttributeChange(QtProperty *prop, PropertyHandler *h) {
   try {
     h->setAttribute(prop);
-  } catch (IFunction::validationException &ve) {
+  } catch (IFunction::ValidationException &ve) {
     std::stringstream err_str;
     err_str << prop->propertyName().toStdString() << " - " << ve.what();
     g_log.warning(err_str.str());

@@ -803,11 +803,11 @@ bool PropertyHandler::setAttribute(QtProperty *prop, bool resetProperties) {
       if (this == m_browser->m_autoBackground) {
         fit();
       }
-    } catch (Mantid::API::IFunction::validationException &ve) { // catch attribute validation error
+    } catch (Mantid::API::IFunction::ValidationException &ve) { // catch attribute validation error
       initAttributes();
       initParameters();
 
-      throw Mantid::API::IFunction::validationException(
+      throw Mantid::API::IFunction::ValidationException(
           ve.what()); // rethrow validation exception so it can be recaught by Fit Property Browser.
     } catch (std::exception &e) {
       initAttributes();
