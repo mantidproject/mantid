@@ -440,21 +440,12 @@ class SliceViewerModel(SliceViewerBaseModel):
     def workspace_equals(self, ws_name):
         return self._ws_name == ws_name
 
-    # private api
-    def _get_ws(self):
-        return self._ws
-
-    def _calculate_axes_angles(self) -> Optional[np.ndarray]:
-        """
-        Calculate angles between all combination of display axes
-        """
-
-        proj_matrix = np.eye(3)  # needs to be 3x3 even if 2D ws as columns passed to recAngle
-        if self.can_support_nonorthogonal_axes():
-            expt_info = self._get_ws().getExperimentInfo(0)
-            lattice = expt_info.sample().getOrientedLattice()
-            if WorkspaceInfo.get_ws_type(self._get_ws()) == WS_TYPE.MDH:
-                ws = self._get_ws()
+    def get_proj_matrix(self):
+        ws = self._get_ws()
+        ws_type = WorkspaceInfo.get_ws_type(ws)
+        if not ws_type == WS_TYPE.MATRIX:
+            proj_matrix = np.eye(3)  # needs to be 3x3 even if 2D ws as columns passed to recAngle when calc axes angles
+            if ws_type == WS_TYPE.MDH:
                 ndims = ws.getNumDims()
                 i_qdims = [idim for idim in range(ndims) if ws.getDimension(idim).getMDFrame().isQ()]
                 irow_end = min(3, len(i_qdims))  # note for 2D the last col/row of proj_matrix is 0,0,1 - i.e. L
@@ -464,12 +455,26 @@ class SliceViewerModel(SliceViewerBaseModel):
             else:
                 # for event try to find axes from log
                 try:
-                    proj_matrix = np.array(expt_info.run().get(PROJ_MATRIX_LOG_NAME).value, dtype=float)
-                    proj_matrix = proj_matrix.reshape(3, 3)
+                    expt_info = ws.getExperimentInfo(0)
+                    proj_matrix = np.array(expt_info.run().get(PROJ_MATRIX_LOG_NAME).value, dtype=float).reshape(3, 3)
                 except (AttributeError, KeyError):  # run can be None so no .get()
                     # assume orthogonal projection if no log exists (i.e. proj_matrix is identity)
                     pass
+            return proj_matrix
+        else:
+            return None
 
+    # private api
+    def _get_ws(self):
+        return self._ws
+
+    def _calculate_axes_angles(self) -> Optional[np.ndarray]:
+        """
+        Calculate angles between all combination of display axes
+        """
+        if self.can_support_nonorthogonal_axes():
+            lattice = self._get_ws().getExperimentInfo(0).sample().getOrientedLattice()
+            proj_matrix = self.get_proj_matrix()
             # calculate angles for all combinations of axes
             angles_matrix = np.zeros((3, 3))
             for ix in range(1, 3):
