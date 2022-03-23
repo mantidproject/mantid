@@ -25,8 +25,39 @@ class CutViewerView(QWidget):
         self._painter = painter
         self._sliceinfo_provider = sliceinfo_provider
         self._setup_ui()
-        self.init_slice_table()
+        self._init_slice_table()
         self.hide()
+
+    def fill_new_table(self):
+        # write proj matrix to table
+        proj_matrix = self._sliceinfo_provider.get_proj_matrix().T  # .T so now each basis vector is a row as in table
+        dims = self._sliceinfo_provider.get_dimensions()
+        states = dims.get_states()
+        states[states.index(None)] = 2  # set last index as out of plane dimension
+        for idim in range(proj_matrix.shape[0]):
+            for icol in range(proj_matrix.shape[0]):
+                self.table.item(states[idim], icol).setData(Qt.EditRole, float(proj_matrix[idim, icol]))
+        # write bin params for cut along horizontal axis (default)
+        bin_params = np.array(dims.get_bin_params())[states]  # nbins except last element which is integration width
+        lims = self._sliceinfo_provider.get_data_limits() # (xlim, ylim, None)
+        for irow in range(self.table.rowCount()-1):
+            start, stop = lims[irow]
+            if irow == 0:
+                nbins = bin_params[irow]
+            else:
+                nbins = 1
+                step = (stop - start) / bin_params[1]
+                cen = (stop + start) / 2
+                start, stop = cen-step, cen+step
+            self.table.item(irow, 5).setData(Qt.EditRole, int(nbins))  # nbins
+            self.table.item(irow, 3).setData(Qt.EditRole, float(start))  # start
+            self.table.item(irow, 4).setData(Qt.EditRole, float(stop))  # stop
+            self.table.item(irow, 6).setData(Qt.EditRole, float((stop - start) / nbins))  # step/width
+        # update slicepoint and width
+        slicept = dims.get_slicepoint()[states[-1]]
+        self.table.item(2, 3).setData(Qt.EditRole, float(slicept - bin_params[-1]/2))  # start
+        self.table.item(2, 4).setData(Qt.EditRole, float(slicept + bin_params[-1]/2))  # stop
+        self.table.item(2, 6).setData(Qt.EditRole, float(bin_params[-1]))  # step (i.e. width)
 
     # private api
     def _setup_ui(self):
@@ -69,7 +100,7 @@ class CutViewerView(QWidget):
         self.figure_layout.addWidget(self.figure.canvas)
         self.layout.addLayout(self.figure_layout)
 
-    def init_slice_table(self):
+    def _init_slice_table(self):
         for icol in range(self.table.columnCount()):
             for irow in range(self.table.rowCount()):
                 item = QTableWidgetItem()
@@ -84,34 +115,3 @@ class CutViewerView(QWidget):
                     item.setFlags(item.flags() | Qt.ItemIsEditable)
                 self.table.setItem(irow, icol, item)
         self.fill_new_table()
-
-    def fill_new_table(self):
-        # write proj matrix to table
-        proj_matrix = self._sliceinfo_provider.get_proj_matrix().T  # .T so now each basis vector is a row as in table
-        dims = self._sliceinfo_provider.get_dimensions()
-        states = dims.get_states()
-        states[states.index(None)] = 2  # set last index as out of plane dimension
-        for idim in range(proj_matrix.shape[0]):
-            for icol in range(proj_matrix.shape[0]):
-                self.table.item(states[idim], icol).setData(Qt.EditRole, float(proj_matrix[idim, icol]))
-        # write bin params for cut along horizontal axis (default)
-        bin_params = np.array(dims.get_bin_params())[states]  # nbins except last element which is integration width
-        lims = self._sliceinfo_provider.get_axes_limits() # (xlim, ylim, None)
-        for irow in range(self.table.rowCount()-1):
-            start, stop = lims[irow]
-            if irow == 0:
-                nbins = bin_params[irow]
-            else:
-                nbins = 1
-                step = (stop - start) / bin_params[1]
-                cen = (stop + start) / 2
-                start, stop = cen-step, cen+step
-            self.table.item(irow, 5).setData(Qt.EditRole, int(nbins))  # nbins
-            self.table.item(irow, 3).setData(Qt.EditRole, float(start))  # start
-            self.table.item(irow, 4).setData(Qt.EditRole, float(stop))  # stop
-            self.table.item(irow, 6).setData(Qt.EditRole, float((stop - start) / nbins))  # step/width
-        # update slicepoint and width
-        slicept = dims.get_slicepoint()[states[-1]]
-        self.table.item(2, 3).setData(Qt.EditRole, float(slicept - bin_params[-1]/2))  # start
-        self.table.item(2, 4).setData(Qt.EditRole, float(slicept + bin_params[-1]/2))  # stop
-        self.table.item(2, 6).setData(Qt.EditRole, float(bin_params[-1]))  # step (i.e. width)

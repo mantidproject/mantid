@@ -174,12 +174,6 @@ class SliceViewer(ObservingPresenter, SliceViewerBasePresenter):
                          qflags=dimensions.qflags,
                          axes_angles=axes_angles)
 
-    def get_dimensions(self):
-        return self.view.data_view.dimensions
-
-    def get_axes_limits(self):
-        return self.view.data_view.get_axes_limits()
-
     def get_proj_matrix(self):
         return self.model.get_proj_matrix()
 
