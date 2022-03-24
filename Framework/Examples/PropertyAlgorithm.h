@@ -20,7 +20,7 @@ public:
   /// no arg constructor
   PropertyAlgorithm() : API::Algorithm() {}
   /// virtual destructor
-  ~PropertyAlgorithm() override {}
+  ~PropertyAlgorithm() override = default;
   /// Algorithm's name for identification overriding a virtual method
   const std::string name() const override { return "PropertyAlgorithm"; }
   /// Algorithm's version for identification overriding a virtual method

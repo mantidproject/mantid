@@ -97,10 +97,10 @@ template <class _UIntType, _UIntType _Xp> struct __log2 {
 template <class _Engine, class _UIntType> class __independent_bits_engine {
 public:
   // types
-  typedef _UIntType result_type;
+  using result_type = _UIntType;
 
 private:
-  typedef typename _Engine::result_type _Engine_result_type;
+  using _Engine_result_type = typename _Engine::result_type;
   typedef typename std::conditional<sizeof(_Engine_result_type) <= sizeof(result_type), result_type,
                                     _Engine_result_type>::type _Working_result_type;
 
@@ -207,14 +207,14 @@ _UIntType __independent_bits_engine<_Engine, _UIntType>::__eval(std::true_type) 
 template <class _IntType = int> class uniform_int_distribution {
 public:
   // types
-  typedef _IntType result_type;
+  using result_type = _IntType;
 
   class param_type {
     result_type __a_;
     result_type __b_;
 
   public:
-    typedef uniform_int_distribution distribution_type;
+    using distribution_type = uniform_int_distribution;
 
     explicit param_type(result_type __a = 0, result_type __b = std::numeric_limits<result_type>::max())
         : __a_(__a), __b_(__b) {}
@@ -264,12 +264,12 @@ template <class _IntType>
 template <class _URNG>
 typename uniform_int_distribution<_IntType>::result_type
 uniform_int_distribution<_IntType>::operator()(_URNG &__g, const param_type &__p) {
-  typedef typename std::conditional<sizeof(result_type) <= sizeof(uint32_t), uint32_t, uint64_t>::type _UIntType;
+  using _UIntType = typename std::conditional<sizeof(result_type) <= sizeof(uint32_t), uint32_t, uint64_t>::type;
   const _UIntType _Rp = __p.b() - __p.a() + _UIntType(1);
   if (_Rp == 1)
     return __p.a();
   const size_t _Dt = std::numeric_limits<_UIntType>::digits;
-  typedef __independent_bits_engine<_URNG, _UIntType> _Eng;
+  using _Eng = __independent_bits_engine<_URNG, _UIntType>;
   if (_Rp == 0)
     return static_cast<result_type>(_Eng(__g, _Dt)());
   size_t __w = _Dt - __clz(_Rp) - 1;

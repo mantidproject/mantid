@@ -4,7 +4,7 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from mantid.simpleapi import AppendSpectra, DeleteWorkspace, Load
+from mantid.simpleapi import AppendSpectra, DeleteWorkspace, Load, plotSpectrum
 from mantid.api import AnalysisDataService, WorkspaceGroup, AlgorithmManager
 from mantid import mtd, logger, config
 
@@ -395,7 +395,7 @@ def sum_chopped_runs(workspace_names):
     return [workspace_names[0]]
 
 
-#--------------------------------------------------------------------------------
+# --------------------------------------------------------------------------------
 
 
 def get_ipf_parameters_from_run(run_number, instrument, analyser, reflection, parameters):
@@ -444,7 +444,8 @@ def get_detectors_to_mask_from_groups(group_names):
 def get_detectors_to_mask(workspace_names):
     masked_detectors = []
     for workspace_name in workspace_names:
-        bad_detectors = [detector for detector in identify_bad_detectors(workspace_name) if detector not in masked_detectors]
+        bad_detectors = [detector for detector in identify_bad_detectors(workspace_name) if detector not in
+                         masked_detectors]
         masked_detectors.extend(bad_detectors)
 
     return sorted(masked_detectors)
@@ -924,7 +925,6 @@ def plot_reduction(workspace_name, plot_type):
     """
 
     if plot_type == 'Spectra' or plot_type == 'Both':
-        from mantidplot import plotSpectrum
         num_spectra = mtd[workspace_name].getNumberHistograms()
         try:
             plotSpectrum(workspace_name, range(0, num_spectra))
@@ -933,9 +933,8 @@ def plot_reduction(workspace_name, plot_type):
 
     can_plot_contour = mtd[workspace_name].getNumberHistograms() > 1
     if (plot_type == 'Contour' or plot_type == 'Both') and can_plot_contour:
-        from mantidplot import importMatrixWorkspace
-        plot_workspace = importMatrixWorkspace(workspace_name)
-        plot_workspace.plotGraph2D()
+        from mantidqt.plotting.functions import pcolormesh
+        pcolormesh(workspace_name)
 
 
 # -------------------------------------------------------------------------------
@@ -1067,8 +1066,8 @@ def rebin_reduction(workspace_name, rebin_string, multi_frame_rebin_string, num_
             params = []
             for i, x in enumerate(xaxis):
                 params.append(x)
-                if i < len(xaxis) -1:
-                    params.append(xaxis[i+1] - x) # delta
+                if i < len(xaxis) - 1:
+                    params.append(xaxis[i+1] - x)  # delta
             Rebin(InputWorkspace=workspace_name,
                   OutputWorkspace=workspace_name,
                   Params=params)

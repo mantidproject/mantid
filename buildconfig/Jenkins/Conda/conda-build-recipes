@@ -23,6 +23,7 @@
 #
 # Possible parameters:
 #   --clobber-yml: clobber the meta yaml files of each package build with conda-build, provide an absolute path to the uteyml file
+#   --recipes-tag: a branch or tag that should be used for cloning the recipes from conda-build-recipes
 #
 
 # Setup expected variables
@@ -58,6 +59,7 @@ SCRIPT_DIR=$WORKSPACE/buildconfig/Jenkins/Conda/
 ENABLE_BUILD_MANTID=false
 ENABLE_BUILD_QT=false
 ENABLE_BUILD_WORKBENCH=false
+RECIPES_TAG=main
 
 # Handle flag inputs
 while [ ! $# -eq 0 ]
@@ -68,6 +70,9 @@ do
         --build-workbench) ENABLE_BUILD_WORKBENCH=true ;;
         --clobber-yml)
             CLOBBER_FILE="--clobber-file $2"
+            shift ;;
+        --recipes-tag)
+            RECIPES_TAG="$2"
             shift ;;
         *)
             echo "Argument not accepted: $1"
@@ -105,7 +110,7 @@ cd $WORKSPACE
 if [[ -d conda-recipes ]]; then
     rm -rf conda-recipes
 fi
-git clone https://github.com/mantidproject/conda-recipes.git --depth=1
+git clone https://github.com/mantidproject/conda-recipes.git --depth=1 -b $RECIPES_TAG
 
 # Run conda build on framework
 cd $RECIPES_DIR/recipes/

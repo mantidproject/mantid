@@ -15,7 +15,7 @@
 
 namespace Mantid::DataObjects {
 /// Constructor
-CoordTransformAffineParser::CoordTransformAffineParser() {}
+CoordTransformAffineParser::CoordTransformAffineParser() = default;
 
 //-----------------------------------------------------------------------------------------------
 /**

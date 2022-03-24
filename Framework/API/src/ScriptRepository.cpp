@@ -9,20 +9,19 @@
 namespace Mantid::API {
 
 ScriptRepoException::ScriptRepoException(const std::string &info, const std::string &system, const std::string &file,
-                                         int line) {
-  _system_error = system;
-  _user_info = info;
+                                         int line)
+    : m_systemError(system), m_userInfo(info) {
 
   if (file.empty()) {
-    _file_path = "Not provided";
+    m_filepath = "Not provided";
   } else {
-    _file_path = file;
+    m_filepath = file;
     if (line > 0) {
-      _file_path.append(": ").append(std::to_string(line));
+      m_filepath.append(": ").append(std::to_string(line));
     }
   }
 }
 
-const char *ScriptRepoException::what() const noexcept { return _user_info.c_str(); }
+const char *ScriptRepoException::what() const noexcept { return m_userInfo.c_str(); }
 
 } // namespace Mantid::API

@@ -110,7 +110,7 @@ class UnitTest : public CxxTest::TestSuite {
       addConversion("a", 1.1);
       addConversion("b", 2.2, 0.5);
     }
-    ~UnitTester() override {}
+    ~UnitTester() override = default;
 
     // Empty overrides of virtual methods
     const std::string unitID() const override { return "aUnit"; }

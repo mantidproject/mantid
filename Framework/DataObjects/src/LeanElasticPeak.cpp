@@ -72,8 +72,7 @@ LeanElasticPeak::LeanElasticPeak(const Mantid::Kernel::V3D &QSampleFrame, double
  * @brief Copy constructor
  * @param other : Source
  */
-LeanElasticPeak::LeanElasticPeak(const LeanElasticPeak &other)
-    : BasePeak(other), m_Qsample(other.m_Qsample), m_wavelength(other.m_wavelength), m_refFrame(other.m_refFrame) {}
+LeanElasticPeak::LeanElasticPeak(const LeanElasticPeak &other) = default;
 
 //----------------------------------------------------------------------------------------------
 /** Constructor making a LeanElasticPeak from IPeak interface
@@ -132,7 +131,7 @@ double LeanElasticPeak::getScattering() const { return asin(getWavelength() / (2
 double LeanElasticPeak::getAzimuthal() const {
   const V3D qLab = getQLabFrame();
   std::shared_ptr<const ReferenceFrame> refFrame = getReferenceFrame();
-  const double qSign = (convention != "Crystallography") ? 1.0 : -1.0;
+  const double qSign = (m_convention != "Crystallography") ? 1.0 : -1.0;
   const V3D detectorDir = -qLab * qSign;
   if (refFrame)
     return atan2(detectorDir[refFrame->pointingUp()], detectorDir[refFrame->pointingHorizontal()]);

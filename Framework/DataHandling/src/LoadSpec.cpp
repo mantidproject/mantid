@@ -27,7 +27,7 @@ using namespace Kernel;
 using namespace API;
 
 /// Empty constructor
-LoadSpec::LoadSpec() {}
+LoadSpec::LoadSpec() = default;
 
 /// Initialisation method.
 void LoadSpec::init() {

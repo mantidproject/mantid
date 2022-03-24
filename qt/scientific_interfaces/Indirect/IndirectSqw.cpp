@@ -81,7 +81,7 @@ IndirectSqw::IndirectSqw(IndirectDataReduction *idrUI, QWidget *parent) : Indire
   m_uiForm.dsSampleInput->isForRunFiles(false);
 }
 
-IndirectSqw::~IndirectSqw() {}
+IndirectSqw::~IndirectSqw() = default;
 
 void IndirectSqw::setup() {}
 

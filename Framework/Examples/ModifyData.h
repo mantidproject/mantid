@@ -20,7 +20,7 @@ public:
   /// no arg constructor
   ModifyData() : API::Algorithm() {}
   /// virtual destructor
-  ~ModifyData() override {}
+  ~ModifyData() override = default;
   /// Algorithm's name for identification overriding a virtual method
   const std::string name() const override { return "ModifyData"; }
   /// Algorithm's version for identification overriding a virtual method

@@ -20,7 +20,7 @@ using namespace Geometry;
 using namespace API;
 
 /// Empty default constructor
-RotateInstrumentComponent::RotateInstrumentComponent() {}
+RotateInstrumentComponent::RotateInstrumentComponent() = default;
 
 /// Initialisation method.
 void RotateInstrumentComponent::init() {

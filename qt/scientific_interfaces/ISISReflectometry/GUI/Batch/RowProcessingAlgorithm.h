@@ -16,19 +16,16 @@
 #include <string>
 #include <vector>
 
-namespace MantidQt {
-namespace CustomInterfaces {
-namespace ISISReflectometry {
-class Batch;
+namespace MantidQt::CustomInterfaces::ISISReflectometry {
+class IBatch;
 class Row;
 
-MANTIDQT_ISISREFLECTOMETRY_DLL MantidQt::API::IConfiguredAlgorithm_sptr createConfiguredAlgorithm(Batch const &model,
-                                                                                                  Row &row);
+} // namespace MantidQt::CustomInterfaces::ISISReflectometry
 
+namespace MantidQt::CustomInterfaces::ISISReflectometry::RowProcessing {
+
+MANTIDQT_ISISREFLECTOMETRY_DLL MantidQt::API::IConfiguredAlgorithm_sptr createConfiguredAlgorithm(IBatch const &model,
+                                                                                                  Row &row);
 MANTIDQT_ISISREFLECTOMETRY_DLL std::unique_ptr<MantidQt::API::IAlgorithmRuntimeProps>
-createAlgorithmRuntimeProps(Batch const &model, Row const &row);
-MANTIDQT_ISISREFLECTOMETRY_DLL std::unique_ptr<MantidQt::API::IAlgorithmRuntimeProps>
-createAlgorithmRuntimeProps(Batch const &model);
-} // namespace ISISReflectometry
-} // namespace CustomInterfaces
-} // namespace MantidQt
+createAlgorithmRuntimeProps(IBatch const &model, boost::optional<Row const &> row = boost::none);
+} // namespace MantidQt::CustomInterfaces::ISISReflectometry::RowProcessing

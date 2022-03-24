@@ -32,8 +32,8 @@ def plot(plot_type: SpectraSelection, plot_index: int, axis_name: str, log_name:
 
             ax.set_title("Surface" + title)
             ax.set_ylabel(axis_name)
-
-            fig.canvas.set_window_title("Surface" + title)
+            if fig.canvas.manager is not None:
+                fig.canvas.manager.set_window_title("Surface" + title)
             fig.show()
         elif plot_type == SpectraSelection.Contour:
             fig = plot_contour([matrix_ws])
@@ -42,7 +42,8 @@ def plot(plot_type: SpectraSelection, plot_index: int, axis_name: str, log_name:
             ax.set_ylabel(axis_name)
             ax.set_title("Contour" + title)
 
-            fig.canvas.set_window_title("Contour" + title)
+            if fig.canvas.manager is not None:
+                fig.canvas.manager.set_window_title("Contour" + title)
 
 
 def _create_workspace_for_group_plot(plot_type: SpectraSelection, workspaces: List[Workspace], plot_index: int,

@@ -59,7 +59,7 @@ public:
       : GenericDataProcessorPresenter(whitelist, processor, group) {}
 
   // Destructor
-  ~GenericDataProcessorPresenterFriend() override {}
+  ~GenericDataProcessorPresenterFriend() override = default;
 };
 
 // Use this mocked presenter for tests that will start the reducing row/group
@@ -83,7 +83,7 @@ public:
       : GenericDataProcessorPresenter(whitelist, processor, postprocessor, group) {}
 
   // Destructor
-  ~GenericDataProcessorPresenterNoThread() override {}
+  ~GenericDataProcessorPresenterNoThread() override = default;
 
 private:
   // non-async row reduce

@@ -295,7 +295,7 @@ QtGroupPropertyManager::QtGroupPropertyManager(QObject *parent) : QtAbstractProp
 /**
     Destroys this manager, and all the properties it has created.
 */
-QtGroupPropertyManager::~QtGroupPropertyManager() {}
+QtGroupPropertyManager::~QtGroupPropertyManager() = default;
 
 /**
     \reimp
@@ -1816,7 +1816,7 @@ void QtCharPropertyManager::uninitializeProperty(QtProperty *property) { d_ptr->
 
 // QtLocalePropertyManager
 
-QtLocalePropertyManagerPrivate::QtLocalePropertyManagerPrivate() {}
+QtLocalePropertyManagerPrivate::QtLocalePropertyManagerPrivate() = default;
 
 void QtLocalePropertyManagerPrivate::slotEnumChanged(QtProperty *property, int value) {
   if (QtProperty *prop = m_languageToProperty.value(property, 0)) {
@@ -4404,7 +4404,7 @@ void QtFlagPropertyManager::uninitializeProperty(QtProperty *property) {
 
 // QtSizePolicyPropertyManager
 
-QtSizePolicyPropertyManagerPrivate::QtSizePolicyPropertyManagerPrivate() {}
+QtSizePolicyPropertyManagerPrivate::QtSizePolicyPropertyManagerPrivate() = default;
 
 void QtSizePolicyPropertyManagerPrivate::slotIntChanged(QtProperty *property, int value) {
   if (QtProperty *prop = m_hStretchToProperty.value(property, 0)) {

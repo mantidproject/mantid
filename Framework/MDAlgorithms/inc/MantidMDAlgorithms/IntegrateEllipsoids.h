@@ -10,6 +10,7 @@
 
 namespace Mantid::MDAlgorithms {
 
+
 // Detect and pass to the correct version
 class DLLExport IntegrateEllipsoids final : public API::DataProcessorAlgorithm {
 public:

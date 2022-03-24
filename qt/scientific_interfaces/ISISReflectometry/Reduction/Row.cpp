@@ -6,6 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "Row.h"
 #include "Common/Map.h"
+#include "IGroup.h"
 #include <boost/algorithm/string.hpp>
 #include <boost/variant.hpp>
 
@@ -19,7 +20,8 @@ Row::Row(std::vector<std::string> runNumbers, double theta,
          ReductionWorkspaces reducedWorkspaceNames)
     : Item(), m_runNumbers(std::move(runNumbers)), m_theta(theta), m_qRange(std::move(qRange)), m_qRangeOutput(),
       m_scaleFactor(std::move(scaleFactor)), m_transmissionRuns(std::move(transmissionRuns)),
-      m_reducedWorkspaceNames(std::move(reducedWorkspaceNames)), m_reductionOptions(std::move(reductionOptions)) {
+      m_reducedWorkspaceNames(std::move(reducedWorkspaceNames)), m_reductionOptions(std::move(reductionOptions)),
+      m_parent(nullptr) {
   std::sort(m_runNumbers.begin(), m_runNumbers.end());
 }
 
@@ -65,6 +67,16 @@ void Row::renameOutputWorkspace(std::string const &oldName, std::string const &n
   m_reducedWorkspaceNames.renameOutput(oldName, newName);
 }
 
+void Row::setParent(IGroup *parent) const { m_parent = parent; }
+
+IGroup *Row::getParent() const { return m_parent; }
+
+void Row::updateParent() {
+  if (m_parent) {
+    m_parent->notifyChildStateChanged();
+  }
+}
+
 Row Row::withExtraRunNumbers(std::vector<std::string> const &extraRunNumbers) const {
   // If both lists of run numbers are the same then there's nothing to merge
   if (extraRunNumbers == m_runNumbers)
@@ -85,6 +97,31 @@ int Row::completedItems() const {
     return 1;
 
   return 0;
+}
+
+void Row::resetState(bool resetChildren) {
+  Item::resetState(resetChildren);
+  updateParent();
+}
+
+void Row::setStarting() {
+  Item::setStarting();
+  updateParent();
+}
+
+void Row::setRunning() {
+  Item::setRunning();
+  updateParent();
+}
+
+void Row::setSuccess() {
+  Item::setSuccess();
+  updateParent();
+}
+
+void Row::setError(std::string const &msg) {
+  Item::setError(msg);
+  updateParent();
 }
 
 bool operator!=(Row const &lhs, Row const &rhs) { return !(lhs == rhs); }

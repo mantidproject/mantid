@@ -75,7 +75,7 @@ DataSelector::DataSelector(QWidget *parent)
   m_uiForm.rfFileInput->setAcceptDrops(false);
 }
 
-DataSelector::~DataSelector() {}
+DataSelector::~DataSelector() = default;
 
 /**
  * Return whether empty input is allowed

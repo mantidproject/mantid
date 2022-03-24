@@ -168,8 +168,18 @@ void CrystalFieldMultiSpectrum::setAttribute(const std::string &name, const Attr
     FunctionGenerator::setAttribute("FWHMs", newVal);
     for (size_t iSpec = 0; iSpec < nSpec; ++iSpec) {
       const auto suffix = std::to_string(iSpec);
-      declareAttribute("FWHMX" + suffix, Attribute(m_fwhmX[iSpec]));
-      declareAttribute("FWHMY" + suffix, Attribute(m_fwhmY[iSpec]));
+      // try to declare attribute, if already exists, set attribute.
+      try {
+        declareAttribute("FWHMX" + suffix, Attribute(m_fwhmX[iSpec]));
+      } catch (const std::invalid_argument &) {
+        setAttribute("FWHMX" + suffix, Attribute(m_fwhmX[iSpec]));
+      }
+
+      try {
+        declareAttribute("FWHMY" + suffix, Attribute(m_fwhmY[iSpec]));
+      } catch (const std::invalid_argument &) {
+        setAttribute("FWHMY" + suffix, Attribute(m_fwhmY[iSpec]));
+      }
     }
   } else if (name == "PhysicalProperties") {
     const auto physpropId = attr.asVector();

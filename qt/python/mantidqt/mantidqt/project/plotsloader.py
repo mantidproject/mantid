@@ -115,7 +115,8 @@ class PlotsLoader(object):
 
         # Update the fig
         fig._label = plot_dict["label"]
-        fig.canvas.set_window_title(plot_dict["label"])
+        if fig.canvas.manager is not None:
+            fig.canvas.manager.set_window_title(plot_dict["label"])
         self.restore_figure_data(fig=fig, dic=plot_dict)
 
         # If the function should create plot then create else return

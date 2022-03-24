@@ -44,7 +44,7 @@ public:
   /// constructor
   CatalogSearch() : API::Algorithm() {}
   /// destructor
-  ~CatalogSearch() override {}
+  ~CatalogSearch() override = default;
   /// Algorithm's name for identification overriding a virtual method
   const std::string name() const override { return "CatalogSearch"; }
   /// Summary of algorithms purpose

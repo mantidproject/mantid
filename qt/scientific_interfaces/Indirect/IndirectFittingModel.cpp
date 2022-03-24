@@ -525,8 +525,8 @@ IAlgorithm_sptr IndirectFittingModel::createSequentialFit(const IFunction_sptr f
   std::stringstream endX;
   for (size_t i = 0; i < m_fitDataModel->getNumberOfDomains(); i++) {
     const auto range = m_fitDataModel->getFittingRange(FitDomainIndex(i));
-    startX << range.first << ",";
-    endX << range.second << ",";
+    startX << std::setprecision(6) << std::floor(range.first * 1E6) / 1E6 << ",";
+    endX << std::setprecision(6) << std::ceil(range.second * 1E6) / 1E6 << ",";
   }
   fitAlgorithm->setProperty("StartX", startX.str());
   fitAlgorithm->setProperty("EndX", endX.str());

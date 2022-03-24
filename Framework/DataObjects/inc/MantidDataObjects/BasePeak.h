@@ -116,7 +116,7 @@ protected:
   double calculateWavelengthFromQLab(const Mantid::Kernel::V3D &qLab);
 
   // ki-kf for Inelastic convention; kf-ki for Crystallography convention
-  std::string convention;
+  std::string m_convention;
 
   /// Cached sample position
   Mantid::Kernel::V3D m_samplePos;

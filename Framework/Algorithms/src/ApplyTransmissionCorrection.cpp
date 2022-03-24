@@ -37,12 +37,9 @@ const std::string TRANSMISSION_ERROR("TransmissionError");
 } // namespace
 
 void ApplyTransmissionCorrection::init() {
-  auto wsValidator = std::make_shared<CompositeValidator>();
-  wsValidator->add<WorkspaceUnitValidator>("Wavelength");
-  wsValidator->add<HistogramValidator>();
-  declareProperty(std::make_unique<WorkspaceProperty<>>(PropertyNames::INPUT_WKSP, "", Direction::Input, wsValidator),
+  declareProperty(std::make_unique<WorkspaceProperty<>>(PropertyNames::INPUT_WKSP, "", Direction::Input),
                   "Workspace to apply the transmission correction to");
-  declareProperty(std::make_unique<WorkspaceProperty<>>(PropertyNames::TRANSMISSION_WKSP, "", Direction::Output,
+  declareProperty(std::make_unique<WorkspaceProperty<>>(PropertyNames::TRANSMISSION_WKSP, "", Direction::Input,
                                                         PropertyMode::Optional),
                   "Workspace containing the transmission values [optional]");
   declareProperty(std::make_unique<WorkspaceProperty<>>(PropertyNames::OUTPUT_WKSP, "", Direction::Output),

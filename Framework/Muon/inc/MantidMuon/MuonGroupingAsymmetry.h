@@ -19,7 +19,7 @@ namespace Muon {
 class MANTID_MUON_DLL MuonGroupingAsymmetry final : public API::Algorithm {
 public:
   MuonGroupingAsymmetry() : API::Algorithm() {}
-  ~MuonGroupingAsymmetry() {}
+  virtual ~MuonGroupingAsymmetry() = default;
 
   const std::string name() const override { return "MuonGroupingAsymmetry"; }
   int version() const override { return (1); }

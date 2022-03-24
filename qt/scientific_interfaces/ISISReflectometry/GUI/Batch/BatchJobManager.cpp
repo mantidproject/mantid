@@ -162,15 +162,21 @@ bool BatchJobManager::hasSelectedRowsRequiringProcessing(Group const &group) {
 std::deque<IConfiguredAlgorithm_sptr> BatchJobManager::getAlgorithms() {
   auto &groups = m_batch.mutableRunsTable().mutableReductionJobs().mutableGroups();
   for (auto &group : groups) {
-    // If the group is selected, process all of its rows
-    if (isSelected(group) && group.requiresProcessing(m_reprocessFailed))
-      return algorithmsForProcessingRowsInGroup(group, true);
-    // If the group has rows that are selected, process the selected rows
-    if (hasSelectedRowsRequiringProcessing(group))
-      return algorithmsForProcessingRowsInGroup(group, false);
-    // If the group's requires postprocessing, do it
-    if (isSelected(group) && group.requiresPostprocessing(m_reprocessFailed))
-      return algorithmForPostprocessingGroup(group);
+    auto algorithms = std::deque<IConfiguredAlgorithm_sptr>{};
+    if (isSelected(group) && group.requiresProcessing(m_reprocessFailed)) {
+      // If the group is selected, process all of its rows
+      algorithms = algorithmsForProcessingRowsInGroup(group, true);
+    } else if (hasSelectedRowsRequiringProcessing(group)) {
+      // If the group has rows that are selected, process the selected rows
+      algorithms = algorithmsForProcessingRowsInGroup(group, false);
+    } else if (isSelected(group) && group.requiresPostprocessing(m_reprocessFailed)) {
+      // If the group's requires postprocessing, do it
+      algorithms = algorithmForPostprocessingGroup(group);
+    }
+    // If we have valid algorithms, return now; otherwise continue to the next group
+    if (algorithms.size() > 0) {
+      return algorithms;
+    }
   }
   return std::deque<IConfiguredAlgorithm_sptr>();
 }
@@ -180,7 +186,7 @@ std::deque<IConfiguredAlgorithm_sptr> BatchJobManager::getAlgorithms() {
  * @returns : the list of configured algorithms
  */
 std::deque<IConfiguredAlgorithm_sptr> BatchJobManager::algorithmForPostprocessingGroup(Group &group) {
-  auto algorithm = createConfiguredAlgorithm(m_batch, group);
+  auto algorithm = GroupProcessing::createConfiguredAlgorithm(m_batch, group);
   auto algorithms = std::deque<IConfiguredAlgorithm_sptr>();
   algorithms.emplace_back(std::move(algorithm));
   return algorithms;
@@ -210,12 +216,21 @@ std::deque<IConfiguredAlgorithm_sptr> BatchJobManager::algorithmsForProcessingRo
  * @returns : true if algorithms were added, false if there was nothing to do
  */
 void BatchJobManager::addAlgorithmForProcessingRow(Row &row, std::deque<IConfiguredAlgorithm_sptr> &algorithms) {
-  auto algorithm = createConfiguredAlgorithm(m_batch, row);
+  IConfiguredAlgorithm_sptr algorithm;
+  try {
+    algorithm = m_algFactory->makeReductionAlgorithm(row);
+  } catch (MultipleRowsFoundException const &) {
+    row.setError("The title and angle specified matches multiple rows in the Experiment Settings tab");
+    // Mark the item as skipped so we don't reprocess it in the current round of
+    // reductions.
+    row.setSkipped(true);
+    return;
+  }
   algorithms.emplace_back(std::move(algorithm));
 }
 
 std::unique_ptr<MantidQt::API::IAlgorithmRuntimeProps> BatchJobManager::rowProcessingProperties() const {
-  return createAlgorithmRuntimeProps(m_batch);
+  return RowProcessing::createAlgorithmRuntimeProps(m_batch);
 }
 
 void BatchJobManager::algorithmStarted(IConfiguredAlgorithm_sptr algorithm) {
@@ -245,10 +260,11 @@ void BatchJobManager::algorithmError(IConfiguredAlgorithm_sptr algorithm, std::s
 
 boost::optional<Item &> BatchJobManager::getRunsTableItem(IConfiguredAlgorithm_sptr const &algorithm) {
   auto jobAlgorithm = std::dynamic_pointer_cast<IBatchJobAlgorithm>(algorithm);
-  if (!jobAlgorithm->item() || jobAlgorithm->item()->isPreview()) {
+  auto *item = jobAlgorithm->item();
+  if (!item || item->isPreview()) {
     return boost::none;
   }
-  return *jobAlgorithm->item();
+  return *item;
 }
 
 std::vector<std::string> BatchJobManager::algorithmOutputWorkspacesToSave(IConfiguredAlgorithm_sptr algorithm) const {
@@ -272,8 +288,8 @@ std::vector<std::string> BatchJobManager::getWorkspacesToSave(Row const &row) co
   // workspaces for the row if the group does not have postprocessing, because
   // in that case users just want to see the postprocessed output instead.
   auto workspaces = std::vector<std::string>();
-  auto const group = m_batch.runsTable().reductionJobs().getParentGroup(row);
-  if (group.hasPostprocessing())
+  auto *const group = row.getParent();
+  if (group && group->hasPostprocessing())
     return workspaces;
 
   // We currently only save the binned workspace in Q
@@ -282,7 +298,7 @@ std::vector<std::string> BatchJobManager::getWorkspacesToSave(Row const &row) co
 }
 
 size_t BatchJobManager::getNumberOfInitialisedRowsInGroup(const int groupIndex) const {
-  auto group = m_batch.runsTable().reductionJobs().groups()[groupIndex];
+  auto const &group = m_batch.runsTable().reductionJobs().groups()[groupIndex];
   return static_cast<int>(std::count_if(group.rows().cbegin(), group.rows().cend(),
                                         [](const boost::optional<Row> &row) { return row.is_initialized(); }));
 }

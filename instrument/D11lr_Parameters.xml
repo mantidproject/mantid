@@ -8,12 +8,16 @@
       </parameter>
       <!-- Logs to sum when merging the runs -->
       <parameter name="sample_logs_sum" type="string" visible="false">
-        <value val="timer" />
+        <value val="duration" />
       </parameter>
       <!-- GroupingPattern for DeadTimeCorrection, groups the entire detector-->
       <parameter name="grouping" type="string" visible="false">
         <value val="0-16383"/>
       </parameter>
+      <!-- Logs to list when conjoining the runs -->
+      <parameter name="conjoin_sample_logs_list" type="string" visible="false">
+  			<value val="sample.thickness, sample_description, run_number" />
+  		</parameter>
       <!-- The pixel sizes [mm] used by SolidAngle, resolution and default Q binning calculations.
       Note that for the panels, often pixels have transposed shape, but the surface is the same.
       Q binning is based on the maximum of the 2 dimensions, so it is also invariant.-->

@@ -437,7 +437,7 @@ class PlottingCanvasView(QtWidgets.QWidget, PlottingCanvasViewInterface):
 
     def _get_plot_kwargs(self, workspace_info: WorkspacePlotInformation):
         label = workspace_info.label
-        plot_kwargs = {'distribution': True, 'autoscale_on_update': False, 'label': label}
+        plot_kwargs = {'distribution': True, 'label': label}
         plot_kwargs["marker"] = self._settings.get_marker(workspace_info.workspace_name)
         plot_kwargs["linestyle"] = self._settings.get_linestyle(workspace_info.workspace_name)
         if isinstance(workspace_info.index, int):

@@ -26,7 +26,7 @@ public:
   /// Constructor
   CatalogLogout() : API::Algorithm() {}
   /// Destructor
-  ~CatalogLogout() override {}
+  ~CatalogLogout() override = default;
   /// Algorithm's name for identification overriding a virtual method
   const std::string name() const override { return "CatalogLogout"; }
   /// Summary of algorithms purpose.

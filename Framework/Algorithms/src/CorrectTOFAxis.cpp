@@ -186,7 +186,7 @@ void CorrectTOFAxis::init() {
                       PropertyNames::ELASTIC_BIN_INDEX + " (default: '" + IndexTypes::DETECTOR_ID + "').");
   declareProperty(std::make_unique<Kernel::ArrayProperty<int>>(PropertyNames::REFERENCE_SPECTRA.c_str()),
                   "A list of reference spectra.");
-  declareProperty(PropertyNames::ELASTIC_BIN_INDEX, EMPTY_INT(), mustBePositiveInt,
+  declareProperty(PropertyNames::ELASTIC_BIN_INDEX, EMPTY_DBL(), mustBePositiveDouble,
                   "Bin index of the nominal elastic TOF channel.", Direction::Input);
   declareProperty(PropertyNames::FIXED_ENERGY, EMPTY_DBL(), mustBePositiveDouble,
                   "Incident energy if the 'EI' sample log is not present/incorrect.", Direction::Input);
@@ -226,10 +226,11 @@ std::map<std::string, std::string> CorrectTOFAxis::validateInputs() {
   }
   // If no reference workspace, we either use a predefined elastic channel
   // or EPP tables to declare the elastic TOF.
-  const int elasticBinIndex = getProperty(PropertyNames::ELASTIC_BIN_INDEX);
+  const double elasticBinFullIndex = getProperty(PropertyNames::ELASTIC_BIN_INDEX);
+  const int elasticBinIndex = static_cast<const int>(elasticBinFullIndex);
   const std::vector<int> spectra = getProperty(PropertyNames::REFERENCE_SPECTRA);
   const double l2 = getProperty(PropertyNames::L2);
-  if (elasticBinIndex != EMPTY_INT()) {
+  if (elasticBinFullIndex != EMPTY_DBL()) {
     const std::string indexType = getProperty(PropertyNames::INDEX_TYPE);
     m_elasticBinIndex = toWorkspaceIndex(elasticBinIndex, indexType, m_inputWs);
     if (spectra.empty() && l2 == EMPTY_DBL()) {
@@ -338,16 +339,21 @@ void CorrectTOFAxis::useReferenceWorkspace(const API::MatrixWorkspace_sptr &outp
 void CorrectTOFAxis::correctManually(const API::MatrixWorkspace_sptr &outputWs) {
   const auto &spectrumInfo = m_inputWs->spectrumInfo();
   const double l1 = spectrumInfo.l1();
-  double l2 = 0;
-  double epp = 0;
-  g_log.information() << "EPP: " << epp << ".\n";
+  auto l2 = 0.0;
+  auto epp = 0.0;
+  auto const fractionalBinIndex = static_cast<double>(getProperty(PropertyNames::ELASTIC_BIN_INDEX));
+  auto const elasticBinIndexOffset = fractionalBinIndex - floor(fractionalBinIndex);
+  auto eppOffset = 0.0;
   if (m_eppTable) {
     averageL2AndEPP(spectrumInfo, l2, epp);
   } else {
     epp = m_inputWs->points(0)[m_elasticBinIndex];
+    eppOffset =
+        elasticBinIndexOffset * (m_inputWs->points(0)[m_elasticBinIndex + 1] - m_inputWs->points(0)[m_elasticBinIndex]);
     const double l2Property = getProperty(PropertyNames::L2);
     l2 = l2Property == EMPTY_DBL() ? averageL2(spectrumInfo) : l2Property;
   }
+  g_log.information() << "EPP: " << epp << ".\n";
   double Ei = getProperty(PropertyNames::FIXED_ENERGY);
   if (Ei == EMPTY_DBL()) {
     Ei = m_inputWs->run().getPropertyAsSingleValue(SampleLog::INCIDENT_ENERGY);
@@ -361,7 +367,7 @@ void CorrectTOFAxis::correctManually(const API::MatrixWorkspace_sptr &outputWs) 
   // In microseconds.
   const double TOF = (l1 + l2) / std::sqrt(2 * Ei * PhysicalConstants::meV / PhysicalConstants::NeutronMass) * 1e6;
   g_log.information() << "Calculated TOF for L1+L2 distance of " << l1 + l2 << "m: " << TOF << '\n';
-  const double shift = TOF - epp;
+  const double shift = TOF - epp - eppOffset;
   g_log.debug() << "TOF shift: " << shift << '\n';
   const auto histogramCount = static_cast<int64_t>(m_inputWs->getNumberHistograms());
   PARALLEL_FOR_IF(threadSafe(*m_inputWs, *outputWs))

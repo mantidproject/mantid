@@ -141,7 +141,7 @@ class MatchPeaks(PythonAlgorithm):
                     issues['InputWorkspace3'] = 'Incompatible x-values'
 
         if input2:
-            if mtd[input1].isDistribution() and not mtd[inout2].isDistribution():
+            if mtd[input1].isDistribution() and not mtd[input2].isDistribution():
                 issues['InputWorkspace2'] = 'InputWorkspace2 and InputWorkspace3 must be either point data or ' \
                                             'histogram data'
             elif mtd[input1].blocksize() != mtd[input2].blocksize():

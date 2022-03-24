@@ -8,14 +8,14 @@
 
 namespace MantidQt::CustomInterfaces::ISISReflectometry {
 
-LookupRow::LookupRow(boost::optional<double> theta,
-
+LookupRow::LookupRow(boost::optional<double> theta, boost::optional<boost::regex> titleMatcher,
                      TransmissionRunPair transmissionRuns,
                      boost::optional<ProcessingInstructions> transmissionProcessingInstructions, RangeInQ qRange,
                      boost::optional<double> scaleFactor,
                      boost::optional<ProcessingInstructions> processingInstructions,
                      boost::optional<ProcessingInstructions> backgroundProcessingInstructions)
-    : m_theta(std::move(theta)), m_transmissionRuns(std::move(transmissionRuns)), m_qRange(std::move(qRange)),
+    : m_theta(std::move(theta)), m_titleMatcher(std::move(titleMatcher)),
+      m_transmissionRuns(std::move(transmissionRuns)), m_qRange(std::move(qRange)),
       m_scaleFactor(std::move(scaleFactor)),
       m_transmissionProcessingInstructions(std::move(transmissionProcessingInstructions)),
       m_processingInstructions(std::move(processingInstructions)),
@@ -23,9 +23,11 @@ LookupRow::LookupRow(boost::optional<double> theta,
 
 TransmissionRunPair const &LookupRow::transmissionWorkspaceNames() const { return m_transmissionRuns; }
 
-bool LookupRow::isWildcard() const { return !m_theta.is_initialized(); }
+bool LookupRow::isWildcard() const { return !m_theta.is_initialized() && !m_titleMatcher.is_initialized(); }
 
 boost::optional<double> LookupRow::thetaOrWildcard() const { return m_theta; }
+
+boost::optional<boost::regex> LookupRow::titleMatcher() const { return m_titleMatcher; }
 
 RangeInQ const &LookupRow::qRange() const { return m_qRange; }
 
@@ -42,11 +44,12 @@ boost::optional<ProcessingInstructions> LookupRow::backgroundProcessingInstructi
 }
 
 bool operator==(LookupRow const &lhs, LookupRow const &rhs) {
-  return lhs.thetaOrWildcard() == rhs.thetaOrWildcard() && lhs.qRange() == rhs.qRange() &&
-         lhs.scaleFactor() == rhs.scaleFactor() &&
-         lhs.transmissionProcessingInstructions() == rhs.transmissionProcessingInstructions() &&
-         lhs.processingInstructions() == rhs.processingInstructions() &&
-         lhs.backgroundProcessingInstructions() == rhs.backgroundProcessingInstructions();
+  return (lhs.m_theta == rhs.m_theta && lhs.m_titleMatcher == rhs.m_titleMatcher &&
+          lhs.m_transmissionRuns == rhs.m_transmissionRuns && lhs.m_qRange == rhs.m_qRange &&
+          lhs.m_scaleFactor == rhs.m_scaleFactor &&
+          lhs.m_transmissionProcessingInstructions == rhs.m_transmissionProcessingInstructions &&
+          lhs.m_processingInstructions == rhs.m_processingInstructions &&
+          lhs.m_backgroundProcessingInstructions == rhs.m_backgroundProcessingInstructions);
 }
 
 bool operator!=(LookupRow const &lhs, LookupRow const &rhs) { return !(lhs == rhs); }
@@ -55,6 +58,8 @@ LookupRow::ValueArray lookupRowToArray(LookupRow const &lookupRow) {
   auto result = LookupRow::ValueArray();
   if (lookupRow.thetaOrWildcard())
     result[LookupRow::Column::THETA] = std::to_string(*lookupRow.thetaOrWildcard());
+  if (lookupRow.titleMatcher())
+    result[LookupRow::Column::TITLE] = lookupRow.titleMatcher()->expression();
   result[LookupRow::Column::FIRST_TRANS] = lookupRow.transmissionWorkspaceNames().firstRunList();
   result[LookupRow::Column::SECOND_TRANS] = lookupRow.transmissionWorkspaceNames().secondRunList();
   if (lookupRow.transmissionProcessingInstructions())

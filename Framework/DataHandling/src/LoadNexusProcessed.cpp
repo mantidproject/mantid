@@ -181,7 +181,7 @@ LoadNexusProcessed::LoadNexusProcessed()
 
 /// Destructor defined here so that NeXus::File can be forward declared
 /// in header
-LoadNexusProcessed::~LoadNexusProcessed() {}
+LoadNexusProcessed::~LoadNexusProcessed() = default;
 
 /**
  * Return the confidence with with this algorithm can load the file

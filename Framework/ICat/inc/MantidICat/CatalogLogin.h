@@ -30,7 +30,7 @@ public:
   /// constructor
   CatalogLogin() : API::Algorithm() {}
   /// Destructor
-  ~CatalogLogin() override {}
+  ~CatalogLogin() override = default;
   /// Algorithm's name for identification overriding a virtual method
   const std::string name() const override { return "CatalogLogin"; }
   /// Summary of algorithms purpose.

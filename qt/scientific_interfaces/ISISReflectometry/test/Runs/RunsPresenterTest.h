@@ -636,6 +636,34 @@ public:
     verifyAndClear();
   }
 
+  void testRowStateChangedOnReductionResumed() {
+    auto presenter = makePresenter();
+    EXPECT_CALL(*m_runsTablePresenter, notifyRowStateChanged()).Times(1);
+    presenter.notifyReductionResumed();
+    verifyAndClear();
+  }
+
+  void testRowStateChangedOnReductionPaused() {
+    auto presenter = makePresenter();
+    EXPECT_CALL(*m_runsTablePresenter, notifyRowStateChanged()).Times(1);
+    presenter.notifyReductionPaused();
+    verifyAndClear();
+  }
+
+  void testRowStateChangedOnAutoreductionResumed() {
+    auto presenter = makePresenter();
+    EXPECT_CALL(*m_runsTablePresenter, notifyRowStateChanged()).Times(1);
+    presenter.notifyAutoreductionResumed();
+    verifyAndClear();
+  }
+
+  void testRowStateChangedOnAutoreductionPaused() {
+    auto presenter = makePresenter();
+    EXPECT_CALL(*m_runsTablePresenter, notifyRowStateChanged()).Times(1);
+    presenter.notifyAutoreductionPaused();
+    verifyAndClear();
+  }
+
   void testNotifyRowOutputsChanged() {
     auto presenter = makePresenter();
     EXPECT_CALL(*m_runsTablePresenter, notifyRowOutputsChanged()).Times(1);
@@ -925,7 +953,7 @@ private:
     auto group = Group(groupName);
     group.appendRow(Row({run}, theta, TransmissionRunPair(), RangeInQ(), boost::none, ReductionOptionsMap(),
                         ReductionWorkspaces({run}, TransmissionRunPair())));
-    jobs.appendGroup(group);
+    jobs.appendGroup(std::move(group));
     return jobs;
   }
 

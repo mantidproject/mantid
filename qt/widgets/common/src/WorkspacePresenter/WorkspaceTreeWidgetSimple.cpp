@@ -83,7 +83,7 @@ WorkspaceTreeWidgetSimple::WorkspaceTreeWidgetSimple(bool viewOnly, QWidget *par
   connect(m_superplotBinsWithErrs, SIGNAL(triggered()), this, SLOT(onSuperplotBinsWithErrsClicked()));
 }
 
-WorkspaceTreeWidgetSimple::~WorkspaceTreeWidgetSimple() {}
+WorkspaceTreeWidgetSimple::~WorkspaceTreeWidgetSimple() = default;
 
 void WorkspaceTreeWidgetSimple::setOverplotDisabled(bool disabled) {
   m_overplotSpectrum->setDisabled(disabled);

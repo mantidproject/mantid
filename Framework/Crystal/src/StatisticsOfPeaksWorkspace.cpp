@@ -30,7 +30,7 @@ DECLARE_ALGORITHM(StatisticsOfPeaksWorkspace)
 //----------------------------------------------------------------------------------------------
 /** Constructor
  */
-StatisticsOfPeaksWorkspace::StatisticsOfPeaksWorkspace() { m_pointGroups = getAllPointGroups(); }
+StatisticsOfPeaksWorkspace::StatisticsOfPeaksWorkspace() : m_pointGroups(getAllPointGroups()) {}
 
 //----------------------------------------------------------------------------------------------
 /** Initialize the algorithm's properties.

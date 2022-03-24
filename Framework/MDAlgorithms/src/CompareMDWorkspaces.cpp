@@ -47,8 +47,7 @@ public:
   SimpleMDEvent(std::vector<float> coordinates, const float &signal, const float &error)
       : mCoordinates(std::move(coordinates)), mSignal(signal), mError(error) {}
 
-  SimpleMDEvent(const SimpleMDEvent &other)
-      : mCoordinates(other.mCoordinates), mSignal(other.mSignal), mError(other.mError) {}
+  SimpleMDEvent(const SimpleMDEvent &other) = default;
 
   // pretty output
   std::string str() const {

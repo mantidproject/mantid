@@ -111,7 +111,7 @@ public:
     row->setOutputNames({"", "IvsQ_test", "IvsQBin_test"});
 
     jobManager.notifyWorkspaceRenamed("IvsQBin_test", "IvsQBin_new");
-    TS_ASSERT_EQUALS(row->state(), State::ITEM_COMPLETE);
+    TS_ASSERT_EQUALS(row->state(), State::ITEM_SUCCESS);
     verifyAndClear();
   }
 
@@ -122,7 +122,7 @@ public:
     row->setOutputNames({"", "IvsQ_test", "IvsQBin_test"});
 
     jobManager.notifyWorkspaceRenamed("IvsQBin_new", "IvsQBin_test");
-    TS_ASSERT_DIFFERS(row->state(), State::ITEM_COMPLETE)
+    TS_ASSERT_DIFFERS(row->state(), State::ITEM_SUCCESS)
     verifyAndClear();
   }
 
@@ -146,7 +146,7 @@ public:
     group.setOutputNames({"stitched_test"});
 
     jobManager.notifyWorkspaceRenamed("stitched_test", "stitched_new");
-    TS_ASSERT_EQUALS(group.state(), State::ITEM_COMPLETE);
+    TS_ASSERT_EQUALS(group.state(), State::ITEM_SUCCESS);
     verifyAndClear();
   }
 

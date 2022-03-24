@@ -395,7 +395,7 @@ void readStartAndEndTime(::NeXus::File &file, API::Run &run) {
 } // End of anonymous namespace
 
 /// Empty default constructor
-LoadNexusLogs::LoadNexusLogs() {}
+LoadNexusLogs::LoadNexusLogs() = default;
 
 /// Initialisation method.
 void LoadNexusLogs::init() {

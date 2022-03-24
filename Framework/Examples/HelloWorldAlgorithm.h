@@ -20,7 +20,7 @@ public:
   /// no arg constructor
   HelloWorldAlgorithm() : API::Algorithm() {}
   /// virtual destructor
-  ~HelloWorldAlgorithm() override {}
+  ~HelloWorldAlgorithm() override = default;
   /// Algorithm's name for identification overriding a virtual method
   const std::string name() const override { return "HelloWorldAlgorithm"; }
   /// Algorithm's version for identification overriding a virtual method

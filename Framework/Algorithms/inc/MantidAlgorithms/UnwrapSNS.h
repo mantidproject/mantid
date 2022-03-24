@@ -34,7 +34,7 @@ namespace Algorithms {
 class MANTID_ALGORITHMS_DLL UnwrapSNS final : public API::Algorithm {
 public:
   UnwrapSNS();
-  ~UnwrapSNS() override {}
+  ~UnwrapSNS() override = default;
   const std::string name() const override { return "UnwrapSNS"; }
   /// Summary of algorithms purpose
   const std::string summary() const override {

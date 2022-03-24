@@ -22,13 +22,13 @@ using namespace CurveFitting;
 /// @param fun :: A function to approximate.
 /// @param start :: The start (lower bound) of an interval on the x-axis.
 /// @param end :: The end (upper bound) of an interval on the x-axis.
-SimpleChebfun::SimpleChebfun(size_t n, ChebfunFunctionType fun, double start, double end) : m_badFit(false) {
-  m_base = std::make_shared<ChebfunBase>(n, start, end);
+SimpleChebfun::SimpleChebfun(size_t n, ChebfunFunctionType fun, double start, double end)
+    : m_base(std::make_shared<ChebfunBase>(n, start, end)), m_badFit(false) {
   m_P = m_base->fit(std::move(fun));
 }
 
-SimpleChebfun::SimpleChebfun(size_t n, const API::IFunction &fun, double start, double end) : m_badFit(false) {
-  m_base = std::make_shared<ChebfunBase>(n, start, end);
+SimpleChebfun::SimpleChebfun(size_t n, const API::IFunction &fun, double start, double end)
+    : m_base(std::make_shared<ChebfunBase>(n, start, end)), m_badFit(false) {
   m_P = m_base->fit(fun);
 }
 
@@ -67,8 +67,8 @@ SimpleChebfun::SimpleChebfun(const API::IFunction &fun, double start, double end
 /// Construct a SimpleChebfun by smoothing data in vectors with x and y data.
 /// @param x :: A vector of x values.
 /// @param y :: A vector of y values. Must have same size as x.
-SimpleChebfun::SimpleChebfun(const std::vector<double> &x, const std::vector<double> &y) : m_badFit(false) {
-  m_base = std::make_shared<ChebfunBase>(x.size() - 1, x.front(), x.back());
+SimpleChebfun::SimpleChebfun(const std::vector<double> &x, const std::vector<double> &y)
+    : m_base(std::make_shared<ChebfunBase>(x.size() - 1, x.front(), x.back())), m_badFit(false) {
   m_P = m_base->smooth(x, y);
 }
 
