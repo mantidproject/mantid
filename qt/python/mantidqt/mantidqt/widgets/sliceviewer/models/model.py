@@ -286,9 +286,33 @@ class SliceViewerModel(SliceViewerBaseModel):
 
     def perform_non_axis_aligned_cut_to_workspace(self, vectors, extents, nbins):
         projection_params = {}
+        # construct projection string for x-axis label
+        cens = np.mean(extents.reshape(2, len(vectors), order='F'), axis=0)  # in u{1..3} basis
+        ix = np.where(nbins > 1)[0][0]  # index of x-axis
+        ivecs = list(range(len(vectors)))
+        ivecs.pop(ix)
+        cen_vec = np.zeros(vectors[0].shape) # position at x = 0
+        for ivec in ivecs:
+            cen_vec = cen_vec + cens[ivec]*vectors[ivec]
+        proj_str = 'x in (' + '  '.join([f'{c}+{x}x' if abs(x) > 0 else f'{c}' for c, x in zip(cen_vec, vectors[ix])]) \
+                   + ')'
+        proj_str.replace('+-', '-')
         for ivec, vec in enumerate(vectors):
-            vec_str = ','.join([str(v) for v in vec])
-            projection_params[f'BasisVector{ivec}'] = ','.join([f'u{ivec+1}', 'unit', vec_str])
+            # calc length
+            length = None
+            if self.get_frame() == SpecialCoordinateSystem.HKL:
+                try:
+                    lattice = self._get_ws().getExperimentInfo(0).sample().getOrientedLattice()
+                    length = 2*np.pi/lattice.d(*vec)
+                except:
+                    pass
+            else:
+                length = np.sqrt(np.sum(vec**2))
+            unit_str = f'in {np.round(length,2)} A^-1' if length is not None else 'r.l.u.'
+            xlab = proj_str if ivec == ix else f'u{ivec+1}'
+            vec_str = ','.join(str(v) for v in vec)
+            projection_params[f'BasisVector{ivec}'] = ', '.join([xlab, unit_str, vec_str])
+
         wscut = BinMD(InputWorkspace=self._get_ws(), AxisAligned=False, OutputExtents=extents,
                       OutputBins=nbins, NormalizeBasisVectors=False, OutputWorkspace='MD_svrebinned',
                       **projection_params)
