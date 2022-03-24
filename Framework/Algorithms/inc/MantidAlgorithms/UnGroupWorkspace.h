@@ -24,7 +24,7 @@ namespace Algorithms {
     @author Sofia Antony
     @date 21/07/2009
  */
-class MANTID_ALGORITHMS_DLL UnGroupWorkspace : public API::Algorithm {
+class MANTID_ALGORITHMS_DLL UnGroupWorkspace final : public API::Algorithm {
 public:
   /// Algorithm's name for identification overriding a virtual method
   const std::string name() const override { return "UnGroupWorkspace"; }

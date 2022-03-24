@@ -63,7 +63,7 @@ MatrixWorkspace_sptr Stitch1D::maskAllBut(int a1, int a2, MatrixWorkspace_sptr &
   const auto histogramCount = static_cast<int>(source->getNumberHistograms());
   PARALLEL_FOR_IF(Kernel::threadSafe(*source, *product))
   for (int i = 0; i < histogramCount; ++i) {
-    PARALLEL_START_INTERUPT_REGION
+    PARALLEL_START_INTERRUPT_REGION
     // Copy over the bin boundaries
     product->setSharedX(i, source->sharedX(i));
     // Copy over the data
@@ -81,9 +81,9 @@ MatrixWorkspace_sptr Stitch1D::maskAllBut(int a1, int a2, MatrixWorkspace_sptr &
     std::copy(sourceY.begin() + a1 + 1, sourceY.begin() + a2, newY.begin() + a1 + 1);
     std::copy(sourceE.begin() + a1 + 1, sourceE.begin() + a2, newE.begin() + a1 + 1);
 
-    PARALLEL_END_INTERUPT_REGION
+    PARALLEL_END_INTERRUPT_REGION
   }
-  PARALLEL_CHECK_INTERUPT_REGION
+  PARALLEL_CHECK_INTERRUPT_REGION
   return product;
 }
 
@@ -98,7 +98,7 @@ void Stitch1D::maskInPlace(int a1, int a2, MatrixWorkspace_sptr &source) {
   const auto histogramCount = static_cast<int>(source->getNumberHistograms());
   PARALLEL_FOR_IF(Kernel::threadSafe(*source))
   for (int i = 0; i < histogramCount; ++i) {
-    PARALLEL_START_INTERUPT_REGION
+    PARALLEL_START_INTERRUPT_REGION
     // Copy over the data
     auto &sourceY = source->mutableY(i);
     auto &sourceE = source->mutableE(i);
@@ -107,9 +107,9 @@ void Stitch1D::maskInPlace(int a1, int a2, MatrixWorkspace_sptr &source) {
       sourceE[binIndex] = 0;
     }
 
-    PARALLEL_END_INTERUPT_REGION
+    PARALLEL_END_INTERRUPT_REGION
   }
-  PARALLEL_CHECK_INTERUPT_REGION
+  PARALLEL_CHECK_INTERRUPT_REGION
 }
 
 //----------------------------------------------------------------------------------------------
@@ -303,7 +303,7 @@ MatrixWorkspace_sptr Stitch1D::rebin(MatrixWorkspace_sptr &input, const std::vec
   // remembered and then replaced post processing.
   PARALLEL_FOR_IF(Kernel::threadSafe(*outWS))
   for (int i = 0; i < histogramCount; ++i) {
-    PARALLEL_START_INTERUPT_REGION
+    PARALLEL_START_INTERRUPT_REGION
     std::vector<size_t> &nanEIndexes = m_nanEIndexes[i];
     std::vector<size_t> &nanYIndexes = m_nanYIndexes[i];
     std::vector<size_t> &infEIndexes = m_infEIndexes[i];
@@ -332,9 +332,9 @@ MatrixWorkspace_sptr Stitch1D::rebin(MatrixWorkspace_sptr &input, const std::vec
       }
     }
 
-    PARALLEL_END_INTERUPT_REGION
+    PARALLEL_END_INTERRUPT_REGION
   }
-  PARALLEL_CHECK_INTERUPT_REGION
+  PARALLEL_CHECK_INTERRUPT_REGION
 
   return outWS;
 }
@@ -418,7 +418,7 @@ bool Stitch1D::hasNonzeroErrors(MatrixWorkspace_sptr &ws) {
   bool hasNonZeroErrors = false;
   PARALLEL_FOR_IF(Kernel::threadSafe(*ws))
   for (int64_t i = 0; i < ws_size; ++i) {
-    PARALLEL_START_INTERUPT_REGION
+    PARALLEL_START_INTERRUPT_REGION
     if (!hasNonZeroErrors) // Keep checking
     {
       const auto &e = ws->e(i);
@@ -429,9 +429,9 @@ bool Stitch1D::hasNonzeroErrors(MatrixWorkspace_sptr &ws) {
         }
       }
     }
-    PARALLEL_END_INTERUPT_REGION
+    PARALLEL_END_INTERRUPT_REGION
   }
-  PARALLEL_CHECK_INTERUPT_REGION
+  PARALLEL_CHECK_INTERRUPT_REGION
 
   return hasNonZeroErrors;
 }
@@ -588,7 +588,7 @@ void Stitch1D::reinsertSpecialValues(const MatrixWorkspace_sptr &ws) {
   auto histogramCount = static_cast<int>(ws->getNumberHistograms());
   PARALLEL_FOR_IF(Kernel::threadSafe(*ws))
   for (int i = 0; i < histogramCount; ++i) {
-    PARALLEL_START_INTERUPT_REGION
+    PARALLEL_START_INTERRUPT_REGION
     // Copy over the data
     auto &sourceY = ws->mutableY(i);
 
@@ -608,9 +608,9 @@ void Stitch1D::reinsertSpecialValues(const MatrixWorkspace_sptr &ws) {
       sourceY[j] = std::numeric_limits<double>::infinity();
     }
 
-    PARALLEL_END_INTERUPT_REGION
+    PARALLEL_END_INTERRUPT_REGION
   }
-  PARALLEL_CHECK_INTERUPT_REGION
+  PARALLEL_CHECK_INTERRUPT_REGION
 }
 
 } // namespace Mantid::Algorithms

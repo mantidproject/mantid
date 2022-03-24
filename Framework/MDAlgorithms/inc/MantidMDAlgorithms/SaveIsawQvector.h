@@ -15,7 +15,7 @@ namespace MDAlgorithms {
 
 /** SaveIsawQvector
  */
-class DLLExport SaveIsawQvector : public API::Algorithm {
+class DLLExport SaveIsawQvector final : public API::Algorithm {
 public:
   const std::string name() const override;
   /// Summary of algorithms purpose

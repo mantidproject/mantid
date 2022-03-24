@@ -14,7 +14,7 @@
 namespace Mantid {
 namespace Algorithms {
 
-class MANTID_ALGORITHMS_DLL CalculateIqt : public API::Algorithm {
+class MANTID_ALGORITHMS_DLL CalculateIqt final : public API::Algorithm {
 public:
   const std::string name() const override;
   int version() const override;

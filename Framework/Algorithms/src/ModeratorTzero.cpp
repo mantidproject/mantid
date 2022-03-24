@@ -117,7 +117,7 @@ void ModeratorTzero::exec() {
   PARALLEL_FOR_IF(Kernel::threadSafe(*inputWS, *outputWS))
   // iterate over the spectra
   for (int i = 0; i < static_cast<int>(numHists); ++i) {
-    PARALLEL_START_INTERUPT_REGION
+    PARALLEL_START_INTERRUPT_REGION
     outputWS->setHistogram(i, inputWS->histogram(i));
 
     // One parser for each parallel processor needed (except Edirect mode)
@@ -189,9 +189,9 @@ void ModeratorTzero::exec() {
     }   // end of if(L2 >= 0)
 
     prog.report();
-    PARALLEL_END_INTERUPT_REGION
+    PARALLEL_END_INTERRUPT_REGION
   } // end of for (int i = 0; i < static_cast<int>(numHists); ++i)
-  PARALLEL_CHECK_INTERUPT_REGION
+  PARALLEL_CHECK_INTERRUPT_REGION
 
   // Copy units
   if (inputWS->getAxis(0)->unit().get()) {
@@ -239,7 +239,7 @@ void ModeratorTzero::execEvent(const std::string &emode) {
   Progress prog(this, 0.0, 1.0, numHists); // report progress of algorithm
   PARALLEL_FOR_IF(Kernel::threadSafe(*outputWS))
   for (int i = 0; i < static_cast<int>(numHists); ++i) {
-    PARALLEL_START_INTERUPT_REGION
+    PARALLEL_START_INTERRUPT_REGION
     auto wsIndex = static_cast<size_t>(i);
     EventList &evlist = outputWS->getSpectrum(wsIndex);
     if (evlist.getNumberEvents() > 0) // don't bother with empty lists
@@ -344,9 +344,9 @@ void ModeratorTzero::execEvent(const std::string &emode) {
       }   // end of if(L2 >= 0)
     }     // end of if (evlist.getNumberEvents() > 0)
     prog.report();
-    PARALLEL_END_INTERUPT_REGION
+    PARALLEL_END_INTERRUPT_REGION
   } // end of for (int i = 0; i < static_cast<int>(numHists); ++i)
-  PARALLEL_CHECK_INTERUPT_REGION
+  PARALLEL_CHECK_INTERRUPT_REGION
   outputWS->clearMRU(); // Clears the Most Recent Used lists */
 } // end of void ModeratorTzero::execEvent()
 

@@ -24,7 +24,7 @@ namespace MDAlgorithms {
 // Note: this relies on several MD specific interfaces, so it needs to be defined
 // in MDAlgorithms despite it not actually operating on MDWorkspaces
 
-class DLLExport IntegrateEllipsoids : public API::Algorithm {
+class DLLExport IntegrateEllipsoids final : public API::Algorithm {
 public:
   const std::string name() const override { return "IntegrateEllipsoids"; }
 

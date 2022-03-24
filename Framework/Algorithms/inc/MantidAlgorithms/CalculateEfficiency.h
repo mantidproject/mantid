@@ -48,7 +48,7 @@ namespace Algorithms {
     File change history is stored at: <https://github.com/mantidproject/mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
  */
-class MANTID_ALGORITHMS_DLL CalculateEfficiency : public API::Algorithm {
+class MANTID_ALGORITHMS_DLL CalculateEfficiency final : public API::Algorithm {
 public:
   /// Algorithm's name for identification overriding a virtual method
   const std::string name() const override { return "CalculateEfficiency"; }

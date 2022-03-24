@@ -38,6 +38,7 @@ public:
   static std::string getDimensionChars() { return "012345"; }
 
 protected:
+  ~SlicingAlgorithm() = default;
   /// Initialise the properties
   void initSlicingProps();
 

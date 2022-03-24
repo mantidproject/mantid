@@ -63,7 +63,7 @@ namespace Algorithms {
     @author Jose Borreguero and Andrei Savici
     @date 12/12/2011
 */
-class MANTID_ALGORITHMS_DLL ModeratorTzeroLinear : public API::Algorithm {
+class MANTID_ALGORITHMS_DLL ModeratorTzeroLinear final : public API::Algorithm {
 public:
   /// Default constructor
   ModeratorTzeroLinear();

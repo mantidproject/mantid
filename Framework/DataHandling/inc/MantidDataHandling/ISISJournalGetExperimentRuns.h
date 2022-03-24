@@ -23,7 +23,7 @@ an investigation and cycle.
 class DLLExport ISISJournalGetExperimentRuns : public API::Algorithm {
 public:
   ISISJournalGetExperimentRuns() : API::Algorithm() {}
-  ~ISISJournalGetExperimentRuns() override = default;
+  virtual ~ISISJournalGetExperimentRuns() override = default;
 
   const std::string name() const override { return "ISISJournalGetExperimentRuns"; }
   const std::string summary() const override {

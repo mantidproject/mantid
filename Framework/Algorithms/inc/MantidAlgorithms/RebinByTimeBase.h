@@ -20,7 +20,9 @@ namespace Algorithms {
  by an absolute time axis.
  */
 class MANTID_ALGORITHMS_DLL RebinByTimeBase : public API::Algorithm {
-public:
+protected:
+  ~RebinByTimeBase() = default;
+
 private:
   /// Initialization method
   void init() override;

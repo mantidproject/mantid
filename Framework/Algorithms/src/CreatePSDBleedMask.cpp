@@ -147,7 +147,7 @@ void CreatePSDBleedMask::exec() {
 
   PARALLEL_FOR_IF(Kernel::threadSafe(*inputWorkspace, *outputWorkspace))
   for (int i = 0; i < numTubes; ++i) {
-    PARALLEL_START_INTERUPT_REGION
+    PARALLEL_START_INTERRUPT_REGION
     auto current = std::next(tubeMap.begin(), i);
     const TubeIndex::mapped_type tubeIndices = current->second;
     bool mask = performBleedTest(tubeIndices, inputWorkspace, maxRate, numIgnoredPixels);
@@ -161,9 +161,9 @@ void CreatePSDBleedMask::exec() {
 
     progress.report("Performing Bleed Test");
 
-    PARALLEL_END_INTERUPT_REGION
+    PARALLEL_END_INTERRUPT_REGION
   }
-  PARALLEL_CHECK_INTERUPT_REGION
+  PARALLEL_CHECK_INTERRUPT_REGION
 
   g_log.information() << numTubesMasked << " tube(s) failed the bleed tests.";
   if (numTubesMasked > 0) {

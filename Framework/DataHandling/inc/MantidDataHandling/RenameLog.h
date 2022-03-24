@@ -16,7 +16,7 @@ namespace DataHandling {
 
   @date 2011-12-16
 */
-class DLLExport RenameLog : public API::Algorithm {
+class DLLExport RenameLog final : public API::Algorithm {
 public:
   /// Algorithm's name for identification
   const std::string name() const override { return "RenameLog"; };

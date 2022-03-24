@@ -22,6 +22,7 @@ namespace DataHandling {
 class DLLExport DownloadInstrument : public API::Algorithm {
 public:
   DownloadInstrument();
+  virtual ~DownloadInstrument() = default;
 
   const std::string name() const override;
   int version() const override;

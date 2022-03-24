@@ -18,7 +18,7 @@ namespace ICat {
   @author Sofia Antony, STFC Rutherford Appleton Laboratory
   @date 09/07/2010
 */
-class MANTID_ICAT_DLL CatalogListInstruments : public API::Algorithm {
+class MANTID_ICAT_DLL CatalogListInstruments final : public API::Algorithm {
 public:
   /// constructor
   CatalogListInstruments() : API::Algorithm() {}

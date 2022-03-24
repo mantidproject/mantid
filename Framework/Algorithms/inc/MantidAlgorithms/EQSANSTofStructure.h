@@ -35,7 +35,7 @@ const double CHOPPER_ANGLE[4] = {129.605, 179.989, 230.010, 230.007};
 // Chopper location (mm)
 const double CHOPPER_LOCATION[4] = {5700., 7800., 9497., 9507.};
 
-class MANTID_ALGORITHMS_DLL EQSANSTofStructure : public API::Algorithm {
+class MANTID_ALGORITHMS_DLL EQSANSTofStructure final : public API::Algorithm {
 public:
   /// Default constructor
   EQSANSTofStructure();

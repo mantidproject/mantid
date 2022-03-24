@@ -40,7 +40,7 @@ struct BinEdgeAxisProxy : AxisProxy {
 
 } // namespace AxisHelper
 
-class DLLExport SaveAscii2 : public API::Algorithm {
+class DLLExport SaveAscii2 final : public API::Algorithm {
 public:
   /// Default constructor
   SaveAscii2();

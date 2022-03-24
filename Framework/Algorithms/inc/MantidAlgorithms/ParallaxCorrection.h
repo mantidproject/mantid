@@ -15,7 +15,7 @@ namespace Algorithms {
 /** ParallaxCorrection : Performs geometrical correction for parallax effect in
  * tube based SANS instruments.
  */
-class MANTID_ALGORITHMS_DLL ParallaxCorrection : public API::Algorithm {
+class MANTID_ALGORITHMS_DLL ParallaxCorrection final : public API::Algorithm {
 public:
   const std::string name() const override;
   int version() const override;

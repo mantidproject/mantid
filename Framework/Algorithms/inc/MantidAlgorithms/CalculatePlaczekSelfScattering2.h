@@ -15,7 +15,7 @@ namespace Algorithms {
 
 /** CalculatePlaczekSelfScattering2 : TODO: DESCRIPTION
  */
-class MANTID_ALGORITHMS_DLL CalculatePlaczekSelfScattering2 : public API::Algorithm {
+class MANTID_ALGORITHMS_DLL CalculatePlaczekSelfScattering2 final : public API::Algorithm {
 public:
   CalculatePlaczekSelfScattering2() : API::Algorithm() {}
   virtual const std::string name() const override { return "CalculatePlaczekSelfScattering"; }

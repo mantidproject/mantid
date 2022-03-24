@@ -16,7 +16,7 @@ namespace Algorithms {
 
   @date 2012-02-24
 */
-class MANTID_ALGORITHMS_DLL Pause : public API::Algorithm {
+class MANTID_ALGORITHMS_DLL Pause final : public API::Algorithm {
 public:
   const std::string name() const override;
   /// Summary of algorithms purpose

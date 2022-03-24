@@ -50,7 +50,7 @@ data to be added.</LI>
 @date 2/5/2008
 @author Ronald Fowler, ISIS, RAL (LoadInstrumentFromNexus)
 */
-class DLLExport LoadInstrumentFromNexus : public API::Algorithm {
+class DLLExport LoadInstrumentFromNexus final : public API::Algorithm {
 public:
   /// Default constructor
   LoadInstrumentFromNexus();

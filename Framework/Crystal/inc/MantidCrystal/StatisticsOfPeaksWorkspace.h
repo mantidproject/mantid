@@ -19,7 +19,7 @@ namespace Crystal {
  * @date 2015-01-05
  */
 
-class MANTID_CRYSTAL_DLL StatisticsOfPeaksWorkspace : public API::Algorithm {
+class MANTID_CRYSTAL_DLL StatisticsOfPeaksWorkspace final : public API::Algorithm {
 public:
   StatisticsOfPeaksWorkspace();
   /// Algorithm's name for identification

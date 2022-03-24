@@ -17,7 +17,7 @@ namespace Algorithms {
   @author
   @date 2011-08-22
 */
-class MANTID_ALGORITHMS_DLL EditInstrumentGeometry : public API::Algorithm {
+class MANTID_ALGORITHMS_DLL EditInstrumentGeometry final : public API::Algorithm {
 public:
   const std::string name() const override;
   /// Summary of algorithms purpose

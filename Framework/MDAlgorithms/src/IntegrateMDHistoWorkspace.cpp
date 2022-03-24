@@ -326,7 +326,7 @@ void IntegrateMDHistoWorkspace::exec() {
 
     PARALLEL_FOR_NO_WSP_CHECK()
     for (int i = 0; i < int(outIterators.size()); ++i) { // NOLINT
-      PARALLEL_START_INTERUPT_REGION
+      PARALLEL_START_INTERRUPT_REGION
       auto outIterator = dynamic_cast<MDHistoWorkspaceIterator *>(outIterators[i].get());
       if (!outIterator) {
         throw std::logic_error("Failed to cast iterator to MDHistoWorkspaceIterator");
@@ -384,9 +384,9 @@ void IntegrateMDHistoWorkspace::exec() {
 
         progress.report();
       } while (outIterator->next());
-      PARALLEL_END_INTERUPT_REGION
+      PARALLEL_END_INTERRUPT_REGION
     }
-    PARALLEL_CHECK_INTERUPT_REGION
+    PARALLEL_CHECK_INTERRUPT_REGION
     outWS->setDisplayNormalization(inWS->displayNormalizationHisto());
     this->setProperty("OutputWorkspace", outWS);
   }

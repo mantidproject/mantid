@@ -299,7 +299,7 @@ void CompareMDWorkspaces::compareMDEventWorkspaces(typename MDEventWorkspace<MDE
 
   PRAGMA_OMP( parallel for if (!filebacked))
   for (int ibox = 0; ibox < num_boxes; ibox++) {
-    PARALLEL_START_INTERUPT_REGION
+    PARALLEL_START_INTERRUPT_REGION
     // No need to compare because the boxes are not same already
     if (!boxes_same) {
       continue;
@@ -327,9 +327,9 @@ void CompareMDWorkspaces::compareMDEventWorkspaces(typename MDEventWorkspace<MDE
       }
     }
 
-    PARALLEL_END_INTERUPT_REGION
+    PARALLEL_END_INTERRUPT_REGION
   } // for box
-  PARALLEL_CHECK_INTERUPT_REGION
+  PARALLEL_CHECK_INTERRUPT_REGION
 
   // throw altogether
   if (!boxes_same) {
