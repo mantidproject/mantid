@@ -87,8 +87,6 @@ class MemoryView(QWidget):
             self.mantid_memory_bar.setStyleSheet(CRITICAL_STYLE)
         elif from_critical_to_normal(self.critical, current_value, new_value):
             self.mantid_memory_bar.setStyleSheet(NORMAL_STYLE)
-        else:
-            pass
 
     def invoke_set_value(self, new_value: int, mem_used: float, mem_avail: float):
         self.set_value.emit(new_value, mem_used, mem_avail)
