@@ -44,11 +44,12 @@ boost::optional<ProcessingInstructions> LookupRow::backgroundProcessingInstructi
 }
 
 bool operator==(LookupRow const &lhs, LookupRow const &rhs) {
-  return lhs.thetaOrWildcard() == rhs.thetaOrWildcard() && lhs.titleMatcher() == rhs.titleMatcher() &&
-         lhs.qRange() == rhs.qRange() && lhs.scaleFactor() == rhs.scaleFactor() &&
-         lhs.transmissionProcessingInstructions() == rhs.transmissionProcessingInstructions() &&
-         lhs.processingInstructions() == rhs.processingInstructions() &&
-         lhs.backgroundProcessingInstructions() == rhs.backgroundProcessingInstructions();
+  return (lhs.m_theta == rhs.m_theta && lhs.m_titleMatcher == rhs.m_titleMatcher &&
+          lhs.m_transmissionRuns == rhs.m_transmissionRuns && lhs.m_qRange == rhs.m_qRange &&
+          lhs.m_scaleFactor == rhs.m_scaleFactor &&
+          lhs.m_transmissionProcessingInstructions == rhs.m_transmissionProcessingInstructions &&
+          lhs.m_processingInstructions == rhs.m_processingInstructions &&
+          lhs.m_backgroundProcessingInstructions == rhs.m_backgroundProcessingInstructions);
 }
 
 bool operator!=(LookupRow const &lhs, LookupRow const &rhs) { return !(lhs == rhs); }

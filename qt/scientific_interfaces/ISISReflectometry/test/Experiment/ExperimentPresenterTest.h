@@ -363,8 +363,8 @@ public:
     auto const lookupRows = presenter.experiment().lookupTableRows();
     TS_ASSERT_EQUALS(lookupRows.size(), 2);
     if (lookupRows.size() == 2) {
-      TS_ASSERT_EQUALS(lookupRows[0], defaultsWithFirstAngle());
-      TS_ASSERT_EQUALS(lookupRows[1], defaultsWithSecondAngle());
+      TS_ASSERT_EQUALS(lookupRows[0].thetaOrWildcard(), defaultsWithFirstAngle().thetaOrWildcard());
+      TS_ASSERT_EQUALS(lookupRows[1].thetaOrWildcard(), defaultsWithSecondAngle().thetaOrWildcard());
     }
     verifyAndClear();
   }

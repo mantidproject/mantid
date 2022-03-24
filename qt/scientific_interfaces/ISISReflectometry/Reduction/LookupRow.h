@@ -61,6 +61,9 @@ public:
   boost::optional<ProcessingInstructions> processingInstructions() const;
   boost::optional<ProcessingInstructions> backgroundProcessingInstructions() const;
 
+  MANTIDQT_ISISREFLECTOMETRY_DLL friend bool operator==(LookupRow const &lhs, LookupRow const &rhs);
+  MANTIDQT_ISISREFLECTOMETRY_DLL friend bool operator!=(LookupRow const &lhs, LookupRow const &rhs);
+
 private:
   boost::optional<double> m_theta;
   boost::optional<boost::regex> m_titleMatcher;
@@ -72,8 +75,6 @@ private:
   boost::optional<ProcessingInstructions> m_backgroundProcessingInstructions;
 };
 
-MANTIDQT_ISISREFLECTOMETRY_DLL bool operator==(LookupRow const &lhs, LookupRow const &rhs);
-MANTIDQT_ISISREFLECTOMETRY_DLL bool operator!=(LookupRow const &lhs, LookupRow const &rhs);
 LookupRow::ValueArray lookupRowToArray(LookupRow const &lookupRow);
 } // namespace ISISReflectometry
 } // namespace CustomInterfaces
