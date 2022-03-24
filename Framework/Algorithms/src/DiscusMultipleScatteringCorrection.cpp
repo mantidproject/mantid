@@ -874,12 +874,12 @@ double DiscusMultipleScatteringCorrection::interpolateSquareRoot(const ISpectrum
   const auto &y = histToInterpolate.y();
   double x0 = histToInterpolate.x()[idx];
   double x1 = histToInterpolate.x()[idx + 1];
-  double a = sqrt((pow(y[idx + 1], 2) - pow(y[idx], 2)) / (x1 - x0));
-  if (a == 0.) {
+  double asq = (pow(y[idx + 1], 2) - pow(y[idx], 2)) / (x1 - x0);
+  if (asq == 0.) {
     throw std::runtime_error("Cannot perform square root interpolation on supplied distribution");
   }
-  double b = x0 - pow(y[idx], 2) / pow(a, 2);
-  return a * sqrt(x - b);
+  double b = x0 - pow(y[idx], 2) / asq;
+  return sqrt(asq * (x - b));
 }
 
 /**
