@@ -10,8 +10,7 @@
 
 namespace Mantid::MDAlgorithms {
 
-
-// Detect and pass to the correct version
+// Detect inputs and pass to the correct version
 class DLLExport IntegrateEllipsoids final : public API::DataProcessorAlgorithm {
 public:
   const std::string name() const override;
