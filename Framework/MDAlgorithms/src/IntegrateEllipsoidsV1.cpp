@@ -65,7 +65,7 @@ void IntegrateEllipsoidsV1::qListFromEventWS(Integrate3DEvents &integrator, Prog
   auto numSpectra = static_cast<int>(wksp->getNumberHistograms());
   PARALLEL_FOR_IF(Kernel::threadSafe(*wksp))
   for (int i = 0; i < numSpectra; ++i) {
-    PARALLEL_START_INTERUPT_REGION
+    PARALLEL_START_INTERRUPT_REGION
 
     // units conversion helper
     UnitsConversionHelper unitConverter;
@@ -112,9 +112,9 @@ void IntegrateEllipsoidsV1::qListFromEventWS(Integrate3DEvents &integrator, Prog
     PARALLEL_CRITICAL(addEvents) { integrator.addEvents(qList, hkl_integ); }
 
     prog.report();
-    PARALLEL_END_INTERUPT_REGION
+    PARALLEL_END_INTERRUPT_REGION
   } // end of loop over spectra
-  PARALLEL_CHECK_INTERUPT_REGION
+  PARALLEL_CHECK_INTERRUPT_REGION
 }
 
 /**
@@ -134,7 +134,7 @@ void IntegrateEllipsoidsV1::qListFromHistoWS(Integrate3DEvents &integrator, Prog
   auto numSpectra = static_cast<int>(wksp->getNumberHistograms());
   PARALLEL_FOR_IF(Kernel::threadSafe(*wksp))
   for (int i = 0; i < numSpectra; ++i) {
-    PARALLEL_START_INTERUPT_REGION
+    PARALLEL_START_INTERRUPT_REGION
 
     // units conversion helper
     UnitsConversionHelper unitConverter;
@@ -186,9 +186,9 @@ void IntegrateEllipsoidsV1::qListFromHistoWS(Integrate3DEvents &integrator, Prog
     }
     PARALLEL_CRITICAL(addHisto) { integrator.addEvents(qList, hkl_integ); }
     prog.report();
-    PARALLEL_END_INTERUPT_REGION
+    PARALLEL_END_INTERRUPT_REGION
   } // end of loop over spectra
-  PARALLEL_CHECK_INTERUPT_REGION
+  PARALLEL_CHECK_INTERRUPT_REGION
 }
 
 /** NOTE: This has been adapted from the SaveIsawQvector algorithm.
