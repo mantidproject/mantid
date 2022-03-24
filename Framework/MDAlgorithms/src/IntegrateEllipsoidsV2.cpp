@@ -57,7 +57,7 @@ void IntegrateEllipsoidsV2::qListFromEventWS(IntegrateQLabEvents &integrator, Pr
   auto numSpectra = static_cast<int>(wksp->getNumberHistograms());
   PARALLEL_FOR_IF(Kernel::threadSafe(*wksp))
   for (int i = 0; i < numSpectra; ++i) {
-    PARALLEL_START_INTERUPT_REGION
+    PARALLEL_START_INTERRUPT_REGION
 
     // units conversion helper
     UnitsConversionHelper unitConverter;
@@ -102,9 +102,9 @@ void IntegrateEllipsoidsV2::qListFromEventWS(IntegrateQLabEvents &integrator, Pr
     PARALLEL_CRITICAL(addEvents) { integrator.addEvents(qList); }
 
     prog.report();
-    PARALLEL_END_INTERUPT_REGION
+    PARALLEL_END_INTERRUPT_REGION
   } // end of loop over spectra
-  PARALLEL_CHECK_INTERUPT_REGION
+  PARALLEL_CHECK_INTERRUPT_REGION
   integrator.populateCellsWithPeaks();
 }
 
@@ -112,7 +112,7 @@ void IntegrateEllipsoidsV2::qListFromHistoWS(IntegrateQLabEvents &integrator, Pr
   auto numSpectra = static_cast<int>(wksp->getNumberHistograms());
   PARALLEL_FOR_IF(Kernel::threadSafe(*wksp))
   for (int i = 0; i < numSpectra; ++i) {
-    PARALLEL_START_INTERUPT_REGION
+    PARALLEL_START_INTERRUPT_REGION
 
     // units conversion helper
     UnitsConversionHelper unitConverter;
@@ -160,9 +160,9 @@ void IntegrateEllipsoidsV2::qListFromHistoWS(IntegrateQLabEvents &integrator, Pr
     }
     PARALLEL_CRITICAL(addHisto) { integrator.addEvents(qList); }
     prog.report();
-    PARALLEL_END_INTERUPT_REGION
+    PARALLEL_END_INTERRUPT_REGION
   } // end of loop over spectra
-  PARALLEL_CHECK_INTERUPT_REGION
+  PARALLEL_CHECK_INTERRUPT_REGION
   integrator.populateCellsWithPeaks();
 }
 
