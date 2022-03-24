@@ -730,12 +730,12 @@ void DiscusMultipleScatteringCorrection::prepareCumulativeProbForQ(double kinc, 
     IOfQMaxPreviousRow = IOfQY.back();
     IOfQYFull.insert(IOfQYFull.end(), IOfQY.begin(), IOfQY.end());
   }
-  auto IOfQYAt2K = IOfQYFull.empty() ? 0. : IOfQYFull.back();
-  if (IOfQYAt2K == 0.)
+  auto IOfQYAtQMax = IOfQYFull.empty() ? 0. : IOfQYFull.back();
+  if (IOfQYAtQMax == 0.)
     throw std::runtime_error("Integral of Q * S(Q) is zero so can't generate probability distribution");
   // normalise probability range to 0-1
   std::transform(IOfQYFull.begin(), IOfQYFull.end(), IOfQYFull.begin(),
-                 [IOfQYAt2K](double d) -> double { return d / IOfQYAt2K; });
+                 [IOfQYAtQMax](double d) -> double { return d / IOfQYAtQMax; });
   // Store the normalized integral (= cumulative probability) on the x axis
   // The y values in the two spectra store Q, w (or w index to be precise)
   PInvOfQ->dataX(0).resize(IOfQYFull.size());
