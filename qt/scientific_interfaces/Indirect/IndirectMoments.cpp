@@ -23,60 +23,30 @@ namespace MantidQt::CustomInterfaces {
 /** Constructor
  */
 IndirectMoments::IndirectMoments(IndirectDataReduction *idrUI, QWidget *parent)
-    : IndirectDataReductionTab(idrUI, parent) {
-  m_uiForm.setupUi(parent);
+    : IndirectDataReductionTab(idrUI, parent), m_model(std::make_unique<IndirectMomentsModel>()),
+      m_view(std::make_unique<IndirectMomentsView>(parent)) {
   setOutputPlotOptionsPresenter(
-      std::make_unique<IndirectPlotOptionsPresenter>(m_uiForm.ipoPlotOptions, PlotWidget::Spectra, "0,2,4"));
+      std::make_unique<IndirectPlotOptionsPresenter>(m_view->getPlotOptions(), PlotWidget::Spectra, "0,2,4"));
 
   const unsigned int NUM_DECIMALS = 6;
 
-  m_uiForm.ppRawPlot->setCanvasColour(QColor(240, 240, 240));
-  m_uiForm.ppMomentsPreview->setCanvasColour(QColor(240, 240, 240));
+  m_view->setupProperties();
 
-  MantidWidgets::RangeSelector *xRangeSelector = m_uiForm.ppRawPlot->addRangeSelector("XRange");
-
-  // PROPERTY TREE
-  m_propTrees["MomentsPropTree"] = new QtTreePropertyBrowser();
-  m_propTrees["MomentsPropTree"]->setFactoryForManager(m_dblManager, m_dblEdFac);
-  m_uiForm.properties->addWidget(m_propTrees["MomentsPropTree"]);
-  m_properties["EMin"] = m_dblManager->addProperty("EMin");
-  m_properties["EMax"] = m_dblManager->addProperty("EMax");
-
-  m_propTrees["MomentsPropTree"]->addProperty(m_properties["EMin"]);
-  m_propTrees["MomentsPropTree"]->addProperty(m_properties["EMax"]);
-
-  m_dblManager->setDecimals(m_properties["EMin"], NUM_DECIMALS);
-  m_dblManager->setDecimals(m_properties["EMax"], NUM_DECIMALS);
-
-  connect(m_uiForm.dsInput, SIGNAL(dataReady(QString const &)), this, SLOT(handleDataReady(const QString &)));
-
-  connect(xRangeSelector, SIGNAL(selectionChanged(double, double)), this, SLOT(rangeChanged(double, double)));
-  connect(m_dblManager, SIGNAL(valueChanged(QtProperty *, double)), this, SLOT(updateProperties(QtProperty *, double)));
-
-  connect(m_uiForm.ckScale, SIGNAL(stateChanged(bool)), this, SLOT(handleScaleChanged(bool)));
-  connect(m_uiForm.spScale, SIGNAL(valueChanged(double)), this, SLOT(handleScaleValueChanged(double)));
+  connect(m_view.get(), SIGNAL(dataReady(QString const &)), this, SLOT(handleDataReady(const QString &)));
+  connect(m_view.get(), SIGNAL(valueChanged(QtProperty *, double)), this, SLOT(updateProperties(QtProperty *, double)));
+  connect(m_view.get(), SIGNAL(scaleChanged(bool)), this, SLOT(handleScaleChanged(bool)));
+  connect(m_view.get(), SIGNAL(scaleValueChanged(double)), this, SLOT(handleScaleValueChanged(double)));
+  connect(m_view.get(), SIGNAL(runClicked()), this, SLOT(runClicked()));
+  connect(m_view.get(), SIGNAL(saveClicked()), this, SLOT(saveClicked()));
 
   // Update the preview plot when the algorithm completes
   connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this, SLOT(momentsAlgComplete(bool)));
 
-  // Plot and save
-  connect(m_uiForm.pbRun, SIGNAL(clicked()), this, SLOT(runClicked()));
-  connect(m_uiForm.pbSave, SIGNAL(clicked()), this, SLOT(saveClicked()));
-
-  connect(this, SIGNAL(updateRunButton(bool, std::string const &, QString const &, QString const &)), this,
+  connect(this, SIGNAL(updateRunButton(bool, std::string const &, QString const &, QString const &)), m_view.get(),
           SLOT(updateRunButton(bool, std::string const &, QString const &, QString const &)));
 
-  // Allows empty workspace selector when initially selected
-  m_uiForm.dsInput->isOptional(true);
-
-  // Disables searching for run files in the data archive
-  m_uiForm.dsInput->isForRunFiles(false);
+  connect(m_view.get(), SIGNAL(showMessageBox(const QString &)), this, SIGNAL(showMessageBox(const QString &)));
 }
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-IndirectMoments::~IndirectMoments() { m_propTrees["MomentsPropTree"]->unsetFactoryForManager(m_dblManager); }
 
 void IndirectMoments::setup() {}
 
@@ -85,8 +55,8 @@ void IndirectMoments::setup() {}
  *
  */
 void IndirectMoments::handleDataReady(QString const &dataName) {
-  if (validate()) {
-    m_model.setInputWorkspace(m_uiForm.dsInput->getCurrentDataName().toStdString());
+  if (m_view->validate()) {
+    m_model->setInputWorkspace(m_view->getDataName());
     plotNewData(dataName);
   }
 }
@@ -94,65 +64,27 @@ void IndirectMoments::handleDataReady(QString const &dataName) {
 /**
  * Handles the scale checkbox being changed.
  */
-void IndirectMoments::handleScaleChanged(bool scale) { m_model.setScale(scale); }
+void IndirectMoments::handleScaleChanged(bool scale) { m_model->setScale(scale); }
 
 /**
  * Handles the scale value being changed.
  */
-void IndirectMoments::handleScaleValueChanged(double value) { m_model.setScaleValue(value); }
+void IndirectMoments::handleScaleValueChanged(double value) { m_model->setScaleValue(value); }
 
-bool IndirectMoments::validate() {
-  UserInputValidator uiv;
-  validateDataIsOfType(uiv, m_uiForm.dsInput, "Sample", DataType::Sqw);
+void IndirectMoments::run() { runAlgorithm(m_model->setupAlgorithm()); }
 
-  auto const errorMessage = uiv.generateErrorMessage();
-  if (!errorMessage.isEmpty())
-    showMessageBox(errorMessage);
-  return errorMessage.isEmpty();
-}
-
-void IndirectMoments::run() { runAlgorithm(m_model.setupAlgorithm()); }
-
+bool IndirectMoments::validate() { return true; }
 /**
  * Clears previous plot data (in both preview and raw plot) and sets the new
  * range bars
  */
 void IndirectMoments::plotNewData(QString const &filename) {
-  disconnect(m_dblManager, SIGNAL(valueChanged(QtProperty *, double)), this,
-             SLOT(updateProperties(QtProperty *, double)));
 
-  // Clears previous plotted data
-  m_uiForm.ppRawPlot->clear();
-  m_uiForm.ppMomentsPreview->clear();
-
-  // Update plot and change data in interface
-  m_uiForm.ppRawPlot->addSpectrum("Raw", filename, 0);
+  m_view->plotNewData(filename);
   auto const range = getXRangeFromWorkspace(filename.toStdString());
-
-  auto xRangeSelector = m_uiForm.ppRawPlot->getRangeSelector("XRange");
-  setPlotPropertyRange(xRangeSelector, m_properties["EMin"], m_properties["EMax"], range);
-  setRangeSelector(xRangeSelector, m_properties["EMin"], m_properties["EMax"], range);
-  m_model.setEMin(range.first);
-  m_model.setEMax(range.second);
-  m_uiForm.ppRawPlot->replot();
-
-  connect(m_dblManager, SIGNAL(valueChanged(QtProperty *, double)), this, SLOT(updateProperties(QtProperty *, double)));
-}
-
-/**
- * Updates the property manager when the range selector is moved.
- *
- * @param min :: The new value of the lower guide
- * @param max :: The new value of the upper guide
- */
-void IndirectMoments::rangeChanged(double min, double max) {
-  disconnect(m_dblManager, SIGNAL(valueChanged(QtProperty *, double)), this,
-             SLOT(updateProperties(QtProperty *, double)));
-  m_dblManager->setValue(m_properties["EMin"], min);
-  m_dblManager->setValue(m_properties["EMax"], max);
-  m_model.setEMin(min);
-  m_model.setEMax(max);
-  connect(m_dblManager, SIGNAL(valueChanged(QtProperty *, double)), this, SLOT(updateProperties(QtProperty *, double)));
+  m_view->setPlotPropertyRange(range);
+  m_view->setRangeSelector(range);
+  m_view->replot();
 }
 
 /**
@@ -164,20 +96,11 @@ void IndirectMoments::rangeChanged(double min, double max) {
  * @param val :: The new value for the property
  */
 void IndirectMoments::updateProperties(QtProperty *prop, double val) {
-  auto eRangeSelector = m_uiForm.ppRawPlot->getRangeSelector("XRange");
-
-  disconnect(m_dblManager, SIGNAL(valueChanged(QtProperty *, double)), this,
-             SLOT(updateProperties(QtProperty *, double)));
-
-  if (prop == m_properties["EMin"]) {
-    setRangeSelectorMin(m_properties["EMin"], m_properties["EMax"], eRangeSelector, val);
-    m_model.setEMin(val);
-  } else if (prop == m_properties["EMax"]) {
-    setRangeSelectorMax(m_properties["EMin"], m_properties["EMax"], eRangeSelector, val);
-    m_model.setEMax(val);
+  if (prop->propertyName() == "EMin") {
+    m_model->setEMin(val);
+  } else if (prop->propertyName() == "EMax") {
+    m_model->setEMax(val);
   }
-
-  connect(m_dblManager, SIGNAL(valueChanged(QtProperty *, double)), this, SLOT(updateProperties(QtProperty *, double)));
 }
 
 /**
@@ -190,29 +113,21 @@ void IndirectMoments::momentsAlgComplete(bool error) {
     return;
 
   MatrixWorkspace_sptr outputWorkspace =
-      AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(m_model.getOutputWorkspace());
+      AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(m_model->getOutputWorkspace());
 
   if (outputWorkspace->getNumberHistograms() < 5)
     return;
 
-  setOutputPlotOptionsWorkspaces({m_model.getOutputWorkspace()});
+  setOutputPlotOptionsWorkspaces({m_model->getOutputWorkspace()});
 
-  // Plot each spectrum
-  m_uiForm.ppMomentsPreview->clear();
-  m_uiForm.ppMomentsPreview->addSpectrum("M0", QString::fromStdString(m_model.getOutputWorkspace()), 0, Qt::green);
-  m_uiForm.ppMomentsPreview->addSpectrum("M1", QString::fromStdString(m_model.getOutputWorkspace()), 1, Qt::black);
-  m_uiForm.ppMomentsPreview->addSpectrum("M2", QString::fromStdString(m_model.getOutputWorkspace()), 2, Qt::red);
-  m_uiForm.ppMomentsPreview->resizeX();
-
-  // Enable plot and save buttons
-  m_uiForm.pbSave->setEnabled(true);
+  m_view->plotOutput(QString::fromStdString(m_model->getOutputWorkspace()));
 }
 
 void IndirectMoments::setFileExtensionsByName(bool filter) {
   QStringList const noSuffixes{""};
   auto const tabName("Moments");
-  m_uiForm.dsInput->setFBSuffixes(filter ? getSampleFBSuffixes(tabName) : getExtensions(tabName));
-  m_uiForm.dsInput->setWSSuffixes(filter ? getSampleWSSuffixes(tabName) : noSuffixes);
+  m_view->setFBSuffixes(filter ? getSampleFBSuffixes(tabName) : getExtensions(tabName));
+  m_view->setWSSuffixes(filter ? getSampleWSSuffixes(tabName) : noSuffixes);
 }
 
 /**
@@ -224,22 +139,9 @@ void IndirectMoments::runClicked() { runTab(); }
  * Handles saving of workspaces
  */
 void IndirectMoments::saveClicked() {
-  if (checkADSForPlotSaveWorkspace(m_model.getOutputWorkspace(), false))
-    addSaveWorkspaceToQueue(m_model.getOutputWorkspace());
+  if (checkADSForPlotSaveWorkspace(m_model->getOutputWorkspace(), false))
+    addSaveWorkspaceToQueue(m_model->getOutputWorkspace());
   m_batchAlgoRunner->executeBatchAsync();
-}
-
-void IndirectMoments::setRunEnabled(bool enabled) { m_uiForm.pbRun->setEnabled(enabled); }
-
-void IndirectMoments::setSaveEnabled(bool enabled) { m_uiForm.pbSave->setEnabled(enabled); }
-
-void IndirectMoments::updateRunButton(bool enabled, std::string const &enableOutputButtons, QString const &message,
-                                      QString const &tooltip) {
-  setRunEnabled(enabled);
-  m_uiForm.pbRun->setText(message);
-  m_uiForm.pbRun->setToolTip(tooltip);
-  if (enableOutputButtons != "unchanged")
-    setSaveEnabled(enableOutputButtons == "enable");
 }
 
 } // namespace MantidQt::CustomInterfaces

@@ -1,6 +1,6 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
-// Copyright &copy; 2013 ISIS Rutherford Appleton Laboratory UKRI,
+// Copyright &copy; 2022 ISIS Rutherford Appleton Laboratory UKRI,
 //   NScD Oak Ridge National Laboratory, European Spallation Source,
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
@@ -8,6 +8,7 @@
 
 #include "DllConfig.h"
 #include "IndirectDataValidationHelper.h"
+#include "MantidQtWidgets/Common/QtPropertyBrowser/QtTreePropertyBrowser"
 #include <typeinfo>
 
 using namespace Mantid::API;
@@ -27,10 +28,12 @@ public:
   void setScale(bool scale);
   void setScaleValue(double scaleValue);
   std::string getOutputWorkspace();
+  QMap<QString, QtProperty *> getProperties();
 
 private:
   std::string m_inputWorkspace;
   std::string m_outputWorkspaceName;
+  QMap<QString, QtProperty *> m_properties;
   double m_eMin;
   double m_eMax;
   double m_scaleValue;
