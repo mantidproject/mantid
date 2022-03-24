@@ -7,6 +7,7 @@ class CutViewerPresenter:
         :param parent: An optional parent widget
         """
         self.view = view
+        # self.view.set_on_table_cell_changed(self._handle_table_cell_changed)
         # self.model = CutViewerModel(presenter)
 
     def on_dimension_changed(self):
@@ -14,3 +15,8 @@ class CutViewerPresenter:
 
     def on_slicepoint_changed(self):
         self.view.update_slicepoint()
+
+    def on_cut_done(self, wsname):
+        self.view.plot_cut_ws(wsname)
+
+    # def send_cut_notification(self):

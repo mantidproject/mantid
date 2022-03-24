@@ -273,6 +273,14 @@ class SliceViewer(ObservingPresenter, SliceViewerBasePresenter):
             self._logger.error(str(exc))
             self._show_status_message("Error exporting single-pixel cut")
 
+    def perform_non_axis_aligned_cut(self, vectors, extents, nbins):
+        try:
+            wscut_name = self.model.perform_non_axis_aligned_cut_to_workspace(vectors, extents, nbins)
+            self._call_cutviewer_presenter_if_created('on_cut_done', wscut_name)
+        except Exception as exc:
+            self._logger.error(str(exc))
+            self._show_status_message("Error exporting single-pixel cut")
+
     def nonorthogonal_axes(self, state: bool):
         """
         Toggle non-orthogonal axes on current view

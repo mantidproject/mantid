@@ -284,6 +284,17 @@ class SliceViewerModel(SliceViewerBaseModel):
 
         return help_msg
 
+    def perform_non_axis_aligned_cut_to_workspace(self, vectors, extents, nbins):
+        projection_params = {}
+        for ivec, vec in enumerate(vectors):
+            vec_str = ','.join([str(v) for v in vec])
+            projection_params[f'BasisVector{ivec}'] = ','.join([f'u{ivec+1}', 'unit', vec_str])
+        wscut = BinMD(InputWorkspace=self._get_ws(), AxisAligned=False, OutputExtents=extents,
+                      OutputBins=nbins, NormalizeBasisVectors=False, OutputWorkspace='MD_svrebinned',
+                      **projection_params)
+        # replace u1 with x for x in [Hcen + x, Kcen + x, Lcen] in 3.142 A^-1 if HKL (otherwise 1 A^-1)
+        return wscut.name()
+
     def export_roi_to_workspace_mdhisto(self, slicepoint: Sequence[Optional[float]],
                                         bin_params: Sequence[float], limits: tuple,
                                         transpose: bool, dimension_indices: Sequence[int]):
