@@ -72,10 +72,10 @@ class CutViewerView(QWidget):
         self.table.item(2, 6).setData(Qt.EditRole, float(bin_params[-1]))  # step (i.e. width)
 
     def plot_cut_ws(self, wsname):
+        self.figure.axes[0].clear()
         self.figure.axes[0].errorbar(ADS.retrieve(wsname), wkspIndex=None, marker='o', capsize=2, color='k',
                                      markersize=3)
         self.figure.canvas.draw()
-        self.figure.axes[0].autoscale(enable=True)
         self.figure.tight_layout()
 
     def read_bin_params_from_table(self):
@@ -168,7 +168,7 @@ class CutViewerView(QWidget):
 
     def _setup_figure_widget(self):
         fig, _, _, _ = create_subplots(1)
-        fig.axes[0].autoscale(enable=True)
+        fig.axes[0].autoscale(enable=True, tight=False)
         self.figure = fig
         self.figure.canvas = FigureCanvas(self.figure)
         toolbar = MantidNavigationToolbar(self.figure.canvas, self)
