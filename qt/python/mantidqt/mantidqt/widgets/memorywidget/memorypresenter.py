@@ -68,16 +68,18 @@ class MemoryPresenter(object):
         Gets memory usage information and passes it to the view
         """
         if self.update_allowed:
-            mem_used_percent, mem_used, mem_avail = get_memory_info()
-            self.view.invoke_set_value(mem_used_percent, mem_used, mem_avail)
+            system_memory_bar = get_memory_info()
+            self.view.invoke_set_value(system_memory_bar.used_percent, system_memory_bar.used_GB,
+                                       system_memory_bar.system_total_GB)
 
     def update_mantid_memory_usage(self):
         """
         Gets memory usage information and passes it to the view
         """
         if self.update_allowed:
-            mantid_mem_used_percent, mantid_mem_used, mem_avail = get_mantid_memory_info()
-            self.view.invoke_mantid_set_value(mantid_mem_used_percent, mantid_mem_used, mem_avail)
+            mantid_memory_bar = get_mantid_memory_info()
+            self.view.invoke_mantid_set_value(mantid_memory_bar.used_percent, mantid_memory_bar.used_GB,
+                                              mantid_memory_bar.system_total_GB)
 
     def cancel_memory_update(self):
         """
