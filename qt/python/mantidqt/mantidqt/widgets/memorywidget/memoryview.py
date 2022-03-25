@@ -48,12 +48,18 @@ def from_critical_to_normal(critical: int, current_value: int, new_value: int) -
 
 class MemoryView(QWidget):
     set_value = Signal(int, float, float)
+    set_mantid_value = Signal(int, float, float)
     """
     Initializes and updates the view of memory(progress) bar.
     """
     def __init__(self, parent):
         super(MemoryView, self).__init__(parent)
         self.critical = CRITICAL_PERCENTAGE
+
+        self.mantid_memory_bar = QProgressBar(self)
+        self.mantid_memory_bar.setAlignment(Qt.AlignCenter)
+        self.set_mantid_value.connect(self._set_mantid_value)
+
         self.memory_bar = QProgressBar(self)
         self.memory_bar.setAlignment(Qt.AlignCenter)
         self.set_value.connect(self._set_value)
@@ -71,8 +77,22 @@ class MemoryView(QWidget):
         else:
             pass
 
+    def set_mantid_bar_color(self, current_value: int, new_value: int):
+        """
+        Updates the memory(progress) bar style if needed
+        :param current_value: Used system memory in percentage from previous update
+        :param new_value: Latest used system memory in percentage
+        """
+        if from_normal_to_critical(self.critical, current_value, new_value):
+            self.mantid_memory_bar.setStyleSheet(CRITICAL_STYLE)
+        elif from_critical_to_normal(self.critical, current_value, new_value):
+            self.mantid_memory_bar.setStyleSheet(NORMAL_STYLE)
+
     def invoke_set_value(self, new_value: int, mem_used: float, mem_avail: float):
         self.set_value.emit(new_value, mem_used, mem_avail)
+
+    def invoke_mantid_set_value(self, new_value: int, mem_used: float, mem_avail: float):
+        self.set_mantid_value.emit(new_value, mem_used, mem_avail)
 
     @Slot(int, float, float)
     def _set_value(self, new_value, mem_used, mem_avail):
@@ -89,5 +109,23 @@ class MemoryView(QWidget):
             return
         self.set_bar_color(current_value, new_value)
         self.memory_bar.setValue(new_value)
-        display_str = f"{mem_used:3.1f}/{mem_avail:3.1f} GB ({new_value:d}%)"
+        display_str = f"{mem_used:3.1f}/{mem_avail:3.1f} GB ({new_value:d}%) - System Total"
         self.memory_bar.setFormat(display_str)
+
+    @Slot(int, float, float)
+    def _set_mantid_value(self, new_value, mem_used, mem_avail):
+        """
+        Receives memory usage information passed by memory presenter
+        and updates the displayed content as well as the style if needed
+        :param new_value: Latest used system memory in percentage
+        :param mem_used: Used system memory in Gigabytes(GB)
+        :param mem_avail: Available system memory in GB
+        """
+        # newValue is the latest mem_used_percent
+        current_value = self.mantid_memory_bar.value()
+        if current_value == new_value:
+            return
+        self.set_mantid_bar_color(current_value, new_value)
+        self.mantid_memory_bar.setValue(new_value)
+        display_str = f"{mem_used:3.1f}/{mem_avail:3.1f} GB ({new_value:d}%) - Mantid"
+        self.mantid_memory_bar.setFormat(display_str)
