@@ -83,7 +83,7 @@ public:
     static
         typename std::enable_if<std::is_same<EventAccessor, typename Accessor::EventAccessType>::value, MortonT>::type
         getIndex(const MDLeanEvent<nd> &event) {
-      return event.getIndex();
+      return event.index;
     }
   };
   template <class Accessor> friend struct AccessFor;
@@ -134,8 +134,6 @@ private:
     for (unsigned i = 0; i < nd; ++i)
       center[i] = coords[i];
   }
-
-  const MortonT getIndex() const { return index; }
 
 public:
   /* Will be keeping functions inline for (possible?) performance improvements
