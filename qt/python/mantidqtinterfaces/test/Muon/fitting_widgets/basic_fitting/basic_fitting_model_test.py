@@ -10,6 +10,9 @@ from unittest import mock
 from mantid.api import AnalysisDataService, FrameworkManager, FunctionFactory
 from mantid.simpleapi import CreateEmptyTableWorkspace, CreateSampleWorkspace
 
+from mantidqtinterfaces.Muon.GUI.Common.contexts.fitting_contexts.basic_fitting_context import (X_FROM_FIT_RANGE,
+                                                                                                X_FROM_DATA_RANGE,
+                                                                                                X_FROM_CUSTOM)
 from mantidqtinterfaces.Muon.GUI.Common.fitting_widgets.basic_fitting.basic_fitting_model import BasicFittingModel, DEFAULT_START_X
 from mantidqtinterfaces.Muon.GUI.Common.muon_pair import MuonPair
 from mantidqtinterfaces.Muon.GUI.Common.muon_base_pair import MuonBasePair
@@ -497,6 +500,7 @@ class BasicFittingModelTest(unittest.TestCase):
         self.model.end_xs = [10.0, 11.0]
         self.model.current_dataset_index = 0
         self.model.plot_guess = True
+        self.model.plot_guess_type = X_FROM_FIT_RANGE
 
         self.model.context = mock.Mock()
         self.model._double_pulse_enabled = mock.Mock(return_value=False)
@@ -505,10 +509,8 @@ class BasicFittingModelTest(unittest.TestCase):
                         'basic_fitting_model.EvaluateFunction') as mock_evaluate:
             self.model._get_guess_parameters = mock.Mock(return_value=['func', 'ws'])
             self.model.update_plot_guess()
-            mock_evaluate.assert_called_with(InputWorkspace=self.model.current_dataset_name,
+            mock_evaluate.assert_called_with(InputWorkspace=mock.ANY,
                                              Function=self.model.current_single_fit_function,
-                                             StartX=self.model.current_start_x,
-                                             EndX=self.model.current_end_x,
                                              OutputWorkspace=guess_workspace_name)
 
     @mock.patch('mantidqtinterfaces.Muon.GUI.Common.fitting_widgets.basic_fitting.basic_fitting_model.EvaluateFunction')
@@ -520,6 +522,7 @@ class BasicFittingModelTest(unittest.TestCase):
         self.model.end_xs = [10.0, 11.0]
         self.model.current_dataset_index = 0
         self.model.plot_guess = True
+        self.model.plot_guess_type = X_FROM_FIT_RANGE
 
         self.model.context = mock.Mock()
         self.model._double_pulse_enabled = mock.Mock(return_value=False)
@@ -528,10 +531,8 @@ class BasicFittingModelTest(unittest.TestCase):
         type(self.model.fitting_context).guess_workspace_name = self.mock_context_guess_workspace_name
         self.model.update_plot_guess()
 
-        mock_evaluate.assert_called_with(InputWorkspace=self.model.current_dataset_name,
+        mock_evaluate.assert_called_with(InputWorkspace=mock.ANY,
                                          Function=self.model.current_single_fit_function,
-                                         StartX=self.model.current_start_x,
-                                         EndX=self.model.current_end_x,
                                          OutputWorkspace=guess_workspace_name)
 
         self.assertEqual(1, self.mock_context_guess_workspace_name.call_count)
@@ -544,6 +545,7 @@ class BasicFittingModelTest(unittest.TestCase):
         self.model.end_xs = [10.0, 11.0]
         self.model.current_dataset_index = 0
         self.model.plot_guess = False
+        self.model.plot_guess_type = X_FROM_FIT_RANGE
 
         self.model.context = mock.Mock()
         self.mock_context_guess_workspace_name = mock.PropertyMock(return_value=None)
@@ -561,6 +563,7 @@ class BasicFittingModelTest(unittest.TestCase):
         self.model.end_xs = [10.0, 11.0]
         self.model.current_dataset_index = 0
         self.model.plot_guess = True
+        self.model.plot_guess_type = X_FROM_FIT_RANGE
 
         self.model.context = mock.Mock()
         self.model._double_pulse_enabled = mock.Mock(return_value=True)
@@ -572,6 +575,75 @@ class BasicFittingModelTest(unittest.TestCase):
 
         self.model._evaluate_double_pulse_function.assert_called_once_with(
             self.model.current_single_fit_function, guess_workspace_name)
+
+    def test_update_plot_guess_will_use_tmp_workspace_with_data_range_if_plot_range_type_is_selected(self):
+        guess_workspace_name = "__frequency_domain_analysis_fitting_guessName1"
+        self.model.dataset_names = self.dataset_names
+        self.model.single_fit_functions = self.single_fit_functions
+        self.model.start_xs = [0.0, 1.0]
+        self.model.end_xs = [10.0, 11.0]
+        self.model.current_dataset_index = 0
+        self.model.plot_guess = True
+        self.model.plot_guess_type = X_FROM_FIT_RANGE
+
+        self.model.context = mock.Mock()
+        self.model._double_pulse_enabled = mock.Mock(return_value=False)
+        self.model._get_plot_guess_name = mock.Mock(return_value=guess_workspace_name)
+        self.model._get_guess_parameters = mock.Mock(return_value=['func', 'ws'])
+        self.model.update_plot_guess()
+
+        guess_workspace = AnalysisDataService.retrieve(guess_workspace_name)
+        data_workspace = AnalysisDataService.retrieve(self.dataset_names[0])
+        self.assertEquals(guess_workspace.dataX(0).min(), 0.0)
+        self.assertEquals(guess_workspace.dataX(0).max(), 10.0)
+        self.assertEquals(guess_workspace.dataX(0).size, data_workspace.blocksize())
+
+    def test_update_plot_guess_will_use_tmp_workspace_with_data_range_if_data_points_type_is_selected(self):
+        guess_workspace_name = "__frequency_domain_analysis_fitting_guessName1"
+        self.model.dataset_names = self.dataset_names
+        self.model.single_fit_functions = self.single_fit_functions
+        self.model.start_xs = [0.0, 1.0]
+        self.model.end_xs = [10.0, 11.0]
+        self.model.current_dataset_index = 0
+        self.model.plot_guess = True
+        self.model.plot_guess_type = X_FROM_DATA_RANGE
+        self.model.plot_guess_points = 1000
+
+        self.model.context = mock.Mock()
+        self.model._double_pulse_enabled = mock.Mock(return_value=False)
+        self.model._get_plot_guess_name = mock.Mock(return_value=guess_workspace_name)
+        self.model._get_guess_parameters = mock.Mock(return_value=['func', 'ws'])
+        self.model.update_plot_guess()
+
+        guess_workspace = AnalysisDataService.retrieve(guess_workspace_name)
+        data_workspace = AnalysisDataService.retrieve(self.dataset_names[0])
+        self.assertEquals(guess_workspace.dataX(0).min(), data_workspace.dataX(0).min())
+        self.assertEquals(guess_workspace.dataX(0).max(), data_workspace.dataX(0).max())
+        self.assertEquals(guess_workspace.dataX(0).size, 1000)
+
+    def test_update_plot_guess_will_use_tmp_workspace_with_data_range_if_custom_type_is_selected(self):
+        guess_workspace_name = "__frequency_domain_analysis_fitting_guessName1"
+        self.model.dataset_names = self.dataset_names
+        self.model.single_fit_functions = self.single_fit_functions
+        self.model.start_xs = [0.0, 1.0]
+        self.model.end_xs = [10.0, 11.0]
+        self.model.current_dataset_index = 0
+        self.model.plot_guess = True
+        self.model.plot_guess_type = X_FROM_CUSTOM
+        self.model.plot_guess_points = 1000
+        self.model.plot_guess_start_x = 2.0
+        self.model.plot_guess_end_x = 12.0
+
+        self.model.context = mock.Mock()
+        self.model._double_pulse_enabled = mock.Mock(return_value=False)
+        self.model._get_plot_guess_name = mock.Mock(return_value=guess_workspace_name)
+        self.model._get_guess_parameters = mock.Mock(return_value=['func', 'ws'])
+        self.model.update_plot_guess()
+
+        guess_workspace = AnalysisDataService.retrieve(guess_workspace_name)
+        self.assertEquals(guess_workspace.dataX(0).min(), 2.0)
+        self.assertEquals(guess_workspace.dataX(0).max(), 12.0)
+        self.assertEquals(guess_workspace.dataX(0).size, 1000)
 
     def test_perform_fit_will_call_the_correct_function_for_a_single_fit(self):
         self.model.dataset_names = self.dataset_names
@@ -805,6 +877,80 @@ class BasicFittingModelTest(unittest.TestCase):
         message = self.model.validate_sequential_fit([self.model.dataset_names])
 
         self.assertEqual(message, "No data or fit function selected for fitting.")
+
+    @mock.patch('mantidqtinterfaces.Muon.GUI.Common.fitting_widgets.basic_fitting.basic_fitting_model.make_group')
+    @mock.patch('mantidqtinterfaces.Muon.GUI.Common.fitting_widgets.basic_fitting.basic_fitting_model.add_list_to_group')
+    @mock.patch('mantidqtinterfaces.Muon.GUI.Common.fitting_widgets.basic_fitting.basic_fitting_model.check_if_workspace_exist')
+    @mock.patch('mantidqtinterfaces.Muon.GUI.Common.fitting_widgets.basic_fitting.basic_fitting_model.retrieve_ws')
+    def test_add_workspaces_to_group(self, retrieve_ws, check_exists, add_to_group, make_group):
+        check_exists.return_value = True
+        retrieve_ws.return_value = "group ws"
+
+        self.model._add_workspaces_to_group(["ws"], "group")
+        retrieve_ws.assert_called_once_with("group")
+        add_to_group.assert_called_once_with(["ws"], "group ws")
+        make_group.assert_not_called()
+
+    @mock.patch('mantidqtinterfaces.Muon.GUI.Common.fitting_widgets.basic_fitting.basic_fitting_model.make_group')
+    @mock.patch('mantidqtinterfaces.Muon.GUI.Common.fitting_widgets.basic_fitting.basic_fitting_model.add_list_to_group')
+    @mock.patch('mantidqtinterfaces.Muon.GUI.Common.fitting_widgets.basic_fitting.basic_fitting_model.check_if_workspace_exist')
+    @mock.patch('mantidqtinterfaces.Muon.GUI.Common.fitting_widgets.basic_fitting.basic_fitting_model.retrieve_ws')
+    def test_add_workspaces_to_new_group(self, retrieve_ws, check_exists, add_to_group, make_group):
+        check_exists.return_value = False
+        retrieve_ws.return_value = "group ws"
+
+        self.model._add_workspaces_to_group(["ws"], "group")
+        retrieve_ws.assert_not_called()
+        add_to_group.assert_not_called()
+        make_group.assert_called_once_with(["ws"], "group")
+
+    def test_set_current_start_and_end_x_as_expected(self):
+
+        self.model.dataset_names = self.dataset_names
+        self.model.current_dataset_index = 0
+        self.model.start_xs = [0.0, 0.0]
+        self.model.end_xs = [15.0, 15.0]
+
+        self.assertEqual(self.model.current_start_x, 0.0)
+        self.assertEqual(self.model.current_end_x, 15.)
+        new_start_x = 5
+        new_end_x = 10
+
+        self.model.set_current_start_and_end_x(new_start_x, new_end_x)
+        self.assertEqual(self.model.current_start_x, new_start_x)
+        self.assertEqual(self.model.current_end_x, new_end_x)
+
+    def test_set_current_start_and_end_x_with_start_bigger_end(self):
+
+        self.model.dataset_names = self.dataset_names
+        self.model.current_dataset_index = 0
+        self.model.start_xs = [0.0, 0.0]
+        self.model.end_xs = [15.0, 15.0]
+
+        self.assertEqual(self.model.current_start_x, 0.0)
+        self.assertEqual(self.model.current_end_x, 15.)
+        new_start_x = 30
+        new_end_x = 50
+
+        self.model.set_current_start_and_end_x(new_start_x, new_end_x)
+        self.assertEqual(self.model.current_start_x, new_start_x)
+        self.assertEqual(self.model.current_end_x, new_end_x)
+
+    def test_set_current_start_and_end_x_fail(self):
+
+        self.model.dataset_names = self.dataset_names
+        self.model.current_dataset_index = 0
+        self.model.start_xs = [0.0, 0.0]
+        self.model.end_xs = [15.0, 15.0]
+
+        self.assertEqual(self.model.current_start_x, 0.0)
+        self.assertEqual(self.model.current_end_x, 15.)
+        new_start_x = 50
+        new_end_x = 10
+
+        self.model.set_current_start_and_end_x(new_start_x, new_end_x)
+        self.assertEqual(self.model.current_start_x, 0.0)
+        self.assertEqual(self.model.current_end_x, 15.0)
 
 
 if __name__ == '__main__':

@@ -72,7 +72,7 @@ public:
     AddPeakMode,
     ComparePeakMode,
     AlignPeakMode,
-    DrawRegularMode,
+    EditShapeMode,
     DrawFreeMode,
     ErasePeakMode,
     InteractionModeSize
@@ -152,6 +152,7 @@ public:
 
   void setCurrentTab(QString currentTab) { m_currentTab = currentTab; }
   void freezeRotation(bool freeze);
+  void toggleToolTip(bool);
 
   //-----------------------------------
   //    Mask methods
@@ -296,6 +297,7 @@ protected slots:
   void alignPeaks(const QRect &rect);
 
   void colorMapChanged();
+  void refreshView();
 
 protected:
   //-----------------------------------

@@ -295,16 +295,25 @@ class ColorbarWidget(QWidget):
     def _autoscale_clim(self):
         """Update stored colorbar limits
         The new limits are found from the colobar data """
-        data = self.colorbar.mappable.get_array()
+        if hasattr(self.colorbar.mappable, "get_array_clipped_to_bounds"):
+            data = self.colorbar.mappable.get_array_clipped_to_bounds()
+        else:
+            # in nonorthog view get passed a QuadMesh that doesn't have the above method
+            # however the data from get_array for MDEvent ws is already clipped (not for MDHisto)
+            data = self.colorbar.mappable.get_array()
         norm = NORM_OPTS[self.norm.currentIndex()]
         try:
             try:
                 masked_data = data[~data.mask]
                 # use the smallest positive value as vmin when using log scale,
                 # matplotlib will take care of the data skipping part.
-                masked_data = masked_data[data > 0] if norm == "Log" else masked_data
-                self.cmin_value = masked_data.min()
-                self.cmax_value = masked_data.max()
+                masked_data = masked_data[masked_data > 0] if norm == "Log" else masked_data
+
+                # If any dimension is zero then we have no data in the display area
+                data_is_empty = any(map(lambda dim: dim == 0, masked_data.shape))
+
+                self.cmin_value = 0. if data_is_empty else masked_data.min()
+                self.cmax_value = 0. if data_is_empty else masked_data.max()
             except (AttributeError, IndexError):
                 data = data[np.nonzero(data)] if norm == "Log" else data
                 self.cmin_value = np.nanmin(data)

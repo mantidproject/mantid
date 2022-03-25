@@ -125,6 +125,18 @@ class ReflectometryISISLoadAndProcessTest(unittest.TestCase):
         history = ['ReflectometryISISPreprocess', 'ReflectometryReductionOneAuto', 'GroupWorkspaces']
         self._check_history(AnalysisDataService.retrieve('IvsQ_binned_13460'), history)
 
+    def test_loading_workspace_group(self):
+        args = self._default_options
+        args['InputRunList'] = 'POLREF14966'
+        outputs = ['IvsLam_14966', 'IvsLam_14966_1', 'IvsLam_14966_2',
+                   'IvsQ_14966', 'IvsQ_14966_1', 'IvsQ_14966_2',
+                   'IvsQ_binned_14966', 'IvsQ_binned_14966_1', 'IvsQ_binned_14966_2',
+                   'TOF_14966_1', 'TOF_14966_2', 'TOF']
+        self._assert_run_algorithm_succeeds(args, outputs)
+        # RROA is called for each member of the group and then they are grouped together to form the output group
+        history = ['ReflectometryReductionOneAuto', 'ReflectometryReductionOneAuto', 'GroupWorkspaces']
+        self._check_history(AnalysisDataService.retrieve('IvsQ_binned_14966_1'), history, False)
+
     def test_overriding_output_names(self):
         self._create_workspace(13460, 'TOF_')
         args = self._default_options

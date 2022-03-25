@@ -804,7 +804,7 @@ public:
   /**  Opens the dataset within this NXData with signal=1 attribute.
    */
   template <typename T> NXDataSetTyped<T> openData() {
-    for (std::vector<NXInfo>::const_iterator it = datasets().begin(); it != datasets().end(); it++) {
+    for (std::vector<NXInfo>::const_iterator it = datasets().begin(); it != datasets().end(); ++it) {
       NXDataSet dset(*this, it->nxname);
       dset.open();
       // std::cerr << "NXData signal of " << it->nxname << " = " <<
@@ -908,12 +908,12 @@ public:
    *   @param name :: The name of the class
    *   @return the nxdata entry
    */
-  NXData openNXData(const std::string &name) { return openNXClass<NXData>(name); }
+  NXData openNXData(const std::string &name) const { return openNXClass<NXData>(name); }
   /**  Opens a NXInstrument
    *   @param name :: The name of the class
    *   @return the instrument
    */
-  NXInstrument openNXInstrument(const std::string &name) { return openNXClass<NXInstrument>(name); }
+  NXInstrument openNXInstrument(const std::string &name) const { return openNXClass<NXInstrument>(name); }
 };
 
 /**  Implements NXroot Nexus class.

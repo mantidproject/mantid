@@ -64,6 +64,12 @@ public:
   /**Save the box at specific disk position using the class, respoinsible for
    * the file IO. */
   virtual void saveAt(API::IBoxControllerIO *const /*saver */, uint64_t /*position*/) const = 0;
+
+  /**Load the additional box data of specified size from the disk location
+   * provided using the class, respoinsible for the file IO and append them to
+   * the box. Allow for passing temporary memory */
+  virtual void loadAndAddFrom(API::IBoxControllerIO *const /*saver */, uint64_t /*position*/, size_t /* Size */,
+                              std::vector<coord_t> &) = 0;
   /**Load the additional box data of specified size from the disk location
    * provided using the class, respoinsible for the file IO and append them to
    * the box */

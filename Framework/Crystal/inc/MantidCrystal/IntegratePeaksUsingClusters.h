@@ -15,7 +15,7 @@ namespace Crystal {
 
 /** IntegratePeaksUsingClusters : Uses clustering to integrate peaks.
  */
-class MANTID_CRYSTAL_DLL IntegratePeaksUsingClusters : public API::Algorithm {
+class MANTID_CRYSTAL_DLL IntegratePeaksUsingClusters final : public API::Algorithm {
 public:
   const std::string name() const override;
   /// Summary of algorithms purpose

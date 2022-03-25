@@ -7,24 +7,20 @@
 import unittest
 
 from mantidqt.utils.qt.testing import start_qapplication
-from mantidqt.utils.qt.testing.qt_widget_finder import QtWidgetFinder
 
 from mantidqtinterfaces.Muon.GUI.Common.fitting_widgets.model_fitting.model_fitting_view import ModelFittingView
-
-from qtpy.QtWidgets import QApplication
+from mantidqtinterfaces.Muon.GUI.Common.results_tab_widget.results_tab_model import TableColumnType
 
 
 @start_qapplication
-class ModelFittingViewTest(unittest.TestCase, QtWidgetFinder):
+class ModelFittingViewTest(unittest.TestCase):
 
     def setUp(self):
         self.view = ModelFittingView()
         self.view.show()
-        self.assert_widget_created()
 
     def tearDown(self):
         self.assertTrue(self.view.close())
-        QApplication.sendPostedEvents()
 
     def test_that_the_dataset_workspace_selector_is_hidden_by_default(self):
         self.assertTrue(self.view.workspace_selector.isHidden())
@@ -62,10 +58,12 @@ class ModelFittingViewTest(unittest.TestCase, QtWidgetFinder):
 
     def test_that_update_x_and_y_parameters_will_update_the_x_and_y_parameters(self):
         x_parameters = ["workspace_name", "A0", "A1"]
+        x_parameter_types = [TableColumnType.NoType.value, TableColumnType.Y.value, TableColumnType.Y.value]
         y_parameters = ["workspace_name", "A0", "A1", "Chi Squared"]
+        y_parameter_types = [TableColumnType.NoType.value, TableColumnType.Y.value, TableColumnType.Y.value, TableColumnType.Y.value]
 
-        self.view.update_x_parameters(x_parameters)
-        self.view.update_y_parameters(y_parameters)
+        self.view.update_x_parameters(x_parameters, x_parameter_types)
+        self.view.update_y_parameters(y_parameters, y_parameter_types)
 
         x_data = [self.view.model_fitting_data_selector.x_selector.itemText(i)
                   for i in range(self.view.model_fitting_data_selector.x_selector.count())]
@@ -75,7 +73,7 @@ class ModelFittingViewTest(unittest.TestCase, QtWidgetFinder):
         self.assertTrue(x_data, x_parameters)
         self.assertTrue(y_data, y_parameters)
         self.assertEqual(self.view.x_parameter(), "workspace_name")
-        self.assertEqual(self.view.y_parameter(), "workspace_name")
+        self.assertEqual(self.view.y_parameter(), "A0")
 
     def test_that_current_result_table_index_returns_the_expected_index(self):
         result_table_names = ["Name1", "Name2", "Name3"]

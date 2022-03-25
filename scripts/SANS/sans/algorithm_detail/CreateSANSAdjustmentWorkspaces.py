@@ -13,14 +13,15 @@ from sans.algorithm_detail.CreateSANSWavelengthPixelAdjustment import CreateSANS
 from sans.algorithm_detail.normalize_to_sans_monitor import normalize_to_monitor
 from sans.common.constants import EMPTY_NAME
 from sans.common.general_functions import create_unmanaged_algorithm
+from sans.state.AllStates import AllStates
 from sans.state.StateObjects.wavelength_interval import WavRange
 
 
 class CreateSANSAdjustmentWorkspaces(object):
-    def __init__(self, state_adjustment, component, data_type, slice_event_factor=1.0):
+    def __init__(self, state: AllStates, component, data_type, slice_event_factor=1.0):
         """
         Calculates wavelength adjustment, pixel adjustment workspaces and wavelength-and-pixel adjustment workspaces.
-        :param state: The SANS State -> Adjustment object
+        :param state: The SANS AllStates object
         :param component: The component of the instrument which is currently being investigated.
                           Allowed values: ['HAB', 'LAB']
         :param data_type: The component of the instrument which is to be reduced.
@@ -31,7 +32,8 @@ class CreateSANSAdjustmentWorkspaces(object):
         self._component = component
         self._data_type = data_type
         self._slice_event_factor = slice_event_factor
-        self._state = state_adjustment
+        self._state_adjustment = state.adjustment
+        self._state_wavelength = state.wavelength
 
     def create_sans_adjustment_workspaces(self, transmission_ws, direct_ws, monitor_ws,
                                           sample_data, wav_range: WavRange):
@@ -89,7 +91,7 @@ class CreateSANSAdjustmentWorkspaces(object):
                                                         calculated_transmission_workspace, wav_range: WavRange):
         component = self._component
 
-        state_adjust = self._state.wavelength_and_pixel_adjustment
+        state_adjust = self._state_adjustment.wavelength_and_pixel_adjustment
 
         alg = CreateSANSWavelengthPixelAdjustment(component=component,
                                                   state_adjustment_wavelength_and_pixel=state_adjust)
@@ -105,7 +107,8 @@ class CreateSANSAdjustmentWorkspaces(object):
         scale_factor = self._slice_event_factor
 
         ws = normalize_to_monitor(
-            state_adjustment_normalize_to_monitor=self._state.normalize_to_monitor,
+            normalize_to_monitor=self._state_adjustment.normalize_to_monitor,
+            wavelengths=self._state_wavelength,
             workspace=monitor_ws, scale_factor=scale_factor, wav_range=wav_range)
 
         return ws
@@ -121,7 +124,7 @@ class CreateSANSAdjustmentWorkspaces(object):
 
         if transmission_ws and direct_ws:
             data_type = self._data_type
-            calc_trans_state = self._state.calculate_transmission
+            calc_trans_state = self._state_adjustment.calculate_transmission
 
             fitted_data, unfitted_data = calculate_transmission(
                 data_type_str=data_type, state_adjustment_calculate_transmission=calc_trans_state,
@@ -129,7 +132,7 @@ class CreateSANSAdjustmentWorkspaces(object):
         return fitted_data, unfitted_data
 
     def _get_wide_angle_correction_workspace(self, sample_data, calculated_transmission_workspace):
-        wide_angle_correction = self._state.wide_angle_correction
+        wide_angle_correction = self._state_adjustment.wide_angle_correction
 
         workspace = None
         if wide_angle_correction and sample_data and calculated_transmission_workspace:

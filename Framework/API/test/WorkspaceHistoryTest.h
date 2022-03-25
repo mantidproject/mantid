@@ -11,8 +11,8 @@
 #include "MantidAPI/AlgorithmHistory.h"
 #include "MantidAPI/FileFinder.h"
 #include "MantidAPI/WorkspaceHistory.h"
+#include "MantidFrameworkTestHelpers/NexusTestHelper.h"
 #include "MantidKernel/Property.h"
-#include "MantidTestHelpers/NexusTestHelper.h"
 #include "Poco/File.h"
 #include <cxxtest/TestSuite.h>
 
@@ -25,7 +25,7 @@ private:
   class SimpleSum : public Algorithm {
   public:
     SimpleSum() : Algorithm() {}
-    ~SimpleSum() override {}
+    ~SimpleSum() override = default;
     const std::string name() const override { return "SimpleSum"; }
     int version() const override { return 1; }
     const std::string category() const override { return "Dummy"; }

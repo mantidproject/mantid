@@ -23,7 +23,7 @@ namespace Algorithms {
 /** CorrectTOFAxis : Corrects the time-of-flight axis with regards to
   the incident energy and the L1+L2 distance or a reference workspace.
 */
-class MANTID_ALGORITHMS_DLL CorrectTOFAxis : public API::Algorithm {
+class MANTID_ALGORITHMS_DLL CorrectTOFAxis final : public API::Algorithm {
 public:
   const std::string name() const override;
   int version() const override;
@@ -32,7 +32,7 @@ public:
   const std::string summary() const override;
 
 private:
-  size_t m_elasticBinIndex = EMPTY_LONG();
+  size_t m_elasticBinIndex;
   API::ITableWorkspace_const_sptr m_eppTable;
   API::MatrixWorkspace_const_sptr m_inputWs;
   API::MatrixWorkspace_const_sptr m_referenceWs;
@@ -44,7 +44,7 @@ private:
   void useReferenceWorkspace(const API::MatrixWorkspace_sptr &outputWs);
   void correctManually(const API::MatrixWorkspace_sptr &outputWs);
   double averageL2(const API::SpectrumInfo &spectrumInfo);
-  void averageL2AndEPP(const API::SpectrumInfo &spectrumInfo, double &l2, double &epp);
+  void averageL2AndEPP(const API::SpectrumInfo &spectrumInfo, double &l2Average, double &eppAverage);
   std::vector<size_t> referenceWorkspaceIndices() const;
 };
 

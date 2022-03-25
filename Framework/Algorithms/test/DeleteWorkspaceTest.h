@@ -9,7 +9,7 @@
 //------------------------------------------------------------------------------
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidAlgorithms/DeleteWorkspace.h"
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
+#include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
 
 #include <cxxtest/TestSuite.h>
 
@@ -85,6 +85,29 @@ public:
 
     TS_ASSERT_EQUALS(dataStore.size(), 0);
 
+    dataStore.clear();
+  }
+
+  void test_deleting_empty_group() {
+    using namespace Mantid::API;
+    using namespace Mantid::DataObjects;
+    AnalysisDataServiceImpl &dataStore = AnalysisDataService::Instance();
+    const size_t storeSizeAtStart(dataStore.size());
+
+    const auto groupName = "emptyGroup";
+    auto group = WorkspaceCreationHelper::createWorkspaceGroup(0, 0, 0, groupName);
+    dataStore.addOrReplace(groupName, group);
+    TS_ASSERT_EQUALS(storeSizeAtStart + 1, dataStore.size())
+    Mantid::Algorithms::DeleteWorkspace alg;
+    alg.initialize();
+    alg.setRethrows(true);
+    alg.setPropertyValue("Workspace", groupName);
+
+    auto success = alg.execute();
+
+    TS_ASSERT(alg.isExecuted());
+    TS_ASSERT(success);
+    TS_ASSERT_EQUALS(storeSizeAtStart, dataStore.size())
     dataStore.clear();
   }
 };

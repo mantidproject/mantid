@@ -11,20 +11,10 @@
 Functionality for dealing with legends on plots
 """
 import matplotlib
-from matplotlib import colors
 from matplotlib.patches import BoxStyle
 
 from mantid.kernel import ConfigService
-from mantid.plots.utility import legend_set_draggable
-
-
-def convert_color_to_hex(color):
-    """Convert a matplotlib color to its hex form"""
-    try:
-        return colors.cnames[color]
-    except (KeyError, TypeError):
-        rgb = colors.colorConverter.to_rgb(color)
-        return colors.rgb2hex(rgb)
+from mantid.plots.utility import convert_color_to_hex, legend_set_draggable
 
 
 class LegendProperties(dict):

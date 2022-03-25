@@ -35,7 +35,7 @@ Workspace2D::Workspace2D(const Workspace2D &other) : HistoWorkspace(other), m_mo
 }
 
 /// Destructor
-Workspace2D::~Workspace2D() {}
+Workspace2D::~Workspace2D() = default;
 
 /**
  * Sets the size of the workspace and initializes arrays to zero

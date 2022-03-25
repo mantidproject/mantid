@@ -177,7 +177,7 @@ void DiffractionFocussing2::exec() {
 
   PARALLEL_FOR_IF(Kernel::threadSafe(*m_matrixInputW, *out))
   for (int outWorkspaceIndex = 0; outWorkspaceIndex < static_cast<int>(m_validGroups.size()); outWorkspaceIndex++) {
-    PARALLEL_START_INTERUPT_REGION
+    PARALLEL_START_INTERRUPT_REGION
     auto group = static_cast<int>(m_validGroups[outWorkspaceIndex]);
 
     // Get the group
@@ -300,9 +300,9 @@ void DiffractionFocussing2::exec() {
     std::for_each(Eout.begin(), Eout.end(), [groupSize](double &val) { val *= static_cast<double>(groupSize); });
 
     prog.report();
-    PARALLEL_END_INTERUPT_REGION
+    PARALLEL_END_INTERRUPT_REGION
   } // end of loop for groups
-  PARALLEL_CHECK_INTERUPT_REGION
+  PARALLEL_CHECK_INTERRUPT_REGION
 
   setProperty("OutputWorkspace", out);
 
@@ -374,7 +374,7 @@ void DiffractionFocussing2::execEvent() {
 
     PRAGMA_OMP(parallel for schedule(dynamic, 1) )
     for (int wiChunk = 0; wiChunk < end; wiChunk++) {
-      PARALLEL_START_INTERUPT_REGION
+      PARALLEL_START_INTERRUPT_REGION
 
       // Perform in chunks for more efficiency
       int max = (wiChunk + 1) * chunkSize;
@@ -396,16 +396,16 @@ void DiffractionFocussing2::execEvent() {
       // Rejoin the chunk with the rest.
       PARALLEL_CRITICAL(DiffractionFocussing2_JoinChunks) { groupEL += chunkEL; }
 
-      PARALLEL_END_INTERUPT_REGION
+      PARALLEL_END_INTERRUPT_REGION
     }
-    PARALLEL_CHECK_INTERUPT_REGION
+    PARALLEL_CHECK_INTERRUPT_REGION
   } else {
     // ------ PARALLELIZE BY GROUPS -------------------------
 
     auto nValidGroups = static_cast<int>(this->m_validGroups.size());
     PARALLEL_FOR_IF(Kernel::threadSafe(*m_eventW))
     for (int iGroup = 0; iGroup < nValidGroups; iGroup++) {
-      PARALLEL_START_INTERUPT_REGION
+      PARALLEL_START_INTERRUPT_REGION
       const std::vector<size_t> &indices = this->m_wsIndices[iGroup];
       for (auto wi : indices) {
         // In workspace index iGroup, put what was in the OLD workspace index wi
@@ -419,9 +419,9 @@ void DiffractionFocussing2::execEvent() {
           std::const_pointer_cast<EventWorkspace>(m_eventW)->getSpectrum(wi).clear();
         }
       }
-      PARALLEL_END_INTERUPT_REGION
+      PARALLEL_END_INTERRUPT_REGION
     }
-    PARALLEL_CHECK_INTERUPT_REGION
+    PARALLEL_CHECK_INTERRUPT_REGION
   } // (done with parallel by groups)
 
   // Now that the data is cleaned up, go through it and set the X vectors to the
@@ -581,7 +581,7 @@ void DiffractionFocussing2::determineRebinParameters() {
       throw std::runtime_error(mess.str());
     }
     // This log step size will give the right # of points
-    step = (log(Xmax) - log(Xmin)) / nPoints;
+    step = expm1((log(Xmax) - log(Xmin)) / nPoints);
     mess << "Found Group:" << gpit->first << "(Xmin,Xmax,log step):" << (gpit->second).first << ","
          << (gpit->second).second << "," << step;
     // g_log.information(mess.str());

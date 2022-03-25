@@ -21,26 +21,28 @@ Optional properties
 
 If only a portion of the workspace should be integrated then the
 optional parameters may be used to restrict the range.
-StartWorkspaceIndex & EndWorkspaceIndex may be used to select a
+``StartWorkspaceIndex`` and ``EndWorkspaceIndex`` may be used to select a
 contiguous range of spectra in the workspace (note that these parameters
 refer to the workspace index value rather than spectrum numbers as taken
 from the raw file). If only a certain range of each spectrum should be
-summed then the RangeLower and RangeUpper properties, as well as their -List
-versions should be used. RangeLower and RangeUpper are single values
-limiting the summing range over all histograms. RangeLowerList and
-RangeUpperList contain the ranges for each individual histogram. The
+summed then the ``RangeLower`` and ``RangeUpper`` properties, as well as their ``-List``
+versions should be used. ``RangeLower`` and ``RangeUpper`` are single values
+limiting the summing range over all histograms. ``RangeLowerList`` and
+``RangeUpperList`` contain the ranges for each individual histogram. The
 properties can be mixed: for instance, the histogram specific lower
-integration limits can be given by RangeLowerList while all upper limits
-can be set to the same value by RangeUpper. If both list and non-list versions
+integration limits can be given by ``RangeLowerList`` while all upper limits
+can be set to the same value by ``RangeUpper``. If both list and non-list versions
 are given, then the range is chosen which gives stricter limits for each
 histogram.
 
-No rebinning takes place as part of this algorithm: if the ranges given do
-not coincide with a bin boundary then the first bin boundary within the
-range is used. If a value is given that is beyond the limit covered by
-the spectrum then it will be integrated up to its limit. The data that
-falls outside any values set will not contribute to the output
-workspace.
+No rebinning takes place as part of this algorithm. If the integration limits given
+do not coincide with a bin boundary then the behaviour depends on the ``IncludePartialBins``
+parameter. If ``IncludePartialBins=True`` then a contribution is calculated for any
+bins that partially sit inside the integration limits. If ``IncludePartialBins=False``
+then the integration only includes bins that sit entirely within the integration limits.
+If an integration limit is given that is beyond the X range covered by the spectrum then
+the integration will proceed up to final bin boundary. The data that falls outside any
+integration limits set will not contribute to the output workspace.
 
 EventWorkspaces
 ###############
@@ -60,6 +62,49 @@ To obtain integral in the desired range, user have to :ref:`algm-Rebin` first,
 and one of the binning intervals have to start from 18000 and another (or the same)
 end at 20000.
 
+Distribution Data
+#################
+
+Mantid workspaces store their data internally in one of two formats: as *counts* or as
+*frequencies* (counts divided by bin-width). When the :math:`y` values are stored as
+frequencies, the workspace is called a *distribution*.
+The algorithms :ref:`ConvertToDistribution <algm-ConvertToDistribution>` and
+:ref:`ConvertFromDistribution <algm-ConvertFromDistribution>` converts the internal
+representation from counts to frequencies or vice versa.
+The ``Integration`` algorithm will correctly deal with the data to give the total
+**counts** as output. That is, if you integrate a distribution workspace directly or
+convert it first to counts and then call ``Integration`` the output workspace will have
+the same :math:`y` values.
+
+Note that the un-integrated axis (say the :math:`x` axis) may still be binned,
+in which case the result of integrating distribution vs non-distribution data will not be equivalent.
+That is, integrating a distribution will create a new distribution where the internal :math:`y`
+values represent the summed counts per :math:`x`-bin-width. Whereas,
+integrating a non-distribution workspace will yield the same internal :math:`y` values but
+these now represent counts (not counts per :math:`x`-bin-width).
+
+
+Fractional Rebinning
+####################
+
+Some algorithms, such as :ref:`SofQWNormalisedPolygon <algm-SofQWNormalisedPolygon>`
+or :ref:`ConvertToReflectometryQ <algm-ConvertToReflectometryQ>`, create a special type of
+:ref:`Workspace2D <Workspace2D>` called a ``RebinnedOutput`` workspace in which
+each bin contains both a value and the fractional overlap area of the this bin over
+that of the original data. There is more discussion of this in the
+:ref:`SofQWNormalisedPolygon <algm-SofQWNormalisedPolygon>` documentation.
+
+This algorithm calculates the integrated counts per spectra of a ``RebinnedOutput``
+workspace as follows:
+
+.. math::
+   I = \left. \sum_i Y_i F_i \middle/ \left(\frac{1}{n} \sum_i F_i \right) \right.
+
+where :math:`Y_i` and :math:`F_i` are the values and fractions for the :math:`i^{\mathrm{th}}`
+bin and the sum runs from ``RangeLower`` to ``RangeUpper``. :math:`n` is the number
+of bins (or fractional bins if ``IncludePartialBins=True``) in the range which is not ``NaN``.
+The :math:`1/n` factor is needed so that the integral is correctly normalised compared to
+the case when there is no fractional bins, where all :math:`F_i = 1`.
 
 
 Usage

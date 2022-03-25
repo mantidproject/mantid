@@ -14,13 +14,13 @@
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/TableRow.h"
 #include "MantidAPI/WorkspaceGroup.h"
+#include "MantidFrameworkTestHelpers/DataProcessorTestHelper.h"
+#include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/GenericDataProcessorPresenter.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/MockObjects.h"
 #include "MantidQtWidgets/Common/MockProgressableView.h"
 #include "MantidQtWidgets/Common/WidgetDllOption.h"
-#include "MantidTestHelpers/DataProcessorTestHelper.h"
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
 using namespace DataProcessorTestHelper;
 using namespace MantidQt::MantidWidgets;
@@ -59,7 +59,7 @@ public:
       : GenericDataProcessorPresenter(whitelist, processor, group) {}
 
   // Destructor
-  ~GenericDataProcessorPresenterFriend() override {}
+  ~GenericDataProcessorPresenterFriend() override = default;
 };
 
 // Use this mocked presenter for tests that will start the reducing row/group
@@ -83,7 +83,7 @@ public:
       : GenericDataProcessorPresenter(whitelist, processor, postprocessor, group) {}
 
   // Destructor
-  ~GenericDataProcessorPresenterNoThread() override {}
+  ~GenericDataProcessorPresenterNoThread() override = default;
 
 private:
   // non-async row reduce

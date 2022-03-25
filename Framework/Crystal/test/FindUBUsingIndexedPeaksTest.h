@@ -13,6 +13,7 @@
 #include <cxxtest/TestSuite.h>
 
 #include "MantidCrystal/FindUBUsingIndexedPeaks.h"
+#include "MantidCrystal/IndexPeaks.h"
 #include "MantidCrystal/LoadIsawPeaks.h"
 #include "MantidCrystal/LoadIsawUB.h"
 #include "MantidDataHandling/LoadNexusProcessed.h"
@@ -178,6 +179,99 @@ public:
     for (size_t i = 0; i < 3; i++) {
       TS_ASSERT_DELTA(correct_err1[i], err_calculated1[i], 5e-4);
       TS_ASSERT_DELTA(correct_err2[i], err_calculated2[i], 5e-4);
+    }
+
+    // Remove workspace from the data service.
+    AnalysisDataService::Instance().remove("peaks");
+  }
+
+  void test_mod_multiple_runs_common_UB() {
+    // Create fake peaks workspace with two different runs with mod vectors
+    auto pw = std::make_shared<LeanElasticPeaksWorkspace>();
+    pw->mutableSample().setOrientedLattice(std::make_unique<OrientedLattice>(5, 6, 7, 90, 90, 90));
+    for (int h = 0; h < 2; h++) {
+      for (int k = 0; k < 2; k++) {
+        for (int l = 0; l < 2; l++) {
+          if (h == 0 && k == 0 && l == 0)
+            continue;
+          auto p1 = pw->createPeakHKL(V3D(h, k, l));
+          auto p2 = pw->createPeakHKL(V3D(h + 0.250, k, l));
+          auto p3 = pw->createPeakHKL(V3D(h - 0.252, k, l));
+          p1->setRunNumber(1);
+          p2->setRunNumber(1);
+          p3->setRunNumber(1);
+          pw->addPeak(*p1);
+          pw->addPeak(*p2);
+          pw->addPeak(*p3);
+          auto p4 = pw->createPeakHKL(V3D(h, k, l));
+          auto p5 = pw->createPeakHKL(V3D(h + 0.252, k, l));
+          auto p6 = pw->createPeakHKL(V3D(h - 0.250, k, l));
+          p4->setRunNumber(2);
+          p5->setRunNumber(2);
+          p6->setRunNumber(2);
+          pw->addPeak(*p4);
+          pw->addPeak(*p5);
+          pw->addPeak(*p6);
+        }
+      }
+    }
+
+    AnalysisDataService::Instance().addOrReplace("peaks", pw);
+
+    IndexPeaks alg;
+    alg.initialize();
+    alg.setPropertyValue("PeaksWorkspace", "peaks");
+    alg.setProperty("RoundHKLs", false);
+    alg.setPropertyValue("ModVector1", "0.25,0,0");
+    alg.setProperty("MaxOrder", 1);
+    alg.execute();
+
+    // Check starting oriented lattice, mod vectors should be all 0
+    OrientedLattice latt = pw->mutableSample().getOrientedLattice();
+
+    V3D start_vec = latt.getModVec(0);
+    V3D start_err = latt.getVecErr(0);
+
+    for (size_t i = 0; i < 3; i++) {
+      TS_ASSERT_EQUALS(0, start_vec[i]);
+      TS_ASSERT_EQUALS(0, start_err[i]);
+    }
+
+    // Run with CommonUBForAll=False
+    FindUBUsingIndexedPeaks alg2;
+    TS_ASSERT_THROWS_NOTHING(alg2.initialize())
+    TS_ASSERT(alg2.isInitialized())
+    TS_ASSERT_THROWS_NOTHING(alg2.setPropertyValue("PeaksWorkspace", "peaks"));
+    TS_ASSERT_THROWS_NOTHING(alg2.execute(););
+    TS_ASSERT(alg2.isExecuted());
+
+    latt = pw->mutableSample().getOrientedLattice();
+    V3D correct_vec = V3D(0.251, 0, 0);
+    V3D correct_err = V3D(0.00026, 0, 0);
+
+    V3D current_vec = latt.getModVec(0);
+    V3D current_err = latt.getVecErr(0);
+
+    for (size_t i = 0; i < 3; i++) {
+      TS_ASSERT_DELTA(correct_vec[i], current_vec[i], 1e-4);
+      TS_ASSERT_DELTA(correct_err[i], current_err[i], 1e-4);
+    }
+
+    // Now with CommonUBForAll=True, should have same mod vectors but larger errors
+    TS_ASSERT_THROWS_NOTHING(alg2.setProperty("CommonUBForAll", true));
+    TS_ASSERT_THROWS_NOTHING(alg2.execute(););
+    TS_ASSERT(alg2.isExecuted());
+
+    latt = pw->mutableSample().getOrientedLattice();
+    correct_vec = V3D(0.251, 0, 0);
+    correct_err = V3D(0.00061, 0, 0);
+
+    current_vec = latt.getModVec(0);
+    current_err = latt.getVecErr(0);
+
+    for (size_t i = 0; i < 3; i++) {
+      TS_ASSERT_DELTA(correct_vec[i], current_vec[i], 1e-4);
+      TS_ASSERT_DELTA(correct_err[i], current_err[i], 1e-4);
     }
 
     // Remove workspace from the data service.

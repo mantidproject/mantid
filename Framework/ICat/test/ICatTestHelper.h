@@ -7,7 +7,7 @@
 #pragma once
 
 #include "MantidAPI/CatalogSession.h"
-#include "MantidTestHelpers/FacilityHelper.h"
+#include "MantidFrameworkTestHelpers/FacilityHelper.h"
 
 namespace ICatTestHelper {
 
@@ -19,8 +19,8 @@ public:
   std::string getSessionId() const;
 
 private:
-  Mantid::API::CatalogSession_sptr m_session;
   FacilityHelper::ScopedFacilities m_loadTESTFacility;
+  Mantid::API::CatalogSession_sptr m_session;
 };
 
 } // namespace ICatTestHelper

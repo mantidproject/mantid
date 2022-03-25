@@ -15,8 +15,8 @@
 #include "MantidAlgorithms/CreateLogPropertyTable.h"
 #include "MantidDataHandling/Load.h"
 #include "MantidDataObjects/EventWorkspace.h"
+#include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidKernel/TimeSeriesProperty.h"
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
 #include <string>
 #include <vector>

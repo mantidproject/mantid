@@ -11,8 +11,8 @@
 #include "MantidSINQ/PoldiUtilities/PoldiResidualCorrelationCore.h"
 
 #include "MantidDataObjects/Workspace2D.h"
+#include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidSINQ/PoldiUtilities/PoldiMockInstrumentHelpers.h"
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
 using namespace Mantid::Poldi;
 using namespace Mantid::API;

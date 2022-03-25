@@ -203,6 +203,27 @@ public:
       newInstrumentWindowName The new title of the window
 %End
 
+  bool isThreadRunning();
+%Docstring
+  bool isThreadRunning()
+  ----------------------
+  Return whether the instrument loading thread is still executing.
+%End
+
+  void waitForThread() /ReleaseGIL/;
+%Docstring
+  void waitForThread()
+  --------------------
+  Blocks until the instrument loading thread is finished.
+%End
+
+  void saveImage(QString filename);
+%Docstring
+  void saveImage(QString filename)
+  --------------------------------
+  Saves the current scene as a png image to a file.
+%End
+
 };
 
 class InstrumentWidgetEncoder {

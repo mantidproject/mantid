@@ -21,6 +21,7 @@ namespace LiveData {
 */
 class MANTID_LIVEDATA_DLL LoadLiveData : public LiveDataAlgorithm {
 public:
+  virtual ~LoadLiveData() = default;
   const std::string name() const override;
   /// Summary of algorithms purpose
   const std::string summary() const override {

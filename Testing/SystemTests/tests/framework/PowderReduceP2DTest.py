@@ -7,6 +7,9 @@
 import systemtesting
 from mantid.simpleapi import PowderReduceP2D
 
+import sys
+import os
+
 
 class PowderReduceP2DTest(systemtesting.MantidSystemTest):
     def __init__(self):
@@ -52,6 +55,10 @@ class PowderReduceP2DTest(systemtesting.MantidSystemTest):
 
     def validate(self):
         return self.outputFile + '.p2d', self.reference
+
+    def skipTests(self):
+        # If CONDA_PREFIX is defined skip tests
+        return "CONDA_PREFIX" in os.environ
 
     def _sampleEventData(self):
         """path to sample event data used for testing the algorithm"""
@@ -122,11 +129,8 @@ class PowderReduceP2DTest(systemtesting.MantidSystemTest):
         return 4
 
     def _loadReference(self):
-        return 'PowderReduceP2D_reference.p2d'
+        suffix = "" if sys.platform != 'win32' else "_msvc"
+        return f'PowderReduceP2D_reference{suffix}.p2d'
 
     def _outputFile(self):
         return 'PowderReduceP2D_Test'
-
-
-if __name__ == '__main__':
-    unittest.main()

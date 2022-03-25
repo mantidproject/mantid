@@ -227,7 +227,6 @@ class _TomlV1ParserImpl(TomlParserImplBase):
 
         to_set = DuplicateWavelengthStates(
             transmission=self.calculate_transmission,
-            normalize=self.normalize_to_monitor,
             wavelength=self.wavelength,
             pixel=self.wavelength_and_pixel)
 
@@ -286,7 +285,7 @@ class _TomlV1ParserImpl(TomlParserImplBase):
             min_q.append(self.get_val("min", shift_dict))
             max_q.append(self.get_val("max", shift_dict))
         else:
-            self.reduction_mode.merge_shift = self.get_val("distance", shift_dict, default=0.0)
+            self.reduction_mode.merge_shift = self.get_val("factor", shift_dict, default=0.0)
 
         self.reduction_mode.merge_range_min = min(q for q in min_q if q is not None) if any(min_q) else None
         self.reduction_mode.merge_range_max = max(q for q in max_q if q is not None) if any(max_q) else None

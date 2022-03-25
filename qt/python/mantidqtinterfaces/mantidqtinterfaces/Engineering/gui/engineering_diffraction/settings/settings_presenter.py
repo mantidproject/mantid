@@ -7,14 +7,14 @@
 # pylint: disable=invalid-name
 from os import path
 from mantidqt.utils.observer_pattern import Observable
+from Engineering.EnggUtils import CALIB_DIR
 
-CALIB_FOLDER = path.join(path.dirname(path.dirname(path.dirname(path.dirname(path.realpath(__file__))))), "calib")
 DEFAULT_FULL_INST_CALIB = "ENGINX_full_instrument_calibration_193749.nxs"
 SETTINGS_DICT = {"save_location": str, "full_calibration": str, "logs": str,
                  "primary_log": str, "sort_ascending": bool, "default_peak": str}
 
 DEFAULT_SETTINGS = {
-    "full_calibration": path.join(CALIB_FOLDER, DEFAULT_FULL_INST_CALIB),
+    "full_calibration": path.join(CALIB_DIR, DEFAULT_FULL_INST_CALIB),
     "save_location": path.join(path.expanduser("~"), "Engineering_Mantid"),
     "logs": ','.join(
         ['Temp_1', 'W_position', 'X_position', 'Y_position', 'Z_position', 'stress', 'strain', 'stressrig_go']),
@@ -126,11 +126,15 @@ class SettingsPresenter(object):
         for key in list(self.settings):
             if key not in DEFAULT_SETTINGS.keys():
                 del self.settings[key]
-        if "default_peak" not in self.settings or not self.settings["default_peak"] in ALL_PEAKS:
+        self.check_and_populate_with_default("default_peak")
+        if not self.settings["default_peak"] in ALL_PEAKS:
             self.settings["default_peak"] = DEFAULT_SETTINGS["default_peak"]
+        self.check_and_populate_with_default("full_calibration")
+        if not path.isfile(self.settings["full_calibration"]):
+            self.settings["full_calibration"] = DEFAULT_SETTINGS["full_calibration"]
         self.check_and_populate_with_default("save_location")
         self.check_and_populate_with_default("logs")
-        self.check_and_populate_with_default("full_calibration")
+
         self.check_and_populate_with_default("primary_log")
         # boolean values already checked to be "" or True or False in settings_helper
         self.check_and_populate_with_default("sort_ascending")

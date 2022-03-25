@@ -61,6 +61,7 @@ extensions = [
     'mantiddoc.directives.algorithm',
     'mantiddoc.directives.attributes',
     'mantiddoc.directives.categories',
+    'mantiddoc.directives.amalgamate',
     'mantiddoc.directives.diagram',
     'mantiddoc.directives.interface',
     'mantiddoc.directives.plot_directive',
@@ -211,8 +212,8 @@ html_show_sphinx = False
 # If true, "(C) Copyright ..." is shown in the HTML footer. Default is True.
 html_show_copyright = False
 
-# Add the last updated information to the bottom of pages.
-html_last_updated_fmt = '%Y-%m-%d'
+# Do not show last updated information in the HTML footer.
+html_last_updated_fmt = None
 
 # -- Options for Epub output ---------------------------------------------------
 # This flag determines if a toc entry is inserted again at the beginning of its nested toc listing.
@@ -261,3 +262,12 @@ intersphinx_mapping = {
     'pystog': ('https://pystog.readthedocs.io/en/latest/', None),
     'mantid-dev': ('https://developer.mantidproject.org/', None)
 }
+
+# Suppress build warnings of the type:
+# "WARNING: document isn't included in any toctree"
+# for individual release notes files.
+exclude_patterns = [
+    'release/templates/*.rst'
+    'release/v6.4.0/**/Bugfixes/*.rst',
+    'release/v6.4.0/**/New_features/*.rst'
+]

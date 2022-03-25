@@ -220,6 +220,9 @@ protected:
 
   /// Declare a single attribute
   void declareAttribute(const std::string &name, const API::IFunction::Attribute &defaultValue);
+  /// Declare a single attribute, with a validator
+  void declareAttribute(const std::string &name, const API::IFunction::Attribute &defaultValue,
+                        const Kernel::IValidator &validator);
   /// Writes itself into a string
   std::string writeToString(const std::string &parentLocalAttributesStr = "") const override;
 

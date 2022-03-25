@@ -10,12 +10,12 @@ Powder Diffraction
 New features
 ############
 - New algorithm :ref:`CalculatePlaczek <algm-CalculatePlaczek>` to compute both first and second Placzek correction factors.
-- New algorithm :ref:`CacculatePlaczekSelfScattering2 <algm-CalculatePlaczekSelfScattering-v2>` utilizes :ref:`CalculatePlaczek <algm-CalculatePlaczek>` to compute first order correction.
+- New algorithm :ref:`CalculatePlaczekSelfScattering2 <algm-CalculatePlaczekSelfScattering-v2>` utilizes :ref:`CalculatePlaczek <algm-CalculatePlaczek>` to compute first order correction.
 - New algorithm :ref:`CombineDiffCal <algm-CombineDiffCal>` to calibrate groups of pixels after cross correlation so that diffraction peaks can be adjusted to the correct positions.
 - New algorithm :ref:`MultipleScatteringCorrection <algm-MultipleScatteringCorrection>` to compute the multiple scattering correction factor for a sample using numerical integration.
 - New algorithm :ref:`NOMADMedianDetectorTest <algm-NOMADMedianDetectorTest>` to mask pixels showing deficient or excessive total counts.
+- New algorithm :ref:`SetSampleFromLogs <algm-SetSampleFromLogs>` inspects the sample environment logs for sample material and geometry information.
 - New script for doing calibration by groups, :ref:`PowderDiffractionCalibration <calibration_tofpd_group_calibration-ref>`.
-- New algorithm :ref:`SetSampleFromLogs <algm-SetSampleFromLogs>` inspects the sample enviroment logs for sample material and geometry information.
 
 Improvements
 ############
@@ -48,12 +48,11 @@ Improvements
 
 Bugfixes
 ########
+- Fixed a bug when filtering events in :ref:`AlignAndFocusPowder <algm-AlignAndFocusPowder-v1>` based on time-of-flight. The code now allows setting the minimum time-of-flight to zero (inclusive).
+- Corrected the equation for pseudo-voigt FWHM and mixing parameter in peak profile function :ref:`Bk2BkExpConvPV <func-Bk2BkExpConvPV>`.
 - Fixed the issue with the calibration diagnostics script when dealing with instruments of which the detector ID does not start from 0.
 - Fixed the issue with :ref:`SNSPowderReduction <algm-SNSPowderReduction>` - when an invalid height unit is encountered while reading sample log the geometry is ignored and it relies purely on user input.
 - Fixed a bug when converting TOF to d-spacing using diffractometer constants with non-zero DIFA when a parabolic model is selected.
-- Corrected the equation for pseudo-voigt FWHM and mixing parameter in peak profile function :ref:`Bk2BkExpConvPV <func-Bk2BkExpConvPV>`.
-- Fixed a bug when filtering events in :ref:`AlignAndFocusPowder <algm-AlignAndFocusPowder-v1>` based on time-of-flight. The code now allows setting the minimum time-of-flight to zero (inclusive).
-
 
 Deprecation
 ###########
@@ -79,16 +78,18 @@ New features
 
 Improvements
 ############
-- The workflows for Calibration and Focusing in the :ref:`Engineering Diffraction interface<Engineering_Diffraction-ref>` and EnginX scripts have been replaced to make use of faster, better tested C++ algorithms (:ref:`PDCalibration <algm-PDCalibration>`) - as a result the following algorithms have been deprecated, and will likely be removed entirely in the next release: :ref:`EnggCalibrate <algm-EnggCalibrate>`, :ref:`EnggCalibrateFull <algm-EnggCalibrateFull>`, :ref:`EnggFocus <algm-EnggFocus>`, :ref:`EnggVanadiumCorrections <algm-EnggVanadiumCorrections>`.
-- The cropping/region of interest selection for Calibration/Focusing is now chosen only on the :ref:`Calibration tab <ui engineering calibration>`, to avoid confusion and duplication of input.
-- The region of interest for Calibration/Focusing can now be selected with a user-supplied custom calibration file.
-- The Focused Run Files input box defaults to the last runs focused on the :ref:`Focus tab <ui engineering focus>`, even if multiple runs were focussed.
-- The full calibration setting now has a default value consisting of the path to the ``ENGINX_full_instrument_calibration_193749.nxs file``.
 - **The usability of the file finder on the** :ref:`Fitting tab <ui engineering fitting>` **has been improved by the addition of file filters based on unit and/or bank.**
 
 .. image::  ../../images/EngDiff_Fit_Browse_Filters.png
    :align: center
    :height: 400px
+
+- The workflows for Calibration and Focusing in the :ref:`Engineering Diffraction interface<Engineering_Diffraction-ref>` and EnginX scripts have been replaced to make use of faster, better tested C++ algorithms (:ref:`PDCalibration <algm-PDCalibration>`). As a result some algorithms have been deprecated, and will likely be removed entirely in the next release. See below for more details.
+- The cropping/region of interest selection for Calibration/Focusing is now chosen only on the :ref:`Calibration tab <ui engineering calibration>`, to avoid confusion and duplication of input.
+- The region of interest for Calibration/Focusing can now be selected with a user-supplied custom calibration file.
+- The Focused Run Files input box defaults to the last runs focused on the :ref:`Focus tab <ui engineering focus>`, even if multiple runs were focussed.
+- The full calibration setting now has a default value consisting of the path to the ``ENGINX_full_instrument_calibration_193749.nxs file``.
+- StartX and EndX for fitting region in :ref:`Fitting tab <ui engineering fitting>` can be manually entered in the fit browser.
 
 
 Bugfixes
@@ -99,6 +100,16 @@ Bugfixes
 - Using the Clear button on the Workspace widget while using the :ref:`Fitting tab <ui engineering fitting>` no longer causes errors when you try to load runs back in.
 - On the :ref:`Fitting tab <ui engineering fitting>` of the :ref:`Engineering Diffraction interface<Engineering_Diffraction-ref>` the background can be inspected whether the background subtraction box is checked or not.
 - Prevent crash when invalid arguments passed to background subtraction algorithm (:ref:`EnggEstimateFocussedBackground <algm-EnggEstimateFocussedBackground>`) in the :ref:`Fitting tab <ui engineering fitting>` of the :ref:`Engineering Diffraction interface<Engineering_Diffraction-ref>`.
+
+
+Deprecation
+###########
+* The replacement of workflows for Calibration and Focusing in the :ref:`Engineering Diffraction interface<Engineering_Diffraction-ref>` and EnginX scripts means the following algorithms have been deprecated, and will likely be removed entirely in the next release:
+
+  * :ref:`EnggCalibrate <algm-EnggCalibrate>`
+  * :ref:`EnggCalibrateFull <algm-EnggCalibrateFull>`
+  * :ref:`EnggFocus <algm-EnggFocus>`
+  * :ref:`EnggVanadiumCorrections <algm-EnggVanadiumCorrections>`.
 
 
 Single Crystal Diffraction
@@ -132,7 +143,7 @@ Improvements
 
 Bugfixes
 ########
-- :ref:`IndexPeaks <algm-IndexPeaks>` can now index peaks in a PeaksWorkspace with only a single run without optimising the UB (i.e. it is now possible to set CommonUBForAll=True in this instance).
+- :ref:`IndexPeaks <algm-IndexPeaks>` can now index peaks in a PeaksWorkspace with only a single run without optimising the UB (i.e. it is now possible to set ``CommonUBForAll=True`` in this instance).
 - Expanded the Q space search radius in DetectorSearcher to avoid missing peaks when using :ref:`PredictPeaks <algm-PredictPeaks>`.
 
 :ref:`Release 6.2.0 <v6.2.0>`

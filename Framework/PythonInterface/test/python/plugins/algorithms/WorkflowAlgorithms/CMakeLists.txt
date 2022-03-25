@@ -8,7 +8,9 @@ set(TEST_PY_FILES
     CalculateMonteCarloAbsorptionTest.py
     CorelliPowderCalibrationCreateTest.py
     DetectorFloodWeightingTest.py
+    DirectILL_commonTest.py
     DirectILLApplySelfShieldingTest.py
+    DirectILLAutoProcessTest.py
     DirectILLCollectDataTest.py
     DirectILLDiagnosticsTest.py
     DirectILLIntegrateVanadiumTest.py
@@ -44,6 +46,7 @@ set(TEST_PY_FILES
     D7YIGPositionCalibrationTest.py
     D7AbsoluteCrossSectionsTest.py
     LoadWANDTest.py
+    MatchAndMergeWorkspacesTest.py
     MDNormSCDPreprocessIncoherentTest.py
     MolDynTest.py
     MSDFitTest.py
@@ -57,6 +60,7 @@ set(TEST_PY_FILES
     ReflectometryILLConvertToQTest.py
     ReflectometryILLPolarizationCorTest.py
     ReflectometryILLPreprocessTest.py
+    ReflectometryISISSumBanksTest.py
     ReflectometryILLSumForegroundTest.py
     ReflectometryISISLoadAndProcessTest.py
     ReflectometryISISPreprocessTest.py
@@ -64,8 +68,10 @@ set(TEST_PY_FILES
     SANSDarkRunBackgroundCorrectionTest.py
     SANSFitShiftScaleTest.py
     SANSILLAutoProcessTest.py
+    SANSILLMultiProcessTest.py
     SANSILLIntegrationTest.py
     SANSILLReductionTest.py
+    SANSILLReduction2Test.py
     SANSILLParameterScanTest.py
     SANSMaskTest.py
     SANSStitchTest.py
@@ -81,12 +87,11 @@ set(TEST_PY_FILES
     TotScatCalculateSelfScatteringTest.py
     TransformToIqtTest.py
     VesuvioDiffractionReductionTest.py
-    WANDPowderReductionTest.py)
+    WANDPowderReductionTest.py
+)
 check_tests_valid(${CMAKE_CURRENT_SOURCE_DIR} ${TEST_PY_FILES})
 
 # Prefix for test name=PythonWorkflowAlgorithms
-set(PYUNITTEST_PYTHONPATH_EXTRA
-    ${PYTHONINTERFACE_PLUGINS_DIR}/algorithms/WorkflowAlgorithms)
-pyunittest_add_test(${CMAKE_CURRENT_SOURCE_DIR} python.WorkflowAlgorithms
-                    ${TEST_PY_FILES})
+set(PYUNITTEST_PYTHONPATH_EXTRA ${PYTHONINTERFACE_PLUGINS_DIR}/algorithms/WorkflowAlgorithms)
+pyunittest_add_test(${CMAKE_CURRENT_SOURCE_DIR} python.WorkflowAlgorithms ${TEST_PY_FILES})
 add_subdirectory(sans)

@@ -15,6 +15,7 @@
 #include "MantidAPI/IConstraint.h"
 #include "MantidAPI/Jacobian.h"
 #include "MantidAPI/ParameterTie.h"
+#include "MantidKernel/IValidator.h"
 #include "MantidKernel/Matrix.h"
 #include "MantidKernel/Unit.h"
 
@@ -162,6 +163,34 @@ template <class... Ts> AttributeLambdaVisitor(Ts...) -> AttributeLambdaVisitor<T
 class MANTID_API_DLL IFunction {
 public:
   /**
+   * Simple Exception Struct to differentiate validation error from other exceptions.
+   */
+  struct ValidationException : public std::runtime_error {
+  public:
+    ValidationException(const std::string &ErrorMsg) : std::runtime_error(ErrorMsg) {}
+  };
+
+  /**
+   * Simple struct to constain function to evaluate attribute validators that is required in both attributes and
+   * visitors.
+   */
+  struct ValidatorEvaluator {
+  public:
+    ValidatorEvaluator(){}; // default constructor
+    template <typename T1> static void evaluate(T1 &inputData, Mantid::Kernel::IValidator_sptr validator) {
+      std::string error;
+
+      if (validator != nullptr) {
+        error = validator->isValid(inputData);
+      }
+
+      if (error != "") {
+        throw IFunction::ValidationException("Set Attribute Error: " + error);
+      }
+    }
+  };
+
+  /**
    * Atribute visitor class. It provides a separate access method
    * for each attribute type. When applied to a particular attribue
    * the appropriate method will be used. The child classes must
@@ -194,6 +223,16 @@ public:
     virtual T apply(bool &) const = 0;
     /// Implement this mathod to access attribute as vector
     virtual T apply(std::vector<double> &) const = 0;
+
+    /// Evaluates the validator associated with attribute this visitor is to visit.
+    template <typename T1> void evaluateValidator(T1 &inputData) const {
+      if (m_validator != nullptr) {
+        ValidatorEvaluator::evaluate(inputData, m_validator);
+      }
+    }
+
+    /// Validator against which to evaluate attribute value to set.
+    Mantid::Kernel::IValidator_sptr m_validator = Mantid::Kernel::IValidator_sptr();
   };
 
   /**
@@ -204,15 +243,15 @@ public:
     /// Virtual destructor
     virtual ~ConstAttributeVisitor() = default;
     /// implements static_visitor's operator() for std::string
-    T operator()(std::string &str) const { return apply(str); }
+    T operator()(const std::string &str) const { return apply(str); }
     /// implements static_visitor's operator() for double
-    T operator()(double &d) const { return apply(d); }
+    T operator()(const double &d) const { return apply(d); }
     /// implements static_visitor's operator() for int
-    T operator()(int &i) const { return apply(i); }
+    T operator()(const int &i) const { return apply(i); }
     /// implements static_visitor's operator() for bool
-    T operator()(bool &b) const { return apply(b); }
+    T operator()(const bool &b) const { return apply(b); }
     /// implements static_visitor's operator() for vector
-    T operator()(std::vector<double> &v) const { return apply(v); }
+    T operator()(const std::vector<double> &v) const { return apply(v); }
 
   protected:
     /// Implement this mathod to access attribute as string
@@ -225,6 +264,16 @@ public:
     virtual T apply(const bool &i) const = 0;
     /// Implement this mathod to access attribute as vector
     virtual T apply(const std::vector<double> &) const = 0;
+
+    /// Evaluates the validator associated with attribute this visitor is to visit.
+    template <typename T1> void evaluateValidator(T1 &inputData) const {
+      if (m_validator != nullptr) {
+        ValidatorEvaluator::evaluate(inputData, m_validator);
+      }
+    }
+
+    /// Validator against which to evaluate attribute value to set.
+    Mantid::Kernel::IValidator_sptr m_validator = Mantid::Kernel::IValidator_sptr();
   };
 
   /// Attribute is a non-fitting parameter.
@@ -254,6 +303,19 @@ public:
     /// Apply a lambda visitor
     template <typename... Ts> void apply(AttributeLambdaVisitor<Ts...> &v) { boost::apply_visitor(v, m_data); }
 
+    /// Set validator to enforce limits on attribute value
+    void setValidator(const Kernel::IValidator_sptr &validator) const;
+    /// Evaluates the validator associated with this attribute. Returns error as a string.
+    void evaluateValidator() const;
+    /// Evaluates the validator associated with this attribute with regards to input value. Returns error as a string.
+    template <typename T> void evaluateValidator(T &inputData) const {
+      if (m_validator != nullptr) {
+        ValidatorEvaluator::evaluate(inputData, m_validator);
+      }
+    }
+    /// Return a clone of the attribute validator;
+    Kernel::IValidator_sptr getValidator() { return m_validator; }
+
     /// Returns type of the attribute
     std::string type() const;
     /// Returns the attribute value as a string
@@ -273,7 +335,7 @@ public:
     double asDouble() const;
     /// Returns bool value if attribute is a bool, throws exception otherwise
     bool asBool() const;
-    /// Returns bool value if attribute is a vector, throws exception otherwise
+    /// Returns vector<double> if attribute is vector<double>, throws exception otherwise
     std::vector<double> asVector() const;
     /// Check if a string attribute is empty
     bool isEmpty() const;
@@ -288,9 +350,10 @@ public:
     void setBool(const bool &);
     /// Sets new value if attribute is a vector
     void setVector(const std::vector<double> &);
-    template <typename T>
     // Set value
-    void setValue(const T &v) {
+    template <typename T> void setValue(const T &v) {
+      evaluateValidator(v);
+
       m_data = v;
     }
     /// Set value from a string.
@@ -301,6 +364,33 @@ public:
     mutable boost::variant<std::string, int, double, bool, std::vector<double>> m_data;
     /// Flag indicating if the string value should be returned quoted
     bool m_quoteValue = false;
+    /// Associated Validator
+    mutable Kernel::IValidator_sptr m_validator;
+  };
+
+  /**
+   * Atribute validator visitor class. It is used to access
+   * m_data of a specificed attribute in order to
+   * evaluate the current value of the attribute against
+   * the associated validator, for all allowed types.
+   */
+  template <typename T = void> class DLLExport AttributeValidatorVisitor : public boost::static_visitor<T> {
+  public:
+    AttributeValidatorVisitor(const IFunction::Attribute *attrToValidate) : m_attrToValidate{attrToValidate} {}
+
+    /// implements static_visitor's operator() for std::string
+    T operator()(std::string &str) const { m_attrToValidate->evaluateValidator(str); }
+    /// implements static_visitor's operator() for double
+    T operator()(double &d) const { m_attrToValidate->evaluateValidator(d); }
+    /// implements static_visitor's operator() for int
+    T operator()(int &i) const { m_attrToValidate->evaluateValidator(i); }
+    /// implements static_visitor's operator() for bool
+    T operator()(bool &b) const { m_attrToValidate->evaluateValidator(b); }
+    /// implements static_visitor's operator() for vector
+    T operator()(std::vector<double> &v) const { m_attrToValidate->evaluateValidator(v); }
+
+  protected:
+    const IFunction::Attribute *m_attrToValidate;
   };
 
   //---------------------------------------------------------//
@@ -578,6 +668,11 @@ protected:
 
   /// Declare a single attribute
   void declareAttribute(const std::string &name, const API::IFunction::Attribute &defaultValue);
+  /// Declare a single attribute with validator
+  void declareAttribute(const std::string &name, const API::IFunction::Attribute &defaultValue,
+                        const Kernel::IValidator &validator);
+  /// Check Attribute to declare does not already exist.
+  void checkAttributeName(const std::string &name);
   /// Store an attribute's value
   void storeAttributeValue(const std::string &name, const API::IFunction::Attribute &value);
   /// A read-only ("mutable") attribute can be stored in a const method

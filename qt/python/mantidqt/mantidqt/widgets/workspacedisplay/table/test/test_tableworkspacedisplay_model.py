@@ -163,6 +163,14 @@ class TableWorkspaceDisplayModelTest(unittest.TestCase):
         self.assertEqual(3, model.marked_columns.as_y_err[1].related_y_column)
         self.assertEqual(4, model.marked_columns.as_y_err[2].related_y_column)
 
+    def test_is_editable_column(self):
+        ws = MockWorkspace()
+        model = TableWorkspaceDisplayModel(ws)
+        ws.isColumnReadOnly = StrictMock(return_value=False)
+        self.assertTrue(model.is_editable_column(0))
+        ws.isColumnReadOnly = StrictMock(return_value=True)
+        self.assertFalse(model.is_editable_column(0))
+
 
 if __name__ == '__main__':
     unittest.main()

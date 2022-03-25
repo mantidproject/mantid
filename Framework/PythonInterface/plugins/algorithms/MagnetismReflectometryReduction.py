@@ -188,8 +188,10 @@ class MagnetismReflectometryReduction(PythonAlgorithm):
             GroupWorkspaces(InputWorkspaces=output_list,
                             OutputWorkspace=output_wsg)
             self.setProperty("OutputWorkspace", output_wsg)
-        else:
+        elif len(output_list) == 1:
             self.setProperty("OutputWorkspace", output_list[0])
+        else:
+            raise ValueError("No valida workspace found.")
 
         # Clean up leftover workspace
         if norm_summed is not None:

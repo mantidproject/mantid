@@ -6,13 +6,13 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
+#include "MantidFrameworkTestHelpers/NexusTestHelper.h"
 #include "MantidKernel/DateAndTime.h"
 #include "MantidKernel/PropertyNexus.h"
 #include "MantidKernel/PropertyWithValue.h"
 #include "MantidKernel/System.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/Timer.h"
-#include "MantidTestHelpers/NexusTestHelper.h"
 #include <cxxtest/TestSuite.h>
 
 using namespace Mantid;

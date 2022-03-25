@@ -278,7 +278,7 @@ std::shared_ptr<API::Workspace> IMWDomainCreator::createOutputWorkspace(
   }
 
   // Set the difference spectrum
-  auto &Ycal = ws->mutableY(1);
+  const auto &Ycal = ws->y(1);
   auto &Diff = ws->mutableY(2);
   const size_t nData = values->size();
   for (size_t i = 0; i < nData; ++i) {
@@ -436,7 +436,6 @@ void IMWDomainCreator::addFunctionValuesToWS(const API::IFunction_sptr &function
         E[k] = s;
       }
 
-      double chi2Reduced = function->getReducedChiSquared();
       size_t dof = nData - nParams;
       auto &yValues = ws->mutableY(wsIndex);
       auto &eValues = ws->mutableE(wsIndex);
@@ -447,7 +446,7 @@ void IMWDomainCreator::addFunctionValuesToWS(const API::IFunction_sptr &function
       }
       for (size_t i = 0; i < nData; i++) {
         yValues[i] = resultValues->getCalculated(i);
-        eValues[i] = T * std::sqrt(E[i] * chi2Reduced);
+        eValues[i] = T * std::sqrt(E[i]);
       }
     } else {
       // otherwise use the parameter errors which is OK for uncorrelated

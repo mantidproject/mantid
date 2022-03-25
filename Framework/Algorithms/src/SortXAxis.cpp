@@ -59,15 +59,15 @@ void SortXAxis::exec() {
 
   PARALLEL_FOR_IF(Kernel::threadSafe(*inputWorkspace, *outputWorkspace))
   for (int specNum = 0u; specNum < (int)inputWorkspace->getNumberHistograms(); specNum++) {
-    PARALLEL_START_INTERUPT_REGION
-    auto workspaceIndicies = createIndexes(sizeOfX);
+    PARALLEL_START_INTERRUPT_REGION
+    auto workspaceIndices = createIndexes(sizeOfX);
 
-    sortIndicesByX(workspaceIndicies, getProperty("Ordering"), *inputWorkspace, specNum);
+    sortIndicesByX(workspaceIndices, getProperty("Ordering"), *inputWorkspace, specNum);
 
-    copyToOutputWorkspace(workspaceIndicies, *inputWorkspace, *outputWorkspace, specNum, isAProperHistogram);
-    PARALLEL_END_INTERUPT_REGION
+    copyToOutputWorkspace(workspaceIndices, *inputWorkspace, *outputWorkspace, specNum, isAProperHistogram);
+    PARALLEL_END_INTERRUPT_REGION
   }
-  PARALLEL_CHECK_INTERUPT_REGION
+  PARALLEL_CHECK_INTERRUPT_REGION
 
   setProperty("OutputWorkspace", outputWorkspace);
 }
@@ -79,38 +79,38 @@ void SortXAxis::exec() {
  * @return std::vector<std::size_t>
  */
 std::vector<std::size_t> SortXAxis::createIndexes(const size_t sizeOfX) {
-  std::vector<std::size_t> workspaceIndicies;
-  workspaceIndicies.reserve(sizeOfX);
+  std::vector<std::size_t> workspaceIndices;
+  workspaceIndices.reserve(sizeOfX);
   for (auto workspaceIndex = 0u; workspaceIndex < sizeOfX; workspaceIndex++) {
-    workspaceIndicies.emplace_back(workspaceIndex);
+    workspaceIndices.emplace_back(workspaceIndex);
   }
-  return workspaceIndicies;
+  return workspaceIndices;
 }
 
 /**
  * @brief A template for sorting the values given a comparator
  *
  * @tparam Comparator
- * @param workspaceIndicies the vector of indicies values
+ * @param workspaceIndices the vector of indices values
  * @param inputWorkspace the original workspace
  * @param specNum the Spectrum number to be sorted
  * @param compare std::less<double> for Ascending order std::greater<double>
  * for descending order
  */
 template <typename Comparator>
-void sortByXValue(std::vector<std::size_t> &workspaceIndicies, const Mantid::API::MatrixWorkspace &inputWorkspace,
+void sortByXValue(std::vector<std::size_t> &workspaceIndices, const Mantid::API::MatrixWorkspace &inputWorkspace,
                   unsigned int specNum, Comparator const &compare) {
-  std::sort(workspaceIndicies.begin(), workspaceIndicies.end(), [&](std::size_t lhs, std::size_t rhs) -> bool {
+  std::sort(workspaceIndices.begin(), workspaceIndices.end(), [&](std::size_t lhs, std::size_t rhs) -> bool {
     return compare(inputWorkspace.x(specNum)[lhs], inputWorkspace.x(specNum)[rhs]);
   });
 }
 
-void SortXAxis::sortIndicesByX(std::vector<std::size_t> &workspaceIndicies, const std::string &order,
+void SortXAxis::sortIndicesByX(std::vector<std::size_t> &workspaceIndices, const std::string &order,
                                const Mantid::API::MatrixWorkspace &inputWorkspace, unsigned int specNum) {
   if (order == "Ascending") {
-    sortByXValue(workspaceIndicies, inputWorkspace, specNum, std::less<double>());
+    sortByXValue(workspaceIndices, inputWorkspace, specNum, std::less<double>());
   } else if (order == "Descending") {
-    sortByXValue(workspaceIndicies, inputWorkspace, specNum, std::greater<double>());
+    sortByXValue(workspaceIndices, inputWorkspace, specNum, std::greater<double>());
   }
 }
 
@@ -119,25 +119,24 @@ void SortXAxis::sortIndicesByX(std::vector<std::size_t> &workspaceIndicies, cons
  * using clone because of how histograms are supported, for the X Axis and the
  * Dx Axis.
  *
- * @param workspaceIndicies the sorted vector of indecies
+ * @param workspaceIndices the sorted vector of indices
  * @param inputWorkspace the unsorted initial workspace
  * @param outputWorkspace the emptry output workspace
  * @param specNum the Spectrum it is currently copying over
  */
-void SortXAxis::copyXandDxToOutputWorkspace(std::vector<std::size_t> &workspaceIndicies,
+void SortXAxis::copyXandDxToOutputWorkspace(const std::vector<std::size_t> &workspaceIndices,
                                             const Mantid::API::MatrixWorkspace &inputWorkspace,
                                             Mantid::API::MatrixWorkspace &outputWorkspace, unsigned int specNum) {
   // Move an ordered X to the output workspace
   for (auto workspaceIndex = 0u; workspaceIndex < inputWorkspace.x(specNum).size(); workspaceIndex++) {
-    outputWorkspace.mutableX(specNum)[workspaceIndex] = inputWorkspace.x(specNum)[workspaceIndicies[workspaceIndex]];
+    outputWorkspace.mutableX(specNum)[workspaceIndex] = inputWorkspace.x(specNum)[workspaceIndices[workspaceIndex]];
   }
 
   // If Dx's are present, move Dx's to the output workspace
   // If Dx's are present, move Dx's to the output workspace
   if (inputWorkspace.hasDx(specNum)) {
     for (auto workspaceIndex = 0u; workspaceIndex < inputWorkspace.dx(specNum).size(); workspaceIndex++) {
-      outputWorkspace.mutableDx(specNum)[workspaceIndex] =
-          inputWorkspace.dx(specNum)[workspaceIndicies[workspaceIndex]];
+      outputWorkspace.mutableDx(specNum)[workspaceIndex] = inputWorkspace.dx(specNum)[workspaceIndices[workspaceIndex]];
     }
   }
 }
@@ -147,41 +146,41 @@ void SortXAxis::copyXandDxToOutputWorkspace(std::vector<std::size_t> &workspaceI
  * using clone because of how histograms are supported, for the Y Axis and the E
  * Axis.
  *
- * @param workspaceIndicies the sorted vector of indicies
+ * @param workspaceIndices the sorted vector of indices
  * @param inputWorkspace the unsorted input workspaces
  * @param outputWorkspace the empty output workspace
  * @param specNum the spectrum number being copied into
  * @param isAProperHistogram whether or not it has been determined to be a valid
  * histogram earlier on.
  */
-void SortXAxis::copyYandEToOutputWorkspace(std::vector<std::size_t> &workspaceIndicies,
+void SortXAxis::copyYandEToOutputWorkspace(std::vector<std::size_t> &workspaceIndices,
                                            const Mantid::API::MatrixWorkspace &inputWorkspace,
                                            Mantid::API::MatrixWorkspace &outputWorkspace, unsigned int specNum,
                                            bool isAProperHistogram) {
   // If Histogram data find the biggest index value and remove it from
-  // workspaceIndicies
+  // workspaceIndices
   if (isAProperHistogram) {
-    auto lastIndexIt = std::find(workspaceIndicies.begin(), workspaceIndicies.end(), inputWorkspace.y(specNum).size());
-    workspaceIndicies.erase(lastIndexIt);
+    auto lastIndexIt = std::find(workspaceIndices.begin(), workspaceIndices.end(), inputWorkspace.y(specNum).size());
+    workspaceIndices.erase(lastIndexIt);
   }
 
-  auto &inSpaceY = inputWorkspace.y(specNum);
+  const auto &inSpaceY = inputWorkspace.y(specNum);
   for (auto workspaceIndex = 0u; workspaceIndex < inputWorkspace.y(specNum).size(); workspaceIndex++) {
-    outputWorkspace.mutableY(specNum)[workspaceIndex] = inSpaceY[workspaceIndicies[workspaceIndex]];
+    outputWorkspace.mutableY(specNum)[workspaceIndex] = inSpaceY[workspaceIndices[workspaceIndex]];
   }
 
-  auto &inSpaceE = inputWorkspace.e(specNum);
+  const auto &inSpaceE = inputWorkspace.e(specNum);
   for (auto workspaceIndex = 0u; workspaceIndex < inputWorkspace.e(specNum).size(); workspaceIndex++) {
-    outputWorkspace.mutableE(specNum)[workspaceIndex] = inSpaceE[workspaceIndicies[workspaceIndex]];
+    outputWorkspace.mutableE(specNum)[workspaceIndex] = inSpaceE[workspaceIndices[workspaceIndex]];
   }
 }
 
-void SortXAxis::copyToOutputWorkspace(std::vector<std::size_t> &workspaceIndicies,
+void SortXAxis::copyToOutputWorkspace(std::vector<std::size_t> &workspaceIndices,
                                       const Mantid::API::MatrixWorkspace &inputWorkspace,
                                       Mantid::API::MatrixWorkspace &outputWorkspace, unsigned int specNum,
                                       bool isAProperHistogram) {
-  copyXandDxToOutputWorkspace(workspaceIndicies, inputWorkspace, outputWorkspace, specNum);
-  copyYandEToOutputWorkspace(workspaceIndicies, inputWorkspace, outputWorkspace, specNum, isAProperHistogram);
+  copyXandDxToOutputWorkspace(workspaceIndices, inputWorkspace, outputWorkspace, specNum);
+  copyYandEToOutputWorkspace(workspaceIndices, inputWorkspace, outputWorkspace, specNum, isAProperHistogram);
 }
 
 /**

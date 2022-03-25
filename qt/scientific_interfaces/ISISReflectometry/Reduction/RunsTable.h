@@ -36,7 +36,7 @@ public:
   void resetState();
   void resetSkippedItems();
   boost::optional<Item &> getItemWithOutputWorkspaceOrNone(std::string const &wsName);
-  std::vector<Group> selectedGroups() const;
+  std::vector<const Group *> selectedGroups() const;
   std::vector<Row> selectedRows() const;
 
 private:
@@ -53,8 +53,8 @@ private:
 template <typename T>
 bool RunsTable::isInSelection(T const &item,
                               std::vector<MantidWidgets::Batch::RowLocation> const &selectedRowLocations) const {
-  auto const path = m_reductionJobs.getPath(item);
-  return containsPath(selectedRowLocations, path);
+  auto const location = m_reductionJobs.getLocation(item);
+  return containsPath(selectedRowLocations, location);
 }
 } // namespace ISISReflectometry
 } // namespace CustomInterfaces

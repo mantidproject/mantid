@@ -4,7 +4,7 @@
 //   NScD Oak Ridge National Laboratory, European Spallation Source,
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#include "MantidTestHelpers/ONCatHelper.h"
+#include "MantidFrameworkTestHelpers/ONCatHelper.h"
 
 #include <exception>
 
@@ -14,7 +14,7 @@ using Mantid::Catalog::OAuth::OAuthToken;
 using Mantid::Kernel::Exception::InternetError;
 using Mantid::Kernel::Exception::NotImplementedError;
 
-namespace Mantid::TestHelpers {
+namespace Mantid::FrameworkTestHelpers {
 
 MockONCatAPI::MockONCatAPI(const MockResponseMap &responseMap)
     : Mantid::Kernel::InternetHelper(), m_responseMap(responseMap), m_responseCallCounts() {
@@ -23,7 +23,7 @@ MockONCatAPI::MockONCatAPI(const MockResponseMap &responseMap)
   }
 }
 
-MockONCatAPI::~MockONCatAPI() {}
+MockONCatAPI::~MockONCatAPI() = default;
 
 bool MockONCatAPI::allResponsesCalledOnce() const {
   return std::all_of(m_responseCallCounts.cbegin(), m_responseCallCounts.cend(),
@@ -35,11 +35,11 @@ bool MockONCatAPI::allResponsesCalled() const {
                      [](const MockResponseCallMapping &mapping) { return mapping.second >= 1; });
 }
 
-int MockONCatAPI::sendHTTPRequest(const std::string &url, std::ostream &responseStream) {
+InternetHelper::HTTPStatus MockONCatAPI::sendHTTPRequest(const std::string &url, std::ostream &responseStream) {
   return sendHTTPSRequest(url, responseStream);
 }
 
-int MockONCatAPI::sendHTTPSRequest(const std::string &url, std::ostream &responseStream) {
+InternetHelper::HTTPStatus MockONCatAPI::sendHTTPSRequest(const std::string &url, std::ostream &responseStream) {
   const auto mockResponse = m_responseMap.find(url);
 
   if (mockResponse == m_responseMap.end()) {
@@ -55,8 +55,8 @@ int MockONCatAPI::sendHTTPSRequest(const std::string &url, std::ostream &respons
 
   // Approximate the behaviour of the actual helper class when a non-OK
   // response is observed.
-  if (statusCode != HTTPResponse::HTTP_OK) {
-    throw InternetError(responseBody, statusCode);
+  if (statusCode != InternetHelper::HTTPStatus::OK) {
+    throw InternetError(responseBody, static_cast<int>(statusCode));
   }
 
   responseStream << responseBody;
@@ -90,4 +90,4 @@ IOAuthTokenStore_uptr make_mock_token_store_already_logged_in() {
   return tokenStore;
 }
 
-} // namespace Mantid::TestHelpers
+} // namespace Mantid::FrameworkTestHelpers

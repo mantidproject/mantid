@@ -5,19 +5,16 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidQtWidgets/InstrumentView/InstrumentActor.h"
-#if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
-#include "MantidQtWidgets/Common/TSVSerialiser.h"
-#endif
 #include "MantidQtWidgets/InstrumentView/InstrumentRenderer.h"
 #include "MantidQtWidgets/InstrumentView/OpenGLError.h"
 
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AnalysisDataService.h"
-#include "MantidAPI/IAlgorithm.h"
 #include "MantidAPI/IMaskWorkspace.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/WorkspaceFactory.h"
+#include "MantidQtWidgets/Common/MessageHandler.h"
 #include "MantidTypes/SpectrumDefinition.h"
 
 #include "MantidGeometry/Instrument.h"
@@ -34,9 +31,10 @@
 #include <cmath>
 
 #include <QMessageBox>
+#include <QMetaObject>
 #include <QSettings>
+#include <QThread>
 
-#include <numeric>
 #include <utility>
 
 using namespace Mantid::Kernel::Exception;
@@ -69,13 +67,30 @@ bool isPhysicalView() {
  * @param scaleMax :: Maximum value of the colormap scale. Used to assign
  * detector colours. Ignored if autoscaling == true.
  */
-InstrumentActor::InstrumentActor(const QString &wsName, bool autoscaling, double scaleMin, double scaleMax)
-    : m_workspace(AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(wsName.toStdString())), m_ragged(true),
-      m_autoscaling(autoscaling), m_defaultPos(), m_isPhysicalInstrument(false) {
+InstrumentActor::InstrumentActor(const std::string &wsName, MantidWidgets::IMessageHandler &messageHandler,
+                                 bool autoscaling, double scaleMin, double scaleMax)
+    : InstrumentActor(AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(wsName), messageHandler, autoscaling,
+                      scaleMin, scaleMax) {}
+
+InstrumentActor::InstrumentActor(MatrixWorkspace_sptr workspace, MantidWidgets::IMessageHandler &messageHandler,
+                                 bool autoscaling, double scaleMin, double scaleMax)
+    : m_workspace(workspace), m_ragged(true), m_autoscaling(autoscaling), m_defaultPos(), m_initialized(false),
+      m_isPhysicalInstrument(false), m_messageHandler(messageHandler) {
+
   // settings
   loadSettings();
 
-  auto sharedWorkspace = m_workspace.lock();
+  m_scaleMin = scaleMin;
+  m_scaleMax = scaleMax;
+
+  m_isCompVisible.assign(componentInfo().size(), true);
+
+  m_renderer.reset(new InstrumentRenderer(*this));
+  m_renderer->changeScaleType(m_scaleType);
+}
+
+void InstrumentActor::initialize(bool resetGeometry, bool setDefaultView) {
+  auto sharedWorkspace = m_workspace;
 
   if (!sharedWorkspace)
     throw std::logic_error("InstrumentActor passed a workspace that isn't a MatrixWorkspace");
@@ -105,18 +120,37 @@ InstrumentActor::InstrumentActor(const QString &wsName, bool autoscaling, double
   }
 
   // set up data ranges and colours
-  setUpWorkspace(sharedWorkspace, scaleMin, scaleMax);
+  setUpWorkspace(sharedWorkspace, m_scaleMin, m_scaleMax);
 
   // If the instrument is empty, maybe only having the sample and source
   if (detectorInfo().size() == 0) {
-    QMessageBox::warning(nullptr, "Mantid - Warning", "This instrument appears to contain no detectors", "OK");
+    m_messageHandler.giveUserWarning("This instrument appears to contain no detectors", "Mantid - Warning");
   }
+
+  // enable drawing now that everything is ready
+  m_initialized = true;
+
+  resetColors();
+
+  // send signal back to the InstrumentWidget to finish setting up
+  emit initWidget(resetGeometry, setDefaultView);
+  emit refreshView();
 }
 
 /**
  * Destructor
  */
 InstrumentActor::~InstrumentActor() { saveSettings(); }
+
+void InstrumentActor::cancel() {
+  blockSignals(true);
+
+  // cancel any running mantid algorithms to help free the thread
+  auto alg = AlgorithmManager::Instance().getAlgorithm(m_algID);
+  if (alg && alg->isRunning()) {
+    alg->cancel();
+  }
+}
 
 /**
  * Set up the workspace: calculate the value ranges, set the colours.
@@ -210,12 +244,7 @@ bool InstrumentActor::hasChildVisible() const {
  *  !!!! DON'T USE THIS TO GET HOLD OF THE INSTRUMENT !!!!
  *  !!!! USE InstrumentActor::getInstrument() BELOW !!!!
  */
-MatrixWorkspace_const_sptr InstrumentActor::getWorkspace() const {
-  if (m_workspace.expired())
-    throw std::runtime_error("Instrument view: workspace doesn't exist");
-
-  return m_workspace.lock();
-}
+MatrixWorkspace_const_sptr InstrumentActor::getWorkspace() const { return m_workspace; }
 
 void InstrumentActor::getBoundingBox(Mantid::Kernel::V3D &minBound, Mantid::Kernel::V3D &maxBound,
                                      const bool excludeMonitors) const {
@@ -240,20 +269,17 @@ MatrixWorkspace_sptr InstrumentActor::getMaskMatrixWorkspace() const {
 void InstrumentActor::setMaskMatrixWorkspace(MatrixWorkspace_sptr wsMask) const { m_maskWorkspace = std::move(wsMask); }
 
 void InstrumentActor::invertMaskWorkspace() const {
-  Mantid::API::MatrixWorkspace_sptr outputWS;
-
-  const std::string maskName = "__InstrumentActor_MaskWorkspace_invert";
-  Mantid::API::AnalysisDataService::Instance().addOrReplace(maskName, getMaskMatrixWorkspace());
   auto invertAlg = AlgorithmManager::Instance().create("BinaryOperateMasks", -1);
   invertAlg->setChild(true);
-  invertAlg->setPropertyValue("InputWorkspace1", maskName);
-  invertAlg->setPropertyValue("OutputWorkspace", maskName);
+  invertAlg->setAlwaysStoreInADS(false);
+  auto maskWs = getMaskMatrixWorkspace();
+  invertAlg->setProperty("InputWorkspace1", maskWs);
+  invertAlg->getPointerToProperty("OutputWorkspace")->createTemporaryValue();
+  invertAlg->setProperty("OutputWorkspace", maskWs);
   invertAlg->setPropertyValue("OperationType", "NOT");
   invertAlg->execute();
 
-  m_maskWorkspace = std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
-      Mantid::API::AnalysisDataService::Instance().retrieve(maskName));
-  Mantid::API::AnalysisDataService::Instance().remove(maskName);
+  m_maskWorkspace = maskWs; // This is a no-op but makes it clear we intended to overwrite the member
 }
 
 /**
@@ -283,24 +309,25 @@ IMaskWorkspace_sptr InstrumentActor::getMaskWorkspaceIfExists() const {
  * Apply mask stored in the helper mask workspace to the data workspace.
  */
 void InstrumentActor::applyMaskWorkspace() {
-  auto wsName = getWorkspace()->getName();
   if (m_maskWorkspace) {
     // Mask detectors
     try {
       auto alg = AlgorithmManager::Instance().create("MaskDetectors", -1);
-      alg->setPropertyValue("Workspace", wsName);
+      alg->setProperty("Workspace", m_workspace);
       alg->setProperty("MaskedWorkspace", m_maskWorkspace);
+      alg->setChild(true);
+      alg->setAlwaysStoreInADS(false);
       alg->execute();
       // After the algorithm finishes the InstrumentWindow catches the
       // after-replace notification
       // and updates this instrument actor.
-    } catch (...) {
-      QMessageBox::warning(nullptr, "Mantid - Warning", "An error accured when applying the mask.", "OK");
+    } catch (std::runtime_error const &) {
+      m_messageHandler.giveUserWarning("An error occurred when applying the mask.", "Mantid - Warning");
     }
   }
 
   // Mask bins
-  m_maskBinsData.mask(wsName);
+  m_maskBinsData.mask(m_workspace);
 
   clearMasks();
 }
@@ -357,11 +384,9 @@ Mantid::detid_t InstrumentActor::getDetID(size_t pickID) const {
   return -1;
 }
 
-QList<Mantid::detid_t> InstrumentActor::getDetIDs(const std::vector<size_t> &dets) const {
-  QList<Mantid::detid_t> detIDs;
-  detIDs.reserve(static_cast<int>(dets.size()));
-  for (auto det : dets)
-    detIDs.append(getDetID(det));
+std::vector<Mantid::detid_t> InstrumentActor::getDetIDs(const std::vector<size_t> &dets) const {
+  std::vector<Mantid::detid_t> detIDs;
+  std::transform(dets.cbegin(), dets.cend(), std::back_inserter(detIDs), [this](auto det) { return getDetID(det); });
   return detIDs;
 }
 
@@ -383,6 +408,11 @@ Mantid::Geometry::ComponentID InstrumentActor::getComponentID(size_t pickID) con
  * workspace
  */
 size_t InstrumentActor::getWorkspaceIndex(size_t index) const { return m_detIndex2WsIndex[index]; }
+
+std::vector<size_t> InstrumentActor::getWorkspaceIndices(const std::vector<size_t> &dets) const {
+  auto detIDs = getDetIDs(dets);
+  return m_workspace->getIndicesFromDetectorIDs(detIDs);
+}
 
 /**
  * Set an interval in the data workspace x-vector's units in which the data are
@@ -433,7 +463,8 @@ void InstrumentActor::sumDetectors(const std::vector<size_t> &dets, std::vector<
 
   Mantid::API::MatrixWorkspace_const_sptr ws = getWorkspace();
   const auto blocksize = ws->blocksize();
-  if (size > blocksize || size == 0) {
+  assert(size > 0);
+  if (size > blocksize) {
     size = blocksize;
   }
 
@@ -517,9 +548,9 @@ void InstrumentActor::sumDetectorsUniform(const std::vector<size_t> &dets, std::
  */
 void InstrumentActor::sumDetectorsRagged(const std::vector<size_t> &dets, std::vector<double> &x,
                                          std::vector<double> &y, size_t size) const {
-  Mantid::API::MatrixWorkspace_const_sptr ws = getWorkspace();
+  Mantid::API::MatrixWorkspace_const_sptr inputWs = getWorkspace();
   //  create a workspace to hold the data from the selected detectors
-  Mantid::API::MatrixWorkspace_sptr dws = Mantid::API::WorkspaceFactory::Instance().create(ws, dets.size());
+  auto detectorWs = Mantid::API::WorkspaceFactory::Instance().create(inputWs, dets.size());
 
   // x-axis limits
   double xStart = maxBinValue();
@@ -531,9 +562,9 @@ void InstrumentActor::sumDetectorsRagged(const std::vector<size_t> &dets, std::v
     const auto index = getWorkspaceIndex(det);
     if (index == INVALID_INDEX)
       continue;
-    dws->setHistogram(nSpec, ws->histogram(index));
-    double xmin = dws->x(nSpec).front();
-    double xmax = dws->x(nSpec).back();
+    detectorWs->setHistogram(nSpec, inputWs->histogram(index));
+    double xmin = detectorWs->x(nSpec).front();
+    double xmax = detectorWs->x(nSpec).back();
     if (xmin < xStart)
       xStart = xmin;
     if (xmax > xEnd)
@@ -556,28 +587,27 @@ void InstrumentActor::sumDetectorsRagged(const std::vector<size_t> &dets, std::v
 
   double dx = (xEnd - xStart) / static_cast<double>(size - 1);
   std::string params = QString("%1,%2,%3").arg(xStart).arg(dx).arg(xEnd).toStdString();
-  std::string outName = "_TMP_sumDetectorsRagged";
 
   try {
     // rebin all spectra to the same binning
     auto alg = AlgorithmManager::Instance().create("Rebin", -1);
-    alg->setProperty("InputWorkspace", dws);
-    alg->setPropertyValue("OutputWorkspace", outName);
+    alg->setChild(true);
+    alg->setAlwaysStoreInADS(false);
+    alg->setProperty("InputWorkspace", detectorWs);
+    alg->getPointerToProperty("OutputWorkspace")->createTemporaryValue();
     alg->setPropertyValue("Params", params);
     alg->execute();
 
-    ws = std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
-        Mantid::API::AnalysisDataService::Instance().retrieve(outName));
-    Mantid::API::AnalysisDataService::Instance().remove(outName);
+    MatrixWorkspace_sptr outputWs = alg->getProperty("OutputWorkspace");
 
-    const auto &commonX = ws->points(0);
-    const auto &firstY = ws->y(0);
+    const auto &commonX = outputWs->points(0);
+    const auto &firstY = outputWs->y(0);
     x.assign(std::cbegin(commonX), std::cend(commonX));
     y.assign(std::cbegin(firstY), std::cend(firstY));
 
     // add the spectra
     for (size_t i = 0; i < nSpec; ++i) {
-      const auto &specY = ws->y(i);
+      const auto &specY = outputWs->y(i);
       std::transform(std::cbegin(y), std::cend(y), std::cbegin(specY), std::begin(y), std::plus<double>());
     }
   } catch (std::invalid_argument &) {
@@ -593,6 +623,9 @@ void InstrumentActor::sumDetectorsRagged(const std::vector<size_t> &dets, std::v
  * the masking information in ....
  */
 void InstrumentActor::resetColors() {
+  if (!m_initialized) {
+    return;
+  }
   m_renderer->reset();
   emit colorMapChanged();
 }
@@ -609,7 +642,12 @@ void InstrumentActor::showGuides(bool on) {
 
 GLColor InstrumentActor::getColor(size_t index) const { return m_renderer->getColor(index); }
 
-void InstrumentActor::draw(bool picking) const { m_renderer->renderInstrument(m_isCompVisible, m_showGuides, picking); }
+void InstrumentActor::draw(bool picking) const {
+  if (!m_initialized) {
+    return;
+  }
+  m_renderer->renderInstrument(m_isCompVisible, m_showGuides, picking);
+}
 
 /**
  * @param fname :: A color map file name.
@@ -727,17 +765,16 @@ void InstrumentActor::setAutoscaling(bool on) {
  * @returns the current applied mask to the main workspace
  */
 Mantid::API::MatrixWorkspace_sptr InstrumentActor::extractCurrentMask() const {
-  const std::string maskName = "__InstrumentActor_MaskWorkspace";
   auto alg = AlgorithmManager::Instance().create("ExtractMask", -1);
-  alg->setPropertyValue("InputWorkspace", getWorkspace()->getName());
-  alg->setPropertyValue("OutputWorkspace", maskName);
-  alg->setLogging(false);
-  alg->execute();
 
-  Mantid::API::MatrixWorkspace_sptr maskWorkspace = std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
-      Mantid::API::AnalysisDataService::Instance().retrieve(maskName));
-  Mantid::API::AnalysisDataService::Instance().remove(maskName);
-  return maskWorkspace;
+  alg->setProperty("InputWorkspace", m_workspace);
+  alg->getPointerToProperty("OutputWorkspace")->createTemporaryValue();
+  alg->setLogging(false);
+  alg->setAlwaysStoreInADS(false);
+  // grab the algorithm ID to use for cancelling execution on quit events
+  m_algID = alg->getAlgorithmID();
+  alg->execute();
+  return alg->getProperty("OutputWorkspace");
 }
 
 /**
@@ -749,12 +786,12 @@ void InstrumentActor::initMaskHelper() const {
   try {
     // extract the mask (if any) from the data to the mask workspace
     m_maskWorkspace = extractCurrentMask();
+  } catch (std::invalid_argument const &ex) {
+    m_messageHandler.giveUserWarning(std::string("Error extracting mask: ") + ex.what(), "Mantid - Warning");
   } catch (...) {
     // don't know what to do here yet ...
-    QMessageBox::warning(nullptr, "Mantid - Warning",
-                         "An error occurred when extracting the mask. "
-                         "Instrument Viewer is not supported yet for workspaces containing a detector scan.",
-                         "OK");
+    m_messageHandler.giveUserWarning(
+        "Instrument Viewer is not supported yet for workspaces containing a detector scan.", "Mantid - Warning");
   }
 }
 
@@ -1063,12 +1100,9 @@ QString InstrumentActor::getParameterInfo(size_t index) const {
     // build the data structure I need Map comp id -> vector of names
     std::string paramName = itParamName.first;
     Mantid::Geometry::ComponentID paramCompId = itParamName.second;
-    // attempt to insert this will fail silently if the key already exists
-    if (mapCmptToNameVector.find(paramCompId) == mapCmptToNameVector.end()) {
-      mapCmptToNameVector.emplace(paramCompId, std::vector<std::string>());
-    }
+    mapCmptToNameVector.emplace(paramCompId, std::vector<std::string>());
     // get the vector out and add the name
-    mapCmptToNameVector[paramCompId].emplace_back(paramName);
+    mapCmptToNameVector[paramCompId].emplace_back(std::move(paramName));
   }
 
   // walk out from the selected component

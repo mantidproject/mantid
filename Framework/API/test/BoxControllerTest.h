@@ -8,8 +8,8 @@
 
 #include "MantidAPI/BoxController.h"
 #include "MantidAPI/IBoxControllerIO.h"
+#include "MantidFrameworkTestHelpers/BoxControllerDummyIO.h"
 #include "MantidKernel/DiskBuffer.h"
-#include "MantidTestHelpers/BoxControllerDummyIO.h"
 #include <boost/optional.hpp>
 #include <cxxtest/TestSuite.h>
 #include <map>

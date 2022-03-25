@@ -9,9 +9,9 @@
 #include <cxxtest/TestSuite.h>
 #include <vector>
 
+#include "MantidFrameworkTestHelpers/MDEventsTestHelper.h"
 #include "MantidGeometry/MDGeometry/MDTypes.h"
 #include "MantidMDAlgorithms/TransposeMD.h"
-#include "MantidTestHelpers/MDEventsTestHelper.h"
 
 using Mantid::MDAlgorithms::TransposeMD;
 using namespace Mantid::DataObjects;

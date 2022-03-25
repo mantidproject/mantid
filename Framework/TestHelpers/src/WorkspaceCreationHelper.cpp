@@ -14,9 +14,9 @@
  *higher
  *  than DataObjects (e.g. any algorithm), even if going via the factory.
  *********************************************************************************/
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
-#include "MantidTestHelpers/ComponentCreationHelper.h"
-#include "MantidTestHelpers/InstrumentCreationHelper.h"
+#include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
+#include "MantidFrameworkTestHelpers/ComponentCreationHelper.h"
+#include "MantidFrameworkTestHelpers/InstrumentCreationHelper.h"
 
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/NumericAxis.h"
@@ -398,6 +398,24 @@ MatrixWorkspace_sptr create2DDetectorScanWorkspaceWithFullInstrument(int nhist, 
   builder.setTimeRanges(DateAndTime(int(startTime), 0), timeRanges);
 
   return builder.buildWorkspace();
+}
+
+//================================================================================================================
+/** Create an Workspace2D with an instrument that contains detectors arranged at even latitude/longitude
+ * values. For use in testing absorption and multiple scattering corrections. The sparse instrument functionality
+ * in these algorithms uses geographical angles (lat/long) to specify the detector positions
+ * Latitude/longitude corresponds to two theta if longitude/latitude equals zero
+ */
+Workspace2D_sptr create2DWorkspaceWithGeographicalDetectors(const int nlat, const int nlong, const double anginc,
+                                                            const int nbins, const double x0, const double deltax,
+                                                            const std::string &instrumentName) {
+  auto inputWorkspace = WorkspaceCreationHelper::create2DWorkspaceBinned(nlat * nlong, nbins, x0, deltax);
+  inputWorkspace->getAxis(0)->unit() = UnitFactory::Instance().create("Wavelength");
+
+  InstrumentCreationHelper::addInstrumentWithGeographicalDetectorsToWorkspace(*inputWorkspace, nlat, nlong, anginc,
+                                                                              instrumentName);
+
+  return inputWorkspace;
 }
 
 //================================================================================================================

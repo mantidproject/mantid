@@ -27,7 +27,7 @@ namespace MantidQt::CustomInterfaces {
 ALCDataLoadingView::ALCDataLoadingView(QWidget *widget)
     : m_widget(widget), m_selectedLog(DEFAULT_LOG), m_numPeriods(0) {}
 
-ALCDataLoadingView::~ALCDataLoadingView() {}
+ALCDataLoadingView::~ALCDataLoadingView() = default;
 
 void ALCDataLoadingView::initialize() {
   m_ui.setupUi(m_widget);
@@ -342,6 +342,14 @@ std::vector<std::string> ALCDataLoadingView::getFiles() {
   for (const auto &file : QFiles)
     files.emplace_back(file.toStdString());
   return files;
+}
+
+void ALCDataLoadingView::setFileExtensions(const std::vector<std::string> &extensions) {
+  QStringList exts;
+  for (std::string value : extensions) {
+    exts << QString::fromStdString(value);
+  }
+  m_ui.runs->setFileExtensions(exts);
 }
 
 std::string ALCDataLoadingView::getFirstFile() { return m_ui.runs->getFirstFilename().toStdString(); }

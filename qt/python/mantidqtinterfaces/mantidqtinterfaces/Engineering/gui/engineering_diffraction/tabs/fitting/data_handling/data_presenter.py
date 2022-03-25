@@ -30,7 +30,7 @@ class FittingDataPresenter(object):
         self.view.set_on_seq_fit_clicked(self._start_seq_fit)
         self.view.set_on_serial_fit_clicked(self._start_serial_fit)
         self.view.set_on_table_cell_changed(self._handle_table_cell_changed)
-        self.view.set_on_bank_changed(self._update_file_filter)
+        self.view.set_on_region_changed(self._update_file_filter)
         self.view.set_on_xunit_changed(self._update_file_filter)
         self.view.set_table_selection_changed(self._handle_selection_changed)
 
@@ -54,15 +54,15 @@ class FittingDataPresenter(object):
         self.model.update_fit(fit_props)
 
     def _start_seq_fit(self):
-        ws_list = self.model.get_ws_sorted_by_primary_log()
-        self.fit_all_started_notifier.notify_subscribers(ws_list, do_sequential=True)
+        ws_name_list = self.model.get_active_ws_sorted_by_primary_log()
+        self.fit_all_started_notifier.notify_subscribers(ws_name_list, do_sequential=True)
 
     def _start_serial_fit(self):
-        ws_list = self.model.get_ws_list()
-        self.fit_all_started_notifier.notify_subscribers(ws_list, do_sequential=False)
+        ws_name_list = self.model.get_active_ws_name_list()
+        self.fit_all_started_notifier.notify_subscribers(ws_name_list, do_sequential=False)
 
-    def _update_file_filter(self, bank, xunit):
-        self.view.update_file_filter(bank, xunit)
+    def _update_file_filter(self, region, xunit):
+        self.view.update_file_filter(region, xunit)
 
     def on_load_clicked(self):
         if self._validate():
@@ -70,49 +70,39 @@ class FittingDataPresenter(object):
             self._start_load_worker(filenames)
 
     def remove_workspace(self, ws_name):
-        if ws_name in self.get_loaded_workspaces():
-            removed = self.get_loaded_workspaces().pop(ws_name)
-            self.plot_removed_notifier.notify_subscribers(removed)
+        if ws_name in self.model.get_all_workspace_names():
+            self.model.remove_workspace(ws_name)
+            # plot_presenter will already be notified of ws being removed via its own ADS observer
             self.plotted.discard(ws_name)
-            self.model.remove_log_rows([self.row_numbers[ws_name]])
-            self.model.update_log_workspace_group()
             self._repopulate_table()
         elif ws_name in self.model.get_log_workspaces_name():
             self.model.update_log_workspace_group()
 
     def rename_workspace(self, old_name, new_name):
-        if old_name in self.get_loaded_workspaces():
+        # Note - ws.name() not updated yet so need to rely on new_name parameter
+        # Also Note - ADS rename is always associated with a ADS replace so
+        # rely on the replace to _repopulate_table. Prefer not to call twice
+        # to avoid issue with legend entries doubling up
+        if old_name in self.model.get_all_workspace_names():
             self.model.update_workspace_name(old_name, new_name)
             if old_name in self.plotted:
                 self.plotted.remove(old_name)
                 self.plotted.add(new_name)
-            self._repopulate_table()
-            self.model.update_log_workspace_group()  # so matches new table
+            if old_name in self.row_numbers: #bgsub not in row_numbers
+                row_no = self.row_numbers.pop(old_name)
+                self.row_numbers[new_name] = row_no
 
+    # handle ADS clear
     def clear_workspaces(self):
-        self.get_loaded_workspaces().clear()
-        self.get_bgsub_workspaces().clear()
-        self.get_bg_params().clear()
-        self.model.set_log_workspaces_none()
+        self.model.clear_workspaces()
         self.plotted.clear()
         self.row_numbers.clear()
         self._repopulate_table()
 
     def replace_workspace(self, name, workspace):
-        if name in self.get_loaded_workspaces():
-            self.get_loaded_workspaces()[name] = workspace
-            if name in self.plotted:
-                self.all_plots_removed_notifier.notify_subscribers()
+        if name in self.model.get_all_workspace_names():
+            self.model.replace_workspace(name, workspace)
             self._repopulate_table()
-
-    def get_loaded_workspaces(self):
-        return self.model.get_loaded_workspaces()
-
-    def get_bgsub_workspaces(self):
-        return self.model.get_bgsub_workspaces()
-
-    def get_bg_params(self):
-        return self.model.get_bg_params()
 
     def restore_table(self):  # used when the interface is being restored from a save or crash
         self._repopulate_table()
@@ -137,6 +127,7 @@ class FittingDataPresenter(object):
         if self.view.get_add_to_plot():
             self.plotted.update(wsnames)
         self._repopulate_table()
+
         # subtract background - has to be done post repopulation, can't change default in _add_row_to_table
         [self.view.set_item_checkstate(self.row_numbers[wsname], 3, True) for wsname in wsnames]
 
@@ -148,35 +139,36 @@ class FittingDataPresenter(object):
         self._remove_all_table_rows()
         self.row_numbers.clear()
         self.all_plots_removed_notifier.notify_subscribers()
-        workspaces = self.get_loaded_workspaces()
+        workspaces = self.model.get_loaded_workspaces()
         for i, name in enumerate(workspaces):
             try:
                 run_no = self.model.get_sample_log_from_ws(name, "run_number")
                 bank = self.model.get_sample_log_from_ws(name, "bankid")
                 if bank == 0:
                     bank = "cropped"
-                checked = name in self.plotted or name + "_bgsub" in self.plotted
-                if name in self.model.get_bg_params():
-                    self._add_row_to_table(name, i, run_no, bank, checked, *self.model.get_bg_params()[name])
-                else:
-                    self._add_row_to_table(name, i, run_no, bank, checked)
+                active_ws_name = self.model.get_active_ws_name(name)
+                plotted = active_ws_name in self.plotted
+                self._add_row_to_table(name, i, run_no, bank, plotted, *self.model.get_bg_params()[name])
             except RuntimeError:
                 self._add_row_to_table(name, i)
-            self._handle_table_cell_changed(i, 2)
+            # update row_numbers at end so _handle_table_cell_changed only acts once row is ready
+            self.row_numbers[name] = i
 
     def _remove_selected_tracked_workspaces(self):
         row_numbers = self._remove_selected_table_rows()
-        self.model.remove_log_rows(row_numbers)
         for row_no in row_numbers:
             ws_name = self.row_numbers.pop(row_no)
-            removed = self.get_loaded_workspaces().pop(ws_name)
-            self.plot_removed_notifier.notify_subscribers(removed)
-            self.plotted.discard(ws_name)
+            removed_ws_list = self.model.delete_workspace(ws_name)
+            for ws in removed_ws_list:
+                #plot_removed_notifier will be done in _repopulate_table
+                self.plotted.discard(ws.name())
         self._repopulate_table()
 
     def _remove_all_tracked_workspaces(self):
-        self.clear_workspaces()
-        self.model.clear_logs()
+        self.model.delete_workspaces()
+        self.all_plots_removed_notifier.notify_subscribers()
+        self.plotted.clear()
+        self.row_numbers.clear()
         self._remove_all_table_rows()
 
     def _plotBG(self):
@@ -188,46 +180,47 @@ class FittingDataPresenter(object):
 
     def _handle_table_cell_changed(self, row, col):
         if row in self.row_numbers:
-            ws_name = self.row_numbers[row]
+            # this is written on assumption that all columns are present.
+            # events fired by view.add_table_row are queued so handler called after add_table_row completes
+            loaded_ws_name = self.row_numbers[row]
             is_plotted = self.view.get_item_checked(row, 2)
             is_sub = self.view.get_item_checked(row, 3)
             if col == 2:
                 # Plot check box
-                if is_sub:
-                    ws = self.model.get_bgsub_workspaces()[ws_name]
-                    ws_name += "_bgsub"
-                else:
-                    ws = self.model.get_loaded_workspaces()[ws_name]
-                if self.view.get_item_checked(row, col):  # Plot Box is checked
+                ws = self.model.get_active_ws(loaded_ws_name)
+                ws_name = self.model.get_active_ws_name(loaded_ws_name)
+                if is_plotted:
                     self.plot_added_notifier.notify_subscribers(ws)
                     self.plotted.add(ws_name)
-                else:  # Plot box is unchecked
+                else:
                     self.plot_removed_notifier.notify_subscribers(ws)
                     self.plotted.discard(ws_name)
             elif col == 3:
                 # subtract bg col
-                self.model.update_bgsub_status(ws_name, is_sub)
-                if is_sub or is_plotted:  # this ensures the sub ws isn't made on load
+                self.model.update_bgsub_status(loaded_ws_name, is_sub)
+                if is_sub:
                     bg_params = self.view.read_bg_params_from_table(row)
-                    self.model.create_or_update_bgsub_ws(ws_name, bg_params)
-                    self._update_plotted_ws_with_sub_state(ws_name, is_sub)
+                    self.model.create_or_update_bgsub_ws(loaded_ws_name, bg_params)
+                if is_plotted:
+                    self._update_plotted_ws_with_sub_state(loaded_ws_name, is_sub)
             elif col > 3:
                 if is_sub:
                     # bg params changed - revaluate background
                     bg_params = self.view.read_bg_params_from_table(row)
-                    self.model.create_or_update_bgsub_ws(ws_name, bg_params)
+                    self.model.create_or_update_bgsub_ws(loaded_ws_name, bg_params)
 
     def _update_plotted_ws_with_sub_state(self, ws_name, is_sub):
         ws = self.model.get_loaded_workspaces()[ws_name]
         ws_bgsub = self.model.get_bgsub_workspaces()[ws_name]
+        ws_bgsub_name = self.model.get_bgsub_workspace_names()[ws_name]
         if ws_name in self.plotted and is_sub:
             self.plot_removed_notifier.notify_subscribers(ws)
             self.plotted.discard(ws_name)
             self.plot_added_notifier.notify_subscribers(ws_bgsub)
-            self.plotted.add(ws_name + "_bgsub")
-        elif ws_name + "_bgsub" in self.plotted and not is_sub:
+            self.plotted.add(ws_bgsub_name)
+        elif ws_bgsub_name in self.plotted and not is_sub:
             self.plot_removed_notifier.notify_subscribers(ws_bgsub)
-            self.plotted.discard(ws_name + "_bgsub")
+            self.plotted.discard(ws_bgsub_name)
             self.plot_added_notifier.notify_subscribers(ws)
             self.plotted.add(ws_name)
 
@@ -264,7 +257,7 @@ class FittingDataPresenter(object):
             return False
         return True
 
-    def _add_row_to_table(self, ws_name, row, run_no=None, bank=None, checked=False, bgsub=False, niter=100,
+    def _add_row_to_table(self, ws_name, row, run_no=None, bank=None, plotted=False, bgsub=False, niter=50,
                           xwindow=None, SG=True):
 
         words = ws_name.split("_")
@@ -272,21 +265,20 @@ class FittingDataPresenter(object):
         if not xwindow:
             ws = self.model.get_loaded_workspaces()[ws_name]
             if ws.getAxis(0).getUnit().unitID() == "TOF":
-                xwindow = 1000
+                xwindow = 600
             else:
-                xwindow = 0.05
+                xwindow = 0.02
         if run_no is not None and bank is not None:
-            self.view.add_table_row(run_no, bank, checked, bgsub, niter, xwindow, SG)
+            self.view.add_table_row(run_no, bank, plotted, bgsub, niter, xwindow, SG)
         elif len(words) == 4 and words[2] == "bank":
             logger.notice("No sample logs present, determining information from workspace name.")
-            self.view.add_table_row(words[1], words[3], checked, bgsub, niter, xwindow, SG)
+            self.view.add_table_row(words[1], words[3], plotted, bgsub, niter, xwindow, SG)
         else:
             logger.warning(
                 "The workspace '{}' was not in the correct naming format. Files should be named in the following way: "
                 "INSTRUMENT_RUNNUMBER_bank_BANK. Using workspace name as identifier.".format(ws_name)
             )
-            self.view.add_table_row(ws_name, "N/A", checked, bgsub, niter, xwindow, SG)
-        self.row_numbers[ws_name] = row
+            self.view.add_table_row(ws_name, "N/A", plotted, bgsub, niter, xwindow, SG)
 
     def _remove_table_row(self, row_no):
         self.view.remove_table_row(row_no)

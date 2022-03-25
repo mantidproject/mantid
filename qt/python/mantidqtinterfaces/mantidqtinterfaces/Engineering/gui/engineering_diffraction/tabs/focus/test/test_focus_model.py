@@ -9,212 +9,170 @@ import tempfile
 import shutil
 from os import path
 
-from unittest.mock import patch, MagicMock, call
-from mantid.simpleapi import CreateSampleWorkspace
+from unittest.mock import patch, MagicMock, call, create_autospec
+from Engineering.EnggUtils import GROUP
 from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.focus import model
-from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.common import output_settings
-from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.common.calibration_info import CalibrationInfo
+from Engineering.common.calibration_info import CalibrationInfo
 
 file_path = "mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.focus.model"
-
-DF_KWARG_NORTH = {'GroupingWorkspace': 'NorthBank_grouping'}
-DF_KWARG_SOUTH = {'GroupingWorkspace': 'SouthBank_grouping'}
-DF_KWARG_CUSTOM = {'GroupingWorkspace': 'custom_grouping_wsp'}
-
-
-def clone_ws_side_effect(ws):
-    return ws
+enggutils_path = "Engineering.EnggUtils"
 
 
 class FocusModelTest(unittest.TestCase):
     def setUp(self):
         self.test_dir = tempfile.mkdtemp()
         self.model = model.FocusModel()
-        self.current_calibration = CalibrationInfo(sample_path="this_is_mocked_out_too",
-                                                   instrument="ENGINX")
+        self.calibration = create_autospec(CalibrationInfo)
+        self.calibration.is_valid.return_value = True
+        self.calibration.get_instrument.return_value = "ENGINX"
+        self.calibration.get_group_suffix.return_value = "all_banks"
+        self.calibration.get_foc_ws_suffix.return_value = "bank"
 
     def tearDown(self):
         shutil.rmtree(self.test_dir)
 
-    @patch(file_path + ".DeleteWorkspace")
-    @patch(file_path + ".Load")
-    @patch(file_path + ".FocusModel._output_sample_logs")
-    @patch(file_path + ".Ads")
-    @patch(file_path + ".FocusModel._save_output")
-    @patch(file_path + ".FocusModel._whole_inst_prefocus")
-    @patch(file_path + ".FocusModel._run_focus")
-    @patch(file_path + ".path_handling.load_workspace")
-    @patch(file_path + ".vanadium_corrections.fetch_correction_workspaces")
-    def test_focus_run_for_each_bank(self, fetch_van, load_focus, run_focus, prefocus, output, ads, logs, load, delete):
-        ads.retrieve.side_effect = ["full_calib", "calib_n", "curves_n", "calib_s", "curves_s"]
-        regions_dict = {"bank_1": "NorthBank_grouping", "bank_2": "SouthBank_grouping"}
-        load_focus.return_value = "mocked_sample"
-        fetch_van.return_value = ("mocked_integ", "mocked_curves")
-        van_path = "fake/van/path"
+    @patch(enggutils_path + '.mantid.DeleteWorkspace')
+    @patch(enggutils_path + '.mantid.ConvertUnits')
+    @patch(enggutils_path + '._save_output_files')
+    @patch(enggutils_path + '._apply_vanadium_norm')
+    @patch(enggutils_path + '._focus_run_and_apply_roi_calibration')
+    @patch(enggutils_path + '._load_run_and_convert_to_dSpacing')
+    @patch(enggutils_path + '._plot_focused_workspaces')
+    @patch(enggutils_path + '.process_vanadium')
+    @patch(file_path + '.load_full_instrument_calibration')
+    def test_focus_run_valid_calibration_plotting(self, mock_load_inst_cal, mock_proc_van, mock_plot, mock_load_run,
+                                                  mock_foc_run, mock_apply_van, mock_save_out, mock_conv_units,
+                                                  mock_del_ws):
+        mock_proc_van.return_value = ("van_ws_foc", "123456")
+        mock_load_run.return_value = MagicMock()
+        sample_foc_ws = MagicMock()
+        sample_foc_ws.name.return_value = "foc_name"
+        mock_conv_units.return_value = sample_foc_ws  # last alg called before ws name appended to plotting list
+        mock_save_out.return_value = ["nxs_path"]
 
-        self.model.focus_run(["305761"], van_path, False, "ENGINX", "0", regions_dict)
+        # plotting focused runs
+        self.model.focus_run(["305761"], "fake/van/path", plot_output=True, rb_num=None, calibration=self.calibration)
 
-        self.assertEqual(2, run_focus.call_count)
-        north_call = call("mocked_sample",
-                          "305761_" + model.FOCUSED_OUTPUT_WORKSPACE_NAME + "bank_1",
-                          "curves_n", "NorthBank_grouping", "calib_n")
-        south_call = call("mocked_sample",
-                          "305761_" + model.FOCUSED_OUTPUT_WORKSPACE_NAME + "bank_2",
-                          "curves_s", "SouthBank_grouping", "calib_s")
-        run_focus.assert_has_calls([north_call, south_call])
+        mock_foc_run.assert_called_once()
+        mock_plot.assert_called_once_with(["foc_name"])
+        self.assertEqual(mock_save_out.call_count, 2)  # once for dSpacing and once for TOF
+        self.assertEqual(self.model._last_focused_files[0], "nxs_path")
+        mock_del_ws.assert_called_once_with("van_ws_foc_rb")
 
-    @patch(file_path + ".DeleteWorkspace")
-    @patch(file_path + ".Load")
-    @patch(file_path + ".FocusModel._output_sample_logs")
-    @patch(file_path + ".Ads")
-    @patch(file_path + ".FocusModel._save_output")
-    @patch(file_path + ".FocusModel._whole_inst_prefocus")
-    @patch(file_path + ".FocusModel._run_focus")
-    @patch(file_path + ".path_handling.load_workspace")
-    @patch(file_path + ".vanadium_corrections.fetch_correction_workspaces")
-    def test_focus_run_for_custom_spectra(self, fetch_van, load_focus, run_focus, prefocus, output, ads, logs, load,
-                                          delete):
-        ads.retrieve.side_effect = ["full_calib", "calib_cropped", "curves_cropped"]
-        fetch_van.return_value = ("mocked_integ", "mocked_curves")
-        van_path = "fake/van/path"
-        load_focus.return_value = "mocked_sample"
-        regions_dict = {"Cropped": "Custom_spectra_grouping"}
+        # no plotting
+        mock_plot.reset_mock()
+        self.model.focus_run(["305761"], "fake/van/path", plot_output=False, rb_num=None, calibration=self.calibration)
 
-        self.model.focus_run(["305761"], van_path, False, "ENGINX", "0", regions_dict)
+        mock_plot.assert_not_called()
 
-        self.assertEqual(1, run_focus.call_count)
-        run_focus.assert_called_with("mocked_sample",
-                                     "305761_" + model.FOCUSED_OUTPUT_WORKSPACE_NAME + "Cropped",
-                                     "curves_cropped", "Custom_spectra_grouping", "calib_cropped")
+    @patch(enggutils_path + '.mantid.DeleteWorkspace')
+    @patch(enggutils_path + '.mantid.ConvertUnits')
+    @patch(enggutils_path + '._save_output_files')
+    @patch(enggutils_path + '._apply_vanadium_norm')
+    @patch(enggutils_path + '._focus_run_and_apply_roi_calibration')
+    @patch(enggutils_path + '._load_run_and_convert_to_dSpacing')
+    @patch(enggutils_path + '.process_vanadium')
+    @patch(file_path + '.load_full_instrument_calibration')
+    def test_save_directories_both_banks_with_RBnum(self, mock_load_inst_cal, mock_proc_van, mock_load_run,
+                                                    mock_foc_run, mock_apply_van, mock_save_out, mock_conv_units,
+                                                    mock_del_ws):
+        rb_num = "1"
+        van_run = "123456"
+        mock_proc_van.return_value = ("van_ws_foc", van_run)
+        mock_load_run.return_value = MagicMock()
+        sample_foc_ws = MagicMock()
+        sample_foc_ws.name.return_value = "foc_name"
+        mock_apply_van.return_value = sample_foc_ws  # xunit = dSpacing
+        mock_conv_units.return_value = sample_foc_ws  # xunit = TOF
+        self.calibration.group = GROUP.BOTH
 
-    @patch(file_path + ".DeleteWorkspace")
-    @patch(file_path + ".Load")
-    @patch(file_path + ".FocusModel._output_sample_logs")
-    @patch(file_path + ".Ads")
-    @patch(file_path + ".FocusModel._save_output")
-    @patch(file_path + ".FocusModel._plot_focused_workspaces")
-    @patch(file_path + ".FocusModel._whole_inst_prefocus")
-    @patch(file_path + ".FocusModel._run_focus")
-    @patch(file_path + ".path_handling.load_workspace")
-    @patch(file_path + ".vanadium_corrections.fetch_correction_workspaces")
-    def test_focus_plotted_when_checked(self, fetch_van, load_focus, run_focus, prefocus, plot_focus, output, ads, logs,
-                                        load, delete):
-        ads.doesExist.return_value = True
-        fetch_van.return_value = ("mocked_integ", "mocked_curves")
-        van_path = "fake/van/path"
-        regions_dict = {"bank_1": "NorthBank_grouping", "bank_2": "SouthBank_grouping"}
-        load_focus.return_value = "mocked_sample"
+        # plotting focused runs
+        self.model.focus_run(["305761"], "fake/van/path", plot_output=False, rb_num=rb_num,
+                             calibration=self.calibration, save_dir='dir')
 
-        self.model.focus_run(["305761"], van_path, True, "ENGINX", "0", regions_dict)
+        self.assertEqual(mock_save_out.call_count, 2)  # once for dSpacing and once for TOF
+        save_calls = 2 * [call([path.join('dir', 'Focus'),
+                                path.join('dir', 'User', rb_num, 'Focus')], sample_foc_ws,
+                               self.calibration, van_run, rb_num)]
+        mock_save_out.assert_has_calls(save_calls)
 
-        self.assertEqual(1, plot_focus.call_count)
+    @patch(enggutils_path + '.mantid.DeleteWorkspace')
+    @patch(enggutils_path + '.mantid.ConvertUnits')
+    @patch(enggutils_path + '._save_output_files')
+    @patch(enggutils_path + '._apply_vanadium_norm')
+    @patch(enggutils_path + '._focus_run_and_apply_roi_calibration')
+    @patch(enggutils_path + '._load_run_and_convert_to_dSpacing')
+    @patch(enggutils_path + '.process_vanadium')
+    @patch(file_path + '.load_full_instrument_calibration')
+    def test_save_directories_texture_with_RBnum(self, mock_load_inst_cal, mock_proc_van, mock_load_run,
+                                                 mock_foc_run, mock_apply_van, mock_save_out, mock_conv_units,
+                                                 mock_del_ws):
+        rb_num = "1"
+        van_run = "123456"
+        mock_proc_van.return_value = ("van_ws_foc", van_run)
+        mock_load_run.return_value = MagicMock()
+        sample_foc_ws = MagicMock()
+        sample_foc_ws.name.return_value = "foc_name"
+        mock_apply_van.return_value = sample_foc_ws  # xunit = dSpacing
+        mock_conv_units.return_value = sample_foc_ws  # xunit = TOF
+        self.calibration.group = GROUP.TEXTURE20
 
-    @patch(file_path + ".DeleteWorkspace")
-    @patch(file_path + ".Load")
-    @patch(file_path + ".FocusModel._output_sample_logs")
-    @patch(file_path + ".Ads")
-    @patch(file_path + ".FocusModel._save_output")
-    @patch(file_path + ".FocusModel._plot_focused_workspaces")
-    @patch(file_path + ".FocusModel._whole_inst_prefocus")
-    @patch(file_path + ".FocusModel._run_focus")
-    @patch(file_path + ".path_handling.load_workspace")
-    @patch(file_path + ".vanadium_corrections.fetch_correction_workspaces")
-    def test_focus_not_plotted_when_not_checked(self, fetch_van, load_focus, run_focus, prefocus, plot_focus, output,
-                                                ads, logs, load, delete):
-        fetch_van.return_value = ("mocked_integ", "mocked_curves")
-        van_path = "fake/van/path"
-        regions_dict = {"region1": "grp_ws_name"}
-        load_focus.return_value = "mocked_sample"
+        # plotting focused runs
+        self.model.focus_run(["305761"], "fake/van/path", plot_output=False, rb_num=rb_num,
+                             calibration=self.calibration, save_dir='dir')
 
-        self.model.focus_run("305761", van_path, False, "ENGINX", "0", regions_dict)
-        self.assertEqual(0, plot_focus.call_count)
+        self.assertEqual(mock_save_out.call_count, 2)  # once for dSpacing and once for TOF
+        save_calls = 2 * [call([path.join('dir', 'User', rb_num, 'Focus')],
+                               sample_foc_ws, self.calibration, van_run, rb_num)]
+        mock_save_out.assert_has_calls(save_calls)
 
-    @patch(file_path + ".SaveFocusedXYE")
-    @patch(file_path + ".SaveGSS")
-    @patch(file_path + ".SaveNexus")
-    @patch(file_path + ".AddSampleLog")
-    def test_save_output_files_with_no_RB_number(self, addlog, nexus, gss, xye):
-        mocked_workspace = "mocked-workspace"
-        output_file = path.join(output_settings.get_output_path(), "Focus",
-                                "ENGINX_123_456_North_TOF.nxs")
+    @patch(enggutils_path + '.mantid.DeleteWorkspace')
+    @patch(enggutils_path + '.mantid.ConvertUnits')
+    @patch(enggutils_path + '._save_output_files')
+    @patch(enggutils_path + '._apply_vanadium_norm')
+    @patch(enggutils_path + '._focus_run_and_apply_roi_calibration')
+    @patch(enggutils_path + '._load_run_and_convert_to_dSpacing')
+    @patch(enggutils_path + '.process_vanadium')
+    @patch(file_path + '.load_full_instrument_calibration')
+    def test_save_directories_texture30_with_RBnum(self, mock_load_inst_cal, mock_proc_van, mock_load_run,
+                                                   mock_foc_run, mock_apply_van, mock_save_out, mock_conv_units,
+                                                   mock_del_ws):
+        rb_num = "1"
+        van_run = "123456"
+        mock_proc_van.return_value = ("van_ws_foc", van_run)
+        mock_load_run.return_value = MagicMock()
+        sample_foc_ws = MagicMock()
+        sample_foc_ws.name.return_value = "foc_name"
+        mock_apply_van.return_value = sample_foc_ws  # xunit = dSpacing
+        mock_conv_units.return_value = sample_foc_ws  # xunit = TOF
+        self.calibration.group = GROUP.TEXTURE30
 
-        self.model._save_output("ENGINX", "123", "456", "North",
-                                mocked_workspace, None)
+        # plotting focused runs
+        self.model.focus_run(["305761"], "fake/van/path", plot_output=False, rb_num=rb_num,
+                             calibration=self.calibration, save_dir='dir')
 
-        self.assertEqual(1, nexus.call_count)
-        self.assertEqual(1, gss.call_count)
-        self.assertEqual(1, xye.call_count)
-        nexus.assert_called_with(Filename=output_file, InputWorkspace=mocked_workspace)
+        self.assertEqual(mock_save_out.call_count, 2)  # once for dSpacing and once for TOF
+        save_calls = 2 * [call([path.join('dir', 'User', rb_num, 'Focus')],
+                               sample_foc_ws, self.calibration, van_run, rb_num)]
+        mock_save_out.assert_has_calls(save_calls)
 
-    @patch(file_path + ".SaveFocusedXYE")
-    @patch(file_path + ".SaveGSS")
-    @patch(file_path + ".SaveNexus")
-    @patch(file_path + ".AddSampleLog")
-    def test_save_output_files_with_RB_number(self, addlog, nexus, gss, xye):
-        self.model._save_output("ENGINX", "123", "456", "North",
-                                "mocked-workspace", "An Experiment Number")
-        self.assertEqual(nexus.call_count, 2)
-        self.assertEqual(gss.call_count, 2)
-        self.assertEqual(xye.call_count, 2)
+    @patch(enggutils_path + '.mantid.DeleteWorkspace')
+    @patch(enggutils_path + '._save_output_files')
+    @patch(enggutils_path + '._load_run_and_convert_to_dSpacing')
+    @patch(enggutils_path + '._plot_focused_workspaces')
+    @patch(enggutils_path + '.process_vanadium')
+    @patch(file_path + '.load_full_instrument_calibration')
+    def test_focus_run_when_zero_proton_charge(self, mock_load_inst_cal, mock_proc_van, mock_plot, mock_load_run,
+                                               mock_save_out, mock_del_ws):
+        mock_proc_van.return_value = ("van_ws_foc", "123456")
+        mock_load_run.return_value = None  # expected return when no proton charge
 
-    @patch(file_path + ".logger")
-    @patch(file_path + ".output_settings.get_output_path")
-    @patch(file_path + ".csv")
-    def test_output_sample_logs_with_rb_number(self, mock_csv, mock_path, mock_logger):
-        mock_writer = MagicMock()
-        mock_csv.writer.return_value = mock_writer
-        mock_path.return_value = self.test_dir
-        ws = CreateSampleWorkspace()
+        self.model.focus_run(["305761"], "fake/van/path", plot_output=True, rb_num=None, calibration=self.calibration,
+                             save_dir='dir')
 
-        self.model._output_sample_logs("ENGINX", "00000", "00000", ws, "0")
-
-        self.assertEqual(5, len(ws.getRun().keys()))
-        self.assertEqual(1, mock_logger.information.call_count)
-        self.assertEqual(8, mock_writer.writerow.call_count)
-
-    @patch(file_path + ".logger")
-    @patch(file_path + ".output_settings.get_output_path")
-    @patch(file_path + ".csv")
-    def test_output_sample_logs_without_rb_number(self, mock_csv, mock_path, mock_logger):
-        mock_writer = MagicMock()
-        mock_csv.writer.return_value = mock_writer
-        mock_path.return_value = self.test_dir
-        ws = CreateSampleWorkspace()
-
-        self.model._output_sample_logs("ENGINX", "00000", "00000", ws, None)
-
-        self.assertEqual(5, len(ws.getRun().keys()))
-        self.assertEqual(1, mock_logger.information.call_count)
-        self.assertEqual(4, mock_writer.writerow.call_count)
-
-    @patch(file_path + ".SaveFocusedXYE")
-    @patch(file_path + ".SaveGSS")
-    @patch(file_path + ".SaveNexus")
-    @patch(file_path + ".AddSampleLog")
-    def test_last_path_updates_with_no_RB_number(self, addlog, nexus, gss, xye):
-        mocked_workspace = "mocked-workspace"
-        output_file = path.join(output_settings.get_output_path(), "Focus",
-                                "ENGINX_123_456_North_TOF.nxs")
-
-        self.model._save_output("ENGINX", "123", "456", "North",
-                                mocked_workspace, None)
-
-        self.assertEqual(self.model._last_focused_files[0], output_file)
-
-    @patch(file_path + ".SaveFocusedXYE")
-    @patch(file_path + ".SaveGSS")
-    @patch(file_path + ".SaveNexus")
-    @patch(file_path + ".AddSampleLog")
-    def test_last_path_updates_with_RB_number(self, addlog, nexus, gss, xye):
-        mocked_workspace = "mocked-workspace"
-        rb_num = '2'
-        output_file = path.join(output_settings.get_output_path(), "User", rb_num, "Focus",
-                                "ENGINX_123_456_North_TOF.nxs")
-
-        self.model._save_output("ENGINX", "123", "456", "North",
-                                mocked_workspace, rb_num)
-
-        self.assertEqual(self.model._last_focused_files[0], output_file)
+        mock_plot.assert_not_called()
+        mock_save_out.assert_not_called()
+        mock_del_ws.assert_not_called()
 
 
 if __name__ == '__main__':

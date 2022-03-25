@@ -4,10 +4,10 @@
 //   NScD Oak Ridge National Laboratory, European Spallation Source,
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#include "MantidTestHelpers/MultiDomainFunctionHelper.h"
-#include "MantidTestHelpers/FakeObjects.h"
+#include "MantidFrameworkTestHelpers/MultiDomainFunctionHelper.h"
+#include "MantidFrameworkTestHelpers/FakeObjects.h"
 
-namespace Mantid::TestHelpers {
+namespace Mantid::FrameworkTestHelpers {
 
 MultiDomainFunctionTest_Function::MultiDomainFunctionTest_Function()
     : Mantid::API::IFunction1D(), Mantid::API::ParamFunction() {
@@ -144,4 +144,4 @@ Mantid::API::MatrixWorkspace_sptr makeMultiDomainWorkspace3() {
 
   return ws3;
 }
-} // namespace Mantid::TestHelpers
+} // namespace Mantid::FrameworkTestHelpers

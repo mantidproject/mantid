@@ -2,10 +2,8 @@
 
 set(MODULE_TEMPLATE src/dataobjects.cpp.in)
 
-# Files containing export definitions, these are automatically processed -- Do
-# NOT sort this list. The order defines the order in which the export
-# definitions occur and some depend on their base classes being exported first
-# --
+# Files containing export definitions, these are automatically processed -- Do NOT sort this list. The order defines the
+# order in which the export definitions occur and some depend on their base classes being exported first --
 set(EXPORT_FILES
     src/Exports/EventList.cpp
     src/Exports/EventWorkspace.cpp
@@ -38,35 +36,35 @@ set(INC_FILES)
 # Create the target for this directory
 
 add_library(
-  PythonDataObjectsModule ${MODULE_DEFINITION} ${EXPORT_FILES} ${SRC_FILES}
-                          ${INC_FILES} ${PYTHON_INSTALL_FILES}
+  PythonDataObjectsModule ${MODULE_DEFINITION} ${EXPORT_FILES} ${SRC_FILES} ${INC_FILES} ${PYTHON_INSTALL_FILES}
 )
-add_library(Mantid::PythonDataObjectsModule ALIAS PythonDataObjectsModule )
+add_library(Mantid::PythonDataObjectsModule ALIAS PythonDataObjectsModule)
 
-target_include_directories(PythonDataObjectsModule PUBLIC
-    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/inc>
-		$<INSTALL_INTERFACE:include/Mantid>
-
+target_include_directories(
+  PythonDataObjectsModule PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/inc> $<INSTALL_INTERFACE:include/Mantid>
 )
 
 set_python_properties(PythonDataObjectsModule _dataobjects)
 
 # Add the required dependencies
-target_link_libraries(PythonDataObjectsModule
+target_link_libraries(
+  PythonDataObjectsModule
   PUBLIC Mantid::DataObjects
-  PRIVATE
-  Mantid::PythonInterfaceCore
-  Mantid::PythonAPIModule
-  Mantid::PythonGeometryModule
-  Mantid::PythonKernelModule
-  Mantid::Types
-  Mantid::HistogramData
-  Mantid::Indexing
+  PRIVATE Mantid::PythonInterfaceCore
+          Mantid::PythonAPIModule
+          Mantid::PythonGeometryModule
+          Mantid::PythonKernelModule
+          Mantid::Types
+          Mantid::HistogramData
+          Mantid::Indexing
 )
 
 # Installation settings
-set_target_properties(PythonDataObjectsModule
-    PROPERTIES INSTALL_RPATH "${EXT_INSTALL_RPATH};${DL_ORIGIN_TAG}/../kernel/;${DL_ORIGIN_TAG}/../geometry/;${DL_ORIGIN_TAG}/../api/")
+set_target_properties(
+  PythonDataObjectsModule
+  PROPERTIES INSTALL_RPATH
+             "${EXT_INSTALL_RPATH};${DL_ORIGIN_TAG}/../kernel/;${DL_ORIGIN_TAG}/../geometry/;${DL_ORIGIN_TAG}/../api/"
+)
 mtd_install_targets(
   TARGETS PythonDataObjectsModule INSTALL_DIRS ${SITE_PACKAGES}/mantid/dataobjects
   ${WORKBENCH_SITE_PACKAGES}/mantid/dataobjects

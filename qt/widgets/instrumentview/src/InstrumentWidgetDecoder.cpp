@@ -40,6 +40,8 @@ void InstrumentWidgetDecoder::decode(const QMap<QString, QVariant> &map, Instrum
 
   m_workspaceName = map[QString("workspaceName")].toString();
 
+  obj.waitForThread();
+
   const auto surfaceType = map[QString("surfaceType")].toInt();
   obj.setSurfaceType(surfaceType);
 
@@ -63,7 +65,7 @@ void InstrumentWidgetDecoder::decode(const QMap<QString, QVariant> &map, Instrum
   this->decodeTabs(map[QString("tabs")].toMap(), obj);
 }
 
-void InstrumentWidgetDecoder::decodeTabs(const QMap<QString, QVariant> &map, InstrumentWidget &obj) {
+void InstrumentWidgetDecoder::decodeTabs(const QMap<QString, QVariant> &map, const InstrumentWidget &obj) {
   this->decodeMaskTab(map[QString("maskTab")].toMap(), obj.m_maskTab);
   this->decodeRenderTab(map[QString("renderTab")].toMap(), obj.m_renderTab);
   this->decodeTreeTab(map[QString("treeTab")].toMap(), obj.m_treeTab);
@@ -337,7 +339,7 @@ Shape2D *InstrumentWidgetDecoder::decodeFree(const QMap<QString, QVariant> &map)
 }
 
 void InstrumentWidgetDecoder::decodeAlignmentInfo(const QList<QVariant> &list,
-                                                  std::shared_ptr<ProjectionSurface> &obj) {
+                                                  const std::shared_ptr<ProjectionSurface> &obj) {
 
   std::vector<std::pair<Mantid::Kernel::V3D, QPointF>> alignmentPlane;
   for (const auto &item : list) {

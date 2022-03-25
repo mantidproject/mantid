@@ -75,10 +75,10 @@ class EngineeringDiffractionGui(QtWidgets.QMainWindow, Ui_main_window):
 
     def setup_presenter(self):
         presenter = EngineeringDiffractionPresenter()
+        presenter.setup_settings(self)  # init before fitting otherwise default peak not populated on first time opened
         presenter.setup_calibration(self)
         presenter.setup_focus(self)
         presenter.setup_fitting(self)
-        presenter.setup_settings(self)
         presenter.setup_calibration_notifier()
         presenter.statusbar_observable.add_subscriber(self.update_statusbar_text_observable)
         presenter.savedir_observable.add_subscriber(self.update_savedir_observable)

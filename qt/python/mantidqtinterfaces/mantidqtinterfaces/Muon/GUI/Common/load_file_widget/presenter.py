@@ -124,7 +124,6 @@ class BrowseFileWidgetPresenter(object):
         self._view.warning_popup(message)
 
     def handle_load_thread_finished(self):
-        self._load_thread.deleteLater()
         self._load_thread = None
 
         if not self.thread_success:
@@ -151,6 +150,10 @@ class BrowseFileWidgetPresenter(object):
             run_list = [self._model.get_data(filename=filename)['run'] for filename in file_list]
 
         self.set_file_edit(file_list)
+        if file_list==[]:
+            self._view.warning_popup("This data is for a different instrument and has not been loaded."
+                                     "The instrument selection on the home tab has been updated."
+                                     "Please reload your data.")
         self._model.current_runs = run_list
 
         self._view.notify_loading_finished()

@@ -73,7 +73,7 @@ Output:
 
 .. testoutput:: ExOSIRISDiffractionReductionSimple
 
-    Number of Spectra: 1, Number of bins: 7582
+    Number of Spectra: 1, Number of bins: 7581
 
 .. testcleanup:: ExOSIRISDiffractionReductionSimple
 

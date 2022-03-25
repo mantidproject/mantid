@@ -16,7 +16,7 @@
 #include "MantidDataHandling/SaveAscii2.h"
 #include "MantidDataObjects/TableWorkspace.h"
 #include "MantidDataObjects/Workspace2D.h"
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
+#include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
 #include <Poco/File.h>
 #include <cxxtest/TestSuite.h>
 #include <fstream>
@@ -42,7 +42,7 @@ public:
     m_filename_nohead = "SaveAsciiTest2FileWithoutHeader.dat";
     m_name = "SaveAscii2WS";
   }
-  ~SaveAscii2Test() override {}
+  ~SaveAscii2Test() override = default;
 
   void testExec() {
     Mantid::DataObjects::Workspace2D_sptr wsToSave;

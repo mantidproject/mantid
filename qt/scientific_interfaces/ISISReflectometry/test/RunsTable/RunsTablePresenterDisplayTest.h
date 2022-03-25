@@ -238,13 +238,20 @@ public:
     verifyAndClearExpectations();
   }
 
+  void testNotifyBatchLoaded() {
+    auto presenter = makePresenter(m_view, twoGroupsWithMixedRowsModel());
+    EXPECT_CALL(m_view, jobs()).Times(1);
+    presenter.notifyBatchLoaded();
+    verifyAndClearExpectations();
+  }
+
 private:
   ReductionJobs oneGroupWithTwoRowsWithSrcAndDestTransRuns() {
     auto reductionJobs = ReductionJobs();
     auto group = Group("Test group 1");
     group.appendRow(makeRow("12345", 0.5, "src trans A", "src trans B"));
     group.appendRow(makeRow("12346", 0.8, "dest trans A", "dest trans B"));
-    reductionJobs.appendGroup(group);
+    reductionJobs.appendGroup(std::move(group));
     return reductionJobs;
   }
 

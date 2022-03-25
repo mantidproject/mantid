@@ -21,7 +21,7 @@
 #include "MantidDataHandling/LoadMuonNexus.h"
 #include "MantidDataHandling/LoadNexus.h"
 #include "MantidDataHandling/SaveNexus.h"
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
+#include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
 #include <Poco/File.h>
 #include <Poco/Path.h>
 

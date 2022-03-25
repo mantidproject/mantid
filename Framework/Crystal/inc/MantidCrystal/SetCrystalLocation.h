@@ -27,7 +27,7 @@ sample position of an events workspace.
 @author Brendan Sullivan, SNS,ORNL
 @date Dec 20 2018
 */
-class MANTID_CRYSTAL_DLL SetCrystalLocation : public API::Algorithm {
+class MANTID_CRYSTAL_DLL SetCrystalLocation final : public API::Algorithm {
 public:
   const std::string name() const override { return "SetCrystalLocation"; };
   /// Summary of algorithms purpose

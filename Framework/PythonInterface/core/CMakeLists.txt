@@ -1,6 +1,5 @@
-# Core Python/C++ code used by all layers accessing the Python C API. It
-# contains functionality such as classes for GIL management, conversion of
-# Python errors to exceptions etc.
+# Core Python/C++ code used by all layers accessing the Python C API. It contains functionality such as classes for GIL
+# management, conversion of Python errors to exceptions etc.
 
 # It should not link to any other Mantid libraries.
 
@@ -10,6 +9,7 @@ set(SRC_FILES
     src/NDArray.cpp
     src/ReleaseGlobalInterpreterLock.cpp
     src/UninstallTrace.cpp
+    src/PythonLoggingChannel.cpp
     src/PythonStdoutChannel.cpp
     src/WrapperHelpers.cpp
     src/Converters/CloneToNDArray.cpp
@@ -34,6 +34,7 @@ set(INC_FILES
     inc/MantidPythonInterface/core/IsNone.h
     inc/MantidPythonInterface/core/NDArray.h
     inc/MantidPythonInterface/core/PropertyWithValueExporter.h
+    inc/MantidPythonInterface/core/PythonLoggingChannel.h
     inc/MantidPythonInterface/core/PythonObjectInstantiator.h
     inc/MantidPythonInterface/core/PythonStdoutChannel.h
     inc/MantidPythonInterface/core/ReleaseGlobalInterpreterLock.h
@@ -67,33 +68,29 @@ set(INC_FILES
 # Add a precompiled header where they are supported
 enable_precompiled_headers(inc/MantidPythonInterface/core/PrecompiledHeader.h SRC_FILES)
 
-
 # Add the target for this directory
 set(_target_name PythonInterfaceCore)
 
 add_library(${_target_name} ${SRC_FILES} ${INC_FILES})
 add_library(Mantid::${_target_name} ALIAS ${_target_name})
 
-
-target_include_directories(${_target_name} PUBLIC
-    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/inc>
-		$<INSTALL_INTERFACE:include/Mantid>
+target_include_directories(
+  ${_target_name} PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/inc> $<INSTALL_INTERFACE:include/Mantid>
 )
 
 # Set the name of the generated library
 set_target_properties(
-  ${_target_name} PROPERTIES OUTPUT_NAME MantidPythonInterfaceCore
-                             COMPILE_DEFINITIONS IN_MANTID_PYTHONINTERFACE_CORE
+  ${_target_name} PROPERTIES OUTPUT_NAME MantidPythonInterfaceCore COMPILE_DEFINITIONS IN_MANTID_PYTHONINTERFACE_CORE
 )
-# We need an if check here as older versions of boost won't define this target
-# we can remove it once we adopt conda fully.
-if (TARGET Boost::python${Python_VERSION_MAJOR}${Python_VERSION_MINOR})
-set(PUBLIC_TARGETS Python::NumPy Boost::python${Python_VERSION_MAJOR}${Python_VERSION_MINOR})
+# We need an if check here as older versions of boost won't define this target we can remove it once we adopt conda
+# fully.
+if(TARGET Boost::python${Python_VERSION_MAJOR}${Python_VERSION_MINOR})
+  set(PUBLIC_TARGETS Python::NumPy Boost::python${Python_VERSION_MAJOR}${Python_VERSION_MINOR})
 else()
-set(PUBLIC_TARGETS Python::NumPy ${BoostPython_LIBRARIES})
+  set(PUBLIC_TARGETS Python::NumPy ${BoostPython_LIBRARIES})
 endif()
 if(USE_PYTHON_DYNAMIC_LIB)
-	list(APPEND PUBLIC_TARGETS Python::Python)
+  list(APPEND PUBLIC_TARGETS Python::Python)
 endif()
 # Dependencies
 target_link_libraries(
@@ -107,21 +104,14 @@ set_property(TARGET ${_target_name} PROPERTY FOLDER "MantidFramework/Python")
 
 # rpath settings
 if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
-  set_target_properties(
-    ${_target_name} PROPERTIES INSTALL_RPATH "@loader_path/../MacOS"
-  )
+  set_target_properties(${_target_name} PROPERTIES INSTALL_RPATH "@loader_path/../MacOS")
 elseif(${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
-  set_target_properties(
-    ${_target_name} PROPERTIES INSTALL_RPATH "\$ORIGIN/../${LIB_DIR}"
-  )
+  set_target_properties(${_target_name} PROPERTIES INSTALL_RPATH "\$ORIGIN/../${LIB_DIR}")
 endif()
 
-
-if (CONDA_BUILD)
-set(TARGET_EXPORT_NAME "MantidPythonInterfaceCoreTargets")
-mtd_install_framework_lib(TARGETS PythonInterfaceCore EXPORT_NAME ${TARGET_EXPORT_NAME})
+if(CONDA_ENV)
+  set(TARGET_EXPORT_NAME "MantidPythonInterfaceCoreTargets")
+  mtd_install_framework_lib(TARGETS PythonInterfaceCore EXPORT_NAME ${TARGET_EXPORT_NAME})
 else()
-mtd_install_targets(
-  TARGETS PythonInterfaceCore INSTALL_DIRS ${LIB_DIR} ${WORKBENCH_LIB_DIR}
-)
+  mtd_install_targets(TARGETS PythonInterfaceCore INSTALL_DIRS ${LIB_DIR} ${WORKBENCH_LIB_DIR})
 endif()

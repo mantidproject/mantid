@@ -257,10 +257,7 @@ void LoadPDFgetNFile::setUnit(const Workspace2D_sptr &ws) {
     string unit = "MomentumTransfer";
     ws->getAxis(0)->setUnit(unit);
   } else if (xcolname == "r") {
-    ws->getAxis(0)->unit() = UnitFactory::Instance().create("Label");
-    Unit_sptr unit = ws->getAxis(0)->unit();
-    std::shared_ptr<Units::Label> label = std::dynamic_pointer_cast<Units::Label>(unit);
-    label->setLabel("AtomicDistance", "Angstrom");
+    ws->getAxis(0)->setUnit("AtomicDistance");
   } else {
     stringstream errss;
     errss << "X axis " << xcolname << " is not supported for unit. \n";

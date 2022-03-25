@@ -21,6 +21,7 @@ public:
   virtual ~ISampleEnvironmentSpecFinder() = default;
   virtual SampleEnvironmentSpec_uptr find(const std::string &facility, const std::string &instrument,
                                           const std::string &name) const = 0;
+  virtual SampleEnvironmentSpec_uptr parseSpec(const std::string &name, const std::string &filename) const = 0;
 };
 // Typedef for a unique_ptr
 using ISampleEnvironmentSpecFinder_uptr = std::unique_ptr<ISampleEnvironmentSpecFinder>;
@@ -42,6 +43,7 @@ public:
 
   size_t cacheSize() const;
   void clearCache();
+  SampleEnvironmentSpec_uptr parseSpec(const std::string &filename, const std::string &filepath) const;
 
 private:
   ISampleEnvironmentSpecFinder_uptr m_finder;
@@ -59,10 +61,9 @@ public:
 
   SampleEnvironmentSpec_uptr find(const std::string &facility, const std::string &instrument,
                                   const std::string &name) const override;
+  SampleEnvironmentSpec_uptr parseSpec(const std::string &name, const std::string &filename) const override;
 
 private:
-  SampleEnvironmentSpec_uptr parseSpec(const std::string &name, const std::string &filename) const;
-
   const std::string m_fileext = ".xml";
   const std::vector<std::string> m_rootDirs;
 };

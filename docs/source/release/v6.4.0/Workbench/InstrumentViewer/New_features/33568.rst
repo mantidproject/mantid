@@ -1,0 +1,1 @@
+- New option to see basic detector data in a tooltip when hovering.

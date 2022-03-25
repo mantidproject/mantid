@@ -31,4 +31,5 @@ creation is outlined in :ref:`issue_tracking`.
    ErrorReporter-ProjectRecovery/ProjectRecoveryTesting
    LiveData/LiveDataTests
    ReflectometryGUI/ReflectometryGUITests
-   SANSGUI/SANSGUITests
+   SANSGUI/ISISSANSGUITests
+   MSlice/MSliceTestGuide

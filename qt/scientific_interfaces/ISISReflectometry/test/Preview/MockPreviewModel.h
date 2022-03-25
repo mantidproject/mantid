@@ -9,6 +9,7 @@
 #include "GUI/Common/IJobManager.h"
 #include "IPreviewModel.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
+#include "MantidGeometry/IDTypes.h"
 
 #include <gmock/gmock.h>
 
@@ -20,7 +21,16 @@ namespace MantidQt::CustomInterfaces::ISISReflectometry {
 
 class MockPreviewModel : public IPreviewModel {
 public:
-  MOCK_METHOD(void, loadWorkspace, (std::string const &, IJobManager &), (override));
+  MOCK_METHOD(bool, loadWorkspaceFromAds, (std::string const &workspaceName), (override));
+  MOCK_METHOD(void, loadAndPreprocessWorkspaceAsync, (std::string const &, IJobManager &), (override));
   MOCK_METHOD(MatrixWorkspace_sptr, getLoadedWs, (), (const, override));
+  MOCK_METHOD(MatrixWorkspace_sptr, getSummedWs, (), (const, override));
+  MOCK_METHOD(std::vector<Mantid::detid_t>, getSelectedBanks, (), (const, override));
+
+  MOCK_METHOD(void, setSelectedBanks, (std::vector<Mantid::detid_t>), (override));
+
+  MOCK_METHOD(void, sumBanksAsync, (IJobManager &), (override));
+  MOCK_METHOD(std::string, detIDsToString, (std::vector<Mantid::detid_t> const &), (const, override));
+  MOCK_METHOD(void, exportSummedWsToAds, (), (const, override));
 };
 } // namespace MantidQt::CustomInterfaces::ISISReflectometry

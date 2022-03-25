@@ -8,10 +8,10 @@
 
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidDataObjects/CoordTransformAffine.h"
+#include "MantidFrameworkTestHelpers/MDEventsTestHelper.h"
 #include "MantidGeometry/MDGeometry/QSample.h"
 #include "MantidKernel/IPropertySettings.h"
 #include "MantidMDAlgorithms/SliceMD.h"
-#include "MantidTestHelpers/MDEventsTestHelper.h"
 
 #include <cxxtest/TestSuite.h>
 

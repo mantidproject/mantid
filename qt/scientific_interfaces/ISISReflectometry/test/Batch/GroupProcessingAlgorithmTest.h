@@ -12,6 +12,7 @@
 #include <cxxtest/TestSuite.h>
 
 using namespace MantidQt::CustomInterfaces::ISISReflectometry;
+using namespace MantidQt::CustomInterfaces::ISISReflectometry::GroupProcessing;
 using namespace MantidQt::CustomInterfaces::ISISReflectometry::ModelCreationHelper;
 
 class GroupProcessingAlgorithmTest : public CxxTest::TestSuite {
@@ -36,14 +37,14 @@ public:
     auto model = Batch(m_experiment, m_instrument, m_runsTable, m_slicing);
     auto group = makeGroupWithTwoRows();
     auto result = createAlgorithmRuntimeProps(model, group);
-    TS_ASSERT_EQUALS(result["InputWorkspaces"], "IvsQ_1, IvsQ_2");
+    TS_ASSERT_EQUALS(result->getPropertyValue("InputWorkspaces"), "IvsQ_1, IvsQ_2");
   }
 
   void testInputWorkspaceListForRowsWithNonStandardNames() {
     auto model = Batch(m_experiment, m_instrument, m_runsTable, m_slicing);
     auto group = makeGroupWithTwoRowsWithNonstandardNames();
     auto result = createAlgorithmRuntimeProps(model, group);
-    TS_ASSERT_EQUALS(result["InputWorkspaces"], "testQ1, testQ2");
+    TS_ASSERT_EQUALS(result->getPropertyValue("InputWorkspaces"), "testQ1, testQ2");
   }
 
   void testOutputNameForTwoRowGroup() {
@@ -52,7 +53,7 @@ public:
     auto result = createAlgorithmRuntimeProps(model, group);
     // The standard IvsQ_ prefix is removed from the individual names so it
     // only appears once at the beginning.
-    TS_ASSERT_EQUALS(result["OutputWorkspace"], "IvsQ_1_2");
+    TS_ASSERT_EQUALS(result->getPropertyValue("OutputWorkspace"), "IvsQ_1_2");
   }
 
   void testOutputNameForRowsWithNonStandardNames() {
@@ -61,7 +62,7 @@ public:
     auto result = createAlgorithmRuntimeProps(model, group);
     // The output is constructed from an IvsQ_ prefix and the original
     // output workspace names
-    TS_ASSERT_EQUALS(result["OutputWorkspace"], "IvsQ_testQ1_testQ2");
+    TS_ASSERT_EQUALS(result->getPropertyValue("OutputWorkspace"), "IvsQ_testQ1_testQ2");
   }
 
   void testStitchParamsSetFromStitchingOptions() {
@@ -73,21 +74,22 @@ public:
     auto model = Batch(experiment, m_instrument, m_runsTable, m_slicing);
     auto group = makeGroupWithTwoRows();
     auto result = createAlgorithmRuntimeProps(model, group);
-    TS_ASSERT_EQUALS(result["key1"], "value1");
-    TS_ASSERT_EQUALS(result["key2"], "value2");
-    TS_ASSERT_EQUALS(result.find("Params"), result.cend());
+    TS_ASSERT_EQUALS(result->getPropertyValue("key1"), "value1");
+    TS_ASSERT_EQUALS(result->getPropertyValue("key2"), "value2");
+    TS_ASSERT(!result->existsProperty("Params"));
   }
 
   void testLookupRowQResolutionUsedForParamsIfStitchingOptionsEmpty() {
+    auto lookupTable = makeLookupTableWithTwoAnglesAndWildcard();
     auto experiment =
         Experiment(AnalysisMode::PointDetector, ReductionType::Normal, SummationType::SumInLambda, false, false,
                    BackgroundSubtraction(), PolarizationCorrections(PolarizationCorrectionType::None),
                    FloodCorrections(FloodCorrectionType::Workspace), TransmissionStitchOptions(),
-                   std::map<std::string, std::string>(), makeLookupTableWithTwoAnglesAndWildcard());
+                   std::map<std::string, std::string>(), std::move(lookupTable));
     auto model = Batch(experiment, m_instrument, m_runsTable, m_slicing);
     auto group = makeGroupWithTwoRows();
     auto result = createAlgorithmRuntimeProps(model, group);
-    TS_ASSERT_EQUALS(result["Params"], "-0.010000");
+    TS_ASSERT_EQUALS(result->getPropertyValue("Params"), "-0.010000");
   }
 
   void testQResolutionForFirstValidRowUsedForParamsIfStitchingOptionsEmpty() {
@@ -99,7 +101,7 @@ public:
     auto model = Batch(experiment, m_instrument, m_runsTable, m_slicing);
     auto group = makeGroupWithTwoRowsWithMixedQResolutions();
     auto result = createAlgorithmRuntimeProps(model, group);
-    TS_ASSERT_EQUALS(result["Params"], "-0.015000");
+    TS_ASSERT_EQUALS(result->getPropertyValue("Params"), "-0.015000");
   }
 
   void testQOutputResolutionForFirstValidRowUsedForParamsIfStitchingOptionsEmpty() {
@@ -111,7 +113,7 @@ public:
     auto model = Batch(experiment, m_instrument, m_runsTable, m_slicing);
     auto group = makeGroupWithTwoRowsWithOutputQResolutions();
     auto result = createAlgorithmRuntimeProps(model, group);
-    TS_ASSERT_EQUALS(result["Params"], "-0.016000");
+    TS_ASSERT_EQUALS(result->getPropertyValue("Params"), "-0.016000");
   }
 
 private:

@@ -59,6 +59,8 @@ Initialise the Interface
 void QtMainWindowView::initLayout() {
   m_ui.setupUi(this);
 
+  m_ui.mainTabs->setUsesScrollButtons(true);
+
   connect(m_ui.helpButton, SIGNAL(clicked()), this, SLOT(helpPressed()));
   connect(m_ui.mainTabs, SIGNAL(tabCloseRequested(int)), this, SLOT(onTabCloseRequested(int)));
   connect(m_ui.newBatch, SIGNAL(triggered(bool)), this, SLOT(onNewBatchRequested(bool)));
@@ -88,9 +90,9 @@ void QtMainWindowView::initLayout() {
   auto makeInstrumentPresenter = InstrumentPresenterFactory();
   auto makePreviewPresenter = PreviewPresenterFactory();
 
-  auto makeBatchPresenter =
-      std::make_unique<BatchPresenterFactory>(std::move(makeRunsPresenter), makeEventPresenter, makeExperimentPresenter,
-                                              makeInstrumentPresenter, makePreviewPresenter, makeSaveSettingsPresenter);
+  auto makeBatchPresenter = std::make_unique<BatchPresenterFactory>(
+      std::move(makeRunsPresenter), makeEventPresenter, makeExperimentPresenter, makeInstrumentPresenter,
+      makePreviewPresenter, makeSaveSettingsPresenter, messageHandler);
 
   // Create the presenter
   auto slitCalculator = std::make_unique<SlitCalculator>(this);
@@ -165,17 +167,22 @@ Handles attempt to close main window
 * @param event : [input] The close event
 */
 void QtMainWindowView::closeEvent(QCloseEvent *event) {
-  // Don't close if anything is running or
-  // user does not want to discard unsaved changes
-  if (m_presenter->isCloseEventPrevented())
-    event->ignore();
-  else
-    event->accept();
+  m_closeEvent = event;
+  m_notifyee->notifyCloseEvent();
 }
+
+void QtMainWindowView::acceptCloseEvent() { m_closeEvent->accept(); }
+
+void QtMainWindowView::ignoreCloseEvent() { m_closeEvent->ignore(); }
 
 void QtMainWindowView::giveUserCritical(const std::string &prompt, const std::string &title) {
   QMessageBox::critical(this, QString::fromStdString(title), QString::fromStdString(prompt), QMessageBox::Ok,
                         QMessageBox::Ok);
+}
+
+void QtMainWindowView::giveUserWarning(const std::string &prompt, const std::string &title) {
+  QMessageBox::warning(this, QString::fromStdString(title), QString::fromStdString(prompt), QMessageBox::Ok,
+                       QMessageBox::Ok);
 }
 
 void QtMainWindowView::giveUserInfo(const std::string &prompt, const std::string &title) {

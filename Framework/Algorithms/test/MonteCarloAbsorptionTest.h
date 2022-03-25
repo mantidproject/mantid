@@ -30,8 +30,8 @@
 #include <cxxtest/TestSuite.h>
 #include <gmock/gmock.h>
 
-#include "MantidTestHelpers/ComponentCreationHelper.h"
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
+#include "MantidFrameworkTestHelpers/ComponentCreationHelper.h"
+#include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
 
 namespace {
 enum class Environment {
@@ -578,8 +578,10 @@ public:
     source->setPos(V3D(0.0, 0.0, -20.0));
     instrument->add(source);
     instrument->markAsSource(source);
+    Mantid::DataObjects::Workspace2D_sptr ws = WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(5, 5);
+    ws->mutableSample().setShape(sampleShape);
     std::shared_ptr<IBeamProfile> beam;
-    TS_ASSERT_THROWS_NOTHING(beam = mcAbsorb->createBeamProfile(*instrument, *sampleShape));
+    TS_ASSERT_THROWS_NOTHING(beam = mcAbsorb->createBeamProfile(*instrument, ws->sample()));
     TS_ASSERT(std::dynamic_pointer_cast<RectangularBeamProfile>(beam)->maxPoint()[1] == 0.06);
   }
 
@@ -627,15 +629,12 @@ public:
     // only checking that it can successfully execute
   }
 
-  void test_Sparse_Workspace() {
-    using Mantid::Kernel::DeltaEMode;
-    constexpr int nspectra = 25;
-    constexpr int nbins = 10;
-    TestWorkspaceDescriptor wsProps = {nspectra, nbins, true, Environment::CylinderSampleOnly, DeltaEMode::Elastic, -1};
-    auto modelWS = setUpWS(wsProps);
+  Mantid::API::MatrixWorkspace_const_sptr do_test_Sparse_Workspace(Mantid::API::MatrixWorkspace_sptr modelWS,
+                                                                   int nExpectedInterpolationCalls) {
     auto mcAbsorb = createTestAlgorithm();
     auto MCAbsorptionStrategy = std::make_shared<MockMCAbsorptionStrategy>();
     mcAbsorb->setAbsorptionStrategy(MCAbsorptionStrategy);
+    auto nbins = modelWS->blocksize();
     auto sparseWS = std::make_shared<MockSparseWorkspace>(*modelWS, nbins, 3, 3);
     mcAbsorb->setSparseWorkspace(sparseWS);
     using namespace ::testing;
@@ -645,7 +644,7 @@ public:
     Mantid::HistogramData::FrequencyStandardDeviations errs(nbins, 0.5);
     const Mantid::HistogramData::Histogram testHistogramOnes(ps, ysOnes, errs);
     EXPECT_CALL(*sparseWS, bilinearInterpolateFromDetectorGrid(_, _))
-        .Times(Exactly(static_cast<int>(nspectra)))
+        .Times(Exactly(static_cast<int>(nExpectedInterpolationCalls)))
         .WillRepeatedly(Return(testHistogramOnes));
 
     mcAbsorb->setProperty("SparseInstrument", true);
@@ -654,7 +653,31 @@ public:
 
     TS_ASSERT_THROWS_NOTHING(mcAbsorb->setProperty("InputWorkspace", modelWS));
     mcAbsorb->execute();
-    auto outputWS = getOutputWorkspace(mcAbsorb);
+    return getOutputWorkspace(mcAbsorb);
+  }
+
+  void test_Sparse_Workspace() {
+    using Mantid::Kernel::DeltaEMode;
+    constexpr int nspectra = 25;
+    constexpr int nbins = 10;
+    TestWorkspaceDescriptor wsProps = {nspectra, nbins, true, Environment::CylinderSampleOnly, DeltaEMode::Elastic, -1};
+    auto modelWS = setUpWS(wsProps);
+    auto outputWS = do_test_Sparse_Workspace(modelWS, nspectra);
+    verifyDimensions(wsProps, outputWS);
+    TS_ASSERT_EQUALS(1.0, outputWS->y(0)[0]);
+    TS_ASSERT_EQUALS(1.0, outputWS->y(0)[1]);
+    TS_ASSERT_EQUALS(1.0, outputWS->y(1)[0]);
+    TS_ASSERT_EQUALS(0.5, outputWS->e(0)[0]);
+  }
+
+  void test_Sparse_Workspace_Spectrum_Without_Detector() {
+    using Mantid::Kernel::DeltaEMode;
+    constexpr int nspectra = 25;
+    constexpr int nbins = 10;
+    TestWorkspaceDescriptor wsProps = {nspectra, nbins, true, Environment::CylinderSampleOnly, DeltaEMode::Elastic, -1};
+    auto modelWS = setUpWS(wsProps);
+    modelWS->getSpectrum(3).clearDetectorIDs();
+    auto outputWS = do_test_Sparse_Workspace(modelWS, nspectra - 1);
     verifyDimensions(wsProps, outputWS);
     TS_ASSERT_EQUALS(1.0, outputWS->y(0)[0]);
     TS_ASSERT_EQUALS(1.0, outputWS->y(0)[1]);

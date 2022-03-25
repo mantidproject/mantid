@@ -15,7 +15,7 @@
 #include "MantidAlgorithms/CropWorkspace.h"
 #include "MantidAlgorithms/Rebin.h"
 #include "MantidDataHandling/LoadRaw3.h"
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
+#include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
 
 #include <string>
 

@@ -26,7 +26,7 @@ TMDE_CLASS
 class MDBoxBaseTester : public MDBoxBase<MDE, nd> {
 public:
   MDBoxBaseTester() : MDBoxBase<MDE, nd>() {}
-  ~MDBoxBaseTester() override {}
+  ~MDBoxBaseTester() override = default;
   MDBoxBaseTester(uint64_t /*filePos*/) : MDBoxBase<MDE, nd>() {}
   MDBoxBaseTester(const MDBoxBaseTester &source) : MDBoxBase<MDE, nd>(source, source.getBoxController()) {}
 
@@ -39,6 +39,8 @@ public:
   void clearFileBacked(bool /* loadData*/) override{/**does nothing*/};
   void setFileBacked() override{};
   void saveAt(API::IBoxControllerIO *const, uint64_t /*position*/) const override{/*Not saveable */};
+  void loadAndAddFrom(API::IBoxControllerIO *const /*saver */, uint64_t /*position*/, size_t /* Size */,
+                      std::vector<coord_t> & /*mem*/) override{};
   void loadAndAddFrom(API::IBoxControllerIO *const, uint64_t /*position*/, size_t /* Size */) override{};
   void reserveMemoryForLoad(uint64_t /* Size */) override{};
   // regardless of what is actually instantiated, base tester would call itself

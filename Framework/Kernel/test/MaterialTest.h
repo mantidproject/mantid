@@ -10,10 +10,10 @@
 #include <cxxtest/TestSuite.h>
 #include <stdexcept>
 
+#include "MantidFrameworkTestHelpers/NexusTestHelper.h"
 #include "MantidKernel/Atom.h"
 #include "MantidKernel/Material.h"
 #include "MantidKernel/NeutronAtom.h"
-#include "MantidTestHelpers/NexusTestHelper.h"
 
 using Mantid::Kernel::Material;
 using Mantid::PhysicalConstants::getNeutronAtom;

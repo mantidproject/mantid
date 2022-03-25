@@ -97,27 +97,25 @@ void CreateWorkspace::exec() {
   const Property *const dataEprop = getProperty("DataE");
   const Property *const errorDxprop = getProperty("Dx");
 
-  const ArrayProperty<double> *pCheck = nullptr;
-
-  pCheck = dynamic_cast<const ArrayProperty<double> *>(dataXprop);
-  if (!pCheck)
+  const auto xCheck = dynamic_cast<const ArrayProperty<double> *>(dataXprop);
+  if (!xCheck)
     throw std::invalid_argument("DataX cannot be casted to a double vector");
-  const std::vector<double> &dataX = *pCheck;
+  const std::vector<double> &dataX = *xCheck;
 
-  pCheck = dynamic_cast<const ArrayProperty<double> *>(dataYprop);
-  if (!pCheck)
+  const auto yCheck = dynamic_cast<const ArrayProperty<double> *>(dataYprop);
+  if (!yCheck)
     throw std::invalid_argument("DataY cannot be casted to a double vector");
-  const std::vector<double> &dataY = *pCheck;
+  const std::vector<double> &dataY = *yCheck;
 
-  pCheck = dynamic_cast<const ArrayProperty<double> *>(dataEprop);
-  if (!pCheck)
+  const auto eCheck = dynamic_cast<const ArrayProperty<double> *>(dataEprop);
+  if (!eCheck)
     throw std::invalid_argument("DataE cannot be casted to a double vector");
-  const std::vector<double> &dataE = *pCheck;
+  const std::vector<double> &dataE = *eCheck;
 
-  pCheck = dynamic_cast<const ArrayProperty<double> *>(errorDxprop);
-  if (!pCheck)
+  const auto dxCheck = dynamic_cast<const ArrayProperty<double> *>(errorDxprop);
+  if (!dxCheck)
     throw std::invalid_argument("Dx cannot be casted to a double vector");
-  const std::vector<double> &dX = *pCheck;
+  const std::vector<double> &dX = *dxCheck;
 
   const int nSpec = getProperty("NSpec");
   const std::string xUnit = getProperty("UnitX");
@@ -188,7 +186,7 @@ void CreateWorkspace::exec() {
 
   PARALLEL_FOR_IF(Kernel::threadSafe(*outputWS))
   for (int i = 0; i < nSpec; i++) {
-    PARALLEL_START_INTERUPT_REGION
+    PARALLEL_START_INTERRUPT_REGION
 
     // In an MPI run the global index i is not necessarily on this rank, i.e.,
     // there might not be a corrsponding workspace index.
@@ -216,9 +214,9 @@ void CreateWorkspace::exec() {
       outputWS->mutableDx(local_i).assign(dX.begin() + yStart, dX.begin() + yEnd);
 
     progress.report();
-    PARALLEL_END_INTERUPT_REGION
+    PARALLEL_END_INTERRUPT_REGION
   }
-  PARALLEL_CHECK_INTERUPT_REGION
+  PARALLEL_CHECK_INTERRUPT_REGION
 
   // Set the Unit of the X Axis
   try {

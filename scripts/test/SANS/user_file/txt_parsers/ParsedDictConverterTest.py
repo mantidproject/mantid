@@ -10,8 +10,11 @@ from unittest import mock
 
 from sans.common.configurations import Configurations
 from sans.common.enums import DetectorType, SANSInstrument, ReductionMode, RangeStepType, RebinType, DataType, FitType
+from sans.state.StateObjects.StateMoveDetectors import StateMoveZOOM
 from sans.test_helper.user_file_test_helper import create_user_file, sample_user_file
+from sans.user_file.settings_tags import DetectorId, TransId
 from sans.user_file.txt_parsers.UserFileReaderAdapter import UserFileReaderAdapter
+from sans.user_file.user_file_reader import UserFileReader
 
 
 class ParsedDictConverterTest(unittest.TestCase):
@@ -128,9 +131,6 @@ class ParsedDictConverterTest(unittest.TestCase):
         self.assertEqual(normalize_to_monitor.prompt_peak_correction_min,  1000)
         self.assertEqual(normalize_to_monitor.prompt_peak_correction_max,  2000)
         self.assertEqual(normalize_to_monitor.rebin_type, RebinType.INTERPOLATING_REBIN)
-        self.assertEqual(normalize_to_monitor.wavelength_interval.wavelength_full_range,  (1.5, 12.5))
-        self.assertEqual(normalize_to_monitor.wavelength_interval.wavelength_step,  0.125)
-        self.assertEqual(normalize_to_monitor.wavelength_step_type, RangeStepType.LIN)
         self.assertEqual(normalize_to_monitor.background_TOF_general_start,  3500)
         self.assertEqual(normalize_to_monitor.background_TOF_general_stop,  4500)
         self.assertEqual(normalize_to_monitor.background_TOF_monitor_start["1"],  35000)
@@ -206,6 +206,43 @@ class ParsedDictConverterTest(unittest.TestCase):
         self.assertEqual(lab.sample_centre_pos2, -170.5/1000.)
         self.assertEqual(hab.sample_centre_pos1,  160.5/1000. )
         self.assertEqual(hab.sample_centre_pos2, -170.1/1000.)
+
+    MM_TO_M = 1000
+
+    def test_move_sets_shift_correctly_m4(self):
+        mocked_values = {DetectorId.INSTRUMENT: [SANSInstrument.SANS2D],
+                         TransId.SPEC_4_SHIFT: [-10.0]}
+        adapter = mock.create_autospec(UserFileReader)
+        adapter.read_user_file.return_value = mocked_values
+        parser = UserFileReaderAdapter(file_information=None, user_file_name=None,
+                                       txt_user_file_reader=adapter)
+        state_move = parser.get_state_move(file_information=None)
+
+        self.assertAlmostEquals(-10.0 / self.MM_TO_M, state_move.monitor_4_offset)
+
+    def test_move_ignores_m5_for_non_zoom(self):
+        mocked_values = {DetectorId.INSTRUMENT: [SANSInstrument.SANS2D],
+                         TransId.SPEC_5_SHIFT: [-10.0]}
+        adapter = mock.create_autospec(UserFileReader)
+        adapter.read_user_file.return_value = mocked_values
+        parser = UserFileReaderAdapter(file_information=None, user_file_name=None,
+                                       txt_user_file_reader=adapter)
+        state_move = parser.get_state_move(file_information=None)
+
+        self.assertAlmostEquals(0.0, state_move.monitor_4_offset)
+
+    def test_move_m5_works_on_zoom(self):
+        mocked_values = {DetectorId.INSTRUMENT: [SANSInstrument.ZOOM],
+                         TransId.SPEC_5_SHIFT: [-5.0]}
+        adapter = mock.create_autospec(UserFileReader)
+        adapter.read_user_file.return_value = mocked_values
+        parser = UserFileReaderAdapter(file_information=None, user_file_name=None,
+                                       txt_user_file_reader=adapter)
+        state_move = parser.get_state_move(file_information=None)
+
+        self.assertIsInstance(state_move, StateMoveZOOM)
+        self.assertAlmostEquals(0.0, state_move.monitor_4_offset)
+        self.assertAlmostEquals(-5.0 / self.MM_TO_M, state_move.monitor_5_offset)
 
 
 if __name__ == '__main__':

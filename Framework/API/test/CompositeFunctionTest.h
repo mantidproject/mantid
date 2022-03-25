@@ -15,7 +15,7 @@
 #include "MantidAPI/IPeakFunction.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/ParamFunction.h"
-#include "MantidTestHelpers/FakeObjects.h"
+#include "MantidFrameworkTestHelpers/FakeObjects.h"
 
 using namespace Mantid;
 using namespace Mantid::API;
@@ -39,7 +39,7 @@ public:
     }
   }
 
-  ~CompositeFunctionTest_MocMatrixWorkspace() override {}
+  ~CompositeFunctionTest_MocMatrixWorkspace() override = default;
 
   bool isRaggedWorkspace() const override { return false; }
 

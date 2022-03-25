@@ -6,13 +6,13 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
+#include "MantidFrameworkTestHelpers/MDEventsTestHelper.h"
+#include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidKernel/WarningSuppressions.h"
 #include "MantidQtWidgets/Common/IImageInfoWidget.h"
 #include "MantidQtWidgets/Common/ImageInfoModelMD.h"
 #include "MantidQtWidgets/Common/ImageInfoModelMatrixWS.h"
 #include "MantidQtWidgets/Common/ImageInfoPresenter.h"
-#include "MantidTestHelpers/MDEventsTestHelper.h"
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include <cxxtest/TestSuite.h>
 #include <gmock/gmock.h>
 

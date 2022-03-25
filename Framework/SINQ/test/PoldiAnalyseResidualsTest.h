@@ -9,8 +9,8 @@
 #include <cxxtest/TestSuite.h>
 
 #include "MantidAPI/FrameworkManager.h"
+#include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidSINQ/PoldiAnalyseResiduals.h"
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
 using namespace Mantid::Poldi;
 using namespace Mantid::API;
@@ -178,6 +178,6 @@ private:
 
   public:
     TestablePoldiAnalyseResiduals() : PoldiAnalyseResiduals() {}
-    ~TestablePoldiAnalyseResiduals() override {}
+    ~TestablePoldiAnalyseResiduals() override = default;
   };
 };

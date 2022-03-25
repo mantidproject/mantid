@@ -7,13 +7,15 @@
 #pragma once
 
 #include "MantidAPI/BinEdgeAxis.h"
+#include "MantidAPI/NumericAxis.h"
 #include "MantidAlgorithms/Rebin2D.h"
+#include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/RebinnedOutput.h"
+#include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidHistogramData/Histogram.h"
 #include "MantidKernel/Timer.h"
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
+#include "MantidKernel/UnitFactory.h"
 #include <cxxtest/TestSuite.h>
-//#include "../../TestHelpers/src/WorkspaceCreationHelper.cpp"
 
 using Mantid::Algorithms::Rebin2D;
 using namespace Mantid::API;
@@ -72,6 +74,26 @@ MatrixWorkspace_sptr makeInputWS(const bool distribution, const bool perf_test =
   return ws;
 }
 
+EventWorkspace_sptr createEmptyEventWorkspace() {
+  // Create the output workspace
+  EventWorkspace_sptr eventWS(new EventWorkspace());
+  // Make sure to initialize.
+  //   We can use dummy numbers for arguments, for event workspace it doesn't
+  //   matter
+  eventWS->initialize(1, 1, 1);
+
+  // Set the units
+  eventWS->getAxis(1)->unit() = Mantid::Kernel::UnitFactory::Instance().create("DeltaE");
+  eventWS->setYUnit("DeltaE");
+
+  auto numericAxis = std::make_unique<NumericAxis>(2);
+  numericAxis->setValue(0, 10.0);
+  numericAxis->setValue(1, 20.0);
+  eventWS->replaceAxis(1, std::move(numericAxis));
+
+  return eventWS;
+}
+
 MatrixWorkspace_sptr runAlgorithm(const MatrixWorkspace_sptr &inputWS, const std::string &axis1Params,
                                   const std::string &axis2Params, const bool UseFractionalArea = false) {
   // Name of the output workspace.
@@ -124,6 +146,12 @@ public:
     MatrixWorkspace_sptr inputWS = makeInputWS(true); // 10 histograms, 10 bins
     MatrixWorkspace_sptr outputWS = runAlgorithm(inputWS, "5.,4.,25.", "-0.5,1,9.5");
     checkData(outputWS, 6, 10, true, true);
+  }
+
+  void test_Rebin2D_With_EventWorkspace() {
+    EventWorkspace_sptr inputWS = createEmptyEventWorkspace();
+    MatrixWorkspace_sptr outputWS = runAlgorithm(inputWS, "5.,4.,25.", "-0.5,1,9.5");
+    // Doesnt check if result is correct, just that an inputws of EventWorkspace doesnt crash it
   }
 
   void test_Rebin2D_With_Bin_Width_Less_Than_One_And_Not_Distribution() {

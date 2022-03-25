@@ -10,7 +10,8 @@ from unittest import mock
 from unittest.mock import patch
 from numpy import isnan, nan
 from mantid.kernel import UnitParams, UnitParametersMap
-from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.fitting.data_handling.data_model import FittingDataModel
+from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.fitting.data_handling.data_model import \
+    FittingDataModel
 from testhelpers import assertRaisesNothing
 
 data_model_path = "mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.fitting.data_handling.data_model"
@@ -23,7 +24,7 @@ class TestFittingDataModel(unittest.TestCase):
         self.mock_inst = mock.MagicMock()
         self.mock_inst.getFullName.return_value = 'instrument'
         mock_prop = mock.MagicMock()
-        mock_prop.value = 1  # bank-id
+        mock_prop.value = 'bank 1'  # bank-id
         mock_log_data = [mock.MagicMock(), mock.MagicMock()]
         mock_log_data[0].name = "LogName"
         mock_log_data[1].name = "proton_charge"
@@ -50,8 +51,8 @@ class TestFittingDataModel(unittest.TestCase):
 
         self.model.load_files("/ar/a_filename.whatever")
 
-        self.assertEqual(1, len(self.model._loaded_workspaces))
-        self.assertEqual(self.mock_ws, self.model._loaded_workspaces["a_filename"])
+        self.assertEqual(1, len(self.model._data_workspaces))
+        self.assertEqual(self.mock_ws, self.model._data_workspaces["a_filename"].loaded_ws)
         mock_load.assert_called_with("/ar/a_filename.whatever", OutputWorkspace="a_filename")
         mock_update_logws_group.assert_called_once()
 
@@ -64,7 +65,7 @@ class TestFittingDataModel(unittest.TestCase):
 
         self.model.load_files("/ar/a_filename.whatever")
 
-        self.assertEqual(1, len(self.model._loaded_workspaces))
+        self.assertEqual(1, len(self.model._data_workspaces))
         mock_load.assert_not_called()
         mock_update_logws_group.assert_called_once()
 
@@ -72,11 +73,11 @@ class TestFittingDataModel(unittest.TestCase):
     @patch(data_model_path + ".Load")
     def test_loading_single_file_already_loaded_tracked(self, mock_load, mock_update_logws_group):
         fpath = "/ar/a_filename.whatever"
-        self.model._loaded_workspaces = {self.model._generate_workspace_name(fpath): self.mock_ws}
+        self.model._data_workspaces.add(self.model._generate_workspace_name(fpath), loaded_ws=self.mock_ws)
 
         self.model.load_files(fpath)
 
-        self.assertEqual(1, len(self.model._loaded_workspaces))
+        self.assertEqual(1, len(self.model._data_workspaces))
         mock_load.assert_not_called()
         mock_update_logws_group.assert_called()
 
@@ -91,8 +92,8 @@ class TestFittingDataModel(unittest.TestCase):
 
         self.model.load_files("/ar/a_filename.whatever")
 
-        self.assertEqual(1, len(self.model._loaded_workspaces))
-        self.assertEqual(self.mock_ws, self.model._loaded_workspaces["a_filename"])
+        self.assertEqual(1, len(self.model._data_workspaces))
+        self.assertEqual(self.mock_ws, self.model._data_workspaces["a_filename"].loaded_ws)
         mock_load.assert_called_with("/ar/a_filename.whatever", OutputWorkspace="a_filename")
         self.assertEqual(1 + len(log_names), len(self.model._log_workspaces))
         for ilog in range(0, len(log_names)):
@@ -105,7 +106,7 @@ class TestFittingDataModel(unittest.TestCase):
         mock_load.side_effect = RuntimeError("Invalid Path")
 
         self.model.load_files("/ar/a_filename.whatever")
-        self.assertEqual(0, len(self.model._loaded_workspaces))
+        self.assertEqual(0, len(self.model._data_workspaces))
         mock_load.assert_called_with("/ar/a_filename.whatever", OutputWorkspace="a_filename")
         self.assertEqual(1, mock_logger.error.call_count)
 
@@ -116,9 +117,9 @@ class TestFittingDataModel(unittest.TestCase):
 
         self.model.load_files("/dir/file1.txt, /dir/file2.nxs")
 
-        self.assertEqual(2, len(self.model._loaded_workspaces))
-        self.assertEqual(self.mock_ws, self.model._loaded_workspaces["file1"])
-        self.assertEqual(self.mock_ws, self.model._loaded_workspaces["file2"])
+        self.assertEqual(2, len(self.model._data_workspaces))
+        self.assertEqual(self.mock_ws, self.model._data_workspaces["file1"].loaded_ws)
+        self.assertEqual(self.mock_ws, self.model._data_workspaces["file2"].loaded_ws)
         mock_load.assert_any_call("/dir/file1.txt", OutputWorkspace="file1")
         mock_load.assert_any_call("/dir/file2.nxs", OutputWorkspace="file2")
         mock_update_logws_group.assert_called_once()
@@ -131,7 +132,7 @@ class TestFittingDataModel(unittest.TestCase):
 
         self.model.load_files("/dir/file1.txt, /dir/file2.nxs")
 
-        self.assertEqual(0, len(self.model._loaded_workspaces))
+        self.assertEqual(0, len(self.model._data_workspaces))
         mock_load.assert_any_call("/dir/file1.txt", OutputWorkspace="file1")
         mock_load.assert_any_call("/dir/file2.nxs", OutputWorkspace="file2")
         self.assertEqual(2, mock_logger.warning.call_count)
@@ -143,7 +144,7 @@ class TestFittingDataModel(unittest.TestCase):
 
         self.model.load_files("/dir/file1.txt, /dir/file2.nxs")
 
-        self.assertEqual(0, len(self.model._loaded_workspaces))
+        self.assertEqual(0, len(self.model._data_workspaces))
         mock_load.assert_any_call("/dir/file1.txt", OutputWorkspace="file1")
         mock_load.assert_any_call("/dir/file2.nxs", OutputWorkspace="file2")
         self.assertEqual(2, mock_logger.error.call_count)
@@ -152,15 +153,13 @@ class TestFittingDataModel(unittest.TestCase):
     @patch(data_model_path + ".EnggEstimateFocussedBackground")
     @patch(data_model_path + ".Minus")
     def test_do_background_subtraction_first_time(self, mock_minus, mock_estimate_bg, mock_delete_ws):
-        self.model._loaded_workspaces = {"name1": self.mock_ws}
-        self.model._bg_sub_workspaces = {"name1": None}
-        self.model._bg_params = dict()
+        self.model._data_workspaces.add("name1", loaded_ws=self.mock_ws)
         mock_estimate_bg.return_value = self.mock_ws
 
         bg_params = [True, 40, 800, False]
         self.model.create_or_update_bgsub_ws("name1", bg_params)
 
-        self.assertEqual(self.model._bg_params["name1"], bg_params)
+        self.assertEqual(self.model._data_workspaces["name1"].bg_params, bg_params)
         mock_minus.assert_called_once()
         mock_estimate_bg.assert_called_once()
         mock_delete_ws.assert_called_once()
@@ -169,15 +168,14 @@ class TestFittingDataModel(unittest.TestCase):
     @patch(data_model_path + ".EnggEstimateFocussedBackground")
     @patch(data_model_path + ".Minus")
     def test_do_background_subtraction_bgparams_changed(self, mock_minus, mock_estimate_bg, mock_delete_ws):
-        self.model._loaded_workspaces = {"name1": self.mock_ws}
-        self.model._bg_sub_workspaces = {"name1": self.mock_ws}
-        self.model._bg_params = {"name1": [True, 80, 1000, False]}
+        self.model._data_workspaces.add("name1", loaded_ws=self.mock_ws, bgsub_ws=self.mock_ws,
+                                        bg_params=[True, 80, 1000, False])
         mock_estimate_bg.return_value = self.mock_ws
 
         bg_params = [True, 40, 800, False]
         self.model.create_or_update_bgsub_ws("name1", bg_params)
 
-        self.assertEqual(self.model._bg_params["name1"], bg_params)
+        self.assertEqual(self.model._data_workspaces["name1"].bg_params, bg_params)
         mock_minus.assert_called_once()
         mock_estimate_bg.assert_called_once()
         mock_delete_ws.assert_called_once()
@@ -185,15 +183,14 @@ class TestFittingDataModel(unittest.TestCase):
     @patch(data_model_path + ".EnggEstimateFocussedBackground")
     @patch(data_model_path + ".Minus")
     def test_do_background_subtraction_no_change(self, mock_minus, mock_estimate_bg):
-        self.model._loaded_workspaces = {"name1": self.mock_ws}
-        self.model._bg_sub_workspaces = {"name1": self.mock_ws}
         bg_params = [True, 80, 1000, False]
-        self.model._bg_params = {"name1": bg_params}
+        self.model._data_workspaces.add("name1", loaded_ws=self.mock_ws, bgsub_ws=self.mock_ws,
+                                        bg_params=bg_params)
         mock_estimate_bg.return_value = self.mock_ws
 
         self.model.create_or_update_bgsub_ws("name1", bg_params)
 
-        self.assertEqual(self.model._bg_params["name1"], bg_params)
+        self.assertEqual(self.model._data_workspaces["name1"].bg_params, bg_params)
         mock_minus.assert_not_called()
         mock_estimate_bg.assert_not_called()
 
@@ -202,9 +199,7 @@ class TestFittingDataModel(unittest.TestCase):
     @patch(data_model_path + ".EnggEstimateFocussedBackground")
     @patch(data_model_path + ".Minus")
     def test_invalid_bg_inputs_dont_throw(self, mock_minus, mock_estimate_bg, mock_delete_ws, mock_set_uncertainties):
-        self.model._loaded_workspaces = {"name1": self.mock_ws}
-        self.model._bg_sub_workspaces = {"name1": None}
-        self.model._bg_params = dict()
+        self.model._data_workspaces.add("name1", loaded_ws=self.mock_ws)
         mock_estimate_bg.side_effect = ValueError("Some problem")
 
         bg_params = [True, -1, 800, False]
@@ -245,23 +240,28 @@ class TestFittingDataModel(unittest.TestCase):
         mock_delws.assert_called_with(name)
         self.assertEqual(None, self.model._log_workspaces)
 
-    def test_update_workspace_name(self):
-        self.model._loaded_workspaces = {"name1": self.mock_ws, "name2": self.mock_ws}
-        self.model._bg_sub_workspaces = {"name1": self.mock_ws, "name2": self.mock_ws}
-        self.model._bg_params = {"name1": [True, 80, 1000, False]}
-        self.model._log_values = {"name1": 1, "name2": 2}
+    @patch(data_model_path + ".FittingDataModel.update_log_workspace_group")
+    def test_update_workspace_name(self, mock_update_log_ws_group):
+        self.model._data_workspaces.add("name1", loaded_ws=self.mock_ws, bgsub_ws=self.mock_ws,
+                                        bg_params=[True, 80, 1000, False])
+        self.model._data_workspaces.add("name2", loaded_ws=self.mock_ws, bgsub_ws=self.mock_ws)
+        self.model._log_values = {"name1": {"log_name1": 1}, "name2": {"log_name1": 2}}
 
         self.model.update_workspace_name("name1", "new_name")
 
-        self.assertEqual({"new_name": self.mock_ws, "name2": self.mock_ws}, self.model._loaded_workspaces)
-        self.assertEqual({"new_name": self.mock_ws, "name2": self.mock_ws}, self.model._bg_sub_workspaces)
-        self.assertEqual({"new_name": [True, 80, 1000, False]}, self.model._bg_params)
-        self.assertEqual({"new_name": 1, "name2": 2}, self.model._log_values)
+        self.assertEqual({"new_name": self.mock_ws, "name2": self.mock_ws},
+                         self.model._data_workspaces.get_loaded_ws_dict())
+        self.assertEqual({"new_name": self.mock_ws, "name2": self.mock_ws},
+                         self.model._data_workspaces.get_bgsub_ws_dict())
+        self.assertEqual({"name2": [], "new_name": [True, 80, 1000, False]},
+                         self.model._data_workspaces.get_bg_params_dict())
+        self.assertEqual({"new_name": {"log_name1": 1}, "name2": {"log_name1": 2}}, self.model._log_values)
 
+    @patch(data_model_path + ".FittingDataModel.remove_all_log_rows")
     @patch(data_model_path + ".FittingDataModel.create_log_workspace_group")
     @patch(data_model_path + ".FittingDataModel.add_log_to_table")
-    def test_update_logs_initial(self, mock_add_log, mock_create_log_group):
-        self.model._loaded_workspaces = {"name1": self.mock_ws}
+    def test_update_logs_initial(self, mock_add_log, mock_create_log_group, mock_remove_all_log_rows):
+        self.model._data_workspaces.add("name1", loaded_ws=self.mock_ws)
         self.model._log_workspaces = None
 
         self.model.update_log_workspace_group()
@@ -275,7 +275,7 @@ class TestFittingDataModel(unittest.TestCase):
     @patch(data_model_path + ".ADS")
     def test_update_logs_deleted(self, mock_ads, mock_add_log, mock_create_log_group, mock_make_runinfo,
                                  mock_make_log_table):
-        self.model._loaded_workspaces = {"name1": self.mock_ws}
+        self.model._data_workspaces.add("name1", loaded_ws=self.mock_ws)
         self.model._log_workspaces = mock.MagicMock()
         self.model._log_names = ['LogName1', 'LogName2']
         # simulate LogName2 and run_info tables being deleted
@@ -319,7 +319,7 @@ class TestFittingDataModel(unittest.TestCase):
         self.model._log_names = ["LogName"]
 
         self.model.add_log_to_table("name1", self.mock_ws, 3)
-        mock_writerow.assert_any_call(self.model._log_workspaces[0], ['instrument', 1, 1, 1.0, 'title'], 3)
+        mock_writerow.assert_any_call(self.model._log_workspaces[0], ['instrument', 1, 'bank 1', 1.0, 'title'], 3)
         mock_writerow.assert_any_call(self.model._log_workspaces[1], [2, 1], 3)
         mock_avglogs.assert_not_called()
         mock_update_logname.assert_called_once()
@@ -411,7 +411,9 @@ class TestFittingDataModel(unittest.TestCase):
         mock_create_table.return_value = mock.MagicMock()
         mock_groupws.side_effect = lambda wslist, OutputWorkspace: wslist
         # setup fit results
-        self.model._loaded_workspaces = {"name1": self.mock_ws, "name2": self.mock_ws}
+        self.model._data_workspaces.add("name1", loaded_ws=self.mock_ws)
+        self.model._data_workspaces.add("name2", loaded_ws=self.mock_ws, bgsub_ws=self.mock_ws,
+                                        bgsub_ws_name="name2_bgsub", bg_params=[True])
         self.model._log_workspaces = mock.MagicMock()
         self.model._log_workspaces.name.return_value = 'some_log'
         func_str = 'name=Gaussian,Height=11,PeakCentre=40000,Sigma=54;name=Gaussian,Height=10,PeakCentre=30000,Sigma=51'
@@ -451,7 +453,7 @@ class TestFittingDataModel(unittest.TestCase):
         self.assertEqual(sorted(ws_names), sorted(self.model._fit_results['name1']['results'].keys()))
         # check the first call to setY and setE for one of the parameters
         for im, m in enumerate(self.model._fit_workspaces[:-2]):
-            for iws, ws in enumerate(self.model._loaded_workspaces.keys()):
+            for iws, ws in enumerate(self.model._data_workspaces.get_loaded_workpace_names()):
                 _, argsY, _ = m.setY.mock_calls[iws]
                 _, argsE, _ = m.setE.mock_calls[iws]
                 self.assertEqual([argsY[0], argsE[0]], [iws, iws])
@@ -474,10 +476,10 @@ class TestFittingDataModel(unittest.TestCase):
                                                                                             mock_groupws)
         mock_ws_list.append(mock.MagicMock())  # adding an additional parameter into model for name2
         func_str2 = self.model._fit_results['name1']['model'] + ';name=FlatBackground,A0=1'
-        self.model._fit_results['name2'] = {'model': func_str2, 'status': 'success',
-                                            'results': dict(self.model._fit_results['name1']['results'],
-                                                            FlatBackground_A0=[[1.0, 0.1]]),
-                                            'costFunction': 2.0}
+        self.model._fit_results['name2_bgsub'] = {'model': func_str2, 'status': 'success',
+                                                  'results': dict(self.model._fit_results['name1']['results'],
+                                                                  FlatBackground_A0=[[1.0, 0.1]]),
+                                                  'costFunction': 2.0}
         self.model.create_fit_tables()
 
         # test the workspaces were created and added to fit_workspaces
@@ -488,15 +490,15 @@ class TestFittingDataModel(unittest.TestCase):
                                        self.model._fit_results['name1']['status'],
                                        self.model._fit_results['name1']['model']], 0)
         mock_writerow.assert_any_call(mock_create_table.return_value,
-                                      ['name2', self.model._fit_results['name2']['costFunction'],
+                                      ['name2_bgsub', self.model._fit_results['name2_bgsub']['costFunction'],
                                        self.model._fit_results['name1']['status'],
-                                       self.model._fit_results['name2']['model']], 1)
+                                       self.model._fit_results['name2_bgsub']['model']], 1)
         # check the matrix workspaces corresponding to the fit parameters
         # 4 unique params plus the peak centre converted to dSpacing
         ws_names = [mock_create_ws.mock_calls[iws][2]['OutputWorkspace'] for iws in range(0, 5)]
         # get list of all unique params across both models
         param_names = list(set(list(self.model._fit_results['name1']['results'].keys()) + list(
-            self.model._fit_results['name2']['results'].keys())))
+            self.model._fit_results['name2_bgsub']['results'].keys())))
         # test only table for unique parameter
         self.assertEqual(sorted(ws_names), sorted(param_names))
 
@@ -516,38 +518,44 @@ class TestFittingDataModel(unittest.TestCase):
     @patch(data_model_path + '.get_setting')
     @patch(data_model_path + '.ADS')
     def test_get_ws_sorted_by_primary_log_ascending(self, mock_ads, mock_getsetting):
-        self.model._loaded_workspaces = {"name1": self.mock_ws, "name2": self.mock_ws, "name3": self.mock_ws}
+        self.model._data_workspaces.add("name1", loaded_ws=self.mock_ws)
+        self.model._data_workspaces.add("name2", loaded_ws=self.mock_ws)
+        self.model._data_workspaces.add("name3", loaded_ws=self.mock_ws)
         mock_getsetting.side_effect = ['log', 'true']  # primary log, sort_ascending
         mock_log_table = mock.MagicMock()
         mock_log_table.column.return_value = [2, 0, 1]  # fake log values
         mock_ads.retrieve.return_value = mock_log_table
 
-        ws_list = self.model.get_ws_sorted_by_primary_log()
+        ws_list = self.model.get_active_ws_sorted_by_primary_log()
 
         self.assertEqual(ws_list, ["name2", "name3", "name1"])
 
     @patch(data_model_path + '.get_setting')
     @patch(data_model_path + '.ADS')
     def test_get_ws_sorted_by_primary_log_descending(self, mock_ads, mock_getsetting):
-        self.model._loaded_workspaces = {"name1": self.mock_ws, "name2": self.mock_ws, "name3": self.mock_ws}
+        self.model._data_workspaces.add("name1", loaded_ws=self.mock_ws)
+        self.model._data_workspaces.add("name2", loaded_ws=self.mock_ws)
+        self.model._data_workspaces.add("name3", loaded_ws=self.mock_ws)
         mock_getsetting.side_effect = ['log', 'false']  # primary log, sort_ascending
         mock_log_table = mock.MagicMock()
         mock_log_table.column.return_value = [2, 0, 1]  # fake log values
         mock_ads.retrieve.return_value = mock_log_table
 
-        ws_list = self.model.get_ws_sorted_by_primary_log()
+        ws_list = self.model.get_active_ws_sorted_by_primary_log()
 
         self.assertEqual(ws_list, ["name1", "name3", "name2"])
 
     @patch(data_model_path + '.get_setting')
     @patch(data_model_path + '.ADS')
     def test_get_ws_sorted_by_primary_log_not_specified(self, mock_ads, mock_getsetting):
-        self.model._loaded_workspaces = {"name1": self.mock_ws, "name2": self.mock_ws, "name3": self.mock_ws}
+        self.model._data_workspaces.add("name1", loaded_ws=self.mock_ws)
+        self.model._data_workspaces.add("name2", loaded_ws=self.mock_ws)
+        self.model._data_workspaces.add("name3", loaded_ws=self.mock_ws)
         mock_getsetting.side_effect = ['', 'false']  # primary log, sort_ascending
 
-        ws_list = self.model.get_ws_sorted_by_primary_log()
+        ws_list = self.model.get_active_ws_sorted_by_primary_log()
 
-        self.assertEqual(ws_list, list(self.model._loaded_workspaces.keys())[::-1])
+        self.assertEqual(ws_list, list(self.model._data_workspaces.get_loaded_workpace_names())[::-1])
         mock_ads.retrieve.assert_not_called()
 
     def _setup_model_log_workspaces(self):

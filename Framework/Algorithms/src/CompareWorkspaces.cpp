@@ -485,7 +485,7 @@ bool CompareWorkspaces::compareEventWorkspaces(const DataObjects::EventWorkspace
   std::vector<int> vec_mismatchedwsindex;
   PARALLEL_FOR_IF(m_parallelComparison && ews1.threadSafe() && ews2.threadSafe())
   for (int i = 0; i < static_cast<int>(ews1.getNumberHistograms()); ++i) {
-    PARALLEL_START_INTERUPT_REGION
+    PARALLEL_START_INTERRUPT_REGION
     m_progress->report("EventLists");
     if (!mismatchedEvent || checkallspectra) // This guard will avoid checking unnecessarily
     {
@@ -534,9 +534,9 @@ bool CompareWorkspaces::compareEventWorkspaces(const DataObjects::EventWorkspace
 
       } // If elist 1 is not equal to elist 2
     }
-    PARALLEL_END_INTERUPT_REGION
+    PARALLEL_END_INTERRUPT_REGION
   }
-  PARALLEL_CHECK_INTERUPT_REGION
+  PARALLEL_CHECK_INTERRUPT_REGION
 
   bool wsmatch;
   if (mismatchedEvent) {
@@ -610,7 +610,7 @@ bool CompareWorkspaces::checkData(const API::MatrixWorkspace_const_sptr &ws1,
   // Now check the data itself
   PARALLEL_FOR_IF(m_parallelComparison && ws1->threadSafe() && ws2->threadSafe())
   for (long i = 0; i < static_cast<long>(numHists); ++i) {
-    PARALLEL_START_INTERUPT_REGION
+    PARALLEL_START_INTERRUPT_REGION
     m_progress->report("Histograms");
 
     if (resultBool || checkAllData) // Avoid checking unnecessarily
@@ -650,9 +650,9 @@ bool CompareWorkspaces::checkData(const API::MatrixWorkspace_const_sptr &ws1,
         resultBool = false;
       }
     }
-    PARALLEL_END_INTERUPT_REGION
+    PARALLEL_END_INTERRUPT_REGION
   }
-  PARALLEL_CHECK_INTERUPT_REGION
+  PARALLEL_CHECK_INTERRUPT_REGION
 
   if (!resultBool)
     recordMismatch("Data mismatch");
@@ -1013,6 +1013,7 @@ void CompareWorkspaces::doPeaksComparison(PeaksWorkspace_sptr tws1, PeaksWorkspa
   }
 
   const double tolerance = getProperty("Tolerance");
+  const bool isRelErr = getProperty("ToleranceRelErr");
   for (int i = 0; i < tws1->getNumberPeaks(); i++) {
     const Peak &peak1 = tws1->getPeak(i);
     const Peak &peak2 = tws2->getPeak(i);
@@ -1066,13 +1067,20 @@ void CompareWorkspaces::doPeaksComparison(PeaksWorkspace_sptr tws1, PeaksWorkspa
       } else {
         g_log.information() << "Column " << name << " is not compared\n";
       }
-      if (std::fabs(s1 - s2) > tolerance) {
+      bool mismatch = false;
+      if (isRelErr) {
+        if (relErr(s1, s2, tolerance)) {
+          mismatch = true;
+        }
+      } else if (std::fabs(s1 - s2) > tolerance) {
+        mismatch = true;
+      }
+      if (mismatch) {
         g_log.notice(name);
-        g_log.notice() << "s1 = " << s1 << "\n"
-                       << "s2 = " << s2 << "\n"
-                       << "std::fabs(s1 - s2) = " << std::fabs(s1 - s2) << "\n"
-                       << "tolerance = " << tolerance << "\n";
-        g_log.notice() << "Data mismatch at cell (row#,col#): (" << i << "," << j << ")\n";
+        g_log.notice() << "data mismatch in column name = " << name << "\n"
+                       << "cell (row#, col#): (" << i << "," << j << ")\n"
+                       << "value1 = " << s1 << "\n"
+                       << "value2 = " << s2 << "\n";
         recordMismatch("Data mismatch");
         return;
       }
@@ -1109,65 +1117,81 @@ void CompareWorkspaces::doLeanElasticPeaksComparison(const LeanElasticPeaksWorks
   IPeaksWorkspace_sptr ipws2 = sortPeaks->getProperty("OutputWorkspace");
 
   const double tolerance = getProperty("Tolerance");
-  for (int i = 0; i < ipws1->getNumberPeaks(); i++) {
+  const bool isRelErr = getProperty("ToleranceRelErr");
+  for (int peakIndex = 0; peakIndex < ipws1->getNumberPeaks(); peakIndex++) {
     for (size_t j = 0; j < ipws1->columnCount(); j++) {
       std::shared_ptr<const API::Column> col = ipws1->getColumn(j);
-      std::string name = col->name();
+      const std::string name = col->name();
       double s1 = 0.0;
       double s2 = 0.0;
       if (name == "RunNumber") {
-        s1 = double(ipws1->getPeak(i).getRunNumber());
-        s2 = double(ipws2->getPeak(i).getRunNumber());
+        s1 = double(ipws1->getPeak(peakIndex).getRunNumber());
+        s2 = double(ipws2->getPeak(peakIndex).getRunNumber());
       } else if (name == "h") {
-        s1 = ipws1->getPeak(i).getH();
-        s2 = ipws2->getPeak(i).getH();
+        s1 = ipws1->getPeak(peakIndex).getH();
+        s2 = ipws2->getPeak(peakIndex).getH();
       } else if (name == "k") {
-        s1 = ipws1->getPeak(i).getK();
-        s2 = ipws2->getPeak(i).getK();
+        s1 = ipws1->getPeak(peakIndex).getK();
+        s2 = ipws2->getPeak(peakIndex).getK();
       } else if (name == "l") {
-        s1 = ipws1->getPeak(i).getL();
-        s2 = ipws2->getPeak(i).getL();
+        s1 = ipws1->getPeak(peakIndex).getL();
+        s2 = ipws2->getPeak(peakIndex).getL();
       } else if (name == "Wavelength") {
-        s1 = ipws1->getPeak(i).getWavelength();
-        s2 = ipws2->getPeak(i).getWavelength();
+        s1 = ipws1->getPeak(peakIndex).getWavelength();
+        s2 = ipws2->getPeak(peakIndex).getWavelength();
       } else if (name == "DSpacing") {
-        s1 = ipws1->getPeak(i).getDSpacing();
-        s2 = ipws2->getPeak(i).getDSpacing();
+        s1 = ipws1->getPeak(peakIndex).getDSpacing();
+        s2 = ipws2->getPeak(peakIndex).getDSpacing();
       } else if (name == "Intens") {
-        s1 = ipws1->getPeak(i).getIntensity();
-        s2 = ipws2->getPeak(i).getIntensity();
+        s1 = ipws1->getPeak(peakIndex).getIntensity();
+        s2 = ipws2->getPeak(peakIndex).getIntensity();
       } else if (name == "SigInt") {
-        s1 = ipws1->getPeak(i).getSigmaIntensity();
-        s2 = ipws2->getPeak(i).getSigmaIntensity();
+        s1 = ipws1->getPeak(peakIndex).getSigmaIntensity();
+        s2 = ipws2->getPeak(peakIndex).getSigmaIntensity();
       } else if (name == "BinCount") {
-        s1 = ipws1->getPeak(i).getBinCount();
-        s2 = ipws2->getPeak(i).getBinCount();
+        s1 = ipws1->getPeak(peakIndex).getBinCount();
+        s2 = ipws2->getPeak(peakIndex).getBinCount();
       } else if (name == "QLab") {
-        V3D q1 = ipws1->getPeak(i).getQLabFrame();
-        V3D q2 = ipws2->getPeak(i).getQLabFrame();
+        V3D q1 = ipws1->getPeak(peakIndex).getQLabFrame();
+        V3D q2 = ipws2->getPeak(peakIndex).getQLabFrame();
         // using s1 here as the diff
         for (int i = 0; i < 3; ++i) {
           s1 += (q1[i] - q2[i]) * (q1[i] - q2[i]);
         }
         s1 = std::sqrt(s1);
+        if (isRelErr) {
+          // divide diff by avg |Q| and then compare to 0 using absolute tol
+          s1 /= 0.5 * (q1.norm() + q2.norm());
+        }
       } else if (name == "QSample") {
-        V3D q1 = ipws1->getPeak(i).getQSampleFrame();
-        V3D q2 = ipws2->getPeak(i).getQSampleFrame();
+        V3D q1 = ipws1->getPeak(peakIndex).getQSampleFrame();
+        V3D q2 = ipws2->getPeak(peakIndex).getQSampleFrame();
         // using s1 here as the diff
         for (int i = 0; i < 3; ++i) {
           s1 += (q1[i] - q2[i]) * (q1[i] - q2[i]);
         }
         s1 = std::sqrt(s1);
+        if (isRelErr) {
+          // divide diff by avg |Q| and then compare to 0 using absolute tol
+          s1 /= 0.5 * (q1.norm() + q2.norm());
+        }
       } else {
         g_log.information() << "Column " << name << " is not compared\n";
       }
-      if (std::fabs(s1 - s2) > tolerance) {
+      bool mismatch = false;
+      if (isRelErr && name != "QLab" && name != "QSample") {
+        if (relErr(s1, s2, tolerance)) {
+          mismatch = true;
+        }
+      } else if (std::fabs(s1 - s2) > tolerance) {
+        mismatch = true;
+      }
+      if (mismatch) {
         g_log.notice(name);
-        g_log.notice() << "s1 = " << s1 << "\n"
-                       << "s2 = " << s2 << "\n"
-                       << "std::fabs(s1 - s2) = " << std::fabs(s1 - s2) << "\n"
-                       << "tolerance = " << tolerance << "\n";
-        g_log.notice() << "Data mismatch at cell (row#,col#): (" << i << "," << j << ")\n";
+        g_log.notice() << "data mismatch in column name = " << name << "\n"
+                       << "cell (row#, col#): (" << peakIndex << "," << j << ")\n"
+                       << "value1 = " << s1 << "\n"
+                       << "value2 = " << s2 << "\n";
         recordMismatch("Data mismatch");
         return;
       }

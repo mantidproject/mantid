@@ -112,7 +112,7 @@ Monday, 3 weeks
 
 *  Ensure that Manual testing begins. An overview of the Manual testing to be done is
    found :ref:`here <Testing>`. Generate the Manual testing issues by following the instructions
-   `here <https://github.com/mantidproject/documents/tree/master/Project-Management/Tools/RoadmapUpdate>`__.
+   `here <https://github.com/mantidproject/documents/tree/main/Project-Management/Tools/RoadmapUpdate>`__.
 *  Over the next week or so, read through the Manual testing issues and ensure that any
    serious problems are raised as an issue and marked against the relevant milestone.
 
@@ -122,7 +122,7 @@ Friday, 1 day
 *  It is likely that many changes have been made over the beta test period, therefore
    we must do some more Manual testing to ensure everything still works. This stage is
    called Smoke testing. Generate the Smoke testing issues by following the instructions
-   `here <https://github.com/mantidproject/documents/tree/master/Project-Management/Tools/RoadmapUpdate/SmokeTesting>`__.
+   `here <https://github.com/mantidproject/documents/tree/main/Project-Management/Tools/RoadmapUpdate/SmokeTesting>`__.
 *  Liase with the Technical Release Manager to announce the creation of the Smoke testing
    issues and Release Candidates in the *\#general* slack channel.
 
@@ -240,6 +240,10 @@ After the Technical Release Manager has finished their release day tasks:
 
    ``neutron<at>neutronsources.org``
 
+   ``announcements<at>mantidproject.org``
+
+   ``ISIS Instrument Scientists + Other``
+
 *  Also post the contents of the message to the *\#announcements* channel on
    Slack.
 *  Create a new item on the forum news.
@@ -259,8 +263,8 @@ Monday, 3 weeks
 
 **Create the Release Branch (once most PR's are merged)**
 
-*  Ensure the `master build and system test
-   <https://builds.mantidproject.org/view/Master%20Pipeline/>`__
+*  Ensure the `main build and system test
+   <https://builds.mantidproject.org/view/Main%20Pipeline/>`__
    jobs have passed for all build environments for this release.
 *  Run `open-release-testing
    <https://builds.mantidproject.org/view/All/job/open-release-testing/>`__
@@ -270,7 +274,7 @@ Monday, 3 weeks
    pull requests not targeted for release out of the milestone, and then change the base branch
    of the remaining pull requests to ``release-next``. You can use the following script
    to update the base branches of these pull requests `update-pr-base-branch.py
-   <https://github.com/mantidproject/mantid/blob/master/tools/scripts/update-pr-base-branch.py>`__
+   <https://github.com/mantidproject/mantid/blob/main/tools/scripts/update-pr-base-branch.py>`__
    A quick example to show how the arguments should be provided to this script is seen below:
 
 .. code-block:: bash
@@ -284,14 +288,14 @@ Monday, 3 weeks
 
   .. code
 
-  The release branch for <version>, called release-next, has now been created: https://github.com/mantidproject/mantid/tree/release-next.  If you've not worked with the release/master-branch workflow before then please take a moment to familiarise yourself with the process: https://developer.mantidproject.org/GitWorkflow.html#code-freeze. The part about ensuring new branches have the correct parent is the most important part (although this can be corrected afterwards). All branches and PRs that were created before this release branch was created are fine, as their history is the same as master.
+  The release branch for <version>, called release-next, has now been created: https://github.com/mantidproject/mantid/tree/release-next.  If you've not worked with the release/main/-branch workflow before then please take a moment to familiarise yourself with the process: https://developer.mantidproject.org/GitWorkflow.html#code-freeze. The part about ensuring new branches have the correct parent is the most important part (although this can be corrected afterwards). All branches and PRs that were created before this release branch was created are fine, as their history is the same as ``main``.
 
 **Create Release Notes Skeleton**
 
-*  Create a skeleton set of release notes on master for the next version using the
+*  Create a skeleton set of release notes on ``main`` for the next version using the
    `python helper tool
-   <https://github.com/mantidproject/mantid/blob/master/tools/release_generator/release.py>`_
-   and open a pull request to put them on ``master``. Make sure the
+   <https://github.com/mantidproject/mantid/blob/main/tools/release_generator/release.py>`_
+   and open a pull request to put them on ``main``. Make sure the
    ``docs/source/release/index.rst`` file has a link to the new release docs.
 
 .. code-block:: bash
@@ -307,8 +311,8 @@ have been fixed. Then:
 
 *  Email ``mantid-builder@mantidproject.org`` and ask that a new token be generated for
    the instrument updates and placed in the appropriate place in Jenkins.
-*  Check the release notes and remove the "Under Construction" paragraph on the main
-   index page.
+*  Check the release notes and verify that the "Under Construction" paragraph on the main
+   index page has been removed. Remove the paragraph if it still exists.
 *  Disable release deploy jobs by building the
    `close-release-testing <https://builds.mantidproject.org/view/All/job/close-release-testing>`__
    job.
@@ -317,15 +321,15 @@ have been fixed. Then:
 
 We are now ready to create the release candidates ready for Smoke testing.
 
-*  On the ``release-next`` branch, create a PR to update the `git SHA
+*  On the ``release-next`` branch, check whether the `git SHA
    <https://github.com/mantidproject/mantid/blob/343037c685c0aca9151523d6a3e105504f8cf218/scripts/ExternalInterfaces/CMakeLists.txt#L11>`__
-   for MSlice.
+   for MSlice is up to date. If not, create a PR to update it.
 *  On the ``release-next`` branch, create a PR to update the `major & minor
-   <https://github.com/mantidproject/mantid/blob/master/buildconfig/CMake/VersionNumber.cmake>`__
+   <https://github.com/mantidproject/mantid/blob/release-next/buildconfig/CMake/VersionNumber.cmake>`__
    versions accordingly. Also, uncomment ``VERSION_PATCH`` and set it to ``0``.
-*  Ask a gatekeeper to: merge the ``release-next`` branch back to ``master`` locally, and then comment
-   out the ``VERSION_PATCH`` on the ``master`` branch. They should then commit and push these changes
-   directly to the remote ``master`` without making a PR.
+*  Ask a gatekeeper to: merge the ``release-next`` branch back to ``main`` locally, and then comment
+   out the ``VERSION_PATCH`` on the ``main`` branch. They should then commit and push these changes
+   directly to the remote ``main`` without making a PR.
 *  Build the `release kit builds <https://builds.mantidproject.org/view/Release%20Pipeline/>`__
    and set the ``PACKAGE_SUFFIX`` parameter to an empty string
 *  Liase with the Quality Assurance Manager to announce the creation of the Smoke testing
@@ -338,7 +342,7 @@ Check with the Quality Assurance Manager that the Smoke testing has been complet
 have been fixed.
 
 *  Run the `release_deploy <https://builds.mantidproject.org/view/Release%20Pipeline/job/release_deploy/>`__
-   job to put the packages, with the exception of Windows, on Sourceforge.
+   job to put the packages, with the exception of Windows, on Sourceforge. Set ``SOURCEFORGE_DIR`` to <major version>.<minor version> (e.g. 6.3)
 
   *  Have someone at ISIS sign the Windows binary and upload this manually to Sourceforge
 
@@ -357,8 +361,6 @@ have been fixed.
 *  Kick off the build for ``mantidXY`` on RHEL7 for the SNS with ``PACKAGE_SUFFIX`` set to
    ``XY`` where ``X`` and ``Y`` correspond to the Major and Minor release version numbers:
    https://builds.mantidproject.org/job/release_clean-rhel7/
-* **ISIS**: If in cycle add a calendar reminder for when the current cycle ends for
-  mantid to be updated on IDAaaS and cabin PCs. If out of cycle do this immediately.
 
 **Generate DOI**
 
@@ -368,14 +370,25 @@ publish a new `release <https://github.com/mantidproject/mantid/releases>`__ on 
 *  Make sure that you have updated your local copy of git to grab the new tag.
    ``git fetch -p``
 *  If the script below fails you may need to update the authors list and push the
-   updates to master. Look for ``authors.py`` in the ``tools/DOI`` directory.
+   updates to ``main``. Look for ``authors.py`` in the ``tools/DOI`` directory.
    It does not matter that these are not on the release branch.
 
 .. code-block:: bash
 
     python tools/DOI/doi.py --username=[username] [X.Y.Z]
+
+for example
+
+.. code-block:: bash
+
     python tools/DOI/doi.py --username="doi.username" 6.1.0
 
 *  The script will prompt you for the password. Ask a senior developer to share the username and
    password with you if you do not already have access to it.
-*  Notify the Release Manager when you complete all your tasks.
+
+**Update Citation File**
+
+Open a PR updating the software ``doi``, ``date-released`` and ``version`` in the ``CITATION.cff`` file
+at the root of the repository.
+
+Notify the Release Manager when you complete all your tasks.

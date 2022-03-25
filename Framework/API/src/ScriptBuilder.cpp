@@ -174,8 +174,14 @@ const std::string ScriptBuilder::buildAlgorithmString(const AlgorithmHistory &al
   auto props = algHistory.getProperties();
 
   try {
+    Mantid::API::Algorithm_sptr algFresh;
     // create a fresh version of the algorithm - unmanaged
-    auto algFresh = AlgorithmManager::Instance().createUnmanaged(name, algHistory.version());
+    if (name == "Load") {
+      int version = std::stoi(algHistory.getPropertyValue("LoaderVersion"));
+      algFresh = AlgorithmManager::Instance().createUnmanaged(algHistory.getPropertyValue("LoaderName"), version);
+    } else {
+      algFresh = AlgorithmManager::Instance().createUnmanaged(name, algHistory.version());
+    }
     algFresh->initialize();
 
     const auto &propsFresh = algFresh->getProperties();

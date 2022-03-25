@@ -167,7 +167,7 @@ void SmoothNeighbours::findNeighboursRectangular() {
   Instrument_const_sptr inst = inWS->getInstrument();
 
   // To get the workspace index from the detector ID
-  const detid2index_map pixel_to_wi = inWS->getDetectorIDToWorkspaceIndexMap(true);
+  const detid2index_map pixel_to_wi = inWS->getDetectorIDToWorkspaceIndexMap(true, true);
 
   // std::cout << " inst->nelements() " << inst->nelements() << "\n";
   Progress prog(this, 0.0, 1.0, inst->nelements());
@@ -565,7 +565,7 @@ void SmoothNeighbours::execWorkspace2D() {
   // Go through all the output workspace
   PARALLEL_FOR_IF(Kernel::threadSafe(*inWS, *outWS))
   for (int outWIi = 0; outWIi < int(numberOfSpectra); outWIi++) {
-    PARALLEL_START_INTERUPT_REGION
+    PARALLEL_START_INTERRUPT_REGION
 
     auto &outSpec = outWS->getSpectrum(outWIi);
     // Reset the Y and E vectors
@@ -615,9 +615,9 @@ void SmoothNeighbours::execWorkspace2D() {
     // outSpec->copyInfoFrom(*inWS->getSpectrum(outWIi));
 
     m_progress->report("Summing");
-    PARALLEL_END_INTERUPT_REGION
+    PARALLEL_END_INTERRUPT_REGION
   }
-  PARALLEL_CHECK_INTERUPT_REGION
+  PARALLEL_CHECK_INTERRUPT_REGION
   if (expandSumAllPixels)
     spreadPixels(outWS);
 }
@@ -712,7 +712,7 @@ void SmoothNeighbours::execEvent(Mantid::DataObjects::EventWorkspace_sptr &ws) {
   // Go through all the output workspace
   PARALLEL_FOR_IF(Kernel::threadSafe(*ws, *outWS))
   for (int outWIi = 0; outWIi < int(numberOfSpectra); outWIi++) {
-    PARALLEL_START_INTERUPT_REGION
+    PARALLEL_START_INTERRUPT_REGION
 
     // Create the output event list (empty)
     EventList &outEL = outWS->getSpectrum(outWIi);
@@ -737,9 +737,9 @@ void SmoothNeighbours::execEvent(Mantid::DataObjects::EventWorkspace_sptr &ws) {
     // if (!sum) outEL.copyInfoFrom(*ws->getSpectrum(outWIi));
 
     m_progress->report("Summing");
-    PARALLEL_END_INTERUPT_REGION
+    PARALLEL_END_INTERRUPT_REGION
   }
-  PARALLEL_CHECK_INTERUPT_REGION
+  PARALLEL_CHECK_INTERRUPT_REGION
 
   // Give the 0-th X bins to all the output spectra.
   outWS->setAllX(inWS->binEdges(0));

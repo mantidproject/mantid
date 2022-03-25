@@ -70,10 +70,10 @@ void SetScalingPSD::exec() {
 /** Read the scaling information from a file (e.g. merlin_detector.sca) or from
  * the RAW file (.raw)
  *  @param scalingFile :: Name of scaling file .sca
- *  @param truepos :: V3D vector of actual positions as read from the file
+ *  @param truePos :: V3D vector of actual positions as read from the file
  *  @return False if unable to open file, True otherwise
  */
-bool SetScalingPSD::processScalingFile(const std::string &scalingFile, std::vector<Kernel::V3D> &truepos) {
+bool SetScalingPSD::processScalingFile(const std::string &scalingFile, std::vector<Kernel::V3D> &truePos) {
   // Read the scaling information from a text file (.sca extension) or from a
   // raw file (.raw)
   // This is really corrected positions as (r,theta,phi) for each detector
@@ -106,7 +106,7 @@ bool SetScalingPSD::processScalingFile(const std::string &scalingFile, std::vect
       g_log.error("Bad detector count in scaling file");
       throw std::runtime_error("Bad detector count in scaling file");
     }
-    truepos.reserve(detectorCount);
+    truePos.reserve(detectorCount);
     getline(sFile, str); // skip title line
     int detIdLast = -10;
     Kernel::V3D truPosLast, detPosLast;
@@ -135,7 +135,7 @@ bool SetScalingPSD::processScalingFile(const std::string &scalingFile, std::vect
       Kernel::V3D truPos;
       // use abs as correction file has -ve l2 for first few detectors
       truPos.spherical(fabs(l2), theta, phi);
-      truepos.emplace_back(truPos);
+      truePos.emplace_back(truPos);
       try {
         // detIndex is what Mantid usually calls detectorID
         size_t index = detectorInfo.indexOf(detIndex);

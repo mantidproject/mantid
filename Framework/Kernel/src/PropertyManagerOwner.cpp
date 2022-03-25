@@ -24,7 +24,7 @@ Logger g_log("PropertyManagerOwner");
 PropertyManagerOwner::PropertyManagerOwner() : m_properties(new PropertyManager) {}
 
 /// Copy constructor
-PropertyManagerOwner::PropertyManagerOwner(const PropertyManagerOwner &po) { m_properties = po.m_properties; }
+PropertyManagerOwner::PropertyManagerOwner(const PropertyManagerOwner &po) : m_properties(po.m_properties) {}
 
 /// Assignment operator
 PropertyManagerOwner &PropertyManagerOwner::operator=(const PropertyManagerOwner &po) {
@@ -178,6 +178,19 @@ Property *PropertyManagerOwner::getPointerToPropertyOrdinal(const int &index) co
  *  @return A vector holding pointers to the list of properties
  */
 const std::vector<Property *> &PropertyManagerOwner::getProperties() const { return m_properties->getProperties(); }
+
+/**
+ * Return the list of declared property names.
+ * @return A vector holding strings of property names
+ */
+std::vector<std::string> PropertyManagerOwner::getDeclaredPropertyNames() const noexcept {
+  std::vector<std::string> names;
+  const auto &props = getProperties();
+  names.reserve(props.size());
+  std::transform(props.cbegin(), props.cend(), std::back_inserter(names),
+                 [](auto &propPtr) { return propPtr->name(); });
+  return names;
+}
 
 /** Get the value of a property. Allows you to assign directly to a variable of
  *the property's type

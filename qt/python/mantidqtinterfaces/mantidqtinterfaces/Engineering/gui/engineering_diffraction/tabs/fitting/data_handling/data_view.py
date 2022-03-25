@@ -4,7 +4,7 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from qtpy import QtWidgets, QtCore
+from qtpy import QtWidgets, QtCore, QtGui
 from os import path
 
 from mantidqt.utils.qt import load_ui
@@ -45,7 +45,8 @@ class FittingDataView(QtWidgets.QWidget, Ui_data):
         super(FittingDataView, self).__init__(parent)
         self.setupUi(self)
         # file finder
-        self.finder_data.readSettings(output_settings.INTERFACES_SETTINGS_GROUP + '/' + output_settings.ENGINEERING_PREFIX)
+        self.finder_data.readSettings(
+            output_settings.INTERFACES_SETTINGS_GROUP + '/' + output_settings.ENGINEERING_PREFIX)
         self.finder_data.setUseNativeWidget(False)
         self.proxy_model = FileFilterProxyModel()
         self.finder_data.setProxyModel(self.proxy_model)
@@ -54,11 +55,12 @@ class FittingDataView(QtWidgets.QWidget, Ui_data):
         self.finder_data.allowMultipleFiles(True)
         self.finder_data.setFileExtensions([".nxs"])
         # xunit combo box
-        self.setup_xunit_combobox()
-        self.update_file_filter(self.combo_bank.currentText(), self.combo_xunit.currentText())
+        self.setup_combo_boxes()
+        self.update_file_filter(self.combo_region.currentText(), self.combo_xunit.currentText())
 
     def saveSettings(self):
-        self.finder_data.saveSettings(output_settings.INTERFACES_SETTINGS_GROUP + '/' + output_settings.ENGINEERING_PREFIX)
+        self.finder_data.saveSettings(
+            output_settings.INTERFACES_SETTINGS_GROUP + '/' + output_settings.ENGINEERING_PREFIX)
 
     # =================
     # Slot Connectors
@@ -67,11 +69,11 @@ class FittingDataView(QtWidgets.QWidget, Ui_data):
     def set_on_load_clicked(self, slot):
         self.button_load.clicked.connect(slot)
 
-    def set_on_bank_changed(self, slot):
-        self.combo_bank.currentIndexChanged.connect(lambda: slot(self.combo_bank.currentText(), self.combo_xunit.currentText()))
+    def set_on_region_changed(self, slot):
+        self.combo_region.currentIndexChanged.connect(lambda: slot(self.combo_region.currentText(), self.combo_xunit.currentText()))
 
     def set_on_xunit_changed(self, slot):
-        self.combo_xunit.currentIndexChanged.connect(lambda: slot(self.combo_bank.currentText(), self.combo_xunit.currentText()))
+        self.combo_xunit.currentIndexChanged.connect(lambda: slot(self.combo_region.currentText(), self.combo_xunit.currentText()))
 
     def set_enable_load_button_connection(self, slot):
         self.sig_enable_load_button.connect(slot)
@@ -95,7 +97,9 @@ class FittingDataView(QtWidgets.QWidget, Ui_data):
         self.button_SerialFit.clicked.connect(slot)
 
     def set_on_table_cell_changed(self, slot):
-        self.table_selection.cellChanged.connect(slot)  # Row, Col
+        # this signal gets triggered from a separate thread sometimes (eg load). So to make the handler
+        # more simple, always issue as a queued signal
+        self.table_selection.cellChanged.connect(slot, QtCore.Qt.QueuedConnection)
 
     def set_table_selection_changed(self, slot):
         self.table_selection.itemSelectionChanged.connect(slot)
@@ -125,7 +129,7 @@ class FittingDataView(QtWidgets.QWidget, Ui_data):
         self.button_SeqFit.setEnabled(enabled)
         self.button_SerialFit.setEnabled(enabled)
 
-    def add_table_row(self, run_no, bank, checked, bgsub, niter, xwindow, SG):
+    def add_table_row(self, run_no, bank, plotted, bgsub, niter, xwindow, SG):
         row_no = self.table_selection.rowCount()
         self.table_selection.insertRow(row_no)
 
@@ -137,22 +141,24 @@ class FittingDataView(QtWidgets.QWidget, Ui_data):
         bank_item.setFlags(name_item.flags() & ~QtCore.Qt.ItemIsEditable)
         self.table_selection.setItem(row_no, 1, bank_item)
 
-        check_box = QtWidgets.QTableWidgetItem()
-        check_box.setFlags(check_box.flags() & ~QtCore.Qt.ItemIsEditable)
-        self.table_selection.setItem(row_no, 2, check_box)
-        if checked:
-            check_box.setCheckState(QtCore.Qt.Checked)
+        plotted_check_box = QtWidgets.QTableWidgetItem()
+
+        plotted_check_box.setFlags(plotted_check_box.flags() & ~QtCore.Qt.ItemIsEditable)
+        if plotted:
+            plotted_check_box.setCheckState(QtCore.Qt.Checked)
         else:
-            check_box.setCheckState(QtCore.Qt.Unchecked)
+            plotted_check_box.setCheckState(QtCore.Qt.Unchecked)
+        # setItem last so that cellChanged signal only fired once
+        self.table_selection.setItem(row_no, 2, plotted_check_box)
 
         bgsub_check_box = QtWidgets.QTableWidgetItem()
         bgsub_check_box.setFlags(bgsub_check_box.flags() & ~QtCore.Qt.ItemIsEditable)
         bgsub_check_box.setToolTip('Estimate the background using iterative low-pass (smoothing) filter algorithm')
-        self.table_selection.setItem(row_no, 3, bgsub_check_box)
         if bgsub:
             bgsub_check_box.setCheckState(QtCore.Qt.Checked)
         else:
             bgsub_check_box.setCheckState(QtCore.Qt.Unchecked)
+        self.table_selection.setItem(row_no, 3, bgsub_check_box)
 
         niter_item = QtWidgets.QTableWidgetItem()
         niter_item.setData(QtCore.Qt.EditRole, int(niter))
@@ -170,11 +176,11 @@ class FittingDataView(QtWidgets.QWidget, Ui_data):
         SG_check_box.setFlags(SG_check_box.flags() & ~QtCore.Qt.ItemIsEditable)
         SG_check_box.setToolTip(
             'Apply linear Savitzky–Golay filter before first iteration of background subtraction (recommended)')
-        self.table_selection.setItem(row_no, 6, SG_check_box)
         if SG:
             SG_check_box.setCheckState(QtCore.Qt.Checked)
         else:
             SG_check_box.setCheckState(QtCore.Qt.Unchecked)
+        self.table_selection.setItem(row_no, 6, SG_check_box)
 
     def remove_table_row(self, row_no):
         self.table_selection.removeRow(row_no)
@@ -194,14 +200,31 @@ class FittingDataView(QtWidgets.QWidget, Ui_data):
         else:
             self.get_table_item(row, col).setCheckState(QtCore.Qt.Unchecked)
 
-    def update_file_filter(self, bank, xunit):
+    def update_file_filter(self, region, xunit):
         self.proxy_model.text_filter = "*"
-        if bank == "1 (North)":
+        if region == "1 (North)":
             self.proxy_model.text_filter += "bank_1"
-        elif bank == "2 (South)":
+        elif region == "2 (South)":
             self.proxy_model.text_filter += "bank_2"
-        if xunit != "All":
+        elif region == "Cropped" or region == "Custom":
+            self.proxy_model.text_filter += region
+        elif region == "Texture":
+            self.proxy_model.text_filter += "Texture*"
+        elif region == "Both Banks":
+            self.proxy_model.text_filter += "bank*"
+        if xunit != "No Unit Filter":
             self.proxy_model.text_filter += "_" + xunit
+        self.proxy_model.text_filter += "*"  # Allows browse for '(No Unit Filter)' with a specified region
+
+        # Keep "No Region/Unit Filter" text grey and other text black
+        for (combo_box, current_text) in ((self.combo_region, region), (self.combo_xunit, xunit)):
+            if current_text[0:2] == "No":  # No Unit or Region Filter
+                combo_box.setStyleSheet("color: grey")
+                for index in range(1, combo_box.count()):
+                    combo_box.setItemData(index, QtGui.QColor("black"), QtCore.Qt.ForegroundRole)
+            else:
+                combo_box.setStyleSheet("color: black")
+                combo_box.setItemData(0, QtGui.QColor("grey"), QtCore.Qt.ForegroundRole)
 
     # =================
     # Component Getters
@@ -243,8 +266,15 @@ class FittingDataView(QtWidgets.QWidget, Ui_data):
     # Internal Setup
     # =================
 
-    def setup_xunit_combobox(self):
-        self.combo_xunit.setEditable(False)
-        # make TOF default
+    def setup_combo_boxes(self):
+        # set "No Region/Unit Filter" text grey and other text black
+        for combo_box, type_name in ((self.combo_region, "Region"), (self.combo_xunit, "Unit")):
+            combo_box.setEditable(True)
+            combo_box.lineEdit().setReadOnly(True)
+            combo_box.lineEdit().setEnabled(False)
+            no_filter_index = combo_box.findText("No " + type_name + " Filter")
+            combo_box.setItemData(no_filter_index, QtGui.QColor("grey"), QtCore.Qt.ForegroundRole)
+
+        # make TOF default for combo_xunit
         index = self.combo_xunit.findText("TOF")
         self.combo_xunit.setCurrentIndex(index)

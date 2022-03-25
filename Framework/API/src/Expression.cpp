@@ -104,15 +104,7 @@ Expression::Expression(const Expression &expr)
 Expression::Expression(const Expression *pexpr) : m_operators(pexpr->m_operators) {}
 
 /// Assignment operator
-Expression &Expression::operator=(const Expression &expr) {
-  m_operators = expr.m_operators;
-  m_funct = expr.m_funct;
-  m_op = expr.m_op;
-  m_terms = expr.m_terms;
-  m_expr = expr.m_expr;
-  m_tokens = expr.m_tokens;
-  return *this;
-}
+Expression &Expression::operator=(const Expression &expr) = default;
 
 void Expression::add_operators(const std::vector<std::string> &ops) {
   m_operators->binary = ops;
@@ -353,7 +345,7 @@ void Expression::tokenize() {
     // remove operators of higher prec
     m_tokens.emplace_back(tokens[0]);
     for (size_t i = 0; i < tokens.size(); i++) {
-      Token &tok = tokens[i];
+      const Token &tok = tokens[i];
       std::string op = m_expr.substr(tok.ie + 1, tok.is1 - tok.ie - 1); //?
       if (m_operators->precedence[op] == min_prec) {
         Token &last_tok = m_tokens.back();
@@ -371,12 +363,12 @@ std::string Expression::GetToken(size_t i) {
     return m_expr;
 
   if (i < m_tokens.size()) {
-    Token &tok = m_tokens[i];
+    const Token &tok = m_tokens[i];
     return m_expr.substr(tok.is, tok.ie - tok.is + 1);
   }
 
   if (i == m_tokens.size()) {
-    Token &tok = m_tokens[i - 1];
+    const Token &tok = m_tokens[i - 1];
     return m_expr.substr(tok.is1);
   }
 
@@ -387,7 +379,7 @@ std::string Expression::GetOp(size_t i) {
   if (m_tokens.empty() || i >= m_tokens.size())
     return "";
 
-  Token &tok = m_tokens[i];
+  const Token &tok = m_tokens[i];
   return m_expr.substr(tok.ie + 1, tok.is1 - tok.ie - 1);
 }
 

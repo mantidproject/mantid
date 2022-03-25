@@ -31,7 +31,7 @@ void SlitCalculator::processInstrumentHasBeenChanged() {
   // need to update because another instrument has been selected.
   on_recalculate_triggered();
 }
-SlitCalculator::~SlitCalculator() {}
+SlitCalculator::~SlitCalculator() = default;
 void SlitCalculator::setInstrument(const std::string &instrumentName) {
   // we want to get the most up-to-date definition, so we use the current
   // date/time
@@ -82,7 +82,7 @@ void SlitCalculator::setupSlitCalculatorWithInstrumentValues(
   }
 }
 Mantid::Geometry::Instrument_const_sptr SlitCalculator::getInstrument() { return instrument; }
-void SlitCalculator::setCurrentInstrumentName(std::string instrumentName) {
+void SlitCalculator::setCurrentInstrumentName(const std::string &instrumentName) {
   this->currentInstrumentName = instrumentName;
 }
 std::string SlitCalculator::getCurrentInstrumentName() { return currentInstrumentName; }

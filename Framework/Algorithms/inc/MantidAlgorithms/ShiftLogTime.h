@@ -16,7 +16,7 @@ namespace Algorithms {
 
   @date 2011-08-26
 */
-class MANTID_ALGORITHMS_DLL ShiftLogTime : public API::Algorithm {
+class MANTID_ALGORITHMS_DLL ShiftLogTime final : public API::Algorithm {
 public:
   const std::string name() const override;
   int version() const override;

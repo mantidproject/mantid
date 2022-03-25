@@ -11,7 +11,7 @@
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/WorkspaceGroup.h"
 
-#include "MantidTestHelpers/FakeObjects.h"
+#include "MantidFrameworkTestHelpers/FakeObjects.h"
 #include <Poco/ActiveResult.h>
 #include <Poco/NObserver.h>
 #include <Poco/Thread.h>
@@ -34,7 +34,7 @@ public:
   public:
     AsyncAlgorithm() : Algorithm(), result(0), throw_exception(false) {}
     AsyncAlgorithm(const bool throw_default) : Algorithm(), result(0), throw_exception(throw_default) {}
-    ~AsyncAlgorithm() override {}
+    ~AsyncAlgorithm() override = default;
     const std::string name() const override { return "AsyncAlgorithm"; } ///< Algorithm's name for identification
     int version() const override { return 1; }                           ///< Algorithm's version for identification
     const std::string category() const override { return "Cat"; }        ///< Algorithm's category for identification

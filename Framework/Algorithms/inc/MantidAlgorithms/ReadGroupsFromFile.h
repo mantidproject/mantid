@@ -56,7 +56,7 @@ namespace Algorithms {
     @author Laurent Chapon, ISIS Facility, Rutherford Appleton Laboratory
     @date 09/03/2009
 */
-class MANTID_ALGORITHMS_DLL ReadGroupsFromFile : public API::Algorithm {
+class MANTID_ALGORITHMS_DLL ReadGroupsFromFile final : public API::Algorithm {
 public:
   /// (Empty) Constructor
   ReadGroupsFromFile();

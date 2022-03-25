@@ -15,7 +15,7 @@
 #include "MantidAPI/WorkspaceProperty.h"
 #include "MantidAlgorithms/Minus.h"
 #include "MantidDataObjects/Workspace2D.h"
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
+#include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
@@ -25,7 +25,7 @@ using namespace Mantid::DataObjects;
 class ComplexOpTest : public Algorithm {
 public:
   ComplexOpTest() : Algorithm() {}
-  ~ComplexOpTest() override {}
+  ~ComplexOpTest() override = default;
   void init() override {
     declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>("InputWorkspace_1", "", Direction::Input));
     declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>("InputWorkspace_2", "", Direction::Input));

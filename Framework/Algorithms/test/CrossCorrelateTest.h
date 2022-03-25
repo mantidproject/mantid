@@ -14,8 +14,8 @@
 #include "MantidAPI/ParamFunction.h"
 #include "MantidAlgorithms/CrossCorrelate.h"
 #include "MantidCurveFitting/Functions/Gaussian.h"
+#include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidHistogramData/LinearGenerator.h"
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
 #include "CrossCorrelateTestData.h"
 
@@ -29,7 +29,7 @@ using Mantid::HistogramData::CountStandardDeviations;
 // THIS CODE IS COMPLETELY UNNECESSARY, BUT MAKE THE FUNCTION FACTORY WORK
 class HackyGaussian : public Gaussian {
 public:
-  ~HackyGaussian() override {}
+  ~HackyGaussian() override = default;
   std::string name() const override { return "Gaussian"; }
 };
 

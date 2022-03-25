@@ -111,6 +111,7 @@ void ConvertAxesToRealSpace::exec() {
   // for each spectra
   PARALLEL_FOR_IF(Kernel::threadSafe(*summedWs, *outputWs))
   for (int i = 0; i < nHist; ++i) {
+    PARALLEL_START_INTERRUPT_REGION
     try {
       V3D pos = spectrumInfo.position(i);
       double r, theta, phi;
@@ -159,6 +160,7 @@ void ConvertAxesToRealSpace::exec() {
       dataVector[i].horizontalValue = std::numeric_limits<double>::min();
       dataVector[i].verticalValue = std::numeric_limits<double>::min();
     }
+    PARALLEL_END_INTERRUPT_REGION
 
     // take the values from the integrated data
     dataVector[i].intensity = summedWs->y(i)[0];
@@ -166,6 +168,7 @@ void ConvertAxesToRealSpace::exec() {
 
     progress.report("Calculating new coords");
   }
+  PARALLEL_CHECK_INTERRUPT_REGION
 
   g_log.warning() << "Could not find detector for " << failedCount << " spectra, see the debug log for more details.\n";
 

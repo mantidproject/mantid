@@ -27,10 +27,10 @@ instruments = {
         'final_neutron_energy': 32.0,  # Final energy on the crystal analyser in cm-1
         'cos_scattering_angle': math.cos(2.356),  # Angle of the crystal analyser radians (NO LONGER USED)
         # The forward detector angle is rather specific as test-data was based on truncated value in radians
-        'settings': {'Forward (TOSCA)': {'angles': [134.98885653282196]},
-                     'Backward (TOSCA)': {'angles': [45.]},
+        'settings': {'Backward (TOSCA)': {'angles': [134.98885653282196]},
+                     'Forward (TOSCA)': {'angles': [45.]},
                      'All detectors (TOSCA)': {'angles': [45., 134.98885653282196]}},
-        'settings_default': 'Forward (TOSCA)',
+        'settings_default': 'Backward (TOSCA)',
         # TOSCA parameters for resolution function
         # sigma = tosca_a * omega * omega + tosca_b * omega + tosca_c
         # where sigma is width of Gaussian function
@@ -70,12 +70,13 @@ sampling = {
     's_relative_threshold': 0.01,  # low cutoff for S intensity (fraction of maximum S)
     's_absolute_threshold': 1e-7,  # low cutoff for S intensity (absolute value)
     'broadening_scheme': 'auto',
+    'force_constants': {  # Parameters related to imported Force Constants data (e.g. Phonopy .yaml)
+        'qpt_cutoff': 15.},  # Distance in Angstrom determining q-point sampling mesh
     }
 
 # Parameters related to estimated of spectra of high quantum orders by repeated convolution with fundamentals
 autoconvolution = {
     'max_order': 10, # Highest quantum order accessed by autoconvolution
-    'scale': 1.0,    # Scale factor applied to normalised convolution kernel
     'fine_bin_factor': 10
     }
 

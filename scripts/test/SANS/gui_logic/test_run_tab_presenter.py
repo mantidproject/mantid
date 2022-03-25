@@ -222,8 +222,28 @@ class RunTabPresenterTest(unittest.TestCase):
         # Clean up
         self._remove_files(user_file_path=user_file_path, batch_file_path=batch_file_path)
 
+    def test_that_on_batch_file_load(self):
+        for exception in [RuntimeError, ValueError, SyntaxError, IOError, KeyError]:
+            # XXX: This function should be broken up into a model / presenter long-term
+            self.presenter._csv_parser.parse_batch_file = mock.Mock(side_effect=exception)
+            self.presenter.sans_logger = mock.Mock()
+            self.presenter.display_warning_box = mock.Mock()
+
+            with mock.patch.multiple("sans.gui_logic.presenter.run_tab_presenter",
+                                     add_dir_to_datasearch=mock.DEFAULT,
+                                     ConfigService=mock.DEFAULT,
+                                     os=mock.DEFAULT) as mock_datasearch:
+
+                mock_datasearch["add_dir_to_datasearch"].return_value = (mock.Mock(), mock.Mock())
+                self.presenter.on_batch_file_load()
+
+            self.presenter.sans_logger.error.assert_called_once()
+            self.presenter.display_warning_box.assert_called_once()
+
     def test_state_retrieved_from_model(self):
+        # Set values which trigger operators, such as divide or parsing, in StateModels
         self._mock_view.q_1d_step = 1.0
+        self._mock_view.transmission_mn_4_shift = 1.0
 
         expected = self.mock_run_tab_model.get_save_types().to_all_states()
         all_states = self.presenter.update_model_from_view()
@@ -383,54 +403,27 @@ class RunTabPresenterTest(unittest.TestCase):
         self.presenter._setup_instrument_specific_settings(instrument)
         self.assertEqual(config['default.instrument'], 'LOQ')
 
-    def test_on_copy_rows_requested_adds_correct_rows_to_clipboard(self):
-        self._mock_view.get_selected_rows.return_value = [0]
-        expected_clipboard = mock.NonCallableMock()
-        self._mock_table.get_row.return_value = expected_clipboard
-
+    def test_on_copy_rows(self):
         self.presenter.on_copy_rows_requested()
+        self._mock_table.copy_rows.assert_called_once_with(self._mock_view.get_selected_rows())
 
-        self.assertTrue(expected_clipboard in self.presenter._clipboard)
+    def test_on_cut_rows(self):
+        # Assume this is tested elsewhere
+        self.presenter.update_view_from_table_model = mock.Mock()
 
-    def test_on_paste_rows_requested_appends_new_row_if_no_row_selected(self):
-        self._mock_view.get_selected_rows.return_value = []
-        pos = 101
-        self._mock_table.get_number_of_rows.return_value = pos
+        self.presenter.on_cut_rows_requested()
 
-        expected = mock.NonCallableMock()
-        self.presenter._clipboard = [expected]
-        self.presenter.update_view_from_table_model = mock.MagicMock()
+        self._mock_table.cut_rows.assert_called_once_with(self._mock_view.get_selected_rows())
+        self.presenter.update_view_from_table_model.assert_called_once()
 
-        self.presenter.on_paste_rows_requested()
-
-        self.presenter.update_view_from_table_model.assert_called_with()
-        self._mock_table.replace_table_entries.assert_called_with([pos], [expected])
-
-    def test_on_paste_rows_requested_replaces_row_if_one_row_is_selected(self):
-        pos = [1]
-        self._mock_view.get_selected_rows.return_value = pos
-
-        test_row_0 = mock.NonCallableMock()
-        self.presenter._clipboard = [test_row_0]
-        self.presenter.update_view_from_table_model = mock.MagicMock()
+    def test_on_paste_rows(self):
+        # Assume this is tested elsewhere
+        self.presenter.update_view_from_table_model = mock.Mock()
 
         self.presenter.on_paste_rows_requested()
 
-        self.presenter.update_view_from_table_model.assert_called_with()
-        self._mock_table.replace_table_entries.assert_called_with(pos, [test_row_0])
-
-    def test_on_paste_rows_requested_replaces_first_row_and_removes_rest_if_multiple_rows_selected(self):
-        expected_pos = [0, 2]
-        self._mock_view.get_selected_rows.return_value = expected_pos
-
-        expected = mock.NonCallableMock()
-        self.presenter._clipboard = [expected]
-        self.presenter.update_view_from_table_model = mock.MagicMock()
-
-        self.presenter.on_paste_rows_requested()
-
-        self.presenter.update_view_from_table_model.assert_called_with()
-        self._mock_table.replace_table_entries.assert_called_with(expected_pos, [expected])
+        self._mock_table.paste_rows.assert_called_once_with(self._mock_view.get_selected_rows())
+        self.presenter.update_view_from_table_model.assert_called_once()
 
     def test_on_insert_row_adds_row_to_table_model_after_selected_row(self):
         self._mock_view.get_selected_rows.return_value = [100]
@@ -470,27 +463,6 @@ class RunTabPresenterTest(unittest.TestCase):
         self.presenter.on_erase_rows()
         self._mock_table.clear_table_entries.assert_called_with()
         self.presenter.update_view_from_table_model.assert_called_with()
-
-    def test_on_cut_rows_requested_updates_clipboard(self):
-        self._mock_view.get_selected_rows.return_value = [0]
-        expected_clipboard = mock.NonCallableMock()
-        self._mock_table.get_row.return_value = expected_clipboard
-
-        self.presenter.on_cut_rows_requested()
-
-        self.assertTrue(expected_clipboard in self.presenter._clipboard)
-
-    def test_on_cut_rows_requested_removes_selected_rows(self):
-        selected_rows = [0]
-        self._mock_view.get_selected_rows.return_value = selected_rows
-
-        expected = "expected_clipboard_val"
-        self._mock_table.get_row.return_value = expected
-
-        self.presenter.on_cut_rows_requested()
-
-        self._mock_table.remove_table_entries.assert_called_with(selected_rows)
-        self.assertTrue(expected in self.presenter._clipboard)
 
     def test_notify_progress_increments_progress(self):
         self.presenter.notify_progress(0, [0.0], [1.0])

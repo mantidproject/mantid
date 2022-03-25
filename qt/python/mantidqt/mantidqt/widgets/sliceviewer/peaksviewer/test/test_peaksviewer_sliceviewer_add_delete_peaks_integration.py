@@ -12,7 +12,7 @@ from unittest.mock import Mock
 import matplotlib
 matplotlib.use("agg")
 
-from mantidqt.widgets.sliceviewer.presenter import SliceViewer  # noqa: E402
+from mantidqt.widgets.sliceviewer.presenters.presenter import SliceViewer  # noqa: E402
 from mantidqt.utils.qt.testing import start_qapplication  # noqa: E402
 from mantid.simpleapi import CreatePeaksWorkspace, CreateMDWorkspace, SetUB, mtd  # noqa: E402
 import numpy as np  # noqa: E402
@@ -52,7 +52,7 @@ class AddDeletePeaksTest(unittest.TestCase):
 
         event = Mock(inaxes=True, xdata=1.0, ydata=2.0)
 
-        sliceViewer.add_delete_peak(event)
+        sliceViewer.canvas_clicked(event)
 
         # nothing should happen since peaksviewer isn't active
         self.assertEqual(mtd[pw_name].getNumberPeaks(), 0)
@@ -60,7 +60,7 @@ class AddDeletePeaksTest(unittest.TestCase):
         # overlay_peaks_workspaces
         sliceViewer._create_peaks_presenter_if_necessary().overlay_peaksworkspaces([pw_name])
 
-        sliceViewer.add_delete_peak(event)
+        sliceViewer.canvas_clicked(event)
 
         # nothing should happen since add/remove peak action not selected
         self.assertEqual(mtd[pw_name].getNumberPeaks(), 0)
@@ -68,15 +68,15 @@ class AddDeletePeaksTest(unittest.TestCase):
         # click the "Add Peaks" button
         sliceViewer.view.peaks_view.peak_actions_view.ui.add_peaks_button.click()
 
-        sliceViewer.add_delete_peak(event)  # should add a peak at (1, 2, 3)
+        sliceViewer.canvas_clicked(event)  # should add a peak at (1, 2, 3)
 
         # peak should now be added
         self.assertEqual(mtd[pw_name].getNumberPeaks(), 1)
         peak = mtd[pw_name].getPeak(0)
         q_sample = peak.getQSampleFrame()
-        self.assertEqual(q_sample[0], 1.0)
-        self.assertEqual(q_sample[1], 2.0)
-        self.assertEqual(q_sample[2], 3.0)
+        self.assertAlmostEqual(q_sample[0], 1.0, delta=1e-10)
+        self.assertAlmostEqual(q_sample[1], 2.0, delta=1e-10)
+        self.assertAlmostEqual(q_sample[2], 3.0, delta=1e-10)
         self.assertEqual(peak.getH(), 0)
         self.assertEqual(peak.getK(), 0)
         self.assertEqual(peak.getL(), 0)
@@ -85,14 +85,14 @@ class AddDeletePeaksTest(unittest.TestCase):
         sliceViewer.view.dimensions.dims[2].y_clicked()
         sliceViewer.view.dimensions.set_slicepoint((None, 4.0, None))
 
-        sliceViewer.add_delete_peak(event)  # should add a peak at (1, 4, 2)
+        sliceViewer.canvas_clicked(event)  # should add a peak at (1, 4, 2)
 
         self.assertEqual(mtd[pw_name].getNumberPeaks(), 2)
         peak = mtd[pw_name].getPeak(1)
         q_sample = peak.getQSampleFrame()
-        self.assertEqual(q_sample[0], 1.0)
-        self.assertEqual(q_sample[1], 4.0)
-        self.assertEqual(q_sample[2], 2.0)
+        self.assertAlmostEqual(q_sample[0], 1.0, delta=1e-10)
+        self.assertAlmostEqual(q_sample[1], 4.0, delta=1e-10)
+        self.assertAlmostEqual(q_sample[2], 2.0, delta=1e-10)
         self.assertEqual(peak.getH(), 0)
         self.assertEqual(peak.getK(), 0)
         self.assertEqual(peak.getL(), 0)
@@ -102,22 +102,22 @@ class AddDeletePeaksTest(unittest.TestCase):
 
         sliceViewer.view.dimensions.set_slicepoint((None, 0.0, None))
         event = Mock(inaxes=True, xdata=1.0, ydata=1.0)
-        sliceViewer.add_delete_peak(event)  # should remove the peak closest to (1, 0, 1)
+        sliceViewer.canvas_clicked(event)  # should remove the peak closest to (1, 0, 1)
 
         self.assertEqual(mtd[pw_name].getNumberPeaks(), 1)
 
         # should be left with the seconds peak that was added
         peak = mtd[pw_name].getPeak(0)
         q_sample = peak.getQSampleFrame()
-        self.assertEqual(q_sample[0], 1.0)
-        self.assertEqual(q_sample[1], 4.0)
-        self.assertEqual(q_sample[2], 2.0)
+        self.assertAlmostEqual(q_sample[0], 1.0, delta=1e-10)
+        self.assertAlmostEqual(q_sample[1], 4.0, delta=1e-10)
+        self.assertAlmostEqual(q_sample[2], 2.0, delta=1e-10)
         self.assertEqual(peak.getH(), 0)
         self.assertEqual(peak.getK(), 0)
         self.assertEqual(peak.getL(), 0)
 
         # remove another peaks, should be none remaining
-        sliceViewer.add_delete_peak(event)  # should remove the peak closest to (1, 0, 1)
+        sliceViewer.canvas_clicked(event)  # should remove the peak closest to (1, 0, 1)
         self.assertEqual(mtd[pw_name].getNumberPeaks(), 0)
 
     def test_HKL(self):
@@ -145,9 +145,9 @@ class AddDeletePeaksTest(unittest.TestCase):
         sliceViewer.view.peaks_view.peak_actions_view.ui.add_peaks_button.click()
 
         # click on 3 different points on the canvas
-        sliceViewer.add_delete_peak(Mock(inaxes=True, xdata=1.0, ydata=2.0))  # should add a peak at HKL=(1, 2, 3)
-        sliceViewer.add_delete_peak(Mock(inaxes=True, xdata=2.0, ydata=2.0))  # should add a peak at HKL=(2, 2, 3)
-        sliceViewer.add_delete_peak(Mock(inaxes=True, xdata=1.5, ydata=1.5))  # should add a peak at HKL=(1.5, 1.5, 3)
+        sliceViewer.canvas_clicked(Mock(inaxes=True, xdata=1.0, ydata=2.0))  # should add a peak at HKL=(1, 2, 3)
+        sliceViewer.canvas_clicked(Mock(inaxes=True, xdata=2.0, ydata=2.0))  # should add a peak at HKL=(2, 2, 3)
+        sliceViewer.canvas_clicked(Mock(inaxes=True, xdata=1.5, ydata=1.5))  # should add a peak at HKL=(1.5, 1.5, 3)
 
         # peaks should be added
         self.assertEqual(mtd[pw_name].getNumberPeaks(), 3)
@@ -155,37 +155,37 @@ class AddDeletePeaksTest(unittest.TestCase):
         # (1, 2, 3)
         peak = mtd[pw_name].getPeak(0)
         q_sample = peak.getQSampleFrame()
-        self.assertAlmostEqual(q_sample[0], 1.0)
-        self.assertAlmostEqual(q_sample[1], 2.0)
-        self.assertAlmostEqual(q_sample[2], 1.5)
-        self.assertEqual(peak.getH(), 1)
-        self.assertEqual(peak.getK(), 2)
-        self.assertEqual(peak.getL(), 3)
+        self.assertAlmostEqual(q_sample[0], 1.0, delta=1e-10)
+        self.assertAlmostEqual(q_sample[1], 2.0, delta=1e-10)
+        self.assertAlmostEqual(q_sample[2], 1.5, delta=1e-10)
+        self.assertAlmostEqual(peak.getH(), 1, delta=1e-10)
+        self.assertAlmostEqual(peak.getK(), 2, delta=1e-10)
+        self.assertAlmostEqual(peak.getL(), 3, delta=1e-10)
 
         # (2, 2, 3)
         peak = mtd[pw_name].getPeak(1)
         q_sample = peak.getQSampleFrame()
-        self.assertAlmostEqual(q_sample[0], 2.0)
-        self.assertAlmostEqual(q_sample[1], 2.0)
-        self.assertAlmostEqual(q_sample[2], 1.5)
-        self.assertEqual(peak.getH(), 2)
-        self.assertEqual(peak.getK(), 2)
-        self.assertEqual(peak.getL(), 3)
+        self.assertAlmostEqual(q_sample[0], 2.0, delta=1e-10)
+        self.assertAlmostEqual(q_sample[1], 2.0, delta=1e-10)
+        self.assertAlmostEqual(q_sample[2], 1.5, delta=1e-10)
+        self.assertAlmostEqual(peak.getH(), 2, delta=1e-10)
+        self.assertAlmostEqual(peak.getK(), 2, delta=1e-10)
+        self.assertAlmostEqual(peak.getL(), 3, delta=1e-10)
 
         # (1.5, 1.5, 3)
         peak = mtd[pw_name].getPeak(2)
         q_sample = peak.getQSampleFrame()
-        self.assertAlmostEqual(q_sample[0], 1.5)
-        self.assertAlmostEqual(q_sample[1], 1.5)
-        self.assertAlmostEqual(q_sample[2], 1.5)
-        self.assertEqual(peak.getH(), 1.5)
-        self.assertEqual(peak.getK(), 1.5)
-        self.assertEqual(peak.getL(), 3)
+        self.assertAlmostEqual(q_sample[0], 1.5, delta=1e-10)
+        self.assertAlmostEqual(q_sample[1], 1.5, delta=1e-10)
+        self.assertAlmostEqual(q_sample[2], 1.5, delta=1e-10)
+        self.assertAlmostEqual(peak.getH(), 1.5, delta=1e-10)
+        self.assertAlmostEqual(peak.getK(), 1.5, delta=1e-10)
+        self.assertAlmostEqual(peak.getL(), 3, delta=1e-10)
 
         # click the "Remove Peaks" button
         sliceViewer.view.peaks_view.peak_actions_view.ui.remove_peaks_button.click()
 
-        sliceViewer.add_delete_peak(Mock(inaxes=True, xdata=2.0, ydata=1.9))  # should remove the peak closest to HKL=(2, 1.9, 3)
+        sliceViewer.canvas_clicked(Mock(inaxes=True, xdata=2.0, ydata=1.9))  # should remove the peak closest to HKL=(2, 1.9, 3)
 
         self.assertEqual(mtd[pw_name].getNumberPeaks(), 2)
 
@@ -194,22 +194,22 @@ class AddDeletePeaksTest(unittest.TestCase):
         # (1, 2, 3)
         peak = mtd[pw_name].getPeak(0)
         q_sample = peak.getQSampleFrame()
-        self.assertAlmostEqual(q_sample[0], 1.0)
-        self.assertAlmostEqual(q_sample[1], 2.0)
-        self.assertAlmostEqual(q_sample[2], 1.5)
-        self.assertEqual(peak.getH(), 1)
-        self.assertEqual(peak.getK(), 2)
-        self.assertEqual(peak.getL(), 3)
+        self.assertAlmostEqual(q_sample[0], 1.0, delta=1e-10)
+        self.assertAlmostEqual(q_sample[1], 2.0, delta=1e-10)
+        self.assertAlmostEqual(q_sample[2], 1.5, delta=1e-10)
+        self.assertAlmostEqual(peak.getH(), 1, delta=1e-10)
+        self.assertAlmostEqual(peak.getK(), 2, delta=1e-10)
+        self.assertAlmostEqual(peak.getL(), 3, delta=1e-10)
 
         # (1.5, 1.5, 3)
         peak = mtd[pw_name].getPeak(1)
         q_sample = peak.getQSampleFrame()
-        self.assertAlmostEqual(q_sample[0], 1.5)
-        self.assertAlmostEqual(q_sample[1], 1.5)
-        self.assertAlmostEqual(q_sample[2], 1.5)
-        self.assertEqual(peak.getH(), 1.5)
-        self.assertEqual(peak.getK(), 1.5)
-        self.assertEqual(peak.getL(), 3)
+        self.assertAlmostEqual(q_sample[0], 1.5, delta=1e-10)
+        self.assertAlmostEqual(q_sample[1], 1.5, delta=1e-10)
+        self.assertAlmostEqual(q_sample[2], 1.5, delta=1e-10)
+        self.assertAlmostEqual(peak.getH(), 1.5, delta=1e-10)
+        self.assertAlmostEqual(peak.getK(), 1.5, delta=1e-10)
+        self.assertAlmostEqual(peak.getL(), 3, delta=1e-10)
 
 
 if __name__ == '__main__':

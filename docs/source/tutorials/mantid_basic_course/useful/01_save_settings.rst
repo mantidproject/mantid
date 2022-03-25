@@ -17,7 +17,7 @@ Saving
 You have learnt how to fit data, which produces its results as output workspaces.
 You have also learnt how to manipulate data with algorithms, and you will do more of this when analysing your data.
 
-But it it is important to be able to save these outputs!
+But it is important to be able to save these outputs!
 
 .. figure:: /images/SaveButton.png
    :align: right

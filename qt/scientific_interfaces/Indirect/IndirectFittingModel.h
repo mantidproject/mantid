@@ -9,17 +9,12 @@
 #include "IIndirectFitDataModel.h"
 #include "IIndirectFitOutput.h"
 #include "IIndirectFittingModel.h"
-#include "IndirectFitData.h"
-#include "IndirectWorkspaceNames.h"
 #include "ParameterEstimation.h"
 
 #include "DllConfig.h"
 #include "MantidAPI/IAlgorithm.h"
-#include "MantidAPI/IFunction_fwd.h"
 #include "MantidAPI/WorkspaceGroup.h"
-#include "MantidQtWidgets/Common/FittingMode.h"
 #include "MantidQtWidgets/Common/FunctionModelSpectra.h"
-#include "MantidQtWidgets/Common/IndexTypes.h"
 
 #include <boost/optional.hpp>
 #include <boost/variant.hpp>
@@ -31,9 +26,15 @@ using namespace MantidWidgets;
 
 extern std::unordered_map<FittingMode, std::string> fitModeToName;
 
-class IndirectFittingModel;
-
 using DefaultParametersType = IndexCollectionType<WorkspaceID, std::unordered_map<std::string, ParameterValue>>;
+
+static const std::string SIM_STRING = "sim";
+static const std::string SEQ_STRING = "seq";
+static const std::string IQTFIT_STRING = "IQt";
+static const std::string CONVFIT_STRING = "Conv";
+static const std::string MSDFIT_STRING = "Msd";
+static const std::string FQFIT_STRING = "FQ";
+static const std::string MULTI_STRING = "Multi";
 
 /*
     IndirectFittingModel - Provides methods for specifying and
@@ -46,18 +47,8 @@ public:
 
   // Functions that interact with IndirectFitDataModel
   void clearWorkspaces() override;
-  bool hasWorkspace(std::string const &workspaceName) const override;
   Mantid::API::MatrixWorkspace_sptr getWorkspace(WorkspaceID workspaceID) const override;
-  FunctionModelSpectra getSpectra(WorkspaceID workspaceID) const override;
-  std::pair<double, double> getFittingRange(WorkspaceID workspaceID, WorkspaceIndex spectrum) const override;
   WorkspaceID getNumberOfWorkspaces() const override;
-  size_t getNumberOfSpectra(WorkspaceID workspaceID) const override;
-  virtual std::vector<std::pair<std::string, size_t>> getResolutionsForFit() const override;
-  void setStartX(double startX, WorkspaceID workspaceID, WorkspaceIndex spectrum) override;
-  void setStartX(double startX, WorkspaceID workspaceID) override;
-  void setEndX(double endX, WorkspaceID workspaceID, WorkspaceIndex spectrum) override;
-  void setEndX(double endX, WorkspaceID workspaceID) override;
-  std::string createDisplayName(WorkspaceID workspaceID) const override;
   bool isMultiFit() const override;
 
   // IIndirectFittingModel
@@ -66,6 +57,8 @@ public:
   virtual boost::optional<std::string> isInvalidFunction() const override;
   std::vector<std::string> getFitParameterNames() const override;
   void setFitFunction(Mantid::API::MultiDomainFunction_sptr function) override;
+  void setFWHM(double fwhm, WorkspaceID WorkspaceID) override;
+  void setBackground(double fwhm, WorkspaceID WorkspaceID) override;
   virtual Mantid::API::MultiDomainFunction_sptr getFitFunction() const override;
   void setDefaultParameterValue(const std::string &name, double value, WorkspaceID workspaceID) override;
   std::unordered_map<std::string, ParameterValue> getParameterValues(WorkspaceID workspaceID,
@@ -78,6 +71,7 @@ public:
   void addSingleFitOutput(const Mantid::API::IAlgorithm_sptr &fitAlgorithm, WorkspaceID workspaceID,
                           WorkspaceIndex spectrum) override;
   virtual void addOutput(Mantid::API::IAlgorithm_sptr fitAlgorithm) override;
+  IIndirectFitOutput *getFitOutput() const override;
 
   // Generic
   void setFittingMode(FittingMode mode) override;
@@ -87,15 +81,13 @@ public:
   boost::optional<ResultLocationNew> getResultLocation(WorkspaceID workspaceID, WorkspaceIndex spectrum) const override;
   Mantid::API::WorkspaceGroup_sptr getResultWorkspace() const override;
   Mantid::API::WorkspaceGroup_sptr getResultGroup() const override;
-  virtual Mantid::API::IAlgorithm_sptr getFittingAlgorithm() const override;
+  Mantid::API::IAlgorithm_sptr getFittingAlgorithm(FittingMode mode) const override;
   Mantid::API::IAlgorithm_sptr getSingleFit(WorkspaceID workspaceID, WorkspaceIndex spectrum) const override;
   Mantid::API::IFunction_sptr getSingleFunction(WorkspaceID workspaceID, WorkspaceIndex spectrum) const override;
   std::string getOutputBasename() const override;
 
   void cleanFailedRun(const Mantid::API::IAlgorithm_sptr &fittingAlgorithm) override;
   void cleanFailedSingleRun(const Mantid::API::IAlgorithm_sptr &fittingAlgorithm, WorkspaceID workspaceID) override;
-  DataForParameterEstimationCollection
-  getDataForParameterEstimation(const EstimationDataSelector &selector) const override;
   void removeFittingData() override;
   void addDefaultParameters() override;
   void removeDefaultParameters() override;
@@ -103,9 +95,8 @@ public:
   IIndirectFitDataModel *getFitDataModel() override;
 
 protected:
-  std::string createOutputName(const std::string &fitMode) const;
-  Mantid::API::IAlgorithm_sptr getFittingAlgorithm(FittingMode mode) const;
-  Mantid::API::IAlgorithm_sptr createSequentialFit(const Mantid::API::IFunction_sptr &function) const;
+  std::string createOutputName(const std::string &fitMode, const std::string &workspaceName,
+                               const std::string &spectra) const;
   Mantid::API::IAlgorithm_sptr createSimultaneousFit(const Mantid::API::MultiDomainFunction_sptr &function) const;
   virtual Mantid::API::MultiDomainFunction_sptr getMultiDomainFunction() const;
   virtual std::unordered_map<std::string, std::string> mapDefaultParameterNames() const;
@@ -117,13 +108,14 @@ protected:
 private:
   void removeWorkspaceFromFittingData(WorkspaceID const &workspaceIndex);
 
-  Mantid::API::IAlgorithm_sptr createSequentialFit(const Mantid::API::IFunction_sptr &function,
+  Mantid::API::IAlgorithm_sptr createSequentialFit(Mantid::API::IFunction_sptr function) const;
+  Mantid::API::IAlgorithm_sptr createSequentialFit(const Mantid::API::IFunction_sptr function,
                                                    const std::string &input) const;
   virtual Mantid::API::IAlgorithm_sptr sequentialFitAlgorithm() const;
   virtual Mantid::API::IAlgorithm_sptr simultaneousFitAlgorithm() const;
   virtual std::string sequentialFitOutputName() const;
   virtual std::string simultaneousFitOutputName() const;
-  virtual std::string singleFitOutputName(WorkspaceID workspaceID, WorkspaceIndex spectrum) const;
+  virtual std::string singleFitOutputName(std::string workspaceName, WorkspaceIndex spectrum) const;
   virtual std::unordered_map<std::string, ParameterValue> createDefaultParameters(WorkspaceID workspaceID) const;
 
   virtual std::string getResultXAxisUnit() const;

@@ -13,6 +13,7 @@
 #include "MantidAPI/Run.h"
 #include "MantidAPI/TextAxis.h"
 #include "MantidAPI/WorkspaceGroup.h"
+#include "MantidQtWidgets/Common/AlgorithmRuntimeProps.h"
 #include "MantidQtWidgets/Common/SignalBlocker.h"
 
 #include <QStringList>
@@ -179,13 +180,13 @@ void ApplyAbsorptionCorrections::run() {
   setRunIsRunning(true);
 
   // Create / Initialize algorithm
-  API::BatchAlgorithmRunner::AlgorithmRuntimeProps absCorProps;
+  auto absCorProps = std::make_unique<MantidQt::API::AlgorithmRuntimeProps>();
   IAlgorithm_sptr applyCorrAlg = AlgorithmManager::Instance().create("ApplyPaalmanPingsCorrection");
   applyCorrAlg->initialize();
 
   // get Sample Workspace
   auto const sampleWs = getADSWorkspace(m_sampleWorkspaceName);
-  absCorProps["SampleWorkspace"] = m_sampleWorkspaceName;
+  absCorProps->setProperty("SampleWorkspace", sampleWs);
 
   const bool useCan = m_uiForm.ckUseCan->isChecked();
   // Get Can and Clone
@@ -221,7 +222,7 @@ void ApplyAbsorptionCorrections::run() {
       }
     }
 
-    absCorProps["CanWorkspace"] = cloneName;
+    absCorProps->setPropertyValue("CanWorkspace", cloneName);
 
     const bool useCanScale = m_uiForm.ckScaleCan->isChecked();
     if (useCanScale) {
@@ -238,10 +239,9 @@ void ApplyAbsorptionCorrections::run() {
 
   QString correctionsWsName = m_uiForm.dsCorrections->getCurrentDataName();
 
-  auto const corrections = getADSWorkspace<WorkspaceGroup>(correctionsWsName.toStdString());
   bool interpolateAll = false;
-  for (std::size_t i = 0; i < corrections->size(); i++) {
-    MatrixWorkspace_sptr factorWs = std::dynamic_pointer_cast<MatrixWorkspace>(corrections->getItem(i));
+  for (std::size_t i = 0; i < m_ppCorrectionsGp->size(); i++) {
+    MatrixWorkspace_sptr factorWs = std::dynamic_pointer_cast<MatrixWorkspace>(m_ppCorrectionsGp->getItem(i));
 
     // Check for matching binning
     const auto factorBlocksize = factorWs->blocksize();
@@ -263,7 +263,7 @@ void ApplyAbsorptionCorrections::run() {
         interpolateAll = true;
       // fall through
       case QMessageBox::Yes:
-        addInterpolationStep(factorWs, absCorProps["SampleWorkspace"]);
+        addInterpolationStep(factorWs, absCorProps->getProperty("SampleWorkspace"));
         break;
       default:
         m_batchAlgoRunner->clearQueue();
@@ -274,8 +274,7 @@ void ApplyAbsorptionCorrections::run() {
         return;
       }
     }
-
-    applyCorrAlg->setProperty("CorrectionsWorkspace", correctionsWsName.toStdString());
+    applyCorrAlg->setProperty("CorrectionsWorkspace", m_correctionsGroupName);
   }
 
   // Generate output workspace name
@@ -321,7 +320,7 @@ void ApplyAbsorptionCorrections::run() {
   applyCorrAlg->setProperty("OutputWorkspace", outputWsName.toStdString());
 
   // Add corrections algorithm to queue
-  m_batchAlgoRunner->addAlgorithm(applyCorrAlg, absCorProps);
+  m_batchAlgoRunner->addAlgorithm(applyCorrAlg, std::move(absCorProps));
 
   // Run algorithm queue
   connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this, SLOT(absCorComplete(bool)));
@@ -342,8 +341,8 @@ void ApplyAbsorptionCorrections::run() {
  * @param toMatch Name of the workspace to match
  */
 void ApplyAbsorptionCorrections::addInterpolationStep(const MatrixWorkspace_sptr &toInterpolate, std::string toMatch) {
-  API::BatchAlgorithmRunner::AlgorithmRuntimeProps interpolationProps;
-  interpolationProps["WorkspaceToMatch"] = std::move(toMatch);
+  auto interpolationProps = std::make_unique<MantidQt::API::AlgorithmRuntimeProps>();
+  interpolationProps->setPropertyValue("WorkspaceToMatch", std::move(toMatch));
 
   IAlgorithm_sptr interpolationAlg = AlgorithmManager::Instance().create("SplineInterpolation");
   interpolationAlg->initialize();
@@ -351,7 +350,7 @@ void ApplyAbsorptionCorrections::addInterpolationStep(const MatrixWorkspace_sptr
   interpolationAlg->setProperty("WorkspaceToInterpolate", toInterpolate->getName());
   interpolationAlg->setProperty("OutputWorkspace", toInterpolate->getName());
 
-  m_batchAlgoRunner->addAlgorithm(interpolationAlg, interpolationProps);
+  m_batchAlgoRunner->addAlgorithm(interpolationAlg, std::move(interpolationProps));
 }
 
 /**
@@ -433,6 +432,20 @@ bool ApplyAbsorptionCorrections::validate() {
   // Validate the corrections workspace
   validateDataIsOfType(uiv, m_uiForm.dsCorrections, "Corrections", DataType::Corrections);
 
+  // Check sample has the same number of Histograms as each of the workspaces in the corrections group
+  m_correctionsGroupName = m_uiForm.dsCorrections->getCurrentDataName().toStdString();
+  m_ppCorrectionsGp = getADSWorkspace<WorkspaceGroup>(m_correctionsGroupName);
+
+  for (std::size_t i = 0; i < m_ppCorrectionsGp->size(); i++) {
+    MatrixWorkspace_sptr factorWs = std::dynamic_pointer_cast<MatrixWorkspace>(m_ppCorrectionsGp->getItem(i));
+
+    const size_t sampleHist = m_ppSampleWS->getNumberHistograms();
+    const size_t containerHist = factorWs->getNumberHistograms();
+
+    if (sampleHist != containerHist) {
+      uiv.addErrorMessage(" Sample and Container do not have a matching number of Histograms.");
+    }
+  }
   // Show errors if there are any
   if (!uiv.isAllInputValid())
     emit showMessageBox(uiv.generateErrorMessage());

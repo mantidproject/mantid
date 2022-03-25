@@ -14,10 +14,10 @@
 #include "MantidCurveFitting/Algorithms/LeBailFit.h"
 #include "MantidDataHandling/LoadAscii2.h"
 #include "MantidDataObjects/TableWorkspace.h"
+#include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidHistogramData/CountStandardDeviations.h"
 #include "MantidHistogramData/Counts.h"
 #include "MantidHistogramData/Points.h"
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
 using namespace Mantid;
 using namespace Mantid::CurveFitting;

@@ -25,7 +25,7 @@
 #include "MantidAPI/TableRow.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataObjects/TableWorkspace.h"
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
+#include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
 
 #include "MantidGeometry/Crystal/BraggScattererFactory.h"
 #include "MantidGeometry/Crystal/CompositeBraggScatterer.h"
@@ -53,7 +53,7 @@ public:
     }
   }
 
-  ~MockDetector() override {}
+  ~MockDetector() override = default;
 
   void loadConfiguration(Instrument_const_sptr poldiInstrument) override { UNUSED_ARG(poldiInstrument); }
   GNU_DIAG_OFF_SUGGEST_OVERRIDE
@@ -94,7 +94,7 @@ public:
     m_slitTimes = std::vector<double>(times, times + sizeof(times) / sizeof(times[0]));
   }
 
-  ~MockChopper() override {}
+  ~MockChopper() override = default;
 
   void loadConfiguration(Instrument_const_sptr poldiInstrument) override{
       UNUSED_ARG(poldiInstrument)} GNU_DIAG_OFF_SUGGEST_OVERRIDE MOCK_METHOD0(rotationSpeed, double());

@@ -6,6 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 from mantidqt.utils.qt import load_ui
 from mantidqtinterfaces.Muon.GUI.Common.data_selectors.cyclic_data_selector_view import CyclicDataSelectorView
+from mantidqtinterfaces.Muon.GUI.Common.results_tab_widget.results_tab_model import TableColumnType
 
 from qtpy.QtWidgets import QWidget
 
@@ -46,12 +47,13 @@ class ModelFittingDataSelectorView(ui_form, base_widget):
     def add_results_table_name(self, results_table_name: str) -> None:
         """Add a results table to the results table combo box."""
         self.result_table_selector.add_dataset_name(results_table_name)
+        self.result_table_selector.set_current_dataset_index(self.result_table_selector.number_of_datasets()-1)
 
     def update_result_table_names(self, table_names: list) -> None:
         """Update the data in the parameter display combo box."""
         self.result_table_selector.update_dataset_name_combo_box(table_names)
 
-    def update_x_parameters(self, x_parameters: list, emit_signal: bool = False) -> None:
+    def update_x_parameters(self, x_parameters: list, x_parameter_types: list, emit_signal: bool = False) -> None:
         """Update the available X parameters."""
         old_x_parameter = self.x_selector.currentText()
 
@@ -60,13 +62,14 @@ class ModelFittingDataSelectorView(ui_form, base_widget):
         self.x_selector.addItems(x_parameters)
         self.x_selector.blockSignals(False)
 
-        new_index = self.set_selected_x_parameter(old_x_parameter)
+        new_x_parameter = self._get_x_parameter_for_update(old_x_parameter, x_parameters, x_parameter_types)
+        new_index = self.set_selected_x_parameter(new_x_parameter)
 
         if emit_signal:
             # Signal is emitted manually in case the index has not changed (but the loaded parameter may be different)
             self.x_selector.currentIndexChanged.emit(new_index)
 
-    def update_y_parameters(self, y_parameters: list, emit_signal: bool = False) -> None:
+    def update_y_parameters(self, y_parameters: list, y_parameter_types: list, emit_signal: bool = False) -> None:
         """Update the available Y parameters."""
         old_y_parameter = self.y_selector.currentText()
 
@@ -75,7 +78,8 @@ class ModelFittingDataSelectorView(ui_form, base_widget):
         self.y_selector.addItems(y_parameters)
         self.y_selector.blockSignals(False)
 
-        new_index = self.set_selected_y_parameter(old_y_parameter)
+        new_y_parameter = self._get_y_parameter_for_update(old_y_parameter, y_parameters, y_parameter_types)
+        new_index = self.set_selected_y_parameter(new_y_parameter)
 
         if emit_signal:
             # Signal is emitted manually in case the index has not changed (but the loaded parameter may be different)
@@ -96,6 +100,22 @@ class ModelFittingDataSelectorView(ui_form, base_widget):
         self.y_selector.setCurrentIndex(new_index if new_index != -1 else 0)
         self.y_selector.blockSignals(False)
         return new_index
+
+    def _get_x_parameter_for_update(self, old_x_parameter: str, x_parameters: list, x_parameter_types: list) -> str:
+        if self.y_selector.findText(old_x_parameter) != -1:
+            return old_x_parameter
+        elif TableColumnType.X.value in x_parameter_types:
+            return x_parameters[x_parameter_types.index(1)]
+        else:
+            return ''
+
+    def _get_y_parameter_for_update(self, old_y_parameter: str, y_parameters: list, y_parameter_types: list) -> str:
+        if self.x_selector.findText(old_y_parameter) != -1:
+            return old_y_parameter
+        elif TableColumnType.Y.value in y_parameter_types:
+            return y_parameters[y_parameter_types.index(2)]
+        else:
+            return ''
 
     def number_of_result_tables(self) -> int:
         """Returns the number of result tables loaded into the widget."""

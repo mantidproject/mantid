@@ -14,8 +14,8 @@
 #include "MantidAPI/TableRow.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidCurveFitting/Algorithms/PawleyFit.h"
+#include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidKernel/V3D.h"
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
 using Mantid::CurveFitting::Algorithms::PawleyFit;
 using Mantid::CurveFitting::Algorithms::V3DFromHKLColumnExtractor;
@@ -149,7 +149,7 @@ private:
 
   public:
     TestablePawleyFit() : PawleyFit() {}
-    ~TestablePawleyFit() override {}
+    ~TestablePawleyFit() override = default;
   };
 
   class TestableV3DFromHKLColumnExtractor : public V3DFromHKLColumnExtractor {

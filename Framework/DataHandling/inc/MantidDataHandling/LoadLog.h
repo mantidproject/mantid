@@ -55,7 +55,7 @@ namespace DataHandling {
     @author Anders Markvardsen, ISIS, RAL
     @date 26/09/2007
 */
-class DLLExport LoadLog : public API::Algorithm {
+class DLLExport LoadLog final : public API::Algorithm {
 public:
   /// Default constructor
   LoadLog();
@@ -109,7 +109,7 @@ private:
   std::string extractLogName(const std::vector<std::string> &logName);
 
   /// Check for SNS-style text file
-  bool SNSTextFormatColumns(const std::string &str, std::vector<double> &out) const;
+  bool SNSTextFormatColumns(const std::string &input, std::vector<double> &out) const;
 
   /// Create timeseries property from .log file and adds that to sample object
   void loadThreeColumnLogFile(std::ifstream &logFileStream, const std::string &logFileName, API::Run &run);

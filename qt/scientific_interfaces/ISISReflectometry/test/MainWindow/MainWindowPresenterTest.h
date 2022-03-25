@@ -383,6 +383,42 @@ public:
     verifyAndClear();
   }
 
+  void testCloseEventChecksIfPrevented() {
+    auto presenter = makePresenter();
+    EXPECT_CALL(*m_batchPresenters[0], isProcessing).Times(1);
+    EXPECT_CALL(*m_batchPresenters[1], isProcessing).Times(1);
+    EXPECT_CALL(*m_batchPresenters[0], isAutoreducing).Times(1);
+    EXPECT_CALL(*m_batchPresenters[1], isAutoreducing).Times(1);
+    EXPECT_CALL(m_view, acceptCloseEvent).Times(1);
+    presenter.notifyCloseEvent();
+    verifyAndClear();
+  }
+
+  void testCloseEventIgnoredIfAutoreducing() {
+    auto presenter = makePresenter();
+    expectBatchIsAutoreducing(0);
+    EXPECT_CALL(m_view, ignoreCloseEvent).Times(1);
+    presenter.notifyCloseEvent();
+    verifyAndClear();
+  }
+
+  void testCloseEventIgnoredIfProcessing() {
+    auto presenter = makePresenter();
+    expectBatchIsProcessing(0);
+    EXPECT_CALL(m_view, ignoreCloseEvent).Times(1);
+    presenter.notifyCloseEvent();
+    verifyAndClear();
+  }
+
+  void testCloseEventAcceptedIfNotWorking() {
+    auto presenter = makePresenter();
+    expectBatchIsNotAutoreducing(0);
+    expectBatchIsNotProcessing(0);
+    EXPECT_CALL(m_view, acceptCloseEvent).Times(1);
+    presenter.notifyCloseEvent();
+    verifyAndClear();
+  }
+
   void testSaveBatch() {
     auto presenter = makePresenter();
     auto const batchIndex = 1;
@@ -480,7 +516,7 @@ private:
     friend class MainWindowPresenterTest;
 
   public:
-    MainWindowPresenterFriend(IMainWindowView *view, IMessageHandler *messageHandler, IFileHandler *fileHandler,
+    MainWindowPresenterFriend(IMainWindowView *view, IReflMessageHandler *messageHandler, IFileHandler *fileHandler,
                               std::unique_ptr<IEncoder> encoder, std::unique_ptr<IDecoder> decoder,
                               std::unique_ptr<ISlitCalculator> slitCalculator,
                               std::unique_ptr<IOptionsDialogPresenter> optionsDialogPresenter,

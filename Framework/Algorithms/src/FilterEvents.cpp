@@ -511,7 +511,7 @@ void FilterEvents::groupOutputWorkspace() {
         "Name of the workspace to be created as the output of grouping ");
   }
 
-  AnalysisDataServiceImpl &ads = AnalysisDataService::Instance();
+  const AnalysisDataServiceImpl &ads = AnalysisDataService::Instance();
   API::WorkspaceGroup_sptr workspace_group = std::dynamic_pointer_cast<WorkspaceGroup>(ads.retrieve(groupname));
   if (!workspace_group) {
     g_log.error("Unable to retrieve output workspace from algorithm GroupWorkspaces");
@@ -1007,9 +1007,9 @@ void FilterEvents::processTableSplittersWorkspace() {
     }
 
     // convert string-target to integer target
-    int int_target(-1);
     const auto &mapiter = m_targetIndexMap.find(target);
 
+    int int_target;
     if (mapiter != m_targetIndexMap.end()) {
       int_target = mapiter->second;
     } else {
@@ -1045,6 +1045,7 @@ void FilterEvents::processTableSplittersWorkspace() {
  *  SplittersWorkspace
  */
 void FilterEvents::createOutputWorkspacesSplitters() {
+  const auto startTime = std::chrono::high_resolution_clock::now();
 
   // Convert information workspace to map
   std::map<int, std::string> infomap;
@@ -1056,11 +1057,15 @@ void FilterEvents::createOutputWorkspacesSplitters() {
   }
 
   // Determine the minimum group index number
-  int minwsgroup = INT_MAX;
-  for (const auto wsgroup : m_targetWorkspaceIndexSet) {
-    if (wsgroup < minwsgroup && wsgroup >= 0)
-      minwsgroup = wsgroup;
-  }
+  const int minwsgroup = *std::min_element(m_targetWorkspaceIndexSet.begin(), m_targetWorkspaceIndexSet.end(),
+                                           [](const int &left, const int &right) {
+                                             if (left >= 0 && right >= 0)
+                                               return left < right;
+                                             if (left >= 0)
+                                               return true;
+                                             else
+                                               return false;
+                                           });
   g_log.debug() << "Min WS Group = " << minwsgroup << "\n";
 
   const bool from1 = getProperty("OutputWorkspaceIndexedFrom1");
@@ -1085,6 +1090,7 @@ void FilterEvents::createOutputWorkspacesSplitters() {
       splitByTime = false;
     }
   }
+  std::shared_ptr<EventWorkspace> prototype_ws = create<EventWorkspace>(*m_eventWS);
 
   for (auto const wsgroup : m_targetWorkspaceIndexSet) {
     // Generate new workspace name
@@ -1117,7 +1123,7 @@ void FilterEvents::createOutputWorkspacesSplitters() {
         add2output = false;
     }
 
-    std::shared_ptr<EventWorkspace> optws = create<EventWorkspace>(*m_eventWS);
+    std::shared_ptr<EventWorkspace> optws = prototype_ws->clone();
     // Clear Run without copying first.
     optws->setSharedRun(Kernel::make_cow<Run>());
     m_outputWorkspacesMap.emplace(wsgroup, optws);
@@ -1180,8 +1186,8 @@ void FilterEvents::createOutputWorkspacesSplitters() {
 
   } // ENDFOR
 
-  // Set output and do debug report
   setProperty("NumberOutputWS", numoutputws);
+  addTimer("createOutputWorkspacesSplitters", startTime, std::chrono::high_resolution_clock::now());
 
   g_log.information("Output workspaces are created. ");
 } // namespace Algorithms
@@ -1210,6 +1216,8 @@ void FilterEvents::createOutputWorkspacesMatrixCase() {
   size_t wsgindex = 0;
   bool descriptiveNames = getProperty("DescriptiveOutputNames");
 
+  std::shared_ptr<EventWorkspace> prototype_ws = create<EventWorkspace>(*m_eventWS);
+
   for (auto const wsgroup : m_targetWorkspaceIndexSet) {
     if (wsgroup < 0)
       throw std::runtime_error("It is not possible to have split-target group "
@@ -1232,7 +1240,7 @@ void FilterEvents::createOutputWorkspacesMatrixCase() {
 
     // create new workspace from input EventWorkspace and all the sample logs
     // are copied to the new one
-    std::shared_ptr<EventWorkspace> optws = create<EventWorkspace>(*m_eventWS);
+    std::shared_ptr<EventWorkspace> optws = prototype_ws->clone();
     // Clear Run without copying first.
     optws->setSharedRun(Kernel::make_cow<Run>());
     m_outputWorkspacesMap.emplace(wsgroup, optws);
@@ -1300,6 +1308,8 @@ void FilterEvents::createOutputWorkspacesTableSplitterCase() {
   size_t numoutputws = m_targetWorkspaceIndexSet.size();
   size_t wsgindex = 0;
 
+  std::shared_ptr<EventWorkspace> prototype_ws = create<EventWorkspace>(*m_eventWS);
+
   for (auto const wsgroup : m_targetWorkspaceIndexSet) {
     if (wsgroup < 0)
       throw std::runtime_error("It is not possible to have split-target group "
@@ -1329,7 +1339,7 @@ void FilterEvents::createOutputWorkspacesTableSplitterCase() {
     }
 
     // create new workspace
-    std::shared_ptr<EventWorkspace> optws = create<EventWorkspace>(*m_eventWS);
+    std::shared_ptr<EventWorkspace> optws = prototype_ws->clone();
     // Clear Run without copying first.
     optws->setSharedRun(Kernel::make_cow<Run>());
     m_outputWorkspacesMap.emplace(wsgroup, optws);
@@ -1597,6 +1607,7 @@ void FilterEvents::setupCustomizedTOFCorrection() {
  * Structure: per spectrum --> per workspace
  */
 void FilterEvents::filterEventsBySplitters(double progressamount) {
+  const auto startTime = std::chrono::high_resolution_clock::now();
   size_t numberOfSpectra = m_eventWS->getNumberHistograms();
 
   // Loop over the histograms (detector spectra) to do split from 1 event list
@@ -1606,7 +1617,7 @@ void FilterEvents::filterEventsBySplitters(double progressamount) {
   // FIXME - Turn on parallel:
   PARALLEL_FOR_NO_WSP_CHECK()
   for (int64_t iws = 0; iws < int64_t(numberOfSpectra); ++iws) {
-    PARALLEL_START_INTERUPT_REGION
+    PARALLEL_START_INTERRUPT_REGION
 
     // Filter the non-skipped
     if (!m_vecSkip[iws]) {
@@ -1633,14 +1644,14 @@ void FilterEvents::filterEventsBySplitters(double progressamount) {
       }
     }
 
-    PARALLEL_END_INTERUPT_REGION
+    PARALLEL_END_INTERRUPT_REGION
   } // END FOR i = 0
-  PARALLEL_CHECK_INTERUPT_REGION
+  PARALLEL_CHECK_INTERRUPT_REGION
 
   // Split the sample logs in each target workspace.
   progress(0.1 + progressamount, "Splitting logs");
 
-  return;
+  addTimer("filterEventsBySplitters", startTime, std::chrono::high_resolution_clock::now());
 }
 
 /** Split events by splitters represented by vector
@@ -1676,7 +1687,7 @@ void FilterEvents::filterEventsByVectorSplitters(double progressamount) {
 
   PARALLEL_FOR_NO_WSP_CHECK()
   for (int64_t iws = 0; iws < int64_t(numberOfSpectra); ++iws) {
-    PARALLEL_START_INTERUPT_REGION
+    PARALLEL_START_INTERRUPT_REGION
 
     // Filter the non-skipped spectrum
     if (!m_vecSkip[iws]) {
@@ -1712,9 +1723,9 @@ void FilterEvents::filterEventsByVectorSplitters(double progressamount) {
         g_log.notice(logmessage);
     }
 
-    PARALLEL_END_INTERUPT_REGION
+    PARALLEL_END_INTERRUPT_REGION
   } // END FOR i = 0
-  PARALLEL_CHECK_INTERUPT_REGION
+  PARALLEL_CHECK_INTERRUPT_REGION
 
   // Finish (1) adding events and splitting the sample logs in each target
   // workspace.

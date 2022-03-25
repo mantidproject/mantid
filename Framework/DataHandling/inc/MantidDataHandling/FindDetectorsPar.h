@@ -120,6 +120,7 @@ class DetParameters;
 
 class DLLExport FindDetectorsPar : public API::Algorithm {
 public:
+  virtual ~FindDetectorsPar() = default;
   /// Algorithm's name for identification overriding a virtual method
   const std::string name() const override { return "FindDetectorsPar"; };
   /// Summary of algorithms purpose
@@ -164,7 +165,7 @@ private:
   std::vector<size_t> detID;
 
   // calculate generic detectors parameters:
-  void calcDetPar(const Geometry::IDetector &det, const Kernel::V3D &Observer, DetParameters &Detector);
+  void calcDetPar(const Geometry::IDetector &detector, const Kernel::V3D &observer, DetParameters &detParameters);
 
   /// if ASCII file is selected as the datasource, this structure describes the
   /// type of this file.

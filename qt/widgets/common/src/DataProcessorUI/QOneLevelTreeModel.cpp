@@ -38,8 +38,6 @@ QOneLevelTreeModel::QOneLevelTreeModel(const ITableWorkspace_sptr &tableWorkspac
           SLOT(tableDataUpdated(const QModelIndex &, const QModelIndex &)));
 }
 
-QOneLevelTreeModel::~QOneLevelTreeModel() {}
-
 /** Returns data for specified index
  * @param index : The index
  * @param role : The role

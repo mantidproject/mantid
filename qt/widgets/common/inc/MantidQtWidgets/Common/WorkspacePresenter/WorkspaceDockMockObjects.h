@@ -28,7 +28,7 @@ public:
     m_presenter = std::dynamic_pointer_cast<ViewNotifiable>(presenter);
     presenter->init();
   }
-  ~MockWorkspaceDockView() override {}
+  ~MockWorkspaceDockView() override = default;
 
   MOCK_CONST_METHOD2(askUserYesNo, bool(const std::string &caption, const std::string &message));
   MOCK_CONST_METHOD2(showCriticalUserMessage, void(const std::string &caption, const std::string &message));
@@ -63,7 +63,7 @@ public:
   MOCK_METHOD0(showWorkspaceData, void());
   MOCK_METHOD0(showInstrumentView, void());
   MOCK_METHOD0(saveToProgram, void());
-  MOCK_METHOD1(plotSpectrum, void(const std::string type));
+  MOCK_METHOD1(plotSpectrum, void(const std::string &type));
   MOCK_METHOD0(showColourFillPlot, void());
   MOCK_METHOD0(showDetectorsTable, void());
   MOCK_METHOD0(showBoxDataTable, void());
@@ -98,7 +98,7 @@ private:
 
 class MockWorkspaceProviderNotifiable : public WorkspaceProviderNotifiable {
 public:
-  ~MockWorkspaceProviderNotifiable() override {}
+  ~MockWorkspaceProviderNotifiable() override = default;
   MOCK_METHOD1(notifyFromWorkspaceProvider, void(Flag flag));
 };
 

@@ -201,6 +201,12 @@ InstrumentWidgetPickTab::InstrumentWidgetPickTab(InstrumentWidget *instrWidget)
   m_zoom->setIcon(QIcon(":/PickTools/zoom.png"));
   m_zoom->setToolTip("Zoom in and out");
 
+  m_whole = new QPushButton();
+  m_whole->setCheckable(true);
+  m_whole->setAutoExclusive(true);
+  m_whole->setToolTip("Select whole instrument");
+  m_whole->setIcon(QIcon(":/PickTools/selection-whole.png"));
+
   m_one = new QPushButton();
   m_one->setCheckable(true);
   m_one->setAutoExclusive(true);
@@ -290,15 +296,17 @@ InstrumentWidgetPickTab::InstrumentWidgetPickTab(InstrumentWidget *instrWidget)
   toolBox->addWidget(m_sector, 0, 6);
   toolBox->addWidget(m_free_draw, 0, 7);
   toolBox->addWidget(m_one, 1, 0);
-  toolBox->addWidget(m_tube, 1, 1);
-  toolBox->addWidget(m_peakAdd, 1, 2);
-  toolBox->addWidget(m_peakErase, 1, 3);
-  toolBox->addWidget(m_peakCompare, 1, 4);
-  toolBox->addWidget(m_peakAlign, 1, 5);
+  toolBox->addWidget(m_whole, 1, 1);
+  toolBox->addWidget(m_tube, 1, 2);
+  toolBox->addWidget(m_peakAdd, 1, 3);
+  toolBox->addWidget(m_peakErase, 1, 4);
+  toolBox->addWidget(m_peakCompare, 1, 5);
+  toolBox->addWidget(m_peakAlign, 1, 6);
   toolBox->setColumnStretch(8, 1);
   toolBox->setSpacing(2);
   connect(m_zoom, SIGNAL(clicked()), this, SLOT(setSelectionType()));
   connect(m_one, SIGNAL(clicked()), this, SLOT(setSelectionType()));
+  connect(m_whole, SIGNAL(clicked()), this, SLOT(setSelectionType()));
   connect(m_tube, SIGNAL(clicked()), this, SLOT(setSelectionType()));
   connect(m_peakAdd, SIGNAL(clicked()), this, SLOT(setSelectionType()));
   connect(m_peakErase, SIGNAL(clicked()), this, SLOT(setSelectionType()));
@@ -455,6 +463,7 @@ void InstrumentWidgetPickTab::integrateTimeBins() {
 void InstrumentWidgetPickTab::setSelectionType() {
   ProjectionSurface::InteractionMode surfaceMode = ProjectionSurface::PickSingleMode;
   auto plotType = m_plotController->getPlotType();
+  auto surface = m_instrWidget->getSurface();
   if (m_zoom->isChecked()) {
     m_selectionType = Single;
     m_activeTool->setText("Tool: Navigation");
@@ -464,6 +473,12 @@ void InstrumentWidgetPickTab::setSelectionType() {
     m_activeTool->setText("Tool: Pixel selection");
     surfaceMode = ProjectionSurface::PickSingleMode;
     plotType = DetectorPlotController::Single;
+  } else if (m_whole->isChecked()) {
+    m_selectionType = WholeInstrument;
+    m_activeTool->setText("Tool: Whole instrument selection");
+    surfaceMode = ProjectionSurface::MoveMode;
+    surface->clearMask();
+    m_instrWidget->updateInstrumentView(true);
   } else if (m_tube->isChecked()) {
     m_selectionType = Tube;
     m_activeTool->setText("Tool: Tube/bank selection");
@@ -491,31 +506,31 @@ void InstrumentWidgetPickTab::setSelectionType() {
   } else if (m_rectangle->isChecked()) {
     m_selectionType = Draw;
     m_activeTool->setText("Tool: Rectangle");
-    surfaceMode = ProjectionSurface::DrawRegularMode;
+    surfaceMode = ProjectionSurface::EditShapeMode;
     plotType = DetectorPlotController::Single;
     m_instrWidget->getSurface()->startCreatingShape2D("rectangle", Qt::green, QColor(255, 255, 255, 80));
   } else if (m_ellipse->isChecked()) {
     m_selectionType = Draw;
     m_activeTool->setText("Tool: Ellipse");
-    surfaceMode = ProjectionSurface::DrawRegularMode;
+    surfaceMode = ProjectionSurface::EditShapeMode;
     plotType = DetectorPlotController::Single;
     m_instrWidget->getSurface()->startCreatingShape2D("ellipse", Qt::green, QColor(255, 255, 255, 80));
   } else if (m_ring_ellipse->isChecked()) {
     m_selectionType = Draw;
     m_activeTool->setText("Tool: Elliptical ring");
-    surfaceMode = ProjectionSurface::DrawRegularMode;
+    surfaceMode = ProjectionSurface::EditShapeMode;
     plotType = DetectorPlotController::Single;
     m_instrWidget->getSurface()->startCreatingShape2D("ring ellipse", Qt::green, QColor(255, 255, 255, 80));
   } else if (m_ring_rectangle->isChecked()) {
     m_selectionType = Draw;
     m_activeTool->setText("Tool: Rectangular ring");
-    surfaceMode = ProjectionSurface::DrawRegularMode;
+    surfaceMode = ProjectionSurface::EditShapeMode;
     plotType = DetectorPlotController::Single;
     m_instrWidget->getSurface()->startCreatingShape2D("ring rectangle", Qt::green, QColor(255, 255, 255, 80));
   } else if (m_sector->isChecked()) {
     m_selectionType = Draw;
     m_activeTool->setText("Tool: Circular sector");
-    surfaceMode = ProjectionSurface::DrawRegularMode;
+    surfaceMode = ProjectionSurface::EditShapeMode;
     plotType = DetectorPlotController::Single;
     m_instrWidget->getSurface()->startCreatingShape2D("sector", Qt::green, QColor(255, 255, 255, 80));
   } else if (m_free_draw->isChecked()) {
@@ -527,22 +542,19 @@ void InstrumentWidgetPickTab::setSelectionType() {
   } else if (m_edit->isChecked()) {
     m_selectionType = Draw;
     m_activeTool->setText("Tool: Shape editing");
-    surfaceMode = ProjectionSurface::DrawRegularMode;
+    surfaceMode = ProjectionSurface::EditShapeMode;
     plotType = DetectorPlotController::Single;
   }
   m_plotController->setPlotType(plotType);
-  auto surface = m_instrWidget->getSurface();
   if (surface) {
-    auto previousInteractionMode = surface->getInteractionMode();
     surface->setInteractionMode(surfaceMode);
     auto interactionMode = surface->getInteractionMode();
-    if (interactionMode != previousInteractionMode) {
-      if (interactionMode == ProjectionSurface::DrawRegularMode || interactionMode == ProjectionSurface::MoveMode) {
-        updatePlotMultipleDetectors();
-      } else {
-        m_plot->clearAll();
-        m_plot->replot();
-      }
+    // if switch to MoveMode then keep the plot
+    if (interactionMode == ProjectionSurface::EditShapeMode || interactionMode == ProjectionSurface::MoveMode) {
+      updatePlotMultipleDetectors();
+    } else {
+      m_plot->clearAll();
+      m_plot->replot();
     }
     setPlotCaption();
   }
@@ -601,7 +613,7 @@ void InstrumentWidgetPickTab::changedIntegrationRange(double /*unused*/, double 
   auto surface = m_instrWidget->getSurface();
   if (surface) {
     auto interactionMode = surface->getInteractionMode();
-    if (interactionMode == ProjectionSurface::DrawRegularMode || interactionMode == ProjectionSurface::MoveMode) {
+    if (interactionMode == ProjectionSurface::EditShapeMode || interactionMode == ProjectionSurface::MoveMode) {
       updatePlotMultipleDetectors();
     }
   }
@@ -708,6 +720,9 @@ void InstrumentWidgetPickTab::selectTool(const ToolType tool) {
   case PixelSelect:
     m_one->setChecked(true);
     break;
+  case WholeInstrumentSelect:
+    m_whole->setChecked(true);
+    break;
   case TubeSelect:
     m_tube->setChecked(true);
     break;
@@ -739,7 +754,7 @@ void InstrumentWidgetPickTab::selectTool(const ToolType tool) {
 }
 
 void InstrumentWidgetPickTab::singleComponentTouched(size_t pickID) {
-  if (canUpdateTouchedDetector()) {
+  if (canUpdateTouchedDetector() && !m_instrWidget->isTabFolded()) {
     m_infoController->displayInfo(pickID);
     m_plotController->setPlotData(pickID);
     m_plotController->updatePlot();
@@ -747,10 +762,12 @@ void InstrumentWidgetPickTab::singleComponentTouched(size_t pickID) {
 }
 
 void InstrumentWidgetPickTab::singleComponentPicked(size_t pickID) {
-  m_infoController->displayInfo(pickID);
-  m_plotController->setPlotData(pickID);
-  m_plotController->zoomOutOnPlot();
-  m_plotController->updatePlot();
+  if (!m_instrWidget->isTabFolded()) {
+    m_infoController->displayInfo(pickID);
+    m_plotController->setPlotData(pickID);
+    m_plotController->zoomOutOnPlot();
+    m_plotController->updatePlot();
+  }
 }
 
 void InstrumentWidgetPickTab::comparePeaks(
@@ -787,14 +804,14 @@ void InstrumentWidgetPickTab::shapeCreated() {
  * selected with drawn shapes.
  */
 void InstrumentWidgetPickTab::updatePlotMultipleDetectors() {
-  if (!isVisible())
+  if (!isVisible() || m_instrWidget->isTabFolded())
     return;
-  ProjectionSurface &surface = *getSurface();
+  const ProjectionSurface &surface = *getSurface();
   if (surface.hasMasks()) {
     std::vector<size_t> dets;
     surface.getMaskedDetectors(dets);
     m_plotController->setPlotData(dets);
-  } else {
+  } else if (m_selectionType == InstrumentWidgetPickTab::WholeInstrument) {
     std::vector<Mantid::detid_t> dets;
     const auto &actor = m_instrWidget->getInstrumentActor();
     const auto &detInfo = actor.detectorInfo();
@@ -808,8 +825,9 @@ void InstrumentWidgetPickTab::updatePlotMultipleDetectors() {
       if (!detInfo.isMonitor(detector))
         detsIds.push_back(detector);
     }
-
     m_plotController->setPlotData(detsIds);
+  } else {
+    m_plotController->clear();
   }
   m_plot->replot();
 }
@@ -1256,8 +1274,10 @@ void DetectorPlotController::addPeakLabels(const std::vector<size_t> &detIndices
  * Update the miniplot for a selected detector.
  */
 void DetectorPlotController::updatePlot() {
-  m_plot->recalcAxisDivs();
-  m_plot->replot();
+  if (!m_instrWidget->isTabFolded()) {
+    m_plot->recalcAxisDivs();
+    m_plot->replot();
+  }
 }
 
 /**

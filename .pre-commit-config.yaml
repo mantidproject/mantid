@@ -19,10 +19,20 @@ repos:
         args: [--allow-multiple-documents]
 
   - repo: https://github.com/mantidproject/pre-commit-hooks.git
-    rev: 8809bbab4c8b9609f559e2428e6255e9407c3efe
+    rev: 82e4b72a17c058d99f510771e3f531fb98c3fe73
     hooks:
       - id: clang-format
         exclude: Testing/Tools/cxxtest|tools
+      - id: cmake-missing-pytest-files
+        # Exclude sphinx / template file
+        exclude: test_doctest.py|python_export_maker.py
+
+
+  - repo: https://github.com/cheshirekow/cmake-format-precommit
+    rev: v0.6.13
+    hooks:
+    - id: cmake-format
+    #- id: cmake-lint <- not ready yet
 
   - repo: https://gitlab.com/pycqa/flake8.git
     rev: 3.7.9

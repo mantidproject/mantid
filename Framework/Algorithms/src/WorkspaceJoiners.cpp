@@ -46,7 +46,7 @@ MatrixWorkspace_sptr WorkspaceJoiners::execWS2D(const MatrixWorkspace &ws1, cons
   const int64_t &nhist1 = ws1.getNumberHistograms();
   PARALLEL_FOR_IF(Kernel::threadSafe(ws1, *output))
   for (int64_t i = 0; i < nhist1; ++i) {
-    PARALLEL_START_INTERUPT_REGION
+    PARALLEL_START_INTERRUPT_REGION
     auto &outSpec = output->getSpectrum(i);
     const auto &inSpec = ws1.getSpectrum(i);
 
@@ -62,9 +62,9 @@ MatrixWorkspace_sptr WorkspaceJoiners::execWS2D(const MatrixWorkspace &ws1, cons
     }
 
     m_progress->report();
-    PARALLEL_END_INTERUPT_REGION
+    PARALLEL_END_INTERRUPT_REGION
   }
-  PARALLEL_CHECK_INTERUPT_REGION
+  PARALLEL_CHECK_INTERRUPT_REGION
 
   // For second loop we use the offset from the first
   const int64_t &nhist2 = ws2.getNumberHistograms();
@@ -72,7 +72,7 @@ MatrixWorkspace_sptr WorkspaceJoiners::execWS2D(const MatrixWorkspace &ws1, cons
   auto &outSpectrumInfo = output->mutableSpectrumInfo();
   PARALLEL_FOR_IF(Kernel::threadSafe(ws2, *output))
   for (int64_t j = 0; j < nhist2; ++j) {
-    PARALLEL_START_INTERUPT_REGION
+    PARALLEL_START_INTERRUPT_REGION
     // The spectrum in the output workspace
     auto &outSpec = output->getSpectrum(nhist1 + j);
     // Spectrum in the second workspace
@@ -95,9 +95,9 @@ MatrixWorkspace_sptr WorkspaceJoiners::execWS2D(const MatrixWorkspace &ws1, cons
     }
 
     m_progress->report();
-    PARALLEL_END_INTERUPT_REGION
+    PARALLEL_END_INTERRUPT_REGION
   }
-  PARALLEL_CHECK_INTERUPT_REGION
+  PARALLEL_CHECK_INTERRUPT_REGION
 
   fixSpectrumNumbers(ws1, ws2, *output);
 
@@ -186,12 +186,11 @@ void WorkspaceJoiners::checkCompatibility(const API::MatrixWorkspace &ws1, const
  * @param max The maximum id (output).
  */
 void WorkspaceJoiners::getMinMax(const MatrixWorkspace &ws, specnum_t &min, specnum_t &max) {
-  specnum_t temp;
   size_t length = ws.getNumberHistograms();
   // initial values
   min = max = ws.getSpectrum(0).getSpectrumNo();
   for (size_t i = 0; i < length; i++) {
-    temp = ws.getSpectrum(i).getSpectrumNo();
+    const auto temp = ws.getSpectrum(i).getSpectrumNo();
     // Adjust min/max
     if (temp < min)
       min = temp;

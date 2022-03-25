@@ -27,7 +27,7 @@ std::map<IqtFunctionModel::ParamID, QString> g_paramName{{IqtFunctionModel::Para
                                                          {IqtFunctionModel::ParamID::BG_A0, "A0"}};
 }
 
-IqtFunctionModel::IqtFunctionModel() {}
+IqtFunctionModel::IqtFunctionModel() = default;
 
 void IqtFunctionModel::clearData() {
   m_numberOfExponentials = 0;
@@ -108,8 +108,8 @@ void IqtFunctionModel::addFunction(const QString &prefix, const QString &funStr)
     if (ne > 1)
       throw std::runtime_error("Cannot add more exponentials.");
     setNumberOfExponentials(ne + 1);
-    if (auto const prefix = getExp2Prefix()) {
-      newPrefix = *prefix;
+    if (auto const exp2Prefix = getExp2Prefix()) {
+      newPrefix = *exp2Prefix;
     } else {
       newPrefix = *getExp1Prefix();
     }

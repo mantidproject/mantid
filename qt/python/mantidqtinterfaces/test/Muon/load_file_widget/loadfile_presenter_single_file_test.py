@@ -5,6 +5,7 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 import unittest
+import time
 
 from unittest import mock
 from mantidqt.utils.qt.testing import start_qapplication
@@ -29,8 +30,9 @@ class LoadFileWidgetPresenterTest(unittest.TestCase):
         return run_twice
 
     def wait_for_thread(self, thread_model):
-        if thread_model:
-            thread_model._thread.wait()
+        if thread_model and thread_model.worker:
+            while thread_model.worker.is_alive():
+                time.sleep(0.1)
             QApplication.sendPostedEvents()
 
     def setUp(self):
@@ -240,6 +242,40 @@ class LoadFileWidgetPresenterTest(unittest.TestCase):
         self.assertEqual(self.model.loaded_runs, [[1234]])
 
         self.assertEqual(self.view.reset_edit_to_cached_value.call_count, 1)
+
+    def test_on_loading_finished(self):
+        self.model.get_instrument_from_latest_run = mock.Mock(return_value="MUSR")
+        self.presenter._multiple_files = False
+        self.presenter.filenames = ["unit test"]
+        self.model._loaded_data_store.get_data = mock.Mock(return_value= True)
+        self.model.get_data = mock.Mock(return_value={'run':1})
+        self.presenter.enable_loading = mock.Mock()
+        self.presenter.set_file_edit = mock.Mock()
+        self.view.notify_loading_finished = mock.Mock()
+
+        self.presenter.on_loading_finished()
+
+        self.presenter.enable_loading.assert_called_once_with()
+        self.presenter.set_file_edit.assert_called_once_with(["unit test"])
+        self.view.notify_loading_finished.assert_called_once_with()
+        self.view.warning_popup.assert_not_called()
+
+    def test_on_loading_finished_fail(self):
+        self.model.get_instrument_from_latest_run = mock.Mock(return_value="MUSR")
+        self.presenter._multiple_files = False
+        self.presenter.filenames = ["unit test"]
+        self.model._loaded_data_store.get_data = mock.Mock(return_value= False)
+        self.model.get_data = mock.Mock(return_value={})
+        self.presenter.enable_loading = mock.Mock()
+        self.presenter.set_file_edit = mock.Mock()
+        self.view.notify_loading_finished = mock.Mock()
+
+        self.presenter.on_loading_finished()
+
+        self.presenter.enable_loading.assert_called_once_with()
+        self.presenter.set_file_edit.assert_called_once_with([])
+        self.view.notify_loading_finished.assert_called_once_with()
+        self.view.warning_popup.assert_called_once()
 
 
 if __name__ == '__main__':

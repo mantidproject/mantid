@@ -31,6 +31,9 @@ class ErrorReportPresenterTest(unittest.TestCase):
         self.app_name = 'ErrorReportPresenterTest'
         self.error_report_presenter = ErrorReporterPresenter(
             self.view, self.exit_code, application=self.app_name)
+        self.view.CONTACT_INFO = "ContactInfo"
+        self.view.NAME = 'John Smith'
+        self.view.EMAIL = 'john.smith@example.com'
 
     def test_sets_logger_view_and_exit_code_upon_construction(self):
         self.assertEqual(self.error_report_presenter._exit_code, self.exit_code)
@@ -53,7 +56,7 @@ class ErrorReportPresenterTest(unittest.TestCase):
 
     def test_send_error_report_to_server_calls_ErrorReport_correctly(self):
         name = 'John Smith'
-        email = 'john.smith@email.com'
+        email = 'john.smith@example.com'
         text_box = 'details of error'
         uptime = 'time_string'
         self.errorreport_mock_instance.sendErrorReport.return_value = 201
@@ -67,7 +70,7 @@ class ErrorReportPresenterTest(unittest.TestCase):
     def test_send_error_report_to_server_calls_ErrorReport_correctly_and_triggers_view_upon_failure(
             self):
         name = 'John Smith'
-        email = 'john.smith@email.com'
+        email = 'john.smith@example.com'
         uptime = 'time_string'
         text_box = 'details of error'
 
@@ -84,7 +87,7 @@ class ErrorReportPresenterTest(unittest.TestCase):
 
     def test_error_handler_share_all_sunny_day_case(self):
         name = 'John Smith'
-        email = 'john.smith@email.com'
+        email = 'john.smith@example.com'
         text_box = 'Details about error'
         continue_working = False
         share = 0
@@ -99,7 +102,7 @@ class ErrorReportPresenterTest(unittest.TestCase):
 
     def test_error_handler_share_non_id_sunny_day_case(self):
         name = 'John Smith'
-        email = 'john.smith@email.com'
+        email = 'john.smith@example.com'
         text_box = 'Details about error'
         continue_working = True
         share = 1
@@ -114,7 +117,7 @@ class ErrorReportPresenterTest(unittest.TestCase):
 
     def test_error_handler_share_nothing_sunny_day_case(self):
         name = 'John Smith'
-        email = 'john.smith@email.com'
+        email = 'john.smith@example.com'
         text_box = 'Details about error'
         continue_working = True
         share = 2

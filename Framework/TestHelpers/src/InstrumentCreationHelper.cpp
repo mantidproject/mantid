@@ -4,7 +4,7 @@
 //   NScD Oak Ridge National Laboratory, European Spallation Source,
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#include "MantidTestHelpers/InstrumentCreationHelper.h"
+#include "MantidFrameworkTestHelpers/InstrumentCreationHelper.h"
 
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/MatrixWorkspace.h"
@@ -83,6 +83,48 @@ void addFullInstrumentToWorkspace(MatrixWorkspace &workspace, bool includeMonito
   workspace.setInstrument(instrument);
 }
 
+void addInstrumentWithGeographicalDetectorsToWorkspace(Mantid::API::MatrixWorkspace &workspace, const int nlat,
+                                                       const int nlong, const double anginc,
+                                                       const std::string &instrumentName) {
+  V3D samplePosition(0., 0., 0.);
+  V3D sourcePosition(0., 0., -14.);
+
+  Instrument_sptr instrument = std::make_shared<Instrument>(instrumentName);
+  instrument->setReferenceFrame(
+      std::make_shared<ReferenceFrame>(Mantid::Geometry::Y, Mantid::Geometry::Z, Right, "0,0,0"));
+
+  InstrumentCreationHelper::addSource(instrument, sourcePosition, "source");
+  InstrumentCreationHelper::addSample(instrument, samplePosition, "sample");
+
+  auto compAss = new ObjCompAssembly("detector-stage");
+  // set up detectors with even spacing in latitude and longitude (to match geographical angles
+  // approach used in the spatial interpolation\sparse instrument functionality)
+  int i = 0;
+  constexpr double deg2rad = M_PI / 180.0;
+  const double angincRad = anginc * deg2rad;
+  constexpr double R = 1.0;
+  for (int lat = 0; lat < nlat; ++lat) {
+    for (int lng = 0; lng < nlong; ++lng) {
+      std::stringstream buffer;
+      buffer << "detector_" << i;
+      V3D detPos;
+      auto latrad = lat * angincRad;
+      auto longrad = lng * angincRad;
+      detPos[1] = R * sin(latrad);
+      const double ct = R * cos(latrad);
+      detPos[2] = ct * cos(longrad);
+      detPos[0] = ct * sin(longrad);
+
+      InstrumentCreationHelper::addDetector(instrument, detPos, i, buffer.str(), compAss);
+      // Link it to the workspace
+      workspace.getSpectrum(i).addDetectorID(i);
+      i++;
+    }
+  }
+  instrument->add(compAss);
+  workspace.setInstrument(instrument);
+}
+
 /** Adds a component to an instrument
  *
  * @param instrument :: instrument to which the component will be added
@@ -143,13 +185,18 @@ void addMonitor(Mantid::Geometry::Instrument_sptr &instrument, const Mantid::Ker
  * @param position :: position of the detector
  * @param ID :: identification number of the detector
  * @param name :: name of the detector
+ * @param compAss :: optional component assembly (to help with saving geometry with SaveNexusESS)
  */
 void addDetector(Mantid::Geometry::Instrument_sptr &instrument, const Mantid::Kernel::V3D &position, const int ID,
-                 const std::string &name) {
+                 const std::string &name, Mantid::Geometry::ObjCompAssembly *compAss) {
   // Where 0.01 is half detector width etc.
   Detector *detector = new Detector(name, ID, ComponentCreationHelper::createCuboid(0.01, 0.02, 0.03), nullptr);
   detector->setPos(position);
-  instrument->add(detector);
   instrument->markAsDetector(detector);
+  if (compAss) {
+    compAss->add(detector);
+  } else {
+    instrument->add(detector);
+  }
 }
 } // namespace InstrumentCreationHelper

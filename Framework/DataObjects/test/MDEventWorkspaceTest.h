@@ -16,12 +16,12 @@
 #include "MantidDataObjects/MDEventWorkspace.h"
 #include "MantidDataObjects/MDGridBox.h"
 #include "MantidDataObjects/MDLeanEvent.h"
+#include "MantidFrameworkTestHelpers/MDEventsTestHelper.h"
 #include "MantidGeometry/MDGeometry/MDBoxImplicitFunction.h"
 #include "MantidGeometry/MDGeometry/MDDimensionExtents.h"
 #include "MantidGeometry/MDGeometry/MDHistoDimension.h"
 #include "MantidGeometry/MDGeometry/QSample.h"
 #include "MantidKernel/Timer.h"
-#include "MantidTestHelpers/MDEventsTestHelper.h"
 #include "PropertyManagerHelper.h"
 #include <cmath>
 #include <cxxtest/TestSuite.h>
@@ -202,9 +202,9 @@ public:
     //    bc->setSplitThreshold(100);
     //    ew->splitBox();
     //
-    //    typedef MDGridBox<MDLeanEvent<1>,1> gbox_t;
-    //    typedef MDBox<MDLeanEvent<1>,1> box_t;
-    //    typedef MDBoxBase<MDLeanEvent<1>,1> ibox_t;
+    //    using gbox_t = MDGridBox<MDLeanEvent<1>,1>;
+    //    using box_t = MDBox<MDLeanEvent<1>,1>;
+    //    using ibox_t = MDBoxBase<MDLeanEvent<1>,1>;
     //
     //    // Make 99 events
     //    coord_t centers[1] = {0};

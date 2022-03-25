@@ -28,6 +28,7 @@ using IndirectFitDataCollectionType = IndexCollectionType<WorkspaceID, std::uniq
 class MANTIDQT_INDIRECT_DLL IIndirectFitDataModel {
 public:
   virtual ~IIndirectFitDataModel() = default;
+  virtual std::vector<IndirectFitData> *getFittingData() = 0;
   virtual bool hasWorkspace(std::string const &workspaceName) const = 0;
   virtual Mantid::API::MatrixWorkspace_sptr getWorkspace(WorkspaceID workspaceID) const = 0;
   virtual FunctionModelSpectra getSpectra(WorkspaceID workspaceID) const = 0;
@@ -55,8 +56,10 @@ public:
   virtual std::vector<double> getExcludeRegionVector(WorkspaceID workspaceID, WorkspaceIndex spectrum) const = 0;
   virtual void setStartX(double startX, WorkspaceID workspaceID, WorkspaceIndex spectrum) = 0;
   virtual void setStartX(double startX, WorkspaceID workspaceID) = 0;
+  virtual void setStartX(double startX, FitDomainIndex fitDomainIndex) = 0;
   virtual void setEndX(double endX, WorkspaceID workspaceID, WorkspaceIndex spectrum) = 0;
   virtual void setEndX(double endX, WorkspaceID workspaceID) = 0;
+  virtual void setEndX(double startX, FitDomainIndex fitDomainIndex) = 0;
   virtual void setExcludeRegion(const std::string &exclude, WorkspaceID workspaceID, WorkspaceIndex spectrum) = 0;
   virtual void setResolution(const std::string &name) = 0;
   virtual void setResolution(const std::string &name, WorkspaceID workspaceID) = 0;

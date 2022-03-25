@@ -56,6 +56,7 @@ public:
   MOCK_CONST_METHOD0(getAlphaValue, std::string());
   MOCK_CONST_METHOD0(isAlphaEnabled, bool());
 
+  MOCK_METHOD1(setFileExtensions, void(const std::vector<std::string> &extensions));
   MOCK_METHOD0(initialize, void());
   MOCK_METHOD2(setDataCurve, void(MatrixWorkspace_sptr workspace, const std::size_t &workspaceIndex));
   MOCK_METHOD1(displayError, void(const std::string &));
@@ -150,6 +151,8 @@ public:
     MockALCDataLoadingView view;
     ALCDataLoadingPresenter presenter(&view);
     EXPECT_CALL(view, initialize());
+    std::vector<std::string> expected{".nxs", ".nxs_v2", ".bin"};
+    EXPECT_CALL(view, setFileExtensions(expected));
     presenter.initialize();
   }
 
@@ -235,11 +238,46 @@ public:
     m_view->foundRuns();
   }
 
-  void test_badCustomGrouping() {
+  void test_badCustomGroupingOutofRange() {
     ON_CALL(*m_view, detectorGroupingType()).WillByDefault(Return("Custom"));
     ON_CALL(*m_view, getForwardGrouping()).WillByDefault(Return("1-48"));
     // Too many detectors (MUSR has only 64)
     ON_CALL(*m_view, getBackwardGrouping()).WillByDefault(Return("49-96"));
+
+    EXPECT_CALL(*m_view, enableLoad(true)).Times(1);
+    EXPECT_CALL(*m_view, setLoadStatus(foundString, "green")).Times(1);
+    EXPECT_CALL(*m_view, setLoadStatus(loadingString, "orange")).Times(1);
+    EXPECT_CALL(*m_view, setLoadStatus("Error", "red")).Times(1);
+    EXPECT_CALL(*m_view, enableRunsAutoAdd(false)).Times(1);
+    EXPECT_CALL(*m_view, enableAll()).Times(1);
+    EXPECT_CALL(*m_view, displayError(StrNe(""))).Times(1);
+
+    m_view->foundRuns();
+    m_view->requestLoading();
+  }
+
+  void test_badCustomGroupingLetter() {
+    ON_CALL(*m_view, detectorGroupingType()).WillByDefault(Return("Custom"));
+    ON_CALL(*m_view, getForwardGrouping()).WillByDefault(Return("1,2"));
+    ON_CALL(*m_view, getBackwardGrouping()).WillByDefault(Return("3,a"));
+
+    EXPECT_CALL(*m_view, enableLoad(true)).Times(1);
+    EXPECT_CALL(*m_view, setLoadStatus(foundString, "green")).Times(1);
+    EXPECT_CALL(*m_view, setLoadStatus(loadingString, "orange")).Times(1);
+    EXPECT_CALL(*m_view, setLoadStatus("Error", "red")).Times(1);
+    EXPECT_CALL(*m_view, enableRunsAutoAdd(false)).Times(1);
+    EXPECT_CALL(*m_view, enableAll()).Times(1);
+    EXPECT_CALL(*m_view, displayError(StrNe(""))).Times(1);
+
+    m_view->foundRuns();
+    m_view->requestLoading();
+  }
+
+  void test_badCustomGroupingDecimal() {
+    ON_CALL(*m_view, detectorGroupingType()).WillByDefault(Return("Custom"));
+    ON_CALL(*m_view, getForwardGrouping()).WillByDefault(Return("1.2,2"));
+    // Too many detectors (MUSR has only 64)
+    ON_CALL(*m_view, getBackwardGrouping()).WillByDefault(Return("3,4"));
 
     EXPECT_CALL(*m_view, enableLoad(true)).Times(1);
     EXPECT_CALL(*m_view, setLoadStatus(foundString, "green")).Times(1);

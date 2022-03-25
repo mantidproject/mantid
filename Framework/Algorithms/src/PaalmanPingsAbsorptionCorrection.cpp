@@ -52,7 +52,8 @@ PaalmanPingsAbsorptionCorrection::PaalmanPingsAbsorptionCorrection()
       m_sample_containerL1s(), m_sampleElementVolumes(), m_sampleElementPositions(), m_numSampleVolumeElements(0),
       m_sampleVolume(0.0), m_containerL1s(), m_container_sampleL1s(), m_containerElementVolumes(),
       m_containerElementPositions(), m_numContainerVolumeElements(0), m_containerVolume(0.0),
-      m_ampleLinearCoefTotScatt(0), m_containerLinearCoefTotScatt(0), m_num_lambda(0), m_xStep(0), m_cubeSide(0.0) {}
+      m_ampleLinearCoefTotScatt(0), m_containerLinearCoefTotScatt(0), m_num_lambda(0), m_xStep(0),
+      m_cubeSideSample(0.0), m_cubeSideContainer(0.0) {}
 
 void PaalmanPingsAbsorptionCorrection::init() {
 
@@ -75,6 +76,10 @@ void PaalmanPingsAbsorptionCorrection::init() {
   auto moreThanZero = std::make_shared<BoundedValidator<double>>();
   moreThanZero->setLower(0.001);
   declareProperty("ElementSize", 1.0, moreThanZero, "The size of one side of an integration element cube in mm");
+
+  declareProperty("ContainerElementSize", EMPTY_DBL(),
+                  "The size of one side of an integration element cube in mm for container."
+                  "Default to be the same as ElementSize.");
 }
 
 std::map<std::string, std::string> PaalmanPingsAbsorptionCorrection::validateInputs() {
@@ -158,7 +163,7 @@ void PaalmanPingsAbsorptionCorrection::exec() {
   // Loop over the spectra
   PARALLEL_FOR_IF(Kernel::threadSafe(*m_inputWS, *ass, *assc, *acc, *acsc))
   for (int64_t i = 0; i < int64_t(numHists); ++i) {
-    PARALLEL_START_INTERUPT_REGION
+    PARALLEL_START_INTERRUPT_REGION
     // Copy over bins
     ass->setSharedX(i, m_inputWS->sharedX(i));
     assc->setSharedX(i, m_inputWS->sharedX(i));
@@ -242,9 +247,9 @@ void PaalmanPingsAbsorptionCorrection::exec() {
 
     prog.report();
 
-    PARALLEL_END_INTERUPT_REGION
+    PARALLEL_END_INTERRUPT_REGION
   }
-  PARALLEL_CHECK_INTERUPT_REGION
+  PARALLEL_CHECK_INTERRUPT_REGION
 
   g_log.information() << "Total number of elements in the integration was " << m_sampleL1s.size() << '\n';
 
@@ -281,7 +286,7 @@ void PaalmanPingsAbsorptionCorrection::initialiseCachedDistances() {
     integrationVolume = constructGaugeVolume();
   }
 
-  auto raster = Geometry::Rasterize::calculate(m_beamDirection, *integrationVolume, m_cubeSide);
+  auto raster = Geometry::Rasterize::calculate(m_beamDirection, *integrationVolume, m_cubeSideSample);
   m_sampleVolume = raster.totalvolume;
   if (raster.l1.size() == 0)
     throw std::runtime_error("Failed to rasterize shape");
@@ -297,7 +302,7 @@ void PaalmanPingsAbsorptionCorrection::initialiseCachedDistances() {
     integrationVolume = constructGaugeVolume();
   }
 
-  raster = Geometry::Rasterize::calculate(m_beamDirection, *integrationVolume, m_cubeSide);
+  raster = Geometry::Rasterize::calculate(m_beamDirection, *integrationVolume, m_cubeSideContainer);
   m_containerVolume = raster.totalvolume;
   if (raster.l1.size() == 0)
     throw std::runtime_error("Failed to rasterize shape");
@@ -354,8 +359,11 @@ void PaalmanPingsAbsorptionCorrection::retrieveBaseProperties() {
   m_num_lambda = getProperty("NumberOfWavelengthPoints");
 
   // Call the virtual function for any further properties
-  m_cubeSide = getProperty("ElementSize"); // in mm
-  m_cubeSide *= 0.001;                     // now in m
+  m_cubeSideSample = getProperty("ElementSize"); // in mm
+  m_cubeSideSample *= 0.001;                     // now in m
+  // use the same elementsize for container if not specified, otherwise use the specified value
+  m_cubeSideContainer = getProperty("ContainerElementSize"); // in mm
+  m_cubeSideContainer = isDefault("ContainerElementSize") ? m_cubeSideSample : m_cubeSideContainer * 1e-3;
 }
 
 /// Create the sample object using the Geometry classes, or use the existing one

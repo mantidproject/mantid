@@ -40,3 +40,7 @@ class PlotModelFitPanePresenter(PlotFitPanePresenter):
         margin = self.context.plot_panes_context[self.name].settings.x_axis_margin
         x_offset = abs(x_upper - x_lower) * margin
         return [x_lower - x_offset, x_upper + x_offset]
+
+    def handle_rebin_options_changed(self):
+        # there is no way to rebin the data -> do nothing
+        return

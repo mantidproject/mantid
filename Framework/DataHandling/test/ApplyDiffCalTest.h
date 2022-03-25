@@ -13,7 +13,7 @@
 #include "MantidDataHandling/ApplyDiffCal.h"
 #include "MantidDataObjects/TableWorkspace.h"
 #include "MantidDataObjects/Workspace2D.h"
-#include "MantidTestHelpers/ComponentCreationHelper.h"
+#include "MantidFrameworkTestHelpers/ComponentCreationHelper.h"
 
 using namespace Mantid::API;
 using namespace Mantid::DataHandling;

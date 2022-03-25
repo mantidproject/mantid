@@ -8,17 +8,15 @@ import unittest
 
 from unittest import mock
 from mantidqt.utils.qt.testing import start_qapplication
-from mantidqt.utils.qt.testing.qt_widget_finder import QtWidgetFinder
 from mantidqtinterfaces.Muon.GUI.Common.contexts.plotting_context import PlottingContext
 from mantidqtinterfaces.Muon.GUI.Common.plot_widget.plotting_canvas.plotting_canvas_view import PlottingCanvasView
 from mantidqtinterfaces.Muon.GUI.Common.plot_widget.quick_edit.quick_edit_widget import QuickEditWidget
 
-from qtpy.QtWidgets import QApplication
 import numpy as np
 
 
 @start_qapplication
-class PlottingCanvasViewTest(unittest.TestCase, QtWidgetFinder):
+class PlottingCanvasViewTest(unittest.TestCase):
 
     def setUp(self):
         self.context = PlottingContext()
@@ -29,11 +27,9 @@ class PlottingCanvasViewTest(unittest.TestCase, QtWidgetFinder):
         self.view.fig.tight_layout = mock.Mock()
         self.view.show()
         self._count = -1
-        self.assert_widget_created()
 
     def tearDown(self):
         self.assertTrue(self.view.close())
-        QApplication.sendPostedEvents()
 
     def make_plot_side_effect(self, _unused):
         self._count +=1
@@ -300,6 +296,79 @@ class PlottingCanvasViewTest(unittest.TestCase, QtWidgetFinder):
         self.view.resizeEvent(mock.Mock())
         # one from start up
         self.assertEqual(1, self.view.fig.tight_layout.call_count)
+
+    def mock_axis(self):
+        axes = mock.Mock()
+        axes.cla = mock.Mock()
+        axes.tracked_workspaces = mock.Mock()
+        axes.tracked_workspaces.clear = mock.Mock()
+        axes.set_prop_cycle = mock.Mock()
+
+        return axes
+
+    def test_clear_all_workspaces_from_plot(self):
+        self.view.fig = mock.Mock()
+        axis = self.mock_axis()
+        self.view.fig.axes = [axis]
+
+        color_queue = mock.Mock()
+        color_queue.reset = mock.Mock()
+        self.view._color_queue = [color_queue]
+
+        shade_region = mock.Mock()
+        shade_region.remove = mock.Mock()
+        self.view._shaded_regions = [shade_region]
+
+        self.view.clear_all_workspaces_from_plot()
+
+        axis.cla.assert_called_once_with()
+        axis.tracked_workspaces.clear.assert_called_once_with()
+        axis.set_prop_cycle.assert_called_once_with(None)
+
+        color_queue.reset.assert_called_once_with()
+
+        shade_region.remove.assert_called_once_with()
+
+    def test_add_shaded_region(self):
+        self.view.fig.axes = [1,2]
+        x_data = [0,1,2,3]
+        y1_data = [1,2,3,4]
+        y2_data = [ 4,3,2,1]
+        axis = 1
+        name = "unit test"
+
+        self.assertEqual(self.view._shaded_regions, {})
+
+        self.view.add_shaded_region(name, axis, x_data, y1_data, y2_data)
+
+        self.assertEqual(list(self.view._shaded_regions.keys()), [name])
+        self.assertEqual(self.view._shaded_regions[name].axis, 2)
+        self.assertEqual(self.view._shaded_regions[name].x_values, x_data)
+        self.assertEqual(self.view._shaded_regions[name].y1_values, y1_data)
+        self.assertEqual(self.view._shaded_regions[name].y2_values, y2_data)
+
+    def test_update_shaded_region(self):
+        self.view.fig.axes = [1,2]
+        x_data = [0,1,2,3]
+        y1_data = [1,2,3,4]
+        y2_data = [ 4,3,2,1]
+        axis = 1
+        name = "unit test"
+
+        self.assertEqual(self.view._shaded_regions, {})
+
+        self.view.add_shaded_region(name, axis, x_data, y1_data, y2_data)
+
+        new_x = [5,4,3,2,1]
+        new_y1 = [4,2,0,-2,-4]
+        new_y2 = [1,2,3,4,5]
+
+        self.view.add_shaded_region(name, axis, new_x, new_y1, new_y2)
+        self.assertEqual(list(self.view._shaded_regions.keys()), [name])
+        self.assertEqual(self.view._shaded_regions[name].axis, 2)
+        self.assertEqual(self.view._shaded_regions[name].x_values, new_x)
+        self.assertEqual(self.view._shaded_regions[name].y1_values, new_y1)
+        self.assertEqual(self.view._shaded_regions[name].y2_values, new_y2)
 
 
 if __name__ == '__main__':

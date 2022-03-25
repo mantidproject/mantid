@@ -13,7 +13,7 @@
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/ParamFunction.h"
 #include "MantidAPI/ParameterTie.h"
-#include "MantidTestHelpers/FakeObjects.h"
+#include "MantidFrameworkTestHelpers/FakeObjects.h"
 #include "PropertyManagerHelper.h"
 
 #include <cxxtest/TestSuite.h>
@@ -40,7 +40,7 @@ public:
     }
   }
 
-  ~MocMatrixWorkspace() override {}
+  ~MocMatrixWorkspace() override = default;
 
   // Section required for iteration
   /// Returns the number of single indexable items in the workspace

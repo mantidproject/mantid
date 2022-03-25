@@ -14,8 +14,8 @@
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidAlgorithms/CompareWorkspaces.h"
 #include "MantidDataObjects/TableWorkspace.h"
+#include "MantidFrameworkTestHelpers/MuonWorkspaceCreationHelper.h"
 #include "MantidMuon/ApplyMuonDetectorGrouping.h"
-#include "MantidTestHelpers/MuonWorkspaceCreationHelper.h"
 
 using namespace Mantid;
 using namespace Mantid::Kernel;

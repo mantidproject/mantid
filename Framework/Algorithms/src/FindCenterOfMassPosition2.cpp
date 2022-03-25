@@ -5,7 +5,6 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAlgorithms/FindCenterOfMassPosition2.h"
-#include "MantidAPI/HistogramValidator.h"
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/TableRow.h"
@@ -40,7 +39,6 @@ void FindCenterOfMassPosition2::init() {
   const auto wsValidator = std::make_shared<CompositeValidator>();
   const auto positiveDouble = std::make_shared<BoundedValidator<double>>();
 
-  wsValidator->add<HistogramValidator>();
   declareProperty(std::make_unique<WorkspaceProperty<>>("InputWorkspace", "", Direction::Input, wsValidator));
   declareProperty("Output", "",
                   "If not empty, a table workspace of that "
@@ -114,8 +112,8 @@ double updateBoundingBox(WorkspaceBoundingBox &boundingBox, WorkspaceBoundingBox
  *  @param numSpec  :: number of spectrum in the workspace to iterate through
  *  @param progress :: object for reporting progress of the operation
  */
-void FindCenterOfMassPosition2::findCenterOfMass(API::MatrixWorkspace_sptr inputWS, double &centerX, double &centerY,
-                                                 const int numSpec, Progress &progress) {
+void FindCenterOfMassPosition2::findCenterOfMass(const API::MatrixWorkspace_sptr &inputWS, double &centerX,
+                                                 double &centerY, const int numSpec, Progress &progress) {
   const double tolerance = getProperty("Tolerance");
   const bool directBeam = getProperty("DirectBeam");
   const double beamRadius = getProperty("BeamRadius");

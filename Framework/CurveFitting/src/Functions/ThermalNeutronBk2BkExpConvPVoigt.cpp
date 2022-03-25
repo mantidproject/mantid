@@ -169,7 +169,7 @@ void ThermalNeutronBk2BkExpConvPVoigt::getMillerIndex(int& h, int &k, int &l)
  * Exception: if the peak profile parameter is not in this peak, then
  *            return an Empty_DBL
  */
-double ThermalNeutronBk2BkExpConvPVoigt::getPeakParameter(std::string paramname) {
+double ThermalNeutronBk2BkExpConvPVoigt::getPeakParameter(const std::string &paramname) {
   // 1. Calculate peak parameters if required
   if (m_hasNewParameterValue) {
     calculateParameters(false);
@@ -334,7 +334,7 @@ void ThermalNeutronBk2BkExpConvPVoigt::functionLocal(double *out, const double *
   // PARALLEL_SET_NUM_THREADS(8);
   // PARALLEL_FOR_NO_WSP_CHECK()
   for (size_t id = 0; id < nData; ++id) {
-    // PARALLEL_START_INTERUPT_REGION
+    // PARALLEL_START_INTERRUPT_REGION
 
     // a) Caclualte peak intensity
     double dT = xValues[id] - m_centre;
@@ -369,9 +369,9 @@ void ThermalNeutronBk2BkExpConvPVoigt::functionLocal(double *out, const double *
     }
     */
 
-    // PARALLEL_END_INTERUPT_REGION
+    // PARALLEL_END_INTERRUPT_REGION
   } // ENDFOR data points
-  // PARALLEL_CHECK_INTERUPT_REGION
+  // PARALLEL_CHECK_INTERRUPT_REGION
 }
 
 //----------------------------------------------------------------------------------------------

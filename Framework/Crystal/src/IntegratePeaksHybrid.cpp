@@ -169,7 +169,7 @@ void IntegratePeaksHybrid::exec() {
   PARALLEL_FOR_IF(Kernel::threadSafe(*peakWS))
   for (int i = 0; i < peakWS->getNumberPeaks(); ++i) {
 
-    PARALLEL_START_INTERUPT_REGION
+    PARALLEL_START_INTERRUPT_REGION
     Geometry::IPeak &peak = peakWS->getPeak(i);
     const V3D center = projection.peakCenter(peak);
 
@@ -236,9 +236,9 @@ void IntegratePeaksHybrid::exec() {
       peak.setSigmaIntensity(std::sqrt(integratedValues.get<1>()));
     }
     progress.report();
-    PARALLEL_END_INTERUPT_REGION
+    PARALLEL_END_INTERRUPT_REGION
   }
-  PARALLEL_CHECK_INTERUPT_REGION
+  PARALLEL_CHECK_INTERRUPT_REGION
 
   setProperty("OutputWorkspace", peakWS);
   setProperty("OutputWorkspaces", outImageResults);

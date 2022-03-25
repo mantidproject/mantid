@@ -40,6 +40,9 @@ _ADDITIONAL_MAINWINDOWS_PARENT = None
 # -----------------------------------------------------------------------------
 # Public Constants
 # -----------------------------------------------------------------------------
+# The strings APPNAME, ORG_DOMAIN, ORGANIZATION are duplicated
+# in mantidqt/dialogs/errorreports/main.py
+
 ORGANIZATION = 'mantidproject'
 ORG_DOMAIN = 'mantidproject.org'
 APPNAME = 'mantidworkbench'
@@ -80,6 +83,9 @@ DEFAULTS = {
         'prompt_save_editor_modified': True,
         'prompt_on_deleting_workspace': False,
         'save_altered_workspaces_only': False
+    },
+    'Editors': {
+        'completion_enabled': True,
     }
 }
 

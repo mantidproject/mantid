@@ -19,7 +19,7 @@ namespace Crystal {
    RHSWorkspace will
     only be matched to the first in the LHSWorkspace that is within tolerance.
 */
-class MANTID_CRYSTAL_DLL DiffPeaksWorkspaces : public API::Algorithm {
+class MANTID_CRYSTAL_DLL DiffPeaksWorkspaces final : public API::Algorithm {
 public:
   const std::string name() const override;
   /// Summary of algorithms purpose

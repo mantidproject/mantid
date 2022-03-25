@@ -114,14 +114,18 @@ void GenerateEventsFilter::init() {
                       std::make_unique<VisibleWhenProperty>("LogName", IS_NOT_EQUAL_TO, ""));
 
   declareProperty("TimeTolerance", 0.0,
-                  "Tolerance in time for the event times to keep; it is used in the case to filter by single value.");
+                  "Tolerance, in seconds, for the event times to keep.  It is used in the case to filter by single "
+                  "value. How TimeTolerance is applied is highly correlated to LogBoundary and PulseFilter.  Check the "
+                  "help or algorithm documents for details.");
   setPropertySettings("TimeTolerance", std::make_unique<VisibleWhenProperty>("LogName", IS_NOT_EQUAL_TO, ""));
 
   vector<string> logboundoptions{"Centre", "Left", "Other"};
   auto logvalidator = std::make_shared<StringListValidator>(logboundoptions);
   declareProperty("LogBoundary", "Centre", logvalidator,
-                  "How to treat log values as being measured in the centre of time\n"
-                  "There are three options, 'Centre', 'Left' and 'Other'. ");
+                  "How to treat log values as being measured in the centre of time. "
+                  "There are three options, 'Centre', 'Left' and 'Other'. "
+                  "This value must be set to Left if the sample log is recorded upon changing,"
+                  "which applies to most of the sample environment devices in SNS.");
   setPropertySettings("LogBoundary", std::make_unique<VisibleWhenProperty>("LogName", IS_NOT_EQUAL_TO, ""));
 
   declareProperty(
@@ -194,7 +198,7 @@ void GenerateEventsFilter::processInOutWorkspaces() {
     // Using default
     title = "Splitters";
   }
-  m_filterInfoWS = m_filterInfoWS = std::make_shared<TableWorkspace>();
+  m_filterInfoWS = std::make_shared<TableWorkspace>();
   m_filterInfoWS->setTitle(title);
   m_filterInfoWS->addColumn("int", "workspacegroup");
   m_filterInfoWS->addColumn("str", "title");
@@ -384,7 +388,7 @@ void GenerateEventsFilter::setFilterByTimeOnly() {
     if (isLogarithmic) {
       // if logarithmic, first an approximation of the value, then the final value depends if reverseLogarithmic is
       // used, because of the way the last bin is managed
-      double logSize = std::log(relativeEndTime_ns / relativeStartTime_ns) / std::log(1 + factor);
+      double logSize = std::log(relativeEndTime_ns / relativeStartTime_ns) / std::log1p(factor);
       if (!m_isReverseLogarithmic) {
         totalNumberOfSlices = static_cast<int>(std::ceil(logSize));
       } else {
@@ -1074,7 +1078,7 @@ void GenerateEventsFilter::makeMultipleFiltersByValuesParallel(const map<size_t,
 
     PRAGMA_OMP(parallel for schedule(dynamic, 1) )
     for (int i = 0; i < numThreads; ++i) {
-      PARALLEL_START_INTERUPT_REGION
+      PARALLEL_START_INTERRUPT_REGION
 
       int istart = vecStart[i];
       int iend = vecEnd[i];
@@ -1082,9 +1086,9 @@ void GenerateEventsFilter::makeMultipleFiltersByValuesParallel(const map<size_t,
       makeMultipleFiltersByValuesPartialLog(istart, iend, m_vecSplitterTimeSet[i], m_vecGroupIndexSet[i],
                                             indexwsindexmap, logvalueranges, tol, filterIncrease, filterDecrease,
                                             startTime, stopTime);
-      PARALLEL_END_INTERUPT_REGION
+      PARALLEL_END_INTERRUPT_REGION
     }
-    PARALLEL_CHECK_INTERUPT_REGION
+    PARALLEL_CHECK_INTERRUPT_REGION
 
     // Concatenate splitters on different threads together
     for (int i = 1; i < numThreads; ++i) {
@@ -1164,7 +1168,6 @@ void GenerateEventsFilter::makeMultipleFiltersByValuesPartialLog(
   const Types::Core::DateAndTime ZeroTime(0);
   int lastindex = -1;
   int currindex = -1;
-  DateAndTime lastTime;
   DateAndTime currTime = ZeroTime;
   DateAndTime start, stop;
   // size_t progslot = 0;
@@ -1182,7 +1185,6 @@ void GenerateEventsFilter::makeMultipleFiltersByValuesPartialLog(
     bool breakloop = false;
     bool createsplitter = false;
 
-    lastTime = currTime;
     currTime = m_dblLog->nthTime(i);
     double currValue = m_dblLog->nthValue(i);
 
@@ -1330,7 +1332,7 @@ void GenerateEventsFilter::makeMultipleFiltersByValuesPartialLog(
       currindex = -1;
 
       // Condition to generate a Splitter (close parenthesis)
-      if (!correctdir && start.totalNanoseconds() > 0) {
+      if (start.totalNanoseconds() > 0) {
         stop = currTime;
         createsplitter = true;
       }
@@ -1426,8 +1428,8 @@ void GenerateEventsFilter::processIntegerValueFilter(int minvalue, int maxvalue,
     // belonged to.
     if (currvalue >= minvalue && currvalue <= maxvalue) {
       // Log value is in specified range
-      if ((i == 0) || (i >= 1 && ((filterIncrease && vecValue[i] >= vecValue[i - 1]) ||
-                                  (filterDecrease && vecValue[i] <= vecValue[i - 1])))) {
+      if ((i == 0) || (filterIncrease && vecValue[i] >= vecValue[i - 1]) ||
+          (filterDecrease && vecValue[i] <= vecValue[i - 1])) {
         // First entry (regardless direction) and other entries considering
         // change of value
         if (singlevaluemode) {

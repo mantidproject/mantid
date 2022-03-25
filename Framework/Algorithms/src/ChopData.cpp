@@ -135,7 +135,7 @@ void ChopData::exec() {
 
       auto edges = inputWS->binEdges(j);
 
-      PARALLEL_START_INTERUPT_REGION;
+      PARALLEL_START_INTERRUPT_REGION;
 
       workspace->mutableX(j).assign(edges.cbegin() + indexLow, edges.cbegin() + indexLow + nbins + 1);
 
@@ -144,9 +144,9 @@ void ChopData::exec() {
       workspace->mutableY(j).assign(inputWS->y(j).cbegin() + indexLow, inputWS->y(j).cbegin() + indexLow + nbins);
 
       workspace->mutableE(j).assign(inputWS->e(j).cbegin() + indexLow, inputWS->e(j).cbegin() + indexLow + nbins);
-      PARALLEL_END_INTERUPT_REGION;
+      PARALLEL_END_INTERRUPT_REGION;
     }
-    PARALLEL_CHECK_INTERUPT_REGION;
+    PARALLEL_CHECK_INTERRUPT_REGION;
 
     // add the workspace to the AnalysisDataService
     std::stringstream name;

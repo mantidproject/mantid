@@ -39,12 +39,6 @@ workspace with that name, containing the two output parameters.
 Presently the DIFA parameter is always set to zero (see
 :ref:`algm-EnggFitTOFFromPeaks`).
 
-The script EnggUtils included with Mantid can produce a GSAS
-parameters file for the ENGIN-X instrument, given the DIFA, DIFC, and ZERO
-parameters for the instrument banks as produced by EnggCalibrate. This
-can be done with the write_ENGINX_GSAS_iparam_file() function as shown
-in the usage example below.
-
 See the algorithm :ref:`algm-EnggFocus` for details on the Vanadium
 corrections.
 
@@ -79,22 +73,9 @@ Usage
                                         VanIntegrationWorkspace=van_integ_ws,
                                         VanCurvesWorkspace=van_curves_ws,
                                         ExpectedPeaks=[1.09, 1.28, 2.1], Bank='2')
-
-    # You can produce an instrument parameters (iparam) file for GSAS.
-    # Note that this is very specific to ENGIN-X
-    GSAS_iparm_fname = 'ENGIN_X_banks.prm'
-    import EnggUtils
-    EnggUtils.write_ENGINX_GSAS_iparam_file(GSAS_iparm_fname, bank_names=['North', 'South'],
-                                            difa=[difa1, difa2], difc=[difc1, difc2], tzero=[tzero1, tzero2])
-
-    import math
     tbl = mtd[out_tbl_name]
-
     print("The output table has {0} row(s)".format(tbl.rowCount()))
 
-    import os
-    print("Output GSAS iparam file was written? {0}".format(os.path.exists(GSAS_iparm_fname)))
-    print("Number of lines of the GSAS iparam file: {0}".format(sum(1 for line in open(GSAS_iparm_fname))))
 
 .. testcleanup:: ExampleCalib
 
@@ -103,12 +84,10 @@ Usage
    DeleteWorkspace(van_integ_ws)
    DeleteWorkspace(van_curves_ws)
 
-   os.remove(GSAS_iparm_fname)
 
 Output:
 
 .. testoutput:: ExampleCalib
 
    The output table has 1 row(s)
-   Output GSAS iparam file was written? True
-   Number of lines of the GSAS iparam file: 36
+

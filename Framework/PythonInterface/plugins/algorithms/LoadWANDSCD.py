@@ -256,7 +256,7 @@ class LoadWANDSCD(PythonAlgorithm):
 
         try:
             ub = np.array(re.findall(r'-?\d+\.*\d*',
-                                     _tmp_ws.run().getProperty('HB2C:CS:CrystalAlign:UBMatrix').value[0]), dtype=np.float).reshape(3, 3)
+                                     _tmp_ws.run().getProperty('HB2C:CS:CrystalAlign:UBMatrix').value[0]), dtype=float).reshape(3, 3)
             sgl = np.deg2rad(_tmp_ws.run().getProperty('HB2C:Mot:sgl.RBV').value[0])  # 'HB2C:Mot:sgl.RBV,1,0,0,-1'
             sgu = np.deg2rad(_tmp_ws.run().getProperty('HB2C:Mot:sgu.RBV').value[0])  # 'HB2C:Mot:sgu.RBV,0,0,1,-1'
             sgl_a = np.array([[1, 0, 0], [0, np.cos(sgl), np.sin(sgl)], [0, -np.sin(sgl), np.cos(sgl)]])

@@ -50,7 +50,7 @@ class DynamicPropertiesWidget;
   @author Martyn Gigg, Tessella plc
   @date 31/01/2011
 */
-class FitDialog : public API::AlgorithmDialog {
+class FitDialog final : public API::AlgorithmDialog {
   Q_OBJECT
 
 public:

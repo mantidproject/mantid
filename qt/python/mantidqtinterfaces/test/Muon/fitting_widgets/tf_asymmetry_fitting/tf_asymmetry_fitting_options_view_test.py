@@ -8,25 +8,20 @@ import unittest
 
 from mantidqt.utils.qt.line_edit_double_validator import LineEditDoubleValidator
 from mantidqt.utils.qt.testing import start_qapplication
-from mantidqt.utils.qt.testing.qt_widget_finder import QtWidgetFinder
 
 from mantidqtinterfaces.Muon.GUI.Common.fitting_widgets.tf_asymmetry_fitting.tf_asymmetry_fitting_options_view import \
     TFAsymmetryFittingOptionsView
 
-from qtpy.QtWidgets import QApplication
-
 
 @start_qapplication
-class TFAsymmetryFittingOptionsViewTest(unittest.TestCase, QtWidgetFinder):
+class TFAsymmetryFittingOptionsViewTest(unittest.TestCase):
 
     def setUp(self):
         self.view = TFAsymmetryFittingOptionsView()
         self.view.show()
-        self.assert_widget_created()
 
     def tearDown(self):
         self.assertTrue(self.view.close())
-        QApplication.sendPostedEvents()
 
     def test_that_the_view_has_been_initialized_with_a_normalisation_line_edit_which_has_a_validator(self):
         self.assertTrue(isinstance(self.view.normalisation_line_edit.validator(), LineEditDoubleValidator))

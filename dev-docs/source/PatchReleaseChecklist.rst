@@ -35,8 +35,8 @@ Development
 The patch release will be prepared based off the tag used to mark
 the last minor release. A branch called ``release-next`` will be created from this tag.
 Changes for the patch should be made using the standard GitHub
-workflow for merging code with ``master``. The issue and pull request should then have the ``PatchCandidate`` label applied to them. These
-commits will then be cherry picked from ``master`` on to the release branch.
+workflow for merging code with ``main``. The issue and pull request should then have the ``PatchCandidate`` label applied to them. These
+commits will then be cherry picked from ``main`` on to the release branch.
 
 Release Branch
 ##############
@@ -53,7 +53,7 @@ Release Notes
 
 Once the patch version has been unfixed the main reviewer should
 create a skeleton set of patch release notes on the release branch
-using the `python helper tool <https://www.github.com/mantidproject/mantid/blob/master/tools/release_generator/patch.py>`__.
+using the `python helper tool <https://www.github.com/mantidproject/mantid/blob/main/tools/release_generator/patch.py>`__.
 
 Cherry Picking & Code Review
 ----------------------------
@@ -138,6 +138,8 @@ Once the testing has passed:
   deploy an MPI version of the patch release.
 * Create new DOI using the scripts in the codebase and instructions on
   :ref:`release checklist <ReleaseChecklist>`.
+* Open a PR to update the relevant metadata in the ``CITATION.cff`` file as
+  explained in the :ref:`release checklist <ReleaseChecklist>`.
 * Send an email, including the text of the release notes, to the
   following lists
 * ``nobugs@nobugsconference.org``

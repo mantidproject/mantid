@@ -1,8 +1,4 @@
-set(TEST_PY_FILES
-    toml_parser_test.py
-    toml_v1_parser_test.py
-    toml_v1_schema_test.py
-)
+set(TEST_PY_FILES toml_parser_test.py toml_v1_parser_test.py toml_v1_schema_test.py)
 
 add_subdirectory(parser_helpers)
 

@@ -38,8 +38,7 @@ Logger g_log("FacilityInfo");
  */
 FacilityInfo::FacilityInfo(const Poco::XML::Element *elem)
     : m_catalogs(elem), m_name(elem->getAttribute("name")), m_timezone(), m_zeroPadding(0), m_delimiter(),
-      m_extensions(), m_archiveSearch(), m_instruments(), m_noFilePrefix(), m_multiFileLimit(100),
-      m_computeResources() {
+      m_extensions(), m_archiveSearch(), m_instruments(), m_noFilePrefix(), m_multiFileLimit(100) {
 
   // Fill the various fields from the XML
   fillZeroPadding(elem);
@@ -47,7 +46,6 @@ FacilityInfo::FacilityInfo(const Poco::XML::Element *elem)
   fillExtensions(elem);
   fillArchiveNames(elem);
   fillTimezone(elem);
-  fillComputeResources(elem);
   fillNoFilePrefix(elem);
   fillMultiFileLimit(elem);
   fillInstruments(elem); // Make sure this is last as it picks up some defaults
@@ -118,8 +116,8 @@ void FacilityInfo::fillArchiveNames(const Poco::XML::Element *elem) {
   } else if (pNL_archives->length() == 1) {
     Poco::AutoPtr<Poco::XML::NodeList> pNL_interfaces = elem->getElementsByTagName("archiveSearch");
     for (unsigned int i = 0; i < pNL_interfaces->length(); ++i) {
-      auto *elem = dynamic_cast<Poco::XML::Element *>(pNL_interfaces->item(i));
-      std::string plugin = elem->getAttribute("plugin");
+      auto *elemenent = dynamic_cast<Poco::XML::Element *>(pNL_interfaces->item(i));
+      std::string plugin = elemenent->getAttribute("plugin");
       if (!plugin.empty()) {
         m_archiveSearch.emplace_back(plugin);
       }
@@ -149,10 +147,10 @@ void FacilityInfo::fillInstruments(const Poco::XML::Element *elem) {
   m_instruments.reserve(n);
 
   for (unsigned long i = 0; i < n; ++i) {
-    auto *elem = dynamic_cast<Poco::XML::Element *>(pNL_instrument->item(i));
-    if (elem) {
+    auto *elemenent = dynamic_cast<Poco::XML::Element *>(pNL_instrument->item(i));
+    if (elemenent) {
       try {
-        InstrumentInfo instr(this, elem);
+        InstrumentInfo instr(this, elemenent);
         m_instruments.emplace_back(instr);
       } catch (std::runtime_error &e) { /*skip this instrument*/
         g_log.warning("Failed to load instument for: " + m_name + ": " + e.what());
@@ -162,32 +160,6 @@ void FacilityInfo::fillInstruments(const Poco::XML::Element *elem) {
 
   if (m_instruments.empty()) {
     throw std::runtime_error("Facility " + m_name + " does not have any instruments;");
-  }
-}
-
-/// Called from constructor to fill compute resources map
-void FacilityInfo::fillComputeResources(const Poco::XML::Element *elem) {
-  Poco::AutoPtr<Poco::XML::NodeList> pNL_compute = elem->getElementsByTagName("computeResource");
-  unsigned long n = pNL_compute->length();
-  for (unsigned long i = 0; i < n; i++) {
-    auto *elem = dynamic_cast<Poco::XML::Element *>(pNL_compute->item(i));
-
-    if (elem) {
-      try {
-        ComputeResourceInfo cr(this, elem);
-        m_computeResInfos.emplace_back(cr);
-
-        g_log.debug() << "Compute resource found: " << cr << '\n';
-      } catch (std::runtime_error &e) { // next resource...
-        g_log.warning("Failed to load compute resource for: " + m_name + ": " + e.what());
-      }
-
-      std::string name = elem->getAttribute("name");
-      // TODO: this is a bit of duplicate effort at the moment, until
-      // RemoteJobManager goes away from here (then this would be
-      // removed), see header for details.
-      m_computeResources.emplace(name, std::make_shared<RemoteJobManager>(elem));
-    }
   }
 }
 
@@ -225,12 +197,6 @@ const InstrumentInfo &FacilityInfo::instrument(std::string iName) const {
 }
 
 /**
- * Get the vector of available compute resources
- * @return vector of ComputeResourInfo for the current facility
- */
-std::vector<ComputeResourceInfo> FacilityInfo::computeResInfos() const { return m_computeResInfos; }
-
-/**
  * Returns a list of instruments of given technique
  * @param tech :: Technique name
  * @return a list of instrument information objects
@@ -244,67 +210,6 @@ std::vector<InstrumentInfo> FacilityInfo::instruments(const std::string &tech) c
     }
   }
   return out;
-}
-
-/**
- * Returns a vector of the names of the available compute resources
- * @return vector of strings of the compute resource names
- */
-std::vector<std::string> FacilityInfo::computeResources() const {
-  std::vector<std::string> names;
-  auto it = m_computeResources.begin();
-  while (it != m_computeResources.end()) {
-    names.emplace_back((*it).first);
-    ++it;
-  }
-
-  return names;
-}
-
-/**
- * Get a compute resource by name
- *
- * @param name Name as specified in the facilities definition file
- *
- * @return the named compute resource
- *
- * @throws NotFoundError if the resource is not found/available.
- */
-const ComputeResourceInfo &FacilityInfo::computeResource(const std::string &name) const {
-  if (name.empty()) {
-    g_log.debug("Cannot find a compute resource without name "
-                "(empty).");
-    throw Exception::NotFoundError("FacilityInfo, empty compute resource name", name);
-  }
-
-  auto it = m_computeResInfos.begin();
-  for (; it != m_computeResInfos.end(); ++it) {
-    if (it->name() == name) {
-      g_log.debug() << "Compute resource '" << name << "' found at facility " << this->name() << ".\n";
-      return *it;
-    }
-  }
-
-  g_log.debug() << "Could not find requested compute resource: " << name << " in facility " << this->name() << ".\n";
-  throw Exception::NotFoundError("FacilityInfo, missing compute resource, it does not seem to be defined "
-                                 "in the facility '" +
-                                     this->name() + "' - ",
-                                 name);
-}
-
-/**
- * Returns a reference to the requested remote job manager
- * @param name :: Name of the cluster we want to submit jobs to
- * @return a shared pointer to the RemoteJobManager instance (or
- * Null if the name wasn't recognized)
- */
-std::shared_ptr<RemoteJobManager> FacilityInfo::getRemoteJobManager(const std::string &name) const {
-  auto it = m_computeResources.find(name);
-  if (it == m_computeResources.end()) {
-    return std::shared_ptr<RemoteJobManager>(); // TODO: should we throw an
-                                                // exception instead??
-  }
-  return (*it).second;
 }
 
 } // namespace Mantid::Kernel

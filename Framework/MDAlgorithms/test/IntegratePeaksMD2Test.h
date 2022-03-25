@@ -17,11 +17,12 @@
 #include "MantidGeometry/MDGeometry/HKL.h"
 #include "MantidGeometry/MDGeometry/MDHistoDimension.h"
 
+#include "MantidFrameworkTestHelpers/ComponentCreationHelper.h"
+#include "MantidKernel/Logger.h"
 #include "MantidKernel/UnitLabelTypes.h"
 #include "MantidMDAlgorithms/CreateMDWorkspace.h"
 #include "MantidMDAlgorithms/FakeMDEventData.h"
 #include "MantidMDAlgorithms/IntegratePeaksMD2.h"
-#include "MantidTestHelpers/ComponentCreationHelper.h"
 
 #include <boost/math/distributions/normal.hpp>
 #include <boost/math/special_functions/pow.hpp>
@@ -38,12 +39,13 @@ using namespace Mantid::API;
 using namespace Mantid::DataObjects;
 using namespace Mantid::Geometry;
 using namespace Mantid::MDAlgorithms;
+using Mantid::Kernel::Logger;
 using Mantid::Kernel::V3D;
 
 class IntegratePeaksMD2Test : public CxxTest::TestSuite {
 public:
   IntegratePeaksMD2Test() { Mantid::API::FrameworkManager::Instance(); }
-  ~IntegratePeaksMD2Test() override {}
+  ~IntegratePeaksMD2Test() override = default;
 
   void test_Init() {
     IntegratePeaksMD2 alg;
@@ -181,6 +183,122 @@ public:
   }
 
   //-------------------------------------------------------------------------------
+  /** Setup simple algorithm*/
+  static void simpleRun(bool shouldPass, size_t numberValuesPeakRadius, size_t numberValuesBkgInnerRadius,
+                        size_t numberValuesBkgOuterRadius, bool cyl = false, bool ellip = false) {
+    createMDEW();
+    // --- Make a fake PeaksWorkspace ---
+    PeaksWorkspace_sptr peakWS = std::make_shared<PeaksWorkspace>();
+    Instrument_sptr inst = ComponentCreationHelper::createTestInstrumentCylindrical(5);
+    peakWS->addPeak(Peak(inst, 1, 1.0, V3D(0., 0., 0.)));
+    TS_ASSERT_EQUALS(peakWS->getPeak(0).getIntensity(), 0.0);
+    AnalysisDataService::Instance().addOrReplace("IntegratePeaksMD2Test_peaks", peakWS);
+
+    std::vector<double> peakRadius(numberValuesPeakRadius, 1.0);
+    std::vector<double> bkgInnerRadius(numberValuesBkgInnerRadius, 1.1);
+    std::vector<double> bkgOuterRadius(numberValuesBkgOuterRadius, 2.0);
+
+    IntegratePeaksMD2 alg;
+    TS_ASSERT_THROWS_NOTHING(alg.initialize())
+    TS_ASSERT(alg.isInitialized())
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("InputWorkspace", "IntegratePeaksMD2Test_MDEWS"));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("PeakRadius", peakRadius));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("PeaksWorkspace", "IntegratePeaksMD2Test_peaks"));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", "IntegratePeaksMD2Test_Output"));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("BackgroundInnerRadius", bkgInnerRadius));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("BackgroundOuterRadius", bkgOuterRadius));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("Ellipsoid", ellip));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("Cylinder", cyl));
+    Logger logger("Logger_simpleRun");
+    logger.notice() << "Running simpleRun with inputs: shouldPass:" << shouldPass
+                    << " numberValuesPeakRadius:" << numberValuesPeakRadius
+                    << " numberValuesBkgInnerRadius:" << numberValuesBkgInnerRadius
+                    << " numberValuesBkgOuterRadius:" << numberValuesBkgOuterRadius << " cyl:" << cyl
+                    << " ellip:" << ellip << "\n";
+    if (shouldPass) {
+      alg.setRethrows(true);
+      TS_ASSERT_THROWS_NOTHING(alg.execute());
+    } else {
+      alg.setRethrows(true);
+      TS_ASSERT_THROWS(alg.execute(), const std::runtime_error &);
+    }
+    AnalysisDataService::Instance().remove("IntegratePeaksMD2Test_peaks");
+  }
+
+  /** In the following four validation tests, three validation principles must be met:
+      (where radius can be peak/BackgroundInner/BackgroundOuter)
+   A) radius vector has 1 or 3 values
+   B) radius vector has 1 value for sphere/cylinder/ellipsoid, 3 values only for ellipsoid
+      (sphere implied when ellipsoid=false and cylinder=false)
+   C) ellipsoid and cylinder cannot both be true
+   */
+  void test_validationSphere() {
+    // To diagnose a test error, find in the test output the last
+    // "Running simpleRun with inputs:" statement just before the "Error:"
+    bool shouldPass = true;
+    bool cyl = false;
+    bool ellip = false;
+    for (size_t peak = 1; peak < 5; peak++) {
+      for (size_t inner = 1; inner < 5; inner++) {
+        for (size_t outer = 1; outer < 5; outer++) {
+          if (peak != 1 || inner != 1 || outer != 1) {
+            shouldPass = false; // fails principle A or B
+          }
+          simpleRun(shouldPass, peak, inner, outer, cyl, ellip);
+          shouldPass = true;
+        }
+      }
+    }
+  }
+
+  void test_validationCylinder() {
+    // To diagnose a test error, find in the test output the last
+    // "Running simpleRun with inputs:" statement just before the Error
+    bool shouldPass = true;
+    bool cyl = true;
+    bool ellip = false;
+    for (size_t peak = 1; peak < 5; peak++) {
+      for (size_t inner = 1; inner < 5; inner++) {
+        for (size_t outer = 1; outer < 5; outer++) {
+          if (peak != 1 || inner != 1 || outer != 1) {
+            shouldPass = false; // fails principle A or B
+          }
+          simpleRun(shouldPass, peak, inner, outer, cyl, ellip);
+          shouldPass = true;
+        }
+      }
+    }
+  }
+
+  void test_validationEllipsoid() {
+    // To diagnose a test error, find in the test output the last
+    // "Running simpleRun with inputs:" statement just before the Error
+    bool shouldPass = true;
+    bool cyl = false;
+    bool ellip = true;
+    for (size_t peak = 1; peak < 5; peak++) {
+      for (size_t inner = 1; inner < 5; inner++) {
+        for (size_t outer = 1; outer < 5; outer++) {
+          if ((peak != 1 && peak != 3) || (inner != 1 && inner != 3) || (outer != 1 && outer != 3)) {
+            shouldPass = false; // fails principle A
+          }
+          simpleRun(shouldPass, peak, inner, outer, cyl, ellip);
+          shouldPass = true;
+        }
+      }
+    }
+  }
+
+  void test_validationEllipsoidandCylinder() {
+    // To diagnose a test error, find in the test output the last
+    // "Running simpleRun with inputs:" statement just before the Error
+    bool shouldPass = false; // fails principle C
+    bool cyl = true;
+    bool ellip = true;
+    simpleRun(shouldPass, 1, 1, 1, cyl, ellip);
+  }
+
+  //-------------------------------------------------------------------------------
   /** Full test using faked-out peak data */
   void test_exec() {
     // --- Fake workspace with 3 peaks ------
@@ -199,7 +317,7 @@ public:
     Instrument_sptr inst = ComponentCreationHelper::createTestInstrumentRectangular(1, 100, 0.05);
 
     // --- Make a fake PeaksWorkspace ---
-    PeaksWorkspace_sptr peakWS0(new PeaksWorkspace());
+    PeaksWorkspace_sptr peakWS0 = std::make_shared<PeaksWorkspace>();
     peakWS0->setInstrument(inst);
     peakWS0->addPeak(Peak(inst, 15050, 1.0));
 
@@ -266,7 +384,7 @@ public:
     AnalysisDataService::Instance().remove("IntegratePeaksMD2Test_peaks");
 
     // --- Make a fake PeaksWorkspace ---
-    PeaksWorkspace_sptr peakWS(new PeaksWorkspace());
+    PeaksWorkspace_sptr peakWS = std::make_shared<PeaksWorkspace>();
     peakWS->addPeak(Peak(inst, 15050, 1.0, V3D(0., 0., 0.)));
     peakWS->addPeak(Peak(inst, 15050, 1.0, V3D(2., 3., 4.)));
     peakWS->addPeak(Peak(inst, 15050, 1.0, V3D(6., 6., 6.)));
@@ -350,7 +468,7 @@ public:
     // Make a fake instrument - doesn't matter, we won't use it really
     Instrument_sptr inst = ComponentCreationHelper::createTestInstrumentCylindrical(5);
     // --- Make a fake PeaksWorkspace ---
-    PeaksWorkspace_sptr peakWS(new PeaksWorkspace());
+    PeaksWorkspace_sptr peakWS = std::make_shared<PeaksWorkspace>();
     peakWS->addPeak(Peak(inst, 1, 1.0, V3D(0., 0., 0.)));
     AnalysisDataService::Instance().add("IntegratePeaksMD2Test_peaks", peakWS);
 
@@ -383,7 +501,7 @@ public:
             3.0); // 27 times the volume / 9 times the counts = 1/3 density
 
     // --- Make a fake PeaksWorkspace ---
-    PeaksWorkspace_sptr peakWS(new PeaksWorkspace());
+    PeaksWorkspace_sptr peakWS = std::make_shared<PeaksWorkspace>();
     Instrument_sptr inst = ComponentCreationHelper::createTestInstrumentCylindrical(5);
     peakWS->addPeak(Peak(inst, 1, 1.0, V3D(0., 0., 0.)));
     TS_ASSERT_EQUALS(peakWS->getPeak(0).getIntensity(), 0.0);
@@ -475,7 +593,7 @@ public:
     createMDEW();
 
     Instrument_sptr inst = ComponentCreationHelper::createTestInstrumentCylindrical(5);
-    PeaksWorkspace_sptr peakWS(new PeaksWorkspace());
+    PeaksWorkspace_sptr peakWS = std::make_shared<PeaksWorkspace>();
     addPeak(numEvents, pos[0], pos[1], pos[2], peakRad);
     peakWS->addPeak(Peak(inst, 1, 1.0, pos));
     AnalysisDataService::Instance().addOrReplace("IntegratePeaksMD2Test_peaks", peakWS);
@@ -528,7 +646,7 @@ public:
     std::vector<double> radii = {0.05, fail_val, fail_val};
 
     Instrument_sptr inst = ComponentCreationHelper::createTestInstrumentCylindrical(5);
-    PeaksWorkspace_sptr peakWS(new PeaksWorkspace());
+    PeaksWorkspace_sptr peakWS = std::make_shared<PeaksWorkspace>();
     addUniform(numEvents, {std::make_pair(-0.5, 0.5), std::make_pair(-0.5, 0.5), std::make_pair(-0.5, 0.5)});
     peakWS->addPeak(Peak(inst, 1, 1.0, pos));
     AnalysisDataService::Instance().addOrReplace("IntegratePeaksMD2Test_peaks", peakWS);
@@ -554,7 +672,7 @@ public:
     createMDEW();
 
     Instrument_sptr inst = ComponentCreationHelper::createTestInstrumentCylindrical(5);
-    PeaksWorkspace_sptr peakWS(new PeaksWorkspace());
+    PeaksWorkspace_sptr peakWS = std::make_shared<PeaksWorkspace>();
     addUniform(numEvents, {std::make_pair(-0.5, 0.5), std::make_pair(-0.5, 0.5), std::make_pair(-0.5, 0.5)});
     peakWS->addPeak(Peak(inst, 1, 1.0, pos));
     AnalysisDataService::Instance().addOrReplace("IntegratePeaksMD2Test_peaks", peakWS);
@@ -603,7 +721,7 @@ public:
     createMDEW();
 
     Instrument_sptr inst = ComponentCreationHelper::createTestInstrumentCylindrical(5);
-    PeaksWorkspace_sptr peakWS(new PeaksWorkspace());
+    PeaksWorkspace_sptr peakWS = std::make_shared<PeaksWorkspace>();
     addUniform(numEvents, {std::make_pair(-0.5, 0.5), std::make_pair(-0.5, 0.5), std::make_pair(-0.5, 0.5)});
     std::vector<std::vector<double>> eigenvects;
     eigenvects.push_back(std::vector<double>{1.0, 0.0, 0.0});
@@ -665,7 +783,7 @@ public:
     // Make a fake instrument - doesn't matter, we won't use it really
     Instrument_sptr inst = ComponentCreationHelper::createTestInstrumentCylindrical(5);
     // --- Make a fake PeaksWorkspace ---
-    PeaksWorkspace_sptr peakWS(new PeaksWorkspace());
+    PeaksWorkspace_sptr peakWS = std::make_shared<PeaksWorkspace>();
     peakWS->addPeak(Peak(inst, 1, 1.0, Q));
     AnalysisDataService::Instance().addOrReplace("IntegratePeaksMD2Test_peaks", peakWS);
 
@@ -722,7 +840,7 @@ public:
     // Make a fake instrument - doesn't matter, we won't use it really
     Instrument_sptr inst = ComponentCreationHelper::createTestInstrumentCylindrical(5);
     // --- Make a fake PeaksWorkspace ---
-    PeaksWorkspace_sptr peakWS(new PeaksWorkspace());
+    PeaksWorkspace_sptr peakWS = std::make_shared<PeaksWorkspace>();
     peakWS->addPeak(Peak(inst, 1, 1.0, Q));
     AnalysisDataService::Instance().addOrReplace("IntegratePeaksMD2Test_peaks", peakWS);
 
@@ -789,7 +907,7 @@ public:
     // Make a fake instrument - doesn't matter, we won't use it really
     Instrument_sptr inst = ComponentCreationHelper::createTestInstrumentCylindrical(5);
     // --- Make a fake PeaksWorkspace ---
-    PeaksWorkspace_sptr peakWS(new PeaksWorkspace());
+    PeaksWorkspace_sptr peakWS = std::make_shared<PeaksWorkspace>();
     peakWS->addPeak(Peak(inst, 1, 1.0, Q));
     AnalysisDataService::Instance().addOrReplace("IntegratePeaksMD2Test_peaks", peakWS);
 
@@ -888,7 +1006,7 @@ public:
     // Make a fake instrument - doesn't matter, we won't use it really
     Instrument_sptr inst = ComponentCreationHelper::createTestInstrumentCylindrical(5);
     // --- Make a fake PeaksWorkspace ---
-    PeaksWorkspace_sptr peakWS(new PeaksWorkspace());
+    PeaksWorkspace_sptr peakWS = std::make_shared<PeaksWorkspace>();
     peakWS->addPeak(Peak(inst, 1, 1.0, Q));
     AnalysisDataService::Instance().addOrReplace("IntegratePeaksMD2Test_peaks", peakWS);
 
@@ -1120,7 +1238,7 @@ public:
     std::mt19937 rng;
     std::uniform_real_distribution<double> flat(-9.0, 9.0);
 
-    peakWS = PeaksWorkspace_sptr(new PeaksWorkspace());
+    PeaksWorkspace_sptr peakWS = std::make_shared<PeaksWorkspace>();
     for (size_t i = 0; i < numPeaks; ++i) {
       // Random peak center
       double x = flat(rng);

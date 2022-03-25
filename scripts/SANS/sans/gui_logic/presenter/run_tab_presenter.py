@@ -210,8 +210,6 @@ class RunTabPresenter(PresenterCommon):
 
         # File information for the first input
         self._file_information = None
-        self._clipboard = []
-
         self._csv_parser = BatchCsvParser()
 
         self._setup_sub_presenters()
@@ -465,7 +463,7 @@ class RunTabPresenter(PresenterCommon):
             # 4. Set the batch file path in the model
             self._model.batch_file = batch_file_path
 
-        except (RuntimeError, ValueError, SyntaxError) as e:
+        except (RuntimeError, ValueError, SyntaxError, IOError, KeyError) as e:
             self.sans_logger.error("Loading of the batch file failed. {}".format(str(e)))
             self.display_warning_box('Warning', 'Loading of the batch file failed', str(e))
 
@@ -800,25 +798,15 @@ class RunTabPresenter(PresenterCommon):
         self.update_view_from_table_model()
 
     def on_copy_rows_requested(self):
-        selected_rows = self._view.get_selected_rows()
-        self._clipboard = []
-        for row in selected_rows:
-            data_from_table_model = self._table_model.get_row(row)
-            self._clipboard.append(data_from_table_model)
+        self._table_model.copy_rows(self._view.get_selected_rows())
 
     def on_cut_rows_requested(self):
-        self.on_copy_rows_requested()
-        row_indices = self._view.get_selected_rows()
-        self.on_rows_removed(row_indices)
+        self._table_model.cut_rows(self._view.get_selected_rows())
+        self.update_view_from_table_model()
 
     def on_paste_rows_requested(self):
-        if self._clipboard:
-            selected_rows = self._view.get_selected_rows()
-            selected_rows = selected_rows if selected_rows else [self.num_rows()]
-            replacement_table_index_models = self._clipboard
-            self._table_model.replace_table_entries(selected_rows, replacement_table_index_models)
-
-            self.update_view_from_table_model()
+        self._table_model.paste_rows(self._view.get_selected_rows())
+        self.update_view_from_table_model()
 
     def on_manage_directories(self):
         self._view.show_directory_manager()
@@ -994,6 +982,7 @@ class RunTabPresenter(PresenterCommon):
         self._set_on_view("wavelength_min")
         self._set_on_view("wavelength_max")
         self._set_on_view("wavelength_step")
+        self._set_on_view("wavelength_range")
 
         self._set_on_view("absolute_scale")
         self._set_on_view("z_offset", self.DEFAULT_DECIMAL_PLACES_MM)

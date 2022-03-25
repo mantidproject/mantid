@@ -37,6 +37,8 @@ public slots:
 
 protected:
   void addData(IAddWorkspaceDialog const *dialog);
+  void checkData(IAddWorkspaceDialog const *dialog);
+  void addDataFromFile(IAddWorkspaceDialog const *dialog);
   void newInputFilesFromDialog(IAddWorkspaceDialog const *dialog);
   virtual void addDataToModel(IAddWorkspaceDialog const *dialog);
   virtual void addTableEntry(FitDomainIndex row);
@@ -48,10 +50,6 @@ protected slots:
   virtual void closeDialog();
 
 signals:
-  /// Signal emitted when file input is visible
-  void fileViewVisible();
-  /// Signal emitted when workspace selector is visible
-  void workspaceViewVisible();
   void dataAdded();
   void dataRemoved();
   void dataChanged();
@@ -97,10 +95,11 @@ private:
   void newPreviewWorkspaceSelected(const QString &workspaceName);
   size_t findWorkspaceID();
   void newInputFiles();
-  void checkNewPreviewSelected(int index);
   void plotInput();
+  void updateIntegrationRange();
 
 private slots:
+  void checkNewPreviewSelected(int index);
   void handlePreviewSpectrumChanged();
   void twoRanges(QtProperty *prop, bool enabled);
   void minChanged(double val);
@@ -109,12 +108,8 @@ private slots:
   void unGroupInput(bool error);
   void runClicked();
   void saveClicked();
-  void updateIntegrationRange();
   void addData();
   void checkLoadedFiles();
-
-  /// Slot called when the current view is changed
-  void handleViewChanged(int index);
 };
 
 } // namespace IDA

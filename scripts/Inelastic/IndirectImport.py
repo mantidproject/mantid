@@ -22,28 +22,10 @@ from mantid import logger
 # the fortran modules with f2py. It must match the version of
 # the numpy ABI at runtime.
 F2PY_MODULES_REQUIRED_C_ABI = 0x01000009
-
-
-def import_mantidplot():
-    """
-    Currently, all scripts in the PythonAlgorithms directory are imported
-    during system tests.  Unfortunately, these tests are run outside of
-    MantidPlot and so are incompatible with scripts that import the
-    "mantidplot" module.  As a result, an error message is dumped to the
-    results log for each PythonAlgorithm in the directory that imports
-    mantidplot, for each and every test.
-
-    Here, we silently catch all ImportErrors so that this does not occur.
-
-    @returns the mantidplot module.
-    """
-    try:
-        import mantidplot
-        return mantidplot
-    except ImportError:
-        # Not a problem since we are only in a system test anyway, and these
-        # scripts are not needed there.
-        return None
+BAYES_PACKAGE_NAME = 'quasielasticbayes'
+UNSUPPORTED_PLATFORM_MESSAGE = """Functionality not currently available on your platform.
+Please try installing the extra package: python -m pip install --user quasielasticbayes
+"""
 
 
 def _os_env():
@@ -52,21 +34,18 @@ def _os_env():
 
 def is_pip_version_of_libs():
     """
-    If we are using a pip version of the libs they are importable with:
-    import Quest
-    import QLdata
+    If we are using a pip version of the libs we can import them from the BAYES_PACKAGE_NAME package
+    import BAYES_PACKAGE_NAME
+    # imports BAYES_PACKAGE_NAME.QLdata ect., i.e. the libraries are usable with:
+    BAYES_PACKAGE_NAME.QLdata.qldata(....)
     ...
     Which will import the binaries from the python path,
     most likely the site-packages folder
     """
-    # Test if one of the fortran libs is already imported
-    name = 'Quest'
-    if name in sys.modules:
-        return True
-    elif importlib.util.find_spec(name) is not None:
-        return True
+    if importlib.util.find_spec(BAYES_PACKAGE_NAME) is not None:
+        return True, BAYES_PACKAGE_NAME + '.'
     else:
-        return False
+        return False, ""
 
 
 def _lib_suffix():
@@ -82,7 +61,8 @@ def _lib_suffix():
     import QLdata_win64
     Thefore, if we are using the pip versions we don't add a suffix.
     """
-    if is_pip_version_of_libs():
+    is_pip, _ = is_pip_version_of_libs()
+    if is_pip:
         return ""
     else:
         if platform.system() == "Windows":
@@ -104,7 +84,7 @@ def _numpy_abi_ver():
 
 
 def unsupported_message():
-    logger.error('F2Py functionality not currently available on your platform.')
+    logger.error(UNSUPPORTED_PLATFORM_MESSAGE)
     sys.exit()
 
 
@@ -123,7 +103,7 @@ def is_supported_f2py_platform():
     # check if we have pip installed the fortran libraries
     # first check the numpy abi is correct
     if _numpy_abi_ver() == F2PY_MODULES_REQUIRED_C_ABI:
-        return is_pip_version_of_libs()
+        return is_pip_version_of_libs()[0]
     return False
 
 
@@ -150,9 +130,9 @@ def import_f2py(lib_base_name):
         sys.path.insert(0, directory)
         yield
         sys.path.pop(0)
-
-    lib_name = lib_base_name + _lib_suffix()
-    return __import__(lib_name)
+    _, package_base = is_pip_version_of_libs()
+    lib_name = package_base + lib_base_name + _lib_suffix()
+    return __import__(lib_name, fromlist=[None])
 
 
 def run_f2py_compatibility_test():
@@ -161,4 +141,4 @@ def run_f2py_compatibility_test():
     the F2Py libraries on an incompatible platform.
     """
     if not is_supported_f2py_platform():
-        raise RuntimeError("F2Py programs NOT available on this platform.")
+        raise RuntimeError(UNSUPPORTED_PLATFORM_MESSAGE)

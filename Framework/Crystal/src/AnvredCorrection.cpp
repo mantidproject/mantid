@@ -89,12 +89,17 @@ void AnvredCorrection::init() {
   auto mustBePositive = std::make_shared<BoundedValidator<double>>();
   mustBePositive->setLower(0.0);
   declareProperty("LinearScatteringCoef", EMPTY_DBL(), mustBePositive,
-                  "Linear scattering coefficient in 1/cm if not set with "
-                  "SetSampleMaterial");
+                  "Linear scattering coefficient in 1/cm. "
+                  "If not provided this will be calculated from the "
+                  "material cross-section if present (set with SetSampleMaterial)");
   declareProperty("LinearAbsorptionCoef", EMPTY_DBL(), mustBePositive,
-                  "Linear absorption coefficient at 1.8 Angstroms in 1/cm if "
-                  "not set with SetSampleMaterial");
-  declareProperty("Radius", EMPTY_DBL(), mustBePositive, "Radius of the sample in centimeters");
+                  "Linear absorption coefficient at 1.8 Angstroms in 1/cm. "
+                  "If not provided this will be calculated from the "
+                  "material cross-section if present (set with SetSampleMaterial)");
+  declareProperty("Radius", EMPTY_DBL(), mustBePositive,
+                  "Radius of the sample in centimeters. f not provided the "
+                  "radius will be taken from the sample shape if it is a sphere "
+                  "(set with SetSample).");
   declareProperty("PreserveEvents", true,
                   "Keep the output workspace as an EventWorkspace, if the "
                   "input has events (default).\n"
@@ -112,6 +117,22 @@ void AnvredCorrection::init() {
                   "If true, use scale factors from instrument parameter map.");
 
   defineProperties();
+}
+
+std::map<std::string, std::string> AnvredCorrection::validateInputs() {
+  std::map<std::string, std::string> result;
+
+  const double radius = getProperty("Radius");
+  if (radius == EMPTY_DBL()) {
+    // check that if radius isn't supplied that the radius can be accessed from the sample
+    m_inputWS = getProperty("InputWorkspace");
+    const auto &sampleShape = m_inputWS->sample().getShape();
+    if (!sampleShape.hasValidShape() ||
+        sampleShape.shapeInfo().shape() != Geometry::detail::ShapeInfo::GeometryShape::SPHERE) {
+      result["Radius"] = "Please supply a radius or provide a workspace with a spherical sample set.";
+    }
+  }
+  return result;
 }
 
 void AnvredCorrection::exec() {
@@ -138,7 +159,8 @@ void AnvredCorrection::exec() {
   // Get the input parameters
   retrieveBaseProperties();
 
-  BuildLamdaWeights();
+  if (!m_onlySphericalAbsorption && !m_returnTransmissionOnly)
+    BuildLamdaWeights();
 
   eventW = std::dynamic_pointer_cast<EventWorkspace>(m_inputWS);
   if (eventW)
@@ -166,7 +188,7 @@ void AnvredCorrection::exec() {
   // Loop over the spectra
   PARALLEL_FOR_IF(Kernel::threadSafe(*m_inputWS, *correctionFactors))
   for (int64_t i = 0; i < int64_t(numHists); ++i) {
-    PARALLEL_START_INTERUPT_REGION
+    PARALLEL_START_INTERRUPT_REGION
 
     // If no detector is found, skip onto the next spectrum
     if (!spectrumInfo.hasDetectors(i) || spectrumInfo.isMonitor(i))
@@ -185,10 +207,11 @@ void AnvredCorrection::exec() {
     double pathlength = 0.0;
 
     std::string bankName;
-
-    const auto &det = spectrumInfo.detector(i);
-    if (m_useScaleFactors)
-      scale_init(det, inst, L2, depth, pathlength, bankName);
+    if (m_useScaleFactors) {
+      const auto &det = spectrumInfo.detector(i);
+      bankName = det.getParent()->getParent()->getName();
+      scale_init(inst, L2, depth, pathlength, bankName);
+    }
 
     auto points = m_inputWS->points(i);
 
@@ -204,14 +227,15 @@ void AnvredCorrection::exec() {
     auto &Y = correctionFactors->mutableY(i);
     auto &E = correctionFactors->mutableE(i);
     // Loop through the bins in the current spectrum
+    bool muRTooLarge = false;
     for (int64_t j = 0; j < specSize; j++) {
 
       double lambda = (unitStr == "TOF") ? wl.convertSingleFromTOF(points[j], L1, 0, pmap) : points[j];
 
       if (m_returnTransmissionOnly) {
-        Y[j] = 1.0 / this->getEventWeight(lambda, scattering);
+        Y[j] = 1.0 / this->getEventWeight(lambda, scattering, muRTooLarge);
       } else {
-        double value = this->getEventWeight(lambda, scattering);
+        double value = this->getEventWeight(lambda, scattering, muRTooLarge);
 
         if (m_useScaleFactors)
           scale_exec(bankName, lambda, depth, inst, pathlength, value);
@@ -221,11 +245,16 @@ void AnvredCorrection::exec() {
       }
     }
 
+    if (muRTooLarge) {
+      g_log.warning("Absorption correction not accurate for muR > 8 which was exceeded in spectrum index " +
+                    std::to_string(i));
+    }
+
     prog.report();
 
-    PARALLEL_END_INTERUPT_REGION
+    PARALLEL_END_INTERRUPT_REGION
   }
-  PARALLEL_CHECK_INTERUPT_REGION
+  PARALLEL_CHECK_INTERRUPT_REGION
 
   // set the absorption correction values in the run parameters
   API::Run &run = correctionFactors->mutableRun();
@@ -260,7 +289,7 @@ void AnvredCorrection::execEvent() {
   // Loop over the spectra
   PARALLEL_FOR_IF(Kernel::threadSafe(*eventW, *correctionFactors))
   for (int64_t i = 0; i < int64_t(numHists); ++i) {
-    PARALLEL_START_INTERUPT_REGION
+    PARALLEL_START_INTERRUPT_REGION
 
     // share bin boundaries, and leave Y and E nullptr
     correctionFactors->setHistogram(i, eventW->binEdges(i));
@@ -283,11 +312,14 @@ void AnvredCorrection::execEvent() {
     double depth = 0.2;
     double pathlength = 0.0;
     std::string bankName;
-    const auto &det = spectrumInfo.detector(i);
-    if (m_useScaleFactors)
-      scale_init(det, inst, L2, depth, pathlength, bankName);
+    if (m_useScaleFactors) {
+      const auto &det = spectrumInfo.detector(i);
+      bankName = det.getParent()->getParent()->getName();
+      scale_init(inst, L2, depth, pathlength, bankName);
+    }
 
     // multiplying an event list by a scalar value
+    bool muRTooLarge = false;
 
     for (auto &ev : events) {
       // get the event's TOF
@@ -296,13 +328,18 @@ void AnvredCorrection::execEvent() {
       if ("TOF" == unitStr)
         lambda = wl.convertSingleFromTOF(lambda, L1, 0, pmap);
 
-      double value = this->getEventWeight(lambda, scattering);
+      double value = this->getEventWeight(lambda, scattering, muRTooLarge);
 
       if (m_useScaleFactors)
         scale_exec(bankName, lambda, depth, inst, pathlength, value);
 
       ev.m_errorSquared = static_cast<float>(ev.m_errorSquared * value * value);
       ev.m_weight *= static_cast<float>(value);
+    }
+
+    if (muRTooLarge) {
+      g_log.warning("Absorption correction not accurate for muR > 9 cm^-1 which was exceeded in spectrum index " +
+                    std::to_string(i));
     }
 
     correctionFactors->getSpectrum(i) += events;
@@ -313,9 +350,9 @@ void AnvredCorrection::execEvent() {
 
     prog.report();
 
-    PARALLEL_END_INTERUPT_REGION
+    PARALLEL_END_INTERRUPT_REGION
   }
-  PARALLEL_CHECK_INTERUPT_REGION
+  PARALLEL_CHECK_INTERRUPT_REGION
 
   // set the absorption correction values in the run parameters
   API::Run &run = correctionFactors->mutableRun();
@@ -344,6 +381,9 @@ void AnvredCorrection::retrieveBaseProperties() {
       m_smu = scatterXSection * rho;
     if (m_amu == EMPTY_DBL())
       m_amu = sampleMaterial.absorbXSection(NeutronAtom::ReferenceLambda) * rho;
+    if (m_radius == EMPTY_DBL())
+      m_radius =
+          m_inputWS->sample().getShape().shapeInfo().sphereGeometry().radius * 100; // convert radius from m to cm
   } else // Save input in Sample with wrong atomic number and name
   {
     NeutronAtom neutron(0, 0, 0.0, 0.0, m_smu, 0.0, m_smu, m_amu);
@@ -366,13 +406,13 @@ void AnvredCorrection::retrieveBaseProperties() {
  *
  *  @param  lamda      The wavelength of an event.
  *  @param  two_theta  The scattering angle of the event.
- *
+ *  @param muRTooLarge bool to warn in muR limit exceeded in absorption correction
  *  @return The weight factor for the specified position and wavelength.
  */
-double AnvredCorrection::getEventWeight(double lamda, double two_theta) {
+double AnvredCorrection::getEventWeight(const double lamda, const double two_theta, bool &muRTooLarge) {
   double transinv = 1;
   if (m_radius > 0)
-    transinv = absor_sphere(two_theta, lamda);
+    transinv = absor_sphere(two_theta, lamda, muRTooLarge);
   // Only Spherical absorption correction
   if (m_onlySphericalAbsorption || m_returnTransmissionOnly)
     return transinv;
@@ -397,7 +437,7 @@ double AnvredCorrection::getEventWeight(double lamda, double two_theta) {
  *       function to calculate a spherical absorption correction
  *       and tbar. based on values in:
  *
- *       c. w. dwiggins, jr., acta cryst. a31, 395 (1975).
+ *       Weber, K., Acta Cryst. B, 25.6 (1969)
  *
  *       in this paper, a is the transmission and a* = 1/a is
  *       the absorption correction.
@@ -411,61 +451,61 @@ double AnvredCorrection::getEventWeight(double lamda, double two_theta) {
  *
  *       @param twoth scattering angle
  *       @param wl scattering wavelength
+ *       @param muRTooLarge bool to warn in muR limit exceeded
  *       @returns absorption
  */
-double AnvredCorrection::absor_sphere(double &twoth, double &wl) {
-  int i;
-  double mu, mur; // mu is the linear absorption coefficient,
-  // r is the radius of the spherical sample.
-  double theta, astar1, astar2, frac, astar;
-  //  double trans;
-  //  double tbar;
+double AnvredCorrection::absor_sphere(const double twoth, const double wl, bool &muRTooLarge) {
+  //  For each of the 19 theta values in (theta = 0:5:90 deg)
+  //  fitted ln(1/A*) = sum_{icoef=0}^{N=7} pc[7-icoef][ith]*(muR)^icoef
+  //  using A* values in Weber (1969) for 0 < muR < 8.
+  //  These values are given in the static array pc[][]
 
-  //  For each of the 19 theta values in dwiggins (theta = 0.0 to 90.0
-  //  in steps of 5.0 deg.), the astar values vs.mur were fit to a third
-  //  order polynomial in excel. these values are given in the static array
-  //  pc[][]
-
-  mu = m_smu + (m_amu / 1.8f) * wl;
-
-  mur = mu * m_radius;
+  double mur = (m_smu + (m_amu / 1.8f) * wl) * m_radius;
   if (mur < 0.) {
     throw std::runtime_error("muR cannot be negative");
-  } else if (mur > 2.5) {
-    g_log.warning() << "muR (" << mur
-                    << ") is not in range of Dwiggins' table ( 0 < muR < 2.5) so using extrapolation of cubic fit."
-                    << std::endl;
+  } else if (mur > 8.0) {
+    muRTooLarge = true;
   }
 
-  theta = twoth * radtodeg_half;
+  auto theta = 0.5 * twoth * radtodeg;
   if (theta < 0. || theta > 90.) {
     std::ostringstream s;
     s << theta;
-    throw std::runtime_error("theta is not in range of Dwiggins' table :" + s.str());
+    throw std::runtime_error("theta is not in allowed range :" + s.str());
   }
 
-  //  using the polymial coefficients, calulate astar (= 1/transmission) at
-  //  theta values below and above the actual theta value.
-
-  i = static_cast<int>(theta / 5.);
-  astar1 = pc[0][i] + mur * (pc[1][i] + mur * (pc[2][i] + pc[3][i] * mur));
-
-  i = i + 1;
-  astar2 = pc[0][i] + mur * (pc[1][i] + mur * (pc[2][i] + pc[3][i] * mur));
-
-  //  do a linear interpolation between theta values.
-
-  frac = theta - static_cast<double>(static_cast<int>(theta / 5.)) * 5.; // theta%5.
-  frac = frac / 5.;
-
-  astar = astar1 * (1 - frac) + astar2 * frac; // astar is the correction
-  //  trans = 1.f/astar;                           // trans is the transmission
+  // tbar = -(double)Math.log(trans)/mu;  // as defined by coppens
   // trans = exp(-mu*tbar)
+  return calc_Astar(theta, mur);
+}
 
-  //  calculate tbar as defined by coppens.
-  //  tbar = -(double)Math.log(trans)/mu;
+/*
+ * Helper function to calc Astar to be called from SaveHKL
+ *       @param theta: half scattering angle (i.e. twotheta/2)
+ *       @param mur: muR is the product of linenar attenuation and sphere radius
+ *       @returns astar: 1/transmission
+ */
+double AnvredCorrection::calc_Astar(const double theta, const double mur) {
+  //  interpolation better done on A = 1/A* = transmission
+  auto ith = static_cast<size_t>(theta / 5.); // floor
+  double lnA_1 = 0.0;
+  double lnA_2 = 0.0;
+  size_t ncoef = sizeof pc / sizeof pc[0]; // order of poly
+  for (size_t icoef = 0; icoef < ncoef; icoef++) {
+    lnA_1 = lnA_1 * mur + pc[icoef][ith];     // previous theta
+    lnA_2 = lnA_2 * mur + pc[icoef][ith + 1]; // next theta
+  }
+  double A1 = std::exp(lnA_1);
+  double sin_th1_sq = std::pow(sin((static_cast<double>(ith) * 5.0) / radtodeg), 2);
+  double A2 = std::exp(lnA_2);
+  double sin_th2_sq = std::pow(sin((static_cast<double>(ith + 1) * 5.0) / radtodeg), 2);
+  // interpolate between theta values using
+  // A(th) = L0 + L1*(sin(th)^2)
+  double L1 = (A1 - A2) / (sin_th1_sq - sin_th2_sq);
+  double L0 = A1 - L1 * sin_th1_sq;
 
-  return astar;
+  // correction to apply (A* = 1/A = 1/transmission)
+  return 1 / (L0 + L1 * std::pow(sin(theta / radtodeg), 2));
 }
 /**
  *  Build the list of weights corresponding to different wavelengths.
@@ -487,8 +527,6 @@ void AnvredCorrection::BuildLamdaWeights() {
   // peaks in ARCS data with no
   // incident spectrum
 
-  double power = m_power_th;
-
   // GetSpectrumWeights( spectrum_file_name, m_lamda_weight);
 
   if (m_lamda_weight.empty()) // loading spectrum failed so use
@@ -497,19 +535,15 @@ void AnvredCorrection::BuildLamdaWeights() {
     // don't override user specified
     // value.
     m_lamda_weight.reserve(NUM_WAVELENGTHS);
-    for (int i = 0; i < NUM_WAVELENGTHS; i++)
-      m_lamda_weight.emplace_back(1.);
-  }
-
-  for (size_t i = 0; i < m_lamda_weight.size(); ++i) {
-    double lamda = static_cast<double>(i) / STEPS_PER_ANGSTROM;
-    m_lamda_weight[i] *= (1 / std::pow(lamda, power));
+    for (int i = 0; i < NUM_WAVELENGTHS; i++) {
+      double lamda = static_cast<double>(i) / STEPS_PER_ANGSTROM;
+      m_lamda_weight.emplace_back(1 / std::pow(lamda, m_power_th));
+    }
   }
 }
 
-void AnvredCorrection::scale_init(const IDetector &det, const Instrument_const_sptr &inst, double &L2, double &depth,
-                                  double &pathlength, std::string &bankName) {
-  bankName = det.getParent()->getParent()->getName();
+void AnvredCorrection::scale_init(const Instrument_const_sptr &inst, const double L2, const double depth,
+                                  double &pathlength, const std::string &bankName) {
   // Distance to center of detector
   std::shared_ptr<const IComponent> det0 = inst->getComponentByName(bankName);
   if ("CORELLI" == inst->getName()) // for Corelli with sixteenpack under bank
@@ -524,8 +558,8 @@ void AnvredCorrection::scale_init(const IDetector &det, const Instrument_const_s
   pathlength = depth / cosA;
 }
 
-void AnvredCorrection::scale_exec(std::string &bankName, double &lambda, double &depth,
-                                  const Instrument_const_sptr &inst, double &pathlength, double &value) {
+void AnvredCorrection::scale_exec(std::string &bankName, const double lambda, const double depth,
+                                  const Instrument_const_sptr &inst, const double pathlength, double value) {
   // correct for the slant path throught the scintillator glass
   double mu = (9.614 * lambda) + 0.266;            // mu for GS20 glass
   double eff_center = 1.0 - std::exp(-mu * depth); // efficiency at center of detector

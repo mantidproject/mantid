@@ -12,9 +12,9 @@
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/SpectrumInfo.h"
 #include "MantidDataObjects/Workspace2D.h"
+#include "MantidFrameworkTestHelpers/IndirectFitDataCreationHelper.h"
+#include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidKernel/UnitConversion.h"
-#include "MantidTestHelpers/IndirectFitDataCreationHelper.h"
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
 using namespace Mantid::API;
 using namespace Mantid::DataObjects;
@@ -286,11 +286,11 @@ public:
 
     data->setStartX(-5.0, WorkspaceIndex{0});
     data->setStartX(6.53, WorkspaceIndex{1});
-    data->setStartX(100000000000000.0, WorkspaceIndex{2});
+    data->setStartX(10.0, WorkspaceIndex{2});
 
     TS_ASSERT_EQUALS(data->getRange(WorkspaceIndex{0}).first, -5.0);
     TS_ASSERT_EQUALS(data->getRange(WorkspaceIndex{1}).first, 6.53);
-    TS_ASSERT_EQUALS(data->getRange(WorkspaceIndex{2}).first, 100000000000000.0);
+    TS_ASSERT_EQUALS(data->getRange(WorkspaceIndex{2}).first, 10.0);
   }
 
   void test_no_throw_when_setEndX_is_provided_a_valid_xValue_and_spectrum_number() {
@@ -304,13 +304,29 @@ public:
   void test_the_provided_endX_is_stored_in_range_after_using_setEndX() {
     auto data = getIndirectFitData(3);
 
-    data->setEndX(-5.0, WorkspaceIndex{0});
+    data->setEndX(0.0, WorkspaceIndex{0});
     data->setEndX(6.53, WorkspaceIndex{1});
     data->setEndX(100000000000000.0, WorkspaceIndex{2});
 
-    TS_ASSERT_EQUALS(data->getRange(WorkspaceIndex{0}).second, -5.0);
+    TS_ASSERT_EQUALS(data->getRange(WorkspaceIndex{0}).second, 0.0);
     TS_ASSERT_EQUALS(data->getRange(WorkspaceIndex{1}).second, 6.53);
     TS_ASSERT_EQUALS(data->getRange(WorkspaceIndex{2}).second, 100000000000000.0);
+  }
+
+  void test_that_endX_can_not_set_to_value_less_than_startX() {
+    auto data = getIndirectFitData(1);
+    auto startX = data->getRange(WorkspaceIndex{0}).first;
+    data->setEndX(startX - 1.0, WorkspaceIndex{0});
+
+    TS_ASSERT_EQUALS(data->getRange(WorkspaceIndex{0}).second, startX);
+  }
+
+  void test_that_startX_can_not_set_to_value_greater_than_startX() {
+    auto data = getIndirectFitData(1);
+    auto endX = data->getRange(WorkspaceIndex{0}).second;
+    data->setStartX(endX + 1.0, WorkspaceIndex{0});
+
+    TS_ASSERT_EQUALS(data->getRange(WorkspaceIndex{0}).first, endX);
   }
 
   void test_that_the_startX_of_two_data_sets_are_combined_when_relating_to_two_seperate_spectra() {

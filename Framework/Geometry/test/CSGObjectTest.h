@@ -8,6 +8,7 @@
 
 #include "MantidGeometry/Objects/CSGObject.h"
 
+#include "MantidFrameworkTestHelpers/ComponentCreationHelper.h"
 #include "MantidGeometry/Math/Algebra.h"
 #include "MantidGeometry/Objects/Rules.h"
 #include "MantidGeometry/Objects/ShapeFactory.h"
@@ -19,7 +20,6 @@
 #include "MantidGeometry/Surfaces/SurfaceFactory.h"
 #include "MantidKernel/Material.h"
 #include "MantidKernel/MersenneTwister.h"
-#include "MantidTestHelpers/ComponentCreationHelper.h"
 #include "MockRNG.h"
 
 #include <cxxtest/TestSuite.h>
@@ -953,6 +953,16 @@ public:
     // Since this is at the corner, triangle sides should be the same as the
     // cylinder dimensions
     TS_ASSERT_DELTA(origin.totalDistInsideObject(), sqrt(pow(HEIGHT * 0.5, 2) + pow(RADIUS, 2)), TOLERANCE);
+
+    // Test sample at the top corner, but the beam direction is going into
+    // the shape
+    BEAM_DIRECTION = V3D{0.0, -HEIGHT, -RADIUS * 2};
+    BEAM_DIRECTION.normalize();
+    origin = Track(V3D{0., HEIGHT, RADIUS * 2.0}, BEAM_DIRECTION);
+    nsegments = cylinder->interceptSurface(origin);
+    TS_ASSERT_EQUALS(nsegments, 1);
+    const auto distInside = sqrt(pow(HEIGHT, 2) + pow(RADIUS * 2, 2));
+    TS_ASSERT_DELTA(origin.totalDistInsideObject(), distInside, TOLERANCE);
   }
 
   void testTracksForHollowCylinder() {

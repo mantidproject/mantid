@@ -21,9 +21,7 @@
 function(find_pyqt major_version)
   find_file(_find_pyqt_py FindPyQt.py PATHS ${CMAKE_MODULE_PATH})
   if(NOT EXISTS ${_find_pyqt_py})
-    message(
-      FATAL_ERROR "Failed to find FindPyQt.py in \"${CMAKE_MODULE_PATH}\""
-    )
+    message(FATAL_ERROR "Failed to find FindPyQt.py in \"${CMAKE_MODULE_PATH}\"")
   endif()
   # Dump config to stdout and parse out the content
   execute_process(
@@ -35,37 +33,25 @@ function(find_pyqt major_version)
     string(REGEX MATCH "^pyqt_version:([^\n]+).*$" _dummy ${_pyqt_config})
     set(PYQT${major_version}_VERSION
         "${CMAKE_MATCH_1}"
-        CACHE STRING
-              "PyQt${major_version}'s version as a 6-digit hexadecimal number"
-              FORCE
+        CACHE STRING "PyQt${major_version}'s version as a 6-digit hexadecimal number" FORCE
     )
 
-    string(REGEX MATCH ".*\npyqt_version_str:([^\n]+).*$" _dummy
-                 ${_pyqt_config}
-    )
+    string(REGEX MATCH ".*\npyqt_version_str:([^\n]+).*$" _dummy ${_pyqt_config})
     set(PYQT${major_version}_VERSION_STR
         "${CMAKE_MATCH_1}"
-        CACHE STRING
-              "PyQt${major_version}'s version as a human-readable string" FORCE
+        CACHE STRING "PyQt${major_version}'s version as a human-readable string" FORCE
     )
 
-    string(REGEX MATCH ".*\npyqt_version_tag:([^\n]+).*$" _dummy
-                 ${_pyqt_config}
-    )
+    string(REGEX MATCH ".*\npyqt_version_tag:([^\n]+).*$" _dummy ${_pyqt_config})
     set(PYQT${major_version}_VERSION_TAG
         "${CMAKE_MATCH_1}"
-        CACHE STRING
-              "The Qt version tag used by PyQt${major_version}'s .sip files"
-              FORCE
+        CACHE STRING "The Qt version tag used by PyQt${major_version}'s .sip files" FORCE
     )
 
     string(REGEX MATCH ".*\npyqt_sip_dir:([^\n]+).*$" _dummy ${_pyqt_config})
     set(PYQT${major_version}_SIP_DIR
         "${CMAKE_MATCH_1}"
-        CACHE
-          PATH
-          "The base directory where PyQt${major_version}'s .sip files are installed"
-          FORCE
+        CACHE PATH "The base directory where PyQt${major_version}'s .sip files are installed" FORCE
     )
 
     string(REGEX MATCH ".*\npyqt_sip_flags:([^\n]+).*$" _dummy ${_pyqt_config})
@@ -88,14 +74,10 @@ function(find_pyqt major_version)
       )
     endif()
   else()
-    message(
-      FATAL_ERROR
-        "Error encountered while determining PyQt confguration:\n${_pyqt_config_err}"
-    )
+    message(FATAL_ERROR "Error encountered while determining PyQt confguration:\n${_pyqt_config_err}")
   endif()
 
-  # Set the sip ABI used for compiling PyQt. Required for the new sip-build
-  # system
+  # Set the sip ABI used for compiling PyQt. Required for the new sip-build system
   if(major_version EQUAL 5)
     set(PYQT5_SIP_ABI_VERSION
         12
@@ -107,8 +89,7 @@ function(find_pyqt major_version)
         CACHE STRING "The sip ABI used to compile PyQt6" FORCE
     )
   else()
-    message(
-      FATAL_ERROR "Unknown PyQt major version specified: ${major_version}. \
+    message(FATAL_ERROR "Unknown PyQt major version specified: ${major_version}. \
         This buildsystem only understands building against PyQt 5/6"
     )
   endif()

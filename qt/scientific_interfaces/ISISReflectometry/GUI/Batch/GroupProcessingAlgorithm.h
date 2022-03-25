@@ -8,24 +8,27 @@
 
 #include "Common/DllConfig.h"
 #include "MantidQtWidgets/Common/BatchAlgorithmRunner.h"
+#include "MantidQtWidgets/Common/IAlgorithmRuntimeProps.h"
+#include "MantidQtWidgets/Common/IConfiguredAlgorithm.h"
+
 #include <boost/optional.hpp>
 #include <map>
 #include <string>
 #include <vector>
 
-namespace MantidQt {
-namespace CustomInterfaces {
-namespace ISISReflectometry {
+namespace MantidQt::CustomInterfaces::ISISReflectometry {
 class Batch;
 class Group;
+class IBatch;
 class IConfiguredAlgorithm;
+} // namespace MantidQt::CustomInterfaces::ISISReflectometry
 
-using AlgorithmRuntimeProps = std::map<std::string, std::string>;
+namespace MantidQt::CustomInterfaces::ISISReflectometry::GroupProcessing {
 
-MANTIDQT_ISISREFLECTOMETRY_DLL MantidQt::API::IConfiguredAlgorithm_sptr createConfiguredAlgorithm(Batch const &model,
+using AlgorithmRuntimeProps = MantidQt::API::IAlgorithmRuntimeProps;
+
+MANTIDQT_ISISREFLECTOMETRY_DLL MantidQt::API::IConfiguredAlgorithm_sptr createConfiguredAlgorithm(IBatch const &model,
                                                                                                   Group &group);
-MANTIDQT_ISISREFLECTOMETRY_DLL AlgorithmRuntimeProps createAlgorithmRuntimeProps(Batch const &model,
-                                                                                 Group const &group);
-} // namespace ISISReflectometry
-} // namespace CustomInterfaces
-} // namespace MantidQt
+MANTIDQT_ISISREFLECTOMETRY_DLL std::unique_ptr<MantidQt::API::IAlgorithmRuntimeProps>
+createAlgorithmRuntimeProps(IBatch const &model, Group const &group);
+} // namespace MantidQt::CustomInterfaces::ISISReflectometry::GroupProcessing

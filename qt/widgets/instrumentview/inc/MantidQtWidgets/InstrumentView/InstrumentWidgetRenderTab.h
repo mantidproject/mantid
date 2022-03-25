@@ -33,8 +33,7 @@ class BinDialog;
 /**
  * Implements the Render tab in InstrumentWidget.
  */
-class EXPORT_OPT_MANTIDQT_INSTRUMENTVIEW InstrumentWidgetRenderTab
-    : public InstrumentWidgetTab {
+class EXPORT_OPT_MANTIDQT_INSTRUMENTVIEW InstrumentWidgetRenderTab : public InstrumentWidgetTab {
   Q_OBJECT
 
 public:
@@ -48,8 +47,7 @@ public:
   void setScaleType(ColorMap::ScaleType type);
   void setAxis(const QString &axisName);
   bool areAxesOn() const;
-  void setupColorBar(const ColorMap & /*cmap*/, double /*minValue*/,
-                     double /*maxValue*/, double /*minPositive*/,
+  void setupColorBar(const ColorMap & /*cmap*/, double /*minValue*/, double /*maxValue*/, double /*minPositive*/,
                      bool /*autoscaling*/);
   /// Load the render window tab settings from file.
   virtual void loadFromProject(const std::string &lines) override;
@@ -87,6 +85,7 @@ private slots:
   void glOptionChanged(bool /*on*/);
   void showMenuToolTip(QAction * /*action*/);
   void setUCorrection();
+  void toggleTooltip(bool /*activate*/);
   void toggleLayerDisplay(bool on);
   void setVisibleLayer(int layer);
 
@@ -135,6 +134,7 @@ private: // members
   QAction *m_lighting;
   QAction *m_GLView; ///< toggle between OpenGL and simple view
   QAction *m_UCorrection;
+  QAction *m_tooltipInfo;
   QActionGroup *m_precisionActionGroup;
   QList<QAction *> m_precisionActions;
 

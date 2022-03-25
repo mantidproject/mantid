@@ -13,13 +13,13 @@
 #include "MantidDataObjects/MDEventFactory.h"
 #include "MantidDataObjects/PeakShapeSpherical.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
+#include "MantidFrameworkTestHelpers/ComponentCreationHelper.h"
 #include "MantidGeometry/MDGeometry/HKL.h"
 #include "MantidGeometry/MDGeometry/MDHistoDimension.h"
 #include "MantidKernel/UnitLabelTypes.h"
 #include "MantidMDAlgorithms/CreateMDWorkspace.h"
 #include "MantidMDAlgorithms/FakeMDEventData.h"
 #include "MantidMDAlgorithms/IntegratePeaksMD.h"
-#include "MantidTestHelpers/ComponentCreationHelper.h"
 
 #include <boost/math/distributions/normal.hpp>
 #include <boost/math/special_functions/pow.hpp>
@@ -38,7 +38,7 @@ using Mantid::Kernel::V3D;
 class IntegratePeaksMDTest : public CxxTest::TestSuite {
 public:
   IntegratePeaksMDTest() { Mantid::API::FrameworkManager::Instance(); }
-  ~IntegratePeaksMDTest() override {}
+  ~IntegratePeaksMDTest() override = default;
 
   void test_Init() {
     IntegratePeaksMD alg;

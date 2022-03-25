@@ -11,7 +11,7 @@
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/WorkspaceHistory.h"
 #include "MantidAlgorithms/RemoveWorkspaceHistory.h"
-#include "MantidTestHelpers/FakeObjects.h"
+#include "MantidFrameworkTestHelpers/FakeObjects.h"
 
 using namespace Mantid::Kernel;
 using Mantid::Algorithms::RemoveWorkspaceHistory;
@@ -22,7 +22,7 @@ private:
   class SimpleSum : public Algorithm {
   public:
     SimpleSum() : Algorithm() {}
-    ~SimpleSum() override {}
+    ~SimpleSum() override = default;
     const std::string name() const override { return "SimpleSum"; }
     const std::string summary() const override { return "SimpleSum"; }
     int version() const override { return 1; }

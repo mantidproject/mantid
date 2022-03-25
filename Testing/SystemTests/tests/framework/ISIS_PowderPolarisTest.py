@@ -165,11 +165,11 @@ class TotalScatteringTest(systemtesting.MantidSystemTest):
         # Whilst total scattering is in development, the validation will avoid using reference files as they will have
         # to be updated very frequently. In the meantime, the expected peak in the PDF at ~3.9 Angstrom will be checked.
         # After rebin this is at X index 37
-        expected_peak_values = [-0.00365,
-                                0.18790,
-                                0.38707,
-                                0.37882,
-                                0.72237]
+        expected_peak_values = [-0.00092,
+                                0.24875,
+                                0.43894,
+                                0.20343,
+                                0.9777]
         for index, ws in enumerate(self.pdf_output):
             self.assertAlmostEqual(ws.dataY(0)[37], expected_peak_values[index], places=3)
 
@@ -189,7 +189,7 @@ class TotalScatteringMergedTest(systemtesting.MantidSystemTest):
         # Whilst total scattering is in development, the validation will avoid using reference files as they will have
         # to be updated very frequently. In the meantime, the expected peak in the PDF at ~3.9 Angstrom will be checked.
         # After rebin this is at X index 37
-        self.assertAlmostEqual(self.pdf_output.dataY(0)[37], 0.7376667, places=3)
+        self.assertAlmostEqual(self.pdf_output.dataY(0)[37], 1.00835, places=3)
 
 
 class TotalScatteringPDFRebinTest(systemtesting.MantidSystemTest):
@@ -243,7 +243,7 @@ class TotalScatteringPdfTypeTest(systemtesting.MantidSystemTest):
         # Whilst total scattering is in development, the validation will avoid using reference files as they will have
         # to be updated very frequently. In the meantime, the expected peak in the PDF at ~3.9 Angstrom will be checked.
         # After rebin this is at X index 37
-        self.assertAlmostEqual(self.pdf_output.dataY(0)[37], 1.01521, places=3)
+        self.assertAlmostEqual(self.pdf_output.dataY(0)[37], 1.0207, places=3)
 
 
 class TotalScatteringFilterTest(systemtesting.MantidSystemTest):
@@ -261,7 +261,7 @@ class TotalScatteringFilterTest(systemtesting.MantidSystemTest):
         # Whilst total scattering is in development, the validation will avoid using reference files as they will have
         # to be updated very frequently. In the meantime, the expected peak in the PDF at ~3.9 Angstrom will be checked.
         # After rebin this is at X index 37
-        self.assertAlmostEqual(self.pdf_output.dataY(0)[37], 0.63779, places=3)
+        self.assertAlmostEqual(self.pdf_output.dataY(0)[37], 0.90692, places=3)
 
 
 class TotalScatteringLorchFilterTest(systemtesting.MantidSystemTest):
@@ -279,7 +279,7 @@ class TotalScatteringLorchFilterTest(systemtesting.MantidSystemTest):
         # Whilst total scattering is in development, the validation will avoid using reference files as they will have
         # to be updated very frequently. In the meantime, the expected peak in the PDF at ~3.9 Angstrom will be checked.
         # After rebin this is at X index 37
-        self.assertAlmostEqual(self.pdf_output.dataY(0)[37], 3.11435, places=3)
+        self.assertAlmostEqual(self.pdf_output.dataY(0)[37], 6.93898, places=3)
 
 
 def run_total_scattering(run_number, merge_banks, q_lims=None, delta_q=None, delta_r=None, pdf_type="G(r)",

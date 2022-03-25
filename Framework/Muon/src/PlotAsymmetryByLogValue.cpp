@@ -387,8 +387,9 @@ void PlotAsymmetryByLogValue::checkProperties(size_t &firstRunNumber, size_t &la
 Workspace_sptr PlotAsymmetryByLogValue::doLoad(const std::string &fileName) {
 
   // Load run
-  auto load = createChildAlgorithm("LoadMuonNexus");
+  auto load = createChildAlgorithm("Load");
   load->setPropertyValue("Filename", fileName);
+  load->setPropertyValue("OutputWorkspace", "tmp");
   load->setPropertyValue("DetectorGroupingTable", "detGroupTable");
   load->setPropertyValue("DeadTimeTable", "deadTimeTable");
   load->execute();

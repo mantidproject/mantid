@@ -8,8 +8,8 @@
 
 #include <cxxtest/TestSuite.h>
 
+#include "MantidFrameworkTestHelpers/ParallelRunner.h"
 #include "MantidParallel/Collectives.h"
-#include "MantidTestHelpers/ParallelRunner.h"
 
 using namespace Mantid;
 using namespace Parallel;

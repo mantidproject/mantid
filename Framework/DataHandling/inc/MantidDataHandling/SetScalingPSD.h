@@ -43,7 +43,7 @@ to use either .raw or .sca</LI>
 
 @author Ronald Fowler
 */
-class DLLExport SetScalingPSD : public API::Algorithm {
+class DLLExport SetScalingPSD final : public API::Algorithm {
 public:
   /// Default constructor
   SetScalingPSD();
@@ -74,7 +74,7 @@ private:
   std::string m_filename;
   /// An integer option controlling the scaling method
   int m_scalingOption;
-  bool processScalingFile(const std::string &scalingFile, std::vector<Kernel::V3D> &truepos);
+  bool processScalingFile(const std::string &scalingFile, std::vector<Kernel::V3D> &truePos);
   API::MatrixWorkspace_sptr m_workspace; ///< Pointer to the workspace
   // void runMoveInstrumentComp(const int& detIndex, const Kernel::V3D& shift);
 

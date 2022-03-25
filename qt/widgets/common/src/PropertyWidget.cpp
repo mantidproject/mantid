@@ -163,7 +163,7 @@ ClickableLabel::ClickableLabel(QWidget *parent) : QLabel(parent) {}
 /**
  * Destructor.
  */
-ClickableLabel::~ClickableLabel() {}
+ClickableLabel::~ClickableLabel() = default;
 
 /**
  * Catches the mouse press event and emits the signal.
@@ -251,7 +251,7 @@ PropertyWidget::PropertyWidget(Mantid::Kernel::Property *prop, QWidget *parent, 
 
 /** Destructor
  */
-PropertyWidget::~PropertyWidget() {}
+PropertyWidget::~PropertyWidget() = default;
 
 /**
  * Set this widget's value.

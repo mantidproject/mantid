@@ -20,6 +20,16 @@ namespace MantidQt {
 namespace CustomInterfaces {
 namespace ISISReflectometry {
 
+namespace Colour {
+constexpr const char *DEFAULT = "#ffffff";          // white
+constexpr const char *INVALID = "#dddddd";          // very pale grey
+constexpr const char *RUNNING = "#f0e442";          // pale yellow
+constexpr const char *SUCCESS = "#d0f4d0";          // pale green
+constexpr const char *WARNING = "#e69f00";          // pale orange
+constexpr const char *FAILURE = "#accbff";          // pale blue
+constexpr const char *CHILDREN_SUCCESS = "#e8f4e8"; // very pale green
+} // namespace Colour
+
 class MANTIDQT_ISISREFLECTOMETRY_DLL RunsTablePresenter : public IRunsTablePresenter, public RunsTableViewSubscriber {
 public:
   RunsTablePresenter(IRunsTableView *view, std::vector<std::string> const &instruments, double thetaTolerance,
@@ -33,6 +43,7 @@ public:
   RunsTable &mutableRunsTable() override;
   void mergeAdditionalJobs(ReductionJobs const &jobs) override;
   void notifyInstrumentChanged(std::string const &instrumentName) override;
+  void notifyBatchLoaded() override;
   void setTablePrecision(int &precision) override;
   void resetTablePrecision() override;
   void settingsChanged() override;
@@ -81,6 +92,7 @@ public:
 
 private:
   void applyGroupStylingToRow(MantidWidgets::Batch::RowLocation const &location);
+  void applyStylingToParent(Row const &row);
   void clearInvalidCellStyling(std::vector<MantidQt::MantidWidgets::Batch::Cell> &cells);
   void clearInvalidCellStyling(MantidQt::MantidWidgets::Batch::Cell &cell);
   void applyInvalidCellStyling(MantidQt::MantidWidgets::Batch::Cell &cell);
@@ -124,7 +136,7 @@ private:
   void forAllCellsAt(MantidWidgets::Batch::RowLocation const &location, UpdateCellFunc updateFunc);
   void forAllCellsAt(MantidWidgets::Batch::RowLocation const &location, UpdateCellWithTooltipFunc updateFunc,
                      std::string const &tooltip);
-  void setRowStylingForItem(MantidWidgets::Batch::RowPath const &rowPath, Item const &item);
+  void setRowStylingForItem(MantidWidgets::Batch::RowLocation const &rowLocation, Item const &item);
   void updateProgressBar();
 
   void notifyTableChanged();

@@ -11,8 +11,8 @@ from sys import float_info
 import unittest
 from unittest.mock import MagicMock, patch
 
-from mantidqt.widgets.sliceviewer.imageinfowidget import ImageInfoWidget, ImageInfoTracker
-from mantidqt.widgets.sliceviewer.transform import NonOrthogonalTransform  # noqa: E402
+from mantidqt.widgets.sliceviewer.presenters.imageinfowidget import ImageInfoWidget, ImageInfoTracker
+from mantidqt.widgets.sliceviewer.models.transform import NonOrthogonalTransform  # noqa: E402
 
 
 class ImageInfoTrackerTest(unittest.TestCase):
@@ -44,7 +44,7 @@ class ImageInfoTrackerTest(unittest.TestCase):
 
         self.image_info_widget.cursorAt.assert_called_with(0.42264973081037405, 1.1547005383792517, float_info.max)
 
-    @patch("mantidqt.widgets.sliceviewer.imageinfowidget.cursor_info")
+    @patch("mantidqt.widgets.sliceviewer.presenters.imageinfowidget.cursor_info")
     def test_nonortho_transform_not_applied_when_not_mesh(self, mock_cursorinfo):
         mock_cursorinfo.return_value = (
             2 * eye(2, dtype=float), None, (1, 1))  # output simple 2D array and slice indices
@@ -57,7 +57,7 @@ class ImageInfoTrackerTest(unittest.TestCase):
 
         self.image_info_widget.cursorAt.assert_called_with(1.0, 1.0, 2.0)
 
-    @patch("mantidqt.widgets.sliceviewer.imageinfowidget.cursor_info")
+    @patch("mantidqt.widgets.sliceviewer.presenters.imageinfowidget.cursor_info")
     def test_cursorAt_arguments_correct_when_not_mesh_and_not_transposed(self, mock_cursorinfo):
         underlying_array = array([[1.0, 2.0], [3.0, 4.0]])
         xdata, ydata = 0.0, 1.0  # Data on image x and y axes at cursor position
@@ -73,7 +73,7 @@ class ImageInfoTrackerTest(unittest.TestCase):
         tracker.on_cursor_at(xdata, ydata)
         self.image_info_widget.cursorAt.assert_called_with(xdata, ydata, underlying_array[xindex][yindex])
 
-    @patch("mantidqt.widgets.sliceviewer.imageinfowidget.cursor_info")
+    @patch("mantidqt.widgets.sliceviewer.presenters.imageinfowidget.cursor_info")
     def test_cursorAt_arguments_correct_when_not_mesh_and_transposed(self, mock_cursorinfo):
         underlying_array = array([[1.0, 2.0], [3.0, 4.0]])
         xdata, ydata = 0.0, 1.0  # Data on image x and y axes at cursor position

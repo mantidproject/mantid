@@ -27,9 +27,9 @@ bool isValidGeneratorString(const std::string &generatorString) {
   std::vector<std::string> generatorStrings;
   boost::split(generatorStrings, generatorString, boost::is_any_of(";"));
 
-  for (auto &generatorString : generatorStrings) {
+  for (auto &identifier : generatorStrings) {
     try {
-      SymmetryOperationSymbolParser::parseIdentifier(generatorString);
+      SymmetryOperationSymbolParser::parseIdentifier(identifier);
     } catch (const Kernel::Exception::ParseError &) {
       return false;
     }

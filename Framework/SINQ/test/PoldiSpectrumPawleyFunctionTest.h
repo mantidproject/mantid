@@ -9,12 +9,12 @@
 #include <cxxtest/TestSuite.h>
 
 #include "MantidAPI/FunctionFactory.h"
+#include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidKernel/V3D.h"
 #include "MantidSINQ/PoldiUtilities/PoldiInstrumentAdapter.h"
 #include "MantidSINQ/PoldiUtilities/PoldiMockInstrumentHelpers.h"
 #include "MantidSINQ/PoldiUtilities/PoldiSpectrumDomainFunction.h"
 #include "MantidSINQ/PoldiUtilities/PoldiSpectrumPawleyFunction.h"
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
 #include <gmock/gmock.h>
 
@@ -31,7 +31,7 @@ GNU_DIAG_OFF_SUGGEST_OVERRIDE
 class MockPawleyFunction : public IPawleyFunction {
 public:
   MockPawleyFunction() {}
-  ~MockPawleyFunction() override {}
+  ~MockPawleyFunction() override = default;
   // IFunction interface
   MOCK_CONST_METHOD0(name, std::string());
   MOCK_CONST_METHOD2(function, void(const FunctionDomain &, FunctionValues &));

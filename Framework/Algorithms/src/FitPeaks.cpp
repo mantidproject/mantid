@@ -852,7 +852,7 @@ std::vector<std::shared_ptr<FitPeaksAlgorithm::PeakFitResult>> FitPeaks::fitPeak
 
   PRAGMA_OMP(parallel for schedule(dynamic, 1) )
   for (int ithread = 0; ithread < nThreads; ithread++) {
-    PARALLEL_START_INTERUPT_REGION
+    PARALLEL_START_INTERRUPT_REGION
     auto iws_begin = m_startWorkspaceIndex + chunkSize * static_cast<size_t>(ithread);
     auto iws_end = (ithread == nThreads - 1) ? m_stopWorkspaceIndex + 1 : iws_begin + chunkSize;
 
@@ -877,9 +877,9 @@ std::vector<std::shared_ptr<FitPeaksAlgorithm::PeakFitResult>> FitPeaks::fitPeak
       }
       prog.report();
     }
-    PARALLEL_END_INTERUPT_REGION
+    PARALLEL_END_INTERRUPT_REGION
   }
-  PARALLEL_CHECK_INTERUPT_REGION
+  PARALLEL_CHECK_INTERRUPT_REGION
 
   return fit_result_vector;
 }
@@ -1280,7 +1280,7 @@ void FitPeaks::calculateFittedPeaks(std::vector<std::shared_ptr<FitPeaksAlgorith
   PARALLEL_FOR_IF(Kernel::threadSafe(*m_fittedPeakWS))
   for (auto iws = static_cast<int64_t>(m_startWorkspaceIndex); iws <= static_cast<int64_t>(m_stopWorkspaceIndex);
        ++iws) {
-    PARALLEL_START_INTERUPT_REGION
+    PARALLEL_START_INTERRUPT_REGION
     // get a copy of peak function and background function
     IPeakFunction_sptr peak_function = std::dynamic_pointer_cast<IPeakFunction>(m_peakFunction->clone());
     IBackgroundFunction_sptr bkgd_function = std::dynamic_pointer_cast<IBackgroundFunction>(m_bkgdFunction->clone());
@@ -1323,9 +1323,9 @@ void FitPeaks::calculateFittedPeaks(std::vector<std::shared_ptr<FitPeaksAlgorith
         m_fittedPeakWS->dataY(static_cast<size_t>(iws))[yindex] = values.getCalculated(yindex - istart);
       }
     } // END-FOR (ipeak)
-    PARALLEL_END_INTERUPT_REGION
+    PARALLEL_END_INTERRUPT_REGION
   } // END-FOR (iws)
-  PARALLEL_CHECK_INTERUPT_REGION
+  PARALLEL_CHECK_INTERRUPT_REGION
 
   return;
 }
@@ -1510,6 +1510,7 @@ double FitPeaks::fitFunctionSD(const IAlgorithm_sptr &fit, const API::IPeakFunct
   fit->setProperty("MaxIterations", m_fitIterations); // magic number
   fit->setProperty("StartX", peak_range.first);
   fit->setProperty("EndX", peak_range.second);
+  fit->setProperty("IgnoreInvalidData", true);
 
   if (m_constrainPeaksPosition) {
     // set up a constraint on peak position
@@ -1590,6 +1591,7 @@ double FitPeaks::fitFunctionMD(API::IFunction_sptr fit_function, const API::Matr
   fit->setProperty("StartX_1", vec_xmin.second);
   fit->setProperty("EndX_1", vec_xmax.second);
   fit->setProperty("MaxIterations", m_fitIterations);
+  fit->setProperty("IgnoreInvalidData", true);
 
   // Execute
   fit->execute();

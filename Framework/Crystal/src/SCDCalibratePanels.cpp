@@ -85,16 +85,16 @@ void SCDCalibratePanels::exec() {
 
     PRAGMA_OMP(parallel for schedule(dynamic, 1) )
     for (int num = 1; num < 64; ++num) {
-      PARALLEL_START_INTERUPT_REGION
+      PARALLEL_START_INTERRUPT_REGION
       std::ostringstream mess;
       mess << "bank" << num;
       IComponent_const_sptr comp = inst->getComponentByName(mess.str(), maxRecurseDepth);
       PARALLEL_CRITICAL(MyBankNames)
       if (comp)
         MyBankNames.insert(mess.str());
-      PARALLEL_END_INTERUPT_REGION
+      PARALLEL_END_INTERRUPT_REGION
     }
-    PARALLEL_CHECK_INTERUPT_REGION
+    PARALLEL_CHECK_INTERRUPT_REGION
   } else {
     for (int i = 0; i < nPeaks; ++i) {
       std::string name = peaksWs->getPeak(i).getBankName();
@@ -105,11 +105,11 @@ void SCDCalibratePanels::exec() {
 
   std::vector<std::string> fit_workspaces(MyBankNames.size() + MyPanels.size(), "fit_");
   std::vector<std::string> parameter_workspaces(MyBankNames.size() + MyPanels.size(), "params_");
-  int i = 0;
+  int bankAndPanelCount = 0;
   for (auto &MyPanel : MyPanels) {
-    fit_workspaces[i] += MyPanel;
-    parameter_workspaces[i] += MyPanel;
-    i++;
+    fit_workspaces[bankAndPanelCount] += MyPanel;
+    parameter_workspaces[bankAndPanelCount] += MyPanel;
+    bankAndPanelCount++;
   }
   if (snapPanels) {
     findL2(MyPanels, peaksWs);
@@ -122,16 +122,16 @@ void SCDCalibratePanels::exec() {
   }
 
   for (auto &MyBankName : MyBankNames) {
-    fit_workspaces[i] += MyBankName;
-    parameter_workspaces[i] += MyBankName;
-    i++;
+    fit_workspaces[bankAndPanelCount] += MyBankName;
+    parameter_workspaces[bankAndPanelCount] += MyBankName;
+    bankAndPanelCount++;
   }
   if (bankPanels) {
     findL2(MyBankNames, peaksWs);
   }
 
   // remove skipped banks
-  for (int j = i - 1; j >= 0; j--) {
+  for (int j = bankAndPanelCount - 1; j >= 0; j--) {
     if (!AnalysisDataService::Instance().doesExist(fit_workspaces[j]))
       fit_workspaces.erase(fit_workspaces.begin() + j);
     if (!AnalysisDataService::Instance().doesExist(parameter_workspaces[j]))
@@ -170,16 +170,16 @@ void SCDCalibratePanels::exec() {
   Geometry::OrientedLattice lattice0 = peaksWs->mutableSample().getOrientedLattice();
   PARALLEL_FOR_IF(Kernel::threadSafe(*peaksWs))
   for (int i = 0; i < nPeaks; i++) {
-    PARALLEL_START_INTERUPT_REGION
+    PARALLEL_START_INTERRUPT_REGION
     DataObjects::Peak &peak = peaksWs->getPeak(i);
     try {
       peak.setInstrument(inst2);
     } catch (const std::exception &exc) {
       g_log.notice() << "Problem in applying calibration to peak " << i << " : " << exc.what() << "\n";
     }
-    PARALLEL_END_INTERUPT_REGION
+    PARALLEL_END_INTERRUPT_REGION
   }
-  PARALLEL_CHECK_INTERUPT_REGION
+  PARALLEL_CHECK_INTERRUPT_REGION
 
   // Find U again for optimized geometry and index peaks
   findU(peaksWs);
@@ -211,7 +211,7 @@ void SCDCalibratePanels::exec() {
   peaksWs->sort(criteria);
   PARALLEL_FOR_IF(Kernel::threadSafe(*ColWksp, *RowWksp, *TofWksp))
   for (int i = 0; i < static_cast<int>(MyBankNames.size()); ++i) {
-    PARALLEL_START_INTERUPT_REGION
+    PARALLEL_START_INTERRUPT_REGION
     const std::string &bankName = *std::next(MyBankNames.begin(), i);
     size_t k = bankName.find_last_not_of("0123456789");
     int bank = 0;
@@ -245,9 +245,9 @@ void SCDCalibratePanels::exec() {
         icount++;
       }
     }
-    PARALLEL_END_INTERUPT_REGION
+    PARALLEL_END_INTERRUPT_REGION
   }
-  PARALLEL_CHECK_INTERUPT_REGION
+  PARALLEL_CHECK_INTERRUPT_REGION
 
   string colFilename = getProperty("ColFilename");
   string rowFilename = getProperty("RowFilename");
@@ -561,7 +561,6 @@ void SCDCalibratePanels::saveXmlFile(const string &FileName, const boost::contai
   IComponent_const_sptr source = instrument.getSource();
 
   oss3 << "<component-link name=\"" << source->getName() << "\">\n";
-  IComponent_const_sptr sample = instrument.getSample();
   V3D sourceRelPos = source->getRelativePos();
 
   writeXmlParameter(oss3, "x", sourceRelPos.X());
@@ -580,9 +579,9 @@ void SCDCalibratePanels::findL2(boost::container::flat_set<string> MyBankNames,
   Geometry::Instrument_const_sptr inst = peaksWs->getInstrument();
 
   PARALLEL_FOR_IF(Kernel::threadSafe(*peaksWs))
-  for (int i = 0; i < static_cast<int>(MyBankNames.size()); ++i) {
-    PARALLEL_START_INTERUPT_REGION
-    const std::string &iBank = *std::next(MyBankNames.begin(), i);
+  for (int bankIndex = 0; bankIndex < static_cast<int>(MyBankNames.size()); ++bankIndex) {
+    PARALLEL_START_INTERRUPT_REGION
+    const std::string &iBank = *std::next(MyBankNames.begin(), bankIndex);
     const std::string bankName = "__PWS_" + iBank;
     PeaksWorkspace_sptr local = peaksWs->clone();
     AnalysisDataService::Instance().addOrReplace(bankName, local);
@@ -654,8 +653,8 @@ void SCDCalibratePanels::findL2(boost::container::flat_set<string> MyBankNames,
     fit_alg->setProperty("Output", "fit");
     fit_alg->executeAsChildAlg();
     std::string fitStatus = fit_alg->getProperty("OutputStatus");
-    double chisq = fit_alg->getProperty("OutputChi2overDoF");
-    g_log.notice() << iBank << "  " << fitStatus << " Chi2overDoF " << chisq << "\n";
+    double fitChisq = fit_alg->getProperty("OutputChi2overDoF");
+    g_log.notice() << iBank << "  " << fitStatus << " Chi2overDoF " << fitChisq << "\n";
     MatrixWorkspace_sptr fitWS = fit_alg->getProperty("OutputWorkspace");
     AnalysisDataService::Instance().addOrReplace("fit_" + iBank, fitWS);
     ITableWorkspace_sptr paramsWS = fit_alg->getProperty("OutputParameters");
@@ -689,9 +688,9 @@ void SCDCalibratePanels::findL2(boost::container::flat_set<string> MyBankNames,
       fit2_alg->setProperty("CreateOutput", true);
       fit2_alg->setProperty("Output", "fit");
       fit2_alg->executeAsChildAlg();
-      std::string fitStatus = fit2_alg->getProperty("OutputStatus");
-      double chisq = fit2_alg->getProperty("OutputChi2overDoF");
-      g_log.notice() << iBank << "  " << fitStatus << " Chi2overDoF " << chisq << "\n";
+      std::string fit2Status = fit2_alg->getProperty("OutputStatus");
+      double fit2Chisq = fit2_alg->getProperty("OutputChi2overDoF");
+      g_log.notice() << iBank << "  " << fit2Status << " Chi2overDoF " << fit2Chisq << "\n";
       fitWS = fit2_alg->getProperty("OutputWorkspace");
       AnalysisDataService::Instance().addOrReplace("fit_" + iBank, fitWS);
       paramsWS = fit2_alg->getProperty("OutputParameters");
@@ -702,8 +701,8 @@ void SCDCalibratePanels::findL2(boost::container::flat_set<string> MyBankNames,
     AnalysisDataService::Instance().remove(bankName);
     SCDPanelErrors det;
     det.moveDetector(xShift, yShift, zShift, xRotate, yRotate, zRotate, scaleWidth, scaleHeight, iBank, peaksWs);
-    PARALLEL_END_INTERUPT_REGION
+    PARALLEL_END_INTERRUPT_REGION
   }
-  PARALLEL_CHECK_INTERUPT_REGION
+  PARALLEL_CHECK_INTERRUPT_REGION
 }
 } // namespace Mantid::Crystal

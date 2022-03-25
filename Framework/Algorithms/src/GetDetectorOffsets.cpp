@@ -132,7 +132,7 @@ void GetDetectorOffsets::exec() {
   auto &spectrumInfo = maskWS->mutableSpectrumInfo();
   PARALLEL_FOR_IF(Kernel::threadSafe(*inputW))
   for (int64_t wi = 0; wi < nspec; ++wi) {
-    PARALLEL_START_INTERUPT_REGION
+    PARALLEL_START_INTERRUPT_REGION
     // Fit the peak
     double offset = fitSpectra(wi);
     double mask = 0.0;
@@ -166,9 +166,9 @@ void GetDetectorOffsets::exec() {
       }
     }
     prog.report();
-    PARALLEL_END_INTERUPT_REGION
+    PARALLEL_END_INTERRUPT_REGION
   }
-  PARALLEL_CHECK_INTERUPT_REGION
+  PARALLEL_CHECK_INTERRUPT_REGION
 
   // Return the output
   setProperty("OutputWorkspace", outputW);
@@ -291,7 +291,7 @@ double GetDetectorOffsets::fitSpectra(const int64_t s) {
  * @param peakLoc :: The location of the peak
  */
 IFunction_sptr GetDetectorOffsets::createFunction(const double peakHeight, const double peakLoc) {
-  FunctionFactoryImpl &creator = FunctionFactory::Instance();
+  const FunctionFactoryImpl &creator = FunctionFactory::Instance();
   auto background = creator.createFunction("LinearBackground");
   auto peak = std::dynamic_pointer_cast<IPeakFunction>(creator.createFunction(getProperty("PeakFunction")));
   peak->setHeight(peakHeight);

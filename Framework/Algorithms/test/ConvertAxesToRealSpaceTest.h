@@ -8,7 +8,7 @@
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
+#include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
 
 #include "MantidAPI/Axis.h"
 #include "MantidAlgorithms/ConvertAxesToRealSpace.h"
@@ -95,5 +95,32 @@ public:
     AnalysisDataService::Instance().remove(outWSName);
 
     return ws;
+  }
+
+  void test_exec_invalid_ws() {
+    std::string baseWSName = "ConvertAxesToRealSpaceTest_exec_invalid_monitors";
+    std::string inWSName(baseWSName + "_InputWS");
+    std::string outWSName(baseWSName + "_OutputWS");
+    std::string verticalAxis = "y";
+    std::string horizontalAxis = "2theta";
+    int nVBins = 100;
+    int nHBins = 200;
+    auto testWS = WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(3, 2, true);
+    AnalysisDataService::Instance().addOrReplace(inWSName, testWS);
+
+    Mantid::Algorithms::ConvertAxesToRealSpace conv;
+
+    conv.initialize();
+
+    TS_ASSERT_THROWS_NOTHING(conv.setPropertyValue("InputWorkspace", inWSName));
+    TS_ASSERT_THROWS_NOTHING(conv.setPropertyValue("OutputWorkspace", outWSName));
+    TS_ASSERT_THROWS_NOTHING(conv.setPropertyValue("VerticalAxis", verticalAxis));
+    TS_ASSERT_THROWS_NOTHING(conv.setPropertyValue("HorizontalAxis", horizontalAxis));
+    TS_ASSERT_THROWS_NOTHING(conv.setProperty("NumberVerticalBins", nVBins));
+    TS_ASSERT_THROWS_NOTHING(conv.setProperty("NumberHorizontalBins", nHBins));
+
+    auto success = conv.execute();
+    TS_ASSERT(!conv.isExecuted());
+    TS_ASSERT(!success);
   }
 };

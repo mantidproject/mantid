@@ -19,7 +19,7 @@ namespace Crystal {
     @author Dennis Mikkelson(adapted from Andrei Savici's CalculateUMatrix)
     @date   2011-08-17
   */
-class MANTID_CRYSTAL_DLL FindUBUsingIndexedPeaks : public API::Algorithm {
+class MANTID_CRYSTAL_DLL FindUBUsingIndexedPeaks final : public API::Algorithm {
 public:
   /// Algorithm's name for identification
   const std::string name() const override { return "FindUBUsingIndexedPeaks"; };
@@ -45,7 +45,7 @@ private:
 
   /// Run the algorithm
   void exec() override;
-  void logLattice(Geometry::OrientedLattice &o_lattice, int &ModDim);
+  void logLattice(const Geometry::OrientedLattice &o_lattice, const int &ModDim);
   int getModulationDimension(Kernel::V3D &mnp);
   bool isPeakIndexed(const Geometry::IPeak &peak);
 };

@@ -33,20 +33,14 @@ Logger g_log("InstrumentInfo");
  * @param elem :: The Poco::XML::Element to read the data from
  * @throw std::runtime_error if name or at least one technique are not defined
  */
-InstrumentInfo::InstrumentInfo(const FacilityInfo *f, const Poco::XML::Element *elem) : m_facility(f) {
+InstrumentInfo::InstrumentInfo(const FacilityInfo *f, const Poco::XML::Element *elem)
+    : m_facility(f), m_name(elem->getAttribute("name")), m_shortName(elem->getAttribute("shortname")),
+      m_delimiter(elem->getAttribute("delimiter")) {
 
-  m_name = elem->getAttribute("name");
-
-  // The string to separate the instrument name and the run number.
-  m_delimiter = elem->getAttribute("delimiter");
-  if (m_delimiter.empty()) {
+  if (m_delimiter.empty())
     m_delimiter = f->delimiter();
-  }
-
-  m_shortName = elem->getAttribute("shortname");
-  if (m_shortName.empty()) {
+  if (m_shortName.empty())
     m_shortName = m_name;
-  }
 
   fillTechniques(elem);
   fillLiveData(elem);
@@ -187,26 +181,26 @@ void InstrumentInfo::fillZeroPadding(const Poco::XML::Element *elem) {
   unsigned long n = pNL_zeropadding->length();
 
   for (unsigned long i = 0; i < n; ++i) {
-    auto elem = dynamic_cast<Poco::XML::Element *>(pNL_zeropadding->item(i));
-    if (!elem)
+    auto elemenent = dynamic_cast<Poco::XML::Element *>(pNL_zeropadding->item(i));
+    if (!elemenent)
       continue;
     // read the zero padding size
-    if (!elem->hasAttribute("size")) {
+    if (!elemenent->hasAttribute("size")) {
       throw std::runtime_error("Zeropadding size is missing for instrument " + m_name);
     }
-    auto &sizeStr = elem->getAttribute("size");
+    auto &sizeStr = elemenent->getAttribute("size");
     int size = 0;
     if (!Mantid::Kernel::Strings::convert(sizeStr, size)) {
       throw std::runtime_error("Zeropadding size must be an integer value (instrument " + m_name + ")");
     }
     // read the start run number
     unsigned int startRunNumber = 0;
-    if (!elem->hasAttribute("startRunNumber")) {
+    if (!elemenent->hasAttribute("startRunNumber")) {
       if (!m_zeroPadding.empty()) {
         throw std::runtime_error("Zeropadding size is missing for instrument " + m_name);
       }
     } else {
-      auto &startRunNumberStr = elem->getAttribute("startRunNumber");
+      auto &startRunNumberStr = elemenent->getAttribute("startRunNumber");
       try {
         startRunNumber = boost::lexical_cast<unsigned int>(startRunNumberStr);
       } catch (...) {
@@ -217,8 +211,8 @@ void InstrumentInfo::fillZeroPadding(const Poco::XML::Element *elem) {
     }
     // read the file prefix
     std::string prefix = m_shortName;
-    if (elem->hasAttribute("prefix")) {
-      prefix = elem->getAttribute("prefix");
+    if (elemenent->hasAttribute("prefix")) {
+      prefix = elemenent->getAttribute("prefix");
     }
     m_zeroPadding[startRunNumber] = std::make_pair(prefix, size);
   }

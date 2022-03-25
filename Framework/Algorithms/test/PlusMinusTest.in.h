@@ -9,7 +9,7 @@
 #include <cxxtest/TestSuite.h>
 #include <cmath>
 
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
+#include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidAlgorithms/Minus.h"
 #include "MantidAlgorithms/Plus.h"
 #include "MantidAlgorithms/Rebin.h"

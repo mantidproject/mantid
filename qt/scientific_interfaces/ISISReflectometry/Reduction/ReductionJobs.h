@@ -38,11 +38,11 @@ public:
   std::vector<Group> const &groups() const;
   Group const &operator[](int index) const;
   std::string nextEmptyGroupName();
+  void setAllRowParents();
 
-  MantidWidgets::Batch::RowPath getPath(Item const &item) const;
-  MantidWidgets::Batch::RowPath getPath(Group const &group) const;
-  MantidWidgets::Batch::RowPath getPath(Row const &row) const;
-  Group const &getParentGroup(Row const &row) const;
+  MantidWidgets::Batch::RowLocation getLocation(Item const &item) const;
+  MantidWidgets::Batch::RowLocation getLocation(Group const &group) const;
+  MantidWidgets::Batch::RowLocation getLocation(Row const &row) const;
   boost::optional<Item &> getItemWithOutputWorkspaceOrNone(std::string const &wsName);
 
   bool validItemAtPath(const MantidWidgets::Batch::RowLocation &rowLocation) const;

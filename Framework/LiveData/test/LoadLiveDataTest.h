@@ -12,10 +12,10 @@
 #include "MantidAPI/Run.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/Workspace2D.h"
+#include "MantidFrameworkTestHelpers/FacilityHelper.h"
 #include "MantidGeometry/Instrument/ComponentInfo.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidLiveData/LoadLiveData.h"
-#include "MantidTestHelpers/FacilityHelper.h"
 #include "TestGroupDataListener.h"
 #include <cxxtest/TestSuite.h>
 #include <numeric>
@@ -26,7 +26,7 @@ using namespace Mantid::DataObjects;
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
 
-class FakeInOutPropertyAlgorithm : public API::Algorithm {
+class FakeInOutPropertyAlgorithm final : public API::Algorithm {
 public:
   static constexpr auto Name = "FakeInOutPropertyAlgorithm";
   static constexpr int Version = 1;

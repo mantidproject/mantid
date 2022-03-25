@@ -12,7 +12,7 @@
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidTestHelpers/ComponentCreationHelper.h"
+#include "MantidFrameworkTestHelpers/ComponentCreationHelper.h"
 #include <memory>
 
 using Mantid::DataHandling::SampleEnvironmentFactory;
@@ -72,12 +72,36 @@ private:
                                                           const std::string &) const override {
       throw std::runtime_error("Unable to find named specification");
     }
+    Mantid::DataHandling::SampleEnvironmentSpec_uptr parseSpec(const std::string &,
+                                                               const std::string &) const override {
+      throw std::runtime_error("Unable to find named specification");
+    }
   };
 
   class TestSampleEnvSpecFinder final : public Mantid::DataHandling::ISampleEnvironmentSpecFinder {
   public:
     Mantid::DataHandling::SampleEnvironmentSpec_uptr find(const std::string &, const std::string &,
                                                           const std::string &) const override {
+      // Just make one
+      using namespace Mantid::Geometry;
+      using namespace Mantid::Kernel;
+
+      ShapeFactory factory;
+      auto small =
+          std::make_shared<Container>(factory.createShape(ComponentCreationHelper::sphereXML(0.004, V3D(), "sp-1")));
+      small->setID("8mm");
+      auto large =
+          std::make_shared<Container>(factory.createShape(ComponentCreationHelper::sphereXML(0.005, V3D(), "sp-2")));
+      large->setID("10mm");
+
+      // Prepare a sample environment spec
+      auto spec = std::make_unique<Mantid::DataHandling::SampleEnvironmentSpec>("CRYO001");
+      spec->addContainer(small);
+      spec->addContainer(large);
+      return spec;
+    }
+    Mantid::DataHandling::SampleEnvironmentSpec_uptr parseSpec(const std::string &,
+                                                               const std::string &) const override {
       // Just make one
       using namespace Mantid::Geometry;
       using namespace Mantid::Kernel;

@@ -25,9 +25,10 @@ public:
   static EncoderTest *createSuite() { return new EncoderTest(); }
   static void destroySuite(EncoderTest *suite) { delete suite; }
 
-  EncoderTest() {
-    PyRun_SimpleString("import mantid.api as api\n"
-                       "api.FrameworkManager.Instance()");
+  void setUp() override { Mantid::API::AlgorithmFactory::Instance().subscribe<ReflectometryISISLoadAndProcess>(); }
+
+  void tearDown() override {
+    Mantid::API::AlgorithmFactory::Instance().unsubscribe("ReflectometryISISLoadAndProcess", 1);
   }
 
   void test_encoder() {
@@ -51,8 +52,13 @@ public:
     auto map = encoder.encodeBatch(&mwv, 0);
 
     tester.testBatch(gui, &mwv, map);
+
+    TS_ASSERT(map.contains(QString("version")))
+    auto constexpr expectedVersion = "1";
+    TS_ASSERT_EQUALS(expectedVersion, map[QString("version")].toString().toStdString())
   }
 };
+
 } // namespace ISISReflectometry
 } // namespace CustomInterfaces
 } // namespace MantidQt

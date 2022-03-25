@@ -28,7 +28,7 @@ set(SRC_FILES
     src/CalculateEfficiency2.cpp
     src/CalculateFlatBackground.cpp
     src/CalculateIqt.cpp
-    src/CalculateMultipleScattering.cpp
+    src/DiscusMultipleScatteringCorrection.cpp
     src/CalculatePlaczek.cpp
     src/CalculatePlaczekSelfScattering.cpp
     src/CalculatePlaczekSelfScattering2.cpp
@@ -338,7 +338,8 @@ set(SRC_FILES
     src/WorkspaceBoundingBox.cpp
     src/WorkspaceJoiners.cpp
     src/XDataConverter.cpp
-    src/XrayAbsorptionCorrection.cpp)
+    src/XrayAbsorptionCorrection.cpp
+)
 
 set(INC_FILES
     inc/MantidAlgorithms/AbsorptionCorrection.h
@@ -370,7 +371,7 @@ set(INC_FILES
     inc/MantidAlgorithms/CalculateEfficiency2.h
     inc/MantidAlgorithms/CalculateFlatBackground.h
     inc/MantidAlgorithms/CalculateIqt.h
-    inc/MantidAlgorithms/CalculateMultipleScattering.h
+    inc/MantidAlgorithms/DiscusMultipleScatteringCorrection.h
     inc/MantidAlgorithms/CalculatePlaczek.h
     inc/MantidAlgorithms/CalculatePlaczekSelfScattering.h
     inc/MantidAlgorithms/CalculatePlaczekSelfScattering2.h
@@ -688,14 +689,12 @@ set(INC_FILES
     inc/MantidAlgorithms/WorkspaceBoundingBox.h
     inc/MantidAlgorithms/WorkspaceJoiners.h
     inc/MantidAlgorithms/XDataConverter.h
-    inc/MantidAlgorithms/XrayAbsorptionCorrection.h)
+    inc/MantidAlgorithms/XrayAbsorptionCorrection.h
+)
 
-set(SRC_UNITY_IGNORE_FILES
-    src/AlignDetectors.cpp
-    src/FFTSmooth.cpp
-    src/FFTSmooth2.cpp
-    src/FilterBadPulses.cpp
-    src/SetUncertainties.cpp)
+set(SRC_UNITY_IGNORE_FILES src/AlignDetectors.cpp src/FFTSmooth.cpp src/FFTSmooth2.cpp src/FilterBadPulses.cpp
+                           src/SetUncertainties.cpp
+)
 
 if(UNITY_BUILD)
   include(UnityBuild)
@@ -730,7 +729,7 @@ set(TEST_FILES
     CalculateEfficiencyTest.h
     CalculateFlatBackgroundTest.h
     CalculateIqtTest.h
-    CalculateMultipleScatteringTest.h
+    DiscusMultipleScatteringCorrectionTest.h
     CalculatePlaczekSelfScattering2Test.h
     CalculatePlaczekSelfScatteringTest.h
     CalculatePlaczekTest.h
@@ -1023,18 +1022,16 @@ set(TEST_FILES
     WorkflowAlgorithmRunnerTest.h
     WorkspaceCreationHelperTest.h
     WorkspaceGroupTest.h
-    XrayAbsorptionCorrectionTest.h)
+    XrayAbsorptionCorrectionTest.h
+)
 
-set(TEST_PY_FILES
-    test/NormaliseToUnityTest.py)
+set(TEST_PY_FILES test/NormaliseToUnityTest.py)
 
-  pyunittest_add_test(${CMAKE_CURRENT_SOURCE_DIR} python ${TEST_PY_FILES})
+pyunittest_add_test(${CMAKE_CURRENT_SOURCE_DIR} python ${TEST_PY_FILES})
 
 if(COVERAGE)
   foreach(loop_var ${SRC_FILES} ${C_SRC_FILES} ${INC_FILES})
-    set_property(GLOBAL APPEND
-                 PROPERTY COVERAGE_SRCS
-                          "${CMAKE_CURRENT_SOURCE_DIR}/${loop_var}")
+    set_property(GLOBAL APPEND PROPERTY COVERAGE_SRCS "${CMAKE_CURRENT_SOURCE_DIR}/${loop_var}")
   endforeach(loop_var)
 endif()
 
@@ -1044,48 +1041,39 @@ enable_precompiled_headers(inc/MantidAlgorithms/PrecompiledHeader.h SRC_FILES)
 add_library(Algorithms ${SRC_FILES} ${C_SRC_FILES} ${INC_FILES})
 add_library(Mantid::Algorithms ALIAS Algorithms)
 
-target_include_directories(Algorithms PUBLIC
-    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/inc>
-		$<INSTALL_INTERFACE:include/Mantid>
+target_include_directories(
+  Algorithms PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/inc> $<INSTALL_INTERFACE:include/Mantid>
 )
 # Set the name of the generated library
-set_target_properties(Algorithms
-                      PROPERTIES OUTPUT_NAME
-                                 MantidAlgorithms
-                                 COMPILE_DEFINITIONS
-                                 "IN_MANTID_ALGORITHMS")
+set_target_properties(Algorithms PROPERTIES OUTPUT_NAME MantidAlgorithms COMPILE_DEFINITIONS "IN_MANTID_ALGORITHMS")
 
 if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
-  set_target_properties(Algorithms
-                        PROPERTIES INSTALL_RPATH
-                                   "@loader_path/../Contents/MacOS")
+  set_target_properties(Algorithms PROPERTIES INSTALL_RPATH "@loader_path/../Contents/MacOS")
 elseif(${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
-  set_target_properties(Algorithms
-                        PROPERTIES INSTALL_RPATH "\$ORIGIN/../${LIB_DIR}")
+  set_target_properties(Algorithms PROPERTIES INSTALL_RPATH "\$ORIGIN/../${LIB_DIR}")
 endif()
 
 # Add to the 'Framework' group in VS
 set_property(TARGET Algorithms PROPERTY FOLDER "MantidFramework")
 
-target_link_libraries(Algorithms PUBLIC Mantid::API Mantid::HistogramData Mantid::Kernel Mantid::Geometry Mantid::Indexing PRIVATE Mantid::DataObjects Mantid::Parallel Mantid::Types Boost::filesystem)
+target_link_libraries(
+  Algorithms
+  PUBLIC Mantid::API Mantid::HistogramData Mantid::Kernel Mantid::Geometry Mantid::Indexing
+  PRIVATE Mantid::DataObjects Mantid::Parallel Mantid::Types Boost::filesystem
+)
 
 # Add the unit tests directory
 add_subdirectory(test)
 
 # Auto-generate exports header
-target_include_directories(Algorithms PUBLIC
-  $<BUILD_INTERFACE:${CMAKE_BINARY_DIR}/Framework/Algorithms>
-  $<INSTALL_INTERFACE:include/Mantid>
+target_include_directories(
+  Algorithms PUBLIC $<BUILD_INTERFACE:${CMAKE_BINARY_DIR}/Framework/Algorithms> $<INSTALL_INTERFACE:include/Mantid>
 )
 generate_mantid_export_header(Algorithms FALSE)
 
 # Installation settings
-if (CONDA_BUILD)
-mtd_install_framework_lib(TARGETS Algorithms PLUGIN_LIB)
+if(CONDA_ENV)
+  mtd_install_framework_lib(TARGETS Algorithms PLUGIN_LIB)
 else()
-mtd_install_targets(TARGETS
-                    Algorithms
-                    INSTALL_DIRS
-                    ${PLUGINS_DIR}
-                    ${WORKBENCH_PLUGINS_DIR})
+  mtd_install_targets(TARGETS Algorithms INSTALL_DIRS ${PLUGINS_DIR} ${WORKBENCH_PLUGINS_DIR})
 endif()

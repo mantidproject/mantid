@@ -41,10 +41,10 @@
 #include <fstream>
 #include <memory>
 
-#include "MantidTestHelpers/ComponentCreationHelper.h"
-#include "MantidTestHelpers/FakeObjects.h"
-#include "MantidTestHelpers/NexusTestHelper.h"
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
+#include "MantidFrameworkTestHelpers/ComponentCreationHelper.h"
+#include "MantidFrameworkTestHelpers/FakeObjects.h"
+#include "MantidFrameworkTestHelpers/NexusTestHelper.h"
+#include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
@@ -808,6 +808,40 @@ public:
     TS_ASSERT_EQUALS(wsReloaded->detectorInfo().isMasked(0), false);
     TS_ASSERT_EQUALS(wsReloaded->detectorInfo().isMasked(1), true);
     TS_ASSERT_EQUALS(wsReloaded->detectorInfo().isMasked(2), false);
+
+    if (clearfiles)
+      Poco::File(file).remove();
+    AnalysisDataService::Instance().remove("testSpace");
+  }
+
+  void test_ragged_x_bins_saves_correct_x_values_when_spectrum_indices_passed() {
+    // stop regression related to bug in github issue #33152
+    auto ws = WorkspaceCreationHelper::create2DWorkspaceWithRectangularInstrument(1, 2, 2);
+    // alter binning of 1st spectrum
+    ws->setX(0, make_cow<Mantid::HistogramData::HistogramX>(std::vector<double>{0.0, 2.0, 4.0}));
+    AnalysisDataService::Instance().add("testSpace", ws);
+
+    SaveNexusProcessed saveAlg;
+    saveAlg.initialize();
+    saveAlg.setPropertyValue("InputWorkspace", "testSpace");
+    std::string file = "SaveNexusProcessedTest_test_masking.nxs";
+    if (Poco::File(file).exists())
+      Poco::File(file).remove();
+    TS_ASSERT_THROWS_NOTHING(saveAlg.setPropertyValue("Filename", file));
+    TS_ASSERT_THROWS_NOTHING(saveAlg.setPropertyValue("WorkspaceIndexList", "1")); // 2nd spectrum
+    TS_ASSERT_THROWS_NOTHING(saveAlg.execute());
+    TS_ASSERT(saveAlg.isExecuted());
+
+    LoadNexus loadAlg;
+    loadAlg.initialize();
+    loadAlg.setPropertyValue("Filename", file);
+    loadAlg.setPropertyValue("OutputWorkspace", "testSpaceReloaded");
+    TS_ASSERT_THROWS_NOTHING(loadAlg.execute());
+    TS_ASSERT(loadAlg.isExecuted());
+    auto wsReloaded =
+        std::dynamic_pointer_cast<Workspace2D>(AnalysisDataService::Instance().retrieve("testSpaceReloaded"));
+    // check has saved x values from 2nd spectrum not 1st
+    TS_ASSERT_EQUALS(wsReloaded->readX(0), ws->readX(1));
 
     if (clearfiles)
       Poco::File(file).remove();

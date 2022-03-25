@@ -104,12 +104,25 @@ Plot Spectra
 Save Result
   Saves the result in the default save directory.
 
+.. _DensityOfStates_Interface:
+
 DensityOfStates
 ---------------
 
-The DensityOfStates interface is used to load CASTEP simulations using the
+The DensityOfStates interface is used to load vibrational spectra using the
 :ref:`SimulatedDensityOfStates <algm-SimulatedDensityOfStates>` algorithm. It supports loading
-full and partial densities of states, raman and IR spectroscopy.
+full and partial densities of states, raman and IR spectroscopy from CASTEP .phonon files.
+
+Force constants data can also be loaded from CASTEP .castep_bin or Phonopy .yaml files.
+(To include the relevant data in .castep_bin, set PHONON_WRITE_FORCE_CONSTANTS to True.
+To include the required data in the phonopy.yaml file,
+use the ``--include-all`` flag or ``INCLUDE_ALL = .TRUE.`` tag.)
+A dense q-point mesh is automatically selected and phonon eigenvalues/eigenvectors are
+calculated using the Euphonic library. This does not include Raman or IR intensities.
+The Euphonic library is not currently included with Mantid and may need to be installed in order
+to read these files.
+In the Script Repository, ``/user/AdamJackson/install_euphonic.py`` can be used to install
+Euphonic to an appropriate location.
 
 .. interface:: Simulation
   :widget: dos

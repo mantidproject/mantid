@@ -1,0 +1,2 @@
+- :ref:`MonteCarloAbsorption <algm-MonteCarloAbsorption>` will now get the beam profile from the sample environment in case the sample shape is not defined,
+  e.g. in container-only absorption correction calculation with sparse instrument geometry.

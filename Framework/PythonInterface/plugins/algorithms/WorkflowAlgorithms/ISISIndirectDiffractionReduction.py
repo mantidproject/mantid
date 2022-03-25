@@ -78,10 +78,14 @@ class ISISIndirectDiffractionReduction(DataProcessorAlgorithm):
 
     def PyInit(self):
         self.declareProperty(StringArrayProperty(name='InputFiles'),
-                             doc='Comma separated list of input files.')
+                             doc='Comma separated list of input files formatted as a string; '
+                                 'this can also incorporate +, -, or : in the same fashion as '
+                                 'any string accepted by Load')
 
         self.declareProperty(StringArrayProperty(name='ContainerFiles'),
-                             doc='Comma separated list of input files for the empty container runs.')
+                             doc='Comma separated list of input files for the empty container runs '
+                                 'formatted as a string; this can also incorporate +, -, or : in '
+                                 'the same fashion as any string accepted by Load')
 
         self.declareProperty('ContainerScaleFactor', 1.0,
                              doc='Factor by which to scale the container runs.')

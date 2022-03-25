@@ -10,7 +10,7 @@
 from .alpha import compute_alpha
 from .painter import MplPainter, Painted
 # 3rd party
-from mantidqt.widgets.sliceviewer.sliceinfo import SliceInfo
+from mantidqt.widgets.sliceviewer.models.sliceinfo import SliceInfo
 # standard library
 from typing import Sequence
 

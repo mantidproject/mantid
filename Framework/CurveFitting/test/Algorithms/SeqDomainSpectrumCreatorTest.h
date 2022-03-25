@@ -13,8 +13,8 @@
 #include "MantidAPI/WorkspaceOpOverloads.h"
 #include "MantidCurveFitting/SeqDomain.h"
 #include "MantidCurveFitting/SeqDomainSpectrumCreator.h"
+#include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidKernel/IPropertyManager.h"
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/TableRow.h"
@@ -353,12 +353,12 @@ private:
     TestableSeqDomainSpectrumCreator(IPropertyManager *manager, const std::string &workspacePropertyName)
         : SeqDomainSpectrumCreator(manager, workspacePropertyName) {}
 
-    ~TestableSeqDomainSpectrumCreator() override {}
+    ~TestableSeqDomainSpectrumCreator() override = default;
   };
 
   class SeqDomainCreatorTestFunction : public IFunction1DSpectrum, public ParamFunction {
   public:
-    ~SeqDomainCreatorTestFunction() override {}
+    ~SeqDomainCreatorTestFunction() override = default;
 
     std::string name() const override { return "SeqDomainCreatorTestFunction"; }
 
@@ -378,7 +378,7 @@ private:
 
   class SeqDomainCreatorTestFunctionComplex : public IFunction1DSpectrum, public ParamFunction {
   public:
-    ~SeqDomainCreatorTestFunctionComplex() override {}
+    ~SeqDomainCreatorTestFunctionComplex() override = default;
 
     std::string name() const override { return "SeqDomainCreatorTestFunctionComplex"; }
 

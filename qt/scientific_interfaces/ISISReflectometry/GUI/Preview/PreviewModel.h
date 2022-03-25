@@ -1,3 +1,4 @@
+
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2021 ISIS Rutherford Appleton Laboratory UKRI,
@@ -9,19 +10,34 @@
 #include "Common/DllConfig.h"
 #include "IPreviewModel.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
+#include "MantidGeometry/IDTypes.h"
 #include "Reduction/PreviewRow.h"
 
+#include <cstddef>
 #include <memory>
 #include <string>
+#include <vector>
 
 namespace MantidQt::CustomInterfaces::ISISReflectometry {
 class IJobManager;
 
-class MANTIDQT_ISISREFLECTOMETRY_DLL PreviewModel : public IPreviewModel {
+class MANTIDQT_ISISREFLECTOMETRY_DLL PreviewModel final : public IPreviewModel {
 public:
+  PreviewModel();
   virtual ~PreviewModel() = default;
-  void loadWorkspace(std::string const &workspaceName, IJobManager &jobManager) override;
+
+  bool loadWorkspaceFromAds(std::string const &workspaceName) override;
+  void loadAndPreprocessWorkspaceAsync(std::string const &workspaceName, IJobManager &jobManager) override;
+  void sumBanksAsync(IJobManager &jobManager) override;
+
+  std::string detIDsToString(std::vector<Mantid::detid_t> const &indices) const override;
+
   Mantid::API::MatrixWorkspace_sptr getLoadedWs() const override;
+  std::vector<Mantid::detid_t> getSelectedBanks() const override;
+  Mantid::API::MatrixWorkspace_sptr getSummedWs() const override;
+
+  void setSelectedBanks(std::vector<Mantid::detid_t> selectedBanks) override;
+  void exportSummedWsToAds() const override;
 
 private:
   // This should be an optional instead of a point, but we have issues reassigning it because boost::optional doesn't
@@ -30,6 +46,5 @@ private:
   std::unique_ptr<PreviewRow> m_runDetails{nullptr};
 
   void createRunDetails(std::string const &workspaceName);
-  Mantid::API::MatrixWorkspace_sptr loadFromAds(std::string const &workspaceName) const;
 };
 } // namespace MantidQt::CustomInterfaces::ISISReflectometry

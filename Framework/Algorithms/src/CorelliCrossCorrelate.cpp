@@ -176,7 +176,7 @@ void CorelliCrossCorrelate::exec() {
   const auto &spectrumInfo = inputWS->spectrumInfo();
   PARALLEL_FOR_IF(Kernel::threadSafe(*outputWS))
   for (int64_t i = 0; i < numHistograms; ++i) {
-    PARALLEL_START_INTERUPT_REGION
+    PARALLEL_START_INTERRUPT_REGION
 
     auto &evlist = outputWS->getSpectrum(i);
 
@@ -234,9 +234,9 @@ void CorelliCrossCorrelate::exec() {
       g_log.warning("Events occurred long after last TDC.");
 
     prog.report();
-    PARALLEL_END_INTERUPT_REGION
+    PARALLEL_END_INTERRUPT_REGION
   }
-  PARALLEL_CHECK_INTERUPT_REGION
+  PARALLEL_CHECK_INTERRUPT_REGION
   setProperty("OutputWorkspace", outputWS);
 }
 

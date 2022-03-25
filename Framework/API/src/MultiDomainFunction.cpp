@@ -79,12 +79,12 @@ void MultiDomainFunction::clearDomainIndices() {
 
 /**
  * Populates a vector with domain indices assigned to function i.
- * @param i :: Index of a function to get the domain info about.
+ * @param funIndex :: Index of a function to get the domain info about.
  * @param nDomains :: Maximum number of domains.
  * @param domains :: (Output) vector to collect domain indixes.
  */
-void MultiDomainFunction::getDomainIndices(size_t i, size_t nDomains, std::vector<size_t> &domains) const {
-  auto it = m_domains.find(i);
+void MultiDomainFunction::getDomainIndices(size_t funIndex, size_t nDomains, std::vector<size_t> &domains) const {
+  auto it = m_domains.find(funIndex);
   if (it == m_domains.end()) { // apply to all domains
     domains.resize(nDomains);
     for (size_t i = 0; i < domains.size(); ++i) {
@@ -130,11 +130,11 @@ void MultiDomainFunction::function(const FunctionDomain &domain, FunctionValues 
     std::vector<size_t> domains;
     getDomainIndices(iFun, cd.getNParts(), domains);
 
-    for (auto &domain : domains) {
-      const FunctionDomain &d = cd.getDomain(domain);
+    for (auto &dom : domains) {
+      const FunctionDomain &d = cd.getDomain(dom);
       FunctionValues tmp(d);
       getFunction(iFun)->function(d, tmp);
-      values.addToCalculated(m_valueOffsets[domain], tmp);
+      values.addToCalculated(m_valueOffsets[dom], tmp);
     }
   }
 }
@@ -169,9 +169,9 @@ void MultiDomainFunction::functionDeriv(const FunctionDomain &domain, Jacobian &
       std::vector<size_t> domains;
       getDomainIndices(iFun, cd.getNParts(), domains);
 
-      for (auto &domain : domains) {
-        const FunctionDomain &d = cd.getDomain(domain);
-        PartialJacobian J(&jacobian, m_valueOffsets[domain], paramOffset(iFun));
+      for (auto &dom : domains) {
+        const FunctionDomain &d = cd.getDomain(dom);
+        PartialJacobian J(&jacobian, m_valueOffsets[dom], paramOffset(iFun));
         getFunction(iFun)->functionDeriv(d, J);
       }
     }
@@ -198,16 +198,16 @@ void MultiDomainFunction::iterationFinished() {
 }
 
 /// Return a value of attribute attName
-IFunction::Attribute MultiDomainFunction::getLocalAttribute(size_t i, const std::string &attName) const {
+IFunction::Attribute MultiDomainFunction::getLocalAttribute(size_t funIndex, const std::string &attName) const {
   if (attName != "domains") {
     throw std::invalid_argument("MultiDomainFunction does not have attribute " + attName);
   }
-  if (i >= nFunctions()) {
+  if (funIndex >= nFunctions()) {
     throw std::out_of_range("Function index is out of range.");
   }
   try {
-    auto it = m_domains.at(i);
-    if (it.size() == 1 && it.front() == i) {
+    auto it = m_domains.at(funIndex);
+    if (it.size() == 1 && it.front() == funIndex) {
       return IFunction::Attribute("i");
     } else if (!it.empty()) {
       auto out = std::to_string(it.front());
@@ -246,19 +246,20 @@ IFunction::Attribute MultiDomainFunction::getLocalAttribute(size_t i, const std:
  * of type 2), 3), 4) or 5) because these values can tell Fit how many domains
  *need to be created.
  *
- * @param i :: Index of a function for which the attribute is being set.
+ * @param funIndex :: Index of a function for which the attribute is being set.
  * @param attName :: Name of an attribute.
  * @param att :: Value of the attribute to set.
  */
-void MultiDomainFunction::setLocalAttribute(size_t i, const std::string &attName, const IFunction::Attribute &att) {
+void MultiDomainFunction::setLocalAttribute(size_t funIndex, const std::string &attName,
+                                            const IFunction::Attribute &att) {
   if (attName != "domains") {
     throw std::invalid_argument("MultiDomainFunction does not have attribute " + attName);
   }
-  if (i >= nFunctions()) {
+  if (funIndex >= nFunctions()) {
     throw std::out_of_range("Function index is out of range.");
   }
   std::string value = att.asString();
-  auto it = m_domains.find(i);
+  auto it = m_domains.find(funIndex);
 
   if (value == "All") { // fit to all domains
     if (it != m_domains.end()) {
@@ -266,10 +267,10 @@ void MultiDomainFunction::setLocalAttribute(size_t i, const std::string &attName
     }
     return;
   } else if (value == "i") { // fit to domain with the same index as the function
-    setDomainIndex(i, i);
+    setDomainIndex(funIndex, funIndex);
     return;
   } else if (value.empty()) { // do not fit to any domain
-    setDomainIndices(i, std::vector<size_t>());
+    setDomainIndices(funIndex, std::vector<size_t>());
     return;
   }
 
@@ -301,7 +302,7 @@ void MultiDomainFunction::setLocalAttribute(size_t i, const std::string &attName
       indx.emplace_back(boost::lexical_cast<size_t>(k.name()));
     }
   }
-  setDomainIndices(i, indx);
+  setDomainIndices(funIndex, indx);
 }
 
 /**

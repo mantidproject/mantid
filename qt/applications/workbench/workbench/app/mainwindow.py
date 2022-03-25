@@ -13,8 +13,8 @@ Defines the QMainWindow of the application and the main() entry point.
 import builtins
 import os
 
-from mantid.api import FrameworkManager
-from mantid.kernel import ConfigService, logger
+from mantid.api import FrameworkManager, AlgorithmManager
+from mantid.kernel import (ConfigService, logger, UsageService, FeatureType)
 from workbench.config import SAVE_STATE_VERSION
 from workbench.app import MAIN_WINDOW_OBJECT_NAME, MAIN_WINDOW_TITLE
 from workbench.utils.windowfinder import find_window
@@ -24,7 +24,7 @@ from workbench.widgets.settings.presenter import SettingsPresenter
 # -----------------------------------------------------------------------------
 # Qt
 # -----------------------------------------------------------------------------
-from qtpy.QtCore import (QEventLoop, Qt, QPoint, QSize)  # noqa
+from qtpy.QtCore import (QEventLoop, Qt, QPoint, QSize, QCoreApplication)  # noqa
 from qtpy.QtGui import (QColor, QFontDatabase, QGuiApplication, QIcon, QPixmap)  # noqa
 from qtpy.QtWidgets import (QApplication, QDesktopWidget, QFileDialog, QMainWindow,
                             QSplashScreen, QMessageBox)  # noqa
@@ -223,6 +223,9 @@ class MainWindow(QMainWindow):
         self.config_updated()
 
         self.override_python_input()
+
+        # Ensure windows created after the main window have their own menu bars (on mac)
+        QCoreApplication.setAttribute(Qt.AA_DontUseNativeMenuBar, True)
 
     def post_mantid_init(self):
         """Run any setup that requires mantid
@@ -588,6 +591,9 @@ class MainWindow(QMainWindow):
             import matplotlib.pyplot as plt  # noqa
             plt.close('all')
 
+            # Cancel all running (managed) algorithms
+            AlgorithmManager.Instance().cancelAll()
+
             app = QApplication.instance()
             if app is not None:
                 app.closeAllWindows()
@@ -597,7 +603,6 @@ class MainWindow(QMainWindow):
             if self.project_recovery is not None:
                 self.project_recovery.stop_recovery_thread()
                 self.project_recovery.closing_workbench = True
-                self.project_recovery.remove_current_pid_folder()
 
             # Cancel memory widget thread
             if self.memorywidget is not None:
@@ -608,6 +613,18 @@ class MainWindow(QMainWindow):
 
             if self.workspacecalculator is not None:
                 self.workspacecalculator.view.closeEvent(event)
+
+            if self.project_recovery is not None:
+                # Do not merge this block with the above block that
+                # starts with the same check.
+                # We deliberately split the call to stop the recovery
+                # thread and removal of the checkpoints folder to
+                # allow for the maximum amount of time for the recovery
+                # thread to finish. Any errors here are ignored as exceptions
+                # on shutdown cannot be handled in a meaningful way.
+                # Future runs of project recovery will clean any stale points
+                # after a month
+                self.project_recovery.remove_current_pid_folder(ignore_errors=True)
 
             event.accept()
         else:
@@ -708,6 +725,7 @@ class MainWindow(QMainWindow):
         self.interface_manager.showConceptHelp('')
 
     def open_mantid_help(self):
+        UsageService.registerFeatureUsage(FeatureType.Feature.Interface, ["Mantid Help"], False)
         self.interface_manager.showHelpPage('')
 
     def open_mantid_homepage(self):
@@ -734,6 +752,9 @@ class MainWindow(QMainWindow):
             font_string = settings.get('MainWindow/font').split(',')
             font = QFontDatabase().font(font_string[0], font_string[-1], int(font_string[1]))
             qapp.setFont(font)
+
+        # reset font for ipython console to ensure it stays monospace
+        self.ipythonconsole.console.reset_font()
 
         # make sure main window is smaller than the desktop
         desktop = QDesktopWidget()

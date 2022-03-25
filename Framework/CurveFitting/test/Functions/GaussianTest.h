@@ -30,7 +30,7 @@ using namespace Mantid::CurveFitting::Constraints;
 // Algorithm to force Gaussian1D to be run by simplex algorithm
 class SimplexGaussian : public Gaussian {
 public:
-  ~SimplexGaussian() override {}
+  ~SimplexGaussian() override = default;
   std::string name() const override { return "SimplexGaussian"; }
 
 protected:
@@ -48,7 +48,7 @@ class GaussianTest : public CxxTest::TestSuite {
 public:
   void test_category() {
     Gaussian fn;
-    TS_ASSERT_EQUALS(fn.category(), "Peak");
+    TS_ASSERT_EQUALS(fn.category(), "Peak; Muon\\MuonModelling");
   }
 
   void test_with_Levenberg_Marquardt() {

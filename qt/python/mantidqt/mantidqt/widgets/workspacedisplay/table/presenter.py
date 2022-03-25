@@ -335,7 +335,8 @@ class TableWorkspaceDisplay(ObservingPresenter, DataCopier):
         x = self.presenter.model.get_column(selected_x)
 
         fig, ax = self.plot.subplots(subplot_kw={"projection": "mantid"})
-        fig.canvas.set_window_title(self.presenter.model.get_name())
+        if fig.canvas.manager is not None:
+            fig.canvas.manager.set_window_title(self.presenter.model.get_name())
         ax.set_xlabel(self.presenter.model.get_column_header(selected_x))
         ax.wsName = self.presenter.model.get_name()
 

@@ -9,7 +9,7 @@
 #include "GUI/Common/IDecoder.h"
 #include "GUI/Common/IEncoder.h"
 #include "GUI/Common/IFileHandler.h"
-#include "GUI/Common/IMessageHandler.h"
+#include "GUI/Common/IReflMessageHandler.h"
 #include "GUI/Options/IOptionsDialogPresenter.h"
 #include "GUI/Runs/IRunsPresenter.h"
 #include "IMainWindowView.h"
@@ -43,7 +43,7 @@ Mantid::Kernel::Logger g_log("Reflectometry GUI");
  * @param batchPresenterFactory :: [input] A factory to create the batches
  * we will manage
  */
-MainWindowPresenter::MainWindowPresenter(IMainWindowView *view, IMessageHandler *messageHandler,
+MainWindowPresenter::MainWindowPresenter(IMainWindowView *view, IReflMessageHandler *messageHandler,
                                          IFileHandler *fileHandler, std::unique_ptr<IEncoder> encoder,
                                          std::unique_ptr<IDecoder> decoder,
                                          std::unique_ptr<ISlitCalculator> slitCalculator,
@@ -130,6 +130,14 @@ void MainWindowPresenter::notifyChangeInstrumentRequested(std::string const &new
     onInstrumentChanged();
 }
 
+void MainWindowPresenter::notifyCloseEvent() {
+  if (isCloseEventPrevented()) {
+    m_view->ignoreCloseEvent();
+  } else {
+    m_view->acceptCloseEvent();
+  }
+}
+
 void MainWindowPresenter::notifyUpdateInstrumentRequested() {
   // An instrument should have been set up before any calls to this function.
   if (!instrument())
@@ -149,11 +157,8 @@ bool MainWindowPresenter::isAnyBatchProcessing() const {
 }
 
 bool MainWindowPresenter::isAnyBatchAutoreducing() const {
-  for (const auto &batchPresenter : m_batchPresenters) {
-    if (batchPresenter->isAutoreducing())
-      return true;
-  }
-  return false;
+  return std::any_of(m_batchPresenters.cbegin(), m_batchPresenters.cend(),
+                     [](auto const &batchPresenter) { return batchPresenter->isAutoreducing(); });
 }
 
 bool MainWindowPresenter::isWarnProcessAllChecked() const {
@@ -312,6 +317,7 @@ void MainWindowPresenter::notifyLoadBatchRequested(int tabIndex) {
   }
   m_decoder->decodeBatch(m_view, tabIndex, map);
   m_batchPresenters[tabIndex].get()->notifyChangesSaved();
+  m_batchPresenters[tabIndex].get()->notifyBatchLoaded();
 }
 
 void MainWindowPresenter::disableSaveAndLoadBatch() { m_view->disableSaveAndLoadBatch(); }

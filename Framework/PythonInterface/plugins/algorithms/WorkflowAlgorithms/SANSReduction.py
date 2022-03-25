@@ -93,7 +93,7 @@ class SANSReduction(PythonAlgorithm):
         filename = self.getProperty("Filename").value
         output_ws = self.getPropertyValue("OutputWorkspace")
         property_manager_name = self.getProperty("ReductionProperties").value
-        property_manager = PropertyManagerDataService.retrieve(property_manager_name)
+        property_manager = PropertyManagerDataService[property_manager_name]
 
         property_list = [p.name for p in property_manager.getProperties()]
 
@@ -303,7 +303,7 @@ class SANSReduction(PythonAlgorithm):
     def process_data_file(self, workspace):
         output_msg = ""
         property_manager_name = self.getProperty("ReductionProperties").value
-        property_manager = PropertyManagerDataService.retrieve(property_manager_name)
+        property_manager = PropertyManagerDataService[property_manager_name]
         property_list = [p.name for p in property_manager.getProperties()]
 
         # Dark current subtraction
@@ -370,7 +370,7 @@ class SANSReduction(PythonAlgorithm):
             Simple execution of an algorithm on the given workspace
         """
         property_manager_name = self.getProperty("ReductionProperties").value
-        property_manager = PropertyManagerDataService.retrieve(property_manager_name)
+        property_manager = PropertyManagerDataService[property_manager_name]
 
         output_msg = ""
         if output_workspace is None:

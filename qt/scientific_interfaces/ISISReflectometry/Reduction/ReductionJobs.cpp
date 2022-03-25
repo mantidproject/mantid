@@ -27,8 +27,9 @@ Group &findOrMakeGroupWithName(ReductionJobs &jobs, std::string const &groupName
  * postprocessing associated with them */
 int countItems(ReductionJobs const &jobs, Item::ItemCountFunction countFunction) {
   auto const &groups = jobs.groups();
-  return std::accumulate(groups.cbegin(), groups.cend(), 0,
-                         [countFunction](int &count, Group const &group) { return count + (group.*countFunction)(); });
+  return std::accumulate(groups.cbegin(), groups.cend(), 0, [countFunction](int const &count, Group const &group) {
+    return count + (group.*countFunction)();
+  });
 }
 } // namespace
 
@@ -88,6 +89,10 @@ std::string ReductionJobs::nextEmptyGroupName() {
   std::string name = "HiddenGroupName" + std::to_string(m_groupNameSuffix);
   m_groupNameSuffix++;
   return name;
+}
+
+void ReductionJobs::setAllRowParents() {
+  std::for_each(m_groups.begin(), m_groups.end(), [](auto &group) { group.setAllRowParents(); });
 }
 
 /* Return true if the reduction table has content. This excludes the
@@ -184,14 +189,13 @@ int percentComplete(ReductionJobs const &jobs) {
 
 Group const &ReductionJobs::operator[](int index) const { return m_groups[index]; }
 
-MantidWidgets::Batch::RowPath ReductionJobs::getPath(Item const &item) const {
+MantidWidgets::Batch::RowLocation ReductionJobs::getLocation(Item const &item) const {
   if (item.isGroup())
-    return getPath(dynamic_cast<Group const &>(item));
-  else
-    return getPath(dynamic_cast<Row const &>(item));
+    return getLocation(dynamic_cast<Group const &>(item));
+  return getLocation(dynamic_cast<Row const &>(item));
 }
 
-MantidWidgets::Batch::RowPath ReductionJobs::getPath(Group const &group) const {
+MantidWidgets::Batch::RowLocation ReductionJobs::getLocation(Group const &group) const {
   // Find this group in the groups list
   auto groupIter = std::find_if(m_groups.cbegin(), m_groups.cend(),
                                 [&group](Group const &currentGroup) -> bool { return &currentGroup == &group; });
@@ -201,10 +205,10 @@ MantidWidgets::Batch::RowPath ReductionJobs::getPath(Group const &group) const {
   }
   // Found the group so return its index as the path
   auto const groupIndex = static_cast<int>(groupIter - m_groups.cbegin());
-  return {groupIndex};
+  return MantidWidgets::Batch::RowLocation({groupIndex});
 }
 
-MantidWidgets::Batch::RowPath ReductionJobs::getPath(Row const &row) const {
+MantidWidgets::Batch::RowLocation ReductionJobs::getLocation(Row const &row) const {
   auto groupIndex = 0;
   for (auto const &group : m_groups) {
     // See if the row is in this group
@@ -220,18 +224,10 @@ MantidWidgets::Batch::RowPath ReductionJobs::getPath(Row const &row) const {
 
     // Found the row, so return its group and row indices as the path
     auto const rowIndex = static_cast<int>(rowIter - rows.cbegin());
-    return {groupIndex, rowIndex};
+    return MantidWidgets::Batch::RowLocation({groupIndex, rowIndex});
   }
 
   throw std::runtime_error("Internal error: could not find table location for row");
-}
-
-Group const &ReductionJobs::getParentGroup(Row const &row) const {
-  auto const path = getPath(row);
-  if (path.size() < 1)
-    throw std::runtime_error("Internal error: could not find parent group for row");
-  auto const groupIndex = path[0];
-  return m_groups[groupIndex];
 }
 
 boost::optional<Item &> ReductionJobs::getItemWithOutputWorkspaceOrNone(std::string const &wsName) {

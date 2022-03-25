@@ -7,14 +7,15 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
+
+@AUTO_GENERATE_WARNING@
+/********** Source = MantidVersion.cpp.in *****************************************************/
+
 #include "MantidKernel/MantidVersion.h"
 
 #include <sstream>
 
-namespace Mantid
-{
-namespace Kernel
-{
+namespace Mantid::Kernel {
 
 const char* MantidVersion::version()
 {
@@ -27,6 +28,10 @@ const char* MantidVersion::versionShort()
 {
   // The major and minor version numbers are specified in Build/CMake/VersionNumber.cmake
   return "@VERSION_MAJOR@.@VERSION_MINOR@";
+}
+
+const MantidVersion::VersionInfo MantidVersion::versionInfo() {
+  return {"@VERSION_MAJOR@", "@VERSION_MINOR@", "@VERSION_PATCH@@VERSION_TWEAK@"};
 }
 
 std::string MantidVersion::releaseNotes()
@@ -104,5 +109,4 @@ std::string MantidVersion::paperCitation()
   return "http://dx.doi.org/10.1016/j.nima.2014.07.029";
 }
 
-} // namespace Kernel
-} // namespace Mantid
+} // namespace Mantid::Kernel

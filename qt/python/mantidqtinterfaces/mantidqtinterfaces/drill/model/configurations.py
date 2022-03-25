@@ -18,11 +18,17 @@ class RundexSettings(object):
     D2B =    "D2B"
     D20 =    "D20"
     D1B =    "D1B"
+    IN4 =     "IN4"
+    IN5 =     "IN5"
+    IN6 =     "IN6"
+    PANTHER = "PANTHER"
+    SHARP =   "SHARP"
 
     # techniques (see instrument/Facilities.xml)
     SANS =   "SANS"
     REFL =   "Reflectometry"
     POWDER = "Powder diffraction"
+    DIRECT = "Direct geometry"
 
     # acquisition modes
     SANS_ACQ =     "SANS v1"
@@ -32,6 +38,7 @@ class RundexSettings(object):
     REFL_NPOL =    "Unpolarized"
     POWDER_DSCAN = "Detector scan"
     POWDER_PSCAN = "Sample scan"
+    DIRECT_TOF = "TOF"
 
     # correspondance between instrument and technique
     TECHNIQUE = {
@@ -43,7 +50,12 @@ class RundexSettings(object):
             FIGARO: REFL,
             D2B:    POWDER,
             D20:    POWDER,
-            D1B:    POWDER
+            D1B:    POWDER,
+            IN4:     DIRECT,
+            IN5:     DIRECT,
+            IN6:     DIRECT,
+            PANTHER: DIRECT,
+            SHARP:   DIRECT
             }
 
     # correspondance between instrument and acquisition mode
@@ -56,7 +68,12 @@ class RundexSettings(object):
             FIGARO: [REFL_NPOL],
             D2B:    [POWDER_DSCAN],
             D20:    [POWDER_DSCAN, POWDER_PSCAN],
-            D1B:    [POWDER_PSCAN]
+            D1B:    [POWDER_PSCAN],
+            IN4:     [DIRECT_TOF],
+            IN5:     [DIRECT_TOF],
+            IN6:     [DIRECT_TOF],
+            PANTHER: [DIRECT_TOF],
+            SHARP:   [DIRECT_TOF]
             }
 
     #group by group processing mode
@@ -175,6 +192,19 @@ class RundexSettings(object):
                 "OutputWorkspace",
                 "CustomOptions"
                 ],
+            DIRECT_TOF: [
+                "Runs",
+                "OutputWorkspace",
+                "ProcessAs",
+                "CadmiumWorkspace",
+                "EmptyContainerWorkspace",
+                "FlatBackground",
+                "VanadiumWorkspace",
+                "MaskWorkspace",
+                "SampleMaterial",
+                "SampleGeometry",
+                "CustomOptions"
+                ]
             }
 
     VISUAL_SETTINGS = {
@@ -182,6 +212,14 @@ class RundexSettings(object):
                 "HiddenColumns": [
                     "FluxRuns",
                     "TransmissionAbsorberRuns"
+                    ]
+                },
+            DIRECT_TOF: {
+                "HiddenColumns": [
+                    "CadmiumWorkspace",
+                    "FlatBackground",
+                    "SampleMaterial",
+                    "SampleGeometry",
                     ]
                 }
             }
@@ -195,6 +233,7 @@ class RundexSettings(object):
             REFL_NPOL:    "ReflectometryILLAutoProcess",
             POWDER_DSCAN: "PowderILLDetectorScan",
             POWDER_PSCAN: "PowderILLParameterScan",
+            DIRECT_TOF:   "DirectILLAutoProcess"
             }
 
     # export algos for each acquisition mode. Each algo has a boolean to set
@@ -231,6 +270,11 @@ class RundexSettings(object):
                 "SaveNexusProcessed": False,
                 "SaveAscii": False,
                 "SaveFocussedXYE": True
+                },
+            DIRECT_TOF: {
+                "SaveNexusProcessed": True,
+                "SaveAscii": False,
+                "SaveNXSPE": False
                 }
             }
 
@@ -245,7 +289,8 @@ class RundexSettings(object):
             "SaveCanSAS1D": ".xml",
             "SaveNISTDAT": ".dat",
             "SaveReflectometryAscii": ".mft",
-            "SaveFocussedXYE": ".dat"
+            "SaveFocussedXYE": ".dat",
+            "SaveNXSPE": ".nxspe"
             }
 
     # ideal number of threads for each acquisition mode (optional)
@@ -259,6 +304,7 @@ class RundexSettings(object):
             REFL_NPOL:    1,
             POWDER_DSCAN: 1,
             POWDER_PSCAN: 1,
+            DIRECT_TOF:   1,
             }
 
     # settings for each acquisition mode
@@ -435,6 +481,39 @@ class RundexSettings(object):
                 "CropNegative2Theta",
                 "ZeroCountingCells",
                 "Unit"
+                ],
+            DIRECT_TOF: [
+                "ReductionType",
+                "FlatBkg",
+                "FlatBkgAveragingWindow",
+                "FlatBkgScaling",
+                "EmptyContainerScaling",
+                "IncidentEnergyCalibration",
+                "IncidentEnergy",
+                "IncidentEnergyRange",
+                "ElasticChannel",
+                "EPPCreationMethod",
+                "ElasticChannelIndex",
+                "EPPWorkspace",
+                "AbsorptionCorrection",
+                "SelfAttenuationMethod",
+                "ContainerMaterial",
+                "ContainerGeometry",
+                "AbsoluteUnitNormalisation",
+                "MaskedTubes",
+                "MaskThresholdMin",
+                "MaskThresholdMax",
+                "MaskedAngles",
+                "MaskWithVanadium",
+                "EnergyExchangeBinning",
+                "MomentumTransferBinning",
+                "DetectorGrouping",
+                "GroupPixelsBy",
+                "GroupingAngleStep",
+                "GroupingBehaviour",
+                "SampleAngleOffset",
+                "SaveOutput",
+                "ClearCache",
                 ]
             }
 

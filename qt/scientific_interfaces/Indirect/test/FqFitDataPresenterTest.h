@@ -15,8 +15,8 @@
 #include "IndirectFunctionBrowser/SingleFunctionTemplateBrowser.h"
 
 #include "MantidAPI/FrameworkManager.h"
+#include "MantidFrameworkTestHelpers/IndirectFitDataCreationHelper.h"
 #include "MantidKernel/WarningSuppressions.h"
-#include "MantidTestHelpers/IndirectFitDataCreationHelper.h"
 
 using namespace Mantid::API;
 using namespace Mantid::IndirectFitDataCreationHelper;
@@ -69,6 +69,7 @@ public:
 class MockIndirectFitDataModel : public IIndirectFitDataModel {
 public:
   /// Public Methods
+  MOCK_METHOD0(getFittingData, std::vector<IndirectFitData> *());
   MOCK_METHOD2(addWorkspace, void(const std::string &workspaceName, const std::string &spectra));
   MOCK_METHOD2(addWorkspace, void(const std::string &workspaceName, const FunctionModelSpectra &spectra));
   MOCK_METHOD2(addWorkspace, void(MatrixWorkspace_sptr workspace, const FunctionModelSpectra &spectra));
@@ -100,8 +101,10 @@ public:
 
   MOCK_METHOD3(setStartX, void(double startX, WorkspaceID workspaceID, WorkspaceIndex spectrum));
   MOCK_METHOD2(setStartX, void(double startX, WorkspaceID workspaceID));
+  MOCK_METHOD2(setStartX, void(double startX, FitDomainIndex fitDomainIndex));
   MOCK_METHOD3(setEndX, void(double endX, WorkspaceID workspaceID, WorkspaceIndex spectrum));
   MOCK_METHOD2(setEndX, void(double endX, WorkspaceID workspaceID));
+  MOCK_METHOD2(setEndX, void(double endX, FitDomainIndex fitDomainIndex));
   MOCK_METHOD3(setExcludeRegion, void(const std::string &exclude, WorkspaceID workspaceID, WorkspaceIndex spectrum));
   MOCK_METHOD2(setExcludeRegion, void(const std::string &exclude, FitDomainIndex index));
   MOCK_METHOD1(setResolution, void(const std::string &name));

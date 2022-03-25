@@ -27,6 +27,7 @@ using testing::Mock;
 using testing::NiceMock;
 using testing::Return;
 using testing::ReturnRef;
+using testing::StrictMock;
 
 class BatchPresenterTest : public CxxTest::TestSuite {
 public:
@@ -498,6 +499,27 @@ public:
     verifyAndClear();
   }
 
+  void testNotifyBatchLoaded() {
+    auto presenter = makePresenter();
+    EXPECT_CALL(*m_runsPresenter, notifyBatchLoaded());
+    presenter->notifyBatchLoaded();
+    verifyAndClear();
+  }
+
+  void testWarningShownOnResumeWhenExperimentSettingsInvalid() {
+    auto presenter = makePresenter();
+    EXPECT_CALL(*m_experimentPresenter, hasValidSettings()).Times(1).WillOnce(Return(false));
+    EXPECT_CALL(m_messageHandler, giveUserCritical(_, _)).Times(1);
+    presenter->notifyResumeReductionRequested();
+  }
+
+  void testWarningShownOnAutoreduceWhenExperimentSettingsInvalid() {
+    auto presenter = makePresenter();
+    EXPECT_CALL(*m_experimentPresenter, hasValidSettings()).Times(1).WillOnce(Return(false));
+    EXPECT_CALL(m_messageHandler, giveUserCritical(_, _)).Times(1);
+    presenter->notifyResumeAutoreductionRequested();
+  }
+
 private:
   NiceMock<MockBatchView> m_view;
   NiceMock<MockBatchJobManager> *m_jobManager;
@@ -509,6 +531,7 @@ private:
   NiceMock<MockInstrumentPresenter> *m_instrumentPresenter;
   NiceMock<MockSavePresenter> *m_savePresenter;
   NiceMock<MockPreviewPresenter> *m_previewPresenter;
+  StrictMock<MockMessageHandler> m_messageHandler;
   std::vector<std::string> m_instruments;
   double m_tolerance;
   Experiment m_experiment;
@@ -526,10 +549,11 @@ private:
                          std::unique_ptr<IExperimentPresenter> experimentPresenter,
                          std::unique_ptr<IInstrumentPresenter> instrumentPresenter,
                          std::unique_ptr<ISavePresenter> savePresenter,
-                         std::unique_ptr<IPreviewPresenter> previewPresenter)
+                         std::unique_ptr<IPreviewPresenter> previewPresenter,
+                         MantidQt::MantidWidgets::IMessageHandler *messageHandler)
         : BatchPresenter(view, std::move(model), jobRunner, std::move(runsPresenter), std::move(eventPresenter),
                          std::move(experimentPresenter), std::move(instrumentPresenter), std::move(savePresenter),
-                         std::move(previewPresenter)) {}
+                         std::move(previewPresenter), messageHandler) {}
   };
 
   RunsTable makeRunsTable() { return RunsTable(m_instruments, m_tolerance, ReductionJobs()); }
@@ -556,7 +580,7 @@ private:
     auto presenter = std::make_unique<BatchPresenterFriend>(
         &m_view, makeModel(), &m_jobRunner, std::move(runsPresenter), std::move(eventPresenter),
         std::move(experimentPresenter), std::move(instrumentPresenter), std::move(savePresenter),
-        std::move(previewPresenter));
+        std::move(previewPresenter), &m_messageHandler);
     presenter->acceptMainPresenter(&m_mainPresenter);
     // Replace the constructed job runner with a mock
     m_jobManager = new NiceMock<MockBatchJobManager>();
@@ -568,6 +592,7 @@ private:
     // The mock runs presenter should by default return true when autoreduction
     // is resumed
     ON_CALL(*m_runsPresenter, resumeAutoreduction()).WillByDefault(Return(true));
+    ON_CALL(*m_experimentPresenter, hasValidSettings()).WillByDefault(Return(true));
     return presenter;
   }
 

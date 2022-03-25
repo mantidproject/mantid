@@ -282,12 +282,12 @@ template <typename Base> std::map<std::string, std::string> ConvolutionFit<Base>
   return errors;
 }
 
-template <typename Base> bool ConvolutionFit<Base>::throwIfElasticQConversionFails() const { return true; }
-
 template <typename Base> bool ConvolutionFit<Base>::isFitParameter(const std::string &name) const {
   bool isBackgroundParameter = name.rfind("A0") != std::string::npos || name.rfind("A1") != std::string::npos;
   return name.rfind("Centre") == std::string::npos && !isBackgroundParameter;
 }
+
+template <typename Base> bool ConvolutionFit<Base>::throwIfElasticQConversionFails() const { return true; }
 
 template <typename Base>
 ITableWorkspace_sptr ConvolutionFit<Base>::processParameterTable(ITableWorkspace_sptr parameterTable) {

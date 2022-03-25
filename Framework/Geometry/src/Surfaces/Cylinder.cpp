@@ -146,12 +146,10 @@ int Cylinder::side(const Kernel::V3D &Pt) const
   return Quadratic::side(Pt);
 }
 
-int Cylinder::onSurface(const Kernel::V3D &Pt) const
+bool Cylinder::onSurface(const Kernel::V3D &Pt) const
 /**
  Calculate if the point PT on the cylinder
  @param Pt :: Kernel::V3D to test
- @retval 1 :: on the surface
- @retval 0 :: not on the surface
  */
 {
   if (m_normVec > 0) // m_normVec =1-3 (point to exclude == m_normVec-1)
@@ -160,7 +158,7 @@ int Cylinder::onSurface(const Kernel::V3D &Pt) const
     x *= x;
     double y = Pt[(m_normVec + 1) % 3] - m_centre[(m_normVec + 1) % 3];
     y *= y;
-    return (std::abs((x + y) - m_radius * m_radius) > Tolerance) ? 0 : 1;
+    return (std::abs((x + y) - m_radius * m_radius) <= Tolerance);
   }
   return Quadratic::onSurface(Pt);
 }

@@ -18,7 +18,7 @@ namespace WorkflowAlgorithms {
 
 @date 2012-07-16
  */
-class DLLExport DgsPreprocessData : public API::Algorithm {
+class DLLExport DgsPreprocessData final : public API::Algorithm {
 public:
   const std::string name() const override;
   /// Summary of algorithms purpose

@@ -115,10 +115,9 @@ MatrixWorkspace::MatrixWorkspace(const Parallel::StorageMode storageMode)
       m_masks() {}
 
 MatrixWorkspace::MatrixWorkspace(const MatrixWorkspace &other)
-    : IMDWorkspace(other), ExperimentInfo(other), m_isInitialized(other.m_isInitialized), m_YUnit(other.m_YUnit),
-      m_YUnitLabel(other.m_YUnitLabel), m_isCommonBinsFlag(other.m_isCommonBinsFlag), m_masks(other.m_masks),
-      m_indexInfoNeedsUpdate(false) {
-  m_indexInfo = std::make_unique<Indexing::IndexInfo>(other.indexInfo());
+    : IMDWorkspace(other), ExperimentInfo(other), m_indexInfo(std::make_unique<Indexing::IndexInfo>(other.indexInfo())),
+      m_isInitialized(other.m_isInitialized), m_YUnit(other.m_YUnit), m_YUnitLabel(other.m_YUnitLabel),
+      m_isCommonBinsFlag(other.m_isCommonBinsFlag), m_masks(other.m_masks), m_indexInfoNeedsUpdate(false) {
   m_axes.resize(other.m_axes.size());
   for (size_t i = 0; i < m_axes.size(); ++i)
     m_axes[i] = std::unique_ptr<Axis>(other.m_axes[i]->clone(this));
@@ -129,7 +128,7 @@ MatrixWorkspace::MatrixWorkspace(const MatrixWorkspace &other)
 /// Destructor
 // RJT, 3/10/07: The Analysis Data Service needs to be able to delete
 // workspaces, so I moved this from protected to public.
-MatrixWorkspace::~MatrixWorkspace() {}
+MatrixWorkspace::~MatrixWorkspace() = default;
 
 /** Returns a const reference to the IndexInfo object of the workspace.
  *
@@ -477,18 +476,26 @@ bool MatrixWorkspace::hasGroupedDetectors() const {
  *    KEY is the DetectorID (pixel ID)
  *    VALUE is the Workspace Index
  *  @param throwIfMultipleDets :: set to true to make the algorithm throw an
- * error
- *         if there is more than one detector for a specific workspace index.
+ * error if there is more than one detector for a specific workspace index.
+ *  @param ignoreIfNoValidDets :: set to true to exclude spectra that do not
+ * include any valid detector IDs. Note that if any valid detector IDs exist
+ * then all of the detector IDs (including the invalid ones) will be returned.
  *  @throw runtime_error if there is more than one detector per spectrum (if
  * throwIfMultipleDets is true)
  *  @return Index to Index Map object. THE CALLER TAKES OWNERSHIP OF THE MAP AND
  * IS RESPONSIBLE FOR ITS DELETION.
  */
-detid2index_map MatrixWorkspace::getDetectorIDToWorkspaceIndexMap(bool throwIfMultipleDets) const {
+detid2index_map MatrixWorkspace::getDetectorIDToWorkspaceIndexMap(bool throwIfMultipleDets,
+                                                                  bool ignoreIfNoValidDets) const {
   detid2index_map map;
+  const auto &specInfo = spectrumInfo();
 
   // Loop through the workspace index
   for (size_t workspaceIndex = 0; workspaceIndex < this->getNumberHistograms(); ++workspaceIndex) {
+    // Workspaces can contain invalid detector IDs. hasDetectors will silently ignore them until this is fixed.
+    if (ignoreIfNoValidDets && !specInfo.hasDetectors(workspaceIndex)) {
+      continue;
+    }
     auto detList = getSpectrum(workspaceIndex).getDetectorIDs();
 
     if (throwIfMultipleDets) {

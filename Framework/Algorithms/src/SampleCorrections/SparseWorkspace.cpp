@@ -112,12 +112,19 @@ SparseWorkspace::SparseWorkspace(const API::MatrixWorkspace &modelWS, const size
   auto parametrizedInstrument = getInstrument();
   // Copy beam parameters.
   const auto modelSource = modelWS.getInstrument()->getSource();
+  const auto parametrizedSource = parametrizedInstrument->getSource();
+  const auto beamShapeParam = modelSource->getParameterAsString("beam-shape");
+  if (!beamShapeParam.empty())
+    paramMap.add("string", parametrizedSource.get(), "beam-shape", beamShapeParam);
   const auto beamWidthParam = modelSource->getNumberParameter("beam-width");
   const auto beamHeightParam = modelSource->getNumberParameter("beam-height");
   if (beamWidthParam.size() == 1 && beamHeightParam.size() == 1) {
-    auto parametrizedSource = parametrizedInstrument->getSource();
     paramMap.add("double", parametrizedSource.get(), "beam-width", beamWidthParam[0]);
     paramMap.add("double", parametrizedSource.get(), "beam-height", beamHeightParam[0]);
+  }
+  const auto beamRadiusParam = modelSource->getNumberParameter("beam-radius");
+  if (beamRadiusParam.size() == 1) {
+    paramMap.add("double", parametrizedSource.get(), "beam-radius", beamRadiusParam[0]);
   }
   // Add information about EFixed in a proper place.
   const auto eMode = modelWS.getEMode();
@@ -137,9 +144,8 @@ SparseWorkspace::SparseWorkspace(const API::MatrixWorkspace &modelWS, const size
   }
 }
 
-SparseWorkspace::SparseWorkspace(const SparseWorkspace &other) : Workspace2D(other) {
-  m_gridDef = std::make_unique<Algorithms::DetectorGridDefinition>(*other.m_gridDef);
-}
+SparseWorkspace::SparseWorkspace(const SparseWorkspace &other)
+    : Workspace2D(other), m_gridDef(std::make_unique<Algorithms::DetectorGridDefinition>(*other.m_gridDef)) {}
 
 /** Find the latitude and longitude intervals the detectors
  *  of the given workspace span as seen from the sample.
@@ -149,25 +155,26 @@ SparseWorkspace::SparseWorkspace(const SparseWorkspace &other) : Workspace2D(oth
  */
 std::tuple<double, double, double, double> SparseWorkspace::extremeAngles(const API::MatrixWorkspace &ws) {
   const auto &spectrumInfo = ws.spectrumInfo();
-  const auto refFrame = ws.getInstrument()->getReferenceFrame();
   double minLat = std::numeric_limits<double>::max();
   double maxLat = std::numeric_limits<double>::lowest();
   double minLong = std::numeric_limits<double>::max();
   double maxLong = std::numeric_limits<double>::lowest();
   for (size_t i = 0; i < ws.getNumberHistograms(); ++i) {
-    double lat, lon;
-    std::tie(lat, lon) = spectrumInfo.geographicalAngles(i);
-    if (lat < minLat) {
-      minLat = lat;
-    }
-    if (lat > maxLat) {
-      maxLat = lat;
-    }
-    if (lon < minLong) {
-      minLong = lon;
-    }
-    if (lon > maxLong) {
-      maxLong = lon;
+    if (spectrumInfo.hasDetectors(i)) {
+      double lat, lon;
+      std::tie(lat, lon) = spectrumInfo.geographicalAngles(i);
+      if (lat < minLat) {
+        minLat = lat;
+      }
+      if (lat > maxLat) {
+        maxLat = lat;
+      }
+      if (lon < minLong) {
+        minLong = lon;
+      }
+      if (lon > maxLong) {
+        maxLong = lon;
+      }
     }
   }
   return std::make_tuple(minLat, maxLat, minLong, maxLong);
@@ -318,7 +325,6 @@ HistogramData::Histogram SparseWorkspace::interpolateFromDetectorGrid(const doub
 
   auto h = histogram(0);
 
-  const auto refFrame = getInstrument()->getReferenceFrame();
   std::array<double, 4> distances;
   for (size_t i = 0; i < 4; ++i) {
     double detLat, detLong;
@@ -342,14 +348,13 @@ HistogramData::Histogram SparseWorkspace::interpolateFromDetectorGrid(const doub
  */
 HistogramData::HistogramE SparseWorkspace::esq(const HistogramData::HistogramE &e) const { return e * e; }
 
-/** Square the error values in a histogram
+/** Square root the error values in a histogram
  *  @param e A HistgramE object
  *  @return A HistogramE object containing the square root values
  */
 HistogramData::HistogramE SparseWorkspace::esqrt(HistogramData::HistogramE e) const {
-  auto &derived = e;
   std::transform(e.cbegin(), e.cend(), e.begin(), [](double f) -> double { return sqrt(f); });
-  return derived;
+  return e;
 }
 
 /** Spatially interpolate a single histogram from nearby detectors using

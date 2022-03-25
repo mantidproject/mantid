@@ -1,16 +1,12 @@
 if(CXXTEST_FOUND)
-  include_directories(SYSTEM ${CXXTEST_INCLUDE_DIR})
-
-  include_directories(../../TestHelpers/inc)
-  set(TESTHELPER_SRCS
-      ../../TestHelpers/src/TearDownWorld.cpp
-      ../../TestHelpers/src/ComponentCreationHelper.cpp
-      ../../TestHelpers/src/InstrumentCreationHelper.cpp
-      ../../TestHelpers/src/WorkspaceCreationHelper.cpp)
 
   cxxtest_add_test(MPIAlgorithmsTest ${TEST_FILES})
-  target_link_libraries(MPIAlgorithmsTest Mantid::MPIAlgorithms)
+  target_link_libraries(MPIAlgorithmsTest PRIVATE Mantid::MPIAlgorithms)
+
+  add_framework_test_helpers(MPIAlgorithmsTest)
   add_dependencies(FrameworkTests MPIAlgorithmsTest)
+
+  target_include_directories(MPIAlgorithmsTest SYSTEM ${CXXTEST_INCLUDE_DIR})
   # Add to the 'FrameworkTests' group in VS
   set_property(TARGET MPIAlgorithmsTest PROPERTY FOLDER "UnitTests")
 endif()

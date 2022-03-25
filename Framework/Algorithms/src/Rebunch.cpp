@@ -84,7 +84,7 @@ void Rebunch::exec() {
     progress_step = 1;
   PARALLEL_FOR_IF(Kernel::threadSafe(*inputW, *outputW))
   for (int hist = 0; hist < histnumber; hist++) {
-    PARALLEL_START_INTERUPT_REGION
+    PARALLEL_START_INTERRUPT_REGION
     // output data arrays are implicitly filled by function
     if (point) {
       rebunch_point(inputW->x(hist), inputW->y(hist), inputW->e(hist), outputW->mutableX(hist), outputW->mutableY(hist),
@@ -101,9 +101,9 @@ void Rebunch::exec() {
       progress(double(hist) / histnumber);
       interruption_point();
     }
-    PARALLEL_END_INTERUPT_REGION
+    PARALLEL_END_INTERRUPT_REGION
   }
-  PARALLEL_CHECK_INTERUPT_REGION
+  PARALLEL_CHECK_INTERRUPT_REGION
   outputW->setDistribution(dist);
 
   // Copy units

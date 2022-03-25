@@ -19,9 +19,11 @@
 #include "MantidQtWidgets/Common/WorkspaceObserver.h"
 #include <memory>
 
-namespace MantidQt {
-namespace CustomInterfaces {
-namespace ISISReflectometry {
+namespace MantidQt::MantidWidgets {
+class IMessageHandler;
+}
+
+namespace MantidQt::CustomInterfaces::ISISReflectometry {
 
 class IBatchView;
 
@@ -39,7 +41,8 @@ public:
                  std::unique_ptr<IRunsPresenter> runsPresenter, std::unique_ptr<IEventPresenter> eventPresenter,
                  std::unique_ptr<IExperimentPresenter> experimentPresenter,
                  std::unique_ptr<IInstrumentPresenter> instrumentPresenter,
-                 std::unique_ptr<ISavePresenter> savePresenter, std::unique_ptr<IPreviewPresenter> previewPresenter);
+                 std::unique_ptr<ISavePresenter> savePresenter, std::unique_ptr<IPreviewPresenter> previewPresenter,
+                 MantidQt::MantidWidgets::IMessageHandler *messageHandler);
   BatchPresenter(BatchPresenter const &rhs) = delete;
   BatchPresenter(BatchPresenter &&rhs) = delete;
   BatchPresenter const &operator=(BatchPresenter const &rhs) = delete;
@@ -71,6 +74,7 @@ public:
   void notifyAnyBatchAutoreductionResumed() override;
   void notifyAnyBatchAutoreductionPaused() override;
   void notifyReductionPaused() override;
+  void notifyBatchLoaded() override;
   bool requestClose() const override;
   bool isProcessing() const override;
   bool isAutoreducing() const override;
@@ -84,7 +88,7 @@ public:
   Mantid::Geometry::Instrument_const_sptr instrument() const override;
   std::string instrumentName() const override;
   int percentComplete() const override;
-  API::IConfiguredAlgorithm::AlgorithmRuntimeProps rowProcessingProperties() const override;
+  std::unique_ptr<MantidQt::API::IAlgorithmRuntimeProps> rowProcessingProperties() const override;
 
   // WorkspaceObserver overrides
   void postDeleteHandle(const std::string &wsName) override;
@@ -114,6 +118,7 @@ private:
   std::unique_ptr<IPreviewPresenter> m_previewPresenter;
   bool m_unsavedBatchFlag;
   IJobRunner *m_jobRunner;
+  MantidQt::MantidWidgets::IMessageHandler *m_messageHandler;
 
   friend class Encoder;
   friend class Decoder;
@@ -122,6 +127,4 @@ private:
 protected:
   std::unique_ptr<IBatchJobManager> m_jobManager;
 };
-} // namespace ISISReflectometry
-} // namespace CustomInterfaces
-} // namespace MantidQt
+} // namespace MantidQt::CustomInterfaces::ISISReflectometry

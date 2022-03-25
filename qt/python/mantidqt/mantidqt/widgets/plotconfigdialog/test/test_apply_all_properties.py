@@ -7,6 +7,7 @@
 #  This file is part of the mantid workbench.
 
 import unittest
+from distutils.version import LooseVersion
 
 import matplotlib
 from matplotlib import use as mpl_use
@@ -18,8 +19,8 @@ from matplotlib.patches import BoxStyle
 from matplotlib.pyplot import figure
 
 from mantid.plots.legend import LegendProperties
+from mantid.plots.utility import convert_color_to_hex
 from unittest.mock import Mock, patch
-from mantidqt.widgets.plotconfigdialog.colorselector import convert_color_to_hex
 from mantidqt.widgets.plotconfigdialog.axestabwidget import AxProperties
 from mantidqt.widgets.plotconfigdialog.axestabwidget.presenter import AxesTabWidgetPresenter
 from mantidqt.widgets.plotconfigdialog.imagestabwidget import ImageProperties
@@ -190,9 +191,14 @@ class ApplyAllPropertiesTest(unittest.TestCase):
         cls.new_curve = cls.ax.containers[0]
 
         # Mock images tab view
-        cls.img_view_mock = Mock(
-            get_selected_image_name=lambda: '(0, 0) - image0',
-            get_properties=lambda: ImageProperties(new_image_props))
+        if LooseVersion(matplotlib.__version__) > LooseVersion("3.1.3"):
+            cls.img_view_mock = Mock(
+                get_selected_image_name=lambda: '(0, 0) - child0',
+                get_properties=lambda: ImageProperties(new_image_props))
+        else:
+            cls.img_view_mock = Mock(
+                get_selected_image_name=lambda: '(0, 0) - image0',
+                get_properties=lambda: ImageProperties(new_image_props))
         cls.img_view_patch = patch(IMAGE_VIEW, lambda x: cls.img_view_mock)
         cls.img_view_patch.start()
 
@@ -216,7 +222,7 @@ class ApplyAllPropertiesTest(unittest.TestCase):
         cls.legend_view_patch.stop()
 
     def test_apply_properties_on_figure_with_image_sets_label(self):
-        self.assertEqual(new_image_props['label'], self.new_img.colorbar._label)
+        self.assertEqual(new_image_props['label'], self.new_img.colorbar.ax.get_ylabel())
 
     def test_apply_properties_on_figure_with_image_sets_colormap(self):
         self.assertEqual(new_image_props['colormap'], self.new_img.cmap.name)

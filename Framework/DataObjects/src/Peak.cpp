@@ -9,7 +9,6 @@
 #include "MantidGeometry/Instrument/RectangularDetector.h"
 #include "MantidGeometry/Instrument/ReferenceFrame.h"
 #include "MantidGeometry/Objects/InstrumentRayTracer.h"
-#include "MantidGeometry/Surfaces/LineIntersectVisit.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/Strings.h"
@@ -157,10 +156,7 @@ Peak::Peak(const Geometry::Instrument_const_sptr &m_inst, double scattering, dou
  * @param other : Source
  * @return
  */
-Peak::Peak(const Peak &other)
-    : BasePeak(other), m_inst(other.m_inst), m_det(other.m_det), m_bankName(other.m_bankName), m_row(other.m_row),
-      m_col(other.m_col), m_detectorID(other.m_detectorID), m_initialEnergy(other.m_initialEnergy),
-      m_finalEnergy(other.m_finalEnergy), sourcePos(other.sourcePos), detPos(other.detPos), m_detIDs(other.m_detIDs) {}
+Peak::Peak(const Peak &other) = default;
 
 //----------------------------------------------------------------------------------------------
 /** Constructor making a Peak from IPeak interface
@@ -465,7 +461,7 @@ Mantid::Kernel::V3D Peak::getQLabFrame() const {
   // And Q in the lab frame
   // Default for ki-kf is positive
   double qSign = 1.0;
-  if (convention == "Crystallography")
+  if (m_convention == "Crystallography")
     qSign = -1.0;
   return (beamDir * wvi - detDir * wvf) * qSign;
 }
@@ -543,7 +539,7 @@ void Peak::setQLabFrame(const Mantid::Kernel::V3D &qLab, boost::optional<double>
   std::shared_ptr<const ReferenceFrame> refFrame = this->m_inst->getReferenceFrame();
   const V3D refBeamDir = refFrame->vecPointingAlongBeam();
   // Default for ki-kf has -q
-  const double qSign = (convention != "Crystallography") ? 1.0 : -1.0;
+  const double qSign = (m_convention != "Crystallography") ? 1.0 : -1.0;
   const double qBeam = qLab.scalar_prod(refBeamDir) * qSign;
 
   if (qBeam == 0.0)

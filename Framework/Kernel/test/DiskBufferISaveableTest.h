@@ -30,7 +30,7 @@ class ISaveableTester : public ISaveable {
 
 public:
   ISaveableTester(size_t idIn) : ISaveable(), id(idIn) {}
-  ~ISaveableTester() override {}
+  ~ISaveableTester() override = default;
   size_t getFileId() const { return id; }
   //-----------------------------------------------------------------------------------------------
 

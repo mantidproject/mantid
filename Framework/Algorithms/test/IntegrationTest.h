@@ -14,10 +14,10 @@
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/RebinnedOutput.h"
 #include "MantidDataObjects/Workspace2D.h"
+#include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidGeometry/IDTypes.h"
 #include "MantidHistogramData/Histogram.h"
 #include "MantidHistogramData/LinearGenerator.h"
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
@@ -146,7 +146,7 @@ public:
     Workspace2D_sptr input;
     TS_ASSERT_THROWS_NOTHING(
         input = std::dynamic_pointer_cast<Workspace2D>(AnalysisDataService::Instance().retrieve("testSpace")))
-    assertRangeWithPartialBins(input);
+    assertRangeWithPartialBins(input, 0.1, 4.5, {52., 74., 96.}, {6.899, 8.240, 9.391});
   }
 
   void testRangeWithPartialBinsAndDistributionData() {
@@ -154,7 +154,23 @@ public:
     TS_ASSERT_THROWS_NOTHING(
         input = std::dynamic_pointer_cast<Workspace2D>(AnalysisDataService::Instance().retrieve("testSpace")))
     input->setDistribution(true);
-    assertRangeWithPartialBins(input);
+    assertRangeWithPartialBins(input, 0.1, 4.5, {52., 74., 96.}, {6.899, 8.240, 9.391});
+  }
+
+  void testRangeWithPartialBinsAndLimitsInSameBin() {
+    Workspace2D_sptr input;
+    TS_ASSERT_THROWS_NOTHING(
+        input = std::dynamic_pointer_cast<Workspace2D>(AnalysisDataService::Instance().retrieve("testSpace")))
+    input->setDistribution(true);
+    assertRangeWithPartialBins(input, 0.1, 0.5, {4., 6., 8.}, {1.265, 1.549, 1.788});
+  }
+
+  void testRangeWithPartialBinsAndEqualLimits() {
+    Workspace2D_sptr input;
+    TS_ASSERT_THROWS_NOTHING(
+        input = std::dynamic_pointer_cast<Workspace2D>(AnalysisDataService::Instance().retrieve("testSpace")))
+    input->setDistribution(true);
+    assertRangeWithPartialBins(input, 0.1, 0.1, {0., 0., 0.}, {0., 0., 0.});
   }
 
   void doTestEvent(const std::string &inName, const std::string &outName, int StartWorkspaceIndex,
@@ -250,22 +266,22 @@ public:
   }
 
   void testRebinnedOutput_NoLimits() {
-    const double truth[] = {1.1, 0.331662479};
+    const double truth[] = {5.5, 1.6583123953};
     doTestRebinned("-3.0", "3.0", 0, 3, false, 4, truth);
   }
 
   void testRebinnedOutput_RangeLimits() {
-    const double truth[] = {1.125, 0.375};
+    const double truth[] = {4.5, 1.5};
     doTestRebinned("-2.0", "2.0", 0, 3, false, 4, truth);
   }
 
   void testRebinnedOutput_WorkspaceIndexLimits() {
-    const double truth[] = {1.1666666667, 0.4409585512};
+    const double truth[] = {4.6666666667, 1.7638342079};
     doTestRebinned("-3.0", "3.0", 1, 2, false, 2, truth);
   }
 
   void testRebinnedOutput_RangeLimitsWithPartialBins() {
-    const double truth[] = {1.1034482756, 0.3745786376};
+    const double truth[] = {3.5862068967, 1.2173805720};
     doTestRebinned("-1.5", "1.75", 0, 3, true, 4, truth);
   }
 
@@ -706,7 +722,8 @@ public:
   }
 
 private:
-  void assertRangeWithPartialBins(const Workspace_sptr &input) {
+  void assertRangeWithPartialBins(const Workspace_sptr &input, const double rangeLower, const double rangeUpper,
+                                  const std::array<double, 3> yy, const std::array<double, 3> ee) {
     Integration alg;
     alg.setRethrows(false);
     TS_ASSERT_THROWS_NOTHING(alg.initialize());
@@ -715,8 +732,8 @@ private:
     // Set the properties
     alg.setProperty("InputWorkspace", input);
     alg.setPropertyValue("OutputWorkspace", "out");
-    alg.setPropertyValue("RangeLower", "0.1");
-    alg.setPropertyValue("RangeUpper", "4.5");
+    alg.setProperty("RangeLower", rangeLower);
+    alg.setProperty("RangeUpper", rangeUpper);
     alg.setPropertyValue("StartWorkspaceIndex", "2");
     alg.setPropertyValue("EndWorkspaceIndex", "4");
     alg.setPropertyValue("IncludePartialBins", "1");
@@ -730,8 +747,7 @@ private:
     Workspace2D_sptr output2D = std::dynamic_pointer_cast<Workspace2D>(output);
     size_t max = 0;
     TS_ASSERT_EQUALS(max = output2D->getNumberHistograms(), 3);
-    const double yy[3] = {52., 74., 96.};
-    const double ee[3] = {6.899, 8.240, 9.391};
+
     for (size_t i = 0; i < max; ++i) {
       Mantid::MantidVec &x = output2D->dataX(i);
       Mantid::MantidVec &y = output2D->dataY(i);
@@ -741,8 +757,8 @@ private:
       TS_ASSERT_EQUALS(y.size(), 1);
       TS_ASSERT_EQUALS(e.size(), 1);
 
-      TS_ASSERT_EQUALS(x[0], 0.1);
-      TS_ASSERT_EQUALS(x[1], 4.5);
+      TS_ASSERT_EQUALS(x[0], rangeLower);
+      TS_ASSERT_EQUALS(x[1], rangeUpper);
       TS_ASSERT_EQUALS(y[0], yy[i]);
       TS_ASSERT_DELTA(e[0], ee[i], 0.001);
     }

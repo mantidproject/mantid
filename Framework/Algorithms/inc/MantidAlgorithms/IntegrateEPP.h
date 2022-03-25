@@ -15,7 +15,7 @@ namespace Algorithms {
 /** IntegrateEPP : Integrate a workspace around the elastic peak positions
   given by a EPP table.
 */
-class MANTID_ALGORITHMS_DLL IntegrateEPP : public API::Algorithm {
+class MANTID_ALGORITHMS_DLL IntegrateEPP final : public API::Algorithm {
 public:
   const std::string name() const override;
   int version() const override;

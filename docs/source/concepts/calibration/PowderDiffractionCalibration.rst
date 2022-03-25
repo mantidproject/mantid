@@ -266,11 +266,11 @@ The workflow follows these step:
 
     DetID DIFC
         1 2208.7
-        2 2319.1
+        2 2319.2
         3 2098.3
         4 2365.5
-        5 2318.2
-        6 2272.7
+        5 2318.3
+        6 2272.8
 
 The evolution in the calibration can be seen with
 

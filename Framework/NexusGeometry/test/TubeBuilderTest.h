@@ -6,11 +6,11 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
+#include "MantidFrameworkTestHelpers/NexusGeometryTestHelpers.h"
 #include "MantidGeometry/Objects/IObject.h"
 #include "MantidGeometry/Rendering/GeometryHandler.h"
 #include "MantidGeometry/Rendering/ShapeInfo.h"
 #include "MantidNexusGeometry/TubeBuilder.h"
-#include "MantidTestHelpers/NexusGeometryTestHelpers.h"
 #include <cxxtest/TestSuite.h>
 #include <numeric>
 

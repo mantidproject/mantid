@@ -114,7 +114,7 @@ void He3TubeEfficiency::exec() {
 
   PARALLEL_FOR_IF(Kernel::threadSafe(*m_inputWS, *m_outputWS))
   for (int i = 0; i < static_cast<int>(numHists); ++i) {
-    PARALLEL_START_INTERUPT_REGION
+    PARALLEL_START_INTERRUPT_REGION
 
     m_outputWS->setSharedX(i, m_inputWS->sharedX(i));
     try {
@@ -133,9 +133,9 @@ void He3TubeEfficiency::exec() {
       interruption_point();
     }
 
-    PARALLEL_END_INTERUPT_REGION
+    PARALLEL_END_INTERRUPT_REGION
   }
-  PARALLEL_CHECK_INTERUPT_REGION
+  PARALLEL_CHECK_INTERRUPT_REGION
 
   this->logErrors();
   this->setProperty("OutputWorkspace", m_outputWS);
@@ -286,7 +286,7 @@ void He3TubeEfficiency::getDetectorGeometry(const Geometry::IDetector &det, doub
  *  @throw invalid_argument if there is any error finding the distance
  * @returns The distance to the surface in metres
  */
-double He3TubeEfficiency::distToSurface(const Kernel::V3D start, const Geometry::IObject *shape) const {
+double He3TubeEfficiency::distToSurface(const Kernel::V3D &start, const Geometry::IObject *shape) const {
   // get a vector from the point that was passed to the origin
   const Kernel::V3D direction = normalize(-start);
   // put the point and the vector (direction) together to get a line,
@@ -378,7 +378,7 @@ void He3TubeEfficiency::execEvent() {
 
   PARALLEL_FOR_IF(Kernel::threadSafe(*m_outputWS))
   for (int i = 0; i < static_cast<int>(numHistograms); ++i) {
-    PARALLEL_START_INTERUPT_REGION
+    PARALLEL_START_INTERRUPT_REGION
 
     const auto &det = spectrumInfo.detector(i);
     if (spectrumInfo.isMonitor(i) || spectrumInfo.isMasked(i)) {
@@ -419,9 +419,9 @@ void He3TubeEfficiency::execEvent() {
       interruption_point();
     }
 
-    PARALLEL_END_INTERUPT_REGION
+    PARALLEL_END_INTERRUPT_REGION
   }
-  PARALLEL_CHECK_INTERUPT_REGION
+  PARALLEL_CHECK_INTERRUPT_REGION
 
   m_outputWS->clearMRU();
 

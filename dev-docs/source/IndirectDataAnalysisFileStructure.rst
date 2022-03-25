@@ -3,81 +3,32 @@
 IndirectDataAnalysis File Structure
 ===================================
 
-The many levels of inheritance in the indirect data analysis codebase can be confusing.
+The many levels of inheritance in the indirect data analysis codebase can be confusing. it is not always clear how they
+all interact.
 
-Tabs
-----
+The Elwin and I(Q,t) are the most different as their components are all contained within a single UI file. This is
+something that should be fixed to be more modular but it could be left till the fit tabs are separated out entirely.
 
-- IndirectTab
+Fit Tab structure
+=================
 
-  - IndirectDataAnalysisTab
+The QENS fit tabs in Inelastic Data analysis have this general structure. Different tabs will feature different derived
+classes for the IndirectFitAnalysisTab, FitDataView, FunctionTemplateBrowser, and the AddWorkspaceDialog
 
-    - IndirectDataAnalysisElwinTab
-    - IndirectDataAnalysisIqtTab
-    - IndirectFitAnalysisTab
+.. figure::  images/QENS/IndirectFitTabStructure.png
+   :width: 400px
 
-      - IndirectDataAnalysisConvFitTab
-      - IndirectDataAnalysisFqFitTab
-      - IndirectDataAnalysisIqtFitTab
-      - IndirectDataAnalysisMSDFitTab
+QENS Fit class structure
+=========================
 
-Fitting Models
---------------
-- IndirectFittingModel
+.. figure::  images/QENS/IndirectFitClassStructure.png
+   :width: 2000px
 
-  - ConvFitModel
-  - FqFitModel
-  - IqtFitModel
-  - MSDFitModel
+The ideal structure for the interface should include MVP for each defined section. As part of the refactor the old
+IndirectFittingModel has been broken up, the IndirectFitData and IndirectFitPlot all previously used the same instance
+of the fitting model, now communication is handled with signals through the presenters and they each have their own.
+Some objects are shared between models, but as a design rule only one object should ever make changes to it e.g. the
+IndirectFitData which is controlled by IndirectFitDataModel, but is sometimes read by IndirectFitPlot.
 
-Fit Data Presenter
-------------------
-These are the single/multiple tabs for loading and selecting data
-
-- IndirectFitDataPresenter (Used by MSDFit and IqtFit)
-  - ConvFitDataPresenter
-  - FqFitDataPresenter
-
-Data Table Presenter
---------------------
-These control the multiple loading tables
-
-- IndirectDataTablePresenter (Used by MSDFit and IqtFit)
-
-  - ConvFitDataTablePresenter
-  - FqFitDataTablePresenter
-
-AddWorkspaceDialog
-------------------
-This is the Dialogue for adding workspaces in multiple mode
-
-- IAddWorkspaceDialog
-
-  - ConvFitAddWorkspaceDialog
-  - FqFitAddWorkspaceDialog
-  - IndirectAddWorkspaceDialog (Used by MSDFit and IqtFit)
-
-Function Template Browser
--------------------------
-These are the fit function templates for each fitting tab, switched out for the full version when `show full function` is checked
-
-- FunctionTemplateBrowser
-
-  - ConvTemplateBrowser
-  - IqtTemplateBrowser
-  - SingleFunctionTemplateBrowser (Used by MSDFit and FqFit)
-
-Function Template Model
------------------------
-- IFunctionModel
-
-  - ConvFunctionModel
-  - IqtFunctionModel
-  - FunctionModel
-    - SingleFunctionTemplateModel
-
-Function Template Presenter
----------------------------
-- ConvTemplatePresenter
-- IqtTemplatePresenter
-- SingleFunctionTemplatePresenter
+The IndirectFitPlotModel also contains a pointer to the active fit function and the IndirectFitOutput from the
+IndirectFittingModel, again it should only ever READ FROM THESE OBJECTS only the IndirectFittingModel should control it.

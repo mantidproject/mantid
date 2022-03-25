@@ -414,6 +414,9 @@
 
    <instrument name="HB2B">
       <technique>technique</technique>
+     <livedata>
+       <connection name="event" address="hb2b-daq1.ornl.gov:31415" listener="SNSLiveEventDataListener" />
+     </livedata>
    </instrument>
 
    <instrument name="WAND" shortname="HB2C">
@@ -439,6 +442,9 @@
 
    <instrument name="GPSANS" shortname="CG2">
       <technique>Small Angle Scattering</technique>
+     <livedata>
+       <connection name="event" address="cg2-daq1.ornl.gov:31415" listener="SNSLiveEventDataListener" />
+     </livedata>
    </instrument>
 
    <instrument name="CG2" shortname="CG2">
@@ -447,6 +453,9 @@
 
    <instrument name="BIOSANS"  shortname="CG3">
       <technique>Small Angle Scattering</technique>
+     <livedata>
+       <connection name="event" address="cg3-daq1.ornl.gov:31415" listener="SNSLiveEventDataListener" />
+     </livedata>
    </instrument>
 
    <instrument name="HIRESSANS">
@@ -461,10 +470,6 @@
    <archive>
       <archiveSearch plugin="SNSDataSearch" />
    </archive>
-
-   <computeResource name="Fermi">
-     <baseURL>https://fermi.ornl.gov/MantidRemote</baseURL>
-   </computeResource>
 
    <timezone>US/Eastern</timezone>
 
@@ -750,6 +755,10 @@
 
   <instrument name="D19">
     <technique>Single Crystal Diffraction</technique>
+  </instrument>
+
+  <instrument name="SALSA">
+    <technique>Strain analyzer</technique>
   </instrument>
 
 </facility>

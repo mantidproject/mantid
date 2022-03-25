@@ -147,7 +147,6 @@ void Integration::exec() {
   auto rebinned_input = std::dynamic_pointer_cast<const RebinnedOutput>(localworkspace);
   auto rebinned_output = std::dynamic_pointer_cast<RebinnedOutput>(outputWorkspace);
 
-  bool is_distrib = outputWorkspace->isDistribution();
   Progress progress(this, progressStart, 1.0, maxWsIndex - minWsIndex + 1);
 
   const bool axisIsText = localworkspace->getAxis(1)->isText();
@@ -156,7 +155,7 @@ void Integration::exec() {
   // Loop over spectra
   PARALLEL_FOR_IF(Kernel::threadSafe(*localworkspace, *outputWorkspace))
   for (int i = minWsIndex; i <= maxWsIndex; ++i) {
-    PARALLEL_START_INTERUPT_REGION
+    PARALLEL_START_INTERRUPT_REGION
     // Workspace index on the output
     const int outWI = i - minWsIndex;
 
@@ -179,23 +178,15 @@ void Integration::exec() {
     // Copy spectrum number, detector IDs
     outSpec.copyInfoFrom(inSpec);
 
-    // Retrieve the spectrum into a vector (Histogram)
-    const auto &X = inSpec.x();
-    const auto &Y = inSpec.y();
-    const auto &E = inSpec.e();
+    const MantidVec *Fin(nullptr);
+    MantidVec *Fout(nullptr);
+    if (rebinned_input)
+      Fin = &rebinned_input->readF(i);
+    if (rebinned_output)
+      Fout = &rebinned_output->dataF(outWI);
 
-    // Find the range [min,max]
-    MantidVec::const_iterator lowit, highit;
     const double lowerLimit = minRanges.empty() ? minRange : std::max(minRange, minRanges[outWI]);
     const double upperLimit = maxRanges.empty() ? maxRange : std::min(maxRange, maxRanges[outWI]);
-
-    // If doing partial bins, we want to set the bin boundaries to the specified
-    // values regardless of whether they're 'in range' for this spectrum
-    // Have to do this here, ahead of the 'continue' a bit down from here.
-    if (incPartBins) {
-      outSpec.dataX()[0] = lowerLimit;
-      outSpec.dataX()[1] = upperLimit;
-    }
 
     if (upperLimit < lowerLimit) {
       std::ostringstream sout;
@@ -205,65 +196,125 @@ void Integration::exec() {
       progress.report();
       continue;
     }
-    if (lowerLimit == EMPTY_DBL()) {
-      lowit = X.begin();
-    } else {
-      lowit = std::lower_bound(X.begin(), X.end(), lowerLimit, tolerant_less());
+
+    integrateSpectrum(inSpec, outSpec, Fin, Fout, lowerLimit, upperLimit, incPartBins);
+
+    progress.report();
+    PARALLEL_END_INTERRUPT_REGION
+  }
+  PARALLEL_CHECK_INTERRUPT_REGION
+
+  if (rebinned_output) {
+    rebinned_output->finalize(false);
+  }
+
+  // Assign it to the output workspace property
+  setProperty("OutputWorkspace", outputWorkspace);
+}
+
+/**
+ * Integrate a single spectrum between the supplied limits
+ */
+void Integration::integrateSpectrum(const API::ISpectrum &inSpec, API::ISpectrum &outSpec,
+                                    const std::vector<double> *Fin, std::vector<double> *Fout, const double lowerLimit,
+                                    const double upperLimit, const bool incPartBins) {
+  // Retrieve the spectrum into a vector (Histogram)
+  const auto &X = inSpec.x();
+  const auto &Y = inSpec.y();
+  const auto &E = inSpec.e();
+
+  // Find the range [min,max]
+  MantidVec::const_iterator lowit, highit;
+
+  // If doing partial bins, we want to set the bin boundaries to the specified
+  // values regardless of whether they're 'in range' for this spectrum
+  // Have to do this here, ahead of the 'continue' a bit down from here.
+  if (incPartBins) {
+    outSpec.dataX()[0] = lowerLimit;
+    outSpec.dataX()[1] = upperLimit;
+  }
+
+  if (lowerLimit == EMPTY_DBL()) {
+    lowit = X.begin();
+  } else {
+    lowit = std::lower_bound(X.begin(), X.end(), lowerLimit, tolerant_less());
+  }
+
+  if (upperLimit == EMPTY_DBL()) {
+    highit = X.end();
+  } else {
+    highit = std::upper_bound(lowit, X.end(), upperLimit, tolerant_less());
+  }
+
+  // If range specified doesn't overlap with this spectrum then bail out
+  if (lowit == X.end() || highit == X.begin())
+    return;
+
+  // Upper limit is the bin before, i.e. the last value smaller than MaxRange
+  --highit; // (note: decrementing 'end()' is safe for vectors, at least
+            // according to the C++ standard)
+
+  auto distmin = std::distance(X.begin(), lowit);
+  auto distmax = std::distance(X.begin(), highit);
+
+  double sumY = 0.0;
+  double sumE = 0.0;
+  double sumF = 0.0;
+  double Fmin = 0.0;
+  double Fmax = 0.0;
+  double Fnor = 0.0;
+  auto is_distrib = inSpec.yMode() == HistogramData::Histogram::YMode::Frequencies;
+  if (distmax <= distmin) {
+    sumY = 0.;
+    sumE = 0.;
+  } else {
+    if (Fin) {
+      // Workspace has fractional area information, need to take into account
+      sumF = std::accumulate(Fin->begin() + distmin, Fin->begin() + distmax, 0.0);
+      // Need to normalise by the number of non-NaN bins - see issue #33407 for details
+      Fnor = static_cast<double>(
+          std::count_if(Fin->begin() + distmin, Fin->begin() + distmax, [](double f) { return f != 0.; }));
+      if (distmin > 0)
+        Fmin = (*Fin)[distmin - 1];
+      Fmax = (*Fin)[static_cast<std::size_t>(distmax) < Fin->size() ? distmax : Fin->size() - 1];
     }
-
-    if (upperLimit == EMPTY_DBL()) {
-      highit = X.end();
-    } else {
-      highit = std::upper_bound(lowit, X.end(), upperLimit, tolerant_less());
-    }
-
-    // If range specified doesn't overlap with this spectrum then bail out
-    if (lowit == X.end() || highit == X.begin())
-      continue;
-
-    // Upper limit is the bin before, i.e. the last value smaller than MaxRange
-    --highit; // (note: decrementing 'end()' is safe for vectors, at least
-              // according to the C++ standard)
-
-    auto distmin = std::distance(X.begin(), lowit);
-    auto distmax = std::distance(X.begin(), highit);
-
-    double sumY = 0.0;
-    double sumE = 0.0;
-    double sumF = 0.0;
-    double Fmin = 0.0;
-    double Fmax = 0.0;
-    if (distmax <= distmin) {
-      sumY = 0.;
-      sumE = 0.;
-    } else {
-      if (rebinned_input) {
-        // Workspace has fractional area information, need to take into account
-        const MantidVec &F = rebinned_input->readF(i);
-        sumF = std::accumulate(F.begin() + distmin, F.begin() + distmax, 0.0);
-        if (distmin > 0)
-          Fmin = F[distmin - 1];
-        Fmax = F[static_cast<std::size_t>(distmax) < F.size() ? distmax : F.size() - 1];
+    if (!is_distrib) {
+      // Sum the Y, and sum the E in quadrature
+      {
+        sumY = std::accumulate(Y.begin() + distmin, Y.begin() + distmax, 0.0);
+        sumE = std::accumulate(E.begin() + distmin, E.begin() + distmax, 0.0, VectorHelper::SumSquares<double>());
       }
+    } else {
+      // Sum Y*binwidth and Sum the (E*binwidth)^2.
+      std::vector<double> widths(X.size());
+      // highit+1 is safe while input workspace guaranteed to be histogram
+      std::adjacent_difference(lowit, highit + 1, widths.begin());
+      sumY = std::inner_product(Y.begin() + distmin, Y.begin() + distmax, widths.begin() + 1, 0.0);
+      sumE = std::inner_product(E.begin() + distmin, E.begin() + distmax, widths.begin() + 1, 0.0, std::plus<double>(),
+                                VectorHelper::TimesSquares<double>());
+    }
+  }
+  // If partial bins are included, set integration range to exact range
+  // given and add on contributions from partial bins either side of range.
+  if (incPartBins) {
+    if ((distmax <= distmin) && (distmin > 0) && (highit < X.end() - 1)) {
+      // handle special case where lower and upper limit are in the same bin
+      const double lower_bin = *lowit;
+      const double prev_bin = *(lowit - 1);
+      double fraction = (upperLimit - lowerLimit);
       if (!is_distrib) {
-        // Sum the Y, and sum the E in quadrature
-        {
-          sumY = std::accumulate(Y.begin() + distmin, Y.begin() + distmax, 0.0);
-          sumE = std::accumulate(E.begin() + distmin, E.begin() + distmax, 0.0, VectorHelper::SumSquares<double>());
-        }
-      } else {
-        // Sum Y*binwidth and Sum the (E*binwidth)^2.
-        std::vector<double> widths(X.size());
-        // highit+1 is safe while input workspace guaranteed to be histogram
-        std::adjacent_difference(lowit, highit + 1, widths.begin());
-        sumY = std::inner_product(Y.begin() + distmin, Y.begin() + distmax, widths.begin() + 1, 0.0);
-        sumE = std::inner_product(E.begin() + distmin, E.begin() + distmax, widths.begin() + 1, 0.0,
-                                  std::plus<double>(), VectorHelper::TimesSquares<double>());
+        fraction /= (lower_bin - prev_bin);
       }
-    }
-    // If partial bins are included, set integration range to exact range
-    // given and add on contributions from partial bins either side of range.
-    if (incPartBins) {
+      const MantidVec::size_type val_index = distmin - 1;
+      sumY += Y[val_index] * fraction;
+      const double eval = E[val_index];
+      sumE += eval * eval * fraction * fraction;
+      if (Fin) {
+        sumF += Fmin * fraction;
+        if (Fmin != 0.0)
+          Fnor += fraction;
+      }
+    } else {
       if (distmin > 0) {
         const double lower_bin = *lowit;
         const double prev_bin = *(lowit - 1);
@@ -275,8 +326,10 @@ void Integration::exec() {
         sumY += Y[val_index] * fraction;
         const double eval = E[val_index];
         sumE += eval * eval * fraction * fraction;
-        if (rebinned_input) {
+        if (Fin) {
           sumF += Fmin * fraction;
+          if (Fmin != 0.0)
+            Fnor += fraction;
         }
       }
       if (highit < X.end() - 1) {
@@ -289,32 +342,23 @@ void Integration::exec() {
         sumY += Y[distmax] * fraction;
         const double eval = E[distmax];
         sumE += eval * eval * fraction * fraction;
-        if (rebinned_input) {
+        if (Fin) {
           sumF += Fmax * fraction;
+          if (Fmax != 0.0)
+            Fnor += fraction;
         }
       }
-    } else {
-      outSpec.mutableX()[0] = lowit == X.end() ? *(lowit - 1) : *(lowit);
-      outSpec.mutableX()[1] = *highit;
     }
-
-    outSpec.mutableY()[0] = sumY;
-    outSpec.mutableE()[0] = sqrt(sumE); // Propagate Gaussian error
-    if (rebinned_output) {
-      rebinned_output->dataF(outWI)[0] = sumF;
-    }
-
-    progress.report();
-    PARALLEL_END_INTERUPT_REGION
-  }
-  PARALLEL_CHECK_INTERUPT_REGION
-
-  if (rebinned_output) {
-    rebinned_output->finalize(false);
+  } else {
+    outSpec.mutableX()[0] = lowit == X.end() ? *(lowit - 1) : *(lowit);
+    outSpec.mutableX()[1] = *highit;
   }
 
-  // Assign it to the output workspace property
-  setProperty("OutputWorkspace", outputWorkspace);
+  outSpec.mutableY()[0] = sumY;
+  outSpec.mutableE()[0] = sqrt(sumE); // Propagate Gaussian error
+  if (Fout) {
+    (*Fout)[0] = sumF / Fnor;
+  }
 }
 
 /**

@@ -18,9 +18,11 @@
 #include "MantidAPI/IPeaksWorkspace.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidGeometry/IDetector.h"
+#include "MantidGeometry/Instrument/ComponentInfo.h"
 #include "MantidGeometry/Objects/CSGObject.h"
 #include "MantidKernel/Unit.h"
 
+#include <QCursor>
 #include <QMenu>
 #include <QMessageBox>
 #include <QMouseEvent>
@@ -29,6 +31,7 @@
 #include <QSet>
 
 #include "MantidKernel/V3D.h"
+#include <QToolTip>
 #include <algorithm>
 #include <cfloat>
 #include <cmath>
@@ -50,6 +53,7 @@ ProjectionSurface::ProjectionSurface(const InstrumentActor *rootActor)
       m_showPeakLabels(false), m_showPeakRelativeIntensity(false), m_peakShapesStyle(0), m_viewChanged(true),
       m_redrawPicking(true) {
   connect(rootActor, SIGNAL(colorMapChanged()), this, SLOT(colorMapChanged()));
+  connect(rootActor, SIGNAL(refreshView()), this, SLOT(refreshView()));
   connect(&m_maskShapes, SIGNAL(shapeCreated()), this, SIGNAL(shapeCreated()));
   connect(&m_maskShapes, SIGNAL(shapeSelected()), this, SIGNAL(shapeSelected()));
   connect(&m_maskShapes, SIGNAL(shapesDeselected()), this, SIGNAL(shapesDeselected()));
@@ -63,11 +67,10 @@ ProjectionSurface::ProjectionSurface(const InstrumentActor *rootActor)
   setInputController(PickTubeMode, pickController);
   setInputController(AddPeakMode, pickController);
   connect(pickController, SIGNAL(pickPointAt(int, int)), this, SLOT(pickComponentAt(int, int)));
-  connect(pickController, SIGNAL(touchPointAt(int, int)), this, SLOT(touchComponentAt(int, int)));
 
   // create and connect the mask drawing input controller
   InputControllerDrawShape *drawController = new InputControllerDrawShape(this);
-  setInputController(DrawRegularMode, drawController);
+  setInputController(EditShapeMode, drawController);
   connect(drawController, SIGNAL(addShape(QString, int, int, QColor, QColor)), &m_maskShapes,
           SLOT(addShape(QString, int, int, QColor, QColor)));
   connect(this, SIGNAL(signalToStartCreatingShape2D(QString, QColor, QColor)), drawController,
@@ -129,6 +132,19 @@ ProjectionSurface::~ProjectionSurface() {
 }
 
 /**
+ * @brief ProjectionSurface::toggleToolTip
+ * Connect or disconnect all controllers reporting for tooltip when a component is touched
+ * @param activateToolTip the new status
+ */
+void ProjectionSurface::toggleToolTip(bool activateToolTip) {
+  for (auto controller : m_inputControllers) {
+    if (activateToolTip) {
+      connect(controller, SIGNAL(touchPointAt(int, int)), this, SLOT(touchComponentAt(int, int)));
+    } else
+      disconnect(controller, SIGNAL(touchPointAt(int, int)), this, SLOT(touchComponentAt(int, int)));
+  }
+}
+/**
  * Resets the instrument actor. The caller must ensure that the instrument
  * stays the same and workspace dimensions also don't change.
  */
@@ -158,7 +174,7 @@ void ProjectionSurface::clear() {
  */
 void ProjectionSurface::draw(GLDisplay *widget) const {
   if (m_viewChanged && (m_redrawPicking || m_interactionMode == PickSingleMode || m_interactionMode == PickTubeMode ||
-                        m_interactionMode == DrawRegularMode)) {
+                        m_interactionMode == EditShapeMode)) {
     draw(widget, true);
     m_redrawPicking = false;
   }
@@ -367,6 +383,11 @@ void ProjectionSurface::colorMapChanged() {
   requestRedraw();
 }
 
+void ProjectionSurface::refreshView() {
+  updateView(false);
+  requestRedraw();
+}
+
 /**
  * Set an interaction mode for the surface.
  * @param mode :: A new mode.
@@ -386,7 +407,7 @@ void ProjectionSurface::setInteractionMode(int mode) {
   if (!controller)
     throw std::logic_error("Input controller doesn't exist.");
   controller->onEnabled();
-  if (mode != DrawRegularMode && mode != DrawFreeMode) {
+  if (mode != EditShapeMode && mode != DrawFreeMode) {
     m_maskShapes.deselectAll();
     foreach (PeakOverlay *po, m_peakShapes) { po->deselectAll(); }
   }
@@ -413,7 +434,7 @@ QString ProjectionSurface::getInfoText() const {
     return "Move cursor over instrument to see detector information. ";
   case AddPeakMode:
     return "Click on a detector then click on the mini-plot to add a peak.";
-  case DrawRegularMode:
+  case EditShapeMode:
     return "Select a tool button to draw a new shape. "
            "Click on shapes to select. Click and move to edit. Press Ctrl+C "
            "/ Ctrl+V to copy/paste";
@@ -758,7 +779,7 @@ void ProjectionSurface::setShowPeakRelativeIntensityFlag(bool on) {
  * @param rect :: New selection rectangle.
  */
 void ProjectionSurface::setSelectionRect(const QRect &rect) {
-  if (m_interactionMode != DrawRegularMode || !m_maskShapes.hasSelection()) {
+  if (m_interactionMode != EditShapeMode || !m_maskShapes.hasSelection()) {
     m_selectRect = rect;
   }
 }
@@ -793,6 +814,18 @@ void ProjectionSurface::pickComponentAt(int x, int y) {
 
 void ProjectionSurface::touchComponentAt(int x, int y) {
   size_t pickID = getPickID(x, y);
+  const auto &componentInfo = m_instrActor->componentInfo();
+
+  if (componentInfo.isDetector(pickID)) {
+    QString text;
+
+    text += "Detector: " + QString::fromStdString(componentInfo.name(pickID)) + '\n';
+
+    const double integrated = m_instrActor->getIntegratedCounts(pickID);
+    const QString counts = integrated == InstrumentActor::INVALID_VALUE ? "N/A" : QString::number(integrated);
+    text += "Counts: " + counts;
+    QToolTip::showText(QCursor::pos(), text);
+  }
   emit singleComponentTouched(pickID);
 }
 

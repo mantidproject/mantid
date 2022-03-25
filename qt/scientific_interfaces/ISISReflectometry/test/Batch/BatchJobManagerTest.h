@@ -10,7 +10,7 @@
 #include "../../../ISISReflectometry/TestHelpers/ModelCreationHelper.h"
 #include "../ReflMockObjects.h"
 #include "MantidDataObjects/Workspace2D.h"
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
+#include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
 
 #include <cxxtest/TestSuite.h>
 #include <gmock/gmock.h>
@@ -70,7 +70,7 @@ protected:
   }
 
   BatchJobManagerFriend makeJobManager(ReductionJobs reductionJobs = ReductionJobs()) {
-    return makeJobManager(reductionJobs, nullptr);
+    return makeJobManager(std::move(reductionJobs), nullptr);
   }
 
   BatchJobManagerFriend makeJobManager(std::unique_ptr<IReflAlgorithmFactory> mockFactory) {

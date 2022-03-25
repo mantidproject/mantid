@@ -42,7 +42,7 @@ protected:
 
 public:
   Sphere();
-  Sphere(Kernel::V3D centre, double radius);
+  Sphere(const Kernel::V3D &centre, double radius);
   std::unique_ptr<Sphere> clone() const;
   /// Effective typename
   std::string className() const override { return "Sphere"; }
@@ -54,7 +54,7 @@ public:
   /// sphere
   int side(const Kernel::V3D &) const override;
   /// Checks whether the give input point is on the surface
-  int onSurface(const Kernel::V3D &) const override;
+  bool onSurface(const Kernel::V3D &) const override;
   /// Gets the distance from the sphere to the input point
   double distance(const Kernel::V3D &) const override;
   /// Setter for centre of sphere

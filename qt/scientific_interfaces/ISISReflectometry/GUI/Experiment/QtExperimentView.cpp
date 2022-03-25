@@ -6,8 +6,8 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "QtExperimentView.h"
 #include "MantidKernel/UsageService.h"
-#include "MantidKernel/WarningSuppressions.h"
 #include "MantidQtWidgets/Common/AlgorithmHintStrategy.h"
+#include "Reduction/LookupRow.h"
 #include <QMessageBox>
 #include <QScrollBar>
 #include <boost/algorithm/string/join.hpp>
@@ -16,6 +16,25 @@
 namespace MantidQt::CustomInterfaces::ISISReflectometry {
 
 namespace {
+// Map of column number to hard-coded tooltips (used for lookup criteria columns)
+std::unordered_map<int, std::string> ColumnTooltips{
+    {LookupRow::THETA,
+     "Theta lookup: runs with theta within 0.01 of this value will use the settings specified in this row"},
+    {LookupRow::TITLE,
+     "Title lookup: runs with a title matching this regex will use the settings specified in this row"}};
+
+// Map of column number to algorithm property name for columns where we want to get the tooltip from the algorithm
+std::unordered_map<int, std::string> ColumnPropertyNames{
+    {LookupRow::FIRST_TRANS, "FirstTransmissionRunList"},
+    {LookupRow::SECOND_TRANS, "SecondTransmissionRunList"},
+    {LookupRow::TRANS_SPECTRA, "TransmissionProcessingInstructions"},
+    {LookupRow::QMIN, "MomentumTransferMin"},
+    {LookupRow::QMAX, "MomentumTransferMax"},
+    {LookupRow::QSTEP, "MomentumTransferStep"},
+    {LookupRow::SCALE, "ScaleFactor"},
+    {LookupRow::RUN_SPECTRA, "ProcessingInstructions"},
+    {LookupRow::BACKGROUND_SPECTRA, "BackgroundProcessingInstructions"}};
+
 // Changing the palette for spin boxes doesn't work but we can
 // change the background colour with a style sheet. This also changes
 // the font slightly on Ubuntu so there may be a better way to do this,
@@ -58,14 +77,9 @@ void QtExperimentView::onRemoveLookupRowRequested() {
 }
 
 void QtExperimentView::showAllLookupRowsAsValid() {
-  for (auto row = 0; row < m_ui.optionsTable->rowCount(); ++row)
+  for (auto row = 0; row < m_ui.optionsTable->rowCount(); ++row) {
     showLookupRowAsValid(row);
-}
-
-void QtExperimentView::showLookupRowsNotUnique(double tolerance) {
-  QMessageBox::critical(this, "Invalid lookup criteria combination!",
-                        "Cannot have multiple defaults with theta values less than " + QString::number(tolerance) +
-                            " apart.");
+  }
 }
 
 void QtExperimentView::showStitchParametersValid() { showAsValid(stitchOptionsLineEdit()); }
@@ -95,19 +109,57 @@ void QtExperimentView::initLayout(const Mantid::API::IAlgorithm_sptr &algorithmF
   connect(m_ui.addPerAngleOptionsButton, SIGNAL(clicked()), this, SLOT(onNewLookupRowRequested()));
 }
 
+/** Set a column tooltip from a map, if it exists
+ *
+ * @param column : the column index
+ * @param tooltips : a map of column index to tooltip
+ * @return : true if the tooltip was set, false if not found
+ */
+bool QtExperimentView::setTooltipFromMap(int column, std::unordered_map<int, std::string> const &tooltips) {
+  auto tooltipIt = tooltips.find(column);
+  if (tooltipIt == tooltips.end()) {
+    return false;
+  }
+  m_columnToolTips[column] = QString::fromStdString(tooltipIt->second);
+  return true;
+}
+
+/** Set a column tooltip from an algorithm property. Does nothing if the property is not found
+ *
+ * @param column : the column index
+ * @param properties : a map of column index to algorithm property name
+ */
+void QtExperimentView::setTooltipFromAlgorithm(int column, std::unordered_map<int, std::string> const &properties,
+                                               const Mantid::API::IAlgorithm_sptr &algorithmForTooltips) {
+  auto propertyIt = properties.find(column);
+  if (propertyIt == properties.end()) {
+    return;
+  }
+  // Get the tooltip for this column based on the algorithm property of the same name
+  auto const toolTip =
+      QString::fromStdString(algorithmForTooltips->getPointerToProperty(propertyIt->second)->documentation());
+  // We could set the tooltip for the column header here using
+  // horizontalHeaderItem(column)->setToolTip(). However, then we lose the
+  // tooltip about the purpose of the table as a whole. So we set the tooltip
+  // on the table cells instead. They are created dynamically, so for now
+  // just cache the tooltip.
+  m_columnToolTips[column] = toolTip;
+}
+
+void QtExperimentView::setTooltip(int row, int column, std::string const &text) {
+  m_ui.optionsTable->blockSignals(true);
+  m_ui.optionsTable->item(row, column)->setToolTip(QString::fromStdString(text));
+  m_ui.optionsTable->blockSignals(false);
+}
+
 void QtExperimentView::initializeTableColumns(QTableWidget &table,
                                               const Mantid::API::IAlgorithm_sptr &algorithmForTooltips) {
   for (auto column = 0; column < table.columnCount(); ++column) {
-    // Get the tooltip for this column based on the algorithm property
-    auto const propertyName = LookupRow::ColumnPropertyName[column];
-    auto const toolTip =
-        QString::fromStdString(algorithmForTooltips->getPointerToProperty(propertyName)->documentation());
-    // We could set the tooltip for the column header here using
-    // horizontalHeaderItem(column)->setToolTip(). However, then we lose the
-    // tooltip about the purpose of the table as a whole. So we set the tooltip
-    // on the table cells instead. They are created dynamically, so for now
-    // just cache the tooltip.
-    m_columnToolTips[column] = toolTip;
+    // First check if there's a tooltip for the column
+    if (!setTooltipFromMap(column, ColumnTooltips)) {
+      // Otherwise, get the tooltip from the algorithm property
+      setTooltipFromAlgorithm(column, ColumnPropertyNames, algorithmForTooltips);
+    }
   }
 }
 
@@ -228,6 +280,7 @@ void QtExperimentView::setEnabledStateForAllWidgets(bool enabled) {
   m_ui.backgroundMethodComboBox->setEnabled(enabled);
   m_ui.polynomialDegreeSpinBox->setEnabled(enabled);
   m_ui.costFunctionComboBox->setEnabled(enabled);
+  m_ui.addPerAngleOptionsButton->setEnabled(enabled);
 }
 
 void QtExperimentView::disableAll() { setEnabledStateForAllWidgets(false); }
@@ -530,19 +583,6 @@ QString QtExperimentView::messageFor(std::vector<MissingInstrumentParameterValue
          " not set in the instrument parameter file but should be.\n";
 }
 
-void QtExperimentView::showOptionLoadErrors(std::vector<InstrumentParameterTypeMissmatch> const &typeErrors,
-                                            std::vector<MissingInstrumentParameterValue> const &missingValues) {
-  auto message = QString("Unable to retrieve default values for the following parameters:\n");
-
-  if (!missingValues.empty())
-    message += messageFor(missingValues);
-
-  for (auto &typeError : typeErrors)
-    message += messageFor(typeError);
-
-  QMessageBox::warning(this, "Failed to load one or more defaults from parameter file", message);
-}
-
 QLineEdit &QtExperimentView::stitchOptionsLineEdit() const { return *static_cast<QLineEdit *>(m_stitchEdit); }
 
 /** Creates hints for 'Stitch1DMany'
@@ -604,23 +644,22 @@ std::string QtExperimentView::textFromCell(QTableWidgetItem const *maybeNullItem
   }
 }
 
-// The missing braces warning is a false positive -
-// https://llvm.org/bugs/show_bug.cgi?id=21629
-GNU_DIAG_OFF("missing-braces")
 std::vector<LookupRow::ValueArray> QtExperimentView::getLookupTable() const {
   auto const &table = *m_ui.optionsTable;
   auto rows = std::vector<LookupRow::ValueArray>();
   rows.reserve(table.rowCount());
+  using Col = LookupRow::Column;
   for (auto row = 0; row < table.rowCount(); ++row) {
-    rows.emplace_back(LookupRow::ValueArray{textFromCell(table.item(row, 0)), textFromCell(table.item(row, 1)),
-                                            textFromCell(table.item(row, 2)), textFromCell(table.item(row, 3)),
-                                            textFromCell(table.item(row, 4)), textFromCell(table.item(row, 5)),
-                                            textFromCell(table.item(row, 6)), textFromCell(table.item(row, 7)),
-                                            textFromCell(table.item(row, 8)), textFromCell(table.item(row, 9))});
+    rows.emplace_back(LookupRow::ValueArray{
+        textFromCell(table.item(row, Col::THETA)), textFromCell(table.item(row, Col::TITLE)),
+        textFromCell(table.item(row, Col::FIRST_TRANS)), textFromCell(table.item(row, Col::SECOND_TRANS)),
+        textFromCell(table.item(row, Col::TRANS_SPECTRA)), textFromCell(table.item(row, Col::QMIN)),
+        textFromCell(table.item(row, Col::QMAX)), textFromCell(table.item(row, Col::QSTEP)),
+        textFromCell(table.item(row, Col::SCALE)), textFromCell(table.item(row, Col::RUN_SPECTRA)),
+        textFromCell(table.item(row, Col::BACKGROUND_SPECTRA))});
   }
   return rows;
 }
-GNU_DIAG_ON("missing-braces")
 
 void QtExperimentView::setLookupTable(std::vector<LookupRow::ValueArray> rows) {
   auto &table = *m_ui.optionsTable;
@@ -642,8 +681,10 @@ void QtExperimentView::showLookupRowAsInvalid(int row, int column) {
 
 void QtExperimentView::showLookupRowAsValid(int row) {
   m_ui.optionsTable->blockSignals(true);
-  for (auto column = 0; column < m_ui.optionsTable->columnCount(); ++column)
+  for (auto column = 0; column < m_ui.optionsTable->columnCount(); ++column) {
     m_ui.optionsTable->item(row, column)->setBackground(QBrush(Qt::transparent));
+    m_ui.optionsTable->item(row, column)->setToolTip(m_columnToolTips[column]);
+  }
   m_ui.optionsTable->blockSignals(false);
 }
 
@@ -690,8 +731,5 @@ std::string QtExperimentView::getStitchOptions() const { return getText(stitchOp
 void QtExperimentView::setStitchOptions(std::string const &stitchOptions) {
   setText(stitchOptionsLineEdit(), stitchOptions);
 }
-
-void showOptionLoadErrors(std::vector<InstrumentParameterTypeMissmatch> const &typeErrors,
-                          std::vector<MissingInstrumentParameterValue> const &missingValues);
 
 } // namespace MantidQt::CustomInterfaces::ISISReflectometry

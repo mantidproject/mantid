@@ -14,6 +14,7 @@
 #include <json/json.h>
 
 using Mantid::Kernel::ErrorReporter;
+using Mantid::Kernel::InternetHelper;
 
 class TestableErrorReporter : public ErrorReporter {
 public:
@@ -24,11 +25,11 @@ public:
 
 protected:
   /// sends a report over the internet
-  int sendReport(const std::string &message, const std::string &url) override {
+  InternetHelper::HTTPStatus sendReport(const std::string &message, const std::string &url) override {
     UNUSED_ARG(message);
     UNUSED_ARG(url);
     // do nothing
-    return 200;
+    return InternetHelper::HTTPStatus::OK;
   }
 };
 
@@ -59,6 +60,18 @@ public:
     TS_ASSERT_EQUALS(root["application"].asString(), name);
     TS_ASSERT_EQUALS(root["upTime"].asString(), to_simple_string(upTime));
     TS_ASSERT_EQUALS(root["exitCode"].asString(), "0");
+  }
+
+  void test_stackTraceWithQuotes() {
+    const std::string appName = "My testing application name";
+    const Mantid::Types::Core::time_duration upTime(5, 0, 7, 0);
+    const std::string stackTrace = "File \" C :\\file\\path\\file.py\", line 194, in broken_function";
+    TestableErrorReporter reporter(appName, upTime, "0", true, "name", "email", "textBox", stackTrace);
+    const std::string message = reporter.generateErrorMessage();
+
+    ::Json::Value root;
+    Mantid::JsonHelpers::parse(message, &root);
+    TS_ASSERT_EQUALS(root["stacktrace"].asString(), stackTrace);
   }
 
   void test_errorMessageWithShare() {
@@ -136,7 +149,7 @@ public:
     TS_ASSERT_EQUALS(root["exitCode"].asString(), "0");
     TS_ASSERT_EQUALS(root["name"].asString(), "");
     TS_ASSERT_EQUALS(root["email"].asString(), "");
-    TS_ASSERT_EQUALS(root["textBox"].asString(), "");
+    TS_ASSERT_EQUALS(root["textBox"].asString(), "textBox");
     TS_ASSERT_EQUALS(root["stacktrace"].asString(), "");
   }
 };

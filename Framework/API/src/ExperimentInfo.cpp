@@ -925,6 +925,25 @@ void ExperimentInfo::saveExperimentInfoNexus(::NeXus::File *file, bool saveInstr
 /** Load the sample and log info from an open NeXus file.
  * @param file :: open NeXus file
  */
+void ExperimentInfo::loadSampleAndLogInfoNexus(::NeXus::File *file, const Mantid::Kernel::NexusHDF5Descriptor &fileInfo,
+                                               const std::string &prefix) {
+  // First, the sample and then the logs
+  int sampleVersion = mutableSample().loadNexus(file, "sample");
+  if (sampleVersion == 0) {
+    // Old-style (before Sep-9-2011) NXS processed
+    // sample field contains both the logs and the sample details
+    file->openGroup("sample", "NXsample");
+    this->mutableRun().loadNexus(file, "", fileInfo, prefix);
+    file->closeGroup();
+  } else {
+    // Newer style: separate "logs" field for the Run object
+    this->mutableRun().loadNexus(file, "logs", fileInfo, prefix);
+  }
+}
+
+/** Load the sample and log info from an open NeXus file.
+ * @param file :: open NeXus file
+ */
 void ExperimentInfo::loadSampleAndLogInfoNexus(::NeXus::File *file) {
   // First, the sample and then the logs
   int sampleVersion = mutableSample().loadNexus(file, "sample");
@@ -938,6 +957,17 @@ void ExperimentInfo::loadSampleAndLogInfoNexus(::NeXus::File *file) {
     // Newer style: separate "logs" field for the Run object
     this->mutableRun().loadNexus(file, "logs");
   }
+}
+
+void ExperimentInfo::loadExperimentInfoNexus(const std::string &nxFilename, ::NeXus::File *file,
+                                             std::string &parameterStr,
+                                             const Mantid::Kernel::NexusHDF5Descriptor &fileInfo,
+                                             const std::string &prefix) {
+  // TODO
+  // load sample and log info
+  loadSampleAndLogInfoNexus(file, fileInfo, prefix);
+
+  loadInstrumentInfoNexus(nxFilename, file, parameterStr);
 }
 
 /** Load the object from an open NeXus file.
@@ -1144,9 +1174,12 @@ void ExperimentInfo::readParameterMap(const std::string &parameterStr) {
   Mantid::Kernel::StringTokenizer splitter(parameterStr, "|", options);
 
   auto iend = splitter.end();
+
+  Mantid::Kernel::StringTokenizer tokens;
+  const std::string visibilityKey = "visible:"; // if visibility is defined, the value will follow this key
   // std::string prev_name;
   for (auto itr = splitter.begin(); itr != iend; ++itr) {
-    Mantid::Kernel::StringTokenizer tokens(*itr, ";");
+    tokens = Mantid::Kernel::StringTokenizer(*itr, ";");
     if (tokens.count() < 4)
       continue;
     std::string comp_name = tokens[0];
@@ -1177,8 +1210,7 @@ void ExperimentInfo::readParameterMap(const std::string &parameterStr) {
       paramValue += ";" + tokens[i];
     const auto &paramType = tokens[1];
     const auto &paramName = tokens[2];
-    auto &paramVisibility = tokens[size - 1];           // parameter visibility, if defined, is the last token
-    auto const visibilityKey = std::string("visible:"); // if visibility is defined, the value will follow this key
+    auto &paramVisibility = tokens[size - 1]; // parameter visibility, if defined, is the last token
     if (paramVisibility.find(visibilityKey) > paramVisibility.size())
       paramVisibility = "true"; // visibility not defined: default to visible
     else {                      // defined, the paramValue has one too many entries, -1 to remove also the semicolon

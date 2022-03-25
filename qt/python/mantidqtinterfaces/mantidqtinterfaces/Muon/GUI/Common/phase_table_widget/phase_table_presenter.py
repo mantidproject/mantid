@@ -109,7 +109,7 @@ class PhaseTablePresenter(object):
     def handle_thread_calculation_error(self, error):
         """Generic handling of error from calculation threads"""
         self.enable_editing_notifier.notify_subscribers()
-        self.view.warning_popup(error)
+        self.view.warning_popup(error.exc_value)
         self.current_alg = None
 
     """=============== Phase table methods ==============="""

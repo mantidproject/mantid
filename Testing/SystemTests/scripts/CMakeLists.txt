@@ -1,7 +1,5 @@
-# Write out a files containing
-# - the data search directories
-# - the default save directory
-# These will be read by the MantidConfig class to configure the properties file
+# Write out a files containing - the data search directories - the default save directory These will be read by the
+# MantidConfig class to configure the properties file
 
 # Data search directories
 set(DATA_DIRS "")
@@ -10,20 +8,15 @@ set(SYSTEM_TEST_DATA_DIR ${ExternalData_BINARY_ROOT}/Testing/Data/SystemTest)
 list(APPEND DATA_DIRS ${SYSTEM_TEST_DATA_DIR})
 list(APPEND DATA_DIRS ${SYSTEM_TEST_DATA_DIR}/INTER)
 # Reference results
-list(
-  APPEND
-    DATA_DIRS
-    ${ExternalData_BINARY_ROOT}/Testing/SystemTests/tests/framework/reference)
+list(APPEND DATA_DIRS ${ExternalData_BINARY_ROOT}/Testing/SystemTests/tests/framework/reference)
 # Unit tests
 list(APPEND DATA_DIRS ${ExternalData_BINARY_ROOT}/Testing/Data/UnitTest)
 # Doc tests
 list(APPEND DATA_DIRS ${ExternalData_BINARY_ROOT}/Testing/Data/DocTest)
 
-# Output to file
-# If this is changed, make sure to update the .gitignore in this directory
+# Output to file If this is changed, make sure to update the .gitignore in this directory
 set(DATA_DIRS_FILE ${CMAKE_CURRENT_LIST_DIR}/datasearch-directories.txt)
-# The quotes are important as CMake translates the list to a semicolon-separated
-# string
+# The quotes are important as CMake translates the list to a semicolon-separated string
 file(WRITE ${DATA_DIRS_FILE} "${DATA_DIRS}")
 
 # Default save directory
@@ -39,9 +32,7 @@ else()
   set(MULTI_CONFIG_GENERATOR "false")
 endif()
 if(MSVC)
-  configure_file(${CMAKE_CURRENT_LIST_DIR}/systemtest.bat.in
-                 ${CMAKE_BINARY_DIR}/systemtest.bat @ONLY)
+  configure_file(${CMAKE_CURRENT_LIST_DIR}/systemtest.bat.in ${CMAKE_BINARY_DIR}/systemtest.bat @ONLY)
 else()
-  configure_file(${CMAKE_CURRENT_LIST_DIR}/systemtest.in
-                 ${CMAKE_BINARY_DIR}/systemtest @ONLY)
+  configure_file(${CMAKE_CURRENT_LIST_DIR}/systemtest.in ${CMAKE_BINARY_DIR}/systemtest @ONLY)
 endif()

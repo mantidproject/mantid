@@ -10,17 +10,19 @@
 
 #include "../../Reduction/Batch.h"
 #include "../../Reduction/Group.h"
+#include "../../Reduction/IBatch.h"
 #include "AlgorithmProperties.h"
 #include "BatchJobAlgorithm.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/IAlgorithm.h"
+#include "MantidQtWidgets/Common/AlgorithmRuntimeProps.h"
 #include "MantidQtWidgets/Common/BatchAlgorithmRunner.h"
+#include "MantidQtWidgets/Common/IAlgorithmRuntimeProps.h"
 
-namespace MantidQt::CustomInterfaces::ISISReflectometry {
+namespace MantidQt::CustomInterfaces::ISISReflectometry::GroupProcessing {
 
 using API::IConfiguredAlgorithm_sptr;
 using Mantid::API::IAlgorithm_sptr;
-using AlgorithmRuntimeProps = std::map<std::string, std::string>;
 namespace { // unnamed namespace
 
 std::string removePrefix(std::string const &value, std::string const &prefix) {
@@ -69,7 +71,7 @@ void updateParamsFromResolution(AlgorithmRuntimeProps &properties, boost::option
   AlgorithmProperties::update("Params", -(resolution.get()), properties);
 }
 
-void updateLookupRowProperties(AlgorithmRuntimeProps &properties, LookupRow const *lookupRow) {
+void updateLookupRowProperties(AlgorithmRuntimeProps &properties, boost::optional<LookupRow> lookupRow) {
   if (!lookupRow)
     return;
 
@@ -110,7 +112,7 @@ void updateStitchProperties(AlgorithmRuntimeProps &properties,
  * @param model : the reduction configuration model
  * @param group : the row from the runs table
  */
-IConfiguredAlgorithm_sptr createConfiguredAlgorithm(Batch const &model, Group &group) {
+IConfiguredAlgorithm_sptr createConfiguredAlgorithm(IBatch const &model, Group &group) {
   // Create the algorithm
   auto alg = Mantid::API::AlgorithmManager::Instance().create("Stitch1DMany");
   alg->setRethrows(true);
@@ -119,20 +121,22 @@ IConfiguredAlgorithm_sptr createConfiguredAlgorithm(Batch const &model, Group &g
   auto properties = createAlgorithmRuntimeProps(model, group);
 
   // Return the configured algorithm
-  auto jobAlgorithm = std::make_shared<BatchJobAlgorithm>(alg, properties, updateGroupFromOutputProperties, &group);
+  auto jobAlgorithm = std::make_shared<BatchJobAlgorithm>(std::move(alg), std::move(properties),
+                                                          updateGroupFromOutputProperties, &group);
   return jobAlgorithm;
 }
 
-AlgorithmRuntimeProps createAlgorithmRuntimeProps(Batch const &model, Group const &group) {
-  auto properties = AlgorithmRuntimeProps();
-  updateWorkspaceProperties(properties, group);
+std::unique_ptr<MantidQt::API::IAlgorithmRuntimeProps> createAlgorithmRuntimeProps(IBatch const &model,
+                                                                                   Group const &group) {
+  auto properties = std::make_unique<MantidQt::API::AlgorithmRuntimeProps>();
+  updateWorkspaceProperties(*properties, group);
   // Set the rebin Params from the lookup row resolution, if given
-  updateLookupRowProperties(properties, model.findLookupRow());
+  updateLookupRowProperties(*properties, model.findWildcardLookupRow());
   // Override the lookup row with the group's rows' resolution,
   // if given
-  updateGroupProperties(properties, group);
+  updateGroupProperties(*properties, group);
   // Override the rebin Params from the user-specified stitch params, if given
-  updateStitchProperties(properties, model.experiment().stitchParameters());
+  updateStitchProperties(*properties, model.experiment().stitchParameters());
   return properties;
 }
-} // namespace MantidQt::CustomInterfaces::ISISReflectometry
+} // namespace MantidQt::CustomInterfaces::ISISReflectometry::GroupProcessing

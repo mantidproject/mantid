@@ -3,7 +3,10 @@
 # Build options
 option(DOCS_DOTDIAGRAMS "If enabled include workflow diagrams generated with dot" OFF)
 option(DOCS_SCREENSHOTS "If enabled include automatically generated screenshots of interfaces" OFF)
-set(DOCS_MATH_EXT "sphinx.ext.imgmath" CACHE STRING "Sphinx extension to be used for rendering math equations in qtassistant. mathjax is used in html.")
+set(DOCS_MATH_EXT
+    "sphinx.ext.imgmath"
+    CACHE STRING "Sphinx extension to be used for rendering math equations in qtassistant. mathjax is used in html."
+)
 set_property(CACHE DOCS_MATH_EXT PROPERTY STRINGS "sphinx.ext.imgmath" "sphinx.ext.mathjax")
 option(DOCS_PLOTDIRECTIVE "If enabled include plots generated with the plot directive. " OFF)
 option(DOCS_QTHELP "If enabled add a target to build the qthelp documentation" ON)
@@ -32,12 +35,16 @@ else()
   set(ENABLE_PLOTDIRECTIVE "")
 endif()
 
-# Add a sphinx build target to build documentation
-#   builder - Name of the sphinx builder: html, qthelp etc
-#   target_name - Optional target name. Default=docs-${builder}
-function (add_sphinx_build_target builder math_renderer)
-  set(runner ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/${CMAKE_CFG_INTDIR}/mantidpython$<$<BOOL:${WIN32}>:.bat>)
-  set(runner_args "--classic")
+# Add a sphinx build target to build documentation builder - Name of the sphinx builder: html, qthelp etc target_name -
+# Optional target name. Default=docs-${builder}
+function(add_sphinx_build_target builder math_renderer)
+  if(CONDA_BUILD)
+    set(runner ${Python_EXECUTABLE})
+  else()
+    set(runner ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/${CMAKE_CFG_INTDIR}/mantidpython$<$<BOOL:${WIN32}>:.bat>)
+    set(runner_args "--classic")
+  endif()
+
   if(ARGC GREATER 2)
     set(target_name ${ARGV2})
   else()
@@ -56,26 +63,31 @@ function (add_sphinx_build_target builder math_renderer)
     set(sphinx_options ${sphinx_options} -t ${ARGV3})
   endif()
 
-  add_custom_target(${target_name}
-      COMMAND
-        ${CMAKE_COMMAND} -E env
-             SCREENSHOTS_DIR=${SCREENSHOTS_DIR}
-             DIAGRAMS_DIR=${DIAGRAMS_DIR}
-             DOT_EXECUTABLE=${DOT_EXECUTABLE}
-             MATH_EXT=${math_renderer}
-             ENABLE_PLOTDIRECTIVE=${ENABLE_PLOTDIRECTIVE}
-             ${runner} ${runner_args} -m ${SPHINX_MAIN} ${sphinx_options} ${SPHINX_CONF_DIR} ${output_dir}
-      DEPENDS Framework
-              mantidqt
-              ${SPHINX_CONF_DIR}/conf.py
-              ${conf_builder}
-      COMMENT "Building ${builder} documentation using ${math_renderer}"
+  set(target_dependencies)
+
+  if(MANTID_FRAMEWORK_LIB STREQUAL "BUILD")
+    set(target_dependencies ${target_dependencies} Framework)
+  endif()
+
+  if(MANTID_QT_LIB STREQUAL "BUILD")
+    set(target_dependencies ${target_dependencies} mantidqt)
+  endif()
+
+  add_custom_target(
+    ${target_name}
+    COMMAND
+      ${CMAKE_COMMAND} -E env SCREENSHOTS_DIR=${SCREENSHOTS_DIR} DIAGRAMS_DIR=${DIAGRAMS_DIR}
+      DOT_EXECUTABLE=${DOT_EXECUTABLE} MATH_EXT=${math_renderer} ENABLE_PLOTDIRECTIVE=${ENABLE_PLOTDIRECTIVE} ${runner}
+      ${runner_args} -m ${SPHINX_MAIN} ${sphinx_options} ${SPHINX_CONF_DIR} ${output_dir}
+    DEPENDS ${target_dependencies} ${SPHINX_CONF_DIR}/conf.py ${conf_builder}
+    COMMENT "Building ${builder} documentation using ${math_renderer}"
   )
   # Group within VS and exclude from whole build
-  set_target_properties(${target_name}
-      PROPERTIES FOLDER "Documentation"
-      EXCLUDE_FROM_DEFAULT_BUILD 1
-      EXCLUDE_FROM_ALL 1
+  set_target_properties(
+    ${target_name}
+    PROPERTIES FOLDER "Documentation"
+               EXCLUDE_FROM_DEFAULT_BUILD 1
+               EXCLUDE_FROM_ALL 1
   )
 endfunction()
 
@@ -85,17 +97,24 @@ add_sphinx_build_target(doctest "sphinx.ext.mathjax")
 
 # qthelp if building workbench
 if(DOCS_QTHELP AND ENABLE_WORKBENCH)
-  find_package(Qt5 COMPONENTS Help REQUIRED)
-  add_sphinx_build_target(qthelp ${DOCS_MATH_EXT} docs-qtassistant qthelp)
-  add_custom_target(docs-qthelp
-                      COMMAND Qt5::qcollectiongenerator qthelp/MantidProject.qhcp
-                      COMMENT "Compiling Qt help documentation")
-  set_target_properties(docs-qthelp
-      PROPERTIES FOLDER "Documentation"
-      EXCLUDE_FROM_DEFAULT_BUILD 1
-      EXCLUDE_FROM_ALL 1
+  find_package(
+    Qt5
+    COMPONENTS Help
+    REQUIRED
   )
-  #add_dependencies(docs-qthelp ${DOCS_MATH_EXT} docs-qtassistant)
+  add_sphinx_build_target(qthelp ${DOCS_MATH_EXT} docs-qtassistant qthelp)
+  add_custom_target(
+    docs-qthelp
+    COMMAND Qt5::qcollectiongenerator qthelp/MantidProject.qhcp
+    COMMENT "Compiling Qt help documentation"
+  )
+  set_target_properties(
+    docs-qthelp
+    PROPERTIES FOLDER "Documentation"
+               EXCLUDE_FROM_DEFAULT_BUILD 1
+               EXCLUDE_FROM_ALL 1
+  )
+  # add_dependencies(docs-qthelp ${DOCS_MATH_EXT} docs-qtassistant)
   add_dependencies(docs-qthelp docs-qtassistant)
 endif()
 
@@ -105,21 +124,21 @@ if(PACKAGE_DOCS)
   set(HTML_DOCS_DEST share/doc)
   foreach(_bundle ${BUNDLES})
     if(TARGET Qt5::qcollectiongenerator)
-      # must "make docs-qthelp" before "make package" otherwise there will be a
-      # build failure
-      install(FILES ${SPHINX_BUILD_DIR}/qthelp/MantidProject.qhc
-                    ${SPHINX_BUILD_DIR}/qthelp/MantidProject.qch
-              DESTINATION ${_bundle}${HTML_DOCS_DEST})
-      install(DIRECTORY ${SPHINX_BUILD_DIR}/qthelp/
+      # must "make docs-qthelp" before "make package" otherwise there will be a build failure
+      install(FILES ${SPHINX_BUILD_DIR}/qthelp/MantidProject.qhc ${SPHINX_BUILD_DIR}/qthelp/MantidProject.qch
               DESTINATION ${_bundle}${HTML_DOCS_DEST}
-              FILES_MATCHING
-              PATTERN "*.html")
-      install(DIRECTORY ${SPHINX_BUILD_DIR}/qthelp/_images/
-                        ${SPHINX_BUILD_DIR}/qthelp/_static/
-              DESTINATION ${_bundle}${HTML_DOCS_DEST})
+      )
+      install(
+        DIRECTORY ${SPHINX_BUILD_DIR}/qthelp/
+        DESTINATION ${_bundle}${HTML_DOCS_DEST}
+        FILES_MATCHING
+        PATTERN "*.html"
+      )
+      install(DIRECTORY ${SPHINX_BUILD_DIR}/qthelp/_images/ ${SPHINX_BUILD_DIR}/qthelp/_static/
+              DESTINATION ${_bundle}${HTML_DOCS_DEST}
+      )
     else(QT_QCOLLECTIONGENERATOR_EXECUTABLE)
-      install(DIRECTORY ${SPHINX_BUILD_DIR}/html/
-              DESTINATION ${_bundle}${HTML_DOCS_DEST})
+      install(DIRECTORY ${SPHINX_BUILD_DIR}/html/ DESTINATION ${_bundle}${HTML_DOCS_DEST})
     endif()
   endforeach()
 endif(PACKAGE_DOCS)

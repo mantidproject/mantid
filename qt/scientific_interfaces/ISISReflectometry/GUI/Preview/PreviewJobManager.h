@@ -21,6 +21,7 @@ public:
   // IJobManager overrides
   void subscribe(JobManagerSubscriber *notifyee) override;
   void startPreprocessing(PreviewRow &row) override;
+  void startSumBanks(PreviewRow &row) override;
 
   // JobRunnerSubscriber overrides
   void notifyBatchComplete(bool) override;

@@ -22,8 +22,7 @@ import mantid.api
 import mantid.kernel
 from mantid.api import MultipleExperimentInfos, MatrixWorkspace
 from mantid.dataobjects import EventWorkspace, MDHistoWorkspace, Workspace2D
-from mantid.plots.legend import convert_color_to_hex
-from mantid.plots.utility import MantidAxType
+from mantid.plots.utility import convert_color_to_hex, MantidAxType
 
 
 # Helper functions for data extraction from a Mantid workspace and plot functionality
@@ -350,7 +349,7 @@ def get_spectrum(workspace, wkspIndex, normalize_by_bin_width, withDy=False, wit
 
 def get_bin_indices(workspace):
     """
-    Find the bins' indices, without these of the monitors if there is some.
+    Find the bins' indices, without those of the monitors if there are some.
     (ie every detector which is not a monitor)
 
     :param workspace: a Workspace2D or an EventWorkspace
@@ -394,7 +393,7 @@ def get_bin_indices(workspace):
 
 def get_bins(workspace, bin_index, withDy=False):
     """
-    Extract a requested bin from each spectrum
+    Extract a requested bin from each spectrum, except if they correspond to monitors
 
     :param workspace: a Workspace2D or an EventWorkspace
     :param bin_index: the index of a bin
@@ -1134,11 +1133,15 @@ def waterfall_create_fill(ax):
         fill.set_zorder((len(ax.get_lines()) - i) + 1)
         set_waterfall_fill_visible(ax, i)
 
-    ax.lines += errorbar_cap_lines
+    for cap in errorbar_cap_lines:
+        ax.add_line(cap)
 
 
 def waterfall_remove_fill(ax):
-    ax.collections[:] = filter(lambda x: not isinstance(x, PolyCollection), ax.collections)
+    # Use a temporary list to hold a reference to the collections whilst removing them.
+    for poly_collection in list(ax.collections):
+        if isinstance(poly_collection, PolyCollection):
+            poly_collection.remove()
     ax.get_figure().canvas.draw()
 
 
@@ -1199,7 +1202,7 @@ def update_colorbar_scale(figure, image, scale, vmin, vmax):
     image.set_norm(scale(vmin=vmin, vmax=vmax))
 
     if image.colorbar:
-        label = image.colorbar._label
+        label = image.colorbar.ax.get_ylabel()
         image.colorbar.remove()
         locator = None
         if scale == LogNorm:

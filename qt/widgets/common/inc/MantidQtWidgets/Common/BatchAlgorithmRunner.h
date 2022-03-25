@@ -1,12 +1,13 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
-// Copyright &copy; 2012 ISIS Rutherford Appleton Laboratory UKRI,
+// Copyright &copy; 2021 ISIS Rutherford Appleton Laboratory UKRI,
 //   NScD Oak Ridge National Laboratory, European Spallation Source,
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
 #include "DllOption.h"
+#include "IConfiguredAlgorithm.h"
 #include "MantidAPI/Algorithm.h"
 
 #include <QObject>
@@ -21,32 +22,7 @@
 #include <mutex>
 #include <utility>
 
-namespace MantidQt {
-namespace API {
-class EXPORT_OPT_MANTIDQT_COMMON IConfiguredAlgorithm {
-public:
-  using AlgorithmRuntimeProps = std::map<std::string, std::string>;
-
-  virtual Mantid::API::IAlgorithm_sptr algorithm() const = 0;
-  virtual AlgorithmRuntimeProps properties() const = 0;
-};
-
-class EXPORT_OPT_MANTIDQT_COMMON ConfiguredAlgorithm : public IConfiguredAlgorithm {
-public:
-  ConfiguredAlgorithm(Mantid::API::IAlgorithm_sptr algorithm, AlgorithmRuntimeProps properties);
-  virtual ~ConfiguredAlgorithm();
-
-  Mantid::API::IAlgorithm_sptr algorithm() const override;
-  AlgorithmRuntimeProps properties() const override;
-
-protected:
-  Mantid::API::IAlgorithm_sptr m_algorithm;
-
-private:
-  AlgorithmRuntimeProps m_properties;
-};
-
-using IConfiguredAlgorithm_sptr = std::shared_ptr<IConfiguredAlgorithm>;
+namespace MantidQt::API {
 
 class BatchCompleteNotification : public Poco::Notification {
 public:
@@ -111,14 +87,13 @@ class EXPORT_OPT_MANTIDQT_COMMON BatchAlgorithmRunner : public QObject {
   Q_OBJECT
 
 public:
-  using AlgorithmRuntimeProps = std::map<std::string, std::string>;
-
   explicit BatchAlgorithmRunner(QObject *parent = nullptr);
   ~BatchAlgorithmRunner() override;
 
   /// Adds an algorithm to the execution queue
-  void addAlgorithm(const Mantid::API::IAlgorithm_sptr &algo,
-                    const AlgorithmRuntimeProps &props = AlgorithmRuntimeProps());
+  void addAlgorithm(const Mantid::API::IAlgorithm_sptr &algo);
+  void addAlgorithm(const Mantid::API::IAlgorithm_sptr &algo, std::unique_ptr<IAlgorithmRuntimeProps> props);
+
   void setQueue(std::deque<IConfiguredAlgorithm_sptr> algorithm);
   /// Clears all algorithms from queue
   void clearQueue();
@@ -188,5 +163,4 @@ private:
   void addAllObservers();
   void removeAllObservers();
 };
-} // namespace API
-} // namespace MantidQt
+} // namespace MantidQt::API

@@ -264,6 +264,22 @@ class StateGuiModelTest(unittest.TestCase):
         state_gui_model.wavelength_step_type = RangeStepType.NOT_SET
         self.assertEqual(state_gui_model.wavelength_step_type, RangeStepType.LIN)
 
+    def test_wavelength_range_returns_user_string(self):
+        # We should return exactly the user string when we have it
+        state_gui_model = StateGuiModel(AllStates())
+        user_input = "1-3,3-5"
+        state_gui_model.wavelength_range = user_input
+        self.assertEqual(state_gui_model.wavelength_range, user_input)
+        self.assertEqual([(1., 5.), (1., 3.), (3., 5.)],
+                         state_gui_model.all_states.wavelength.wavelength_interval.selected_ranges)
+
+    def test_wavelength_range_builds_user_string(self):
+        # We need to build this string when the user hasn't interacted with the GUI
+        state_gui_model = StateGuiModel(AllStates())
+        ranges = [(1., 7.), (1., 3.), (3., 5.), (5., 7.)]
+        state_gui_model.all_states.wavelength.wavelength_interval.selected_ranges = ranges
+        self.assertEqual(state_gui_model.wavelength_range, "1.0-3.0, 3.0-5.0, 5.0-7.0")
+
     def test_wavelength_step_type_resets_range_for_non_range(self):
         state_gui_model = StateGuiModel(AllStates())
 
@@ -323,11 +339,6 @@ class StateGuiModelTest(unittest.TestCase):
         self.assertEqual(trans_state.wavelength_interval.wavelength_full_range, (low, high))
         self.assertEqual(trans_state.wavelength_interval.wavelength_step, step)
         self.assertEqual(trans_state.wavelength_step_type, step_type)
-        # Monitor
-        norm_state = model.all_states.adjustment.normalize_to_monitor
-        self.assertEqual(norm_state.wavelength_interval.wavelength_full_range, (low, high))
-        self.assertEqual(norm_state.wavelength_interval.wavelength_step, step)
-        self.assertEqual(norm_state.wavelength_step_type, step_type)
 
         # Wavelength and pixel adjustment
         adj_state = model.all_states.adjustment.wavelength_and_pixel_adjustment

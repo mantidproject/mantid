@@ -268,7 +268,7 @@ API::MatrixWorkspace_sptr ConvertUnits::setupOutputWorkspace(const API::MatrixWo
     Progress prog(this, 0.0, 0.2, m_numberOfSpectra);
     PARALLEL_FOR_IF(Kernel::threadSafe(*outputWS))
     for (int64_t i = 0; i < static_cast<int64_t>(m_numberOfSpectra); ++i) {
-      PARALLEL_START_INTERUPT_REGION
+      PARALLEL_START_INTERRUPT_REGION
       // Take the bin width dependency out of the Y & E data
       const auto &X = outputWS->x(i);
       auto &Y = outputWS->mutableY(i);
@@ -280,9 +280,9 @@ API::MatrixWorkspace_sptr ConvertUnits::setupOutputWorkspace(const API::MatrixWo
       }
 
       prog.report("Convert to " + m_outputUnit->unitID());
-      PARALLEL_END_INTERUPT_REGION
+      PARALLEL_END_INTERRUPT_REGION
     }
-    PARALLEL_CHECK_INTERUPT_REGION
+    PARALLEL_CHECK_INTERRUPT_REGION
   }
 
   // Set the final unit that our output workspace will have
@@ -326,12 +326,12 @@ MatrixWorkspace_sptr ConvertUnits::convertQuickly(const API::MatrixWorkspace_con
 
     PARALLEL_FOR_IF(Kernel::threadSafe(*outputWS))
     for (int64_t j = 1; j < numberOfSpectra_i; ++j) {
-      PARALLEL_START_INTERUPT_REGION
+      PARALLEL_START_INTERRUPT_REGION
       outputWS->setX(j, xVals);
       prog.report("Convert to " + m_outputUnit->unitID());
-      PARALLEL_END_INTERUPT_REGION
+      PARALLEL_END_INTERRUPT_REGION
     }
-    PARALLEL_CHECK_INTERUPT_REGION
+    PARALLEL_CHECK_INTERRUPT_REGION
     if (!m_inputEvents) // if in event mode the work is done
       return outputWS;
   }
@@ -344,7 +344,7 @@ MatrixWorkspace_sptr ConvertUnits::convertQuickly(const API::MatrixWorkspace_con
   // Loop over the histograms (detector spectra)
   PARALLEL_FOR_IF(Kernel::threadSafe(*outputWS))
   for (int64_t k = 0; k < numberOfSpectra_i; ++k) {
-    PARALLEL_START_INTERUPT_REGION
+    PARALLEL_START_INTERRUPT_REGION
     if (!commonBoundaries) {
       for (auto &x : outputWS->mutableX(k)) {
         x = factor * std::pow(x, power);
@@ -355,9 +355,9 @@ MatrixWorkspace_sptr ConvertUnits::convertQuickly(const API::MatrixWorkspace_con
       eventWS->getSpectrum(k).convertUnitsQuickly(factor, power);
     }
     prog.report("Convert to " + m_outputUnit->unitID());
-    PARALLEL_END_INTERUPT_REGION
+    PARALLEL_END_INTERRUPT_REGION
   }
-  PARALLEL_CHECK_INTERUPT_REGION
+  PARALLEL_CHECK_INTERRUPT_REGION
 
   if (m_inputEvents)
     eventWS->clearMRU();
@@ -411,19 +411,19 @@ MatrixWorkspace_sptr ConvertUnits::convertViaTOF(Kernel::Unit_const_sptr fromUni
 
   // Perform Sanity Validation before creating workspace
   const double checkdelta = 0.0;
-  UnitParametersMap pmap = {{UnitParams::delta, checkdelta}};
+  UnitParametersMap upmap = {{UnitParams::delta, checkdelta}};
   if (efixedProp != EMPTY_DBL()) {
-    pmap[UnitParams::efixed] = efixedProp;
+    upmap[UnitParams::efixed] = efixedProp;
   }
   size_t checkIndex = 0;
-  spectrumInfo.getDetectorValues(*fromUnit, *outputUnit, emode, signedTheta, checkIndex, pmap);
+  spectrumInfo.getDetectorValues(*fromUnit, *outputUnit, emode, signedTheta, checkIndex, upmap);
   // copy the X values for the check
   auto checkXValues = inputWS->readX(checkIndex);
   try {
     // Convert the input unit to time-of-flight
-    checkFromUnit->toTOF(checkXValues, emptyVec, l1, emode, pmap);
+    checkFromUnit->toTOF(checkXValues, emptyVec, l1, emode, upmap);
     // Convert from time-of-flight to the desired unit
-    checkOutputUnit->fromTOF(checkXValues, emptyVec, l1, emode, pmap);
+    checkOutputUnit->fromTOF(checkXValues, emptyVec, l1, emode, upmap);
   } catch (std::runtime_error &) { // if it's a detector specific problem then ignore
   }
 
@@ -436,7 +436,7 @@ MatrixWorkspace_sptr ConvertUnits::convertViaTOF(Kernel::Unit_const_sptr fromUni
   // Loop over the histograms (detector spectra)
   PARALLEL_FOR_IF(Kernel::threadSafe(*outputWS))
   for (int64_t i = 0; i < numberOfSpectra_i; ++i) {
-    PARALLEL_START_INTERUPT_REGION
+    PARALLEL_START_INTERRUPT_REGION
     double efixed = efixedProp;
 
     // Now get the detector object for this histogram
@@ -475,9 +475,9 @@ MatrixWorkspace_sptr ConvertUnits::convertViaTOF(Kernel::Unit_const_sptr fromUni
     }
 
     prog.report("Convert to " + m_outputUnit->unitID());
-    PARALLEL_END_INTERUPT_REGION
+    PARALLEL_END_INTERRUPT_REGION
   } // loop over spectra
-  PARALLEL_CHECK_INTERUPT_REGION
+  PARALLEL_CHECK_INTERRUPT_REGION
 
   if (failedDetectorCount != 0) {
     g_log.information() << "Unable to calculate sample-detector distance for " << failedDetectorCount
@@ -560,7 +560,7 @@ void ConvertUnits::reverse(const API::MatrixWorkspace_sptr &WS) {
     auto numberOfSpectra_i = static_cast<int>(numberOfSpectra);
     PARALLEL_FOR_IF(Kernel::threadSafe(*WS))
     for (int j = 0; j < numberOfSpectra_i; ++j) {
-      PARALLEL_START_INTERUPT_REGION
+      PARALLEL_START_INTERRUPT_REGION
       if (isInputEvents) {
         eventWS->getSpectrum(j).reverse();
       } else {
@@ -568,9 +568,9 @@ void ConvertUnits::reverse(const API::MatrixWorkspace_sptr &WS) {
         std::reverse(WS->mutableY(j).begin(), WS->mutableY(j).end());
         std::reverse(WS->mutableE(j).begin(), WS->mutableE(j).end());
       }
-      PARALLEL_END_INTERUPT_REGION
+      PARALLEL_END_INTERRUPT_REGION
     }
-    PARALLEL_CHECK_INTERUPT_REGION
+    PARALLEL_CHECK_INTERRUPT_REGION
   }
 }
 

@@ -5,10 +5,8 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 
-/********** PLEASE NOTE! THIS FILE WAS AUTO-GENERATED FROM CMAKE.
- * ***********************/
-/********** Source = kernel.cpp.in
- * *******************************************************/
+@AUTO_GENERATE_WARNING@
+/********** Source = kernel.cpp.in **********************************************************/
 
 #include <boost/python/def.hpp>
 #include <boost/python/docstring_options.hpp>
@@ -17,10 +15,10 @@
 #include <Poco/Instantiator.h>
 #include <Poco/LoggingFactory.h>
 
-#include "MantidKernel/MantidVersion.h"
 #include "MantidPythonInterface/core/NDArray.h"
 #include "MantidPythonInterface/kernel/Registry/TypeRegistry.h"
 #include "MantidPythonInterface/kernel/kernel.h"
+#include "MantidPythonInterface/core/PythonLoggingChannel.h"
 #include "MantidPythonInterface/core/PythonStdoutChannel.h"
 
 // See
@@ -49,6 +47,9 @@ BOOST_PYTHON_MODULE(_kernel) {
   _import_array();
   // register the python logger with poco
   Poco::LoggingFactory::defaultFactory().registerChannelClass(
+    "PythonLoggingChannel",
+    new Poco::Instantiator<Poco::PythonLoggingChannel, Poco::Channel>);
+  Poco::LoggingFactory::defaultFactory().registerChannelClass(
     "PythonStdoutChannel",
     new Poco::Instantiator<Poco::PythonStdoutChannel, Poco::Channel>);
   /*
@@ -57,20 +58,6 @@ BOOST_PYTHON_MODULE(_kernel) {
       "PyBindStdoutChannel", new Poco::Instantiator<Poco::PyBindStdoutChannel, Poco::Channel>);
   */
 
-  def("version_str", &Mantid::Kernel::MantidVersion::version,
-      "Returns the Mantid version string in the form \"major.minor.patch\"");
-  def("release_notes_url", &Mantid::Kernel::MantidVersion::releaseNotes,
-      "Returns the url to the most applicable release notes");
-  def("revision", &Mantid::Kernel::MantidVersion::revision,
-      "Returns the abbreviated SHA-1 of the last commit");
-  def("revision_full", &Mantid::Kernel::MantidVersion::revisionFull,
-      "Returns the full SHA-1 of the last commit");
-  def("release_date", &Mantid::Kernel::MantidVersion::releaseDate,
-      "Returns the date of the last commit");
-  def("doi", &Mantid::Kernel::MantidVersion::doi,
-      "Returns the DOI for this release of Mantid");
-  def("paper_citation", &Mantid::Kernel::MantidVersion::paperCitation,
-      "Returns The citation for the Mantid paper");
 
   Mantid::PythonInterface::Registry::TypeRegistry::registerBuiltins();
 
