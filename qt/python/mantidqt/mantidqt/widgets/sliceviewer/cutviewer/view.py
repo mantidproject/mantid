@@ -104,6 +104,9 @@ class CutViewerView(QWidget):
                                              float((extents[1, irow] - extents[0, irow]) / nbins[irow]))
         elif icol == 5:
             # nbins changed - adjust step
+            if nbins[irow] < 1:
+                nbins[irow] = 1
+                self.table.item(irow, 5).setData(Qt.EditRole, int(nbins[irow]))  # nbins
             self.table.item(irow, 6).setData(Qt.EditRole, float((extents[1, irow] - extents[0, irow]) / nbins[irow]))
             if nbins[irow] == 1 and nbins[ivec] == 1:
                 nbins[ivec] = 100
@@ -115,6 +118,9 @@ class CutViewerView(QWidget):
         elif icol == 6:
             # step changed - adjust nbins
             step = float(self.table.item(irow, 6).text())
+            if step < 0:
+                step = abs(step)
+                self.table.item(irow, 6).setData(Qt.EditRole, step)
             nbins[irow] = (extents[1, irow] - extents[0, irow]) / step
             if nbins[irow] < 1:
                 nbins[irow] = 1
