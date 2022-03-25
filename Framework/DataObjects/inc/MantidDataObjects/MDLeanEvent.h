@@ -108,7 +108,7 @@ protected:
 #pragma pack(push, 1)
   union {
     coord_t center[nd];
-    MortonT index;
+    MortonT index = 0;
   };
 #pragma pack(pop)
 
