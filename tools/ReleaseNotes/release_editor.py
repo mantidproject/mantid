@@ -1,6 +1,6 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
-# Copyright &copy; 2021 ISIS Rutherford Appleton Laboratory UKRI,
+# Copyright &copy; 2022 ISIS Rutherford Appleton Laboratory UKRI,
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
@@ -45,17 +45,20 @@ def createFileName(fileName, pathDirectory, includeStatement):
     newFileName = fileName.replace(includeStatement, "")
     newFileName = newFileName.replace("\n", "")
     newFileName = pathDirectory + '/' + newFileName
-    return newFileName
+    return os.path.normpath(newFileName)
 
 
-def addReleaseNotesToMain(pathDirectory):
+def addReleaseNotesToMain(pathDirectory, listOfDirectories):
     for file in os.listdir(pathDirectory):
         if file.endswith(".rst"):
             with open(mainDirectory + '/' + file) as fileToEdit:
                 for line in fileToEdit:
                     if line.startswith(directive):
                         fileName = createFileName(line, pathDirectory, directive)
-                        releaseNotes = collateNotes(fileName)
+                        if fileName in listOfDirectories:
+                            releaseNotes = collateNotes(fileName)
+                        else:
+                            releaseNotes = ""
                         originalFile = mainDirectory + '/' + file
                         updateFile(originalFile, releaseNotes, line)
 
@@ -67,7 +70,7 @@ def getReleaseNoteDirectories(path, directoryList):
 
     # add dir to directorylist if it contains .rst files
     if len([f for f in os.listdir(path) if f.endswith('.rst')]) > 0:
-        directoryList.append(path)
+        directoryList.append(os.path.normpath(path))
 
     for d in os.listdir(path):
         new_path = os.path.join(path, d)
@@ -115,9 +118,9 @@ if __name__ == '__main__':
     args = parser.parse_args()
 
     args.release = fixReleaseName(args.release)
-    mainDirectory = createFileLocation(args.release)
+    mainDirectory = os.path.normpath(createFileLocation(args.release))
     directive = ".. amalgamate:: "
     directoriesUsed = checkContainsReleaseNote(mainDirectory)
 
-    addReleaseNotesToMain(mainDirectory)
+    addReleaseNotesToMain(mainDirectory, directoriesUsed)
     moveFiles(directoriesUsed)
