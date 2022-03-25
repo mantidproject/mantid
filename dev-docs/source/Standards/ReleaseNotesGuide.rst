@@ -104,7 +104,7 @@ This is the basic directory structure that is available to you for release notes
 	  + New features
 	  + Bugfixes
 
-  - Powder Diffraction (Sub-heading)
+  - Single Crystal Diffraction (Sub-heading)
 
 	  + New features
 	  + Bugfixes

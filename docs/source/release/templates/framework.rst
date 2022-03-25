@@ -52,9 +52,6 @@ Bugfixes
 .. amalgamate:: Framework/Python/Bugfixes
 
 
-Installation
-------------
-
 MantidWorkbench
 ---------------
 
