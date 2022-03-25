@@ -1,0 +1,2 @@
+- New feature: `FitPropertyBrowser` has been extended to allow for Function Attribute Validators.
+  This allows the value of attributes to be restricted in numerous ways such as being bounded by a numeric min/max value or to be selected from a list of values using a drop box.
