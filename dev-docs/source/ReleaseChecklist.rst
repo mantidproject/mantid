@@ -138,7 +138,18 @@ language, layout, and collecting images.
 Wednesday, 2 weeks & 3 days
 ---------------------------
 
-*  Create issues for people to neaten up the release notes and add images etc.
+*  Switch to manual handling of release notes by running the release_editor.py script using the
+   `release editor helper tool
+   <https://github.com/mantidproject/mantid/blob/main/tools/ReleaseNotes/release_editor.py>`_
+   and open a pull request to put them on ``release``. The script copies all of separate release notes under the correct heading of their upper level file, e.g. framework.rst, and moves
+   the original release notes into a 'Used' folder. This makes it easier for the Release Editor to see which notes have been copied over and which haven't and prevents losing notes or merge conflicts.
+
+.. code-block:: bash
+
+    python release_editor.py --release 6.4.0
+
+*  Neaten up the release notes and add images etc.
+*  Copy over new release notes into main files and move separate release notes into 'Used' folder when done to avoid confusion.
 *  Ensure an image for the release is found to highlight the main changes for this
    release. This can be a collage of images if there is not a big 'headline' feature
    or change.
@@ -147,6 +158,11 @@ Tuesday, 4 days
 ---------------
 
 *  Review the complete set of release notes to make sure there are no glaring mistakes.
+
+After Release
+-------------
+
+* Remove all separate release note files and sub-file structure to leave just the upper level release notes e.g. diffraction.rst, index.rst, framework.rst etc.
 
 .. _release-manager-checklist:
 
