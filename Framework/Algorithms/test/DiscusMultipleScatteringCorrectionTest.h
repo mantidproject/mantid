@@ -280,7 +280,7 @@ public:
       const double analyticResult1 = calculateFlatPlateAnalyticalResult(xPoints[0], mat, twoTheta, THICKNESS);
       const double analyticResult2 = calculateFlatPlateAnalyticalResult(xPoints[2], mat, twoTheta, THICKNESS);
       const auto &singleScatterY = singleScatterResult->y(SPECTRUMINDEXTOTEST);
-      const double delta(1e-05);
+      const double delta(2e-05);
       TS_ASSERT_DELTA(singleScatterY[0], analyticResult1, delta);
       TS_ASSERT_DELTA(singleScatterY[2], analyticResult2, delta);
       // check interpolated point is somewhere in between
