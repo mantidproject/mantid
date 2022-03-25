@@ -177,7 +177,6 @@ void PolarizationAngleCorrectionMD::applyPolarizationAngleCorrection(
           for (auto i = 0u; i < nd; ++i) {
             qsample.emplace_back(it->getCenter(i));
           }
-          // std::vector<double> qsample = {it->getCenter(0), it->getCenter(1), it->getCenter(2)};
           std::vector<double> qlab = mRotationMatrixMap[it->getExpInfoIndex()] * qsample;
           qx = qlab[0];
           qz = qlab[2];
