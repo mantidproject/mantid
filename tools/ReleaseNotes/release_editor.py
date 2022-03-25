@@ -48,17 +48,18 @@ def createFileName(fileName, pathDirectory, includeStatement):
     return os.path.normpath(newFileName)
 
 
-def addReleaseNotesToMain(pathDirectory, listOfDirectories):
+def addReleaseNotesToMain(pathDirectory):
+    # iterates through files in a directory
     for file in os.listdir(pathDirectory):
+        # only copy from .rst files
         if file.endswith(".rst"):
             with open(mainDirectory + '/' + file) as fileToEdit:
+                # iterate through each line in the upper level release note file e.g. diffraction.rst
                 for line in fileToEdit:
+                    # finds the amalgamate directive to replace
                     if line.startswith(directive):
                         fileName = createFileName(line, pathDirectory, directive)
-                        if fileName in listOfDirectories:
-                            releaseNotes = collateNotes(fileName)
-                        else:
-                            releaseNotes = ""
+                        releaseNotes = collateNotes(fileName)
                         originalFile = mainDirectory + '/' + file
                         updateFile(originalFile, releaseNotes, line)
 
@@ -123,5 +124,5 @@ if __name__ == '__main__':
     directive = ".. amalgamate:: "
     directoriesUsed = checkContainsReleaseNote(mainDirectory)
 
-    addReleaseNotesToMain(mainDirectory, directoriesUsed)
+    addReleaseNotesToMain(mainDirectory)
     moveFiles(directoriesUsed)
