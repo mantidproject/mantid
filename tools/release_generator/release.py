@@ -105,11 +105,27 @@ TECH_DOCS = ['framework.rst', 'mantidworkbench.rst', 'diffraction.rst', 'direct_
 MANTID_DOI = '`doi: 10.5286/SOFTWARE/MANTID{version_maj_min} <https://dx.doi.org/10.5286/SOFTWARE/' \
              'MANTID{version_maj_min}>`_'
 
+#################################################################################
+# Lists to help create the subfolders
+level1 = ['/Diffraction', '/Direct_Geometry', '/Framework', '/Muon']
+#For upper level folders that will require Bugfixes, Improvements and New features as sub directories
+level1Upper = ['/Workbench', '/Reflectometry', '/SANS', '/Indirect']
+
+diffraction = ['/Powder', '/Single_Crystal', '/Engineering']
+framework = ['/Algorithms', '/Data_Objects', '/Fit_Functions', '/Python']
+workbench = ['/InstrumentViewer', '/SliceViewer']
+direct = ['/General', '/CrystalField', '/MSlice']
+indirect = ['/Algorithms']
+muon = ['/FDA', '/Muon_Analysis', '/MA_FDA', '/ALC', '/Elemental_Analysis', '/Algorithms']
+
+subfolders = ['/Bugfixes', '/New_features']
+muon_subfolders = ['/Bugfixes']
+#################################################################################
+
 
 def getTemplate(technique):
     # @param technique is the name of the page
     templateFilePath = os.path.abspath(os.path.join(getTemplateRoot(), technique))
-    print("The Template filepath is = ", templateFilePath)
     with open(templateFilePath) as f:
         content = f.read()
     return content
@@ -171,6 +187,44 @@ def addToReleaseList(release_root, version):
             handle.write(oldtext[i])
 
 
+def makeReleaseNoteDirectories(HigherLevel):
+    for directory in level1:
+        os.makedirs(HigherLevel+directory, exist_ok=True)
+    for directory in level1Upper:
+        os.makedirs(HigherLevel + directory, exist_ok=True)
+        makeReleaseNoteSubfolders(directory, HigherLevel)
+    makeSubDirectoriesFromList(diffraction, '/Diffraction', HigherLevel)
+    makeSubDirectoriesFromList(framework, '/Framework', HigherLevel)
+    makeSubDirectoriesFromList(workbench, '/Workbench', HigherLevel)
+    makeSubDirectoriesFromList(direct, '/Direct_Geometry', HigherLevel)
+    makeSubDirectoriesFromList(indirect, '/Indirect', HigherLevel)
+    makeSubDirectoriesFromList(muon, '/Muon', HigherLevel)
+
+
+def makeSubDirectoriesFromList(directoryList, upperDirectory, HigherLevel):
+    for directory in directoryList:
+        combinedDirectory = upperDirectory + directory
+        os.makedirs(HigherLevel + combinedDirectory, exist_ok=True)
+        makeReleaseNoteSubfolders(combinedDirectory, HigherLevel)
+
+
+def makeReleaseNoteSubfolders(directory, HigherLevel):
+    for folder in subfolders:
+        if 'Muon' in directory:
+            for single_folder in muon_subfolders:
+                os.makedirs(HigherLevel + directory + single_folder, exist_ok=True)
+        else:
+            os.makedirs(HigherLevel + directory + folder, exist_ok=True)
+            makeGitkeep(folder, directory, HigherLevel)
+
+
+def makeGitkeep(folder, directory, HigherLevel):
+    filename = '.gitkeep'
+    fullPath = HigherLevel + directory + folder
+    if not os.listdir(fullPath):
+        open(fullPath + '/' + filename, 'a').close()
+
+
 if __name__ == '__main__':
     from argparse import ArgumentParser
     parser = ArgumentParser(description="Generate generic release pages")
@@ -222,3 +276,5 @@ if __name__ == '__main__':
         with open(filename, 'w') as handle:
             handle.write(contents)
             handle.write(release_link)
+
+    makeReleaseNoteDirectories(release_root)
