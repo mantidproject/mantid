@@ -30,7 +30,13 @@ class CutViewerView(QWidget):
         self.table.cellChanged.connect(self.on_cell_changed)
         self.hide()  # hide initially as visibility is toggled
 
+    def show(self):
+        super().show()
+        if len(self.figure.axes[0].tracked_workspaces) == 0:
+            self.send_bin_params()  # make initial cut
+
     def reset_table_data(self):
+        self.table.blockSignals(True)
         # write proj matrix to table
         proj_matrix = self._sliceinfo_provider.get_proj_matrix().T  # .T so now each basis vector is a row as in table
         dims = self._sliceinfo_provider.get_dimensions()
@@ -60,6 +66,8 @@ class CutViewerView(QWidget):
         self.table.item(2, 3).setData(Qt.EditRole, float(slicept - bin_params[-1]/2))  # start
         self.table.item(2, 4).setData(Qt.EditRole, float(slicept + bin_params[-1]/2))  # stop
         self.table.item(2, 6).setData(Qt.EditRole, float(bin_params[-1]))  # step (i.e. width)
+        self.table.blockSignals(False)
+        self.send_bin_params()
 
     def update_slicepoint(self):
         dims = self._sliceinfo_provider.get_dimensions()
@@ -135,10 +143,10 @@ class CutViewerView(QWidget):
 
     def on_cell_changed(self, irow, icol):
         self.validate_table(irow, icol)
-        vectors, extents, nbins = self.read_bin_params_from_table()
-        self.send_bin_params(vectors, extents, nbins)
+        self.send_bin_params()
 
-    def send_bin_params(self, vectors, extents, nbins):
+    def send_bin_params(self):
+        vectors, extents, nbins = self.read_bin_params_from_table()
         if (extents[-1, :] - extents[0, :] > 0).all() and np.sum(nbins > 1) == 1 \
                 and not np.isclose(np.linalg.det(vectors), 0.0):
             self._sliceinfo_provider.perform_non_axis_aligned_cut(vectors, extents.flatten(order='F'), nbins)
