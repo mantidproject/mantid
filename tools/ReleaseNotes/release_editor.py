@@ -95,8 +95,9 @@ def collateNotes(path):
         if file.endswith(".rst"):
             filesScanned.append(file)
             with open(path + '/' + file) as f:
-                contents = f.read()
+                contents = f.read().rstrip()
                 combinedRst = combinedRst + "\n" + contents
+    combinedRst = combinedRst.strip() + "\n"
     return combinedRst
 
 
