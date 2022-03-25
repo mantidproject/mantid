@@ -72,9 +72,11 @@ class CutViewerView(QWidget):
         self.table.item(2, 6).setData(Qt.EditRole, float(bin_params[-1]))  # step (i.e. width)
 
     def plot_cut_ws(self, wsname):
-        self.figure.axes[0].clear()
-        self.figure.axes[0].errorbar(ADS.retrieve(wsname), wkspIndex=None, marker='o', capsize=2, color='k',
-                                     markersize=3)
+        if len(self.figure.axes[0].tracked_workspaces) == 0:
+            self.figure.axes[0].errorbar(ADS.retrieve(wsname), wkspIndex=None, marker='o', capsize=2, color='k',
+                                         markersize=3)
+        self.figure.axes[0].ignore_existing_data_limits = True
+        self.figure.axes[0].autoscale_view()
         self.figure.canvas.draw()
         self.figure.tight_layout()
 
