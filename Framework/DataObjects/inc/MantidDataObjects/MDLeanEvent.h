@@ -339,17 +339,15 @@ public:
     totalSignal = 0;
     totalErrSq = 0;
 
-    size_t index(0);
+    size_t dataIndex(0);
     for (const MDLeanEvent<nd> &event : events) {
-      float signal = event.signal;
-      float errorSquared = event.errorSquared;
-      data[index++] = static_cast<coord_t>(signal);
-      data[index++] = static_cast<coord_t>(errorSquared);
+      data[dataIndex++] = static_cast<coord_t>(event.signal);
+      data[dataIndex++] = static_cast<coord_t>(event.errorSquared);
       for (size_t d = 0; d < nd; d++)
-        data[index++] = event.center[d];
+        data[dataIndex++] = event.center[d];
       // Track the total signal
-      totalSignal += signal_t(signal);
-      totalErrSq += signal_t(errorSquared);
+      totalSignal += signal_t(event.signal);
+      totalErrSq += signal_t(event.errorSquared);
     }
   }
 
