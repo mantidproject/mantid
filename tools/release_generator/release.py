@@ -9,7 +9,7 @@ import os
 import sys
 
 DOCS = {
-    'index.rst':'''.. _v{version}:
+    'index.rst': '''.. _v{version}:
 
 ===========================
 Mantid {version} Release Notes
@@ -94,134 +94,35 @@ For a full list of all issues addressed during this release please see the `GitH
 .. _GitHub milestone: {milestone_link}
 
 .. _GitHub release page: https://github.com/mantidproject/mantid/releases/tag/v{version}
-''',
-    'framework.rst':'''=================
-Framework Changes
-=================
-
-.. contents:: Table of Contents
-   :local:
-
-.. warning:: **Developers:** Sort changes under appropriate heading
-    putting new features at the top of the section, followed by
-    improvements, followed by bug fixes.
-
-Concepts
---------
-
-Algorithms
-----------
-
-Data Objects
-------------
-
-Python
-------
-
-Installation
-------------
-
-MantidWorkbench
----------------
-
-See :doc:`mantidworkbench`.
-
-SliceViewer
------------
-
-Improvements
-############
-
-Bugfixes
-########
-''',
-    'mantidworkbench.rst':'''========================
-Mantid Workbench Changes
-========================
-
-.. contents:: Table of Contents
-   :local:
-
-New and Improved
-----------------
-
-Bugfixes
---------
 '''
     }
 
 ################################################################################
 
-TECH_DOCS = {
-    'diffraction.rst':('Diffraction Changes', '''
-.. warning:: **Developers:** Sort changes under appropriate heading
-    putting new features at the top of the section, followed by
-    improvements, followed by bug fixes.
+TECH_DOCS = ['framework.rst', 'mantidworkbench.rst', 'diffraction.rst', 'direct_geometry.rst', 'indirect_geometry.rst',
+             'muon.rst', 'sans.rst', 'reflectometry.rst']
 
-Powder Diffraction
-------------------
-
-Engineering Diffraction
------------------------
-
-Single Crystal Diffraction
---------------------------
-'''),
-    'direct_geometry.rst':('Direct Geometry Changes', '''
-.. warning:: **Developers:** Sort changes under appropriate heading
-    putting new features at the top of the section, followed by
-    improvements, followed by bug fixes.
-'''),
-    'indirect_geometry.rst':('Indirect Geometry Changes', '''
-.. warning:: **Developers:** Sort changes under appropriate heading
-    putting new features at the top of the section, followed by
-    improvements, followed by bug fixes.
-'''),
-    'muon.rst':('MuSR Changes', '''
-.. warning:: **Developers:** Sort changes under appropriate heading
-    putting new features at the top of the section, followed by
-    improvements, followed by bug fixes.
-'''),
-    'sans.rst':('SANS Changes', '''
-.. warning:: **Developers:** Sort changes under appropriate heading
-    putting new features at the top of the section, followed by
-    improvements, followed by bug fixes.
-'''),
-    'reflectometry.rst':('Reflectometry Changes', '''
-.. warning:: **Developers:** Sort changes under appropriate heading
-    putting new features at the top of the section, followed by
-    improvements, followed by bug fixes.
-''')
-    }
-
-TECH_HEAD = '''{divider}
-{technique}
-{divider}
-'''
-
-TECH_CONTENTS = '''
-.. contents:: Table of Contents
-   :local:
-'''
-
-MANTID_DOI = '`doi: 10.5286/SOFTWARE/MANTID{version_maj_min} <https://dx.doi.org/10.5286/SOFTWARE/MANTID{version_maj_min}>`_'
+MANTID_DOI = '`doi: 10.5286/SOFTWARE/MANTID{version_maj_min} <https://dx.doi.org/10.5286/SOFTWARE/' \
+             'MANTID{version_maj_min}>`_'
 
 
-def createTechniquePage(technique, body, components):
-    '''
-    @param technique is the name of the page
-    @param body is the contents of the page
-    @param components is list of component names in github to link to
-    '''
-    technique = technique.strip()
-    content = TECH_HEAD.format(divider=('=' * len(technique)), technique=technique)
-    content += TECH_CONTENTS + body
+def getTemplate(technique):
+    # @param technique is the name of the page
+    templateFilePath = os.path.abspath(os.path.join(getTemplateRoot(), technique))
+    print("The Template filepath is = ", templateFilePath)
+    with open(templateFilePath) as f:
+        content = f.read()
     return content
 
 
 def getReleaseRoot():
     script_dir = os.path.split(sys.argv[0])[0]
     return os.path.abspath(os.path.join(script_dir, '../../docs/source/release/'))
+
+
+def getTemplateRoot():
+    script_dir = os.path.split(sys.argv[0])[0]
+    return os.path.abspath(os.path.join(script_dir, '../../docs/source/release/templates/'))
 
 
 def fixReleaseName(name):
@@ -234,7 +135,7 @@ def fixReleaseName(name):
     except ValueError as e:
         raise RuntimeError('expected version number form: major.minor.patch', e)
     if len(version) == 3:
-        pass # perfect
+        pass  # perfect
     elif len(version) == 2:
         name += '.0'
     elif len(version) == 1:
@@ -312,11 +213,12 @@ if __name__ == '__main__':
             if 'index.rst' not in filename:
                 handle.write(release_link)
 
-    for filename in TECH_DOCS.keys():
-        name, contents = TECH_DOCS[filename]
+    for filename in TECH_DOCS:
+        name = filename.strip()
+        contents = getTemplate(name)
         contents = contents.format(sanitized_milestone=sanitized_milestone, version=args.release[1:])
         filename = os.path.join(release_root, filename)
         print('making', filename)
         with open(filename, 'w') as handle:
-            handle.write(createTechniquePage(name, contents, [1,2,3]))
+            handle.write(contents)
             handle.write(release_link)
