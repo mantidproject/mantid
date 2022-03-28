@@ -13,6 +13,7 @@
 
 #pragma once
 
+#include "MantidFrameworkTestHelpers/FallbackBoostOptionalIO.h"
 #include "MantidGeometry/Crystal/IPeak.h"
 #include "MantidGeometry/Crystal/PeakTransform.h"
 #include "MantidGeometry/Crystal/PeakTransformFactory.h"

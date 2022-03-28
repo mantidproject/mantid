@@ -129,8 +129,8 @@ private:
   double absor_sphere(const double twoth, const double wl, bool &muRTooLarge);
   void scale_init(const Geometry::Instrument_const_sptr &inst, const double L2, const double depth, double &pathlength,
                   const std::string &bankName);
-  void scale_exec(std::string &bankName, const double lambda, const double depth,
-                  const Geometry::Instrument_const_sptr &inst, const double pathlength, double value);
+  double scale_exec(std::string &bankName, const double lambda, const double depth,
+                    const Geometry::Instrument_const_sptr &inst, const double pathlength, double eventWeight);
 
   double m_smu;                       ///< linear scattering coefficient in 1/cm
   double m_amu;                       ///< linear absoprtion coefficient in 1/cm
