@@ -18,4 +18,4 @@ Please refer to the docs of the other two for proper useage and acceptable input
 .. categories::
 
 .. sourcelink::
-   :filename: IntegrateEllipsoidsV3
+   :filename: IntegrateEllipsoidsV2
