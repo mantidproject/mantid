@@ -13,6 +13,38 @@ Like all documentation, release notes are written in `reStructuredText <https://
 and processed using `Sphinx <http://www.sphinx-doc.org/en/master/>`__ along with
 `Sphinx bootstrap theme <https://pypi.python.org/pypi/sphinx-bootstrap-theme/>`__ and custom css. For the basics of how to format your release notes please see the :ref:`Documentation Guide For Devs <DocumentationGuideForDevs>` .
 
+When to add release notes
+-------------------------
+Release notes are an important part of communicating with users about the new features and bugfixes in the next release of Mantid. This means that any piece of work that impacts on user experience or that has been requested by users will normally require a release note.
+Examples of the type of work normally requiring notes:-
+
+- New GUIs, algorithms, buttons, menus, documentation etc.
+- Work that will require users to change their workflow
+- Under the hood work that will make a noticeable difference to users e.g. improving loading speed
+- Updating user documentation
+- Making changes at the request of users
+
+The following are examples of when release notes are not required:-
+
+- refactoring code in a way that does not alter the user experience
+- fixing compiler warnings
+- adding unit or system tests
+- updating developer documentation
+
+If in doubt check with your team lead/manager for guidance.
+
+
+How to write a release note
+---------------------------
+Release notes are intended for users and should be written with that audience in mind. Your note should contain enough information to convey the changes to a non-developer audience without containing lengthy details of exactly how the solution
+was implemented in the code base.
+
+Avoid writing essays. If your new feature/bugfix requires lengthy explanations for users you should consider whether you need to add or update other documentation. You can then summarise the work in a couple of sentences in the release note and include
+a link to the more detailed information. Also consider using images or a gif walkthrough (see https://docs.mantidproject.org/nightly/release/v6.2.0/indirect_geometry.html for example) to help convey the information.
+
+Developers are asked to check their spelling, punctuation and grammar.
+
+Always start your release note with ``-`` so that it will be formatted as a bullet point in the collated list, e.g. `` - A new release note.``.
 
 Adding release notes
 --------------------
@@ -71,14 +103,40 @@ Once all the directories are in place you can add your release note as a separat
 
 You can add sub-headings to a sub-heading if you would like (e.g. ``/Workbench/Algorithm/Fitting``) that is fine to do, so long as your new branch ends with the ``New_features`` and ``Bugfixes`` folders.
 
+Adding images to release notes
+------------------------------
+Images or gif walkthroughs can be an excellent way to convey information easily and clearly. To add an image first save your image as a ``.png`` or ``.gif`` file in the ``../docs/source/images/`` folder.
+In your release note add an empty line and then on a new line add the following sphinx directive
+
+.. code-block:: rest
+
+	.. image::  ../../images/filenameOfYourImage.png
+		    :align: center
+
+
+Note that the recommended alignment is center and the align command is on the second line of the code block in alignment with the ``../`` at the start of the image link.
+
+For the image to display correctly when collated please only link to ``../../images`` folder. This will mean that the individual release note will not look correct on building, however the upper level file will (see :ref:`Previewing release notes <ReleaseNotePreview>` below).
+
+If you would like to add a walkthrough ``.gif`` file then you need to use the ``.. figure::`` directive instead of ``.. image::``. Your file should be saved in the images folder also.
+If you are not sure how to create a walkthrough try using an application like `ScreenToGif <https://www.screentogif.com/>`__ .
+
+.. _ReleaseNotePreview:
+
 Previewing release notes
 ------------------------
 
-Currently the only  way you can preview release notes prior to them being merged in is as follows:-
+There are two ways you can preview release notes prior to them being merged in:-
 
-Via a Pull Request (PR): You can view the release note on Github and it will show it using basic .rst rendering. You cannot check all the features you might expect to see when the release note is merged in (e.g. you cannot
+1. A clean build of the docs folder. Delete the docs folder in your build folder and then rebuild the docs. **WARNING** - this may take some time. Once rebuilt open the upper level file you expect your release note to appear in e.g. ``framework.html``.
+This is a good way to test that images appear correctly and that links work.
+
+2. Via a Pull Request (PR): You can view the release note on Github and it will show it using basic .rst rendering. You cannot check all the features you might expect to see when the release note is merged in (e.g. you cannot
 verify links work) but it gives you an idea of how it might look.
 
+How to review release notes
+---------------------------
+Reviewers are encouraged to review release notes as diligently as reviewing the functionality and code in a pull request. If you struggle to understand the release note the chances are a user will too. Check for spelling and grammar mistakes.
 
 During release
 --------------
