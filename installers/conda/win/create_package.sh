@@ -1,4 +1,4 @@
-#!/bin/bash -ex
+#!/bin/bash -e
 
 # REQUIRES NSIS to be installed and on the path.
 # Construct a standalone windows MantidWorkbench NSIS package.
@@ -36,10 +36,10 @@ done
 shift $((OPTIND-1))
 
 # Define variables
-HERE="$(pwd)"
+THIS_SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 CONDA_ENV=_conda_env
-CONDA_ENV_PATH=$HERE/$CONDA_ENV
-COPY_DIR=$HERE/_package_build
+CONDA_ENV_PATH=$THIS_SCRIPT_DIR/$CONDA_ENV
+COPY_DIR=$THIS_SCRIPT_DIR/_package_build
 CONDA_EXE=mamba
 PACKAGE_NAME=$1
 
@@ -54,16 +54,17 @@ rm -rf $CONDA_ENV_PATH
 mkdir $COPY_DIR
 
 echo "Creating conda env from mantidworkbench and jq"
-"$CONDA_EXE" create --prefix $CONDA_ENV mantidworkbench m2w64-jq --copy -c $CONDA_CHANNEL -c conda-forge -y
+"$CONDA_EXE" create --prefix $CONDA_ENV_PATH mantidworkbench m2w64-jq --copy -c $CONDA_CHANNEL -c conda-forge -y
 echo "Conda env created"
 
 # Determine version information
 VERSION=$("$CONDA_EXE" list --prefix "$CONDA_ENV_PATH" '^mantid$' --json | $CONDA_ENV_PATH/Library/mingw-w64/bin/jq.exe --raw-output '.[0].version')
 echo "Version number: $version"
+VERSION=1
 
 # Remove jq
 echo "Removing jq from conda env"
-"$CONDA_EXE" remove --prefix $CONDA_ENV --yes m2w64-jq
+"$CONDA_EXE" remove --prefix $CONDA_ENV_PATH --yes m2w64-jq
 echo "jq removed from conda env"
 
 # Pip install quasielasticbayes so it can be packaged alongside workbench on windows
@@ -125,6 +126,9 @@ echo "Copy share files (includes mantid docs) to the package"
 cp $CONDA_ENV_PATH/Library/share/doc $COPY_DIR/share/ -r
 cp $CONDA_ENV_PATH/Library/share/eigen3 $COPY_DIR/share/ -r
 
+echo "Copy executable file and executable script into package"
+cp $THIS_SCRIPT_DIR/MantidWorkbench.exe $COPY_DIR/bin/ -f
+
 # Cleanup pdb files and remove them from bin
 echo "Performing some cleanup.... deleting files"
 rm -rf $COPY_DIR/bin/*.pdb
@@ -138,15 +142,25 @@ rm -rf $CONDA_ENV_PATH
 
 # Now package using NSIS
 echo "Edit the NSIS script"
-THIS_SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 NSIS_SCRIPT=$THIS_SCRIPT_DIR/project.nsi
 
 echo "Packaging package via NSIS"
-makensis $NSIS_SCRIPT /DVERSION=$VERSION /DPACKAGE_DIR=$COPY_DIR /DOUTFILE_NAME=$PACKAGE_NAME
-echo "Package packaged, find it here: $THIS_SCRIPT_DIR/$PACKAGE_NAME.exe"
+# Make windows-like paths because NSIS is weird
+COPY_DIR_DRIVE_LETTER="$(echo ${COPY_DIR:1:1} | tr [:lower:] [:upper:])"
+COPY_DIR_FLIPPED_SLASH=${COPY_DIR////\\}
+
+NSIS_PATH_DRIVE_LETTER="$(echo ${NSIS_SCRIPT:1:1} | tr [:lower:] [:upper:])"
+NSIS_PATH_FLIPPED_SLASH=${NSIS_SCRIPT////\\}
+
+WINDOWS_PATH_COPY_DIR="$COPY_DIR_DRIVE_LETTER:${COPY_DIR_FLIPPED_SLASH:2}"
+WINDOWS_PATH_NSIS_SCRIPT="$NSIS_PATH_DRIVE_LETTER:${NSIS_PATH_FLIPPED_SLASH:2}"
+
+echo makensis /DVERSION=$VERSION /DPACKAGE_DIR="$WINDOWS_PATH_COPY_DIR" /DOUTFILE_NAME=$PACKAGE_NAME "$WINDOWS_PATH_NSIS_SCRIPT"
+cmd.exe /C "START /wait "" makensis /V4 /DVERSION=$VERSION /DPACKAGE_DIR=\"$WINDOWS_PATH_COPY_DIR\" /DOUTFILE_NAME=$PACKAGE_NAME \"$WINDOWS_PATH_NSIS_SCRIPT\""
+echo "Package packaged, find it here: $THIS_SCRIPT_DIR/$PACKAGE_NAME"
 
 echo "Cleaning up left over files"
-rm $NSIS_SCRIPT
+rm -rf $CONDA_ENV_PATH
 rm -rf $COPY_DIR
 
 echo "Done"

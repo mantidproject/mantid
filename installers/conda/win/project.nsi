@@ -28,8 +28,15 @@ Section "-Core installation"
     # Set output path to the installation directory.
     SetOutPath "$INSTDIR"
 
-    # Put file there
+    # Put files there
     File /r "${PACKAGE_DIR}\*.*"
+
+    # Add MantidWorkbench-script.pyw file to the install directory
+    FileOpen $0 "$INSTDIR\bin\MantidWorkbench-script.pyw" w
+    FileWrite $0 "#!$INSTDIR\bin\pythonw.exe$\n"
+    FileWrite $0 "import workbench.app.main$\n"
+    FileWrite $0 "workbench.app.main.main()$\n"
+    FileClose $0
 
     # Store installation folder in registry
     WriteRegStr HKCU "Software\${PACKAGE_VENDOR}\${PACKAGE_NAME}" "" $INSTDIR
@@ -49,7 +56,6 @@ Section "-Core installation"
     # Create shortucts for startmenu
     CreateDirectory "$SMPROGRAMS\${START_MENU_FOLDER}"
     CreateShortCut "$SMPROGRAMS\${START_MENU_FOLDER}\Mantid Workbench.lnk" "$INSTDIR\bin\MantidWorkbench.exe"
-    CreateShortCut "$SMPROGRAMS\${START_MENU_FOLDER}\Mantid Workbench (Python).lnk" "$INSTDIR\bin\python.exe" "-m workbenc.app.main"
     CreateShortCut "$SMPROGRAMS\${START_MENU_FOLDER}\Mantid Notebook.lnk" "$INSTDIR\bin\mantidpython.bat" "notebook --notebook-dir=%userprofile%"
     CreateShortCut "$SMPROGRAMS\${START_MENU_FOLDER}\Uninstall.lnk" "$\"$INSTDIR\uninstall.exe$\""
 
