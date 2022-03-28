@@ -292,7 +292,7 @@ Monday, 3 weeks
 
 **Create Release Notes Skeleton**
 
-*  Create a skeleton set of release notes on ``main`` for the next version using the
+*  Create a skeleton set of release notes and subfolders on ``main`` for the next version using the
    `python helper tool
    <https://github.com/mantidproject/mantid/blob/main/tools/release_generator/release.py>`_
    and open a pull request to put them on ``main``. Make sure the
