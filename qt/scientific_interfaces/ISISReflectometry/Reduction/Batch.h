@@ -45,6 +45,10 @@ public:
   void resetSkippedItems();
   boost::optional<Item &> getItemWithOutputWorkspaceOrNone(std::string const &wsName);
 
+  void updateLookupIndex(Row &row);
+  void updateLookupIndexesOfGroup(Group &group);
+  void updateLookupIndexesOfTable();
+
 private:
   Experiment const &m_experiment;
   Instrument const &m_instrument;
