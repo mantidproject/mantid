@@ -201,3 +201,7 @@ rel/
 # in source installed conda
 mambaforge/
 miniconda3/
+
+# in source building of windows packages
+installers/conda/win/_conda_env
+installers/conda/win/_package_build
