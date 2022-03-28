@@ -84,8 +84,8 @@ class MemoryManager(QObject):
         Gets memory usage information and passes it to the view
         """
         if self.update_allowed:
-            mem_used_percent, mem_used, mem_avail = get_memory_info()
-            return mem_used_percent
+            memory_info = get_memory_info()
+            return memory_info.used_percent
 
     def cancel_memory_update(self):
         """
