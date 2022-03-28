@@ -9,6 +9,8 @@ import os
 import sys
 import shutil
 
+DIRECTIVE = ".. amalgamate:: "
+
 
 def getReleaseRoot():
     script_dir = os.path.split(sys.argv[0])[0]
@@ -57,8 +59,8 @@ def addReleaseNotesToMain(pathDirectory):
                 # iterate through each line in the upper level release note file e.g. diffraction.rst
                 for line in fileToEdit:
                     # finds the amalgamate directive to replace
-                    if line.startswith(directive):
-                        fileName = createFileName(line, pathDirectory, directive)
+                    if line.startswith(DIRECTIVE):
+                        fileName = createFileName(line, pathDirectory, DIRECTIVE)
                         releaseNotes = collateNotes(fileName)
                         originalFile = mainDirectory + '/' + file
                         updateFile(originalFile, releaseNotes, line)
@@ -121,7 +123,6 @@ if __name__ == '__main__':
 
     args.release = fixReleaseName(args.release)
     mainDirectory = os.path.normpath(createFileLocation(args.release))
-    directive = ".. amalgamate:: "
     directoriesUsed = checkContainsReleaseNote(mainDirectory)
 
     addReleaseNotesToMain(mainDirectory)
