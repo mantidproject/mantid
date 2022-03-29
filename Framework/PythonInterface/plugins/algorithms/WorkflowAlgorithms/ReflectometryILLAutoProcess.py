@@ -737,6 +737,9 @@ class ReflectometryILLAutoProcess(DataProcessorAlgorithm):
                                   format(mtd[outputWorkspaceName].spectrumInfo().l1()))
             self.log().accumulate('Final reflected foreground centre distance [m]: {0:.5f}\n'.
                                   format(mtd[outputWorkspaceName].spectrumInfo().l2(0)))
+            self.log().accumulate('Final source (mid chopper) to foreground centre distance [m]: {0:.5f}\n'.
+                                  format(mtd[outputWorkspaceName].spectrumInfo().l1()
+                                         +mtd[outputWorkspaceName].spectrumInfo().l2(0)))
 
     def polarization_correction(self, inputWorkspaceName, outputWorkspaceName):
         """Run the ReflectometryILLPolarizationCor."""
