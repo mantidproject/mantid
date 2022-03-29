@@ -12,7 +12,7 @@ class CutViewerView(QWidget):
     """Displays a table view of the PeaksWorkspace along with controls
     to interact with the peaks.
     """
-    def __init__(self, painter, sliceinfo_provider, parent=None):
+    def __init__(self, canvas, sliceinfo_provider, parent=None):
         """
         :param painter: An object responsible for drawing the representation of the cut
         :param sliceinfo_provider: An object responsible for providing access to current slice information
@@ -23,7 +23,10 @@ class CutViewerView(QWidget):
         self.table = None
         self.figure = None
         self.figure_layout = None
-        self._painter = painter
+        self.cut_rep = None
+        self.xvec = None
+        self.yvec = None
+        self.canvas = canvas
         self._sliceinfo_provider = sliceinfo_provider
         self._setup_ui()
         self._init_slice_table()
@@ -34,6 +37,13 @@ class CutViewerView(QWidget):
         super().show()
         if len(self.figure.axes[0].tracked_workspaces) == 0:
             self.send_bin_params()  # make initial cut
+        self.plot_line()
+
+    def hide(self):
+        super().hide()
+        if self.cut_rep is not None:
+            self.cut_rep.remove()
+            self.cut_rep = None
 
     def reset_table_data(self):
         self.table.blockSignals(True)
@@ -46,14 +56,20 @@ class CutViewerView(QWidget):
             self._write_vector_to_table(states[idim], proj_matrix[idim, :])
         # write bin params for cut along horizontal axis (default)
         bin_params = np.array(dims.get_bin_params())[states]  # nbins except last element which is integration width
-        lims = self._sliceinfo_provider.get_data_limits()  # (xlim, ylim, None)
+        datalims = self._sliceinfo_provider.get_data_limits()  # (xlim, ylim, None)
+        axlims = self._sliceinfo_provider.get_axes_limits()
         for irow in range(self.table.rowCount()-1):
-            start, stop = lims[irow]
+            start, stop = axlims[irow]
+            data_extent = datalims[irow][1]-datalims[irow][0]
             if irow == 0:
-                nbins = bin_params[irow]
+                padding_frac = 0.25
+                nbins = 2*padding_frac*bin_params[irow]*(stop-start)/data_extent
+                padding = padding_frac*(stop-start)
+                start = start + padding
+                stop = stop - padding
             else:
                 nbins = 1
-                step = (stop - start) / bin_params[1]
+                step = data_extent / bin_params[1]
                 cen = (stop + start) / 2
                 start, stop = cen-step, cen+step
             self.table.item(irow, 5).setData(Qt.EditRole, int(nbins))  # nbins
@@ -85,6 +101,12 @@ class CutViewerView(QWidget):
                                          markersize=3)
         self.figure.axes[0].ignore_existing_data_limits = True
         self.figure.axes[0].autoscale_view()
+
+        def match(artist):
+            return artist.__module__ == "matplotlib.text"
+
+        for textobj in self.figure.findobj(match=match):
+            textobj.set_fontsize(8)
         self.figure.canvas.draw()
         self.figure.tight_layout()
 
@@ -144,12 +166,74 @@ class CutViewerView(QWidget):
     def on_cell_changed(self, irow, icol):
         self.validate_table(irow, icol)
         self.send_bin_params()
+        self.plot_line()
 
     def send_bin_params(self):
         vectors, extents, nbins = self.read_bin_params_from_table()
         if (extents[-1, :] - extents[0, :] > 0).all() and np.sum(nbins > 1) == 1 \
                 and not np.isclose(np.linalg.det(vectors), 0.0):
             self._sliceinfo_provider.perform_non_axis_aligned_cut(vectors, extents.flatten(order='F'), nbins)
+
+    def plot_line(self):
+        # find vectors corresponding to x and y axes
+        proj_matrix = self._sliceinfo_provider.get_proj_matrix().T  # .T so now each basis vector is a row as in table
+        dims = self._sliceinfo_provider.get_dimensions()
+        states = dims.get_states()
+        self.xvec = proj_matrix[states.index(0), :]
+        self.xvec = self.xvec/np.sqrt(np.sum(self.xvec**2))
+        self.yvec = proj_matrix[states.index(1), :]
+        self.yvec = self.yvec / np.sqrt(np.sum(self.yvec ** 2))
+        # find x/y coord of start/end point of cut
+        vectors, extents, nbins = self.read_bin_params_from_table()
+        cens = np.mean(extents, axis=0)  # in u{1..3} basis
+        icut = np.where(nbins > 1)[0][0]  # index of x-axis
+        ivecs = list(range(len(vectors)))
+        ivecs.pop(icut)
+        zero_vec = np.zeros(vectors[0].shape) # position at  0 along cut axis
+        for ivec in ivecs:
+            zero_vec = zero_vec + cens[ivec]*vectors[ivec]
+        start = zero_vec + extents[0, icut] * vectors[icut, :]
+        end = zero_vec + extents[1, icut] * vectors[icut, :]
+        xmin = np.dot(start, self.xvec)
+        xmax = np.dot(end, self.xvec)
+        ymin = np.dot(start, self.yvec)
+        ymax = np.dot(end, self.yvec)
+        # get thickness of cut defined for unit vector perp to cut (so scale by magnitude of vector in the table)
+        iint = nbins[:-1].tolist().index(1)
+        thickness = (extents[1, iint]-extents[0, iint])*np.sqrt(np.sum(vectors[iint, :]**2))
+        if self.cut_rep is not None:
+            self.cut_rep.remove()
+        self.cut_rep = CutRepresentation(self, self.canvas, xmin, xmax, ymin, ymax, thickness)
+
+    def get_coords_from_cut_representation(self):
+        if self.cut_rep is None:
+            return
+        # get vectors in u{1..3} basis
+        xmin, xmax, ymin, ymax = self.cut_rep.get_start_end_points()
+        start = xmin*self.xvec + ymin*self.yvec
+        stop = xmax*self.xvec + ymax*self.yvec
+        u1 = stop - start
+        u1 = u1 / np.sqrt(np.sum(u1 ** 2))
+        u1_min, u1_max = np.dot(start, u1), np.dot(stop, u1)
+        # get integrated dim
+        vectors, _, _ = self.read_bin_params_from_table()
+        u2 = np.cross(u1, vectors[-1, :])
+        u2 = u2 / np.sqrt(np.sum(u2 ** 2))
+        u2_cen = np.dot(start, u2)
+        u2_step = self.cut_rep.thickness
+        self.table.blockSignals(True)
+        self._write_vector_to_table(0, u1)
+        self.table.item(0, 3).setData(Qt.EditRole, float(u1_min))
+        self.table.item(0, 4).setData(Qt.EditRole, float(u1_max))
+        self.table.item(0, 5).setData(Qt.EditRole, int(50))
+        self.table.item(1, 6).setData(Qt.EditRole, float((u1_max-u1_min)/50))
+        self._write_vector_to_table(1, u2)
+        self.table.item(1, 3).setData(Qt.EditRole, float(u2_cen - u2_step/2))
+        self.table.item(1, 4).setData(Qt.EditRole, float(u2_cen + u2_step/2))
+        self.table.item(1, 5).setData(Qt.EditRole, int(1))
+        self.table.item(1, 6).setData(Qt.EditRole, float(u2_step))
+        self.table.blockSignals(False)
+        self.send_bin_params()
 
     # private api
     def _setup_ui(self):
@@ -212,3 +296,118 @@ class CutViewerView(QWidget):
     def _write_vector_to_table(self, irow, vector):
         for icol in range(len(vector)):
             self.table.item(irow, icol).setData(Qt.EditRole, float(vector[icol]))
+
+
+class CutRepresentation:
+    def __init__(self, view, canvas, xmin, xmax, ymin, ymax, thickness):
+        self.view = view
+        self.canvas = canvas
+        self.ax = canvas.figure.axes[0]
+        self.thickness = thickness
+        self.start = self.ax.plot(xmin, ymin, 'ow', label='start')[0]  # , picker=True)
+        self.end = self.ax.plot(xmax, ymax, 'ow', label='end')[0]  # , picker=True)
+        self.line = None
+        self.mid = None
+        self.box = None
+        self.mid_box_top = None
+        self.mid_box_bot = None
+        self.current_artist = None
+        self.cid_release = self.canvas.mpl_connect('button_release_event', self.on_release)
+        self.cid_press = self.canvas.mpl_connect('button_press_event', self.on_press)
+        self.cid_motion = self.canvas.mpl_connect('motion_notify_event', self.on_motion)
+        self.draw()
+
+    def remove(self):
+        self.clear_lines(all_lines=True)
+        for cid in [self.cid_release, self.cid_press, self.cid_motion]:
+            self.canvas.mpl_disconnect(cid)
+
+    def draw(self):
+        self.draw_line()
+        self.draw_box()
+        self.canvas.draw()
+
+    def get_start_end_points(self):
+        xmin, xmax = self.start.get_xdata()[0], self.end.get_xdata()[0]
+        ymin, ymax = self.start.get_ydata()[0], self.end.get_ydata()[0]
+        return xmin, xmax, ymin, ymax
+
+    def get_mid_point(self):
+        xmin, xmax, ymin, ymax = self.get_start_end_points()
+        return 0.5 * (xmin + xmax), 0.5 * (ymin + ymax)
+
+    def get_perp_dir(self):
+        # vector perp to line
+        xmin, xmax, ymin, ymax = self.get_start_end_points()
+        u = np.array([xmax - xmin, ymax - ymin, 0])
+        w = np.cross(u, [0, 0, 1])[0:-1]
+        what = w / np.sqrt(np.sum(w ** 2))
+        return what
+
+    def draw_line(self):
+        xmin, xmax, ymin, ymax = self.get_start_end_points()
+        self.mid = self.ax.plot(np.mean([xmin, xmax]), np.mean([ymin, ymax]),
+                                label='mid', marker='o', color='w', markerfacecolor='w')[0]
+        self.line = self.ax.plot([xmin, xmax], [ymin, ymax], '-w')[0]
+
+    def draw_box(self):
+        xmin, xmax, ymin, ymax = self.get_start_end_points()
+        start = np.array([xmin, ymin])
+        end = np.array([xmax, ymax])
+        vec = self.get_perp_dir()
+        points = np.zeros((5, 2))
+        points[0, :] = start + self.thickness * vec / 2
+        points[1, :] = start - self.thickness * vec / 2
+        points[2, :] = end - self.thickness * vec / 2
+        points[3, :] = end + self.thickness * vec / 2
+        points[4, :] = points[0, :]  # close the loop
+        self.box = self.ax.plot(points[:, 0], points[:, 1], '--r')[0]
+        # plot mid points
+        mid = 0.5 * (start + end)
+        mid_top = mid + self.thickness * vec / 2
+        mid_bot = mid - self.thickness * vec / 2
+        self.mid_box_top = self.ax.plot(mid_top[0], mid_top[1], 'or', label='mid_box_top',
+                                        markerfacecolor='w')[0]
+        self.mid_box_bot = self.ax.plot(mid_bot[0], mid_bot[1], 'or', label='mid_box_bot',
+                                        markerfacecolor='w')[0]
+
+    def clear_lines(self, all_lines=False):
+        lines_to_clear = [self.mid, self.line, self.box, self.mid_box_top, self.mid_box_bot]
+        if all_lines:
+            lines_to_clear.extend([self.start, self.end])  # normally don't delete these as artist data kept updated
+        for line in lines_to_clear:
+            if line in self.ax.lines:
+                self.ax.lines.remove(line)
+
+    def on_press(self, event):
+        if event.inaxes == self.ax and self.current_artist is None:
+            x, y = event.xdata, event.ydata
+            dx = np.diff(self.ax.get_xlim())[0]
+            dy = np.diff(self.ax.get_ylim())[0]
+            for line in [self.start, self.end, self.mid, self.mid_box_top, self.mid_box_bot]:
+                if abs(x - line.get_xdata()[0]) < dx / 100 and abs(y - line.get_ydata()[0]) < dy / 100:
+                    self.current_artist = line
+                    break
+
+    def on_motion(self, event):
+        if event.inaxes == self.ax and self.current_artist is not None:
+            self.clear_lines()
+            if len(self.current_artist.get_xdata()) == 1:
+                if 'mid' in self.current_artist.get_label():
+                    x0, y0 = self.get_mid_point()
+                    dx = event.xdata - x0
+                    dy = event.ydata - y0
+                    if self.current_artist.get_label() == 'mid':
+                        for line in [self.start, self.end]:
+                            line.set_data([line.get_xdata()[0] + dx], [line.get_ydata()[0] + dy])
+                    else:
+                        vec = self.get_perp_dir()
+                        self.thickness = 2 * np.dot(vec, [dx, dy])
+                else:
+                    self.current_artist.set_data([event.xdata], [event.ydata])
+            self.draw()  # should draw artists rather than remove and re-plot
+
+    def on_release(self, event):
+        if event.inaxes == self.ax and self.current_artist is not None:
+            self.current_artist = None
+            self.view.get_coords_from_cut_representation()

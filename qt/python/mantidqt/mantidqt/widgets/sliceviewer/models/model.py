@@ -294,8 +294,8 @@ class SliceViewerModel(SliceViewerBaseModel):
         cen_vec = np.zeros(vectors[0].shape) # position at x = 0
         for ivec in ivecs:
             cen_vec = cen_vec + cens[ivec]*vectors[ivec]
-        proj_str = 'x in (' + '  '.join([f'{c}+{x}x' if abs(x) > 0 else f'{c}' for c, x in zip(cen_vec, vectors[ix])]) \
-                   + ')'
+        proj_str = 'x in (' + '  '.join([f'{np.round(c,2)}+{np.round(x,2)}x' if abs(x) > 0 else f'{np.round(c,2)}'
+                                        for c, x in zip(cen_vec, vectors[ix])]) + ')'
         proj_str.replace('+-', '-')
         for ivec, vec in enumerate(vectors):
             # calc length

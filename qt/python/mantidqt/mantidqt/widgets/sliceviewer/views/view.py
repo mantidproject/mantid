@@ -86,7 +86,7 @@ class SliceViewerView(QWidget, ObservingView):
     @property
     def non_axis_aligned_cut_view(self):
         if self._non_axis_aligned_cut_view is None:
-            self._non_axis_aligned_cut_view = CutViewerView(MplPainter(self.data_view), self.presenter)
+            self._non_axis_aligned_cut_view = CutViewerView(self.data_view.canvas, self.presenter)
             self._splitter.addWidget(self._non_axis_aligned_cut_view)
         return self._non_axis_aligned_cut_view
 
