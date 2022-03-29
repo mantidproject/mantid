@@ -291,8 +291,9 @@ class DrillSample(QObject):
         Args:
             msg (str): error message
         """
-        logger.error("Error while processing sample {0}: {1}"
-                     .format(self._index + 1, msg))
+        if msg:
+            logger.error("Error while processing sample {0}: {1}"
+                         .format(self._index + 1, msg))
         self._status = self.STATUS_ERROR
         self.statusChanged.emit()
 
