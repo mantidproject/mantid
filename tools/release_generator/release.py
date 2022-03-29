@@ -5,7 +5,9 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
+
 import os
+import pathlib
 import sys
 
 DOCS = {
@@ -107,38 +109,40 @@ MANTID_DOI = '`doi: 10.5286/SOFTWARE/MANTID{version_maj_min} <https://dx.doi.org
 
 #################################################################################
 # Lists to help create the subfolders
-level1 = ['/Diffraction', '/Direct_Geometry', '/Framework', '/Muon']
-#For upper level folders that will require Bugfixes, Improvements and New features as sub directories
-level1Upper = ['/Workbench', '/Reflectometry', '/SANS', '/Indirect']
+level1 = ['Diffraction', 'Direct_Geometry', 'Framework', 'Muon']
+# For upper level folders that will require Bugfixes, Improvements and New features as sub directories
+level1Upper = ['Workbench', 'Reflectometry', 'SANS', 'Indirect']
 
-diffraction = ['/Powder', '/Single_Crystal', '/Engineering']
-framework = ['/Algorithms', '/Data_Objects', '/Fit_Functions', '/Python']
-workbench = ['/InstrumentViewer', '/SliceViewer']
-direct = ['/General', '/CrystalField', '/MSlice']
-indirect = ['/Algorithms']
-muon = ['/FDA', '/Muon_Analysis', '/MA_FDA', '/ALC', '/Elemental_Analysis', '/Algorithms']
+diffraction = ['Powder', 'Single_Crystal', 'Engineering']
+framework = ['Algorithms', 'Data_Objects', 'Fit_Functions', 'Python']
+workbench = ['InstrumentViewer', 'SliceViewer']
+direct = ['General', 'CrystalField', 'MSlice']
+indirect = ['Algorithms']
+muon = ['FDA', 'Muon_Analysis', 'MA_FDA', 'ALC', 'Elemental_Analysis', 'Algorithms']
 
-subfolders = ['/Bugfixes', '/New_features']
-muon_subfolders = ['/Bugfixes']
+subfolders = ['Bugfixes', 'New_features']
+muon_subfolders = ['Bugfixes']
 #################################################################################
 
 
 def getTemplate(technique):
     # @param technique is the name of the page
-    templateFilePath = os.path.abspath(os.path.join(getTemplateRoot(), technique))
+    templateFilePath = getTemplateRoot() / technique
     with open(templateFilePath) as f:
         content = f.read()
     return content
 
 
-def getReleaseRoot():
-    script_dir = os.path.split(sys.argv[0])[0]
-    return os.path.abspath(os.path.join(script_dir, '../../docs/source/release/'))
+def getReleaseRoot() -> pathlib.Path:
+    program_path = pathlib.Path((sys.argv[0])[0])
+    release_path = program_path / '../../../docs/source/release/'
+    return release_path.resolve()
 
 
-def getTemplateRoot():
-    script_dir = os.path.split(sys.argv[0])[0]
-    return os.path.abspath(os.path.join(script_dir, '../../docs/source/release/templates/'))
+def getTemplateRoot() -> pathlib.Path:
+    program_path = pathlib.Path((sys.argv[0])[0])
+    template_path = program_path / '../../../docs/source/release/templates/'
+    return template_path.resolve()
 
 
 def fixReleaseName(name):
@@ -169,7 +173,7 @@ def toMilestoneName(version):
 
 
 def addToReleaseList(release_root, version):
-    filename = os.path.join(release_root, 'index.rst')
+    filename = release_root / 'index.rst'
 
     # read in the entire old version
     with open(filename, 'r') as handle:
@@ -189,40 +193,46 @@ def addToReleaseList(release_root, version):
 
 def makeReleaseNoteDirectories(HigherLevel):
     for directory in level1:
-        os.makedirs(HigherLevel+directory, exist_ok=True)
+        dirName = pathlib.Path.joinpath(HigherLevel, directory)
+        dirName.mkdir(parents=True, exist_ok=True)
     for directory in level1Upper:
-        os.makedirs(HigherLevel + directory, exist_ok=True)
+        dirName = pathlib.Path.joinpath(HigherLevel, directory)
+        dirName.mkdir(parents=True, exist_ok=True)
         makeReleaseNoteSubfolders(directory, HigherLevel)
-    makeSubDirectoriesFromList(diffraction, '/Diffraction', HigherLevel)
-    makeSubDirectoriesFromList(framework, '/Framework', HigherLevel)
-    makeSubDirectoriesFromList(workbench, '/Workbench', HigherLevel)
-    makeSubDirectoriesFromList(direct, '/Direct_Geometry', HigherLevel)
-    makeSubDirectoriesFromList(indirect, '/Indirect', HigherLevel)
-    makeSubDirectoriesFromList(muon, '/Muon', HigherLevel)
+    makeSubDirectoriesFromList(diffraction, 'Diffraction', HigherLevel)
+    makeSubDirectoriesFromList(framework, 'Framework', HigherLevel)
+    makeSubDirectoriesFromList(workbench, 'Workbench', HigherLevel)
+    makeSubDirectoriesFromList(direct, 'Direct_Geometry', HigherLevel)
+    makeSubDirectoriesFromList(indirect, 'Indirect', HigherLevel)
+    makeSubDirectoriesFromList(muon, 'Muon', HigherLevel)
 
 
 def makeSubDirectoriesFromList(directoryList, upperDirectory, HigherLevel):
     for directory in directoryList:
-        combinedDirectory = upperDirectory + directory
-        os.makedirs(HigherLevel + combinedDirectory, exist_ok=True)
+        combinedDirectory = HigherLevel / upperDirectory / directory
+        combinedDirectory.mkdir(parents=True, exist_ok=True)
         makeReleaseNoteSubfolders(combinedDirectory, HigherLevel)
 
 
 def makeReleaseNoteSubfolders(directory, HigherLevel):
+    directoryStr = str(directory)
     for folder in subfolders:
-        if 'Muon' in directory:
+        if 'Muon' in directoryStr:
             for single_folder in muon_subfolders:
-                os.makedirs(HigherLevel + directory + single_folder, exist_ok=True)
+                subfolderName = HigherLevel / directory / single_folder
+                subfolderName.mkdir(parents=True, exist_ok=True)
+                makeGitkeep(subfolderName)
         else:
-            os.makedirs(HigherLevel + directory + folder, exist_ok=True)
-            makeGitkeep(folder, directory, HigherLevel)
+            subfolderName = HigherLevel / directory / folder
+            subfolderName.mkdir(parents=True, exist_ok=True)
+            makeGitkeep(subfolderName)
 
 
-def makeGitkeep(folder, directory, HigherLevel):
+def makeGitkeep(subfolderName):
     filename = '.gitkeep'
-    fullPath = HigherLevel + directory + folder
-    if not os.listdir(fullPath):
-        open(fullPath + '/' + filename, 'a').close()
+    gitFile = subfolderName / filename
+    if not os.listdir(subfolderName):
+        open(gitFile, 'a').close()
 
 
 if __name__ == '__main__':
@@ -231,7 +241,7 @@ if __name__ == '__main__':
     parser.add_argument('--release', required=True)
     parser.add_argument('--milestone', required=False, default=None,
                         help="Formatted with html escapes already")
-    args=parser.parse_args()
+    args = parser.parse_args()
 
     # parse, repair, and create missing arguments
     args.release = fixReleaseName(args.release)
@@ -243,35 +253,32 @@ if __name__ == '__main__':
     print('     root:', release_root)
     # Encode the milestone to remove spaces for the GitHub filter URL
     sanitized_milestone = args.milestone.replace(' ', '+')
-    milestone_link ='https://github.com/mantidproject/mantid/pulls?utf8=%E2%9C%93&q=is%3Apr+' \
+    milestone_link = 'https://github.com/mantidproject/mantid/pulls?utf8=%E2%9C%93&q=is%3Apr+' \
         + f'milestone%3A%22{sanitized_milestone}%22+is%3Amerged'
     # add the new sub-site to the index
     addToReleaseList(release_root, args.release)
 
     # create all of the sub-area pages
-    release_root = os.path.join(release_root, args.release)
-    if not os.path.exists(release_root):
-        print('creating directory', release_root)
-        os.makedirs(release_root)
+    release_root = release_root / args.release
+    print('creating directory', release_root)
+    release_root.mkdir(parents=True, exist_ok=True)
     release_link = '\n:ref:`Release {0} <{1}>`'.format(args.release[1:], args.release)
 
     for filename in DOCS.keys():
-        version_maj_min=args.release[1:-2]
+        version_maj_min = args.release[1:-2]
         contents = DOCS[filename].format(milestone_link=milestone_link, version=args.release[1:],
                                          version_maj_min=version_maj_min,
                                          mantid_doi=MANTID_DOI.format(version_maj_min=version_maj_min))
-        filename = os.path.join(release_root, filename)
+        filename = release_root / filename
         print('making', filename)
         with open(filename, 'w') as handle:
             handle.write(contents)
-            if 'index.rst' not in filename:
-                handle.write(release_link)
 
     for filename in TECH_DOCS:
         name = filename.strip()
         contents = getTemplate(name)
         contents = contents.format(sanitized_milestone=sanitized_milestone, version=args.release[1:])
-        filename = os.path.join(release_root, filename)
+        filename = release_root / filename
         print('making', filename)
         with open(filename, 'w') as handle:
             handle.write(contents)
