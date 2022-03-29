@@ -333,6 +333,8 @@ class DrillPresenter:
         QDialog to get the file path from the user.
         """
         defaultSaveDirectory = config["defaultsave.directory"]
+        if not defaultSaveDirectory:
+            defaultSaveDirectory = "."
         filename = QFileDialog.getOpenFileName(self.view, 'Load rundex',
                                                defaultSaveDirectory,
                                                "Rundex (*.mrd);;All (*)")
@@ -365,6 +367,8 @@ class DrillPresenter:
         used.
         """
         defaultSaveDirectory = config["defaultsave.directory"]
+        if not defaultSaveDirectory:
+            defaultSaveDirectory = "."
         filename = QFileDialog.getSaveFileName(self.view, 'Save rundex',
                                                defaultSaveDirectory + '/*.mrd',
                                                "Rundex (*.mrd);;All (*)")
