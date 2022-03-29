@@ -246,7 +246,8 @@ class Project(AnalysisDataServiceObserver):
 
     def _load_file_dialog(self):
         return open_a_file_dialog(accept_mode=QFileDialog.AcceptOpen, file_mode=QFileDialog.ExistingFile,
-                                  file_filter="Project files ( *" + " *".join(self.valid_file_exts) + ")")
+                                  file_filter="Project files ( *" + " *".join(self.valid_file_exts) + ")",
+                                  directory=ConfigService["defaultsave.directory"])
 
     def offer_save(self, parent):
         """
