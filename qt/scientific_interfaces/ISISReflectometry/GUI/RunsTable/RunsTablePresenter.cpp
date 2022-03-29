@@ -468,6 +468,7 @@ void RunsTablePresenter::updateRowField(MantidWidgets::Batch::RowLocation const 
   updateRow(m_model.mutableReductionJobs(), groupIndex, rowIndex, rowValidationResult.validElseNone());
   if (rowValidationResult.isValid()) {
     showAllCellsOnRowAsValid(itemIndex);
+    m_mainPresenter->notifyRowContentChanged(m_model.mutableReductionJobs().mutableGroups()[0].mutableRows()[0].get());
   } else {
     showCellsAsInvalidInView(itemIndex, rowValidationResult.assertError());
   }

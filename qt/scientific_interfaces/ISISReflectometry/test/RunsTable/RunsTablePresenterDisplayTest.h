@@ -245,6 +245,16 @@ public:
     verifyAndClearExpectations();
   }
 
+  void testNotifyBatchRowCellChanged() {
+    auto reductionJobs = twoGroupsWithMixedRowsModel();
+    auto presenter = makePresenter(m_view, reductionJobs);
+    auto const rowLocation = location(0, 0);
+    ON_CALL(m_jobs, cellAt(rowLocation, 0)).WillByDefault(Return(Cell("")));
+    EXPECT_CALL(m_mainPresenter, notifyRowContentChanged(_)).Times(1);
+    presenter.notifyCellTextChanged(rowLocation, 0, "", "");
+    verifyAndClearExpectations();
+  }
+
 private:
   ReductionJobs oneGroupWithTwoRowsWithSrcAndDestTransRuns() {
     auto reductionJobs = ReductionJobs();
