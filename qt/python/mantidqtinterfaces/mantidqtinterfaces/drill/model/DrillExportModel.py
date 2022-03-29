@@ -161,7 +161,8 @@ class DrillExportModel:
         Triggered when the export finished with success.
 
         Args:
-            name (str): the task name
+            wsName (str): name of the exported workspace
+            filename (str): name of the file
         """
         if wsName not in self._successExports:
             self._successExports[wsName] = set()
@@ -178,7 +179,8 @@ class DrillExportModel:
         Triggered when the export failed.
 
         Args:
-            name (str): the task name
+            wsName (str): name of the exported workspace
+            filename (str): name of the file
             msg (str): error msg
         """
         logger.error("Error while exporting workspace {}.".format(wsName))
