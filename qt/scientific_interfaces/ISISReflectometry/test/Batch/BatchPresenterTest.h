@@ -521,6 +521,13 @@ public:
     presenter->notifyResumeAutoreductionRequested();
   }
 
+  void testAllIndexesUpdatedWhenSettingsChanged() {
+    auto mock = makeMockModel();
+    EXPECT_CALL(*mock, updateLookupIndexesOfTable()).Times(1);
+    auto presenter = makePresenter(std::move(mock));
+    presenter->notifySettingsChanged();
+  }
+
 private:
   NiceMock<MockBatchView> m_view;
   NiceMock<MockBatchJobManager> *m_jobManager;
@@ -563,7 +570,7 @@ private:
     return std::make_unique<Batch>(m_experiment, m_instrument, m_runsTable, m_slicing);
   }
 
-  std::unique_ptr<IBatch> makeMockModel() { return std::make_unique<MockBatch>(); }
+  std::unique_ptr<MockBatch> makeMockModel() { return std::make_unique<MockBatch>(); }
 
   std::unique_ptr<BatchPresenterFriend> makePresenter(std::unique_ptr<IBatch> batchModel) {
     // Create pointers to the child presenters and pass them into the batch

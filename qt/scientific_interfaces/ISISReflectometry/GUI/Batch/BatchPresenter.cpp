@@ -281,6 +281,7 @@ std::string BatchPresenter::instrumentName() const { return m_mainPresenter->ins
 
 void BatchPresenter::settingsChanged() {
   setBatchUnsaved();
+  m_model->updateLookupIndexesOfTable();
   m_runsPresenter->settingsChanged();
 }
 
