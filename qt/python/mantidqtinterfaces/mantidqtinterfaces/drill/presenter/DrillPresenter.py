@@ -332,7 +332,9 @@ class DrillPresenter:
         Triggered when the user want to load a file. This methods start a
         QDialog to get the file path from the user.
         """
-        filename = QFileDialog.getOpenFileName(self.view, 'Load rundex', '.',
+        defaultSaveDirectory = config["defaultsave.directory"]
+        filename = QFileDialog.getOpenFileName(self.view, 'Load rundex',
+                                               defaultSaveDirectory,
                                                "Rundex (*.mrd);;All (*)")
         if not filename[0]:
             return
@@ -362,8 +364,9 @@ class DrillPresenter:
         will open a dialog to select the file even if one has previously been
         used.
         """
+        defaultSaveDirectory = config["defaultsave.directory"]
         filename = QFileDialog.getSaveFileName(self.view, 'Save rundex',
-                                               './*.mrd',
+                                               defaultSaveDirectory + '/*.mrd',
                                                "Rundex (*.mrd);;All (*)")
         if not filename[0]:
             return
