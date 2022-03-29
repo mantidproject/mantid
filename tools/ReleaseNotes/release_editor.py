@@ -6,15 +6,17 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 
 import os
+import pathlib
 import sys
-import shutil
+
 
 DIRECTIVE = ".. amalgamate:: "
 
 
-def getReleaseRoot():
-    script_dir = os.path.split(sys.argv[0])[0]
-    return os.path.abspath(os.path.join(script_dir, '../../docs/source/release/'))
+def getReleaseRoot() -> pathlib.Path:
+    program_path = pathlib.Path((sys.argv[0])[0])
+    script_dir = program_path / '../../../docs/source/release/'
+    return script_dir.resolve()
 
 
 def fixReleaseName(name):
@@ -23,47 +25,43 @@ def fixReleaseName(name):
     return name
 
 
-def createFileLocation(releaseNo):
-    release_root = getReleaseRoot()
-    release_root = release_root + '/' + releaseNo
-    return release_root
+def createFileLocation(releaseNo) -> pathlib.Path:
+    return getReleaseRoot() / releaseNo
 
 
 def updateFile(originalFile, replaceText, textToReplace):
     # opens the upper level release note e.g. diffraction.rst
-    mainRST = open(originalFile, 'r')
-    rstToRead = mainRST.read()
-    mainRST.close()
+    with open(originalFile, mode='r') as mainRST:
+        rstToRead = mainRST.read()
+        mainRST.close()
 
     # replaces the amalgamate directive with the notes compiled for that heading
     newdata = rstToRead.replace(textToReplace, replaceText)
 
-    mainRST = open(originalFile, 'w')
-    mainRST.write(newdata)
-    mainRST.close()
+    with open(originalFile, mode='w') as mainRST:
+        mainRST.write(newdata)
+        mainRST.close()
 
 
-def createFileName(fileName, pathDirectory, includeStatement):
+def createFileName(fileName, pathDirectory, includeStatement) -> pathlib.Path:
     newFileName = fileName.replace(includeStatement, "")
     newFileName = newFileName.replace("\n", "")
-    newFileName = pathDirectory + '/' + newFileName
-    return os.path.normpath(newFileName)
+    newFileName = pathDirectory / newFileName
+    return newFileName
 
 
 def addReleaseNotesToMain(pathDirectory):
     # iterates through files in a directory
-    for file in os.listdir(pathDirectory):
-        # only copy from .rst files
-        if file.endswith(".rst"):
-            with open(mainDirectory + '/' + file) as fileToEdit:
-                # iterate through each line in the upper level release note file e.g. diffraction.rst
-                for line in fileToEdit:
-                    # finds the amalgamate directive to replace
-                    if line.startswith(DIRECTIVE):
-                        fileName = createFileName(line, pathDirectory, DIRECTIVE)
-                        releaseNotes = collateNotes(fileName)
-                        originalFile = mainDirectory + '/' + file
-                        updateFile(originalFile, releaseNotes, line)
+    for file in pathDirectory.glob('*.rst'):
+        with open(file) as fileToEdit:
+            # iterate through each line in the upper level release note file e.g. diffraction.rst
+            for line in fileToEdit:
+                # finds the amalgamate directive to replace
+                if line.startswith(DIRECTIVE):
+                    fileName = createFileName(line, pathDirectory, DIRECTIVE)
+                    releaseNotes = collateNotes(fileName)
+                    originalFile = mainDirectory / file
+                    updateFile(originalFile, releaseNotes, line)
 
 
 def getReleaseNoteDirectories(path, directoryList):
@@ -73,7 +71,8 @@ def getReleaseNoteDirectories(path, directoryList):
 
     # add dir to directorylist if it contains .rst files
     if len([f for f in os.listdir(path) if f.endswith('.rst')]) > 0:
-        directoryList.append(os.path.normpath(path))
+        path = pathlib.Path(path)
+        directoryList.append(path)
 
     for d in os.listdir(path):
         new_path = os.path.join(path, d)
@@ -86,7 +85,7 @@ def getReleaseNoteDirectories(path, directoryList):
 def checkContainsReleaseNote(path):
     releaseNoteList = []
     getReleaseNoteDirectories(path, releaseNoteList)
-    releaseNoteList.remove(path)
+    releaseNoteList.pop(0)
     return releaseNoteList
 
 
@@ -94,12 +93,11 @@ def checkContainsReleaseNote(path):
 def collateNotes(path):
     combinedRst = ""
     filesScanned = []
-    for file in os.listdir(path):
-        if file.endswith(".rst"):
-            filesScanned.append(file)
-            with open(path + '/' + file) as f:
-                contents = f.read().rstrip()
-                combinedRst = combinedRst + "\n" + contents
+    for file in path.glob('*.rst'):
+        filesScanned.append(file)
+        with open(file) as f:
+            contents = f.read().rstrip()
+            combinedRst = combinedRst + "\n" + contents
     combinedRst = combinedRst.strip() + "\n"
     return combinedRst
 
@@ -107,12 +105,11 @@ def collateNotes(path):
 # Moves the release note files that have been copied to top level file into 'Used' folders
 def moveFiles(listOfDirectories):
     for path in listOfDirectories:
-        os.makedirs(path + '/' + 'Used')
-        for file in os.listdir(path):
-            if file.endswith(".rst"):
-                currentFileLocation = path + '/' + file
-                newFileLocation = path + '/Used/' + file
-                shutil.move(currentFileLocation, newFileLocation)
+        usedDir = path / 'Used'
+        usedDir.mkdir(parents=True, exist_ok=True)
+        for file in path.glob('*.rst'):
+            used_folder = 'Used'
+            file.rename(path / used_folder / file.name)
 
 
 if __name__ == '__main__':
@@ -122,7 +119,7 @@ if __name__ == '__main__':
     args = parser.parse_args()
 
     args.release = fixReleaseName(args.release)
-    mainDirectory = os.path.normpath(createFileLocation(args.release))
+    mainDirectory = createFileLocation(args.release)
     directoriesUsed = checkContainsReleaseNote(mainDirectory)
 
     addReleaseNotesToMain(mainDirectory)
