@@ -34,5 +34,8 @@ public:
   MOCK_METHOD(void, resetSkippedItems, (), (override));
   MOCK_METHOD(void, resetState, (), (override));
   MOCK_METHOD(std::vector<MantidWidgets::Batch::RowLocation>, selectedRowLocations, (), (const, override));
+  MOCK_METHOD(void, updateLookupIndex, (Row &), (override));
+  MOCK_METHOD(void, updateLookupIndexesOfGroup, (Group &), (override));
+  MOCK_METHOD(void, updateLookupIndexesOfTable, (), (override));
 };
 } // namespace MantidQt::CustomInterfaces::ISISReflectometry

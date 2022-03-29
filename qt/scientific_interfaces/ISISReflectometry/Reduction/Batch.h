@@ -49,9 +49,9 @@ public:
   void resetSkippedItems() override;
   boost::optional<Item &> getItemWithOutputWorkspaceOrNone(std::string const &wsName) override;
 
-  void updateLookupIndex(Row &row);
-  void updateLookupIndexesOfGroup(Group &group);
-  void updateLookupIndexesOfTable();
+  void updateLookupIndex(Row &row) override;
+  void updateLookupIndexesOfGroup(Group &group) override;
+  void updateLookupIndexesOfTable() override;
 
 private:
   Experiment const &m_experiment;

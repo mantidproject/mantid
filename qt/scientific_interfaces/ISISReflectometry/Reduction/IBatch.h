@@ -44,5 +44,8 @@ public:
   virtual void resetSkippedItems() = 0;
   virtual void resetState() = 0;
   virtual std::vector<MantidWidgets::Batch::RowLocation> selectedRowLocations() const = 0;
+  virtual void updateLookupIndex(Row &row) = 0;
+  virtual void updateLookupIndexesOfGroup(Group &group) = 0;
+  virtual void updateLookupIndexesOfTable() = 0;
 };
 } // namespace MantidQt::CustomInterfaces::ISISReflectometry
