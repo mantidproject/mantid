@@ -5,18 +5,21 @@
 # Unicode only defaults to true in NSIS 3.07 onwards.
 Unicode True
 
-!define START_MENU_FOLDER "Mantid"
+!define PACKAGE_SUFFIX "Test"
+!define PACKAGE_NAME "mantid${PACKAGE_SUFFIX}"
+!define START_MENU_FOLDER "Mantid${PACKAGE_SUFFIX}"
+!define MANTIDWORKBENCH_LINK_NAME "Mantid Workbench ${PACKAGE_SUFFIX}.lnk"
+!define MANTIDNOTEBOOK_LINK_NAME "Mantid Notebook ${PACKAGE_SUFFIX}.lnk"
 
 # The name of the installer
-Name "Mantid Workbench"
+Name "Mantid Workbench ${PACKAGE_SUFFIX}"
 
-!define PACKAGE_NAME "mantidTest"
 !define PACKAGE_VENDOR "ISIS Rutherford Appleton Laboratory UKRI, NScD Oak Ridge National Laboratory, European Spallation Source and Institut Laue - Langevin"
 # The file to write
 OutFile "${OUTFILE_NAME}"
 
 # The default installation directory
-InstallDir "C:\MantidInstall"
+InstallDir "C:\Mantid${PACKAGE_SUFFIX}Install"
 
 # The text to prompt the user to enter a directory
 DirText "This will install mantid and its components"
@@ -46,18 +49,22 @@ Section "-Core installation"
 
 	# Write registry entries for uninstaller for "Add/Remove programs" information
 	WriteRegStr HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\${PACKAGE_NAME}" "DisplayName" "${PACKAGE_NAME}"
-	WriteRegStr HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\${PACKAGE_NAME}" "UninstallString" "$\"$INSTDIR\uninstall.exe$\""
+	WriteRegStr HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\${PACKAGE_NAME}" "UninstallString" "$\"$INSTDIR\Uninstall.exe$\""
 	WriteRegStr HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\${PACKAGE_NAME}" "DisplayVersion" "${VERSION}"
 	WriteRegStr HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\${PACKAGE_NAME}" "NoRepair" 1
 	WriteRegStr HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\${PACKAGE_NAME}" "NoModify" 1
-	WriteRegStr HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\${PACKAGE_NAME}" "DisplayIcon" "$\"$INSTDIR\uninstall.exe$\""
+	WriteRegStr HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\${PACKAGE_NAME}" "DisplayIcon" "$\"$INSTDIR\Uninstall.exe$\""
 	WriteRegStr HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\${PACKAGE_NAME}" "Publisher" "${PACKAGE_VENDOR}"
 
-    # Create shortucts for startmenu
+    # Create shortucts for start menu
     CreateDirectory "$SMPROGRAMS\${START_MENU_FOLDER}"
-    CreateShortCut "$SMPROGRAMS\${START_MENU_FOLDER}\Mantid Workbench.lnk" "$INSTDIR\bin\MantidWorkbench.exe"
-    CreateShortCut "$SMPROGRAMS\${START_MENU_FOLDER}\Mantid Notebook.lnk" "$INSTDIR\bin\mantidpython.bat" "notebook --notebook-dir=%userprofile%"
-    CreateShortCut "$SMPROGRAMS\${START_MENU_FOLDER}\Uninstall.lnk" "$\"$INSTDIR\uninstall.exe$\""
+    CreateShortCut "$SMPROGRAMS\${START_MENU_FOLDER}\${MANTIDWORKBENCH_LINK_NAME}" "$INSTDIR\bin\MantidWorkbench.exe"
+    CreateShortCut "$SMPROGRAMS\${START_MENU_FOLDER}\${MANTIDNOTEBOOK_LINK_NAME}" "$INSTDIR\bin\mantidpython.bat" "notebook --notebook-dir=%userprofile%"
+    CreateShortCut "$SMPROGRAMS\${START_MENU_FOLDER}\Uninstall.lnk" "$\"$INSTDIR\Uninstall.exe$\""
+
+    # Create desktop shortcuts
+    CreateShortCut "$DESKTOP\${MANTIDWORKBENCH_LINK_NAME}" "$INSTDIR\bin\MantidWorkbench.exe"
+    CreateShortCut "$DESKTOP\${MANTIDNOTEBOOK_LINK_NAME}" "$INSTDIR\bin\mantidpython.bat" "notebook --notebook-dir=%userprofile%"
 
 SectionEnd ; end the section
 
@@ -78,11 +85,15 @@ Section "Uninstall"
     Delete $INSTDIR\Uninstall.exe
     RMDir $INSTDIR
 
-    # Remove shortcuts
-    Delete "$SMPROGRAMS\${START_MENU_FOLDER}\Mantid Workbench.lnk"
-    Delete "$SMPROGRAMS\${START_MENU_FOLDER}\Mantid Workbench (Python).lnk"
-    Delete "$SMPROGRAMS\${START_MENU_FOLDER}\Mantid Notebook.lnk"
+    # Remove start menu shortcuts
+    Delete "$SMPROGRAMS\${START_MENU_FOLDER}\${MANTIDWORKBENCH_LINK_NAME}"
+    Delete "$SMPROGRAMS\${START_MENU_FOLDER}\${MANTIDNOTEBOOK_LINK_NAME}"
     Delete "$SMPROGRAMS\${START_MENU_FOLDER}\Uninstall.lnk"
     RMDir "$SMPROGRAMS\${START_MENU_FOLDER}"
+
+    # Remove desktop shortcuts
+    Delete "$DESKTOP\${MANTIDWORKBENCH_LINK_NAME}"
+    Delete "$DESKTOP\${MANTIDNOTEBOOK_LINK_NAME}"
+
 SectionEnd
 
