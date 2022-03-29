@@ -34,9 +34,9 @@ void AsymmetricPearsonVII::init() {
   declareParameter("RightShape", 1.0, "Right shape parameter");
 
   // constrain shape parameters to the suggested range of values
-  auto leftShapeConstraint = std::make_unique<BoundaryConstraint>(this, "LeftShape", 1.0, 20.0, true);
+  auto leftShapeConstraint = std::make_unique<BoundaryConstraint>(this, "LeftShape", 0.0, true);
   addConstraint(std::move(leftShapeConstraint));
-  auto rightShapeConstraint = std::make_unique<BoundaryConstraint>(this, "RightShape", 1.0, 20.0, true);
+  auto rightShapeConstraint = std::make_unique<BoundaryConstraint>(this, "RightShape", 0.0, true);
   addConstraint(std::move(rightShapeConstraint));
 }
 
