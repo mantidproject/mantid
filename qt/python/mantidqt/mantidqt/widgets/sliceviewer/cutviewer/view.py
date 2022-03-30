@@ -55,7 +55,7 @@ class CutViewerView(QWidget):
         for idim in range(proj_matrix.shape[0]):
             self._write_vector_to_table(states[idim], proj_matrix[idim, :])
         # write bin params for cut along horizontal axis (default)
-        bin_params = np.array(dims.get_bin_params())[states]  # nbins except last element which is integration width
+        bin_params = dims.get_bin_params()  # nbins except last element which is integration width
         datalims = self._sliceinfo_provider.get_data_limits()  # (xlim, ylim, None)
         axlims = self._sliceinfo_provider.get_axes_limits()
         for irow in range(self.table.rowCount()-1):
@@ -63,13 +63,13 @@ class CutViewerView(QWidget):
             data_extent = datalims[irow][1]-datalims[irow][0]
             if irow == 0:
                 padding_frac = 0.25
-                nbins = 2*padding_frac*bin_params[irow]*(stop-start)/data_extent
+                nbins = 2*padding_frac*bin_params[states.index(irow)]*(stop-start)/data_extent
                 padding = padding_frac*(stop-start)
                 start = start + padding
                 stop = stop - padding
             else:
                 nbins = 1
-                step = data_extent / bin_params[1]
+                step = data_extent / bin_params[states.index(irow)]
                 cen = (stop + start) / 2
                 start, stop = cen-step, cen+step
             self.table.item(irow, 5).setData(Qt.EditRole, int(nbins))  # nbins
@@ -77,23 +77,17 @@ class CutViewerView(QWidget):
             self.table.item(irow, 4).setData(Qt.EditRole, float(stop))  # stop
             self.table.item(irow, 6).setData(Qt.EditRole, float((stop - start) / nbins))  # step/width
         self.update_slicepoint()
-        # update slicepoint and width
-        slicept = dims.get_slicepoint()[states[-1]]
-        self.table.item(2, 3).setData(Qt.EditRole, float(slicept - bin_params[-1]/2))  # start
-        self.table.item(2, 4).setData(Qt.EditRole, float(slicept + bin_params[-1]/2))  # stop
-        self.table.item(2, 6).setData(Qt.EditRole, float(bin_params[-1]))  # step (i.e. width)
         self.table.blockSignals(False)
         self.send_bin_params()
+        self.plot_line()
 
     def update_slicepoint(self):
         dims = self._sliceinfo_provider.get_dimensions()
-        states = dims.get_states()
-        states[states.index(None)] = 2  # set last index as out of plane dimension
-        bin_params = np.array(dims.get_bin_params())[states]
+        width = dims.get_bin_params()[dims.get_states().index(None)]
         slicept = self._sliceinfo_provider.get_sliceinfo().z_value
-        self.table.item(2, 3).setData(Qt.EditRole, float(slicept - bin_params[-1]/2))  # start
-        self.table.item(2, 4).setData(Qt.EditRole, float(slicept + bin_params[-1]/2))  # stop
-        self.table.item(2, 6).setData(Qt.EditRole, float(bin_params[-1]))  # step (i.e. width)
+        self.table.item(2, 3).setData(Qt.EditRole, float(slicept - width/2))  # start
+        self.table.item(2, 4).setData(Qt.EditRole, float(slicept + width/2))  # stop
+        self.table.item(2, 6).setData(Qt.EditRole, float(width))  # step (i.e. width)
 
     def plot_cut_ws(self, wsname):
         if len(self.figure.axes[0].tracked_workspaces) == 0:
@@ -173,6 +167,8 @@ class CutViewerView(QWidget):
         if (extents[-1, :] - extents[0, :] > 0).all() and np.sum(nbins > 1) == 1 \
                 and not np.isclose(np.linalg.det(vectors), 0.0):
             self._sliceinfo_provider.perform_non_axis_aligned_cut(vectors, extents.flatten(order='F'), nbins)
+        else:
+            print('BINMD args not valid!')
 
     def plot_line(self):
         # find vectors corresponding to x and y axes
