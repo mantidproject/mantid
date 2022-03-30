@@ -528,6 +528,14 @@ public:
     presenter->notifySettingsChanged();
   }
 
+  void testSingleRowUpdatedWhenRowContentChanged() {
+    auto mock = makeMockModel();
+    auto row = makeRow(0.7);
+    EXPECT_CALL(*mock, updateLookupIndex(row)).Times(1);
+    auto presenter = makePresenter(std::move(mock));
+    presenter->notifyRowContentChanged(row);
+  }
+
 private:
   NiceMock<MockBatchView> m_view;
   NiceMock<MockBatchJobManager> *m_jobManager;

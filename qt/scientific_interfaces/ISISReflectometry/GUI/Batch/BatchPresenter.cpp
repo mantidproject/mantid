@@ -275,7 +275,7 @@ void BatchPresenter::notifyAnyBatchAutoreductionPaused() { m_runsPresenter->noti
 
 void BatchPresenter::notifyBatchLoaded() { m_runsPresenter->notifyBatchLoaded(); }
 
-void BatchPresenter::notifyRowContentChanged(Row &changedRow) {}
+void BatchPresenter::notifyRowContentChanged(Row &changedRow) { m_model->updateLookupIndex(changedRow); }
 
 Mantid::Geometry::Instrument_const_sptr BatchPresenter::instrument() const { return m_mainPresenter->instrument(); }
 
