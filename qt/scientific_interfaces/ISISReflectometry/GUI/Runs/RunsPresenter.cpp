@@ -284,7 +284,7 @@ std::string RunsPresenter::instrumentName() const { return m_mainPresenter->inst
 
 void RunsPresenter::notifyTableChanged() { m_tableUnsaved = true; }
 
-void RunsPresenter::notifyRowContentChanged(Row &changedRow) {}
+void RunsPresenter::notifyRowContentChanged(Row &changedRow) { m_mainPresenter->notifyRowContentChanged(changedRow); }
 
 void RunsPresenter::settingsChanged() { tablePresenter()->settingsChanged(); }
 

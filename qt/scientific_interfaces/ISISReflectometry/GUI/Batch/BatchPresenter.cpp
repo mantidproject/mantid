@@ -275,6 +275,8 @@ void BatchPresenter::notifyAnyBatchAutoreductionPaused() { m_runsPresenter->noti
 
 void BatchPresenter::notifyBatchLoaded() { m_runsPresenter->notifyBatchLoaded(); }
 
+void BatchPresenter::notifyRowContentChanged(Row &changedRow) {}
+
 Mantid::Geometry::Instrument_const_sptr BatchPresenter::instrument() const { return m_mainPresenter->instrument(); }
 
 std::string BatchPresenter::instrumentName() const { return m_mainPresenter->instrumentName(); }
