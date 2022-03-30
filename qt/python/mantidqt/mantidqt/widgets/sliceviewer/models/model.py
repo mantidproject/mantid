@@ -295,7 +295,7 @@ class SliceViewerModel(SliceViewerBaseModel):
         cen_vec = np.zeros(vectors[0].shape) # position at x = 0
         for ivec in ivecs:
             cen_vec = cen_vec + cens[ivec]*vectors[ivec]
-        proj_str = 'x in (' + '  '.join([f'{np.round(c,2)}+{np.round(x,2)}x' if abs(x) > 0 else f'{np.round(c,2)}'
+        proj_str = '(' + ' '.join([f'{np.round(c,2)}+{np.round(x,2)}x' if abs(x) > 0 else f'{np.round(c,2)}'
                                         for c, x in zip(cen_vec, vectors[ix])]) + ')'
         proj_str.replace('+-', '-')
         for ivec, vec in enumerate(vectors):
@@ -309,14 +309,13 @@ class SliceViewerModel(SliceViewerBaseModel):
                     pass
             else:
                 length = np.sqrt(np.sum(vec**2))
-            unit_str = f'in {np.round(length,2)} A^-1' if length is not None else 'r.l.u.'
+            unit_str = f'in {np.round(length,2)} Ang^-1' if length is not None else 'r.l.u.'
             xlab = proj_str if ivec == ix else f'u{ivec+1}'
             vec_str = ','.join(str(v) for v in vec)
             projection_params[f'BasisVector{ivec}'] = ', '.join([xlab, unit_str, vec_str])
 
         BinMD(InputWorkspace=self._get_ws(), AxisAligned=False, OutputExtents=extents,
               OutputBins=nbins, NormalizeBasisVectors=False, OutputWorkspace=self._1Dcut_name, **projection_params)
-        # replace u1 with x for x in [Hcen + x, Kcen + x, Lcen] in 3.142 A^-1 if HKL (otherwise 1 A^-1)
         return self._1Dcut_name
 
     def export_roi_to_workspace_mdhisto(self, slicepoint: Sequence[Optional[float]],

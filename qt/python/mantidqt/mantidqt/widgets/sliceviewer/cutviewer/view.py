@@ -4,6 +4,7 @@ from qtpy.QtGui import QColor
 from mantid.plots.plotfunctions import create_subplots
 from mantidqt.MPLwidgets import FigureCanvas
 from mantidqt.plotting.mantid_navigation_toolbar import MantidNavigationToolbar
+import matplotlib.text as text
 import numpy as np
 from mantid.simpleapi import AnalysisDataService as ADS
 
@@ -93,11 +94,16 @@ class CutViewerView(QWidget):
                                          markersize=3)
         self.figure.axes[0].ignore_existing_data_limits = True
         self.figure.axes[0].autoscale_view()
-
-        def match(artist):
-            return artist.__module__ == "matplotlib.text"
-
-        for textobj in self.figure.findobj(match=match):
+        # # reformat xlabel string
+        xstr = self.figure.axes[0].get_xlabel()
+        istart = xstr.index('(')
+        iend = xstr.index(')')
+        xunit_str = xstr[iend+1:].replace('Ang^-1', '$\\AA^{-1}$)').replace('(', '').replace(')', '')
+        xstr = xstr[0:istart] + xstr[istart:iend+1].replace(' ', ', ') + xunit_str
+        xstr = xstr
+        self.figure.axes[0].set_xlabel(xstr)
+        # set text size
+        for textobj in self.figure.findobj(text.Text):
             textobj.set_fontsize(8)
         self.figure.canvas.draw()
         self.figure.tight_layout()
@@ -165,8 +171,6 @@ class CutViewerView(QWidget):
         if (extents[-1, :] - extents[0, :] > 0).all() and np.sum(nbins > 1) == 1 \
                 and not np.isclose(np.linalg.det(vectors), 0.0):
             self._sliceinfo_provider.perform_non_axis_aligned_cut(vectors, extents.flatten(order='F'), nbins)
-        else:
-            print('BINMD args not valid!')
 
     def plot_line(self):
         # find vectors corresponding to x and y axes
