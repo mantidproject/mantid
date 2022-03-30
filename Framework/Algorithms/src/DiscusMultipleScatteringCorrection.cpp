@@ -213,7 +213,7 @@ std::map<std::string, std::string> DiscusMultipleScatteringCorrection::validateI
           if (SQWS->getAxis(0)->unit()->unitID() == "DeltaE")
             wValue = SQWS->dataX(0)[iBin];
           else {
-            wValue = SQWS->getAxis(1)->getValue(iBin);
+            wValue = SQWS->getAxis(1)->getValue(iHist);
           }
           if ((SQWS->y(iHist)[iBin] > 0.) && (wValue < 0.))
             atLeastOnePositive = true;
