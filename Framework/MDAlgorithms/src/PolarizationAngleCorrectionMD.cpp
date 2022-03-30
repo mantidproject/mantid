@@ -125,9 +125,6 @@ if temperature points to a log name, it must be present in each experiment info,
 std::map<std::string, std::string> PolarizationAngleCorrectionMD::validateInputs() {
   std::map<std::string, std::string> output;
 
-  // Get input workspace
-  API::IMDEventWorkspace_sptr input_ws = getProperty("InputWorkspace");
-
   // check input dimension
   std::string dim_error = checkInputMDDimension();
   if (dim_error != "") {
@@ -157,7 +154,8 @@ void PolarizationAngleCorrectionMD::applyPolarizationAngleCorrection(
   for (int i = 0; i < numBoxes; ++i) {
     PARALLEL_START_INTERRUPT_REGION
     auto *box = dynamic_cast<MDBox<MDE, nd> *>(boxes[i]);
-    if (box && !box->getIsMasked()) {
+    assert(box);
+    if (!box->getIsMasked()) {
       // get the MEEvents from box
       std::vector<MDE> &events = box->getEvents();
       // Add events, with bounds checking
@@ -173,7 +171,10 @@ void PolarizationAngleCorrectionMD::applyPolarizationAngleCorrection(
         } else {
           // Q-sample
           // Qlab = R * QSample
-          std::vector<double> qsample = {it->getCenter(0), it->getCenter(1), it->getCenter(2)};
+          std::vector<double> qsample;
+          for (auto d = 0u; d < nd; ++d) {
+            qsample.emplace_back(it->getCenter(d));
+          }
           std::vector<double> qlab = mRotationMatrixMap[it->getExpInfoIndex()] * qsample;
           qx = qlab[0];
           qz = qlab[2];

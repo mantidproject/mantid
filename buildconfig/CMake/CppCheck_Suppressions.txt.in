@@ -575,8 +575,6 @@ useStlAlgorithm:${CMAKE_SOURCE_DIR}/Framework/MDAlgorithms/src/MDNorm.cpp:962
 shadowVariable:${CMAKE_SOURCE_DIR}/Framework/MDAlgorithms/src/MDNormSCD.cpp:202
 unreadVariable:${CMAKE_SOURCE_DIR}/Framework/MDAlgorithms/src/MDWSTransform.cpp:321
 constParameter:${CMAKE_SOURCE_DIR}/Framework/MDAlgorithms/src/MDWSDescription.cpp:204
-nullPointerRedundantCheck:${CMAKE_SOURCE_DIR}/Framework/MDAlgorithms/src/PolarizationAngleCorrectionMD.cpp:203
-unreadVariable:${CMAKE_SOURCE_DIR}/Framework/MDAlgorithms/src/PolarizationAngleCorrectionMD.cpp:129
 useStlAlgorithm:${CMAKE_SOURCE_DIR}/Framework/MDAlgorithms/src/SaveIsawQvector.cpp:113
 duplicateExpression:${CMAKE_SOURCE_DIR}/Framework/MDAlgorithms/src/SaveMD2.cpp:128
 nullPointerRedundantCheck:${CMAKE_SOURCE_DIR}/Framework/MDAlgorithms/src/DgsScatteredTransmissionCorrectionMD.cpp:163
