@@ -131,6 +131,7 @@ public:
   MOCK_METHOD1(notifyInstrumentChanged, void(std::string const &));
   MOCK_METHOD0(notifyTableChanged, void());
   MOCK_METHOD1(notifyRowContentChanged, void(Row &));
+  MOCK_METHOD1(notifyGroupNameChanged, void(Group &));
   MOCK_METHOD0(settingsChanged, void());
   MOCK_METHOD0(notifyChangesSaved, void());
   MOCK_METHOD0(notifyBatchLoaded, void());

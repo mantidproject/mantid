@@ -452,6 +452,7 @@ void RunsTablePresenter::updateGroupName(MantidWidgets::Batch::RowLocation const
     cell.setContentText(oldValue);
     m_view->jobs().setCellAt(itemIndex, column, cell);
   }
+  m_mainPresenter->notifyGroupNameChanged(m_model.mutableReductionJobs().mutableGroups()[0]);
 }
 
 void RunsTablePresenter::updateRowField(MantidWidgets::Batch::RowLocation const &itemIndex, int column,

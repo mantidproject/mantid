@@ -286,6 +286,8 @@ void RunsPresenter::notifyTableChanged() { m_tableUnsaved = true; }
 
 void RunsPresenter::notifyRowContentChanged(Row &changedRow) { m_mainPresenter->notifyRowContentChanged(changedRow); }
 
+void RunsPresenter::notifyGroupNameChanged(Group &changedGroup) {}
+
 void RunsPresenter::settingsChanged() { tablePresenter()->settingsChanged(); }
 
 void RunsPresenter::notifyChangesSaved() {
