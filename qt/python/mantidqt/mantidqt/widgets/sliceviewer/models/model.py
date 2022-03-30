@@ -55,6 +55,7 @@ class SliceViewerModel(SliceViewerBaseModel):
         self._rebinned_name = wsname + '_svrebinned'
         self._xcut_name, self._ycut_name = wsname + '_cut_x', wsname + '_cut_y'
         self._roi_name = wsname + '_roi'
+        self._1Dcut_name = wsname + '_1Dcut'
 
         ws_type = WorkspaceInfo.get_ws_type(self._get_ws())
         if ws_type == WS_TYPE.MDE:
@@ -313,11 +314,10 @@ class SliceViewerModel(SliceViewerBaseModel):
             vec_str = ','.join(str(v) for v in vec)
             projection_params[f'BasisVector{ivec}'] = ', '.join([xlab, unit_str, vec_str])
 
-        wscut = BinMD(InputWorkspace=self._get_ws(), AxisAligned=False, OutputExtents=extents,
-                      OutputBins=nbins, NormalizeBasisVectors=False, OutputWorkspace='MD_svrebinned',
-                      **projection_params)
+        BinMD(InputWorkspace=self._get_ws(), AxisAligned=False, OutputExtents=extents,
+              OutputBins=nbins, NormalizeBasisVectors=False, OutputWorkspace=self._1Dcut_name, **projection_params)
         # replace u1 with x for x in [Hcen + x, Kcen + x, Lcen] in 3.142 A^-1 if HKL (otherwise 1 A^-1)
-        return wscut.name()
+        return self._1Dcut_name
 
     def export_roi_to_workspace_mdhisto(self, slicepoint: Sequence[Optional[float]],
                                         bin_params: Sequence[float], limits: tuple,
