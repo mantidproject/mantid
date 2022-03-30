@@ -398,7 +398,7 @@ class CutRepresentation:
                             line.set_data([line.get_xdata()[0] + dx], [line.get_ydata()[0] + dy])
                     else:
                         vec = self.get_perp_dir()
-                        self.thickness = 2 * np.dot(vec, [dx, dy])
+                        self.thickness = 2 * abs(np.dot(vec, [dx, dy]))
                 else:
                     self.current_artist.set_data([event.xdata], [event.ydata])
             self.draw()  # should draw artists rather than remove and re-plot
@@ -406,4 +406,6 @@ class CutRepresentation:
     def on_release(self, event):
         if event.inaxes == self.ax and self.current_artist is not None:
             self.current_artist = None
+            if self.end.get_xdata()[0] < self.start.get_xdata()[0]:
+                self.start, self.end = self.end, self.start
             self.view.get_coords_from_cut_representation()
