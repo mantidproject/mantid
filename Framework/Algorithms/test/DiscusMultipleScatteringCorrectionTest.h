@@ -70,14 +70,9 @@ public:
         SetupFlatPlateWorkspace(1, NTHETA, ang_inc, 1, 0.5, 1.0, 10 * THICKNESS, 10 * THICKNESS, THICKNESS);
 
     auto SofQWorkspace = WorkspaceCreationHelper::create2DWorkspace(1, 3);
-    SofQWorkspace->mutableX(0)[0] = 0.9985;
-    SofQWorkspace->mutableX(0)[1] = 0.9995;
-    SofQWorkspace->mutableX(0)[2] = 1.0005;
-    SofQWorkspace->mutableX(0)[3] = 1.0015;
+    SofQWorkspace->mutableX(0) = {0.9985, 0.9995, 1.0005, 1.0015};
     // S(Q) zero everywhere apart from spike at Q=1
-    SofQWorkspace->mutableY(0)[0] = 0.;
-    SofQWorkspace->mutableY(0)[1] = 100.;
-    SofQWorkspace->mutableY(0)[2] = 0.;
+    SofQWorkspace->mutableY(0) = {0., 100., 0.};
     SofQWorkspace->getAxis(0)->unit() = UnitFactory::Instance().create("MomentumTransfer");
 
     auto alg = std::make_shared<Mantid::Algorithms::DiscusMultipleScatteringCorrection>();

@@ -207,17 +207,15 @@ std::map<std::string, std::string> DiscusMultipleScatteringCorrection::validateI
        this algorithm doesn't do that*/
     if ((axisUnits.find("DeltaE") != axisUnits.end()) && !SQWS->getAxis(1)->isSpectra()) {
       bool atLeastOnePositive = false;
+      bool xIsW = SQWS->getAxis(0)->unit()->unitID() == "DeltaE";
       for (size_t iHist = 0; iHist < SQWS->getNumberHistograms(); iHist++) {
-        for (size_t iBin = 0; iBin < SQWS->y(iHist).size(); iBin++) {
-          double wValue;
-          if (SQWS->getAxis(0)->unit()->unitID() == "DeltaE")
-            wValue = SQWS->dataX(0)[iBin];
-          else {
-            wValue = SQWS->getAxis(1)->getValue(iHist);
-          }
-          if ((SQWS->y(iHist)[iBin] > 0.) && (wValue < 0.))
-            atLeastOnePositive = true;
-        }
+        auto &yValues = SQWS->dataY(iHist);
+        auto wValues = xIsW ? SQWS->dataX(0) : std::vector<double>(yValues.size(), SQWS->getAxis(1)->getValue(iHist));
+        std::vector<std::pair<double, double>> ywVals;
+        std::transform(yValues.begin(), yValues.end(), wValues.begin(), std::back_inserter(ywVals),
+                       [](double y, double w) { return std::make_pair(y, w); });
+        if (std::any_of(ywVals.begin(), ywVals.end(), [](auto yw) { return yw.first > 0. && yw.second < 0.; }))
+          atLeastOnePositive = true;
       }
       if (!atLeastOnePositive)
         issues["StructureFactorWorkspace"] += "S(Q, w) must have some positive values for negative w\n";
@@ -348,10 +346,8 @@ void DiscusMultipleScatteringCorrection::convertWsBothAxesToPoints(MatrixWorkspa
   }
   if (dynamic_cast<BinEdgeAxis *>(ws->getAxis(1)) != nullptr) {
     auto edges = dynamic_cast<NumericAxis *>(ws->getAxis(1))->getValues();
-    std::vector<double> centres(edges.size() - 1);
-    for (size_t i = 0; i < centres.size(); ++i) {
-      centres[i] = (0.5 * (edges[i] + edges[i + 1]));
-    }
+    std::vector<double> centres;
+    VectorHelper::convertToBinCentre(edges, centres);
     auto newAxis = std::make_unique<NumericAxis>(centres);
     newAxis->setUnit(ws->getAxis(1)->unit()->unitID());
     ws->replaceAxis(1, std::move(newAxis));
@@ -389,10 +385,6 @@ void DiscusMultipleScatteringCorrection::exec() {
     qmax = 2 * kmax;
   }
   m_QSQWS = prepareQSQ(qmax);
-  size_t totalPoints = 0;
-  for (size_t i = 0; i < m_QSQWS->getNumberHistograms(); i++) {
-    totalPoints += m_QSQWS->histogram(i).size();
-  }
 
   m_simulateEnergiesIndependently = getProperty("SimulateEnergiesIndependently");
   // call this function with dummy efixed to determine total possible simulation points
@@ -487,7 +479,7 @@ void DiscusMultipleScatteringCorrection::exec() {
       MatrixWorkspace_sptr invPOfQ;
       if (m_importanceSampling) {
         // prep invPOfQ outside the bin loop to avoid costly construction\destruction
-        invPOfQ = createInvPOfQ(totalPoints);
+        invPOfQ = createInvPOfQ(m_QSQWS->size());
       }
 
       for (size_t bin = 0; bin < nbins; bin += xStepSize) {
@@ -627,13 +619,13 @@ DiscusMultipleScatteringCorrection::generateInputKOutputWList(const double efixe
       return t;
     });
   } else {
-    if ((!m_simulateEnergiesIndependently) && (m_EMode == DeltaEMode::Direct)) {
+    if ((!m_simulateEnergiesIndependently) && (m_EMode == DeltaEMode::Direct))
       kInW.emplace_back(std::make_tuple(kFixed, -1, 0.));
-    } else {
+    else {
       for (int i = 0; i < static_cast<int>(xPoints.size()); i++) {
-        if (m_EMode == DeltaEMode::Direct) {
+        if (m_EMode == DeltaEMode::Direct)
           kInW.emplace_back(std::make_tuple(kFixed, i, xPoints[i]));
-        } else if (m_EMode == DeltaEMode::Indirect) {
+        else if (m_EMode == DeltaEMode::Indirect) {
           const double initialE = efixed + xPoints[i];
           if (initialE > 0) {
             const double kin = toWaveVector(initialE);
@@ -951,14 +943,13 @@ double DiscusMultipleScatteringCorrection::interpolateGaussian(const ISpectrum &
  * @return The interpolated S(Q,w) value
  */
 double DiscusMultipleScatteringCorrection::Interpolate2D(MatrixWorkspace_sptr SOfQ, double w, double q) {
-  double SQ;
-  int iW;
+  double SQ = 0.;
+  int iW = -1;
   auto &wValues = dynamic_cast<NumericAxis *>(SOfQ->getAxis(1))->getValues();
   try {
     // required w values will often equal the points in the S(Q,w) distribution so pick nearest value
     iW = static_cast<int>(Kernel::VectorHelper::indexOfValueFromCentersNoThrow(wValues, w));
-  } catch (std::out_of_range) {
-    iW = -1;
+  } catch (std::out_of_range &) {
   }
   if (iW >= 0) {
     if (m_importanceSampling)
@@ -967,8 +958,7 @@ double DiscusMultipleScatteringCorrection::Interpolate2D(MatrixWorkspace_sptr SO
       SQ = interpolateFlat(SOfQ->getSpectrum(iW), q);
     else
       SQ = interpolateGaussian(m_logSQ->getSpectrum(iW), q);
-  } else
-    SQ = 0.;
+  }
 
   return SQ;
 }
@@ -1118,6 +1108,7 @@ double DiscusMultipleScatteringCorrection::getKf(const double deltaE, const doub
     // a negative number in here. deltaE was capped using a threshold calculated using fromWaveVector so
     // hopefully any rounding will affect fromWaveVector(kinc) in same direction
     kf = toWaveVector(fromWaveVector(kinc) - deltaE);
+    assert(!std::isnan(kf));
   }
   return kf;
 }
