@@ -56,20 +56,18 @@ class CutViewerView(QWidget):
             self._write_vector_to_table(states[idim], proj_matrix[idim, :])
         # write bin params for cut along horizontal axis (default)
         bin_params = dims.get_bin_params()  # nbins except last element which is integration width
-        datalims = self._sliceinfo_provider.get_data_limits()  # (xlim, ylim, None)
         axlims = self._sliceinfo_provider.get_axes_limits()
         for irow in range(self.table.rowCount()-1):
             start, stop = axlims[irow]
-            data_extent = datalims[irow][1]-datalims[irow][0]
             if irow == 0:
                 padding_frac = 0.25
-                nbins = 2*padding_frac*bin_params[states.index(irow)]*(stop-start)/data_extent
+                nbins = 2*padding_frac*bin_params[states.index(irow)]*(stop-start)
                 padding = padding_frac*(stop-start)
                 start = start + padding
                 stop = stop - padding
             else:
                 nbins = 1
-                step = data_extent / bin_params[states.index(irow)]
+                step = 2*(stop-start) / bin_params[states.index(irow)]  # width = 2*step = 4*bin_width
                 cen = (stop + start) / 2
                 start, stop = cen-step, cen+step
             self.table.item(irow, 5).setData(Qt.EditRole, int(nbins))  # nbins
