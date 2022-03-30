@@ -26,7 +26,7 @@ void IFunction1D::calcNumericalDerivative1D(Jacobian *jacobian, EvaluationMethod
    * consider that method when updating this.
    */
   using std::fabs;
-  constexpr double epsilon(std::numeric_limits<double>::epsilon() * 100);
+  constexpr double epsilon(std::numeric_limits<double>::epsilon()); // * 100);
   constexpr double stepPercentage(0.001);
   constexpr double cutoff = 100.0 * std::numeric_limits<double>::min() / stepPercentage;
 
@@ -39,10 +39,11 @@ void IFunction1D::calcNumericalDerivative1D(Jacobian *jacobian, EvaluationMethod
   for (size_t iP = 0; iP < nParam; iP++) {
     if (isActive(iP)) {
       const double val = activeParameter(iP);
-      if (fabs(val) < cutoff) {
-        step = epsilon;
+      // if (fabs(val) < cutoff) {
+      if (fabs(val) < 1 || val == 0) {
+        step = sqrt(epsilon);
       } else {
-        step = val * stepPercentage;
+        step = val * sqrt(epsilon);
       }
 
       const double paramPstep = val + step;

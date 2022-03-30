@@ -109,6 +109,8 @@ Framework/Kernel/inc/MantidKernel/GitHubApiHelper.h
 qt/python/mantidqt/mantidqt/resources.py
 qt/applications/workbench/workbench/app/resources.py
 qt/applications/workbench/qt.conf
+qt/python/mantidqtinterfaces/mantidqtinterfaces/ui/batchwidget/ui_batch_widget_window.py
+qt/python/mantidqtinterfaces/mantidqtinterfaces/ui/dataprocessorinterface/ui_data_processor_window.py
 
 # Visual C++ cache files
 ipch/
