@@ -151,14 +151,21 @@ class CutViewerView(QWidget):
             if step < 0:
                 step = abs(step)
                 self.table.item(irow, 6).setData(Qt.EditRole, step)
-            nbins[irow] = (extents[1, irow] - extents[0, irow]) / step
-            if nbins[irow] < 1:
-                nbins[irow] = 1
-                self.table.item(ivec, 6).setData(Qt.EditRole, float((extents[1, irow] - extents[0, irow])))
-            if nbins[irow] % 1 > 0:
-                extents[irow, 1] = extents[irow, 1] - (nbins[irow] % 1) * step  # so integer number of bins
-                self.table.item(irow, 4).setData(Qt.EditRole, float(extents[irow, 1]))
-            self.table.item(irow, 5).setData(Qt.EditRole, int(nbins[irow]))  # nbins
+            if nbins[irow] > 1:
+                # step along cut axis changed
+                nbin = (extents[1, irow] - extents[0, irow]) / step
+                if nbin < 1:
+                    nbins[irow] = 1
+                    self.table.item(ivec, 6).setData(Qt.EditRole, float((extents[1, irow] - extents[0, irow])))
+                if nbin % 1 > 0:
+                    extents[1, irow] = extents[1, irow] - (nbin % 1) * step  # so integer number of bins
+                    self.table.item(irow, 4).setData(Qt.EditRole, float(extents[1, irow]))
+                self.table.item(irow, 5).setData(Qt.EditRole, int(nbin))  # nbins
+            else:
+                # width of integtrated axis changed
+                cen = np.mean(extents[:, irow])
+                self.table.item(irow, 3).setData(Qt.EditRole, float(cen - step / 2))
+                self.table.item(irow, 4).setData(Qt.EditRole, float(cen + step / 2))
         self.table.blockSignals(False)
 
     def on_cell_changed(self, irow, icol):
