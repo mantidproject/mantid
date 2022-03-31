@@ -76,6 +76,7 @@ public:
   void notifyReductionPaused() override;
   void notifyBatchLoaded() override;
   void notifyRowContentChanged(Row &changedRow) override;
+  void notifyGroupNameChanged(Group &changedGroup) override;
   bool requestClose() const override;
   bool isProcessing() const override;
   bool isAutoreducing() const override;

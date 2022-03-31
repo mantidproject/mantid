@@ -799,6 +799,14 @@ public:
     verifyAndClear();
   }
 
+  void testNotifyGroupNameChanged() {
+    auto presenter = makePresenter();
+    auto group = makeGroupWithOneRow();
+    EXPECT_CALL(m_mainPresenter, notifyGroupNameChanged(group));
+    presenter.notifyGroupNameChanged(group);
+    verifyAndClear();
+  }
+
 private:
   class RunsPresenterFriend : public RunsPresenter {
     friend class RunsPresenterTest;

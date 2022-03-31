@@ -277,6 +277,8 @@ void BatchPresenter::notifyBatchLoaded() { m_runsPresenter->notifyBatchLoaded();
 
 void BatchPresenter::notifyRowContentChanged(Row &changedRow) { m_model->updateLookupIndex(changedRow); }
 
+void BatchPresenter::notifyGroupNameChanged(Group &changedGroup) {}
+
 Mantid::Geometry::Instrument_const_sptr BatchPresenter::instrument() const { return m_mainPresenter->instrument(); }
 
 std::string BatchPresenter::instrumentName() const { return m_mainPresenter->instrumentName(); }
