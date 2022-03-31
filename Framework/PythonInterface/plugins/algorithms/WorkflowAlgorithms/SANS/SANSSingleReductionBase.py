@@ -8,8 +8,6 @@
 
 """A base class to share functionality between SANSSingleReduction versions."""
 
-from collections import defaultdict
-
 from mantid.api import (DistributedDataProcessorAlgorithm,
                         MatrixWorkspaceProperty, Progress, PropertyMode)
 from mantid.kernel import Direction
@@ -127,8 +125,6 @@ class SANSSingleReductionBase(DistributedDataProcessorAlgorithm):
                 # Merge the list of lists into a single flat list to keep our lives easier
                 completed_event_slices.extend(reduced_slices)
 
-        reduction_mode_vs_workspace_names = defaultdict(list)
-
         # --------------------------------------------------------------------------------------------------------------
         # Deal with non-merged
         # Note that we have non-merged workspaces even in the case of a merged reduction, ie LAB and HAB results
@@ -136,8 +132,6 @@ class SANSSingleReductionBase(DistributedDataProcessorAlgorithm):
         progress.report("Final clean up...")
 
         reduction_mode_vs_output_workspaces = get_final_output_workspaces(completed_event_slices, self)
-        reduction_mode_vs_workspace_names = self._get_workspace_names(reduction_mode_vs_workspace_names,
-                                                                      completed_event_slices)
 
         # --------------------------------------------------------------------------------------------------------------
         # Deal with merging
@@ -169,7 +163,7 @@ class SANSSingleReductionBase(DistributedDataProcessorAlgorithm):
         # --------------------------------------------------------------------------------------------------------------
         # Set the output workspaces
         # --------------------------------------------------------------------------------------------------------------
-        self.set_output_workspaces(reduction_mode_vs_output_workspaces, reduction_mode_vs_workspace_names)
+        self.set_output_workspaces(reduction_mode_vs_output_workspaces)
 
         # --------------------------------------------------------------------------------------------------------------
         # Set the reduced can workspaces on the output if optimizations are
@@ -216,7 +210,7 @@ class SANSSingleReductionBase(DistributedDataProcessorAlgorithm):
     def set_shift_and_scale_output(self, scale_factors, shift_factors):
         raise NotImplementedError("set_shift_and_scale_output must be implemented.")
 
-    def set_output_workspaces(self, reduction_mode_vs_output_workspaces, reduction_mode_vs_workspace_names):
+    def set_output_workspaces(self, reduction_mode_vs_output_workspaces):
         raise NotImplementedError("set_output_workspaces must be implemented.")
 
     def do_reduction(self, reduction_alg, reduction_setting_bundles, use_optimizations, progress):

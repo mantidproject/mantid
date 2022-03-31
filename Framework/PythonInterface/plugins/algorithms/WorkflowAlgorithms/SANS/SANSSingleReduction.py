@@ -149,13 +149,12 @@ class SANSSingleReduction(SANSSingleReductionBase):
         self.setProperty("OutScaleFactor", scale_factors[0])
         self.setProperty("OutShiftFactor", shift_factors[0])
 
-    def set_output_workspaces(self, reduction_mode_vs_output_workspaces, reduction_mode_vs_workspace_names):
+    def set_output_workspaces(self, reduction_mode_vs_output_workspaces):
         """
         Sets the output workspaces which can be HAB, LAB or Merged.
 
         At this step we also provide a workspace name to the sample logs which can be used later on for saving
         :param reduction_mode_vs_output_workspaces:  map from reduction mode to output workspace
-        :param reduction_mode_vs_workspace_names: an unused dict. Required for version 2 compatibility
         """
         # Note that this breaks the flexibility that we have established with the reduction mode. We have not hardcoded
         # HAB or LAB anywhere which means that in the future there could be other detectors of relevance. Here we
