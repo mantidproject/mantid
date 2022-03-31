@@ -16,6 +16,7 @@ from mantid.simpleapi import CloneWorkspace
 from sans.algorithm_detail.single_execution import (run_core_reduction, run_optimized_for_can)
 from sans.common.enums import (DataType, ReductionMode)
 from sans.common.general_functions import does_can_workspace_exist_on_ads
+from sans.data_objects.sans_workflow_algorithm_outputs import SANSWorkflowAlgorithmOutputs
 
 
 class SANSSingleReduction(SANSSingleReductionBase):
@@ -149,12 +150,12 @@ class SANSSingleReduction(SANSSingleReductionBase):
         self.setProperty("OutScaleFactor", scale_factors[0])
         self.setProperty("OutShiftFactor", shift_factors[0])
 
-    def set_output_workspaces(self, reduction_mode_vs_output_workspaces):
+    def set_output_workspaces(self, workflow_outputs: SANSWorkflowAlgorithmOutputs):
         """
         Sets the output workspaces which can be HAB, LAB or Merged.
 
         At this step we also provide a workspace name to the sample logs which can be used later on for saving
-        :param reduction_mode_vs_output_workspaces:  map from reduction mode to output workspace
+        :param workflow_outputs:  collection of wavelength sliced and reduced workspaces
         """
         # Note that this breaks the flexibility that we have established with the reduction mode. We have not hardcoded
         # HAB or LAB anywhere which means that in the future there could be other detectors of relevance. Here we
@@ -162,17 +163,14 @@ class SANSSingleReduction(SANSSingleReductionBase):
 
         merged, lab, hab = WorkspaceGroup(), WorkspaceGroup(), WorkspaceGroup()
 
-        for reduction_mode, output_workspace_list in reduction_mode_vs_output_workspaces.items():
-            for output_workspace in output_workspace_list:
-                if reduction_mode is ReductionMode.MERGED:
-                    merged.addWorkspace(output_workspace)
-                elif reduction_mode is ReductionMode.LAB:
-                    lab.addWorkspace(output_workspace)
-                elif reduction_mode is ReductionMode.HAB:
-                    hab.addWorkspace(output_workspace)
-                else:
-                    raise RuntimeError("SANSSingleReduction: Cannot set the output workspace. The selected reduction "
-                                       "mode {0} is unknown.".format(reduction_mode))
+        for ws in workflow_outputs.lab_output:
+            lab.addWorkspace(ws)
+
+        for ws in workflow_outputs.hab_output:
+            hab.addWorkspace(ws)
+
+        for ws in workflow_outputs.merged_output:
+            merged.addWorkspace(ws)
 
         self._set_prop_if_group_has_data("OutputWorkspaceLAB", lab)
         self._set_prop_if_group_has_data("OutputWorkspaceHAB", hab)
