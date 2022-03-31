@@ -1,0 +1,1 @@
+- The :ref:`SANSILLMultiProcess <algm-SANSILLMultiProcess>` now properly handles the RuntimError coming from user requesting masks that do not exist, with a relevant issue message displayed.
