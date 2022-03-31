@@ -201,3 +201,6 @@ rel/
 # in source installed conda
 mambaforge/
 miniconda3/
+
+#dns full gui documentation
+/home/koshchii/GitRepos/mantid_fork/mantid/docs/source/interfaces/direct/dns/
