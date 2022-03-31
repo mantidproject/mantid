@@ -34,6 +34,9 @@ Taking Slices
 #. The original slice plot should remain unchanged
 #. Double-click on elements of the original slice plot and modify settings
 #. Ensure that the slice plot changes accordingly
+#. Click ``Make Current`` on the original slice plot
+#. Modify the slice settings in the ``Slice`` tab again and click ``Display``
+#. This time the new slice plot overwrites the original slice plot
 
 2. Overplot recoil lines and Bragg peaks
 ########################################
@@ -43,7 +46,13 @@ Taking Slices
 #. Select two or three materials from the submenu for ``Bragg peaks`` and ensure that Bragg peaks in different colours per material are plotted on the slice plot.
 #. Make sure that when deselecting one of the materials only the respective Bragg peaks are removed from the slice plot but the ones still selected remain.
 
-3. Generate a script
+3. Check plot toolbar
+#####################
+
+#. In the plot window, check that the following buttons are working as expected: Zoom in, Zoom out, Legends (add a recoil line to display a legend first), Save, Copy, Print and Plot Options. Modify plot options and make sure that the plot changes accordingly.
+
+
+4. Generate a script
 ####################
 
 #. Navigate to the ``File`` menu on the slice plot
