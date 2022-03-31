@@ -68,6 +68,8 @@ class SliceViewer(ObservingPresenter, SliceViewerBasePresenter):
         sliceinfo = self.get_sliceinfo()
         if not sliceinfo.can_support_nonorthogonal_axes():
             self.view.data_view.disable_tool_button(ToolItemText.NONORTHOGONAL_AXES)
+        if not self.model.can_support_non_axis_cuts():
+            self.view.data_view.disable_tool_button(ToolItemText.NONAXISALIGNEDCUTS)
 
         self.view.data_view.help_button.clicked.connect(self.action_open_help_window)
 

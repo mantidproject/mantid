@@ -86,6 +86,18 @@ class SliceViewerModel(SliceViewerBaseModel):
             return True
         return False
 
+    def can_support_non_axis_cuts(self) -> bool:
+        ws = self._get_ws()
+        if WorkspaceInfo.can_support_dynamic_rebinning(ws):
+            ndims = ws.getNumDims()
+            if ndims == 3 and all(ws.getDimension(idim).getMDFrame().isQ() for idim in range(ndims)):
+                # only support cut viewer for 3D Q MD workspaces that can be rebinned atm
+                return True
+            else:
+                return False
+        else:
+            return False
+
     def can_support_nonorthogonal_axes(self) -> bool:
         """
         Query if the workspace can support non-orthogonal axes.
