@@ -39,6 +39,11 @@ Taking Slices
 #. Modify the slice settings in the ``Slice`` tab again and click ``Display``
 #. This time the new slice plot overwrites the original slice plot
 
+.. figure:: ../../../../docs/source/images/slice_plot.png
+   :alt: slice_plot.png
+   :align: center
+   :width: 80%
+
 2. Overplot recoil lines and Bragg peaks
 ########################################
 
@@ -47,7 +52,12 @@ Taking Slices
 #. Select two or three materials from the submenu for ``Bragg peaks`` and ensure that Bragg peaks in different colours per material are plotted on the slice plot.
 #. Make sure that when deselecting one of the materials only the respective Bragg peaks are removed from the slice plot but the ones still selected remain.
 
-3. Check plot toolbar
+.. figure:: ../../../../docs/source/images/recoil_line_bragg_peaks.png
+   :alt: recoil_line_bragg_peaks.png
+   :align: center
+   :width: 80%
+
+3. The plot toolbar
 #####################
 
 #. In the plot window, check that the following buttons are working as expected: Zoom in, Zoom out, Legends (add a recoil line to display a legend first), Save, Copy, Print and Plot Options. Modify plot options and make sure that the plot changes accordingly.
@@ -77,10 +87,10 @@ Taking Cuts
    :align: center
    :width: 80%
 
-#. Check that the menu item 'Intensity' is disabled as well as the item 'Recoil lines' within the menu item 'Information'.
+#. Check that the menu item ``Intensity`` is disabled as well as the item ``Recoil lines`` within the menu item ``Information``.
 #. On the cut plot, click ``Keep``
 #. Modify the step size on the ``Cut`` tab and click ``Plot Over``. A second cut should appear on the cut plot in a different colour.
-#. Click on ``Plot Options`` on the cut plot and modify settings
+#. Click on Plot Options on the cut plot and modify settings
 #. Ensure that the cut plot changes accordingly
 
 2. Interactive Cuts
@@ -90,9 +100,11 @@ Taking Cuts
 #. Click ``Display`` in the ``Slice`` tab without changing the default values
 #. On the slice plot, select ``Interactive Cuts``
 #. Use the cursor to select a rectangular region in the slice plot. A second window with a cut plot should open.
-#. Check that the menu item 'Intensity' is disabled as well as the item 'Recoil lines' within the menu item 'Information' in the new plot window
-#. Check that the 'File' menu only has one menu item, 'Close'
+#. Check that the menu item ``Intensity`` is disabled as well as the item ``Recoil lines`` within the menu item ``Information`` in the new plot window
+#. Check that the ``File`` menu only has one menu item, ``Close``
 #. Change the rectangle by changing its size or dragging it to a different area of the slice plot. The cut plot should update accordingly.
+#. Click on ``Save Cut to Workspace`` and check the ``MD Histo`` tab of the Workspace Manager to verify that the new workspace was added
+#. Click on Flip Integration Axis. The y axis label changes from ``Energy Transfer (meV)`` to :math:`|Q| (\mathrm{\AA}^{-1})` or vice versa, depending on the initial label.
 
 .. figure:: ../../../../docs/source/images/interactive_cuts.png
    :alt: interactive_cuts.png
@@ -105,6 +117,11 @@ Taking Cuts
 #. Navigate to the ``Information`` menu on the cut plot
 #. Select ``Aluminium`` from the submenu for ``Bragg peaks``. Green lines should appear on the cut plot with a respective legend entry.
 #. Deselect ``Aluminium`` form the submenu for ``Bragg peaks``. Both green lines and the respective legend entry should disappear.
+
+.. figure:: ../../../../docs/source/images/cut_with_bragg_peaks.png
+   :alt: cut_with_bragg_peaks.png
+   :align: center
+   :width: 80%
 
 4. Generate a script
 ####################
@@ -124,6 +141,6 @@ Taking Cuts
 #. Set the ``y`` value to ``2`` and hit enter. The cuts are now plotted with an additional offset (``2``) in direction of the y axis.
 
 .. figure:: ../../../../docs/source/images/waterfall_cut_plot.png
-   :alt: interactive_cuts.png
+   :alt: waterfall_cut_plot.png
    :align: center
    :width: 80%
