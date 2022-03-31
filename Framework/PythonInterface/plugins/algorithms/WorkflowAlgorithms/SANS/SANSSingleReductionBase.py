@@ -164,7 +164,7 @@ class SANSSingleReductionBase(DistributedDataProcessorAlgorithm):
         # enabled. This will allow SANSBatchReduction to add them to the ADS.
         # --------------------------------------------------------------------------------------------------------------
         if use_optimizations:
-            if not save_can:
+            if save_can:
                 self.set_reduced_can_workspace_on_output(completed_event_slices)
             self.set_reduced_can_count_and_norm_on_output(completed_event_slices)
 
