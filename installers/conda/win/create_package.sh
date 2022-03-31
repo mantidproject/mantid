@@ -60,7 +60,6 @@ echo "Conda env created"
 # Determine version information
 VERSION=$("$CONDA_EXE" list --prefix "$CONDA_ENV_PATH" '^mantid$' --json | $CONDA_ENV_PATH/Library/mingw-w64/bin/jq.exe --raw-output '.[0].version')
 echo "Version number: $version"
-VERSION=1
 
 # Remove jq
 echo "Removing jq from conda env"
@@ -146,17 +145,23 @@ NSIS_SCRIPT=$THIS_SCRIPT_DIR/project.nsi
 
 echo "Packaging package via NSIS"
 # Make windows-like paths because NSIS is weird
-COPY_DIR_DRIVE_LETTER="$(echo ${COPY_DIR:1:1} | tr [:lower:] [:upper:])"
-COPY_DIR_FLIPPED_SLASH=${COPY_DIR////\\}
+SCRIPT_DRIVE_LETTER="$(echo ${COPY_DIR:1:1} | tr [:lower:] [:upper:])"
+COPY_DIR=${COPY_DIR////\\}
+COPY_DIR="$SCRIPT_DRIVE_LETTER:${COPY_DIR:2}"
 
-NSIS_PATH_DRIVE_LETTER="$(echo ${NSIS_SCRIPT:1:1} | tr [:lower:] [:upper:])"
-NSIS_PATH_FLIPPED_SLASH=${NSIS_SCRIPT////\\}
+NSIS_SCRIPT=${NSIS_SCRIPT////\\}
+NSIS_SCRIPT="$SCRIPT_DRIVE_LETTER:${NSIS_SCRIPT:2}"
 
-WINDOWS_PATH_COPY_DIR="$COPY_DIR_DRIVE_LETTER:${COPY_DIR_FLIPPED_SLASH:2}"
-WINDOWS_PATH_NSIS_SCRIPT="$NSIS_PATH_DRIVE_LETTER:${NSIS_PATH_FLIPPED_SLASH:2}"
+ICON_PATH=$THIS_SCRIPT_DIR/../../../images/mantidplot.ico
+ICON_PATH=${ICON_PATH////\\}
+ICON_PATH="$SCRIPT_DRIVE_LETTER:${ICON_PATH:2}"
 
-echo makensis /DVERSION=$VERSION /DPACKAGE_DIR="$WINDOWS_PATH_COPY_DIR" /DOUTFILE_NAME=$PACKAGE_NAME "$WINDOWS_PATH_NSIS_SCRIPT"
-cmd.exe /C "START /wait "" makensis /V4 /DVERSION=$VERSION /DPACKAGE_DIR=\"$WINDOWS_PATH_COPY_DIR\" /DOUTFILE_NAME=$PACKAGE_NAME \"$WINDOWS_PATH_NSIS_SCRIPT\""
+LICENSE_PATH=$THIS_SCRIPT_DIR/../../../LICENSE.txt
+LICENSE_PATH=${LICENSE_PATH////\\}
+LICENSE_PATH="$SCRIPT_DRIVE_LETTER:${LICENSE_PATH:2}"
+
+echo makensis /V4 /DVERSION=$VERSION /DPACKAGE_DIR=\"$COPY_DIR\" /DOUTFILE_NAME=$PACKAGE_NAME /DICON_PATH=$ICON_PATH /DMUI_PAGE_LICENSE_PATH=$LICENSE_PATH \"$NSIS_SCRIPT\"
+cmd.exe /C "START /wait "" makensis /V4 /DVERSION=$VERSION /DPACKAGE_DIR=\"$COPY_DIR\" /DOUTFILE_NAME=$PACKAGE_NAME /DICON_PATH=$ICON_PATH /DMUI_PAGE_LICENSE_PATH=$LICENSE_PATH \"$NSIS_SCRIPT\""
 echo "Package packaged, find it here: $THIS_SCRIPT_DIR/$PACKAGE_NAME"
 
 echo "Cleaning up left over files"
