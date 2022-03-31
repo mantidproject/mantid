@@ -389,7 +389,7 @@ class SANSILLMultiProcess(DataProcessorAlgorithm):
                         try:
                             FileFinder.Instance().findRuns(item)
                         except RuntimeError as re:
-                            issues[prop] = re
+                            issues[prop] = str(re)
         return issues
 
     def validateInputs(self):
