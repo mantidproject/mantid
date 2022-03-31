@@ -7,14 +7,13 @@
 
 import os
 import pathlib
-import sys
 
 
 DIRECTIVE = ".. amalgamate:: "
 
 
 def getReleaseRoot() -> pathlib.Path:
-    program_path = pathlib.Path((sys.argv[0])[0])
+    program_path = pathlib.Path(__file__).resolve()
     script_dir = program_path / '../../../docs/source/release/'
     return script_dir.resolve()
 
