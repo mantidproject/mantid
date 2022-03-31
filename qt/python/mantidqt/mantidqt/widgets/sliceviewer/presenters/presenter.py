@@ -329,11 +329,19 @@ class SliceViewer(ObservingPresenter, SliceViewerBasePresenter):
             self.view.peaks_view.hide()
 
     def non_axis_aligned_cut(self):
+        data_view = self._data_view
         if self.view.non_axis_aligned_cut_view.isVisible():
             self.view.non_axis_aligned_cut_view.hide()
+            for tool in [ToolItemText.REGIONSELECTION, ToolItemText.LINEPLOTS]:
+                data_view.deactivate_and_disable_tool(tool)
+            if self.get_sliceinfo().can_support_nonorthogonal_axes():
+                data_view.enable_tool_button(ToolItemText.NONORTHOGONAL_AXES)
         else:
             self._create_cutviewer_presenter_if_necessary()
             self.view.non_axis_aligned_cut_view.show()
+            data_view.deactivate_tool(ToolItemText.ZOOM)
+            for tool in [ToolItemText.REGIONSELECTION, ToolItemText.LINEPLOTS, ToolItemText.NONORTHOGONAL_AXES]:
+                data_view.deactivate_and_disable_tool(tool)
 
     def replace_workspace(self, workspace_name, workspace):
         """

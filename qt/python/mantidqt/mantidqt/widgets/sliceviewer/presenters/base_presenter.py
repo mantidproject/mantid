@@ -55,9 +55,6 @@ class SliceViewerBasePresenter(IDataViewSubscriber, ABC):
         else:
             self._data_view.draw_plot()
 
-    # def get_axes_limits(self):
-    #     self._data_view.get_axes_limits()
-
     def get_data_limits(self):
         return Dimensions.get_dim_limits(self.model.ws, self.get_slicepoint(), self._data_view.dimensions.transpose)
 
