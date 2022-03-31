@@ -536,6 +536,14 @@ public:
     presenter->notifyRowContentChanged(row);
   }
 
+  void testModelInformedWhenGroupNameChanged() {
+    auto mock = makeMockModel();
+    auto group = makeGroupWithOneRow();
+    EXPECT_CALL(*mock, updateLookupIndexesOfGroup(group)).Times(1);
+    auto presenter = makePresenter(std::move(mock));
+    presenter->notifyGroupNameChanged(group);
+  }
+
 private:
   NiceMock<MockBatchView> m_view;
   NiceMock<MockBatchJobManager> *m_jobManager;
