@@ -32,7 +32,7 @@ class FileLoading:
             return parser.parse_toml_file(file_path, file_information=file_information)
         except KeyError as e:
             raise UserFileLoadException(f"The following key is missing: {e}")
-        except ValueError as e:
+        except (NotImplementedError, ValueError) as e:
             raise UserFileLoadException(e)
 
     @staticmethod

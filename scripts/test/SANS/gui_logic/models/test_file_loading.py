@@ -22,7 +22,7 @@ class FileLoadingTest(unittest.TestCase):
             self.assertEquals(result, mocked_parser.parse_toml_file.return_value)
 
     def test_wraps_exceptions_toml(self):
-        expected_wrapped = [KeyError(), ValueError()]
+        expected_wrapped = [KeyError(), NotImplementedError(), ValueError()]
 
         for known_exception in expected_wrapped:
             with mock.patch("sans.gui_logic.models.file_loading.TomlParser") as mocked_module:
