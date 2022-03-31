@@ -15,6 +15,7 @@ set(SRC_FILES
     ${FRAMEWORK_DIR}/TestHelpers/src/InstrumentCreationHelper.cpp
     ${FRAMEWORK_DIR}/TestHelpers/src/WorkspaceCreationHelper.cpp
 )
+set(INC_FILES ${FRAMEWORK_DIR}/TestHelpers/inc/MantidFrameworkTestHelpers/WorkspaceCreationHelper.h)
 add_library(PythonWorkspaceCreationHelper ${SRC_FILES} ${INC_FILES})
 set_python_properties(PythonWorkspaceCreationHelper _WorkspaceCreationHelper)
 
