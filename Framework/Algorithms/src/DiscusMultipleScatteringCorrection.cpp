@@ -392,13 +392,14 @@ void DiscusMultipleScatteringCorrection::exec() {
 
   int nSimulationPointsInt = getProperty("NumberOfSimulationPoints");
   size_t nSimulationPoints = static_cast<size_t>(nSimulationPointsInt);
-  if (isEmpty(nSimulationPoints) || nSimulationPoints > inputNbins) {
-    if (!isEmpty(nSimulationPoints)) {
-      g_log.warning() << "The requested number of simulation points is larger "
-                         "than the maximum number of simulations per spectra. "
-                         "Defaulting to "
-                      << inputNbins << ".\n ";
-    }
+
+  if (isEmpty(nSimulationPoints)) {
+    nSimulationPoints = inputNbins;
+  } else if (nSimulationPoints > inputNbins) {
+    g_log.warning() << "The requested number of simulation points is larger "
+                       "than the maximum number of simulations per spectra. "
+                       "Defaulting to "
+                    << inputNbins << ".\n ";
     nSimulationPoints = inputNbins;
   }
 
