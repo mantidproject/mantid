@@ -29,10 +29,11 @@ Taking Slices
 #. In the ``Workspace Manager`` tab select the workspace ``MAR21335_Ei60meV``
 #. Click ``Display`` in the ``Slice`` tab without changing the default values
 #. On the slice plot, click ``Keep``
-#. Modify the slice settings in the ``Slice`` tab, for instance the range values and click ``Display``
+#. Modify the slice settings in the ``Slice`` tab, for instance the values for ``from`` and ``to``, and click ``Display``
 #. A second slice plot should open with a plot reflecting your changes in the settings
 #. The original slice plot should remain unchanged
 #. Double-click on elements of the original slice plot and modify settings
+#. Change the title and the y axis label to LaTeX, for instance ``$\mathrm{\AA}^{-1}$``, and ensure the text is displayed correctly (for ``$\mathrm{\AA}^{-1}$`` it should be :math:`\mathrm{\AA}^{-1}`)
 #. Ensure that the slice plot changes accordingly
 #. Click ``Make Current`` on the original slice plot
 #. Modify the slice settings in the ``Slice`` tab again and click ``Display``
@@ -89,6 +90,8 @@ Taking Cuts
 #. Click ``Display`` in the ``Slice`` tab without changing the default values
 #. On the slice plot, select ``Interactive Cuts``
 #. Use the cursor to select a rectangular region in the slice plot. A second window with a cut plot should open.
+#. Check that the menu item 'Intensity' is disabled as well as the item 'Recoil lines' within the menu item 'Information' in the new plot window
+#. Check that the 'File' menu only has one menu item, 'Close'
 #. Change the rectangle by changing its size or dragging it to a different area of the slice plot. The cut plot should update accordingly.
 
 .. figure:: ../../../../docs/source/images/interactive_cuts.png
@@ -108,5 +111,19 @@ Taking Cuts
 
 #. Navigate to the ``File`` menu on the cut plot
 #. Select ``Generate Script to Clipboard`` and paste the script into the Mantid editor. Please note that on Linux ``Ctrl + V`` might not work as expected. Use ``shift insert`` instead in this case.
-#. Run the script and check that the same slice plot is displayed
+#. Run the script and check that the same cut plot is displayed
 
+5. Waterfall plots
+##################
+
+#. Navigate to the ``Cut`` tab
+#. In the row labelled ``along``, set the ``from`` value to ``0`` and the ``to`` value to ``10``
+#. In the row labelled ``over``, set the ``from`` value to ``-5`` and the ``to`` value to ``5`` as well as the ``width`` value to ``2``
+#. Click ``Plot``. A new window with a cut plot should open.
+#. Click ``Waterfall`` and set the ``x`` value to ``0.5``, then hit enter. The cuts are now plotted with a ``0.5`` offset in direction of the x axis.
+#. Set the ``y`` value to ``2`` and hit enter. The cuts are now plotted with an additional offset (``2``) in direction of the y axis.
+
+.. figure:: ../../../../docs/source/images/waterfall_cut_plot.png
+   :alt: interactive_cuts.png
+   :align: center
+   :width: 80%
