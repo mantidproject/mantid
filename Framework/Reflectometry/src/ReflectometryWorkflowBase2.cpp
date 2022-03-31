@@ -83,6 +83,36 @@ std::vector<size_t> getProcessingInstructionsAsIndices(std::string const &instru
   });
   return indices;
 }
+
+/** Get a detector parameter from an instrument
+ *
+ * @param instrument : the instrument containing the parameters
+ * @param param : the parameter name
+ * @return : the parameter value converted to an integer, or boost::none if it was not found
+ * @throw : if the detector index is invalid
+ */
+boost::optional<size_t> getDetectorParamOrNone(const Instrument_const_sptr &instrument,
+                                               const MatrixWorkspace_sptr &inputWS, const std::string &param) {
+  const std::vector<double> value = instrument->getNumberParameter(param);
+  if (value.empty()) {
+    return boost::none;
+  }
+  // Check it's a valid workspace index
+  if (value[0] < 0) {
+    std::ostringstream msg;
+    msg << "Parameter file value " << param << "=" << value[0] << " is invalid; it must be 0 or greater";
+    throw std::out_of_range(msg.str());
+  }
+
+  auto const wsIndex = static_cast<size_t>(value[0]);
+  if (wsIndex >= inputWS->getNumberHistograms()) {
+    std::ostringstream msg;
+    msg << "Parameter file value " << param << "=" << wsIndex
+        << " is out of range; max workspace index= " << inputWS->getNumberHistograms() - 1 << ")";
+    throw std::out_of_range(msg.str());
+  }
+  return wsIndex;
+}
 } // namespace
 
 namespace Mantid::Reflectometry {
@@ -689,42 +719,37 @@ void ReflectometryWorkflowBase2::populateMonitorProperties(const IAlgorithm_sptr
  */
 std::string ReflectometryWorkflowBase2::findProcessingInstructions(const Instrument_const_sptr &instrument,
                                                                    const MatrixWorkspace_sptr &inputWS) const {
-
+  assert(instrument && inputWS && inputWS->getNumberHistograms() > 0);
   const std::string analysisMode = getProperty("AnalysisMode");
 
+  boost::optional<size_t> maybeStart;
+  boost::optional<size_t> maybeStop;
   if (analysisMode == "PointDetectorAnalysis") {
-    const std::vector<double> pointStart = instrument->getNumberParameter("PointDetectorStart");
-    const std::vector<double> pointStop = instrument->getNumberParameter("PointDetectorStop");
-
-    if (pointStart.empty() || pointStop.empty()) {
-      throw std::runtime_error("Could not find 'PointDetectorStart' and/or "
-                               "'PointDetectorStop' in parameter file. Please "
-                               "provide processing instructions manually or "
-                               "set analysis mode to 'MultiDetectorAnalysis'.");
+    maybeStart = getDetectorParamOrNone(instrument, inputWS, "PointDetectorStart");
+    maybeStop = getDetectorParamOrNone(instrument, inputWS, "PointDetectorStop");
+    if (!maybeStart || !maybeStop) {
+      throw std::runtime_error(
+          "Could not find 'PointDetectorStart' and/or 'PointDetectorStop' in parameter file. Please provide processing "
+          "instructions manually or set analysis mode to 'MultiDetectorAnalysis'.");
     }
-    const auto detStart = static_cast<int>(pointStart[0]);
-    const auto detStop = static_cast<int>(pointStop[0]);
-
-    auto instructions = std::to_string(detStart);
-    if (detStart != detStop)
-      instructions += "-" + std::to_string(detStop);
-    return instructions;
-  }
-
-  else {
-    const std::vector<double> multiStart = instrument->getNumberParameter("MultiDetectorStart");
-    const std::vector<double> multiStop = instrument->getNumberParameter("MultiDetectorStop");
-    if (multiStart.empty()) {
-      throw std::runtime_error("Could not find 'MultiDetectorStart in "
-                               "parameter file. Please provide processing "
-                               "instructions manually or set analysis mode to "
-                               "'PointDetectorAnalysis'.");
+  } else {
+    maybeStart = getDetectorParamOrNone(instrument, inputWS, "MultiDetectorStart");
+    maybeStop = getDetectorParamOrNone(instrument, inputWS, "MultiDetectorStop");
+    if (!maybeStart) {
+      throw std::runtime_error("Could not find 'MultiDetectorStart' in parameter file. Please provide processing "
+                               "instructions manually or set analysis mode to 'PointDetectorAnalysis'.");
     }
-    // Use last workspace index if stop is empty
-    auto const stop = multiStop.empty() ? inputWS->getNumberHistograms() - 1 : static_cast<int>(multiStop[0]);
-    auto instructions = std::to_string(static_cast<int>(multiStart[0])) + "-" + std::to_string(stop);
-    return instructions;
+    if (!maybeStop) {
+      // Default to the last workspace index if stop is not given
+      maybeStop = inputWS->getNumberHistograms() - 1;
+    }
   }
+  // We always have start; stop is optional
+  auto instructions = std::to_string(*maybeStart);
+  if (maybeStop && *maybeStart != *maybeStop) {
+    instructions += "-" + std::to_string(*maybeStop);
+  }
+  return instructions;
 }
 
 /** Set transmission properties
