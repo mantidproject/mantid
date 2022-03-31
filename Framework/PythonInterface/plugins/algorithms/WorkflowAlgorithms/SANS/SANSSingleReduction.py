@@ -43,7 +43,10 @@ class SANSSingleReduction(SANSSingleReductionBase):
                              doc='The output workspace for the low-angle bank.')
         self.declareProperty(WorkspaceGroupProperty('OutputWorkspaceHAB', '',
                                                     optional=PropertyMode.Optional, direction=Direction.Output),
-                             doc='The output workspace for the high-angle bank.')
+                             doc='The output workspace for the high-angle bank.'),
+        self.declareProperty(WorkspaceGroupProperty('OutputWorkspaceHABScaled', '',
+                                                    optional=PropertyMode.Optional, direction=Direction.Output),
+                             doc='The scaled output HAB workspace when merging')
         self.declareProperty(WorkspaceGroupProperty('OutputWorkspaceMerged', '',
                                                     optional=PropertyMode.Optional, direction=Direction.Output),
                              doc='The output workspace for the merged reduction.')
@@ -51,6 +54,7 @@ class SANSSingleReduction(SANSSingleReductionBase):
         self.setPropertyGroup("OutShiftFactor", 'Output')
         self.setPropertyGroup("OutputWorkspaceLAB", 'Output')
         self.setPropertyGroup("OutputWorkspaceHAB", 'Output')
+        self.setPropertyGroup("OutputWorkspaceHABScaled", 'Output')
         self.setPropertyGroup("OutputWorkspaceMerged", 'Output')
 
         # CAN output
@@ -161,7 +165,7 @@ class SANSSingleReduction(SANSSingleReductionBase):
         # HAB or LAB anywhere which means that in the future there could be other detectors of relevance. Here we
         # reference HAB and LAB directly since we currently don't want to rely on dynamic properties. See also in PyInit
 
-        merged, lab, hab = WorkspaceGroup(), WorkspaceGroup(), WorkspaceGroup()
+        merged, lab, hab, scaled = WorkspaceGroup(), WorkspaceGroup(), WorkspaceGroup(), WorkspaceGroup()
 
         for ws in workflow_outputs.lab_output:
             lab.addWorkspace(ws)
@@ -172,8 +176,12 @@ class SANSSingleReduction(SANSSingleReductionBase):
         for ws in workflow_outputs.merged_output:
             merged.addWorkspace(ws)
 
+        for ws in workflow_outputs.scaled_hab_output:
+            scaled.addWorkspace(ws)
+
         self._set_prop_if_group_has_data("OutputWorkspaceLAB", lab)
         self._set_prop_if_group_has_data("OutputWorkspaceHAB", hab)
+        self._set_prop_if_group_has_data("OutputWorkspaceHABScaled", scaled)
         self._set_prop_if_group_has_data("OutputWorkspaceMerged", merged)
 
     def set_reduced_can_workspace_on_output(self, completed_event_bundled):
