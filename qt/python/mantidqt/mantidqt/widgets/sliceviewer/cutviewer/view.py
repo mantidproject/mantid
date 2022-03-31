@@ -94,7 +94,7 @@ class CutViewerView(QWidget):
                                          markersize=3)
         self.figure.axes[0].ignore_existing_data_limits = True
         self.figure.axes[0].autoscale_view()
-        # # reformat xlabel string
+        # reformat xlabel string
         xstr = self.figure.axes[0].get_xlabel()
         istart = xstr.index('(')
         iend = xstr.index(')')
@@ -125,9 +125,14 @@ class CutViewerView(QWidget):
         self.table.blockSignals(True)
         ivec = int(not bool(irow))  # index of u1 or u2 - which ever not changed (3rd row not editable)
         if icol < 3:
-            # choose a new vector in plane that is not a linear combination of two other
-            vectors[ivec] = np.cross(vectors[irow], vectors[2])
-            self._write_vector_to_table(ivec, vectors[ivec])
+            if abs(np.dot(vectors[irow], vectors[-1])) > 1e-15:
+                # not a vector out of slice plane - reset
+                vectors[irow] = np.cross(vectors[ivec], vectors[-1])
+                self._write_vector_to_table(irow, vectors[irow])
+            else:
+                # choose a new vector in plane that is not a linear combination of two other
+                vectors[ivec] = np.cross(vectors[irow], vectors[-1])
+                self._write_vector_to_table(ivec, vectors[ivec])
         elif icol == 3 or icol == 4:
             # extents changed - adjust width based on nbins
             self.table.item(irow, 6).setData(Qt.EditRole,
@@ -162,7 +167,7 @@ class CutViewerView(QWidget):
                     self.table.item(irow, 4).setData(Qt.EditRole, float(extents[1, irow]))
                 self.table.item(irow, 5).setData(Qt.EditRole, int(nbin))  # nbins
             else:
-                # width of integtrated axis changed
+                # width of integrated axis changed
                 cen = np.mean(extents[:, irow])
                 self.table.item(irow, 3).setData(Qt.EditRole, float(cen - step / 2))
                 self.table.item(irow, 4).setData(Qt.EditRole, float(cen + step / 2))
