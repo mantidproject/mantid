@@ -81,6 +81,17 @@ class TestWorkspaceInfo(unittest.TestCase):
             self.assertFalse(WorkspaceInfo.can_support_dynamic_rebinning(mock_ws))
             mock_get_ws_type.assert_called_once_with(mock_ws)
 
+    def test_cannot_support_dynamic_rebinning_for_MDH_workspace_if_altered(self):
+        with mock.patch.object(WorkspaceInfo, "get_ws_type") as mock_get_ws_type:
+            mock_get_ws_type.return_value = WS_TYPE.MDH
+            mock_ws = mock.NonCallableMock()
+            mock_ws.hasOriginalWorkspace.return_value = True
+            mock_ws.getOriginalWorkspace.return_value.getNumDims.return_value = mock_ws.getNumDims.return_value
+            mock_ws.getExperimentInfo.return_value.run.return_value.get.return_value.value = "1"
+
+            self.assertFalse(WorkspaceInfo.can_support_dynamic_rebinning(mock_ws))
+            mock_get_ws_type.assert_called_once_with(mock_ws)
+
     def test_cannot_support_dynamic_rebinning_for_MDH_workspace_with_different_dims(self):
         with mock.patch.object(WorkspaceInfo, "get_ws_type") as mock_get_ws_type:
             mock_get_ws_type.return_value = WS_TYPE.MDH
