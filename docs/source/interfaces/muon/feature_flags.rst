@@ -9,21 +9,23 @@ Muon Feature Flags
 Overview
 --------
 
-Muon Feature Flags provides super users with access to additional features such as raw plots and model analysis.
+Muon Feature Flags provide advanced users with access to additional features such as raw plots and model analysis.
 
 
 How to set up
 --------------
 
-To access feature flags you need to make changes to your ``Mantd.user.properties file``. To do this, follow these instructions: -
+To access feature flags you need to make changes to your ``Mantd.user.properties file``. To do this, follow these instructions:
 
-1. Open file explorer and navigate to the ``MantidInstall`` folder
-2. For Windows users - open the bin folder.
-   For Mac or Linux users - got to ``$HOME/.mantid/Mantid.user.properties``
-3. Open the ``Mantid.user.properties`` file.
-4. At the bottom of the file add the line ``muon.GUI=<options>``. See section on :ref:`Options <feature_flag_options>` below for more details.
-5. Save the file.
-6. Open Mantid - You should now have access to the features you chose in step 4.
+1. Navigate to the location of the ``Mantid.user.properties`` file
+
+   a. For Windows users - Open the file explorer and navigate to the ``MantidInstall\bin`` folder
+   b. For Mac or Linux users - got to ``~/.mantid/Mantid.user.properties``
+
+2. Open the ``Mantid.user.properties`` file.
+3. At the bottom of the file add the line ``muon.GUI=<options>``. See section on :ref:`Options <feature_flag_options>` below for more details.
+4. Save the file.
+5. Open Mantid - You should now have access to the features you chose in step 4.
 
 If this does not work see the :ref:`Warning <feature_flag_warning>` notice below for common ways this can fail.
 
@@ -64,7 +66,7 @@ Setting any of the following for the first time may remove the ``muon.GUI=<optio
 - Default instrument
 - Manage user directories
 
-To avoid this : -
+To avoid this :
 
 - Open Mantid and set the default settings (i.e. the list above)
 - Close Mantid
