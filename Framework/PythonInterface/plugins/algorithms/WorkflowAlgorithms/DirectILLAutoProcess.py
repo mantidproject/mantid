@@ -230,7 +230,7 @@ class DirectILLAutoProcess(DataProcessorAlgorithm):
         self.declareProperty('FlatBackgroundSource', "",
                              doc='File(s) or workspaces containing the source to calculate flat background.')
 
-        self.copyProperties('DirectILLCollectData', common.PROP_FLAT_BKG_SCALING)
+        self.copyProperties('DirectILLCollectData', [common.PROP_FLAT_BKG_SCALING, common.PROP_OUTPUT_FLAT_BKG_WS])
 
         self.copyProperties('DirectILLReduction', common.PROP_ABSOLUTE_UNITS)
 
@@ -243,6 +243,7 @@ class DirectILLAutoProcess(DataProcessorAlgorithm):
         self.setPropertyGroup(common.PROP_FLAT_BKG_WINDOW, additional_inputs_group)
         self.setPropertyGroup('FlatBackgroundSource', additional_inputs_group)
         self.setPropertyGroup(common.PROP_FLAT_BKG_SCALING, additional_inputs_group)
+        self.setPropertyGroup(common.PROP_OUTPUT_FLAT_BKG_WS, additional_inputs_group)
         self.setPropertyGroup(common.PROP_ABSOLUTE_UNITS, additional_inputs_group)
 
         self.copyProperties('DirectILLCollectData', [common.PROP_NORMALISATION, common.PROP_MON_PEAK_SIGMA_MULTIPLIER])
@@ -456,7 +457,8 @@ class DirectILLAutoProcess(DataProcessorAlgorithm):
         kwargs = dict()
         if not self.getProperty('FlatBackgroundSource').isDefault:
             kwargs['FlatBkgWorkspace'] = self.flat_background
-            kwargs[common.PROP_FLAT_BKG_SCALING] = self.flat_bkg_scaling
+        kwargs[common.PROP_FLAT_BKG_SCALING] = self.flat_bkg_scaling
+        kwargs[common.PROP_OUTPUT_FLAT_BKG_WS] = self.getPropertyValue(common.PROP_OUTPUT_FLAT_BKG_WS)
         if not self.getProperty(common.PROP_FLAT_BKG).isDefault:
             kwargs[common.PROP_FLAT_BKG] = self.getPropertyValue(common.PROP_FLAT_BKG)
             kwargs[common.PROP_FLAT_BKG_WINDOW] = self.getPropertyValue(common.PROP_FLAT_BKG_WINDOW)
