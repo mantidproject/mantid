@@ -245,6 +245,8 @@ class DirectILLAutoProcess(DataProcessorAlgorithm):
         self.setPropertyGroup(common.PROP_FLAT_BKG_SCALING, additional_inputs_group)
         self.setPropertyGroup(common.PROP_ABSOLUTE_UNITS, additional_inputs_group)
 
+        self.copyProperties('DirectILLCollectData', [common.PROP_NORMALISATION, common.PROP_MON_PEAK_SIGMA_MULTIPLIER])
+
         self.copyProperties('DirectILLCollectData', common.PROP_INCIDENT_ENERGY_CALIBRATION)
 
         self.declareProperty(name='IncidentEnergy',
@@ -475,6 +477,8 @@ class DirectILLAutoProcess(DataProcessorAlgorithm):
             self.vanadium_epp = "{}_epp".format(ws)
             kwargs['OutputEPPWorkspace'] = self.vanadium_epp
             self.to_clean.append(self.vanadium_epp)
+        kwargs[common.PROP_NORMALISATION] = self.getPropertyValue(common.PROP_NORMALISATION)
+        kwargs[common.PROP_MON_PEAK_SIGMA_MULTIPLIER] = self.getPropertyValue(common.PROP_MON_PEAK_SIGMA_MULTIPLIER)
 
         DirectILLCollectData(
             Run=sample,
