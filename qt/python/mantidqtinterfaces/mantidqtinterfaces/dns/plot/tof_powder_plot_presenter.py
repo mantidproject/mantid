@@ -32,7 +32,7 @@ class DNSTofPowderPlotPresenter(DNSObserver):
 
     def tab_got_focus(self):
         if (self.param_dict['tof_powder_script_generator']
-        ['script_number'] != self._plotted_script_number):
+                ['script_number'] != self._plotted_script_number):
             self._plot()
 
     def process_auto_reduction_request(self):

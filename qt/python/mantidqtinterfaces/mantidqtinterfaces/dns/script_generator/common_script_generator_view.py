@@ -13,7 +13,6 @@ from qtpy.QtWidgets import QProgressDialog
 from mantidqtinterfaces.dns.data_structures.dns_view import DNSView
 
 
-
 class DNSScriptGeneratorView(DNSView):
     """
         Common Widget for DNS Script generator, shows mantid script

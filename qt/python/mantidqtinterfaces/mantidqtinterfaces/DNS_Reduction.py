@@ -12,15 +12,17 @@ GUI for reduction of elastic and TOF data at the DNS instrumentat MLZ
 import sys
 import os
 
-from mantidqt.gui_helper import get_qapplication
-from qtpy import QtGui, QtWidgets
+sys.path.pop(0)
+from mantidqt.gui_helper import get_qapplication  # noqa: E402
+from qtpy import QtGui, QtWidgets  # noqa: E402
 
-from mantidqtinterfaces.dns.main_widget import DNSReductionGuiWidget
+from mantidqtinterfaces.dns.main_widget import \
+    DNSReductionGuiWidget  # noqa: E402
 
 # remove script path from sys.path, which is automatically added in python 3
 # otherwise Muon and Engineering modules
 # are not found if called from command line
-sys.path.pop(0)
+
 
 app, within_mantid = get_qapplication()
 

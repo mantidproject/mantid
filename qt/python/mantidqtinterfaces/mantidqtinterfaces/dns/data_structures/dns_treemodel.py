@@ -105,8 +105,8 @@ class DNSTreeModel(QAbstractItemModel):
         ]
 
     def _is_scan_complete(self, row):
-        return (self.scan_from_row(row).childCount() >=
-                self._scan_expected_points_from_row(row))
+        return (self.scan_from_row(row).childCount()
+                >= self._scan_expected_points_from_row(row))
 
     def text_in_scan(self, row, text):
         return text in self._scan_command_from_row(row)
@@ -151,7 +151,7 @@ class DNSTreeModel(QAbstractItemModel):
 
     def get_filename_from_index(self, index):
         item = self._item_from_index(index)
-        if not item.hasChildren() and item is not None:
+        if item is not None and not item.hasChildren():
             return item.data(9)
         return ''
 
@@ -294,9 +294,10 @@ class DNSTreeModel(QAbstractItemModel):
     @staticmethod
     def _get_scantext(dnsfile):
         return [
-            f'{dnsfile.scannumber} {dnsfile.sample} {dnsfile.scancommand}'
-            f' #{dnsfile.scanpoints}'
-        ] + 9 * ['']
+                   f'{dnsfile.scannumber} {dnsfile.sample}'
+                   f' {dnsfile.scancommand}'
+                   f' #{dnsfile.scanpoints}'
+               ] + 9 * ['']
 
     @staticmethod
     def _get_data_from_dnsfile(dnsfile):

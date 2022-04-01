@@ -18,7 +18,6 @@ from qtpy.QtWidgets import QMainWindow
 from qtpy.QtCore import QProcess
 
 
-
 class DNSReductionGUIView(QMainWindow):
     # pylint: disable=too-many-instance-attributes
     """
