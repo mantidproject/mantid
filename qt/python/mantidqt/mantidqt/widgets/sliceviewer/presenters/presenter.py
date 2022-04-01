@@ -330,20 +330,22 @@ class SliceViewer(ObservingPresenter, SliceViewerBasePresenter):
         else:
             self.view.peaks_view.hide()
 
-    def non_axis_aligned_cut(self):
+    def non_axis_aligned_cut(self, state):
         data_view = self._data_view
-        if self.view.non_axis_aligned_cut_view.isVisible():
-            self.view.non_axis_aligned_cut_view.hide()
+        if state:
+            if self._cutviewer_presenter is None:
+                self._cutviewer_presenter = CutViewerPresenter(self, data_view.canvas)
+                self.view.add_widget_to_splitter(self._cutviewer_presenter.get_view())
+            self._cutviewer_presenter.show_view()
+            data_view.deactivate_tool(ToolItemText.ZOOM)
+            for tool in [ToolItemText.REGIONSELECTION, ToolItemText.LINEPLOTS, ToolItemText.NONORTHOGONAL_AXES]:
+                data_view.deactivate_and_disable_tool(tool)
+        else:
+            self._cutviewer_presenter.hide_view()
             for tool in [ToolItemText.REGIONSELECTION, ToolItemText.LINEPLOTS]:
                 data_view.deactivate_and_disable_tool(tool)
             if self.get_sliceinfo().can_support_nonorthogonal_axes():
                 data_view.enable_tool_button(ToolItemText.NONORTHOGONAL_AXES)
-        else:
-            self._create_cutviewer_presenter_if_necessary()
-            self.view.non_axis_aligned_cut_view.show()
-            data_view.deactivate_tool(ToolItemText.ZOOM)
-            for tool in [ToolItemText.REGIONSELECTION, ToolItemText.LINEPLOTS, ToolItemText.NONORTHOGONAL_AXES]:
-                data_view.deactivate_and_disable_tool(tool)
 
     def replace_workspace(self, workspace_name, workspace):
         """
@@ -439,11 +441,6 @@ class SliceViewer(ObservingPresenter, SliceViewerBasePresenter):
         """
         if self._peaks_presenter is not None:
             getattr(self._peaks_presenter, attr)(*args, **kwargs)
-
-    def _create_cutviewer_presenter_if_necessary(self):
-        if self._cutviewer_presenter is None:
-            self._cutviewer_presenter = CutViewerPresenter(self.view.non_axis_aligned_cut_view)
-        return self._cutviewer_presenter
 
     def _call_cutviewer_presenter_if_created(self, attr, *args, **kwargs):
         """
