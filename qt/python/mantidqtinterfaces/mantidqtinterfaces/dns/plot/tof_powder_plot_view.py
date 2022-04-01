@@ -14,7 +14,6 @@ from mantidqt.widgets.sliceviewer.presenters.presenter import SliceViewer
 from mantidqtinterfaces.dns.data_structures.dns_view import DNSView
 
 
-
 class DNSTofPowderPlotView(DNSView):
     """
         Widget for basic plotting of DNS powder TOF data

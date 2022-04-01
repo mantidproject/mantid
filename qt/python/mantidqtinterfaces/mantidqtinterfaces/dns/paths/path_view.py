@@ -14,7 +14,6 @@ from qtpy.QtWidgets import QFileDialog
 from mantidqtinterfaces.dns.data_structures.dns_view import DNSView
 
 
-
 class DNSPathView(DNSView):
     """
         Widget that lets user select DNS data directories

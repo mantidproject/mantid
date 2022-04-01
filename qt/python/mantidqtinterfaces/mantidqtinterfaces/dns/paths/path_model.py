@@ -23,7 +23,6 @@ class DNSPathModel(DNSObsModel):
     def get_current_directory():
         return os.getcwd()
 
-
     @staticmethod
     def get_user_and_propnumber(dir_name):
         try:

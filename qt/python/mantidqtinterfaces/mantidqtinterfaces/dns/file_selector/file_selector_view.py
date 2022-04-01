@@ -14,7 +14,6 @@ from qtpy.QtWidgets import QProgressDialog
 from mantidqtinterfaces.dns.data_structures.dns_view import DNSView
 
 
-
 class DNSFileSelectorView(DNSView):
     """
        lets user select DNS data data files for further reduction

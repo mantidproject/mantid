@@ -12,14 +12,17 @@ GUI for reduction of elastic and TOF data at the DNS instrumentat MLZ
 import sys
 import os
 
-# remove script path from sys.path otherwise Muon and Engineering modules
-# are not found if called from command line
 sys.path.pop(0)
+from mantidqt.gui_helper import get_qapplication  # noqa: E402
+from qtpy import QtGui, QtWidgets  # noqa: E402
 
-from mantidqt.gui_helper import get_qapplication
-from qtpy import QtGui, QtWidgets
+from mantidqtinterfaces.dns.main_widget import \
+    DNSReductionGuiWidget  # noqa: E402
 
-from mantidqtinterfaces.dns.main_widget import DNSReductionGuiWidget
+# remove script path from sys.path, which is automatically added in python 3
+# otherwise Muon and Engineering modules
+# are not found if called from command line
+
 
 app, within_mantid = get_qapplication()
 
@@ -31,7 +34,8 @@ view.setWindowTitle('DNS Reduction GUI- Powder TOF')
 screenShape = QtWidgets.QDesktopWidget().screenGeometry()
 view.resize(int(screenShape.width() * 0.6), int(screenShape.height() * 0.6))
 appdir = os.path.dirname(__file__)
-app.setWindowIcon(QtGui.QIcon(f'{appdir}/dns/dns_icon.png'))
+if not within_mantid:
+    app.setWindowIcon(QtGui.QIcon(f'{appdir}/dns/dns_icon.png'))
 view.show()
 
 if not within_mantid:

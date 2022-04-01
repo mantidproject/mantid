@@ -15,7 +15,7 @@ from mantidqtinterfaces.dns.helpers.file_processing import (
     create_dir, create_dir_from_filename, filter_filenames,
     get_path_and_prefix, load_txt, open_editor, return_filelist,
     return_standard_zip, save_txt, unzip_latest_standard)
-from mantidqtinterfaces.dns.tests.helpers_for_testing import \
+from mantidqtinterfaces.dns.helpers.helpers_for_testing import \
     get_3filenames
 
 
@@ -133,12 +133,19 @@ class DNSfile_processingTest(unittest.TestCase):
 
     @staticmethod
     @patch('mantidqtinterfaces.dns.helpers.file_processing.'
+           'subprocess.call')
+    @patch('mantidqtinterfaces.dns.helpers.file_processing.'
+           'sys')
+    @patch('mantidqtinterfaces.dns.helpers.file_processing.'
            'os.startfile')
     @patch('mantidqtinterfaces.dns.helpers.file_processing.'
            'os.path.exists')
-    def test_open_editor(mock_path_exist, mock_startfile):
+    def test_open_editor(mock_path_exist, mock_startfile, mock_sys,
+                         mock_subprocess):
         mock_path_exist.return_value = False
+        mock_sys.platform = "win32"
         open_editor('123.d_dat', crdir=None)
+        mock_subprocess.assert_not_called()
         mock_path_exist.assert_called_once_with('123.d_dat')
         mock_startfile.assert_not_called()
         mock_path_exist.return_value = True
@@ -146,6 +153,18 @@ class DNSfile_processingTest(unittest.TestCase):
         open_editor('123.d_dat', crdir='d')
         mock_path_exist.assert_called_once_with('d/123.d_dat')
         mock_startfile.assert_called_once_with('d/123.d_dat')
+        mock_startfile.reset_mock()
+        mock_sys.platform = "linux2"
+        open_editor('123.d_dat', crdir='d')
+        mock_subprocess.assert_called_with(['xdg-open', '123.d_dat'])
+        mock_sys.platform = "darwin"
+        open_editor('123.d_dat', crdir='d')
+        mock_subprocess.assert_called_with(['open', '123.d_dat'])
+        mock_subprocess.reset_mock()
+        mock_sys.platform = "nonesense"
+        open_editor('123.d_dat', crdir='d')
+        mock_subprocess.assert_not_called()
+        mock_startfile.assert_not_called()
 
     def test_get_path_and_prefix(self):
         testv = get_path_and_prefix('C:/123')
