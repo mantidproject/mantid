@@ -214,9 +214,7 @@ class DirectILLAutoProcess(DataProcessorAlgorithm):
         self.declareProperty('VanadiumWorkspace', '',
                              doc='File(s) or workspaces containing vanadium data.')
 
-        self.declareProperty(WorkspaceGroupProperty('EmptyContainerWorkspace', '',
-                                                    direction=Direction.Input,
-                                                    optional=PropertyMode.Optional),
+        self.declareProperty('EmptyContainerWorkspace', '',
                              doc='Empty container workspace.')
 
         self.declareProperty('EmptyContainerScaling', 1.0,
