@@ -11,6 +11,8 @@ DNS file helpers
 import glob
 import os
 import re
+import subprocess
+import sys
 import zipfile
 
 
@@ -33,7 +35,7 @@ def return_filelist(datadir):
     filelist = []
     if not os.path.isdir(datadir):
         return []
-    for fname in os.listdir(datadir):
+    for fname in sorted(os.listdir(datadir)):
         if re.match(r".*?_[0-9]+.d_dat", fname):
             filelist.append(fname)
     return filelist
@@ -96,7 +98,12 @@ def open_editor(filename, crdir=None):
     else:
         crpath = filename
     if os.path.exists(crpath):
-        os.startfile(crpath)
+        if sys.platform.startswith("win"):
+            os.startfile(crpath)
+        elif sys.platform.startswith("linux"):
+            subprocess.call(["xdg-open", filename])
+        elif sys.platform == "darwin":
+            subprocess.call(["open", filename])
 
 
 def get_path_and_prefix(path):
