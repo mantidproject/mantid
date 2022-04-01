@@ -256,6 +256,11 @@ protected:
   size_t m_frames;
   size_t m_framesValid;
 
+  // number of events
+  size_t m_maxEvents;
+  size_t m_processedEvents;
+  size_t m_droppedEvents;
+
   // time boundaries
   const TimeLimits m_timeBoundary; // seconds
 
@@ -263,14 +268,17 @@ protected:
 
 public:
   EventProcessor(const std::vector<bool> &roi, const std::vector<size_t> &mapIndex, const double framePeriod,
-                 const double gatePeriod, TimeLimits timeBoundary)
+                 const double gatePeriod, const TimeLimits &timeBoundary, size_t maxEvents)
       : m_roi(roi), m_mapIndex(mapIndex), m_framePeriod(framePeriod), m_gatePeriod(gatePeriod), m_frames(0),
-        m_framesValid(0), m_timeBoundary(std::move(timeBoundary)) {}
+        m_framesValid(0), m_timeBoundary(timeBoundary), m_maxEvents(maxEvents), m_processedEvents(0),
+        m_droppedEvents(0) {}
 
   void newFrame() {
-    m_frames++;
-    if (validFrame())
-      m_framesValid++;
+    if (m_maxEvents == 0 || m_processedEvents < m_maxEvents) {
+      m_frames++;
+      if (validFrame())
+        m_framesValid++;
+    }
   }
 
   inline bool validFrame() const {
@@ -288,6 +296,12 @@ public:
     auto start = m_framePeriod * static_cast<double>(m_frames);
     return static_cast<int64_t>(start * 1.0e3);
   }
+
+  size_t numFrames() const { return m_framesValid; }
+
+  size_t availableEvents() const { return m_processedEvents + m_droppedEvents; }
+
+  size_t processedEvents() const { return m_processedEvents; }
 
   void addEvent(size_t x, size_t p, double tof, double /*taux*/) {
 
@@ -318,7 +332,12 @@ public:
       return;
 
     // finally pass to specific handler
-    addEventImpl(id, xid, y, mtof);
+    if (m_maxEvents == 0 || m_processedEvents < m_maxEvents) {
+      addEventImpl(id, xid, y, mtof);
+      m_processedEvents++;
+    } else {
+      m_droppedEvents++;
+    }
   }
 };
 
@@ -344,16 +363,9 @@ public:
   // construction
   EventCounter(const std::vector<bool> &roi, const std::vector<size_t> &mapIndex, const double framePeriod,
                const double gatePeriod, const TimeLimits &timeBoundary, std::vector<size_t> &eventCounts,
-               const double L1, const double V0, const std::vector<double> &vecL2)
-      : EventProcessor(roi, mapIndex, framePeriod, gatePeriod, timeBoundary), m_eventCounts(eventCounts), m_L1(L1),
-        m_V0(V0), m_L2(vecL2), m_histogram(5000, -2500.0, 2500.0) {}
-
-  size_t numFrames() const { return m_framesValid; }
-
-  size_t numEvents() const {
-    size_t sum(0);
-    return std::accumulate(m_eventCounts.begin(), m_eventCounts.end(), sum);
-  }
+               const double L1, const double V0, const std::vector<double> &vecL2, size_t maxEvents)
+      : EventProcessor(roi, mapIndex, framePeriod, gatePeriod, timeBoundary, maxEvents), m_eventCounts(eventCounts),
+        m_L1(L1), m_V0(V0), m_L2(vecL2), m_histogram(5000, -2500.0, 2500.0) {}
 
   // clips the histogram above 25% and takes the mean of the values
   double tofCorrection() {
@@ -408,8 +420,8 @@ protected:
 public:
   EventAssigner(const std::vector<bool> &roi, const std::vector<size_t> &mapIndex, const double framePeriod,
                 const double gatePeriod, const TimeLimits &timeBoundary, std::vector<EventVector_pt> &eventVectors,
-                int64_t startTime, double tofCorrection, double sampleTime)
-      : EventProcessor(roi, mapIndex, framePeriod, gatePeriod, timeBoundary), m_eventVectors(eventVectors),
+                int64_t startTime, double tofCorrection, double sampleTime, size_t maxEvents)
+      : EventProcessor(roi, mapIndex, framePeriod, gatePeriod, timeBoundary, maxEvents), m_eventVectors(eventVectors),
         m_tofMin(std::numeric_limits<double>::max()), m_tofMax(std::numeric_limits<double>::min()),
         m_startTime(startTime), m_tofCorrection(tofCorrection), m_sampleTime(sampleTime) {}
 
@@ -562,23 +574,23 @@ void LoadPLN::exec(const std::string &hdfFile, const std::string &eventFile) {
   AddSinglePointTimeSeriesProperty<double>(logManager, m_startRun, "GatePeriod", gatePeriod);
 
   // count total events per pixel and reserve necessary memory
+  size_t hdfCounts = static_cast<size_t>(logManager.getTimeSeriesProperty<int>("TotalCounts")->firstValue());
   loadDetectorL2Values();
   double sourceSample = fabs(instr->getSource()->getPos().Z());
   double wavelength = logManager.getTimeSeriesProperty<double>("Wavelength")->firstValue();
   double velocity = PhysicalConstants::h / (PhysicalConstants::NeutronMass * wavelength * 1e-10);
   double sampleTime = 1.0e6 * sourceSample / velocity;
   PLN::EventCounter eventCounter(roi, detMapIndex, framePeriod, gatePeriod, timeBoundary, eventCounts, sourceSample,
-                                 velocity, m_detectorL2);
+                                 velocity, m_detectorL2, hdfCounts);
   PLN::loadEvents(prog, "loading neutron counts", eventFile, eventCounter);
   ANSTO::ProgressTracker progTracker(prog, "creating neutron event lists", numberHistograms, Progress_ReserveMemory);
   prepareEventStorage(progTracker, eventCounts, eventVectors);
 
   // log a message if the number of events in the event file does not match
   // the total counts in the hdf
-  size_t hdfCounts = static_cast<size_t>(logManager.getTimeSeriesProperty<int>("TotalCounts")->firstValue());
-  if (hdfCounts != eventCounter.numEvents()) {
+  if (hdfCounts != eventCounter.availableEvents()) {
     g_log.error("HDF and event counts differ: " + std::to_string(hdfCounts) + ", " +
-                std::to_string(eventCounter.numEvents()));
+                std::to_string(eventCounter.availableEvents()));
   }
 
   // now perform the actual event collection and TOF convert if necessary
@@ -594,7 +606,7 @@ void LoadPLN::exec(const std::string &hdfFile, const std::string &eventFile) {
   logManager.addProperty("CalibrateTOF", (calibrateTOF ? 1 : 0));
   AddSinglePointTimeSeriesProperty<double>(logManager, m_startRun, "TOFCorrection", tofCorrection);
   PLN::EventAssigner eventAssigner(roi, detMapIndex, framePeriod, gatePeriod, timeBoundary, eventVectors, start_nanosec,
-                                   tofCorrection, sampleTime);
+                                   tofCorrection, sampleTime, hdfCounts);
   PLN::loadEvents(prog, "loading neutron events (TOF)", eventFile, eventAssigner);
 
   // perform a calibration and then TOF conversion if necessary
