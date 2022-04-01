@@ -374,6 +374,7 @@ void DiscusMultipleScatteringCorrection::exec() {
     qmax = 2 * kmax;
   }
   m_QSQWS = prepareQSQ(qmax);
+  normaliseSOfQ();
 
   m_simulateEnergiesIndependently = getProperty("SimulateEnergiesIndependently");
   // call this function with dummy efixed to determine total possible simulation points
@@ -476,7 +477,7 @@ void DiscusMultipleScatteringCorrection::exec() {
       MatrixWorkspace_sptr normLogSOfQ;
       if (m_importanceSampling)
         // prep invPOfQ outside the bin loop to avoid costly construction\destruction
-        invPOfQ = createWorkspace(2, m_QSQWS->size());
+        invPOfQ = createWorkspace(3, m_QSQWS->size());
       MatrixWorkspace_sptr normSOfQ = m_SQWS->clone();
 
       for (size_t bin = 0; bin < nbins; bin += xStepSize) {
@@ -490,11 +491,10 @@ void DiscusMultipleScatteringCorrection::exec() {
 
         if (m_importanceSampling)
           prepareCumulativeProbForQ(kinc, invPOfQ);
-        normaliseSOfQ(kinc, normSOfQ);
         // if (!m_importanceSampling)
         //  convertToLogWorkspace(normSOfQ);
 
-        auto weights = simulatePaths(nSingleScatterEvents, 1, rng, invPOfQ, normSOfQ, kinc, wValues, detPos, true);
+        auto weights = simulatePaths(nSingleScatterEvents, 1, rng, invPOfQ, kinc, wValues, detPos, true);
         if (std::get<1>(kInW[bin]) == -1) {
           noAbsSimulationWS->getSpectrum(i).mutableY() += weights;
         } else {
@@ -504,7 +504,7 @@ void DiscusMultipleScatteringCorrection::exec() {
         for (int ne = 0; ne < nScatters; ne++) {
           int nEvents = ne == 0 ? nSingleScatterEvents : nMultiScatterEvents;
 
-          weights = simulatePaths(nEvents, ne + 1, rng, invPOfQ, normSOfQ, kinc, wValues, detPos, false);
+          weights = simulatePaths(nEvents, ne + 1, rng, invPOfQ, kinc, wValues, detPos, false);
           if (std::get<1>(kInW[bin]) == -1.0) {
             simulationWSs[ne]->getSpectrum(i).mutableY() += weights;
           } else {
@@ -767,18 +767,21 @@ void DiscusMultipleScatteringCorrection::prepareCumulativeProbForQ(double kinc, 
   if (IOfQYAtQMax == 0.)
     throw std::runtime_error("Integral of Q * S(Q) is zero so can't generate probability distribution");
   // normalise probability range to 0-1
-  std::transform(IOfQYFull.begin(), IOfQYFull.end(), IOfQYFull.begin(),
+  std::vector<double> IOfQYNorm;
+  std::transform(IOfQYFull.begin(), IOfQYFull.end(), std::back_inserter(IOfQYNorm),
                  [IOfQYAtQMax](double d) -> double { return d / IOfQYAtQMax; });
   // Store the normalized integral (= cumulative probability) on the x axis
   // The y values in the two spectra store Q, w (or w index to be precise)
   for (size_t i = 0; i < PInvOfQ->getNumberHistograms(); i++) {
-    PInvOfQ->dataX(i).resize(IOfQYFull.size());
-    PInvOfQ->dataX(i) = IOfQYFull;
+    PInvOfQ->dataX(i).resize(IOfQYNorm.size());
+    PInvOfQ->dataX(i) = IOfQYNorm;
   }
   PInvOfQ->dataY(0).resize(qValuesFull.size());
   PInvOfQ->dataY(0) = qValuesFull;
   PInvOfQ->dataY(1).resize(wIndices.size());
   PInvOfQ->dataY(1) = wIndices;
+  PInvOfQ->dataY(2).resize(IOfQYFull.size());
+  PInvOfQ->dataY(2) = IOfQYFull;
 }
 
 void DiscusMultipleScatteringCorrection::convertToLogWorkspace(MatrixWorkspace_sptr &SOfQ) {
@@ -797,18 +800,34 @@ void DiscusMultipleScatteringCorrection::convertToLogWorkspace(MatrixWorkspace_s
   }
 }
 
-void DiscusMultipleScatteringCorrection::normaliseSOfQ(double kinc, const API::MatrixWorkspace_sptr &SOfQ) {
+void DiscusMultipleScatteringCorrection::normaliseSOfQ() {
   std::vector<double> IOfQYFull;
-  std::tie(IOfQYFull, std::ignore, std::ignore) = integrateQSQ(kinc);
-  double totalIntegral = IOfQYFull.back();
-  double factor = 2 * kinc * kinc / totalIntegral;
-  for (size_t iW = 0; iW < SOfQ->getNumberHistograms(); iW++) {
-    auto SOfQY = m_SQWS->dataY(iW);
+  auto &wValues = dynamic_cast<NumericAxis *>(m_SQWS->getAxis(1))->getValues();
+  // Scale the integral of Q.S(Q,w) over dQdw (Q limits function of ki, all w) so that it equals 2ki^2
+  // For a full, properly normalised S(Q,w) this integral would already equal 2ki^2
+  // Note - for multiple scatters the weight gets divided by 2ki^2 (although not the same ki), so the absolute scale of
+  // the S(Q,w) isn't important. The weight just gets scaled down if some ki's have small kinematic region available For
+  // the weight of the final leg of the track the absolute S(Q,w) scale does have an effect because it's not divided by
+  // 2ki^2 Integral tends to constant value at large ki so pick a large ki Work out which ki generates a kinematic range
+  // whose bottom right hand corner is at the max Q of the supplied S(Q,w)
+  //  w
+  //  |  ---
+  //  |_/___\_____Q
+  //  | \    \
+  //  |  \    \
+  // qmax = ki + kf, kf = fromWaveVector(ki) + wmin
+  double SQqmax = m_SQWS->x(0).back();
+  double k = (SQqmax * SQqmax + wValues.front() / PhysicalConstants::E_mev_toNeutronWavenumberSq) / (2 * SQqmax);
+  std::tie(IOfQYFull, std::ignore, std::ignore) = integrateQSQ(k);
+  double factor = 2 * k * k / IOfQYFull.back();
+
+  for (size_t iW = 0; iW < m_SQWS->getNumberHistograms(); iW++) {
+    auto &SOfQY = m_SQWS->dataY(iW);
     std::transform(SOfQY.begin(), SOfQY.end(), SOfQY.begin(), [factor](double d) -> double { return d * factor; });
-    SOfQ->dataX(iW).resize(m_SQWS->dataX(iW).size());
-    SOfQ->dataX(iW) = m_SQWS->dataX(iW);
-    SOfQ->dataY(iW).resize(SOfQY.size());
-    SOfQ->dataY(iW) = SOfQY;
+  }
+  for (size_t iW = 0; iW < m_QSQWS->getNumberHistograms(); iW++) {
+    auto &QSOfQY = m_QSQWS->dataY(iW);
+    std::transform(QSOfQY.begin(), QSOfQY.end(), QSOfQY.begin(), [factor](double d) -> double { return d * factor; });
   }
 }
 
@@ -1106,15 +1125,13 @@ double DiscusMultipleScatteringCorrection::Interpolate2D(MatrixWorkspace_sptr SO
  */
 std::vector<double> DiscusMultipleScatteringCorrection::simulatePaths(
     const int nPaths, const int nScatters, Kernel::PseudoRandomNumberGenerator &rng, MatrixWorkspace_sptr &invPOfQ,
-    API::MatrixWorkspace_sptr &normSOfQ, const double kinc, const std::vector<double> &wValues,
-    const Kernel::V3D &detPos, bool specialSingleScatterCalc) {
+    const double kinc, const std::vector<double> &wValues, const Kernel::V3D &detPos, bool specialSingleScatterCalc) {
   double sumOfQSS = 0.;
   std::vector<double> sumOfWeights(wValues.size(), 0.);
   int countZeroWeights = 0; // for debugging and analysis of where importance sampling may help
 
   for (int ie = 0; ie < nPaths; ie++) {
-    auto [success, weights, QSS] =
-        scatter(nScatters, rng, invPOfQ, normSOfQ, kinc, wValues, detPos, specialSingleScatterCalc);
+    auto [success, weights, QSS] = scatter(nScatters, rng, invPOfQ, kinc, wValues, detPos, specialSingleScatterCalc);
     if (success) {
       std::transform(weights.begin(), weights.end(), sumOfWeights.begin(), sumOfWeights.begin(), std::plus<double>());
       sumOfQSS += QSS;
@@ -1152,11 +1169,9 @@ std::vector<double> DiscusMultipleScatteringCorrection::simulatePaths(
  * @return A tuple containing a success/fail boolean, the calculated weights and
  * a sum of the QSS values across the n-1 multiple scatters
  */
-std::tuple<bool, std::vector<double>, double>
-DiscusMultipleScatteringCorrection::scatter(const int nScatters, Kernel::PseudoRandomNumberGenerator &rng,
-                                            const MatrixWorkspace_sptr &invPOfQ, API::MatrixWorkspace_sptr &normSOfQ,
-                                            const double kinc, const std::vector<double> &wValues,
-                                            const Kernel::V3D &detPos, bool specialSingleScatterCalc) {
+std::tuple<bool, std::vector<double>, double> DiscusMultipleScatteringCorrection::scatter(
+    const int nScatters, Kernel::PseudoRandomNumberGenerator &rng, const MatrixWorkspace_sptr &invPOfQ,
+    const double kinc, const std::vector<double> &wValues, const Kernel::V3D &detPos, bool specialSingleScatterCalc) {
   double weight = 1;
   double numberDensity = m_sampleShape->material().numberDensityEffective();
   // if scale up scatteringXSection by 100*numberDensity then may not need
@@ -1179,9 +1194,9 @@ DiscusMultipleScatteringCorrection::scatter(const int nScatters, Kernel::PseudoR
         currentInvPOfQ = newInvPOfQ;
       }
     }
-    q_dir(track, currentInvPOfQ, normSOfQ, k, scatteringXSection, rng, QSS, weight);
-    if ((k != kinc))
-      normaliseSOfQ(k, normSOfQ);
+    auto trackStillAlive = q_dir(track, currentInvPOfQ, k, scatteringXSection, rng, QSS, weight);
+    if (!trackStillAlive)
+      return {true, {0.}, 0.};
     int nlinks = m_sampleShape->interceptSurface(track);
     if (m_env) {
       nlinks += m_env->interceptSurfaces(track);
@@ -1228,7 +1243,7 @@ DiscusMultipleScatteringCorrection::scatter(const int nScatters, Kernel::PseudoR
       const auto qVector = directionToDetector * kout - prevDirection * k;
       const double q = qVector.norm();
       const double finalW = fromWaveVector(k) - finalE;
-      double SQ = Interpolate2D(normSOfQ, finalW, q);
+      double SQ = Interpolate2D(m_SQWS, finalW, q);
       std::tie(sigma_total, scatteringXSection) = new_vector(m_sampleShape->material(), kout, specialSingleScatterCalc);
       vmu = 100 * numberDensity * sigma_total;
       if (specialSingleScatterCalc)
@@ -1269,41 +1284,8 @@ std::tuple<double, double> DiscusMultipleScatteringCorrection::getKinematicRange
   return {qmin, qrange};
 }
 
-/**
- * Sample the w value for a scattering event and calculate kf based on w and kinc
- * @param wValues The energy transfer values from the S(Q,w) workspace
- * @param kinc The wavevector before the scatter event
- * @param rng Random number generator
- * @ return a tuple containing the sampled kf,w values and the wrange over which w was sampled from
- */
-std::tuple<double, int, double> DiscusMultipleScatteringCorrection::sampleKW(const std::vector<double> &wValues,
-                                                                             Kernel::PseudoRandomNumberGenerator &rng,
-                                                                             const double kinc) {
-  // the energy transfer must always be less than the positive value corresponding to energy going from ki to 0
-  // Note - this is still the case for indirect because on a multiple scatter the kf isn't kfixed
-  double wMax = fromWaveVector(kinc);
-  // find largest w bin centre that is < wmax and then sample w up to the next bin edge. w bins not necessarily equal
-  // so don't just sample w index
-  auto it = std::lower_bound(wValues.begin(), wValues.end(), wMax);
-  int iWMax = static_cast<int>(std::distance(wValues.begin(), it) - 1);
-  assert(iWMax >= 0);
-  std::vector<double> wBinEdges;
-  wBinEdges.reserve(wValues.size() + 1);
-  VectorHelper::convertToBinBoundary(wValues, wBinEdges);
-  int iW;
-  if (iWMax == 0)
-    iW = 0;
-  else {
-    double w = wBinEdges.front() + rng.nextValue() * (std::min(wMax, wBinEdges[iWMax + 1]) - wBinEdges.front());
-    iW = static_cast<int>(Kernel::VectorHelper::indexOfValueFromCentersNoThrow(wValues, w));
-  }
-  double k = getKf(wValues[iW], kinc);
-  return {k, iW, wBinEdges[iW + 1] - wBinEdges[0]};
-}
-
 // update track direction, QSS and weight
-void DiscusMultipleScatteringCorrection::q_dir(Geometry::Track &track, const MatrixWorkspace_sptr &invPOfQ,
-                                               const MatrixWorkspace_sptr &normSOfQ, double &k,
+bool DiscusMultipleScatteringCorrection::q_dir(Geometry::Track &track, const MatrixWorkspace_sptr &invPOfQ, double &k,
                                                const double scatteringXSection,
                                                Kernel::PseudoRandomNumberGenerator &rng, double &QSS, double &weight) {
   const double kinc = k;
@@ -1311,27 +1293,40 @@ void DiscusMultipleScatteringCorrection::q_dir(Geometry::Track &track, const Mat
   int iW;
   if (m_importanceSampling) {
     std::tie(QQ, iW) = sampleQW(invPOfQ, rng.nextValue());
-    k = getKf(normSOfQ->getAxis(1)->getValue(iW), kinc);
+    k = getKf(m_SQWS->getAxis(1)->getValue(iW), kinc);
     // S(Q) not strictly needed here but useful to see if the higher values are indeed being returned
-    SQ = interpolateFlat(normSOfQ->getSpectrum(iW), QQ);
-    weight = weight * scatteringXSection;
+    SQ = interpolateFlat(m_SQWS->getSpectrum(iW), QQ);
+    double integralOverKinAccessibleRange = invPOfQ->getSpectrum(2).y().back();
+    weight = weight * scatteringXSection * integralOverKinAccessibleRange / (2 * kinc * kinc);
   } else {
-    auto wAxis = dynamic_cast<NumericAxis *>(normSOfQ->getAxis(1));
-    if (!wAxis)
-      throw std::invalid_argument("Cannot sample w on S(Q,w) without a numeric w axis");
-    double wrange;
-    std::tie(k, iW, wrange) = sampleKW(wAxis->getValues(), rng, kinc);
-    auto [qmin, qrange] = getKinematicRange(k, kinc);
-    QQ = qmin + qrange * rng.nextValue();
-    SQ = interpolateFlat /* interpolateGaussian*/ (normSOfQ->getSpectrum(iW), QQ);
-    weight = weight * scatteringXSection * SQ * QQ * qrange * wrange / (2 * kinc * kinc);
+    auto wValues = dynamic_cast<NumericAxis *>(m_SQWS->getAxis(1))->getValues();
+    // in order to keep integration limits constant sample full range of w even if some not kinematically accessible
+    auto iW = rng.nextInt(0, wValues.size() - 1);
+    // if w inaccessible return (ie treat as zero weight) rather than retry so that integration stays over full w range
+    // Note - Discus retried here which I believe is incorrect
+    if (fromWaveVector(kinc) - wValues[iW] <= 0)
+      return false;
+    k = toWaveVector(fromWaveVector(kinc) - wValues[iW]);
+    double maxkf = toWaveVector(fromWaveVector(kinc) - wValues.front());
+    std::vector<double> wBinEdges;
+    VectorHelper::convertToBinBoundary(wValues, wBinEdges);
+    double wRange = wBinEdges.back() - wBinEdges.front();
+    double qrange = kinc + maxkf;
+    QQ = qrange * rng.nextValue();
+    SQ = interpolateFlat /* interpolateGaussian*/ (m_SQWS->getSpectrum(iW), QQ);
+    // integrate over rectangular area of qw space
+    weight = weight * scatteringXSection * SQ * QQ * qrange * wRange / (2 * kinc * kinc);
   }
   // T = 2theta
   const double cosT = (kinc * kinc + k * k - QQ * QQ) / (2 * kinc * k);
+  // if q not accessible return rather than retry so that integration stays over rectangular area
+  if (std::abs(cosT) > 1.0)
+    return false;
 
   QSS += QQ * SQ;
 
   updateTrackDirection(track, cosT, rng.nextValue() * 2 * M_PI);
+  return true;
 }
 
 /**

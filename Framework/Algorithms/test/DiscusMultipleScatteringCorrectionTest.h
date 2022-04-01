@@ -628,6 +628,7 @@ public:
       alg->setProperty("NumberOfSimulationPoints", numberSimulationPoints);
     alg->setProperty("ImportanceSampling", importanceSampling);
     alg->setProperty("SimulateEnergiesIndependently", simulateWSeparately);
+    alg->setProperty("SeedValue", 666666666);
     alg->execute();
 
     if (alg->isExecuted()) {
@@ -641,11 +642,13 @@ public:
       const double delta(1e-04);
       const int SPECTRUMINDEXTOTEST = 2; // 20 degrees
       // check at the w=+/-1 points
-      TS_ASSERT_DELTA(doubleScatterResult->y(SPECTRUMINDEXTOTEST)[33], expWeightMinusOne, delta);
-      TS_ASSERT_DELTA(doubleScatterResult->y(SPECTRUMINDEXTOTEST)[46], expWeightPlusOne, delta);
+      double actualWeightMinusOne = doubleScatterResult->y(SPECTRUMINDEXTOTEST)[33];
+      double actualWeightPlusOne = doubleScatterResult->y(SPECTRUMINDEXTOTEST)[46];
+      TS_ASSERT_DELTA(actualWeightMinusOne, expWeightMinusOne, delta);
+      TS_ASSERT_DELTA(actualWeightPlusOne, expWeightPlusOne, delta);
       // double scatter intensity is larger than single at this point
-      TS_ASSERT(doubleScatterResult->y(SPECTRUMINDEXTOTEST)[33] > singleScatterResult->y(SPECTRUMINDEXTOTEST)[33]);
-      TS_ASSERT(doubleScatterResult->y(SPECTRUMINDEXTOTEST)[46] > singleScatterResult->y(SPECTRUMINDEXTOTEST)[46]);
+      TS_ASSERT(actualWeightMinusOne > singleScatterResult->y(SPECTRUMINDEXTOTEST)[33]);
+      TS_ASSERT(actualWeightPlusOne > singleScatterResult->y(SPECTRUMINDEXTOTEST)[46]);
 
       Mantid::API::AnalysisDataService::Instance().deepRemoveGroup("MuscatResults");
     }
