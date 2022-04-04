@@ -319,10 +319,6 @@ public:
     // map the raw detector index to the physical model
     size_t xid = m_mapIndex[x];
 
-    // take the modules of the tof time to account for the
-    // longer background chopper rate
-    double mtof = tof < 0.0 ? fmod(tof + m_gatePeriod, m_gatePeriod) : fmod(tof, m_gatePeriod);
-
     size_t id = xid < DETECTOR_TUBES ? PIXELS_PER_TUBE * xid + y : DETECTOR_SPECTRA + xid;
     if (id >= m_roi.size())
       return;
@@ -333,6 +329,10 @@ public:
 
     // finally pass to specific handler
     if (m_maxEvents == 0 || m_processedEvents < m_maxEvents) {
+      // take the modulus of the tof time to account for the
+      // longer background chopper rate
+      double mtof = tof < 0.0 ? fmod(tof + m_gatePeriod, m_gatePeriod) : fmod(tof, m_gatePeriod);
+
       addEventImpl(id, xid, y, mtof);
       m_processedEvents++;
     } else {
@@ -652,7 +652,7 @@ void LoadPLN::loadDetectorL2Values() {
 }
 
 /// Set up the detector masks to the region of interest \p roi.
-void LoadPLN::setupDetectorMasks(std::vector<bool> &roi) {
+void LoadPLN::setupDetectorMasks(const std::vector<bool> &roi) {
 
   // count total number of masked bins
   size_t maskedBins = 0;
