@@ -20,7 +20,7 @@ To access feature flags you need to make changes to your ``Mantd.user.properties
 1. Navigate to the location of the ``Mantid.user.properties`` file
 
    a. For Windows users - Open the file explorer and navigate to the ``MantidInstall\bin`` folder
-   b. For Mac or Linux users - got to ``~/.mantid/Mantid.user.properties``
+   b. For Mac or Linux users - go to ``~/.mantid/Mantid.user.properties``
 
 2. Open the ``Mantid.user.properties`` file.
 3. At the bottom of the file add the line ``muon.GUI=<options>``. See section on :ref:`Options <feature_flag_options>` below for more details.
