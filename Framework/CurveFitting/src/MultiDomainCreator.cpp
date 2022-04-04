@@ -51,6 +51,7 @@ void MultiDomainCreator::createDomain(std::shared_ptr<API::FunctionDomain> &doma
     }
     API::FunctionDomain_sptr dom;
     creator->createDomain(dom, values, i0);
+    creator->separateCompositeMembersInOutput(m_outputCompositeMembers, m_convolutionCompositeMembers);
     jointDomain->addDomain(dom);
     i0 += dom->size();
   }
