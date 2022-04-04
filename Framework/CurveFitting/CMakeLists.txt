@@ -41,6 +41,12 @@ set(SRC_FILES
     src/CostFunctions/CostFuncPoisson.cpp
     src/ExcludeRangeFinder.cpp
     src/FitMW.cpp
+    src/EigenComplexMatrix.cpp
+    src/EigenComplexVector.cpp
+    src/EigenMatrix.cpp
+    src/EigenMatrixView.cpp
+    src/EigenVector.cpp
+    src/EigenVectorView.cpp
     src/FuncMinimizers/BFGS_Minimizer.cpp
     src/FuncMinimizers/DampedGaussNewtonMinimizer.cpp
     src/FuncMinimizers/DerivMinimizer.cpp
@@ -220,6 +226,16 @@ set(INC_FILES
     inc/MantidCurveFitting/CostFunctions/CostFuncRwp.h
     inc/MantidCurveFitting/CostFunctions/CostFuncUnweightedLeastSquares.h
     inc/MantidCurveFitting/CostFunctions/CostFuncPoisson.h
+    inc/EigenComplexMatrix.h
+    inc/EigenComplexVector.h
+    inc/EigenFortranDefs.h
+    inc/EigenFortranMatrix.h
+    inc/EigenFortranVector.h
+    inc/EigenJacobian.h
+    inc/EigenMatrix.h
+    inc/EigenMatrixView.h
+    inc/EigenVector.h
+    inc/EigenVectorView.h
     inc/MantidCurveFitting/ExcludeRangeFinder.h
     inc/MantidCurveFitting/FitMW.h
     inc/MantidCurveFitting/FortranDefs.h
