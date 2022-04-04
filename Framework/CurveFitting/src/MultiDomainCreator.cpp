@@ -71,15 +71,6 @@ void MultiDomainCreator::initFunction(API::IFunction_sptr function) {
       // get domain indices for this function
       mdFunction->getDomainIndices(iFun, m_creators.size(), domainIndices);
       if (!domainIndices.empty()) {
-        /*
-        if ( domainIndices.size() != 1 )
-        {
-          std::stringstream msg;
-          msg << "Function #" << iFun << " applies to multiple domains.\n"
-              << "Only one of the domains is used to set workspace.";
-          g_log.warning(msg.str());
-        }
-        */
         size_t index = domainIndices[0];
         if (index >= m_creators.size()) {
           std::stringstream msg;
