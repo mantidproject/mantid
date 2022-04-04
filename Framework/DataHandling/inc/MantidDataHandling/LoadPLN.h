@@ -96,7 +96,7 @@ protected:
 
   // shared member variables
   DataObjects::EventWorkspace_sptr m_localWorkspace;
-  int32_t m_datasetIndex;
+  int32_t m_datasetIndex{0};
   std::string m_startRun;
   std::vector<double> m_detectorL2;
 };

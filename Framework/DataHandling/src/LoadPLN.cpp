@@ -193,7 +193,7 @@ public:
 
   bool read(char *s, std::streamsize n) { return static_cast<bool>(_ifs.read(s, n)); }
 
-  size_t size() { return _size; }
+  size_t size() const { return _size; }
 
   size_t position() { return _ifs.tellg(); }
 
@@ -270,8 +270,8 @@ public:
   EventProcessor(const std::vector<bool> &roi, const std::vector<size_t> &mapIndex, const double framePeriod,
                  const double gatePeriod, const TimeLimits &timeBoundary, size_t maxEvents)
       : m_roi(roi), m_mapIndex(mapIndex), m_framePeriod(framePeriod), m_gatePeriod(gatePeriod), m_frames(0),
-        m_framesValid(0), m_timeBoundary(timeBoundary), m_maxEvents(maxEvents), m_processedEvents(0),
-        m_droppedEvents(0) {}
+        m_framesValid(0), m_maxEvents(maxEvents), m_processedEvents(0), m_droppedEvents(0),
+        m_timeBoundary(timeBoundary) {}
 
   void newFrame() {
     if (m_maxEvents == 0 || m_processedEvents < m_maxEvents) {
@@ -641,7 +641,7 @@ void LoadPLN::exec(const std::string &hdfFile, const std::string &eventFile) {
 /// Recovers the L2 neutronic distance for each detector.
 void LoadPLN::loadDetectorL2Values() {
 
-  m_detectorL2 = std::vector<double>(HISTOGRAMS);
+  m_detectorL2.resize(HISTOGRAMS, 0.0);
   const auto &detectorInfo = m_localWorkspace->detectorInfo();
   auto detIDs = detectorInfo.detectorIDs();
   for (const auto detID : detIDs) {
@@ -757,7 +757,7 @@ void LoadPLN::loadParameters(const std::string &hdfFile, API::LogManager &logm) 
     auto nthTime = GetNeXusValue<int32_t>(entry, "instrument/detector/start_time", 0, m_datasetIndex);
 
     Types::Core::time_duration duration =
-        boost::posix_time::microseconds(static_cast<boost::int64_t>((nthTime - baseTime) * 1.0e6));
+        boost::posix_time::microseconds((static_cast<int64_t>(nthTime) - static_cast<int64_t>(baseTime)) * 1'000'000);
     Types::Core::DateAndTime startDataset(startTime + duration);
     m_startRun = startDataset.toISO8601String();
   } else {
