@@ -320,9 +320,6 @@ containerOutOfBounds:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadPSIMuonB
 containerOutOfBounds:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadPSIMuonBin.cpp:855
 useStlAlgorithm:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadPSIMuonBin.cpp:206
 useStlAlgorithm:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadPSIMuonBin.cpp:233
-constParameter:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadPLN.cpp:93
-constParameter:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadPLN.cpp:105
-constParameter:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadPLN.cpp:643
 integerOverflowCond:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadRaw/byte_rel_comp.cpp:59
 objectIndex:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadRaw/isisraw.cpp:592
 objectIndex:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadRaw/isisraw.cpp:593
