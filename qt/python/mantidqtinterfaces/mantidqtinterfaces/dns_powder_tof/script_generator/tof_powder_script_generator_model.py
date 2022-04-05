@@ -111,7 +111,7 @@ class DNSTofPowderScriptGeneratorModel(DNSScriptGeneratorModel):
             "from mantid.simpleapi import ComputeCalibrationCoefVan, Divide,"
             "CorrectTOF",
             "from mantid.simpleapi import SaveAscii, SaveNexus, MaskDetectors",
-            "from mantidqtinterfaces.dns.scripts.dnstof import "
+            "from mantidqtinterfaces.dns_powder_tof.scripts.dnstof import "
             "convert_to_d_e, get_sqw, "
             "load_data", ''
         ]

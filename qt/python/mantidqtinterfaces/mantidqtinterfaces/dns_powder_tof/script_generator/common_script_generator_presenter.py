@@ -8,7 +8,7 @@
 Common Presenter for DNS Script generators
 """
 
-from mantidqtinterfaces.dns.data_structures.dns_observer import DNSObserver
+from mantidqtinterfaces.dns_powder_tof.data_structures.dns_observer import DNSObserver
 
 
 class DNSScriptGeneratorPresenter(DNSObserver):

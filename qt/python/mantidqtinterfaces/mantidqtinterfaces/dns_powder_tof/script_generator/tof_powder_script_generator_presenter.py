@@ -8,7 +8,7 @@
 DNS script generator for TOF powder data
 """
 
-from mantidqtinterfaces.dns.script_generator.\
+from mantidqtinterfaces.dns_powder_tof.script_generator.\
     common_script_generator_presenter import DNSScriptGeneratorPresenter
 
 
