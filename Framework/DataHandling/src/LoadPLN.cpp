@@ -124,7 +124,7 @@ void MapNeXusToProperty(const NeXus::NXEntry &entry, const std::string &path, co
   logManager.addProperty<T>(name, value * factor);
 }
 
-// sting is a special case
+// string is a special case
 template <>
 void MapNeXusToProperty<std::string>(const NeXus::NXEntry &entry, const std::string &path, const std::string &defval,
                                      API::LogManager &logManager, const std::string &name,
