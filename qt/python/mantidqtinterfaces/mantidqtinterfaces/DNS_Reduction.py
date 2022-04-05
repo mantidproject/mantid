@@ -6,23 +6,24 @@
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
 """
-GUI for reduction of elastic and TOF data at the DNS instrumentat MLZ
+GUI for reduction of elastic and TOF data at the DNS instrument MLZ
 """
 # pylint: disable=invalid-name
 import sys
 import os
 
-sys.path.pop(0)
+# sys.path.pop(0) OKcomment: seem not to do anything
+
 from mantidqt.gui_helper import get_qapplication  # noqa: E402
 from qtpy import QtGui, QtWidgets  # noqa: E402
 
-from mantidqtinterfaces.dns.main_widget import \
+from mantidqtinterfaces.dns_powder_tof.main_widget import \
     DNSReductionGuiWidget  # noqa: E402
 
 # remove script path from sys.path, which is automatically added in python 3
 # otherwise Muon and Engineering modules
 # are not found if called from command line
-
+# OKcomment: is the comment above relevant? why isn't it removed?
 
 app, within_mantid = get_qapplication()
 
@@ -30,13 +31,13 @@ reducer_widget = DNSReductionGuiWidget(name='DNS-Reduction',
                                        app=app,
                                        within_mantid=within_mantid)
 view = reducer_widget.view
-view.setWindowTitle('DNS Reduction GUI- Powder TOF')
+view.setWindowTitle('DNS Reduction GUI - Powder TOF')
 screenShape = QtWidgets.QDesktopWidget().screenGeometry()
 view.resize(int(screenShape.width() * 0.6), int(screenShape.height() * 0.6))
-appdir = os.path.dirname(__file__)
-if not within_mantid:
-    app.setWindowIcon(QtGui.QIcon(f'{appdir}/dns/dns_icon.png'))
+app_dir = os.path.dirname(__file__)
 view.show()
-
 if not within_mantid:
+    app.setWindowIcon(QtGui.QIcon(f'{app_dir}/dns_powder_tof/dns_icon.png'))
     sys.exit(app.exec_())
+else:
+    app.setWindowIcon(QtGui.QIcon(':/images/MantidIcon.ico'))
