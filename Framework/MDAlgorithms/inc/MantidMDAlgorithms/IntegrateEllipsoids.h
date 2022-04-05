@@ -10,11 +10,11 @@
 
 namespace Mantid::MDAlgorithms {
 
-// Detect inputs and pass to the correct version
+// Detect and pass to the correct version
 class DLLExport IntegrateEllipsoids final : public API::DataProcessorAlgorithm {
 public:
   const std::string name() const override;
-  /// Summary of algorithms purpose
+  /// Summary of algorithm's purpose
   const std::string summary() const override {
     return "Integrate Single Crystal Diffraction Bragg peaks using 3D "
            "ellipsoids.";
