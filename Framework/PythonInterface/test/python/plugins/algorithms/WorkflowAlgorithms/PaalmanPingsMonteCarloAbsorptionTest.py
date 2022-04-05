@@ -123,9 +123,9 @@ class PaalmanPingsMonteCarloAbsorptionTest(unittest.TestCase):
             self.assertEqual(corr_ws.getAxis(1).getUnit().unitID(), spectrum_axis)
 
     def _test_corrections_workspaces(self, workspaces, spectrum_axis=None, with_container=False):
-        self.assertNotEquals(workspaces, None)
+        self.assertNotEqual(workspaces, None)
         self.assertTrue(isinstance(workspaces, WorkspaceGroup))
-        self.assertEquals(workspaces.getNumberOfEntries(), 4 if with_container else 1)
+        self.assertEqual(workspaces.getNumberOfEntries(), 4 if with_container else 1)
 
         for workspace in workspaces:
             self._test_corrections_workspace(workspace, spectrum_axis)

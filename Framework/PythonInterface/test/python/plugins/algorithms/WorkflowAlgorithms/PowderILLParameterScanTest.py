@@ -70,20 +70,20 @@ class PowderILLParameterScanTest(unittest.TestCase):
     def test_normalise_monitor(self):
         red = PowderILLParameterScan(Run=self._runs,NormaliseTo='Monitor')
         self.assertTrue(red)
-        self.assertAlmostEquals(red.readY(0)[1400],0.00348,5)
-        self.assertAlmostEquals(red.readY(1)[2100],0.00335,5)
+        self.assertAlmostEqual(red.readY(0)[1400],0.00348,5)
+        self.assertAlmostEqual(red.readY(1)[2100],0.00335,5)
 
     def test_normalise_time(self):
         red = PowderILLParameterScan(Run=self._runs,NormaliseTo='Time')
         self.assertTrue(red)
-        self.assertAlmostEquals(red.readY(0)[1400],9532/300.,4)
-        self.assertAlmostEquals(red.readY(1)[2100],9789/300.,2)
+        self.assertAlmostEqual(red.readY(0)[1400],9532/300.,4)
+        self.assertAlmostEqual(red.readY(1)[2100],9789/300.,2)
 
     def test_normalise_roi(self):
         red = PowderILLParameterScan(Run=self._runs,NormaliseTo='ROI',ROI='0,100')
         self.assertTrue(red)
-        self.assertAlmostEquals(red.readY(0)[1400],0.00055,5)
-        self.assertAlmostEquals(red.readY(1)[2100],0.00053,5)
+        self.assertAlmostEqual(red.readY(0)[1400],0.00055,5)
+        self.assertAlmostEqual(red.readY(1)[2100],0.00053,5)
 
     def test_crop_zero_counting_cells(self):
         red = PowderILLParameterScan(Run=self._runs,ZeroCountingCells='Crop')
@@ -98,7 +98,7 @@ class PowderILLParameterScanTest(unittest.TestCase):
     def test_normalise_time_single(self):
         red = PowderILLParameterScan(Run='967087',NormaliseTo='Time')
         self.assertTrue(red)
-        self.assertAlmostEquals(red.readY(0)[1400],9532/300.,4)
+        self.assertAlmostEqual(red.readY(0)[1400],9532/300.,4)
 
 if __name__ == '__main__':
     unittest.main()

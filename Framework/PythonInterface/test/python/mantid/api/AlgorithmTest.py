@@ -249,7 +249,7 @@ class AlgorithmTest(unittest.TestCase):
         ws = child_alg.getProperty("OutputWorkspace").value
 
         default_num_histos = 100  # From createSampleWorkspace
-        self.assertEquals((default_num_histos * num_banks), ws.getNumberHistograms())
+        self.assertEqual((default_num_histos * num_banks), ws.getNumberHistograms())
 
     def test_createChildAlgorithm_with_float_arg(self):
         parent_alg = AlgorithmManager.createUnmanaged('Load')
@@ -259,7 +259,7 @@ class AlgorithmTest(unittest.TestCase):
         child_alg.execute()
         ws = child_alg.getProperty("OutputWorkspace").value
 
-        self.assertEquals(2.0, ws.readX(0)[0])
+        self.assertEqual(2.0, ws.readX(0)[0])
 
     def test_createChildAlgorithm_with_list(self):
         parent_alg = AlgorithmManager.createUnmanaged('Load')

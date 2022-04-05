@@ -22,13 +22,13 @@ class UnitCellTest(unittest.TestCase):
         self.assertEqual(u1.alpha(), 90)
 
         u2 = UnitCell(3,4,5)
-        self.assertAlmostEquals(u2.b1(),1./3., 10)
-        self.assertAlmostEquals(u2.alphastar(), 90, 10)
+        self.assertAlmostEqual(u2.b1(),1./3., 10)
+        self.assertAlmostEqual(u2.alphastar(), 90, 10)
 
         u4 = u2
-        self.assertAlmostEquals(u4.volume(),1./u2.recVolume(),10)
+        self.assertAlmostEqual(u4.volume(),1./u2.recVolume(),10)
         u2.seta(3)
-        self.assertAlmostEquals(u2.a(),3,10)
+        self.assertAlmostEqual(u2.a(),3,10)
 
     def test_numpy_array_conversion(self):
         row0 = (0.162546756312, 0.00815256992072, -0.00145274558861)
@@ -74,7 +74,7 @@ class UnitCellTest(unittest.TestCase):
         unit.setModVec3(vectors[2])
 
         for index, expected in enumerate(vectors):
-            self.assertEquals(vectors[index], unit.getModVec(index))
+            self.assertEqual(vectors[index], unit.getModVec(index))
 
     def test_getMaxOrder_returns_int(self):
         unit = UnitCell(3, 3, 3)
@@ -86,7 +86,7 @@ class UnitCellTest(unittest.TestCase):
 
         unit.setMaxOrder(2)
 
-        self.assertEquals(2, unit.getMaxOrder())
+        self.assertEqual(2, unit.getMaxOrder())
 
     def _check_cell(self, cell):
         self.assertAlmostEqual(cell.a(),2.5,10)

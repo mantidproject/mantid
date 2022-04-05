@@ -495,7 +495,7 @@ class SliceViewerTest(unittest.TestCase):
         pres.replace_workspace(mock.NonCallableMock(), mock.NonCallableMock())
 
         pres._close_view_with_message.assert_not_called()
-        self.assertEquals(mock_model, pres.model)
+        self.assertEqual(mock_model, pres.model)
 
     def test_replace_workspace_replaces_model(self):
         mock_model = mock.MagicMock()
@@ -504,7 +504,7 @@ class SliceViewerTest(unittest.TestCase):
         mock_model.workspace_equals.return_value = True
         with mock.patch("mantidqt.widgets.sliceviewer.presenters.presenter.SliceViewerModel") as mock_model_class:
             pres.replace_workspace(mock.NonCallableMock(), mock.NonCallableMock())
-            self.assertEquals(mock_model_class.return_value, pres.model)
+            self.assertEqual(mock_model_class.return_value, pres.model)
 
     def test_rename_workspace(self):
         mock_model = mock.MagicMock()

@@ -75,7 +75,7 @@ class CalculateMonteCarloAbsorptionTest(unittest.TestCase):
             self.assertEqual(corr_ws.getAxis(1).getUnit().unitID(), spectrum_axis)
 
     def _test_corrections_workspaces(self, workspaces, spectrum_axis=None):
-        self.assertNotEquals(workspaces, None)
+        self.assertNotEqual(workspaces, None)
 
         for workspace in workspaces:
             self._test_corrections_workspace(workspace, spectrum_axis)

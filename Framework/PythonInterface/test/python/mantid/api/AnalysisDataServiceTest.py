@@ -86,7 +86,7 @@ class AnalysisDataServiceTest(unittest.TestCase):
 
     def do_check_for_matrix_workspace_type(self, workspace):
         self.assertTrue(isinstance(workspace, MatrixWorkspace))
-        self.assertNotEquals(workspace.name(), '')
+        self.assertNotEqual(workspace.name(), '')
         self.assertTrue(hasattr(workspace, 'getNumberHistograms'))
         self.assertTrue(hasattr(workspace, 'getMemorySize'))
 
