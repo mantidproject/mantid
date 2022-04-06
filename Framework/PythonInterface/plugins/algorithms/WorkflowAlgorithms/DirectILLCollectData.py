@@ -68,7 +68,7 @@ def _calibratedIncidentEnergy(detWorkspace, monWorkspace, monEPPWorkspace, eiCal
     instrument = detWorkspace.getInstrument()
     instrument_name = instrument.getName()
     eiWorkspace = None
-    if instrument_name in ['IN4', 'IN6', 'PANTHER']:
+    if instrument_name in ['IN4', 'IN6', 'PANTHER', 'SHARP']:
         run = detWorkspace.run()
         eiCalibrationDets = instrument.getStringParameter('Ei_calibration_detectors')[0]
         maximumEnergy = 10.
@@ -87,6 +87,10 @@ def _calibratedIncidentEnergy(detWorkspace, monWorkspace, monEPPWorkspace, eiCal
         elif instrument_name == 'IN6':
             suppressorChopperSpeed = run.getProperty('Suppressor.rotation_speed').value
             timeFrame = 60.e6 / suppressorChopperSpeed / 2
+        elif instrument_name == 'SHARP':
+            fermiChopperSpeed = run.getProperty('Fermi.rotation_speed').value
+            timeFrame = 60.e6 / fermiChopperSpeed / 2
+            maximumEnergy = 1000.
         energy = GetEiMonDet(DetectorWorkspace=detWorkspace,
                              DetectorWorkspaceIndexType='WorkspaceIndex',
                              DetectorWorkspaceIndexSet=eiCalibrationDets,
