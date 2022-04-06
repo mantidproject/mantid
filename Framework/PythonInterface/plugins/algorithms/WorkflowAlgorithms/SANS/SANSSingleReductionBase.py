@@ -8,8 +8,6 @@
 
 """A base class to share functionality between SANSSingleReduction versions."""
 
-from collections import defaultdict
-
 from mantid.api import (DistributedDataProcessorAlgorithm,
                         MatrixWorkspaceProperty, Progress, PropertyMode)
 from mantid.kernel import Direction
@@ -19,6 +17,7 @@ from sans.algorithm_detail.single_execution import (get_final_output_workspaces,
 from sans.algorithm_detail.strip_end_nans_and_infs import strip_end_nans
 from sans.common.enums import (DataType, ReductionMode)
 from sans.common.general_functions import create_child_algorithm
+from sans.data_objects.sans_workflow_algorithm_outputs import SANSWorkflowAlgorithmOutputs
 from sans.state.Serializer import Serializer
 
 
@@ -127,17 +126,13 @@ class SANSSingleReductionBase(DistributedDataProcessorAlgorithm):
                 # Merge the list of lists into a single flat list to keep our lives easier
                 completed_event_slices.extend(reduced_slices)
 
-        reduction_mode_vs_workspace_names = defaultdict(list)
-
         # --------------------------------------------------------------------------------------------------------------
         # Deal with non-merged
         # Note that we have non-merged workspaces even in the case of a merged reduction, ie LAB and HAB results
         # --------------------------------------------------------------------------------------------------------------
         progress.report("Final clean up...")
 
-        reduction_mode_vs_output_workspaces = get_final_output_workspaces(completed_event_slices, self)
-        reduction_mode_vs_workspace_names = self._get_workspace_names(reduction_mode_vs_workspace_names,
-                                                                      completed_event_slices)
+        workflow_alg_outputs = get_final_output_workspaces(completed_event_slices, self)
 
         # --------------------------------------------------------------------------------------------------------------
         # Deal with merging
@@ -149,34 +144,27 @@ class SANSSingleReductionBase(DistributedDataProcessorAlgorithm):
         if overall_reduction_mode is ReductionMode.MERGED:
             progress.report("Merging reductions ...")
             merge_bundle = get_merge_bundle_for_merge_request(completed_event_slices, self)
-            reduction_mode_vs_output_workspaces[ReductionMode.MERGED] = []
             for merged in merge_bundle:
                 scale_factors.append(merged.scale)
                 shift_factors.append(merged.shift)
-                reduction_mode_vs_output_workspaces[ReductionMode.MERGED].append(merged.merged_workspace)
-                merged_name = self._get_merged_workspace_name(completed_event_slices)
-                reduction_mode_vs_workspace_names[ReductionMode.MERGED].append(merged_name)
-
+                workflow_alg_outputs.merged_output.append(merged.merged_workspace)
+                # Pack scaled HAB as a diagnostic tool
                 scaled_HAB = strip_end_nans(merged.scaled_hab_workspace, self)
-                reduction_mode_vs_output_workspaces[ReductionMode.HAB].append(scaled_HAB)
-                # Get HAB workspace name
-                state = completed_event_slices[0].output_bundle.state
-                hab_name = self._get_output_workspace_name(state, reduction_mode=ReductionMode.HAB)
-                reduction_mode_vs_workspace_names[ReductionMode.HAB].append(hab_name)
+                workflow_alg_outputs.scaled_hab_output.append(scaled_HAB)
 
             self.set_shift_and_scale_output(scale_factors, shift_factors)
 
         # --------------------------------------------------------------------------------------------------------------
         # Set the output workspaces
         # --------------------------------------------------------------------------------------------------------------
-        self.set_output_workspaces(reduction_mode_vs_output_workspaces, reduction_mode_vs_workspace_names)
+        self.set_output_workspaces(workflow_alg_outputs)
 
         # --------------------------------------------------------------------------------------------------------------
         # Set the reduced can workspaces on the output if optimizations are
         # enabled. This will allow SANSBatchReduction to add them to the ADS.
         # --------------------------------------------------------------------------------------------------------------
         if use_optimizations:
-            if not save_can:
+            if save_can:
                 self.set_reduced_can_workspace_on_output(completed_event_slices)
             self.set_reduced_can_count_and_norm_on_output(completed_event_slices)
 
@@ -216,7 +204,7 @@ class SANSSingleReductionBase(DistributedDataProcessorAlgorithm):
     def set_shift_and_scale_output(self, scale_factors, shift_factors):
         raise NotImplementedError("set_shift_and_scale_output must be implemented.")
 
-    def set_output_workspaces(self, reduction_mode_vs_output_workspaces, reduction_mode_vs_workspace_names):
+    def set_output_workspaces(self, workflow_outputs: SANSWorkflowAlgorithmOutputs):
         raise NotImplementedError("set_output_workspaces must be implemented.")
 
     def do_reduction(self, reduction_alg, reduction_setting_bundles, use_optimizations, progress):

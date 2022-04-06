@@ -1,0 +1,1 @@
+- Merged mode now correctly saves can workspaces when "Save Can" is ticked
