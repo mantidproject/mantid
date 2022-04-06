@@ -1,0 +1,1 @@
+`AsymmetricPearsonVII  <https://docs.mantidproject.org/nightly/fitting/fitfunctions/AsymmetricPearsonVII.html>`_ fit function is implemented in order to improve description of the peaks that have an asymmetric shape.

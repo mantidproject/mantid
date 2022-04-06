@@ -69,8 +69,6 @@ class DrillExportModel:
             except:
                 pass
         self._pool = DrillAlgorithmPool()
-        self._pool.signals.taskError.connect(self._onTaskError)
-        self._pool.signals.taskSuccess.connect(self._onTaskSuccess)
         self._exports = dict()
         self._successExports = dict()
 
@@ -158,17 +156,14 @@ class DrillExportModel:
         except:
             return False
 
-    def _onTaskSuccess(self, name):
+    def _onTaskSuccess(self, wsName, filename):
         """
         Triggered when the export finished with success.
 
         Args:
-            name (str): the task name
+            wsName (str): name of the exported workspace
+            filename (str): name of the file
         """
-        name = name.split(':')
-        wsName = name[0]
-        filename = name[1]
-
         if wsName not in self._successExports:
             self._successExports[wsName] = set()
         self._successExports[wsName].add(filename)
@@ -179,18 +174,15 @@ class DrillExportModel:
                 del self._exports[wsName]
                 self._logSuccessExport(wsName)
 
-    def _onTaskError(self, name, msg):
+    def _onTaskError(self, wsName, filename, msg):
         """
         Triggered when the export failed.
 
         Args:
-            name (str): the task name
+            wsName (str): name of the exported workspace
+            filename (str): name of the file
             msg (str): error msg
         """
-        name = name.split(':')
-        wsName = name[0]
-        filename = name[1]
-
         logger.error("Error while exporting workspace {}.".format(wsName))
         logger.error(msg)
 
@@ -277,6 +269,11 @@ class DrillExportModel:
                         kwargs['WriteXError'] = True
                 task = DrillTask(name, algo, InputWorkspace=wsName,
                                  FileName=filename, **kwargs)
+                task.addSuccessCallback(lambda wsName=wsName, filename=filename:
+                                        self._onTaskSuccess(wsName, filename))
+                task.addErrorCallback(lambda msg, wsName=wsName,
+                                             filename=filename:
+                                      self._onTaskError(wsName, filename, msg))
                 tasks.append(task)
 
         self._pool.addProcesses(tasks)
