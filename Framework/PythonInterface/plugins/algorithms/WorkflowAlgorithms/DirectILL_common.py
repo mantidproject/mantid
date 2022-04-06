@@ -188,8 +188,12 @@ def get_grouping_pattern(ws, vertical_step, horizontal_step=1):
         while pixel_id < n_pixels - (group_by_x - 1) * n_pixels_per_tube:
             pattern = []
             for tube_shift in range(0, group_by_x):
+                if n_pixels < pixel_id + tube_shift * n_pixels_per_tube + group_by_y:
+                    pattern_max = n_pixels  # grouping will be cut to the last available pixel id
+                else:
+                    pattern_max = pixel_id + tube_shift * n_pixels_per_tube + group_by_y
                 numeric_pattern = list(range(pixel_id + tube_shift * n_pixels_per_tube,
-                                             pixel_id + tube_shift * n_pixels_per_tube + group_by_y))
+                                             pattern_max))
                 pattern.append('+'.join(map(str, numeric_pattern)))
             pattern = "+".join(pattern)
             grouping_pattern.append(pattern)
