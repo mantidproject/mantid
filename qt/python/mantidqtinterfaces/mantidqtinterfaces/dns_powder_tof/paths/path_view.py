@@ -26,7 +26,6 @@ class DNSPathView(DNSView):
 
         self._map = {
             'data_dir': self._content.lE_data_dir,
-            'logbook_dir': self._content.lE_logbook_dir,
             'psd_dir': self._content.lE_psd_dir,
             'user': self._content.lE_user,
             'prop_nb': self._content.lE_prop_nb,
@@ -41,7 +40,6 @@ class DNSPathView(DNSView):
         # connect signals
         self._content.pB_file_data.clicked.connect(self._filedialog)
         self._content.pB_file_psd.clicked.connect(self._filedialog)
-        self._content.pB_file_logbook.clicked.connect(self._filedialog)
         self._content.pB_file_standards.clicked.connect(self._filedialog)
         self._content.pB_file_script.clicked.connect(self._filedialog)
         self._content.pB_clear.clicked.connect(self._clear_directories)
@@ -73,7 +71,6 @@ class DNSPathView(DNSView):
     def _clear_directories(self):
         self.set_user('')
         self.set_prop_number('')
-        self.set_path('logbook_dir', '')
         self.set_path('data_dir', '')
         self.set_path('standards_dir', '')
         self.set_path('script_dir', '')

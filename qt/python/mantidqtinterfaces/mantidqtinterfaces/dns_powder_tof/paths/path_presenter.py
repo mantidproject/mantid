@@ -24,7 +24,7 @@ class DNSPathPresenter(DNSObserver):
             self.view.set_datapath(self.model.get_current_directory())
 
     def _data_path_set(self, dir_name):
-        for typename in ['psd', 'logbook', 'standards', 'script', 'export']:
+        for typename in ['psd', 'standards', 'script', 'export']:
             if not self.view.get_path(typename + '_dir'):
                 self.view.set_path(typename + '_dir',
                                    dir_name + '/' + typename)
