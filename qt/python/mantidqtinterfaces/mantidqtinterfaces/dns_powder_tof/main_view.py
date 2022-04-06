@@ -33,7 +33,7 @@ class DNSReductionGUIView(QMainWindow):
         self.ui = load_ui(__file__,
                           'dns_gui_main_reduced_menu.ui',
                           baseinstance=self)
-        self.subview_menues = []
+        self.subview_menus = []
         self.last_index = 0
         # connect menu signals
         self.ui.actionQuit.triggered.connect(self.close)
@@ -111,10 +111,10 @@ class DNSReductionGUIView(QMainWindow):
     def add_submenu(self, subview):
         for menu in subview.menues:
             submenu = self.menu.insertMenu(self.ui.menuHelp.menuAction(), menu)
-            self.subview_menues.append(submenu)
+            self.subview_menus.append(submenu)
 
     def clear_submenues(self):
-        for submenu in self.subview_menues:
+        for submenu in self.subview_menus:
             self.menu.removeAction(submenu)
 
     def _modus_change(self):

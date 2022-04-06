@@ -16,7 +16,7 @@ from mantidqtinterfaces.dns_powder_tof.data_structures.dns_view import DNSView
 
 class DNSFileSelectorView(DNSView):
     """
-       lets user select DNS data data files for further reduction
+       Lets user select DNS data files for further reduction
     """
     NAME = 'Data'
 
@@ -142,10 +142,10 @@ class DNSFileSelectorView(DNSView):
         self._content.sB_last_scans.setHidden(index)
         self._content.sB_td_file_to.setHidden(index)
         self._content.sB_td_file_nb.setHidden(index)
-        self._content.l_td_file_nb.setHidden(index)
+        #self._content.l_td_file_nb.setHidden(index)
         self._content.pB_td_read_filtered.setHidden(index)
         self._content.cB_autoload.setHidden(index)
-        self._content.l_td_file_to.setHidden(index)
+        #self._content.l_td_file_to.setHidden(index)
         self._content.groupBox_filter_standard.setHidden(1 - index)
         self._standard_treeview.setHidden(1 - index)
         self.cB_auto_standard.setHidden(1 - index)
