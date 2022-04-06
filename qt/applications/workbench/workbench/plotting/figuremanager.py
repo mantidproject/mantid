@@ -46,6 +46,9 @@ from workbench.plotting.toolbar import WorkbenchNavigationToolbar, ToolbarStateM
 from workbench.plotting.plothelppages import PlotHelpPages
 
 
+STATUS_BAR_HEIGHT = 45
+
+
 def _replace_workspace_name_in_string(old_name, new_name, string):
     return re.sub(rf'\b{old_name}\b', new_name, string)
 
@@ -240,11 +243,17 @@ class FigureManagerWorkbench(FigureManagerBase, QObject):
         # resize the main window so it will display the canvas with the
         # requested size:
         cs = canvas.sizeHint()
-        sbs = self.window.statusBar().sizeHint()
-        self._status_and_tool_height = tbs_height + sbs.height()
+
+        # for matplot lib v3.5 and higher status bar height needs to be fixed
+        if LooseVersion(matplotlib.__version__) >= LooseVersion("3.5.0"):
+            self.window.statusBar().setFixedHeight(STATUS_BAR_HEIGHT)
+            self._status_and_tool_height = tbs_height + STATUS_BAR_HEIGHT
+        else:
+            sbs = self.window.statusBar().sizeHint()
+            self._status_and_tool_height = tbs_height + sbs.height()
+
         height = cs.height() + self._status_and_tool_height
         self.window.resize(cs.width(), height)
-
         self.fit_browser = FitPropertyBrowser(canvas, ToolbarStateManager(self.toolbar))
         self.fit_browser.closing.connect(self.handle_fit_browser_close)
         self.window.setCentralWidget(canvas)
