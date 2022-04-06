@@ -481,6 +481,8 @@ class DirectILLAutoProcess(DataProcessorAlgorithm):
             self.to_clean.append(self.vanadium_epp)
         kwargs[common.PROP_NORMALISATION] = self.getPropertyValue(common.PROP_NORMALISATION)
         kwargs[common.PROP_MON_PEAK_SIGMA_MULTIPLIER] = self.getPropertyValue(common.PROP_MON_PEAK_SIGMA_MULTIPLIER)
+        if not self.clear_cache:
+            kwargs[common.PROP_CLEANUP_MODE] = 'Cleanup OFF'
 
         DirectILLCollectData(
             Run=sample,
