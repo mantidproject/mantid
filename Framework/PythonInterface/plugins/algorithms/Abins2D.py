@@ -30,6 +30,9 @@ class Abins2D(AbinsAlgorithm, PythonAlgorithm):
     def summary(self) -> str:
         return "Calculates inelastic neutron scattering over 2D (q,ω) space."
 
+    def seeAlso(self):
+        return ["Abins"]
+
     def PyInit(self) -> None:
         from abins.constants import TWO_DIMENSIONAL_INSTRUMENTS
         # Declare properties for all Abins Algorithms

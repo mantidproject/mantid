@@ -41,7 +41,7 @@ More information about the implemented working equations can be found :ref:`here
 After successful analysis a user obtains a Mantid Workspace Group which stores theoretical spectra (and,
 optionally, experimental data).
 Currently a user can produce theoretical spectra for given atoms (e.g. 'atom_1', the first atom listed in the input
-data) or types of atom (for example for benzene two element symbols: C, H) and for each quantum event (up to fourth
+data) or types of atom (for example for benzene two element symbols: C, H) and for each quantum event (up to tenth
 order).
 Total theoretical spectra can also be generated, summing over all considered quantum events for that atom or element.
 The user can also produce a total spectrum for the whole considered system.
