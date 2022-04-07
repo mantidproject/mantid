@@ -814,7 +814,6 @@ class TableWorkspaceDisplayPresenterTest(unittest.TestCase):
         ) as mock_load_data:
             presenter.replace_workspace(ws.TEST_NAME, ws)
             mock_load_data.assert_called_once_with(view)
-            view.emit_repaint.assert_called_once_with()
 
 
 if __name__ == '__main__':

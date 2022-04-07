@@ -66,7 +66,7 @@ class TableWorkspaceDisplayModelTest(unittest.TestCase):
         expected_col = 1111
         expected_row = 1
 
-        model.set_cell_data(expected_row, expected_col, test_data)
+        model.set_cell_data(expected_row, expected_col, test_data, True)
 
         # check that the correct conversion function was retrieved
         # -> the one for the column for which the data is being set
