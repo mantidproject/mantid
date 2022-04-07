@@ -9,8 +9,8 @@
 //----------------------------------------------------------------------
 #include "MantidCurveFitting/Functions/BSpline.h"
 #include "MantidAPI/FunctionFactory.h"
-#include "MantidCurveFitting/GSLMatrix.h"
-#include "MantidCurveFitting/GSLVector.h"
+#include "MantidCurveFitting/EigenMatrix.h"
+#include "MantidCurveFitting/EigenVector.h"
 
 namespace Mantid::CurveFitting::Functions {
 
@@ -61,7 +61,7 @@ BSpline::BSpline() {
  */
 void BSpline::function1D(double *out, const double *xValues, const size_t nData) const {
   size_t np = nParams();
-  GSLVector B(np);
+  EigenVector B(np);
   double startX = getAttribute("StartX").asDouble();
   double endX = getAttribute("EndX").asDouble();
 
@@ -102,7 +102,7 @@ void BSpline::derivative1D(double *out, const double *xValues, size_t nData, con
   }
 #endif
 
-  GSLMatrix B(k, order + 1);
+  EigenMatrix B(k, order + 1);
   double startX = getAttribute("StartX").asDouble();
   double endX = getAttribute("EndX").asDouble();
 
@@ -225,7 +225,7 @@ void BSpline::resetKnots() {
       resetGSLObjects();
       resetParameters();
     }
-    GSLVector bp(breakPoints);
+    EigenVector bp(breakPoints);
     gsl_bspline_knots(bp.gsl(), m_bsplineWorkspace.get());
     storeAttributeValue("StartX", Attribute(breakPoints.front()));
     storeAttributeValue("EndX", Attribute(breakPoints.back()));

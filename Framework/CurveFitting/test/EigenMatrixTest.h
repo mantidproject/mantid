@@ -8,9 +8,17 @@
 
 #include <cxxtest/TestSuite.h>
 
+#include "MantidCurveFitting/EigenComplexMatrix.h"
+#include "MantidCurveFitting/EigenComplexVector.h"
 #include "MantidCurveFitting/EigenMatrix.h"
 
 using namespace Mantid::CurveFitting;
+
+namespace {
+#define TS_ASSERT_COMPLEX_DELTA(v1, r2, i2, d)                                                                         \
+  TS_ASSERT_DELTA(ComplexType(v1).real(), r2, d);                                                                      \
+  TS_ASSERT_DELTA(ComplexType(v1).imag(), i2, d);
+} // namespace
 
 class EigenMatrixTest : public CxxTest::TestSuite {
 public:
@@ -364,13 +372,13 @@ public:
     EigenVector x;
     EigenMatrix mm = m;
     mm.solve(b, x);
-    Eigen::VectorXd sol_vec = RoundVec(x.copy_view(), 8);
+    Eigen::VectorXd sol_vec = x.copy_view();
 
-    TS_ASSERT_EQUALS(sol_vec.size(), 2);
-    TS_ASSERT_EQUALS(sol_vec[0], -1.0);
-    TS_ASSERT_EQUALS(sol_vec[1], 3.0);
+    TS_ASSERT_DELTA(sol_vec.size(), 2, 1e-8);
+    TS_ASSERT_DELTA(sol_vec[0], -1.0, 1e-8);
+    TS_ASSERT_DELTA(sol_vec[1], 3.0, 1e-8);
     Eigen::VectorXd test_sol = m.inspector() * sol_vec;
-    TS_ASSERT_EQUALS(test_sol[0], 5.0);
-    TS_ASSERT_EQUALS(test_sol[1], 2.0);
+    TS_ASSERT_DELTA(test_sol[0], 5.0, 1e-8);
+    TS_ASSERT_DELTA(test_sol[1], 2.0, 1e-8);
   }
 };

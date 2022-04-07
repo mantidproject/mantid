@@ -8,7 +8,7 @@
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidCurveFitting/ComplexVector.h"
+#include "MantidCurveFitting/EigenComplexVector.h"
 
 using namespace Mantid::CurveFitting;
 

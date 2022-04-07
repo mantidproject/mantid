@@ -12,13 +12,13 @@
 #include "MantidCurveFitting/EigenFortranMatrix.h"
 #include "MantidCurveFitting/EigenMatrix.h"
 
+using Mantid::CurveFitting::ComplexMatrix;
 using Mantid::CurveFitting::ComplexType;
-using Mantid::CurveFitting::EigenComplexMatrix;
-using Mantid::CurveFitting::EigenFortranMatrix;
 using Mantid::CurveFitting::EigenMatrix;
+using Mantid::CurveFitting::FortranMatrix;
 
 using DoubleFortranMatrix = FortranMatrix<EigenMatrix>;
-using ComplexFortranMatrix = FortranMatrix<EigenComplexMatrix>;
+using ComplexFortranMatrix = FortranMatrix<ComplexMatrix>;
 
 class FortranMatrixTest : public CxxTest::TestSuite {
 public:

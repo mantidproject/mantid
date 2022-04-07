@@ -6,7 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
-//#include "MantidCurveFitting/DllConfig.h"
+#include "MantidCurveFitting/DllConfig.h"
 
 #include <Eigen/Core>
 #include <complex>
