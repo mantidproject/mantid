@@ -9,7 +9,7 @@
 # Print usage and exit
 function usage() {
   local exitcode=$1
-  echo "Usage: $0 [options] package_name icon_file"
+  echo "Usage: $0 [options] package_name"
   echo
   echo "Create a standalone installable package out of a mantidworkbench Conda package. The"
   echo " package is built in $BUILDDIR. This directory will be created if it does not exist"
@@ -18,6 +18,7 @@ function usage() {
   echo "environment, and on the path."
   echo "Options:"
   echo "  -c Optional Conda channel overriding the default mantid"
+  echo "  -s Optional Add a suffix to the output mantid file, has to be Unstable, or Nightly or not used"
   echo
   echo "Positional Arguments"
   echo "  package_name: The name of the package exe, i.e. the final name will be '${package_name}.exe'"
@@ -26,14 +27,40 @@ function usage() {
 
 # Optional arguments
 CONDA_CHANNEL=mantid
-while getopts ":c:h" o; do
-  case "$o" in
-  c) CONDA_CHANNEL="$OPTARG";;
-  h) usage 0;;
-  *) usage 1;;
-esac
+SUFFIX=""
+PACKAGE_NAME=${@: -1} # grab last arguement
+while [ ! $# -eq 0 ]
+do
+    case "$1" in
+        -c)
+            CONDA_CHANNEL="$2"
+            shift
+            ;;
+        -s)
+            SUFFIX="$2"
+            shift
+            ;;
+        -h)
+            usage 0
+            ;;
+        *)
+            if [ ! -z "$2" ]
+            then
+              usage 1
+            fi
+            ;;
+  esac
+  shift
 done
-shift $((OPTIND-1))
+
+# If suffix is not empty and does not contain Unstable or Nightly then fail.
+if [ ! -z "$SUFFIX" ]
+then
+  if [ "$SUFFIX" != "Unstable" ] && [ "$SUFFIX" != "Nightly" ]; then
+    echo "Suffix must either not be passed, or be Unstable or Nightly, for release do not pass this argument."
+    exit 1
+  fi
+fi
 
 # Define variables
 THIS_SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -41,7 +68,6 @@ CONDA_ENV=_conda_env
 CONDA_ENV_PATH=$THIS_SCRIPT_DIR/$CONDA_ENV
 COPY_DIR=$THIS_SCRIPT_DIR/_package_build
 CONDA_EXE=mamba
-PACKAGE_NAME=$1
 
 # Sanity check arguments. Especially ensure that paths are not empty as we are removing
 # items and we don't want to accidentally clean out system paths
@@ -140,10 +166,9 @@ echo "Cleanup directory containing build that is no longer needed"
 rm -rf $CONDA_ENV_PATH
 
 # Now package using NSIS
-echo "Edit the NSIS script"
+echo "Packaging package via NSIS"
 NSIS_SCRIPT=$THIS_SCRIPT_DIR/project.nsi
 
-echo "Packaging package via NSIS"
 # Make windows-like paths because NSIS is weird
 SCRIPT_DRIVE_LETTER="$(echo ${COPY_DIR:1:1} | tr [:lower:] [:upper:])"
 COPY_DIR=${COPY_DIR////\\}
@@ -152,16 +177,27 @@ COPY_DIR="$SCRIPT_DRIVE_LETTER:${COPY_DIR:2}"
 NSIS_SCRIPT=${NSIS_SCRIPT////\\}
 NSIS_SCRIPT="$SCRIPT_DRIVE_LETTER:${NSIS_SCRIPT:2}"
 
-ICON_PATH=$THIS_SCRIPT_DIR/../../../images/mantidplot.ico
+LOWER_CASE_SUFFIX="$(echo ${SUFFIX} | tr [:upper:] [:lower:])"
+
+ICON_PATH=$THIS_SCRIPT_DIR/../../../images/mantidplot$LOWER_CASE_SUFFIX.ico
 ICON_PATH=${ICON_PATH////\\}
 ICON_PATH="$SCRIPT_DRIVE_LETTER:${ICON_PATH:2}"
+
+WORKBENCH_ICON=$THIS_SCRIPT_DIR/../../../images/mantid_workbench$LOWER_CASE_SUFFIX.ico
+WORKBENCH_ICON=${WORKBENCH_ICON////\\}
+WORKBENCH_ICON="$SCRIPT_DRIVE_LETTER:${WORKBENCH_ICON:2}"
+
+NOTEBOOK_ICON=$THIS_SCRIPT_DIR/../../../images/mantid_notebook$LOWER_CASE_SUFFIX.ico
+NOTEBOOK_ICON=${NOTEBOOK_ICON////\\}
+NOTEBOOK_ICON="$SCRIPT_DRIVE_LETTER:${NOTEBOOK_ICON:2}"
 
 LICENSE_PATH=$THIS_SCRIPT_DIR/../../../LICENSE.txt
 LICENSE_PATH=${LICENSE_PATH////\\}
 LICENSE_PATH="$SCRIPT_DRIVE_LETTER:${LICENSE_PATH:2}"
+echo Workebench Icon: $WORKBENCH_ICON
 
-echo makensis /V4 /DVERSION=$VERSION /DPACKAGE_DIR=\"$COPY_DIR\" /DOUTFILE_NAME=$PACKAGE_NAME /DICON_PATH=$ICON_PATH /DMUI_PAGE_LICENSE_PATH=$LICENSE_PATH \"$NSIS_SCRIPT\"
-cmd.exe /C "START /wait "" makensis /V4 /DVERSION=$VERSION /DPACKAGE_DIR=\"$COPY_DIR\" /DOUTFILE_NAME=$PACKAGE_NAME /DICON_PATH=$ICON_PATH /DMUI_PAGE_LICENSE_PATH=$LICENSE_PATH \"$NSIS_SCRIPT\""
+echo makensis /V4 /DVERSION=$VERSION /DPACKAGE_DIR=\"$COPY_DIR\" /DPACKAGE_SUFFIX=$SUFFIX /DOUTFILE_NAME=$PACKAGE_NAME /DICON_PATH=$ICON_PATH /DWORKBENCH_ICON=$WORKBENCH_ICON /DNOTEBOOK_ICON=$NOTEBOOK_ICON /DMUI_PAGE_LICENSE_PATH=$LICENSE_PATH \"$NSIS_SCRIPT\"
+cmd.exe /C "START /wait "" makensis /V4 /DVERSION=$VERSION /DPACKAGE_DIR=\"$COPY_DIR\" /DPACKAGE_SUFFIX=$SUFFIX /DOUTFILE_NAME=$PACKAGE_NAME /DICON_PATH=$ICON_PATH /DWORKBENCH_ICON=$WORKBENCH_ICON /DNOTEBOOK_ICON=$NOTEBOOK_ICON /DMUI_PAGE_LICENSE_PATH=$LICENSE_PATH \"$NSIS_SCRIPT\""
 echo "Package packaged, find it here: $THIS_SCRIPT_DIR/$PACKAGE_NAME"
 
 echo "Cleaning up left over files"
