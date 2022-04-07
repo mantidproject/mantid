@@ -38,7 +38,7 @@ class DNSReductionGUIPresenterTest(unittest.TestCase):
         cls.modus.widgets = {'observer1': cls.widget}
         cls.widget.view = mock.Mock()
         # cls.widget.view.has_tab = True
-        cls.widget.view.menues = True
+        cls.widget.view.menus = True
         cls.widget.presenter = mock.Mock()
         cls.widget.presenter.view = cls.widget.view
         cls.parameter_abo.observers = [cls.widget.presenter]
@@ -98,7 +98,7 @@ class DNSReductionGUIPresenterTest(unittest.TestCase):
         self.view.clear_subviews.reset_mock()
         self.presenter._switch_mode('powder_tof')
         self.view.clear_subviews.assert_called_once()
-        self.view.clear_submenues.assert_called_once()
+        self.view.clear_submenus.assert_called_once()
         self.modus.change.assert_called_once()
         self.parameter_abo.register.assert_called_once()
         self.view.add_subview.assert_called_once()

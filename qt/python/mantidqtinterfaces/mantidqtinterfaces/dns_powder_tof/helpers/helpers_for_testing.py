@@ -80,7 +80,7 @@ fselector_fulldat = {
         'channelwidth': 1.6,
         'filename': 'service_788058.d_dat',
         'wavelength': 47.400000000000006,
-        'sampletype': '4p1K_map',
+        'sample_type': '4p1K_map',
         'selector_speed': 7032.0
     }],
     'standard_data': [{
@@ -94,7 +94,7 @@ fselector_fulldat = {
         'channelwidth': 1.6,
         'filename': 'test_empty.d_dat',
         'wavelength': 47.400000000000006,
-        'sampletype': 'empty',
+        'sample_type': 'empty',
         'selector_speed': 7032.0
     }, {
         'filenumber': 788058,
@@ -107,7 +107,7 @@ fselector_fulldat = {
         'channelwidth': 1.6,
         'filename': 'test_vana.d_dat',
         'wavelength': 47.400000000000006,
-        'sampletype': 'vana',
+        'sample_type': 'vana',
         'selector_speed': 7032.0
     }, {
         'filenumber': 788059,
@@ -120,7 +120,7 @@ fselector_fulldat = {
         'channelwidth': 1.6,
         'filename': 'test_vana.d_dat',
         'wavelength': 47.400000000000006,
-        'sampletype': 'vana',
+        'sample_type': 'vana',
         'selector_speed': 7032.0
     }]
 }

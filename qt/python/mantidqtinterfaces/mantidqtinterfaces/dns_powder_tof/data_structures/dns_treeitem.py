@@ -12,34 +12,34 @@ Custum Tree Item for DNS which is either a Scan or a File in DnsTreeModel
 class DNSTreeItem:
     """
     Custom Tree Item Class for DNS which is either a Scan
-    or a File in DnsTreeModel
+    or a File in DnsTreeModel.
     """
 
     def __init__(self, data, parent=None, checked=0):
         self.parent_item = parent
         self.item_data = data
-        self.child_items = []
-        self._checkstate = 0
+        self.children_items = []
+        self._check_state = 0
         self.setChecked(checked)
 
     def clearChilds(self):
-        self.child_items = []
+        self.children_items = []
 
     def appendChild(self, item):
-        self.child_items.append(item)
+        self.children_items.append(item)
         return item
 
     def child(self, row):
-        return self.child_items[row]
+        return self.children_items[row]
 
     def removeChild(self, row):
-        self.child_items.pop(row)
+        self.children_items.pop(row)
 
     def childCount(self):
-        return len(self.child_items)
+        return len(self.children_items)
 
-    def get_childs(self):
-        return self.child_items
+    def get_children_items(self):
+        return self.children_items
 
     def columnCount(self):
         return len(self.item_data)
@@ -68,25 +68,25 @@ class DNSTreeItem:
             return 'empty'
         return 'sample'
 
-    def is_type(self, sampletype):
-        return sampletype == self.get_sample_type()
+    def is_type(self, sample_type):
+        return sample_type == self.get_sample_type()
 
     def hasChildren(self):
         return bool(self.childCount() > 0)
 
     def isChecked(self):
-        return self._checkstate
+        return self._check_state
 
     def parent(self):
         return self.parent_item
 
     def row(self):
         if self.parent_item:
-            return self.parent_item.child_items.index(self)
+            return self.parent_item.children_items.index(self)
         return 0
 
     def setChecked(self, checked=2):
-        self._checkstate = checked
+        self._check_state = checked
 
     def setData(self, data, column):
         self.item_data[column] = data

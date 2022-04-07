@@ -54,7 +54,7 @@ class DNSTofPowderOptionsPresenter(DNSCommonOptionsPresenter):
             self._determine_wavelength()
         if own_options['dEstep'] == 0 or own_options['qstep'] == 0:
             self._estimate_q_and_binning()
-            self.view.show_statusmessage(
+            self.view.show_status_message(
                 'q-range and binning automatically estimated', 30)
 
     def process_commandline_request(self, cloptions):

@@ -75,9 +75,9 @@ class DNSTreeModelTest(unittest.TestCase):
     def test_scan_range(self):
         self.assertEqual(self.model._scan_range(), range(0, 2))
 
-    def test_get_sampletype(self):
-        self.assertEqual(self.model._get_sampletype('123_vanadium'), 'vana')
-        self.assertEqual(self.model._get_sampletype('123_hui'), '123_hui')
+    def test_get_sample_type(self):
+        self.assertEqual(self.model._get_sample_type('123_vanadium'), 'vana')
+        self.assertEqual(self.model._get_sample_type('123_hui'), '123_hui')
 
     def test_get_scan_rows(self):
         testv = self.model._get_scan_rows()
@@ -250,7 +250,7 @@ class DNSTreeModelTest(unittest.TestCase):
         self.assertEqual(self.model.rowCount(), 0)
 
     def test_new_scan_check(self):
-        self.model._lastscan_number = self.data[0].scannumber
+        self.model._last_scan_number = self.data[0].scannumber
         self.model._last_tof = self.data[0].tofchannels
         self.model._last_tof_time = self.data[0].channelwidth
         self.model._last_sample = self.data[0].sample
@@ -284,7 +284,7 @@ class DNSTreeModelTest(unittest.TestCase):
         self.assertTrue(scan.isChecked())
 
     def test_setup_model_data(self):
-        self.assertEqual(self.model._lastscan_number, '14933')
+        self.assertEqual(self.model._last_scan_number, '14933')
         self.assertEqual(self.model._last_tof_time, 1.6)
         self.assertEqual(self.model._last_tof, 1000)
         self.assertEqual(self.model._last_sample, '4p1K_map')

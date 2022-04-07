@@ -52,7 +52,7 @@ class DNSViewTest(unittest.TestCase):
         self.assertIsInstance(self.view, DNSView)
         self.assertIsInstance(self.view, QWidget)
         self.assertTrue(hasattr(self.view, 'HAS_TAB'))
-        self.assertTrue(hasattr(self.view, 'menues'))
+        self.assertTrue(hasattr(self.view, 'menus'))
         self.assertTrue(hasattr(self.view, '_map'))
 
     def test_process_events(self):
@@ -135,11 +135,11 @@ class DNSViewTest(unittest.TestCase):
         self.view.raise_error('123', critical=False, info=False)
         mock_messagebox.assert_called_once()
 
-    def test_show_statusmessage(self):
+    def test_show_status_message(self):
         self.view.parent = mock.Mock()
-        self.view.parent.show_statusmessage = mock.Mock()
-        self.view.show_statusmessage(message='', time=1, clear=False)
-        self.view.parent.show_statusmessage.assert_called_once()
+        self.view.parent.show_status_message = mock.Mock()
+        self.view.show_status_message(message='', time=1, clear=False)
+        self.view.parent.show_status_message.assert_called_once()
 
 
 if __name__ == '__main__':

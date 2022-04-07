@@ -113,7 +113,7 @@ class DNSReductionGUIView(QMainWindow):
             submenu = self.menu.insertMenu(self.ui.menuHelp.menuAction(), menu)
             self.subview_menus.append(submenu)
 
-    def clear_submenues(self):
+    def clear_submenus(self):
         for submenu in self.subview_menus:
             self.menu.removeAction(submenu)
 
@@ -138,7 +138,7 @@ class DNSReductionGUIView(QMainWindow):
     def _save_triggered(self):
         self.sig_save_triggered.emit()
 
-    def show_statusmessage(self, message='', time=10, clear=False):
+    def show_status_message(self, message='', time=10, clear=False):
         oldmessage = self.ui.statusbar.currentMessage()
         if oldmessage and not clear:
             message = " AND ".join((message, oldmessage))

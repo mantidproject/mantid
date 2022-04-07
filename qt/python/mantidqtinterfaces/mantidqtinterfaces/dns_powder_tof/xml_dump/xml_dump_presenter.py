@@ -32,7 +32,7 @@ class DNSXMLDumpPresenter(DNSObserver):
             options = self.param_dict
             self.model.dic_to_xml_file(options, xml_file_path, xml_header)
             self.last_filename = xml_file_path
-            self.view.show_statusmessage(f'Saved as {xml_file_path}', 30)
+            self.view.show_status_message(f'Saved as {xml_file_path}', 30)
         return xml_file_path
 
     def save_xml(self):
@@ -41,7 +41,7 @@ class DNSXMLDumpPresenter(DNSObserver):
             xml_header = self.view.get_file_header()
             options = self.param_dict
             self.model.dic_to_xml_file(options, self.last_filename, xml_header)
-            self.view.show_statusmessage(
+            self.view.show_status_message(
                 f'Saved as {self.last_filename}', 30)
         else:
             self.save_as_xml()

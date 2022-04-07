@@ -108,13 +108,15 @@ class ParameterAbo:
         self.observer_dict['xml_dump'].save_as_xml()
 
     def update_from_observer(self, observer):
-        """updates the gui_parameter dictionary from one specific observer"""
+        """
+        Updates the gui_parameter dictionary from one specific observer.
+        """
         self.gui_parameter[observer.name] = observer.get_option_dict()
         self._notify_observers()
 
     def update_from_all_observers(self):
         """
-        gets data from all observers
+        Gets data from all observers.
         """
         for observer in self.observers:
             self.gui_parameter[observer.name] = observer.get_option_dict()

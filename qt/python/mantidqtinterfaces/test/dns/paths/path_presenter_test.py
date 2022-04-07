@@ -31,7 +31,7 @@ class DNSPathPresenterTest(unittest.TestCase):
         cls.view.sig_data_path_set = mock.Mock(return_value='dummypath')
         cls.view.sig_clear_cache = mock.Mock()
         cls.view.sig_filedialog_requested = mock.Mock(return_value='data')
-        cls.view.within_manitd = False
+        cls.view.within_mantid = False
         # view functions
         cls.view.get_path.return_value = ''
         cls.view.open_filedialog.return_value = 'C:/dummy/test.py'
@@ -64,7 +64,7 @@ class DNSPathPresenterTest(unittest.TestCase):
         self.model.get_user_and_propnumber.assert_called_once()
         self.view.set_prop_number.assert_called_once()
         self.view.set_user.assert_called_once()
-        self.view.show_statusmessage.assert_not_called()
+        self.view.show_status_message.assert_not_called()
 
     def test_clear_cache(self):
         self.presenter._clear_cache()

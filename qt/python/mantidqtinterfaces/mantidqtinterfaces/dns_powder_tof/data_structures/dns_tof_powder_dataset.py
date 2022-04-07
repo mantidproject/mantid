@@ -122,8 +122,8 @@ class DNSTofDataset(ObjectDict):
         dataset_string += "}"
         return dataset_string
 
-    def _get_nb_banks(self, sampletype=None):
-        dic = self.datadic.get(sampletype, 0)
+    def _get_nb_banks(self, sample_type=None):
+        dic = self.datadic.get(sample_type, 0)
         if dic:
             return len(dic.keys()) - 1
         return 0

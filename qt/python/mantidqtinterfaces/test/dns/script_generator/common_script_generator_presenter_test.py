@@ -10,11 +10,11 @@ from unittest import mock
 
 from mantidqtinterfaces.dns.data_structures.dns_observer import \
     DNSObserver
-from mantidqtinterfaces.dns.script_generator.\
+from mantidqtinterfaces.dns.script_generator. \
     common_script_generator_model import DNSScriptGeneratorModel
-from mantidqtinterfaces.dns.script_generator.\
+from mantidqtinterfaces.dns.script_generator. \
     common_script_generator_presenter import DNSScriptGeneratorPresenter
-from mantidqtinterfaces.dns.script_generator.\
+from mantidqtinterfaces.dns.script_generator. \
     common_script_generator_view import DNSScriptGeneratorView
 from mantidqtinterfaces.dns.tests.helpers_for_testing import (
     get_fake_empty_param_dict, get_fake_param_dict, get_filepath)
@@ -76,12 +76,12 @@ class DNSScriptGeneratorPresenterTest(unittest.TestCase):
         self.view.open_progress_dialog.assert_called_once_with(1)
         self.model.run_script.assert_called_once_with(['test1', 'test2'])
         self.assertEqual(self.presenter._script_number, 1)
-        self.view.show_statusmessage.assert_called_once()  # from saving
+        self.view.show_status_message.assert_called_once()  # from saving
         self.model.run_script.return_value = 'Error'
         self.presenter._generate_script()
-        self.view.show_statusmessage.assert_called_with('Error',
-                                                        30,
-                                                        clear=True)
+        self.view.show_status_message.assert_called_with('Error',
+                                                         30,
+                                                         clear=True)
         self.model.script_maker.return_value = ['test1', 'test2']
         self.presenter._generate_script()
         self.assertEqual(self.presenter._script_number, 1)  # not run
@@ -119,7 +119,7 @@ class DNSScriptGeneratorPresenterTest(unittest.TestCase):
         self.presenter.param_dict['paths'] = {'script_dir': '123'}
         self.presenter._save_script('')
         self.model.save_script.assert_called_once_with('', 'script.txt', '123')
-        self.view.show_statusmessage.assert_called_once()
+        self.view.show_status_message.assert_called_once()
         self.model.save_script.reset_mock()
         self.presenter.param_dict['paths'] = {'script_dir': ''}
         self.presenter._save_script('')

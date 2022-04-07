@@ -15,48 +15,47 @@ from mantidqtinterfaces.dns_powder_tof.options.common_options_model import \
 
 
 class DNSTofPowderOptionsModel(DNSCommonOptionsModel):
-
-    def estimate_q_and_binning(self, fulldata, wavelength):
+    def estimate_q_and_binning(self, full_data, wavelength):
         """
-        Estimation of q and ideal binning based on selected sample data
+        Estimation of q and ideal binning based on selected sample data.
         """
-        channelwidths, chan_error = get_channelwidths(fulldata)
-        tofchannels, tof_error = get_tofchannels(fulldata)
-        det_rot_min, det_rot_max = self.get_det_rot_min_max(fulldata)
+        channel_widths, chan_error = get_channelwidths(full_data)
+        tof_channels, tof_error = get_tofchannels(full_data)
+        det_rot_min, det_rot_max = self.get_det_rot_min_max(full_data)
         d_e = lambda_to_energy(wavelength)
         binning = {
             'dEmin': -d_e + 0.5,
             'dEmax': d_e - 0.5,
-            'dEstep': 2 * d_e / max(tofchannels) * 10,
+            'dEstep': 2 * d_e / max(tof_channels) * 10,
             # in principle *10 should not be done, prevents empty bins
             'qmax': twotheta_to_q(det_rot_max + 115, wavelength, -d_e),
             'qmin': twotheta_to_q(det_rot_min, wavelength, 0),
-            'qstep': 0.025,  # anyhow linear steps not good
+            'qstep': 0.025,  # anyhow, linear steps not good
         }
         errors = {
-            'channelwidths': channelwidths,
+            'channelwidths': channel_widths,
             'chan_error': chan_error,
-            'tofchannels': tofchannels,
+            'tofchannels': tof_channels,
             'tof_error': tof_error
         }
         return [binning, errors]
 
 
-def get_tofchannels(fulldata):
-    tofchannels = [x['tofchannels'] for x in fulldata]
-    error = number_of_tof_channels_varies(tofchannels)
-    return [tofchannels, error]
+def get_tofchannels(full_data):
+    tof_channels = [x['tofchannels'] for x in full_data]
+    error = number_of_tof_channels_varies(tof_channels)
+    return [tof_channels, error]
 
 
-def get_channelwidths(fulldata):
-    channelwidths = [x['channelwidth'] for x in fulldata]
-    error = channelwidth_varies(channelwidths)
-    return [channelwidths, error]
+def get_channelwidths(full_data):
+    channel_widths = [x['channelwidth'] for x in full_data]
+    error = channelwidth_varies(channel_widths)
+    return [channel_widths, error]
 
 
-def channelwidth_varies(channelwidths):
-    return len(set(channelwidths)) != 1
+def channelwidth_varies(channel_widths):
+    return len(set(channel_widths)) != 1
 
 
-def number_of_tof_channels_varies(tofchannels):
-    return len(set(tofchannels)) != 1
+def number_of_tof_channels_varies(tof_channels):
+    return len(set(tof_channels)) != 1

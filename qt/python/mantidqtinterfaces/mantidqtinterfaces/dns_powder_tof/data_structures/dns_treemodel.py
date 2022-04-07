@@ -16,16 +16,16 @@ class DNSTreeModel(QAbstractItemModel):
     # pylint: disable=too-many-public-methods   # redefinition of QT methods
     """
     QT Model to store DNS scan structure consisting of scans with files as
-    children
+    children.
     """
 
     def __init__(self, data=None, parent=None):
         super().__init__(parent)
         self._scan = None
-        self.rootItem = DNSTreeItem(
+        self.root_item = DNSTreeItem(
             ('number', 'det_rot', 'sample_rot', 'field', 'temperature',
-             'sample', 'time', 'tof_channels', 'tof_channelwidth', 'filepath'))
-        self._lastscan_number = None
+             'sample', 'time', 'tof_channels', 'tof_channel_width', 'filepath'))
+        self._last_scan_number = None
         self._last_tof_time = None
         self._last_tof = None
         self._last_sample = None
@@ -46,48 +46,48 @@ class DNSTreeModel(QAbstractItemModel):
             return QModelIndex()
         child_item = index.internalPointer()
         parent_item = child_item.parent()
-        if parent_item == self.rootItem:
+        if parent_item == self.root_item:
             return QModelIndex()
         return self.createIndex(parent_item.row(), 0, parent_item)
 
     def headerData(self, section, orientation, role):  # overrides QT function
         if orientation == Qt.Horizontal and role == Qt.DisplayRole:
-            return self.rootItem.data(section)
+            return self.root_item.data(section)
         return None
 
     def columnCount(self, parent):  # overrides QT function
         """
-        returns number fo columns
+        Returns number of columns.
         """
         if parent.isValid():
             return parent.internalPointer().columnCount()
-        return self.rootItem.columnCount()
+        return self.root_item.columnCount()
 
     def _scan_command_from_row(self, row):
-        return self.rootItem.child(row).data(0)
+        return self.root_item.child(row).data(0)
 
     def _scan_expected_points_from_row(self, row):
         """
-        returns the number of the scanpoints which are expected from the scan
-        command can be smaller than number of childs if scan did not run
-        completly
+        Returns the number of the scan points which are expected from the scan
+        command can be smaller than number of children if scan did not run
+        completely
         """
-        scancommand = self._scan_command_from_row(row)
-        scancommand = scancommand.split('#')[1]
-        if '/' in scancommand:
-            scancommand = scancommand.split('/')[1]
-        if scancommand:
-            return int(scancommand.strip())
+        scan_command = self._scan_command_from_row(row)
+        scan_command = scan_command.split('#')[1]
+        if '/' in scan_command:
+            scan_command = scan_command.split('/')[1]
+        if scan_command:
+            return int(scan_command.strip())
         return 0
 
     def number_of_scans(self):
-        return self.rootItem.childCount()
+        return self.root_item.childCount()
 
     def _scan_range(self):
         return range(self.number_of_scans())
 
     @staticmethod
-    def _get_sampletype(sample):
+    def _get_sample_type(sample):
         if 'vanadium' in sample or 'vana' in sample:
             return 'vana'
         if 'nicr' in sample or 'NiCr' in sample:
@@ -97,7 +97,6 @@ class DNSTreeModel(QAbstractItemModel):
         return sample
 
     # complex getting
-
     def _get_scan_rows(self):
         return [
             row for row in self._scan_range()
@@ -159,7 +158,7 @@ class DNSTreeModel(QAbstractItemModel):
         return self.index(row, 0, parent)
 
     def scan_from_row(self, row):
-        return self.rootItem.child(row)
+        return self.root_item.child(row)
 
     def rowCount(self, parent=None):  # overrides QT function
         parent_item = self._get_or_create_parent_item(parent)
@@ -169,7 +168,7 @@ class DNSTreeModel(QAbstractItemModel):
 
     def _get_or_create_parent_item(self, parent):
         if parent is None or not parent.isValid():
-            return self.rootItem
+            return self.root_item
         return parent.internalPointer()
 
     def is_scan_tof(self, row):
@@ -201,7 +200,7 @@ class DNSTreeModel(QAbstractItemModel):
                         'channelwidth': float(item.data(8)),
                         'filename': item.data(9),
                         'wavelength': float(item.data(10)) * 10,
-                        'sampletype': self._get_sampletype(item.data(5)),
+                        'sample_type': self._get_sample_type(item.data(5)),
                         'selector_speed': float(item.data(11))
                     })
                 else:
@@ -279,14 +278,14 @@ class DNSTreeModel(QAbstractItemModel):
         Removing of all scans from model
         """
         self.beginRemoveRows(QModelIndex(), 0, self.number_of_scans() - 1)
-        self.rootItem.clearChilds()
+        self.root_item.clearChilds()
         self.endRemoveRows()
-        self._lastscan_number = None
+        self._last_scan_number = None
 
     def _new_scan_check(self, dnsfile):
         # seperates scans and measurements with different tof-channels
         # or samplenames
-        return (dnsfile.scannumber != self._lastscan_number
+        return (dnsfile.scannumber != self._last_scan_number
                 or self._last_tof != dnsfile.tofchannels
                 or self._last_tof_time != dnsfile.channelwidth
                 or self._last_sample != dnsfile.sample)
@@ -323,15 +322,15 @@ class DNSTreeModel(QAbstractItemModel):
         """
         Adding data to the model accepts a list of dnsfile objects
         """
-        rootitem = self.rootItem
+        root_item = self.root_item
         for dnsfile in dnsfiles:
             if self._new_scan_check(dnsfile):
-                self._scan = DNSTreeItem(self._get_scantext(dnsfile), rootitem)
+                self._scan = DNSTreeItem(self._get_scantext(dnsfile), root_item)
                 self.beginInsertRows(QModelIndex(), self.number_of_scans(),
                                      self.number_of_scans())
-                rootitem.appendChild(self._scan)
+                root_item.appendChild(self._scan)
                 self.endInsertRows()
-                self._lastscan_number = dnsfile.scannumber
+                self._last_scan_number = dnsfile.scannumber
             file_data = self._get_data_from_dnsfile(dnsfile)
             self._last_tof = dnsfile.tofchannels
             self._last_tof_time = dnsfile.channelwidth

@@ -53,7 +53,7 @@ class DNSScriptGeneratorPresenter(DNSObserver):
             self.view.process_events()
             error = self.model.run_script(script)
             if error:
-                self.view.show_statusmessage(error, 30, clear=True)
+                self.view.show_status_message(error, 30, clear=True)
             else:
                 self._script_number += 1
             self._finish_script_run()
@@ -97,9 +97,9 @@ class DNSScriptGeneratorPresenter(DNSObserver):
         if scriptdir:
             filename, scriptpath = self.model.save_script(
                 script, filename, scriptdir)
-            self.view.show_statusmessage(f'script saved to: {scriptpath}',
-                                         30,
-                                         clear=True)
+            self.view.show_status_message(f'script saved to: {scriptpath}',
+                                          30,
+                                          clear=True)
             self._set_script_filename(filename)
         else:
             self.raise_error('No script filepath set, script will not be '

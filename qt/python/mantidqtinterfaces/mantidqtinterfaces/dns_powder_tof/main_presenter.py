@@ -54,14 +54,14 @@ class DNSReductionGUIPresenter:
         elastic/TOF, powder/single crystal  and simulation
         """
         self.view.clear_subviews()
-        self.view.clear_submenues()
+        self.view.clear_submenus()
         self.modus.change(modus)
         self._parameter_abo.clear()
         for widget in self.modus.widgets.values():
             self._parameter_abo.register(widget.presenter)
             if widget.view.HAS_TAB:
                 self.view.add_subview(widget.view)
-            if widget.view.menues:
+            if widget.view.menus:
                 self.view.add_submenu(widget.view)
         self._parameter_abo.notify_modus_change()
 

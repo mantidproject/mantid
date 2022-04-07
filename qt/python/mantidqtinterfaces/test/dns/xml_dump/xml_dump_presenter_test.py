@@ -47,7 +47,7 @@ class DNSXMLDumpPresenterTest(unittest.TestCase):
         self.view.open_load_filename.reset_mock()
         self.view.open_save_filename.reset_mock()
         self.model.xml_file_to_dict.reset_mock()
-        self.view.show_statusmessage.reset_mock()
+        self.view.show_status_message.reset_mock()
 
     def test___init__(self):
         self.assertIsInstance(self.presenter, DNSXMLDumpPresenter)
@@ -69,7 +69,7 @@ class DNSXMLDumpPresenterTest(unittest.TestCase):
         self.view.get_file_header.assert_called_once()
         self.model.dic_to_xml_file.assert_called_once_with(
             OrderedDict(), 'test2.xml', {'manitd_version': 1.0})
-        self.view.show_statusmessage.assert_called_once()
+        self.view.show_status_message.assert_called_once()
         self.assertEqual(testv, 'test2.xml')
 
     def test_save_xml(self):
@@ -78,7 +78,7 @@ class DNSXMLDumpPresenterTest(unittest.TestCase):
         self.view.open_save_filename.assert_called_once()
         self.view.open_save_filename.reset_mock()
         self.view.get_file_header.reset_mock()
-        self.view.show_statusmessage.reset_mock()
+        self.view.show_status_message.reset_mock()
 
         self.presenter.last_filename = 'te.xml'
         self.presenter.save_xml()
@@ -86,7 +86,7 @@ class DNSXMLDumpPresenterTest(unittest.TestCase):
         self.view.get_file_header.assert_called_once()
         self.model.dic_to_xml_file(OrderedDict(), 'te.xml',
                                    {'manitd_version': 1.0})
-        self.view.show_statusmessage.assert_called_once()
+        self.view.show_status_message.assert_called_once()
 
     # def test_set_view_from_param(self):
     # pass

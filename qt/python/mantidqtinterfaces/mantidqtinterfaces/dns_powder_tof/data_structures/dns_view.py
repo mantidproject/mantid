@@ -26,9 +26,9 @@ class DNSView(QWidget):
             self.setVisible(False)
         self.parent = parent
         self._map = {}
-        self.menues = []
+        self.menus = []
         self.app = getattr(parent, 'app', None)
-        self.within_manitd = getattr(parent, 'within_mantid', None)
+        self.within_mantid = getattr(parent, 'within_mantid', None)
 
     def process_events(self):
         self.app.processEvents()
@@ -40,7 +40,7 @@ class DNSView(QWidget):
     @staticmethod
     def set_single_state(target_object, value):
         """
-         Setting widget value independent of type
+        Setting widget value independent of type.
         """
         if value is None:
             return
@@ -57,7 +57,7 @@ class DNSView(QWidget):
         elif isinstance(target_object, QComboBox):
             index = target_object.findText(
                 str(value),
-                Qt.MatchFixedString)  # crapy workaround for Qt4 compability
+                Qt.MatchFixedString)  # Crapy workaround for Qt4 compatibility
             if index >= 0:
                 target_object.setCurrentIndex(index)
         elif isinstance(target_object, QSlider):
@@ -72,7 +72,7 @@ class DNSView(QWidget):
     def _get_single_state(target_object):
         # pylint: disable=too-many-return-statements
         """
-        Returning of widget value independent of type
+        Returning of widget value independent of type.
         """
         if isinstance(target_object, QDoubleSpinBox):
             return target_object.value()
@@ -98,20 +98,20 @@ class DNSView(QWidget):
     def get_state(self):
         """
         Retuning of a dictionary with the names of the widgets
-        as keys and the values
+        as keys and the values.
         """
         state_dict = OrderedDict()
         for key, target_object in self._map.items():
             state = self._get_single_state(target_object)
             if state is not None:
-                # pushbuttons for example are not defined in the get function
+                # Push buttons for example are not defined in the get function
                 state_dict[key] = state
         return state_dict
 
     def set_state(self, state_dict):
         """
-        Stetting the gui state from a dictionary
-        containing the shortnames of the widgets as keys and the values
+        Setting the gui state from a dictionary
+        containing the shortnames of the widgets as keys and the values.
         """
         for key, target_object in self._map.items():
             self.set_single_state(target_object,
@@ -120,7 +120,7 @@ class DNSView(QWidget):
     @staticmethod
     def raise_error(message, critical=False, info=False):
         """
-        Errors are shown as popups
+        Errors are shown as popups.
         """
         error_dialog = QMessageBox()
         if critical:
@@ -133,7 +133,7 @@ class DNSView(QWidget):
         error_dialog.setWindowTitle("Error")
         error_dialog.exec_()
 
-    def show_statusmessage(self, message='', time=1, clear=False):
-        """Change of status message in global DNS GUI """
+    def show_status_message(self, message='', time=1, clear=False):
+        """Change of status message in global DNS GUI."""
         if self.parent is not None:
-            self.parent.show_statusmessage(message, time, clear=clear)
+            self.parent.show_status_message(message, time, clear=clear)

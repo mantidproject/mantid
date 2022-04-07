@@ -45,7 +45,7 @@ class DNSTofPowderOptionsPresenterTest(unittest.TestCase):
         })
         cls.view.raise_error = mock.Mock()
         cls.view.set_state = mock.Mock()
-        cls.view.show_statusmessage = mock.Mock()
+        cls.view.show_status_message = mock.Mock()
 
         cls.presenter.param_dict = get_fake_param_dict()
         cls.presenter.param_dict['tof_powder_options'] = {'123': 123}
@@ -75,7 +75,7 @@ class DNSTofPowderOptionsPresenterTest(unittest.TestCase):
 
     def test_process_request(self):
         self.presenter.process_request()
-        self.view.show_statusmessage.assert_called_once()
+        self.view.show_status_message.assert_called_once()
         self.view.raise_error.assert_called_once()
 
 

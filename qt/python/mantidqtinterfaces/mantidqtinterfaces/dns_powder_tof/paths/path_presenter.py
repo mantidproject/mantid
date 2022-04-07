@@ -18,7 +18,7 @@ class DNSPathPresenter(DNSObserver):
         self.view.sig_data_path_set.connect(self._data_path_set)
         self.view.sig_clear_cache.connect(self._clear_cache)
         self.view.sig_filedialog_requested.connect(self._filedialog_requested)
-        if not self.view.within_manitd:
+        if not self.view.within_mantid:
             # if launches from commandline, set path to current working
             # directory
             self.view.set_datapath(self.model.get_current_directory())
@@ -36,7 +36,7 @@ class DNSPathPresenter(DNSObserver):
             self.view.set_prop_number(prop_nb)
             self.view.set_user(user)
         else:
-            self.view.show_statusmessage(
+            self.view.show_status_message(
                 'No DNS .d_dat file found in data'
                 'directory', 30)
 
