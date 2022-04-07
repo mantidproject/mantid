@@ -808,7 +808,7 @@ class TableWorkspaceDisplayPresenterTest(unittest.TestCase):
     def test_replace(self, ws, view, presenter):
         # patch this out after the constructor of the presenter has finished,
         # so that we reset any calls it might have made
-        presenter.model.edit_flag = True
+        presenter.model.block_model_replace = True
         with patch(
                 'mantidqt.widgets.workspacedisplay.table.presenter.TableWorkspaceDataPresenterStandard.load_data'
         ) as mock_load_data:

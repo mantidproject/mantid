@@ -54,7 +54,7 @@ class TableWorkspaceDisplayViewTest(unittest.TestCase):
         ws.addColumn("double", "test_col")
 
         presenter = TableWorkspaceDisplay(ws, batch=False)
-        presenter.model.edit_flag = True
+        presenter.model.block_model_replace = True
         current_rows = presenter.view.rowCount()
         ws.addRow({'test_col': 1.0})
 
@@ -66,7 +66,7 @@ class TableWorkspaceDisplayViewTest(unittest.TestCase):
         ws.addColumn("double", "l")
 
         presenter = TableWorkspaceDisplay(ws, batch=False)
-        presenter.model.edit_flag = True
+        presenter.model.block_model_replace = True
         current_rows = presenter.view.rowCount()
         ws.addRow([1.0])
 
@@ -78,7 +78,7 @@ class TableWorkspaceDisplayViewTest(unittest.TestCase):
         ws.addColumn("double", "test_col")
 
         presenter = TableWorkspaceDisplay(ws, batch=True)
-        presenter.model.edit_flag = True
+        presenter.model.block_model_replace = True
         ws.removeColumn('test_col')
 
         self.assertEqual(0, presenter.view.columnCount())
@@ -89,7 +89,7 @@ class TableWorkspaceDisplayViewTest(unittest.TestCase):
         ws.addColumn("double", "test_col")
 
         presenter = TableWorkspaceDisplay(ws, batch=True)
-        presenter.model.edit_flag = True
+        presenter.model.block_model_replace = True
         current_rows = presenter.view.rowCount()
         ws.addRow({'test_col': 1.0})
 

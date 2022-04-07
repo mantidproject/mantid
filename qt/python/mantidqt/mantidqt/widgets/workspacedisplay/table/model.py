@@ -30,10 +30,10 @@ class TableWorkspaceColumnTypeMapping(object):
 
 
 @contextmanager
-def table_ws_context_manager(model):
-    model.edit_flag = True
+def block_model_replacement(model):
+    model.block_model_replace = True
     yield
-    model.edit_flag = False
+    model.block_model_replace = False
 
 
 class TableWorkspaceDisplayModel:
@@ -66,7 +66,7 @@ class TableWorkspaceDisplayModel:
         self.ws_num_cols = self.ws.columnCount()
         self.marked_columns = MarkedColumns()
         self._original_column_headers = self.get_column_headers()
-        self.edit_flag = False
+        self.block_model_replace = False
         # loads the types of the columns
         for col in range(self.ws_num_cols):
             plot_type = self.ws.getPlotType(col)
@@ -143,7 +143,7 @@ class TableWorkspaceDisplayModel:
             # at the same time as we are trying to locally update the data in the
             # item object itself, which causes a Qt exception that the object has
             # already been deleted and a crash
-            with table_ws_context_manager(self):
+            with block_model_replacement(self):
                 self.ws.setCell(row, col, data)
 
     def workspace_equals(self, workspace_name):
