@@ -98,7 +98,7 @@ class DNSFileSelectorView(DNSView):
         self.progress = None
         self.combo_changed(0)
 
-    # SIGNALS
+    # signals
     sig_read_all = Signal()
     sig_read_filtered = Signal()
     sig_filters_clicked = Signal()
@@ -114,7 +114,7 @@ class DNSFileSelectorView(DNSView):
     sig_standard_filters_clicked = Signal()
     sig_right_click = Signal(QModelIndex)
 
-    # Signal reactions
+    # signal reactions
 
     def _treeview_clicked(self, point):
         self.sig_right_click.emit(self._treeview.indexAt(point))
@@ -137,15 +137,11 @@ class DNSFileSelectorView(DNSView):
 
     def combo_changed(self, index):
         self._content.groupBox_filter.setHidden(index)
+        self._content.groupBox_filter_filenumber.setHidden(index)
         self._content.pB_check_last_scan.setHidden(index)
         self._content.pB_check_last_complete_scan.setHidden(index)
         self._content.sB_last_scans.setHidden(index)
-        self._content.sB_td_file_to.setHidden(index)
-        self._content.sB_td_file_nb.setHidden(index)
-        #self._content.l_td_file_nb.setHidden(index)
-        self._content.pB_td_read_filtered.setHidden(index)
         self._content.cB_autoload.setHidden(index)
-        #self._content.l_td_file_to.setHidden(index)
         self._content.groupBox_filter_standard.setHidden(1 - index)
         self._standard_treeview.setHidden(1 - index)
         self.cB_auto_standard.setHidden(1 - index)
@@ -159,7 +155,8 @@ class DNSFileSelectorView(DNSView):
     def _un_expand_all(self):
         self._treeview.collapseAll()
 
-    def expand_all(self):  # public can be called from presenter
+    # public can be called from presenter
+    def expand_all(self):
         self._treeview.expandAll()
 
     def _filter_scans_checked(self):
@@ -175,7 +172,6 @@ class DNSFileSelectorView(DNSView):
         self.sig_read_filtered.emit()
 
     # get states
-
     def get_filters(self):
         """
         Returning chosen filters which should be applied to the list of scans
@@ -233,11 +229,11 @@ class DNSFileSelectorView(DNSView):
 
     # progress dialog
 
-    def open_progress_dialog(self, numofsteps):
-        if numofsteps:
+    def open_progress_dialog(self, num_of_steps):
+        if num_of_steps:
             self.progress = QProgressDialog(
-                f"Loading {numofsteps} files...", "Abort Loading", 0,
-                numofsteps)
+                f"Loading {num_of_steps} files...", "Abort Loading", 0,
+                num_of_steps)
             self.progress.setWindowModality(Qt.WindowModal)
             self.progress.setMinimumDuration(200)
             self.progress.open(self._progress_canceled)
@@ -249,9 +245,8 @@ class DNSFileSelectorView(DNSView):
         self.progress.setValue(step)
 
     # manipulating view
-
-    def set_first_column_spanned(self, scanrange):
-        for i in scanrange:
+    def set_first_column_spanned(self, scan_range):
+        for i in scan_range:
             self._treeview.setFirstColumnSpanned(i, self._treeview.rootIndex(),
                                                  True)
 

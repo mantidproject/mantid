@@ -84,6 +84,22 @@
          </property>
         </widget>
        </item>
+       <item>
+        <spacer name="horizontalSpacer_2">
+         <property name="orientation">
+          <enum>Qt::Horizontal</enum>
+         </property>
+         <property name="sizeType">
+          <enum>QSizePolicy::Minimum</enum>
+         </property>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>20</width>
+           <height>20</height>
+          </size>
+         </property>
+        </spacer>
+       </item>
       </layout>
      </item>
      <item>
@@ -129,7 +145,7 @@
    <item>
     <layout class="QVBoxLayout" name="global_right">
      <item>
-      <widget class="QGroupBox" name="groupBox_filter_standard_3">
+      <widget class="QGroupBox" name="groupBox_filter_filenumber">
        <property name="title">
         <string>Filter by File Number:</string>
        </property>
@@ -144,7 +160,7 @@
         <item>
          <layout class="QHBoxLayout" name="horizontalLayout_7">
           <item>
-           <widget class="QLabel" name="l_td_file_to_2">
+           <widget class="QLabel" name="l_td_file_from">
             <property name="text">
              <string>From</string>
             </property>
@@ -191,217 +207,213 @@
       </widget>
      </item>
      <item>
-      <layout class="QVBoxLayout" name="global_right_2">
-       <item>
-        <widget class="QGroupBox" name="groupBox_filter">
-         <property name="toolTip">
-          <string/>
-         </property>
-         <property name="title">
-          <string>Filter by Scan Command:</string>
-         </property>
-         <layout class="QVBoxLayout" name="verticalLayout_4">
+      <widget class="QGroupBox" name="groupBox_filter">
+       <property name="toolTip">
+        <string/>
+       </property>
+       <property name="title">
+        <string>Filter by Scan Command:</string>
+       </property>
+       <layout class="QVBoxLayout" name="verticalLayout_4">
+        <item>
+         <widget class="QLabel" name="label_show_only">
+          <property name="text">
+           <string>Show Only:</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QCheckBox" name="cB_filter_scans">
+          <property name="text">
+           <string>scans</string>
+          </property>
+          <property name="checked">
+           <bool>false</bool>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QCheckBox" name="cB_filter_cscans">
+          <property name="text">
+           <string>cscans</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QCheckBox" name="cB_filter_det_rot">
+          <property name="text">
+           <string>det_rot</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QCheckBox" name="cB_filter_sample_rot">
+          <property name="text">
+           <string>sample_rot</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <layout class="QHBoxLayout" name="horizontalLayout_5">
+          <property name="sizeConstraint">
+           <enum>QLayout::SetMinimumSize</enum>
+          </property>
           <item>
-           <widget class="QLabel" name="label_show_only">
+           <widget class="QCheckBox" name="cB_filter_free">
             <property name="text">
-             <string>Show Only:</string>
+             <string/>
             </property>
            </widget>
           </item>
           <item>
-           <widget class="QCheckBox" name="cB_filter_scans">
+           <widget class="QLineEdit" name="lE_filter_free_text">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="minimumSize">
+             <size>
+              <width>0</width>
+              <height>0</height>
+             </size>
+            </property>
+            <property name="maximumSize">
+             <size>
+              <width>16777215</width>
+              <height>16777215</height>
+             </size>
+            </property>
             <property name="text">
-             <string>scans</string>
-            </property>
-            <property name="checked">
-             <bool>false</bool>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QCheckBox" name="cB_filter_cscans">
-            <property name="text">
-             <string>cscans</string>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QCheckBox" name="cB_filter_det_rot">
-            <property name="text">
-             <string>det_rot</string>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QCheckBox" name="cB_filter_sample_rot">
-            <property name="text">
-             <string>sample_rot</string>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <layout class="QHBoxLayout" name="horizontalLayout_5">
-            <property name="sizeConstraint">
-             <enum>QLayout::SetMinimumSize</enum>
-            </property>
-            <item>
-             <widget class="QCheckBox" name="cB_filter_free">
-              <property name="text">
-               <string/>
-              </property>
-             </widget>
-            </item>
-            <item>
-             <widget class="QLineEdit" name="lE_filter_free_text">
-              <property name="sizePolicy">
-               <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
-                <horstretch>0</horstretch>
-                <verstretch>0</verstretch>
-               </sizepolicy>
-              </property>
-              <property name="minimumSize">
-               <size>
-                <width>0</width>
-                <height>0</height>
-               </size>
-              </property>
-              <property name="maximumSize">
-               <size>
-                <width>16777215</width>
-                <height>16777215</height>
-               </size>
-              </property>
-              <property name="text">
-               <string>time</string>
-              </property>
-             </widget>
-            </item>
-           </layout>
-          </item>
-         </layout>
-        </widget>
-       </item>
-       <item>
-        <widget class="QGroupBox" name="groupBox_filter_standard">
-         <property name="title">
-          <string>Filter by ???:</string>
-         </property>
-         <layout class="QVBoxLayout" name="verticalLayout">
-          <item>
-           <widget class="QLabel" name="l_show_only">
-            <property name="text">
-             <string>Show Only:</string>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QCheckBox" name="cB_filter_vanadium">
-            <property name="text">
-             <string>Vanadium</string>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QCheckBox" name="cB_filter_nicr">
-            <property name="text">
-             <string>NiCr</string>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QCheckBox" name="cB_filter_empty">
-            <property name="text">
-             <string>empty</string>
+             <string>time</string>
             </property>
            </widget>
           </item>
          </layout>
-        </widget>
-       </item>
-       <item>
-        <widget class="QGroupBox" name="groupBox_check">
-         <property name="toolTip">
-          <string/>
-         </property>
-         <property name="title">
-          <string>Check Scans:</string>
-         </property>
-         <layout class="QGridLayout" name="gridLayout_3">
-          <item row="3" column="0" rowspan="2">
-           <widget class="QSpinBox" name="sB_last_scans">
-            <property name="toolTip">
-             <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;number of scans which are selected if &amp;quot;Last scans&amp;quot; or &amp;quot;Last compl. s.&amp;quot; is clicked.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-            </property>
-            <property name="value">
-             <number>1</number>
-            </property>
-           </widget>
-          </item>
-          <item row="5" column="0" colspan="2">
-           <widget class="QPushButton" name="pB_check_selected">
-            <property name="toolTip">
-             <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;checks selected files.&lt;/p&gt;&lt;p&gt;You can use multiselection with Shift and Strg.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-            </property>
-            <property name="text">
-             <string>Check Selected</string>
-            </property>
-           </widget>
-          </item>
-          <item row="1" column="0">
-           <widget class="QPushButton" name="pB_check_all">
-            <property name="text">
-             <string>All</string>
-            </property>
-           </widget>
-          </item>
-          <item row="3" column="1">
-           <widget class="QPushButton" name="pB_check_last_scan">
-            <property name="text">
-             <string>Last Scans</string>
-            </property>
-           </widget>
-          </item>
-          <item row="1" column="1">
-           <widget class="QPushButton" name="pB_check_none">
-            <property name="text">
-             <string>None</string>
-            </property>
-           </widget>
-          </item>
-          <item row="4" column="1">
-           <widget class="QPushButton" name="pB_check_last_complete_scan">
-            <property name="text">
-             <string>Last Completed Scans</string>
-            </property>
-           </widget>
-          </item>
-         </layout>
-        </widget>
-       </item>
-       <item>
-        <widget class="QGroupBox" name="groupBox_expand">
-         <property name="title">
-          <string>Expand</string>
-         </property>
-         <layout class="QHBoxLayout" name="horizontalLayout_3">
-          <item>
-           <widget class="QPushButton" name="pB_expand_all">
-            <property name="text">
-             <string>All</string>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QPushButton" name="pB_expand_none">
-            <property name="text">
-             <string>None</string>
-            </property>
-           </widget>
-          </item>
-         </layout>
-        </widget>
-       </item>
-      </layout>
+        </item>
+       </layout>
+      </widget>
+     </item>
+     <item>
+      <widget class="QGroupBox" name="groupBox_filter_standard">
+       <property name="title">
+        <string>Filter by ???:</string>
+       </property>
+       <layout class="QVBoxLayout" name="verticalLayout">
+        <item>
+         <widget class="QLabel" name="l_show_only">
+          <property name="text">
+           <string>Show Only:</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QCheckBox" name="cB_filter_vanadium">
+          <property name="text">
+           <string>Vanadium</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QCheckBox" name="cB_filter_nicr">
+          <property name="text">
+           <string>NiCr</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QCheckBox" name="cB_filter_empty">
+          <property name="text">
+           <string>empty</string>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </widget>
+     </item>
+     <item>
+      <widget class="QGroupBox" name="groupBox_check">
+       <property name="toolTip">
+        <string/>
+       </property>
+       <property name="title">
+        <string>Check Scans:</string>
+       </property>
+       <layout class="QGridLayout" name="gridLayout_3">
+        <item row="3" column="0" rowspan="2">
+         <widget class="QSpinBox" name="sB_last_scans">
+          <property name="toolTip">
+           <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;number of scans which are selected if &amp;quot;Last scans&amp;quot; or &amp;quot;Last compl. s.&amp;quot; is clicked.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+          </property>
+          <property name="value">
+           <number>1</number>
+          </property>
+         </widget>
+        </item>
+        <item row="5" column="0" colspan="2">
+         <widget class="QPushButton" name="pB_check_selected">
+          <property name="toolTip">
+           <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;checks selected files.&lt;/p&gt;&lt;p&gt;You can use multiselection with Shift and Strg.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+          </property>
+          <property name="text">
+           <string>Check Selected</string>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="0">
+         <widget class="QPushButton" name="pB_check_all">
+          <property name="text">
+           <string>All</string>
+          </property>
+         </widget>
+        </item>
+        <item row="3" column="1">
+         <widget class="QPushButton" name="pB_check_last_scan">
+          <property name="text">
+           <string>Last Scans</string>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="1">
+         <widget class="QPushButton" name="pB_check_none">
+          <property name="text">
+           <string>None</string>
+          </property>
+         </widget>
+        </item>
+        <item row="4" column="1">
+         <widget class="QPushButton" name="pB_check_last_complete_scan">
+          <property name="text">
+           <string>Last Completed Scans</string>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </widget>
+     </item>
+     <item>
+      <widget class="QGroupBox" name="groupBox_expand">
+       <property name="title">
+        <string>Expand</string>
+       </property>
+       <layout class="QHBoxLayout" name="horizontalLayout_3">
+        <item>
+         <widget class="QPushButton" name="pB_expand_all">
+          <property name="text">
+           <string>All</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QPushButton" name="pB_expand_none">
+          <property name="text">
+           <string>None</string>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </widget>
      </item>
      <item>
       <spacer name="verticalSpacer">
