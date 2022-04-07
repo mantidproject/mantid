@@ -65,7 +65,7 @@ public:
   }
 
   void test_testSQDeltaFunction() {
-    /*const double THICKNESS = 0.001; // metres
+    /* const double THICKNESS = 0.001; // metres
 
     const int NTHETA = 900;
     const double ang_inc = 180.0 / NTHETA;
@@ -417,6 +417,7 @@ public:
     TS_ASSERT_EQUALS(testResultY[2], 2.0);
     testResultX.clear();
     testResultY.clear();
+    alg.integrateCumulative(test, 0., 0., testResultX, testResultY);
     TS_ASSERT_EQUALS(testResultY[0], 0.);
     testResultX.clear();
     testResultY.clear();
@@ -628,7 +629,7 @@ public:
       alg->setProperty("NumberOfSimulationPoints", numberSimulationPoints);
     alg->setProperty("ImportanceSampling", importanceSampling);
     alg->setProperty("SimulateEnergiesIndependently", simulateWSeparately);
-    alg->setProperty("SeedValue", 666666666);
+    alg->setProperty("SeedValue", 222222222);
     alg->execute();
 
     if (alg->isExecuted()) {
