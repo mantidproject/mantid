@@ -1,5 +1,5 @@
 # Mantid NSIS script
-# Assumes you have passed /DVERSION, /DOUTFILE_NAME, /DPACKAGE_DIR, /DICON_PATH, /DMUI_PAGE_LICENSE_PATH as arguments
+# Assumes you have passed /DVERSION, /DOUTFILE_NAME, /DPACKAGE_DIR, /DPACKAGE_SUFFIX, /DICON_PATH, /DWORKBENCH_ICON, /DNOTEBOOK_ICON, /DMUI_PAGE_LICENSE_PATH as arguments
 
 # This must be set for long paths to work properly.
 # Unicode only defaults to true in NSIS 3.07 onwards.
@@ -7,7 +7,6 @@ Unicode True
 
 !include MUI2.nsh
 
-!define PACKAGE_SUFFIX "Test"
 !define PACKAGE_NAME "mantid${PACKAGE_SUFFIX}"
 !define START_MENU_FOLDER "Mantid${PACKAGE_SUFFIX}"
 !define MANTIDWORKBENCH_LINK_NAME "Mantid Workbench ${PACKAGE_SUFFIX}.lnk"
@@ -48,8 +47,6 @@ FunctionEnd
 # The name of the installer
 Name "Mantid Workbench ${PACKAGE_SUFFIX}"
 
-!define PACKAGE_NAME "mantidTest"
-!define PACKAGE_VENDOR "ISIS Rutherford Appleton Laboratory UKRI, NScD Oak Ridge National Laboratory, European Spallation Source and Institut Laue - Langevin"
 # The file to write
 OutFile "${OUTFILE_NAME}"
 
@@ -70,7 +67,7 @@ Section "-Core installation"
     File /r "${PACKAGE_DIR}\*.*"
 
     # Add MantidWorkbench-script.pyw file to the install directory
-    FileOpen $0 "$INSTDIR\bin\MantidWorkbench-script.pyw" w
+    FileOpen $0 "$INSTDIR\bin\MantidWorkbench-script.pyw" w # This w is intentional and opens it in write mode
     FileWrite $0 "#!$INSTDIR\bin\pythonw.exe$\n"
     FileWrite $0 "import workbench.app.main$\n"
     FileWrite $0 "workbench.app.main.main()$\n"
@@ -94,12 +91,16 @@ Section "-Core installation"
     # Create shortucts for start menu
     CreateDirectory "$SMPROGRAMS\${START_MENU_FOLDER}"
     CreateShortCut "$SMPROGRAMS\${START_MENU_FOLDER}\${MANTIDWORKBENCH_LINK_NAME}" "$INSTDIR\bin\MantidWorkbench.exe"
-    CreateShortCut "$SMPROGRAMS\${START_MENU_FOLDER}\${MANTIDNOTEBOOK_LINK_NAME}" "$INSTDIR\bin\mantidpython.bat" "notebook --notebook-dir=%userprofile%"
+    SetOutPath "$INSTDIR\bin"
+    CreateShortCut "$SMPROGRAMS\${START_MENU_FOLDER}\${MANTIDNOTEBOOK_LINK_NAME}" "cmd.exe" "/C $\"call $INSTDIR\bin\pythonw.exe -m notebook --notebook-dir=%userprofile%$\"" "${NOTEBOOK_ICON}"
+    SetOutPath "$INSTDIR"
     CreateShortCut "$SMPROGRAMS\${START_MENU_FOLDER}\Uninstall.lnk" "$\"$INSTDIR\Uninstall.exe$\""
 
     # Create desktop shortcuts
-    CreateShortCut "$DESKTOP\${MANTIDWORKBENCH_LINK_NAME}" "$INSTDIR\bin\MantidWorkbench.exe"
-    CreateShortCut "$DESKTOP\${MANTIDNOTEBOOK_LINK_NAME}" "$INSTDIR\bin\mantidpython.bat" "notebook --notebook-dir=%userprofile%"
+    CreateShortCut "$DESKTOP\${MANTIDWORKBENCH_LINK_NAME}" "$INSTDIR\bin\MantidWorkbench.exe" "" "${WORKBENCH_ICON}"
+    SetOutPath "$INSTDIR\bin"
+    CreateShortCut "$DESKTOP\${MANTIDNOTEBOOK_LINK_NAME}" "cmd.exe" "/C $\"call $INSTDIR\bin\pythonw.exe -m notebook --notebook-dir=%userprofile%$\"" "${NOTEBOOK_ICON}"
+    SetOutPath "$INSTDIR"
 
 SectionEnd ; end the section
 

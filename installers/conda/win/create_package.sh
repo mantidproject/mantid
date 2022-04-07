@@ -80,14 +80,14 @@ rm -rf $CONDA_ENV_PATH
 mkdir $COPY_DIR
 
 echo "Creating conda env from mantidworkbench and jq"
-"$CONDA_EXE" create --prefix $CONDA_ENV_PATH mantidworkbench m2w64-jq --copy -c $CONDA_CHANNEL -c conda-forge -y
+"$CONDA_EXE" create --prefix $CONDA_ENV_PATH mantidworkbench m2w64-jq notebook --copy -c $CONDA_CHANNEL -c conda-forge -y
 echo "Conda env created"
 
 # Determine version information
 VERSION=$("$CONDA_EXE" list --prefix "$CONDA_ENV_PATH" '^mantid$' --json | $CONDA_ENV_PATH/Library/mingw-w64/bin/jq.exe --raw-output '.[0].version')
 echo "Version number: $version"
+# VERSION=1
 
-# Remove jq
 echo "Removing jq from conda env"
 "$CONDA_EXE" remove --prefix $CONDA_ENV_PATH --yes m2w64-jq
 echo "jq removed from conda env"
