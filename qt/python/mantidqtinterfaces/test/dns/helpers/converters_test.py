@@ -8,7 +8,7 @@
 import unittest
 
 from mantidqtinterfaces.dns.helpers.converters import (
-    lambda_to_energy, twotheta_to_q)
+    lambda_to_energy, two_theta_to_q)
 
 
 class DNSconvertersTest(unittest.TestCase):
@@ -22,13 +22,13 @@ class DNSconvertersTest(unittest.TestCase):
         with self.assertRaises(ZeroDivisionError):
             lambda_to_energy(0)
 
-    def test_twotheta_to_q(self):
-        qabs = twotheta_to_q(120, 4.74, 0)
+    def test_two_theta_to_q(self):
+        qabs = two_theta_to_q(120, 4.74, 0)
         self.assertAlmostEqual(qabs, 2.29594856)
-        qabs = twotheta_to_q(120, 4.74, 3)
+        qabs = two_theta_to_q(120, 4.74, 3)
         self.assertAlmostEqual(qabs, 1.67443094)
         with self.assertRaises(ZeroDivisionError):
-            twotheta_to_q(120, 0, 0)
+            two_theta_to_q(120, 0, 0)
 
 
 if __name__ == '__main__':
