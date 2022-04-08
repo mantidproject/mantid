@@ -16,7 +16,7 @@ import multiprocessing
 from mantid.api import FrameworkManagerImpl
 from mantid.kernel import ConfigService, UsageService, version_str as mantid_version_str
 from mantidqt.utils.qt import plugins
-from mantidqt.dialogs import errorreports
+from mantidqt.dialogs.errorreports import main as errorreports_main
 import mantidqt.utils.qt as qtutils
 
 # Find Qt plugins for development builds on some platforms
@@ -132,7 +132,7 @@ def start_error_reporter():
     """
     Used to start the error reporter if the program has segfaulted.
     """
-    errorreports.main.main()
+    errorreports_main.main()
 
 
 def create_and_launch_workbench(app, command_line_options):
