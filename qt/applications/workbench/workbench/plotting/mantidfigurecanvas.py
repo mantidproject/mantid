@@ -20,7 +20,8 @@ class MantidFigureCanvas(FigureCanvasQTAgg):
         super().__init__(figure=figure)
         self._pen_color = Qt.black
         self._pen_thickness = 1.5
-        self._dpi_ratio = self.devicePixelRatio() or 1
+        if LooseVersion(matplotlib.__version__) >= LooseVersion("3.5.0"):
+            self._dpi_ratio = self.devicePixelRatio() or 1
 
     # options controlling the pen used by tools that manipulate the graph - e.g the zoom box
     @property
