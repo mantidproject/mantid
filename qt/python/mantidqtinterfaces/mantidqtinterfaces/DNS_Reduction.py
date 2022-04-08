@@ -1,18 +1,22 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2019 ISIS Rutherford Appleton Laboratory UKRI,
-
 #     NScD Oak Ridge National Laboratory, European Spallation Source
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
-"""
-GUI for reduction of elastic and TOF data at the DNS instrument MLZ
-"""
 # pylint: disable=invalid-name
+
+"""
+GUI for reduction of elastic and TOF data at the DNS instrument MLZ.
+"""
+
 import sys
 import os
 
-# sys.path.pop(0) OKcomment: seem not to do anything
+# Remove script path from sys.path, which is automatically added in python 3.
+# Otherwise, Muon and Engineering modules are not found if called from the
+# command line
+sys.path.pop(0)
 
 from mantidqt.gui_helper import get_qapplication  # noqa: E402
 from qtpy import QtGui, QtWidgets  # noqa: E402
@@ -20,13 +24,7 @@ from qtpy import QtGui, QtWidgets  # noqa: E402
 from mantidqtinterfaces.dns_powder_tof.main_widget import \
     DNSReductionGuiWidget  # noqa: E402
 
-# remove script path from sys.path, which is automatically added in python 3
-# otherwise Muon and Engineering modules
-# are not found if called from command line
-# OKcomment: is the comment above relevant? why isn't it removed?
-
 app, within_mantid = get_qapplication()
-
 reducer_widget = DNSReductionGuiWidget(name='DNS-Reduction',
                                        app=app,
                                        within_mantid=within_mantid)
