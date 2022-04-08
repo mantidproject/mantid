@@ -13,35 +13,20 @@ Interface Overview
    :height: 400px
 \
 
-This interface is used to analyse elastic and inelastic data of the DNS
-instrument at MLZ. The interface can be accessed from the main menu of
-MantidWorkbench, in *Interfaces → Direct → DNS Reduction*.
-It can also be run standalone by running python **DNSReduction.py** in
-*qt/python/mantidqtinterfaces/mantidqtinterfaces*.
+This interface can be used to perform the data reduction of the DNS Powder TOF data at MLZ. The interface can be accessed from the main menu of MantidWorkbench, in *Interfaces → Direct → DNS Reduction*. It can also be run standalone by running python **DNSReduction.py** in *qt/python/mantidqtinterfaces/mantidqtinterfaces*.
 
-The interface has separate modi for different kinds of measurements at DNS,
-they can be accessed over the interface menu for example
-**Tools → Change Mode -> Powder TOF** changes to the mode for
-inelastic time of flight data processing for powders.
-At the moment it only works for data of the polarization analysis detector bank,
-not for the position sensitive detector.
+The interface performs data reduction for inelastic time of flight data processing for powders. At the moment it only works for data of the polarization analysis detector bank, not for the position sensitive detector.
 
-Below the interface menu are the different tabs for data processing,
-which should be called from left to right during data processing.
-They can be common for multiple modi or specific for one modus.
+Below the interface menu are the different tabs for data processing, which should be called from left to right during data processing.
 
-Common Tabs
------------
+Tabs Description
+----------------
 
-* :ref:`Paths Tab <dns_paths_tab-ref>`
-* :ref:`Data Tab <dns_data_tab-ref>`
-* :ref:`Script Generator Tab <dns_script_generator_tab-ref>`
-
-Specific Tabs
--------------
-
-* :ref:`Powder TOF Options Tab <dns_powder_tof_options_tab-ref>`
-* :ref:`Powder TOF Plotting Tab <dns_powder_tof_plotting_tab-ref>`
+* :ref:`Paths <dns_paths_tab-ref>`
+* :ref:`Data <dns_data_tab-ref>`
+* :ref:`Script Generator <dns_script_generator_tab-ref>`
+* :ref:`Powder TOF Options <dns_powder_tof_options_tab-ref>`
+* :ref:`Powder TOF Plotting <dns_powder_tof_plotting_tab-ref>`
 
 Feedback & Comments
 -------------------

@@ -8,39 +8,30 @@ DNS Path Tab
    :height: 400px
 \
 
-In this tab you can set the directories containing the datafiles which should
-be processed. If you set the **Data directory** all other fields will be
-automatically set, to standard values.
-If a DNS data file is found in the directory, the proposal number and
+In this tab you can set the directories containing the datafiles which should be processed. If you set the **Data Directory** filed all other fields will be automatically set to default values. If a DNS data file is found in the directory, the proposal number and
 username will be shown.
 
-If the GUI is called from commandline, the current working directory is
-automatically chosen as data directory.
+If the GUI is called from commandline, the current working directory is automatically chosen as data directory.
 
-Directories
-^^^^^^^^^^^^^^^^^^^^^^^^^
-**Data directory** for the DNS .d_dat files
+Main Controls
+^^^^^^^^^^^^^
 
-**PSD directory** for the position sensitive detector event
-list mode .mdat files (not used atm.)
++------------------------------+----------------------------------------------------------------------------------------------+
+| **Data Directory**           | Path to the DNS .d_dat files                                                                 |
++------------------------------+----------------------------------------------------------------------------------------------+
+| **PSD Directory**            | Path to the position sensitive detector event list mode .mdat files (not used at the moment) |
++------------------------------+----------------------------------------------------------------------------------------------+
+| **Logbook Directory**        | Path to the Nicos log files (not used at the moment)                                         |
++------------------------------+----------------------------------------------------------------------------------------------+
+| **Script Directory**         | Path to the directory in which reduction scripts will be saved                               |
++------------------------------+----------------------------------------------------------------------------------------------+
+| **Standard Files Directory** | Path to the DNS calibration files (normally Vanadium, NiCr and Empty)                        |
++------------------------------+----------------------------------------------------------------------------------------------+
+| **Export Directory**         | Path to the directory in which the processed data are saved (in the chosen formats)          |
++------------------------------+----------------------------------------------------------------------------------------------+
 
-**Logbook directory** for the Nicos log files (not used atm.)
+The button **Clear Directories** clears all the fields, this shoud be done if the **Data Directory** is changed and new automatic setting of the other directories is wanted.
 
-**Script directory** where the reduction scripts will be saved
+The **Clear Cached Filelist** button deletes the saved filelist of the **Data Tab**, which is cached for speed reasons in the data directory in the file *last_filelist.txt*
 
-**Standard files** here the DNS calibration files are stored,
-normally Vanadium, NiCr and Empty.
-
-**Export directory** if the checkbox is checked, the processed data is
-automatically exported to this directory in the chosen formats.
-
-The button **Clear directories** clears all the fields, this shoud be done if
-the **Data directory** is changed and new automatic setting of the other
-directories is wanted.
-
-The **Clear cached filelist** button deletes the saved filelist of the
-**Data Tab**, which is cached for speed reasons in the data directory in the
-file *last_filelist.txt*
-
-:ref:`DNS Reduction <dns_reduction-ref>`
-
+:ref:`DNS Powder TOF <dns_powder_tof-ref>`
