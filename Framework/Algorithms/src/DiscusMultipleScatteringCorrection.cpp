@@ -821,15 +821,6 @@ double DiscusMultipleScatteringCorrection::calculateSOfQNormalisationFactor() {
   std::tie(IOfQYFull, std::ignore, std::ignore) = integrateQSQ(k);
   double factor = 2 * k * k / IOfQYFull.back();
   return factor;
-
-  /* for (size_t iW = 0; iW < m_SQWS->getNumberHistograms(); iW++) {
-    auto &SOfQY = m_SQWS->dataY(iW);
-    std::transform(SOfQY.begin(), SOfQY.end(), SOfQY.begin(), [factor](double d) -> double { return d * factor; });
-  }
-  for (size_t iW = 0; iW < m_QSQWS->getNumberHistograms(); iW++) {
-    auto &QSOfQY = m_QSQWS->dataY(iW);
-    std::transform(QSOfQY.begin(), QSOfQY.end(), QSOfQY.begin(), [factor](double d) -> double { return d * factor; });
-  }*/
 }
 
 /**
