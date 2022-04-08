@@ -326,11 +326,7 @@ void SmoothNeighbours::findNeighboursUbiqutious() {
   outWI = 0;
   int sum = getProperty("SumNumberOfNeighbours");
   std::shared_ptr<const Geometry::IComponent> parent, neighbParent, grandparent, neighbGParent;
-  auto used = new bool[inWS->getNumberHistograms()];
-  if (sum > 1) {
-    for (size_t wi = 0; wi < inWS->getNumberHistograms(); wi++)
-      used[wi] = false;
-  }
+  std::vector<bool> used(inWS->getNumberHistograms(), false);
   const auto &detectorInfo = inWS->detectorInfo();
   for (size_t wi = 0; wi < inWS->getNumberHistograms(); wi++) {
     if (sum > 1)
@@ -419,8 +415,6 @@ void SmoothNeighbours::findNeighboursUbiqutious() {
 
     m_progress->report("Finding Neighbours");
   } // each workspace index
-
-  delete[] used;
 }
 
 /**
@@ -523,17 +517,13 @@ void SmoothNeighbours::exec() {
   else
     findNeighboursUbiqutious();
 
-  EventWorkspace_sptr wsEvent = std::dynamic_pointer_cast<EventWorkspace>(inWS);
+  auto wsEvent = std::dynamic_pointer_cast<EventWorkspace>(inWS);
   if (wsEvent)
     wsEvent->sortAll(TOF_SORT, m_progress.get());
-
-  if (!wsEvent || !PreserveEvents)
-    this->execWorkspace2D();
-  else if (wsEvent)
+  if (wsEvent && PreserveEvents)
     this->execEvent(wsEvent);
   else
-    throw std::runtime_error("This algorithm requires a Workspace2D or "
-                             "EventWorkspace as its input.");
+    this->execWorkspace2D();
 }
 
 //--------------------------------------------------------------------------------------------
