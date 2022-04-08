@@ -8,6 +8,7 @@
 """
 Qt-based matplotlib canvas
 """
+from distutils.version import LooseVersion
 from qtpy.QtCore import Qt
 from qtpy.QtGui import QPen
 from matplotlib.backends.backend_qt5agg import (  # noqa: F401
