@@ -4,8 +4,9 @@
 #     NScD Oak Ridge National Laboratory, European Spallation Source
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
+
 """
-DNS File selector View - Tab of DNS Reduction GUI
+DNS File selector View - Tab of DNS Reduction GUI.
 """
 
 from mantidqt.utils.qt import load_ui
@@ -16,7 +17,7 @@ from mantidqtinterfaces.dns_powder_tof.data_structures.dns_view import DNSView
 
 class DNSFileSelectorView(DNSView):
     """
-       Lets user select DNS data files for further reduction
+    Lets user select DNS data files for further reduction.
     """
     NAME = 'Data'
 
@@ -55,7 +56,8 @@ class DNSFileSelectorView(DNSView):
         self._standard_treeview.setContextMenuPolicy(Qt.CustomContextMenu)
         self._standard_treeview.customContextMenuRequested.connect(
             self._treeview_clicked)
-        # buttons
+
+        # Buttons
         self._content.pB_td_read_all.clicked.connect(self._read_all_clicked)
         self._content.pB_td_read_filtered.clicked.connect(
             self._read_filtered_clicked)
@@ -80,7 +82,7 @@ class DNSFileSelectorView(DNSView):
             self._check_last)
         self._content.pB_check_selected.clicked.connect(self._check_selected)
 
-        # checkboxes
+        # Checkboxes
         self._map['filter_vanadium'].stateChanged.connect(
             self._filter_standard_checked)
         self._map['filter_nicr'].stateChanged.connect(
@@ -89,7 +91,7 @@ class DNSFileSelectorView(DNSView):
             self._filter_standard_checked)
         self._map['autoload'].stateChanged.connect(self._autoload_checked)
 
-        # combo box
+        # Combo box
         self._content.combB_directory.currentIndexChanged.connect(
             self.combo_changed)
 
@@ -98,7 +100,7 @@ class DNSFileSelectorView(DNSView):
         self.progress = None
         self.combo_changed(0)
 
-    # signals
+    # Signals
     sig_read_all = Signal()
     sig_read_filtered = Signal()
     sig_filters_clicked = Signal()
@@ -114,8 +116,7 @@ class DNSFileSelectorView(DNSView):
     sig_standard_filters_clicked = Signal()
     sig_right_click = Signal(QModelIndex)
 
-    # signal reactions
-
+    # Signal reactions
     def _treeview_clicked(self, point):
         self.sig_right_click.emit(self._treeview.indexAt(point))
 
@@ -137,7 +138,7 @@ class DNSFileSelectorView(DNSView):
 
     def combo_changed(self, index):
         self._content.groupBox_filter.setHidden(index)
-        self._content.groupBox_filter_filenumber.setHidden(index)
+        self._content.groupBox_filter_file_number.setHidden(index)
         self._content.pB_check_last_scan.setHidden(index)
         self._content.pB_check_last_complete_scan.setHidden(index)
         self._content.sB_last_scans.setHidden(index)
@@ -155,7 +156,7 @@ class DNSFileSelectorView(DNSView):
     def _un_expand_all(self):
         self._treeview.collapseAll()
 
-    # public can be called from presenter
+    # Public can be called from presenter
     def expand_all(self):
         self._treeview.expandAll()
 
@@ -171,10 +172,10 @@ class DNSFileSelectorView(DNSView):
     def _read_filtered_clicked(self):
         self.sig_read_filtered.emit()
 
-    # get states
+    # Get states
     def get_filters(self):
         """
-        Returning chosen filters which should be applied to the list of scans
+        Returning chosen filters which should be applied to the list of scans.
         """
         state_dict = self.get_state()
         freetext = state_dict['filter_free_text']
@@ -182,7 +183,7 @@ class DNSFileSelectorView(DNSView):
             'det_rot': state_dict['filter_det_rot'],
             'sample_rot': state_dict['filter_sample_rot'],
             ' scan': state_dict['filter_scans'],
-            # space is important to not get cscans
+            # Space is important to not get cscans
             'cscan': state_dict['filter_cscans'],
             freetext: state_dict['filter_free'],
         }
@@ -207,7 +208,7 @@ class DNSFileSelectorView(DNSView):
         }
         return filters
 
-    def get_start_end_filenumbers(self):
+    def get_start_end_file_numbers(self):
         start = self._map['file_nb'].value()
         end = self._map['file_to'].value()
         return [start, end]
@@ -227,8 +228,7 @@ class DNSFileSelectorView(DNSView):
     def is_scan_hidden(self, row):
         return self._treeview.isRowHidden(row, self._treeview.rootIndex())
 
-    # progress dialog
-
+    # Progress dialog
     def open_progress_dialog(self, num_of_steps):
         if num_of_steps:
             self.progress = QProgressDialog(
@@ -244,13 +244,13 @@ class DNSFileSelectorView(DNSView):
     def set_progress(self, step):
         self.progress.setValue(step)
 
-    # manipulating view
+    # Manipulating view
     def set_first_column_spanned(self, scan_range):
         for i in scan_range:
             self._treeview.setFirstColumnSpanned(i, self._treeview.rootIndex(),
                                                  True)
 
-    def set_start_end_filenumbers_from_arguments(self, start, end):
+    def set_start_end_file_numbers_from_arguments(self, start, end):
         self.set_single_state(self._map['file_nb'], start)
         self.set_single_state(self._map['file_to'], end)
 
@@ -259,3 +259,10 @@ class DNSFileSelectorView(DNSView):
             self._standard_treeview.setModel(model)
         else:
             self._sample_treeview.setModel(model)
+
+    def adjust_treeview_columns_size(self):
+        #print('Count:', self.get_selected_indexes())
+        #n_columns = self._sample_treeview.header()
+        num_columns = 10
+        for i in range(num_columns):
+            self._sample_treeview.resizeColumnToContents(i)

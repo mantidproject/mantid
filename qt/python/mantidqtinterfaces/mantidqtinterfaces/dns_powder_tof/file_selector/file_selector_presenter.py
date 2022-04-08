@@ -1,19 +1,18 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
-# Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2021 ISIS Rutherford Appleton Laboratory UKRI,
 #     NScD Oak Ridge National Laboratory, European Spallation Source
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
+
 """
-DNS File selector Presenter - Tab of DNS Reduction GUI
+DNS File selector Presenter - Tab of DNS Reduction GUI.
 """
 
 from mantidqtinterfaces.dns_powder_tof.data_structures.dns_observer import DNSObserver
 
 
 class DNSFileSelectorPresenter(DNSObserver):
-
     def __init__(self,
                  name=None,
                  parent=None,
@@ -23,12 +22,12 @@ class DNSFileSelectorPresenter(DNSObserver):
         # pylint: disable=too-many-arguments
         super().__init__(parent=parent, name=name, view=view, model=model)
         self.watcher = watcher
-        self.view.set_tree_model(self.model.get_model())
+        self.view.set_tree_model(self.model.get_model()) # OKcomment: this line seems redundant
         self.view.set_tree_model(self.model.get_model(standard=True),
                                  standard=True)
         self._old_data_set = set()
 
-        # connect signals
+        # Connect signals
         self.view.sig_read_all.connect(self._read_all)
         self.view.sig_read_filtered.connect(self._read_filtered)
         self.view.sig_filters_clicked.connect(self._filter_scans)
@@ -43,64 +42,68 @@ class DNSFileSelectorPresenter(DNSObserver):
         self.view.sig_dataset_changed.connect(self._dataset_changed)
         self.watcher.sig_files_changed.connect(self._files_changed_by_watcher)
 
-    # loading
-
+    # Loading
     def _read_all(self, filtered=False, watcher=False, start=None, end=None):
         """
         Reading of new files, if filtered is True, only the files in the
-        range specified by start and end
+        range specified by start and end.
         """
         fn_range = [start, end]
-        datapath = self.param_dict['paths']['data_dir']
-        nbfiles, loaded, datafiles, fn_range = \
-            self.model.set_datafiles_to_load(datapath, fn_range, filtered,
+        data_path = self.param_dict['paths']['data_dir']
+        nb_files, loaded, datafiles, fn_range = \
+            self.model.set_datafiles_to_load(data_path, fn_range, filtered,
                                              watcher)
 
-        self.view.open_progress_dialog(nbfiles)
-        self.model.read_all(datafiles, datapath, loaded, watcher)
+        self.view.open_progress_dialog(nb_files)
+        self.model.read_all(datafiles, data_path, loaded, watcher)
         self.view.set_first_column_spanned(self.model.get_scan_range())
         self._filter_scans()
         if self.model.get_number_of_scans() == 1:
             self.view.expand_all()
         if not filtered:
             self._set_start_end(fn_range)
+        self.view.adjust_treeview_columns_size()
 
     def _read_filtered(self):
-        """ reads only the files in the range given by start and stop fields
-            in the view """
-        start, end = self.view.get_start_end_filenumbers()
+        """
+        Reads only the files in the range given by start and stop fields
+        in the view.
+        """
+        start, end = self.view.get_start_end_file_numbers()
         self._read_all(filtered=True, start=start, end=end)
 
-    def _read_standard(self, selfcall=False):
+    def _read_standard(self, self_call=False):
         """
-        Reading of standard files
+        Reading of standard files.
         """
-        datapath = self.param_dict['paths']['data_dir']
-        standardpath = self.param_dict['paths']['standards_dir']
-        if not standardpath:
+        data_path = self.param_dict['paths']['data_dir']
+        standard_path = self.param_dict['paths']['standards_dir']
+        if not standard_path:
             self.raise_error('No path set for standard data')
-        standard_found = self.model.read_standard(standardpath)
+        standard_found = self.model.read_standard(standard_path)
         self.view.set_first_column_spanned(self.model.get_scan_range())
         self._filter_standard()
-        if not standard_found and not selfcall:
-            if self.model.try_unzip(datapath, standardpath):
-                self._read_standard(selfcall=True)
+        if not standard_found and not self_call:
+            if self.model.try_unzip(data_path, standard_path):
+                self._read_standard(self_call=True)
 
     def _cancel_loading(self):
         self.model.set_loading_canceled(True)
 
     def _set_start_end(self, fn_range):
         start, end = fn_range
-        self.view.set_start_end_filenumbers_from_arguments(start, end)
+        self.view.set_start_end_file_numbers_from_arguments(start, end)
 
     def _files_changed_by_watcher(self):
-        """triggered by view if new files are found and timer of 5 s is run
-           down"""
+        """
+        Triggered by view if new files are found and timer of 5 s is run
+        down.
+        """
         self._read_all(watcher=True)
 
     def _autoload(self, state):
-        datadir = self.param_dict['paths']['data_dir']
-        if state == 2 and datadir:
+        data_dir = self.param_dict['paths']['data_dir']
+        if state == 2 and data_dir:
             self.watcher.start_watcher()
             if not self._old_data_set:
                 self._read_all()
@@ -108,15 +111,14 @@ class DNSFileSelectorPresenter(DNSObserver):
             self.watcher.stop_watcher()
 
     # scan selection
-
     def _automatic_select_all_standard_files(self):
         was = not self.model.model_is_standard()
         if was:  # if view is not standard we change to it and change back
             self.view.combo_changed(1)
         self._read_standard()
         self._check_all_vissible_scans()
-        self.view.show_statusmessage('automatically loaded all standard files',
-                                     30)
+        self.view.show_status_message('automatically loaded all standard files',
+                                      30)
         if was:
             self.view.combo_changed(0)
 
@@ -145,35 +147,34 @@ class DNSFileSelectorPresenter(DNSObserver):
     def _get_non_hidden_rows(self):
         hidden = self.view.is_scan_hidden
         scan_range = self.model.get_scan_range()
-        nonhidden_rows = [row for row in scan_range if not hidden(row)]
-        return nonhidden_rows
+        non_hidden_rows = [row for row in scan_range if not hidden(row)]
+        return non_hidden_rows
 
     def _filter_scans(self):
         """
         Hide and uncheck the scans in the treeview which do not
-        match filters from get_filters
+        match filters from get_filters.
         """
         self._show_all_scans()
         filters = self.view.get_filters().items()
-        hidescans = self.model.filter_scans_for_boxes(filters,
-                                                      self._is_modus_tof())
-        for row in hidescans:
+        hide_scans = self.model.filter_scans_for_boxes(filters,
+                                                       self._is_modus_tof())
+        for row in hide_scans:
             self.view.hide_scan(row, hidden=True)
 
     def _filter_standard(self):
         """
-        Hide and uncheck the standard files which do not match filters
+        Hide and uncheck the standard files which do not match filters.
         """
         self._show_all_scans()
         filters = self.view.get_standard_filters()
         active = filters['vanadium'] or filters['empty'] or filters['nicr']
-        hidescans = self.model.filter_standard_types(filters, active,
-                                                     self._is_modus_tof())
-        for row in hidescans:
+        hide_scans = self.model.filter_standard_types(filters, active,
+                                                      self._is_modus_tof())
+        for row in hide_scans:
             self.view.hide_scan(row, hidden=True)
 
-    # Change of datasets
-
+    # change of datasets
     def _changed_to_standard(self):
         if not self.model.get_number_of_scans():
             self._read_standard()
@@ -191,8 +192,7 @@ class DNSFileSelectorPresenter(DNSObserver):
             self.model.set_model()
             self._filter_scans()
 
-    # Change of modi
-
+    # change of modi
     def _is_modus_tof(self):
         return '_tof' in self.modus
 
@@ -201,27 +201,28 @@ class DNSFileSelectorPresenter(DNSObserver):
         self._filter_standard()
         self.view.hide_tof(self._is_modus_tof())
 
-    # model can access this function # have no idea how to do this otherwise
-
+    # model can access this function
+    # have no idea how to do this otherwise
     def update_progress(self, i, end):
         if i % 100 == 0 or i >= end - 1:
             self.view.set_progress(i + 1)
 
     def _right_click(self, index):
-        """Open files in the treeview with rightclick"""
-        datapath = self.param_dict['paths']['data_dir']
-        standardpath = self.param_dict['paths']['standards_dir']
-        self.model.open_datafile(index, datapath, standardpath)
+        """
+        Open files in the treeview with right click.
+        """
+        data_path = self.param_dict['paths']['data_dir']
+        standard_path = self.param_dict['paths']['standards_dir']
+        self.model.open_datafile(index, data_path, standard_path)
 
-    # normal observer function
-
+    # Normal observer function
     def get_option_dict(self):
         if self.view is not None:
             self.own_dict.update(self.view.get_state())
         self.own_dict['full_data'] = self.model.get_data()
         self.own_dict['standard_data'] = self.model.get_data(standard=True)
-        self.own_dict['selected_filenumbers'] = self.model.get_data(
-            fullinfo=False)
+        self.own_dict['selected_file_numbers'] = self.model.get_data(
+            full_info=False)
         return self.own_dict
 
     def process_request(self):
@@ -232,15 +233,15 @@ class DNSFileSelectorPresenter(DNSObserver):
     def set_view_from_param(self):
         """
         Setting of the fields defined in mapping from the parameter dictionary
-        and checks scans checked in the dict
+        and checks scans checked in the dict.
         """
-        filenumbers = self.param_dict[self.name].pop('selected_filenumbers',
-                                                     [])
+        file_numbers = self.param_dict[self.name].pop('selected_file_numbers',
+                                                      [])
         self.view.set_state(self.param_dict.get(self.name, {}))
-        notfound = self.model.check_by_filenumbers(filenumbers)
-        if notfound:
-            print(f'Of {len(filenumbers)} loaded checked '
-                  f'filenumbers {notfound} were not found '
+        not_found = self.model.check_by_file_numbers(file_numbers)
+        if not_found:
+            print(f'Of {len(file_numbers)} loaded checked '
+                  f'file numbers {not_found} were not found '
                   'in list of datafiles')
 
     def tab_got_focus(self):
@@ -253,6 +254,6 @@ class DNSFileSelectorPresenter(DNSObserver):
     def process_commandline_request(self, command_dict):
         ffnmb = int(command_dict['files'][0]['ffnmb'])
         lfnmb = int(command_dict['files'][0]['lfnmb'])
-        self.view.set_start_end_filenumbers_from_arguments(ffnmb, lfnmb)
+        self.view.set_start_end_file_numbers_from_arguments(ffnmb, lfnmb)
         self._read_filtered()
         self.model.check_fn_range(ffnmb, lfnmb)

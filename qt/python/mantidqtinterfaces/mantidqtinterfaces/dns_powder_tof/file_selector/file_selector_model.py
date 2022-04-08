@@ -4,8 +4,9 @@
 #     NScD Oak Ridge National Laboratory, European Spallation Source
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
+
 """
-presenter for dns path panel
+Presenter for dns path panel.
 """
 
 from mantidqtinterfaces.dns_powder_tof.data_structures.dns_file import DNSFile
@@ -18,67 +19,60 @@ from mantidqtinterfaces.dns_powder_tof.helpers.file_processing import (
 
 
 class DNSFileSelectorModel(DNSObsModel):
-
     def __init__(self, parent=None):
         super().__init__(parent)
-        # model has this function to call back on parent
-        # no idea how to avoid this
+        # Model has this function to call back on parent.
+        # No idea how to avoid this.
         self.update_progress = parent.update_progress
-        # Qt treemodels
-        self.treemodel = DNSTreeModel()
+        # Qt tree models
+        self.tree_model = DNSTreeModel()
         self.standard_data = DNSTreeModel()
-        self.active_model = self.treemodel
+        self.active_model = self.tree_model
         self.old_data_set = None
-        self.alldatafiles = None
+        self.all_datafiles = None
         self.loading_canceled = False
 
-    def _filter_out_already_loaded(self, alldatafiles, watcher):
+    def _filter_out_already_loaded(self, all_datafiles, watcher):
         if watcher:
             datafiles = [
-                dfile for dfile in alldatafiles
-                if dfile not in self.old_data_set
+                data_file for data_file in all_datafiles
+                if data_file not in self.old_data_set
             ]
         else:
-            datafiles = alldatafiles
+            datafiles = all_datafiles
         return datafiles
 
-    def set_datafiles_to_load(
-        self,
-        datapath,
-        fn_range,
-        filtered=False,
-        watcher=False,
-    ):
+    def set_datafiles_to_load(self, data_path, fn_range, filtered=False, watcher=False):
         """
         Reading of new files, if filtered is True, only the files in the
-        range specified
+        range specified.
         """
-        self.alldatafiles = return_filelist(datapath)
-        datafiles = self._filter_out_already_loaded(self.alldatafiles, watcher)
-        loaded = self._get_list_of_loaded_files(datapath, watcher)
+        self.all_datafiles = return_filelist(data_path)
+        datafiles = self._filter_out_already_loaded(self.all_datafiles, watcher)
+        loaded = self._get_list_of_loaded_files(data_path, watcher)
         datafiles, fn_range = self._filter_range(datafiles, fn_range, filtered)
         number_of_datafiles = len(datafiles)
         return number_of_datafiles, loaded, datafiles, fn_range
 
-    def _get_start_end_filenumbers(self):
-        if self.alldatafiles:
-            start = int(self.alldatafiles[0].split('_')[-2][:-2])
-            end = int(self.alldatafiles[-1].split('_')[-2][:-2])
+    def _get_start_end_file_numbers(self):
+        if self.all_datafiles:
+            start = int(self.all_datafiles[0].split('_')[-2][:-2])
+            end = int(self.all_datafiles[-1].split('_')[-2][:-2])
             return [start, end]
         return [0, 0]
 
     def _filter_range(self, datafiles, fn_range, filtered=False):
         start, end = fn_range
         if start is None or end is None:
-            fn_range = self._get_start_end_filenumbers()
+            fn_range = self._get_start_end_file_numbers()
         if filtered:
             datafiles = filter_filenames(datafiles, start, end)
         return datafiles, fn_range
 
-    def read_all(self, datafiles, datapath, loaded, watcher=False):
+    def read_all(self, datafiles, data_path, loaded, watcher=False):
         """
         Reading of new files, if filtered is True, only the files in the
-        range specified
+        range specified.
         """
         self.loading_canceled = False
         self._clear_scans_if_not_sequential(watcher)
@@ -86,50 +80,50 @@ class DNSFileSelectorModel(DNSObsModel):
             self.update_progress(i, len(datafiles))
             if self.loading_canceled:
                 break
-            dnsfile = self._load_file_from_chache_or_new(
-                loaded, filename, datapath)
-            if dnsfile.new_format:  # ignore files with old format
-                self.treemodel.setup_model_data([dnsfile])
-        self.old_data_set = set(self.alldatafiles)
+            dns_file = self._load_file_from_chache_or_new(
+                loaded, filename, data_path)
+            if dns_file.new_format:  # ignore files with old format
+                self.tree_model.setup_model_data([dns_file])
+        self.old_data_set = set(self.all_datafiles)
         self._add_number_of_files_per_scan()
-        self._save_filelist(datapath)
+        self._save_filelist(data_path)
 
-    def read_standard(self, standardpath):
+    def read_standard(self, standard_path):
         """
-        Reeding of standard files
+        Reading of standard files.
         """
         model = self.standard_data
-        datafiles = return_filelist(standardpath)
+        datafiles = return_filelist(standard_path)
         model.clear_scans()
         for filename in datafiles:
-            dnsfile = DNSFile(standardpath, filename)
-            model.setup_model_data([dnsfile])
-        model.add_number_of_childs()
+            dns_file = DNSFile(standard_path, filename)
+            model.setup_model_data([dns_file])
+        model.add_number_of_children()
         return model.rowCount()
 
     @staticmethod
-    def try_unzip(datapath, standardpath):
+    def try_unzip(data_path, standard_path):
         # if standard directory is empty try to get standard files from zip
-        if standardpath and datapath:
-            return unzip_latest_standard(datapath, standardpath)
+        if standard_path and data_path:
+            return unzip_latest_standard(data_path, standard_path)
         return False
 
     def _add_number_of_files_per_scan(self):
-        self.treemodel.add_number_of_childs()
+        self.tree_model.add_number_of_children()
 
     def _clear_scans_if_not_sequential(self, watcher):
         if not watcher:
-            self.treemodel.clear_scans()
+            self.tree_model.clear_scans()
 
-    def _get_list_of_loaded_files(self, datapath, watcher):
+    def _get_list_of_loaded_files(self, data_path, watcher):
         if watcher:
             return {}
-        return self._load_saved_filelist(datapath)
+        return self._load_saved_filelist(data_path)
 
     @staticmethod
     def _load_saved_filelist(path):
         """
-        we save the list of loaed files so we have to read the files only once
+        We save the list of load files, so we have to read the files only once.
         """
         loaded = {}
         try:
@@ -138,27 +132,27 @@ class DNSFileSelectorModel(DNSObsModel):
             return loaded
         try:
             for line in txt:
-                dnsfile = ObjectDict()
+                dns_file = ObjectDict()
                 data = line[0:-1].split(' ; ')
                 if len(data) < 15:
                     continue
-                dnsfile.filenumber = data[0]
-                dnsfile.det_rot = float(data[1])
-                dnsfile.sample_rot = float(data[2])
-                dnsfile.field = data[3]
-                dnsfile.temp_samp = float(data[4])
-                dnsfile.sample = data[5]
-                dnsfile.endtime = data[6]
-                dnsfile.tofchannels = int(data[7])
-                dnsfile.channelwidth = float(data[8])
-                dnsfile.filename = data[9]
-                dnsfile.wavelength = float(data[10])
-                dnsfile.selector_speed = float(data[11])
-                dnsfile.scannumber = data[12]
-                dnsfile.scancommand = data[13]
-                dnsfile.scanpoints = data[14]
-                dnsfile.new_format = True
-                loaded[dnsfile.filename] = dnsfile
+                dns_file.file_number = data[0]
+                dns_file.det_rot = float(data[1])
+                dns_file.sample_rot = float(data[2])
+                dns_file.field = data[3]
+                dns_file.temp_samp = float(data[4])
+                dns_file.sample = data[5]
+                dns_file.end_time = data[6]
+                dns_file.tof_channels = int(data[7])
+                dns_file.channel_width = float(data[8])
+                dns_file.filename = data[9]
+                dns_file.wavelength = float(data[10])
+                dns_file.selector_speed = float(data[11])
+                dns_file.scan_number = data[12]
+                dns_file.scan_command = data[13]
+                dns_file.scan_points = data[14]
+                dns_file.new_format = True
+                loaded[dns_file.filename] = dns_file
         except IndexError:
             pass
         return loaded
@@ -169,8 +163,7 @@ class DNSFileSelectorModel(DNSObsModel):
     def get_scan_range(self):
         return range(self.get_number_of_scans())
 
-    # scan checking
-
+    # Scan checking
     def check_last_scans(self, number_of_scans_to_check, complete,
                          not_hidden_rows):
         self.uncheck_all_scans()
@@ -188,18 +181,19 @@ class DNSFileSelectorModel(DNSObsModel):
     def uncheck_all_scans(self):
         self.active_model.uncheck_all_scans()
 
-    def check_by_filenumbers(self, filenumbers):
-        notfound = 0
-        filenb_dict = self.treemodel.get_filenumber_dict()
-        for filenb in filenumbers:
+    def check_by_file_numbers(self, file_numbers):
+        not_found = 0
+        file_number_dict = self.tree_model.get_file_number_dict()
+        for file_number in file_numbers:
             try:
-                self.treemodel.set_checked_from_index(filenb_dict[filenb])
+                self.tree_model.set_checked_from_index(
+                    file_number_dict[file_number])
             except KeyError:
-                notfound += 1
-        return notfound
+                not_found += 1
+        return not_found
 
     def check_fn_range(self, ffnmb, lfnmb):
-        self.treemodel.check_fn_range(ffnmb, lfnmb)
+        self.tree_model.check_fn_range(ffnmb, lfnmb)
 
     def set_loading_canceled(self, canceled=True):
         self.loading_canceled = canceled
@@ -207,78 +201,75 @@ class DNSFileSelectorModel(DNSObsModel):
     def get_model(self, standard=False):
         if standard:
             return self.standard_data
-        return self.treemodel
+        return self.tree_model
 
-    # data receiving
-
+    # Data receiving
     def model_is_standard(self):
         return self.active_model == self.standard_data
 
-    def get_data(self, standard=False, fullinfo=True):
+    def get_data(self, standard=False, full_info=True):
         if standard:
-            return self.standard_data.get_checked(fullinfo=True)
-        return self.treemodel.get_checked(fullinfo=fullinfo)
+            return self.standard_data.get_checked(full_info=True)
+        return self.tree_model.get_checked(full_info=full_info)
 
     def set_model(self, standard=False):
         if standard:
             self.active_model = self.standard_data
         else:
-            self.active_model = self.treemodel
+            self.active_model = self.tree_model
 
-    # scan filtering:
-
+    # Scan filtering
     def filter_scans_for_boxes(self, filters, is_tof):
         model = self.active_model
-        hidescans = self._filter_tof_scans(is_tof)
+        hide_scans = self._filter_tof_scans(is_tof)
         for row in self.get_scan_range():
             for text, filter_condition in filters:
                 if filter_condition and not model.text_in_scan(row, text):
                     model.set_checked_scan(row, 0)
-                    hidescans.add(row)
-        return hidescans
+                    hide_scans.add(row)
+        return hide_scans
 
     def _filter_tof_scans(self, is_tof):
-        hidescans = set()
+        hide_scans = set()
         for row in self.get_scan_range():
             if is_tof != self.active_model.is_scan_tof(row):
-                hidescans.add(row)
+                hide_scans.add(row)
                 self.active_model.set_checked_scan(row, 0)
-        return hidescans
+        return hide_scans
 
     def filter_standard_types(self, filters, active, is_tof):
-        hidescans = self._filter_tof_scans(is_tof)
+        hide_scans = self._filter_tof_scans(is_tof)
         for row in self.get_scan_range():
             scan = self.active_model.scan_from_row(row)
             hidden = [
-                filters[sampletype] and scan.is_type(sampletype)
-                for sampletype in ['vanadium', 'nicr', 'empty']
+                filters[sample_type] and scan.is_type(sample_type)
+                for sample_type in ['vanadium', 'nicr', 'empty']
             ]
             if not any(hidden) and active:
-                hidescans.add(row)
-        return hidescans
+                hide_scans.add(row)
+        return hide_scans
 
-    # opening data files in external editor
-
-    def open_datafile(self, index, datapath, standardpath):
+    # Opening data files in external editor
+    def open_datafile(self, index, data_path, standard_path):
         filename = self.active_model.get_filename_from_index(index)
         if self.active_model == self.standard_data:
-            path = standardpath
+            path = standard_path
         else:
-            path = datapath
+            path = data_path
         if filename:
             open_editor(filename, path)
 
-    # Chaching of filelist
+    # Caching of filelist
     @staticmethod
-    def _load_file_from_chache_or_new(loaded, filename, datapath):
-        dnsfile = loaded.get(filename, False)
-        if not dnsfile:
-            dnsfile = DNSFile(datapath, filename)
-        return dnsfile
+    def _load_file_from_chache_or_new(loaded, filename, data_path):
+        dns_file = loaded.get(filename, False)
+        if not dns_file:
+            dns_file = DNSFile(data_path, filename)
+        return dns_file
 
-    def _save_filelist(self, datapath):
-        txt = "".join(self.treemodel.get_txt())
+    def _save_filelist(self, data_path):
+        txt = "".join(self.tree_model.get_txt())
         try:
-            save_txt(txt, 'last_filelist.txt', datapath)
+            save_txt(txt, 'last_filelist.txt', data_path)
         except PermissionError:
             pass
