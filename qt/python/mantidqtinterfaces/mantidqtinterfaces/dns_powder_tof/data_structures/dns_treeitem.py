@@ -4,8 +4,9 @@
 #     NScD Oak Ridge National Laboratory, European Spallation Source
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
+
 """
-Custum Tree Item for DNS which is either a Scan or a File in DnsTreeModel
+Custom Tree Item for DNS which is either a Scan or a File in DnsTreeModel.
 """
 
 
@@ -14,7 +15,6 @@ class DNSTreeItem:
     Custom Tree Item Class for DNS which is either a Scan
     or a File in DnsTreeModel.
     """
-
     def __init__(self, data, parent=None, checked=0):
         self.parent_item = parent
         self.item_data = data

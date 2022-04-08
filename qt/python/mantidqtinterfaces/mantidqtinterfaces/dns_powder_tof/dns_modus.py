@@ -24,12 +24,14 @@ from mantidqtinterfaces.dns_powder_tof.xml_dump.xml_dump_widget import \
 
 
 class DNSModus:
-    """defines the different reduction modes and which widgets are used in
-       each mode """
+    """
+    Defines the different reduction modes and which widgets are used in
+    each mode.
+    """
 
     def __init__(self, name, parent):
         super().__init__()
-        self.parent = parent  # schould be main widget
+        self.parent = parent  # should be main widget
         self.name = name  # only names in the mapping below are allowed
         self.widgets = OrderedDict()
 
@@ -39,7 +41,7 @@ class DNSModus:
                 'tof_powder_script_generator', 'xml_dump', 'plot_tof_powder'
             ]
         }
-        # yapf: disable
+        # Yapf: disable
         self._widget_map = {
             'paths': DNSPathWidget,
             'file_selector': DNSFileSelectorWidget,
@@ -48,11 +50,13 @@ class DNSModus:
             'xml_dump': DNSXMLDumpWidget,
             'plot_tof_powder': DNSTofPowderPlotWidget,
         }
-        # yapf: enable
+        # Yapf: enable
 
     def change(self, name):
-        """changes the mode of DNS GUI only names from _mode_map  are
-           allowed"""
+        """
+        Changes the mode of DNS GUI only names from _mode_map  are
+        allowed.
+        """
         self.name = name
         self.widgets.clear()
         for key in self._mode_map.get(self.name, []):

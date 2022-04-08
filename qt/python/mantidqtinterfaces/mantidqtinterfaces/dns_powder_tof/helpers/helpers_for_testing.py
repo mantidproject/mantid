@@ -9,115 +9,115 @@ from mantidqtinterfaces.dns.data_structures.object_dict import \
     ObjectDict
 
 datasetdic = [{
-    'filenumber': '774714',
+    'file_number': '774714',
     'det_rot': -7.01,
     'sample_rot': 123.0,
     'field': 'z7_sf',
     'temp_samp': 288.771,
     'sample': 'vana',
-    'endtime': '2020-03-02 17:55:12',
-    'tofchannels': 1,
-    'channelwidth': 1.6,
+    'end_time': '2020-03-02 17:55:12',
+    'tof_channels': 1,
+    'channel_width': 1.6,
     'filename': 'service_774714.d_dat',
     'wavelength': 4.74,
     'selector_speed': 7032.0,
-    'scannumber': '14743',
-    'scancommand': (
+    'scan_number': '14743',
+    'scan_command': (
         "scan([det_rot, sample_rot], [-5.0000, 125.0000], "
         "[-0.5000, -0.5000], 10, tsf=120.0, field=['z7_sf', 'z7_nsf'],"
         " tnsf=240.0)"),
-    'scanpoints': '20',
+    'scan_points': '20',
     'new_format': True
 }, {
-    'filenumber': '787463',
+    'file_number': '787463',
     'det_rot': -8.0,
     'sample_rot': 169.0,
     'field': 'z7_sf',
     'temp_samp': 4.1,
     'sample': '4p1K_map',
-    'endtime': '2020-03-12 05:47:15',
-    'tofchannels': 1,
-    'channelwidth': 2.0,
+    'end_time': '2020-03-12 05:47:15',
+    'tof_channels': 1,
+    'channel_width': 2.0,
     'filename': 'service_787463.d_dat',
     'wavelength': 4.74,
     'selector_speed': 7030.0,
-    'scannumber': '14932',
-    'scancommand': (
+    'scan_number': '14932',
+    'scan_command': (
         "scan([det_rot, sample_rot], [-8.0000, 127.0000], "
         "[0, 1.0000], 170, tsf=30.0, field=['z7_sf', 'z7_nsf'], tnsf=30.0)"),
-    'scanpoints': '340',
+    'scan_points': '340',
     'new_format': True
 }, {
-    'filenumber': '788058',
+    'file_number': '788058',
     'det_rot': -9.0,
     'sample_rot': 295.0,
     'field': 'z7_nsf',
     'temp_samp': 4.1,
     'sample': '4p1K_map',
-    'endtime': '2020-03-12 11:27:20',
-    'tofchannels': 1000,
-    'channelwidth': 1.6,
+    'end_time': '2020-03-12 11:27:20',
+    'tof_channels': 1000,
+    'channel_width': 1.6,
     'filename': 'service_788058.d_dat',
     'wavelength': 4.74,
     'selector_speed': 7032.0,
-    'scannumber': '14933',
-    'scancommand': (
+    'scan_number': '14933',
+    'scan_command': (
         "scan([det_rot, sample_rot], [-9.0000, 126.0000], "
         "[0, 1.0000], 170, tsf=30.0, field=['z7_sf', 'z7_nsf'], tnsf=30.0)"),
-    'scanpoints': '1',
+    'scan_points': '1',
     'new_format': True
 }]
 
 fselector_fulldat = {
     'full_data': [{
-        'filenumber': 788058,
+        'file_number': 788058,
         'det_rot': -9.0,
         'sample_rot': 295.0,
         'field': 'z7_nsf',
         'temperature': 4.1,
-        'samplename': '4p1K_map',
-        'tofchannels': 1000,
-        'channelwidth': 1.6,
+        'sample_name': '4p1K_map',
+        'tof_channels': 1000,
+        'channel_width': 1.6,
         'filename': 'service_788058.d_dat',
         'wavelength': 47.400000000000006,
         'sample_type': '4p1K_map',
         'selector_speed': 7032.0
     }],
     'standard_data': [{
-        'filenumber': 788058,
+        'file_number': 788058,
         'det_rot': -9.0,
         'sample_rot': 295.0,
         'field': 'x7_nsf',
         'temperature': 4.1,
-        'samplename': '_empty',
-        'tofchannels': 1000,
-        'channelwidth': 1.6,
+        'sample_name': '_empty',
+        'tof_channels': 1000,
+        'channel_width': 1.6,
         'filename': 'test_empty.d_dat',
         'wavelength': 47.400000000000006,
         'sample_type': 'empty',
         'selector_speed': 7032.0
     }, {
-        'filenumber': 788058,
+        'file_number': 788058,
         'det_rot': -9.04,
         'sample_rot': 295.0,
         'field': 'z7_nsf',
         'temperature': 4.1,
-        'samplename': '_vana',
-        'tofchannels': 1000,
-        'channelwidth': 1.6,
+        'sample_name': '_vana',
+        'tof_channels': 1000,
+        'channel_width': 1.6,
         'filename': 'test_vana.d_dat',
         'wavelength': 47.400000000000006,
         'sample_type': 'vana',
         'selector_speed': 7032.0
     }, {
-        'filenumber': 788059,
+        'file_number': 788059,
         'det_rot': -10.0,
         'sample_rot': 295.0,
         'field': 'z7_nsf',
         'temperature': 4.1,
-        'samplename': '_vana',
-        'tofchannels': 1000,
-        'channelwidth': 1.6,
+        'sample_name': '_vana',
+        'tof_channels': 1000,
+        'channel_width': 1.6,
         'filename': 'test_vana.d_dat',
         'wavelength': 47.400000000000006,
         'sample_type': 'vana',
@@ -184,8 +184,8 @@ def get_3filenames():
     return [x['filename'] for x in datasetdic]
 
 
-def get_3filenumbers():
-    return [x['filenumber'] for x in datasetdic]
+def get_3file_numbers():
+    return [x['file_number'] for x in datasetdic]
 
 
 def get_fake_tof_binning():  # matches data 1,2 above
@@ -206,7 +206,7 @@ def get_fileselector_param_dict():
             'standards_dir': 'C:/stand',
         },
         'file_selector': {
-            'selected_filenumbers': [796640, 796640]
+            'selected_file_numbers': [796640, 796640]
         }
     }
 
@@ -251,9 +251,9 @@ def get_fake_elastic_sc_options():
 
 def get_fake_tof_errors():  # matches data 1,2 above
     return {
-        'channelwidths': [2.0, 1.6],
+        'channel_widths': [2.0, 1.6],
         'chan_error': True,
-        'tofchannels': [1, 1000],
+        'tof_channels': [1, 1000],
         'tof_error': True
     }
 

@@ -29,7 +29,7 @@ class DNSFile(ObjectDict):
         separator = "#" + "-" * 74 + "\n"
         wavelength = self['wavelength'] / 10.0  # written in nm
         txt += f"# DNS Data userid={self['users']},exp={self['proposal']}," \
-               f"file={self['filenumber']},sample={self['sample']}\n"
+               f"file={self['file_number']},sample={self['sample']}\n"
         txt += separator
         txt += "# 2\n"
         txt += f"# User: {self['users']}\n"
@@ -100,9 +100,9 @@ class DNSFile(ObjectDict):
         txt += separator
 
         txt += "# TOF parameters\n"
-        txt += f"#  TOF channels                {self['tofchannels']:4d}\n"
+        txt += f"#  TOF channels                {self['tof_channels']:4d}\n"
         txt += "#  Time per channel            " \
-               f"{self['channelwidth']:6.1f} microsecs\n"
+               f"{self['channel_width']:6.1f} microsecs\n"
         txt += "#  Delay time                  " \
                f"{self['tofdelay']:6.1f} microsecs\n"
         txt += "#  Chopper slits\n"
@@ -114,16 +114,16 @@ class DNSFile(ObjectDict):
         txt += f"#  Monitor           {self['monitor']:16d}\n"
         txt += "#\n"
         txt += f"#    start   at      {self['starttime']}\n"
-        txt += f"#    stopped at      {self['endtime']}\n"
+        txt += f"#    stopped at      {self['end_time']}\n"
         txt += separator
 
         txt += "# Extended data\n"
-        if self['scannumber']:
-            txt += "#  Scannumber               " \
-                   f"{int(self['scannumber']):8d}\n"
+        if self['scan_number']:
+            txt += "#  scan_number               " \
+                   f"{int(self['scan_number']):8d}\n"
         else:
-            txt += "#  Scannumber                       \n"
-        txt += f"#  Scancommand              {self['scancommand']}\n"
+            txt += "#  scan_number                       \n"
+        txt += f"#  scan_command              {self['scan_command']}\n"
         txt += f"#  Scanposition             {self['scanposition']:>8s}\n"
         txt += f"#  pol_trans_x              {self['pol_trans_x']:8.1f} mm\n"
         txt += f"#  pol_trans_y              {self['pol_trans_y']:8.1f} mm\n"
@@ -135,15 +135,15 @@ class DNSFile(ObjectDict):
 
         # write array
         txt += "# DATA (number of detectors, number of TOF channels)\n"
-        txt += f"# 64 {self['tofchannels']:4d}\n"
+        txt += f"# 64 {self['tof_channels']:4d}\n"
         for ch in range(24):
             txt += f"{ch:2d} "
-            for q in range(self['tofchannels']):
+            for q in range(self['tof_channels']):
                 txt += f" {self.counts[ch, q]:8d}"
             txt += "\n"
         for ch in range(24, 64):
             txt += f"{ch:2d} "
-            for q in range(self['tofchannels']):
+            for q in range(self['tof_channels']):
                 txt += f" {0:8d}"
             txt += "\n"
         txt = ''.join([line.rstrip() + '\n' for line in txt.splitlines()])
@@ -161,7 +161,7 @@ class DNSFile(ObjectDict):
         line = line[1].split(',file=')
         self['proposal'] = line[0]
         line = line[1].split(',sample=')
-        self['filenumber'] = line[0]
+        self['file_number'] = line[0]
         self['sample'] = line[1][:-1]
         line = txt[7].split()
         self['mon_rot'] = float(line[3])
@@ -188,15 +188,15 @@ class DNSFile(ObjectDict):
         self['temp_tube'] = float(txt[43][25:-3])
         self['temp_samp'] = float(txt[44][25:-3])
         self['temp_set'] = float(txt[45][25:-3])
-        self['tofchannels'] = int(txt[48][25:-1])
-        self['channelwidth'] = float(txt[49][25:-11])
+        self['tof_channels'] = int(txt[48][25:-1])
+        self['channel_width'] = float(txt[49][25:-11])
         self['tofdelay'] = float(txt[50][25:-11])
         self['timer'] = float(txt[56][15:-5])
         self['monitor'] = int(txt[57][15:-1])
         self['starttime'] = txt[59][21:-1]
-        self['endtime'] = txt[60][21:-1]
-        self['scannumber'] = txt[63][15:-1].strip()
-        self['scancommand'] = txt[64][28:-1]
+        self['end_time'] = txt[60][21:-1]
+        self['scan_number'] = txt[63][15:-1].strip()
+        self['scan_command'] = txt[64][28:-1]
         self['scanposition'] = txt[65][15:-1].strip()
         self['pol_trans_x'] = float(txt[66][15:-4])
         self['pol_trans_y'] = float(txt[67][15:-4])
@@ -204,10 +204,10 @@ class DNSFile(ObjectDict):
         self['selector_lift'] = float(txt[69][17:-4])
         self['selector_speed'] = float(txt[70][17:-4])
         if '/' in self['scanposition']:
-            self['scanpoints'] = self['scanposition'].split('/')[1]
+            self['scan_points'] = self['scanposition'].split('/')[1]
         else:
-            self['scanpoints'] = ''
-        self['counts'] = np.zeros((24, self['tofchannels']),
+            self['scan_points'] = ''
+        self['counts'] = np.zeros((24, self['tof_channels']),
                                   dtype=int)  # for python 2 use long
         for ch in range(24):
             self['counts'][ch, :] = txt[74 + ch].split()[1:]

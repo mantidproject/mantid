@@ -4,9 +4,10 @@
 #     NScD Oak Ridge National Laboratory, European Spallation Source
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
+
 """
 DNS Observer Class, they share a common data model DNSReductionGui_model
-and are updated by DNSReductionGui_presenter
+and are updated by DNSReductionGui_presenter.
 """
 
 from collections import OrderedDict
@@ -15,13 +16,12 @@ from collections import OrderedDict
 class DNSObserver():
     # pylint: disable=too-many-instance-attributes
     """
-    common class definition for DNS Observers,
+    Common class definition for DNS Observers,
     they have their own parameter dictionary and can have a view and a model,
     its parent is the widget,
     they are the only ones which communicate with their view and model
-    which are DI to them by the widget
+    which are DI to them by the widget.
     """
-
     def __init__(self, parent=None, name=None, view=None, model=None):
         super().__init__()
         self.name = name
@@ -34,7 +34,9 @@ class DNSObserver():
         self.request_from_abo = None
 
     def update(self, param_dict):
-        """Updating the own dictionary from ParameterAbo"""
+        """
+        Updating the own dictionary from ParameterAbo.
+        """
         if self.modus != self.parent.parent.modus.name:
             self.modus = self.parent.parent.modus.name
             self.on_modus_change()
@@ -43,11 +45,15 @@ class DNSObserver():
             self.own_dict.update(self.param_dict[self.name])
 
     def set_view_from_param(self):
-        """sets the view from the own parmeter dictionary"""
+        """
+        Sets the view from the own parameter dictionary.
+        """
         self.view.set_state(self.param_dict.get(self.name, None))
 
     def get_option_dict(self):
-        """Return own options from view"""
+        """
+        Returns own options from view.
+        """
         if self.view is not None:
             self.own_dict.update(self.view.get_state())
         return self.own_dict
@@ -58,9 +64,12 @@ class DNSObserver():
 
     def process_request(self):
         """Main presenter can request data from DNSObservers"""
+        pass
 
     def tab_got_focus(self):
         """run if the tab of the associated view got the focus"""
+        pass
 
     def on_modus_change(self):
         """run when the modus of the gui changes"""
+        pass

@@ -16,8 +16,8 @@ from mantidqtinterfaces.dns_powder_tof.helpers.list_range_converters import \
 
 
 # copied from dns dataset
-def get_proposal_from_filname(filename, filenumber):
-    return filename.replace(f'_{filenumber:06d}.d_dat', '')
+def get_proposal_from_filname(filename, file_number):
+    return filename.replace(f'_{file_number:06d}.d_dat', '')
 
 
 def get_bank_positions(sampledata, rounding_limit=0.05):
@@ -47,26 +47,26 @@ def _get_field_string(fields, llens):
     return ",\n".join(stringlist)
 
 
-def _get_path_string(dataset, samplename):
-    path = dataset[samplename].pop('path')
+def _get_path_string(dataset, sample_name):
+    path = dataset[sample_name].pop('path')
     return f"'path': '{path}',\n"
 
 
-def _get_sample_string(samplename, llens):
-    return f"'{samplename:s}': {{".rjust(llens)
+def _get_sample_string(sample_name, llens):
+    return f"'{sample_name:s}': {{".rjust(llens)
 
 
 def _get_datapath(entry, path):
     proposal = get_proposal_from_filname(entry['filename'],
-                                         entry['filenumber'])
+                                         entry['file_number'])
     return os.path.join(path, proposal)
 
 
 def _convert_list_to_range(dataset):
     for sample_typ, det_rots in dataset.items():
-        for det_rot, filenumbers in det_rots.items():
+        for det_rot, file_numbers in det_rots.items():
             if det_rot != 'path':
-                dataset[sample_typ][det_rot] = list_to_range(filenumbers)
+                dataset[sample_typ][det_rot] = list_to_range(file_numbers)
     return dataset
 
 
@@ -82,7 +82,7 @@ def _get_closest_bank_key(banks, det_rot):
 
 def _create_new_datatype(dataset, datatype, det_rot, entry, path):
     dataset[datatype] = {
-        det_rot: [entry['filenumber']],
+        det_rot: [entry['file_number']],
         'path': _get_datapath(entry, path)
     }
 
@@ -91,9 +91,9 @@ def _add_or_create_filelist(dataset, datatype, det_rot, entry):
     compare = _get_closest_bank_key(dataset[datatype], det_rot)
     fnlist = dataset[datatype].get(compare, None)
     if fnlist is not None:
-        fnlist.append(entry['filenumber'])
+        fnlist.append(entry['file_number'])
     else:
-        dataset[datatype][compare] = [entry['filenumber']]
+        dataset[datatype][compare] = [entry['file_number']]
 
 
 class DNSTofDataset(ObjectDict):
@@ -114,9 +114,9 @@ class DNSTofDataset(ObjectDict):
         dataset = self.datadic
         llens = _get_max_key_length(dataset)
         dataset_string = '{\n'
-        for samplename, fields in dataset.items():
-            dataset_string += _get_sample_string(samplename, llens)
-            dataset_string += _get_path_string(dataset, samplename)
+        for sample_name, fields in dataset.items():
+            dataset_string += _get_sample_string(sample_name, llens)
+            dataset_string += _get_path_string(dataset, sample_name)
             dataset_string += _get_field_string(fields, llens)
             dataset_string += "},\n"
         dataset_string += "}"
@@ -169,11 +169,11 @@ class DNSTofDataset(ObjectDict):
     def create_dataset(data, path):
         """ creates a smaller dictionary used in the reduction script
             of the form
-            dict[datatype][path/det_rot] = list(filenumbers)
+            dict[datatype][path/det_rot] = list(file_numbers)
         """
         dataset = {}
         for entry in data:
-            datatype = entry['samplename']
+            datatype = entry['sample_name']
             det_rot = entry['det_rot']
             if datatype in dataset:
                 _add_or_create_filelist(dataset, datatype, det_rot, entry)

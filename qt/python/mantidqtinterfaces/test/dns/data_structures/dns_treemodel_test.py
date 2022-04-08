@@ -65,7 +65,7 @@ class DNSTreeModelTest(unittest.TestCase):
     def test_scan_expected_points_from_row(self):
         tesv = self.model._scan_expected_points_from_row(0)
         self.assertEqual(tesv, 340)
-        self.model.add_number_of_childs()
+        self.model.add_number_of_children()
         tesv = self.model._scan_expected_points_from_row(0)
         self.assertEqual(tesv, 340)
 
@@ -257,12 +257,12 @@ class DNSTreeModelTest(unittest.TestCase):
         self.assertFalse(self.model._new_scan_check(self.data[0]))
         self.assertTrue(self.model._new_scan_check(self.data[1]))
 
-    def test_get_scantext(self):
-        testv = self.model._get_scantext(self.data[0])
+    def test_get_scan_text(self):
+        testv = self.model._get_scan_text(self.data[0])
         self.assertEqual(testv[0], self.first_scancommand)
 
-    def test_get_data_from_dnsfile(self):
-        testv = self.model._get_data_from_dnsfile(self.data[0])[0]
+    def test_get_data_from_dns_file(self):
+        testv = self.model._get_data_from_dns_file(self.data[0])[0]
         self.assertEqual(testv, '787463')
 
     def test_check_child_if_scan_is_checked(self):
@@ -290,10 +290,10 @@ class DNSTreeModelTest(unittest.TestCase):
         self.assertEqual(self.model._last_sample, '4p1K_map')
         self.assertEqual(self.model.rowCount(), 2)
 
-    def test_add_number_of_childs(self):
+    def test_add_number_of_children(self):
         index = self.model._scan_index_from_row(0)
         scan = self.model._item_from_index(index)
-        testv = self.model.add_number_of_childs()
+        testv = self.model.add_number_of_children()
         self.assertEqual(testv, 2)
         postfix = scan.data(0).split('#')[1].split('/')[0]
         self.assertEqual(postfix, '1')
@@ -302,8 +302,8 @@ class DNSTreeModelTest(unittest.TestCase):
         testv = self.model.get_txt()
         self.assertEqual(testv[0][0:10], '787463 ; -')
 
-    def test_get_filenumber_dict(self):
-        testv = self.model.get_filenumber_dict()
+    def test_get_file_number_dict(self):
+        testv = self.model.get_file_number_dict()
         self.assertIsInstance(testv, dict)
         self.assertIsInstance(testv[788058], QModelIndex)
         self.assertTrue(testv[788058].isValid())

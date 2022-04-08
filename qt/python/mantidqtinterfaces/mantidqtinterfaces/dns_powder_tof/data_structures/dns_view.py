@@ -4,6 +4,7 @@
 #     NScD Oak Ridge National Laboratory, European Spallation Source
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
+
 """
 Common Class for DNS Views - supports easy setting and getting of values
 """
@@ -57,7 +58,7 @@ class DNSView(QWidget):
         elif isinstance(target_object, QComboBox):
             index = target_object.findText(
                 str(value),
-                Qt.MatchFixedString)  # Crapy workaround for Qt4 compatibility
+                Qt.MatchFixedString)  # crapy workaround for Qt4 compatibility
             if index >= 0:
                 target_object.setCurrentIndex(index)
         elif isinstance(target_object, QSlider):
@@ -104,14 +105,14 @@ class DNSView(QWidget):
         for key, target_object in self._map.items():
             state = self._get_single_state(target_object)
             if state is not None:
-                # Push buttons for example are not defined in the get function
+                # push buttons for example are not defined in the get function
                 state_dict[key] = state
         return state_dict
 
     def set_state(self, state_dict):
         """
-        Setting the gui state from a dictionary
-        containing the shortnames of the widgets as keys and the values.
+        Setting the gui state from a dictionary containing the
+        short names of the widgets as keys and the values.
         """
         for key, target_object in self._map.items():
             self.set_single_state(target_object,
@@ -134,6 +135,8 @@ class DNSView(QWidget):
         error_dialog.exec_()
 
     def show_status_message(self, message='', time=1, clear=False):
-        """Change of status message in global DNS GUI."""
+        """
+        Change of status message in global DNS GUI.
+        """
         if self.parent is not None:
             self.parent.show_status_message(message, time, clear=clear)
