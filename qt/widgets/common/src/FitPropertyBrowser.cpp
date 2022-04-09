@@ -3215,7 +3215,7 @@ void FitPropertyBrowser::addAllowedSpectra(const QString &wsName, const QList<in
   if (ws) {
     QList<int> indices;
     std::transform(wsSpectra.begin(), wsSpectra.end(), std::back_inserter(indices),
-                   [ws](int i) { return static_cast<int>(ws->getIndexFromSpectrumNumber(i)); });
+                   [&ws](int i) { return static_cast<int>(ws->getIndexFromSpectrumNumber(i)); });
 
     auto wsFound = m_allowedSpectra.find(wsName);
     m_allowedSpectra.insert(wsName, indices);
