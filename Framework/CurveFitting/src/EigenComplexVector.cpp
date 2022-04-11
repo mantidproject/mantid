@@ -139,6 +139,13 @@ ComplexVector &ComplexVector::operator*=(const ComplexType d) {
   return *this;
 }
 
+/// Add a complex number
+/// @param d :: The complex number
+ComplexVector &ComplexVector::operator+=(const ComplexType &d) {
+  m_vector.array() += d;
+  return *this;
+}
+
 /// Create a new ComplexVector and move all data to it.
 /// Destroys this vector.
 ComplexVector ComplexVector::move() { return ComplexVector(m_vector); }
@@ -153,6 +160,35 @@ std::ostream &operator<<(std::ostream &ostr, const ComplexVector &v) {
   }
   ostr.flags(fflags);
   return ostr;
+}
+
+/// Create an index array that would sort this vector
+/// @param ascending :: If true sort in ascending order. Otherwise
+///     sort in descending order.
+std::vector<size_t> ComplexVector::sortIndiciesByMagnitude(bool ascending) const {
+  std::vector<size_t> indices(size());
+  for (size_t i = 0; i < size(); ++i) {
+    indices[i] = i;
+  }
+  if (ascending) {
+    std::sort(indices.begin(), indices.end(),
+              [this](size_t i, size_t j) { return norm(this->get(i)) < norm(this->get(j)); });
+  } else {
+    std::sort(indices.begin(), indices.end(),
+              [this](size_t i, size_t j) { return norm(this->get(i)) > norm(this->get(j)); });
+  }
+  return indices;
+}
+
+/// Sort this vector in order defined by an index array
+/// @param indices :: Indices defining the order of elements in sorted vector.
+void ComplexVector::sort(const std::vector<size_t> &indices) {
+  std::vector<ComplexType> data(size());
+  for (size_t i = 0; i < size(); ++i) {
+    data[i] = m_vector(indices[i]);
+  }
+  Eigen::VectorXcd v = Eigen::VectorXcd(data);
+  m_vector(std::move(v));
 }
 
 } // namespace Mantid::CurveFitting

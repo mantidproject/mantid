@@ -61,6 +61,8 @@ public:
   const ComplexType operator[](size_t i) const { return eigen()(i); }
   /// Get a "reference" to an element.
   ComplexType &operator[](size_t i) { return eigen()(i); }
+  /// Create an index array that would sort this vector
+  std::vector<size_t> sortIndiciesByMagnitude(bool ascending = true) const;
 
   /// Add a vector
   ComplexVector &operator+=(const ComplexVector &v);
@@ -68,6 +70,11 @@ public:
   ComplexVector &operator-=(const ComplexVector &v);
   /// Multiply by a number
   ComplexVector &operator*=(const ComplexType d);
+  /// Add a complex number
+  ComplexVector &operator+=(const ComplexType &d);
+  /// Sort Vector by indicies provided
+  void sort(const std::vector<size_t> &indices);
+  /// Get index of the minimum element
 
 protected:
   /// Create a new ComplexVector and move all data to it. Destroys this vector.

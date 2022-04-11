@@ -22,10 +22,6 @@ namespace {
 // https://llvm.org/bugs/show_bug.cgi?id=21629
 GNU_DIAG_OFF("missing-braces")
 
-// Get a complex conjugate of the value returned by
-// ComplexMatrix::operator(i,j)
-ComplexType conjg(const ComplexMatrixValueConverter &conv) { return std::conj(static_cast<ComplexType>(conv)); }
-
 // number of rare earth ions (trivalent rare earths with unfilled f-shell)
 const int maxNre = 13;
 
@@ -383,7 +379,7 @@ ComplexType matjp(const ComplexFortranMatrix &ev, int i, int k, int dim) {
   v(1) = 0.0;
   ComplexType res = 0.0;
   for (int s = 1; s <= dim; ++s) { // do 20 s=1,dim
-    res += conjg(ev(s, i)) * v(s);
+    res += std::conj(ev(s, i)) * v(s);
   }
   return res;
 }
@@ -400,7 +396,7 @@ ComplexType matjm(const ComplexFortranMatrix &ev, int i, int k, int dim) {
   v(dim) = 0.0;
   ComplexType res = 0.0;
   for (int s = 1; s <= dim; ++s) { // do 20 s=1,dim
-    res += conjg(ev(s, i)) * v(s);
+    res += std::conj(ev(s, i)) * v(s);
   }
   return res;
 }
@@ -437,7 +433,7 @@ ComplexType matjz(const ComplexFortranMatrix &ev, int i, int k, int dim) {
   }
   ComplexType res = 0.0;
   for (int s = 1; s <= dim; ++s) { //	do 20 s=1,dim
-    res += conjg(ev(s, i)) * v(s);
+    res += std::conj(ev(s, i)) * v(s);
   }
   return res;
 }
@@ -553,7 +549,7 @@ void zeeman(ComplexFortranMatrix &hamiltonian, const int nre, const DoubleFortra
           // c add an external magnetic field
           0.5 * facext * bextm * delta(mj, nj + 1, j) * jp(nj, j) +
           0.5 * facext * bextp * delta(mj, nj - 1, j) * jm(nj, j) + facext * bextz * delta(mj, nj, j) * nj;
-      hamiltonian(n, m) = conjg(hamiltonian(m, n));
+      hamiltonian(n, m) = std::conj(hamiltonian(m, n));
     }
   }
 }
@@ -561,7 +557,7 @@ void zeeman(ComplexFortranMatrix &hamiltonian, const int nre, const DoubleFortra
 //---------------------------------------
 // Calculation of the eigenvalues/vectors
 //---------------------------------------
-void diagonalise(const ComplexFortranMatrix &hamiltonian, DoubleFortranVector &eigenvalues,
+void diagonalise(const ComplexFortranMatrix &hamiltonian, ComplexFortranVector &eigenvalues,
                  ComplexFortranMatrix &eigenvectors) {
   // Diagonalisation of the hamiltonian
   auto dim = hamiltonian.len1();
@@ -571,14 +567,14 @@ void diagonalise(const ComplexFortranMatrix &hamiltonian, DoubleFortranVector &e
   h.eigenSystemHermitian(eigenvalues, eigenvectors);
 
   // Sort the eigenvalues in ascending order
-  auto sortedIndices = eigenvalues.sortIndices();
+  auto sortedIndices = eigenvalues.sortIndiciesByMagnitude(); // does it make sense to do this for complex numbers?
   eigenvalues.sort(sortedIndices);
   // Eigenvectors are in columns. Sort the columns
   // to match the sorted eigenvalues.
   eigenvectors.sortColumns(sortedIndices);
 
   // Shift the lowest energy level to 0
-  auto indexMin = static_cast<int>(eigenvalues.indexOfMinElement() + 1);
+  auto indexMin = static_cast<int>(sortedIndices[0]);
   auto eshift = eigenvalues(indexMin);
   eigenvalues += -eshift;
 }
@@ -599,7 +595,7 @@ GNU_DIAG_ON("missing-braces")
 ///  |1=Ce|2=Pr|3=Nd|4=Pm|5=Sm|6=Eu|7=Gd|8=Tb|9=Dy|10=Ho|11=Er|12=Tm|13=Yb|
 /// @param bext :: The external field in Cartesians (Hx, Hy, Hz) in Tesla
 ///    The z-axis is parallel to the crystal field quantisation axis.
-void calculateZeemanEigensystem(DoubleFortranVector &eigenvalues, ComplexFortranMatrix &eigenvectors,
+void calculateZeemanEigensystem(ComplexFortranVector &eigenvalues, ComplexFortranMatrix &eigenvectors,
                                 const ComplexFortranMatrix &hamiltonian, int nre, const DoubleFortranVector &bext) {
   ComplexFortranMatrix h = hamiltonian;
   DoubleFortranVector bmol(1, 3);
@@ -629,7 +625,7 @@ void calculateZeemanEigensystem(DoubleFortranVector &eigenvalues, ComplexFortran
 /// @param alpha_euler :: The alpha Euler angle in radians
 /// @param beta_euler :: The beta Euler angle in radians
 /// @param gamma_euler :: The gamma Euler angle in radians
-void calculateEigensystem(DoubleFortranVector &eigenvalues, ComplexFortranMatrix &eigenvectors,
+void calculateEigensystem(ComplexFortranVector &eigenvalues, ComplexFortranMatrix &eigenvectors,
                           ComplexFortranMatrix &hamiltonian, ComplexFortranMatrix &hzeeman, int nre,
                           const DoubleFortranVector &bmol, const DoubleFortranVector &bext,
                           const ComplexFortranMatrix &bkq, double alpha_euler, double beta_euler, double gamma_euler) {
@@ -659,7 +655,7 @@ void calculateEigensystem(DoubleFortranVector &eigenvalues, ComplexFortranMatrix
       if (q != 0) {
         dkq_star(k, q) = dkq_star(k, q) / 2.0;
       }
-      dkq_star(k, -q) = conjg(dkq_star(k, q));
+      dkq_star(k, -q) = std::conj(dkq_star(k, q));
     }
   }
   //-------------------------------------------------------------------
@@ -667,7 +663,7 @@ void calculateEigensystem(DoubleFortranVector &eigenvalues, ComplexFortranMatrix
   //-------------------------------------------------------------------
   for (int k = 2; k <= 6; k += 2) { // do k=2,6,2
     for (int q = -k; q <= k; ++q) { // do q=-k,k
-      dkq_star(k, q) = conjg(dkq_star(k, q));
+      dkq_star(k, q) = std::conj(dkq_star(k, q));
     }
   }
   //-------------------------------------------------------------------
@@ -752,7 +748,7 @@ void calculateEigensystem(DoubleFortranVector &eigenvalues, ComplexFortranMatrix
           hamiltonian(m, n) = hamiltonian(m, n) + rdkq_star(k, q) * full_okq(k, q, mj, nj, j);
         }
       }
-      hamiltonian(n, m) = conjg(hamiltonian(m, n));
+      hamiltonian(n, m) = std::conj(hamiltonian(m, n));
     }
   }
 

@@ -74,7 +74,7 @@ void BSpline::function1D(double *out, const double *xValues, const size_t nData)
     if (x < startX || x > endX) {
       out[i] = 0.0;
     } else {
-      gsl_bspline_eval(x, B.gsl(), m_bsplineWorkspace.get());
+      gsl_bspline_eval(x, getGSLVector(B.mutator().data()), m_bsplineWorkspace.get());
       double val = 0.0;
       for (size_t j = 0; j < np; ++j) {
         val += getParameter(j) * B.get(j);
@@ -118,10 +118,11 @@ void BSpline::derivative1D(double *out, const double *xValues, size_t nData, con
       size_t jstart(0);
       size_t jend(0);
 #if GSL_MAJOR_VERSION < 2
-      gsl_bspline_deriv_eval_nonzero(x, order, B.gsl(), &jstart, &jend, m_bsplineWorkspace.get(),
-                                     m_bsplineDerivWorkspace.get());
+      gsl_bspline_deriv_eval_nonzero(x, order, getGSLMatrix(B.mutator().data()), &jstart, &jend,
+                                     m_bsplineWorkspace.get(), m_bsplineDerivWorkspace.get());
 #else
-      gsl_bspline_deriv_eval_nonzero(x, order, B.gsl(), &jstart, &jend, m_bsplineWorkspace.get());
+      gsl_bspline_deriv_eval_nonzero(x, order, getGSLMatrix(B.mutator().data()), &jstart, &jend,
+                                     m_bsplineWorkspace.get());
 #endif
       double val = 0.0;
       for (size_t j = jstart; j <= jend; ++j) {
@@ -226,7 +227,7 @@ void BSpline::resetKnots() {
       resetParameters();
     }
     EigenVector bp(breakPoints);
-    gsl_bspline_knots(bp.gsl(), m_bsplineWorkspace.get());
+    gsl_bspline_knots(getGSLVector(bp.inspector().data()), m_bsplineWorkspace.get());
     storeAttributeValue("StartX", Attribute(breakPoints.front()));
     storeAttributeValue("EndX", Attribute(breakPoints.back()));
   }
