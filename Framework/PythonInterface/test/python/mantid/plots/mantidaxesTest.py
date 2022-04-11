@@ -283,7 +283,7 @@ class MantidAxesTest(unittest.TestCase):
             axes.images[0].set_cmap(new_cmap)
 
         def extra_checks(axes):
-            self.assertEquals(new_cmap, axes.images[0].get_cmap().name)
+            self.assertEqual(new_cmap, axes.images[0].get_cmap().name)
 
         self._do_image_replace_common_bins(self.ax.imshow,
                                            lambda ax: ax.images,
@@ -297,7 +297,7 @@ class MantidAxesTest(unittest.TestCase):
             axes.images[0].set_interpolation(interpolation)
 
         def extra_checks(axes):
-            self.assertEquals(interpolation, axes.images[0].get_interpolation())
+            self.assertEqual(interpolation, axes.images[0].get_interpolation())
 
         self._do_image_replace_common_bins(self.ax.imshow,
                                            lambda ax: ax.images,

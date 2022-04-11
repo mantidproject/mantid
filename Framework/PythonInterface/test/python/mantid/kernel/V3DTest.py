@@ -27,63 +27,63 @@ class V3DTest(unittest.TestCase):
         a = V3D(0.0, 0.0, 0.0)
         b = V3D(2.0, 2.0, 2.0)
         d = a.distance(b)
-        self.assertAlmostEquals(d, 2.0 * math.sqrt(3.0))
+        self.assertAlmostEqual(d, 2.0 * math.sqrt(3.0))
 
     def test_angle(self):
         a = V3D(2.0, 0.0, 0.0)
         b = V3D(0.0, 1.0, 0.0)
         c = V3D(1.0, 1.0, 0.0)
         d = V3D(-1.0, 0.0, 0.0)
-        self.assertAlmostEquals(a.angle(a), 0.0)
-        self.assertAlmostEquals(a.angle(b), math.pi / 2.0)
-        self.assertAlmostEquals(a.angle(c), math.pi / 4.0)
-        self.assertAlmostEquals(a.angle(d), math.pi)
+        self.assertAlmostEqual(a.angle(a), 0.0)
+        self.assertAlmostEqual(a.angle(b), math.pi / 2.0)
+        self.assertAlmostEqual(a.angle(c), math.pi / 4.0)
+        self.assertAlmostEqual(a.angle(d), math.pi)
 
     def test_cos_angle(self):
         a = V3D(2.0, 0.0, 0.0)
         b = V3D(0.0, 1.0, 0.0)
         c = V3D(1.0, 1.0, 0.0)
         d = V3D(-1.0, 0.0, 0.0)
-        self.assertAlmostEquals(a.cosAngle(a), 1.0)
-        self.assertAlmostEquals(a.cosAngle(b), 0.0)
-        self.assertAlmostEquals(a.cosAngle(c), 1.0 / np.sqrt(2.))
-        self.assertAlmostEquals(a.cosAngle(d), -1.0)
+        self.assertAlmostEqual(a.cosAngle(a), 1.0)
+        self.assertAlmostEqual(a.cosAngle(b), 0.0)
+        self.assertAlmostEqual(a.cosAngle(c), 1.0 / np.sqrt(2.))
+        self.assertAlmostEqual(a.cosAngle(d), -1.0)
 
     def test_zenith(self):
         b = V3D(0.0, 0.0, 0.0)
         a = V3D(9.9, 7.6, 0.0)
         self.assertEqual(a.zenith(a), 0.0)
-        self.assertAlmostEquals(a.zenith(b), math.pi / 2.0)
+        self.assertAlmostEqual(a.zenith(b), math.pi / 2.0)
         a = V3D(-1.1, 0.0, 0.0);
-        self.assertAlmostEquals(a.zenith(b), math.pi / 2.0)
+        self.assertAlmostEqual(a.zenith(b), math.pi / 2.0)
         a = V3D(0.0, 0.0, 1.0);
         self.assertEqual(a.zenith(b), 0.0);
         a = V3D(1.0, 0.0, 1.0);
-        self.assertAlmostEquals(a.zenith(b), math.pi / 4.0)
+        self.assertAlmostEqual(a.zenith(b), math.pi / 4.0)
         a = V3D(1.0, 0.0, -1.0);
-        self.assertAlmostEquals(a.zenith(b), 3.0 * math.pi / 4.0)
+        self.assertAlmostEqual(a.zenith(b), 3.0 * math.pi / 4.0)
 
     def test_scalarprod(self):
         a = V3D(1.0, 2.0, 1.0)
         b = V3D(1.0, -2.0, -1.0)
         sp = a.scalar_prod(b)
-        self.assertAlmostEquals(sp, -4.0)
+        self.assertAlmostEqual(sp, -4.0)
 
     def test_crossprod(self):
         a = V3D(1.0, 0.0, 0.0)
         b = V3D(0.0, 1.0, 0.0)
         c = a.cross_prod(b)
-        self.assertAlmostEquals(c.X(), 0.0)
-        self.assertAlmostEquals(c.Y(), 0.0)
-        self.assertAlmostEquals(c.Z(), 1.0)
+        self.assertAlmostEqual(c.X(), 0.0)
+        self.assertAlmostEqual(c.Y(), 0.0)
+        self.assertAlmostEqual(c.Z(), 1.0)
 
     def test_norm(self):
         p = V3D(1.0, -5.0, 8.0);
-        self.assertAlmostEquals(p.norm(), math.sqrt(90.0))
+        self.assertAlmostEqual(p.norm(), math.sqrt(90.0))
 
     def test_norm2(self):
         p = V3D(1.0, -5.0, 8.0);
-        self.assertAlmostEquals(p.norm2(), 90.0)
+        self.assertAlmostEqual(p.norm2(), 90.0)
 
     def test_equality_operators_use_value_comparison(self):
         p1 = V3D(1.0, -5.0, 8.0)
@@ -101,16 +101,16 @@ class V3DTest(unittest.TestCase):
         v = V3D(1, 1, 1)
         inDegrees = False
         angles = v.directionAngles(inDegrees)
-        self.assertAlmostEquals(math.acos(1.0 / math.sqrt(3.0)), angles.X())
-        self.assertAlmostEquals(math.acos(1.0 / math.sqrt(3.0)), angles.Y())
-        self.assertAlmostEquals(math.acos(1.0 / math.sqrt(3.0)), angles.Z())
+        self.assertAlmostEqual(math.acos(1.0 / math.sqrt(3.0)), angles.X())
+        self.assertAlmostEqual(math.acos(1.0 / math.sqrt(3.0)), angles.Y())
+        self.assertAlmostEqual(math.acos(1.0 / math.sqrt(3.0)), angles.Z())
 
     def test_directionAngles(self):
         v = V3D(1, 1, 1)
         angles = v.directionAngles()
-        self.assertAlmostEquals(math.acos(1.0 / math.sqrt(3.0)) * 180 / math.pi, angles.X())
-        self.assertAlmostEquals(math.acos(1.0 / math.sqrt(3.0)) * 180 / math.pi, angles.Y())
-        self.assertAlmostEquals(math.acos(1.0 / math.sqrt(3.0)) * 180 / math.pi, angles.Z())
+        self.assertAlmostEqual(math.acos(1.0 / math.sqrt(3.0)) * 180 / math.pi, angles.X())
+        self.assertAlmostEqual(math.acos(1.0 / math.sqrt(3.0)) * 180 / math.pi, angles.Y())
+        self.assertAlmostEqual(math.acos(1.0 / math.sqrt(3.0)) * 180 / math.pi, angles.Z())
 
     def test_hash(self):
         v1 = V3D(1, 1, 1)

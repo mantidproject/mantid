@@ -222,7 +222,7 @@ class MaxEntPresenterTest(unittest.TestCase):
     def test_get_N_points_comboboxes_appropriately(self):
         self.presenter.getWorkspaceNames()
 
-        self.assertEquals(retrieve_combobox_info(self.view.N_points),
+        self.assertEqual(retrieve_combobox_info(self.view.N_points),
                           ['2048', '4096', '8192', '16384', '32768', '65536',
                            '131072', '262144', '524288', '1048576'])
 
