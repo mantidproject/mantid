@@ -1,1 +1,1 @@
-- Fixed a bug with the plotting status bar in Conda builds. The status bar has a fixed size so that there is no flicerking behaviour as users move over the plot image or the z axis image.
+- Fixed a bug with the plotting status bar in Conda builds. The status bar has a fixed size so that there is no flickering behaviour as users move over the plot image or the z axis image.
