@@ -137,20 +137,16 @@ class SANSILLParameterScan(PythonAlgorithm):
         self.setUp()
 
         _, load_ws_name = needs_loading(self.sample, "Load")
-        LoadAndMerge(Filename=self.sample, OutputWorkspace=load_ws_name + "_grouped",
-                     LoaderOptions={"Wavelength": self.wavelength}, startProgress=0, endProgress=0.7)
+        Load(Filename=self.sample, OutputWorkspace=load_ws_name, startProgress=0, endProgress=0.7)
 
-        # Omega scans are loaded as histogram data for compatibility reasons, but we need point data from now on.
-        # Converting from histogram to point data is straight forward and no meaningful information can be lost.
-        ConvertToPointData(InputWorkspace=load_ws_name + "_grouped", OutputWorkspace=load_ws_name + "_grouped")
-
-        ConjoinXRuns(InputWorkspaces=load_ws_name + "_grouped",
-                     OutputWorkspace=load_ws_name + "_joined",
-                     SampleLogAsXAxis=self.observable, startProgress=0.7, endProgress=0.75)
-        mtd[load_ws_name + '_grouped'].delete()
+        # TODO remove that when monitors are added to nexus
+        ws = mtd[load_ws_name]
+        x_val = ws.dataX(0)
+        ws.setX(ws.getNumberHistograms() - 1, x_val)
+        ws.setX(ws.getNumberHistograms() - 2, x_val)
 
         sort_x_axis_output = load_ws_name + '_sorted' if not self.output_joined else self.output_joined
-        SortXAxis(InputWorkspace=load_ws_name + "_joined", OutputWorkspace=sort_x_axis_output,
+        SortXAxis(InputWorkspace=load_ws_name, OutputWorkspace=sort_x_axis_output,
                   startProgress=0.75, endProgress=0.8)
 
         if self.observable == "Omega.value":
@@ -173,7 +169,7 @@ class SANSILLParameterScan(PythonAlgorithm):
                              ProcessAs='Absorber',
                              NormaliseBy=self.normalise,
                              OutputWorkspace=absorber_name,
-                             Version=1)
+                             Version=2)
 
         process_container, container_name = needs_processing(self.container, 'Container')
 
@@ -185,28 +181,31 @@ class SANSILLParameterScan(PythonAlgorithm):
                              AbsorberInputWorkspace=absorber_name,
                              CacheSolidAngle=True,
                              NormaliseBy=self.normalise,
-                             Version=1)
+                             Version=2)
 
         self.progress.report(0, "Reducing data.")
-        SANSILLReduction(InputWorkspace=sort_x_axis_output,
-                         AbsorberInputWorkspace=absorber_name,
-                         ContainerInputWorkspace=container_name,
-                         SensitivityInputWorkspace=sens_input,
-                         DefaultMaskedInputWorkspace=default_mask_input,
+        SANSILLReduction(SampleWorkspace=sort_x_axis_output,
+                         # AbsorberInputWorkspace=absorber_name,
+                         # ContainerInputWorkspace=container_name,
+                         # SensitivityInputWorkspace=sens_input,
+                         # DefaultMaskedInputWorkspace=default_mask_input,
                          NormaliseBy=self.normalise,
                          OutputWorkspace=sort_x_axis_output,
                          startProgress=0.8,
                          endProgress=0.95,
-                         Version=1)
+                         Version=2)
 
-        instrument = mtd[load_ws_name + "_joined"].getInstrument()
+        instrument = mtd[load_ws_name].getInstrument()
         detector = instrument.getComponentByName("detector")
         if "detector-width" in detector.getParameterNames() and "detector-height" in detector.getParameterNames():
             width = int(detector.getNumberParameter("detector-width")[0])
             height = int(detector.getNumberParameter("detector-height")[0])
         else:
-            raise RuntimeError('No width or height found for this instrument. Unable to group detectors.')
-        mtd[load_ws_name + "_joined"].delete()
+            # TODO bring back this check when properties are updated
+            width = 1152
+            height = 192
+            # raise RuntimeError('No width or height found for this instrument. Unable to group detectors.')
+        mtd[load_ws_name].delete()
 
         self.checkPixelY(height)
         grouping = create_detector_grouping(self.pixel_y_min, self.pixel_y_max, width, height)

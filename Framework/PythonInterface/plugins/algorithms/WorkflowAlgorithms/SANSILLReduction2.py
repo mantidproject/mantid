@@ -22,13 +22,13 @@ class SANSILLReduction(PythonAlgorithm):
         and TOF measurements (equidistant and non-equidistant, D33 only).
     """
 
-    mode = None # the acquisition mode of the reduction
-    instrument = None # the name of the instrument
-    n_samples = None # how many samples
-    n_frames = None # how many frames per sample in case of kinetic
-    process = None # the process type
-    n_reports = None # how many progress report checkpoints
-    progress = None # the global progress reporter
+    mode = None  # the acquisition mode of the reduction
+    instrument = None  # the name of the instrument
+    n_samples = None  # how many samples
+    n_frames = None  # how many frames per sample in case of kinetic
+    process = None  # the process type
+    n_reports = None  # how many progress report checkpoints
+    progress = None  # the global progress reporter
     processes = ['DarkCurrent', 'EmptyBeam', 'Transmission', 'EmptyContainer', 'Water', 'Solvent', 'Sample']
 
     def category(self):
@@ -48,27 +48,37 @@ class SANSILLReduction(PythonAlgorithm):
 
     def validateInputs(self):
         issues = dict()
+
         runs = self.getPropertyValue('Runs').split(',')
         non_blank_runs = list(filter(lambda x: x != EMPTY_TOKEN, runs))
         if not non_blank_runs:
             issues['Runs'] = 'Only blanks runs have been provided, there must be at least one non-blank run.'
+
         process = self.getPropertyValue('ProcessAs')
         if process == 'Transmission' and not self.getPropertyValue('FluxWorkspace'):
             issues['FluxWorkspace'] = 'Empty beam flux input workspace is mandatory for transmission calculation.'
+
         samples_thickness = len(self.getProperty('SampleThickness').value)
         if samples_thickness != 1 and samples_thickness != self.getPropertyValue('Runs').count(',') + 1:
             issues['SampleThickness'] = 'Sample thickness must have either a single value or as many as there are samples.'
+
+        if not self.getPropertyValue("SampleWorkspace") and not self.getPropertyValue("Runs"):
+            issues['SampleWorkspace'] = "Providing either a run file or an already loaded input workspace is mandatory."
+            issues['Runs'] = "Providing either a run file or an already loaded input workspace is mandatory."
+
         return issues
 
     def PyInit(self):
 
         #================================MAIN PARAMETERS================================#
+        can_runs = EnabledWhenProperty('SampleWorkspace', PropertyCriterion.IsEqualTo, '')
 
         self.declareProperty(MultipleFileProperty(name='Runs',
                                                   action=FileAction.OptionalLoad,
                                                   extensions=['nxs'],
                                                   allow_empty=True),
                              doc='File path of run(s).')
+        self.setPropertySettings('Runs', can_runs)
 
         self.declareProperty(name='ProcessAs',
                              defaultValue='Sample',
@@ -93,6 +103,7 @@ class SANSILLReduction(PythonAlgorithm):
         solvent_sample = EnabledWhenProperty(solvent, sample, LogicOperator.Or)
         water_solvent_sample = EnabledWhenProperty(solvent_sample, water, LogicOperator.Or)
         can_water_solvent_sample = EnabledWhenProperty(water_solvent_sample, container, LogicOperator.Or)
+        can_sample_workspace = EnabledWhenProperty('Runs', PropertyCriterion.IsEqualTo, '')
 
         # most of D33 data has 0 monitor counts, so normalise by time is a better universal default
         self.declareProperty(name='NormaliseBy',
@@ -132,6 +143,11 @@ class SANSILLReduction(PythonAlgorithm):
         self.setPropertySettings('TransmissionThetaDependent', can_water_solvent_sample)
 
         #================================INPUT WORKSPACES================================#
+
+        self.declareProperty(MatrixWorkspaceProperty('SampleWorkspace', '', direction=Direction.Input,
+                                                     optional=PropertyMode.Optional),
+                             doc='Input workspace containing already loaded sample data, used for parameter scans.')
+        self.setPropertySettings('SampleWorkspace', can_sample_workspace)
 
         self.declareProperty(MatrixWorkspaceProperty(name='DarkCurrentWorkspace',
                                                      defaultValue='',
@@ -786,22 +802,32 @@ class SANSILLReduction(PythonAlgorithm):
         There it could load the instrument only with the first run to save some time
         The main complexity here is the injection of blanks (for sample) and replicas (for transmission)
         '''
+        if not self.getPropertyValue('Runs'):
+            #
+            self.progress = Progress(self, start=0.0, end=1.0, nreports=10)
+            return
+
         ws = self.getPropertyValue('OutputWorkspace')
         tmp = f'__{ws}'
         runs = self.getPropertyValue('Runs').split(',')
         non_blank_runs = list(filter(lambda x: x != EMPTY_TOKEN, runs))
         blank_runs = list(filter(lambda x: x == EMPTY_TOKEN, runs))
+
         nreports = len(non_blank_runs) + self.processes.index(self.getPropertyValue('ProcessAs')) + 2
         self.progress = Progress(self, start=0.0, end=1.0, nreports=nreports)
+
         if self.getPropertyValue('ProcessAs') == 'Transmission':
             # sometimes the same transmission can be applied to many samples
             non_blank_runs = self.remove_repeated(non_blank_runs)
+
         LoadAndMerge(Filename=','.join(non_blank_runs), OutputWorkspace=tmp, startProgress=0., endProgress=len(non_blank_runs)/nreports)
         self.progress.report(len(non_blank_runs), 'Loaded')
+
         if isinstance(mtd[tmp], MatrixWorkspace) and blank_runs:
             # if we loaded a single workspace but there are blanks, need to make a group so that the blanks can be inserted
             RenameWorkspace(InputWorkspace=tmp, OutputWorkspace=tmp+'_0')
             GroupWorkspaces(InputWorkspaces=[tmp+'_0'], OutputWorkspace=tmp)
+
         if isinstance(mtd[tmp], WorkspaceGroup):
             # the setup is performed based on the first workspace
             # this assumes that in one call of this algorithm, all the input runs are homogeneous; that is,
@@ -829,7 +855,6 @@ class SANSILLReduction(PythonAlgorithm):
         self.set_process_as(ws)
         assert isinstance(mtd[ws], MatrixWorkspace)
         self.progress.report('Combined')
-        return ws
 
     def preprocess_group(self, wsg):
         '''Preprocesses a loaded workspace group'''
@@ -927,7 +952,11 @@ class SANSILLReduction(PythonAlgorithm):
         If we are processing the empty beam we apply the dark current correction and process as empty beam
         If we are processing transmission, we apply both dark current and empty beam corrections and process as transmission
         '''
-        ws = self.getPropertyValue('OutputWorkspace')
+        if not self.getPropertyValue('Runs'):
+            ws = self.getPropertyValue('SampleWorkspace')
+        else:
+            ws = self.getPropertyValue('OutputWorkspace')
+
         self.apply_normalisation(ws)
         self.progress.report()
         if self.process != 'DarkCurrent':
@@ -942,7 +971,8 @@ class SANSILLReduction(PythonAlgorithm):
                     self.calculate_transmission(ws)
                 else:
                     self.apply_transmission(ws)
-                    self.apply_solid_angle(ws)
+                    # TODO take care of solid angle
+                    # self.apply_solid_angle(ws)
                     self.progress.report()
                     if self.process != 'EmptyContainer':
                         self.apply_container(ws)
