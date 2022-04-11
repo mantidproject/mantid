@@ -199,8 +199,8 @@ class SimpleShapeDiscusInelastic(PythonAlgorithm):
         if not self._mass_density:
             issues['SampleMassDensity'] = 'Please enter a non-zero number for sample mass density'
 
-#        if self._chemical_formula:
-#            issues['SampleChemicalFormula'] = 'Please enter a chemical formula or cross sections.'
+        if not self._chemical_formula:
+            issues['SampleChemicalFormula'] = 'Please enter a chemical formula.'
 
         if not self._height:
             issues['Height'] = 'Please enter a non-zero number for height'
