@@ -1,4 +1,10 @@
 - A new Abins2D algorithm has been added for simulation of inelastic neutron scattering in direct-geometry
+
   - This employs the same almost-isotropic analytic powder-averaging incoherent approximation as Abins
   - The ISIS MARI, MAPS, and MERLIN instruments are supported, alongside ILL-PANTHER and a "TwoDMap" ideal simulation. Please direct requests/specifications for additional instruments to Sanghamitra Mukhopadhyay and Adam Jackson.
   - The algorithm produces workspaces in (E,q) space, best viewed interactively in Sliceviewer, or rendered as colorfill plots
+
+.. code-block:: rest
+
+   .. image::  ../../images/Abins2D_release_merlin.png
+	       :align: center
