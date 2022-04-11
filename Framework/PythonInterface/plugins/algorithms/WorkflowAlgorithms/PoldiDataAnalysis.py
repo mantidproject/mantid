@@ -33,9 +33,10 @@ class PoldiDataAnalysis(PythonAlgorithm):
         return False
 
     def PyInit(self):
-        self._allowedFunctions = ["Gaussian", "Lorentzian", "PseudoVoigt", "Voigt"]
+        self._allowedFunctions = ["AsymmetricPearsonVII", "Gaussian", "Lorentzian", "PseudoVoigt", "Voigt"]
 
         self._globalParameters = {
+            "AsymmetricPearsonVII": [],
             'Gaussian': [],
             'Lorentzian': [],
             'PseudoVoigt': ['Mixing'],
