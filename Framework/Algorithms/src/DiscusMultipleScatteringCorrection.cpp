@@ -344,8 +344,9 @@ void DiscusMultipleScatteringCorrection::convertWsBothAxesToPoints(MatrixWorkspa
       ws = SQWSPoints;
     }
   }
-  if (dynamic_cast<BinEdgeAxis *>(ws->getAxis(1)) != nullptr) {
-    auto edges = dynamic_cast<NumericAxis *>(ws->getAxis(1))->getValues();
+  auto binAxis = dynamic_cast<BinEdgeAxis *>(ws->getAxis(1));
+  if (binAxis) {
+    auto edges = binAxis->getValues();
     std::vector<double> centres;
     VectorHelper::convertToBinCentre(edges, centres);
     auto newAxis = std::make_unique<NumericAxis>(centres);
@@ -698,7 +699,10 @@ void DiscusMultipleScatteringCorrection::prepareCumulativeProbForQ(double kinc, 
   std::vector<double> IOfQYFull, qValuesFull, wIndices;
   double IOfQMaxPreviousRow = 0.;
 
-  auto &wValues = dynamic_cast<NumericAxis *>(m_SQWS->getAxis(1))->getValues();
+  auto wAxis = dynamic_cast<NumericAxis *>(m_SQWS->getAxis(1));
+  if (!wAxis)
+    throw std::invalid_argument("Cannot calculate cumulative probability for S(Q,w) without a numeric w axis");
+  auto &wValues = wAxis->getValues();
   std::vector<double> wBinEdges;
   VectorHelper::convertToBinBoundary(wValues, wBinEdges);
 
@@ -946,7 +950,10 @@ double DiscusMultipleScatteringCorrection::interpolateGaussian(const ISpectrum &
 double DiscusMultipleScatteringCorrection::Interpolate2D(MatrixWorkspace_sptr SOfQ, double w, double q) {
   double SQ = 0.;
   int iW = -1;
-  auto &wValues = dynamic_cast<NumericAxis *>(SOfQ->getAxis(1))->getValues();
+  auto wAxis = dynamic_cast<NumericAxis *>(SOfQ->getAxis(1));
+  if (!wAxis)
+    throw std::invalid_argument("Cannot perform 2D interpolation on S(Q,w) that doesn't have a numeric w axis");
+  auto &wValues = wAxis->getValues();
   try {
     // required w values will often equal the points in the S(Q,w) distribution so pick nearest value
     iW = static_cast<int>(Kernel::VectorHelper::indexOfValueFromCentersNoThrow(wValues, w));
@@ -1162,7 +1169,10 @@ void DiscusMultipleScatteringCorrection::q_dir(Geometry::Track &track, const Mat
     SQ = interpolateFlat(m_SQWS->getSpectrum(iW), QQ);
     weight = weight * scatteringXSection;
   } else {
-    std::tie(k, iW) = sampleKW(dynamic_cast<NumericAxis *>(m_logSQ->getAxis(1))->getValues(), rng, kinc);
+    auto wAxis = dynamic_cast<NumericAxis *>(m_logSQ->getAxis(1));
+    if (!wAxis)
+      throw std::invalid_argument("Cannot sample w on S(Q,w) without a numeric w axis");
+    std::tie(k, iW) = sampleKW(wAxis->getValues(), rng, kinc);
     auto [qmin, qrange] = getKinematicRange(k, kinc);
     QQ = qmin + qrange * rng.nextValue();
     SQ = interpolateGaussian(m_logSQ->getSpectrum(iW), QQ);
