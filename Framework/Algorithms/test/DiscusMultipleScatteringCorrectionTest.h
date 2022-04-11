@@ -41,7 +41,7 @@ public:
   }
   void integrateCumulative(const Mantid::HistogramData::Histogram &h, double xmin, double xmax,
                            std::vector<double> &resultX, std::vector<double> &resultY) {
-    DiscusMultipleScatteringCorrection::integrateCumulative(h, xmin, xmax, resultX, resultY, true);
+    DiscusMultipleScatteringCorrection::integrateCumulative(h, xmin, xmax, resultX, resultY);
   }
   void getXMinMax(const Mantid::API::MatrixWorkspace &ws, double &xmin, double &xmax) {
     DiscusMultipleScatteringCorrection::getXMinMax(ws, xmin, xmax);
@@ -810,31 +810,6 @@ public:
     alg.initialize();
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", inputWorkspace));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("StructureFactorWorkspace", SofQWorkspaceZero));
-    const int NSCATTERINGS = 2;
-    TS_ASSERT_THROWS_NOTHING(alg.setProperty("NumberScatterings", NSCATTERINGS));
-    TS_ASSERT_THROWS_NOTHING(alg.setProperty("NeutronPathsSingle", 1));
-    TS_ASSERT_THROWS_NOTHING(alg.setProperty("NeutronPathsMultiple", 1));
-    TS_ASSERT_THROWS_NOTHING(alg.setProperty("OutputWorkspace", "MuscatResults"));
-    TS_ASSERT_THROWS(alg.execute(), const std::runtime_error &);
-  }
-
-  void test_invalid_SQW_no_negative_w_supplied_for_inelastic() {
-    DiscusMultipleScatteringCorrectionHelper alg;
-    const double THICKNESS = 0.001; // metres
-    auto inputWorkspace = SetupFlatPlateWorkspace(1, 1, 1.0, 1, 0.5, 1.0, 100 * THICKNESS, 100 * THICKNESS, THICKNESS,
-                                                  0., {0., 0., 1.}, DeltaEMode::Direct);
-    auto SofQWorkspaceWithOnlyPositiveW = WorkspaceCreationHelper::create2DWorkspaceBinned(2, 1, 1000);
-    auto verticalAxis = std::make_unique<Mantid::API::NumericAxis>(2);
-    // Now set the axis q values
-    for (int i = 0; i < 2; ++i) {
-      verticalAxis->setValue(0, i * 1.0);
-    }
-    SofQWorkspaceWithOnlyPositiveW->replaceAxis(1, std::move(verticalAxis));
-    SofQWorkspaceWithOnlyPositiveW->getAxis(0)->unit() = UnitFactory::Instance().create("DeltaE");
-    SofQWorkspaceWithOnlyPositiveW->getAxis(1)->unit() = UnitFactory::Instance().create("MomentumTransfer");
-    alg.initialize();
-    TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", inputWorkspace));
-    TS_ASSERT_THROWS_NOTHING(alg.setProperty("StructureFactorWorkspace", SofQWorkspaceWithOnlyPositiveW));
     const int NSCATTERINGS = 2;
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("NumberScatterings", NSCATTERINGS));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("NeutronPathsSingle", 1));

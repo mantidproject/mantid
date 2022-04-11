@@ -200,28 +200,6 @@ std::map<std::string, std::string> DiscusMultipleScatteringCorrection::validateI
 
     if (SQWS->getAxis(1)->isSpectra())
       issues["StructureFactorWorkspace"] += "S(Q, w) must have a numeric spectrum axis\n";
-
-    /* ensure S(Q,w) has some negative values - for a few reasons:
-    1) It's not physical to have a one-sided S(Q,w)
-    2) if S(Q,w) only includes positive w (energy loss) this opens up the possibility of not being able to complete
-       a neutron path through to the detector if the neutron ends up with energy below the min w
-    3) DISCUS took a one sided S(Q,w) and generated values for opposite w using detailed balance so make it clear
-       this algorithm doesn't do that*/
-    if ((axisUnits.find("DeltaE") != axisUnits.end()) && !SQWS->getAxis(1)->isSpectra()) {
-      bool atLeastOnePositive = false;
-      bool xIsW = SQWS->getAxis(0)->unit()->unitID() == "DeltaE";
-      for (size_t iHist = 0; iHist < SQWS->getNumberHistograms(); iHist++) {
-        auto &yValues = SQWS->dataY(iHist);
-        auto wValues = xIsW ? SQWS->dataX(0) : std::vector<double>(yValues.size(), SQWS->getAxis(1)->getValue(iHist));
-        std::vector<std::pair<double, double>> ywVals;
-        std::transform(yValues.begin(), yValues.end(), wValues.begin(), std::back_inserter(ywVals),
-                       [](double y, double w) { return std::make_pair(y, w); });
-        if (std::any_of(ywVals.begin(), ywVals.end(), [](auto yw) { return yw.first > 0. && yw.second < 0.; }))
-          atLeastOnePositive = true;
-      }
-      if (!atLeastOnePositive)
-        issues["StructureFactorWorkspace"] += "S(Q, w) must have some positive values for negative w\n";
-    }
   }
 
   for (size_t i = 0; i < SQWS->getNumberHistograms(); i++) {
@@ -742,7 +720,7 @@ DiscusMultipleScatteringCorrection::integrateQSQ(double kinc) {
     auto kf = getKf(wValues[iW], kinc);
     auto [qmin, qrange] = getKinematicRange(kf, kinc);
     std::vector<double> IOfQX, IOfQY;
-    integrateCumulative(m_QSQWS->histogram(iW), qmin, qmin + qrange, IOfQX, IOfQY, true);
+    integrateCumulative(m_QSQWS->histogram(iW), qmin, qmin + qrange, IOfQX, IOfQY);
     qValuesFull.insert(qValuesFull.end(), IOfQX.begin(), IOfQX.end());
     wIndices.insert(wIndices.end(), IOfQX.size(), static_cast<double>(iW));
     // w bin width for elastic will equal 1
@@ -837,17 +815,15 @@ double DiscusMultipleScatteringCorrection::calculateSOfQNormalisationFactor() {
  */
 void DiscusMultipleScatteringCorrection::integrateCumulative(const Mantid::HistogramData::Histogram &h,
                                                              const double xmin, const double xmax,
-                                                             std::vector<double> &resultX, std::vector<double> &resultY,
-                                                             bool returnCumulative) {
+                                                             std::vector<double> &resultX,
+                                                             std::vector<double> &resultY) {
   const std::vector<double> &xValues = h.readX();
   const std::vector<double> &yValues = h.readY();
   bool isPoints = h.xMode() == HistogramData::Histogram::XMode::Points;
 
   // set the integral to zero at xmin
-  if (returnCumulative) {
-    resultX.emplace_back(xmin);
-    resultY.emplace_back(0.);
-  }
+  resultX.emplace_back(xmin);
+  resultY.emplace_back(0.);
   double sum = 0;
 
   // ensure there's a point at xmin
@@ -877,10 +853,8 @@ void DiscusMultipleScatteringCorrection::integrateCumulative(const Mantid::Histo
       } else
         yToUse = yValues[iRight - 1];
       sum += yToUse * (xValues[iRight] - xmin);
-      if (returnCumulative) {
-        resultX.push_back(xValues[iRight]);
-        resultY.push_back(sum);
-      }
+      resultX.push_back(xValues[iRight]);
+      resultY.push_back(sum);
       iRight++;
     } else {
       if (isPoints) {
@@ -890,10 +864,8 @@ void DiscusMultipleScatteringCorrection::integrateCumulative(const Mantid::Histo
       } else
         yToUse = yValues[iRight - 1];
       sum += yToUse * (xmax - xmin);
-      if (returnCumulative) {
-        resultX.push_back(xmax);
-        resultY.push_back(sum);
-      }
+      resultX.push_back(xmax);
+      resultY.push_back(sum);
       iRight++;
     }
   }
@@ -902,10 +874,8 @@ void DiscusMultipleScatteringCorrection::integrateCumulative(const Mantid::Histo
   for (; iRight < xValues.size() && xValues[iRight] <= xmax; iRight++) {
     yToUse = isPoints ? 0.5 * (yValues[iRight] + yValues[iRight - 1]) : yValues[iRight - 1];
     sum += yToUse * (xValues[iRight] - xValues[iRight - 1]);
-    if (returnCumulative) {
-      resultX.emplace_back(xValues[iRight]);
-      resultY.emplace_back(sum);
-    }
+    resultX.emplace_back(xValues[iRight]);
+    resultY.emplace_back(sum);
   }
 
   // integrate a partial final interval if xmax is between points
@@ -916,12 +886,6 @@ void DiscusMultipleScatteringCorrection::integrateCumulative(const Mantid::Histo
     } else
       yToUse = yValues[iRight - 1];
     sum += yToUse * (xmax - xValues[iRight - 1]);
-    if (returnCumulative) {
-      resultX.emplace_back(xmax);
-      resultY.emplace_back(sum);
-    }
-  }
-  if (!returnCumulative) {
     resultX.emplace_back(xmax);
     resultY.emplace_back(sum);
   }
@@ -931,7 +895,7 @@ API::MatrixWorkspace_sptr DiscusMultipleScatteringCorrection::integrateWS(const 
   auto wsIntegrals = DataObjects::create<Workspace2D>(*ws, HistogramData::Points{0.});
   for (size_t i = 0; i < ws->getNumberHistograms(); i++) {
     std::vector<double> IOfQX, IOfQY;
-    integrateCumulative(ws->histogram(i), ws->x(i).front(), ws->x(i).back(), IOfQX, IOfQY, true);
+    integrateCumulative(ws->histogram(i), ws->x(i).front(), ws->x(i).back(), IOfQX, IOfQY);
     wsIntegrals->mutableY(i) = IOfQY.back();
   }
   return wsIntegrals;
