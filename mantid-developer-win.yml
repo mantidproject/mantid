@@ -5,7 +5,7 @@ channels:
 
 dependencies:
   - boost=1.75.* # Also pulls in boost-cpp
-  - cmake>=3.20.*
+  - cmake=3.19.*|>=3.21.0 # Avoid bug in 3.20.* with updating external projects
   - conda-wrappers
   - doxygen>=1.9.*
   - eigen=3.4.*
