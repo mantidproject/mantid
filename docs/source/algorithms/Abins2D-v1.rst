@@ -76,7 +76,7 @@ weights can be added for a slight improvement to the predicted
 spectrum.  (If the spectrum is dominated by coherent scattering, this
 approximation may not be the appropriate tool.)
 
-.. testcode:: Abins2DexplicitParameters
+.. testcode:: Abins2DExplicitParameters
 
     wrk_verbose=Abins(AbInitioProgram="CASTEP", VibrationalOrPhononFile="benzene.phonon",
                       TemperatureInKelvin=10, Instrument="MAPS",
@@ -84,21 +84,15 @@ approximation may not be the appropriate tool.)
                       QuantumOrderEventsNumber="2", Autoconvolution=True,
                       ScaleByCrossSection="Total")
 
-    for name in wrk_verbose.getNames():
-        print(name)
+    print(f"Created {wrk_verbose.size()} workspaces")
+    print(f"including {wrk_verbose[12].name()}")
 
 Output:
 
-.. testoutput:: AbinsexplicitParameters2D
+.. testoutput:: Abins2DExplicitParameters
 
-    experimental_wrk
-    wrk_verbose_total
-    wrk_verbose_H_total
-    wrk_verbose_H
-    wrk_verbose_atom_1_total
-    wrk_verbose_atom_1
-    wrk_verbose_atom_2_total
-    wrk_verbose_atom_2
+   Created 34 workspaces
+   including wrk_verbose_atom_1_total
 
 .. categories::
 
