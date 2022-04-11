@@ -22,7 +22,7 @@ from abins.constants import MILLI_EV_TO_WAVENUMBER
 # Instruments constants  #############################
 instruments = {
     'fwhm': 3.0,  # approximate value for the full width at half maximum for Gaussian experimental resolutions
-    'TwoDMap': {
+    'Ideal2D': {
         'resolution': 0.01,  # Width of broadening function as a fraction of incident energy
         'n_energy_bins': 1000,  # Number of energy bins (from zero to e_init)
         'q_size': 200,  # Number of q slices in output plot

@@ -6,7 +6,7 @@ import abins
 from .directinstrument import DirectInstrument
 
 
-class TwoDMap(DirectInstrument):
+class Ideal2D(DirectInstrument):
     """An instrument for q-resolved 2D maps"""
     def __init__(self, *args, **kwargs):
         super().__init__(*args, name='TwoDMap', **kwargs)

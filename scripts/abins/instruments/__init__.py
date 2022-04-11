@@ -11,12 +11,12 @@ from .lagrangeinstrument import LagrangeInstrument
 from .panther import PantherInstrument
 from .pychop import PyChopInstrument
 from .toscainstrument import ToscaInstrument
-from .twodmap import TwoDMap
+from .ideal2d import Ideal2D
 
 
 instruments = {"lagrange": LagrangeInstrument,
                "tosca": ToscaInstrument,
-               "twodmap": TwoDMap,
+               "ideal2d": Ideal2D,
                "maps": (PyChopInstrument, {'name': 'MAPS'}),
                "mari": (PyChopInstrument, {'name': 'MARI'}),
                "merlin": (PyChopInstrument, {'name': 'MERLIN'}),

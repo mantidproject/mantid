@@ -43,7 +43,7 @@ class Abins2D(AbinsAlgorithm, PythonAlgorithm):
 
         # Declare instrument properties
         self.declare_instrument_properties(
-            default="TwoDMap", choices=TWO_DIMENSIONAL_INSTRUMENTS,
+            default="Ideal2D", choices=TWO_DIMENSIONAL_INSTRUMENTS,
             multiple_choice_settings=[('Chopper', 'settings', 'Chopper package')],
             freeform_settings=[('IncidentEnergy', '4100', 'Incident energy in EnergyUnits'),
                                ('ChopperFrequency', '', 'Chopper frequency in Hz')])
@@ -251,15 +251,6 @@ class Abins2D(AbinsAlgorithm, PythonAlgorithm):
         message = " in scripts/abins/parameters.py. "
 
         self._check_common_advanced_parameters(message)
-        self._check_2d_parameters(message)
-
-    def _check_2d_parameters(self, message_end=None):
-        # check 2D resolution
-        resolution_2d = abins.parameters.instruments['TwoDMap']['resolution']
-        if not (isinstance(resolution_2d, float) and resolution_2d > 0):
-            raise RuntimeError("Invalid value of abins.parameters"
-                               ".instruments['TwoDMap']['resolution']"
-                               + message_end)
 
     def _get_properties(self):
         """
