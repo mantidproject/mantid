@@ -43,6 +43,9 @@ Taking Slices
    :align: center
    :width: 80%
 
+2. Modifying a Slice
+####################
+
 #. Modify the slice settings in the ``Slice`` tab, for instance the values for x for ``from`` to ``1.5`` and ``to`` to ``5.5`` , and click ``Display``
 #. A second slice plot should open with a plot reflecting your changes in the settings
 #. The original slice plot should remain unchanged
@@ -51,6 +54,9 @@ Taking Slices
    :alt: modified_slice_plot.png
    :align: center
    :width: 80%
+
+3. The Plots Tab
+################
 
 #. Navigate to the ``Plots`` tab of MSlice and check that there are entries for two plots
 #. Open the ``Plots`` tab of Mantid and check that there are no entries for plots
@@ -63,7 +69,7 @@ Taking Slices
 #. Modify the slice settings in the ``Slice`` tab again and click ``Display``
 #. This time the new slice plot overwrites the original slice plot
 
-2. Overplot Recoil Lines and Bragg Peaks
+4. Overplot Recoil Lines and Bragg Peaks
 ########################################
 
 #. Navigate to the ``Information`` menu on the slice plot
@@ -76,13 +82,13 @@ Taking Slices
    :align: center
    :width: 80%
 
-3. The Plot Toolbar
+5. The Plot Toolbar
 #####################
 
 #. In the plot window, check that the following buttons are working as expected: Zoom in, Zoom out, ``Legends`` (add a recoil line to display a legend first), Save, Copy, Print and Plot Options. Modify plot options and make sure that the plot changes accordingly.
 
 
-4. Generate a Script
+6. Generate a Script
 ####################
 
 #. Navigate to the ``File`` menu on the slice plot
@@ -106,13 +112,16 @@ Taking Cuts
    :align: center
    :width: 80%
 
+2. Modifying a Cut
+##################
+
 #. Check that the menu item ``Intensity`` is disabled as well as the item ``Recoil lines`` within the menu item ``Information``.
 #. Modify the step size on the ``Cut`` tab to ``0.02`` and click ``Plot Over``. A second cut should appear on the cut plot in a different colour.
 #. Click on Plot Options on the cut plot and modify settings
 #. Ensure that the cut plot changes accordingly
 #. Click on Save to Workbench on the ``Cut`` tab and check that in Mantid a workspace with the name ``MAR21335_Ei60meV_cut(-5.000,5.000)`` appears
 #. In the row labelled ``over``, set the ``from`` value to ``-1`` and the ``to`` value to ``1`` and click ``Plot``
-#. Navigate to the tab ``MD Histo`` tab and check that there are two entries, ``MAR21335_Ei60meV_cut(-5.000,5.000)`` and ``MAR21335_Ei60meV_cut(-1.000,1.000)``
+#. Navigate to the tab ``MD Histo`` tab and check that there are at least two entries, ``MAR21335_Ei60meV_cut(-5.000,5.000)`` and ``MAR21335_Ei60meV_cut(-1.000,1.000)``. Please note that there might be more entries from the previous tests.
 #. Select ``MAR21335_Ei60meV_cut(-1.000,1.000)`` and click ``Save to Workbench``
 #. Check that in Mantid a workspace with the name ``MAR21335_Ei60meV_cut(-1.000,1.000)`` appears
 #. Navigate to the ``Cut`` tab
@@ -127,7 +136,7 @@ Taking Cuts
    :align: center
    :width: 80%
 
-2. Interactive Cuts
+3. Interactive Cuts
 ###################
 
 #. Navigate to the ``Slice`` tab of the ``Workspace Manager`` tab
@@ -140,12 +149,18 @@ Taking Cuts
 #. Click on ``Save Cut to Workspace`` and check the ``MD Histo`` tab of the Workspace Manager to verify that the new workspace was added
 #. Click on Flip Integration Axis. The y axis label changes from ``Energy Transfer (meV)`` to :math:`|Q| (\mathrm{\AA}^{-1})` or vice versa, depending on the initial label.
 
+
+.. figure:: ../../../../docs/source/images/flip_integration_axis.png
+   :alt: flip_integration_axis.png
+   :align: center
+   :width: 10%
+
 .. figure:: ../../../../docs/source/images/interactive_cuts.png
    :alt: interactive_cuts.png
    :align: center
    :width: 80%
 
-3. Overplot Bragg Peaks
+4. Overplot Bragg Peaks
 #######################
 
 #. Navigate to the ``Information`` menu on the cut plot
@@ -157,14 +172,14 @@ Taking Cuts
    :align: center
    :width: 80%
 
-4. Generate a Script
+5. Generate a Script
 ####################
 
-#. Navigate to the ``File`` menu on the cut plot
+#. Navigate to the ``File`` menu on a cut plot. Please note that this needs to be a cut plot created via the ``Cut`` tab and not an interactive cut.
 #. Select ``Generate Script to Clipboard`` and paste the script into the Mantid editor. Please note that on Linux ``Ctrl + V`` might not work as expected. Use ``shift insert`` instead in this case.
 #. Run the script and check that the same cut plot is displayed
 
-5. Waterfall Plots
+6. Waterfall Plots
 ##################
 
 #. Navigate to the ``Cut`` tab
@@ -182,6 +197,9 @@ Taking Cuts
 The Command Line Interface
 --------------------------
 
+1. Use the Mantid Editor
+########################
+
 #. Close all plots currently open but not the MSlice interface
 #. Copy the following code into the Mantid editor. You might have to modify the file path for the Load command to the correct location of ``MAR21335_Ei60meV.nxs``.
 
@@ -196,6 +214,9 @@ The Command Line Interface
     ws2d = mc.Slice(ws, '|Q|, 0, 10, 0.01', 'DeltaE, -5, 55, 0.5')
     mc.PlotSlice(ws2d)
 
+2. Run an Example Script
+########################
+
 #. Run the script.
 #. There should be two new windows with a slice plot and a cut plot
 
@@ -204,10 +225,21 @@ The Command Line Interface
    :align: center
    :width: 80%
 
+3. Use the Jupyter QtConsole
+############################
+
 #. Repeat the same test by copying the script into the Jupyter QtConsole of the MSlice interface
+
+.. figure:: ../../../../docs/source/images/mslice_jupyter_qtconsole.png
+   :alt: mslice_jupyter_qtconsole.png
+   :align: center
+   :width: 80%
 
 The Workspace Manager
 ---------------------
+
+1. Check Scale and Subtract
+###########################
 
 #. Select the ``MAR21335_Ei60meV`` workspace in the ``Workspace Manager``, click on ``Save`` and select ``ASCII``
 #. A file dialog opens and allows entering a name for saving the file
@@ -235,6 +267,9 @@ The Workspace Manager
    :align: center
    :width: 80%
 
+2. Check Delete and Sum
+#######################
+
 #. Delete all workspaces apart from the ``MAR21335_Ei60meV`` workspace
 #. Scale the ``MAR21335_Ei60meV`` workspace with a factor of ``1.0``
 #. A new workspace with the name ``MAR21335_Ei60meV_scaled`` appears
@@ -243,7 +278,7 @@ The Workspace Manager
 #. Delete the workspace with the name ``MAR21335_Ei60meV_scaled``
 #. Scale the ``MAR21335_Ei60meV`` workspace with a factor of ``2.0``
 #. A new workspace with the name ``MAR21335_Ei60meV_scaled`` appears
-#. In the ``Workspace Manager`` tab select the workspace ``MAR21335_Ei60me_scaledV``
+#. In the ``Workspace Manager`` tab select the workspace ``MAR21335_Ei60me_scaled``
 #. Navigate to the ``Cut`` tab
 #. In the row labelled ``along``, set the ``from`` value to ``0`` and the ``to`` value to ``10``
 #. In the row labelled ``over``, set the ``from`` value to ``-5`` and the ``to`` value to ``5``
