@@ -1,5 +1,6 @@
 #pylint: disable=no-init
-from mantid.api import (PythonAlgorithm, AlgorithmFactory, MatrixWorkspaceProperty)
+from mantid.api import (PythonAlgorithm, AlgorithmFactory, MatrixWorkspaceProperty,
+                        WorkspaceGroupProperty, PropertyMode)
 from mantid.kernel import (VisibleWhenProperty, PropertyCriterion,
                            StringListValidator, IntBoundedValidator, FloatBoundedValidator, Direction)
 from mantid.simpleapi import *
@@ -40,7 +41,10 @@ class SimpleShapeDiscusInelastic(PythonAlgorithm):
         self.declareProperty(MatrixWorkspaceProperty('SqwWorkspace', '',
                                                      direction=Direction.Input),
                              doc='S(Q,w) Workspace')
-        self.declareProperty(name='OutputWorkspace', defaultValue='MuscatResults',
+        self.declareProperty(WorkspaceGroupProperty(name='OutputWorkspace',
+                                                    defaultValue='MuscatResults',
+                                                    direction=Direction.Output,
+                                                    optional=PropertyMode.Optional),
                              doc='Name for results workspaces')
 
         self.declareProperty(name='SampleMassDensity', defaultValue=1.0,
@@ -113,6 +117,7 @@ class SimpleShapeDiscusInelastic(PythonAlgorithm):
                              doc='Number of scatterings. Default=1')
 
     def PyExec(self):
+
         reduced_ws = self.getProperty('ReducedWorkspace').value
         sqw_ws = self.getProperty('SqwWorkspace').value
 
@@ -142,11 +147,14 @@ class SimpleShapeDiscusInelastic(PythonAlgorithm):
                                 "InnerRadius": sample_inner, "OuterRadius": sample_outer, "Center": [0.,0.,0.]},
                       Material={"ChemicalFormula": self._chemical_formula, "MassDensity": self._mass_density})
 
-        DiscusMultipleScatteringCorrection(InputWorkspace=reduced_ws, StructureFactorWorkspace=sqw_ws,
-                                           OutputWorkspace=self._output_ws,
-                                           NeutronPathsSingle=self._single_paths,
-                                           NeutronPathsMultiple=self._multiple_paths,
-                                           NumberScatterings=self._scatterings)
+        results_group_ws = DiscusMultipleScatteringCorrection(InputWorkspace=reduced_ws,
+                                                              StructureFactorWorkspace=sqw_ws,
+                                                              OutputWorkspace=self._output_ws,
+                                                              NeutronPathsSingle=self._single_paths,
+                                                              NeutronPathsMultiple=self._multiple_paths,
+                                                              NumberScatterings=self._scatterings)
+
+        self.setProperty('OutputWorkspace', results_group_ws)
 
     def _setup(self):
 
