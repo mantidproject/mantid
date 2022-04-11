@@ -8,7 +8,6 @@
 
 import os
 import pathlib
-import sys
 
 DOCS = {
     'index.rst': '''.. _v{version}:
@@ -134,13 +133,13 @@ def getTemplate(technique):
 
 
 def getReleaseRoot() -> pathlib.Path:
-    program_path = pathlib.Path((sys.argv[0])[0])
+    program_path = pathlib.Path(__file__).resolve()
     release_path = program_path / '../../../docs/source/release/'
     return release_path.resolve()
 
 
 def getTemplateRoot() -> pathlib.Path:
-    program_path = pathlib.Path((sys.argv[0])[0])
+    program_path = pathlib.Path(__file__).resolve()
     template_path = program_path / '../../../docs/source/release/templates/'
     return template_path.resolve()
 
