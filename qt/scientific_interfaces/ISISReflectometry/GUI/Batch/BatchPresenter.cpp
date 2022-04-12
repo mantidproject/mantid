@@ -123,7 +123,6 @@ void BatchPresenter::notifyAlgorithmStarted(IConfiguredAlgorithm_sptr &algorithm
   }
   m_jobManager->algorithmStarted(algorithm);
   m_runsPresenter->notifyRowModelChanged(item.value());
-  m_runsPresenter->notifyRowStateChanged(item.value());
 }
 
 void BatchPresenter::notifyAlgorithmComplete(IConfiguredAlgorithm_sptr &algorithm) {
@@ -133,7 +132,6 @@ void BatchPresenter::notifyAlgorithmComplete(IConfiguredAlgorithm_sptr &algorith
   }
   m_jobManager->algorithmComplete(algorithm);
   m_runsPresenter->notifyRowModelChanged(item.value());
-  m_runsPresenter->notifyRowStateChanged(item.value());
   /// TODO Longer term it would probably be better if algorithms took care
   /// of saving their outputs so we could remove this callback
   if (m_savePresenter->shouldAutosave()) {
@@ -149,7 +147,6 @@ void BatchPresenter::notifyAlgorithmError(IConfiguredAlgorithm_sptr algorithm, s
   }
   m_jobManager->algorithmError(algorithm, message);
   m_runsPresenter->notifyRowModelChanged(item.value());
-  m_runsPresenter->notifyRowStateChanged(item.value());
 }
 
 /** Start processing the next batch of algorithms.
@@ -348,18 +345,15 @@ std::unique_ptr<MantidQt::API::IAlgorithmRuntimeProps> BatchPresenter::rowProces
 void BatchPresenter::postDeleteHandle(const std::string &wsName) {
   auto const item = m_jobManager->notifyWorkspaceDeleted(wsName);
   m_runsPresenter->notifyRowModelChanged(item);
-  m_runsPresenter->notifyRowStateChanged(item);
 }
 
 void BatchPresenter::renameHandle(const std::string &oldName, const std::string &newName) {
   auto const item = m_jobManager->notifyWorkspaceRenamed(oldName, newName);
   m_runsPresenter->notifyRowModelChanged(item);
-  m_runsPresenter->notifyRowStateChanged(item);
 }
 
 void BatchPresenter::clearADSHandle() {
   m_jobManager->notifyAllWorkspacesDeleted();
   m_runsPresenter->notifyRowModelChanged();
-  m_runsPresenter->notifyRowStateChanged();
 }
 } // namespace MantidQt::CustomInterfaces::ISISReflectometry
