@@ -78,11 +78,11 @@ approximation may not be the appropriate tool.)
 
 .. testcode:: Abins2DExplicitParameters
 
-    wrk_verbose=Abins(AbInitioProgram="CASTEP", VibrationalOrPhononFile="benzene.phonon",
-                      TemperatureInKelvin=10, Instrument="MAPS",
-                      Atoms="H, atom1, atom2", SumContributions=True,
-                      QuantumOrderEventsNumber="2", Autoconvolution=True,
-                      ScaleByCrossSection="Total")
+    wrk_verbose=Abins2D(AbInitioProgram="CASTEP", VibrationalOrPhononFile="benzene.phonon",
+                        TemperatureInKelvin=10, Instrument="MAPS",
+                        Atoms="H, atom1, atom2", SumContributions=True,
+                        QuantumOrderEventsNumber="2", Autoconvolution=True,
+                        ScaleByCrossSection="Total")
 
     print(f"Created {wrk_verbose.size()} workspaces")
     print(f"including {wrk_verbose[12].name()}")

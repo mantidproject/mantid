@@ -52,7 +52,7 @@ class Abins2D(AbinsAlgorithm, PythonAlgorithm):
         """
         Performs input validation. Use to ensure the user has defined a consistent set of parameters.
         """
-        from abins.constants import MILLI_EV_TO_WAVENUMBER
+        from abins.constants import MILLI_EV_TO_WAVENUMBER, TWO_DIMENSIONAL_CHOPPER_INSTRUMENTS
 
         issues = dict()
         issues = self.validate_common_inputs(issues)
@@ -61,15 +61,16 @@ class Abins2D(AbinsAlgorithm, PythonAlgorithm):
         self._check_advanced_parameter()
 
         instrument_name = self.getProperty("Instrument").value
-        allowed_frequencies = abins.parameters.instruments[instrument_name]['chopper_allowed_frequencies']
-        default_frequency = abins.parameters.instruments[instrument_name].get('chopper_frequency_default', None)
+        if instrument_name in TWO_DIMENSIONAL_CHOPPER_INSTRUMENTS:
+            allowed_frequencies = abins.parameters.instruments[instrument_name]['chopper_allowed_frequencies']
+            default_frequency = abins.parameters.instruments[instrument_name].get('chopper_frequency_default', None)
 
-        if (self.getProperty("ChopperFrequency").value) == '' and (default_frequency is None):
-            issues["ChopperFrequency"] = "This instrument does not have a default chopper frequency"
-        elif (self.getProperty("ChopperFrequency").value
-              and int(self.getProperty("ChopperFrequency").value) not in allowed_frequencies):
-            issues["ChopperFrequency"] = (f"This chopper frequency is not valid for the instrument {instrument_name}. "
-                                          "Valid frequencies: " + ", ".join([str(freq) for freq in allowed_frequencies]))
+            if (self.getProperty("ChopperFrequency").value) == '' and (default_frequency is None):
+                issues["ChopperFrequency"] = "This instrument does not have a default chopper frequency"
+            elif (self.getProperty("ChopperFrequency").value
+                  and int(self.getProperty("ChopperFrequency").value) not in allowed_frequencies):
+                issues["ChopperFrequency"] = (f"This chopper frequency is not valid for the instrument {instrument_name}. "
+                                              "Valid frequencies: " + ", ".join([str(freq) for freq in allowed_frequencies]))
 
         if not isinstance(float(self.getProperty("IncidentEnergy").value), numbers.Real):
             issues["IncidentEnergy"] = "Incident energy must be a real number"

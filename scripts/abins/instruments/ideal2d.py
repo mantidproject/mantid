@@ -9,7 +9,7 @@ from .directinstrument import DirectInstrument
 class Ideal2D(DirectInstrument):
     """An instrument for q-resolved 2D maps"""
     def __init__(self, *args, **kwargs):
-        super().__init__(*args, name='TwoDMap', **kwargs)
+        super().__init__(*args, name='Ideal2D', **kwargs)
 
     def get_q_bounds(self, pad: float = 0.) -> Tuple[float, float]:
         params = abins.parameters.instruments[self._name]

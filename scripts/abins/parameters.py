@@ -29,8 +29,7 @@ instruments = {
         'q_range': (0, 20),  # Lower and upper limits of measurement q sampling
         'e_init': 4100.0,  # Incident energies in cm-1
         'settings_default': '',
-        'settings': {'': {'chopper': 'A'}},
-        'chopper_allowed_frequencies': list(range(50, 601, 50)),
+        'settings': {'': {'chopper': ''}},
         'min_wavenumber': 0.,
         'max_wavenumber': 4100.0
         },
@@ -38,7 +37,7 @@ instruments = {
         'q_size': 100,
         'e_init': 150 * MILLI_EV_TO_WAVENUMBER,
         'settings_default': '',
-        'settings': {'': {'chopper': 'G004'}},
+        'settings': {'': {'chopper': ''}},
         'angle_range': (5, 140),
         'chopper_frequency_default': 400,
         'chopper_allowed_frequencies': list(range(50, 601, 50)),
