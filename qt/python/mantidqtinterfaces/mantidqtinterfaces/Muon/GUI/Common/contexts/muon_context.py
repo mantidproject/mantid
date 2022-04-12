@@ -27,6 +27,7 @@ from mantidqtinterfaces.Muon.GUI.Common.muon_base import MuonRun
 from mantidqtinterfaces.Muon.GUI.Common.muon_pair import MuonPair
 from mantidqtinterfaces.Muon.GUI.Common.muon_diff import MuonDiff
 from typing import List
+from mantid.dataobjects import TableWorkspace
 
 
 class MuonContext(object):
@@ -536,6 +537,9 @@ class MuonContext(object):
         # required as the renameHandler returns a name instead of a workspace.
         if isinstance(workspace, str):
             workspace_name = workspace
+        if isinstance(workspace, TableWorkspace):
+            # if its a table ws do nothing in the main part of the GUI
+            return
         else:
             workspace_name = workspace.name()
 
@@ -543,7 +547,6 @@ class MuonContext(object):
         self.group_pair_context.remove_workspace_by_name(workspace_name)
         self.phase_context.remove_workspace_by_name(workspace_name)
         self.fitting_context.remove_workspace_by_name(workspace_name)
-        self.results_context.remove_workspace_by_name(workspace_name)
         self.update_view_from_model_notifier.notify_subscribers(workspace_name)
         self.deleted_plots_notifier.notify_subscribers(workspace)
 

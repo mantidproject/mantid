@@ -6,7 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 from mantidqt.utils.observer_pattern import GenericObservable, GenericObserverWithArgPassing, GenericObserver
 from mantidqtinterfaces.Muon.GUI.Common.ADSHandler.ADS_calls import check_if_workspace_exist
-from mantidqtinterfaces.Muon.GUI.Common.ADSHandler.muon_ADS_observer import MuonADSObserver
+
 from mantidqtinterfaces.Muon.GUI.Common.fitting_widgets.basic_fitting.basic_fitting_presenter import BasicFittingPresenter
 from mantidqtinterfaces.Muon.GUI.Common.fitting_widgets.model_fitting.model_fitting_model import ModelFittingModel
 from mantidqtinterfaces.Muon.GUI.Common.fitting_widgets.model_fitting.model_fitting_view import ModelFittingView
@@ -36,24 +36,30 @@ class ModelFittingPresenter(BasicFittingPresenter):
         self.view.set_slot_for_selected_x_changed(self.handle_selected_x_changed)
         self.view.set_slot_for_selected_y_changed(self.handle_selected_y_changed)
 
-        self.ADS_observer = MuonADSObserver(self.remove,
-                                            self.clear,
-                                             self.replaced) # need to add unsubscribe to a close method in the widget
+        self.clear_observer = GenericObserverWithArgPassing(self.clear)
+        self.remove_observer = GenericObserverWithArgPassing(self.remove)
+        self.replace_observer = GenericObserverWithArgPassing(self.replaced)
 
-    def remove(self, ws):
-        if workspace.name() in self.model.result_table_names:
-            return
-            #names = self.model.result_table_names
-            #names.pop(ws.name())
-            #self.model.result_table_names = names
-            #self.view.update_result_table_names(names)
-            #self.handle_results_table_changed()
+    def remove(self, workspace):
+        if isinstance(workspace, str):
+            workspace_name = workspace
+        else:
+            workspace_name = workspace.name()
+        if workspace_name in self.model.result_table_names:
+            names = self.model.result_table_names
+            names.remove(workspace_name)
+            print("mooo remove", names)
+            self.view.update_result_table_names(names)
+            self.model.result_table_names = names
+            self.handle_results_table_changed()
 
     def clear(self):
+        print("mooo clear")
         self.model.result_table_names = []
         self.view.update_result_table_names([])
 
     def replaced(self, workspace):
+        print("mooo replace")
         if workspace.name() in self.model.result_table_names:
             self.handle_results_table_changed()
 
