@@ -30,7 +30,6 @@ class SANSILLParameterScan(PythonAlgorithm):
     observable = None
     pixel_y_min = None
     pixel_y_max = None
-    wavelength = None
 
     def category(self):
         return 'ILL\\SANS;ILL\\Auto'
@@ -67,7 +66,6 @@ class SANSILLParameterScan(PythonAlgorithm):
         self.observable = self.getPropertyValue('Observable')
         self.pixel_y_min = self.getProperty('PixelYMin').value
         self.pixel_y_max = self.getProperty('PixelYMax').value
-        self.wavelength = self.getProperty('Wavelength').value
         self.progress = Progress(self, start=0.0, end=1.0, nreports=10)
 
     def checkPixelY(self, height):
@@ -116,9 +114,6 @@ class SANSILLParameterScan(PythonAlgorithm):
                              doc='Minimal y-index taken in the integration')
         self.declareProperty('PixelYMax', 180, validator=IntBoundedValidator(lower=0),
                              doc='Maximal y-index taken in the integration')
-
-        self.declareProperty('Wavelength', 0., validator=FloatBoundedValidator(lower=0.),
-                             doc='Wavelength of the experiment. Will try to read Nexus files if not provided.')
 
         self.setPropertyGroup('SensitivityMap', 'Options')
         self.setPropertyGroup('DefaultMaskFile', 'Options')
