@@ -664,18 +664,18 @@ public:
     verifyAndClear();
   }
 
-  void testNotifyRowOutputsChanged() {
+  void testNotifyRowModelChanged() {
     auto presenter = makePresenter();
-    EXPECT_CALL(*m_runsTablePresenter, notifyRowOutputsChanged()).Times(1);
-    presenter.notifyRowOutputsChanged();
+    EXPECT_CALL(*m_runsTablePresenter, notifyRowModelChanged()).Times(1);
+    presenter.notifyRowModelChanged();
     verifyAndClear();
   }
 
-  void testNotifyRowOutputsChangedItem() {
+  void testNotifyRowModelChangedItem() {
     auto presenter = makePresenter();
     auto row = makeRow();
-    EXPECT_CALL(*m_runsTablePresenter, notifyRowOutputsChanged(_)).Times(1);
-    presenter.notifyRowOutputsChanged(row);
+    EXPECT_CALL(*m_runsTablePresenter, notifyRowModelChanged(_)).Times(1);
+    presenter.notifyRowModelChanged(row);
     verifyAndClear();
   }
 

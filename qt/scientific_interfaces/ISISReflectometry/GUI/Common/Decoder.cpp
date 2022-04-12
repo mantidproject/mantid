@@ -287,7 +287,7 @@ void Decoder::decodeRunsTable(QtRunsTableView *gui, ReductionJobs *redJobs, Runs
 
   if (m_projectSave) {
     // Apply styling and restore completed state for output range values
-    presenter->notifyRowOutputsChanged();
+    presenter->notifyRowModelChanged();
     presenter->notifyRowStateChanged();
   }
   gui->m_ui.filterBox->setText(map[QString("filterBox")].toString());

@@ -122,7 +122,7 @@ void BatchPresenter::notifyAlgorithmStarted(IConfiguredAlgorithm_sptr &algorithm
     return;
   }
   m_jobManager->algorithmStarted(algorithm);
-  m_runsPresenter->notifyRowOutputsChanged(item.value());
+  m_runsPresenter->notifyRowModelChanged(item.value());
   m_runsPresenter->notifyRowStateChanged(item.value());
 }
 
@@ -132,7 +132,7 @@ void BatchPresenter::notifyAlgorithmComplete(IConfiguredAlgorithm_sptr &algorith
     return;
   }
   m_jobManager->algorithmComplete(algorithm);
-  m_runsPresenter->notifyRowOutputsChanged(item.value());
+  m_runsPresenter->notifyRowModelChanged(item.value());
   m_runsPresenter->notifyRowStateChanged(item.value());
   /// TODO Longer term it would probably be better if algorithms took care
   /// of saving their outputs so we could remove this callback
@@ -148,7 +148,7 @@ void BatchPresenter::notifyAlgorithmError(IConfiguredAlgorithm_sptr algorithm, s
     return;
   }
   m_jobManager->algorithmError(algorithm, message);
-  m_runsPresenter->notifyRowOutputsChanged(item.value());
+  m_runsPresenter->notifyRowModelChanged(item.value());
   m_runsPresenter->notifyRowStateChanged(item.value());
 }
 
@@ -347,19 +347,19 @@ std::unique_ptr<MantidQt::API::IAlgorithmRuntimeProps> BatchPresenter::rowProces
 
 void BatchPresenter::postDeleteHandle(const std::string &wsName) {
   auto const item = m_jobManager->notifyWorkspaceDeleted(wsName);
-  m_runsPresenter->notifyRowOutputsChanged(item);
+  m_runsPresenter->notifyRowModelChanged(item);
   m_runsPresenter->notifyRowStateChanged(item);
 }
 
 void BatchPresenter::renameHandle(const std::string &oldName, const std::string &newName) {
   auto const item = m_jobManager->notifyWorkspaceRenamed(oldName, newName);
-  m_runsPresenter->notifyRowOutputsChanged(item);
+  m_runsPresenter->notifyRowModelChanged(item);
   m_runsPresenter->notifyRowStateChanged(item);
 }
 
 void BatchPresenter::clearADSHandle() {
   m_jobManager->notifyAllWorkspacesDeleted();
-  m_runsPresenter->notifyRowOutputsChanged();
+  m_runsPresenter->notifyRowModelChanged();
   m_runsPresenter->notifyRowStateChanged();
 }
 } // namespace MantidQt::CustomInterfaces::ISISReflectometry

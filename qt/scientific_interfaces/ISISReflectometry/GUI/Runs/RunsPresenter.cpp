@@ -165,10 +165,10 @@ void RunsPresenter::notifyRowStateChanged(boost::optional<Item const &> item) {
   tablePresenter()->notifyRowStateChanged(item);
 }
 
-void RunsPresenter::notifyRowOutputsChanged() { tablePresenter()->notifyRowOutputsChanged(); }
+void RunsPresenter::notifyRowModelChanged() { tablePresenter()->notifyRowModelChanged(); }
 
-void RunsPresenter::notifyRowOutputsChanged(boost::optional<Item const &> item) {
-  tablePresenter()->notifyRowOutputsChanged(item);
+void RunsPresenter::notifyRowModelChanged(boost::optional<Item const &> item) {
+  tablePresenter()->notifyRowModelChanged(item);
 }
 
 void RunsPresenter::notifyBatchLoaded() { m_tablePresenter->notifyBatchLoaded(); }

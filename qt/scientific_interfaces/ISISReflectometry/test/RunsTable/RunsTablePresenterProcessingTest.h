@@ -214,21 +214,21 @@ public:
     verifyAndClearExpectations();
   }
 
-  void testNotifyRowOutputsChangedForInputQRange() {
+  void testNotifyRowModelChangedForInputQRange() {
     auto presenter = makePresenter(m_view, oneGroupWithARowWithInputQRangeModel());
     EXPECT_CALL(m_jobs, setCellsAt(RowLocation({0, 0}), rowCellsWithValues(Colour::DEFAULT))).Times(1);
-    presenter.notifyRowOutputsChanged();
+    presenter.notifyRowModelChanged();
     verifyAndClearExpectations();
   }
 
-  void testNotifyRowOutputsChangedForOutputQRange() {
+  void testNotifyRowModelChangedForOutputQRange() {
     auto presenter = makePresenter(m_view, oneGroupWithARowWithOutputQRangeModel());
     auto cells = rowCellsWithValues(Colour::DEFAULT);
     cells[4].setOutput();
     cells[5].setOutput();
     cells[6].setOutput();
     EXPECT_CALL(m_jobs, setCellsAt(RowLocation({0, 0}), cells)).Times(1);
-    presenter.notifyRowOutputsChanged();
+    presenter.notifyRowModelChanged();
     verifyAndClearExpectations();
   }
 

@@ -220,7 +220,7 @@ public:
     verifyAndClearExpectations();
   }
 
-  void testNotifyRowOutputsChangedRounding() {
+  void testNotifyRowModelChangedRounding() {
     auto presenter = makePresenter(m_view, oneGroupWithARowWithInputQRangeModelMixedPrecision());
     auto precision = 2;
     presenter.setTablePrecision(precision);
@@ -234,7 +234,7 @@ public:
          MantidQt::MantidWidgets::Batch::Cell(MantidQt::MantidWidgets::optionsToString(ReductionOptionsMap())),
          MantidQt::MantidWidgets::Batch::Cell("")});
     EXPECT_CALL(m_jobs, setCellsAt(rowLocation, roundedCells)).Times(1);
-    presenter.notifyRowOutputsChanged();
+    presenter.notifyRowModelChanged();
 
     verifyAndClearExpectations();
   }
