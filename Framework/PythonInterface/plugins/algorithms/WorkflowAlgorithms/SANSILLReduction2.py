@@ -246,7 +246,7 @@ class SANSILLReduction(PythonAlgorithm):
         self.setPropertySettings('OutputFluxWorkspace', beam)
 
     def reset(self):
-        '''Resets the class member variables'''
+        """Resets the class member variables"""
         self.instrument = None
         self.mode = None
         self.n_frames = None
@@ -256,7 +256,7 @@ class SANSILLReduction(PythonAlgorithm):
         self.progress = None
 
     def setup(self, ws):
-        '''Performs a full setup, which can be done only after having loaded the sample data'''
+        """Performs a full setup, which can be done only after having loaded the sample data"""
         self.process = self.getPropertyValue('ProcessAs')
         self.instrument = ws.getInstrument().getName()
         self.log().notice(f'Set the instrument name to {self.instrument}')
@@ -280,10 +280,10 @@ class SANSILLReduction(PythonAlgorithm):
                 raise RuntimeError('Only the sample and transmission can be kinetic measurements, the calibration measurements cannot.')
 
     def check_zero_monitor(self, mon_ws):
-        '''
+        """
         Throws an error, if the sum of monitor spectra is not strictly positive.
         Logs an error, if there is a bin in monitor spectra that is not strictly positive.
-        '''
+        """
         if np.sum(mtd[mon_ws].readY(0)) <= 0:
             raise RuntimeError('Normalise by monitor requested, \
                                 but the monitor spectrum has no positive counts, please switch to time normalization.')
@@ -294,7 +294,7 @@ class SANSILLReduction(PythonAlgorithm):
     #==============================METHODS TO APPLY CORRECTIONS==============================#
 
     def apply_normalisation(self, ws):
-        '''Normalizes the workspace by monitor (default) or acquisition time'''
+        """Normalizes the workspace by monitor (default) or acquisition time"""
         normalise_by = self.getPropertyValue('NormaliseBy')
         if self.mode != AcqMode.TOF:
             if normalise_by == 'Monitor':
@@ -330,7 +330,7 @@ class SANSILLReduction(PythonAlgorithm):
         MaskDetectors(Workspace=ws, DetectorList=monitor_id(self.instrument))
 
     def apply_dead_time(self, ws):
-        '''Performs the dead time correction'''
+        """Performs the dead time correction"""
         instrument = mtd[ws].getInstrument()
         if instrument.hasParameter('tau'):
             tau = instrument.getNumberParameter('tau')[0]
@@ -348,7 +348,7 @@ class SANSILLReduction(PythonAlgorithm):
             self.log().notice('No tau available in IPF, skipping dead time correction.')
 
     def apply_dark_current(self, ws):
-        '''Applies Cd/B4C subtraction'''
+        """Applies Cd/B4C subtraction"""
         cadmium_ws = self.getPropertyValue('DarkCurrentWorkspace')
         if cadmium_ws:
             check_processed_flag(mtd[cadmium_ws], 'DarkCurrent')
@@ -362,7 +362,7 @@ class SANSILLReduction(PythonAlgorithm):
                 Minus(LHSWorkspace=ws, RHSWorkspace=cadmium_ws, OutputWorkspace=ws)
 
     def apply_direct_beam(self, ws):
-        '''Applies the beam center correction'''
+        """Applies the beam center correction"""
         beam_ws = self.getPropertyValue('EmptyBeamWorkspace')
         if beam_ws:
             check_processed_flag(mtd[beam_ws], 'EmptyBeam')
@@ -379,7 +379,7 @@ class SANSILLReduction(PythonAlgorithm):
                                  LogType='Number', LogUnit='rad')
 
     def apply_multipanel_beam_center_corr(self, ws, beam_x, beam_y):
-        '''Applies the beam center correction on multipanel detectors'''
+        """Applies the beam center correction on multipanel detectors"""
         instrument = mtd[ws].getInstrument()
         l2_main = mtd[ws].getRun()['L2'].value
         if instrument.hasParameter('detector_panels'):
@@ -391,7 +391,7 @@ class SANSILLReduction(PythonAlgorithm):
             MoveInstrumentComponent(Workspace=ws, X=-beam_x, Y=-beam_y, ComponentName='detector')
 
     def apply_flux(self, ws):
-        '''Applies empty beam flux absolute scale normalisation'''
+        """Applies empty beam flux absolute scale normalisation"""
         flux_ws = self.getPropertyValue('FluxWorkspace')
         if flux_ws:
             if self.mode == AcqMode.TOF:
@@ -406,7 +406,7 @@ class SANSILLReduction(PythonAlgorithm):
             AddSampleLog(Workspace=ws, LogText='True', LogType='String', LogName='NormalisedByFlux')
 
     def apply_transmission(self, ws):
-        '''Applies transmission correction'''
+        """Applies transmission correction"""
         tr_ws = self.getPropertyValue('TransmissionWorkspace')
         theta_dependent = self.getProperty('TransmissionThetaDependent').value
         if tr_ws:
@@ -440,7 +440,7 @@ class SANSILLReduction(PythonAlgorithm):
                     MaskAngle(Workspace=ws, MinAngle=89, MaxAngle=91, Angle='TwoTheta')
 
     def apply_container(self, ws):
-        '''Applies empty container subtraction'''
+        """Applies empty container subtraction"""
         can_ws = self.getPropertyValue('EmptyContainerWorkspace')
         if can_ws:
             check_processed_flag(mtd[can_ws], 'EmptyContainer')
@@ -457,7 +457,7 @@ class SANSILLReduction(PythonAlgorithm):
                 Minus(LHSWorkspace=ws, RHSWorkspace=can_ws, OutputWorkspace=ws)
 
     def apply_water(self, ws):
-        '''Applies flat-field (water) normalisation for detector efficiency and absolute scale'''
+        """Applies flat-field (water) normalisation for detector efficiency and absolute scale"""
         flat_ws = self.getPropertyValue('FlatFieldWorkspace')
         if flat_ws:
             check_processed_flag(mtd[flat_ws], 'Water')
@@ -473,7 +473,7 @@ class SANSILLReduction(PythonAlgorithm):
             self.rescale_flux(ws, flat_ws)
 
     def apply_sensitivity(self, ws):
-        '''Applies inter-pixel detector efficiency map'''
+        """Applies inter-pixel detector efficiency map"""
         sens_ws = self.getPropertyValue('SensitivityWorkspace')
         if sens_ws:
             Divide(LHSWorkspace=ws, RHSWorkspace=sens_ws, OutputWorkspace=ws, WarnOnZeroDivide=False)
@@ -481,7 +481,7 @@ class SANSILLReduction(PythonAlgorithm):
             MaskDetectors(Workspace=ws, MaskedWorkspace=sens_ws)
 
     def apply_solvent(self, ws):
-        '''Applies pixel-by-pixel solvent/buffer subtraction'''
+        """Applies pixel-by-pixel solvent/buffer subtraction"""
         solvent_ws = self.getPropertyValue('SolventWorkspace')
         if solvent_ws:
             check_processed_flag(mtd[solvent_ws], 'Solvent')
@@ -498,7 +498,7 @@ class SANSILLReduction(PythonAlgorithm):
                 Minus(LHSWorkspace=ws, RHSWorkspace=solvent_ws, OutputWorkspace=ws)
 
     def apply_solid_angle(self, ws):
-        '''Calculates solid angle and divides by it'''
+        """Calculates solid angle and divides by it"""
         sa_ws = ws + '_solidangle'
         # D22B has the front panel tilted, hence the Rectangle approximation is wrong
         # D16 can be rotated around the sample, where again rectangle is wrong unless we rotate back
@@ -508,7 +508,7 @@ class SANSILLReduction(PythonAlgorithm):
         DeleteWorkspace(Workspace=sa_ws)
 
     def apply_masks(self, ws):
-        '''
+        """
         Applies default (edges and permanently bad pixels) and beam stop masks
         Masks can be created in many ways: manually, via MaskBTP, etc.
         When creating a mask with instrument viewer, there are 2 possibilities:
@@ -517,7 +517,7 @@ class SANSILLReduction(PythonAlgorithm):
             In this case the workspace is a SpecialWorkspace2D which just contains 1s as intensity for the detector that is masked
         o) hitting the button Apply to Data
             In this case the workspace has a proper mask.
-        '''
+        """
         edge_mask = self.getProperty('DefaultMaskWorkspace').value
         if edge_mask and (isinstance(edge_mask, SpecialWorkspace2D) or edge_mask.detectorInfo().hasMaskedDetectors()):
             MaskDetectors(Workspace=ws, MaskedWorkspace=edge_mask)
@@ -526,7 +526,7 @@ class SANSILLReduction(PythonAlgorithm):
             MaskDetectors(Workspace=ws, MaskedWorkspace=beam_stop_mask)
 
     def apply_thickness(self, ws):
-        '''Normalises by sample thickness'''
+        """Normalises by sample thickness"""
         thicknesses = self.getProperty('SampleThickness').value
         length = len(thicknesses)
         if length == 1 and thicknesses[0] > 0:
@@ -551,7 +551,7 @@ class SANSILLReduction(PythonAlgorithm):
                 DeleteWorkspace(thick_ws)
 
     def apply_parallax(self, ws):
-        '''Applies the parallax correction'''
+        """Applies the parallax correction"""
         components = ['detector']
         offsets = [0.]
         if self.instrument == 'D22B':
@@ -567,12 +567,12 @@ class SANSILLReduction(PythonAlgorithm):
     #===============================HELPER METHODS===============================#
 
     def rescale_flux(self, ws, flat_ws):
-        '''
+        """
             Rescales the absolute scale if ws and flat_ws are at different distances
             If both sample and flat runs are normalised by flux, there is nothing to do, they are both in abs scale
             If one is normalised, the other is not, we raise an error
             If neither is normalised by flux, only then we have to rescale by the factor
-        '''
+        """
         message = 'Sample and flat field runs are not consistent in terms of flux normalisation; ' \
                   'unable to perform flat field normalisation. ' \
                   'Make sure either they are both normalised or both not normalised by direct beam flux.'
@@ -593,10 +593,10 @@ class SANSILLReduction(PythonAlgorithm):
             raise RuntimeError(message)
 
     def do_rescale_flux(self, ws, flat_ws):
-        '''
+        """
         Scales ws by the flux factor wrt the flat field
         Formula 14, Grillo I. (2008) Small-Angle Neutron Scattering and Applications in Soft Condensed Matter
-        '''
+        """
         if self.mode != AcqMode.TOF:
             check_wavelengths_match(mtd[ws], mtd[flat_ws])
         sample_l2 = mtd[ws].getRun()['L2'].value
@@ -606,11 +606,11 @@ class SANSILLReduction(PythonAlgorithm):
         Scale(InputWorkspace=ws, Factor=flux_factor, OutputWorkspace=ws)
 
     def broadcast_kinetic(self, ws):
-        '''
+        """
         Broadcasts the given workspace to the dimensions of the sample workspace
         Repeats the values by the number of frames in order to allow vectorized application of the correction
         Here we are matching in terms of the x-axis size
-        '''
+        """
         x = mtd[ws].readX(0)
         y = mtd[ws].readY(0)
         e = mtd[ws].readE(0)
@@ -622,14 +622,14 @@ class SANSILLReduction(PythonAlgorithm):
         return out
 
     def broadcast_tof(self, ws, flux):
-        '''
+        """
         Broadcasts the direct beam flux that can be easily rebinned at application time
         For TOF, the flux is wavelength dependent, and the sample workspace is ragged
         Hence the flux must be rebinned to the sample before it can be divided by flux
         That's why we broadcast the empty beam workspace to the same size as the sample
         This allows rebinning spectrum-wise when processing the sample w/o tiling the empty beam data for each sample
         Here we are matching in terms of vertical axis size (i.e. number of spectra)
-        '''
+        """
         nspec = mtd[ws].getNumberHistograms()
         x = mtd[flux].readX(0)
         y = mtd[flux].readY(0)
@@ -638,7 +638,7 @@ class SANSILLReduction(PythonAlgorithm):
                         ParentWorkspace=ws, OutputWorkspace=flux, UnitX=mtd[ws].getAxis(0).getUnit().unitID())
 
     def fit_beam_width(self, ws):
-        ''''Groups detectors vertically and fits the horizontal beam width with a Gaussian profile'''
+        """'Groups detectors vertically and fits the horizontal beam width with a Gaussian profile"""
         tmp_ws = ws + '_beam_width'
         CloneWorkspace(InputWorkspace=ws, OutputWorkspace=tmp_ws)
         grouping_pattern = get_vertical_grouping_pattern(tmp_ws)
@@ -666,7 +666,7 @@ class SANSILLReduction(PythonAlgorithm):
                                         tmp_ws+'_fit_output_NormalisedCovarianceMatrix'])
 
     def inject_blank_samples(self, ws):
-        '''Creates blank workspaces with the right dimension to include in the input list of workspaces'''
+        """Creates blank workspaces with the right dimension to include in the input list of workspaces"""
         reference = mtd[ws][0]
         nbins = self.n_frames
         nspec = reference.getNumberHistograms()
@@ -683,7 +683,7 @@ class SANSILLReduction(PythonAlgorithm):
         return result
 
     def inject_replica_transmissions(self, ws):
-        '''Repeats the transmission workspaces if they are reused for several samples'''
+        """Repeats the transmission workspaces if they are reused for several samples"""
         result = []
         runs = self.getPropertyValue('Runs').split(',')
         runs_unique = self.remove_repeated(runs)
@@ -699,7 +699,7 @@ class SANSILLReduction(PythonAlgorithm):
         return result
 
     def remove_repeated(self, list):
-        '''Removes the repetitions from the list'''
+        """Removes the repetitions from the list"""
         result = []
         for it in list:
             if it not in result:
@@ -707,11 +707,11 @@ class SANSILLReduction(PythonAlgorithm):
         return result
 
     def set_process_as(self, ws):
-        '''Sets the process as flag as sample log for future sanity checks'''
+        """Sets the process as flag as sample log for future sanity checks"""
         AddSampleLog(Workspace=ws, LogName='ProcessedAs', LogText=self.process)
 
     def linearize_axis(self, ws):
-        '''Linearizes x-axis for a single rebinned event workspace to transform it to kinetic'''
+        """Linearizes x-axis for a single rebinned event workspace to transform it to kinetic"""
         x = np.arange(mtd[ws].blocksize())
         for s in range(mtd[ws].getNumberHistograms()):
             mtd[ws].setX(s, x)
@@ -719,7 +719,7 @@ class SANSILLReduction(PythonAlgorithm):
     #===============================METHODS TO TREAT PROCESS TYPES===============================#
 
     def treat_empty_beam(self, ws):
-        '''Processes as empty beam, i.e. calculates beam center, beam width and incident flux'''
+        """Processes as empty beam, i.e. calculates beam center, beam width and incident flux"""
         centers = ws + '_centers'
         radius = self.getProperty('BeamRadius').value
         FindCenterOfMassPosition(InputWorkspace=ws, DirectBeam=True, BeamRadius=radius, Output=centers)
@@ -735,7 +735,7 @@ class SANSILLReduction(PythonAlgorithm):
         self.calculate_flux(ws)
 
     def calculate_flux(self, ws):
-        '''Calculates the incident flux'''
+        """Calculates the incident flux"""
         if self.process == 'EmptyBeam':
             flux = self.getPropertyValue('OutputFluxWorkspace')
             if not flux:
@@ -776,7 +776,7 @@ class SANSILLReduction(PythonAlgorithm):
             self.setProperty('OutputFluxWorkspace', flux)
 
     def calculate_transmission(self, ws):
-        '''Calculates the transmission'''
+        """Calculates the transmission"""
         flux_ws = self.getPropertyValue('FluxWorkspace')
         check_distances_match(mtd[ws], mtd[flux_ws])
         self.calculate_flux(ws)
@@ -787,7 +787,7 @@ class SANSILLReduction(PythonAlgorithm):
         Divide(LHSWorkspace=ws, RHSWorkspace=flux_ws, OutputWorkspace=ws)
 
     def generate_sensitivity(self, ws):
-        '''Creates relative inter-pixel efficiency map'''
+        """Creates relative inter-pixel efficiency map"""
         sens = self.getPropertyValue('OutputSensitivityWorkspace')
         if sens:
             CalculateEfficiency(InputWorkspace=ws, OutputWorkspace=sens)
@@ -796,12 +796,12 @@ class SANSILLReduction(PythonAlgorithm):
     #===============================CORE LOGIC OF LOAD AND REDUCE===============================#
 
     def load(self):
-        '''
+        """
         Loads, merges and concatenates the input runs, as appropriate.
         TODO: Consider moving this out to a separate algorithm, once v2 of the loader is in
         There it could load the instrument only with the first run to save some time
         The main complexity here is the injection of blanks (for sample) and replicas (for transmission)
-        '''
+        """
         if not self.getPropertyValue('Runs'):
             #
             self.progress = Progress(self, start=0.0, end=1.0, nreports=10)
@@ -857,14 +857,14 @@ class SANSILLReduction(PythonAlgorithm):
         self.progress.report('Combined')
 
     def preprocess_group(self, wsg):
-        '''Preprocesses a loaded workspace group'''
+        """Preprocesses a loaded workspace group"""
         for ws in mtd[wsg]:
             self.preprocess(ws.name())
 
     def preprocess(self, ws):
-        '''
+        """
         Prepares the loaded workspace based on the acq mode
-        '''
+        """
         if self.mode != AcqMode.TOF:
             mtd[ws].getAxis(0).setUnit('Empty')
             run = mtd[ws].getRun()
@@ -902,13 +902,13 @@ class SANSILLReduction(PythonAlgorithm):
             self.place_detector(ws)
 
     def place_detector(self, ws):
-        '''
+        """
         Places the detector just as the LoadILLSANS would do.
         This is because event nexus are loaded by LoadEventNexus, and rebinned events are loaded by LoadNexusProcessed.
         None of those performs instrument specific placement, so we have to do it here.
         TODO: It is not good to repeat the logic of the LoadILLSANS, the only way to avoid this would be to create a small separate C++
         algorithm that does the placement, and it can be called both from within the loader, and here if needed; that is, for events.
-        '''
+        """
         instr = mtd[ws].getInstrument()
         run = mtd[ws].getRun()
         if instr.getName() == 'D22B':
@@ -946,12 +946,12 @@ class SANSILLReduction(PythonAlgorithm):
             AddSampleLog(Workspace=ws, LogName="L2", LogText=str(distance), LogType="Number")
 
     def reduce(self):
-        '''
+        """
         Performs the corresponding reduction based on the process type
         This is the core logic of the reduction realised as a hard-wired dependency graph, for example:
         If we are processing the empty beam we apply the dark current correction and process as empty beam
         If we are processing transmission, we apply both dark current and empty beam corrections and process as transmission
-        '''
+        """
         if not self.getPropertyValue('Runs'):
             ws = self.getPropertyValue('SampleWorkspace')
         else:
@@ -992,7 +992,7 @@ class SANSILLReduction(PythonAlgorithm):
         self.setProperty('OutputWorkspace', ws)
 
     def PyExec(self):
-        '''Entry point of the execution'''
+        """Entry point of the execution"""
         self.reset()
         self.load()
         self.reduce()
