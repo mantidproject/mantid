@@ -30,6 +30,8 @@ class SANSILLParameterScan(PythonAlgorithm):
     observable = None
     pixel_y_min = None
     pixel_y_max = None
+    default_mask_ws = None
+    sensitivity_ws = None
 
     def category(self):
         return 'ILL\\SANS;ILL\\Auto'
@@ -135,75 +137,21 @@ class SANSILLParameterScan(PythonAlgorithm):
         ws.setX(ws.getNumberHistograms() - 1, x_val)
         ws.setX(ws.getNumberHistograms() - 2, x_val)
 
-        sort_x_axis_output = load_ws_name + '_sorted' if not self.output_joined else self.output_joined
-        SortXAxis(InputWorkspace=load_ws_name, OutputWorkspace=sort_x_axis_output,
+        sorted_data = load_ws_name + '_sorted' if not self.output_joined else self.output_joined
+        SortXAxis(InputWorkspace=load_ws_name, OutputWorkspace=sorted_data,
                   startProgress=0.75, endProgress=0.8)
-
-        if self.observable == "Omega.value":
-            mtd[sort_x_axis_output].getAxis(0).setUnit("label").setLabel(self.observable, 'degrees')
-
-        load_sensitivity, sens_input = needs_loading(self.sensitivity, 'Sensitivity')
-        self.progress.report(8, 'Loading sensitivity')
-        if load_sensitivity:
-            LoadNexusProcessed(Filename=self.sensitivity, OutputWorkspace=sens_input)
-
-        load_default_mask, default_mask_input = needs_loading(self.default_mask, "DefaultMask")
-        self.progress.report(0, 'Loading default mask')
-        if load_default_mask:
-            LoadNexusProcessed(Filename=self.default_mask, OutputWorkspace=default_mask_input)
-
-        process_absorber, absorber_name = needs_processing(self.absorber, 'Absorber')
-        self.progress.report(0, 'Processing absorber')
-        if process_absorber:
-            SANSILLReduction(Run=self.absorber,
-                             ProcessAs='Absorber',
-                             NormaliseBy=self.normalise,
-                             OutputWorkspace=absorber_name,
-                             Version=2)
-
-        process_container, container_name = needs_processing(self.container, 'Container')
-
-        self.progress.report(0, 'Processing container')
-        if process_container:
-            SANSILLReduction(Run=self.container,
-                             ProcessAs='Container',
-                             OutputWorkspace=container_name,
-                             AbsorberInputWorkspace=absorber_name,
-                             CacheSolidAngle=True,
-                             NormaliseBy=self.normalise,
-                             Version=2)
-
-        self.progress.report(0, "Reducing data.")
-        SANSILLReduction(SampleWorkspace=sort_x_axis_output,
-                         # AbsorberInputWorkspace=absorber_name,
-                         # ContainerInputWorkspace=container_name,
-                         # SensitivityInputWorkspace=sens_input,
-                         # DefaultMaskedInputWorkspace=default_mask_input,
-                         NormaliseBy=self.normalise,
-                         OutputWorkspace=sort_x_axis_output,
-                         startProgress=0.8,
-                         endProgress=0.95,
-                         Version=2)
-
-        instrument = mtd[load_ws_name].getInstrument()
-        detector = instrument.getComponentByName("detector")
-        if "detector-width" in detector.getParameterNames() and "detector-height" in detector.getParameterNames():
-            width = int(detector.getNumberParameter("detector-width")[0])
-            height = int(detector.getNumberParameter("detector-height")[0])
-        else:
-            raise RuntimeError('No width or height found for this instrument. Unable to group detectors.')
         mtd[load_ws_name].delete()
 
-        self.checkPixelY(height)
-        grouping = create_detector_grouping(self.pixel_y_min, self.pixel_y_max, width, height)
+        self.load_input_files()
+        self.reduce(sorted_data)
 
-        GroupDetectors(InputWorkspace=sort_x_axis_output,
-                       OutputWorkspace=self.output2D,
-                       GroupingPattern=grouping,
-                       Behaviour="Average")
+        if self.observable == "Omega.value":
+            mtd[sorted_data].getAxis(0).setUnit("label").setLabel(self.observable, 'degrees')
+
+        self.group_detectors(sorted_data)
 
         if not self.output_joined:
-            mtd[sort_x_axis_output].delete()
+            mtd[sorted_data].delete()
         else:
             self.setProperty('OutputJoinedWorkspace', mtd[self.output_joined])
 
@@ -217,6 +165,85 @@ class SANSILLParameterScan(PythonAlgorithm):
         Transpose(InputWorkspace=self.output2D, OutputWorkspace=self.output2D)
 
         self.setProperty('OutputWorkspace', mtd[self.output2D])
+
+    def load_input_files(self):
+        """
+        Load input files provided by the user if needed
+        """
+
+        load_sensitivity, self.sensitivity_ws = needs_loading(self.sensitivity, 'Sensitivity')
+        if load_sensitivity:
+            self.progress.report(8, 'Loading sensitivity')
+            LoadNexusProcessed(Filename=self.sensitivity, OutputWorkspace=self.sensitivity_ws)
+
+        load_default_mask, self.default_mask_ws = needs_loading(self.default_mask, "DefaultMask")
+        if load_default_mask:
+            self.progress.report(0, 'Loading default mask')
+            LoadNexusProcessed(Filename=self.default_mask, OutputWorkspace=self.default_mask_ws)
+
+    def reduce(self, sorted_ws):
+        """
+        Do the standard data reduction using SANSILLReduction
+
+        @param sorted_ws: the name of the sample workspace with X axis holding the sorted scanned parameter
+        """
+
+        process_absorber, absorber_name = needs_processing(self.absorber, 'DarkCurrent')
+        if process_absorber:
+            self.progress.report(0, 'Processing dark current')
+            SANSILLReduction(Run=self.absorber,
+                             ProcessAs='DarkCurrent',
+                             NormaliseBy=self.normalise,
+                             OutputWorkspace=absorber_name,
+                             Version=2)
+
+        process_container, container_name = needs_processing(self.container, 'Container')
+
+        if process_container:
+            # TODO check if it necessary to put the default mask here
+            self.progress.report(0, 'Processing container')
+            SANSILLReduction(Run=self.container,
+                             ProcessAs='EmptyContainer',
+                             OutputWorkspace=container_name,
+                             AbsorberInputWorkspace=absorber_name,
+                             CacheSolidAngle=True,
+                             NormaliseBy=self.normalise,
+                             Version=2)
+
+        # reduce the sample data
+        self.progress.report(0, "Reducing data.")
+        SANSILLReduction(SampleWorkspace=sorted_ws,
+                         DarkCurrentWorkspace=absorber_name,
+                         EmptyContainerWorkspace=container_name,
+                         SensitivityWorkspace=self.sensitivity_ws,
+                         DefaultMaskWorkspace=self.default_mask_ws,
+                         NormaliseBy=self.normalise,
+                         OutputWorkspace=sorted_ws,
+                         startProgress=0.8,
+                         endProgress=0.95,
+                         Version=2)
+
+    def group_detectors(self, ws):
+        """
+        Average each tube / wire value of the detector.
+
+        @param ws: the name of the ws to group
+        """
+        instrument = mtd[ws].getInstrument()
+        detector = instrument.getComponentByName("detector")
+        if "detector-width" in detector.getParameterNames() and "detector-height" in detector.getParameterNames():
+            width = int(detector.getNumberParameter("detector-width")[0])
+            height = int(detector.getNumberParameter("detector-height")[0])
+        else:
+            raise RuntimeError('No width or height found for this instrument. Unable to group detectors.')
+
+        self.checkPixelY(height)
+        grouping = create_detector_grouping(self.pixel_y_min, self.pixel_y_max, width, height)
+
+        GroupDetectors(InputWorkspace=ws,
+                       OutputWorkspace=self.output2D,
+                       GroupingPattern=grouping,
+                       Behaviour="Average")
 
 
 def create_detector_grouping(y_min, y_max, detector_width, detector_height):
