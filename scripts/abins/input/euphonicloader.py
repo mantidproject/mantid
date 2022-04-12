@@ -29,19 +29,8 @@ class EuphonicLoader(AbInitioLoader):
         super().__init__(input_ab_initio_filename=input_ab_initio_filename)
         self._ab_initio_program = "FORCECONSTANTS"
 
-    def read_vibrational_or_phonon_data(self):
-        """Get AbinsData (structure and modes) from force constants data.
-
-        Frequencies/displacements are interpolated using the Euphonic library
-        over a regular q-point mesh. The mesh is determined by a Moreno-Soler
-        realspace cutoff, related to the size of an equivalent
-        supercell. Meshes are rounded up so a very small cutoff will yield
-        gamma-point-only sampling.
-
-        """
-        cutoff = sampling_parameters["force_constants"]["qpt_cutoff"]
-        modes = euphonic_calculate_modes(filename=self._clerk.get_input_filename(), cutoff=cutoff)
-
+    @staticmethod
+    def data_dict_from_modes(modes):
         unit_cell = modes.crystal.cell_vectors.to("angstrom").magnitude
         atoms = {
             f"atom_{atom_index}": {"symbol": str(atom_type), "sort": atom_index, "coord": unit_cell.T.dot(atom_r), "mass": mass}
@@ -58,6 +47,21 @@ class EuphonicLoader(AbInitioLoader):
             "unit_cell": unit_cell,
             "atoms": atoms,
         }
+        return file_data
+
+    def read_vibrational_or_phonon_data(self):
+        """Get AbinsData (structure and modes) from force constants data.
+
+        Frequencies/displacements are interpolated using the Euphonic library
+        over a regular q-point mesh. The mesh is determined by a Moreno-Soler
+        realspace cutoff, related to the size of an equivalent
+        supercell. Meshes are rounded up so a very small cutoff will yield
+        gamma-point-only sampling.
+
+        """
+        cutoff = sampling_parameters["force_constants"]["qpt_cutoff"]
+        modes = euphonic_calculate_modes(filename=self._clerk.get_input_filename(), cutoff=cutoff)
+        file_data = self.data_dict_from_modes(modes)
 
         # save stuff to hdf file
         save_keys = ["frequencies", "weights", "k_vectors", "atomic_displacements", "unit_cell", "atoms"]
