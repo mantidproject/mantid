@@ -13,32 +13,23 @@ class CutViewerView(QWidget):
     """Displays a table view of the PeaksWorkspace along with controls
     to interact with the peaks.
     """
-    def __init__(self, canvas, sliceinfo_provider, parent=None):
+    def __init__(self, presenter, canvas, parent=None):
         """
         :param painter: An object responsible for drawing the representation of the cut
         :param sliceinfo_provider: An object responsible for providing access to current slice information
         :param parent: An optional parent widget
         """
         super().__init__(parent)
+        self.presenter = presenter
         self.layout = None
+        self.figure_layout = None
         self.table = None
         self.figure = None
-        self.figure_layout = None
         self.cut_rep = None
-        self.xvec = None
-        self.yvec = None
         self.canvas = canvas
-        self._sliceinfo_provider = sliceinfo_provider
         self._setup_ui()
         self._init_slice_table()
         self.table.cellChanged.connect(self.on_cell_changed)
-        self.hide()  # hide initially as visibility is toggled
-
-    def show(self):
-        super().show()
-        if len(self.figure.axes[0].tracked_workspaces) == 0:
-            self.send_bin_params()  # make initial cut
-        self.plot_line()
 
     def hide(self):
         super().hide()
@@ -46,69 +37,18 @@ class CutViewerView(QWidget):
             self.cut_rep.remove()
             self.cut_rep = None
 
-    def reset_table_data(self):
-        self.table.blockSignals(True)
-        # write proj matrix to table
-        proj_matrix = self._sliceinfo_provider.get_proj_matrix().T  # .T so now each basis vector is a row as in table
-        dims = self._sliceinfo_provider.get_dimensions()
-        states = dims.get_states()
-        states[states.index(None)] = 2  # set last index as out of plane dimension
-        for idim in range(proj_matrix.shape[0]):
-            self._write_vector_to_table(states[idim], proj_matrix[idim, :])
-        # write bin params for cut along horizontal axis (default)
-        bin_params = dims.get_bin_params()  # nbins except last element which is integration width
-        axlims = self._sliceinfo_provider.get_axes_limits()
-        for irow in range(self.table.rowCount()-1):
-            start, stop = axlims[irow]
-            if irow == 0:
-                padding_frac = 0.25
-                nbins = 2*padding_frac*bin_params[states.index(irow)]*(stop-start)
-                padding = padding_frac*(stop-start)
-                start = start + padding
-                stop = stop - padding
-            else:
-                nbins = 1
-                step = 2*(stop-start) / bin_params[states.index(irow)]  # width = 2*step = 4*bin_width
-                cen = (stop + start) / 2
-                start, stop = cen-step, cen+step
-            self.table.item(irow, 5).setData(Qt.EditRole, int(nbins))  # nbins
-            self.table.item(irow, 3).setData(Qt.EditRole, float(start))  # start
-            self.table.item(irow, 4).setData(Qt.EditRole, float(stop))  # stop
-            self.table.item(irow, 6).setData(Qt.EditRole, float((stop - start) / nbins))  # step/width
-        self.update_slicepoint()
-        self.table.blockSignals(False)
-        self.send_bin_params()
-        self.plot_line()
+    # signals
 
-    def update_slicepoint(self):
-        dims = self._sliceinfo_provider.get_dimensions()
-        width = dims.get_bin_params()[dims.get_states().index(None)]
-        slicept = self._sliceinfo_provider.get_sliceinfo().z_value
-        self.table.item(2, 3).setData(Qt.EditRole, float(slicept - width/2))  # start
-        self.table.item(2, 4).setData(Qt.EditRole, float(slicept + width/2))  # stop
-        self.table.item(2, 6).setData(Qt.EditRole, float(width))  # step (i.e. width)
+    def on_cell_changed(self, irow, icol):
+        self.set_bin_params(*self.presenter.validate_bin_params(irow, icol))
+        self.presenter.update_cut()
 
-    def plot_cut_ws(self, wsname):
-        if len(self.figure.axes[0].tracked_workspaces) == 0:
-            self.figure.axes[0].errorbar(ADS.retrieve(wsname), wkspIndex=None, marker='o', capsize=2, color='k',
-                                         markersize=3)
-        self.figure.axes[0].ignore_existing_data_limits = True
-        self.figure.axes[0].autoscale_view()
-        # reformat xlabel string
-        xstr = self.figure.axes[0].get_xlabel()
-        istart = xstr.index('(')
-        iend = xstr.index(')')
-        xunit_str = xstr[iend+1:].replace('Ang^-1', '$\\AA^{-1}$)').replace('(', '').replace(')', '')
-        xstr = xstr[0:istart] + xstr[istart:iend+1].replace(' ', ', ') + xunit_str
-        xstr = xstr
-        self.figure.axes[0].set_xlabel(xstr)
-        # set text size
-        for textobj in self.figure.findobj(text.Text):
-            textobj.set_fontsize(8)
-        self.figure.canvas.draw()
-        self.figure.tight_layout()
+    # getters
 
-    def read_bin_params_from_table(self):
+    def get_step(self, irow):
+        return float(self.table.item(irow, 6).text())
+
+    def get_bin_params(self):
         vectors = np.zeros((3, 3), dtype=float)
         extents = np.zeros((2, 3), dtype=float)
         nbins = np.zeros(3, dtype=int)
@@ -120,130 +60,59 @@ class CutViewerView(QWidget):
             nbins[ivec] = int(self.table.item(ivec, 5).text())
         return vectors, extents, nbins
 
-    def validate_table(self, irow, icol):
-        vectors, extents, nbins = self.read_bin_params_from_table()
+    # setters
+
+    def set_vector(self, irow, vector):
+        for icol in range(len(vector)):
+            self.table.item(irow, icol).setData(Qt.EditRole, float(vector[icol]))
+
+    def set_extent(self, irow, start=None, stop=None):
+        if start is not None:
+            self.table.item(irow, 3).setData(Qt.EditRole, float(start))
+        if stop is not None:
+            self.table.item(irow, 4).setData(Qt.EditRole, float(stop))
+
+    def set_step(self, irow, step):
+        self.table.item(irow, 6).setData(Qt.EditRole, float(step))
+
+    def update_step(self, irow):
+        _, extents, nbins = self.get_bin_params()
+        self.set_step(irow, (extents[1, irow]-extents[0, irow])/nbins[irow])
+
+    def set_nbin(self, irow, nbin):
+        self.table.item(irow, 5).setData(Qt.EditRole, int(nbin))
+        self.update_step(irow)
+
+    def set_bin_params(self, vectors, extents, nbins):
         self.table.blockSignals(True)
-        ivec = int(not bool(irow))  # index of u1 or u2 - which ever not changed (3rd row not editable)
-        if icol < 3:
-            if abs(np.dot(vectors[irow], vectors[-1])) > 1e-15:
-                # not a vector out of slice plane - reset
-                vectors[irow] = np.cross(vectors[ivec], vectors[-1])
-                self._write_vector_to_table(irow, vectors[irow])
-            else:
-                # choose a new vector in plane that is not a linear combination of two other
-                vectors[ivec] = np.cross(vectors[irow], vectors[-1])
-                self._write_vector_to_table(ivec, vectors[ivec])
-        elif icol == 3 or icol == 4:
-            # extents changed - adjust width based on nbins
-            self.table.item(irow, 6).setData(Qt.EditRole,
-                                             float((extents[1, irow] - extents[0, irow]) / nbins[irow]))
-        elif icol == 5:
-            # nbins changed - adjust step
-            if nbins[irow] < 1:
-                nbins[irow] = 1
-                self.table.item(irow, 5).setData(Qt.EditRole, int(nbins[irow]))  # nbins
-            self.table.item(irow, 6).setData(Qt.EditRole, float((extents[1, irow] - extents[0, irow]) / nbins[irow]))
-            if nbins[irow] == 1 and nbins[ivec] == 1:
-                nbins[ivec] = 100
-            elif nbins[irow] > 1 and nbins[ivec] > 1:
-                nbins[ivec] = 1
-            self.table.item(ivec, 5).setData(Qt.EditRole, int(nbins[ivec]))
-            self.table.item(ivec, 6).setData(Qt.EditRole,
-                                             float((extents[1, ivec] - extents[0, ivec]) / nbins[ivec]))
-        elif icol == 6:
-            # step changed - adjust nbins
-            step = float(self.table.item(irow, 6).text())
-            if step < 0:
-                step = abs(step)
-                self.table.item(irow, 6).setData(Qt.EditRole, step)
-            if nbins[irow] > 1:
-                # step along cut axis changed
-                nbin = (extents[1, irow] - extents[0, irow]) / step
-                if nbin < 1:
-                    nbins[irow] = 1
-                    self.table.item(ivec, 6).setData(Qt.EditRole, float((extents[1, irow] - extents[0, irow])))
-                if nbin % 1 > 0:
-                    extents[1, irow] = extents[1, irow] - (nbin % 1) * step  # so integer number of bins
-                    self.table.item(irow, 4).setData(Qt.EditRole, float(extents[1, irow]))
-                self.table.item(irow, 5).setData(Qt.EditRole, int(nbin))  # nbins
-            else:
-                # width of integrated axis changed
-                cen = np.mean(extents[:, irow])
-                self.table.item(irow, 3).setData(Qt.EditRole, float(cen - step / 2))
-                self.table.item(irow, 4).setData(Qt.EditRole, float(cen + step / 2))
+        for irow in range(len(nbins)):
+            self.set_vector(irow, vectors[irow])
+            self.set_extent(irow, *extents[:, irow])
+            self.set_nbin(irow, nbins[irow])  # do this last as step automatically updated given extents
+        self.table.blockSignals(False)
+        self.plot_cut_representation()
+        return vectors, extents, nbins
+
+    def set_slicepoint(self, slicept, width):
+        self.table.blockSignals(True)
+        self.set_extent(2, slicept - width/2, slicept + width/2)
+        self.set_step(2, width)
         self.table.blockSignals(False)
 
-    def on_cell_changed(self, irow, icol):
-        self.validate_table(irow, icol)
-        self.send_bin_params()
-        self.plot_line()
+    # plotting
 
-    def send_bin_params(self):
-        vectors, extents, nbins = self.read_bin_params_from_table()
-        if (extents[-1, :] - extents[0, :] > 0).all() and np.sum(nbins > 1) == 1 \
-                and not np.isclose(np.linalg.det(vectors), 0.0):
-            self._sliceinfo_provider.perform_non_axis_aligned_cut(vectors, extents.flatten(order='F'), nbins)
+    def plot_cut_ws(self, wsname):
+        if len(self.figure.axes[0].tracked_workspaces) == 0:
+            self.figure.axes[0].errorbar(ADS.retrieve(wsname), wkspIndex=None, marker='o', capsize=2, color='k',
+                                         markersize=3)
+        self._format_cut_figure()
+        self.figure.canvas.draw()
 
-    def plot_line(self):
-        # find vectors corresponding to x and y axes
-        proj_matrix = self._sliceinfo_provider.get_proj_matrix().T  # .T so now each basis vector is a row as in table
-        dims = self._sliceinfo_provider.get_dimensions()
-        states = dims.get_states()
-        self.xvec = proj_matrix[states.index(0), :]
-        self.xvec = self.xvec/np.sqrt(np.sum(self.xvec**2))
-        self.yvec = proj_matrix[states.index(1), :]
-        self.yvec = self.yvec / np.sqrt(np.sum(self.yvec ** 2))
-        # find x/y coord of start/end point of cut
-        vectors, extents, nbins = self.read_bin_params_from_table()
-        cens = np.mean(extents, axis=0)  # in u{1..3} basis
-        icut = np.where(nbins > 1)[0][0]  # index of x-axis
-        ivecs = list(range(len(vectors)))
-        ivecs.pop(icut)
-        zero_vec = np.zeros(vectors[0].shape) # position at  0 along cut axis
-        for ivec in ivecs:
-            zero_vec = zero_vec + cens[ivec]*vectors[ivec]
-        start = zero_vec + extents[0, icut] * vectors[icut, :]
-        end = zero_vec + extents[1, icut] * vectors[icut, :]
-        xmin = np.dot(start, self.xvec)
-        xmax = np.dot(end, self.xvec)
-        ymin = np.dot(start, self.yvec)
-        ymax = np.dot(end, self.yvec)
-        # get thickness of cut defined for unit vector perp to cut (so scale by magnitude of vector in the table)
-        iint = nbins[:-1].tolist().index(1)
-        thickness = (extents[1, iint]-extents[0, iint])*np.sqrt(np.sum(vectors[iint, :]**2))
+    def plot_cut_representation(self):
         if self.cut_rep is not None:
             self.cut_rep.remove()
-        self.cut_rep = CutRepresentation(self, self.canvas, xmin, xmax, ymin, ymax, thickness)
-
-    def get_coords_from_cut_representation(self):
-        if self.cut_rep is None:
-            return
-        # get vectors in u{1..3} basis
-        xmin, xmax, ymin, ymax = self.cut_rep.get_start_end_points()
-        start = xmin*self.xvec + ymin*self.yvec
-        stop = xmax*self.xvec + ymax*self.yvec
-        u1 = stop - start
-        u1 = u1 / np.sqrt(np.sum(u1 ** 2))
-        u1_min, u1_max = np.dot(start, u1), np.dot(stop, u1)
-        # get integrated dim
-        vectors, _, _ = self.read_bin_params_from_table()
-        u2 = np.cross(u1, vectors[-1, :])
-        u2 = u2 / np.sqrt(np.sum(u2 ** 2))
-        u2_cen = np.dot(start, u2)
-        u2_step = self.cut_rep.thickness
-        self.table.blockSignals(True)
-        self._write_vector_to_table(0, u1)
-        self.table.item(0, 3).setData(Qt.EditRole, float(u1_min))
-        self.table.item(0, 4).setData(Qt.EditRole, float(u1_max))
-        self.table.item(0, 5).setData(Qt.EditRole, int(50))
-        self.table.item(1, 6).setData(Qt.EditRole, float((u1_max-u1_min)/50))
-        self._write_vector_to_table(1, u2)
-        self.table.item(1, 3).setData(Qt.EditRole, float(u2_cen - u2_step/2))
-        self.table.item(1, 4).setData(Qt.EditRole, float(u2_cen + u2_step/2))
-        self.table.item(1, 5).setData(Qt.EditRole, int(1))
-        self.table.item(1, 6).setData(Qt.EditRole, float(u2_step))
-        self.table.blockSignals(False)
-        self.send_bin_params()
+        self.cut_rep = CutRepresentation(self.canvas, self.presenter.update_bin_params_from_cut_representation,
+                                         *self.presenter.get_cut_representation_parameters())
 
     # private api
     def _setup_ui(self):
@@ -301,21 +170,32 @@ class CutViewerView(QWidget):
                 else:
                     item.setFlags(item.flags() | Qt.ItemIsEditable)
                 self.table.setItem(irow, icol, item)
-        self.reset_table_data()
 
-    def _write_vector_to_table(self, irow, vector):
-        for icol in range(len(vector)):
-            self.table.item(irow, icol).setData(Qt.EditRole, float(vector[icol]))
+    def _format_cut_figure(self):
+        self.figure.axes[0].ignore_existing_data_limits = True
+        self.figure.axes[0].autoscale_view()
+        self._format_cut_xabel()
+        for textobj in self.figure.findobj(text.Text):
+            textobj.set_fontsize(8)
+        self.figure.tight_layout()
+
+    def _format_cut_xabel(self):
+        xlab = self.figure.axes[0].get_xlabel()
+        istart = xlab.index('(')
+        iend = xlab.index(')')
+        xunit_str = xlab[iend + 1:].replace('Ang^-1', '$\\AA^{-1}$)').replace('(', '').replace(')', '')
+        xlab = xlab[0:istart] + xlab[istart:iend + 1].replace(' ', ', ') + xunit_str
+        self.figure.axes[0].set_xlabel(xlab)
 
 
 class CutRepresentation:
-    def __init__(self, view, canvas, xmin, xmax, ymin, ymax, thickness):
-        self.view = view
+    def __init__(self, canvas, notify_on_release, xmin, xmax, ymin, ymax, thickness):
+        self.notify_on_release = notify_on_release
         self.canvas = canvas
         self.ax = canvas.figure.axes[0]
         self.thickness = thickness
-        self.start = self.ax.plot(xmin, ymin, 'ow', label='start')[0]  # , picker=True)
-        self.end = self.ax.plot(xmax, ymax, 'ow', label='end')[0]  # , picker=True)
+        self.start = self.ax.plot(xmin, ymin, 'ow', label='start')[0]
+        self.end = self.ax.plot(xmax, ymax, 'ow', label='end')[0]
         self.line = None
         self.mid = None
         self.box = None
@@ -422,4 +302,4 @@ class CutRepresentation:
             self.current_artist = None
             if self.end.get_xdata()[0] < self.start.get_xdata()[0]:
                 self.start, self.end = self.end, self.start
-            self.view.get_coords_from_cut_representation()
+            self.notify_on_release(*self.get_start_end_points(), self.thickness)
