@@ -20,7 +20,7 @@ import mantidqtinterfaces.Muon.GUI.Common.ADSHandler.workspace_naming as wsName
 from mantidqtinterfaces.Muon.GUI.Common.ADSHandler.ADS_calls import retrieve_ws, delete_ws
 from mantidqtinterfaces.Muon.GUI.Common.ADSHandler.workspace_group_definition import add_to_group
 from mantidqtinterfaces.Muon.GUI.Common.contexts.muon_group_pair_context import get_default_grouping
-from mantidqtinterfaces.Muon.GUI.Common.contexts.muon_context_ADS_observer import MuonContextADSObserver
+from mantidqtinterfaces.Muon.GUI.Common.ADSHandler.muon_ADS_observer import MuonADSObserver
 from mantidqtinterfaces.Muon.GUI.Common.ADSHandler.muon_workspace_wrapper import MuonWorkspaceWrapper
 from mantidqt.utils.observer_pattern import Observable
 from mantidqtinterfaces.Muon.GUI.Common.muon_base import MuonRun
@@ -45,7 +45,7 @@ class MuonContext(object):
         self.base_directory = base_directory
         self.workspace_suffix = workspace_suffix
         self._plot_panes_context = plot_panes_context
-        self.ads_observer = MuonContextADSObserver(
+        self.ads_observer = MuonADSObserver(
             self.remove_workspace,
             self.clear_context,
             self.workspace_replaced)
