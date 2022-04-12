@@ -971,8 +971,7 @@ class SANSILLReduction(PythonAlgorithm):
                     self.calculate_transmission(ws)
                 else:
                     self.apply_transmission(ws)
-                    # TODO take care of solid angle
-                    # self.apply_solid_angle(ws)
+                    self.apply_solid_angle(ws)
                     self.progress.report()
                     if self.process != 'EmptyContainer':
                         self.apply_container(ws)

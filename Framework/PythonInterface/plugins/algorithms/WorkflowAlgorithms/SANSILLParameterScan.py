@@ -196,10 +196,7 @@ class SANSILLParameterScan(PythonAlgorithm):
             width = int(detector.getNumberParameter("detector-width")[0])
             height = int(detector.getNumberParameter("detector-height")[0])
         else:
-            # TODO bring back this check when properties are updated
-            width = 1152
-            height = 192
-            # raise RuntimeError('No width or height found for this instrument. Unable to group detectors.')
+            raise RuntimeError('No width or height found for this instrument. Unable to group detectors.')
         mtd[load_ws_name].delete()
 
         self.checkPixelY(height)
