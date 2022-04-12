@@ -229,7 +229,12 @@ std::string GeneratePythonFitScript::generateFitScript(std::string const &fittin
   bool plotOutput = getProperty("PlotOutput");
   if (plotOutput) {
     generatedScript += "\n";
-    generatedScript += getFileContents("GeneratePythonFitScript_PlottingOutput.py.in");
+    std::vector<double> const startXs = getProperty("StartXs");
+    if (startXs.size() == 1u) {
+      generatedScript += getFileContents("GeneratePythonFitScript_PlottingSingleOutput.py.in");
+    } else {
+      generatedScript += getFileContents("GeneratePythonFitScript_PlottingMultiOutput.py.in");
+    }
   }
 
   return generatedScript;
