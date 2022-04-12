@@ -11,6 +11,7 @@
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidCurveFitting/EigenMatrix.h"
 #include "MantidCurveFitting/EigenVector.h"
+#include "MantidCurveFitting/GSLFunctions.h"
 
 namespace Mantid::CurveFitting::Functions {
 

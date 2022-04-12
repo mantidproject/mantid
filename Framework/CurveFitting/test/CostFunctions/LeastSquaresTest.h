@@ -20,6 +20,7 @@
 #include "MantidCurveFitting/Functions/Gaussian.h"
 #include "MantidCurveFitting/Functions/LinearBackground.h"
 #include "MantidCurveFitting/Functions/UserFunction.h"
+#include "MantidCurveFitting/GSLFunctions.h"
 
 #include <gsl/gsl_blas.h>
 #include <sstream>
@@ -160,7 +161,7 @@ public:
     TS_ASSERT_DELTA(der1[1], 0.9, 1e-10);
 
     TS_ASSERT_DELTA(costFun->valDerivHessian(), 0.145, 1e-10);
-    const GSLVector &g = costFun->getDeriv();
+    const EigenVector &g = costFun->getDeriv();
     // const GSLMatrix& H = costFun->getHessian();
     TS_ASSERT_DELTA(g.get(0), 1.1, 1e-10);
     TS_ASSERT_DELTA(g.get(1), 0.9, 1e-10);
@@ -192,16 +193,17 @@ public:
                     1e-10); // == 0.5 *( 0.2^2 + 0.3^2 + 0.4^2 )
 
     TS_ASSERT_DELTA(costFun->valDerivHessian(), 0.145, 1e-10);
-    GSLVector g = costFun->getDeriv();
-    const GSLMatrix &H = costFun->getHessian();
+    EigenVector g = costFun->getDeriv();
+    const EigenMatrix &H = costFun->getHessian();
 
-    GSLVector dx(2);
+    EigenVector dx(2);
     dx.set(0, -0.1);
     dx.set(1, -0.2);
 
     double L; // = d*dx + 0.5 * dx * H * dx
-    gsl_blas_dgemv(CblasNoTrans, 0.5, H.gsl(), dx.gsl(), 1., g.gsl());
-    gsl_blas_ddot(g.gsl(), dx.gsl(), &L);
+    gsl_blas_dgemv(CblasNoTrans, 0.5, getGSLMatrix(H.inspector().data()), getGSLVector(dx.inspector().data()), 1.,
+                   getGSLVector(g.mutator().data()));
+    gsl_blas_ddot(getGSLVector(g.inspector().data()), getGSLVector(dx.inspector().data()), &L);
     TS_ASSERT_DELTA(L, -0.145, 1e-10); // L + costFun->val() == 0
   }
 

@@ -183,12 +183,14 @@ std::vector<size_t> ComplexVector::sortIndiciesByMagnitude(bool ascending) const
 /// Sort this vector in order defined by an index array
 /// @param indices :: Indices defining the order of elements in sorted vector.
 void ComplexVector::sort(const std::vector<size_t> &indices) {
-  std::vector<ComplexType> data(size());
+  std::vector<ComplexType> temp_data(size());
+
   for (size_t i = 0; i < size(); ++i) {
-    data[i] = m_vector(indices[i]);
+    temp_data[i] = m_vector(indices[i]);
   }
-  Eigen::VectorXcd v = Eigen::VectorXcd(data);
-  m_vector(std::move(v));
+  resize(indices.size());
+
+  m_vector = complex_vec_map_type(temp_data.data(), temp_data.size(), dynamic_stride(0, 1));
 }
 
 } // namespace Mantid::CurveFitting

@@ -85,12 +85,18 @@ public:
 class JacobianImpl1 : public API::Jacobian {
 public:
   /// The pointer to the internal jacobian matrix
-  Eigen::MatrixXd *m_J;
+  map_type *m_J;
   /// Maps declared indeces to active. For fixed (tied) parameters holds -1
   std::vector<int> m_index;
 
-  /// Set the pointer to the jacobian matrix
-  void setJ(Eigen::MatrixXd *J) { m_J = J; }
+  /// Set the internal jacobian matrix from an Eigen::MatrixXd
+  void setJ(Eigen::MatrixXd &J) {
+    m_J = new map_type(J.data(), J.rows(), J.cols(), dynamic_stride(J.outerStride(), J.innerStride()));
+  }
+  /// Set the internal jacobian matrix using a map
+  void setJ(map_type *J) { m_J = J; }
+  /// Destructor
+  ~JacobianImpl1() { delete m_J; }
 
   /// overwrite base method
   /// @param value :: the value
@@ -98,12 +104,12 @@ public:
   ///  @throw runtime_error Thrown if column of Jacobian to add number to does
   ///  not exist
   void addNumberToColumn(const double &value, const size_t &iActiveP) override {
-    if (iActiveP < m_J.cols()) {
+    if (iActiveP < m_J->cols()) {
       // add penalty to first and last point and every 10th point in between
-      m_J.data()[iActiveP] += value;
-      m_J.data()[(m_J.rows() - 1) * m_J.cols() + iActiveP] += value;
-      for (size_t iY = 9; iY < m_J.rows() - 1; iY += 10)
-        m_J.data()[iY * m_J.cols() + iActiveP] += value;
+      m_J->data()[iActiveP] += value;
+      m_J->data()[(m_J->rows() - 1) * m_J->cols() + iActiveP] += value;
+      for (size_t iY = 9; iY < m_J->rows() - 1; iY += 10)
+        m_J->data()[iY * m_J->cols() + iActiveP] += value;
     } else {
       throw std::runtime_error("Try to add number to column of Jacobian matrix "
                                "which does not exist.");
@@ -128,17 +134,17 @@ public:
     }
     int j = m_index[iP];
     if (j >= 0)
-      m_J(iY, j) = value;
+      (*m_J)(iY, j) = value;
   }
   /// overwrite base method
   double get(size_t iY, size_t iP) override {
     int j = m_index[iP];
     if (j >= 0)
-      return m_J(iY, j);
+      return (*m_J)(iY, j);
     return 0.0;
   }
   /// overwrite base method
-  void zero() override { m_J.setZero(); }
+  void zero() override { m_J->setZero(); }
 };
 
 } // namespace CurveFitting

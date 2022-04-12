@@ -23,10 +23,6 @@ namespace Mantid::CurveFitting::Functions {
 
 namespace {
 
-// Get a complex conjugate of the value returned by
-// ComplexMatrix::operator(i,j)
-ComplexType conj(const ComplexMatrixValueConverter &conv) { return std::conj(static_cast<ComplexType>(conv)); }
-
 // Does the actual calculation of the susceptibility
 void calculate(double *out, const double *xValues, const size_t nData, const DoubleFortranVector &en,
                const ComplexFortranMatrix &wf, const int nre, const std::vector<double> &H, const double convfact) {

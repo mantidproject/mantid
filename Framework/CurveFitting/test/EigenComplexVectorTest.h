@@ -238,4 +238,4 @@ public:
     v.set(1, v31);
     return v;
   }
-}
+};

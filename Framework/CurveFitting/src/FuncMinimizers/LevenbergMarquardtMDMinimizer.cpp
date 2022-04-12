@@ -9,6 +9,7 @@
 //----------------------------------------------------------------------
 #include "MantidCurveFitting/FuncMinimizers/LevenbergMarquardtMDMinimizer.h"
 #include "MantidCurveFitting/CostFunctions/CostFuncFitting.h"
+#include "MantidCurveFitting/GSLFunctions.h"
 
 #include "MantidAPI/CostFunctionFactory.h"
 #include "MantidAPI/FuncMinimizerFactory.h"
@@ -97,8 +98,8 @@ bool LevenbergMarquardtMDMinimizer::iterate(size_t /*iteration*/) {
   }
 
   // copy the hessian
-  GSLMatrix H(m_costFunction->getHessian());
-  GSLVector dd(m_costFunction->getDeriv());
+  EigenMatrix H(m_costFunction->getHessian());
+  EigenVector dd(m_costFunction->getDeriv());
 
   // scaling factors
   std::vector<double> sf(n);
@@ -143,7 +144,7 @@ bool LevenbergMarquardtMDMinimizer::iterate(size_t /*iteration*/) {
   }
 
   // Parameter corrections
-  GSLVector dx(n);
+  EigenVector dx(n);
   // To find dx solve the system of linear equations   H * dx == -m_der
   dd *= -1.0;
   try {
@@ -177,7 +178,7 @@ bool LevenbergMarquardtMDMinimizer::iterate(size_t /*iteration*/) {
   // save previous state
   m_costFunction->push();
   // Update the parameters of the cost function.
-  GSLVector parameters(n);
+  EigenVector parameters(n);
   m_costFunction->getParameters(parameters);
   parameters += dx;
   m_costFunction->setParameters(parameters);
@@ -192,10 +193,11 @@ bool LevenbergMarquardtMDMinimizer::iterate(size_t /*iteration*/) {
 
   double dL;
   // der -> - der - 0.5 * hessian * dx
-  gsl_blas_dgemv(CblasNoTrans, -0.5, m_costFunction->getHessian().gsl(), dx.gsl(), 1., dd.gsl());
+  gsl_blas_dgemv(CblasNoTrans, -0.5, getGSLMatrix(m_costFunction->getHessian().inspector().data()),
+                 getGSLVector(dx.inspector().data()), 1., getGSLVector(dd.mutator().data()));
   // calculate the linear part of the change in cost function
   // dL = - der * dx - 0.5 * dx * hessian * dx
-  gsl_blas_ddot(dd.gsl(), dx.gsl(), &dL);
+  gsl_blas_ddot(getGSLVector(dd.inspector().data()), getGSLVector(dx.inspector().data()), &dL);
 
   double F1 = m_costFunction->val();
   if (verbose) {
@@ -207,9 +209,9 @@ bool LevenbergMarquardtMDMinimizer::iterate(size_t /*iteration*/) {
 
   // Try the stop condition
   if (m_rho >= 0) {
-    GSLVector p(n);
+    EigenVector p(n);
     m_costFunction->getParameters(p);
-    double dx_norm = gsl_blas_dnrm2(dx.gsl());
+    double dx_norm = gsl_blas_dnrm2(getGSLVector(dx.inspector().data()));
     if (dx_norm < absError) {
       if (verbose) {
         g_log.warning() << "Successful fit, parameters changed by less than " << absError << '\n';

@@ -19,6 +19,9 @@ namespace CurveFitting {
 using ComplexType = std::complex<double>;
 class ComplexVector;
 
+typedef Eigen::Stride<Eigen::Dynamic, Eigen::Dynamic> dynamic_stride;
+typedef Eigen::Map<Eigen::VectorXcd, 0, dynamic_stride> complex_vec_map_type;
+
 /**
 A complex-valued vector for linear algebra computations.
 */

@@ -155,7 +155,7 @@ std::vector<double> CostFuncLeastSquares::getFitWeights(API::FunctionValues_sptr
  * @param covar :: Output cavariance matrix.
  * @param epsrel :: Tolerance.
  */
-void CostFuncLeastSquares::calActiveCovarianceMatrix(GSLMatrix &covar, double epsrel) {
+void CostFuncLeastSquares::calActiveCovarianceMatrix(EigenMatrix &covar, double epsrel) {
   UNUSED_ARG(epsrel);
 
   if (m_hessian.isEmpty()) {

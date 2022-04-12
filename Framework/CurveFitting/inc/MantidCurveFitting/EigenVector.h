@@ -9,6 +9,7 @@
 #include "MantidCurveFitting/DllConfig.h"
 
 #include "Eigen/Core"
+#include "Eigen/Dense"
 #include "MantidCurveFitting/EigenVectorView.h"
 
 #include <ostream>

@@ -8,6 +8,7 @@
 #include "MantidAPI/FunctionDomain1D.h"
 #include "MantidAPI/FunctionValues.h"
 #include "MantidAPI/IFunction1D.h"
+#include "MantidCurveFitting/GSLFunctions.h"
 #include "MantidCurveFitting/HalfComplex.h"
 
 #include <gsl/gsl_eigen.h>
@@ -666,7 +667,7 @@ std::vector<double> ChebfunBase::roots(const std::vector<double> &a) const {
     return r; // function is a constant
 
   const size_t N2 = 2 * N;
-  GSLMatrix C(N2, N2);
+  EigenMatrix C(N2, N2);
   C.zero();
   const double an = a[N];
 
@@ -685,7 +686,7 @@ std::vector<double> ChebfunBase::roots(const std::vector<double> &a) const {
 
   gsl_vector_complex *eval = gsl_vector_complex_alloc(N2);
   auto workspace = gsl_eigen_nonsymm_alloc(N2);
-  gsl_eigen_nonsymm(C.gsl(), eval, workspace);
+  gsl_eigen_nonsymm(getGSLMatrix(C.mutator().data()), eval, workspace);
   gsl_eigen_nonsymm_free(workspace);
 
   const double Dx = endX() - startX();

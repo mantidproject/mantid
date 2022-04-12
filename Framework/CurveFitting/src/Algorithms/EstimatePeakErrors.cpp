@@ -5,8 +5,8 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidCurveFitting/Algorithms/EstimatePeakErrors.h"
+#include "MantidCurveFitting/EigenMatrix.h"
 #include "MantidCurveFitting/Functions/PeakParameterFunction.h"
-#include "MantidCurveFitting/GSLMatrix.h"
 
 #include "MantidAPI/CompositeFunction.h"
 #include "MantidAPI/FunctionProperty.h"
@@ -56,8 +56,8 @@ namespace {
 /// @param height :: Output receiving value of peak height.
 /// @param fwhm :: Output receiving value of peak FWHM.
 /// @param intensity :: Output receiving value of peak intensity.
-GSLMatrix makeJacobian(IPeakFunction &peak, double &centre, double &height, double &fwhm, double &intensity) {
-  GSLMatrix jacobian(4, peak.nParams());
+EigenMatrix makeJacobian(IPeakFunction &peak, double &centre, double &height, double &fwhm, double &intensity) {
+  EigenMatrix jacobian(4, peak.nParams());
   centre = peak.centre();
   height = peak.height();
   fwhm = peak.fwhm();
@@ -83,13 +83,13 @@ GSLMatrix makeJacobian(IPeakFunction &peak, double &centre, double &height, doub
 /// @param results :: The table with results
 /// @param covariance :: The covariance matrix for the parameters of the peak.
 /// @param prefix :: A prefix for the parameter names.
-void calculatePeakValues(IPeakFunction &peak, ITableWorkspace &results, const GSLMatrix &covariance,
+void calculatePeakValues(IPeakFunction &peak, ITableWorkspace &results, const EigenMatrix &covariance,
                          const std::string &prefix) {
   double centre, height, fwhm, intensity;
-  GSLMatrix J = makeJacobian(peak, centre, height, fwhm, intensity);
+  EigenMatrix J = makeJacobian(peak, centre, height, fwhm, intensity);
   // CHECK_OUT_GSL_MATRIX("J=", J);
 
-  GSLMatrix JCJ = J * covariance * J.tr();
+  EigenMatrix JCJ = J * covariance * J.tr();
   // CHECK_OUT_GSL_MATRIX("JCJ=", JCJ);
 
   TableRow row = results.appendRow();
@@ -135,7 +135,7 @@ void EstimatePeakErrors::exec() {
   auto *peak = dynamic_cast<IPeakFunction *>(function.get());
 
   if (peak) {
-    GSLMatrix covariance(*matrix);
+    EigenMatrix covariance(*matrix);
     calculatePeakValues(*peak, *results, covariance, "");
   } else {
     auto *cf = dynamic_cast<CompositeFunction *>(function.get());
@@ -147,7 +147,7 @@ void EstimatePeakErrors::exec() {
         peak = dynamic_cast<IPeakFunction *>(fun);
         if (peak) {
           std::string prefix = "f" + std::to_string(i) + ".";
-          GSLMatrix covariance(*matrix, ip, ip, np, np);
+          EigenMatrix covariance(*matrix, ip, ip, np, np);
           calculatePeakValues(*peak, *results, covariance, prefix);
         }
         ip += np;

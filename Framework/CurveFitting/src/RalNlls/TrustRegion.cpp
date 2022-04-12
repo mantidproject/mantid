@@ -16,6 +16,7 @@
 #include <limits>
 #include <string>
 
+#include "MantidCurveFitting/GSLFunctions.h"
 #include <cmath>
 #include <gsl/gsl_blas.h>
 #include <gsl/gsl_linalg.h>
@@ -34,7 +35,8 @@ const double EPSILON_MCH = std::numeric_limits<double>::epsilon();
 void matmultInner(const DoubleFortranMatrix &J, DoubleFortranMatrix &A) {
   auto n = J.len2();
   A.allocate(n, n);
-  gsl_blas_dgemm(CblasTrans, CblasNoTrans, 1.0, J.gsl(), J.gsl(), 0.0, A.gsl());
+  gsl_blas_dgemm(CblasTrans, CblasNoTrans, 1.0, getGSLMatrix(J.inspector().data()), getGSLMatrix(J.inspector().data()),
+                 0.0, getGSLMatrix(A.inspector().data()));
 }
 
 /**  Given an (m x n)  matrix J held by columns as a vector,
@@ -51,7 +53,8 @@ void getSvdJ(const DoubleFortranMatrix &J, double &s1, double &sn) {
   DoubleFortranMatrix V(n, n);
   DoubleFortranVector S(n);
   DoubleFortranVector work(n);
-  gsl_linalg_SV_decomp(U.gsl(), V.gsl(), S.gsl(), work.gsl());
+  gsl_linalg_SV_decomp(getGSLMatrix(U.mutator().data()), getGSLMatrix(V.mutator().data()),
+                       getGSLVector(S.mutator().data()), getGSLVector(work.mutator().data()));
   s1 = S(1);
   sn = S(n);
 }
@@ -63,7 +66,7 @@ void getSvdJ(const DoubleFortranMatrix &J, double &s1, double &sn) {
 double norm2(const DoubleFortranVector &v) {
   if (v.size() == 0)
     return 0.0;
-  return gsl_blas_dnrm2(v.gsl());
+  return gsl_blas_dnrm2(getGSLVector(v.inspector().data()));
 }
 
 /** Multiply a matrix by a vector.
@@ -76,7 +79,8 @@ void multJ(const DoubleFortranMatrix &J, const DoubleFortranVector &x, DoubleFor
   if (Jx.len() != J.len1()) {
     Jx.allocate(J.len1());
   }
-  gsl_blas_dgemv(CblasNoTrans, 1.0, J.gsl(), x.gsl(), 0.0, Jx.gsl());
+  gsl_blas_dgemv(CblasNoTrans, 1.0, getGSLMatrix(J.inspector().data()), getGSLVector(x.inspector().data()), 0.0,
+                 getGSLVector(Jx.mutator().data()));
 }
 
 /** Multiply a transposed matrix by a vector.
@@ -89,7 +93,8 @@ void multJt(const DoubleFortranMatrix &J, const DoubleFortranVector &x, DoubleFo
   if (Jtx.len() != J.len2()) {
     Jtx.allocate(J.len2());
   }
-  gsl_blas_dgemv(CblasTrans, 1.0, J.gsl(), x.gsl(), 0.0, Jtx.gsl());
+  gsl_blas_dgemv(CblasTrans, 1.0, getGSLMatrix(J.inspector().data()), getGSLVector(x.inspector().data()), 0.0,
+                 getGSLVector(Jtx.mutator().data()));
 }
 
 /** Dot product of two vectors.
@@ -192,14 +197,18 @@ void rankOneUpdate(DoubleFortranMatrix &hf, NLLS_workspace &w) {
   // hf = hf + (1/yts) (y# - Sk d)^T y:
   alpha = 1 / yts;
   // call dGER(n,n,alpha,w.ysharpSks,1,w.y,1,hf,n)
-  gsl_blas_dger(alpha, w.ysharpSks.gsl(), w.y.gsl(), hf.gsl());
+
+  gsl_blas_dger(alpha, getGSLVector(w.ysharpSks.inspector().data()), getGSLVector(w.y.inspector().data()),
+                getGSLMatrix(hf.mutator().data()));
   // hf = hf + (1/yts) y^T (y# - Sk d):
   // call dGER(n,n,alpha,w.y,1,w.ysharpSks,1,hf,n)
-  gsl_blas_dger(alpha, w.y.gsl(), w.ysharpSks.gsl(), hf.gsl());
+  gsl_blas_dger(alpha, getGSLVector(w.y.inspector().data()), getGSLVector(w.ysharpSks.inspector().data()),
+                getGSLMatrix(hf.mutator().data()));
   // hf = hf - ((y# - Sk d)^T d)/((yts)**2)) * y y^T
   alpha = -dotProduct(w.ysharpSks, w.d) / (pow(yts, 2));
   // call dGER(n,n,alpha,w.y,1,w.y,1,hf,n)
-  gsl_blas_dger(alpha, w.y.gsl(), w.y.gsl(), hf.gsl());
+  gsl_blas_dger(alpha, getGSLVector(w.y.inspector().data()), getGSLVector(w.y.inspector().data()),
+                getGSLMatrix(hf.mutator().data()));
 }
 
 /** Update the trust region radius which is hidden in NLLS_workspace w
@@ -353,9 +362,9 @@ void applyScaling(const DoubleFortranMatrix &J, DoubleFortranMatrix &A, DoubleFo
  *  @param ew :: The output eigenvalues.
  *  @param ev :: The output eigenvectors.
  */
-void allEigSymm(const DoubleFortranMatrix &A, DoubleFortranVector &ew, DoubleFortranMatrix &ev) {
+void allEigSymm(const DoubleFortranMatrix &A, ComplexFortranVector &ew, ComplexFortranMatrix &ev) {
   auto M = A;
-  M.eigenSystem(ew, ev);
+  M.eigenSystem(ew.eigen(), ev.eigen());
 }
 
 // This isn't used because we don't calculate second derivatives in Mantid

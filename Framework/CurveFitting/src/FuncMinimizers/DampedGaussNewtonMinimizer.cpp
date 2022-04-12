@@ -9,6 +9,7 @@
 //----------------------------------------------------------------------
 #include "MantidCurveFitting/FuncMinimizers/DampedGaussNewtonMinimizer.h"
 #include "MantidCurveFitting/CostFunctions/CostFuncLeastSquares.h"
+#include "MantidCurveFitting/GSLFunctions.h"
 
 #include "MantidAPI/CostFunctionFactory.h"
 #include "MantidAPI/FuncMinimizerFactory.h"
@@ -62,8 +63,8 @@ bool DampedGaussNewtonMinimizer::iterate(size_t /*iteration*/) {
   m_leastSquares->valDerivHessian();
 
   // copy the hessian
-  GSLMatrix H(m_leastSquares->getHessian());
-  GSLVector dd(m_leastSquares->getDeriv());
+  EigenMatrix H(m_leastSquares->getHessian());
+  EigenVector dd(m_leastSquares->getDeriv());
 
   for (size_t i = 0; i < n; ++i) {
     double tmp = H.get(i, i) + damping;
@@ -84,7 +85,7 @@ bool DampedGaussNewtonMinimizer::iterate(size_t /*iteration*/) {
   }
 
   /// Parameter corrections
-  GSLVector dx(n);
+  EigenVector dx(n);
   // To find dx solve the system of linear equations   H * dx == -m_der
   dd *= -1.0;
   try {
@@ -118,9 +119,9 @@ bool DampedGaussNewtonMinimizer::iterate(size_t /*iteration*/) {
   // --- prepare for the next iteration --- //
 
   // Try the stop condition
-  GSLVector p(n);
+  EigenVector p(n);
   m_leastSquares->getParameters(p);
-  double dx_norm = gsl_blas_dnrm2(dx.gsl());
+  double dx_norm = gsl_blas_dnrm2(getGSLVector(dx.mutator().data()));
   return dx_norm >= m_relTol;
 }
 

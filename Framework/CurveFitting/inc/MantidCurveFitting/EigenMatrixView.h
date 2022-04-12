@@ -6,7 +6,6 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 #include <Eigen/Core>
-#include <Eigen/Dense>
 
 namespace Mantid::CurveFitting {
 typedef Eigen::Stride<Eigen::Dynamic, Eigen::Dynamic> dynamic_stride;

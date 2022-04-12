@@ -9,7 +9,7 @@
 #include "MantidAPI/ICostFunction.h"
 #include "MantidAPI/IFunction.h"
 #include "MantidCurveFitting/CostFunctions/CostFuncLeastSquares.h"
-#include "MantidCurveFitting/GSLJacobian.h"
+#include "MantidCurveFitting/EigenJacobian.h"
 #include <gsl/gsl_blas.h>
 #include <gsl/gsl_multifit_nlin.h>
 #include <gsl/gsl_multimin.h>
@@ -49,6 +49,15 @@ struct GSL_FitData {
 int gsl_f(const gsl_vector *x, void *params, gsl_vector *f);
 int gsl_df(const gsl_vector *x, void *params, gsl_matrix *J);
 int gsl_fdf(const gsl_vector *x, void *params, gsl_vector *f, gsl_matrix *J);
+
+/// take data from Eigen Vector and take a gsl view
+inline gsl_vector *getGSLVector(double *d) { return &gsl_vector_view_array(d, 1).vector; }
+/// take  data from Eigen Matrix and take a gsl view
+inline gsl_matrix *getGSLMatrix(double *d) { return &gsl_matrix_view_array(d, 1, 1).matrix; }
+/// take const data from Eigen Vector and take a gsl view
+inline gsl_vector *getGSLVector(const double *d) { return &gsl_vector_const_view_array(d, 1).vector; }
+/// take const data from Eigen Matrix and take a gsl view
+inline gsl_matrix *getGSLMatrix(const double *d) { return &gsl_matrix_const_view_array(d, 1, 1).matrix; }
 
 } // namespace CurveFitting
 } // namespace Mantid

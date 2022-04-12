@@ -50,14 +50,6 @@ private:
   void resetKnots();
   /// Copy break points from GSL internal objects
   void getGSLBreakPoints(std::vector<double> &bp) const;
-  /// take data from Eigen Vector and take a gsl view
-  inline gsl_vector *getGSLVector(double *d) { return &gsl_vector_view_array(d, 1).vector; }
-  /// take data from Eigen Matrix and take a gsl view
-  inline gsl_matrix *getGSLMatrix(double *d) { return &gsl_matrix_view_array(d, 1, 1).matrix; }
-  /// take const data from Eigen Vector and take a gsl view
-  inline gsl_vector *getGSLVector(const double *d) const { return &gsl_vector_const_view_array(d, 1).vector; }
-  /// take const data from Eigen Matrix and take a gsl view
-  inline gsl_matrix *getGSLMatrix(const double *d) const { return &gsl_matrix_const_view_array(d, 1, 1).matrix; }
 
   /// structure used by GSL internally
   std::shared_ptr<gsl_bspline_workspace> m_bsplineWorkspace;

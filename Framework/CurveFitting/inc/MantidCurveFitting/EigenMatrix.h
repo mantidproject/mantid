@@ -13,6 +13,7 @@
 #include "MantidKernel/Matrix.h"
 
 #include "Eigen/Core"
+#include "Eigen/Dense"
 
 #include <iomanip>
 #include <stdexcept>
@@ -43,6 +44,8 @@ public:
   EigenMatrix(EigenMatrix &M, size_t row, size_t col, size_t nRows, size_t nCols);
   /// Constructor
   EigenMatrix(const Kernel::Matrix<double> &M);
+  /// Constructor
+  EigenMatrix(const Kernel::Matrix<double> &M, size_t row, size_t col, size_t nRows, size_t nCols);
 
   /// Copy assignment operator
   EigenMatrix &operator=(const EigenMatrix &M);

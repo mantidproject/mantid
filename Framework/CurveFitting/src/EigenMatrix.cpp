@@ -8,7 +8,6 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidCurveFitting/EigenMatrix.h"
-#include "Eigen/Core"
 #include <iostream>
 
 namespace Mantid::CurveFitting {
@@ -64,6 +63,22 @@ EigenMatrix::EigenMatrix(EigenMatrix &M, size_t row, size_t col, size_t nRows, s
 /// @param M :: A matrix to copy.
 EigenMatrix::EigenMatrix(const Kernel::Matrix<double> &M)
     : m_data(M.getVector()), m_view(EigenMatrix_View(m_data.data(), M.numRows(), M.numCols())) {}
+
+/// Create a submatrix. A submatrix is a reference to part of the parent matrix.
+/// @param M :: The parent matrix.
+/// @param row :: The first row in the submatrix.
+/// @param col :: The first column in the submatrix.
+/// @param nRows :: The number of rows in the submatrix.
+/// @param nCols :: The number of columns in the submatrix.
+EigenMatrix::EigenMatrix(const Kernel::Matrix<double> &M, size_t row, size_t col, size_t nRows, size_t nCols) {
+  if (row + nRows > M.numRows() || col + nCols > M.numCols()) {
+    throw std::runtime_error("Submatrix exceeds matrix size.");
+  }
+  m_data.resize(nRows * nCols);
+
+  auto temp_view = EigenMatrix_View(M.getVector().data(), nRows, nCols, row, col);
+  std::memcpy(m_data.data(), temp_view.matrix_mutator().data(), sizeof m_data.data());
+}
 
 /// "Move" constructor
 EigenMatrix::EigenMatrix(std::vector<double> &&data, size_t nx, size_t ny)

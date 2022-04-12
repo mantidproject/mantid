@@ -41,17 +41,6 @@ Eigen::VectorXd createVecFromArray(double *array, const int &nElements) {
 
 Eigen::VectorXd GenerateVector(int i, bool random = false) { return createVecFromArray(createArray(i, random), i); }
 
-Eigen::MatrixXd RoundMatr(Eigen::MatrixXd m, int n) {
-  int expo = pow(10, n);
-
-  return m.unaryExpr([expo](double x) { return round(x * expo) / expo; });
-}
-
-Eigen::MatrixXd RoundVec(Eigen::VectorXd v, int n) {
-  int expo = pow(10, n);
-
-  return v.unaryExpr([expo](double x) { return round(x * expo) / expo; });
-}
 } // namespace
 
 class EigenViewTest : public CxxTest::TestSuite {
@@ -61,14 +50,17 @@ public:
     EigenMatrix_View test_m_1 = EigenMatrix_View(m);
     TS_ASSERT(m == test_m_1.matrix_mutator()); // test matrix are equal upon creation of view
 
-    m(0, 0) = -1.0;
+    double d = 5;
+    int i = 5;
+    m(Eigen::Index(1), Eigen::Index(1)) = d;
+
     test_m_1.matrix_mutator()(0, 1) = -2.0;
     TS_ASSERT(m == test_m_1.matrix_mutator()); // test view and matrix reference same matrix
 
     EigenMatrix_View test_m_2 = test_m_1;
     TS_ASSERT(test_m_2.matrix_inspector() == test_m_1.matrix_inspector()); // test copy assignment operator
 
-    m(0, 0) = -3.0;
+    m(Eigen::Index(0), Eigen::Index(0)) = -3.0;
     TS_ASSERT(test_m_2.matrix_mutator() == m &&
               test_m_1.matrix_mutator() == m); // test copied views still reference the original matrix.
 
@@ -81,7 +73,8 @@ public:
                   test_m_1.matrix_inspector()(3, 3)); // test view sub_matrix considers correct elements
 
     test_m_3.matrix_mutator()(0, 1) = -4.0;
-    TS_ASSERT(m(3, 3) == test_m_3.matrix_mutator()(1, 1)); // test sub-matrix still references original matrix.
+    TS_ASSERT(m(Eigen::Index(3), Eigen::Index(3)) ==
+              test_m_3.matrix_mutator()(1, 1)); // test sub-matrix still references original matrix.
 
     EigenMatrix_View test_m_4 = EigenMatrix_View(test_m_3.matrix_mutator());
     test_m_4.matrix_mutator()(1, 1) = -5.0;
