@@ -34,8 +34,9 @@ DECLARE_NEXUS_FILELOADER_ALGORITHM(LoadILLSALSA)
  * @return An integer specifying the confidence level. 0 indicates it will not be used
  */
 int LoadILLSALSA::confidence(Kernel::NexusDescriptor &descriptor) const {
-  if (descriptor.pathExists("/entry0/data_scan") && descriptor.pathExists("/entry0/instrument/Tx") &&
-      descriptor.pathExists("/entry0/instrument/Ty") && descriptor.pathExists("/entry0/instrument/Tz"))
+  if ((descriptor.pathExists("/entry0/data_scan") || descriptor.pathExists("/entry0/data")) &&
+      descriptor.pathExists("/entry0/instrument/Tx") && descriptor.pathExists("/entry0/instrument/Ty") &&
+      descriptor.pathExists("/entry0/instrument/Tz"))
     return 80;
   else
     return 0;
