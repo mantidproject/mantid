@@ -98,6 +98,7 @@ void LoadILLSALSA::exec() {
 
   m_outputWorkspace = DataObjects::create<DataObjects::Workspace2D>(m_numberOfRows * m_numberOfColumns + 1,
                                                                     HistogramData::Points(m_numberOfScans));
+  setProperty("OutputWorkspace", m_outputWorkspace);
 
   // set the instrument
   double sampleToDetectorDistance = getProperty("DetectorDistance");
@@ -120,7 +121,6 @@ void LoadILLSALSA::setInstrument(double distance, double angle) {
   loadInst->setProperty<API::MatrixWorkspace_sptr>("Workspace", m_outputWorkspace);
   loadInst->setProperty("RewriteSpectraMap", Kernel::OptionalBool(true));
   loadInst->execute();
-  setProperty("OutputWorkspace", m_outputWorkspace);
 
   // translation
   double angleRad = angle * M_PI / 180.0;
