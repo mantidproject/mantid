@@ -231,7 +231,8 @@ public:
          MantidQt::MantidWidgets::Batch::Cell("Trans A"), MantidQt::MantidWidgets::Batch::Cell("Trans B"),
          MantidQt::MantidWidgets::Batch::Cell("0.56"), MantidQt::MantidWidgets::Batch::Cell("0.90"),
          MantidQt::MantidWidgets::Batch::Cell("0.01"), MantidQt::MantidWidgets::Batch::Cell(""),
-         MantidQt::MantidWidgets::Batch::Cell(MantidQt::MantidWidgets::optionsToString(ReductionOptionsMap()))});
+         MantidQt::MantidWidgets::Batch::Cell(MantidQt::MantidWidgets::optionsToString(ReductionOptionsMap())),
+         MantidQt::MantidWidgets::Batch::Cell("")});
     EXPECT_CALL(m_jobs, setCellsAt(rowLocation, roundedCells)).Times(1);
     presenter.notifyRowOutputsChanged();
 
