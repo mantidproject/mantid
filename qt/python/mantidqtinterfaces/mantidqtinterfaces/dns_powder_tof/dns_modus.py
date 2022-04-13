@@ -4,9 +4,11 @@
 #     NScD Oak Ridge National Laboratory, European Spallation Source
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
+
 """
-Definition of DNS measurement modi and functions fo switching
+Definition of DNS measurement modi and functions fo switching.
 """
+
 from collections import OrderedDict
 
 from mantidqtinterfaces.dns_powder_tof.file_selector.file_selector_widget \
@@ -28,7 +30,6 @@ class DNSModus:
     Defines the different reduction modes and which widgets are used in
     each mode.
     """
-
     def __init__(self, name, parent):
         super().__init__()
         self.parent = parent  # should be main widget

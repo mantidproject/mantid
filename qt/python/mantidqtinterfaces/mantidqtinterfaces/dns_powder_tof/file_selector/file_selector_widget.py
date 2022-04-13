@@ -4,9 +4,11 @@
 #     NScD Oak Ridge National Laboratory, European Spallation Source
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
+
 """
-DNS File Selector widget
+DNS File Selector widget.
 """
+
 from mantidqtinterfaces.dns_powder_tof.data_structures.dns_widget import DNSWidget
 from mantidqtinterfaces.dns_powder_tof.file_selector.file_selector_model import \
     DNSFileSelectorModel
@@ -19,7 +21,6 @@ from mantidqtinterfaces.dns_powder_tof.file_selector.file_selector_watcher \
 
 
 class DNSFileSelectorWidget(DNSWidget):
-
     def __init__(self, name, parent):
         super().__init__(name, parent)
         self.view = DNSFileSelectorView(parent=parent.view)

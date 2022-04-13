@@ -4,15 +4,16 @@
 #     NScD Oak Ridge National Laboratory, European Spallation Source
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
+
 """
 DNS Observer Class, they share a common data model DNSReductionGui_model
-and are updated by DNSReductionGui_presenter
+and are updated by DNSReductionGui_presenter.
 """
 
 
 class DNSObsModel:
     """
-    Defines a model for DNS Observers
+    Defines a model for DNS Observers.
     """
 
     def __init__(self, parent):
