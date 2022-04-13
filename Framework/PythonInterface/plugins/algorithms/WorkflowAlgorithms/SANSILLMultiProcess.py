@@ -773,9 +773,9 @@ class SANSILLMultiProcess(DataProcessorAlgorithm):
             if self.getProperty('ProduceSensitivity').value:
                 process = 'Water'
                 sens_out = sample_ws + '_Sens'
-            uesr_thickness = self.getProperty('SampleThickness').value
+            user_thickness = self.getProperty('SampleThickness').value
             thickness_from = self.getPropertyValue('SampleThicknessFrom')
-            thickness_to_use = uesr_thickness if thickness_from == 'User' else [-1]
+            thickness_to_use = user_thickness if thickness_from == 'User' else [-1]
             SANSILLReduction(Runs=runs,
                              ProcessAs=process,
                              DarkCurrentWorkspace=dark_current_ws,
