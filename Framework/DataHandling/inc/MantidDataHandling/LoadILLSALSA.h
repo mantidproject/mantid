@@ -41,6 +41,8 @@ private:
   void exec() override;
   // set the instrument
   void setInstrument(double distance, double angle);
+  // load data from old single point nexus
+  void loadOldNexus(const std::string &filename);
   // fill workspace with detector and monitor counts
   void fillWorkspaceData(const Mantid::NeXus::NXInt &detectorData, const std::vector<std::string> &scanVariableNames,
                          const Mantid::NeXus::NXDouble &scanVariables);

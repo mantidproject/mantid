@@ -145,6 +145,53 @@ void LoadILLSALSA::setInstrument(double distance, double angle) {
   rotateInst->execute();
 }
 
+/**
+ * Load old Nexus files that contain a single point. In this case, data are in /entry0/data/Multi_data and there shape
+ * is 256x256x1.
+ * @param filename Nexus filename
+ */
+void LoadILLSALSA::loadOldNexus(const std::string &filename) {
+  Mantid::NeXus::NXRoot dataRoot(filename);
+  Mantid::NeXus::NXEntry dataFirstEntry = dataRoot.openFirstEntry();
+
+  Mantid::NeXus::NXData dataGroup = dataFirstEntry.openNXData("/data");
+  Mantid::NeXus::NXInt data = dataGroup.openIntData();
+  data.load();
+  dataGroup.close();
+
+  Mantid::NeXus::NXData monitorGroup = dataFirstEntry.openNXData("/monitor/data");
+  Mantid::NeXus::NXInt monitor = monitorGroup.openIntData();
+  monitor.load();
+  monitorGroup.close();
+
+  m_numberOfScans = data.dims(3); // always 1 in this case
+  m_numberOfRows = data.dims(0);
+  m_numberOfColumns = data.dims(1);
+
+  m_outputWorkspace =
+      DataObjects::create<DataObjects::Workspace2D>(m_numberOfRows * m_numberOfColumns + 1, HistogramData::Points(1));
+  setProperty("OutputWorkspace", m_outputWorkspace);
+
+  // fill detector data
+  int index = 0;
+  for (int i = 0; i < m_numberOfRows; i++) {
+    for (int j = 0; j < m_numberOfColumns; j++) {
+      auto &spectrum = m_outputWorkspace->mutableY(index);
+      auto &errors = m_outputWorkspace->mutableE(index);
+      spectrum = data(i, j, 0);
+      errors = sqrt(data(i, j, 0));
+      index++;
+    }
+  }
+
+  // fill monitor data
+  m_outputWorkspace->mutableY(index)[0] = monitor(0, 0, 0);
+  m_outputWorkspace->mutableE(index)[0] = monitor(0, 0, 0);
+  m_outputWorkspace->mutableX(index)[0] = monitor(0, 0, 0);
+
+  dataRoot.close();
+}
+
 void LoadILLSALSA::fillWorkspaceData(const Mantid::NeXus::NXInt &detectorData,
                                      const std::vector<std::string> &scanVariableNames,
                                      const Mantid::NeXus::NXDouble &scanVariables) {
