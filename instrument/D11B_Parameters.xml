@@ -102,8 +102,12 @@
       <parameter name="log_list_to_save" type="string" visible="false">
       	<value val="facility,instrument_name,experiment_identifier,
       		    experiment_title,start_time,end_time,numor_list,
-      		    processedAs,wavelength,sample_transmission_numors,
-                          collimation.actual_position,L2"/>
+		    processedAs,wavelength,sample_transmission_ws,
+		    sample_transmission_numors,beam_ws,beam_numors,
+		    container_ws,container_numors,absorber_ws,absorber_numors,
+		    flux_ws,flux_numors,reference_ws,reference_numors,
+		    sensitivity_ws,sensitivity_numors,mask_ws,
+		    collimation.actual_position,L2"/>
       </parameter>
     </component-link>
     <!-- These parameters are used in ParallaxCorrection algorithm -->
