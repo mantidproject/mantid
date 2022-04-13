@@ -48,9 +48,9 @@ If defined in your class then you can use it to set a python attribute on your o
 
 If desired, the possible values that an attribute can take can be restricted through the use
 of a Function Attribute Validator. Such a validator must derive from the ``IValidator``
-abstract class; a number of these are currently provided in the Manitd Kernel such as:
+abstract class; a number of these are currently provided in the Mantid Kernel such as:
     - List Validator (attribute value must be specified from a provided list of values).
-    - Bounded Validator (numeric attritute value must be between two provided bounds).
+    - Bounded Validator (numeric attribute value must be between two provided bounds).
     - String contrains validator (string attribute value must contain a provided sub-string/s)
 
 In python, attributes can be declared with a validator using the following syntax:
@@ -61,9 +61,9 @@ In python, attributes can be declared with a validator using the following synta
     class Example1DFunction(IFunction1D): # or IPeakFunction
 
         def init(self):
-            self.declareParameter("StrAttr", "acceptable"", StringListValidator(["acceptable","values"]))
+            self.declareParameter("StrAttr", "acceptable", StringListValidator(["acceptable","values"]))
             self.declareAttribute("FloatAtt", 3.0, FloatBoundedValidator(0.0, 5.0))
             self.declareAttribute("StringContainsAtt", "StringContains", StringContainsValidator(["Contains"]))
 
-If a string list validator is used for any function called fromm the ``FitPropertyBrowser``, the attribute
+If a string list validator is used for any function called from the ``FitPropertyBrowser``, the attribute
 value can be input through the browser using a combo box.

@@ -275,7 +275,8 @@ void CrystalFieldMultiSpectrum::buildTargetFunction() const {
     }
   } else {
     m_physprops.clear();
-    std::transform(physprops.begin(), physprops.end(), std::back_inserter(m_physprops),
+    m_physprops.reserve(physprops.size());
+    std::transform(physprops.cbegin(), physprops.cend(), std::back_inserter(m_physprops),
                    [](auto elem) { return static_cast<int>(elem); });
   }
   // Create the single-spectrum functions.

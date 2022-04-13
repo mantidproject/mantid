@@ -1641,7 +1641,10 @@ void FitPropertyBrowser::finishHandle(const Mantid::API::IAlgorithm *alg) {
 
   IFunction_sptr function = alg->getProperty("Function");
   updateBrowserFromFitResults(function);
-
+  if (alg->existsProperty("OutputWorkspace")) {
+    std::string out = alg->getProperty("OutputWorkspace");
+    emit algorithmFinished(QString::fromStdString(out));
+  }
   // Update Status string in member variable (so can be retrieved)
   m_fitAlgOutputStatus = alg->getPropertyValue("OutputStatus");
   auto status = QString::fromStdString(m_fitAlgOutputStatus);
@@ -3214,8 +3217,9 @@ void FitPropertyBrowser::addAllowedSpectra(const QString &wsName, const QList<in
   auto ws = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(name);
   if (ws) {
     QList<int> indices;
-    std::transform(wsSpectra.begin(), wsSpectra.end(), std::back_inserter(indices),
-                   [&ws](int i) { return static_cast<int>(ws->getIndexFromSpectrumNumber(i)); });
+    indices.reserve(wsSpectra.size());
+    std::transform(wsSpectra.cbegin(), wsSpectra.cend(), std::back_inserter(indices),
+                   [&ws](const auto i) { return static_cast<int>(ws->getIndexFromSpectrumNumber(i)); });
 
     auto wsFound = m_allowedSpectra.find(wsName);
     m_allowedSpectra.insert(wsName, indices);
