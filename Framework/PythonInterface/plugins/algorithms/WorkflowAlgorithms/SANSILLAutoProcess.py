@@ -915,6 +915,11 @@ class SANSILLAutoProcess(DataProcessorAlgorithm):
                 Wavelength=self.getProperty('Wavelength').value,
                 Version=1)
 
+        common.add_correction_numors(ws=sample_name, stransmission=sample_transmission_name,
+                                     container=container_name, absorber=absorber_name, beam=beam_name,
+                                     flux=flux_name, solvent=solv_input, reference=ref_input,
+                                     sensitivity=sens_input)
+
         output_sample = self.output + '_#' + str(i + 1)
 
         output_panels = ''

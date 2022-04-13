@@ -796,6 +796,9 @@ class SANSILLMultiProcess(DataProcessorAlgorithm):
                              OutputSensitivityWorkspace=sens_out,
                              startProgress=(self.lambda_rank+d)*self.n_samples/self.n_reports,
                              endProgress=(self.lambda_rank+d+1)*self.n_samples/self.n_reports)
+            add_correction_numors(ws=sample_ws, stransmission=sample_tr_ws,
+                                  container=empty_can_ws, absorber=dark_current_ws, beam=empty_beam_ws,
+                                  flux=flux_ws, solvent=solvent_ws, reference='', sensitivity='')
             return [sample_ws, sens_out]
         else:
             return []

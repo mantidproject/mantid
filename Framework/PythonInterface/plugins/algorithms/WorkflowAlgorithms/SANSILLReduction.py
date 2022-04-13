@@ -9,10 +9,10 @@ from mantid.api import PythonAlgorithm, MatrixWorkspaceProperty, WorkspaceProper
 from mantid.kernel import Direction, EnabledWhenProperty, FloatBoundedValidator, LogicOperator, PropertyCriterion, \
     StringListValidator
 from mantid.simpleapi import *
+import SANSILLCommon as common
 from math import fabs
 import numpy as np
 import os
-import re
 
 
 class SANSILLReduction(PythonAlgorithm):
@@ -96,23 +96,6 @@ class SANSILLReduction(PythonAlgorithm):
     def _mask(ws, masked_ws, check_if_masked_detectors=True):
         if not check_if_masked_detectors or masked_ws.detectorInfo().hasMaskedDetectors():
             MaskDetectors(Workspace=ws, MaskedWorkspace=masked_ws)
-
-    @staticmethod
-    def _return_numors(paths):
-        regex_all = r'(\+)'
-        p = re.compile(regex_all)
-        list_entries = []
-        binary_op = []
-        prev_pos = 0
-        for obj in p.finditer(paths):
-            list_entries.append(paths[prev_pos:obj.span()[0]])
-            prev_pos = obj.span()[1]
-            binary_op.append(obj.group())
-        list_entries.append(paths[prev_pos:])  # add the last remaining file
-        list_entries = [os.path.split(entry)[1] for entry in list_entries]
-        binary_op.append('') # there is one fewer binary operator than there are numors
-        list_entries = [entry + operation for entry, operation in zip(list_entries, binary_op)]
-        return ''.join(list_entries)
 
     def PyInit(self):
 
@@ -692,11 +675,52 @@ class SANSILLReduction(PythonAlgorithm):
         ReplaceSpecialValues(InputWorkspace=ws, OutputWorkspace=ws, NaNValue=0,
                              NaNError=0, InfinityValue=0, InfinityError=0)
         mtd[ws].getRun().addProperty('ProcessedAs', process, True)
-        mtd[ws].getRun().addProperty('numor_list', self._return_numors(self.getPropertyValue('Run')), True)
-        mtd[ws].getRun().addProperty('sample_transmission_numors',
-                                     self._return_numors(self.getPropertyValue('TransmissionInputWorkspace')), True)
+        self._add_correction_information(ws)
         RenameWorkspace(InputWorkspace=ws, OutputWorkspace=ws[2:])
         self.setProperty('OutputWorkspace', mtd[ws[2:]])
+
+    def _add_correction_information(self, ws):
+        """Adds information regarding corrections and inputs to the provided workspace.
+
+        Args:
+            ws: (str) workspace name to which information is to be added
+        """
+        mtd[ws].getRun().addProperty(
+            'numor_list',
+            common.return_numors_from_path(self.getPropertyValue('Run')),
+            True)
+        mtd[ws].getRun().addProperty(
+            'sample_transmission_ws',
+            common.return_numors_from_path(self.getPropertyValue('TransmissionInputWorkspace')),
+            True)
+        mtd[ws].getRun().addProperty(
+            'container_ws',
+            common.return_numors_from_path(self.getPropertyValue('ContainerInputWorkspace')),
+            True)
+        mtd[ws].getRun().addProperty(
+            'absorber_ws',
+            common.return_numors_from_path(self.getPropertyValue('AbsorberInputWorkspace')),
+            True)
+        mtd[ws].getRun().addProperty(
+            'beam_ws',
+            common.return_numors_from_path(self.getPropertyValue('BeamInputWorkspace')),
+            True)
+        mtd[ws].getRun().addProperty(
+            'flux_ws',
+            common.return_numors_from_path(self.getPropertyValue('FluxInputWorkspace')),
+            True)
+        mtd[ws].getRun().addProperty(
+            'reference_ws',
+            common.return_numors_from_path(self.getPropertyValue('ReferenceInputWorkspace')),
+            True)
+        mtd[ws].getRun().addProperty(
+            'sensitivity_ws',
+            common.return_numors_from_path(self.getPropertyValue('SensitivityInputWorkspace')),
+            True)
+        mtd[ws].getRun().addProperty(
+            'mask_ws',
+            common.return_numors_from_path(self.getPropertyValue('MaskedInputWorkspace')),
+            True)
 
     def _apply_masks(self, ws):
         # apply the default mask, e.g. the bad detector edges
@@ -922,9 +946,8 @@ class SANSILLReduction(PythonAlgorithm):
             MaskDetectorsIf(InputWorkspace=ws, OutputWorkspace=ws, Operator='NotFinite')
 
             mtd[ws].getRun().addProperty('ProcessedAs', 'Sample', True)
-            mtd[ws].getRun().addProperty('numor_list', self._return_numors(self.getPropertyValue('Run')), True)
-            mtd[ws].getRun().addProperty('sample_transmission_numors',
-                                          self._return_numors(self.getPropertyValue('TransmissionInputWorkspace')), True)
+            self._add_correction_information(ws)
+
             RenameWorkspace(InputWorkspace=ws, OutputWorkspace=ws[2:])
 
         GroupWorkspaces(InputWorkspaces=frames_to_group, OutputWorkspace=group_name[2:])
