@@ -132,7 +132,7 @@ class TableWorkspaceDisplay(ObservingPresenter, DataCopier):
         return TableWorkspaceDisplayModel.supports(ws)
 
     def replace_workspace(self, workspace_name, workspace):
-        if self.presenter.model.workspace_equals(workspace_name) and self.presenter.model.block_model_replace:
+        if self.presenter.model.workspace_equals(workspace_name) and not self.presenter.model.block_model_replace:
             self.presenter.view.blockSignals(True)
             self.presenter.model = TableWorkspaceDisplayModel(workspace)
             self.presenter.load_data(self.presenter.view)
