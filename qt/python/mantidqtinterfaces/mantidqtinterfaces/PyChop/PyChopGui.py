@@ -694,7 +694,7 @@ class PyChopGui(QMainWindow):
                     txt += self._gen_text_ei(ei, obj)
         return txt
 
-    def showText(self):
+    def showText(self, *args):
         """
         Creates a dialog to show the generated text output.
         """
@@ -721,7 +721,7 @@ class PyChopGui(QMainWindow):
         self.txtloop = QEventLoop()
         self.txtloop.exec_()
 
-    def saveText(self):
+    def saveText(self, *args):
         """
         Saves the generated text to a file (opens file dialog).
         """

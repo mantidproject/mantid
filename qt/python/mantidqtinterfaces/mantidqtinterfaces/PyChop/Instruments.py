@@ -445,7 +445,7 @@ class ChopperSystem(object):
         if not self.isFermi:
             raise AttributeError('Cannot set Fermi chopper package on this instrument')
         if value not in self.packages.keys():
-            ky = [k for k in self.packages.keys() if value.upper() == k.upper()]
+            ky = [k for k in self.packages.keys() if str(value).upper() == k.upper()]
             if not ky:
                 raise ValueError('Fermi package ''%s'' not recognised. Allowed values are: %s'
                                  % (value, ', '.join(self.packages.keys())))
@@ -471,7 +471,7 @@ class ChopperSystem(object):
             setattr(self, prop, copy.deepcopy(self._variant_defaults[prop]))
         self._variant = value
         if value not in self.variants.keys():
-            ky = [k for k in self.variants.keys() if value.upper() == k.upper()]
+            ky = [k for k in self.variants.keys() if str(value).upper() == k.upper()]
             if not ky:
                 raise ValueError('Variant ''%s'' not recognised. Allowed values are: %s'
                                  % (value, ', '.join(self.variants.keys())))
@@ -665,7 +665,7 @@ class Instrument(object):
 
     __child_properties = ['package', 'variant', 'frequency', 'phase', 'ei', 'tjit', 'emin', 'emax']
 
-    __known_instruments = ['let', 'maps', 'mari', 'merlin']
+    __known_instruments = ['let', 'maps', 'mari', 'merlin', 'arcs', 'cncs', 'hyspec', 'sequoia']
 
     def __init__(self, instrument, chopper=None, freq=None):
         if isinstance(instrument, str):
@@ -775,7 +775,7 @@ class Instrument(object):
         # If not set, sets energy transfers to values to compare exactly to RAE's original implementation.
         if Etrans is None:
             Etrans = np.linspace(0.05*Ei, 0.95*Ei+0.05*0.05*Ei, 19, endpoint=True)
-        Etrans = np.array(Etrans if np.shape(Etrans) else [Etrans])
+        Etrans = np.array(Etrans if np.shape(Etrans) else [Etrans], dtype=float)
         if len(np.where(Etrans > Ei)[0]) > 0:
             warnings.warn('Cannot calculate for energy transfer greater than Ei (physically negative neutron energies!)')
         Etrans[np.where(Etrans >= Ei)] = np.nan
@@ -909,7 +909,15 @@ class Instrument(object):
         obj.ei = argdict['ei']
         if argdict['variant']:
             obj.variant = argdict['variant']
-        return obj.getResolution(argdict['etrans'] if argdict['etrans'] else 0.), obj.getFlux()
+        etrans = argdict['etrans']
+        if etrans is None:
+            etrans = 0.
+        else:
+            try:
+                etrans = float(etrans)
+            except TypeError:
+                etrans = np.asfarray(etrans)
+        return obj.getResolution(etrans), obj.getFlux()
 
     def __repr__(self):
         return self.name if self.name else 'Undefined instrument'
