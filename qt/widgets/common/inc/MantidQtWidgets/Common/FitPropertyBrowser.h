@@ -198,8 +198,6 @@ public:
   QString getYColumnName() const;
   /// Get the name of the Error column
   QString getErrColumnName() const;
-  /// Remove LogValue from the browser
-  void removeLogValue();
 
   /// Return a list of registered functions
   const QStringList &registeredFunctions() const { return m_registeredFunctions; }
@@ -508,7 +506,6 @@ protected:
   QtProperty *m_costFunction;
   QtProperty *m_maxIterations;
   QtProperty *m_peakRadius;
-  QtProperty *m_logValue;
   QtProperty *m_plotDiff;
   QtProperty *m_excludeRange;
   QtProperty *m_plotCompositeMembers;

@@ -80,12 +80,12 @@ int getNumberOfSpectra(const MatrixWorkspace_sptr &workspace) {
 FitPropertyBrowser::FitPropertyBrowser(QWidget *parent, QObject *mantidui)
     : QDockWidget("Fit Function", parent), m_workspaceIndex(nullptr), m_startX(nullptr), m_endX(nullptr),
       m_output(nullptr), m_minimizer(nullptr), m_ignoreInvalidData(nullptr), m_costFunction(nullptr),
-      m_maxIterations(nullptr), m_peakRadius(nullptr), m_logValue(nullptr), m_plotDiff(nullptr),
-      m_excludeRange(nullptr), m_plotCompositeMembers(nullptr), m_convolveMembers(nullptr), m_rawData(nullptr),
-      m_xColumn(nullptr), m_yColumn(nullptr), m_errColumn(nullptr), m_showParamErrors(nullptr),
-      m_evaluationType(nullptr), m_compositeFunction(), m_browser(nullptr), m_fitActionUndoFit(nullptr),
-      m_fitActionSeqFit(nullptr), m_fitActionFit(nullptr), m_fitActionEvaluate(nullptr), m_functionsGroup(nullptr),
-      m_settingsGroup(nullptr), m_customSettingsGroup(nullptr), m_changeSlotsEnabled(false), m_guessOutputName(true),
+      m_maxIterations(nullptr), m_peakRadius(nullptr), m_plotDiff(nullptr), m_excludeRange(nullptr),
+      m_plotCompositeMembers(nullptr), m_convolveMembers(nullptr), m_rawData(nullptr), m_xColumn(nullptr),
+      m_yColumn(nullptr), m_errColumn(nullptr), m_showParamErrors(nullptr), m_evaluationType(nullptr),
+      m_compositeFunction(), m_browser(nullptr), m_fitActionUndoFit(nullptr), m_fitActionSeqFit(nullptr),
+      m_fitActionFit(nullptr), m_fitActionEvaluate(nullptr), m_functionsGroup(nullptr), m_settingsGroup(nullptr),
+      m_customSettingsGroup(nullptr), m_changeSlotsEnabled(false), m_guessOutputName(true),
       m_updateObserver(*this, &FitPropertyBrowser::handleFactoryUpdate), m_fitMapper(nullptr), m_fitMenu(nullptr),
       m_displayActionPlotGuess(nullptr), m_displayActionQuality(nullptr), m_displayActionClearAll(nullptr),
       m_setupActionCustomSetup(nullptr), m_setupActionRemove(nullptr), m_tip(nullptr), m_fitSelector(nullptr),
@@ -2664,12 +2664,6 @@ void FitPropertyBrowser::setAutoBackgroundName(const QString &aName) {
   }
 }
 
-/// Remove LogValue from the browser
-void FitPropertyBrowser::removeLogValue() {
-  m_settingsGroup->property()->removeSubProperty(m_logValue);
-  m_logValue = nullptr;
-}
-
 void FitPropertyBrowser::sequentialFit() {
   auto *dlg = new SequentialFitDialog(this, m_mantidui);
   std::string wsName = workspaceName();
@@ -2779,7 +2773,7 @@ void FitPropertyBrowser::setTextPlotGuess(const QString &text) { m_displayAction
  */
 void FitPropertyBrowser::workspaceChange(const QString &wsName) {
   if (m_guessOutputName) {
-    removeLogValue();
+    m_stringManager->setValue(m_output, QString::fromStdString(workspaceName()));
   }
 
   emit workspaceNameChanged(wsName);
