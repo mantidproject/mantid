@@ -84,7 +84,7 @@ class CutViewerModel:
         self.yvec /= sqrt(sum(self.yvec ** 2))
         # find x/y coord of start/end point of cut
         cens = mean(extents, axis=0)  # in u{1..3} basis of view table
-        icut = where(nbins > 1)[0][0]  # index of cut axis
+        icut = where(nbins > 1)[0][0] if where(nbins > 1)[0].size > 0 else 0 # index of cut axis
         ivecs = list(range(len(vectors)))
         ivecs.pop(icut)
         zero_vec = zeros(vectors[0].shape)  # position at  0 along cut axis
