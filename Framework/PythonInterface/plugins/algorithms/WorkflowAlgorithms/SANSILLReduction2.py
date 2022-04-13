@@ -444,6 +444,7 @@ class SANSILLReduction(PythonAlgorithm):
                                  OutputWorkspace=tr_ws_rebin)
                 ApplyTransmissionCorrection(InputWorkspace=ws, TransmissionWorkspace=tr_ws_rebin,
                                             ThetaDependent=theta_dependent, OutputWorkspace=ws)
+                mtd[ws].getRun().addProperty('sample.transmission', list(mtd[tr_ws_rebin].readY(0)), True)
                 DeleteWorkspace(tr_ws_rebin)
             else:
                 check_wavelengths_match(mtd[tr_ws], mtd[ws])
@@ -458,6 +459,7 @@ class SANSILLReduction(PythonAlgorithm):
                                             TransmissionWorkspace=tr_to_apply,
                                             ThetaDependent=theta_dependent,
                                             OutputWorkspace=ws)
+                mtd[ws].getRun().addProperty('sample.transmission', list(mtd[tr_to_apply].readY(0)), True)
                 if needs_broadcasting:
                     DeleteWorkspace(tr_to_apply)
                 if theta_dependent and self.instrument == 'D16' and 75 < mtd[ws].getRun()['Gamma.value'].value < 105:
