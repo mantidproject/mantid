@@ -178,14 +178,14 @@ class DNSFileSelectorView(DNSView):
         Returning chosen filters which should be applied to the list of scans.
         """
         state_dict = self.get_state()
-        freetext = state_dict['filter_free_text']
+        free_text = state_dict['filter_free_text']
         filters = {
             'det_rot': state_dict['filter_det_rot'],
             'sample_rot': state_dict['filter_sample_rot'],
             ' scan': state_dict['filter_scans'],
             # Space is important to not get cscans
             'cscan': state_dict['filter_cscans'],
-            freetext: state_dict['filter_free'],
+            free_text: state_dict['filter_free'],
         }
         if filters[' scan'] and filters['cscan']:
             filters['scan'] = True
@@ -260,9 +260,6 @@ class DNSFileSelectorView(DNSView):
         else:
             self._sample_treeview.setModel(model)
 
-    def adjust_treeview_columns_size(self):
-        #print('Count:', self.get_selected_indexes())
-        #n_columns = self._sample_treeview.header()
-        num_columns = 10
+    def adjust_treeview_columns_width(self, num_columns):
         for i in range(num_columns):
-            self._sample_treeview.resizeColumnToContents(i)
+            self._treeview.resizeColumnToContents(i)

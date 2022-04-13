@@ -273,3 +273,6 @@ class DNSFileSelectorModel(DNSObsModel):
             save_txt(txt, 'last_filelist.txt', data_path)
         except PermissionError:
             pass
+
+    def get_active_model_column_count(self):
+        return self.active_model.root_item.columnCount()

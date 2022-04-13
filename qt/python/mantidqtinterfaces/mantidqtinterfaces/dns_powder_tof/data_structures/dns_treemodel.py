@@ -51,6 +51,7 @@ class DNSTreeModel(QAbstractItemModel):
             return QModelIndex()
         return self.createIndex(parent_item.row(), 0, parent_item)
 
+    #OKcomment: not used anywhere
     def headerData(self, section, orientation, role):  # overrides QT function
         if orientation == Qt.Horizontal and role == Qt.DisplayRole:
             return self.root_item.data(section)
@@ -121,6 +122,8 @@ class DNSTreeModel(QAbstractItemModel):
         item = self._item_from_index(index)
         if role == Qt.DisplayRole:
             return item.data(index.column())
+        if role == Qt.TextAlignmentRole and index.row() != 0:
+            return Qt.AlignHCenter
         if role == Qt.CheckStateRole and index.column() == 0:
             if item.isChecked() == 2:
                 return Qt.Checked
@@ -185,12 +188,12 @@ class DNSTreeModel(QAbstractItemModel):
         checked = self.match(self.index(0, 0, QModelIndex()),
                              Qt.CheckStateRole, Qt.Checked, -1,
                              Qt.MatchExactly | Qt.MatchRecursive)
-        nchecked = []
+        n_checked = []
         for index in checked:
             item = self._item_from_index(index)
             if not item.hasChildren():
                 if full_info:
-                    nchecked.append({
+                    n_checked.append({
                         'file_number': int(item.data(0)),
                         'det_rot': float(item.data(1)),
                         'sample_rot': float(item.data(2)),
@@ -205,8 +208,8 @@ class DNSTreeModel(QAbstractItemModel):
                         'selector_speed': float(item.data(11))
                     })
                 else:
-                    nchecked.append(int(item.data(0)))
-        return nchecked
+                    n_checked.append(int(item.data(0)))
+        return n_checked
 
     def check_scans_by_indexes(self, indexes):
         self.uncheck_all_scans()
@@ -253,8 +256,8 @@ class DNSTreeModel(QAbstractItemModel):
             for row in range(item.childCount()):
                 child = item.child(row)
                 child.setChecked(item.isChecked())
-                childindex = self.index(row, 0, index)
-                self.dataChanged.emit(childindex, childindex)
+                child_index = self.index(row, 0, index)
+                self.dataChanged.emit(child_index, child_index)
         else:
             parent = item.parent()
             status = 0

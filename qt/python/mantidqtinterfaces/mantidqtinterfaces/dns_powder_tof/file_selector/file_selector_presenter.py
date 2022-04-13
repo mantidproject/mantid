@@ -22,7 +22,7 @@ class DNSFileSelectorPresenter(DNSObserver):
         # pylint: disable=too-many-arguments
         super().__init__(parent=parent, name=name, view=view, model=model)
         self.watcher = watcher
-        self.view.set_tree_model(self.model.get_model()) # OKcomment: this line seems redundant
+        self.view.set_tree_model(self.model.get_model())
         self.view.set_tree_model(self.model.get_model(standard=True),
                                  standard=True)
         self._old_data_set = set()
@@ -62,7 +62,9 @@ class DNSFileSelectorPresenter(DNSObserver):
             self.view.expand_all()
         if not filtered:
             self._set_start_end(fn_range)
-        self.view.adjust_treeview_columns_size()
+
+        num_columns = self.model.get_active_model_column_count()
+        self.view.adjust_treeview_columns_width(num_columns)
 
     def _read_filtered(self):
         """
