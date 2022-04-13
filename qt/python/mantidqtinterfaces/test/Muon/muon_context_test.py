@@ -10,6 +10,9 @@ from collections import Counter
 
 from mantid.api import AnalysisDataService, FileFinder
 from mantid import ConfigService
+
+from mantidqtinterfaces.Muon.GUI.Common.ADSHandler.ADS_calls import retrieve_ws
+from mantidqtinterfaces.Muon.GUI.Common.utilities.algorithm_utils import create_empty_table, run_create_workspace
 from mantidqt.utils.qt.testing import start_qapplication
 from mantidqtinterfaces.Muon.GUI.Common.calculate_pair_and_group import run_pre_processing
 from mantidqtinterfaces.Muon.GUI.Common.utilities.load_utils import load_workspace_from_filename
@@ -660,6 +663,63 @@ class MuonContextTest(unittest.TestCase):
     def test_do_grouping(self, group_mock):
         self.context.do_grouping()
         group_mock.assert_called_once_with(self.data_context.instrument, self.context.workspace_suffix)
+
+    def test_remove_workspace_str(self):
+        self.context.data_context.remove_workspace_by_name = mock.Mock()
+        self.context.group_pair_context.remove_workspace_by_name = mock.Mock()
+        self.context.phase_context.remove_workspace_by_name = mock.Mock()
+        self.context.fitting_context.remove_workspace_by_name = mock.Mock()
+        self.context.update_view_from_model_notifier.notify_subscribers = mock.Mock()
+        self.context.deleted_plots_notifier.notify_subscribers = mock.Mock()
+        name = "test"
+
+        self.context.remove_workspace(name)
+
+        self.context.data_context.remove_workspace_by_name.assert_called_once_with(name)
+        self.context.group_pair_context.remove_workspace_by_name.assert_called_once_with(name)
+        self.context.phase_context.remove_workspace_by_name.assert_called_once_with(name)
+        self.context.fitting_context.remove_workspace_by_name.assert_called_once_with(name)
+        self.context.update_view_from_model_notifier.notify_subscribers.assert_called_once_with(name)
+        self.context.deleted_plots_notifier.notify_subscribers.assert_called_once_with(name)
+
+    def test_remove_workspace_ws(self):
+        self.context.data_context.remove_workspace_by_name = mock.Mock()
+        self.context.group_pair_context.remove_workspace_by_name = mock.Mock()
+        self.context.phase_context.remove_workspace_by_name = mock.Mock()
+        self.context.fitting_context.remove_workspace_by_name = mock.Mock()
+        self.context.update_view_from_model_notifier.notify_subscribers = mock.Mock()
+        self.context.deleted_plots_notifier.notify_subscribers = mock.Mock()
+
+        name = run_create_workspace([0,1], [0,1], "test")
+        ws = retrieve_ws("test")
+
+        self.context.remove_workspace(ws)
+
+        self.context.data_context.remove_workspace_by_name.assert_called_once_with(name)
+        self.context.group_pair_context.remove_workspace_by_name.assert_called_once_with(name)
+        self.context.phase_context.remove_workspace_by_name.assert_called_once_with(name)
+        self.context.fitting_context.remove_workspace_by_name.assert_called_once_with(name)
+        self.context.update_view_from_model_notifier.notify_subscribers.assert_called_once_with(name)
+        self.context.deleted_plots_notifier.notify_subscribers.assert_called_once_with(ws)
+
+    def test_remove_workspace_table(self):
+        self.context.data_context.remove_workspace_by_name = mock.Mock()
+        self.context.group_pair_context.remove_workspace_by_name = mock.Mock()
+        self.context.phase_context.remove_workspace_by_name = mock.Mock()
+        self.context.fitting_context.remove_workspace_by_name = mock.Mock()
+        self.context.update_view_from_model_notifier.notify_subscribers = mock.Mock()
+        self.context.deleted_plots_notifier.notify_subscribers = mock.Mock()
+
+        ws = create_empty_table("test")
+
+        self.context.remove_workspace(ws)
+
+        self.context.data_context.remove_workspace_by_name.assert_not_called()
+        self.context.group_pair_context.remove_workspace_by_name.assert_not_called()
+        self.context.phase_context.remove_workspace_by_name.assert_not_called()
+        self.context.fitting_context.remove_workspace_by_name.assert_not_called()
+        self.context.update_view_from_model_notifier.notify_subscribers.assert_not_called()
+        self.context.deleted_plots_notifier.notify_subscribers.assert_not_called()
 
 
 if __name__ == '__main__':

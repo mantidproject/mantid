@@ -48,18 +48,15 @@ class ModelFittingPresenter(BasicFittingPresenter):
         if workspace_name in self.model.result_table_names:
             names = self.model.result_table_names
             names.remove(workspace_name)
-            print("mooo remove", names)
             self.view.update_result_table_names(names)
             self.model.result_table_names = names
             self.handle_results_table_changed()
 
     def clear(self):
-        print("mooo clear")
         self.model.result_table_names = []
         self.view.update_result_table_names([])
 
     def replaced(self, workspace):
-        print("mooo replace")
         if workspace.name() in self.model.result_table_names:
             self.handle_results_table_changed()
 
