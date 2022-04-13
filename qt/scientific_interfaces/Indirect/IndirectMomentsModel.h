@@ -28,12 +28,10 @@ public:
   void setScale(bool scale);
   void setScaleValue(double scaleValue);
   std::string getOutputWorkspace();
-  QMap<QString, QtProperty *> getProperties();
 
 private:
   std::string m_inputWorkspace;
   std::string m_outputWorkspaceName;
-  QMap<QString, QtProperty *> m_properties;
   double m_eMin;
   double m_eMax;
   double m_scaleValue;

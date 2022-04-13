@@ -54,6 +54,4 @@ void IndirectMomentsModel::setScaleValue(double scaleValue) { m_scaleValue = sca
 
 std::string IndirectMomentsModel::getOutputWorkspace() { return m_outputWorkspaceName; }
 
-QMap<QString, QtProperty *> IndirectMomentsModel::getProperties() { return m_properties; }
-
 } // namespace MantidQt::CustomInterfaces
