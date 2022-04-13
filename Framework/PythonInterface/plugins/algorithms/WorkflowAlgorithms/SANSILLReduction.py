@@ -588,6 +588,7 @@ class SANSILLReduction(PythonAlgorithm):
             ApplyTransmissionCorrection(InputWorkspace=ws, TransmissionValue=transmission,
                                         TransmissionError=transmission_err, ThetaDependent=theta_dependent,
                                         OutputWorkspace=ws)
+            mtd[ws].getRun().addProperty('sample.transmission', float(transmission), True)
         else:
             # wavelength dependent transmission, need to rebin
             transmission_rebinned = ws + '_tr_rebinned'
@@ -595,6 +596,7 @@ class SANSILLReduction(PythonAlgorithm):
                              OutputWorkspace=transmission_rebinned)
             ApplyTransmissionCorrection(InputWorkspace=ws, TransmissionWorkspace=transmission_rebinned,
                                         ThetaDependent=theta_dependent, OutputWorkspace=ws)
+            mtd[ws].getRun().addProperty('sample.transmission', list(mtd[transmission_rebinned].readY(0)), True)
             DeleteWorkspace(transmission_rebinned)
 
     def _apply_container(self, ws, container_ws):
