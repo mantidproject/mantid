@@ -340,6 +340,8 @@ class SliceViewer(ObservingPresenter, SliceViewerBasePresenter):
             data_view.deactivate_tool(ToolItemText.ZOOM)
             for tool in [ToolItemText.REGIONSELECTION, ToolItemText.LINEPLOTS, ToolItemText.NONORTHOGONAL_AXES]:
                 data_view.deactivate_and_disable_tool(tool)
+            # turn off cursor tracking as this causes plot to resize interfering with interactive cutting tool
+            data_view.track_cursor.setChecked(False)  # on_track_cursor_state_change(False)
         else:
             self._cutviewer_presenter.hide_view()
             for tool in [ToolItemText.REGIONSELECTION, ToolItemText.LINEPLOTS]:
