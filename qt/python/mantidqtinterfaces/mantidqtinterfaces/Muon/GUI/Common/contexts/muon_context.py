@@ -537,7 +537,7 @@ class MuonContext(object):
         # required as the renameHandler returns a name instead of a workspace.
         if isinstance(workspace, str):
             workspace_name = workspace
-        if isinstance(workspace, TableWorkspace):
+        elif isinstance(workspace, TableWorkspace):
             # if its a table ws do nothing in the main part of the GUI
             return
         else:
