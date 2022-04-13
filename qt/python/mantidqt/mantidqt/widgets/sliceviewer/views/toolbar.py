@@ -47,7 +47,7 @@ class SliceViewerNavigationToolbar(MantidNavigationToolbar):
                              'linePlotsClicked', False),
         MantidNavigationTool(ToolItemText.REGIONSELECTION, 'Toggle region selection on/off', 'mdi.vector-rectangle',
                              'regionSelectionClicked', False),
-        MantidNavigationTool(ToolItemText.NONAXISALIGNEDCUTS, 'Toggle cutting tool', 'mdi.angle-acute',
+        MantidNavigationTool(ToolItemText.NONAXISALIGNEDCUTS, 'Toggle cutting tool', 'mdi.vector-line',
                              'nonAlignedCutsClicked', False),
         MantidStandardNavigationTools.SEPARATOR,
         MantidNavigationTool(ToolItemText.OVERLAY_PEAKS, 'Add peaks overlays on/off', 'mdi.chart-bubble',
