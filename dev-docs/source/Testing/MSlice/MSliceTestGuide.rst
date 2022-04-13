@@ -278,7 +278,7 @@ The Workspace Manager
 #. Delete the workspace with the name ``MAR21335_Ei60meV_scaled``
 #. Scale the ``MAR21335_Ei60meV`` workspace with a factor of ``2.0``
 #. A new workspace with the name ``MAR21335_Ei60meV_scaled`` appears
-#. In the ``Workspace Manager`` tab select the workspace ``MAR21335_Ei60me_scaled``
+#. In the ``Workspace Manager`` tab select the workspace ``MAR21335_Ei60meV_scaled``
 #. Navigate to the ``Cut`` tab
 #. In the row labelled ``along``, set the ``from`` value to ``0`` and the ``to`` value to ``10``
 #. In the row labelled ``over``, set the ``from`` value to ``-5`` and the ``to`` value to ``5``
