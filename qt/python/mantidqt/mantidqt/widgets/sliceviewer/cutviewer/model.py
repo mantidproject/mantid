@@ -23,7 +23,7 @@ class CutViewerModel:
             if iaxis == 0:
                 # cut axis
                 padding_frac = 0.25
-                nbins[iaxis] = 2 * padding_frac * bin_params[states.index(iaxis)] * (stop - start)
+                nbins[iaxis] = 2 * padding_frac * bin_params[states.index(iaxis)]
                 padding = padding_frac * (stop - start)
                 start, stop = start + padding, stop - padding
             else:
