@@ -951,6 +951,7 @@ class SANSILLMultiProcess(DataProcessorAlgorithm):
                    OutputScaleFactorsWorkspace=output_scale_factors,
                    ReferenceWorkspace=inputs[self.getProperty('StitchReferenceIndex').value],
                    **kwargs)
+            mtd[output].getRun().addProperty('stitch_scale_factors', list(mtd[output_scale_factors].readY(0)), True)
             return [output, output_scale_factors]
         except RuntimeError as e:
             self.log().error('Unable to stitch, consider stitching manually: '+str(e))

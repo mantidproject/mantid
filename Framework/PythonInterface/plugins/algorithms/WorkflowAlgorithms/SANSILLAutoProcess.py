@@ -454,10 +454,14 @@ class SANSILLAutoProcess(DataProcessorAlgorithm):
         # try to stitch automatically
         if len(outputSamples) > 1 and self.getPropertyValue('OutputType') == 'I(Q)':
             try:
-                stitched = self.output + "_stitched"
+                stitched = f'{self.output}_stitched'
+                stitch_params_ws = f'{self.output}_stitch_scale_factors'
                 Stitch(InputWorkspaces=outputSamples,
                        OutputWorkspace=stitched,
-                       ReferenceWorkspace=outputSamples[self.stitch_reference_index])
+                       ReferenceWorkspace=outputSamples[self.stitch_reference_index],
+                       OutputScaleFactorsWorkspace=stitch_params_ws)
+                mtd[stitched].getRun().addProperty('stitch_scale_factors', list(mtd[stitch_params_ws].readY(0)), True)
+                DeleteWorkspace(stitch_params_ws)
                 outputSamples.append(stitched)
             except RuntimeError as re:
                 self.log().warning("Unable to stitch automatically, consider "
