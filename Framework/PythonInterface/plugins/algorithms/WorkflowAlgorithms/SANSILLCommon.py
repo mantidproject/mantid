@@ -9,6 +9,7 @@ from mantid.api import WorkspaceGroup
 from enum import IntEnum
 from math import fabs
 from os import path
+import re
 
 
 class AcqMode(IntEnum):
@@ -36,6 +37,76 @@ EMPTY_TOKEN = '000000'
 # But in order to reduce it together in a vectorized way and apply the transmissions
 # we will need to inject a blank measurement in the place of 0, with the same number of frames
 # as the sample measurement (so 1 if mono, >1 if kinetic mono).
+
+
+def return_numors_from_path(run_list):
+    """Returns numors used to create a given workspace, including binary operations performed.
+
+    Args:
+        run_list: (str) containing full paths of all inputs, including binary operations on nexus files
+    """
+    regex_all = r'(\+)'
+    p = re.compile(regex_all)
+    list_entries = []
+    binary_op = []
+    prev_pos = 0
+    for obj in p.finditer(run_list):
+        list_entries.append(run_list[prev_pos:obj.span()[0]])
+        prev_pos = obj.span()[1]
+        binary_op.append(obj.group())
+    list_entries.append(run_list[prev_pos:])  # add the last remaining file
+    list_entries = [path.split(entry)[1] for entry in list_entries]
+    binary_op.append('')  # there is one fewer binary operator than there are numors
+    list_entries = [entry + operation for entry, operation in zip(list_entries, binary_op)]
+    return ''.join(list_entries)
+
+
+def _return_numors_from_ws(ws_name):
+    """Returns numor lists from the provided workspace name.
+
+    Args:
+        ws_name: (str) workspace name to extract numor_list from
+    """
+    numors = str()
+    if ws_name in mtd:
+        try:
+            numors = mtd[ws_name].getRun().getLogData('numor_list').value
+        except RuntimeError:  # numor list not set
+            numors = ''
+    return numors
+
+
+def add_correction_numors(ws, stransmission, container, absorber, beam, flux, solvent, reference,
+                          sensitivity):
+    """Adds numors used for corrections and inputs to the provided workspace.
+
+    Args:
+        ws: (str) workspace name to which information is to be added
+        stransmission: (str) workspace name with sample transmission
+        container: (str) workspace name with container
+        absorber: (str) workspace name with absorber
+        beam: (str) workspace name with beam
+        flux: (str) workspace name with flux
+        solvent: (str) workspace name with solvent
+        reference: (str) workspace name with reference
+        sensitivity: (str) workspace name with sensitivity
+    """
+    mtd[ws].getRun().addProperty('sample_transmission_numors',
+                                 _return_numors_from_ws(stransmission), True)
+    mtd[ws].getRun().addProperty('container_numors',
+                                 _return_numors_from_ws(container), True)
+    mtd[ws].getRun().addProperty('absorber_numors',
+                                 _return_numors_from_ws(absorber), True)
+    mtd[ws].getRun().addProperty('beam_numors',
+                                 _return_numors_from_ws(beam), True)
+    mtd[ws].getRun().addProperty('flux_numors',
+                                 _return_numors_from_ws(flux), True)
+    mtd[ws].getRun().addProperty('solvent_numors',
+                                 _return_numors_from_ws(solvent), True)
+    mtd[ws].getRun().addProperty('reference_numors',
+                                 _return_numors_from_ws(reference), True)
+    mtd[ws].getRun().addProperty('sensitivity_numors',
+                                 _return_numors_from_ws(sensitivity), True)
 
 
 def get_run_number(value):
