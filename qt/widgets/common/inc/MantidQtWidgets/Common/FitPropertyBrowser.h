@@ -663,9 +663,6 @@ private:
   /// The autobackground handler
   PropertyHandler *m_autoBackground;
 
-  /// Log names
-  QStringList m_logs;
-
   /// Number of decimal places in double properties
   int m_decimals;
 
