@@ -8,18 +8,10 @@ from mantid.api import DataProcessorAlgorithm, MatrixWorkspaceProperty, Multiple
     WorkspaceGroupProperty, FileAction, WorkspaceGroup
 from mantid.kernel import Direction, FloatBoundedValidator, FloatArrayProperty, IntBoundedValidator
 from mantid.simpleapi import *
+import SANSILLCommon as common
 import numpy as np
 from os import path
-
 EMPTY_TOKEN = '000000'
-
-
-def get_run_number(value):
-    """
-    Extracts the run number from the first run out of the string value of a
-    multiple file property of numors
-    """
-    return path.splitext(path.basename(value.split(',')[0].split('+')[0]))[0]
 
 
 def needs_processing(property_value, process_reduction_type):
@@ -33,7 +25,7 @@ def needs_processing(property_value, process_reduction_type):
     do_process = False
     ws_name = ''
     if property_value:
-        run_number = get_run_number(property_value)
+        run_number = common.get_run_number(property_value)
         ws_name = run_number + '_' + process_reduction_type
         if mtd.doesExist(ws_name):
             if isinstance(mtd[ws_name], WorkspaceGroup):
