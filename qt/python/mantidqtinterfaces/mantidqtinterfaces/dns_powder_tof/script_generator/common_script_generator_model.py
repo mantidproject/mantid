@@ -45,7 +45,7 @@ class DNSScriptGeneratorModel(DNSObsModel):
     def cancel_progress(self):
         self._progress_is_canceled = True
 
-    def script_maker(self, _options, _paths, _fselector):
+    def script_maker(self, _options, _paths, _file_selector):
         """
         Generation of a Mantid script to reduce DNS data
         """
@@ -73,6 +73,6 @@ class DNSScriptGeneratorModel(DNSObsModel):
         return filename
 
     @staticmethod
-    def save_script(script, filename, scriptdir):
-        create_dir(scriptdir)
-        return save_txt(script, filename, scriptdir)
+    def save_script(script, filename, script_dir):
+        create_dir(script_dir)
+        return save_txt(script, filename, script_dir)

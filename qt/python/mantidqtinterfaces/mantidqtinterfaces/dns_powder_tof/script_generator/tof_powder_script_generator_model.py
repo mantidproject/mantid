@@ -31,9 +31,9 @@ class DNSTofPowderScriptGeneratorModel(DNSScriptGeneratorModel):
         self._sample_data = None
 
     def _validate_tof_options(self):
-        return not (self._tof_opt['dEstep'] == 0 or self._tof_opt['qstep'] == 0
-                    or self._tof_opt['qmax'] <= self._tof_opt['qmin']
-                    or self._tof_opt['dEmax'] <= self._tof_opt['dEmin'])
+        return not (self._tof_opt['dE_step'] == 0 or self._tof_opt['q_step'] == 0
+                    or self._tof_opt['q_max'] <= self._tof_opt['q_min']
+                    or self._tof_opt['dE_max'] <= self._tof_opt['dE_min'])
 
     def _validate_nb_empty_banks(self):
         return not (self._nb_empty_banks == 0 and self._tof_opt['corrections']
@@ -42,10 +42,10 @@ class DNSTofPowderScriptGeneratorModel(DNSScriptGeneratorModel):
 
     def _validate_nb_vana_banks(self):
         return not (self._nb_vana_banks == 0 and self._tof_opt['corrections']
-                    and self._tof_opt['det_efficency'])
+                    and self._tof_opt['det_efficiency'])
 
     def _check_vana_cor(self):
-        return (self._tof_opt['corrections'] and self._tof_opt['det_efficency']
+        return (self._tof_opt['corrections'] and self._tof_opt['det_efficiency']
                 and self._nb_vana_banks > 0)
 
     def _check_bg_cor(self):
@@ -94,12 +94,12 @@ class DNSTofPowderScriptGeneratorModel(DNSScriptGeneratorModel):
 
     def _get_binning_lines(self):
         return [
-            f"bins = {{'qmin' : {self._tof_opt['qmin']:7.3f}, "
-            f"'qmax' : {self._tof_opt['qmax']:7.3f}, "
-            f"'qstep' : {self._tof_opt['qstep']:7.3f},"
-            f"\n        'dEmin': {self._tof_opt['dEmin']:7.3f}, "
-            f"'dEmax': {self._tof_opt['dEmax']:7.3f}, "
-            f"'dEstep': {self._tof_opt['dEstep']:7.3f}"
+            f"bins = {{'q_min' : {self._tof_opt['q_min']:7.3f}, "
+            f"'q_max' : {self._tof_opt['q_max']:7.3f}, "
+            f"'q_step' : {self._tof_opt['q_step']:7.3f},"
+            f"\n        'dE_min': {self._tof_opt['dE_min']:7.3f}, "
+            f"'dE_max': {self._tof_opt['dE_max']:7.3f}, "
+            f"'dE_step': {self._tof_opt['dE_step']:7.3f}"
             f"}}", ''
         ]
 
@@ -283,16 +283,16 @@ class DNSTofPowderScriptGeneratorModel(DNSScriptGeneratorModel):
                  and bool(paths["export_dir"]))
         return [sascii, nexus]
 
-    def _setup_sample_data(self, paths, fselector):
-        self._sample_data = DNSTofDataset(data=fselector['full_data'],
+    def _setup_sample_data(self, paths, file_selector):
+        self._sample_data = DNSTofDataset(data=file_selector['full_data'],
                                           path=paths['data_dir'],
                                           issample=True)
         self._nb_banks = self._sample_data.get_nb_sample_banks()
 
-    def _setup_standard_data(self, paths, fselector):
+    def _setup_standard_data(self, paths, file_selector):
         if self._tof_opt['corrections']:
             self._standard_data = DNSTofDataset(
-                data=fselector['standard_data'],
+                data=file_selector['standard_data'],
                 path=paths['standards_dir'],
                 issample=False)
             self._nb_vana_banks = self._standard_data.get_nb_vana_banks()
@@ -301,12 +301,12 @@ class DNSTofPowderScriptGeneratorModel(DNSScriptGeneratorModel):
             self._nb_vana_banks = 0
             self._nb_empty_banks = 0
 
-    def script_maker(self, options, paths, fselector=None):  # noqa: C901
+    def script_maker(self, options, paths, file_selector=None):  # noqa: C901
         self._tof_opt = options
         self._script = []
 
-        self._setup_sample_data(paths, fselector)
-        self._setup_standard_data(paths, fselector)
+        self._setup_sample_data(paths, file_selector)
+        self._setup_standard_data(paths, file_selector)
         self._check_if_to_save(paths)
         # if to do correction
         self._vana_cor = self._check_vana_cor()

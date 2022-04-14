@@ -68,7 +68,7 @@ datasetdic = [{
     'new_format': True
 }]
 
-fselector_fulldat = {
+file_selector_fulldat = {
     'full_data': [{
         'file_number': 788058,
         'det_rot': -9.0,
@@ -141,8 +141,8 @@ def get_paths():
     }
 
 
-def get_fselector_fulldat():
-    return fselector_fulldat
+def get_file_selector_fulldat():
+    return file_selector_fulldat
 
 
 # fake SC dataset with 2 scans for treeview tests
@@ -190,12 +190,12 @@ def get_3file_numbers():
 
 def get_fake_tof_binning():  # matches data 1,2 above
     return {
-        'dEmin': -3.1409856698897682,
-        'dEmax': 3.1409856698897682,
-        'dEstep': 0.07281971339779537,
-        'qmax': 2.837342973507243,
-        'qmin': 0.1849336923669811,
-        'qstep': 0.025
+        'dE_min': -3.1409856698897682,
+        'dE_max': 3.1409856698897682,
+        'dE_step': 0.07281971339779537,
+        'q_max': 2.837342973507243,
+        'q_min': 0.1849336923669811,
+        'q_step': 0.025
     }
 
 
@@ -217,7 +217,7 @@ def get_fake_tof_options():
         'corrections': True,
         'substract_vana_back': True,
         'substract_sample_back': True,
-        'det_efficency': True,
+        'det_efficiency': True,
         'vanadium_temperature': 295,
         'vana_back_factor': 1,
         'sample_back_factor': 1,

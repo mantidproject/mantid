@@ -26,20 +26,20 @@ class DNSTofPowderOptionsView(DNSView):
                                 baseinstance=self)
         self._map = {
             'vanadium_temperature': self._content.dSB_vanadium_temperature,
-            'dEmin': self._content.dSB_dEmin,
+            'dE_min': self._content.dSB_dE_min,
             'correct_elastic_peak_position': self._content.
             cB_correct_elastic_peak_position,
-            'qmax': self._content.dSB_qmax,
+            'q_max': self._content.dSB_q_max,
             'epp_channel': self._content.SB_epp_channel,
-            'qmin': self._content.dSB_qmin,
-            'dEmax': self._content.dSB_dEmax,
-            'dEstep': self._content.dSB_dEstep,
+            'q_min': self._content.dSB_q_min,
+            'dE_max': self._content.dSB_dE_max,
+            'dE_step': self._content.dSB_dE_step,
             'corrections': self._content.gB_corrections,
             'wavelength': self._content.dSB_wavelength,
-            'det_efficency': self._content.cB_det_efficency,
+            'det_efficiency': self._content.cB_det_efficiency,
             'delete_raw': self._content.cB_delete_raw,
             'norm_monitor': self._content.rB_norm_monitor,
-            'qstep': self._content.dSB_qstep,
+            'q_step': self._content.dSB_q_step,
             'substract_sample_back': self._content.cB_substract_sample_back,
             'substract_vana_back': self._content.cB_substract_vana_back,
             'vana_back_factor': self._content.dSB_vana_back_factor,
@@ -51,8 +51,8 @@ class DNSTofPowderOptionsView(DNSView):
         # connect signals
         self._content.pB_estimate.clicked.connect(self._estimate_q_and_binning)
         self._map['get_wavelength'].stateChanged.connect(self._get_wavelength)
-        self._map['det_efficency'].stateChanged.connect(
-            self._disable_sub_det_efficency)
+        self._map['det_efficiency'].stateChanged.connect(
+            self._disable_sub_det_efficiency)
         self._map['substract_sample_back'].stateChanged.connect(
             self._disable_sub_substract_sample_back)
         self._map['substract_vana_back'].stateChanged.connect(
@@ -65,7 +65,7 @@ class DNSTofPowderOptionsView(DNSView):
     def deactivate_get_wavelength(self):
         self._map['get_wavelength'].setCheckState(0)
 
-    def _disable_sub_det_efficency(self, state):
+    def _disable_sub_det_efficiency(self, state):
         self._map['vanadium_temperature'].setEnabled(state)
         self._map['correct_elastic_peak_position'].setEnabled(state)
         self._map['substract_vana_back'].setEnabled(state)

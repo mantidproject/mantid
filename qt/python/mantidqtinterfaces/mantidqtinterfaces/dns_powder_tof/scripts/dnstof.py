@@ -4,8 +4,9 @@
 #     NScD Oak Ridge National Laboratory, European Spallation Source
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
+
 """
-DNS script helpers for TOF powder reduction
+DNS script helpers for TOF powder reduction.
 """
 
 # import mantid algorithms
@@ -15,87 +16,93 @@ from mantid.simpleapi import (BinMD, ConvertToDistribution, ConvertToMD,
                               LoadDNSLegacy, MergeMD, MergeRuns, mtd)
 
 
-def convert_to_d_e(gws, efixed):
-    """Converting to dE"""
+def convert_to_d_e(gws, e_fixed):
+    """
+    Converting to dE.
+    """
     d_e_ws = f'{gws}_dE'
     ConvertUnits(gws,
                  Target='DeltaE',
                  EMode='Direct',
-                 EFixed=efixed,
+                 EFixed=e_fixed,
                  OutputWorkspace=d_e_ws)
     ConvertToDistribution(d_e_ws)
     sws = f'{gws}_dE_S'
     CorrectKiKf(d_e_ws, OutputWorkspace=sws)
 
 
-def get_sqw(gws_name, outws_name, b):
-    """Conversion and Binning of workspace to Q vs dE  """
+def get_sqw(gws_name, out_ws_name, b):
+    """
+    Conversion and binning of workspace to Q vs dE.
+    """
     gws = mtd[gws_name]
-    minvals, maxvals = ConvertToMDMinMaxGlobal(gws[0], '|Q|', 'Direct')
-    outws = f'g{outws_name}_mde'
+    min_vals, max_vals = ConvertToMDMinMaxGlobal(gws[0], '|Q|', 'Direct')
+    out_ws = f'g{out_ws_name}_mde'
     ConvertToMD(gws,
                 QDimensions='|Q|',
                 dEAnalysisMode='Direct',
                 PreprocDetectorsWS="-",
-                MinValues=minvals,
-                MaxValues=maxvals,
-                OutputWorkspace=outws)
-    outws1 = f'{outws_name}_mde'
+                MinValues=min_vals,
+                MaxValues=max_vals,
+                OutputWorkspace=out_ws)
+    out_ws_1 = f'{out_ws_name}_mde'
     if gws.getNumberOfEntries() > 1:
-        MergeMD(outws, OutputWorkspace=outws1)
+        MergeMD(out_ws, OutputWorkspace=out_ws_1)
     else:
-        outws1 = outws
+        out_ws_1 = out_ws
 
-    xbins = int((b['qmax'] - b['qmin']) / b['qstep'])
-    xmax = b['qmin'] + xbins * b['qstep']
-    ad0 = f"|Q|,{b['qmin']},{xmax},{xbins}"
+    x_bins = int((b['q_max'] - b['q_min']) / b['q_step'])
+    x_max = b['q_min'] + x_bins * b['q_step']
+    ad0 = f"|Q|,{b['q_min']},{x_max},{x_bins}"
 
-    ybins = int((b['dEmax'] - b['dEmin']) / b['dEstep'])
-    ymax = b['dEmin'] + ybins * b['dEstep']
-    ad1 = f"DeltaE,{b['dEmin']},{ymax},{ybins}"
-    BinMD(InputWorkspace=outws1,
+    y_bins = int((b['dE_max'] - b['dE_min']) / b['dE_step'])
+    y_max = b['dE_min'] + y_bins * b['dE_step']
+    ad1 = f"DeltaE,{b['dE_min']},{y_max},{y_bins}"
+    BinMD(InputWorkspace=out_ws_1,
           AlignedDim0=ad0,
           AlignedDim1=ad1,
-          OutputWorkspace=f'{outws_name}_sqw')
+          OutputWorkspace=f'{out_ws_name}_sqw')
 
 
 def load_data(data, prefix, p):
-    """Loading of multiple DNS powder TOF data in workspaces"""
-    wslist = []
-    # bankpositions must be sorted, since script divides based on position
-    bankpositions = sorted([x for x in data.keys() if x != 'path'])
-    for i, bankposition in enumerate(bankpositions):
-        wsname = f"{prefix}_{i + 1}"
-        pre_load_data(bankposition, wsname, p, data)
-        wslist.append(wsname)
-    GroupWorkspaces(wslist, OutputWorkspace=prefix)
+    """
+    Loading of multiple DNS powder TOF data in workspaces.
+    """
+    ws_list = []
+    # bank positions must be sorted, since script divides based on position
+    bank_positions = sorted([x for x in data.keys() if x != 'path'])
+    for i, bank_position in enumerate(bank_positions):
+        ws_name = f"{prefix}_{i + 1}"
+        pre_load_data(bank_position, ws_name, p, data)
+        ws_list.append(ws_name)
+    GroupWorkspaces(ws_list, OutputWorkspace=prefix)
 
 
-def pre_load_data(bankposition, prefix, p, data):
+def pre_load_data(bank_position, prefix, p, data):
     """
-    Loading and merging of multiple DNS powder TOF datafiles into a workspace
+    Loading and merging of multiple DNS powder TOF datafiles into a workspace.
     """
-    wslist = []
-    for rn in data[bankposition]:
-        infile = f"{data['path']}_{rn:06d}.d_dat"
-        wsname = f"ws_{rn:06d}"
+    ws_list = []
+    for rn in data[bank_position]:
+        in_file = f"{data['path']}_{rn:06d}.d_dat"
+        ws_name = f"ws_{rn:06d}"
         if p['wavelength'] > 0:
-            LoadDNSLegacy(infile,
+            LoadDNSLegacy(in_file,
                           Normalization='no',
                           ElasticChannel=p['e_channel'],
                           Wavelength=p['wavelength'],
-                          OutputWorkspace=wsname)
+                          OutputWorkspace=ws_name)
         else:
-            LoadDNSLegacy(infile,
+            LoadDNSLegacy(in_file,
                           Normalization='no',
                           ElasticChannel=p['e_channel'],
-                          OutputWorkspace=wsname)
-        wslist.append(wsname)
+                          OutputWorkspace=ws_name)
+        ws_list.append(ws_name)
 
-    ws = MergeRuns(wslist,
+    ws = MergeRuns(ws_list,
                    SampleLogsSum='mon_sum,duration',
                    SampleLogsTimeSeries='deterota,T1,T2,Tsp',
                    OutputWorkspace=prefix)
     if p['delete_raw']:
-        DeleteWorkspaces(wslist)
+        DeleteWorkspaces(ws_list)
     return ws

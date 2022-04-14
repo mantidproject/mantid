@@ -20,10 +20,10 @@ def get_proposal_from_filname(filename, file_number):
     return filename.replace(f'_{file_number:06d}.d_dat', '')
 
 
-def get_bank_positions(sampledata, rounding_limit=0.05):
+def get_bank_positions(sample_data, rounding_limit=0.05):
     new_arr = []
     inside = False
-    banks = set(entry['det_rot'] for entry in sampledata)
+    banks = set(entry['det_rot'] for entry in sample_data)
     for bank in banks:
         for compare in new_arr:
             if abs(compare - bank) < rounding_limit:

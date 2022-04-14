@@ -57,7 +57,7 @@ class DNSFileSelectorView(DNSView):
         self._standard_treeview.customContextMenuRequested.connect(
             self._treeview_clicked)
 
-        # Buttons
+        # buttons
         self._content.pB_td_read_all.clicked.connect(self._read_all_clicked)
         self._content.pB_td_read_filtered.clicked.connect(
             self._read_filtered_clicked)
@@ -91,7 +91,7 @@ class DNSFileSelectorView(DNSView):
             self._filter_standard_checked)
         self._map['autoload'].stateChanged.connect(self._autoload_checked)
 
-        # Combo box
+        # combo box
         self._content.combB_directory.currentIndexChanged.connect(
             self.combo_changed)
 
@@ -100,7 +100,7 @@ class DNSFileSelectorView(DNSView):
         self.progress = None
         self.combo_changed(0)
 
-    # Signals
+    # signals
     sig_read_all = Signal()
     sig_read_filtered = Signal()
     sig_filters_clicked = Signal()
@@ -116,7 +116,7 @@ class DNSFileSelectorView(DNSView):
     sig_standard_filters_clicked = Signal()
     sig_right_click = Signal(QModelIndex)
 
-    # Signal reactions
+    # signal reactions
     def _treeview_clicked(self, point):
         self.sig_right_click.emit(self._treeview.indexAt(point))
 
@@ -155,7 +155,7 @@ class DNSFileSelectorView(DNSView):
     def _un_expand_all(self):
         self._treeview.collapseAll()
 
-    # Public can be called from presenter
+    # public can be called from presenter
     def expand_all(self):
         self._treeview.expandAll()
 
@@ -171,7 +171,7 @@ class DNSFileSelectorView(DNSView):
     def _read_filtered_clicked(self):
         self.sig_read_filtered.emit()
 
-    # Get states
+    # get states
     def get_filters(self):
         """
         Returning chosen filters which should be applied to the list of scans.
@@ -182,7 +182,7 @@ class DNSFileSelectorView(DNSView):
             'det_rot': state_dict['filter_det_rot'],
             'sample_rot': state_dict['filter_sample_rot'],
             ' scan': state_dict['filter_scans'],
-            # Space is important to not get cscans
+            # space is important to not get cscans
             'cscan': state_dict['filter_cscans'],
             free_text: state_dict['filter_free'],
         }
@@ -227,7 +227,7 @@ class DNSFileSelectorView(DNSView):
     def is_scan_hidden(self, row):
         return self._treeview.isRowHidden(row, self._treeview.rootIndex())
 
-    # Progress dialog
+    # progress dialog
     def open_progress_dialog(self, num_of_steps):
         if num_of_steps:
             self.progress = QProgressDialog(
@@ -243,7 +243,7 @@ class DNSFileSelectorView(DNSView):
     def set_progress(self, step):
         self.progress.setValue(step)
 
-    # Manipulating view
+    # manipulating view
     def set_first_column_spanned(self, scan_range):
         for i in scan_range:
             self._treeview.setFirstColumnSpanned(i, self._treeview.rootIndex(),

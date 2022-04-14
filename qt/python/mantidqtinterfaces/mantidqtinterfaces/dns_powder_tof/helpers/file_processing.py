@@ -28,33 +28,33 @@ def filter_filenames(alldatafiles, start, end):
     return filtered
 
 
-def return_filelist(datadir):
+def return_filelist(data_dir):
     """
-    Return list of names of dnsfiles in datadir
+    Return list of names of dnsfiles in data_dir
     """
     filelist = []
-    if not os.path.isdir(datadir):
+    if not os.path.isdir(data_dir):
         return []
-    for fname in sorted(os.listdir(datadir)):
+    for fname in sorted(os.listdir(data_dir)):
         if re.match(r".*?_[0-9]+.d_dat", fname):
             filelist.append(fname)
     return filelist
 
 
-def return_standard_zip(datadir):
-    if not os.path.isdir(datadir):
+def return_standard_zip(data_dir):
+    if not os.path.isdir(data_dir):
         return ''
-    zipfiles = sorted(glob.glob(datadir + "/standard*.zip"))
+    zipfiles = sorted(glob.glob(data_dir + "/standard*.zip"))
     if zipfiles:
         latest_standard_file = max(zipfiles, key=os.path.getmtime)
         return latest_standard_file
     return ''
 
 
-def unzip_latest_standard(datadir, standarddir):
+def unzip_latest_standard(data_dir, standarddir):
     latest_zip = return_standard_zip(standarddir)
     if not latest_zip:
-        latest_zip = return_standard_zip(datadir)
+        latest_zip = return_standard_zip(data_dir)
     if latest_zip:
         with zipfile.ZipFile(latest_zip, "r") as zip_ref:
             zip_ref.extractall(standarddir)

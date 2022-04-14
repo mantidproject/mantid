@@ -5,25 +5,25 @@
 #     NScD Oak Ridge National Laboratory, European Spallation Source
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
+
 """
-DNS TOF powder Options Presenter - Tab of DNS Reduction GUI
+DNS TOF powder Options Presenter - Tab of DNS Reduction GUI.
 """
 
 from mantidqtinterfaces.dns_powder_tof.data_structures.dns_observer import DNSObserver
 
 
 class DNSCommonOptionsPresenter(DNSObserver):
-
     def __init__(self, name=None, parent=None, view=None, model=None):
         super().__init__(parent=parent, name=name, view=view, model=model)
 
     def _determine_wavelength(self):
         """
-        getting wavelength from selected DNSFiles, checks for deviations
+        Getting wavelength from selected DNSFiles, checks for deviations.
         """
-        fulldata = self.param_dict['file_selector']['full_data']
-        if not fulldata:
-            self.raise_error('no data selected', critical=True)
+        full_data = self.param_dict['file_selector']['full_data']
+        if not full_data:
+            self.raise_error('No data selected', critical=True)
             return None
         warnings = {
             'wavelength_varies': 'Warning, different wavelengths in'
@@ -35,7 +35,7 @@ class DNSCommonOptionsPresenter(DNSObserver):
             ' wavelength more'
             ' than 10%, set wavelength manually. ',
         }
-        wavelength, errors = self.model.determine_wavelength(fulldata)
+        wavelength, errors = self.model.determine_wavelength(full_data)
         for key, value in errors.items():
             self.raise_error(warnings[key], doraise=value)
         if any(errors.values()):
