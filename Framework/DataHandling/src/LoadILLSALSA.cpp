@@ -163,8 +163,12 @@ void LoadILLSALSA::loadOldNexus(const std::string &filename) {
   detectorDataset.read(dataInt.data(), detectorDataset.getDataType());
   monitorDataset.read(dataInt.data() + 256 * 256, monitorDataset.getDataType());
 
-  for (size_t i = 0; i < dataInt.size(); i++)
-    m_outputWorkspace->mutableY(i)[0] = dataInt[i];
+  for (size_t i = 0; i < dataInt.size(); i++) {
+    double count = dataInt[i];
+    double error = sqrt(count);
+    m_outputWorkspace->mutableY(i)[0] = count;
+    m_outputWorkspace->mutableE(i)[0] = error;
+  }
 
   detectorDataset.close();
   monitorDataset.close();
