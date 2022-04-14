@@ -194,8 +194,12 @@ void LoadILLSALSA::loadNewNexus(const std::string &filename) {
   detectorDataset.read(dataInt.data(), detectorDataset.getDataType());
 
   for (size_t j = 0; j < m_numberOfScans; j++)
-    for (size_t i = 0; i < m_numberOfRows * m_numberOfColumns; i++)
-      m_outputWorkspace->mutableY(i)[j] = dataInt[j * m_numberOfRows * m_numberOfColumns + i];
+    for (size_t i = 0; i < m_numberOfRows * m_numberOfColumns; i++) {
+      double count = dataInt[j * m_numberOfRows * m_numberOfColumns + i];
+      double error = sqrt(count);
+      m_outputWorkspace->mutableY(i)[j] = count;
+      m_outputWorkspace->mutableE(i)[j] = error;
+    }
 }
 
 void LoadILLSALSA::fillWorkspaceData(const Mantid::NeXus::NXInt &detectorData,
