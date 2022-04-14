@@ -350,7 +350,7 @@
         <string/>
        </property>
        <property name="title">
-        <string>Check Scans:</string>
+        <string>Select Scans/Files:</string>
        </property>
        <layout class="QGridLayout" name="gridLayout_3">
         <item row="3" column="0" rowspan="2">
@@ -369,7 +369,7 @@
            <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;checks selected files.&lt;/p&gt;&lt;p&gt;You can use multiselection with Shift and Strg.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
           </property>
           <property name="text">
-           <string>Check Selected</string>
+           <string>Select Highligted</string>
           </property>
          </widget>
         </item>
@@ -407,7 +407,7 @@
      <item>
       <widget class="QGroupBox" name="groupBox_expand">
        <property name="title">
-        <string>Expand</string>
+        <string>Expand Scans:</string>
        </property>
        <layout class="QHBoxLayout" name="horizontalLayout_3">
         <item>
