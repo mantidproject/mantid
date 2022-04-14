@@ -215,6 +215,8 @@ void LoadILLSALSA::loadNewNexus(const std::string &filename) {
       break;
     monitorIndex++;
   }
+  if (monitorIndex == rdata.size())
+    throw std::runtime_error("Monitor count not found. Please check your nexus file.");
   scanVarNames.vlenReclaim(rdata.data(), scanVarNames.getDataType(), scanVarNamesSpace);
 
   scanVarNames.close();
@@ -225,6 +227,8 @@ void LoadILLSALSA::loadNewNexus(const std::string &filename) {
 
   nDims = scanVarNamesSpace.getSimpleExtentNdims();
   dimsSize = std::vector<hsize_t>(nDims);
+  if ((nDims != 2) || (dimsSize[1] != m_numberOfScans))
+    throw std::runtime_error("Scanned variables are not formatted properly. Check you nexus file.");
   scanVarSpace.getSimpleExtentDims(dimsSize.data(), nullptr);
 
   std::vector<double> scanVarData(7 * 10);
