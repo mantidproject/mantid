@@ -25,9 +25,11 @@ class DNSFileSelectorPresenter(DNSObserver):
         self.view.set_tree_model(self.model.get_model())
         self.view.set_tree_model(self.model.get_model(standard=True),
                                  standard=True)
+        # hide filter by filename box from view
+        self.view.groupBox_filter_file_number.setHidden(True)
         self._old_data_set = set()
 
-        # Connect signals
+        # connect signals
         self.view.sig_read_all.connect(self._read_all)
         self.view.sig_read_filtered.connect(self._read_filtered)
         self.view.sig_filters_clicked.connect(self._filter_scans)
@@ -42,7 +44,7 @@ class DNSFileSelectorPresenter(DNSObserver):
         self.view.sig_dataset_changed.connect(self._dataset_changed)
         self.watcher.sig_files_changed.connect(self._files_changed_by_watcher)
 
-    # Loading
+    # loading
     def _read_all(self, filtered=False, watcher=False, start=None, end=None):
         """
         Reading of new files, if filtered is True, only the files in the
@@ -217,7 +219,7 @@ class DNSFileSelectorPresenter(DNSObserver):
         standard_path = self.param_dict['paths']['standards_dir']
         self.model.open_datafile(index, data_path, standard_path)
 
-    # Normal observer function
+    # normal observer function
     def get_option_dict(self):
         if self.view is not None:
             self.own_dict.update(self.view.get_state())

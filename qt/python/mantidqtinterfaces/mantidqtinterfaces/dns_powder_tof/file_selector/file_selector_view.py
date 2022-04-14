@@ -138,7 +138,6 @@ class DNSFileSelectorView(DNSView):
 
     def combo_changed(self, index):
         self._content.groupBox_filter.setHidden(index)
-        self._content.groupBox_filter_file_number.setHidden(index)
         self._content.pB_check_last_scan.setHidden(index)
         self._content.pB_check_last_complete_scan.setHidden(index)
         self._content.sB_last_scans.setHidden(index)
