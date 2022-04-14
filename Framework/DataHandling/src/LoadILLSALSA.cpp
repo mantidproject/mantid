@@ -231,11 +231,11 @@ void LoadILLSALSA::loadNewNexus(const std::string &filename) {
     throw std::runtime_error("Scanned variables are not formatted properly. Check you nexus file.");
   scanVarSpace.getSimpleExtentDims(dimsSize.data(), nullptr);
 
-  std::vector<double> scanVarData(7 * 10);
+  std::vector<double> scanVarData(dimsSize[0] * dimsSize[1]);
   scanVar.read(scanVarData.data(), scanVar.getDataType());
-  std::vector<double> monitorData(10);
+  std::vector<double> monitorData(dimsSize[1]);
   for (size_t i = 0; i < monitorData.size(); i++)
-    monitorData[i] = scanVarData[monitorIndex * 10 + i];
+    monitorData[i] = scanVarData[monitorIndex * dimsSize[1] + i];
 
   scanVar.close();
 
