@@ -11,6 +11,8 @@
 #include "MantidKernel/NexusDescriptor.h"
 #include "MantidNexus/NexusClasses.h"
 
+#include <H5Cpp.h>
+
 #include <memory>
 #include <string>
 #include <vector>
@@ -42,9 +44,9 @@ private:
   // set the instrument
   void setInstrument(double distance, double angle);
   // load data from old single point nexus
-  void loadOldNexus(const std::string &filename);
+  void loadOldNexus(const H5::H5File &h5file);
   // load data from new scan nexus
-  void loadNewNexus(const std::string &filename);
+  void loadNewNexus(const H5::H5File &h5file);
   // fill workspace with detector and monitor counts
   void fillWorkspaceData(const Mantid::NeXus::NXInt &detectorData, const std::vector<std::string> &scanVariableNames,
                          const Mantid::NeXus::NXDouble &scanVariables);

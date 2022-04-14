@@ -18,7 +18,6 @@
 #include "MantidKernel/OptionalBool.h"
 #include "MantidNexus/NexusClasses.h"
 
-#include <H5Cpp.h>
 #include <iterator>
 #include <sstream>
 
@@ -81,19 +80,19 @@ void LoadILLSALSA::exec() {
     fileType = NEW;
   }
 
-  h5file.close();
-
   switch (fileType) {
   case NONE:
     throw std::runtime_error("pb");
     break;
   case OLD:
-    loadOldNexus(filename);
+    loadOldNexus(h5file);
     break;
   case NEW:
-    loadNewNexus(filename);
+    loadNewNexus(h5file);
     break;
   }
+
+  h5file.close();
 }
 
 void LoadILLSALSA::setInstrument(double distance, double angle) {
@@ -129,11 +128,9 @@ void LoadILLSALSA::setInstrument(double distance, double angle) {
 /**
  * Load old Nexus files that contain a single point. In this case, data are in /entry0/data/Multi_data and there shape
  * is 256x256x1.
- * @param filename Nexus filename
+ * @param h5file reference to the opened hdf5/nexus file
  */
-void LoadILLSALSA::loadOldNexus(const std::string &filename) {
-  H5::H5File h5file(filename, H5F_ACC_RDONLY);
-
+void LoadILLSALSA::loadOldNexus(const H5::H5File &h5file) {
   H5::DataSet detectorDataset = h5file.openDataSet("entry0/data/Multi_data");
   H5::DataSet monitorDataset = h5file.openDataSet("entry0/monitor/data");
 
@@ -153,17 +150,13 @@ void LoadILLSALSA::loadOldNexus(const std::string &filename) {
 
   detectorDataset.close();
   monitorDataset.close();
-
-  h5file.close();
 }
 
 /**
  * Fill the output workspace with data coming from a scanning nexus.
- * @param filename Nexus file name
+ * @param h5file reference to the opened hdf5/nexus file
  */
-void LoadILLSALSA::loadNewNexus(const std::string &filename) {
-  H5::H5File h5file(filename, H5F_ACC_RDONLY);
-
+void LoadILLSALSA::loadNewNexus(const H5::H5File &h5file) {
   H5::DataSet detectorDataset = h5file.openDataSet("entry0/data_scan/detector_data/data");
   H5::DataSpace detectorDataspace = detectorDataset.getSpace();
 
@@ -223,8 +216,6 @@ void LoadILLSALSA::loadNewNexus(const std::string &filename) {
     monitorData[i] = scanVarData[monitorIndex * dimsSize[1] + i];
 
   scanVar.close();
-
-  h5file.close();
 
   // fill the workspace
   for (size_t j = 0; j < m_numberOfScans; j++) {
