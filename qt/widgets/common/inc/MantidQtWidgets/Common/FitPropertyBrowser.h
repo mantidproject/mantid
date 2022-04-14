@@ -198,12 +198,6 @@ public:
   QString getYColumnName() const;
   /// Get the name of the Error column
   QString getErrColumnName() const;
-  /// Set LogValue for PlotPeakByLogValue
-  void setLogValue(const QString &lv = "");
-  /// Get LogValue
-  std::string getLogValue() const;
-  /// Remove LogValue from the browser
-  void removeLogValue();
 
   /// Return a list of registered functions
   const QStringList &registeredFunctions() const { return m_registeredFunctions; }
@@ -512,7 +506,6 @@ protected:
   QtProperty *m_costFunction;
   QtProperty *m_maxIterations;
   QtProperty *m_peakRadius;
-  QtProperty *m_logValue;
   QtProperty *m_plotDiff;
   QtProperty *m_excludeRange;
   QtProperty *m_plotCompositeMembers;
@@ -548,8 +541,6 @@ protected:
   /// if true the output name will be guessed every time workspace name is
   /// changeed
   bool m_guessOutputName;
-  /// Check if the input workspace is a group
-  bool isWorkspaceAGroup() const;
 
   /// A list of registered functions
   mutable QStringList m_registeredFunctions;
@@ -671,9 +662,6 @@ private:
 
   /// The autobackground handler
   PropertyHandler *m_autoBackground;
-
-  /// Log names
-  QStringList m_logs;
 
   /// Number of decimal places in double properties
   int m_decimals;
