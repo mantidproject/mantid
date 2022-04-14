@@ -93,6 +93,15 @@ void LoadILLSALSA::exec() {
     break;
   }
 
+  // set the instrument
+  double sampleToDetectorDistance = getProperty("DetectorDistance");
+  H5::DataSet thetaDataset = h5file.openDataSet("entry0/instrument/2theta/value");
+  double theta;
+  thetaDataset.read(&theta, thetaDataset.getDataType());
+  double twoThetaAngle = theta + static_cast<double>(getProperty("ThetaOffset"));
+  setInstrument(sampleToDetectorDistance, twoThetaAngle);
+  thetaDataset.close();
+
   h5file.close();
 }
 
