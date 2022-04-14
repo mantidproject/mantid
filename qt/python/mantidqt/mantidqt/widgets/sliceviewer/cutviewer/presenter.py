@@ -1,3 +1,11 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2022 ISIS Rutherford Appleton Laboratory UKRI,
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
+# SPDX - License - Identifier: GPL - 3.0 +
+#  This file is part of the mantid workbench.
+#
 from mantidqt.widgets.sliceviewer.cutviewer.view import CutViewerView
 from mantidqt.widgets.sliceviewer.cutviewer.model import CutViewerModel
 
@@ -9,24 +17,9 @@ class CutViewerPresenter:
         :param sliceinfo_provider: An object responsible for providing access to current slice information
         :param parent: An optional parent widget
         """
-        self.view = CutViewerView(self, canvas)
+        self.view = CutViewerView(self, canvas, sliceviewer_presenter.get_frame())
         self.model = CutViewerModel(self, sliceviewer_presenter.get_proj_matrix())
         self._sliceview_presenter = sliceviewer_presenter
-
-    # signals
-
-    def on_dimension_changed(self):
-        self.reset_view_table()
-        self.update_cut()
-
-    def on_slicepoint_changed(self):
-        slicept = self._sliceview_presenter.get_sliceinfo().z_value
-        width = self.model.get_slicewidth(self._sliceview_presenter.get_dimensions())
-        self.view.set_slicepoint(slicept, width)
-        self.update_cut()
-
-    def on_cut_done(self, wsname):
-        self.view.plot_cut_ws(wsname)
 
     def show_view(self):
         self.view.show()
@@ -62,3 +55,17 @@ class CutViewerPresenter:
         self.view.set_bin_params(
             *self.model.calc_bin_params_from_cut_representation(xmin, xmax, ymin, ymax, thickness, vectors[-1, :]))
         self.update_cut()
+
+    # signals
+    def on_dimension_changed(self):
+        self.reset_view_table()
+        self.update_cut()
+
+    def on_slicepoint_changed(self):
+        slicept = self._sliceview_presenter.get_sliceinfo().z_value
+        width = self.model.get_slicewidth(self._sliceview_presenter.get_dimensions())
+        self.view.set_slicepoint(slicept, width)
+        self.update_cut()
+
+    def on_cut_done(self, wsname):
+        self.view.plot_cut_ws(wsname)

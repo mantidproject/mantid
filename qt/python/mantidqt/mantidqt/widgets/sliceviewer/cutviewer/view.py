@@ -1,3 +1,11 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2022 ISIS Rutherford Appleton Laboratory UKRI,
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
+# SPDX - License - Identifier: GPL - 3.0 +
+#  This file is part of the mantid workbench.
+#
 from qtpy.QtWidgets import QVBoxLayout, QWidget, QTableWidget, QHeaderView, QTableWidgetItem
 from qtpy.QtCore import Qt
 from qtpy.QtGui import QColor
@@ -7,13 +15,14 @@ from mantidqt.plotting.mantid_navigation_toolbar import MantidNavigationToolbar
 import matplotlib.text as text
 import numpy as np
 from mantid.simpleapi import AnalysisDataService as ADS
+from mantid.kernel import SpecialCoordinateSystem
 
 
 class CutViewerView(QWidget):
     """Displays a table view of the PeaksWorkspace along with controls
     to interact with the peaks.
     """
-    def __init__(self, presenter, canvas, parent=None):
+    def __init__(self, presenter, canvas, frame, parent=None):
         """
         :param painter: An object responsible for drawing the representation of the cut
         :param sliceinfo_provider: An object responsible for providing access to current slice information
@@ -27,6 +36,7 @@ class CutViewerView(QWidget):
         self.figure = None
         self.cut_rep = None
         self.canvas = canvas
+        self.frame = frame
         self._setup_ui()
         self._init_slice_table()
         self.table.cellChanged.connect(self.on_cell_changed)
@@ -135,7 +145,9 @@ class CutViewerView(QWidget):
         """
         table_widget = QTableWidget(3, 7, self)
         table_widget.setVerticalHeaderLabels(['u1', 'u2', 'u3'])
-        table_widget.setHorizontalHeaderLabels(['a*', 'b*', 'c*', 'start', 'stop', 'nbins', 'step'])
+        col_headers = ['a*', 'b*', 'c*'] if self.frame == SpecialCoordinateSystem.HKL else ['Qx', 'Qy', 'Qz']
+        col_headers.extend(['start', 'stop', 'nbins', 'step'])
+        table_widget.setHorizontalHeaderLabels(col_headers)
         table_widget.setFixedHeight(table_widget.verticalHeader().defaultSectionSize()*(table_widget.rowCount()+1))  # +1 to include headers
         for icol in range(table_widget.columnCount()):
             table_widget.setColumnWidth(icol, 50)
