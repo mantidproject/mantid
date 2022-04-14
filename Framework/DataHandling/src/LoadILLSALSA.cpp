@@ -10,13 +10,11 @@
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/RegisterFileLoader.h"
 #include "MantidAPI/WorkspaceProperty.h"
-#include "MantidDataHandling/H5Util.h"
 #include "MantidDataHandling/LoadHelper.h"
 #include "MantidDataObjects/WorkspaceCreation.h"
 #include "MantidHistogramData/Points.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/OptionalBool.h"
-#include "MantidNexus/NexusClasses.h"
 
 #include <iterator>
 #include <sstream>
