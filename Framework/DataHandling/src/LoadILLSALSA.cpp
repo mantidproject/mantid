@@ -177,6 +177,9 @@ void LoadILLSALSA::loadNewNexus(const H5::H5File &h5file) {
 
   size_t numberOfScans = dimsSize[0];
 
+  if ((dimsSize[1] != VERTICAL_NUMBER_PIXELS) || (dimsSize[2] != HORIZONTAL_NUMBER_PIXELS))
+    throw std::runtime_error("");
+
   m_outputWorkspace = DataObjects::create<DataObjects::Workspace2D>(
       VERTICAL_NUMBER_PIXELS * HORIZONTAL_NUMBER_PIXELS + 1, HistogramData::Points(numberOfScans));
   setProperty("OutputWorkspace", m_outputWorkspace);
