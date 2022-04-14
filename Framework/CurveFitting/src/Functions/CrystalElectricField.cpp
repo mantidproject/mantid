@@ -567,7 +567,7 @@ void diagonalise(const ComplexFortranMatrix &hamiltonian, DoubleFortranVector &e
   h.eigenSystemHermitian(eigenvalues, eigenvectors);
 
   // Sort the eigenvalues in ascending order
-  auto sortedIndices = eigenvalues.sortIndices(); // does it make sense to do this for complex numbers?
+  auto sortedIndices = eigenvalues.sortIndices();
   eigenvalues.sort(sortedIndices);
   // Eigenvectors are in columns. Sort the columns
   // to match the sorted eigenvalues.
