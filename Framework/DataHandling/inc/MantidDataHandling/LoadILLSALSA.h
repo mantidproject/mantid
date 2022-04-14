@@ -47,9 +47,6 @@ private:
   void loadOldNexus(const H5::H5File &h5file);
   // load data from new scan nexus
   void loadNewNexus(const H5::H5File &h5file);
-  // fill workspace with detector and monitor counts
-  void fillWorkspaceData(const Mantid::NeXus::NXInt &detectorData, const std::vector<std::string> &scanVariableNames,
-                         const Mantid::NeXus::NXDouble &scanVariables);
   // fill workspace with metadata
   void fillWorkspaceMetadata(const std::string &filename);
   // Output workspace

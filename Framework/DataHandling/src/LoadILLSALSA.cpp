@@ -229,37 +229,6 @@ void LoadILLSALSA::loadNewNexus(const H5::H5File &h5file) {
   }
 }
 
-void LoadILLSALSA::fillWorkspaceData(const Mantid::NeXus::NXInt &detectorData,
-                                     const std::vector<std::string> &scanVariableNames,
-                                     const Mantid::NeXus::NXDouble &scanVariables) {
-  // fill detector data
-  int index = 0;
-  for (int i = 0; i < m_numberOfRows; i++) {
-    for (int j = 0; j < m_numberOfColumns; j++) {
-      auto &spectrum = m_outputWorkspace->mutableY(index);
-      auto &errors = m_outputWorkspace->mutableE(index);
-      auto &axis = m_outputWorkspace->mutableX(index);
-      for (int k = 0; k < m_numberOfScans; k++) {
-        spectrum[k] = detectorData(k, i, j);
-        errors[k] = sqrt(detectorData(k, i, j));
-        axis[k] = k;
-      }
-      index++;
-    }
-  }
-
-  // fill monitor data
-  auto it = std::find(scanVariableNames.cbegin(), scanVariableNames.cend(), "Monitor1");
-  if (it == scanVariableNames.cend())
-    throw std::runtime_error("Monitor was not found in scanned variable. Please check your nexus file.");
-  auto monitorIndex = std::distance(scanVariableNames.cbegin(), it);
-  for (int i = 0; i < m_numberOfScans; i++) {
-    m_outputWorkspace->mutableY(index)[i] = scanVariables((int)monitorIndex, i);
-    m_outputWorkspace->mutableE(index)[i] = sqrt(scanVariables((int)monitorIndex, i));
-    m_outputWorkspace->mutableX(index)[i] = i;
-  }
-}
-
 void LoadILLSALSA::fillWorkspaceMetadata(const std::string &filename) {
   API::Run &runDetails = m_outputWorkspace->mutableRun();
   NXhandle nxHandle;
