@@ -61,58 +61,37 @@ void LoadILLSALSA::init() {
  */
 void LoadILLSALSA::exec() {
   const std::string filename = getPropertyValue("Filename");
+  H5::H5File h5file(filename, H5F_ACC_RDONLY);
 
-  // load scanned variables names
-  std::vector<std::string> scanVariableNames;
-  {
-    H5::H5File h5file(filename, H5F_ACC_RDONLY);
-    H5::Group scanVariables = h5file.openGroup("entry0/data_scan/scanned_variables/variables_names");
-    scanVariableNames = H5Util::readStringVector(scanVariables, "name");
-    scanVariables.close();
-    h5file.close();
+  enum FileType { OLD, NEW, NONE };
+
+  FileType fileType = NONE;
+  // guess type of file
+  try {
+    H5::DataSet detectorDataset = h5file.openDataSet("entry0/data");
+  } catch (...) {
+    fileType = OLD;
   }
 
-  // load data (detector and scanned variables)
-  Mantid::NeXus::NXRoot dataRoot(filename);
-  Mantid::NeXus::NXEntry dataFirstEntry = dataRoot.openFirstEntry();
-
-  Mantid::NeXus::NXData scanVariablesGroup = dataFirstEntry.openNXData("/data_scan/scanned_variables/data");
-  Mantid::NeXus::NXDouble scanVariables = scanVariablesGroup.openDoubleData();
-  scanVariables.load();
-  scanVariablesGroup.close();
-
-  Mantid::NeXus::NXData dataGroup = dataFirstEntry.openNXData("/data_scan/detector_data/data");
-  Mantid::NeXus::NXInt data = dataGroup.openIntData();
-  data.load();
-  dataGroup.close();
-
-  m_numberOfScans = data.dims(0);
-  m_numberOfRows = data.dims(1);
-  m_numberOfColumns = data.dims(2);
-
-  if (scanVariables.dims(1) != m_numberOfScans) {
-    std::ostringstream msg;
-    msg << "Number of scans in detector data (" << m_numberOfScans << ") ";
-    msg << "and scanned variables (" << scanVariables.dims(1) << ") do not match, please check your nexus file.";
-    throw std::runtime_error(msg.str());
+  try {
+    H5::DataSet detectorDataset = h5file.openDataSet("entry0/data_scan");
+  } catch (...) {
+    fileType = NEW;
   }
 
-  m_outputWorkspace = DataObjects::create<DataObjects::Workspace2D>(m_numberOfRows * m_numberOfColumns + 1,
-                                                                    HistogramData::Points(m_numberOfScans));
-  setProperty("OutputWorkspace", m_outputWorkspace);
+  h5file.close();
 
-  // set the instrument
-  double sampleToDetectorDistance = getProperty("DetectorDistance");
-  Mantid::NeXus::NXFloat theta = dataFirstEntry.openNXFloat("/instrument/2theta/value");
-  theta.load();
-  double twoThetaAngle = theta[0] + static_cast<double>(getProperty("ThetaOffset"));
-  setInstrument(sampleToDetectorDistance, twoThetaAngle);
-
-  fillWorkspaceData(data, scanVariableNames, scanVariables);
-
-  dataRoot.close();
-
-  fillWorkspaceMetadata(filename);
+  switch (fileType) {
+  case NONE:
+    throw std::runtime_error("pb");
+    break;
+  case OLD:
+    loadOldNexus(filename);
+    break;
+  case NEW:
+    loadNewNexus(filename);
+    break;
+  }
 }
 
 void LoadILLSALSA::setInstrument(double distance, double angle) {
