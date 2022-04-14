@@ -246,12 +246,23 @@ public:
   }
 
   void testNotifyBatchRowCellChanged() {
+    auto constexpr groupIndex = 1;
+    auto constexpr rowIndex = 1;
+    auto constexpr cellIndex = 1;
     auto reductionJobs = twoGroupsWithMixedRowsModel();
     auto presenter = makePresenter(m_view, reductionJobs);
-    auto const rowLocation = location(0, 0);
-    ON_CALL(m_jobs, cellAt(rowLocation, 0)).WillByDefault(Return(Cell("")));
-    EXPECT_CALL(m_mainPresenter, notifyRowContentChanged(_)).Times(1);
-    presenter.notifyCellTextChanged(rowLocation, 0, "", "");
+    auto const rowLocation = location(groupIndex, rowIndex);
+    ON_CALL(m_jobs, cellAt(rowLocation, cellIndex)).WillByDefault(Return(Cell("")));
+    // This extra call is needed to sort out some row states that get changed by calls to Update Row. That's not what
+    // we're testing here, so just get the state in line before checking notify is called correctly.
+    presenter.notifyCellTextChanged(rowLocation, cellIndex, "", "");
+    EXPECT_CALL(m_mainPresenter, notifyRowContentChanged(presenter.mutableRunsTable()
+                                                             .mutableReductionJobs()
+                                                             .mutableGroups()[groupIndex]
+                                                             .mutableRows()[rowIndex]
+                                                             .get()))
+        .Times(1);
+    presenter.notifyCellTextChanged(rowLocation, cellIndex, "", "");
     verifyAndClearExpectations();
   }
 
