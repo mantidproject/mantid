@@ -1,16 +1,22 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2022 ISIS Rutherford Appleton Laboratory UKRI,
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
+# SPDX - License - Identifier: GPL - 3.0 +
+#  This file is part of the mantid workbench.
+#
 import unittest
 from unittest import mock
 from numpy import eye, array, array_equal, zeros, allclose, c_, tile, sqrt
 
 from mantidqt.widgets.sliceviewer.cutviewer.model import CutViewerModel
-from mantidqt.widgets.sliceviewer.cutviewer.presenter import CutViewerPresenter
 
 
 class TestCutViewerModel(unittest.TestCase):
     def setUp(self):
         # load empty instrument so can create a peak table
-        self.mock_presenter = mock.create_autospec(CutViewerPresenter)
-        self.model = CutViewerModel(self.mock_presenter, eye(3))
+        self.model = CutViewerModel(eye(3))
         self.mock_dims = mock.MagicMock()
         # setup dimensions corresponding to HK plane with (X,Y) = (K,H)
         self.mock_dims.get_states.side_effect = lambda: [1, 0, None]  # so return can be modified

@@ -18,7 +18,7 @@ class CutViewerPresenter:
         :param parent: An optional parent widget
         """
         self.view = CutViewerView(self, canvas, sliceviewer_presenter.get_frame())
-        self.model = CutViewerModel(self, sliceviewer_presenter.get_proj_matrix())
+        self.model = CutViewerModel(sliceviewer_presenter.get_proj_matrix())
         self._sliceview_presenter = sliceviewer_presenter
 
     def show_view(self):

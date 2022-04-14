@@ -1,10 +1,17 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2022 ISIS Rutherford Appleton Laboratory UKRI,
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
+# SPDX - License - Identifier: GPL - 3.0 +
+#  This file is part of the mantid workbench.
+#
 from numpy import isclose, sum, argsort, ones, sqrt, zeros,  mean, where, dot, cross, array, vstack
 from numpy.linalg import det
 
 
 class CutViewerModel:
-    def __init__(self, presenter, proj_matrix):
-        self.presenter = presenter
+    def __init__(self, proj_matrix):
         self.proj_matrix = proj_matrix.T  # .T so now each basis vector is a row as in view table
         self.xvec = None  # q vector of colorfill x-axis
         self.yvec = None  # q vector of colorfill y-axis
