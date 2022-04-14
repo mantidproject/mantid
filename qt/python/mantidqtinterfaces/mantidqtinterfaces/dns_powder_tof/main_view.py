@@ -4,8 +4,9 @@
 #     NScD Oak Ridge National Laboratory, European Spallation Source
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
+
 """
-Reduction GUI for DNS Instrument at MLZ
+Reduction GUI for DNS Instrument at MLZ.
 """
 
 import webbrowser
@@ -21,9 +22,8 @@ from qtpy.QtCore import QProcess
 class DNSReductionGUIView(QMainWindow):
     # pylint: disable=too-many-instance-attributes
     """
-    Main View for DNS reduction gui
+    Main View for DNS reduction GUI.
     """
-
     def __init__(self, parent=None, app=None, within_mantid=None):
         QMainWindow.__init__(self, parent=None)
         self.parent = parent
@@ -62,10 +62,10 @@ class DNSReductionGUIView(QMainWindow):
         self.menu = self.ui.menubar
         self.subviews = []
         self.last_index = 0
-        # Connect Signals
+        # connect signals
         self.ui.tabWidget.currentChanged.connect(self._tab_changed)
 
-    # Signals
+    # signals
     sig_tab_changed = Signal(int, int)
     sig_save_as_triggered = Signal()
     sig_save_triggered = Signal()
@@ -99,9 +99,9 @@ class DNSReductionGUIView(QMainWindow):
         self.subviews = []
         self._clear_tabs()
 
-    def get_view_for_tabindex(self, tabindex):
-        if tabindex <= len(self.subviews):
-            return self.subviews[tabindex]
+    def get_view_for_tab_index(self, tab_index):
+        if tab_index <= len(self.subviews):
+            return self.subviews[tab_index]
         return None
 
     def _help_button_clicked(self):
@@ -139,9 +139,9 @@ class DNSReductionGUIView(QMainWindow):
         self.sig_save_triggered.emit()
 
     def show_status_message(self, message='', time=10, clear=False):
-        oldmessage = self.ui.statusbar.currentMessage()
-        if oldmessage and not clear:
-            message = " AND ".join((message, oldmessage))
+        old_message = self.ui.statusbar.currentMessage()
+        if old_message and not clear:
+            message = " AND ".join((message, old_message))
         self.ui.statusbar.showMessage(message, time * 1000)
 
     def switch_to_plot_tab(self):

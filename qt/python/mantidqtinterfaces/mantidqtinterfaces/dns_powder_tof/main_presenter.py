@@ -4,16 +4,16 @@
 #     NScD Oak Ridge National Laboratory, European Spallation Source
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
+
 """
-Reduction GUI for DNS Instrument at MLZ
+Reduction GUI for DNS Instrument at MLZ.
 """
 
 
 class DNSReductionGUIPresenter:
     """
-    main gui presenter for dns, presenter is onwed by mainview
+    Main GUI presenter for dns, presenter is owned by main_view.
     """
-
     def __init__(self,
                  name=None,
                  view=None,
@@ -37,21 +37,27 @@ class DNSReductionGUIPresenter:
         self.view.sig_modus_change.connect(self._switch_mode)
 
     def _load_xml(self):
-        """Loading of GUI status from XML file"""
+        """
+        Loading of GUI status from XML file.
+        """
         self._parameter_abo.xml_load()
 
     def _save_as(self):
-        """Saving of GUI status as XML file"""
+        """
+        Saving of GUI status as XML file.
+        """
         self._parameter_abo.xml_save_as()
 
     def _save(self):
-        """Saving of GUI status as XML file to known filename"""
+        """
+        Saving of GUI status as XML file to known filename.
+        """
         self._parameter_abo.xml_save()
 
     def _switch_mode(self, modus):
         """
-        Switching between differnt data reduction modes
-        elastic/TOF, powder/single crystal  and simulation
+        Switching between different data reduction modes
+        elastic/TOF, powder/single crystal and simulation.
         """
         self.view.clear_subviews()
         self.view.clear_submenus()
@@ -65,12 +71,12 @@ class DNSReductionGUIPresenter:
                 self.view.add_submenu(widget.view)
         self._parameter_abo.notify_modus_change()
 
-    def _tab_changed(self, oldtabindex, tabindex):
-        oldview = self.view.get_view_for_tabindex(oldtabindex)
-        actualview = self.view.get_view_for_tabindex(tabindex)
+    def _tab_changed(self, old_tab_index, tab_index):
+        old_view = self.view.get_view_for_tab_index(old_tab_index)
+        actual_view = self.view.get_view_for_tab_index(tab_index)
         for observer in self._parameter_abo.observers:
-            if observer.view == oldview:
+            if observer.view == old_view:
                 self._parameter_abo.update_from_observer(observer)
         for observer in self._parameter_abo.observers:
-            if observer.view == actualview:
+            if observer.view == actual_view:
                 self._parameter_abo.notify_focused_tab(observer)
