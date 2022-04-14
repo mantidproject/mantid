@@ -120,9 +120,10 @@ class DNSTreeModel(QAbstractItemModel):
         Returns either data or check state of items.
         """
         item = self._item_from_index(index)
+        parent_item = item.hasChildren()
         if role == Qt.DisplayRole:
             return item.data(index.column())
-        if role == Qt.TextAlignmentRole and index.row() != 0:
+        if role == Qt.TextAlignmentRole and not parent_item: # center align child items
             return Qt.AlignHCenter
         if role == Qt.CheckStateRole and index.column() == 0:
             if item.isChecked() == 2:
