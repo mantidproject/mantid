@@ -125,9 +125,9 @@ class MantidNavigationToolbar(NavigationToolbar2, QToolBar):
         pass
 
     def set_message(self, s):
-        self.message.emit(s)
+        self.message.emit(s.replace("\n", ""))
         if self.coordinates:
-            self.locLabel.setText(s)
+            self.locLabel.setText(s.replace("\n", ""))
 
     def set_cursor(self, cursor):
         self.canvas.setCursor(cursord[cursor])
