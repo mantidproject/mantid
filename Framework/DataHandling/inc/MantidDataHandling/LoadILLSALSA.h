@@ -37,6 +37,10 @@ public:
   int confidence(Kernel::NexusDescriptor &descriptor) const override;
 
 private:
+  // Number of pixel on the detector in the vertical dimension
+  static const size_t VERTICAL_NUMBER_PIXELS;
+  // Number of pixel on the detector in the horizontal dimension
+  static const size_t HORIZONTAL_NUMBER_PIXELS;
   // Initialisation code
   void init() override;
   // Execution code
@@ -51,10 +55,6 @@ private:
   void fillWorkspaceMetadata(const std::string &filename);
   // Output workspace
   std::shared_ptr<DataObjects::Workspace2D> m_outputWorkspace;
-  // number of rows in data
-  int m_numberOfRows;
-  // number of columns in data
-  int m_numberOfColumns;
 };
 
 } // namespace DataHandling

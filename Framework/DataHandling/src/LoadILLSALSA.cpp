@@ -25,6 +25,9 @@ namespace Mantid::DataHandling {
 
 DECLARE_NEXUS_FILELOADER_ALGORITHM(LoadILLSALSA)
 
+const size_t LoadILLSALSA::VERTICAL_NUMBER_PIXELS = 256;
+const size_t LoadILLSALSA::HORIZONTAL_NUMBER_PIXELS = 256;
+
 /**
  * Return the confidence with with this algorithm can load the file
  *
@@ -134,12 +137,13 @@ void LoadILLSALSA::loadOldNexus(const H5::H5File &h5file) {
   H5::DataSet detectorDataset = h5file.openDataSet("entry0/data/Multi_data");
   H5::DataSet monitorDataset = h5file.openDataSet("entry0/monitor/data");
 
-  m_outputWorkspace = DataObjects::create<DataObjects::Workspace2D>(256 * 256 + 1, HistogramData::Points(1));
+  m_outputWorkspace = DataObjects::create<DataObjects::Workspace2D>(
+      VERTICAL_NUMBER_PIXELS * HORIZONTAL_NUMBER_PIXELS + 1, HistogramData::Points(1));
   setProperty("OutputWorkspace", m_outputWorkspace);
 
-  std::vector<int> dataInt(256 * 256 + 1);
+  std::vector<int> dataInt(VERTICAL_NUMBER_PIXELS * HORIZONTAL_NUMBER_PIXELS + 1);
   detectorDataset.read(dataInt.data(), detectorDataset.getDataType());
-  monitorDataset.read(dataInt.data() + 256 * 256, monitorDataset.getDataType());
+  monitorDataset.read(dataInt.data() + VERTICAL_NUMBER_PIXELS * HORIZONTAL_NUMBER_PIXELS, monitorDataset.getDataType());
 
   for (size_t i = 0; i < dataInt.size(); i++) {
     double count = dataInt[i];
@@ -165,14 +169,12 @@ void LoadILLSALSA::loadNewNexus(const H5::H5File &h5file) {
   detectorDataspace.getSimpleExtentDims(dimsSize.data(), NULL);
 
   size_t numberOfScans = dimsSize[0];
-  m_numberOfRows = dimsSize[1];
-  m_numberOfColumns = dimsSize[2];
 
-  m_outputWorkspace = DataObjects::create<DataObjects::Workspace2D>(m_numberOfRows * m_numberOfColumns + 1,
-                                                                    HistogramData::Points(numberOfScans));
+  m_outputWorkspace = DataObjects::create<DataObjects::Workspace2D>(
+      VERTICAL_NUMBER_PIXELS * HORIZONTAL_NUMBER_PIXELS + 1, HistogramData::Points(numberOfScans));
   setProperty("OutputWorkspace", m_outputWorkspace);
 
-  std::vector<int> dataInt(numberOfScans * m_numberOfRows * m_numberOfColumns);
+  std::vector<int> dataInt(numberOfScans * VERTICAL_NUMBER_PIXELS * HORIZONTAL_NUMBER_PIXELS);
   detectorDataset.read(dataInt.data(), detectorDataset.getDataType());
 
   detectorDataset.close();
@@ -219,13 +221,13 @@ void LoadILLSALSA::loadNewNexus(const H5::H5File &h5file) {
 
   // fill the workspace
   for (size_t j = 0; j < numberOfScans; j++) {
-    for (size_t i = 0; i < m_numberOfRows * m_numberOfColumns; i++) {
-      double count = dataInt[j * m_numberOfRows * m_numberOfColumns + i];
+    for (size_t i = 0; i < VERTICAL_NUMBER_PIXELS * HORIZONTAL_NUMBER_PIXELS; i++) {
+      double count = dataInt[j * VERTICAL_NUMBER_PIXELS * HORIZONTAL_NUMBER_PIXELS + i];
       double error = sqrt(count);
       m_outputWorkspace->mutableY(i)[j] = count;
       m_outputWorkspace->mutableE(i)[j] = error;
     }
-    m_outputWorkspace->mutableY(m_numberOfRows * m_numberOfColumns)[j] = monitorData[j];
+    m_outputWorkspace->mutableY(VERTICAL_NUMBER_PIXELS * HORIZONTAL_NUMBER_PIXELS)[j] = monitorData[j];
   }
 }
 
