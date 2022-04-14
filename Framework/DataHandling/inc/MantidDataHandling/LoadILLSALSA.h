@@ -51,8 +51,6 @@ private:
   void fillWorkspaceMetadata(const std::string &filename);
   // Output workspace
   std::shared_ptr<DataObjects::Workspace2D> m_outputWorkspace;
-  // number of scans in data
-  int m_numberOfScans;
   // number of rows in data
   int m_numberOfRows;
   // number of columns in data

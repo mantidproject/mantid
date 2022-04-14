@@ -164,15 +164,15 @@ void LoadILLSALSA::loadNewNexus(const H5::H5File &h5file) {
   std::vector<hsize_t> dimsSize(nDims);
   detectorDataspace.getSimpleExtentDims(dimsSize.data(), NULL);
 
-  m_numberOfScans = dimsSize[0];
+  size_t numberOfScans = dimsSize[0];
   m_numberOfRows = dimsSize[1];
   m_numberOfColumns = dimsSize[2];
 
   m_outputWorkspace = DataObjects::create<DataObjects::Workspace2D>(m_numberOfRows * m_numberOfColumns + 1,
-                                                                    HistogramData::Points(m_numberOfScans));
+                                                                    HistogramData::Points(numberOfScans));
   setProperty("OutputWorkspace", m_outputWorkspace);
 
-  std::vector<int> dataInt(m_numberOfScans * m_numberOfRows * m_numberOfColumns);
+  std::vector<int> dataInt(numberOfScans * m_numberOfRows * m_numberOfColumns);
   detectorDataset.read(dataInt.data(), detectorDataset.getDataType());
 
   detectorDataset.close();
@@ -206,7 +206,7 @@ void LoadILLSALSA::loadNewNexus(const H5::H5File &h5file) {
   nDims = scanVarSpace.getSimpleExtentNdims();
   dimsSize = std::vector<hsize_t>(nDims);
   scanVarSpace.getSimpleExtentDims(dimsSize.data(), nullptr);
-  if ((nDims != 2) || (dimsSize[1] != m_numberOfScans))
+  if ((nDims != 2) || (dimsSize[1] != numberOfScans))
     throw std::runtime_error("Scanned variables are not formatted properly. Check you nexus file.");
 
   std::vector<double> scanVarData(dimsSize[0] * dimsSize[1]);
@@ -218,7 +218,7 @@ void LoadILLSALSA::loadNewNexus(const H5::H5File &h5file) {
   scanVar.close();
 
   // fill the workspace
-  for (size_t j = 0; j < m_numberOfScans; j++) {
+  for (size_t j = 0; j < numberOfScans; j++) {
     for (size_t i = 0; i < m_numberOfRows * m_numberOfColumns; i++) {
       double count = dataInt[j * m_numberOfRows * m_numberOfColumns + i];
       double error = sqrt(count);
