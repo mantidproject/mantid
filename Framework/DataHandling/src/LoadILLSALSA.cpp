@@ -172,6 +172,32 @@ void LoadILLSALSA::loadOldNexus(const std::string &filename) {
   h5file.close();
 }
 
+void LoadILLSALSA::loadNewNexus(const std::string &filename) {
+  H5::H5File h5file(filename, H5F_ACC_RDONLY);
+
+  H5::DataSet detectorDataset = h5file.openDataSet("entry0/data_scan/detector_data/data");
+  H5::DataSpace detectorDataspace = detectorDataset.getSpace();
+
+  int nDims = detectorDataspace.getSimpleExtentNdims();
+  std::vector<hsize_t> dimsSize(nDims);
+  detectorDataspace.getSimpleExtentDims(dimsSize.data(), NULL);
+
+  m_numberOfScans = dimsSize[0];
+  m_numberOfRows = dimsSize[1];
+  m_numberOfColumns = dimsSize[2];
+
+  m_outputWorkspace = DataObjects::create<DataObjects::Workspace2D>(m_numberOfRows * m_numberOfColumns,
+                                                                    HistogramData::Points(m_numberOfScans));
+  setProperty("OutputWorkspace", m_outputWorkspace);
+
+  std::vector<int> dataInt(m_numberOfScans * m_numberOfRows * m_numberOfColumns);
+  detectorDataset.read(dataInt.data(), detectorDataset.getDataType());
+
+  for (size_t j = 0; j < m_numberOfScans; j++)
+    for (size_t i = 0; i < m_numberOfRows * m_numberOfColumns; i++)
+      m_outputWorkspace->mutableY(i)[j] = dataInt[j * m_numberOfRows * m_numberOfColumns + i];
+}
+
 void LoadILLSALSA::fillWorkspaceData(const Mantid::NeXus::NXInt &detectorData,
                                      const std::vector<std::string> &scanVariableNames,
                                      const Mantid::NeXus::NXDouble &scanVariables) {
