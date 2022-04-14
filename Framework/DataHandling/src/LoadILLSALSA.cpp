@@ -151,45 +151,25 @@ void LoadILLSALSA::setInstrument(double distance, double angle) {
  * @param filename Nexus filename
  */
 void LoadILLSALSA::loadOldNexus(const std::string &filename) {
-  Mantid::NeXus::NXRoot dataRoot(filename);
-  Mantid::NeXus::NXEntry dataFirstEntry = dataRoot.openFirstEntry();
+  H5::H5File h5file(filename, H5F_ACC_RDONLY);
 
-  Mantid::NeXus::NXData dataGroup = dataFirstEntry.openNXData("/data");
-  Mantid::NeXus::NXInt data = dataGroup.openIntData();
-  data.load();
-  dataGroup.close();
+  H5::DataSet detectorDataset = h5file.openDataSet("entry0/data/Multi_data");
+  H5::DataSet monitorDataset = h5file.openDataSet("entry0/monitor/data");
 
-  Mantid::NeXus::NXData monitorGroup = dataFirstEntry.openNXData("/monitor/data");
-  Mantid::NeXus::NXInt monitor = monitorGroup.openIntData();
-  monitor.load();
-  monitorGroup.close();
-
-  m_numberOfScans = data.dims(3); // always 1 in this case
-  m_numberOfRows = data.dims(0);
-  m_numberOfColumns = data.dims(1);
-
-  m_outputWorkspace =
-      DataObjects::create<DataObjects::Workspace2D>(m_numberOfRows * m_numberOfColumns + 1, HistogramData::Points(1));
+  m_outputWorkspace = DataObjects::create<DataObjects::Workspace2D>(256 * 256 + 1, HistogramData::Points(1));
   setProperty("OutputWorkspace", m_outputWorkspace);
 
-  // fill detector data
-  int index = 0;
-  for (int i = 0; i < m_numberOfRows; i++) {
-    for (int j = 0; j < m_numberOfColumns; j++) {
-      auto &spectrum = m_outputWorkspace->mutableY(index);
-      auto &errors = m_outputWorkspace->mutableE(index);
-      spectrum = data(i, j, 0);
-      errors = sqrt(data(i, j, 0));
-      index++;
-    }
-  }
+  std::vector<int> dataInt(256 * 256 + 1);
+  detectorDataset.read(dataInt.data(), detectorDataset.getDataType());
+  monitorDataset.read(dataInt.data() + 256 * 256, monitorDataset.getDataType());
 
-  // fill monitor data
-  m_outputWorkspace->mutableY(index)[0] = monitor(0, 0, 0);
-  m_outputWorkspace->mutableE(index)[0] = monitor(0, 0, 0);
-  m_outputWorkspace->mutableX(index)[0] = monitor(0, 0, 0);
+  for (size_t i = 0; i < dataInt.size(); i++)
+    m_outputWorkspace->mutableY(i)[0] = dataInt[i];
 
-  dataRoot.close();
+  detectorDataset.close();
+  monitorDataset.close();
+
+  h5file.close();
 }
 
 void LoadILLSALSA::fillWorkspaceData(const Mantid::NeXus::NXInt &detectorData,
