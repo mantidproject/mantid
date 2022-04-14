@@ -107,6 +107,11 @@ class DNSFileSelectorPresenter(DNSObserver):
 
     def _autoload(self, state):
         data_dir = self.param_dict['paths']['data_dir']
+
+        if not data_dir:
+            self.raise_error('No data selected', critical=True)
+            return None
+
         if state == 2 and data_dir:
             self.watcher.start_watcher()
             if not self._old_data_set:
