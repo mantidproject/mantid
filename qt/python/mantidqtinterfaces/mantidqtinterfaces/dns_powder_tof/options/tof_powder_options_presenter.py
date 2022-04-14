@@ -4,8 +4,9 @@
 #     NScD Oak Ridge National Laboratory, European Spallation Source
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
+
 """
-DNS TOF powder Options Presenter - Tab of DNS Reduction GUI
+DNS TOF powder Options Presenter - Tab of DNS Reduction GUI.
 """
 
 from mantidqtinterfaces.dns_powder_tof.options.common_options_presenter import \
@@ -23,19 +24,19 @@ class DNSTofPowderOptionsPresenter(DNSCommonOptionsPresenter):
 
     def _estimate_q_and_binning(self):
         """
-        Estimation of q and ideal binning based on selected sample data
+        Estimation of q and ideal binning based on selected sample data.
         """
         own_options = self.get_option_dict()
         if own_options['get_wavelength']:
             if self._determine_wavelength() is None:
                 return False
         wavelength = own_options['wavelength']
-        fulldata = self.param_dict['file_selector']['full_data']
-        if not fulldata:
-            self.raise_error('no data selected', critical=True)
+        full_data = self.param_dict['file_selector']['full_data']
+        if not full_data:
+            self.raise_error('No data selected', critical=True)
             return False
         binning, errors = self.model.estimate_q_and_binning(
-            fulldata, wavelength)
+            full_data, wavelength)
         self.raise_error("Waning different channel_widths "
                          f"{errors['channel_widths']} in selected"
                          " datafiles.",
@@ -52,12 +53,12 @@ class DNSTofPowderOptionsPresenter(DNSCommonOptionsPresenter):
         own_options = self.get_option_dict()
         if own_options['get_wavelength']:
             self._determine_wavelength()
-        if own_options['dEstep'] == 0 or own_options['qstep'] == 0:
+        if own_options['dE_step'] == 0 or own_options['q_step'] == 0:
             self._estimate_q_and_binning()
             self.view.show_status_message(
                 'q-range and binning automatically estimated', 30)
 
-    def process_commandline_request(self, cloptions):
-        for command in ['det_efficency']:
-            if command in cloptions:
-                self.view.set_single_state_by_name(command, cloptions[command])
+    def process_commandline_request(self, cl_options): #OKcomment: what does "cl" stand for?
+        for command in ['det_efficiency']:
+            if command in cl_options:
+                self.view.set_single_state_by_name(command, cl_options[command])

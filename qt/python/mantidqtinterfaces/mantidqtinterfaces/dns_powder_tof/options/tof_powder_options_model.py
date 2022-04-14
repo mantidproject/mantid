@@ -24,13 +24,13 @@ class DNSTofPowderOptionsModel(DNSCommonOptionsModel):
         det_rot_min, det_rot_max = self.get_det_rot_min_max(full_data)
         d_e = lambda_to_energy(wavelength)
         binning = {
-            'dEmin': -d_e + 0.5,
-            'dEmax': d_e - 0.5,
-            'dEstep': 2 * d_e / max(tof_channels) * 10,
+            'dE_min': -d_e + 0.5,
+            'dE_max': d_e - 0.5,
+            'dE_step': 2 * d_e / max(tof_channels) * 10,
             # in principle *10 should not be done, prevents empty bins
-            'qmax': two_theta_to_q(det_rot_max + 115, wavelength, -d_e),
-            'qmin': two_theta_to_q(det_rot_min, wavelength, 0),
-            'qstep': 0.025,  # anyhow, linear steps not good
+            'q_max': two_theta_to_q(det_rot_max + 115, wavelength, -d_e),
+            'q_min': two_theta_to_q(det_rot_min, wavelength, 0),
+            'q_step': 0.025,  # anyhow, linear steps not good
         }
         errors = {
             'channel_widths': channel_widths,
