@@ -67,43 +67,43 @@ def create_dir_from_filename(filename):
     create_dir(cddir)
 
 
-def create_dir(crdir):
-    if not os.path.exists(crdir):
-        os.makedirs(crdir)
+def create_dir(current_dir):
+    if not os.path.exists(current_dir):
+        os.makedirs(current_dir)
 
 
-def save_txt(txt, filename, crdir=None):
-    if crdir is not None and crdir:
-        crpath = ''.join((crdir, '/', filename))
+def save_txt(txt, filename, current_dir=None):
+    if current_dir is not None and current_dir:
+        current_path = ''.join((current_dir, '/', filename))
     else:
-        crpath = filename
-    with open(crpath, 'w', encoding="utf8") as myfile:
+        current_path = filename
+    with open(current_path, 'w', encoding="utf8") as myfile:
         myfile.write(txt)
-    return [filename, crpath]
+    return [filename, current_path]
 
 
-def load_txt(filename, crdir=None):
-    if crdir is not None and crdir:
-        crpath = ''.join((crdir, '/', filename))
+def load_txt(filename, current_dir=None):
+    if current_dir is not None and current_dir:
+        current_path = ''.join((current_dir, '/', filename))
     else:
-        crpath = filename
-    with open(crpath, 'r', encoding="utf8") as myfile:
+        current_path = filename
+    with open(current_path, 'r', encoding="utf8") as myfile:
         txt = myfile.readlines()
     return txt
 
 
-def open_editor(filename, crdir=None):
-    if crdir is not None and crdir:
-        crpath = ''.join((crdir, '/', filename))
+def open_editor(filename, current_dir=None):
+    if current_dir is not None and current_dir:
+        current_path = ''.join((current_dir, '/', filename))
     else:
-        crpath = filename
-    if os.path.exists(crpath):
+        current_path = filename
+    if os.path.exists(current_path):
         if sys.platform.startswith("win"):
-            os.startfile(crpath)
+            os.startfile(current_path)
         elif sys.platform.startswith("linux"):
-            subprocess.call(["xdg-open", filename])
+            subprocess.call(["xdg-open", current_path])
         elif sys.platform == "darwin":
-            subprocess.call(["open", filename])
+            subprocess.call(["open", current_path])
 
 
 def get_path_and_prefix(path):

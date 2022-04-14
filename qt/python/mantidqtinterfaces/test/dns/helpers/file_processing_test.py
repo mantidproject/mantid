@@ -110,11 +110,11 @@ class DNSfile_processingTest(unittest.TestCase):
            'open')
     def test_save_txt(self, mock_open):
         mockwrite = mock_open.return_value.__enter__.return_value.write
-        testv = save_txt(txt='abc', filename='123.dat', crdir=None)
+        testv = save_txt(txt='abc', filename='123.dat', current_dir=None)
         self.assertEqual(testv, ['123.dat', '123.dat'])
         mock_open.assert_called_once_with('123.dat', 'w', encoding='utf8')
         mockwrite.assert_called_once_with('abc')
-        testv = save_txt(txt='abc', filename='123.dat', crdir='d')
+        testv = save_txt(txt='abc', filename='123.dat', current_dir='d')
         self.assertEqual(testv, ['123.dat', 'd/123.dat'])
 
     @patch('mantidqtinterfaces.dns.helpers.file_processing.'
@@ -122,12 +122,12 @@ class DNSfile_processingTest(unittest.TestCase):
     def test_load_txt(self, mock_open):
         mockread = mock_open.return_value.__enter__.return_value.readlines
         mockread.return_value = 'hzu'
-        testv = load_txt(filename='123.dat', crdir=None)
+        testv = load_txt(filename='123.dat', current_dir=None)
         mock_open.assert_called_once_with('123.dat', 'r', encoding='utf8')
         mockread.assert_called_once()
         mock_open.reset_mock()
         mockread.rset_mock()
-        testv = load_txt(filename='123.dat', crdir='d')
+        testv = load_txt(filename='123.dat', current_dir='d')
         mock_open.assert_called_once_with('d/123.dat', 'r', encoding='utf8')
         self.assertEqual(testv, 'hzu')
 
@@ -144,25 +144,25 @@ class DNSfile_processingTest(unittest.TestCase):
                          mock_subprocess):
         mock_path_exist.return_value = False
         mock_sys.platform = "win32"
-        open_editor('123.d_dat', crdir=None)
+        open_editor('123.d_dat', current_dir=None)
         mock_subprocess.assert_not_called()
         mock_path_exist.assert_called_once_with('123.d_dat')
         mock_startfile.assert_not_called()
         mock_path_exist.return_value = True
         mock_path_exist.reset_mock()
-        open_editor('123.d_dat', crdir='d')
+        open_editor('123.d_dat', current_dir='d')
         mock_path_exist.assert_called_once_with('d/123.d_dat')
         mock_startfile.assert_called_once_with('d/123.d_dat')
         mock_startfile.reset_mock()
         mock_sys.platform = "linux2"
-        open_editor('123.d_dat', crdir='d')
+        open_editor('123.d_dat', current_dir='d')
         mock_subprocess.assert_called_with(['xdg-open', '123.d_dat'])
         mock_sys.platform = "darwin"
-        open_editor('123.d_dat', crdir='d')
+        open_editor('123.d_dat', current_dir='d')
         mock_subprocess.assert_called_with(['open', '123.d_dat'])
         mock_subprocess.reset_mock()
         mock_sys.platform = "nonesense"
-        open_editor('123.d_dat', crdir='d')
+        open_editor('123.d_dat', current_dir='d')
         mock_subprocess.assert_not_called()
         mock_startfile.assert_not_called()
 
