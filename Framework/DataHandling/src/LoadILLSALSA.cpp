@@ -190,20 +190,63 @@ void LoadILLSALSA::loadNewNexus(const std::string &filename) {
   m_numberOfRows = dimsSize[1];
   m_numberOfColumns = dimsSize[2];
 
-  m_outputWorkspace = DataObjects::create<DataObjects::Workspace2D>(m_numberOfRows * m_numberOfColumns,
+  m_outputWorkspace = DataObjects::create<DataObjects::Workspace2D>(m_numberOfRows * m_numberOfColumns + 1,
                                                                     HistogramData::Points(m_numberOfScans));
   setProperty("OutputWorkspace", m_outputWorkspace);
 
   std::vector<int> dataInt(m_numberOfScans * m_numberOfRows * m_numberOfColumns);
   detectorDataset.read(dataInt.data(), detectorDataset.getDataType());
 
-  for (size_t j = 0; j < m_numberOfScans; j++)
+  detectorDataset.close();
+
+  // get scanned variable names
+  H5::DataSet scanVarNames = h5file.openDataSet("entry0/data_scan/scanned_variables/variables_names/name");
+  H5::DataSpace scanVarNamesSpace = scanVarNames.getSpace();
+
+  nDims = scanVarNamesSpace.getSimpleExtentNdims();
+  dimsSize = std::vector<hsize_t>(nDims);
+  scanVarNamesSpace.getSimpleExtentDims(dimsSize.data(), nullptr);
+
+  std::vector<char *> rdata(dimsSize[0]);
+  scanVarNames.read(rdata.data(), scanVarNames.getDataType());
+  size_t monitorIndex = 0;
+  while (monitorIndex < rdata.size()) {
+    if (std::string(rdata[monitorIndex]) == "Monitor1")
+      break;
+    monitorIndex++;
+  }
+  scanVarNames.vlenReclaim(rdata.data(), scanVarNames.getDataType(), scanVarNamesSpace);
+
+  scanVarNames.close();
+
+  // get scanned variable values and extract monitor count
+  H5::DataSet scanVar = h5file.openDataSet("entry0/data_scan/scanned_variables/data");
+  H5::DataSpace scanVarSpace = scanVar.getSpace();
+
+  nDims = scanVarNamesSpace.getSimpleExtentNdims();
+  dimsSize = std::vector<hsize_t>(nDims);
+  scanVarSpace.getSimpleExtentDims(dimsSize.data(), nullptr);
+
+  std::vector<double> scanVarData(7 * 10);
+  scanVar.read(scanVarData.data(), scanVar.getDataType());
+  std::vector<double> monitorData(10);
+  for (size_t i = 0; i < monitorData.size(); i++)
+    monitorData[i] = scanVarData[monitorIndex * 10 + i];
+
+  scanVar.close();
+
+  h5file.close();
+
+  // fill the workspace
+  for (size_t j = 0; j < m_numberOfScans; j++) {
     for (size_t i = 0; i < m_numberOfRows * m_numberOfColumns; i++) {
       double count = dataInt[j * m_numberOfRows * m_numberOfColumns + i];
       double error = sqrt(count);
       m_outputWorkspace->mutableY(i)[j] = count;
       m_outputWorkspace->mutableE(i)[j] = error;
     }
+    m_outputWorkspace->mutableY(m_numberOfRows * m_numberOfColumns)[j] = monitorData[j];
+  }
 }
 
 void LoadILLSALSA::fillWorkspaceData(const Mantid::NeXus::NXInt &detectorData,
