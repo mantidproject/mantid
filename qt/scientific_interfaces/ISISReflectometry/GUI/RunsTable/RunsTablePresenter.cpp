@@ -452,7 +452,7 @@ void RunsTablePresenter::updateGroupName(MantidWidgets::Batch::RowLocation const
     cell.setContentText(oldValue);
     m_view->jobs().setCellAt(itemIndex, column, cell);
   }
-  m_mainPresenter->notifyGroupNameChanged(m_model.mutableReductionJobs().mutableGroups()[0]);
+  m_mainPresenter->notifyGroupNameChanged(m_model.mutableReductionJobs().mutableGroups()[groupIndex]);
 }
 
 void RunsTablePresenter::updateRowField(MantidWidgets::Batch::RowLocation const &itemIndex, int column,
@@ -469,7 +469,8 @@ void RunsTablePresenter::updateRowField(MantidWidgets::Batch::RowLocation const 
   updateRow(m_model.mutableReductionJobs(), groupIndex, rowIndex, rowValidationResult.validElseNone());
   if (rowValidationResult.isValid()) {
     showAllCellsOnRowAsValid(itemIndex);
-    m_mainPresenter->notifyRowContentChanged(m_model.mutableReductionJobs().mutableGroups()[0].mutableRows()[0].get());
+    m_mainPresenter->notifyRowContentChanged(
+        m_model.mutableReductionJobs().mutableGroups()[groupIndex].mutableRows()[rowIndex].get());
   } else {
     showCellsAsInvalidInView(itemIndex, rowValidationResult.assertError());
   }
