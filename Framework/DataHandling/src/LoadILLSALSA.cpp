@@ -176,6 +176,10 @@ void LoadILLSALSA::loadOldNexus(const std::string &filename) {
   h5file.close();
 }
 
+/**
+ * Fill the output workspace with data coming from a scanning nexus.
+ * @param filename Nexus file name
+ */
 void LoadILLSALSA::loadNewNexus(const std::string &filename) {
   H5::H5File h5file(filename, H5F_ACC_RDONLY);
 
