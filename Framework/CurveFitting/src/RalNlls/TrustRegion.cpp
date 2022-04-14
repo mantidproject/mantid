@@ -362,9 +362,9 @@ void applyScaling(const DoubleFortranMatrix &J, DoubleFortranMatrix &A, DoubleFo
  *  @param ew :: The output eigenvalues.
  *  @param ev :: The output eigenvectors.
  */
-void allEigSymm(const DoubleFortranMatrix &A, ComplexFortranVector &ew, ComplexFortranMatrix &ev) {
+void allEigSymm(const DoubleFortranMatrix &A, DoubleFortranVector &ew, DoubleFortranMatrix &ev) {
   auto M = A;
-  M.eigenSystem(ew.eigen(), ev.eigen());
+  M.eigenSystem(ew, ev);
 }
 
 // This isn't used because we don't calculate second derivatives in Mantid

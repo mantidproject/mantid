@@ -225,7 +225,7 @@ ComplexType ComplexMatrix::det() {
 /// matrix.
 /// @param eigenVectors :: Output variable that receives the eigenvectors of
 /// this matrix.
-void ComplexMatrix::eigenSystemHermitian(ComplexVector &eigenValues, ComplexMatrix &eigenVectors) {
+void ComplexMatrix::eigenSystemHermitian(EigenVector &eigenValues, ComplexMatrix &eigenVectors) {
   size_t n = size1();
   if (n != size2()) {
     throw std::runtime_error("Matrix eigenSystem: the matrix must be square.");
@@ -234,7 +234,14 @@ void ComplexMatrix::eigenSystemHermitian(ComplexVector &eigenValues, ComplexMatr
 
   Eigen::ComplexEigenSolver<Eigen::MatrixXcd> solver;
   solver.compute(m_matrix);
-  eigenValues = solver.eigenvalues();
+
+  // gsl function does not return complex values whereas the eigen solver can. This check is
+  // here to ensure it doesn't and the behaviour of this function remains consistant.
+  if (!solver.eigenvalues().imag().isZero()) {
+    throw std::runtime_error("Matrix eigenSystem: the eigensystem has complex eigenvalues.");
+  }
+
+  eigenValues = solver.eigenvalues().real();
   eigenVectors = solver.eigenvectors();
 }
 

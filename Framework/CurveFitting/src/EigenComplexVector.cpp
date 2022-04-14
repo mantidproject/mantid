@@ -162,24 +162,6 @@ std::ostream &operator<<(std::ostream &ostr, const ComplexVector &v) {
   return ostr;
 }
 
-/// Create an index array that would sort this vector
-/// @param ascending :: If true sort in ascending order. Otherwise
-///     sort in descending order.
-std::vector<size_t> ComplexVector::sortIndiciesByMagnitude(bool ascending) const {
-  std::vector<size_t> indices(size());
-  for (size_t i = 0; i < size(); ++i) {
-    indices[i] = i;
-  }
-  if (ascending) {
-    std::sort(indices.begin(), indices.end(),
-              [this](size_t i, size_t j) { return norm(this->get(i)) < norm(this->get(j)); });
-  } else {
-    std::sort(indices.begin(), indices.end(),
-              [this](size_t i, size_t j) { return norm(this->get(i)) > norm(this->get(j)); });
-  }
-  return indices;
-}
-
 /// Sort this vector in order defined by an index array
 /// @param indices :: Indices defining the order of elements in sorted vector.
 void ComplexVector::sort(const std::vector<size_t> &indices) {

@@ -557,7 +557,7 @@ void zeeman(ComplexFortranMatrix &hamiltonian, const int nre, const DoubleFortra
 //---------------------------------------
 // Calculation of the eigenvalues/vectors
 //---------------------------------------
-void diagonalise(const ComplexFortranMatrix &hamiltonian, ComplexFortranVector &eigenvalues,
+void diagonalise(const ComplexFortranMatrix &hamiltonian, DoubleFortranVector &eigenvalues,
                  ComplexFortranMatrix &eigenvectors) {
   // Diagonalisation of the hamiltonian
   auto dim = hamiltonian.len1();
@@ -567,7 +567,7 @@ void diagonalise(const ComplexFortranMatrix &hamiltonian, ComplexFortranVector &
   h.eigenSystemHermitian(eigenvalues, eigenvectors);
 
   // Sort the eigenvalues in ascending order
-  auto sortedIndices = eigenvalues.sortIndiciesByMagnitude(); // does it make sense to do this for complex numbers?
+  auto sortedIndices = eigenvalues.sortIndices(); // does it make sense to do this for complex numbers?
   eigenvalues.sort(sortedIndices);
   // Eigenvectors are in columns. Sort the columns
   // to match the sorted eigenvalues.
@@ -595,7 +595,7 @@ GNU_DIAG_ON("missing-braces")
 ///  |1=Ce|2=Pr|3=Nd|4=Pm|5=Sm|6=Eu|7=Gd|8=Tb|9=Dy|10=Ho|11=Er|12=Tm|13=Yb|
 /// @param bext :: The external field in Cartesians (Hx, Hy, Hz) in Tesla
 ///    The z-axis is parallel to the crystal field quantisation axis.
-void calculateZeemanEigensystem(ComplexFortranVector &eigenvalues, ComplexFortranMatrix &eigenvectors,
+void calculateZeemanEigensystem(DoubleFortranVector &eigenvalues, ComplexFortranMatrix &eigenvectors,
                                 const ComplexFortranMatrix &hamiltonian, int nre, const DoubleFortranVector &bext) {
   ComplexFortranMatrix h = hamiltonian;
   DoubleFortranVector bmol(1, 3);
@@ -625,7 +625,7 @@ void calculateZeemanEigensystem(ComplexFortranVector &eigenvalues, ComplexFortra
 /// @param alpha_euler :: The alpha Euler angle in radians
 /// @param beta_euler :: The beta Euler angle in radians
 /// @param gamma_euler :: The gamma Euler angle in radians
-void calculateEigensystem(ComplexFortranVector &eigenvalues, ComplexFortranMatrix &eigenvectors,
+void calculateEigensystem(DoubleFortranVector &eigenvalues, ComplexFortranMatrix &eigenvectors,
                           ComplexFortranMatrix &hamiltonian, ComplexFortranMatrix &hzeeman, int nre,
                           const DoubleFortranVector &bmol, const DoubleFortranVector &bext,
                           const ComplexFortranMatrix &bkq, double alpha_euler, double beta_euler, double gamma_euler) {

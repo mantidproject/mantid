@@ -64,8 +64,6 @@ public:
   const ComplexType operator[](size_t i) const { return eigen()(i); }
   /// Get a "reference" to an element.
   ComplexType &operator[](size_t i) { return eigen()(i); }
-  /// Create an index array that would sort this vector
-  std::vector<size_t> sortIndiciesByMagnitude(bool ascending = true) const;
 
   /// Add a vector
   ComplexVector &operator+=(const ComplexVector &v);

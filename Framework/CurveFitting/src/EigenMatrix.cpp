@@ -281,7 +281,7 @@ double EigenMatrix::det() const {
 /// matrix.
 /// @param eigenVectors :: Output variable that receives the eigenvectors of
 /// this matrix.
-void EigenMatrix::eigenSystem(Eigen::VectorXcd &eigenValues, Eigen::MatrixXcd &eigenVectors) {
+void EigenMatrix::eigenSystem(EigenVector &eigenValues, EigenMatrix &eigenVectors) {
   size_t n = size1();
   if (n != size2()) {
     throw std::runtime_error("Matrix eigenSystem: the matrix must be square.");
@@ -289,8 +289,17 @@ void EigenMatrix::eigenSystem(Eigen::VectorXcd &eigenValues, Eigen::MatrixXcd &e
 
   Eigen::EigenSolver<Eigen::MatrixXd> solver;
   solver.compute(inspector());
-  eigenValues = solver.eigenvalues();
-  eigenVectors = solver.eigenvectors();
+
+  // previously gsl used "gsl_eigen_symmv" to calculate the eigenSystem. This function only returned
+  // real eigenvalues/vectors. The eigen function used can handle and return complex values.
+  // this causes errors when returning to a non-complex EigenVector and EigenMatrix classes.
+  // this check is here to alert to this error.
+  if (!solver.eigenvalues().imag().isZero() || !solver.eigenvectors().imag().isZero()) {
+    throw std::invalid_argument("eigensystem has complex eigenvalues or eigenvectors");
+  } else {
+    eigenValues = solver.eigenvalues().real();
+    eigenVectors = solver.eigenvectors().real();
+  }
 }
 
 /// Copy a row into a EigenVector

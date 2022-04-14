@@ -113,7 +113,7 @@ public:
   /// Calculate the determinant
   double det() const;
   /// Calculate the eigensystem of a symmetric matrix
-  void eigenSystem(Eigen::VectorXcd &eigenValues, Eigen::MatrixXcd &eigenVectors);
+  void eigenSystem(EigenVector &eigenValues, EigenMatrix &eigenVectors);
   /// Calculate the eigensystem of a symmetric matrix
   EigenMatrix tr() const;
 

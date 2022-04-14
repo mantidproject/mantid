@@ -271,7 +271,7 @@ public:
 
   void test_eigenSystem_rectangular_throw_complex() {
     ComplexMatrix M(3, 4);
-    ComplexVector v;
+    EigenVector v;
     ComplexMatrix Q;
     TS_ASSERT_THROWS(M.eigenSystemHermitian(v, Q), const std::runtime_error &);
   }
@@ -284,7 +284,7 @@ public:
     m.set(1, 0, 1);
     m.set(1, 1, 11);
 
-    ComplexVector v;
+    EigenVector v;
     ComplexMatrix Q;
     ComplexMatrix M = m;
     M.eigenSystemHermitian(v, Q);
@@ -309,7 +309,7 @@ public:
     m.set(1, 0, conj(v1));
     m.set(1, 1, 11);
 
-    ComplexVector v;
+    EigenVector v;
     ComplexMatrix Q;
     ComplexMatrix M = m;
     M.eigenSystemHermitian(v, Q);
@@ -345,7 +345,7 @@ public:
     m.set(3, 1, conj(v13));
     m.set(3, 2, conj(v23));
     m.set(3, 3, 33);
-    ComplexVector v;
+    EigenVector v;
     ComplexMatrix Q;
     ComplexMatrix M = m;
     M.eigenSystemHermitian(v, Q);

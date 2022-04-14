@@ -108,7 +108,7 @@ public:
   /// Calculate the determinant
   ComplexType det();
   /// Calculate the eigensystem of a Hermitian matrix
-  void eigenSystemHermitian(ComplexVector &eigenValues, ComplexMatrix &eigenVectors);
+  void eigenSystemHermitian(EigenVector &eigenValues, ComplexMatrix &eigenVectors);
 
   /// Get "transposed" matrix to be used in multiplications
   ComplexMatrix tr() const;

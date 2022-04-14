@@ -184,9 +184,9 @@ public:
 
   void test_eigenSystem_rectangular_throw() {
     EigenMatrix M(3, 4);
-    ComplexVector v;
-    ComplexMatrix Q;
-    TS_ASSERT_THROWS(M.eigenSystem(v.eigen(), Q.eigen()), const std::runtime_error &);
+    EigenVector v;
+    EigenMatrix Q;
+    TS_ASSERT_THROWS(M.eigenSystem(v, Q), const std::runtime_error &);
   }
 
   void test_eigenSystem() {
@@ -208,31 +208,31 @@ public:
     m.set(3, 1, 13);
     m.set(3, 2, 23);
     m.set(3, 3, 33);
-    ComplexVector v;
-    ComplexMatrix Q;
+    EigenVector v;
+    EigenMatrix Q;
     EigenMatrix M = m;
-    M.eigenSystem(v.eigen(), Q.eigen());
+    M.eigenSystem(v, Q);
     TS_ASSERT_EQUALS(v.size(), n);
     TS_ASSERT_EQUALS(Q.size1(), n);
     TS_ASSERT_EQUALS(Q.size2(), n);
     {
-      ComplexMatrix D = Q.tr() * m * Q;
+      EigenMatrix D = Q.tr() * m * Q;
       double trace_m = 0.0;
-      ComplexType trace_D = 0.0;
-      ComplexType det = 1.0;
+      double trace_D = 0.0;
+      double det = 1.0;
       for (size_t i = 0; i < n; ++i) {
-        TS_ASSERT_DELTA(D.get(i, i).real(), v.get(i).real(), 1e-10);
+        TS_ASSERT_DELTA(D.get(i, i), v.get(i), 1e-10);
         trace_m += m.get(i, i);
         trace_D += D.get(i, i);
         det *= D.get(i, i);
       }
-      TS_ASSERT_DELTA(trace_D.real(), trace_m, 1e-10);
-      TS_ASSERT_DELTA(det.real(), m.det(), 1e-10);
+      TS_ASSERT_DELTA(trace_D, trace_m, 1e-10);
+      TS_ASSERT_DELTA(det, m.det(), 1e-10);
     }
     {
-      ComplexMatrix D = Q.tr() * Q;
+      EigenMatrix D = Q.tr() * Q;
       for (size_t i = 0; i < n; ++i) {
-        TS_ASSERT_DELTA(D.get(i, i).real(), 1.0, 1e-10);
+        TS_ASSERT_DELTA(D.get(i, i), 1.0, 1e-10);
       }
     }
   }
