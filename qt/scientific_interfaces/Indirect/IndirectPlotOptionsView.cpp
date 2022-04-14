@@ -89,7 +89,6 @@ void IndirectPlotOptionsView::emitSelectedIndicesChanged() {
 }
 
 void IndirectPlotOptionsView::emitSelectedIndicesChanged(QString const &spectra) {
-  QString nonConstCopy = spectra;
   if (spectra.isEmpty()) {
     emit selectedIndicesChanged(spectra.toStdString());
   }

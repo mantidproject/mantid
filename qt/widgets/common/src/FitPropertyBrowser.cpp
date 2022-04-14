@@ -3273,9 +3273,10 @@ void FitPropertyBrowser::addAllowedSpectra(const QString &wsName, const QList<in
   auto ws = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(name);
   if (ws) {
     QList<int> indices;
-    for (auto const i : wsSpectra) {
-      indices.push_back(static_cast<int>(ws->getIndexFromSpectrumNumber(i)));
-    }
+    indices.reserve(wsSpectra.size());
+    std::transform(wsSpectra.cbegin(), wsSpectra.cend(), std::back_inserter(indices),
+                   [&ws](const auto i) { return static_cast<int>(ws->getIndexFromSpectrumNumber(i)); });
+
     auto wsFound = m_allowedSpectra.find(wsName);
     m_allowedSpectra.insert(wsName, indices);
     if (wsFound != m_allowedSpectra.end()) {
