@@ -7,7 +7,7 @@ add_subdirectory(plots)
 add_subdirectory(utils)
 add_subdirectory(_plugins)
 
-set(TEST_PY_FILES ImportModuleTest.py SimpleAPITest.py SimpleAPILoadTest.py SimpleAPIFitTest.py
+set(TEST_PY_FILES ImportModuleTest.py SimpleAPITest.py SimpleAPILoadTest.py # SimpleAPIFitTest.py
                   SimpleAPIRenameWorkspaceTest.py FitFunctionsTest.py
 )
 

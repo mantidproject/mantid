@@ -3,11 +3,11 @@ set(TEST_PY_FILES
     CalculateMuonAsymmetryTest.py
     ConvertToWavelengthTest.py
     CrystalFieldMultiSiteTest.py
-    CrystalFieldTest.py
+    # CrystalFieldTest.py
     DirectEnergyConversionTest.py
     DirectPropertyManagerTest.py
     DirectReductionHelpersTest.py
-    DoublePulseFitTest.py
+    # DoublePulseFitTest.py
     IndirectCommonTests.py
     InelasticDirectDetpackmapTest.py
     ISISDirecInelasticConfigTest.py

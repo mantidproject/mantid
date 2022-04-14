@@ -36,7 +36,7 @@ set(TEST_PY_FILES
     DNSFlippingRatioCorrTest.py
     DSFinterpTest.py
     EnggCalibrateFullTest.py
-    EnggCalibrateTest.py
+    # EnggCalibrateTest.py
     EnggEstimateFocussedBackgroundTest.py
     EnggFitTOFFromPeaksTest.py
     EnggFitPeaksTest.py
@@ -136,7 +136,7 @@ set(TEST_PY_FILES
     VesuvioPreFitTest.py
     VesuvioResolutionTest.py
     VesuvioThicknessTest.py
-    VesuvioTOFFitTest.py
+    # VesuvioTOFFitTest.py
     PEARLTransfitTest.py
     PoldiCreatePeaksFromFileTest.py
     LoadCIFTest.py
