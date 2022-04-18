@@ -908,7 +908,6 @@ class Instrument(object):
         ! The results are returned as tuple: (resolution, flux)
         """
         argdict = argparser(args, kwargs, ['inst', 'package', 'frequency', 'ei', 'etrans', 'variant'])
-        print(argdict)
         if argdict['inst'] is None:
             raise RuntimeError('You must specify the instrument name')
         obj = cls(argdict['inst'])
