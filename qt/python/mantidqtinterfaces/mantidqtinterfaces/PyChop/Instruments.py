@@ -17,6 +17,7 @@ from . import Chop, MulpyRep
 from scipy.interpolate import interp1d
 from scipy.special import erf
 from scipy import constants
+from scipy.optimize import curve_fit
 
 # Some global constants
 SIGMA2FWHM = 2 * np.sqrt(2 * np.log(2))
@@ -445,7 +446,7 @@ class ChopperSystem(object):
         if not self.isFermi:
             raise AttributeError('Cannot set Fermi chopper package on this instrument')
         if value not in self.packages.keys():
-            ky = [k for k in self.packages.keys() if value.upper() == k.upper()]
+            ky = [k for k in self.packages.keys() if str(value).upper() == k.upper()]
             if not ky:
                 raise ValueError('Fermi package ''%s'' not recognised. Allowed values are: %s'
                                  % (value, ', '.join(self.packages.keys())))
@@ -471,7 +472,7 @@ class ChopperSystem(object):
             setattr(self, prop, copy.deepcopy(self._variant_defaults[prop]))
         self._variant = value
         if value not in self.variants.keys():
-            ky = [k for k in self.variants.keys() if value.upper() == k.upper()]
+            ky = [k for k in self.variants.keys() if str(value).upper() == k.upper()]
             if not ky:
                 raise ValueError('Variant ''%s'' not recognised. Allowed values are: %s'
                                  % (value, ', '.join(self.variants.keys())))
@@ -665,7 +666,7 @@ class Instrument(object):
 
     __child_properties = ['package', 'variant', 'frequency', 'phase', 'ei', 'tjit', 'emin', 'emax']
 
-    __known_instruments = ['let', 'maps', 'mari', 'merlin']
+    __known_instruments = ['let', 'maps', 'mari', 'merlin', 'arcs', 'cncs', 'hyspec', 'sequoia']
 
     def __init__(self, instrument, chopper=None, freq=None):
         if isinstance(instrument, str):
@@ -775,7 +776,7 @@ class Instrument(object):
         # If not set, sets energy transfers to values to compare exactly to RAE's original implementation.
         if Etrans is None:
             Etrans = np.linspace(0.05*Ei, 0.95*Ei+0.05*0.05*Ei, 19, endpoint=True)
-        Etrans = np.array(Etrans if np.shape(Etrans) else [Etrans])
+        Etrans = np.array(Etrans if np.shape(Etrans) else [Etrans], dtype=float)
         if len(np.where(Etrans > Ei)[0]) > 0:
             warnings.warn('Cannot calculate for energy transfer greater than Ei (physically negative neutron energies!)')
         Etrans[np.where(Etrans >= Ei)] = np.nan
@@ -879,10 +880,8 @@ class Instrument(object):
         """
         ! Calculates the resolution and flux directly (without setting up a PyChop2 object)
         !
-        ! PyChop2.calculate('mari', 's', 250., 55.)      # Instname, Chopper Type, Freq, Ei in order
-        ! PyChop2.calculate('let', 180, 2.2)             # For LET, chopper type is not needed.
-        ! PyChop2.calculate('let', [160., 80.], 1.)      # For LET, specify resolution and pulse remover freq
-        ! PyChop2.calculate('let', 'High flux', 80, 2.2) # LET default is medium flux configuration
+        ! PyChop2.calculate('mari', 's', 250., 55.)                # Instname, Chopper Type, Freq, Ei in order
+        ! PyChop2.calculate('let', 'High flux', [160., 80.], 2.2)  # For LET, specify resolution and pulse remover freq
         ! PyChop2.calculate(inst='mari', package='s', freq=250., ei=55.) # With keyword arguments
         ! PyChop2.calculate(inst='let', variant='High resolution', freq=[160., 80.], ei=2.2)
         !
@@ -899,6 +898,13 @@ class Instrument(object):
         ! PyChop2.calculate('merlin', 'g', 450., 60., range(55))
         ! PyChop2.calculate('maps', 'a', 450., 600., etrans=np.linspace(0,550,55))
         !
+        ! For fast calculations, one can return a polynomial approximation (cubic) of the
+        ! resolution function. By passing etrans='polynomial', the calculator estimates the
+        ! resolution for etrans=np.arange(-Ei, Ei, Ei*0.01) then fits it to a cubic polynomial.
+        ! The resolution is then an array with coefficients, from the lowest power.
+        !
+        ! res, flux = PyChop2.calculate(inst='cncs', variant='High flux', freq=240, ei=1.5, etrans='polynomial')
+        !
         ! The results are returned as tuple: (resolution, flux)
         """
         argdict = argparser(args, kwargs, ['inst', 'package', 'frequency', 'ei', 'etrans', 'variant'])
@@ -909,7 +915,27 @@ class Instrument(object):
         obj.ei = argdict['ei']
         if argdict['variant']:
             obj.variant = argdict['variant']
-        return obj.getResolution(argdict['etrans'] if argdict['etrans'] else 0.), obj.getFlux()
+        etrans = argdict['etrans']
+        return_polynomial = False
+        if etrans is None:
+            etrans = 0.
+        else:
+            if etrans == 'polynomial':
+                return_polynomial = True
+                etrans = np.arange(-obj.ei, obj.ei, obj.ei*0.01)
+            try:
+                etrans = float(etrans)
+            except TypeError:
+                etrans = np.asfarray(etrans)
+        res = obj.getResolution(etrans)
+
+        if return_polynomial:
+            def cubic(x, x_0, x_1, x_2, x_3):
+                return x_0 + x_1 * x + x_2 * x**2 + x_3 * x**3
+            popt, pcov = curve_fit(cubic, etrans, res)
+            res = popt
+        flux = obj.getFlux()
+        return res, flux
 
     def __repr__(self):
         return self.name if self.name else 'Undefined instrument'
