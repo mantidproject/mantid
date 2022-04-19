@@ -41,9 +41,10 @@ public:
   static DecoderTest *createSuite() { return new DecoderTest(); }
   static void destroySuite(DecoderTest *suite) { delete suite; }
 
-  DecoderTest() {
-    PyRun_SimpleString("import mantid.api as api\n"
-                       "api.FrameworkManager.Instance()");
+  void setUp() override { Mantid::API::AlgorithmFactory::Instance().subscribe<ReflectometryISISLoadAndProcess>(); }
+
+  void tearDown() override {
+    Mantid::API::AlgorithmFactory::Instance().unsubscribe("ReflectometryISISLoadAndProcess", 1);
   }
 
   void test_decodeMainWindow() {

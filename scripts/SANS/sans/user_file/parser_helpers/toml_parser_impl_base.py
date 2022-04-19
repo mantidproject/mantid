@@ -24,6 +24,7 @@ class TomlParserImplBase:
         the full path.
         :param keys: A list of keys to iterate through
         """
+        keys = [str(i) for i in keys]
         key_path = ".".join(keys)
         exception = MissingMandatoryParam(f"The following key is required but missing: {key_path}")
         # Don't use None in case user entered None themselves

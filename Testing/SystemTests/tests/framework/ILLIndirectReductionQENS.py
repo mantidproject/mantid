@@ -134,9 +134,9 @@ class ILLIndirectReductionQENSTest(systemtesting.MantidSystemTest):
         # amount of masked bins in the beginning and in the end of the spectra
         m1 = mtd['50K_red'].getItem(0).maskedBinIndices(0)
         m2 = mtd['200K_red'].getItem(0).maskedBinIndices(0)
-        self.assertEquals(len(m1), len(m2))
+        self.assertEqual(len(m1), len(m2))
         for i in range(len(m1)):
-            self.assertEquals(m1[i], m2[i])
+            self.assertEqual(m1[i], m2[i])
 
     def runTest(self):
 

@@ -16,7 +16,6 @@ import re
 from functools import wraps
 
 import matplotlib
-from matplotlib._pylab_helpers import Gcf
 from matplotlib.axes import Axes
 from matplotlib.backend_bases import FigureManagerBase
 from matplotlib.collections import LineCollection
@@ -37,6 +36,7 @@ from mantidqt.widgets.superplot import Superplot
 from mantidqt.widgets.waterfallplotfillareadialog.presenter import WaterfallPlotFillAreaDialogPresenter
 from mantidqt.widgets.waterfallplotoffsetdialog.presenter import WaterfallPlotOffsetDialogPresenter
 from workbench.config import get_window_config
+from workbench.plotting.globalfiguremanager import GlobalFigureManager
 from workbench.plotting.mantidfigurecanvas import (  # noqa: F401
     MantidFigureCanvas, draw_if_interactive as draw_if_interactive_impl, show as show_impl)
 from workbench.plotting.figureinteraction import FigureInteraction
@@ -283,7 +283,7 @@ class FigureManagerWorkbench(FigureManagerBase, QObject):
             self.window.showFullScreen()
 
     def _window_activated(self):
-        Gcf.set_active(self)
+        GlobalFigureManager.set_active(self)
 
     def _get_toolbar(self, canvas, parent):
         return WorkbenchNavigationToolbar(canvas, parent, False)
@@ -327,7 +327,7 @@ class FigureManagerWorkbench(FigureManagerBase, QObject):
 
         self._ads_observer.observeAll(False)
         self._ads_observer = None
-        # disconnect window events before calling Gcf.destroy. window.close is not guaranteed to
+        # disconnect window events before calling GlobalFigureManager.destroy. window.close is not guaranteed to
         # delete the object and do this for us. On macOS it was observed that closing the figure window
         # would produce an extraneous activated event that would add a new figure to the plots list
         # right after deleted the old one.
@@ -338,11 +338,11 @@ class FigureManagerWorkbench(FigureManagerBase, QObject):
             self.superplot.close()
 
         try:
-            Gcf.destroy(self.num)
+            GlobalFigureManager.destroy(self.num)
         except AttributeError:
             pass
             # It seems that when the python session is killed,
-            # Gcf can get destroyed before the Gcf.destroy
+            # GlobalFigureManager can get destroyed before the GlobalFigureManager.destroy
             # line is run, leading to a useless AttributeError.
 
     def launch_plot_options(self):
@@ -441,7 +441,7 @@ class FigureManagerWorkbench(FigureManagerBase, QObject):
         # We need to add a call to the figure manager here to call
         # notify methods when a figure is renamed, to update our
         # plot list.
-        Gcf.figure_title_changed(self.num)
+        GlobalFigureManager.figure_title_changed(self.num)
 
         # For the workbench we also keep the label in sync, this is
         # to allow getting a handle as plt.figure('Figure Name')
@@ -453,7 +453,7 @@ class FigureManagerWorkbench(FigureManagerBase, QObject):
         plot visibility was changed. This method is added to this
         class so that it can be wrapped in a QAppThreadCall.
         """
-        Gcf.figure_visibility_changed(self.num)
+        GlobalFigureManager.figure_visibility_changed(self.num)
 
     def generate_plot_script_clipboard(self):
         script = generate_script(self.canvas.figure, exclude_headers=True)
@@ -510,7 +510,15 @@ class FigureManagerWorkbench(FigureManagerBase, QObject):
         ax.lines.reverse()
         for cap in errorbar_cap_lines:
             ax.add_line(cap)
-        ax.collections += fills
+        if LooseVersion("3.7") > LooseVersion(matplotlib.__version__) >= LooseVersion("3.2"):
+            for line_fill in fills:
+                if line_fill not in ax.collections:
+                    ax.add_collection(line_fill)
+        elif LooseVersion(matplotlib.__version__) < LooseVersion("3.2"):
+            ax.collections += fills
+        else:
+            raise NotImplementedError("ArtistList will become an immutable tuple in matplotlib 3.7 and thus, "
+                                      "this code doesn't work anymore.")
         ax.collections.reverse()
         ax.update_waterfall(x, y)
 

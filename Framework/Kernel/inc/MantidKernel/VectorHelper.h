@@ -46,8 +46,11 @@ void MANTID_KERNEL_DLL convertToBinCentre(const std::vector<double> &bin_edges, 
 /// Convert an array of bin centers to bin boundary values.
 void MANTID_KERNEL_DLL convertToBinBoundary(const std::vector<double> &bin_centers, std::vector<double> &bin_edges);
 
-/// Gets the bin of a value from a vector of bin centers
+/// Gets the bin of a value from a vector of bin centers and throws exception if out of range
 size_t MANTID_KERNEL_DLL indexOfValueFromCenters(const std::vector<double> &bin_centers, const double value);
+
+/// Gets the bin of a value from a vector of bin centers and returns -1 if out of range
+int MANTID_KERNEL_DLL indexOfValueFromCentersNoThrow(const std::vector<double> &bin_centers, const double value);
 
 /// Gets the bin of a value from a vector of bin edges
 size_t MANTID_KERNEL_DLL indexOfValueFromEdges(const std::vector<double> &bin_edges, const double value);

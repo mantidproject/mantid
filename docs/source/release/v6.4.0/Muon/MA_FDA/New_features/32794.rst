@@ -1,0 +1,1 @@
+- Users will now receive a warning if they load a run with missing period information.

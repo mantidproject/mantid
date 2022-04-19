@@ -76,6 +76,7 @@ set(PYTHON_PLUGINS
     algorithms/GetEiT0atSNS.py
     algorithms/GetIPTS.py
     algorithms/GetLiveInstrumentValue.py
+    algorithms/GroupBySampleChangerPosition.py
     algorithms/HB2AReduce.py
     algorithms/HB3AAdjustSampleNorm.py
     algorithms/HB3AFindPeaks.py

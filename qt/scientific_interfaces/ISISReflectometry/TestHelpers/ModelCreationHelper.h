@@ -78,6 +78,7 @@ MANTIDQT_ISISREFLECTOMETRY_DLL LookupTable makeEmptyLookupTable();
 MANTIDQT_ISISREFLECTOMETRY_DLL LookupTable makeLookupTable();
 MANTIDQT_ISISREFLECTOMETRY_DLL LookupTable makeLookupTableWithTwoAngles();
 MANTIDQT_ISISREFLECTOMETRY_DLL LookupTable makeLookupTableWithTwoAnglesAndWildcard();
+MANTIDQT_ISISREFLECTOMETRY_DLL LookupTable makeLookupTableWithTwoValidDuplicateCriteria();
 MANTIDQT_ISISREFLECTOMETRY_DLL std::map<std::string, std::string> makeStitchOptions();
 MANTIDQT_ISISREFLECTOMETRY_DLL std::map<std::string, std::string> makeEmptyStitchOptions();
 MANTIDQT_ISISREFLECTOMETRY_DLL BackgroundSubtraction makeBackgroundSubtraction();
@@ -89,6 +90,7 @@ MANTIDQT_ISISREFLECTOMETRY_DLL RangeInLambda makeTransmissionRunRange();
 MANTIDQT_ISISREFLECTOMETRY_DLL TransmissionStitchOptions makeEmptyTransmissionStitchOptions();
 MANTIDQT_ISISREFLECTOMETRY_DLL Experiment makeExperiment();
 MANTIDQT_ISISREFLECTOMETRY_DLL Experiment makeEmptyExperiment();
+MANTIDQT_ISISREFLECTOMETRY_DLL Experiment makeExperimentWithValidDuplicateCriteria();
 
 /* Instrument */
 MANTIDQT_ISISREFLECTOMETRY_DLL RangeInLambda makeWavelengthRange();

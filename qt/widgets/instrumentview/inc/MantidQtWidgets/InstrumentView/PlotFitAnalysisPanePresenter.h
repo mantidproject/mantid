@@ -31,14 +31,12 @@ public:
   virtual void addFunction(Mantid::API::IFunction_sptr func) = 0;
 };
 
-class EXPORT_OPT_MANTIDQT_INSTRUMENTVIEW PlotFitAnalysisPanePresenter
-    : public QObject,
-      public IPlotFitAnalysisPanePresenter {
+class EXPORT_OPT_MANTIDQT_INSTRUMENTVIEW PlotFitAnalysisPanePresenter : public QObject,
+                                                                        public IPlotFitAnalysisPanePresenter {
   Q_OBJECT
 
 public:
-  explicit PlotFitAnalysisPanePresenter(IPlotFitAnalysisPaneView *m_view,
-                                        PlotFitAnalysisPaneModel *m_model);
+  explicit PlotFitAnalysisPanePresenter(IPlotFitAnalysisPaneView *m_view, PlotFitAnalysisPaneModel *m_model);
   ~PlotFitAnalysisPanePresenter() {
     delete m_model;
     delete m_fitObserver;

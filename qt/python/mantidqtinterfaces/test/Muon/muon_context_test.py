@@ -113,23 +113,23 @@ class MuonContextTest(unittest.TestCase):
             self.assertTrue(item in ads_list)
 
     def test_window(self):
-        self.assertEquals("Muon Analysis", self.context.window_title)
+        self.assertEqual("Muon Analysis", self.context.window_title)
 
     def test_get_runs(self):
         runs = self.context.get_runs(" 19489 ")
-        self.assertEquals(runs, [[19489]])
+        self.assertEqual(runs, [[19489]])
 
     def test_get_group_or_pair(self):
         group_and_pair = self.context.get_group_and_pair("All")
-        self.assertEquals(group_and_pair, (["fwd", "bwd"], ["long"]))
+        self.assertEqual(group_and_pair, (["fwd", "bwd"], ["long"]))
 
     def test_get_group(self):
         group_and_pair = self.context.get_group_and_pair(" fwd , bwd ")
-        self.assertEquals(group_and_pair, (["fwd", "bwd"], []))
+        self.assertEqual(group_and_pair, (["fwd", "bwd"], []))
 
     def test_get_pair(self):
         group_and_pair = self.context.get_group_and_pair(" long ")
-        self.assertEquals(group_and_pair, ([], ["long"]))
+        self.assertEqual(group_and_pair, ([], ["long"]))
 
     def test_reset_groups_and_pairs_to_default(self):
         self.assertEqual(self.group_pair_context.group_names, ['fwd', 'bwd'])

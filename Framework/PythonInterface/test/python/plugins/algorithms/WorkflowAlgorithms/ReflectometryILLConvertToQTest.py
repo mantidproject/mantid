@@ -64,10 +64,10 @@ class ReflectometryILLConvertToQTest(unittest.TestCase):
         self.assertTrue(ws)
         self.assertTrue(isinstance(ws, MatrixWorkspace))
         self.assertFalse(ws.isHistogramData())
-        self.assertEquals(ws.blocksize(), blocksize)
-        self.assertEquals(ws.getNumberHistograms(), 1)
+        self.assertEqual(ws.blocksize(), blocksize)
+        self.assertEqual(ws.getNumberHistograms(), 1)
         self.assertTrue(ws.hasDx(0))
-        self.assertEquals(ws.getAxis(0).getUnit().unitID(), 'MomentumTransfer')
+        self.assertEqual(ws.getAxis(0).getUnit().unitID(), 'MomentumTransfer')
 
 if __name__ == "__main__":
     unittest.main()

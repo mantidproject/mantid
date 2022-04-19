@@ -61,7 +61,7 @@ class IndirectILLEnergyTransferTest(unittest.TestCase):
         self._check_workspace_group(mtd['red'], 2, 18, 1017)
         deltaE = mtd['red'][0].readX(0)
         bsize = mtd['red'][0].blocksize()
-        self.assertAlmostEquals(deltaE[bsize//2], 0, 4)
+        self.assertAlmostEqual(deltaE[bsize//2], 0, 4)
         self.assertTrue(deltaE[-1] > -deltaE[0])
 
     def test_one_wing_QENS(self):
@@ -73,7 +73,7 @@ class IndirectILLEnergyTransferTest(unittest.TestCase):
 
         deltaE = res[0].readX(0)
         bsize = res[0].blocksize()
-        self.assertEquals(deltaE[bsize//2], 0)
+        self.assertEqual(deltaE[bsize//2], 0)
         self.assertTrue(deltaE[-1] > -deltaE[0])
 
     def test_one_wing_EFWS(self):
@@ -113,7 +113,7 @@ class IndirectILLEnergyTransferTest(unittest.TestCase):
         self.assertTrue(mtd.doesExist(mon_ws))
         self.assertTrue(mtd[mon_ws])
         self.assertTrue(isinstance(mtd[mon_ws], MatrixWorkspace))
-        self.assertEquals(mtd[mon_ws].getAxis(0).getUnit().unitID(), 'DeltaE')
+        self.assertEqual(mtd[mon_ws].getAxis(0).getUnit().unitID(), 'DeltaE')
         self._check_workspace_group(res, 1, 2050, 1121)
 
     def test_bats_grouped(self):
@@ -147,7 +147,7 @@ class IndirectILLEnergyTransferTest(unittest.TestCase):
         self._check_workspace_group(mtd["res"], 1, 2051, 984)
 
         epp_ws = mtd['out_epp_ws']
-        self.assertEquals(epp_ws.rowCount(), 4)
+        self.assertEqual(epp_ws.rowCount(), 4)
 
     def test_fit_all(self):
         args = {'Run': self._runs['3_single_dets'],
@@ -162,13 +162,13 @@ class IndirectILLEnergyTransferTest(unittest.TestCase):
         self._check_workspace_group(mtd["res"], 1, 2051, 984)
 
         epp_ws = mtd['out_epp_ws']
-        self.assertEquals(epp_ws.rowCount(), 516)
+        self.assertEqual(epp_ws.rowCount(), 516)
 
     def _check_workspace_group(self, wsgroup, nentries, nspectra, nbins):
 
         self.assertTrue(isinstance(wsgroup, WorkspaceGroup))
 
-        self.assertEquals(wsgroup.getNumberOfEntries(),nentries)
+        self.assertEqual(wsgroup.getNumberOfEntries(),nentries)
 
         item = wsgroup.getItem(0)
 
@@ -176,9 +176,9 @@ class IndirectILLEnergyTransferTest(unittest.TestCase):
 
         self.assertEqual(item.getAxis(0).getUnit().unitID(), "DeltaE")
 
-        self.assertEquals(item.getNumberHistograms(),nspectra)
+        self.assertEqual(item.getNumberHistograms(),nspectra)
 
-        self.assertEquals(item.blocksize(), nbins)
+        self.assertEqual(item.blocksize(), nbins)
 
         self.assertTrue(item.getSampleDetails())
 

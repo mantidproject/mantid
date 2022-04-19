@@ -5,9 +5,52 @@ MuSR Changes
 .. contents:: Table of Contents
    :local:
 
-.. warning:: **Developers:** Sort changes under appropriate heading
-    putting new features at the top of the section, followed by
-    improvements, followed by bug fixes.
+Frequency Domain Analysis
+-------------------------
+
+Bugfixes
+############
+.. amalgamate:: Muon/FDA/Bugfixes
+
+
+Muon Analysis
+-------------
+
+Bugfixes
+############
+.. amalgamate:: Muon/Muon_Analysis/Bugfixes
+
+
+Muon Analysis and Frequency Domain Analysis
+-------------------------------------------
+
+Bugfixes
+############
+.. amalgamate:: Muon/MA_FDA/Bugfixes
+
+
+ALC
+---
+
+Bugfixes
+############
+.. amalgamate:: Muon/ALC/Bugfixes
+
+
+Elemental Analysis
+------------------
+
+Bugfixes
+############
+.. amalgamate:: Muon/Elemental_Analysis/Bugfixes
+
+
+Algorithms
+----------
+
+Bugfixes
+############
+.. amalgamate:: Muon/Algorithms/Bugfixes
 
 :ref:`Release 6.4.0 <v6.4.0>`
 

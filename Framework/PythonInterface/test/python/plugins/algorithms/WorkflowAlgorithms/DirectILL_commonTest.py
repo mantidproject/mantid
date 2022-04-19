@@ -80,9 +80,9 @@ class DirectILL_commonTest(unittest.TestCase):
         last_element -- expected value for the final element of the pattern
         """
         pattern_list = pattern.split(',')
-        self.assertEquals(len(pattern_list), length)
-        self.assertEquals(pattern_list[0], first_element)
-        self.assertEquals(pattern_list[-1], last_element)
+        self.assertEqual(len(pattern_list), length)
+        self.assertEqual(pattern_list[0], first_element)
+        self.assertEqual(pattern_list[-1], last_element)
 
 
 if __name__ == '__main__':

@@ -408,9 +408,10 @@ MatrixWorkspace_sptr create2DDetectorScanWorkspaceWithFullInstrument(int nhist, 
  */
 Workspace2D_sptr create2DWorkspaceWithGeographicalDetectors(const int nlat, const int nlong, const double anginc,
                                                             const int nbins, const double x0, const double deltax,
-                                                            const std::string &instrumentName) {
+                                                            const std::string &instrumentName,
+                                                            const std::string &xunit) {
   auto inputWorkspace = WorkspaceCreationHelper::create2DWorkspaceBinned(nlat * nlong, nbins, x0, deltax);
-  inputWorkspace->getAxis(0)->unit() = UnitFactory::Instance().create("Wavelength");
+  inputWorkspace->getAxis(0)->unit() = UnitFactory::Instance().create(xunit);
 
   InstrumentCreationHelper::addInstrumentWithGeographicalDetectorsToWorkspace(*inputWorkspace, nlat, nlong, anginc,
                                                                               instrumentName);

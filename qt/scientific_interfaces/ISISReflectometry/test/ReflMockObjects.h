@@ -32,6 +32,7 @@
 #include "GUI/Save/IAsciiSaver.h"
 #include "GUI/Save/ISavePresenter.h"
 #include "MantidAPI/AlgorithmManager.h"
+#include "MantidFrameworkTestHelpers/FallbackBoostOptionalIO.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidKernel/ICatalogInfo.h"
 #include "MantidKernel/ProgressBase.h"

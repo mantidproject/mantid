@@ -273,7 +273,7 @@ private:
 
   /// Delete a series of input workspaces using the Analysis Data Service
   void cleanup(const std::vector<std::string> &workspaces) {
-    for (const auto ws : workspaces) {
+    for (const auto &ws : workspaces) {
       if (AnalysisDataService::Instance().doesExist(ws))
         AnalysisDataService::Instance().remove(ws);
     }

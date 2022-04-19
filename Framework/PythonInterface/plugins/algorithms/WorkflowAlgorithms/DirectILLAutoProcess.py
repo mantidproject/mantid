@@ -638,7 +638,16 @@ class DirectILLAutoProcess(DataProcessorAlgorithm):
                 n_detector_cols = 10
                 sparse_parameters['NumberOfDetectorRows'] = n_detector_rows
                 sparse_parameters['NumberOfDetectorColumns'] = n_detector_cols
-
+            # ensure the beam dimensions are always larger than the sample:
+            if 'Height' in sample_geometry:
+                sparse_parameters['BeamHeight'] = 2 * float(sample_geometry['Height'].value)
+            if 'Width' in sample_geometry:
+                size_property = 'Width'
+            elif 'Radius' in sample_geometry:
+                size_property = 'Radius'
+            else:  # Annulus
+                size_property = 'OuterRadius'
+            sparse_parameters['BeamWidth'] = 2 * float(sample_geometry[size_property].value)
             PaalmanPingsMonteCarloAbsorption(
                 InputWorkspace=ws,
                 CorrectionsWorkspace=self.absorption_corr,

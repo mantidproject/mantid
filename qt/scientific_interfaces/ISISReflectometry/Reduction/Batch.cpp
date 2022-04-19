@@ -40,4 +40,27 @@ void Batch::resetSkippedItems() { m_runsTable.resetSkippedItems(); }
 boost::optional<Item &> Batch::getItemWithOutputWorkspaceOrNone(std::string const &wsName) {
   return m_runsTable.getItemWithOutputWorkspaceOrNone(wsName);
 }
+
+void Batch::updateLookupIndex(Row &row) {
+  try {
+    row.setLookupIndex(experiment().getLookupRowIndexFromRow(row, runsTable().thetaTolerance()));
+  } catch (MultipleRowsFoundException &e) {
+    row.setError(e.what());
+  }
+}
+
+void Batch::updateLookupIndexesOfGroup(Group &group) {
+  for (auto &row : group.mutableRows()) {
+    if (row.is_initialized()) {
+      updateLookupIndex(row.get());
+    }
+  }
+}
+
+void Batch::updateLookupIndexesOfTable() {
+  for (auto &group : m_runsTable.mutableReductionJobs().mutableGroups()) {
+    updateLookupIndexesOfGroup(group);
+  }
+}
+
 } // namespace MantidQt::CustomInterfaces::ISISReflectometry

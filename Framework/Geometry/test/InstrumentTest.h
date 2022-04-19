@@ -16,6 +16,7 @@
 #include "MantidKernel/DateAndTime.h"
 #include "MantidKernel/EigenConversionHelpers.h"
 #include "MantidKernel/Exception.h"
+#include <cxxtest/BenchmarkUtil.h>
 #include <cxxtest/TestSuite.h>
 #include <memory>
 
@@ -656,11 +657,11 @@ public:
   }
 
   void test_access_pos_non_parameterized() {
-
     const detid_t nPixels = 100 * 100 * 6;
     double pos_x = 0;
     for (detid_t i = 1; i <= nPixels; i++) {
       pos_x += m_instrumentNotParameterized->getDetector(i)->getPos().X();
+      CxxTest::doNotOptimize(&pos_x);
     }
   }
 
@@ -670,6 +671,7 @@ public:
     double pos_x = 0;
     for (detid_t i = 1; i <= nPixels; i++) {
       pos_x += m_instrumentParameterized->getDetector(i)->getPos().X();
+      CxxTest::doNotOptimize(&pos_x);
     }
   }
 
@@ -679,6 +681,7 @@ public:
     Kernel::Quat rot;
     for (detid_t i = 1; i <= nPixels; i++) {
       rot += m_instrumentNotParameterized->getDetector(i)->getRotation();
+      CxxTest::doNotOptimize(&rot);
     }
   }
 
@@ -688,6 +691,7 @@ public:
     Kernel::Quat rot;
     for (detid_t i = 1; i <= nPixels; i++) {
       rot += m_instrumentParameterized->getDetector(i)->getRotation();
+      CxxTest::doNotOptimize(&rot);
     }
   }
 

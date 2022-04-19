@@ -611,9 +611,6 @@ void LoadDNSSCD::fillOutputWorkspaceRaw(double wavelength) {
   double theta_min = tth_limits[0] / 2.0;
   double theta_max = tth_limits[1] / 2.0;
 
-  double omega_offset = getProperty("OmegaOffset");
-  omega_offset *= -1.0;
-
   std::vector<double> extentMins = {theta_min, 0.0, tof1};
   std::vector<double> extentMaxs = {theta_max, 360.0, m_tof_max};
 

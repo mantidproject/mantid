@@ -134,6 +134,37 @@ Best Practice Advice
 -  Always perform test set-up outside of the test method. That way your
    timings will only relate to the target code you wish to measure.
 
+Avoiding Compiler Optimizations
+###############################
+
+A common issue with performance tests is when you want to compute some
+value over a large number of iterations but ultimately you don't want
+to actually use it in the end. We have included some handy utility functions
+to avoid the compiler optimizing unused variables away. For more information
+this conference talk is quite enlightening: https://youtu.be/nXaxk27zwlk?t=2441.
+
+For example, we attempt to time the sum of a value after many calls to an operation:
+
+.. code-block:: c++
+
+   #include <CxxTest/BenchmarkUtil.h>
+
+   class MyTestPerformance : public CxxTest::TestSuite {
+   public:
+
+      void test_slow_performance() {
+        double value(0.0);
+        for(size_t i = 0; i < 1000000) {
+          value += my_op();
+          CxxTest::doNotOptimize(&value);
+        }
+      }
+   };
+
+Without the ``CxxTest::doNotOptimize(&value);`` call the compiler will likely spot
+that ``value`` is ultimately unused and the whole function will be optimized away
+and the benchmark will become useless.
+
 Jobs that monitor performance
 #############################
 

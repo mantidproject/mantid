@@ -117,11 +117,9 @@ void addDataset(Json::Value &parent, const std::string &name, const std::vector<
                 const std::vector<T> &data, const std::string &attributesName = "",
                 const std::string &attributesValues = "") {
   auto dataset = createEmptyDataset(name, getType<T>());
-  auto numVals = 1;
   int i = 0;
   for (; i < static_cast<int>(arrayShape.size() - 1); ++i) {
     auto s = arrayShape[i];
-    numVals *= s;
     dataset["dataset"]["size"][i] = s;
     resizeValues(dataset["values"], s);
   }

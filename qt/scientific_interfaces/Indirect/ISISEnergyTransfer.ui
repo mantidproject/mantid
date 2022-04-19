@@ -36,6 +36,16 @@
         </property>
        </widget>
       </item>
+      <item row="2" column="1">
+       <widget class="QCheckBox" name="ckUseCalib">
+        <property name="toolTip">
+         <string>Use calibration file to adjust for detector efficiency.</string>
+        </property>
+        <property name="text">
+         <string>Use Calib File</string>
+        </property>
+       </widget>
+      </item>
       <item row="2" column="0">
        <widget class="MantidQt::MantidWidgets::DataSelector" name="dsCalibrationFile" native="true">
         <property name="enabled">
@@ -61,13 +71,16 @@
         </property>
        </widget>
       </item>
-      <item row="2" column="1">
-       <widget class="QCheckBox" name="ckUseCalib">
+      <item row="1" column="1">
+       <widget class="QCheckBox" name="ckLoadLogFiles">
         <property name="toolTip">
-         <string>Use calibration file to adjust for detector efficiency.</string>
+         <string>Load log files</string>
         </property>
         <property name="text">
-         <string>Use Calib File</string>
+         <string>Load Log Files</string>
+        </property>
+        <property name="checked">
+         <bool>true</bool>
         </property>
        </widget>
       </item>
@@ -83,19 +96,6 @@
          <string>Input Runs</string>
         </property>
         <property name="multipleFiles" stdset="0">
-         <bool>true</bool>
-        </property>
-       </widget>
-      </item>
-      <item row="1" column="1">
-       <widget class="QCheckBox" name="ckLoadLogFiles">
-        <property name="toolTip">
-         <string>Load log files</string>
-        </property>
-        <property name="text">
-         <string>Load Log Files</string>
-        </property>
-        <property name="checked">
          <bool>true</bool>
         </property>
        </widget>
@@ -1056,9 +1056,12 @@
          </spacer>
         </item>
         <item>
-         <widget class="QCheckBox" name="ckGroupOutput">
-          <property name="text">
-           <string>Group Output</string>
+         <widget class="QComboBox" name="cbGroupOutput">
+          <property name="editable">
+           <bool>false</bool>
+          </property>
+          <property name="currentText">
+           <string/>
           </property>
          </widget>
         </item>
@@ -1144,11 +1147,6 @@
  </widget>
  <customwidgets>
   <customwidget>
-   <class>MantidQt::MantidWidgets::DataSelector</class>
-   <extends>QWidget</extends>
-   <header>MantidQtWidgets/Common/DataSelector.h</header>
-  </customwidget>
-  <customwidget>
    <class>MantidQt::CustomInterfaces::IndirectPlotOptionsView</class>
    <extends>QWidget</extends>
    <header>IndirectPlotOptionsView.h</header>
@@ -1159,6 +1157,11 @@
    <extends>QWidget</extends>
    <header>MantidQtWidgets/Common/FileFinderWidget.h</header>
    <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>MantidQt::MantidWidgets::DataSelector</class>
+   <extends>QWidget</extends>
+   <header>MantidQtWidgets/Common/DataSelector.h</header>
   </customwidget>
  </customwidgets>
  <tabstops>

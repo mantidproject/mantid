@@ -237,8 +237,6 @@ constParameter:${CMAKE_SOURCE_DIR}/Framework/CurveFitting/src/Functions/CrystalE
 constParameter:${CMAKE_SOURCE_DIR}/Framework/CurveFitting/src/Functions/CrystalElectricField.cpp:454
 constParameter:${CMAKE_SOURCE_DIR}/Framework/CurveFitting/src/Functions/CrystalElectricField.cpp:484
 identicalInnerCondition:${CMAKE_SOURCE_DIR}/Framework/CurveFitting/src/Functions/CrystalFieldMultiSpectrum.cpp:128
-oppositeInnerCondition:${CMAKE_SOURCE_DIR}/Framework/CurveFitting/src/Functions/CrystalFieldMultiSpectrum.cpp:252
-useStlAlgorithm:${CMAKE_SOURCE_DIR}/Framework/CurveFitting/src/Functions/CrystalFieldMultiSpectrum.cpp:280
 constParameter:${CMAKE_SOURCE_DIR}/Framework/CurveFitting/src/RalNlls/TrustRegion.cpp:288
 constParameter:${CMAKE_SOURCE_DIR}/Framework/CurveFitting/src/RalNlls/TrustRegion.cpp:288
 unsignedLessThanZero:${CMAKE_SOURCE_DIR}/Framework/CurveFitting/src/ParDomain.cpp:72
@@ -317,9 +315,6 @@ containerOutOfBounds:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadPSIMuonB
 containerOutOfBounds:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadPSIMuonBin.cpp:855
 useStlAlgorithm:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadPSIMuonBin.cpp:206
 useStlAlgorithm:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadPSIMuonBin.cpp:233
-constParameter:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadPLN.cpp:93
-constParameter:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadPLN.cpp:105
-constParameter:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadPLN.cpp:643
 integerOverflowCond:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadRaw/byte_rel_comp.cpp:59
 objectIndex:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadRaw/isisraw.cpp:592
 objectIndex:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadRaw/isisraw.cpp:593
@@ -368,8 +363,6 @@ useStlAlgorithm:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/RemoveLogs.cpp:67
 rethrowNoCurrentException:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/SaveDetectorsGrouping.cpp:90
 knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/SaveNXcanSAS.cpp:678
 unreadVariable:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/SaveNXcanSAS.cpp:356
-unreadVariable:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/SaveNexusProcessed.cpp:79
-unreadVariable:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/SaveNexusProcessed.cpp:94
 knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/SaveRKH.cpp:175
 knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/SaveRKH.cpp:183
 nullPointerRedundantCheck:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/SaveRMCProfile.cpp:63
@@ -540,9 +533,7 @@ unreadVariable:${CMAKE_SOURCE_DIR}/Framework/SINQ/src/SINQTranspose3D.cpp:117
 unreadVariable:${CMAKE_SOURCE_DIR}/Framework/SINQ/src/SINQTranspose3D.cpp:118
 unreadVariable:${CMAKE_SOURCE_DIR}/Framework/SINQ/src/SINQTranspose3D.cpp:156
 unreadVariable:${CMAKE_SOURCE_DIR}/Framework/SINQ/src/SINQTranspose3D.cpp:157
-constParameter:${CMAKE_SOURCE_DIR}/Framework/TestHelpers/src/JSONGeometryParserTestHelper.cpp:176
-unreadVariable:${CMAKE_SOURCE_DIR}/Framework/TestHelpers/src/JSONGeometryParserTestHelper.cpp:120
-unreadVariable:${CMAKE_SOURCE_DIR}/Framework/TestHelpers/src/JSONGeometryParserTestHelper.cpp:124
+constParameter:${CMAKE_SOURCE_DIR}/Framework/TestHelpers/src/JSONGeometryParserTestHelper.cpp:174
 constParameter:${CMAKE_SOURCE_DIR}/Framework/TestHelpers/src/MuonWorkspaceCreationHelper.cpp:193
 useStlAlgorithm:${CMAKE_SOURCE_DIR}/Framework/WorkflowAlgorithms/src/ExtractQENSMembers.cpp:107
 useStlAlgorithm:${CMAKE_SOURCE_DIR}/Framework/WorkflowAlgorithms/src/ProcessIndirectFitParameters.cpp:45
@@ -576,8 +567,6 @@ useStlAlgorithm:${CMAKE_SOURCE_DIR}/Framework/MDAlgorithms/src/MDNorm.cpp:962
 shadowVariable:${CMAKE_SOURCE_DIR}/Framework/MDAlgorithms/src/MDNormSCD.cpp:202
 unreadVariable:${CMAKE_SOURCE_DIR}/Framework/MDAlgorithms/src/MDWSTransform.cpp:321
 constParameter:${CMAKE_SOURCE_DIR}/Framework/MDAlgorithms/src/MDWSDescription.cpp:204
-nullPointerRedundantCheck:${CMAKE_SOURCE_DIR}/Framework/MDAlgorithms/src/PolarizationAngleCorrectionMD.cpp:203
-unreadVariable:${CMAKE_SOURCE_DIR}/Framework/MDAlgorithms/src/PolarizationAngleCorrectionMD.cpp:129
 useStlAlgorithm:${CMAKE_SOURCE_DIR}/Framework/MDAlgorithms/src/SaveIsawQvector.cpp:113
 duplicateExpression:${CMAKE_SOURCE_DIR}/Framework/MDAlgorithms/src/SaveMD2.cpp:128
 nullPointerRedundantCheck:${CMAKE_SOURCE_DIR}/Framework/MDAlgorithms/src/DgsScatteredTransmissionCorrectionMD.cpp:163
@@ -588,11 +577,8 @@ templateRecursion:${CMAKE_SOURCE_DIR}/Framework/MDAlgorithms/src/SliceMD.cpp:300
 useStlAlgorithm:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/FitDomain.cpp:97
 unreadVariable:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/FitDomain.cpp:125
 knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/FitPropertyBrowser.cpp:862
-knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/FitPropertyBrowser.cpp:1634
 shadowVariable:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/FitPropertyBrowser.cpp:512
-shadowVariable:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/FitPropertyBrowser.cpp:1791
 constParameter:${CMAKE_SOURCE_DIR}/qt/widgets/common/inc/MantidQtWidgets/Common/PropertyHandler.h:194
-useStlAlgorithm:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/FitPropertyBrowser.cpp:3251
 useStlAlgorithm:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/FitScriptGeneratorDataTable.cpp:200
 unsignedLessThanZero:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/FitScriptGeneratorModel.cpp:611
 knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/FlowLayout.cpp:131
