@@ -17,7 +17,7 @@ class DNSScriptGeneratorView(DNSView):
     """
         Common Widget for DNS Script generator, shows mantid script
     """
-    NAME = "Script generator"
+    NAME = "Script Generator"
 
     def __init__(self, parent):
         super().__init__(parent)

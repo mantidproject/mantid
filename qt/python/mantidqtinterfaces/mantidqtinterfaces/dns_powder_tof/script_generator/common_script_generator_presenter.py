@@ -57,6 +57,8 @@ class DNSScriptGeneratorPresenter(DNSObserver):
             else:
                 self._script_number += 1
             self._finish_script_run()
+        # activate copy script to clipboard button
+        self.view.pB_copy_to_clipboard.setEnabled(True)
 
     def _finish_script_run(self):
         pass
@@ -97,7 +99,7 @@ class DNSScriptGeneratorPresenter(DNSObserver):
         if script_dir:
             filename, script_path = self.model.save_script(
                 script, filename, script_dir)
-            self.view.show_status_message(f'script saved to: {script_path}',
+            self.view.show_status_message(f'Script Saved to: {script_path}',
                                           30,
                                           clear=True)
             self._set_script_filename(filename)

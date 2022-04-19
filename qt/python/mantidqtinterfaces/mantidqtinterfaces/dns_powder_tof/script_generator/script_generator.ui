@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>408</width>
-    <height>398</height>
+    <width>1431</width>
+    <height>936</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -25,7 +25,7 @@
      <item>
       <widget class="QPushButton" name="pB_generate_script">
        <property name="text">
-        <string>Generate script</string>
+        <string>Generate Script</string>
        </property>
       </widget>
      </item>
@@ -49,7 +49,7 @@
      <item>
       <widget class="QCheckBox" name="cB_automatic_name">
        <property name="text">
-        <string>automatic</string>
+        <string>Automatic Script Filename</string>
        </property>
        <property name="checked">
         <bool>true</bool>
@@ -58,8 +58,11 @@
      </item>
      <item>
       <widget class="QPushButton" name="pB_copy_to_clipboard">
+       <property name="enabled">
+        <bool>false</bool>
+       </property>
        <property name="text">
-        <string>copy to clipboard</string>
+        <string>Copy Script to Clipboard</string>
        </property>
       </widget>
      </item>
