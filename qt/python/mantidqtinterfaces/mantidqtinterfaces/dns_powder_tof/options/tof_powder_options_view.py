@@ -4,8 +4,9 @@
 #     NScD Oak Ridge National Laboratory, European Spallation Source
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
+
 """
-DNS Options Widget = View - Tab of DNS Reduction GUI
+DNS Options Widget = View - Tab of DNS Reduction GUI.
 """
 
 from mantidqt.utils.qt import load_ui
@@ -15,7 +16,7 @@ from mantidqtinterfaces.dns_powder_tof.data_structures.dns_view import DNSView
 
 class DNSTofPowderOptionsView(DNSView):
     """
-        Widget that lets user select redcution options for TOF powder
+    Widget that lets user select reduction options for TOF powder.
     """
     NAME = "Options"
 
@@ -40,8 +41,8 @@ class DNSTofPowderOptionsView(DNSView):
             'delete_raw': self._content.cB_delete_raw,
             'norm_monitor': self._content.rB_norm_monitor,
             'q_step': self._content.dSB_q_step,
-            'substract_sample_back': self._content.cB_substract_sample_back,
-            'substract_vana_back': self._content.cB_substract_vana_back,
+            'subtract_sample_back': self._content.cB_subtract_sample_back,
+            'subtract_vana_back': self._content.cB_subtract_vana_back,
             'vana_back_factor': self._content.dSB_vana_back_factor,
             'sample_back_factor': self._content.dSB_sample_back_factor,
             'mask_bad_detectors': self._content.cB_mask_bad_detectors,
@@ -50,13 +51,14 @@ class DNSTofPowderOptionsView(DNSView):
 
         # connect signals
         self._content.pB_estimate.clicked.connect(self._estimate_q_and_binning)
+        self._map['wavelength'].valueChanged.connect(self.deactivate_get_wavelength)
         self._map['get_wavelength'].stateChanged.connect(self._get_wavelength)
         self._map['det_efficiency'].stateChanged.connect(
             self._disable_sub_det_efficiency)
-        self._map['substract_sample_back'].stateChanged.connect(
-            self._disable_sub_substract_sample_back)
-        self._map['substract_vana_back'].stateChanged.connect(
-            self._disable_sub_substract_vana_back)
+        self._map['subtract_sample_back'].stateChanged.connect(
+            self._disable_sub_subtract_sample_back)
+        self._map['subtract_vana_back'].stateChanged.connect(
+            self._disable_sub_subtract_vana_back)
 
     # Signals
     sig_get_wavelength = Signal()
@@ -68,14 +70,14 @@ class DNSTofPowderOptionsView(DNSView):
     def _disable_sub_det_efficiency(self, state):
         self._map['vanadium_temperature'].setEnabled(state)
         self._map['correct_elastic_peak_position'].setEnabled(state)
-        self._map['substract_vana_back'].setEnabled(state)
+        self._map['subtract_vana_back'].setEnabled(state)
         self._map['vana_back_factor'].setEnabled(state)
         self._map['mask_bad_detectors'].setEnabled(state)
 
-    def _disable_sub_substract_sample_back(self, state):
+    def _disable_sub_subtract_sample_back(self, state):
         self._map['sample_back_factor'].setEnabled(state)
 
-    def _disable_sub_substract_vana_back(self, state):
+    def _disable_sub_subtract_vana_back(self, state):
         self._map['vana_back_factor'].setEnabled(state)
 
     def _estimate_q_and_binning(self):
