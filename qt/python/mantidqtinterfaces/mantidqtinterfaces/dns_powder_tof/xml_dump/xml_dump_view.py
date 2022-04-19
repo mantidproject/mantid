@@ -4,8 +4,9 @@
 #     NScD Oak Ridge National Laboratory, European Spallation Source
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
+
 """
-DNS XML dump view
+DNS XML dump view.
 """
 
 import platform
@@ -15,7 +16,6 @@ from collections import OrderedDict
 from os.path import expanduser
 from qtpy.QtWidgets import QFileDialog
 from mantidqtinterfaces.dns_powder_tof.data_structures.dns_view import DNSView
-
 
 # to get mantid version
 try:
@@ -27,7 +27,7 @@ except (ImportError, ImportWarning):
 
 class DNSXMLDumpView(DNSView):
     """
-        Widget that lets user save or load data reduction xml files
+    Widget that lets user save or load data reduction xml files.
     """
     # Widget name
     name = "XmlDump"
@@ -39,26 +39,26 @@ class DNSXMLDumpView(DNSView):
         self.main_view = parent
         self.setVisible(False)
 
-    def open_load_filename(self, startpath=expanduser("~")):
+    def open_load_filename(self, start_path=expanduser("~")):
         """
-        Open a file dialog to load xml file
+        Open a file dialog to load xml file.
         """
         xml_filepath = QFileDialog.getOpenFileName(
             parent=self.main_view,
             caption="Select XML file for loading",
-            directory=startpath,
+            directory=start_path,
             filter="XML files (*.xml)",
             options=QFileDialog.DontUseNativeDialog)
         return xml_filepath
 
-    def open_save_filename(self, startpath=expanduser("~")):
+    def open_save_filename(self, start_path=expanduser("~")):
         """
-        Open a file dialog save xml file
+        Open a file dialog save xml file.
         """
         xml_filepath = QFileDialog.getSaveFileName(
             parent=self.main_view,
             caption="Select XML file for saving",
-            directory=startpath,
+            directory=start_path,
             filter="XML files (*.xml)",
             options=QFileDialog.DontUseNativeDialog)
         return xml_filepath

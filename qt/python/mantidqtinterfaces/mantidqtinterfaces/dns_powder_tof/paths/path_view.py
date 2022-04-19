@@ -4,8 +4,9 @@
 #     NScD Oak Ridge National Laboratory, European Spallation Source
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
+
 """
-DNS Path Configuration Widget = View - Tab of DNS Reduction GUI
+DNS Path Configuration Widget = View - Tab of DNS Reduction GUI.
 """
 
 from mantidqt.utils.qt import load_ui
@@ -16,7 +17,7 @@ from mantidqtinterfaces.dns_powder_tof.data_structures.dns_view import DNSView
 
 class DNSPathView(DNSView):
     """
-        Widget that lets user select DNS data directories
+    Widget that lets user select DNS data directories.
     """
     NAME = 'Paths'
 
@@ -38,30 +39,30 @@ class DNSPathView(DNSView):
         }
 
         # connect signals
-        self._content.pB_file_data.clicked.connect(self._filedialog)
-        self._content.pB_file_psd.clicked.connect(self._filedialog)
-        self._content.pB_file_standards.clicked.connect(self._filedialog)
-        self._content.pB_file_script.clicked.connect(self._filedialog)
+        self._content.pB_file_data.clicked.connect(self._file_dialog)
+        self._content.pB_file_psd.clicked.connect(self._file_dialog)
+        self._content.pB_file_standards.clicked.connect(self._file_dialog)
+        self._content.pB_file_script.clicked.connect(self._file_dialog)
         self._content.pB_clear.clicked.connect(self._clear_directories)
-        self._content.pB_export.clicked.connect(self._filedialog)
+        self._content.pB_export.clicked.connect(self._file_dialog)
         self._content.pB_clear_cache.clicked.connect(self._clear_cache)
 
-    # Signals
+    # signals
     sig_data_path_set = Signal(str)
     sig_clear_cache = Signal()
-    sig_filedialog_requested = Signal(str)
+    sig_file_dialog_requested = Signal(str)
 
-    def _filedialog(self):
+    def _file_dialog(self):
         sender = self.sender().objectName()[8:]
-        self.sig_filedialog_requested.emit(sender)
+        self.sig_file_dialog_requested.emit(sender)
 
-    def open_filedialog(self, startpath):
+    def open_file_dialog(self, start_path):
         dir_name = QFileDialog.getExistingDirectory(
-            self, "Select folder", startpath,
+            self, "Select folder", start_path,
             QFileDialog.ShowDirsOnly)
         return dir_name
 
-    def set_datapath(self, dir_name):
+    def set_data_path(self, dir_name):
         self.set_path('data_dir', dir_name)
         self.sig_data_path_set.emit(dir_name)
 
@@ -77,8 +78,8 @@ class DNSPathView(DNSView):
         self.set_path('psd_dir', '')
         self.set_path('export_dir', '')
 
-    def get_path(self, pathtype):
-        return self._map[pathtype].text()
+    def get_path(self, path_type):
+        return self._map[path_type].text()
 
     def get_prop_number(self):
         return self._map['prop_nb'].text()
@@ -86,8 +87,8 @@ class DNSPathView(DNSView):
     def get_user(self):
         return self._map['user'].text()
 
-    def set_path(self, pathtype, directory):
-        self._map[pathtype].setText(directory)
+    def set_path(self, path_type, directory):
+        self._map[path_type].setText(directory)
 
     def set_prop_number(self, prop_nb):
         self._map['prop_nb'].setText(prop_nb)

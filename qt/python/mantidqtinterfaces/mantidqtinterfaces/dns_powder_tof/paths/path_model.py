@@ -40,7 +40,7 @@ class DNSPathModel(DNSObsModel):
             os.remove(path + '/last_filelist.txt')
 
     @staticmethod
-    def get_startpath_for_dialog(path):
+    def get_start_path_for_dialog(path):
         if path:
             return path
         return expanduser("~")

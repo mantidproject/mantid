@@ -215,8 +215,8 @@ def get_fake_tof_options():
     tof_opt = get_fake_tof_binning()
     tof_opt.update({
         'corrections': True,
-        'substract_vana_back': True,
-        'substract_sample_back': True,
+        'subtract_vana_back': True,
+        'subtract_sample_back': True,
         'det_efficiency': True,
         'vanadium_temperature': 295,
         'vana_back_factor': 1,

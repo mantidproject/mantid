@@ -98,7 +98,7 @@ class DNSTreeModel(QAbstractItemModel):
             return 'empty'
         return sample
 
-    # Complex getting
+    # complex getting
     def _get_scan_rows(self):
         return [
             row for row in self._scan_range()

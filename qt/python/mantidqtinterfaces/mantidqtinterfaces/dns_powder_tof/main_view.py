@@ -72,8 +72,8 @@ class DNSReductionGUIView(QMainWindow):
     sig_open_triggered = Signal()
     sig_modus_change = Signal(str)
 
-    def _add_tab(self, newtab, position=-1):
-        self.ui.tabWidget.insertTab(position, newtab, newtab.NAME)
+    def _add_tab(self, new_tab, position=-1):
+        self.ui.tabWidget.insertTab(position, new_tab, new_tab.NAME)
 
     def _clear_tabs(self):
         self.ui.tabWidget.clear()

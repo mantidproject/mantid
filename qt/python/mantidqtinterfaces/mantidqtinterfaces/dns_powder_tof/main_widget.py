@@ -4,9 +4,11 @@
 #     NScD Oak Ridge National Laboratory, European Spallation Source
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
+
 """
-DNS GUI Main widget
+DNS GUI Main widget.
 """
+
 from mantidqtinterfaces.dns_powder_tof.data_structures.dns_widget import \
     DNSWidget
 from mantidqtinterfaces.dns_powder_tof.dns_modus import DNSModus
@@ -17,8 +19,9 @@ from mantidqtinterfaces.dns_powder_tof.parameter_abo import ParameterAbo
 
 
 class DNSReductionGuiWidget(DNSWidget):
-    """Main DNS Gui widget, host, view, presenter, model"""
-
+    """
+    Main DNS Gui widget, host, view, presenter, model.
+    """
     def __init__(self, name=None, parent=None, app=None, within_mantid=None):
         super().__init__(name, parent)
         self.name = name

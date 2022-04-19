@@ -34,7 +34,7 @@ class DNSFileSelectorPresenter(DNSObserver):
         self.view.sig_read_filtered.connect(self._read_filtered)
         self.view.sig_filters_clicked.connect(self._filter_scans)
         self.view.sig_standard_filters_clicked.connect(self._filter_standard)
-        self.view.sig_check_all.connect(self._check_all_vissible_scans)
+        self.view.sig_check_all.connect(self._check_all_visible_scans)
         self.view.sig_uncheck_all.connect(self._uncheck_all_scans)
         self.view.sig_check_last.connect(self._check_last_scans)
         self.view.sig_check_selected.connect(self._check_selected_scans)
@@ -109,7 +109,7 @@ class DNSFileSelectorPresenter(DNSObserver):
         data_dir = self.param_dict['paths']['data_dir']
 
         if not data_dir:
-            self.raise_error('No data selected', critical=True)
+            self.raise_error('No data directory selected', critical=True)
             return None
 
         if state == 2 and data_dir:
@@ -125,13 +125,13 @@ class DNSFileSelectorPresenter(DNSObserver):
         if was:  # if view is not standard we change to it and change back
             self.view.combo_changed(1)
         self._read_standard()
-        self._check_all_vissible_scans()
+        self._check_all_visible_scans()
         self.view.show_status_message('automatically loaded all standard files',
                                       30)
         if was:
             self.view.combo_changed(0)
 
-    def _check_all_vissible_scans(self):
+    def _check_all_visible_scans(self):
         self.model.check_scans_by_rows(self._get_non_hidden_rows())
 
     def _check_last_scans(self, sender_name):

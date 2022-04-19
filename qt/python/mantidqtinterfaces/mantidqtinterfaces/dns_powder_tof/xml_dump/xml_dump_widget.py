@@ -4,9 +4,11 @@
 #     NScD Oak Ridge National Laboratory, European Spallation Source
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
+
 """
-DNS Path widget
+DNS Path widget.
 """
+
 from mantidqtinterfaces.dns_powder_tof.data_structures.dns_widget import \
     DNSWidget
 from mantidqtinterfaces.dns_powder_tof.xml_dump.xml_dump_model import \
@@ -18,7 +20,6 @@ from mantidqtinterfaces.dns_powder_tof.xml_dump.xml_dump_view import \
 
 
 class DNSXMLDumpWidget(DNSWidget):
-
     def __init__(self, name, parent):
         super().__init__(name, parent)
         self.view = DNSXMLDumpView(parent=parent.view)

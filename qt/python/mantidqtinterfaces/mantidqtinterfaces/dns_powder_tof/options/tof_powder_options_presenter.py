@@ -14,7 +14,6 @@ from mantidqtinterfaces.dns_powder_tof.options.common_options_presenter import \
 
 
 class DNSTofPowderOptionsPresenter(DNSCommonOptionsPresenter):
-
     def __init__(self, name=None, parent=None, view=None, model=None):
         super().__init__(parent=parent, name=name, view=view, model=model)
         # connect signals

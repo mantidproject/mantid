@@ -6,7 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 
 """
-Definition of DNS measurement modi and functions fo switching.
+Definition of DNS measurement modi and functions for switching.
 """
 
 from collections import OrderedDict

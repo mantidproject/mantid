@@ -37,8 +37,8 @@ class DNSTofPowderScriptGeneratorModel(DNSScriptGeneratorModel):
 
     def _validate_nb_empty_banks(self):
         return not (self._nb_empty_banks == 0 and self._tof_opt['corrections']
-                    and (self._tof_opt['substract_vana_back']
-                         or self._tof_opt['substract_sample_back']))
+                    and (self._tof_opt['subtract_vana_back']
+                         or self._tof_opt['subtract_sample_back']))
 
     def _validate_nb_vana_banks(self):
         return not (self._nb_vana_banks == 0 and self._tof_opt['corrections']
@@ -161,7 +161,7 @@ class DNSTofPowderScriptGeneratorModel(DNSScriptGeneratorModel):
             lines = ['', 'ec =  MonitorEfficiencyCorUser("raw_ec")']
             if self._nb_empty_banks != self._nb_banks:
                 lines += ['# only one empty can bank', 'ec = ec[0]']
-            if self._tof_opt['substract_sample_back']:
+            if self._tof_opt['subtract_sample_back']:
                 lines += [
                     "# subtract empty can",
                     "data1 = data1 - ec* params['ecSampleFactor']", ''
@@ -169,7 +169,7 @@ class DNSTofPowderScriptGeneratorModel(DNSScriptGeneratorModel):
         return lines
 
     def _get_vana_ec_subst_lines(self):
-        if self._tof_opt['substract_vana_back'] and self._bg_cor:
+        if self._tof_opt['subtract_vana_back'] and self._bg_cor:
             if self._tof_opt['vana_back_factor'] != 1:
                 return ["vanadium = vanadium - ec * params['ecVanaFactor']"]
             return ["vanadium = vanadium - ec"]

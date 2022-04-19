@@ -63,13 +63,19 @@ class DNSObserver():
             self.view.raise_error(message, critical, info)
 
     def process_request(self):
-        """Main presenter can request data from DNSObservers"""
+        """
+        Main presenter can request data from DNSObservers.
+        """
         pass
 
     def tab_got_focus(self):
-        """run if the tab of the associated view got the focus"""
+        """
+        Run if the tab of the associated view got the focus.
+        """
         pass
 
     def on_modus_change(self):
-        """run when the modus of the gui changes"""
+        """
+        Run when the modus of the gui changes.
+        """
         pass

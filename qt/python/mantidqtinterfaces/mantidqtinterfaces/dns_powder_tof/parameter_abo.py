@@ -4,26 +4,26 @@
 #     NScD Oak Ridge National Laboratory, European Spallation Source
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
+
 """
-DNS Reduction GUI parameter abo
+DNS Reduction GUI parameter abo.
 """
+
 from collections import OrderedDict
 
 
 class ParameterAbo:
     """
-    Sharing of common parameter dictionary between DNSObservers
+    Sharing of common parameter dictionary between DNSObservers.
 
-    observers are the presenters of the gui widgets
-    they are instances of DNSObserver and have a argument name which is a
+    Observers are the presenters of the gui widgets.
+    They are instances of DNSObserver and have an argument name which is a
     unique string and a method update which can get information from the gui
-    parameters
-    they react on .get_option_dict() calls
+    parameters. They react on .get_option_dict() calls.
     """
-
     def __init__(self):
-        self.observers = []  # we keep it as list since, order is important
-        self.gui_parameter = OrderedDict()  # Ordered Dictionary
+        self.observers = []  # we keep it as list since order is important
+        self.gui_parameter = OrderedDict()  # ordered dictionary
         self.observer_dict = {}
 
     def get_gui_param(self):
@@ -31,9 +31,10 @@ class ParameterAbo:
         return self.gui_parameter
 
     def project_save_load(self, gui_param):
-        """loads the gui status from mantid workbench project save"""
-        # this should replace xml loud at some point
-        self.gui_parameter = gui_param
+        """
+        Loads the gui status from mantid workbench project save.
+        """
+        self.gui_parameter = gui_param # this should replace xml load at some point
         self._notify_observers()
         for observer in self.observers:
             observer.set_view_from_param()
@@ -42,7 +43,8 @@ class ParameterAbo:
         self.gui_parameter.clear()
 
     def register(self, observer):
-        """register a specific observer
+        """
+        Register a specific observer.
         """
         if observer not in self.observers:  # do not allow multiple
             # registrations, should not happen anyhow
@@ -55,40 +57,47 @@ class ParameterAbo:
         self.update_from_observer(observer)
 
     def unregister(self, observer):
-        """unregisters a specific observer
+        """
+        Unregisters a specific observer.
         """
         self.observers.remove(observer)
         self.observer_dict.pop(observer.name, False)
 
     def clear(self):
-        """clear observers
+        """
+        Clear observers.
         """
         self.observers = []
         self.observer_dict = {}
 
     def _notify_observers(self):
-        """general notifcation of the observers, that parameters of
-        other observers were changed
+        """
+        General notification of the observers that parameters of
+        other observers were changed.
         """
         for observer in self.observers:
             observer.update(self.gui_parameter)
 
     def notify_modus_change(self):
-        """some observers, are used in multiple reduction modes, but have
-        different behaviour in differnt modes,
-        this function tells them that the mode has changed
+        """
+        Some observers are used in multiple reduction modes, but have
+        different behaviour in different modes.
+        This function tells them that the mode has changed.
         """
         for observer in self.observers:
             observer.on_modus_change()
 
     @staticmethod
     def notify_focused_tab(observer):
-        """notifies the tab which was selected by the user, that it got focus
+        """
+        Notifies the tab which was selected by the user, that it got focus.
         """
         observer.tab_got_focus()
 
     def xml_load(self):
-        """loads the gui status from an xml file"""
+        """
+        Loads the gui status from an xml file.
+        """
         gui_param = self.observer_dict['xml_dump'].load_xml()
         if gui_param is not None:
             self.gui_parameter = gui_param
@@ -97,13 +106,16 @@ class ParameterAbo:
                 observer.set_view_from_param()
 
     def xml_save(self):
-        """saves xml to previous saved filename or if not there asks for name
+        """
+        Saves xml to previous saved filename or if not there asks for name.
         """
         self.update_from_all_observers()
         self.observer_dict['xml_dump'].save_xml()
 
     def xml_save_as(self):
-        """saves to an xml file by choosing a name"""
+        """
+        Saves to an xml file by choosing a name.
+        """
         self.update_from_all_observers()
         self.observer_dict['xml_dump'].save_as_xml()
 
@@ -124,17 +136,19 @@ class ParameterAbo:
         self._notify_observers()
 
     def process_request(self):
-        """observers can process requests from other observers, this is used
-        for automatic data reduction
+        """
+        Observers can process requests from other observers, this is used
+        for automatic data reduction.
         """
         for observer in self.observers:
             observer.process_request()
         self.update_from_all_observers()
 
     def process_commandline_request(self, command_dict):
-        """observers have a special function to process command line requests.
+        """
+        Observers have a special function to process command line requests.
         a commandline command will be run through the observers, as they are
-        ordered in the list in dns_modus
+        ordered in the list in dns_modus.
         """
         for observer in self.observers:
             observer.process_commandline_request(command_dict)
