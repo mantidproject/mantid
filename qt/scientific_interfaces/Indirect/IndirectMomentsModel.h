@@ -22,7 +22,7 @@ public:
   IndirectMomentsModel();
   ~IndirectMomentsModel() = default;
   IAlgorithm_sptr setupAlgorithm();
-  void setInputWorkspace(std::string workspace);
+  void setInputWorkspace(const std::string &workspace);
   void setEMin(double eMin);
   void setEMax(double eMax);
   void setScale(bool scale);

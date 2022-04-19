@@ -28,8 +28,6 @@ IndirectMoments::IndirectMoments(IndirectDataReduction *idrUI, QWidget *parent)
   setOutputPlotOptionsPresenter(
       std::make_unique<IndirectPlotOptionsPresenter>(m_view->getPlotOptions(), PlotWidget::Spectra, "0,2,4"));
 
-  const unsigned int NUM_DECIMALS = 6;
-
   m_view->setupProperties();
 
   connect(m_view.get(), SIGNAL(dataReady(QString const &)), this, SLOT(handleDataReady(const QString &)));

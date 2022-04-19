@@ -39,7 +39,7 @@ IAlgorithm_sptr IndirectMomentsModel::setupAlgorithm() {
   return momentsAlg;
 }
 
-void IndirectMomentsModel::setInputWorkspace(std::string workspace) {
+void IndirectMomentsModel::setInputWorkspace(const std::string &workspace) {
   m_inputWorkspace = workspace;
   m_outputWorkspaceName = m_inputWorkspace.substr(0, m_inputWorkspace.length() - 4) + "_Moments";
 }
