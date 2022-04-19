@@ -205,4 +205,6 @@ miniconda3/
 # in source building of windows packages
 installers/conda/win/_conda_env
 installers/conda/win/_package_build
+installers/conda/win/_nsis_conda_env
+installers/conda/win/nsis_log.txt
 !installers/conda/win/MantidWorkbench.exe

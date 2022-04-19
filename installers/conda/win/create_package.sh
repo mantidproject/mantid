@@ -1,10 +1,9 @@
 #!/bin/bash -e
 
-# REQUIRES NSIS to be installed and on the path.
-# Construct a standalone windows MantidWorkbench NSIS package.
-# The package is created from a pre-packaged conda version
+# Constructs a standalone windows MantidWorkbench installer using NSIS.
+# The package is created from a pre-packaged version of Mantid from conda
 # and removes any excess that is not necessary in a standalone
-# packaged
+# package
 
 # Print usage and exit
 function usage() {
@@ -28,7 +27,7 @@ function usage() {
 # Optional arguments
 CONDA_CHANNEL=mantid
 SUFFIX=""
-PACKAGE_NAME=${@: -1} # grab last arguement
+PACKAGE_NAME=${@: -1} # grab last argument
 while [ ! $# -eq 0 ]
 do
     case "$1" in
@@ -54,8 +53,7 @@ do
 done
 
 # If suffix is not empty and does not contain Unstable or Nightly then fail.
-if [ ! -z "$SUFFIX" ]
-then
+if [ ! -z "$SUFFIX" ]; then
   if [ "$SUFFIX" != "Unstable" ] && [ "$SUFFIX" != "Nightly" ]; then
     echo "Suffix must either not be passed, or be Unstable or Nightly, for release do not pass this argument."
     exit 1
@@ -85,8 +83,7 @@ echo "Conda env created"
 
 # Determine version information
 VERSION=$("$CONDA_EXE" list --prefix "$CONDA_ENV_PATH" '^mantid$' --json | $CONDA_ENV_PATH/Library/mingw-w64/bin/jq.exe --raw-output '.[0].version')
-echo "Version number: $version"
-# VERSION=1
+echo "Version number: $VERSION"
 
 echo "Removing jq from conda env"
 "$CONDA_EXE" remove --prefix $CONDA_ENV_PATH --yes m2w64-jq
@@ -162,11 +159,18 @@ find $COPY_DIR -name *.pyc -delete
 rm -rf $COPY_DIR/bin/api-ms-win*.dll
 rm -rf $COPY_DIR/bin/libclang.dll
 
-echo "Cleanup directory containing build that is no longer needed"
-rm -rf $CONDA_ENV_PATH
-
 # Now package using NSIS
 echo "Packaging package via NSIS"
+
+# Create a conda environment with nsis installed
+NSIS_CONDA_ENV=_nsis_conda_env
+NSIS_CONDA_ENV_PATH=$THIS_SCRIPT_DIR/$NSIS_CONDA_ENV
+# First remove existing environment if it exists
+rm -rf $NSIS_CONDA_ENV_PATH
+echo "Creating nsis conda env"
+"$CONDA_EXE" create --prefix $NSIS_CONDA_ENV_PATH nsis -c conda-forge -y
+echo "Conda nsis env created"
+
 NSIS_SCRIPT=$THIS_SCRIPT_DIR/project.nsi
 
 # Make windows-like paths because NSIS is weird
@@ -176,6 +180,15 @@ COPY_DIR="$SCRIPT_DRIVE_LETTER:${COPY_DIR:2}"
 
 NSIS_SCRIPT=${NSIS_SCRIPT////\\}
 NSIS_SCRIPT="$SCRIPT_DRIVE_LETTER:${NSIS_SCRIPT:2}"
+
+NSIS_OUTPUT_LOG=$THIS_SCRIPT_DIR/nsis_log.txt
+NSIS_OUTPUT_LOG=${NSIS_OUTPUT_LOG////\\}
+NSIS_OUTPUT_LOG="$SCRIPT_DRIVE_LETTER:${NSIS_OUTPUT_LOG:2}"
+
+# Path to makensis from our nsis conda environment
+MAKENSIS_COMMAND=$NSIS_CONDA_ENV_PATH/NSIS/makensis
+MAKENSIS_COMMAND=${MAKENSIS_COMMAND////\\}
+MAKENSIS_COMMAND="$SCRIPT_DRIVE_LETTER:${MAKENSIS_COMMAND:2}"
 
 LOWER_CASE_SUFFIX="$(echo ${SUFFIX} | tr [:upper:] [:lower:])"
 
@@ -196,12 +209,15 @@ LICENSE_PATH=${LICENSE_PATH////\\}
 LICENSE_PATH="$SCRIPT_DRIVE_LETTER:${LICENSE_PATH:2}"
 echo Workebench Icon: $WORKBENCH_ICON
 
-echo makensis /V4 /DVERSION=$VERSION /DPACKAGE_DIR=\"$COPY_DIR\" /DPACKAGE_SUFFIX=$SUFFIX /DOUTFILE_NAME=$PACKAGE_NAME /DICON_PATH=$ICON_PATH /DWORKBENCH_ICON=$WORKBENCH_ICON /DNOTEBOOK_ICON=$NOTEBOOK_ICON /DMUI_PAGE_LICENSE_PATH=$LICENSE_PATH \"$NSIS_SCRIPT\"
-cmd.exe /C "START /wait "" makensis /V4 /DVERSION=$VERSION /DPACKAGE_DIR=\"$COPY_DIR\" /DPACKAGE_SUFFIX=$SUFFIX /DOUTFILE_NAME=$PACKAGE_NAME /DICON_PATH=$ICON_PATH /DWORKBENCH_ICON=$WORKBENCH_ICON /DNOTEBOOK_ICON=$NOTEBOOK_ICON /DMUI_PAGE_LICENSE_PATH=$LICENSE_PATH \"$NSIS_SCRIPT\""
+
+# Run the makensis command from our nsis Conda environment
+echo makensis /V4 /O\"$NSIS_OUTPUT_LOG\" /DVERSION=$VERSION /DPACKAGE_DIR=\"$COPY_DIR\" /DPACKAGE_SUFFIX=$SUFFIX /DOUTFILE_NAME=$PACKAGE_NAME /DICON_PATH=$ICON_PATH /DWORKBENCH_ICON=$WORKBENCH_ICON /DNOTEBOOK_ICON=$NOTEBOOK_ICON /DMUI_PAGE_LICENSE_PATH=$LICENSE_PATH \"$NSIS_SCRIPT\"
+cmd.exe /C "START /wait "" $MAKENSIS_COMMAND /V4 /DVERSION=$VERSION /O\"$NSIS_OUTPUT_LOG\" /DPACKAGE_DIR=\"$COPY_DIR\" /DPACKAGE_SUFFIX=$SUFFIX /DOUTFILE_NAME=$PACKAGE_NAME /DICON_PATH=$ICON_PATH /DWORKBENCH_ICON=$WORKBENCH_ICON /DNOTEBOOK_ICON=$NOTEBOOK_ICON /DMUI_PAGE_LICENSE_PATH=$LICENSE_PATH \"$NSIS_SCRIPT\""
 echo "Package packaged, find it here: $THIS_SCRIPT_DIR/$PACKAGE_NAME"
 
-echo "Cleaning up left over files"
+#echo "Cleaning up left over files"
 rm -rf $CONDA_ENV_PATH
 rm -rf $COPY_DIR
+rm -rf $NSIS_CONDA_ENV_PATH
 
 echo "Done"

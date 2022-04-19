@@ -21,7 +21,6 @@ dependencies:
   - matplotlib=3.5.*
   - nexus=4.4.*
   - ninja>=1.10.2
-  - nsis>=3
   - numpy>=1.20.2
   - occt>=7.4.0
   - conda-wrappers
