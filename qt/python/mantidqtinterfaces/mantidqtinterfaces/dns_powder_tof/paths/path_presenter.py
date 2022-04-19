@@ -49,7 +49,8 @@ class DNSPathPresenter(DNSObserver):
         path = self.view.get_path('data_dir')
         start_path = self.model.get_start_path_for_dialog(path)
         dir_name = self.view.open_file_dialog(start_path)
-        if sender == 'data':
-            self.view.set_data_path(dir_name)
-        else:
-            self.view.set_path(sender + '_dir', dir_name)
+        if dir_name != '': # needed not to fill out fields when the path wasn't chosen
+            if sender == 'data':
+                self.view.set_data_path(dir_name)
+            else:
+                self.view.set_path(sender + '_dir', dir_name)

@@ -6,7 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 
 """
-Common Class for DNS Views - supports easy setting and getting of values
+Common Class for DNS Views - supports easy setting and getting of values.
 """
 
 from collections import OrderedDict
