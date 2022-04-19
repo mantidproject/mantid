@@ -566,17 +566,18 @@ void diagonalise(const ComplexFortranMatrix &hamiltonian, DoubleFortranVector &e
   ComplexFortranMatrix h = hamiltonian;
   h.eigenSystemHermitian(eigenvalues, eigenvectors);
 
-  // Sort the eigenvalues in ascending order
+  // Get the indicies of the eigenvalues sorted in ascending order
   auto sortedIndices = eigenvalues.sortIndices();
-  eigenvalues.sort(sortedIndices);
-  // Eigenvectors are in columns. Sort the columns
-  // to match the sorted eigenvalues.
-  eigenvectors.sortColumns(sortedIndices);
 
   // Shift the lowest energy level to 0
   auto indexMin = static_cast<int>(sortedIndices[0]);
   auto eshift = eigenvalues(indexMin);
   eigenvalues += -eshift;
+
+  eigenvalues.sort(sortedIndices);
+  // Eigenvectors are in columns. Sort the columns
+  // to match the sorted eigenvalues.
+  eigenvectors.sortColumns(sortedIndices);
 }
 
 GNU_DIAG_ON("missing-braces")
