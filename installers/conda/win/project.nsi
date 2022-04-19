@@ -63,8 +63,14 @@ Section "-Core installation"
     # Set output path to the installation directory.
     SetOutPath "$INSTDIR"
 
-    # Put files there
-    File /r "${PACKAGE_DIR}\*.*"
+    # Replace the forward slashes in the temporary package directory PACKAGE_DIR with backslashes
+    # otherwise the syntax for long path names ("\\?\") will not work.
+    Var /GLOBAL PACKAGE_DIR_BACKSLASHES
+    StrCpy $PACKAGE_DIR_BACKSLASHES "dummy" # We need this line to avoid an unused variable warning!
+    !searchreplace PACKAGE_DIR_BACKSLASHES ${PACKAGE_DIR} "/" "\"
+    # Add all files to be written to the output path. Use the long path prefix ""\\?\" to avoid problems
+    # with files that have long path lengths.
+    File /r "\\?\${PACKAGE_DIR_BACKSLASHES}\*.*"
 
     # Add MantidWorkbench-script.pyw file to the install directory
     FileOpen $0 "$INSTDIR\bin\MantidWorkbench-script.pyw" w # This w is intentional and opens it in write mode
