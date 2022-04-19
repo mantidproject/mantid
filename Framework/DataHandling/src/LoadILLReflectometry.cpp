@@ -869,8 +869,14 @@ double LoadILLReflectometry::sourceSampleDistance() const {
     return pairCentre;
   } else {
     const double chopperDist = mmToMeter(doubleFromRun("ChopperSetting.chopperpair_sample_distance"));
-    const double deflectionAngle = doubleFromRun(m_sampleAngleName);
-    return chopperDist + m_sampleZOffset / std::cos(degToRad(deflectionAngle));
+    std::string entryName = "correct_chopper_sample_distance";
+    bool correctChopperSampleDistance = m_localWorkspace->getInstrument()->getBoolParameter(entryName)[0];
+    auto offset = 0.0;
+    if (correctChopperSampleDistance) {
+      const double deflectionAngle = doubleFromRun(m_sampleAngleName);
+      offset = m_sampleZOffset / std::cos(degToRad(deflectionAngle));
+    }
+    return chopperDist + offset;
   }
 }
 

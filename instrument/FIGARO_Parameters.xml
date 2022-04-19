@@ -50,11 +50,17 @@
 		<parameter name="DH1Z">
 		 <!-- The sample to first height motor position along Z [m]-->
  		 	<value val="1.135" />
- 	  </parameter>
+		</parameter>
 		<parameter name="DH2Z">
-		 <!-- The sample to second height motor position along Z [m]-->
- 		 	<value val="2.077" />
- 	  </parameter>
+		  <!-- The sample to second height motor position along Z [m]-->
+		  <value val="2.077" />
+		</parameter>
+
+		<parameter name="correct_chopper_sample_distance" type="bool" visible="false">
+		  <value val="true" valid-to="2022-04-20T23:59:59"/>
+		  <value val="false" valid-from="2022-04-20T23:59:59"/>
+		</parameter>
+
 	  <parameter name="logbook_default_parameters" type="string" visible="false">
 	    <value val="proposal:/entry0/user/proposal:s,
 			experiment identifier:/entry0/experiment_identifier:s,
