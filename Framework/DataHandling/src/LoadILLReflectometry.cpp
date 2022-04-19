@@ -803,22 +803,7 @@ double LoadILLReflectometry::sampleDetectorDistance() const {
   if (m_instrument == Supported::D17) {
     sampleDetectorDistance = mmToMeter(doubleFromRun("det.value"));
   } else {
-    // For FIGARO, the DTR field contains the sample-to-detector distance
-    // when the detector is at the horizontal position (angle = 0).
-    const double restZ = mmToMeter(doubleFromRun("DTR.value"));
-    // Motor DH1 vertical coordinate.
-    const double DH1Y = mmToMeter(doubleFromRun("DH1.value"));
-    const double DH1Z = m_localWorkspace->getInstrument()->getNumberParameter("DH1Z")[0];
-    const double detectorRestY = 0.509;
-    const double detAngle = detectorAngle();
-    const double detectorY = std::sin(degToRad(detAngle)) * (restZ - DH1Z) + DH1Y - detectorRestY;
-    const double detectorZ = std::cos(degToRad(detAngle)) * (restZ - DH1Z) + DH1Z;
-    const double pixelOffset = detectorRestY - 0.5 * m_pixelWidth;
-    const double beamY = detectorY + pixelOffset * std::cos(degToRad(detAngle));
-    const double sht1 = mmToMeter(doubleFromRun("SHT1.value"));
-    const double beamZ = detectorZ - pixelOffset * std::sin(degToRad(detAngle));
-    const double deflectionAngle = doubleFromRun(m_sampleAngleName);
-    sampleDetectorDistance = std::hypot(beamY - sht1, beamZ) - m_sampleZOffset / std::cos(degToRad(deflectionAngle));
+    sampleDetectorDistance = mmToMeter(doubleFromRun("Distance.Sample_CenterOfDetector_distance"));
   }
   return sampleDetectorDistance;
 }
