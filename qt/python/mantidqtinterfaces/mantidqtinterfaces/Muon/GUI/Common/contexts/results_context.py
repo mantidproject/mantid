@@ -16,7 +16,7 @@ class ResultsContext:
 
         self.ADS_observer = MuonADSObserver(self.remove,
                                             self.clear,
-                                             self.replaced) # need to add unsubscribe to a close method in the widget
+                                            self.replaced)
         self.remove_observable = GenericObservable()
         self.clear_observable = GenericObservable()
         self.replace_observable = GenericObservable()
