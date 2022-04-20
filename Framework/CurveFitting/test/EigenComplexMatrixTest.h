@@ -277,6 +277,9 @@ public:
   }
 
   void test_small_real_eigenSystem() {
+    // this replicates a portion of the CrystalFieldTest. This ensures consistency of results at the
+    // ComplexMatrix level.
+
     const size_t n = 2;
     ComplexMatrix m(n, n);
     m.set(0, 0, 0);
@@ -371,6 +374,47 @@ public:
       for (size_t i = 0; i < n; ++i) {
         TS_ASSERT_COMPLEX_DELTA_2(D.get(i, i), 1.0, 1e-10);
       }
+    }
+  }
+
+  void test_crystal_eigenSystem() {
+    // this replicates a portion of the CrystalFieldTest. This ensures consistency of results at the
+    // ComplexMatrix level.
+
+    Eigen::MatrixXcd m{{27.737, 0, -85.3224, 0, -62.279, 0}, {0, -73.789, 0, 112.995, 0, -62.279},
+                       {-85.3224, 0, 46.052, 0, 112.995, 0}, {0, 112.995, 0, 46.052, 0, -85.3224},
+                       {-62.279, 0, 112.995, 0, -73.789, 0}, {0, -62.279, 0, -85.3224, 0, 27.737}};
+    ComplexMatrix m_c(std::move(m));
+
+    EigenVector v;
+    ComplexMatrix m_cr;
+
+    m_c.eigenSystemHermitian(v, m_cr);
+
+    auto indicies = v.sortIndices();
+    v.sort(indicies);
+    m_cr.sortColumns(indicies);
+
+    auto res = m_cr.ctr() * m_cr;
+
+    for (size_t i = 0; i < res.size1(); ++i) {
+      for (size_t j = 0; j < res.size2(); ++j) {
+        ComplexType value = res(i, j);
+        if (i == j) {
+          TS_ASSERT_DELTA(value.real(), 1.0, 1e-10);
+          TS_ASSERT_DELTA(value.imag(), 0.0, 1e-10);
+        } else {
+          TS_ASSERT_DELTA(value.real(), 0.0, 1e-10);
+          TS_ASSERT_DELTA(value.imag(), 0.0, 1e-10);
+        }
+      }
+    }
+
+    Eigen::VectorXd ans_v(6);
+    ans_v << -142.461, -142.461, -42.2269, -42.2269, 184.688, 184.688;
+
+    for (size_t i = 0; i < v.size(); i++) {
+      TS_ASSERT_DELTA(v.get(i), ans_v(i), 1e-1);
     }
   }
 

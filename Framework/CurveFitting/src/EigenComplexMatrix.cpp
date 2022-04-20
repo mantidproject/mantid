@@ -232,16 +232,10 @@ void ComplexMatrix::eigenSystemHermitian(EigenVector &eigenValues, ComplexMatrix
   }
   eigenValues.resize(n);
 
-  Eigen::ComplexEigenSolver<Eigen::MatrixXcd> solver;
+  Eigen::SelfAdjointEigenSolver<Eigen::MatrixXcd> solver;
   solver.compute(m_matrix);
 
-  // gsl function does not return complex values whereas the eigen solver can. This check is
-  // here to ensure it doesn't and the behaviour of this function remains consistant.
-  if (!solver.eigenvalues().imag().isZero()) {
-    throw std::runtime_error("Matrix eigenSystem: the eigensystem has complex eigenvalues.");
-  }
-
-  eigenValues = solver.eigenvalues().real();
+  eigenValues = solver.eigenvalues();
   eigenVectors = solver.eigenvectors();
 }
 

@@ -287,14 +287,15 @@ void EigenMatrix::eigenSystem(EigenVector &eigenValues, EigenMatrix &eigenVector
     throw std::runtime_error("Matrix eigenSystem: the matrix must be square.");
   }
 
-  Eigen::EigenSolver<Eigen::MatrixXd> solver;
+  Eigen::SelfAdjointEigenSolver<Eigen::MatrixXd> solver;
+  solver;
   solver.compute(inspector());
 
   // previously gsl used "gsl_eigen_symmv" to calculate the eigenSystem. This function only returned
-  // real eigenvalues/vectors. The eigen function used can handle and return complex values.
+  // real eigenvalues/vectors. The eigen function used can handle and return complex eigen vectors.
   // this causes errors when returning to a non-complex EigenVector and EigenMatrix classes.
   // this check is here to alert to this error.
-  if (!solver.eigenvalues().imag().isZero() || !solver.eigenvectors().imag().isZero()) {
+  if (!solver.eigenvectors().imag().isZero()) {
     throw std::invalid_argument("eigensystem has complex eigenvalues or eigenvectors");
   } else {
     eigenValues = solver.eigenvalues().real();
