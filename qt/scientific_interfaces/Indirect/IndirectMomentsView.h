@@ -44,7 +44,7 @@ public:
 signals:
   void valueChanged(QtProperty *, double);
   void dataReady(QString const &);
-  void scaleChanged(bool);
+  void scaleChanged(int);
   void scaleValueChanged(double);
   void runClicked();
   void saveClicked();

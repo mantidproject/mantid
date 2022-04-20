@@ -32,7 +32,7 @@ IndirectMoments::IndirectMoments(IndirectDataReduction *idrUI, QWidget *parent)
 
   connect(m_view.get(), SIGNAL(dataReady(QString const &)), this, SLOT(handleDataReady(const QString &)));
   connect(m_view.get(), SIGNAL(valueChanged(QtProperty *, double)), this, SLOT(updateProperties(QtProperty *, double)));
-  connect(m_view.get(), SIGNAL(scaleChanged(bool)), this, SLOT(handleScaleChanged(bool)));
+  connect(m_view.get(), SIGNAL(scaleChanged(int)), this, SLOT(handleScaleChanged(int)));
   connect(m_view.get(), SIGNAL(scaleValueChanged(double)), this, SLOT(handleScaleValueChanged(double)));
   connect(m_view.get(), SIGNAL(runClicked()), this, SLOT(runClicked()));
   connect(m_view.get(), SIGNAL(saveClicked()), this, SLOT(saveClicked()));
@@ -62,7 +62,7 @@ void IndirectMoments::handleDataReady(QString const &dataName) {
 /**
  * Handles the scale checkbox being changed.
  */
-void IndirectMoments::handleScaleChanged(bool scale) { m_model->setScale(scale); }
+void IndirectMoments::handleScaleChanged(int state) { m_model->setScale(state == Qt::Checked); }
 
 /**
  * Handles the scale value being changed.

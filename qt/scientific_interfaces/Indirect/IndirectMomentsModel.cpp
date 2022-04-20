@@ -23,7 +23,7 @@ namespace MantidQt::CustomInterfaces {
 //----------------------------------------------------------------------------------------------
 /** Constructor
  */
-IndirectMomentsModel::IndirectMomentsModel() {}
+IndirectMomentsModel::IndirectMomentsModel() { m_scale = false; }
 
 IAlgorithm_sptr IndirectMomentsModel::setupAlgorithm() {
   IAlgorithm_sptr momentsAlg = AlgorithmManager::Instance().create("SofQWMoments", -1);
@@ -33,8 +33,11 @@ IAlgorithm_sptr IndirectMomentsModel::setupAlgorithm() {
   momentsAlg->setProperty("EnergyMax", m_eMax);
   momentsAlg->setProperty("OutputWorkspace", m_outputWorkspaceName);
 
-  if (m_scale)
+  if (m_scale) {
     momentsAlg->setProperty("Scale", m_scaleValue);
+  } else {
+    momentsAlg->setProperty("Scale", 1.0);
+  }
 
   return momentsAlg;
 }

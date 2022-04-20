@@ -46,7 +46,7 @@ protected slots:
 
 private slots:
   void handleDataReady(QString const &dataName) override;
-  void handleScaleChanged(bool scale);
+  void handleScaleChanged(int state);
   void handleScaleValueChanged(double value);
 
 private:

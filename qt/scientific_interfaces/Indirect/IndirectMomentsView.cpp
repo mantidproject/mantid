@@ -35,7 +35,7 @@ IndirectMomentsView::IndirectMomentsView(QWidget *parent) {
   connect(xRangeSelector, SIGNAL(selectionChanged(double, double)), this, SLOT(rangeChanged(double, double)));
 
   connect(m_uiForm.dsInput, SIGNAL(dataReady(QString const &)), this, SIGNAL(dataReady(const QString &)));
-  connect(m_uiForm.ckScale, SIGNAL(stateChanged(bool)), this, SIGNAL(scaleChanged(bool)));
+  connect(m_uiForm.ckScale, SIGNAL(stateChanged(int)), this, SIGNAL(scaleChanged(int)));
   connect(m_uiForm.spScale, SIGNAL(valueChanged(double)), this, SIGNAL(scaleValueChanged(double)));
   connect(m_uiForm.pbRun, SIGNAL(clicked()), this, SIGNAL(runClicked()));
   connect(m_uiForm.pbSave, SIGNAL(clicked()), this, SIGNAL(saveClicked()));
