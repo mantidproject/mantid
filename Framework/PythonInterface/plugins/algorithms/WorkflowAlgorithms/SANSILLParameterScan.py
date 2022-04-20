@@ -104,9 +104,10 @@ class SANSILLParameterScan(PythonAlgorithm):
         self.declareProperty(FileProperty('DefaultMaskFile', '', action=FileAction.OptionalLoad, extensions=['nxs']),
                              doc='File containing the default mask to be applied to all the detector configurations.')
 
+        # TODO copy that from reduction
         self.declareProperty(name='NormaliseBy',
-                             defaultValue='Timer',
-                             validator=StringListValidator(['None', 'Timer', 'Monitor']),
+                             defaultValue='Time',
+                             validator=StringListValidator(['None', 'Time', 'Monitor']),
                              doc='Choose the normalisation type.')
 
         self.declareProperty('Observable', 'Omega.value',
