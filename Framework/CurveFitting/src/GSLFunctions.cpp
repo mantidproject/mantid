@@ -85,7 +85,7 @@ int gsl_df(const gsl_vector *x, void *params, gsl_matrix *J) {
 
   auto *p = reinterpret_cast<struct GSL_FitData *>(params);
 
-  p->J.setJ(new map_type(J->data, J->size1, J->size2, dynamic_stride(1, J->size1)));
+  p->J.setJ(new map_type(J->data, J->size1, J->size2, dynamic_stride(J->size1, 1)));
 
   // update function parameters
   if (x->data) {
