@@ -656,10 +656,9 @@ size_t LoadILLSANS::loadDataFromTubes(NeXus::NXInt &data, const std::vector<doub
     PARALLEL_FOR_IF(Kernel::threadSafe(*m_localWorkspace))
     for (int i = 0; i < numberOfTubes; i++) {
       for (int j = 0; j < numberOfPixelsPerTube; j++) {
-        std::vector<int> spectrum;
-        spectrum.reserve(numberOfChannels);
+        std::vector<int> spectrum(numberOfChannels);
         for (int k = 0; k < numberOfChannels; k++) {
-          spectrum.push_back(data(k, i, j));
+          spectrum[k] = data(k, i, j);
         }
         const size_t index = firstIndex + i * numberOfPixelsPerTube + j;
         const HistogramData::Counts histoCounts(spectrum.begin(), spectrum.end());
