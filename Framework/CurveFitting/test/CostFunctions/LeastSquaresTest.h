@@ -201,9 +201,9 @@ public:
     dx.set(1, -0.2);
 
     double L; // = d*dx + 0.5 * dx * H * dx
-    gsl_blas_dgemv(CblasNoTrans, 0.5, getGSLMatrix(H.inspector().data()), getGSLVector(dx.inspector().data()), 1.,
-                   getGSLVector(g.mutator().data()));
-    gsl_blas_ddot(getGSLVector(g.inspector().data()), getGSLVector(dx.inspector().data()), &L);
+    gsl_blas_dgemv(CblasNoTrans, 0.5, getGSLMatrix_const(H.inspector()), getGSLVector_const(dx.inspector()), 1.,
+                   getGSLVector(g.mutator()));
+    gsl_blas_ddot(getGSLVector_const(g.inspector()), getGSLVector_const(dx.inspector()), &L);
     TS_ASSERT_DELTA(L, -0.145, 1e-10); // L + costFun->val() == 0
   }
 

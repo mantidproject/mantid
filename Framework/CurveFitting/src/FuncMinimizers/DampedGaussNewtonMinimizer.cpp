@@ -121,7 +121,7 @@ bool DampedGaussNewtonMinimizer::iterate(size_t /*iteration*/) {
   // Try the stop condition
   EigenVector p(n);
   m_leastSquares->getParameters(p);
-  double dx_norm = gsl_blas_dnrm2(getGSLVector(dx.mutator().data()));
+  double dx_norm = gsl_blas_dnrm2(getGSLVector(dx.mutator()));
   return dx_norm >= m_relTol;
 }
 

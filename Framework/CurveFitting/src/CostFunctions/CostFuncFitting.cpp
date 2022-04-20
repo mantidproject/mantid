@@ -124,7 +124,7 @@ void CostFuncFitting::calActiveCovarianceMatrix(EigenMatrix &covar, double epsre
   // construct the jacobian
   EigenJacobian J(*m_function, m_values->size());
   size_t na = this->nParams(); // number of active parameters
-  auto j = J.getJ();
+  const auto &j = J.getJ();
   assert(j.cols() == na);
   covar.resize(na, na);
 
@@ -132,7 +132,7 @@ void CostFuncFitting::calActiveCovarianceMatrix(EigenMatrix &covar, double epsre
   m_function->functionDeriv(*m_domain, J);
 
   // let the GSL to compute the covariance matrix
-  gsl_multifit_covar(getGSLMatrix(j.data()), epsrel, getGSLMatrix(covar.mutator().data()));
+  gsl_multifit_covar(getGSLMatrix_const(j), epsrel, getGSLMatrix(covar.mutator()));
 }
 
 /** Calculates covariance matrix

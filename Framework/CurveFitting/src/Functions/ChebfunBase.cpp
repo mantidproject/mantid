@@ -686,7 +686,7 @@ std::vector<double> ChebfunBase::roots(const std::vector<double> &a) const {
 
   gsl_vector_complex *eval = gsl_vector_complex_alloc(N2);
   auto workspace = gsl_eigen_nonsymm_alloc(N2);
-  gsl_eigen_nonsymm(getGSLMatrix(C.mutator().data()), eval, workspace);
+  gsl_eigen_nonsymm(getGSLMatrix(C.mutator()), eval, workspace);
   gsl_eigen_nonsymm_free(workspace);
 
   const double Dx = endX() - startX();
