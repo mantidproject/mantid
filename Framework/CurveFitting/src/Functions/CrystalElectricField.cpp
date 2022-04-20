@@ -564,14 +564,15 @@ void diagonalise(const ComplexFortranMatrix &hamiltonian, DoubleFortranVector &e
   eigenvalues.allocate(1, dim);
   eigenvectors.allocate(1, dim, 1, dim);
   ComplexFortranMatrix h = hamiltonian;
+
   h.eigenSystemHermitian(eigenvalues, eigenvectors);
 
   // Get the indicies of the eigenvalues sorted in ascending order
   auto sortedIndices = eigenvalues.sortIndices();
 
   // Shift the lowest energy level to 0
-  auto indexMin = static_cast<int>(sortedIndices[0]);
-  auto eshift = eigenvalues(indexMin);
+  auto indexMin = static_cast<int>(sortedIndices[0] + 1); // default fortran matrix has base 1.
+  auto eshift = eigenvalues[indexMin];
   eigenvalues += -eshift;
 
   eigenvalues.sort(sortedIndices);
