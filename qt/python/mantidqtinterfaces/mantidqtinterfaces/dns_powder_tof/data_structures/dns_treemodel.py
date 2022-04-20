@@ -25,7 +25,7 @@ class DNSTreeModel(QAbstractItemModel):
         self._scan = None
         self.root_item = DNSTreeItem(
             ('number', 'det_rot', 'sample_rot', 'field', 'temperature',
-             'sample', 'time', 'tof_channels', 'tof_channel_width', 'filepath'))
+             'sample', 'time', 'tof_channels', 'tof_channel_width', 'filename'))
         self._last_scan_number = None
         self._last_tof_time = None
         self._last_tof = None

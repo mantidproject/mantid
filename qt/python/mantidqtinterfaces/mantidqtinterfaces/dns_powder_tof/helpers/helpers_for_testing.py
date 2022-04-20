@@ -231,6 +231,7 @@ def get_fake_tof_options():
     return tof_opt
 
 
+#OKcomment: not used anywhere
 def get_fake_elastic_sc_options():
     el_opt = {
         'a': 2,
@@ -249,6 +250,7 @@ def get_fake_elastic_sc_options():
     return el_opt
 
 
+#OKcomment: not used anywhere
 def get_fake_tof_errors():  # matches data 1,2 above
     return {
         'channel_widths': [2.0, 1.6],
@@ -258,6 +260,7 @@ def get_fake_tof_errors():  # matches data 1,2 above
     }
 
 
+#OKcomment: not used anywhere
 def get_fake_elastic_datadic():
     return {
         'knso': {

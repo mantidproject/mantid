@@ -286,7 +286,7 @@ class DNSTofPowderScriptGeneratorModel(DNSScriptGeneratorModel):
     def _setup_sample_data(self, paths, file_selector):
         self._sample_data = DNSTofDataset(data=file_selector['full_data'],
                                           path=paths['data_dir'],
-                                          issample=True)
+                                          is_sample=True)
         self._nb_banks = self._sample_data.get_nb_sample_banks()
 
     def _setup_standard_data(self, paths, file_selector):
@@ -294,7 +294,7 @@ class DNSTofPowderScriptGeneratorModel(DNSScriptGeneratorModel):
             self._standard_data = DNSTofDataset(
                 data=file_selector['standard_data'],
                 path=paths['standards_dir'],
-                issample=False)
+                is_sample=False)
             self._nb_vana_banks = self._standard_data.get_nb_vana_banks()
             self._nb_empty_banks = self._standard_data.get_nb_empty_banks()
         else:

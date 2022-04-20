@@ -22,11 +22,20 @@ class DNSFileSelectorPresenter(DNSObserver):
         # pylint: disable=too-many-arguments
         super().__init__(parent=parent, name=name, view=view, model=model)
         self.watcher = watcher
+        self.view = view
+        # set sample data view
         self.view.set_tree_model(self.model.get_model())
+        # set standard data view
         self.view.set_tree_model(self.model.get_model(standard=True),
                                  standard=True)
+
+        # adjust view to column width
+        self.num_columns = self.model.get_active_model_column_count()
+        self.view.adjust_treeview_columns_width(self.num_columns)
+
         # hide filter by filename box from view
         self.view.groupBox_filter_file_number.setHidden(True)
+
         self._old_data_set = set()
 
         # connect signals
@@ -40,7 +49,7 @@ class DNSFileSelectorPresenter(DNSObserver):
         self.view.sig_check_selected.connect(self._check_selected_scans)
         self.view.sig_right_click.connect(self._right_click)
         self.view.sig_progress_canceled.connect(self._cancel_loading)
-        self.view.sig_autoload_clicked.connect(self._autoload)
+        self.view.sig_autoload_new_clicked.connect(self._autoload_new)
         self.view.sig_dataset_changed.connect(self._dataset_changed)
         self.watcher.sig_files_changed.connect(self._files_changed_by_watcher)
 
@@ -65,8 +74,8 @@ class DNSFileSelectorPresenter(DNSObserver):
         if not filtered:
             self._set_start_end(fn_range)
 
-        num_columns = self.model.get_active_model_column_count()
-        self.view.adjust_treeview_columns_width(num_columns)
+        # re-adjust view to column width
+        self.view.adjust_treeview_columns_width(self.num_columns)
 
     def _read_filtered(self):
         """
@@ -90,6 +99,9 @@ class DNSFileSelectorPresenter(DNSObserver):
         if not standard_found and not self_call:
             if self.model.try_unzip(data_path, standard_path):
                 self._read_standard(self_call=True)
+        self.view.expand_all()
+        # re-adjust view to column width
+        self.view.adjust_treeview_columns_width(self.num_columns)
 
     def _cancel_loading(self):
         self.model.set_loading_canceled(True)
@@ -105,7 +117,7 @@ class DNSFileSelectorPresenter(DNSObserver):
         """
         self._read_all(watcher=True)
 
-    def _autoload(self, state):
+    def _autoload_new(self, state):
         data_dir = self.param_dict['paths']['data_dir']
 
         if not data_dir:
@@ -236,7 +248,7 @@ class DNSFileSelectorPresenter(DNSObserver):
 
     def process_request(self):
         own_options = self.get_option_dict()
-        if own_options['auto_standard'] and not own_options['standard_data']:
+        if own_options['auto_select_standard'] and not own_options['standard_data']:
             self._automatic_select_all_standard_files()
 
     def set_view_from_param(self):

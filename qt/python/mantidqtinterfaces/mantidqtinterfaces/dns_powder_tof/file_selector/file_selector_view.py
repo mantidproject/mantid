@@ -38,7 +38,7 @@ class DNSFileSelectorView(DNSView):
             'file_to': self._content.sB_td_file_to,
             'file_nb': self._content.sB_td_file_nb,
             'filter_free': self._content.cB_filter_free,
-            'autoload': self._content.cB_autoload,
+            'autoload_new': self._content.cB_autoload_new,
             'filter_free_text': self._content.lE_filter_free_text,
             'filter_empty': self._content.cB_filter_empty,
             'filter_cscans': self._content.cB_filter_cscans,
@@ -47,7 +47,7 @@ class DNSFileSelectorView(DNSView):
             'filter_vanadium': self._content.cB_filter_vanadium,
             'last_scans': self._content.sB_last_scans,
             'filter_det_rot': self._content.cB_filter_det_rot,
-            'auto_standard': self._content.cB_auto_standard,
+            'auto_select_standard': self._content.cB_auto_select_standard,
         }
 
         self._treeview.setContextMenuPolicy(Qt.CustomContextMenu)
@@ -82,21 +82,22 @@ class DNSFileSelectorView(DNSView):
             self._check_last)
         self._content.pB_check_selected.clicked.connect(self._check_selected)
 
-        # Checkboxes
+        # check boxes
         self._map['filter_vanadium'].stateChanged.connect(
             self._filter_standard_checked)
         self._map['filter_nicr'].stateChanged.connect(
             self._filter_standard_checked)
         self._map['filter_empty'].stateChanged.connect(
             self._filter_standard_checked)
-        self._map['autoload'].stateChanged.connect(self._autoload_checked)
+        self._map['autoload_new'].stateChanged.connect(self._autoload_new_checked)
 
         # combo box
         self._content.combB_directory.currentIndexChanged.connect(
             self.combo_changed)
 
-        self._content.groupBox_filter_standard.setHidden(1)
-        self._standard_treeview.setHidden(1)
+        # hide standard files view
+        self._standard_treeview.setHidden(True)
+
         self.progress = None
         self.combo_changed(0)
 
@@ -111,7 +112,7 @@ class DNSFileSelectorView(DNSView):
     sig_check_last = Signal(str)
 
     sig_progress_canceled = Signal()
-    sig_autoload_clicked = Signal(int)
+    sig_autoload_new_clicked = Signal(int)
     sig_dataset_changed = Signal(int)
     sig_standard_filters_clicked = Signal()
     sig_right_click = Signal(QModelIndex)
@@ -120,8 +121,8 @@ class DNSFileSelectorView(DNSView):
     def _treeview_clicked(self, point):
         self.sig_right_click.emit(self._treeview.indexAt(point))
 
-    def _autoload_checked(self, state):
-        self.sig_autoload_clicked.emit(state)
+    def _autoload_new_checked(self, state):
+        self.sig_autoload_new_clicked.emit(state)
 
     def _check_all(self):
         self.sig_check_all.emit()
@@ -137,15 +138,16 @@ class DNSFileSelectorView(DNSView):
         self.sig_check_last.emit(sender_name)
 
     def combo_changed(self, index):
-        self._content.groupBox_filter.setHidden(index)
+        # index: 0 - Sample Data, 1 - Standard Data
+        self._content.groupBox_filter_by_scan.setHidden(index)
         self._content.pB_check_last_scan.setHidden(index)
         self._content.pB_check_last_complete_scan.setHidden(index)
         self._content.sB_last_scans.setHidden(index)
-        self._content.cB_autoload.setHidden(index)
+        self._content.cB_autoload_new.setHidden(index)
         self._content.groupBox_filter_standard.setHidden(1 - index)
         self._standard_treeview.setHidden(1 - index)
-        self.cB_auto_standard.setHidden(1 - index)
         self._sample_treeview.setHidden(index)
+        self.cB_auto_select_standard.setHidden(1 - index)
         if index:
             self._treeview = self._standard_treeview
         else:
@@ -182,7 +184,7 @@ class DNSFileSelectorView(DNSView):
             'det_rot': state_dict['filter_det_rot'],
             'sample_rot': state_dict['filter_sample_rot'],
             ' scan': state_dict['filter_scans'],
-            # space is important to not get cscans
+            # space is important not to get cscans
             'cscan': state_dict['filter_cscans'],
             free_text: state_dict['filter_free'],
         }

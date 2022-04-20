@@ -49,7 +49,7 @@
         </spacer>
        </item>
        <item>
-        <widget class="QCheckBox" name="cB_auto_standard">
+        <widget class="QCheckBox" name="cB_auto_select_standard">
          <property name="text">
           <string>Automatically Select Standard Files</string>
          </property>
@@ -59,7 +59,7 @@
         </widget>
        </item>
        <item>
-        <widget class="QCheckBox" name="cB_autoload">
+        <widget class="QCheckBox" name="cB_autoload_new">
          <property name="toolTip">
           <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Autoload new files which are added at the end of the actual scan list.&lt;/p&gt;&lt;p&gt;Will not load new files, in other scans, or delete removed files from scanlist.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
          </property>
@@ -219,7 +219,7 @@
       </widget>
      </item>
      <item>
-      <widget class="QGroupBox" name="groupBox_filter">
+      <widget class="QGroupBox" name="groupBox_filter_by_scan">
        <property name="toolTip">
         <string/>
        </property>

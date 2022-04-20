@@ -4,8 +4,9 @@
 #     NScD Oak Ridge National Laboratory, European Spallation Source
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
+
 """
-Class which loads and stores a single DNS datafile in a dictionary
+Class which loads and stores a single DNS datafile in a dictionary.
 """
 
 import os
@@ -16,7 +17,7 @@ from mantidqtinterfaces.dns_powder_tof.helpers.list_range_converters import \
 
 
 # copied from dns dataset
-def get_proposal_from_filname(filename, file_number):
+def get_proposal_from_filename(filename, file_number):
     return filename.replace(f'_{file_number:06d}.d_dat', '')
 
 
@@ -42,9 +43,9 @@ def _get_max_key_length(dataset):
 def _get_field_string(fields, llens):
     field_items = sorted(fields.items())
     spacer = " " * (llens + 1)
-    stringlist = [(f"{spacer}{key:4.2f}: {value}")
-                  for key, value in field_items]
-    return ",\n".join(stringlist)
+    string_list = [(f"{spacer}{key:4.2f}: {value}")
+                   for key, value in field_items]
+    return ",\n".join(string_list)
 
 
 def _get_path_string(dataset, sample_name):
@@ -57,8 +58,8 @@ def _get_sample_string(sample_name, llens):
 
 
 def _get_datapath(entry, path):
-    proposal = get_proposal_from_filname(entry['filename'],
-                                         entry['file_number'])
+    proposal = get_proposal_from_filename(entry['filename'],
+                                          entry['file_number'])
     return os.path.join(path, proposal)
 
 
@@ -89,29 +90,30 @@ def _create_new_datatype(dataset, datatype, det_rot, entry, path):
 
 def _add_or_create_filelist(dataset, datatype, det_rot, entry):
     compare = _get_closest_bank_key(dataset[datatype], det_rot)
-    fnlist = dataset[datatype].get(compare, None)
-    if fnlist is not None:
-        fnlist.append(entry['file_number'])
+    fn_list = dataset[datatype].get(compare, None)
+    if fn_list is not None:
+        fn_list.append(entry['file_number'])
     else:
         dataset[datatype][compare] = [entry['file_number']]
 
 
 class DNSTofDataset(ObjectDict):
     """
-    class for storing data of a multiple dns datafiles
-    this is a dictionary  but can also be accessed like atributes
+    Class for storing data of a multiple dns datafiles.
+    This is a dictionary, but can also be accessed like attributes.
     """
-
-    def __init__(self, data, path, issample=True):
+    def __init__(self, data, path, is_sample=True):
         super().__init__()
-        self['issample'] = issample
+        self['is_sample'] = is_sample
         self['banks'] = get_bank_positions(data)
-        self['datadic'] = self.create_dataset(data, path)
+        self['data_dic'] = self.create_dataset(data, path)
 
     def format_dataset(self):
-        """Formating the dictionary to a nicely indented string"""
+        """
+        Formatting the dictionary to a nicely indented string.
+        """
 
-        dataset = self.datadic
+        dataset = self.data_dic
         llens = _get_max_key_length(dataset)
         dataset_string = '{\n'
         for sample_name, fields in dataset.items():
@@ -123,38 +125,38 @@ class DNSTofDataset(ObjectDict):
         return dataset_string
 
     def _get_nb_banks(self, sample_type=None):
-        dic = self.datadic.get(sample_type, 0)
+        dic = self.data_dic.get(sample_type, 0)
         if dic:
             return len(dic.keys()) - 1
         return 0
 
     def get_vana_filename(self):
-        vanafilename = [x for x in self.datadic.keys() if '_vana' in x]
-        if len(vanafilename) == 0:
-            vanafilename = ''
-        elif len(vanafilename) > 1:
-            vanafilename = ''
+        vana_filename = [x for x in self.data_dic.keys() if '_vana' in x]
+        if len(vana_filename) == 0:
+            vana_filename = ''
+        elif len(vana_filename) > 1:
+            vana_filename = ''
         else:
-            vanafilename = vanafilename[0]
-        return vanafilename
+            vana_filename = vana_filename[0]
+        return vana_filename
 
     def get_empty_filename(self):
-        emptyfilename = [
-            x for x in self.datadic.keys() if ('_empty' in x or '_leer' in x)
+        empty_filename = [
+            x for x in self.data_dic.keys() if ('_empty' in x or '_leer' in x)
         ]
-        if len(emptyfilename) == 0:
-            emptyfilename = ''
-        elif len(emptyfilename) > 1:
-            emptyfilename = ''
+        if len(empty_filename) == 0:
+            empty_filename = ''
+        elif len(empty_filename) > 1:
+            empty_filename = ''
         else:
-            emptyfilename = emptyfilename[0]
-        return emptyfilename
+            empty_filename = empty_filename[0]
+        return empty_filename
 
     def get_sample_filename(self):
-        samplefilename = list(self.datadic.keys())
-        # if len(samplefilename) > 1:
+        sample_filename = list(self.data_dic.keys())
+        # if len(sample_filename) > 1:
         #    pass
-        return samplefilename[0]
+        return sample_filename[0]
 
     def get_nb_sample_banks(self):
         return self._get_nb_banks(self.get_sample_filename())
@@ -167,9 +169,10 @@ class DNSTofDataset(ObjectDict):
 
     @staticmethod
     def create_dataset(data, path):
-        """ creates a smaller dictionary used in the reduction script
-            of the form
-            dict[datatype][path/det_rot] = list(file_numbers)
+        """
+        Creates a smaller dictionary used
+        in the reduction script of the form
+        dict[datatype][path/det_rot] = list(file_numbers).
         """
         dataset = {}
         for entry in data:

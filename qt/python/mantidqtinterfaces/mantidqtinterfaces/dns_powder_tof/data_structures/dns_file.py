@@ -4,8 +4,9 @@
 #     NScD Oak Ridge National Laboratory, European Spallation Source
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
+
 """
-Class which loads and stores a single DNS datafile in a dictionary
+Class which loads and stores a single DNS datafile in a dictionary.
 """
 
 import numpy as np
@@ -15,10 +16,9 @@ from mantidqtinterfaces.dns_powder_tof.helpers.file_processing import (load_txt,
 
 class DNSFile(ObjectDict):
     """
-    class for reading, writing and storing data of a single dns datafile
-    this is a dictionary  but can also be accessed like atributes
+    Class for reading, writing and storing data of a single dns datafile.
+    This is a dictionary, but can also be accessed like attributes.
     """
-
     def __init__(self, datapath, filename):
         super().__init__()
         self.new_format = self.read(datapath, filename)
