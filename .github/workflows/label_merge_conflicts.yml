@@ -4,7 +4,7 @@ on:
     branches:
       - 'main'
       - 'release-next'
-      - 'ornl**'
+      - 'ornl-next'
   pull_request:
     types: [opened, synchronize, reopened]
 
