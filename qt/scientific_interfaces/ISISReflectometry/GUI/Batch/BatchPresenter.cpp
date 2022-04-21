@@ -33,7 +33,7 @@ using API::IConfiguredAlgorithm_sptr;
  * presenter
  * @param savePresenter :: [input] A pointer to the 'Save ASCII' tab presenter
  */
-BatchPresenter::BatchPresenter(IBatchView *view, std::unique_ptr<Batch> model, IJobRunner *jobRunner,
+BatchPresenter::BatchPresenter(IBatchView *view, std::unique_ptr<IBatch> model, IJobRunner *jobRunner,
                                std::unique_ptr<IRunsPresenter> runsPresenter,
                                std::unique_ptr<IEventPresenter> eventPresenter,
                                std::unique_ptr<IExperimentPresenter> experimentPresenter,
@@ -275,12 +275,17 @@ void BatchPresenter::notifyAnyBatchAutoreductionPaused() { m_runsPresenter->noti
 
 void BatchPresenter::notifyBatchLoaded() { m_runsPresenter->notifyBatchLoaded(); }
 
+void BatchPresenter::notifyRowContentChanged(Row &changedRow) { m_model->updateLookupIndex(changedRow); }
+
+void BatchPresenter::notifyGroupNameChanged(Group &changedGroup) { m_model->updateLookupIndexesOfGroup(changedGroup); }
+
 Mantid::Geometry::Instrument_const_sptr BatchPresenter::instrument() const { return m_mainPresenter->instrument(); }
 
 std::string BatchPresenter::instrumentName() const { return m_mainPresenter->instrumentName(); }
 
 void BatchPresenter::settingsChanged() {
   setBatchUnsaved();
+  m_model->updateLookupIndexesOfTable();
   m_runsPresenter->settingsChanged();
 }
 

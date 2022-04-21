@@ -38,7 +38,7 @@ int countItemsForLocation(ReductionJobs const &jobs, MantidWidgets::Batch::RowLo
 
 using API::IConfiguredAlgorithm_sptr;
 
-BatchJobManager::BatchJobManager(Batch &batch, std::unique_ptr<IReflAlgorithmFactory> algFactory)
+BatchJobManager::BatchJobManager(IBatch &batch, std::unique_ptr<IReflAlgorithmFactory> algFactory)
     : m_batch(batch), m_algFactory(std::move(algFactory)), m_isProcessing(false), m_isAutoreducing(false),
       m_reprocessFailed(false), m_processAll(false), m_processPartial(false) {
   // TODO Pass IJobRunner into this class and move job execution here instead of in the presenter

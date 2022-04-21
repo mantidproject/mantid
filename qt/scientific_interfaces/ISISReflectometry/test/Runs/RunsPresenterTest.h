@@ -791,6 +791,22 @@ public:
     verifyAndClear();
   }
 
+  void testNotifyRowContentChanged() {
+    auto presenter = makePresenter();
+    auto row = makeRow(0.5);
+    EXPECT_CALL(m_mainPresenter, notifyRowContentChanged(row));
+    presenter.notifyRowContentChanged(row);
+    verifyAndClear();
+  }
+
+  void testNotifyGroupNameChanged() {
+    auto presenter = makePresenter();
+    auto group = makeGroupWithOneRow();
+    EXPECT_CALL(m_mainPresenter, notifyGroupNameChanged(group));
+    presenter.notifyGroupNameChanged(group);
+    verifyAndClear();
+  }
+
 private:
   class RunsPresenterFriend : public RunsPresenter {
     friend class RunsPresenterTest;

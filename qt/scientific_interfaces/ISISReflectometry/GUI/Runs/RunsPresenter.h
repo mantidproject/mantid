@@ -96,6 +96,8 @@ public:
   void notifyAnyBatchAutoreductionPaused() override;
   void notifyInstrumentChanged(std::string const &instrumentName) override;
   void notifyTableChanged() override;
+  void notifyRowContentChanged(Row &changedRow) override;
+  void notifyGroupNameChanged(Group &changedGroup) override;
   void settingsChanged() override;
   void notifyChangesSaved() override;
   bool hasUnsavedChanges() const override;

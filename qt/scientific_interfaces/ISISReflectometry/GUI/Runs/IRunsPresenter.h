@@ -49,6 +49,8 @@ public:
   virtual void notifyAnyBatchAutoreductionPaused() = 0;
   virtual void notifyInstrumentChanged(std::string const &instrumentName) = 0;
   virtual void notifyTableChanged() = 0;
+  virtual void notifyRowContentChanged(Row &changedRow) = 0;
+  virtual void notifyGroupNameChanged(Group &changedGroup) = 0;
   virtual void settingsChanged() = 0;
   virtual void notifyChangesSaved() = 0;
   virtual bool hasUnsavedChanges() const = 0;

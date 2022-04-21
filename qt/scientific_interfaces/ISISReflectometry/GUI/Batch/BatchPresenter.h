@@ -37,7 +37,7 @@ class MANTIDQT_ISISREFLECTOMETRY_DLL BatchPresenter : public IBatchPresenter,
                                                       public MantidQt::API::WorkspaceObserver {
 public:
   /// Constructor
-  BatchPresenter(IBatchView *view, std::unique_ptr<Batch> model, IJobRunner *jobRunner,
+  BatchPresenter(IBatchView *view, std::unique_ptr<IBatch> model, IJobRunner *jobRunner,
                  std::unique_ptr<IRunsPresenter> runsPresenter, std::unique_ptr<IEventPresenter> eventPresenter,
                  std::unique_ptr<IExperimentPresenter> experimentPresenter,
                  std::unique_ptr<IInstrumentPresenter> instrumentPresenter,
@@ -75,6 +75,8 @@ public:
   void notifyAnyBatchAutoreductionPaused() override;
   void notifyReductionPaused() override;
   void notifyBatchLoaded() override;
+  void notifyRowContentChanged(Row &changedRow) override;
+  void notifyGroupNameChanged(Group &changedGroup) override;
   bool requestClose() const override;
   bool isProcessing() const override;
   bool isAutoreducing() const override;
@@ -108,7 +110,7 @@ private:
   void settingsChanged();
 
   IBatchView *m_view;
-  std::unique_ptr<Batch> m_model;
+  std::unique_ptr<IBatch> m_model;
   IMainWindowPresenter *m_mainPresenter;
   std::unique_ptr<IRunsPresenter> m_runsPresenter;
   std::unique_ptr<IEventPresenter> m_eventPresenter;
