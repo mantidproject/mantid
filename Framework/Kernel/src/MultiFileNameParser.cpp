@@ -137,9 +137,7 @@ bool ReverseCaselessCompare::operator()(const std::string &a, const std::string 
 /// Constructor.
 Parser::Parser()
     : m_runs(), m_fileNames(), m_multiFileName(), m_dirString(), m_instString(), m_underscoreString(), m_runString(),
-      m_extString(),
-      // m_zeroPadding(),
-      m_validInstNames() {
+      m_extString(), m_validInstNames(), m_trimWhiteSpaces(true) {
   const ConfigServiceImpl &config = ConfigService::Instance();
 
   const auto facilities = config.getFacilities();
@@ -196,10 +194,12 @@ std::vector<std::vector<unsigned int>> Parser::parseMultiRunString(std::string r
   if (runString.empty())
     return std::vector<std::vector<unsigned int>>();
 
-  // Remove whitespaces.
-  runString.erase(std::remove_if( // ("Erase-remove" idiom.)
-                      runString.begin(), runString.end(), isspace),
-                  runString.end());
+  // Remove whitespaces if requested.
+  if (trimWhiteSpaces()) {
+    runString.erase(std::remove_if( // ("Erase-remove" idiom.)
+                        runString.begin(), runString.end(), isspace),
+                    runString.end());
+  }
   // Only numeric characters, or occurances of plus, minus, comma and colon are
   // allowed.
   if (!matchesFully(runString, "([0-9]|\\+|\\-|,|:)+")) {
@@ -221,6 +221,21 @@ std::vector<std::vector<unsigned int>> Parser::parseMultiRunString(std::string r
   return runGroups;
 }
 
+/**
+ * Returns value of trimming whitespace from input
+ *
+ * @returns True/False
+ */
+bool Parser::trimWhiteSpaces() const { return m_trimWhiteSpaces; }
+
+/**
+ * Sets if the property is set to automatically trim string unput values of
+ * whitespace
+ *
+ * @param setting The new setting value
+ */
+void Parser::setTrimWhiteSpaces(const bool &setting) { m_trimWhiteSpaces = setting; }
+
 /////////////////////////////////////////////////////////////////////////////
 // Private member functions of Parser class.
 /////////////////////////////////////////////////////////////////////////////
@@ -241,9 +256,8 @@ void Parser::clear() {
 
 /**
  * Splits up the m_multiFileName string into component parts, to be used
- *elsewhere by
- * the parser.  Some validation is done here, and exceptions thrown if required
- * components are missing.
+ * elsewhere by  the parser.  Some validation is done here, and exceptions
+ * thrown if required components are missing.
  *
  * @throws std::runtime_error if a required component is not present in the
  *string.
@@ -255,11 +269,12 @@ void Parser::split() {
   // (We shun the use of Poco::File here as it is unable to deal with certain
   // combinations of special characters, for example double commas.)
 
-  // Clear whitespace before getting extentions and directories.
-  m_multiFileName.erase(std::remove_if( // ("Erase-remove" idiom.)
-                            m_multiFileName.begin(), m_multiFileName.end(), isspace),
-                        m_multiFileName.end());
-
+  // Clear whitespace before getting extentions and directories, if requested.
+  if (trimWhiteSpaces()) {
+    m_multiFileName.erase(std::remove_if( // ("Erase-remove" idiom.)
+                              m_multiFileName.begin(), m_multiFileName.end(), isspace),
+                          m_multiFileName.end());
+  }
   // Get the extension, if there is one.
   const size_t lastDot = m_multiFileName.find_last_of('.');
   if (lastDot != std::string::npos)

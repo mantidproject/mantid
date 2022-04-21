@@ -86,6 +86,10 @@ public:
   /// Parses a string consisting of only run number info, into a vector of vector
   /// of run numbers.
   std::vector<std::vector<unsigned int>> parseMultiRunString(std::string runString);
+  /// Return the setting for trimming whitespaces in run string
+  bool trimWhiteSpaces() const;
+  /// Set the flag for trimming whitespaces in run string
+  void setTrimWhiteSpaces(const bool &setting);
 
 private:
   /// Clear all member variables.
@@ -103,6 +107,8 @@ private:
   std::string m_dirString, m_instString, m_underscoreString, m_runString, m_extString;
   /// All the valid instrument names.
   std::set<std::string, ReverseCaselessCompare> m_validInstNames;
+  /// Flag to determine if string input should be trimmed of whitespace
+  bool m_trimWhiteSpaces;
 };
 
 /**
