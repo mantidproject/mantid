@@ -214,7 +214,10 @@ bool FileProperty::isOptional() const {
  * An empty string indicates success.
  */
 std::string FileProperty::setValue(const std::string &propValue) {
-  std::string strippedValue = Kernel::Strings::strip(propValue);
+  std::string strippedValue = propValue;
+  if (autoTrim()) { // strip whitespaces only when requested (default)
+    std::string strippedValue = Kernel::Strings::strip(propValue);
+  }
 
   // Empty value is allowed if optional
   if (strippedValue.empty()) {
