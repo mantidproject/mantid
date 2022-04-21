@@ -1866,14 +1866,11 @@ double FitPropertyBrowser::endX() const { return m_doubleManager->value(m_endX);
 void FitPropertyBrowser::setEndX(double value) { m_doubleManager->setValue(m_endX, value); }
 
 void FitPropertyBrowser::setXRange(double start, double end) {
-#if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
   disconnect(m_doubleManager, SIGNAL(propertyChanged(QtProperty *)), this, SLOT(doubleChanged(QtProperty *)));
-#endif
 
   m_doubleManager->setValue(m_startX, start);
   m_doubleManager->setValue(m_endX, end);
 
-#if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
   setWorkspace(m_compositeFunction);
   m_doubleManager->setMinimum(m_endX, start);
   m_doubleManager->setMaximum(m_startX, end);
@@ -1882,7 +1879,6 @@ void FitPropertyBrowser::setXRange(double start, double end) {
   getHandler()->setAttribute("EndX", end);
 
   connect(m_doubleManager, SIGNAL(propertyChanged(QtProperty *)), this, SLOT(doubleChanged(QtProperty *)));
-#endif
 }
 
 QVector<double> FitPropertyBrowser::getXRange() {

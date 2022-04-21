@@ -6,15 +6,12 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "IndirectPlotOptionsView.h"
 
+#include "MantidQtIcons/Icon.h"
 #include "MantidQtWidgets/Common/SignalBlocker.h"
 
 #include <QMenu>
 #include <QMessageBox>
 #include <QSettings>
-
-#if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
-#include "MantidQtIcons/Icon.h"
-#endif
 
 namespace {
 
@@ -45,29 +42,11 @@ QString getAction(std::map<std::string, std::string> const &actions, std::string
   return "";
 }
 
-QIcon plotCurveIcon() {
-#if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
-  return QIcon(":/curves.png");
-#else
-  return MantidQt::Icons::getIcon("mdi.chart-line");
-#endif
-}
+QIcon plotCurveIcon() { return MantidQt::Icons::getIcon("mdi.chart-line"); }
 
-QIcon plotContourIcon() {
-#if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
-  return QIcon(":/contour_map.png");
-#else
-  return MantidQt::Icons::getIcon("mdi.chart-scatterplot-hexbin");
-#endif
-}
+QIcon plotContourIcon() { return MantidQt::Icons::getIcon("mdi.chart-scatterplot-hexbin"); }
 
-QIcon plotTiledIcon() {
-#if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
-  return QIcon(":/arrangeLayers.png");
-#else
-  return MantidQt::Icons::getIcon("mdi.chart-line-stacked");
-#endif
-}
+QIcon plotTiledIcon() { return MantidQt::Icons::getIcon("mdi.chart-line-stacked"); }
 
 } // namespace
 
@@ -110,7 +89,6 @@ void IndirectPlotOptionsView::emitSelectedIndicesChanged() {
 }
 
 void IndirectPlotOptionsView::emitSelectedIndicesChanged(QString const &spectra) {
-  QString nonConstCopy = spectra;
   if (spectra.isEmpty()) {
     emit selectedIndicesChanged(spectra.toStdString());
   }
