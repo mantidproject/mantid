@@ -193,11 +193,11 @@ bool LevenbergMarquardtMDMinimizer::iterate(size_t /*iteration*/) {
 
   double dL;
   // der -> - der - 0.5 * hessian * dx
-  gsl_blas_dgemv(CblasNoTrans, -0.5, getGSLMatrix_const(m_costFunction->getHessian().inspector()),
-                 getGSLVector_const(dx.inspector()), 1., getGSLVector(dd.mutator()));
+  gsl_blas_dgemv(CblasNoTrans, -0.5, &getGSLMatrixView_const(m_costFunction->getHessian().inspector()).matrix,
+                 &getGSLVectorView_const(dx.inspector()).vector, 1., &getGSLVectorView(dd.mutator()).vector);
   // calculate the linear part of the change in cost function
   // dL = - der * dx - 0.5 * dx * hessian * dx
-  gsl_blas_ddot(getGSLVector_const(dd.inspector()), getGSLVector_const(dx.inspector()), &dL);
+  gsl_blas_ddot(&getGSLVectorView_const(dd.inspector()).vector, &getGSLVectorView_const(dx.inspector()).vector, &dL);
 
   double F1 = m_costFunction->val();
   if (verbose) {
@@ -211,7 +211,7 @@ bool LevenbergMarquardtMDMinimizer::iterate(size_t /*iteration*/) {
   if (m_rho >= 0) {
     EigenVector p(n);
     m_costFunction->getParameters(p);
-    double dx_norm = gsl_blas_dnrm2(getGSLVector_const(dx.inspector()));
+    double dx_norm = gsl_blas_dnrm2(&getGSLVectorView_const(dx.inspector()).vector);
     if (dx_norm < absError) {
       if (verbose) {
         g_log.warning() << "Successful fit, parameters changed by less than " << absError << '\n';

@@ -8,7 +8,6 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidCurveFitting/GSLFunctions.h"
-#include "Eigen/Core"
 #include "MantidAPI/IConstraint.h"
 #include "MantidAPI/ICostFunction.h"
 

@@ -51,16 +51,16 @@ int gsl_df(const gsl_vector *x, void *params, gsl_matrix *J);
 int gsl_fdf(const gsl_vector *x, void *params, gsl_vector *f, gsl_matrix *J);
 
 /// take data from Eigen Vector and take a gsl view
-inline gsl_vector *getGSLVector(vec_map_type &v) { return &gsl_vector_view_array(v.data(), v.size()).vector; }
+inline gsl_vector_view getGSLVectorView(vec_map_type &v) { return gsl_vector_view_array(v.data(), v.size()); }
 /// take  data from Eigen Matrix and take a gsl view
-inline gsl_matrix *getGSLMatrix(map_type &m) { return &gsl_matrix_view_array(m.data(), m.rows(), m.cols()).matrix; }
+inline gsl_matrix_view getGSLMatrixView(map_type &m) { return gsl_matrix_view_array(m.data(), m.rows(), m.cols()); }
 /// take const data from Eigen Vector and take a gsl view
-inline gsl_vector const *getGSLVector_const(const vec_map_type v) {
-  return &gsl_vector_const_view_array(v.data(), v.size()).vector;
+inline gsl_vector_const_view const getGSLVectorView_const(const vec_map_type v) {
+  return gsl_vector_const_view_array(v.data(), v.size());
 }
 /// take const data from Eigen Matrix and take a gsl view
-inline gsl_matrix const *getGSLMatrix_const(const map_type m) {
-  return &gsl_matrix_const_view_array(m.data(), m.rows(), m.cols()).matrix;
+inline gsl_matrix_const_view const getGSLMatrixView_const(const map_type m) {
+  return gsl_matrix_const_view_array(m.data(), m.rows(), m.cols());
 }
 
 } // namespace CurveFitting

@@ -35,8 +35,8 @@ const double EPSILON_MCH = std::numeric_limits<double>::epsilon();
 void matmultInner(const DoubleFortranMatrix &J, DoubleFortranMatrix &A) {
   auto n = J.len2();
   A.allocate(n, n);
-  gsl_blas_dgemm(CblasTrans, CblasNoTrans, 1.0, getGSLMatrix_const(J.inspector()), getGSLMatrix_const(J.inspector()),
-                 0.0, getGSLMatrix(A.mutator()));
+  gsl_blas_dgemm(CblasTrans, CblasNoTrans, 1.0, &getGSLMatrixView_const(J.inspector()).matrix,
+                 &getGSLMatrixView_const(J.inspector()).matrix, 0.0, &getGSLMatrixView(A.mutator()).matrix);
 }
 
 /**  Given an (m x n)  matrix J held by columns as a vector,
@@ -53,8 +53,8 @@ void getSvdJ(const DoubleFortranMatrix &J, double &s1, double &sn) {
   DoubleFortranMatrix V(n, n);
   DoubleFortranVector S(n);
   DoubleFortranVector work(n);
-  gsl_linalg_SV_decomp(getGSLMatrix(U.mutator()), getGSLMatrix(V.mutator()), getGSLVector(S.mutator()),
-                       getGSLVector(work.mutator()));
+  gsl_linalg_SV_decomp(&getGSLMatrixView(U.mutator()).matrix, &getGSLMatrixView(V.mutator()).matrix,
+                       &getGSLVectorView(S.mutator()).vector, &getGSLVectorView(work.mutator()).vector);
   s1 = S(1);
   sn = S(n);
 }
@@ -66,7 +66,7 @@ void getSvdJ(const DoubleFortranMatrix &J, double &s1, double &sn) {
 double norm2(const DoubleFortranVector &v) {
   if (v.size() == 0)
     return 0.0;
-  return gsl_blas_dnrm2(getGSLVector_const(v.inspector()));
+  return gsl_blas_dnrm2(&getGSLVectorView_const(v.inspector()).vector);
 }
 
 /** Multiply a matrix by a vector.
@@ -79,8 +79,8 @@ void multJ(const DoubleFortranMatrix &J, const DoubleFortranVector &x, DoubleFor
   if (Jx.len() != J.len1()) {
     Jx.allocate(J.len1());
   }
-  gsl_blas_dgemv(CblasNoTrans, 1.0, getGSLMatrix_const(J.inspector()), getGSLVector_const(x.inspector()), 0.0,
-                 getGSLVector(Jx.mutator()));
+  gsl_blas_dgemv(CblasNoTrans, 1.0, &getGSLMatrixView_const(J.inspector()).matrix,
+                 &getGSLVectorView_const(x.inspector()).vector, 0.0, &getGSLVectorView(Jx.mutator()).vector);
 }
 
 /** Multiply a transposed matrix by a vector.
@@ -93,8 +93,8 @@ void multJt(const DoubleFortranMatrix &J, const DoubleFortranVector &x, DoubleFo
   if (Jtx.len() != J.len2()) {
     Jtx.allocate(J.len2());
   }
-  gsl_blas_dgemv(CblasTrans, 1.0, getGSLMatrix_const(J.inspector()), getGSLVector_const(x.inspector()), 0.0,
-                 getGSLVector(Jtx.mutator()));
+  gsl_blas_dgemv(CblasTrans, 1.0, &getGSLMatrixView_const(J.inspector()).matrix,
+                 &getGSLVectorView_const(x.inspector()).vector, 0.0, &getGSLVectorView(Jtx.mutator()).vector);
 }
 
 /** Dot product of two vectors.
@@ -198,17 +198,17 @@ void rankOneUpdate(DoubleFortranMatrix &hf, NLLS_workspace &w) {
   alpha = 1 / yts;
   // call dGER(n,n,alpha,w.ysharpSks,1,w.y,1,hf,n)
 
-  gsl_blas_dger(alpha, getGSLVector_const(w.ysharpSks.inspector()), getGSLVector_const(w.y.inspector()),
-                getGSLMatrix(hf.mutator()));
+  gsl_blas_dger(alpha, &getGSLVectorView_const(w.ysharpSks.inspector()).vector,
+                &getGSLVectorView_const(w.y.inspector()).vector, &getGSLMatrixView(hf.mutator()).matrix);
   // hf = hf + (1/yts) y^T (y# - Sk d):
   // call dGER(n,n,alpha,w.y,1,w.ysharpSks,1,hf,n)
-  gsl_blas_dger(alpha, getGSLVector_const(w.y.inspector()), getGSLVector_const(w.ysharpSks.inspector()),
-                getGSLMatrix(hf.mutator()));
+  gsl_blas_dger(alpha, &getGSLVectorView_const(w.y.inspector()).vector,
+                &getGSLVectorView_const(w.ysharpSks.inspector()).vector, &getGSLMatrixView(hf.mutator()).matrix);
   // hf = hf - ((y# - Sk d)^T d)/((yts)**2)) * y y^T
   alpha = -dotProduct(w.ysharpSks, w.d) / (pow(yts, 2));
   // call dGER(n,n,alpha,w.y,1,w.y,1,hf,n)
-  gsl_blas_dger(alpha, getGSLVector_const(w.y.inspector()), getGSLVector_const(w.y.inspector()),
-                getGSLMatrix(hf.mutator()));
+  gsl_blas_dger(alpha, &getGSLVectorView_const(w.y.inspector()).vector, &getGSLVectorView_const(w.y.inspector()).vector,
+                &getGSLMatrixView(hf.mutator()).matrix);
 }
 
 /** Update the trust region radius which is hidden in NLLS_workspace w

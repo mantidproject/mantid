@@ -32,6 +32,30 @@ using namespace Mantid::CurveFitting::CostFunctions;
 using namespace Mantid::CurveFitting::Functions;
 using namespace Mantid::API;
 
+namespace {
+void printVec(const gsl_vector &v) {
+  gsl_vector vc = v;
+
+  for (size_t i = 0; i < vc.size; i++) {
+    std::cout << gsl_vector_get(&vc, i) << std::endl;
+  }
+  std::cout << std::endl;
+}
+
+void printMatr(const gsl_matrix &m) {
+  gsl_matrix mc = m;
+
+  for (size_t i = 0; i < mc.size1; i++) {
+    for (size_t j = 0; j < mc.size2; j++) {
+      double d = gsl_matrix_get(&mc, i, j);
+      std::cout << d << " ";
+    }
+    std::cout << std::endl;
+  }
+  std::cout << std::endl;
+}
+} // namespace
+
 class LeastSquaresTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
@@ -201,9 +225,11 @@ public:
     dx.set(1, -0.2);
 
     double L; // = d*dx + 0.5 * dx * H * dx
-    gsl_blas_dgemv(CblasNoTrans, 0.5, getGSLMatrix_const(H.inspector()), getGSLVector_const(dx.inspector()), 1.,
-                   getGSLVector(g.mutator()));
-    gsl_blas_ddot(getGSLVector_const(g.inspector()), getGSLVector_const(dx.inspector()), &L);
+
+    gsl_blas_dgemv(CblasNoTrans, 0.5, &getGSLMatrixView_const(H.inspector()).matrix,
+                   &getGSLVectorView_const(dx.inspector()).vector, 1., &getGSLVectorView(g.mutator()).vector);
+
+    gsl_blas_ddot(&getGSLVectorView_const(g.inspector()).vector, &getGSLVectorView_const(dx.inspector()).vector, &L);
     TS_ASSERT_DELTA(L, -0.145, 1e-10); // L + costFun->val() == 0
   }
 
