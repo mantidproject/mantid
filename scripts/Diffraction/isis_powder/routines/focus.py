@@ -14,23 +14,20 @@ import numpy
 import os
 
 
-def focus(run_number_string, instrument, perform_vanadium_norm, absorb,
-          paalman_pings, sample_details=None, container_details=None):
+def focus(run_number_string, instrument, perform_vanadium_norm, absorb, sample_details=None):
     input_batching = instrument._get_input_batching_mode()
     if input_batching == INPUT_BATCHING.Individual:
         return _individual_run_focusing(instrument=instrument, perform_vanadium_norm=perform_vanadium_norm,
-                                        run_number=run_number_string, absorb=absorb, paalman_pings=paalman_pings,
-                                        sample_details=sample_details, container_details=container_details)
+                                        run_number=run_number_string, absorb=absorb, sample_details=sample_details)
     elif input_batching == INPUT_BATCHING.Summed:
         return _batched_run_focusing(instrument, perform_vanadium_norm, run_number_string, absorb=absorb,
-                                     paalman_pings=paalman_pings, sample_details=sample_details,
-                                     container_details=container_details)
+                                     sample_details=sample_details)
     else:
         raise ValueError("Input batching not passed through. Please contact development team.")
 
 
-def _focus_one_ws(input_workspace, run_number, instrument, perform_vanadium_norm, absorb, paalman_pings,
-                  sample_details, container_details, vanadium_path):
+def _focus_one_ws(input_workspace, run_number, instrument, perform_vanadium_norm, absorb,
+                  sample_details, vanadium_path):
     run_details = instrument._get_run_details(run_number_string=run_number)
     if perform_vanadium_norm:
         _test_splined_vanadium_exists(instrument, run_details)
@@ -53,7 +50,7 @@ def _focus_one_ws(input_workspace, run_number, instrument, perform_vanadium_norm
                                                    scale_factor=instrument._inst_settings.sample_empty_scale)
 
     # Correct for absorption / multiple scattering if required
-    if paalman_pings and summed_empty and absorb and container_details:
+    if absorb and instrument._inst_settings.absorb_method == 'PaalmanPings' and summed_empty:
         events_per_point_string = instrument._inst_settings.paalman_pings_events_per_point
         if events_per_point_string:
             events_per_point = int(events_per_point_string)
@@ -66,23 +63,24 @@ def _focus_one_ws(input_workspace, run_number, instrument, perform_vanadium_norm
         if expected_filename in os.listdir(save_directory):
             input_workspace = mantid.LoadNexus(os.path.join(save_directory, expected_filename))
         else:
-            corrections = mantid.PaalmanPingsMonteCarloAbsorption(
-                InputWorkspace=input_workspace,
-                Shape=sample_details._shape_type.capitalize(),
-                BeamHeight=2.0,
-                BeamWidth=2.0,
-                Height=sample_details.height(),
-                SampleRadius=sample_details._shape.radius,
-                SampleChemicalFormula=sample_details.material_object.chemical_formula,
-                ContainerRadius=container_details.radius,
-                ContainerChemicalFormula=container_details.material_object.chemical_formula,
-                EventsPerPoint=events_per_point
-            )
+            mantid.SetSample(input_workspace, Geometry={'Shape': sample_details._shape_type.capitalize(),
+                                                        'Height': sample_details.height(),
+                                                        'Radius': sample_details._shape.radius},
+                             Material={'ChemicalFormula': sample_details.material_object.chemical_formula},
+                             ContainerGeometry={'Shape': 'HollowCylinder', 'Height': sample_details.height(),
+                                                'InnerRadius': sample_details._shape.radius,
+                                                'OuterRadius': sample_details.container_radius},
+                             ContainerMaterial={'ChemicalFormula': sample_details.container_material_object.chemical_formula}
+                             )
+
+            corrections = mantid.PaalmanPingsMonteCarloAbsorption(InputWorkspace=input_workspace, Shape='Preset',
+                                                                  EventsPerPoint=events_per_point)
+
             input_workspace = mantid.ApplyPaalmanPingsCorrection(SampleWorkspace=input_workspace,
                                                                  CorrectionsWorkspace=corrections,
                                                                  CanWorkspace=summed_empty)
             mantid.SaveNexus(input_workspace, os.path.join(save_directory, expected_filename))
-    if not paalman_pings and summed_empty:
+    elif summed_empty:
         input_workspace = common.subtract_summed_runs(ws_to_correct=input_workspace,
                                                       empty_sample=summed_empty)
     # Crop to largest acceptable TOF range
@@ -154,8 +152,7 @@ def _apply_vanadium_corrections(instrument, input_workspace, perform_vanadium_no
     return processed_spectra
 
 
-def _batched_run_focusing(instrument, perform_vanadium_norm, run_number_string,
-                          absorb, paalman_pings, sample_details, container_details):
+def _batched_run_focusing(instrument, perform_vanadium_norm, run_number_string, absorb, sample_details):
     read_ws_list = common.load_current_normalised_ws_list(run_number_string=run_number_string,
                                                           instrument=instrument)
     run_details = instrument._get_run_details(run_number_string=run_number_string)
@@ -171,8 +168,7 @@ def _batched_run_focusing(instrument, perform_vanadium_norm, run_number_string,
     for ws in read_ws_list:
         output = _focus_one_ws(input_workspace=ws, run_number=run_number_string, instrument=instrument,
                                perform_vanadium_norm=perform_vanadium_norm, absorb=absorb,
-                               paalman_pings=paalman_pings,sample_details=sample_details,
-                               container_details=container_details, vanadium_path=vanadium_splines)
+                               sample_details=sample_details, vanadium_path=vanadium_splines)
     if instrument.get_instrument_prefix() == "PEARL" and vanadium_splines is not None :
         if hasattr(vanadium_splines, "OutputWorkspace"):
             vanadium_splines = vanadium_splines.OutputWorkspace
@@ -212,7 +208,7 @@ def _divide_by_vanadium_splines(spectra_list, vanadium_splines, instrument):
     return output_list
 
 
-def _individual_run_focusing(instrument, perform_vanadium_norm, run_number, absorb, paalman_pings, sample_details):
+def _individual_run_focusing(instrument, perform_vanadium_norm, run_number, absorb, sample_details):
     # Load and process one by one
     run_numbers = common.generate_run_numbers(run_number_string=run_number)
     run_details = instrument._get_run_details(run_number_string=run_number)
@@ -229,9 +225,8 @@ def _individual_run_focusing(instrument, perform_vanadium_norm, run_number, abso
     for run in run_numbers:
         ws = common.load_current_normalised_ws_list(run_number_string=run, instrument=instrument)
         output = _focus_one_ws(input_workspace=ws[0], run_number=run, instrument=instrument, absorb=absorb,
-                               paalman_pings=paalman_pings,
                                perform_vanadium_norm=perform_vanadium_norm, sample_details=sample_details,
-                               container_details=container_details, vanadium_path=vanadium_splines)
+                               vanadium_path=vanadium_splines)
     return output
 
 

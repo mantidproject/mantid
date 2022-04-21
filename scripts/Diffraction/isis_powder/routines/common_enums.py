@@ -18,3 +18,9 @@ class WORKSPACE_UNITS(object):
     d_spacing = "dSpacing"
     tof = "TOF"
     wavelength = "Wavelength"
+
+
+class ABSORB_METHOD(object):
+    enum_friendly_name = "absorb method"
+    simple = "Simple"  # default
+    paalman_pings = "PaalmanPings"

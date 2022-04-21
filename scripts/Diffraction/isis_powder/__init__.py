@@ -12,6 +12,6 @@ from .pearl import Pearl  # noqa: F401
 from .polaris import Polaris  # noqa: F401
 
 # Other useful classes
-from .routines.sample_details import SampleDetails, ContainerDetails  # noqa: F401
+from .routines.sample_details import SampleDetails  # noqa: F401
 # Prevent users using from import *
 __all__ = []

@@ -34,16 +34,8 @@ class SampleDetails(object):
                            "\"cylinder\" and \"slab\"")
 
         self.material_object = None
-        if common.dictionary_key_helper(dictionary=kwargs, key="chemical_formula", throws=False):
-            self.material_object = _Material(chemical_formula=common.dictionary_key_helper(dictionary=kwargs,
-                                                                                           key="chemical_formula",
-                                                                                           throws=False),
-                                             number_density=common.dictionary_key_helper(dictionary=kwargs,
-                                                                                         key="number_density",
-                                                                                         throws=False),
-                                             crystal_density=common.dictionary_key_helper(dictionary=kwargs,
-                                                                                          key="crystal_density",
-                                                                                          throws=False))
+        self.container_material_object = None
+        self.container_radius = None
 
     def is_material_set(self):
         return self.material_object is not None
@@ -69,6 +61,22 @@ class SampleDetails(object):
 
         self.material_object = _Material(chemical_formula=chemical_formula, number_density=number_density,
                                          crystal_density=crystal_density)
+
+    def set_container(self, **kwargs):
+        chemical_formula = common.dictionary_key_helper(dictionary=kwargs, key="chemical_formula",
+                                                        exception_msg="The following argument is required but was not"
+                                                                      " passed: chemical_formula")
+        number_density = common.dictionary_key_helper(dictionary=kwargs, key="number_density", throws=False)
+        crystal_density = common.dictionary_key_helper(dictionary=kwargs, key="crystal_density", throws=False)
+        if self.container_material_object is not None:
+            self.print_container_details()
+            raise RuntimeError("The container material has already been set to the above details. "
+                               "To change the material call 'reset_sample_material()'")
+
+        self.container_material_object = _Material(chemical_formula=chemical_formula, number_density=number_density,
+                                                   crystal_density=crystal_density)
+        if self._shape_type == "cylinder":
+            self.container_radius = common.dictionary_key_helper(dictionary=kwargs, key="radius", throws=True)
 
     def set_material_properties(self, **kwargs):
         err_msg = "The following argument is required but was not set or passed: "
@@ -123,6 +131,19 @@ class SampleDetails(object):
             self.material_object.print_material()
         print()  # Newline for visual spacing
 
+    def print_container_details(self):
+        print("Container Details")
+        print("------------------------")
+        print("Shape type: " + self._shape_type)
+        print("Radius: " + self.container_radius)
+        print("------------------------")
+
+        if self.material_object is None:
+            print("Material has not been set (or has been reset).")
+        else:
+            self.container_material_object.print_material()
+        print()  # Newline for visual spacing
+
     def shape_type(self):
         return self._shape_type
 
@@ -155,43 +176,6 @@ class SampleDetails(object):
             return self._shape.thickness
         else:
             raise RuntimeError("Thickness is not applicable for the shape type \"{}\"".format(self._shape_type))
-
-
-class ContainerDetails(object):
-
-    def __init__(self, sample_details, **kwargs):
-        self.radius = None
-        if sample_details._shape_type == "cylinder":
-            self.radius = common.dictionary_key_helper(dictionary=kwargs, key="radius", throws=True)
-        self.material_object = None
-        if common.dictionary_key_helper(dictionary=kwargs, key="chemical_formula", throws=False):
-            self.material_object = _Material(chemical_formula=common.dictionary_key_helper(dictionary=kwargs,
-                                                                                           key="chemical_formula",
-                                                                                           throws=False),
-                                             number_density=common.dictionary_key_helper(dictionary=kwargs,
-                                                                                         key="number_density",
-                                                                                         throws=False),
-                                             crystal_density=common.dictionary_key_helper(dictionary=kwargs,
-                                                                                          key="crystal_density",
-                                                                                          throws=False))
-
-    def reset_sample_material(self):
-        self.material_object = None
-
-    def set_material(self, **kwargs):
-        chemical_formula = common.dictionary_key_helper(dictionary=kwargs, key="chemical_formula",
-                                                        exception_msg="The following argument is required but was not"
-                                                                      " passed: chemical_formula")
-        number_density = common.dictionary_key_helper(dictionary=kwargs, key="number_density", throws=False)
-        crystal_density = common.dictionary_key_helper(dictionary=kwargs, key="crystal_density", throws=False)
-
-        if self.material_object is not None:
-            raise RuntimeError("The material has already been set to the above details. If the properties"
-                               " have not been set they can be modified with 'set_material_properties()'. Otherwise"
-                               " to change the material call 'reset_sample_material()'")
-
-        self.material_object = _Material(chemical_formula=chemical_formula, number_density=number_density,
-                                         crystal_density=crystal_density)
 
 
 class _Material(object):
