@@ -20,9 +20,6 @@
 namespace Mantid {
 namespace Kernel {
 namespace MultiFileNameParsing {
-/// Parses a string consisting of only run number info, into a vector of vector
-/// of run numbers.
-MANTID_KERNEL_DLL std::vector<std::vector<unsigned int>> parseMultiRunString(std::string runString);
 /// Suggests a workspace name, given a vector of file names. (Which we assume
 /// will be added.)
 MANTID_KERNEL_DLL std::string suggestWorkspaceName(const std::vector<std::string> &fileNames);
@@ -86,6 +83,9 @@ public:
   std::string runString() const { return m_runString; }
   /// Return the parsed extension string.
   std::string extString() const { return m_extString; }
+  /// Parses a string consisting of only run number info, into a vector of vector
+  /// of run numbers.
+  std::vector<std::vector<unsigned int>> parseMultiRunString(std::string runString);
 
 private:
   /// Clear all member variables.

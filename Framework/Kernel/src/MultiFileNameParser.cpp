@@ -82,48 +82,6 @@ std::string &accumulateString(std::string &output, std::pair<unsigned int, unsig
 /////////////////////////////////////////////////////////////////////////////
 
 /**
- * Parses a string containing a comma separated list of run "tokens", where
- * each run token is of one of the allowed forms (a single run or a range
- * of runs or an added range of runs, etc.)
- *
- * @param runString :: a string containing the runs to parse, in the correct
- *format.
- * @returns a vector of vectors of unsigned ints, one int for each run, where
- *runs to be added are contained in the same sub-vector.
- * @throws std::runtime_error when runString provided is in an incorrect format.
- */
-std::vector<std::vector<unsigned int>> parseMultiRunString(std::string runString) {
-  // If the run string is empty, return no runs.
-  if (runString.empty())
-    return std::vector<std::vector<unsigned int>>();
-
-  // Remove whitespace.
-  runString.erase(std::remove_if( // ("Erase-remove" idiom.)
-                      runString.begin(), runString.end(), isspace),
-                  runString.end());
-
-  // Only numeric characters, or occurances of plus, minus, comma and colon are
-  // allowed.
-  if (!matchesFully(runString, "([0-9]|\\+|\\-|,|:)+")) {
-    throw std::runtime_error("Non-numeric or otherwise unaccetable character(s) detected.");
-  }
-
-  // Tokenize on commas.
-  std::vector<std::string> tokens;
-  tokens = boost::split(tokens, runString, boost::is_any_of(","));
-
-  // Validate each token.
-  std::for_each(tokens.begin(), tokens.end(), validateToken);
-
-  // Parse each token, accumulate the results, and return them.
-  std::vector<std::vector<unsigned int>> runGroups;
-  for (auto const &token : tokens) {
-    parseToken(runGroups, token);
-  }
-  return runGroups;
-}
-
-/**
  * Suggests a workspace name for the given vector of file names (which, because
  * they are in the same vector, we will assume they are to be added.)  Example:
  *
@@ -220,6 +178,47 @@ void Parser::parse(const std::string &multiFileName) {
 
   // Generate complete file names for each run using helper functor.
   std::transform(m_runs.begin(), m_runs.end(), std::back_inserter(m_fileNames), generateFileName);
+}
+
+/**
+ * Parses a string containing a comma separated list of run "tokens", where
+ * each run token is of one of the allowed forms (a single run or a range
+ * of runs or an added range of runs, etc.)
+ *
+ * @param runString :: a string containing the runs to parse, in the correct
+ *format.
+ * @returns a vector of vectors of unsigned ints, one int for each run, where
+ *runs to be added are contained in the same sub-vector.
+ * @throws std::runtime_error when runString provided is in an incorrect format.
+ */
+std::vector<std::vector<unsigned int>> Parser::parseMultiRunString(std::string runString) {
+  // If the run string is empty, return no runs.
+  if (runString.empty())
+    return std::vector<std::vector<unsigned int>>();
+
+  // Remove whitespaces.
+  runString.erase(std::remove_if( // ("Erase-remove" idiom.)
+                      runString.begin(), runString.end(), isspace),
+                  runString.end());
+  // Only numeric characters, or occurances of plus, minus, comma and colon are
+  // allowed.
+  if (!matchesFully(runString, "([0-9]|\\+|\\-|,|:)+")) {
+    throw std::runtime_error("Non-numeric or otherwise unaccetable character(s) detected.");
+  }
+
+  // Tokenize on commas.
+  std::vector<std::string> tokens;
+  tokens = boost::split(tokens, runString, boost::is_any_of(","));
+
+  // Validate each token.
+  std::for_each(tokens.begin(), tokens.end(), validateToken);
+
+  // Parse each token, accumulate the results, and return them.
+  std::vector<std::vector<unsigned int>> runGroups;
+  for (auto const &token : tokens) {
+    parseToken(runGroups, token);
+  }
+  return runGroups;
 }
 
 /////////////////////////////////////////////////////////////////////////////
