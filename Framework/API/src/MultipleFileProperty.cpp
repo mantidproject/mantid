@@ -269,6 +269,7 @@ std::string MultipleFileProperty::setValueAsMultipleFiles(const std::string &pro
     for (; plusToken != end; ++plusToken)
       plusTokenStrings.emplace_back(plusToken->str());
 
+    m_parser.setTrimWhiteSpaces(autoTrim()); // keep trimming whitespaces in parser consistent with this property
     for (auto &plusTokenString : plusTokenStrings) {
       try {
         m_parser.parse(plusTokenString);
