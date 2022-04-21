@@ -43,6 +43,10 @@ class PoldiDataAnalysis(PythonAlgorithm):
             'Voigt': ['LorentzFWHM']
         }
 
+        self._boundedParameters = {
+            "AsymmetricPearsonVII": ['LeftShape', 'RightShape']
+        }
+
         self.declareProperty(WorkspaceProperty(name="InputWorkspace", defaultValue="", direction=Direction.Input),
                              doc='MatrixWorkspace with 2D POLDI data and valid POLDI instrument.')
 
@@ -77,6 +81,11 @@ class PoldiDataAnalysis(PythonAlgorithm):
                              doc=('If this option is activated, certain parameters are kept the same for all peaks. '
                                   'An example is the mixing parameter of the PseudoVoigt function.'))
 
+        self.declareProperty("BoundProfileParameters", True, direction=Direction.Input,
+                             doc=('If this option is activated, certain parameters will be bound to a specific range '
+                                  'of values for all peaks. Currently it is implemented for the "LeftShape" and "RightShape" '
+                                  'parameters of the Asymmetric Pearson VII function.'))
+
         self.declareProperty("PawleyFit", False, direction=Direction.Input,
                              doc='Should the 2D-fit determine lattice parameters?')
 
@@ -108,12 +117,19 @@ class PoldiDataAnalysis(PythonAlgorithm):
         self.expectedPeaks = self.getProperty("ExpectedPeaks").value
         self.profileFunction = self.getProperty("ProfileFunction").value
         self.useGlobalParameters = self.getProperty("TieProfileParameters").value
+        self.useBoundedParameters = self.getProperty("BoundProfileParameters").value
         self.maximumRelativeFwhm = self.getProperty("MaximumRelativeFwhm").value
         self.outputIntegratedIntensities = self.getProperty("OutputIntegratedIntensities").value
+        print('PROFILE FUNCTION', self.profileFunction)
 
         self.globalParameters = ''
         if self.useGlobalParameters:
             self.globalParameters = ','.join(self._globalParameters[self.profileFunction])
+
+        self.boundedParameters = ''
+        if self.useBoundedParameters:
+            self.boundedParameters = ','.join(self._boundedParameters[self.profileFunction])
+            print('PROFILE FUNCTION2:', self.boundedParameters)
 
         if not self.workspaceHasCounts(self.inputWorkspace):
             raise RuntimeError("Aborting analysis since workspace " + self.baseName + " does not contain any counts.")
@@ -254,6 +270,7 @@ class PoldiDataAnalysis(PythonAlgorithm):
                         PoldiPeakWorkspace=peaks,
                         PeakProfileFunction=self.profileFunction,
                         GlobalParameters=self.globalParameters,
+                        BoundedParameters=self.boundedParameters,
                         PawleyFit=pawleyFit,
                         MaximumIterations=100,
                         OutputWorkspace=spectrum2DName,
