@@ -101,8 +101,6 @@ private:
   std::string m_multiFileName;
   /// The various sections of the given string to parse.
   std::string m_dirString, m_instString, m_underscoreString, m_runString, m_extString;
-  /// The instrument-specific run zero padding value.
-  // int m_zeroPadding;
   /// All the valid instrument names.
   std::set<std::string, ReverseCaselessCompare> m_validInstNames;
 };

@@ -16,10 +16,8 @@
 #include <Poco/File.h>
 #include <Poco/Path.h>
 
-#include <memory>
-
-//#include <cstdlib>
 #include <iterator>
+#include <memory>
 
 namespace Mantid::API {
 
