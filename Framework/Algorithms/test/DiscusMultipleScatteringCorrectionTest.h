@@ -548,19 +548,19 @@ public:
     }
   }
 
-  void run_test_inelastic_on_realistic_structure_factor(const DeltaEMode::Type emode, int nPaths,
-                                                        bool importanceSampling, bool simulateWSeparately,
-                                                        int numberSimulationPoints, double expWeightMinusOne,
-                                                        double expWeightPlusOne, double delta) {
+  void run_test_inelastic_on_realistic_structure_factor(
+      const DeltaEMode::Type emode, const double eInitial, int nPaths, bool importanceSampling,
+      bool simulateWSeparately, int numberSimulationPoints, double expWeightMinusOne, double expWeightPlusOne,
+      double delta, Mantid::API::MatrixWorkspace_sptr scatteringCrossSection = nullptr) {
     // run test on a realistic structure factor. Validate against results in original Discus paper
-
+    assert(emode != DeltaEMode::Elastic);
     // calculate the S(Q,w) values based on a Lorentzian
     double qmin = 0.; // 0.001
     double qmax = 4.0;
     int nqpts = 9;
-    double wmin = -5.85;
-    double wmax = 5.85;
-    int nwpts = 79; // negative w is given explicitly so ~double number of pts in Discus
+    double wmin = /* -11.7*/ -5.85;
+    double wmax = /*11.7*/ 5.85;
+    int nwpts = /*157*/ 79; // negative w is given explicitly so ~double number of pts in Discus
     double wwidth = (wmax - wmin) / (nwpts - 1);
     // D = 2.3E-05 #cm2 s - 1
     double D =
@@ -602,11 +602,10 @@ public:
     // results
     const int NTHETA = 18;
     const double ang_inc = 180.0 / NTHETA;
-    const double EInitial = 5.1;
     // sample occupies +y,-z and -y,+z regions ie \ when looking along positive x direction
     // the detectors are in a ring in the yz plane in positive y. All 4 Discus angles are on the same side of the sample
     auto inputWorkspace = SetupFlatPlateWorkspace(NTHETA, 1, ang_inc, nwpts, wmin - 0.5 * wwidth, wwidth, 0.05, 0.05,
-                                                  THICKNESS, -45.0, {1.0, 0.0, 0.0}, emode, EInitial);
+                                                  THICKNESS, -45.0, {1.0, 0.0, 0.0}, emode, eInitial);
     auto alg = std::make_shared<Mantid::Algorithms::DiscusMultipleScatteringCorrection>();
 
     // override the material
@@ -629,6 +628,8 @@ public:
       alg->setProperty("NumberOfSimulationPoints", numberSimulationPoints);
     alg->setProperty("ImportanceSampling", importanceSampling);
     alg->setProperty("SimulateEnergiesIndependently", simulateWSeparately);
+    if (scatteringCrossSection)
+      alg->setProperty("ScatteringCrossSection", scatteringCrossSection);
     alg->execute();
 
     if (alg->isExecuted()) {
@@ -647,37 +648,50 @@ public:
       TS_ASSERT_DELTA(actualWeightPlusOne, expWeightPlusOne, delta);
       // double scatter intensity is larger than single at this point
       TS_ASSERT(actualWeightMinusOne > singleScatterResult->y(SPECTRUMINDEXTOTEST)[33]);
-      TS_ASSERT(actualWeightPlusOne > singleScatterResult->y(SPECTRUMINDEXTOTEST)[46]);
+      // the weights at positive w can be zero so use >= here
+      TS_ASSERT(actualWeightPlusOne >= singleScatterResult->y(SPECTRUMINDEXTOTEST)[46]);
 
       Mantid::API::AnalysisDataService::Instance().deepRemoveGroup("MuscatResults");
     }
   }
 
   void test_direct_on_realistic_structure_factor_with_importance_sampling() {
-    run_test_inelastic_on_realistic_structure_factor(DeltaEMode::Direct, 1000, true, false, -1, 0.00023, 0.00019,
+    run_test_inelastic_on_realistic_structure_factor(DeltaEMode::Direct, 5.1, 1000, true, false, -1, 0.00023, 0.00019,
                                                      2E-05);
   }
 
   void test_direct_on_realistic_structure_factor_without_importance_sampling() {
-    run_test_inelastic_on_realistic_structure_factor(DeltaEMode::Direct, 1000, false, false, -1, 0.00023, 0.00019,
+    run_test_inelastic_on_realistic_structure_factor(DeltaEMode::Direct, 5.1, 1000, false, false, -1, 0.00023, 0.00019,
                                                      1E-04);
   }
 
   void test_direct_on_realistic_structure_factor_without_importance_sampling_simulate_w_separately() {
-    run_test_inelastic_on_realistic_structure_factor(DeltaEMode::Direct, 1000, false, true, -1, 0.00023, 0.00019,
+    run_test_inelastic_on_realistic_structure_factor(DeltaEMode::Direct, 5.1, 1000, false, true, -1, 0.00023, 0.00019,
                                                      1E-04);
   }
 
   void test_indirect_on_realistic_structure_factor_without_importance_sampling() {
     // results are not vastly different to the direct geometry
-    run_test_inelastic_on_realistic_structure_factor(DeltaEMode::Indirect, 1000, false, false, -1, 0.00024, 0.00019,
-                                                     1E-04);
+    run_test_inelastic_on_realistic_structure_factor(DeltaEMode::Indirect, 5.1, 1000, false, false, -1, 0.00024,
+                                                     0.00019, 1E-04);
   }
 
   void test_indirect_on_realistic_structure_factor_with_deltaE_interpolation() {
     // only run simulation on half of the deltaE bins (even indices) and interpolate the rest (odd indices)
-    run_test_inelastic_on_realistic_structure_factor(DeltaEMode::Indirect, 1000, false, false, 40, 0.00024, 0.00019,
+    run_test_inelastic_on_realistic_structure_factor(DeltaEMode::Indirect, 5.1, 1000, false, false, 40, 0.00024,
+                                                     0.00019, 1E-04);
+  }
+
+  void test_direct_on_realistic_structure_factor_with_restricted_kinematic_range() {
+    run_test_inelastic_on_realistic_structure_factor(DeltaEMode::Direct, 0.1, 1000, true, false, -1, 0.00023, 0.0,
                                                      1E-04);
+    auto scatteringCrossSectionWS = WorkspaceCreationHelper::create2DWorkspacePoints(1, 3);
+    scatteringCrossSectionWS->getAxis(0)->unit() = UnitFactory::Instance().create("Momentum");
+    scatteringCrossSectionWS->mutableX(0) = {0.5, 1.0, 1.5};    // Ei=5.1 means ki=1.56
+    scatteringCrossSectionWS->mutableY(0) = {10.0, 15.0, 18.5}; // Ni has scattering cross section of 18.5 barns
+    // weight at w=-1 is suppressed
+    run_test_inelastic_on_realistic_structure_factor(DeltaEMode::Direct, 0.1, 1000, true, false, -1, 0.00005, 0.0,
+                                                     1E-05, scatteringCrossSectionWS);
   }
 
   void test_getxminmax() {

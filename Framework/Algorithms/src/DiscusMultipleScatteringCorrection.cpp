@@ -23,6 +23,7 @@
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/CompositeValidator.h"
 #include "MantidKernel/EnabledWhenProperty.h"
+#include "MantidKernel/EqualBinsChecker.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/Material.h"
 #include "MantidKernel/MersenneTwister.h"
@@ -200,6 +201,17 @@ std::map<std::string, std::string> DiscusMultipleScatteringCorrection::validateI
 
     if (SQWS->getAxis(1)->isSpectra())
       issues["StructureFactorWorkspace"] += "S(Q, w) must have a numeric spectrum axis\n";
+    std::vector<double> wValues;
+    if (SQWS->getAxis(0)->unit()->unitID() == "DeltaE")
+      wValues = SQWS->x(0).rawData();
+    else {
+      auto wAxis = dynamic_cast<NumericAxis *>(SQWS->getAxis(1));
+      if (wAxis)
+        wValues = wAxis->getValues();
+    }
+    Kernel::EqualBinsChecker checker(wValues, 1E-7, -1);
+    if (!checker.validate().empty())
+      issues["StructureFactorWorkspace"] += "S(Q,w) must have equally spaced w values";
   }
 
   for (size_t i = 0; i < SQWS->getNumberHistograms(); i++) {
@@ -352,7 +364,7 @@ void DiscusMultipleScatteringCorrection::exec() {
     qmax = 2 * kmax;
   }
   m_QSQWS = prepareQSQ(qmax);
-  double normFactor = calculateSOfQNormalisationFactor();
+  calculateQSQIntegralAsFunctionOfK();
 
   m_simulateEnergiesIndependently = getProperty("SimulateEnergiesIndependently");
   // call this function with dummy efixed to determine total possible simulation points
@@ -455,7 +467,7 @@ void DiscusMultipleScatteringCorrection::exec() {
       MatrixWorkspace_sptr normLogSOfQ;
       if (m_importanceSampling)
         // prep invPOfQ outside the bin loop to avoid costly construction\destruction
-        invPOfQ = createWorkspace(3, m_QSQWS->size());
+        invPOfQ = createWorkspace(2, m_QSQWS->size());
       MatrixWorkspace_sptr normSOfQ = m_SQWS->clone();
 
       for (size_t bin = 0; bin < nbins; bin += xStepSize) {
@@ -472,7 +484,7 @@ void DiscusMultipleScatteringCorrection::exec() {
         // if (!m_importanceSampling)
         //  convertToLogWorkspace(normSOfQ);
 
-        auto weights = simulatePaths(nSingleScatterEvents, 1, rng, invPOfQ, normFactor, kinc, wValues, detPos, true);
+        auto weights = simulatePaths(nSingleScatterEvents, 1, rng, invPOfQ, kinc, wValues, detPos, true);
         if (std::get<1>(kInW[bin]) == -1) {
           noAbsSimulationWS->getSpectrum(i).mutableY() += weights;
         } else {
@@ -482,7 +494,7 @@ void DiscusMultipleScatteringCorrection::exec() {
         for (int ne = 0; ne < nScatters; ne++) {
           int nEvents = ne == 0 ? nSingleScatterEvents : nMultiScatterEvents;
 
-          weights = simulatePaths(nEvents, ne + 1, rng, invPOfQ, normFactor, kinc, wValues, detPos, false);
+          weights = simulatePaths(nEvents, ne + 1, rng, invPOfQ, kinc, wValues, detPos, false);
           if (std::get<1>(kInW[bin]) == -1.0) {
             simulationWSs[ne]->getSpectrum(i).mutableY() += weights;
           } else {
@@ -758,8 +770,6 @@ void DiscusMultipleScatteringCorrection::prepareCumulativeProbForQ(double kinc, 
   PInvOfQ->dataY(0) = qValuesFull;
   PInvOfQ->dataY(1).resize(wIndices.size());
   PInvOfQ->dataY(1) = wIndices;
-  PInvOfQ->dataY(2).resize(IOfQYFull.size());
-  PInvOfQ->dataY(2) = IOfQYFull;
 }
 
 void DiscusMultipleScatteringCorrection::convertToLogWorkspace(MatrixWorkspace_sptr &SOfQ) {
@@ -778,27 +788,36 @@ void DiscusMultipleScatteringCorrection::convertToLogWorkspace(MatrixWorkspace_s
   }
 }
 
-double DiscusMultipleScatteringCorrection::calculateSOfQNormalisationFactor() {
+/**
+ * This is a generalised version of the normalisation done in the original Discus algorithm
+ * The original algorithm only considered two scatters so there was only ever one scatter
+ * with a free direction after scatter that got a contribution from the q_dir function. This
+ * meant that the k value going into the scatter was always fixed and equal to the overall kinc
+ * The approach here will cope with multiple scatters by calculating a sumQSS as multiple
+ * kinc values. These will be interpolated as required later on
+ */
+void DiscusMultipleScatteringCorrection::calculateQSQIntegralAsFunctionOfK() {
   std::vector<double> IOfQYFull;
-  auto &wValues = dynamic_cast<NumericAxis *>(m_SQWS->getAxis(1))->getValues();
-  // Scale the integral of Q.S(Q,w) over dQdw (Q limits function of ki, all w) so that it equals 2ki^2
-  // For a full, properly normalised S(Q,w) this integral would already equal 2ki^2
-  // Note - for multiple scatters the weight gets divided by 2ki^2 (although not the same ki), so the absolute scale of
-  // the S(Q,w) isn't important. The weight just gets scaled down if some ki's have small kinematic region available For
-  // the weight of the final leg of the track the absolute S(Q,w) scale does have an effect because it's not divided by
-  // 2ki^2 Integral tends to constant value at large ki so pick a large ki Work out which ki generates a kinematic range
-  // whose bottom right hand corner is at the max Q of the supplied S(Q,w)
-  //  w
-  //  |  ---
-  //  |_/___\_____Q
-  //  | \    \
-  //  |  \    \
-  // qmax = ki + kf, kf = fromWaveVector(ki) + wmin
-  double SQqmax = m_SQWS->x(0).back();
-  double k = (SQqmax * SQqmax + wValues.front() / PhysicalConstants::E_mev_toNeutronWavenumberSq) / (2 * SQqmax);
-  std::tie(IOfQYFull, std::ignore, std::ignore) = integrateQSQ(k);
-  double factor = 2 * k * k / IOfQYFull.back();
-  return factor;
+  std::vector<double> kValues, QSQIntegrals;
+  // Calculate the integral for a range of k values. Not massively important which k values but choose them here
+  // based on the q points in the supplied S(Q) profile. For each q point calculate the integral for k=q/2
+  std::vector<double> qValues = m_SQWS->histogram(0).readX();
+  // k values may be such that the kinematic range extends beyond the q range of the S(Q) profile supplied
+  // so add a couple of larger k's. The integral/2k^2 will tend to a constant once beyond the q range of S(Q)
+  if (m_EMode != DeltaEMode::Elastic) {
+    qValues.push_back(qValues.back() * 2);
+    qValues.push_back(qValues.back() * 2);
+  }
+  std::transform(qValues.begin(), qValues.end(), std::back_inserter(kValues), [](double d) -> double { return d / 2; });
+  for (auto k : kValues) {
+    std::tie(IOfQYFull, std::ignore, std::ignore) = integrateQSQ(k);
+    double normalisedIntegral = IOfQYFull.back() / (2 * k * k);
+    QSQIntegrals.push_back(normalisedIntegral);
+  }
+  m_QSQIntegral = std::make_shared<DataObjects::Histogram1D>(HistogramData::Histogram::XMode::Points,
+                                                             HistogramData::Histogram::YMode::Frequencies);
+  m_QSQIntegral->dataX() = kValues;
+  m_QSQIntegral->dataY() = QSQIntegrals;
 }
 
 /**
@@ -1081,8 +1100,7 @@ double DiscusMultipleScatteringCorrection::Interpolate2D(MatrixWorkspace_sptr SO
  */
 std::vector<double> DiscusMultipleScatteringCorrection::simulatePaths(
     const int nPaths, const int nScatters, Kernel::PseudoRandomNumberGenerator &rng, MatrixWorkspace_sptr &invPOfQ,
-    const double normFactor, const double kinc, const std::vector<double> &wValues, const Kernel::V3D &detPos,
-    bool specialSingleScatterCalc) {
+    const double kinc, const std::vector<double> &wValues, const Kernel::V3D &detPos, bool specialSingleScatterCalc) {
   std::vector<double> sumOfWeights(wValues.size(), 0.);
   int countZeroWeights = 0; // for debugging and analysis of where importance sampling may help
 
@@ -1096,9 +1114,6 @@ std::vector<double> DiscusMultipleScatteringCorrection::simulatePaths(
       ie--;
   }
   for (size_t i = 0; i < wValues.size(); i++) {
-    // if (!m_importanceSampling)
-    // divide by the mean of Q*S(Q) for each of the n-1 terms representing a multiple scatter
-    sumOfWeights[i] = sumOfWeights[i] * pow(normFactor, nScatters - 1);
     sumOfWeights[i] = sumOfWeights[i] / nPaths;
   }
 
@@ -1227,6 +1242,11 @@ double DiscusMultipleScatteringCorrection::getKf(const double deltaE, const doub
 /**
  * Get the range of q values accessible for a particular kinc and kf. Since the kinc value is known
  * during the simulation this is similar to direct geometry kinematics
+ *  w
+ *  |  ---
+ *  |_/___\_____Q
+ *  | \    \
+ *  |  \    \
  * @param kf The wavevector after the scatter event
  * @param ki The wavevector before the scatter event
  * @return a tuple containing qmin and the qrange
@@ -1235,6 +1255,10 @@ std::tuple<double, double> DiscusMultipleScatteringCorrection::getKinematicRange
   const double qmin = abs(kf - ki);
   const double qrange = 2 * std::min(ki, kf);
   return {qmin, qrange};
+}
+
+double DiscusMultipleScatteringCorrection::getQSQIntegral(double k) {
+  return interpolateFlat(*m_QSQIntegral, k) * 2 * k * k;
 }
 
 // update track direction and weight
@@ -1247,10 +1271,9 @@ bool DiscusMultipleScatteringCorrection::q_dir(Geometry::Track &track, const Mat
   if (m_importanceSampling) {
     std::tie(QQ, iW) = sampleQW(invPOfQ, rng.nextValue());
     k = getKf(m_SQWS->getAxis(1)->getValue(iW), kinc);
-    // S(Q) not strictly needed here but useful to see if the higher values are indeed being returned
+    // S(Q) not strictly needed here but useful to see if the most popular values are indeed being returned
     SQ = interpolateFlat(m_SQWS->getSpectrum(iW), QQ);
-    double integralOverKinAccessibleRange = invPOfQ->getSpectrum(2).y().back();
-    weight = weight * scatteringXSection * integralOverKinAccessibleRange / (2 * kinc * kinc);
+    weight = weight * scatteringXSection;
   } else {
     auto wValues = dynamic_cast<NumericAxis *>(m_SQWS->getAxis(1))->getValues();
     // in order to keep integration limits constant sample full range of w even if some not kinematically accessible
@@ -1267,8 +1290,9 @@ bool DiscusMultipleScatteringCorrection::q_dir(Geometry::Track &track, const Mat
     double qrange = kinc + maxkf;
     QQ = qrange * rng.nextValue();
     SQ = interpolateFlat /* interpolateGaussian*/ (m_SQWS->getSpectrum(iW), QQ);
+    double integralQSQ = getQSQIntegral(kinc);
     // integrate over rectangular area of qw space
-    weight = weight * scatteringXSection * SQ * QQ * qrange * wRange / (2 * kinc * kinc);
+    weight = weight * scatteringXSection * SQ * QQ * qrange * wRange / integralQSQ;
   }
   // T = 2theta
   const double cosT = (kinc * kinc + k * k - QQ * QQ) / (2 * kinc * k);

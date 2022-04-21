@@ -73,7 +73,7 @@ private:
   API::MatrixWorkspace_sptr createOutputWorkspace(const API::MatrixWorkspace &inputWS) const;
   std::tuple<double, double> new_vector(const Kernel::Material &material, double k, bool specialSingleScatterCalc);
   std::vector<double> simulatePaths(const int nEvents, const int nScatters, Kernel::PseudoRandomNumberGenerator &rng,
-                                    API::MatrixWorkspace_sptr &invPOfQ, const double normFactor, const double kinc,
+                                    API::MatrixWorkspace_sptr &invPOfQ, const double kinc,
                                     const std::vector<double> &wValues, const Kernel::V3D &detPos,
                                     bool specialSingleScatterCalc);
   std::tuple<bool, std::vector<double>> scatter(const int nScatters, Kernel::PseudoRandomNumberGenerator &rng,
@@ -93,7 +93,7 @@ private:
   void setWorkspaceName(const API::MatrixWorkspace_sptr &ws, std::string wsName);
   API::MatrixWorkspace_sptr createWorkspace(size_t nhists, size_t expectedSize);
   void convertToLogWorkspace(API::MatrixWorkspace_sptr &SOfQ);
-  double calculateSOfQNormalisationFactor();
+  void calculateQSQIntegralAsFunctionOfK();
   void prepareCumulativeProbForQ(double kinc, const API::MatrixWorkspace_sptr &PInvOfQ);
   API::MatrixWorkspace_uptr prepareQSQ(double kinc);
   double getKf(const double deltaE, const double kinc);
@@ -103,11 +103,13 @@ private:
   std::vector<std::tuple<double, int, double>> generateInputKOutputWList(const double efixed,
                                                                          const std::vector<double> &xPoints);
   std::tuple<std::vector<double>, std::vector<double>, std::vector<double>> integrateQSQ(double kinc);
+  double getQSQIntegral(double k);
   long long m_callsToInterceptSurface{0};
   std::map<int, int> m_attemptsToGenerateInitialTrack;
   int m_maxScatterPtAttempts{};
   std::shared_ptr<const DataObjects::Histogram1D> m_sigmaSS; // scattering cross section as a function of k
   API::MatrixWorkspace_sptr m_SQWS;
+  std::shared_ptr<DataObjects::Histogram1D> m_QSQIntegral; // integral of Q.S(Q) as a function of k
   API::MatrixWorkspace_sptr m_QSQWS;
   API::MatrixWorkspace_sptr m_logSQ;
   Geometry::IObject_const_sptr m_sampleShape;
