@@ -10,19 +10,22 @@
 #include "MantidAPI/Jacobian.h"
 #include "MantidCurveFitting/EigenMatrix.h"
 
+#include <gsl/gsl_matrix.h>
+
 #include <stdexcept>
 #include <vector>
 
 namespace Mantid {
 namespace CurveFitting {
 /**
-An implementation of Jacobian using Eigen:Matrix.
-
+Two implementations of Jacobian.
+-The first (EigenJacobian) using Eigen::Matrix.
+- The second (JacobianImpl1) using gsl_matrix.
 @author Anders Markvardsen, ISIS, RAL
 @date 14/05/2010
 */
 class EigenJacobian : public API::Jacobian {
-  /// The internal jacobian matrix
+  /// The pointer to the the internal jacobian matrix
   EigenMatrix m_J;
   /// Maps declared indeces to active. For fixed (tied) parameters holds -1
   std::vector<int> m_index;
@@ -44,7 +47,7 @@ public:
 
   EigenMatrix &matrix() { return m_J; }
 
-  /// Get the Reference to the jacobian
+  /// Get the pointer to the GSL's jacobian
   map_type &getJ() { return m_J.mutator(); }
 
   /// overwrite base method
@@ -84,21 +87,13 @@ public:
 /// The implementation of Jacobian
 class JacobianImpl1 : public API::Jacobian {
 public:
-  /// The internal jacobian matrix
-  map_type m_J;
+  /// The pointer to the GSL's internal jacobian matrix
+  gsl_matrix *m_J;
   /// Maps declared indeces to active. For fixed (tied) parameters holds -1
   std::vector<int> m_index;
 
-  JacobianImpl1() : m_J({}, 0, 0, dynamic_stride(0, 0)) {}
-
-  /// Set the internal jacobian matrix from an Eigen::MatrixXd
-  void setJ(Eigen::MatrixXd &J) {
-    new (&m_J) map_type(J.data(), J.rows(), J.cols(), dynamic_stride(J.outerStride(), J.innerStride()));
-  }
-  /// Set the internal jacobian matrix using a map
-  void setJ(map_type &J) {
-    new (&m_J) map_type(J.data(), J.rows(), J.cols(), dynamic_stride(J.outerStride(), J.innerStride()));
-  }
+  /// Set the pointer to the GSL's jacobian
+  void setJ(gsl_matrix *J) { m_J = J; }
 
   /// overwrite base method
   /// @param value :: the value
@@ -106,12 +101,12 @@ public:
   ///  @throw runtime_error Thrown if column of Jacobian to add number to does
   ///  not exist
   void addNumberToColumn(const double &value, const size_t &iActiveP) override {
-    if (iActiveP < m_J.cols()) {
+    if (iActiveP < m_J->size2) {
       // add penalty to first and last point and every 10th point in between
-      m_J.data()[iActiveP] += value;
-      m_J.data()[(m_J.rows() - 1) * m_J.cols() + iActiveP] += value;
-      for (size_t iY = 9; iY < m_J.rows() - 1; iY += 10)
-        m_J.data()[iY * m_J.cols() + iActiveP] += value;
+      m_J->data[iActiveP] += value;
+      m_J->data[(m_J->size1 - 1) * m_J->size2 + iActiveP] += value;
+      for (size_t iY = 9; iY < m_J->size1 - 1; iY += 10)
+        m_J->data[iY * m_J->size2 + iActiveP] += value;
     } else {
       throw std::runtime_error("Try to add number to column of Jacobian matrix "
                                "which does not exist.");
@@ -136,17 +131,17 @@ public:
     }
     int j = m_index[iP];
     if (j >= 0)
-      m_J(iY, j) = value;
+      gsl_matrix_set(m_J, iY, j, value);
   }
   /// overwrite base method
   double get(size_t iY, size_t iP) override {
     int j = m_index[iP];
     if (j >= 0)
-      return m_J(iY, j);
+      return gsl_matrix_get(m_J, iY, j);
     return 0.0;
   }
   /// overwrite base method
-  void zero() override { m_J.setZero(); }
+  void zero() override { gsl_matrix_set_zero(m_J); }
 };
 
 } // namespace CurveFitting
