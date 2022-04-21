@@ -157,7 +157,9 @@ class SimpleShapeDiscusInelastic(PythonAlgorithm):
                                                               OutputWorkspace=self._output_ws,
                                                               NeutronPathsSingle=self._single_paths,
                                                               NeutronPathsMultiple=self._multiple_paths,
-                                                              NumberScatterings=self._scatterings)
+                                                              NumberScatterings=self._scatterings,
+                                                              startProgress=0.,
+                                                              endProgress=1.)
 
         self.setProperty('OutputWorkspace', results_group_ws)
 
