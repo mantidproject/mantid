@@ -213,14 +213,14 @@ Usage
                                                       OutputWorkspace="MuscatResults", NeutronPathsSingle=1000,
                                                       NeutronPathsMultiple=10000, ImportanceSampling=True)
    # Can't index into workspace group by name (yet) so just get the members from the ADS instead
-   Scatter_1_DeltaFunction = CloneWorkspace('Scatter_1')
-   Scatter_2_DeltaFunction = CloneWorkspace('Scatter_2')
+   Scatter_1_DeltaFunction = CloneWorkspace('MuscatResults_Scatter_1')
+   Scatter_2_DeltaFunction = CloneWorkspace('MuscatResults_Scatter_2')
    DeleteWorkspace('MuscatResults')
 
    DiscusMultipleScatteringCorrection(InputWorkspace=ws, StructureFactorWorkspace=Sofq_isotropic,
                                       OutputWorkspace="MuscatResultsIsotropic", NeutronPathsSingle=1000,
                                       NeutronPathsMultiple=10000, ImportanceSampling=True)
-   Scatter_2_Isotropic = CloneWorkspace('Scatter_2')
+   Scatter_2_Isotropic = CloneWorkspace('MuscatResultsIsotropic_Scatter_2')
 
 
    # q=2ksin(theta), so q spike corresonds to single scatter spike at ~60 degrees, double scatter spikes at 0 and 120 degrees
@@ -327,19 +327,19 @@ The double scatter profile shows a similar shape to the analytic result calculat
                                       NeutronPathsMultiple=1000)
 
    # reverse w axis because Discus w = Ef-Ei (opposite to Mantid)
-   for i in range(mtd['Scatter_1'].getNumberHistograms()):
-       y = np.flip(mtd['Scatter_1'].dataY(i),0)
-       mtd['Scatter_1'].setY(i,y.tolist())
-   for i in range(mtd['Scatter_2'].getNumberHistograms()):
-       y = np.flip(mtd['Scatter_2'].dataY(i),0)
-       mtd['Scatter_2'].setY(i,y.tolist())
+   for i in range(mtd['MuscatResults_Scatter_1'].getNumberHistograms()):
+       y = np.flip(mtd['MuscatResults_Scatter_1'].dataY(i),0)
+       mtd['MuscatResults_Scatter_1'].setY(i,y.tolist())
+   for i in range(mtd['MuscatResults_Scatter_2'].getNumberHistograms()):
+       y = np.flip(mtd['MuscatResults_Scatter_2'].dataY(i),0)
+       mtd['MuscatResults_Scatter_2'].setY(i,y.tolist())
 
    plt.rcParams['figure.figsize'] = (5, 6)
    fig, ax = plt.subplots(subplot_kw={'projection':'mantid'})
    for i, tt in enumerate(two_thetas):
-       ax.plot(mtd['Scatter_1'], wkspIndex=i, label='Single: ' + str(tt) + ' degrees')
+       ax.plot(mtd['MuscatResults_Scatter_1'], wkspIndex=i, label='Single: ' + str(tt) + ' degrees')
    for i, tt in enumerate(two_thetas):
-       ax.plot(mtd['Scatter_2'], wkspIndex=i, label='Double: ' + str(tt) + ' degrees', linestyle='--')
+       ax.plot(mtd['MuscatResults_Scatter_2'], wkspIndex=i, label='Double: ' + str(tt) + ' degrees', linestyle='--')
    plt.yscale('log')
    ax.set_xlim(-1,1)
    ax.set_ylim(1e-4,1e-1)
@@ -362,8 +362,6 @@ References
 .. [#MAY] J Mayers, R Cywinski, 1985 *Nuclear Instruments and Methods in Physics Research* A241, A Monte Carlo Evaluation Of Analytical Multiple Scattering Corrections For Unpolarised Neutron Scattering And Polarisation Analysis Data `doi: 10.1016/0168-9002(85)90607-2 <https://doi.org/10.1016/0168-9002(85)90607-2>`_
 
 
-Usage
------
 
 
 .. categories::

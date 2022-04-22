@@ -569,7 +569,7 @@ void DiscusMultipleScatteringCorrection::exec() {
   if (AnalysisDataService::Instance().doesExist(outputGroupWSName))
     API::AnalysisDataService::Instance().deepRemoveGroup(outputGroupWSName);
 
-  const std::string wsNamePrefix = "Scatter_";
+  const std::string wsNamePrefix = outputGroupWSName + "_Scatter_";
   std::string wsName = wsNamePrefix + "1_NoAbs";
   setWorkspaceName(noAbsOutputWS, wsName);
   wsgroup->addWorkspace(noAbsOutputWS);
@@ -585,7 +585,7 @@ void DiscusMultipleScatteringCorrection::exec() {
     for (size_t i = 1; i < outputWSs.size(); i++) {
       summedOutput = summedOutput + outputWSs[i];
     }
-    wsName = "Scatter_2_" + std::to_string(outputWSs.size()) + "_Summed";
+    wsName = wsNamePrefix + "2_ " + std::to_string(outputWSs.size()) + "_Summed";
     setWorkspaceName(summedOutput, wsName);
     wsgroup->addWorkspace(summedOutput);
   }
