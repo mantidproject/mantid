@@ -101,15 +101,15 @@ With this approach the Q value for each segment is chosen as follows based on a 
 
 .. math::
 
-   J_n = \frac{1}{A} \int dS \int_{0}^{1} dt_1 \frac{1-e^{-\mu_T l_1^{\ max}}}{\sigma_T} \prod\limits_{i=1}^{n-1}[\int_{0}^{1} dt_{i+1} \int_{0}^{1} dv_i 2 \frac{I(2k)}{2k^2} \sigma_s \int_{0}^{1} du_i \frac{(1-e^{-\mu_T l_{i+1}^{max}})}{\sigma_T}] e^{-\mu_T l_{out}} S(Q_n) \frac{\sigma_s}{4 \pi}
+   J_n = \frac{1}{A} \int dS \int_{0}^{1} dt_1 \frac{1-e^{-\mu_T l_1^{\ max}}}{\sigma_T} \prod\limits_{i=1}^{n-1}[\int_{0}^{1} dt_{i+1} \int_{0}^{1} dv_i \frac{I(2k)}{2k^2} \sigma_s \int_{0}^{1} du_i \frac{(1-e^{-\mu_T l_{i+1}^{max}})}{\sigma_T}] e^{-\mu_T l_{out}} S(Q_n) \frac{\sigma_s}{4 \pi}
 
-   J_n = \frac{1}{A} \int dS \int_{0}^{1} dt_1 \frac{1-e^{-\mu_T l_1^{\ max}}}{\sigma_T} \prod\limits_{i=1}^{n-1}[\int_{0}^{1} dt_{i+1} \int_{0}^{1} dv_i 2 \sigma_s(k) \int_{0}^{1} du_i \frac{(1-e^{-\mu_T l_{i+1}^{max}})}{\sigma_T}] e^{-\mu_T l_{out}} S(Q_n) \frac{\sigma_s}{4 \pi}
+   J_n = \frac{1}{A} \int dS \int_{0}^{1} dt_1 \frac{1-e^{-\mu_T l_1^{\ max}}}{\sigma_T} \prod\limits_{i=1}^{n-1}[\int_{0}^{1} dt_{i+1} \int_{0}^{1} dv_i \sigma_s(k) \int_{0}^{1} du_i \frac{(1-e^{-\mu_T l_{i+1}^{max}})}{\sigma_T}] e^{-\mu_T l_{out}} S(Q_n) \frac{\sigma_s}{4 \pi}
 
 Finally, the equivalent Monte Carlo integration that the algorithm performs with importance sampling enabled is:
 
 .. math::
 
-   J_n = \frac{1}{N}\sum \frac{1-e^{-\mu_T l_1^{\ max}}}{\sigma_T} \prod\limits_{i=1}^{n-1}[2 \sigma_s(k) \frac{(1-e^{-\mu_T l_{i+1}^{max}})}{\sigma_T}] e^{-\mu_T l_{out}} S(Q_n) \frac{\sigma_s}{4 \pi}
+   J_n = \frac{1}{N}\sum \frac{1-e^{-\mu_T l_1^{\ max}}}{\sigma_T} \prod\limits_{i=1}^{n-1}[\sigma_s(k) \frac{(1-e^{-\mu_T l_{i+1}^{max}})}{\sigma_T}] e^{-\mu_T l_{out}} S(Q_n) \frac{\sigma_s}{4 \pi}
 
 The importance sampling has also been implemented for inelastic instruments by flatting out the 2D :math:`S(Q, \omega)` profile into a 1D array.
 A 1D coordinate is created which is the actual Q value added onto the maximum Q from the preceding :math:`\omega` row: :math:`Q'(Q,\omega_i) = Q + Q_{max}(\omega_{i-1})`
