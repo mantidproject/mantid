@@ -581,13 +581,26 @@ void DiscusMultipleScatteringCorrection::exec() {
   }
 
   if (outputWSs.size() > 1) {
-    auto summedOutput = createOutputWorkspace(*inputWS);
+    // create sum of multiple scatter workspaces for use in subtraction method
+    auto summedMScatOutput = createOutputWorkspace(*inputWS);
     for (size_t i = 1; i < outputWSs.size(); i++) {
-      summedOutput = summedOutput + outputWSs[i];
+      summedMScatOutput = summedMScatOutput + outputWSs[i];
     }
     wsName = wsNamePrefix + "2_ " + std::to_string(outputWSs.size()) + "_Summed";
-    setWorkspaceName(summedOutput, wsName);
-    wsgroup->addWorkspace(summedOutput);
+    setWorkspaceName(summedMScatOutput, wsName);
+    wsgroup->addWorkspace(summedMScatOutput);
+    // create sum of all scattering order workspaces for use in ratio method
+    auto summedAllScatOutput = createOutputWorkspace(*inputWS);
+    summedAllScatOutput = summedMScatOutput + outputWSs[0];
+    wsName = wsNamePrefix + "1_ " + std::to_string(outputWSs.size()) + "_Summed";
+    setWorkspaceName(summedAllScatOutput, wsName);
+    wsgroup->addWorkspace(summedAllScatOutput);
+    // create ratio of single to all scatter
+    auto ratioOutput = createOutputWorkspace(*inputWS);
+    ratioOutput = outputWSs[0] / summedAllScatOutput;
+    wsName = outputGroupWSName + "_Ratio_Single_To_All_Scatters";
+    setWorkspaceName(ratioOutput, wsName);
+    wsgroup->addWorkspace(ratioOutput);
   }
 
   // set the output property
@@ -1398,6 +1411,12 @@ void DiscusMultipleScatteringCorrection::interpolateFromSparse(
   PARALLEL_CHECK_INTERRUPT_REGION
 }
 
+/**
+ * Adjust workspace name in case of clash in the ADS.
+ * Was mainly of value when member workspaces didn't have the group name as a prefix but
+ * have left this in place in case there is a clash for any reason
+ * @param wsName The name to set on the workspace
+ */
 void DiscusMultipleScatteringCorrection::correctForWorkspaceNameClash(std::string &wsName) {
   bool noClash(false);
 

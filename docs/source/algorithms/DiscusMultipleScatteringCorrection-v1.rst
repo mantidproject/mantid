@@ -124,6 +124,8 @@ The algorithm outputs a workspace group containing the following workspaces:
 - Several workspaces called ``Scatter_n`` where n is the number of scattering events considered. Each workspace contains "per detector" weights as a function of momentum or energy transfer for a specific number of scattering events. The number of scattering events ranges between 1 and the number specified in the NumberOfScatterings parameter
 - A workspace called ``Scatter_1_NoAbsorb`` is also created for a scenario where neutrons are scattered once, absorption is assumed to be zero and re-scattering after the simulated scattering event is assumed to be zero. This is the quantity :math:`J_{1}^{*}` described in the Discus manual
 - A workspace called ``Scatter_2_n_Summed`` which is the sum of the ``Scatter_n`` workspaces for n > 1
+- A workspace called ``Scatter_1_n_Summed`` which is the sum of the ``Scatter_n`` workspaces for n >= 1
+- A workspace called ``Ratio_Single_To_All_Scatters`` which is the ``Scatter_1`` workspace divided by ``Scatter_1_n_Summed``
 
 The output can be applied to a workspace containing a real sample measurement in one of two ways:
 
@@ -354,7 +356,7 @@ This is the equivalent plot from the original Discus Fortran program:
 
 
 References
-##########
+----------
 
 .. [#JOH] M W Johnson, 1974 AERE Report R7682, Discus: A computer program for the calculating of multiple scattering effects in inelastic neutron scattering experiments
 .. [#HOW] WS Howells, V Garcia Sakai, F Demmel, MTF Telling, F Fernandez-Alonso, Feb 2010, MODES manual RAL-TR-2010-006, `doi: 10.5286/raltr.2010006 <https://doi.org/10.5286/raltr.2010006>`_
