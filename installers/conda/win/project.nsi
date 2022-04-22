@@ -8,10 +8,11 @@ Unicode True
 !include MUI2.nsh
 
 !define PACKAGE_NAME "mantid${PACKAGE_SUFFIX}"
-!define START_MENU_FOLDER "Mantid${PACKAGE_SUFFIX}"
 !define MANTIDWORKBENCH_LINK_NAME "Mantid Workbench ${PACKAGE_SUFFIX}.lnk"
 !define MANTIDNOTEBOOK_LINK_NAME "Mantid Notebook ${PACKAGE_SUFFIX}.lnk"
 !define PACKAGE_VENDOR "ISIS Rutherford Appleton Laboratory UKRI, NScD Oak Ridge National Laboratory, European Spallation Source and Institut Laue - Langevin"
+
+Var StartMenuFolder
 
 # --------------------------------------------------------------------
 # Add functions needed for install and uninstall with the modern UI
@@ -26,13 +27,19 @@ ${EndIf}
 FunctionEnd
 
 # --------------------------------------------------------------------
-# ModernUI variables definitions, some of these are passed in as arguements such as MUI_ICON, MUI_UNICON etc.
+# ModernUI variables definitions, some of these are passed in as arguments such as MUI_ICON, MUI_UNICON etc.
 !define MUI_ICON "${ICON_PATH}"
 !define MUI_UNICON "${ICON_PATH}"
 
 !insertmacro MUI_PAGE_WELCOME
 !insertmacro MUI_PAGE_LICENSE "${MUI_PAGE_LICENSE_PATH}"
 !insertmacro MUI_PAGE_DIRECTORY
+
+# Customise Start menu location
+!define MUI_STARTMENUPAGE_REGISTRY_ROOT "HKCU"
+!define MUI_STARTMENUPAGE_REGISTRY_KEY "Software\${PACKAGE_VENDOR}\${PACKAGE_NAME}"
+!define MUI_STARTMENUPAGE_REGISTRY_VALUENAME "Start Menu Folder"
+!insertmacro MUI_PAGE_STARTMENU Application $StartMenuFolder
 
 !insertmacro MUI_PAGE_INSTFILES
 !insertmacro MUI_PAGE_FINISH
@@ -45,7 +52,7 @@ FunctionEnd
 # --------------------------------------------------------------------
 
 # The name of the installer
-Name "Mantid Workbench ${PACKAGE_SUFFIX}"
+Name "Mantid${PACKAGE_SUFFIX}"
 
 # The file to write
 OutFile "${OUTFILE_NAME}"
@@ -93,29 +100,29 @@ Section "-Core installation"
 	WriteRegStr HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\${PACKAGE_NAME}" "NoModify" 1
 	WriteRegStr HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\${PACKAGE_NAME}" "DisplayIcon" "$\"$INSTDIR\Uninstall.exe$\""
 	WriteRegStr HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\${PACKAGE_NAME}" "Publisher" "${PACKAGE_VENDOR}"
+# See if this is automatically added by the MUI stuff?
+#	WriteRegStr HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\${PACKAGE_NAME}" "StartMenu" "${StartMenuFolder}"
 
     # Create shortucts for start menu
-    CreateDirectory "$SMPROGRAMS\${START_MENU_FOLDER}"
-    CreateShortCut "$SMPROGRAMS\${START_MENU_FOLDER}\${MANTIDWORKBENCH_LINK_NAME}" "$INSTDIR\bin\MantidWorkbench.exe"
-    SetOutPath "$INSTDIR\bin"
-    CreateShortCut "$SMPROGRAMS\${START_MENU_FOLDER}\${MANTIDNOTEBOOK_LINK_NAME}" "cmd.exe" "/C $\"call $INSTDIR\bin\pythonw.exe -m notebook --notebook-dir=%userprofile%$\"" "${NOTEBOOK_ICON}"
-    SetOutPath "$INSTDIR"
-    CreateShortCut "$SMPROGRAMS\${START_MENU_FOLDER}\Uninstall.lnk" "$\"$INSTDIR\Uninstall.exe$\""
+    !insertmacro MUI_STARTMENU_WRITE_BEGIN Application
+        CreateDirectory "$SMPROGRAMS\$StartMenuFolder"
+        CreateShortCut "$SMPROGRAMS\$StartMenuFolder\${MANTIDWORKBENCH_LINK_NAME}" "$INSTDIR\bin\MantidWorkbench.exe"
+        SetOutPath "$INSTDIR\bin" # Not sure why this is here?
+        CreateShortCut "$SMPROGRAMS\$StartMenuFolder\${MANTIDNOTEBOOK_LINK_NAME}" "cmd.exe" "/C $\"call $INSTDIR\bin\pythonw.exe -m notebook --notebook-dir=%userprofile%$\"" "${NOTEBOOK_ICON}"
+        SetOutPath "$INSTDIR" # Not sure why this is here?
+        CreateShortCut "$SMPROGRAMS\$StartMenuFolder\Uninstall.lnk" "$\"$INSTDIR\Uninstall.exe$\""
+    !insertmacro MUI_STARTMENU_WRITE_END
 
     # Create desktop shortcuts
     CreateShortCut "$DESKTOP\${MANTIDWORKBENCH_LINK_NAME}" "$INSTDIR\bin\MantidWorkbench.exe" "" "${WORKBENCH_ICON}"
-    SetOutPath "$INSTDIR\bin"
+    SetOutPath "$INSTDIR\bin" # Not sure why this is here?
     CreateShortCut "$DESKTOP\${MANTIDNOTEBOOK_LINK_NAME}" "cmd.exe" "/C $\"call $INSTDIR\bin\pythonw.exe -m notebook --notebook-dir=%userprofile%$\"" "${NOTEBOOK_ICON}"
-    SetOutPath "$INSTDIR"
+    SetOutPath "$INSTDIR" # Not sure why this is here?
 
-SectionEnd ; end the section
+SectionEnd
 
 # The uninstall section
 Section "Uninstall"
-    # Remove uninstall registry entries
-	DeleteRegKey HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\${PACKAGE_NAME}"
-	DeleteRegKey HKCU "Software\${PACKAGE_VENDOR}\${PACKAGE_NAME}"
-
     # Remove mantid itself
     RMDir /r $INSTDIR\bin
     RMDir /r $INSTDIR\include
@@ -128,14 +135,19 @@ Section "Uninstall"
     RMDir $INSTDIR
 
     # Remove start menu shortcuts
-    Delete "$SMPROGRAMS\${START_MENU_FOLDER}\${MANTIDWORKBENCH_LINK_NAME}"
-    Delete "$SMPROGRAMS\${START_MENU_FOLDER}\${MANTIDNOTEBOOK_LINK_NAME}"
-    Delete "$SMPROGRAMS\${START_MENU_FOLDER}\Uninstall.lnk"
-    RMDir "$SMPROGRAMS\${START_MENU_FOLDER}"
+    !insertmacro MUI_STARTMENU_GETFOLDER Application $StartMenuFolder
+    Delete "$SMPROGRAMS\$StartMenuFolder\${MANTIDWORKBENCH_LINK_NAME}"
+    Delete "$SMPROGRAMS\$StartMenuFolder\${MANTIDNOTEBOOK_LINK_NAME}"
+    Delete "$SMPROGRAMS\$StartMenuFolder\Uninstall.lnk"
+    RMDir "$SMPROGRAMS\$StartMenuFolder"
 
     # Remove desktop shortcuts
     Delete "$DESKTOP\${MANTIDWORKBENCH_LINK_NAME}"
     Delete "$DESKTOP\${MANTIDNOTEBOOK_LINK_NAME}"
+
+    # Remove registry keys
+    DeleteRegKey HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\${PACKAGE_NAME}"
+    DeleteRegKey HKCU "Software\${PACKAGE_VENDOR}\${PACKAGE_NAME}"
 
 SectionEnd
 
