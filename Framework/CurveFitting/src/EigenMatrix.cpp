@@ -254,9 +254,10 @@ void EigenMatrix::solve(EigenVector &rhs, EigenVector &x) {
   auto res = dec.solve(b);
   x = res;
 
-  if (!rhs.inspector().isApprox(inspector() * x.inspector())) {
-    throw std::runtime_error("Matrix Solution Error: solution does not exist.");
-  }
+  // Commented out soltution error, as gsl implementation didn't provide this.
+  // if (!rhs.inspector().isApprox(inspector() * x.inspector())) {
+  //  //throw std::runtime_error("Matrix Solution Error: solution does not exist.");
+  //}
 }
 
 /// Invert this matrix
