@@ -106,6 +106,7 @@ void WorkspaceTreeWidgetSimple::popupContextMenu() {
     menu = m_loadMenu;
   else {
     menu = new QMenu(this);
+    menu->setAttribute(Qt::WA_DeleteOnClose, true);
     menu->setObjectName("WorkspaceContextMenu");
 
     // plot submenu first for MatrixWorkspace.
