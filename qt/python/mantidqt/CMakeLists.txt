@@ -140,6 +140,7 @@ set(PYTHON_WIDGET_QT5_ONLY_TESTS
     mantidqt/widgets/sliceviewer/test/test_sliceviewer_zoom.py
     mantidqt/widgets/sliceviewer/test/test_workspace_info.py
     mantidqt/widgets/sliceviewer/cutviewer/test/test_cutviewer_model.py
+    mantidqt/widgets/sliceviewer/cutviewer/test/test_cutviewer_presenter.py
     mantidqt/widgets/sliceviewer/peaksviewer/test/test_peaksviewer_actions.py
     mantidqt/widgets/sliceviewer/peaksviewer/test/test_peaksviewer_model.py
     mantidqt/widgets/sliceviewer/peaksviewer/test/test_peaksviewer_presenter.py

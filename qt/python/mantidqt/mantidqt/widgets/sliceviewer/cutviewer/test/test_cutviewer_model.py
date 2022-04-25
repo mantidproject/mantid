@@ -134,5 +134,5 @@ class TestCutViewerModel(unittest.TestCase):
                                  rtol=0.0, atol=1e-10))
 
 
-if __name__ == '__name':
+if __name__ == '__main__':
     unittest.main()
