@@ -294,6 +294,7 @@ class SliceViewer(ObservingPresenter, SliceViewerBasePresenter):
         data_view = self.view.data_view
         if state:
             data_view.deactivate_and_disable_tool(ToolItemText.REGIONSELECTION)
+            data_view.disable_tool_button(ToolItemText.NONAXISALIGNEDCUTS)
             data_view.disable_tool_button(ToolItemText.LINEPLOTS)
             # set transform from sliceinfo but ignore view as non-ortho state not set yet
             data_view.create_axes_nonorthogonal(self.get_sliceinfo(force_nonortho_mode=True).get_northogonal_transform())
@@ -302,6 +303,7 @@ class SliceViewer(ObservingPresenter, SliceViewerBasePresenter):
             data_view.create_axes_orthogonal()
             data_view.enable_tool_button(ToolItemText.LINEPLOTS)
             data_view.enable_tool_button(ToolItemText.REGIONSELECTION)
+            data_view.enable_tool_button(ToolItemText.NONAXISALIGNEDCUTS)
 
         self.new_plot()
 
