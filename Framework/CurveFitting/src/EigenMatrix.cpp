@@ -346,8 +346,8 @@ EigenVector EigenMatrix::multiplyByVector(const EigenVector &v) const {
 
 /// Copy matrix, transpose, then return transposed copy.
 EigenMatrix EigenMatrix::tr() const {
-  EigenMatrix res = *this;
-  res.mutator() = inspector().transpose();
+  EigenMatrix res;
+  res = inspector().transpose();
   return res;
 }
 

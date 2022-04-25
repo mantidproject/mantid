@@ -122,9 +122,12 @@ void BSpline::derivative1D(double *out, const double *xValues, size_t nData, con
       gsl_bspline_deriv_eval_nonzero(x, order, getGSLMatrix(B.mutator().data()), &jstart, &jend,
                                      m_bsplineWorkspace.get(), m_bsplineDerivWorkspace.get());
 #else
-      gsl_bspline_deriv_eval_nonzero(x, order, &getGSLMatrixView(B.mutator()).matrix, &jstart, &jend,
+      EigenMatrix B_Trans(B.tr());
+      gsl_bspline_deriv_eval_nonzero(x, order, &getGSLMatrixView(B_Trans.mutator()).matrix, &jstart, &jend,
                                      m_bsplineWorkspace.get());
+      B = B_Trans.tr();
 #endif
+
       double val = 0.0;
       for (size_t j = jstart; j <= jend; ++j) {
         val += getParameter(j) * B.get(j - jstart, order);

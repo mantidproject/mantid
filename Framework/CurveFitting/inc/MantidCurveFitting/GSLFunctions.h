@@ -53,7 +53,7 @@ int gsl_fdf(const gsl_vector *x, void *params, gsl_vector *f, gsl_matrix *J);
 /// take data from Eigen Vector and take a gsl view
 inline gsl_vector_view getGSLVectorView(vec_map_type &v) { return gsl_vector_view_array(v.data(), v.size()); }
 /// take  data from Eigen Matrix and take a gsl view
-inline gsl_matrix_view getGSLMatrixView(map_type &m) { return gsl_matrix_view_array(m.data(), m.rows(), m.cols()); }
+inline gsl_matrix_view getGSLMatrixView(map_type &m) { return gsl_matrix_view_array(m.data(), m.cols(), m.rows()); }
 /// take const data from Eigen Vector and take a gsl view
 inline gsl_vector_const_view const getGSLVectorView_const(const vec_map_type v) {
   return gsl_vector_const_view_array(v.data(), v.size());
