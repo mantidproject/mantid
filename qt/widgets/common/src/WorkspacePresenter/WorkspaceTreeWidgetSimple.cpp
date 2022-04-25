@@ -219,11 +219,11 @@ void WorkspaceTreeWidgetSimple::popupContextMenu() {
       bool containsMatrixWorkspace{false};
       bool containsPeaksWorkspace{false};
 
-      for (auto ws : workspaces) {
-        if (auto matrixWS = std::dynamic_pointer_cast<MatrixWorkspace>(ws)) {
+      for (const auto &ws : workspaces) {
+        if (std::dynamic_pointer_cast<MatrixWorkspace>(ws)) {
           containsMatrixWorkspace = true;
           break;
-        } else if (auto peaksWS = std::dynamic_pointer_cast<IPeaksWorkspace>(ws)) {
+        } else if (std::dynamic_pointer_cast<IPeaksWorkspace>(ws)) {
           containsPeaksWorkspace = true;
         }
       }
@@ -259,7 +259,7 @@ void WorkspaceTreeWidgetSimple::popupContextMenu() {
       // SetSampleMaterial algorithm requires that the workspace
       // inherits from ExperimentInfo, so check that it does
       // before adding the action to the context menu.
-      if (auto experimentInfoWS = std::dynamic_pointer_cast<ExperimentInfo>(workspace)) {
+      if (std::dynamic_pointer_cast<ExperimentInfo>(workspace)) {
         menu->addAction(m_sampleMaterial);
       }
     }
