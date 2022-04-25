@@ -473,15 +473,13 @@ class SuperplotPresenter:
             dict(str: str): plot keywork arguments
         """
         kwargs = dict()
-        ws = mtd[ws_name]
+        kwargs["wkspIndex"] = spectrum
         if normalise is True:
             kwargs["normalise_spectrum"] = True
         if mode == self.SPECTRUM_MODE_TEXT:
             kwargs["axis"] = MantidAxType.SPECTRUM
-            kwargs["specNum"] = ws.getSpectrumNumbers()[spectrum]
         elif mode == self.BIN_MODE_TEXT:
             kwargs["axis"] = MantidAxType.BIN
-            kwargs["wkspIndex"] = spectrum
         kwargs["color"] = color
         return kwargs
 
