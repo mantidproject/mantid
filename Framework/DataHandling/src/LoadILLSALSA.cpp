@@ -105,6 +105,11 @@ void LoadILLSALSA::exec() {
   h5file.close();
 }
 
+/**
+ * Load the instrument and set its position.
+ * @param distance Sample to detector distance (in meters)
+ * @param angle Beam to detector angle (2 theta, in degrees)
+ */
 void LoadILLSALSA::setInstrument(double distance, double angle) {
   // load instrument
   auto loadInst = createChildAlgorithm("LoadInstrument");
