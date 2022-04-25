@@ -47,28 +47,6 @@ Usage
 
 .. include:: ../usagedata-note.txt
 
-**Example - CalMuonDetectorPhases**
-
-.. testcode:: CalMuonDetectorPhasesExample
-
-   # Load four spectra from a muon nexus file
-   ws = Load(Filename='MUSR00022725.nxs', SpectrumMin=1, SpectrumMax=4)
-   # Calibrate the phases and amplitudes
-   detectorTable, fittingResults = CalMuonDetectorPhases(InputWorkspace='ws', LastGoodData=4, ForwardSpectra="1,2", BackwardSpectra="3,4")
-
-   # Print the result
-   for i in range(0,4):
-     print("Detector {} has phase {:.6f} and amplitude {:.6f}".format(detectorTable.cell(i,0), detectorTable.cell(i,2), detectorTable.cell(i,1)))
-
-Output:
-
-.. testoutput:: CalMuonDetectorPhasesExample
-
-  Detector 1 has phase 0.950498 and amplitude 0.133113
-  Detector 2 has phase 1.171793 and amplitude 0.134679
-  Detector 3 has phase 1.356717 and amplitude 0.149431
-  Detector 4 has phase 1.484481 and amplitude 0.152870
-
 **Example - CalMuonDetectorPhases with dead detector**
 
 .. testcode:: CalMuonDetectorPhasesDeadExample

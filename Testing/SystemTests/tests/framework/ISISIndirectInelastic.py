@@ -1107,6 +1107,9 @@ class OSIRISConvFit(ISISIndirectInelasticConvFit):
 
         self.result_names = ['osi97935_graphite002_conv_1LFitL_s0_to_41_Result_1']
 
+    def skipTests(self):
+        return True
+
     def get_reference_files(self):
         self.tolerance = 0.3
         # gsl v2 gives a slightly different result than v1
@@ -1140,6 +1143,9 @@ class IRISConvFit(ISISIndirectInelasticConvFit):
         self.tolerance = 0.2
         # gsl v2 gives a slightly different result than v1
         return ['II.IRISConvFitSeq.nxs'] if using_gsl_v1() else ['II.IRISConvFitSeq_gslv2.nxs']
+
+    def skipTests(self):
+        return True
 
 #==============================================================================
 # Transmission Monitor Test

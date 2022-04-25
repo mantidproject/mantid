@@ -52,6 +52,9 @@ class SingleFileFindPeaksIntegrate(systemtesting.MantidSystemTest):
                           ws_name+'_peaks',
                           ws_name+'_integrated'])
 
+    def skipTests(self):
+        return True
+
 
 class SingleFilePredictPeaksIntegrate(systemtesting.MantidSystemTest):
     def runTest(self):
@@ -82,6 +85,9 @@ class SingleFilePredictPeaksIntegrate(systemtesting.MantidSystemTest):
         DeleteWorkspaces([ws_name+'_data',
                           ws_name+'_peaks',
                           ws_name+'_integrated'])
+
+    def skipTests(self):
+        return True
 
 
 class SingleFilePredictPeaksUBFromFindPeaksIntegrate(systemtesting.MantidSystemTest):
@@ -120,6 +126,9 @@ class SingleFilePredictPeaksUBFromFindPeaksIntegrate(systemtesting.MantidSystemT
                           ws_name+'_found_peaks',
                           ws_name+'_peaks',
                           ws_name+'_integrated'])
+
+    def skipTests(self):
+        return True
 
 
 class MultiFileFindPeaksIntegrate(systemtesting.MantidSystemTest):
@@ -176,6 +185,9 @@ class MultiFileFindPeaksIntegrate(systemtesting.MantidSystemTest):
         DeleteWorkspaces([ws_name+'_data',
                           ws_name+'_peaks',
                           ws_name+'_integrated'])
+
+    def skipTests(self):
+        return True
 
 
 class MultiFilePredictPeaksIntegrate(systemtesting.MantidSystemTest):
@@ -301,6 +313,9 @@ class MultiFilePredictPeaksUBFromFindPeaksIntegrate(systemtesting.MantidSystemTe
                           ws_name+'_found_peaks',
                           ws_name+'_peaks',
                           ws_name+'_integrated'])
+
+    def skipTests(self):
+        return True
 
 
 class SatellitePeaksFakeData(systemtesting.MantidSystemTest):

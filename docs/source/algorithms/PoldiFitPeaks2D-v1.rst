@@ -108,58 +108,6 @@ Furthermore, a 1D diffractogram is also calculated, which shows all peaks that w
 
 The following example shows an example for refinement of lattice parameters using the PawleyFit-option.
 
-.. testcode:: ExSilicon2DPawley
-
-    import numpy as np
-
-    # Load and merge 2 data files for better statistics.
-    truncated = PoldiLoadRuns(2013, 6903, 6904, 2)
-
-    # Perform correlation, peak search and fit
-    correlated_6904 = PoldiAutoCorrelation("truncated_data_6904")
-    peaks_6904 = PoldiPeakSearch(correlated_6904)
-
-    PoldiFitPeaks1D(InputWorkspace = correlated_6904, FwhmMultiples = 4.0,
-                    PeakFunction = "Gaussian", PoldiPeakTable = peaks_6904,
-                    OutputWorkspace = "peaks_refined_6904",
-                    FitPlotsWorkspace = "fit_plots_6904")
-
-    # Generate reflections for Silicon
-    si_peaks = PoldiCreatePeaksFromCell(SpaceGroup = "F d -3 m",
-                                        Atoms = "Si 0.0 0.0 0.0",
-                                        a = 5.431,
-                                        LatticeSpacingMin = 0.7)
-    # Index the refined peaks
-    indexed = PoldiIndexKnownCompounds("peaks_refined_6904",
-                                       CompoundWorkspaces = "si_peaks")
-
-    # Only consider the first 8 peaks
-    DeleteTableRows("peaks_refined_6904_indexed_si_peaks", "8-30")
-
-    # Fit a unit cell.
-    PoldiFitPeaks2D(InputWorkspace="truncated_data_6904",
-                             PoldiPeakWorkspace="peaks_refined_6904_indexed_si_peaks",
-                             OutputWorkspace="fitted_6904",
-                             PawleyFit = True,
-                             MaximumIterations=100,
-                             RefinedPoldiPeakWorkspace="peaks_fit_2d_6904",
-                             Calculated1DSpectrum="simulated_1d_6904",
-                             RefinedCellParameters="refined_cell_6904")
-
-
-    lattice_parameters = AnalysisDataService.retrieve("refined_cell_6904")
-
-    cell_a = np.round(lattice_parameters.cell(0, 1), 5)
-    cell_a_error = np.round(lattice_parameters.cell(0, 2), 5)
-
-    print("Refined lattice parameter a = {:.5f} +/- {}".format(cell_a, cell_a_error))
-
-The refined lattice parameter is printed at the end:
-
-.. testoutput:: ExSilicon2DPawley
-
-    Refined lattice parameter a = 5.43126 +/- 4e-05
-
 .. categories::
 
 .. sourcelink::

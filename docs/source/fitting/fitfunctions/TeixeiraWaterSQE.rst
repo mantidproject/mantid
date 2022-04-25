@@ -53,33 +53,6 @@ The value of the momentum transfer :math:`Q` is contained in the loaded data
 
 :math:`S(Q,E) = I \cdot R(Q,E) \otimes [EISF\delta(E) + (1-EISF)\cdot TeixeiraWaterSQE(Q,E)] + (a+bE)`
 
-.. testcode:: SingleSpectrumTeixeiraWaterSQE
-
-    resolution=Load("irs26173_graphite002_res.nxs")
-    data=Load("irs26176_graphite002_red.nxs")
-    function="""
-    (composite=Convolution,FixResolution=false,NumDeriv=true;
-      name=TabulatedFunction,Workspace=resolution,WorkspaceIndex=0,Scaling=1,XScaling=1,ties=(Scaling=1,XScaling=1);
-      (  name=DeltaFunction,Centre=0,ties=(Centre=0);
-         name=TeixeiraWaterSQE,Centre=0,ties=(Centre=0),constraints=(DiffCoeff<3.0)
-      )
-    );
-    name=LinearBackground"""
-    # Let's fit spectrum with workspace index 5. Appropriate value of Q is picked up
-    # automatically from workspace 'data' and passed on to the fit function
-    fit_output = Fit(Function=function, InputWorkspace=data, WorkspaceIndex=5,
-                     CreateOutput=True, Output="fit", MaxIterations=100)
-    params = fit_output.OutputParameters  # table containing the optimal fit parameters
-
-    # Check some results
-    DiffCoeff = params.row(6)["Value"]
-    Tau = params.row(7)["Value"]
-    if abs(DiffCoeff-2.1)/2.1 < 0.1 and abs(Tau-1.85)/1.85 < 0.1:
-        print("Optimal parameters within 10% of expected values")
-    else:
-        print(DiffCoeff, Tau, fit_output.OutputChi2overDoF)
-
-
 **Example - Global fit to a synthetic signal:**
 
 The signal is modeled by the model of the previous example.
@@ -191,10 +164,6 @@ The goal is to find out the residence time and the jump length
         print("Error. Obtained Tau=",Tau," instead of",tau)
 
 Output:
-
-.. testoutput:: SingleSpectrumTeixeiraWaterSQE
-
-    Optimal parameters within 10% of expected values
 
 .. testoutput:: ExampleTeixeiraWaterSQE
 

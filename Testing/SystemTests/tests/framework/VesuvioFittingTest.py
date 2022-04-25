@@ -91,6 +91,9 @@ class VesuvioFittingTest(systemtesting.MantidSystemTest):
         self.disableChecking.append('SpectraMap')
         return "fit_Workspace","VesuvioFittingTest.nxs"
 
+    def skipTests(self):
+        return True
+
 #------------------------------------------------------------------------------------------------------------------
 
 

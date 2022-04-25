@@ -164,6 +164,9 @@ class POLDIDataAnalysisTestSiPawley(POLDIDataAnalysisTestSi):
         self.assertLessThan(np.abs(a_err), 5.0e-5)
         self.assertLessThan(np.abs(a_val - 5.4311946) / a_err, 1.5)
 
+    def skipTests(self):
+        return True
+
 
 class POLDIDataAnalysisEmptyFile(systemtesting.MantidSystemTest):
     """This test runs PoldiDataAnalysis with Si data, using an empty workspace."""
