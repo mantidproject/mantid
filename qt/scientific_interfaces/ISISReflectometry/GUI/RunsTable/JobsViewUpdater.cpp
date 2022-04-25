@@ -37,12 +37,7 @@ MantidWidgets::Batch::Cell qRangeCellOrDefault(RangeInQ const &qRangeInput, Rang
 
 boost::optional<size_t> incrementIndex(const Row &row) {
   auto lookupIndex = row.lookupIndex();
-  if (lookupIndex.is_initialized()) {
-    lookupIndex = lookupIndex.get() + 1;
-  } else {
-    lookupIndex = boost::none;
-  }
-  return lookupIndex;
+  return lookupIndex.is_initialized() ? boost::optional<size_t>(lookupIndex.get() + 1) : boost::none;
 }
 
 std::vector<MantidQt::MantidWidgets::Batch::Cell> cellsFromRow(Row const &row, boost::optional<int> precision) {

@@ -33,8 +33,6 @@ public:
 private:
   MantidQt::MantidWidgets::Batch::IJobTreeView &m_view;
   boost::optional<int> m_precision;
-
-  boost::optional<size_t> incrementIndex(const Row &row);
 };
 } // namespace ISISReflectometry
 } // namespace CustomInterfaces
