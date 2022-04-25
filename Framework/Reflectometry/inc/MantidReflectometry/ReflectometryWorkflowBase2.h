@@ -22,6 +22,8 @@ namespace Reflectometry {
  */
 class MANTID_REFLECTOMETRY_DLL ReflectometryWorkflowBase2 : public API::DataProcessorAlgorithm {
 protected:
+  /// Initialize the analysis properties
+  void initAnalysisProperties();
   /// Initialize reduction-type properties
   void initReductionProperties();
   /// Initialize monitor properties
