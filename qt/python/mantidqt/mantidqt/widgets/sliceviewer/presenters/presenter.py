@@ -347,7 +347,7 @@ class SliceViewer(ObservingPresenter, SliceViewerBasePresenter):
         else:
             self._cutviewer_presenter.hide_view()
             for tool in [ToolItemText.REGIONSELECTION, ToolItemText.LINEPLOTS]:
-                data_view.deactivate_and_disable_tool(tool)
+                data_view.enable_tool_button(tool)
             if self.get_sliceinfo().can_support_nonorthogonal_axes():
                 data_view.enable_tool_button(ToolItemText.NONORTHOGONAL_AXES)
 
