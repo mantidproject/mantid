@@ -276,19 +276,17 @@ class SuperplotPresenterTest(unittest.TestCase):
         mode = self.presenter.SPECTRUM_MODE_TEXT
         color = "color"
         ws = mock.Mock()
-        ws.getSpectrumNumbers.return_value = [99]
         self.m_mtd.__getitem__.return_value = ws
         kwargs = self.presenter._fill_plot_kwargs(ws_name, spectrum, normalise,
                                                   mode, color)
-        ws.getSpectrumNumbers.assert_called_once()
         self.assertDictEqual(kwargs, {"axis": MantidAxType.SPECTRUM,
-                                      "specNum": 99,
+                                      "wkspIndex": 0,
                                       "color": "color"})
         normalise = True
         kwargs = self.presenter._fill_plot_kwargs(ws_name, spectrum, normalise,
                                                   mode, color)
         self.assertDictEqual(kwargs, {"axis": MantidAxType.SPECTRUM,
-                                      "specNum": 99,
+                                      "wkspIndex": 0,
                                       "color": "color",
                                       "normalise_spectrum": True})
         mode = self.presenter.BIN_MODE_TEXT
