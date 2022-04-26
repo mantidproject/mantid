@@ -126,8 +126,9 @@ public:
 
   void testSettingsChangedResetsStateInView() {
     auto presenter = makePresenter(m_view, oneGroupWithARowModel());
-    expectGroupStateCleared();
-    expectRowStateCleared();
+    EXPECT_CALL(m_jobs, setCellsAt(RowLocation({0, 0}), rowCells(Colour::DEFAULT))).Times(1);
+    EXPECT_CALL(m_jobs, setCellsAt(RowLocation({0}), rowCells(Colour::DEFAULT))).Times(1);
+    EXPECT_CALL(m_jobs, setCellsAt(RowLocation({0, 0}), rowCellsWithSomeValues())).Times(1);
     presenter.settingsChanged();
     verifyAndClearExpectations();
   }
@@ -213,21 +214,21 @@ public:
     verifyAndClearExpectations();
   }
 
-  void testNotifyRowOutputsChangedForInputQRange() {
+  void testNotifyRowModelChangedForInputQRange() {
     auto presenter = makePresenter(m_view, oneGroupWithARowWithInputQRangeModel());
     EXPECT_CALL(m_jobs, setCellsAt(RowLocation({0, 0}), rowCellsWithValues(Colour::DEFAULT))).Times(1);
-    presenter.notifyRowOutputsChanged();
+    presenter.notifyRowModelChanged();
     verifyAndClearExpectations();
   }
 
-  void testNotifyRowOutputsChangedForOutputQRange() {
+  void testNotifyRowModelChangedForOutputQRange() {
     auto presenter = makePresenter(m_view, oneGroupWithARowWithOutputQRangeModel());
     auto cells = rowCellsWithValues(Colour::DEFAULT);
     cells[4].setOutput();
     cells[5].setOutput();
     cells[6].setOutput();
     EXPECT_CALL(m_jobs, setCellsAt(RowLocation({0, 0}), cells)).Times(1);
-    presenter.notifyRowOutputsChanged();
+    presenter.notifyRowModelChanged();
     verifyAndClearExpectations();
   }
 
@@ -247,8 +248,8 @@ public:
 
 private:
   std::vector<Cell> rowCells(const char *colour) {
-    auto cells =
-        std::vector<Cell>{Cell(""), Cell(""), Cell(""), Cell(""), Cell(""), Cell(""), Cell(""), Cell(""), Cell("")};
+    auto cells = std::vector<Cell>{Cell(""), Cell(""), Cell(""), Cell(""), Cell(""),
+                                   Cell(""), Cell(""), Cell(""), Cell(""), Cell("")};
     for (auto &cell : cells)
       cell.setBackgroundColor(colour);
     return cells;
@@ -257,18 +258,23 @@ private:
   std::vector<Cell> rowCellsWithValues(const char *colour) {
     auto cells =
         std::vector<Cell>{Cell("12345"),    Cell("0.500000"), Cell("Trans A"), Cell("Trans B"), Cell("0.500000"),
-                          Cell("0.900000"), Cell("0.010000"), Cell(""),        Cell("")};
+                          Cell("0.900000"), Cell("0.010000"), Cell(""),        Cell(""),        Cell("")};
     for (auto &cell : cells)
       cell.setBackgroundColor(colour);
     return cells;
   }
 
+  std::vector<Cell> rowCellsWithSomeValues() {
+    return std::vector<Cell>{Cell("12345"), Cell("0.500000"), Cell("Trans A"), Cell("Trans B"), Cell(""),
+                             Cell(""),      Cell(""),         Cell(""),        Cell(""),        Cell("")};
+  }
+
   void expectGroupStateCleared() {
-    EXPECT_CALL(m_jobs, setCellsAt(RowLocation({0}), rowCells(Colour::DEFAULT))).Times(1);
+    EXPECT_CALL(m_jobs, setCellsAt(RowLocation({0}), rowCells(Colour::DEFAULT))).Times(AtLeast(1));
   }
 
   void expectRowStateCleared() {
-    EXPECT_CALL(m_jobs, setCellsAt(RowLocation({0, 0}), rowCells(Colour::DEFAULT))).Times(1);
+    EXPECT_CALL(m_jobs, setCellsAt(RowLocation({0, 0}), rowCells(Colour::DEFAULT))).Times(AtLeast(1));
   }
 
   void expectRowStateInvalid() {

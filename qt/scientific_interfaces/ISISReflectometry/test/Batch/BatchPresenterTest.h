@@ -338,8 +338,7 @@ public:
     auto row = makeRow();
     EXPECT_CALL(*m_jobManager, getRunsTableItem(algorithm)).Times(1).WillOnce(Return(row));
     EXPECT_CALL(*m_jobManager, algorithmStarted(algorithm)).Times(1);
-    EXPECT_CALL(*m_runsPresenter, notifyRowOutputsChanged(_)).Times(1);
-    EXPECT_CALL(*m_runsPresenter, notifyRowStateChanged(_)).Times(1);
+    EXPECT_CALL(*m_runsPresenter, notifyRowModelChanged(_)).Times(1);
     presenter->notifyAlgorithmStarted(algorithm);
     verifyAndClear();
   }
@@ -350,8 +349,7 @@ public:
     auto row = makeRow();
     EXPECT_CALL(*m_jobManager, getRunsTableItem(algorithm)).Times(1).WillOnce(Return(row));
     EXPECT_CALL(*m_jobManager, algorithmComplete(algorithm)).Times(1);
-    EXPECT_CALL(*m_runsPresenter, notifyRowOutputsChanged(_)).Times(1);
-    EXPECT_CALL(*m_runsPresenter, notifyRowStateChanged(_)).Times(1);
+    EXPECT_CALL(*m_runsPresenter, notifyRowModelChanged(_)).Times(1);
     presenter->notifyAlgorithmComplete(algorithm);
     verifyAndClear();
   }
@@ -361,8 +359,7 @@ public:
     IConfiguredAlgorithm_sptr algorithm = std::make_shared<MockBatchJobAlgorithm>();
     EXPECT_CALL(*m_jobManager, getRunsTableItem(algorithm)).Times(1).WillOnce(Return(boost::none));
     EXPECT_CALL(*m_jobManager, algorithmStarted(_)).Times(0);
-    EXPECT_CALL(*m_runsPresenter, notifyRowOutputsChanged(_)).Times(0);
-    EXPECT_CALL(*m_runsPresenter, notifyRowStateChanged(_)).Times(0);
+    EXPECT_CALL(*m_runsPresenter, notifyRowModelChanged(_)).Times(0);
     presenter->notifyAlgorithmStarted(algorithm);
     verifyAndClear();
   }
@@ -372,8 +369,7 @@ public:
     IConfiguredAlgorithm_sptr algorithm = std::make_shared<MockBatchJobAlgorithm>();
     EXPECT_CALL(*m_jobManager, getRunsTableItem(algorithm)).Times(1).WillOnce(Return(boost::none));
     EXPECT_CALL(*m_jobManager, algorithmComplete(_)).Times(0);
-    EXPECT_CALL(*m_runsPresenter, notifyRowOutputsChanged(_)).Times(0);
-    EXPECT_CALL(*m_runsPresenter, notifyRowStateChanged(_)).Times(0);
+    EXPECT_CALL(*m_runsPresenter, notifyRowModelChanged(_)).Times(0);
     presenter->notifyAlgorithmComplete(algorithm);
     verifyAndClear();
   }
@@ -383,8 +379,7 @@ public:
     IConfiguredAlgorithm_sptr algorithm = std::make_shared<MockBatchJobAlgorithm>();
     EXPECT_CALL(*m_jobManager, getRunsTableItem(algorithm)).Times(1).WillOnce(Return(boost::none));
     EXPECT_CALL(*m_jobManager, algorithmError(_, _)).Times(0);
-    EXPECT_CALL(*m_runsPresenter, notifyRowOutputsChanged(_)).Times(0);
-    EXPECT_CALL(*m_runsPresenter, notifyRowStateChanged(_)).Times(0);
+    EXPECT_CALL(*m_runsPresenter, notifyRowModelChanged(_)).Times(0);
     presenter->notifyAlgorithmError(algorithm, "");
     verifyAndClear();
   }
@@ -423,8 +418,7 @@ public:
     auto row = makeRow();
     EXPECT_CALL(*m_jobManager, getRunsTableItem(algorithm)).Times(1).WillOnce(Return(row));
     EXPECT_CALL(*m_jobManager, algorithmError(algorithm, errorMessage)).Times(1);
-    EXPECT_CALL(*m_runsPresenter, notifyRowStateChanged(_)).Times(1);
-    EXPECT_CALL(*m_runsPresenter, notifyRowOutputsChanged(_)).Times(1);
+    EXPECT_CALL(*m_runsPresenter, notifyRowModelChanged(_)).Times(1);
     presenter->notifyAlgorithmError(algorithm, errorMessage);
     verifyAndClear();
   }
@@ -439,8 +433,7 @@ public:
 
   void testRowStateUpdatedWhenWorkspaceDeleted() {
     auto presenter = makePresenter(makeModel());
-    EXPECT_CALL(*m_runsPresenter, notifyRowOutputsChanged(_)).Times(1);
-    EXPECT_CALL(*m_runsPresenter, notifyRowStateChanged(_)).Times(1);
+    EXPECT_CALL(*m_runsPresenter, notifyRowModelChanged(_)).Times(1);
     presenter->postDeleteHandle("");
     verifyAndClear();
   }
@@ -456,8 +449,7 @@ public:
 
   void testRowStateUpdatedWhenWorkspaceRenamed() {
     auto presenter = makePresenter(makeModel());
-    EXPECT_CALL(*m_runsPresenter, notifyRowOutputsChanged(_)).Times(1);
-    EXPECT_CALL(*m_runsPresenter, notifyRowStateChanged(_)).Times(1);
+    EXPECT_CALL(*m_runsPresenter, notifyRowModelChanged(_)).Times(1);
     presenter->renameHandle("", "");
     verifyAndClear();
   }
@@ -471,8 +463,7 @@ public:
 
   void testRowStateUpdatedWhenWorkspacesCleared() {
     auto presenter = makePresenter(makeModel());
-    EXPECT_CALL(*m_runsPresenter, notifyRowOutputsChanged()).Times(1);
-    EXPECT_CALL(*m_runsPresenter, notifyRowStateChanged()).Times(1);
+    EXPECT_CALL(*m_runsPresenter, notifyRowModelChanged()).Times(1);
     presenter->clearADSHandle();
     verifyAndClear();
   }
