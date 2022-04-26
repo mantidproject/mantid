@@ -517,17 +517,13 @@ void SmoothNeighbours::exec() {
   else
     findNeighboursUbiqutious();
 
-  EventWorkspace_sptr wsEvent = std::dynamic_pointer_cast<EventWorkspace>(inWS);
+  auto wsEvent = std::dynamic_pointer_cast<EventWorkspace>(inWS);
   if (wsEvent)
     wsEvent->sortAll(TOF_SORT, m_progress.get());
-
-  if (!wsEvent || !PreserveEvents)
-    this->execWorkspace2D();
-  else if (wsEvent)
+  if (wsEvent && PreserveEvents)
     this->execEvent(wsEvent);
   else
-    throw std::runtime_error("This algorithm requires a Workspace2D or "
-                             "EventWorkspace as its input.");
+    this->execWorkspace2D();
 }
 
 //--------------------------------------------------------------------------------------------
