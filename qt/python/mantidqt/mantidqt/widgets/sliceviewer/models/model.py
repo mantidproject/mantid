@@ -491,7 +491,7 @@ class SliceViewerModel(SliceViewerBaseModel):
                 try:
                     expt_info = ws.getExperimentInfo(0)
                     proj_matrix = np.array(expt_info.run().get(PROJ_MATRIX_LOG_NAME).value, dtype=float).reshape(3, 3)
-                except (AttributeError, KeyError):  # run can be None so no .get()
+                except (AttributeError, KeyError, ValueError):  # run can be None so no .get()
                     # assume orthogonal projection if no log exists (i.e. proj_matrix is identity)
                     pass
             return proj_matrix
