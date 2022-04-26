@@ -326,11 +326,7 @@ void SmoothNeighbours::findNeighboursUbiqutious() {
   outWI = 0;
   int sum = getProperty("SumNumberOfNeighbours");
   std::shared_ptr<const Geometry::IComponent> parent, neighbParent, grandparent, neighbGParent;
-  auto used = new bool[inWS->getNumberHistograms()];
-  if (sum > 1) {
-    for (size_t wi = 0; wi < inWS->getNumberHistograms(); wi++)
-      used[wi] = false;
-  }
+  std::vector<bool> used(inWS->getNumberHistograms(), false);
   const auto &detectorInfo = inWS->detectorInfo();
   for (size_t wi = 0; wi < inWS->getNumberHistograms(); wi++) {
     if (sum > 1)
@@ -419,8 +415,6 @@ void SmoothNeighbours::findNeighboursUbiqutious() {
 
     m_progress->report("Finding Neighbours");
   } // each workspace index
-
-  delete[] used;
 }
 
 /**
