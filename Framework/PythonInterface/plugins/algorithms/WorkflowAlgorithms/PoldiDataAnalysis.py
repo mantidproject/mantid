@@ -44,7 +44,11 @@ class PoldiDataAnalysis(PythonAlgorithm):
         }
 
         self._boundedParameters = {
-            "AsymmetricPearsonVII": ['LeftShape', 'RightShape']
+            "AsymmetricPearsonVII": ['LeftShape', 'RightShape'],
+            'Gaussian': [],
+            'Lorentzian': [],
+            'PseudoVoigt': [],
+            'Voigt': []
         }
 
         self.declareProperty(WorkspaceProperty(name="InputWorkspace", defaultValue="", direction=Direction.Input),
@@ -83,8 +87,9 @@ class PoldiDataAnalysis(PythonAlgorithm):
 
         self.declareProperty("BoundProfileParameters", True, direction=Direction.Input,
                              doc=('If this option is activated, certain parameters will be bound to a specific range '
-                                  'of values for all peaks. Currently it is implemented for the "LeftShape" and "RightShape" '
-                                  'parameters of the Asymmetric Pearson VII function.'))
+                                  'of values for all peaks. It is implemented for the "LeftShape" and "RightShape" '
+                                  'parameters of the asymmetric Pearson VII function, which are set to be bound to '
+                                  'a [0, 20] range.'))
 
         self.declareProperty("PawleyFit", False, direction=Direction.Input,
                              doc='Should the 2D-fit determine lattice parameters?')
@@ -120,7 +125,6 @@ class PoldiDataAnalysis(PythonAlgorithm):
         self.useBoundedParameters = self.getProperty("BoundProfileParameters").value
         self.maximumRelativeFwhm = self.getProperty("MaximumRelativeFwhm").value
         self.outputIntegratedIntensities = self.getProperty("OutputIntegratedIntensities").value
-        print('PROFILE FUNCTION', self.profileFunction)
 
         self.globalParameters = ''
         if self.useGlobalParameters:
@@ -129,7 +133,6 @@ class PoldiDataAnalysis(PythonAlgorithm):
         self.boundedParameters = ''
         if self.useBoundedParameters:
             self.boundedParameters = ','.join(self._boundedParameters[self.profileFunction])
-            print('PROFILE FUNCTION2:', self.boundedParameters)
 
         if not self.workspaceHasCounts(self.inputWorkspace):
             raise RuntimeError("Aborting analysis since workspace " + self.baseName + " does not contain any counts.")

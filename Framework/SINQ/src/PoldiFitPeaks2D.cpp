@@ -412,9 +412,10 @@ Poldi2DFunction_sptr PoldiFitPeaks2D::getFunctionFromPeakCollection(const PoldiP
     poldi2DFunction->addTies(ties);
   }
 
+  // Only use bounds for independent peaks.
   std::string bounds = getUserSpecifiedBounds(poldi2DFunction);
   if (!bounds.empty()) {
-    poldi2DFunction->addTies(bounds);
+    poldi2DFunction->addConstraints(bounds);
   }
 
   return poldi2DFunction;
@@ -649,7 +650,6 @@ std::string PoldiFitPeaks2D::getUserSpecifiedTies(const IFunction_sptr &poldiFn)
     }
 
     if (!tieComponents.empty()) {
-      std::cout << "LOOK HERE\n" << boost::algorithm::join(tieComponents, ",") << "Over\n";
       return boost::algorithm::join(tieComponents, ",");
     }
   }
@@ -693,14 +693,9 @@ std::string PoldiFitPeaks2D::getUserSpecifiedBounds(const IFunction_sptr &poldiF
         case 0:
           g_log.warning("Function does not have a parameter called '" + boundedParameter + "', ignoring.");
           break;
-        case 1:
-          g_log.warning("There is only one peak, no ties necessary.");
-          break;
         default: {
-          std::string reference = matchedParameters.front();
-
-          for (auto par = matchedParameters.begin() + 1; par != matchedParameters.end(); ++par) {
-            boundedComponents.emplace_back(*par + "=" + reference);
+          for (auto par = matchedParameters.begin(); par != matchedParameters.end(); ++par) {
+            boundedComponents.emplace_back("1.0<=" + *par + "<=20.0");
           }
           break;
         }
@@ -709,7 +704,7 @@ std::string PoldiFitPeaks2D::getUserSpecifiedBounds(const IFunction_sptr &poldiF
     }
 
     if (!boundedComponents.empty()) {
-      std::cout << "LOOK HERE\n" << boost::algorithm::join(boundedComponents, ",") << "Over\n";
+      std::cout << "BOUNDED: " << boost::algorithm::join(boundedComponents, ",") << "\n";
       return boost::algorithm::join(boundedComponents, ",");
     }
   }
@@ -1153,7 +1148,7 @@ void PoldiFitPeaks2D::init() {
   declareProperty("BoundedParameters", "",
                   "Comma-separated list of parameter "
                   "names that will will be bound to a specific "
-                  "range of values for all peaks.");
+                  "range of values for all peaks, is ignored when PawleyFit is selected.");
 
   declareProperty("PawleyFit", false,
                   "Instead of refining individual peaks, "
