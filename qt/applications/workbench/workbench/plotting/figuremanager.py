@@ -242,9 +242,9 @@ class FigureManagerWorkbench(FigureManagerBase, QObject):
         cs = canvas.sizeHint()
         sbs = self.window.statusBar().sizeHint()
         self._status_and_tool_height = tbs_height + sbs.height()
-
         height = cs.height() + self._status_and_tool_height
         self.window.resize(cs.width(), height)
+
         self.fit_browser = FitPropertyBrowser(canvas, ToolbarStateManager(self.toolbar))
         self.fit_browser.closing.connect(self.handle_fit_browser_close)
         self.window.setCentralWidget(canvas)
