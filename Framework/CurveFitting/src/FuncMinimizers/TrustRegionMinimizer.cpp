@@ -100,8 +100,12 @@ void TrustRegionMinimizer::evalJ(const DoubleFortranVector &x, DoubleFortranMatr
   if (J.len1() != m || J.len2() != n) {
     J.allocate(m, n);
   }
-  m_J.setJ(&getGSLMatrixView(J.mutator()).matrix);
+
+  DoubleFortranMatrix J_tr(J.tr());
+  m_J.setJ(&getGSLMatrixView(J_tr.mutator()).matrix);
   m_function->functionDeriv(domain, m_J);
+  J = J_tr.tr();
+
   for (int i = 1; i <= m; ++i) {
     double w = values.getFitWeight(i - 1);
     for (int j = 1; j <= n; ++j) {

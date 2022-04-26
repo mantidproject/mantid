@@ -46,8 +46,15 @@ public:
   /// Index operator
   ElementConstType operator()(int i, int j) const;
   ElementRefType operator()(int i, int j);
+  /// Assignment operator - Matrix Class
+  FortranMatrix<MatrixClass> &operator=(const EigenMatrix m);
+  /// Assignment operator - Complex Matrix Class
+  FortranMatrix<MatrixClass> &operator=(const ComplexMatrix m);
+
   /// Move the data to a new matrix of MatrixClass
   MatrixClass moveToBaseMatrix();
+  /// copy and transpose the matrix
+  FortranMatrix<MatrixClass> tr() const;
 
 private:
   /// Calculate the size (1D) of a matrix First
@@ -132,6 +139,33 @@ template <class MatrixClass> int FortranMatrix<MatrixClass>::len1() const { retu
 
 /// Get the size along the second dimension as an int.
 template <class MatrixClass> int FortranMatrix<MatrixClass>::len2() const { return static_cast<int>(this->size2()); }
+
+/// Copy matrix, transpose, then return transposed copy.
+template <class MatrixClass> FortranMatrix<MatrixClass> FortranMatrix<MatrixClass>::tr() const {
+  FortranMatrix<MatrixClass> res;
+  EigenMatrix res_m;
+  res_m = inspector().transpose();
+  res = res_m;
+  return res;
+}
+
+/// Assignment operator - Matrix Class
+template <class MatrixClass> FortranMatrix<MatrixClass> &FortranMatrix<MatrixClass>::operator=(const EigenMatrix m) {
+  this->resize(m.size1(), m.size2());
+  for (size_t i = 0; i < size1(); i++) {
+    for (size_t j = 0; j < size2(); j++) {
+      this->operator()(i, j) = m.get(i, j);
+    }
+  }
+  return *this;
+}
+
+/// Assignment operator - Complex Matrix Class
+template <class MatrixClass> FortranMatrix<MatrixClass> &FortranMatrix<MatrixClass>::operator=(const ComplexMatrix m) {
+  m.resize(m.size1(), m.size2());
+  m_matrix = m.inspector();
+  return *this;
+}
 
 } // namespace CurveFitting
 } // namespace Mantid
