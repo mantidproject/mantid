@@ -1,0 +1,1 @@
+- Fix a bug where Mantid could hang when running multiple python algorithms simultaneously, e.g. when running live data and processing a batch at the same time.
