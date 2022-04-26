@@ -70,15 +70,17 @@ void LoadILLSALSA::exec() {
   try {
     H5::DataSet detectorDataset = h5file.openDataSet("entry0/data");
     detectorDataset.close();
-  } catch (...) {
     fileType = OLD;
+  } catch (...) {
+    fileType = NONE;
   }
 
   try {
     H5::DataSet detectorDataset = h5file.openDataSet("entry0/data_scan");
     detectorDataset.close();
-  } catch (...) {
     fileType = NEW;
+  } catch (...) {
+    fileType = NONE;
   }
 
   switch (fileType) {
