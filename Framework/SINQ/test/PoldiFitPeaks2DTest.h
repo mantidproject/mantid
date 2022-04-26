@@ -266,6 +266,48 @@ public:
     TS_ASSERT(ties.empty());
   }
 
+  void testGetUserSpecifiedBounds() {
+    TestablePoldiFitPeaks2D spectrumCalculator;
+    spectrumCalculator.initialize();
+    spectrumCalculator.setProperty("PeakProfileFunction", "AsymmetricPearsonVII");
+
+    // Create a function with some peaks
+    PoldiPeakCollection_sptr peaks = PoldiPeakCollectionHelpers::createPoldiPeakCollectionNormalized();
+    peaks->setProfileFunctionName("AsymmetricPearsonVII");
+    std::shared_ptr<Poldi2DFunction> poldi2DFunction = spectrumCalculator.getFunctionFromPeakCollection(peaks);
+
+    // Bouns "LeftShape" and "RightShape" to a [1, 20] range
+    spectrumCalculator.setProperty("BoundedParameters", "LeftShape,RightShape");
+    std::string bounds = spectrumCalculator.getUserSpecifiedBounds(poldi2DFunction);
+    bounds = spectrumCalculator.getUserSpecifiedBounds(poldi2DFunction);
+
+    TS_ASSERT_EQUALS(bounds, "1.0<=f0.LeftShape<=20.0,1.0<=f1.LeftShape<=20.0,"
+                             "1.0<=f2.LeftShape<=20.0,1.0<=f3.LeftShape<=20.0,"
+                             "1.0<=f0.RightShape<=20.0,1.0<=f1.RightShape<=20.0,"
+                             "1.0<=f2.RightShape<=20.0,1.0<=f3.RightShape<=20.0");
+
+    // Empty
+    spectrumCalculator.setProperty("BoundedParameters", "");
+    bounds = spectrumCalculator.getUserSpecifiedBounds(poldi2DFunction);
+    TS_ASSERT(bounds.empty());
+
+    // Invalid name
+    spectrumCalculator.setProperty("BoundedParameters", "Invalid");
+    bounds = spectrumCalculator.getUserSpecifiedBounds(poldi2DFunction);
+    TS_ASSERT(bounds.empty());
+
+    // Valid and invalid
+    spectrumCalculator.setProperty("BoundedParameters", "LeftShape,Invalid");
+    bounds = spectrumCalculator.getUserSpecifiedBounds(poldi2DFunction);
+    TS_ASSERT_EQUALS(bounds, "1.0<=f0.LeftShape<=20.0,1.0<=f1.LeftShape<=20.0,"
+                             "1.0<=f2.LeftShape<=20.0,1.0<=f3.LeftShape<=20.0");
+
+    // Several empty
+    spectrumCalculator.setProperty("BoundedParameters", ",,,,");
+    bounds = spectrumCalculator.getUserSpecifiedBounds(poldi2DFunction);
+    TS_ASSERT(bounds.empty());
+  }
+
   void testGetPeakCollectionFromFunction() {
     TestablePoldiFitPeaks2D spectrumCalculator;
     spectrumCalculator.initialize();
