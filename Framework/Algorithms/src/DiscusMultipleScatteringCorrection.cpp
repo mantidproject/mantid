@@ -1143,14 +1143,9 @@ std::tuple<bool, std::vector<double>> DiscusMultipleScatteringCorrection::scatte
     const double kinc, const std::vector<double> &wValues, const Kernel::V3D &detPos, bool specialSingleScatterCalc) {
   double weight = 1;
   double numberDensity = m_sampleShape->material().numberDensityEffective();
-  // if scale up scatteringXSection by 100*numberDensity then may not need
-  // sigma_total any more but leave it alone now to align with original code
 
-  auto [sigma_total, scatteringXSection] = new_vector(m_sampleShape->material(), kinc, specialSingleScatterCalc);
-
-  double vmu = 100 * numberDensity * sigma_total;
   auto track = start_point(rng);
-  updateWeightAndPosition(track, weight, kinc, rng);
+  updateWeightAndPosition(track, weight, kinc, rng, specialSingleScatterCalc);
 
   auto currentInvPOfQ = invPOfQ;
   double k = kinc;
@@ -1174,8 +1169,7 @@ std::tuple<bool, std::vector<double>> DiscusMultipleScatteringCorrection::scatte
     if (nlinks == 0) {
       return {false, {0.}};
     }
-    std::tie(sigma_total, scatteringXSection) = new_vector(m_sampleShape->material(), k, specialSingleScatterCalc);
-    updateWeightAndPosition(track, weight, k, rng);
+    updateWeightAndPosition(track, weight, k, rng, specialSingleScatterCalc);
   }
 
   Kernel::V3D directionToDetector = detPos - track.startPoint();
@@ -1387,52 +1381,55 @@ Geometry::Track DiscusMultipleScatteringCorrection::start_point(Kernel::PseudoRa
  * as described in Mancinelli paper
  * @param track A track defining the current trajectory
  * @param weight The weight for the current path that is about to be updated
- * @param vmu The total attenuation coefficient
- * @param sigma_total The total cross section (scattering + absorption)
+ * @param k The wavevector of the track
  * @param rng Random number generator
+ * @param specialSingleScatterCalc Boolean indicating whether special single
+ * scatter calculation should be performed
  */
 
-int DiscusMultipleScatteringCorrection::updateWeightAndPosition(Geometry::Track &track, double &weight, const double k,
-                                                                Kernel::PseudoRandomNumberGenerator &rng) {
+std::string DiscusMultipleScatteringCorrection::updateWeightAndPosition(Geometry::Track &track, double &weight,
+                                                                        const double k,
+                                                                        Kernel::PseudoRandomNumberGenerator &rng,
+                                                                        bool specialSingleScatterCalc) {
   // work out maximum distance to next scatter point dl
   // At the moment this doesn't cope if sample shape is concave eg if track has more than one segment inside the
   // sample with segment outside sample in between
   double totalMuL = 0.;
-  std::vector<double> dls, muLs, vmus, sigmaTotals;
+  std::vector<double> muLs, vmus;
   std::vector<std::string> compIDs;
-  double dl = 0.;
+  double newWeight = 0.;
   for (auto it = track.cbegin(); it != track.cend(); it++) {
     const double length = it->distInsideObject;
     const auto &segObj = *(it->object);
-    auto [sigma_total, scatteringXSection] = new_vector(segObj.material(), k, false);
+    auto [sigma_total, scatteringXSection] = new_vector(segObj.material(), k, specialSingleScatterCalc);
     double vmu = 100 * segObj.material().numberDensityEffective() * sigma_total;
     vmus.push_back(vmu);
-    sigmaTotals.push_back(sigma_total);
     double muL = length * vmu;
+    muLs.push_back(muL);
     totalMuL += muL;
-    muLs.push_back(totalMuL);
-    dls.push_back(length);
     compIDs.push_back(segObj.id());
+    double b4 = (1.0 - exp(-muL));
+    newWeight += b4 / sigma_total;
   }
-
-  double b4 = (1.0 - exp(-totalMuL));
-  const double muL = -log(1 - rng.nextValue() * b4);
-  auto it = std::lower_bound(muLs.begin(), muLs.end(), muL);
-  auto componentIndex = std::distance(muLs.begin(), it);
-  double newWeight = 0., vl = 0.;
-  for (size_t i = 0; i < componentIndex; i++) {
-    b4 = (1.0 - exp(-muLs[i]));
-    newWeight += b4 / sigmaTotals[i];
-    vl += dls[i];
-  }
-  const double partialMuL = componentIndex == 0 ? muL : muL - muLs[componentIndex - 1];
-  vl += partialMuL / vmus[componentIndex];
-  b4 = (1.0 - exp(-muLs[componentIndex]));
-  newWeight += b4 / sigmaTotals[componentIndex];
   weight = weight * newWeight;
+
+  // randomly sample distance travelled across a total muL and work out which component this sits in
+  double b4Overall = (1.0 - exp(-totalMuL));
+  double muL = -log(1 - rng.nextValue() * b4Overall);
+  double vl = 0.;
+  std::string compIDContainingScatter;
+  for (size_t i = 0; i < track.count(); i++) {
+    if (muL - muLs[i] > 0) {
+      vl += muLs[i] / vmus[i];
+      muL = muL - muLs[i];
+    } else {
+      compIDContainingScatter = compIDs[i];
+      vl += muL / vmus[i];
+      break;
+    }
+  }
   inc_xyz(track, vl);
-  auto compID = compIDs[componentIndex];
-  return -1;
+  return compIDContainingScatter;
 }
 
 /**

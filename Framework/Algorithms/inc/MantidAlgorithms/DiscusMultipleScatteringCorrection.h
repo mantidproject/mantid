@@ -83,8 +83,8 @@ private:
   Geometry::Track start_point(Kernel::PseudoRandomNumberGenerator &rng);
   Geometry::Track generateInitialTrack(Kernel::PseudoRandomNumberGenerator &rng);
   void inc_xyz(Geometry::Track &track, double vl);
-  int updateWeightAndPosition(Geometry::Track &track, double &weight, const double k,
-                              Kernel::PseudoRandomNumberGenerator &rng);
+  std::string updateWeightAndPosition(Geometry::Track &track, double &weight, const double k,
+                                      Kernel::PseudoRandomNumberGenerator &rng, bool specialSingleScatterCalc);
   bool q_dir(Geometry::Track &track, const API::MatrixWorkspace_sptr &invPOfQ, double &k,
              const double scatteringXSection, Kernel::PseudoRandomNumberGenerator &rng, double &weight);
   void interpolateFromSparse(API::MatrixWorkspace &targetWS, const SparseWorkspace &sparseWS,
