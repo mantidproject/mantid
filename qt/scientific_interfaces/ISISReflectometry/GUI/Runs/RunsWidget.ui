@@ -88,10 +88,10 @@
             </size>
            </property>
            <property name="toolTip">
-            <string>The instrument used for the investigation to search for</string>
+            <string>The instrument used for the investigation to search for. Note: This changes the instrument globally within mantid, affecting all batches</string>
            </property>
            <property name="whatsThis">
-            <string>Specifies which instrument you're searching for data from.</string>
+            <string>Specifies which instrument you're searching for data from. This changes the instrument globally within mantid, affecting all batches.</string>
            </property>
           </widget>
          </item>
