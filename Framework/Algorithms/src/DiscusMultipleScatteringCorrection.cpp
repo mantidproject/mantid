@@ -1108,6 +1108,7 @@ std::tuple<bool, std::vector<double>, double> DiscusMultipleScatteringCorrection
       return {false, {0.}, 0};
     }
     std::tie(sigma_total, scatteringXSection) = new_vector(m_sampleShape->material(), k, specialSingleScatterCalc);
+    vmu = 100 * numberDensity * sigma_total;
     updateWeightAndPosition(track, weight, vmu, sigma_total, rng);
   }
 
@@ -1125,9 +1126,6 @@ std::tuple<bool, std::vector<double>, double> DiscusMultipleScatteringCorrection
   }
   std::vector<double> weights;
   const double dl = track.front().distInsideObject;
-  if (specialSingleScatterCalc)
-    vmu = 0;
-  const auto AT2 = exp(-dl * vmu);
   auto scatteringXSectionFull = m_sampleShape->material().totalScatterXSection();
   // Step through required overall energy transfer (w) values and work out what
   // w that means for the final scatter. There will be a single w value for elastic
@@ -1144,6 +1142,11 @@ std::tuple<bool, std::vector<double>, double> DiscusMultipleScatteringCorrection
       const double q = qVector.norm();
       const double finalW = fromWaveVector(k) - finalE;
       double SQ = Interpolate2D(m_SQWS, finalW, q);
+      std::tie(sigma_total, scatteringXSection) = new_vector(m_sampleShape->material(), kout, specialSingleScatterCalc);
+      vmu = 100 * numberDensity * sigma_total;
+      if (specialSingleScatterCalc)
+        vmu = 0;
+      const auto AT2 = exp(-dl * vmu);
       weights.emplace_back(weight * AT2 * SQ * scatteringXSectionFull / (4 * M_PI));
     } else {
       weights.emplace_back(0.);
