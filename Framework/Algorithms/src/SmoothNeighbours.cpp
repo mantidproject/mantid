@@ -40,6 +40,22 @@ namespace {
 const std::string NON_UNIFORM_GROUP = "NonUniform Detectors";
 const std::string RECTANGULAR_GROUP = "Rectangular Detectors";
 const std::string INPUT_WORKSPACE = "InputWorkspace";
+
+/// Helper struct to run a lambda on exit out of the scope the
+/// object is defined in
+struct CallOnExit {
+  using Callable = std::function<void()>;
+  CallOnExit(Callable &&callable) noexcept : m_callable(std::move(callable)) {}
+  ~CallOnExit() {
+    try {
+      m_callable();
+    } catch (...) {
+    };
+  }
+
+private:
+  Callable m_callable;
+};
 } // namespace
 
 SmoothNeighbours::SmoothNeighbours() : API::Algorithm(), m_weightedSum(std::make_unique<NullWeighting>()) {}
@@ -455,7 +471,6 @@ double SmoothNeighbours::translateToMeters(const std::string &radiusUnits, const
   return translatedRadius;
 }
 
-//--------------------------------------------------------------------------------------------
 /** Executes the algorithm
  *
  */
@@ -463,7 +478,6 @@ void SmoothNeighbours::exec() {
   m_inWS = getProperty("InputWorkspace");
 
   m_preserveEvents = getProperty("PreserveEvents");
-
   m_expandSumAllPixels = getProperty("ExpandSumAllPixels");
 
   // Use the unit type to translate the entered radius into meters.
@@ -479,6 +493,13 @@ void SmoothNeighbours::exec() {
 
   // Progress reporting, first for the sorting
   m_progress = std::make_unique<Progress>(this, 0.0, 0.2, m_inWS->getNumberHistograms());
+
+  // Clean up when we are done
+  CallOnExit resetInWSOnExit([this]() { m_inWS.reset(); });
+  CallOnExit resetNeighboursOnExit([this]() {
+    m_neighbours.clear();
+    m_neighbours.shrink_to_fit();
+  });
 
   // Run the appropriate method depending on the type of the instrument
   if (m_inWS->getInstrument()->containsRectDetectors() == Instrument::ContainsState::Full)
