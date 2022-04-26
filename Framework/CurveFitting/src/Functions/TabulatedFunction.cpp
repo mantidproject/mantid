@@ -276,7 +276,7 @@ void TabulatedFunction::loadWorkspace(const std::string &wsName) const {
   auto ws = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(wsName);
   loadWorkspace(ws);
   if (!m_workspace) {
-    throw std::runtime_error("Unable to set " + wsName + " as workspace attribute. Incorrect workspace type?");
+    throw std::runtime_error("Unable to set " + wsName + " as workspace attribute. Expected a MatrixWorkspace.");
   }
 }
 
