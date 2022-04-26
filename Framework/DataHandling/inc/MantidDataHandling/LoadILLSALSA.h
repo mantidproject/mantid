@@ -32,7 +32,7 @@ public:
   int version() const override { return 1; }
   const std::vector<std::string> seeAlso() const override { return {"LoadNexus"}; }
   /// Algorithm's category for identification
-  const std::string category() const override { return "DataHandling\\Nexus;ILL\\Diffraction"; }
+  const std::string category() const override { return "DataHandling\\Nexus;ILL\\Strain"; }
   /// Returns a confidence value that this algorithm can load a file
   int confidence(Kernel::NexusDescriptor &descriptor) const override;
 
