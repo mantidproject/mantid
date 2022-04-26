@@ -690,37 +690,6 @@ def _run_number_generator(processed_string):
         raise ValueError("Could not generate run numbers from this input: " + processed_string)
 
 
-def generate_sample_geometry(sample_details):
-    """
-    Generates the expected input for sample geometry using the SampleDetails class
-    :param sample_details: Instance of SampleDetails containing details about sample geometry and material
-    :return: A map of the sample geometry
-    """
-    return {'Shape': 'Cylinder',
-            'Height': sample_details.height(),
-            'Radius': sample_details.radius(),
-            'Center': sample_details.center()}
-
-
-def generate_sample_material(sample_details):
-    """
-    Generates the expected input for sample material using the SampleDetails class
-    :param sample_details: Instance of SampleDetails containing details about sample geometry and material
-    :return: A map of the sample material
-    """
-    material = sample_details.material_object
-    # See SetSampleMaterial for documentation on this dictionary
-    material_json = {'ChemicalFormula': material.chemical_formula}
-    if material.number_density:
-        material_json["SampleNumberDensity"] = material.number_density
-    if material.absorption_cross_section:
-        material_json["AttenuationXSection"] = material.absorption_cross_section
-    if material.scattering_cross_section:
-        material_json["ScatteringXSection"] = material.scattering_cross_section
-
-    return material_json
-
-
 def workspace_has_current(ws):
     """
     Gat whether the total charge for this run was greater than 0

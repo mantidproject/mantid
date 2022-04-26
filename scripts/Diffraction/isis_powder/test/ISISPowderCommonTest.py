@@ -633,7 +633,7 @@ class ISISPowderCommonTest(unittest.TestCase):
         sample_details = SampleDetails(height=4.0, radius=3.0,
                                        center=[0.5, 1.0, -3.2], shape='cylinder')
         # Run test
-        result = common.generate_sample_geometry(sample_details)
+        result = sample_details.generate_sample_geometry()
         # Validate result
         expected = {'Shape': 'Cylinder',
                     'Height': 4.0,
@@ -649,7 +649,7 @@ class ISISPowderCommonTest(unittest.TestCase):
         sample_details.set_material_properties(absorption_cross_section=123,
                                                scattering_cross_section=456)
         # Run test
-        result = common.generate_sample_material(sample_details)
+        result = sample_details.generate_sample_material()
         # Validate
         expected = {'ChemicalFormula': 'Si',
                     'SampleNumberDensity': 1.5,

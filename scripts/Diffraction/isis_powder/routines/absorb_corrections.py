@@ -89,8 +89,8 @@ def _calculate__cylinder_absorb_corrections(ws_to_correct, multiple_scattering, 
 
 
 def _setup_sample_for_cylinder_absorb_corrections(ws_to_correct, sample_details_obj):
-    geometry_json = common.generate_sample_geometry(sample_details_obj)
-    material_json = common.generate_sample_material(sample_details_obj)
+    geometry_json = sample_details_obj.generate_sample_geometry()
+    material_json = sample_details_obj.generate_sample_material()
     mantid.SetSample(InputWorkspace=ws_to_correct, Geometry=geometry_json, Material=material_json)
 
 

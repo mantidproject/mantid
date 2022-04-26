@@ -86,8 +86,8 @@ def generate_ts_pdf(run_number, focus_file_path, merge_banks=False, q_lims=None,
     focused_ws = mantid.ConvertUnits(InputWorkspace=focused_ws, Target="MomentumTransfer", EMode='Elastic')
 
     raw_ws = mantid.Load(Filename='POLARIS'+str(run_number))
-    sample_geometry = common.generate_sample_geometry(sample_details)
-    sample_material = common.generate_sample_material(sample_details)
+    sample_geometry = sample_details.generate_sample_geometry()
+    sample_material = sample_details.generate_sample_material()
     self_scattering_correction = mantid.TotScatCalculateSelfScattering(
         InputWorkspace=raw_ws,
         CalFileName=cal_file_name,

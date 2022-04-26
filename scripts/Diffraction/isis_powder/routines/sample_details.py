@@ -36,6 +36,8 @@ class SampleDetails(object):
         self.material_object = None
         self.container_material_object = None
         self.container_radius = None
+        self.front_thick = None
+        self.back_thick = None
 
     def is_material_set(self):
         return self.material_object is not None
@@ -75,8 +77,11 @@ class SampleDetails(object):
 
         self.container_material_object = _Material(chemical_formula=chemical_formula, number_density=number_density,
                                                    crystal_density=crystal_density)
-        if self._shape_type == "cylinder":
+        if self._shape_type.capitalize() == "Cylinder":
             self.container_radius = common.dictionary_key_helper(dictionary=kwargs, key="radius", throws=True)
+        if self._shape_type.capitalize() == "Slab":
+            self.front_thick = common.dictionary_key_helper(dictionary=kwargs, key="front_thick", throws=False)
+            self.back_thick = common.dictionary_key_helper(dictionary=kwargs, key="back_thick", throws=False)
 
     def set_material_properties(self, **kwargs):
         err_msg = "The following argument is required but was not set or passed: "
@@ -148,10 +153,28 @@ class SampleDetails(object):
         return self._shape_type
 
     def radius(self):
-        if self._shape_type == "cylinder":
+        if self._shape_type.capitalize() == "Cylinder":
             return self._shape.radius
         else:
             raise RuntimeError("Radius is not applicable for the shape type \"{}\"".format(self._shape_type))
+
+    def container_radius(self):
+        if self._shape_type.capitalize() == "Cylinder":
+            return self.container_radius
+        else:
+            raise RuntimeError("Container Radius is not applicable for the shape type \"{}\"".format(self._shape_type))
+
+    def get_front_thick(self):
+        if self._shape_type.capitalize() == "Slab":
+            return self.front_thick
+        else:
+            raise RuntimeError("Front Thick is not applicable for the shape type \"{}\"".format(self._shape_type))
+
+    def get_back_thick(self):
+        if self._shape_type.capitalize() == "Slab":
+            return self.back_thick
+        else:
+            raise RuntimeError("Back Thick is not applicable for the shape type \"{}\"".format(self._shape_type))
 
     def height(self):
         return self._shape.height
@@ -176,6 +199,67 @@ class SampleDetails(object):
             return self._shape.thickness
         else:
             raise RuntimeError("Thickness is not applicable for the shape type \"{}\"".format(self._shape_type))
+
+    def generate_sample_geometry(self):
+        """
+        Generates the expected input for sample geometry using the SampleDetails class
+        :param self: Instance of SampleDetails containing details about sample geometry and material
+        :return: A map of the sample geometry
+        """
+        if self._shape_type.capitalize() == "Slab":
+            return {'Shape': "FlatPlate",
+                    'Width': self.width(),
+                    'Height': self.height(),
+                    'Thick': self.thickness(),
+                    'Center': self.center(),
+                    'Angle': self.angle()}
+
+        elif self._shape_type.capitalize() == "Cylinder":
+            return {'Shape': self._shape_type.capitalize(),
+                    'Height': self.height(),
+                    'Radius': self.radius(),
+                    'Center': self.center()}
+
+    def generate_sample_material(self):
+        """
+        Generates the expected input for sample material using the SampleDetails class
+        :param self: Instance of SampleDetails containing details about sample geometry and material
+        :return: A map of the sample material
+        """
+
+        # See SetSampleMaterial for documentation on this dictionary
+        material_json = {'ChemicalFormula': self.material_object.chemical_formula}
+        if self.material_object.number_density:
+            material_json["SampleNumberDensity"] = self.material_object.number_density
+        if self.material_object.absorption_cross_section:
+            material_json["AttenuationXSection"] = self.material_object.absorption_cross_section
+        if self.material_object.scattering_cross_section:
+            material_json["ScatteringXSection"] = self.material_object.scattering_cross_section
+
+        return material_json
+
+    def generate_container_geometry(self):
+
+        sample_shape = self._shape_type.capitalize()
+        if sample_shape == "Slab":
+            return {'Shape': "FlatPlateHolder",
+                    'Width': self.width(),
+                    'Height': self.height(),
+                    'Thick': self.thickness(),
+                    'Center': self.center(),
+                    'Angle': self.angle(),
+                    'FrontThick': self.get_front_thick(),
+                    'BackThick': self.get_back_thick()}
+
+        elif sample_shape == "Cylinder":
+            return {'Shape': 'HollowCylinder',
+                    'Height': self.height(),
+                    'InnerRadius': self.radius(),
+                    'OuterRadius': self.container_radius,
+                    'Center': self.center()}
+
+    def generate_container_material(self):
+        return {'ChemicalFormula': self.container_material_object.chemical_formula}
 
 
 class _Material(object):

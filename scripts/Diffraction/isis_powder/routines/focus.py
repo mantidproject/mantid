@@ -63,15 +63,10 @@ def _focus_one_ws(input_workspace, run_number, instrument, perform_vanadium_norm
         if expected_filename in os.listdir(save_directory):
             input_workspace = mantid.LoadNexus(os.path.join(save_directory, expected_filename))
         else:
-            mantid.SetSample(input_workspace, Geometry={'Shape': sample_details._shape_type.capitalize(),
-                                                        'Height': sample_details.height(),
-                                                        'Radius': sample_details._shape.radius},
-                             Material={'ChemicalFormula': sample_details.material_object.chemical_formula},
-                             ContainerGeometry={'Shape': 'HollowCylinder', 'Height': sample_details.height(),
-                                                'InnerRadius': sample_details._shape.radius,
-                                                'OuterRadius': sample_details.container_radius},
-                             ContainerMaterial={'ChemicalFormula': sample_details.container_material_object.chemical_formula}
-                             )
+            mantid.SetSample(input_workspace, Geometry=sample_details.generate_sample_geometry(),
+                             Material=sample_details.generate_sample_material(),
+                             ContainerGeometry=sample_details.generate_container_geometry(),
+                             ContainerMaterial=sample_details.generate_container_material())
 
             corrections = mantid.PaalmanPingsMonteCarloAbsorption(InputWorkspace=input_workspace, Shape='Preset',
                                                                   EventsPerPoint=events_per_point)
@@ -92,8 +87,8 @@ def _focus_one_ws(input_workspace, run_number, instrument, perform_vanadium_norm
         # Set sample material if specified by the user
         if sample_details is not None:
             mantid.SetSample(InputWorkspace=input_workspace,
-                             Geometry=common.generate_sample_geometry(sample_details),
-                             Material=common.generate_sample_material(sample_details))
+                             Geometry=sample_details.generate_sample_geometry(),
+                             Material=sample_details.generate_sample_material())
     # Align
     mantid.ApplyDiffCal(InstrumentWorkspace=input_workspace,
                         CalibrationFile=run_details.offset_file_path)
