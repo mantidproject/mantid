@@ -26,9 +26,9 @@ def _catch_exceptions(func):
     return wrapper
 
 
-class MuonContextADSObserver(AnalysisDataServiceObserver):
+class MuonADSObserver(AnalysisDataServiceObserver):
     def __init__(self, delete_callback, clear_callback, replace_callback, delete_group_callback=None):
-        super(MuonContextADSObserver, self).__init__()
+        super(MuonADSObserver, self).__init__()
         self.delete_callback = delete_callback
         self.clear_callback = clear_callback
         self.replace_callback = replace_callback
