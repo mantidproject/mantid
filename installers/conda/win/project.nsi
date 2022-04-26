@@ -15,6 +15,76 @@ Unicode True
 
 Var StartMenuFolder
 
+# The name of the installer
+Name "Mantid${PACKAGE_SUFFIX}"
+
+# The file to write
+OutFile "${OUTFILE_NAME}"
+
+# The default installation directory
+InstallDir "C:\Mantid${PACKAGE_SUFFIX}Install"
+
+# The text to prompt the user to enter a directory
+DirText "This will install mantid and its components"
+
+RequestExecutionLevel user
+
+# --------------------------------------------------------------------
+# Functions and macros for checking whether Mantid is running
+Var STR_HAYSTACK
+Var STR_NEEDLE
+Var STR_CONTAINS_VAR_1
+Var STR_CONTAINS_VAR_2
+Var STR_CONTAINS_VAR_3
+Var STR_CONTAINS_VAR_4
+Var STR_RETURN_VAR
+
+Function StrContains
+  Exch $STR_NEEDLE
+  Exch 1
+  Exch $STR_HAYSTACK
+    StrCpy $STR_RETURN_VAR ""
+    StrCpy $STR_CONTAINS_VAR_1 -1
+    StrLen $STR_CONTAINS_VAR_2 $STR_NEEDLE
+    StrLen $STR_CONTAINS_VAR_4 $STR_HAYSTACK
+    loop:
+      IntOp $STR_CONTAINS_VAR_1 $STR_CONTAINS_VAR_1 + 1
+      StrCpy $STR_CONTAINS_VAR_3 $STR_HAYSTACK $STR_CONTAINS_VAR_2 $STR_CONTAINS_VAR_1
+      StrCmp $STR_CONTAINS_VAR_3 $STR_NEEDLE found
+      StrCmp $STR_CONTAINS_VAR_1 $STR_CONTAINS_VAR_4 str_contains_done
+      Goto loop
+    found:
+      StrCpy $STR_RETURN_VAR $STR_NEEDLE
+      Goto str_contains_done
+    str_contains_done:
+   Pop $STR_NEEDLE ;Prevent "invalid opcode" errors and keep the
+   Exch $STR_RETURN_VAR
+FunctionEnd
+
+!macro _StrContainsConstructor OUT NEEDLE HAYSTACK
+  Push "${HAYSTACK}"
+  Push "${NEEDLE}"
+  Call StrContains
+  Pop "${OUT}"
+!macroend
+
+!define StrContains '!insertmacro "_StrContainsConstructor"'
+
+!macro HandleRunningMantid processname processpath message
+  nsExec::ExecToStack  "wmic process where $\"name='${processname}'$\" get ExecutablePath"
+  Pop $0
+  Pop $1 ;output of ExecToStack
+  ${StrContains} $0 ${processpath} "$1"
+  StrCmp $0 "" notfound
+    MessageBox MB_OK '${message}'
+    Abort
+  notfound:
+!macroend
+
+Function in.abortIfRunning
+  !insertmacro HandleRunningMantid "pythonw.exe" "$INSTDIR" "$INSTDIR\bin\MantidWorkbench.exe appears to be running. Please shut down MantidWorkbench and try again."
+FunctionEnd
+
 # --------------------------------------------------------------------
 # Add functions needed for install and uninstall with the modern UI
 
@@ -34,6 +104,8 @@ FunctionEnd
 
 !insertmacro MUI_PAGE_WELCOME
 !insertmacro MUI_PAGE_LICENSE "${MUI_PAGE_LICENSE_PATH}"
+# Check whether Mantid is currently running before installing
+!define MUI_PAGE_CUSTOMFUNCTION_LEAVE in.abortIfRunning
 !insertmacro MUI_PAGE_DIRECTORY
 
 # Customise Start menu location
@@ -51,22 +123,7 @@ FunctionEnd
 !insertmacro MUI_LANGUAGE "English"
 
 # --------------------------------------------------------------------
-
-# The name of the installer
-Name "Mantid${PACKAGE_SUFFIX}"
-
-# The file to write
-OutFile "${OUTFILE_NAME}"
-
-# The default installation directory
-InstallDir "C:\Mantid${PACKAGE_SUFFIX}Install"
-
-# The text to prompt the user to enter a directory
-DirText "This will install mantid and its components"
-
-RequestExecutionLevel user
-
-# The stuff to install
+# Install files, shortcuts and reg keys
 Section "-Core installation"
     # Set output path to the installation directory.
     SetOutPath "$INSTDIR"
@@ -125,6 +182,7 @@ SectionEnd
 # The uninstall section
 Section "Uninstall"
     # Remove mantid itself
+    # Should we instead get the install from registry? Here $INSTDIR is wherever the uninstaller .exe is run.
     RMDir /r $INSTDIR\bin
     RMDir /r $INSTDIR\include
     RMDir /r $INSTDIR\instrument\*.*
