@@ -38,9 +38,9 @@ void IFunction1D::calcNumericalDerivative1D(Jacobian *jacobian, EvaluationMethod
     if (isActive(iP)) {
       const double val = activeParameter(iP);
       if (val == 0) {
-        step = sqrt(epsilon);
+        step = epsilon * 100.0;
       } else if (fabs(val) < 1) {
-        step = std::signbit(val) ? -1.0 * sqrt(epsilon) : sqrt(epsilon);
+        step = sqrt(epsilon);
       } else {
         step = val * sqrt(epsilon);
       }
