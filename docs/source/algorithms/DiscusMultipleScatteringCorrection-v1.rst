@@ -209,9 +209,10 @@ Usage
              Material={'NumberDensity': 0.02, 'AttenuationXSection': 0.0,
                        'CoherentXSection': 0.0, 'IncoherentXSection': 0.0, 'ScatteringXSection': 80.0})
 
-   DiscusMultipleScatteringCorrection(InputWorkspace=ws, StructureFactorWorkspace=Sofq,
-                                      OutputWorkspace="MuscatResults", NeutronPathsSingle=1000,
-                                      NeutronPathsMultiple=10000, ImportanceSampling=True)
+   results_group = DiscusMultipleScatteringCorrection(InputWorkspace=ws, StructureFactorWorkspace=Sofq,
+                                                      OutputWorkspace="MuscatResults", NeutronPathsSingle=1000,
+                                                      NeutronPathsMultiple=10000, ImportanceSampling=True)
+   # Can't index into workspace group by name (yet) so just get the members from the ADS instead
    Scatter_1_DeltaFunction = CloneWorkspace('Scatter_1')
    Scatter_2_DeltaFunction = CloneWorkspace('Scatter_2')
    DeleteWorkspace('MuscatResults')
