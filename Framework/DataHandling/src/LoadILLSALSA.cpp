@@ -103,6 +103,8 @@ void LoadILLSALSA::exec() {
   thetaDataset.close();
 
   h5file.close();
+
+  fillWorkspaceMetadata(filename);
 }
 
 /**
