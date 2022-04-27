@@ -47,9 +47,11 @@ class PelicanReductionAutoQTest(systemtesting.MantidSystemTest):
     def runTest(self):
         PelicanReduction('44464', OutputWorkspace='test', EnergyTransfer='-2,0.05,2',
                          Processing='SOFQW1-Centre', ConfigurationFile='pelican_doctest.ini')
-        self.assertTrue('test_qw1_2D' in mtd, "Expected output workspace in ADS")
-        ws = mtd['test_qw1_2D']
-        xv = ws.dataX[0]
+        self.assertTrue('test_qw1' in mtd, "Expected output workspace group in ADS")
+        wg = mtd['test_qw1']
+        index = dict([(tag, i) for i, tag in enumerate(wg.getNames())])
+        ws = wg.getItem(index['test_qw1_2D'])
+        xv = ws.dataX(0)
         self.assertDelta( xv[0], 0.0, 0.01, "Unexpected minimum Q value")
         self.assertDelta( xv[-1], 2.7, 0.01, "Unexpected maximum Q value")
 
