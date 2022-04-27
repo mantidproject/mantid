@@ -764,6 +764,8 @@ void DiscusMultipleScatteringCorrection::prepareCumulativeProbForQ(double kinc, 
 /**
  * Integrate a distribution between the supplied xmin and xmax values using trapezoid rule
  * without any extrapolation on either end of the distribution
+ * Return the integral for each x value between xmin and xmax. This is the main reason the Integration
+ * algorithm isn't used. The Integration algorithm also has some unexpected behaviour for points datasets
  * Return two vectors rather than a histogram for performance reasons and to make transposing it easier
  * @param h Histogram object containing the distribution to integrate
  * @param xmin The lower integration limit
@@ -891,6 +893,13 @@ std::tuple<double, double> DiscusMultipleScatteringCorrection::new_vector(const 
   return {sig_total, scatteringXSection};
 }
 
+/**
+ * Use importance sampling to choose a Q and w value for the scatter
+ * @param CumulativeProb The inverse of the cumulative probability distribution. Both spectra have x set to 0-1.
+ * The first spectrum has y set to Q values and the second spectrum as y set to w index values
+ * @param x A randomly chosen value between 0 and 1
+ * @return A tuple containing the sampled Q value and the index of the sampled w value in the S(Q,w) distribution
+ */
 std::tuple<double, int> DiscusMultipleScatteringCorrection::sampleQW(const MatrixWorkspace_sptr &CumulativeProb,
                                                                      double x) {
   return {interpolateSquareRoot(CumulativeProb->getSpectrum(0), x),
