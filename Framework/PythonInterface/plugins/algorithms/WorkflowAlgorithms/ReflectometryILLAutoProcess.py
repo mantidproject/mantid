@@ -835,9 +835,11 @@ class ReflectometryILLAutoProcess(DataProcessorAlgorithm):
         """
         save_path = config['defaultsave.directory']
         parameter_output = os.path.join(save_path, "{}.txt".format(mtd[ws].getName()))
-        run = mtd[ws].run() if not isinstance(mtd[ws], WorkspaceGroup) else mtd[ws][0].run()
+        is_group = isinstance(mtd[ws], WorkspaceGroup)
+        run = mtd[ws][0].run() if is_group else mtd[ws].run()
         try:
-            log_list = mtd[ws].getInstrument().getStringParameter('reduction_logs_to_save')[0]
+            wksp = mtd[ws][0] if is_group else mtd[ws]
+            log_list = wksp.getInstrument().getStringParameter('reduction_logs_to_save')[0]
         except IndexError:
             self.log().warning('A list of reduction logs to save not specified, cannot save them.')
             return
