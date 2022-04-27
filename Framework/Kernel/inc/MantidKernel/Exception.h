@@ -269,7 +269,7 @@ private:
 public:
   MisMatch(const T &, const T &, const std::string &);
   MisMatch(const MisMatch<T> &A);
-  MisMatch<T> &operator=(const MisMatch<T> &rhs);
+  MisMatch<T> &operator=(const MisMatch<T> &rhs) = delete;
 
   /// Overloaded reporting method
   const char *what() const noexcept override;
