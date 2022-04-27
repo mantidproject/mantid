@@ -68,19 +68,20 @@ void LoadILLSALSA::exec() {
   FileType fileType = NONE;
   // guess type of file
   try {
-    H5::DataSet detectorDataset = h5file.openDataSet("entry0/data");
+    H5::Group detectorDataset = h5file.openGroup("entry0/data");
     detectorDataset.close();
     fileType = OLD;
-  } catch (...) {
+  } catch (const H5::Exception &e) {
     fileType = NONE;
   }
-
-  try {
-    H5::DataSet detectorDataset = h5file.openDataSet("entry0/data_scan");
-    detectorDataset.close();
-    fileType = NEW;
-  } catch (...) {
-    fileType = NONE;
+  if (fileType == NONE) {
+    try {
+      H5::Group detectorDataset = h5file.openGroup("entry0/data_scan");
+      detectorDataset.close();
+      fileType = NEW;
+    } catch (const H5::Exception &e) {
+      fileType = NONE;
+    }
   }
 
   switch (fileType) {
