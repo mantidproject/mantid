@@ -585,7 +585,7 @@ template <typename T> void Matrix<T>::setMem(const size_t a, const size_t b) {
   if (a == m_numRows && b == m_numColumns && m_rawData != nullptr)
     return;
 
-  if (a <= 0 || b <= 0)
+  if (a == 0 || b == 0)
     return;
 
   m_numRows = a;
