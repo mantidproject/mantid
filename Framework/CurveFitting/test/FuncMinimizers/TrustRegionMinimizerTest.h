@@ -99,10 +99,10 @@ public:
 
     matmultInner(m, a);
 
-    TS_ASSERT_EQUALS(a(1, 1), 1);
-    TS_ASSERT_EQUALS(a(2, 2), 1);
-    TS_ASSERT_EQUALS(a(3, 3), 1);
-    TS_ASSERT_EQUALS(a(4, 4), 1);
+    TS_ASSERT_EQUALS(a(1, 1), 30);
+    TS_ASSERT_EQUALS(a(2, 1), 70);
+    TS_ASSERT_EQUALS(a(1, 2), 70);
+    TS_ASSERT_EQUALS(a(2, 2), 174);
   }
 
   void test_Linear() {
