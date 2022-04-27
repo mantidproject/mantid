@@ -167,7 +167,6 @@ useStlAlgorithm:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/CreateFloodWorkspac
 knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/ResetNegatives.cpp:115
 knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/ResizeRectangularDetector.cpp:74
 useStlAlgorithm:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/SampleCorrections/MCInteractionStatistics.cpp:77
-nullPointerRedundantCheck:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/SmoothNeighbours.cpp:256
 unreadVariable:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/VesuvioL1ThetaResolution.cpp:241
 useStlAlgorithm:${CMAKE_SOURCE_DIR}/Framework/API/src/Algorithm.cpp:369
 useStlAlgorithm:${CMAKE_SOURCE_DIR}/Framework/API/src/AlgorithmHistory.cpp:90

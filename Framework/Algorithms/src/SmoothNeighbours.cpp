@@ -226,6 +226,7 @@ void SmoothNeighbours::findNeighboursRectangular() {
     setWeightingStrategy("Flat", m_radius);
     m_nNeighbours = m_adjX * m_adjY - 1;
     findNeighboursUbiquitous();
+    return;
   }
 
   // Resize the vector we are setting
@@ -246,62 +247,58 @@ void SmoothNeighbours::findNeighboursRectangular() {
 
   m_outWI = 0;
   // Build a map to sort by the detectorID
-  std::vector<std::pair<int, int>> v1;
+  std::vector<std::pair<int, int>> idToIndexMap;
+  idToIndexMap.reserve(detList.size());
   for (int i = 0; i < static_cast<int>(detList.size()); i++)
-    v1.emplace_back(detList[i]->getAtXY(0, 0)->getID(), i);
+    idToIndexMap.emplace_back(detList[i]->getAtXY(0, 0)->getID(), i);
 
   // To sort in descending order
   if (sum)
-    stable_sort(v1.begin(), v1.end());
-
-  std::vector<std::pair<int, int>>::iterator Iter1;
+    stable_sort(idToIndexMap.begin(), idToIndexMap.end());
 
   // Loop through the RectangularDetector's we listed before.
-  for (Iter1 = v1.begin(); Iter1 != v1.end(); ++Iter1) {
-    int i = (*Iter1).second;
-    std::shared_ptr<RectangularDetector> det = detList[i];
-    std::string det_name = det->getName();
-    if (det) {
-      for (int j = 0; j < det->xpixels(); j += sumX) {
-        for (int k = 0; k < det->ypixels(); k += sumY) {
-          double totalWeight = 0;
-          // Neighbours and weights
-          std::vector<weightedNeighbour> neighbours;
+  for (const auto &idIndex : idToIndexMap) {
+    std::shared_ptr<RectangularDetector> det = detList[idIndex.second];
+    const std::string det_name = det->getName();
+    for (int j = 0; j < det->xpixels(); j += sumX) {
+      for (int k = 0; k < det->ypixels(); k += sumY) {
+        double totalWeight = 0;
+        // Neighbours and weights
+        std::vector<weightedNeighbour> neighbours;
 
-          for (int ix = startX; ix <= endX; ix++)
-            for (int iy = startY; iy <= endY; iy++) {
-              // Weights for corners=1; higher for center and adjacent pixels
-              double smweight = m_weightedSum->weightAt(m_adjX, ix, m_adjY, iy);
+        for (int ix = startX; ix <= endX; ix++)
+          for (int iy = startY; iy <= endY; iy++) {
+            // Weights for corners=1; higher for center and adjacent pixels
+            double smweight = m_weightedSum->weightAt(m_adjX, ix, m_adjY, iy);
 
-              // Find the pixel ID at that XY position on the rectangular
-              // detector
-              if (j + ix >= det->xpixels() - m_edge || j + ix < m_edge)
-                continue;
-              if (k + iy >= det->ypixels() - m_edge || k + iy < m_edge)
-                continue;
-              int pixelID = det->getAtXY(j + ix, k + iy)->getID();
+            // Find the pixel ID at that XY position on the rectangular
+            // detector
+            if (j + ix >= det->xpixels() - m_edge || j + ix < m_edge)
+              continue;
+            if (k + iy >= det->ypixels() - m_edge || k + iy < m_edge)
+              continue;
+            int pixelID = det->getAtXY(j + ix, k + iy)->getID();
 
-              // Find the corresponding workspace index, if any
-              auto mapEntry = pixel_to_wi.find(pixelID);
-              if (mapEntry != pixel_to_wi.end()) {
-                size_t wi = mapEntry->second;
-                neighbours.emplace_back(wi, smweight);
-                // Count the total weight
-                totalWeight += smweight;
-              }
+            // Find the corresponding workspace index, if any
+            auto mapEntry = pixel_to_wi.find(pixelID);
+            if (mapEntry != pixel_to_wi.end()) {
+              size_t wi = mapEntry->second;
+              neighbours.emplace_back(wi, smweight);
+              // Count the total weight
+              totalWeight += smweight;
             }
+          }
 
-          // Adjust the weights of each neighbour to normalize to unity
-          if (!sum || m_expandSumAllPixels)
-            for (auto &neighbour : neighbours)
-              neighbour.second /= totalWeight;
+        // Adjust the weights of each neighbour to normalize to unity
+        if (!sum || m_expandSumAllPixels)
+          for (auto &neighbour : neighbours)
+            neighbour.second /= totalWeight;
 
-          // Save the list of neighbours for this output workspace index.
-          m_neighbours[m_outWI] = neighbours;
-          m_outWI++;
+        // Save the list of neighbours for this output workspace index.
+        m_neighbours[m_outWI] = neighbours;
+        m_outWI++;
 
-          m_progress->report("Finding Neighbours");
-        }
+        m_progress->report("Finding Neighbours");
       }
     }
     prog.report(det_name);
