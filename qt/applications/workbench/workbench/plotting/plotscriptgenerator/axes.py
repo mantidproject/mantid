@@ -8,16 +8,18 @@
 
 from numpy import isclose
 
+from matplotlib import rcParams
 from matplotlib.ticker import NullLocator
 from matplotlib.ticker import NullFormatter, ScalarFormatter, LogFormatterSciNotation
 
-from mantid.plots.utility import get_autoscale_limits
+from mantid.plots.utility import convert_color_to_hex, get_autoscale_limits
 from workbench.plotting.plotscriptgenerator.utils import convert_value_to_arg_string
 
 BASE_AXIS_LABEL_COMMAND = "set_{}label({})"
 BASE_AXIS_LIM_COMMAND = "set_{}lim({})"
 BASE_SET_TITLE_COMMAND = "set_title({})"
 BASE_AXIS_SCALE_COMMAND = "set_{}scale('{}')"
+BASE_SET_FACECOLOR_COMMAND = "set_facecolor('{}')"
 
 TICK_FORMATTER_CLASSES = {
     "NullFormatter": NullFormatter,
@@ -35,6 +37,8 @@ DEFAULT_TICK_FORMATTERS = {
     "linear": {"major": ScalarFormatter, "minor": NullFormatter},
     "log": {"major": LogFormatterSciNotation, "minor": LogFormatterSciNotation}
 }
+
+DEFAULT_FACECOLOR = rcParams['axes.facecolor']
 
 
 def generate_axis_limit_commands(ax):
@@ -69,6 +73,14 @@ def generate_axis_scale_commands(ax):
         if scale != 'linear':
             commands.append(BASE_AXIS_SCALE_COMMAND.format(axis, scale))
     return commands
+
+
+def generate_axis_facecolor_commands(ax):
+    # Check that the colour is different to default, otherwise return None.
+    colour = convert_color_to_hex(ax.get_facecolor()).lower()
+    if colour != convert_color_to_hex(DEFAULT_FACECOLOR).lower():
+        return BASE_SET_FACECOLOR_COMMAND.format(colour)
+    return None
 
 
 def generate_tick_params_kwargs(axis, tick_type="major"):

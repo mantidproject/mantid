@@ -27,10 +27,10 @@ instruments = {
         'final_neutron_energy': 32.0,  # Final energy on the crystal analyser in cm-1
         'cos_scattering_angle': math.cos(2.356),  # Angle of the crystal analyser radians (NO LONGER USED)
         # The forward detector angle is rather specific as test-data was based on truncated value in radians
-        'settings': {'Forward (TOSCA)': {'angles': [134.98885653282196]},
-                     'Backward (TOSCA)': {'angles': [45.]},
+        'settings': {'Backward (TOSCA)': {'angles': [134.98885653282196]},
+                     'Forward (TOSCA)': {'angles': [45.]},
                      'All detectors (TOSCA)': {'angles': [45., 134.98885653282196]}},
-        'settings_default': 'Forward (TOSCA)',
+        'settings_default': 'Backward (TOSCA)',
         # TOSCA parameters for resolution function
         # sigma = tosca_a * omega * omega + tosca_b * omega + tosca_c
         # where sigma is width of Gaussian function
@@ -77,7 +77,6 @@ sampling = {
 # Parameters related to estimated of spectra of high quantum orders by repeated convolution with fundamentals
 autoconvolution = {
     'max_order': 10, # Highest quantum order accessed by autoconvolution
-    'scale': 1.0,    # Scale factor applied to normalised convolution kernel
     'fine_bin_factor': 10
     }
 

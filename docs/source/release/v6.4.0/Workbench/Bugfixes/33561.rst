@@ -1,0 +1,1 @@
+- Suppressed a spurious warning where matplotlib warns about creating a figure outside of the main thread when using the script window.

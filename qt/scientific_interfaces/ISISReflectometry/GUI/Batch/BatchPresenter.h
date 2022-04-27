@@ -19,9 +19,11 @@
 #include "MantidQtWidgets/Common/WorkspaceObserver.h"
 #include <memory>
 
-namespace MantidQt {
-namespace CustomInterfaces {
-namespace ISISReflectometry {
+namespace MantidQt::MantidWidgets {
+class IMessageHandler;
+}
+
+namespace MantidQt::CustomInterfaces::ISISReflectometry {
 
 class IBatchView;
 
@@ -35,11 +37,12 @@ class MANTIDQT_ISISREFLECTOMETRY_DLL BatchPresenter : public IBatchPresenter,
                                                       public MantidQt::API::WorkspaceObserver {
 public:
   /// Constructor
-  BatchPresenter(IBatchView *view, std::unique_ptr<Batch> model, IJobRunner *jobRunner,
+  BatchPresenter(IBatchView *view, std::unique_ptr<IBatch> model, IJobRunner *jobRunner,
                  std::unique_ptr<IRunsPresenter> runsPresenter, std::unique_ptr<IEventPresenter> eventPresenter,
                  std::unique_ptr<IExperimentPresenter> experimentPresenter,
                  std::unique_ptr<IInstrumentPresenter> instrumentPresenter,
-                 std::unique_ptr<ISavePresenter> savePresenter, std::unique_ptr<IPreviewPresenter> previewPresenter);
+                 std::unique_ptr<ISavePresenter> savePresenter, std::unique_ptr<IPreviewPresenter> previewPresenter,
+                 MantidQt::MantidWidgets::IMessageHandler *messageHandler);
   BatchPresenter(BatchPresenter const &rhs) = delete;
   BatchPresenter(BatchPresenter &&rhs) = delete;
   BatchPresenter const &operator=(BatchPresenter const &rhs) = delete;
@@ -72,6 +75,8 @@ public:
   void notifyAnyBatchAutoreductionPaused() override;
   void notifyReductionPaused() override;
   void notifyBatchLoaded() override;
+  void notifyRowContentChanged(Row &changedRow) override;
+  void notifyGroupNameChanged(Group &changedGroup) override;
   bool requestClose() const override;
   bool isProcessing() const override;
   bool isAutoreducing() const override;
@@ -105,7 +110,7 @@ private:
   void settingsChanged();
 
   IBatchView *m_view;
-  std::unique_ptr<Batch> m_model;
+  std::unique_ptr<IBatch> m_model;
   IMainWindowPresenter *m_mainPresenter;
   std::unique_ptr<IRunsPresenter> m_runsPresenter;
   std::unique_ptr<IEventPresenter> m_eventPresenter;
@@ -115,6 +120,7 @@ private:
   std::unique_ptr<IPreviewPresenter> m_previewPresenter;
   bool m_unsavedBatchFlag;
   IJobRunner *m_jobRunner;
+  MantidQt::MantidWidgets::IMessageHandler *m_messageHandler;
 
   friend class Encoder;
   friend class Decoder;
@@ -123,6 +129,4 @@ private:
 protected:
   std::unique_ptr<IBatchJobManager> m_jobManager;
 };
-} // namespace ISISReflectometry
-} // namespace CustomInterfaces
-} // namespace MantidQt
+} // namespace MantidQt::CustomInterfaces::ISISReflectometry

@@ -18,7 +18,7 @@ namespace DataHandling {
   @author Karl Palmen
   @date 2012-08-23
 */
-class DLLExport ModifyDetectorDotDatFile : public API::Algorithm {
+class DLLExport ModifyDetectorDotDatFile final : public API::Algorithm {
 public:
   /// Algorithm's name for identification
   const std::string name() const override { return "ModifyDetectorDotDatFile"; };

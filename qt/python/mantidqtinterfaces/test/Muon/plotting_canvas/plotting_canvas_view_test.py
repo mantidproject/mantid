@@ -8,17 +8,15 @@ import unittest
 
 from unittest import mock
 from mantidqt.utils.qt.testing import start_qapplication
-from mantidqt.utils.qt.testing.qt_widget_finder import QtWidgetFinder
 from mantidqtinterfaces.Muon.GUI.Common.contexts.plotting_context import PlottingContext
 from mantidqtinterfaces.Muon.GUI.Common.plot_widget.plotting_canvas.plotting_canvas_view import PlottingCanvasView
 from mantidqtinterfaces.Muon.GUI.Common.plot_widget.quick_edit.quick_edit_widget import QuickEditWidget
 
-from qtpy.QtWidgets import QApplication
 import numpy as np
 
 
 @start_qapplication
-class PlottingCanvasViewTest(unittest.TestCase, QtWidgetFinder):
+class PlottingCanvasViewTest(unittest.TestCase):
 
     def setUp(self):
         self.context = PlottingContext()
@@ -29,11 +27,9 @@ class PlottingCanvasViewTest(unittest.TestCase, QtWidgetFinder):
         self.view.fig.tight_layout = mock.Mock()
         self.view.show()
         self._count = -1
-        self.assert_widget_created()
 
     def tearDown(self):
         self.assertTrue(self.view.close())
-        QApplication.sendPostedEvents()
 
     def make_plot_side_effect(self, _unused):
         self._count +=1
@@ -346,7 +342,7 @@ class PlottingCanvasViewTest(unittest.TestCase, QtWidgetFinder):
         self.view.add_shaded_region(name, axis, x_data, y1_data, y2_data)
 
         self.assertEqual(list(self.view._shaded_regions.keys()), [name])
-        self.assertEqual(self.view._shaded_regions[name].axis, 1)
+        self.assertEqual(self.view._shaded_regions[name].axis, 2)
         self.assertEqual(self.view._shaded_regions[name].x_values, x_data)
         self.assertEqual(self.view._shaded_regions[name].y1_values, y1_data)
         self.assertEqual(self.view._shaded_regions[name].y2_values, y2_data)
@@ -369,7 +365,7 @@ class PlottingCanvasViewTest(unittest.TestCase, QtWidgetFinder):
 
         self.view.add_shaded_region(name, axis, new_x, new_y1, new_y2)
         self.assertEqual(list(self.view._shaded_regions.keys()), [name])
-        self.assertEqual(self.view._shaded_regions[name].axis, 1)
+        self.assertEqual(self.view._shaded_regions[name].axis, 2)
         self.assertEqual(self.view._shaded_regions[name].x_values, new_x)
         self.assertEqual(self.view._shaded_regions[name].y1_values, new_y1)
         self.assertEqual(self.view._shaded_regions[name].y2_values, new_y2)

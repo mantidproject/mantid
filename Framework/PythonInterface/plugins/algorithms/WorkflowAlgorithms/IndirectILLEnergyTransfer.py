@@ -299,13 +299,13 @@ class IndirectILLEnergyTransfer(PythonAlgorithm):
     @staticmethod
     def _monitor_zero_range(ws):
         """
-        Gives the bin indices of the first and last non-zero bins in monitor
+        Gives the bin indices of the first and last bins in monitor, having at least 1% of max monitor count
         @param ws :: input workspace name
         return    :: [start,end]
         """
 
         y = mtd[ws].readY(0)
-        nonzero = np.argwhere(y != 0)
+        nonzero = np.argwhere(y > max(y)/100)
         start = nonzero[0][0] if nonzero.any() else 0
         end = nonzero[-1][0] if nonzero.any() else len(y)
         return start, end

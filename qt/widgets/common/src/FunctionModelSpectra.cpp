@@ -39,17 +39,12 @@ FunctionModelSpectra::FunctionModelSpectra(WorkspaceIndex minimum, WorkspaceInde
   m_isContinuous = true;
 }
 
-FunctionModelSpectra::FunctionModelSpectra(const FunctionModelSpectra &vec)
-    : m_vec(vec.m_vec), m_isContinuous(vec.m_isContinuous) {}
+FunctionModelSpectra::FunctionModelSpectra(const FunctionModelSpectra &vec) = default;
 
 FunctionModelSpectra::FunctionModelSpectra(FunctionModelSpectra &&vec)
     : m_vec(std::move(vec.m_vec)), m_isContinuous(vec.m_isContinuous) {}
 
-FunctionModelSpectra &FunctionModelSpectra::operator=(const FunctionModelSpectra &vec) {
-  m_vec = vec.m_vec;
-  m_isContinuous = vec.m_isContinuous;
-  return *this;
-}
+FunctionModelSpectra &FunctionModelSpectra::operator=(const FunctionModelSpectra &vec) = default;
 
 FunctionModelSpectra &FunctionModelSpectra::operator=(FunctionModelSpectra &&vec) {
   m_vec = std::move(vec.m_vec);

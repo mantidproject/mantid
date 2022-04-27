@@ -37,7 +37,7 @@ using namespace API;
 using DataObjects::Workspace2D_sptr;
 
 /// Empty default constructor
-RemoveLogs::RemoveLogs() {}
+RemoveLogs::RemoveLogs() = default;
 
 /// Initialisation method.
 void RemoveLogs::init() {

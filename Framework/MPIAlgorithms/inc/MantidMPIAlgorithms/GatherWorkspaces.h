@@ -41,12 +41,12 @@ namespace MPIAlgorithms {
    created by the root process.</LI>
     </UL>
 */
-class GatherWorkspaces : public API::Algorithm {
+class GatherWorkspaces final : public API::Algorithm {
 public:
   /// (Empty) Constructor
   GatherWorkspaces() : API::Algorithm() {}
   /// Virtual destructor
-  virtual ~GatherWorkspaces() {}
+  virtual ~GatherWorkspaces() = default;
   /// Algorithm's name
   virtual const std::string name() const { return "GatherWorkspaces"; }
   /// Algorithm's version

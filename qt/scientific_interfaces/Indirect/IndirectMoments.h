@@ -7,6 +7,8 @@
 #pragma once
 
 #include "IndirectDataReductionTab.h"
+#include "IndirectMomentsModel.h"
+#include "IndirectMomentsView.h"
 
 #include "MantidKernel/System.h"
 #include "ui_IndirectMoments.h"
@@ -27,15 +29,13 @@ class DLLExport IndirectMoments : public IndirectDataReductionTab {
 
 public:
   IndirectMoments(IndirectDataReduction *idrUI, QWidget *parent = nullptr);
-  ~IndirectMoments() override;
+  ~IndirectMoments() = default;
 
   void setup() override;
   void run() override;
   bool validate() override;
 
 protected slots:
-  /// Slot for when the range selector changes
-  void rangeChanged(double min, double max);
   /// Slot to update the guides when the range properties change
   void updateProperties(QtProperty *prop, double val);
   /// Called when the algorithm completes to update preview plot
@@ -44,19 +44,17 @@ protected slots:
   void runClicked();
   void saveClicked();
 
-  void setRunEnabled(bool enabled);
-  void setSaveEnabled(bool enabled);
-  void updateRunButton(bool enabled = true, std::string const &enableOutputButtons = "unchanged",
-                       QString const &message = "Run", QString const &tooltip = "");
-
 private slots:
   void handleDataReady(QString const &dataName) override;
+  void handleScaleChanged(int state);
+  void handleScaleValueChanged(double value);
 
 private:
   void plotNewData(QString const &filename);
   void setFileExtensionsByName(bool filter) override;
-
   Ui::IndirectMoments m_uiForm;
+  std::unique_ptr<IndirectMomentsModel> m_model;
+  std::unique_ptr<IndirectMomentsView> m_view;
 };
 } // namespace CustomInterfaces
 } // namespace MantidQt

@@ -107,14 +107,14 @@ class IPeakFunctionTest(unittest.TestCase):
 
         # This is a rectangle function with height 2 and width 3, centered
         # around 1.0. The intensity should be 6.0 (height * width)
-        self.assertAlmostEquals(func.intensity(), 6.0, places=10)
+        self.assertAlmostEqual(func.intensity(), 6.0, places=10)
 
         # Setting the intensity only changes height, not width
         func.setIntensity(12.0)
 
         self.assertEqual(func.fwhm(), 3.0)
-        self.assertAlmostEquals(func.height(), 4.0, places=10)
-        self.assertAlmostEquals(func.intensity(), 12.0, places=10)
+        self.assertAlmostEqual(func.height(), 4.0, places=10)
+        self.assertAlmostEqual(func.intensity(), 12.0, places=10)
 
     def test_get_set_matrix_workspace(self):
         ws = LoadEmptyInstrument(InstrumentName='ENGIN-X', OutputWorkspace='ws')
@@ -141,7 +141,7 @@ class IPeakFunctionTest(unittest.TestCase):
         func.setError("Center", 0.1)
         func.setError("Height", 0.2)
         func.setError("Fwhm", 0.3)
-        self.assertAlmostEquals(func.intensityError(), func.intensityErrorLocal(), places=6)
+        self.assertAlmostEqual(func.intensityError(), func.intensityErrorLocal(), places=6)
 
 
 if __name__ == '__main__':

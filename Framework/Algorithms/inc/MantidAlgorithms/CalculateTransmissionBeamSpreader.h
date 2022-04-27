@@ -55,7 +55,7 @@ namespace Algorithms {
     @author Mathieu Doucet, ORNL
     @date 28/07/2010
 */
-class MANTID_ALGORITHMS_DLL CalculateTransmissionBeamSpreader : public API::Algorithm {
+class MANTID_ALGORITHMS_DLL CalculateTransmissionBeamSpreader final : public API::Algorithm {
 public:
   /// Algorithm's name
   const std::string name() const override { return "CalculateTransmissionBeamSpreader"; }

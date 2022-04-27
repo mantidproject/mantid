@@ -22,7 +22,7 @@ def safe_qthread(func):
     return _wrapped
 
 
-def get_instrumentview(workspace):
+def get_instrumentview(workspace, wait=True):
     """Return a handle to the instrument view of given workspace
     :param ws: input workspace
     """
@@ -46,4 +46,9 @@ def get_instrumentview(workspace):
     ivp.set_color_scale = ivp.get_render_tab().setLegendScaleType
     ivp.is_thread_running = ivp.container.widget.isThreadRunning
     ivp.wait = ivp.container.widget.waitForThread
+    ivp.replace_workspace = safe_qthread(ivp.replace_workspace)
+    ivp.save_image = safe_qthread(ivp.save_image)
+    # wait for the instrument view finish construction before returning it
+    if wait:
+        ivp.wait()
     return ivp

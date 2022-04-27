@@ -16,6 +16,7 @@ from workbench.plotting.plotscriptgenerator.axes import (generate_axis_limit_com
                                                          generate_axis_label_commands,
                                                          generate_set_title_command,
                                                          generate_axis_scale_commands,
+                                                         generate_axis_facecolor_commands,
                                                          generate_tick_commands,
                                                          generate_tick_formatter_commands)
 from workbench.plotting.plotscriptgenerator.figure import generate_subplots_command
@@ -56,6 +57,7 @@ def generate_script(fig, exclude_headers=False):
         axes.set_xlabel and axes.set_ylabel()
         axes.set_xlim() and axes.set_ylim()
         axes.set_xscale() and axes.set_yscale()
+        axes.set_facecolor()
         <Set axes major tick formatters if non-default>
         axes.legend().set_draggable(True)     (if legend present, or just draggable() for earlier matplotlib versions)
         <Legend title and label commands if non-default>
@@ -74,7 +76,7 @@ def generate_script(fig, exclude_headers=False):
             continue
         ax_object_var = get_axes_object_variable(ax)
         if axes_type(ax) in [FigureType.Image]:
-            colormap_lines, colormap_headers = get_plot_2d_cmd(ax, ax_object_var) # ax.imshow or pcolormesh
+            colormap_lines, colormap_headers = get_plot_2d_cmd(ax, ax_object_var)  # ax.imshow or pcolormesh
             plot_commands.extend(colormap_lines)
             plot_headers.extend(colormap_headers)
         else:
@@ -87,6 +89,7 @@ def generate_script(fig, exclude_headers=False):
         plot_commands.extend(get_axis_label_cmds(ax, ax_object_var))  # ax.set_label
         plot_commands.extend(get_axis_limit_cmds(ax, ax_object_var))  # ax.set_lim
         plot_commands.extend(get_axis_scale_cmds(ax, ax_object_var))  # ax.set_scale
+        plot_commands.extend(get_axis_facecolor_cmds(ax, ax_object_var))  # ax.set_facecolor
 
         # Only add the ticker import to headers if it's needed.
         formatter_commands = get_tick_formatter_commands(ax, ax_object_var)
@@ -156,6 +159,14 @@ def get_axis_scale_cmds(ax, ax_object_var):
     return ["{ax_obj}.{cmd}".format(ax_obj=ax_object_var, cmd=cmd) for cmd in axis_scale_cmds]
 
 
+def get_axis_facecolor_cmds(ax, ax_object_var):
+    """Get command ax.set_facecolor. Returns an empty list if the facecolor is default."""
+    command = generate_axis_facecolor_commands(ax)
+    if command is not None:
+        return ["{ax_obj}.{cmd}".format(ax_obj=ax_object_var, cmd=command)]
+    return []
+
+
 def get_title_cmds(ax, ax_object_var):
     """Get command ax.set_title return an empty list if no title set"""
     if ax.get_title():
@@ -195,12 +206,17 @@ def get_axes_object_variable(ax):
     # plt.subplots returns an Axes object if there's only one axes being
     # plotted otherwise it returns a list
     ax_object_var = AXES_VARIABLE
-    try:
-        if ax.numRows > 1:
-            ax_object_var += "[{row_num}]".format(row_num=row_num(ax))
-        if ax.numCols > 1:
-            ax_object_var += "[{col_num}]".format(col_num=col_num(ax))
-    except AttributeError:
-        # No numRows or NumCols members, so no list use the default
-        pass
+
+    if hasattr(ax, "get_gridspec") and hasattr(ax.get_gridspec(), "nrows") and hasattr(ax.get_gridspec(), "ncols"):
+        num_rows = ax.get_gridspec().nrows
+        num_cols = ax.get_gridspec().ncols
+    else:
+        num_rows = ax.numRows
+        num_cols = ax.numCols
+
+    if num_rows > 1:
+        ax_object_var += "[{row_num}]".format(row_num=row_num(ax))
+    if num_cols > 1:
+        ax_object_var += "[{col_num}]".format(col_num=col_num(ax))
+
     return ax_object_var

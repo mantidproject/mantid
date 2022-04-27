@@ -178,8 +178,6 @@ QTwoLevelTreeModel::QTwoLevelTreeModel(const ITableWorkspace_sptr &tableWorkspac
           SLOT(tableDataUpdated(const QModelIndex &, const QModelIndex &)));
 }
 
-QTwoLevelTreeModel::~QTwoLevelTreeModel() {}
-
 /** Return the Edit role data
  */
 QVariant QTwoLevelTreeModel::getEditRole(const QModelIndex &index) const { return getDisplayRole(index); }

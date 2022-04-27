@@ -80,12 +80,12 @@ int getNumberOfSpectra(const MatrixWorkspace_sptr &workspace) {
 FitPropertyBrowser::FitPropertyBrowser(QWidget *parent, QObject *mantidui)
     : QDockWidget("Fit Function", parent), m_workspaceIndex(nullptr), m_startX(nullptr), m_endX(nullptr),
       m_output(nullptr), m_minimizer(nullptr), m_ignoreInvalidData(nullptr), m_costFunction(nullptr),
-      m_maxIterations(nullptr), m_peakRadius(nullptr), m_logValue(nullptr), m_plotDiff(nullptr),
-      m_excludeRange(nullptr), m_plotCompositeMembers(nullptr), m_convolveMembers(nullptr), m_rawData(nullptr),
-      m_xColumn(nullptr), m_yColumn(nullptr), m_errColumn(nullptr), m_showParamErrors(nullptr),
-      m_evaluationType(nullptr), m_compositeFunction(), m_browser(nullptr), m_fitActionUndoFit(nullptr),
-      m_fitActionSeqFit(nullptr), m_fitActionFit(nullptr), m_fitActionEvaluate(nullptr), m_functionsGroup(nullptr),
-      m_settingsGroup(nullptr), m_customSettingsGroup(nullptr), m_changeSlotsEnabled(false), m_guessOutputName(true),
+      m_maxIterations(nullptr), m_peakRadius(nullptr), m_plotDiff(nullptr), m_excludeRange(nullptr),
+      m_plotCompositeMembers(nullptr), m_convolveMembers(nullptr), m_rawData(nullptr), m_xColumn(nullptr),
+      m_yColumn(nullptr), m_errColumn(nullptr), m_showParamErrors(nullptr), m_evaluationType(nullptr),
+      m_compositeFunction(), m_browser(nullptr), m_fitActionUndoFit(nullptr), m_fitActionSeqFit(nullptr),
+      m_fitActionFit(nullptr), m_fitActionEvaluate(nullptr), m_functionsGroup(nullptr), m_settingsGroup(nullptr),
+      m_customSettingsGroup(nullptr), m_changeSlotsEnabled(false), m_guessOutputName(true),
       m_updateObserver(*this, &FitPropertyBrowser::handleFactoryUpdate), m_fitMapper(nullptr), m_fitMenu(nullptr),
       m_displayActionPlotGuess(nullptr), m_displayActionQuality(nullptr), m_displayActionClearAll(nullptr),
       m_setupActionCustomSetup(nullptr), m_setupActionRemove(nullptr), m_tip(nullptr), m_fitSelector(nullptr),
@@ -1284,7 +1284,7 @@ void FitPropertyBrowser::boolChanged(QtProperty *prop) {
     PropertyHandler *h = getHandler()->findHandler(prop);
     if (!h)
       return;
-    h->setAttribute(prop);
+    enactAttributeChange(prop, h);
   }
 }
 
@@ -1330,7 +1330,7 @@ void FitPropertyBrowser::intChanged(QtProperty *prop) {
     PropertyHandler *h = getHandler()->findHandler(prop);
     if (!h)
       return;
-    h->setAttribute(prop);
+    enactAttributeChange(prop, h);
   }
 }
 
@@ -1373,8 +1373,18 @@ void FitPropertyBrowser::doubleChanged(QtProperty *prop) {
         h->addConstraint(parProp, false, true, 0, upBound);
       }
     } else { // it could be an attribute
-      h->setAttribute(prop);
+      enactAttributeChange(prop, h);
     }
+  }
+}
+
+void FitPropertyBrowser::enactAttributeChange(QtProperty *prop, PropertyHandler *h) {
+  try {
+    h->setAttribute(prop);
+  } catch (IFunction::ValidationException &ve) {
+    std::stringstream err_str;
+    err_str << prop->propertyName().toStdString() << " - " << ve.what();
+    g_log.warning(err_str.str());
   }
 }
 
@@ -1631,7 +1641,7 @@ void FitPropertyBrowser::finishHandle(const Mantid::API::IAlgorithm *alg) {
 
   IFunction_sptr function = alg->getProperty("Function");
   updateBrowserFromFitResults(function);
-  if (!isWorkspaceAGroup() && alg->existsProperty("OutputWorkspace")) {
+  if (alg->existsProperty("OutputWorkspace")) {
     std::string out = alg->getProperty("OutputWorkspace");
     emit algorithmFinished(QString::fromStdString(out));
   }
@@ -1768,9 +1778,9 @@ void FitPropertyBrowser::postDeleteHandle(const std::string &wsName) { removeWor
 
 void FitPropertyBrowser::removeWorkspace(const std::string &wsName) {
   QString oldName = QString::fromStdString(workspaceName());
-  int i = m_workspaceNames.indexOf(QString(wsName.c_str()));
-  if (i >= 0) {
-    m_workspaceNames.removeAt(i);
+  int iName = m_workspaceNames.indexOf(QString(wsName.c_str()));
+  if (iName >= 0) {
+    m_workspaceNames.removeAt(iName);
   }
 
   bool initialSignalsBlocked = m_enumManager->signalsBlocked();
@@ -1781,9 +1791,9 @@ void FitPropertyBrowser::removeWorkspace(const std::string &wsName) {
 
   m_enumManager->setEnumNames(m_workspace, m_workspaceNames);
 
-  i = m_workspaceNames.indexOf(oldName);
-  if (i >= 0) {
-    m_enumManager->setValue(m_workspace, i);
+  iName = m_workspaceNames.indexOf(oldName);
+  if (iName >= 0) {
+    m_enumManager->setValue(m_workspace, iName);
   }
 
   m_enumManager->blockSignals(initialSignalsBlocked);
@@ -1802,18 +1812,26 @@ void FitPropertyBrowser::removeWorkspace(const std::string &wsName) {
 }
 
 void FitPropertyBrowser::renameHandle(const std::string &oldName, const std::string &newName) {
-  int i = m_workspaceNames.indexOf(QString(oldName.c_str()));
-  if (i >= 0) {
-    m_workspaceNames.replace(i, QString::fromStdString(newName));
+  QString oldNameQ = QString::fromStdString(oldName);
+  QString newNameQ = QString::fromStdString(newName);
+  auto it = m_allowedSpectra.find(oldNameQ);
+  if (it != m_allowedSpectra.end()) {
+    auto indices = m_allowedSpectra.value(oldNameQ);
+    m_allowedSpectra.remove(oldNameQ);
+    m_allowedSpectra.insert(newNameQ, indices);
+  }
+  int iWorkspace = m_workspaceNames.indexOf(oldNameQ);
+  if (iWorkspace >= 0) {
+    m_workspaceNames.replace(iWorkspace, newNameQ);
     m_enumManager->setEnumNames(m_workspace, m_workspaceNames);
   }
-  workspaceChange(QString::fromStdString(newName));
+  workspaceChange(newNameQ);
 
   for (auto i = 0; i < m_wsListWidget->count(); ++i) {
     auto item = m_wsListWidget->item(i);
     if (item->text().toStdString() == oldName) {
       m_wsListWidget->takeItem(m_wsListWidget->row(item));
-      m_wsListWidget->insertItem(m_wsListWidget->row(item), QString::fromStdString(newName));
+      m_wsListWidget->insertItem(m_wsListWidget->row(item), newNameQ);
     }
   }
 }
@@ -1825,12 +1843,6 @@ void FitPropertyBrowser::renameHandle(const std::string &oldName, const std::str
 bool FitPropertyBrowser::isWorkspaceValid(Mantid::API::Workspace_sptr ws) const {
   return (dynamic_cast<Mantid::API::MatrixWorkspace *>(ws.get()) != nullptr ||
           dynamic_cast<Mantid::API::ITableWorkspace *>(ws.get()) != nullptr);
-}
-
-bool FitPropertyBrowser::isWorkspaceAGroup() const {
-  // MG: Disabled as there is an issue with replacing workspace groups and the
-  // browser
-  return false;
 }
 
 /// Is the current function a peak?
@@ -1854,14 +1866,11 @@ double FitPropertyBrowser::endX() const { return m_doubleManager->value(m_endX);
 void FitPropertyBrowser::setEndX(double value) { m_doubleManager->setValue(m_endX, value); }
 
 void FitPropertyBrowser::setXRange(double start, double end) {
-#if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
   disconnect(m_doubleManager, SIGNAL(propertyChanged(QtProperty *)), this, SLOT(doubleChanged(QtProperty *)));
-#endif
 
   m_doubleManager->setValue(m_startX, start);
   m_doubleManager->setValue(m_endX, end);
 
-#if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
   setWorkspace(m_compositeFunction);
   m_doubleManager->setMinimum(m_endX, start);
   m_doubleManager->setMaximum(m_startX, end);
@@ -1870,7 +1879,6 @@ void FitPropertyBrowser::setXRange(double start, double end) {
   getHandler()->setAttribute("EndX", end);
 
   connect(m_doubleManager, SIGNAL(propertyChanged(QtProperty *)), this, SLOT(doubleChanged(QtProperty *)));
-#endif
 }
 
 QVector<double> FitPropertyBrowser::getXRange() {
@@ -2402,6 +2410,26 @@ QtProperty *FitPropertyBrowser::addStringProperty(const QString &name) const {
 }
 
 /**
+ * Create a string list property and selects a property manager for it
+ * based on the property name
+ * @param name :: The name of the new property
+ * @param allowed_values :: A list of the values allowed by the validator
+ * @return Pointer to the created property
+ */
+QtProperty *FitPropertyBrowser::addStringListProperty(const QString &name,
+                                                      const std::vector<std::string> &allowed_values) const {
+  QStringList qAllowedValues;
+  QtProperty *prop = m_enumManager->addProperty(name);
+
+  for (const auto &values : allowed_values) {
+    qAllowedValues << QString::fromStdString(values);
+  }
+  m_enumManager->setEnumNames(prop, qAllowedValues);
+
+  return prop;
+}
+
+/**
  * Set a value to a string property.
  * @param prop :: A pointer to the property
  * @param value :: New value for the property
@@ -2632,57 +2660,6 @@ void FitPropertyBrowser::setAutoBackgroundName(const QString &aName) {
   }
 }
 
-/// Set LogValue for PlotPeakByLogValue
-void FitPropertyBrowser::setLogValue(const QString &lv) {
-  if (isWorkspaceAGroup()) {
-    // validateGroupMember();
-    if (!m_logValue) {
-      m_logValue = m_enumManager->addProperty("LogValue");
-      m_settingsGroup->property()->addSubProperty(m_logValue);
-    }
-    m_logs.clear();
-    m_logs << "";
-    /* if (!m_groupMember.empty())
-     {
-       Mantid::API::MatrixWorkspace_sptr ws =
-         std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
-         Mantid::API::AnalysisDataService::Instance().retrieve(m_groupMember)
-         );
-       if (ws)
-       {
-         const std::vector<Mantid::Kernel::Property*> logs =
-     ws->run().getLogData();
-         for(int i=0;i<static_cast<int>(logs.size()); ++i)
-         {
-           m_logs << QString::fromStdString(logs[i]->name());
-         }
-       }
-     }*/
-    m_enumManager->setEnumNames(m_logValue, m_logs);
-    int i = m_logs.indexOf(lv);
-    if (i < 0)
-      i = 0;
-    m_enumManager->setValue(m_logValue, i);
-  }
-}
-
-std::string FitPropertyBrowser::getLogValue() const {
-  if (isWorkspaceAGroup() && m_logValue) {
-    int i = m_enumManager->value(m_logValue);
-    if (i < m_logs.size())
-      return m_logs[i].toStdString();
-  }
-  return "";
-}
-
-/// Remove LogValue from the browser
-void FitPropertyBrowser::removeLogValue() {
-  if (isWorkspaceAGroup())
-    return;
-  m_settingsGroup->property()->removeSubProperty(m_logValue);
-  m_logValue = nullptr;
-}
-
 void FitPropertyBrowser::sequentialFit() {
   auto *dlg = new SequentialFitDialog(this, m_mantidui);
   std::string wsName = workspaceName();
@@ -2792,16 +2769,7 @@ void FitPropertyBrowser::setTextPlotGuess(const QString &text) { m_displayAction
  */
 void FitPropertyBrowser::workspaceChange(const QString &wsName) {
   if (m_guessOutputName) {
-    if (isWorkspaceAGroup()) {
-      m_stringManager->setValue(m_output, QString::fromStdString(workspaceName() + "_params"));
-    } else {
-      m_stringManager->setValue(m_output, QString::fromStdString(workspaceName()));
-    }
-  }
-  if (isWorkspaceAGroup()) {
-    setLogValue();
-  } else {
-    removeLogValue();
+    m_stringManager->setValue(m_output, QString::fromStdString(workspaceName()));
   }
 
   emit workspaceNameChanged(wsName);
@@ -3239,9 +3207,10 @@ void FitPropertyBrowser::addAllowedSpectra(const QString &wsName, const QList<in
   auto ws = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(name);
   if (ws) {
     QList<int> indices;
-    for (auto const i : wsSpectra) {
-      indices.push_back(static_cast<int>(ws->getIndexFromSpectrumNumber(i)));
-    }
+    indices.reserve(wsSpectra.size());
+    std::transform(wsSpectra.cbegin(), wsSpectra.cend(), std::back_inserter(indices),
+                   [&ws](const auto i) { return static_cast<int>(ws->getIndexFromSpectrumNumber(i)); });
+
     auto wsFound = m_allowedSpectra.find(wsName);
     m_allowedSpectra.insert(wsName, indices);
     if (wsFound != m_allowedSpectra.end()) {

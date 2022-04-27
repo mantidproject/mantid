@@ -56,6 +56,7 @@
 #include <QSplitter>
 #include <QStackedLayout>
 #include <QString>
+#include <QTabWidget>
 #include <QTemporaryFile>
 #include <QThread>
 #include <QUrl>
@@ -85,7 +86,7 @@ struct WorkspaceReplacementFlagHolder {
   ~WorkspaceReplacementFlagHolder() { m_worskpaceReplacementFlag = false; }
 
 private:
-  WorkspaceReplacementFlagHolder();
+  WorkspaceReplacementFlagHolder() = delete;
   bool &m_worskpaceReplacementFlag;
 };
 
@@ -532,6 +533,12 @@ void InstrumentWidget::waitForThread() const {
  * after the background thread finished is done
  */
 bool InstrumentWidget::isFinished() const { return m_finished; }
+
+/**
+ * @brief InstrumentWidget::isTabFolded
+ * @return whether the side tab menu is folded or currently visible
+ */
+bool InstrumentWidget::isTabFolded() const { return mControlsTab->visibleRegion().isEmpty(); }
 
 /**
  * Update the info text displayed at the bottom of the window.

@@ -223,12 +223,14 @@ class FigureInteractionTest(unittest.TestCase):
         self.assertEqual(r"Counts ($\AA$)$^{-1}$", ax.get_ylabel())
 
     def test_normalization_toggle_with_no_autoscale_on_update_no_errors(self):
+        self.ax.autoscale(enable=False, axis='both')
         self._test_toggle_normalization(errorbars_on=False,
-                                        plot_kwargs={'distribution': True, 'autoscale_on_update': False})
+                                        plot_kwargs={'distribution': True})
 
     def test_normalization_toggle_with_no_autoscale_on_update_with_errors(self):
+        self.ax.autoscale(enable=False, axis='both')
         self._test_toggle_normalization(errorbars_on=True,
-                                        plot_kwargs={'distribution': True, 'autoscale_on_update': False})
+                                        plot_kwargs={'distribution': True})
 
     def test_add_error_bars_menu(self):
         self.ax.errorbar([0, 15000], [0, 14000], yerr=[10, 10000], label='MyLabel 2')
@@ -602,7 +604,7 @@ class FigureInteractionTest(unittest.TestCase):
         self.assertEqual(1, self.interactor.redraw_annotations.call_count)
 
     def test_toggle_normalisation_on_contour_plot_maintains_contour_line_colour(self):
-        from mantid.plots.legend import convert_color_to_hex
+        from mantid.plots.utility import convert_color_to_hex
         ws = CreateWorkspace(DataX=[1, 2, 3, 4, 2, 4, 6, 8], DataY=[2] * 8, NSpec=2, OutputWorkspace="test_ws")
         fig = plot_contour([ws])
 
@@ -614,7 +616,7 @@ class FigureInteractionTest(unittest.TestCase):
         fig_interactor = FigureInteraction(fig_manager_mock)
         fig_interactor._toggle_normalization(fig.axes[0])
 
-        self.assertTrue(all(convert_color_to_hex(col.get_color()[0]) == "#ff9900"
+        self.assertTrue(all(convert_color_to_hex(col.get_edgecolor()[0]) == "#ff9900"
                             for col in fig.get_axes()[0].collections))
 
     def test_toggle_normalisation_applies_to_all_images_if_one_colorbar(self):

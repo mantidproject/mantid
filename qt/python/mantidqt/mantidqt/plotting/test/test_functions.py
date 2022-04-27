@@ -212,7 +212,7 @@ class FunctionsTest(TestCase):
         fig = pcolormesh_from_names([ws])
 
         mock_ConfigService.getString.assert_any_call('plots.images.Colormap')
-        self.assertEqual(fig.gca().images[0].colorbar.get_cmap(), spring_colormap)
+        self.assertEqual(fig.gca().images[0].colorbar.cmap, spring_colormap)
 
     def test_workspace_can_be_plotted_on_top_of_scripted_plots(self):
         fig = plt.figure()

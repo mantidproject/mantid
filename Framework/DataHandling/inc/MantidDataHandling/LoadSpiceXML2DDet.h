@@ -42,7 +42,7 @@ public:
 
 /** LoadSpiceXML2DDet : Load 2D detector data in XML format form SPICE
  */
-class DLLExport LoadSpiceXML2DDet : public API::Algorithm {
+class DLLExport LoadSpiceXML2DDet final : public API::Algorithm {
 public:
   LoadSpiceXML2DDet();
   ~LoadSpiceXML2DDet() override;

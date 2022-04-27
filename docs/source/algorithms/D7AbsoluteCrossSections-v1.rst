@@ -16,7 +16,7 @@ The cross-section separation provides information about magnetic, nuclear cohere
 The absolute scale normalisation uses either the output from cross-section separation or a vanadium reference sample for polarised diffraction and spectroscopy data measured
 by D7 instrument at the ILL.
 
-Three types of cross-section separation are supported: `Uniaxial`, `XYZ`, and `10p`, for which 2, 6, and 10 distributions with spin-flip and non-spin-flip cross-sections
+Three types of cross-section separation are supported: `Z`, `XYZ`, and `10p`, for which 2, 6, and 10 distributions with spin-flip and non-spin-flip cross-sections
 are required. In addition, the XYZ cross-section separation can be executed either assuming isotropic magnetism, such as in Ref. [#Ehlers]_, or when the magnetism cannot
 be assumed to be isotropic, for example in single crystals, as described in Ref. [#Schweika]_. Which set of equations is used is controlled by setting `IsotropicMagnetism`
 to either `True` or `False`. The expected input for the cross-section separation is a workspace group containing spin-flip and non-spin-flip
@@ -26,7 +26,20 @@ Three ways of sample data normalisation are supported: `Vanadium`, `Paramagnetic
 or from the cross-section separation (magnetic and spin-incoherent respectively) is used. This step can also be skipped by setting `NormalisationMethod` parameter
 to `'None'`.
 
-This algorithm is indended to be invoked on sample data that is fully corrected and needs to be normalised to the absolute scale.
+`MeasurementTechnique` property allows to distinguish between data reduced as `Powder`, `SingleCrystal`, or `TOF` by :ref:`PolDiffILLReduction <algm-PolDiffILLReduction>`.
+`Paramagnetic` and `Incoherent` data normalisation approaches are not possible when the was data reduced in the `TOF` mode.
+
+The choice for the output units are set with `OutputUnits` property. The options are: `TwoTheta`, `Q`, `Qxy`, `Qw`, `Default`, and `Input`. The first two are the most relevant
+for `Powder` measurement technique. Single crystal data would be best shown on the `Qx` - `Qy` plane, which can be achieved by setting `OutputUnit` to `Qxy`. The `TOF`-mode
+specific output unit is `Qw`, which allows to obtain data on the momentum exchange (Q) - energy exchange plane (`w`, which stands for :math:`\omega`). The `Input` setting allows for
+preserving the input unit without undergoing any conversions, which can be useful when trying to find a source of issue in the reduction. The `Default` mode will show the most
+relevant output, depending on the technique. It will be equivalent to `Q` option for `Powder` data, `Qxy` for single crystal, and in the TOF mode, it will be a group of data
+as a function of spectrum number versus energy exchange (equivalent to `Input` in TOF), :math:`2\theta` versus energy exchange, and :math:`S (Q, \omega)` distribution (as in `Qw`).
+
+For the TOF-mode, it is possible to provide user-defined binning for the momentum-exchange axis, used by :ref:`SOfQWNormalisedPolygons <algm-SOfQWNormalisedPolygons>` algorithm. If this
+property is not defined, the algorithm will automatically provide non-equidistant binning that is suitable for the data distribution.
+
+This algorithm is indended to be invoked on sample data that is fully corrected and needs to be normalised to an appropriate scale.
 
 SampleAndEnvironmentProperties
 ##############################
@@ -46,6 +59,14 @@ Keys required when the `MeasurementTechnique` is `SingleCrystal`:
 - *KiXAngle* - angle between the incident momentum and X-axis
 - *OmegaShift* - omega offset
 
+Optional keys when the `MeasurementTechnique` is `SingleCrystal`:
+
+- *fld*
+- *nQ*
+
+`nQ` allows the user to decide how many bins should the `Q_{x}` and `Q_{y}` axes be split into, 80 by default. `fld` is used to decide whether to expand the distribution symmetrically
+to the negative side of `Q_{x}` and `Q_{y}` axes, equal to 1 (`True`) by default.
+
 Cross-section separation method
 ###############################
 
@@ -53,7 +74,7 @@ Below are presented formulae used to separate magnetic (M), nuclear coherent (N)
 spin-flip :math:`\left(\frac{d\sigma}{d\Omega}\right)_{\text{sf}}` and non-spin-flip :math:`\left(\frac{d\sigma}{d\Omega}\right)_{\text{nsf}}`
 cross-sections from the provided input :ref:`WorkspaceGroup <WorkspaceGroup>`.
 
-1. Uniaxial
+1. Z
 
 At least two separate measurements along the same axis with opposite spin orientations are needed for this method to work. Usually, the measured axis is the 'Z' axis that is colinear with the beam axis, thus the spin-flip and non-spin-flip cross-sections are measured along the longitudinal axis. This method does not allow for separation of magnetic cross-section.
 
@@ -68,7 +89,7 @@ In this case, the magnetic cross-section cannot be separated from data.
 
 2. XYZ
 
-This method is an expansion of the Uniaxial method, that requires measurements of spin-flip and non-spin-flip cross-sections along three orthogonal axes. This method allows for separation of magnetic cross-section from nuclear coherent and spin-incoherent.
+This method is an expansion of the Z method, that requires measurements of spin-flip and non-spin-flip cross-sections along three orthogonal axes. This method allows for separation of magnetic cross-section from nuclear coherent and spin-incoherent.
 
 The following set of equations applies to the isotropic magnetism case, such as in powder samples, and are based on Ref. [#Steward]_ and [#Ehlers]_.
 
@@ -187,21 +208,25 @@ Usage
    sampleProperties = {'SampleMass': 2.932, 'FormulaUnitMass': 50.942}
 
    Load('ILL/D7/vanadium_xyz.nxs', OutputWorkspace='vanadium_xyz') # loads already reduced data
-   D7AbsoluteCrossSections(InputWorkspace='vanadium_xyz', CrossSectionSeparationMethod='XYZ',
-                           SampleAndEnvironmentProperties=sampleProperties,
-                           OutputTreatment='Merge', OutputWorkspace='xyz')
+   D7AbsoluteCrossSections(
+	      InputWorkspace='vanadium_xyz',
+	      CrossSectionSeparationMethod='XYZ',
+              SampleAndEnvironmentProperties=sampleProperties,
+	      OutputTreatment='Merge',
+	      OutputWorkspace='xyz',
+	      OutputUnits='TwoTheta')
    print("Number of separated cross-sections: {}".format(mtd['xyz'].getNumberOfEntries()))
    Integration(InputWorkspace=mtd['xyz'][1], OutputWorkspace='sum_coherent')
    Integration(InputWorkspace=mtd['xyz'][2], OutputWorkspace='sum_incoherent')
    Divide(LHSWorkspace='sum_incoherent', RHSWorkspace='sum_coherent', OutputWorkspace='ratio')
-   print("Ratio of spin-incoherent to nuclear coherent cross-sections measured for vanadium is equal to: {0:.1f}".format(mtd['ratio'].readY(0)[0]))
+   print("Ratio of spin-incoherent to nuclear coherent cross-sections measured for vanadium is equal to: {0:.0f}".format(mtd['ratio'].readY(0)[0]))
 
 Output:
 
 .. testoutput:: ExD7AbsoluteCrossSections_XYZ_separation
 
    Number of separated cross-sections: 6
-   Ratio of spin-incoherent to nuclear coherent cross-sections measured for vanadium is equal to: 11.9
+   Ratio of spin-incoherent to nuclear coherent cross-sections measured for vanadium is equal to: 170
 
 .. testcleanup:: ExD7AbsoluteCrossSections_XYZ_separation
 
@@ -258,7 +283,7 @@ Output:
    mtd.clear()
 
 
-**Example - D7D7AbsoluteCrossSections - Single crystal sample normalisation with vanadium**
+**Example - D7D7AbsoluteCrossSections - Single crystal sample XYZ cross-section separation**
 
 .. testcode:: ExD7AbsoluteCrossSections_single_crystal
 
@@ -289,6 +314,37 @@ Output:
 
    mtd.clear()
 
+
+**Example - D7D7AbsoluteCrossSections - Time-of-flight measurement with Z-only cross-section separation**
+
+.. testcode:: ExD7AbsoluteCrossSections_tof_z-only
+
+   sample_dictionary_H2O = {'SampleMass':0.874, 'FormulaUnitMass':18.0, 'SampleChemicalFormula':'H2O'}
+
+   Load('ILL/D7/395639_reduced.nxs', OutputWorkspace='h2O_ws')
+   D7AbsoluteCrossSections(
+     InputWorkspace='h2O_ws',
+     OutputWorkspace='h2O_reduced',
+     CrossSectionSeparationMethod='Z',
+     NormalisationMethod='None',
+     OutputUnits='Default',
+     SampleAndEnvironmentProperties=sample_dictionary_H2O,
+     AbsoluteUnitsNormalisation=True,
+     MeasurementTechnique='TOF',
+     ClearCache=True,
+     QBinning='-5,0.04,1.5'
+   )
+   print("The number of entries in the output data is: {}".format(mtd['h2O_reduced'].getNumberOfEntries()))
+
+Output:
+
+.. testoutput:: ExD7AbsoluteCrossSections_tof_z-only
+
+   The number of entries in the output data is: 9
+
+.. testcleanup:: ExD7AbsoluteCrossSections_single_crystal
+
+   mtd.clear()
 
 References
 ----------

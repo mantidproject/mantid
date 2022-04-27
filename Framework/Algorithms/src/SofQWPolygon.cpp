@@ -62,7 +62,7 @@ void SofQWPolygon::exec() {
   PARALLEL_FOR_IF(Kernel::threadSafe(*inputWS, *outputWS))
   for (int64_t i = 0; i < static_cast<int64_t>(nTheta); ++i) // signed for openmp
   {
-    PARALLEL_START_INTERUPT_REGION
+    PARALLEL_START_INTERRUPT_REGION
 
     const double theta = m_thetaPts[i];
     if (theta < 0.0) // One to skip
@@ -106,9 +106,9 @@ void SofQWPolygon::exec() {
       }
     }
 
-    PARALLEL_END_INTERUPT_REGION
+    PARALLEL_END_INTERRUPT_REGION
   }
-  PARALLEL_CHECK_INTERUPT_REGION
+  PARALLEL_CHECK_INTERRUPT_REGION
 
   DataObjects::FractionalRebinning::normaliseOutput(outputWS, inputWS, m_progress.get());
 

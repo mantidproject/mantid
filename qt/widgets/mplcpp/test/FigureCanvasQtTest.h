@@ -41,6 +41,8 @@ public:
   void testToDataCoordinatesReturnsExpectedPoint() {
     FigureCanvasQt canvas{111};
     canvas.gca().plot({1, 2, 3, 4, 5}, {1, 2, 3, 4, 5});
+    canvas.draw(); // We now need to draw as 3.2 changed when autoscaling occurs in plots, to only when drawn, not
+                   // when a plot function is ran.
 
     auto dataCoords =
         canvas.toDataCoords(QPoint(static_cast<int>(canvas.width() * 0.5), static_cast<int>(canvas.height() * 0.25)));

@@ -77,10 +77,6 @@ TMDE(MDEventWorkspace)::MDEventWorkspace(const MDEventWorkspace<MDE, nd> &other)
   }
 }
 
-//-----------------------------------------------------------------------------------------------
-/** Destructor
- */
-TMDE(MDEventWorkspace)::~MDEventWorkspace() {}
 /**Make workspace file backed if it has not been already file backed
  * @param fileName -- short or full file name of the file, which should be used
  * as the file back end

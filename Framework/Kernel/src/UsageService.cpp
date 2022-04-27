@@ -191,7 +191,7 @@ void UsageServiceImpl::sendStartupReport() {
   try {
     std::string message = this->generateStartupMessage();
     // send the report
-    Poco::ActiveResult<int> result = m_startupActiveMethod(message);
+    Poco::ActiveResult<InternetHelper::HTTPStatus> result = m_startupActiveMethod(message);
   } catch (std::exception &ex) {
     g_log.debug() << "Send startup usage failure. " << ex.what() << '\n';
   }
@@ -204,7 +204,7 @@ void UsageServiceImpl::sendFeatureUsageReport(const bool synchronous = false) {
       if (synchronous) {
         sendFeatureAsyncImpl(message);
       } else {
-        Poco::ActiveResult<int> result = m_featureActiveMethod(message);
+        Poco::ActiveResult<InternetHelper::HTTPStatus> result = m_featureActiveMethod(message);
       }
     }
 
@@ -313,18 +313,18 @@ std::string UsageServiceImpl::generateFeatureUsageMessage() {
 
 /**Async method for sending startup messages
  */
-int UsageServiceImpl::sendStartupAsyncImpl(const std::string &message) {
+InternetHelper::HTTPStatus UsageServiceImpl::sendStartupAsyncImpl(const std::string &message) {
   return this->sendReport(message, m_url + "/api/usage");
 }
 
 /**Async method for sending feature messages
  */
-int UsageServiceImpl::sendFeatureAsyncImpl(const std::string &message) {
+InternetHelper::HTTPStatus UsageServiceImpl::sendFeatureAsyncImpl(const std::string &message) {
   return this->sendReport(message, m_url + "/api/feature");
 }
 
-int UsageServiceImpl::sendReport(const std::string &message, const std::string &url) {
-  int status = -1;
+InternetHelper::HTTPStatus UsageServiceImpl::sendReport(const std::string &message, const std::string &url) {
+  InternetHelper::HTTPStatus status{InternetHelper::HTTPStatus::BAD_REQUEST};
   try {
     Kernel::InternetHelper helper;
     std::stringstream responseStream;
@@ -332,8 +332,9 @@ int UsageServiceImpl::sendReport(const std::string &message, const std::string &
     helper.setBody(message);
     status = helper.sendRequest(url, responseStream);
   } catch (Mantid::Kernel::Exception::InternetError &e) {
-    status = e.errorCode();
-    g_log.information() << "Call to \"" << url << "\" responded with " << status << "\n" << e.what() << "\n";
+    status = static_cast<InternetHelper::HTTPStatus>(e.errorCode());
+    g_log.information() << "Call to \"" << url << "\" responded with " << static_cast<int>(status) << "\n"
+                        << e.what() << "\n";
   }
 
   return status;

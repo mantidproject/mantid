@@ -23,14 +23,14 @@ class UnitsTest(unittest.TestCase):
     def test_quick_conversion_with_string_input(self):
         energy = UnitFactory.Instance().create("Energy")
         factor, power = energy.quickConversion("Wavelength")
-        self.assertAlmostEquals(factor, 9.04456756843)
+        self.assertAlmostEqual(factor, 9.04456756843)
         self.assertEqual(power, -0.5)
 
     def test_quick_conversion_with_unit_input(self):
         energy = UnitFactory.Instance().create("Energy")
         wavelength = UnitFactory.Instance().create("Wavelength")
         factor, power = energy.quickConversion(wavelength)
-        self.assertAlmostEquals(factor, 9.04456756843)
+        self.assertAlmostEqual(factor, 9.04456756843)
         self.assertEqual(power, -0.5)
 
 # -------------  Failure cases  -------------------

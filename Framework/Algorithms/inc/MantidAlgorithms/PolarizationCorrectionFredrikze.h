@@ -24,7 +24,7 @@ namespace Algorithms {
  Fredrikze, H, et al. "Calibration of a polarized neutron reflectometer" Physica
  B 297 (2001)
  */
-class MANTID_ALGORITHMS_DLL PolarizationCorrectionFredrikze : public API::Algorithm {
+class MANTID_ALGORITHMS_DLL PolarizationCorrectionFredrikze final : public API::Algorithm {
 public:
   const std::string name() const override;
   int version() const override;

@@ -57,7 +57,7 @@ namespace Algorithms {
  *
  *
  */
-class MANTID_ALGORITHMS_DLL CheckWorkspacesMatch : public API::Algorithm, public API::DeprecatedAlgorithm {
+class MANTID_ALGORITHMS_DLL CheckWorkspacesMatch final : public API::Algorithm, public API::DeprecatedAlgorithm {
 public:
   CheckWorkspacesMatch();
 

@@ -24,6 +24,7 @@ from mantidqt.utils.qt.testing import start_qapplication
 from mantidqt.utils.testing.strict_mock import StrictMock
 from mantidqt.widgets.fitpropertybrowser.fitpropertybrowser import FitPropertyBrowser
 from workbench.plotting.figuremanager import FigureManagerADSObserver
+from mantid.plots.utility import MantidAxType
 
 from qtpy.QtWidgets import QDockWidget
 
@@ -63,7 +64,6 @@ class FitPropertyBrowserTest(unittest.TestCase):
         property_browser = self._create_widget(canvas=canvas)
         property_browser.setWorkspaceName('ws_name')
         plot([ws], spectrum_nums=[3], overplot=True, fig=fig)
-        property_browser.show()
         property_browser.setWorkspaceIndex(2)
         self.assertEqual(property_browser.workspaceIndex(), 2)
         property_browser.hide()
@@ -181,6 +181,7 @@ class FitPropertyBrowserTest(unittest.TestCase):
     def test_plot_limits_are_not_changed_when_plotting_fit_lines(self):
         fig, canvas, _ = self._create_and_plot_matrix_workspace()
         ax_limits = fig.get_axes()[0].axis()
+        canvas.draw()
         widget = self._create_widget(canvas=canvas)
         fit_ws_name = "fit_ws"
         CreateSampleWorkspace(OutputWorkspace=fit_ws_name)
@@ -281,6 +282,27 @@ class FitPropertyBrowserTest(unittest.TestCase):
 
         # it should show a linear line with intercept 2 and gradient 1
         self.assertEqual(str(func.getFunction(0)), 'name=LinearBackground,A0=2,A1=1')
+
+    def test_fit_property_browser_correctly_handles_bin_plots(self):
+        # create & plot workspace
+        fig, canvas, ws = self._create_and_plot_matrix_workspace('ws_name', distribution=True)
+
+        #set bin plot kwargs
+        plot_kwargs = {"axis": MantidAxType.BIN}
+
+        #overplot bin plot
+        plot([ws], wksp_indices=[0], plot_kwargs=plot_kwargs, fig=fig, overplot=True)
+
+        property_browser = self._create_widget(canvas=canvas)
+
+        #if only 1 spectra is returned, bin spectra has been correctly excluded, spectra correctly included
+        self.assertEqual(len(property_browser._get_allowed_spectra()),1)
+
+        #remove valid spectra plot, leaving a single bin plot
+        fig.get_axes()[0].remove_artists_if(lambda artist: artist.get_label() == 'ws_name: spec 1')
+
+        #check no spectra is now returned.
+        self.assertFalse(property_browser._get_allowed_spectra())
 
     # Private helper functions
     @classmethod

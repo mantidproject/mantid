@@ -11,7 +11,7 @@ Description
 -----------
 
 Calculates the minimum and maximum momentum transfer (Q) for a SANS workspace.
-The input workspace must have instrument defined and data in units of wavelength [Angstroms].
+The input workspace must have instrument defined and data in units of wavelength [Angstroms], or the wavelength must be present in the sample logs.
 Elastic scattering is assumed.
 Masked detectors and monitors do not enter the calculation.
 The calculated values (in inverse Angstroms) will be set in sample logs as **qmin** and **qmax** respectively.

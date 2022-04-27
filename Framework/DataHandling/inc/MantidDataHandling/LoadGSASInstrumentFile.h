@@ -22,7 +22,7 @@ namespace DataHandling {
 
 /** LoadGSASInstrumentFile : Load GSAS instrument file to TableWorkspace(s)
  */
-class DLLExport LoadGSASInstrumentFile : public API::Algorithm {
+class DLLExport LoadGSASInstrumentFile final : public API::Algorithm {
 public:
   /// Algorithm's name for identification overriding a virtual method
   const std::string name() const override { return "LoadGSASInstrumentFile"; }

@@ -83,6 +83,9 @@ DEFAULTS = {
         'prompt_save_editor_modified': True,
         'prompt_on_deleting_workspace': False,
         'save_altered_workspaces_only': False
+    },
+    'Editors': {
+        'completion_enabled': True,
     }
 }
 

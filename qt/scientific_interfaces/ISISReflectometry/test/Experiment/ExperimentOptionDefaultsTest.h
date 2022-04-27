@@ -72,18 +72,22 @@ public:
 
   void testDefaultLookupRowOptions() {
     auto result = getDefaults();
-    auto expected = LookupRow(boost::none, TransmissionRunPair(), boost::none,
+    auto expected = LookupRow(boost::none, boost::none, TransmissionRunPair(), boost::none,
                               RangeInQ(boost::none, boost::none, boost::none), boost::none, boost::none, boost::none);
-    TS_ASSERT_EQUALS(result.lookupTable().size(), 1);
-    TS_ASSERT_EQUALS(result.lookupTable().front(), expected);
+    auto foundLookupRows = result.lookupTableRows();
+    TS_ASSERT_EQUALS(foundLookupRows.size(), 1);
+    if (!foundLookupRows.empty())
+      TS_ASSERT_EQUALS(foundLookupRows.front(), expected);
   }
 
   void testValidLookupRowOptionsFromParamsFile() {
     auto result = getDefaultsFromParamsFile("Experiment");
-    auto expected = LookupRow(boost::none, TransmissionRunPair(), boost::none, RangeInQ(0.01, 0.03, 0.2), 0.7,
-                              std::string("390-415"), std::string("370-389,416-430"));
-    TS_ASSERT_EQUALS(result.lookupTable().size(), 1);
-    TS_ASSERT_EQUALS(result.lookupTable().front(), expected);
+    auto expected = LookupRow(boost::none, boost::none, TransmissionRunPair(), boost::none, RangeInQ(0.01, 0.03, 0.2),
+                              0.7, std::string("390-415"), std::string("370-389,416-430"));
+    auto foundLookupRows = result.lookupTableRows();
+    TS_ASSERT_EQUALS(foundLookupRows.size(), 1);
+    if (!foundLookupRows.empty())
+      TS_ASSERT_EQUALS(foundLookupRows.front(), expected);
   }
 
   void testInvalidLookupRowOptionsFromParamsFile() { getDefaultsFromParamsFileThrows("LookupRow_Invalid"); }

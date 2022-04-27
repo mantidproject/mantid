@@ -43,9 +43,9 @@ class BeamCentrePresenterTest(unittest.TestCase):
 
         self.presenter.on_processing_finished_centre_finder()
         for i in [self.view.rear_pos_1, self.view.rear_pos_2]:
-            self.assertEquals(1, i)
+            self.assertEqual(1, i)
         for i in [self.view.front_pos_1, self.view.front_pos_2]:
-            self.assertEquals(2, i)
+            self.assertEqual(2, i)
 
     def test_that_on_run_clicked_updates_model_from_view(self):
         self.view.left_right = False

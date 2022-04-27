@@ -34,10 +34,19 @@ The algorithms can be used as flexible building blocks in Python scripts. Not al
 
 Together with the other algorithms and services provided by the Mantid framework, the reduction algorithms can handle a great number of reduction scenarios. If this proves insufficient, however, the algorithms can be accessed using Python. Before making modifications it is recommended to copy the source files and rename the algorithms as not to break the original behavior.
 
+Additionally, there is an algorithm that streamlines the reduction process, which is the recommended way of performing the reduction:
+
+:ref:`algm-DirectILLAutoProcess`
+     Performs full data treatment of a defined reduction technique and process.
+
+The :ref:`algm-DirectILLAutoProcess` algorithm calls and properly connects inputs for the algorithms specified above to provide a simplified interface for standard reductions. The number of possible
+workflows is necessarily more limited than when calls to intermediate algorithms are made individually and from a user-defined script. The individual algorithms should be used only in case when
+the order of corrections needs changing or any other custom modifications to the standard workflow in the :ref:`algm-DirectILLAutoProcess` are necessary.
+
 This document tries to give an overview on how the algorithms work together via Python examples. Please refer to the algorithm documentation for details of each individual algorithm.
 
 Instrument specific defaults and recommendations
-################################################
+================================================
 
 Some algorithm properties have the word 'AUTO' in their default value. This means that the default will be chosen according to the instrument by reading the actual default from the instrument parameters. The documentation of the algorithms which have these types of properties includes tables showing the defaults for supported ILL instruments.
 
@@ -110,7 +119,7 @@ Output:
 
 .. testoutput:: BasicIN4Reduction
 
-    S(Q,W): Q range: 0.0...9.18A; W range -96.3...7.62meV
+    S(Q,W): Q range: 0.0...9.21A; W range -97.0...7.62meV
 
 The basic reduction for IN5 and PANTHER differs slightly with regards to the diagnostics step. In this case, the "raw" workspace is not needed, and it is not necessary to pass the EPP workspace to :ref:`algm-DirectILLDiagnostics`:
 
@@ -146,6 +155,26 @@ The basic reduction for IN5 and PANTHER differs slightly with regards to the dia
         DiagnosticsWorkspace='diagnostics'
     )
 
+The same effect can be achieved by calling the :ref:`algm-DirectILLAutoProcess` algorithm, and the syntax is the same regardless of the instrument:
+
+.. code-block:: python
+    # Vanadium
+    DirectILLAutoProcess(
+        Runs='085801-085802',
+        OutputWorkspace='vanadium',
+        ProcessAs='Vanadium',
+        ClearCache=True
+    )
+    # Sample
+    DirectILLAutoProcess(
+        Runs='087294+087295',
+        OutputWorkspace='sample',
+        ProcessAs='Sample',
+        VanadiumWorkspace='vanadium',
+        ClearCache=True
+    )
+
+
 Connecting inputs and outputs
 =============================
 
@@ -171,6 +200,8 @@ Every ``DirectILL`` algorithm has an *OutputWorkspace* property which provides t
 As shown above, these optional outputs are sometimes named similarly the corresponding inputs giving a hint were they are supposed to be used.
 
 The information regarding which numors were loaded by relevant NeXus data loaders to create the current workspace is available in the sample logs under the entry `run_list`.
+
+In the case of :ref:`algm-DirectILLAutoProcess` the connection of outputs and inputs of the workflow is handled by the algorithm internally.
 
 Time-independent background for position sensitive tubes
 ========================================================
@@ -342,7 +373,10 @@ Output:
 
 .. testoutput:: SelfShieldingReduction
 
-    S(Q,W): Q range: 0.0...9.18A; W range -96.3...7.62meV
+    S(Q,W): Q range: 0.0...9.21A; W range -97.0...7.62meV
+
+
+In the case of :ref:`algm-DirectILLAutoProcess`, the self-attenuation correction is handled internally when the `AbsorptionCorrection` property is set to either `Fast` or `Full`, which denote the granularity of the geometry to be used for calculations. Another property, `SelfAbsorptionCorrection` allows to choose whether to use Monte Carlo or numerical integration methods. Similarly to the case presented above, at least the geometry and material of the sample need of the provided as input, via `SampleMaterial` and `SampleGeometry` properties.
 
 Workspace compatibility
 =======================
@@ -379,7 +413,7 @@ Output:
 
 .. testoutput:: SampleContainerCompatibility
 
-    Sample's TOF axis starts at 966.8mus, container's at 966.8mus
+    Sample's TOF axis starts at 965.4mus, container's at 965.7mus
 
 Container subtraction
 =====================
@@ -489,7 +523,11 @@ Output:
 
 .. testoutput:: ContainerSubtraction
 
-    S(Q,W): Q range: 0.0...9.18A; W range -96.3...7.62meV
+    S(Q,W): Q range: 0.0...9.21A; W range -97.0...7.62meV
+
+Container subtraction is handled internally by the :ref:`algm-DirectILLAutoProcess` algorithm, provided the X-axis binning is compatible between the current sample and the empty container workspace.
+For the correction to be taken into account, the `EmptyContainerWorkspace` needs to be pointed to the empty container workspace.
+
 
 Interpolation of container data to different temperatures
 ---------------------------------------------------------
@@ -526,7 +564,12 @@ Sometimes the empty container is not measured at all the experiment's temperatur
     # Target sample temperature.
     Ts = 50.0
     # Linear interpolation.
-    container_50K = (T1 - Ts) / DT * mtd['container_1.5K'] + (Ts - T0) / DT * mtd['container_100K']
+    RebinToWorkspace(
+        WorkspaceToRebin='container_100K',
+	WorkspaceToMatch='container_1.5K',
+        OutputWorkspace='container_100K_rebinned1p5K'
+    )
+    container_50K = (T1 - Ts) / DT * mtd['container_1.5K'] + (Ts - T0) / DT * mtd['container_100K_rebinned1p5K']
     T_sample_logs = container_50K.run().getProperty('sample.temperature').value
     mean_T = numpy.mean(T_sample_logs)
     print('Note, that the mean temperature from the sample logs is {:.4}K, a bit off.'.format(mean_T))
@@ -661,7 +704,12 @@ Lets put it all together into a complex Python script. The script below reduces 
     T1 = 100.0
     DT = T1 - T0
     Ts = 50.0 # Target T
-    container_50K = (T1 - Ts) / DT * mtd['container_1.5K'] + (Ts - T0) / DT * mtd['container_100K']
+    RebinToWorkspace(
+        WorkspaceToRebin='container_100K',
+        WorkspaceToMatch='container_1.5K',
+        OutputWorkspace='container_100K_rebinned1p5K'
+    )
+    container_50K = (T1 - Ts) / DT * mtd['container_1.5K'] + (Ts - T0) / DT * mtd['container_100K_rebinned1p5K']
     DirectILLApplySelfShielding(
         InputWorkspace='sample_50K',
         OutputWorkspace='corrected_50K',
@@ -692,7 +740,104 @@ Output:
 
 .. testoutput:: FullExample
 
-    SofQW_1.5K: Q range: 0.0...9.18A; W range -96.3...7.62meV
-    SofQW_50K: Q range: 0.0...9.18A; W range -96.3...7.62meV
+    SofQW_1.5K: Q range: 0.0...9.21A; W range -97.0...7.62meV
+    SofQW_50K: Q range: 0.0...9.19A; W range -96.6...7.62meV
+
+And the same reduction, but with the use of the :ref:`algm-DirectILLAutoProcess`:
+
+.. testsetup:: FullExampleAutoProcess
+
+    config.setFacility('ILL')
+    config.appendDataSearchSubDir('ILL/IN4/')
+
+.. testcode:: FullExampleAutoProcess
+
+    vanadium_runs = '085801-085802'
+    sample_runs = '087294+087295,087283-087290'
+    container_runs = '087306-087309,087311-087314'
+
+    vanadium_ws = 'vanadium_auto'
+    container_ws = 'container'
+    sample_ws = 'sample'
+
+    # Sample self-shielding and container subtraction.
+    geometry = {
+        'Shape': 'HollowCylinder',
+        'Height': 4.0,
+        'InnerRadius': 1.9,
+        'OuterRadius': 2.0,
+        'Center': [0.0, 0.0, 0.0]
+    }
+    material = {
+        'ChemicalFormula': 'Cd S',
+        'SampleNumberDensity': 0.01
+    }
+    Ei = 8.804337831263577
+
+    DirectILLAutoProcess(
+        Runs=vanadium_runs,
+        OutputWorkspace=vanadium_ws,
+        ProcessAs='Vanadium',
+        ReductionType='Powder',
+        FlatBkg = 'Flat Bkg ON',
+        ElasticChannel='Elastic Channel AUTO',
+        EPPCreationMethod='Fit EPP'
+    )
+
+    DirectILLAutoProcess(
+        Runs=container_runs,
+	OutputWorkspace=container_ws,
+        ProcessAs='Empty',
+        ReductionType='Powder',
+        IncidentEnergyCalibration="Energy Calibration ON",
+        IncidentEnergy=Ei
+    )
+
+    # Need to interpolate container to 50K
+    T0 = 1.5
+    T1 = 100.0
+    DT = T1 - T0
+    Ts = 50.0 # Target T
+    RebinToWorkspace(
+        WorkspaceToRebin='container_087311_Ei9meV_T100.0K',
+        WorkspaceToMatch='container_087306_Ei9meV_T1.5K',
+        OutputWorkspace='container_087311_Ei9meV_T100.0K'
+    )
+    container_Ei9meV_50K = (T1 - Ts) / DT * mtd['container_087306_Ei9meV_T1.5K'] + (Ts - T0) / DT * mtd['container_087311_Ei9meV_T100.0K']
+    mtd[container_ws].add('container_Ei9meV_50K')
+
+    DirectILLAutoProcess(
+        Runs=sample_runs,
+        OutputWorkspace=sample_ws,
+        ProcessAs='Sample',
+        ReductionType='Powder',
+        VanadiumWorkspace=vanadium_ws,
+        EmptyContainerWorkspace=container_ws,
+        IncidentEnergyCalibration="Energy Calibration ON",
+        IncidentEnergy=Ei,
+        SampleMaterial=material,
+        SampleGeometry=geometry,
+        SaveOutput=False,
+        ClearCache=True,
+    )
+
+    outputs = ['sample_SofQW_087294_Ei9meV_T1.5K', 'sample_SofQW_087283_Ei9meV_T50.0K']
+    for output in outputs:
+        SofQW = mtd[output]
+        qAxis = SofQW.readX(0)  # Vertical axis
+        eAxis = SofQW.getAxis(1)  # Horizontal axis
+        print('{}: Q range: {:.3}...{:.3}A; W range {:.3}...{:.3}meV'.format(
+            output, qAxis[0], qAxis[-1], eAxis.getMin(), eAxis.getMax()))
+
+Output:
+
+.. testoutput:: FullExampleAutoProcess
+
+    sample_SofQW_087294_Ei9meV_T1.5K: Q range: 0.0...9.21A; W range -97.0...7.62meV
+    sample_SofQW_087283_Ei9meV_T50.0K: Q range: 0.0...9.19A; W range -96.6...7.62meV
+
+.. testcleanup:: FullExampleAutoProcess
+
+    mtd.clear()
 
 .. categories:: Techniques

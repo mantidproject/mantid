@@ -7,6 +7,13 @@
 #pragma once
 
 #include "BatchJobManagerTest.h"
+#include "test/Batch/MockReflAlgorithmFactory.h"
+
+#include <memory>
+
+using ::testing::_;
+using ::testing::Return;
+using ::testing::Throw;
 
 class BatchJobManagerProcessingTest : public CxxTest::TestSuite, public BatchJobManagerTest {
 public:
@@ -194,6 +201,30 @@ public:
     verifyAndClear();
   }
 
+  void testGetAlgorithmsWithMultipleMatchingRows() {
+    auto mockAlgFactory = std::make_unique<MockReflAlgorithmFactory>();
+    EXPECT_CALL(*mockAlgFactory, makeReductionAlgorithm(_)).Times(1).WillOnce(Throw(MultipleRowsFoundException("")));
+
+    // Create the job manager and ensure the group/row is selected for processing
+    auto jobManager = makeJobManager(twoGroupsWithARowModel(), std::move(mockAlgFactory));
+    selectGroup(jobManager, 0);
+    selectRow(jobManager, 0, 0);
+
+    // Execute the test
+    auto const algorithms = jobManager.getAlgorithms();
+
+    // Check the row was marked with an error
+    auto const &row = m_runsTable.reductionJobs().groups()[0].rows()[0].get();
+    TS_ASSERT_EQUALS(row.state(), State::ITEM_ERROR);
+    TS_ASSERT_EQUALS(row.message(),
+                     "The title and angle specified matches multiple rows in the Experiment Settings tab");
+    // Check the row was not included in the results
+    TS_ASSERT(algorithms.empty());
+
+    auto const &unprocessedRow = m_runsTable.reductionJobs().groups()[1].rows()[0].get();
+    TS_ASSERT_EQUALS(unprocessedRow.state(), State::ITEM_NOT_STARTED);
+  }
+
   void testGetAlgorithmsWithEmptyModel() {
     auto jobManager = makeJobManager();
     auto const algorithms = jobManager.getAlgorithms();
@@ -233,7 +264,7 @@ public:
     EXPECT_CALL(*m_jobAlgorithm, updateItem()).Times(1);
 
     jobManager.algorithmComplete(m_jobAlgorithm);
-    TS_ASSERT_EQUALS(row.state(), State::ITEM_COMPLETE);
+    TS_ASSERT_EQUALS(row.state(), State::ITEM_SUCCESS);
     verifyAndClear();
   }
 
@@ -250,6 +281,70 @@ public:
     TS_ASSERT_EQUALS(row.reducedWorkspaceNames().iVsLambda(), "");
     TS_ASSERT_EQUALS(row.reducedWorkspaceNames().iVsQ(), "");
     TS_ASSERT_EQUALS(row.reducedWorkspaceNames().iVsQBinned(), "");
+    verifyAndClear();
+  }
+
+  void testAlgorithmCompleteSetsParentsSingleRow() {
+    auto group = makeGroupWithOneRow();
+    Row *row = &group.mutableRows()[0].get();
+    auto jobManager = makeJobManager();
+
+    EXPECT_CALL(*m_jobAlgorithm, item()).Times(AtLeast(1)).WillRepeatedly(Return(row));
+    EXPECT_CALL(*m_jobAlgorithm, updateItem()).Times(1);
+
+    jobManager.algorithmComplete(m_jobAlgorithm);
+
+    TS_ASSERT_EQUALS(row->state(), State::ITEM_SUCCESS);
+    TS_ASSERT_EQUALS(group.state(), State::ITEM_CHILDREN_SUCCESS);
+
+    verifyAndClear();
+  }
+
+  void testAlgorithmCompleteSetsParentsMultipleRows() {
+    auto group = makeGroupWithTwoRows();
+    Row *row1 = &group.mutableRows()[0].get();
+    Row *row2 = &group.mutableRows()[1].get();
+    auto jobManager = makeJobManager();
+
+    EXPECT_CALL(*m_jobAlgorithm, item()).Times(2).WillOnce(Return(row1)).WillOnce(Return(row2));
+    EXPECT_CALL(*m_jobAlgorithm, updateItem()).Times(2);
+
+    jobManager.algorithmComplete(m_jobAlgorithm);
+
+    TS_ASSERT_EQUALS(row1->state(), State::ITEM_SUCCESS);
+    TS_ASSERT_EQUALS(row2->state(), State::ITEM_NOT_STARTED);
+    TS_ASSERT_EQUALS(group.state(), State::ITEM_NOT_STARTED);
+
+    jobManager.algorithmComplete(m_jobAlgorithm);
+
+    TS_ASSERT_EQUALS(row1->state(), State::ITEM_SUCCESS);
+    TS_ASSERT_EQUALS(row2->state(), State::ITEM_SUCCESS);
+    TS_ASSERT_EQUALS(group.state(), State::ITEM_CHILDREN_SUCCESS);
+
+    verifyAndClear();
+  }
+
+  void testAlgorithmErrorSetsParentIncomplete() {
+    auto group = makeGroupWithTwoRows();
+    Row *row1 = &group.mutableRows()[0].get();
+    Row *row2 = &group.mutableRows()[1].get();
+    auto jobManager = makeJobManager();
+
+    EXPECT_CALL(*m_jobAlgorithm, item()).Times(2).WillOnce(Return(row1)).WillOnce(Return(row2));
+    EXPECT_CALL(*m_jobAlgorithm, updateItem()).Times(1);
+
+    jobManager.algorithmError(m_jobAlgorithm, "row1 invalid");
+
+    TS_ASSERT_EQUALS(row1->state(), State::ITEM_ERROR);
+    TS_ASSERT_EQUALS(row2->state(), State::ITEM_NOT_STARTED);
+    TS_ASSERT_EQUALS(group.state(), State::ITEM_NOT_STARTED);
+
+    jobManager.algorithmComplete(m_jobAlgorithm);
+
+    TS_ASSERT_EQUALS(row1->state(), State::ITEM_ERROR);
+    TS_ASSERT_EQUALS(row2->state(), State::ITEM_SUCCESS);
+    TS_ASSERT_EQUALS(group.state(), State::ITEM_NOT_STARTED);
+
     verifyAndClear();
   }
 };

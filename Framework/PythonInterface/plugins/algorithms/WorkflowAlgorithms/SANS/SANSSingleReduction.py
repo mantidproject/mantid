@@ -16,6 +16,7 @@ from mantid.simpleapi import CloneWorkspace
 from sans.algorithm_detail.single_execution import (run_core_reduction, run_optimized_for_can)
 from sans.common.enums import (DataType, ReductionMode)
 from sans.common.general_functions import does_can_workspace_exist_on_ads
+from sans.data_objects.sans_workflow_algorithm_outputs import SANSWorkflowAlgorithmOutputs
 
 
 class SANSSingleReduction(SANSSingleReductionBase):
@@ -42,7 +43,10 @@ class SANSSingleReduction(SANSSingleReductionBase):
                              doc='The output workspace for the low-angle bank.')
         self.declareProperty(WorkspaceGroupProperty('OutputWorkspaceHAB', '',
                                                     optional=PropertyMode.Optional, direction=Direction.Output),
-                             doc='The output workspace for the high-angle bank.')
+                             doc='The output workspace for the high-angle bank.'),
+        self.declareProperty(WorkspaceGroupProperty('OutputWorkspaceHABScaled', '',
+                                                    optional=PropertyMode.Optional, direction=Direction.Output),
+                             doc='The scaled output HAB workspace when merging')
         self.declareProperty(WorkspaceGroupProperty('OutputWorkspaceMerged', '',
                                                     optional=PropertyMode.Optional, direction=Direction.Output),
                              doc='The output workspace for the merged reduction.')
@@ -50,6 +54,7 @@ class SANSSingleReduction(SANSSingleReductionBase):
         self.setPropertyGroup("OutShiftFactor", 'Output')
         self.setPropertyGroup("OutputWorkspaceLAB", 'Output')
         self.setPropertyGroup("OutputWorkspaceHAB", 'Output')
+        self.setPropertyGroup("OutputWorkspaceHABScaled", 'Output')
         self.setPropertyGroup("OutputWorkspaceMerged", 'Output')
 
         # CAN output
@@ -149,34 +154,34 @@ class SANSSingleReduction(SANSSingleReductionBase):
         self.setProperty("OutScaleFactor", scale_factors[0])
         self.setProperty("OutShiftFactor", shift_factors[0])
 
-    def set_output_workspaces(self, reduction_mode_vs_output_workspaces, reduction_mode_vs_workspace_names):
+    def set_output_workspaces(self, workflow_outputs: SANSWorkflowAlgorithmOutputs):
         """
         Sets the output workspaces which can be HAB, LAB or Merged.
 
         At this step we also provide a workspace name to the sample logs which can be used later on for saving
-        :param reduction_mode_vs_output_workspaces:  map from reduction mode to output workspace
-        :param reduction_mode_vs_workspace_names: an unused dict. Required for version 2 compatibility
+        :param workflow_outputs:  collection of wavelength sliced and reduced workspaces
         """
         # Note that this breaks the flexibility that we have established with the reduction mode. We have not hardcoded
         # HAB or LAB anywhere which means that in the future there could be other detectors of relevance. Here we
         # reference HAB and LAB directly since we currently don't want to rely on dynamic properties. See also in PyInit
 
-        merged, lab, hab = WorkspaceGroup(), WorkspaceGroup(), WorkspaceGroup()
+        merged, lab, hab, scaled = WorkspaceGroup(), WorkspaceGroup(), WorkspaceGroup(), WorkspaceGroup()
 
-        for reduction_mode, output_workspace_list in reduction_mode_vs_output_workspaces.items():
-            for output_workspace in output_workspace_list:
-                if reduction_mode is ReductionMode.MERGED:
-                    merged.addWorkspace(output_workspace)
-                elif reduction_mode is ReductionMode.LAB:
-                    lab.addWorkspace(output_workspace)
-                elif reduction_mode is ReductionMode.HAB:
-                    hab.addWorkspace(output_workspace)
-                else:
-                    raise RuntimeError("SANSSingleReduction: Cannot set the output workspace. The selected reduction "
-                                       "mode {0} is unknown.".format(reduction_mode))
+        for ws in workflow_outputs.lab_output:
+            lab.addWorkspace(ws)
+
+        for ws in workflow_outputs.hab_output:
+            hab.addWorkspace(ws)
+
+        for ws in workflow_outputs.merged_output:
+            merged.addWorkspace(ws)
+
+        for ws in workflow_outputs.scaled_hab_output:
+            scaled.addWorkspace(ws)
 
         self._set_prop_if_group_has_data("OutputWorkspaceLAB", lab)
         self._set_prop_if_group_has_data("OutputWorkspaceHAB", hab)
+        self._set_prop_if_group_has_data("OutputWorkspaceHABScaled", scaled)
         self._set_prop_if_group_has_data("OutputWorkspaceMerged", merged)
 
     def set_reduced_can_workspace_on_output(self, completed_event_bundled):

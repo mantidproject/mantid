@@ -47,7 +47,7 @@ data to be added.</LI>
 @author Anders Markvardsen, ISIS, RAL
 @date 2/5/2008
 */
-class DLLExport LoadInstrumentFromRaw : public API::Algorithm {
+class DLLExport LoadInstrumentFromRaw final : public API::Algorithm {
 public:
   /// Default constructor
   LoadInstrumentFromRaw();

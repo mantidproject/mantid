@@ -44,8 +44,8 @@ class PropertiesDialogTest(unittest.TestCase):
         xEditor = XAxisEditor(fig.canvas, ax)
         yEditor = YAxisEditor(fig.canvas, ax)
         # test grid visibility
-        self.assertEqual(xEditor._memento.grid, ax.xaxis._gridOnMajor)
-        self.assertEqual(yEditor._memento.grid, ax.yaxis._gridOnMajor)
+        self.assertEqual(xEditor._memento.grid, ax.xaxis._major_tick_kw['gridOn'])
+        self.assertEqual(yEditor._memento.grid, ax.yaxis._major_tick_kw['gridOn'])
         # test limits
         self.assertEqual(xEditor._memento.min, ax.get_xlim()[0])
         self.assertEqual(xEditor._memento.max, ax.get_xlim()[1])

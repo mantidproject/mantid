@@ -228,6 +228,24 @@ Artist Axes::text(double x, double y, const QString &text, const char *horizonta
 }
 
 /**
+ * Add an arbitrary text label to the canvas
+ * @param x X position in data coordinates
+ * @param y Y position in data coordinates
+ * @param text The string to attach to the canvas
+ * @param horizontalAlignment A string indicating the horizontal
+ * @param transform A transform object to
+ * alignment of the string
+ */
+
+Artist Axes::text(double x, double y, const QString &text, const char *horizontalAlignment, Transform transform) {
+  GlobalInterpreterLock lock;
+  auto args = Python::NewRef(Py_BuildValue("(ffs)", x, y, text.toLatin1().constData()));
+  auto kwargs = Python::NewRef(
+      Py_BuildValue("{sssO}", "horizontalalignment", horizontalAlignment, "transform", transform.pyobj().ptr()));
+  return Artist(pyobj().attr("text")(*args, **kwargs));
+}
+
+/**
  * @brief Set the X-axis scale to the given value.
  * @param value New scale type. See
  * https://matplotlib.org/api/_as_gen/matplotlib.axes.Axes.set_xscale.html
@@ -337,6 +355,16 @@ void Axes::autoscaleView(bool scaleX, bool scaleY) {
  */
 void Axes::autoscaleView(bool tight, bool scaleX, bool scaleY) {
   callMethodNoCheck<void, bool, bool, bool>(pyobj(), "autoscale_view", tight, scaleX, scaleY);
+}
+
+/**
+ * Returns the blended transform that treats X in data coordinates and Y in axes coordinates
+ * https://matplotlib.org/stable/tutorials/advanced/transforms_tutorial.html#blended-transformations
+ * @return An instance of a matplotlib.transforms.Transform
+ */
+Transform Axes::getXAxisTransform() const {
+  GlobalInterpreterLock lock;
+  return Transform(pyobj().attr("get_xaxis_transform")());
 }
 
 } // namespace MantidQt::Widgets::MplCpp

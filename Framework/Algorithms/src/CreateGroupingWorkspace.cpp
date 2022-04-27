@@ -619,16 +619,16 @@ void CreateGroupingWorkspace::exec() {
 
           PRAGMA_OMP(parallel for schedule(dynamic, 1) )
           for (int num = 0; num < 300; ++num) {
-            PARALLEL_START_INTERUPT_REGION
+            PARALLEL_START_INTERRUPT_REGION
             std::ostringstream mess;
             mess << grouping << num;
             IComponent_const_sptr comp = inst->getComponentByName(mess.str(), maxRecurseDepth);
             PARALLEL_CRITICAL(GroupNames)
             if (comp)
               GroupNames += mess.str() + ",";
-            PARALLEL_END_INTERUPT_REGION
+            PARALLEL_END_INTERRUPT_REGION
           }
-          PARALLEL_CHECK_INTERUPT_REGION
+          PARALLEL_CHECK_INTERRUPT_REGION
     }
   }
 

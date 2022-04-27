@@ -20,8 +20,8 @@ class FittingTabPresenterTest(unittest.TestCase):
 
         groups, pairs, diffs, description, default = load_grouping_from_XML(filename)
 
-        self.assertEquals(description, 'emu longitudinal (96 detectors)')
-        self.assertEquals(default, 'long')
+        self.assertEqual(description, 'emu longitudinal (96 detectors)')
+        self.assertEqual(default, 'long')
 
     def test_load_grouping_copes_with_no_default_name_specified(self):
         directory = ConfigService['instrumentDefinition.directory']
@@ -29,8 +29,8 @@ class FittingTabPresenterTest(unittest.TestCase):
 
         groups, diffs, pairs, description, default = load_grouping_from_XML(filename)
 
-        self.assertEquals(description, filename)
-        self.assertEquals(default, '')
+        self.assertEqual(description, filename)
+        self.assertEqual(default, '')
 
     @mock.patch('mantidqtinterfaces.Muon.GUI.Common.utilities.xml_utils.ET.parse')
     def test_that_save_and_load_grouping_xml_correctly_stores_and_reads_period_data(self, mock_file_parse):

@@ -1,0 +1,1 @@
+- :ref:`LoadPLN <algm-LoadPLN>` now supports loading ANSTO PELICAN data during event capture mid experiment as a cross check for long experiments.

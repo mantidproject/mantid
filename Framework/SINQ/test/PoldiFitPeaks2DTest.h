@@ -438,6 +438,6 @@ private:
 
   public:
     TestablePoldiFitPeaks2D() : PoldiFitPeaks2D() {}
-    ~TestablePoldiFitPeaks2D() override {}
+    ~TestablePoldiFitPeaks2D() override = default;
   };
 };

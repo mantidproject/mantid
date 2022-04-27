@@ -10,6 +10,7 @@
 #include "Experiment.h"
 #include "IBatch.h"
 #include "Instrument.h"
+#include "Reduction/LookupRow.h"
 #include "RunsTable.h"
 #include "Slicing.h"
 
@@ -25,24 +26,32 @@ namespace ISISReflectometry {
     The Batch model holds the entire reduction configuration for a batch of
     runs.
 */
-class MANTIDQT_ISISREFLECTOMETRY_DLL Batch : public IBatch {
+class MANTIDQT_ISISREFLECTOMETRY_DLL Batch final : public IBatch {
 public:
   Batch(Experiment const &experiment, Instrument const &instrument, RunsTable &runsTable, Slicing const &slicing);
 
-  Experiment const &experiment() const;
-  Instrument const &instrument() const;
-  RunsTable const &runsTable() const;
-  RunsTable &mutableRunsTable();
-  Slicing const &slicing() const;
+  Experiment const &experiment() const override;
+  Instrument const &instrument() const override;
+  RunsTable const &runsTable() const override;
+  RunsTable &mutableRunsTable() override;
+  Slicing const &slicing() const override;
 
-  std::vector<MantidWidgets::Batch::RowLocation> selectedRowLocations() const;
-  std::vector<Group> selectedGroups() const;
-  template <typename T>
-  bool isInSelection(T const &item, std::vector<MantidWidgets::Batch::RowLocation> const &selectedRowLocations) const;
-  LookupRow const *findLookupRow(boost::optional<double> thetaAngle = boost::none) const;
-  void resetState();
-  void resetSkippedItems();
-  boost::optional<Item &> getItemWithOutputWorkspaceOrNone(std::string const &wsName);
+  std::vector<MantidWidgets::Batch::RowLocation> selectedRowLocations() const override;
+  bool isInSelection(const Item &item,
+                     const std::vector<MantidWidgets::Batch::RowLocation> &selectedRowLocations) override;
+  bool isInSelection(const Row &item,
+                     const std::vector<MantidWidgets::Batch::RowLocation> &selectedRowLocations) override;
+  bool isInSelection(const Group &item,
+                     const std::vector<MantidWidgets::Batch::RowLocation> &selectedRowLocations) override;
+  boost::optional<LookupRow> findLookupRow(Row const &row) const override;
+  boost::optional<LookupRow> findWildcardLookupRow() const override;
+  void resetState() override;
+  void resetSkippedItems() override;
+  boost::optional<Item &> getItemWithOutputWorkspaceOrNone(std::string const &wsName) override;
+
+  void updateLookupIndex(Row &row) override;
+  void updateLookupIndexesOfGroup(Group &group) override;
+  void updateLookupIndexesOfTable() override;
 
 private:
   Experiment const &m_experiment;
@@ -51,11 +60,6 @@ private:
   Slicing const &m_slicing;
 };
 
-template <typename T>
-bool Batch::isInSelection(T const &item,
-                          std::vector<MantidWidgets::Batch::RowLocation> const &selectedRowLocations) const {
-  return m_runsTable.isInSelection(item, selectedRowLocations);
-}
 } // namespace ISISReflectometry
 } // namespace CustomInterfaces
 } // namespace MantidQt

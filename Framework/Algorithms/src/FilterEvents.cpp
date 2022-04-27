@@ -1617,7 +1617,7 @@ void FilterEvents::filterEventsBySplitters(double progressamount) {
   // FIXME - Turn on parallel:
   PARALLEL_FOR_NO_WSP_CHECK()
   for (int64_t iws = 0; iws < int64_t(numberOfSpectra); ++iws) {
-    PARALLEL_START_INTERUPT_REGION
+    PARALLEL_START_INTERRUPT_REGION
 
     // Filter the non-skipped
     if (!m_vecSkip[iws]) {
@@ -1644,9 +1644,9 @@ void FilterEvents::filterEventsBySplitters(double progressamount) {
       }
     }
 
-    PARALLEL_END_INTERUPT_REGION
+    PARALLEL_END_INTERRUPT_REGION
   } // END FOR i = 0
-  PARALLEL_CHECK_INTERUPT_REGION
+  PARALLEL_CHECK_INTERRUPT_REGION
 
   // Split the sample logs in each target workspace.
   progress(0.1 + progressamount, "Splitting logs");
@@ -1687,7 +1687,7 @@ void FilterEvents::filterEventsByVectorSplitters(double progressamount) {
 
   PARALLEL_FOR_NO_WSP_CHECK()
   for (int64_t iws = 0; iws < int64_t(numberOfSpectra); ++iws) {
-    PARALLEL_START_INTERUPT_REGION
+    PARALLEL_START_INTERRUPT_REGION
 
     // Filter the non-skipped spectrum
     if (!m_vecSkip[iws]) {
@@ -1723,9 +1723,9 @@ void FilterEvents::filterEventsByVectorSplitters(double progressamount) {
         g_log.notice(logmessage);
     }
 
-    PARALLEL_END_INTERUPT_REGION
+    PARALLEL_END_INTERRUPT_REGION
   } // END FOR i = 0
-  PARALLEL_CHECK_INTERUPT_REGION
+  PARALLEL_CHECK_INTERRUPT_REGION
 
   // Finish (1) adding events and splitting the sample logs in each target
   // workspace.

@@ -119,9 +119,7 @@ class FrequencyAnalysisPlotWidgetTest(unittest.TestCase):
 
         self.context.update_plots_notifier.add_subscriber = mock.Mock()
         self.context.deleted_plots_notifier.add_subscriber = mock.Mock()
-
         self.widget.insert_plot_panes()
-
         self.context.update_plots_notifier.add_subscriber.assert_any_call("data 1")
         self.context.update_plots_notifier.add_subscriber.assert_any_call("fit 2")
         self.context.update_plots_notifier.add_subscriber.assert_any_call("maxent 3")

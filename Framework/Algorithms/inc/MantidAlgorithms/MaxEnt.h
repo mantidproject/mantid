@@ -23,6 +23,7 @@ namespace Algorithms {
 
 class MANTID_ALGORITHMS_DLL MaxEnt : public API::Algorithm {
 public:
+  virtual ~MaxEnt() = default;
   /// Algorithm's name
   const std::string name() const override;
   /// Algorithm's version

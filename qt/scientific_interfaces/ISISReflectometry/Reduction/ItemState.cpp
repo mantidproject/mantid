@@ -31,7 +31,7 @@ void ItemState::setStarting() { m_state = State::ITEM_STARTING; }
 
 void ItemState::setRunning() { m_state = State::ITEM_RUNNING; }
 
-void ItemState::setSuccess() { m_state = State::ITEM_COMPLETE; }
+void ItemState::setSuccess() { m_state = State::ITEM_SUCCESS; }
 
 void ItemState::setWarning(std::string const &message) {
   m_state = State::ITEM_WARNING;
@@ -42,6 +42,8 @@ void ItemState::setError(std::string const &message) {
   m_state = State::ITEM_ERROR;
   m_message = message;
 }
+
+void ItemState::setChildrenSuccess() { m_state = State::ITEM_CHILDREN_SUCCESS; }
 
 void ItemState::reset() {
   m_state = State::ITEM_NOT_STARTED;

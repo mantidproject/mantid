@@ -123,6 +123,15 @@ class DrillProcessSANSTest(systemtesting.MantidSystemTest):
                            "CalculateResolution": "MildnerCarpenter",
                            "TransmissionBeamRadius": "0.2"})
 
+        # remove all exports
+        QTest.mouseClick(self.drill.export, Qt.LeftButton)
+        ew = self.drill.children()[-1]
+        for i in range(ew.algoList.rowCount()):
+            widget = ew.algoList.itemAtPosition(i,0).widget()
+            if isinstance(widget, QCheckBox) and widget.isChecked():
+                QTest.mouseClick(widget, Qt.LeftButton)
+        QTest.mouseClick(ew.okButton, Qt.LeftButton)
+
         self.editCell(0, "SampleRuns", sampleRuns[0])
         self.editCell(0, "SampleTransmissionRuns", sampleTransmissionRuns[0])
         self.editCell(0, "BeamRuns", beamRuns)

@@ -22,7 +22,7 @@ public:
 
   AlgorithmFactoryTest() {}
 
-  ~AlgorithmFactoryTest() override {}
+  ~AlgorithmFactoryTest() override = default;
 
   void testSubscribe() {
     std::unique_ptr<Mantid::Kernel::AbstractInstantiator<Algorithm>> newTwo =

@@ -6,9 +6,10 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 
 import numbers
-from typing import Optional, Union, Tuple
+from typing import Optional, Union
 
 import numpy as np
+from scipy.special import factorial
 
 from abins import AbinsData, FrequencyPowderGenerator, SData, SDataByAngle
 from abins.constants import CM1_2_HARTREE, K_2_HARTREE, FLOAT_TYPE, INT_TYPE, MIN_SIZE
@@ -114,12 +115,13 @@ class SPowderSemiEmpiricalCalculator:
         self._bin_centres = self._bins[:-1] + (bin_width / 2)
 
         if self._autoconvolution:
-            fine_bin_factor = abins.parameters.autoconvolution['fine_bin_factor']
+            self._fine_bin_factor = abins.parameters.autoconvolution['fine_bin_factor']
             self._fine_bins = np.arange(start=abins.parameters.sampling['min_wavenumber'],
                                         stop=(abins.parameters.sampling['max_wavenumber'] + bin_width),
-                                        step=(bin_width / fine_bin_factor),
+                                        step=(bin_width / self._fine_bin_factor),
                                         dtype=FLOAT_TYPE)
-            self._fine_bin_centres = self._fine_bins[:-1] + (bin_width / fine_bin_factor / 2)
+            self._fine_bin_centres = self._fine_bins[:-1] + (bin_width / self._fine_bin_factor / 2)
+            self._fine_bin_width = self._fine_bins[1] - self._fine_bins[0]
 
         else:
             self._fine_bins = None
@@ -326,19 +328,18 @@ class SPowderSemiEmpiricalCalculator:
         # Initialize the main data container
         sdata = self._get_empty_sdata(use_fine_bins=self._autoconvolution, max_order=self._quantum_order_num)
 
-        # Compute order 1 structure factor and corresponding DW contributions
-        if isotropic_fundamentals:
-            min_order = 1
-        else:
-            fundamentals_sdata, fundamentals_sdata_with_dw = self._calculate_fundamentals_over_k(angle=angle)
-            if autoconvolution:
-                sdata.update(fundamentals_sdata)  # These pre-DW fundamentals are needed for autoconvolution
-            min_order = 2
+        # Get q^2 series corresponding to energy bins
+        q2 = self._instrument.calculate_q_powder(input_data=self._bin_centres, angle=angle)
 
-        # Collect SData without DW factors
-        if isotropic_fundamentals or self._quantum_order_num > 1:
+        if self._quantum_order_num == 1 or self._autoconvolution:
+            min_order = 1  # Need fundamentals without DW
+        else:
+            min_order = 2  # Skip fundamentals to be calculated separately
+
+        # Collect SData at q = 1/Å without DW factors
+        if isotropic_fundamentals or self._quantum_order_num > 1 or self._autoconvolution:
             for k_index in range(self._num_k):
-                _ = self._calculate_s_powder_over_atoms(k_index=k_index, angle=angle,
+                _ = self._calculate_s_powder_over_atoms(k_index=k_index, q2=1.,
                                                         bins=(self._fine_bins if self._autoconvolution else self._bins),
                                                         sdata=sdata, min_order=min_order)
 
@@ -348,10 +349,21 @@ class SPowderSemiEmpiricalCalculator:
                                   f"analytic powder-averaging. "
                                   f"Adding autoconvolution data up to order {max_dw_order}.",
                                   reporter=self.progress_reporter)
+
             sdata.add_autoconvolution_spectra()
             sdata = sdata.rebin(self._bins)  # Don't need fine bins any more, so reduce cost of remaining steps
 
+            # Apply appropriate q-dependence to each order, along with 1/(n!) term
+            factorials = factorial(range(1, max_dw_order + 1))[:, np.newaxis]
+            factorials[:min_order + 1] = 1.  # Remove 1/n! for orders that were explicitly calculated
+
+            q2n_over_n_factorial = q2 ** np.arange(1, max_dw_order + 1)[:, np.newaxis] / factorials
+            sdata *= q2n_over_n_factorial
+
         else:
+            q2n = q2 ** np.arange(1, self._quantum_order_num + 1)[:, np.newaxis]
+            sdata *= q2n
+
             self._report_progress(f"Finished calculating SData to order {self._quantum_order_num} by analytic powder-averaging.",
                                   reporter=self.progress_reporter)
             max_dw_order = self._quantum_order_num
@@ -359,22 +371,25 @@ class SPowderSemiEmpiricalCalculator:
         if isotropic_fundamentals or (self._quantum_order_num > 1) or autoconvolution:
             self._report_progress(f"Applying isotropic Debye-Waller factor to orders {min_order} and above.",
                                   reporter=self.progress_reporter)
-            iso_dw = self.calculate_isotropic_dw(angle=angle)
+            iso_dw = self.calculate_isotropic_dw(q2=q2)
             sdata.apply_dw(iso_dw, min_order=min_order, max_order=max_dw_order)
 
+        # Finally we (re)calculate the first-order spectrum with more accurate DW method
         if not isotropic_fundamentals:
-            sdata.update(fundamentals_sdata_with_dw)  # Replace fundamentals with more sophisticated DW
+            self._report_progress(
+                "Calculating fundamentals with mode-dependent Debye-Waller factor.",
+                reporter=self.progress_reporter)
+
+            fundamentals_sdata_with_dw = self._calculate_fundamentals_over_k(angle=angle)
+            sdata.update(fundamentals_sdata_with_dw)
 
         return sdata
 
-    def calculate_isotropic_dw(self, *, angle: float) -> np.ndarray:
+    def calculate_isotropic_dw(self, *, q2: np.ndarray) -> np.ndarray:
         """Compute Debye-Waller factor in isotropic approximation for current system
 
         Returns an N_atoms x N_frequencies array.
         """
-
-        q2 = self._instrument.calculate_q_powder(input_data=self._bin_centres, angle=angle)
-
         average_a_traces = np.sum([self._powder_data.get_a_traces(k_index) * kpoint.weight
                                   for k_index, kpoint in enumerate(self._abins_data.get_kpoints_data())],
                                   axis=0)
@@ -425,9 +440,11 @@ class SPowderSemiEmpiricalCalculator:
                      temperature = sdata.get_temperature(),
                      sample_form = sdata.get_sample_form())
 
-    def _calculate_fundamentals_over_k(self, *, angle: float) -> Tuple[SData, SData]:
+    def _calculate_fundamentals_over_k(self,
+                                       angle: float = None,
+                                       q2: np.ndarray = None) -> SData:
         """
-        Calculate order-1 incoherent S with and without DW corrections
+        Calculate order-1 incoherent S with mode-dependent DW correction
 
         Atomic cross-sections are not included at this stage.
         Values are averaged over the k-points included in self._abins_data.
@@ -435,18 +452,29 @@ class SPowderSemiEmpiricalCalculator:
         If autoconvolution is to be applied, the base S values will be binned to a fine energy grid.
         The DW-corrected values are always binned to the standard energy grid.
 
+        Either angle or q2 must be provided.
+
+        Args:
+            angle:
+                Scattering angle in degrees (used to calculate q-points corresponding to energies)
+            q2:
+                Fixed q-point(s) - related to energies by numpy broadcasting
+                (i.e. scalar used for all energies, row vector corresponds to
+                energies, column vector adds q-sampling dimension).
+
         returns:
-            Tuple of two SData with the base S and Debye-Waller-corrected
+            SData for fundamentals including mode-dependent Debye-Waller factor
 
         """
-        fundamentals_sdata = self._get_empty_sdata(use_fine_bins=self._autoconvolution, max_order=1)
-        fundamentals_sdata_with_dw = self._get_empty_sdata(use_fine_bins=False, max_order=1)
+        if not (angle is None) ^ (q2 is None):  # XNOR
+            raise ValueError("Exactly one should be set: angle or q2")
 
-        s_bins = self._fine_bins if self._autoconvolution else self._bins
+        fundamentals_sdata_with_dw = self._get_empty_sdata(use_fine_bins=False, max_order=1)
 
         for k_index, kpoint in enumerate(self._abins_data.get_kpoints_data()):
             frequencies = self._powder_data.get_frequencies()[k_index]
-            q2 = self._instrument.calculate_q_powder(input_data=frequencies, angle=angle)
+            if angle is not None:
+                q2 = self._instrument.calculate_q_powder(input_data=frequencies, angle=angle)
 
             a_tensors = self._powder_data.get_a_tensors()[k_index]
             a_traces = self._powder_data.get_a_traces(k_index)
@@ -454,36 +482,41 @@ class SPowderSemiEmpiricalCalculator:
             b_traces = self._powder_data.get_b_traces(k_index)
 
             for atom_index, atom_label in enumerate(self._abins_data.get_atoms_data().extract()):
-                s, s_with_dw = self._calculate_order_one(q2=q2,
-                                                         frequencies=frequencies,
-                                                         a_tensor=a_tensors[atom_index],
-                                                         a_trace=a_traces[atom_index],
-                                                         b_tensor=b_tensors[atom_index],
-                                                         b_trace=b_traces[atom_index],
-                                                         include_dw=True)
+                s = self._calculate_order_one(q2=q2,
+                                              frequencies=frequencies,
+                                              a_tensor=a_tensors[atom_index],
+                                              a_trace=a_traces[atom_index],
+                                              b_tensor=b_tensors[atom_index],
+                                              b_trace=b_traces[atom_index])
 
-                rebinned_s, _ = np.histogram(frequencies, bins=s_bins,
-                                             weights=(s * kpoint.weight), density=False)
+                dw = self._calculate_order_one_dw(q2=q2,
+                                                  frequencies=frequencies,
+                                                  a_tensor=a_tensors[atom_index],
+                                                  a_trace=a_traces[atom_index],
+                                                  b_tensor=b_tensors[atom_index],
+                                                  b_trace=b_traces[atom_index])
+
                 rebinned_s_with_dw, _ = np.histogram(frequencies, bins=self._bins,
-                                                     weights=(s_with_dw * kpoint.weight), density=False)
+                                                     weights=(s * dw * kpoint.weight), density=False)
 
-                fundamentals_sdata.add_dict({atom_label: {'s': {'order_1': rebinned_s}}})
                 fundamentals_sdata_with_dw.add_dict({atom_label: {'s': {'order_1': rebinned_s_with_dw}}})
 
-        return fundamentals_sdata, fundamentals_sdata_with_dw
+        return fundamentals_sdata_with_dw
 
     def _calculate_s_powder_over_atoms(self, *, k_index: int,
-                                       angle: float,
+                                       q2: np.ndarray,
                                        sdata: SData,
                                        bins: np.ndarray,
                                        min_order: int = 1) -> None:
         """
         Evaluates S for all atoms for the given q-point and checks if S is consistent.
 
+        Debye-Waller terms are not included at this stage.
+
         Powder data should have already been initialised and stored in self._powder_data
 
         :param k_index: Index of k-point from calculated phonon data
-        :param angle: Scattering angle determining energy-q relationship
+        :param q2: Array of squared absolute q-point values in angstrom^-2. (Columns correspond to energies.)
         :param sdata: Data container to which results will be summed in-place
         :param bins: Frequency bins consistent with sdata
         :param min_order: Lowest quantum order to evaluate. (The max is determined by self._quantum_order_num.)
@@ -492,18 +525,18 @@ class SPowderSemiEmpiricalCalculator:
         assert min_order in (1, 2)  # Cannot start higher than 2; need information about combinations
 
         for atom_index in range(self._num_atoms):
-            self._report_progress(msg=f'Calculating S for atom {atom_index}, k-point {k_index}, {angle} degrees',
+            self._report_progress(msg=f'Calculating S for atom {atom_index}, k-point {k_index}',
                                   reporter=self.progress_reporter)
-            self._calculate_s_powder_one_atom(atom_index=atom_index, k_index=k_index, angle=angle,
+            self._calculate_s_powder_one_atom(atom_index=atom_index, k_index=k_index, q2=q2,
                                               sdata=sdata, bins=bins, min_order=min_order)
 
-    def _calculate_s_powder_one_atom(self, *, atom_index: int, k_index: int, angle: float,
+    def _calculate_s_powder_one_atom(self, *, atom_index: int, k_index: int, q2: np.ndarray,
                                      sdata: SData, bins: np.ndarray,
                                      min_order: int = 1) -> None:
         """
         :param atom_index: number of atom
         :param k_index: Index of k-point in phonon data
-        :param angle: Scattering angle determining energy-q relationship
+        :param q2: Array of squared absolute q-point values in angstrom^-2. (Columns correspond to energies.)
         :sdata: Data container to which results will be summed in-place
         :bins: Frequency bins consistent with sdata
         :min_order: Lowest quantum order to evaluate. (The max is determined by self._quantum_order_num.)
@@ -524,9 +557,7 @@ class SPowderSemiEmpiricalCalculator:
         b_trace = self._powder_data.get_b_traces(k_index)[atom_index]
 
         calculate_order = {1: self._calculate_order_one,
-                           2: self._calculate_order_two,
-                           3: self._calculate_order_three,
-                           4: self._calculate_order_four}
+                           2: self._calculate_order_two}
 
         # Chunking to save memory has been removed pending closer examination
         for order in range(min_order, self._quantum_order_num + 1):
@@ -536,7 +567,6 @@ class SPowderSemiEmpiricalCalculator:
                 fundamentals_array=fundamentals,
                 fundamentals_coefficients=fund_coeff,
                 quantum_order=order)
-            q2 = self._instrument.calculate_q_powder(input_data=frequencies, angle=angle)
 
             scattering_intensities = calculate_order[order](
                 q2=q2, frequencies=frequencies, indices=coefficients,
@@ -576,10 +606,34 @@ class SPowderSemiEmpiricalCalculator:
 
         return freq, coeff
 
+    def _calculate_order_one_dw(self, *, q2: np.ndarray,
+                                frequencies: np.ndarray,
+                                a_tensor=None, a_trace=None,
+                                b_tensor=None, b_trace=None):
+        """
+        Calculate mode-dependent Debye-Waller factor for the first order quantum event for one atom.
+        :param q2: squared values of momentum transfer vectors
+        :param frequencies: frequencies for which transitions occur
+        :param a_tensor: total MSD tensor for the given atom
+        :param a_trace: total MSD trace for the given atom
+        :param b_tensor: frequency dependent MSD tensor for the given atom
+        :param b_trace: frequency dependent MSD trace for the given atom
+        :returns: s for the first quantum order event for the given atom
+        """
+        trace_ba = np.einsum('kli, il->k', b_tensor, a_tensor)
+        if self._temperature < np.finfo(type(self._temperature)).eps:
+            coth = 1.
+        else:
+            coth = 1.0 / np.tanh(frequencies * CM1_2_HARTREE
+                                 / (2.0 * self._temperature * K_2_HARTREE))
+        dw = np.exp(-q2 * (a_trace + 2.0 * trace_ba / b_trace) / 5.0 * coth * coth)
+
+        return dw
+
     def _calculate_order_one(self, *, q2: np.ndarray, frequencies: np.ndarray,
                              a_tensor=None, a_trace=None,
                              b_tensor=None, b_trace=None,
-                             indices=None, include_dw=False):
+                             indices=None):
         """
         Calculates S for the first order quantum event for one atom.
         :param q2: squared values of momentum transfer vectors
@@ -592,22 +646,7 @@ class SPowderSemiEmpiricalCalculator:
         :param include_dw: Include (mode-dependent) Debye-Waller temperature effect
         :returns: s for the first quantum order event for the given atom
         """
-        s = q2 * b_trace / 3.0
-
-        if include_dw:
-            trace_ba = np.einsum('kli, il->k', b_tensor, a_tensor)
-            if self._temperature < np.finfo(type(self._temperature)).eps:
-                coth = 1.
-            else:
-                coth = 1.0 / np.tanh(frequencies * CM1_2_HARTREE
-                                     / (2.0 * self._temperature * K_2_HARTREE))
-            dw = np.exp(-q2 * (a_trace + 2.0 * trace_ba / b_trace) / 5.0 * coth * coth)
-
-            s_with_dw = s * dw
-
-            return s, s_with_dw
-        else:
-            return s
+        return q2 * b_trace / 3.0
 
     def _calculate_order_two(self, q2=None, frequencies=None, indices=None, a_tensor=None, a_trace=None,
                              b_tensor=None, b_trace=None):
@@ -654,40 +693,4 @@ class SPowderSemiEmpiricalCalculator:
                   + np.einsum('kli, kil->k',
                               np.take(b_tensor, indices=indices[:, 1], axis=0),
                               np.take(b_tensor, indices=indices[:, 0], axis=0))) / (30.0 * factor)
-        return s
-
-    # noinspection PyUnusedLocal,PyUnusedLocal
-    def _calculate_order_three(self, q2=None, frequencies=None, indices=None, a_tensor=None, a_trace=None,
-                               b_tensor=None, b_trace=None):
-        """
-        Calculates S for the third order quantum event for one atom.
-        :param q2: squared values of momentum transfer vectors
-        :param frequencies: frequencies for which transitions occur
-        :param indices: array which stores information how transitions can be decomposed in terms of fundamentals
-        :param a_tensor: total MSD tensor for the given atom
-        :param a_trace: total MSD trace for the given atom
-        :param b_tensor: frequency dependent MSD tensor for the given atom
-        :param b_trace: frequency dependent MSD trace for the given atom
-        :returns: s for the third quantum order event for the given atom
-        """
-        s = 9.0 / 1086.0 * q2 ** 3 * np.prod(np.take(b_trace, indices=indices), axis=1)
-
-        return s
-
-    # noinspection PyUnusedLocal
-    def _calculate_order_four(self, q2=None, frequencies=None, indices=None, a_tensor=None, a_trace=None,
-                              b_tensor=None, b_trace=None):
-        """
-        Calculates S for the fourth order quantum event for one atom.
-        :param q2: q2: squared values of momentum transfer vectors
-        :param frequencies: frequencies for which transitions occur
-        :param indices: array which stores information how transitions can be decomposed in terms of fundamentals
-        :param a_tensor: total MSD tensor for the given atom
-        :param a_trace: total MSD trace for the given atom
-        :param b_tensor: frequency dependent MSD tensor for the given atom
-        :param b_trace: frequency dependent MSD trace for the given atom
-        :returns: s for the forth quantum order event for the given atom
-        """
-        s = 27.0 / 49250.0 * q2 ** 4 * np.prod(np.take(b_trace, indices=indices), axis=1)
-
         return s

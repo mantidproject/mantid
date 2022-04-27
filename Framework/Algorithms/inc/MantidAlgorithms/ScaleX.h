@@ -31,7 +31,7 @@ Required Properties:
 @author
 @date 6/23/2011
 */
-class MANTID_ALGORITHMS_DLL ScaleX : public API::Algorithm {
+class MANTID_ALGORITHMS_DLL ScaleX final : public API::Algorithm {
 public:
   /// Default constructor
   ScaleX();

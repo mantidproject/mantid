@@ -142,7 +142,6 @@ class ISISIndirectEnergyTransferWrapper(DataProcessorAlgorithm):
     def PyExec(self):
         self._setup()
         self._reduce_data()
-
         self.setProperty('OutputWorkspace', get_ads_workspace(self._output_workspace))
 
     def _reduce_data(self):

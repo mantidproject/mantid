@@ -44,14 +44,15 @@ public:
   virtual int totalItems() const = 0;
   virtual int completedItems() const = 0;
 
+  virtual void setStarting();
+  virtual void setRunning();
+  virtual void setSuccess();
+  virtual void setError(std::string const &msg);
+
   bool complete() const;
   bool success() const;
 
   void setProgress(double p, std::string const &msg);
-  void setStarting();
-  void setRunning();
-  void setSuccess();
-  void setError(std::string const &msg);
 
 protected:
   ItemState m_itemState;

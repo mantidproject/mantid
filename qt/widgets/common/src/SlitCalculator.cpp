@@ -31,7 +31,7 @@ void SlitCalculator::processInstrumentHasBeenChanged() {
   // need to update because another instrument has been selected.
   on_recalculate_triggered();
 }
-SlitCalculator::~SlitCalculator() {}
+SlitCalculator::~SlitCalculator() = default;
 void SlitCalculator::setInstrument(const std::string &instrumentName) {
   // we want to get the most up-to-date definition, so we use the current
   // date/time

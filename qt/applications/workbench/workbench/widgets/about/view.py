@@ -259,6 +259,7 @@ font: {self.rescale_w(12)}px;
         lbl_personal_setup.setAlignment(Qt.AlignHCenter)
         grp_personal_setup_layout.addWidget(lbl_personal_setup)
         personal_setup_form_layout = QFormLayout()
+        personal_setup_form_layout.setFieldGrowthPolicy(QFormLayout.AllNonFixedFieldsGrow)
         personal_setup_form_layout.setHorizontalSpacing(self.rescale_w(5))
         personal_setup_form_layout.setVerticalSpacing(self.rescale_h(5))
         personal_setup_form_layout.setLabelAlignment(Qt.AlignRight)

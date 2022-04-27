@@ -33,7 +33,7 @@ class FilteredTimeSeriesPropertyTest(unittest.TestCase):
 
     def test_constructor_filters_source_series(self):
         filtered = FloatFilteredTimeSeriesProperty(self._source, self._filter)
-        self.assertEquals(filtered.size(), 2)
+        self.assertEqual(filtered.size(), 2)
 
     def test_unfiltered_returns_source_property(self):
         filtered = FloatFilteredTimeSeriesProperty(self._source, self._filter)

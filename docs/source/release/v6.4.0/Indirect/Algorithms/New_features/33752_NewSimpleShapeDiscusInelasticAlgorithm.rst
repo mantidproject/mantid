@@ -1,0 +1,1 @@
+- Add new workflow algorithm called :ref:`SimpleShapeDiscusInelastic <algm-SimpleShapeDiscusInelastic>` that calls :ref:`DiscusMultipleScatteringCorrection <algm-DiscusMultipleScatteringCorrection>` with options for some simple shape types

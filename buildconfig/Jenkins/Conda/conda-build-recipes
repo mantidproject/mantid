@@ -1,0 +1,134 @@
+#!/bin/bash -ex
+
+# This script expects to be in a POSIX environment, the script clones the conda-recipes
+# repo and then runs conda builds based on passed args. By default it only clones the
+# source, you need to pass a flag to actually build something useful. If building a
+# package dependent on a different one it will build and produce that package too.
+#
+# Script usage:
+# conda-build-recipes WORKSPACE [options]
+#
+# Example command to build all of the packages:
+# conda-build-recipes $WORKSPACE --build-mantid --build-qt --build-workbench
+#
+# Expected args:
+#   1. WORKSPACE: path to the workspace/source code that this should run inside
+#                 (mantid repo). Windows Caveat: Only use / for this argument do
+#                 not use \\ or \ in the path.
+#
+# Possible flags:
+#   --build-mantid: build the mantid package using conda-build
+#   --build-qt: build the qt package using conda-build (this will implicitly build mantid)
+#   --build-workbench: build the workbench package using conda-build (this will implicitly build qt and mantid)
+#
+# Possible parameters:
+#   --clobber-yml: clobber the meta yaml files of each package build with conda-build, provide an absolute path to the uteyml file
+#   --recipes-tag: a branch or tag that should be used for cloning the recipes from conda-build-recipes
+#
+
+# Setup expected variables
+WORKSPACE=$1
+if [[ -z "$WORKSPACE" ]]; then
+    echo "A workspace argument is required"
+    exit 1
+fi
+shift
+if [[ $OSTYPE == "msys"* ]]; then
+    if [[ "$WORKSPACE" == *'\'* ]]; then
+        echo "You have \ or \\ in your Workspace path, this is not supported on Windows."
+        exit 1
+    fi
+    WORKSPACE=${WORKSPACE////\\} # Replace // with \
+    # Require git settings so that paths can be checked out with longer file names than 260 characters
+    if [[ ! $(git config --system --get core.longpaths) == true ]]; then
+        echo "This windows machine is does not have longpaths enabled for git, please run this command: git config --system core.longpaths true"
+        exit 1
+    fi
+fi
+EXPECTED_MAMBAFORGE_PATH=$WORKSPACE/mambaforge # Install into the WORKSPACE_DIR
+if [[ $OSTYPE == "msys" ]]; then
+    EXPECTED_CONDA_PATH=$EXPECTED_MAMBAFORGE_PATH/condabin/mamba.bat
+else
+    EXPECTED_CONDA_PATH=$EXPECTED_MAMBAFORGE_PATH/bin/mamba
+fi
+CONDA_ENV_NAME=mantid-conda-build-env
+RECIPES_DIR=$WORKSPACE/conda-recipes
+SCRIPT_DIR=$WORKSPACE/buildconfig/Jenkins/Conda/
+
+# Parse flags
+ENABLE_BUILD_MANTID=false
+ENABLE_BUILD_QT=false
+ENABLE_BUILD_WORKBENCH=false
+RECIPES_TAG=main
+
+# Handle flag inputs
+while [ ! $# -eq 0 ]
+do
+    case "$1" in
+        --build-mantid) ENABLE_BUILD_MANTID=true ;;
+        --build-qt) ENABLE_BUILD_QT=true ;;
+        --build-workbench) ENABLE_BUILD_WORKBENCH=true ;;
+        --clobber-yml)
+            CLOBBER_FILE="--clobber-file $2"
+            shift ;;
+        --recipes-tag)
+            RECIPES_TAG="$2"
+            shift ;;
+        *)
+            echo "Argument not accepted: $1"
+            exit 1
+            ;;
+  esac
+  shift
+done
+
+# Build dependencies for requested packages
+if [[ $ENABLE_BUILD_QT  == true ]]; then
+    ENABLE_BUILD_MANTID=true
+fi
+
+if [[ $ENABLE_WORKBENCH  == true ]]; then
+    ENABLE_BUILD_MANTID=true
+    ENABLE_BUILD_QT=true
+fi
+
+# Setup Mambaforge
+$SCRIPT_DIR/download-and-install-mambaforge $EXPECTED_MAMBAFORGE_PATH $EXPECTED_CONDA_PATH true
+
+# Remove conda env if it exists
+$EXPECTED_CONDA_PATH env remove -n $CONDA_ENV_NAME
+
+# Create env with conda-verify and boa (Mamba but for conda-build) installed
+$EXPECTED_CONDA_PATH create -n $CONDA_ENV_NAME boa conda-verify -y
+
+# Activate Conda environment
+. $WORKSPACE/mambaforge/etc/profile.d/conda.sh
+conda activate $CONDA_ENV_NAME
+
+# Clone the recipes
+cd $WORKSPACE
+if [[ -d conda-recipes ]]; then
+    rm -rf conda-recipes
+fi
+git clone https://github.com/mantidproject/conda-recipes.git --depth=1 -b $RECIPES_TAG
+
+# Run conda build on framework
+cd $RECIPES_DIR/recipes/
+
+if [[ $OSTYPE == "msys" ]]; then
+    WINDOWS_BUILD_OPTIONS="--no-build-id" # Do not use build id as it makes the path too long (>260 chars) for CMake (Legacy Windows API issue)
+fi
+
+if [[ $ENABLE_BUILD_MANTID == true ]]; then
+    conda mambabuild ./mantid/ $CLOBBER_FILE $WINDOWS_BUILD_OPTIONS
+fi
+
+
+if [[ $ENABLE_BUILD_QT == true ]]; then
+    conda mambabuild ./mantidqt/ $CLOBBER_FILE $WINDOWS_BUILD_OPTIONS
+fi
+
+
+if [[ $ENABLE_BUILD_WORKBENCH == true ]]; then
+    conda mambabuild ./mantidworkbench/ $CLOBBER_FILE $WINDOWS_BUILD_OPTIONS
+fi

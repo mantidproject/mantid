@@ -15,7 +15,7 @@ namespace MDAlgorithms {
 /** TransposeMD : Transpose an MDWorkspace. Allows dimensions to be collapsed
   down.
 */
-class MANTID_MDALGORITHMS_DLL TransposeMD : public API::Algorithm {
+class MANTID_MDALGORITHMS_DLL TransposeMD final : public API::Algorithm {
 public:
   const std::string name() const override;
   int version() const override;

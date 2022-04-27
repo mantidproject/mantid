@@ -128,7 +128,7 @@ private:
   std::set<index> _hkls;
 };
 
-class MANTID_CRYSTAL_DLL IndexSXPeaks : public API::Algorithm {
+class MANTID_CRYSTAL_DLL IndexSXPeaks final : public API::Algorithm {
 public:
   /// Algorithm's name for identification overriding a virtual method
   const std::string name() const override { return "IndexSXPeaks"; }

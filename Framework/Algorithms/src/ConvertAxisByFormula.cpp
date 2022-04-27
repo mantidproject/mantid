@@ -194,12 +194,12 @@ void ConvertAxisByFormula::exec() {
       Progress prog(this, 0.6, 1.0, numberOfSpectra_i);
       PARALLEL_FOR_IF(Kernel::threadSafe(*outputWs))
       for (int64_t j = 1; j < numberOfSpectra_i; ++j) {
-        PARALLEL_START_INTERUPT_REGION
+        PARALLEL_START_INTERRUPT_REGION
         outputWs->setX(j, xVals);
         prog.report();
-        PARALLEL_END_INTERUPT_REGION
+        PARALLEL_END_INTERRUPT_REGION
       }
-      PARALLEL_CHECK_INTERUPT_REGION
+      PARALLEL_CHECK_INTERRUPT_REGION
     }
   } else {
     size_t axisLength = axisPtr->length();

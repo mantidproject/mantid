@@ -79,6 +79,21 @@ public:
     TS_ASSERT(!result.is_initialized());
   }
 
+  void testParseTitleMatcherEmpty() {
+    auto result = parseTitleMatcher("      \t  ");
+    TS_ASSERT(!result.is_initialized());
+  }
+
+  void testParseTitleMatcher() {
+    auto result = parseTitleMatcher(".*");
+    TS_ASSERT(result.is_initialized());
+  }
+
+  void testParseTitleMatcherHandlesInvalidRegex() {
+    auto result = parseTitleMatcher("[");
+    TS_ASSERT(!result.is_initialized());
+  }
+
   void testParseOptions() {
     auto result = parseOptions("key1=value1, key2=value2");
     std::map<std::string, std::string> expected = {{"key1", "value1"}, {"key2", "value2"}};

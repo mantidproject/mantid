@@ -117,12 +117,16 @@ class FitPropertyBrowser(FitPropertyBrowserBase):
                     # we don't want to include the fit workspace in our selection
                     if ws_name in output_wsnames:
                         continue
-                    spectrum_list = [artist.spec_num for artist in artists]
-                    spectrum_list = sorted(list(set(spectrum_list)))
-                    allowed_spectra[ws_name] = spectrum_list
+                    #loop through arists and get relevant spec numbers if spec_num represents a spectrum as opposed to a bin axes.
+                    spectrum_list = [artist.spec_num for artist in artists if artist.is_spec]
+
+                    if spectrum_list:
+                        spectrum_list = sorted(list(set(spectrum_list)))
+                        allowed_spectra[ws_name] = spectrum_list
             except AttributeError:  # scripted plots have no tracked_workspaces
                 pass
         self.allowed_spectra = allowed_spectra
+
         return allowed_spectra
 
     def _get_table_workspace(self):
@@ -216,6 +220,9 @@ class FitPropertyBrowser(FitPropertyBrowserBase):
         self.setPeakToolOn(True)
         self.canvas.draw()
         self.set_output_window_names()
+        # Turn off autoscaling in the future
+        for axes in self.canvas.figure.get_axes():
+            axes.autoscale(enable=False)
 
     def set_output_window_names(self):
         import matplotlib.pyplot as plt  # unfortunately need to import again
@@ -377,9 +384,10 @@ class FitPropertyBrowser(FitPropertyBrowserBase):
         # Keep local copy of the original lines
         original_lines = self.get_lines()
 
-        ax.plot(ws, wkspIndex=1, autoscale_on_update=False, **plot_kwargs)
+        ax.autoscale(enable=False, axis='both')
+        ax.plot(ws, wkspIndex=1, **plot_kwargs)
         if plot_diff:
-            ax.plot(ws, wkspIndex=2, autoscale_on_update=False, **plot_kwargs)
+            ax.plot(ws, wkspIndex=2, **plot_kwargs)
 
         self.addFitResultWorkspacesToTableWidget()
         # Add properties back to the lines

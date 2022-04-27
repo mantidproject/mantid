@@ -10,6 +10,7 @@ from collections import OrderedDict
 from typing import List, Tuple
 
 from mantid.kernel import mpisetup, logger
+from mantid.dataobjects import Workspace2D
 from sans.algorithm_detail.bundles import (EventSliceSettingBundle, OutputBundle,
                                            OutputPartsBundle, OutputTransmissionBundle, CompletedSlices, ReducedSlice)
 from sans.algorithm_detail.merge_reductions import MergeFactory
@@ -19,6 +20,7 @@ from sans.common.enums import (DetectorType, ReductionMode, OutputParts, Transmi
 from sans.common.general_functions import (create_child_algorithm, get_reduced_can_workspace_from_ads,
                                            get_transmission_workspaces_from_ads,
                                            write_hash_into_reduced_can_workspace, wav_range_to_str)
+from sans.data_objects.sans_workflow_algorithm_outputs import SANSWorkflowAlgorithmOutputs
 from sans.state.Serializer import Serializer
 
 
@@ -178,7 +180,7 @@ def pair_up_wav_ranges(list_to_pair: CompletedSlices) -> List[Tuple[ReducedSlice
     return packed
 
 
-def get_final_output_workspaces(completed_event_slices, parent_alg):
+def get_final_output_workspaces(completed_event_slices, parent_alg) -> SANSWorkflowAlgorithmOutputs:
     """
     This function provides the final steps for the data reduction.
 
@@ -194,24 +196,30 @@ def get_final_output_workspaces(completed_event_slices, parent_alg):
         hab_lab_outputs[k] = pair_up_wav_ranges(v)
 
     # For each reduction mode, we need to perform a can subtraction (and potential cleaning of the workspace)
-    final_output_workspaces = {}
-    for bank, all_reductions in hab_lab_outputs.items():
-        final_output_workspaces[bank] = []
-        for paired_reductions in all_reductions:
-            can = next(filter(lambda i: i.output_bundle.data_type is DataType.CAN, paired_reductions), None)
-            sample = next(filter(lambda i: i.output_bundle.data_type is DataType.SAMPLE, paired_reductions))
-            # Perform the can subtraction
-            if can:
-                final_output_workspace = perform_can_subtraction(sample.output_bundle.output_workspace,
-                                                                 can.output_bundle.output_workspace,
-                                                                 parent_alg)
-            else:
-                final_output_workspace = sample.output_bundle.output_workspace
+    lab_workspaces = _pack_outputs(hab_lab_outputs.pop(ReductionMode.LAB, None), parent_alg)
+    hab_workspaces = _pack_outputs(hab_lab_outputs.pop(ReductionMode.HAB, None), parent_alg)
 
-            # Tidy up the workspace by removing start/end-NANs and start/end-INFs
-            final_output_workspace = strip_end_nans(final_output_workspace, parent_alg)
-            final_output_workspaces[bank].append(final_output_workspace)
+    return SANSWorkflowAlgorithmOutputs(lab_output=lab_workspaces, hab_output=hab_workspaces)
 
+
+def _pack_outputs(reductions, parent_alg) -> List[Workspace2D]:
+    if not reductions:
+        return []
+    final_output_workspaces = []
+    for paired_reductions in reductions:
+        can = next(filter(lambda i: i.output_bundle.data_type is DataType.CAN, paired_reductions), None)
+        sample = next(filter(lambda i: i.output_bundle.data_type is DataType.SAMPLE, paired_reductions))
+        # Perform the can subtraction
+        if can:
+            final_output_workspace = perform_can_subtraction(sample.output_bundle.output_workspace,
+                                                             can.output_bundle.output_workspace,
+                                                             parent_alg)
+        else:
+            final_output_workspace = sample.output_bundle.output_workspace
+
+        # Tidy up the workspace by removing start/end-NANs and start/end-INFs
+        final_output_workspace = strip_end_nans(final_output_workspace, parent_alg)
+        final_output_workspaces.append(final_output_workspace)
     return final_output_workspaces
 
 

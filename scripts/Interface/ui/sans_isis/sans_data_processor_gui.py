@@ -575,7 +575,7 @@ class SANSDataProcessorGui(QMainWindow,
         Load the user file
         """
         # Load the user file
-        load_file(self.user_file_line_edit, "TOML Files (*.toml, *.TOML);; Text Files (*.txt)",
+        load_file(self.user_file_line_edit, "TOML Files (*.toml *.Toml *.TOML);; Text Files (*.txt *.Txt *.TXT)",
                   self.__generic_settings, self.__path_key, self.get_user_file_path)
 
         # Set full user file path for default loading

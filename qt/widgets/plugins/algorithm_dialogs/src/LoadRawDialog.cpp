@@ -41,7 +41,7 @@ LoadRawDialog::LoadRawDialog(QWidget *parent) : AlgorithmDialog(parent), m_pathB
 /**
  *Destructor
  */
-LoadRawDialog::~LoadRawDialog() {}
+LoadRawDialog::~LoadRawDialog() = default;
 
 //---------------------------------------
 // Private member functions

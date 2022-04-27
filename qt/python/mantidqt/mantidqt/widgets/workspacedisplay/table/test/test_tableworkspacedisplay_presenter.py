@@ -529,7 +529,7 @@ class TableWorkspaceDisplayPresenterTest(unittest.TestCase):
         twd.action_plot(PlotType.LINEAR)
 
         twd.plot.subplots.assert_called_once_with(subplot_kw={'projection': 'mantid'})
-        twd.plot.mock_fig.canvas.set_window_title.assert_called_once_with(twd.model.get_name())
+        twd.plot.mock_fig.canvas.manager.set_window_title.assert_called_once_with(twd.model.get_name())
         twd.plot.mock_ax.set_xlabel.assert_called_once_with(twd.model.get_column_header(col_as_x))
         col_y_name = twd.model.get_column_header(col_as_y)
         twd.plot.mock_ax.set_ylabel.assert_called_once_with(col_y_name)
@@ -559,7 +559,7 @@ class TableWorkspaceDisplayPresenterTest(unittest.TestCase):
         twd.action_plot(PlotType.LINEAR)
 
         twd.plot.subplots.assert_called_once_with(subplot_kw={'projection': 'mantid'})
-        twd.plot.mock_fig.canvas.set_window_title.assert_called_once_with(twd.model.get_name())
+        twd.plot.mock_fig.canvas.manager.set_window_title.assert_called_once_with(twd.model.get_name())
         twd.plot.mock_ax.set_xlabel.assert_called_once_with(twd.model.get_column_header(col_as_x))
 
         col_y1_name = twd.model.get_column_header(col_as_y1)
@@ -651,7 +651,7 @@ class TableWorkspaceDisplayPresenterTest(unittest.TestCase):
 
         twd.plot.subplots.assert_called_once_with(subplot_kw={'projection': 'mantid'})
 
-        twd.plot.mock_fig.canvas.set_window_title.assert_called_once_with(twd.model.get_name())
+        twd.plot.mock_fig.canvas.manager.set_window_title.assert_called_once_with(twd.model.get_name())
         twd.plot.mock_ax.set_xlabel.assert_called_once_with(twd.model.get_column_header(col_as_x))
         col_y_name = twd.model.get_column_header(col_as_y)
         twd.plot.mock_ax.set_ylabel.assert_called_once_with(col_y_name)
@@ -748,7 +748,7 @@ class TableWorkspaceDisplayPresenterTest(unittest.TestCase):
         twd.action_plot(plot_type)
 
         twd.plot.subplots.assert_called_once_with(subplot_kw={'projection': 'mantid'})
-        twd.plot.mock_fig.canvas.set_window_title.assert_called_once_with(twd.model.get_name())
+        twd.plot.mock_fig.canvas.manager.set_window_title.assert_called_once_with(twd.model.get_name())
         twd.plot.mock_ax.set_xlabel.assert_called_once_with(twd.model.get_column_header(col_as_x))
 
         col_y1_name = twd.model.get_column_header(col_as_y1)
@@ -808,12 +808,12 @@ class TableWorkspaceDisplayPresenterTest(unittest.TestCase):
     def test_replace(self, ws, view, presenter):
         # patch this out after the constructor of the presenter has finished,
         # so that we reset any calls it might have made
+        presenter.model.block_model_replace = False
         with patch(
                 'mantidqt.widgets.workspacedisplay.table.presenter.TableWorkspaceDataPresenterStandard.load_data'
         ) as mock_load_data:
             presenter.replace_workspace(ws.TEST_NAME, ws)
             mock_load_data.assert_called_once_with(view)
-            view.emit_repaint.assert_called_once_with()
 
 
 if __name__ == '__main__':

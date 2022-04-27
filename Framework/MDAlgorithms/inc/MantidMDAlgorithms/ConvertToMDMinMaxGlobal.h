@@ -17,7 +17,7 @@ namespace MDAlgorithms {
   MD-space
     The current version knows
 */
-class DLLExport ConvertToMDMinMaxGlobal : public API::Algorithm {
+class DLLExport ConvertToMDMinMaxGlobal final : public API::Algorithm {
 public:
   const std::string name() const override;
   /// Summary of algorithms purpose

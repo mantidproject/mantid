@@ -83,7 +83,7 @@ class SampleTest(unittest.TestCase):
         b_real = (xs0['coh_scatt_length_real']*2 + xs1['coh_scatt_length_real']*3) / 5
         b_imag = (xs0['coh_scatt_length_img']*2 + xs1['coh_scatt_length_img']*3) / 5
         xs = .04 * pi * (b_real * b_real + b_imag * b_imag)
-        self.assertAlmostEquals(material.cohScatterXSection(), xs, places=4)
+        self.assertAlmostEqual(material.cohScatterXSection(), xs, places=4)
 
     def test_get_shape(self):
         sample = Sample()

@@ -9,7 +9,7 @@
 
 namespace Mantid::DataObjects {
 
-AffineMatrixParameterParser::AffineMatrixParameterParser() {}
+AffineMatrixParameterParser::AffineMatrixParameterParser() = default;
 
 //----------------------------------------------------------------------------------------------
 

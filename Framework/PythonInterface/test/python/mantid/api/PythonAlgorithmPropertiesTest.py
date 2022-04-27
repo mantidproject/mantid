@@ -88,7 +88,7 @@ class PythonAlgorithmPropertiesTest(unittest.TestCase):
 
         def_dir = alg.getProperty("NumPropWithDefaultDir")
         self.assertEqual(def_dir.direction, Direction.Input)
-        self.assertNotEquals("", def_dir.isValid)
+        self.assertNotEqual("", def_dir.isValid)
         self.assertRaises(ValueError, alg.setProperty, "NumPropWithDefaultDir", -10)
         testhelpers.assertRaisesNothing(self, alg.setProperty, "NumPropWithDefaultDir", 11)
 

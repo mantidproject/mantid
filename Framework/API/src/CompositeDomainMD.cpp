@@ -42,7 +42,7 @@ CompositeDomainMD::CompositeDomainMD(const IMDWorkspace_const_sptr &ws, size_t m
 /**
  * Destructor.
  */
-CompositeDomainMD::~CompositeDomainMD() {}
+CompositeDomainMD::~CompositeDomainMD() = default;
 
 /// Return i-th domain reset to its start.
 const FunctionDomain &CompositeDomainMD::getDomain(size_t i) const {

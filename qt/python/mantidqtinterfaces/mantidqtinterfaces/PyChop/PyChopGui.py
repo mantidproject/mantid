@@ -16,6 +16,8 @@ This module contains a class to create a graphical user interface for PyChop.
 
 import sys
 import re
+from distutils.version import LooseVersion
+
 import numpy as np
 import os
 import warnings
@@ -316,7 +318,7 @@ class PyChopGui(QMainWindow):
     def _set_overplot(self, overplot, axisname):
         axis = getattr(self, axisname)
         if overplot:
-            if matplotlib.compare_versions('2.1.0',matplotlib.__version__):
+            if LooseVersion('2.1.0') > LooseVersion(matplotlib.__version__):
                 axis.hold(True)
         else:
             setattr(self, axisname+'_xlim', 0)
@@ -336,7 +338,7 @@ class PyChopGui(QMainWindow):
         if hasattr(freq, '__len__'):
             freq = freq[0]
         if multiplot:
-            if matplotlib.compare_versions('2.1.0',matplotlib.__version__):
+            if LooseVersion('2.1.0') > LooseVersion(matplotlib.__version__):
                 self.resaxes.hold(True)
             for ie, Ei in enumerate(self.eis):
                 en = np.linspace(0, 0.95*Ei, 200)
@@ -349,7 +351,7 @@ class PyChopGui(QMainWindow):
                     if self.tabs.isTabEnabled(self.qetabID):
                         self.plot_qe(Ei, label_text, hold=True)
                     self.resaxes_xlim = max(Ei, self.resaxes_xlim)
-            if matplotlib.compare_versions('2.1.0',matplotlib.__version__):
+            if LooseVersion('2.1.0') > LooseVersion(matplotlib.__version__):
                 self.resaxes.hold(False)
         else:
             ei = self.engine.getEi()
@@ -424,7 +426,7 @@ class PyChopGui(QMainWindow):
         if update:
             self.flxaxes1.clear()
             self.flxaxes2.clear()
-            if matplotlib.compare_versions('2.1.0',matplotlib.__version__):
+            if LooseVersion('2.1.0') > LooseVersion(matplotlib.__version__):
                 self.flxaxes1.hold(True)
                 self.flxaxes2.hold(True)
             for ii, instrument in enumerate(tmpinst):
@@ -443,7 +445,7 @@ class PyChopGui(QMainWindow):
                     flux[ie] = self.engine.getFlux(ei)
                     elres[ie] = self.engine.getResolution(0., ei)[0]
             if overplot:
-                if matplotlib.compare_versions('2.1.0',matplotlib.__version__):
+                if LooseVersion('2.1.0') > LooseVersion(matplotlib.__version__):
                     self.flxaxes1.hold(True)
                     self.flxaxes2.hold(True)
             else:
@@ -510,7 +512,7 @@ class PyChopGui(QMainWindow):
                 flux[ie] = self.engine.getFlux(ei)
                 elres[ie] = self.engine.getResolution(0., ei)[0]
         if overplot:
-            if matplotlib.compare_versions('2.1.0',matplotlib.__version__):
+            if LooseVersion('2.1.0') > LooseVersion(matplotlib.__version__):
                 self.frqaxes1.hold(True)
                 self.frqaxes2.hold(True)
         else:
@@ -692,7 +694,8 @@ class PyChopGui(QMainWindow):
                     txt += self._gen_text_ei(ei, obj)
         return txt
 
-    def showText(self):
+    def showText(self, *args):
+        # The args are not used, but button clicked returns a bool for cheked state
         """
         Creates a dialog to show the generated text output.
         """
@@ -719,7 +722,8 @@ class PyChopGui(QMainWindow):
         self.txtloop = QEventLoop()
         self.txtloop.exec_()
 
-    def saveText(self):
+    def saveText(self, *args):
+        # The args are not used, but button clicked returns a bool for cheked state
         """
         Saves the generated text to a file (opens file dialog).
         """

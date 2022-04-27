@@ -18,7 +18,7 @@ namespace Algorithms {
 /** DirectILLTubeBackground : Fits polynomial backgrounds over the pixels of
   position sensitive tubes.
 */
-class MANTID_ALGORITHMS_DLL DirectILLTubeBackground : public API::Algorithm {
+class MANTID_ALGORITHMS_DLL DirectILLTubeBackground final : public API::Algorithm {
 public:
   const std::string name() const override;
   int version() const override;

@@ -31,7 +31,7 @@ using DataObjects::Workspace2D;
 using DataObjects::Workspace2D_sptr;
 
 /// Empty default constructor
-SaveCSV::SaveCSV() {}
+SaveCSV::SaveCSV() = default;
 
 /** Initialisation method. Does nothing at present.
  *

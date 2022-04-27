@@ -21,7 +21,6 @@ MuonFunctionBrowser::MuonFunctionBrowser(QWidget *parent, bool multi)
 /**
  * Destructor
  */
-MuonFunctionBrowser::~MuonFunctionBrowser() {}
 
 } // namespace MantidWidgets
 } // namespace MantidQt

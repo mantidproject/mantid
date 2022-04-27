@@ -43,7 +43,7 @@ to use either .raw or .sca</LI>
 
 @author Ronald Fowler
 */
-class DLLExport SetScalingPSD : public API::Algorithm {
+class DLLExport SetScalingPSD final : public API::Algorithm {
 public:
   /// Default constructor
   SetScalingPSD();

@@ -39,7 +39,7 @@ public:
     }
   }
 
-  ~CompositeFunctionTest_MocMatrixWorkspace() override {}
+  ~CompositeFunctionTest_MocMatrixWorkspace() override = default;
 
   bool isRaggedWorkspace() const override { return false; }
 

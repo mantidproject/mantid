@@ -86,7 +86,7 @@ private:
   ObjCompAssembly &operator=(const ICompAssembly &);
 
   /// the group of child components
-  std::vector<ObjComponent *> group;
+  std::vector<ObjComponent *> m_group;
 };
 
 /// Shared pointer to ObjCompAssembly

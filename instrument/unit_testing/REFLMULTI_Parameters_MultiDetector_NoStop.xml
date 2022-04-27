@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<parameter-file instrument="REFLMULTI" valid-from="forever">
+
+    <component-link name="REFLMULTI" >
+
+        <parameter name="AnalysisMode" type="string">
+            <value val="MultiDetectorAnalysis"/>
+        </parameter>
+
+        <parameter name="MultiDetectorStart">
+            <value val="2"/>
+        </parameter>
+
+    </component-link>
+
+</parameter-file>
