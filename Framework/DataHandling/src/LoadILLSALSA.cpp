@@ -71,7 +71,7 @@ void LoadILLSALSA::exec() {
     H5::Group detectorDataset = h5file.openGroup("entry0/data");
     detectorDataset.close();
     fileType = V1;
-  } catch (const H5::Exception &e) {
+  } catch (H5::Exception) {
     fileType = NONE;
   }
   if (fileType == NONE) {
@@ -79,7 +79,7 @@ void LoadILLSALSA::exec() {
       H5::Group detectorDataset = h5file.openGroup("entry0/data_scan");
       detectorDataset.close();
       fileType = V2;
-    } catch (const H5::Exception &e) {
+    } catch (H5::Exception) {
       fileType = NONE;
     }
   }
