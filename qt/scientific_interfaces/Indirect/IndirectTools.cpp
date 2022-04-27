@@ -5,7 +5,6 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "IndirectTools.h"
-#include "IndirectTransmissionCalc.h"
 
 #include "MantidKernel/ConfigService.h"
 
@@ -24,9 +23,6 @@ void IndirectTools::initLayout() {
 
   // Connect Poco Notification Observer
   Mantid::Kernel::ConfigService::Instance().addObserver(m_changeObserver);
-
-  // Insert each tab into the interface on creation
-  m_tabs.emplace(TRANSMISSION, new IndirectTransmissionCalc(m_uiForm.IndirectToolsTabs->widget(TRANSMISSION)));
 
   // Connect each tab to the actions available in this GUI
   std::map<unsigned int, IndirectToolsTab *>::iterator iter;
