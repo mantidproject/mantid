@@ -73,45 +73,50 @@ private:
   API::MatrixWorkspace_sptr createOutputWorkspace(const API::MatrixWorkspace &inputWS) const;
   std::tuple<double, double> new_vector(const Kernel::Material &material, double k, bool specialSingleScatterCalc);
   std::vector<double> simulatePaths(const int nEvents, const int nScatters, Kernel::PseudoRandomNumberGenerator &rng,
-                                    API::MatrixWorkspace_sptr &invPOfQ, const double kinc,
+                                    const std::vector<API::MatrixWorkspace_sptr> &invPOfQs, const double kinc,
                                     const std::vector<double> &wValues, const Kernel::V3D &detPos,
                                     bool specialSingleScatterCalc);
   std::tuple<bool, std::vector<double>> scatter(const int nScatters, Kernel::PseudoRandomNumberGenerator &rng,
-                                                const API::MatrixWorkspace_sptr &invPOfQ, const double kinc,
-                                                const std::vector<double> &wValues, const Kernel::V3D &detPos,
-                                                bool specialSingleScatterCalc);
+                                                const std::vector<API::MatrixWorkspace_sptr> &invPOfQ,
+                                                const double kinc, const std::vector<double> &wValues,
+                                                const Kernel::V3D &detPos, bool specialSingleScatterCalc);
   Geometry::Track start_point(Kernel::PseudoRandomNumberGenerator &rng);
   Geometry::Track generateInitialTrack(Kernel::PseudoRandomNumberGenerator &rng);
   void inc_xyz(Geometry::Track &track, double vl);
-  double updateWeightAndPosition(Geometry::Track &track, double &weight, const double k,
+  size_t updateWeightAndPosition(Geometry::Track &track, double &weight, const double k,
                                  Kernel::PseudoRandomNumberGenerator &rng, bool specialSingleScatterCalc);
-  bool q_dir(Geometry::Track &track, const API::MatrixWorkspace_sptr &invPOfQ, double &k,
-             const double scatteringXSection, Kernel::PseudoRandomNumberGenerator &rng, double &weight);
+  bool q_dir(Geometry::Track &track, const size_t compIdxWithScatter,
+             const std::vector<API::MatrixWorkspace_sptr> &invPOfQs, double &k, const double scatteringXSection,
+             Kernel::PseudoRandomNumberGenerator &rng, double &weight);
   void interpolateFromSparse(API::MatrixWorkspace &targetWS, const SparseWorkspace &sparseWS,
                              const Mantid::Algorithms::InterpolationOption &interpOpt);
   void correctForWorkspaceNameClash(std::string &wsName);
   void setWorkspaceName(const API::MatrixWorkspace_sptr &ws, std::string wsName);
-  API::MatrixWorkspace_sptr createWorkspace(size_t nhists, size_t expectedSize);
-  void convertToLogWorkspace(API::MatrixWorkspace_sptr &SOfQ);
+  std::vector<API::MatrixWorkspace_sptr> createWorkspace(size_t nhists,
+                                                         const std::vector<API::MatrixWorkspace_sptr> &QSQs);
+  void convertToLogWorkspace(const std::vector<API::MatrixWorkspace_sptr> &SOfQs);
   void calculateQSQIntegralAsFunctionOfK();
-  void prepareCumulativeProbForQ(double kinc, const API::MatrixWorkspace_sptr &PInvOfQ);
-  API::MatrixWorkspace_uptr prepareQSQ(double kinc);
+  void prepareCumulativeProbForQ(double kinc, const std::vector<API::MatrixWorkspace_sptr> &PInvOfQs);
+  std::vector<API::MatrixWorkspace_sptr> prepareQSQ(double kinc);
   double getKf(const double deltaE, const double kinc);
   void prepareStructureFactor();
   void convertWsBothAxesToPoints(API::MatrixWorkspace_sptr &ws);
   std::tuple<double, double> getKinematicRange(double kf, double ki);
   std::vector<std::tuple<double, int, double>> generateInputKOutputWList(const double efixed,
                                                                          const std::vector<double> &xPoints);
-  std::tuple<std::vector<double>, std::vector<double>, std::vector<double>> integrateQSQ(double kinc);
-  double getQSQIntegral(double k);
+  std::tuple<std::vector<double>, std::vector<double>, std::vector<double>>
+  integrateQSQ(const API::MatrixWorkspace_sptr &QSQ, double kinc);
+  double getQSQIntegral(size_t compIdxWithScatter, double k);
   long long m_callsToInterceptSurface{0};
   std::map<int, int> m_attemptsToGenerateInitialTrack;
   int m_maxScatterPtAttempts{};
   std::shared_ptr<const DataObjects::Histogram1D> m_sigmaSS; // scattering cross section as a function of k
+  // vectors of S(Q,w) and derived quantities. One entry for sample and each environment component
   std::vector<API::MatrixWorkspace_sptr> m_SQWSs;
-  std::shared_ptr<DataObjects::Histogram1D> m_QSQIntegral; // integral of Q.S(Q) as a function of k
-  API::MatrixWorkspace_sptr m_QSQWS;
-  API::MatrixWorkspace_sptr m_logSQ;
+  std::vector<std::shared_ptr<DataObjects::Histogram1D>> m_QSQIntegrals; // integral of Q.S(Q) as a function of k
+  std::vector<API::MatrixWorkspace_sptr> m_QSQWSs;
+  std::vector<API::MatrixWorkspace_sptr> m_logSQs;
+  std::vector<Geometry::IObject_const_sptr> m_components;
   Geometry::IObject_const_sptr m_sampleShape;
   bool m_importanceSampling{};
   Kernel::DeltaEMode::Type m_EMode{Kernel::DeltaEMode::Undefined};
