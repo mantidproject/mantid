@@ -83,8 +83,8 @@ private:
   Geometry::Track start_point(Kernel::PseudoRandomNumberGenerator &rng);
   Geometry::Track generateInitialTrack(Kernel::PseudoRandomNumberGenerator &rng);
   void inc_xyz(Geometry::Track &track, double vl);
-  std::string updateWeightAndPosition(Geometry::Track &track, double &weight, const double k,
-                                      Kernel::PseudoRandomNumberGenerator &rng, bool specialSingleScatterCalc);
+  double updateWeightAndPosition(Geometry::Track &track, double &weight, const double k,
+                                 Kernel::PseudoRandomNumberGenerator &rng, bool specialSingleScatterCalc);
   bool q_dir(Geometry::Track &track, const API::MatrixWorkspace_sptr &invPOfQ, double &k,
              const double scatteringXSection, Kernel::PseudoRandomNumberGenerator &rng, double &weight);
   void interpolateFromSparse(API::MatrixWorkspace &targetWS, const SparseWorkspace &sparseWS,
@@ -108,7 +108,7 @@ private:
   std::map<int, int> m_attemptsToGenerateInitialTrack;
   int m_maxScatterPtAttempts{};
   std::shared_ptr<const DataObjects::Histogram1D> m_sigmaSS; // scattering cross section as a function of k
-  API::MatrixWorkspace_sptr m_SQWS;
+  std::vector<API::MatrixWorkspace_sptr> m_SQWSs;
   std::shared_ptr<DataObjects::Histogram1D> m_QSQIntegral; // integral of Q.S(Q) as a function of k
   API::MatrixWorkspace_sptr m_QSQWS;
   API::MatrixWorkspace_sptr m_logSQ;
