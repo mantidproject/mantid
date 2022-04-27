@@ -97,14 +97,10 @@ constructActions(boost::optional<std::map<std::string, std::string>> const &avai
   std::map<std::string, std::string> actions;
   if (availableActions)
     actions = availableActions.get();
-  if (actions.find("Plot Spectra") == actions.end())
-    actions["Plot Spectra"] = "Plot Spectra";
-  if (actions.find("Plot Bins") == actions.end())
-    actions["Plot Bins"] = "Plot Bins";
-  if (actions.find("Plot Contour") == actions.end())
-    actions["Plot Contour"] = "Plot Contour";
-  if (actions.find("Plot Tiled") == actions.end())
-    actions["Plot Tiled"] = "Plot Tiled";
+  actions.insert({"Plot Spectra", "Plot Spectra"});
+  actions.insert({"Plot Bins", "Plot Bins"});
+  actions.insert({"Plot Contour", "Plot Contour"});
+  actions.insert({"Plot Tiled", "Plot Tiled"});
   return actions;
 }
 

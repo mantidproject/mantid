@@ -41,8 +41,8 @@ template <typename T> std::vector<T> getIncrementingSequence(const T &from, std:
 std::vector<std::string> appendSuffix(std::vector<std::string> const &vec, std::string const &suffix) {
   std::vector<std::string> appended;
   appended.reserve(vec.size());
-  for (auto &&str : vec)
-    appended.emplace_back(str + suffix);
+  std::transform(vec.cbegin(), vec.cend(), std::back_inserter(appended),
+                 [&suffix](auto &&str) { return str + suffix; });
   return appended;
 }
 
