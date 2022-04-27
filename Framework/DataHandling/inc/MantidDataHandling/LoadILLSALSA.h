@@ -47,10 +47,10 @@ private:
   void exec() override;
   // set the instrument
   void setInstrument(double distance, double angle);
-  // load data from old single point nexus
-  void loadOldNexus(const H5::H5File &h5file);
-  // load data from new scan nexus
-  void loadNewNexus(const H5::H5File &h5file);
+  // load data from v1 Nexus
+  void loadNexusV1(const H5::H5File &h5file);
+  // load data from V2 Nexus
+  void loadNexusV2(const H5::H5File &h5file);
   // fill workspace with metadata
   void fillWorkspaceMetadata(const std::string &filename);
   // Output workspace

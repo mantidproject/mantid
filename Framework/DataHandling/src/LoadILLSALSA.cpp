@@ -89,10 +89,10 @@ void LoadILLSALSA::exec() {
     throw std::runtime_error("The Nexus file your are trying to open is not supported by the SALSA loader.");
     break;
   case V1:
-    loadOldNexus(h5file);
+    loadNexusV1(h5file);
     break;
   case V2:
-    loadNewNexus(h5file);
+    loadNexusV2(h5file);
     break;
   }
 
@@ -146,11 +146,10 @@ void LoadILLSALSA::setInstrument(double distance, double angle) {
 }
 
 /**
- * Load old Nexus files that contain a single point. In this case, data are in /entry0/data/Multi_data and there shape
- * is 256x256x1.
+ * Load V1 Nexus file. In this case, data are in /entry0/data/Multi_data and there shape is 256x256x1.
  * @param h5file reference to the opened hdf5/nexus file
  */
-void LoadILLSALSA::loadOldNexus(const H5::H5File &h5file) {
+void LoadILLSALSA::loadNexusV1(const H5::H5File &h5file) {
   H5::DataSet detectorDataset = h5file.openDataSet("entry0/data/Multi_data");
   H5::DataSet monitorDataset = h5file.openDataSet("entry0/monitor/data");
 
@@ -174,10 +173,11 @@ void LoadILLSALSA::loadOldNexus(const H5::H5File &h5file) {
 }
 
 /**
- * Fill the output workspace with data coming from a scanning nexus.
+ * Load V2 Nexus file. In this case, data are in entry0/data_scan/detector_data/data and there shape is nx256x256 (with
+ * n the number of scans).
  * @param h5file reference to the opened hdf5/nexus file
  */
-void LoadILLSALSA::loadNewNexus(const H5::H5File &h5file) {
+void LoadILLSALSA::loadNexusV2(const H5::H5File &h5file) {
   H5::DataSet detectorDataset = h5file.openDataSet("entry0/data_scan/detector_data/data");
   H5::DataSpace detectorDataspace = detectorDataset.getSpace();
 
