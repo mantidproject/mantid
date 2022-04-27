@@ -105,6 +105,16 @@ public:
     TS_ASSERT_EQUALS(a(2, 2), 174);
   }
 
+  void test_norm_2() {
+    DoubleFortranVector v(4);
+    v(1) = 1;
+    v(2) = 2;
+    v(3) = 3;
+    v(4) = 4;
+
+    TS_ASSERT_DELTA(norm2(v), 5.477, 1e-3);
+  }
+
   void test_Linear() {
     API::FunctionDomain1D_sptr domain(new API::FunctionDomain1DVector(0.0, 10.0, 20));
     API::FunctionValues mockData(*domain);
@@ -248,7 +258,7 @@ public:
     TS_ASSERT_EQUALS(s.getError(), "success"); // Failed to converge
   }
 
-  void xtest_Linear_constrained() {
+  void test_Linear_constrained() {
     API::FunctionDomain1D_sptr domain(new API::FunctionDomain1DVector(0.0, 10.0, 20));
     API::FunctionValues mockData(*domain);
     UserFunction dataMaker;

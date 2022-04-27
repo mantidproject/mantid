@@ -66,7 +66,7 @@ void getSvdJ(const DoubleFortranMatrix &J, double &s1, double &sn) {
 double norm2(const DoubleFortranVector &v) {
   if (v.size() == 0)
     return 0.0;
-  return v.inspector().squaredNorm();
+  return v.inspector().norm();
 }
 
 /** Multiply a matrix by a vector.
