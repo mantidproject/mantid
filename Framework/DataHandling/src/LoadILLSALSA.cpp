@@ -63,14 +63,14 @@ void LoadILLSALSA::exec() {
   const std::string filename = getPropertyValue("Filename");
   H5::H5File h5file(filename, H5F_ACC_RDONLY);
 
-  enum FileType { OLD, NEW, NONE };
+  enum FileType { NONE, V1, V2 };
 
   FileType fileType = NONE;
   // guess type of file
   try {
     H5::Group detectorDataset = h5file.openGroup("entry0/data");
     detectorDataset.close();
-    fileType = OLD;
+    fileType = V1;
   } catch (const H5::Exception &e) {
     fileType = NONE;
   }
@@ -78,7 +78,7 @@ void LoadILLSALSA::exec() {
     try {
       H5::Group detectorDataset = h5file.openGroup("entry0/data_scan");
       detectorDataset.close();
-      fileType = NEW;
+      fileType = V2;
     } catch (const H5::Exception &e) {
       fileType = NONE;
     }
@@ -88,10 +88,10 @@ void LoadILLSALSA::exec() {
   case NONE:
     throw std::runtime_error("The Nexus file your are trying to open is not supported by the SALSA loader.");
     break;
-  case OLD:
+  case V1:
     loadOldNexus(h5file);
     break;
-  case NEW:
+  case V2:
     loadNewNexus(h5file);
     break;
   }
