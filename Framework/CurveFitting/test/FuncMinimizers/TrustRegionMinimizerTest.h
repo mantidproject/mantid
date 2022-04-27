@@ -262,39 +262,6 @@ public:
     API::FunctionDomain1D_sptr domain(new API::FunctionDomain1DVector(0.0, 10.0, 20));
     API::FunctionValues mockData(*domain);
     UserFunction dataMaker;
-    dataMaker.setAttributeValue("Formula", "a*x+b");
-    dataMaker.setParameter("a", 1.1);
-    dataMaker.setParameter("b", 2.2);
-    dataMaker.function(*domain, mockData);
-
-    API::FunctionValues_sptr values(new API::FunctionValues(*domain));
-    values->setFitDataFromCalculated(mockData);
-    values->setFitWeights(1.0);
-
-    std::shared_ptr<UserFunction> fun = std::make_shared<UserFunction>();
-    fun->setAttributeValue("Formula", "a*x+b");
-    fun->setParameter("a", 1.);
-    fun->setParameter("b", 2.);
-
-    fun->addConstraint(std::make_unique<BoundaryConstraint>(fun.get(), "a", 0, 0.5));
-
-    std::shared_ptr<CostFuncLeastSquares> costFun = std::make_shared<CostFuncLeastSquares>();
-    costFun->setFittingFunction(fun, domain, values);
-    TS_ASSERT_EQUALS(costFun->nParams(), 2);
-
-    TrustRegionMinimizer s;
-    s.initialize(costFun);
-    TS_ASSERT(s.minimize());
-
-    TS_ASSERT_DELTA(fun->getParameter("a"), 0.5, 0.1); // got 1.1
-    TS_ASSERT_DELTA(fun->getParameter("b"), 5.2, 0.2); // got 2.2
-    TS_ASSERT_EQUALS(s.getError(), "success");
-  }
-
-  void test_Linear_constrained1() {
-    API::FunctionDomain1D_sptr domain(new API::FunctionDomain1DVector(0.0, 10.0, 20));
-    API::FunctionValues mockData(*domain);
-    UserFunction dataMaker;
     dataMaker.setAttributeValue("Formula", "a^2*x+b");
     dataMaker.setParameter("a", 1);
     dataMaker.setParameter("b", 2);
