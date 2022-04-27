@@ -35,10 +35,8 @@ const double EPSILON_MCH = std::numeric_limits<double>::epsilon();
 void matmultInner(const DoubleFortranMatrix &J, DoubleFortranMatrix &A) {
   auto n = J.len2();
   A.allocate(n, n);
-  gsl_blas_dgemm(CblasTrans, CblasNoTrans, 1.0, &getGSLMatrixView_const_tr(J.inspector()).matrix,
-                 &getGSLMatrixView_const_tr(J.inspector()).matrix, 0.0, &getGSLMatrixView(A.mutator()).matrix);
-  DoubleFortranMatrix A_tr(A.tr());
-  A = A_tr;
+
+  A.mutator() = J.inspector().transpose() * J.inspector();
 }
 
 /**  Given an (m x n)  matrix J held by columns as a vector,
@@ -68,7 +66,7 @@ void getSvdJ(const DoubleFortranMatrix &J, double &s1, double &sn) {
 double norm2(const DoubleFortranVector &v) {
   if (v.size() == 0)
     return 0.0;
-  return gsl_blas_dnrm2(&getGSLVectorView_const(v.inspector()).vector);
+  return v.inspector().squaredNorm();
 }
 
 /** Multiply a matrix by a vector.
@@ -81,8 +79,8 @@ void multJ(const DoubleFortranMatrix &J, const DoubleFortranVector &x, DoubleFor
   if (Jx.len() != J.len1()) {
     Jx.allocate(J.len1());
   }
-  gsl_blas_dgemv(CblasNoTrans, 1.0, &getGSLMatrixView_const_tr(J.inspector()).matrix,
-                 &getGSLVectorView_const(x.inspector()).vector, 0.0, &getGSLVectorView(Jx.mutator()).vector);
+
+  Jx.mutator() = J.inspector() * x.inspector();
 }
 
 /** Multiply a transposed matrix by a vector.
@@ -95,8 +93,8 @@ void multJt(const DoubleFortranMatrix &J, const DoubleFortranVector &x, DoubleFo
   if (Jtx.len() != J.len2()) {
     Jtx.allocate(J.len2());
   }
-  gsl_blas_dgemv(CblasTrans, 1.0, &getGSLMatrixView_const_tr(J.inspector()).matrix,
-                 &getGSLVectorView_const(x.inspector()).vector, 0.0, &getGSLVectorView(Jtx.mutator()).vector);
+
+  Jtx.mutator() = J.inspector().transpose() * x.inspector();
 }
 
 /** Dot product of two vectors.
