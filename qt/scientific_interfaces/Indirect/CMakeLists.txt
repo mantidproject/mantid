@@ -82,7 +82,6 @@ set(SRC_FILES
     IndirectSqw.cpp
     IndirectSymmetrise.cpp
     IndirectTab.cpp
-    IndirectTools.cpp
     IndirectToolsTab.cpp
     IndirectTransmission.cpp
     IqtFitModel.cpp
@@ -159,7 +158,6 @@ set(MOC_FILES
     IndirectSqw.h
     IndirectSymmetrise.h
     IndirectTab.h
-    IndirectTools.h
     IndirectToolsTab.h
     IndirectTransmission.h
     IndirectFitPropertyBrowser.h
@@ -229,7 +227,6 @@ set(UI_FILES
     IndirectSpectrumSelector.ui
     IndirectSqw.ui
     IndirectSymmetrise.ui
-    IndirectTools.ui
     IndirectTransmission.ui
     IndirectDataAnalysisIqtTab.ui
     Quasi.ui
