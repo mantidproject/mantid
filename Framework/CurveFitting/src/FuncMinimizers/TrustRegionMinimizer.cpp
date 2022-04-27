@@ -551,7 +551,7 @@ std::pair<double, double> minMaxValues(const DoubleFortranVector &v) {
 double twoNorm(const DoubleFortranVector &v) {
   if (v.size() == 0)
     return 0.0;
-  return gsl_blas_dnrm2(&getGSLVectorView_const(v.inspector()).vector);
+  return v.norm();
 }
 
 /** Get the dot-product of two vectors of the same size.
