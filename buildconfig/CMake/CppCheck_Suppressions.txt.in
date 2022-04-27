@@ -68,7 +68,6 @@ noCopyConstructor:${CMAKE_SOURCE_DIR}/Framework/Geometry/inc/MantidGeometry/Rend
 // - If the line number changes then update it here, or resolve the defect and remove from list
 
 unreadVariable:${CMAKE_SOURCE_DIR}/Framework/Kernel/src/InternetHelper.cpp:445
-useStlAlgorithm:${CMAKE_SOURCE_DIR}/Framework/Kernel/src/InstrumentInfo.cpp:160
 mismatchingContainerExpression:${CMAKE_SOURCE_DIR}/Framework/Kernel/src/LogFilter.cpp:55
 mismatchingContainerExpression:${CMAKE_SOURCE_DIR}/Framework/Kernel/src/LogFilter.cpp:59
 mismatchingContainerExpression:${CMAKE_SOURCE_DIR}/Framework/Kernel/src/LogFilter.cpp:74
