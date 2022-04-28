@@ -1,0 +1,1 @@
+- Fixed a memory leak whereby copies of workspaces were being retained even though the workspace had been deleted.
