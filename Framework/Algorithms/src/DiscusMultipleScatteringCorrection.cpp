@@ -798,7 +798,7 @@ void DiscusMultipleScatteringCorrection::integrateCumulative(const Mantid::Histo
   auto iter = std::upper_bound(h.x().cbegin(), h.x().cend(), xmin);
   auto iRight = static_cast<size_t>(std::distance(h.x().cbegin(), iter));
 
-  auto linearInterp = [xValues, yValues](double x, int lIndex, int rIndex) -> double {
+  auto linearInterp = [xValues, yValues](double x, size_t lIndex, size_t rIndex) -> double {
     return (yValues[lIndex] * (xValues[rIndex] - x) + yValues[rIndex] * (x - xValues[lIndex])) /
            (xValues[rIndex] - xValues[lIndex]);
   };
@@ -856,7 +856,7 @@ void DiscusMultipleScatteringCorrection::integrateCumulative(const Mantid::Histo
 
 API::MatrixWorkspace_sptr DiscusMultipleScatteringCorrection::integrateWS(API::MatrixWorkspace_sptr ws) {
   auto retVal = DataObjects::create<Workspace2D>(ws->getNumberHistograms(), HistogramData::Points{0.});
-  for (auto i = 0; i < ws->getNumberHistograms(); i++) {
+  for (size_t i = 0; i < ws->getNumberHistograms(); i++) {
     std::vector<double> IOfQX, IOfQY;
     integrateCumulative(ws->histogram(i), ws->x(i).front(), ws->x(i).back(), IOfQX, IOfQY);
     retVal->mutableY(i) = IOfQY.back();
