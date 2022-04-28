@@ -6,6 +6,7 @@
 Unicode True
 
 !include MUI2.nsh
+!include FileFunc.nsh
 
 !define PACKAGE_NAME "mantid${PACKAGE_SUFFIX}"
 !define DISPLAY_NAME "Mantid${PACKAGE_SUFFIX}"
@@ -88,12 +89,31 @@ FunctionEnd
 # --------------------------------------------------------------------
 # Add functions needed for install and uninstall with the modern UI
 
-# Overwrite .onInit to give the option to uninstall a previous version if it exists
-Function .onInit
+# On clicking install, uninstall any instance of mantid that exists in the target directory.
+Function in.uninstallIfExistsInTargetDirectory
+    IfFileExists $INSTDIR\uninstall.exe 0 +2 ;If there is an uninstall.exe run it
+    ExecWait '"$INSTDIR\uninstall.exe" /UIS _?=$INSTDIR'
+FunctionEnd
+
+# Give the option to uninstall the currently installed version of the same package.
+# Currently not used, but may be useful to cater for obscure use cases.
+# The message box text should be updated to include the package name and install directory.
+Function in.uninstallPreviousPackage
 ReadRegStr $0 HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\${PACKAGE_NAME}" "UninstallString"
 ${If} $0 != ""
 ${AndIf} ${Cmd} `MessageBox MB_YESNO|MB_ICONQUESTION "Run the uninstaller of the previous version?" /SD IDYES IDYES`
 	Exec $0
+${EndIf}
+FunctionEnd
+
+# Close the uninstaller window automatically in the case that it's run with /UIS flags (e.g. by the installer).
+Function un.skipIfSilentProgress
+ClearErrors
+${GetParameters} $0
+${GetOptions} "$0" "/UIS" $1
+${IfNot} ${Errors}
+    SetAutoClose true # Make sure user does not have to click close
+    Abort
 ${EndIf}
 FunctionEnd
 
@@ -114,9 +134,12 @@ FunctionEnd
 !define MUI_STARTMENUPAGE_REGISTRY_VALUENAME "Start Menu Folder"
 !insertmacro MUI_PAGE_STARTMENU Application $StartMenuFolder
 
+# Uninstall mantid if it's already in the target directory.
+!define MUI_PAGE_CUSTOMFUNCTION_SHOW in.uninstallIfExistsInTargetDirectory
 !insertmacro MUI_PAGE_INSTFILES
 !insertmacro MUI_PAGE_FINISH
 
+!define MUI_PAGE_CUSTOMFUNCTION_PRE un.skipIfSilentProgress
 !insertmacro MUI_UNPAGE_CONFIRM
 !insertmacro MUI_UNPAGE_INSTFILES
 
