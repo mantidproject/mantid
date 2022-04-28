@@ -73,7 +73,7 @@ private:
                           double sum, double error, int nPixels, double min_eff, double max_eff);
 
   void maskComponent(API::MatrixWorkspace &ws, const std::string &componentName);
-  void maskEdges(const API::MatrixWorkspace_sptr &ws, int high, int low, int left, int right,
+  void maskEdges(const API::MatrixWorkspace_sptr &ws, int left, int right, int high, int low,
                  const std::string &componentName);
 };
 
