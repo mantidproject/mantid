@@ -549,7 +549,7 @@ void TimeSeriesProperty<TYPE>::splitByTimeVector(const std::vector<DateAndTime> 
   }
 
   DateAndTime filterStartTime = timeToFilterTo[index_splitter];
-  DateAndTime filterEndTime = timeToFilterTo[index_splitter + 1];
+  DateAndTime filterEndTime;
 
   // move along the entries to find the entry inside the current splitter
   auto firstEntryInSplitter = std::lower_bound(currentTimes.begin(), currentTimes.end(), filterStartTime);

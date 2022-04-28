@@ -87,7 +87,6 @@ assignBoolToFloat:${CMAKE_SOURCE_DIR}/Framework/Kernel/src/TimeSeriesProperty.cp
 assignBoolToFloat:${CMAKE_SOURCE_DIR}/Framework/Kernel/src/TimeSeriesProperty.cpp:906
 unreadVariable:${CMAKE_SOURCE_DIR}/Framework/Kernel/src/TimeSeriesProperty.cpp:468
 unreadVariable:${CMAKE_SOURCE_DIR}/Framework/Kernel/src/TimeSeriesProperty.cpp:469
-unreadVariable:${CMAKE_SOURCE_DIR}/Framework/Kernel/src/TimeSeriesProperty.cpp:552
 knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/Kernel/src/V3D.cpp:34
 unsignedLessThanZero:${CMAKE_SOURCE_DIR}/Framework/Kernel/src/VMD.cpp:35
 unsignedLessThanZero:${CMAKE_SOURCE_DIR}/Framework/Kernel/src/VMD.cpp:117
