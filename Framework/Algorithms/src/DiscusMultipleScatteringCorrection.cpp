@@ -608,6 +608,14 @@ void DiscusMultipleScatteringCorrection::exec() {
     // ConvFit method being investigated by Spencer for inelastic currently uses the opposite ratio
     if (m_EMode != DeltaEMode::Elastic) {
       auto invRatioOutput = 1 / ratioOutput;
+      auto replaceNans = this->createChildAlgorithm("ReplaceSpecialValues");
+      replaceNans->setChild(true);
+      replaceNans->initialize();
+      replaceNans->setProperty("InputWorkspace", invRatioOutput);
+      replaceNans->setProperty("OutputWorkspace", invRatioOutput);
+      replaceNans->setProperty("NaNValue", 0.0);
+      replaceNans->setProperty("InfinityValue", 0.0);
+      replaceNans->execute();
       wsName = outputGroupWSName + "_Ratio_All_To_Single";
       setWorkspaceName(invRatioOutput, wsName);
       wsgroup->addWorkspace(invRatioOutput);
@@ -862,8 +870,8 @@ void DiscusMultipleScatteringCorrection::integrateCumulative(const Mantid::Histo
   }
 }
 
-API::MatrixWorkspace_sptr DiscusMultipleScatteringCorrection::integrateWS(API::MatrixWorkspace_sptr ws) {
-  auto retVal = DataObjects::create<Workspace2D>(ws->getNumberHistograms(), HistogramData::Points{0.});
+API::MatrixWorkspace_sptr DiscusMultipleScatteringCorrection::integrateWS(const API::MatrixWorkspace_sptr &ws) {
+  auto retVal = DataObjects::create<Workspace2D>(*ws, HistogramData::Points{0.});
   for (size_t i = 0; i < ws->getNumberHistograms(); i++) {
     std::vector<double> IOfQX, IOfQY;
     integrateCumulative(ws->histogram(i), ws->x(i).front(), ws->x(i).back(), IOfQX, IOfQY);

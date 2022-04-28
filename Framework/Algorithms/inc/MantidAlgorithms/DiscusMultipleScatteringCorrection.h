@@ -63,7 +63,7 @@ protected:
   void updateTrackDirection(Geometry::Track &track, const double cosT, const double phi);
   void integrateCumulative(const Mantid::HistogramData::Histogram &h, const double xmin, const double xmax,
                            std::vector<double> &resultX, std::vector<double> &resultY);
-  API::MatrixWorkspace_sptr integrateWS(API::MatrixWorkspace_sptr ws);
+  API::MatrixWorkspace_sptr integrateWS(const API::MatrixWorkspace_sptr &ws);
 
 private:
   void init() override;
