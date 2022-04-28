@@ -95,7 +95,6 @@ constParameter:${CMAKE_SOURCE_DIR}/Framework/API/inc/MantidAPI/IFunction.h:209
 constParameter:${CMAKE_SOURCE_DIR}/Framework/API/inc/MantidAPI/IFunction.h:211
 constParameter:${CMAKE_SOURCE_DIR}/Framework/API/inc/MantidAPI/IFunction.h:213
 constParameter:${CMAKE_SOURCE_DIR}/Framework/API/inc/MantidAPI/IFunction.h:215
-constParameter:${CMAKE_SOURCE_DIR}/Framework/DataObjects/inc/MantidDataObjects/TableWorkspace.h:344
 redundantInitialization:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/ChangeTimeZero.cpp:133
 unreadVariable:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/CopySample.cpp:168
 unassignedVariable:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/CorelliCalibrationDatabase.cpp:460
