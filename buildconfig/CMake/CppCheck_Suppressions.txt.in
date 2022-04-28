@@ -77,7 +77,6 @@ mismatchingContainerExpression:${CMAKE_SOURCE_DIR}/Framework/Kernel/src/LogFilte
 knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/Kernel/src/Matrix.cpp:874
 knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/Kernel/src/Matrix.cpp:1003
 knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/Kernel/src/Memory.cpp:284
-objectIndex:${CMAKE_SOURCE_DIR}/Framework/Kernel/src/NexusHDF5Descriptor.cpp:87
 useStlAlgorithm:${CMAKE_SOURCE_DIR}/Framework/Kernel/inc/MantidKernel/DataService.h:366
 useStlAlgorithm:${CMAKE_SOURCE_DIR}/Framework/Kernel/inc/MantidKernel/DataService.h:390
 unassignedVariable:${CMAKE_SOURCE_DIR}/Framework/Kernel/src/Quat.cpp:687

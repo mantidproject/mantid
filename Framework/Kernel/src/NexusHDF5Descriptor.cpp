@@ -83,8 +83,7 @@ herr_t readStringAttribute(hid_t attr, char **data) {
     free(strings);
   } else {
     *data = (char *)malloc(33);
-    strcpy(*data, " higher dimensional string array");
-    *data[32] = '\0';
+    strcpy(*data, " higher dimensional string array\0");
   }
 
   H5Tclose(atype);
