@@ -370,10 +370,10 @@ set(TEST_FILES
     Algorithms/EstimatePeakErrorsTest.h
     Algorithms/EvaluateFunctionTest.h
     Algorithms/FitPowderDiffPeaksTest.h
-    Algorithms/FitTest.h
+    # Algorithms/FitTest.h
     Algorithms/LeBailFitTest.h
     Algorithms/LeBailFunctionTest.h
-    Algorithms/NormaliseByPeakAreaTest.h
+    # Algorithms/NormaliseByPeakAreaTest.h
     Algorithms/PawleyFitTest.h
     Algorithms/PlotPeakByLogValueTest.h
     Algorithms/PlotPeakByLogValueHelperTest.h
@@ -396,13 +396,13 @@ set(TEST_FILES
     CostFunctions/CostFuncFittingTest.h
     CostFunctions/CostFuncUnweightedLeastSquaresTest.h
     CostFunctions/LeastSquaresTest.h
-    CostFuncPoissonTest.h
+    # CostFuncPoissonTest.h
     FitMWTest.h
     FortranMatrixTest.h
     FortranVectorTest.h
     FuncMinimizers/BFGSTest.h
     FuncMinimizers/DampedGaussNewtonMinimizerTest.h
-    FuncMinimizers/ErrorMessagesTest.h
+    # FuncMinimizers/ErrorMessagesTest.h
     FuncMinimizers/FABADAMinimizerTest.h
     FuncMinimizers/FRConjugateGradientTest.h
     FuncMinimizers/LevenbergMarquardtMDTest.h
@@ -430,7 +430,7 @@ set(TEST_FILES
     Functions/CriticalPeakRelaxationRateTest.h
     Functions/CrystalFieldControlTest.h
     Functions/CrystalFieldEnergiesTest.h
-    Functions/CrystalFieldFunctionTest.h
+    # Functions/CrystalFieldFunctionTest.h
     Functions/CrystalFieldHeatCapacityTest.h
     Functions/CrystalFieldMagnetisationTest.h
     Functions/CrystalFieldMomentTest.h
@@ -443,7 +443,7 @@ set(TEST_FILES
     Functions/DecoupAsymPowderMagLongTest.h
     Functions/DecoupAsymPowderMagRotTest.h
     Functions/DeltaFunctionTest.h
-    Functions/DiffRotDiscreteCircleTest.h
+    # Functions/DiffRotDiscreteCircleTest.h
     Functions/DiffSphereTest.h
     Functions/DynamicKuboToyabeTest.h
     Functions/ElasticIsoRotDiffTest.h

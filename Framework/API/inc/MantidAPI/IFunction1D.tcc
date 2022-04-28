@@ -37,13 +37,7 @@ void IFunction1D::calcNumericalDerivative1D(Jacobian *jacobian, EvaluationMethod
   for (size_t iP = 0; iP < nParam; iP++) {
     if (isActive(iP)) {
       const double val = activeParameter(iP);
-      if (val == 0) {
-        step = epsilon * 100.0;
-      } else if (fabs(val) < 1) {
-        step = sqrt(epsilon);
-      } else {
-        step = val * sqrt(epsilon);
-      }
+      step = calculateStepSize(val);
 
       const double paramPstep = val + step;
       setActiveParameter(iP, paramPstep);

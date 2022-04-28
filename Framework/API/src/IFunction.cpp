@@ -41,6 +41,32 @@
 #include <sstream>
 #include <utility>
 
+namespace {
+
+const double EPSILON = std::numeric_limits<double>::epsilon();
+const double MIN_DOUBLE = std::numeric_limits<double>::min();
+const double STEP_PERCENTAGE = 0.001;
+
+const double calculateStepSizeDefault(const double parameterValue) {
+  if (fabs(parameterValue) < 100.0 * MIN_DOUBLE / STEP_PERCENTAGE) {
+    return 100.0 * EPSILON;
+  } else {
+    return parameterValue * STEP_PERCENTAGE;
+  }
+}
+
+const double calculateStepSizeSqrtEpsilon(const double parameterValue) {
+  if (parameterValue == 0) {
+    return 100.0 * EPSILON;
+  } else if (fabs(parameterValue) < 1) {
+    return sqrt(EPSILON);
+  } else {
+    return parameterValue * sqrt(EPSILON);
+  }
+}
+
+} // namespace
+
 namespace Mantid::API {
 using namespace Geometry;
 
@@ -66,7 +92,8 @@ const std::vector<std::string> EXCLUDEUSAGE = {"CompositeFunction"};
 /**
  * Constructor
  */
-IFunction ::IFunction() : m_isParallel(false), m_handler(nullptr), m_chiSquared(0.0) {}
+IFunction ::IFunction()
+    : m_isParallel(false), m_handler(nullptr), m_chiSquared(0.0), m_stepSizeMethod(StepSizeMethod::DEFAULT) {}
 
 /**
  * Destructor
@@ -1043,13 +1070,7 @@ void IFunction::calNumericalDeriv(const FunctionDomain &domain, Jacobian &jacobi
   for (size_t iP = 0; iP < nParam; iP++) {
     if (isActive(iP)) {
       const double val = activeParameter(iP);
-      if (val == 0) {
-        step = epsilon * 100.0;
-      } else if (fabs(val) < 1) {
-        step = sqrt(epsilon);
-      } else {
-        step = val * sqrt(epsilon);
-      }
+      step = calculateStepSize(val);
 
       const double paramPstep = val + step;
       setActiveParameter(iP, paramPstep);
@@ -1064,6 +1085,20 @@ void IFunction::calNumericalDeriv(const FunctionDomain &domain, Jacobian &jacobi
       }
     }
   }
+}
+
+/** Calculates the step size to use when calculating the numerical derivative.
+ * @param parameterValue :: The value of the active parameter.
+ * @returns The step size to use when calculating the numerical derivative.
+ */
+const double IFunction::calculateStepSize(const double parameterValue) const {
+  switch (m_stepSizeMethod) {
+  case StepSizeMethod::DEFAULT:
+    return calculateStepSizeDefault(parameterValue);
+  case StepSizeMethod::SQRT_EPSILON:
+    return calculateStepSizeSqrtEpsilon(parameterValue);
+  }
+  throw std::invalid_argument("An invalid step size calculation was detected.");
 }
 
 /** Initialize the function providing it the workspace

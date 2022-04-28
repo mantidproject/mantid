@@ -162,6 +162,8 @@ template <class... Ts> AttributeLambdaVisitor(Ts...) -> AttributeLambdaVisitor<T
 */
 class MANTID_API_DLL IFunction {
 public:
+  enum StepSizeMethod { DEFAULT, SQRT_EPSILON };
+
   /**
    * Simple Exception Struct to differentiate validation error from other exceptions.
    */
@@ -683,6 +685,8 @@ protected:
   void applyOrderedTies();
   /// Writes itself into a string
   [[nodiscard]] virtual std::string writeToString(const std::string &parentLocalAttributesStr = "") const;
+  /// Calculates the step size to use for the currently active parameter
+  [[nodiscard]] const double calculateStepSize(const double parameterValue) const;
 
   friend class ParameterTie;
   friend class CompositeFunction;
@@ -713,6 +717,8 @@ private:
   std::vector<ParameterTie *> m_orderedTies;
   /// whether the function usage has been registered
   bool m_isRegistered{false};
+  /// The method used to calculate the step size
+  StepSizeMethod m_stepSizeMethod;
 };
 
 /// shared pointer to the function base class
