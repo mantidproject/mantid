@@ -293,7 +293,7 @@ std::map<std::string, std::string> ReflectometryBackgroundSubtraction::validateI
   Indexing::SpectrumIndexSet indexSet;
   try {
     indexSet = *indexProp;
-  } catch (std::runtime_error &e) {
+  } catch (std::runtime_error const &e) {
     // This can except unhandled when the input workspace is the wrong type. So just add an error instead.
     errors["InputWorkspace"] = e.what();
   }
