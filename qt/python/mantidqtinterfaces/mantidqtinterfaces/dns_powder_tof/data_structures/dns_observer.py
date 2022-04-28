@@ -22,6 +22,7 @@ class DNSObserver():
     they are the only ones which communicate with their view and model
     which are DI to them by the widget.
     """
+
     def __init__(self, parent=None, name=None, view=None, model=None):
         super().__init__()
         self.name = name
@@ -48,7 +49,7 @@ class DNSObserver():
         """
         Sets the view from the own parameter dictionary.
         """
-        self.view.set_state(self.param_dict.get(self.name, None))
+        self.view.set_state(self.own_dict) # own dict not from abo
 
     def get_option_dict(self):
         """
@@ -66,16 +67,13 @@ class DNSObserver():
         """
         Main presenter can request data from DNSObservers.
         """
-        pass
 
     def tab_got_focus(self):
         """
         Run if the tab of the associated view got the focus.
         """
-        pass
 
     def on_modus_change(self):
         """
         Run when the modus of the gui changes.
         """
-        pass
