@@ -209,6 +209,9 @@ LICENSE_PATH=${LICENSE_PATH////\\}
 LICENSE_PATH="$SCRIPT_DRIVE_LETTER:${LICENSE_PATH:2}"
 echo Workebench Icon: $WORKBENCH_ICON
 
+# Generate uninstall commands to make sure to only remove files that are copied by the installer
+echo Generating uninstaller helper files
+python $THIS_SCRIPT_DIR/create_uninstall_lists.py --package_dir=$COPY_DIR --output_dir=$THIS_SCRIPT_DIR
 
 # Run the makensis command from our nsis Conda environment
 echo makensis /V4 /O\"$NSIS_OUTPUT_LOG\" /DVERSION=$VERSION /DPACKAGE_DIR=\"$COPY_DIR\" /DPACKAGE_SUFFIX=$SUFFIX /DOUTFILE_NAME=$PACKAGE_NAME /DICON_PATH=$ICON_PATH /DWORKBENCH_ICON=$WORKBENCH_ICON /DNOTEBOOK_ICON=$NOTEBOOK_ICON /DMUI_PAGE_LICENSE_PATH=$LICENSE_PATH \"$NSIS_SCRIPT\"
