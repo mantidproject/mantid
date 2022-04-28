@@ -50,13 +50,11 @@ class SimpleShapeDiscusInelasticTest(unittest.TestCase):
             y_unit = corr_ws_grp[i].YUnitLabel()
             blocksize = corr_ws_grp[i].blocksize()
             if corr_ws_grp[i].name().endswith('Integrated'):
-                self.assertEqual(x_unit, 'Empty')
-                self.assertEqual(y_unit, '')
                 self.assertEqual(blocksize, 1)
             else:
-                self.assertEqual(x_unit, 'DeltaE')
-                self.assertEqual(y_unit, 'Scattered Weight')
                 self.assertEqual(blocksize, 1905)
+            self.assertEqual(x_unit, 'DeltaE')
+            self.assertEqual(y_unit, 'Scattered Weight')
 
             num_hists = corr_ws_grp[i].getNumberHistograms()
             self.assertEqual(num_hists, 10)
