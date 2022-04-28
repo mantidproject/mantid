@@ -220,5 +220,7 @@ echo "Cleaning up left over files"
 rm -rf $CONDA_ENV_PATH
 rm -rf $COPY_DIR
 rm -rf $NSIS_CONDA_ENV_PATH
+rm $THIS_SCRIPT_DIR/uninstall_files.nsh
+rm $THIS_SCRIPT_DIR/uninstall_dirs.nsh
 
 echo "Done"
