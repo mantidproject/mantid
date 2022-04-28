@@ -126,7 +126,7 @@ The algorithm outputs a workspace group containing the following workspaces:
 - A workspace called ``Scatter_1_NoAbsorb`` is also created for a scenario where neutrons are scattered once, absorption is assumed to be zero and re-scattering after the simulated scattering event is assumed to be zero. This is the quantity :math:`J_{1}^{*}` described in the Discus manual
 - A workspace called ``Scatter_2_n_Summed`` which is the sum of the ``Scatter_n`` workspaces for n > 1
 - A workspace called ``Scatter_1_n_Summed`` which is the sum of the ``Scatter_n`` workspaces for n >= 1
-- A workspace called ``Ratio_Single_To_All_Scatters`` which is the ``Scatter_1`` workspace divided by ``Scatter_1_n_Summed``
+- A workspace called ``Ratio_Single_To_All`` which is the ``Scatter_1`` workspace divided by ``Scatter_1_n_Summed``
 
 The output can be applied to a workspace containing a real sample measurement in one of two ways:
 

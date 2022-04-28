@@ -42,8 +42,8 @@ class SimpleShapeDiscusInelasticTest(unittest.TestCase):
     def _test_corrections_workspace(self, corr_ws_grp):
         number_ws = corr_ws_grp.getNumberOfEntries()
         # Scatter_1, Scatter_1_NoAbs, Scatter_2, Scatter_1_2_Summed, Scatter_2_2_Summed
-        # Scatter_1_Integrated, Scatter_2_Integrated, Ratio
-        self.assertEqual(number_ws,8)
+        # Scatter_1_Integrated, Scatter_2_Integrated, Ratio x 2
+        self.assertEqual(number_ws, 9)
 
         for i in range(number_ws):
             x_unit = corr_ws_grp[i].getAxis(0).getUnit().unitID()
