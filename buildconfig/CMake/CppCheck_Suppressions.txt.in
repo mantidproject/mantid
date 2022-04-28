@@ -89,7 +89,6 @@ unreadVariable:${CMAKE_SOURCE_DIR}/Framework/Kernel/src/TimeSeriesProperty.cpp:4
 unreadVariable:${CMAKE_SOURCE_DIR}/Framework/Kernel/src/TimeSeriesProperty.cpp:469
 uninitvar:${CMAKE_SOURCE_DIR}/Framework/Parallel/inc/MantidParallel/ThreadingBackend.h:82
 uninitvar:${CMAKE_SOURCE_DIR}/Framework/Parallel/inc/MantidParallel/ThreadingBackend.h:84
-useStlAlgorithm:${CMAKE_SOURCE_DIR}/Framework/Parallel/src/IO/MultiProcessEventLoader.cpp:37
 redundantInitialization:${CMAKE_SOURCE_DIR}/Framework/Geometry/inc/MantidGeometry/Instrument/Component.h:176
 redundantInitialization:${CMAKE_SOURCE_DIR}/Framework/Geometry/inc/MantidGeometry/Instrument/Component.h:262
 redundantInitialization:${CMAKE_SOURCE_DIR}/Framework/Geometry/inc/MantidGeometry/Instrument/Component.h:328
