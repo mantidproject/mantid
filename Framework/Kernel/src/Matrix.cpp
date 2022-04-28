@@ -871,8 +871,6 @@ identity matrix. (?)
             }
           }
         }
-      } else if (pivoted[j] > 1) {
-        throw std::runtime_error("Error doing G-J elem on a singular matrix");
       }
     }
     pivoted[icol]++;
@@ -1000,7 +998,7 @@ yes invert the matrix using analytic formula. If not then use standard Invert
         if (D >= 2) {
           m_rawData[i][j] = static_cast<T>(pow(-1.0, i + j));
           lambda = static_cast<T>(acosh(D / 2));
-        } else if ((D > -2) && (D < 2)) {
+        } else if (D > -2) {
           m_rawData[i][j] = 1;                   // use +1 here instead of the -1 in the paper
           lambda = static_cast<T>(acos(-D / 2)); // extra minus sign here compared to paper
         } else {

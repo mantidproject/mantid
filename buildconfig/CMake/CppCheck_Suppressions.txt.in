@@ -74,8 +74,6 @@ mismatchingContainerExpression:${CMAKE_SOURCE_DIR}/Framework/Kernel/src/LogFilte
 mismatchingContainerExpression:${CMAKE_SOURCE_DIR}/Framework/Kernel/src/LogFilter.cpp:77
 mismatchingContainerExpression:${CMAKE_SOURCE_DIR}/Framework/Kernel/src/LogFilter.cpp:89
 mismatchingContainerExpression:${CMAKE_SOURCE_DIR}/Framework/Kernel/src/LogFilter.cpp:91
-knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/Kernel/src/Matrix.cpp:874
-knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/Kernel/src/Matrix.cpp:1003
 knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/Kernel/src/Memory.cpp:284
 unassignedVariable:${CMAKE_SOURCE_DIR}/Framework/Kernel/src/Quat.cpp:687
 unassignedVariable:${CMAKE_SOURCE_DIR}/Framework/Kernel/src/Quat.cpp:687
