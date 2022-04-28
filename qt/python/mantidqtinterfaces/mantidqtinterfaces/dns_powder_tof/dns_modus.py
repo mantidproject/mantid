@@ -55,7 +55,7 @@ class DNSModus:
 
     def change(self, name):
         """
-        Changes the mode of DNS GUI only names from _mode_map  are
+        Changes the mode of DNS GUI only names from _mode_map are
         allowed.
         """
         self.name = name

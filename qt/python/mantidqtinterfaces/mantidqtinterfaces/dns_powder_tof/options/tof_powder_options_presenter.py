@@ -57,7 +57,7 @@ class DNSTofPowderOptionsPresenter(DNSCommonOptionsPresenter):
             self.view.show_status_message(
                 'q-range and binning automatically estimated', 30)
 
-    def process_commandline_request(self, cl_options): #OKcomment: what does "cl" stand for?
+    def process_commandline_request(self, com_line_options):
         for command in ['det_efficiency']:
-            if command in cl_options:
-                self.view.set_single_state_by_name(command, cl_options[command])
+            if command in com_line_options:
+                self.view.set_single_state_by_name(command, com_line_options[command])

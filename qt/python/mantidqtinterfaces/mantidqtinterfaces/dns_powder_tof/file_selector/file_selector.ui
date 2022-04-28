@@ -64,7 +64,7 @@
           <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Autoload new files which are added at the end of the actual scan list.&lt;/p&gt;&lt;p&gt;Will not load new files, in other scans, or delete removed files from scanlist.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
          </property>
          <property name="text">
-          <string>Autload New</string>
+          <string>Autoload New</string>
          </property>
         </widget>
        </item>
@@ -248,7 +248,7 @@
      <item>
       <widget class="QGroupBox" name="groupBox_filter_standard">
        <property name="title">
-        <string>Filter by ???:</string>
+        <string>Filter by Sample Type:</string>
        </property>
        <layout class="QVBoxLayout" name="verticalLayout">
         <item>
