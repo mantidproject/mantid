@@ -52,19 +52,14 @@ AnalysisDataServiceImpl &instance() {
  * @return a python list of the workspaces in the ADS
  */
 
-// list retrieveWorkspaces(AnalysisDataServiceImpl const *const self, const list &names, bool unrollGroups = false) {
-//  using WeakPtr = std::weak_ptr<Workspace>;
-//  const auto wsSharedPtrs =
-//      self->retrieveWorkspaces(Converters::PySequenceToVector<std::string>(names)(), unrollGroups);
-//      std::vector<WeakPtr> wsWeakPtrs;
-//  std::transform(wsSharedPtrs.begin(), wsSharedPtrs.end(), std::back_inserter(wsWeakPtrs),
-//                     [](const Workspace_sptr wksp) -> WeakPtr { return WeakPtr(wksp); });
-//      return Converters::ToPyList<WeakPtr>()(wsWeakPtrs);
-//}
-
 list retrieveWorkspaces(AnalysisDataServiceImpl const *const self, const list &names, bool unrollGroups = false) {
-  return Converters::ToPyList<Workspace_sptr>()(
-      self->retrieveWorkspaces(Converters::PySequenceToVector<std::string>(names)(), unrollGroups));
+  using WeakPtr = std::weak_ptr<Workspace>;
+  const auto wsSharedPtrs =
+      self->retrieveWorkspaces(Converters::PySequenceToVector<std::string>(names)(), unrollGroups);
+  std::vector<WeakPtr> wsWeakPtrs;
+  std::transform(wsSharedPtrs.begin(), wsSharedPtrs.end(), std::back_inserter(wsWeakPtrs),
+                 [](const Workspace_sptr &wksp) -> WeakPtr { return WeakPtr(wksp); });
+  return Converters::ToPyList<WeakPtr>()(wsWeakPtrs);
 }
 
 GNU_DIAG_OFF("unused-local-typedef")
