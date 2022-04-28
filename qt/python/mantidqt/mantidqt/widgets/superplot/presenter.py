@@ -371,7 +371,7 @@ class SuperplotPresenter:
                     spectra.append(data[1])
             self._view.set_spectra_list(name, spectra)
 
-    def _update_plot(self, replot=False):
+    def _update_plot(self, replot=False):  # noqa C901
         """
         Update the plot. This function overplots the memorized data with the
         currently selected workspace and spectrum index. It keeps a memory of
@@ -393,7 +393,10 @@ class SuperplotPresenter:
 
         # remove curves not in plotted_data
         for artist in artists:
-            ws, sp = axes.get_artists_workspace_and_workspace_index(artist)
+            try:
+                ws, sp = axes.get_artists_workspace_and_workspace_index(artist)
+            except KeyError:
+                continue
             ws_name = ws.name()
             if (ws_name, sp) not in plotted_data:
                 axes.remove_artists_if(lambda a: a==artist)
@@ -428,6 +431,8 @@ class SuperplotPresenter:
                     color = self._model.get_workspace_color(ws_name)
                     kwargs = self._fill_plot_kwargs(ws_name, sp, normalised,
                                                     mode, color)
+                    if ws_name not in mtd:
+                        continue
                     ws = mtd[ws_name]
                     if self._error_bars:
                         lines = axes.errorbar(ws, **kwargs)

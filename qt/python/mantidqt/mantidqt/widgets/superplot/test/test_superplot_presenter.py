@@ -228,6 +228,7 @@ class SuperplotPresenterTest(unittest.TestCase):
         self.m_view.set_spectra_list.assert_has_calls(calls)
 
     def test_update_plot(self):
+        self.m_mtd.__contains__.return_value = True
         self.m_axes.reset_mock()
         self.m_model.get_plotted_data.return_value = [("ws5", 5), ("ws2", 1)]
         self.m_model.is_spectrum_mode.return_value = True
