@@ -41,21 +41,25 @@ class SimpleShapeDiscusInelasticTest(unittest.TestCase):
 
     def _test_corrections_workspace(self, corr_ws_grp):
         number_ws = corr_ws_grp.getNumberOfEntries()
-        # Scatter_1, Scatter_1_NoAbs, Scatter_2, Scatter_2_2_Summed
-        self.assertEqual(number_ws,4)
+        # Scatter_1, Scatter_1_NoAbs, Scatter_2, Scatter_1_2_Summed, Scatter_2_2_Summed
+        # Scatter_1_Integrated, Scatter_2_Integrated, Ratio
+        self.assertEqual(number_ws,8)
 
         for i in range(number_ws):
             x_unit = corr_ws_grp[i].getAxis(0).getUnit().unitID()
-            self.assertEqual(x_unit, 'DeltaE')
-
             y_unit = corr_ws_grp[i].YUnitLabel()
-            self.assertEqual(y_unit, 'Scattered Weight')
+            blocksize = corr_ws_grp[i].blocksize()
+            if corr_ws_grp[i].name().endswith('Integrated'):
+                self.assertEqual(x_unit, 'Empty')
+                self.assertEqual(y_unit, '')
+                self.assertEqual(blocksize, 1)
+            else:
+                self.assertEqual(x_unit, 'DeltaE')
+                self.assertEqual(y_unit, 'Scattered Weight')
+                self.assertEqual(blocksize, 1905)
 
             num_hists = corr_ws_grp[i].getNumberHistograms()
             self.assertEqual(num_hists, 10)
-
-            blocksize = corr_ws_grp[i].blocksize()
-            self.assertEqual(blocksize, 1905)
 
     def test_flat_plate(self):
         # Test flat plate shape
