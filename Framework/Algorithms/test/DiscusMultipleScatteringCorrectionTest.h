@@ -144,12 +144,11 @@ public:
     if (alg->isExecuted()) {
       Mantid::API::WorkspaceGroup_sptr output =
           Mantid::API::AnalysisDataService::Instance().retrieveWS<Mantid::API::WorkspaceGroup>("MuscatResults");
-      std::vector<std::string> wsNames = {
-          "MuscatResults_Scatter_1_NoAbs",      "MuscatResults_Scatter_1",
-          "MuscatResults_Scatter_1_Integrated", "MuscatResults_Scatter_2",
-          "MuscatResults_Scatter_2_Integrated", "MuscatResults_Scatter_3",
-          "MuscatResults_Scatter_3_Integrated", "MuscatResults_Scatter_2_3_Summed",
-          "MuscatResults_Scatter_1_3_Summed",   "MuscatResults_Ratio_Single_To_All_Scatters"};
+      std::vector<std::string> wsNames = {"MuscatResults_Scatter_1_NoAbs",      "MuscatResults_Scatter_1",
+                                          "MuscatResults_Scatter_1_Integrated", "MuscatResults_Scatter_2",
+                                          "MuscatResults_Scatter_2_Integrated", "MuscatResults_Scatter_3",
+                                          "MuscatResults_Scatter_3_Integrated", "MuscatResults_Scatter_2_3_Summed",
+                                          "MuscatResults_Scatter_1_3_Summed",   "MuscatResults_Ratio_Single_To_All"};
       for (auto &name : wsNames) {
         Mantid::API::Workspace_sptr wsPtr;
         TS_ASSERT_THROWS_NOTHING(wsPtr = output->getItem(name));

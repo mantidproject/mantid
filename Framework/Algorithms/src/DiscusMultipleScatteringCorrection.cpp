@@ -601,9 +601,17 @@ void DiscusMultipleScatteringCorrection::exec() {
     // create ratio of single to all scatter
     auto ratioOutput = createOutputWorkspace(*inputWS);
     ratioOutput = outputWSs[0] / summedAllScatOutput;
-    wsName = outputGroupWSName + "_Ratio_Single_To_All_Scatters";
+    wsName = outputGroupWSName + "_Ratio_Single_To_All";
     setWorkspaceName(ratioOutput, wsName);
     wsgroup->addWorkspace(ratioOutput);
+
+    // ConvFit method being investigated by Spencer for inelastic currently uses the opposite ratio
+    if (m_EMode != DeltaEMode::Elastic) {
+      auto invRatioOutput = 1 / ratioOutput;
+      wsName = outputGroupWSName + "_Ratio_All_To_Single";
+      setWorkspaceName(invRatioOutput, wsName);
+      wsgroup->addWorkspace(invRatioOutput);
+    }
   }
 
   // set the output property
