@@ -84,7 +84,6 @@ echo "Conda env created"
 # Determine version information
 VERSION=$("$CONDA_EXE" list --prefix "$CONDA_ENV_PATH" '^mantid$' --json | $CONDA_ENV_PATH/Library/mingw-w64/bin/jq.exe --raw-output '.[0].version')
 echo "Version number: $VERSION"
-
 echo "Removing jq from conda env"
 "$CONDA_EXE" remove --prefix $CONDA_ENV_PATH --yes m2w64-jq
 echo "jq removed from conda env"
@@ -111,7 +110,6 @@ cp $CONDA_ENV_PATH/Library/bin/*.dll $COPY_DIR/bin/
 
 echo "Copy Mantid specific files from env/Library/bin to package/bin"
 cp $CONDA_ENV_PATH/Library/bin/Mantid.properties $COPY_DIR/bin/
-cp $CONDA_ENV_PATH/Library/bin/Mantid.user.properties $COPY_DIR/bin/
 cp $CONDA_ENV_PATH/Library/bin/MantidNexusParallelLoader.exe $COPY_DIR/bin/
 cp $CONDA_ENV_PATH/Library/bin/mantid-scripts.pth $COPY_DIR/bin/
 cp $CONDA_ENV_PATH/Library/bin/MantidWorkbench.exe $COPY_DIR/bin/
