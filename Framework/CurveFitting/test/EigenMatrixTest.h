@@ -34,6 +34,30 @@ public:
     TS_ASSERT_EQUALS(m(2, 1), 22.);
   }
 
+  void test_create_from_kernel_matrix() {
+    Mantid::Kernel::Matrix<double> m(3, 10);
+    for (size_t i = 0; i < m.numRows(); i++) {
+      for (size_t j = 0; j < m.numCols(); j++) {
+        m[i][j] = j + i * m.numCols();
+      }
+    }
+
+    EigenMatrix em2(m);
+    for (size_t i = 0; i < em2.size1(); i++) {
+      for (size_t j = 0; j < em2.size2(); j++) {
+        TS_ASSERT_EQUALS(em2(i, j), m[i][j]);
+      }
+    }
+
+    // create sub matrix
+    EigenMatrix em(m, 0, 0, 3, 3);
+    for (size_t i = 0; i < em.size1(); i++) {
+      for (size_t j = 0; j < em.size2(); j++) {
+        TS_ASSERT_EQUALS(em(i, j), m[i][j]);
+      }
+    }
+  }
+
   void test_multiply_two_matrices() {
     EigenMatrix m1(2, 2);
     m1.set(0, 0, 1);

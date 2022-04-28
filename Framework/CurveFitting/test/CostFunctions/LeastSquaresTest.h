@@ -226,7 +226,8 @@ public:
 
     double L; // = d*dx + 0.5 * dx * H * dx
 
-    gsl_blas_dgemv(CblasNoTrans, 0.5, &getGSLMatrixView_const_tr(H.inspector()).matrix,
+    EigenMatrix temp_H_tr = H.tr();
+    gsl_blas_dgemv(CblasNoTrans, 0.5, &getGSLMatrixView_const(temp_H_tr.inspector()).matrix,
                    &getGSLVectorView_const(dx.inspector()).vector, 1., &getGSLVectorView(g.mutator()).vector);
 
     gsl_blas_ddot(&getGSLVectorView_const(g.inspector()).vector, &getGSLVectorView_const(dx.inspector()).vector, &L);

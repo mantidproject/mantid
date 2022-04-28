@@ -404,6 +404,7 @@ set(TEST_FILES
     EigenFortranMatrixTest.h
     EigenFortranVectorTest.h
     EigenMatrixTest.h
+    EigenToGSLTest.h
     EigenVectorTest.h
     EigenViewTest.h
     FitMWTest.h

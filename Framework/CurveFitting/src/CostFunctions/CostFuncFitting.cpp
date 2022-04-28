@@ -133,7 +133,10 @@ void CostFuncFitting::calActiveCovarianceMatrix(EigenMatrix &covar, double epsre
 
   // let the GSL to compute the covariance matrix
   EigenMatrix covar_tr(covar.tr());
-  gsl_multifit_covar(&getGSLMatrixView_const_tr(j).matrix, epsrel, &getGSLMatrixView(covar_tr.mutator()).matrix);
+  EigenMatrix temp_j_tr;
+  temp_j_tr = j.transpose();
+  gsl_multifit_covar(&getGSLMatrixView_const(temp_j_tr.inspector()).matrix, epsrel,
+                     &getGSLMatrixView(covar_tr.mutator()).matrix);
   covar = covar_tr.tr();
 }
 

@@ -59,9 +59,9 @@ inline gsl_matrix_view getGSLMatrixView(map_type &tr) { return gsl_matrix_view_a
 inline gsl_vector_const_view const getGSLVectorView_const(const vec_map_type v) {
   return gsl_vector_const_view_array(v.data(), v.size());
 }
-/// take data from an Eigen Matrix, transpose matrix, return a gsl view a transose of the transosed matrix.
-inline gsl_matrix_const_view const getGSLMatrixView_const_tr(const map_type m) {
-  return gsl_matrix_const_view_array(m.transpose().data(), m.rows(), m.cols());
+/// take data from a constEigen Matrix and return a transposed gsl view.
+inline gsl_matrix_const_view const getGSLMatrixView_const(const map_type m) {
+  return gsl_matrix_const_view_array(m.data(), m.cols(), m.rows());
 }
 
 } // namespace CurveFitting

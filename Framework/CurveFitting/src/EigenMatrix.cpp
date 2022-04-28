@@ -62,7 +62,20 @@ EigenMatrix::EigenMatrix(EigenMatrix &M, size_t row, size_t col, size_t nRows, s
 /// Constructor
 /// @param M :: A matrix to copy.
 EigenMatrix::EigenMatrix(const Kernel::Matrix<double> &M)
-    : m_data(M.getVector()), m_view(EigenMatrix_View(m_data.data(), M.numRows(), M.numCols())) {}
+    : m_data(M.numRows() * M.numCols()), m_view(EigenMatrix_View(m_data.data(), M.numRows(), M.numCols())) {
+
+  // Mantid::Kernel::Matrix stores row by row, so have to transpose initial matrix.
+  // To do this we copy into an eign matrix, then tranpose.
+  auto temp_vec = M.getVector();
+  Eigen::MatrixXd temp_matr_tr = EigenMatrix_View(temp_vec.data(), M.numCols(), M.numRows()).matrix_mutator();
+  Eigen::MatrixXd temp_matr = temp_matr_tr.transpose();
+
+  const double *p = temp_matr.data();
+  double *p2 = m_data.data();
+  while (p != temp_matr.data() + m_data.size()) {
+    *p2++ = *p++;
+  }
+}
 
 /// Create a submatrix. A submatrix is a reference to part of the parent matrix.
 /// @param M :: The parent matrix.
@@ -74,10 +87,21 @@ EigenMatrix::EigenMatrix(const Kernel::Matrix<double> &M, size_t row, size_t col
   if (row + nRows > M.numRows() || col + nCols > M.numCols()) {
     throw std::runtime_error("Submatrix exceeds matrix size.");
   }
-  m_data.resize(nRows * nCols);
+  resize(nRows, nCols);
 
-  auto temp_view = EigenMatrix_View(M.getVector().data(), nRows, nCols, row, col);
-  std::memcpy(m_data.data(), temp_view.matrix_mutator().data(), sizeof m_data.data());
+  // Mantid::Kernel::Matrix stores row by row, so have to transpose initial matrix before taking view.
+  // To do this we copy into an eign matrix, tranpose, then take a sub matrix.
+  auto temp_vec = M.getVector();
+  Eigen::MatrixXd temp_matr_tr = EigenMatrix_View(temp_vec.data(), M.numCols(), M.numRows()).matrix_mutator();
+  Eigen::MatrixXd temp_matr = temp_matr_tr.transpose();
+  auto temp_matr_sub_view = EigenMatrix_View(temp_matr.data(), nRows, nCols, nRows, nCols, row, col);
+  Eigen::MatrixXd temp_matr_sub = temp_matr_sub_view.matrix_inspector();
+
+  const double *p = temp_matr_sub.data();
+  double *p2 = m_data.data();
+  while (p != temp_matr_sub.data() + (nRows * nCols)) {
+    *p2++ = *p++;
+  }
 }
 
 /// "Move" constructor
@@ -212,8 +236,8 @@ EigenVector EigenMatrix::operator*(const EigenVector &v) const {
     throw std::invalid_argument("Matrix by vector multiplication: wrong size of vector.");
   }
 
-  EigenVector res(size1());
-  res.mutator() = inspector() * v.inspector();
+  EigenVector res;
+  res = inspector() * v.inspector();
   return res;
 }
 
@@ -227,8 +251,8 @@ EigenMatrix EigenMatrix::operator*(const EigenMatrix &m) const {
     throw std::invalid_argument("Matrix by matrix multiplication: matricies are of incompatible sizes.");
   }
 
-  EigenMatrix res(m.size1(), size2());
-  res.mutator() = inspector() * m.inspector();
+  EigenMatrix res;
+  res = inspector() * m.inspector();
   return res;
 }
 
@@ -338,9 +362,8 @@ EigenVector EigenMatrix::multiplyByVector(const EigenVector &v) const {
     throw std::invalid_argument("Matrix by vector multiplication: wrong size of vector.");
   }
 
-  EigenVector res(size2());
-  res.mutator() = inspector() * v.inspector();
-
+  EigenVector res;
+  res = inspector() * v.inspector();
   return res;
 }
 
