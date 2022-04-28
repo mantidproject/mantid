@@ -7,7 +7,7 @@
 from isis_powder.routines.param_map_entry import ParamMapEntry
 from isis_powder.gem_routines.gem_enums import GEM_CHOPPER_MODES
 from isis_powder.routines.common import PARAM_MAPPING as COMMON_PARAM_MAPPING
-from isis_powder.routines.common_enums import INPUT_BATCHING, WORKSPACE_UNITS
+from isis_powder.routines.common_enums import INPUT_BATCHING, WORKSPACE_UNITS, ABSORB_METHOD
 
 #                 Maps friendly user name (ext_name) -> script name (int_name)
 attr_mapping = [
@@ -57,6 +57,10 @@ attr_mapping = [
                   optional=True),
     ParamMapEntry(ext_name="user_name", int_name="user_name"),
     ParamMapEntry(ext_name="vanadium_cropping_values", int_name="vanadium_cropping_values"),
-    ParamMapEntry(ext_name="vanadium_normalisation", int_name="do_van_norm")
+    ParamMapEntry(ext_name="vanadium_normalisation", int_name="do_van_norm"),
+    ParamMapEntry(ext_name="absorb_method", int_name="absorb_method", enum_class=ABSORB_METHOD, optional=True),
+    ParamMapEntry(ext_name="paalman_pings_events_per_point", int_name="paalman_pings_events_per_point", optional=True),
+    ParamMapEntry(ext_name="force_recalculate_paalman_pings",
+                  int_name="force_recalculate_paalman_pings", optional=True),
 ]
 attr_mapping.extend(COMMON_PARAM_MAPPING)

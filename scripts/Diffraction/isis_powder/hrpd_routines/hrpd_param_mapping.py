@@ -6,6 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 from isis_powder.hrpd_routines.hrpd_enums import HRPD_MODES, HRPD_TOF_WINDOWS
 from isis_powder.routines.common import PARAM_MAPPING as COMMON_PARAM_MAPPING
+from isis_powder.routines.common_enums import ABSORB_METHOD
 from isis_powder.routines.param_map_entry import ParamMapEntry
 
 attr_mapping = [
@@ -36,6 +37,11 @@ attr_mapping = [
     ParamMapEntry(ext_name="vanadium_normalisation", int_name="do_van_norm"),
     ParamMapEntry(ext_name="vanadium_tof_cropping", int_name="van_tof_cropping"),
     ParamMapEntry(ext_name="vanadium_peaks_masking_file", int_name="masking_file_name"),
-    ParamMapEntry(ext_name="window", int_name="tof_window", enum_class=HRPD_TOF_WINDOWS)
+    ParamMapEntry(ext_name="window", int_name="tof_window", enum_class=HRPD_TOF_WINDOWS),
+    ParamMapEntry(ext_name="absorb_method", int_name="absorb_method", enum_class=ABSORB_METHOD, optional=True),
+    ParamMapEntry(ext_name="paalman_pings_events_per_point", int_name="paalman_pings_events_per_point", optional=True),
+    ParamMapEntry(ext_name="force_recalculate_paalman_pings",
+                  int_name="force_recalculate_paalman_pings", optional=True)
+
 ]
 attr_mapping.extend(COMMON_PARAM_MAPPING)

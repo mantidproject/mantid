@@ -5,6 +5,7 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 from isis_powder.routines.common import PARAM_MAPPING
+from isis_powder.routines.common_enums import ABSORB_METHOD
 from isis_powder.routines.param_map_entry import ParamMapEntry
 from isis_powder.pearl_routines.pearl_enums import PEARL_FOCUS_MODES, PEARL_TT_MODES
 
@@ -61,6 +62,10 @@ attr_mapping = [
                   int_name="absorb_out_file",
                   optional=True),
     ParamMapEntry(ext_name="vanadium_tof_cropping", int_name="van_tof_cropping"),
-    ParamMapEntry(ext_name="vanadium_normalisation", int_name="van_norm")
+    ParamMapEntry(ext_name="vanadium_normalisation", int_name="van_norm"),
+    ParamMapEntry(ext_name="absorb_method", int_name="absorb_method", enum_class=ABSORB_METHOD, optional=True),
+    ParamMapEntry(ext_name="paalman_pings_events_per_point", int_name="paalman_pings_events_per_point", optional=True),
+    ParamMapEntry(ext_name="force_recalculate_paalman_pings",
+                  int_name="force_recalculate_paalman_pings", optional=True)
 ]
 attr_mapping.extend(PARAM_MAPPING)

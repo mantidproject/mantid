@@ -51,30 +51,35 @@ def _focus_one_ws(input_workspace, run_number, instrument, perform_vanadium_norm
 
     # Correct for absorption / multiple scattering if required
     if absorb and instrument._inst_settings.absorb_method == 'PaalmanPings' and summed_empty:
-        events_per_point_string = instrument._inst_settings.paalman_pings_events_per_point
+        expected_filename = "PaalmanPingsCorrections_" + instrument.get_instrument_prefix() + run_number \
+                            + "_" + instrument._get_input_batching_mode() + ".nxs"
+        save_directory = instrument._inst_settings.output_dir
+        force_recalculate_paalman_pings = instrument._inst_settings.force_recalculate_paalman_pings
+
+        mantid.SetSample(input_workspace, Geometry=sample_details.generate_sample_geometry(),
+                         Material=sample_details.generate_sample_material(),
+                         ContainerGeometry=sample_details.generate_container_geometry(),
+                         ContainerMaterial=sample_details.generate_container_material())
         if events_per_point_string:
             events_per_point = int(events_per_point_string)
         else:
             events_per_point = 1000
-        expected_filename = "PaalmanPingsApplied_" + instrument.get_instrument_prefix() + run_number \
-                            + "_" + instrument._get_input_batching_mode() \
-                            + f"_{events_per_point}eventsperpoint" + ".nxs"
-        save_directory = instrument._inst_settings.output_dir
-        if expected_filename in os.listdir(save_directory):
-            input_workspace = mantid.LoadNexus(os.path.join(save_directory, expected_filename))
-        else:
-            mantid.SetSample(input_workspace, Geometry=sample_details.generate_sample_geometry(),
-                             Material=sample_details.generate_sample_material(),
-                             ContainerGeometry=sample_details.generate_container_geometry(),
-                             ContainerMaterial=sample_details.generate_container_material())
 
+        if force_recalculate_paalman_pings or expected_filename not in os.listdir(save_directory):
             corrections = mantid.PaalmanPingsMonteCarloAbsorption(InputWorkspace=input_workspace, Shape='Preset',
                                                                   EventsPerPoint=events_per_point)
+            mantid.SaveNexus(corrections, os.path.join(save_directory, expected_filename))
+        else:
+            expected_path = os.path.join(save_directory, expected_filename)
+            logger.warning(f'Loading pre-calculated corrections file found at {expected_path} \n'
+                           f' To recalculate with new sample + container values,'
+                           f' set "force_recalculate_paalman_pings = True" in the config file.')
+            corrections = mantid.LoadNexus(expected_path)
 
-            input_workspace = mantid.ApplyPaalmanPingsCorrection(SampleWorkspace=input_workspace,
-                                                                 CorrectionsWorkspace=corrections,
-                                                                 CanWorkspace=summed_empty)
-            mantid.SaveNexus(input_workspace, os.path.join(save_directory, expected_filename))
+        input_workspace = mantid.ApplyPaalmanPingsCorrection(SampleWorkspace=input_workspace,
+                                                             CorrectionsWorkspace=corrections,
+                                                             CanWorkspace=summed_empty)
+
     elif summed_empty:
         input_workspace = common.subtract_summed_runs(ws_to_correct=input_workspace,
                                                       empty_sample=summed_empty)
