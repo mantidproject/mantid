@@ -201,11 +201,7 @@ std::string axisXML(const std::vector<double> &axis) {
  * @throws Exception::NotFoundError if the property does not exist
  */
 double getPropertyAsDouble(const Kernel::PropertyManager &args, const std::string &name) {
-  try {
-    return args.getProperty(name);
-  } catch (std::runtime_error &) {
-    return static_cast<int>(args.getProperty(name));
-  }
+  return std::stod(args.getPropertyValue(name));
 }
 
 /**
@@ -213,17 +209,18 @@ double getPropertyAsDouble(const Kernel::PropertyManager &args, const std::strin
  * vector<double> or a vector<int> property and casts accordingly
  * @param args A reference to the property manager
  * @param name The name of the property
- * @return The value of the property as a double
+ * @return The value of the property as a vector<double>
  * @throws Exception::NotFoundError if the property does not exist
  */
 std::vector<double> getPropertyAsVectorDouble(const Kernel::PropertyManager &args, const std::string &name) {
-  try {
-    return args.getProperty(name);
-  } catch (std::runtime_error &) {
-    std::vector<int> intValues = args.getProperty(name);
-    std::vector<double> dblValues(std::begin(intValues), std::end(intValues));
-    return dblValues;
+  std::string vectorAsString = args.getPropertyValue(name);
+  std::vector<double> vectorOfDoubles;
+  std::stringstream ss(vectorAsString);
+  std::string elementAsString;
+  while (std::getline(ss, elementAsString, ',')) {
+    vectorOfDoubles.push_back(std::stod(elementAsString));
   }
+  return vectorOfDoubles;
 }
 
 /**
@@ -847,6 +844,7 @@ std::string SetSample::createFlatPlateXML(const Kernel::PropertyManager &args, c
   const double widthInCM = getPropertyAsDouble(args, ShapeArgs::WIDTH);
   const double heightInCM = getPropertyAsDouble(args, ShapeArgs::HEIGHT);
   const double thickInCM = getPropertyAsDouble(args, ShapeArgs::THICK);
+  const double angleInDegrees = getPropertyAsDouble(args, ShapeArgs::ANGLE);
   // Convert to half-"width" in metres
   const double szX = (widthInCM * 5e-3);
   const double szY = (heightInCM * 5e-3);
@@ -860,8 +858,7 @@ std::string SetSample::createFlatPlateXML(const Kernel::PropertyManager &args, c
   if (args.existsProperty(ShapeArgs::ANGLE)) {
     Goniometer gr;
     const auto upAxis = makeV3D(0, 1, 0);
-    gr.pushAxis("up", upAxis.X(), upAxis.Y(), upAxis.Z(), args.getProperty(ShapeArgs::ANGLE), Geometry::CCW,
-                Geometry::angDegrees);
+    gr.pushAxis("up", upAxis.X(), upAxis.Y(), upAxis.Z(), angleInDegrees, Geometry::CCW, Geometry::angDegrees);
     auto &rotation = gr.getR();
     lfb.rotate(rotation);
     lft.rotate(rotation);
@@ -870,7 +867,7 @@ std::string SetSample::createFlatPlateXML(const Kernel::PropertyManager &args, c
   }
   std::vector<double> center = {0., 0., 0.};
   if (args.existsProperty(ShapeArgs::CENTER)) {
-    center = args.getProperty(ShapeArgs::CENTER);
+    center = getPropertyAsVectorDouble(args, ShapeArgs::CENTER);
     const V3D centrePos(center[0] * 0.01, center[1] * 0.01, center[2] * 0.01);
     // translate to true center after rotation
     lfb += centrePos;
