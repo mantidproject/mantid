@@ -9,7 +9,8 @@
 DNS File selector Presenter - Tab of DNS Reduction GUI.
 """
 
-from mantidqtinterfaces.dns_powder_tof.data_structures.dns_observer import DNSObserver
+from mantidqtinterfaces.dns_powder_tof.data_structures.dns_observer import \
+    DNSObserver
 
 
 class DNSFileSelectorPresenter(DNSObserver):
@@ -39,6 +40,8 @@ class DNSFileSelectorPresenter(DNSObserver):
         self._old_data_set = set()
 
         # connect signals
+        self.view.sig_expanded.connect(self._expanded)
+
         self.view.sig_read_all.connect(self._read_all)
         self.view.sig_read_filtered.connect(self._read_filtered)
         self.view.sig_filters_clicked.connect(self._filter_scans)
@@ -122,7 +125,6 @@ class DNSFileSelectorPresenter(DNSObserver):
 
         if not data_dir:
             self.raise_error('No data directory selected', critical=True)
-            return None
 
         if state == 2 and data_dir:
             self.watcher.start_watcher()
@@ -138,8 +140,9 @@ class DNSFileSelectorPresenter(DNSObserver):
             self.view.combo_changed(1)
         self._read_standard()
         self._check_all_visible_scans()
-        self.view.show_status_message('automatically loaded all standard files',
-                                      30)
+        self.view.show_status_message(
+            'automatically loaded all standard files',
+            30)
         if was:
             self.view.combo_changed(0)
 
@@ -248,7 +251,8 @@ class DNSFileSelectorPresenter(DNSObserver):
 
     def process_request(self):
         own_options = self.get_option_dict()
-        if own_options['auto_select_standard'] and not own_options['standard_data']:
+        if (own_options['auto_select_standard'] and not
+                own_options['standard_data']):
             self._automatic_select_all_standard_files()
 
     def set_view_from_param(self):
@@ -278,3 +282,7 @@ class DNSFileSelectorPresenter(DNSObserver):
         self.view.set_start_end_file_numbers_from_arguments(ffnmb, lfnmb)
         self._read_filtered()
         self.model.check_fn_range(ffnmb, lfnmb)
+
+    def _expanded(self):
+        self.num_columns = self.model.get_active_model_column_count()
+        self.view.adjust_treeview_columns_width(self.num_columns)

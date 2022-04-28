@@ -56,6 +56,8 @@ class DNSFileSelectorView(DNSView):
         self._standard_treeview.setContextMenuPolicy(Qt.CustomContextMenu)
         self._standard_treeview.customContextMenuRequested.connect(
             self._treeview_clicked)
+        self._treeview.expanded.connect(self._expanded)
+        self._treeview.collapsed.connect(self._expanded)
 
         # buttons
         self._content.pB_td_read_all.clicked.connect(self._read_all_clicked)
@@ -89,7 +91,8 @@ class DNSFileSelectorView(DNSView):
             self._filter_standard_checked)
         self._map['filter_empty'].stateChanged.connect(
             self._filter_standard_checked)
-        self._map['autoload_new'].stateChanged.connect(self._autoload_new_checked)
+        self._map['autoload_new'].stateChanged.connect(
+            self._autoload_new_checked)
 
         # combo box
         self._content.combB_directory.currentIndexChanged.connect(
@@ -110,7 +113,7 @@ class DNSFileSelectorView(DNSView):
     sig_uncheck_all = Signal()
     sig_check_selected = Signal()
     sig_check_last = Signal(str)
-
+    sig_expanded = Signal()
     sig_progress_canceled = Signal()
     sig_autoload_new_clicked = Signal(int)
     sig_dataset_changed = Signal(int)
@@ -118,6 +121,9 @@ class DNSFileSelectorView(DNSView):
     sig_right_click = Signal(QModelIndex)
 
     # signal reactions
+    def _expanded(self, _dummy):
+        self.sig_expanded.emit()
+
     def _treeview_clicked(self, point):
         self.sig_right_click.emit(self._treeview.indexAt(point))
 
