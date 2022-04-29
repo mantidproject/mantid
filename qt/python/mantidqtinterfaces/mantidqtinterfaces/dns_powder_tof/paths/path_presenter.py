@@ -17,6 +17,9 @@ class DNSPathPresenter(DNSObserver):
     def __init__(self, name=None, parent=None, view=None, model=None):
         super().__init__(parent=parent, name=name, view=view, model=model)
         self.view.sig_data_path_set.connect(self._data_path_set)
+        self.view.sig_data_dir_editing_finished.connect(
+            self._data_path_editing_finished)
+
         self.view.sig_clear_cache.connect(self._clear_cache)
         self.view.sig_file_dialog_requested.connect(
             self._file_dialog_requested)
@@ -24,6 +27,10 @@ class DNSPathPresenter(DNSObserver):
             # if launches from commandline, set path to current working
             # directory
             self.view.set_data_path(self.model.get_current_directory())
+
+    def _data_path_editing_finished(self):
+        own_dict = self.get_option_dict()
+        self._data_path_set(own_dict['data_dir'])
 
     def _data_path_set(self, dir_name):
         own_dict = self.get_option_dict()
@@ -52,7 +59,7 @@ class DNSPathPresenter(DNSObserver):
         path = self.view.get_path('data_dir')
         start_path = self.model.get_start_path_for_dialog(path)
         dir_name = self.view.open_file_dialog(start_path)
-        if dir_name != '': # needed not to fill out fields when the path
+        if dir_name:
             # wasn't chosen
             if sender == 'data':
                 self.view.set_data_path(dir_name)

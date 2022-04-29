@@ -48,11 +48,17 @@ class DNSPathView(DNSView):
         self._content.pB_file_script.clicked.connect(self._file_dialog)
         self._content.pB_export.clicked.connect(self._file_dialog)
         self._content.pB_clear_cache.clicked.connect(self._clear_cache)
+        self._map['data_dir'].editingFinished.connect(
+            self._data_dir_editing_finished)
 
     # signals
     sig_data_path_set = Signal(str)
     sig_clear_cache = Signal()
     sig_file_dialog_requested = Signal(str)
+    sig_data_dir_editing_finished = Signal()
+
+    def _data_dir_editing_finished(self):
+        self.sig_data_dir_editing_finished.emit()
 
     def _file_dialog(self):
         sender = self.sender().objectName()[8:]

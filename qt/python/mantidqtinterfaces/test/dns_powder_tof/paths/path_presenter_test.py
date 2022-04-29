@@ -32,6 +32,7 @@ class DNSPathPresenterTest(unittest.TestCase):
         cls.view.sig_data_path_set = mock.Mock(return_value='dummypath')
         cls.view.sig_clear_cache = mock.Mock()
         cls.view.sig_file_dialog_requested = mock.Mock(return_value='data')
+        cls.view.sig_data_dir_editing_finished = mock.Mock()
         cls.view.within_mantid = False
         # view functions
         cls.view.get_path.return_value = ''
@@ -54,6 +55,11 @@ class DNSPathPresenterTest(unittest.TestCase):
         self.assertIsInstance(self.presenter, DNSObserver)
         self.view.set_data_path.assert_not_called()
         self.model.get_current_directory.assert_called()
+
+    def test_data_path_editing_finished(self):
+        self.view.get_state.return_value = {'auto_set_other_dir': True}
+        self.presenter._data_path_set(dir_name='C:/test')
+        self.assertEqual(self.view.set_path.call_count, 4)
 
     def test_data_path_set(self):
         self.view.get_state.return_value = {'auto_set_other_dir': True}
