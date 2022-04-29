@@ -9,6 +9,7 @@ import sys
 import unittest
 
 from isis_powder.routines import sample_details
+from mantid.simpleapi import SetSample, CreateSampleWorkspace
 
 
 class ISISPowderSampleDetailsTest(unittest.TestCase):
@@ -351,6 +352,197 @@ class ISISPowderSampleDetailsTest(unittest.TestCase):
         self.assertEqual(sample_details_obj_str.height(), float(height_string))
         self.assertEqual(sample_details_obj_str.center(), [float(p) for p in center_string])
         self.assertEqual(sample_details_obj_str.angle(), float(angle_string))
+
+    def test_generate_geometry_cylinder(self):
+        workspace = CreateSampleWorkspace()
+
+        # float
+        radius_float = 1.0
+        height_float = 2.0
+        center_float = [1.0, 2.0, 3.0]
+        sample_details_float = sample_details.SampleDetails(radius=radius_float, shape="cylinder",
+                                                            height=height_float, center=center_float)
+        sample_details_float.set_material(chemical_formula='Si')
+
+        # int
+        radius_int = 1
+        height_int = 3
+        center_int = [1, 2, 3]
+        sample_details_int = sample_details.SampleDetails(radius=radius_int, shape="cylinder",
+                                                          height=height_int, center=center_int)
+        sample_details_int.set_material(chemical_formula='Si')
+
+        # string
+        radius_string = "1"
+        height_string = "2"
+        center_string = ["1", "2", "3"]
+        sample_details_string = sample_details.SampleDetails(radius=radius_string, shape="cylinder",
+                                                             height=height_string, center=center_string)
+        sample_details_string.set_material(chemical_formula='Si')
+
+        radius_mix = 1.23
+        height_mix = 2
+        center_mix = ["1", 2, 3.45]
+        sample_details_mix = sample_details.SampleDetails(radius=radius_mix, shape="cylinder",
+                                                          height=height_mix, center=center_mix)
+        sample_details_mix.set_material(chemical_formula='Si')
+
+        sample_details_objects = [sample_details_float, sample_details_int,
+                                  sample_details_string, sample_details_mix]
+        for sample_details_object in sample_details_objects:
+            SetSample(workspace, Geometry=sample_details_object.generate_sample_geometry(),
+                      Material=sample_details_object.generate_sample_material())
+
+    def test_generate_geometry_cylinder_with_container(self):
+        workspace = CreateSampleWorkspace()
+        # float
+        radius_float = 1.0
+        height_float = 2.0
+        center_float = [1.0, 2.0, 3.0]
+        sample_details_float = sample_details.SampleDetails(radius=radius_float, shape="cylinder",
+                                                            height=height_float, center=center_float)
+        sample_details_float.set_material(chemical_formula='Si')
+        sample_details_float.set_container(radius=2.0, chemical_formula='V')
+        # int
+        radius_int = 1
+        height_int = 3
+        center_int = [1, 2, 3]
+        sample_details_int = sample_details.SampleDetails(radius=radius_int, shape="cylinder",
+                                                          height=height_int, center=center_int)
+        sample_details_int.set_material(chemical_formula='Si')
+        sample_details_int.set_container(radius=2, chemical_formula='V')
+        # string
+        radius_string = "1"
+        height_string = "2"
+        center_string = ["1", "2", "3"]
+        sample_details_string = sample_details.SampleDetails(radius=radius_string, shape="cylinder",
+                                                             height=height_string, center=center_string)
+        sample_details_string.set_material(chemical_formula='Si')
+        sample_details_string.set_container(radius="2", chemical_formula='V')
+        # mix
+        radius_mix = 1.23
+        height_mix = 2
+        center_mix = ["1", 2, 3.45]
+        sample_details_mix = sample_details.SampleDetails(radius=radius_mix, shape="cylinder",
+                                                          height=height_mix, center=center_mix)
+        sample_details_mix.set_material(chemical_formula='Si')
+        sample_details_mix.set_container(radius="2", chemical_formula='V')
+
+        sample_details_objects = [sample_details_float, sample_details_int,
+                                  sample_details_string, sample_details_mix]
+        for sample_details_object in sample_details_objects:
+            SetSample(workspace, Geometry=sample_details_object.generate_sample_geometry(),
+                      Material=sample_details_object.generate_sample_material(),
+                      ContainerGeometry=sample_details_object.generate_container_geometry(),
+                      ContainerMaterial=sample_details_object.generate_container_material())
+
+    def test_generate_geometry_slab(self):
+        workspace = CreateSampleWorkspace()
+
+        # float
+        thickness_float = 2.2
+        width_float = 1.0
+        height_float = 2.0
+        center_float = [1.0, 2.0, 3.0]
+        angle_float = 3.0
+        sample_details_float = sample_details.SampleDetails(thickness=thickness_float, shape="slab",
+                                                            height=height_float, width=width_float,
+                                                            center=center_float, angle=angle_float)
+        sample_details_float.set_material(chemical_formula='Si')
+
+        # int
+        thickness_int = 1
+        width_int = 2
+        height_int = 3
+        center_int = [1, 2, 3]
+        angle_int = 4
+        sample_details_int = sample_details.SampleDetails(thickness=thickness_int, shape="slab",
+                                                          height=height_int, width=width_int, center=center_int,
+                                                          angle=angle_int)
+        sample_details_int.set_material(chemical_formula='Si')
+
+        # string
+        thickness_string = "5"
+        width_string = "1"
+        height_string = "2"
+        center_string = ["1", "2", "3"]
+        angle_string = "3"
+        sample_details_string = sample_details.SampleDetails(thickness=thickness_string, shape="slab",
+                                                             height=height_string, width=width_string,
+                                                             center=center_string, angle=angle_string)
+        sample_details_string.set_material(chemical_formula='Si')
+
+        # mix
+        thickness_mix = "5"
+        width_mix = 3.5
+        height_mix = "2"
+        center_mix = ["1", 2, 3.45]
+        angle_mix = 3
+        sample_details_mix = sample_details.SampleDetails(thickness=thickness_mix, shape="slab",
+                                                          height=height_mix, width=width_mix,
+                                                          center=center_mix, angle=angle_mix)
+        sample_details_mix.set_material(chemical_formula='Si')
+
+        sample_details_objects = [sample_details_float, sample_details_int,
+                                  sample_details_string, sample_details_mix]
+        for sample_details_object in sample_details_objects:
+            SetSample(workspace, Geometry=sample_details_object.generate_sample_geometry(),
+                      Material=sample_details_object.generate_sample_material())
+
+    def test_generate_geometry_slab_with_container(self):
+        workspace = CreateSampleWorkspace()
+
+        thickness_float = 2.2
+        width_float = 1.0
+        height_float = 2.0
+        center_float = [1.0, 2.0, 3.0]
+        angle_float = 3.0
+        sample_details_float = sample_details.SampleDetails(thickness=thickness_float, shape="slab",
+                                                            height=height_float, width=width_float,
+                                                            center=center_float, angle=angle_float)
+        sample_details_float.set_material(chemical_formula='Si')
+        sample_details_float.set_container(front_thick=2.0, back_thick=2.2, chemical_formula='V')
+
+        thickness_int = 1
+        width_int = 2
+        height_int = 3
+        center_int = [1, 2, 3]
+        angle_int = 4
+        sample_details_int = sample_details.SampleDetails(thickness=thickness_int, shape="slab",
+                                                          height=height_int, width=width_int, center=center_int,
+                                                          angle=angle_int)
+        sample_details_int.set_material(chemical_formula='Si')
+        sample_details_int.set_container(front_thick=2, back_thick=1, chemical_formula='V')
+
+        thickness_string = "5"
+        width_string = "1"
+        height_string = "2"
+        center_string = ["1", "2", "3"]
+        angle_string = "3"
+        sample_details_string = sample_details.SampleDetails(thickness=thickness_string, shape="slab",
+                                                             height=height_string, width=width_string,
+                                                             center=center_string, angle=angle_string)
+        sample_details_string.set_material(chemical_formula='Si')
+        sample_details_string.set_container(front_thick="2", back_thick="2.2", chemical_formula='V')
+
+        thickness_mix = "5"
+        width_mix = 3.5
+        height_mix = "2"
+        center_mix = ["1", 2, 3.45]
+        angle_mix = 3
+        sample_details_mix = sample_details.SampleDetails(thickness=thickness_mix, shape="slab",
+                                                          height=height_mix, width=width_mix,
+                                                          center=center_mix, angle=angle_mix)
+        sample_details_mix.set_material(chemical_formula='Si')
+        sample_details_mix.set_container(front_thick="2.0", back_thick=2, chemical_formula='V')
+
+        sample_details_objects = [sample_details_float, sample_details_int,
+                                  sample_details_string, sample_details_mix]
+        for sample_details_object in sample_details_objects:
+            SetSample(workspace, Geometry=sample_details_object.generate_sample_geometry(),
+                      Material=sample_details_object.generate_sample_material(),
+                      ContainerGeometry=sample_details_object.generate_container_geometry(),
+                      ContainerMaterial=sample_details_object.generate_container_material())
 
 
 def get_std_out_buffer_obj():

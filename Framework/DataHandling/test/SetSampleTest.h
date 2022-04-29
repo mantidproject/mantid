@@ -728,6 +728,69 @@ public:
     TS_ASSERT(alg->isExecuted());
   }
 
+  void test_Setting_center_as_doubles() {
+    auto inputWS = WorkspaceCreationHelper::create2DWorkspaceBinned(1, 1);
+    auto alg = createAlgorithm(inputWS);
+
+    using namespace Mantid::Kernel;
+    using DoubleArrayProperty = ArrayProperty<double>;
+    using DoubleProperty = PropertyWithValue<double>;
+    using StringProperty = PropertyWithValue<std::string>;
+
+    auto props = std::make_shared<PropertyManager>();
+    props->declareProperty(std::make_unique<StringProperty>("Shape", "Cylinder"), "");
+    props->declareProperty(std::make_unique<DoubleProperty>("Height", 2), "");
+    props->declareProperty(std::make_unique<DoubleProperty>("Radius", 3), "");
+    std::vector<double> center{0.0, 0.5, 1.23};
+    props->declareProperty(std::make_unique<DoubleArrayProperty>("Center", center), "");
+
+    alg->setProperty("Geometry", props);
+    TS_ASSERT_THROWS_NOTHING(alg->execute());
+    TS_ASSERT(alg->isExecuted());
+  }
+
+  void test_Setting_center_as_longs() {
+    auto inputWS = WorkspaceCreationHelper::create2DWorkspaceBinned(1, 1);
+    auto alg = createAlgorithm(inputWS);
+
+    using namespace Mantid::Kernel;
+    using LongArrayProperty = ArrayProperty<long>;
+    using DoubleProperty = PropertyWithValue<double>;
+    using StringProperty = PropertyWithValue<std::string>;
+
+    auto props = std::make_shared<PropertyManager>();
+    props->declareProperty(std::make_unique<StringProperty>("Shape", "Cylinder"), "");
+    props->declareProperty(std::make_unique<DoubleProperty>("Height", 2), "");
+    props->declareProperty(std::make_unique<DoubleProperty>("Radius", 3), "");
+    std::vector<long> center{0, 3, 1};
+    props->declareProperty(std::make_unique<LongArrayProperty>("Center", center), "");
+
+    alg->setProperty("Geometry", props);
+    TS_ASSERT_THROWS_NOTHING(alg->execute());
+    TS_ASSERT(alg->isExecuted());
+  }
+
+  void test_Setting_center_as_ints() {
+    auto inputWS = WorkspaceCreationHelper::create2DWorkspaceBinned(1, 1);
+    auto alg = createAlgorithm(inputWS);
+
+    using namespace Mantid::Kernel;
+    using IntArrayProperty = ArrayProperty<int>;
+    using DoubleProperty = PropertyWithValue<double>;
+    using StringProperty = PropertyWithValue<std::string>;
+
+    auto props = std::make_shared<PropertyManager>();
+    props->declareProperty(std::make_unique<StringProperty>("Shape", "Cylinder"), "");
+    props->declareProperty(std::make_unique<DoubleProperty>("Height", 2), "");
+    props->declareProperty(std::make_unique<DoubleProperty>("Radius", 3), "");
+    std::vector<int> center{0, 3, 1};
+    props->declareProperty(std::make_unique<IntArrayProperty>("Center", center), "");
+
+    alg->setProperty("Geometry", props);
+    TS_ASSERT_THROWS_NOTHING(alg->execute());
+    TS_ASSERT(alg->isExecuted());
+  }
+
   //----------------------------------------------------------------------------
   // Failure tests
   //----------------------------------------------------------------------------

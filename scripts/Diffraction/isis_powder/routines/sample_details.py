@@ -370,7 +370,7 @@ class _Slab(object):
 
 
 class _HollowCylinder(object):
-    def __init__(self, kwargs, sample_height, sample_radius, sample_center, ):
+    def __init__(self, kwargs, sample_height, sample_radius, sample_center):
         # By using kwargs we get a better error than "init takes n arguments"
         container_radius = common.dictionary_key_helper(dictionary=kwargs, key="radius",
                                                         exception_msg=property_err_string.format("radius"))

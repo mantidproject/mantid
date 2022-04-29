@@ -55,11 +55,16 @@ def _focus_one_ws(input_workspace, run_number, instrument, perform_vanadium_norm
                             + "_" + instrument._get_input_batching_mode() + ".nxs"
         save_directory = instrument._inst_settings.output_dir
         force_recalculate_paalman_pings = instrument._inst_settings.force_recalculate_paalman_pings
-
-        mantid.SetSample(input_workspace, Geometry=sample_details.generate_sample_geometry(),
-                         Material=sample_details.generate_sample_material(),
-                         ContainerGeometry=sample_details.generate_container_geometry(),
-                         ContainerMaterial=sample_details.generate_container_material())
+        container_geometry = sample_details.generate_container_geometry()
+        container_material = sample_details.generate_container_material()
+        if container_geometry and container_material:
+            mantid.SetSample(input_workspace, Geometry=sample_details.generate_sample_geometry(),
+                             Material=sample_details.generate_sample_material(),
+                             ContainerGeometry=container_geometry,
+                             ContainerMaterial=container_material)
+        else:
+            mantid.SetSample(input_workspace, Geometry=sample_details.generate_sample_geometry(),
+                             Material=sample_details.generate_sample_material())
         if events_per_point_string:
             events_per_point = int(events_per_point_string)
         else:
