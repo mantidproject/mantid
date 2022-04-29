@@ -101,8 +101,6 @@ useStlAlgorithm:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/DiffractionFocussin
 nullPointer:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/FitPeaks.cpp:1644
 nullPointer:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/FitPeaks.cpp:1956
 useStlAlgorithm:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/FitPeaks.cpp:1749
-unreadVariable:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/GeneratePythonFitScript.cpp:175
-unreadVariable:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/GeneratePythonFitScript.cpp:187
 unreadVariable:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/GenerateEventsFilter.cpp:834
 unreadVariable:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/GenerateEventsFilter.cpp:1170
 unreadVariable:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/GenerateEventsFilter.cpp:1171
