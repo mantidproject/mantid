@@ -184,7 +184,6 @@ knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/CurveFitting/src/CostFunct
 unsignedLessThanZero:${CMAKE_SOURCE_DIR}/Framework/CurveFitting/src/FuncMinimizers/FABADAMinimizer.cpp:1069
 constParameter:${CMAKE_SOURCE_DIR}/Framework/CurveFitting/src/FuncMinimizers/TrustRegionMinimizer.cpp:807
 uninitDerivedMemberVar:${CMAKE_SOURCE_DIR}/Framework/CurveFitting/src/Functions/BivariateNormal.cpp:65
-unsignedLessThanZero:${CMAKE_SOURCE_DIR}/Framework/CurveFitting/src/Functions/BivariateNormal.cpp:166
 unreadVariable:${CMAKE_SOURCE_DIR}/Framework/CurveFitting/src/Functions/Convolution.cpp:224
 constParameter:${CMAKE_SOURCE_DIR}/Framework/CurveFitting/src/Functions/CrystalElectricField.cpp:453
 constParameter:${CMAKE_SOURCE_DIR}/Framework/CurveFitting/src/Functions/CrystalElectricField.cpp:453

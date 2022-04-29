@@ -163,7 +163,7 @@ void BivariateNormal::function1D(double *out, const double *xValues, const size_
 void BivariateNormal::functionDeriv1D(API::Jacobian *out, const double *xValues, const size_t nData) {
   UNUSED_ARG(xValues);
   UNUSED_ARG(nData);
-  if (nData <= static_cast<size_t>(0))
+  if (nData == 0)
     return;
   double penDeriv = initCommon();
 
