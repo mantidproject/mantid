@@ -72,9 +72,6 @@ class INTERReductionTest(systemtesting.MantidSystemTest, ISISReflectometryWorkfl
         SaveNexus(InputWorkspace=INTERReductionTest.reference_workspace_name,
                   Filename=INTERReductionTest.reference_file)
 
-    def skipTests(self):
-        return True
-
 
 def eventRef(run_number, angle, start=0, stop=0, DB='TRANS'):
     '''Perform reflectometry reduction on a slice of the given run for the given

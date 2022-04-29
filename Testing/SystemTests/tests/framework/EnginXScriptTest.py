@@ -50,9 +50,6 @@ class FocusBothBanks(systemtesting.MantidSystemTest):
         ADS.clear()
         _try_delete_cal_and_focus_dirs(CWDIR)
 
-    def skipTests(self):
-        return True
-
 
 class FocusCroppedSpectraSameDiffConstsAsBank(systemtesting.MantidSystemTest):
 
@@ -74,9 +71,6 @@ class FocusCroppedSpectraSameDiffConstsAsBank(systemtesting.MantidSystemTest):
     def cleanup(self):
         ADS.clear()
         _try_delete_cal_and_focus_dirs(CWDIR)
-
-    def skipTests(self):
-        return True
 
 
 class FocusTexture(systemtesting.MantidSystemTest):
@@ -101,9 +95,6 @@ class FocusTexture(systemtesting.MantidSystemTest):
         self.disableChecking.extend(['Instrument'])  # don't check
         return self._ws_foc.name(), "299080_engggui_focusing_output_ws_Texture.nxs"
 
-    def skipTests(self):
-        return True
-
 
 class FocusTexture30(systemtesting.MantidSystemTest):
 
@@ -126,9 +117,6 @@ class FocusTexture30(systemtesting.MantidSystemTest):
         self.tolerance = 1e-6
         self.disableChecking.extend(['Instrument'])  # don't check
         return self._ws_foc.name(), "299080_engggui_focusing_output_ws_Texture30.nxs"
-
-    def skipTests(self):
-        return True
 
 
 def _try_delete_cal_and_focus_dirs(parent_dir):

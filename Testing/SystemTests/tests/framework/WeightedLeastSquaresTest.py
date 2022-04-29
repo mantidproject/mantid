@@ -269,6 +269,3 @@ class WeightedLeastSquaresTest(systemtesting.MantidSystemTest):
 
     def validate(self):
         return self._success
-
-    def skipTests(self):
-        return True

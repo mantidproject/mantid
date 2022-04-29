@@ -72,56 +72,56 @@ class EnggFitTOFFromPeaksTest(unittest.TestCase):
         expected_zero = -5873.54719194736
         self.assertTrue(self._approxRelErrorLessThan(zero, expected_zero, 5e-3))
 
-    # def test_4peaks_runs_ok(self):
-    #     """
-    #     Tests fitting DIFA/DIFC/TZERO on a four clean peaks from EnggFitPeaks.
-    #     """
-    #
-    #     peak_def1 = "name=FlatBackground,A0=1;name=BackToBackExponential, I=15000, A=0.1, B=0.14, X0=15000, S=50"
-    #     peak_def2 = "name=FlatBackground,A0=1;name=BackToBackExponential, I=6000, A=0.02, B=0.021, X0=20000, S=40"
-    #     peak_def3 = "name=FlatBackground,A0=1;name=BackToBackExponential, I=10000, A=0.1, B=0.09, X0=25000, S=60"
-    #     peak_def4 = "name=FlatBackground,A0=1;name=BackToBackExponential, I=12000, A=0.02, B=0.09, X0=30000, S=50"
-    #     sws = CreateSampleWorkspace(Function="User Defined",
-    #                                 UserDefinedFunction=peak_def1 + ";" + peak_def2 + ";" + peak_def3 + ";" + peak_def4,
-    #                                 NumBanks=1,
-    #                                 BankPixelWidth=1,
-    #                                 XMin=5000,
-    #                                 XMax=40000,
-    #                                 BinWidth=25)
-    #     EditInstrumentGeometry(Workspace=sws, L2=[1.5], Polar=[90], PrimaryFlightPath=50)
-    #
-    #     peaksTblName = 'test_fit_peaks_table'
-    #     ep1 = 0.83
-    #     ep2 = 1.09
-    #     ep3 = 1.4
-    #     ep4 = 1.62
-    #     test_fit_peaks_table = EnggFitPeaks(sws,
-    #                                         WorkspaceIndex=0,
-    #                                         ExpectedPeaks=[ep1, ep2, ep3, ep4],
-    #                                         OutFittedPeaksTable=peaksTblName)
-    #
-    #     paramsTblName = 'test_fit_tof_table'
-    #     difa, difc, zero = EnggFitTOFFromPeaks(OutParametersTable=paramsTblName,
-    #                                             FittedPeaks=test_fit_peaks_table)
-    #
-    #     pTable = mtd[paramsTblName]
-    #     self.assertEqual(pTable.rowCount(), 1)
-    #     self.assertEqual(pTable.columnCount(), 3)
-    #
-    #     self.assertEqual(test_fit_peaks_table.rowCount(), 4)
-    #
-    #     # fitting results on some platforms (OSX) are different by ~0.07%
-    #     # Algorithm doesn't work and is being deprecated so tolerance doesn't actually matter.
-    #     expected_difa = 2369.8867804068127
-    #     self.assertTrue(self._approxRelErrorLessThan(difa, expected_difa, 40))
-    #     expected_difc = 12736.35201894777
-    #     self.assertTrue(self._approxRelErrorLessThan(difc, expected_difc, 40))
-    #     expected_zero = 2943.7460510348255
-    #     self.assertTrue(self._approxRelErrorLessThan(zero, expected_zero, 40))
-    #
-    #     # values in the table should also be good within epsilon
-    #     self.assertTrue(self._approxRelErrorLessThan(pTable.cell(0, 1), expected_difc, 40))
-    #     self.assertTrue(self._approxRelErrorLessThan(pTable.cell(0, 2), expected_zero, 40))
+    def test_4peaks_runs_ok(self):
+        """
+        Tests fitting DIFA/DIFC/TZERO on a four clean peaks from EnggFitPeaks.
+        """
+
+        peak_def1 = "name=FlatBackground,A0=1;name=BackToBackExponential, I=15000, A=0.1, B=0.14, X0=15000, S=50"
+        peak_def2 = "name=FlatBackground,A0=1;name=BackToBackExponential, I=6000, A=0.02, B=0.021, X0=20000, S=40"
+        peak_def3 = "name=FlatBackground,A0=1;name=BackToBackExponential, I=10000, A=0.1, B=0.09, X0=25000, S=60"
+        peak_def4 = "name=FlatBackground,A0=1;name=BackToBackExponential, I=12000, A=0.02, B=0.09, X0=30000, S=50"
+        sws = CreateSampleWorkspace(Function="User Defined",
+                                    UserDefinedFunction=peak_def1 + ";" + peak_def2 + ";" + peak_def3 + ";" + peak_def4,
+                                    NumBanks=1,
+                                    BankPixelWidth=1,
+                                    XMin=5000,
+                                    XMax=40000,
+                                    BinWidth=25)
+        EditInstrumentGeometry(Workspace=sws, L2=[1.5], Polar=[90], PrimaryFlightPath=50)
+
+        peaksTblName = 'test_fit_peaks_table'
+        ep1 = 0.83
+        ep2 = 1.09
+        ep3 = 1.4
+        ep4 = 1.62
+        test_fit_peaks_table = EnggFitPeaks(sws,
+                                            WorkspaceIndex=0,
+                                            ExpectedPeaks=[ep1, ep2, ep3, ep4],
+                                            OutFittedPeaksTable=peaksTblName)
+
+        paramsTblName = 'test_fit_tof_table'
+        difa, difc, zero = EnggFitTOFFromPeaks(OutParametersTable=paramsTblName,
+                                                FittedPeaks=test_fit_peaks_table)
+
+        pTable = mtd[paramsTblName]
+        self.assertEqual(pTable.rowCount(), 1)
+        self.assertEqual(pTable.columnCount(), 3)
+
+        self.assertEqual(test_fit_peaks_table.rowCount(), 4)
+
+        # fitting results on some platforms (OSX) are different by ~0.07%
+        # Algorithm doesn't work and is being deprecated so tolerance doesn't actually matter.
+        expected_difa = 2369.8867804068127
+        self.assertTrue(self._approxRelErrorLessThan(difa, expected_difa, 40))
+        expected_difc = 12736.35201894777
+        self.assertTrue(self._approxRelErrorLessThan(difc, expected_difc, 40))
+        expected_zero = 2943.7460510348255
+        self.assertTrue(self._approxRelErrorLessThan(zero, expected_zero, 40))
+
+        # values in the table should also be good within epsilon
+        self.assertTrue(self._approxRelErrorLessThan(pTable.cell(0, 1), expected_difc, 40))
+        self.assertTrue(self._approxRelErrorLessThan(pTable.cell(0, 2), expected_zero, 40))
 
     def _approxRelErrorLessThan(self, val, ref, epsilon):
         """
