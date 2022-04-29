@@ -140,7 +140,6 @@ accessMoved:${CMAKE_SOURCE_DIR}/Framework/API/src/IFunction.cpp:374
 useStlAlgorithm:${CMAKE_SOURCE_DIR}/Framework/API/src/IFunction.cpp:367
 useStlAlgorithm:${CMAKE_SOURCE_DIR}/Framework/API/src/IFunction.cpp:410
 useStlAlgorithm:${CMAKE_SOURCE_DIR}/Framework/API/src/MultiDomainFunction.cpp:302
-knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/API/src/MultiPeriodGroupAlgorithm.cpp:44
 useStlAlgorithm:${CMAKE_SOURCE_DIR}/Framework/API/src/MultipleFileProperty.cpp:90
 useStlAlgorithm:${CMAKE_SOURCE_DIR}/Framework/API/src/SpectrumInfo.cpp:57
 useStlAlgorithm:${CMAKE_SOURCE_DIR}/Framework/API/src/SpectrumInfo.cpp:66
