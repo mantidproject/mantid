@@ -199,7 +199,7 @@ void rankOneUpdate(DoubleFortranMatrix &hf, NLLS_workspace &w) {
   // call dGER(n,n,alpha,w.ysharpSks,1,w.y,1,hf,n)
 
   DoubleFortranMatrix hf_tr(hf.tr());
-  gsl_matrix *hf_gsl = &getGSLMatrixView(hf.mutator()).matrix;
+  gsl_matrix *hf_gsl = &getGSLMatrixView(hf_tr.mutator()).matrix;
 
   gsl_blas_dger(alpha, &getGSLVectorView_const(w.ysharpSks.inspector()).vector,
                 &getGSLVectorView_const(w.y.inspector()).vector, hf_gsl);
