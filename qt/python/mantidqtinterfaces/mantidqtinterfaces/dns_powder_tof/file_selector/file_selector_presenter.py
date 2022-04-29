@@ -49,6 +49,7 @@ class DNSFileSelectorPresenter(DNSObserver):
         self.view.sig_right_click.connect(self._right_click)
         self.view.sig_progress_canceled.connect(self._cancel_loading)
         self.view.sig_autoload_new_clicked.connect(self._autoload_new)
+        self.view.sig_auto_select_standard_clicked.connect(self._auto_select_standard)
         self.view.sig_dataset_changed.connect(self._dataset_changed)
         self.watcher.sig_files_changed.connect(self._files_changed_by_watcher)
 
@@ -118,6 +119,10 @@ class DNSFileSelectorPresenter(DNSObserver):
                 self._read_all()
         else:
             self.watcher.stop_watcher()
+
+    def _auto_select_standard(self, state):
+        if state == 2:
+            self._check_all_visible_scans()
 
     # scan selection
     def _automatic_select_all_standard_files(self):
@@ -196,6 +201,9 @@ class DNSFileSelectorPresenter(DNSObserver):
             self.view.sig_read_all.connect(self._read_standard)
             self.model.set_model(standard=True)
             self._changed_to_standard()
+            own_options = self.get_option_dict()
+            if own_options['auto_select_standard']:
+                self._check_all_visible_scans()
         else:
             self.view.sig_read_all.disconnect(self._read_standard)
             self.view.sig_read_all.connect(self._read_all)

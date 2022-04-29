@@ -89,6 +89,8 @@ class DNSFileSelectorView(DNSView):
             self._filter_standard_checked)
         self._map['autoload_new'].stateChanged.connect(
             self._autoload_new_checked)
+        self._map['auto_select_standard'].stateChanged.connect(
+            self._auto_select_standard_clicked)
 
         # combo box
         self._content.combB_directory.currentIndexChanged.connect(
@@ -111,6 +113,7 @@ class DNSFileSelectorView(DNSView):
     sig_expanded = Signal()
     sig_progress_canceled = Signal()
     sig_autoload_new_clicked = Signal(int)
+    sig_auto_select_standard_clicked = Signal(int)
     sig_dataset_changed = Signal(int)
     sig_standard_filters_clicked = Signal()
     sig_right_click = Signal(QModelIndex)
@@ -124,6 +127,9 @@ class DNSFileSelectorView(DNSView):
 
     def _autoload_new_checked(self, state):
         self.sig_autoload_new_clicked.emit(state)
+
+    def _auto_select_standard_clicked(self, state):
+        self.sig_auto_select_standard_clicked.emit(state)
 
     def _check_all(self):
         self.sig_check_all.emit()
