@@ -157,68 +157,6 @@
    <item>
     <layout class="QVBoxLayout" name="global_right">
      <item>
-      <widget class="QGroupBox" name="groupBox_filter_file_number">
-       <property name="title">
-        <string>Filter by File Number:</string>
-       </property>
-       <layout class="QVBoxLayout" name="verticalLayout_2">
-        <item>
-         <widget class="QLabel" name="l_show_only_3">
-          <property name="text">
-           <string>Show Only:</string>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <layout class="QHBoxLayout" name="horizontalLayout_7">
-          <item>
-           <widget class="QLabel" name="l_td_file_from">
-            <property name="text">
-             <string>From</string>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QSpinBox" name="sB_td_file_nb">
-            <property name="maximum">
-             <number>999999999</number>
-            </property>
-           </widget>
-          </item>
-         </layout>
-        </item>
-        <item>
-         <layout class="QHBoxLayout" name="horizontalLayout">
-          <item>
-           <widget class="QLabel" name="l_td_file_to">
-            <property name="text">
-             <string>To</string>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QSpinBox" name="sB_td_file_to">
-            <property name="maximum">
-             <number>999999999</number>
-            </property>
-           </widget>
-          </item>
-         </layout>
-        </item>
-        <item>
-         <widget class="QPushButton" name="pB_td_read_filtered">
-          <property name="toolTip">
-           <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;faster way to read only the files speficied in the linedit Filenumbers ... to ...&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-          </property>
-          <property name="text">
-           <string>Read Filtered</string>
-          </property>
-         </widget>
-        </item>
-       </layout>
-      </widget>
-     </item>
-     <item>
       <widget class="QGroupBox" name="groupBox_filter_by_scan">
        <property name="toolTip">
         <string/>

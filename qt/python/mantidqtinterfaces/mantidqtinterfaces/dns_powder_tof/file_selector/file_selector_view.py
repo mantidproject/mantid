@@ -35,8 +35,6 @@ class DNSFileSelectorView(DNSView):
 
         self._map = {
             'filter_scans': self._content.cB_filter_scans,
-            'file_to': self._content.sB_td_file_to,
-            'file_nb': self._content.sB_td_file_nb,
             'filter_free': self._content.cB_filter_free,
             'autoload_new': self._content.cB_autoload_new,
             'filter_free_text': self._content.lE_filter_free_text,
@@ -61,8 +59,6 @@ class DNSFileSelectorView(DNSView):
 
         # buttons
         self._content.pB_td_read_all.clicked.connect(self._read_all_clicked)
-        self._content.pB_td_read_filtered.clicked.connect(
-            self._read_filtered_clicked)
         self._content.cB_filter_det_rot.stateChanged.connect(
             self._filter_scans_checked)
         self._content.cB_filter_sample_rot.stateChanged.connect(
