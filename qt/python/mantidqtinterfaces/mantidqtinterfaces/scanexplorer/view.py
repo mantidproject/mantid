@@ -120,3 +120,7 @@ class ScanExplorerView(QMainWindow):
         dialog.show()
 
         dialog.accepted.connect(self.presenter.on_dialog_accepted)
+
+    @property
+    def data_view(self):
+        return self._data_view

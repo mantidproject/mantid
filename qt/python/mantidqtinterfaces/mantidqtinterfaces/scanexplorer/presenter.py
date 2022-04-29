@@ -104,7 +104,7 @@ class ScanExplorerPresenter:
                                                    dims_info=self.get_dimensions_info(),
                                                    can_normalise=False)
         self.view.show_slice_viewer(workspace)
-        self.view._data_view.add_line_plots(PixelLinePlot, self.view._data_view.presenter)
+        self.view.data_view.add_line_plots(PixelLinePlot, self.view.data_view.presenter)
 
     def on_files_selected(self, files: list):
         """
