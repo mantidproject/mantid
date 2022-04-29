@@ -189,7 +189,6 @@ std::vector<std::vector<size_t>> IntegrateByComponent::makeMap(const API::Matrix
 
     if (anc.size() < static_cast<size_t>(parents)) {
       g_log.warning("Too many levels up. Will ignore LevelsUp");
-      parents = 0;
       return makeInstrumentMap(countsWS);
     }
     mymap.emplace(anc[parents - 1]->getComponentID(), i);

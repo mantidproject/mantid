@@ -105,7 +105,6 @@ unreadVariable:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/GenerateEventsFilter
 unreadVariable:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/GenerateEventsFilter.cpp:1170
 unreadVariable:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/GenerateEventsFilter.cpp:1171
 unreadVariable:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/GetAllEi.cpp:758
-unreadVariable:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/IntegrateByComponent.cpp:192
 useStlAlgorithm:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/PDCalibration.cpp:1299
 constStatement:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/PolarizationCorrectionWildes.cpp:96
 constStatement:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/PolarizationCorrectionWildes.cpp:101
