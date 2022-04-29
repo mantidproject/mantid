@@ -13,7 +13,7 @@ from qtpy.QtCore import QObject, Signal
 from mantid.api import MatrixWorkspace, MultipleExperimentInfos, AlgorithmObserver, Algorithm
 from mantidqt.widgets.sliceviewer.views.dataview import SliceViewerDataView
 from mantidqt.widgets.sliceviewer.presenters.presenter import SliceViewer
-from mantidqt.widgets.sliceviewer.presenters.lineplots import PixelLinePlot  #, RectangleSelectionLinePlot
+from mantidqt.widgets.sliceviewer.presenters.lineplots import PixelLinePlot  # , RectangleSelectionLinePlot
 from mantid.kernel import logger
 from mantid.api import mtd
 
@@ -127,7 +127,16 @@ class ScanExplorerPresenter:
         """
         self.observer.observeStarting()
 
-    def on_algorithm_finished(self, _, __):
+    def on_algorithm_finished(self, error, error_message):
+        """
+        Slot called when the algorithm summoned by the dialog has run its course. Show the result in the slice viewer
+        @param error: True if the algorithm threw an error, else False
+        @param error_message: the error message given by the algorithm if there was any
+        """
+        if error:
+            logger.error("Error running the algorithm :\n" + error_message)
+            return
+
         if not mtd.doesExist(self.future_workspace):
             logger.warning("Output workspace not found.")
             return
@@ -152,7 +161,7 @@ class ScanAlgorithmObserverSignals(QObject):
     """
     Signals for the observer
     """
-    finished = Signal(int, str)  # return 0 for success, 1 for error, and in this case an error message
+    finished = Signal(bool, str)  # return False for success, True for error, and in this case an error message
     started = Signal(Algorithm)
 
 
@@ -177,7 +186,7 @@ class ScanAlgorithmObserver(AlgorithmObserver):
         """
         Called when the observed algorithm is finished
         """
-        self.signals.finished.emit(0, "ee")
+        self.signals.finished.emit(self.error, self.error_message)
 
         # the algorithm has run, so we can stop listening for now. IF IT WOULD WORK
         self.stopObservingManager()
