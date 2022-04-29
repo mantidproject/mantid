@@ -65,7 +65,7 @@ for each histogram.
 @author Anders Markvardsen, ISIS, RAL
 @date 15/10/2007
 */
-class DLLExport SaveCSV : public API::Algorithm {
+class DLLExport SaveCSV final : public API::Algorithm {
 public:
   /// Default constructor
   SaveCSV();

@@ -18,7 +18,7 @@ CollapseGroupsCommand defines the action "Collapse All Groups"
 class CollapseGroupsCommand : public CommandBase {
 public:
   CollapseGroupsCommand(DataProcessorPresenter *tablePresenter) : CommandBase(tablePresenter) {}
-  virtual ~CollapseGroupsCommand() {}
+  virtual ~CollapseGroupsCommand() = default;
 
   void execute() override { m_presenter->notify(DataProcessorPresenter::CollapseAllGroupsFlag); };
   QString name() override { return QString("Collapse All Groups"); }

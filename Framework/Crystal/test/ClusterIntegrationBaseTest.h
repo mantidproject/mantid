@@ -166,5 +166,5 @@ protected:
   }
 
 public:
-  virtual ~ClusterIntegrationBaseTest() {}
+  virtual ~ClusterIntegrationBaseTest() = default;
 };

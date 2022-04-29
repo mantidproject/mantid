@@ -261,7 +261,7 @@ std::vector<std::vector<double>> SumOverlappingTubes::performBinning(MatrixWorks
     const auto &specInfo = ws->spectrumInfo();
     PARALLEL_FOR_IF(Kernel::threadSafe(*ws, *outputWS))
     for (int i = 0; i < static_cast<int>(specInfo.size()); ++i) {
-      PARALLEL_START_INTERUPT_REGION
+      PARALLEL_START_INTERRUPT_REGION
       if (specInfo.isMonitor(i) || specInfo.isMasked(i))
         continue;
 
@@ -331,9 +331,9 @@ std::vector<std::vector<double>> SumOverlappingTubes::performBinning(MatrixWorks
           normalisation[heightIndex][angleIndex]++;
         }
       }
-      PARALLEL_END_INTERUPT_REGION
+      PARALLEL_END_INTERRUPT_REGION
     }
-    PARALLEL_CHECK_INTERUPT_REGION
+    PARALLEL_CHECK_INTERRUPT_REGION
   }
 
   return normalisation;

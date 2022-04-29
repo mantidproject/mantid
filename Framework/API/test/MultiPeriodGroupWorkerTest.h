@@ -28,7 +28,7 @@ public:
     declareProperty(std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "", Direction::Output), "");
   }
   void exec() override { setProperty("OutputWorkspace", Workspace_sptr(new WorkspaceTester)); }
-  ~TestAlgorithm() override {}
+  ~TestAlgorithm() override = default;
 };
 DECLARE_ALGORITHM(TestAlgorithm)
 

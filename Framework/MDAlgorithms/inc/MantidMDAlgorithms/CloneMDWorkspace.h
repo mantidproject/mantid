@@ -19,7 +19,7 @@ namespace MDAlgorithms {
   @author Janik Zikovsky
   @date 2011-08-15
 */
-class DLLExport CloneMDWorkspace : public API::Algorithm {
+class DLLExport CloneMDWorkspace final : public API::Algorithm {
 public:
   /// Algorithm's name for identification
   const std::string name() const override { return "CloneMDWorkspace"; };

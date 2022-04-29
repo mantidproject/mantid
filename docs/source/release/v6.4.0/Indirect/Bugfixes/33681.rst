@@ -1,0 +1,6 @@
+An error is fixed in Abins. This relates to the assignment of
+"Forward" and "Backward" detector settings for TOSCA, which were
+reversed from their conventional definition. The default behaviour has
+not changed: results will only be affected for calculations which
+explicitly selected the "Forward (TOSCA)" or "Backward (TOSCA)"
+options.

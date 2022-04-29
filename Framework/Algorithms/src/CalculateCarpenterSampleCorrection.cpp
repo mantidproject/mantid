@@ -169,7 +169,7 @@ void CalculateCarpenterSampleCorrection::exec() {
   const auto &spectrumInfo = inputWksp->spectrumInfo();
   PARALLEL_FOR_IF(Kernel::threadSafe(*absWksp, *msWksp))
   for (int64_t index = 0; index < NUM_HIST; ++index) {
-    PARALLEL_START_INTERUPT_REGION
+    PARALLEL_START_INTERRUPT_REGION
     if (!spectrumInfo.hasDetectors(index))
       throw std::runtime_error("Failed to find detector");
     if (spectrumInfo.isMasked(index))
@@ -193,9 +193,9 @@ void CalculateCarpenterSampleCorrection::exec() {
     }
 
     prog.report();
-    PARALLEL_END_INTERUPT_REGION
+    PARALLEL_END_INTERRUPT_REGION
   }
-  PARALLEL_CHECK_INTERUPT_REGION
+  PARALLEL_CHECK_INTERRUPT_REGION
 
   absWksp->setDistribution(true);
   absWksp->setYUnit("");

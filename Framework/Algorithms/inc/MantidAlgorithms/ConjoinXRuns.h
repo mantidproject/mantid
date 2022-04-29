@@ -18,7 +18,7 @@ namespace Algorithms {
 /** ConjoinXRuns : This algorithms joins the input workspaces horizontally,
  * i.e. by appending (concatenating) their columns.
  */
-class MANTID_ALGORITHMS_DLL ConjoinXRuns : public API::Algorithm {
+class MANTID_ALGORITHMS_DLL ConjoinXRuns final : public API::Algorithm {
 public:
   const std::string name() const override;
   int version() const override;
@@ -43,7 +43,7 @@ private:
   void exec() override;
 
   std::string checkLogEntry(const API::MatrixWorkspace_sptr &) const;
-  std::vector<double> getXAxis(const API::MatrixWorkspace_sptr &) const;
+  std::vector<double> getXAxis(const API::MatrixWorkspace_sptr &, double &) const;
   void joinSpectrum(int64_t);
 
   /// Sample log entry name

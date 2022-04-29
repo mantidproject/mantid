@@ -4,10 +4,12 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
+from distutils.version import LooseVersion
+
 from mantidqt.gui_helper import show_interface_help
 import numpy as np
 import mantid
-from qtpy import QtWidgets
+from qtpy import QtWidgets, QtCore
 from mantidqt.MPLwidgets import *
 import matplotlib
 from matplotlib.figure import Figure
@@ -350,7 +352,7 @@ class QECoverageGUI(QtWidgets.QWidget):
             self.xlim = 0
             self.axes.clear()
             self.axes.axhline(color='k')
-        if matplotlib.compare_versions('2.1.0',matplotlib.__version__):
+        if LooseVersion('2.1.0') > LooseVersion(matplotlib.__version__):
             self.axes.hold(True) # hold is deprecated since 2.1.0, true by default
         Inst = self.direct_inst_box.currentText()
         for n in range(len(qe)):
@@ -386,7 +388,7 @@ class QECoverageGUI(QtWidgets.QWidget):
             self.axes.clear()
             self.axes.axhline(color='k')
         else:
-            if matplotlib.compare_versions('2.1.0',matplotlib.__version__):
+            if LooseVersion('2.1.0') > LooseVersion(matplotlib.__version__):
                 self.axes.hold(True) # hold is deprecated since 2.1.0, true by default
         line, = self.axes.plot(qe[0][0], qe[0][1])
         line.set_label(inst + '_' + ana)

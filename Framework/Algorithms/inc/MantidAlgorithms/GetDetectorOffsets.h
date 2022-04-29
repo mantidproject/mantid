@@ -19,7 +19,7 @@ namespace Algorithms {
  @author Laurent Chapon, ISIS Facility, Rutherford Appleton Laboratory
  @date 08/03/2009
  */
-class MANTID_ALGORITHMS_DLL GetDetectorOffsets : public API::Algorithm {
+class MANTID_ALGORITHMS_DLL GetDetectorOffsets final : public API::Algorithm {
 
   enum class offset_mode : int { signed_offset, relative_offset, absolute_offset };
 

@@ -15,7 +15,7 @@ namespace MDAlgorithms {
 
 /** EvaluateMDFunction : TODO: DESCRIPTION
  */
-class DLLExport EvaluateMDFunction : public API::Algorithm, public API::DeprecatedAlgorithm {
+class DLLExport EvaluateMDFunction final : public API::Algorithm, public API::DeprecatedAlgorithm {
 public:
   EvaluateMDFunction();
 

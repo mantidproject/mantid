@@ -525,7 +525,7 @@ void LoadDNSSCD::fillOutputWorkspace(double wavelength) {
       if ((theta > theta_min) && (theta < theta_max)) {
         PARALLEL_FOR_IF(Kernel::threadSafe(*m_OutWS, *normWS))
         for (int64_t channel = 0; channel < nchannels; channel++) {
-          PARALLEL_START_INTERUPT_REGION
+          PARALLEL_START_INTERRUPT_REGION
           double signal = ds.signal[i][channel];
           signal_t error = std::sqrt(signal);
           double tof2 = static_cast<double>(channel) * ds.chwidth + 0.5 * ds.chwidth; // bin centers
@@ -556,9 +556,9 @@ void LoadDNSSCD::fillOutputWorkspace(double wavelength) {
                                           static_cast<uint16_t>(expInfoIndex), 0, detid, millerindex.data());
             }
           }
-          PARALLEL_END_INTERUPT_REGION
+          PARALLEL_END_INTERRUPT_REGION
         }
-        PARALLEL_CHECK_INTERUPT_REGION
+        PARALLEL_CHECK_INTERRUPT_REGION
       }
     }
   }
@@ -610,9 +610,6 @@ void LoadDNSSCD::fillOutputWorkspaceRaw(double wavelength) {
   std::vector<double> tth_limits = getProperty("TwoThetaLimits");
   double theta_min = tth_limits[0] / 2.0;
   double theta_max = tth_limits[1] / 2.0;
-
-  double omega_offset = getProperty("OmegaOffset");
-  omega_offset *= -1.0;
 
   std::vector<double> extentMins = {theta_min, 0.0, tof1};
   std::vector<double> extentMaxs = {theta_max, 360.0, m_tof_max};
@@ -678,7 +675,7 @@ void LoadDNSSCD::fillOutputWorkspaceRaw(double wavelength) {
       if ((theta > theta_min) && (theta < theta_max)) {
         PARALLEL_FOR_IF(Kernel::threadSafe(*m_OutWS, *normWS))
         for (int64_t channel = 0; channel < nchannels; channel++) {
-          PARALLEL_START_INTERUPT_REGION
+          PARALLEL_START_INTERRUPT_REGION
           double signal = ds.signal[i][channel];
           signal_t error = std::sqrt(signal);
           double tof2(tof2_elastic);
@@ -698,9 +695,9 @@ void LoadDNSSCD::fillOutputWorkspaceRaw(double wavelength) {
             norm_inserter.insertMDEvent(static_cast<float>(norm_signal), static_cast<float>(norm_error * norm_error),
                                         static_cast<uint16_t>(expInfoIndex), 0, detid, datapoint.data());
           }
-          PARALLEL_END_INTERUPT_REGION
+          PARALLEL_END_INTERRUPT_REGION
         }
-        PARALLEL_CHECK_INTERUPT_REGION
+        PARALLEL_CHECK_INTERRUPT_REGION
       }
     }
   }

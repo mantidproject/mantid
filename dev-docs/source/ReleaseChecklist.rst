@@ -138,7 +138,18 @@ language, layout, and collecting images.
 Wednesday, 2 weeks & 3 days
 ---------------------------
 
-*  Create issues for people to neaten up the release notes and add images etc.
+*  Switch to manual handling of release notes by running the release_editor.py script using the
+   `release editor helper tool
+   <https://github.com/mantidproject/mantid/blob/main/tools/ReleaseNotes/release_editor.py>`_
+   and open a pull request to put them on ``release-next``. The script copies all of the separate release notes under the correct heading of their upper level file, e.g. framework.rst, and moves
+   the original release notes into a 'Used' folder. This makes it easier for the Release Editor to see which notes have been copied over and which haven't and prevents losing notes or merge conflicts.
+
+.. code-block:: bash
+
+    python release_editor.py --release 6.4.0
+
+*  Neaten up the release notes and add images etc.
+*  Copy over new release notes into main files and move separate release notes into 'Used' folder when done to avoid confusion.
 *  Ensure an image for the release is found to highlight the main changes for this
    release. This can be a collage of images if there is not a big 'headline' feature
    or change.
@@ -147,6 +158,11 @@ Tuesday, 4 days
 ---------------
 
 *  Review the complete set of release notes to make sure there are no glaring mistakes.
+
+Just before release
+-------------------
+
+* As one of the final steps in preparing to tag the release, remove all separate release note files and sub-file structure to leave just the upper level release notes e.g. diffraction.rst, index.rst, framework.rst etc.
 
 .. _release-manager-checklist:
 
@@ -240,6 +256,10 @@ After the Technical Release Manager has finished their release day tasks:
 
    ``neutron<at>neutronsources.org``
 
+   ``announcements<at>mantidproject.org``
+
+   ``ISIS Instrument Scientists + Other``
+
 *  Also post the contents of the message to the *\#announcements* channel on
    Slack.
 *  Create a new item on the forum news.
@@ -288,7 +308,7 @@ Monday, 3 weeks
 
 **Create Release Notes Skeleton**
 
-*  Create a skeleton set of release notes on ``main`` for the next version using the
+*  Create a skeleton set of release notes and subfolders on ``main`` for the next version using the
    `python helper tool
    <https://github.com/mantidproject/mantid/blob/main/tools/release_generator/release.py>`_
    and open a pull request to put them on ``main``. Make sure the
@@ -307,8 +327,8 @@ have been fixed. Then:
 
 *  Email ``mantid-builder@mantidproject.org`` and ask that a new token be generated for
    the instrument updates and placed in the appropriate place in Jenkins.
-*  Check the release notes and remove the "Under Construction" paragraph on the main
-   index page.
+*  Check the release notes and verify that the "Under Construction" paragraph on the main
+   index page has been removed. Remove the paragraph if it still exists.
 *  Disable release deploy jobs by building the
    `close-release-testing <https://builds.mantidproject.org/view/All/job/close-release-testing>`__
    job.
@@ -317,11 +337,11 @@ have been fixed. Then:
 
 We are now ready to create the release candidates ready for Smoke testing.
 
-*  On the ``release-next`` branch, create a PR to update the `git SHA
+*  On the ``release-next`` branch, check whether the `git SHA
    <https://github.com/mantidproject/mantid/blob/343037c685c0aca9151523d6a3e105504f8cf218/scripts/ExternalInterfaces/CMakeLists.txt#L11>`__
-   for MSlice.
+   for MSlice is up to date. If not, create a PR to update it.
 *  On the ``release-next`` branch, create a PR to update the `major & minor
-   <https://github.com/mantidproject/mantid/blob/main/buildconfig/CMake/VersionNumber.cmake>`__
+   <https://github.com/mantidproject/mantid/blob/release-next/buildconfig/CMake/VersionNumber.cmake>`__
    versions accordingly. Also, uncomment ``VERSION_PATCH`` and set it to ``0``.
 *  Ask a gatekeeper to: merge the ``release-next`` branch back to ``main`` locally, and then comment
    out the ``VERSION_PATCH`` on the ``main`` branch. They should then commit and push these changes
@@ -338,7 +358,7 @@ Check with the Quality Assurance Manager that the Smoke testing has been complet
 have been fixed.
 
 *  Run the `release_deploy <https://builds.mantidproject.org/view/Release%20Pipeline/job/release_deploy/>`__
-   job to put the packages, with the exception of Windows, on Sourceforge.
+   job to put the packages, with the exception of Windows, on Sourceforge. Set ``SOURCEFORGE_DIR`` to <major version>.<minor version> (e.g. 6.3)
 
   *  Have someone at ISIS sign the Windows binary and upload this manually to Sourceforge
 
@@ -357,8 +377,6 @@ have been fixed.
 *  Kick off the build for ``mantidXY`` on RHEL7 for the SNS with ``PACKAGE_SUFFIX`` set to
    ``XY`` where ``X`` and ``Y`` correspond to the Major and Minor release version numbers:
    https://builds.mantidproject.org/job/release_clean-rhel7/
-* **ISIS**: If in cycle add a calendar reminder for when the current cycle ends for
-  mantid to be updated on IDAaaS and cabin PCs. If out of cycle do this immediately.
 
 **Generate DOI**
 
@@ -374,6 +392,11 @@ publish a new `release <https://github.com/mantidproject/mantid/releases>`__ on 
 .. code-block:: bash
 
     python tools/DOI/doi.py --username=[username] [X.Y.Z]
+
+for example
+
+.. code-block:: bash
+
     python tools/DOI/doi.py --username="doi.username" 6.1.0
 
 *  The script will prompt you for the password. Ask a senior developer to share the username and

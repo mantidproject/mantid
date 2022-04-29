@@ -1,0 +1,15 @@
+digraph SANSILLMultiProcess {
+  $global_style
+
+  subgraph algorithms {
+    $algorithm_style
+    calculate_transmissions
+    reduce_samples
+    azimuthal_average
+    stitch
+  }
+
+  calculate_transmissions -> reduce_samples
+  reduce_samples -> azimuthal_average
+  azimuthal_average -> stitch
+}

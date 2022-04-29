@@ -1133,11 +1133,15 @@ def waterfall_create_fill(ax):
         fill.set_zorder((len(ax.get_lines()) - i) + 1)
         set_waterfall_fill_visible(ax, i)
 
-    ax.lines += errorbar_cap_lines
+    for cap in errorbar_cap_lines:
+        ax.add_line(cap)
 
 
 def waterfall_remove_fill(ax):
-    ax.collections[:] = filter(lambda x: not isinstance(x, PolyCollection), ax.collections)
+    # Use a temporary list to hold a reference to the collections whilst removing them.
+    for poly_collection in list(ax.collections):
+        if isinstance(poly_collection, PolyCollection):
+            poly_collection.remove()
     ax.get_figure().canvas.draw()
 
 
@@ -1198,7 +1202,7 @@ def update_colorbar_scale(figure, image, scale, vmin, vmax):
     image.set_norm(scale(vmin=vmin, vmax=vmax))
 
     if image.colorbar:
-        label = image.colorbar._label
+        label = image.colorbar.ax.get_ylabel()
         image.colorbar.remove()
         locator = None
         if scale == LogNorm:

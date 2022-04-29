@@ -14,7 +14,7 @@ namespace Algorithms {
 
 /** DeadTimeCorrection : Performs dead time correction.
  */
-class MANTID_ALGORITHMS_DLL DeadTimeCorrection : public API::Algorithm {
+class MANTID_ALGORITHMS_DLL DeadTimeCorrection final : public API::Algorithm {
 public:
   const std::string name() const override;
   int version() const override;

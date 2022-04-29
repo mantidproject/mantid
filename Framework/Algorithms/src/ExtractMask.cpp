@@ -71,7 +71,7 @@ void ExtractMask::exec() {
 
   PARALLEL_FOR_IF(Kernel::threadSafe(*inputWS, *maskWS))
   for (int64_t i = 0; i < nHist; ++i) {
-    PARALLEL_START_INTERUPT_REGION
+    PARALLEL_START_INTERRUPT_REGION
     bool inputIsMasked(false);
     if (spectrumInfo.hasDetectors(i)) {
       // special workspaces can mysteriously have the mask bit set
@@ -79,9 +79,9 @@ void ExtractMask::exec() {
     }
     maskWS->setMaskedIndex(i, inputIsMasked);
     prog.report();
-    PARALLEL_END_INTERUPT_REGION
+    PARALLEL_END_INTERRUPT_REGION
   }
-  PARALLEL_CHECK_INTERUPT_REGION
+  PARALLEL_CHECK_INTERRUPT_REGION
 
   g_log.information() << maskWS->getNumberMasked() << " spectra are masked\n";
   g_log.information() << detectorList.size() << " detectors are masked\n";

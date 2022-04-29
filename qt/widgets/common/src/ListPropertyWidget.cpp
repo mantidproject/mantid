@@ -20,7 +20,7 @@ namespace MantidQt::API {
 //----------------------------------------------------------------------------------------------
 /** Destructor
  */
-ListPropertyWidget::~ListPropertyWidget() {}
+ListPropertyWidget::~ListPropertyWidget() = default;
 
 //----------------------------------------------------------------------------------------------
 /** Constructor

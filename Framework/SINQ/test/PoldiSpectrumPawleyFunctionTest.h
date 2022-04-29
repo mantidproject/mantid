@@ -31,7 +31,7 @@ GNU_DIAG_OFF_SUGGEST_OVERRIDE
 class MockPawleyFunction : public IPawleyFunction {
 public:
   MockPawleyFunction() {}
-  ~MockPawleyFunction() override {}
+  ~MockPawleyFunction() override = default;
   // IFunction interface
   MOCK_CONST_METHOD0(name, std::string());
   MOCK_CONST_METHOD2(function, void(const FunctionDomain &, FunctionValues &));

@@ -146,7 +146,7 @@ void ModeratorTzeroLinear::exec() {
   Progress prog(this, 0.0, 1.0, numHists); // report progress of algorithm
   PARALLEL_FOR_IF(Kernel::threadSafe(*inputWS, *outputWS))
   for (int i = 0; i < static_cast<int>(numHists); ++i) {
-    PARALLEL_START_INTERUPT_REGION
+    PARALLEL_START_INTERRUPT_REGION
     double t_f, L_i;
     auto wsIndex = static_cast<size_t>(i);
     calculateTfLi(spectrumInfo, wsIndex, t_f, L_i);
@@ -162,9 +162,9 @@ void ModeratorTzeroLinear::exec() {
       outbins += offset;
     }
     prog.report();
-    PARALLEL_END_INTERUPT_REGION
+    PARALLEL_END_INTERRUPT_REGION
   }
-  PARALLEL_CHECK_INTERUPT_REGION
+  PARALLEL_CHECK_INTERRUPT_REGION
 
   // Copy units
   if (inputWS->getAxis(0)->unit()) {
@@ -202,7 +202,7 @@ void ModeratorTzeroLinear::execEvent() {
   PARALLEL_FOR_IF(Kernel::threadSafe(*outputWS))
   for (int i = 0; i < static_cast<int>(numHists); ++i) {
     auto wsIndex = static_cast<size_t>(i);
-    PARALLEL_START_INTERUPT_REGION
+    PARALLEL_START_INTERRUPT_REGION
     EventList &evlist = outputWS->getSpectrum(wsIndex);
     if (evlist.getNumberEvents() > 0) // don't bother with empty lists
     {
@@ -217,9 +217,9 @@ void ModeratorTzeroLinear::execEvent() {
       }
     }
     prog.report();
-    PARALLEL_END_INTERUPT_REGION
+    PARALLEL_END_INTERRUPT_REGION
   }
-  PARALLEL_CHECK_INTERUPT_REGION
+  PARALLEL_CHECK_INTERRUPT_REGION
   outputWS->clearMRU(); // Clears the Most Recent Used lists */
 } // end of void ModeratorTzeroLinear::execEvent()
 

@@ -58,10 +58,10 @@ class ReflectometryBackgroundSubtractionTest(unittest.TestCase):
         for i in range(0, output.getNumberHistograms()):
             if i == 3 or i == 4:
                 for itr in range(0, output.blocksize()):
-                    self.assertEquals(3.0, output.dataY(i)[itr])
+                    self.assertEqual(3.0, output.dataY(i)[itr])
             else:
                 for itr in range(0, output.blocksize()):
-                    self.assertEquals(0.0, output.dataY(i)[itr])
+                    self.assertEqual(0.0, output.dataY(i)[itr])
 
     def test_output_Polynomial(self):
         """
@@ -76,10 +76,10 @@ class ReflectometryBackgroundSubtractionTest(unittest.TestCase):
         for i in range(0, output.getNumberHistograms()):
             if i == 3 or i == 4:
                 for itr in range(0, output.blocksize()):
-                    self.assertEquals(3.0, output.dataY(i)[itr])
+                    self.assertEqual(3.0, output.dataY(i)[itr])
             else:
                 for itr in range(0, output.blocksize()):
-                    self.assertEquals(0.0, output.dataY(i)[itr])
+                    self.assertEqual(0.0, output.dataY(i)[itr])
 
     def test_output_AveragePixelFit(self):
         """
@@ -95,10 +95,10 @@ class ReflectometryBackgroundSubtractionTest(unittest.TestCase):
         for i in range(0, output.getNumberHistograms()):
             if i == 3 or i == 4:
                 for itr in range(0, output.blocksize()):
-                    self.assertEquals(3.0, output.dataY(i)[itr])
+                    self.assertEqual(3.0, output.dataY(i)[itr])
             else:
                 for itr in range(0, output.blocksize()):
-                    self.assertEquals(0.0, output.dataY(i)[itr])
+                    self.assertEqual(0.0, output.dataY(i)[itr])
 
     def test_peak_range_changes_with_index_type(self):
         """
@@ -117,10 +117,10 @@ class ReflectometryBackgroundSubtractionTest(unittest.TestCase):
         for i in range(0, output.getNumberHistograms()):
             if i == 3 or i == 4:
                 for itr in range(0, output.blocksize()):
-                    self.assertEquals(3.0, output.dataY(i)[itr])
+                    self.assertEqual(3.0, output.dataY(i)[itr])
             else:
                 for itr in range(0, output.blocksize()):
-                    self.assertEquals(0.0, output.dataY(i)[itr])
+                    self.assertEqual(0.0, output.dataY(i)[itr])
 
     def test_Polynomial_error_for_single_spectra(self):
         args = {'InputWorkspace' : 'workspace_with_peak',
@@ -151,6 +151,18 @@ class ReflectometryBackgroundSubtractionTest(unittest.TestCase):
                 'PeakRange' : '2-4,6-7',
                 'OutputWorkspace': 'output'}
         self._assert_run_algorithm_throws(args)
+
+    def test_validateInputs(self):
+        group = mantid.api.WorkspaceGroup()
+        mtd['group'] = group
+        args = {'InputWorkspace' : 'group',
+                'BackgroundCalculationMethod' : 'PerDetectorAverage',
+                'OutputWorkspace': 'output'}
+        alg = create_algorithm('ReflectometryBackgroundSubtraction', **args)
+        error_map = alg.validateInputs()
+        self.assertEqual(len(error_map), 1)
+        self.assertEqual(error_map['InputWorkspace'], "Invalid workspace type provided to IndexProperty. "
+                                                      "Must be convertible to MatrixWorkspace.")
 
     def _assert_run_algorithm_succeeds(self, args):
         """ Run the algorithm with the given args and check it succeeds """

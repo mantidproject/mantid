@@ -41,7 +41,7 @@ ArrayLengthValidator<TYPE>::ArrayLengthValidator(const size_t lenmin, const size
 //----------------------------------------------------------------------------------------------
 /** Destructor
  */
-template <typename TYPE> ArrayLengthValidator<TYPE>::~ArrayLengthValidator() {}
+template <typename TYPE> ArrayLengthValidator<TYPE>::~ArrayLengthValidator() = default;
 
 /**
   Check if length is set

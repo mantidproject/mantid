@@ -15,7 +15,7 @@ namespace Algorithms {
 /** MaskNonOverlappingBins : Compares the X ranges of two workspace and
  * masks the non-overlapping bins in the first workspace.
  */
-class MANTID_ALGORITHMS_DLL MaskNonOverlappingBins : public API::Algorithm {
+class MANTID_ALGORITHMS_DLL MaskNonOverlappingBins final : public API::Algorithm {
 public:
   std::string const name() const override;
   int version() const override;

@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<parameter-file instrument="REFL" valid-from="forever">
+
+    <component-link name="REFL" >
+
+        <parameter name="AnalysisMode" type="string">
+            <value val="PointDetectorAnalysis"/>
+        </parameter>
+
+        <parameter name="PointDetectorStart">
+            <!--Negative value is invalid-->
+            <value val="-2"/>
+        </parameter>
+
+        <parameter name="PointDetectorStop">
+            <value val="2"/>
+        </parameter>
+
+    </component-link>
+
+</parameter-file>

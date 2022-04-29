@@ -67,6 +67,8 @@ set(SRC_FILES
     IndirectLoadILL.cpp
     IndirectMolDyn.cpp
     IndirectMoments.cpp
+    IndirectMomentsModel.cpp
+    IndirectMomentsView.cpp
     IndirectPlotOptionsModel.cpp
     IndirectPlotOptionsPresenter.cpp
     IndirectPlotOptionsView.cpp
@@ -107,7 +109,6 @@ set(MOC_FILES
     FqFitDataView.h
     FunctionTemplateBrowser.h
     IAddWorkspaceDialog.h
-    IIndirectFitDataModel.h
     IIndirectFitDataView.h
     IIndirectFitOutputOptionsView.h
     IIndirectFitPlotView.h
@@ -131,7 +132,6 @@ set(MOC_FILES
     IndirectDiffractionReduction.h
     IndirectEditResultsDialog.h
     IndirectFitAnalysisTab.h
-    IndirectFitDataModel.h
     IndirectFitDataPresenter.h
     IndirectFitDataView.h
     IndirectFitOutputOptionsPresenter.h
@@ -149,6 +149,8 @@ set(MOC_FILES
     IndirectLoadILL.h
     IndirectMolDyn.h
     IndirectMoments.h
+    IndirectMomentsModel.h
+    IndirectMomentsView.h
     IndirectPlotOptionsPresenter.h
     IndirectPlotOptionsView.h
     IndirectSassena.h
@@ -178,8 +180,10 @@ set(MOC_FILES
 set(INC_FILES
     ConvFitModel.h
     FqFitModel.h
+    IIndirectFitDataModel.h
     IndirectDataValidationHelper.h
     IndirectFitData.h
+    IndirectFitDataModel.h
     IndirectFitOutputOptionsModel.h
     IndirectFitPlotModel.h
     IndirectFitPlotPresenter.h

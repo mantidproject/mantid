@@ -125,9 +125,9 @@ template <class T> IndexSet<T>::IndexSet(int64_t min, int64_t max, size_t fullRa
 
 /// Constructor for a set containing all specified indices. Range is verified at
 /// construction time and duplicates cause an error.
-template <class T> IndexSet<T>::IndexSet(const std::vector<size_t> &indices, size_t fullRange) : m_isRange(false) {
+template <class T>
+IndexSet<T>::IndexSet(const std::vector<size_t> &indices, size_t fullRange) : m_isRange(false), m_indices(indices) {
   // Validate indices, using m_indices as buffer (reassigned later).
-  m_indices = indices;
   std::sort(m_indices.begin(), m_indices.end());
   if (!m_indices.empty() && *m_indices.rbegin() >= fullRange)
     throw std::out_of_range("IndexSet: specified index is out of range");

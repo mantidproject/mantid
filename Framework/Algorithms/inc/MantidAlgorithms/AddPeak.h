@@ -16,7 +16,7 @@ namespace Algorithms {
 
   @date 2012-10-16
  */
-class MANTID_ALGORITHMS_DLL AddPeak : public API::Algorithm {
+class MANTID_ALGORITHMS_DLL AddPeak final : public API::Algorithm {
 public:
   /// Algorithm's name for identification
   const std::string name() const override { return "AddPeak"; };

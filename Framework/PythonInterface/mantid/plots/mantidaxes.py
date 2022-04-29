@@ -7,6 +7,9 @@
 #  This file is part of the mantid package
 from collections.abc import Iterable
 import copy
+from distutils.version import LooseVersion
+
+import matplotlib
 import numpy as np
 import re
 
@@ -27,8 +30,7 @@ from mantid.api import AnalysisDataService as ads
 from mantid.plots import datafunctions, axesfunctions, axesfunctions3D
 from mantid.plots.legend import LegendProperties
 from mantid.plots.datafunctions import get_normalize_by_bin_width
-from mantid.plots.utility import (artists_hidden, autoscale_on_update,
-                                  legend_set_draggable, MantidAxType)
+from mantid.plots.utility import (artists_hidden, legend_set_draggable, MantidAxType)
 
 
 WATERFALL_XOFFSET_DEFAULT, WATERFALL_YOFFSET_DEFAULT = 10, 20
@@ -628,8 +630,6 @@ class MantidAxes(Axes):
         if datafunctions.validate_args(*args,**kwargs):
             logger.debug('using plotfunctions')
 
-            autoscale_on = kwargs.pop("autoscale_on_update", self.get_autoscale_on())
-
             def _data_update(artists, workspace, new_kwargs=None):
                 # It's only possible to plot 1 line at a time from a workspace
                 try:
@@ -653,14 +653,6 @@ class MantidAxes(Axes):
                     if (not self.is_empty(self)) and self.legend_ is not None:
                         legend_set_draggable(self.legend(), True)
 
-                if new_kwargs:
-                    _autoscale_on = new_kwargs.pop("autoscale_on_update", self.get_autoscale_on())
-                else:
-                    _autoscale_on = self.get_autoscale_on()
-
-                if _autoscale_on:
-                    self.relim()
-                    self.autoscale()
                 return artists
 
             workspace = args[0]
@@ -668,16 +660,14 @@ class MantidAxes(Axes):
             normalize_by_bin_width, kwargs = get_normalize_by_bin_width(workspace, self, **kwargs)
             is_normalized = normalize_by_bin_width or \
                             (hasattr(workspace, 'isDistribution') and workspace.isDistribution())
-
-            with autoscale_on_update(self, autoscale_on):
-                artist = self.track_workspace_artist(workspace,
-                                                     axesfunctions.plot(self, normalize_by_bin_width=is_normalized,
-                                                                        *args, **kwargs),
-                                                     _data_update, spec_num, is_normalized,
-                                                     MantidAxes.is_axis_of_type(MantidAxType.SPECTRUM, kwargs),
-                                                     kwargs.get('LogName', None),
-                                                     kwargs.get('Filtered', None),
-                                                     kwargs.get('ExperimentInfo', None))
+            artist = self.track_workspace_artist(workspace,
+                                                 axesfunctions.plot(self, normalize_by_bin_width=is_normalized,
+                                                                    *args, **kwargs),
+                                                 _data_update, spec_num, is_normalized,
+                                                 MantidAxes.is_axis_of_type(MantidAxType.SPECTRUM, kwargs),
+                                                 kwargs.get('LogName', None),
+                                                 kwargs.get('Filtered', None),
+                                                 kwargs.get('ExperimentInfo', None))
             return artist
         else:
             return Axes.plot(self, *args, **kwargs)
@@ -730,13 +720,7 @@ class MantidAxes(Axes):
         if datafunctions.validate_args(*args):
             logger.debug('using plotfunctions')
 
-            autoscale_on = kwargs.pop("autoscale_on_update", self.get_autoscale_on())
-
             def _data_update(artists, workspace, new_kwargs=None):
-                if new_kwargs:
-                    _autoscale_on = new_kwargs.pop("autoscale_on_update", self.get_autoscale_on())
-                else:
-                    _autoscale_on = self.get_autoscale_on()
                 # errorbar with workspaces can only return a single container
                 container_orig = artists[0]
                 # It is not possible to simply reset the error bars so
@@ -751,12 +735,10 @@ class MantidAxes(Axes):
                     pass
                 # this gets pushed back onto the containers list
                 try:
-                    with autoscale_on_update(self, _autoscale_on):
-                        # this gets pushed back onto the containers list
-                        if new_kwargs:
-                            container_new = axesfunctions.errorbar(self, workspace, **new_kwargs)
-                        else:
-                            container_new = axesfunctions.errorbar(self, workspace, **kwargs)
+                    if new_kwargs:
+                        container_new = axesfunctions.errorbar(self, workspace, **new_kwargs)
+                    else:
+                        container_new = axesfunctions.errorbar(self, workspace, **kwargs)
 
                     self.containers.insert(orig_idx, container_new)
                     self.containers.pop()
@@ -783,19 +765,16 @@ class MantidAxes(Axes):
                         legend_set_draggable(self.legend(), True)
 
                 return container_new
-
             workspace = args[0]
             spec_num = self.get_spec_number_or_bin(workspace, kwargs)
             normalize_by_bin_width, kwargs = get_normalize_by_bin_width(workspace, self, **kwargs)
-            is_normalized = normalize_by_bin_width or \
-                            (hasattr(workspace, 'isDistribution') and workspace.isDistribution())
-
-            with autoscale_on_update(self, autoscale_on):
-                artist = self.track_workspace_artist(workspace,
-                                                     axesfunctions.errorbar(self, normalize_by_bin_width = is_normalized,
-                                                                            *args, **kwargs),
-                                                     _data_update, spec_num, is_normalized,
-                                                     MantidAxes.is_axis_of_type(MantidAxType.SPECTRUM, kwargs))
+            is_normalized = normalize_by_bin_width or (hasattr(workspace, 'isDistribution')
+                                                       and workspace.isDistribution())
+            artist = self.track_workspace_artist(workspace,
+                                                 axesfunctions.errorbar(self, normalize_by_bin_width=is_normalized,
+                                                                        *args, **kwargs),
+                                                 _data_update, spec_num, is_normalized,
+                                                 MantidAxes.is_axis_of_type(MantidAxType.SPECTRUM, kwargs))
             return artist
         else:
             return Axes.errorbar(self, *args, **kwargs)
@@ -1118,7 +1097,8 @@ class MantidAxes(Axes):
         self.waterfall_x_offset = x_offset
         self.waterfall_y_offset = y_offset
 
-        self.lines += errorbar_cap_lines
+        for cap in errorbar_cap_lines:
+            self.lines.add_line(cap)
 
         datafunctions.set_waterfall_toolbar_options_enabled(self)
         self.get_figure().canvas.draw()
@@ -1238,7 +1218,7 @@ class MantidAxes(Axes):
         cb = colorbar
         cb.mappable = mappable
         mappable.colorbar = cb
-        mappable.colorbar_cid = mappable.callbacksSM.connect('changed', cb.on_mappable_changed)
+        mappable.colorbar_cid = mappable.callbacksSM.connect('changed', cb.update_normal)
         cb.update_normal(mappable)
 
     def _remove_matching_curve_from_creation_args(self, workspace_name, workspace_index, spec_num):
@@ -1290,27 +1270,25 @@ class MantidAxes3D(Axes3D):
     name = 'mantid3d'
 
     def __init__(self, *args, **kwargs):
+        if LooseVersion('3.4.0') <= LooseVersion(matplotlib.__version__):
+            kwargs["auto_add_to_figure"] = False
         super().__init__(*args, **kwargs)
-
-        # Remove the connection for when you click on the plot as this is dealt with in figureinteraction.py to stop
-        # it interfering with double-clicking on the axes.
-        self.figure.canvas.mpl_disconnect(self._cids[1])
 
     def set_title(self, *args, **kwargs):
         # The set_title function in Axes3D also moves the title downwards for some reason so the Axes function is called
         # instead.
         return Axes.set_title(self, *args, **kwargs)
 
-    def set_xlim3d(self, *args):
-        super().set_xlim3d(*args)
+    def set_xlim3d(self, *args, **kwargs):
+        super().set_xlim3d(*args, **kwargs)
         self._set_overflowing_data_to_nan(0)
 
-    def set_ylim3d(self, *args):
-        super().set_ylim3d(*args)
+    def set_ylim3d(self, *args, **kwargs):
+        super().set_ylim3d(*args, **kwargs)
         self._set_overflowing_data_to_nan(1)
 
-    def set_zlim3d(self, *args):
-        super().set_zlim3d(*args)
+    def set_zlim3d(self, *args, **kwargs):
+        super().set_zlim3d(*args, **kwargs)
         self._set_overflowing_data_to_nan(2)
 
     def autoscale(self, *args, **kwargs):
@@ -1334,11 +1312,16 @@ class MantidAxes3D(Axes3D):
             else:
                 axis_index_list = [axis_index]
 
-            for axis_index in axis_index_list:
-                axis_data = self.original_data_surface[axis_index].copy()
-                axis_data[np.less(axis_data, min_vals[axis_index], where=~np.isnan(axis_data))] = np.nan
-                axis_data[np.greater(axis_data, max_vals[axis_index], where=~np.isnan(axis_data))] = np.nan
-                self.collections[0]._vec[axis_index] = axis_data
+            # if original_data_surface does not match current collections then we shouldn't add it back,
+            # delete attribute and skip adding back.
+            if self.collections[0]._vec[axis_index_list[0]].size != self.original_data_surface[axis_index_list[0]].size:
+                delattr(self, 'original_data_surface')
+            else:
+                for axis_index in axis_index_list:
+                    axis_data = self.original_data_surface[axis_index].copy()
+                    axis_data[np.less(axis_data, min_vals[axis_index], where=~np.isnan(axis_data))] = np.nan
+                    axis_data[np.greater(axis_data, max_vals[axis_index], where=~np.isnan(axis_data))] = np.nan
+                    self.collections[0]._vec[axis_index] = axis_data
 
         if hasattr(self, 'original_data_wireframe'):
 

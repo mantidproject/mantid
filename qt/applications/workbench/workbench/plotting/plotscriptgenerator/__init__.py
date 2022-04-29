@@ -76,7 +76,7 @@ def generate_script(fig, exclude_headers=False):
             continue
         ax_object_var = get_axes_object_variable(ax)
         if axes_type(ax) in [FigureType.Image]:
-            colormap_lines, colormap_headers = get_plot_2d_cmd(ax, ax_object_var) # ax.imshow or pcolormesh
+            colormap_lines, colormap_headers = get_plot_2d_cmd(ax, ax_object_var)  # ax.imshow or pcolormesh
             plot_commands.extend(colormap_lines)
             plot_headers.extend(colormap_headers)
         else:
@@ -206,12 +206,17 @@ def get_axes_object_variable(ax):
     # plt.subplots returns an Axes object if there's only one axes being
     # plotted otherwise it returns a list
     ax_object_var = AXES_VARIABLE
-    try:
-        if ax.numRows > 1:
-            ax_object_var += "[{row_num}]".format(row_num=row_num(ax))
-        if ax.numCols > 1:
-            ax_object_var += "[{col_num}]".format(col_num=col_num(ax))
-    except AttributeError:
-        # No numRows or NumCols members, so no list use the default
-        pass
+
+    if hasattr(ax, "get_gridspec") and hasattr(ax.get_gridspec(), "nrows") and hasattr(ax.get_gridspec(), "ncols"):
+        num_rows = ax.get_gridspec().nrows
+        num_cols = ax.get_gridspec().ncols
+    else:
+        num_rows = ax.numRows
+        num_cols = ax.numCols
+
+    if num_rows > 1:
+        ax_object_var += "[{row_num}]".format(row_num=row_num(ax))
+    if num_cols > 1:
+        ax_object_var += "[{col_num}]".format(col_num=col_num(ax))
+
     return ax_object_var

@@ -636,18 +636,46 @@ public:
     verifyAndClear();
   }
 
-  void testNotifyRowOutputsChanged() {
+  void testRowStateChangedOnReductionResumed() {
     auto presenter = makePresenter();
-    EXPECT_CALL(*m_runsTablePresenter, notifyRowOutputsChanged()).Times(1);
-    presenter.notifyRowOutputsChanged();
+    EXPECT_CALL(*m_runsTablePresenter, notifyRowStateChanged()).Times(1);
+    presenter.notifyReductionResumed();
     verifyAndClear();
   }
 
-  void testNotifyRowOutputsChangedItem() {
+  void testRowStateChangedOnReductionPaused() {
+    auto presenter = makePresenter();
+    EXPECT_CALL(*m_runsTablePresenter, notifyRowStateChanged()).Times(1);
+    presenter.notifyReductionPaused();
+    verifyAndClear();
+  }
+
+  void testRowStateChangedOnAutoreductionResumed() {
+    auto presenter = makePresenter();
+    EXPECT_CALL(*m_runsTablePresenter, notifyRowStateChanged()).Times(1);
+    presenter.notifyAutoreductionResumed();
+    verifyAndClear();
+  }
+
+  void testRowStateChangedOnAutoreductionPaused() {
+    auto presenter = makePresenter();
+    EXPECT_CALL(*m_runsTablePresenter, notifyRowStateChanged()).Times(1);
+    presenter.notifyAutoreductionPaused();
+    verifyAndClear();
+  }
+
+  void testNotifyRowModelChanged() {
+    auto presenter = makePresenter();
+    EXPECT_CALL(*m_runsTablePresenter, notifyRowModelChanged()).Times(1);
+    presenter.notifyRowModelChanged();
+    verifyAndClear();
+  }
+
+  void testNotifyRowModelChangedItem() {
     auto presenter = makePresenter();
     auto row = makeRow();
-    EXPECT_CALL(*m_runsTablePresenter, notifyRowOutputsChanged(_)).Times(1);
-    presenter.notifyRowOutputsChanged(row);
+    EXPECT_CALL(*m_runsTablePresenter, notifyRowModelChanged(_)).Times(1);
+    presenter.notifyRowModelChanged(row);
     verifyAndClear();
   }
 
@@ -760,6 +788,22 @@ public:
     auto presenter = makePresenter();
     EXPECT_CALL(*m_runsTablePresenter, notifyBatchLoaded()).Times(1);
     presenter.notifyBatchLoaded();
+    verifyAndClear();
+  }
+
+  void testNotifyRowContentChanged() {
+    auto presenter = makePresenter();
+    auto row = makeRow(0.5);
+    EXPECT_CALL(m_mainPresenter, notifyRowContentChanged(row));
+    presenter.notifyRowContentChanged(row);
+    verifyAndClear();
+  }
+
+  void testNotifyGroupNameChanged() {
+    auto presenter = makePresenter();
+    auto group = makeGroupWithOneRow();
+    EXPECT_CALL(m_mainPresenter, notifyGroupNameChanged(group));
+    presenter.notifyGroupNameChanged(group);
     verifyAndClear();
   }
 

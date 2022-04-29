@@ -156,7 +156,7 @@ class PolDiffILLReductionTest(unittest.TestCase):
         self._check_process_flag(mtd['sample_tof'], 'Sample')
 
     def _check_process_flag(self, ws, value):
-        self.assertEquals(ws[0].getRun().getLogData('ProcessedAs').value, value)
+        self.assertEqual(ws[0].getRun().getLogData('ProcessedAs').value, value)
 
     def _check_output(self, ws, blocksize, spectra, nEntries, x_unit, x_unit_id, y_unit, y_unit_id):
         self.assertTrue(ws)

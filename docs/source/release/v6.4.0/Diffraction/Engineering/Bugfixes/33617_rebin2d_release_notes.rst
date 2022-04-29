@@ -1,0 +1,1 @@
+- fix :ref:`algm-Rebin2D` to allow input of :ref:`EventWorkspace <EventWorkspace>` without crashing

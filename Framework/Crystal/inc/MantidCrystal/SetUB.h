@@ -20,7 +20,7 @@ namespace Crystal {
   @author Andrei Savici
   @date 2011-11-07
 */
-class MANTID_CRYSTAL_DLL SetUB : public API::Algorithm {
+class MANTID_CRYSTAL_DLL SetUB final : public API::Algorithm {
 public:
   const std::string name() const override;
   /// Summary of algorithms purpose

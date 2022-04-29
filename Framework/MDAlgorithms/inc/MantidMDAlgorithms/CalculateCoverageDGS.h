@@ -16,7 +16,7 @@ namespace MDAlgorithms {
 /** CalculateCoverageDGS : Calculate coverage for single crystal direct geometry
   scattering
 */
-class DLLExport CalculateCoverageDGS : public API::Algorithm {
+class DLLExport CalculateCoverageDGS final : public API::Algorithm {
 public:
   CalculateCoverageDGS();
   const std::string name() const override;

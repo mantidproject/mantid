@@ -17,7 +17,7 @@ namespace MDAlgorithms {
 
   @date 2012-01-18
 */
-class DLLExport TransformMD : public API::Algorithm {
+class DLLExport TransformMD final : public API::Algorithm {
 public:
   const std::string name() const override;
   /// Summary of algorithms purpose

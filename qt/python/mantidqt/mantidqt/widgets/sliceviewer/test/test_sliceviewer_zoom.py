@@ -11,7 +11,7 @@ from unittest.mock import ANY, MagicMock
 
 # 3rd party imports
 #from matplotlib.backend_bases import FigureCanvas
-from mantidqt.widgets.sliceviewer.zoom import ScrollZoomMixin
+from mantidqt.widgets.sliceviewer.presenters.zoom import ScrollZoomMixin
 
 
 class ScrollZoomMixinTest(unittest.TestCase):

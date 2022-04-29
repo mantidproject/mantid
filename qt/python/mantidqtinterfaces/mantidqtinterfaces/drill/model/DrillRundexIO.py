@@ -155,7 +155,11 @@ class DrillRundexIO:
         parameters = drill.getParameters()
         parametersJson = dict()
         for parameter in parameters:
-            parametersJson[parameter.getName()] = parameter.getValue()
+            parameter_name = parameter.getName()
+            parameter_value = parameter.getValue()
+            if isinstance(parameter_value, PropertyManager):
+                parameter_value = dict(parameter_value)
+            parametersJson[parameter_name] = parameter_value
         if parametersJson:
             json_data[RundexSettings.SETTINGS_JSON_KEY] = parametersJson
 

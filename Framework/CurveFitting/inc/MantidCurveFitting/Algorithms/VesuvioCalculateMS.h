@@ -36,7 +36,7 @@ struct DetectorParams;
   Calculates the multiple scattering & total scattering contributions
   for a flat-plate or cylindrical sample.
 */
-class MANTID_CURVEFITTING_DLL VesuvioCalculateMS : public API::Algorithm {
+class MANTID_CURVEFITTING_DLL VesuvioCalculateMS final : public API::Algorithm {
 private:
   // Holds date on the compton scattering properties of an atom
   struct ComptonNeutronAtom {

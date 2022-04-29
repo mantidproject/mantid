@@ -215,7 +215,7 @@ template <typename MDE, size_t nd> void MergeMD::doPlus(typename MDEventWorkspac
 
     PRAGMA_OMP( parallel for if (!ws2->isFileBacked()) )
     for (int i = 0; i < numBoxes; i++) {
-      PARALLEL_START_INTERUPT_REGION
+      PARALLEL_START_INTERRUPT_REGION
       auto *box = dynamic_cast<MDBox<MDE, nd> *>(boxes[i]);
       if (box && !box->getIsMasked()) {
         // Copy the events from WS2 and add them into WS1
@@ -235,9 +235,9 @@ template <typename MDE, size_t nd> void MergeMD::doPlus(typename MDEventWorkspac
         else
           box->releaseEvents();
       }
-      PARALLEL_END_INTERUPT_REGION
+      PARALLEL_END_INTERRUPT_REGION
     }
-    PARALLEL_CHECK_INTERUPT_REGION
+    PARALLEL_CHECK_INTERRUPT_REGION
 
     // Progress * prog2 = new Progress(this, 0.4, 0.9, 100);
     Progress *prog2 = nullptr;

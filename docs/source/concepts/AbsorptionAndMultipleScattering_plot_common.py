@@ -74,11 +74,13 @@ def get_montecarlo_results(sample_ws):
     X=[0,10,20,30,40]
     Y=[1,1,1,1,1]
     SQ=CreateWorkspace(DataX=X,DataY=Y,UnitX="MomentumTransfer")
-    mc_corrections = DiscusMultipleScatteringCorrection(sample_ws, SofqWorkspace=SQ, NumberScatterings=2)
+    ConvertUnits(InputWorkspace=sample_ws, OutputWorkspace=sample_ws, Target="Momentum")
+    mc_corrections = DiscusMultipleScatteringCorrection(sample_ws, StructureFactorWorkspace=SQ, NumberScatterings=2)
     # apply ms correction using ratio method
     multi_scatt_ratio = mc_corrections[1]/(mc_corrections[1] + mc_corrections[2])
     mc_ms = sample_ws * multi_scatt_ratio
-    # apply absorption correction after ms correction to get total correction
+    # apply absorption correction after ms correction to get fully corrected result
+    ConvertUnits(InputWorkspace=mc_ms, OutputWorkspace=mc_ms, Target="Wavelength")
     mc_ms = mc_ms / mc_abs_factor
 
     mc_abs_factor = 1. / mc_abs_factor

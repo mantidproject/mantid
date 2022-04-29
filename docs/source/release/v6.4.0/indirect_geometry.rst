@@ -5,14 +5,29 @@ Indirect Geometry Changes
 .. contents:: Table of Contents
    :local:
 
-.. warning:: **Developers:** Sort changes under appropriate heading
-    putting new features at the top of the section, followed by
-    improvements, followed by bug fixes.
+
+New Features
+------------
+
+.. amalgamate:: Indirect/New_features
+
+Bugfixes
+--------
+
+.. amalgamate:: Indirect/Bugfixes
+
+Algorithms
+----------
+
+New Features
+############
+
+.. amalgamate:: Indirect/Algorithms/New_features
+
+Bugfixes
+########
+
+.. amalgamate:: Indirect/Algorithms/Bugfixes
+
 
 :ref:`Release 6.4.0 <v6.4.0>`
-
-
-Changes
-#######
-
-- In Indirect Data analysis the button for fitting the currently plotted spectra has been renamed and rescaled to fit the interface.

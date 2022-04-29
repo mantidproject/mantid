@@ -83,7 +83,7 @@ LeBailFunction::LeBailFunction(const std::string &peaktype) {
 //----------------------------------------------------------------------------------------------
 /** Destructor
  */
-LeBailFunction::~LeBailFunction() {}
+LeBailFunction::~LeBailFunction() = default;
 
 //----------------------------------------------------------------------------------------------
 /** Return the composite function

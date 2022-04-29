@@ -178,6 +178,6 @@ private:
 
   public:
     TestablePoldiAnalyseResiduals() : PoldiAnalyseResiduals() {}
-    ~TestablePoldiAnalyseResiduals() override {}
+    ~TestablePoldiAnalyseResiduals() override = default;
   };
 };

@@ -46,13 +46,11 @@ DECLARE_DIALOG(FitDialog)
  * with the followin rule InputWorkspace_[domainIndex]
  */
 InputWorkspaceWidget::InputWorkspaceWidget(FitDialog *parent, int domainIndex)
-    : QWidget(parent), m_fitDialog(parent), m_domainIndex(domainIndex), m_dynamicProperties(nullptr) {
-  m_wsPropName = "InputWorkspace";
+    : QWidget(parent), m_fitDialog(parent), m_domainIndex(domainIndex), m_wsPropName("InputWorkspace"),
+      m_workspaceName(new QComboBox(this)), m_dynamicProperties(nullptr), m_layout(new QVBoxLayout(this)) {
   if (domainIndex > 0) {
     m_wsPropName += "_" + QString::number(domainIndex);
   }
-  m_layout = new QVBoxLayout(this);
-  m_workspaceName = new QComboBox(this);
   m_layout->addWidget(m_workspaceName);
 
   QStringList allowedValues = getAllowedPropertyValues(m_wsPropName);

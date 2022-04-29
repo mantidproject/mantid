@@ -48,7 +48,6 @@ PostprocessingAlgorithm::PostprocessingAlgorithm(const QString &name, const QStr
 PostprocessingAlgorithm::PostprocessingAlgorithm() : m_prefix(), m_inputProp(), m_outputProp() {}
 
 // Destructor
-PostprocessingAlgorithm::~PostprocessingAlgorithm() {}
 
 // Returns the name of the input workspace property
 QString PostprocessingAlgorithm::inputProperty() const { return m_inputProp; }

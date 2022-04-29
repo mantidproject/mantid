@@ -24,7 +24,7 @@ namespace DataHandling {
     @author Martyn Gigg, Tessella Support Services plc
     @date 13/03/2009
 */
-class DLLExport CreateSampleShape : public API::Algorithm {
+class DLLExport CreateSampleShape final : public API::Algorithm {
 public:
   static void setSampleShape(API::ExperimentInfo &expt, const std::string &shapeXML);
 

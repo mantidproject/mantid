@@ -15,13 +15,55 @@ Concepts
 Algorithms
 ----------
 
+New Features
+############
+
+.. amalgamate:: Framework/Algorithms/New_features
+
+Bugfixes
+########
+
+.. amalgamate:: Framework/Algorithms/Bugfixes
+
 Data Objects
 ------------
+
+New Features
+############
+
+.. amalgamate:: Framework/Data_Objects/New_features
+
+Bugfixes
+########
+
+.. amalgamate:: Framework/Data_Objects/Bugfixes
+
+Fit Functions
+-------------
+
+New Features
+############
+
+.. amalgamate:: Framework/Fit_Functions/New_features
+
+Bugfixes
+########
+
+.. amalgamate:: Framework/Fit_Functions/Bugfixes
+
 
 Python
 ------
 
-- Added possibility to forward log messages to Python, see :ref:`mantid.utils.logging.log_to_python`.
+New Features
+############
+
+.. amalgamate:: Framework/Python/New_features
+
+Bugfixes
+########
+
+.. amalgamate:: Framework/Python/Bugfixes
 
 Installation
 ------------
@@ -31,13 +73,5 @@ MantidWorkbench
 
 See :doc:`mantidworkbench`.
 
-SliceViewer
------------
-
-Improvements
-############
-
-Bugfixes
-########
 
 :ref:`Release 6.4.0 <v6.4.0>`

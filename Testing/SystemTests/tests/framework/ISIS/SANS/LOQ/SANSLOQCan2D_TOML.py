@@ -21,7 +21,7 @@ class SANSLOQCan2DTest_TOML(systemtesting.MantidSystemTest):
         LOQ()
         Set2D()
         Detector("main-detector-bank")
-        MaskFile('MASK_094AA.TOML')
+        MaskFile('MASK_094AA.toml')
         # apply some small artificial shift
         SetDetectorOffsets('REAR', -1.0, 1.0, 0.0, 0.0, 0.0, 0.0)
         Gravity(True)

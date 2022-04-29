@@ -14,6 +14,7 @@
 #include "GUI/Save/ISavePresenter.h"
 #include "IBatchView.h"
 #include "MantidQtWidgets/Common/HelpWindow.h"
+#include "MantidQtWidgets/Common/IMessageHandler.h"
 #include <memory>
 
 namespace MantidQt::CustomInterfaces::ISISReflectometry {
@@ -32,18 +33,19 @@ using API::IConfiguredAlgorithm_sptr;
  * presenter
  * @param savePresenter :: [input] A pointer to the 'Save ASCII' tab presenter
  */
-BatchPresenter::BatchPresenter(IBatchView *view, std::unique_ptr<Batch> model, IJobRunner *jobRunner,
+BatchPresenter::BatchPresenter(IBatchView *view, std::unique_ptr<IBatch> model, IJobRunner *jobRunner,
                                std::unique_ptr<IRunsPresenter> runsPresenter,
                                std::unique_ptr<IEventPresenter> eventPresenter,
                                std::unique_ptr<IExperimentPresenter> experimentPresenter,
                                std::unique_ptr<IInstrumentPresenter> instrumentPresenter,
                                std::unique_ptr<ISavePresenter> savePresenter,
-                               std::unique_ptr<IPreviewPresenter> previewPresenter)
+                               std::unique_ptr<IPreviewPresenter> previewPresenter,
+                               MantidQt::MantidWidgets::IMessageHandler *messageHandler)
     : m_view(view), m_model(std::move(model)), m_mainPresenter(), m_runsPresenter(std::move(runsPresenter)),
       m_eventPresenter(std::move(eventPresenter)), m_experimentPresenter(std::move(experimentPresenter)),
       m_instrumentPresenter(std::move(instrumentPresenter)), m_savePresenter(std::move(savePresenter)),
       m_previewPresenter(std::move(previewPresenter)), m_unsavedBatchFlag(false), m_jobRunner(jobRunner),
-      m_jobManager(new BatchJobManager(*m_model)) {
+      m_messageHandler(messageHandler), m_jobManager(std::make_unique<BatchJobManager>(*m_model)) {
 
   m_jobRunner->subscribe(this);
 
@@ -100,6 +102,7 @@ void BatchPresenter::notifyBatchComplete(bool error) {
   // Continue processing the next batch of algorithms, if there is more to do
   auto algorithms = m_jobManager->getAlgorithms();
   if (algorithms.size() > 0) {
+    notifyReductionResumed();
     startBatch(std::move(algorithms));
     return;
   }
@@ -119,8 +122,7 @@ void BatchPresenter::notifyAlgorithmStarted(IConfiguredAlgorithm_sptr &algorithm
     return;
   }
   m_jobManager->algorithmStarted(algorithm);
-  m_runsPresenter->notifyRowOutputsChanged(item.value());
-  m_runsPresenter->notifyRowStateChanged(item.value());
+  m_runsPresenter->notifyRowModelChanged(item.value());
 }
 
 void BatchPresenter::notifyAlgorithmComplete(IConfiguredAlgorithm_sptr &algorithm) {
@@ -129,8 +131,7 @@ void BatchPresenter::notifyAlgorithmComplete(IConfiguredAlgorithm_sptr &algorith
     return;
   }
   m_jobManager->algorithmComplete(algorithm);
-  m_runsPresenter->notifyRowOutputsChanged(item.value());
-  m_runsPresenter->notifyRowStateChanged(item.value());
+  m_runsPresenter->notifyRowModelChanged(item.value());
   /// TODO Longer term it would probably be better if algorithms took care
   /// of saving their outputs so we could remove this callback
   if (m_savePresenter->shouldAutosave()) {
@@ -145,8 +146,7 @@ void BatchPresenter::notifyAlgorithmError(IConfiguredAlgorithm_sptr algorithm, s
     return;
   }
   m_jobManager->algorithmError(algorithm, message);
-  m_runsPresenter->notifyRowOutputsChanged(item.value());
-  m_runsPresenter->notifyRowStateChanged(item.value());
+  m_runsPresenter->notifyRowModelChanged(item.value());
 }
 
 /** Start processing the next batch of algorithms.
@@ -160,6 +160,12 @@ bool BatchPresenter::startBatch(std::deque<IConfiguredAlgorithm_sptr> algorithms
 }
 
 void BatchPresenter::resumeReduction() {
+  if (!m_experimentPresenter->hasValidSettings()) {
+    m_messageHandler->giveUserCritical(
+        "One or more of the experiment settings is invalid. Please check the Experiment Settings tab.",
+        "Processing Error");
+    return;
+  }
   // Update the model
   m_jobManager->notifyReductionResumed();
   // Get the algorithms to process
@@ -202,6 +208,12 @@ void BatchPresenter::notifyReductionPaused() {
 }
 
 void BatchPresenter::resumeAutoreduction() {
+  if (!m_experimentPresenter->hasValidSettings()) {
+    m_messageHandler->giveUserCritical(
+        "One or more of the experiment settings is invalid. Please check the Experiment Settings tab.",
+        "Processing Error");
+    return;
+  }
   // Update the model first to ensure the autoprocessing flag is set
   m_jobManager->notifyAutoreductionResumed();
   // The runs presenter starts autoreduction. This sets off a search to find
@@ -260,12 +272,17 @@ void BatchPresenter::notifyAnyBatchAutoreductionPaused() { m_runsPresenter->noti
 
 void BatchPresenter::notifyBatchLoaded() { m_runsPresenter->notifyBatchLoaded(); }
 
+void BatchPresenter::notifyRowContentChanged(Row &changedRow) { m_model->updateLookupIndex(changedRow); }
+
+void BatchPresenter::notifyGroupNameChanged(Group &changedGroup) { m_model->updateLookupIndexesOfGroup(changedGroup); }
+
 Mantid::Geometry::Instrument_const_sptr BatchPresenter::instrument() const { return m_mainPresenter->instrument(); }
 
 std::string BatchPresenter::instrumentName() const { return m_mainPresenter->instrumentName(); }
 
 void BatchPresenter::settingsChanged() {
   setBatchUnsaved();
+  m_model->updateLookupIndexesOfTable();
   m_runsPresenter->settingsChanged();
 }
 
@@ -327,19 +344,16 @@ std::unique_ptr<MantidQt::API::IAlgorithmRuntimeProps> BatchPresenter::rowProces
 
 void BatchPresenter::postDeleteHandle(const std::string &wsName) {
   auto const item = m_jobManager->notifyWorkspaceDeleted(wsName);
-  m_runsPresenter->notifyRowOutputsChanged(item);
-  m_runsPresenter->notifyRowStateChanged(item);
+  m_runsPresenter->notifyRowModelChanged(item);
 }
 
 void BatchPresenter::renameHandle(const std::string &oldName, const std::string &newName) {
   auto const item = m_jobManager->notifyWorkspaceRenamed(oldName, newName);
-  m_runsPresenter->notifyRowOutputsChanged(item);
-  m_runsPresenter->notifyRowStateChanged(item);
+  m_runsPresenter->notifyRowModelChanged(item);
 }
 
 void BatchPresenter::clearADSHandle() {
   m_jobManager->notifyAllWorkspacesDeleted();
-  m_runsPresenter->notifyRowOutputsChanged();
-  m_runsPresenter->notifyRowStateChanged();
+  m_runsPresenter->notifyRowModelChanged();
 }
 } // namespace MantidQt::CustomInterfaces::ISISReflectometry

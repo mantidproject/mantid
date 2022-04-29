@@ -92,7 +92,7 @@ WorkspaceTreeWidget::WorkspaceTreeWidget(MantidDisplayBase *mdb, bool viewOnly, 
     hideButtonToolbar();
 }
 
-WorkspaceTreeWidget::~WorkspaceTreeWidget() {}
+WorkspaceTreeWidget::~WorkspaceTreeWidget() = default;
 
 /**
  * Accept a drag drop event and process the data appropriately

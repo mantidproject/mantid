@@ -188,7 +188,7 @@ void AnvredCorrection::exec() {
   // Loop over the spectra
   PARALLEL_FOR_IF(Kernel::threadSafe(*m_inputWS, *correctionFactors))
   for (int64_t i = 0; i < int64_t(numHists); ++i) {
-    PARALLEL_START_INTERUPT_REGION
+    PARALLEL_START_INTERRUPT_REGION
 
     // If no detector is found, skip onto the next spectrum
     if (!spectrumInfo.hasDetectors(i) || spectrumInfo.isMonitor(i))
@@ -235,13 +235,13 @@ void AnvredCorrection::exec() {
       if (m_returnTransmissionOnly) {
         Y[j] = 1.0 / this->getEventWeight(lambda, scattering, muRTooLarge);
       } else {
-        double value = this->getEventWeight(lambda, scattering, muRTooLarge);
-
+        const auto eventWeight = this->getEventWeight(lambda, scattering, muRTooLarge);
+        double scaleFactor(eventWeight);
         if (m_useScaleFactors)
-          scale_exec(bankName, lambda, depth, inst, pathlength, value);
+          scaleFactor = scale_exec(bankName, lambda, depth, inst, pathlength, eventWeight);
 
-        Y[j] = Yin[j] * value;
-        E[j] = Ein[j] * value;
+        Y[j] = Yin[j] * scaleFactor;
+        E[j] = Ein[j] * scaleFactor;
       }
     }
 
@@ -252,9 +252,9 @@ void AnvredCorrection::exec() {
 
     prog.report();
 
-    PARALLEL_END_INTERUPT_REGION
+    PARALLEL_END_INTERRUPT_REGION
   }
-  PARALLEL_CHECK_INTERUPT_REGION
+  PARALLEL_CHECK_INTERRUPT_REGION
 
   // set the absorption correction values in the run parameters
   API::Run &run = correctionFactors->mutableRun();
@@ -289,7 +289,7 @@ void AnvredCorrection::execEvent() {
   // Loop over the spectra
   PARALLEL_FOR_IF(Kernel::threadSafe(*eventW, *correctionFactors))
   for (int64_t i = 0; i < int64_t(numHists); ++i) {
-    PARALLEL_START_INTERUPT_REGION
+    PARALLEL_START_INTERRUPT_REGION
 
     // share bin boundaries, and leave Y and E nullptr
     correctionFactors->setHistogram(i, eventW->binEdges(i));
@@ -350,9 +350,9 @@ void AnvredCorrection::execEvent() {
 
     prog.report();
 
-    PARALLEL_END_INTERUPT_REGION
+    PARALLEL_END_INTERRUPT_REGION
   }
-  PARALLEL_CHECK_INTERUPT_REGION
+  PARALLEL_CHECK_INTERRUPT_REGION
 
   // set the absorption correction values in the run parameters
   API::Run &run = correctionFactors->mutableRun();
@@ -558,17 +558,19 @@ void AnvredCorrection::scale_init(const Instrument_const_sptr &inst, const doubl
   pathlength = depth / cosA;
 }
 
-void AnvredCorrection::scale_exec(std::string &bankName, const double lambda, const double depth,
-                                  const Instrument_const_sptr &inst, const double pathlength, double value) {
+double AnvredCorrection::scale_exec(std::string &bankName, const double lambda, const double depth,
+                                    const Instrument_const_sptr &inst, const double pathlength, double eventWeight) {
   // correct for the slant path throught the scintillator glass
-  double mu = (9.614 * lambda) + 0.266;            // mu for GS20 glass
-  double eff_center = 1.0 - std::exp(-mu * depth); // efficiency at center of detector
-  double eff_R = 1.0 - exp(-mu * pathlength);      // efficiency at point R
-  value *= eff_center / eff_R;                     // slant path efficiency ratio
+  const double mu = (9.614 * lambda) + 0.266;            // mu for GS20 glass
+  const double eff_center = 1.0 - std::exp(-mu * depth); // efficiency at center of detector
+  const double eff_R = 1.0 - exp(-mu * pathlength);      // efficiency at point R
+  double scaleFactor(eventWeight * eff_center / eff_R);  // slant path efficiency ratio
   // Take out the "bank" part of the bank name
   bankName.erase(remove_if(bankName.begin(), bankName.end(), std::not_fn(::isdigit)), bankName.end());
   if (inst->hasParameter("detScale" + bankName))
-    value *= static_cast<double>(inst->getNumberParameter("detScale" + bankName)[0]);
+    scaleFactor *= static_cast<double>(inst->getNumberParameter("detScale" + bankName)[0]);
+
+  return scaleFactor;
 }
 
 } // namespace Mantid::Crystal

@@ -377,7 +377,7 @@ class GroupingTablePresenterTest(unittest.TestCase):
 
         valid = self.presenter.validate_periods('1-5')
 
-        self.assertEquals(RowValid.invalid_for_all_runs, valid)
+        self.assertEqual(RowValid.invalid_for_all_runs, valid)
 
     def test_that_period_valid_for_at_least_one_run_returns_valid(self):
         self.presenter._model._context = mock.MagicMock()
@@ -386,12 +386,12 @@ class GroupingTablePresenterTest(unittest.TestCase):
 
         valid = self.presenter.validate_periods('1-4')
 
-        self.assertEquals(RowValid.valid_for_some_runs, valid)
+        self.assertEqual(RowValid.valid_for_some_runs, valid)
 
     def test_that_period_string_containing_not_matching_run_entry_regex_returns_invalid(self):
         valid = self.presenter.validate_periods('Invalid string')
 
-        self.assertEquals(RowValid.invalid_for_all_runs, valid)
+        self.assertEqual(RowValid.invalid_for_all_runs, valid)
 
     def _fake_num_periods(self, run):
         num_periods_dict = {'[84447]': 4, '[84448]': 4, '[84449]': 4, '[84450]':2, '[84451]' :1}
@@ -401,7 +401,7 @@ class GroupingTablePresenterTest(unittest.TestCase):
         self.presenter.add_group(MuonGroup(group_name='group_1', detector_ids=[1,2,3,4]))
         self.presenter.add_group(MuonGroup(group_name='group_2', detector_ids=[1,2,3,4]))
 
-        self.assertEquals(self.model.selected_groups, ['group_1'])
+        self.assertEqual(self.model.selected_groups, ['group_1'])
 
     def test_update_view_from_model_correctly_adds_warnings_for_invalid_periods(self):
         self.presenter._model.validate_periods_list = mock.MagicMock(return_value=RowValid.invalid_for_all_runs)

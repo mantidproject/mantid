@@ -17,7 +17,7 @@ namespace Algorithms {
   Removes all algorithm history records from the workspace history attached to a
   workspace.
 */
-class MANTID_ALGORITHMS_DLL RemoveWorkspaceHistory : public API::Algorithm {
+class MANTID_ALGORITHMS_DLL RemoveWorkspaceHistory final : public API::Algorithm {
 public:
   const std::string name() const override;
   const std::string summary() const override;

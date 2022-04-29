@@ -15,6 +15,7 @@ from qtpy.QtGui import QColor, QFont, QFontMetrics
 from qtpy.QtWidgets import QFileDialog, QMessageBox, QStatusBar, QVBoxLayout, QWidget
 
 from mantidqt.io import open_a_file_dialog
+from mantid.kernel import config
 from mantidqt.widgets.codeeditor.codecommenter import CodeCommenter
 from mantidqt.widgets.codeeditor.completion import CodeCompleter
 from mantidqt.widgets.codeeditor.editor import CodeEditor
@@ -42,7 +43,8 @@ class EditorIO(object):
 
     def ask_for_filename(self):
         filename = open_a_file_dialog(parent=self.editor, default_suffix=".py", file_filter="Python Files (*.py)",
-                                      accept_mode=QFileDialog.AcceptSave, file_mode=QFileDialog.AnyFile)
+                                      accept_mode=QFileDialog.AcceptSave, file_mode=QFileDialog.AnyFile,
+                                      directory=config["defaultsave.directory"])
         if filename is not None and os.path.isdir(filename):
             # Set value to None as, we do not want to be saving a directory, it is possible to receive a directory
             filename = None

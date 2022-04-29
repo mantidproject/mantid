@@ -20,7 +20,7 @@ namespace MDAlgorithms {
  * @author Janik Zikovsky
  * @date 2011-06-01
  */
-class DLLExport CentroidPeaksMD2 : public API::Algorithm {
+class DLLExport CentroidPeaksMD2 final : public API::Algorithm {
 public:
   /// Algorithm's name for identification
   const std::string name() const override { return "CentroidPeaksMD"; };
