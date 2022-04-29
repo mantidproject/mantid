@@ -38,6 +38,109 @@
       <property name="sizeConstraint">
        <enum>QLayout::SetDefaultConstraint</enum>
       </property>
+      <item row="5" column="7">
+       <widget class="QPushButton" name="pB_file_script">
+        <property name="enabled">
+         <bool>false</bool>
+        </property>
+        <property name="text">
+         <string>Browse</string>
+        </property>
+       </widget>
+      </item>
+      <item row="3" column="1">
+       <widget class="QLineEdit" name="lE_data_dir">
+        <property name="enabled">
+         <bool>true</bool>
+        </property>
+        <property name="minimumSize">
+         <size>
+          <width>0</width>
+          <height>0</height>
+         </size>
+        </property>
+       </widget>
+      </item>
+      <item row="7" column="5">
+       <widget class="QLabel" name="l_prop_nb">
+        <property name="text">
+         <string>Proposal Number</string>
+        </property>
+       </widget>
+      </item>
+      <item row="3" column="5">
+       <widget class="QLabel" name="l_psd_dir">
+        <property name="text">
+         <string>PSD Directory</string>
+        </property>
+       </widget>
+      </item>
+      <item row="5" column="6">
+       <widget class="QLineEdit" name="lE_script_dir">
+        <property name="enabled">
+         <bool>false</bool>
+        </property>
+        <property name="readOnly">
+         <bool>false</bool>
+        </property>
+       </widget>
+      </item>
+      <item row="3" column="0">
+       <widget class="QLabel" name="l_data_dir">
+        <property name="text">
+         <string>Data Directory</string>
+        </property>
+       </widget>
+      </item>
+      <item row="7" column="6">
+       <widget class="QLineEdit" name="lE_prop_nb">
+        <property name="enabled">
+         <bool>false</bool>
+        </property>
+        <property name="toolTip">
+         <string>filled out automatically from first file found in data path</string>
+        </property>
+        <property name="statusTip">
+         <string/>
+        </property>
+        <property name="inputMask">
+         <string/>
+        </property>
+        <property name="maxLength">
+         <number>20</number>
+        </property>
+        <property name="frame">
+         <bool>true</bool>
+        </property>
+        <property name="readOnly">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+      <item row="3" column="3">
+       <widget class="QPushButton" name="pB_file_data">
+        <property name="text">
+         <string>Browse</string>
+        </property>
+       </widget>
+      </item>
+      <item row="3" column="7">
+       <widget class="QPushButton" name="pB_file_psd">
+        <property name="enabled">
+         <bool>false</bool>
+        </property>
+        <property name="text">
+         <string>Browse</string>
+        </property>
+       </widget>
+      </item>
+      <item row="5" column="5">
+       <widget class="QLabel" name="label">
+        <property name="text">
+         <string>Script Directory</string>
+        </property>
+       </widget>
+      </item>
       <item row="3" column="2">
        <widget class="QLabel" name="I_data_dir_req">
         <property name="palette">
@@ -91,14 +194,31 @@
         </property>
        </widget>
       </item>
-      <item row="5" column="5">
+      <item row="3" column="6">
+       <widget class="QLineEdit" name="lE_psd_dir">
+        <property name="enabled">
+         <bool>false</bool>
+        </property>
+        <property name="readOnly">
+         <bool>false</bool>
+        </property>
+       </widget>
+      </item>
+      <item row="6" column="5">
        <widget class="QLabel" name="l_user">
         <property name="text">
          <string>User</string>
         </property>
        </widget>
       </item>
-      <item row="5" column="6">
+      <item row="7" column="0">
+       <widget class="QPushButton" name="pB_clear_cache">
+        <property name="text">
+         <string>Clear Cached</string>
+        </property>
+       </widget>
+      </item>
+      <item row="6" column="6">
        <widget class="QLineEdit" name="lE_user">
         <property name="enabled">
          <bool>false</bool>
@@ -111,113 +231,13 @@
         </property>
        </widget>
       </item>
-      <item row="3" column="6">
-       <widget class="QLineEdit" name="lE_psd_dir"/>
-      </item>
-      <item row="6" column="0">
-       <widget class="QPushButton" name="pB_clear_cache">
+      <item row="4" column="1">
+       <widget class="QCheckBox" name="cB_auto_set_other_dir">
         <property name="text">
-         <string>Clear Cached</string>
+         <string>Automatically set other directories</string>
         </property>
-       </widget>
-      </item>
-      <item row="3" column="5">
-       <widget class="QLabel" name="l_psd_dir">
-        <property name="text">
-         <string>PSD Directory</string>
-        </property>
-       </widget>
-      </item>
-      <item row="4" column="6">
-       <widget class="QLineEdit" name="lE_script_dir"/>
-      </item>
-      <item row="3" column="0">
-       <widget class="QLabel" name="l_data_dir">
-        <property name="text">
-         <string>Data Directory</string>
-        </property>
-       </widget>
-      </item>
-      <item row="5" column="0">
-       <widget class="QPushButton" name="pB_clear">
-        <property name="text">
-         <string>Clear Directories</string>
-        </property>
-       </widget>
-      </item>
-      <item row="6" column="6">
-       <widget class="QLineEdit" name="lE_prop_nb">
-        <property name="enabled">
-         <bool>false</bool>
-        </property>
-        <property name="toolTip">
-         <string>filled out automatically from first file found in data path</string>
-        </property>
-        <property name="statusTip">
-         <string/>
-        </property>
-        <property name="inputMask">
-         <string/>
-        </property>
-        <property name="maxLength">
-         <number>20</number>
-        </property>
-        <property name="frame">
+        <property name="checked">
          <bool>true</bool>
-        </property>
-        <property name="readOnly">
-         <bool>true</bool>
-        </property>
-       </widget>
-      </item>
-      <item row="4" column="5">
-       <widget class="QLabel" name="label">
-        <property name="text">
-         <string>Script Directory</string>
-        </property>
-       </widget>
-      </item>
-      <item row="3" column="3">
-       <widget class="QPushButton" name="pB_file_data">
-        <property name="text">
-         <string>Browse</string>
-        </property>
-       </widget>
-      </item>
-      <item row="3" column="7">
-       <widget class="QPushButton" name="pB_file_psd">
-        <property name="text">
-         <string>Browse</string>
-        </property>
-       </widget>
-      </item>
-      <item row="6" column="5">
-       <widget class="QLabel" name="l_prop_nb">
-        <property name="text">
-         <string>Proposal Number</string>
-        </property>
-       </widget>
-      </item>
-      <item row="4" column="7">
-       <widget class="QPushButton" name="pB_file_script">
-        <property name="enabled">
-         <bool>true</bool>
-        </property>
-        <property name="text">
-         <string>Browse</string>
-        </property>
-       </widget>
-      </item>
-      <item row="3" column="1">
-       <widget class="QLineEdit" name="lE_data_dir">
-        <property name="enabled">
-         <bool>true</bool>
-        </property>
-        <property name="minimumSize">
-         <size>
-          <width>0</width>
-          <height>0</height>
-         </size>
         </property>
        </widget>
       </item>
@@ -245,13 +265,20 @@
       </item>
       <item row="0" column="2">
        <widget class="QPushButton" name="pB_file_standards">
+        <property name="enabled">
+         <bool>false</bool>
+        </property>
         <property name="text">
          <string>Browse</string>
         </property>
        </widget>
       </item>
       <item row="0" column="1">
-       <widget class="QLineEdit" name="lE_standards_dir"/>
+       <widget class="QLineEdit" name="lE_standards_dir">
+        <property name="enabled">
+         <bool>false</bool>
+        </property>
+       </widget>
       </item>
      </layout>
     </widget>
@@ -266,7 +293,11 @@
      </property>
      <layout class="QGridLayout" name="gridLayout_3">
       <item row="0" column="1">
-       <widget class="QLineEdit" name="lE_export_dir"/>
+       <widget class="QLineEdit" name="lE_export_dir">
+        <property name="enabled">
+         <bool>false</bool>
+        </property>
+       </widget>
       </item>
       <item row="2" column="0" colspan="3">
        <layout class="QHBoxLayout" name="horizontalLayout">
@@ -304,6 +335,9 @@
       </item>
       <item row="0" column="2">
        <widget class="QPushButton" name="pB_export">
+        <property name="enabled">
+         <bool>false</bool>
+        </property>
         <property name="text">
          <string>Browse</string>
         </property>

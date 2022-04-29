@@ -36,14 +36,16 @@ class DNSPathView(DNSView):
             'nexus': self._content.cB_nexus,
             'ascii': self._content.cB_ascii,
             'export': self._content.gB_export,
+            'auto_set_other_dir': self._content.cB_auto_set_other_dir,
         }
 
         # connect signals
+        self._content.cB_auto_set_other_dir.stateChanged.connect(
+            self._toggle_editable_directories)
         self._content.pB_file_data.clicked.connect(self._file_dialog)
         self._content.pB_file_psd.clicked.connect(self._file_dialog)
         self._content.pB_file_standards.clicked.connect(self._file_dialog)
         self._content.pB_file_script.clicked.connect(self._file_dialog)
-        self._content.pB_clear.clicked.connect(self._clear_directories)
         self._content.pB_export.clicked.connect(self._file_dialog)
         self._content.pB_clear_cache.clicked.connect(self._clear_cache)
 
@@ -69,14 +71,16 @@ class DNSPathView(DNSView):
     def _clear_cache(self):
         self.sig_clear_cache.emit()
 
-    def _clear_directories(self):
-        self.set_user('')
-        self.set_prop_number('')
-        self.set_path('data_dir', '')
-        self.set_path('standards_dir', '')
-        self.set_path('script_dir', '')
-        self.set_path('psd_dir', '')
-        self.set_path('export_dir', '')
+    def _toggle_editable_directories(self):
+        state = not self._map['auto_set_other_dir'].checkState()
+        self._map['standards_dir'].setEnabled(state)
+        self._map['script_dir'].setEnabled(state)
+        self._map['psd_dir'].setEnabled(state)
+        self._map['export_dir'].setEnabled(state)
+        self._content.pB_file_psd.setEnabled(state)
+        self._content.pB_file_standards.setEnabled(state)
+        self._content.pB_file_script.setEnabled(state)
+        self._content.pB_export.setEnabled(state)
 
     def get_path(self, path_type):
         return self._map[path_type].text()

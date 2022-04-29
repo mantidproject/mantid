@@ -28,6 +28,7 @@ class DNSPathPresenterTest(unittest.TestCase):
         cls.view = mock.create_autospec(DNSPathView)
         cls.model = mock.create_autospec(DNSPathModel)
         # view signals
+
         cls.view.sig_data_path_set = mock.Mock(return_value='dummypath')
         cls.view.sig_clear_cache = mock.Mock()
         cls.view.sig_file_dialog_requested = mock.Mock(return_value='data')
@@ -55,9 +56,14 @@ class DNSPathPresenterTest(unittest.TestCase):
         self.model.get_current_directory.assert_called()
 
     def test_data_path_set(self):
+        self.view.get_state.return_value = {'auto_set_other_dir': True}
         self.presenter._data_path_set(dir_name='C:/test')
         self.assertEqual(self.view.set_path.call_count, 4)
         self.view.set_path.assert_called_with('export_dir', 'C:/test/export')
+        self.view.set_path.reset_mock()
+        self.view.get_state.return_value = {'auto_set_other_dir': False}
+        self.presenter._data_path_set(dir_name='C:/test')
+        self.view.set_path.assert_not_called()
 
     def test_set_user_prop_from_datafile(self):
         self.presenter._set_user_prop_from_datafile(dir_name='C:/test')
