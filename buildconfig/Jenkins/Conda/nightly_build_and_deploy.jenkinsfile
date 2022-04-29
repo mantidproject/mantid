@@ -13,6 +13,12 @@ def build_and_test_win(cmake_preset) {
     bat "\"${WIN_BASH}\" -ex -c \"${WORKSPACE_UNIX_PATH}/buildconfig/Jenkins/Conda/conda-buildscript ${WORKSPACE_UNIX_PATH} ${cmake_preset} --enable-systemtests --clean-build --clean-external-projects\""
 }
 
+def publish_test_reports() {
+    xunit thresholds: [failed(failureThreshold: '0')],
+        tools: [CTest(excludesPattern: '', pattern: 'build/Testing/**/*.xml', stopProcessingIfError: true)]
+    junit "build/Testing/SystemTests/scripts/TEST-*.xml"
+}
+
 def conda_build_unix(arch) {
     sh "rm -rf ${CONDA_BLD_PATH}"
     sh "${WORKSPACE}/buildconfig/Jenkins/Conda/conda-build-recipes ${WORKSPACE} --build-mantid --build-qt --build-workbench"
@@ -45,6 +51,11 @@ pipeline {
                     steps {
                         build_and_test_unix("linux-ci")
                     }
+                    post {
+                        always {
+                            publish_test_reports()
+                        }
+                    }
                 }
                 stage('platform: windows') {
                     agent { label 'win-build' }
@@ -52,11 +63,21 @@ pipeline {
                         script { WORKSPACE_UNIX_PATH = "${WORKSPACE}".replaceAll("\\\\", "/") }
                         build_and_test_win("win")
                     }
+                    post {
+                        always {
+                            publish_test_reports()
+                        }
+                    }
                 }
                 stage('platform: macos') {
                     agent { label 'conda-build-osx' }
                     steps {
                         build_and_test_unix("osx-ci")
+                    }
+                    post {
+                        always {
+                            publish_test_reports()
+                        }
                     }
                 }
             }
