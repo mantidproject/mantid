@@ -52,7 +52,6 @@ The process for how to run a benchmark is explained extensively in the `FitBench
   software: mantid
 
   num_runs: 1
-  max_runtime: 600
 
   [MINIMIZERS]
 
@@ -64,10 +63,6 @@ The process for how to run a benchmark is explained extensively in the `FitBench
 
   make_plots: yes
 
-  [OUTPUT]
-
-  results_dir: benchmark_results/
-
   [LOGGING]
 
   external_output: log_only
@@ -78,14 +73,14 @@ The process for how to run a benchmark is explained extensively in the `FitBench
 
 .. code-block:: sh
 
-  fitbenchmarking -o fitting_options.ini -p examples/benchmark_problems/Muon
+  fitbenchmarking -o fitting_options.ini -p examples/benchmark_problems/Muon -r benchmark_results/
 
-When the benchmark is complete, it should open a browser which contains the results. You should read the FitBenchmarking documentation if you need help with how to interpret these results.
+When the benchmark is complete, it should open a browser which contains the results. You should read the FitBenchmarking documentation if you need help with how to interpret these results. The results will also be stored in a folder specified by the ``-r`` flag.
 
 Tips
 ####
 
 * Make sure your terminal or command prompt is open in the correct location and has the virtual environment activated when running your benchmark.
 * It might be necessary to pip install some addition packages if you see errors when running a benchmark: ``pip install 'h5py>=2.10.0,<3' && pip install 'pyyaml>=5.4.1'``.
-* Each time your run the benchmark, the old results will be overwritten unless you change the ``results_dir`` option in the ``*ini`` file.
+* Each time your run the benchmark, the old results will be overwritten unless you change the ``-r`` flag when running the ``fitbenchmarking`` command.
 * To do a benchmark of the changes made in a Pull Request, you can tell Jenkins to build an unstable package, and then you can install this locally. When creating your benchmark environment, you would then use the python.exe found in the Mantid unstable install directory.
