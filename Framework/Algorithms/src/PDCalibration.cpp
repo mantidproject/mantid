@@ -1295,9 +1295,8 @@ API::MatrixWorkspace_sptr PDCalibration::calculateResolutionTable() {
       const double mean =
           std::accumulate(resolution.begin(), resolution.end(), 0.) / static_cast<double>(resolution.size());
       double stddev = 0.;
-      for (const auto value : resolution) {
-        stddev += (value - mean) * (value * mean);
-      }
+      std::for_each(resolution.cbegin(), resolution.cend(),
+                    [&stddev, mean](const auto value) { stddev += (value - mean) * (value * mean); });
       stddev = std::sqrt(stddev / static_cast<double>(resolution.size() - 1));
       resolutionWksp->setValue(detId, mean, stddev);
     }
