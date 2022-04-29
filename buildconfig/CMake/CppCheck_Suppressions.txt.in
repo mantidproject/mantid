@@ -98,8 +98,6 @@ constParameter:${CMAKE_SOURCE_DIR}/Framework/API/inc/MantidAPI/IFunction.h:215
 unassignedVariable:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/CorelliCalibrationDatabase.cpp:460
 stlFindInsert:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/DiffractionFocussing.cpp:78
 useStlAlgorithm:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/DiffractionFocussing2.cpp:632
-useStlAlgorithm:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/FitPeak.cpp:1457
-useStlAlgorithm:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/FitPeak.cpp:1466
 nullPointer:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/FitPeaks.cpp:1644
 nullPointer:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/FitPeaks.cpp:1956
 useStlAlgorithm:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/FitPeaks.cpp:1749
