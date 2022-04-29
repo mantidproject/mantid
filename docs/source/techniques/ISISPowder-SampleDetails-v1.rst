@@ -129,8 +129,7 @@ which is greater than 0.
 
 Example Input:
 
-..  code-block:: python
-
+cc
     sample_obj = SampleDetails(radius=5.0, ...)
 
 .. _shape-sampleDetails_isis-powder-diffraction-ref:
@@ -173,6 +172,30 @@ Example Input:
    sample_obj = SampleDetails(width=1.0, ...)
 
 .. _set_material_sample_details_isis-powder-diffraction-ref:
+
+
+Set container details
+---------------------
+
+Currently the supported container shapes are HollowCylinder (for Cylinder shaped samples)
+and FlatPlateHolder (for Slab shaped samples). These container shapes are inferred from the sample so only a few
+container parameters need to be set. These container shapes support the
+:ref:`PaalmanPingsMonteCarloAbsorption <algm-PaalmanPingsMonteCarloAbsorption>` method available when focussing.
+
+Example Input:
+
+.. code-block:: python
+
+    from isis_powder import SampleDetails
+
+    cylinder_obj = SampleDetails(height=4.0, radius=1.0, center=[0, 0, 0], shape='cylinder')
+    cylinder_obj.set_material(chemical_formula='Si')
+    cylinder_obj.set_container(radius=2.0, chemical_formula='V')
+
+    slab_obj = SampleDetails(height=4.0, width=4.0, thickness=2.0, angle=0.0, center=[0, 0, 0], shape='slab')
+    slab_obj.set_material(chemical_formula='Si')
+    slab_obj.set_container(front_thick=4.0, back_thick=4.0, chemical_formula='V')
+
 
 Setting the material
 --------------------

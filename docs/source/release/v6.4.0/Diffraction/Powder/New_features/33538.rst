@@ -1,0 +1,5 @@
+- The ISIS powder diffraction scripts support the PaalmanPings absorption correction method,
+  calling :ref:`PaalmanPingsMonteCarloAbsorption <algm-PaalmanPingsMonteCarloAbsorption>`.
+  To access it, set ``absorb_method: 'PaalmanPings'`` in the user config file.
+  Also there are new optional config settings (with their default values)
+  ``paalman_pings_events_per_point: 1000`` and ``force_recalculate_paalman_pings: False``
