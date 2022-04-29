@@ -57,7 +57,8 @@ list retrieveWorkspaces(AnalysisDataServiceImpl const *const self, const list &n
   const auto wsSharedPtrs =
       self->retrieveWorkspaces(Converters::PySequenceToVector<std::string>(names)(), unrollGroups);
   std::vector<WeakPtr> wsWeakPtrs;
-  std::transform(wsSharedPtrs.begin(), wsSharedPtrs.end(), std::back_inserter(wsWeakPtrs),
+  wsWeakPtrs.reserve(wsSharedPtrs.size());
+  std::transform(wsSharedPtrs.cbegin(), wsSharedPtrs.cend(), std::back_inserter(wsWeakPtrs),
                  [](const Workspace_sptr &wksp) -> WeakPtr { return WeakPtr(wksp); });
   return Converters::ToPyList<WeakPtr>()(wsWeakPtrs);
 }
