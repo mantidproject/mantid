@@ -36,6 +36,39 @@ Usage
 
 The algorithm requires relatively little input and can be run like this:
 
+.. testcode::
+
+    import numpy as np
+
+    # Load POLDI data
+    PoldiLoadRuns(2013, 6903, 6904, 2, OutputWorkspace='poldi', MaskBadDetectors=False)
+
+    # Create Silicon peaks
+    PoldiCreatePeaksFromCell(SpaceGroup='F d -3 m', Atoms='Si 0 0 0 1.0 0.01', a=5.431,
+                             LatticeSpacingMin=0.7,
+                             OutputWorkspace='Si')
+
+    PoldiDataAnalysis(InputWorkspace='poldi_data_6904',
+                      ExpectedPeaks='Si', PawleyFit=True,
+                      MaximumPeakNumber=8,
+                      PlotResult=False,
+                      OutputWorkspace='result')
+
+    # Take a look at the refined cell:
+
+    cell = AnalysisDataService.retrieve('poldi_data_6904_cell_refined')
+
+    cell_a = np.round(cell.cell(0, 1), 5)
+    cell_a_error = np.round(cell.cell(0, 2), 5)
+
+    print("Refined lattice parameter a = {:.5f} +/- {}".format(cell_a, cell_a_error))
+
+This will print the following output:
+
+.. testoutput::
+
+    Refined lattice parameter a = 5.43126 +/- 5e-05
+
 If PlotResult is changed to True, a plot of the spectrum and the residuals is created as described above.
 
 .. categories::

@@ -41,6 +41,28 @@ where :math:`A` is the :code:`DefaultLevel`; it is a parameter of the entropy fu
 is default-value since the maximum entropy solution with no data is :math:`f(\omega)=A` for all :math:`\omega`. The algorithm maximises
 :math:`S-\chi^2` and it is seen from the definition of :code:`Factor` above that this algorithm property acts a Lagrange multiplier, i.e. controlling the value :math:`\chi^2` converges to.
 
+
+Usage
+-----
+
+.. testcode::
+
+  # load data
+  Load(Filename='MUSR00022725.nxs', OutputWorkspace='MUSR00022725')
+  # estimate phases
+  CalMuonDetectorPhases(InputWorkspace='MUSR00022725', FirstGoodData=0.10000000000000001, LastGoodData=16, DetectorTable='phases', DataFitted='fitted', ForwardSpectra='9-16,57-64', BackwardSpectra='25-32,41-48')
+  MuonMaxent(InputWorkspace='MUSR00022725', InputPhaseTable='phases', Npts='16384', OuterIterations='9', InnerIterations='12', DefaultLevel=0.11, Factor=1.03, OutputWorkspace='freq', OutputPhaseTable='phasesOut', ReconstructedSpectra='time')
+  # get data
+  freq = AnalysisDataService.retrieve("freq")
+  print('frequency values {:.3f} {:.3f} {:.3f} {:.3f} {:.3f}'.format(freq.readY(0)[5], freq.readY(0)[690],freq.readY(0)[700], freq.readY(0)[710],freq.readY(0)[900]))
+
+Output
+######
+
+.. testoutput::
+
+  frequency values 0.110 0.789 0.871 0.821 0.105
+
 .. categories::
 
 .. sourcelink::
