@@ -60,7 +60,7 @@ class ScanExplorerView(QMainWindow):
 
         # we don't want to use model.get_ws for the image info widget as this needs
         # extra arguments depending on workspace type.
-        workspace = self.presenter.get_ws()
+        workspace = self.presenter.ws()
         workspace.readLock()
         try:
             self._data_view.image_info_widget.setWorkspace(workspace)

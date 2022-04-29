@@ -8,9 +8,15 @@
 
 from enum import Enum
 
-from mantid.api import MatrixWorkspace, MultipleExperimentInfos
+from qtpy.QtCore import QObject, Signal
+
+from mantid.api import MatrixWorkspace, MultipleExperimentInfos, AlgorithmObserver, Algorithm
 from mantidqt.widgets.sliceviewer.views.dataview import SliceViewerDataView
 from mantidqt.widgets.sliceviewer.presenters.presenter import SliceViewer
+from mantidqt.widgets.sliceviewer.presenters.lineplots import PixelLinePlot  #, RectangleSelectionLinePlot
+from mantid.kernel import logger
+from mantid.api import mtd
+
 
 from .model import ScanExplorerModel
 from .view import ScanExplorerView
@@ -31,6 +37,13 @@ class ScanExplorerPresenter:
 
         self.view.sig_files_selected.connect(self.on_files_selected)
         self.view.file_line_edit.returnPressed.connect(self.on_line_edited)
+
+        self.observer = ScanAlgorithmObserver()
+
+        self.observer.signals.finished.connect(self.on_algorithm_finished)
+        self.observer.signals.started.connect(self.set_algorithm_result_name)
+
+        self.future_workspace = None
 
     def get_dim_info(self, n: int) -> dict:
         """
@@ -91,6 +104,7 @@ class ScanExplorerPresenter:
                                                    dims_info=self.get_dimensions_info(),
                                                    can_normalise=False)
         self.view.show_slice_viewer(workspace)
+        self.view._data_view.add_line_plots(PixelLinePlot, self.view._data_view.presenter)
 
     def on_files_selected(self, files: list):
         """
@@ -99,9 +113,6 @@ class ScanExplorerPresenter:
         """
         self.view.file_line_edit.setText(', '.join(files))
 
-    def on_dialog_accepted(self):
-        pass
-
     def on_line_edited(self):
         """
         Slot triggered by the line edit being validated.
@@ -109,8 +120,71 @@ class ScanExplorerPresenter:
         files = self.view.file_line_edit.text()
         self.model.process_files(files)
 
-    def get_ws(self):
+    def on_dialog_accepted(self):
+        """
+        TODO Slot triggered when the scan dialog is accepted. That means the algorithm is also triggered, and we need to
+        fetch it to get the user's input.
+        """
+        self.observer.observeStarting()
+
+    def on_algorithm_finished(self, _, __):
+        if not mtd.doesExist(self.future_workspace):
+            logger.warning("Output workspace not found.")
+            return
+
+        self._ws = mtd[self.future_workspace]
+        self.future_workspace = None
+
+        self.create_slice_viewer(self._ws)
+
+    def set_algorithm_result_name(self, new_algorithm):
+        self.future_workspace = new_algorithm.getPropertyValue("OutputWorkspace")
+
+    @property
+    def ws(self):
         return self._ws
 
     def show(self):
         self.view.show()
+
+
+class ScanAlgorithmObserverSignals(QObject):
+    """
+    Signals for the observer
+    """
+    finished = Signal(int, str)  # return 0 for success, 1 for error, and in this case an error message
+    started = Signal(Algorithm)
+
+
+class ScanAlgorithmObserver(AlgorithmObserver):
+    def __init__(self):
+        super(ScanAlgorithmObserver, self).__init__()
+        self.signals = ScanAlgorithmObserverSignals()
+        self.error = False
+        self.error_message = ""
+
+    def startingHandle(self, alg):
+        # We are waiting for this specific algorithm, so in the off chance another is run just at the same time,
+        # we check for its name
+        if alg.name() != "SANSILLParameterScan":
+            return
+
+        self.signals.started.emit(alg)
+
+        self.observeFinish(alg)
+
+    def finishHandle(self):
+        """
+        Called when the observed algorithm is finished
+        """
+        self.signals.finished.emit(0, "ee")
+
+        # the algorithm has run, so we can stop listening for now. IF IT WOULD WORK
+        self.stopObservingManager()
+
+    def errorHandle(self, msg):
+        """
+        Called when the observed algo encounter an error.
+        """
+        self.error = True
+        self.error_message = msg
