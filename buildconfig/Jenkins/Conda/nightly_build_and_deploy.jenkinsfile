@@ -54,7 +54,7 @@ pipeline {
                     }
                 }
                 stage('platform: macos') {
-                    agent { label 'osx-10.13-build' }
+                    agent { label 'conda-build-osx' }
                     steps {
                         build_and_test_unix("osx-ci")
                     }
