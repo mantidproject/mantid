@@ -129,7 +129,8 @@ which is greater than 0.
 
 Example Input:
 
-cc
+..  code-block:: python
+
     sample_obj = SampleDetails(radius=5.0, ...)
 
 .. _shape-sampleDetails_isis-powder-diffraction-ref:

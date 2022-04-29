@@ -26,7 +26,6 @@ class Polaris(AbstractInst):
         # Hold the last dictionary later to avoid us having to keep parsing the YAML
         self._run_details_cached_obj = {}
         self._sample_details = None
-        self._container_details = None
 
     # Public API
 
