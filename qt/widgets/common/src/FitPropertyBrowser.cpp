@@ -1305,14 +1305,16 @@ void FitPropertyBrowser::intChanged(QtProperty *prop) {
     }
     m_oldWorkspaceIndex = allowedIndex;
   } else if (prop->propertyName() == "Workspace Index") {
+    // Property field from Settings. Note the white space.
     PropertyHandler *h = getHandler()->findHandler(prop);
     if (!h)
       return;
     h->setFunctionWorkspace();
   } else if (prop->propertyName() == "WorkspaceIndex") {
+    // Property field from functions. In a word.
     PropertyHandler *h = getHandler()->findHandler(prop);
     auto const index = prop->valueText().toInt();
-    if (h && index != workspaceIndex()) {
+    if (h) {
       h->setAttribute(prop);
       setWorkspaceIndex(index);
       emit workspaceIndexChanged(index);
