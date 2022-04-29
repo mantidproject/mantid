@@ -43,7 +43,6 @@ EigenMatrix::EigenMatrix(std::initializer_list<std::initializer_list<double>> il
 EigenMatrix::EigenMatrix(const EigenMatrix &M)
     : m_data(M.m_data), m_view(EigenMatrix_View(m_data.data(), M.size1(), M.size2())) {}
 
-// CHECK IF THIS WORKS
 /// Create a submatrix. A submatrix is a reference to part of the parent matrix.
 /// @param M :: The parent matrix.
 /// @param row :: The first row in the submatrix.
@@ -94,7 +93,8 @@ EigenMatrix::EigenMatrix(const Kernel::Matrix<double> &M, size_t row, size_t col
   auto temp_vec = M.getVector();
   Eigen::MatrixXd temp_matr_tr = EigenMatrix_View(temp_vec.data(), M.numCols(), M.numRows()).matrix_mutator();
   Eigen::MatrixXd temp_matr = temp_matr_tr.transpose();
-  auto temp_matr_sub_view = EigenMatrix_View(temp_matr.data(), nRows, nCols, nRows, nCols, row, col);
+  auto temp_matr_sub_view =
+      EigenMatrix_View(temp_matr.data(), temp_matr.rows(), temp_matr.cols(), nRows, nCols, row, col);
   Eigen::MatrixXd temp_matr_sub = temp_matr_sub_view.matrix_inspector();
 
   const double *p = temp_matr_sub.data();

@@ -35,7 +35,7 @@ public:
   }
 
   void test_create_from_kernel_matrix() {
-    Mantid::Kernel::Matrix<double> m(3, 10);
+    Mantid::Kernel::Matrix<double> m(3, 4);
     for (size_t i = 0; i < m.numRows(); i++) {
       for (size_t j = 0; j < m.numCols(); j++) {
         m[i][j] = j + i * m.numCols();
@@ -50,7 +50,7 @@ public:
     }
 
     // create sub matrix
-    EigenMatrix em(m, 0, 0, 3, 3);
+    EigenMatrix em(m, 0, 0, 2, 2);
     for (size_t i = 0; i < em.size1(); i++) {
       for (size_t j = 0; j < em.size2(); j++) {
         TS_ASSERT_EQUALS(em(i, j), m[i][j]);
@@ -178,6 +178,7 @@ public:
     m.set(3, 3, 33);
 
     EigenMatrix subm(m, 1, 1, 2, 2);
+
     TS_ASSERT_EQUALS(subm.get(0, 0), 11);
     TS_ASSERT_EQUALS(subm.get(0, 1), 12);
     TS_ASSERT_EQUALS(subm.get(1, 0), 21);
