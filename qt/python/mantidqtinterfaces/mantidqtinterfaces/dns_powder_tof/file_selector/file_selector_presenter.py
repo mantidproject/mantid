@@ -40,7 +40,6 @@ class DNSFileSelectorPresenter(DNSObserver):
         self.view.sig_expanded.connect(self._expanded)
 
         self.view.sig_read_all.connect(self._read_all)
-        self.view.sig_read_filtered.connect(self._read_filtered)
         self.view.sig_filters_clicked.connect(self._filter_scans)
         self.view.sig_standard_filters_clicked.connect(self._filter_standard)
         self.view.sig_check_all.connect(self._check_all_visible_scans)

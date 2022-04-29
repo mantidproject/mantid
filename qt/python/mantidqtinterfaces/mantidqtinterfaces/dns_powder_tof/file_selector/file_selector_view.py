@@ -102,7 +102,6 @@ class DNSFileSelectorView(DNSView):
 
     # signals
     sig_read_all = Signal()
-    sig_read_filtered = Signal()
     sig_filters_clicked = Signal()
 
     sig_check_all = Signal()
@@ -171,9 +170,6 @@ class DNSFileSelectorView(DNSView):
 
     def _read_all_clicked(self):
         self.sig_read_all.emit()
-
-    def _read_filtered_clicked(self):
-        self.sig_read_filtered.emit()
 
     # get states
     def get_filters(self):
