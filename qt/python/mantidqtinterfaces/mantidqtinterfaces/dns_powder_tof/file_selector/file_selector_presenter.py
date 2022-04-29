@@ -70,19 +70,9 @@ class DNSFileSelectorPresenter(DNSObserver):
         self._filter_scans()
         if self.model.get_number_of_scans() == 1:
             self.view.expand_all()
-        if not filtered:
-            self._set_start_end(fn_range)
 
         # re-adjust view to column width
         self.view.adjust_treeview_columns_width(self.num_columns)
-
-    def _read_filtered(self):
-        """
-        Reads only the files in the range given by start and stop fields
-        in the view.
-        """
-        start, end = self.view.get_start_end_file_numbers()
-        self._read_all(filtered=True, start=start, end=end)
 
     def _read_standard(self, self_call=False):
         """
@@ -273,11 +263,10 @@ class DNSFileSelectorPresenter(DNSObserver):
         self.view.hide_tof(hidden='_tof' not in self.modus)
 
     def process_commandline_request(self, command_dict):
-        ffnmb = int(command_dict['files'][0]['ffnmb'])
-        lfnmb = int(command_dict['files'][0]['lfnmb'])
-        self.view.set_start_end_file_numbers_from_arguments(ffnmb, lfnmb)
-        self._read_filtered()
-        self.model.check_fn_range(ffnmb, lfnmb)
+        start = int(command_dict['files'][0]['ffnmb'])
+        end = int(command_dict['files'][0]['lfnmb'])
+        self._read_all(filtered=True, start=start, end=end)
+        self.model.check_fn_range(start, end)
 
     def _expanded(self):
         self.num_columns = self.model.get_active_model_column_count()

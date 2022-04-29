@@ -207,11 +207,6 @@ class DNSFileSelectorView(DNSView):
         }
         return filters
 
-    def get_start_end_file_numbers(self):
-        start = self._map['file_nb'].value()
-        end = self._map['file_to'].value()
-        return [start, end]
-
     def hide_scan(self, row, hidden=True):
         self._treeview.setRowHidden(row, self._treeview.rootIndex(), hidden)
 
@@ -248,10 +243,6 @@ class DNSFileSelectorView(DNSView):
         for i in scan_range:
             self._treeview.setFirstColumnSpanned(i, self._treeview.rootIndex(),
                                                  True)
-
-    def set_start_end_file_numbers_from_arguments(self, start, end):
-        self.set_single_state(self._map['file_nb'], start)
-        self.set_single_state(self._map['file_to'], end)
 
     def set_tree_model(self, model, standard=False):
         if standard:
