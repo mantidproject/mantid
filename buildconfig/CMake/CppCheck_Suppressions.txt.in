@@ -96,8 +96,6 @@ constParameter:${CMAKE_SOURCE_DIR}/Framework/API/inc/MantidAPI/IFunction.h:211
 constParameter:${CMAKE_SOURCE_DIR}/Framework/API/inc/MantidAPI/IFunction.h:213
 constParameter:${CMAKE_SOURCE_DIR}/Framework/API/inc/MantidAPI/IFunction.h:215
 unassignedVariable:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/CorelliCalibrationDatabase.cpp:460
-useStlAlgorithm:${CMAKE_SOURCE_DIR}/Framework/Indexing/inc/MantidIndexing/Conversion.h:35
-useStlAlgorithm:${CMAKE_SOURCE_DIR}/Framework/Indexing/inc/MantidIndexing/Conversion.h:51
 useStlAlgorithm:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/CropWorkspaceRagged.cpp:65
 useStlAlgorithm:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/CropWorkspaceRagged.cpp:72
 stlFindInsert:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/DiffractionFocussing.cpp:78
