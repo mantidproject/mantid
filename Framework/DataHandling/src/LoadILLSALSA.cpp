@@ -187,8 +187,12 @@ void LoadILLSALSA::loadNexusV2(const H5::H5File &h5file) {
 
   size_t numberOfScans = dimsSize[0];
 
-  if ((dimsSize[1] != VERTICAL_NUMBER_PIXELS) || (dimsSize[2] != HORIZONTAL_NUMBER_PIXELS))
-    throw std::runtime_error("");
+  if ((dimsSize[1] != VERTICAL_NUMBER_PIXELS) || (dimsSize[2] != HORIZONTAL_NUMBER_PIXELS)) {
+    std::ostringstream oss;
+    oss << "Unexpected data shape, got " << dimsSize[1] << "x" << dimsSize[2] << "pixels ";
+    oss << "instead of " << VERTICAL_NUMBER_PIXELS << "x" << HORIZONTAL_NUMBER_PIXELS;
+    throw std::runtime_error(oss.str());
+  }
 
   m_outputWorkspace = DataObjects::create<DataObjects::Workspace2D>(
       VERTICAL_NUMBER_PIXELS * HORIZONTAL_NUMBER_PIXELS + 1, HistogramData::Points(numberOfScans));
