@@ -618,7 +618,7 @@ public:
   /// Calculate numerical derivatives
   void calNumericalDeriv(const FunctionDomain &domain, Jacobian &jacobian);
   /// Calculate step size for the given parameter value
-  [[nodiscard]] const double calculateStepSize(const double parameterValue) const;
+  [[nodiscard]] double calculateStepSize(const double parameterValue) const;
   /// Set the covariance matrix
   void setCovarianceMatrix(const std::shared_ptr<Kernel::Matrix<double>> &covar);
   /// Get the covariance matrix
@@ -723,7 +723,7 @@ private:
   /// whether the function usage has been registered
   bool m_isRegistered{false};
   /// The method used to calculate the step size
-  std::function<const double(const double)> m_stepSizeMethod;
+  std::function<double(const double)> m_stepSizeMethod;
 };
 
 /// shared pointer to the function base class

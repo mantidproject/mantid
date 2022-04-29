@@ -74,7 +74,7 @@ const std::vector<std::string> EXCLUDEUSAGE = {"CompositeFunction"};
 /**
  * Constructor
  */
-IFunction ::IFunction() : m_isParallel(false), m_handler(nullptr), m_chiSquared(0.0) {
+IFunction ::IFunction() : m_isParallel(false), m_handler(nullptr), m_chiSquared(0.0), m_stepSizeMethod(nullptr) {
   setStepSizeMethod(StepSizeMethod::DEFAULT);
 }
 
@@ -1068,9 +1068,7 @@ void IFunction::calNumericalDeriv(const FunctionDomain &domain, Jacobian &jacobi
  * @param parameterValue :: The value of the active parameter.
  * @returns The step size to use when calculating the numerical derivative.
  */
-const double IFunction::calculateStepSize(const double parameterValue) const {
-  return m_stepSizeMethod(parameterValue);
-}
+double IFunction::calculateStepSize(const double parameterValue) const { return m_stepSizeMethod(parameterValue); }
 
 /** Sets the function to use when calculating the step size.
  * @param stepSizeMethod :: An enum indicating which method to use when calculating the step size.
@@ -1078,13 +1076,13 @@ const double IFunction::calculateStepSize(const double parameterValue) const {
 void IFunction::setStepSizeMethod(const StepSizeMethod stepSizeMethod) {
   switch (stepSizeMethod) {
   case StepSizeMethod::DEFAULT:
-    m_stepSizeMethod = [](const double parameterValue) -> const double {
+    m_stepSizeMethod = [](const double parameterValue) -> double {
       return fabs(parameterValue) < 100.0 * MIN_DOUBLE / STEP_PERCENTAGE ? 100.0 * EPSILON
                                                                          : parameterValue * STEP_PERCENTAGE;
     };
     return;
   case StepSizeMethod::SQRT_EPSILON:
-    m_stepSizeMethod = [](const double parameterValue) -> const double {
+    m_stepSizeMethod = [](const double parameterValue) -> double {
       return fabs(parameterValue) < 1 ? sqrt(EPSILON) : parameterValue * sqrt(EPSILON);
     };
     return;
