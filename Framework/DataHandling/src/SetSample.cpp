@@ -844,7 +844,7 @@ std::string SetSample::createFlatPlateXML(const Kernel::PropertyManager &args, c
   const double widthInCM = getPropertyAsDouble(args, ShapeArgs::WIDTH);
   const double heightInCM = getPropertyAsDouble(args, ShapeArgs::HEIGHT);
   const double thickInCM = getPropertyAsDouble(args, ShapeArgs::THICK);
-  const double angleInDegrees = getPropertyAsDouble(args, ShapeArgs::ANGLE);
+
   // Convert to half-"width" in metres
   const double szX = (widthInCM * 5e-3);
   const double szY = (heightInCM * 5e-3);
@@ -856,6 +856,7 @@ std::string SetSample::createFlatPlateXML(const Kernel::PropertyManager &args, c
   auto lbb = makeV3D(szX, -szY, szZ);
   auto rfb = makeV3D(-szX, -szY, -szZ);
   if (args.existsProperty(ShapeArgs::ANGLE)) {
+    const double angleInDegrees = getPropertyAsDouble(args, ShapeArgs::ANGLE);
     Goniometer gr;
     const auto upAxis = makeV3D(0, 1, 0);
     gr.pushAxis("up", upAxis.X(), upAxis.Y(), upAxis.Z(), angleInDegrees, Geometry::CCW, Geometry::angDegrees);
