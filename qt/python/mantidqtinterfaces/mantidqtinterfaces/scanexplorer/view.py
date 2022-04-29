@@ -10,6 +10,7 @@ from qtpy.QtWidgets import QWidget, QMainWindow, QHBoxLayout, QPushButton, QSpli
 from qtpy.QtCore import *
 
 import mantid
+from mantidqt.interfacemanager import InterfaceManager
 
 
 class ScanExplorerView(QMainWindow):
@@ -35,9 +36,13 @@ class ScanExplorerView(QMainWindow):
 
         self.reload_button = QPushButton(text="Reload")
 
+        self.advanced_button = QPushButton(text="Advanced")
+        self.advanced_button.clicked.connect(self.open_alg_dialog)
+
         self.interface_layout.addWidget(self.file_line_edit)
         self.interface_layout.addWidget(self.browse_button)
         self.interface_layout.addWidget(self.reload_button)
+        self.interface_layout.addWidget(self.advanced_button)
 
         interface_widget = QWidget()
         interface_widget.setLayout(self.interface_layout)
@@ -88,7 +93,7 @@ class ScanExplorerView(QMainWindow):
         TODO
         Open a new directory manager window so the user can select a directory.
         """
-        base_directory = "/users/tillet"
+        base_directory = "/users/tillet/data/d16_omega/new_proto"
 
         name_filter = "*.nxs"
 
@@ -101,7 +106,17 @@ class ScanExplorerView(QMainWindow):
 
         self.sig_files_selected.emit(files_path)
 
+    def open_alg_dialog(self):
 
-# class TMPSliceViewerDataView(SliceViewerDataView):
-#     def __init__(self):
-#         super().__init__()
+        manager = InterfaceManager()
+        preset = dict()
+        enabled = dict()
+        if self.file_line_edit.text():
+            preset["SampleRuns"] = self.file_line_edit.text()
+            enabled = ["SampleRuns"]
+
+        dialog = manager.createDialogFromName("SANSILLParameterScan", 1, self, False, preset, "coucou", enabled)
+
+        dialog.show()
+
+        dialog.accepted.connect(self.presenter.on_dialog_accepted)

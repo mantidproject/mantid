@@ -99,6 +99,9 @@ class ScanExplorerPresenter:
         """
         self.view.file_line_edit.setText(', '.join(files))
 
+    def on_dialog_accepted(self):
+        pass
+
     def on_line_edited(self):
         """
         Slot triggered by the line edit being validated.
