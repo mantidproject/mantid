@@ -85,8 +85,6 @@ void TrustRegionMinimizer::evalF(const DoubleFortranVector &x, DoubleFortranVect
   for (size_t i = 0; i < values.size(); ++i) {
     f.set(i, (values.getCalculated(i) - values.getFitData(i)) * values.getFitWeight(i));
   }
-
-  std::cout << "w.f: " << f << std::endl << std::endl;
 }
 
 /** Evaluate the Jacobian
@@ -114,8 +112,6 @@ void TrustRegionMinimizer::evalJ(const DoubleFortranVector &x, DoubleFortranMatr
       J(i, j) *= w;
     }
   }
-
-  std::cout << "w.J: " << J << std::endl << std::endl;
 }
 
 /** Evaluate the Hessian
@@ -154,8 +150,6 @@ bool TrustRegionMinimizer::iterate(size_t /*iteration*/) {
     // evaluate the residual
     evalF(X, w.f);
     inform.f_eval = inform.f_eval + 1;
-
-    std::cout << "w.f: " << w.f << std::endl << std::endl;
 
     // and evaluate the jacobian
     evalJ(X, w.J);
@@ -312,8 +306,6 @@ bool TrustRegionMinimizer::iterate(size_t /*iteration*/) {
   X = w.Xnew;
   w.f = w.fnew;
 
-  std::cout << "wf: " << w.f << std::endl << std::endl;
-
   if (!options.exact_second_derivatives) {
     // first, let's save some old values...
     // g_old = -J_k^T r_k
@@ -325,7 +317,6 @@ bool TrustRegionMinimizer::iterate(size_t /*iteration*/) {
 
   // evaluate J and hf at the new point
   evalJ(X, w.J);
-
   inform.g_eval = inform.g_eval + 1;
 
   if (options.calculate_svd_J) {

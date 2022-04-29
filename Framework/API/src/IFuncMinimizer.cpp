@@ -22,7 +22,6 @@ bool IFuncMinimizer::minimize(size_t maxIterations) {
   size_t iter = 0;
   bool success = false;
   do {
-    std::cout << std::endl << "--Start Iter--" << std::endl;
     if (!iterate(iter)) {
       success = m_errorString.empty() || m_errorString == "success";
       if (success) {
