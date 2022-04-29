@@ -26,7 +26,6 @@ void IFunction1D::calcNumericalDerivative1D(Jacobian *jacobian, EvaluationMethod
    * consider that method when updating this.
    */
   using std::fabs;
-  constexpr double epsilon(std::numeric_limits<double>::epsilon());
 
   applyTies(); // just in case
   std::vector<double> minusStep(nData), plusStep(nData);

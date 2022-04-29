@@ -43,9 +43,9 @@
 
 namespace {
 
-const double EPSILON = std::numeric_limits<double>::epsilon();
-const double MIN_DOUBLE = std::numeric_limits<double>::min();
-const double STEP_PERCENTAGE = 0.001;
+constexpr double EPSILON = std::numeric_limits<double>::epsilon();
+constexpr double MIN_DOUBLE = std::numeric_limits<double>::min();
+constexpr double STEP_PERCENTAGE = 0.001;
 
 const double calculateStepSizeDefault(const double parameterValue) {
   if (fabs(parameterValue) < 100.0 * MIN_DOUBLE / STEP_PERCENTAGE) {
@@ -289,18 +289,14 @@ std::string IFunction::writeTies() const {
  * @param tie :: A pointer to a new tie
  */
 void IFunction::addTie(std::unique_ptr<ParameterTie> tie) {
-
   auto iPar = getParameterIndex(*tie);
-  bool found = false;
-  for (auto &m_tie : m_ties) {
-    auto mPar = getParameterIndex(*m_tie);
-    if (mPar == iPar) {
-      found = true;
-      m_tie = std::move(tie);
-      break;
-    }
-  }
-  if (!found) {
+
+  auto it =
+      std::find_if(m_ties.begin(), m_ties.end(), [&](const auto &m_tie) { return getParameterIndex(*m_tie) == iPar; });
+
+  if (it != m_ties.end()) {
+    *it = std::move(tie);
+  } else {
     m_ties.emplace_back(std::move(tie));
     setParameterStatus(iPar, Tied);
   }
@@ -389,15 +385,13 @@ void IFunction::clearTies() {
  */
 void IFunction::addConstraint(std::unique_ptr<IConstraint> ic) {
   size_t iPar = ic->parameterIndex();
-  bool found = false;
-  for (auto &constraint : m_constraints) {
-    if (constraint->parameterIndex() == iPar) {
-      found = true;
-      constraint = std::move(ic);
-      break;
-    }
-  }
-  if (!found) {
+
+  auto it = std::find_if(m_constraints.begin(), m_constraints.end(),
+                         [&iPar](const auto &constraint) { return constraint->parameterIndex() == iPar; });
+
+  if (it != m_constraints.end()) {
+    *it = std::move(ic);
+  } else {
     m_constraints.emplace_back(std::move(ic));
   }
 }
@@ -433,14 +427,15 @@ void IFunction::removeConstraint(const std::string &parName) {
  */
 void IFunction::setConstraintPenaltyFactor(const std::string &parName, const double &c) {
   size_t iPar = parameterIndex(parName);
-  for (auto &constraint : m_constraints) {
-    if (iPar == constraint->getLocalIndex()) {
-      constraint->setPenaltyFactor(c);
-      return;
-    }
+  const auto it = std::find_if(m_constraints.cbegin(), m_constraints.cend(),
+                               [&iPar](const auto &constraint) { return iPar == constraint->getLocalIndex(); });
+
+  if (it != m_constraints.cend()) {
+    (*it)->setPenaltyFactor(c);
+  } else {
+    g_log.warning() << parName << " does not have constraint so setConstraintPenaltyFactor failed"
+                    << "\n";
   }
-  g_log.warning() << parName << " does not have constraint so setConstraintPenaltyFactor failed"
-                  << "\n";
 }
 
 /// Remove all constraints.
@@ -1052,7 +1047,6 @@ void IFunction::calNumericalDeriv(const FunctionDomain &domain, Jacobian &jacobi
    * consider that method when updating this.
    */
 
-  constexpr double epsilon = std::numeric_limits<double>::epsilon();
   const size_t nParam = nParams();
   size_t nData = getValuesSize(domain);
 
