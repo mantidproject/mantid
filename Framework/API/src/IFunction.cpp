@@ -47,24 +47,6 @@ constexpr double EPSILON = std::numeric_limits<double>::epsilon();
 constexpr double MIN_DOUBLE = std::numeric_limits<double>::min();
 constexpr double STEP_PERCENTAGE = 0.001;
 
-const double calculateStepSizeDefault(const double parameterValue) {
-  if (fabs(parameterValue) < 100.0 * MIN_DOUBLE / STEP_PERCENTAGE) {
-    return 100.0 * EPSILON;
-  } else {
-    return parameterValue * STEP_PERCENTAGE;
-  }
-}
-
-const double calculateStepSizeSqrtEpsilon(const double parameterValue) {
-  if (parameterValue == 0) {
-    return 100.0 * EPSILON;
-  } else if (fabs(parameterValue) < 1) {
-    return sqrt(EPSILON);
-  } else {
-    return parameterValue * sqrt(EPSILON);
-  }
-}
-
 } // namespace
 
 namespace Mantid::API {
@@ -92,8 +74,9 @@ const std::vector<std::string> EXCLUDEUSAGE = {"CompositeFunction"};
 /**
  * Constructor
  */
-IFunction ::IFunction()
-    : m_isParallel(false), m_handler(nullptr), m_chiSquared(0.0), m_stepSizeMethod(StepSizeMethod::DEFAULT) {}
+IFunction ::IFunction() : m_isParallel(false), m_handler(nullptr), m_chiSquared(0.0) {
+  setStepSizeMethod(StepSizeMethod::DEFAULT);
+}
 
 /**
  * Destructor
@@ -1086,13 +1069,27 @@ void IFunction::calNumericalDeriv(const FunctionDomain &domain, Jacobian &jacobi
  * @returns The step size to use when calculating the numerical derivative.
  */
 const double IFunction::calculateStepSize(const double parameterValue) const {
-  switch (m_stepSizeMethod) {
+  return m_stepSizeMethod(parameterValue);
+}
+
+/** Sets the function to use when calculating the step size.
+ * @param stepSizeMethod :: An enum indicating which method to use when calculating the step size.
+ */
+void IFunction::setStepSizeMethod(const StepSizeMethod stepSizeMethod) {
+  switch (stepSizeMethod) {
   case StepSizeMethod::DEFAULT:
-    return calculateStepSizeDefault(parameterValue);
+    m_stepSizeMethod = [](const double parameterValue) -> const double {
+      return fabs(parameterValue) < 100.0 * MIN_DOUBLE / STEP_PERCENTAGE ? 100.0 * EPSILON
+                                                                         : parameterValue * STEP_PERCENTAGE;
+    };
+    return;
   case StepSizeMethod::SQRT_EPSILON:
-    return calculateStepSizeSqrtEpsilon(parameterValue);
+    m_stepSizeMethod = [](const double parameterValue) -> const double {
+      return fabs(parameterValue) < 1 ? sqrt(EPSILON) : parameterValue * sqrt(EPSILON);
+    };
+    return;
   }
-  throw std::invalid_argument("An invalid step size calculation was detected.");
+  throw std::invalid_argument("An invalid method for calculating the step size was provided.");
 }
 
 /** Initialize the function providing it the workspace

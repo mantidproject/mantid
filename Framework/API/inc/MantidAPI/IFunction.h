@@ -162,8 +162,6 @@ template <class... Ts> AttributeLambdaVisitor(Ts...) -> AttributeLambdaVisitor<T
 */
 class MANTID_API_DLL IFunction {
 public:
-  enum StepSizeMethod { DEFAULT, SQRT_EPSILON };
-
   /**
    * Simple Exception Struct to differentiate validation error from other exceptions.
    */
@@ -619,6 +617,8 @@ public:
   [[nodiscard]] virtual std::vector<std::shared_ptr<IFunction>> createEquivalentFunctions() const;
   /// Calculate numerical derivatives
   void calNumericalDeriv(const FunctionDomain &domain, Jacobian &jacobian);
+  /// Calculate step size for the given parameter value
+  [[nodiscard]] const double calculateStepSize(const double parameterValue) const;
   /// Set the covariance matrix
   void setCovarianceMatrix(const std::shared_ptr<Kernel::Matrix<double>> &covar);
   /// Get the covariance matrix
@@ -649,6 +649,13 @@ public:
   virtual void setParameterStatus(size_t i, ParameterStatus status) = 0;
   /// Get status of parameter
   [[nodiscard]] virtual ParameterStatus getParameterStatus(size_t i) const = 0;
+
+  /// Describes the method in which the step size will be calculated:
+  /// DEFAULT: Uses the traditional Mantid method of calculating the step size.
+  /// SQRT_EPSILON:  Uses the square root of epsilon to calculate the step size.
+  enum StepSizeMethod { DEFAULT, SQRT_EPSILON };
+  /// Sets the StepSizeMethod to use when calculation the step size
+  void setStepSizeMethod(const StepSizeMethod stepSizeMethod);
 
 protected:
   /// Function initialization. Declare function parameters in this method.
@@ -685,8 +692,6 @@ protected:
   void applyOrderedTies();
   /// Writes itself into a string
   [[nodiscard]] virtual std::string writeToString(const std::string &parentLocalAttributesStr = "") const;
-  /// Calculates the step size to use for the currently active parameter
-  [[nodiscard]] const double calculateStepSize(const double parameterValue) const;
 
   friend class ParameterTie;
   friend class CompositeFunction;
@@ -718,7 +723,7 @@ private:
   /// whether the function usage has been registered
   bool m_isRegistered{false};
   /// The method used to calculate the step size
-  StepSizeMethod m_stepSizeMethod;
+  std::function<const double(const double)> m_stepSizeMethod;
 };
 
 /// shared pointer to the function base class

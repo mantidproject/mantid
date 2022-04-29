@@ -177,10 +177,10 @@ public:
     fun.setStepSizeMethod(MockFunction::StepSizeMethod::SQRT_EPSILON);
 
     const double parameterValue1 = 1.1;
-    const double parameterValue2 = 1.1;
+    const double parameterValue2 = -1.1;
 
     const double sqrtEpsilon = sqrt(std::numeric_limits<double>::epsilon());
-    TS_ASSERT_DELTA(fun.calculateStepSize(parameterValue1), parameterValue1 * sqrtEpsilon);
-    TS_ASSERT_DELTA(fun.calculateStepSize(parameterValue2), parameterValue2 * sqrtEpsilon);
+    TS_ASSERT_EQUALS(fun.calculateStepSize(parameterValue1), parameterValue1 * sqrtEpsilon);
+    TS_ASSERT_EQUALS(fun.calculateStepSize(parameterValue2), parameterValue2 * sqrtEpsilon);
   }
 };
