@@ -59,7 +59,7 @@ class DNSTofPowderScriptGeneratorModel(DNSScriptGeneratorModel):
                     'Vanadium correction option choosen.')
         if not self._validate_nb_empty_banks():
             return ('No Background files selected, but background'
-                    ' substraction option choosen.')
+                    ' subtraction option choosen.')
         return ''
 
     def _get_vanastring(self):
@@ -155,7 +155,7 @@ class DNSTofPowderScriptGeneratorModel(DNSScriptGeneratorModel):
             ]
         return ['data1 = mtd["raw_data1"]']
 
-    def _get_substract_empty_lines(self):
+    def _get_subtract_empty_lines(self):
         lines = []
         if self._bg_cor:
             lines = ['', 'ec =  MonitorEfficiencyCorUser("raw_ec")']
@@ -325,7 +325,7 @@ class DNSTofPowderScriptGeneratorModel(DNSScriptGeneratorModel):
         self._add_lines_to_script(self._get_binning_lines())
         self._add_lines_to_script(self._get_load_data_lines())
         self._add_lines_to_script(self._get_normation_lines())
-        self._add_lines_to_script(self._get_substract_empty_lines())
+        self._add_lines_to_script(self._get_subtract_empty_lines())
         self._add_lines_to_script(self._get_vana_lines())
         self._add_lines_to_script(self._get_energy_print_lines())
         self._add_lines_to_script(self._get_sqw_lines())

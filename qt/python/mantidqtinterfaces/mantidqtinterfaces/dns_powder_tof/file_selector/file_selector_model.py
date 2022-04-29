@@ -275,4 +275,4 @@ class DNSFileSelectorModel(DNSObsModel):
             pass
 
     def get_active_model_column_count(self):
-        return self.active_model.root_item.columnCount()
+        return self.active_model.rootItem.columnCount()

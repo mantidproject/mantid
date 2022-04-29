@@ -5,7 +5,7 @@
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
 import numpy as np
-from mantidqtinterfaces.dns.data_structures.object_dict import \
+from mantidqtinterfaces.dns_powder_tof.data_structures.object_dict import \
     ObjectDict
 
 datasetdic = [{

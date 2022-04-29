@@ -34,9 +34,6 @@ class DNSFileSelectorPresenter(DNSObserver):
         self.num_columns = self.model.get_active_model_column_count()
         self.view.adjust_treeview_columns_width(self.num_columns)
 
-        # hide filter by filename box from view
-        self.view.groupBox_filter_file_number.setHidden(True)
-
         self._old_data_set = set()
 
         # connect signals

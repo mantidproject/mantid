@@ -7,7 +7,7 @@
 """
 project Save for Reduction GUI for DNS Instrument at MLZ
 """
-from mantidqtinterfaces.dns.main_widget import DNSReductionGuiWidget
+from mantidqtinterfaces.dns_powder_tof.main_widget import DNSReductionGuiWidget
 
 
 class InterfaceAttributes():
