@@ -114,7 +114,7 @@ class DNSFileSelectorPresenter(DNSObserver):
             self.raise_error('No data directory selected', critical=True)
 
         if state == 2 and data_dir:
-            self.watcher.start_watcher()
+            self.watcher.start_watcher(data_dir)
             if not self._old_data_set:
                 self._read_all()
         else:
