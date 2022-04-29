@@ -850,7 +850,7 @@ set(TEST_FILES
     FindPeakBackgroundTest.h
     FindPeaksTest.h
     FitPeakTest.h
-    # FitPeaksTest.h
+    FitPeaksTest.h
     FixGSASInstrumentFileTest.h
     FlatPlateAbsorptionTest.h
     GeneralisedSecondDifferenceTest.h

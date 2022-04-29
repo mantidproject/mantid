@@ -33,12 +33,12 @@ set(TEST_PY_FILES
     IndirectILLReductionDIFFTest.py
     IndirectILLReductionFWSTest.py
     IndirectILLReductionQENSTest.py
-    # IndirectReplaceFitResultTest.py
+    IndirectReplaceFitResultTest.py
     IndirectResolutionTest.py
     IndirectSampleChangerTest.py
     IndirectTransmissionMonitorTest.py
     IndirectTwoPeakFitTest.py
-    # IqtFitMultipleTest.py
+    IqtFitMultipleTest.py
     IqtFitSequentialTest.py
     ISISIndirectDiffractionReductionTest.py
     ISISIndirectEnergyTransferTest.py
