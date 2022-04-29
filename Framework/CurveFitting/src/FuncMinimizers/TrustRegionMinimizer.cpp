@@ -1355,9 +1355,6 @@ void TrustRegionMinimizer::calculateStep(const DoubleFortranMatrix &J, const Dou
     }
   }
 
-  std::cout << "Delta: " << Delta << std::endl;
-  std::cout << "normd: " << normd << std::endl;
-
 } // calculateStep
 
 /** Return the current value of the cost function.
