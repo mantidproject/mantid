@@ -159,7 +159,7 @@ public:
   }
 
   void test_subMatrix() {
-    EigenMatrix m(4, 4);
+    EigenMatrix m(3, 4);
     m.set(0, 0, 0);
     m.set(0, 1, 1);
     m.set(0, 2, 2);
@@ -172,10 +172,6 @@ public:
     m.set(2, 1, 21);
     m.set(2, 2, 22);
     m.set(2, 3, 23);
-    m.set(3, 0, 30);
-    m.set(3, 1, 31);
-    m.set(3, 2, 32);
-    m.set(3, 3, 33);
 
     EigenMatrix subm(m, 1, 1, 2, 2);
 
