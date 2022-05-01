@@ -17,30 +17,27 @@
 namespace Mantid::CurveFitting {
 
 /// Constructor
-ComplexVector::ComplexVector() {
-  m_vector = Eigen::VectorXcd(1);
-  zero();
-}
+ComplexVector::ComplexVector() : m_vector(Eigen::VectorXcd(1)) { zero(); }
 
 /// Constructor
 /// @param n :: The length of the vector.
-ComplexVector::ComplexVector(const size_t n) { m_vector = Eigen::VectorXcd(n); }
+ComplexVector::ComplexVector(const size_t n) : m_vector(Eigen::VectorXcd(n)) {}
 
 /// Copy constructor.
 /// @param v :: The other vector
-ComplexVector::ComplexVector(const ComplexVector &v) { m_vector = v.m_vector; }
+ComplexVector::ComplexVector(const ComplexVector &v) : m_vector(v.m_vector) {}
 
 /// Move constructor
 /// @param v :: The other vector
-ComplexVector::ComplexVector(ComplexVector &&v) { m_vector = std::move(v.m_vector); }
+ComplexVector::ComplexVector(ComplexVector &&v) : m_vector(std::move(v.m_vector)) {}
 
 /// Copy from an Eigen::Vector
 /// @param v :: A vector to copy from.
-ComplexVector::ComplexVector(const Eigen::VectorXcd v) { m_vector = v; }
+ComplexVector::ComplexVector(const Eigen::VectorXcd v) : m_vector(v) {}
 
 /// Move from an Eigen::Vector
 /// @param v :: A vector to move.
-ComplexVector::ComplexVector(Eigen::VectorXcd &&v) { m_vector = std::move(v); }
+ComplexVector::ComplexVector(Eigen::VectorXcd &&v) : m_vector(std::move(v)) {}
 
 /// Copy assignment operator
 /// @param v :: The other vector

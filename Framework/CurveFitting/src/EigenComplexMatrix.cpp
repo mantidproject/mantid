@@ -16,14 +16,11 @@ ComplexMatrix::ComplexMatrix() {}
 /// Constructor
 /// @param nx :: First dimension
 /// @param ny :: Second dimension
-ComplexMatrix::ComplexMatrix(const size_t nx, const size_t ny) {
-  m_matrix = Eigen::MatrixXcd(nx, ny);
-  zero();
-}
+ComplexMatrix::ComplexMatrix(const size_t nx, const size_t ny) : m_matrix(Eigen::MatrixXcd(nx, ny)) { zero(); }
 
 /// Copy constructor
 /// @param M :: The other matrix.
-ComplexMatrix::ComplexMatrix(const ComplexMatrix &M) { m_matrix = M.eigen(); }
+ComplexMatrix::ComplexMatrix(const ComplexMatrix &M) : m_matrix(M.eigen()) {}
 
 /// Create a submatrix. A submatrix is a view into the parent matrix.
 /// Lifetime of a submatrix cannot exceed the lifetime of the parent.

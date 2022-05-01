@@ -107,7 +107,7 @@ public:
   /// This matrix is destroyed.
   /// @param rhs :: The right-hand-side vector
   /// @param x :: The solution vector
-  void solve(EigenVector &rhs, EigenVector &x);
+  void solve(const EigenVector &rhs, EigenVector &x);
   /// Invert this matrix
   void invert();
   /// Calculate the determinant

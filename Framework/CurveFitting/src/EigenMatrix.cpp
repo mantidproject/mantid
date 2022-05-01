@@ -261,7 +261,7 @@ EigenMatrix EigenMatrix::operator*(const EigenMatrix &m) const {
 /// @param x :: The solution vector
 /// @throws std::invalid_argument if the input vectors have wrong sizes.
 /// @throws std::runtime_error if Eigen cannot produce a valid solution.
-void EigenMatrix::solve(EigenVector &rhs, EigenVector &x) {
+void EigenMatrix::solve(const EigenVector &rhs, EigenVector &x) {
   if (size1() != size2()) {
     throw std::invalid_argument("System of linear equations: the matrix must be square.");
   }
@@ -313,7 +313,6 @@ void EigenMatrix::eigenSystem(EigenVector &eigenValues, EigenMatrix &eigenVector
   }
 
   Eigen::SelfAdjointEigenSolver<Eigen::MatrixXd> solver;
-  solver;
   solver.compute(inspector());
 
   // previously gsl used "gsl_eigen_symmv" to calculate the eigenSystem. This function only returned

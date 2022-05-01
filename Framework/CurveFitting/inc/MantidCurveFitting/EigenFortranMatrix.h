@@ -47,9 +47,9 @@ public:
   ElementConstType operator()(int i, int j) const;
   ElementRefType operator()(int i, int j);
   /// Assignment operator - Matrix Class
-  FortranMatrix<MatrixClass> &operator=(const EigenMatrix m);
+  FortranMatrix<MatrixClass> &operator=(const EigenMatrix &m);
   /// Assignment operator - Complex Matrix Class
-  FortranMatrix<MatrixClass> &operator=(const ComplexMatrix m);
+  FortranMatrix<MatrixClass> &operator=(const ComplexMatrix &m);
 
   /// Move the data to a new matrix of MatrixClass
   MatrixClass moveToBaseMatrix();
@@ -150,7 +150,7 @@ template <class MatrixClass> FortranMatrix<MatrixClass> FortranMatrix<MatrixClas
 }
 
 /// Assignment operator - Matrix Class
-template <class MatrixClass> FortranMatrix<MatrixClass> &FortranMatrix<MatrixClass>::operator=(const EigenMatrix m) {
+template <class MatrixClass> FortranMatrix<MatrixClass> &FortranMatrix<MatrixClass>::operator=(const EigenMatrix &m) {
   this->resize(m.size1(), m.size2());
   for (size_t i = 0; i < size1(); i++) {
     for (size_t j = 0; j < size2(); j++) {
@@ -161,8 +161,8 @@ template <class MatrixClass> FortranMatrix<MatrixClass> &FortranMatrix<MatrixCla
 }
 
 /// Assignment operator - Complex Matrix Class
-template <class MatrixClass> FortranMatrix<MatrixClass> &FortranMatrix<MatrixClass>::operator=(const ComplexMatrix m) {
-  m.resize(m.size1(), m.size2());
+template <class MatrixClass> FortranMatrix<MatrixClass> &FortranMatrix<MatrixClass>::operator=(const ComplexMatrix &m) {
+  this->resize(m.size1(), m.size2());
   m_matrix = m.inspector();
   return *this;
 }
