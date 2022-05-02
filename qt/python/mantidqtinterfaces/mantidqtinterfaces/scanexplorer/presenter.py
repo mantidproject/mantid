@@ -11,7 +11,6 @@ from enum import Enum
 from qtpy.QtCore import QObject, Signal
 
 from mantid.api import MatrixWorkspace, MultipleExperimentInfos, AlgorithmObserver, Algorithm
-from mantidqt.widgets.sliceviewer.views.dataview import SliceViewerDataView
 from mantidqt.widgets.sliceviewer.presenters.presenter import SliceViewer
 from mantidqt.widgets.sliceviewer.presenters.lineplots import PixelLinePlot  # , RectangleSelectionLinePlot
 from mantid.kernel import logger
@@ -100,9 +99,7 @@ class ScanExplorerPresenter:
         """
         self._ws = workspace
         presenter = SliceViewer(ws=workspace)
-        self.view._data_view = SliceViewerDataView(presenter=presenter,
-                                                   dims_info=self.get_dimensions_info(),
-                                                   can_normalise=False)
+        self.view._data_view = presenter._data_view
         self.view.show_slice_viewer(workspace)
         self.view.data_view.add_line_plots(PixelLinePlot, self.view.data_view.presenter)
 
