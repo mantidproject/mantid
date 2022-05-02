@@ -3,7 +3,7 @@
 DNS Data Tab
 ------------
 
-.. image::  ../../../images/DNS_interface_data_tab.png
+.. image::  ../../../images/DNS_interface_powder_tof_data_tab.png
    :align: center
    :height: 400px
 
@@ -45,5 +45,5 @@ the GUI will look for the newest zip file with *standard* in its name in the
 standard directory or if none is found also in the data directory,
 unzip it and try to use the unzipped files.
 
-:ref:`DNS Reduction <dns_reduction-ref>`
+:ref:`DNS Powder TOF <dns_powder_tof-ref>`
 

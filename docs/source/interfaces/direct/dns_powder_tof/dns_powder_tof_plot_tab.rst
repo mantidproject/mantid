@@ -3,7 +3,7 @@
 DNS Powder TOF Plotting Tab
 ---------------------------
 
-.. image::  ../../../images/DNS_interface_powder_tof_plot_tab.png
+.. image::  ../../../images/DNS_interface_powder_tof_plotting_tab.png
    :align: center
    :height: 400px
 \
@@ -11,4 +11,4 @@ DNS Powder TOF Plotting Tab
 The **Plotting tab** of the powder TOF mode,
 is just the mantid :ref:`sliceviewer`.
 
-:ref:`DNS Reduction <dns_reduction-ref>`
+:ref:`DNS Powder TOF <dns_powder_tof-ref>`

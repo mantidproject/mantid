@@ -29,4 +29,4 @@ Alternatively the elastic peak channel can be given manually.
 The **Binning** is automatically chosen to show the full dataset if nothing is
 selected but can be overwritten.
 
-:ref:`DNS Reduction <dns_reduction-ref>`
+:ref:`DNS Powder TOF <dns_powder_tof-ref>`

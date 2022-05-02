@@ -3,7 +3,7 @@
 DNS Script Generator Tab
 ------------------------
 
-.. image::  ../../../images/DNS_interface_script_generator_tab.png
+.. image::  ../../../images/DNS_interface_powder_tof_script_generator_tab.png
    :align: center
    :height: 400px
 \
@@ -22,4 +22,4 @@ Running of the script can be aborted, by clicking *abort loading* but then the
 data cannot be plotted.
 The shown script cannot be edited in the window but copied to the clipboard.
 
-:ref:`DNS Reduction <dns_reduction-ref>`
+:ref:`DNS Powder TOF <dns_powder_tof-ref>`
