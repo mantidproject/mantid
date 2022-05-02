@@ -106,6 +106,10 @@ class ScanExplorerPresenter:
         self.view.show_slice_viewer(workspace)
         self.view.data_view.add_line_plots(PixelLinePlot, self.view.data_view.presenter)
 
+        # TODO find a better way to activate the cursor tracking
+        self.view.data_view.track_cursor.setChecked(False)
+        self.view.data_view.track_cursor.setChecked(True)
+
     def on_files_selected(self, files: list):
         """
         Slot triggered by the user selecting files through the browser
