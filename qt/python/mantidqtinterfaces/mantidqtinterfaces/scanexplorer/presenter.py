@@ -42,7 +42,7 @@ class ScanExplorerPresenter:
         self.observer.signals.finished.connect(self.on_algorithm_finished)
         self.observer.signals.started.connect(self.set_algorithm_result_name)
 
-        self.future_workspace = None
+        self.future_workspace: str = ""
 
     def get_dim_info(self, n: int) -> dict:
         """
@@ -123,12 +123,12 @@ class ScanExplorerPresenter:
 
     def on_dialog_accepted(self):
         """
-        TODO Slot triggered when the scan dialog is accepted. That means the algorithm is also triggered, and we need to
-        fetch it to get the user's input.
+        Slot triggered when the scan dialog is accepted. That means the algorithm is started, and the observer needs to
+        start watching for it.
         """
         self.observer.observeStarting()
 
-    def on_algorithm_finished(self, error, error_message):
+    def on_algorithm_finished(self, error: bool, error_message: str):
         """
         Slot called when the algorithm summoned by the dialog has run its course. Show the result in the slice viewer
         @param error: True if the algorithm threw an error, else False
@@ -148,6 +148,10 @@ class ScanExplorerPresenter:
         self.create_slice_viewer(self._ws)
 
     def set_algorithm_result_name(self, new_algorithm):
+        """
+        Sets the name of the workspace that will be shown once the algorithm completes.
+        @param new_algorithm: the algorithm that has been created
+        """
         self.future_workspace = new_algorithm.getPropertyValue("OutputWorkspace")
 
     @property
