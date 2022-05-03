@@ -27,14 +27,13 @@ fi
 # Setup virtualenv for building the docs
 ###############################################################################
 VIRTUAL_ENV=$BUILD_DIR/venv
-if [[ ! -d $VIRTUAL_ENV ]]; then
-    python3 -m venv $VIRTUAL_ENV
-    source $VIRTUAL_ENV/bin/activate
-    python3 -m pip install sphinx==1.8
-    python3 -m pip install sphinx_bootstrap_theme
-else
-    source $VIRTUAL_ENV/bin/activate
+if [[  -d $VIRTUAL_ENV ]]; then
+  rm -f $VIRTUAL_ENV
 fi
+python3 -m venv $VIRTUAL_ENV
+source $VIRTUAL_ENV/bin/activate
+python3 -m pip install sphinx
+python3 -m pip install sphinx_bootstrap_theme
 which python3
 
 ###############################################################################
