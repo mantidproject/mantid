@@ -315,9 +315,6 @@ public:
     manager.setProperty("WorkspaceIndex2", 0);
     manager.setProperty("WorkspaceIndex3", 0);
 
-    FunctionDomain_sptr domain;
-    FunctionValues_sptr values;
-
     auto mdfun = std::make_shared<MultiDomainFunction>();
 
     std::shared_ptr<CompositeFunction> mfun = std::make_shared<CompositeFunction>();
