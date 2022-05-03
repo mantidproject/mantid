@@ -27,6 +27,7 @@ public:
   const std::string category() const override;
 
 protected:
+  ~CreatePolarizationEfficienciesBase() = default;
   void initOutputWorkspace();
   std::vector<std::string> getNonDefaultProperties(std::vector<std::string> const &props) const;
 

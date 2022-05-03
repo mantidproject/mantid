@@ -9,14 +9,13 @@
 #
 from contextlib import contextmanager
 import unittest
-from unittest.mock import MagicMock, call, patch, DEFAULT
+from unittest.mock import MagicMock, call, patch, DEFAULT, Mock
 
-from mantid.api import MatrixWorkspace, IMDEventWorkspace, IMDHistoWorkspace
+from mantid.api import MatrixWorkspace, IMDEventWorkspace, IMDHistoWorkspace, MultipleExperimentInfos
 from mantid.kernel import SpecialCoordinateSystem
 from mantid.geometry import IMDDimension, OrientedLattice
-from numpy.testing import assert_equal
 import numpy as np
-from mantidqt.widgets.sliceviewer.model import SliceViewerModel, WS_TYPE, MIN_WIDTH
+from mantidqt.widgets.sliceviewer.models.model import SliceViewerModel, MIN_WIDTH
 
 
 # Mock helpers
@@ -122,6 +121,8 @@ def _create_mock_workspace(ws_type,
             ws.isMDHistoWorkspace.return_value = True
             ws.getNonIntegratedDimensions.return_value = [MagicMock(), MagicMock()]
             ws.hasOriginalWorkspace.return_value = False
+            basis_mat = np.eye(ndims)
+            ws.getBasisVector.side_effect = lambda idim: basis_mat[:, idim]
         else:
             ws.isMDHistoWorkspace.return_value = False
 
@@ -245,84 +246,66 @@ class SliceViewerModelTest(unittest.TestCase):
     def setUp(self):
         self.ws2d_histo.reset_mock()
 
-    def test_model_MDH(self):
-        model = SliceViewerModel(self.ws_MD_3D)
+    def test_init_with_valid_MatrixWorkspace(self):
+        mock_ws = MagicMock(spec=MatrixWorkspace)
+        mock_ws.getNumberHistograms.return_value = 2
+        mock_ws.getDimension.return_value.getNBins.return_value = 2.
 
-        self.assertEqual(model.get_ws(), self.ws_MD_3D)
-        self.assertEqual(model.get_ws_type(), WS_TYPE.MDH)
+        self.assertIsNotNone(SliceViewerModel(mock_ws))
 
-        signal = np.arange(100).reshape(5, 5, 4)
-        assert_equal(model.get_data((None, 2, 2)), signal[(slice(None), 3, 3)])
-        assert_equal(model.get_data((1, 2, None)), range(72, 76))
-        assert_equal(model.get_data((None, None, 0)), signal[(slice(None), slice(None), 2)])
+    def test_init_with_valid_MDHistoWorkspace(self):
+        mock_ws = MagicMock(spec=MultipleExperimentInfos)
+        mock_ws.name = Mock(return_value="")
+        mock_ws.isMDHistoWorkspace = Mock(return_value=True)
+        mock_ws.getNumNonIntegratedDims = Mock(return_value=700)
 
-        dim_info = model.get_dim_info(0)
-        self.assertEqual(dim_info['minimum'], -3)
-        self.assertEqual(dim_info['maximum'], 3)
-        self.assertEqual(dim_info['number_of_bins'], 5)
-        self.assertAlmostEqual(dim_info['width'], 1.2)
-        self.assertEqual(dim_info['name'], 'Dim1')
-        self.assertEqual(dim_info['units'], 'MomentumTransfer')
-        self.assertEqual(dim_info['type'], 'MDH')
-        self.assertEqual(dim_info['qdim'], False)
+        with patch.object(SliceViewerModel, "_calculate_axes_angles"):
+            self.assertIsNotNone(SliceViewerModel(mock_ws))
 
-        dim_infos = model.get_dimensions_info()
-        self.assertEqual(len(dim_infos), 3)
+    def test_init_with_valid_MDEventWorkspace(self):
+        mock_ws = MagicMock(spec=MultipleExperimentInfos)
+        mock_ws.name = Mock(return_value='')
+        mock_ws.isMDHistoWorkspace = Mock(return_value=False)
+        mock_ws.getNumDims = Mock(return_value=4)
 
-        dim_info = dim_infos[2]
-        self.assertEqual(dim_info['minimum'], -1)
-        self.assertEqual(dim_info['maximum'], 1)
-        self.assertEqual(dim_info['number_of_bins'], 4)
-        self.assertAlmostEqual(dim_info['width'], 0.5)
-        self.assertEqual(dim_info['name'], 'Dim3')
-        self.assertEqual(dim_info['units'], 'Angstrom')
-        self.assertEqual(dim_info['type'], 'MDH')
-        self.assertEqual(dim_info['qdim'], False)
+        with patch.object(SliceViewerModel, "_calculate_axes_angles"):
+            self.assertIsNotNone(SliceViewerModel(mock_ws))
 
-    @patch('mantidqt.widgets.sliceviewer.model.BinMD')
-    def test_model_MDE(self, mock_binmd):
-        model = SliceViewerModel(self.ws_MDE_3D)
-        mock_binmd.return_value = self.ws_MD_3D
+    def test_init_raises_for_incorrect_workspace_type(self):
+        mock_ws = MagicMock()
 
-        self.assertNotEqual(model.get_ws((None, None, 0), (1, 2, 4)), self.ws_MDE_3D)
+        self.assertRaisesRegex(ValueError, "MatrixWorkspace and MDWorkspace", SliceViewerModel, mock_ws)
 
-        mock_binmd.assert_called_once_with(AxisAligned=False,
-                                           BasisVector0='h,rlu,1.0,0.0,0.0',
-                                           BasisVector1='k,rlu,0.0,1.0,0.0',
-                                           BasisVector2='l,rlu,0.0,0.0,1.0',
-                                           EnableLogging=False,
-                                           InputWorkspace=self.ws_MDE_3D,
-                                           OutputBins=[1, 2, 1],
-                                           OutputExtents=[-3, 3, -4, 4, -2.0, 2.0],
-                                           OutputWorkspace='ws_MDE_3D_svrebinned')
-        mock_binmd.reset_mock()
-        self.assertEqual(model._get_ws(), self.ws_MDE_3D)
-        self.assertEqual(model.get_ws_type(), WS_TYPE.MDE)
+    def test_init_raises_if_fewer_than_two_histograms(self):
+        mock_ws = MagicMock(spec=MatrixWorkspace)
+        mock_ws.getNumberHistograms.return_value = 1
 
-        dim_info = model.get_dim_info(0)
-        self.assertEqual(dim_info['minimum'], -3)
-        self.assertEqual(dim_info['maximum'], 3)
-        self.assertEqual(dim_info['number_of_bins'], 1)
-        self.assertAlmostEqual(dim_info['width'], 6)
-        self.assertEqual(dim_info['name'], 'h')
-        self.assertEqual(dim_info['units'], 'rlu')
-        self.assertEqual(dim_info['type'], 'MDE')
-        self.assertEqual(dim_info['qdim'], False)
+        self.assertRaisesRegex(ValueError, "contain at least 2 spectra", SliceViewerModel, mock_ws)
 
-        dim_infos = model.get_dimensions_info()
-        self.assertEqual(len(dim_infos), 3)
+    def test_init_raises_if_fewer_than_two_bins(self):
+        mock_ws = MagicMock(spec=MatrixWorkspace)
+        mock_ws.getNumberHistograms.return_value = 2
+        mock_ws.getDimension.return_value.getNBins.return_value = 1
 
-        dim_info = dim_infos[2]
-        self.assertEqual(dim_info['minimum'], -5)
-        self.assertEqual(dim_info['maximum'], 5)
-        self.assertEqual(dim_info['number_of_bins'], 1)
-        self.assertAlmostEqual(dim_info['width'], 10)
-        self.assertEqual(dim_info['name'], 'l')
-        self.assertEqual(dim_info['units'], 'rlu')
-        self.assertEqual(dim_info['type'], 'MDE')
-        self.assertEqual(dim_info['qdim'], False)
+        self.assertRaisesRegex(ValueError, "contain at least 2 bins", SliceViewerModel, mock_ws)
 
-    @patch('mantidqt.widgets.sliceviewer.model.BinMD')
+    def test_init_raises_if_fewer_than_two_integrated_dimensions(self):
+        mock_ws = MagicMock(spec=MultipleExperimentInfos)
+        mock_ws.isMDHistoWorkspace = Mock(return_value=True)
+        mock_ws.getNumNonIntegratedDims = Mock(return_value=1)
+        mock_ws.name = Mock(return_value='')
+
+        self.assertRaisesRegex(ValueError, "at least 2 non-integrated dimensions", SliceViewerModel, mock_ws)
+
+    def test_init_raises_if_fewer_than_two_dimensions(self):
+        mock_ws = MagicMock(spec=MultipleExperimentInfos)
+        mock_ws.isMDHistoWorkspace = Mock(return_value=False)
+        mock_ws.getNumDims = Mock(return_value=1)
+        mock_ws.name = Mock(return_value='')
+
+        self.assertRaisesRegex(ValueError, "at least 2 dimensions", SliceViewerModel, mock_ws)
+
+    @patch('mantidqt.widgets.sliceviewer.models.model.BinMD')
     def test_model_MDE_basis_vectors_not_normalised_when_HKL(self, mock_binmd):
         ws = _create_mock_mdeventworkspace(ndims=3,
                                            coords=SpecialCoordinateSystem.HKL,
@@ -347,7 +330,7 @@ class SliceViewerModelTest(unittest.TestCase):
                                            OutputWorkspace=ws.name() + '_svrebinned')
         mock_binmd.reset_mock()
 
-    @patch('mantidqt.widgets.sliceviewer.model.BinMD')
+    @patch('mantidqt.widgets.sliceviewer.models.model.BinMD')
     def test_get_ws_MDE_with_limits_uses_limits_over_dimension_extents(self, mock_binmd):
         model = SliceViewerModel(self.ws_MDE_3D)
         mock_binmd.return_value = self.ws_MD_3D
@@ -370,7 +353,7 @@ class SliceViewerModelTest(unittest.TestCase):
         model.get_data((None, None, 0), (1, 2, 4), [0, 1, None], ((-2, 2), (-1, 1)))
         mock_binmd.assert_called_once_with(**call_params)
 
-    @patch('mantidqt.widgets.sliceviewer.model.BinMD')
+    @patch('mantidqt.widgets.sliceviewer.models.model.BinMD')
     def test_get_ws_mde_sets_minimum_width_on_data_limits(self, mock_binmd):
         model = SliceViewerModel(self.ws_MDE_3D)
         mock_binmd.return_value = self.ws_MD_3D
@@ -391,75 +374,6 @@ class SliceViewerModelTest(unittest.TestCase):
                            OutputWorkspace='ws_MDE_3D_svrebinned')
         mock_binmd.assert_called_once_with(**call_params)
         mock_binmd.reset_mock()
-
-    def test_model_matrix(self):
-        model = SliceViewerModel(self.ws2d_histo)
-
-        self.assertEqual(model.get_ws(), self.ws2d_histo)
-        self.assertEqual(model.get_ws_type(), WS_TYPE.MATRIX)
-
-        dim_info = model.get_dim_info(0)
-        self.assertEqual(dim_info['minimum'], 10)
-        self.assertEqual(dim_info['maximum'], 30)
-        self.assertEqual(dim_info['number_of_bins'], 2)
-        self.assertAlmostEqual(dim_info['width'], 10)
-        self.assertEqual(dim_info['name'], 'Wavelength')
-        self.assertEqual(dim_info['units'], 'Angstrom')
-        self.assertEqual(dim_info['type'], 'MATRIX')
-        self.assertEqual(dim_info['qdim'], False)
-
-        dim_infos = model.get_dimensions_info()
-        self.assertEqual(len(dim_infos), 2)
-
-        dim_info = dim_infos[1]
-        self.assertEqual(dim_info['minimum'], 4)
-        self.assertEqual(dim_info['maximum'], 8)
-        self.assertEqual(dim_info['number_of_bins'], 2)
-        self.assertAlmostEqual(dim_info['width'], 2)
-        self.assertEqual(dim_info['name'], 'Energy transfer')
-        self.assertEqual(dim_info['units'], 'meV')
-        self.assertEqual(dim_info['type'], 'MATRIX')
-        self.assertEqual(dim_info['qdim'], False)
-
-    def test_qflags_for_qlab_coordinates_detected(self):
-        mock_q3d = _create_mock_workspace(IMDEventWorkspace,
-                                          coords=SpecialCoordinateSystem.QLab,
-                                          has_oriented_lattice=False)
-        mock_q3d = _add_dimensions(mock_q3d, ('Q_lab_x', 'Q_lab_y', 'Q_lab_z', 'DeltaE'),
-                                   isq=(True, True, True, False))
-        model = SliceViewerModel(mock_q3d)
-
-        for i in range(3):
-            dim_info = model.get_dim_info(i)
-            self.assertTrue(dim_info['qdim'], msg=f'Dimension {i} not spatial as expected')
-        self.assertFalse(model.get_dim_info(3)['qdim'])
-
-    def test_qflags_for_qsample_coordinates_detected(self):
-        mock_q3d = _create_mock_workspace(IMDEventWorkspace,
-                                          coords=SpecialCoordinateSystem.QSample,
-                                          has_oriented_lattice=False)
-        mock_q3d = _add_dimensions(mock_q3d, ('Q_sample_x', 'Q_sample_y', 'Q_sample_z', 'DeltaE'),
-                                   isq=(True, True, True, False))
-
-        model = SliceViewerModel(mock_q3d)
-
-        for i in range(3):
-            dim_info = model.get_dim_info(i)
-            self.assertTrue(dim_info['qdim'], msg=f'Dimension {i} not spatial as expected')
-        self.assertFalse(model.get_dim_info(3)['qdim'])
-
-    def test_qflags_for_hkl_coordinates_detected(self):
-        mock_q3d = _create_mock_workspace(IMDEventWorkspace,
-                                          coords=SpecialCoordinateSystem.HKL,
-                                          has_oriented_lattice=False)
-        mock_q3d = _add_dimensions(mock_q3d, ('[H,0,0]', '[0,K,0]', '[0,0,L]', 'DeltaE'),
-                                   isq=(True, True, True, False))
-        model = SliceViewerModel(mock_q3d)
-
-        for i in range(3):
-            dim_info = model.get_dim_info(i)
-            self.assertTrue(dim_info['qdim'], msg=f'Dimension {i} not spatial as expected')
-        self.assertFalse(model.get_dim_info(3)['qdim'])
 
     def test_matrix_workspace_can_be_normalized_if_not_a_distribution(self):
         non_distrib_ws2d = _create_mock_matrixworkspace((1, 2, 3), (4, 5, 6),
@@ -541,38 +455,6 @@ class SliceViewerModelTest(unittest.TestCase):
         self._assert_supports_peaks_overlay(True, IMDEventWorkspace, ndims=3)
         self._assert_supports_peaks_overlay(True, IMDHistoWorkspace, ndims=3)
 
-    def test_mdeventworkspace_supports_dynamic_rebinning(self):
-        self._assert_supports_dynamic_rebinning(True,
-                                                IMDEventWorkspace,
-                                                has_original_workspace=True)
-        self._assert_supports_dynamic_rebinning(True,
-                                                IMDEventWorkspace,
-                                                has_original_workspace=False)
-
-    def test_mdhistoworkspace_supports_dynamic_rebinning_if_original_exists_with_same_ndims(self):
-        self._assert_supports_dynamic_rebinning(True,
-                                                IMDHistoWorkspace,
-                                                has_original_workspace=True)
-        self._assert_supports_dynamic_rebinning(False,
-                                                IMDHistoWorkspace,
-                                                has_original_workspace=False)
-
-    def test_mdhistoworkspace_does_not_support_dynamic_rebinning_if_original_exists_with_different_ndims(self):
-        self._assert_supports_dynamic_rebinning(False,
-                                                IMDHistoWorkspace,
-                                                has_original_workspace=True,
-                                                original_ws_ndims=4)
-
-    def test_mdhistoworkspace_does_not_support_dynamic_rebinning_if_altered(self):
-        self._assert_supports_dynamic_rebinning(False,
-                                                IMDHistoWorkspace,
-                                                has_original_workspace=True,
-                                                original_ws_ndims=3,
-                                                mdhisto_was_modified=True)
-
-    def test_matrixworkspace_does_not_dynamic_rebinning(self):
-        self._assert_supports_dynamic_rebinning(False, MatrixWorkspace)
-
     def test_title_for_matrixworkspace_just_contains_ws_name(self):
         model = SliceViewerModel(self.ws2d_histo)
 
@@ -629,38 +511,7 @@ class SliceViewerModelTest(unittest.TestCase):
         for iy in range(1, 3):
             self.assertAlmostEqual(axes_angles[0, iy], np.pi / 2, delta=1e-10)
 
-    def test_get_dim_limits_returns_limits_for_display_dimensions_for_matrix(self):
-        model = SliceViewerModel(self.ws2d_histo)
-        data_limits = ((10, 30), (4, 8))
-
-        limits = model.get_dim_limits(slicepoint=(None, None), transpose=False)
-        self.assertEqual(data_limits, limits)
-        limits = model.get_dim_limits(slicepoint=(None, None), transpose=True)
-        self.assertEqual((data_limits[1], data_limits[0]), limits)
-
-    def test_get_dim_limits_returns_limits_for_display_dimensions_for_md(self):
-        model = SliceViewerModel(self.ws_MDE_3D)
-        data_limits = ((-3, 3), (-4, 4), (-5, 5))
-
-        limits = model.get_dim_limits(slicepoint=(None, None, 0), transpose=False)
-        self.assertEqual(data_limits[:2], limits)
-        limits = model.get_dim_limits(slicepoint=(None, None, 0), transpose=True)
-        self.assertEqual((data_limits[1], data_limits[0]), limits)
-        limits = model.get_dim_limits(slicepoint=(None, 0, None), transpose=False)
-        self.assertEqual((data_limits[0], data_limits[2]), limits)
-        limits = model.get_dim_limits(slicepoint=(None, 0, None), transpose=True)
-        self.assertEqual((data_limits[2], data_limits[0]), limits)
-
-    def test_get_dim_limits_raises_error_num_display_dims_ne_2(self):
-        model = SliceViewerModel(self.ws_MDE_3D)
-
-        self.assertRaises(ValueError, model.get_dim_limits, slicepoint=(0, 0, 0), transpose=False)
-        self.assertRaises(ValueError,
-                          model.get_dim_limits,
-                          slicepoint=(None, 0, 0),
-                          transpose=False)
-
-    @patch.multiple('mantidqt.widgets.sliceviewer.roi',
+    @patch.multiple('mantidqt.widgets.sliceviewer.models.roi',
                     ExtractSpectra=DEFAULT,
                     Rebin=DEFAULT,
                     SumSpectra=DEFAULT,
@@ -701,10 +552,10 @@ class SliceViewerModelTest(unittest.TestCase):
         assert_call_as_expected(xmin, xmax, 1, 3, transpose=False, is_spectra=False)
         assert_call_as_expected(ymin, ymax, 0, 2, transpose=True, is_spectra=False)
 
-    @patch('mantidqt.widgets.sliceviewer.roi.ExtractSpectra')
-    @patch('mantidqt.widgets.sliceviewer.roi.Rebin')
-    @patch('mantidqt.widgets.sliceviewer.roi.SumSpectra')
-    @patch('mantidqt.widgets.sliceviewer.roi.Transpose')
+    @patch('mantidqt.widgets.sliceviewer.models.roi.ExtractSpectra')
+    @patch('mantidqt.widgets.sliceviewer.models.roi.Rebin')
+    @patch('mantidqt.widgets.sliceviewer.models.roi.SumSpectra')
+    @patch('mantidqt.widgets.sliceviewer.models.roi.Transpose')
     def test_export_cuts_for_matrixworkspace(self, mock_transpose, mock_sum_spectra, mock_rebin,
                                              mock_extract_spectra):
         xmin, xmax, ymin, ymax = -4., 5., 6., 9.
@@ -783,8 +634,8 @@ class SliceViewerModelTest(unittest.TestCase):
                                     is_spectra=is_spectra,
                                     is_ragged=is_ragged)
 
-    @patch('mantidqt.widgets.sliceviewer.model.TransposeMD')
-    @patch('mantidqt.widgets.sliceviewer.model.IntegrateMDHistoWorkspace')
+    @patch('mantidqt.widgets.sliceviewer.models.model.TransposeMD')
+    @patch('mantidqt.widgets.sliceviewer.models.model.IntegrateMDHistoWorkspace')
     def test_export_region_for_mdhisto_workspace(self, mock_intMD, mock_transposemd):
         xmin, xmax, ymin, ymax = -1., 3., 2., 4.
         slicepoint, bin_params = (None, None, 0.5), (100, 100, 0.1)
@@ -847,8 +698,8 @@ class SliceViewerModelTest(unittest.TestCase):
             assert_call_as_expected(transpose=True, dimension_indices=transposed_dimension_indices,
                                     export_type=export_type)
 
-    @patch('mantidqt.widgets.sliceviewer.model.TransposeMD')
-    @patch('mantidqt.widgets.sliceviewer.model.BinMD')
+    @patch('mantidqt.widgets.sliceviewer.models.model.TransposeMD')
+    @patch('mantidqt.widgets.sliceviewer.models.model.BinMD')
     def test_export_region_for_mdevent_workspace(self, mock_binmd, mock_transposemd):
         xmin, xmax, ymin, ymax = -1., 3., 2., 4.
         slicepoint, bin_params = (None, None, 0.5), (100, 100, 0.1)
@@ -941,8 +792,8 @@ class SliceViewerModelTest(unittest.TestCase):
             assert_call_as_expected(transpose=True, dimension_indices=transposed_dimension_indices,
                                     export_type=export_type)
 
-    @patch('mantidqt.widgets.sliceviewer.model.BinMD')
-    @patch('mantidqt.widgets.sliceviewer.roi.ExtractSpectra')
+    @patch('mantidqt.widgets.sliceviewer.models.model.BinMD')
+    @patch('mantidqt.widgets.sliceviewer.models.roi.ExtractSpectra')
     def test_export_region_raises_exception_if_operation_failed(self, mock_extract_spectra,
                                                                 mock_binmd):
         def assert_error_returned_in_help(workspace, export_type, mock_alg, err_msg):
@@ -982,36 +833,6 @@ class SliceViewerModelTest(unittest.TestCase):
                                     ndims=ndims)
         model = SliceViewerModel(ws)
         self.assertEqual(expectation, model.can_support_peaks_overlays())
-
-    def _assert_supports_dynamic_rebinning(self, expectation, ws_type, ndims=3, has_original_workspace=None,
-                                           original_ws_ndims=None, mdhisto_was_modified=False):
-        ws = _create_mock_workspace(ws_type,
-                                    coords=SpecialCoordinateSystem.QLab,
-                                    has_oriented_lattice=False,
-                                    ndims=ndims)
-        if ws_type == MatrixWorkspace:
-            ws.hasOriginalWorkspace.side_effect = lambda index: False
-        elif has_original_workspace is not None:
-            ws.hasOriginalWorkspace.side_effect = lambda index: has_original_workspace
-            if not original_ws_ndims:
-                original_ws_ndims = ndims
-            orig_ws = _create_mock_workspace(ws_type,
-                                             coords=SpecialCoordinateSystem.QLab,
-                                             has_oriented_lattice=False,
-                                             ndims=original_ws_ndims)
-            ws.getOriginalWorkspace.side_effect = lambda index: orig_ws
-
-        if ws_type == IMDHistoWorkspace:
-            if mdhisto_was_modified:
-                ws.getNumExperimentInfo.return_value = 1
-                mock_run = MagicMock()
-                mock_run.hasProperty.return_value = True  # run.hasProperty("mdhisto_was_modified")
-                mock_run.get.return_value = MagicMock(value='1')  # run.get("mdhisto_was_modified").value == '1'
-                ws.getExperimentInfo.return_value = MagicMock(return_value=mock_run)
-            else:
-                ws.getNumExperimentInfo.return_value = 0
-        model = SliceViewerModel(ws)
-        self.assertEqual(expectation, model.can_support_dynamic_rebinning())
 
 
 if __name__ == '__main__':

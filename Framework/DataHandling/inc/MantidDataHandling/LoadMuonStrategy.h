@@ -23,7 +23,7 @@ public:
   // Constructor
   LoadMuonStrategy(Kernel::Logger &g_log, std::string filename, LoadMuonNexusV2NexusHelper &nexusLoader);
   // Virtual destructor
-  virtual ~LoadMuonStrategy() {}
+  virtual ~LoadMuonStrategy() = default;
   // Load muon log data
   virtual void loadMuonLogData() = 0;
   // Returns the good frames from the nexus entry

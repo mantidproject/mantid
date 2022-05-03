@@ -20,7 +20,7 @@ namespace MDAlgorithms {
 /** ConvertSpiceDataToRealSpace : Convert data from SPICE file to singals
   in real space contained in MDEventWrokspaces
 */
-class DLLExport ConvertSpiceDataToRealSpace : public API::Algorithm {
+class DLLExport ConvertSpiceDataToRealSpace final : public API::Algorithm {
 public:
   /// Algorithm's name
   const std::string name() const override { return "ConvertSpiceDataToRealSpace"; }

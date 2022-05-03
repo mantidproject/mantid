@@ -39,6 +39,7 @@ namespace Poldi {
 
 class MANTID_SINQ_DLL PoldiFitPeaks2D : public API::Algorithm {
 public:
+  virtual ~PoldiFitPeaks2D() = default;
   const std::string name() const override;
   int version() const override;
   const std::vector<std::string> seeAlso() const override { return {"PoldiFitPeaks1D"}; }

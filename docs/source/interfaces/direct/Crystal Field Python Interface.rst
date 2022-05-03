@@ -304,7 +304,7 @@ resolution model at the peak position :math:`E`.
 Defining Multiple Spectra
 -------------------------
 
-A `CrystalField` object can be configured to work with multiple spectra. In this case some many of the object's properties
+A `CrystalField` object can be configured to work with multiple spectra. In this case many of the object's properties
 become lists. Here is an example of defining a `CrystalField` object with two spectra::
 
     cf = CrystalField('Ce', 'C2v', B20=0.37737, B22=3.9770, B40=-0.031787, B42=-0.11611, B44=-0.12544,
@@ -796,9 +796,19 @@ Calculating Physical Properties
 -------------------------------
 
 In addition to the inelastic neutron spectrum, various physical properties arising from the crystal field interaction
-can be calculated. These include the crystal field contribution to the magnetic heat capacity, the magnetic
-susceptibility, and magnetisation. The calculated values can be invoked using the `getHeatCapacity()`,
-`getSusceptibility()` and `getMagneticMoment()` methods.
+can be calculated. These include (but are not necessarily limited to):
+
+- the crystal field contribution to the magnetic heat capacity;
+- magnetic susceptibility;
+- magnetic moment (and subsequently magnetisation)
+- the dipole transition matrix (and individual components).
+
+The calculated values can be invoked using the respective functions:
+
+- `getHeatCapacity()`;
+- `getSusceptibility()`;
+- `getMagneticMoment()`;
+- `getDipoleMatrix()` (+ `getDipoleMatrixComponent(<'X', 'Y' or 'Z'>)`).
 
 To calculate the heat capacity use::
 
@@ -822,7 +832,7 @@ To calculate the heat capacity use::
     Cv = cf.getHeatCapacity(ws, 1)  # Uses the second spectrum's x-values for T (e.g. 450<T<900)
     plot(*Cv)
 
-All the physical properties methods returns a tuple of `(x, y)` values. The heat capacity is calculated in
+All the physical properties methods (excluding dipole matrix functions) returns a tuple of `(x, y)` values. The heat capacity is calculated in
 Jmol\ :sup:`-1`\ K\ :sup:`-1`\ .
 The theory is described in :ref:`CrystalFieldHeatCapacity <func-CrystalFieldHeatCapacity>`.
 
@@ -870,11 +880,21 @@ Please note that if cgs units are used, then the magnetic field must be specifie
 (1T == 10000G). Note also that the cgs unit "emu/mol" in this case is "erg/Gauss/mol" quantifying a molar magnetic
 moment.
 
-Finally, please note that the calculation result is the molar magnetic moment. Thus to get the magnetisation, you
+Please note that the calculation result is the molar magnetic moment. Thus to get the magnetisation, you
 should divide this by the molar volume of the material.
 By default, the calculation temperature is 1K, and the applied magnetic field is 1T along [001]. For further details
 and a description of the theory, see the :ref:`CrystalFieldMagnetisation <func-CrystalFieldMagnetisation>` and
 :ref:`CrystalFieldMoment <func-CrystalFieldMoment>` pages.
+
+To calculate the dipole transition matrix (and components)::
+
+    import matplotlib.pyplot as plt
+    cf = CrystalField('Ce', 'C2v', B20=0.37737, B22=3.9770, Temperature=44.0)
+    A = cf.getDipoleMatrix()       # Calculates the dipole transition matrix, which is equal to the sum of its components::
+    Ax = cf.getDipoleMatrixComponent('X') # Calculates the component of the dipole transition matrix in the x direction
+    Ay = cf.getDipoleMatrixComponent('Y') # Calculates the component of the dipole transition matrix in the Y direction
+    Az = cf.getDipoleMatrixComponent('Z') # Calculates the component of the dipole transition matrix in the Z direction
+
 
 Fitting Physical Properties
 ---------------------------

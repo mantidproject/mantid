@@ -112,12 +112,19 @@ SparseWorkspace::SparseWorkspace(const API::MatrixWorkspace &modelWS, const size
   auto parametrizedInstrument = getInstrument();
   // Copy beam parameters.
   const auto modelSource = modelWS.getInstrument()->getSource();
+  const auto parametrizedSource = parametrizedInstrument->getSource();
+  const auto beamShapeParam = modelSource->getParameterAsString("beam-shape");
+  if (!beamShapeParam.empty())
+    paramMap.add("string", parametrizedSource.get(), "beam-shape", beamShapeParam);
   const auto beamWidthParam = modelSource->getNumberParameter("beam-width");
   const auto beamHeightParam = modelSource->getNumberParameter("beam-height");
   if (beamWidthParam.size() == 1 && beamHeightParam.size() == 1) {
-    auto parametrizedSource = parametrizedInstrument->getSource();
     paramMap.add("double", parametrizedSource.get(), "beam-width", beamWidthParam[0]);
     paramMap.add("double", parametrizedSource.get(), "beam-height", beamHeightParam[0]);
+  }
+  const auto beamRadiusParam = modelSource->getNumberParameter("beam-radius");
+  if (beamRadiusParam.size() == 1) {
+    paramMap.add("double", parametrizedSource.get(), "beam-radius", beamRadiusParam[0]);
   }
   // Add information about EFixed in a proper place.
   const auto eMode = modelWS.getEMode();

@@ -27,6 +27,8 @@ public:
   int version() const override;
 
 protected:
+  ~BooleanBinaryOperationMD() = default;
+
   /// Return true if the algorithm can operate on a scalar.
   virtual bool acceptScalar() const { return true; }
   bool commutative() const override;

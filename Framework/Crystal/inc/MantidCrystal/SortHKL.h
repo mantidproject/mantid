@@ -29,7 +29,7 @@ namespace Crystal {
  * @author Vickie Lynch, SNS
  * @date 2012-01-20
  */
-class MANTID_CRYSTAL_DLL SortHKL : public API::Algorithm {
+class MANTID_CRYSTAL_DLL SortHKL final : public API::Algorithm {
 public:
   SortHKL();
   ~SortHKL() override;

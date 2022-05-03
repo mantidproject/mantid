@@ -18,7 +18,7 @@ namespace Algorithms {
   workspace
   using the Wiener filter smoothing.
 */
-class MANTID_ALGORITHMS_DLL WienerSmooth : public API::Algorithm {
+class MANTID_ALGORITHMS_DLL WienerSmooth final : public API::Algorithm {
 public:
   const std::string name() const override { return "WienerSmooth"; }
   int version() const override;

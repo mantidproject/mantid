@@ -41,7 +41,7 @@ be >= 1 </LI>
 @author Dickon Champion, STFC
 @date 24/06/2008
 */
-class MANTID_ALGORITHMS_DLL Rebunch : public API::Algorithm {
+class MANTID_ALGORITHMS_DLL Rebunch final : public API::Algorithm {
 public:
   /// Algorithm's name for identification overriding a virtual method
   const std::string name() const override { return "Rebunch"; }

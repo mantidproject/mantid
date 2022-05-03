@@ -17,7 +17,7 @@ namespace Algorithms {
 /** ManualProgressReporter : Development Algorithm that reports
  * to a progress tracker a bunch of times
  */
-class ManualProgressReporter : public API::Algorithm {
+class ManualProgressReporter final : public API::Algorithm {
 public:
   const std::string name() const override { return "ManualProgressReporter"; }
   int version() const override { return 1; };

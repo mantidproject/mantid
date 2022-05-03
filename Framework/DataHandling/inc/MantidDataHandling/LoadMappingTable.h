@@ -37,7 +37,7 @@ Required Properties:
 @author Laurent Chapon, ISIS Rutherford Appleton Laboratory
 @date 25/04/2008
 */
-class DLLExport LoadMappingTable : public API::Algorithm {
+class DLLExport LoadMappingTable final : public API::Algorithm {
 public:
   /// Default constructor
   LoadMappingTable();

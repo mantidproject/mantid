@@ -25,7 +25,7 @@ using namespace Mantid::DataObjects;
 class ComplexOpTest : public Algorithm {
 public:
   ComplexOpTest() : Algorithm() {}
-  ~ComplexOpTest() override {}
+  ~ComplexOpTest() override = default;
   void init() override {
     declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>("InputWorkspace_1", "", Direction::Input));
     declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>("InputWorkspace_2", "", Direction::Input));

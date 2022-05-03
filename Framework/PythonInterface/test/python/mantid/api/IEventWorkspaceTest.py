@@ -28,8 +28,8 @@ class IEventWorkspaceTest(unittest.TestCase):
 
     def test_meta_information(self):
         self.assertEqual(self._test_ws.getNumberEvents(), 1000)
-        self.assertAlmostEquals(self._test_ws.getTofMin(), 0.5)
-        self.assertAlmostEquals(self._test_ws.getTofMax(), 99.5)
+        self.assertAlmostEqual(self._test_ws.getTofMin(), 0.5)
+        self.assertAlmostEqual(self._test_ws.getTofMax(), 99.5)
 
     def test_that_clearing_mru_does_not_raise_an_error(self):
         try:
@@ -49,23 +49,23 @@ class IEventWorkspaceTest(unittest.TestCase):
         self.assertTrue(isinstance(el, IEventList))
         TofList = el.getTofs()
         self.assertEqual(len(TofList), el.getNumberEvents()) #check length
-        self.assertAlmostEquals(TofList[0], 0.5) #first value
+        self.assertAlmostEqual(TofList[0], 0.5) #first value
 
     def test_event_list_getWeights(self):
         el = self._test_ws.getSpectrum(0)
         self.assertTrue(isinstance(el, IEventList))
         weightList = el.getWeights()
         self.assertEqual(len(weightList), el.getNumberEvents()) #check length
-        self.assertAlmostEquals(weightList[0], 1.0) #first value
-        self.assertAlmostEquals(weightList[len(weightList)-1], 1.0) #last value
+        self.assertAlmostEqual(weightList[0], 1.0) #first value
+        self.assertAlmostEqual(weightList[len(weightList)-1], 1.0) #last value
 
     def test_event_list_getWeightErrors(self):
         el = self._test_ws.getSpectrum(0)
         self.assertTrue(isinstance(el, IEventList))
         weightErrorList = el.getWeightErrors()
         self.assertEqual(len(weightErrorList), el.getNumberEvents()) #check length
-        self.assertAlmostEquals(weightErrorList[0], 1.0) #first value
-        self.assertAlmostEquals(weightErrorList[len(weightErrorList)-1], 1.0) #last value
+        self.assertAlmostEqual(weightErrorList[0], 1.0) #first value
+        self.assertAlmostEqual(weightErrorList[len(weightErrorList)-1], 1.0) #last value
 
     def test_deprecated_getEventList(self):
         el = self._test_ws.getEventList(0)

@@ -32,7 +32,6 @@ from mantid.kernel import (
 import ILL_utilities as utils
 from ReflectometryILL_common import SampleLogs
 from ReflectometryILLPreprocess import BkgMethod, Prop, SubalgLogging
-from ReflectometryILLSumForeground import SumType
 from mantid.simpleapi import *
 import math
 
@@ -99,19 +98,23 @@ class PropertyNames(object):
     INCOHERENT = 'Incoherent'
     COHERENT = 'Coherent'
 
-    USE_MANUAL_SCALE_FACTORS = 'UseManualScaleFactors'
     MANUAL_SCALE_FACTORS = 'ManualScaleFactors'
     CACHE_DIRECT_BEAM = 'CacheDirectBeam'
 
 
 class ReflectometryILLAutoProcess(DataProcessorAlgorithm):
 
-    def __init__(self):
-        """Initialize an instance of the algorithm."""
-        DataProcessorAlgorithm.__init__(self)
+    @staticmethod
+    def _get_numor_string(runs):
+        """Returns numor string based on the provided runs list."""
+        if not isinstance(runs, list):
+            runs = [runs]
+        if isinstance(runs[0], list):
+            runs = runs[0]
+        return '+'.join([numor[numor.rfind('/') + 1:-4] for numor in runs])
 
     def category(self):
-        """Return the categories of the algrithm."""
+        """Return the categories of the algorithm."""
         return 'ILL\\Reflectometry;ILL\\Auto;Workflow\\Reflectometry'
 
     def name(self):
@@ -272,21 +275,12 @@ class ReflectometryILLAutoProcess(DataProcessorAlgorithm):
         )
 
         self.declareProperty(
-            PropertyNames.USE_MANUAL_SCALE_FACTORS,
-            defaultValue=False,
-            doc='Choose to apply manual scale factors for stitching.'
-        )
-
-        self.declareProperty(
             FloatArrayProperty(
                 PropertyNames.MANUAL_SCALE_FACTORS,
                 values=[]
             ),
-            doc='A list of manual scale factors for stitching (number of anlge configurations minus 1)'
+            doc='An optional list of manual scale factors for stitching (number of angle configurations minus 1)'
         )
-
-        self.setPropertySettings(PropertyNames.MANUAL_SCALE_FACTORS,
-                                 EnabledWhenProperty(PropertyNames.USE_MANUAL_SCALE_FACTORS, PropertyCriterion.IsNotDefault))
 
         self.declareProperty(
             PropertyNames.CACHE_DIRECT_BEAM,
@@ -543,6 +537,12 @@ class ReflectometryILLAutoProcess(DataProcessorAlgorithm):
         )
         self.setPropertyGroup(PropertyNames.XMAX, preProcessReflected)
 
+        self.declareProperty(
+            name="SaveReductionParams",
+            defaultValue=True,
+            doc="Whether to save reduction parameters in an ASCII file."
+        )
+
     def validateInputs(self):
         """Return a dictionary containing issues found in properties."""
         issues = dict()
@@ -556,7 +556,7 @@ class ReflectometryILLAutoProcess(DataProcessorAlgorithm):
                 if len(value) != dimensionality and len(value) != 1:
                     issues[property_name] = 'Parameter size mismatch: must have a single value or as many as there are reflected beams:' \
                                             ' given {0}, but there are {1} reflected beam runs'.format(len(value), dimensionality)
-        if self.getProperty(PropertyNames.USE_MANUAL_SCALE_FACTORS).value:
+        if not self.getProperty(PropertyNames.MANUAL_SCALE_FACTORS).isDefault:
             manual_scale_factors = self.getProperty(PropertyNames.MANUAL_SCALE_FACTORS).value
             if len(manual_scale_factors) != dimensionality-1:
                 issues[PropertyNames.MANUAL_SCALE_FACTORS] = \
@@ -659,6 +659,8 @@ class ReflectometryILLAutoProcess(DataProcessorAlgorithm):
             return run.getLogData('DAN.value').value
         elif run.hasProperty('dan.value'):
             return run.getLogData('dan.value').value
+        elif run.hasProperty('VirtualAxis.DAN_actual_angle'):
+            return run.getLogData('VirtualAxis.DAN_actual_angle').value
         else:
             raise RuntimeError('Unable to retrieve the detector angle from ' + ws)
 
@@ -714,6 +716,11 @@ class ReflectometryILLAutoProcess(DataProcessorAlgorithm):
         """Run the ReflectometryILLSumForeground, empty directForegroundName decides, if reflected beam is present."""
         wavelengthRange = [float(self.get_value(PropertyNames.WAVELENGTH_LOWER, angle_index)),
                            float(self.get_value(PropertyNames.WAVELENGTH_UPPER, angle_index))]
+        if directForegroundName == '' and sumType == 'SumInQ':
+            wavelengthRange = [float(self.getProperty(PropertyNames.WAVELENGTH_LOWER).getDefault),
+                               float(self.getProperty(PropertyNames.WAVELENGTH_UPPER).getDefault)]
+            sumType = 'SumInLambda'
+
         directBeamName = directForegroundName[:-4] if directForegroundName else ''
         ReflectometryILLSumForeground(
             InputWorkspace=inputWorkspaceName,
@@ -730,6 +737,9 @@ class ReflectometryILLAutoProcess(DataProcessorAlgorithm):
                                   format(mtd[outputWorkspaceName].spectrumInfo().l1()))
             self.log().accumulate('Final reflected foreground centre distance [m]: {0:.5f}\n'.
                                   format(mtd[outputWorkspaceName].spectrumInfo().l2(0)))
+            self.log().accumulate('Final source (mid chopper) to foreground centre distance [m]: {0:.5f}\n'.
+                                  format(mtd[outputWorkspaceName].spectrumInfo().l1()
+                                         +mtd[outputWorkspaceName].spectrumInfo().l2(0)))
 
     def polarization_correction(self, inputWorkspaceName, outputWorkspaceName):
         """Run the ReflectometryILLPolarizationCor."""
@@ -757,7 +767,9 @@ class ReflectometryILLAutoProcess(DataProcessorAlgorithm):
         dbrun = self._db[0]  if len(self._db) == 1 else self._db[angle_index]
         directBeamInput = self.compose_run_string(dbrun)
         self.preprocess_direct_beam(directBeamInput, directBeamName, angle_index)
-        self.sum_foreground(directBeamName, directForegroundName, SumType.IN_LAMBDA, angle_index)
+        sum_type = self.get_value(PropertyNames.SUM_TYPE, angle_index)
+        sum_type = 'SumInLambda' if sum_type == PropertyNames.INCOHERENT else 'SumInQ'
+        self.sum_foreground(directBeamName, directForegroundName, sum_type, angle_index)
         if self.getProperty(PropertyNames.CACHE_DIRECT_BEAM).value:
             self._autoCleanup.protect(directBeamName)
             self._autoCleanup.protect(directForegroundName)
@@ -815,6 +827,29 @@ class ReflectometryILLAutoProcess(DataProcessorAlgorithm):
             run_inputs.append(run11_input)
         return run_inputs, run_names
 
+    def _save_parameters(self, ws):
+        """Saves workspace parameters used in the reduction to an ASCII file.
+
+        Keyword parameters:
+        ws - workspace used to obtain reduction parameters
+        """
+        save_path = config['defaultsave.directory']
+        parameter_output = os.path.join(save_path, "{}.txt".format(mtd[ws].getName()))
+        run = mtd[ws].run() if not isinstance(mtd[ws], WorkspaceGroup) else mtd[ws][0].run()
+        try:
+            log_list = mtd[ws].getInstrument().getStringParameter('reduction_logs_to_save')[0]
+        except IndexError:
+            self.log().warning('A list of reduction logs to save not specified, cannot save them.')
+            return
+        property_list = [log.strip() for log in log_list.split(',')]  # removes empty spaces from log names
+        with open(parameter_output, "w") as outfile:
+            for prop in property_list:
+                if run.hasProperty(prop):
+                    property_val = run.getLogData(prop).value
+                    if isinstance(property_val, int) or isinstance(property_val, float):
+                        property_val = round(property_val, 4)
+                    outfile.write("{}\t{}\n".format(prop, str(property_val)))
+
     def PyExec(self):
         """Execute the algorithm."""
         self.log().purge()
@@ -827,10 +862,12 @@ class ReflectometryILLAutoProcess(DataProcessorAlgorithm):
         for angle_index in range(self._dimensionality):
             if len(self._db) == 1:
                 runDB = self.make_name(self._db[0])
+                direct_beam_names = self._get_numor_string(self._db)
             else:
                 runDB = self.make_name(self._db[angle_index])
+                direct_beam_names = self._get_numor_string(self._db[angle_index])
             self.log().accumulate('Angle {0}:\n'.format(angle_index+1))
-            self.log().accumulate('Direct Beam: {0}\n'.format(runDB))
+            self.log().accumulate('Direct Beam(s): {0}\n'.format(direct_beam_names))
             directBeamName = runDB + '_direct'
             directForegroundName = directBeamName + '_frg'
             # always process direct beam; even if it can be the same for different angles,
@@ -838,7 +875,8 @@ class ReflectometryILLAutoProcess(DataProcessorAlgorithm):
             self.process_direct_beam(directBeamName, directForegroundName, angle_index)
             if not self.is_polarized():
                 runRB = self.make_name(self._rb[angle_index])
-                self.log().accumulate('Reflected Beam: {0}\n'.format(runRB))
+                refl_beam_names = self._get_numor_string(self._rb[angle_index])
+                self.log().accumulate('Reflected Beam(s): {0}\n'.format(refl_beam_names))
                 reflectedBeamName = runRB + '_reflected'
                 reflectedBeamInput = self.compose_run_string(self._rb[angle_index])
                 to_convert_to_q = self.process_reflected_beam(reflectedBeamInput, reflectedBeamName, directBeamName, angle_index)
@@ -858,16 +896,18 @@ class ReflectometryILLAutoProcess(DataProcessorAlgorithm):
             if scaleFactor != 1:
                 Scale(InputWorkspace=convertedToQName, OutputWorkspace=convertedToQName, Factor=scaleFactor)
             to_group.append(convertedToQName)
+            if self.getProperty('SaveReductionParams').value:
+                self._save_parameters(convertedToQName)
             self._autoCleanup.protect(convertedToQName)
             progress.report()
 
         if len(to_group) > 1:
             try:
                 stitched = self._outWS + '_stitched'
-                use_manual = self.getProperty(PropertyNames.USE_MANUAL_SCALE_FACTORS).value
                 scale_factors = self.getProperty(PropertyNames.MANUAL_SCALE_FACTORS).value
-                Stitch1DMany(InputWorkspaces=to_group, OutputWorkspace=stitched, UseManualScaleFactors=use_manual,
-                             ManualScaleFactors=scale_factors)
+                Stitch(InputWorkspaces=to_group,
+                       OutputWorkspace=stitched,
+                       ManualScaleFactors=scale_factors)
                 to_group.append(stitched)
             except RuntimeError as re:
                 self.log().warning('Unable to stitch automatically, consider stitching manually: ' + str(re))

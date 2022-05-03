@@ -16,7 +16,7 @@ namespace MantidQt::CustomInterfaces::IDA {
 using namespace MantidWidgets;
 using namespace Mantid::API;
 
-ConvFunctionModel::ConvFunctionModel() {}
+ConvFunctionModel::ConvFunctionModel() = default;
 
 void ConvFunctionModel::clearData() {
   m_fitType = FitType::None;

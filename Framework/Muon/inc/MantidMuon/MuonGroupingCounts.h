@@ -14,10 +14,10 @@ using namespace Mantid::API;
 namespace Mantid {
 namespace Muon {
 
-class MANTID_MUON_DLL MuonGroupingCounts : public API::Algorithm {
+class MANTID_MUON_DLL MuonGroupingCounts final : public API::Algorithm {
 public:
   MuonGroupingCounts() : API::Algorithm() {}
-  ~MuonGroupingCounts() {}
+  virtual ~MuonGroupingCounts() = default;
 
   const std::string name() const override { return "MuonGroupingCounts"; }
   int version() const override { return (1); }

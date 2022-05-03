@@ -10,58 +10,100 @@ class RundexSettings(object):
 
     # instruments
     D11 =    "D11"
-    D11B =   "D11B"
     D16 =    "D16"
     D22 =    "D22"
-    D22B =   "D22B"
     D33 =    "D33"
     D17 =    "D17"
     FIGARO = "FIGARO"
     D2B =    "D2B"
     D20 =    "D20"
     D1B =    "D1B"
+    IN4 =     "IN4"
+    IN5 =     "IN5"
+    IN6 =     "IN6"
+    PANTHER = "PANTHER"
+    SHARP =   "SHARP"
 
     # techniques (see instrument/Facilities.xml)
     SANS =   "SANS"
     REFL =   "Reflectometry"
     POWDER = "Powder diffraction"
+    DIRECT = "Direct geometry"
 
     # acquisition modes
-    SANS_ACQ =     "SANS"
+    SANS_ACQ =     "SANS v1"
     SANS_PSCAN =   "Sample scan"
+    SANS_MULTI =   "SANS v2"
     REFL_POL =     "Polarized"
     REFL_NPOL =    "Unpolarized"
     POWDER_DSCAN = "Detector scan"
     POWDER_PSCAN = "Sample scan"
+    DIRECT_TOF = "TOF"
 
     # correspondance between instrument and technique
     TECHNIQUE = {
             D11:    SANS,
-            D11B:    SANS,
             D16:    SANS,
             D22:    SANS,
-            D22B:    SANS,
             D33:    SANS,
             D17:    REFL,
             FIGARO: REFL,
             D2B:    POWDER,
             D20:    POWDER,
-            D1B:    POWDER
+            D1B:    POWDER,
+            IN4:     DIRECT,
+            IN5:     DIRECT,
+            IN6:     DIRECT,
+            PANTHER: DIRECT,
+            SHARP:   DIRECT
             }
 
     # correspondance between instrument and acquisition mode
     ACQUISITION_MODES = {
-            D11:    [SANS_ACQ],
-            D11B:    [SANS_ACQ],
+            D11:    [SANS_ACQ, SANS_MULTI],
             D16:    [SANS_ACQ, SANS_PSCAN],
-            D22:    [SANS_ACQ],
-            D22B:    [SANS_ACQ],
-            D33:    [SANS_ACQ],
+            D22:    [SANS_ACQ, SANS_MULTI],
+            D33:    [SANS_ACQ, SANS_MULTI],
             D17:    [REFL_POL, REFL_NPOL],
             FIGARO: [REFL_NPOL],
             D2B:    [POWDER_DSCAN],
             D20:    [POWDER_DSCAN, POWDER_PSCAN],
-            D1B:    [POWDER_PSCAN]
+            D1B:    [POWDER_PSCAN],
+            IN4:     [DIRECT_TOF],
+            IN5:     [DIRECT_TOF],
+            IN6:     [DIRECT_TOF],
+            PANTHER: [DIRECT_TOF],
+            SHARP:   [DIRECT_TOF]
+            }
+
+    #group by group processing mode
+    COLUMN_BY_COLUMN = "ColumnByColumn"
+    GROUP_BY_GROUP = "GroupByGroup"
+    PROCESSING_MODE = {
+            SANS_MULTI: GROUP_BY_GROUP
+            }
+    GROUPED_COLUMNS = {
+            SANS_MULTI: [
+                "SampleRunsD1",
+                "SampleRunsD2",
+                "SampleRunsD3",
+                "SampleRunsD4",
+                "SampleRunsD5",
+                "DarkCurrentRuns",
+                "EmptyBeamRuns",
+                "FluxRuns",
+                "EmptyContainerRuns",
+                "SampleTrRunsW1",
+                "SampleTrRunsW2",
+                "TrDarkCurrentRuns",
+                "ContainerTrRuns",
+                "TrEmptyBeamRuns",
+                "BeamStopMasks",
+                "FlatFields",
+                "Solvents",
+                "SampleThickness",
+                "SampleNames",
+                ]
             }
 
     # parameters for each acquisition mode
@@ -90,6 +132,28 @@ class RundexSettings(object):
                 "OutputWorkspace",
                 "OutputJoinedWorkspace",
                 "CustomOptions"
+                ],
+            SANS_MULTI: [
+                "SampleRunsD1",
+                "SampleRunsD2",
+                "SampleRunsD3",
+                "SampleRunsD4",
+                "SampleRunsD5",
+                "DarkCurrentRuns",
+                "EmptyBeamRuns",
+                "FluxRuns",
+                "EmptyContainerRuns",
+                "SampleTrRunsW1",
+                "SampleTrRunsW2",
+                "TrDarkCurrentRuns",
+                "ContainerTrRuns",
+                "TrEmptyBeamRuns",
+                "BeamStopMasks",
+                "FlatFields",
+                "Solvents",
+                "SampleThickness",
+                "SampleNames",
+                "OutputWorkspace"
                 ],
             REFL_POL: [
                 "Run00",
@@ -128,6 +192,19 @@ class RundexSettings(object):
                 "OutputWorkspace",
                 "CustomOptions"
                 ],
+            DIRECT_TOF: [
+                "Runs",
+                "OutputWorkspace",
+                "ProcessAs",
+                "CadmiumWorkspace",
+                "EmptyContainerWorkspace",
+                "FlatBackground",
+                "VanadiumWorkspace",
+                "MaskWorkspace",
+                "SampleMaterial",
+                "SampleGeometry",
+                "CustomOptions"
+                ]
             }
 
     VISUAL_SETTINGS = {
@@ -136,6 +213,14 @@ class RundexSettings(object):
                     "FluxRuns",
                     "TransmissionAbsorberRuns"
                     ]
+                },
+            DIRECT_TOF: {
+                "HiddenColumns": [
+                    "CadmiumWorkspace",
+                    "FlatBackground",
+                    "SampleMaterial",
+                    "SampleGeometry",
+                    ]
                 }
             }
 
@@ -143,16 +228,24 @@ class RundexSettings(object):
     ALGORITHM = {
             SANS_ACQ:     "SANSILLAutoProcess",
             SANS_PSCAN:   "SANSILLParameterScan",
+            SANS_MULTI:   "SANSILLMultiProcess",
             REFL_POL:     "ReflectometryILLAutoProcess",
             REFL_NPOL:    "ReflectometryILLAutoProcess",
             POWDER_DSCAN: "PowderILLDetectorScan",
             POWDER_PSCAN: "PowderILLParameterScan",
+            DIRECT_TOF:   "DirectILLAutoProcess"
             }
 
     # export algos for each acquisition mode. Each algo has a boolean to set
     # it as activated or not
     EXPORT_ALGORITHMS = {
             SANS_ACQ: {
+                "SaveNexusProcessed": False,
+                "SaveAscii": False,
+                "SaveCanSAS1D": True,
+                "SaveNISTDAT": True
+                },
+            SANS_MULTI: {
                 "SaveNexusProcessed": False,
                 "SaveAscii": False,
                 "SaveCanSAS1D": True,
@@ -177,6 +270,11 @@ class RundexSettings(object):
                 "SaveNexusProcessed": False,
                 "SaveAscii": False,
                 "SaveFocussedXYE": True
+                },
+            DIRECT_TOF: {
+                "SaveNexusProcessed": True,
+                "SaveAscii": False,
+                "SaveNXSPE": False
                 }
             }
 
@@ -190,7 +288,8 @@ class RundexSettings(object):
             "SaveAscii": ".txt",
             "SaveCanSAS1D": ".xml",
             "SaveNISTDAT": ".dat",
-            "SaveReflectometryAscii": ".mft",
+            "SaveReflectometryAscii": [".mft", ".lam"],
+            "SaveNXSPE": ".nxspe",
             "SaveFocussedXYE": ".dat"
             }
 
@@ -200,10 +299,12 @@ class RundexSettings(object):
     THREADS_NUMBER = {
             SANS_ACQ:     1,
             SANS_PSCAN:   1,
+            SANS_MULTI:   1,
             REFL_POL:     1,
             REFL_NPOL:    1,
             POWDER_DSCAN: 1,
             POWDER_PSCAN: 1,
+            DIRECT_TOF:   1,
             }
 
     # settings for each acquisition mode
@@ -255,6 +356,37 @@ class RundexSettings(object):
                 "PixelYMin",
                 "PixelYMax",
                 "Wavelength"
+                ],
+            SANS_MULTI : [
+                "SensitivityMap",
+                "DefaultMask",
+                "TransmissionThetaDependent",
+                "NormaliseBy",
+                "TrBeamRadius",
+                "BeamRadius",
+                "SampleThicknessFrom",
+                "SampleNamesFrom",
+                "WaterCrossSection",
+                "ProduceSensitivity",
+                "SensitivityWithOffset",
+                "OutputType",
+                "DistancesAtWavelength2",
+                "OutputBinning",
+                "CalculateResolution",
+                "DefaultQBinning",
+                "BinningFactor",
+                "NumberOfWedges",
+                "WedgeAngle",
+                "WedgeOffset",
+                "AsymmetricWedges",
+                "WavelengthRange",
+                "ShapeTable",
+                "OutputPanels",
+                "PerformStitching",
+                "ManualScaleFactors",
+                "TieScaleFactors",
+                "ScaleFactorCalculation",
+                "StitchReferenceIndex",
                 ],
             REFL_POL : [
                 "PolarizationEfficiencyFile",
@@ -349,6 +481,39 @@ class RundexSettings(object):
                 "CropNegative2Theta",
                 "ZeroCountingCells",
                 "Unit"
+                ],
+            DIRECT_TOF: [
+                "ReductionType",
+                "FlatBkg",
+                "FlatBkgAveragingWindow",
+                "FlatBkgScaling",
+                "EmptyContainerScaling",
+                "IncidentEnergyCalibration",
+                "IncidentEnergy",
+                "IncidentEnergyRange",
+                "ElasticChannel",
+                "EPPCreationMethod",
+                "ElasticChannelIndex",
+                "EPPWorkspace",
+                "AbsorptionCorrection",
+                "SelfAttenuationMethod",
+                "ContainerMaterial",
+                "ContainerGeometry",
+                "AbsoluteUnitNormalisation",
+                "MaskedTubes",
+                "MaskThresholdMin",
+                "MaskThresholdMax",
+                "MaskedAngles",
+                "MaskWithVanadium",
+                "EnergyExchangeBinning",
+                "MomentumTransferBinning",
+                "DetectorGrouping",
+                "GroupPixelsBy",
+                "GroupingAngleStep",
+                "GroupingBehaviour",
+                "SampleAngleOffset",
+                "SaveOutput",
+                "ClearCache",
                 ]
             }
 

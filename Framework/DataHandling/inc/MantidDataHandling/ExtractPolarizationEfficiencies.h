@@ -15,7 +15,7 @@ namespace DataHandling {
    efficiencies to be used with the polarization correction algorithm
    (PolarizationEfficienciesCor).
 */
-class DLLExport ExtractPolarizationEfficiencies : public API::Algorithm {
+class DLLExport ExtractPolarizationEfficiencies final : public API::Algorithm {
 public:
   const std::string name() const override;
   int version() const override;

@@ -118,9 +118,6 @@ public:
     // Now set up data in workspace2D
     double dQ = 0;
     double Q0 = calcQ(bankR, detectorInfo, PeakRow, PeakCol, 1000.0 + 30.0 * 50);
-
-    double TotIntensity = 0;
-
     const detid2index_map map = wsPtr->getDetectorIDToWorkspaceIndexMap(true);
 
     for (int row = 0; row < NRC; row++)
@@ -138,7 +135,6 @@ public:
 
         for (int chan = 0; chan < NTimes; chan++) {
           double val = max<double>(0.0, MaxRC * (1 - abs(chan - PeakChan) / MaxPeakTimeSpan));
-          TotIntensity += val;
           T[chan] += val;
           val += 1.4;
 

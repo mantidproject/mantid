@@ -450,18 +450,18 @@ void BinaryOperation::doSingleValue() {
     // ---- The output is an EventWorkspace ------
     PARALLEL_FOR_IF(Kernel::threadSafe(*m_lhs, *m_rhs, *m_out))
     for (int64_t i = 0; i < numHists; ++i) {
-      PARALLEL_START_INTERUPT_REGION
+      PARALLEL_START_INTERRUPT_REGION
       m_out->setSharedX(i, m_lhs->sharedX(i));
       performEventBinaryOperation(m_eout->getSpectrum(i), rhsY, rhsE);
       m_progress->report(this->name());
-      PARALLEL_END_INTERUPT_REGION
+      PARALLEL_END_INTERRUPT_REGION
     }
-    PARALLEL_CHECK_INTERUPT_REGION
+    PARALLEL_CHECK_INTERRUPT_REGION
   } else {
     // ---- Histogram Output -----
     PARALLEL_FOR_IF(Kernel::threadSafe(*m_lhs, *m_rhs, *m_out))
     for (int64_t i = 0; i < numHists; ++i) {
-      PARALLEL_START_INTERUPT_REGION
+      PARALLEL_START_INTERRUPT_REGION
       m_out->setSharedX(i, m_lhs->sharedX(i));
       // Get reference to output vectors here to break any sharing outside the
       // function call below
@@ -471,9 +471,9 @@ void BinaryOperation::doSingleValue() {
       HistogramData::HistogramE &outE = m_out->mutableE(i);
       performBinaryOperation(m_lhs->histogram(i), rhsY, rhsE, outY, outE);
       m_progress->report(this->name());
-      PARALLEL_END_INTERUPT_REGION
+      PARALLEL_END_INTERRUPT_REGION
     }
-    PARALLEL_CHECK_INTERUPT_REGION
+    PARALLEL_CHECK_INTERRUPT_REGION
   }
 }
 
@@ -496,21 +496,21 @@ void BinaryOperation::doSingleColumn() {
     // ---- The output is an EventWorkspace ------
     PARALLEL_FOR_IF(Kernel::threadSafe(*m_lhs, *m_rhs, *m_out))
     for (int64_t i = 0; i < numHists; ++i) {
-      PARALLEL_START_INTERUPT_REGION
+      PARALLEL_START_INTERRUPT_REGION
       const double rhsY = m_rhs->y(i)[0];
       const double rhsE = m_rhs->e(i)[0];
       if (propagateSpectraMask(lhsSpectrumInfo, rhsSpectrumInfo, i, *m_out, outSpectrumInfo)) {
         performEventBinaryOperation(m_eout->getSpectrum(i), rhsY, rhsE);
       }
       m_progress->report(this->name());
-      PARALLEL_END_INTERUPT_REGION
+      PARALLEL_END_INTERRUPT_REGION
     }
-    PARALLEL_CHECK_INTERUPT_REGION
+    PARALLEL_CHECK_INTERRUPT_REGION
   } else {
     // ---- Histogram Output -----
     PARALLEL_FOR_IF(Kernel::threadSafe(*m_lhs, *m_rhs, *m_out))
     for (int64_t i = 0; i < numHists; ++i) {
-      PARALLEL_START_INTERUPT_REGION
+      PARALLEL_START_INTERRUPT_REGION
       const double rhsY = m_rhs->y(i)[0];
       const double rhsE = m_rhs->e(i)[0];
 
@@ -525,9 +525,9 @@ void BinaryOperation::doSingleColumn() {
         performBinaryOperation(m_lhs->histogram(i), rhsY, rhsE, outY, outE);
       }
       m_progress->report(this->name());
-      PARALLEL_END_INTERUPT_REGION
+      PARALLEL_END_INTERRUPT_REGION
     }
-    PARALLEL_CHECK_INTERUPT_REGION
+    PARALLEL_CHECK_INTERRUPT_REGION
   }
 }
 
@@ -554,13 +554,13 @@ void BinaryOperation::doSingleSpectrum() {
       const int64_t numHists = m_lhs->getNumberHistograms();
       PARALLEL_FOR_IF(Kernel::threadSafe(*m_lhs, *m_rhs, *m_out))
       for (int64_t i = 0; i < numHists; ++i) {
-        PARALLEL_START_INTERUPT_REGION
+        PARALLEL_START_INTERRUPT_REGION
         // Perform the operation on the event list on the output (== lhs)
         performEventBinaryOperation(m_eout->getSpectrum(i), rhs_spectrum);
         m_progress->report(this->name());
-        PARALLEL_END_INTERUPT_REGION
+        PARALLEL_END_INTERRUPT_REGION
       }
-      PARALLEL_CHECK_INTERUPT_REGION
+      PARALLEL_CHECK_INTERRUPT_REGION
     } else {
       // -------- The rhs is a histogram ---------
       // Pull m_out the m_rhs spectrum
@@ -574,13 +574,13 @@ void BinaryOperation::doSingleSpectrum() {
 
       PARALLEL_FOR_IF(Kernel::threadSafe(*m_lhs, *m_rhs, *m_out))
       for (int64_t i = 0; i < numHists; ++i) {
-        PARALLEL_START_INTERUPT_REGION
+        PARALLEL_START_INTERRUPT_REGION
         // Perform the operation on the event list on the output (== lhs)
         performEventBinaryOperation(m_eout->getSpectrum(i), rhsX, rhsY, rhsE);
         m_progress->report(this->name());
-        PARALLEL_END_INTERUPT_REGION
+        PARALLEL_END_INTERRUPT_REGION
       }
-      PARALLEL_CHECK_INTERUPT_REGION
+      PARALLEL_CHECK_INTERRUPT_REGION
     }
 
   } else {
@@ -597,7 +597,7 @@ void BinaryOperation::doSingleSpectrum() {
 
     PARALLEL_FOR_IF(Kernel::threadSafe(*m_lhs, *m_rhs, *m_out))
     for (int64_t i = 0; i < numHists; ++i) {
-      PARALLEL_START_INTERUPT_REGION
+      PARALLEL_START_INTERRUPT_REGION
       m_out->setSharedX(i, m_lhs->sharedX(i));
       // Get reference to output vectors here to break any sharing outside the
       // function call below
@@ -607,9 +607,9 @@ void BinaryOperation::doSingleSpectrum() {
       HistogramData::HistogramE &outE = m_out->mutableE(i);
       performBinaryOperation(m_lhs->histogram(i), rhs, outY, outE);
       m_progress->report(this->name());
-      PARALLEL_END_INTERUPT_REGION
+      PARALLEL_END_INTERRUPT_REGION
     }
-    PARALLEL_CHECK_INTERUPT_REGION
+    PARALLEL_CHECK_INTERRUPT_REGION
   }
 }
 
@@ -644,7 +644,7 @@ void BinaryOperation::do2D(bool mismatchedSpectra) {
       const int64_t numHists = m_lhs->getNumberHistograms();
       PARALLEL_FOR_IF(Kernel::threadSafe(*m_lhs, *m_rhs, *m_out))
       for (int64_t i = 0; i < numHists; ++i) {
-        PARALLEL_START_INTERUPT_REGION
+        PARALLEL_START_INTERRUPT_REGION
         m_progress->report(this->name());
 
         int64_t rhs_wi = i;
@@ -664,9 +664,9 @@ void BinaryOperation::do2D(bool mismatchedSpectra) {
         // Free up memory on the RHS if that is possible
         if (m_ClearRHSWorkspace)
           const_cast<EventList &>(m_erhs->getSpectrum(rhs_wi)).clear();
-        PARALLEL_END_INTERUPT_REGION
+        PARALLEL_END_INTERRUPT_REGION
       }
-      PARALLEL_CHECK_INTERUPT_REGION
+      PARALLEL_CHECK_INTERRUPT_REGION
     } else {
       // -------- The rhs is a histogram, or we want to use the histogram
       // representation of it ---------
@@ -676,7 +676,7 @@ void BinaryOperation::do2D(bool mismatchedSpectra) {
 
       PARALLEL_FOR_IF(Kernel::threadSafe(*m_lhs, *m_rhs, *m_out))
       for (int64_t i = 0; i < numHists; ++i) {
-        PARALLEL_START_INTERUPT_REGION
+        PARALLEL_START_INTERRUPT_REGION
         m_progress->report(this->name());
         int64_t rhs_wi = i;
         if (mismatchedSpectra && table) {
@@ -697,9 +697,9 @@ void BinaryOperation::do2D(bool mismatchedSpectra) {
         if (m_ClearRHSWorkspace)
           const_cast<EventList &>(m_erhs->getSpectrum(rhs_wi)).clear();
 
-        PARALLEL_END_INTERUPT_REGION
+        PARALLEL_END_INTERRUPT_REGION
       }
-      PARALLEL_CHECK_INTERUPT_REGION
+      PARALLEL_CHECK_INTERRUPT_REGION
     }
 
   } else {
@@ -712,7 +712,7 @@ void BinaryOperation::do2D(bool mismatchedSpectra) {
 
     PARALLEL_FOR_IF(Kernel::threadSafe(*m_lhs, *m_rhs, *m_out))
     for (int64_t i = 0; i < numHists; ++i) {
-      PARALLEL_START_INTERUPT_REGION
+      PARALLEL_START_INTERRUPT_REGION
       m_progress->report(this->name());
       m_out->setSharedX(i, m_lhs->sharedX(i));
       int64_t rhs_wi = i;
@@ -738,9 +738,9 @@ void BinaryOperation::do2D(bool mismatchedSpectra) {
       if (m_ClearRHSWorkspace)
         const_cast<EventList &>(m_erhs->getSpectrum(rhs_wi)).clear();
 
-      PARALLEL_END_INTERUPT_REGION
+      PARALLEL_END_INTERRUPT_REGION
     }
-    PARALLEL_CHECK_INTERUPT_REGION
+    PARALLEL_CHECK_INTERRUPT_REGION
   }
   // Make sure we don't use outdated MRU
   if (m_ClearRHSWorkspace)

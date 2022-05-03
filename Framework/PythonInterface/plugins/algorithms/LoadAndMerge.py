@@ -5,10 +5,11 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 import os.path
-from mantid.kernel import Direction, StringContainsValidator, PropertyManagerProperty
+from mantid.kernel import Direction, StringContainsValidator, StringListValidator, PropertyManagerProperty, \
+    EnabledWhenProperty, PropertyCriterion
 from mantid.api import AlgorithmFactory, AlgorithmManager, MultipleFileProperty, \
     WorkspaceProperty, PythonAlgorithm, FileLoaderRegistry, Progress
-from mantid.simpleapi import MergeRuns, RenameWorkspace, DeleteWorkspace, GroupWorkspaces, mtd
+from mantid.simpleapi import MergeRuns, RenameWorkspace, DeleteWorkspace, GroupWorkspaces, ConjoinXRuns, ConvertToPointData, mtd
 
 
 class LoadAndMerge(PythonAlgorithm):
@@ -56,6 +57,11 @@ class LoadAndMerge(PythonAlgorithm):
                              doc='Options for merging the metadata')
         self.declareProperty(WorkspaceProperty('OutputWorkspace', '', direction=Direction.Output),
                              doc='Output workspace or workspace group.')
+        self.declareProperty('OutputBehaviour', 'Group', StringListValidator(['Group', 'Concatenate']),
+                             doc='Whether to group the workspaces to a workspace group or to concatenate them to a single workspace.')
+        self.declareProperty('SampleLogAsXAxis', '',
+                             doc='Sample log to be put as x-axis when concatenating; will use linear indices if left blank.')
+        self.setPropertySettings('SampleLogAsXAxis', EnabledWhenProperty('OutputBehaviour', PropertyCriterion.IsEqualTo, 'Concatenate'))
 
     def _load(self, run, runnumber):
         """
@@ -146,7 +152,17 @@ class LoadAndMerge(PythonAlgorithm):
                 to_group.append(runnumbers)
 
         if len(to_group) != 1:
-            GroupWorkspaces(InputWorkspaces=to_group, OutputWorkspace=output)
+            if self.getPropertyValue('OutputBehaviour') == 'Group':
+                GroupWorkspaces(InputWorkspaces=to_group, OutputWorkspace=output)
+            else:
+                log_as_x = self.getPropertyValue('SampleLogAsXAxis')
+                # first ensure point data before attempting conjoin, as it is undefined for histograms
+                for ws in to_group:
+                    ConvertToPointData(InputWorkspace=ws, OutputWorkspace=ws)
+                if log_as_x:
+                    ConjoinXRuns(InputWorkspaces=to_group, OutputWorkspace=output, SampleLogAsXAxis=log_as_x)
+                else:
+                    ConjoinXRuns(InputWorkspaces=to_group, OutputWorkspace=output, LinearizeAxis=True)
         else:
             RenameWorkspace(InputWorkspace=to_group[0], OutputWorkspace=output)
 

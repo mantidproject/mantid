@@ -1,0 +1,76 @@
+digraph Sample {
+  $global_style
+
+  subgraph decisions {
+    $decision_style
+    Mask
+    SelfAttenuation
+    RebinData
+    Group
+    Save
+  }
+
+  subgraph params {
+    $param_style
+    Runs
+    EmptyContainerWorkspace
+    VanadiumWorkspace
+  }
+
+  subgraph values {
+    $value_style
+    OutputWorkspace
+  }
+
+  subgraph algorithms {
+    $algorithm_style
+    DirectILLCollectData
+    MaskDetectors
+    PaalmanPingsMonteCarloAbsorption
+    PaalmanPingsAbsorptionCorrection
+    ApplyPaalmanPingsCorrection
+    Minus
+    MaskWorkspace
+    Divide
+    ConvertUnits
+    CorrectKiKf
+    DetectorEfficiencyCorUser
+    Rebin
+    SaveOutput
+    GroupDetectors
+  }
+
+  Runs -> DirectILLCollectData
+  DirectILLCollectData -> Mask
+  MaskWorkspace -> MaskCreation
+  MaskCreation -> MaskWorkspace
+  MaskWorkspace -> MaskDetectors
+  Mask -> MaskDetectors
+  MaskDetectors -> Minus
+  Mask -> Minus
+  EmptyContainerWorkspace -> Minus
+  Minus -> SelfAttenuation
+  SelfAttenuation -> PaalmanPingsAbsorptionCorrection
+  SelfAttenuation -> PaalmanPingsMonteCarloAbsorption
+  PaalmanPingsAbsorptionCorrection -> ApplyPaalmanPingsCorrection
+  PaalmanPingsMonteCarloAbsorption -> ApplyPaalmanPingsCorrection
+  ApplyPaalmanPingsCorrection -> Divide
+  SelfAttenuation -> Divide
+  VanadiumWorkspace -> Divide
+  Divide -> ConvertUnits
+  ConvertUnits -> CorrectKiKf
+  CorrectKiKf -> DetectorEfficiencyCorUser
+  DetectorEfficiencyCorUser -> RebinData
+  RebinData -> Rebin
+  Rebin -> Group
+  RebinData -> Group
+  Group -> GroupDetectors
+  Group -> Save
+  GroupDetectors -> Save
+  Save -> SaveOutput
+  SaveOutput -> OutputWorkspace
+  Save -> OutputWorkspace
+}
+
+
+

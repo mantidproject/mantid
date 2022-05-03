@@ -19,7 +19,7 @@ class TomlParserTest(unittest.TestCase):
         return self.mocked_reader
 
     def test_returns_v1_parser(self):
-        test_dict = {"toml_file_version": 0}
+        test_dict = {"toml_file_version": 1}
 
         parser = TomlParser(toml_reader=self.get_mocked_reader(test_dict))
         mocked_file_info = mock.NonCallableMock()
@@ -42,7 +42,7 @@ class TomlParserTest(unittest.TestCase):
             parser.get_toml_parser(toml_file_path=mock.NonCallableMock, file_information=None)
 
     def test_parse_toml_file_calls_get_all_states(self):
-        test_dict = {"toml_file_version": 0}
+        test_dict = {"toml_file_version": 1}
 
         parser = TomlParser(toml_reader=self.get_mocked_reader(test_dict))
         with mock.patch("sans.user_file.toml_parsers.toml_parser.TomlV1Parser") as mocked_parser:

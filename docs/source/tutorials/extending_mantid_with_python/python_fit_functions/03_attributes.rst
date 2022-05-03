@@ -24,6 +24,7 @@ function:
 
             self.declareAttribute("NLoops", 10)
 
+
 The value of an attribute does not change throughout the fitting so it is best
 to store it locally once after it has been set by the user. A method called
 ``setAttributeValue`` is defined by the super class and is called
@@ -45,3 +46,33 @@ If defined in your class then you can use it to set a python attribute on your o
             if name == "NLoops":
                 # Can the be accessed quicker later using self._nloops
                 self._nloops = value
+
+|
+====================
+Attribute Validators
+====================
+
+If desired, the possible values that an attribute can take can be restricted through the use
+of a Function Attribute Validator. Such a validator must derive from the ``IValidator``
+abstract class; a number of these are currently provided in the Mantid Kernel such as:
+    - List Validator (attribute value must be specified from a provided list of values).
+    - Bounded Validator (numeric attribute value must be between two provided bounds).
+    - String contrains validator (string attribute value must contain a provided sub-string/s)
+
+In python, attributes can be declared with a validator using the following syntax:
+
+.. code-block:: python
+
+    from mantid.kernel import StringListValidator, StringContainsValidator, FloatBoundedValidator
+
+    class Example1DFunction(IFunction1D): # or IPeakFunction
+
+        def init(self):
+            self.declareParameter("StrAttr", "acceptable", StringListValidator(["acceptable","values"]))
+            self.declareAttribute("FloatAtt", 3.0, FloatBoundedValidator(0.0, 5.0))
+            self.declareAttribute("StringContainsAtt", "StringContains",
+                                                        StringContainsValidator(["Contains"]))
+
+
+If a string list validator is used for any function called from the ``FitPropertyBrowser``, the attribute
+value can be input through the browser using a combo box.

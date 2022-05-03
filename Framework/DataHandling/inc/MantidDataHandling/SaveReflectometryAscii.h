@@ -18,7 +18,7 @@ namespace DataHandling {
 Saves a file of desired (mft, txt, dat or custom) Ascii format from a 2D
 workspace.
 */
-class DLLExport SaveReflectometryAscii : public API::Algorithm {
+class DLLExport SaveReflectometryAscii final : public API::Algorithm {
 public:
   /// Algorithm's name. @see Algorithm::name
   const std::string name() const override { return "SaveReflectometryAscii"; }
@@ -74,6 +74,8 @@ private:
   std::vector<std::string> m_wsName;
   /// The output file stream
   std::ofstream m_file;
+  /// The angle used to calculate wavelength from momentum exchange, in rad
+  double m_theta;
 };
 } // namespace DataHandling
 } // namespace Mantid

@@ -33,7 +33,7 @@ public:
   static void destroySuite(SaveReflectometryAsciiTest *suite) { delete suite; }
 
   SaveReflectometryAsciiTest() {}
-  ~SaveReflectometryAsciiTest() override {}
+  ~SaveReflectometryAsciiTest() override = default;
 
   void testInit() {
     SaveReflectometryAscii alg;
@@ -798,6 +798,50 @@ public:
     while (std::getline(in, fullline)) {
       TS_ASSERT_EQUALS(fullline, *(it++))
     }
+    in.close();
+    Poco::File(filename).remove();
+  }
+
+  void test_lam() {
+    const auto &x1 = Mantid::HistogramData::Points({0.1, 0.34});
+    const auto &y1 = Mantid::HistogramData::Counts({3., 6.6});
+    Mantid::HistogramData::Histogram histogram(x1, y1);
+    const Workspace_sptr ws = create<Workspace2D>(1, histogram);
+    auto outputFileHandle = Poco::TemporaryFile();
+    const std::string file = outputFileHandle.path();
+    SaveReflectometryAscii alg;
+    alg.initialize();
+    alg.setRethrows(true);
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", ws))
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("Filename", file))
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("FileExtension", ".lam"))
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("Theta", 4.0))
+    TS_ASSERT_THROWS_NOTHING(alg.execute())
+    TS_ASSERT(alg.isExecuted())
+    std::string filename = alg.getPropertyValue("Filename");
+    TS_ASSERT(Poco::File(filename.append(".lam")).exists())
+    std::vector<std::string> data;
+    data.reserve(2);
+    data.emplace_back("       1.000000000000000e-01       "
+                      "3.000000000000000e+00       1.732050807568877e+00       "
+                      "8.765857018194932e+00");
+    data.emplace_back("       3.400000000000000e-01       "
+                      "6.600000000000000e+00       2.569046515733026e+00       "
+                      "2.578193240645569e+00");
+    std::ifstream in(filename);
+    TS_ASSERT(not_empty(in))
+    std::string fullline;
+    auto it = data.begin();
+    const int nSkip = 24; // used to skip the header
+    int lineNo = 0;
+    while (std::getline(in, fullline)) {
+      lineNo++;
+      if (lineNo < nSkip)
+        continue;
+      TS_ASSERT_EQUALS(fullline, *(it++))
+    }
+    TS_ASSERT(in.eof())
+
     in.close();
     Poco::File(filename).remove();
   }

@@ -55,6 +55,10 @@ public:
     testSave(gui->m_save.get(), map[QString("saveView")].toMap());
   }
 
+  void checkPerAngleDefaultsRowEquals(const QtBatchView *gui, const QList<QVariant> &list, int rowIndex) {
+    testPerAngleDefaultsRow(gui->m_experiment->m_ui.optionsTable, list, rowIndex);
+  }
+
 private:
   void testExperiment(const QtExperimentView *gui, const QMap<QString, QVariant> &map) {
     TS_ASSERT_EQUALS(gui->m_ui.analysisModeComboBox->currentIndex(), map[QString("analysisModeComboBox")].toInt())
@@ -96,7 +100,7 @@ private:
   void testPerAngleDefaultsRow(const QTableWidget *tab, const QList<QVariant> &list, int rowIndex) {
     for (auto columnIndex = 0; columnIndex < tab->columnCount(); ++columnIndex) {
       auto guiText = tab->item(rowIndex, columnIndex)->text();
-      TS_ASSERT_EQUALS(guiText, list[columnIndex].toString())
+      TS_ASSERT_EQUALS(guiText.toStdString(), list[columnIndex].toString().toStdString())
     }
   }
 
@@ -269,6 +273,60 @@ private:
     TS_ASSERT_EQUALS(gui->m_ui.logValueEdit->text(), map[QString("logValueEdit")].toString())
     TS_ASSERT_EQUALS(gui->m_ui.logValueTypeEdit->text(), map[QString("logValueTypeEdit")].toString())
   }
+};
+
+/**
+ * This fake version of the LoadAndProcess exists so we don't have to import the
+ * python API, which was causing some issues on Ubuntu when running the tests.
+ *
+ * It is only used to set the tooltips in the views from the algorithm.
+ */
+class ReflectometryISISLoadAndProcess : public Mantid::API::Algorithm {
+public:
+  ReflectometryISISLoadAndProcess() : Algorithm() {}
+  ~ReflectometryISISLoadAndProcess() override = default;
+  const std::string name() const override { return "ReflectometryISISLoadAndProcess"; }
+  int version() const override { return 1; }
+  const std::string summary() const override { return "ReflectometryISISLoadAndProcess"; }
+
+  void init() override {
+    declareProperty("FirstTransmissionRunList", "");
+    declareProperty("SecondTransmissionRunList", "");
+    declareProperty("MomentumTransferMin", "");
+    declareProperty("MomentumTransferStep", "");
+    declareProperty("MomentumTransferMax", "");
+    declareProperty("TransmissionProcessingInstructions", "");
+    declareProperty("ScaleFactor", "");
+    declareProperty("ProcessingInstructions", "");
+    declareProperty("BackgroundProcessingInstructions", "");
+    declareProperty("AnalysisMode", "");
+    declareProperty("StartOverlap", "");
+    declareProperty("EndOverlap", "");
+    declareProperty("Params", "");
+    declareProperty("ScaleRHSWorkspace", "");
+    declareProperty("PolarizationAnalysis", "");
+    declareProperty("ReductionType", "");
+    declareProperty("SummationType", "");
+    declareProperty("IncludePartialBins", "");
+    declareProperty("FloodCorrection", "");
+    declareProperty("FloodWorkspace", "");
+    declareProperty("Debug", "");
+    declareProperty("SubtractBackground", "");
+    declareProperty("BackgroundCalculationMethod", "");
+    declareProperty("DegreeOfPolynomial", "");
+    declareProperty("CostFunction", "");
+    declareProperty("NormalizeByIntegratedMonitors", "");
+    declareProperty("MonitorIntegrationWavelengthMin", "");
+    declareProperty("MonitorIntegrationWavelengthMax", "");
+    declareProperty("MonitorBackgroundWavelengthMin", "");
+    declareProperty("MonitorBackgroundWavelengthMax", "");
+    declareProperty("WavelengthMin", "");
+    declareProperty("WavelengthMax", "");
+    declareProperty("I0MonitorIndex", "");
+    declareProperty("DetectorCorrectionType", "");
+    declareProperty("CorrectDetectors", "");
+  }
+  void exec() override {}
 };
 
 } // namespace ISISReflectometry

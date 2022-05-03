@@ -76,7 +76,7 @@ extractParametersFromTable(Mantid::API::ITableWorkspace_sptr tableWs) {
 
 namespace MantidQt::CustomInterfaces::IDA {
 
-IndirectFitOutput::IndirectFitOutput() {}
+IndirectFitOutput::IndirectFitOutput() = default;
 
 bool IndirectFitOutput::isEmpty() const { return m_parameters.empty(); }
 

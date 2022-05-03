@@ -27,12 +27,12 @@ namespace ICat {
   @author Sofia Antony, ISIS Rutherford Appleton Laboratory
   @date 07/07/2010
 */
-class MANTID_ICAT_DLL CatalogGetDataSets : public API::Algorithm {
+class MANTID_ICAT_DLL CatalogGetDataSets final : public API::Algorithm {
 public:
   /// constructor for CatalogGetDataSets
   CatalogGetDataSets() : API::Algorithm() {}
   /// destructor for CatalogGetDataSets
-  ~CatalogGetDataSets() override {}
+  ~CatalogGetDataSets() override = default;
   /// Algorithm's name for identification overriding a virtual method
   const std::string name() const override { return "CatalogGetDataSets"; }
   /// Summary of algorithms purpose

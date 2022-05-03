@@ -49,8 +49,6 @@ DisplayCurveFit::DisplayCurveFit(QWidget *parent) : API::MantidWidget(parent), m
                  {curveType::residuals, m_uiForm.residualsPlot}};
 }
 
-DisplayCurveFit::~DisplayCurveFit() {}
-
 /**
  * @brief Sets the range of the given axis scale to a given range in the two
  * fitting

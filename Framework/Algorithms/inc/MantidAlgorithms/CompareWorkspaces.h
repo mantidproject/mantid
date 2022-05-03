@@ -57,7 +57,7 @@ namespace Algorithms {
  *
  *
  */
-class MANTID_ALGORITHMS_DLL CompareWorkspaces : public API::Algorithm {
+class MANTID_ALGORITHMS_DLL CompareWorkspaces final : public API::Algorithm {
 public:
   /// Algorithm's name
   const std::string name() const override { return "CompareWorkspaces"; }

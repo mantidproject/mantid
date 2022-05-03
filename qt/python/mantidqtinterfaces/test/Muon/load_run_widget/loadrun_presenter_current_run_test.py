@@ -49,7 +49,6 @@ class LoadRunWidgetLoadCurrentRunTest(unittest.TestCase):
     def wait_for_thread(self, thread_model):
         if thread_model and thread_model.worker:
             while thread_model.worker.is_alive():
-                QApplication.sendPostedEvents()
                 time.sleep(0.1)
             QApplication.sendPostedEvents()
 

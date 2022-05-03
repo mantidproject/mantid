@@ -32,5 +32,5 @@ public:
   void clear() { m_progressableView->clearProgress(); }
   void setAsPercentageIndicator() { m_progressableView->setAsPercentageIndicator(); }
   void setAsEndlessIndicator() { m_progressableView->setAsEndlessIndicator(); }
-  ~ProgressPresenter() {}
+  virtual ~ProgressPresenter() = default;
 };

@@ -76,6 +76,7 @@ set(PYTHON_PLUGINS
     algorithms/GetEiT0atSNS.py
     algorithms/GetIPTS.py
     algorithms/GetLiveInstrumentValue.py
+    algorithms/GroupBySampleChangerPosition.py
     algorithms/HB2AReduce.py
     algorithms/HB3AAdjustSampleNorm.py
     algorithms/HB3AFindPeaks.py
@@ -208,6 +209,7 @@ set(PYTHON_PLUGINS
     algorithms/WorkflowAlgorithms/D7YIGPositionCalibration.py
     algorithms/WorkflowAlgorithms/DetectorFloodWeighting.py
     algorithms/WorkflowAlgorithms/DirectILLApplySelfShielding.py
+    algorithms/WorkflowAlgorithms/DirectILLAutoProcess.py
     algorithms/WorkflowAlgorithms/DirectILLCollectData.py
     algorithms/WorkflowAlgorithms/DirectILLDiagnostics.py
     algorithms/WorkflowAlgorithms/DirectILLIntegrateVanadium.py
@@ -293,9 +295,12 @@ set(PYTHON_PLUGINS
     algorithms/WorkflowAlgorithms/SANSDirectBeamTransmission.py
     algorithms/WorkflowAlgorithms/SANSFitShiftScale.py
     algorithms/WorkflowAlgorithms/SANSILLAutoProcess.py
+    algorithms/WorkflowAlgorithms/SANSILLCommon.py
     algorithms/WorkflowAlgorithms/SANSILLIntegration.py
+    algorithms/WorkflowAlgorithms/SANSILLMultiProcess.py
     algorithms/WorkflowAlgorithms/SANSILLParameterScan.py
     algorithms/WorkflowAlgorithms/SANSILLReduction.py
+    algorithms/WorkflowAlgorithms/SANSILLReduction2.py
     algorithms/WorkflowAlgorithms/SANSMask.py
     algorithms/WorkflowAlgorithms/SANSPatchSensitivity.py
     algorithms/WorkflowAlgorithms/SANSReduction.py

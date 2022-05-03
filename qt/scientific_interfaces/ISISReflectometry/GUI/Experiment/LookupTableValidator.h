@@ -17,22 +17,24 @@ namespace ISISReflectometry {
 class MANTIDQT_ISISREFLECTOMETRY_DLL LookupTableValidator {
 public:
   using ContentType = std::vector<LookupRow::ValueArray>;
-  using ResultType = ValidationResult<LookupTable, LookupTableValidationError>;
+  using LookupTableRows = std::vector<LookupRow>;
+  using ResultType = ValidationResult<LookupTableRows, LookupTableValidationError>;
 
   ResultType operator()(ContentType const &lookupTableContent, double thetaTolerance) const;
 
-  ValidationResult<boost::blank, ThetaValuesValidationError> validateThetaValues(LookupTable lookupTable,
-                                                                                 double tolerance) const;
+  ValidationResult<boost::blank, LookupCriteriaError> validateSearchCriteria(LookupTableRows lookupTable,
+                                                                             double tolerance) const;
 
-  void validateAllLookupRows(ContentType const &lookupTableContent, LookupTable &lookupTable,
-                             std::vector<InvalidDefaultsError> &validationErrors) const;
+  void validateAllLookupRows(ContentType const &lookupTableContent, LookupTableRows &lookupTable,
+                             std::vector<InvalidLookupRowCells> &validationErrors) const;
 
-  int countWildcards(LookupTable const &lookupTable) const;
+  int countWildcards(LookupTableRows const &lookupTable) const;
 
-  void sortInPlaceWildcardsFirstThenByTheta(LookupTable &lookupTable) const;
+  void sortInPlaceByThetaThenTitleMatcher(LookupTableRows &lookupTable) const;
 
-  bool hasUniqueThetas(LookupTable lookupTable, int wildcardCount, double tolerance) const;
-  void appendThetaErrorForAllRows(std::vector<InvalidDefaultsError> &validationErrors, std::size_t rowCount) const;
+  bool hasUniqueSearchCriteria(LookupTableRows lookupTable, double tolerance) const;
+  void appendSearchCriteriaErrorForAllRows(std::vector<InvalidLookupRowCells> &validationErrors,
+                                           std::size_t rowCount) const;
 };
 } // namespace ISISReflectometry
 } // namespace CustomInterfaces

@@ -22,14 +22,15 @@
 		</parameter>
 		<!-- Default monitor spectrum number for monitor normalisation. -->
 		<parameter name="default-incident-monitor-spectrum" type="int" visible="false">
-			<value val="257" />
+			<value val="256" />
 		</parameter>
 		<!-- MergeRuns behavior when merging sample logs. -->
 		<parameter name="sample_logs_sum" type="string" visible="false">
-			<value val="duration, monitor1.monsum, monitor2.monsum, PSD.detsum, time" />
+			<value val="duration, monitor1.monsum, monitor2.monsum, PSD.detsum" />
 		</parameter>
 		<parameter name="sample_logs_time_series" type="string" visible="false">
-			<value val="sample.temperature" />
+		        <value val="sample.temperature, time, Chopper1.speed_average, Chopper1.phase_average,
+			            Chopper2.speed_average, Chopper2.phase_average" />
 		</parameter>
 		<parameter name="sample_logs_warn" type="string" visible="false">
 			<value val="sample.temperature" />
@@ -66,5 +67,64 @@
 			      title,start_time,end_time,numor_list,
 			      processedAs,wavelength,sample_transmission_numors,L2"/>
 		</parameter>
+		<parameter name="chopper1_speed" type="string" visible="false">
+		  <!-- The sample log name for the chopper1 speed -->
+		  <value val="VirtualChopper.chopper1_speed_average" valid-to="2021-04-01T23:59:59"/>
+		  <value val="Chopper1.speed_average" valid-from="2021-04-02T00:00:00"/>
+		</parameter>
+		<parameter name="chopper1_phase" type="string" visible="false">
+		  <!-- The sample log name for the chopper1 phase -->
+		  <value val="VirtualChopper.chopper1_phase_average" valid-to="2021-04-01T23:59:59"/>
+		  <value val="Chopper1.phase_average" valid-from="2021-04-02T00:00:00"/>
+		</parameter>
+		<parameter name="chopper2_speed" type="string" visible="false">
+		  <!-- The sample log name for the chopper2 speed -->
+		  <value val="VirtualChopper.chopper2_speed_average" valid-to="2021-04-01T23:59:59"/>
+		  <value val="Chopper2.speed_average" valid-from="2021-04-02T00:00:00"/>
+		</parameter>
+		<parameter name="chopper2_phase" type="string" visible="false">
+		  <!-- The sample log name for the chopper2 phase -->
+		  <value val="VirtualChopper.chopper2_phase_average" valid-to="2021-04-01T23:59:59"/>
+		  <value val="Chopper2.phase_average" valid-from="2021-04-02T00:00:00"/>
+		</parameter>
+		<parameter name="chopper1_speed_alt" type="string" visible="false">
+		  <!-- The sample log name for the alternative chopper1 speed, for short runs -->
+		  <value val="Chopper1.rotation_speed"/>
+		</parameter>
+		<parameter name="chopper1_phase_alt" type="string" visible="false">
+		  <!-- The sample log name for the alternative chopper1 phase, for short runs -->
+		  <value val="Chopper1.phase"/>
+		</parameter>
+		<parameter name="chopper2_speed_alt" type="string" visible="false">
+		  <!-- The sample log name for the alternative chopper2 speed, for short runs -->
+		  <value val="Chopper2.rotation_speed"/>
+		</parameter>
+		<parameter name="chopper2_phase_alt" type="string" visible="false">
+		  <!-- The sample log name for the alternative chopper2 phase, for short runs -->
+		  <value val="Chopper2.phase"/>
+		</parameter>
+		<parameter name="logbook_default_parameters" type="string" visible="false">
+		  <value val="proposal:/entry0/user/proposal:s,
+			      experiment identifier:/entry0/experiment_identifier:s,
+			      start time:/entry0/start_time:s,
+			      duration:/entry0/duration:d,
+			      title:/entry0/title:s,
+			      angle:/entry0/instrument/AngleSetting/actual_angle:f,
+			      slit2 size:/entry0/instrument/MainParameters/Slit2_size:f,
+			      dan:/entry0/instrument/dan/value:f,
+			      san:/entry0/instrument/san/value:f,
+			      slit3 size:/entry0/instrument/MainParameters/Slit3_size:f" />
+		</parameter>
+		<parameter name="logbook_optional_parameters" type="string" visible="false">
+		  <value val="sample changer:/entry0/instrument/VirtualSampleChanger/wanted_changer:f,
+			      analyser pos:/entry0/instrument/tra/value:f" />
+		</parameter>
+		<parameter name="reduction_logs_to_save" type="string" visible="false">
+		  <value val="poff,d0,chopper1.speed_average,chopper1.phase_average,chopper2.speed_average,
+			      chopper2.phase_average,MainParameters.Pixel_width,MainParameters.open_offset,
+			      MainParameters.pickup_offset,ChopperWindow,
+			      san.value,dan.value"/>
+		</parameter>
+
 	</component-link>
 </parameter-file>

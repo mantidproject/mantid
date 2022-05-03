@@ -41,7 +41,7 @@ namespace WorkflowAlgorithms {
     File change history is stored at: <https://github.com/mantidproject/mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class DLLExport SANSSolidAngleCorrection : public API::Algorithm {
+class DLLExport SANSSolidAngleCorrection final : public API::Algorithm {
 public:
   /// Algorithm's name
   const std::string name() const override { return "SANSSolidAngleCorrection"; }

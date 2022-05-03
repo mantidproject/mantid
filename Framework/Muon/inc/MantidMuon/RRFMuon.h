@@ -20,7 +20,7 @@ namespace Algorithms {
 @author Raquel Alvarez, ISIS, RAL
 @date 5/12/2014
 */
-class MANTID_MUON_DLL RRFMuon : public API::Algorithm {
+class MANTID_MUON_DLL RRFMuon final : public API::Algorithm {
 public:
   /// Algorithm's name for identification overriding a virtual method
   const std::string name() const override { return "RRFMuon"; }

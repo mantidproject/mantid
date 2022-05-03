@@ -17,7 +17,7 @@ namespace DataHandling {
 
   @date 2012-07-16
 */
-class DLLExport GenerateGroupingPowder : public API::Algorithm {
+class DLLExport GenerateGroupingPowder final : public API::Algorithm {
 public:
   const std::string name() const override;
   /// Summary of algorithms purpose

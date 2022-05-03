@@ -107,7 +107,7 @@ private:
   class MockBraggScatterer : public BraggScattererInCrystalStructure {
   public:
     MockBraggScatterer() : BraggScattererInCrystalStructure() {}
-    ~MockBraggScatterer() override {}
+    ~MockBraggScatterer() override = default;
     GNU_DIAG_OFF_SUGGEST_OVERRIDE
     MOCK_CONST_METHOD0(name, std::string());
     MOCK_CONST_METHOD0(clone, BraggScatterer_sptr());

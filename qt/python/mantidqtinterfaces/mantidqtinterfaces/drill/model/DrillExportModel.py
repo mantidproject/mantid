@@ -69,8 +69,6 @@ class DrillExportModel:
             except:
                 pass
         self._pool = DrillAlgorithmPool()
-        self._pool.signals.taskError.connect(self._onTaskError)
-        self._pool.signals.taskSuccess.connect(self._onTaskSuccess)
         self._exports = dict()
         self._successExports = dict()
 
@@ -158,17 +156,14 @@ class DrillExportModel:
         except:
             return False
 
-    def _onTaskSuccess(self, name):
+    def _onTaskSuccess(self, wsName, filename):
         """
         Triggered when the export finished with success.
 
         Args:
-            name (str): the task name
+            wsName (str): name of the exported workspace
+            filename (str): name of the file
         """
-        name = name.split(':')
-        wsName = name[0]
-        filename = name[1]
-
         if wsName not in self._successExports:
             self._successExports[wsName] = set()
         self._successExports[wsName].add(filename)
@@ -179,18 +174,15 @@ class DrillExportModel:
                 del self._exports[wsName]
                 self._logSuccessExport(wsName)
 
-    def _onTaskError(self, name, msg):
+    def _onTaskError(self, wsName, filename, msg):
         """
         Triggered when the export failed.
 
         Args:
-            name (str): the task name
+            wsName (str): name of the exported workspace
+            filename (str): name of the file
             msg (str): error msg
         """
-        name = name.split(':')
-        wsName = name[0]
-        filename = name[1]
-
         logger.error("Error while exporting workspace {}.".format(wsName))
         logger.error(msg)
 
@@ -213,6 +205,45 @@ class DrillExportModel:
         logger.notice("Successful export of workspace {} to {}"
                       .format(wsName, filenames))
         del self._successExports[wsName]
+
+    def _createTasks(self, wsName, algo, exportPath, extension):
+        """
+        Create a list of drill tasks for exporting data.
+
+        Args:
+            wsName: string with name of the workspace to be saved
+            algo: string with algorithm name to be used
+            exportPath: string path for the output file
+            extension: list of strings or string with desired extension(s)
+        """
+        tasks = list()
+        extensions = extension
+        if not isinstance(extension, list):
+            extensions = [extension]
+        for ext in extensions:
+            filename = os.path.join(exportPath,
+                                    wsName + ext)
+            name = wsName + ":" + filename
+            if wsName not in self._exports:
+                self._exports[wsName] = set()
+
+            self._exports[wsName].add(filename)
+            kwargs = {}
+            if 'Ascii' in algo:
+                log_list = mtd[wsName].getInstrument().getStringParameter('log_list_to_save')
+                if log_list:
+                    log_list = log_list[0].split(',')
+                    kwargs['LogList'] = [log.strip() for log in log_list]  # removes white spaces
+                if 'Reflectometry' in algo:
+                    kwargs['WriteHeader'] = True
+                    kwargs['FileExtension'] = ext
+                    kwargs['Theta'] = mtd[wsName].getRun().getProperty('san.value').value
+                else:
+                    kwargs['WriteXError'] = True
+            task = DrillTask(name, algo, InputWorkspace=wsName,
+                             FileName=filename, **kwargs)
+            tasks.append(task)
+        return tasks
 
     def run(self, sample):
         """
@@ -244,7 +275,7 @@ class DrillExportModel:
             return
 
         tasks = list()
-        for algo,active in self._exportAlgorithms.items():
+        for algo, active in self._exportAlgorithms.items():
             if not active:
                 continue
             if not self._validCriteria(outputWs, algo):
@@ -256,7 +287,6 @@ class DrillExportModel:
             for wsName in mtd.getObjectNames(contain=workspaceName):
                 if isinstance(mtd[wsName], WorkspaceGroup):
                     continue
-
                 filename = os.path.join(
                         exportPath,
                         wsName + RundexSettings.EXPORT_ALGO_EXTENSION[algo])
@@ -277,6 +307,11 @@ class DrillExportModel:
                         kwargs['WriteXError'] = True
                 task = DrillTask(name, algo, InputWorkspace=wsName,
                                  FileName=filename, **kwargs)
+                task.addSuccessCallback(lambda wsName=wsName, filename=filename:
+                                        self._onTaskSuccess(wsName, filename))
+                task.addErrorCallback(lambda msg, wsName=wsName,
+                                             filename=filename:
+                                      self._onTaskError(wsName, filename, msg))
                 tasks.append(task)
 
         self._pool.addProcesses(tasks)

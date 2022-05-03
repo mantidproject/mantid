@@ -14,7 +14,6 @@
 #pragma once
 
 #include "MantidKernel/DateAndTime.h"
-#include "MantidKernel/System.h"
 #include <ctime>
 #include <cxxtest/TestSuite.h>
 #include <sstream>
@@ -192,7 +191,6 @@ public:
 
   void test_subtraction_of_times_limits() {
     DateAndTime a, b, c;
-    boost::posix_time::ptime p;
     time_duration td;
 
     a = DateAndTime("2200-01-02 00:01:02.345");

@@ -13,13 +13,11 @@ import math
 import re
 import platform
 import time
-import numpy as np
 import mantid
 from mantid.api import *
 from mantid.simpleapi import *
 from mantid.kernel import *
 from reduction_gui.reduction.reflectometer.refl_data_series import DataSeries
-from reduction_gui.reduction.reflectometer.refl_data_script import DataSets
 
 
 class LRAutoReduction(PythonAlgorithm):
@@ -53,9 +51,6 @@ class LRAutoReduction(PythonAlgorithm):
         # ------------ Properties that should be in the meta data -------------
         self.declareProperty("ScaleToUnity", True,
                              "If true, the reflectivity under the Q cutoff will be scaled to 1")
-        self.declareProperty(IntArrayProperty("PrimaryFractionRange", [117, 197],
-                                              IntArrayLengthValidator(2), direction=Direction.Input),
-                             "Pixel range to use for calculating the primary fraction correction.")
         self.declareProperty(IntArrayProperty("DirectBeamList", [], direction=Direction.Input),
                              "List of direct beam run numbers (integers)")
         self.declareProperty(FileProperty("ScalingFactorFile", "", FileAction.OptionalLoad,
@@ -69,8 +64,6 @@ class LRAutoReduction(PythonAlgorithm):
                              "Wavelength offset used for TOF range determination")
         self.declareProperty("ScalingWavelengthCutoff", 10.0,
                              "Wavelength above which the scaling factors are assumed to be one")
-        self.declareProperty("FindPeaks", False,
-                             "Find reflectivity peaks instead of using the template values")
         self.declareProperty("ReadSequenceFromFile", False,
                              "Read the run sequence information from the file, not the title")
         self.declareProperty("ForceSequenceNumber", 0,
@@ -200,33 +193,6 @@ class LRAutoReduction(PythonAlgorithm):
 
         return first_run_of_set, sequence_number, is_direct_beam
 
-    def _find_peaks(self, event_data):
-        """
-            Find reflectivity peak and low-resolution peak for a workspace
-            @param event_data: data workspace
-        """
-        # Find peaks as needed
-        nx = int(event_data.getInstrument().getNumberParameter("number-of-x-pixels")[0])
-        ny = int(event_data.getInstrument().getNumberParameter("number-of-y-pixels")[0])
-        tof_summed = Integration(InputWorkspace=event_data)
-
-        # Reflectivity peak
-        peak_data = RefRoi(InputWorkspace=tof_summed, IntegrateY=False,
-                           NXPixel=nx, NYPixel=ny, ConvertToQ=False)
-        peak_data = Transpose(InputWorkspace=peak_data)
-        peak, _, _ = LRPeakSelection(InputWorkspace=peak_data, ComputePrimaryRange=False)
-
-        # Low-resolution range
-        peak_data = RefRoi(InputWorkspace=tof_summed, IntegrateY=True,
-                           NXPixel=nx, NYPixel=ny, ConvertToQ=False)
-        peak_data = Transpose(InputWorkspace=peak_data)
-        _, low_res, _ = LRPeakSelection(InputWorkspace=peak_data, ComputePrimaryRange=False)
-
-        AnalysisDataService.remove(str(tof_summed))
-        AnalysisDataService.remove(str(peak_data))
-
-        return [int(x) for x in peak], [int(x) for x in low_res]
-
     def _read_template(self, sequence_number):
         """
             Read template from file.
@@ -258,41 +224,17 @@ class LRAutoReduction(PythonAlgorithm):
         """
         # Check whether we need to read a template file
         filename = self.getProperty("TemplateFile").value
-        # Keep track of the origin of the template so we know whether to force peak finding
-        create_template = False
 
-        # If a template was supplied, use it.
+        # Look for the template file
         if len(filename.strip()) > 0:
             data_set = self._read_template(sequence_number)
-        # ... if not, create a new one using the meta-data information
         else:
-            create_template = True
-            logger.notice("No template supplied: one will be created - peaks will be found automatically")
-            data_set = self._create_template(run_number, first_run_of_set, sequence_number)
-
-        # Backward compatibility with early templates:
-        #   Verify that the primary fraction is available
-        if data_set.clocking_from is None and data_set.clocking_to is None:
-            primary_range = self.getProperty("PrimaryFractionRange").value
-            data_set.clocking_from = int(primary_range[0])
-            data_set.clocking_to = int(primary_range[1])
-            logger.notice("Template did not contain primary fraction range: using supplied default")
+            raise RuntimeError("No template supplied")
 
         # Get incident medium as a simple string
         _incident_medium_str = str(data_set.incident_medium_list[0])
         _list = _incident_medium_str.split(',')
         incident_medium = _list[data_set.incident_medium_index_selected]
-
-        # If we have to find peaks, do it here
-        find_peaks = self.getProperty("FindPeaks").value
-        if find_peaks or create_template:
-            # Find reflectivity peak
-            self.reflectivity_peak, self.low_res = self._find_peaks(self.event_data)
-            logger.notice("Using reflectivity peak %s (template was %s)" % (self.reflectivity_peak, data_set.DataPeakPixels))
-            data_set.DataPeakPixels = self.reflectivity_peak
-            data_set.DataBackgroundRoi = [self.reflectivity_peak[0] - 3, self.reflectivity_peak[1] + 3, 0, 0]
-            logger.notice("Using low-res %s (template was %s)" % (self.low_res, data_set.data_x_range))
-            data_set.data_x_range = self.low_res
 
         return data_set, incident_medium
 
@@ -313,176 +255,6 @@ class LRAutoReduction(PythonAlgorithm):
             value = default
             logger.error("Empty %s value in the data logs: using %s=%s" % (key, key, default))
         return value
-
-    #pylint: disable=too-many-locals
-    def _create_template(self, run_number, first_run_of_set, sequence_number):
-        """
-            Create a new template according to the meta-data
-            @param run_number: run number according to the data file name
-            @param first_run_of_set: first run in the sequence (sequence ID)
-            @param sequence_number: the ID of the data set within the sequence of runs
-        """
-        # If so, load it and only overwrite the part we are dealing with here.
-        template_file = self._get_output_template_path(first_run_of_set)
-        if os.path.isfile(template_file):
-            logger.notice("Writing template: %s" % template_file)
-            fd = open(template_file, "r")
-            xml_str = fd.read()
-            s = DataSeries()
-            s.from_xml(xml_str)
-        else:
-            s = DataSeries()
-
-        # Now we have an initial template
-        self.data_series_template = s
-
-        # Get the TOF range
-        tof_range = self._get_tof_range()
-
-        # Get information from meta-data
-        meta_data_run = self.event_data.getRun()
-        _incident_medium = self.getProperty("IncidentMedium").value
-        incident_medium = self._read_property(meta_data_run, "incident_medium",
-                                              _incident_medium, is_string=True)
-
-        q_min = self._read_property(meta_data_run, "output_q_min", 0.001)
-        q_step = -abs(self._read_property(meta_data_run, "output_q_step", 0.02))
-        dQ_constant = self._read_property(meta_data_run, "dq_constant", 0.004)
-        dQ_slope = self._read_property(meta_data_run, "dq_slope", 0.02)
-        angle_offset = self._read_property(meta_data_run, "angle_offset", 0.016)
-        angle_offset_err = self._read_property(meta_data_run, "angle_offset_error", 0.001)
-
-        _primary_range = self.getProperty("PrimaryFractionRange").value
-        _primary_min = int(_primary_range[0])
-        _primary_max = int(_primary_range[1])
-        # The DAS logs are all stored as floats, but we are expecting an integer
-        primary_min = math.trunc(float(self._read_property(meta_data_run, "primary_range_min", _primary_min)))
-        primary_max = math.trunc(float(self._read_property(meta_data_run, "primary_range_max", _primary_max)))
-
-        _sf_file = self.getProperty("ScalingFactorFile").value
-        sf_file = self._read_property(meta_data_run, "scaling_factor_file",
-                                      _sf_file, is_string=True)
-
-        def _new_data_set():
-            d = DataSets()
-            d.NormFlag = True
-            d.DataBackgroundFlag = True
-            d.data_x_range_flag = True
-            d.norm_x_range_flag = True
-            d.DataTofRange = tof_range
-            d.NormBackgroundFlag = True
-            d.slits_width_flag = True
-            d.incident_medium_list = [incident_medium]
-            d.incident_medium_index_selected = 0
-            d.angle_offset = angle_offset
-            d.angle_offset_error = angle_offset_err
-            d.clocking_from = primary_min
-            d.clocking_to = primary_max
-            d.q_min = q_min
-            d.q_step = q_step
-            d.fourth_column_dq0 = dQ_constant
-            d.fourth_column_dq_over_q = dQ_slope
-            d.scaling_factor_file = sf_file
-            return d
-
-        # Copy over the existing series, up to the point we are at
-        new_data_sets = []
-        # First, copy over the entries in the existing template,
-        # up to the point previous to the current point
-        for i in range(min(int(run_number) - int(first_run_of_set), len(s.data_sets))):
-            sequence_id = int(first_run_of_set) + i
-            logger.information("Copying %s" % sequence_id)
-            d = s.data_sets[i]
-            d.data_files = [sequence_id]
-            new_data_sets.append(d)
-
-        running_id = len(new_data_sets)
-        # Pad the items between what we have and the current point
-        for i in range(running_id, int(run_number) - int(first_run_of_set) + 1):
-            sequence_id = int(first_run_of_set) + i
-            logger.information("Adding %s" % sequence_id)
-            d = _new_data_set()
-            d.data_files = [sequence_id]
-            new_data_sets.append(d)
-
-        self.data_series_template.data_sets = new_data_sets
-
-        data_set = self.data_series_template.data_sets[sequence_number - 1]
-
-        # Find direct beam peaks
-        self._get_direct_beam(meta_data_run, data_set)
-
-        return data_set
-
-    def _get_tof_range(self):
-        """
-            Determine TOF range from the data
-        """
-        sample = self.event_data.getInstrument().getSample()
-        source = self.event_data.getInstrument().getSource()
-        source_sample_distance = sample.getDistance(source)
-        detector = self.event_data.getDetector(0)
-        sample_detector_distance = detector.getPos().getZ()
-        source_detector_distance = source_sample_distance + sample_detector_distance
-        h = 6.626e-34  # m^2 kg s^-1
-        m = 1.675e-27  # kg
-        wl = self.event_data.getRun().getProperty('LambdaRequest').value[0]
-        chopper_speed = self.event_data.getRun().getProperty('SpeedRequest1').value[0]
-        wl_offset = self.getProperty("WavelengthOffset").value
-        cst = source_detector_distance / h * m
-        tof_min = cst * (wl + wl_offset * 60.0 / chopper_speed - 1.7 * 60.0 / chopper_speed) * 1e-4
-        tof_max = cst * (wl + wl_offset * 60.0 / chopper_speed + 1.7 * 60.0 / chopper_speed) * 1e-4
-        return [tof_min, tof_max]
-
-    def _get_direct_beam(self, meta_data_run, data_set):
-        """
-            Get the direct beam run information for the loaded data
-            @param meta_data_run: Run object from the Mantid workspace
-            @param data_set: DataSets object
-        """
-        # Wavelength of the data we are reducing
-        data_wl = self.event_data.getRun().getProperty('LambdaRequest').value[0]
-        data_thi = self.event_data.getRun().getProperty('thi').value[0]
-
-        _direct_beam_runs = list(self.getProperty("DirectBeamList").value)
-        direct_beam_runs_str = self._read_property(meta_data_run, "direct_beam_runs",
-                                                   _direct_beam_runs, is_string=True)
-        # The direct runs in the DAS logs are stored as a string
-        if isinstance(direct_beam_runs_str, str):
-            try:
-                direct_beam_runs = [int(r.strip()) for r in direct_beam_runs_str.split(',')]
-            except ValueError:
-                direct_beam_runs = []
-        else:
-            direct_beam_runs = direct_beam_runs_str
-
-        # For each run, load and compare the wavelength
-        direct_beam_found = None
-        for r in direct_beam_runs:
-            direct_beam_data = LoadEventNexus(Filename="REF_L_%s" % r)
-            # Only consider zero-attenuator runs
-            att = direct_beam_data.getRun().getProperty('vAtt').value[0]-1
-            if not att == 0:
-                continue
-            wl = direct_beam_data.getRun().getProperty('LambdaRequest').value[0]
-            thi = direct_beam_data.getRun().getProperty('thi').value[0]
-            if np.abs(data_wl - wl) < 0.01 and np.abs(data_thi - thi) < 0.015:
-                direct_beam_found = r
-                break
-
-        # Raise an exception if we haven't found our direct beam run
-        if direct_beam_found is None:
-            msg = "Could not find a valid direct beam run for "
-            msg += "wl=%s in %s" % (data_wl, str(direct_beam_runs))
-            raise RuntimeError(msg)
-
-        # Find the direct beam peak
-        peak, low_res = self._find_peaks(direct_beam_data)
-        data_set.norm_file = direct_beam_found
-        data_set.NormPeakPixels = peak
-        data_set.NormBackgroundRoi = [peak[0] - 3, peak[1] + 3]
-        data_set.NormBackgroundFlag = True
-        data_set.norm_x_range = low_res
 
     def _get_output_template_path(self, first_run_of_set):
         output_dir = self.getProperty("OutputDirectory").value
@@ -568,7 +340,7 @@ class LRAutoReduction(PythonAlgorithm):
         if len(input_ws_list) == 0:
             logger.notice("No data sets to stitch.")
             return
-        input_ws_list = sorted(input_ws_list)
+        input_ws_list = sorted(input_ws_list, key=lambda _ws: int(_ws.split('_')[2]))
 
         default_file_name = 'REFL_%s_combined_data_auto.txt' % first_run_of_set
         file_path = os.path.join(output_dir, default_file_name)
@@ -681,9 +453,8 @@ class LRAutoReduction(PythonAlgorithm):
             "AngleOffsetError": data_set.angle_offset_error,
             "ScalingFactorFile": str(data_set.scaling_factor_file),
             "SlitsWidthFlag": data_set.slits_width_flag,
-            "ApplyPrimaryFraction": True,
+            "ApplyPrimaryFraction": False,
             "SlitTolerance": slit_tolerance,
-            "PrimaryFractionRange": [data_set.clocking_from, data_set.clocking_to],
             "OutputWorkspace": 'reflectivity_%s_%s_%s' % (first_run_of_set, sequence_number, run_number)
         }
 

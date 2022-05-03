@@ -18,7 +18,7 @@ namespace MantidWidgets {
 
 class WorkspaceProviderNotifiable {
 public:
-  virtual ~WorkspaceProviderNotifiable() {}
+  virtual ~WorkspaceProviderNotifiable() = default;
 
   enum class Flag {
     WorkspaceLoaded,

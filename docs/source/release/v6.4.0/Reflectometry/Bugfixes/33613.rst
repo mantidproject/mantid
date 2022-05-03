@@ -1,0 +1,1 @@
+- Fixed a potential crash running live data reduction when SliceViewer is open on the live data workspace.

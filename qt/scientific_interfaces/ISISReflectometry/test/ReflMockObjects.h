@@ -32,6 +32,7 @@
 #include "GUI/Save/IAsciiSaver.h"
 #include "GUI/Save/ISavePresenter.h"
 #include "MantidAPI/AlgorithmManager.h"
+#include "MantidFrameworkTestHelpers/FallbackBoostOptionalIO.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidKernel/ICatalogInfo.h"
 #include "MantidKernel/ProgressBase.h"
@@ -164,6 +165,7 @@ public:
   MOCK_METHOD0(notifyAutoreductionResumed, void());
   MOCK_METHOD1(notifyInstrumentChanged, void(std::string const &));
   MOCK_METHOD0(restoreDefaults, void());
+  MOCK_METHOD(bool, hasValidSettings, (), (const, noexcept, override));
 };
 
 class MockInstrumentPresenter : public IInstrumentPresenter {
@@ -194,7 +196,7 @@ public:
 class MockProgressBase : public Mantid::Kernel::ProgressBase {
 public:
   MOCK_METHOD1(doReport, void(const std::string &));
-  ~MockProgressBase() override {}
+  ~MockProgressBase() override = default;
 };
 
 /**** Catalog ****/
@@ -210,7 +212,7 @@ public:
   MOCK_CONST_METHOD0(linuxPrefix, const std::string());
   MOCK_CONST_METHOD0(clone, ICatalogInfo *());
   MOCK_CONST_METHOD1(transformArchivePath, std::string(const std::string &));
-  ~MockICatalogInfo() override {}
+  ~MockICatalogInfo() override = default;
 };
 
 class MockSearcher : public ISearcher {
@@ -302,6 +304,7 @@ public:
 class MockDecoder : public IDecoder {
 public:
   MOCK_METHOD3(decodeBatch, void(const IMainWindowView *, int, const QMap<QString, QVariant> &));
+  MOCK_CONST_METHOD1(decodeVersion, size_t(const QMap<QString, QVariant> &));
 };
 
 class MockPythonRunner : public IPythonRunner {

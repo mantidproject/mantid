@@ -36,7 +36,7 @@ public:
   // this is testing/special routine
   void setSaved(bool On = true) { this->m_wasSaved = On; }
 
-  ~SaveableTesterWithFile() override {}
+  ~SaveableTesterWithFile() override = default;
 
   void clearDataFromMemory() override {
     this->setLoaded(false);

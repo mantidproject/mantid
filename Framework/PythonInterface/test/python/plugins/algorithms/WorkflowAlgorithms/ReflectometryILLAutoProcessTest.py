@@ -177,12 +177,12 @@ class ReflectometryILLAutoProcessTest(unittest.TestCase):
 
     def checkOutput(self, ws_group, n_ws):
         self.assertTrue(isinstance(ws_group, WorkspaceGroup))
-        self.assertEquals(ws_group.getNumberOfEntries(), n_ws)
+        self.assertEqual(ws_group.getNumberOfEntries(), n_ws)
         for ws in ws_group:
             self.assertTrue(isinstance(ws, MatrixWorkspace))
-            self.assertEquals(ws.getNumberHistograms(), 1)
+            self.assertEqual(ws.getNumberHistograms(), 1)
             self.assertFalse(ws.isHistogramData())
-            self.assertEquals(ws.getAxis(0).getUnit().unitID(), 'MomentumTransfer')
+            self.assertEqual(ws.getAxis(0).getUnit().unitID(), 'MomentumTransfer')
             self.assertTrue(ws.hasDx(0))
 
 if __name__ == "__main__":

@@ -84,7 +84,9 @@
 		<parameter name="sample_logs_list" type="string">
 		        <value val="run_list" />
 		</parameter>
-
+		<parameter name="elastic_channel_precision" type="int">
+		        <value val="3" />
+		</parameter>
 
 		<!-- The detector name for the height axis used in SumOverlappingTubes -->
 		<parameter name="detector_for_height_axis" type="string" visible="false">

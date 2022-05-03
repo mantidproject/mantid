@@ -29,7 +29,7 @@ namespace Algorithms {
 //---------------------------------------------------------------------------
 struct DetectorParams;
 
-class MANTID_CURVEFITTING_DLL VesuvioCalculateGammaBackground : public API::Algorithm {
+class MANTID_CURVEFITTING_DLL VesuvioCalculateGammaBackground final : public API::Algorithm {
 public:
   VesuvioCalculateGammaBackground();
   ~VesuvioCalculateGammaBackground() override;

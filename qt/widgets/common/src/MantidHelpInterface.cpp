@@ -11,9 +11,9 @@
 using namespace MantidQt::API;
 using std::string;
 
-MantidHelpInterface::MantidHelpInterface() {}
+MantidHelpInterface::MantidHelpInterface() = default;
 
-MantidHelpInterface::~MantidHelpInterface() {}
+MantidHelpInterface::~MantidHelpInterface() = default;
 
 void MantidHelpInterface::showPage(const std::string &url) { UNUSED_ARG(url); }
 

@@ -30,7 +30,7 @@ FitScriptGeneratorPresenter::FitScriptGeneratorPresenter(IFitScriptGeneratorView
   setWorkspaces(workspaceNames, startX, endX);
 }
 
-FitScriptGeneratorPresenter::~FitScriptGeneratorPresenter() {}
+FitScriptGeneratorPresenter::~FitScriptGeneratorPresenter() = default;
 
 void FitScriptGeneratorPresenter::notifyPresenter(ViewEvent const &event, [[maybe_unused]] std::string const &arg1,
                                                   [[maybe_unused]] std::string const &arg2) {

@@ -42,7 +42,7 @@ namespace DataHandling {
    @author Martyn, Tessella plc
    @date 29/07/2009
 */
-class DLLExport RawFileInfo : public API::Algorithm {
+class DLLExport RawFileInfo final : public API::Algorithm {
 public:
   static const std::string runTitle(const ISISRAW &isisRaw);
   static const std::string runHeader(const ISISRAW &isisRaw);

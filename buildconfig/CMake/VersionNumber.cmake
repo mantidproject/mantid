@@ -16,7 +16,7 @@ if(CONDA_BUILD)
   message(STATUS "Version: ${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_PATCH}")
 else()
   set(VERSION_MAJOR 6)
-  set(VERSION_MINOR 2)
+  set(VERSION_MINOR 3)
 endif()
 
 # UNCOMMENT the next 'set' line to 'force' the patch version number to a value (instead of using the count coming out of
@@ -27,7 +27,7 @@ endif()
 # The tweak is mean to keep in line with the pre-release numbering. https://semver.org/ examples: First release cadidate
 # for tweak 1 is "-1-rc.1" Second release cadidate for tweak 1 is "-1-rc.2" Actual tweak release is "-1"
 
-# set(VERSION_TWEAK "-5-rc.1")
+# set(VERSION_TWEAK "-2-rc.1")
 
 # pep440 is incompatible with semantic versioning https://www.python.org/dev/peps/pep-0440/ example: First release
 # cadidate for tweak 1 is ".1rc.1"

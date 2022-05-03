@@ -20,7 +20,7 @@ class ChopperConfiguration;
    (.irf) to  GSAS"s instrument
     file (.iparm/.prm).
   */
-class DLLExport SaveGSASInstrumentFile : public API::Algorithm {
+class DLLExport SaveGSASInstrumentFile final : public API::Algorithm {
 public:
   SaveGSASInstrumentFile();
   /// Algorithm's name

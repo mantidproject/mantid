@@ -5,12 +5,43 @@ Mantid Workbench Changes
 .. contents:: Table of Contents
    :local:
 
-New and Improved
-----------------
-- New general setting: `Provide auto-completion suggestions in the script editor` for making auto-completion optional in the script editor
+New Features
+------------
+
+.. amalgamate:: Workbench/New_features
 
 Bugfixes
 --------
-- In DrILL interface, scrolling down in the settings dialog no longer affects the comboxes
+
+.. amalgamate:: Workbench/Bugfixes
+
+Instrument Viewer
+-----------------
+
+New Features
+############
+
+.. amalgamate:: Workbench/InstrumentViewer/New_features
+
+Bugfixes
+########
+
+.. amalgamate:: Workbench/InstrumentViewer/Bugfixes
+
+
+Sliceviewer
+-----------
+
+New Features
+############
+
+.. amalgamate:: Workbench/SliceViewer/New_features
+
+Bugfixes
+########
+
+.. amalgamate:: Workbench/SliceViewer/Bugfixes
+
+
 
 :ref:`Release 6.4.0 <v6.4.0>`

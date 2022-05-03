@@ -31,7 +31,7 @@ class TomlParser(object):
         :return: Appropriate parser for the associated TOML dictionary
         """
         version = toml_dict["toml_file_version"]
-        if version == 0:
+        if version == 1:
             return TomlV1Parser(toml_dict, file_information=file_information)
         else:
             raise NotImplementedError("Version {0} of the SANS Toml Format is not supported".format(version))
