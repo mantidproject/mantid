@@ -18,6 +18,7 @@
 #include <algorithm>
 #include <boost/lexical_cast.hpp>
 #include <memory>
+#include <numeric>
 #include <sstream>
 #include <utility>
 
@@ -179,7 +180,7 @@ void CompositeFunction::setMatrixWorkspace(std::shared_ptr<const MatrixWorkspace
  */
 void CompositeFunction::setStepSizeMethod(const StepSizeMethod stepSizeMethod) {
   std::for_each(m_functions.begin(), m_functions.end(),
-                [&](const auto &function) { function->setStepSizeMethod(stepSizeMethod); });
+                [&stepSizeMethod](const auto &function) { function->setStepSizeMethod(stepSizeMethod); });
 }
 
 /** Function you want to fit to.

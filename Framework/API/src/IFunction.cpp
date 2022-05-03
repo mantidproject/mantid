@@ -47,6 +47,15 @@ constexpr double EPSILON = std::numeric_limits<double>::epsilon();
 constexpr double MIN_DOUBLE = std::numeric_limits<double>::min();
 constexpr double STEP_PERCENTAGE = 0.001;
 
+const auto defaultStepSize = [](const double parameterValue) -> double {
+  return fabs(parameterValue) < 100.0 * MIN_DOUBLE / STEP_PERCENTAGE ? 100.0 * EPSILON
+                                                                     : parameterValue * STEP_PERCENTAGE;
+};
+
+const auto sqrtEpsilonStepSize = [](const double parameterValue) -> double {
+  return fabs(parameterValue) < 1 ? sqrt(EPSILON) : parameterValue * sqrt(EPSILON);
+};
+
 } // namespace
 
 namespace Mantid::API {
@@ -74,9 +83,8 @@ const std::vector<std::string> EXCLUDEUSAGE = {"CompositeFunction"};
 /**
  * Constructor
  */
-IFunction ::IFunction() : m_isParallel(false), m_handler(nullptr), m_chiSquared(0.0), m_stepSizeMethod(nullptr) {
-  setStepSizeMethod(StepSizeMethod::DEFAULT);
-}
+IFunction ::IFunction()
+    : m_isParallel(false), m_handler(nullptr), m_chiSquared(0.0), m_stepSizeFunction(defaultStepSize) {}
 
 /**
  * Destructor
@@ -273,7 +281,6 @@ std::string IFunction::writeTies() const {
  */
 void IFunction::addTie(std::unique_ptr<ParameterTie> tie) {
   auto iPar = getParameterIndex(*tie);
-
   auto it =
       std::find_if(m_ties.begin(), m_ties.end(), [&](const auto &m_tie) { return getParameterIndex(*m_tie) == iPar; });
 
@@ -368,7 +375,6 @@ void IFunction::clearTies() {
  */
 void IFunction::addConstraint(std::unique_ptr<IConstraint> ic) {
   size_t iPar = ic->parameterIndex();
-
   auto it = std::find_if(m_constraints.begin(), m_constraints.end(),
                          [&iPar](const auto &constraint) { return constraint->parameterIndex() == iPar; });
 
@@ -1068,7 +1074,7 @@ void IFunction::calNumericalDeriv(const FunctionDomain &domain, Jacobian &jacobi
  * @param parameterValue :: The value of the active parameter.
  * @returns The step size to use when calculating the numerical derivative.
  */
-double IFunction::calculateStepSize(const double parameterValue) const { return m_stepSizeMethod(parameterValue); }
+double IFunction::calculateStepSize(const double parameterValue) const { return m_stepSizeFunction(parameterValue); }
 
 /** Sets the function to use when calculating the step size.
  * @param stepSizeMethod :: An enum indicating which method to use when calculating the step size.
@@ -1076,15 +1082,10 @@ double IFunction::calculateStepSize(const double parameterValue) const { return 
 void IFunction::setStepSizeMethod(const StepSizeMethod stepSizeMethod) {
   switch (stepSizeMethod) {
   case StepSizeMethod::DEFAULT:
-    m_stepSizeMethod = [](const double parameterValue) -> double {
-      return fabs(parameterValue) < 100.0 * MIN_DOUBLE / STEP_PERCENTAGE ? 100.0 * EPSILON
-                                                                         : parameterValue * STEP_PERCENTAGE;
-    };
+    m_stepSizeFunction = defaultStepSize;
     return;
   case StepSizeMethod::SQRT_EPSILON:
-    m_stepSizeMethod = [](const double parameterValue) -> double {
-      return fabs(parameterValue) < 1 ? sqrt(EPSILON) : parameterValue * sqrt(EPSILON);
-    };
+    m_stepSizeFunction = sqrtEpsilonStepSize;
     return;
   }
   throw std::invalid_argument("An invalid method for calculating the step size was provided.");

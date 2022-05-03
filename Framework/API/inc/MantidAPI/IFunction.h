@@ -652,8 +652,8 @@ public:
 
   /// Describes the method in which the step size will be calculated:
   /// DEFAULT: Uses the traditional Mantid method of calculating the step size.
-  /// SQRT_EPSILON:  Uses the square root of epsilon to calculate the step size.
-  enum StepSizeMethod { DEFAULT, SQRT_EPSILON };
+  /// SQRT_EPSILON: Uses the square root of epsilon to calculate the step size.
+  enum class StepSizeMethod { DEFAULT, SQRT_EPSILON };
   /// Sets the StepSizeMethod to use when calculation the step size
   virtual void setStepSizeMethod(const StepSizeMethod stepSizeMethod);
 
@@ -722,8 +722,8 @@ private:
   std::vector<ParameterTie *> m_orderedTies;
   /// whether the function usage has been registered
   bool m_isRegistered{false};
-  /// The method used to calculate the step size
-  std::function<double(const double)> m_stepSizeMethod;
+  /// The function used to calculate the step size
+  std::function<double(const double)> m_stepSizeFunction;
 };
 
 /// shared pointer to the function base class

@@ -100,7 +100,7 @@ void IFittingAlgorithm::init() {
                   Kernel::Direction::Input);
   const std::array<std::string, 2> stepSizes = {{"Default", "Sqrt epsilon"}};
   declareProperty(
-      "StepSizeType", "Default", Kernel::IValidator_sptr(new Kernel::ListValidator<std::string>(stepSizes)),
+      "StepSizeMethod", "Default", Kernel::IValidator_sptr(new Kernel::ListValidator<std::string>(stepSizes)),
       "The way the step size is calculated for numerical derivatives. See the section about step sizes in the Fit "
       "algorithm documentation to understand the difference between \"Default\" and \"Sqrt epsilon\".",
       Kernel::Direction::Input);
@@ -131,7 +131,7 @@ void IFittingAlgorithm::afterPropertySet(const std::string &propName) {
     addWorkspace(propName);
   } else if (propName == "DomainType") {
     setDomainType();
-  } else if (propName == "StepSizeType") {
+  } else if (propName == "StepSizeMethod") {
     setStepSizeMethod();
   }
 }
@@ -183,11 +183,9 @@ void IFittingAlgorithm::setFunction() {
  */
 void IFittingAlgorithm::setStepSizeMethod() {
   if (m_function) {
-    const std::string stepSizeType = getProperty("StepSizeType");
-    if (stepSizeType == "Default")
-      m_function->setStepSizeMethod(IFunction::StepSizeMethod::DEFAULT);
-    else if (stepSizeType == "Sqrt epsilon")
-      m_function->setStepSizeMethod(IFunction::StepSizeMethod::SQRT_EPSILON);
+    const std::string stepSizeMethod = getProperty("StepSizeMethod");
+    m_function->setStepSizeMethod(stepSizeMethod == "Sqrt epsilon" ? IFunction::StepSizeMethod::SQRT_EPSILON
+                                                                   : IFunction::StepSizeMethod::DEFAULT);
   }
 }
 

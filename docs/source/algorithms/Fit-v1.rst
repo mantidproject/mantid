@@ -281,25 +281,25 @@ is calculated numerically using floating-point arithmetic. Mantid provides two m
 the step size. Depending on the data you are fitting, you might want to use a different step size
 calculation method than the default.
 
-The ``DEFAULT`` method calculates the step size as follows:
+The ``Default`` method calculates the step size as follows:
 
-+---------------------------------------+---------------------+
-| :math:`x_0`                           | :math:`h`           |
-+=======================================+=====================+
-| :math:`-2.22e-303 < x_0 < +2.22e-303`	| :math:`100\epsilon` |
-+---------------------------------------+---------------------+
-| otherwise                             | :math:`0.001x_0`    |
-+---------------------------------------+---------------------+
++---------------------------+---------------------+
+| :math:`x_0` range         | :math:`h`           |
++===========================+=====================+
+| :math:`|x_0| < 2.22e-303` | :math:`100\epsilon` |
++---------------------------+---------------------+
+| :math:`|x_0| >= 2.22e-303`| :math:`0.001x_0`    |
++---------------------------+---------------------+
 
-The ``SQRT_EPSILON`` method calculates the step size as follows:
+The ``Sqrt epsilon`` method calculates the step size as follows:
 
-+-----------------------+---------------------------+
-| :math:`x_0`           | :math:`h`                 |
-+=======================+===========================+
-| :math:`-1 < x_0 < +1`	| :math:`\sqrt{epsilon}`    |
-+-----------------------+---------------------------+
-| otherwise             | :math:`x_0\sqrt{epsilon}` |
-+-----------------------+---------------------------+
++-----------------------+----------------------------+
+| :math:`x_0` range     | :math:`h`                  |
++=======================+============================+
+| :math:`|x_0| < 1`	| :math:`\sqrt{\epsilon}`    |
++-----------------------+----------------------------+
+| :math:`|x_0| >= 1`    | :math:`x_0\sqrt{\epsilon}` |
++-----------------------+----------------------------+
 
 where :math:`x_0` is the value of the active parameter and :math:`\epsilon \approx 2.22e-16`.
 
