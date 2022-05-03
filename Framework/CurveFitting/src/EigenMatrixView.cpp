@@ -8,11 +8,18 @@
 #include "MantidCurveFitting/EigenMatrixView.h"
 
 namespace Mantid::CurveFitting {
-/// EigenMatrix_View Constructors
-/// default constructor
+// EigenMatrix_View Constructors
+// default constructor
 EigenMatrix_View::EigenMatrix_View() : m_view({}, 0, 0, dynamic_stride(0, 0)), isConst(false) {}
 
-/// constructor: array->matrix view
+// constructor: array->matrix view
+/// @param base: array from which to take view.
+/// @param nTotalRows: total number of rows in the subject matrix.
+/// @param nTotalCols: total number of columns in the subject matrix.
+/// @param nElements_1: number of elements to include in view in dimension 1 (rows).
+/// @param nElements_2: number of elements to include in view in dimension 2 (cols).
+/// @param startElement_1: index number of element to start view on, dimension 1 (rows).
+/// @param startElement_2: index number of element to start view on, dimension 2 (cols).
 EigenMatrix_View::EigenMatrix_View(double *base, const size_t nTotalRows, size_t nTotalCols, size_t nElements_1,
                                    size_t nElements_2, const size_t &startElement_1, const size_t &startElement_2)
     : m_view(base, nTotalRows, nTotalCols, dynamic_stride(nTotalRows, 1)) {
@@ -28,7 +35,12 @@ EigenMatrix_View::EigenMatrix_View(double *base, const size_t nTotalRows, size_t
                          dynamic_stride(nTotalRows, 1));
 }
 
-/// constructor: matrix->matrix view
+// constructor: matrix->matrix view
+/// @param matrix: Eigen::MatrixXd from which to take view.
+/// @param nElements_1: number of elements to include in view in dimension 1 (rows).
+/// @param nElements_2: number of elements to include in view in dimension 2 (cols).
+/// @param startElement_1: index number of element to start view on, dimension 1 (rows).
+/// @param startElement_2: index number of element to start view on, dimension 2 (cols).
 EigenMatrix_View::EigenMatrix_View(Eigen::MatrixXd &matrix, size_t nElements_1, size_t nElements_2,
                                    const size_t &startElement_1, const size_t &startElement_2)
     : m_view(matrix.data(), matrix.rows(), matrix.cols(), dynamic_stride(matrix.outerStride(), matrix.innerStride())) {
@@ -44,7 +56,12 @@ EigenMatrix_View::EigenMatrix_View(Eigen::MatrixXd &matrix, size_t nElements_1, 
                          dynamic_stride(matrix.outerStride(), matrix.innerStride()));
 }
 
-/// constructor: map->matrix view
+// constructor: map->matrix view
+/// @param matrix:  Eigen::Map of an Eigen::MatrixXd from which to take view.
+/// @param nElements_1: number of elements to include in view in dimension 1 (rows).
+/// @param nElements_2: number of elements to include in view in dimension 2 (cols).
+/// @param startElement_1: index number of element to start view on, dimension 1 (rows).
+/// @param startElement_2: index number of element to start view on, dimension 2 (cols).
 EigenMatrix_View::EigenMatrix_View(map_type &matrix, size_t nElements_1, size_t nElements_2,
                                    const size_t &startElement_1, const size_t &startElement_2)
     : m_view(matrix.data(), matrix.rows(), matrix.cols(), dynamic_stride(matrix.outerStride(), matrix.innerStride())) {
@@ -61,6 +78,13 @@ EigenMatrix_View::EigenMatrix_View(map_type &matrix, size_t nElements_1, size_t 
 }
 
 /// CONST constructor: array->matrix view
+/// @param base: array from which to take view.
+/// @param nTotalRows: total number of rows in the subject matrix.
+/// @param nTotalCols: total number of columns in the subject matrix.
+/// @param nElements_1: number of elements to include in view in dimension 1 (rows).
+/// @param nElements_2: number of elements to include in view in dimension 2 (cols).
+/// @param startElement_1: index number of element to start view on, dimension 1 (rows).
+/// @param startElement_2: index number of element to start view on, dimension 2 (cols).
 EigenMatrix_View::EigenMatrix_View(const double *base, const size_t nTotalRows, size_t nTotalCols, size_t nElements_1,
                                    size_t nElements_2, const size_t &startElement_1, const size_t &startElement_2)
     : m_view({}, 0, 0, dynamic_stride(0, 0)), isConst(true) {
@@ -74,6 +98,11 @@ EigenMatrix_View::EigenMatrix_View(const double *base, const size_t nTotalRows, 
 }
 
 /// CONST constructor: matrix->matrix view
+/// @param matrix: Eigen::MatrixXd from which to take view.
+/// @param nElements_1: number of elements to include in view in dimension 1 (rows).
+/// @param nElements_2: number of elements to include in view in dimension 2 (cols).
+/// @param startElement_1: index number of element to start view on, dimension 1 (rows).
+/// @param startElement_2: index number of element to start view on, dimension 2 (cols).
 EigenMatrix_View::EigenMatrix_View(const Eigen::MatrixXd &matrix, size_t nElements_1, size_t nElements_2,
                                    const size_t &startElement_1, const size_t &startElement_2)
     : m_view({}, 0, 0, dynamic_stride(0, 0)), isConst(true) {
@@ -87,6 +116,11 @@ EigenMatrix_View::EigenMatrix_View(const Eigen::MatrixXd &matrix, size_t nElemen
 }
 
 /// CONST constructor: map->matrix view
+/// @param matrix:  Eigen::Map of an Eigen::MatrixXd from which to take view.
+/// @param nElements_1: number of elements to include in view in dimension 1 (rows).
+/// @param nElements_2: number of elements to include in view in dimension 2 (cols).
+/// @param startElement_1: index number of element to start view on, dimension 1 (rows).
+/// @param startElement_2: index number of element to start view on, dimension 2 (cols).
 EigenMatrix_View::EigenMatrix_View(const map_type &matrix, size_t nElements_1, size_t nElements_2,
                                    const size_t &startElement_1, const size_t &startElement_2)
     : m_view({}, 0, 0, dynamic_stride(0, 0)), isConst(true) {
@@ -100,24 +134,19 @@ EigenMatrix_View::EigenMatrix_View(const map_type &matrix, size_t nElements_1, s
 }
 
 /// CONST copy constructor
+/// @param v :: EigenMatrix_View to copy.
 EigenMatrix_View::EigenMatrix_View(const EigenMatrix_View &v) : m_view({}, 0, 0, dynamic_stride(0, 0)), isConst(true) {
   new (&m_view)
       const_map_type(v.matrix_inspector().data(), v.rows(), v.cols(), dynamic_stride(v.outerStride(), v.innerStride()));
 }
 
 /// copy constructor
+/// @param v :: EigenMatrix_View to copy.
 EigenMatrix_View::EigenMatrix_View(EigenMatrix_View &v)
     : m_view(v.matrix_mutator().data(), v.rows(), v.cols(), dynamic_stride(v.outerStride(), v.innerStride())),
       isConst(false) {}
 
-void EigenMatrix_View::setMatrix(Eigen::MatrixXd matrix) {
-  if (!isConst) {
-    m_view = matrix; // does this need to set view as a reference
-  } else {
-    throw std::runtime_error("Matrix is const matrix, a const matrix cannot be set.");
-  }
-}
-
+/// @returns a non-const reference to the member m_view, an Eigen::Map of an Eigen::MatrixXd.
 map_type &EigenMatrix_View::matrix_mutator() {
   if (!isConst) {
     return m_view;

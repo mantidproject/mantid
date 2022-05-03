@@ -13,8 +13,8 @@ typedef Eigen::Map<Eigen::VectorXd, 0, dynamic_stride> vec_map_type;
 typedef Eigen::Map<const Eigen::VectorXd, 0, dynamic_stride> vec_const_map_type;
 
 struct MANTID_CURVEFITTING_DLL EigenVector_View {
-  /// EigenVector_View Constructors
-  /// default constructor
+  // EigenVector_View Constructors
+  // default constructor
   EigenVector_View();
 
   /// constructor: map->vector view
@@ -35,10 +35,10 @@ struct MANTID_CURVEFITTING_DLL EigenVector_View {
   // CONST constructor: array->vector view
   EigenVector_View(const double *base, const size_t nElements, const size_t &startElement = 0);
 
-  /// copy constructor
+  // copy constructor
   EigenVector_View(EigenVector_View &v);
 
-  /// CONST copy constructor
+  // CONST copy constructor
   EigenVector_View(const EigenVector_View &v);
 
   vec_map_type &vector_mutator();

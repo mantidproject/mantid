@@ -213,8 +213,8 @@ EigenMatrix &EigenMatrix::operator-=(const EigenMatrix &M) {
   m_view.matrix_mutator() -= M.inspector();
   return *this;
 }
-/// subtract a matrix from this
-/// @param M :: A matrix
+/// subtract a constant from this
+/// @param d :: A number
 EigenMatrix &EigenMatrix::operator-=(const double &d) {
   m_view.matrix_mutator().array() -= d;
   return *this;

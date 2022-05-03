@@ -14,41 +14,39 @@ typedef Eigen::Map<const Eigen::MatrixXd, 0, dynamic_stride> const_map_type;
 
 struct MANTID_CURVEFITTING_DLL EigenMatrix_View {
 
-  /// EigenMatrix_View Constructors
-  /// default constructor
+  // EigenMatrix_View Constructors
+  // default constructor
   EigenMatrix_View();
 
-  /// constructor: array->matrix view
+  // constructor: array->matrix view
   EigenMatrix_View(double *base, const size_t nTotalRows, size_t nTotalCols, size_t nElements_1 = -1,
                    size_t nElements_2 = -1, const size_t &startElement_1 = 0, const size_t &startElement_2 = 0);
 
-  /// constructor: matrix->matrix view
+  // constructor: matrix->matrix view
   EigenMatrix_View(Eigen::MatrixXd &matrix, size_t nElements_1 = -1, size_t nElements_2 = -1,
                    const size_t &startElement_1 = 0, const size_t &startElement_2 = 0);
 
-  /// constructor: map->matrix view
+  // constructor: map->matrix view
   EigenMatrix_View(map_type &matrix, size_t nElements_1 = -1, size_t nElements_2 = -1, const size_t &startElement_1 = 0,
                    const size_t &startElement_2 = 0);
 
-  /// CONST constructor: array->matrix view
+  // CONST constructor: array->matrix view
   EigenMatrix_View(const double *base, const size_t nTotalRows, size_t nTotalCols, size_t nElements_1 = -1,
                    size_t nElements_2 = -1, const size_t &startElement_1 = 0, const size_t &startElement_2 = 0);
 
-  /// CONST constructor: matrix->matrix view
+  // CONST constructor: matrix->matrix view
   EigenMatrix_View(const Eigen::MatrixXd &matrix, size_t nElements_1 = -1, size_t nElements_2 = -1,
                    const size_t &startElement_1 = 0, const size_t &startElement_2 = 0);
 
-  /// CONST constructor: map->matrix view
+  // CONST constructor: map->matrix view
   EigenMatrix_View(const map_type &matrix, size_t nElements_1 = -1, size_t nElements_2 = -1,
                    const size_t &startElement_1 = 0, const size_t &startElement_2 = 0);
 
-  /// copy constructor
+  // copy constructor
   EigenMatrix_View(EigenMatrix_View &v);
 
-  /// CONST copy constructor
+  // CONST copy constructor
   EigenMatrix_View(const EigenMatrix_View &v);
-
-  void setMatrix(Eigen::MatrixXd matrix);
 
   map_type &matrix_mutator();
   inline const map_type matrix_inspector() const { return m_view; };
