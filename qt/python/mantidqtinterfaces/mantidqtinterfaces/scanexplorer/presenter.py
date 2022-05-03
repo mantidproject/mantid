@@ -127,6 +127,7 @@ class ScanExplorerPresenter:
         start watching for it.
         """
         self.observer.observeStarting()
+        self.observer.observing = True
 
     def on_algorithm_finished(self, error: bool, error_message: str):
         """
@@ -143,7 +144,7 @@ class ScanExplorerPresenter:
             return
 
         self._ws = mtd[self.future_workspace]
-        self.future_workspace = None
+        self.future_workspace = ""
 
         self.create_slice_viewer(self._ws)
 
@@ -176,8 +177,13 @@ class ScanAlgorithmObserver(AlgorithmObserver):
         self.signals = ScanAlgorithmObserverSignals()
         self.error = False
         self.error_message = ""
+        self.observing = False
 
     def startingHandle(self, alg):
+        """
+        Called when an algorithm is started.
+        @param alg: the algorithm starting
+        """
         # We are waiting for this specific algorithm, so in the off chance another is run just at the same time,
         # we check for its name
         if alg.name() != "SANSILLParameterScan":
@@ -194,7 +200,11 @@ class ScanAlgorithmObserver(AlgorithmObserver):
         self.signals.finished.emit(self.error, self.error_message)
 
         # the algorithm has run, so we can stop listening for now. IF IT WOULD WORK
-        self.stopObservingManager()
+        if self.observing:
+            self.observing = False
+
+            # this function hangs? it breaks nothing but eats the thread
+            self.stopObservingManager()
 
     def errorHandle(self, msg):
         """
