@@ -495,6 +495,7 @@ set(TEST_FILES
     LoadILLPolarizationFactorsTest.h
     LoadILLPolarizedDiffractionTest.h
     LoadILLReflectometryTest.h
+    LoadILLSALSATest.h
     LoadILLSANSTest.h
     LoadILLTOF2Test.h
     LoadILLTest.h
