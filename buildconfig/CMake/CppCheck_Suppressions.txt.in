@@ -163,9 +163,6 @@ knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/Crystal/src/MaskPeaksWorks
 knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/Crystal/src/MaskPeaksWorkspace.cpp:193
 knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/Crystal/src/PeakHKLErrors.cpp:388
 nullPointerRedundantCheck:${CMAKE_SOURCE_DIR}/Framework/Crystal/src/PeakHKLErrors.cpp:173
-unreadVariable:${CMAKE_SOURCE_DIR}/Framework/CurveFitting/src/Algorithms/DoublePulseFit.cpp:198
-unreadVariable:${CMAKE_SOURCE_DIR}/Framework/CurveFitting/src/Algorithms/DoublePulseFit.cpp:199
-unreadVariable:${CMAKE_SOURCE_DIR}/Framework/CurveFitting/src/Algorithms/DoublePulseFit.cpp:222
 knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/CurveFitting/src/Algorithms/PlotPeakByLogValueHelper.cpp:53
 knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/CurveFitting/src/Algorithms/PlotPeakByLogValueHelper.cpp:149
 knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/CurveFitting/src/Algorithms/PlotPeakByLogValueHelper.cpp:190
