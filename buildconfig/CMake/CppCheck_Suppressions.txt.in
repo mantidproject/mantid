@@ -273,8 +273,6 @@ knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadGSASI
 useStlAlgorithm:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadGSASInstrumentFile.cpp:171
 unreadVariable:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadHelper.cpp:168
 useStlAlgorithm:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadHFIRSANS.cpp:440
-constParameter:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadILLIndirect2.cpp:157
-constParameter:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadILLIndirect2.cpp:433
 constParameter:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadILLTOF2.cpp:115
 constParameter:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadILLTOF2.cpp:143
 constParameter:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadILLTOF2.cpp:230
