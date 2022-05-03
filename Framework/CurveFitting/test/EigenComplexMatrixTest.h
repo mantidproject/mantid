@@ -45,7 +45,7 @@ ComplexType v33{33, 0.33};
   TS_ASSERT_DELTA(ComplexType(v1).imag(), ComplexType(v2).imag(), d);
 } // namespace
 
-class ComplexMatrixTest : public CxxTest::TestSuite {
+class EigenComplexMatrixTest : public CxxTest::TestSuite {
 public:
   void test_zeros_complex() {
     ComplexMatrix m(10, 12);

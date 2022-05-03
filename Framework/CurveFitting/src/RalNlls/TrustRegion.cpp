@@ -49,7 +49,7 @@ void matmultInner(const DoubleFortranMatrix &J, DoubleFortranMatrix &A) {
 void getSvdJ(const DoubleFortranMatrix &J, double &s1, double &sn) {
 
   auto n = J.len2();
-  DoubleFortranMatrix U(J.tr());
+  DoubleFortranMatrix U(J.transpose());
   DoubleFortranMatrix V(n, n);
   DoubleFortranVector S(n);
   DoubleFortranVector work(n);
@@ -198,7 +198,7 @@ void rankOneUpdate(DoubleFortranMatrix &hf, NLLS_workspace &w) {
   alpha = 1 / yts;
   // call dGER(n,n,alpha,w.ysharpSks,1,w.y,1,hf,n)
 
-  DoubleFortranMatrix hf_tr(hf.tr());
+  DoubleFortranMatrix hf_tr(hf.transpose());
   gsl_matrix *hf_gsl = &getGSLMatrixView(hf_tr.mutator()).matrix;
 
   gsl_blas_dger(alpha, &getGSLVectorView_const(w.ysharpSks.inspector()).vector,

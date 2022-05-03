@@ -20,12 +20,12 @@ using Mantid::CurveFitting::FortranMatrix;
 using DoubleFortranMatrix = FortranMatrix<EigenMatrix>;
 using ComplexFortranMatrix = FortranMatrix<ComplexMatrix>;
 
-class FortranMatrixTest : public CxxTest::TestSuite {
+class EigenFortranMatrixTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static FortranMatrixTest *createSuite() { return new FortranMatrixTest(); }
-  static void destroySuite(FortranMatrixTest *suite) { delete suite; }
+  static EigenFortranMatrixTest *createSuite() { return new EigenFortranMatrixTest(); }
+  static void destroySuite(EigenFortranMatrixTest *suite) { delete suite; }
 
   void test_double_c_indexing() {
     DoubleFortranMatrix m(3, 3);
@@ -197,5 +197,27 @@ public:
     m.allocate(0, 3, -4, 4);
     TS_ASSERT_EQUALS(m.size1(), 4);
     TS_ASSERT_EQUALS(m.size2(), 9);
+  }
+
+  void test_transpose_complex() {
+    ComplexFortranMatrix m(1, 2);
+    m(1, 1) = 1.;
+    m(1, 2) = 2.;
+
+    ComplexFortranMatrix m_tr = m.transpose();
+
+    TS_ASSERT_EQUALS(m_tr(1, 1), m(1, 1));
+    TS_ASSERT_EQUALS(m_tr(2, 1), m(1, 2));
+  }
+
+  void test_transpose_double() {
+    DoubleFortranMatrix m(1, 2);
+    m(1, 1) = 1.;
+    m(1, 2) = 2.;
+
+    DoubleFortranMatrix m_tr = m.transpose();
+
+    TS_ASSERT_EQUALS(m_tr(1, 1), m(1, 1));
+    TS_ASSERT_EQUALS(m_tr(2, 1), m(1, 2));
   }
 };

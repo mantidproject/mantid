@@ -17,12 +17,12 @@ using Mantid::CurveFitting::FortranVector;
 using FortranDoubleVector = FortranVector<Mantid::CurveFitting::EigenVector>;
 using FortranComplexVector = FortranVector<Mantid::CurveFitting::ComplexVector>;
 
-class FortranVectorTest : public CxxTest::TestSuite {
+class EigenFortranVectorTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static FortranVectorTest *createSuite() { return new FortranVectorTest(); }
-  static void destroySuite(FortranVectorTest *suite) { delete suite; }
+  static EigenFortranVectorTest *createSuite() { return new EigenFortranVectorTest(); }
+  static void destroySuite(EigenFortranVectorTest *suite) { delete suite; }
 
   void test_double_c_indexing() {
     FortranDoubleVector v(3);
