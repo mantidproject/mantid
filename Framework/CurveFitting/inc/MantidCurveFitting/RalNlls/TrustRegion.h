@@ -14,11 +14,12 @@ namespace Mantid {
 namespace CurveFitting {
 namespace NLLS {
 
-void matmultInner(const DoubleFortranMatrix &J, DoubleFortranMatrix &A);
+void MANTID_CURVEFITTING_DLL matmultInner(const DoubleFortranMatrix &J, DoubleFortranMatrix &A);
 void getSvdJ(const DoubleFortranMatrix &J, double &s1, double &sn);
-double norm2(const DoubleFortranVector &v);
-void multJ(const DoubleFortranMatrix &J, const DoubleFortranVector &x, DoubleFortranVector &Jx);
-void multJt(const DoubleFortranMatrix &J, const DoubleFortranVector &x, DoubleFortranVector &Jtx);
+double MANTID_CURVEFITTING_DLL norm2(const DoubleFortranVector &v);
+void MANTID_CURVEFITTING_DLL multJ(const DoubleFortranMatrix &J, const DoubleFortranVector &x, DoubleFortranVector &Jx);
+void MANTID_CURVEFITTING_DLL multJt(const DoubleFortranMatrix &J, const DoubleFortranVector &x,
+                                    DoubleFortranVector &Jtx);
 double evaluateModel(const DoubleFortranVector &f, const DoubleFortranMatrix &J, const DoubleFortranMatrix &hf,
                      const DoubleFortranVector &d, const nlls_options &options, evaluate_model_work &w);
 double calculateRho(double normf, double normfnew, double md, const nlls_options &options);

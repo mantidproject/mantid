@@ -12,7 +12,7 @@ typedef Eigen::Stride<Eigen::Dynamic, Eigen::Dynamic> dynamic_stride;
 typedef Eigen::Map<Eigen::MatrixXd, 0, dynamic_stride> map_type;
 typedef Eigen::Map<const Eigen::MatrixXd, 0, dynamic_stride> const_map_type;
 
-struct EigenMatrix_View {
+struct MANTID_CURVEFITTING_DLL EigenMatrix_View {
 
   /// EigenMatrix_View Constructors
   /// default constructor
