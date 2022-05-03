@@ -98,6 +98,12 @@ void IFittingAlgorithm::init() {
                   "centre of each bin. If it is \"Histogram\" then function is "
                   "integrated within the bin and the integrals returned.",
                   Kernel::Direction::Input);
+  const std::array<std::string, 2> stepSizes = {{"Default", "Sqrt epsilon"}};
+  declareProperty(
+      "StepSizeType", "Default", Kernel::IValidator_sptr(new Kernel::ListValidator<std::string>(stepSizes)),
+      "The way the step size is calculated for numerical derivatives. See the section about step sizes in the Fit "
+      "algorithm documentation to understand the difference between \"Default\" and \"Sqrt epsilon\".",
+      Kernel::Direction::Input);
   declareProperty("PeakRadius", 0,
                   "A value of the peak radius the peak functions should use. A "
                   "peak radius defines an interval on the x axis around the "
@@ -167,6 +173,20 @@ void IFittingAlgorithm::setFunction() {
   } else {
     m_workspacePropertyNames.resize(1, "InputWorkspace");
     m_workspaceIndexPropertyNames.resize(1, "WorkspaceIndex");
+  }
+  setStepSizeMethod();
+}
+
+/**
+ * Sets the method to use when calculating the step size for the numerical derivative.
+ */
+void IFittingAlgorithm::setStepSizeMethod() {
+  if (m_function) {
+    const std::string stepSizeType = getProperty("StepSizeType");
+    if (stepSizeType == "Default")
+      m_function->setStepSizeMethod(IFunction::StepSizeMethod::DEFAULT);
+    else if (stepSizeType == "Sqrt epsilon")
+      m_function->setStepSizeMethod(IFunction::StepSizeMethod::SQRT_EPSILON);
   }
 }
 
