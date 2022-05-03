@@ -15,7 +15,10 @@ from mantidqt.interfacemanager import InterfaceManager
 
 class ScanExplorerView(QMainWindow):
 
-    """TODO"""
+    """Index of the slice viewer widget in the splitter. Used to replace it when needed."""
+    SLICE_VIEWER_SPLITTER_INDEX = 1
+
+    """Signal sent when files are selected in the file dialog."""
     sig_files_selected = Signal(list)
 
     def __init__(self, parent=None, presenter=None):
@@ -73,10 +76,13 @@ class ScanExplorerView(QMainWindow):
         Set visual options for the slice viewer and display it.
         @param workspace: the workspace to display
         """
-        self._data_view.create_axes_orthogonal(redraw_on_zoom=not False)
+        # self._data_view.create_axes_orthogonal(redraw_on_zoom=not False)
 
-        self.splitter.setOrientation(Qt.Vertical)
-        self.splitter.addWidget(self._data_view)
+        if self.splitter.count() == 1:
+            self.splitter.setOrientation(Qt.Vertical)
+            self.splitter.addWidget(self._data_view)
+        else:
+            self.splitter.replaceWidget(self.SLICE_VIEWER_SPLITTER_INDEX, self._data_view)
         self.plot_workspace(workspace)
 
     def new_plot(self):
@@ -90,8 +96,7 @@ class ScanExplorerView(QMainWindow):
 
     def show_directory_manager(self):
         """
-        TODO
-        Open a new directory manager window so the user can select a directory.
+        Open a new directory manager window so the user can select files.
         """
         base_directory = "/users/tillet/data/d16_omega/new_proto"
 
@@ -107,7 +112,9 @@ class ScanExplorerView(QMainWindow):
         self.sig_files_selected.emit(files_path)
 
     def open_alg_dialog(self):
-
+        """
+        Open the dialog for SANSILLParameterScan and setup connections.
+        """
         manager = InterfaceManager()
         preset = dict()
         enabled = dict()
@@ -115,7 +122,7 @@ class ScanExplorerView(QMainWindow):
             preset["SampleRuns"] = self.file_line_edit.text()
             enabled = ["SampleRuns"]
 
-        dialog = manager.createDialogFromName("SANSILLParameterScan", 1, self, False, preset, "coucou", enabled)
+        dialog = manager.createDialogFromName("SANSILLParameterScan", 1, self, False, preset, "", enabled)
 
         dialog.show()
 
@@ -124,3 +131,7 @@ class ScanExplorerView(QMainWindow):
     @property
     def data_view(self):
         return self._data_view
+
+    @data_view.setter
+    def data_view(self, new_data_view):
+        self._data_view = new_data_view

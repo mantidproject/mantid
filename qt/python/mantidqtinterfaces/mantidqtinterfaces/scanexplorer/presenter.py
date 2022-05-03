@@ -99,7 +99,7 @@ class ScanExplorerPresenter:
         """
         self._ws = workspace
         presenter = SliceViewer(ws=workspace)
-        self.view._data_view = presenter._data_view
+        self.view.data_view = presenter._data_view
         self.view.show_slice_viewer(workspace)
         self.view.data_view.add_line_plots(PixelLinePlot, self.view.data_view.presenter)
 
