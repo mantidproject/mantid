@@ -47,12 +47,9 @@ python3 -m sphinx $WORKSPACE/dev-docs/source $BUILD_DIR
 ###############################################################################
 # Push the results
 ###############################################################################
-if [ "builder" == "$USER" ]; then
-    echo "Setting username"
-    git config user.name mantid-builder
-    git config user.email "mantid-buildserver@mantidproject.org"
-fi
-
+echo "Setting username"
+git config user.name mantid-builder
+git config user.email "mantid-buildserver@mantidproject.org"
 # commit returns true if nothing happened
 git add .
 git commit -m "Automatic update of developer site" || exit 0
