@@ -38,6 +38,14 @@ def archive_conda_build(arch) {
     onlyIfSuccessful: true
 }
 
+def create_standalone_package_osx() {
+  sh "${WORKSPACE}/installers/conda/osx/create_bundle.sh -c local -s ${PACKAGE_SUFFIX}"
+  archiveArtifacts artifacts: "${WORKSPACE}/*.dmg",
+    allowEmptyArchive: false,
+    fingerprint: true,
+    onlyIfSuccessful: true
+}
+
 pipeline {
   agent none
   environment {
@@ -89,16 +97,16 @@ pipeline {
         sh '${WORKSPACE}/buildconfig/Jenkins/Conda/update-conda-recipes.sh $GITHUB_ACCESS_TOKEN $GITHUB_USER_NAME'
       }
     }
-    stage('Create Conda packages') {
+    stage('Packaging') {
       parallel {
-        stage('conda-build: linux-64') {
+        stage('platform: linux-64') {
           agent { label 'conda-build-linux' }
           environment { CONDA_BLD_PATH = "${WORKSPACE}/conda-bld" }
           steps {
             conda_build_unix("linux-64")
           }
         }
-        stage('conda-build: win-64') {
+        stage('platform: win-64') {
           agent { label 'conda-build-win' }
           steps {
             script {
@@ -108,25 +116,29 @@ pipeline {
             conda_build_win("win-64")
           }
         }
-        stage('conda-build: osx-64') {
+        stage('platform: osx-64') {
           agent { label 'conda-build-osx' }
           environment { CONDA_BLD_PATH = "${WORKSPACE}/conda-bld" }
           steps {
             conda_build_unix("osx-64")
+            create_standalone_package_osx()
           }
         }
       }
     }
-    stage ('Deploy packages'){
+    stage ('Publish Conda packages to Anaconda') {
       agent { label 'conda-build-linux' } // Use linux for simplicity with shell scripts
       environment { ANACONDA_TOKEN = credentials("${ANACONDA_TOKEN_CREDENTIAL_ID}") }
       steps{
         // Copy all artifacts into ${WORKSPACE} from the current job, using ${JOB_NAME} and the current ${BUILD_NUMBER}
-        copyArtifacts fingerprintArtifacts: true, projectName: '${JOB_NAME}', selector: specific('${BUILD_NUMBER}')
+        copyArtifacts filter: '*.tar.bz2',
+          fingerprintArtifacts: true,
+          projectName: '${JOB_NAME}',
+          selector: specific('${BUILD_NUMBER}')
         sh '${WORKSPACE}/buildconfig/Jenkins/Conda/publish-to-anaconda ${WORKSPACE} $ANACONDA_TOKEN $ANACONDA_CHANNEL $ANACONDA_CHANNEL_LABEL ${WORKSPACE}/conda-bld/linux-64/mantid-*.tar.bz2 ${WORKSPACE}/conda-bld/linux-64/mantidqt-*.tar.bz2 ${WORKSPACE}/conda-bld/linux-64/mantidworkbench-*.tar.bz2 ${WORKSPACE}/conda-bld/osx-64/mantid-*.tar.bz2 ${WORKSPACE}/conda-bld/osx-64/mantidqt-*.tar.bz2 ${WORKSPACE}/conda-bld/osx-64/mantidworkbench-*.tar.bz2 ${WORKSPACE}/conda-bld/win-64/mantid-*.tar.bz2 ${WORKSPACE}/conda-bld/win-64/mantidqt-*.tar.bz2 ${WORKSPACE}/conda-bld/win-64/mantidworkbench-*.tar.bz2'
       }
     }
-    stage ('Delete old packages'){
+    stage ('Delete old Conda nightly packages from Anaconda') {
       agent { label 'conda-build-linux' } // Use linux for simplicity with shell scripts
       environment { ANACONDA_TOKEN = credentials("${ANACONDA_TOKEN_CREDENTIAL_ID}") }
       steps {
