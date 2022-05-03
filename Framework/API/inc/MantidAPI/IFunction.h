@@ -655,7 +655,7 @@ public:
   /// SQRT_EPSILON:  Uses the square root of epsilon to calculate the step size.
   enum StepSizeMethod { DEFAULT, SQRT_EPSILON };
   /// Sets the StepSizeMethod to use when calculation the step size
-  void setStepSizeMethod(const StepSizeMethod stepSizeMethod);
+  virtual void setStepSizeMethod(const StepSizeMethod stepSizeMethod);
 
 protected:
   /// Function initialization. Declare function parameters in this method.

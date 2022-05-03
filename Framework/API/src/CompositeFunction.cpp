@@ -174,6 +174,11 @@ void CompositeFunction::setMatrixWorkspace(std::shared_ptr<const MatrixWorkspace
   }
 }
 
+void CompositeFunction::setStepSizeMethod(const StepSizeMethod stepSizeMethod) {
+  std::for_each(m_functions.begin(), m_functions.end(),
+                [&](const auto &function) { function->setStepSizeMethod(stepSizeMethod); });
+}
+
 /** Function you want to fit to.
  *  @param domain :: An instance of FunctionDomain with the function arguments.
  *  @param values :: A FunctionValues instance for storing the calculated
