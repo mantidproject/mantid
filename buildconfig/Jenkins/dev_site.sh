@@ -43,7 +43,7 @@ which python3
 # the wacky long line is what is run from inside "sphinx-build" which is not
 # installed by virtualenv for some reason
 ###############################################################################
-sphinx_build $WORKSPACE/dev-docs/source $BUILD_DIR
+python3 -m sphinx $WORKSPACE/dev-docs/source $BUILD_DIR
 
 ###############################################################################
 # Push the results
