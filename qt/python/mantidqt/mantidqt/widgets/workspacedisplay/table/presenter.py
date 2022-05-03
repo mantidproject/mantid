@@ -6,7 +6,6 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 #  This file is part of mantidqt package.
 from functools import partial
-
 from qtpy.QtCore import Qt
 
 from mantid.kernel import logger
@@ -133,15 +132,11 @@ class TableWorkspaceDisplay(ObservingPresenter, DataCopier):
         return TableWorkspaceDisplayModel.supports(ws)
 
     def replace_workspace(self, workspace_name, workspace):
-        if self.presenter.model.workspace_equals(workspace_name):
-            # stops triggering itemChanged signal while the data is being reloaded
+        if self.presenter.model.workspace_equals(workspace_name) and not self.presenter.model.block_model_replace:
             self.presenter.view.blockSignals(True)
-
             self.presenter.model = TableWorkspaceDisplayModel(workspace)
             self.presenter.load_data(self.presenter.view)
             self.presenter.view.blockSignals(False)
-
-            self.presenter.view.emit_repaint()
 
     def action_copy_cells(self):
         self.copy_cells(self.presenter.view)

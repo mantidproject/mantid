@@ -52,30 +52,6 @@ set(INC_FILES
     inc/MantidReflectometry/SpecularReflectionPositionCorrect2.h
 )
 
-set(TEST_FILES
-    CalculateSlitsTest.h
-    ConvertToReflectometryQTest.h
-    CreateTransmissionWorkspace2Test.h
-    CreateTransmissionWorkspaceAuto2Test.h
-    FindReflectometryLines2Test.h
-    NRCalculateSlitResolutionTest.h
-    ReflectometryBeamStatisticsTest.h
-    ReflectometryMomentumTransferTest.h
-    ReflectometryReductionOne2Test.h
-    ReflectometryReductionOneAuto2Test.h
-    ReflectometryReductionOneAuto3Test.h
-    ReflectometryTransformKiKfTest.h
-    ReflectometryTransformPTest.h
-    ReflectometryTransformQxQzTest.h
-    ReflectometrySumInQTest.h
-    SpecularReflectionCalculateTheta2Test.h
-    SpecularReflectionCalculateThetaTest.h
-    SpecularReflectionPositionCorrect2Test.h
-    SpecularReflectionPositionCorrectTest.h
-)
-
-set(TEST_PY_FILES ReflectometryBackgroundSubtractionTest.py ReflectometryReductionOne2Test.py)
-
 if(COVERAGE)
   foreach(loop_var ${SRC_FILES} ${INC_FILES})
     set_property(GLOBAL APPEND PROPERTY COVERAGE_SRCS "${CMAKE_CURRENT_SOURCE_DIR}/${loop_var}")

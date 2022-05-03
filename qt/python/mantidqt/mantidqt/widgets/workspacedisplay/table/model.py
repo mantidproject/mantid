@@ -10,6 +10,7 @@ from mantid.api import IPeaksWorkspace, ITableWorkspace
 from mantid.kernel import V3D
 from mantidqt.widgets.workspacedisplay.table.error_column import ErrorColumn
 from mantidqt.widgets.workspacedisplay.table.marked_columns import MarkedColumns
+from contextlib import contextmanager
 
 
 class TableWorkspaceColumnTypeMapping(object):
@@ -26,6 +27,13 @@ class TableWorkspaceColumnTypeMapping(object):
     XERR = 4
     YERR = 5
     LABEL = 6
+
+
+@contextmanager
+def block_model_replacement(model):
+    model.block_model_replace = True
+    yield
+    model.block_model_replace = False
 
 
 class TableWorkspaceDisplayModel:
@@ -58,7 +66,7 @@ class TableWorkspaceDisplayModel:
         self.ws_num_cols = self.ws.columnCount()
         self.marked_columns = MarkedColumns()
         self._original_column_headers = self.get_column_headers()
-
+        self.block_model_replace = False
         # loads the types of the columns
         for col in range(self.ws_num_cols):
             plot_type = self.ws.getPlotType(col)
@@ -135,7 +143,8 @@ class TableWorkspaceDisplayModel:
             # at the same time as we are trying to locally update the data in the
             # item object itself, which causes a Qt exception that the object has
             # already been deleted and a crash
-            self.ws.setCell(row, col, data, notify_replace=False)
+            with block_model_replacement(self):
+                self.ws.setCell(row, col, data)
 
     def workspace_equals(self, workspace_name):
         return self.ws.name() == workspace_name

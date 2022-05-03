@@ -77,6 +77,7 @@ set(TEST_PY_FILES
     SANSStitchTest.py
     SavePlot1DTest.py
     SaveVulcanGSSTest.py
+    SimpleShapeDiscusInelasticTest.py
     SimpleShapeMonteCarloAbsorptionTest.py
     SimulatedDensityOfStatesTest.py
     SofQWMomentsTest.py

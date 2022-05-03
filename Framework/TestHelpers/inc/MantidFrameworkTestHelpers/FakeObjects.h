@@ -107,6 +107,17 @@ private:
 };
 
 //===================================================================================================================
+
+class FakeWorkspace : public Mantid::API::Workspace {
+public:
+  const std::string id() const override { return "FakeWorkspace"; }
+  Workspace *doClone() const override { return new FakeWorkspace(*this); }
+  Workspace *doCloneEmpty() const override { return new FakeWorkspace; }
+  const std::string toString() const override { return "FakeWorkspace instance"; }
+  size_t getMemorySize() const override { return 0; }
+};
+
+//===================================================================================================================
 class AxeslessWorkspaceTester : public MatrixWorkspace {
 public:
   AxeslessWorkspaceTester(const Mantid::Parallel::StorageMode storageMode = Mantid::Parallel::StorageMode::Cloned)

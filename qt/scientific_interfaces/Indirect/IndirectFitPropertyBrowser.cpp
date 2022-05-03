@@ -121,25 +121,26 @@ QStringList IndirectFitPropertyBrowser::getLocalParameters() const {
 }
 
 void IndirectFitPropertyBrowser::syncFullBrowserWithTemplate() {
-  auto const fun = m_templateBrowser->getFunction();
-  auto signalBlocker = ScopedSignalBlocker(m_functionBrowser);
-  if (fun) {
+  m_functionBrowser->blockSignals(true);
+  if (auto const fun = m_templateBrowser->getFunction()) {
     m_functionBrowser->setFunction(fun);
     m_functionBrowser->updateMultiDatasetParameters(*m_templateBrowser->getGlobalFunction());
     m_functionBrowser->setGlobalParameters(m_templateBrowser->getGlobalParameters());
     m_functionBrowser->setCurrentDataset(m_templateBrowser->getCurrentDataset());
   }
+  m_functionBrowser->blockSignals(false);
 }
 
 void IndirectFitPropertyBrowser::syncTemplateBrowserWithFull() {
+  m_templateBrowser->blockSignals(true);
   auto const funStr = m_functionBrowser->getFunctionString();
-  auto signalBlocker = ScopedSignalBlocker(m_templateBrowser);
   if (auto const fun = m_functionBrowser->getGlobalFunction()) {
     m_templateBrowser->setFunction(funStr);
     m_templateBrowser->updateMultiDatasetParameters(*fun);
     m_templateBrowser->setGlobalParameters(m_functionBrowser->getGlobalParameters());
     m_templateBrowser->setCurrentDataset(m_functionBrowser->getCurrentDataset());
   }
+  m_templateBrowser->blockSignals(false);
 }
 
 void IndirectFitPropertyBrowser::init() {

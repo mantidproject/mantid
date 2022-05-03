@@ -10,8 +10,10 @@
 #include "MantidPythonInterface/core/Converters/ToPyList.h"
 #include "MantidPythonInterface/core/DataServiceExporter.h"
 #include "MantidPythonInterface/core/GetPointer.h"
+#include "MantidPythonInterface/core/WeakPtr.h"
 
 #include <boost/python/enum.hpp>
+
 #include <boost/python/list.hpp>
 #include <boost/python/overloads.hpp>
 #include <boost/python/return_value_policy.hpp>
@@ -49,9 +51,16 @@ AnalysisDataServiceImpl &instance() {
  * @param unrollGroups If true unroll the workspace groups
  * @return a python list of the workspaces in the ADS
  */
+
 list retrieveWorkspaces(AnalysisDataServiceImpl const *const self, const list &names, bool unrollGroups = false) {
-  return Converters::ToPyList<Workspace_sptr>()(
-      self->retrieveWorkspaces(Converters::PySequenceToVector<std::string>(names)(), unrollGroups));
+  using WeakPtr = std::weak_ptr<Workspace>;
+  const auto wsSharedPtrs =
+      self->retrieveWorkspaces(Converters::PySequenceToVector<std::string>(names)(), unrollGroups);
+  std::vector<WeakPtr> wsWeakPtrs;
+  wsWeakPtrs.reserve(wsSharedPtrs.size());
+  std::transform(wsSharedPtrs.cbegin(), wsSharedPtrs.cend(), std::back_inserter(wsWeakPtrs),
+                 [](const Workspace_sptr &wksp) -> WeakPtr { return WeakPtr(wksp); });
+  return Converters::ToPyList<WeakPtr>()(wsWeakPtrs);
 }
 
 GNU_DIAG_OFF("unused-local-typedef")

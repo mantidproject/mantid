@@ -25,3 +25,7 @@ class ModelFittingTabWidget(object):
 
         context.update_view_from_model_notifier.add_subscriber(
             self.model_fitting_tab_presenter.update_view_from_model_observer)
+
+        context.results_context.clear_observable.add_subscriber(self.model_fitting_tab_presenter.clear_observer)
+        context.results_context.remove_observable.add_subscriber(self.model_fitting_tab_presenter.remove_observer)
+        context.results_context.replace_observable.add_subscriber(self.model_fitting_tab_presenter.replace_observer)

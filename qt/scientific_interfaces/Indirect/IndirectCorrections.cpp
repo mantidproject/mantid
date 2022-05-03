@@ -75,11 +75,7 @@ void IndirectCorrections::initLayout() {
 /**
  * Allow Python to be called locally.
  */
-void IndirectCorrections::initLocalPython() {
-  QString pyInput = "from mantid.simpleapi import *";
-  QString pyOutput = runPythonCode(pyInput).trimmed();
-  loadSettings();
-}
+void IndirectCorrections::initLocalPython() { loadSettings(); }
 
 /**
  * Load the settings saved for this interface.
