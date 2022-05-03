@@ -736,6 +736,7 @@ void DiscusMultipleScatteringCorrection::prepareCumulativeProbForQ(double kinc, 
     throw std::invalid_argument("Cannot calculate cumulative probability for S(Q,w) without a numeric w axis");
   auto &wValues = wAxis->getValues();
   std::vector<double> wBinEdges;
+  wBinEdges.reserve(wValues.size() + 1);
   VectorHelper::convertToBinBoundary(wValues, wBinEdges);
 
   double wMax = fromWaveVector(kinc);
@@ -814,7 +815,7 @@ void DiscusMultipleScatteringCorrection::integrateCumulative(const Mantid::Histo
   auto iter = std::upper_bound(h.x().cbegin(), h.x().cend(), xmin);
   auto iRight = static_cast<size_t>(std::distance(h.x().cbegin(), iter));
 
-  auto linearInterp = [xValues, yValues](double x, size_t lIndex, size_t rIndex) -> double {
+  auto linearInterp = [&xValues, &yValues](const double x, const size_t lIndex, const size_t rIndex) -> double {
     return (yValues[lIndex] * (xValues[rIndex] - x) + yValues[rIndex] * (x - xValues[lIndex])) /
            (xValues[rIndex] - xValues[lIndex]);
   };
@@ -848,10 +849,7 @@ void DiscusMultipleScatteringCorrection::integrateCumulative(const Mantid::Histo
 
   // integrate the intervals between each pair of points. Do this until right point is at end of vector or > xmax
   for (; iRight < xValues.size() && xValues[iRight] <= xmax; iRight++) {
-    if (isPoints)
-      yToUse = 0.5 * (yValues[iRight] + yValues[iRight - 1]);
-    else
-      yToUse = yValues[iRight - 1];
+    yToUse = isPoints ? 0.5 * (yValues[iRight] + yValues[iRight - 1]) : yValues[iRight - 1];
     sum += yToUse * (xValues[iRight] - xValues[iRight - 1]);
     resultX.emplace_back(xValues[iRight]);
     resultY.emplace_back(sum);
@@ -871,13 +869,13 @@ void DiscusMultipleScatteringCorrection::integrateCumulative(const Mantid::Histo
 }
 
 API::MatrixWorkspace_sptr DiscusMultipleScatteringCorrection::integrateWS(const API::MatrixWorkspace_sptr &ws) {
-  auto retVal = DataObjects::create<Workspace2D>(*ws, HistogramData::Points{0.});
+  auto wsIntegrals = DataObjects::create<Workspace2D>(*ws, HistogramData::Points{0.});
   for (size_t i = 0; i < ws->getNumberHistograms(); i++) {
     std::vector<double> IOfQX, IOfQY;
     integrateCumulative(ws->histogram(i), ws->x(i).front(), ws->x(i).back(), IOfQX, IOfQY);
-    retVal->mutableY(i) = IOfQY.back();
+    wsIntegrals->mutableY(i) = IOfQY.back();
   }
-  return retVal;
+  return wsIntegrals;
 }
 
 /**
@@ -928,8 +926,8 @@ std::tuple<double, int> DiscusMultipleScatteringCorrection::sampleQW(const Matri
  * for flat S(Q) will be a quadratic
  */
 double DiscusMultipleScatteringCorrection::interpolateSquareRoot(const ISpectrum &histToInterpolate, double x) {
-  auto &histx = histToInterpolate.x();
-  auto &histy = histToInterpolate.y();
+  const auto &histx = histToInterpolate.x();
+  const auto &histy = histToInterpolate.y();
   assert(histToInterpolate.histogram().xMode() == HistogramData::Histogram::XMode::Points);
   if (x > histx.back()) {
     return histy.back();
@@ -937,15 +935,15 @@ double DiscusMultipleScatteringCorrection::interpolateSquareRoot(const ISpectrum
   if (x < histx.front()) {
     return histy.front();
   }
-  auto iter = std::upper_bound(histx.cbegin(), histx.cend(), x);
-  auto idx = static_cast<size_t>(std::distance(histx.cbegin(), iter) - 1);
-  double x0 = histx[idx];
-  double x1 = histx[idx + 1];
-  double asq = (pow(histy[idx + 1], 2) - pow(histy[idx], 2)) / (x1 - x0);
+  const auto iter = std::upper_bound(histx.cbegin(), histx.cend(), x);
+  const auto idx = static_cast<size_t>(std::distance(histx.cbegin(), iter) - 1);
+  const double x0 = histx[idx];
+  const double x1 = histx[idx + 1];
+  const double asq = (pow(histy[idx + 1], 2) - pow(histy[idx], 2)) / (x1 - x0);
   if (asq == 0.) {
     throw std::runtime_error("Cannot perform square root interpolation on supplied distribution");
   }
-  double b = x0 - pow(histy[idx], 2) / asq;
+  const double b = x0 - pow(histy[idx], 2) / asq;
   return sqrt(asq * (x - b));
 }
 
@@ -1230,6 +1228,7 @@ std::tuple<double, int> DiscusMultipleScatteringCorrection::sampleKW(const std::
     iW = 0;
   else {
     std::vector<double> wBinEdges;
+    wBinEdges.reserve(wValues.size() + 1);
     VectorHelper::convertToBinBoundary(wValues, wBinEdges);
     double w = wBinEdges.front() + rng.nextValue() * (std::min(wMax, wBinEdges[iWMax + 1]) - wBinEdges.front());
     iW = static_cast<int>(Kernel::VectorHelper::indexOfValueFromCentersNoThrow(wValues, w));
