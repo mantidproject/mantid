@@ -166,10 +166,12 @@ template <class Type> struct TemplateSubTypeImpl : public TemplateSubType {
     return out;
   }
   int getTypeIndex(const QString &typeName) const override {
-    for (auto &&it : g_typeMap) {
-      if (it.second.name == typeName)
-        return static_cast<int>(it.first);
-    }
+    const auto it = std::find_if(g_typeMap.cbegin(), g_typeMap.cend(),
+                                 [&typeName](auto &&it) { return it.second.name == typeName; });
+
+    if (it != g_typeMap.cend())
+      return static_cast<int>((*it).first);
+
     return static_cast<int>(FitType::None);
   }
   int getNTypes() const override { return static_cast<int>(g_typeMap.size()); }
