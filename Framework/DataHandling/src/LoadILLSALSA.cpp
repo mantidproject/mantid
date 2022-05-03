@@ -90,6 +90,7 @@ void LoadILLSALSA::exec() {
     break;
   case V1:
     loadNexusV1(h5file);
+
     break;
   case V2:
     loadNexusV2(h5file);
@@ -99,7 +100,7 @@ void LoadILLSALSA::exec() {
   // set the instrument
   double sampleToDetectorDistance = getProperty("DetectorDistance");
   H5::DataSet thetaDataset = h5file.openDataSet("entry0/instrument/2theta/value");
-  double theta;
+  float theta;
   thetaDataset.read(&theta, thetaDataset.getDataType());
   double twoThetaAngle = theta + static_cast<double>(getProperty("ThetaOffset"));
   setInstrument(sampleToDetectorDistance, twoThetaAngle);
