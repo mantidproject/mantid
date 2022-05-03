@@ -199,7 +199,6 @@ std::string MultipleFileProperty::setValueAsSingleFile(const std::string &propVa
 
   // Use a slave FileProperty to do the job for us.
   FileProperty slaveFileProp("Slave", "", FileProperty::Load, m_exts, Direction::Input);
-  slaveFileProp.setAutoTrim(autoTrim()); // forward autoTrim setting to the slave
 
   std::string error = slaveFileProp.setValue(propValue);
 
@@ -364,8 +363,6 @@ std::string MultipleFileProperty::setValueAsMultipleFiles(const std::string &pro
 
       if (!useDefaultExt) {
         FileProperty slaveFileProp("Slave", "", FileProperty::Load, m_exts, Direction::Input);
-        slaveFileProp.setAutoTrim(autoTrim()); // forward autoTrim setting to the slave
-
         std::string error = slaveFileProp.setValue(unresolvedFileName);
 
         // If an error was returned then pass it along.
