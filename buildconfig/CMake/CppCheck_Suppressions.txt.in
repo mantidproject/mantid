@@ -174,7 +174,6 @@ duplicateCondition:${CMAKE_SOURCE_DIR}/Framework/API/src/BoxController.cpp:282
 unsignedLessThanZero:${CMAKE_SOURCE_DIR}/Framework/API/src/BoxController.cpp:220
 useStlAlgorithm:${CMAKE_SOURCE_DIR}/Framework/API/src/BoxControllerSettingsAlgorithm.cpp:40
 knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/API/src/CompositeDomainMD.cpp:28
-useStlAlgorithm:${CMAKE_SOURCE_DIR}/Framework/API/src/CompositeFunction.cpp:342
 knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/API/src/DetectorSearcher.cpp:172
 knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/API/src/FileProperty.cpp:65
 useStlAlgorithm:${CMAKE_SOURCE_DIR}/Framework/API/src/MultiDomainFunction.cpp:302

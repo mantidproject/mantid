@@ -174,6 +174,9 @@ void CompositeFunction::setMatrixWorkspace(std::shared_ptr<const MatrixWorkspace
   }
 }
 
+/** Sets the function to use when calculating the step size.
+ * @param stepSizeMethod :: An enum indicating which method to use when calculating the step size.
+ */
 void CompositeFunction::setStepSizeMethod(const StepSizeMethod stepSizeMethod) {
   std::for_each(m_functions.begin(), m_functions.end(),
                 [&](const auto &function) { function->setStepSizeMethod(stepSizeMethod); });
@@ -342,11 +345,9 @@ size_t CompositeFunction::nParams() const { return m_nParams; }
 
 // Total number of attributes
 size_t CompositeFunction::nAttributes() const {
-  size_t numAttributes = nGlobalAttributes();
-  for (const auto &func : m_functions) {
-    numAttributes += func->nAttributes();
-  }
-  return numAttributes;
+  return std::accumulate(
+      m_functions.cbegin(), m_functions.cend(), nGlobalAttributes(),
+      [](const size_t accumulator, const auto &function) -> size_t { return accumulator + function->nAttributes(); });
 }
 /**
  *
