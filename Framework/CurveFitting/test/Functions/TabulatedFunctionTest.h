@@ -185,6 +185,13 @@ public:
                      const Mantid::Kernel::Exception::NotFoundError &);
   }
 
+  void test_loadWorkspaceGroup() {
+    auto ws = WorkspaceCreationHelper::createWorkspaceGroup(3, 3, 3, "group");
+    TabulatedFunction fun;
+    TS_ASSERT_THROWS(fun.setAttributeValue("Workspace", "group"), const std::runtime_error &);
+    AnalysisDataService::Instance().clear();
+  }
+
   void test_Derivatives() {
     auto ws = WorkspaceCreationHelper::create2DWorkspaceFromFunction(Fun(), 1, -5.0, 5.0, 0.1, false);
     AnalysisDataService::Instance().add("TABULATEDFUNCTIONTEST_WS", ws);

@@ -26,7 +26,20 @@ using namespace Mantid::API;
 using namespace Mantid::Kernel;
 
 namespace {
-bool singleValued(const MatrixWorkspace &ws) { return (ws.getNumberHistograms() == 1 && ws.blocksize() == 1); }
+bool hasSingleValue(const MatrixWorkspace &ws) { return (ws.getNumberHistograms() == 1 && ws.blocksize() == 1); }
+bool hasMultipleBins(const MatrixWorkspace &ws) {
+  try {
+    return (ws.blocksize() > 1);
+  } catch (...) {
+    const size_t numHist = ws.getNumberHistograms();
+    for (size_t i = 0; i < numHist; ++i) {
+      if (ws.y(i).size() > 1) {
+        return true;
+      }
+    }
+  }
+  return false;
+}
 } // namespace
 
 namespace MantidQt::MantidWidgets {
@@ -100,15 +113,10 @@ void WorkspaceTreeWidgetSimple::popupContextMenu() {
     m_tree->selectionModel()->clear();
 
   QMenu *menu(nullptr);
-
-  // If no workspace is here then have load items
-  if (selectedWsName.isEmpty())
+  if (selectedWsName.isEmpty()) {
+    // If no workspace is here then have load items
     menu = m_loadMenu;
-  else {
-    menu = new QMenu(this);
-    menu->setObjectName("WorkspaceContextMenu");
-
-    // plot submenu first for MatrixWorkspace.
+  } else {
     // Check is defensive just in case the workspace has disappeared
     Workspace_sptr workspace;
     try {
@@ -116,159 +124,7 @@ void WorkspaceTreeWidgetSimple::popupContextMenu() {
     } catch (Exception::NotFoundError &) {
       return;
     }
-    if (auto matrixWS = std::dynamic_pointer_cast<MatrixWorkspace>(workspace)) {
-      QMenu *plotSubMenu(new QMenu("Plot", menu));
-      // Don't plot 1D spectra if only one X value
-      bool multipleBins = false;
-      try {
-        multipleBins = (matrixWS->blocksize() > 1);
-      } catch (...) {
-        const size_t numHist = matrixWS->getNumberHistograms();
-        for (size_t i = 0; i < numHist; ++i) {
-          if (matrixWS->y(i).size() > 1) {
-            multipleBins = true;
-            break;
-          }
-        }
-      }
-      if (multipleBins) {
-        plotSubMenu->addAction(m_plotSpectrum);
-        plotSubMenu->addAction(m_overplotSpectrum);
-        plotSubMenu->addAction(m_plotSpectrumWithErrs);
-        plotSubMenu->addAction(m_overplotSpectrumWithErrs);
-        plotSubMenu->addAction(m_plotAdvanced);
-        plotSubMenu->addAction(m_superplot);
-        plotSubMenu->addAction(m_superplotWithErrs);
-      } else {
-        plotSubMenu->addAction(m_plotBin);
-        plotSubMenu->addAction(m_superplotBins);
-        plotSubMenu->addAction(m_superplotBinsWithErrs);
-      }
-      plotSubMenu->addSeparator();
-      plotSubMenu->addAction(m_plotColorfill);
-
-      if (multipleBins) {
-        QMenu *plot3DSubMenu(new QMenu("3D", menu));
-        plot3DSubMenu->addAction(m_plotSurface);
-        plot3DSubMenu->addAction(m_plotWireframe);
-        plot3DSubMenu->addAction(m_plotContour);
-
-        plotSubMenu->addMenu(plot3DSubMenu);
-      }
-      if (!singleValued(*matrixWS)) {
-        // regular matrix workspace
-        menu->addMenu(plotSubMenu);
-        menu->addSeparator();
-        menu->addAction(m_showData);
-        menu->addAction(m_showAlgorithmHistory);
-        menu->addAction(m_showInstrument);
-        m_showInstrument->setEnabled(matrixWS->getInstrument() && !matrixWS->getInstrument()->getName().empty() &&
-                                     matrixWS->getAxis(1)->isSpectra());
-        menu->addAction(m_sampleLogs);
-        menu->addAction(m_sliceViewer);
-        menu->addAction(m_showDetectors);
-      } else {
-        menu->addAction(m_showData);
-      }
-
-    } else if (std::dynamic_pointer_cast<ITableWorkspace>(workspace)) {
-      menu->addAction(m_showData);
-      menu->addAction(m_showAlgorithmHistory);
-      if (std::dynamic_pointer_cast<IPeaksWorkspace>(workspace)) {
-        menu->addAction(m_showDetectors);
-      }
-    } else if (auto md_ws = std::dynamic_pointer_cast<IMDWorkspace>(workspace)) {
-      menu->addAction(m_showAlgorithmHistory);
-      menu->addAction(m_sampleLogs);
-
-      // launch slice viewer or plot spectrum conditionally
-      bool add_slice_viewer = false;
-      bool add_1d_plot = false;
-
-      if (md_ws->isMDHistoWorkspace()) {
-        // if the number of non-integral  if the number of non-integrated
-        // dimensions is 1.
-        auto num_dims = md_ws->getNumNonIntegratedDims();
-        if (num_dims == 1) {
-          // number of non-integral dimension is 1: show menu item to plot
-          // spectrum
-          add_1d_plot = true;
-        } else if (num_dims > 1) {
-          // number of non-integral dimension is larger than 1: show menu item
-          // to launch slice view
-          add_slice_viewer = true;
-        }
-      } else if (md_ws->getNumDims() > 1) {
-        add_slice_viewer = true;
-      }
-
-      if (add_slice_viewer) {
-        menu->addAction(m_sliceViewer);
-      } else if (add_1d_plot) {
-        QMenu *plotSubMenu(new QMenu("Plot", menu));
-        plotSubMenu->addAction(m_plotMDHisto1D);
-        plotSubMenu->addAction(m_overplotMDHisto1D);
-        plotSubMenu->addAction(m_plotMDHisto1DWithErrs);
-        plotSubMenu->addAction(m_overplotMDHisto1DWithErrs);
-        menu->addMenu(plotSubMenu);
-      }
-
-    } else if (auto wsGroup = std::dynamic_pointer_cast<WorkspaceGroup>(workspace)) {
-      auto workspaces = wsGroup->getAllItems();
-      bool containsMatrixWorkspace{false};
-      bool containsPeaksWorkspace{false};
-
-      for (auto ws : workspaces) {
-        if (auto matrixWS = std::dynamic_pointer_cast<MatrixWorkspace>(ws)) {
-          containsMatrixWorkspace = true;
-          break;
-        } else if (auto peaksWS = std::dynamic_pointer_cast<IPeaksWorkspace>(ws)) {
-          containsPeaksWorkspace = true;
-        }
-      }
-
-      // Add plotting options if the group contains at least one matrix
-      // workspace.
-      if (containsMatrixWorkspace) {
-        QMenu *plotSubMenu(new QMenu("Plot", menu));
-
-        plotSubMenu->addAction(m_plotSpectrum);
-        plotSubMenu->addAction(m_overplotSpectrum);
-        plotSubMenu->addAction(m_plotSpectrumWithErrs);
-        plotSubMenu->addAction(m_overplotSpectrumWithErrs);
-        plotSubMenu->addAction(m_plotAdvanced);
-        plotSubMenu->addAction(m_superplot);
-        plotSubMenu->addAction(m_superplotWithErrs);
-
-        plotSubMenu->addSeparator();
-        plotSubMenu->addAction(m_plotColorfill);
-        menu->addMenu(plotSubMenu);
-
-        menu->addSeparator();
-      }
-
-      if (containsMatrixWorkspace || containsPeaksWorkspace) {
-        menu->addAction(m_showDetectors);
-      }
-    }
-
-    // Only show sample material action if we have a single workspace
-    // selected.
-    if (m_tree->selectedItems().size() == 1) {
-      // SetSampleMaterial algorithm requires that the workspace
-      // inherits from ExperimentInfo, so check that it does
-      // before adding the action to the context menu.
-      if (auto experimentInfoWS = std::dynamic_pointer_cast<ExperimentInfo>(workspace)) {
-        menu->addAction(m_sampleMaterial);
-      }
-    }
-
-    menu->addSeparator();
-    menu->addAction(m_rename);
-    menu->addAction(m_saveNexus);
-
-    menu->addSeparator();
-    menu->addAction(m_delete);
+    menu = createWorkspaceContextMenu(*workspace);
   }
 
   // Show the menu at the cursor's current position
@@ -360,6 +216,160 @@ void WorkspaceTreeWidgetSimple::onSuperplotBinsClicked() {
 
 void WorkspaceTreeWidgetSimple::onSuperplotBinsWithErrsClicked() {
   emit superplotBinsWithErrsClicked(getSelectedWorkspaceNamesAsQList());
+}
+
+/**
+ * Create a new QMenu object filled with appropriate items for the given workspace
+ * The created object has this as its parent and WA_DeleteOnClose set
+ */
+QMenu *WorkspaceTreeWidgetSimple::createWorkspaceContextMenu(const Mantid::API::Workspace &workspace) {
+  auto menu = new QMenu(this);
+  menu->setAttribute(Qt::WA_DeleteOnClose, true);
+  menu->setObjectName("WorkspaceContextMenu");
+
+  if (auto matrixWS = dynamic_cast<const MatrixWorkspace *>(&workspace))
+    addMatrixWorkspaceActions(menu, *matrixWS);
+  else if (auto tableWS = dynamic_cast<const ITableWorkspace *>(&workspace))
+    addTableWorkspaceActions(menu, *tableWS);
+  else if (auto mdWS = dynamic_cast<const IMDWorkspace *>(&workspace))
+    addMDWorkspaceActions(menu, *mdWS);
+  else if (auto wsGroup = dynamic_cast<const WorkspaceGroup *>(&workspace))
+    addWorkspaceGroupActions(menu, *wsGroup);
+
+  // Add for all types
+  addGeneralWorkspaceActions(menu);
+
+  return menu;
+}
+
+void WorkspaceTreeWidgetSimple::addMatrixWorkspaceActions(QMenu *menu, const Mantid::API::MatrixWorkspace &workspace) {
+  // Show just data for a single value.
+  if (hasSingleValue(workspace)) {
+    menu->addAction(m_showData);
+    return;
+  }
+
+  menu->addMenu(createMatrixWorkspacePlotMenu(menu, hasMultipleBins(workspace)));
+  menu->addSeparator();
+  menu->addAction(m_showData);
+  menu->addAction(m_showAlgorithmHistory);
+  menu->addAction(m_showInstrument);
+  m_showInstrument->setEnabled(workspace.getInstrument() && !workspace.getInstrument()->getName().empty() &&
+                               workspace.getAxis(1)->isSpectra());
+  menu->addAction(m_sampleLogs);
+  menu->addAction(m_sliceViewer);
+  menu->addAction(m_showDetectors);
+  if (m_tree->selectedItems().size() == 1) {
+    menu->addAction(m_sampleMaterial);
+  }
+}
+
+void WorkspaceTreeWidgetSimple::addTableWorkspaceActions(QMenu *menu, const Mantid::API::ITableWorkspace &workspace) {
+  menu->addAction(m_showData);
+  menu->addAction(m_showAlgorithmHistory);
+  if (dynamic_cast<const IPeaksWorkspace *>(&workspace)) {
+    menu->addAction(m_showDetectors);
+  }
+}
+
+void WorkspaceTreeWidgetSimple::addMDWorkspaceActions(QMenu *menu, const Mantid::API::IMDWorkspace &workspace) {
+  menu->addAction(m_showAlgorithmHistory);
+  menu->addAction(m_sampleLogs);
+
+  // launch slice viewer or plot spectrum conditionally
+  bool addSliceViewer = false;
+  bool add1DPlot = false;
+
+  if (workspace.isMDHistoWorkspace()) {
+    // if the number of non-integral  if the number of non-integrated
+    // dimensions is 1.
+    auto num_dims = workspace.getNumNonIntegratedDims();
+    if (num_dims == 1) {
+      // number of non-integral dimension is 1: show menu item to plot
+      // spectrum
+      add1DPlot = true;
+    } else if (num_dims > 1) {
+      // number of non-integral dimension is larger than 1: show menu item
+      // to launch slice view
+      addSliceViewer = true;
+    }
+  } else if (workspace.getNumDims() > 1) {
+    addSliceViewer = true;
+  }
+
+  if (addSliceViewer) {
+    menu->addAction(m_sliceViewer);
+  } else if (add1DPlot) {
+    auto *plotSubMenu = new QMenu("Plot", menu);
+    plotSubMenu->addAction(m_plotMDHisto1D);
+    plotSubMenu->addAction(m_overplotMDHisto1D);
+    plotSubMenu->addAction(m_plotMDHisto1DWithErrs);
+    plotSubMenu->addAction(m_overplotMDHisto1DWithErrs);
+    menu->addMenu(plotSubMenu);
+  }
+}
+
+void WorkspaceTreeWidgetSimple::addWorkspaceGroupActions(QMenu *menu, const Mantid::API::WorkspaceGroup &workspace) {
+  auto workspaces = workspace.getAllItems();
+  bool containsMatrixWorkspace{false};
+  bool containsPeaksWorkspace{false};
+  for (const auto &ws : workspaces) {
+    if (std::dynamic_pointer_cast<MatrixWorkspace>(ws)) {
+      containsMatrixWorkspace = true;
+      break;
+    } else if (std::dynamic_pointer_cast<IPeaksWorkspace>(ws)) {
+      containsPeaksWorkspace = true;
+    }
+  }
+
+  // Add plotting options if the group contains at least one matrix
+  // workspace.
+  if (containsMatrixWorkspace) {
+    menu->addMenu(createMatrixWorkspacePlotMenu(menu, true));
+    menu->addSeparator();
+  }
+
+  if (containsMatrixWorkspace || containsPeaksWorkspace) {
+    menu->addAction(m_showDetectors);
+  }
+}
+
+void WorkspaceTreeWidgetSimple::addGeneralWorkspaceActions(QMenu *menu) const {
+  menu->addSeparator();
+  menu->addAction(m_rename);
+  menu->addAction(m_saveNexus);
+  menu->addSeparator();
+  menu->addAction(m_delete);
+}
+
+QMenu *WorkspaceTreeWidgetSimple::createMatrixWorkspacePlotMenu(QWidget *parent, bool hasMultipleBins) {
+  auto *plotSubMenu = new QMenu("Plot", parent);
+  if (hasMultipleBins) {
+    plotSubMenu->addAction(m_plotSpectrum);
+    plotSubMenu->addAction(m_overplotSpectrum);
+    plotSubMenu->addAction(m_plotSpectrumWithErrs);
+    plotSubMenu->addAction(m_overplotSpectrumWithErrs);
+    plotSubMenu->addAction(m_plotAdvanced);
+    plotSubMenu->addAction(m_superplot);
+    plotSubMenu->addAction(m_superplotWithErrs);
+    plotSubMenu->addSeparator();
+    plotSubMenu->addAction(m_plotColorfill);
+    // 3D
+    auto *plot3DSubMenu = new QMenu("3D", plotSubMenu);
+    plot3DSubMenu->addAction(m_plotSurface);
+    plot3DSubMenu->addAction(m_plotWireframe);
+    plot3DSubMenu->addAction(m_plotContour);
+    plotSubMenu->addMenu(plot3DSubMenu);
+
+  } else {
+    plotSubMenu->addAction(m_plotBin);
+    plotSubMenu->addAction(m_superplotBins);
+    plotSubMenu->addAction(m_superplotBinsWithErrs);
+    plotSubMenu->addSeparator();
+    plotSubMenu->addAction(m_plotColorfill);
+  }
+
+  return plotSubMenu;
 }
 
 } // namespace MantidQt::MantidWidgets

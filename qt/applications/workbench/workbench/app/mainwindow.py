@@ -635,7 +635,8 @@ class MainWindow(QMainWindow):
     def open_file(self):
         # todo: when more file types are added this should
         # live in its own type
-        filepath, _ = QFileDialog.getOpenFileName(self, "Open File...", "", "Python (*.py)")
+        defaultSaveDirectory = ConfigService['defaultsave.directory']
+        filepath, _ = QFileDialog.getOpenFileName(self, "Open File...", defaultSaveDirectory, "Python (*.py)")
         if not filepath:
             return
         self.editor.open_file_in_new_tab(filepath)

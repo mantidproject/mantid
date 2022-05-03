@@ -1,0 +1,1 @@
+- Fix for hard crash when user attempts to use WorkspaceGroup as Workspace in TabulatedFunction. Now, a runtime_error exception is thrown with information that the attribute cannot be assigned.

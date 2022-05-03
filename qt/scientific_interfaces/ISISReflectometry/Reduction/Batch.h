@@ -32,22 +32,26 @@ public:
 
   Experiment const &experiment() const override;
   Instrument const &instrument() const override;
-  RunsTable const &runsTable() const;
-  RunsTable &mutableRunsTable();
+  RunsTable const &runsTable() const override;
+  RunsTable &mutableRunsTable() override;
   Slicing const &slicing() const override;
 
-  std::vector<MantidWidgets::Batch::RowLocation> selectedRowLocations() const;
-  template <typename T>
-  bool isInSelection(T const &item, std::vector<MantidWidgets::Batch::RowLocation> const &selectedRowLocations) const;
+  std::vector<MantidWidgets::Batch::RowLocation> selectedRowLocations() const override;
+  bool isInSelection(const Item &item,
+                     const std::vector<MantidWidgets::Batch::RowLocation> &selectedRowLocations) override;
+  bool isInSelection(const Row &item,
+                     const std::vector<MantidWidgets::Batch::RowLocation> &selectedRowLocations) override;
+  bool isInSelection(const Group &item,
+                     const std::vector<MantidWidgets::Batch::RowLocation> &selectedRowLocations) override;
   boost::optional<LookupRow> findLookupRow(Row const &row) const override;
   boost::optional<LookupRow> findWildcardLookupRow() const override;
-  void resetState();
-  void resetSkippedItems();
-  boost::optional<Item &> getItemWithOutputWorkspaceOrNone(std::string const &wsName);
+  void resetState() override;
+  void resetSkippedItems() override;
+  boost::optional<Item &> getItemWithOutputWorkspaceOrNone(std::string const &wsName) override;
 
-  void updateLookupIndex(Row &row);
-  void updateLookupIndexesOfGroup(Group &group);
-  void updateLookupIndexesOfTable();
+  void updateLookupIndex(Row &row) override;
+  void updateLookupIndexesOfGroup(Group &group) override;
+  void updateLookupIndexesOfTable() override;
 
 private:
   Experiment const &m_experiment;
@@ -56,11 +60,6 @@ private:
   Slicing const &m_slicing;
 };
 
-template <typename T>
-bool Batch::isInSelection(T const &item,
-                          std::vector<MantidWidgets::Batch::RowLocation> const &selectedRowLocations) const {
-  return m_runsTable.isInSelection(item, selectedRowLocations);
-}
 } // namespace ISISReflectometry
 } // namespace CustomInterfaces
 } // namespace MantidQt

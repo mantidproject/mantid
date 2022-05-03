@@ -86,11 +86,7 @@ void IndirectDataAnalysis::initLayout() {
 /**
  * Allow Python to be called locally.
  */
-void IndirectDataAnalysis::initLocalPython() {
-  QString pyInput = "from mantid.simpleapi import *";
-  QString pyOutput = runPythonCode(pyInput).trimmed();
-  loadSettings();
-}
+void IndirectDataAnalysis::initLocalPython() { loadSettings(); }
 
 /**
  * Load the settings saved for this interface.

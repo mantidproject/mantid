@@ -170,8 +170,6 @@ void IndirectSymmetrise::handleDataReady(QString const &dataName) {
 }
 
 bool IndirectSymmetrise::validate() {
-  auto const sampleName = m_uiForm.dsInput->getCurrentDataName();
-
   UserInputValidator uiv;
   // Validate the sample workspace
   validateDataIsOfType(uiv, m_uiForm.dsInput, "Sample", DataType::Red);

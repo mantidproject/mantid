@@ -126,26 +126,8 @@ void IndirectLoadILL::run() {
 
   QString const filename = m_uiForm.mwRun->getFirstFilename();
   QFileInfo const finfo(filename);
-  QString ext = finfo.suffix().toLower();
 
   QString const instrument = m_uiForm.iicInstrumentConfiguration->getInstrumentName();
-  QString const analyser = m_uiForm.iicInstrumentConfiguration->getAnalyserName();
-  QString const reflection = m_uiForm.iicInstrumentConfiguration->getReflectionName();
-
-  if (m_uiForm.chkUseMap->isChecked()) {
-    useMap = "True";
-  }
-  QString const mapPath = m_uiForm.mwMapFile->getFirstFilename();
-
-  if (m_uiForm.chkRejectZero->isChecked()) {
-    rejectZero = "True";
-  }
-
-  // output options
-  if (m_uiForm.chkSave->isChecked()) {
-    save = "True";
-  }
-  plot = m_uiForm.cbPlot->currentText();
 
   if (instrument == "IN16B") {
     auto const temporaryName = "__tmp_IndirectLoadASCII_IN16B";

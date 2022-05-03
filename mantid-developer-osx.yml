@@ -49,3 +49,9 @@ dependencies:
   # Needed only for development
   - cppcheck==2.5
   - pre-commit>=2.12.0
+
+  # Use conda version of clang to get matching CXXFLAGS.
+  # Pinned to same version as conda forge: https://github.com/conda-forge/conda-forge-pinning-feedstock/blob/main/recipe/conda_build_config.yaml#L23
+  - clang_osx-64=12
+  - clangxx_osx-64=12
+  - llvm-openmp=12

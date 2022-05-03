@@ -1,0 +1,1 @@
+- Fixed a bug with the plotting status bar in Conda builds. The status bar no longer flickers when users move over the plot image or the z axis image.
