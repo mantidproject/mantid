@@ -74,6 +74,10 @@ public:
     TS_ASSERT(outputWS)
     TS_ASSERT_EQUALS(outputWS->getNumberHistograms(), 256 * 256 + 1)
     TS_ASSERT_EQUALS(outputWS->blocksize(), 10)
+    auto component = outputWS->getInstrument()->getComponentByName("detector");
+    auto pos = component->getPos();
+    TS_ASSERT_DELTA(sqrt(pow(pos.Z(), 2) + pow(pos.Y(), 2) + pow(pos.X(), 2)), 1.0, 1e-5);
+    TS_ASSERT_DELTA(acos(pos.Z() / 1.0) * 180.0 / M_PI, 85.603, 1e-5)
   }
 };
 
