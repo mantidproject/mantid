@@ -4,10 +4,14 @@
 //   NScD Oak Ridge National Laboratory, European Spallation Source,
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
+#include <cmath>
 #include <cxxtest/TestSuite.h>
 
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidDataHandling/LoadILLSALSA.h"
+#include "MantidGeometry/IComponent.h"
+#include "MantidGeometry/Instrument.h"
+#include "MantidKernel/V3D.h"
 
 class LoadILLSALSATest : public CxxTest::TestSuite {
 public:
@@ -44,6 +48,7 @@ public:
     alg.setChild(true);
     alg.initialize();
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("Filename", "046508.nxs"))
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("DetectorDistance", "3.5"))
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", "__unused_for_child"))
     TS_ASSERT_THROWS_NOTHING(alg.execute())
     TS_ASSERT(alg.isExecuted())
@@ -51,6 +56,9 @@ public:
     TS_ASSERT(outputWS)
     TS_ASSERT_EQUALS(outputWS->getNumberHistograms(), 256 * 256 + 1)
     TS_ASSERT_EQUALS(outputWS->blocksize(), 1)
+    auto component = outputWS->getInstrument()->getComponentByName("detector");
+    auto pos = component->getPos();
+    TS_ASSERT_EQUALS(sqrt(pow(pos.Z(), 2) + pow(pos.Y(), 2) + pow(pos.X(), 2)), 3.5);
   }
 
   void test_loadV2() {
