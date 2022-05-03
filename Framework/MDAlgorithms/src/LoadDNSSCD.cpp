@@ -41,6 +41,8 @@
 #include <boost/exception/diagnostic_information.hpp>
 #include <boost/exception_ptr.hpp>
 #include <boost/regex.hpp>
+
+#include <algorithm>
 #include <iomanip>
 #include <iterator>
 #include <map>
@@ -238,8 +240,7 @@ void LoadDNSSCD::loadHuber(const ITableWorkspace_sptr &tws) {
 Mantid::API::ITableWorkspace_sptr LoadDNSSCD::saveHuber() {
   std::vector<double> huber;
   huber.reserve(m_data.size());
-  for (const auto &ds : m_data)
-    huber.emplace_back(ds.huber);
+  std::transform(m_data.cbegin(), m_data.cend(), std::back_inserter(huber), [](const auto &ds) { return ds.huber; });
   // remove dublicates
   std::sort(huber.begin(), huber.end());
   huber.erase(unique(huber.begin(), huber.end()), huber.end());
