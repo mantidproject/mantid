@@ -22,10 +22,10 @@ Below the interface menu, there are various tabs for data processing. These tabs
 Tabs Usage and Description
 --------------------------
 
-* :ref:`Paths <dns_paths_tab-ref>`
-* :ref:`Data <dns_data_tab-ref>`
-* :ref:`Script Generator <dns_script_generator_tab-ref>`
+* :ref:`Paths <dns_powder_tof_paths_tab-ref>`
+* :ref:`Data <dns_powder_tof_data_tab-ref>`
 * :ref:`Options <dns_powder_tof_options_tab-ref>`
+* :ref:`Script Generator <dns_powder_tof_script_generator_tab-ref>`
 * :ref:`Plotting <dns_powder_tof_plotting_tab-ref>`
 
 Feedback & Comments

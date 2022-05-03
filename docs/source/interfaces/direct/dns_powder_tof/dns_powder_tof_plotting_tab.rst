@@ -8,7 +8,4 @@ DNS Powder TOF Plotting Tab
    :height: 400px
 \
 
-The **Plotting tab** of the powder TOF mode,
-is just the mantid :ref:`sliceviewer`.
-
-:ref:`DNS Powder TOF <dns_powder_tof-ref>`
+The plotting tab of the powder TOF mode, is just the Mantid :ref:`sliceviewer`.
