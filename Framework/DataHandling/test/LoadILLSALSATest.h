@@ -59,6 +59,7 @@ public:
     auto component = outputWS->getInstrument()->getComponentByName("detector");
     auto pos = component->getPos();
     TS_ASSERT_DELTA(sqrt(pow(pos.Z(), 2) + pow(pos.Y(), 2) + pow(pos.X(), 2)), 3.5, 1e-5);
+    TS_ASSERT_DELTA(acos(pos.Z() / 3.5) * 180.0 / M_PI, 100.502, 1e-5)
   }
 
   void test_loadV2() {
