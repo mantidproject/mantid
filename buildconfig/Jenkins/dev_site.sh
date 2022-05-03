@@ -19,23 +19,23 @@ if [ -d $BUILD_DIR ]; then
   git pull --rebase
 else
   echo "$BUILD_DIR does not exist - cloning developer site"
-  git clone -b gh-pages git@github.com-mantid-builder:mantidproject/developer.git $BUILD_DIR || exit -1
+  git clone -b gh-pages https://github.com/mantidproject/developer.git $BUILD_DIR || exit -1
   cd $BUILD_DIR
 fi
 
 ###############################################################################
 # Setup virtualenv for building the docs
 ###############################################################################
-VIRTUAL_ENV=$BUILD_DIR/virtualenv
+VIRTUAL_ENV=$BUILD_DIR/venv
 if [[ ! -d $VIRTUAL_ENV ]]; then
-    virtualenv --python=/usr/bin/python3 --no-pip --no-setuptools --system-site-packages "$VIRTUAL_ENV"
+    python3 -m venv $VIRTUAL_ENV
     source $VIRTUAL_ENV/bin/activate
-    python -m pip install sphinx==1.8
-    python -m pip install sphinx_bootstrap_theme
+    python3 -m pip install sphinx==1.8
+    python3 -m pip install sphinx_bootstrap_theme
 else
     source $VIRTUAL_ENV/bin/activate
 fi
-which python
+which python3
 
 ###############################################################################
 # Build the developer site
@@ -43,8 +43,7 @@ which python
 # the wacky long line is what is run from inside "sphinx-build" which is not
 # installed by virtualenv for some reason
 ###############################################################################
-SPHINX_VERS=$(python -c "import sphinx;print(sphinx.__version__)")
-python -c "import sys;from pkg_resources import load_entry_point;sys.exit(load_entry_point('Sphinx==$SPHINX_VERS', 'console_scripts', 'sphinx-build')())" $WORKSPACE/dev-docs/source $BUILD_DIR
+sphinx_build $WORKSPACE/dev-docs/source $BUILD_DIR
 
 ###############################################################################
 # Push the results
@@ -58,4 +57,4 @@ fi
 # commit returns true if nothing happened
 git add .
 git commit -m "Automatic update of developer site" || exit 0
-git push
+git push https://${GITHUB_ACCESS_TOKEN}@github.com/mantidproject/developer gh-pages
