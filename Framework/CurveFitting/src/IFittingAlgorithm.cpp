@@ -131,6 +131,8 @@ void IFittingAlgorithm::afterPropertySet(const std::string &propName) {
     addWorkspace(propName);
   } else if (propName == "DomainType") {
     setDomainType();
+  } else if (propName == "StepSizeType") {
+    setStepSizeMethod();
   }
 }
 
@@ -174,7 +176,6 @@ void IFittingAlgorithm::setFunction() {
     m_workspacePropertyNames.resize(1, "InputWorkspace");
     m_workspaceIndexPropertyNames.resize(1, "WorkspaceIndex");
   }
-  setStepSizeMethod();
 }
 
 /**
