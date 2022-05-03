@@ -39,6 +39,20 @@ public:
     TS_ASSERT(alg.isInitialized())
   }
 
+  void test_loadV1() {
+    Mantid::DataHandling::LoadILLSALSA alg;
+    alg.setChild(true);
+    alg.initialize();
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("Filename", "046508.nxs"))
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", "__unused_for_child"))
+    TS_ASSERT_THROWS_NOTHING(alg.execute())
+    TS_ASSERT(alg.isExecuted())
+    Mantid::API::MatrixWorkspace_const_sptr outputWS = alg.getProperty("OutputWorkspace");
+    TS_ASSERT(outputWS)
+    TS_ASSERT_EQUALS(outputWS->getNumberHistograms(), 256 * 256 + 1)
+    TS_ASSERT_EQUALS(outputWS->blocksize(), 1)
+  }
+
   void test_loadV2() {
     Mantid::DataHandling::LoadILLSALSA alg;
     alg.setChild(true);
