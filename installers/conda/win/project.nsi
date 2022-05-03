@@ -1,5 +1,5 @@
 # Mantid NSIS script
-# Assumes you have passed /DVERSION, /DOUTFILE_NAME, /DPACKAGE_DIR, /DPACKAGE_SUFFIX, /DICON_PATH, /DWORKBENCH_ICON, /DNOTEBOOK_ICON, /DMUI_PAGE_LICENSE_PATH as arguments
+# Assumes you have passed /DVERSION, /DOUTFILE_NAME, /DPACKAGE_DIR, /DPACKAGE_SUFFIX, /DMANTID_ICON, /DWORKBENCH_ICON, /DNOTEBOOK_ICON, /DMUI_PAGE_LICENSE_PATH as arguments
 
 # This must be set for long paths to work properly.
 # Unicode only defaults to true in NSIS 3.07 onwards.
@@ -119,8 +119,8 @@ FunctionEnd
 
 # --------------------------------------------------------------------
 # ModernUI variables definitions, some of these are passed in as arguments such as MUI_ICON, MUI_UNICON etc.
-!define MUI_ICON "${ICON_PATH}"
-!define MUI_UNICON "${ICON_PATH}"
+!define MUI_ICON "${MANTID_ICON}"
+!define MUI_UNICON "${MANTID_ICON}"
 
 !insertmacro MUI_PAGE_WELCOME
 !insertmacro MUI_PAGE_LICENSE "${MUI_PAGE_LICENSE_PATH}"
