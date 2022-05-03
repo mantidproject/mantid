@@ -10,11 +10,8 @@ function usage() {
   local exitcode=$1
   echo "Usage: $0 [options] package_name"
   echo
-  echo "Create a standalone installable package out of a mantidworkbench Conda package. The"
-  echo " package is built in $BUILDDIR. This directory will be created if it does not exist"
-  echo " or purged if it already exists. The final installer will be created in the current"
-  echo " working directory. Requires mamba and NSIS to be installed in the running "
-  echo "environment, and on the path."
+  echo "Create a standalone installable package out of a mantidworkbench Conda package."
+  echo "Requires mamba to be installed in the running environment, and on the path."
   echo "Options:"
   echo "  -c Optional Conda channel overriding the default mantid"
   echo "  -s Optional Add a suffix to the output mantid file, has to be Unstable, or Nightly or not used"
