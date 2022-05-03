@@ -15,7 +15,7 @@ typedef Eigen::Map<const Eigen::VectorXd, 0, dynamic_stride> vec_const_map_type;
 struct EigenVector_View {
   /// EigenVector_View Constructors
   /// default constructor
-  EigenVector_View::EigenVector_View();
+  EigenVector_View();
 
   /// constructor: map->vector view
   EigenVector_View(vec_map_type &vector, const size_t nElements = -1, const size_t &startElement = 0);
@@ -36,15 +36,15 @@ struct EigenVector_View {
   EigenVector_View(const double *base, const size_t nElements, const size_t &startElement = 0);
 
   /// copy constructor
-  EigenVector_View::EigenVector_View(EigenVector_View &v);
+  EigenVector_View(EigenVector_View &v);
 
   /// CONST copy constructor
-  EigenVector_View::EigenVector_View(const EigenVector_View &v);
+  EigenVector_View(const EigenVector_View &v);
 
   vec_map_type &vector_mutator();
   inline const vec_map_type vector_inspector() const { return m_view; }
   inline vec_map_type vector_copy() const { return m_view; }
-  inline const size_t size() const { return m_view.size(); }
+  inline size_t size() const { return m_view.size(); }
 
   EigenVector_View &operator=(EigenVector_View &V);
   EigenVector_View &operator=(EigenVector_View &&V);
