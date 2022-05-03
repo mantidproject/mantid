@@ -376,6 +376,7 @@ constParameter:${CMAKE_SOURCE_DIR}/qt/scientific_interfaces/ISISReflectometry/GU
 useStlAlgorithm:${CMAKE_SOURCE_DIR}/qt/scientific_interfaces/ISISReflectometry/GUI/Batch/BatchJobManager.cpp:152
 constParameter:${CMAKE_SOURCE_DIR}/qt/scientific_interfaces/ISISReflectometry/GUI/Instrument/InstrumentPresenter.cpp:18
 useStlAlgorithm:${CMAKE_SOURCE_DIR}/qt/scientific_interfaces/ISISReflectometry/GUI/MainWindow/MainWindowPresenter.cpp:153
+<<<<<<< HEAD
 knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/CurveFitting/src/EigenMatrixView.cpp:19
 knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/CurveFitting/src/EigenMatrixView.cpp:22
 knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/CurveFitting/src/EigenMatrixView.cpp:24
@@ -387,3 +388,30 @@ knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/CurveFitting/src/EigenMatr
 knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/CurveFitting/src/EigenMatrixView.cpp:80
 knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/CurveFitting/src/EigenMatrixView.cpp:82
 knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/CurveFitting/src/EigenVectorView.cpp:31
+||||||| parent of 3db6e2f6806 (Update cppsuppressions #REF32234)
+knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/CurveFitting/src/EigenMatrixView.cpp:19
+knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/CurveFitting/src/EigenMatrixView.cpp:22
+knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/CurveFitting/src/EigenMatrixView.cpp:24
+knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/CurveFitting/src/EigenMatrixView.cpp:35
+knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/CurveFitting/src/EigenMatrixView.cpp:38
+knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/CurveFitting/src/EigenMatrixView.cpp:40
+knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/CurveFitting/src/EigenMatrixView.cpp:67
+knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/CurveFitting/src/EigenMatrixView.cpp:69
+knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/CurveFitting/src/EigenMatrixView.cpp:80
+knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/CurveFitting/src/EigenMatrixView.cpp:82
+knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/CurveFitting/src/EigenVectorView.cpp:31
+returnTempReference:${CMAKE_SOURCE_DIR}/qt/scientific_interfaces/Indirect/IndirectFitData.cpp:127
+=======
+knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/CurveFitting/src/EigenMatrixView.cpp:26
+knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/CurveFitting/src/EigenMatrixView.cpp:29
+knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/CurveFitting/src/EigenMatrixView.cpp:31
+knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/CurveFitting/src/EigenMatrixView.cpp:47
+knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/CurveFitting/src/EigenMatrixView.cpp:50
+knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/CurveFitting/src/EigenMatrixView.cpp:52
+knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/CurveFitting/src/EigenMatrixView.cpp:91
+knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/CurveFitting/src/EigenMatrixView.cpp:93
+knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/CurveFitting/src/EigenMatrixView.cpp:109
+knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/CurveFitting/src/EigenMatrixView.cpp:111
+knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/CurveFitting/src/EigenVectorView.cpp:34
+returnTempReference:${CMAKE_SOURCE_DIR}/qt/scientific_interfaces/Indirect/IndirectFitData.cpp:127
+>>>>>>> 3db6e2f6806 (Update cppsuppressions #REF32234)
