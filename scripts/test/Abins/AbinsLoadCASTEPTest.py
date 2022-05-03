@@ -32,7 +32,7 @@ class LoadCASTEPTest(unittest.TestCase, abins.input.Tester):
     _gamma_sum = "squaricn_sum_LoadCASTEP"
 
     def test_gamma_sum_correction(self):
-        self.check(name=self._gamma_sum, loader=CASTEPLoader)
+        self.check(name=self._gamma_sum, loader=CASTEPLoader, use_euphonic=False)
 
     # ===================================================================================
     # |     Use case: Gamma point calculation and no sum correction for Gamma point     |
@@ -40,7 +40,7 @@ class LoadCASTEPTest(unittest.TestCase, abins.input.Tester):
     _gamma_no_sum = "squaricn_no_sum_LoadCASTEP"
 
     def test_gamma_no_sum_correction(self):
-        self.check(name=self._gamma_no_sum, loader=CASTEPLoader)
+        self.check(name=self._gamma_no_sum, loader=CASTEPLoader, use_euphonic=False)
 
     # ===================================================================================
     # | Use case: more than one k-point and sum correction                              |
@@ -48,7 +48,7 @@ class LoadCASTEPTest(unittest.TestCase, abins.input.Tester):
     _many_k_sum = "Si2-phonon_LoadCASTEP"
 
     def test_sum_correction_single_crystal(self):
-        self.check(name=self._many_k_sum, loader=CASTEPLoader)
+        self.check(name=self._many_k_sum, loader=CASTEPLoader, use_euphonic=False)
 
     # ===================================================================================
     # |   Use case: more than one k-point without sum correction                        |
@@ -57,7 +57,7 @@ class LoadCASTEPTest(unittest.TestCase, abins.input.Tester):
     _many_k_no_sum = "Si2-sc_LoadCASTEP"
 
     def test_no_sum_correction_single_crystal(self):
-        self.check(name=self._many_k_no_sum, loader=CASTEPLoader)
+        self.check(name=self._many_k_no_sum, loader=CASTEPLoader, use_euphonic=False)
 
     # ===================================================================================
     # |   Use case: system with isotope Li7 and D                                       |
@@ -66,7 +66,7 @@ class LoadCASTEPTest(unittest.TestCase, abins.input.Tester):
     _li7_d2 = "LiOH_H2O_7Li_2D2O_LoadCASTEP"
 
     def test_isotopes(self):
-        self.check(name=self._li7_d2, loader=CASTEPLoader)
+        self.check(name=self._li7_d2, loader=CASTEPLoader, use_euphonic=False)
 
 
 if __name__ == "__main__":

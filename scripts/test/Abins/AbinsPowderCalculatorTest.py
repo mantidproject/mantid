@@ -66,9 +66,10 @@ class PowderCalculatorTest(unittest.TestCase):
         new_tester = abins.PowderCalculator(filename=abins_data_filename, abins_data=ref_data["DFT"], temperature=300.0)
 
         loaded_data = new_tester.load_formatted_data().extract()
+
         for key in ref_data["powder"]:
             for i in ref_data["powder"][key]:
-                self.assertEqual(True, np.allclose(calculated_data[key][i], loaded_data[key][i]))
+                assert_allclose(calculated_data[key][i], loaded_data[key][i])
 
     def _get_ref_data(self, filename=None):
         with open(filename, "r") as fp:

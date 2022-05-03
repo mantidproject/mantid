@@ -23,72 +23,50 @@ else:
 
 class CASTEPLoader(AbInitioLoader):
     """
-    Load phonon mode data from CASTEP .phonon files.
-
-    This may dispatch to Euphonic or to the legacy implementation.
-
-    (Not all Mantid users will have Euphonic installed, but the legacy implementation
-    will fail on .phonon files that a) include LO-TO splitting b) do not have it as
-    the first q-point entry in the file.)
-    """
-    def __init__(self, input_ab_initio_filename, use_euphonic=None):
-        """Parser for CASTEP .phonon files
-
-        :param input_ab_initio_filename: CASTEP .phonon file to load
-        :param use_euphonic: Choose between legacy parser and Euphonic library.
-            If None, Euphonic will be detected and used if available.
-
-        """
-        super().__init__(input_ab_initio_filename=input_ab_initio_filename)
-        self._ab_initio_program = "CASTEP"
-
-        if use_euphonic is None:
-            if euphonic_available:
-                use_euphonic = True
-            else:
-                use_euphonic = False
-                logger.notice("Euphonic library not found")
-
-        if use_euphonic:
-            self._loader = EuphonicCASTEPLoader(input_ab_initio_filename)
-            logger.notice("Using Euphonic library for CASTEP file import")
-        else:
-            self._loader = LegacyCASTEPLoader(input_ab_initio_filename)
-            logger.notice("Using legacy implementation for CASTEP file import")
-
-    def read_vibrational_or_phonon_data(self) -> AbinsData:
-        return self._loader.read_vibrational_or_phonon_data()
-
-
-class EuphonicCASTEPLoader(AbInitioLoader):
-    def __init__(self, input_ab_initio_filename) -> None:
-        super().__init__(input_ab_initio_filename=input_ab_initio_filename)
-        self._ab_initio_program = "CASTEP"
-
-    def read_vibrational_or_phonon_data(self) -> AbinsData:
-        modes = QpointPhononModes.from_castep(self._clerk.get_input_filename())
-        data = EuphonicLoader.data_dict_from_modes(modes)
-        self.save_ab_initio_data(data=data)
-        return self._rearrange_data(data=data)
-
-
-class LegacyCASTEPLoader(AbInitioLoader):
-    """
     Class which handles loading files from foo.phonon output CASTEP files.
     Functions to read phonon file taken from SimulatedDensityOfStates (credits for Elliot Oram.).
     """
 
-    def __init__(self, input_ab_initio_filename):
+    def __init__(self, input_ab_initio_filename, use_euphonic=None):
         """
 
         :param input_ab_initio_filename: name of file with phonon data (foo.phonon)
         """
         super().__init__(input_ab_initio_filename=input_ab_initio_filename)
 
+        self._use_euphonic = use_euphonic
+        if self._use_euphonic is None:
+            if euphonic_available:
+                self._use_euphonic = True
+            else:
+                self._use_euphonic = False
+                logger.notice("Euphonic library not found")
+
         # Regex pattern for a floating point number
         self._float_regex = r"\-?(?:\d+\.?\d*|\d*\.?\d+)"
         self._sum_rule = None
         self._ab_initio_program = "CASTEP"
+
+    def read_vibrational_or_phonon_data(self):
+        """
+        Reads frequencies, weights of k-point vectors, k-point vectors, amplitudes of atomic displacements
+        from a <>.phonon file. Save frequencies, weights of k-point vectors, k-point vectors, amplitudes of atomic
+        displacements, hash of the phonon file (hash) to <>.hdf5
+
+        :returns:  object of type AbinsData.
+        """
+        if self._use_euphonic:
+            logger.notice("Using Euphonic library for CASTEP file import")
+            return self._euphonic_read_vibrational_or_phonon_data()
+        else:
+            logger.notice("Using legacy implementation for CASTEP file import")
+            return self._legacy_read_vibrational_or_phonon_data()
+
+    def _euphonic_read_vibrational_or_phonon_data(self) -> AbinsData:
+        modes = QpointPhononModes.from_castep(self._clerk.get_input_filename())
+        data = EuphonicLoader.data_dict_from_modes(modes)
+        self.save_ab_initio_data(data=data)
+        return self._rearrange_data(data=data)
 
     # noinspection PyMethodMayBeStatic
     def _parse_block_header(self, header_match, block_count):
@@ -247,7 +225,7 @@ class LegacyCASTEPLoader(AbInitioLoader):
 
             return found
 
-    def read_vibrational_or_phonon_data(self):
+    def _legacy_read_vibrational_or_phonon_data(self):
         """
         Reads frequencies, weights of k-point vectors, k-point vectors, amplitudes of atomic displacements
         from a <>.phonon file. Save frequencies, weights of k-point vectors, k-point vectors, amplitudes of atomic
