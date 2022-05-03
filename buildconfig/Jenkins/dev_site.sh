@@ -28,7 +28,7 @@ fi
 ###############################################################################
 VIRTUAL_ENV=$BUILD_DIR/venv
 if [[  -d $VIRTUAL_ENV ]]; then
-  rm -f $VIRTUAL_ENV
+  rm -fr $VIRTUAL_ENV
 fi
 python3 -m venv $VIRTUAL_ENV
 source $VIRTUAL_ENV/bin/activate
