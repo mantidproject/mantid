@@ -40,7 +40,7 @@ class SANS2D_GDW20_4m_22_02_2D_M3(systemtesting.MantidSystemTest):
 @ISISSansSystemTest(SANSInstrument.SANS2D)
 class SANS2D_GDW20_4m_22_02_2D_M4(systemtesting.MantidSystemTest):
     def skipTests(self):
-        return sys.platform == 'win32 and 'CONDA_PREFIX' in os.environ
+        return sys.platform == 'win32' and 'CONDA_PREFIX' in os.environ
 
     def requiredMemoryMB(self):
         return 2000
