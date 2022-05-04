@@ -8,10 +8,9 @@
 Class which loads and stores a single DNS datafile in a dictionary
 """
 
-from testhelpers import run_algorithm
-from mantid.api import AnalysisDataService
 import unittest
 from unittest.mock import patch
+from mantid.api import FileFinder
 
 from mantidqtinterfaces.dns_powder_tof.data_structures.dns_file import DNSFile
 from mantidqtinterfaces.dns_powder_tof.data_structures.object_dict import \
@@ -27,8 +26,9 @@ class DNSFileTest(unittest.TestCase):
     def setUpClass(cls):
         cls.filepath = get_filepath()
         cls.data = get_dataset()
-        cls.file = DNSFile('', "dnstof.d_dat")
-        cls.txt = "".join(load_txt("dnstof.d_dat"))
+        cls.fullfilename = FileFinder.Instance().getFullPath("dnstof.d_dat")
+        cls.file = DNSFile('', cls.fullfilename)
+        cls.txt = "".join(load_txt(cls.fullfilename))
 
     def test___init__(self):
         self.assertIsInstance(self.file, ObjectDict)
