@@ -65,6 +65,14 @@ class SofQWMoments(DataProcessorAlgorithm):
             scale_alg.execute()
             logger.information('y(q,w) scaled by %f' % self._factor)
 
+        workflow_prog.report('Integrating result')
+        moments_0 = self._output_ws + '_M0'
+        integration_alg = self.createChildAlgorithm("Integration", enableLogging=False)
+        integration_alg.setProperty("InputWorkspace", input_ws)
+        integration_alg.setProperty("OutputWorkspace", moments_0)
+        integration_alg.execute()
+        mtd.addOrReplace(moments_0, integration_alg.getProperty("OutputWorkspace").value)
+
         # calculate delta x
         workflow_prog.report('Converting to point data')
         convert_point_alg = self.createChildAlgorithm("ConvertToPointData", enableLogging=False)
@@ -121,13 +129,6 @@ class SofQWMoments(DataProcessorAlgorithm):
         convert_hist_alg.setProperty("InputWorkspace", input_ws)
         convert_hist_alg.setProperty("OutputWorkspace", input_ws)
         convert_hist_alg.execute()
-
-        workflow_prog.report('Integrating result')
-        integration_alg = self.createChildAlgorithm("Integration", enableLogging=False)
-        integration_alg.setProperty("InputWorkspace", convert_hist_alg.getProperty("OutputWorkspace").value)
-        integration_alg.setProperty("OutputWorkspace", moments_0)
-        integration_alg.execute()
-        mtd.addOrReplace(moments_0, integration_alg.getProperty("OutputWorkspace").value)
 
         moments = [moments_1, moments_2, moments_3, moments_4]
         divide_alg = self.createChildAlgorithm("Divide", enableLogging=False)
