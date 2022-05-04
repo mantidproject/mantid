@@ -19,10 +19,10 @@ namespace {
 Eigen::MatrixXd GenerateMatrix(int i, int j, bool random = false) {
   std::srand((unsigned int)time(0));
   if (random) {
-    return Eigen::MatrixXd::Random(i, j).unaryExpr([](double x) { return round(abs(x * 10)); });
+    return Eigen::MatrixXd::Random(i, j).unaryExpr([](double x) -> double { return round(abs(x * 10)); });
   } else {
     double n = 0;
-    return Eigen::MatrixXd(i, j).unaryExpr([&n]() { return ++n; });
+    return Eigen::MatrixXd(i, j).unaryExpr([&n](double x) -> double { return ++n; });
   }
 }
 
