@@ -8,7 +8,8 @@
 Class which loads and stores a single DNS datafile in a dictionary
 """
 
-
+from testhelpers import run_algorithm
+from mantid.api import AnalysisDataService
 import unittest
 from unittest.mock import patch
 
@@ -26,8 +27,8 @@ class DNSFileTest(unittest.TestCase):
     def setUpClass(cls):
         cls.filepath = get_filepath()
         cls.data = get_dataset()
-        cls.file = DNSFile('', 'dnstof.d_dat')
-        cls.txt = "".join(load_txt('dnstof.d_dat'))
+        cls.file = DNSFile('', "dnstof.d_dat")
+        cls.txt = "".join(load_txt("dnstof.d_dat"))
 
     def test___init__(self):
         self.assertIsInstance(self.file, ObjectDict)
@@ -41,7 +42,7 @@ class DNSFileTest(unittest.TestCase):
 
     def test_read(self):
         # already read in init
-        self.assertAlmostEqual(self.file['det_rot'], -5.0)
+        self.assertAlmostEqual(self.file['det_rot'], -7.5)
         self.assertEqual(self.file.counts[3, 0], 3)
 
 
