@@ -217,7 +217,7 @@ void BoxController::fromXMLString(const std::string &xml) {
   std::string s;
   s = pBoxElement->getChildElement("NumDims")->innerText();
   Strings::convert(s, nd);
-  if (nd <= 0 || nd > 20)
+  if (nd == 0 || nd > 20)
     throw std::runtime_error("BoxController::fromXMLString(): Bad number of dimensions found.");
 
   size_t ival;
