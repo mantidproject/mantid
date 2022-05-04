@@ -9,6 +9,8 @@
 from numpy import isclose, sum, argsort, ones, sqrt, zeros,  mean, where, dot, cross, array, vstack
 from numpy.linalg import det
 
+DEFAULT_NBINS = 50
+
 
 class CutViewerModel:
     def __init__(self, proj_matrix):
@@ -64,7 +66,7 @@ class CutViewerModel:
             if nbins[irow] < 1:
                 nbins[irow] = 1
             if nbins[irow] == 1 and nbins[ivec] == 1:
-                nbins[ivec] = 100
+                nbins[ivec] = DEFAULT_NBINS
             elif nbins[irow] > 1 and nbins[ivec] > 1:
                 nbins[ivec] = 1
         elif icol == 6 and step != 0:
@@ -75,8 +77,10 @@ class CutViewerModel:
                     # step along cut axis changed
                     nbin = (extents[1, irow] - extents[0, irow]) / step
                     if nbin < 1:
+                        # step greater than extent - swap cut direction to be along ivec
                         nbin = 1
-                    if nbin % 1 > 0:
+                        nbins[ivec] = DEFAULT_NBINS
+                    elif nbin % 1 > 0:
                         extents[1, irow] = extents[1, irow] - (nbin % 1) * step  # so integer number of bins
                     nbins[irow] = nbin
             else:
