@@ -5,14 +5,14 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
+#include "MantidCurveFitting/DllConfig.h"
+
 #include <Eigen/Core>
 
 namespace Mantid::CurveFitting {
 typedef Eigen::Stride<Eigen::Dynamic, Eigen::Dynamic> dynamic_stride;
 typedef Eigen::Map<Eigen::MatrixXd, 0, dynamic_stride> map_type;
 typedef Eigen::Map<const Eigen::MatrixXd, 0, dynamic_stride> const_map_type;
-
-class EigenMatrix_View;
 
 class MANTID_CURVEFITTING_DLL EigenMatrix_View {
 public:
