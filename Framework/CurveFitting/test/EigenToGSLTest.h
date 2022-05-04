@@ -98,7 +98,9 @@ public:
   }
 
   void test_EigenVector_to_GSL_const() {
-    const EigenVector v(&GenerateVector(10));
+    auto vec = GenerateVector(10);
+
+    const EigenVector v(&vec);
 
     const gsl_vector_const_view v_gsl = getGSLVectorView_const(v.inspector());
 
