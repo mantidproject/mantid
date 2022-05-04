@@ -89,7 +89,7 @@ EigenVector &EigenVector::operator=(const Eigen::VectorXd v) {
   }
   m_view = EigenVector_View(m_data.data(), m_data.size());
   return *this;
-};
+}
 
 /// Resize the vector
 /// @param n :: The new length

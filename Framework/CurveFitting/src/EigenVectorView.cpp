@@ -22,7 +22,7 @@ EigenVector_View::EigenVector_View(vec_map_type &vector, const size_t nElements,
   } else {
     new (&m_view) vec_map_type(vector.data() + startElement, nElements, dynamic_stride(0, 1));
   }
-};
+}
 
 // constructor: vector->vector view
 /// @param vector :: Eigen::VectorXd from which to take view.
@@ -35,7 +35,7 @@ EigenVector_View::EigenVector_View(Eigen::VectorXd &vector, const size_t nElemen
   } else {
     new (&m_view) vec_map_type(vector.data() + startElement, nElements, dynamic_stride(0, 1));
   }
-};
+}
 
 // constructor: array->vector view
 /// @param base :: array from which to take view.
@@ -51,7 +51,7 @@ EigenVector_View::EigenVector_View(double *base, const size_t nElements, const s
 EigenVector_View::EigenVector_View(const vec_map_type &vector, const size_t nElements, const size_t &startElement)
     : m_view({}, 0, dynamic_stride(0, 0)) {
   new (&m_view) vec_const_map_type(vector.data() + startElement, nElements, dynamic_stride(0, 1));
-};
+}
 
 // CONST constructor: vector->vector view
 /// @param vector :: Eigen::VectorXd from which to take view.
@@ -60,7 +60,7 @@ EigenVector_View::EigenVector_View(const vec_map_type &vector, const size_t nEle
 EigenVector_View::EigenVector_View(const Eigen::VectorXd &vector, const size_t nElements, const size_t &startElement)
     : m_view({}, 0, dynamic_stride(0, 0)), isConst(true) {
   new (&m_view) vec_const_map_type(vector.data() + startElement, nElements, dynamic_stride(0, 1));
-};
+}
 
 // CONST constructor: array->vector view
 /// @param base :: array from which to take view.
