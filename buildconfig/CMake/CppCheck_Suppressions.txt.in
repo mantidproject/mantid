@@ -113,7 +113,6 @@ constStatement:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/PolarizationCorrecti
 invalidFunctionArg:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/Qxy.cpp:355
 invalidFunctionArg:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/Qxy.cpp:356
 knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/ResetNegatives.cpp:115
-useStlAlgorithm:${CMAKE_SOURCE_DIR}/Framework/API/src/BoxControllerSettingsAlgorithm.cpp:40
 knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/API/src/CompositeDomainMD.cpp:28
 useStlAlgorithm:${CMAKE_SOURCE_DIR}/Framework/API/src/CompositeFunction.cpp:342
 knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/API/src/DetectorSearcher.cpp:172
