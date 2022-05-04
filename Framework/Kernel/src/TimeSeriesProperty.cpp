@@ -464,9 +464,6 @@ void TimeSeriesProperty<TYPE>::splitByTime(std::vector<SplittingInterval> &split
     if (i_property == m_values.size()) {
       // i_property is out of the range. Then use the last entry
       myOutput->addValue(m_values[i_property - 1].time(), m_values[i_property - 1].value());
-
-      ++itspl;
-      ++counter;
       break;
     }
 
