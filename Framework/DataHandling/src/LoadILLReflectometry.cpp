@@ -252,12 +252,10 @@ void LoadILLReflectometry::initNames(const NeXus::NXEntry &entry) {
   }
   g_log.debug() << "Instrument name: " << instrumentName << '\n';
   if (m_instrument == Supported::D17) {
-    m_detectorAngleName = "dan.value";
     m_offsetFrom = "VirtualChopper";
     m_chopper1Name = "Chopper1";
     m_chopper2Name = "Chopper2";
   } else if (m_instrument == Supported::FIGARO) {
-    m_detectorAngleName = "VirtualAxis.DAN_actual_angle";
     m_sampleAngleName = "CollAngle.actual_coll_angle";
     m_offsetFrom = "CollAngle";
     // FIGARO: find out which of the four choppers are used
@@ -701,7 +699,6 @@ void LoadILLReflectometry::initPixelWidth() {
 void LoadILLReflectometry::placeDetector() {
   m_detectorDistance = sampleDetectorDistance();
   m_localWorkspace->mutableRun().addProperty<double>("L2", m_detectorDistance, true);
-  m_detectorAngle = detectorAngle();
   const auto detectorRotationAngle = detectorRotation();
   const std::string componentName = "detector";
   const RotationPlane rotPlane = m_instrument == Supported::D17 ? RotationPlane::horizontal : RotationPlane::vertical;
@@ -765,19 +762,6 @@ void LoadILLReflectometry::placeSource() {
 /// Return the incident neutron deflection angle.
 double LoadILLReflectometry::collimationAngle() const {
   return m_instrument == Supported::FIGARO ? doubleFromRun(m_sampleAngleName) : 0.;
-}
-
-/// Return the detector center angle.
-double LoadILLReflectometry::detectorAngle() const {
-  if (m_instrument == Supported::D17) {
-    return doubleFromRun(m_detectorAngleName);
-  } else {
-    const double DH1Y = mmToMeter(doubleFromRun("DH1.value"));
-    const double DH2Y = mmToMeter(doubleFromRun("DH2.value"));
-    const double DH1Z = m_localWorkspace->getInstrument()->getNumberParameter("DH1Z")[0];
-    const double DH2Z = m_localWorkspace->getInstrument()->getNumberParameter("DH2Z")[0];
-    return radToDeg(std::atan2(DH2Y - DH1Y, DH2Z - DH1Z));
-  }
 }
 
 /** Calculate the offset angle between detector center and peak.

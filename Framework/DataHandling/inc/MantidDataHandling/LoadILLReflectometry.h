@@ -66,20 +66,17 @@ private:
   void placeSlits();
   void placeSource();
   double collimationAngle() const;
-  double detectorAngle() const;
   double offsetAngle(const double peakCentre, const double detectorCentre, const double detectorDistance) const;
   Supported m_instrument{Supported::D17};
   size_t m_acqMode{1}; ///(1: TOF (default), 0: monochromatic)
   size_t m_numberOfChannels{0};
   size_t m_numberOfHistograms{0};
-  std::string m_detectorAngleName;
   std::string m_sampleAngleName;
   std::string m_offsetFrom;
   std::string m_chopper1Name;
   std::string m_chopper2Name;
   double m_tofDelay{0.0};
   double m_channelWidth{0.0};
-  double m_detectorAngle{0.0};
   double m_detectorDistance{0.0};
   double m_pixelWidth{0.0};
   double m_sampleZOffset{0.0};
