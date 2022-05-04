@@ -1077,10 +1077,10 @@ void IFunction::calNumericalDeriv(const FunctionDomain &domain, Jacobian &jacobi
 double IFunction::calculateStepSize(const double parameterValue) const { return m_stepSizeFunction(parameterValue); }
 
 /** Sets the function to use when calculating the step size.
- * @param stepSizeMethod :: An enum indicating which method to use when calculating the step size.
+ * @param method :: An enum indicating which method to use when calculating the step size.
  */
-void IFunction::setStepSizeMethod(const StepSizeMethod stepSizeMethod) {
-  switch (stepSizeMethod) {
+void IFunction::setStepSizeMethod(const StepSizeMethod method) {
+  switch (method) {
   case StepSizeMethod::DEFAULT:
     m_stepSizeFunction = defaultStepSize;
     return;
