@@ -135,8 +135,10 @@ void CostFuncFitting::calActiveCovarianceMatrix(EigenMatrix &covar, double epsre
   EigenMatrix covar_tr(covar.tr());
   EigenMatrix temp_j_tr;
   temp_j_tr = j.transpose();
-  gsl_multifit_covar(&getGSLMatrixView_const(temp_j_tr.inspector()).matrix, epsrel,
-                     &getGSLMatrixView(covar_tr.mutator()).matrix);
+  gsl_matrix_const_view temp_j_tr_gsl = getGSLMatrixView_const(temp_j_tr.inspector());
+  gsl_matrix_view covar_tr_gsl = getGSLMatrixView(covar_tr.mutator());
+
+  gsl_multifit_covar(&temp_j_tr_gsl.matrix, epsrel, &covar_tr_gsl.matrix);
   covar = covar_tr.tr();
 }
 

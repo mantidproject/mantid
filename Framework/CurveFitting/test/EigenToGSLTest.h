@@ -51,15 +51,20 @@ public:
     EigenMatrix m(10, 5);
     m = GenerateMatrix(10, 5);
 
-    EigenMatrix m_tr = m.tr();
+    gsl_matrix_view m_gsl_view = getGSLMatrixView(m.mutator());
+    gsl_matrix *m_gsl = &m_gsl_view.matrix;
 
-    gsl_matrix *m_gsl = &getGSLMatrixView(m.mutator()).matrix;
+    EigenMatrix m_tr = m.tr();
 
     for (int i = 0; i < m.size1(); i++) {
       for (int j = 0; j < m.size2(); j++) {
         TS_ASSERT_EQUALS(gsl_matrix_get(m_gsl, j, i), m_tr(j, i));
       }
     }
+
+    // check reference is not broken
+    gsl_matrix_set(m_gsl, 0, 0, -1.);
+    TS_ASSERT_EQUALS(gsl_matrix_get(m_gsl, 0, 0), m(0, 0));
   }
 
   void test_EigenMatrix_to_GSL_const() {
@@ -67,7 +72,9 @@ public:
     m = GenerateMatrix(10, 5);
 
     EigenMatrix m_tr = m.tr();
-    const gsl_matrix *m_gsl = &getGSLMatrixView_const(m_tr.inspector()).matrix;
+
+    const gsl_matrix_const_view m_gsl_view = getGSLMatrixView_const(m_tr.inspector());
+    const gsl_matrix *m_gsl = &m_gsl_view.matrix;
 
     for (int i = 0; i < m.size1(); i++) {
       for (int j = 0; j < m.size2(); j++) {
@@ -84,6 +91,10 @@ public:
     for (int i = 0; i < v.size(); i++) {
       TS_ASSERT_EQUALS(gsl_vector_get(v_gsl, i), v[i]);
     }
+
+    // check reference is not broken
+    gsl_vector_set(v_gsl, 0, -1.);
+    TS_ASSERT_EQUALS(gsl_vector_get(v_gsl, 0), v[0]);
   }
 
   void test_EigenVector_to_GSL_const() {

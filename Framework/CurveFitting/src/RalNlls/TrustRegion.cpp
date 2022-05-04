@@ -53,8 +53,13 @@ void getSvdJ(const DoubleFortranMatrix &J, double &s1, double &sn) {
   DoubleFortranMatrix V(n, n);
   DoubleFortranVector S(n);
   DoubleFortranVector work(n);
-  gsl_linalg_SV_decomp(&getGSLMatrixView(U.mutator()).matrix, &getGSLMatrixView(V.mutator()).matrix,
-                       &getGSLVectorView(S.mutator()).vector, &getGSLVectorView(work.mutator()).vector);
+
+  gsl_matrix_view U_gsl = getGSLMatrixView(U.mutator());
+  gsl_matrix_view V_gsl = getGSLMatrixView(V.mutator());
+  gsl_vector_view S_gsl = getGSLVectorView(S.mutator());
+  gsl_vector_view work_gsl = getGSLVectorView(work.mutator());
+  gsl_linalg_SV_decomp(&U_gsl.matrix, &V_gsl.matrix, &S_gsl.vector, &work_gsl.vector);
+
   s1 = S(1);
   sn = S(n);
 }
@@ -199,19 +204,18 @@ void rankOneUpdate(DoubleFortranMatrix &hf, NLLS_workspace &w) {
   // call dGER(n,n,alpha,w.ysharpSks,1,w.y,1,hf,n)
 
   DoubleFortranMatrix hf_tr(hf.transpose());
-  gsl_matrix *hf_gsl = &getGSLMatrixView(hf_tr.mutator()).matrix;
+  gsl_matrix_view hf_gsl = getGSLMatrixView(hf_tr.mutator());
+  const gsl_vector_const_view ysharkSks_gsl = getGSLVectorView_const(w.ysharpSks.inspector());
+  const gsl_vector_const_view y_gsl = getGSLVectorView_const(w.y.inspector());
 
-  gsl_blas_dger(alpha, &getGSLVectorView_const(w.ysharpSks.inspector()).vector,
-                &getGSLVectorView_const(w.y.inspector()).vector, hf_gsl);
+  gsl_blas_dger(alpha, &ysharkSks_gsl.vector, &y_gsl.vector, &hf_gsl.matrix);
   // hf = hf + (1/yts) y^T (y# - Sk d):
   // call dGER(n,n,alpha,w.y,1,w.ysharpSks,1,hf,n)
-  gsl_blas_dger(alpha, &getGSLVectorView_const(w.y.inspector()).vector,
-                &getGSLVectorView_const(w.ysharpSks.inspector()).vector, hf_gsl);
+  gsl_blas_dger(alpha, &y_gsl.vector, &gysharkSks_gsl.vector, &hf_gsl.matrix);
   // hf = hf - ((y# - Sk d)^T d)/((yts)**2)) * y y^T
   alpha = -dotProduct(w.ysharpSks, w.d) / (pow(yts, 2));
   // call dGER(n,n,alpha,w.y,1,w.y,1,hf,n)
-  gsl_blas_dger(alpha, &getGSLVectorView_const(w.y.inspector()).vector, &getGSLVectorView_const(w.y.inspector()).vector,
-                hf_gsl);
+  gsl_blas_dger(alpha, &y_gsl.vector, &y_gsl.vector, &hf_gsl.matrix);
   hf = hf_tr.tr();
 }
 

@@ -102,7 +102,8 @@ void TrustRegionMinimizer::evalJ(const DoubleFortranVector &x, DoubleFortranMatr
   }
 
   DoubleFortranMatrix J_tr(J.transpose());
-  m_J.setJ(&getGSLMatrixView(J_tr.mutator()).matrix);
+  gsl_matrix_view J_tr_gsl = getGSLMatrixView(J_tr.mutator());
+  m_J.setJ(&J_tr_gsl.matrix);
   m_function->functionDeriv(domain, m_J);
   J = J_tr.tr();
 

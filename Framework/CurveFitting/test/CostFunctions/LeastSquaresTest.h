@@ -227,10 +227,13 @@ public:
     double L; // = d*dx + 0.5 * dx * H * dx
 
     EigenMatrix temp_H_tr = H.tr();
-    gsl_blas_dgemv(CblasNoTrans, 0.5, &getGSLMatrixView_const(temp_H_tr.inspector()).matrix,
-                   &getGSLVectorView_const(dx.inspector()).vector, 1., &getGSLVectorView(g.mutator()).vector);
+    const gsl_matrix_const_view temp_H_tr_gsl = getGSLMatrixView_const(temp_H_tr.inspector());
+    const gsl_vectir_const_view dx_gsl = getGSLVectorView_const(dx.inspector());
+    gsl_vector_view g_gsl = getGSLVectorView(g.mutator());
 
-    gsl_blas_ddot(&getGSLVectorView_const(g.inspector()).vector, &getGSLVectorView_const(dx.inspector()).vector, &L);
+    gsl_blas_dgemv(CblasNoTrans, 0.5, &temp_H_tr_gsl.matrix, &dx_gsl.vector, 1., &g_gsl.vector);
+
+    gsl_blas_ddot(&g_gsl.vector, &dx_gsl.vector, &L);
     TS_ASSERT_DELTA(L, -0.145, 1e-10); // L + costFun->val() == 0
   }
 

@@ -75,7 +75,8 @@ void BSpline::function1D(double *out, const double *xValues, const size_t nData)
     if (x < startX || x > endX) {
       out[i] = 0.0;
     } else {
-      gsl_bspline_eval(x, &getGSLVectorView(B.mutator()).vector, m_bsplineWorkspace.get());
+      gsl_vector_view B_gsl = getGSLVectorView(B.mutator());
+      gsl_bspline_eval(x, &B_gsl.vector, m_bsplineWorkspace.get());
       double val = 0.0;
       for (size_t j = 0; j < np; ++j) {
         val += getParameter(j) * B.get(j);
@@ -119,13 +120,14 @@ void BSpline::derivative1D(double *out, const double *xValues, size_t nData, con
       size_t jstart(0);
       size_t jend(0);
 #if GSL_MAJOR_VERSION < 2
-      gsl_bspline_deriv_eval_nonzero(x, order, getGSLMatrix(B.mutator().data()), &jstart, &jend,
-                                     m_bsplineWorkspace.get(), m_bsplineDerivWorkspace.get());
+      gsl_matrix_view B_gsl = getGSLMatrix(B.mutator().data());
+      gsl_bspline_deriv_eval_nonzero(x, order, &B_gsl.matrix, &jstart, &jend, m_bsplineWorkspace.get(),
+                                     m_bsplineDerivWorkspace.get());
 #else
-      EigenMatrix B_Trans(B.tr());
-      gsl_bspline_deriv_eval_nonzero(x, order, &getGSLMatrixView(B_Trans.mutator()).matrix, &jstart, &jend,
-                                     m_bsplineWorkspace.get());
-      B = B_Trans.tr();
+      EigenMatrix B_tr(B.tr());
+      gsl_matrix_view B_gsl_tr = getGSLMatrixView(B_tr.mutator());
+      gsl_bspline_deriv_eval_nonzero(x, order, &B_gsl_tr.matrix, &jstart, &jend, m_bsplineWorkspace.get());
+      B = B_tr.tr();
 #endif
 
       double val = 0.0;
@@ -231,7 +233,9 @@ void BSpline::resetKnots() {
       resetParameters();
     }
     EigenVector bp(breakPoints);
-    gsl_bspline_knots(&getGSLVectorView_const(bp.inspector()).vector, m_bsplineWorkspace.get());
+
+    const gsl_vector_const_view bp_gsl = getGSLVectorView_const(bp.inspector());
+    gsl_bspline_knots(&bp_gsl.vector, m_bsplineWorkspace.get());
     storeAttributeValue("StartX", Attribute(breakPoints.front()));
     storeAttributeValue("EndX", Attribute(breakPoints.back()));
   }
