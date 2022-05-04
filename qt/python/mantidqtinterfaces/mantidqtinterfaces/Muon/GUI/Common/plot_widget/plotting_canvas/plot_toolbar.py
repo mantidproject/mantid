@@ -88,7 +88,6 @@ class PlotToolbar(MantidNavigationToolbar):
         self._send_notifiers(pan_or_zoom_checked)
 
     def _send_notifiers(self, is_checked):
-        print(is_checked)
         if is_checked:
             self.disable_autoscale_notifier.notify_subscribers()
             self.uncheck_autoscale_notifier.notify_subscribers()
