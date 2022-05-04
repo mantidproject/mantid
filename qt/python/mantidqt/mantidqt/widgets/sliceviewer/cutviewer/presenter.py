@@ -39,7 +39,17 @@ class CutViewerPresenter:
                                                self._sliceview_presenter.get_sliceinfo().z_value))
 
     def validate_bin_params(self, irow, icol):
-        return self.model.validate_bin_params(irow, icol, *self.view.get_bin_params(), self.view.get_step(irow))
+        iunchanged = int(not bool(irow))  # index of u1 or u2 - which ever not changed (3rd row not editable)
+        vectors, extents, nbins = self.view.get_bin_params()
+        if icol < 3:
+            vectors = self.model.validate_vectors(irow, iunchanged, vectors)
+        elif icol == 5:
+            nbins = self.model.validate_nbins(irow, iunchanged, nbins)
+        elif icol == 6:
+            nbins, extents = self.model.validate_step(irow, iunchanged, nbins, extents, self.view.get_step(irow))
+        else:
+            extents = self.model.validate_extents(irow, extents)
+        return vectors, extents, nbins
 
     def update_cut(self):
         vectors, extents, nbins = self.view.get_bin_params()

@@ -52,48 +52,49 @@ class CutViewerModel:
     def get_slicewidth(self, dims):
         return dims.get_bin_params()[dims.get_states().index(None)]  # slicinfo not always up to date, so use dims
 
-    def validate_bin_params(self, irow, icol, vectors, extents, nbins, step):
-        ivec = int(not bool(irow))  # index of u1 or u2 - which ever not changed (3rd row not editable)
-        if icol < 3:
-            if abs(dot(vectors[irow], vectors[-1])) > 1e-15:
-                # not a vector out of slice plane - reset
-                vectors[irow] = cross(vectors[ivec], vectors[-1])
-            else:
-                # choose a new vector in plane that is not a linear combination of two other
-                vectors[ivec] = cross(vectors[irow], vectors[-1])
-        elif icol == 5:
-            # nbins changed
-            if nbins[irow] < 1:
-                nbins[irow] = 1
-            if nbins[irow] == 1 and nbins[ivec] == 1:
-                nbins[ivec] = DEFAULT_NBINS
-            elif nbins[irow] > 1 and nbins[ivec] > 1:
-                nbins[ivec] = 1
-        elif icol == 6 and step != 0:
-            # step changed - adjust nbins
-            step = abs(step)
-            if nbins[irow] > 1:
-                if step > 0:
-                    # step along cut axis changed
-                    nbin = (extents[1, irow] - extents[0, irow]) / step
-                    if nbin < 1:
-                        # step greater than extent - swap cut direction to be along ivec
-                        nbin = 1
-                        nbins[ivec] = DEFAULT_NBINS
-                    elif nbin % 1 > 0:
-                        extents[1, irow] = extents[1, irow] - (nbin % 1) * step  # so integer number of bins
-                    nbins[irow] = nbin
-            else:
-                # width of integrated axis changed
-                cen = mean(extents[:, irow])
-                extents[:, irow] = [cen - step / 2, cen + step / 2]
+    def validate_vectors(self, irow, iunchanged, vectors):
+        if abs(dot(vectors[irow], vectors[-1])) > 1e-15:
+            # not a vector out of slice plane - reset
+            vectors[irow] = cross(vectors[iunchanged], vectors[-1])
         else:
-            if icol == 4 or icol == 5:
-                # check extents have min < max - if not switch
-                umin, umax = extents[:, irow]
-                if umax < umin:
-                    extents[:, irow] = umax, umin
-        return vectors, extents, nbins
+            # choose a new vector in plane that is not a linear combination of two other
+            vectors[iunchanged] = cross(vectors[irow], vectors[-1])
+        return vectors
+
+    def validate_nbins(self, irow, iunchanged, nbins):
+        if nbins[irow] < 1:
+            nbins[irow] = 1
+        if nbins[irow] == 1 and nbins[iunchanged] == 1:
+            nbins[iunchanged] = DEFAULT_NBINS
+        elif nbins[irow] > 1 and nbins[iunchanged] > 1:
+            nbins[iunchanged] = 1
+        return nbins
+
+    def validate_step(self, irow, iunchanged, nbins, extents, step):
+        step = abs(step)
+        if nbins[irow] > 1:
+            if step > 0:
+                # step along cut axis changed
+                nbin = (extents[1, irow] - extents[0, irow]) / step
+                if nbin < 1:
+                    # step greater than extent - swap cut direction to be along ivec
+                    nbin = 1
+                    nbins[iunchanged] = DEFAULT_NBINS
+                elif nbin % 1 > 0:
+                    extents[1, irow] = extents[1, irow] - (nbin % 1) * step  # so integer number of bins
+                nbins[irow] = nbin
+        else:
+            # width of integrated axis changed
+            cen = mean(extents[:, irow])
+            extents[:, irow] = [cen - step / 2, cen + step / 2]
+        return nbins, extents
+
+    def validate_extents(self, irow, extents):
+        # check extents have min < max - if not switch
+        umin, umax = extents[:, irow]
+        if umax < umin:
+            extents[:, irow] = umax, umin
+        return extents
 
     def calc_cut_representation_parameters(self, vectors, extents, nbins, states):
         self.xvec = self.proj_matrix[states.index(0), :]
