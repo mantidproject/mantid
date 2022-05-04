@@ -112,7 +112,6 @@ constStatement:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/PolarizationCorrecti
 constStatement:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/PolarizationCorrectionWildes.cpp:652
 invalidFunctionArg:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/Qxy.cpp:355
 invalidFunctionArg:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/Qxy.cpp:356
-useStlAlgorithm:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/Q1DWeighted.cpp:322
 useStlAlgorithm:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/CreateFloodWorkspace.cpp:85
 knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/ResetNegatives.cpp:115
 knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/ResizeRectangularDetector.cpp:74
