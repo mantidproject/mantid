@@ -63,7 +63,7 @@ public:
   std::string GetDescription() const;
 
 private:
-  void init(const Kernel::DblMatrix &UB, ReducedCell &form_0, ReducedCell &form_i, bool allowPermutations);
+  void init(const Kernel::DblMatrix &UB, const ReducedCell &form_0, ReducedCell &form_i, const bool allowPermutations);
   void SetSidesIncreasing(Kernel::DblMatrix &UB);
   void StandardizeTetragonal(Kernel::DblMatrix &UB);
   void StandardizeHexagonal(Kernel::DblMatrix &UB);
