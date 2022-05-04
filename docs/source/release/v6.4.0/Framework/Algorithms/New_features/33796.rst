@@ -1,0 +1,1 @@
+- the output workspace group that is created by :ref:`DiscusMultipleScatteringCorrection <algm-DiscusMultipleScatteringCorrection>` has been updated. The names of the member workspaces are now prefixed by the group name and some additional workspaces have been added to store the integral of the scattering weight across the x axis (Delta E for inelastic and Momentum for elastic)
