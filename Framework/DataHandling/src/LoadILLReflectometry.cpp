@@ -639,7 +639,7 @@ double LoadILLReflectometry::detectorRotation() {
   m_localWorkspace->mutableRun().addProperty("reduction.line_position", peakCentre, true);
   const double detectorCentre = getProperty("DetectorCentreFractionalIndex");
   const std::string measurement = getPropertyValue("Measurement");
-  double two_theta = -offsetAngle(peakCentre, detectorCentre, m_detectorDistance);
+  double two_theta = offsetAngle(peakCentre, detectorCentre, m_detectorDistance);
   if (measurement == "ReflectedBeam") {
     if (isDefault("BraggAngle")) {
       if (m_sampleAngle == 0.) {
@@ -774,7 +774,7 @@ double LoadILLReflectometry::offsetAngle(const double peakCentre, const double d
                                          const double detectorDistance) const {
   // Sign depends on the definition of detector angle and which way
   // spectrum numbers increase.
-  const auto sign = m_instrument == Supported::D17 ? 1. : -1.;
+  const auto sign = m_instrument == Supported::D17 ? -1. : 1.;
   const double offsetWidth = (detectorCentre - peakCentre) * m_pixelWidth;
   return sign * radToDeg(std::atan2(offsetWidth, detectorDistance));
 }
