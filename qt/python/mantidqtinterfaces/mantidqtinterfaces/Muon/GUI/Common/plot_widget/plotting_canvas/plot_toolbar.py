@@ -77,79 +77,24 @@ class PlotToolbar(MantidNavigationToolbar):
         self.is_minor_grid_on = False
         self.is_major_grid_on = False
 
-    def zoom(self, *args):
-        """Activate zoom to rect mode."""
-        if self._active == 'ZOOM':
-            self._active = None
+    def _update_buttons_checked(self):
+        # sync button checkstates to match active mode
+        pan_or_zoom_checked = False
+        if 'pan' in self._actions:
+            self._actions['pan'].setChecked(self._get_mode() == 'PAN' or self._get_mode() == 'pan/zoom'  )
+        if 'zoom' in self._actions:
+            self._actions['zoom'].setChecked(self._get_mode()  == 'ZOOM' or self._get_mode() == 'zoom rect' )
+        pan_or_zoom_checked = self._actions['pan'].isChecked() or self._actions['zoom'].isChecked()
+        self._send_notifiers(pan_or_zoom_checked)
+
+    def _send_notifiers(self, is_checked):
+        print(is_checked)
+        if is_checked:
+            self.disable_autoscale_notifier.notify_subscribers()
+            self.uncheck_autoscale_notifier.notify_subscribers()
+        else:
             self.enable_autoscale_notifier.notify_subscribers()
             self.range_changed_notifier.notify_subscribers()
-
-        else:
-            self.uncheck_autoscale_notifier.notify_subscribers()
-            self.disable_autoscale_notifier.notify_subscribers()
-            self._active = 'ZOOM'
-
-        if self._idPress is not None:
-            self._idPress = self.canvas.mpl_disconnect(self._idPress)
-            self.mode = ''
-
-        if self._idRelease is not None:
-            self._idRelease = self.canvas.mpl_disconnect(self._idRelease)
-            self.mode = ''
-
-        if self._active:
-            self._idPress = self.canvas.mpl_connect('button_press_event',
-                                                    self.press_zoom)
-            self._idRelease = self.canvas.mpl_connect('button_release_event',
-                                                      self.release_zoom)
-            self.mode = 'zoom rect'
-            self.canvas.widgetlock(self)
-        else:
-            self.canvas.widgetlock.release(self)
-
-        for axes in self.canvas.figure.get_axes():
-            axes.set_navigate_mode(self._active)
-
-        self._update_buttons_checked()
-        self.set_message(self.mode)
-
-    def pan(self, *args):
-        """Activate the pan/zoom tool. pan with left button, zoom with right"""
-        # set the pointer icon and button press funcs to the
-        # appropriate callbacks
-
-        if self._active == 'PAN':
-            self._active = None
-            self.enable_autoscale_notifier.notify_subscribers()
-            self.range_changed_notifier.notify_subscribers()
-
-        else:
-            self.uncheck_autoscale_notifier.notify_subscribers()
-            self.disable_autoscale_notifier.notify_subscribers()
-            self._active = 'PAN'
-        if self._idPress is not None:
-            self._idPress = self.canvas.mpl_disconnect(self._idPress)
-            self.mode = ''
-
-        if self._idRelease is not None:
-            self._idRelease = self.canvas.mpl_disconnect(self._idRelease)
-            self.mode = ''
-
-        if self._active:
-            self._idPress = self.canvas.mpl_connect(
-                'button_press_event', self.press_pan)
-            self._idRelease = self.canvas.mpl_connect(
-                'button_release_event', self.release_pan)
-            self.mode = 'pan/zoom'
-            self.canvas.widgetlock(self)
-        else:
-            self.canvas.widgetlock.release(self)
-
-        for axes in self.canvas.figure.get_axes():
-            axes.set_navigate_mode(self._active)
-
-        self._update_buttons_checked()
-        self.set_message(self.mode)
 
     def home(self, *args):
         """Restore the original view."""
