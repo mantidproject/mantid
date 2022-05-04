@@ -84,7 +84,8 @@ public:
   }
 
   void test_EigenVector_to_GSL() {
-    EigenVector v(&GenerateVector(10));
+    auto vec = GenerateVector(10);
+    EigenVector v(&vec);
 
     gsl_vector_view v_gsl = getGSLVectorView(v.mutator());
 

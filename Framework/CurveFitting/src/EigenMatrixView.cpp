@@ -19,8 +19,8 @@ EigenMatrix_View::EigenMatrix_View() : m_view({}, 0, 0, dynamic_stride(0, 0)), i
 /// @param nElements_2: number of elements to include in view in dimension 2 (cols).
 /// @param startElement_1: index number of element to start view on, dimension 1 (rows).
 /// @param startElement_2: index number of element to start view on, dimension 2 (cols).
-EigenMatrix_View::EigenMatrix_View(double *base, const size_t nTotalRows, size_t nTotalCols, size_t nElements_1,
-                                   size_t nElements_2, const size_t &startElement_1, const size_t &startElement_2)
+EigenMatrix_View::EigenMatrix_View(double *base, const size_t nTotalRows, size_t nTotalCols, int nElements_1,
+                                   int nElements_2, const size_t &startElement_1, const size_t &startElement_2)
     : m_view(base, nTotalRows, nTotalCols, dynamic_stride(nTotalRows, 1)) {
   if (nElements_1 == -1 && nElements_2 == -1)
     // if both are default, exit as m_view is initialised as such
@@ -40,7 +40,7 @@ EigenMatrix_View::EigenMatrix_View(double *base, const size_t nTotalRows, size_t
 /// @param nElements_2: number of elements to include in view in dimension 2 (cols).
 /// @param startElement_1: index number of element to start view on, dimension 1 (rows).
 /// @param startElement_2: index number of element to start view on, dimension 2 (cols).
-EigenMatrix_View::EigenMatrix_View(Eigen::MatrixXd &matrix, size_t nElements_1, size_t nElements_2,
+EigenMatrix_View::EigenMatrix_View(Eigen::MatrixXd &matrix, int nElements_1, int nElements_2,
                                    const size_t &startElement_1, const size_t &startElement_2)
     : m_view(matrix.data(), matrix.rows(), matrix.cols(), dynamic_stride(matrix.outerStride(), matrix.innerStride())) {
   if (nElements_1 == -1 && nElements_2 == -1)
@@ -61,8 +61,8 @@ EigenMatrix_View::EigenMatrix_View(Eigen::MatrixXd &matrix, size_t nElements_1, 
 /// @param nElements_2: number of elements to include in view in dimension 2 (cols).
 /// @param startElement_1: index number of element to start view on, dimension 1 (rows).
 /// @param startElement_2: index number of element to start view on, dimension 2 (cols).
-EigenMatrix_View::EigenMatrix_View(map_type &matrix, size_t nElements_1, size_t nElements_2,
-                                   const size_t &startElement_1, const size_t &startElement_2)
+EigenMatrix_View::EigenMatrix_View(map_type &matrix, int nElements_1, int nElements_2, const size_t &startElement_1,
+                                   const size_t &startElement_2)
     : m_view(matrix.data(), matrix.rows(), matrix.cols(), dynamic_stride(matrix.outerStride(), matrix.innerStride())) {
   if (nElements_1 == -1 && nElements_2 == -1)
     // if both are default, exit as m_view is initialised as such
@@ -84,8 +84,8 @@ EigenMatrix_View::EigenMatrix_View(map_type &matrix, size_t nElements_1, size_t 
 /// @param nElements_2: number of elements to include in view in dimension 2 (cols).
 /// @param startElement_1: index number of element to start view on, dimension 1 (rows).
 /// @param startElement_2: index number of element to start view on, dimension 2 (cols).
-EigenMatrix_View::EigenMatrix_View(const double *base, const size_t nTotalRows, size_t nTotalCols, size_t nElements_1,
-                                   size_t nElements_2, const size_t &startElement_1, const size_t &startElement_2)
+EigenMatrix_View::EigenMatrix_View(const double *base, const size_t nTotalRows, size_t nTotalCols, int nElements_1,
+                                   int nElements_2, const size_t &startElement_1, const size_t &startElement_2)
     : m_view({}, 0, 0, dynamic_stride(0, 0)), isConst(true) {
   if (nElements_1 == -1)
     nElements_1 = nTotalRows;
@@ -102,7 +102,7 @@ EigenMatrix_View::EigenMatrix_View(const double *base, const size_t nTotalRows, 
 /// @param nElements_2: number of elements to include in view in dimension 2 (cols).
 /// @param startElement_1: index number of element to start view on, dimension 1 (rows).
 /// @param startElement_2: index number of element to start view on, dimension 2 (cols).
-EigenMatrix_View::EigenMatrix_View(const Eigen::MatrixXd &matrix, size_t nElements_1, size_t nElements_2,
+EigenMatrix_View::EigenMatrix_View(const Eigen::MatrixXd &matrix, int nElements_1, int nElements_2,
                                    const size_t &startElement_1, const size_t &startElement_2)
     : m_view({}, 0, 0, dynamic_stride(0, 0)), isConst(true) {
   if (nElements_1 == -1)
@@ -120,7 +120,7 @@ EigenMatrix_View::EigenMatrix_View(const Eigen::MatrixXd &matrix, size_t nElemen
 /// @param nElements_2: number of elements to include in view in dimension 2 (cols).
 /// @param startElement_1: index number of element to start view on, dimension 1 (rows).
 /// @param startElement_2: index number of element to start view on, dimension 2 (cols).
-EigenMatrix_View::EigenMatrix_View(const map_type &matrix, size_t nElements_1, size_t nElements_2,
+EigenMatrix_View::EigenMatrix_View(const map_type &matrix, int nElements_1, int nElements_2,
                                    const size_t &startElement_1, const size_t &startElement_2)
     : m_view({}, 0, 0, dynamic_stride(0, 0)), isConst(true) {
   if (nElements_1 == -1)

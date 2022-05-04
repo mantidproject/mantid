@@ -21,10 +21,10 @@ public:
   EigenVector_View();
 
   /// constructor: map->vector view
-  EigenVector_View(vec_map_type &vector, const size_t nElements = -1, const size_t &startElement = 0);
+  EigenVector_View(vec_map_type &vector, const int nElements = -1, const size_t &startElement = 0);
 
   // constructor: vector->vector view
-  EigenVector_View(Eigen::VectorXd &vector, const size_t nElements = -1, const size_t &startElement = 0);
+  EigenVector_View(Eigen::VectorXd &vector, const int nElements = -1, const size_t &startElement = 0);
 
   // constructor: array->vector view
   EigenVector_View(double *base, const size_t nElements, const size_t &startElement = 0);
