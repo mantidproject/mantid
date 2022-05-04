@@ -150,7 +150,7 @@ template <class MatrixClass> FortranMatrix<MatrixClass> &FortranMatrix<MatrixCla
   this->resize(m.size1(), m.size2());
   for (size_t i = 0; i < this->size1(); i++) {
     for (size_t j = 0; j < this->size2(); j++) {
-      this->operator()(i + 1, j + 1) = m.get(i, j);
+      this->operator()(i + 1ULL, j + 1ULL) = m.get(i, j);
     }
   }
   return *this;

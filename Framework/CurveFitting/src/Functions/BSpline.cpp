@@ -120,7 +120,7 @@ void BSpline::derivative1D(double *out, const double *xValues, size_t nData, con
       size_t jstart(0);
       size_t jend(0);
 #if GSL_MAJOR_VERSION < 2
-      gsl_matrix_view B_gsl = getGSLMatrixView(B.mutator().data());
+      gsl_matrix_view B_gsl = getGSLMatrixView(B.mutator());
       gsl_bspline_deriv_eval_nonzero(x, order, &B_gsl.matrix, &jstart, &jend, m_bsplineWorkspace.get(),
                                      m_bsplineDerivWorkspace.get());
 #else

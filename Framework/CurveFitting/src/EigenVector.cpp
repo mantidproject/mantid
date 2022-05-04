@@ -50,7 +50,7 @@ EigenVector::EigenVector(const EigenVector &v)
 /// @param v :: A vector to copy from.
 EigenVector::EigenVector(const Eigen::VectorXd *v)
     : m_data(v->size()), m_view(EigenVector_View(m_data.data(), m_data.size())) {
-  for (size_t i = 0; i < v->size(); ++i) {
+  for (size_t i = 0; i < (size_t)v->size(); ++i) {
     m_data[i] = (*v)(i);
   }
 }
@@ -83,7 +83,7 @@ EigenVector &EigenVector::operator=(const Eigen::VectorXd v) {
     m_data.resize(1);
   } else {
     m_data.resize(v.size());
-    for (size_t i = 0; i < v.size(); ++i) {
+    for (size_t i = 0; i < (size_t)v.size(); ++i) {
       m_data[i] = v(i);
     }
   }
