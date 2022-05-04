@@ -113,7 +113,6 @@ constStatement:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/PolarizationCorrecti
 invalidFunctionArg:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/Qxy.cpp:355
 invalidFunctionArg:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/Qxy.cpp:356
 knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/ResetNegatives.cpp:115
-unreadVariable:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/VesuvioL1ThetaResolution.cpp:241
 useStlAlgorithm:${CMAKE_SOURCE_DIR}/Framework/API/src/Algorithm.cpp:369
 useStlAlgorithm:${CMAKE_SOURCE_DIR}/Framework/API/src/AlgorithmHistory.cpp:90
 duplicateCondition:${CMAKE_SOURCE_DIR}/Framework/API/src/BoxController.cpp:282
