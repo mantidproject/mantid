@@ -60,4 +60,4 @@ class SANS2D_GDW20_4m_22_02_2D_M4(systemtesting.MantidSystemTest):
         self.disableChecking.append('Instrument')
         self.disableChecking.append('SpectraMap')
 
-        return self.returned, "SANS2D_GDW20_4m_cycle_22_02_2D_M4_ref.nxs"
+        return self.returned, "SANS2D_GDW20_4m_cycle_22_02_2D_M4_V2_ref.nxs"
