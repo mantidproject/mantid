@@ -487,14 +487,6 @@ void TimeSeriesProperty<TYPE>::splitByTime(std::vector<SplittingInterval> &split
     // Go to the next interval
     ++itspl;
     ++counter;
-    // But if we reached the end, then we are done.
-    if (itspl == splitter.end())
-      break;
-
-    // No need to keep looping through the filter if we are out of events
-    if (i_property == this->m_values.size())
-      break;
-
   } // Looping through entries in the splitter vector
 
   // Make sure all entries have the correct size recorded in m_size.
