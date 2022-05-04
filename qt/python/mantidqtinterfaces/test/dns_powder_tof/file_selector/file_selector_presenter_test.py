@@ -47,6 +47,7 @@ class DNSFileSelectorPresenterTest(unittest.TestCase):
         cls.view.sig_right_click = mock.Mock()
         cls.view.sig_progress_canceled = mock.Mock()
         cls.view.sig_autoload_new_clicked = mock.Mock()
+        cls.view.sig_auto_select_standard_clicked = mock.Mock()
         cls.view.sig_dataset_changed = mock.Mock()
 
         # watcher signal
@@ -245,7 +246,13 @@ class DNSFileSelectorPresenterTest(unittest.TestCase):
         self.presenter._changed_to_standard()
         mock_read.assert_called_once()
 
-    def test_dataset_changed(self):
+    @patch('mantidqtinterfaces.dns_powder_tof.file_selector.file_selector_'
+           'presenter.'
+           'DNSFileSelectorPresenter.get_option_dict')
+    def test_dataset_changed(self, mock_get_option):
+        mock_get_option.return_value = {
+            'auto_select_standard': False
+        }
         self.presenter._dataset_changed(True)
         self.model.set_model.assert_called_once_with(standard=True)
         self.view.sig_read_all.disconnect.assert_called_once_with(

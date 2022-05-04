@@ -6,6 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 
 import unittest
+import os
 
 from mantidqtinterfaces.dns_powder_tof.data_structures import \
     dns_tof_powder_dataset
@@ -67,7 +68,7 @@ class DNSTofDatasetTest(unittest.TestCase):
         testv = self.ds.format_dataset()
         self.assertEqual(
             testv,
-            "{\n     '4p1K_map': {'path': 'C:/123\\service',\n               "
+            "{\n     '4p1K_map': {'path': '" + os.path.join('C:/123', 'service') + "',\n               "
             "    -9.00: [788058]},\n}")
 
     def test__get_nb_banks(self):
@@ -109,7 +110,7 @@ class DNSTofDatasetTest(unittest.TestCase):
         entry = self.fulldata[0]
         path = '123'
         testv = dns_tof_powder_dataset._get_datapath(entry, path)
-        self.assertEqual(testv, '123\\service')
+        self.assertEqual(testv, os.path.join('123', 'service'))
 
     def test__convert_list_to_range(self):
         testv = dns_tof_powder_dataset._convert_list_to_range(
@@ -145,7 +146,7 @@ class DNSTofDatasetTest(unittest.TestCase):
         self.assertEqual(
             testv, {'4p1K_map': {
                 -9.0: '[788058]',
-                'path': 'a\\service'
+                'path': os.path.join('a', 'service')
             }})
 
     def test__create_new_datatype(self):
@@ -158,7 +159,7 @@ class DNSTofDatasetTest(unittest.TestCase):
                                                     entry, path)
         self.assertTrue('xv' in dataset)
         self.assertEqual(dataset['xv'][-5], [788058])
-        self.assertEqual(dataset['xv']['path'], 'C:/123\\service')
+        self.assertEqual(dataset['xv']['path'], os.path.join('C:/123', 'service'))
 
     def test__get_closest_bank_key(self):
         testv = dns_tof_powder_dataset._get_closest_bank_key({0: 1, 2: 1}, 0.1)
