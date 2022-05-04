@@ -18,7 +18,6 @@
 #include <Poco/String.h>
 #include <algorithm>
 #include <boost/algorithm/string/join.hpp>
-#include <boost/algorithm/string/trim.hpp>
 
 #include <json/json.h>
 
