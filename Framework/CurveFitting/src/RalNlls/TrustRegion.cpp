@@ -211,7 +211,7 @@ void rankOneUpdate(DoubleFortranMatrix &hf, NLLS_workspace &w) {
   gsl_blas_dger(alpha, &ysharkSks_gsl.vector, &y_gsl.vector, &hf_gsl.matrix);
   // hf = hf + (1/yts) y^T (y# - Sk d):
   // call dGER(n,n,alpha,w.y,1,w.ysharpSks,1,hf,n)
-  gsl_blas_dger(alpha, &y_gsl.vector, &gysharkSks_gsl.vector, &hf_gsl.matrix);
+  gsl_blas_dger(alpha, &y_gsl.vector, &ysharkSks_gsl.vector, &hf_gsl.matrix);
   // hf = hf - ((y# - Sk d)^T d)/((yts)**2)) * y y^T
   alpha = -dotProduct(w.ysharpSks, w.d) / (pow(yts, 2));
   // call dGER(n,n,alpha,w.y,1,w.y,1,hf,n)

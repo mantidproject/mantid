@@ -228,7 +228,7 @@ public:
 
     EigenMatrix temp_H_tr = H.tr();
     const gsl_matrix_const_view temp_H_tr_gsl = getGSLMatrixView_const(temp_H_tr.inspector());
-    const gsl_vectir_const_view dx_gsl = getGSLVectorView_const(dx.inspector());
+    const gsl_vector_const_view dx_gsl = getGSLVectorView_const(dx.inspector());
     gsl_vector_view g_gsl = getGSLVectorView(g.mutator());
 
     gsl_blas_dgemv(CblasNoTrans, 0.5, &temp_H_tr_gsl.matrix, &dx_gsl.vector, 1., &g_gsl.vector);
