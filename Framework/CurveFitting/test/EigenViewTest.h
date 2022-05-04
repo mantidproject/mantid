@@ -20,7 +20,7 @@ Eigen::MatrixXd GenerateMatrix(int i, int j, bool random = false) {
     return Eigen::MatrixXd::Random(i, j).unaryExpr([](double x) { return round(abs(x * 10)); });
   } else {
     double n = 0;
-    return Eigen::MatrixXd(i, j).unaryExpr([&n](double x) { return ++n; });
+    return Eigen::MatrixXd(i, j).unaryExpr([&n]() { return ++n; });
   }
 }
 
@@ -51,7 +51,6 @@ public:
     TS_ASSERT(m == test_m_1.matrix_mutator()); // test matrix are equal upon creation of view
 
     double d = 5;
-    int i = 5;
     m(Eigen::Index(1), Eigen::Index(1)) = d;
 
     test_m_1.matrix_mutator()(0, 1) = -2.0;

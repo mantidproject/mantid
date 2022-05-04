@@ -22,7 +22,7 @@ Eigen::MatrixXd GenerateMatrix(int i, int j, bool random = false) {
     return Eigen::MatrixXd::Random(i, j).unaryExpr([](double x) { return round(abs(x * 10)); });
   } else {
     double n = 0;
-    return Eigen::MatrixXd(i, j).unaryExpr([&n](double x) { return ++n; });
+    return Eigen::MatrixXd(i, j).unaryExpr([&n]() { return ++n; });
   }
 }
 
@@ -56,8 +56,8 @@ public:
 
     EigenMatrix m_tr = m.tr();
 
-    for (int i = 0; i < m.size1(); i++) {
-      for (int j = 0; j < m.size2(); j++) {
+    for (size_t i = 0; i < m.size1(); i++) {
+      for (size_t j = 0; j < m.size2(); j++) {
         TS_ASSERT_EQUALS(gsl_matrix_get(m_gsl, j, i), m_tr(j, i));
       }
     }
@@ -76,8 +76,8 @@ public:
     const gsl_matrix_const_view m_gsl_view = getGSLMatrixView_const(m_tr.inspector());
     const gsl_matrix *m_gsl = &m_gsl_view.matrix;
 
-    for (int i = 0; i < m.size1(); i++) {
-      for (int j = 0; j < m.size2(); j++) {
+    for (size_t i = 0; i < m.size1(); i++) {
+      for (size_t j = 0; j < m.size2(); j++) {
         TS_ASSERT_EQUALS(gsl_matrix_get(m_gsl, i, j), m(i, j));
       }
     }
@@ -86,24 +86,24 @@ public:
   void test_EigenVector_to_GSL() {
     EigenVector v(&GenerateVector(10));
 
-    gsl_vector *v_gsl = &getGSLVectorView(v.mutator()).vector;
+    gsl_vector_view v_gsl = getGSLVectorView(v.mutator());
 
-    for (int i = 0; i < v.size(); i++) {
-      TS_ASSERT_EQUALS(gsl_vector_get(v_gsl, i), v[i]);
+    for (size_t i = 0; i < v.size(); i++) {
+      TS_ASSERT_EQUALS(gsl_vector_get(&v_gsl.vector, i), v[i]);
     }
 
     // check reference is not broken
-    gsl_vector_set(v_gsl, 0, -1.);
-    TS_ASSERT_EQUALS(gsl_vector_get(v_gsl, 0), v[0]);
+    gsl_vector_set(&v_gsl.vector, 0, -1.);
+    TS_ASSERT_EQUALS(gsl_vector_get(&v_gsl.vector, 0), v[0]);
   }
 
   void test_EigenVector_to_GSL_const() {
     const EigenVector v(&GenerateVector(10));
 
-    const gsl_vector *v_gsl = &getGSLVectorView_const(v.inspector()).vector;
+    const gsl_vector_const_view v_gsl = getGSLVectorView_const(v.inspector());
 
-    for (int i = 0; i < v.size(); i++) {
-      TS_ASSERT_EQUALS(gsl_vector_get(v_gsl, i), v[i]);
+    for (size_t i = 0; i < v.size(); i++) {
+      TS_ASSERT_EQUALS(gsl_vector_get(&v_gsl.vector, i), v[i]);
     }
   }
 };
