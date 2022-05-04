@@ -16,6 +16,8 @@
 #include "MantidKernel/FacilityInfo.h"
 #include "MantidKernel/ListValidator.h"
 
+#include <algorithm>
+#include <iterator>
 #include <limits>
 
 using namespace Mantid::Kernel;
@@ -81,8 +83,8 @@ void CreateFloodWorkspace::init() {
 
   std::vector<std::string> allowedValues;
   allowedValues.reserve(funMap.size());
-  for (const auto &i : funMap)
-    allowedValues.emplace_back(i.first);
+  std::transform(funMap.cbegin(), funMap.cend(), std::back_inserter(allowedValues),
+                 [](const auto &i) { return i.first; });
   auto backgroundValidator = std::make_shared<ListValidator<std::string>>(allowedValues);
   declareProperty(Prop::BACKGROUND, "Linear", backgroundValidator, "Background function.");
 
