@@ -67,21 +67,28 @@ class CutViewerModel:
                 nbins[ivec] = 100
             elif nbins[irow] > 1 and nbins[ivec] > 1:
                 nbins[ivec] = 1
-        elif icol == 6:
+        elif icol == 6 and step != 0:
             # step changed - adjust nbins
             step = abs(step)
             if nbins[irow] > 1:
-                # step along cut axis changed
-                nbin = (extents[1, irow] - extents[0, irow]) / step
-                if nbin < 1:
-                    nbin = 1
-                if nbin % 1 > 0:
-                    extents[1, irow] = extents[1, irow] - (nbin % 1) * step  # so integer number of bins
-                nbins[irow] = nbin
+                if step > 0:
+                    # step along cut axis changed
+                    nbin = (extents[1, irow] - extents[0, irow]) / step
+                    if nbin < 1:
+                        nbin = 1
+                    if nbin % 1 > 0:
+                        extents[1, irow] = extents[1, irow] - (nbin % 1) * step  # so integer number of bins
+                    nbins[irow] = nbin
             else:
                 # width of integrated axis changed
                 cen = mean(extents[:, irow])
                 extents[:, irow] = [cen - step / 2, cen + step / 2]
+        else:
+            if icol == 4 or icol == 5:
+                # check extents have min < max - if not switch
+                umin, umax = extents[:, irow]
+                if umax < umin:
+                    extents[:, irow] = umax, umin
         return vectors, extents, nbins
 
     def calc_cut_representation_parameters(self, vectors, extents, nbins, states):
