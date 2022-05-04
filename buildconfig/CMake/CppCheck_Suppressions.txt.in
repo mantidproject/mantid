@@ -128,7 +128,6 @@ containerOutOfBounds:${CMAKE_SOURCE_DIR}/Framework/Crystal/src/LoadIsawSpectrum.
 knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/Crystal/src/MaskPeaksWorkspace.cpp:192
 knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/Crystal/src/MaskPeaksWorkspace.cpp:193
 knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/Crystal/src/PeakHKLErrors.cpp:388
-nullPointerRedundantCheck:${CMAKE_SOURCE_DIR}/Framework/Crystal/src/PeakHKLErrors.cpp:173
 knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/CurveFitting/src/Algorithms/PlotPeakByLogValueHelper.cpp:53
 knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/CurveFitting/src/Algorithms/PlotPeakByLogValueHelper.cpp:149
 knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/CurveFitting/src/Algorithms/PlotPeakByLogValueHelper.cpp:190
