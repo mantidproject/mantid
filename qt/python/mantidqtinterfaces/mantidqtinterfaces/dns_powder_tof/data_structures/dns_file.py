@@ -119,11 +119,11 @@ class DNSFile(ObjectDict):
 
         txt += "# Extended data\n"
         if self['scan_number']:
-            txt += "#  scan_number               " \
+            txt += "#  Scannumber               " \
                    f"{int(self['scan_number']):8d}\n"
         else:
-            txt += "#  scan_number                       \n"
-        txt += f"#  scan_command              {self['scan_command']}\n"
+            txt += "#  Scannumber                       \n"
+        txt += f"#  Scancommand              {self['scan_command']}\n"
         txt += f"#  Scanposition             {self['scanposition']:>8s}\n"
         txt += f"#  pol_trans_x              {self['pol_trans_x']:8.1f} mm\n"
         txt += f"#  pol_trans_y              {self['pol_trans_y']:8.1f} mm\n"
