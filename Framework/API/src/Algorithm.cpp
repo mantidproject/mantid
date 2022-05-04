@@ -36,6 +36,8 @@
 
 #include <json/json.h>
 
+#include <algorithm>
+#include <iterator>
 #include <map>
 #include <memory>
 #include <utility>
@@ -365,9 +367,7 @@ void Algorithm::cacheInputWorkspaceHistories() {
   auto cacheHistories = [this](const Workspace_sptr &ws) {
     if (auto group = dynamic_cast<const WorkspaceGroup *>(ws.get())) {
       m_inputWorkspaceHistories.reserve(m_inputWorkspaceHistories.size() + group->size());
-      for (const auto &memberWS : *group) {
-        m_inputWorkspaceHistories.emplace_back(memberWS);
-      }
+      std::copy(group->begin(), group->end(), std::back_inserter(m_inputWorkspaceHistories));
     } else {
       m_inputWorkspaceHistories.emplace_back(ws);
     }
