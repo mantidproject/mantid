@@ -2786,6 +2786,7 @@ class ConvertToQISIS(ReductionStep):
                 ReplaceSpecialValues(InputWorkspace=workspace,
                                      OutputWorkspace=workspace,
                                      NaNValue="0", InfinityValue="0")
+                ResetNegatives(InputWorkspace=workspace, OutputWorkspace=workspace)
                 # We need to correct for special values in the partial outputs. The
                 # counts seem to have NANS.
                 if self.outputParts:
@@ -2794,9 +2795,11 @@ class ConvertToQISIS(ReductionStep):
                     ReplaceSpecialValues(InputWorkspace=sum_of_counts,
                                          OutputWorkspace=sum_of_counts,
                                          NaNValue="0", InfinityValue="0")
+                    ResetNegatives(InputWorkspace=sum_of_counts, OutputWorkspace=sum_of_counts)
                     ReplaceSpecialValues(InputWorkspace=sum_of_norm,
                                          OutputWorkspace=sum_of_norm,
                                          NaNValue="0", InfinityValue="0")
+                    ResetNegatives(InputWorkspace=sum_of_norm, OutputWorkspace=sum_of_norm)
             else:
                 raise NotImplementedError('The type of Q reduction has not been set, e.g. 1D or 2D')
         except:
@@ -4077,6 +4080,7 @@ class ReplaceErrors(ReductionStep):
 
     def execute(self, reducer, workspace):
         ReplaceSpecialValues(InputWorkspace=workspace, OutputWorkspace=workspace, NaNValue="0", InfinityValue="0")
+        ResetNegatives(InputWorkspace=workspace, OutputWorkspace=workspace)
 
 
 def _padRunNumber(run_no, field_width):
