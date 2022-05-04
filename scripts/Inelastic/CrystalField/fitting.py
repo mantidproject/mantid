@@ -1564,7 +1564,7 @@ class CrystalFieldFit(object):
             ws_kwargs['InputWorkspace'] = self._input_workspace[0]
             i = 1
             for workspace in self._input_workspace[1:]:
-                ws_kwargs['InputWorkspace_{}'.format(i)] = workspace
+                ws_kwargs[f'InputWorkspace_{i}'] = workspace
                 i += 1
             # clean up multispectrum function to prevent problems during evaluation
             # e.g. remove FWHMX0/FWHMY0 and FWHMX1/FWHMY1
