@@ -27,14 +27,33 @@ Creating your Benchmarking Environment
 
 1. From the same terminal or command prompt, run the following command:
 
+If using Windows:
+
 .. code-block:: sh
 
   py -m virtualenv -p=[INSTALL_PATH]\bin\python.exe benchmark-env
 
-This will create a virtual environment based on the python executable provided with your Mantid installation. For Windows, the location of this executable is ``C:\MantidInstall\bin\python.exe``. In this example, ``benchmark-env`` is the name given to your virtual environment.
+This will create a virtual environment based on the python executable provided with your Mantid installation. For Windows, the location of this executable is ``C:\MantidInstall\bin\python.exe``.
+
+If using Ubuntu:
+
+.. code-block:: sh
+
+  virtualenv --python=python3 benchmark-env
+
+In this example, ``benchmark-env`` is the name given to your virtual environment.
 
 2. Activate your environment. This is explained in the 'Activating a virtual environment' section found `here <https://packaging.python.org/en/latest/guides/installing-using-pip-and-virtual-environments/#activating-a-virtual-environment>`_.
-3. Install the FitBenchmarking package by following the instructions found `here <https://fitbenchmarking.readthedocs.io/en/stable/users/install_instructions/fitbenchmarking.html>`_.
+
+3. It might be necessary to upgrade and install a few packages before installing FitBenchmarking if working from a Linux terminal:
+
+.. code-block:: sh
+
+  python3 -m pip install --upgrade pip
+  python3 -m pip install --upgrade pillow
+  sudo apt-get install libglu1-mesa
+
+4. Install the FitBenchmarking package by following the instructions found `here <https://fitbenchmarking.readthedocs.io/en/stable/users/install_instructions/fitbenchmarking.html>`_.
 
 Your environment should now be ready for performing a benchmark of Mantid minimizers.
 
@@ -73,14 +92,14 @@ The process for how to run a benchmark is explained extensively in the `FitBench
 
 .. code-block:: sh
 
-  fitbenchmarking -o fitting_options.ini -p examples/benchmark_problems/Muon -r benchmark_results/
+  fitbenchmarking -o fitting_options.ini -p examples/benchmark_problems/Muon
 
-When the benchmark is complete, it should open a browser which contains the results. You should read the FitBenchmarking documentation if you need help with how to interpret these results. The results will also be stored in a folder specified by the ``-r`` flag.
+When the benchmark is complete, it should open a browser which contains the results. You should read the FitBenchmarking documentation if you need help with how to interpret these results. The results will also be stored in your current folder location.
 
 Tips
 ####
 
 * Make sure your terminal or command prompt is open in the correct location and has the virtual environment activated when running your benchmark.
 * It might be necessary to pip install some addition packages if you see errors when running a benchmark: ``pip install 'h5py>=2.10.0,<3' && pip install 'pyyaml>=5.4.1'``.
-* Each time your run the benchmark, the old results will be overwritten unless you change the ``-r`` flag when running the ``fitbenchmarking`` command.
+* Each time your run the benchmark, the old results will be overwritten unless you change the directory you run the ``fitbenchmarking`` command from. In later versions of FitBenchmarking (>v1.5) there will be an option to specify the results directory on the command line or via the ``.ini`` file.
 * To do a benchmark of the changes made in a Pull Request, you can tell Jenkins to build an unstable package, and then you can install this locally. When creating your benchmark environment, you would then use the python.exe found in the Mantid unstable install directory.
