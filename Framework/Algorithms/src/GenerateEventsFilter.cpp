@@ -826,12 +826,10 @@ void GenerateEventsFilter::makeFilterBySingleValue(double min, double max, doubl
   bool lastGood = false;
   time_duration tol = DateAndTime::durationFromSeconds(TimeTolerance);
   int numgood = 0;
-  DateAndTime lastTime, currT;
-  DateAndTime start, stop;
+  DateAndTime currT, start, stop;
 
   size_t progslot = 0;
   for (int i = 0; i < m_dblLog->size(); i++) {
-    lastTime = currT;
     // The new entry
     currT = m_dblLog->nthTime(i);
 
@@ -1168,8 +1166,7 @@ void GenerateEventsFilter::makeMultipleFiltersByValuesPartialLog(
   const Types::Core::DateAndTime ZeroTime(0);
   int lastindex = -1;
   int currindex = -1;
-  DateAndTime currTime = ZeroTime;
-  DateAndTime start, stop;
+  DateAndTime currTime, start, stop;
   // size_t progslot = 0;
 
   g_log.information() << "Log time coverage (index: " << istart << ", " << iend << ") from "
