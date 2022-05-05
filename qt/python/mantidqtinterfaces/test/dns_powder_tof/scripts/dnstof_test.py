@@ -55,13 +55,13 @@ class DNSScriptsTof(unittest.TestCase):
         mock_converttomdminmax.return_value = [0, 1]
         mock_mtd.__getitem__.return_value.getNumberOfEntries.return_value = 0
         b = get_fake_tof_binning()
-        get_sqw('abc', 'ouname', b)
+        get_sqw(gws_name='abc', out_ws_name='ouname', b=b)
         calls = [
-            unittest.mock.call.__getitem__('abc'),
-            unittest.mock.call.__getitem__().__getitem__(0),
-            unittest.mock.call.__getitem__().getNumberOfEntries()
+            unittest.mock.call('abc'),
+            unittest.mock.call().__getitem__(0),
+            unittest.mock.call().getNumberOfEntries()
         ]
-        mock_mtd.assert_has_calls(calls)
+        mock_mtd.__getitem__.assert_has_calls(calls)
         mock_converttomdminmax.assert_called_once_with(
             mock_mtd.__getitem__().__getitem__(), '|Q|', 'Direct')
         mock_converttomd.assert_called_once_with(mock_mtd.__getitem__(),
