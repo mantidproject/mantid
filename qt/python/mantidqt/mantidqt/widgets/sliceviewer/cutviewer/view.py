@@ -189,12 +189,12 @@ class CutViewerView(QWidget):
     def _format_cut_figure(self):
         self.figure.axes[0].ignore_existing_data_limits = True
         self.figure.axes[0].autoscale_view()
-        self._format_cut_xabel()
+        self._format_cut_xlabel()
         for textobj in self.figure.findobj(text.Text):
             textobj.set_fontsize(8)
         self.figure.tight_layout()
 
-    def _format_cut_xabel(self):
+    def _format_cut_xlabel(self):
         xlab = self.figure.axes[0].get_xlabel()
         istart = xlab.index('(')
         iend = xlab.index(')')

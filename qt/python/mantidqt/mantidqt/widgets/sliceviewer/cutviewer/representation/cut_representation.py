@@ -1,3 +1,10 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2022 ISIS Rutherford Appleton Laboratory UKRI,
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
+# SPDX - License - Identifier: GPL - 3.0 +
+#  This file is part of the mantid workbench.
 from numpy import array, cross, sqrt, sum, mean, zeros, diff, dot
 
 
@@ -83,7 +90,7 @@ class CutRepresentation:
                 self.ax.lines.remove(line)
 
     def on_press(self, event):
-        if event.inaxes == self.ax and self.current_artist is None:
+        if self.is_valid_event(event):
             x, y = event.xdata, event.ydata
             dx = diff(self.ax.get_xlim())[0]
             dy = diff(self.ax.get_ylim())[0]
@@ -93,26 +100,31 @@ class CutRepresentation:
                     break
 
     def on_motion(self, event):
-        if event.inaxes == self.ax and self.current_artist is not None:
+        if self.is_valid_event(event) and self.has_current_artist():
             self.clear_lines()
-            if len(self.current_artist.get_xdata()) == 1:
-                if 'mid' in self.current_artist.get_label():
-                    x0, y0 = self.get_mid_point()
-                    dx = event.xdata - x0
-                    dy = event.ydata - y0
-                    if self.current_artist.get_label() == 'mid':
-                        for line in [self.start, self.end]:
-                            line.set_data([line.get_xdata()[0] + dx], [line.get_ydata()[0] + dy])
-                    else:
-                        vec = self.get_perp_dir()
-                        self.thickness = 2 * abs(dot(vec, [dx, dy]))
+            if 'mid' in self.current_artist.get_label():
+                x0, y0 = self.get_mid_point()
+                dx = event.xdata - x0
+                dy = event.ydata - y0
+                if self.current_artist.get_label() == 'mid':
+                    for line in [self.start, self.end]:
+                        line.set_data([line.get_xdata()[0] + dx], [line.get_ydata()[0] + dy])
                 else:
-                    self.current_artist.set_data([event.xdata], [event.ydata])
-            self.draw()  # should draw artists rather than remove and re-plot
+                    vec = self.get_perp_dir()
+                    self.thickness = 2 * abs(dot(vec, [dx, dy]))
+            else:
+                self.current_artist.set_data([event.xdata], [event.ydata])
+            self.draw()
 
     def on_release(self, event):
-        if event.inaxes == self.ax and self.current_artist is not None:
+        if self.is_valid_event(event) and self.has_current_artist():
             self.current_artist = None
             if self.end.get_xdata()[0] < self.start.get_xdata()[0]:
                 self.start, self.end = self.end, self.start
             self.notify_on_release(*self.get_start_end_points(), self.thickness)
+
+    def is_valid_event(self, event):
+        return event.inaxes == self.ax
+
+    def has_current_artist(self):
+        return self.current_artist is not None
