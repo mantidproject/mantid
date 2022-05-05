@@ -38,7 +38,7 @@ public:
     Mantid::Kernel::Matrix<double> m(3, 4);
     for (size_t i = 0; i < m.numRows(); i++) {
       for (size_t j = 0; j < m.numCols(); j++) {
-        m[i][j] = j + i * m.numCols();
+        m[i][j] = (double)(j + i * m.numCols());
       }
     }
 

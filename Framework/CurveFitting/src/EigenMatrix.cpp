@@ -53,9 +53,10 @@ EigenMatrix::EigenMatrix(EigenMatrix &M, size_t row, size_t col, size_t nRows, s
   if (row + nRows > M.size1() || col + nCols > M.size2()) {
     throw std::runtime_error("Submatrix exceeds matrix size.");
   }
-  m_data.resize(nRows * nCols);
+  size_t newSize = nRows * nCols;
+  m_data.resize(newSize);
   m_view = EigenMatrix_View(M.mutator(), nRows, nCols, row, col);
-  std::memcpy(m_data.data(), M.mutator().data(), sizeof m_data.data());
+  std::copy(M.mutator().data(), M.mutator().data() + newSize, m_data.data());
 }
 
 /// Constructor
@@ -68,12 +69,7 @@ EigenMatrix::EigenMatrix(const Kernel::Matrix<double> &M)
   auto temp_vec = M.getVector();
   Eigen::MatrixXd temp_matr_tr = EigenMatrix_View(temp_vec.data(), M.numCols(), M.numRows()).matrix_mutator();
   Eigen::MatrixXd temp_matr = temp_matr_tr.transpose();
-
-  const double *p = temp_matr.data();
-  double *p2 = m_data.data();
-  while (p != temp_matr.data() + m_data.size()) {
-    *p2++ = *p++;
-  }
+  std::copy(temp_matr.data(), temp_matr.data() + temp_matr.size(), m_data.data());
 }
 
 /// Create a submatrix. A submatrix is a reference to part of the parent matrix.
@@ -96,12 +92,7 @@ EigenMatrix::EigenMatrix(const Kernel::Matrix<double> &M, size_t row, size_t col
   auto temp_matr_sub_view =
       EigenMatrix_View(temp_matr.data(), temp_matr.rows(), temp_matr.cols(), nRows, nCols, row, col);
   Eigen::MatrixXd temp_matr_sub = temp_matr_sub_view.matrix_inspector();
-
-  const double *p = temp_matr_sub.data();
-  double *p2 = m_data.data();
-  while (p != temp_matr_sub.data() + (nRows * nCols)) {
-    *p2++ = *p++;
-  }
+  std::copy(temp_matr_sub.data(), temp_matr_sub.data() + temp_matr_sub.size(), m_data.data());
 }
 
 /// "Move" constructor
@@ -118,7 +109,7 @@ EigenMatrix &EigenMatrix::operator=(const EigenMatrix &M) {
 /// Assignment operator - Eigen::MatrixXd
 EigenMatrix &EigenMatrix::operator=(const Eigen::MatrixXd m) {
   m_data.resize(m.rows() * m.cols());
-  for (size_t i = 0; i < m.size(); i++) {
+  for (size_t i = 0; i < (size_t)m.size(); i++) {
     m_data[i] = *(m.data() + i);
   }
   m_view = EigenMatrix_View(m_data.data(), m.rows(), m.cols());

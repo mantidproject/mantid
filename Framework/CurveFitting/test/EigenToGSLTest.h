@@ -22,7 +22,7 @@ Eigen::MatrixXd GenerateMatrix(int i, int j, bool random = false) {
     return Eigen::MatrixXd::Random(i, j).unaryExpr([](double x) -> double { return round(abs(x * 10)); });
   } else {
     double n = 0;
-    return Eigen::MatrixXd(i, j).unaryExpr([&n](double x) -> double { return ++n; });
+    return Eigen::MatrixXd(i, j).unaryExpr([&n](double x) -> double { return x + n++; });
   }
 }
 
@@ -31,13 +31,11 @@ double *createArray(const int &nArraySize, bool random) {
   double *array = new double[nArraySize];
   for (int i = 0; i < nArraySize; ++i)
     random ? array[i] = rand() % nArraySize : array[i] = i;
-
   return array;
 }
 
 Eigen::VectorXd createVecFromArray(double *array, const int &nElements) {
   Eigen::Map<Eigen::VectorXd> vec(array, nElements, 1);
-
   return vec;
 }
 

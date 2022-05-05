@@ -20,7 +20,7 @@ Eigen::MatrixXd GenerateMatrix(int i, int j, bool random = false) {
     return Eigen::MatrixXd::Random(i, j).unaryExpr([](double x) -> double { return round(abs(x * 10)); });
   } else {
     double n = 0;
-    return Eigen::MatrixXd(i, j).unaryExpr([&n](double x) -> double { return ++n; });
+    return Eigen::MatrixXd(i, j).unaryExpr([&n](double x) -> double { return x + n++; });
   }
 }
 

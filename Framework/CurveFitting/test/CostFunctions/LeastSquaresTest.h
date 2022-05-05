@@ -32,30 +32,6 @@ using namespace Mantid::CurveFitting::CostFunctions;
 using namespace Mantid::CurveFitting::Functions;
 using namespace Mantid::API;
 
-namespace {
-void printVec(const gsl_vector &v) {
-  gsl_vector vc = v;
-
-  for (size_t i = 0; i < vc.size; i++) {
-    std::cout << gsl_vector_get(&vc, i) << std::endl;
-  }
-  std::cout << std::endl;
-}
-
-void printMatr(const gsl_matrix &m) {
-  gsl_matrix mc = m;
-
-  for (size_t i = 0; i < mc.size1; i++) {
-    for (size_t j = 0; j < mc.size2; j++) {
-      double d = gsl_matrix_get(&mc, i, j);
-      std::cout << d << " ";
-    }
-    std::cout << std::endl;
-  }
-  std::cout << std::endl;
-}
-} // namespace
-
 class LeastSquaresTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
