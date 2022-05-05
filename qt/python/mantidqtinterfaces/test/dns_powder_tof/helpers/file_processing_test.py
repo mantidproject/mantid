@@ -163,8 +163,8 @@ class DNSfile_processingTest(unittest.TestCase):
         mock_subprocess.assert_not_called()
 
     def test_get_path_and_prefix(self):
-        testv = get_path_and_prefix('C:/123')
-        self.assertEqual(testv, ('C:', '123'))
+        testv = get_path_and_prefix('C:/abc/123.d_dat')
+        self.assertEqual(testv, ('C:/abc', '123.d_dat'))
 
 
 if __name__ == '__main__':
