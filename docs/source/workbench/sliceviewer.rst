@@ -160,7 +160,7 @@ in the table.
    :width: 75%
    :align: center
 
-Note at present this tool cannot be used in non-orthgonal view, or for workspaces that contain non-Q dimensions.
+Note at present this tool cannot be used in non-orthogonal view, or for workspaces that contain non-Q dimensions.
 
 .. _sliceviewer_cursor:
 

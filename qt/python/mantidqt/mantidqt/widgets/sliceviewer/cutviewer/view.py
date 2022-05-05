@@ -56,6 +56,10 @@ class CutViewerView(QWidget):
         self.set_bin_params(*self.presenter.validate_bin_params(irow, icol))
         self.presenter.update_cut()
 
+    def resizeEvent(self, event):
+        super().resizeEvent(event)
+        self.figure.tight_layout()
+
     # getters
 
     def get_step(self, irow):
@@ -193,7 +197,7 @@ class CutViewerView(QWidget):
         for textobj in self.figure.findobj(text.Text):
             textobj.set_fontsize(8)
         if not self.figure.get_figheight() == 0 and not self.figure.get_figwidth() == 0:
-            # bug in tight_layout gives np.linalg error for singluar matrix if above conditions not met
+            # bug in tight_layout gives np.linalg error for singular matrix if above conditions not met
             # https://github.com/matplotlib/matplotlib/issues/9789  - says fixed for plt v2.1.0 (but seen on v3.1.2)
             self.figure.tight_layout()
 
