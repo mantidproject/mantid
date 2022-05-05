@@ -2785,8 +2785,8 @@ class ConvertToQISIS(ReductionStep):
                     ExtraLength=self._grav_extra_length)
                 ReplaceSpecialValues(InputWorkspace=workspace,
                                      OutputWorkspace=workspace,
-                                     NaNValue="0", InfinityValue="0")
-                ResetNegatives(InputWorkspace=workspace, OutputWorkspace=workspace)
+                                     NaNValue="0", InfinityValue="0", UseAbsolute=False, SmallNumberThreshold=0.0,
+                                     SmallNumberValue=0.0, SmallNumberError=0.0)
                 # We need to correct for special values in the partial outputs. The
                 # counts seem to have NANS.
                 if self.outputParts:
@@ -2794,12 +2794,12 @@ class ConvertToQISIS(ReductionStep):
                     sum_of_norm = workspace + "_sumOfNormFactors"
                     ReplaceSpecialValues(InputWorkspace=sum_of_counts,
                                          OutputWorkspace=sum_of_counts,
-                                         NaNValue="0", InfinityValue="0")
-                    ResetNegatives(InputWorkspace=sum_of_counts, OutputWorkspace=sum_of_counts)
+                                         NaNValue="0", InfinityValue="0", UseAbsolute=False, SmallNumberThreshold=0.0,
+                                         SmallNumberValue=0.0, SmallNumberError=0.0)
                     ReplaceSpecialValues(InputWorkspace=sum_of_norm,
                                          OutputWorkspace=sum_of_norm,
-                                         NaNValue="0", InfinityValue="0")
-                    ResetNegatives(InputWorkspace=sum_of_norm, OutputWorkspace=sum_of_norm)
+                                         NaNValue="0", InfinityValue="0", UseAbsolute=False, SmallNumberThreshold=0.0,
+                                         SmallNumberValue=0.0, SmallNumberError=0.0)
             else:
                 raise NotImplementedError('The type of Q reduction has not been set, e.g. 1D or 2D')
         except:
@@ -4079,8 +4079,9 @@ class ReplaceErrors(ReductionStep):
         self.name = None
 
     def execute(self, reducer, workspace):
-        ReplaceSpecialValues(InputWorkspace=workspace, OutputWorkspace=workspace, NaNValue="0", InfinityValue="0")
-        ResetNegatives(InputWorkspace=workspace, OutputWorkspace=workspace)
+        ReplaceSpecialValues(InputWorkspace=workspace, OutputWorkspace=workspace, NaNValue="0", InfinityValue="0",
+                             UseAbsolute=False, SmallNumberThreshold=0.0,
+                             SmallNumberValue=0.0, SmallNumberError=0.0)
 
 
 def _padRunNumber(run_no, field_width):

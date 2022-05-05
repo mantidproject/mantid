@@ -138,7 +138,6 @@ def _run_q_2d(workspace, output_summed_parts, state_convert_to_q,
 
     reduced_workspace = qxy_alg.getProperty("OutputWorkspace").value
     reduced_workspace = _replace_special_values(reduced_workspace)
-    reduced_workspace = _reset_negatives(reduced_workspace)
 
     # Get the partial workspaces
     if output_summed_parts:
@@ -164,20 +163,14 @@ def _replace_special_values(workspace):
     replace_options = {"InputWorkspace": workspace,
                        "OutputWorkspace": EMPTY_NAME,
                        "NaNValue": 0.,
-                       "InfinityValue": 0.}
+                       "InfinityValue": 0.,
+                       "UseAbsolute": False,
+                       "SmallNumberThreshold": 0.0,
+                       "SmallNumberValue": 0.0,
+                       "SmallNumberError": 0.0}
     replace_alg = create_unmanaged_algorithm(replace_name, **replace_options)
     replace_alg.execute()
     return replace_alg.getProperty("OutputWorkspace").value
-
-
-def _reset_negatives(workspace):
-    remove_negatives = "ResetNegatives"
-    remove_negatives_options = {"InputWorkspace": workspace,
-                                "OutputWorkspace": EMPTY_NAME,
-                                "AddMinimum": False}
-    remove_negatives_alg = create_unmanaged_algorithm(remove_negatives, **remove_negatives_options)
-    remove_negatives_alg.execute()
-    return remove_negatives_alg.getProperty("OutputWorkspace").value
 
 
 def _create_q_resolution_workspace(convert_to_q, workspace):
