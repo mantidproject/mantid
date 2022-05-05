@@ -119,6 +119,7 @@ Tools
    VSCode
    Eclipse
    WindowsSubsystemForLinux
+   ObtainingABenchmarkForMantidFitting
 
 :doc:`ToolsOverview`
    Describes ``class_maker``, ``valgrind`` and related tools.
@@ -143,6 +144,9 @@ Tools
 
 :doc:`WindowsSubsystemForLinux`
    Guide for setting up Ubuntu 18.04 and Centos7 as subsystems on Windows (WSL2).
+
+:doc:`ObtainingABenchmarkForMantidFitting`
+   Guide for setting up an environment to perform a benchmark of Mantid fitting minimizers.
 
 =======
 Testing
