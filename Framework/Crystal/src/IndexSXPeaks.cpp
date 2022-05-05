@@ -204,6 +204,8 @@ void IndexSXPeaks::exec() {
   }
   prog.report(); // 1st Progress report.
 
+  assert(peaks.size() >= 2);
+
   cullHKLs(peaks, unitcell);
 
   prog.report();       // 2nd progress report.

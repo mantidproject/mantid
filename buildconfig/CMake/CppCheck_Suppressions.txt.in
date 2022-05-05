@@ -121,8 +121,6 @@ knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/Beamline/src/ComponentInfo
 knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/Beamline/src/ComponentInfo.cpp:508
 unsignedLessThanZero:${CMAKE_SOURCE_DIR}/Framework/Beamline/src/ComponentInfo.cpp:650
 shadowFunction:${CMAKE_SOURCE_DIR}/Framework/Crystal/inc/MantidCrystal/IndexSXPeaks.h:104
-containerOutOfBounds:${CMAKE_SOURCE_DIR}/Framework/Crystal/src/IndexSXPeaks.cpp:210
-containerOutOfBounds:${CMAKE_SOURCE_DIR}/Framework/Crystal/src/IndexSXPeaks.cpp:218
 knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/Crystal/src/IntegratePeakTimeSlices.cpp:100
 containerOutOfBounds:${CMAKE_SOURCE_DIR}/Framework/Crystal/src/LoadIsawSpectrum.cpp:126
 knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/Crystal/src/MaskPeaksWorkspace.cpp:192
