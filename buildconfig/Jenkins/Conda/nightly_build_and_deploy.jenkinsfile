@@ -39,7 +39,6 @@ def archive_conda_build(arch) {
 }
 
 def create_standalone_package_osx() {
-  sh "${WORKSPACE}/installers/conda/osx/create_bundle.sh -c local -s ${PACKAGE_SUFFIX}"
   archiveArtifacts artifacts: "${WORKSPACE}/*.dmg",
     allowEmptyArchive: false,
     fingerprint: true,
@@ -47,7 +46,6 @@ def create_standalone_package_osx() {
 }
 
 def create_standalone_package_win() {
-  bat "\"${WIN_BASH}\" -ex -c \"${WORKSPACE_UNIX_PATH}/installers/conda/win/create_package.sh -c local -s ${PACKAGE_SUFFIX}\""
   archiveArtifacts artifacts: "${WORKSPACE_UNIX_PATH}/*.exe",
     allowEmptyArchive: false,
     fingerprint: true,
