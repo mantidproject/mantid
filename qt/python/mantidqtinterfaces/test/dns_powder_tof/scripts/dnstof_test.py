@@ -57,7 +57,6 @@ class DNSScriptsTof(unittest.TestCase):
         b = get_fake_tof_binning()
         get_sqw('abc', 'ouname', b)
         calls = [
-            call.__getitem__('abc'),
             call.__getitem__().__getitem__(0),
             call.__getitem__().getNumberOfEntries()
         ]
