@@ -163,9 +163,8 @@ void PeakHKLErrors::cLone(std::shared_ptr<Geometry::ParameterMap> &pmap,
  * Creates a new parameterized instrument for which the parameter values can be
  *changed
  *
- * @param Peaks - a PeaksWorkspace used to get the original instrument.  The
- *instrument from the 0th peak is
- *                the one that is used.
+ * @param peaksWs - a PeaksWorkspace used to get the original instrument.  The instrument from the 0th peak is the one
+ * that is used.
  *
  * NOTE: All the peaks in the PeaksWorkspace must use the same instrument.
  */
