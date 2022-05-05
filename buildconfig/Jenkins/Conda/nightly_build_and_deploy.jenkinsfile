@@ -119,7 +119,7 @@ pipeline {
           steps {
             script {
               WORKSPACE_UNIX_PATH = "${WORKSPACE}".replaceAll("\\\\", "/")
-              CONDA_BLD_WIN_PATH = "${WORKSPACE_UNIX_PATH}\\conda-bld"
+              CONDA_BLD_WIN_PATH = "${WORKSPACE}\\conda-bld"
             }
             conda_build_win("win-64")
             create_standalone_package_win()
