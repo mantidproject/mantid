@@ -7,6 +7,7 @@
 import argparse
 import importlib
 import sys
+from typing import Sequence
 
 import mantid
 from qtpy import QT_VERSION
@@ -17,8 +18,10 @@ from mantidqt.dialogs.errorreports.report import CrashReportPage
 import mantidqt.utils.qt as qtutils
 
 
-def main() -> int:
-    command_line_args = parse_commandline()
+def main(argv: Sequence[str] = None) -> int:
+    argv = argv if argv is not None else sys.argv
+
+    command_line_args = parse_commandline(argv)
     exit_code_str = command_line_args.exit_code
     exit_code = int(exit_code_str)
     if mantid.config['usagereports.enabled'] != '1':
@@ -36,11 +39,11 @@ def main() -> int:
         qtutils.force_layer_backing_BigSur()
 
     from qtpy.QtWidgets import QApplication
-    app = QApplication(sys.argv)
+    app = QApplication(argv)
     # The strings APPNAME, ORG_DOMAIN, ORGANIZATION are duplicated from workbench.config
-    app.setOrganizationName('mantidproject')
-    app.setOrganizationDomain('mantidproject.org')
-    app.setApplicationName('mantidworkbench')
+    app.setOrganizationName(command_line_args.org_name)
+    app.setOrganizationDomain(command_line_args.org_domain)
+    app.setApplicationName(command_line_args.application)
     QSettings.setDefaultFormat(QSettings.IniFormat)
     form = CrashReportPage(show_continue_terminate=False)
     presenter = ErrorReporterPresenter(form, exit_code_str, command_line_args.application)
@@ -50,15 +53,17 @@ def main() -> int:
     return exit_code
 
 
-def parse_commandline() -> argparse.Namespace:
+def parse_commandline(argv: Sequence[str]) -> argparse.Namespace:
     """
     Parse the command line arguments and return them to the caller
     """
     parser = argparse.ArgumentParser(description='Pass in exit_code')
     parser.add_argument('--exitcode', dest='exit_code', default=0)
     parser.add_argument('--qtdir', dest='qtdir', default='')
-    parser.add_argument('--application', dest='application')
-    return parser.parse_args()
+    parser.add_argument('--orgname', dest='org_name', default='unknown')
+    parser.add_argument('--orgdomain', dest='org_domain', default='unknown')
+    parser.add_argument('--application', dest='application', default='unknown')
+    return parser.parse_args(argv)
 
 
 if __name__ == '__main__':  # if we're running file directly and not importing it
