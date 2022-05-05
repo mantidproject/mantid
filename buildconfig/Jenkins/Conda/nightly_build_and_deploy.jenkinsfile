@@ -46,6 +46,14 @@ def create_standalone_package_osx() {
     onlyIfSuccessful: true
 }
 
+def create_standalone_package_win() {
+  bat "\"${WIN_BASH}\" -ex -c \"${WORKSPACE_UNIX_PATH}/installers/conda/win/create_package.sh -c local -s ${PACKAGE_SUFFIX}\""
+  archiveArtifacts artifacts: "${WORKSPACE_UNIX_PATH}/*.exe",
+    allowEmptyArchive: false,
+    fingerprint: true,
+    onlyIfSuccessful: true
+}
+
 pipeline {
   agent none
   environment {
@@ -114,6 +122,7 @@ pipeline {
               CONDA_BLD_PATH = "${WORKSPACE_UNIX_PATH}/conda-bld"
             }
             conda_build_win("win-64")
+            create_standalone_package_win()
           }
         }
         stage('platform: osx-64') {

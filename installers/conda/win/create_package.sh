@@ -24,7 +24,6 @@ function usage() {
 # Optional arguments
 CONDA_CHANNEL=mantid
 SUFFIX=""
-PACKAGE_NAME=${@: -1} # grab last argument
 while [ ! $# -eq 0 ]
 do
     case "$1" in
@@ -63,10 +62,8 @@ CONDA_ENV=_conda_env
 CONDA_ENV_PATH=$THIS_SCRIPT_DIR/$CONDA_ENV
 COPY_DIR=$THIS_SCRIPT_DIR/_package_build
 CONDA_EXE=mamba
-
-# Sanity check arguments. Especially ensure that paths are not empty as we are removing
-# items and we don't want to accidentally clean out system paths
-test -n "$PACKAGE_NAME" || usage 1
+PACKAGE_PREFIX=MantidWorkbench
+PACKAGE_NAME="$PACKAGE_PREFIX${SUFFIX}"
 
 echo "Cleaning up left over old directories"
 rm -rf $COPY_DIR
@@ -208,10 +205,15 @@ echo Workebench Icon: $WORKBENCH_ICON
 echo Generating uninstaller helper files
 python $THIS_SCRIPT_DIR/create_uninstall_lists.py --package_dir=$COPY_DIR --output_dir=$THIS_SCRIPT_DIR
 
+# Give NSIS full path to the output package name so that it drops it in the current working directory.
+OUTFILE_NAME=$PWD/$PACKAGE_NAME.exe
+OUTFILE_NAME=${OUTFILE_NAME////\\}
+OUTFILE_NAME="$SCRIPT_DRIVE_LETTER:${OUTFILE_NAME:2}"
+
 # Run the makensis command from our nsis Conda environment
-echo makensis /V4 /O\"$NSIS_OUTPUT_LOG\" /DVERSION=$VERSION /DPACKAGE_DIR=\"$COPY_DIR\" /DPACKAGE_SUFFIX=$SUFFIX /DOUTFILE_NAME=$PACKAGE_NAME /DMANTID_ICON=$MANTID_ICON /DWORKBENCH_ICON=$WORKBENCH_ICON /DNOTEBOOK_ICON=$NOTEBOOK_ICON /DMUI_PAGE_LICENSE_PATH=$LICENSE_PATH \"$NSIS_SCRIPT\"
-cmd.exe /C "START /wait "" $MAKENSIS_COMMAND /V4 /DVERSION=$VERSION /O\"$NSIS_OUTPUT_LOG\" /DPACKAGE_DIR=\"$COPY_DIR\" /DPACKAGE_SUFFIX=$SUFFIX /DOUTFILE_NAME=$PACKAGE_NAME /DMANTID_ICON=$MANTID_ICON /DWORKBENCH_ICON=$WORKBENCH_ICON /DNOTEBOOK_ICON=$NOTEBOOK_ICON /DMUI_PAGE_LICENSE_PATH=$LICENSE_PATH \"$NSIS_SCRIPT\""
-echo "Package packaged, find it here: $THIS_SCRIPT_DIR/$PACKAGE_NAME"
+echo makensis /V4 /O\"$NSIS_OUTPUT_LOG\" /DVERSION=$VERSION /DPACKAGE_DIR=\"$COPY_DIR\" /DPACKAGE_SUFFIX=$SUFFIX /DOUTFILE_NAME=$OUTFILE_NAME /DMANTID_ICON=$MANTID_ICON /DWORKBENCH_ICON=$WORKBENCH_ICON /DNOTEBOOK_ICON=$NOTEBOOK_ICON /DMUI_PAGE_LICENSE_PATH=$LICENSE_PATH \"$NSIS_SCRIPT\"
+cmd.exe /C "START /wait "" $MAKENSIS_COMMAND /V4 /DVERSION=$VERSION /O\"$NSIS_OUTPUT_LOG\" /DPACKAGE_DIR=\"$COPY_DIR\" /DPACKAGE_SUFFIX=$SUFFIX /DOUTFILE_NAME=$OUTFILE_NAME /DMANTID_ICON=$MANTID_ICON /DWORKBENCH_ICON=$WORKBENCH_ICON /DNOTEBOOK_ICON=$NOTEBOOK_ICON /DMUI_PAGE_LICENSE_PATH=$LICENSE_PATH \"$NSIS_SCRIPT\""
+echo "Package packaged, find it here: $OUTFILE_NAME"
 
 echo "Cleaning up left over files"
 rm -rf $CONDA_ENV_PATH
