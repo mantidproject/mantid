@@ -58,7 +58,7 @@ def parse_commandline(argv: Sequence[str]) -> argparse.Namespace:
     Parse the command line arguments and return them to the caller
     """
     parser = argparse.ArgumentParser(description='Pass in exit_code')
-    parser.add_argument('--exitcode', dest='exit_code', default=0)
+    parser.add_argument('--exitcode', dest='exit_code', default="1")
     parser.add_argument('--qtdir', dest='qtdir', default='')
     parser.add_argument('--orgname', dest='org_name', default='unknown')
     parser.add_argument('--orgdomain', dest='org_domain', default='unknown')
