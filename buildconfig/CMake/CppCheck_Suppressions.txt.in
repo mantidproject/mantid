@@ -276,9 +276,6 @@ useStlAlgorithm:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadHFIRSANS.cpp:
 constParameter:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadILLReflectometry.cpp:238
 constParameter:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadILLReflectometry.cpp:365
 constParameter:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadILLReflectometry.cpp:652
-constParameter:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadILLTOF2.cpp:115
-constParameter:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadILLTOF2.cpp:143
-constParameter:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadILLTOF2.cpp:230
 constParameter:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadISISNexus2.cpp:878
 constParameter:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadISISNexus2.cpp:1053
 redundantInitialization:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadISISNexusHelper.cpp:214
