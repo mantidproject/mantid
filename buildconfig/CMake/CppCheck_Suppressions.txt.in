@@ -44,9 +44,6 @@ copyCtorAndEqOperator:${CMAKE_SOURCE_DIR}/Framework/API/inc/MantidAPI/VectorPara
 copyCtorAndEqOperator:${CMAKE_SOURCE_DIR}/Framework/Catalog/inc/MantidCatalog/ONCat.h
 copyCtorAndEqOperator:${CMAKE_SOURCE_DIR}/Framework/Catalog/inc/MantidCatalog/ONCatEntity.h
 
-copyCtorAndEqOperator:${CMAKE_SOURCE_DIR}/Framework/Crystal/inc/MantidCrystal/IndexSXPeaks.h
-copyCtorAndEqOperator:${CMAKE_SOURCE_DIR}/Framework/Crystal/inc/MantidCrystal/IntegratePeakTimeSlices.h
-
 copyCtorAndEqOperator:${CMAKE_SOURCE_DIR}/Framework/Geometry/inc/MantidGeometry/Instrument/CompAssembly.h
 copyCtorAndEqOperator:${CMAKE_SOURCE_DIR}/Framework/Geometry/inc/MantidGeometry/Instrument/Container.h
 copyCtorAndEqOperator:${CMAKE_SOURCE_DIR}/Framework/Geometry/inc/MantidGeometry/Instrument/ObjCompAssembly.h
