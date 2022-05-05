@@ -57,8 +57,9 @@ class DNSScriptsTof(unittest.TestCase):
         b = get_fake_tof_binning()
         get_sqw('abc', 'ouname', b)
         calls = [
-            call.__getitem__().__getitem__(0),
-            call.__getitem__().getNumberOfEntries()
+            unittest.mock.call.__getitem__('abc'),
+            unittest.mock.call.__getitem__().__getitem__(0),
+            unittest.mock.call.__getitem__().getNumberOfEntries()
         ]
         mock_mtd.assert_has_calls(calls)
         mock_converttomdminmax.assert_called_once_with(
