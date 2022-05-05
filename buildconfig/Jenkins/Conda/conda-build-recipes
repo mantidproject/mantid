@@ -132,3 +132,12 @@ fi
 if [[ $ENABLE_BUILD_WORKBENCH == true ]]; then
     conda mambabuild ./mantidworkbench/ $CLOBBER_FILE $WINDOWS_BUILD_OPTIONS
 fi
+
+# Build the standalone packages, currently only for Windows and macOS
+PACKAGE_SUFFIX=Nightly # Hard code this for now while testing.
+if [[ $OSTYPE == 'msys'* ]]; then
+    WIN_BASH = "C:\\Program Files\\git\\bin\\bash.exe"
+    bat "\"${WIN_BASH}\" -ex -c \"${WORKSPACE}/installers/conda/win/create_package.sh -c local -s ${PACKAGE_SUFFIX}\""
+elif [[ $OSTYPE == 'darwin'* ]]; then
+    sh "${WORKSPACE}/installers/conda/osx/create_bundle.sh -c local -s ${PACKAGE_SUFFIX}"
+fi

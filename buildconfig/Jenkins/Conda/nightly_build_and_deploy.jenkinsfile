@@ -26,7 +26,7 @@ def conda_build_unix(arch) {
 }
 
 def conda_build_win(arch) {
-  bat "IF EXIST ${CONDA_BLD_PATH} RMDIR /S /Q ${CONDA_BLD_PATH}"
+  bat "IF EXIST ${CONDA_BLD_WIN_PATH} RMDIR /S /Q ${CONDA_BLD_WIN_PATH}"
   bat "\"${WIN_BASH}\" -ex -c \"${WORKSPACE_UNIX_PATH}/buildconfig/Jenkins/Conda/conda-build-recipes ${WORKSPACE_UNIX_PATH} --build-mantid --build-qt --build-workbench\""
   archive_conda_build(arch)
 }
@@ -39,8 +39,14 @@ def archive_conda_build(arch) {
 }
 
 def create_standalone_package_osx() {
-  sh "${WORKSPACE}/installers/conda/osx/create_bundle.sh -c local -s ${PACKAGE_SUFFIX}"
   archiveArtifacts artifacts: "${WORKSPACE}/*.dmg",
+    allowEmptyArchive: false,
+    fingerprint: true,
+    onlyIfSuccessful: true
+}
+
+def create_standalone_package_win() {
+  archiveArtifacts artifacts: "${WORKSPACE_UNIX_PATH}/*.exe",
     allowEmptyArchive: false,
     fingerprint: true,
     onlyIfSuccessful: true
@@ -111,9 +117,10 @@ pipeline {
           steps {
             script {
               WORKSPACE_UNIX_PATH = "${WORKSPACE}".replaceAll("\\\\", "/")
-              CONDA_BLD_PATH = "${WORKSPACE_UNIX_PATH}/conda-bld"
+              CONDA_BLD_WIN_PATH = "${WORKSPACE}\\conda-bld"
             }
             conda_build_win("win-64")
+            create_standalone_package_win()
           }
         }
         stage('platform: osx-64') {
