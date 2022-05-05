@@ -120,14 +120,7 @@ knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/Beamline/src/ComponentInfo
 knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/Beamline/src/ComponentInfo.cpp:501
 knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/Beamline/src/ComponentInfo.cpp:508
 unsignedLessThanZero:${CMAKE_SOURCE_DIR}/Framework/Beamline/src/ComponentInfo.cpp:650
-shadowFunction:${CMAKE_SOURCE_DIR}/Framework/Crystal/inc/MantidCrystal/IndexSXPeaks.h:104
 knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/Crystal/src/IntegratePeakTimeSlices.cpp:100
-<<<<<<< HEAD
-containerOutOfBounds:${CMAKE_SOURCE_DIR}/Framework/Crystal/src/LoadIsawSpectrum.cpp:126
-||||||| parent of d173fe7035c (Refs #0. Fix stlFindInsert error.)
-stlFindInsert:${CMAKE_SOURCE_DIR}/Framework/Crystal/src/LoadIsawPeaks.cpp:581
-=======
->>>>>>> d173fe7035c (Refs #0. Fix stlFindInsert error.)
 knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/Crystal/src/MaskPeaksWorkspace.cpp:192
 knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/Crystal/src/MaskPeaksWorkspace.cpp:193
 knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/Crystal/src/PeakHKLErrors.cpp:388
