@@ -276,6 +276,51 @@ public:
     AnalysisDataService::Instance().remove("WSCor");
   }
 
+  void testExecCheckLargeNonAbsolute() {
+    MatrixWorkspace_sptr inputWS = createWorkspace();
+    // Put in some small values
+    inputWS->dataY(0)[0] = 1600;
+    inputWS->dataY(0)[1] = -2000;
+    inputWS->dataE(0)[1] = -1000;
+    AnalysisDataService::Instance().add("InputWS", inputWS);
+
+    Mantid::Algorithms::ReplaceSpecialValues alg3;
+    alg3.initialize();
+    TS_ASSERT_THROWS_NOTHING(alg3.setPropertyValue("InputWorkspace", "InputWS"));
+    TS_ASSERT_THROWS_NOTHING(alg3.setPropertyValue("OutputWorkspace", "WSCor"));
+    TS_ASSERT_THROWS_NOTHING(alg3.setPropertyValue("BigNumberThreshold", "1500"));
+    TS_ASSERT_THROWS_NOTHING(alg3.setPropertyValue("BigNumberValue", "999"));
+    TS_ASSERT_THROWS_NOTHING(alg3.setPropertyValue("BigNumberError", "0"));
+    TS_ASSERT_THROWS_NOTHING(alg3.setProperty("CheckErrorAxis", true));
+    TS_ASSERT_THROWS_NOTHING(alg3.setProperty("UseAbsolute", false));
+
+    TS_ASSERT_THROWS_NOTHING(alg3.execute());
+    TS_ASSERT(alg3.isExecuted());
+
+    MatrixWorkspace_sptr result;
+    TS_ASSERT_THROWS_NOTHING(result = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("WSCor"));
+    TS_ASSERT(result);
+
+    TS_ASSERT_EQUALS(result->y(0)[0], 999);
+    TS_ASSERT_EQUALS(result->e(0)[0], 0);
+    TS_ASSERT_EQUALS(result->y(0)[1], -2000);
+    TS_ASSERT_EQUALS(result->e(0)[1], -1000);
+
+    for (size_t i = 0; i < result->getNumberHistograms(); ++i) {
+      for (int j = 0; j < 4; ++j) {
+        if (!std::isnormal(inputWS->y(i)[j]) || !std::isnormal(inputWS->e(i)[j])) {
+          // Skip any we can't compare
+          continue;
+        } else {
+          TS_ASSERT(result->y(i)[j] <= inputWS->y(i)[j]);
+        }
+      }
+    }
+
+    AnalysisDataService::Instance().remove("InputWS");
+    AnalysisDataService::Instance().remove("WSCor");
+  }
+
   void checkValues(const MatrixWorkspace_sptr &inputWS, const MatrixWorkspace_sptr &result, bool naNCheck,
                    bool infCheck) {
 

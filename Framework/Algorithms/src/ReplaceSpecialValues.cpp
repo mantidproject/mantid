@@ -105,9 +105,13 @@ bool ReplaceSpecialValues::checkIfNan(const double value) const { return (std::i
 
 bool ReplaceSpecialValues::checkIfInfinite(const double value) const { return (std::isinf(value)); }
 
-bool ReplaceSpecialValues::checkIfBig(const double value) const { return (std::abs(value) > m_bigThreshold); }
+bool ReplaceSpecialValues::checkIfBig(const double value) const {
+  return m_useAbsolute ? std::abs(value) > m_bigThreshold : value > m_bigThreshold;
+}
 
-bool ReplaceSpecialValues::checkIfSmall(const double value) const { return (std::abs(value) < m_smallThreshold); }
+bool ReplaceSpecialValues::checkIfSmall(const double value) const {
+  return m_useAbsolute ? std::abs(value) < m_smallThreshold : value < m_smallThreshold;
+}
 
 bool ReplaceSpecialValues::checkifPropertyEmpty(const double value) const {
   return (std::abs(value - Mantid::EMPTY_DBL()) < 1e-08);
