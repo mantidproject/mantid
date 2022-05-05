@@ -1,0 +1,1 @@
+- The :ref:`algm-ReplaceSpecialValues-v1` algorithm can now operate properly on negative numbers by disabling the UseAbsolute property.
