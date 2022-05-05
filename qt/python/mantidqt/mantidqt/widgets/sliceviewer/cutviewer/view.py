@@ -192,7 +192,10 @@ class CutViewerView(QWidget):
         self._format_cut_xlabel()
         for textobj in self.figure.findobj(text.Text):
             textobj.set_fontsize(8)
-        self.figure.tight_layout()
+        if not self.figure.get_figheight() == 0 and not self.figure.get_figwidth() == 0:
+            # bug in tight_layout gives np.linalg error for singluar matrix if above conditions not met
+            # https://github.com/matplotlib/matplotlib/issues/9789  - says fixed for plt v2.1.0 (but seen on v3.1.2)
+            self.figure.tight_layout()
 
     def _format_cut_xlabel(self):
         xlab = self.figure.axes[0].get_xlabel()
