@@ -232,6 +232,7 @@ CutViewer Tool
 It should only be enabled for the `ws_3D` and `ws_3D_QLab` workspaces (see comment for details) - the first 3 column headers for the vectors should be a*,b*,c* and Qx,Qy,Qz for the two workspaces respectively.
 
 .. code-block:: python
+
     Load(Filename='CNCS_7860_event.nxs', OutputWorkspace='CNCS_7860_event')  # disabled (MatrixWorkspace)
 
     ws_2D = CreateMDWorkspace(Dimensions='2', Extents='-5,5,-4,4', Names='H,K',
@@ -259,6 +260,7 @@ It should only be enabled for the `ws_3D` and `ws_3D_QLab` workspaces (see comme
 3.  Run the following and open `ws` in sliceviewer.
 
 .. code-block:: python
+
     ws = CreateMDWorkspace(Dimensions='3', Extents='-5,5,-4,4,-3,3',
                               Names='H,K,L', Units='r.l.u.,r.l.u.,r.l.u.',
                               Frames='HKL,HKL,HKL', SplitInto='2', SplitThreshold='50')
@@ -276,7 +278,7 @@ It should only be enabled for the `ws_3D` and `ws_3D_QLab` workspaces (see comme
     - Disables line plots
     - Sliceviewer should look like
 
-.. figure:: ../../images/CutViewer_HKplane.png
+.. figure:: ../../images/SliceViewer/CutViewer_HKplane.png
    :class: screenshot
    :align: center
 
@@ -284,7 +286,7 @@ It should only be enabled for the `ws_3D` and `ws_3D_QLab` workspaces (see comme
 7. Set the axes to (X,Y) = (L, K) - check u1 = [0,0,1] and u2 = [0,1,0]
 8. Change the slice point of H to be 0 - it should look like this
 
-.. figure:: ../../images/CutViewer_KLplane.png
+.. figure:: ../../images/SliceViewer/CutViewer_KLplane.png
    :class: screenshot
    :align: center
 
@@ -296,8 +298,8 @@ It should only be enabled for the `ws_3D` and `ws_3D_QLab` workspaces (see comme
     - the cut representation line on the colorfill plot has the correct start/stop
     - the 1D plot in the cut viewer pane has the correct axes limits
 
-12. Set step of u1 to be 2 (i.e. greater than the extent of the cut) - this should set nbins=1 and step = 1.5 (note the plot won't be updated).
-13. transpose the axes so now (X,Y) = (K,L) - the cut should have 50 bins along K (default value)
+12. Set step of u1 to be 2 (i.e. greater than the extent of the cut) - this should set nbins=1 and step = 1.5 and put the cut along u2 with nbins = 50.
+13. Transpose the axes so now (X,Y) = (K,L) - the cut should have 50 bins along K (default value)
 14. Change the nbins of u2 to 50 (it should set nbins=1 for u1 and change the step=4). Check the white line of the cut representation on the colorfill plot is now vertical.
 15. Try to change the a* column of the u1 to 1 (this would take u1 out of the plane of the slice, i.e. not orthogonal to u3) - it should reset to 0 - i.e. u1 = [0,1,0].
 16. Click and hold down on one of the red markers with white face on the colorfill plot and drag, release at ~K=1.
