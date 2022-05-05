@@ -22,5 +22,5 @@ class WORKSPACE_UNITS(object):
 
 class ABSORB_METHOD(object):
     enum_friendly_name = "absorb method"
-    simple = "Simple"  # default
+    mayers = "Mayers"  # default
     paalman_pings = "PaalmanPings"

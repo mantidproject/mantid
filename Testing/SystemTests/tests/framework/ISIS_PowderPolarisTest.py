@@ -43,6 +43,7 @@ calibration_map_path = os.path.join(input_dir, calibration_map_rel_path)
 calibration_dir = os.path.join(input_dir, calibration_folder_name)
 spline_path = os.path.join(calibration_dir, spline_rel_path)
 unsplined_van_path = os.path.join(calibration_dir, unsplined_van_rel_path)
+config_file_path = r"/home/danielmurphy/Downloads/polaris-calculate-pdf/polaris_config_example.yaml"
 
 total_scattering_input_file = os.path.join(input_dir, "ISIS_Powder-POLARIS98533_TotalScatteringInput.nxs")
 
@@ -57,6 +58,7 @@ class CreateVanadiumTest(systemtesting.MantidSystemTest):
 
     def runTest(self):
         setup_mantid_paths()
+        print("Daniel")
         self.calibration_results = run_vanadium_calibration()
 
     def validate(self):
@@ -119,6 +121,49 @@ class FocusTest(systemtesting.MantidSystemTest):
         finally:
             config['datasearch.directories'] = self.existing_config
             mantid.mtd.clear()
+
+
+class FocusTestPaalmanPings(systemtesting.MantidSystemTest):
+
+    focus_results = None
+    existing_config = config['datasearch.directories']
+
+    def requiredFiles(self):
+        return _gen_required_files()
+
+    def runTest(self):
+        # Gen vanadium calibration first
+        setup_mantid_paths()
+        self.focus_results = run_focus_paalmanpings_absorption("98533")
+
+    def validate(self):
+        # check output files as expected
+        def generate_error_message(expected_file, output_dir):
+            return "Unable to find {} in {}.\nContents={}".format(expected_file, output_dir,
+                                                                  os.listdir(output_dir))
+
+        def assert_output_file_exists(directory, filename):
+            self.assertTrue(os.path.isfile(os.path.join(directory, filename)),
+                            msg=generate_error_message(filename, directory))
+
+        user_output = os.path.join(output_dir, "17_1", "Test")
+        assert_output_file_exists(user_output, 'POLARIS98533.nxs')
+        assert_output_file_exists(user_output, 'POLARIS98533.gsas')
+        output_dat_dir = os.path.join(user_output, 'dat_files')
+        for bankno in range(1, 6):
+            assert_output_file_exists(output_dat_dir, 'POL98533-b_{}-TOF.dat'.format(bankno))
+            assert_output_file_exists(output_dat_dir, 'POL98533-b_{}-d.dat'.format(bankno))
+
+        assert_output_file_exists(output_dir, "PaalmanPingsCorrections_POLARIS98533_Summed.nxs")
+        for ws in self.focus_results:
+            self.assertEqual(ws.sample().getMaterial().name(), 'Si')
+        self.tolerance_is_rel_err = True
+        self.tolerance = 1e-6
+        # return self.focus_results.name(), "ISIS_Powder-POLARIS98533_FocusSempty.nxs"
+        pass
+
+    def cleanup(self):
+        mantid.mtd.clear()
 
 
 class FocusTestChopperMode(systemtesting.MantidSystemTest):
@@ -357,11 +402,43 @@ def run_focus_no_chopper(run_number):
                              sample_empty_scale=sample_empty_scale)
 
 
+def run_focus_mayers_absorption(run_number):
+    sample_empty = 98532  # Use the vanadium empty again to make it obvious
+    sample_empty_scale = 0.5  # Set it to 50% scale
+
+    # Copy the required splined file into place first (instead of relying on generated one)
+    splined_file_name = "POLARIS00098532_splined.nxs"
+
+    original_splined_path = os.path.join(input_dir, splined_file_name)
+    shutil.copy(original_splined_path, spline_path)
+
+    inst_object = setup_inst_object(None)
+    return inst_object.focus(run_number=run_number, input_mode="Individual", do_van_normalisation=True,
+                             do_absorb_corrections=True, sample_empty=sample_empty,
+                             sample_empty_scale=sample_empty_scale)
+
+
+def run_focus_paalmanpings_absorption(run_number):
+    sample_empty = 98532  # Use the vanadium empty again to make it obvious
+    sample_empty_scale = 0.5  # Set it to 50% scale
+
+    # Copy the required splined file into place first (instead of relying on generated one)
+    splined_file_name = "POLARIS00098532_splined.nxs"
+
+    original_splined_path = os.path.join(input_dir, splined_file_name)
+    shutil.copy(original_splined_path, spline_path)
+
+    inst_object = setup_inst_object("PDF", with_container=True)
+    return inst_object.focus(run_number=run_number, input_mode="Summed", do_van_normalisation=True,
+                             do_absorb_corrections=True, absorb_method="PaalmanPings", sample_empty=sample_empty,
+                             sample_empty_scale=sample_empty_scale, multiple_scattering=False)
+
+
 def setup_mantid_paths():
     config['datasearch.directories'] += ";" + input_dir
 
 
-def setup_inst_object(mode):
+def setup_inst_object(mode, with_container=False):
     user_name = "Test"
     if mode:
         inst_obj = Polaris(user_name=user_name, calibration_mapping_file=calibration_map_path,
@@ -372,6 +449,8 @@ def setup_inst_object(mode):
 
     sample_details = SampleDetails(height=4.0, radius=0.2985, center=[0, 0, 0], shape='cylinder')
     sample_details.set_material(chemical_formula='Si')
+    if with_container:
+        sample_details.set_container(radius=0.3175, chemical_formula='V')
     inst_obj.set_sample_details(sample=sample_details)
 
     return inst_obj
@@ -385,4 +464,4 @@ def _try_delete(path):
         else:
             os.remove(path)
     except OSError:
-        print ("Could not delete output file at: ", path)
+        print("Could not delete output file at: ", path)

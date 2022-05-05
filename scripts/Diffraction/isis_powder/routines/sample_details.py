@@ -220,10 +220,16 @@ class SampleDetails(object):
         return material_json
 
     def generate_container_geometry(self):
-        return self._container_shape.generate_container_geometry()
+        if self._container_shape:
+            return self._container_shape.generate_container_geometry()
+        else:
+            return None
 
     def generate_container_material(self):
-        return {'ChemicalFormula': self.container_material_object.chemical_formula}
+        if self.container_material_object:
+            return {'ChemicalFormula': self.container_material_object.chemical_formula}
+        else:
+            return None
 
 
 class _Material(object):

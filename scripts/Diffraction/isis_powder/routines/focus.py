@@ -14,7 +14,7 @@ import numpy
 import os
 
 
-def focus(run_number_string, instrument, perform_vanadium_norm, absorb, sample_details=None):
+def focus(run_number_string, instrument, perform_vanadium_norm, absorb, sample_details=None, absorb_method=None):
     input_batching = instrument._get_input_batching_mode()
     if input_batching == INPUT_BATCHING.Individual:
         return _individual_run_focusing(instrument=instrument, perform_vanadium_norm=perform_vanadium_norm,
@@ -27,7 +27,7 @@ def focus(run_number_string, instrument, perform_vanadium_norm, absorb, sample_d
 
 
 def _focus_one_ws(input_workspace, run_number, instrument, perform_vanadium_norm, absorb,
-                  sample_details, vanadium_path):
+                  sample_details, vanadium_path, absorb_method=None):
     run_details = instrument._get_run_details(run_number_string=run_number)
     if perform_vanadium_norm:
         _test_splined_vanadium_exists(instrument, run_details)
@@ -49,56 +49,36 @@ def _focus_one_ws(input_workspace, run_number, instrument, perform_vanadium_norm
                                                    instrument=instrument,
                                                    scale_factor=instrument._inst_settings.sample_empty_scale)
 
-    # Correct for absorption / multiple scattering if required
-    if absorb and instrument._inst_settings.absorb_method == 'PaalmanPings' and summed_empty:
-        expected_filename = "PaalmanPingsCorrections_" + instrument.get_instrument_prefix() + run_number \
-                            + "_" + instrument._get_input_batching_mode() + ".nxs"
-        save_directory = instrument._inst_settings.output_dir
-        force_recalculate_paalman_pings = instrument._inst_settings.force_recalculate_paalman_pings
-        container_geometry = sample_details.generate_container_geometry()
-        container_material = sample_details.generate_container_material()
-        if container_geometry and container_material:
-            mantid.SetSample(input_workspace, Geometry=sample_details.generate_sample_geometry(),
-                             Material=sample_details.generate_sample_material(),
-                             ContainerGeometry=container_geometry,
-                             ContainerMaterial=container_material)
-        else:
-            mantid.SetSample(input_workspace, Geometry=sample_details.generate_sample_geometry(),
-                             Material=sample_details.generate_sample_material())
-        if events_per_point_string:
-            events_per_point = int(events_per_point_string)
-        else:
-            events_per_point = 1000
-
-        if force_recalculate_paalman_pings or expected_filename not in os.listdir(save_directory):
-            corrections = mantid.PaalmanPingsMonteCarloAbsorption(InputWorkspace=input_workspace, Shape='Preset',
-                                                                  EventsPerPoint=events_per_point)
-            mantid.SaveNexus(corrections, os.path.join(save_directory, expected_filename))
-        else:
-            expected_path = os.path.join(save_directory, expected_filename)
-            logger.warning(f'Loading pre-calculated corrections file found at {expected_path} \n'
-                           f' To recalculate with new sample + container values,'
-                           f' set "force_recalculate_paalman_pings = True" in the config file.')
-            corrections = mantid.LoadNexus(expected_path)
-
-        input_workspace = mantid.ApplyPaalmanPingsCorrection(SampleWorkspace=input_workspace,
-                                                             CorrectionsWorkspace=corrections,
-                                                             CanWorkspace=summed_empty)
-
-    elif summed_empty:
-        input_workspace = common.subtract_summed_runs(ws_to_correct=input_workspace,
-                                                      empty_sample=summed_empty)
-    # Crop to largest acceptable TOF range
-    input_workspace = instrument._crop_raw_to_expected_tof_range(ws_to_crop=input_workspace)
-
     if absorb:
-        input_workspace = instrument._apply_absorb_corrections(run_details=run_details, ws_to_correct=input_workspace)
+        if summed_empty:
+            if absorb_method == 'PaalmanPings':
+                instrument._apply_paalmanpings_absorb_and_subtract_empty(workspace=input_workspace,
+                                                                         summed_empty=summed_empty,
+                                                                         sample_details=sample_details,
+                                                                         run_number=run_number)
+            else:
+                input_workspace = common.subtract_summed_runs(ws_to_correct=input_workspace, empty_sample=summed_empty)
+                input_workspace = instrument._apply_absorb_corrections(run_details=run_details,
+                                                                       ws_to_correct=input_workspace)
+        else:
+            if absorb_method == 'PaalmanPings':
+                raise NoneTypeError("The PaalmanPings absorption method requires valid summed empty runs.")
+            else:
+                input_workspace = instrument._apply_absorb_corrections(run_details=run_details,
+                                                                       ws_to_correct=input_workspace)
     else:
+        if summed_empty:
+            input_workspace = common.subtract_summed_runs(ws_to_correct=input_workspace, empty_sample=summed_empty)
+
         # Set sample material if specified by the user
         if sample_details is not None:
             mantid.SetSample(InputWorkspace=input_workspace,
                              Geometry=sample_details.generate_sample_geometry(),
                              Material=sample_details.generate_sample_material())
+
+    # Crop to largest acceptable TOF range
+    input_workspace = instrument._crop_raw_to_expected_tof_range(ws_to_crop=input_workspace)
+
     # Align
     mantid.ApplyDiffCal(InstrumentWorkspace=input_workspace,
                         CalibrationFile=run_details.offset_file_path)
