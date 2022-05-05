@@ -7,9 +7,15 @@ Model Fitting Tab
    :align: right
    :height: 400px
 
-The model fitting tab is used to perform a fit across fit parameters and sample logs found in a results table.
-This tab allows you to select a results table, before selecting the data that should be plotted on the x and y axes. It is then possible to perform a fit using a selected fit function.
-The selected model fit data is displayed in a plotting pane on the right hand side of the interface. An example model fit plot is seen in the image below.
+Overview
+^^^^^^^^
+
+The model fitting tab is used to perform a fit across fit parameters and sample logs found in a results table within the
+:ref:`Muon Analysis <Muon_Analysis-ref>` and :ref:`Frequency Domain Analysis <Frequency_Domain_Analysis-ref>`. To use
+Model fitting it must first be enabled via the :ref:`feature flags <Muon_Feature_Flags-ref>`.
+This tab allows you to select a results table, before selecting the data that should be plotted on the x and y axes. It
+is then possible to perform a fit using a selected fit function. The selected model fit data is displayed in a plotting
+pane on the right hand side of the interface. An example model fit plot is seen in the image below.
 
 .. image::  ../../images/muon_interface_tab_model_fitting_plot.png
    :align: right
@@ -49,3 +55,4 @@ Used By
 ^^^^^^^
 
 :ref:`Muon Analysis <Muon_Analysis-ref>`
+:ref:`Frequency Domain Analysis <Frequency_Domain_Analysis-ref>`

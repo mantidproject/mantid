@@ -15,6 +15,8 @@ DETACH_MAX_TRIES=5
 DETACH_WAIT_SECS=60
 CONDA_EXE=mamba
 CONDA_PACKAGE=mantidworkbench
+BUNDLE_PREFIX=MantidWorkbench
+ICON_DIR="$HERE/../../../images"
 
 # Cleanup on script exit
 # Remove temporary work files and ensure volumes are detached
@@ -167,46 +169,61 @@ function create_disk_image() {
 # Print usage and exit
 function usage() {
   local exitcode=$1
-  echo "Usage: $0 [options] bundle_name icon_file"
+  echo "Usage: $0 [options]"
   echo
   echo "Create a DragNDrop bundle out of a Conda package. The package is built in $BUILD_DIR."
+  echo "The final name will be '${BUNDLENAME}${suffix}.app'"
   echo "This directory will be created if it does not exist or purged if it already exists."
   echo "The final .dmg will be created in the current working directory."
   echo "Options:"
   echo "  -c Optional Conda channel overriding the default mantid"
+  echo "  -s Optional Add a suffix to the output mantid file, has to be Unstable, or Nightly or not used"
   echo
-  echo "Positional Arguments"
-  echo "  bundle_name: The name of the bundle app directory, i.e. the final name will be '${bundle_name}.app'"
-  echo "  icon_file: An icon file, in icns format, for the final bundle"
   exit $exitcode
 }
 
 ## Script begin
 # Optional arguments
 conda_channel=mantid
-while getopts ":c:h" o; do
-  case "$o" in
-  c) conda_channel="$OPTARG";;
-  h) usage 0;;
-  *) usage 1;;
-esac
+suffix=
+while [ ! $# -eq 0 ]
+do
+    case "$1" in
+        -c)
+            conda_channel="$2"
+            shift
+            ;;
+        -s)
+            suffix="$2"
+            shift
+            ;;
+        -h)
+            usage 0
+            ;;
+        *)
+            if [ ! -z "$2" ]
+            then
+              usage 1
+            fi
+            ;;
+  esac
+  shift
 done
-shift $((OPTIND-1))
 
-# Positional arguments
-# 2) - the name of the bundle
-# 3) - path to .icns image used as icon for bundle
-bundle_name=$1
-bundle_icon=$2
+# If suffix is not empty and does not contain Unstable or Nightly then fail.
+if [ ! -z "$suffix" ]; then
+  if [ "$suffix" != "Unstable" ] && [ "$suffix" != "Nightly" ]; then
+    echo "Suffix must either not be passed, or be Unstable or Nightly, for release do not pass this argument."
+    exit 1
+  fi
+fi
 
-# Sanity check arguments. Especially ensure that paths are not empty as we are removing
-# items and we don't want to accidentally clean out system paths
-test -n "$bundle_name" || usage 1
-test -n "$bundle_icon" || usage 1
-
+bundle_name="$BUNDLE_PREFIX$suffix"
+bundle_icon="${ICON_DIR}/mantid_workbench$(echo $suffix | tr '[:upper:]' '[:lower:]').icns"
 bundle_dirname="$bundle_name".app
 bundle_contents="$BUILD_DIR"/"$bundle_dirname"/Contents
 echo "Building '$bundle_dirname' in '$BUILD_DIR' from '$conda_channel' Conda channel"
+echo "Using bundle icon ${bundle_icon}"
 
 # Build directory needs to be empty before we start
 if [ -d "$BUILD_DIR" ]; then
