@@ -91,7 +91,7 @@ void DiscusMultipleScatteringCorrection::init() {
       "calculations and units of energy transfer (DeltaE) for inelastic calculations. This is used to "
       "supply the sample details, the detector positions and the x axis range to calculate corrections for");
 
-  declareProperty(std::make_unique<WorkspaceProperty<>>("StructureFactorWorkspace", "", Direction::Input),
+  declareProperty(std::make_unique<WorkspaceProperty<Workspace>>("StructureFactorWorkspace", "", Direction::Input),
                   "The name of the workspace containing S'(q) or S'(q, w).  For elastic calculations, the input "
                   "workspace must contain a single spectrum and have X units of momentum transfer.");
   declareProperty(std::make_unique<WorkspaceProperty<WorkspaceGroup>>("OutputWorkspace", "", Direction::Output),
@@ -185,7 +185,9 @@ std::map<std::string, std::string> DiscusMultipleScatteringCorrection::validateI
   auto SQWSGroup = std::dynamic_pointer_cast<WorkspaceGroup>(SQWSBase);
   if (SQWSGroup) {
     auto groupMembers = SQWSGroup->getAllItems();
-    auto nEnvComponents = inputWS->sample().getEnvironment().nelements();
+    int nEnvComponents = 0;
+    if (inputWS->sample().hasEnvironment())
+      nEnvComponents = inputWS->sample().getEnvironment().nelements();
     if (nEnvComponents + 1 != groupMembers.size())
       issues["StructureFactorWorkspace"] =
           "Number of workspaces in S(Q,w) workspace group doesn't match number of components in sample\\environment";
@@ -193,8 +195,14 @@ std::map<std::string, std::string> DiscusMultipleScatteringCorrection::validateI
     componentNames.push_back(inputWS->sample().getName());
     for (size_t i = 0; i < nEnvComponents; i++)
       componentNames.push_back(inputWS->sample().getEnvironment().getComponent(i).id());
-    for (auto &ws : groupMembers)
+    for (auto &ws : groupMembers) {
+      if (std::find(componentNames.begin(), componentNames.end(), ws->getName()) == componentNames.end()) {
+        issues["StructureFactorWorkspace"] = "Workspace called " + ws->getName() +
+                                             " present in S(Q,w) workspace group but no sample or component named that "
+                                             "in input workspace sample environment";
+      }
       SQWSs.push_back(std::dynamic_pointer_cast<MatrixWorkspace>(ws));
+    }
   } else
     SQWSs.push_back(std::dynamic_pointer_cast<MatrixWorkspace>(SQWSBase));
 
@@ -380,13 +388,16 @@ void DiscusMultipleScatteringCorrection::exec() {
       m_SQWSs.push_back(matrixWs);
     }
   } else {
-    auto nComponents = 1 + inputWS->sample().getEnvironment().nelements();
+    auto nEnvComponents = 0;
+    if (inputWS->sample().hasEnvironment())
+      nEnvComponents = inputWS->sample().getEnvironment().nelements();
     m_SQWSs.push_back(std::dynamic_pointer_cast<MatrixWorkspace>(SQWS));
-    MatrixWorkspace_sptr isotropicSQ = DataObjects::create<Workspace2D>(
-        *m_SQWSs[0], static_cast<size_t>(1),
-        HistogramData::Histogram(HistogramData::Points{0.}, HistogramData::Frequencies{1.}));
-    for (size_t i = 0; i < nComponents; i++)
+    for (size_t i = 0; i < 1 /* nEnvComponents*/; i++) {
+      MatrixWorkspace_sptr isotropicSQ = DataObjects::create<Workspace2D>(
+          *m_SQWSs[0], static_cast<size_t>(1),
+          HistogramData::Histogram(HistogramData::Points{0.}, HistogramData::Frequencies{1.}));
       m_SQWSs.push_back(isotropicSQ);
+    }
   }
 
   prepareStructureFactor();
@@ -856,16 +867,19 @@ void DiscusMultipleScatteringCorrection::calculateQSQIntegralAsFunctionOfK() {
     std::vector<double> IOfQYFull;
     std::vector<double> kValues, QSQIntegrals;
     // Calculate the integral for a range of k values. Not massively important which k values but choose them here
-    // based on the q points in the supplied S(Q) profile. For each q point calculate the integral for k=q/2
-    std::vector<double> qValues = m_SQWSs[i]->histogram(0).readX();
+    // based on the q points in the QS(Q) profile. For each q point calculate the integral for k=q/2
+    std::vector<double> qValues = m_QSQWSs[i]->histogram(0).readX();
     // k values may be such that the kinematic range extends beyond the q range of the S(Q) profile supplied
     // so add a couple of larger k's. The integral/2k^2 will tend to a constant once beyond the q range of S(Q)
     if (m_EMode != DeltaEMode::Elastic) {
-      qValues.push_back(qValues.back() * 2);
-      qValues.push_back(qValues.back() * 2);
+      double qMaxSupplied = m_SQWSs[i]->x(i).back();
+      xxxxxxxxxxxxNOT SURE ABOUT THIS auto it = std::upper_bound(qValues.begin(), qValues.end(), qMaxSupplied);
+      qValues.insert(it, qMaxSupplied * 2);
+      qValues.insert(it + 1, qMaxSupplied * 2);
     }
     std::transform(qValues.begin(), qValues.end(), std::back_inserter(kValues),
                    [](double d) -> double { return d / 2; });
+    kValues.erase(std::remove_if(kValues.begin(), kValues.end(), [](const double x) { return x == 0; }), kValues.end());
     for (auto k : kValues) {
       std::tie(IOfQYFull, std::ignore, std::ignore) = integrateQSQ(m_QSQWSs[i], k);
       double normalisedIntegral = IOfQYFull.back() / (2 * k * k);
