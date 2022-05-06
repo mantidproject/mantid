@@ -112,25 +112,25 @@ pipeline {
 //     }
     stage('Packaging') {
       parallel {
-        stage('platform: linux-64') {
-          agent { label 'conda-build-linux' }
-          environment { CONDA_BLD_PATH = "${WORKSPACE}/conda-bld" }
-          steps {
-            conda_build_unix("linux-64")
-            create_standalone_package_linux()
-          }
-        }
-//         stage('platform: win-64') {
-//           agent { label 'conda-build-win' }
+//         stage('platform: linux-64') {
+//           agent { label 'conda-build-linux' }
+//           environment { CONDA_BLD_PATH = "${WORKSPACE}/conda-bld" }
 //           steps {
-//             script {
-//               WORKSPACE_UNIX_PATH = "${WORKSPACE}".replaceAll("\\\\", "/")
-//               CONDA_BLD_WIN_PATH = "${WORKSPACE}\\conda-bld"
-//             }
-//             conda_build_win("win-64")
-//             create_standalone_package_win()
+//             conda_build_unix("linux-64")
+//             create_standalone_package_linux()
 //           }
 //         }
+        stage('platform: win-64') {
+          agent { label 'conda-build-win' }
+          steps {
+            script {
+              WORKSPACE_UNIX_PATH = "${WORKSPACE}".replaceAll("\\\\", "/")
+              CONDA_BLD_WIN_PATH = "${WORKSPACE}\\conda-bld"
+            }
+            conda_build_win("win-64")
+            create_standalone_package_win()
+          }
+        }
 //         stage('platform: osx-64') {
 //           agent { label 'conda-build-osx' }
 //           environment { CONDA_BLD_PATH = "${WORKSPACE}/conda-bld" }
