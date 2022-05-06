@@ -618,16 +618,19 @@ class ReflectometryILLPreprocess(DataProcessorAlgorithm):
         """Perform detector position correction for reflected beams."""
         direct_line = self.getProperty('DirectBeamForegroundCentre').value
         calibratedWSName = self._names.withSuffix('reflected_beam_calibration')
+        kwargs = dict()
+        kwargs['DetectorCorrectionType'] = 'RotateAroundSample' \
+            if self._instrumentName == 'D17' else 'VerticalShift'
         calibratedWS = SpecularReflectionPositionCorrect(
             InputWorkspace=ws,
             OutputWorkspace=calibratedWSName,
             DetectorComponentName='detector',
-            LinePosition=direct_line, # yes, this is the direct line position!
+            LinePosition=direct_line,  # direct line position
             TwoTheta=2*self._theta_from_detector_angles(),
             PixelSize=common.pixelSize(self._instrumentName),
-            DetectorCorrectionType='RotateAroundSample',
             DetectorFacesSample=True,
-            EnableLogging=self._subalgLogging
+            EnableLogging=self._subalgLogging,
+            **kwargs
         )
         self._cleanup.cleanup(ws)
         return calibratedWS
