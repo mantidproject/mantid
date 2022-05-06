@@ -93,7 +93,9 @@ void DiscusMultipleScatteringCorrection::init() {
 
   declareProperty(std::make_unique<WorkspaceProperty<Workspace>>("StructureFactorWorkspace", "", Direction::Input),
                   "The name of the workspace containing S'(q) or S'(q, w).  For elastic calculations, the input "
-                  "workspace must contain a single spectrum and have X units of momentum transfer.");
+                  "workspace must contain a single spectrum and have X units of momentum transfer. A workspace group "
+                  "containing one workspace per component can also be supplied if a calculation is being run on a "
+                  "workspace with a sample environment specified");
   declareProperty(std::make_unique<WorkspaceProperty<WorkspaceGroup>>("OutputWorkspace", "", Direction::Output),
                   "Name for the WorkspaceGroup that will be created. Each workspace in the "
                   "group contains a calculated weight for a particular number of "
@@ -384,7 +386,6 @@ void DiscusMultipleScatteringCorrection::exec() {
     auto groupMembers = SQWSGroup->getAllItems();
     for (auto &ws : groupMembers) {
       auto matrixWs = std::dynamic_pointer_cast<MatrixWorkspace>(ws);
-      m_components.push_back(matrixWs->sample().getShapePtr());
       m_SQWSs.push_back(matrixWs);
     }
   } else {
@@ -392,12 +393,19 @@ void DiscusMultipleScatteringCorrection::exec() {
     if (inputWS->sample().hasEnvironment())
       nEnvComponents = inputWS->sample().getEnvironment().nelements();
     m_SQWSs.push_back(std::dynamic_pointer_cast<MatrixWorkspace>(SQWS));
-    for (size_t i = 0; i < 1 /* nEnvComponents*/; i++) {
+    for (size_t i = 0; i < nEnvComponents; i++) {
       MatrixWorkspace_sptr isotropicSQ = DataObjects::create<Workspace2D>(
           *m_SQWSs[0], static_cast<size_t>(1),
           HistogramData::Histogram(HistogramData::Points{0.}, HistogramData::Frequencies{1.}));
       m_SQWSs.push_back(isotropicSQ);
     }
+  }
+
+  m_components.push_back(inputWS->sample().getShapePtr());
+  if (inputWS->sample().hasEnvironment()) {
+    auto nEnvComponents = inputWS->sample().getEnvironment().nelements();
+    for (size_t i = 0; i < nEnvComponents; i++)
+      m_components.push_back(inputWS->sample().getEnvironment().getComponentPtr(i));
   }
 
   prepareStructureFactor();
@@ -737,6 +745,19 @@ std::vector<API::MatrixWorkspace_sptr> DiscusMultipleScatteringCorrection::prepa
         SQValues.insert(SQValues.begin(), SQValues.front());
       }
       if (qValues.back() < qmax) {
+        if (m_EMode != DeltaEMode::Elastic) {
+          // in case qmax is DBL_MAX add a few extra points beyond supplied q range that are closer. Useful for
+          // m_QSQIntegral where flat interpolation means final point at qmax probably won't be used
+          double maxSuppliedQ = qValues.back();
+          if (2 * maxSuppliedQ < qmax) {
+            qValues.push_back(2 * maxSuppliedQ);
+            SQValues.push_back(SQValues.back());
+          }
+          if (4 * maxSuppliedQ < qmax) {
+            qValues.push_back(4 * maxSuppliedQ);
+            SQValues.push_back(SQValues.back());
+          }
+        }
         qValues.push_back(qmax);
         SQValues.push_back(SQValues.back());
       }
@@ -858,7 +879,7 @@ void DiscusMultipleScatteringCorrection::convertToLogWorkspace(const std::vector
  * The original algorithm only considered two scatters so there was only ever one scatter
  * with a free direction after scatter that got a contribution from the q_dir function. This
  * meant that the k value going into the scatter was always fixed and equal to the overall kinc
- * The approach here will cope with multiple scatters by calculating a sumQSS as multiple
+ * The approach here will cope with multiple scatters by calculating a sumQSS at multiple
  * kinc values. These will be interpolated as required later on
  */
 void DiscusMultipleScatteringCorrection::calculateQSQIntegralAsFunctionOfK() {
@@ -869,14 +890,6 @@ void DiscusMultipleScatteringCorrection::calculateQSQIntegralAsFunctionOfK() {
     // Calculate the integral for a range of k values. Not massively important which k values but choose them here
     // based on the q points in the QS(Q) profile. For each q point calculate the integral for k=q/2
     std::vector<double> qValues = m_QSQWSs[i]->histogram(0).readX();
-    // k values may be such that the kinematic range extends beyond the q range of the S(Q) profile supplied
-    // so add a couple of larger k's. The integral/2k^2 will tend to a constant once beyond the q range of S(Q)
-    if (m_EMode != DeltaEMode::Elastic) {
-      double qMaxSupplied = m_SQWSs[i]->x(i).back();
-      xxxxxxxxxxxxNOT SURE ABOUT THIS auto it = std::upper_bound(qValues.begin(), qValues.end(), qMaxSupplied);
-      qValues.insert(it, qMaxSupplied * 2);
-      qValues.insert(it + 1, qMaxSupplied * 2);
-    }
     std::transform(qValues.begin(), qValues.end(), std::back_inserter(kValues),
                    [](double d) -> double { return d / 2; });
     kValues.erase(std::remove_if(kValues.begin(), kValues.end(), [](const double x) { return x == 0; }), kValues.end());
@@ -1334,6 +1347,7 @@ std::tuple<double, double> DiscusMultipleScatteringCorrection::getKinematicRange
 }
 
 double DiscusMultipleScatteringCorrection::getQSQIntegral(size_t compIdxWithScatter, double k) {
+  // the QSQIntegrals were divided by k^2 so in theory they should be ~flat
   return interpolateFlat(*m_QSQIntegrals[compIdxWithScatter], k) * 2 * k * k;
 }
 
