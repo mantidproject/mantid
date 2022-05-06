@@ -782,13 +782,13 @@ double LoadILLReflectometry::offsetAngle(const double peakCentre, const double d
  *  @return the distance in meters
  */
 double LoadILLReflectometry::sampleDetectorDistance() const {
-  double sampleDetectorDistance;
+  std::string distanceEntry;
   if (m_instrument == Supported::D17) {
-    sampleDetectorDistance = mmToMeter(doubleFromRun("det.value"));
+    distanceEntry = "det.value";
   } else {
-    sampleDetectorDistance = mmToMeter(doubleFromRun("Distance.Sample_CenterOfDetector_distance"));
+    distanceEntry = "Distance.Sample_CenterOfDetector_distance";
   }
-  return sampleDetectorDistance;
+  return mmToMeter(doubleFromRun(distanceEntry));
 }
 
 /// Return the horizontal offset along the z axis.
