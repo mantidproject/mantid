@@ -32,7 +32,7 @@ template <typename TYPE> VMDBase<TYPE>::VMDBase() : nd(1) {
 /** Constructor
  * @param nd :: number of dimensions  */
 template <typename TYPE> VMDBase<TYPE>::VMDBase(size_t nd) : nd(nd) {
-  if (nd <= 0)
+  if (nd == 0)
     throw std::invalid_argument("nd must be > 0");
   data = new TYPE[nd];
   for (size_t d = 0; d < nd; d++)
@@ -114,7 +114,7 @@ VMDBase<TYPE>::VMDBase(double val0, double val1, double val2, double val3, doubl
 /** Copy constructor
  * @param other :: other to copy */
 template <typename TYPE> VMDBase<TYPE>::VMDBase(const VMDBase &other) : nd(other.nd) {
-  if (nd <= 0)
+  if (nd == 0)
     throw std::invalid_argument("nd must be > 0");
   data = new TYPE[nd];
   for (size_t d = 0; d < nd; d++)
@@ -161,7 +161,7 @@ template <typename TYPE> VMDBase<TYPE> &VMDBase<TYPE>::operator=(VMDBase &&other
  * @param nd :: number of dimensions
  * @param bareData :: pointer to a nd-sized bare data array */
 template <typename TYPE> VMDBase<TYPE>::VMDBase(size_t nd, const double *bareData) : nd(nd) {
-  if (nd <= 0)
+  if (nd == 0)
     throw std::invalid_argument("nd must be > 0");
   data = new TYPE[nd];
   for (size_t d = 0; d < nd; d++)
@@ -172,7 +172,7 @@ template <typename TYPE> VMDBase<TYPE>::VMDBase(size_t nd, const double *bareDat
  * @param nd :: number of dimensions
  * @param bareData :: pointer to a nd-sized bare data array */
 template <typename TYPE> VMDBase<TYPE>::VMDBase(size_t nd, const float *bareData) : nd(nd) {
-  if (nd <= 0)
+  if (nd == 0)
     throw std::invalid_argument("nd must be > 0");
   data = new TYPE[nd];
   for (size_t d = 0; d < nd; d++)
@@ -190,7 +190,7 @@ template <typename TYPE> VMDBase<TYPE>::VMDBase(const V3D &vector) : nd(3) {
 /** Constructor
  * @param vector :: vector of doubles */
 template <typename TYPE> VMDBase<TYPE>::VMDBase(const std::vector<double> &vector) : nd(vector.size()) {
-  if (nd <= 0)
+  if (nd == 0)
     throw std::invalid_argument("nd must be > 0");
   data = new TYPE[nd];
   for (size_t d = 0; d < nd; d++)
@@ -200,7 +200,7 @@ template <typename TYPE> VMDBase<TYPE>::VMDBase(const std::vector<double> &vecto
 /** Constructor
  * @param vector :: vector of floats */
 template <typename TYPE> VMDBase<TYPE>::VMDBase(const std::vector<float> &vector) : nd(vector.size()) {
-  if (nd <= 0)
+  if (nd == 0)
     throw std::invalid_argument("nd must be > 0");
   data = new TYPE[nd];
   for (size_t d = 0; d < nd; d++)
@@ -223,7 +223,7 @@ template <typename TYPE> VMDBase<TYPE>::VMDBase(const std::string &str) {
   });
 
   nd = vals.size();
-  if (nd <= 0)
+  if (nd == 0)
     throw std::invalid_argument("nd must be > 0");
   data = new TYPE[nd];
   std::copy(vals.cbegin(), vals.cend(), data);

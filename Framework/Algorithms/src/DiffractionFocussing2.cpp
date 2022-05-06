@@ -21,6 +21,7 @@
 #include "MantidIndexing/IndexInfo.h"
 #include "MantidKernel/VectorHelper.h"
 
+#include <algorithm>
 #include <cfloat>
 #include <iterator>
 #include <numeric>
@@ -628,8 +629,8 @@ size_t DiffractionFocussing2::setupGroupToWSIndices() {
     totalHistProcess += wsIndices[group].size();
   }
 
-  for (const auto &group : m_validGroups)
-    m_wsIndices.emplace_back(std::move(wsIndices[static_cast<int>(group)]));
+  std::transform(m_validGroups.cbegin(), m_validGroups.cend(), std::back_inserter(m_wsIndices),
+                 [&wsIndices](const auto &group) { return wsIndices[static_cast<int>(group)]; });
 
   return totalHistProcess;
 }

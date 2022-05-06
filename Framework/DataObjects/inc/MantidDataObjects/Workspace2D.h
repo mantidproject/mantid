@@ -71,7 +71,7 @@ public:
   /** sets the monitorWorkspace indexlist
     @param mList :: a vector holding the monitor workspace indexes
   */
-  void setMonitorList(std::vector<specnum_t> &mList) { m_monitorList = mList; }
+  void setMonitorList(const std::vector<specnum_t> &mList) { m_monitorList = mList; }
 
   /// Copy the data (Y's) from an image to this workspace.
   void setImageY(const API::MantidImage &image, size_t start = 0, bool parallelExecution = true) override;

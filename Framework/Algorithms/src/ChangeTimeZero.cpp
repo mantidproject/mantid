@@ -124,7 +124,7 @@ API::MatrixWorkspace_sptr ChangeTimeZero::createOutputWS(const API::MatrixWorksp
  * @returns A time shift in seconds
  */
 double ChangeTimeZero::getTimeShift(const API::MatrixWorkspace_sptr &ws) const {
-  auto timeShift = m_defaultTimeShift;
+  double timeShift;
   // Check if we are dealing with an absolute time
   std::string timeOffset = getProperty("AbsoluteTimeOffset");
   if (isAbsoluteTimeShift(timeOffset)) {
