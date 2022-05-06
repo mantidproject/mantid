@@ -122,13 +122,15 @@ void CrystalFieldMultiSpectrum::init() {
 }
 
 size_t CrystalFieldMultiSpectrum::getNumberDomains() const {
-  if (!m_target)
+  if (!m_target) {
     buildTargetFunction();
+  }
 
-  if (m_target)
+  if (m_target) {
     return m_target->getNumberDomains();
-  else
+  } else {
     throw std::runtime_error("Failed to build target function.");
+  }
 }
 
 std::vector<IFunction_sptr> CrystalFieldMultiSpectrum::createEquivalentFunctions() const {
