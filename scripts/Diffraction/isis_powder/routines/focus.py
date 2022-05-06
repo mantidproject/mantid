@@ -14,7 +14,7 @@ import numpy
 import os
 
 
-def focus(run_number_string, instrument, perform_vanadium_norm, absorb, sample_details=None, absorb_method=None):
+def focus(run_number_string, instrument, perform_vanadium_norm, absorb, sample_details=None):
     input_batching = instrument._get_input_batching_mode()
     if input_batching == INPUT_BATCHING.Individual:
         return _individual_run_focusing(instrument=instrument, perform_vanadium_norm=perform_vanadium_norm,
@@ -27,7 +27,7 @@ def focus(run_number_string, instrument, perform_vanadium_norm, absorb, sample_d
 
 
 def _focus_one_ws(input_workspace, run_number, instrument, perform_vanadium_norm, absorb,
-                  sample_details, vanadium_path, absorb_method=None):
+                  sample_details, vanadium_path):
     run_details = instrument._get_run_details(run_number_string=run_number)
     if perform_vanadium_norm:
         _test_splined_vanadium_exists(instrument, run_details)
@@ -48,36 +48,37 @@ def _focus_one_ws(input_workspace, run_number, instrument, perform_vanadium_norm
         summed_empty = common.generate_summed_runs(empty_sample_ws_string=run_details.sample_empty,
                                                    instrument=instrument,
                                                    scale_factor=instrument._inst_settings.sample_empty_scale)
+    absorb_method = None
+    try:
+        absorb_method = instrument._inst_settings.absorb_method
+    except AttributeError:
+        absorb_method = 'Mayers'
 
-    if absorb:
-        if summed_empty:
-            if absorb_method == 'PaalmanPings':
-                instrument._apply_paalmanpings_absorb_and_subtract_empty(workspace=input_workspace,
-                                                                         summed_empty=summed_empty,
-                                                                         sample_details=sample_details,
-                                                                         run_number=run_number)
-            else:
-                input_workspace = common.subtract_summed_runs(ws_to_correct=input_workspace, empty_sample=summed_empty)
-                input_workspace = instrument._apply_absorb_corrections(run_details=run_details,
-                                                                       ws_to_correct=input_workspace)
+    if absorb and absorb_method == 'PaalmanPings':
+        if run_details.sample_empty: # need summed_empty including container
+            instrument._apply_paalmanpings_absorb_and_subtract_empty(workspace=input_workspace,
+                                                                     summed_empty=summed_empty,
+                                                                     sample_details=sample_details,
+                                                                     run_number=run_number)
+            # Crop to largest acceptable TOF range
+            input_workspace = instrument._crop_raw_to_expected_tof_range(ws_to_crop=input_workspace)
         else:
-            if absorb_method == 'PaalmanPings':
-                raise NoneTypeError("The PaalmanPings absorption method requires valid summed empty runs.")
-            else:
-                input_workspace = instrument._apply_absorb_corrections(run_details=run_details,
-                                                                       ws_to_correct=input_workspace)
+            raise TypeError("The PaalmanPings absorption method requires 'sample_empty' to be supplied.")
     else:
         if summed_empty:
             input_workspace = common.subtract_summed_runs(ws_to_correct=input_workspace, empty_sample=summed_empty)
+        # Crop to largest acceptable TOF range
+        input_workspace = instrument._crop_raw_to_expected_tof_range(ws_to_crop=input_workspace)
 
-        # Set sample material if specified by the user
-        if sample_details is not None:
-            mantid.SetSample(InputWorkspace=input_workspace,
-                             Geometry=sample_details.generate_sample_geometry(),
-                             Material=sample_details.generate_sample_material())
-
-    # Crop to largest acceptable TOF range
-    input_workspace = instrument._crop_raw_to_expected_tof_range(ws_to_crop=input_workspace)
+        if absorb:
+            input_workspace = instrument._apply_absorb_corrections(run_details=run_details,
+                                                                   ws_to_correct=input_workspace)
+        else:
+            # Set sample material if specified by the user
+            if sample_details is not None:
+                mantid.SetSample(InputWorkspace=input_workspace,
+                                 Geometry=sample_details.generate_sample_geometry(),
+                                 Material=sample_details.generate_sample_material())
 
     # Align
     mantid.ApplyDiffCal(InstrumentWorkspace=input_workspace,
