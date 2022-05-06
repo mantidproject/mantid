@@ -15,7 +15,6 @@ from mantidqtinterfaces.dns_powder_tof.helpers.helpers_for_testing import \
 
 
 class DNSScriptsTof(unittest.TestCase):
-
     @classmethod
     def setUpClass(cls):
         pass
@@ -57,7 +56,7 @@ class DNSScriptsTof(unittest.TestCase):
         get_sqw(gws_name='abc', out_ws_name='ouname', b=b)
         self.assertEqual(len(mock_mtd.__getitem__.mock_calls), 3)
         self.assertEqual(mock_mtd.__getitem__.mock_calls[0],
-                         unittest.mock.call('abc'),)
+                         unittest.mock.call('abc'))
         self.assertEqual(mock_mtd.__getitem__.mock_calls[2],
                          unittest.mock.call().getNumberOfEntries())
         self.assertEqual(mock_mtd.__getitem__.return_value.
