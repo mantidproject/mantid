@@ -58,71 +58,71 @@ pipeline {
     WIN_BASH = "C:\\Program Files\\git\\bin\\bash.exe"
   }
   stages {
-    stage('Build and test') {
-      parallel {
-        stage('platform: linux') {
-          agent { label 'conda-build-linux' }
-          steps {
-            build_and_test_unix("linux-ci")
-          }
-          post {
-            always {
-              publish_test_reports()
-            }
-          }
-        }
-        stage('platform: windows') {
-          agent { label 'conda-build-win' }
-          steps {
-            script { WORKSPACE_UNIX_PATH = "${WORKSPACE}".replaceAll("\\\\", "/") }
-            build_and_test_win("win")
-          }
-          post {
-            always {
-              publish_test_reports()
-            }
-          }
-        }
-        stage('platform: macos') {
-          agent { label 'conda-build-osx' }
-          steps {
-            build_and_test_unix("osx-ci")
-          }
-          post {
-            always {
-              publish_test_reports()
-            }
-          }
-        }
-      }
-    }
-    stage('Update conda-recipes repository') {
-      agent { label 'conda-build-linux' }
-      environment { GITHUB_ACCESS_TOKEN = credentials("${GITHUB_TOKEN_CREDENTIAL_ID}") }
-      steps {
-        sh '${WORKSPACE}/buildconfig/Jenkins/Conda/update-conda-recipes.sh $GITHUB_ACCESS_TOKEN $GITHUB_USER_NAME'
-      }
-    }
+//     stage('Build and test') {
+//       parallel {
+//         stage('platform: linux') {
+//           agent { label 'conda-build-linux' }
+//           steps {
+//             build_and_test_unix("linux-ci")
+//           }
+//           post {
+//             always {
+//               publish_test_reports()
+//             }
+//           }
+//         }
+//         stage('platform: windows') {
+//           agent { label 'conda-build-win' }
+//           steps {
+//             script { WORKSPACE_UNIX_PATH = "${WORKSPACE}".replaceAll("\\\\", "/") }
+//             build_and_test_win("win")
+//           }
+//           post {
+//             always {
+//               publish_test_reports()
+//             }
+//           }
+//         }
+//         stage('platform: macos') {
+//           agent { label 'conda-build-osx' }
+//           steps {
+//             build_and_test_unix("osx-ci")
+//           }
+//           post {
+//             always {
+//               publish_test_reports()
+//             }
+//           }
+//         }
+//       }
+//     }
+//     stage('Update conda-recipes repository') {
+//       agent { label 'conda-build-linux' }
+//       environment { GITHUB_ACCESS_TOKEN = credentials("${GITHUB_TOKEN_CREDENTIAL_ID}") }
+//       steps {
+//         sh '${WORKSPACE}/buildconfig/Jenkins/Conda/update-conda-recipes.sh $GITHUB_ACCESS_TOKEN $GITHUB_USER_NAME'
+//       }
+//     }
     stage('Packaging') {
       parallel {
-        stage('platform: linux-64') {
-          agent { label 'conda-build-linux' }
-          environment { CONDA_BLD_PATH = "${WORKSPACE}/conda-bld" }
-          steps {
-            conda_build_unix("linux-64")
-          }
-        }
-        stage('platform: win-64') {
-          agent { label 'conda-build-win' }
-          steps {
-            script {
-              WORKSPACE_UNIX_PATH = "${WORKSPACE}".replaceAll("\\\\", "/")
-              CONDA_BLD_WIN_PATH = "${WORKSPACE}\\conda-bld"
-            }
-            conda_build_win("win-64")
-            create_standalone_package_win()
-          }
-        }
+//         stage('platform: linux-64') {
+//           agent { label 'conda-build-linux' }
+//           environment { CONDA_BLD_PATH = "${WORKSPACE}/conda-bld" }
+//           steps {
+//             conda_build_unix("linux-64")
+//           }
+//         }
+//         stage('platform: win-64') {
+//           agent { label 'conda-build-win' }
+//           steps {
+//             script {
+//               WORKSPACE_UNIX_PATH = "${WORKSPACE}".replaceAll("\\\\", "/")
+//               CONDA_BLD_WIN_PATH = "${WORKSPACE}\\conda-bld"
+//             }
+//             conda_build_win("win-64")
+//             create_standalone_package_win()
+//           }
+//         }
         stage('platform: osx-64') {
           agent { label 'conda-build-osx' }
           environment { CONDA_BLD_PATH = "${WORKSPACE}/conda-bld" }
@@ -133,27 +133,27 @@ pipeline {
         }
       }
     }
-    stage ('Publish Conda packages to Anaconda') {
-      agent { label 'conda-build-linux' } // Use linux for simplicity with shell scripts
-      environment { ANACONDA_TOKEN = credentials("${ANACONDA_TOKEN_CREDENTIAL_ID}") }
-      steps{
-        // Copy all artifacts into ${WORKSPACE} from the current job, using ${JOB_NAME} and the current ${BUILD_NUMBER}
-        copyArtifacts filter: '*.tar.bz2',
-          fingerprintArtifacts: true,
-          projectName: '${JOB_NAME}',
-          selector: specific('${BUILD_NUMBER}')
-        sh '${WORKSPACE}/buildconfig/Jenkins/Conda/publish-to-anaconda ${WORKSPACE} $ANACONDA_TOKEN $ANACONDA_CHANNEL $ANACONDA_CHANNEL_LABEL ${WORKSPACE}/conda-bld/linux-64/mantid-*.tar.bz2 ${WORKSPACE}/conda-bld/linux-64/mantidqt-*.tar.bz2 ${WORKSPACE}/conda-bld/linux-64/mantidworkbench-*.tar.bz2 ${WORKSPACE}/conda-bld/osx-64/mantid-*.tar.bz2 ${WORKSPACE}/conda-bld/osx-64/mantidqt-*.tar.bz2 ${WORKSPACE}/conda-bld/osx-64/mantidworkbench-*.tar.bz2 ${WORKSPACE}/conda-bld/win-64/mantid-*.tar.bz2 ${WORKSPACE}/conda-bld/win-64/mantidqt-*.tar.bz2 ${WORKSPACE}/conda-bld/win-64/mantidworkbench-*.tar.bz2'
-      }
-    }
-    stage ('Delete old Conda nightly packages from Anaconda') {
-      agent { label 'conda-build-linux' } // Use linux for simplicity with shell scripts
-      environment { ANACONDA_TOKEN = credentials("${ANACONDA_TOKEN_CREDENTIAL_ID}") }
-      steps {
-        script { deletion_script = "${WORKSPACE}/buildconfig/Jenkins/Conda/delete-old-nightlies.sh" }
-        sh '${deletion_script} ${WORKSPACE} $ANACONDA_TOKEN --channel mantid --package mantid --label nightly'
-        sh '${deletion_script} ${WORKSPACE} $ANACONDA_TOKEN --channel mantid --package mantidqt --label nightly'
-        sh '${deletion_script} ${WORKSPACE} $ANACONDA_TOKEN --channel mantid --package mantidworkbench --label nightly'
-      }
-    }
+//     stage ('Publish Conda packages to Anaconda') {
+//       agent { label 'conda-build-linux' } // Use linux for simplicity with shell scripts
+//       environment { ANACONDA_TOKEN = credentials("${ANACONDA_TOKEN_CREDENTIAL_ID}") }
+//       steps{
+//         // Copy all artifacts into ${WORKSPACE} from the current job, using ${JOB_NAME} and the current ${BUILD_NUMBER}
+//         copyArtifacts filter: '*.tar.bz2',
+//           fingerprintArtifacts: true,
+//           projectName: '${JOB_NAME}',
+//           selector: specific('${BUILD_NUMBER}')
+//         sh '${WORKSPACE}/buildconfig/Jenkins/Conda/publish-to-anaconda ${WORKSPACE} $ANACONDA_TOKEN $ANACONDA_CHANNEL $ANACONDA_CHANNEL_LABEL ${WORKSPACE}/conda-bld/linux-64/mantid-*.tar.bz2 ${WORKSPACE}/conda-bld/linux-64/mantidqt-*.tar.bz2 ${WORKSPACE}/conda-bld/linux-64/mantidworkbench-*.tar.bz2 ${WORKSPACE}/conda-bld/osx-64/mantid-*.tar.bz2 ${WORKSPACE}/conda-bld/osx-64/mantidqt-*.tar.bz2 ${WORKSPACE}/conda-bld/osx-64/mantidworkbench-*.tar.bz2 ${WORKSPACE}/conda-bld/win-64/mantid-*.tar.bz2 ${WORKSPACE}/conda-bld/win-64/mantidqt-*.tar.bz2 ${WORKSPACE}/conda-bld/win-64/mantidworkbench-*.tar.bz2'
+//       }
+//     }
+//     stage ('Delete old Conda nightly packages from Anaconda') {
+//       agent { label 'conda-build-linux' } // Use linux for simplicity with shell scripts
+//       environment { ANACONDA_TOKEN = credentials("${ANACONDA_TOKEN_CREDENTIAL_ID}") }
+//       steps {
+//         script { deletion_script = "${WORKSPACE}/buildconfig/Jenkins/Conda/delete-old-nightlies.sh" }
+//         sh '${deletion_script} ${WORKSPACE} $ANACONDA_TOKEN --channel mantid --package mantid --label nightly'
+//         sh '${deletion_script} ${WORKSPACE} $ANACONDA_TOKEN --channel mantid --package mantidqt --label nightly'
+//         sh '${deletion_script} ${WORKSPACE} $ANACONDA_TOKEN --channel mantid --package mantidworkbench --label nightly'
+//       }
+//     }
   }
 }
