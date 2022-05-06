@@ -74,6 +74,7 @@ class MultipleRectangleSelectionLinePlot(RectangleSelectionLinePlot):
         y_step = (ymax - ymin) / arr.shape[0]
 
         # sum the values inside every patch
+        # TODO stop summing things multiple times when
         for rect in self._rectangles:
             # get rectangle position in the image
             x0, y0 = rect.get_xy()
@@ -104,5 +105,15 @@ class MultipleRectangleSelectionLinePlot(RectangleSelectionLinePlot):
         self.plotter.plot_x_line(x_line_x_axis, x_line_y_axis)
         self.plotter.plot_y_line(y_line_x_axis, y_line_y_axis)
 
+        self.plotter.update_line_plot_limits()
+        self.plotter.redraw()
+
+    def clear(self):
+        """
+        Clear all the rectangles currently shown
+        """
+        for rect in self._rectangles:
+            rect.remove()
+        self._rectangles = []
         self.plotter.update_line_plot_limits()
         self.plotter.redraw()

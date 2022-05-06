@@ -39,19 +39,19 @@ class ScanExplorerView(QMainWindow):
         self.browse_button = QPushButton(text="Browse")
         self.browse_button.clicked.connect(self.show_directory_manager)
 
-        self.reload_button = QPushButton(text="Reload")
+        self.multiple_button = QPushButton(text="Multiple")
+        self.multiple_button.clicked.connect(self.start_multiple_rect_mode)
+
+        self.clear_button = QPushButton(text="Clear")
 
         self.advanced_button = QPushButton(text="Advanced")
         self.advanced_button.clicked.connect(self.open_alg_dialog)
 
-        self.multiple_button = QPushButton(text="Multiple")
-        self.multiple_button.clicked.connect(self.start_multiple_rect_mode)
-
         self.interface_layout.addWidget(self.file_line_edit)
         self.interface_layout.addWidget(self.browse_button)
-        self.interface_layout.addWidget(self.reload_button)
-        self.interface_layout.addWidget(self.advanced_button)
         self.interface_layout.addWidget(self.multiple_button)
+        self.interface_layout.addWidget(self.clear_button)
+        self.interface_layout.addWidget(self.advanced_button)
 
         interface_widget = QWidget()
         interface_widget.setLayout(self.interface_layout)
@@ -63,9 +63,15 @@ class ScanExplorerView(QMainWindow):
         mantid.UsageService.registerFeatureUsage(mantid.kernel.FeatureType.Interface, "ScanExplorer", False)
 
     def start_multiple_rect_mode(self):
+        """
+        Change to multiple rectangle mode.
+        """
         tool = MultipleRectangleSelectionLinePlot
         self._data_view.mpl_toolbar.set_action_checked(ToolItemText.REGIONSELECTION, state=True, trigger=True)
         self._data_view.switch_line_plots_tool(tool, self.presenter)
+
+        # TODO stop calling private attributes
+        self.clear_button.clicked.connect(self._data_view._line_plots.clear)
 
     def refresh_view(self):
         """
