@@ -41,6 +41,23 @@
 #include <sstream>
 #include <utility>
 
+namespace {
+
+constexpr double EPSILON = std::numeric_limits<double>::epsilon();
+constexpr double MIN_DOUBLE = std::numeric_limits<double>::min();
+constexpr double STEP_PERCENTAGE = 0.001;
+
+const auto defaultStepSize = [](const double parameterValue) -> double {
+  return fabs(parameterValue) < 100.0 * MIN_DOUBLE / STEP_PERCENTAGE ? 100.0 * EPSILON
+                                                                     : parameterValue * STEP_PERCENTAGE;
+};
+
+const auto sqrtEpsilonStepSize = [](const double parameterValue) -> double {
+  return fabs(parameterValue) < 1 ? sqrt(EPSILON) : parameterValue * sqrt(EPSILON);
+};
+
+} // namespace
+
 namespace Mantid::API {
 using namespace Geometry;
 
@@ -66,7 +83,8 @@ const std::vector<std::string> EXCLUDEUSAGE = {"CompositeFunction"};
 /**
  * Constructor
  */
-IFunction ::IFunction() : m_isParallel(false), m_handler(nullptr), m_chiSquared(0.0) {}
+IFunction ::IFunction()
+    : m_isParallel(false), m_handler(nullptr), m_chiSquared(0.0), m_stepSizeFunction(defaultStepSize) {}
 
 /**
  * Destructor
@@ -262,18 +280,13 @@ std::string IFunction::writeTies() const {
  * @param tie :: A pointer to a new tie
  */
 void IFunction::addTie(std::unique_ptr<ParameterTie> tie) {
-
   auto iPar = getParameterIndex(*tie);
-  bool found = false;
-  for (auto &m_tie : m_ties) {
-    auto mPar = getParameterIndex(*m_tie);
-    if (mPar == iPar) {
-      found = true;
-      m_tie = std::move(tie);
-      break;
-    }
-  }
-  if (!found) {
+  auto it =
+      std::find_if(m_ties.begin(), m_ties.end(), [&](const auto &m_tie) { return getParameterIndex(*m_tie) == iPar; });
+
+  if (it != m_ties.end()) {
+    *it = std::move(tie);
+  } else {
     m_ties.emplace_back(std::move(tie));
     setParameterStatus(iPar, Tied);
   }
@@ -362,15 +375,12 @@ void IFunction::clearTies() {
  */
 void IFunction::addConstraint(std::unique_ptr<IConstraint> ic) {
   size_t iPar = ic->parameterIndex();
-  bool found = false;
-  for (auto &constraint : m_constraints) {
-    if (constraint->parameterIndex() == iPar) {
-      found = true;
-      constraint = std::move(ic);
-      break;
-    }
-  }
-  if (!found) {
+  auto it = std::find_if(m_constraints.begin(), m_constraints.end(),
+                         [&iPar](const auto &constraint) { return constraint->parameterIndex() == iPar; });
+
+  if (it != m_constraints.end()) {
+    *it = std::move(ic);
+  } else {
     m_constraints.emplace_back(std::move(ic));
   }
 }
@@ -406,14 +416,15 @@ void IFunction::removeConstraint(const std::string &parName) {
  */
 void IFunction::setConstraintPenaltyFactor(const std::string &parName, const double &c) {
   size_t iPar = parameterIndex(parName);
-  for (auto &constraint : m_constraints) {
-    if (iPar == constraint->getLocalIndex()) {
-      constraint->setPenaltyFactor(c);
-      return;
-    }
+  const auto it = std::find_if(m_constraints.cbegin(), m_constraints.cend(),
+                               [&iPar](const auto &constraint) { return iPar == constraint->getLocalIndex(); });
+
+  if (it != m_constraints.cend()) {
+    (*it)->setPenaltyFactor(c);
+  } else {
+    g_log.warning() << parName << " does not have constraint so setConstraintPenaltyFactor failed"
+                    << "\n";
   }
-  g_log.warning() << parName << " does not have constraint so setConstraintPenaltyFactor failed"
-                  << "\n";
 }
 
 /// Remove all constraints.
@@ -1025,9 +1036,6 @@ void IFunction::calNumericalDeriv(const FunctionDomain &domain, Jacobian &jacobi
    * consider that method when updating this.
    */
 
-  constexpr double epsilon = std::numeric_limits<double>::epsilon() * 100;
-  constexpr double stepPercentage = 0.001;
-  constexpr double cutoff = 100.0 * std::numeric_limits<double>::min() / stepPercentage;
   const size_t nParam = nParams();
   size_t nData = getValuesSize(domain);
 
@@ -1045,11 +1053,7 @@ void IFunction::calNumericalDeriv(const FunctionDomain &domain, Jacobian &jacobi
   for (size_t iP = 0; iP < nParam; iP++) {
     if (isActive(iP)) {
       const double val = activeParameter(iP);
-      if (fabs(val) < cutoff) {
-        step = epsilon;
-      } else {
-        step = val * stepPercentage;
-      }
+      step = calculateStepSize(val);
 
       const double paramPstep = val + step;
       setActiveParameter(iP, paramPstep);
@@ -1064,6 +1068,27 @@ void IFunction::calNumericalDeriv(const FunctionDomain &domain, Jacobian &jacobi
       }
     }
   }
+}
+
+/** Calculates the step size to use when calculating the numerical derivative.
+ * @param parameterValue :: The value of the active parameter.
+ * @returns The step size to use when calculating the numerical derivative.
+ */
+double IFunction::calculateStepSize(const double parameterValue) const { return m_stepSizeFunction(parameterValue); }
+
+/** Sets the function to use when calculating the step size.
+ * @param method :: An enum indicating which method to use when calculating the step size.
+ */
+void IFunction::setStepSizeMethod(const StepSizeMethod method) {
+  switch (method) {
+  case StepSizeMethod::DEFAULT:
+    m_stepSizeFunction = defaultStepSize;
+    return;
+  case StepSizeMethod::SQRT_EPSILON:
+    m_stepSizeFunction = sqrtEpsilonStepSize;
+    return;
+  }
+  throw std::invalid_argument("An invalid method for calculating the step size was provided.");
 }
 
 /** Initialize the function providing it the workspace

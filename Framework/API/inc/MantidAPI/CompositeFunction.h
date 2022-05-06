@@ -55,6 +55,7 @@ public:
   /// Set matrix workspace
   void setMatrixWorkspace(std::shared_ptr<const API::MatrixWorkspace> workspace, size_t wi, double startX,
                           double endX) override;
+  void setStepSizeMethod(const StepSizeMethod stepSizeMethod) override;
 
   /// Function you want to fit to.
   void function(const FunctionDomain &domain, FunctionValues &values) const override;
