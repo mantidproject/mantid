@@ -10,6 +10,7 @@ from qtpy.QtWidgets import QWidget, QMainWindow, QHBoxLayout, QPushButton, QSpli
 from qtpy.QtCore import *
 
 import mantid
+from .rectangle_plot import MultipleRectangleSelectionLinePlot
 from mantidqt.interfacemanager import InterfaceManager
 
 
@@ -42,10 +43,14 @@ class ScanExplorerView(QMainWindow):
         self.advanced_button = QPushButton(text="Advanced")
         self.advanced_button.clicked.connect(self.open_alg_dialog)
 
+        self.multiple_button = QPushButton(text="Multiple")
+        self.multiple_button.clicked.connect(self.start_multiple_rect_mode)
+
         self.interface_layout.addWidget(self.file_line_edit)
         self.interface_layout.addWidget(self.browse_button)
         self.interface_layout.addWidget(self.reload_button)
         self.interface_layout.addWidget(self.advanced_button)
+        self.interface_layout.addWidget(self.multiple_button)
 
         interface_widget = QWidget()
         interface_widget.setLayout(self.interface_layout)
@@ -55,6 +60,10 @@ class ScanExplorerView(QMainWindow):
 
         # register startup
         mantid.UsageService.registerFeatureUsage(mantid.kernel.FeatureType.Interface, "ScanExplorer", False)
+
+    def start_multiple_rect_mode(self):
+        tool = MultipleRectangleSelectionLinePlot
+        self._data_view.switch_line_plots_tool(tool, self.presenter)
 
     def refresh_view(self):
         """
