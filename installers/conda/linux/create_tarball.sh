@@ -156,7 +156,8 @@ mkdir -p "$bundle_contents"
 bundle_conda_prefix="$bundle_contents"
 
 echo "Creating Conda environment in '$bundle_conda_prefix' from '$CONDA_PACKAGE'"
-"$CONDA_EXE" create --quiet --prefix "$bundle_conda_prefix" --copy --channel "$conda_channel" --yes \
+"$CONDA_EXE" create --quiet --prefix "$bundle_conda_prefix" --copy \
+  --channel "$conda_channel" --channel conda-forge --yes \
   "$CONDA_PACKAGE" \
   jq  # used for processing the version string
 echo
