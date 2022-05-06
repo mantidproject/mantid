@@ -998,7 +998,7 @@ yes invert the matrix using analytic formula. If not then use standard Invert
         auto iMinusj = static_cast<T>(i) - static_cast<T>(j);
         auto iPlusj = static_cast<T>(i) + static_cast<T>(j);
         if (D >= 2) {
-          m_rawData[i][j] = static_cast<T>(pow(-1.0, i + j));
+          m_rawData[i][j] = static_cast<T>(pow(-1.0, static_cast<double>(i + j)));
           lambda = static_cast<T>(acosh(D / 2));
         } else if ((D > -2) && (D < 2)) {
           m_rawData[i][j] = 1;                   // use +1 here instead of the -1 in the paper

@@ -159,7 +159,7 @@ void CorelliCalibrationApply::exec() {
   rotateAlg->initialize();
   rotateAlg->setProperty("Workspace", wsName);
   for (size_t row_num = 0; row_num < calTable->rowCount(); row_num++) {
-    if (abs(rotangs->cell<double>(row_num)) < 1e-8) {
+    if (std::abs(rotangs->cell<double>(row_num)) < 1e-8) {
       continue;
     }
     rotateAlg->setProperty("ComponentName", componentNames->cell<std::string>(row_num));
