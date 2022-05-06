@@ -31,8 +31,6 @@ void IndirectTools::initLayout() {
   // Connect each tab to the actions available in this GUI
   std::map<unsigned int, IndirectToolsTab *>::iterator iter;
   for (iter = m_tabs.begin(); iter != m_tabs.end(); ++iter) {
-    connect(iter->second, SIGNAL(executePythonScript(const QString &, bool)), this,
-            SIGNAL(runAsPythonScript(const QString &, bool)));
     connect(iter->second, SIGNAL(showMessageBox(const QString &)), this, SLOT(showMessageBox(const QString &)));
     iter->second->setupTab();
   }
