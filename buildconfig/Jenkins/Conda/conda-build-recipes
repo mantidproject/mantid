@@ -139,5 +139,5 @@ if [[ $OSTYPE == 'msys'* ]]; then
     WIN_BASH = "C:\\Program Files\\git\\bin\\bash.exe"
     bat "\"${WIN_BASH}\" -ex -c \"${WORKSPACE}/installers/conda/win/create_package.sh -c local -s ${PACKAGE_SUFFIX}\""
 elif [[ $OSTYPE == 'darwin'* ]]; then
-    sh "${WORKSPACE}/installers/conda/osx/create_bundle.sh -c local -s ${PACKAGE_SUFFIX}"
+    ${WORKSPACE}/installers/conda/osx/create_bundle.sh -c local -s ${PACKAGE_SUFFIX}
 fi
