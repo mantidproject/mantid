@@ -10,8 +10,9 @@ from qtpy.QtWidgets import QWidget, QMainWindow, QHBoxLayout, QPushButton, QSpli
 from qtpy.QtCore import *
 
 import mantid
-from .rectangle_plot import MultipleRectangleSelectionLinePlot
 from mantidqt.interfacemanager import InterfaceManager
+from mantidqt.widgets.sliceviewer.views.toolbar import ToolItemText
+from .rectangle_plot import MultipleRectangleSelectionLinePlot
 
 
 class ScanExplorerView(QMainWindow):
@@ -63,6 +64,7 @@ class ScanExplorerView(QMainWindow):
 
     def start_multiple_rect_mode(self):
         tool = MultipleRectangleSelectionLinePlot
+        self._data_view.mpl_toolbar.set_action_checked(ToolItemText.REGIONSELECTION, state=True, trigger=True)
         self._data_view.switch_line_plots_tool(tool, self.presenter)
 
     def refresh_view(self):
