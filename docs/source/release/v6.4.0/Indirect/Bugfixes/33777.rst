@@ -1,0 +1,1 @@
+A bug has been fixes in SofQWMoments that prevented it from working with OSIRIS data.
