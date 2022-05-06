@@ -60,7 +60,7 @@ class DNSScriptsTof(unittest.TestCase):
                          unittest.mock.call('abc'),)
         self.assertEqual(mock_mtd.__getitem__.mock_calls[2],
                          unittest.mock.call().getNumberOfEntries())
-        self.assertEqual(mock_mtd.__getitem__.return_value.\
+        self.assertEqual(mock_mtd.__getitem__.return_value.
                          __getitem__.mock_calls[0], unittest.mock.call(0))
         mock_converttomdminmax.assert_called_once_with(
             mock_mtd.__getitem__().__getitem__(), '|Q|', 'Direct')
