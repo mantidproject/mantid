@@ -82,6 +82,7 @@ set(SRC_FILES
     IndirectSqw.cpp
     IndirectSymmetrise.cpp
     IndirectTab.cpp
+    IndirectToolsTab.cpp
     IndirectTransmission.cpp
     IqtFitModel.cpp
     MSDFitModel.cpp
@@ -157,6 +158,7 @@ set(MOC_FILES
     IndirectSqw.h
     IndirectSymmetrise.h
     IndirectTab.h
+    IndirectToolsTab.h
     IndirectTransmission.h
     IndirectFitPropertyBrowser.h
     ISISCalibration.h
