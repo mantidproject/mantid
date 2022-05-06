@@ -195,12 +195,6 @@ void DoublePulseFit::execConcrete() {
     doublePulseFunction = getDoublePulseFunction(function, pulseOffset, firstPulseWeight, secondPulseWeight);
   }
 
-  Mantid::API::FunctionFactory::Instance().createInitialized(doublePulseFunction->asString());
-  Mantid::API::FunctionFactory::Instance().createInitialized(
-      "composite=Convolution,FixResolution=false,NumDeriv=true;name=GausOsc,A="
-      "0.2,Sigma=0.2,Frequency=1,Phi=0;(name=DeltaFunction,Height=1,Centre=-0."
-      "33,ties=(Height=1,Centre=-0.33);name=DeltaFunction,Height=1,Centre=0,"
-      "ties=(Height=1,Centre=0))");
   runFitAlgorith(fitAlg, doublePulseFunction, getProperty("MaxIterations"));
 
   createOutput(fitAlg, doublePulseFunction);
