@@ -39,7 +39,6 @@ class DNSScriptsTof(unittest.TestCase):
         mock_correctkikf.assert_called_once_with('abc_dE',
                                                  OutputWorkspace='abc_dE_S')
 
-    @staticmethod
     @patch('mantidqtinterfaces.dns_powder_tof.scripts.dnstof.'
            'mtd')
     @patch('mantidqtinterfaces.dns_powder_tof.scripts.dnstof.'
@@ -50,18 +49,19 @@ class DNSScriptsTof(unittest.TestCase):
            'ConvertToMD')
     @patch('mantidqtinterfaces.dns_powder_tof.scripts.dnstof.'
            'ConvertToMDMinMaxGlobal')
-    def test_get_sqw(mock_converttomdminmax, mock_converttomd,
+    def test_get_sqw(self, mock_converttomdminmax, mock_converttomd,
                      mock_mergemd, mock_binmd, mock_mtd):
         mock_converttomdminmax.return_value = [0, 1]
         mock_mtd.__getitem__.return_value.getNumberOfEntries.return_value = 0
         b = get_fake_tof_binning()
         get_sqw(gws_name='abc', out_ws_name='ouname', b=b)
-        calls = [
-            unittest.mock.call('abc'),
-            unittest.mock.call().__getitem__(0),
-            unittest.mock.call().getNumberOfEntries()
-        ]
-        mock_mtd.__getitem__.assert_has_calls(calls)
+        self.assertEqual(len(mock_mtd.__getitem__.mock_calls), 3)
+        self.assertEqual(mock_mtd.__getitem__.mock_calls[0],
+                         unittest.mock.call('abc'),)
+        self.assertEqual(mock_mtd.__getitem__.mock_calls[2],
+                         unittest.mock.call().getNumberOfEntries())
+        self.assertEqual(mock_mtd.__getitem__.return_value.\
+                         __getitem__.mock_calls[0], unittest.mock.call(0))
         mock_converttomdminmax.assert_called_once_with(
             mock_mtd.__getitem__().__getitem__(), '|Q|', 'Direct')
         mock_converttomd.assert_called_once_with(mock_mtd.__getitem__(),
