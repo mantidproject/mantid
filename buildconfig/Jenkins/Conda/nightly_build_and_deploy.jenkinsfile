@@ -38,6 +38,13 @@ def archive_conda_build(arch) {
     onlyIfSuccessful: true
 }
 
+def create_standalone_package_linux() {
+  archiveArtifacts artifacts: "${WORKSPACE}/*.xz",
+    allowEmptyArchive: false,
+    fingerprint: true,
+    onlyIfSuccessful: true
+}
+
 def create_standalone_package_osx() {
   archiveArtifacts artifacts: "${WORKSPACE}/*.dmg",
     allowEmptyArchive: false,
@@ -110,6 +117,7 @@ pipeline {
 //           environment { CONDA_BLD_PATH = "${WORKSPACE}/conda-bld" }
 //           steps {
 //             conda_build_unix("linux-64")
+//             create_standalone_package_linux()
 //           }
 //         }
 //         stage('platform: win-64') {
