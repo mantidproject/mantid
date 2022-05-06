@@ -29,7 +29,7 @@ class ScanExplorerView(QMainWindow):
 
         self.widget = QWidget()
 
-        self.splitter = QSplitter(parent=self.widget)
+        self.splitter = QSplitter(orientation=Qt.Vertical, parent=self.widget)
 
         self.interface_layout = QHBoxLayout(self)
 
@@ -88,7 +88,6 @@ class ScanExplorerView(QMainWindow):
         # self._data_view.create_axes_orthogonal(redraw_on_zoom=not False)
 
         if self.splitter.count() == 1:
-            self.splitter.setOrientation(Qt.Vertical)
             self.splitter.addWidget(self._data_view)
         else:
             self.splitter.replaceWidget(self.SLICE_VIEWER_SPLITTER_INDEX, self._data_view)
