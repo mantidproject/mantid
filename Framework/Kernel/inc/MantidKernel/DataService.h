@@ -382,7 +382,7 @@ public:
       return datamap.size();
     } else {
       return std::count_if(datamap.cbegin(), datamap.cend(),
-                           [](const auto it) { return !isHiddenDataServiceObject(it.first); });
+                           [](const auto &it) { return !isHiddenDataServiceObject(it.first); });
     }
   }
 
