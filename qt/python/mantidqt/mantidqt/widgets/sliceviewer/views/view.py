@@ -41,9 +41,9 @@ class SliceViewerView(QWidget, ObservingView):
         self._splitter = QSplitter(self)
         self._data_view = SliceViewerDataView(presenter, dims_info, can_normalise, self, conf)
         self._splitter.addWidget(self._data_view)
+        self._splitter.splitterMoved.connect(self._data_view.on_resize)
         #  peaks viewer off by default
         self._peaks_view = None
-
         # config the splitter appearance
         splitterStyleStr = """QSplitter::handle{
             border: 1px dotted gray;
@@ -60,6 +60,7 @@ class SliceViewerView(QWidget, ObservingView):
 
         # connect up additional peaks signals
         self.data_view.mpl_toolbar.peaksOverlayClicked.connect(self.peaks_overlay_clicked)
+        self.data_view.mpl_toolbar.nonAlignedCutsClicked.connect(self.non_axis_aligned_cuts_clicked)
         self.close_signal.connect(self._run_close)
         self.rename_signal.connect(self._on_rename)
 
@@ -76,14 +77,20 @@ class SliceViewerView(QWidget, ObservingView):
         """Lazily instantiates PeaksViewer and returns it"""
         if self._peaks_view is None:
             self._peaks_view = PeaksViewerCollectionView(MplPainter(self.data_view), self.presenter)
-            self._splitter.addWidget(self._peaks_view)
-
+            self.add_widget_to_splitter(self._peaks_view)
         return self._peaks_view
+
+    def add_widget_to_splitter(self, widget):
+        self._splitter.addWidget(widget)
+        self._data_view.on_resize()
 
     def peaks_overlay_clicked(self):
         """Peaks overlay button has been toggled
         """
         self.presenter.overlay_peaks_workspaces()
+
+    def non_axis_aligned_cuts_clicked(self, state):
+        self.presenter.non_axis_aligned_cut(state)
 
     def query_peaks_to_overlay(self, current_overlayed_names):
         """Display a dialog to the user to ask which peaks to overlay
