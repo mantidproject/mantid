@@ -135,9 +135,12 @@ fi
 
 # Build the standalone packages, currently only for Windows and macOS
 PACKAGE_SUFFIX=Nightly # Hard code this for now while testing.
+# Set our local conda channel to find our locally build mantidworkbench package.
+LOCAL_CHANNEL=file://$CONDA_PREFIX/conda-bld
 if [[ $OSTYPE == 'msys'* ]]; then
-    WIN_BASH = "C:\\Program Files\\git\\bin\\bash.exe"
-    bat "\"${WIN_BASH}\" -ex -c \"${WORKSPACE}/installers/conda/win/create_package.sh -c local -s ${PACKAGE_SUFFIX}\""
+    ${WORKSPACE}/installers/conda/win/create_package.sh -c "${LOCAL_CHANNEL}" -s ${PACKAGE_SUFFIX}
 elif [[ $OSTYPE == 'darwin'* ]]; then
-    sh "${WORKSPACE}/installers/conda/osx/create_bundle.sh -c local -s ${PACKAGE_SUFFIX}"
+    ${WORKSPACE}/installers/conda/osx/create_bundle.sh -c "${LOCAL_CHANNEL}" -s ${PACKAGE_SUFFIX}
+else
+    ${WORKSPACE}/installers/conda/linux/create_tarball.sh -c "${LOCAL_CHANNEL}" -s ${PACKAGE_SUFFIX}
 fi
