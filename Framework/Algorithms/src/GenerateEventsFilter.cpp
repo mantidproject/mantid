@@ -1165,7 +1165,7 @@ void GenerateEventsFilter::makeMultipleFiltersByValuesPartialLog(
   // Define loop control parameters
   const Types::Core::DateAndTime ZeroTime(0);
   int lastindex = -1;
-  int currindex = -1;
+  int currindex;
   DateAndTime currTime, start, stop;
   // size_t progslot = 0;
 
