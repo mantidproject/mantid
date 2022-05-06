@@ -20,6 +20,11 @@ from mantid.api import (PythonAlgorithm, FileProperty, WorkspaceProperty, FileAc
                         Progress)
 from mantid.simpleapi import *  # noqa
 
+# some defaults
+DEF_MAX_ENERGY_GAIN = 1000.0
+MEV_TO_WAVEVECTOR = 0.6947
+TWO_THETA = 125.0 * math.pi / 180.0
+
 
 def range_to_values(rng):
 
@@ -220,16 +225,16 @@ def scale_and_remove_background(source_ws, source_scale, empty_ws, empty_scale,
     #   source_scale.source_ws - empty_scale.empty_ws -> out_ws
     alpha_scale = source_scale * 1.0e6 / beam_monitor_counts(source_ws)
     Scale(InputWorkspace=source_ws,
-            Factor=alpha_scale, OutputWorkspace=out_ws)
+          Factor=alpha_scale, OutputWorkspace=out_ws)
     if empty_ws is not None:
         factor = empty_scale * 1.0e6 / beam_monitor_counts(empty_ws)
         Scale(InputWorkspace=empty_ws, Factor=factor,
-                OutputWorkspace=empty_ws)
+              OutputWorkspace=empty_ws)
         Minus(LHSWorkspace=out_ws, RHSWorkspace=empty_ws,
-                OutputWorkspace=out_ws)
+              OutputWorkspace=out_ws)
         if floor_negatives:
             ResetNegatives(InputWorkspace=out_ws,
-                            OutputWorkspace=out_ws, AddMinimum=False)
+                           OutputWorkspace=out_ws, AddMinimum=False)
 
 
 class PelicanReduction(PythonAlgorithm):
@@ -284,9 +289,10 @@ class PelicanReduction(PythonAlgorithm):
                              doc='Energy transfer range in meV expressed as min, step, max')
 
         self.declareProperty(name='MomentumTransfer',
-                             defaultValue='0.0, 0.02, 2.6',
+                             defaultValue='',
                              doc='Momentum transfer range in inverse Angstroms,\n'
-                                 ' expressed as min, step, max')
+                                 'expressed as min, step, max\n'
+                                 'Default estimates the max range based on energy transfer.')
 
         self.declareProperty(name='Processing', defaultValue='SOFQW1-Centre',
                              validator=StringListValidator(
@@ -296,6 +302,9 @@ class PelicanReduction(PythonAlgorithm):
 
         self.declareProperty(name='LambdaOnTwoMode', defaultValue=False,
                              doc='Set if instrument running in lambda on two mode.')
+
+        self.declareProperty(name='FrameOverlap', defaultValue=False,
+                             doc='Set if the energy transfer extends over a frame.')
 
         self.declareProperty(WorkspaceProperty('OutputWorkspace', '',
                                                direction=Direction.Output),
@@ -320,6 +329,13 @@ class PelicanReduction(PythonAlgorithm):
         # Set up the processing parameters
         self.setUp()
 
+        # remove any remnant intermediate files
+        try:
+            ws = mtd['intermediate']
+            DeleteWorkspace(ws)
+        except KeyError:
+            pass
+
         # Get the list of data files from the runs
         sample_runs = self._hdf_files_from_runs('SampleRuns')
         empty_runs = self._hdf_files_from_runs('EmptyRuns')
@@ -332,6 +348,8 @@ class PelicanReduction(PythonAlgorithm):
         # which needs to be removed
         sample_file = re.sub(r':[0-9]+$', '', sample_runs[0])
         self.set_efixed(sample_file)
+        if not self._q_range:
+            self.set_qrange()
 
         # The progress includes 4 additional status reports on top of incrementing
         # the progress on each loaded file
@@ -498,6 +516,15 @@ class PelicanReduction(PythonAlgorithm):
         self._efixed = float(ANGSTROMS_TO_MEV / wavelength**2)
         self._mscor = float(values['mscor'][0])
 
+    def set_qrange(self):
+        Ki = MEV_TO_WAVEVECTOR * math.sqrt(self._efixed)
+        # get max transfer to neutron from sample
+        max_xfer = - range_to_values(self._ev_range)[0]
+        max_xfer = max(0., max_xfer)
+        Kt = MEV_TO_WAVEVECTOR * math.sqrt(self._efixed + max_xfer)
+        Qmax_sqrd = Ki**2 + Kt**2 - 2 * Ki * Kt * math.cos(TWO_THETA)
+        self._q_range = '0.0, 0.02, {:.1f}'.format(math.sqrt(Qmax_sqrd))
+
     def setUp(self):
 
         self._pixels_per_tube = 64
@@ -563,6 +590,7 @@ class PelicanReduction(PythonAlgorithm):
         self._keep_intermediate = self.getProperty(
             'KeepIntermediateWorkspaces').value
         self._lambda_on_two = self.getProperty('LambdaOnTwoMode').value
+        self._frame_overlap = self.getProperty('FrameOverlap').value
 
         self._lo_integ_range = self._get_param(
             float, 'processing', 'lo_integ_range', 3500.0)
@@ -574,7 +602,7 @@ class PelicanReduction(PythonAlgorithm):
         self._tof_correction = self._get_param(
             float, 'processing', 'tof_correction', 0.0)
         self._max_energy_gain = self._get_param(
-            float, 'processing', 'max_energy_gain', 0.0)
+            float, 'processing', 'max_energy_gain', DEF_MAX_ENERGY_GAIN)
         self._calibrate_tof = self._get_param(
             bool, 'processing', 'calibrate_tof', False)
 
@@ -707,13 +735,23 @@ class PelicanReduction(PythonAlgorithm):
         # check if no runs or already loaded
         if not analyse_runs:
             return None
-        if output_ws in self._intermediate_ws:
-            return output_ws
+
+        if self._keep_intermediate:
+            # include the pre-converted merged file for analysis if needed
+            merged_ws = output_ws + '_merged'
+            self._load_merge(analyse_runs, merged_ws, self._analyse_load_opts)
+            CloneWorkspace(InputWorkspace=merged_ws, OutputWorkspace=output_ws)
+            self._intermediate_ws.append(merged_ws)
+        else:
+            self._load_merge(analyse_runs, output_ws, self._analyse_load_opts)
 
         self._load_merge(analyse_runs, output_ws, self._analyse_load_opts)
 
         # if minimum_tof then shift the tof by the gate period
-        if self._max_energy_gain > 0.0:
+        if self._frame_overlap:
+            if self._max_energy_gain == DEF_MAX_ENERGY_GAIN:
+                logger.warning("Using default 'max_energy_gain' = {:.1f} meV, if needed define exact value in the ini file.".format(
+                    DEF_MAX_ENERGY_GAIN))
             ows = mtd[output_ws]
             try:
                 gate_period = ows.getRun().getProperty('GatePeriod').value[0]
