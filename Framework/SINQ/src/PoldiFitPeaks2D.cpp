@@ -630,21 +630,15 @@ std::string PoldiFitPeaks2D::getUserSpecifiedTies(const IFunction_sptr &poldiFn)
           }
         }
 
-        switch (matchedParameters.size()) {
-        case 0:
+        if (matchedParameters.size() == 0) {
           g_log.warning("Function does not have a parameter called '" + tieParameter + "', ignoring.");
-          break;
-        case 1:
+        } else if (matchedParameters.size() == 1) {
           g_log.warning("There is only one peak, no ties necessary.");
-          break;
-        default: {
+        } else {
           std::string reference = matchedParameters.front();
-
           for (auto par = matchedParameters.begin() + 1; par != matchedParameters.end(); ++par) {
             tieComponents.emplace_back(*par + "=" + reference);
           }
-          break;
-        }
         }
       }
     }
@@ -689,22 +683,17 @@ std::string PoldiFitPeaks2D::getUserSpecifiedBounds(const IFunction_sptr &poldiF
           }
         }
 
-        switch (matchedParameters.size()) {
-        case 0:
+        if (matchedParameters.size() == 0) {
           g_log.warning("Function does not have a parameter called '" + boundedParameter + "', ignoring.");
-          break;
-        default: {
+        } else {
           for (auto par = matchedParameters.begin(); par != matchedParameters.end(); ++par) {
             boundedComponents.emplace_back("1.0<=" + *par + "<=20.0");
           }
-          break;
-        }
         }
       }
     }
 
     if (!boundedComponents.empty()) {
-      std::cout << "BOUNDED: " << boost::algorithm::join(boundedComponents, ",") << "\n";
       return boost::algorithm::join(boundedComponents, ",");
     }
   }
