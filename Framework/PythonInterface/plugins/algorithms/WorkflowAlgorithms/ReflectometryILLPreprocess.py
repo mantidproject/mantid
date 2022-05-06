@@ -12,7 +12,7 @@ from mantid.simpleapi import *
 import ReflectometryILL_common as common
 import ILL_utilities as utils
 import numpy as np
-from math import fabs
+from math import fabs, atan
 
 
 class Prop:
@@ -618,6 +618,19 @@ class ReflectometryILLPreprocess(DataProcessorAlgorithm):
         """Perform detector position correction for reflected beams."""
         direct_line = self.getProperty('DirectBeamForegroundCentre').value
         calibratedWSName = self._names.withSuffix('reflected_beam_calibration')
+        if self._instrumentName == 'FIGARO':
+            # Figaro requires an extra correction to its position equal to difference between direct and reflected
+            # lines and their instrument centre
+            run = ws.getRun()
+            pixel_width = common.pixelSize(self._instrumentName)
+            sample_det_distance = run.getLogData('L2').value
+            peak_centre = 127.5  # centre of the instrument
+            refl_line = run.getLogData('reduction.line_position').value
+            dir_angle = (180.0 / np.pi) * atan((direct_line - peak_centre) * pixel_width / sample_det_distance)
+            refl_angle = (180.0 / np.pi) * atan((refl_line - peak_centre) * pixel_width / sample_det_distance)
+            delta_angle = -dir_angle + refl_angle
+        else:
+            delta_angle = 0.0
         kwargs = dict()
         kwargs['DetectorCorrectionType'] = 'RotateAroundSample' \
             if self._instrumentName == 'D17' else 'VerticalShift'
@@ -626,7 +639,7 @@ class ReflectometryILLPreprocess(DataProcessorAlgorithm):
             OutputWorkspace=calibratedWSName,
             DetectorComponentName='detector',
             LinePosition=direct_line,  # direct line position
-            TwoTheta=2*self._theta_from_detector_angles(),
+            TwoTheta=2*self._theta_from_detector_angles() + delta_angle,
             PixelSize=common.pixelSize(self._instrumentName),
             DetectorFacesSample=True,
             EnableLogging=self._subalgLogging,
