@@ -85,6 +85,7 @@ set(SRC_FILES
     IndirectTools.cpp
     IndirectToolsTab.cpp
     IndirectTransmission.cpp
+    IndirectTransmissionCalc.cpp
     IqtFitModel.cpp
     MSDFitModel.cpp
     Quasi.cpp
@@ -161,6 +162,7 @@ set(MOC_FILES
     IndirectTab.h
     IndirectTools.h
     IndirectToolsTab.h
+    IndirectTransmissionCalc.h
     IndirectTransmission.h
     IndirectFitPropertyBrowser.h
     ISISCalibration.h
@@ -231,6 +233,7 @@ set(UI_FILES
     IndirectSymmetrise.ui
     IndirectTools.ui
     IndirectTransmission.ui
+    IndirectTransmissionCalc.ui
     IndirectDataAnalysisIqtTab.ui
     Quasi.ui
     ResNorm.ui
