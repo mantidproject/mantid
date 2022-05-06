@@ -86,6 +86,8 @@ protected:
 
   std::string getUserSpecifiedTies(const API::IFunction_sptr &poldiFn);
 
+  std::string getUserSpecifiedBounds(const API::IFunction_sptr &poldiFn);
+
   PoldiPeakCollection_sptr getPeakCollectionFromFunction(const API::IFunction_sptr &fitFunction);
 
   void assignMillerIndices(const PoldiPeakCollection_sptr &from, PoldiPeakCollection_sptr &to) const;
