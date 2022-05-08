@@ -66,8 +66,8 @@ input_data recipes/mantidworkbench/meta.yaml
 
 git diff --exit-code
 if [ $? -ne 0 ]; then
-    git config user.name ${GITHUB_USER_NAME}
-    git config user.email ${GITHUB_USER_NAME}@mantidproject.org
+    git config user.name mantid-builder
+    git config user.email mantid-buildserver@mantidproject.org
     git add recipes/*/meta.yaml
     git commit -m "Update version and git sha" --no-verify --signoff
     git pull --ff
