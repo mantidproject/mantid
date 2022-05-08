@@ -1,4 +1,4 @@
-#!/bin/bash -x
+#!/bin/bash -ex
 
 # Update the https://github.com/mantidproject/conda-recipes repository with the latest changes from the currently
 # checked out branch.
