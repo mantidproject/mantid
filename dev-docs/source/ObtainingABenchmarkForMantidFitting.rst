@@ -53,9 +53,13 @@ In this example, ``benchmark-env`` is the name given to your virtual environment
   python3 -m pip install --upgrade pillow
   sudo apt-get install libglu1-mesa
 
-4. Install the FitBenchmarking package by following the instructions found `here <https://fitbenchmarking.readthedocs.io/en/stable/users/install_instructions/fitbenchmarking.html>`_. If installing FitBenchmarking from source, it is recommended you use the editable flag ``-e`` when pip installing.
+4. Install the FitBenchmarking package by following the instructions found `here <https://fitbenchmarking.readthedocs.io/en/stable/users/install_instructions/fitbenchmarking.html>`_. Note that installing FitBenchmarking from source using the editable flag ``-e`` proved to be the most stable installation prior to the release of FitBenchmarking v0.2.
 
-5. It is also recommended you pip install 'h5py>=2.10.0,<3' and 'pyyaml>=5.4.1' to avoid needless warning messages.
+5. It is also recommended you pip install the following packages to avoid needless warning messages:
+
+.. code-block:: sh
+
+  pip install 'h5py>=2.10.0,<3' && pip install 'pyyaml>=5.4.1'
 
 Your environment should now be ready for performing a benchmark of Mantid minimizers.
 
@@ -103,5 +107,5 @@ Tips
 
 * Make sure your git bash terminal is open in the correct location and has the virtual environment activated when running your benchmark.
 * Each time your run the benchmark, the old results will be overwritten unless you change the directory you run the ``fitbenchmarking`` command from. In later versions of FitBenchmarking (>v1.5) there will be an option to specify the results directory on the command line or via the ``.ini`` file.
-* To do a benchmark of the changes made in a Pull Request, you can tell Jenkins to build an unstable package, and then you can install this locally. When creating your benchmark environment, you would then use the python.exe found in the Mantid unstable install directory.
+* To do a benchmark of the changes made in a Pull Request, you can create an unstable build by following the instructions `here <https://developer.mantidproject.org/BuildingWithCMake.html>`_. When creating your benchmark environment, you would then use the python.exe found in the Mantid unstable install directory.
 * Be aware that an 'Unexpected Exception' can sometimes occur when running the fitbenchmarking command after installing it from source without the editable flag ``-e``.
