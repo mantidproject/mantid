@@ -7,8 +7,7 @@
 from isis_powder.routines.param_map_entry import ParamMapEntry
 from isis_powder.gem_routines.gem_enums import GEM_CHOPPER_MODES
 from isis_powder.routines.common import PARAM_MAPPING as COMMON_PARAM_MAPPING
-from isis_powder.routines.common_enums import INPUT_BATCHING, WORKSPACE_UNITS
-
+from isis_powder.routines.common_enums import INPUT_BATCHING, WORKSPACE_UNITS, ABSORB_METHOD
 #                 Maps friendly user name (ext_name) -> script name (int_name)
 attr_mapping = [
     ParamMapEntry(ext_name="calibration_to_adjust", int_name="cal_adjust", optional=True),
@@ -27,6 +26,7 @@ attr_mapping = [
     ParamMapEntry(ext_name="get_det_offsets_x_min", int_name="get_det_offsets_x_min"),
     ParamMapEntry(ext_name="get_det_offsets_x_max", int_name="get_det_offsets_x_max"),
     ParamMapEntry(ext_name="do_absorb_corrections", int_name="do_absorb_corrections"),
+    ParamMapEntry(ext_name="absorb_method", int_name="absorb_method", enum_class=ABSORB_METHOD, optional=True),
     ParamMapEntry(ext_name="file_ext", int_name="file_extension", optional=True),
     ParamMapEntry(ext_name="first_cycle_run_no", int_name="run_in_range"),
     ParamMapEntry(ext_name="focused_cropping_values", int_name="focused_cropping_values"),

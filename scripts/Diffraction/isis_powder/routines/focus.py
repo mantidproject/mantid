@@ -48,13 +48,8 @@ def _focus_one_ws(input_workspace, run_number, instrument, perform_vanadium_norm
         summed_empty = common.generate_summed_runs(empty_sample_ws_string=run_details.sample_empty,
                                                    instrument=instrument,
                                                    scale_factor=instrument._inst_settings.sample_empty_scale)
-    absorb_method = None
-    try:
-        absorb_method = instrument._inst_settings.absorb_method
-    except AttributeError:
-        absorb_method = 'Mayers'
 
-    if absorb and absorb_method == 'PaalmanPings':
+    if absorb and instrument._inst_settings.absorb_method == 'PaalmanPings':
         if run_details.sample_empty: # need summed_empty including container
             instrument._apply_paalmanpings_absorb_and_subtract_empty(workspace=input_workspace,
                                                                      summed_empty=summed_empty,

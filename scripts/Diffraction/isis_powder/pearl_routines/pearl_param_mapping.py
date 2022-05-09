@@ -5,6 +5,7 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 from isis_powder.routines.common import PARAM_MAPPING
+from isis_powder.routines.common_enums import ABSORB_METHOD
 from isis_powder.routines.param_map_entry import ParamMapEntry
 from isis_powder.pearl_routines.pearl_enums import PEARL_FOCUS_MODES, PEARL_TT_MODES
 
@@ -23,6 +24,7 @@ attr_mapping = [
     ParamMapEntry(ext_name="cross_corr_x_min", int_name="cross_corr_x_min"),
     ParamMapEntry(ext_name="cross_corr_x_max", int_name="cross_corr_x_max"),
     ParamMapEntry(ext_name="do_absorb_corrections", int_name="absorb_corrections"),
+    ParamMapEntry(ext_name="absorb_method", int_name="absorb_method", enum_class=ABSORB_METHOD, optional=True),
     ParamMapEntry(ext_name="file_ext", int_name="file_extension", optional=True),
     ParamMapEntry(ext_name="focused_bin_widths", int_name="focused_bin_widths"),
     ParamMapEntry(ext_name="custom_focused_bin_widths", int_name="custom_focused_bin_widths"),

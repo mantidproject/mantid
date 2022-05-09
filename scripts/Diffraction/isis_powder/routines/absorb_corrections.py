@@ -128,18 +128,19 @@ def apply_paalmanpings_absorb_and_subtract_empty(workspace, instrument, summed_e
     except FileNotFoundError:
         pass
 
+    container_geometry = sample_details.generate_container_geometry()
+    container_material = sample_details.generate_container_material()
+    if container_geometry and container_material:
+        mantid.SetSample(workspace, Geometry=sample_details.generate_sample_geometry(),
+                         Material=sample_details.generate_sample_material(),
+                         ContainerGeometry=container_geometry,
+                         ContainerMaterial=container_material)
+    else:
+        mantid.SetSample(workspace, Geometry=sample_details.generate_sample_geometry(),
+                         Material=sample_details.generate_sample_material())
+
     if force_recalculate_paalman_pings or not corrections_file_found:
         events_per_point_string = instrument._inst_settings.paalman_pings_events_per_point
-        container_geometry = sample_details.generate_container_geometry()
-        container_material = sample_details.generate_container_material()
-        if container_geometry and container_material:
-            mantid.SetSample(workspace, Geometry=sample_details.generate_sample_geometry(),
-                             Material=sample_details.generate_sample_material(),
-                             ContainerGeometry=container_geometry,
-                             ContainerMaterial=container_material)
-        else:
-            mantid.SetSample(workspace, Geometry=sample_details.generate_sample_geometry(),
-                             Material=sample_details.generate_sample_material())
         if events_per_point_string:
             events_per_point = int(events_per_point_string)
         else:
@@ -153,6 +154,7 @@ def apply_paalmanpings_absorb_and_subtract_empty(workspace, instrument, summed_e
                        f' To recalculate with new sample + container values,'
                        f' set "force_recalculate_paalman_pings = True" in the config file.')
         corrections = mantid.LoadNexus(expected_path)
+        corrections = corrections.OutputWorkspace
 
     workspace = mantid.ApplyPaalmanPingsCorrection(SampleWorkspace=workspace,
                                                    CorrectionsWorkspace=corrections,

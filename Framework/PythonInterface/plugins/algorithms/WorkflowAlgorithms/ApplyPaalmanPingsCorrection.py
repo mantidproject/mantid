@@ -5,8 +5,8 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 # pylint: disable=no-init,too-many-instance-attributes
-from mantid.simpleapi import AddSampleLog, ScaleX, Divide, Minus, RenameWorkspace, \
-    ConvertUnits, CloneWorkspace, RebinToWorkspace
+from mantid.simpleapi import AddSampleLog, ScaleX, Divide, Minus, Multiply, RenameWorkspace, \
+    ConvertUnits, CloneWorkspace, RebinToWorkspace, DeleteWorkspace
 from mantid.api import PythonAlgorithm, AlgorithmFactory, MatrixWorkspaceProperty, WorkspaceGroupProperty, \
     PropertyMode, MatrixWorkspace, Progress, WorkspaceGroup
 from mantid.kernel import Direction, logger
@@ -378,16 +378,19 @@ class ApplyPaalmanPingsCorrection(PythonAlgorithm):
         acc = factor_workspaces['acc']
         acsc = factor_workspaces['acsc']
         assc = factor_workspaces['assc']
-        subtrahend = container_workspace * (acsc / acc)
-        difference = Minus(sample_workspace, subtrahend)
+        subtrahend = Multiply(container_workspace, (acsc / acc), StoreInADS=False)
+        difference = Minus(sample_workspace, subtrahend, StoreInADS=False)
+        DeleteWorkspace(subtrahend)
         return difference / assc
 
     def _two_factor_corrections_approximation(self, sample_workspace, container_workspace, factor_workspaces):
         acc = factor_workspaces['acc']
         ass = factor_workspaces['ass']
-        minuend = (sample_workspace / ass)
-        subtrahend = (container_workspace / acc)
-        difference = Minus(minuend, subtrahend)
+        minuend = Divide(sample_workspace, ass, StoreInADS=False)
+        subtrahend = Divide(container_workspace, acc, StoreInADS=False)
+        difference = Minus(minuend, subtrahend, StoreInADS=False)
+        DeleteWorkspace(subtrahend)
+        DeleteWorkspace(minuend)
         return difference
 
 

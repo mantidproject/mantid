@@ -6,6 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 from isis_powder.hrpd_routines.hrpd_enums import HRPD_MODES, HRPD_TOF_WINDOWS
 from isis_powder.routines.common import PARAM_MAPPING as COMMON_PARAM_MAPPING
+from isis_powder.routines.common_enums import ABSORB_METHOD
 from isis_powder.routines.param_map_entry import ParamMapEntry
 
 attr_mapping = [
@@ -13,6 +14,7 @@ attr_mapping = [
     ParamMapEntry(ext_name="calibration_mapping_file", int_name="cal_mapping_path"),
     ParamMapEntry(ext_name="config_file", int_name="config_file_name"),
     ParamMapEntry(ext_name="do_absorb_corrections", int_name="do_absorb_corrections"),
+    ParamMapEntry(ext_name="absorb_method", int_name="absorb_method", enum_class=ABSORB_METHOD, optional=True),
     ParamMapEntry(ext_name="eff_integration_range", int_name="eff_integration_range",
                   optional=True),
     ParamMapEntry(ext_name="file_ext", int_name="file_extension", optional=True),

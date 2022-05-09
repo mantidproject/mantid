@@ -117,11 +117,11 @@ class FocusTest(systemtesting.MantidSystemTest):
             _try_delete(spline_path)
             _try_delete(output_dir)
         finally:
-            config['datasearch.directories'] = self.existing_config
             mantid.mtd.clear()
+            config['datasearch.directories'] = self.existing_config
 
 
-class FocusTestAbsorptionPaalmanPings(systemtesting.MantidSystemTest):
+class FocusTestAbsorptionPaalmanPingsCalculateCorrection(systemtesting.MantidSystemTest):
 
     focus_results = None
     existing_config = config['datasearch.directories']
@@ -132,7 +132,7 @@ class FocusTestAbsorptionPaalmanPings(systemtesting.MantidSystemTest):
     def runTest(self):
         # Gen vanadium calibration first
         setup_mantid_paths()
-        self.focus_results = run_focus_absorption("98533", paalman_pings=True)
+        self.focus_results = run_focus_absorption("98533", paalman_pings=True, force_recalculate_paalman_pings=True)
 
     def validate(self):
         # check output files as expected
@@ -158,10 +158,64 @@ class FocusTestAbsorptionPaalmanPings(systemtesting.MantidSystemTest):
         self.tolerance_is_rel_err = True
         self.tolerance = 1e-6
         return self.focus_results.name(), "ISIS_Powder-POLARIS98533_FocusPaalmanPings.nxs"
-        pass
 
     def cleanup(self):
-        mantid.mtd.clear()
+        try:
+            _try_delete(spline_path)
+            _try_delete(output_dir)
+        finally:
+            mantid.mtd.clear()
+            config['datasearch.directories'] = self.existing_config
+
+
+class FocusTestAbsorptionPaalmanPingsLoadCachedCorrection(systemtesting.MantidSystemTest):
+
+    focus_results_load_cached_correction = None
+    existing_config = config['datasearch.directories']
+
+    def requiredFiles(self):
+        return _gen_required_files()
+
+    def runTest(self):
+        # Gen vanadium calibration first
+        setup_mantid_paths()
+        # generate cached corrections file
+        run_focus_absorption("98533", paalman_pings=True, force_recalculate_paalman_pings=True)
+        self.focus_results_load_cached_correction = run_focus_absorption("98533", paalman_pings=True,
+                                                                         force_recalculate_paalman_pings=False)
+
+    def validate(self):
+        # check output files as expected
+        def generate_error_message(expected_file, output_dir):
+            return "Unable to find {} in {}.\nContents={}".format(expected_file, output_dir,
+                                                                  os.listdir(output_dir))
+
+        def assert_output_file_exists(directory, filename):
+            self.assertTrue(os.path.isfile(os.path.join(directory, filename)),
+                            msg=generate_error_message(filename, directory))
+
+        user_output = os.path.join(output_dir, "17_1", "Test")
+        assert_output_file_exists(user_output, 'POLARIS98533.nxs')
+        assert_output_file_exists(user_output, 'POLARIS98533.gsas')
+        output_dat_dir = os.path.join(user_output, 'dat_files')
+        for bankno in range(1, 6):
+            assert_output_file_exists(output_dat_dir, 'POL98533-b_{}-TOF.dat'.format(bankno))
+            assert_output_file_exists(output_dat_dir, 'POL98533-b_{}-d.dat'.format(bankno))
+
+        assert_output_file_exists(output_dir, "PaalmanPingsCorrections_POLARIS98533_Summed.nxs")
+        for ws in self.focus_results_load_cached_correction:
+            self.assertEqual(ws.sample().getMaterial().name(), 'Si')
+        self.tolerance_is_rel_err = True
+        self.tolerance = 1e-6
+        return self.focus_results_load_cached_correction.name(), "ISIS_Powder-POLARIS98533_FocusPaalmanPings.nxs"
+
+    def cleanup(self):
+        try:
+            _try_delete(spline_path)
+            _try_delete(output_dir)
+        finally:
+            mantid.mtd.clear()
+            config['datasearch.directories'] = self.existing_config
 
 
 class FocusTestAbsorptionMayers(systemtesting.MantidSystemTest):
@@ -199,12 +253,15 @@ class FocusTestAbsorptionMayers(systemtesting.MantidSystemTest):
             self.assertEqual(ws.sample().getMaterial().name(), 'Si')
         self.tolerance_is_rel_err = True
         self.tolerance = 1e-6
-        mantid.SaveNexus(self.focus_results, "/home/danielmurphy/Desktop/ISIS_Powder-POLARIS98533_FocusMayers.nxs")
         return self.focus_results.name(), "ISIS_Powder-POLARIS98533_FocusMayers.nxs"
-        pass
 
     def cleanup(self):
-        mantid.mtd.clear()
+        try:
+            _try_delete(spline_path)
+            _try_delete(output_dir)
+        finally:
+            mantid.mtd.clear()
+            config['datasearch.directories'] = self.existing_config
 
 
 class FocusTestChopperMode(systemtesting.MantidSystemTest):
@@ -234,6 +291,7 @@ class FocusTestChopperMode(systemtesting.MantidSystemTest):
             _try_delete(spline_path)
             _try_delete(output_dir)
         finally:
+            mantid.mtd.clear()
             config['datasearch.directories'] = self.existing_config
 
 
@@ -443,7 +501,7 @@ def run_focus_no_chopper(run_number):
                              sample_empty_scale=sample_empty_scale)
 
 
-def run_focus_absorption(run_number, paalman_pings):
+def run_focus_absorption(run_number, paalman_pings=False, force_recalculate_paalman_pings=False):
     sample_empty = 98532  # Use the vanadium empty again to make it obvious
     sample_empty_scale = 0.5  # Set it to 50% scale
 
@@ -454,14 +512,13 @@ def run_focus_absorption(run_number, paalman_pings):
     shutil.copy(original_splined_path, spline_path)
 
     inst_object = setup_inst_object("PDF", with_container=True)
-    absorb_method = "Mayers"  # None would default to Mayers
     if paalman_pings:
-        inst_object._inst_settings.absorb_method = "PaalmanPings"
+        inst_object._inst_settings.absorb_method = "PaalmanPings"  # defaults to Mayers
         inst_object._inst_settings.paalman_pings_events_per_point = 1
-        inst_object._inst_settings.force_recalculate_paalman_pings = True
-        absorb_method = "PaalmanPings"
+        if force_recalculate_paalman_pings:
+            inst_object._inst_settings.force_recalculate_paalman_pings = True
     return inst_object.focus(run_number=run_number, input_mode="Summed", do_van_normalisation=True,
-                             do_absorb_corrections=True, absorb_method=absorb_method, sample_empty=sample_empty,
+                             do_absorb_corrections=True, sample_empty=sample_empty,
                              sample_empty_scale=sample_empty_scale, multiple_scattering=False)
 
 

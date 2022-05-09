@@ -67,8 +67,7 @@ class AbstractInst(object):
                run_number_string,
                do_van_normalisation,
                do_absorb_corrections,
-               sample_details=None,
-               absorb_method=None):
+               sample_details=None):
         """
         Focuses the user specified run - should be called by the concrete instrument
         :param run_number_string: The run number(s) to be processed
