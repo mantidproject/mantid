@@ -18,13 +18,12 @@
 #include "MantidKernel/Strings.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidQtWidgets/Common/MantidDesktopServices.h"
-#include <QtGlobal>
-#if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
 #include "MantidQtWidgets/Common/Python/Object.h"
 #include "MantidQtWidgets/MplCpp/Figure.h"
 #include "MantidQtWidgets/MplCpp/MantidAxes.h"
 #include "boost/python.hpp"
-#endif
+#include <QtGlobal>
+
 #include <QFileInfo>
 #include <QUrl>
 
@@ -332,14 +331,6 @@ void StepScan::setupOptionControls() {
 
 void StepScan::launchInstrumentWindow() {
   // Gotta do this in python
-#if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
-  std::string pyCode = "instrument_view = getInstrumentView('" + m_inputWSName +
-                       "',2)\n"
-                       "instrument_view.show()";
-
-  runPythonCode(QString::fromStdString(pyCode));
-
-#else
   std::string pyCode = "from mantidqt.widgets.instrumentview.api import get_instrumentview\n"
                        "instrument_view = get_instrumentview('" +
                        m_inputWSName +
@@ -348,7 +339,7 @@ void StepScan::launchInstrumentWindow() {
                        "instrument_view.show_view()";
   Mantid::PythonInterface::GlobalInterpreterLock lock;
   PyRun_SimpleString(pyCode.c_str());
-#endif
+
   // Attach the observers so that if a mask workspace is generated over in the
   // instrument view,
   // it is automatically selected by the combobox over here
@@ -613,7 +604,6 @@ void StepScan::generateCurve(const QString &var) {
   plotCurve();
 }
 
-#if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
 namespace {
 auto get_fig_ax(boost::optional<int> fignum) {
   std::string pyCode = "import matplotlib.pyplot as plt\n"
@@ -641,7 +631,6 @@ auto get_fig_ax(boost::optional<int> fignum) {
   return std::make_tuple(fig, ax);
 }
 } // namespace
-#endif
 
 void StepScan::plotCurve() {
   // Get the name of the dataset to produce the plot title
@@ -662,30 +651,6 @@ void StepScan::plotCurve() {
   else
     yAxisTitle += " / " + normalization;
 
-#if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
-  // Has to be done via python
-  std::string pyCode = "g = graph('" + title +
-                       "')\n"
-                       "if g is None:\n"
-                       "    g = plotSpectrum('" +
-                       m_plotWSName +
-                       "',0,True,type=Layer.Scatter)\n"
-                       "    l = g.activeLayer()\n"
-                       "    l.legend().hide()\n"
-                       "    l.removeTitle()\n"
-                       "    setWindowName(g,'" +
-                       title +
-                       "')\n"
-                       "    g.setWindowLabel('Step Scan')\n"
-                       "l = g.activeLayer()\n"
-                       "l.setAxisTitle(Layer.Bottom,'" +
-                       xAxisTitle +
-                       "')\n"
-                       "l.setAxisTitle(Layer.Left,'" +
-                       yAxisTitle + "')";
-
-  runPythonCode(QString::fromStdString(pyCode));
-#else
   auto [fig, ax] = get_fig_ax(m_fignum);
   m_fignum = fig.number();
   auto ws = AnalysisDataService::Instance().retrieveWS<Mantid::API::MatrixWorkspace>(m_plotWSName);
@@ -700,7 +665,6 @@ void StepScan::plotCurve() {
   fig.show();
   this->activateWindow();
   this->raise();
-#endif
 }
 
 void StepScan::handleAddEvent(Mantid::API::WorkspaceAddNotification_ptr pNf) {

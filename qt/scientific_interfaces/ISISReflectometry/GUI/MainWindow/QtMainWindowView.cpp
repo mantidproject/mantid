@@ -72,11 +72,8 @@ void QtMainWindowView::initLayout() {
   auto instruments = std::vector<std::string>({{"INTER", "SURF", "CRISP", "POLREF", "OFFSPEC"}});
 
   auto thetaTolerance = 0.01;
-#if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
-  Plotter plotter(this);
-#else
   Plotter plotter;
-#endif
+
   auto makeRunsTablePresenter = RunsTablePresenterFactory(instruments, thetaTolerance, std::move(plotter));
 
   auto messageHandler = this;

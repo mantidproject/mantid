@@ -21,16 +21,14 @@
 #include <QLatin1Char>
 #include <QLatin1String>
 #include <QResource>
-#include <boost/lexical_cast.hpp>
-#include <memory>
-#if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
 #include <QStandardPaths>
-#endif
 #include <QString>
 #include <QTemporaryFile>
 #include <QTextStream>
 #include <QUrl>
 #include <QWidget>
+#include <boost/lexical_cast.hpp>
+#include <memory>
 #include <stdexcept>
 
 namespace MantidQt::MantidWidgets {
@@ -443,11 +441,8 @@ void MantidHelpWindow::determineFileLocs() {
 
   // determine cache file location
   m_cacheFile = COLLECTION_FILE.toStdString();
-#if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
-  QString dataLoc = QDesktopServices::storageLocation(QDesktopServices::DataLocation);
-#else
+
   QString dataLoc = QStandardPaths::writableLocation(QStandardPaths::GenericDataLocation) + "/data";
-#endif
 
   if (dataLoc.endsWith("mantidproject")) {
     Poco::Path path(dataLoc.toStdString(), m_cacheFile);

@@ -255,35 +255,6 @@ QVariant RepoModel::data(const QModelIndex &index, int role) const {
     if (role == Qt::DecorationRole) {
       if (index.column() == 0) {
         inf = repo_ptr->fileInfo(path.toStdString());
-#if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
-        if (inf.directory) {
-          status = repo_ptr->fileStatus(path.toStdString());
-          if (status == Mantid::API::REMOTE_ONLY)
-            return QIcon::fromTheme("folder-remote", QIcon(QPixmap(":/win/folder-remote")));
-          else
-            return QIcon::fromTheme("folder", QIcon(QPixmap(":/win/folder")));
-        } else {
-          int pos = QString(path).lastIndexOf('.');
-          if (pos < 0)
-            return QIcon::fromTheme("unknown", QIcon(QPixmap(":/win/unknown")));
-          if (path.contains("readme", Qt::CaseInsensitive))
-            return QIcon::fromTheme("text-x-readme", QIcon(QPixmap(":/win/txt_file.png")));
-
-          QString extension = QString(path).remove(0, pos);
-          if (extension == ".cpp" || extension == ".CPP" || extension == ".c" || extension == ".C")
-            return QIcon::fromTheme("text-x-c++", QIcon(QPixmap(":/win/unknown")));
-          else if (extension == ".py" || extension == ".PY")
-            return QIcon::fromTheme("text-x-python", QIcon(QPixmap(":/win/text-x-python")));
-          else if (extension == ".ui")
-            return QIcon::fromTheme("document", QIcon(QPixmap(":/win/document")));
-          else if (extension == ".docx" || extension == ".doc" || extension == ".odf")
-            return QIcon::fromTheme("x-office-document", QIcon(QPixmap(":/win/office-document")));
-          else if (extension == ".pdf")
-            return QIcon::fromTheme("application-pdf", QIcon(QPixmap(":/win/file_pdf")));
-          else
-            return QIcon::fromTheme("unknown", QIcon(QPixmap(":/win/unknown")));
-        }
-#else
         if (inf.directory) {
           status = repo_ptr->fileStatus(path.toStdString());
           if (status == Mantid::API::REMOTE_ONLY) {
@@ -309,7 +280,6 @@ QVariant RepoModel::data(const QModelIndex &index, int role) const {
           else
             return Icons::getIcon("mdi.file-question", "black", 1.2);
         }
-#endif
       }
     } // end decorationRole
 

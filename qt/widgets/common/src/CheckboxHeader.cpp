@@ -17,11 +17,7 @@ namespace MantidWidgets {
 CheckboxHeader::CheckboxHeader(Qt::Orientation orientation, QWidget *parent)
     : QHeaderView(orientation, parent), m_checked(false) {
   show();
-#if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
-  setClickable(true);
-#else
   setSectionsClickable(true);
-#endif
 }
 
 /**

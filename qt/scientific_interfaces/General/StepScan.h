@@ -79,9 +79,7 @@ private:
   API::AlgorithmRunner *m_algRunner; ///< Object for running algorithms asynchronously
   Poco::NObserver<StepScan, Mantid::API::WorkspaceAddNotification> m_addObserver;
   Poco::NObserver<StepScan, Mantid::API::WorkspaceAfterReplaceNotification> m_replObserver;
-#if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
   boost::optional<int> m_fignum;
-#endif
   bool m_replaceObserverAdded;
 };
 

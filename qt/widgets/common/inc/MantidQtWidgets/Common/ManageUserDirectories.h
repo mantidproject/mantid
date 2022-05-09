@@ -7,13 +7,9 @@
 #pragma once
 
 #include "DllOption.h"
+#include <QDialog>
 #include <QtGlobal>
 
-#if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
-#include "MantidQtWidgets/Common/MantidDialog.h"
-#else
-#include <QDialog>
-#endif
 #include "ui_ManageUserDirectories.h"
 
 namespace MantidQt {
@@ -23,15 +19,8 @@ namespace API {
  * Access and update the user directory settings within the
  * Mantid config service
  */
-class EXPORT_OPT_MANTIDQT_COMMON ManageUserDirectories
-#if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
-    : public MantidQt::API::MantidDialog {
-  using BaseClass = MantidQt::API::MantidDialog;
-#else
-    : public QDialog {
+class EXPORT_OPT_MANTIDQT_COMMON ManageUserDirectories : public QDialog {
   using BaseClass = QDialog;
-#endif
-
   Q_OBJECT
 
 public:

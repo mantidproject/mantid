@@ -47,13 +47,9 @@ int loadPluginsFromCfgPath(const std::string &key) { return loadPluginsFromPath(
  * @return The number of libraries successfully loaded
  */
 int loadPluginsFromPath(const std::string &path) {
-// We must *NOT* load plugins compiled against a different version of Qt
-// so we set exclude flags by Qt version.
-#if (QT_VERSION < QT_VERSION_CHECK(5, 0, 0))
-  static std::vector<std::string> excludes{"Qt5"};
-#else
+  // We must *NOT* load plugins compiled against a different version of Qt
+  // so we set exclude flags by Qt version.
   static std::vector<std::string> excludes{"Qt4"};
-#endif
   return LibraryManager::Instance().openLibraries(path, LibraryManagerImpl::NonRecursive, excludes);
 }
 } // namespace MantidQt::API
