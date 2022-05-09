@@ -63,44 +63,44 @@ pipeline {
     WIN_BASH = "C:\\Program Files\\git\\bin\\bash.exe"
   }
   stages {
-    stage('Build and test') {
-      parallel {
-        stage('platform: linux') {
-          agent { label 'conda-build-linux' }
-          steps {
-            build_and_test_unix("linux-ci")
-          }
-          post {
-            always {
-              publish_test_reports()
-            }
-          }
-        }
-        stage('platform: windows') {
-          agent { label 'conda-build-win' }
-          steps {
-            script { WORKSPACE_UNIX_PATH = "${WORKSPACE}".replaceAll("\\\\", "/") }
-            build_and_test_win("win")
-          }
-          post {
-            always {
-              publish_test_reports()
-            }
-          }
-        }
-        stage('platform: macos') {
-          agent { label 'conda-build-osx' }
-          steps {
-            build_and_test_unix("osx-ci")
-          }
-          post {
-            always {
-              publish_test_reports()
-            }
-          }
-        }
-      }
-    }
+    // stage('Build and test') {
+    //   parallel {
+    //     stage('platform: linux') {
+    //       agent { label 'conda-build-linux' }
+    //       steps {
+    //         build_and_test_unix("linux-ci")
+    //       }
+    //       post {
+    //         always {
+    //           publish_test_reports()
+    //         }
+    //       }
+    //     }
+    //     stage('platform: windows') {
+    //       agent { label 'conda-build-win' }
+    //       steps {
+    //         script { WORKSPACE_UNIX_PATH = "${WORKSPACE}".replaceAll("\\\\", "/") }
+    //         build_and_test_win("win")
+    //       }
+    //       post {
+    //         always {
+    //           publish_test_reports()
+    //         }
+    //       }
+    //     }
+    //     stage('platform: macos') {
+    //       agent { label 'conda-build-osx' }
+    //       steps {
+    //         build_and_test_unix("osx-ci")
+    //       }
+    //       post {
+    //         always {
+    //           publish_test_reports()
+    //         }
+    //       }
+    //     }
+    //   }
+    // }
     stage('Update conda-recipes repository') {
       agent { label 'conda-build-linux' }
       environment { GITHUB_ACCESS_TOKEN = credentials("${GITHUB_TOKEN_CREDENTIAL_ID}") }
