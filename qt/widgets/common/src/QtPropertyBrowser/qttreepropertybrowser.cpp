@@ -101,7 +101,7 @@
 #include <QTreeWidget>
 
 namespace {
-// Translation function for Qt5 which has no encoding option
+// Translation function for Qt5
 QString translateUtf8Encoded(const char *context, const char *key, const char *disambiguation = nullptr, int n = -1) {
   return QApplication::translate(context, key, disambiguation, n);
 }

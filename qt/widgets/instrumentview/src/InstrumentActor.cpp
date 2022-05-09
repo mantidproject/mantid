@@ -1150,18 +1150,7 @@ std::vector<std::string> InstrumentActor::getStringParameter(const std::string &
  * @return string representing the current state of the instrumet actor.
  */
 std::string InstrumentActor::saveToProject() const {
-#if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
-  API::TSVSerialiser tsv;
-  const std::string currentColorMap = getCurrentColorMap().toStdString();
-
-  if (!currentColorMap.empty())
-    tsv.writeLine("FileName") << currentColorMap;
-
-  tsv.writeSection("binmasks", m_maskBinsData.saveToProject());
-  return tsv.outputLines();
-#else
   throw std::runtime_error("InstrumentActor::saveToProject() not implemented for Qt >= 5");
-#endif
 }
 
 /**
@@ -1169,23 +1158,8 @@ std::string InstrumentActor::saveToProject() const {
  * @param lines :: string representing the current state of the instrumet actor.
  */
 void InstrumentActor::loadFromProject(const std::string &lines) {
-#if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
-  API::TSVSerialiser tsv(lines);
-  if (tsv.selectLine("FileName")) {
-    QString filename;
-    tsv >> filename;
-    loadColorMap(filename);
-  }
-
-  if (tsv.selectSection("binmasks")) {
-    std::string binMaskLines;
-    tsv >> binMaskLines;
-    m_maskBinsData.loadFromProject(binMaskLines);
-  }
-#else
   Q_UNUSED(lines);
   throw std::runtime_error("InstrumentActor::saveToProject() not implemented for Qt >= 5");
-#endif
 }
 
 bool InstrumentActor::hasGridBank() const { return m_hasGrid; }

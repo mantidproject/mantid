@@ -8,18 +8,10 @@
 
 #include <QtGlobal>
 
-#if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
-#include "MantidQtWidgets/Plotting/Qwt/DraggableColorBarWidget.h"
-#elif QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
 #include "MantidQtWidgets/MplCpp/ColorbarWidget.h"
-#endif
 
 namespace MantidQt {
 namespace MantidWidgets {
-#if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
-using ColorBar = DraggableColorBarWidget;
-#elif QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
 using ColorBar = MantidQt::Widgets::MplCpp::ColorbarWidget;
-#endif
 } // namespace MantidWidgets
 } // namespace MantidQt

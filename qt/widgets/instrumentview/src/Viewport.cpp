@@ -496,29 +496,8 @@ void Viewport::transform(Mantid::Kernel::V3D &pos) const {
 }
 
 void Viewport::loadFromProject(const std::string &lines) {
-#if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
-  reset();
-  API::TSVSerialiser tsv(lines);
-
-  tsv.selectLine("Translation");
-  double xTrans, yTrans;
-  tsv >> xTrans >> yTrans;
-  setTranslation(xTrans, yTrans);
-
-  tsv.selectLine("Zoom");
-  double zoom;
-  tsv >> zoom;
-  setZoom(zoom);
-
-  tsv.selectLine("Rotation");
-  double w, a, b, c;
-  tsv >> w >> a >> b >> c;
-  Mantid::Kernel::Quat quat(w, a, b, c);
-  setRotation(quat);
-#else
   Q_UNUSED(lines);
   throw std::runtime_error("Viewport::loadFromProject not implemented for Qt >= 5");
-#endif
 }
 
 std::string Viewport::saveToProject() const {

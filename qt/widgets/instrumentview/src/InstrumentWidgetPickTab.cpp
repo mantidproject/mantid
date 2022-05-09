@@ -5,9 +5,6 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidQtWidgets/InstrumentView/InstrumentWidgetPickTab.h"
-#if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
-#include "MantidQtWidgets/Common/TSVSerialiser.h"
-#endif
 #include "MantidQtWidgets/InstrumentView/CollapsiblePanel.h"
 #include "MantidQtWidgets/InstrumentView/InstrumentActor.h"
 #include "MantidQtWidgets/InstrumentView/InstrumentWidget.h"
@@ -865,53 +862,15 @@ void InstrumentWidgetPickTab::savePlotToWorkspace() { m_plotController->savePlot
  * @param lines :: lines from the project file to load state from
  */
 void InstrumentWidgetPickTab::loadFromProject(const std::string &lines) {
-#if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
-  API::TSVSerialiser tsv(lines);
-
-  if (!tsv.selectSection("picktab"))
-    return;
-
-  std::string tabLines;
-  tsv >> tabLines;
-  API::TSVSerialiser tab(tabLines);
-
-  // load active push button
-  std::vector<QPushButton *> buttons{m_zoom,      m_edit, m_ellipse, m_rectangle, m_ring_ellipse, m_ring_rectangle,
-                                     m_free_draw, m_one,  m_tube,    m_peakAdd,   m_peakErase};
-
-  tab.selectLine("ActiveTools");
-  for (auto button : buttons) {
-    bool value;
-    tab >> value;
-    button->setChecked(value);
-  }
-#else
   Q_UNUSED(lines);
   throw std::runtime_error("MaskBinsData::loadFromProject() not implemented for Qt >= 5");
-#endif
 }
 
 /** Save the state of the pick tab to a Mantid project file
  * @return a string representing the state of the pick tab
  */
 std::string InstrumentWidgetPickTab::saveToProject() const {
-#if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
-  API::TSVSerialiser tsv, tab;
-
-  // save active push button
-  std::vector<QPushButton *> buttons{m_zoom,      m_edit, m_ellipse, m_rectangle, m_ring_ellipse, m_ring_rectangle,
-                                     m_free_draw, m_one,  m_tube,    m_peakAdd,   m_peakErase};
-
-  tab.writeLine("ActiveTools");
-  for (auto button : buttons) {
-    tab << button->isChecked();
-  }
-
-  tsv.writeSection("picktab", tab.outputLines());
-  return tsv.outputLines();
-#else
   throw std::runtime_error("MaskBinsData::saveToProject() not implemented for Qt >= 5");
-#endif
 }
 
 //=====================================================================================//
@@ -1751,18 +1710,6 @@ QString DetectorPlotController::getTubeXUnitsName() const {
  * Return symbolic name of units of current TubeXUnit.
  */
 QString DetectorPlotController::getTubeXUnitsUnits() const {
-#if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
-  switch (m_tubeXUnits) {
-  case LENGTH:
-    return "(m)";
-  case PHI:
-    return "(radians)";
-  case OUT_OF_PLANE_ANGLE:
-    return "(radians)";
-  default:
-    return "";
-  }
-#else
   switch (m_tubeXUnits) {
   case LENGTH:
     return "m";
@@ -1773,15 +1720,9 @@ QString DetectorPlotController::getTubeXUnitsUnits() const {
   default:
     return "";
   }
-#endif
 }
 
-void DetectorPlotController::setTubeXUnits(TubeXUnits units) {
-  m_tubeXUnits = units;
-#if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
-  m_plot->setXLabel(getTubeXUnitsName() + " " + getTubeXUnitsUnits());
-#endif
-}
+void DetectorPlotController::setTubeXUnits(TubeXUnits units) { m_tubeXUnits = units; }
 
 /**
  * Get the plot caption for the current plot type.
@@ -1883,11 +1824,6 @@ void DetectorPlotController::addPeak(double x, double y) {
 /**
  * Zoom out back to the natural home of the mini plot
  */
-void DetectorPlotController::zoomOutOnPlot() {
-#if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
-// Do nothing if in Qt4 or below.
-#else
-  m_plot->zoomOutOnPlot();
-#endif
-}
+void DetectorPlotController::zoomOutOnPlot() { m_plot->zoomOutOnPlot(); }
+
 } // namespace MantidQt::MantidWidgets
