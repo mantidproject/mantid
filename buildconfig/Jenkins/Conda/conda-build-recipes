@@ -113,7 +113,7 @@ fi
 git clone https://github.com/mantidproject/conda-recipes.git --depth=1 -b $RECIPES_TAG
 
 # Run conda build on framework
-cd $RECIPES_DIR/recipes/
+pushd $RECIPES_DIR/recipes/
 
 if [[ $OSTYPE == "msys" ]]; then
     WINDOWS_BUILD_OPTIONS="--no-build-id" # Do not use build id as it makes the path too long (>260 chars) for CMake (Legacy Windows API issue)
@@ -133,10 +133,15 @@ if [[ $ENABLE_BUILD_WORKBENCH == true ]]; then
     conda mambabuild ./mantidworkbench/ $CLOBBER_FILE $WINDOWS_BUILD_OPTIONS
 fi
 
+popd
+
 # Build the standalone packages, currently only for Windows and macOS
 PACKAGE_SUFFIX=Nightly # Hard code this for now while testing.
 # Set our local conda channel to find our locally build mantidworkbench package.
 LOCAL_CHANNEL=file://$CONDA_PREFIX/conda-bld
+# Jenkins Pipeline expects packages in the root workspace directory
+cd $WORKSPACE
+
 if [[ $OSTYPE == 'msys'* ]]; then
     ${WORKSPACE}/installers/conda/win/create_package.sh -c "${LOCAL_CHANNEL}" -s ${PACKAGE_SUFFIX}
 elif [[ $OSTYPE == 'darwin'* ]]; then
