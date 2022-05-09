@@ -37,21 +37,21 @@ def archive_conda_build(arch) {
 }
 
 def create_standalone_package_linux() {
-  archiveArtifacts artifacts: "${WORKSPACE}/*.xz",
+  archiveArtifacts artifacts: "*.xz",
     allowEmptyArchive: false,
     fingerprint: true,
     onlyIfSuccessful: true
 }
 
 def create_standalone_package_osx() {
-  archiveArtifacts artifacts: "${WORKSPACE}/*.dmg",
+  archiveArtifacts artifacts: "*.dmg",
     allowEmptyArchive: false,
     fingerprint: true,
     onlyIfSuccessful: true
 }
 
 def create_standalone_package_win() {
-  archiveArtifacts artifacts: "${WORKSPACE_UNIX_PATH}/*.exe",
+  archiveArtifacts artifacts: "*.exe",
     allowEmptyArchive: false,
     fingerprint: true,
     onlyIfSuccessful: true
