@@ -50,6 +50,7 @@ class SANS2D_GDW20_4m_22_02_2D_M4(systemtesting.MantidSystemTest):
         self.returned = WavRangeReduction()
 
     def validate(self):
+        self.tolerance = 3e-8  # Required for slightly differing error results on Windows conda builds.
         self.disableChecking.append('Axes')
         self.disableChecking.append('Instrument')
         self.disableChecking.append('SpectraMap')
