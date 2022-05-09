@@ -87,10 +87,7 @@ void calculatePeakValues(IPeakFunction &peak, ITableWorkspace &results, const Ei
                          const std::string &prefix) {
   double centre, height, fwhm, intensity;
   EigenMatrix J = makeJacobian(peak, centre, height, fwhm, intensity);
-  // CHECK_OUT_GSL_MATRIX("J=", J);
-
   EigenMatrix JCJ = J * covariance * J.tr();
-  // CHECK_OUT_GSL_MATRIX("JCJ=", JCJ);
 
   TableRow row = results.appendRow();
   row << prefix + "Centre" << centre << sqrt(JCJ.get(0, 0));

@@ -49,9 +49,6 @@ void Fit::initConcrete() {
   getPointerToProperty("OutputStatus")->setDocumentation("Whether the fit was successful");
   declareProperty("OutputChi2overDoF", 0.0, "Returns the goodness of the fit", Kernel::Direction::Output);
 
-  // Disable default gsl error handler (which is to call abort!)
-  // gsl_set_error_handler_off();
-
   std::vector<std::string> minimizerOptions = API::FuncMinimizerFactory::Instance().getKeys();
   Kernel::IValidator_sptr minimizerValidator = std::make_shared<Kernel::StartsWithValidator>(minimizerOptions);
 
@@ -287,8 +284,8 @@ void Fit::createOutput() {
         if (j == i)
           row << 100.0;
         else {
-          if (!covar.inspector().data()) { // check this error handle line - unsure if it works.
-            throw std::runtime_error("There was an error while allocating the (GSL) covariance "
+          if (!covar.inspector().data()) {
+            throw std::runtime_error("There was an error while allocating the covariance "
                                      "matrix "
                                      "which is needed to produce fitting error results.");
           }
