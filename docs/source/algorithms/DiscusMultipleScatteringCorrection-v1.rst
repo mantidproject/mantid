@@ -101,15 +101,15 @@ With this approach the Q value for each segment is chosen as follows based on a 
 
 .. math::
 
-   J_n = \frac{1}{A} \int dS \int_{0}^{1} dt_1 \frac{1-e^{-\mu_T l_1^{\ max}}}{\sigma_T} \prod\limits_{i=1}^{n-1}[\int_{0}^{1} dt_{i+1} \int_{0}^{1} dv_i 2 \frac{I(2k)}{2k^2} \sigma_s \int_{0}^{1} du_i \frac{(1-e^{-\mu_T l_{i+1}^{max}})}{\sigma_T}] e^{-\mu_T l_{out}} S(Q_n) \frac{\sigma_s}{4 \pi}
+   J_n = \frac{1}{A} \int dS \int_{0}^{1} dt_1 \frac{1-e^{-\mu_T l_1^{\ max}}}{\sigma_T} \prod\limits_{i=1}^{n-1}[\int_{0}^{1} dt_{i+1} \int_{0}^{1} dv_i \frac{I(2k)}{2k^2} \sigma_s \int_{0}^{1} du_i \frac{(1-e^{-\mu_T l_{i+1}^{max}})}{\sigma_T}] e^{-\mu_T l_{out}} S(Q_n) \frac{\sigma_s}{4 \pi}
 
-   J_n = \frac{1}{A} \int dS \int_{0}^{1} dt_1 \frac{1-e^{-\mu_T l_1^{\ max}}}{\sigma_T} \prod\limits_{i=1}^{n-1}[\int_{0}^{1} dt_{i+1} \int_{0}^{1} dv_i 2 \sigma_s(k) \int_{0}^{1} du_i \frac{(1-e^{-\mu_T l_{i+1}^{max}})}{\sigma_T}] e^{-\mu_T l_{out}} S(Q_n) \frac{\sigma_s}{4 \pi}
+   J_n = \frac{1}{A} \int dS \int_{0}^{1} dt_1 \frac{1-e^{-\mu_T l_1^{\ max}}}{\sigma_T} \prod\limits_{i=1}^{n-1}[\int_{0}^{1} dt_{i+1} \int_{0}^{1} dv_i \sigma_s(k) \int_{0}^{1} du_i \frac{(1-e^{-\mu_T l_{i+1}^{max}})}{\sigma_T}] e^{-\mu_T l_{out}} S(Q_n) \frac{\sigma_s}{4 \pi}
 
 Finally, the equivalent Monte Carlo integration that the algorithm performs with importance sampling enabled is:
 
 .. math::
 
-   J_n = \frac{1}{N}\sum \frac{1-e^{-\mu_T l_1^{\ max}}}{\sigma_T} \prod\limits_{i=1}^{n-1}[2 \sigma_s(k) \frac{(1-e^{-\mu_T l_{i+1}^{max}})}{\sigma_T}] e^{-\mu_T l_{out}} S(Q_n) \frac{\sigma_s}{4 \pi}
+   J_n = \frac{1}{N}\sum \frac{1-e^{-\mu_T l_1^{\ max}}}{\sigma_T} \prod\limits_{i=1}^{n-1}[\sigma_s(k) \frac{(1-e^{-\mu_T l_{i+1}^{max}})}{\sigma_T}] e^{-\mu_T l_{out}} S(Q_n) \frac{\sigma_s}{4 \pi}
 
 The importance sampling has also been implemented for inelastic instruments by flatting out the 2D :math:`S(Q, \omega)` profile into a 1D array.
 A 1D coordinate is created which is the actual Q value added onto the maximum Q from the preceding :math:`\omega` row: :math:`Q'(Q,\omega_i) = Q + Q_{max}(\omega_{i-1})`
@@ -122,8 +122,11 @@ Outputs
 The algorithm outputs a workspace group containing the following workspaces:
 
 - Several workspaces called ``Scatter_n`` where n is the number of scattering events considered. Each workspace contains "per detector" weights as a function of momentum or energy transfer for a specific number of scattering events. The number of scattering events ranges between 1 and the number specified in the NumberOfScatterings parameter
+- Several workspaces called ``Scatter_n_Integrated`` which are integrals of the ``Scatter_n`` workspaces across the x axis (Momentum for elastic and DeltaE for inelastic)
 - A workspace called ``Scatter_1_NoAbsorb`` is also created for a scenario where neutrons are scattered once, absorption is assumed to be zero and re-scattering after the simulated scattering event is assumed to be zero. This is the quantity :math:`J_{1}^{*}` described in the Discus manual
 - A workspace called ``Scatter_2_n_Summed`` which is the sum of the ``Scatter_n`` workspaces for n > 1
+- A workspace called ``Scatter_1_n_Summed`` which is the sum of the ``Scatter_n`` workspaces for n >= 1
+- A workspace called ``Ratio_Single_To_All`` which is the ``Scatter_1`` workspace divided by ``Scatter_1_n_Summed``
 
 The output can be applied to a workspace containing a real sample measurement in one of two ways:
 
@@ -213,14 +216,14 @@ Usage
                                                       OutputWorkspace="MuscatResults", NeutronPathsSingle=1000,
                                                       NeutronPathsMultiple=10000, ImportanceSampling=True)
    # Can't index into workspace group by name (yet) so just get the members from the ADS instead
-   Scatter_1_DeltaFunction = CloneWorkspace('Scatter_1')
-   Scatter_2_DeltaFunction = CloneWorkspace('Scatter_2')
+   Scatter_1_DeltaFunction = CloneWorkspace('MuscatResults_Scatter_1')
+   Scatter_2_DeltaFunction = CloneWorkspace('MuscatResults_Scatter_2')
    DeleteWorkspace('MuscatResults')
 
    DiscusMultipleScatteringCorrection(InputWorkspace=ws, StructureFactorWorkspace=Sofq_isotropic,
                                       OutputWorkspace="MuscatResultsIsotropic", NeutronPathsSingle=1000,
                                       NeutronPathsMultiple=10000, ImportanceSampling=True)
-   Scatter_2_Isotropic = CloneWorkspace('Scatter_2')
+   Scatter_2_Isotropic = CloneWorkspace('MuscatResultsIsotropic_Scatter_2')
 
 
    # q=2ksin(theta), so q spike corresonds to single scatter spike at ~60 degrees, double scatter spikes at 0 and 120 degrees
@@ -327,19 +330,19 @@ The double scatter profile shows a similar shape to the analytic result calculat
                                       NeutronPathsMultiple=1000)
 
    # reverse w axis because Discus w = Ef-Ei (opposite to Mantid)
-   for i in range(mtd['Scatter_1'].getNumberHistograms()):
-       y = np.flip(mtd['Scatter_1'].dataY(i),0)
-       mtd['Scatter_1'].setY(i,y.tolist())
-   for i in range(mtd['Scatter_2'].getNumberHistograms()):
-       y = np.flip(mtd['Scatter_2'].dataY(i),0)
-       mtd['Scatter_2'].setY(i,y.tolist())
+   for i in range(mtd['MuscatResults_Scatter_1'].getNumberHistograms()):
+       y = np.flip(mtd['MuscatResults_Scatter_1'].dataY(i),0)
+       mtd['MuscatResults_Scatter_1'].setY(i,y.tolist())
+   for i in range(mtd['MuscatResults_Scatter_2'].getNumberHistograms()):
+       y = np.flip(mtd['MuscatResults_Scatter_2'].dataY(i),0)
+       mtd['MuscatResults_Scatter_2'].setY(i,y.tolist())
 
    plt.rcParams['figure.figsize'] = (5, 6)
    fig, ax = plt.subplots(subplot_kw={'projection':'mantid'})
    for i, tt in enumerate(two_thetas):
-       ax.plot(mtd['Scatter_1'], wkspIndex=i, label='Single: ' + str(tt) + ' degrees')
+       ax.plot(mtd['MuscatResults_Scatter_1'], wkspIndex=i, label='Single: ' + str(tt) + ' degrees')
    for i, tt in enumerate(two_thetas):
-       ax.plot(mtd['Scatter_2'], wkspIndex=i, label='Double: ' + str(tt) + ' degrees', linestyle='--')
+       ax.plot(mtd['MuscatResults_Scatter_2'], wkspIndex=i, label='Double: ' + str(tt) + ' degrees', linestyle='--')
    plt.yscale('log')
    ax.set_xlim(-1,1)
    ax.set_ylim(1e-4,1e-1)
@@ -354,7 +357,7 @@ This is the equivalent plot from the original Discus Fortran program:
 
 
 References
-##########
+----------
 
 .. [#JOH] M W Johnson, 1974 AERE Report R7682, Discus: A computer program for the calculating of multiple scattering effects in inelastic neutron scattering experiments
 .. [#HOW] WS Howells, V Garcia Sakai, F Demmel, MTF Telling, F Fernandez-Alonso, Feb 2010, MODES manual RAL-TR-2010-006, `doi: 10.5286/raltr.2010006 <https://doi.org/10.5286/raltr.2010006>`_
@@ -362,8 +365,6 @@ References
 .. [#MAY] J Mayers, R Cywinski, 1985 *Nuclear Instruments and Methods in Physics Research* A241, A Monte Carlo Evaluation Of Analytical Multiple Scattering Corrections For Unpolarised Neutron Scattering And Polarisation Analysis Data `doi: 10.1016/0168-9002(85)90607-2 <https://doi.org/10.1016/0168-9002(85)90607-2>`_
 
 
-Usage
------
 
 
 .. categories::

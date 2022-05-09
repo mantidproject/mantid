@@ -8,6 +8,8 @@ import numpy as np
 import re
 from CrystalField.energies import energies as CFEnergy
 
+ION_NAME_PATTERN = re.compile(r'[SJsj]([0-9\.]+)')
+
 
 def ionname2Nre(ionname):
     ion_nre_map = {'Ce': 1, 'Pr': 2, 'Nd': 3, 'Pm': 4, 'Sm': 5, 'Eu': 6, 'Gd': 7,
@@ -15,7 +17,7 @@ def ionname2Nre(ionname):
     if ionname not in ion_nre_map.keys():
         msg = 'Value %s is not allowed for attribute Ion.\nList of allowed values: %s' % \
               (ionname, ', '.join(list(ion_nre_map.keys())))
-        arbitraryJ = re.match(r'[SJsj]([0-9\.]+)', ionname)
+        arbitraryJ = re.match(ION_NAME_PATTERN, ionname)
         if arbitraryJ and (float(arbitraryJ.group(1)) % 0.5) == 0:
             nre = int(-float(arbitraryJ.group(1)) * 2.)
             if nre < -99:

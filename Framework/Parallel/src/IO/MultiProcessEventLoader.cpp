@@ -7,6 +7,7 @@
 #include "MantidParallel/IO/MultiProcessEventLoader.h"
 //#include <boost/process/child.hpp>
 #include <Poco/Process.h>
+#include <algorithm>
 #include <chrono>
 #include <fstream>
 #include <iomanip>
@@ -33,8 +34,7 @@ MultiProcessEventLoader::MultiProcessEventLoader(uint32_t numPixels, uint32_t nu
 std::vector<std::string> MultiProcessEventLoader::generateSegmentsName(uint32_t procNum) {
   std::vector<std::string> res(procNum, generateTimeBasedPrefix() + "_mantid_multiprocess_NXloader_segment_");
   unsigned short i{0};
-  for (auto &name : res)
-    name += std::to_string(i++);
+  std::for_each(res.begin(), res.end(), [&i](auto &name) { name += std::to_string(i++); });
   return res;
 }
 

@@ -1,0 +1,5 @@
+Various documentation updates
+MSlice now available as a noarch conda package
+Update to matplotlib 3.5
+Add ability to change slice plot font sizes using quick options
+Changed default cut algorithm to Integration

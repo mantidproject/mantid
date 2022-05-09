@@ -1,0 +1,1 @@
+- Fixed bug that prevented seeing individual members of composite multi-domain fit functions

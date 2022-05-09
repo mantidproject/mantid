@@ -121,6 +121,15 @@ if [[ $CLEAN_BUILD  == true ]]; then
     rm -rf $BUILD_DIR
 fi
 
+# Check whether this is an incremental build that only changes rst files
+if [ -d $BUILD_DIR ]; then
+    if ${SCRIPT_DIR}/../check_for_changes dev-docs-only || ${SCRIPT_DIR}/../check_for_changes user-docs-only; then
+      ENABLE_BUILD_CODE=false
+      ENABLE_UNIT_TESTS=false
+      ENABLE_SYSTEM_TESTS=false
+    fi
+fi
+
 mkdir -p $BUILD_DIR
 
 rm -rf ${BUILD_DIR}/bin ${BUILD_DIR}/ExternalData ${BUILD_DIR}/Testing
@@ -134,15 +143,8 @@ fi
 # Clean up artifacts from previous builds
 rm -f -- *.dmg *.rpm *.deb *.tar.gz *.tar.xz *.exe
 
-# Should we even build the code?
-if ${SCRIPT_DIR}/../check_for_changes dev-docs-only || ${SCRIPT_DIR}/../check_for_changes user-docs-only; then
-    ENABLE_BUILD_CODE=false
-    ENABLE_UNIT_TESTS=false
-    ENABLE_SYSTEM_TESTS=false
-fi
-
 # Run the script that handles the actual building
-$SCRIPT_DIR/build $WORKSPACE $CMAKE_PRESET $ENABLE_DOCS $ENABLE_DEV_DOCS $ENABLE_BUILD_CODE $ENABLE_UNIT_TESTS $ENABLE_SYSTEM_TESTS $EXTRA_CMAKE_FLAGS
+$SCRIPT_DIR/build $WORKSPACE $CMAKE_PRESET $ENABLE_DOCS $ENABLE_DEV_DOCS $ENABLE_BUILD_CODE $ENABLE_UNIT_TESTS $ENABLE_SYSTEM_TESTS "$EXTRA_CMAKE_FLAGS" $BUILD_THREADS
 
 # Run unit and system tests
 $SCRIPT_DIR/run-tests $WORKSPACE $ENABLE_SYSTEM_TESTS $ENABLE_UNIT_TESTS $ENABLE_DOCS $ENABLE_DOC_TESTS $BUILD_THREADS $USE_CORE_DUMPS

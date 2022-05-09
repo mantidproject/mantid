@@ -114,6 +114,12 @@ void Fit::readProperties() {
 /// Initialize the minimizer for this fit.
 /// @param maxIterations :: Maximum number of iterations.
 void Fit::initializeMinimizer(size_t maxIterations) {
+  const bool unrollComposites = getProperty("OutputCompositeMembers");
+  bool convolveMembers = existsProperty("ConvolveMembers");
+  if (convolveMembers) {
+    convolveMembers = getProperty("ConvolveMembers");
+  }
+  m_domainCreator->separateCompositeMembersInOutput(unrollComposites, convolveMembers);
   m_costFunction = getCostFunctionInitialized();
   std::string minimizerName = getPropertyValue("Minimizer");
   m_minimizer = API::FuncMinimizerFactory::Instance().createMinimizer(minimizerName);
@@ -204,7 +210,7 @@ void Fit::finalizeMinimizer(size_t nIterations) {
   }
 }
 
-/// Create algorithm output worksapces.
+/// Create algorithm output workspaces.
 void Fit::createOutput() {
 
   // degrees of freedom
@@ -337,12 +343,6 @@ void Fit::createOutput() {
     bool outputParametersOnly = getProperty("OutputParametersOnly");
 
     if (!outputParametersOnly) {
-      const bool unrollComposites = getProperty("OutputCompositeMembers");
-      bool convolveMembers = existsProperty("ConvolveMembers");
-      if (convolveMembers) {
-        convolveMembers = getProperty("ConvolveMembers");
-      }
-      m_domainCreator->separateCompositeMembersInOutput(unrollComposites, convolveMembers);
       m_domainCreator->createOutputWorkspace(baseName, m_function, m_costFunction->getDomain(),
                                              m_costFunction->getValues());
     }

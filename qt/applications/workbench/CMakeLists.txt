@@ -48,11 +48,15 @@ if(APPLE OR WIN32)
     set(_py_exe "pythonw.exe")
     set(_qt_plugins_standalone "..\\\\plugins\\\\qt5")
     set(PACKAGE_EXECUTABLE MantidWorkbench)
+    target_compile_definitions(MantidWorkbench PRIVATE -D_WIN32_WINNT=0x0A00)
+    target_compile_definitions(MantidWorkbenchInstalled PRIVATE -D_WIN32_WINNT=0x0A00)
   else()
     set(_py_exe "python")
     set(_qt_plugins_standalone "../PlugIns")
     # appears in the unified menu bar and helps distiguish from other packages
     set(PACKAGE_EXECUTABLE MantidWorkbench${CPACK_PACKAGE_SUFFIX_CAMELCASE})
+    target_compile_definitions(MantidWorkbench PRIVATE -DBOOST_ASIO_DISABLE_STD_ALIGNED_ALLOC)
+    target_compile_definitions(MantidWorkbenchInstalled PRIVATE -DBOOST_ASIO_DISABLE_STD_ALIGNED_ALLOC)
   endif()
   set_target_properties(
     MantidWorkbenchInstalled PROPERTIES OUTPUT_NAME ${PACKAGE_EXECUTABLE} RUNTIME_OUTPUT_DIRECTORY

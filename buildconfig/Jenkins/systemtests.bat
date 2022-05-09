@@ -93,7 +93,7 @@ if "%SYSTEST_NPROCS%"=="" (
 ) else (
   set NTHREADS=%SYSTEST_NPROCS%
 )
-@echo "Runing system tests with %NTHREADS% cores."
+echo "Runing system tests with %NTHREADS% cores."
 
 set PYTHON_EXE=
 set SYSTEMTEST_ARGS=

@@ -412,6 +412,12 @@ Poldi2DFunction_sptr PoldiFitPeaks2D::getFunctionFromPeakCollection(const PoldiP
     poldi2DFunction->addTies(ties);
   }
 
+  // Only use bounds for independent peaks.
+  std::string bounds = getUserSpecifiedBounds(poldi2DFunction);
+  if (!bounds.empty()) {
+    poldi2DFunction->addConstraints(bounds);
+  }
+
   return poldi2DFunction;
 }
 
@@ -624,21 +630,15 @@ std::string PoldiFitPeaks2D::getUserSpecifiedTies(const IFunction_sptr &poldiFn)
           }
         }
 
-        switch (matchedParameters.size()) {
-        case 0:
+        if (matchedParameters.size() == 0) {
           g_log.warning("Function does not have a parameter called '" + tieParameter + "', ignoring.");
-          break;
-        case 1:
+        } else if (matchedParameters.size() == 1) {
           g_log.warning("There is only one peak, no ties necessary.");
-          break;
-        default: {
+        } else {
           std::string reference = matchedParameters.front();
-
           for (auto par = matchedParameters.begin() + 1; par != matchedParameters.end(); ++par) {
             tieComponents.emplace_back(*par + "=" + reference);
           }
-          break;
-        }
         }
       }
     }
@@ -647,7 +647,56 @@ std::string PoldiFitPeaks2D::getUserSpecifiedTies(const IFunction_sptr &poldiFn)
       return boost::algorithm::join(tieComponents, ",");
     }
   }
+  return "";
+}
 
+/**
+ * @brief Returns a string with bounded parameters that are passed to Fit
+ *
+ * This method uses the BoundedParameters property, which may contain a comma-
+ * separated list of parameter names that will be bounded for all peaks.
+ *
+ * Parameters that do not exist are silently ignored, but a warning is written
+ * to the log so that users have a chance to find typos.
+ *
+ * @param poldiFn :: Function with some parameters.
+ * @return :: String to pass to the Constraint-property of Fit.
+ */
+std::string PoldiFitPeaks2D::getUserSpecifiedBounds(const IFunction_sptr &poldiFn) {
+  std::string boundedParametersList = getProperty("BoundedParameters");
+
+  if (!boundedParametersList.empty()) {
+    std::vector<std::string> boundedParameters;
+
+    boost::split(boundedParameters, boundedParametersList, boost::is_any_of(",;"));
+
+    std::vector<std::string> parameters = poldiFn->getParameterNames();
+
+    std::vector<std::string> boundedComponents;
+    for (auto &boundedParameter : boundedParameters) {
+      if (!boundedParameter.empty()) {
+        std::vector<std::string> matchedParameters;
+
+        for (auto &parameter : parameters) {
+          if (boost::algorithm::ends_with(parameter, boundedParameter)) {
+            matchedParameters.emplace_back(parameter);
+          }
+        }
+
+        if (matchedParameters.size() == 0) {
+          g_log.warning("Function does not have a parameter called '" + boundedParameter + "', ignoring.");
+        } else {
+          for (auto par = matchedParameters.begin(); par != matchedParameters.end(); ++par) {
+            boundedComponents.emplace_back("1.0<=" + *par + "<=20.0");
+          }
+        }
+      }
+    }
+
+    if (!boundedComponents.empty()) {
+      return boost::algorithm::join(boundedComponents, ",");
+    }
+  }
   return "";
 }
 
@@ -1084,6 +1133,11 @@ void PoldiFitPeaks2D::init() {
                   "Comma-separated list of parameter "
                   "names that are identical for all "
                   "peaks, is ignored when PawleyFit is selected.");
+
+  declareProperty("BoundedParameters", "",
+                  "Comma-separated list of parameter "
+                  "names that will will be bound to a specific "
+                  "range of values for all peaks, is ignored when PawleyFit is selected.");
 
   declareProperty("PawleyFit", false,
                   "Instead of refining individual peaks, "

@@ -30,8 +30,8 @@ namespace {
  * as accuracy to convert into integers
  */
 double nearInt(double val, double eps, double mult) noexcept {
-  if (val > 0) {
-    if (val < 1) {
+  if (val > 0.0) {
+    if (val < 1.0) {
       mult /= val;
     } else {
       if (std::abs(val - std::round(val)) > eps) {

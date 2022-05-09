@@ -1,0 +1,1 @@
+- the x unit validation on the parameter ScatteringCrossSection in :ref:`DiscusMultipleScatteringCorrection <algm-DiscusMultipleScatteringCorrection>` has been corrected to check for Momentum
