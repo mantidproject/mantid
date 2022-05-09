@@ -229,7 +229,11 @@ class Tester(object):
         try:
             read_filename = abins.test_helpers.find_file(filename=filename + "." + extension)
         except ValueError:
+            read_filename = ''
+        if not read_filename:
             read_filename = abins.test_helpers.find_file(filename=filename + "." + extension.upper())
+        if not read_filename:
+            raise ValueError(f"Could not find file {filename + '.' + extension}")
 
         ab_initio_reader = loader(input_ab_initio_filename=read_filename, **loader_kwargs)
         data = self._get_reader_data(ab_initio_reader)
