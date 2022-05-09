@@ -397,7 +397,7 @@ class ReflectometryILLPreprocess(DataProcessorAlgorithm):
             if angle_option == 'SampleAngle':
                 bragg_angle = common.sample_angle(first_run)
             elif angle_option == 'DetectorAngle':
-                bragg_angle = self._theta_from_detector_angles()
+                bragg_angle = -self.getProperty('DirectBeamDetectorAngle').value
                 # in this clause we still need to correct for the difference of foreground
                 # centres between direct and reflected beams
                 # but we need first to load the reflected beam to be able to do this

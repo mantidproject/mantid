@@ -774,8 +774,9 @@ double LoadILLReflectometry::offsetAngle(const double peakCentre, const double d
                                          const double detectorDistance) const {
   const double offsetWidth = (detectorCentre - peakCentre) * m_pixelWidth;
   // Sign depends on the definition of detector angle and which way
-  // spectrum numbers increase. Negative convention is used for both D17 and FIGARO.
-  return -radToDeg(std::atan2(offsetWidth, detectorDistance));
+  // spectrum numbers increase. Negative convention is used for D17 and positive for FIGARO.
+  auto const sign = m_instrument == Supported::FIGARO ? 1 : -1;
+  return sign * radToDeg(std::atan2(offsetWidth, detectorDistance));
 }
 
 /** Return the sample to detector distance for the current instrument.
