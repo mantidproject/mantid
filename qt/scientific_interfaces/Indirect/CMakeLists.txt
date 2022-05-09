@@ -64,7 +64,6 @@ set(SRC_FILES
     IndirectFunctionBrowser/SingleFunctionTemplatePresenter.cpp
     IndirectInstrumentConfig.cpp
     IndirectInterface.cpp
-    IndirectLoadILL.cpp
     IndirectMolDyn.cpp
     IndirectMoments.cpp
     IndirectMomentsModel.cpp
@@ -146,7 +145,6 @@ set(MOC_FILES
     IndirectFunctionBrowser/SingleFunctionTemplatePresenter.h
     IndirectInstrumentConfig.h
     IndirectInterface.h
-    IndirectLoadILL.h
     IndirectMolDyn.h
     IndirectMoments.h
     IndirectMomentsModel.h
@@ -224,7 +222,6 @@ set(UI_FILES
     IndirectFitTab.ui
     IndirectInstrumentConfig.ui
     IndirectInterfaceSettings.ui
-    IndirectLoadILL.ui
     IndirectMolDyn.ui
     IndirectMoments.ui
     IndirectPlotOptions.ui
