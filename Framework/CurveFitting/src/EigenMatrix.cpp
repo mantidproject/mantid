@@ -280,7 +280,13 @@ void EigenMatrix::invert() {
   if (size1() != size2()) {
     throw std::runtime_error("Matrix inverse: the matrix must be square.");
   }
-  mutator() = inspector().inverse();
+  Eigen::MatrixXd temp_m = inspector();
+  Eigen::FullPivLU<Eigen::MatrixXd> lu(temp_m);
+  if (lu.isInvertible()) {
+    mutator() = temp_m.inverse();
+  } else {
+    // do nothing - this preserves the previous GSL behaviour.
+  }
 }
 
 /// Calculate the determinant
