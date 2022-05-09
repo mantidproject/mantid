@@ -77,7 +77,13 @@ void IndirectTransmissionCalc::run() {
 
   IAlgorithm_sptr transAlg = AlgorithmManager::Instance().create("IndirectTransmission");
   transAlg->initialize();
-  transAlg->setProperty("Instrument", instrumentName);
+  try {
+    transAlg->setProperty("Instrument", instrumentName);
+  } catch (std::exception &) {
+    emit showMessageBox("Instrument " + QString::fromStdString(instrumentName) + " is not supported.");
+    setRunIsRunning(false);
+    return;
+  }
   transAlg->setProperty("Analyser", m_uiForm.iicInstrumentConfiguration->getAnalyserName().toStdString());
   transAlg->setProperty("Reflection", m_uiForm.iicInstrumentConfiguration->getReflectionName().toStdString());
   transAlg->setProperty("ChemicalFormula", m_uiForm.leChemicalFormula->text().toStdString());
