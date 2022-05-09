@@ -55,13 +55,13 @@ public:
   size_t size() const;
 
   /// Set an element
-  void set(size_t i, const ComplexType &value);
+  void set(const size_t i, const ComplexType &value);
   /// Get an element
-  ComplexType get(size_t i) const;
+  ComplexType get(const size_t i) const;
   // Set all elements to zero
   void zero();
   /// Get a "const reference" to an element.
-  const ComplexType operator[](size_t i) const { return eigen()(i); }
+  const ComplexType operator[](const size_t i) const { return eigen()(i); }
   /// Get a "reference" to an element.
   ComplexType &operator[](size_t i) { return eigen()(i); }
 

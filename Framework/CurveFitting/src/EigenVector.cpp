@@ -110,7 +110,7 @@ size_t EigenVector::size() const { return m_data.size(); }
 /// set an element
 /// @param i :: The element index
 /// @param value :: The new value
-void EigenVector::set(size_t i, double value) {
+void EigenVector::set(const size_t i, const double value) {
   if (i < m_data.size())
     m_data[i] = value;
   else {
@@ -121,7 +121,7 @@ void EigenVector::set(size_t i, double value) {
 }
 /// get an element
 /// @param i :: The element index
-double EigenVector::get(size_t i) const {
+double EigenVector::get(const size_t i) const {
   if (i < m_data.size())
     return m_data[i];
 

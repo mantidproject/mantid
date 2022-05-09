@@ -37,7 +37,7 @@ public:
   /// Copy constructor
   ComplexMatrix(const ComplexMatrix &M);
   /// Create a submatrix.
-  ComplexMatrix(const ComplexMatrix &M, size_t row, size_t col, size_t nRows, size_t nCols);
+  ComplexMatrix(const ComplexMatrix &M, const size_t row, const size_t col, const size_t nRows, const size_t nCols);
   /// Move constructor
   explicit ComplexMatrix(ComplexMatrix &&m) noexcept;
   /// Move constructor with EigenMatrix
@@ -64,13 +64,13 @@ public:
   /// Second size of the matrix
   size_t size2() const;
   /// Set an element
-  void set(size_t i, size_t j, ComplexType value);
+  void set(const size_t i, const size_t j, const ComplexType value);
   /// Get an element
-  ComplexType get(size_t i, size_t j) const;
+  ComplexType get(const size_t i, const size_t j) const;
   /// The "index" operator
-  ComplexType operator()(size_t i, size_t j) const;
+  ComplexType operator()(const size_t i, const size_t j) const;
   /// Get the reference to the data element
-  ComplexType &operator()(size_t i, size_t j);
+  ComplexType &operator()(const size_t i, const size_t j);
 
   /// Set this matrix to identity matrix
   void identity();
@@ -92,9 +92,9 @@ public:
   ComplexMatrix operator*(const ComplexMatrix &m) const;
 
   /// Copy a row into a GSLVector
-  ComplexVector copyRow(size_t i) const;
+  ComplexVector copyRow(const size_t i) const;
   /// Copy a column into a GSLVector
-  ComplexVector copyColumn(size_t i) const;
+  ComplexVector copyColumn(const size_t i) const;
   /// Sort columns in order defined by an index array
   void sortColumns(const std::vector<size_t> &indices);
 

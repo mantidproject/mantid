@@ -60,13 +60,13 @@ public:
   size_t size() const;
 
   /// Set an element
-  void set(size_t i, double value);
+  void set(const size_t i, const double value);
   /// Get an element
-  double get(size_t i) const;
+  double get(const size_t i) const;
   /// Get a const reference to an element
-  const double &operator[](size_t i) const { return m_data[i]; }
+  const double &operator[](const size_t i) const { return m_data[i]; }
   /// Get a reference to an element
-  double &operator[](size_t i) { return m_data[i]; }
+  double &operator[](const size_t i) { return m_data[i]; }
   // Set all elements to zero
   void zero();
   /// Normalise this vector

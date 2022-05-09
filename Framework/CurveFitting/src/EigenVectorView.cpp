@@ -15,7 +15,7 @@ EigenVector_View::EigenVector_View() : m_view({}, 0, dynamic_stride(0, 0)) {}
 /// @param vector :: Eigen::Map of a Eigen::VectorXd from which to take view.
 /// @param startElement :: The first element of the view.
 /// @param nElements :: The number of elements to view.
-EigenVector_View::EigenVector_View(vec_map_type &vector, const int nElements, const size_t &startElement)
+EigenVector_View::EigenVector_View(vec_map_type &vector, const int nElements, const size_t startElement)
     : m_view(vector.data(), vector.size(), dynamic_stride(0, 1)) {
   if (nElements == -1) {
     // if nElements is default, do nothing as m_view is initialised as such
@@ -28,7 +28,7 @@ EigenVector_View::EigenVector_View(vec_map_type &vector, const int nElements, co
 /// @param vector :: Eigen::VectorXd from which to take view.
 /// @param startElement :: The first element of the view.
 /// @param nElements :: The number of elements to view.
-EigenVector_View::EigenVector_View(Eigen::VectorXd &vector, const int nElements, const size_t &startElement)
+EigenVector_View::EigenVector_View(Eigen::VectorXd &vector, const int nElements, const size_t startElement)
     : m_view(vector.data(), vector.size(), dynamic_stride(0, 1)) {
   if (nElements == -1) {
     // if nElements is default, do nothing as m_view is initialised as such
@@ -41,14 +41,14 @@ EigenVector_View::EigenVector_View(Eigen::VectorXd &vector, const int nElements,
 /// @param base :: array from which to take view.
 /// @param startElement :: The first element of the view.
 /// @param nElements :: The number of elements to view.
-EigenVector_View::EigenVector_View(double *base, const size_t nElements, const size_t &startElement)
+EigenVector_View::EigenVector_View(double *base, const size_t nElements, const size_t startElement)
     : m_view(base + startElement, nElements, dynamic_stride(0, 1)) {}
 
 // CONST constructor: map->vector view
 /// @param vector :: Eigen::Map of a Eigen::VectorXd from which to take view.
 /// @param startElement :: The first element of the view.
 /// @param nElements :: The number of elements to view.
-EigenVector_View::EigenVector_View(const vec_map_type &vector, const size_t nElements, const size_t &startElement)
+EigenVector_View::EigenVector_View(const vec_map_type &vector, const size_t nElements, const size_t startElement)
     : m_view({}, 0, dynamic_stride(0, 0)) {
   new (&m_view) vec_const_map_type(vector.data() + startElement, nElements, dynamic_stride(0, 1));
 }
@@ -57,7 +57,7 @@ EigenVector_View::EigenVector_View(const vec_map_type &vector, const size_t nEle
 /// @param vector :: Eigen::VectorXd from which to take view.
 /// @param startElement :: The first element of the view.
 /// @param nElements :: The number of elements to view.
-EigenVector_View::EigenVector_View(const Eigen::VectorXd &vector, const size_t nElements, const size_t &startElement)
+EigenVector_View::EigenVector_View(const Eigen::VectorXd &vector, const size_t nElements, const size_t startElement)
     : m_view({}, 0, dynamic_stride(0, 0)), isConst(true) {
   new (&m_view) vec_const_map_type(vector.data() + startElement, nElements, dynamic_stride(0, 1));
 }
@@ -66,7 +66,7 @@ EigenVector_View::EigenVector_View(const Eigen::VectorXd &vector, const size_t n
 /// @param base :: array from which to take view.
 /// @param startElement :: The first element of the view.
 /// @param nElements :: The number of elements to view.
-EigenVector_View::EigenVector_View(const double *base, const size_t nElements, const size_t &startElement)
+EigenVector_View::EigenVector_View(const double *base, const size_t nElements, const size_t startElement)
     : m_view({}, 0, dynamic_stride(0, 0)), isConst(true) {
   new (&m_view) vec_const_map_type(base + startElement, nElements, dynamic_stride(0, 1));
 }

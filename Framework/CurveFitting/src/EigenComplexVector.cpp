@@ -86,7 +86,7 @@ size_t ComplexVector::size() const { return m_vector.size(); }
 /// set an element
 /// @param i :: The element index
 /// @param value :: The new value
-void ComplexVector::set(size_t i, const ComplexType &value) {
+void ComplexVector::set(const size_t i, const ComplexType &value) {
   if (i < size()) {
     m_vector(i) = value;
   } else {
@@ -97,7 +97,7 @@ void ComplexVector::set(size_t i, const ComplexType &value) {
 }
 /// get an element
 /// @param i :: The element index
-ComplexType ComplexVector::get(size_t i) const {
+ComplexType ComplexVector::get(const size_t i) const {
   if (i < size()) {
     return m_vector(i);
   }

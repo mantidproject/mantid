@@ -29,7 +29,8 @@ ComplexMatrix::ComplexMatrix(const ComplexMatrix &M) : m_matrix(M.eigen()) {}
 /// @param col :: The first column in the submatrix.
 /// @param nRows :: The number of rows in the submatrix.
 /// @param nCols :: The number of columns in the submatrix.
-ComplexMatrix::ComplexMatrix(const ComplexMatrix &M, size_t row, size_t col, size_t nRows, size_t nCols) {
+ComplexMatrix::ComplexMatrix(const ComplexMatrix &M, const size_t row, const size_t col, const size_t nRows,
+                             const size_t nCols) {
   if (row + nRows > M.size1() || col + nCols > M.size2()) {
     throw std::runtime_error("Submatrix exceeds matrix size.");
   }
@@ -86,7 +87,7 @@ size_t ComplexMatrix::size2() const { return m_matrix.cols(); }
 /// @param i :: The row
 /// @param j :: The column
 /// @param value :: The new vaule
-void ComplexMatrix::set(size_t i, size_t j, ComplexType value) {
+void ComplexMatrix::set(const size_t i, const size_t j, const ComplexType value) {
   if (i < size1() && j < size2()) {
     m_matrix(i, j) = value;
   } else {
@@ -97,7 +98,7 @@ void ComplexMatrix::set(size_t i, size_t j, ComplexType value) {
 /// get an element
 /// @param i :: The row
 /// @param j :: The column
-ComplexType ComplexMatrix::get(size_t i, size_t j) const {
+ComplexType ComplexMatrix::get(const size_t i, const size_t j) const {
   if (i < size1() && j < size2()) {
     return m_matrix(i, j);
   }
@@ -105,10 +106,12 @@ ComplexType ComplexMatrix::get(size_t i, size_t j) const {
 }
 
 /// The "index" operator
-ComplexType ComplexMatrix::operator()(size_t i, size_t j) const { return const_cast<ComplexMatrix &>(*this)(i, j); }
+ComplexType ComplexMatrix::operator()(const size_t i, const size_t j) const {
+  return const_cast<ComplexMatrix &>(*this)(i, j);
+}
 
 /// Get the reference to the data element
-ComplexType &ComplexMatrix::operator()(size_t i, size_t j) { return m_matrix(i, j); }
+ComplexType &ComplexMatrix::operator()(const size_t i, const size_t j) { return m_matrix(i, j); }
 
 /// Set this matrix to identity matrix
 void ComplexMatrix::identity() { m_matrix.setIdentity(); }
@@ -238,7 +241,7 @@ void ComplexMatrix::eigenSystemHermitian(EigenVector &eigenValues, ComplexMatrix
 
 /// Copy a row into a EigenVector
 /// @param i :: A row index.
-ComplexVector ComplexMatrix::copyRow(size_t i) const {
+ComplexVector ComplexMatrix::copyRow(const size_t i) const {
   if (i >= size1()) {
     throw std::out_of_range("EigenMatrix row index is out of range.");
   }
@@ -249,7 +252,7 @@ ComplexVector ComplexMatrix::copyRow(size_t i) const {
 
 /// Copy a column into a Complex EigenVector
 /// @param i :: A column index.
-ComplexVector ComplexMatrix::copyColumn(size_t i) const {
+ComplexVector ComplexMatrix::copyColumn(const size_t i) const {
   if (i >= size2()) {
     throw std::out_of_range("ComplexMatrix column index is out of range.");
   }

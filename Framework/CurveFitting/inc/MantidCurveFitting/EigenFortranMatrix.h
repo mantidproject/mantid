@@ -44,8 +44,8 @@ public:
   /// Get the size along the second dimension as an int.
   int len2() const;
   /// Index operator
-  ElementConstType operator()(int i, int j) const;
-  ElementRefType operator()(int i, int j);
+  ElementConstType operator()(const int i, const int j) const;
+  ElementRefType operator()(const int i, const int j);
   /// Assignment operator - Matrix Class
   FortranMatrix<MatrixClass> &operator=(const MatrixClass &m);
 
@@ -56,13 +56,13 @@ public:
 
 private:
   /// Calculate the size (1D) of a matrix First
-  static size_t makeSize(int firstIndex, int lastIndex);
+  static size_t makeSize(const int firstIndex, const int lastIndex);
 };
 
 //-----------------  Method implementations -------------------------//
 
 /// Calculate the size (1D) of a matrix First
-template <class MatrixClass> size_t FortranMatrix<MatrixClass>::makeSize(int firstIndex, int lastIndex) {
+template <class MatrixClass> size_t FortranMatrix<MatrixClass>::makeSize(const int firstIndex, const int lastIndex) {
   if (lastIndex < firstIndex) {
     throw std::invalid_argument("Matrix defined with invalid index range.");
   }
@@ -117,13 +117,14 @@ template <class MatrixClass> void FortranMatrix<MatrixClass>::allocate(const int
 
 /// The "index" operator
 template <class MatrixClass>
-typename FortranMatrix<MatrixClass>::ElementConstType FortranMatrix<MatrixClass>::operator()(int i, int j) const {
+typename FortranMatrix<MatrixClass>::ElementConstType FortranMatrix<MatrixClass>::operator()(const int i,
+                                                                                             const int j) const {
   return this->MatrixClass::operator()(static_cast<size_t>(i - m_base1), static_cast<size_t>(j - m_base2));
 }
 
 /// Get the reference to the data element
 template <class MatrixClass>
-typename FortranMatrix<MatrixClass>::ElementRefType FortranMatrix<MatrixClass>::operator()(int i, int j) {
+typename FortranMatrix<MatrixClass>::ElementRefType FortranMatrix<MatrixClass>::operator()(const int i, const int j) {
   return this->MatrixClass::operator()(static_cast<size_t>(i - m_base1), static_cast<size_t>(j - m_base2));
 }
 
