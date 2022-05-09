@@ -78,7 +78,7 @@ public:
       _hkls.erase(it);
   }
   const Mantid::Kernel::V3D &getQ() const { return _Q; }
-  double angle(const PeakCandidate &rhs) { return rhs._Q.angle(_Q); }
+  double angle(const PeakCandidate &rhs) const { return rhs._Q.angle(_Q); }
   void setIndex(const std::set<index> &s) {
     _hkls.clear();
     _hkls = s;
@@ -148,7 +148,7 @@ private:
   // Helper method to cull potential hkls off each peak.
   void cullHKLs(std::vector<PeakCandidate> &peakCandidates, Mantid::Geometry::UnitCell &unitcell);
   // Helper method used to check that not all peaks are colinear.
-  void validateNotColinear(std::vector<PeakCandidate> &peakCandidates) const;
+  void validateNotColinear(const std::vector<PeakCandidate> &peakCandidates) const;
   // Overridden Algorithm methods
   void init() override;
   //
