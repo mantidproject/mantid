@@ -30,7 +30,7 @@ def conda_build_win(arch) {
 }
 
 def archive_conda_build(arch) {
-  archiveArtifacts artifacts: "mambaforge/**/conda-bld/${arch}/*.tar.bz2",
+  archiveArtifacts artifacts: "**/conda-bld/${arch}/*.tar.bz2",
     allowEmptyArchive: false,
     fingerprint: true,
     onlyIfSuccessful: true
