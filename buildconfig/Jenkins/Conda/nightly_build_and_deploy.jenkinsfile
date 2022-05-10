@@ -67,6 +67,7 @@ pipeline {
     //   parallel {
     //     stage('platform: linux') {
     //       agent { label 'conda-build-linux' }
+    //       options { timestamps () }
     //       steps {
     //         build_and_test_unix("linux-ci")
     //       }
@@ -78,6 +79,7 @@ pipeline {
     //     }
     //     stage('platform: windows') {
     //       agent { label 'conda-build-win' }
+    //       options { timestamps () }
     //       steps {
     //         script { WORKSPACE_UNIX_PATH = "${WORKSPACE}".replaceAll("\\\\", "/") }
     //         build_and_test_win("win")
@@ -90,6 +92,7 @@ pipeline {
     //     }
     //     stage('platform: macos') {
     //       agent { label 'conda-build-osx' }
+    //       options { timestamps () }
     //       steps {
     //         build_and_test_unix("osx-ci")
     //       }
@@ -112,6 +115,7 @@ pipeline {
       parallel {
         stage('platform: linux-64') {
           agent { label 'conda-build-linux' }
+          options { timestamps () }
           steps {
             conda_build_unix("linux-64")
             create_standalone_package_linux()
@@ -119,6 +123,7 @@ pipeline {
         }
         stage('platform: win-64') {
           agent { label 'conda-build-win' }
+          options { timestamps () }
           steps {
             script {
               WORKSPACE_UNIX_PATH = "${WORKSPACE}".replaceAll("\\\\", "/")
@@ -129,6 +134,7 @@ pipeline {
         }
         stage('platform: osx-64') {
           agent { label 'conda-build-osx' }
+          options { timestamps () }
           steps {
             conda_build_unix("osx-64")
             create_standalone_package_osx()
@@ -138,6 +144,7 @@ pipeline {
     }
     stage ('Publish Conda packages to Anaconda') {
       agent { label 'conda-build-linux' } // Use linux for simplicity with shell scripts
+      options { timestamps () }
       environment { ANACONDA_TOKEN = credentials("${ANACONDA_TOKEN_CREDENTIAL_ID}") }
       steps{
         // Copy all artifacts into ${WORKSPACE} from the current job, using ${JOB_NAME} and the current ${BUILD_NUMBER}
@@ -150,6 +157,7 @@ pipeline {
     }
     stage ('Delete old Conda nightly packages from Anaconda') {
       agent { label 'conda-build-linux' } // Use linux for simplicity with shell scripts
+      options { timestamps () }
       environment { ANACONDA_TOKEN = credentials("${ANACONDA_TOKEN_CREDENTIAL_ID}") }
       steps {
         script { deletion_script = "${WORKSPACE}/buildconfig/Jenkins/Conda/delete-old-nightlies.sh" }
