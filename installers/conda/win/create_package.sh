@@ -130,6 +130,7 @@ cp $CONDA_ENV_PATH/Library/plugins/imageformats $COPY_DIR/plugins/qt5/ -r
 cp $CONDA_ENV_PATH/Library/plugins/printsupport $COPY_DIR/plugins/qt5/ -r
 cp $CONDA_ENV_PATH/Library/plugins/sqldrivers $COPY_DIR/plugins/qt5/ -r
 cp $CONDA_ENV_PATH/Library/plugins/styles $COPY_DIR/plugins/qt5/ -r
+cp $CONDA_ENV_PATH/Library/plugins/qt5/*.dll $COPY_DIR/plugins/qt5
 cp $CONDA_ENV_PATH/Library/plugins/*.dll $COPY_DIR/plugins/
 cp $CONDA_ENV_PATH/Library/plugins/python $COPY_DIR/plugins/ -r
 
@@ -159,6 +160,10 @@ NSIS_CONDA_ENV=_nsis_conda_env
 NSIS_CONDA_ENV_PATH=$THIS_SCRIPT_DIR/$NSIS_CONDA_ENV
 # First remove existing environment if it exists
 rm -rf $NSIS_CONDA_ENV_PATH
+# Remove temporary nsis helper files
+rm -f $THIS_SCRIPT_DIR/uninstall_files.nsh
+rm -f $THIS_SCRIPT_DIR/uninstall_dirs.nsh
+
 echo "Creating nsis conda env"
 "$CONDA_EXE" create --prefix $NSIS_CONDA_ENV_PATH nsis -c conda-forge -y
 echo "Conda nsis env created"
@@ -216,12 +221,5 @@ OUTFILE_NAME="$SCRIPT_DRIVE_LETTER:${OUTFILE_NAME:2}"
 echo makensis /V4 /O\"$NSIS_OUTPUT_LOG\" /DVERSION=$VERSION /DPACKAGE_DIR=\"$COPY_DIR\" /DPACKAGE_SUFFIX=$SUFFIX /DOUTFILE_NAME=$OUTFILE_NAME /DMANTID_ICON=$MANTID_ICON /DWORKBENCH_ICON=$WORKBENCH_ICON /DNOTEBOOK_ICON=$NOTEBOOK_ICON /DMUI_PAGE_LICENSE_PATH=$LICENSE_PATH \"$NSIS_SCRIPT\"
 cmd.exe /C "START /wait "" $MAKENSIS_COMMAND /V4 /DVERSION=$VERSION /O\"$NSIS_OUTPUT_LOG\" /DPACKAGE_DIR=\"$COPY_DIR\" /DPACKAGE_SUFFIX=$SUFFIX /DOUTFILE_NAME=$OUTFILE_NAME /DMANTID_ICON=$MANTID_ICON /DWORKBENCH_ICON=$WORKBENCH_ICON /DNOTEBOOK_ICON=$NOTEBOOK_ICON /DMUI_PAGE_LICENSE_PATH=$LICENSE_PATH \"$NSIS_SCRIPT\""
 echo "Package packaged, find it here: $OUTFILE_NAME"
-
-echo "Cleaning up left over files"
-rm -rf $CONDA_ENV_PATH
-rm -rf $COPY_DIR
-rm -rf $NSIS_CONDA_ENV_PATH
-rm $THIS_SCRIPT_DIR/uninstall_files.nsh
-rm $THIS_SCRIPT_DIR/uninstall_dirs.nsh
 
 echo "Done"
