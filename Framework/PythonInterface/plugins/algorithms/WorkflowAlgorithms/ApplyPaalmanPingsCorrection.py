@@ -6,7 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 # pylint: disable=no-init,too-many-instance-attributes
 from mantid.simpleapi import AddSampleLog, ScaleX, Divide, Minus, Multiply, RenameWorkspace, \
-    ConvertUnits, CloneWorkspace, RebinToWorkspace, DeleteWorkspace
+    ConvertUnits, CloneWorkspace, RebinToWorkspace
 from mantid.api import PythonAlgorithm, AlgorithmFactory, MatrixWorkspaceProperty, WorkspaceGroupProperty, \
     PropertyMode, MatrixWorkspace, Progress, WorkspaceGroup
 from mantid.kernel import Direction, logger
@@ -380,17 +380,15 @@ class ApplyPaalmanPingsCorrection(PythonAlgorithm):
         assc = factor_workspaces['assc']
         subtrahend = Multiply(container_workspace, (acsc / acc), StoreInADS=False)
         difference = Minus(sample_workspace, subtrahend, StoreInADS=False)
-        DeleteWorkspace(subtrahend)
-        return difference / assc
+        quotient = Divide(difference, assc, OutputWorkspace="__quotient")
+        return quotient
 
     def _two_factor_corrections_approximation(self, sample_workspace, container_workspace, factor_workspaces):
         acc = factor_workspaces['acc']
         ass = factor_workspaces['ass']
         minuend = Divide(sample_workspace, ass, StoreInADS=False)
         subtrahend = Divide(container_workspace, acc, StoreInADS=False)
-        difference = Minus(minuend, subtrahend, StoreInADS=False)
-        DeleteWorkspace(subtrahend)
-        DeleteWorkspace(minuend)
+        difference = Minus(minuend, subtrahend, OutputWorkspace="__difference")
         return difference
 
 
