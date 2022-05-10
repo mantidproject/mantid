@@ -205,8 +205,10 @@ echo Workebench Icon: $WORKBENCH_ICON
 echo Generating uninstaller helper files
 python $THIS_SCRIPT_DIR/create_uninstall_lists.py --package_dir=$COPY_DIR --output_dir=$THIS_SCRIPT_DIR
 
+# Add version info to the package name
+VERSION_NAME="$PACKAGE_NAME"-"$VERSION".exe
 # Give NSIS full path to the output package name so that it drops it in the current working directory.
-OUTFILE_NAME=$PWD/$PACKAGE_NAME.exe
+OUTFILE_NAME=$PWD/$VERSION_NAME
 OUTFILE_NAME=${OUTFILE_NAME////\\}
 OUTFILE_NAME="$SCRIPT_DRIVE_LETTER:${OUTFILE_NAME:2}"
 
