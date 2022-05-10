@@ -325,12 +325,12 @@ void QtPropertyEditorDelegate::paint(QPainter *painter, const QStyleOptionViewIt
     }
     QString optionName = m_editorPrivate->options()[optionIndex];
     if (property->hasOption(optionName)) {
-      QStyleOptionButton opt;
+      QStyleOptionButton optButton;
       auto state = property->checkOption(optionName) ? QStyle::State_On : QStyle::State_Off;
-      opt.state |= state;
-      opt.rect = option.rect;
-      opt.rect.setWidth(opt.rect.height());
-      QApplication::style()->drawPrimitive(QStyle::PE_IndicatorCheckBox, &opt, painter);
+      optButton.state |= state;
+      optButton.rect = option.rect;
+      optButton.rect.setWidth(optButton.rect.height());
+      QApplication::style()->drawPrimitive(QStyle::PE_IndicatorCheckBox, &optButton, painter);
     }
   }
 }
@@ -562,16 +562,8 @@ void QtTreePropertyBrowserPrivate::updateItem(QTreeWidgetItem *item) {
   item->setWhatsThis(0, property->whatsThis());
   item->setText(0, property->propertyName());
   bool wasEnabled = item->flags() & Qt::ItemIsEnabled;
-  bool isEnabled = wasEnabled;
-  if (property->isEnabled()) {
-    QTreeWidgetItem *parent = item->parent();
-    if (!parent || (parent->flags() & Qt::ItemIsEnabled))
-      isEnabled = true;
-    else
-      isEnabled = false;
-  } else {
-    isEnabled = false;
-  }
+  bool isEnabled = property->isEnabled() ? !item->parent() || (item->parent()->flags() & Qt::ItemIsEnabled) : false;
+
   if (wasEnabled != isEnabled) {
     if (isEnabled)
       enableItem(item);

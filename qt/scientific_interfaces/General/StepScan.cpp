@@ -625,7 +625,7 @@ auto get_fig_ax(boost::optional<int> fignum) {
   } else {
     main_namespace["fig_num"] = Python::Object();
   }
-  auto ignored = boost::python::exec(pyCode.c_str(), main_namespace);
+  boost::python::exec(pyCode.c_str(), main_namespace);
   auto fig = Figure(boost::python::extract<Python::Object>(main_namespace["fig"]));
   auto ax = MantidAxes(boost::python::extract<Python::Object>(main_namespace["ax"]));
   return std::make_tuple(fig, ax);
@@ -659,7 +659,7 @@ void StepScan::plotCurve() {
   QHash<QString, QVariant> hash;
   hash.insert("linestyle", "");
   hash.insert("marker", ".");
-  auto line = ax.plot(ws, 0, "black", "", hash);
+  ax.plot(ws, 0, "black", "", hash);
   ax.setXLabel(xAxisTitle.c_str());
   ax.setYLabel(yAxisTitle.c_str());
   fig.show();
