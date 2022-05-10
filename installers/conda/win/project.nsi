@@ -163,8 +163,9 @@ Section "-Core installation"
     # Add MantidWorkbench-script.pyw file to the install directory
     FileOpen $0 "$INSTDIR\bin\MantidWorkbench-script.pyw" w # This w is intentional and opens it in write mode
     FileWrite $0 "#!$INSTDIR\bin\pythonw.exe$\n"
-    FileWrite $0 "import workbench.app.main$\n"
-    FileWrite $0 "workbench.app.main.main()$\n"
+    FileWrite $0 "if __name__ == '__main__':\n"
+    FileWrite $0 "    import workbench.app.main$\n"
+    FileWrite $0 "    workbench.app.main.main()$\n"
     FileClose $0
 
     # Store installation folder in registry
